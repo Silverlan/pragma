@@ -14,6 +14,7 @@
 #include "pragma/lua/classes/ldef_quaternion.h"
 #include "pragma/lua/classes/ldef_damageinfo.h"
 #include "pragma/lua/classes/ldef_angle.h"
+#include "pragma/lua/converters/vector_converter_t.hpp"
 #include "pragma/lua/libraries/lray.h"
 #include "pragma/lua/custom_constructor.hpp"
 #include "pragma/lua/class_manager.hpp"
@@ -23,16 +24,19 @@
 #include <pragma/game/game.h>
 #include "luasystem.h"
 #include "pragma/game/damageinfo.h"
+#include "pragma/model/model.h"
 #include "pragma/physics/raytraces.h"
 #include "pragma/entities/environment/env_quake.h"
 #include "pragma/physics/collisionmasks.h"
 #include "pragma/util/util_game.hpp"
 #include "pragma/util/bulletinfo.h"
+#include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
+#include "pragma/entities/components/base_flex_component.hpp"
 #include "pragma/entities/components/damageable_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/lua/lua_call.hpp"
@@ -46,6 +50,7 @@
 #include <luainterface.hpp>
 #include <se_scene.hpp>
 #include <pragma/math/intersection.h>
+#include <panima/skeleton.hpp>
 #include <luabind/class_info.hpp>
 #include <util_zip.h>
 
@@ -153,6 +158,12 @@ void Lua::util::register_shared(luabind::module_ &mod)
 void Lua::util::register_library(lua_State *l)
 {
 	auto utilMod = luabind::module(l,"util");
+
+	auto retargetMod = luabind::module(l,"retarget");
+	auto defRetargetData = luabind::class_<util::retarget::RetargetData>("RetargetData");
+	auto nsRetarget = luabind::namespace_("retarget");
+	nsRetarget[defRetargetData];
+
 	utilMod[
 		luabind::def("splash_damage",splash_damage),
 		luabind::def("get_date_time",static_cast<std::string(*)(const std::string&)>(Lua::util::date_time)),
@@ -183,6 +194,11 @@ void Lua::util::register_library(lua_State *l)
 			return util::Uuid{::util::generate_uuid_v4(seed)};
 		})
 	];
+	nsRetarget[luabind::def("initialize_retarget_data",&Lua::util::retarget::initialize_retarget_data)];
+	nsRetarget[luabind::def("apply_retarget_rig",&Lua::util::retarget::apply_retarget_rig)];
+	nsRetarget[luabind::def("initialize_retarget_flex_data",&Lua::util::retarget::initialize_retarget_flex_data)];
+	nsRetarget[luabind::def("apply_retarget_flex",&Lua::util::retarget::retarget_flex_controllers)];
+	utilMod[nsRetarget];
 
 	auto defUuid = luabind::class_<util::Uuid>("Uuid");
 	defUuid.def("__tostring",+[](const util::Uuid &uuid) {

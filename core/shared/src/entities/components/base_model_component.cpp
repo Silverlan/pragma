@@ -282,7 +282,7 @@ void BaseModelComponent::SetModel(const std::string &mdl)
 	auto *nw = GetEntity().GetNetworkState();
 	auto *game = nw->GetGameState();
 	auto &mdlManager = nw->GetModelManager();
-	m_modelName = std::make_unique<std::string>(mdlManager.GetNormalizedModelName(mdl));
+	m_modelName = std::make_unique<std::string>(mdlManager.ToCacheIdentifier(mdl));
 	auto prevMdl = GetModel();
 	auto model = game->LoadModel(*m_modelName);
 	if(model == nullptr)

@@ -713,8 +713,6 @@ void NetworkState::Think()
 		m_thinkCallbacks[i]();
 }
 
-const std::unordered_map<std::string,std::shared_ptr<Model>> &NetworkState::GetCachedModels() const {return m_modelManager->GetCache();}
-
 const pragma::asset::ModelManager &NetworkState::GetModelManager() const {return const_cast<NetworkState*>(this)->GetModelManager();}
 pragma::asset::ModelManager &NetworkState::GetModelManager() {return *m_modelManager;}
 

@@ -10,6 +10,7 @@
 #include "pragma/lua/lua_script_watcher.h"
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/entity_iterator.hpp"
+#include "pragma/model/modelmanager.h"
 #include "pragma/model/model.h"
 #include <sharedutils/util_file.h>
 #include <pragma/asset/util_asset.hpp>
@@ -75,11 +76,11 @@ void ResourceWatcherManager::ReloadMaterial(const std::string &path)
 		{
 			auto fname = ufile::get_file_from_filename(path);
 			ufile::remove_extension_from_filename(fname);
-			auto &models = m_networkState->GetCachedModels();
+			auto &models = m_networkState->GetModelManager().GetCache();
 			std::unordered_set<Model*> modelMap;
 			for(auto &pair : models)
 			{
-				auto &mdl = pair.second;
+				auto &mdl = static_cast<pragma::asset::ModelAsset*>(pair.second.asset.get())->model;
 				auto &textures = mdl->GetTextures();
 				for(auto it=textures.begin();it!=textures.end();++it)
 				{
@@ -149,9 +150,8 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &rootPath,const
 		{
 			if(game != nullptr)
 			{
-				auto &mdls = m_networkState->GetCachedModels();
-				auto it = mdls.find(path);
-				if(it != mdls.end())
+				auto *asset = m_networkState->GetModelManager().FindCachedAsset(path);
+				if(asset != nullptr)
 				{
 #if RESOURCE_WATCHER_VERBOSE > 0
 					auto mdlPath = "models\\" +path;

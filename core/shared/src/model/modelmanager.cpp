@@ -34,92 +34,14 @@ static const std::vector<std::string> &get_model_extensions()
 	}
 	return extensions;
 }
-std::string pragma::asset::ModelManager::GetNormalizedModelName(const std::string &mdlName)
-{
-	util::Path path {mdlName};
-	path.Canonicalize();
-	path.RemoveFileExtension(get_model_extensions());
-	// path += ".wmd"; // TODO: Remove this extension!
-	return path.GetString();
-}
-std::string pragma::asset::ModelManager::GetCacheName(const std::string &mdlName)
-{
-	auto normalizedName = GetNormalizedModelName(mdlName);
-	util::Path path {normalizedName};
-	path.RemoveFileExtension(get_model_extensions());
-	auto strPath = path.GetString();
-	ustring::to_lower(strPath);
-	return strPath;
-}
+bool pragma::asset::ModelAsset::IsInUse() const {return model.use_count() > 1;}
 
 pragma::asset::ModelManager::ModelManager(NetworkState &nw)
 	: m_nw{nw}
-{}
-
-uint32_t pragma::asset::ModelManager::ClearUnused()
 {
-	uint32_t n = 0;
-	for(auto it=m_cache.begin();it!=m_cache.end();)
-	{
-		auto &mdl = it->second;
-		if(mdl.use_count() == 1)
-		{
-			it = m_cache.erase(it);
-			++n;
-			continue;
-		}
-		++it;
-	}
-	return n;
-}
-uint32_t pragma::asset::ModelManager::ClearFlagged()
-{
-	uint32_t n = 0;
-	for(auto &name : m_flaggedForDeletion)
-	{
-		auto itCache = m_cache.find(name);
-		if(itCache == m_cache.end())
-			continue;
-		m_cache.erase(itCache);
-		++n;
-	}
-	m_flaggedForDeletion.clear();
-	return n;
-}
-uint32_t pragma::asset::ModelManager::Clear()
-{
-	auto n = m_cache.size();
-	m_cache.clear();
-	m_flaggedForDeletion.clear();
-	return n;
-}
-void pragma::asset::ModelManager::FlagForRemoval(Model &mdl)
-{
-	auto name = GetCacheName(mdl.GetName());
-	auto it = m_cache.find(name);
-	if(it == m_cache.end())
-		return;
-	m_flaggedForDeletion.insert(name);
-}
-
-void pragma::asset::ModelManager::FlagAllForRemoval()
-{
-	m_flaggedForDeletion.reserve(m_cache.size());
-	for(auto &pair : m_cache)
-		m_flaggedForDeletion.insert(pair.first);
-}
-
-const std::unordered_map<std::string,std::shared_ptr<Model>> &pragma::asset::ModelManager::GetCache() const {return m_cache;}
-
-const Model *pragma::asset::ModelManager::FindCachedModel(const std::string &mdlName) const
-{
-	return const_cast<ModelManager*>(this)->FindCachedModel(mdlName);
-}
-Model *pragma::asset::ModelManager::FindCachedModel(const std::string &mdlName)
-{
-	auto normalizedName = GetCacheName(mdlName);
-	auto it = m_cache.find(normalizedName);
-	return (it != m_cache.end()) ? it->second.get() : nullptr;
+	// TODO: New extensions might be added after the model manager has been created
+	for(auto &ext : get_model_extensions())
+		RegisterFileExtension(ext);
 }
 
 std::shared_ptr<Model> pragma::asset::ModelManager::CreateModel(uint32_t numBones,const std::string &mdlName)
@@ -161,10 +83,7 @@ std::shared_ptr<Model> pragma::asset::ModelManager::CreateModel(const std::strin
 	}
 
 	if(addToCache)
-	{
-		auto cacheName = GetCacheName(name);
-		m_cache[cacheName] = mdl;
-	}
+		AddToCache(name,std::make_shared<ModelAsset>(mdl));
 	return mdl;
 }
 std::shared_ptr<Model> pragma::asset::ModelManager::LoadModel(FWMD &wmd,const std::string &mdlName) const
@@ -181,39 +100,40 @@ std::shared_ptr<Model> pragma::asset::ModelManager::LoadModel(const std::string 
 {
 	if(outIsNewModel)
 		*outIsNewModel = false;
-	auto normMdlName = GetNormalizedModelName(mdlName);
-	auto cacheName = GetCacheName(normMdlName);
+	auto cacheIdentifier = ToCacheIdentifier(mdlName);
 	if(bReload == false)
 	{
-		auto itFlagged = m_flaggedForDeletion.find(cacheName);
-		if(itFlagged!= m_flaggedForDeletion.end())
-			m_flaggedForDeletion.erase(itFlagged);
+		FlagForRemoval(mdlName,false);
 
-		auto it = m_cache.find(cacheName);
-		if(it != m_cache.end())
-		{
-			auto &mdl = it->second;
-			// mdl->PrecacheTextureGroup(0);
-			return mdl;
-		}
+		auto *asset = FindCachedAsset(mdlName);
+		if(asset)
+			return static_cast<ModelAsset*>(asset)->model;
 	}
 
 	assert(m_nw.GetGameState());
 	FWMD wmdLoader {m_nw.GetGameState()};
-	auto mdl = LoadModel(wmdLoader,normMdlName);
+	auto mdl = LoadModel(wmdLoader,ToCacheIdentifier(mdlName));
 	if(mdl == nullptr)
 		return nullptr;
 	mdl->Update();
-	m_cache[cacheName] = mdl;
+	AddToCache(mdlName,std::make_shared<ModelAsset>(mdl));
 	if(outIsNewModel != nullptr)
 		*outIsNewModel = true;
-
 	return mdl;
 }
-std::shared_ptr<Model> pragma::asset::ModelManager::FindModel(const std::string &mdlName)
+void pragma::asset::ModelManager::FlagForRemoval(const Model &mdl,bool flag)
 {
-	auto it = m_cache.find(GetCacheName(mdlName));
-	return (it != m_cache.end()) ? it->second : nullptr;
+	auto *asset = FindCachedAsset(mdl.GetName());
+	if(asset && static_cast<ModelAsset*>(asset)->model.get() == &mdl)
+	{
+		FlagForRemoval(mdl.GetName());
+		return;
+	}
+	auto it = std::find_if(m_cache.begin(),m_cache.end(),[&mdl](const std::pair<size_t,AssetInfo> &pair) {
+		auto &assetInfo = pair.second;
+		return static_cast<ModelAsset*>(assetInfo.asset.get())->model.get() == &mdl;
+	});
+	if(it == m_cache.end())
+		return;
+	FlagForRemoval(it->first);
 }
-
-

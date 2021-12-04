@@ -69,9 +69,10 @@ void ServerState::SendRoughModel(const std::string &f,const std::vector<pragma::
 //#if RESOURCE_TRANSFER_VERBOSE == 1
 	Con::csv<<"[ResourceManager] Got Request For: "<<mdlName<<Con::endl;
 //#endif
-	auto mdl = GetModelManager().FindCachedModel(mdlName);
-	if(mdl == nullptr)
+	auto *asset = GetModelManager().FindCachedAsset(mdlName);
+	if(asset == nullptr)
 		return;
+	auto &mdl = static_cast<pragma::asset::ModelAsset*>(asset)->model;
 	NetPacket pOut;
 	pOut->WriteString(mdlName);
 
@@ -359,9 +360,10 @@ void NET_sv_query_model_texture(pragma::networking::IServerClient &session,NetPa
 {
 	auto mdlName = packet->ReadString();
 	auto matName = packet->ReadString();
-	auto mdl = server->GetModelManager().FindCachedModel(mdlName);
-	if(mdl == nullptr)
+	auto *asset = server->GetModelManager().FindCachedAsset(mdlName);
+	if(asset == nullptr)
 		return;
+	auto &mdl = static_cast<pragma::asset::ModelAsset*>(asset)->model;
 	std::string dstName;
 	if(mdl->FindMaterial(matName,dstName) == false)
 		return;

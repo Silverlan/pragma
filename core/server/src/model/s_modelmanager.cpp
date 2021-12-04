@@ -17,6 +17,6 @@ std::shared_ptr<Model> pragma::asset::SModelManager::LoadModel(const std::string
 {
 	auto mdl = ModelManager::LoadModel(mdlName,bReload,outIsNewModel);
 	if(mdl == nullptr)
-		static_cast<SGame&>(*m_nw.GetGameState()).RegisterGameResource("models/" +GetNormalizedModelName(mdlName));
+		static_cast<SGame&>(*m_nw.GetGameState()).RegisterGameResource("models/" +ToCacheIdentifier(mdlName));
 	return mdl;
 }

@@ -254,9 +254,9 @@ void Game::OnRemove()
 	// contain luabind objects, which have to be destroyed before we destroy the
 	// lua state.
 	// TODO: Implement this properly!
-	for(auto &pair : GetNetworkState()->GetCachedModels())
+	for(auto &pair : GetNetworkState()->GetModelManager().GetCache())
 	{
-		for(auto &colMesh : pair.second->GetCollisionMeshes())
+		for(auto &colMesh : static_cast<pragma::asset::ModelAsset*>(pair.second.asset.get())->model->GetCollisionMeshes())
 			colMesh->ClearShape();
 	}
 

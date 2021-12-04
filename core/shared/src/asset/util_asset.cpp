@@ -179,7 +179,7 @@ std::string pragma::asset::get_normalized_path(const std::string &name,Type type
 	switch(type)
 	{
 	case Type::Model:
-		return ModelManager::GetNormalizedModelName(path.GetString());
+		//return ModelManager::GetNormalizedModelName(path.GetString());
 	case Type::Map:
 	case Type::Material:
 	case Type::Texture:
@@ -251,7 +251,8 @@ bool pragma::asset::is_loaded(NetworkState &nw,const std::string &name,Type type
 	case Type::Model:
 	{
 		auto &mdlManager = nw.GetModelManager();
-		return mdlManager.FindCachedModel(name);
+		auto *asset = mdlManager.FindCachedAsset(name);
+		return asset != nullptr;
 	}
 	case Type::Map:
 		return false; // TODO

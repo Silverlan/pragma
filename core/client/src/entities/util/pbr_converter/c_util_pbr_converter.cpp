@@ -177,8 +177,8 @@ void CPBRConverterComponent::OnEntitySpawn()
 	auto &models = client->GetModelManager().GetCache();
 	for(auto &pair : models)
 	{
-		auto &mdl = pair.second;
-		UpdateMetalness(*mdl);
+		auto &assetInfo = pair.second;
+		UpdateMetalness(*static_cast<pragma::asset::ModelAsset*>(assetInfo.asset.get())->model);
 		//UpdateAmbientOcclusion(*mdl);
 	}
 }

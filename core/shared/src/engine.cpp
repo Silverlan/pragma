@@ -59,7 +59,7 @@
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_path.hpp>
 #include <fsys/filesystem.h>
-
+#pragma optimize("",off)
 const pragma::IServerState &Engine::GetServerStateInterface() const
 {
 	if(m_libServer == nullptr)
@@ -346,13 +346,13 @@ static uint32_t clear_assets(NetworkState *state,pragma::asset::Type type,bool v
 
 			std::unordered_map<Model*,std::string> oldCache;
 			for(auto &pair : cache)
-				oldCache[pair.second.get()] = pair.first;
+				oldCache[static_cast<pragma::asset::ModelManager::AssetType*>(pair.second.asset.get())->model.get()] = pair.first;
 
 			n = mdlManager.ClearUnused();
 
 			std::unordered_map<Model*,std::string> newCache;
 			for(auto &pair : cache)
-				newCache[pair.second.get()] = pair.first;
+				newCache[static_cast<pragma::asset::ModelManager::AssetType*>(pair.second.asset.get())->model.get()] = pair.first;
 
 			for(auto &pair : oldCache)
 			{
@@ -918,3 +918,4 @@ REGISTER_ENGINE_CONVAR_CALLBACK(debug_profiling_enabled,[](NetworkState*,ConVar*
 		return;
 	engine->SetProfilingEnabled(enabled);
 });
+#pragma optimize("",on)

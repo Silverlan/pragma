@@ -20,40 +20,39 @@
 #include <sharedutils/util_string.h>
 #include "pragma/entities/baseworld.h"
 #include <sharedutils/util_file.h>
+#include <sharedutils/asset_loader/asset_manager.hpp>
 #include <unordered_set>
 
 namespace pragma::asset
 {
-	class DLLNETWORK ModelManager
+	struct DLLNETWORK ModelAsset
+		: public util::IAsset
 	{
 	public:
-		static std::string GetNormalizedModelName(const std::string &mdlName);
-
+		ModelAsset(const std::shared_ptr<Model> &model)
+			: model{model}
+		{}
+		virtual bool IsInUse() const override;
+		std::shared_ptr<Model> model;
+	};
+	class DLLNETWORK ModelManager
+		: public util::IAssetManager
+	{
+	public:
+		using AssetType = ModelAsset;
 		ModelManager(NetworkState &nw);
 		virtual ~ModelManager()=default;
 
-		uint32_t ClearUnused();
-		uint32_t ClearFlagged();
-		uint32_t Clear();
-		void FlagForRemoval(Model &mdl);
-		void FlagAllForRemoval();
+		using util::IAssetManager::FlagForRemoval;
+		void FlagForRemoval(const Model &mdl,bool flag=true);
 
-		const std::unordered_map<std::string,std::shared_ptr<Model>> &GetCache() const;
-		const Model *FindCachedModel(const std::string &mdlName) const;
-		Model *FindCachedModel(const std::string &mdlName);
 		std::shared_ptr<Model> CreateModel(const std::string &name="",bool bAddReference=true,bool addToCache=false);
 		virtual std::shared_ptr<Model> LoadModel(const std::string &mdlName,bool bReload=false,bool *outIsNewModel=nullptr);
 	protected:
-		static std::string GetCacheName(const std::string &mdlName);
 		virtual std::shared_ptr<Model> CreateModel(uint32_t numBones,const std::string &mdlName);
 
 		NetworkState &m_nw;
 		virtual std::shared_ptr<Model> LoadModel(FWMD &wmd,const std::string &mdlName) const;
-	private:
-		std::shared_ptr<Model> FindModel(const std::string &mdlName);
-
-		std::unordered_map<std::string,std::shared_ptr<Model>> m_cache;
-		std::unordered_set<std::string> m_flaggedForDeletion;
 	};
 };
 

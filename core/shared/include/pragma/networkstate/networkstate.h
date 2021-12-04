@@ -83,7 +83,6 @@ public:
 	// Assets
 	const pragma::asset::ModelManager &GetModelManager() const;
 	pragma::asset::ModelManager &GetModelManager();
-	const std::unordered_map<std::string,std::shared_ptr<Model>> &GetCachedModels() const;
 
 	// Debug
 	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase> *GetProfilingStageManager();

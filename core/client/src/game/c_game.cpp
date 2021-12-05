@@ -1314,18 +1314,14 @@ void CGame::InitializeMapEntities(pragma::asset::WorldData &worldData,std::vecto
 void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 {
 	Game::InitializeWorldData(worldData);
-	TextureManager::LoadInfo loadInfo {};
-	loadInfo.flags = TextureLoadFlags::LoadInstantly;
 
-	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	loadInfo.sampler = c_engine->GetRenderContext().CreateSampler(samplerCreateInfo);
-
-	std::shared_ptr<void> texture = nullptr;
-	static_cast<CMaterialManager&>(static_cast<ClientState*>(GetNetworkState())->GetMaterialManager()).GetTextureManager().Load(
-		c_engine->GetRenderContext(),worldData.GetLightmapAtlasTexturePath(GetMapName()),loadInfo,&texture
-	);
+	auto texture = static_cast<CMaterialManager&>(static_cast<ClientState*>(GetNetworkState())->GetMaterialManager()).GetTextureManager().LoadTexture(worldData.GetLightmapAtlasTexturePath(GetMapName()));
 	if(texture)
 	{
+		prosper::util::SamplerCreateInfo samplerCreateInfo {};
+		auto sampler = c_engine->GetRenderContext().CreateSampler(samplerCreateInfo);
+		texture->GetVkTexture()->SetSampler(*sampler);
+
 		auto &tex = *static_cast<Texture*>(texture.get());
 		auto lightmapAtlas = tex.GetVkTexture();
 		//auto lightmapAtlas = pragma::CLightMapComponent::CreateLightmapTexture(img->GetWidth(),img->GetHeight(),static_cast<uint16_t*>(img->GetData()));

@@ -45,20 +45,15 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCLightMap.def("SetLightmapAtlas",static_cast<void(*)(lua_State*,pragma::CLightMapComponent&,const std::string &path)>([](lua_State *l,pragma::CLightMapComponent &hLightMapC,const std::string &path) {
 		auto *nw = c_engine->GetNetworkState(l);
 
-		TextureManager::LoadInfo loadInfo {};
-		loadInfo.flags = TextureLoadFlags::LoadInstantly;
-
-		prosper::util::SamplerCreateInfo samplerCreateInfo {};
-		loadInfo.sampler = c_engine->GetRenderContext().CreateSampler(samplerCreateInfo);
-		std::shared_ptr<void> texture = nullptr;
-		static_cast<CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).GetTextureManager().Load(
-			c_engine->GetRenderContext(),path,loadInfo,&texture
-		);
+		auto texture = static_cast<CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).GetTextureManager().LoadTexture(path);
 		if(texture == nullptr)
 			return;
 		auto &vkTex = std::static_pointer_cast<Texture>(texture)->GetVkTexture();
 		if(vkTex == nullptr)
 			return;
+		prosper::util::SamplerCreateInfo samplerCreateInfo {};
+		auto sampler = c_engine->GetRenderContext().CreateSampler(samplerCreateInfo);
+		vkTex->SetSampler(*sampler);
 		hLightMapC.SetLightMapAtlas(vkTex);
 	}));
 	defCLightMap.def("SetExposure",&pragma::CLightMapComponent::SetLightMapExposure);

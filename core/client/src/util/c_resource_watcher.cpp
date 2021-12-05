@@ -30,14 +30,12 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 	auto *nw = m_networkState;
 	auto &matManager = static_cast<CMaterialManager&>(nw->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
-	auto tex = texManager.GetTexture(path);
-	if(tex == nullptr)
+	auto *asset = texManager.FindCachedAsset(path);
+	if(asset == nullptr)
 		return;
-	TextureManager::LoadInfo loadInfo {};
-	if(cvMatStreaming->GetBool() == false)
-		loadInfo.flags |= TextureLoadFlags::LoadInstantly;
-	loadInfo.flags |= TextureLoadFlags::Reload;
-	loadInfo.onLoadCallback = FunctionCallback<void,std::shared_ptr<Texture>>::Create([path,nw](std::shared_ptr<Texture> tex) {
+	texManager.RemoveFromCache(path);
+	msys::TextureLoadInfo loadInfo {};
+	loadInfo.onLoaded = [path,nw](msys::TextureAsset &asset) {
 		if(nw == nullptr)
 			return;
 		auto &matManager = static_cast<CMaterialManager&>(nw->GetMaterialManager());
@@ -93,8 +91,8 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 			if(data != nullptr)
 				fLookForTextureAndUpdate(*data,static_cast<CMaterial&>(*hMat.get()));
 		}
-	});
-	texManager.ReloadTexture(path,loadInfo);
+	};
+	texManager.LoadTexture(path,loadInfo);
 }
 
 void CResourceWatcherManager::OnMaterialReloaded(const std::string &path,const std::unordered_set<Model*> &modelMap)

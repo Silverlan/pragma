@@ -182,11 +182,11 @@ void CGame::RegisterLua()
 		luabind::def("load_material",static_cast<Material*(*)(lua_State*,const std::string&,bool,bool)>(Lua::engine::load_material)),
 		luabind::def("load_material",static_cast<Material*(*)(lua_State*,const std::string&,bool)>(Lua::engine::load_material)),
 		luabind::def("load_material",static_cast<Material*(*)(lua_State*,const std::string&)>(Lua::engine::load_material)),
-		luabind::def("load_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,const std::string&,TextureLoadFlags)>(Lua::engine::load_texture)),
+		luabind::def("load_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,const std::string&,msys::TextureLoadFlags)>(Lua::engine::load_texture)),
 		luabind::def("load_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,const std::string&)>(Lua::engine::load_texture)),
-		luabind::def("load_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,const LFile&,const std::string&,TextureLoadFlags loadFlags)>(Lua::engine::load_texture)),
+		luabind::def("load_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,const LFile&,const std::string&,msys::TextureLoadFlags loadFlags)>(Lua::engine::load_texture)),
 		luabind::def("load_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,const LFile&,const std::string&)>(Lua::engine::load_texture)),
-		luabind::def("load_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,const LFile&,TextureLoadFlags)>(Lua::engine::load_texture)),
+		luabind::def("load_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,const LFile&,msys::TextureLoadFlags)>(Lua::engine::load_texture)),
 		luabind::def("load_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,const LFile&)>(Lua::engine::load_texture)),
 		luabind::def("create_material",static_cast<Material*(*)(const std::string&,const std::string&)>(Lua::engine::create_material)),
 		luabind::def("create_material",static_cast<Material*(*)(const std::string&)>(Lua::engine::create_material)),
@@ -381,10 +381,9 @@ void CGame::RegisterLua()
 		{"RENDER_FLAG_HDR_BIT",umath::to_integral(RenderFlags::HDR)},
 		{"RENDER_FLAG_PARTICLE_DEPTH_BIT",umath::to_integral(RenderFlags::ParticleDepth)},
 
-		{"TEXTURE_LOAD_FLAG_NONE",umath::to_integral(TextureLoadFlags::None)},
-		{"TEXTURE_LOAD_FLAG_BIT_LOAD_INSTANTLY",umath::to_integral(TextureLoadFlags::LoadInstantly)},
-		{"TEXTURE_LOAD_FLAG_BIT_RELOAD",umath::to_integral(TextureLoadFlags::Reload)},
-		{"TEXTURE_LOAD_FLAG_BIT_DONT_CACHE",umath::to_integral(TextureLoadFlags::DontCache)}
+		{"TEXTURE_LOAD_FLAG_NONE",umath::to_integral(msys::TextureLoadFlags::None)},
+		{"TEXTURE_LOAD_FLAG_DONT_CACHE",umath::to_integral(msys::TextureLoadFlags::DontCache)},
+		{"TEXTURE_LOAD_FLAG_IGNORE_CACHE",umath::to_integral(msys::TextureLoadFlags::IgnoreCache)}
 	});
 
 	auto gameMod = luabind::module(GetLuaState(),"game");

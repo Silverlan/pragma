@@ -694,8 +694,8 @@ static bool is_asset_loaded(NetworkState &nw,const std::string &name,pragma::ass
 	{
 	case pragma::asset::Type::Texture:
 	{
-		auto tex = static_cast<CMaterialManager&>(nw.GetMaterialManager()).GetTextureManager().FindTexture(name,true);
-		return tex != nullptr;
+		auto *asset = static_cast<CMaterialManager&>(nw.GetMaterialManager()).GetTextureManager().FindCachedAsset(name);
+		return asset != nullptr;
 	}
 	case pragma::asset::Type::ParticleSystem:
 	{

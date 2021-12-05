@@ -257,13 +257,11 @@ static bool load_image(
 	auto f = FileManager::OpenSystemFile(imgPath.c_str(),"rb");
 	if(f == nullptr)
 		return false;
-	TextureManager::LoadInfo loadInfo {};
-	loadInfo.flags = TextureLoadFlags::LoadInstantly | TextureLoadFlags::DontCache;
-	std::shared_ptr<void> texture = nullptr;
 	auto &texManager = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
-	if(texManager.Load(c_engine->GetRenderContext(),image->uri,f,loadInfo,&texture) == false)
+	auto texture = texManager.LoadTexture(image->uri,msys::TextureLoadFlags::DontCache);
+	if(texture == nullptr)
 		return false;
-	if(std::static_pointer_cast<Texture>(texture)->HasValidVkTexture() == false)
+	if(texture->HasValidVkTexture() == false)
 		return false;
 	if(imageIdx >= inputData.textures.size())
 		inputData.textures.resize(imageIdx +1);
@@ -1187,10 +1185,8 @@ std::shared_ptr<Model> pragma::asset::import_model(const std::string &fileName,s
 
 bool pragma::asset::import_texture(const std::string &fileName,const TextureImportInfo &texInfo,const std::string &outputPath,std::string &outErrMsg)
 {
-	TextureManager::LoadInfo loadInfo {};
-	loadInfo.flags = TextureLoadFlags::LoadInstantly | TextureLoadFlags::DontCache;
-	std::shared_ptr<void> tex;
-	if(static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(c_engine->GetRenderContext(),fileName,loadInfo,&tex) == false)
+	auto tex = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().LoadTexture(fileName,msys::TextureLoadFlags::DontCache);
+	if(tex == nullptr)
 	{
 		outErrMsg = "Unable to load texture!";
 		return false;
@@ -1204,10 +1200,16 @@ bool pragma::asset::import_texture(const std::string &fileName,const TextureImpo
 }
 bool pragma::asset::import_texture(VFilePtr f,const TextureImportInfo &texInfo,const std::string &outputPath,std::string &outErrMsg)
 {
-	TextureManager::LoadInfo loadInfo {};
-	loadInfo.flags = TextureLoadFlags::LoadInstantly | TextureLoadFlags::DontCache;
-	std::shared_ptr<void> tex;
-	if(static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(c_engine->GetRenderContext(),"",f,loadInfo,&tex) == false)
+	auto *fr = dynamic_cast<VFilePtrInternalReal*>(f.get());
+	if(!fr)
+		return false;
+	auto &path = fr->GetPath();
+	std::string ext;
+	if(ufile::get_extension(path,&ext) == false)
+		return false;
+	auto fp = std::make_shared<fsys::File>(f);
+	auto tex = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().LoadTexture("",fp,ext,{msys::TextureLoadFlags::DontCache});
+	if(tex == nullptr)
 	{
 		outErrMsg = "Unable to load texture!";
 		return false;
@@ -1516,10 +1518,8 @@ bool pragma::asset::export_texture(
 )
 {
 	auto &texManager = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
-	TextureManager::LoadInfo loadInfo {};
-	loadInfo.flags = TextureLoadFlags::LoadInstantly;
-	std::shared_ptr<void> pTexture = nullptr;
-	if(texManager.Load(c_engine->GetRenderContext(),texturePath,loadInfo,&pTexture) == false || std::static_pointer_cast<Texture>(pTexture)->HasValidVkTexture() == false)
+	auto pTexture = texManager.LoadTexture(texturePath);
+	if(pTexture == nullptr || pTexture->HasValidVkTexture() == false)
 	{
 		outErrMsg = "Unable to load texture '" +texturePath +"'!";
 		return false;

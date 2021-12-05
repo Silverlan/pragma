@@ -20,6 +20,7 @@
 #include <image/prosper_sampler.hpp>
 #include <sharedutils/util_file.h>
 #include <cmaterialmanager.h>
+#include <texturemanager/texture.h>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
@@ -57,12 +58,10 @@ std::optional<pragma::ShaderSpecularGlossinessToMetalnessRoughness::MetalnessRou
 	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit;
 
 	auto fGetWhiteTex = [&context]() -> prosper::Texture* {
-		TextureManager::LoadInfo loadInfo {};
-		loadInfo.flags = TextureLoadFlags::LoadInstantly;
-		std::shared_ptr<void> tex = nullptr;
-		if(static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(context,"white",loadInfo,&tex) == false)
+		auto tex = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().LoadTexture("white");
+		if(tex == nullptr)
 			return nullptr;
-		return std::static_pointer_cast<Texture>(tex)->GetVkTexture().get();
+		return tex->GetVkTexture().get();
 	};
 
 	if(diffuseMap == nullptr)

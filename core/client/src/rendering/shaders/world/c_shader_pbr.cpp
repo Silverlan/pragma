@@ -142,10 +142,6 @@ bool ShaderPBR::BindDescriptorSetTexture(Material &mat,prosper::IDescriptorSet &
 	auto &matManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 
-	TextureManager::LoadInfo loadInfo {};
-	loadInfo.flags = TextureLoadFlags::LoadInstantly;
-	loadInfo.mipmapLoadMode = TextureMipmapMode::Load;
-
 	std::shared_ptr<Texture> tex = nullptr;
 	if(texInfo && texInfo->texture)
 		tex = std::static_pointer_cast<Texture>(texInfo->texture);
@@ -158,20 +154,12 @@ bool ShaderPBR::BindDescriptorSetTexture(Material &mat,prosper::IDescriptorSet &
 	return true;
 }
 
-static TextureManager::LoadInfo get_texture_load_info()
-{
-	TextureManager::LoadInfo loadInfo {};
-	loadInfo.flags = TextureLoadFlags::LoadInstantly;
-	loadInfo.mipmapLoadMode = TextureMipmapMode::Load;
-	return loadInfo;
-}
-
 static bool bind_default_texture(prosper::IDescriptorSet &ds,const std::string &defaultTexName,uint32_t bindingIndex,Texture **optOutTex)
 {
 	auto &matManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
-	std::shared_ptr<void> ptrTex = nullptr;
-	if(texManager.Load(c_engine->GetRenderContext(),defaultTexName,get_texture_load_info(),&ptrTex) == false)
+	auto ptrTex = texManager.LoadTexture(defaultTexName);
+	if(ptrTex == nullptr)
 		return false;
 	auto tex = std::static_pointer_cast<Texture>(ptrTex);
 

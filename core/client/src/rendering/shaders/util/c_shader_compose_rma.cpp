@@ -20,6 +20,7 @@
 #include <image/prosper_sampler.hpp>
 #include <sharedutils/util_file.h>
 #include <cmaterialmanager.h>
+#include <texturemanager/texture.h>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
@@ -57,12 +58,10 @@ std::shared_ptr<prosper::IImage> pragma::ShaderComposeRMA::ComposeRMA(
 	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::SampledBit;
 
 	auto fGetWhiteTex = [&context]() -> prosper::Texture* {
-		TextureManager::LoadInfo loadInfo {};
-		loadInfo.flags = TextureLoadFlags::LoadInstantly;
-		std::shared_ptr<void> tex = nullptr;
-		if(static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(context,"white",loadInfo,&tex) == false)
+		auto tex = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().LoadTexture("white");
+		if(tex == nullptr)
 			return nullptr;
-		return std::static_pointer_cast<Texture>(tex)->GetVkTexture().get();
+		return tex->GetVkTexture().get();
 	};
 
 	if(roughnessMap == nullptr)
@@ -117,10 +116,8 @@ std::shared_ptr<prosper::IImage> pragma::ShaderComposeRMA::ComposeRMA(
 bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::IPrContext &context,const std::string &rmaInputPath,prosper::IImage &aoImg,const std::string *optRmaOutputPath)
 {
 	auto &texManager = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
-	std::shared_ptr<void> rmaTexInfo;
-	TextureManager::LoadInfo loadInfo {};
-	loadInfo.flags = TextureLoadFlags::LoadInstantly;
-	if(texManager.Load(context,rmaInputPath,loadInfo,&rmaTexInfo) == false || rmaTexInfo == nullptr || std::static_pointer_cast<Texture>(rmaTexInfo)->HasValidVkTexture() == false)
+	auto rmaTexInfo = texManager.LoadTexture(rmaInputPath);
+	if(rmaTexInfo == nullptr || rmaTexInfo->HasValidVkTexture() == false)
 		return false;
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
@@ -128,8 +125,7 @@ bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::IPrContext &conte
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	auto aoTex = context.CreateTexture(texCreateInfo,aoImg,imgViewCreateInfo,samplerCreateInfo);
 
-	auto tex = std::static_pointer_cast<Texture>(rmaTexInfo);
-	auto texRMA = (tex->IsError() == false) ? tex->GetVkTexture() : nullptr;
+	auto texRMA = (rmaTexInfo->IsError() == false) ? rmaTexInfo->GetVkTexture() : nullptr;
 	auto newRMA = ComposeRMA(context,texRMA.get(),texRMA.get(),aoTex.get());
 
 	uimg::TextureInfo imgWriteInfo {};

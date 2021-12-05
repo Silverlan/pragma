@@ -16,6 +16,7 @@
 #include <pragma/console/convars.h>
 #include <sharedutils/util_file.h>
 #include <cmaterialmanager.h>
+#include <texturemanager/texture.h>
 #include <pragma/console/command_options.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
@@ -257,7 +258,11 @@ void CEngine::RegisterConsoleCommands()
 	
 	conVarMap.RegisterConCommand("debug_textures",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		auto &texManager = static_cast<CMaterialManager&>(static_cast<ClientState*>(GetClientState())->GetMaterialManager()).GetTextureManager();
-		auto textures = texManager.GetTextures();
+		std::vector<std::shared_ptr<Texture>> textures;
+		auto &cache = texManager.GetCache();
+		textures.reserve(cache.size());
+		for(auto &pair : cache)
+			textures.push_back(static_cast<msys::TextureAsset*>(pair.second.asset.get())->texture);
 		std::vector<prosper::DeviceSize> textureSizes;
 		std::vector<size_t> sortedIndices {};
 		textureSizes.reserve(textures.size());

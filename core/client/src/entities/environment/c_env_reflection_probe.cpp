@@ -719,16 +719,15 @@ bool CReflectionProbeComponent::GenerateIBLReflectionsFromCubemap(prosper::Textu
 	auto irradianceMap = shaderConvolute->ConvoluteCubemapLighting(cubemap,32);
 	auto prefilterMap = shaderRoughness->ComputeRoughness(cubemap,512);
 
-	TextureManager::LoadInfo loadInfo {};
-	loadInfo.mipmapLoadMode = TextureMipmapMode::Ignore;
-	loadInfo.flags = TextureLoadFlags::LoadInstantly;
-	std::shared_ptr<prosper::Texture> brdfTex = nullptr;
 	std::shared_ptr<void> texPtr = nullptr;
 
 	// Load BRDF texture from disk, if it already exists
-	if(static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(c_engine->GetRenderContext(),"env/brdf.ktx",loadInfo,&texPtr) == true)
-		brdfTex = std::static_pointer_cast<Texture>(texPtr)->GetVkTexture();
-
+	msys::TextureLoadInfo loadInfo {};
+	loadInfo.mipmapMode = TextureMipmapMode::Ignore;
+	std::shared_ptr<prosper::Texture> brdfTex = nullptr;
+	auto texInfo = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().LoadTexture("env/brdf.ktx",loadInfo);
+	if(texInfo)
+		brdfTex = texInfo->GetVkTexture();
 	// Otherwise generate it
 	if(brdfTex == nullptr)
 		brdfTex = shaderBRDF->CreateBRDFConvolutionMap(512);

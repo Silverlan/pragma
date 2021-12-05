@@ -54,6 +54,7 @@
 #include <queries/prosper_timer_query.hpp>
 #include <pragma/asset/util_asset.hpp>
 #include <prosper_window.hpp>
+#include <fsys/ifile.hpp>
 
 extern "C"
 {
@@ -614,7 +615,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 
 	// Initialize Client Instance
 	auto matManager = std::make_shared<CMaterialManager>(this->GetRenderContext());
-	matManager->GetTextureManager().SetTextureFileHandler([this](const std::string &fpath) -> VFilePtr {
+	matManager->GetTextureManager().SetFileHandler([this](const std::string &fpath) -> std::shared_ptr<ufile::IFile> {
 		if(FileManager::Exists(fpath) == false)
 		{
 			auto &formats = MaterialManager::get_supported_image_formats();
@@ -627,7 +628,10 @@ bool CEngine::Initialize(int argc,char *argv[])
 					break;
 			}
 		}
-		return nullptr;
+		auto fp = filemanager::open_file(fpath,filemanager::FileMode::Binary | filemanager::FileMode::Read);
+		if(!fp)
+			return nullptr;
+		return std::make_shared<fsys::File>(fp);
 	});
 	matManager->SetTextureImporter([this](const std::string &fpath,const std::string &outputPath) -> VFilePtr {
 		if(FileManager::Exists(fpath) == false)
@@ -1570,23 +1574,25 @@ uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 				n += texManager.ClearUnused();
 			else
 			{
-				auto &cache = texManager.GetTextures();
+				auto &cache = texManager.GetCache();
 
 				std::unordered_map<Texture*,std::string> oldCache;
-				for(auto &tex : cache)
+				for(auto &pair : cache)
 				{
-					if(!tex)
+					if(!pair.second.asset)
 						continue;
+					auto &tex = static_cast<msys::TextureAsset*>(pair.second.asset.get())->texture;
 					oldCache[tex.get()] = tex->GetName();
 				}
 
 				n += texManager.ClearUnused();
 
 				std::unordered_map<Texture*,std::string> newCache;
-				for(auto &tex : cache)
+				for(auto &pair : cache)
 				{
-					if(!tex)
+					if(!pair.second.asset)
 						continue;
+					auto &tex = static_cast<msys::TextureAsset*>(pair.second.asset.get())->texture;
 					newCache[tex.get()] = tex->GetName();
 				}
 

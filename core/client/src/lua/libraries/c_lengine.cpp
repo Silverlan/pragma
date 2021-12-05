@@ -28,6 +28,7 @@
 #include <image/prosper_render_target.hpp>
 #include <pragma/entities/environment/effects/particlesystemdata.h>
 #include <prosper_window.hpp>
+#include <fsys/ifile.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -115,47 +116,64 @@ void Lua::engine::precache_model(lua_State *l,const std::string &mdl)
 	});
 }
 
-std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const std::string &name,TextureLoadFlags loadFlags)
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const std::string &name,msys::TextureLoadFlags loadFlags)
 {
-	TextureManager::LoadInfo loadInfo {};
-	loadInfo.flags = loadFlags;
-	std::shared_ptr<void> tex = nullptr;
-	auto result = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(c_engine->GetRenderContext(),name,loadInfo,&tex);
-	if(result == false || tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
+	auto &texManager = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
+	msys::TextureLoadInfo info {};
+	info.flags = loadFlags;
+	auto tex = texManager.LoadTexture(name,info);
+	if(tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
 		return nullptr;
 	return std::static_pointer_cast<Texture>(tex)->GetVkTexture();
 }
-std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const std::string &name) {return load_texture(l,name,TextureLoadFlags::None);}
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const std::string &name) {return load_texture(l,name,msys::TextureLoadFlags::None);}
 
-std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const LFile &file,const std::string &cacheName,TextureLoadFlags loadFlags)
+static std::optional<std::string> get_extension(const LFile &file)
+{
+	auto *fp = dynamic_cast<VFilePtrInternalReal*>(const_cast<LFile&>(file).GetHandle().get());
+	if(!fp)
+		return {};
+	auto path = fp->GetPath();
+	std::string ext;
+	return ufile::get_extension(path,&ext) ? ext : std::optional<std::string>{};
+}
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const LFile &file,const std::string &cacheName,msys::TextureLoadFlags loadFlags)
 {
 	auto *lf = Lua::CheckFile(l,1);
 	if(lf == nullptr)
 		return nullptr;
-	TextureManager::LoadInfo loadInfo {};
-	loadInfo.flags = loadFlags;
-	loadInfo.flags |= TextureLoadFlags::DontCache;
-	std::shared_ptr<void> tex = nullptr;
-	auto result = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(c_engine->GetRenderContext(),cacheName,lf->GetHandle(),loadInfo,&tex);
-	if(result == false || tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
+	auto ext = get_extension(file);
+	if(!ext.has_value())
+		return nullptr;
+	auto &texManager = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
+	auto f = std::make_shared<fsys::File>(const_cast<LFile&>(file).GetHandle());
+	msys::TextureLoadInfo info {};
+	info.flags = loadFlags;
+	info.flags |= msys::TextureLoadFlags::DontCache;
+	auto tex = texManager.LoadTexture("",f,*ext,info);
+	if(tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
 		return nullptr;
 	return std::static_pointer_cast<Texture>(tex)->GetVkTexture();
 }
-std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const LFile &file,const std::string &cacheName) {return load_texture(l,file,cacheName,TextureLoadFlags::None);}
-std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const LFile &file,TextureLoadFlags loadFlags)
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const LFile &file,const std::string &cacheName) {return load_texture(l,file,cacheName,msys::TextureLoadFlags::None);}
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const LFile &file,msys::TextureLoadFlags loadFlags)
 {
 	auto *lf = Lua::CheckFile(l,1);
 	if(lf == nullptr)
 		return nullptr;
-	TextureManager::LoadInfo loadInfo {};
-	loadInfo.flags = loadFlags;
-	std::shared_ptr<void> tex = nullptr;
-	auto result = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(c_engine->GetRenderContext(),"",lf->GetHandle(),loadInfo,&tex);
-	if(result == false || tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
+	auto ext = get_extension(file);
+	if(!ext.has_value())
+		return nullptr;
+	auto &texManager = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
+	auto f = std::make_shared<fsys::File>(const_cast<LFile&>(file).GetHandle());
+	msys::TextureLoadInfo info {};
+	info.flags = loadFlags;
+	auto tex = texManager.LoadTexture("",f,*ext,info);
+	if(tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
 		return nullptr;
 	return std::static_pointer_cast<Texture>(tex)->GetVkTexture();
 }
-std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const LFile &file) {return load_texture(l,file,TextureLoadFlags::None);}
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const LFile &file) {return load_texture(l,file,msys::TextureLoadFlags::None);}
 
 Material *Lua::engine::load_material(lua_State *l,const std::string &mat,bool reload,bool loadInstantly) {return client->LoadMaterial(mat,loadInstantly,reload);}
 Material *Lua::engine::load_material(lua_State *l,const std::string &mat,bool reload) {return load_material(l,mat,reload,false);}

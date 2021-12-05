@@ -19,7 +19,7 @@ extern DLLCLIENT CEngine *c_engine;
 
 LINK_WGUI_TO_CLASS(WIImageSlideShow,WIImageSlideShow);
 
-
+#pragma optimize("",off)
 WIImageSlideShow::PreloadImage::PreloadImage()
 	: ready(false),loading(false),image(-1)
 {}
@@ -194,15 +194,17 @@ void WIImageSlideShow::PreloadNextImage(Int32 img)
 	auto &matManager = static_cast<CMaterialManager&>(wgui.GetMaterialManager());
 	auto &textureManager = matManager.GetTextureManager();
 	auto hSlideShow = GetHandle();
-	TextureManager::LoadInfo loadInfo {};
-	loadInfo.onLoadCallback = FunctionCallback<void,std::shared_ptr<Texture>>::Create([this,f,hSlideShow](std::shared_ptr<Texture> texture) {
+
+	msys::TextureLoadInfo loadInfo {};
+	loadInfo.flags |= msys::TextureLoadFlags::AbsolutePath;
+	loadInfo.onLoaded = [this,hSlideShow](util::IAsset &asset) {
 		if(!hSlideShow.IsValid())
 			return;
-		m_imgPreload.texture = texture;
+		m_imgPreload.texture = static_cast<msys::TextureAsset&>(asset).texture;
 		m_imgPreload.ready = true;
 		m_imgPreload.loading = false;
-	});
-	textureManager.Load(wgui.GetContext(),f,loadInfo,nullptr,true);
+	};
+	textureManager.LoadTexture(f,loadInfo);
 }
 
 void WIImageSlideShow::DisplayNextImage()
@@ -233,4 +235,4 @@ void WIImageSlideShow::PreloadNextRandomShuffle()
 	}
 	PreloadNextImage(Int32(img));
 }
-
+#pragma optimize("",on)

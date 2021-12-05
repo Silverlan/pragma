@@ -115,15 +115,16 @@ Model::Model(NetworkState *nw,uint32_t numBones,const std::string &name)
 }
 
 Model::Model(const Model &other)
-	: m_networkState(other.m_networkState),m_metaInfo(other.m_metaInfo),m_bValid(other.m_bValid),m_mass(other.m_mass),
+	: m_networkState(other.m_networkState),m_metaInfo(other.m_metaInfo),m_stateFlags(other.m_stateFlags),m_mass(other.m_mass),
 	m_blendControllers(other.m_blendControllers),m_bodyGroups(other.m_bodyGroups),m_hitboxes(other.m_hitboxes),
 	m_name(other.m_name),m_animationIDs(other.m_animationIDs),m_bindPose(other.m_bindPose),m_collisionMin(other.m_collisionMin),
 	m_collisionMax(other.m_collisionMax),m_renderMin(other.m_renderMin),m_renderMax(other.m_renderMax),m_joints(other.m_joints),
 	m_baseMeshes(other.m_baseMeshes),m_lods(other.m_lods),m_attachments(other.m_attachments),
 	m_materials(other.m_materials),m_textureGroups(other.m_textureGroups),m_skeleton(std::make_unique<panima::Skeleton>(*other.m_skeleton)),
 	m_reference(Frame::Create(*other.m_reference)),m_vertexCount(other.m_vertexCount),m_triangleCount(other.m_triangleCount),
-	m_bAllMaterialsLoaded(true),m_flexControllers(other.m_flexControllers),m_flexes(other.m_flexes),m_phonemeMap(other.m_phonemeMap)
+	m_flexControllers(other.m_flexControllers),m_flexes(other.m_flexes),m_phonemeMap(other.m_phonemeMap)
 {
+	m_stateFlags |= StateFlags::AllMaterialsLoaded;
 	m_meshGroups.reserve(other.m_meshGroups.size());
 	for(auto &meshGroup : other.m_meshGroups)
 		m_meshGroups.push_back(ModelMeshGroup::Create(*meshGroup));
@@ -217,7 +218,7 @@ bool Model::IsEqual(const Model &other) const
 		return false;
 	if(m_skeleton && *m_skeleton != *other.m_skeleton)
 		return false;
-	static_assert(sizeof(Model) == 1'000,"Update this function when making changes to this class!");
+	static_assert(sizeof(Model) == 992,"Update this function when making changes to this class!");
 	return true;
 }
 bool Model::operator==(const Model &other) const
@@ -232,7 +233,7 @@ Model &Model::operator=(const Model &other)
 {
 	m_networkState = other.m_networkState;
 	m_metaInfo = other.m_metaInfo;
-	m_bValid = other.m_bValid;
+	m_stateFlags = other.m_stateFlags;
 	m_mass = other.m_mass;
 	m_meshCount = other.m_meshCount;
 	m_subMeshCount = other.m_subMeshCount;
@@ -247,7 +248,6 @@ Model &Model::operator=(const Model &other)
 	m_eyeballs = other.m_eyeballs;
 	m_reference = other.m_reference;
 	m_name = other.m_name;
-	m_bAllMaterialsLoaded = other.m_bAllMaterialsLoaded;
 	m_animations = other.m_animations;
 	m_vertexAnimations = other.m_vertexAnimations;
 	m_animationIDs = other.m_animationIDs;
@@ -500,7 +500,7 @@ void Model::AddEyeball(const Eyeball &eyeball) {m_eyeballs.push_back(eyeball);}
 
 void Model::Construct()
 {
-	m_bValid = true;
+	m_stateFlags |= StateFlags::Valid;
 	m_name = "";
 	m_skeleton = std::make_unique<panima::Skeleton>();
 	m_mass = 0.f;
@@ -536,8 +536,8 @@ void Model::OnMaterialLoaded()
 		else
 			++it;
 	}
-	m_bAllMaterialsLoaded = bAllLoaded;
-	if(m_bAllMaterialsLoaded == true)
+	umath::set_flag(m_stateFlags,StateFlags::AllMaterialsLoaded,bAllLoaded);
+	if(bAllLoaded == true)
 	{
 		for(auto &hCb : m_onAllMatsLoadedCallbacks)
 		{
@@ -549,7 +549,7 @@ void Model::OnMaterialLoaded()
 }
 CallbackHandle Model::CallOnMaterialsLoaded(const std::function<void(void)> &f)
 {
-	if(m_bAllMaterialsLoaded == true)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::AllMaterialsLoaded) == true)
 	{
 		f();
 		return {};
@@ -559,7 +559,7 @@ CallbackHandle Model::CallOnMaterialsLoaded(const std::function<void(void)> &f)
 }
 void Model::AddLoadingMaterial(Material &mat,std::optional<uint32_t> index)
 {
-	m_bAllMaterialsLoaded = false;
+	umath::set_flag(m_stateFlags,StateFlags::AllMaterialsLoaded,false);
 	if(index.has_value())
 		m_materials.at(*index) = mat.GetHandle();
 	else
@@ -638,8 +638,9 @@ void Model::RemoveTexture(uint32_t idx)
 	auto &meta = GetMetaInfo();
 	if(idx < meta.textures.size())
 		meta.textures.erase(meta.textures.begin() +idx);
-	if(idx < m_materials.size())
-		m_materials.erase(m_materials.begin() +idx);
+	auto &materials = GetMaterials();
+	if(idx < materials.size())
+		materials.erase(materials.begin() +idx);
 	for(auto &group : m_textureGroups)
 	{
 		for(auto it=group.textures.begin();it!=group.textures.end();)
@@ -833,6 +834,8 @@ void Model::LoadMaterials(const std::vector<uint32_t> &textureGroupIds,bool prec
 
 void Model::LoadMaterials(bool precache,bool bReload)
 {
+	if(!precache)
+		m_stateFlags |= StateFlags::MaterialsLoadInitiated;
 	auto &meta = GetMetaInfo();
 	auto bDontPrecacheTexGroups = umath::is_flag_set(meta.flags,Model::Flags::DontPrecacheTextureGroups);
 	std::vector<uint32_t> groupIds;
@@ -899,15 +902,21 @@ std::optional<uint32_t> Model::GetMaterialIndex(const ModelSubMesh &mesh,uint32_
 		return {};
 	return texGroup->textures.at(idx);
 }
-std::vector<MaterialHandle> &Model::GetMaterials() {return m_materials;}
-const std::vector<MaterialHandle> &Model::GetMaterials() const {return m_materials;}
+std::vector<MaterialHandle> &Model::GetMaterials()
+{
+	if(!umath::is_flag_set(m_stateFlags,StateFlags::MaterialsLoadInitiated))
+		LoadMaterials();
+	return m_materials;
+}
+const std::vector<MaterialHandle> &Model::GetMaterials() const {return const_cast<Model*>(this)->GetMaterials();}
 std::vector<std::string> &Model::GetTextures() {return m_metaInfo.textures;}
 std::vector<TextureGroup> &Model::GetTextureGroups() {return m_textureGroups;}
 Material *Model::GetMaterial(uint32_t texID)
 {
-	if(texID >= m_materials.size())
+	auto &materials = GetMaterials();
+	if(texID >= materials.size())
 		return nullptr;
-	return m_materials[texID].get();
+	return materials[texID].get();
 }
 Material *Model::GetMaterial(uint32_t texGroup,uint32_t texID)
 {
@@ -923,9 +932,10 @@ Material *Model::GetMaterial(uint32_t texGroup,uint32_t texID)
 		return GetMaterial(0,texID);
 	}
 	texID = skin.textures[texID];
-	if(texID >= m_materials.size())
+	auto &materials = GetMaterials();
+	if(texID >= materials.size())
 		return nullptr;
-	return m_materials[texID].get();
+	return materials[texID].get();
 }
 TextureGroup *Model::GetTextureGroup(uint32_t i)
 {
@@ -1250,7 +1260,7 @@ void Model::ClearCache()
 
 const std::string &Model::GetName() const {return m_name;}
 
-bool Model::IsValid() const {return m_bValid;}
+bool Model::IsValid() const {return umath::is_flag_set(m_stateFlags,StateFlags::Valid);}
 
 void Model::AddMesh(const std::string &meshGroup,const std::shared_ptr<ModelMesh> &mesh)
 {
@@ -1340,7 +1350,8 @@ std::optional<uint32_t> Model::AssignDistinctMaterial(const ModelMeshGroup &grou
 	auto matIdx = GetMaterialIndex(subMesh);
 	if(matIdx.has_value() == false)
 		return {};
-	auto hMat = m_materials.at(*matIdx);
+	auto &materials = GetMaterials();
+	auto hMat = materials.at(*matIdx);
 	if(hMat.IsValid() == false)
 		return {};
 	auto strPath = hMat->GetAbsolutePath();

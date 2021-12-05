@@ -24,6 +24,7 @@
 #include "pragma/util/resource_watcher.h"
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/model/modelmanager.h"
+#include "pragma/debug/intel_vtune.hpp"
 #include <pragma/console/s_cvar_global_functions.h>
 #include <pragma/lua/luaapi.h>
 #include <luainterface.hpp>
@@ -226,6 +227,10 @@ Material *NetworkState::LoadMaterial(const std::string &path,bool bReload) {retu
 
 Material *NetworkState::LoadMaterial(const std::string &path,bool precache,bool bReload)
 {
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().BeginTask("load_material");
+	util::ScopeGuard sgVtune {[]() {debug::get_domain().EndTask();}};
+#endif
 	static auto bSkipPort = false;
 	bool bFirstTimeError;
 	auto *mat = GetMaterialManager().Load(path,bReload,!precache,&bFirstTimeError);

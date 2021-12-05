@@ -103,7 +103,7 @@ void Lua::engine::unbind_key(const std::string &key)
 		return;
 	c_engine->UnmapKey(c);
 }
-void Lua::engine::precache_material(lua_State *l,const std::string &mat) {client->LoadMaterial(mat.c_str());}
+void Lua::engine::precache_material(lua_State *l,const std::string &mat) {client->PrecacheMaterial(mat.c_str());}
 
 void Lua::engine::precache_model(lua_State *l,const std::string &mdl)
 {

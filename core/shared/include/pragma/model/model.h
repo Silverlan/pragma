@@ -212,6 +212,14 @@ public:
 		Count = 8
 	};
 
+	enum class StateFlags : uint32_t
+	{
+		None = 0u,
+		Valid = 1u,
+		AllMaterialsLoaded = Valid<<1u,
+		MaterialsLoadInitiated = AllMaterialsLoaded<<1u
+	};
+
 	struct DLLNETWORK MetaInfo
 	{
 		MetaInfo();
@@ -573,7 +581,7 @@ private:
 	static bool Load(Model &mdl,NetworkState &nw,const udm::AssetData &data,std::string &outErr);
 	NetworkState *m_networkState = nullptr;
 	mutable MetaInfo m_metaInfo = {};
-	bool m_bValid = false;
+	StateFlags m_stateFlags = StateFlags::None;
 	float m_mass = 0.f;
 	uint32_t m_meshCount = 0u;
 	uint32_t m_subMeshCount = 0u;
@@ -590,7 +598,6 @@ private:
 	static std::unordered_map<std::string,std::shared_ptr<Model>> m_models;
 	std::shared_ptr<Frame> m_reference = nullptr;
 	std::string m_name;
-	bool m_bAllMaterialsLoaded = false;
 	std::vector<std::shared_ptr<pragma::animation::Animation>> m_animations;
 	std::vector<std::shared_ptr<VertexAnimation>> m_vertexAnimations;
 	std::unordered_map<std::string,unsigned int> m_animationIDs;
@@ -626,6 +633,7 @@ private:
 REGISTER_BASIC_BITWISE_OPERATORS(Model::CopyFlags);
 REGISTER_BASIC_BITWISE_OPERATORS(Model::MergeFlags);
 REGISTER_BASIC_BITWISE_OPERATORS(Model::Flags);
+REGISTER_BASIC_BITWISE_OPERATORS(Model::StateFlags);
 #pragma warning(pop)
 
 template<class TModel>

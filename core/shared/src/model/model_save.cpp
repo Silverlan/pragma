@@ -109,7 +109,7 @@ std::shared_ptr<Model> Model::Copy(Game *game,CopyFlags copyFlags) const
 	if(mdl == nullptr)
 		return nullptr;
 	mdl->m_metaInfo = m_metaInfo;
-	mdl->m_bValid = m_bValid;
+	mdl->m_stateFlags = m_stateFlags;
 	mdl->m_mass = m_mass;
 	mdl->m_meshCount = m_meshCount;
 	mdl->m_subMeshCount = m_subMeshCount;
@@ -124,7 +124,6 @@ std::shared_ptr<Model> Model::Copy(Game *game,CopyFlags copyFlags) const
 	mdl->m_hitboxes = m_hitboxes;
 	mdl->m_reference = Frame::Create(*m_reference);
 	mdl->m_name = m_name;
-	mdl->m_bAllMaterialsLoaded = true;
 	mdl->m_animations = m_animations;
 	mdl->m_flexAnimations = m_flexAnimations;
 	mdl->m_animationIDs = m_animationIDs;
@@ -210,7 +209,7 @@ std::shared_ptr<Model> Model::Copy(Game *game,CopyFlags copyFlags) const
 			flexAnim = std::make_shared<FlexAnimation>(*flexAnim);
 	}
 	// TODO: Copy collision mesh soft body sub mesh reference
-	static_assert(sizeof(Model) == 1'000,"Update this function when making changes to this class!");
+	static_assert(sizeof(Model) == 992,"Update this function when making changes to this class!");
 	return mdl;
 }
 

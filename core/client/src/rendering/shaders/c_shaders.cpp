@@ -58,8 +58,8 @@
 #include <pragma/console/convars.h>
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/world_environment.hpp"
+#include <pragma/debug/intel_vtune.hpp>
 #include <buffers/prosper_buffer.hpp>
-
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -82,6 +82,11 @@ void CGame::InitShaders()
 {
 	Con::cout<<"Loading shaders..."<<Con::endl;
 	
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().BeginTask("load_shaders");
+	util::ScopeGuard sgVtune {[]() {debug::get_domain().EndTask();}};
+#endif
+
 	auto &shaderManager = c_engine->GetShaderManager();
 	pragma::ShaderScene::SetRenderPassSampleCount(static_cast<prosper::SampleCountFlags>(GetMSAASampleCount()));
 

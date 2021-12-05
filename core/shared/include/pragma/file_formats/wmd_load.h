@@ -48,7 +48,7 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 		if(mdl)
 		{
 			mdl->SetName(model);
-			mdl->LoadMaterials();
+			mdl->PrecacheMaterials();
 
 			for(auto &inc : mdl->GetMetaInfo().includes)
 			{

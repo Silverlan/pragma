@@ -55,6 +55,7 @@
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/util/util_game.hpp"
+#include "pragma/debug/intel_vtune.hpp"
 #include <sharedutils/util_library.hpp>
 #include <luainterface.hpp>
 #include <udm.hpp>
@@ -883,6 +884,10 @@ std::shared_ptr<Model> Game::CreateModel(const std::string &mdl) const {return m
 std::shared_ptr<Model> Game::CreateModel(bool bAddReference) const {return m_stateNetwork->GetModelManager().CreateModel("",bAddReference);}
 std::shared_ptr<Model> Game::LoadModel(const std::string &mdl,bool bReload)
 {
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().BeginTask("load_model");
+	util::ScopeGuard sgVtune {[]() {debug::get_domain().EndTask();}};
+#endif
 	if(engine->IsVerbose())
 		Con::cout<<"Loading model '"<<mdl<<"'..."<<Con::endl;
 	auto bNewModel = false;

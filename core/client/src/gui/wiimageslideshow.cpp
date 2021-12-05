@@ -204,7 +204,7 @@ void WIImageSlideShow::PreloadNextImage(Int32 img)
 		m_imgPreload.ready = true;
 		m_imgPreload.loading = false;
 	};
-	textureManager.LoadTexture(f,loadInfo);
+	textureManager.PreloadTexture(f,loadInfo);
 }
 
 void WIImageSlideShow::DisplayNextImage()

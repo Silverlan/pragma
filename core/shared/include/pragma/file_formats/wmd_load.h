@@ -19,7 +19,7 @@
 #include <sharedutils/util_file.h>
 
 template<class TModel,class TModelMesh,class TModelSubMesh>
-	std::shared_ptr<Model> FWMD::Load(Game *game,const std::string &pmodel,const std::function<Material*(const std::string&,bool)> &loadMaterial,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel)
+	std::shared_ptr<Model> FWMD::Load(Game *game,const std::string &pmodel,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel)
 {
 	auto &nw = *game->GetNetworkState();
 	std::string pathCache(pmodel);
@@ -48,7 +48,7 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 		if(mdl)
 		{
 			mdl->SetName(model);
-			mdl->LoadMaterials(loadMaterial);
+			mdl->LoadMaterials();
 
 			for(auto &inc : mdl->GetMetaInfo().includes)
 			{
@@ -80,7 +80,7 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 			if(assetWrapper != nullptr)
 			{
 				bSkipPort = true; // Safety flag to make sure we never end up in an infinite recursion
-				auto r = Load<TModel,TModelMesh,TModelSubMesh>(game,pmodel,loadMaterial,loadModel);
+				auto r = Load<TModel,TModelMesh,TModelSubMesh>(game,pmodel,loadModel);
 				bSkipPort = false;
 				return r;
 			}
@@ -91,7 +91,7 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 			if(util::port_hl2_model(nw,"models\\",mdlName +".mdl") == true || util::port_source2_model(nw,"models\\",mdlName +".vmdl_c") == true || util::port_nif_model(nw,"models\\",mdlName +".nif"))
 			{
 				bSkipPort = true; // Safety flag to make sure we never end up in an infinite recursion
-				auto r = Load<TModel,TModelMesh,TModelSubMesh>(game,pmodel,loadMaterial,loadModel);
+				auto r = Load<TModel,TModelMesh,TModelSubMesh>(game,pmodel,loadModel);
 				bSkipPort = false;
 				return r;
 			}
@@ -193,7 +193,7 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 			texGroup->textures.push_back(texID);
 		}
 	}
-	mdl->LoadMaterials(loadMaterial);
+	mdl->LoadMaterials();
 
 	// Determine default surface material from material info if possible
 	SurfaceMaterial *smDefault = nullptr;

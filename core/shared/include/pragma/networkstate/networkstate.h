@@ -92,8 +92,9 @@ public:
 	ResourceWatcherManager &GetResourceWatcher();
 
 	// Textures
-	virtual Material *LoadMaterial(const std::string &path,bool bReload=false);
-	bool PortMaterial(const std::string &path,const std::function<Material*(const std::string&,bool)> &fLoadMaterial);
+	Material *LoadMaterial(const std::string &path,bool bReload=false);
+	Material *PrecacheMaterial(const std::string &path);
+	bool PortMaterial(const std::string &path);
 	MapInfo *GetMapInfo();
 	std::string GetMap();
 	virtual void Close();
@@ -175,6 +176,8 @@ public:
 	ConVar *CreateConVar(const std::string &scmd,const std::string &value,ConVarFlags flags,const std::string &help="");
 	virtual ConCommand *CreateConCommand(const std::string &scmd,LuaFunction fc,ConVarFlags flags=ConVarFlags::None,const std::string &help="");
 protected:
+	virtual Material *LoadMaterial(const std::string &path,bool precache,bool bReload);
+
 	static UInt8 STATE_COUNT;
 	std::unique_ptr<MapInfo> m_mapInfo = nullptr;
 	bool m_bTCPOnly;

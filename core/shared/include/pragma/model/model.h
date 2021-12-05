@@ -483,14 +483,14 @@ public:
 	bool SetMaterial(uint32_t texIdx,Material *mat);
 	void RemoveTexture(uint32_t idx);
 	void ClearTextures();
-	void LoadMaterials(const std::function<Material*(const std::string&,bool)> &loadMaterial,bool bReload=false);
+	void LoadMaterials(bool bReload=false);
+	void PrecacheMaterials();
 	TextureGroup *CreateTextureGroup();
 	std::vector<std::string> &GetTextures();
 	std::vector<MaterialHandle> &GetMaterials();
 	const std::vector<MaterialHandle> &GetMaterials() const;
 	Material *GetMaterial(uint32_t texID);
 	Material *GetMaterial(uint32_t texGroup,uint32_t texID);
-	void PrecacheTexture(uint32_t texId,const std::function<Material*(const std::string&,bool)> &loadMaterial,bool bReload=false);
 	virtual void PrecacheTexture(uint32_t texId,bool bReload=false);
 	std::vector<TextureGroup> &GetTextureGroups();
 	TextureGroup *GetTextureGroup(uint32_t i);
@@ -553,9 +553,8 @@ protected:
 	bool LoadFromAssetData(Game &game,const udm::AssetData &data,std::string &outErr);
 	virtual void OnMaterialMissing(const std::string &matName);
 	void AddLoadingMaterial(Material &mat,std::optional<uint32_t> index={});
-	void PrecacheTextureGroup(const std::function<Material*(const std::string&,bool)> &loadMaterial,unsigned int i);
-	void LoadMaterials(const std::vector<uint32_t> &textureGroups,const std::function<Material*(const std::string&,bool)> &loadMaterial,bool bReload=false);
-	bool FindMaterial(const std::string &texture,std::string &matPath,const std::function<Material*(const std::string&,bool)> &loadMaterial) const;
+	void LoadMaterials(const std::vector<uint32_t> &textureGroups,bool precache,bool bReload);
+	void LoadMaterials(bool precache,bool bReload);
 
 	virtual std::shared_ptr<VertexAnimation> CreateVertexAnimation(const std::string &name) const;
 	std::vector<std::shared_ptr<VertexAnimation>>::const_iterator FindVertexAnimation(const std::string &name) const;

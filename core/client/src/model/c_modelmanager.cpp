@@ -23,9 +23,7 @@ std::shared_ptr<Model> pragma::asset::CModelManager::LoadModel(const std::string
 
 std::shared_ptr<Model> pragma::asset::CModelManager::LoadModel(FWMD &wmd,const std::string &mdlName) const
 {
-	return std::shared_ptr<Model>{wmd.Load<CModel,CModelMesh,CModelSubMesh>(m_nw.GetGameState(),mdlName,[this](const std::string &mat,bool reload) -> Material* {
-		return m_nw.LoadMaterial(mat,reload);
-	},[this](const std::string &mdlName) -> std::shared_ptr<Model> {
+	return std::shared_ptr<Model>{wmd.Load<CModel,CModelMesh,CModelSubMesh>(m_nw.GetGameState(),mdlName,[this](const std::string &mdlName) -> std::shared_ptr<Model> {
 		return m_nw.GetGameState()->LoadModel(mdlName);
 	})};
 }

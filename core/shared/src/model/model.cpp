@@ -665,16 +665,9 @@ void Model::ClearTextures()
 	for(auto &group : m_textureGroups)
 		group.textures.clear();
 }
-void Model::PrecacheTextureGroup(const std::function<Material*(const std::string&,bool)> &loadMaterial,uint32_t i)
-{
-	if(i >= m_textureGroups.size())
-		return;
-	LoadMaterials({i},loadMaterial);
-}
 void Model::OnMaterialMissing(const std::string&) {}
 
-bool Model::FindMaterial(const std::string &texture,std::string &matPath) const {return FindMaterial(texture,matPath,nullptr);}
-bool Model::FindMaterial(const std::string &texture,std::string &matPath,const std::function<Material*(const std::string&,bool)> &loadMaterial) const
+bool Model::FindMaterial(const std::string &texture,std::string &matPath) const
 {
 	auto &meta = GetMetaInfo();
 	auto &texturePaths = meta.texturePaths;
@@ -689,16 +682,16 @@ bool Model::FindMaterial(const std::string &texture,std::string &matPath,const s
 		}
 	}
 	static auto bSkipPort = false;
-	if(bSkipPort == true || loadMaterial == nullptr || engine->ShouldMountExternalGameResources() == false)
+	if(bSkipPort == true || engine->ShouldMountExternalGameResources() == false)
 		return false;
 	// Material not found; Attempt to port
 	for(auto &path : texturePaths)
 	{
 		auto texPath = path +texture;
-		if(m_networkState->PortMaterial(texPath,loadMaterial) == true)
+		if(m_networkState->PortMaterial(texPath) == true)
 		{
 			bSkipPort = true;
-			auto r = FindMaterial(texture,matPath,loadMaterial);
+			auto r = FindMaterial(texture,matPath);
 			bSkipPort = false;
 			return r;
 		}
@@ -706,7 +699,7 @@ bool Model::FindMaterial(const std::string &texture,std::string &matPath,const s
 	return false;
 }
 
-void Model::PrecacheTexture(uint32_t texId,const std::function<Material*(const std::string&,bool)> &loadMaterial,bool bReload)
+void Model::PrecacheTexture(uint32_t texId,bool bReload)
 {
 	// TODO: lodMaterial Parameter
 	// TODO: Virtual (Clientside override)
@@ -718,25 +711,17 @@ void Model::PrecacheTexture(uint32_t texId,const std::function<Material*(const s
 		m_materials.resize(texId +1);
 	auto &texture = m_metaInfo.textures.at(texId);
 	std::string matPath;
-	if(FindMaterial(texture,matPath,loadMaterial) == false)
+	if(FindMaterial(texture,matPath) == false)
 	{
 		OnMaterialMissing(texture);
 		return;
 	}
 	if(!matPath.empty())
 	{
-		auto *mat = loadMaterial(matPath,bReload);
+		auto *mat = m_networkState->LoadMaterial(matPath,bReload);
 		if(mat != nullptr)
 			AddLoadingMaterial(*mat,texId);
 	}
-}
-
-void Model::PrecacheTexture(uint32_t texId,bool bReload)
-{
-	PrecacheTexture(texId,[](const std::string &matName,bool bReload) -> Material* {
-		auto *nw = engine->GetServerNetworkState();
-		return nw->LoadMaterial(matName,bReload);
-	},bReload);
 }
 
 void Model::Optimize()
@@ -796,7 +781,9 @@ void Model::Optimize()
 	}
 }
 
-void Model::LoadMaterials(const std::vector<uint32_t> &textureGroupIds,const std::function<Material*(const std::string&,bool)> &loadMaterial,bool bReload)
+void Model::PrecacheMaterials() {LoadMaterials(true,false);}
+
+void Model::LoadMaterials(const std::vector<uint32_t> &textureGroupIds,bool precache,bool bReload)
 {
 	// Loading materials may require saving materials / textures, which can trigger the resource watcher,
 	// so we'll disable it temporarily. This is a bit of a messy solution...
@@ -806,10 +793,11 @@ void Model::LoadMaterials(const std::vector<uint32_t> &textureGroupIds,const std
 	auto &meta = GetMetaInfo();
 	auto &textures = meta.textures;
 	//m_materials.clear();
-	m_materials.resize(textures.size());
+	if(!precache)
+		m_materials.resize(textures.size());
+	
 	std::vector<std::string> materialPaths;
 	materialPaths.resize(textures.size());
-
 	auto &textureGroups = GetTextureGroups();
 	for(auto i=decltype(textureGroupIds.size()){0};i<textureGroupIds.size();++i)
 	{
@@ -817,8 +805,11 @@ void Model::LoadMaterials(const std::vector<uint32_t> &textureGroupIds,const std
 		for(auto texId : group.textures)
 		{
 			auto &texture = textures[texId];
-			if(FindMaterial(texture,materialPaths[texId],loadMaterial) == false)
-				OnMaterialMissing(texture);
+			if(FindMaterial(texture,materialPaths[texId]) == false)
+			{
+				if(!precache)
+					OnMaterialMissing(texture);
+			}
 		}
 	}
 	for(auto i=decltype(materialPaths.size()){0};i<materialPaths.size();++i)
@@ -826,15 +817,21 @@ void Model::LoadMaterials(const std::vector<uint32_t> &textureGroupIds,const std
 		auto &matPath = materialPaths[i];
 		if(!matPath.empty())
 		{
-			auto *mat = loadMaterial(matPath,bReload);
+			if(precache)
+			{
+				m_networkState->PrecacheMaterial(matPath);
+				continue;
+			}
+			auto *mat = m_networkState->LoadMaterial(matPath,bReload);
 			if(mat != nullptr)
 				AddLoadingMaterial(*mat,i);
 		}
 	}
-	OnMaterialLoaded();
+	if(!precache)
+		OnMaterialLoaded();
 }
 
-void Model::LoadMaterials(const std::function<Material*(const std::string&,bool)> &loadMaterial,bool bReload)
+void Model::LoadMaterials(bool precache,bool bReload)
 {
 	auto &meta = GetMetaInfo();
 	auto bDontPrecacheTexGroups = umath::is_flag_set(meta.flags,Model::Flags::DontPrecacheTextureGroups);
@@ -843,8 +840,10 @@ void Model::LoadMaterials(const std::function<Material*(const std::string&,bool)
 	groupIds.reserve(texGroups.size());
 	for(auto i=decltype(texGroups.size()){0};i<((bDontPrecacheTexGroups == true) ? 1 : texGroups.size());++i)
 		groupIds.push_back(static_cast<uint32_t>(i));
-	LoadMaterials(groupIds,loadMaterial,bReload);
+	LoadMaterials(groupIds,precache,bReload);
 }
+
+void Model::LoadMaterials(bool bReload) {LoadMaterials(false,bReload);}
 TextureGroup *Model::CreateTextureGroup()
 {
 	m_textureGroups.push_back(TextureGroup{});
@@ -856,10 +855,9 @@ TextureGroup *Model::CreateTextureGroup()
 }
 void Model::PrecacheTextureGroup(uint32_t i)
 {
-	PrecacheTextureGroup([](const std::string &matName,bool bReload) -> Material* {
-		auto *nw = engine->GetServerNetworkState();
-		return nw->LoadMaterial(matName,bReload);
-	},i);
+	if(i >= m_textureGroups.size())
+		return;
+	LoadMaterials(std::vector<uint32_t>{i},false,true);
 }
 void Model::PrecacheTextureGroups()
 {

@@ -60,6 +60,7 @@ private:
 	std::vector<std::shared_ptr<ALSound>> m_serverSounds;
 protected:
 	virtual void implFindSimilarConVars(const std::string &input,std::vector<SimilarCmdInfo> &similarCmds) const override;
+	virtual Material *LoadMaterial(const std::string &path,bool precache,bool bReload) override;
 	virtual void InitializeResourceManager() override;
 	void ClearConCommands();
 	void OnMasterServerRegistered(bool b,std::string reason);
@@ -68,6 +69,7 @@ protected:
 	void ResetGameServer();
 	WMServerData m_serverData;
 public:
+	using NetworkState::LoadMaterial;
 	virtual void Initialize() override;
 	virtual void Think() override;
 	virtual void Tick() override;
@@ -134,7 +136,6 @@ public:
 	SGame *GetGameState();
 	virtual void EndGame() override;
 	virtual bool IsGameActive() override;
-	virtual Material *LoadMaterial(const std::string &path,bool bReload=false) override;
 
 	// Sound
 	virtual bool LoadSoundScripts(const char *file,bool bPrecache=false) override;

@@ -90,9 +90,7 @@ std::shared_ptr<Model> pragma::asset::ModelManager::LoadModel(FWMD &wmd,const st
 {
 	auto *game = m_nw.GetGameState();
 	assert(game);
-	return std::shared_ptr<Model>{wmd.Load<Model,ModelMesh,ModelSubMesh>(game,mdlName,[this](const std::string &mat,bool reload) -> Material* {
-		return m_nw.LoadMaterial(mat,reload);
-	},[this](const std::string &mdlName) -> std::shared_ptr<Model> {
+	return std::shared_ptr<Model>{wmd.Load<Model,ModelMesh,ModelSubMesh>(game,mdlName,[this](const std::string &mdlName) -> std::shared_ptr<Model> {
 		return m_nw.GetGameState()->LoadModel(mdlName);
 	})};
 }

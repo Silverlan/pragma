@@ -48,9 +48,7 @@ void Lua::engine::PrecacheModel_sv(lua_State *l,const std::string &mdlName)
 	auto *nw = ::engine->GetNetworkState(l);
 	FWMD wmd(nw->GetGameState());
 	wmd.Load<Model,ModelMesh,ModelSubMesh>(
-		nw->GetGameState(),mdlName,[nw](const std::string &matName,bool bReload) -> Material* {
-			return nw->LoadMaterial(matName,bReload);
-		},[nw](const std::string &mdlName) -> std::shared_ptr<Model> {
+		nw->GetGameState(),mdlName,[nw](const std::string &mdlName) -> std::shared_ptr<Model> {
 			return nw->GetGameState()->LoadModel(mdlName,false);
 		}
 	);

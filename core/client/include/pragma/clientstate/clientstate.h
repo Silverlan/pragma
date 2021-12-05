@@ -107,13 +107,13 @@ protected:
 	void DestroyClient();
 
 	virtual void implFindSimilarConVars(const std::string &input,std::vector<SimilarCmdInfo> &similarCmds) const override;
+	virtual Material *LoadMaterial(const std::string &path,bool precache,bool bReload) override;
 public:
 	ClientState();
 	virtual ~ClientState() override;
 	virtual bool IsClient() const;
 public:
 	virtual bool ShouldRemoveSound(ALSound &snd) override;
-	virtual Material *LoadMaterial(const std::string &path,bool bReload=false) override;
 	Material *LoadMaterial(const std::string &path,const std::function<void(Material*)> &onLoaded,bool bReload,bool bLoadInstantly); // TODO
 	Material *CreateMaterial(const std::string &path,const std::string &shader);
 	Material *CreateMaterial(const std::string &shader);
@@ -229,7 +229,7 @@ public:
 	void OnFilesDropped(std::vector<std::string> &files);
 
 	Material *LoadMaterial(const std::string &path,const std::function<void(Material*)> &onLoaded,bool bReload=false);
-	Material *LoadMaterial(const std::string &path,bool bLoadInstantly,bool bReload);
+	Material *LoadMaterial(const std::string &path);
 
 	void ReadEntityData(NetPacket &packet);
 };

@@ -2041,9 +2041,7 @@ void Lua::Model::LoadMaterials(lua_State *l,::Model &mdl,bool bReload)
 {
 	//Lua::CheckModel(l,1);
 	auto *nw = engine->GetNetworkState(l);
-	mdl.LoadMaterials([nw](const std::string &str,bool b) -> Material* {
-		return nw->LoadMaterial(str,b);
-	},bReload);
+	mdl.LoadMaterials(bReload);
 }
 void Lua::Model::AddTexturePath(lua_State*,::Model &mdl,const std::string &path)
 {

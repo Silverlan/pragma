@@ -22,9 +22,7 @@ std::shared_ptr<ModelSubMesh> CModel::CreateSubMesh() const {return std::make_sh
 
 void CModel::PrecacheTextureGroup(uint32_t i)
 {
-	Model::PrecacheTextureGroup([](const std::string &path,bool bReload) -> Material* {
-		return client->LoadMaterial(path,bReload);
-	},i);
+	Model::PrecacheTextureGroup(i);
 }
 
 void CModel::OnMaterialMissing(const std::string &matName)
@@ -37,9 +35,7 @@ void CModel::OnMaterialMissing(const std::string &matName)
 
 void CModel::PrecacheTexture(uint32_t texId,bool bReload)
 {
-	Model::PrecacheTexture(texId,[](const std::string &path,bool bReload) -> Material* {
-		return client->LoadMaterial(path,bReload);
-	},bReload);
+	Model::PrecacheTexture(texId,bReload);
 }
 
 void CModel::AddMesh(const std::string &meshGroup,const std::shared_ptr<ModelMesh> &mesh) {}

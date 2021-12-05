@@ -431,19 +431,17 @@ WMServerData &ServerState::GetServerData() {return m_serverData;}
 
 void ServerState::GetLuaConCommands(std::unordered_map<std::string,ConCommand*> **cmds) {*cmds = &m_luaConCommands;}
 
-Material *ServerState::LoadMaterial(const std::string &path,bool bReload)
+Material *ServerState::LoadMaterial(const std::string &path,bool precache,bool bReload)
 {
 	bool bFirstTimeError;
-	auto *mat = GetMaterialManager().Load(path,bReload,&bFirstTimeError);
+	auto *mat = GetMaterialManager().Load(path,bReload,!precache,&bFirstTimeError);
 	if(bFirstTimeError == true)
 	{
 		static auto bSkipPort = false;
 		if(bSkipPort == false)
 		{
 			bSkipPort = true;
-			auto b = PortMaterial(path,[this,&mat](const std::string &path,bool bReload) -> Material* {
-				return mat = LoadMaterial(path,bReload);
-			});
+			auto b = PortMaterial(path);
 			bSkipPort = false;
 			if(b == true)
 				return mat;

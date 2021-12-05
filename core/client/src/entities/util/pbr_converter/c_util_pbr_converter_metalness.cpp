@@ -197,7 +197,7 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl,CMaterial &mat)
 	mat.UpdateTextures();
 	std::string err;
 	if(mat.Save(err))
-		client->LoadMaterial(mat.GetName(),true,true); // Reload material immediately
+		client->LoadMaterial(mat.GetName(),nullptr,true,true); // Reload material immediately
 }
 
 void CPBRConverterComponent::UpdateMetalness(Model &mdl)

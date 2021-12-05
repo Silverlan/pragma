@@ -240,7 +240,7 @@ int Lua::util::Client::export_material(lua_State *l)
 	if(Lua::IsString(l,1))
 	{
 		std::string matPath = Lua::CheckString(l,1);
-		mat = client->LoadMaterial(matPath,true,false);
+		mat = client->LoadMaterial(matPath,nullptr,true,false);
 	}
 	else
 		mat = Lua::CheckMaterial(l,1);

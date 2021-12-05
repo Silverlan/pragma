@@ -860,7 +860,7 @@ DLLCLIENT void CMD_reloadmaterial(NetworkState *state,pragma::BasePlayerComponen
 	if(argv.empty())
 		return;
 	Con::cout<<"Reloading '"<<argv[0]<<"'..."<<Con::endl;
-	client->LoadMaterial(argv[0].c_str(),true,true);
+	client->LoadMaterial(argv[0].c_str(),nullptr,true);
 }
 
 DLLCLIENT void CMD_reloadmaterials(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string>&)

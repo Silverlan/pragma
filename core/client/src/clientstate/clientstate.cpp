@@ -658,11 +658,11 @@ ModelSubMesh *ClientState::CreateSubMesh() const {return new CModelSubMesh;}
 ModelMesh *ClientState::CreateMesh() const {return new CModelMesh;}
 
 static auto cvMatStreaming = GetClientConVar("cl_material_streaming_enabled");
-Material *ClientState::LoadMaterial(const std::string &path,bool bReload)
+Material *ClientState::LoadMaterial(const std::string &path,bool precache,bool bReload)
 {
 	if(c_engine->IsVerbose())
 		Con::cout<<"Loading material '"<<path<<"'..."<<Con::endl;
-	return LoadMaterial(path,nullptr,bReload,!cvMatStreaming->GetBool());
+	return LoadMaterial(path,nullptr,bReload,!precache/*!cvMatStreaming->GetBool()*/);
 }
 
 static void init_shader(Material *mat)
@@ -730,9 +730,7 @@ Material *ClientState::LoadMaterial(const std::string &path,const std::function<
 		if(bSkipPort == false)
 		{
 			bSkipPort = true;
-			auto b = PortMaterial(path,[this,&mat,&onLoaded,bLoadInstantly](const std::string &path,bool bReload) -> Material* {
-				return mat = LoadMaterial(path,onLoaded,bReload,bLoadInstantly);
-			});
+			auto b = PortMaterial(path);
 			if(b)
 			{
 				// Note: Porting the material may have also ported the texture files.
@@ -754,8 +752,8 @@ Material *ClientState::LoadMaterial(const std::string &path,const std::function<
 		init_shader(mat);
 	return mat;
 }
+Material *ClientState::LoadMaterial(const std::string &path) {return LoadMaterial(path,nullptr,false);}
 Material *ClientState::LoadMaterial(const std::string &path,const std::function<void(Material*)> &onLoaded,bool bReload) {return LoadMaterial(path,onLoaded,bReload,!cvMatStreaming->GetBool());}
-Material *ClientState::LoadMaterial(const std::string &path,bool bLoadInstantly,bool bReload) {return LoadMaterial(path,CallbackHandle(),bReload,bLoadInstantly);}
 
 pragma::networking::IClient *ClientState::GetClient() {return m_client.get();}
 

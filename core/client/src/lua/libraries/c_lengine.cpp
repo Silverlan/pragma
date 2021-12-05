@@ -109,9 +109,7 @@ void Lua::engine::precache_model(lua_State *l,const std::string &mdl)
 {
 	auto *nw = c_engine->GetNetworkState(l);
 	FWMD wmd(nw->GetGameState());
-	wmd.Load<CModel,CModelMesh,CModelSubMesh>(nw->GetGameState(),mdl.c_str(),[](const std::string &path,bool bReload) -> Material* {
-		return client->LoadMaterial(path,bReload);	
-	},[](const std::string &path) -> std::shared_ptr<Model> {
+	wmd.Load<CModel,CModelMesh,CModelSubMesh>(nw->GetGameState(),mdl.c_str(),[](const std::string &path) -> std::shared_ptr<Model> {
 		return c_game->LoadModel(path);
 	});
 }
@@ -175,7 +173,7 @@ std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const L
 }
 std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const LFile &file) {return load_texture(l,file,msys::TextureLoadFlags::None);}
 
-Material *Lua::engine::load_material(lua_State *l,const std::string &mat,bool reload,bool loadInstantly) {return client->LoadMaterial(mat,loadInstantly,reload);}
+Material *Lua::engine::load_material(lua_State *l,const std::string &mat,bool reload,bool loadInstantly) {return client->LoadMaterial(mat,nullptr,reload,loadInstantly);}
 Material *Lua::engine::load_material(lua_State *l,const std::string &mat,bool reload) {return load_material(l,mat,reload,false);}
 Material *Lua::engine::load_material(lua_State *l,const std::string &mat) {return load_material(l,mat,false,false);}
 

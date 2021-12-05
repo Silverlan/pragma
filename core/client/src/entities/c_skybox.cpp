@@ -101,7 +101,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 	for(auto i=decltype(sidePostfixes.size()){0u};i<sidePostfixes.size();++i)
 	{
 		auto &sidePostFix = sidePostfixes.at(i);
-		auto *matSide = client->LoadMaterial(matName +postfix +sidePostFix,true,false);
+		auto *matSide = client->LoadMaterial(matName +postfix +sidePostFix,nullptr,false,true);
 		if(matSide == nullptr)
 			return false;
 		auto *diffuseMapSide = matSide->GetDiffuseMap();
@@ -245,7 +245,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 		std::string err;
 		if(mat->Save(savePath.GetString(),err,true))
 		{
-			client->LoadMaterial(matName,true);
+			client->LoadMaterial(matName,nullptr,false,true);
 			Con::cout<<"Skybox material saved as '"<<(matName +".wmi")<<"'"<<Con::endl;
 			return true;
 		}
@@ -274,11 +274,7 @@ void CSkyboxComponent::ValidateMaterials()
 		return; // Skybox is valid; Skip the material
 	// Attempt to use HDR textures, otherwise LDR
 	if(CreateCubemapFromIndividualTextures(texturePath +texture +".pmat","_hdr") || CreateCubemapFromIndividualTextures(texturePath +texture +".pmat"))
-	{
-		mdl->LoadMaterials([](const std::string &str,bool b) -> Material* {
-			return client->LoadMaterial(str,b);
-		});
-	}
+		mdl->LoadMaterials();
 }
 
 void CSkybox::Initialize()
@@ -293,7 +289,7 @@ static void sky_override(NetworkState*,ConVar*,std::string,std::string skyMat)
 		return;
 	CMaterial *matSky = nullptr;
 	if(skyMat.empty() == false)
-		matSky = static_cast<CMaterial*>(client->LoadMaterial(skyMat,true,false));
+		matSky = static_cast<CMaterial*>(client->LoadMaterial(skyMat,nullptr,false,true));
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CSkyboxComponent>>();
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CModelComponent>>();

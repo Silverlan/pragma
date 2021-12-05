@@ -154,7 +154,7 @@ void NetworkState::UpdateSounds(std::vector<std::shared_ptr<ALSound>> &sounds)
 	}
 }
 
-bool NetworkState::PortMaterial(const std::string &path,const std::function<Material*(const std::string&,bool)> &fLoadMaterial)
+bool NetworkState::PortMaterial(const std::string &path)
 {
 	auto pathWithoutExt = path;
 	auto extensions = pragma::asset::get_supported_extensions(pragma::asset::Type::Material);
@@ -170,9 +170,8 @@ bool NetworkState::PortMaterial(const std::string &path,const std::function<Mate
 		if(util::port_file(this,"materials\\" +matPath) == false)
 			return false;
 	}
-	if(fLoadMaterial == nullptr)
-		return true;
-	auto *mat = fLoadMaterial(matPath,true);
+
+	auto *mat = LoadMaterial(matPath,true);
 	if(mat && mat->GetDataBlock())
 	{
 		// Port textures as well
@@ -222,11 +221,14 @@ bool NetworkState::CheatsEnabled() const
 	return engine->GetConVarBool("sv_cheats");
 }
 
-Material *NetworkState::LoadMaterial(const std::string &path,bool bReload)
+Material *NetworkState::PrecacheMaterial(const std::string &path) {return LoadMaterial(path,true,false);}
+Material *NetworkState::LoadMaterial(const std::string &path,bool bReload) {return LoadMaterial(path,false,bReload);}
+
+Material *NetworkState::LoadMaterial(const std::string &path,bool precache,bool bReload)
 {
 	static auto bSkipPort = false;
 	bool bFirstTimeError;
-	auto *mat = GetMaterialManager().Load(path,bReload,&bFirstTimeError);
+	auto *mat = GetMaterialManager().Load(path,bReload,!precache,&bFirstTimeError);
 	if(bFirstTimeError == true)
 	{
 		if(bSkipPort == false)

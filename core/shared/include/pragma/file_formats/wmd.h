@@ -112,7 +112,7 @@ public:
 	FWMD(Game *game);
 	~FWMD();
 	template<class TModel,class TModelMesh,class TModelSubMesh>
-		std::shared_ptr<Model> Load(Game *game,const std::string &model,const std::function<Material*(const std::string&,bool)> &loadMaterial,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel);
+		std::shared_ptr<Model> Load(Game *game,const std::string &model,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel);
 	void GetMeshes(std::vector<FWMDMesh*> **meshes);
 };
 

@@ -445,7 +445,7 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	std::string err;
 	auto result = mat->Save(apath.GetString(),err);
 	if(result)
-		client->LoadMaterial(rpath.GetString(),true);
+		client->LoadMaterial(rpath.GetString(),nullptr,true);
 	return result;
 }
 
@@ -775,7 +775,7 @@ Material *CReflectionProbeComponent::LoadMaterial(bool &outIsDefault)
 		outIsDefault = true;
 		matPath = "maps/default_ibl." +std::string{pragma::asset::FORMAT_MATERIAL_ASCII};
 	}
-	auto *mat = client->LoadMaterial(matPath.GetString(),true,false);
+	auto *mat = client->LoadMaterial(matPath.GetString(),nullptr,true,false);
 	return (mat && mat->IsError() == false) ? mat : nullptr;
 }
 bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()

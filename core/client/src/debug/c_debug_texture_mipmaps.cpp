@@ -69,10 +69,10 @@ void Console::commands::debug_texture_mipmaps(NetworkState*,pragma::BasePlayerCo
 	auto &texPath = argv.front();
 	auto &materialManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
 	auto &textureManager = materialManager.GetTextureManager();
-	auto *asset = static_cast<msys::TextureAsset*>(textureManager.FindCachedAsset(texPath));
+	auto asset = msys::TextureManager::GetAssetObject(*textureManager.FindCachedAsset(texPath));
 	std::shared_ptr<Texture> texture = nullptr;
-	if(asset && asset->texture->HasValidVkTexture())
-		texture = asset->texture;
+	if(asset && asset->HasValidVkTexture())
+		texture = asset;
 	else
 	{
 		auto *mat = materialManager.FindMaterial(texPath);

@@ -7,12 +7,60 @@
 
 #include "stdafx_shared.h"
 #include "pragma/model/modelmanager.h"
+#include "pragma/file_formats/wmd_load.h"
 #include "pragma/asset/util_asset.hpp"
 #include <sharedutils/util_path.hpp>
 #include <panima/skeleton.hpp>
 #include <panima/bone.hpp>
+#include <fsys/ifile.hpp>
 
 extern DLLNETWORK Engine *engine;
+#pragma optimize("",off)
+bool pragma::asset::ModelFormatHandler::LoadData(ModelProcessor &processor,ModelLoadInfo &info)
+{
+	auto &nw = static_cast<ModelManager&>(GetAssetManager()).GetNetworkState();
+	auto &game = *nw.GetGameState();
+	model = static_cast<ModelManager&>(GetAssetManager()).Load(processor.identifier,std::move(m_file),processor.formatExtension,
+		[&game](const std::string &mdlName) -> std::shared_ptr<Model> {
+			return game.LoadModel(mdlName);
+	});
+	return model != nullptr;
+}
+pragma::asset::ModelFormatHandler::ModelFormatHandler(util::IAssetManager &assetManager)
+	: util::IAssetFormatHandler{assetManager}
+{}
+		
+///////////
+
+std::unique_ptr<util::IAssetProcessor> pragma::asset::ModelLoader::CreateAssetProcessor(
+	const std::string &identifier,const std::string &ext,std::unique_ptr<util::IAssetFormatHandler> &&formatHandler
+)
+{
+	auto processor = util::TAssetFormatLoader<ModelProcessor>::CreateAssetProcessor(identifier,ext,std::move(formatHandler));
+	auto &mdlProcessor = static_cast<ModelProcessor&>(*processor);
+	mdlProcessor.identifier = identifier;
+	mdlProcessor.formatExtension = ext;
+	return processor;
+}
+
+///////////
+
+pragma::asset::ModelLoadInfo::ModelLoadInfo(util::AssetLoadFlags flags)
+	: util::AssetLoadInfo{flags}
+{}
+pragma::asset::ModelProcessor::ModelProcessor(util::AssetFormatLoader &loader,std::unique_ptr<util::IAssetFormatHandler> &&handler)
+	: util::FileAssetProcessor{loader,std::move(handler)}
+{}
+bool pragma::asset::ModelProcessor::Load()
+{
+	auto &mdlHandler = static_cast<ModelFormatHandler&>(*handler);
+	auto r = mdlHandler.LoadData(*this,static_cast<ModelLoadInfo&>(*loadInfo));
+	if(!r)
+		return false;
+	model = mdlHandler.model;
+	return true;
+}
+bool pragma::asset::ModelProcessor::Finalize() {return true;}
 
 static const std::vector<std::string> &get_model_extensions()
 {
@@ -34,16 +82,56 @@ static const std::vector<std::string> &get_model_extensions()
 	}
 	return extensions;
 }
-bool pragma::asset::ModelAsset::IsInUse() const {return model.use_count() > 1;}
+
+/*std::optional<util::AssetLoadJobId> pragma::asset::ModelLoader::AddJob(
+	NetworkState &nw,const std::string &identifier,const std::string &ext,const std::unique_ptr<ufile::IFile> &file,util::AssetLoadJobPriority priority
+)
+{
+	//ModelProcessor(util::AssetFormatLoader &loader,std::unique_ptr<util::IAssetFormatHandler> &&handler);
+	auto processor = std::make_unique<ModelProcessor>(nw,*this,std::move(file));
+	return IAssetLoader::AddJob(identifier,std::move(processor),priority);
+}*/
 
 pragma::asset::ModelManager::ModelManager(NetworkState &nw)
 	: m_nw{nw}
 {
+	auto fileHandler = std::make_unique<util::AssetFileHandler>();
+	fileHandler->open = [](const std::string &path) -> std::unique_ptr<ufile::IFile> {
+		auto f = filemanager::open_file(path,filemanager::FileMode::Read | filemanager::FileMode::Binary);
+		if(!f)
+			return nullptr;
+		return std::make_unique<fsys::File>(f);
+	};
+	fileHandler->exists = [](const std::string &path) -> bool {
+		return filemanager::exists(path);
+	};
+	SetFileHandler(std::move(fileHandler));
+	SetRootDirectory("models");
+	m_loader = std::make_unique<ModelLoader>(*this);
+
 	// TODO: New extensions might be added after the model manager has been created
 	for(auto &ext : get_model_extensions())
 		RegisterFileExtension(ext);
-}
 
+	RegisterFormatHandler("pmdl_b",[](util::IAssetManager &assetManager) -> std::unique_ptr<util::IAssetFormatHandler> {
+		return std::make_unique<ModelFormatHandler>(assetManager);
+	});
+}
+std::shared_ptr<Model> pragma::asset::ModelManager::Load(
+	const std::string &mdlName,std::unique_ptr<ufile::IFile> &&f,const std::string &ext,
+	const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel
+)
+{
+	auto &game = *m_nw.GetGameState();
+	FWMD wmd {&game};
+	auto mdl = wmd.Load<Model,ModelMesh,ModelSubMesh>(&game,mdlName,std::move(f),ext,
+		[&game](const std::string &mdlName) -> std::shared_ptr<Model> {
+			return game.LoadModel(mdlName);
+	});
+	if(mdl)
+		mdl->Update();
+	return mdl;
+}
 std::shared_ptr<Model> pragma::asset::ModelManager::CreateModel(uint32_t numBones,const std::string &mdlName)
 {
 	return Model::Create<Model>(&m_nw,numBones,mdlName);
@@ -83,16 +171,52 @@ std::shared_ptr<Model> pragma::asset::ModelManager::CreateModel(const std::strin
 	}
 
 	if(addToCache)
-		AddToCache(name,std::make_shared<ModelAsset>(mdl));
+	{
+		auto asset = std::make_shared<util::Asset>();
+		asset->assetObject = mdl;
+		AddToCache(name,asset);
+	}
 	return mdl;
+}
+void pragma::asset::ModelManager::InitializeProcessor(util::IAssetProcessor &processor) {}
+util::AssetObject pragma::asset::ModelManager::InitializeAsset(const util::AssetLoadJob &job)
+{
+	auto &mdlProcessor = *static_cast<ModelProcessor*>(job.processor.get());
+	return mdlProcessor.model;
+}
+#if 0
+bool pragma::asset::ModelManager::PrecacheModel(const std::string &mdlName) const
+{
+	auto f = filemanager::open_file(mdlName,filemanager::FileMode::Read | filemanager::FileMode::Binary);
+	if(!f)
+		return false;
+	std::string ext;
+	if(!ufile::get_extension(mdlName,&ext))
+		return false;
+	auto fp = std::make_unique<fsys::File>(f);
+	auto jobId = m_loader->AddJob(m_nw,mdlName,ext,std::move(fp));
+	return jobId.has_value();
 }
 std::shared_ptr<Model> pragma::asset::ModelManager::LoadModel(FWMD &wmd,const std::string &mdlName) const
 {
-	auto *game = m_nw.GetGameState();
-	assert(game);
-	return std::shared_ptr<Model>{wmd.Load<Model,ModelMesh,ModelSubMesh>(game,mdlName,[this](const std::string &mdlName) -> std::shared_ptr<Model> {
-		return m_nw.GetGameState()->LoadModel(mdlName);
-	})};
+
+
+}
+std::shared_ptr<Model> pragma::asset::ModelManager::LoadModel(const std::string &cacheName,const std::shared_ptr<ufile::IFile> &file,const std::string &ext)
+{
+	auto *asset = FindCachedAsset(cacheName);
+	if(asset)
+		return GetAssetObject(*asset);
+	auto fp = std::make_unique<fsys::File>(file);
+	auto jobId = m_loader->AddJob(m_nw,cacheName,ext,std::move(fp));
+
+	return jobId.has_value();
+
+	mdl->Update();
+	AddToCache(mdlName,std::make_shared<ModelAsset>(mdl));
+	if(outIsNewModel != nullptr)
+		*outIsNewModel = true;
+	return mdl;
 }
 std::shared_ptr<Model> pragma::asset::ModelManager::LoadModel(const std::string &mdlName,bool bReload,bool *outIsNewModel)
 {
@@ -109,8 +233,30 @@ std::shared_ptr<Model> pragma::asset::ModelManager::LoadModel(const std::string 
 	}
 
 	assert(m_nw.GetGameState());
-	FWMD wmdLoader {m_nw.GetGameState()};
-	auto mdl = LoadModel(wmdLoader,ToCacheIdentifier(mdlName));
+	//FWMD wmdLoader {m_nw.GetGameState()};
+	//auto mdl = LoadModel(wmdLoader,ToCacheIdentifier(mdlName));
+
+	std::string pathCache(pmodel);
+	// std::transform(pathCache.begin(),pathCache.end(),pathCache.begin(),::tolower);
+
+	auto model = pmodel;
+	
+	std::string ext;
+	auto mdlPath = pragma::asset::find_file(pathCache,pragma::asset::Type::Model,&ext);
+	if(mdlPath.has_value())
+		model = *mdlPath;
+
+	std::string path = "models\\";
+	path += model;
+
+	ustring::to_lower(ext);
+
+
+
+
+
+
+
 	if(mdl == nullptr)
 		return nullptr;
 	mdl->Update();
@@ -119,19 +265,26 @@ std::shared_ptr<Model> pragma::asset::ModelManager::LoadModel(const std::string 
 		*outIsNewModel = true;
 	return mdl;
 }
+#endif
 void pragma::asset::ModelManager::FlagForRemoval(const Model &mdl,bool flag)
 {
 	auto *asset = FindCachedAsset(mdl.GetName());
-	if(asset && static_cast<ModelAsset*>(asset)->model.get() == &mdl)
+	if(asset)
 	{
-		FlagForRemoval(mdl.GetName());
-		return;
+		auto mdlCache = GetAssetObject(*asset);
+		if(mdlCache.get() == &mdl)
+		{
+			FlagForRemoval(mdl.GetName());
+			return;
+		}
 	}
 	auto it = std::find_if(m_cache.begin(),m_cache.end(),[&mdl](const std::pair<size_t,AssetInfo> &pair) {
 		auto &assetInfo = pair.second;
-		return static_cast<ModelAsset*>(assetInfo.asset.get())->model.get() == &mdl;
+		auto mdlCache = GetAssetObject(*assetInfo.asset);
+		return mdlCache.get() == &mdl;
 	});
 	if(it == m_cache.end())
 		return;
 	FlagForRemoval(it->first);
 }
+#pragma optimize("",on)

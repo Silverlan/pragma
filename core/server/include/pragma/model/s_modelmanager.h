@@ -18,7 +18,7 @@ namespace pragma::asset
 	public:
 		using ModelManager::ModelManager;
 	private:
-		virtual std::shared_ptr<Model> LoadModel(const std::string &mdlName,bool bReload=false,bool *outIsNewModel=nullptr) override;
+		//virtual std::shared_ptr<Model> LoadModel(const std::string &mdlName,bool bReload=false,bool *outIsNewModel=nullptr) override;
 	};
 };
 

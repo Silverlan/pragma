@@ -45,7 +45,8 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCLightMap.def("SetLightmapAtlas",static_cast<void(*)(lua_State*,pragma::CLightMapComponent&,const std::string &path)>([](lua_State *l,pragma::CLightMapComponent &hLightMapC,const std::string &path) {
 		auto *nw = c_engine->GetNetworkState(l);
 
-		auto texture = static_cast<CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).GetTextureManager().LoadTexture(path);
+		auto &texManager = static_cast<CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).GetTextureManager();
+		auto texture = texManager.LoadAsset(path);
 		if(texture == nullptr)
 			return;
 		auto &vkTex = std::static_pointer_cast<Texture>(texture)->GetVkTexture();

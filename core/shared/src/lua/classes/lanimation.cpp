@@ -16,6 +16,7 @@
 #include "pragma/util/util_game.hpp"
 #include <panima/skeleton.hpp>
 #include <panima/bone.hpp>
+#include <fsys/ifile.hpp>
 #include <udm.hpp>
 
 std::shared_ptr<pragma::animation::Animation> Lua::Animation::Create(lua_State *l)
@@ -39,7 +40,7 @@ void Lua::Animation::Load(lua_State *l,LFile &f)
 	fptr->Seek(offset);
 	if(isUdmFormat)
 	{
-		auto udmData = util::load_udm_asset(fptr);
+		auto udmData = util::load_udm_asset(std::make_unique<fsys::File>(fptr));
 		if(udmData == nullptr)
 			return;
 		std::string err;

@@ -284,7 +284,7 @@ static bool bind_default_texture(prosper::IDescriptorSet &ds,const std::string &
 {
 	auto &matManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
-	auto ptrTex = texManager.LoadTexture(defaultTexName);
+	auto ptrTex = texManager.LoadAsset(defaultTexName);
 	if(ptrTex == nullptr)
 		return false;
 	if(ptrTex && ptrTex->HasValidVkTexture())

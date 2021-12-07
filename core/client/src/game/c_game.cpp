@@ -1315,7 +1315,8 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 {
 	Game::InitializeWorldData(worldData);
 
-	auto texture = static_cast<CMaterialManager&>(static_cast<ClientState*>(GetNetworkState())->GetMaterialManager()).GetTextureManager().LoadTexture(worldData.GetLightmapAtlasTexturePath(GetMapName()));
+	auto &texManager = static_cast<CMaterialManager&>(static_cast<ClientState*>(GetNetworkState())->GetMaterialManager()).GetTextureManager();
+	auto texture = texManager.LoadAsset(worldData.GetLightmapAtlasTexturePath(GetMapName()));
 	if(texture)
 	{
 		prosper::util::SamplerCreateInfo samplerCreateInfo {};

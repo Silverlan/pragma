@@ -45,13 +45,13 @@ Lua::tb<void> Lua::engine::get_info(lua_State *l)
 
 void Lua::engine::PrecacheModel_sv(lua_State *l,const std::string &mdlName)
 {
-	auto *nw = ::engine->GetNetworkState(l);
+	/*auto *nw = ::engine->GetNetworkState(l);
 	FWMD wmd(nw->GetGameState());
 	wmd.Load<Model,ModelMesh,ModelSubMesh>(
 		nw->GetGameState(),mdlName,[nw](const std::string &mdlName) -> std::shared_ptr<Model> {
 			return nw->GetGameState()->LoadModel(mdlName,false);
 		}
-	);
+	);*/
 }
 
 std::shared_ptr<Model> Lua::engine::get_model(lua_State *l,const std::string &mdlName)

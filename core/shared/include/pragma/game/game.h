@@ -119,6 +119,7 @@ public:
 	std::shared_ptr<Model> CreateModel(const std::string &mdl) const;
 	std::shared_ptr<Model> CreateModel(bool bAddReference=true) const;
 	std::shared_ptr<Model> LoadModel(const std::string &mdl,bool bReload=false);
+	bool PrecacheModel(const std::string &mdl);
 	bool RunLua(const std::string &lua,const std::string &chunkName);
 	LuaDirectoryWatcherManager &GetLuaScriptWatcher();
 	ResourceWatcherManager &GetResourceWatcher();

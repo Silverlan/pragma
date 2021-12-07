@@ -34,8 +34,8 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 	if(asset == nullptr)
 		return;
 	texManager.RemoveFromCache(path);
-	msys::TextureLoadInfo loadInfo {};
-	loadInfo.onLoaded = [path,nw](msys::TextureAsset &asset) {
+	auto loadInfo = std::make_unique<msys::TextureLoadInfo>();
+	loadInfo->onLoaded = [path,nw](util::Asset &asset) {
 		if(nw == nullptr)
 			return;
 		auto &matManager = static_cast<CMaterialManager&>(nw->GetMaterialManager());
@@ -92,7 +92,7 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 				fLookForTextureAndUpdate(*data,static_cast<CMaterial&>(*hMat.get()));
 		}
 	};
-	texManager.LoadTexture(path,loadInfo);
+	texManager.LoadAsset(path,std::move(loadInfo));
 }
 
 void CResourceWatcherManager::OnMaterialReloaded(const std::string &path,const std::unordered_set<Model*> &modelMap)

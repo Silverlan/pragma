@@ -19,6 +19,7 @@
 #include <datasystem_vector.h>
 #include <datasystem_color.h>
 #include <sharedutils/util_file.h>
+#include <fsys/ifile.hpp>
 
 extern DLLNETWORK Engine *engine;
 
@@ -1127,7 +1128,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			if(!file.GetHandle())
 				return Lua::mult<bool,std::string>{l,false,"Invalid file handle!"};
 			std::string err;
-			auto udmData = ::util::load_udm_asset(file.GetHandle(),&err);
+			auto udmData = ::util::load_udm_asset(std::make_unique<fsys::File>(file.GetHandle()),&err);
 			if(udmData == nullptr)
 				return Lua::mult<bool,std::string>{l,false,std::move(err)};
 			return luabind::object{l,udmData};

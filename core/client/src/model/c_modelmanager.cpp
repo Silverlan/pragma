@@ -13,7 +13,22 @@
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 
-std::shared_ptr<Model> pragma::asset::CModelManager::LoadModel(const std::string &mdlName,bool bReload,bool *outIsNewModel)
+
+std::shared_ptr<Model> pragma::asset::CModelManager::Load(
+	const std::string &mdlName,std::unique_ptr<ufile::IFile> &&f,const std::string &ext,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel
+)
+{
+	auto &game = *m_nw.GetGameState();
+	FWMD wmd {&game};
+	auto mdl = wmd.Load<CModel,CModelMesh,CModelSubMesh>(&game,mdlName,std::move(f),ext,
+		[&game](const std::string &mdlName) -> std::shared_ptr<Model> {
+			return game.LoadModel(mdlName);
+	});
+	if(mdl)
+		mdl->Update();
+	return mdl;
+}
+/*std::shared_ptr<Model> pragma::asset::CModelManager::LoadModel(const std::string &mdlName,bool bReload,bool *outIsNewModel)
 {
 	auto mdl = ModelManager::LoadModel(mdlName,bReload,outIsNewModel);
 	if(mdl == nullptr)
@@ -30,4 +45,4 @@ std::shared_ptr<Model> pragma::asset::CModelManager::LoadModel(FWMD &wmd,const s
 std::shared_ptr<Model> pragma::asset::CModelManager::CreateModel(uint32_t numBones,const std::string &mdlName)
 {
 	return Model::Create<CModel>(&m_nw,numBones,mdlName);
-}
+}*/

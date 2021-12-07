@@ -346,13 +346,13 @@ static uint32_t clear_assets(NetworkState *state,pragma::asset::Type type,bool v
 
 			std::unordered_map<Model*,std::string> oldCache;
 			for(auto &pair : cache)
-				oldCache[static_cast<pragma::asset::ModelManager::AssetType*>(pair.second.asset.get())->model.get()] = pair.first;
+				oldCache[pragma::asset::ModelManager::GetAssetObject(*pair.second.asset).get()] = pair.first;
 
 			n = mdlManager.ClearUnused();
 
 			std::unordered_map<Model*,std::string> newCache;
 			for(auto &pair : cache)
-				newCache[static_cast<pragma::asset::ModelManager::AssetType*>(pair.second.asset.get())->model.get()] = pair.first;
+				newCache[pragma::asset::ModelManager::GetAssetObject(*pair.second.asset).get()] = pair.first;
 
 			for(auto &pair : oldCache)
 			{

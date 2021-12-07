@@ -57,6 +57,7 @@
 #include "pragma/util/util_game.hpp"
 #include "pragma/debug/intel_vtune.hpp"
 #include <sharedutils/util_library.hpp>
+#include <fsys/ifile.hpp>
 #include <luainterface.hpp>
 #include <udm.hpp>
 
@@ -257,7 +258,7 @@ void Game::OnRemove()
 	// TODO: Implement this properly!
 	for(auto &pair : GetNetworkState()->GetModelManager().GetCache())
 	{
-		for(auto &colMesh : static_cast<pragma::asset::ModelAsset*>(pair.second.asset.get())->model->GetCollisionMeshes())
+		for(auto &colMesh : pragma::asset::ModelManager::GetAssetObject(*pair.second.asset)->GetCollisionMeshes())
 			colMesh->ClearShape();
 	}
 
@@ -815,7 +816,7 @@ bool Game::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Enti
 	auto worldData = pragma::asset::WorldData::Create(*GetNetworkState());
 	if(pragma::asset::matches_format(format,pragma::asset::FORMAT_MAP_BINARY) || pragma::asset::matches_format(format,pragma::asset::FORMAT_MAP_ASCII))
 	{
-		auto udmData = util::load_udm_asset(f);
+		auto udmData = util::load_udm_asset(std::make_unique<fsys::File>(f));
 		std::string err;
 		if(udmData == nullptr || worldData->LoadFromAssetData(udmData->GetAssetData(),pragma::asset::EntityData::Flags::None,err) == false)
 		{
@@ -882,6 +883,22 @@ void Game::InitializeMapEntities(pragma::asset::WorldData &worldData,std::vector
 
 std::shared_ptr<Model> Game::CreateModel(const std::string &mdl) const {return m_stateNetwork->GetModelManager().CreateModel(mdl);}
 std::shared_ptr<Model> Game::CreateModel(bool bAddReference) const {return m_stateNetwork->GetModelManager().CreateModel("",bAddReference);}
+bool Game::PrecacheModel(const std::string &mdl)
+{
+	if(engine->IsVerbose())
+		Con::cout<<"Precaching model '"<<mdl<<"'..."<<Con::endl;
+	auto *asset = GetNetworkState()->GetModelManager().FindCachedAsset(mdl);
+	if(asset)
+		return true;
+	auto loadInfo = std::make_unique<pragma::asset::ModelLoadInfo>();
+	loadInfo->onLoaded = [this](util::Asset &asset) {
+		auto mdl = pragma::asset::ModelManager::GetAssetObject(asset);
+		CallCallbacks<void,std::reference_wrapper<std::shared_ptr<Model>>>("OnModelLoaded",mdl);
+		CallLuaCallbacks<void,std::shared_ptr<Model>>("OnModelLoaded",mdl);
+	};
+	auto r = GetNetworkState()->GetModelManager().PreloadAsset(mdl,std::move(loadInfo));
+	return r.success;
+}
 std::shared_ptr<Model> Game::LoadModel(const std::string &mdl,bool bReload)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
@@ -890,9 +907,13 @@ std::shared_ptr<Model> Game::LoadModel(const std::string &mdl,bool bReload)
 #endif
 	if(engine->IsVerbose())
 		Con::cout<<"Loading model '"<<mdl<<"'..."<<Con::endl;
-	auto bNewModel = false;
-	auto r = GetNetworkState()->GetModelManager().LoadModel(mdl,bReload,&bNewModel);
-	if(bNewModel == true && r != nullptr)
+	if(bReload)
+		GetNetworkState()->GetModelManager().RemoveFromCache(mdl);
+	auto *asset = GetNetworkState()->GetModelManager().FindCachedAsset(mdl);
+	if(asset)
+		return pragma::asset::ModelManager::GetAssetObject(*asset);
+	auto r = GetNetworkState()->GetModelManager().LoadAsset(mdl);
+	if(r != nullptr)
 	{
 		CallCallbacks<void,std::reference_wrapper<std::shared_ptr<Model>>>("OnModelLoaded",r);
 		CallLuaCallbacks<void,std::shared_ptr<Model>>("OnModelLoaded",r);

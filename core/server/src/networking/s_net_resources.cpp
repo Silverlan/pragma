@@ -72,7 +72,7 @@ void ServerState::SendRoughModel(const std::string &f,const std::vector<pragma::
 	auto *asset = GetModelManager().FindCachedAsset(mdlName);
 	if(asset == nullptr)
 		return;
-	auto &mdl = static_cast<pragma::asset::ModelAsset*>(asset)->model;
+	auto mdl = pragma::asset::ModelManager::GetAssetObject(*asset);
 	NetPacket pOut;
 	pOut->WriteString(mdlName);
 
@@ -363,7 +363,7 @@ void NET_sv_query_model_texture(pragma::networking::IServerClient &session,NetPa
 	auto *asset = server->GetModelManager().FindCachedAsset(mdlName);
 	if(asset == nullptr)
 		return;
-	auto &mdl = static_cast<pragma::asset::ModelAsset*>(asset)->model;
+	auto mdl = pragma::asset::ModelManager::GetAssetObject(*asset);
 	std::string dstName;
 	if(mdl->FindMaterial(matName,dstName) == false)
 		return;

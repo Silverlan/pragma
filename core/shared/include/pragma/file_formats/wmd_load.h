@@ -17,28 +17,32 @@
 #include "pragma/util/util_game.hpp"
 #include <udm.hpp>
 #include <sharedutils/util_file.h>
+#include <fsys/ifile.hpp>
 
 template<class TModel,class TModelMesh,class TModelSubMesh>
-	std::shared_ptr<Model> FWMD::Load(Game *game,const std::string &pmodel,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel)
+	std::shared_ptr<Model> FWMD::Load(Game *game,const std::string &model,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel)
+{
+	std::string ext;
+	if(!ufile::get_extension(model,&ext))
+		return nullptr;
+	return Load<TModel,TModelMesh,TModelSubMesh>(game,model,ext,loadModel);
+}
+template<class TModel,class TModelMesh,class TModelSubMesh>
+	std::shared_ptr<Model> FWMD::Load(Game *game,const std::string &model,const std::string &ext,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel)
+{
+	auto f = filemanager::open_file(model,filemanager::FileMode::Read | filemanager::FileMode::Binary);
+	if(!f)
+		return nullptr;
+	auto fp = std::make_unique<fsys::File>(f);
+	return Load<TModel,TModelMesh,TModelSubMesh>(game,model,std::move(fp),ext,loadModel);
+}
+template<class TModel,class TModelMesh,class TModelSubMesh>
+	std::shared_ptr<Model> FWMD::Load(Game *game,const std::string &model,std::unique_ptr<ufile::IFile> &&f,const std::string &ext,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel)
 {
 	auto &nw = *game->GetNetworkState();
-	std::string pathCache(pmodel);
-	// std::transform(pathCache.begin(),pathCache.end(),pathCache.begin(),::tolower);
-
-	auto model = pmodel;
-	
-	std::string ext;
-	auto mdlPath = pragma::asset::find_file(pathCache,pragma::asset::Type::Model,&ext);
-	if(mdlPath.has_value())
-		model = *mdlPath;
-
-	std::string path = "models\\";
-	path += model;
-
-	ustring::to_lower(ext);
 	if(ext == pragma::asset::FORMAT_MODEL_BINARY || ext == pragma::asset::FORMAT_MODEL_ASCII)
 	{
-		auto udm = util::load_udm_asset(path);
+		auto udm = util::load_udm_asset(std::move(f));
 		if(udm == nullptr)
 			return nullptr;
 		std::string err;
@@ -64,7 +68,7 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 	}
 
 	// Deprecated format
-	const char *cPath = path.c_str();
+	const char *cPath = model.c_str();
 	m_file = FileManager::OpenFile(cPath,"rb");
 	if(m_file == NULL)
 	{
@@ -74,24 +78,24 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 		static auto bSkipPort = false;
 		if(bSkipPort == false)
 		{
-			auto pathNoExt = path;
+			auto pathNoExt = model;
 			ufile::remove_extension_from_filename(pathNoExt,pragma::asset::get_supported_extensions(pragma::asset::Type::Model,true));
 			auto assetWrapper = pragma::get_engine()->GetAssetManager().ImportAsset(*game,pragma::asset::Type::Model,nullptr,pathNoExt);
 			if(assetWrapper != nullptr)
 			{
 				bSkipPort = true; // Safety flag to make sure we never end up in an infinite recursion
-				auto r = Load<TModel,TModelMesh,TModelSubMesh>(game,pmodel,loadModel);
+				auto r = Load<TModel,TModelMesh,TModelSubMesh>(game,model,ext,loadModel);
 				bSkipPort = false;
 				return r;
 			}
 
-			auto mdlName = pmodel;
+			auto mdlName = model;
 			ufile::remove_extension_from_filename(mdlName,pragma::asset::get_supported_extensions(pragma::asset::Type::Model,true));
 			auto *nw = game->GetNetworkState();
 			if(util::port_hl2_model(nw,"models\\",mdlName +".mdl") == true || util::port_source2_model(nw,"models\\",mdlName +".vmdl_c") == true || util::port_nif_model(nw,"models\\",mdlName +".nif"))
 			{
 				bSkipPort = true; // Safety flag to make sure we never end up in an infinite recursion
-				auto r = Load<TModel,TModelMesh,TModelSubMesh>(game,pmodel,loadModel);
+				auto r = Load<TModel,TModelMesh,TModelSubMesh>(game,model,ext,loadModel);
 				bSkipPort = false;
 				return r;
 			}

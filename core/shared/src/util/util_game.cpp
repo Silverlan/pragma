@@ -11,6 +11,7 @@
 #include "pragma/entities/entity_iterator.hpp"
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_path.hpp>
+#include <fsys/ifile.hpp>
 #include <udm.hpp>
 
 util::ParallelJob<std::vector<Vector2>&> util::generate_lightmap_uvs(NetworkState &nwState,uint32_t atlastWidth,uint32_t atlasHeight,const std::vector<umath::Vertex> &verts,const std::vector<uint32_t> &tris)
@@ -28,9 +29,9 @@ util::ParallelJob<std::vector<Vector2>&> util::generate_lightmap_uvs(NetworkStat
 	return job;
 }
 
-static bool print_code_snippet(VFilePtr &f,uint32_t lineIdx,uint32_t charIdx)
+static bool print_code_snippet(ufile::IFile &f,uint32_t lineIdx,uint32_t charIdx)
 {
-	f->Seek(0);
+	f.Seek(0);
 	uint32_t numLinesPrint = 3;
 	if(lineIdx < 2)
 		numLinesPrint = lineIdx +1;
@@ -41,7 +42,7 @@ static bool print_code_snippet(VFilePtr &f,uint32_t lineIdx,uint32_t charIdx)
 	{
 		if(curLine == startLineIdx)
 			break;
-		auto c = f->ReadChar();
+		auto c = f.ReadChar();
 		if(c == '\n')
 		{
 			++curLine;
@@ -54,7 +55,7 @@ static bool print_code_snippet(VFilePtr &f,uint32_t lineIdx,uint32_t charIdx)
 	std::vector<std::string> lines;
 	lines.resize(numLinesPrint);
 	for(auto &l : lines)
-		l = f->ReadLine();
+		l = f.ReadLine();
 
 	uint32_t lineOffset = 0;
 	for(auto it=lines.begin();it!=lines.end();++it)
@@ -84,22 +85,31 @@ static bool print_code_snippet(VFilePtr &f,uint32_t lineIdx,uint32_t charIdx)
 	return true;
 }
 template<typename T>
-	static std::shared_ptr<udm::Data> load_udm_asset(T &f,std::string *optOutErr)
+	static std::shared_ptr<udm::Data> load_udm_asset(T &&f,std::string *optOutErr)
 	{
+		using TBase = util::base_type<T>;
+		VFilePtr fptr = nullptr;
 		try
 		{
-			return udm::Data::Load(f);
+			if constexpr(std::is_same_v<TBase,std::string>)
+				return udm::Data::Load(f);
+			else
+			{
+				if(typeid(f) == typeid(fsys::File))
+					fptr = static_cast<fsys::File*>(f.get())->GetFile();
+				return udm::Data::Load(std::move(f));
+			}
 		}
 		catch(const udm::AsciiException &e)
 		{
 			if(optOutErr)
 				*optOutErr = e.what();
 			Con::cwar<<"[UDM] Failed to load UDM asset";
-			if constexpr(std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>,std::string>)
+			if constexpr(std::is_same_v<TBase,std::string>)
 				Con::cout<<" '"<<f<<"'";
 			else
 			{
-				auto *ptr = static_cast<VFilePtrInternalReal*>(f.get());
+				auto *ptr = static_cast<VFilePtrInternalReal*>(fptr.get());
 				if(ptr)
 				{
 					auto path = util::Path::CreateFile(ptr->GetPath());
@@ -112,10 +122,19 @@ template<typename T>
 			{
 				auto fptr = FileManager::OpenFile(f.c_str(),"r");
 				if(fptr)
-					print_code_snippet(fptr,e.lineIndex,e.charIndex);
+				{
+					fsys::File f {fptr};
+					print_code_snippet(f,e.lineIndex,e.charIndex);
+				}
 			}
 			else
-				print_code_snippet(f,e.lineIndex,e.charIndex);
+			{
+				if(fptr)
+				{
+					fsys::File f {fptr};
+					print_code_snippet(f,e.lineIndex,e.charIndex);
+				}
+			}
 		}
 		catch(const udm::Exception &e)
 		{
@@ -129,9 +148,9 @@ std::shared_ptr<udm::Data> util::load_udm_asset(const std::string &fileName,std:
 {
 	return ::load_udm_asset(fileName,optOutErr);
 }
-std::shared_ptr<udm::Data> util::load_udm_asset(std::shared_ptr<VFilePtrInternal> f,std::string *optOutErr)
+std::shared_ptr<udm::Data> util::load_udm_asset(std::unique_ptr<ufile::IFile> &&f,std::string *optOutErr)
 {
-	return ::load_udm_asset(f,optOutErr);
+	return ::load_udm_asset(std::move(f),optOutErr);
 }
 
 void util::write_udm_entity(udm::LinkedPropertyWrapperArg udm,EntityHandle &hEnt)

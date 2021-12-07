@@ -86,6 +86,7 @@ struct DLLNETWORK FWMDVertex
 	std::unordered_map<unsigned long long,float> weights;
 };
 
+namespace ufile {struct IFile;};
 class DLLNETWORK FWMD
 	: FWDF
 {
@@ -112,7 +113,11 @@ public:
 	FWMD(Game *game);
 	~FWMD();
 	template<class TModel,class TModelMesh,class TModelSubMesh>
-		std::shared_ptr<Model> Load(Game *game,const std::string &model,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel);
+		std::shared_ptr<Model> Load(Game *game,const std::string &mdlName,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel);
+	template<class TModel,class TModelMesh,class TModelSubMesh>
+		std::shared_ptr<Model> Load(Game *game,const std::string &mdlName,const std::string &ext,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel);
+	template<class TModel,class TModelMesh,class TModelSubMesh>
+		std::shared_ptr<Model> Load(Game *game,const std::string &mdlName,std::unique_ptr<ufile::IFile> &&f,const std::string &ext,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel);
 	void GetMeshes(std::vector<FWMDMesh*> **meshes);
 };
 

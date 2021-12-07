@@ -214,6 +214,8 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 
 	std::unordered_map<ModelSubMesh*,ModelMesh*> subMeshToMesh;
 	auto &mdl = mdlC->GetModel();
+	if(!mdl)
+		return;
 	for(auto &meshGroup : mdl->GetMeshGroups())
 	{
 		for(auto &mesh : meshGroup->GetMeshes())

@@ -14,7 +14,7 @@
 class FontInfo;
 class LFile;
 enum class TextureLoadFlags : uint32_t;
-namespace msys {enum class TextureLoadFlags : uint32_t;};
+namespace util {enum class AssetLoadFlags : uint32_t;};
 namespace Lua
 {
 	namespace engine
@@ -27,11 +27,11 @@ namespace Lua
 		DLLCLIENT Material *load_material(lua_State *l,const std::string &mat,bool reload,bool loadInstantly);
 		DLLCLIENT Material *load_material(lua_State *l,const std::string &mat,bool reload);
 		DLLCLIENT Material *load_material(lua_State *l,const std::string &mat);
-		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l,const std::string &name,msys::TextureLoadFlags loadFlags);
+		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l,const std::string &name,util::AssetLoadFlags loadFlags);
 		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l,const std::string &name);
-		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l,const LFile &file,const std::string &cacheName,msys::TextureLoadFlags loadFlags);
+		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l,const LFile &file,const std::string &cacheName,util::AssetLoadFlags loadFlags);
 		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l,const LFile &file,const std::string &cacheName);
-		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l,const LFile &file,msys::TextureLoadFlags loadFlags);
+		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l,const LFile &file,util::AssetLoadFlags loadFlags);
 		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l,const LFile &file);
 		DLLCLIENT Material *get_error_material();
 		DLLCLIENT void clear_unused_materials();

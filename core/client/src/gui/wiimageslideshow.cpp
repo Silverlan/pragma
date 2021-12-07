@@ -195,16 +195,16 @@ void WIImageSlideShow::PreloadNextImage(Int32 img)
 	auto &textureManager = matManager.GetTextureManager();
 	auto hSlideShow = GetHandle();
 
-	msys::TextureLoadInfo loadInfo {};
-	loadInfo.flags |= msys::TextureLoadFlags::AbsolutePath;
-	loadInfo.onLoaded = [this,hSlideShow](util::IAsset &asset) {
+	auto loadInfo = std::make_unique<msys::TextureLoadInfo>();
+	loadInfo->flags |= util::AssetLoadFlags::AbsolutePath;
+	loadInfo->onLoaded = [this,hSlideShow](util::Asset &asset) {
 		if(!hSlideShow.IsValid())
 			return;
-		m_imgPreload.texture = static_cast<msys::TextureAsset&>(asset).texture;
+		m_imgPreload.texture = msys::TextureManager::GetAssetObject(asset);
 		m_imgPreload.ready = true;
 		m_imgPreload.loading = false;
 	};
-	textureManager.PreloadTexture(f,loadInfo);
+	textureManager.PreloadAsset(f,std::move(loadInfo));
 }
 
 void WIImageSlideShow::DisplayNextImage()

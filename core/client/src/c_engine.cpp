@@ -615,7 +615,8 @@ bool CEngine::Initialize(int argc,char *argv[])
 
 	// Initialize Client Instance
 	auto matManager = std::make_shared<CMaterialManager>(this->GetRenderContext());
-	matManager->GetTextureManager().SetFileHandler([this](const std::string &fpath) -> std::shared_ptr<ufile::IFile> {
+	auto fileHandler = std::make_unique<util::AssetFileHandler>();
+	fileHandler->open = [this](const std::string &fpath) -> std::unique_ptr<ufile::IFile> {
 		if(FileManager::Exists(fpath) == false)
 		{
 			auto &formats = MaterialManager::get_supported_image_formats();
@@ -631,8 +632,11 @@ bool CEngine::Initialize(int argc,char *argv[])
 		auto fp = filemanager::open_file(fpath,filemanager::FileMode::Binary | filemanager::FileMode::Read);
 		if(!fp)
 			return nullptr;
-		return std::make_shared<fsys::File>(fp);
-	});
+		return std::make_unique<fsys::File>(fp);
+	};
+	fileHandler->exists = [](const std::string &path) -> bool {
+		return filemanager::exists(path);
+	};
 	matManager->SetTextureImporter([this](const std::string &fpath,const std::string &outputPath) -> VFilePtr {
 		if(FileManager::Exists(fpath) == false)
 		{
@@ -1581,7 +1585,7 @@ uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 				{
 					if(!pair.second.asset)
 						continue;
-					auto &tex = static_cast<msys::TextureAsset*>(pair.second.asset.get())->texture;
+					auto tex = msys::TextureManager::GetAssetObject(*pair.second.asset);
 					oldCache[tex.get()] = tex->GetName();
 				}
 
@@ -1592,7 +1596,7 @@ uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 				{
 					if(!pair.second.asset)
 						continue;
-					auto &tex = static_cast<msys::TextureAsset*>(pair.second.asset.get())->texture;
+					auto tex = msys::TextureManager::GetAssetObject(*pair.second.asset);
 					newCache[tex.get()] = tex->GetName();
 				}
 

@@ -258,7 +258,7 @@ static bool load_image(
 	if(f == nullptr)
 		return false;
 	auto &texManager = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
-	auto texture = texManager.LoadTexture(image->uri,msys::TextureLoadFlags::DontCache);
+	auto texture = texManager.LoadAsset(image->uri,util::AssetLoadFlags::DontCache);
 	if(texture == nullptr)
 		return false;
 	if(texture->HasValidVkTexture() == false)
@@ -1185,7 +1185,7 @@ std::shared_ptr<Model> pragma::asset::import_model(const std::string &fileName,s
 
 bool pragma::asset::import_texture(const std::string &fileName,const TextureImportInfo &texInfo,const std::string &outputPath,std::string &outErrMsg)
 {
-	auto tex = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().LoadTexture(fileName,msys::TextureLoadFlags::DontCache);
+	auto tex = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().LoadAsset(fileName,util::AssetLoadFlags::DontCache);
 	if(tex == nullptr)
 	{
 		outErrMsg = "Unable to load texture!";
@@ -1207,8 +1207,9 @@ bool pragma::asset::import_texture(VFilePtr f,const TextureImportInfo &texInfo,c
 	std::string ext;
 	if(ufile::get_extension(path,&ext) == false)
 		return false;
-	auto fp = std::make_shared<fsys::File>(f);
-	auto tex = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().LoadTexture("",fp,ext,{msys::TextureLoadFlags::DontCache});
+	auto fp = std::make_unique<fsys::File>(f);
+	auto &texManager = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
+	auto tex = texManager.LoadAsset("",std::move(fp),ext,std::make_unique<msys::TextureLoadInfo>(util::AssetLoadFlags::DontCache));
 	if(tex == nullptr)
 	{
 		outErrMsg = "Unable to load texture!";
@@ -1286,7 +1287,7 @@ bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo 
 		Con::cout<<"Loading map data..."<<Con::endl;
 	
 	auto worldData = pragma::asset::WorldData::Create(*client);
-	auto udmData = util::load_udm_asset(f);
+	auto udmData = util::load_udm_asset(std::make_unique<fsys::File>(f));
 	f = nullptr;
 	std::string err;
 	if(udmData == nullptr || worldData->LoadFromAssetData(udmData->GetAssetData(),pragma::asset::EntityData::Flags::None,err) == false)
@@ -1518,7 +1519,7 @@ bool pragma::asset::export_texture(
 )
 {
 	auto &texManager = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
-	auto pTexture = texManager.LoadTexture(texturePath);
+	auto pTexture = texManager.LoadAsset(texturePath);
 	if(pTexture == nullptr || pTexture->HasValidVkTexture() == false)
 	{
 		outErrMsg = "Unable to load texture '" +texturePath +"'!";

@@ -722,10 +722,10 @@ bool CReflectionProbeComponent::GenerateIBLReflectionsFromCubemap(prosper::Textu
 	std::shared_ptr<void> texPtr = nullptr;
 
 	// Load BRDF texture from disk, if it already exists
-	msys::TextureLoadInfo loadInfo {};
-	loadInfo.mipmapMode = TextureMipmapMode::Ignore;
+	auto loadInfo = std::make_unique<msys::TextureLoadInfo>();
+	loadInfo->mipmapMode = TextureMipmapMode::Ignore;
 	std::shared_ptr<prosper::Texture> brdfTex = nullptr;
-	auto texInfo = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().LoadTexture("env/brdf.ktx",loadInfo);
+	auto texInfo = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().LoadAsset("env/brdf.ktx",std::move(loadInfo));
 	if(texInfo)
 		brdfTex = texInfo->GetVkTexture();
 	// Otherwise generate it

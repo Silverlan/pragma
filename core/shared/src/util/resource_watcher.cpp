@@ -80,7 +80,7 @@ void ResourceWatcherManager::ReloadMaterial(const std::string &path)
 			std::unordered_set<Model*> modelMap;
 			for(auto &pair : models)
 			{
-				auto &mdl = static_cast<pragma::asset::ModelAsset*>(pair.second.asset.get())->model;
+				auto mdl = pragma::asset::ModelManager::GetAssetObject(*pair.second.asset);
 				auto &textures = mdl->GetTextures();
 				for(auto it=textures.begin();it!=textures.end();++it)
 				{

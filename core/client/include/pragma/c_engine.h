@@ -87,6 +87,7 @@ public:
 	};
 
 	using pragma::RenderContext::DrawFrame;
+	virtual void SetAssetMultiThreadedLoadingEnabled(bool enabled) override;
 	
 	// Debug
 	virtual void DumpDebugInformation(ZIPFile &zip) const override;

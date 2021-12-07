@@ -97,7 +97,8 @@ public:
 		Running = Verbose<<1u,
 		Initialized = Running<<1u,
 		DeveloperMode = Initialized<<1u,
-		Closed = DeveloperMode<<1u
+		Closed = DeveloperMode<<1u,
+		MultiThreadedAssetLoadingEnabled = Closed<<1u
 	};
 
 	enum class CPUProfilingPhase : uint32_t
@@ -121,6 +122,8 @@ public:
 
 	uint32_t ClearUnusedAssets(pragma::asset::Type type,bool verbose=false) const;
 	uint32_t ClearUnusedAssets(const std::vector<pragma::asset::Type> &types,bool verbose=false) const;
+	virtual void SetAssetMultiThreadedLoadingEnabled(bool enabled);
+	void UpdateAssetMultiThreadedLoadingEnabled();
 
 	// Debug
 	pragma::debug::CPUProfiler &GetProfiler() const;
@@ -299,7 +302,7 @@ protected:
 	std::vector<CallbackHandle> m_profileHandlers = {};
 	
 	std::queue<std::function<void()>> m_tickEventQueue;
-	StateFlags m_stateFlags = StateFlags::Running;
+	StateFlags m_stateFlags;
 	mutable upad::PackageManager *m_padPackageManager = nullptr;
 	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_profilingStageManager = nullptr;
 

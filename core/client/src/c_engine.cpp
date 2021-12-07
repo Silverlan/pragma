@@ -26,6 +26,7 @@
 #include <pragma/entities/environment/lights/c_env_light.h>
 #include <pragma/lua/lua_error_handling.hpp>
 #include <cmaterialmanager.h>
+#include <pragma/model/modelmanager.h>
 #include <pragma/model/c_modelmesh.h>
 #include <cctype>
 #include <sharedutils/util_debug.h>
@@ -487,6 +488,18 @@ void CEngine::OnFilesDropped(prosper::Window &window,std::vector<std::string> &f
 	client->OnFilesDropped(files);
 }
 bool CEngine::IsWindowFocused() const {return umath::is_flag_set(m_stateFlags,StateFlags::WindowFocused);}
+
+void CEngine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
+{
+	Engine::SetAssetMultiThreadedLoadingEnabled(enabled);
+	auto *cl = GetClientState();
+	if(cl)
+	{
+		cl->GetModelManager().GetLoader().SetMultiThreadingEnabled(enabled);
+		auto &texManager = static_cast<CMaterialManager&>(cl->GetMaterialManager()).GetTextureManager();
+		texManager.GetLoader().SetMultiThreadingEnabled(enabled);
+	}
+}
 
 extern std::optional<bool> g_launchParamWindowedMode;
 extern std::optional<int> g_launchParamRefreshRate;

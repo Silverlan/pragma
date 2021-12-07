@@ -17,6 +17,7 @@ ClientState *CEngine::OpenClientState()
 	m_clInstance->state = std::make_unique<ClientState>();
 	auto *cl = GetClientState();
 	cl->Initialize();
+	UpdateAssetMultiThreadedLoadingEnabled();
 	return static_cast<ClientState*>(cl);
 }
 

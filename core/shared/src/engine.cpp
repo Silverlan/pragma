@@ -116,7 +116,8 @@ DLLNETWORK Engine *engine = NULL;
 Engine::Engine(int,char*[])
 	: CVarHandler(),
 	m_logFile(nullptr),
-	m_tickRate(Engine::DEFAULT_TICK_RATE)
+	m_tickRate(Engine::DEFAULT_TICK_RATE),
+	m_stateFlags{StateFlags::Running | StateFlags::MultiThreadedAssetLoadingEnabled}
 {
 	// TODO: File cache doesn't work with absolute paths at the moment
 	// (e.g. addons/imported/models/some_model.pmdl would return false even if the file exists)
@@ -418,6 +419,13 @@ uint32_t Engine::ClearUnusedAssets(pragma::asset::Type type,bool verbose) const
 		Con::cout<<n<<" assets have been cleared!"<<Con::endl;
 	return n;
 }
+void Engine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
+{
+	auto *sv = GetServerNetworkState();
+	if(sv)
+		sv->GetModelManager().GetLoader().SetMultiThreadingEnabled(enabled);
+}
+void Engine::UpdateAssetMultiThreadedLoadingEnabled() {SetAssetMultiThreadedLoadingEnabled(umath::is_flag_set(m_stateFlags,StateFlags::MultiThreadedAssetLoadingEnabled));}
 uint32_t Engine::ClearUnusedAssets(const std::vector<pragma::asset::Type> &types,bool verbose) const
 {
 	uint32_t n = 0;
@@ -618,6 +626,11 @@ bool Engine::Initialize(int argc,char *argv[])
 		SetConVar("cache_version",std::to_string(cacheVersionTarget));
 		ClearCache();
 	}
+
+	if(!GetConVarBool("asset_file_cache_enabled"))
+		filemanager::set_use_file_index_cache(false);
+	if(!GetConVarBool("asset_multithreading_enabled"))
+		SetAssetMultiThreadedLoadingEnabled(false);
 	
 	ServerState *server = OpenServerState();
 	if(server != nullptr && IsServerOnly())
@@ -866,6 +879,7 @@ ServerState *Engine::OpenServerState()
 	m_svInstance->state = std::move(svState);
 	auto *sv = GetServerNetworkState();
 	sv->Initialize();
+	UpdateAssetMultiThreadedLoadingEnabled();
 	return static_cast<ServerState*>(sv);
 }
 

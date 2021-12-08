@@ -12,6 +12,7 @@
 #include <texturemanager/texturemanager.h>
 #include <texturemanager/load/texture_loader.hpp>
 #include <cmaterialmanager.h>
+#include <cmaterial_manager2.hpp>
 #include <image/prosper_sampler.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
@@ -75,7 +76,7 @@ static void CVAR_CALLBACK_cl_render_texture_quality(NetworkState*,ConVar*,int,in
 	UInt32 anisotropy;
 	get_filter_mode(cvTextureFiltering->GetInt(),minFilter,magFilter,mipmapMode,anisotropy);
 	auto lodOffset = get_quality_lod_offset();
-	auto &materialManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
+	auto &materialManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager());
 	auto &textureManager = materialManager.GetTextureManager();
 	auto &sampler = static_cast<msys::TextureLoader&>(textureManager.GetLoader()).GetTextureSampler();
 	//auto &customSamplers = textureManager.GetCustomSamplers();

@@ -118,7 +118,7 @@ public:
 public:
 	ServerState();
 	virtual ~ServerState() override;
-	virtual MaterialManager &GetMaterialManager() override;
+	virtual msys::MaterialManager &GetMaterialManager() override;
 	virtual ModelSubMesh *CreateSubMesh() const override;
 	virtual ModelMesh *CreateMesh() const override;
 	virtual bool IsServer() const override;

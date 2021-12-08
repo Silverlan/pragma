@@ -16,6 +16,7 @@
 #include <pragma/console/convars.h>
 #include <sharedutils/util_file.h>
 #include <cmaterialmanager.h>
+#include <cmaterial_manager2.hpp>
 #include <texturemanager/texture.h>
 #include <pragma/console/command_options.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -68,7 +69,7 @@ void CEngine::RegisterConsoleCommands()
 	);
 	conVarMap.RegisterConVarCallback("cl_downscale_imported_high_resolution_rma_textures",std::function<void(NetworkState*,ConVar*,bool,bool)>{[](
 		NetworkState *nw,ConVar *cv,bool oldVal,bool newVal) -> void {
-			static_cast<CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).SetDownscaleImportedRMATextures(newVal);
+			//static_cast<msys::CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).SetDownscaleImportedRMATextures(newVal);
 	}});
 	conVarMap.RegisterConVar<bool>(
 		"render_debug_mode",false,ConVarFlags::None,
@@ -257,12 +258,12 @@ void CEngine::RegisterConsoleCommands()
 	);
 	
 	conVarMap.RegisterConCommand("debug_textures",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
-		auto &texManager = static_cast<CMaterialManager&>(static_cast<ClientState*>(GetClientState())->GetMaterialManager()).GetTextureManager();
+		auto &texManager = static_cast<msys::CMaterialManager&>(static_cast<ClientState*>(GetClientState())->GetMaterialManager()).GetTextureManager();
 		std::vector<std::shared_ptr<Texture>> textures;
 		auto &cache = texManager.GetCache();
 		textures.reserve(cache.size());
 		for(auto &pair : cache)
-			textures.push_back(msys::TextureManager::GetAssetObject(*pair.second.asset.get()));
+			textures.push_back(msys::TextureManager::GetAssetObject(*texManager.GetAsset(pair.second)));
 		std::vector<prosper::DeviceSize> textureSizes;
 		std::vector<size_t> sortedIndices {};
 		textureSizes.reserve(textures.size());

@@ -96,8 +96,11 @@ pragma::asset::ModelManager::ModelManager(NetworkState &nw)
 	: m_nw{nw}
 {
 	auto fileHandler = std::make_unique<util::AssetFileHandler>();
-	fileHandler->open = [](const std::string &path) -> std::unique_ptr<ufile::IFile> {
-		auto f = filemanager::open_file(path,filemanager::FileMode::Read | filemanager::FileMode::Binary);
+	fileHandler->open = [](const std::string &path,util::AssetFormatType formatType) -> std::unique_ptr<ufile::IFile> {
+		auto openMode = filemanager::FileMode::Read;
+		if(formatType == util::AssetFormatType::Binary)
+			openMode |= filemanager::FileMode::Binary;
+		auto f = filemanager::open_file(path,openMode);
 		if(!f)
 			return nullptr;
 		return std::make_unique<fsys::File>(f);
@@ -278,9 +281,8 @@ void pragma::asset::ModelManager::FlagForRemoval(const Model &mdl,bool flag)
 			return;
 		}
 	}
-	auto it = std::find_if(m_cache.begin(),m_cache.end(),[&mdl](const std::pair<size_t,AssetInfo> &pair) {
-		auto &assetInfo = pair.second;
-		auto mdlCache = GetAssetObject(*assetInfo.asset);
+	auto it = std::find_if(m_cache.begin(),m_cache.end(),[this,&mdl](const std::pair<util::AssetIdentifierHash,util::AssetIndex> &pair) {
+		auto mdlCache = GetAssetObject(*GetAsset(pair.second));
 		return mdlCache.get() == &mdl;
 	});
 	if(it == m_cache.end())

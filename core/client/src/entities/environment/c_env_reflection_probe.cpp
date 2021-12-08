@@ -22,6 +22,7 @@
 #include <pragma/asset/util_asset.hpp>
 #include <pragma/console/sh_cmd.h>
 #include <cmaterialmanager.h>
+#include <cmaterial_manager2.hpp>
 #include <texturemanager/texturemanager.h>
 #include <texture_type.h>
 #include <wgui/types/wirect.h>
@@ -433,7 +434,7 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 		return false;
 	}
 
-	auto *mat = client->CreateMaterial("ibl");
+	auto mat = client->CreateMaterial("ibl");
 	if(mat == nullptr)
 		return false;
 	auto &dataBlock = mat->GetDataBlock();
@@ -725,7 +726,7 @@ bool CReflectionProbeComponent::GenerateIBLReflectionsFromCubemap(prosper::Textu
 	auto loadInfo = std::make_unique<msys::TextureLoadInfo>();
 	loadInfo->mipmapMode = TextureMipmapMode::Ignore;
 	std::shared_ptr<prosper::Texture> brdfTex = nullptr;
-	auto texInfo = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().LoadAsset("env/brdf.ktx",std::move(loadInfo));
+	auto texInfo = static_cast<msys::CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().LoadAsset("env/brdf.ktx",std::move(loadInfo));
 	if(texInfo)
 		brdfTex = texInfo->GetVkTexture();
 	// Otherwise generate it

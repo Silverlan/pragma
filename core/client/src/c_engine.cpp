@@ -19,6 +19,7 @@
 #include <pragma/engine_init.hpp>
 #include <pragma/console/convars.h>
 #include "pragma/console/engine_cvar.h"
+#include "pragma/model/c_modelmanager.h"
 #include "pragma/networking/iclient.hpp"
 #include "pragma/networking/local_client.hpp"
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
@@ -26,6 +27,7 @@
 #include <pragma/entities/environment/lights/c_env_light.h>
 #include <pragma/lua/lua_error_handling.hpp>
 #include <cmaterialmanager.h>
+#include <cmaterial_manager2.hpp>
 #include <pragma/model/modelmanager.h>
 #include <pragma/model/c_modelmesh.h>
 #include <cctype>
@@ -495,8 +497,11 @@ void CEngine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
 	auto *cl = GetClientState();
 	if(cl)
 	{
-		cl->GetModelManager().GetLoader().SetMultiThreadingEnabled(enabled);
-		auto &texManager = static_cast<CMaterialManager&>(cl->GetMaterialManager()).GetTextureManager();
+		auto &mdlManager = cl->GetModelManager();
+		mdlManager.GetLoader().SetMultiThreadingEnabled(enabled);
+		auto &matManager = static_cast<msys::CMaterialManager&>(cl->GetMaterialManager());
+		matManager.GetLoader().SetMultiThreadingEnabled(enabled);
+		auto &texManager = matManager.GetTextureManager();
 		texManager.GetLoader().SetMultiThreadingEnabled(enabled);
 	}
 }
@@ -627,9 +632,9 @@ bool CEngine::Initialize(int argc,char *argv[])
 	shaderManager.GetShader("blur_vertical");
 
 	// Initialize Client Instance
-	auto matManager = std::make_shared<CMaterialManager>(this->GetRenderContext());
+	auto matManager = std::make_shared<msys::CMaterialManager>(this->GetRenderContext());
 	auto fileHandler = std::make_unique<util::AssetFileHandler>();
-	fileHandler->open = [this](const std::string &fpath) -> std::unique_ptr<ufile::IFile> {
+	fileHandler->open = [this](const std::string &fpath,util::AssetFormatType formatType) -> std::unique_ptr<ufile::IFile> {
 		if(FileManager::Exists(fpath) == false)
 		{
 			auto &formats = MaterialManager::get_supported_image_formats();
@@ -642,7 +647,10 @@ bool CEngine::Initialize(int argc,char *argv[])
 					break;
 			}
 		}
-		auto fp = filemanager::open_file(fpath,filemanager::FileMode::Binary | filemanager::FileMode::Read);
+		auto openMode = filemanager::FileMode::Read;
+		if(formatType == util::AssetFormatType::Binary)
+			openMode |= filemanager::FileMode::Binary;
+		auto fp = filemanager::open_file(fpath,openMode);
 		if(!fp)
 			return nullptr;
 		return std::make_unique<fsys::File>(fp);
@@ -650,7 +658,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 	fileHandler->exists = [](const std::string &path) -> bool {
 		return filemanager::exists(path);
 	};
-	matManager->SetTextureImporter([this](const std::string &fpath,const std::string &outputPath) -> VFilePtr {
+	/*matManager->SetTextureImporter([this](const std::string &fpath,const std::string &outputPath) -> VFilePtr {
 		if(FileManager::Exists(fpath) == false)
 		{
 			auto &formats = MaterialManager::get_supported_image_formats();
@@ -664,9 +672,9 @@ bool CEngine::Initialize(int argc,char *argv[])
 			}
 		}
 		return nullptr;
-	});
-	auto *matErr = matManager->Load("error",nullptr,nullptr,false,nullptr,true);
-	m_clInstance = std::unique_ptr<StateInstance>(new StateInstance{matManager,matErr});
+	});*/
+	auto matErr = matManager->LoadAsset("error");
+	m_clInstance = std::unique_ptr<StateInstance>(new StateInstance{matManager,matErr.get()});
 	//
 
 	auto &gui = WGUI::Open(GetRenderContext(),matManager);
@@ -1237,7 +1245,7 @@ void CEngine::DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t n_curre
 	auto ptrDrawCmd = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd.shared_from_this());
 	CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("DrawFrame",std::ref(ptrDrawCmd));
 
-	static_cast<CMaterialManager&>(*m_clInstance->materialManager).Update(); // Requires active command buffer
+	static_cast<msys::CMaterialManager&>(*m_clInstance->materialManager).Poll(); // Requires active command buffer
 
 	StartProfilingStage(CPUProfilingPhase::GUI);
 	auto &gui = WGUI::GetInstance();
@@ -1586,7 +1594,7 @@ uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 		auto *cl = GetClientState();
 		if(cl)
 		{
-			auto &texManager = static_cast<CMaterialManager&>(cl->GetMaterialManager()).GetTextureManager();
+			auto &texManager = static_cast<msys::CMaterialManager&>(cl->GetMaterialManager()).GetTextureManager();
 			if(!IsVerbose())
 				n += texManager.ClearUnused();
 			else
@@ -1596,9 +1604,10 @@ uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 				std::unordered_map<Texture*,std::string> oldCache;
 				for(auto &pair : cache)
 				{
-					if(!pair.second.asset)
+					auto asset = texManager.GetAsset(pair.second);
+					if(!asset)
 						continue;
-					auto tex = msys::TextureManager::GetAssetObject(*pair.second.asset);
+					auto tex = msys::TextureManager::GetAssetObject(*asset);
 					oldCache[tex.get()] = tex->GetName();
 				}
 
@@ -1607,9 +1616,10 @@ uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 				std::unordered_map<Texture*,std::string> newCache;
 				for(auto &pair : cache)
 				{
-					if(!pair.second.asset)
+					auto asset = texManager.GetAsset(pair.second);
+					if(!asset)
 						continue;
-					auto tex = msys::TextureManager::GetAssetObject(*pair.second.asset);
+					auto tex = msys::TextureManager::GetAssetObject(*asset);
 					newCache[tex.get()] = tex->GetName();
 				}
 

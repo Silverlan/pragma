@@ -48,12 +48,12 @@ void CPBRConverterComponent::ProcessQueue()
 		return;
 	}
 	item.isRunning = true;
-	if(item.hModel.expired() || item.hMaterial.IsValid() == false)
+	if(item.hModel.expired() || item.hMaterial == nullptr)
 		return;
 	auto &mat = *item.hMaterial.get();
 	auto &mdl = *item.hModel.get();
 	auto &mats = mdl.GetMaterials();
-	auto itMat = std::find_if(mats.begin(),mats.end(),[&mat](const MaterialHandle &hMat) {
+	auto itMat = std::find_if(mats.begin(),mats.end(),[&mat](const msys::MaterialHandle &hMat) {
 		return hMat.get() == &mat;
 	});
 	assert(itMat != mats.end());
@@ -80,7 +80,7 @@ void CPBRConverterComponent::ProcessQueue()
 			Con::cwar<<"WARNING: Generating ambient occlusion map failed: "<<worker.GetResultMessage()<<Con::endl;
 			return;
 		}
-		if(hMat.IsValid() == false || hMdl.expired())
+		if(hMat == nullptr || hMdl.expired())
 			return;
 		auto imgBuffer = worker.GetResult();
 		WriteAOMap(*hMdl.get(),static_cast<CMaterial&>(*hMat.get()),*imgBuffer,imgBuffer->GetWidth(),imgBuffer->GetHeight());

@@ -11,6 +11,7 @@
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
+#include <material_manager2.hpp>
 #include <luainterface.hpp>
 
 extern DLLNETWORK Engine *engine;

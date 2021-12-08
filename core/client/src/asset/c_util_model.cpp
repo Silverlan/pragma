@@ -21,6 +21,8 @@
 #include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/components/c_radius_component.hpp"
 #include "c_gltf_writer.hpp"
+#include <cmaterial_manager2.hpp>
+#include <texturemanager/texture_manager2.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/model/animation/vertex_animation.hpp>
 #include <sharedutils/util_file.h>
@@ -257,7 +259,7 @@ static bool load_image(
 	auto f = FileManager::OpenSystemFile(imgPath.c_str(),"rb");
 	if(f == nullptr)
 		return false;
-	auto &texManager = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
 	auto texture = texManager.LoadAsset(image->uri,util::AssetLoadFlags::DontCache);
 	if(texture == nullptr)
 		return false;
@@ -467,14 +469,15 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 		util::Path matPathRelative {matName};
 		matPathRelative.PopFront();
 
-		auto *mat = static_cast<CMaterial*>(client->CreateMaterial(matPathRelative.GetString(),"pbr"));
+		auto mat = client->CreateMaterial(matPathRelative.GetString(),"pbr");
+		auto *cmat = static_cast<CMaterial*>(mat.get());
 		auto &dataBlock = mat->GetDataBlock();
 		dataBlock->AddValue("int","alpha_mode",std::to_string(umath::to_integral(alphaMode)));
 		dataBlock->AddValue("float","alpha_cutoff",std::to_string(gltfMat.alphaCutoff));
 
 		std::string textureRootPath = "addons/converted/";
 
-		auto fWriteImage = [mat,&fGetTextureInfo,&textureRootPath](
+		auto fWriteImage = [cmat,&fGetTextureInfo,&textureRootPath](
 			const std::string &matIdentifier,const std::string &texName,prosper::IImage &img,bool greyScale,bool normalMap,AlphaMode alphaMode=AlphaMode::Opaque
 			) {
 				auto texInfo = fGetTextureInfo(greyScale,normalMap,alphaMode);
@@ -482,7 +485,7 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 
 				util::Path albedoPath {texName};
 				albedoPath.PopFront();
-				mat->SetTexture(matIdentifier,albedoPath.GetString());
+				cmat->SetTexture(matIdentifier,albedoPath.GetString());
 		};
 
 		auto isHandled = false;
@@ -570,7 +573,7 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 			if(baseColorImage)
 				fWriteImage(Material::ALBEDO_MAP_IDENTIFIER,matName +"_albedo",*baseColorImage,false /* greyScale */,false /* normalMap */,alphaMode);
 			else
-				mat->SetTexture(Material::ALBEDO_MAP_IDENTIFIER,"white");
+				cmat->SetTexture(Material::ALBEDO_MAP_IDENTIFIER,"white");
 
 			auto &baseColorFactor = gltfMat.pbrMetallicRoughness.baseColorFactor;
 			if(baseColorFactor != std::vector<double>{1.0,1.0,1.0,1.0})
@@ -637,7 +640,7 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 		std::string err;
 		mat->Save(savePath.GetString(),err,true);
 
-		mdl->AddMaterial(0,mat);
+		mdl->AddMaterial(0,mat.get());
 
 		++matIdx;
 	}
@@ -1185,7 +1188,7 @@ std::shared_ptr<Model> pragma::asset::import_model(const std::string &fileName,s
 
 bool pragma::asset::import_texture(const std::string &fileName,const TextureImportInfo &texInfo,const std::string &outputPath,std::string &outErrMsg)
 {
-	auto tex = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().LoadAsset(fileName,util::AssetLoadFlags::DontCache);
+	auto tex = static_cast<msys::CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().LoadAsset(fileName,util::AssetLoadFlags::DontCache);
 	if(tex == nullptr)
 	{
 		outErrMsg = "Unable to load texture!";
@@ -1208,7 +1211,7 @@ bool pragma::asset::import_texture(VFilePtr f,const TextureImportInfo &texInfo,c
 	if(ufile::get_extension(path,&ext) == false)
 		return false;
 	auto fp = std::make_unique<fsys::File>(f);
-	auto &texManager = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
 	auto tex = texManager.LoadAsset("",std::move(fp),ext,std::make_unique<msys::TextureLoadInfo>(util::AssetLoadFlags::DontCache));
 	if(tex == nullptr)
 	{
@@ -1518,7 +1521,7 @@ bool pragma::asset::export_texture(
 	const std::optional<std::string> &optFileNameOverride
 )
 {
-	auto &texManager = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
 	auto pTexture = texManager.LoadAsset(texturePath);
 	if(pTexture == nullptr || pTexture->HasValidVkTexture() == false)
 	{
@@ -1676,7 +1679,7 @@ std::optional<util::ParallelJob<pragma::asset::ModelAOWorkerResult>> pragma::ass
 	aoJobs.reserve(materials.size());
 	for(auto &mat : materials)
 	{
-		if(mat.IsValid() == false)
+		if(!mat)
 			continue;
 		auto *rmaMap = mat->GetRMAMap();
 		if(rmaMap == nullptr)
@@ -1768,7 +1771,7 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(
 		return AOResult::FailedToCreateAOJob;
 	}
 	auto &materials = mdl.GetMaterials();
-	auto it = std::find_if(materials.begin(),materials.end(),[&mat](const MaterialHandle &hMat) {
+	auto it = std::find_if(materials.begin(),materials.end(),[&mat](const msys::MaterialHandle &hMat) {
 		return &mat == hMat.get();
 	});
 	if(it == materials.end())
@@ -1811,7 +1814,7 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(
 		auto *shaderComposeRMA = static_cast<pragma::ShaderComposeRMA*>(c_engine->GetShader("compose_rma").get());
 		if(worker.IsSuccessful() == false)
 			return;
-		if(hMat.IsValid() == false)
+		if(!hMat)
 		{
 			worker.SetStatus(util::JobStatus::Failed,"Material is not valid!");
 			return;

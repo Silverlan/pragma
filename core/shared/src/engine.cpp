@@ -52,6 +52,7 @@
 #include <pragma/game/game_resources.hpp>
 #include <pragma/util/resource_watcher.h>
 #include <util_pad.hpp>
+#include <material_manager2.hpp>
 #include <pragma/networking/iserver.hpp>
 #include <pragma/addonsystem/addonsystem.h>
 #include <pragma/model/animation/activities.h>
@@ -347,13 +348,13 @@ static uint32_t clear_assets(NetworkState *state,pragma::asset::Type type,bool v
 
 			std::unordered_map<Model*,std::string> oldCache;
 			for(auto &pair : cache)
-				oldCache[pragma::asset::ModelManager::GetAssetObject(*pair.second.asset).get()] = pair.first;
+				oldCache[pragma::asset::ModelManager::GetAssetObject(*mdlManager.GetAsset(pair.second)).get()] = pair.first;
 
 			n = mdlManager.ClearUnused();
 
 			std::unordered_map<Model*,std::string> newCache;
 			for(auto &pair : cache)
-				newCache[pragma::asset::ModelManager::GetAssetObject(*pair.second.asset).get()] = pair.first;
+				newCache[pragma::asset::ModelManager::GetAssetObject(*mdlManager.GetAsset(pair.second)).get()] = pair.first;
 
 			for(auto &pair : oldCache)
 			{
@@ -372,25 +373,17 @@ static uint32_t clear_assets(NetworkState *state,pragma::asset::Type type,bool v
 			n = matManager.ClearUnused();
 		else
 		{
-			auto &cache = matManager.GetMaterials();
+			auto &cache = matManager.GetCache();
 
 			std::unordered_map<Material*,std::string> oldCache;
-			for(auto &hMat : cache)
-			{
-				if(!hMat.IsValid())
-					continue;
-				oldCache[hMat.get()] = hMat.get()->GetName();
-			}
+			for(auto &pair : cache)
+				oldCache[msys::MaterialManager::GetAssetObject(*matManager.GetAsset(pair.second)).get()] = pair.first;
 
 			n = matManager.ClearUnused();
 
 			std::unordered_map<Material*,std::string> newCache;
-			for(auto &hMat : cache)
-			{
-				if(!hMat.IsValid())
-					continue;
-				newCache[hMat.get()] = hMat.get()->GetName();
-			}
+			for(auto &pair : cache)
+				newCache[msys::MaterialManager::GetAssetObject(*matManager.GetAsset(pair.second)).get()] = pair.first;
 
 			for(auto &pair : oldCache)
 			{
@@ -423,7 +416,11 @@ void Engine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
 {
 	auto *sv = GetServerNetworkState();
 	if(sv)
+	{
 		sv->GetModelManager().GetLoader().SetMultiThreadingEnabled(enabled);
+		auto &matManager = sv->GetMaterialManager();
+		matManager.GetLoader().SetMultiThreadingEnabled(enabled);
+	}
 }
 void Engine::UpdateAssetMultiThreadedLoadingEnabled() {SetAssetMultiThreadedLoadingEnabled(umath::is_flag_set(m_stateFlags,StateFlags::MultiThreadedAssetLoadingEnabled));}
 uint32_t Engine::ClearUnusedAssets(const std::vector<pragma::asset::Type> &types,bool verbose) const
@@ -605,9 +602,9 @@ bool Engine::Initialize(int argc,char *argv[])
 	RegisterConsoleCommands();
 
 	// Initialize Server Instance
-	auto matManager = std::make_shared<MaterialManager>();
-	auto *matErr = matManager->Load("error");
-	m_svInstance = std::unique_ptr<StateInstance>(new StateInstance{matManager,matErr});
+	auto matManager = std::make_shared<msys::MaterialManager>();
+	auto matErr = matManager->LoadAsset("error");
+	m_svInstance = std::unique_ptr<StateInstance>(new StateInstance{matManager,matErr.get()});
 	//
 	InitLaunchOptions(argc,argv);
 	if(Lua::get_extended_lua_modules_enabled())

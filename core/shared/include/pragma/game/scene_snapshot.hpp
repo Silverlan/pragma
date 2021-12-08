@@ -44,7 +44,7 @@ namespace pragma
 			std::vector<Vertex> verts = {};
 			std::vector<uint16_t> tris = {};
 			std::vector<Vector2> lightmapUvs = {};
-			MaterialHandle material = {};
+			msys::MaterialHandle material = {};
 		};
 		struct DLLNETWORK Object
 		{
@@ -60,14 +60,14 @@ namespace pragma
 		std::vector<std::shared_ptr<Mesh>> &GetMeshes();
 		const std::vector<std::shared_ptr<Object>> &GetObjects() const;
 		std::vector<std::shared_ptr<Object>> &GetObjects();
-		const std::vector<MaterialHandle> &GetMaterials() const;
-		std::vector<MaterialHandle> &GetMaterials();
+		const std::vector<msys::MaterialHandle> &GetMaterials() const;
+		std::vector<msys::MaterialHandle> &GetMaterials();
 	private:
 		void AddMaterial(Material &mat);
 		SceneSnapshot()=default;
 		std::vector<std::shared_ptr<Mesh>> m_meshes = {};
 		std::vector<std::shared_ptr<Object>> m_objects = {};
-		std::vector<MaterialHandle> m_materials = {};
+		std::vector<msys::MaterialHandle> m_materials = {};
 	};
 };
 

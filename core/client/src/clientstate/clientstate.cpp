@@ -11,6 +11,7 @@
 #include <pragma/console/convars.h>
 #include "pragma/networking/netmessages.h"
 #include "cmaterialmanager.h"
+#include <cmaterial_manager2.hpp>
 #include "pragma/model/c_modelmanager.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/gui/mainmenu/wimainmenu.h"
@@ -653,7 +654,7 @@ ConVarMap *ClientState::GetConVarMap() {return console_system::client::get_conva
 bool ClientState::IsMultiPlayer() const {return c_engine->IsMultiPlayer();}
 bool ClientState::IsSinglePlayer() const {return c_engine->IsSinglePlayer();}
 
-MaterialManager &ClientState::GetMaterialManager() {return *c_engine->GetClientStateInstance().materialManager;}
+msys::MaterialManager &ClientState::GetMaterialManager() {return *c_engine->GetClientStateInstance().materialManager;}
 ModelSubMesh *ClientState::CreateSubMesh() const {return new CModelSubMesh;}
 ModelMesh *ClientState::CreateMesh() const {return new CModelMesh;}
 
@@ -676,38 +677,56 @@ static void init_shader(Material *mat)
 		const_cast<util::ShaderInfo*>(info)->SetShader(std::make_shared<::util::WeakHandle<prosper::Shader>>(shader));
 	}
 }
-Material *ClientState::CreateMaterial(const std::string &path,const std::string &shader)
+msys::MaterialHandle ClientState::CreateMaterial(const std::string &path,const std::string &shader)
 {
-	auto *mat = GetMaterialManager().CreateMaterial(path,shader);
+	auto mat = GetMaterialManager().CreateMaterial(path,shader,nullptr);
 	if(mat == nullptr)
 		return mat;
-	static_cast<CMaterial*>(mat)->SetOnLoadedCallback(std::bind(init_shader,mat));
+	static_cast<CMaterial*>(mat.get())->SetOnLoadedCallback(std::bind(init_shader,mat.get()));
 	return mat;
 }
 
-Material *ClientState::CreateMaterial(const std::string &shader)
+msys::MaterialHandle ClientState::CreateMaterial(const std::string &shader)
 {
-	auto *mat = GetMaterialManager().CreateMaterial(shader);
+	auto mat = GetMaterialManager().CreateMaterial(shader,nullptr);
 	if(mat == nullptr)
 		return mat;
-	static_cast<CMaterial*>(mat)->SetOnLoadedCallback(std::bind(init_shader,mat));
+	static_cast<CMaterial*>(mat.get())->SetOnLoadedCallback(std::bind(init_shader,mat.get()));
 	return mat;
 }
 
 Material *ClientState::LoadMaterial(const std::string &path,const std::function<void(Material*)> &onLoaded,bool bReload,bool bLoadInstantly)
 {
+	auto &matManager = GetMaterialManager();
+	if(bReload)
+		matManager.RemoveFromCache(path);
+	auto success = true;
+	Material *mat = nullptr;
+	if(!bLoadInstantly)
+		success = matManager.PreloadAsset(path).success;
+	else
+	{
+		auto asset = matManager.LoadAsset(path);
+		success = (asset != nullptr);
+		mat = asset.get();
+	}
+
 	//bLoadInstantly = true;
 	auto bShaderInitialized = std::make_shared<bool>(false);
 
 	bool bFirstTimeError;
-	auto *mat = static_cast<CMaterialManager&>(GetMaterialManager()).Load(path,[this,onLoaded,bShaderInitialized](Material *mat) mutable {
+	auto loadInfo = std::make_unique<msys::MaterialLoadInfo>();
+	loadInfo->onLoaded = [this,bShaderInitialized,onLoaded](util::Asset &asset) mutable {
 		// TODO: bShaderInitialized should never be null, but for some reason is!
+		auto mat = msys::CMaterialManager::GetAssetObject(asset);
+		if(!mat)
+			return;
 		if(bShaderInitialized == nullptr || bShaderInitialized.use_count() > 1) // Callback has been called immediately
-			init_shader(mat);
+			init_shader(mat.get());
 		bShaderInitialized = nullptr;
-		CallCallbacks<void,CMaterial*>("OnMaterialLoaded",static_cast<CMaterial*>(mat));
+		CallCallbacks<void,CMaterial*>("OnMaterialLoaded",static_cast<CMaterial*>(mat.get()));
 		if(onLoaded != nullptr)
-			onLoaded(mat);
+			onLoaded(mat.get());
 		// Material has been fully loaded!
 
 		std::string ext;
@@ -723,8 +742,10 @@ Material *ClientState::LoadMaterial(const std::string &path,const std::function<
 			std::string err;
 			mat->Save(savePath.GetString(),err);
 		}
-	},nullptr,bReload,&bFirstTimeError,bLoadInstantly);
-	if(bFirstTimeError == true)
+	};
+	auto pmat = static_cast<msys::CMaterialManager&>(GetMaterialManager()).LoadAsset(path,std::move(loadInfo));
+	mat = pmat.get();
+	if(!mat)
 	{
 		static auto bSkipPort = false;
 		if(bSkipPort == false)

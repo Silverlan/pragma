@@ -823,7 +823,7 @@ void CParticleSystemComponent::SetExtent(float ext)
 float CParticleSystemComponent::GetRadius() const {return m_radius;}
 float CParticleSystemComponent::GetExtent() const {return m_extent;}
 
-void CParticleSystemComponent::SetMaterial(Material *mat) {m_material = mat ? mat->GetHandle() : MaterialHandle{};}
+void CParticleSystemComponent::SetMaterial(Material *mat) {m_material = mat ? mat->GetHandle() : msys::MaterialHandle{};}
 void CParticleSystemComponent::SetMaterial(const char *mat) {SetMaterial(client->LoadMaterial(mat));}
 Material *CParticleSystemComponent::GetMaterial() const {return m_material.get();}
 
@@ -1090,7 +1090,7 @@ void CParticleSystemComponent::Start()
 	{
 		m_bufParticleAnimData = nullptr;
 		m_descSetGroupAnimation = nullptr;
-		if(m_material.IsValid())
+		if(m_material)
 		{
 			if(IsTextureScrollingEnabled())
 			{

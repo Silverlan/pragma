@@ -239,7 +239,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 	if(c_game->SaveImage(ptrCubemapBuffers,largestWidth,largestHeight,szPerPixel,fullPath,imgWriteInfo,true))
 	{
 		Con::cout<<"Skybox cubemap texture saved as '"<<fullPath<<"'! Generating material..."<<Con::endl;
-		auto *mat = client->CreateMaterial("skybox");
+		auto mat = client->CreateMaterial("skybox");
 		mat->GetDataBlock()->AddValue("texture","skybox",matName);
 		auto savePath = pragma::asset::relative_path_to_absolute_path(matName,pragma::asset::Type::Material,util::CONVERT_PATH);
 		std::string err;
@@ -270,7 +270,7 @@ void CSkyboxComponent::ValidateMaterials()
 	auto &mat = materials.front();
 	auto &texture = textures.front();
 	auto &texturePath = texturePaths.front();
-	if(mat.IsValid() && mat->GetTextureInfo("skybox"))
+	if(mat && mat->GetTextureInfo("skybox"))
 		return; // Skybox is valid; Skip the material
 	// Attempt to use HDR textures, otherwise LDR
 	if(CreateCubemapFromIndividualTextures(texturePath +texture +".pmat","_hdr") || CreateCubemapFromIndividualTextures(texturePath +texture +".pmat"))

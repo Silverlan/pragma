@@ -70,6 +70,7 @@
 #include <luainterface.hpp>
 #include <luabind/copy_policy.hpp>
 #include <cmaterialmanager.h>
+#include <cmaterial_manager2.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -190,7 +191,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 		auto shaderInfo = c_engine->GetShaderManager().PreRegisterShader(shader);
 		mat.Initialize(shaderInfo,db);
 		mat.SetLoaded(true);
-		auto shaderHandler = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetShaderHandler();
+		auto shaderHandler = static_cast<msys::CMaterialManager&>(client->GetMaterialManager()).GetShaderHandler();
 		if(shaderHandler)
 			shaderHandler(&mat);
 	}));

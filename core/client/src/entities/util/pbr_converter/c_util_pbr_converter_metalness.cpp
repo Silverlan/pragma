@@ -25,7 +25,7 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl,CMaterial &mat)
 	// we'll try to find a collision mesh near the visual mesh that uses this material
 	// and check its surface material instead. If its metal, we'll assume the visual material is metal as well.
 	auto &mats = mdl.GetMaterials();
-	auto itMat = std::find_if(mats.begin(),mats.end(),[&mat](const MaterialHandle &hMat) {
+	auto itMat = std::find_if(mats.begin(),mats.end(),[&mat](const msys::MaterialHandle &hMat) {
 		return hMat.get() == &mat;
 	});
 	assert(itMat != mats.end());
@@ -205,7 +205,7 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl)
 	ConvertMaterialsToPBR(mdl);
 	for(auto hMat : mdl.GetMaterials())
 	{
-		if(hMat.IsValid() == false)
+		if(!hMat)
 			continue;
 		auto &mat = static_cast<CMaterial&>(*hMat.get());
 		// Make sure it's a PBR material

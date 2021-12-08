@@ -22,6 +22,7 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 #include <texture_type.h>
+#include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
 extern DLLCLIENT CGame *c_game;
@@ -265,7 +266,7 @@ void ShaderTest::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipe
 
 static bool bind_texture(Material &mat,prosper::IDescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,Texture *optDefaultTex=nullptr)
 {
-	auto &matManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
+	auto &matManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 
 	std::shared_ptr<Texture> tex = nullptr;
@@ -282,7 +283,7 @@ static bool bind_texture(Material &mat,prosper::IDescriptorSet &ds,TextureInfo *
 
 static bool bind_default_texture(prosper::IDescriptorSet &ds,const std::string &defaultTexName,uint32_t bindingIndex)
 {
-	auto &matManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
+	auto &matManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 	auto ptrTex = texManager.LoadAsset(defaultTexName);
 	if(ptrTex == nullptr)
@@ -294,7 +295,7 @@ static bool bind_default_texture(prosper::IDescriptorSet &ds,const std::string &
 
 static bool bind_texture(Material &mat,prosper::IDescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,const std::string &defaultTexName)
 {
-	auto &matManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
+	auto &matManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 
 	std::shared_ptr<Texture> tex = nullptr;

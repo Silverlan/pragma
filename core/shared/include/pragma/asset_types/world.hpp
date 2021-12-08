@@ -145,9 +145,9 @@ namespace pragma::asset
 		bool SaveLightmapAtlas(const std::string &mapName);
 		void WriteEntities(VFilePtrReal &f);
 
-		std::vector<MaterialHandle> ReadMaterials(VFilePtr &f);
+		std::vector<msys::MaterialHandle> ReadMaterials(VFilePtr &f);
 		void ReadBSPTree(VFilePtr &f,uint32_t version);
-		void ReadEntities(VFilePtr &f,const std::vector<MaterialHandle> &materials,EntityData::Flags entMask);
+		void ReadEntities(VFilePtr &f,const std::vector<msys::MaterialHandle> &materials,EntityData::Flags entMask);
 
 		NetworkState &m_nw;
 		std::vector<std::vector<WorldModelMeshIndex>> m_meshesPerCluster;

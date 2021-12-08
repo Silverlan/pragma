@@ -22,6 +22,7 @@
 #include <wgui/wihandle.h>
 #include "pragma/lua/classes/c_lwibase.h"
 #include "cmaterialmanager.h"
+#include <cmaterial_manager2.hpp>
 //#include "shader_screen.h" // prosper TODO
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/entities/c_listener.h"
@@ -660,7 +661,7 @@ void CGame::ReloadMaterialShader(CMaterial *mat)
 void CGame::Initialize()
 {
 	Game::Initialize();
-	auto &materialManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
+	auto &materialManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager());
 	materialManager.SetShaderHandler(&shader_handler);
 	pragma::CRenderComponent::InitializeBuffers();
 	pragma::CLightComponent::InitializeBuffers();
@@ -781,7 +782,7 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 		CallLuaCallbacks<void,std::shared_ptr<prosper::ICommandBuffer>>("DrawFrame",baseDrawCmd);
 	}));
 
-	auto &materialManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
+	auto &materialManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager());
 	if(m_surfaceMaterialManager)
 		m_surfaceMaterialManager->Load("scripts/physics/materials.udm");
 
@@ -1315,7 +1316,7 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 {
 	Game::InitializeWorldData(worldData);
 
-	auto &texManager = static_cast<CMaterialManager&>(static_cast<ClientState*>(GetNetworkState())->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<msys::CMaterialManager&>(static_cast<ClientState*>(GetNetworkState())->GetMaterialManager()).GetTextureManager();
 	auto texture = texManager.LoadAsset(worldData.GetLightmapAtlasTexturePath(GetMapName()));
 	if(texture)
 	{
@@ -1366,7 +1367,7 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 		}
 	}
 
-	auto &materialManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
+	auto &materialManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager());
 	materialManager.ReloadMaterialShaders();
 }
 

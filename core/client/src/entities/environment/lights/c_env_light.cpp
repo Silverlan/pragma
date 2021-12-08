@@ -124,7 +124,7 @@ bool CLightComponent::ShouldPass(const Model &mdl,const CModelSubMesh &mesh)
 {
 	auto &materials = mdl.GetMaterials();
 	auto texId = mdl.GetMaterialIndex(mesh);
-	if(texId.has_value() == false || *texId >= materials.size() || !materials[*texId].IsValid()) // Ignore meshes with invalid materials
+	if(texId.has_value() == false || *texId >= materials.size() || !materials[*texId]) // Ignore meshes with invalid materials
 		return false;
 	auto &mat = materials[*texId];
 	auto *info = mat.get()->GetShaderInfo();

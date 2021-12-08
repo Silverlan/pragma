@@ -10,6 +10,7 @@
 #include "pragma/networkstate/networkstate.h"
 #include "pragma/model/modelmanager.h"
 #include "pragma/game/game_resources.hpp"
+#include <material_manager2.hpp>
 #include <sharedutils/util_path.hpp>
 #include <udm.hpp>
 
@@ -239,7 +240,7 @@ std::optional<std::string> pragma::asset::find_file(const std::string &name,Type
 		auto *sv = engine->GetServerNetworkState();
 		auto *cl = engine->GetClientState();
 		auto *nw = sv ? sv : cl; // Doesn't matter which one
-		return nw ? nw->GetMaterialManager().FindMaterialPath(name) : std::optional<std::string>{};
+		return nw ? nw->GetMaterialManager().FindAssetFilePath(name) : std::optional<std::string>{};
 	}
 	}
 	return {};
@@ -257,7 +258,7 @@ bool pragma::asset::is_loaded(NetworkState &nw,const std::string &name,Type type
 	case Type::Map:
 		return false; // TODO
 	case Type::Material:
-		return nw.GetMaterialManager().FindMaterial(name);
+		return nw.GetMaterialManager().FindCachedAsset(name);
 	case Type::Sound:
 	case Type::ParticleSystem:
 		return false; // TODO

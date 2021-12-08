@@ -17,6 +17,7 @@
 #include <wgui/wgui.h>
 #include <wgui/fontmanager.h>
 #include <cmaterialmanager.h>
+#include <cmaterial_manager2.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -67,7 +68,7 @@ void Console::commands::debug_texture_mipmaps(NetworkState*,pragma::BasePlayerCo
 		return;
 	}
 	auto &texPath = argv.front();
-	auto &materialManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
+	auto &materialManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager());
 	auto &textureManager = materialManager.GetTextureManager();
 	auto asset = msys::TextureManager::GetAssetObject(*textureManager.FindCachedAsset(texPath));
 	std::shared_ptr<Texture> texture = nullptr;
@@ -75,7 +76,8 @@ void Console::commands::debug_texture_mipmaps(NetworkState*,pragma::BasePlayerCo
 		texture = asset;
 	else
 	{
-		auto *mat = materialManager.FindMaterial(texPath);
+		auto *asset = materialManager.FindCachedAsset(texPath);
+		auto mat = asset ? msys::CMaterialManager::GetAssetObject(*asset) : nullptr;
 		auto *diffuseMap = (mat != nullptr) ? mat->GetDiffuseMap() : nullptr;
 		if(diffuseMap == nullptr || diffuseMap->texture == nullptr || static_cast<Texture*>(diffuseMap->texture.get())->HasValidVkTexture() == false)
 		{

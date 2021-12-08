@@ -51,7 +51,10 @@ class Material;
 class Model;
 class ModelMesh;
 class ModelSubMesh;
-class MaterialManager;
+namespace msys
+{
+	class MaterialManager;
+};
 class ResourceWatcherManager;
 class ALSound;
 enum class ALSoundType : int32_t;
@@ -135,7 +138,7 @@ public:
 	virtual bool IsMultiPlayer() const=0;
 	virtual bool IsSinglePlayer() const=0;
 	bool CheatsEnabled() const;
-	virtual MaterialManager &GetMaterialManager()=0;
+	virtual msys::MaterialManager &GetMaterialManager()=0;
 	virtual ModelSubMesh *CreateSubMesh() const=0;
 	virtual ModelMesh *CreateMesh() const=0;
 

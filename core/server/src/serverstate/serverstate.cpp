@@ -17,6 +17,7 @@
 #include "luasystem.h"
 #include "pragma/networking/local_server.hpp"
 #include "pragma/networking/recipient_filter.hpp"
+#include <material_manager2.hpp>
 #include <pragma/game/gamemode/gamemodemanager.h>
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_util.h>
@@ -433,9 +434,20 @@ void ServerState::GetLuaConCommands(std::unordered_map<std::string,ConCommand*> 
 
 Material *ServerState::LoadMaterial(const std::string &path,bool precache,bool bReload)
 {
-	bool bFirstTimeError;
-	auto *mat = GetMaterialManager().Load(path,bReload,!precache,&bFirstTimeError);
-	if(bFirstTimeError == true)
+	auto &matManager = GetMaterialManager();
+	if(bReload)
+		matManager.RemoveFromCache(path);
+	auto success = true;
+	Material *mat = nullptr;
+	if(precache)
+		success = matManager.PreloadAsset(path).success;
+	else
+	{
+		auto asset = matManager.LoadAsset(path);
+		success = (asset != nullptr);
+		mat = asset.get();
+	}
+	if(!success)
 	{
 		static auto bSkipPort = false;
 		if(bSkipPort == false)
@@ -451,7 +463,7 @@ Material *ServerState::LoadMaterial(const std::string &path,bool precache,bool b
 	return mat;
 }
 
-MaterialManager &ServerState::GetMaterialManager() {return *engine->GetServerStateInstance().materialManager;}
+msys::MaterialManager &ServerState::GetMaterialManager() {return *engine->GetServerStateInstance().materialManager;}
 ModelSubMesh *ServerState::CreateSubMesh() const {return new ModelSubMesh;}
 ModelMesh *ServerState::CreateMesh() const {return new ModelMesh;}
 

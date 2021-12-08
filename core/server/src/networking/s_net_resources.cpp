@@ -20,6 +20,7 @@
 #include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/networking/enums.hpp>
 #include <pragma/entities/components/base_player_component.hpp>
+#include <material_manager2.hpp>
 #include <sharedutils/util_file.h>
 
 #define RESOURCE_TRANSFER_VERBOSE 0
@@ -368,7 +369,9 @@ void NET_sv_query_model_texture(pragma::networking::IServerClient &session,NetPa
 	if(mdl->FindMaterial(matName,dstName) == false)
 		return;
 	auto &matManager = server->GetMaterialManager();
-	auto *mat = matManager.FindMaterial(dstName,dstName);
+	auto normalizedName = matManager.ToCacheIdentifier(dstName);
+	auto *matAsset = matManager.FindCachedAsset(dstName);
+	auto mat = matAsset ? msys::MaterialManager::GetAssetObject(*matAsset) : nullptr;
 	if(mat == nullptr)
 		return;
 	auto &block = mat->GetDataBlock();
@@ -399,5 +402,5 @@ void NET_sv_query_model_texture(pragma::networking::IServerClient &session,NetPa
 	std::vector<pragma::networking::IServerClient*> vSession = {&session};
 	for(auto &tex : textures)
 		server->SendResourceFile(tex,vSession);
-	server->SendResourceFile("materials\\" +dstName,vSession);
+	server->SendResourceFile("materials\\" +normalizedName,vSession);
 }

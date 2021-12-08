@@ -12,6 +12,7 @@
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/model/modelmanager.h"
 #include "pragma/model/model.h"
+#include <material_manager2.hpp>
 #include <sharedutils/util_file.h>
 #include <pragma/asset/util_asset.hpp>
 
@@ -76,11 +77,12 @@ void ResourceWatcherManager::ReloadMaterial(const std::string &path)
 		{
 			auto fname = ufile::get_file_from_filename(path);
 			ufile::remove_extension_from_filename(fname);
-			auto &models = m_networkState->GetModelManager().GetCache();
+			auto &mdlManager = m_networkState->GetModelManager();
+			auto &models = mdlManager.GetCache();
 			std::unordered_set<Model*> modelMap;
 			for(auto &pair : models)
 			{
-				auto mdl = pragma::asset::ModelManager::GetAssetObject(*pair.second.asset);
+				auto mdl = pragma::asset::ModelManager::GetAssetObject(*mdlManager.GetAsset(pair.second));
 				auto &textures = mdl->GetTextures();
 				for(auto it=textures.begin();it!=textures.end();++it)
 				{
@@ -200,9 +202,10 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &rootPath,const
 #endif
 			ReloadTexture(path);
 			auto &matManager = nw->GetMaterialManager();
-			for(auto &hMat : matManager.GetMaterials()) // Find all materials which use this texture
+			for(auto &pair : matManager.GetCache()) // Find all materials which use this texture
 			{
-				if(hMat.IsValid() == false)
+				auto hMat = msys::MaterialManager::GetAssetObject(*matManager.GetAsset(pair.second));
+				if(!hMat)
 					continue;
 				auto *mat = hMat.get();
 				auto &block = mat->GetDataBlock();

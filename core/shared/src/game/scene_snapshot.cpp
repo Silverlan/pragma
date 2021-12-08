@@ -18,7 +18,7 @@ std::shared_ptr<SceneSnapshot> SceneSnapshot::Create()
 
 void SceneSnapshot::AddMaterial(Material &mat)
 {
-	auto it = std::find_if(m_materials.begin(),m_materials.end(),[&mat](const MaterialHandle &hMat) {
+	auto it = std::find_if(m_materials.begin(),m_materials.end(),[&mat](const msys::MaterialHandle &hMat) {
 		return hMat.get() == &mat;
 	});
 	if(it != m_materials.end())
@@ -65,7 +65,7 @@ void SceneSnapshot::AddModel(Model &mdl,uint32_t skin)
 				if(mat == nullptr)
 					continue;
 				snapshotMesh->material = mat->GetHandle();
-				if(snapshotMesh->material.IsValid())
+				if(snapshotMesh->material)
 					AddMaterial(*snapshotMesh->material.get());
 				m_meshes.push_back(snapshotMesh);
 			}
@@ -125,5 +125,5 @@ const std::vector<std::shared_ptr<SceneSnapshot::Mesh>> &SceneSnapshot::GetMeshe
 std::vector<std::shared_ptr<SceneSnapshot::Mesh>> &SceneSnapshot::GetMeshes() {return m_meshes;}
 const std::vector<std::shared_ptr<SceneSnapshot::Object>> &SceneSnapshot::GetObjects() const {return const_cast<SceneSnapshot*>(this)->GetObjects();}
 std::vector<std::shared_ptr<SceneSnapshot::Object>> &SceneSnapshot::GetObjects() {return m_objects;}
-const std::vector<MaterialHandle> &SceneSnapshot::GetMaterials() const {return const_cast<SceneSnapshot*>(this)->GetMaterials();}
-std::vector<MaterialHandle> &SceneSnapshot::GetMaterials() {return m_materials;}
+const std::vector<msys::MaterialHandle> &SceneSnapshot::GetMaterials() const {return const_cast<SceneSnapshot*>(this)->GetMaterials();}
+std::vector<msys::MaterialHandle> &SceneSnapshot::GetMaterials() {return m_materials;}

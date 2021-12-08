@@ -375,7 +375,7 @@ namespace pragma
 
 		std::vector<ControlPoint> m_controlPoints {};
 		std::vector<ControlPoint> m_controlPointsPrev {};
-		MaterialHandle m_material {};
+		msys::MaterialHandle m_material {};
 		float m_tNextEmission = 0.f;
 		double m_tLastEmission = 0.0;
 		double m_tLifeTime = 0.0;

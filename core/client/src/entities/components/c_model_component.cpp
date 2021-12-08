@@ -17,6 +17,7 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
 using namespace pragma;
@@ -24,7 +25,7 @@ using namespace pragma;
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
-
+#pragma optimize("",off)
 ComponentEventId CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED = INVALID_COMPONENT_ID;
 void CModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CModelComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
@@ -82,7 +83,7 @@ void CModelComponent::SetMaterialOverride(uint32_t idx,const std::string &matOve
 	if(idx >= m_materialOverrides.size())
 		m_materialOverrides.resize(idx +1);
 	auto *mat = client->LoadMaterial(matOverride);
-	m_materialOverrides.at(idx) = mat ? mat->GetHandle() : MaterialHandle{};
+	m_materialOverrides.at(idx) = mat ? mat->GetHandle() : msys::MaterialHandle{};
 	umath::set_flag(m_stateFlags,StateFlags::RenderMeshUpdateRequired);
 }
 void CModelComponent::SetMaterialOverride(uint32_t idx,CMaterial &mat)
@@ -103,7 +104,7 @@ CMaterial *CModelComponent::GetMaterialOverride(uint32_t idx) const
 {
 	return (idx < m_materialOverrides.size()) ? static_cast<CMaterial*>(m_materialOverrides.at(idx).get()) : nullptr;
 }
-const std::vector<MaterialHandle> &CModelComponent::GetMaterialOverrides() const {return m_materialOverrides;}
+const std::vector<msys::MaterialHandle> &CModelComponent::GetMaterialOverrides() const {return m_materialOverrides;}
 
 CMaterial *CModelComponent::GetRenderMaterial(uint32_t idx,uint32_t skin) const
 {
@@ -214,7 +215,7 @@ void CModelComponent::UpdateRenderBufferList()
 		m_lodMeshRenderBufferData.push_back({});
 		auto &renderBufferData = m_lodMeshRenderBufferData.back();
 		renderBufferData.renderBuffer = renderBuffer;
-		renderBufferData.material = mat ? mat->GetHandle() : MaterialHandle{};
+		renderBufferData.material = mat ? mat->GetHandle() : msys::MaterialHandle{};
 		renderBufferData.enableDepthPrepass = depthPrepassEnabled && shader && shader->IsDepthPrepassEnabled();
 		if(mat == nullptr || shader == nullptr)
 			continue;
@@ -436,3 +437,4 @@ void CModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 	UpdateLOD(0);
 	BaseModelComponent::OnModelChanged(model);
 }
+#pragma optimize("",on)

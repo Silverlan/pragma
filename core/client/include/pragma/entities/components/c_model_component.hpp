@@ -51,7 +51,7 @@ namespace pragma
 		void SetMaterialOverride(uint32_t idx,CMaterial &mat);
 		void ClearMaterialOverride(uint32_t idx);
 		CMaterial *GetMaterialOverride(uint32_t idx) const;
-		const std::vector<MaterialHandle> &GetMaterialOverrides() const;
+		const std::vector<msys::MaterialHandle> &GetMaterialOverrides() const;
 		CMaterial *GetRenderMaterial(uint32_t idx) const;
 		CMaterial *GetRenderMaterial(uint32_t idx,uint32_t skin) const;
 
@@ -102,7 +102,7 @@ namespace pragma
 		virtual void OnModelChanged(const std::shared_ptr<Model> &model) override;
 		void UpdateRenderBufferList();
 
-		std::vector<MaterialHandle> m_materialOverrides = {};
+		std::vector<msys::MaterialHandle> m_materialOverrides = {};
 		uint32_t m_lod = 0u;
 		float m_tNextLodUpdate = 0.f;
 		float m_lastLodCamDistance = 0.f;

@@ -172,7 +172,7 @@ std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssig
 			if(matId.has_value() == false || *matId >= mats.size())
 				continue;
 			auto &hMat = mats.at(*matId);
-			if(hMat.IsValid() == false)
+			if(!hMat)
 				continue;
 			auto shaderName = hMat->GetShaderIdentifier();
 			ustring::to_lower(shaderName);

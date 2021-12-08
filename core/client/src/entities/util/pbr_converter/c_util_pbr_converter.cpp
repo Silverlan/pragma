@@ -34,6 +34,7 @@
 #include <util_texture_info.hpp>
 #include <pragma/model/modelmanager.h>
 #include <cmaterialmanager.h>
+#include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
 extern DLLCLIENT CEngine *c_engine;
@@ -101,7 +102,7 @@ void CPBRConverterComponent::ConvertMaterialsToPBR(Model &mdl)
 {
 	for(auto hMat : mdl.GetMaterials())
 	{
-		if(hMat.IsValid() == false)
+		if(!hMat)
 			continue;
 		auto &mat = static_cast<CMaterial&>(*hMat.get());
 		if(ShouldConvertMaterial(mat) == false)
@@ -167,18 +168,21 @@ void CPBRConverterComponent::OnEntitySpawn()
 		ConvertToPBR(*mat);
 	}));
 
-	for(auto &hMat : client->GetMaterialManager().GetMaterials())
+	auto &matManager = client->GetMaterialManager();
+	for(auto &pair : matManager.GetCache())
 	{
-		if(hMat.IsValid() == false || hMat.get()->IsLoaded() == false || ShouldConvertMaterial(static_cast<CMaterial&>(*hMat.get())) == false)
+		auto hMat = msys::CMaterialManager::GetAssetObject(*matManager.GetAsset(pair.second));
+		if(!hMat || hMat.get()->IsLoaded() == false || ShouldConvertMaterial(static_cast<CMaterial&>(*hMat.get())) == false)
 			continue;
 		ConvertToPBR(static_cast<CMaterial&>(*hMat.get()));
 	}
 
-	auto &models = client->GetModelManager().GetCache();
+	auto &mdlManager = client->GetModelManager();
+	auto &models = mdlManager.GetCache();
 	for(auto &pair : models)
 	{
-		auto &assetInfo = pair.second;
-		UpdateMetalness(*pragma::asset::ModelManager::GetAssetObject(*assetInfo.asset));
+		auto idx = pair.second;
+		UpdateMetalness(*pragma::asset::ModelManager::GetAssetObject(*mdlManager.GetAsset(idx)));
 		//UpdateAmbientOcclusion(*mdl);
 	}
 }
@@ -344,7 +348,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	auto savePath = pragma::asset::relative_path_to_absolute_path(matTraditional.GetName(),pragma::asset::Type::Material,util::CONVERT_PATH);
 	if(matTraditional.Save(savePath.GetString(),err,true))
 		client->LoadMaterial(matName,nullptr,true,true); // Reload material immediately
-	static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().ClearUnused();
+	static_cast<msys::CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().ClearUnused();
 	// Con::cout<<"Conversion complete!"<<Con::endl;
 	return true;
 }

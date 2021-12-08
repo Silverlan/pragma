@@ -8,10 +8,11 @@
 #include "stdafx_shared.h"
 #include "pragma/engine.h"
 #include "pragma/console/conout.h"
+#include <material_manager2.hpp>
 
 extern DLLNETWORK Engine *engine;
 
-Engine::StateInstance::StateInstance(const std::shared_ptr<MaterialManager> &matManager,Material *matErr)
+Engine::StateInstance::StateInstance(const std::shared_ptr<msys::MaterialManager> &matManager,Material *matErr)
 	: materialManager{matManager},state(nullptr)
 {
 	if(matErr == nullptr)

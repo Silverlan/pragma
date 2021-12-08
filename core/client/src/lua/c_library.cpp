@@ -57,6 +57,7 @@
 #include <alsoundsystem.hpp>
 #include <luainterface.hpp>
 #include <cmaterialmanager.h>
+#include <cmaterial_manager2.hpp>
 #include <impl_texture_formats.h>
 #include <prosper_window.hpp>
 #include <prosper_command_buffer.hpp>
@@ -66,7 +67,7 @@
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CEngine *c_engine;
-
+#pragma optimize("",off)
 static void register_gui(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();
@@ -694,7 +695,7 @@ static bool is_asset_loaded(NetworkState &nw,const std::string &name,pragma::ass
 	{
 	case pragma::asset::Type::Texture:
 	{
-		auto *asset = static_cast<CMaterialManager&>(nw.GetMaterialManager()).GetTextureManager().FindCachedAsset(name);
+		auto *asset = static_cast<msys::CMaterialManager&>(nw.GetMaterialManager()).GetTextureManager().FindCachedAsset(name);
 		return asset != nullptr;
 	}
 	case pragma::asset::Type::ParticleSystem:
@@ -1137,7 +1138,7 @@ void CGame::RegisterLuaLibraries()
 
 	auto modAsset = luabind::module_(GetLuaState(),"asset");
 	modAsset[
-		luabind::def("clear_unused_textures",static_cast<uint32_t(*)()>([]() -> uint32_t {return static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().ClearUnused();}))
+		luabind::def("clear_unused_textures",static_cast<uint32_t(*)()>([]() -> uint32_t {return static_cast<msys::CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().ClearUnused();}))
 	];
 	auto defMapExportInfo = luabind::class_<pragma::asset::MapExportInfo>("MapExportInfo");
 	defMapExportInfo.def(luabind::constructor<>());
@@ -1208,3 +1209,4 @@ void CGame::RegisterLuaLibraries()
 		)
 	];
 }
+#pragma optimize("",on)

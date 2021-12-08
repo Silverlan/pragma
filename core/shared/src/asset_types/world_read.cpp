@@ -65,17 +65,17 @@ bool pragma::asset::WorldData::Read(VFilePtr &f,EntityData::Flags entMask,std::s
 	ReadEntities(f,materials,entMask);
 	return true;
 }
-std::vector<MaterialHandle> pragma::asset::WorldData::ReadMaterials(VFilePtr &f)
+std::vector<msys::MaterialHandle> pragma::asset::WorldData::ReadMaterials(VFilePtr &f)
 {
 	auto numMaterials = f->Read<uint32_t>();
 	m_materialTable.resize(numMaterials);
-	std::vector<MaterialHandle> materials {};
+	std::vector<msys::MaterialHandle> materials {};
 	materials.reserve(numMaterials);
 	for(auto &str : m_materialTable)
 	{
 		str = f->ReadString();
 		auto *mat = m_nw.LoadMaterial(str);
-		materials.push_back(mat ? mat->GetHandle() : MaterialHandle{});
+		materials.push_back(mat ? mat->GetHandle() : msys::MaterialHandle{});
 	}
 	return materials;
 }
@@ -135,7 +135,7 @@ void pragma::asset::WorldData::ReadBSPTree(VFilePtr &f,uint32_t version)
 		f->Read(meshIndices.data(),meshIndices.size() *sizeof(meshIndices.front()));
 	}
 }
-void pragma::asset::WorldData::ReadEntities(VFilePtr &f,const std::vector<MaterialHandle> &materials,EntityData::Flags entMask)
+void pragma::asset::WorldData::ReadEntities(VFilePtr &f,const std::vector<msys::MaterialHandle> &materials,EntityData::Flags entMask)
 {
 	auto numEnts = f->Read<uint32_t>();
 	m_entities.reserve(numEnts);

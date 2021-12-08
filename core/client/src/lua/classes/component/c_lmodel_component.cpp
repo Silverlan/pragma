@@ -30,8 +30,8 @@ void Lua::ModelDef::register_class(lua_State *l,luabind::module_ &entsMod)
 		if(!mdl)
 			return;
 		auto &mats = mdl->GetMaterials();
-		auto it = std::find_if(mats.begin(),mats.end(),[&matSrc](const MaterialHandle &hMat) {
-			if(!hMat.IsValid())
+		auto it = std::find_if(mats.begin(),mats.end(),[&matSrc](const msys::MaterialHandle &hMat) {
+			if(!hMat)
 				return false;
 			return pragma::asset::matches(hMat.get()->GetName(),matSrc,pragma::asset::Type::Material);
 		});

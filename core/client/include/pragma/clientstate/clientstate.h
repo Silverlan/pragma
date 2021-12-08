@@ -115,8 +115,8 @@ public:
 public:
 	virtual bool ShouldRemoveSound(ALSound &snd) override;
 	Material *LoadMaterial(const std::string &path,const std::function<void(Material*)> &onLoaded,bool bReload,bool bLoadInstantly); // TODO
-	Material *CreateMaterial(const std::string &path,const std::string &shader);
-	Material *CreateMaterial(const std::string &shader);
+	msys::MaterialHandle CreateMaterial(const std::string &path,const std::string &shader);
+	msys::MaterialHandle CreateMaterial(const std::string &shader);
 	bool LoadGUILuaFile(std::string f);
 	pragma::networking::IClient *GetClient();
 	void Think();
@@ -128,7 +128,7 @@ public:
 	bool IsConnected() const;
 	void AddGUILuaWrapperFactory(const std::function<luabind::object(lua_State*,WIBase&)> &f);
 	std::vector<std::function<luabind::object(lua_State*,WIBase&)>> &GetGUILuaWrapperFactories();
-	virtual MaterialManager &GetMaterialManager() override;
+	virtual msys::MaterialManager &GetMaterialManager() override;
 	virtual ModelSubMesh *CreateSubMesh() const override;
 	virtual ModelMesh *CreateMesh() const override;
 	virtual void Initialize() override;

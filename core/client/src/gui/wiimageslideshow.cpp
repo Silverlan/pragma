@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/gui/wiimageslideshow.h"
 #include <cmaterialmanager.h>
+#include <cmaterial_manager2.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_texture.hpp>
 #include <image/prosper_sampler.hpp>
@@ -191,7 +192,7 @@ void WIImageSlideShow::PreloadNextImage(Int32 img)
 	imgPreload.image = img;
 
 	auto &wgui = WGUI::GetInstance();
-	auto &matManager = static_cast<CMaterialManager&>(wgui.GetMaterialManager());
+	auto &matManager = static_cast<msys::CMaterialManager&>(wgui.GetMaterialManager());
 	auto &textureManager = matManager.GetTextureManager();
 	auto hSlideShow = GetHandle();
 

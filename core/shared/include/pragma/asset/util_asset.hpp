@@ -111,7 +111,7 @@ namespace pragma::asset
 		void SetMaterial(Material &mat);
 		Material *GetMaterial() const;
 	private:
-		MaterialHandle m_material {};
+		msys::MaterialHandle m_material = nullptr;
 	};
 
 	class DLLNETWORK AssetManager

@@ -117,12 +117,12 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,Enti
 	}
 
 	udm["materials"](m_materialTable);
-	std::vector<MaterialHandle> materials {};
+	std::vector<msys::MaterialHandle> materials {};
 	materials.reserve(m_materialTable.size());
 	for(auto &str : m_materialTable)
 	{
 		auto *mat = m_nw.LoadMaterial(str);
-		materials.push_back(mat ? mat->GetHandle() : MaterialHandle{});
+		materials.push_back(mat ? mat->GetHandle() : msys::MaterialHandle{});
 	}
 
 	auto udmLightmap = udm["lightmap"];

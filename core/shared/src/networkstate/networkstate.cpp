@@ -25,6 +25,7 @@
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/model/modelmanager.h"
 #include "pragma/debug/intel_vtune.hpp"
+#include <material_manager2.hpp>
 #include <pragma/console/s_cvar_global_functions.h>
 #include <pragma/lua/luaapi.h>
 #include <luainterface.hpp>
@@ -232,9 +233,20 @@ Material *NetworkState::LoadMaterial(const std::string &path,bool precache,bool 
 	util::ScopeGuard sgVtune {[]() {debug::get_domain().EndTask();}};
 #endif
 	static auto bSkipPort = false;
-	bool bFirstTimeError;
-	auto *mat = GetMaterialManager().Load(path,bReload,!precache,&bFirstTimeError);
-	if(bFirstTimeError == true)
+	auto &matManager = GetMaterialManager();
+	if(bReload)
+		matManager.RemoveFromCache(path);
+	auto success = true;
+	Material *mat = nullptr;
+	if(precache)
+		success = matManager.PreloadAsset(path).success;
+	else
+	{
+		auto asset = matManager.LoadAsset(path);
+		success = (asset != nullptr);
+		mat = asset.get();
+	}
+	if(!success)
 	{
 		if(bSkipPort == false)
 		{
@@ -244,7 +256,7 @@ Material *NetworkState::LoadMaterial(const std::string &path,bool precache,bool 
 			if(util::port_file(this,"materials\\" +vmtPath) == true)
 			{
 				bSkipPort = true;
-				mat = LoadMaterial(path,bReload);
+				mat = LoadMaterial(path,false);
 				bSkipPort = false;
 				if(mat != nullptr)
 				{

@@ -495,8 +495,8 @@ public:
 	void PrecacheMaterials();
 	TextureGroup *CreateTextureGroup();
 	std::vector<std::string> &GetTextures();
-	std::vector<MaterialHandle> &GetMaterials();
-	const std::vector<MaterialHandle> &GetMaterials() const;
+	std::vector<msys::MaterialHandle> &GetMaterials();
+	const std::vector<msys::MaterialHandle> &GetMaterials() const;
 	Material *GetMaterial(uint32_t texID);
 	Material *GetMaterial(uint32_t texGroup,uint32_t texID);
 	virtual void PrecacheTexture(uint32_t texId,bool bReload=false);
@@ -624,7 +624,7 @@ private:
 	std::vector<LODInfo> m_lods; // LODs have to be in order!
 	std::vector<Attachment> m_attachments;
 	std::vector<ObjectAttachment> m_objectAttachments;
-	std::vector<MaterialHandle> m_materials;
+	std::vector<msys::MaterialHandle> m_materials;
 	std::vector<TextureGroup> m_textureGroups;
 	std::vector<CallbackHandle> m_matLoadCallbacks;
 	std::vector<CallbackHandle> m_onAllMatsLoadedCallbacks;

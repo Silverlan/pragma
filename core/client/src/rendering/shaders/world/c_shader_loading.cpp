@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_loading.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
+#include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
 using namespace pragma;

@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/model/poly.h"
 #include <pragma/console/conout.h>
+#include <material_manager2.hpp>
 
 Con::c_cout &operator<<(Con::c_cout& os,const Poly& poly)
 {
@@ -293,7 +294,7 @@ void Poly::RemoveDisplacement()
 	if(m_displacement == nullptr)
 		return;
 	m_displacement = nullptr;
-	m_material = m_nwState->GetMaterialManager().Load("tools/toolsnodraw");
+	m_material = m_nwState->GetMaterialManager().LoadAsset("tools/toolsnodraw").get();
 }
 
 void Poly::SetDisplacement(std::shared_ptr<DispInfo> disp) {m_displacement = disp;}

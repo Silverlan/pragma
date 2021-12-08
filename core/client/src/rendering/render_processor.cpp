@@ -26,6 +26,7 @@
 #include <sharedutils/magic_enum.hpp>
 #include <prosper_framebuffer.hpp>
 #include <prosper_command_buffer.hpp>
+#include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
 extern DLLCLIENT CEngine *c_engine;
@@ -97,7 +98,7 @@ static void print_pass_stats(const RenderPassStats &stats,bool full)
 		Con::cout<<Con::endl;
 		for(auto &hMat : stats.materials)
 		{
-			if(hMat.IsValid() == false)
+			if(!hMat)
 				continue;
 			auto *albedoMap = hMat.get()->GetAlbedoMap();
 			Con::cout<<hMat.get()->GetName();
@@ -679,7 +680,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 		{
 			if(optStats)
 				ttmp = std::chrono::steady_clock::now();
-			auto *mat = matManager.GetMaterial(item.material);
+			auto *mat = static_cast<Material*>(matManager.GetAsset(item.material)->assetObject.get());
 			assert(mat);
 			if(prepass)
 			{

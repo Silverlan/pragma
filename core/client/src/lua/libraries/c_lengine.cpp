@@ -22,6 +22,7 @@
 #include <texturemanager/texturemanager.h>
 #include "textureinfo.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
+#include <cmaterial_manager2.hpp>
 #include <pragma/lua/libraries/lengine.h>
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/lua/lua_entity_component.hpp>
@@ -116,7 +117,7 @@ void Lua::engine::precache_model(lua_State *l,const std::string &mdl)
 
 std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const std::string &name,util::AssetLoadFlags loadFlags)
 {
-	auto &texManager = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
 	auto tex = texManager.LoadAsset(name,loadFlags);
 	if(tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
 		return nullptr;
@@ -141,7 +142,7 @@ std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const L
 	auto ext = get_extension(file);
 	if(!ext.has_value())
 		return nullptr;
-	auto &texManager = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
 	auto f = std::make_unique<fsys::File>(const_cast<LFile&>(file).GetHandle());
 	auto tex = texManager.LoadAsset("",std::move(f),*ext,std::make_unique<msys::TextureLoadInfo>(loadFlags | util::AssetLoadFlags::DontCache));
 	if(tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
@@ -157,7 +158,7 @@ std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const L
 	auto ext = get_extension(file);
 	if(!ext.has_value())
 		return nullptr;
-	auto &texManager = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
+	auto &texManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
 	auto f = std::make_unique<fsys::File>(const_cast<LFile&>(file).GetHandle());
 	auto tex = texManager.LoadAsset("",std::move(f),*ext,std::make_unique<msys::TextureLoadInfo>(loadFlags));
 	if(tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
@@ -173,9 +174,13 @@ Material *Lua::engine::load_material(lua_State *l,const std::string &mat) {retur
 Material *Lua::engine::get_error_material() {return client->GetMaterialManager().GetErrorMaterial();}
 void Lua::engine::clear_unused_materials() {client->GetMaterialManager().ClearUnused();}
 
-Material *Lua::engine::create_material(const std::string &identifier,const std::string &shader) {return client->CreateMaterial(identifier,shader);;}
-Material *Lua::engine::create_material(const std::string &shader) {return client->CreateMaterial(shader);}
-Material *Lua::engine::get_material(const std::string &identifier) {return client->GetMaterialManager().FindMaterial(identifier);}
+std::shared_ptr<Material> Lua::engine::create_material(const std::string &identifier,const std::string &shader) {return client->CreateMaterial(identifier,shader);;}
+std::shared_ptr<Material> Lua::engine::create_material(const std::string &shader) {return client->CreateMaterial(shader);}
+Material *Lua::engine::get_material(const std::string &identifier)
+{
+	auto *asset = client->GetMaterialManager().FindCachedAsset(identifier);
+	return asset ? msys::CMaterialManager::GetAssetObject(*asset).get() : nullptr;
+}
 
 int Lua::engine::create_particle_system(lua_State *l)
 {

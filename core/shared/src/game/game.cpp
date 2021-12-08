@@ -56,6 +56,7 @@
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/util/util_game.hpp"
 #include "pragma/debug/intel_vtune.hpp"
+#include <material_manager2.hpp>
 #include <sharedutils/util_library.hpp>
 #include <fsys/ifile.hpp>
 #include <luainterface.hpp>
@@ -256,9 +257,10 @@ void Game::OnRemove()
 	// contain luabind objects, which have to be destroyed before we destroy the
 	// lua state.
 	// TODO: Implement this properly!
-	for(auto &pair : GetNetworkState()->GetModelManager().GetCache())
+	auto &mdlManager = GetNetworkState()->GetModelManager();
+	for(auto &pair : mdlManager.GetCache())
 	{
-		for(auto &colMesh : pragma::asset::ModelManager::GetAssetObject(*pair.second.asset)->GetCollisionMeshes())
+		for(auto &colMesh : pragma::asset::ModelManager::GetAssetObject(*mdlManager.GetAsset(pair.second))->GetCollisionMeshes())
 			colMesh->ClearShape();
 	}
 

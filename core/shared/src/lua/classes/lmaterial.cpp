@@ -45,10 +45,10 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 	classDef.def("GetName",&::Material::GetName);
 	classDef.def("GetDataBlock",&::Material::GetDataBlock);
 	classDef.def("Copy",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
-		auto *matCopy = mat.Copy();
+		auto matCopy = mat.Copy();
 		if(matCopy == nullptr)
 			return;
-		Lua::Push<::Material*>(l,matCopy);
+		Lua::Push<msys::MaterialHandle>(l,matCopy);
 	}));
 	classDef.def("UpdateTextures",&::Material::UpdateTextures);
 	classDef.def("Save",static_cast<luabind::variant<std::string,bool>(*)(lua_State*,::Material&,udm::AssetData&)>([](lua_State *l,::Material &mat,udm::AssetData &assetData) -> luabind::variant<std::string,bool> {

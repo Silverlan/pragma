@@ -109,11 +109,12 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 	auto maxDist = pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 100.f;
 	auto endRadius = maxDist *umath::tan(umath::deg_to_rad(m_coneAngle));
 
-	auto *mat = static_cast<CMaterial*>(client->CreateMaterial("lightcone","light_cone"));
+	auto mat = client->CreateMaterial("lightcone","light_cone");
+	auto *cmat = static_cast<CMaterial*>(mat.get());
 	auto &data = mat->GetDataBlock();
 	data->AddValue("int","alpha_mode",std::to_string(umath::to_integral(AlphaMode::Blend)));
 	data->AddValue("float","cone_height",std::to_string(maxDist));
-	mat->SetTexture("albedo_map","error");
+	cmat->SetTexture("albedo_map","error");
 
 	const uint32_t coneDetail = 64;
 	const uint32_t segmentCount = 20;
@@ -150,7 +151,7 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 		mesh->AddSubMesh(subMesh);
 	}
 	group->AddMesh(mesh);
-	mdl->AddMaterial(0,mat);
+	mdl->AddMaterial(0,mat.get());
 	mdl->Update(ModelUpdateFlags::All);
 
 	mdlComponent->SetModel(mdl);

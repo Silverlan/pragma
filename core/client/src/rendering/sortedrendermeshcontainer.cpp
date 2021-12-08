@@ -179,8 +179,8 @@ SortedRenderMeshContainer::SortedRenderMeshContainer(CBaseEntity *ent,std::vecto
 		{
 			auto *subMesh = static_cast<CModelSubMesh*>(it->get());
 			auto idxTexture = mdl->GetMaterialIndex(*subMesh,ent->GetSkin());
-			auto hMat = idxTexture.has_value() ? materials[*idxTexture] : MaterialHandle{};
-			if(hMat.IsValid())
+			auto hMat = idxTexture.has_value() ? materials[*idxTexture] : msys::MaterialHandle{};
+			if(hMat)
 			{
 				auto *mat = hMat.get();
 				auto *info = mat->GetShaderInfo();

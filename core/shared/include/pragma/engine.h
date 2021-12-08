@@ -63,8 +63,8 @@ public:
 	{
 	public:
 		~StateInstance();
-		StateInstance(const std::shared_ptr<MaterialManager> &matManager,Material *matErr);
-		std::shared_ptr<MaterialManager> materialManager;
+		StateInstance(const std::shared_ptr<msys::MaterialManager> &matManager,Material *matErr);
+		std::shared_ptr<msys::MaterialManager> materialManager;
 		std::unique_ptr<NetworkState> state;
 	};
 	struct DLLNETWORK ConsoleOutput

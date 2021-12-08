@@ -22,6 +22,7 @@
 #include <prosper_command_buffer.hpp>
 #include <texturemanager/texturemanager.h>
 #include <cmaterialmanager.h>
+#include <cmaterial_manager2.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 
@@ -45,7 +46,7 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCLightMap.def("SetLightmapAtlas",static_cast<void(*)(lua_State*,pragma::CLightMapComponent&,const std::string &path)>([](lua_State *l,pragma::CLightMapComponent &hLightMapC,const std::string &path) {
 		auto *nw = c_engine->GetNetworkState(l);
 
-		auto &texManager = static_cast<CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).GetTextureManager();
+		auto &texManager = static_cast<msys::CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).GetTextureManager();
 		auto texture = texManager.LoadAsset(path);
 		if(texture == nullptr)
 			return;

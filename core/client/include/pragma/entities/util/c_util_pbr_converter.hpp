@@ -30,7 +30,7 @@ namespace pragma
 	{
 		PBRAOBakeJob(Model &mdl,Material &mat);
 		util::WeakHandle<Model> hModel = {};
-		MaterialHandle hMaterial = {};
+		msys::MaterialHandle hMaterial = {};
 		EntityHandle hEntity = {};
 		util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> job = {};
 		bool isRunning = false;

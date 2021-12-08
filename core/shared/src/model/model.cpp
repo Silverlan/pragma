@@ -523,7 +523,7 @@ void Model::OnMaterialLoaded()
 	auto bAllLoaded = true;
 	for(auto &hMat : m_materials)
 	{
-		if(hMat.IsValid() && hMat->IsLoaded() == false)
+		if(hMat && hMat->IsLoaded() == false)
 		{
 			bAllLoaded = false;
 			break;
@@ -580,7 +580,7 @@ uint32_t Model::AddTexture(const std::string &tex,Material *mat)
 		return it -meta.textures.begin();
 	meta.textures.push_back(ntex);
 	if(mat == nullptr)
-		m_materials.push_back(MaterialHandle{});
+		m_materials.push_back(msys::MaterialHandle{});
 	else
 		AddLoadingMaterial(*mat);
 	return static_cast<uint32_t>(meta.textures.size() -1);
@@ -902,13 +902,13 @@ std::optional<uint32_t> Model::GetMaterialIndex(const ModelSubMesh &mesh,uint32_
 		return {};
 	return texGroup->textures.at(idx);
 }
-std::vector<MaterialHandle> &Model::GetMaterials()
+std::vector<msys::MaterialHandle> &Model::GetMaterials()
 {
 	if(!umath::is_flag_set(m_stateFlags,StateFlags::MaterialsLoadInitiated))
 		LoadMaterials();
 	return m_materials;
 }
-const std::vector<MaterialHandle> &Model::GetMaterials() const {return const_cast<Model*>(this)->GetMaterials();}
+const std::vector<msys::MaterialHandle> &Model::GetMaterials() const {return const_cast<Model*>(this)->GetMaterials();}
 std::vector<std::string> &Model::GetTextures() {return m_metaInfo.textures;}
 std::vector<TextureGroup> &Model::GetTextureGroups() {return m_textureGroups;}
 Material *Model::GetMaterial(uint32_t texID)
@@ -1352,7 +1352,7 @@ std::optional<uint32_t> Model::AssignDistinctMaterial(const ModelMeshGroup &grou
 		return {};
 	auto &materials = GetMaterials();
 	auto hMat = materials.at(*matIdx);
-	if(hMat.IsValid() == false)
+	if(!hMat)
 		return {};
 	auto strPath = hMat->GetAbsolutePath();
 	if(strPath.has_value() == false)

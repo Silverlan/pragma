@@ -1495,7 +1495,7 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 	{
 		for(auto &hMat : mdlDesc.model.GetMaterials())
 		{
-			if(hMat.IsValid() == false)
+			if(!hMat)
 				continue;
 			auto *mat = hMat.get();
 			auto it = std::find(materials.begin(),materials.end(),mat);

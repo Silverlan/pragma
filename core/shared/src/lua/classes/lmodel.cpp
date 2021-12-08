@@ -24,6 +24,7 @@
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/model/animation/flex_animation.hpp"
 #include "pragma/model/modelmesh.h"
+#include <material_manager2.hpp>
 #include <luabind/iterator_policy.hpp>
 #include <pragma/lua/lua_call.hpp>
 #include <sharedutils/util_path.hpp>

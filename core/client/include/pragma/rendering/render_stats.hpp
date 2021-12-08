@@ -184,7 +184,7 @@ struct DLLCLIENT RenderPassStats
 	BaseSceneStatsCounterTimerList<Counter,Timer> *operator->() {return &stats;}
 	const BaseSceneStatsCounterTimerList<Counter,Timer> *operator->() const {return const_cast<RenderPassStats*>(this)->operator->();}
 	std::vector<EntityHandle> entities;
-	std::vector<MaterialHandle> materials;
+	std::vector<msys::MaterialHandle> materials;
 	std::vector<util::WeakHandle<prosper::Shader>> shaders;
 	std::vector<std::shared_ptr<const CModelSubMesh>> meshes;
 

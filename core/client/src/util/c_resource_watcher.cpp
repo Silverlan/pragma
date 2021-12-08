@@ -16,6 +16,7 @@
 #include <textureinfo.h>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/asset/util_asset.hpp>
+#include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
 extern DLLCLIENT CEngine *c_engine;
@@ -28,7 +29,7 @@ static auto cvMatStreaming = GetClientConVar("cl_material_streaming_enabled");
 void CResourceWatcherManager::ReloadTexture(const std::string &path)
 {
 	auto *nw = m_networkState;
-	auto &matManager = static_cast<CMaterialManager&>(nw->GetMaterialManager());
+	auto &matManager = static_cast<msys::CMaterialManager&>(nw->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 	auto *asset = texManager.FindCachedAsset(path);
 	if(asset == nullptr)
@@ -38,7 +39,7 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 	loadInfo->onLoaded = [path,nw](util::Asset &asset) {
 		if(nw == nullptr)
 			return;
-		auto &matManager = static_cast<CMaterialManager&>(nw->GetMaterialManager());
+		auto &matManager = static_cast<msys::CMaterialManager&>(nw->GetMaterialManager());
 		auto &texManager = matManager.GetTextureManager();
 
 		auto pathNoExt = path;
@@ -83,9 +84,10 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 		};
 
 		// Iterate all materials and update the ones that use this texture
-		for(auto &hMat : matManager.GetMaterials())
+		for(auto &pair : matManager.GetCache())
 		{
-			if(hMat.IsValid() == false)
+			auto hMat = msys::CMaterialManager::GetAssetObject(*matManager.GetAsset(pair.second));
+			if(!hMat)
 				continue;
 			auto &data = hMat.get()->GetDataBlock();
 			if(data != nullptr)

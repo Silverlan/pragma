@@ -12,6 +12,7 @@
 #include "textureinfo.h"
 #include "pragma/rendering/shaders/world/c_shader_textured_base.hpp"
 #include <cmaterial.h>
+#include <cmaterial_manager2.hpp>
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
@@ -62,7 +63,7 @@ void Lua::Material::Client::GetData(lua_State *l,::Material *mat)
 
 void Lua::Material::Client::InitializeShaderData(lua_State *l,::Material *mat,bool reload)
 {
-	auto shaderHandler = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetShaderHandler();
+	auto shaderHandler = static_cast<msys::CMaterialManager&>(client->GetMaterialManager()).GetShaderHandler();
 	if(shaderHandler)
 		shaderHandler(mat);
 	auto *shader = static_cast<::pragma::ShaderTexturedBase*>(mat->GetUserData());

@@ -5,8 +5,8 @@
  * Copyright (c) 2021 Silverlan
  */
 
-#ifndef __MODELMANAGER_H__
-#define __MODELMANAGER_H__
+#ifndef __PRAGMA_MODEL_MANAGER_HPP__
+#define __PRAGMA_MODEL_MANAGER_HPP__
 
 #include <unordered_map>
 #include <vector>

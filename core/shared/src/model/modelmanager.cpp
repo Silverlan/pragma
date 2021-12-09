@@ -182,7 +182,7 @@ std::shared_ptr<Model> pragma::asset::ModelManager::CreateModel(const std::strin
 	return mdl;
 }
 void pragma::asset::ModelManager::InitializeProcessor(util::IAssetProcessor &processor) {}
-util::AssetObject pragma::asset::ModelManager::InitializeAsset(const util::AssetLoadJob &job)
+util::AssetObject pragma::asset::ModelManager::InitializeAsset(const util::Asset &asset,const util::AssetLoadJob &job)
 {
 	auto &mdlProcessor = *static_cast<ModelProcessor*>(job.processor.get());
 	return mdlProcessor.model;

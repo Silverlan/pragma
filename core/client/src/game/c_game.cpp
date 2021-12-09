@@ -156,6 +156,9 @@ void CGame::MessagePacketTracker::CheckMessages(uint8_t messageId,std::vector<do
 
 //////////////////////////
 
+static std::vector<std::string> g_requiredGameTextures = {"white","black","transparent","white_unlit","error"};
+std::vector<std::string> &get_required_game_textures() {return g_requiredGameTextures;}
+
 namespace pragma::rendering {class LightingStageRenderProcessor; class DepthStageRenderProcessor;};
 static auto cvWorkerThreadCount = GetClientConVar("render_queue_worker_thread_count");
 CGame::CGame(NetworkState *state)
@@ -302,6 +305,10 @@ CGame::CGame(NetworkState *state)
 
 	m_renderQueueBuilder = std::make_unique<pragma::rendering::RenderQueueBuilder>();
 	m_renderQueueWorkerManager = std::make_unique<pragma::rendering::RenderQueueWorkerManager>(umath::clamp(cvWorkerThreadCount->GetInt(),1,20));
+
+	auto &texManager = static_cast<msys::CMaterialManager&>(static_cast<ClientState*>(GetNetworkState())->GetMaterialManager()).GetTextureManager();
+	for(auto &tex : g_requiredGameTextures)
+		texManager.LoadAsset(tex); // Pre-loaded in ClientState constructor
 }
 
 CGame::~CGame() {}

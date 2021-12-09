@@ -81,7 +81,7 @@ namespace pragma::asset
 		virtual std::shared_ptr<Model> Load(const std::string &mdlName,std::unique_ptr<ufile::IFile> &&f,const std::string &ext,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel);
 	protected:
 		virtual void InitializeProcessor(util::IAssetProcessor &processor) override;
-		virtual util::AssetObject InitializeAsset(const util::AssetLoadJob &job) override;
+		virtual util::AssetObject InitializeAsset(const util::Asset &asset,const util::AssetLoadJob &job) override;
 		virtual std::shared_ptr<Model> CreateModel(uint32_t numBones,const std::string &mdlName);
 		//bool PrecacheModel(const std::string &mdlName) const;
 		//std::shared_ptr<Model> LoadModel(const std::string &cacheName,const std::shared_ptr<ufile::IFile> &file,const std::string &ext);

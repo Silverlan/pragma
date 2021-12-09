@@ -67,6 +67,7 @@ extern DLLCLIENT CEngine *c_engine;
 DLLCLIENT ClientState *client = NULL;
 extern CGame *c_game;
 
+std::vector<std::string> &get_required_game_textures();
 ClientState::ClientState()
 	: NetworkState(),m_client(nullptr),m_svInfo(nullptr),m_resDownload(nullptr),
 	m_volMaster(1.f),m_hMainMenu(),m_luaGUI(NULL)
@@ -95,6 +96,10 @@ ClientState::ClientState()
 	RegisterCallback<void,std::reference_wrapper<NetPacket>>("OnReceivePacket");
 	RegisterCallback<void,std::reference_wrapper<NetPacket>>("OnSendPacketTCP");
 	RegisterCallback<void,std::reference_wrapper<NetPacket>>("OnSendPacketUDP");
+
+	auto &texManager = static_cast<msys::CMaterialManager&>(GetMaterialManager()).GetTextureManager();
+	for(auto &tex : get_required_game_textures())
+		texManager.PreloadAsset(tex);
 }
 
 ClientState::~ClientState()
@@ -703,7 +708,11 @@ Material *ClientState::LoadMaterial(const std::string &path,const std::function<
 	auto success = true;
 	Material *mat = nullptr;
 	if(!bLoadInstantly)
+	{
 		success = matManager.PreloadAsset(path).success;
+		if(success)
+			return nullptr;
+	}
 	else
 	{
 		auto asset = matManager.LoadAsset(path);

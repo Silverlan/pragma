@@ -80,11 +80,11 @@ void CModelComponent::UpdateBaseShaderSpecializationFlags()
 
 void CModelComponent::SetMaterialOverride(uint32_t idx,const std::string &matOverride)
 {
-	if(idx >= m_materialOverrides.size())
-		m_materialOverrides.resize(idx +1);
 	auto *mat = client->LoadMaterial(matOverride);
-	m_materialOverrides.at(idx) = mat ? mat->GetHandle() : msys::MaterialHandle{};
-	umath::set_flag(m_stateFlags,StateFlags::RenderMeshUpdateRequired);
+	if(mat)
+		SetMaterialOverride(idx,static_cast<CMaterial&>(*mat));
+	else
+		ClearMaterialOverride(idx);
 }
 void CModelComponent::SetMaterialOverride(uint32_t idx,CMaterial &mat)
 {
@@ -92,6 +92,7 @@ void CModelComponent::SetMaterialOverride(uint32_t idx,CMaterial &mat)
 		m_materialOverrides.resize(idx +1);
 	m_materialOverrides.at(idx) = mat.GetHandle();
 	umath::set_flag(m_stateFlags,StateFlags::RenderMeshUpdateRequired);
+	mat.UpdateTextures(); // Ensure all textures have been fully loaded
 }
 void CModelComponent::ClearMaterialOverride(uint32_t idx)
 {
@@ -435,6 +436,12 @@ void CModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 		return;
 	}
 	UpdateLOD(0);
+	for(auto &hMat : model->GetMaterials())
+	{
+		if(!hMat)
+			continue;
+		hMat->UpdateTextures(); // Ensure all textures have been fully loaded
+	}
 	BaseModelComponent::OnModelChanged(model);
 }
 #pragma optimize("",on)

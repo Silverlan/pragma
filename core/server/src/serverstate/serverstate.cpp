@@ -440,7 +440,11 @@ Material *ServerState::LoadMaterial(const std::string &path,bool precache,bool b
 	auto success = true;
 	Material *mat = nullptr;
 	if(precache)
+	{
 		success = matManager.PreloadAsset(path).success;
+		if(success)
+			return nullptr;
+	}
 	else
 	{
 		auto asset = matManager.LoadAsset(path);

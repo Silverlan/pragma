@@ -623,15 +623,15 @@ bool Engine::Initialize(int argc,char *argv[])
 		SetConVar("cache_version",std::to_string(cacheVersionTarget));
 		ClearCache();
 	}
+	
+	ServerState *server = OpenServerState();
+	if(server != nullptr && IsServerOnly())
+		LoadConfig();
 
 	if(!GetConVarBool("asset_file_cache_enabled"))
 		filemanager::set_use_file_index_cache(false);
 	if(!GetConVarBool("asset_multithreading_enabled"))
 		SetAssetMultiThreadedLoadingEnabled(false);
-	
-	ServerState *server = OpenServerState();
-	if(server != nullptr && IsServerOnly())
-		LoadConfig();
 
 	return true;
 }

@@ -413,6 +413,13 @@ void Game::Initialize()
 
 	LoadSoundScripts("fx.udm");
 }
+
+void Game::OnInitialized()
+{
+	auto &mdlManager = GetNetworkState()->GetModelManager();
+	mdlManager.PreloadAsset("error");
+}
+
 void Game::SetUp() {}
 
 class PhysEventCallback

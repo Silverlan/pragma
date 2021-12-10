@@ -40,6 +40,7 @@
 #include <sharedutils/util_file.h>
 #include <pragma/engine_info.hpp>
 #include <prosper_util.hpp>
+#include <shader/prosper_pipeline_loader.hpp>
 #include <image/prosper_render_target.hpp>
 #include <debug/prosper_debug.hpp>
 #include <prosper_command_buffer.hpp>
@@ -1306,13 +1307,14 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 	auto perfTimers = umath::is_flag_set(m_stateFlags,StateFlags::EnableGpuPerformanceTimers);
 	auto drawGui = !cvHideGui->GetBool();
 
+	auto &context = GetRenderContext();
 	if(drawGui)
 	{
 		auto &rp = rt->GetRenderPass();
 		auto &fb = rt->GetFramebuffer();
 		StartProfilingStage(GPUProfilingPhase::GUI);
 
-		for(auto &wpWindow : GetRenderContext().GetWindows())
+		for(auto &wpWindow : context.GetWindows())
 		{
 			auto window = wpWindow.lock();
 			if(!window || window->IsValid() == false)
@@ -1328,6 +1330,9 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 
 		StopProfilingStage(GPUProfilingPhase::GUI);
 	}
+
+	// Make sure all shader pipelines have been fully loaded and initialized
+	context.GetPipelineLoader().Flush();
 
 	auto *cl = static_cast<ClientState*>(GetClientState());
 	auto tStart = util::Clock::now();

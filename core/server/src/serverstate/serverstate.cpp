@@ -350,6 +350,7 @@ void ServerState::StartGame(bool singlePlayer)
 
 	CallCallbacks<void,SGame*>("OnGameStart",GetGameState());
 	m_game->Initialize();
+	m_game->OnInitialized();
 	if(IsServerRunning())
 		RegisterServerInfo();
 }

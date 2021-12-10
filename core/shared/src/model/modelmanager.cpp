@@ -13,6 +13,7 @@
 #include <panima/skeleton.hpp>
 #include <panima/bone.hpp>
 #include <fsys/ifile.hpp>
+#include <pragma/debug/intel_vtune.hpp>
 
 extern DLLNETWORK Engine *engine;
 #pragma optimize("",off)
@@ -60,7 +61,20 @@ bool pragma::asset::ModelProcessor::Load()
 	model = mdlHandler.model;
 	return true;
 }
-bool pragma::asset::ModelProcessor::Finalize() {return true;}
+bool pragma::asset::ModelProcessor::Finalize()
+{
+	// TODO: Move buffer allocation to Load() to make better use of multi-threading.
+	// Data copying has to be performed on main thread due to the use of a primary
+	// command buffer.
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().BeginTask("load_model_update_buffers");
+#endif
+	model->Update(ModelUpdateFlags::UpdateBuffers | ModelUpdateFlags::UpdateChildren);
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().EndTask();
+#endif
+	return true;
+}
 
 static const std::vector<std::string> &get_model_extensions()
 {
@@ -126,6 +140,9 @@ std::shared_ptr<Model> pragma::asset::ModelManager::Load(
 )
 {
 	auto &game = *m_nw.GetGameState();
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().BeginTask("sv_load_model_core");
+#endif
 	FWMD wmd {&game};
 	auto mdl = wmd.Load<Model,ModelMesh,ModelSubMesh>(&game,mdlName,std::move(f),ext,
 		[&game](const std::string &mdlName) -> std::shared_ptr<Model> {
@@ -133,6 +150,9 @@ std::shared_ptr<Model> pragma::asset::ModelManager::Load(
 	});
 	if(mdl)
 		mdl->Update();
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().EndTask();
+#endif
 	return mdl;
 }
 std::shared_ptr<Model> pragma::asset::ModelManager::CreateModel(uint32_t numBones,const std::string &mdlName)

@@ -644,6 +644,7 @@ void ClientState::StartNewGame(const std::string &gameMode)
 	m_game->SetGameMode(gameMode);
 	CallCallbacks<void,CGame*>("OnGameStart",GetGameState());
 	m_game->Initialize();
+	m_game->OnInitialized();
 	//if(!IsConnected())
 	//	RequestServerInfo(); // Deprecated; Now handled through NET_cl_map_ready
 	CloseMainMenu();

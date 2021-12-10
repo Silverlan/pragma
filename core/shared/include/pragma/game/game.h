@@ -143,6 +143,7 @@ public:
 	virtual void SetupLua();
 	virtual void SetUp();
 	virtual void Initialize();
+	virtual void OnInitialized();
 
 	const pragma::EntityComponentManager &GetEntityComponentManager() const;
 	pragma::EntityComponentManager &GetEntityComponentManager();

@@ -118,7 +118,7 @@ extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 DLLCLIENT CGame *c_game = NULL;
 DLLCLIENT pragma::physics::IEnvironment *c_physEnv = NULL;
-
+#pragma optimize("",off)
 CGame::MessagePacketTracker::MessagePacketTracker()
 	: lastInMessageId(0),outMessageId(0)
 {
@@ -1183,6 +1183,8 @@ void CGame::ReloadGameWorldShaderPipelines() const
 	static_cast<Callback<void>*>(cb.get())->SetFunction([this,cb]() mutable {
 		cb.Remove();
 
+		if(!umath::is_flag_set(const_cast<CGame*>(this)->m_stateFlags,StateFlags::GameWorldShaderPipelineReloadRequired))
+			return;
 		umath::set_flag(const_cast<CGame*>(this)->m_stateFlags,StateFlags::GameWorldShaderPipelineReloadRequired,false);
 		auto &shaderManager = c_engine->GetShaderManager();
 		for(auto &shader : shaderManager.GetShaders())
@@ -1870,3 +1872,4 @@ Float CGame::GetRestitutionScale() const
 {
 	return cvRestitution->GetFloat();
 }
+#pragma optimize("",on)

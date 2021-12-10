@@ -20,7 +20,7 @@
 #include <udm.hpp>
 
 using namespace pragma;
-
+#pragma optimize("",off)
 ComponentEventId BaseModelComponent::EVENT_ON_MODEL_CHANGED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseModelComponent::EVENT_ON_MODEL_MATERIALS_LOADED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseModelComponent::EVENT_ON_SKIN_CHANGED = pragma::INVALID_COMPONENT_ID;
@@ -106,7 +106,13 @@ float BaseModelComponent::GetMaxDrawDistance() const {return m_maxDrawDistance;}
 void BaseModelComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
-	if(m_kvModel.empty() == false)
+	if(m_modelName)
+	{
+		auto mdlName = std::move(*m_modelName);
+		m_modelName = nullptr;
+		SetModel(mdlName);
+	}
+	else if(m_kvModel.empty() == false)
 		SetModel(m_kvModel);
 	if(m_kvSkin != std::numeric_limits<uint32_t>::max())
 		SetSkin(m_kvSkin);
@@ -279,10 +285,17 @@ void BaseModelComponent::SetModel(const std::string &mdl)
 		SetModel(std::shared_ptr<Model>(nullptr));
 		return;
 	}
+	
 	auto *nw = GetEntity().GetNetworkState();
 	auto *game = nw->GetGameState();
 	auto &mdlManager = nw->GetModelManager();
 	m_modelName = std::make_unique<std::string>(mdlManager.ToCacheIdentifier(mdl));
+	if(!GetEntity().IsSpawned())
+	{
+		mdlManager.PreloadAsset(mdl);
+		return;
+	}
+
 	auto prevMdl = GetModel();
 	auto model = game->LoadModel(*m_modelName);
 	if(model == nullptr)
@@ -470,3 +483,4 @@ void CEOnModelChanged::PushArguments(lua_State *l)
 {
 	Lua::Push<std::shared_ptr<Model>>(l,model);
 }
+#pragma optimize("",on)

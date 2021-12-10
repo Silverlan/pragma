@@ -12,12 +12,15 @@
 #include "pragma/model/c_modelmanager.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-
+#include <pragma/debug/intel_vtune.hpp>
 
 std::shared_ptr<Model> pragma::asset::CModelManager::Load(
 	const std::string &mdlName,std::unique_ptr<ufile::IFile> &&f,const std::string &ext,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel
 )
 {
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().BeginTask("cl_load_model_core");
+#endif
 	auto &game = *m_nw.GetGameState();
 	FWMD wmd {&game};
 	auto mdl = wmd.Load<CModel,CModelMesh,CModelSubMesh>(&game,mdlName,std::move(f),ext,
@@ -26,6 +29,9 @@ std::shared_ptr<Model> pragma::asset::CModelManager::Load(
 	});
 	if(mdl)
 		mdl->Update();
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().EndTask();
+#endif
 	return mdl;
 }
 /*std::shared_ptr<Model> pragma::asset::CModelManager::LoadModel(const std::string &mdlName,bool bReload,bool *outIsNewModel)

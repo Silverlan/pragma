@@ -470,7 +470,7 @@ bool Model::LoadFromAssetData(Game &game,const udm::AssetData &data,std::string 
 				subMesh->LoadFromAssetData(udm::AssetData{udmSubMesh},outErr);
 				if(subMesh == nullptr)
 					return false;
-				subMesh->Update(ModelUpdateFlags::UpdateBuffers);
+				// subMesh->Update(ModelUpdateFlags::UpdateBuffers);
 			}
 		}
 	}

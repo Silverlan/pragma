@@ -108,11 +108,7 @@ void Lua::engine::precache_material(lua_State *l,const std::string &mat) {client
 
 void Lua::engine::precache_model(lua_State *l,const std::string &mdl)
 {
-	auto *nw = c_engine->GetNetworkState(l);
-	FWMD wmd(nw->GetGameState());
-	wmd.Load<CModel,CModelMesh,CModelSubMesh>(nw->GetGameState(),mdl.c_str(),[](const std::string &path) -> std::shared_ptr<Model> {
-		return c_game->LoadModel(path);
-	});
+	c_game->PrecacheModel(mdl);
 }
 
 std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const std::string &name,util::AssetLoadFlags loadFlags)

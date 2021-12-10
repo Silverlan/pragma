@@ -62,7 +62,7 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 				else
 					mdl->Merge(*mdlOther);
 			}
-			mdl->Update(ModelUpdateFlags::UpdateVertexAnimationBuffer);
+			// mdl->Update(ModelUpdateFlags::UpdateVertexAnimationBuffer);
 		}
 		return mdl;
 	}

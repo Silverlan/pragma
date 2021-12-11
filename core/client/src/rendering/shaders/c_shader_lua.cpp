@@ -61,7 +61,10 @@ pragma::LuaShaderBase *pragma::LuaShaderBase::GetShader(prosper::BasePipelineCre
 }
 pragma::LuaShaderBase::LuaShaderBase(prosper::Shader &shader)
 	: LuaObjectBase(),m_shader(shader)
-{}
+{
+	// No multi-threading for Lua callbacks
+	shader.SetMultiThreadedPipelineInitializationEnabled(false);
+}
 void pragma::LuaShaderBase::Initialize(const luabind::object &o)
 {
 	m_baseLuaObj = std::shared_ptr<luabind::object>(new luabind::object(o));

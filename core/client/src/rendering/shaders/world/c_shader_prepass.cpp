@@ -21,6 +21,7 @@
 using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
+extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 decltype(ShaderPrepassBase::VERTEX_BINDING_RENDER_BUFFER_INDEX) ShaderPrepassBase::VERTEX_BINDING_RENDER_BUFFER_INDEX = {prosper::VertexInputRate::Instance};
@@ -308,7 +309,7 @@ void ShaderPrepass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &p
 	if(isReflection)
 		prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::FrontBit);
 
-	if(c_game->GetGameWorldShaderSettings().ssaoEnabled)
+	if(client->GetGameWorldShaderSettings().ssaoEnabled)
 		enableNormalOutput = true;
 	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::FragmentBit,umath::to_integral(SpecializationConstant::EnableAlphaTest),static_cast<uint32_t>(enableAlphaTest));
 	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::FragmentBit,umath::to_integral(SpecializationConstant::EnableNormalOutput),static_cast<uint32_t>(enableNormalOutput));

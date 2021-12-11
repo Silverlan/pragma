@@ -512,6 +512,7 @@ extern std::optional<int> g_launchParamRefreshRate;
 extern std::optional<bool> g_launchParamNoBorder;
 extern std::optional<uint32_t> g_launchParamWidth;
 extern std::optional<uint32_t> g_launchParamHeight;
+void register_game_shaders();
 bool CEngine::Initialize(int argc,char *argv[])
 {
 	Engine::Initialize(argc,argv);
@@ -767,6 +768,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 	InitializeSoundEngine();
 
 	OpenClientState();
+	register_game_shaders(); // Preload game shaders
 
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ConsoleOpen))
 		OpenConsole(); // GUI Console mustn't be opened before client has been created!
@@ -1306,8 +1308,11 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 {
 	auto perfTimers = umath::is_flag_set(m_stateFlags,StateFlags::EnableGpuPerformanceTimers);
 	auto drawGui = !cvHideGui->GetBool();
-
+	
+	// Make sure all shader pipelines have been fully loaded and initialized
 	auto &context = GetRenderContext();
+	context.GetPipelineLoader().Flush();
+
 	if(drawGui)
 	{
 		auto &rp = rt->GetRenderPass();
@@ -1330,9 +1335,6 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 
 		StopProfilingStage(GPUProfilingPhase::GUI);
 	}
-
-	// Make sure all shader pipelines have been fully loaded and initialized
-	context.GetPipelineLoader().Flush();
 
 	auto *cl = static_cast<ClientState*>(GetClientState());
 	auto tStart = util::Clock::now();

@@ -73,41 +73,6 @@ namespace pragma
 	{
 		class RenderQueueBuilder;
 		class RenderQueueWorkerManager;
-		struct DLLCLIENT GameWorldShaderSettings
-		{
-			enum class ShadowQuality : uint32_t
-			{
-				VeryLow = 0,
-				Low,
-				Medium,
-				High,
-				VeryHigh
-			};
-			// TODO: Enable these once C++20 is available
-			//bool operator==(const GameWorldShaderSettings&) const=default;
-			//bool operator!=(const GameWorldShaderSettings&) const=default;
-			bool operator==(const GameWorldShaderSettings &other) const
-			{
-				return other.shadowQuality == shadowQuality &&
-					other.ssaoEnabled == ssaoEnabled &&
-					other.bloomEnabled == bloomEnabled &&
-					other.fxaaEnabled == fxaaEnabled &&
-					other.debugModeEnabled == debugModeEnabled &&
-					other.iblEnabled == iblEnabled &&
-					other.dynamicLightingEnabled == dynamicLightingEnabled &&
-					other.dynamicShadowsEnabled == dynamicShadowsEnabled;
-				static_assert(sizeof(GameWorldShaderSettings) == 12);
-			}
-			bool operator!=(const GameWorldShaderSettings &other) const {return !operator==(other);}
-			ShadowQuality shadowQuality = ShadowQuality::Medium;
-			bool ssaoEnabled = true;
-			bool bloomEnabled = true;
-			bool fxaaEnabled = true;
-			bool debugModeEnabled = false;
-			bool iblEnabled = true;
-			bool dynamicLightingEnabled = true;
-			bool dynamicShadowsEnabled = true;
-		};
 	};
 	class LuaShaderManager;
 	class LuaParticleModifierManager;
@@ -466,12 +431,9 @@ public:
 	pragma::rendering::RenderQueueWorkerManager &GetRenderQueueWorkerManager();
 	prosper::IDescriptorSet &GetGlobalRenderSettingsDescriptorSet();
 	GlobalRenderSettingsBufferData &GetGlobalRenderSettingsBufferData();
-	pragma::rendering::GameWorldShaderSettings &GetGameWorldShaderSettings() {return m_worldShaderSettings;}
-	const pragma::rendering::GameWorldShaderSettings &GetGameWorldShaderSettings() const {return const_cast<CGame*>(this)->GetGameWorldShaderSettings();}
 	void ReloadGameWorldShaderPipelines() const;
 	void ReloadPrepassShaderPipelines() const;
-
-	void UpdateGameWorldShaderSettings();
+	void OnGameWorldShaderSettingsChanged(const pragma::rendering::GameWorldShaderSettings &newSettings,const pragma::rendering::GameWorldShaderSettings &oldSettings);
 
 	// For internal use only!
 	const std::vector<util::DrawSceneInfo> &GetQueuedRenderScenes() const;
@@ -560,7 +522,6 @@ private:
 	Vector4 m_colScale = {};
 	Material *m_matOverride = nullptr;
 	bool m_bMainRenderPass = true;
-	pragma::rendering::GameWorldShaderSettings m_worldShaderSettings {};
 	std::weak_ptr<prosper::IPrimaryCommandBuffer> m_currentDrawCmd = {};
 	std::array<util::WeakHandle<prosper::Shader>,umath::to_integral(GameShader::Count)> m_gameShaders = {};
 	StateFlags m_stateFlags = StateFlags::None;

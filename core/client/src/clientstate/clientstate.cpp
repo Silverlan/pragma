@@ -108,6 +108,25 @@ ClientState::~ClientState()
 	FileManager::RemoveCustomMountDirectory("downloads");
 }
 
+void ClientState::UpdateGameWorldShaderSettings()
+{
+	auto oldSettings = m_worldShaderSettings;
+	m_worldShaderSettings.shadowQuality = static_cast<pragma::rendering::GameWorldShaderSettings::ShadowQuality>(GetConVarInt("render_shadow_quality"));
+	m_worldShaderSettings.ssaoEnabled = GetConVarBool("cl_render_ssao");
+	m_worldShaderSettings.bloomEnabled = GetConVarBool("render_bloom_enabled");
+	m_worldShaderSettings.debugModeEnabled = GetConVarBool("render_debug_mode") || GetConVarBool("render_unlit");
+	m_worldShaderSettings.fxaaEnabled = static_cast<pragma::rendering::AntiAliasing>(GetConVarInt("cl_render_anti_aliasing")) == pragma::rendering::AntiAliasing::FXAA;
+	m_worldShaderSettings.iblEnabled = GetConVarBool("render_ibl_enabled");
+	m_worldShaderSettings.dynamicLightingEnabled = GetConVarBool("render_dynamic_lighting_enabled");
+	m_worldShaderSettings.dynamicShadowsEnabled = GetConVarBool("render_dynamic_shadows_enabled");
+	if(m_worldShaderSettings == oldSettings)
+		return;
+
+	auto *game = GetGameState();
+	if(game)
+		static_cast<CGame*>(game)->OnGameWorldShaderSettingsChanged(m_worldShaderSettings,oldSettings);
+}
+
 void ClientState::InitializeGameClient(bool singlePlayerLocalGame)
 {
 	DestroyClient();
@@ -171,6 +190,8 @@ void ClientState::Initialize()
 	InitializeGUILua();
 	auto &gui = WGUI::GetInstance();
 	m_hMainMenu = gui.Create<WIMainMenu>()->GetHandle();
+
+	UpdateGameWorldShaderSettings();
 
 #if ALSYS_STEAM_AUDIO_SUPPORT_ENABLED == 1
 	auto *soundSys = c_engine->GetSoundSystem();

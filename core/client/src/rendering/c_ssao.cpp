@@ -22,6 +22,7 @@
 #include <prosper_descriptor_set_group.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
+extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 bool SSAOInfo::Initialize(
@@ -151,8 +152,8 @@ void Console::commands::debug_ssao(NetworkState *state,pragma::BasePlayerCompone
 
 static void cl_render_ssao_callback(NetworkState*,ConVar*,bool,bool val)
 {
-	if(c_game == nullptr)
+	if(client == nullptr)
 		return;
-	c_game->UpdateGameWorldShaderSettings();
+	client->UpdateGameWorldShaderSettings();
 }
 REGISTER_CONVAR_CALLBACK_CL(cl_render_ssao,cl_render_ssao_callback);

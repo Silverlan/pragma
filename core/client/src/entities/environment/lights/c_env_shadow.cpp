@@ -67,9 +67,9 @@ static void reload_all_shadow_maps()
 static void cmd_render_shadow_quality(NetworkState*,ConVar*,int,int quality)
 {
 	reload_all_shadow_maps();
-	if(c_game == nullptr)
+	if(client == nullptr)
 		return;
-	c_game->UpdateGameWorldShaderSettings();
+	client->UpdateGameWorldShaderSettings();
 }
 REGISTER_CONVAR_CALLBACK_CL(render_shadow_quality,cmd_render_shadow_quality);
 

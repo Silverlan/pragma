@@ -107,6 +107,7 @@
 #include <pragma/level/level_info.hpp>
 #include <pragma/asset_types/world.hpp>
 #include <sharedutils/util_library.hpp>
+#include <shader/prosper_pipeline_loader.hpp>
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
 #include <udm.hpp>
@@ -177,7 +178,6 @@ CGame::CGame(NetworkState *state)
 	m_luaShaderManager = std::make_shared<pragma::LuaShaderManager>();
 	m_luaParticleModifierManager = std::make_shared<pragma::LuaParticleModifierManager>();
 
-	UpdateGameWorldShaderSettings();
 	umath::set_flag(m_stateFlags,StateFlags::PrepassShaderPipelineReloadRequired,false);
 	umath::set_flag(m_stateFlags,StateFlags::GameWorldShaderPipelineReloadRequired,false);
 
@@ -380,38 +380,27 @@ void CGame::GetRegisteredEntities(std::vector<std::string> &classes,std::vector<
 	GetLuaRegisteredEntities(luaClasses);
 }
 
-void CGame::UpdateGameWorldShaderSettings()
+void CGame::OnGameWorldShaderSettingsChanged(const pragma::rendering::GameWorldShaderSettings &newSettings,const pragma::rendering::GameWorldShaderSettings &oldSettings)
 {
-	auto oldSettings = m_worldShaderSettings;
-	m_worldShaderSettings.shadowQuality = static_cast<pragma::rendering::GameWorldShaderSettings::ShadowQuality>(GetConVarInt("render_shadow_quality"));
-	m_worldShaderSettings.ssaoEnabled = GetConVarBool("cl_render_ssao");
-	m_worldShaderSettings.bloomEnabled = GetConVarBool("render_bloom_enabled");
-	m_worldShaderSettings.debugModeEnabled = GetConVarBool("render_debug_mode") || GetConVarBool("render_unlit");
-	m_worldShaderSettings.fxaaEnabled = static_cast<pragma::rendering::AntiAliasing>(GetConVarInt("cl_render_anti_aliasing")) == pragma::rendering::AntiAliasing::FXAA;
-	m_worldShaderSettings.iblEnabled = GetConVarBool("render_ibl_enabled");
-	m_worldShaderSettings.dynamicLightingEnabled = GetConVarBool("render_dynamic_lighting_enabled");
-	m_worldShaderSettings.dynamicShadowsEnabled = GetConVarBool("render_dynamic_shadows_enabled");
-	if(m_worldShaderSettings == oldSettings)
-		return;
-	if(m_worldShaderSettings.fxaaEnabled != oldSettings.fxaaEnabled || m_worldShaderSettings.bloomEnabled != oldSettings.bloomEnabled)
+	if(newSettings.fxaaEnabled != oldSettings.fxaaEnabled || newSettings.bloomEnabled != oldSettings.bloomEnabled)
 	{
 		auto shader = c_engine->GetShaderManager().GetShader("pp_hdr");
 		if(shader.valid())
 			shader->ReloadPipelines();
 	}
-	if(m_worldShaderSettings.ssaoEnabled != oldSettings.ssaoEnabled)
+	if(newSettings.ssaoEnabled != oldSettings.ssaoEnabled)
 		ReloadPrepassShaderPipelines();
 	if(
-		m_worldShaderSettings.shadowQuality != oldSettings.shadowQuality ||
-		m_worldShaderSettings.ssaoEnabled != oldSettings.ssaoEnabled ||
-		m_worldShaderSettings.bloomEnabled != oldSettings.bloomEnabled ||
-		m_worldShaderSettings.debugModeEnabled != oldSettings.debugModeEnabled ||
-		m_worldShaderSettings.iblEnabled != oldSettings.iblEnabled ||
-		m_worldShaderSettings.dynamicLightingEnabled != oldSettings.dynamicLightingEnabled ||
-		m_worldShaderSettings.dynamicShadowsEnabled != oldSettings.dynamicShadowsEnabled
+		newSettings.shadowQuality != oldSettings.shadowQuality ||
+		newSettings.ssaoEnabled != oldSettings.ssaoEnabled ||
+		newSettings.bloomEnabled != oldSettings.bloomEnabled ||
+		newSettings.debugModeEnabled != oldSettings.debugModeEnabled ||
+		newSettings.iblEnabled != oldSettings.iblEnabled ||
+		newSettings.dynamicLightingEnabled != oldSettings.dynamicLightingEnabled ||
+		newSettings.dynamicShadowsEnabled != oldSettings.dynamicShadowsEnabled
 	)
 		ReloadGameWorldShaderPipelines();
-	if(m_worldShaderSettings.dynamicLightingEnabled != oldSettings.dynamicLightingEnabled)
+	if(newSettings.dynamicLightingEnabled != oldSettings.dynamicLightingEnabled)
 	{
 		auto shader = c_engine->GetShaderManager().GetShader("forwardp_light_culling");
 		if(shader.valid())
@@ -421,9 +410,9 @@ void CGame::UpdateGameWorldShaderSettings()
 
 static void cmd_render_ibl_enabled(NetworkState*,ConVar*,bool,bool enabled)
 {
-	if(c_game == nullptr)
+	if(client == nullptr)
 		return;
-	c_game->UpdateGameWorldShaderSettings();
+	client->UpdateGameWorldShaderSettings();
 }
 REGISTER_CONVAR_CALLBACK_CL(render_ibl_enabled,cmd_render_ibl_enabled);
 REGISTER_CONVAR_CALLBACK_CL(render_dynamic_lighting_enabled,cmd_render_ibl_enabled);
@@ -676,8 +665,6 @@ void CGame::Initialize()
 	pragma::CParticleSystemComponent::InitializeBuffers();
 
 	InitShaders();
-
-	m_globalRenderSettingsBufferData = std::make_unique<GlobalRenderSettingsBufferData>();
 	
 	pragma::CParticleSystemComponent::Precache("impact");
 	pragma::CParticleSystemComponent::Precache("muzzleflash");
@@ -691,9 +678,9 @@ void CGame::Initialize()
 
 static void render_debug_mode(NetworkState*,ConVar*,int32_t,int32_t debugMode)
 {
-	if(c_game == nullptr)
+	if(client == nullptr)
 		return;
-	c_game->UpdateGameWorldShaderSettings();
+	client->UpdateGameWorldShaderSettings();
 	EntityIterator entIt {*c_game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CSceneComponent>>();
 	for(auto *ent : entIt)
@@ -753,7 +740,20 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 	Game::InitializeGame();
 	SetupLua();
 
+	m_hCbDrawFrame = c_engine->AddCallback("DrawFrame",FunctionCallback<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>::Create([this](std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>> drawCmd) {
+		auto baseDrawCmd = std::static_pointer_cast<prosper::ICommandBuffer>(drawCmd.get());
+		CallLuaCallbacks<void,std::shared_ptr<prosper::ICommandBuffer>>("DrawFrame",baseDrawCmd);
+	}));
+
+	auto &materialManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager());
+	if(m_surfaceMaterialManager)
+		m_surfaceMaterialManager->Load("scripts/physics/materials.udm");
+	
 	auto resolution = c_engine->GetRenderResolution();
+	c_engine->GetRenderContext().GetPipelineLoader().Flush();
+	c_engine->GetRenderContext().SavePipelineCache();
+
+	m_globalRenderSettingsBufferData = std::make_unique<GlobalRenderSettingsBufferData>();
 	auto *scene = pragma::CSceneComponent::Create(pragma::CSceneComponent::CreateInfo{});
 	if(scene)
 	{
@@ -783,17 +783,6 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 	}
 
 	Resize(false);
-
-	m_hCbDrawFrame = c_engine->AddCallback("DrawFrame",FunctionCallback<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>::Create([this](std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>> drawCmd) {
-		auto baseDrawCmd = std::static_pointer_cast<prosper::ICommandBuffer>(drawCmd.get());
-		CallLuaCallbacks<void,std::shared_ptr<prosper::ICommandBuffer>>("DrawFrame",baseDrawCmd);
-	}));
-
-	auto &materialManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager());
-	if(m_surfaceMaterialManager)
-		m_surfaceMaterialManager->Load("scripts/physics/materials.udm");
-
-	c_engine->GetRenderContext().SavePipelineCache();
 
 	auto *cam = CreateCamera(
 		m_scene->GetWidth(),m_scene->GetHeight(),

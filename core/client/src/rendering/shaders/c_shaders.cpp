@@ -78,22 +78,12 @@ static void CVAR_CALLBACK_cl_render_shadow_resolution(NetworkState*,ConVar*,int,
 }
 REGISTER_CONVAR_CALLBACK_CL(cl_render_shadow_resolution,CVAR_CALLBACK_cl_render_shadow_resolution);
 
-void CGame::InitShaders()
+void register_game_shaders()
 {
-	Con::cout<<"Loading shaders..."<<Con::endl;
-	
-#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	debug::get_domain().BeginTask("load_shaders");
-	util::ScopeGuard sgVtune {[]() {debug::get_domain().EndTask();}};
-#endif
-
 	auto &shaderManager = c_engine->GetShaderManager();
-	pragma::ShaderScene::SetRenderPassSampleCount(static_cast<prosper::SampleCountFlags>(GetMSAASampleCount()));
-
 	shaderManager.RegisterShader("clear_color",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderClearColor(context,identifier);});
-
 	shaderManager.RegisterShader("prepass",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPrepass(context,identifier);});
-
+	
 	// shaderManager.RegisterShader("forwardp_light_indexing",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderForwardPLightIndexing(context,identifier);});
 	shaderManager.RegisterShader("forwardp_light_culling",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderForwardPLightCulling(context,identifier);});
 
@@ -118,9 +108,7 @@ void CGame::InitShaders()
 	shaderManager.RegisterShader("debug",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderDebug(context,identifier);});
 	shaderManager.RegisterShader("debug_texture",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderDebugTexture(context,identifier);});
 	shaderManager.RegisterShader("debug_vertex",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderDebugVertexColor(context,identifier);});
-	m_gameShaders.at(umath::to_integral(GameShader::Debug)) = shaderManager.GetShader("debug");
-	m_gameShaders.at(umath::to_integral(GameShader::DebugTexture)) = shaderManager.GetShader("debug_texture");
-	m_gameShaders.at(umath::to_integral(GameShader::DebugVertex)) = shaderManager.GetShader("debug_vertex");
+
 	shaderManager.RegisterShader("debug_depth_to_rgb",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderDepthToRGB(context,identifier);});
 	shaderManager.RegisterShader("debug_cube_depth_to_rgb",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderCubeDepthToRGB(context,identifier);});
 	shaderManager.RegisterShader("debug_csm_depth_to_rgb",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderCSMDepthToRGB(context,identifier);});
@@ -133,12 +121,7 @@ void CGame::InitShaders()
 	shaderManager.RegisterShader("shadow",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderShadow(context,identifier);});
 	shaderManager.RegisterShader("shadowcsm",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderShadowCSM(context,identifier);});
 	shaderManager.RegisterShader("shadow_spot",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderShadowSpot(context,identifier);});
-	m_gameShaders.at(umath::to_integral(GameShader::Shadow)) = shaderManager.GetShader("shadow");
-	m_gameShaders.at(umath::to_integral(GameShader::ShadowCSM)) = shaderManager.GetShader("shadowcsm");
-	m_gameShaders.at(umath::to_integral(GameShader::ShadowSpot)) = shaderManager.GetShader("shadow_spot");
-	// TODO: Transparent shaders
-	//shaderManager.RegisterShader("hdr",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderHDR(context,identifier);});
-	
+
 	shaderManager.RegisterShader("equirectangular_to_cubemap",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderEquirectangularToCubemap(context,identifier);});
 	shaderManager.RegisterShader("cubemap_to_equirectangular",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderCubemapToEquirectangular(context,identifier);});
 	shaderManager.RegisterShader("convolute_cubemap_lighting",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderConvoluteCubemapLighting(context,identifier);});
@@ -161,11 +144,36 @@ void CGame::InitShaders()
 	shaderManager.RegisterShader("glow",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderGlow(context,identifier);});
 	shaderManager.RegisterShader("pp_hdr",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPHDR(context,identifier);});
 	shaderManager.RegisterShader("pp_fog",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPFog(context,identifier);});
+
+	shaderManager.RegisterShader("pp_water",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPWater(context,identifier);});
+	shaderManager.RegisterShader("pp_fxaa",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPFXAA(context,identifier);});
+}
+
+void CGame::InitShaders()
+{
+	Con::cout<<"Loading shaders..."<<Con::endl;
+	
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().BeginTask("load_shaders");
+	util::ScopeGuard sgVtune {[]() {debug::get_domain().EndTask();}};
+#endif
+
+	auto &shaderManager = c_engine->GetShaderManager();
+	pragma::ShaderScene::SetRenderPassSampleCount(static_cast<prosper::SampleCountFlags>(GetMSAASampleCount()));
+
+	m_gameShaders.at(umath::to_integral(GameShader::Debug)) = shaderManager.GetShader("debug");
+	m_gameShaders.at(umath::to_integral(GameShader::DebugTexture)) = shaderManager.GetShader("debug_texture");
+	m_gameShaders.at(umath::to_integral(GameShader::DebugVertex)) = shaderManager.GetShader("debug_vertex");
+
+	m_gameShaders.at(umath::to_integral(GameShader::Shadow)) = shaderManager.GetShader("shadow");
+	m_gameShaders.at(umath::to_integral(GameShader::ShadowCSM)) = shaderManager.GetShader("shadowcsm");
+	m_gameShaders.at(umath::to_integral(GameShader::ShadowSpot)) = shaderManager.GetShader("shadow_spot");
+	// TODO: Transparent shaders
+	//shaderManager.RegisterShader("hdr",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderHDR(context,identifier);});
+	
 	shaderManager.GetShader("copy_image");
 	m_gameShaders.at(umath::to_integral(GameShader::PPTonemapping)) = shaderManager.GetShader("pp_hdr");
 	m_gameShaders.at(umath::to_integral(GameShader::PPFog)) = shaderManager.GetShader("pp_fog");
-	shaderManager.RegisterShader("pp_water",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPWater(context,identifier);});
-	shaderManager.RegisterShader("pp_fxaa",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPFXAA(context,identifier);});
 	m_gameShaders.at(umath::to_integral(GameShader::PPFXAA)) = shaderManager.GetShader("pp_fxaa");
 
 	// Make sure these are always loaded

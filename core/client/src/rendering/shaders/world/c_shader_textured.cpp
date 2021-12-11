@@ -30,6 +30,7 @@
 #include <cmaterial.h>
 
 extern DLLCLIENT CGame *c_game;
+extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
@@ -312,7 +313,7 @@ void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelin
 	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableDepthBias);
 
 	// Properties
-	auto &shaderSettings = c_game->GetGameWorldShaderSettings();
+	auto &shaderSettings = client->GetGameWorldShaderSettings();
 	auto fSetPropertyValue = [this,&pipelineInfo](GameShaderSpecializationPropertyIndex prop,auto value) {
 		ShaderGameWorld::AddSpecializationConstant(
 			pipelineInfo,prosper::ShaderStageFlags::FragmentBit,umath::to_integral(prop),sizeof(value),&value

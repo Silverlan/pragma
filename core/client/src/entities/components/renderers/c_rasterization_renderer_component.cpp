@@ -337,7 +337,7 @@ void CRasterizationRendererComponent::OnEntityComponentRemoved(BaseEntityCompone
 		m_rendererComponent = nullptr;
 }
 
-bool CRasterizationRendererComponent::IsSSAOEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::SSAOEnabled) && c_game->GetGameWorldShaderSettings().ssaoEnabled;}
+bool CRasterizationRendererComponent::IsSSAOEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::SSAOEnabled) && client->GetGameWorldShaderSettings().ssaoEnabled;}
 void CRasterizationRendererComponent::SetSSAOEnabled(bool b)
 {
 	umath::set_flag(m_stateFlags,StateFlags::SSAOEnabled,b);
@@ -585,7 +585,7 @@ static void cl_render_ssao_callback(NetworkState*,ConVar*,bool,bool enabled)
 {
 	if(c_game == nullptr)
 		return;
-	auto &gameWorldShaderSettings = c_game->GetGameWorldShaderSettings();
+	auto &gameWorldShaderSettings = client->GetGameWorldShaderSettings();
 	if(gameWorldShaderSettings.ssaoEnabled == enabled)
 		return;
 	gameWorldShaderSettings.ssaoEnabled = enabled;

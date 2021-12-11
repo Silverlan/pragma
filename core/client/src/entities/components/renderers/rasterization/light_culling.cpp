@@ -22,10 +22,11 @@
 using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
+extern DLLCLIENT ClientState *client;
 
 void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawSceneInfo &drawSceneInfo)
 {
-	auto &shaderSettings = c_game->GetGameWorldShaderSettings();
+	auto &shaderSettings = client->GetGameWorldShaderSettings();
 	if(drawSceneInfo.scene.expired() || shaderSettings.dynamicLightingEnabled == false)
 		return;
 	auto &scene = *drawSceneInfo.scene;
@@ -138,7 +139,7 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawS
 }
 void pragma::CRasterizationRendererComponent::RenderShadows(const util::DrawSceneInfo &drawSceneInfo)
 {
-	auto &shaderSettings = c_game->GetGameWorldShaderSettings();
+	auto &shaderSettings = client->GetGameWorldShaderSettings();
 	if(drawSceneInfo.scene.expired() || shaderSettings.dynamicLightingEnabled == false)
 		return;
 	auto &drawCmd = drawSceneInfo.commandBuffer;

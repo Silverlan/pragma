@@ -24,6 +24,7 @@
 using namespace pragma::rendering;
 
 extern DLLCLIENT CEngine *c_engine;
+extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 static auto cvBloomEnabled = GetClientConVar("render_bloom_enabled");
@@ -143,8 +144,8 @@ void pragma::CRasterizationRendererComponent::RenderGlowMeshes(std::shared_ptr<p
 
 static void cmd_render_bloom_enabled(NetworkState*,ConVar*,bool,bool enabled)
 {
-	if(c_game == nullptr)
+	if(client == nullptr)
 		return;
-	c_game->UpdateGameWorldShaderSettings();
+	client->UpdateGameWorldShaderSettings();
 }
 REGISTER_CONVAR_CALLBACK_CL(render_bloom_enabled,cmd_render_bloom_enabled);

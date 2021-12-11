@@ -12,6 +12,7 @@
 #include "pragma/clientdefinitions.h"
 #include <pragma/networkstate/networkstate.h>
 #include <pragma/networking/portinfo.h>
+#include "pragma/rendering/game_world_shader_settings.hpp"
 #include "pragma/game/c_game.h"
 #include "pragma/audio/c_alsound.h"
 
@@ -95,6 +96,7 @@ private:
 
 	WIHandle m_hMainMenu;
 	WIHandle m_hFps;
+	pragma::rendering::GameWorldShaderSettings m_worldShaderSettings {};
 protected:
 	std::shared_ptr<Lua::Interface> m_luaGUI = nullptr;
 	void InitializeGUILua();
@@ -133,6 +135,10 @@ public:
 	virtual ModelMesh *CreateMesh() const override;
 	virtual void Initialize() override;
 	virtual Lua::ErrorColorMode GetLuaErrorColorMode() override;
+
+	pragma::rendering::GameWorldShaderSettings &GetGameWorldShaderSettings() {return m_worldShaderSettings;}
+	const pragma::rendering::GameWorldShaderSettings &GetGameWorldShaderSettings() const {return const_cast<ClientState*>(this)->GetGameWorldShaderSettings();}
+	void UpdateGameWorldShaderSettings();
 
 	WIMainMenu *GetMainMenu();
 

@@ -69,7 +69,8 @@ bool pragma::asset::ModelProcessor::Finalize()
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("load_model_update_buffers");
 #endif
-	model->Update(ModelUpdateFlags::UpdateBuffers | ModelUpdateFlags::UpdateChildren);
+	// Note: Collision shapes have to be updated on the main thread, because of the creation of a luabind object
+	model->Update(ModelUpdateFlags::UpdateBuffers | ModelUpdateFlags::UpdateChildren | ModelUpdateFlags::UpdateCollisionShapes);
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().EndTask();
 #endif
@@ -149,7 +150,7 @@ std::shared_ptr<Model> pragma::asset::ModelManager::Load(
 			return game.LoadModel(mdlName);
 	});
 	if(mdl)
-		mdl->Update();
+		mdl->Update(ModelUpdateFlags::AllData & ~ModelUpdateFlags::UpdateCollisionShapes);
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().EndTask();
 #endif

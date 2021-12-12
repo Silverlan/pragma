@@ -1308,17 +1308,13 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 {
 	auto perfTimers = umath::is_flag_set(m_stateFlags,StateFlags::EnableGpuPerformanceTimers);
 	auto drawGui = !cvHideGui->GetBool();
-	
-	// Make sure all shader pipelines have been fully loaded and initialized
-	auto &context = GetRenderContext();
-	context.GetPipelineLoader().Flush();
-
 	if(drawGui)
 	{
 		auto &rp = rt->GetRenderPass();
 		auto &fb = rt->GetFramebuffer();
 		StartProfilingStage(GPUProfilingPhase::GUI);
 
+		auto &context = GetRenderContext();
 		for(auto &wpWindow : context.GetWindows())
 		{
 			auto window = wpWindow.lock();

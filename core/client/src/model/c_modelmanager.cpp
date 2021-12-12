@@ -28,7 +28,7 @@ std::shared_ptr<Model> pragma::asset::CModelManager::Load(
 			return game.LoadModel(mdlName);
 	});
 	if(mdl)
-		mdl->Update();
+		mdl->Update(ModelUpdateFlags::AllData & ~ModelUpdateFlags::UpdateCollisionShapes);
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().EndTask();
 #endif

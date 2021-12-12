@@ -212,7 +212,11 @@ void CModelComponent::UpdateRenderBufferList()
 		std::shared_ptr<prosper::IRenderBuffer> renderBuffer = nullptr;
 		auto *shader = mat ? dynamic_cast<pragma::ShaderGameWorldLightingPass*>(mat->GetPrimaryShader()) : nullptr;
 		if(shader && shader->IsValid())
+		{
 			renderBuffer = mesh.GetRenderBuffer(*shader);
+			if(!shader->InitializeMaterialDescriptorSet(*mat))
+				mat = nullptr;
+		}
 		m_lodMeshRenderBufferData.push_back({});
 		auto &renderBufferData = m_lodMeshRenderBufferData.back();
 		renderBufferData.renderBuffer = renderBuffer;

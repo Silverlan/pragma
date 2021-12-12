@@ -45,6 +45,7 @@
 #include <pragma/engine_version.h>
 #include <luainterface.hpp>
 #include <alsoundsystem.hpp>
+#include <shader/prosper_pipeline_loader.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
 #include <sharedutils/util_library.hpp>
 #include <prosper_util.hpp>
@@ -481,6 +482,9 @@ void ClientState::Render(util::DrawSceneInfo &drawSceneInfo,std::shared_ptr<pros
 	>("PreRender",std::ref(drawSceneInfo),std::ref(rt));
 	if(m_game != nullptr)
 	{
+		auto &context = c_engine->GetRenderContext();
+		context.GetPipelineLoader().Flush(); // Make sure all shaders have been loaded and initialized
+
 		m_game->CallCallbacks<
 			void,std::reference_wrapper<const util::DrawSceneInfo>,
 			std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>

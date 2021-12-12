@@ -14,7 +14,7 @@
 #include "pragma/debug/c_debugoverlay.h"
 #include <pragma/math/intersection.h>
 #include <sstream>
-
+#pragma optimize("",off)
 template<class T>
 	std::shared_ptr<typename OcclusionOctree<T>::Node> OcclusionOctree<T>::Node::Create(OcclusionOctree<T> *tree,Node *parent)
 {
@@ -43,34 +43,40 @@ template<class T>
 }
 
 template<class T>
-	bool OcclusionOctree<T>::Node::InsertObject(const T &o,const Vector3 &min,const Vector3 &max,std::vector<std::weak_ptr<BaseOcclusionOctree::Node>> &nodesInserted,bool bForceInsert)
+	OcclusionOctreeInsertResult OcclusionOctree<T>::Node::InsertObject(const T &o,const Vector3 &min,const Vector3 &max,std::vector<std::weak_ptr<BaseOcclusionOctree::Node>> &nodesInserted,bool bForceInsert)
 {
 	if(bForceInsert == false && IsContained(min,max) == false)
-		return false;
+		return OcclusionOctreeInsertResult::ObjectOutOfBounds;
 	if(HasObject(o) == true)
-		return true;
+		return OcclusionOctreeInsertResult::ObjectAlreadyIncluded;
 	InitializeChildren();
 	auto bInChildren = false;
 	if(m_children != nullptr)
 	{
 		for(auto &c : *m_children)
 		{
-			if(static_cast<Node*>(c.get())->InsertObject(o,min,max,nodesInserted) == true)
+			if(static_cast<Node*>(c.get())->InsertObject(o,min,max,nodesInserted) != OcclusionOctreeInsertResult::ObjectOutOfBounds)
 			{
 				bInChildren = true;
 				if(m_tree->IsSingleReferenceMode() == true)
-					return true;
+				{
+					UpdateState(OcclusionOctreeUpdateMode::DontUpdateParents);
+					return OcclusionOctreeInsertResult::ObjectInsertedInChildNode;
+				}
 			}
 		}
 	}
 	if(bInChildren == true)
-		return true;
+	{
+		UpdateState(OcclusionOctreeUpdateMode::DontUpdateParents);
+		return OcclusionOctreeInsertResult::ObjectInsertedInChildNode;
+	}
 	m_objects.push_back(o);
 	nodesInserted.push_back(shared_from_this());
 	//if(IsEmpty() == true)
 	//	UpdateState();
-	UpdateState(true);
-	return true;
+	UpdateState(OcclusionOctreeUpdateMode::DontUpdateParents);
+	return OcclusionOctreeInsertResult::ObjectInserted;
 }
 
 template<class T>
@@ -79,7 +85,7 @@ template<class T>
 	auto *parent = GetParent();
 	while(parent != nullptr)
 	{
-		if(static_cast<Node*>(parent)->InsertObject(o,min,max,nodesInserted) == true)
+		if(static_cast<Node*>(parent)->InsertObject(o,min,max,nodesInserted) != OcclusionOctreeInsertResult::ObjectOutOfBounds)
 			return true;
 		parent = parent->GetParent();
 	}
@@ -191,13 +197,14 @@ template<class T>
 		return;
 	}
 	auto &root = optNode ? *optNode : GetRootNode();
-	if(root.InsertObject(o,min,max,nodes,optNode ? true : false) == false)
+	std::weak_ptr<BaseOcclusionOctree::Node> wp = root.shared_from_this();
+	if(root.InsertObject(o,min,max,nodes,optNode ? true : false) == OcclusionOctreeInsertResult::ObjectOutOfBounds)
 	{
 		m_objectNodes.erase(it);
 #if ENABLE_OCCLUSION_DEBUG_MODE == 1
 		m_dbgObjects.erase(m_dbgObjects.end() -1);
 #endif
-		if(optNode == nullptr)
+		if(optNode == nullptr && wp.expired() == false)
 			root.InsertObjectReverse(o,min,max,nodes);
 	}
 }
@@ -278,10 +285,13 @@ template<class T>
 		if(it == m_objectNodes.end())
 			it = m_objectNodes.insert(typename decltype(m_objectNodes)::value_type(o,std::vector<std::weak_ptr<BaseOcclusionOctree::Node>>{})).first;
 		// Attempt to re-insert object into node again
-		if(n->InsertObject(o,min,max,it->second) == false)
+		std::weak_ptr<BaseOcclusionOctree::Node> wp = n->shared_from_this();
+		if(n->InsertObject(o,min,max,it->second) == OcclusionOctreeInsertResult::ObjectOutOfBounds)
 		{
-			n->InsertObjectReverse(o,min,max,it->second);
-			n->UpdateState(true);
+			if(!wp.expired())
+				n->InsertObjectReverse(o,min,max,it->second);
+			if(!wp.expired())
+				n->UpdateState(OcclusionOctreeUpdateMode::ForceUpdateParents);
 		}
 	}
 }
@@ -468,5 +478,7 @@ template<class T>
 	return ValidationError::Success;
 }
 #endif
+
+#pragma optimize("",on)
 
 #endif

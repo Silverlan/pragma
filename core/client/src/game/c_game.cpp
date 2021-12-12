@@ -673,7 +673,8 @@ void CGame::Initialize()
 	// Initialize Scene (Has to be initialized AFTER shaders!)
 
 	InitializeWorldEnvironment();
-	m_matLoad = client->LoadMaterial("loading",CallbackHandle{},false,true);
+	auto *mat = client->LoadMaterial("loading",CallbackHandle{},false,true);
+	m_matLoad = mat ? mat->GetHandle() : nullptr;
 }
 
 static void render_debug_mode(NetworkState*,ConVar*,int32_t,int32_t debugMode)

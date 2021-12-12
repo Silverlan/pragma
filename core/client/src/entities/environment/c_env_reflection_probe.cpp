@@ -55,7 +55,7 @@ extern DLLCLIENT CGame *c_game;
 using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_reflection_probe,CEnvReflectionProbe);
-
+#pragma optimize("",off)
 rendering::IBLData::IBLData(const std::shared_ptr<prosper::Texture> &irradianceMap,const std::shared_ptr<prosper::Texture> &prefilterMap,const std::shared_ptr<prosper::Texture> &brdfMap)
 	: irradianceMap{irradianceMap},prefilterMap{prefilterMap},brdfMap{brdfMap}
 {}
@@ -446,7 +446,7 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	std::string err;
 	auto result = mat->Save(apath.GetString(),err);
 	if(result)
-		client->LoadMaterial(rpath.GetString(),nullptr,true);
+		client->LoadMaterial(rpath.GetString(),nullptr,true,true);
 	return result;
 }
 
@@ -776,7 +776,7 @@ Material *CReflectionProbeComponent::LoadMaterial(bool &outIsDefault)
 		outIsDefault = true;
 		matPath = "maps/default_ibl." +std::string{pragma::asset::FORMAT_MATERIAL_ASCII};
 	}
-	auto *mat = client->LoadMaterial(matPath.GetString(),nullptr,true,false);
+	auto *mat = client->LoadMaterial(matPath.GetString(),nullptr,false,true);
 	return (mat && mat->IsError() == false) ? mat : nullptr;
 }
 bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
@@ -1027,3 +1027,4 @@ void Console::commands::debug_pbr_ibl(NetworkState *state,pragma::BasePlayerComp
 		pSlider->SetAnchor(0.f,0.f,1.f,0.f);
 	}
 }
+#pragma optimize("",on)

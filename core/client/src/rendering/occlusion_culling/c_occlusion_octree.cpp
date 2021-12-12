@@ -11,7 +11,7 @@
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/debug/c_debugoverlay.h"
 #include <pragma/math/intersection.h>
-
+#pragma optimize("",off)
 BaseOcclusionOctree::Node::Node(BaseOcclusionOctree *tree,Node *parent)
 	: m_tree(tree),m_parent((parent != nullptr) ? parent->shared_from_this() : std::weak_ptr<BaseOcclusionOctree::Node>{})
 {}
@@ -46,7 +46,7 @@ bool BaseOcclusionOctree::Node::IsContained(const Vector3 &min,const Vector3 &ma
 	return (umath::intersection::aabb_aabb(min,max,m_worldBounds.first,m_worldBounds.second) != umath::intersection::Intersect::Outside) ? true : false;
 }
 
-bool BaseOcclusionOctree::Node::UpdateState(bool bForceUpdateParents)
+bool BaseOcclusionOctree::Node::UpdateState(OcclusionOctreeUpdateMode updateMode)
 {
 	uint32_t branchObjectCount = 0;
 	auto childrenValid = true;
@@ -62,14 +62,18 @@ bool BaseOcclusionOctree::Node::UpdateState(bool bForceUpdateParents)
 	}
 	auto oldObjectCount = m_branchObjectCount;
 	m_branchObjectCount = branchObjectCount;
-	if((bForceUpdateParents == true || m_branchObjectCount != oldObjectCount) && m_parent.expired() == false)
+	if((updateMode == OcclusionOctreeUpdateMode::ForceUpdateParents || m_branchObjectCount != oldObjectCount) && m_parent.expired() == false)
 	{
-		if(m_parent.lock()->UpdateState() == false)
+		if(updateMode == OcclusionOctreeUpdateMode::DontUpdateParents)
+			return childrenValid;
+		if(m_parent.lock()->UpdateState() == false) // TODO: Should this always update parents recursively? (i.e. ForceUpdateParents)
 			return false; // This node is no longer valid, we have to bail out!
 	}
+	std::weak_ptr<Node> wp = shared_from_this();
 	if(m_parent.expired() == true)
 		m_tree->ShrinkRoot();
-	UpdateDebugObject();
+	if(wp.expired() == false)
+		UpdateDebugObject();
 	return childrenValid;
 }
 
@@ -351,3 +355,4 @@ const typename BaseOcclusionOctree::Node &BaseOcclusionOctree::GetRootNode() con
 float BaseOcclusionOctree::GetMinNodeSize() const {return m_minNodeSize;}
 float BaseOcclusionOctree::GetMaxNodeSize() const {return m_maxNodeSize;}
 void BaseOcclusionOctree::DebugPrint() const {m_root->DebugPrint();}
+#pragma optimize("",on)

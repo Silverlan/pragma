@@ -1904,12 +1904,12 @@ void Lua::doc::register_library(Lua::Interface &lua)
 			Lua::SetTableValue(l,t);
 		}
 	}));
-	docLib[cdefFunction];
 
 	auto cdefExCode = luabind::class_<pragma::doc::Function::ExampleCode>("ExampleCode");
 	cdefExCode.def_readwrite("description",&pragma::doc::Function::ExampleCode::description);
 	cdefExCode.def_readwrite("code",&pragma::doc::Function::ExampleCode::code);
-	cdefFunction.scope[cdefFunction];
+	cdefFunction.scope[cdefExCode];
+	docLib[cdefFunction];
 
 	auto cdefMember = luabind::class_<pragma::doc::Member>("Member");
 	cdefMember.add_static_constant("MODE_NONE",umath::to_integral(pragma::doc::Member::Mode::None));

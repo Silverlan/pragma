@@ -519,7 +519,6 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		return t;
 	}));
 	classDefVhcCreateInfo.scope[classDefSuspensionInfo];
-	physMod[classDefVhcCreateInfo];
 
 	auto classDefAntiRollBar = luabind::class_<pragma::physics::VehicleCreateInfo::AntiRollBar>("AntiRollBar");
 	classDefAntiRollBar.def(luabind::constructor<>());
@@ -527,7 +526,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefAntiRollBar.def_readwrite("wheel1",reinterpret_cast<std::underlying_type_t<decltype(pragma::physics::VehicleCreateInfo::AntiRollBar::wheel1)> pragma::physics::VehicleCreateInfo::AntiRollBar::*>(&pragma::physics::VehicleCreateInfo::AntiRollBar::wheel1));
 	classDefAntiRollBar.def_readwrite("stiffness",&pragma::physics::VehicleCreateInfo::AntiRollBar::stiffness);
 	classDefVhcCreateInfo.scope[classDefAntiRollBar];
-	physMod[classDefAntiRollBar];
+	physMod[classDefVhcCreateInfo];
 
 	auto classDefWheelCreateInfo = luabind::class_<pragma::physics::WheelCreateInfo>("WheelCreateInfo");
 	classDefWheelCreateInfo.scope[luabind::def("CreateStandardFrontWheel",&pragma::physics::WheelCreateInfo::CreateStandardFrontWheel)];

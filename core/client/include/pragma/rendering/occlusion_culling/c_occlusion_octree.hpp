@@ -23,6 +23,12 @@ namespace DebugRenderer {class BaseObject;};
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
+enum class OcclusionOctreeUpdateMode : uint8_t
+{
+	Default = 0,
+	ForceUpdateParents,
+	DontUpdateParents
+};
 class BaseOcclusionOctree
 {
 public:
@@ -42,7 +48,7 @@ public:
 		const Vector3 &GetDimensions() const;
 		Vector3 GetChildDimensions() const;
 		bool IsContained(const Vector3 &min,const Vector3 &max) const;
-		bool UpdateState(bool bForceUpdateParents=false);
+		bool UpdateState(OcclusionOctreeUpdateMode updateMode=OcclusionOctreeUpdateMode::Default);
 		void InitializeChildren(bool bPopulateChildren=false);
 		const std::array<std::shared_ptr<Node>,8> *GetChildren() const;
 		bool HasObjects() const;
@@ -117,6 +123,14 @@ private:
 	mutable bool m_bDebugModeEnabled = false;
 };
 
+
+enum class OcclusionOctreeInsertResult : uint8_t
+{
+	ObjectOutOfBounds = 0,
+	ObjectAlreadyIncluded,
+	ObjectInsertedInChildNode,
+	ObjectInserted
+};
 template<class T>
 	class DLLCLIENT OcclusionOctree
 		: public BaseOcclusionOctree
@@ -129,7 +143,7 @@ public:
 		virtual uint32_t GetObjectCount() const override;
 		bool HasObject(const T &o) const;
 		void RemoveObject(const T &o,bool bSkipCheck=false);
-		bool InsertObject(const T &o,const Vector3 &min,const Vector3 &max,std::vector<std::weak_ptr<BaseOcclusionOctree::Node>> &nodesInserted,bool bForceInsert=false);
+		OcclusionOctreeInsertResult InsertObject(const T &o,const Vector3 &min,const Vector3 &max,std::vector<std::weak_ptr<BaseOcclusionOctree::Node>> &nodesInserted,bool bForceInsert=false);
 		bool InsertObjectReverse(const T &o,const Vector3 &min,const Vector3 &max,std::vector<std::weak_ptr<BaseOcclusionOctree::Node>> &nodesInserted);
 		const std::vector<T> &GetObjects() const;
 		OcclusionOctree<T> *GetTree();

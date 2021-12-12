@@ -41,7 +41,7 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 SceneRenderDesc::SceneRenderDesc(pragma::CSceneComponent &scene)
 	: m_scene{scene}
 {
@@ -641,8 +641,13 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 				umath::Plane{uvec::FORWARD,d}
 			};
 		}
-
-		auto frustumPlanes = frustumCullingEnabled ? (g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->frustumPlanes : cam.GetFrustumPlanes()) : frustumPlanesCube;
+		std::vector<umath::Plane> frustumPlanes;
+		if(!frustumCullingEnabled)
+			frustumPlanes = frustumPlanesCube;
+		else if(g_debugFreezeCamData.has_value())
+			frustumPlanes = g_debugFreezeCamData->frustumPlanes;
+		else
+			cam.GetFrustumPlanes(frustumPlanes);
 		if(drawSceneInfo.clipPlane.has_value())
 			frustumPlanes.push_back(*drawSceneInfo.clipPlane);
 		auto fShouldCull = [&frustumPlanes](const Vector3 &min,const Vector3 &max) -> bool {return SceneRenderDesc::ShouldCull(min,max,frustumPlanes);};
@@ -809,3 +814,4 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 		--g_activeRenderQueueThreads;
 	});
 }
+#pragma optimize("",on)

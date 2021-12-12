@@ -73,6 +73,7 @@ namespace pragma
 	{
 		class RenderQueueBuilder;
 		class RenderQueueWorkerManager;
+		struct GameWorldShaderSettings;
 	};
 	class LuaShaderManager;
 	class LuaParticleModifierManager;
@@ -505,7 +506,7 @@ private:
 	void InitShaders();
 	void LoadLuaShaders();
 	void LoadLuaShader(std::string file);
-	MaterialHandle m_matLoad = {};
+	msys::MaterialHandle m_matLoad = {};
 
 	// FOV used for view-models
 	util::PFloatProperty m_viewFov = nullptr;

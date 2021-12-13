@@ -906,7 +906,7 @@ bool Game::PrecacheModel(const std::string &mdl)
 		CallLuaCallbacks<void,std::shared_ptr<Model>>("OnModelLoaded",mdl);
 	};
 	auto r = GetNetworkState()->GetModelManager().PreloadAsset(mdl,std::move(loadInfo));
-	return r.success;
+	return r;
 }
 std::shared_ptr<Model> Game::LoadModel(const std::string &mdl,bool bReload)
 {

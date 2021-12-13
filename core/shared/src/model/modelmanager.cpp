@@ -7,6 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/model/modelmanager.h"
+#include "pragma/util/util_game.hpp"
 #include "pragma/file_formats/wmd_load.h"
 #include "pragma/asset/util_asset.hpp"
 #include <sharedutils/util_path.hpp>
@@ -17,19 +18,51 @@
 
 extern DLLNETWORK Engine *engine;
 #pragma optimize("",off)
-bool pragma::asset::ModelFormatHandler::LoadData(ModelProcessor &processor,ModelLoadInfo &info)
-{
-	auto &nw = static_cast<ModelManager&>(GetAssetManager()).GetNetworkState();
-	auto &game = *nw.GetGameState();
-	model = static_cast<ModelManager&>(GetAssetManager()).Load(processor.identifier,std::move(m_file),processor.formatExtension,
-		[&game](const std::string &mdlName) -> std::shared_ptr<Model> {
-			return game.LoadModel(mdlName);
-	});
-	return model != nullptr;
-}
-pragma::asset::ModelFormatHandler::ModelFormatHandler(util::IAssetManager &assetManager)
+pragma::asset::IModelFormatHandler::IModelFormatHandler(util::IAssetManager &assetManager)
 	: util::IAssetFormatHandler{assetManager}
 {}
+bool pragma::asset::IModelFormatHandler::LoadData(ModelProcessor &processor,ModelLoadInfo &info)
+{
+	if(model)
+	{
+		model->SetName(processor.identifier);
+		model->PrecacheMaterials();
+		auto &mdlManager = static_cast<ModelManager&>(GetAssetManager());
+		for(auto &inc : model->GetMetaInfo().includes)
+			mdlManager.PreloadAsset(inc);
+	}
+	return model != nullptr;
+}
+
+///////////
+
+pragma::asset::PmdlFormatHandler::PmdlFormatHandler(util::IAssetManager &assetManager)
+	: IModelFormatHandler{assetManager}
+{}
+bool pragma::asset::PmdlFormatHandler::LoadData(ModelProcessor &processor,ModelLoadInfo &info)
+{
+	auto &mdlManager = static_cast<ModelManager&>(GetAssetManager());
+	auto &nw = mdlManager.GetNetworkState();
+	auto &game = *nw.GetGameState();
+
+	auto udm = util::load_udm_asset(std::move(m_file));
+	if(udm == nullptr)
+		return false;
+	std::string err;
+	auto mdl = mdlManager.CreateModel(0u,std::string{""});
+	if(!mdl)
+	{
+		m_error = err;
+		return false;
+	}
+	if(!Model::Load(*mdl,nw,udm->GetAssetData(),err))
+	{
+		m_error = err;
+		return false;
+	}
+	model = mdl;
+	return IModelFormatHandler::LoadData(processor,info);
+}
 		
 ///////////
 
@@ -54,7 +87,7 @@ pragma::asset::ModelProcessor::ModelProcessor(util::AssetFormatLoader &loader,st
 {}
 bool pragma::asset::ModelProcessor::Load()
 {
-	auto &mdlHandler = static_cast<ModelFormatHandler&>(*handler);
+	auto &mdlHandler = static_cast<IModelFormatHandler&>(*handler);
 	auto r = mdlHandler.LoadData(*this,static_cast<ModelLoadInfo&>(*loadInfo));
 	if(!r)
 		return false;
@@ -69,6 +102,19 @@ bool pragma::asset::ModelProcessor::Finalize()
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("load_model_update_buffers");
 #endif
+
+	auto &assetManager = static_cast<ModelManager&>(handler->GetAssetManager());
+	for(auto &inc : model->GetMetaInfo().includes)
+	{
+		auto asset = assetManager.LoadAsset(inc);
+		if(!asset)
+		{
+			Con::cwar<<"WARNING: Model '"<<model->GetName()<<"' has include reference to model '"<<inc<<"', but that model could not be loaded! Ignoring..."<<Con::endl;
+			continue;
+		}
+		model->Merge(*asset);
+	}
+
 	// Note: Collision shapes have to be updated on the main thread, because of the creation of a luabind object
 	model->Update(ModelUpdateFlags::UpdateBuffers | ModelUpdateFlags::UpdateChildren | ModelUpdateFlags::UpdateCollisionShapes);
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
@@ -131,35 +177,20 @@ pragma::asset::ModelManager::ModelManager(NetworkState &nw)
 	for(auto &ext : get_model_extensions())
 		RegisterFileExtension(ext);
 
-	RegisterFormatHandler("pmdl_b",[](util::IAssetManager &assetManager) -> std::unique_ptr<util::IAssetFormatHandler> {
-		return std::make_unique<ModelFormatHandler>(assetManager);
-	});
-}
-std::shared_ptr<Model> pragma::asset::ModelManager::Load(
-	const std::string &mdlName,std::unique_ptr<ufile::IFile> &&f,const std::string &ext,
-	const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel
-)
-{
-	auto &game = *m_nw.GetGameState();
-#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("sv_load_model_core");
-#endif
-	FWMD wmd {&game};
-	auto mdl = wmd.Load<Model,ModelMesh,ModelSubMesh>(&game,mdlName,std::move(f),ext,
-		[&game](const std::string &mdlName) -> std::shared_ptr<Model> {
-			return game.LoadModel(mdlName);
-	});
-	if(mdl)
-		mdl->Update(ModelUpdateFlags::AllData & ~ModelUpdateFlags::UpdateCollisionShapes);
-#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().EndTask();
-#endif
-	return mdl;
+	RegisterFormatHandler<PmdlFormatHandler>("pmdl_b");
+	RegisterFormatHandler<PmdlFormatHandler>("pmdl");
+	RegisterFormatHandler<WmdFormatHandler>("wmd"); // Legacy format
+	
+	// Import formats
+	RegisterImportHandler<SourceMdlFormatHandler>("mdl");
+	// TODO: vmdl_c, nif
 }
 std::shared_ptr<Model> pragma::asset::ModelManager::CreateModel(uint32_t numBones,const std::string &mdlName)
 {
 	return Model::Create<Model>(&m_nw,numBones,mdlName);
 }
+std::shared_ptr<ModelMesh> pragma::asset::ModelManager::CreateMesh() {return m_nw.GetGameState()->CreateModelMesh();}
+std::shared_ptr<ModelSubMesh> pragma::asset::ModelManager::CreateSubMesh() {return m_nw.GetGameState()->CreateModelSubMesh();}
 std::shared_ptr<Model> pragma::asset::ModelManager::CreateModel(const std::string &name,bool bAddReference,bool addToCache)
 {
 	uint32_t boneCount = (bAddReference == true) ? 1 : 0;

@@ -56,14 +56,54 @@ namespace pragma::asset
 	{
 		ModelLoadInfo(util::AssetLoadFlags flags=util::AssetLoadFlags::None);
 	};
-	class DLLNETWORK ModelFormatHandler
+	class DLLNETWORK IModelFormatHandler
 		: public util::IAssetFormatHandler
 	{
 	public:
-		ModelFormatHandler(util::IAssetManager &assetManager);
-		bool LoadData(ModelProcessor &processor,ModelLoadInfo &info);
+		IModelFormatHandler(util::IAssetManager &assetManager);
+		virtual bool LoadData(ModelProcessor &processor,ModelLoadInfo &info);
 		std::shared_ptr<Model> model = nullptr;
 	};
+	class DLLNETWORK PmdlFormatHandler
+		: public IModelFormatHandler
+	{
+	public:
+		PmdlFormatHandler(util::IAssetManager &assetManager);
+		virtual bool LoadData(ModelProcessor &processor,ModelLoadInfo &info) override;
+	};
+	class DLLNETWORK WmdFormatHandler
+		: public IModelFormatHandler
+	{
+	public:
+		WmdFormatHandler(util::IAssetManager &assetManager);
+		virtual bool LoadData(ModelProcessor &processor,ModelLoadInfo &info) override;
+	private:
+		void LoadBones(unsigned short version,unsigned int numBones,Model &mdl);
+		void LoadAttachments(Model &mdl);
+		void LoadObjectAttachments(Model &mdl);
+		void LoadHitboxes(uint16_t version,Model &mdl);
+		void LoadMeshes(unsigned short version,Model &mdl,const std::function<std::shared_ptr<ModelMesh>()> &meshFactory,const std::function<std::shared_ptr<ModelSubMesh>()> &subMeshFactory);
+		void LoadLODData(unsigned short version,Model &mdl);
+		void LoadBodygroups(Model &mdl);
+		void LoadJoints(Model &mdl);
+		void LoadSoftBodyData(Model &mdl,CollisionMesh &colMesh);
+		void LoadCollisionMeshes(Game *game,unsigned short version,Model &mdl,SurfaceMaterial *smDefault=nullptr);
+		void LoadBlendControllers(Model &mdl);
+		void LoadIKControllers(uint16_t version,Model &mdl);
+		void LoadAnimations(unsigned short version,Model &mdl);
+		void LoadChildBones(const panima::Skeleton &skeleton,std::shared_ptr<panima::Bone> bone);
+		bool m_bStatic;
+		Game *m_gameState = nullptr;
+	};
+
+	class DLLNETWORK SourceMdlFormatHandler
+		: public util::IImportAssetFormatHandler
+	{
+	public:
+		SourceMdlFormatHandler(util::IAssetManager &assetManager);
+		virtual bool Import(const std::string &outputPath,std::string &outFilePath) override;
+	};
+
 	class DLLNETWORK ModelManager
 		: public util::TFileAssetManager<Model,ModelLoadInfo>
 	{
@@ -78,11 +118,12 @@ namespace pragma::asset
 		//virtual std::shared_ptr<Model> LoadModel(const std::string &mdlName,bool bReload=false,bool *outIsNewModel=nullptr);
 		NetworkState &GetNetworkState() {return m_nw;}
 
-		virtual std::shared_ptr<Model> Load(const std::string &mdlName,std::unique_ptr<ufile::IFile> &&f,const std::string &ext,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel);
+		virtual std::shared_ptr<Model> CreateModel(uint32_t numBones,const std::string &mdlName);
+		virtual std::shared_ptr<ModelMesh> CreateMesh();
+		virtual std::shared_ptr<ModelSubMesh> CreateSubMesh();
 	protected:
 		virtual void InitializeProcessor(util::IAssetProcessor &processor) override;
 		virtual util::AssetObject InitializeAsset(const util::Asset &asset,const util::AssetLoadJob &job) override;
-		virtual std::shared_ptr<Model> CreateModel(uint32_t numBones,const std::string &mdlName);
 		//bool PrecacheModel(const std::string &mdlName) const;
 		//std::shared_ptr<Model> LoadModel(const std::string &cacheName,const std::shared_ptr<ufile::IFile> &file,const std::string &ext);
 

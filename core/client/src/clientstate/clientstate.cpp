@@ -735,7 +735,7 @@ Material *ClientState::LoadMaterial(const std::string &path,const std::function<
 	Material *mat = nullptr;
 	if(!bLoadInstantly)
 	{
-		success = matManager.PreloadAsset(path).success;
+		success = matManager.PreloadAsset(path);
 		if(success)
 			return nullptr;
 	}

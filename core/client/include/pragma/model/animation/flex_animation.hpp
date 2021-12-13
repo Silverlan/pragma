@@ -28,13 +28,14 @@ private:
 };
 
 namespace udm {struct AssetData;};
+namespace ufile {struct IFile;};
 class DLLNETWORK FlexAnimation
 	: public std::enable_shared_from_this<FlexAnimation>
 {
 public:
 	static constexpr uint32_t FORMAT_VERSION = 1u;
 	static constexpr auto PFLEXANIM_IDENTIFIER = "PFLEXANI";
-	static std::shared_ptr<FlexAnimation> Load(std::shared_ptr<VFilePtrInternal> &f);
+	static std::shared_ptr<FlexAnimation> Load(ufile::IFile &f);
 	static std::shared_ptr<FlexAnimation> Load(const udm::AssetData &data,std::string &outErr);
 	FlexAnimation()=default;
 	FlexAnimation(const FlexAnimation &other);

@@ -19,27 +19,27 @@ bool FlexAnimationFrame::operator==(const FlexAnimationFrame &other) const
 	static_assert(sizeof(FlexAnimationFrame) == 40,"Update this function when making changes to this class!");
 	return m_flexControllerValues == other.m_flexControllerValues;
 }
-std::shared_ptr<FlexAnimation> FlexAnimation::Load(std::shared_ptr<VFilePtrInternal> &f)
+std::shared_ptr<FlexAnimation> FlexAnimation::Load(ufile::IFile &f)
 {
-	auto version = f->Read<uint32_t>();
+	auto version = f.Read<uint32_t>();
 	if(version < 1 || version > FORMAT_VERSION)
 		return nullptr;
 	auto flexAnim = std::make_shared<FlexAnimation>();
-	flexAnim->SetFps(f->Read<float>());
+	flexAnim->SetFps(f.Read<float>());
 
-	auto numFlexControllerIds = f->Read<uint32_t>();
+	auto numFlexControllerIds = f.Read<uint32_t>();
 	auto &flexControllerIds = flexAnim->GetFlexControllerIds();
 	flexControllerIds.resize(numFlexControllerIds);
-	f->Read(flexControllerIds.data(),flexControllerIds.size() *sizeof(flexControllerIds.front()));
+	f.Read(flexControllerIds.data(),flexControllerIds.size() *sizeof(flexControllerIds.front()));
 
-	auto numFrames = f->Read<uint32_t>();
+	auto numFrames = f.Read<uint32_t>();
 	auto &frames = flexAnim->GetFrames();
 	frames.reserve(numFrames);
 	for(auto j=decltype(numFrames){0u};j<numFrames;++j)
 	{
 		auto &frame = flexAnim->AddFrame();
 		auto &values = frame.GetValues();
-		f->Read(values.data(),values.size() *sizeof(values.front()));
+		f.Read(values.data(),values.size() *sizeof(values.front()));
 	}
 	return flexAnim;
 }

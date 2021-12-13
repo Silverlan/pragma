@@ -602,7 +602,8 @@ bool Engine::Initialize(int argc,char *argv[])
 	RegisterConsoleCommands();
 
 	// Initialize Server Instance
-	auto matManager = std::make_shared<msys::MaterialManager>();
+	auto matManager = msys::MaterialManager::Create();
+	matManager->SetImportDirectory("addons/converted/materials");
 	auto matErr = matManager->LoadAsset("error");
 	m_svInstance = std::unique_ptr<StateInstance>(new StateInstance{matManager,matErr.get()});
 	//

@@ -32,6 +32,7 @@
 #include <mathutil/vertex.hpp>
 #include <panima/skeleton.hpp>
 #include <panima/bone.hpp>
+#include <fsys/ifile.hpp>
 #include <udm.hpp>
 
 extern DLLNETWORK Engine *engine;
@@ -989,7 +990,8 @@ void Lua::Model::register_class(
 		auto fptr = std::dynamic_pointer_cast<VFilePtrInternal>(f.GetHandle());
 		if(fptr == nullptr)
 			return {};
-		return luabind::object{l,FlexAnimation::Load(fptr)};
+		fsys::File fp {fptr};
+		return luabind::object{l,FlexAnimation::Load(fp)};
 	}))];
 	classDefFlexAnim.scope[luabind::def("Load",static_cast<void(*)(lua_State*,udm::AssetData&)>([](lua_State *l,udm::AssetData &assetData) {
 		std::string err;

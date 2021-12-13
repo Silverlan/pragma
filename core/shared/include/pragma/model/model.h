@@ -247,6 +247,7 @@ public:
 public:
 	static constexpr auto PMDL_IDENTIFIER = "PMDL";
 	static constexpr udm::Version PMDL_VERSION = 1;
+	static bool Load(Model &mdl,NetworkState &nw,const udm::AssetData &data,std::string &outErr);
 	template<class TModel>
 		static std::shared_ptr<Model> Create(NetworkState *nw,uint32_t numBones,const std::string &name="");
 	template<class TModel>
@@ -578,7 +579,6 @@ protected:
 	std::vector<Flex>::iterator FindFlex(const std::string &name);
 private:
 	void Construct();
-	static bool Load(Model &mdl,NetworkState &nw,const udm::AssetData &data,std::string &outErr);
 	NetworkState *m_networkState = nullptr;
 	mutable MetaInfo m_metaInfo = {};
 	StateFlags m_stateFlags = StateFlags::None;

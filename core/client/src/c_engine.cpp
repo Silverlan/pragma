@@ -634,7 +634,8 @@ bool CEngine::Initialize(int argc,char *argv[])
 	shaderManager.GetShader("blur_vertical");
 
 	// Initialize Client Instance
-	auto matManager = std::make_shared<msys::CMaterialManager>(this->GetRenderContext());
+	auto matManager = msys::CMaterialManager::Create(GetRenderContext());
+	matManager->SetImportDirectory("addons/converted/materials");
 	auto fileHandler = std::make_unique<util::AssetFileHandler>();
 	fileHandler->open = [this](const std::string &fpath,util::AssetFormatType formatType) -> std::unique_ptr<ufile::IFile> {
 		if(FileManager::Exists(fpath) == false)

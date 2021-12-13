@@ -240,7 +240,7 @@ Material *NetworkState::LoadMaterial(const std::string &path,bool precache,bool 
 	Material *mat = nullptr;
 	if(precache)
 	{
-		success = matManager.PreloadAsset(path).success;
+		success = matManager.PreloadAsset(path);
 		if(success)
 			return nullptr;
 	}

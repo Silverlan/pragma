@@ -17,6 +17,7 @@
 #include "pragma/lua/libraries/c_lengine.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
+#include "pragma/asset/util_asset.hpp"
 #include <wgui/fontmanager.h>
 #include "pragma/lua/classes/c_ldef_fontinfo.h"
 #include <texturemanager/texturemanager.h>

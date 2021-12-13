@@ -1081,7 +1081,7 @@ bool Model::SaveLegacy(Game *game,const std::string &name,const std::string &roo
 	assert(texturePaths.size() <= std::numeric_limits<uint8_t>::max());
 
 	f->Write("WMD",3);
-	f->Write<uint16_t>(WMD_VERSION);
+	f->Write<uint16_t>(38 /* version */);
 	f->Write<Flags>(flags);
 	f->Write<Vector3>(mdl.GetEyeOffset());
 
@@ -1387,9 +1387,9 @@ bool Model::SaveLegacy(Game *game,const std::string &name,const std::string &roo
 		for(auto i=decltype(collisionMeshes.size()){0};i<collisionMeshes.size();++i)
 		{
 			auto &mesh = collisionMeshes[i];
-			auto flags = CollisionMeshLoadFlags::None;
+			uint64_t flags = 0;
 			if(mesh->IsConvex())
-				flags |= CollisionMeshLoadFlags::Convex;
+				flags |= 2;
 
 			// Collect soft body information
 			auto bSoftBody = mesh->IsSoftBody();
@@ -1431,9 +1431,9 @@ bool Model::SaveLegacy(Game *game,const std::string &name,const std::string &roo
 			}
 			//
 			if(bSoftBody)
-				flags |= CollisionMeshLoadFlags::SoftBody;
+				flags |= 1;
 
-			f->Write<CollisionMeshLoadFlags>(flags);
+			f->Write<uint64_t>(flags);
 			f->Write<int32_t>(mesh->GetBoneParent());
 			// Version 0x0002
 			f->Write<Vector3>(mesh->GetOrigin());

@@ -10,13 +10,13 @@
 #include "pragma/file_formats/wdf.h"
 #include "pragma/model/animation/animation.hpp"
 
+namespace ufile {struct IFile;};
 class DLLNETWORK FWAD
-	: FWDF
 {
 private:
 	
 public:
-	std::shared_ptr<pragma::animation::Animation> ReadData(unsigned short version,VFilePtr f);
+	std::shared_ptr<pragma::animation::Animation> ReadData(unsigned short version,ufile::IFile &f);
 	std::shared_ptr<pragma::animation::Animation> Load(unsigned short version,const char *animation);
 };
 

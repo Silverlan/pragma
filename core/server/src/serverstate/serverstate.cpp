@@ -53,7 +53,9 @@ ServerState::ServerState()
 	m_alsoundID = 1;
 	server = this;
 	m_soundScriptManager = std::make_unique<SoundScriptManager>();
+
 	m_modelManager = std::make_unique<pragma::asset::SModelManager>(*this);
+	engine->InitializeAssetManager(*m_modelManager);
 
 	FileManager::AddCustomMountDirectory("cache",static_cast<fsys::SearchFlags>(FSYS_SEARCH_CACHE));
 

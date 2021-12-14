@@ -104,6 +104,30 @@ namespace pragma::asset
 		virtual bool Import(const std::string &outputPath,std::string &outFilePath) override;
 	};
 
+	class DLLNETWORK Source2VmdlFormatHandler
+		: public util::IImportAssetFormatHandler
+	{
+	public:
+		Source2VmdlFormatHandler(util::IAssetManager &assetManager);
+		virtual bool Import(const std::string &outputPath,std::string &outFilePath) override;
+	};
+
+	class DLLNETWORK NifFormatHandler
+		: public util::IImportAssetFormatHandler
+	{
+	public:
+		NifFormatHandler(util::IAssetManager &assetManager);
+		virtual bool Import(const std::string &outputPath,std::string &outFilePath) override;
+	};
+
+	class DLLNETWORK AssetManagerFormatHandler
+		: public util::IImportAssetFormatHandler
+	{
+	public:
+		AssetManagerFormatHandler(util::IAssetManager &assetManager);
+		virtual bool Import(const std::string &outputPath,std::string &outFilePath) override;
+	};
+
 	class DLLNETWORK ModelManager
 		: public util::TFileAssetManager<Model,ModelLoadInfo>
 	{

@@ -52,6 +52,7 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_window.hpp>
 
+
 static std::unordered_map<std::string,std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &ClientState::GetConVarPtrs() {return *conVarPtrs;}
 ConVarHandle ClientState::GetConVarHandle(std::string scvar)
@@ -75,7 +76,10 @@ ClientState::ClientState()
 {
 	client = this;
 	m_soundScriptManager = std::make_unique<CSoundScriptManager>();
+
 	m_modelManager = std::make_unique<pragma::asset::CModelManager>(*this);
+	c_engine->InitializeAssetManager(*m_modelManager);
+
 	auto &gui = WGUI::GetInstance();
 	gui.SetCreateCallback(WGUILuaInterface::InitializeGUIElement);
 	//CVarHandler::Initialize();

@@ -173,17 +173,25 @@ pragma::asset::ModelManager::ModelManager(NetworkState &nw)
 	SetRootDirectory("models");
 	m_loader = std::make_unique<ModelLoader>(*this);
 
-	// TODO: New extensions might be added after the model manager has been created
-	for(auto &ext : get_model_extensions())
-		RegisterFileExtension(ext);
-
 	RegisterFormatHandler<PmdlFormatHandler>("pmdl_b");
 	RegisterFormatHandler<PmdlFormatHandler>("pmdl");
 	RegisterFormatHandler<WmdFormatHandler>("wmd"); // Legacy format
 	
 	// Import formats
 	RegisterImportHandler<SourceMdlFormatHandler>("mdl");
-	// TODO: vmdl_c, nif
+	RegisterImportHandler<Source2VmdlFormatHandler>("vmdl_c");
+	RegisterImportHandler<NifFormatHandler>("nif");
+
+	auto &assetManager = pragma::get_engine()->GetAssetManager();
+	auto numImporters = assetManager.GetImporterCount(pragma::asset::Type::Model);
+	for(auto i=decltype(numImporters){0u};i<numImporters;++i)
+	{
+		auto *importerInfo = assetManager.GetImporterInfo(pragma::asset::Type::Model,i);
+		if(!importerInfo)
+			continue;
+		for(auto &ext : importerInfo->fileExtensions)
+			RegisterImportHandler<AssetManagerFormatHandler>(ext);
+	}
 }
 std::shared_ptr<Model> pragma::asset::ModelManager::CreateModel(uint32_t numBones,const std::string &mdlName)
 {

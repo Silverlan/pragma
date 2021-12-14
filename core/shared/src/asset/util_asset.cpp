@@ -12,6 +12,7 @@
 #include "pragma/game/game_resources.hpp"
 #include <material_manager2.hpp>
 #include <sharedutils/util_path.hpp>
+#include <fsys/ifile.hpp>
 #include <udm.hpp>
 
 extern DLLNETWORK Engine *engine;
@@ -20,12 +21,12 @@ bool pragma::asset::exists(const std::string &name,Type type)
 {
 	return find_file(name,type).has_value();
 }
-std::optional<std::string> pragma::asset::determine_format_from_data(VFilePtr f,Type type)
+std::optional<std::string> pragma::asset::determine_format_from_data(ufile::IFile &f,Type type)
 {
-	auto offset = f->Tell();
+	auto offset = f.Tell();
 	std::array<char,4> header {};
-	f->Read(header.data(),header.size());
-	f->Seek(offset);
+	f.Read(header.data(),header.size());
+	f.Seek(offset);
 
 	if(ustring::compare(header.data(),udm::HEADER_IDENTIFIER))
 		return get_binary_udm_extension(type);
@@ -290,7 +291,7 @@ void pragma::asset::AssetManager::RegisterExporter(const ExporterInfo &importerI
 	exporter.handler = exportHandler;
 	m_exporters[umath::to_integral(type)].push_back(exporter);
 }
-std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::ImportAsset(Game &game,Type type,VFilePtr f,const std::optional<std::string> &filePath,std::string *optOutErr) const
+std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::ImportAsset(Game &game,Type type,ufile::IFile *f,const std::optional<std::string> &filePath,std::string *optOutErr) const
 {
 	auto fpath = filePath;
 	if(f == nullptr && filePath.has_value())
@@ -308,7 +309,8 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 				fpath = filePathWithExt;
 
 				std::string err;
-				auto aw = importer.handler(game,f,fpath,err);
+				fsys::File fp {f};
+				auto aw = importer.handler(game,fp,fpath,err);
 				if(aw && aw->GetType() == type)
 				{
 					if(filePath.has_value())
@@ -345,18 +347,21 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 		return nullptr;
 	}
 
-	for(auto &importer : m_importers[umath::to_integral(type)])
+	if(f)
 	{
-		std::string err;
-		auto aw = importer.handler(game,f,fpath,err);
-		if(aw && aw->GetType() == type)
-			return aw;
-		if(optOutErr)
-			*optOutErr = err;
+		for(auto &importer : m_importers[umath::to_integral(type)])
+		{
+			std::string err;
+			auto aw = importer.handler(game,*f,fpath,err);
+			if(aw && aw->GetType() == type)
+				return aw;
+			if(optOutErr)
+				*optOutErr = err;
+		}
 	}
 	return nullptr;
 }
-bool pragma::asset::AssetManager::ExportAsset(Game &game,Type type,VFilePtrReal f,const IAssetWrapper &assetWrapper,std::string *optOutErr) const
+bool pragma::asset::AssetManager::ExportAsset(Game &game,Type type,ufile::IFile &f,const IAssetWrapper &assetWrapper,std::string *optOutErr) const
 {
 	for(auto &exporter : m_exporters[umath::to_integral(type)])
 	{

@@ -13,10 +13,7 @@
 #include <memory>
 
 class Game;
-class VFilePtrInternal;
-class VFilePtrInternalReal;
-using VFilePtr = std::shared_ptr<VFilePtrInternal>;
-using VFilePtrReal = std::shared_ptr<VFilePtrInternalReal>;
+namespace ufile {struct IFile;};
 namespace pragma::asset
 {
 	static constexpr auto FORMAT_MAP_BINARY = "pmap_b";
@@ -62,7 +59,7 @@ namespace pragma::asset
 	DLLNETWORK std::optional<std::string> get_legacy_extension(Type type);
 	DLLNETWORK std::optional<std::string> get_binary_udm_extension(Type type);
 	DLLNETWORK std::optional<std::string> get_ascii_udm_extension(Type type);
-	DLLNETWORK std::optional<std::string> determine_format_from_data(VFilePtr f,Type type);
+	DLLNETWORK std::optional<std::string> determine_format_from_data(ufile::IFile &f,Type type);
 	DLLNETWORK std::optional<std::string> determine_format_from_filename(const std::string_view &fileName,Type type);
 	DLLNETWORK std::optional<Type> determine_type_from_extension(const std::string_view &ext);
 	DLLNETWORK bool matches_format(const std::string_view &format0,const std::string_view &format1);
@@ -124,12 +121,12 @@ namespace pragma::asset
 			std::vector<std::string> fileExtensions;
 		};
 		using ExporterInfo = ImporterInfo;
-		using ImportHandler = std::function<std::unique_ptr<IAssetWrapper>(Game&,VFilePtr,const std::optional<std::string>&,std::string&)>;
-		using ExportHandler = std::function<bool(Game&,VFilePtrReal,const IAssetWrapper&,std::string&)>;
+		using ImportHandler = std::function<std::unique_ptr<IAssetWrapper>(Game&,ufile::IFile&,const std::optional<std::string>&,std::string&)>;
+		using ExportHandler = std::function<bool(Game&,ufile::IFile&,const IAssetWrapper&,std::string&)>;
 		void RegisterImporter(const ImporterInfo &importerInfo,Type type,const ImportHandler &importHandler);
 		void RegisterExporter(const ExporterInfo &importerInfo,Type type,const ExportHandler &exportHandler);
-		std::unique_ptr<IAssetWrapper> ImportAsset(Game &game,Type type,VFilePtr f,const std::optional<std::string> &filePath={},std::string *optOutErr=nullptr) const;
-		bool ExportAsset(Game &game,Type type,VFilePtrReal f,const IAssetWrapper &assetWrapper,std::string *optOutErr=nullptr) const;
+		std::unique_ptr<IAssetWrapper> ImportAsset(Game &game,Type type,ufile::IFile *f,const std::optional<std::string> &filePath={},std::string *optOutErr=nullptr) const;
+		bool ExportAsset(Game &game,Type type,ufile::IFile &f,const IAssetWrapper &assetWrapper,std::string *optOutErr=nullptr) const;
 
 		uint32_t GetImporterCount(Type type) const {return m_importers[umath::to_integral(type)].size();}
 		uint32_t GetExporterCount(Type type) const {return m_exporters[umath::to_integral(type)].size();}

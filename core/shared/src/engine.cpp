@@ -604,6 +604,8 @@ bool Engine::Initialize(int argc,char *argv[])
 	// Initialize Server Instance
 	auto matManager = msys::MaterialManager::Create();
 	matManager->SetImportDirectory("addons/converted/materials");
+	InitializeAssetManager(*matManager);
+
 	auto matErr = matManager->LoadAsset("error");
 	m_svInstance = std::unique_ptr<StateInstance>(new StateInstance{matManager,matErr.get()});
 	//
@@ -635,6 +637,31 @@ bool Engine::Initialize(int argc,char *argv[])
 		SetAssetMultiThreadedLoadingEnabled(false);
 
 	return true;
+}
+
+void Engine::InitializeAssetManager(util::FileAssetManager &assetManager) const
+{
+	assetManager.SetExternalSourceFileImportHandler([this,&assetManager](const std::string &path,const std::string &outputPath) -> std::optional<std::string> {
+		auto *nw = GetClientState();
+		if(!nw)
+			nw = GetServerNetworkState();
+		if(!nw)
+			return {};
+		auto &rootDir = assetManager.GetRootDirectory();
+		auto &extensions = assetManager.GetSupportedFormatExtensions();
+		for(auto &extInfo : extensions)
+		{
+			auto formatPath = rootDir;
+			formatPath += util::Path::CreateFile(path +'.' +extInfo.extension);
+
+			auto p = rootDir;
+			p += util::Path::CreateFile(outputPath +'.' +extInfo.extension);
+
+			if(util::port_file(nw,formatPath.GetString(),p.GetString()))
+				return extInfo.extension;
+		}
+		return {};
+	});
 }
 
 void Engine::InitializeExternalArchiveManager() {util::initialize_external_archive_manager(GetServerNetworkState());}

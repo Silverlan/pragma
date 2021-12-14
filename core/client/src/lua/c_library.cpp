@@ -1119,7 +1119,8 @@ void CGame::RegisterLuaLibraries()
 			else if(Lua::IsFile(l,1))
 			{
 				auto f = Lua::CheckFile(l,1);
-				result = pragma::asset::import_texture(f->GetHandle(),texImportInfo,outputPath,errMsg);
+				auto fp = std::make_unique<fsys::File>(f->GetHandle());
+				result = pragma::asset::import_texture(std::move(fp),texImportInfo,outputPath,errMsg);
 			}
 			else
 			{

@@ -29,6 +29,7 @@
 #include <pragma/model/model.h>
 #include <util_image_buffer.hpp>
 #include <prosper_window.hpp>
+#include <fsys/ifile.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
@@ -153,7 +154,14 @@ int Lua::util::Client::import_model(lua_State *l)
 	if(Lua::IsSet(l,2))
 		outputPath = ::util::Path::CreatePath(Lua::CheckString(l,2));
 	std::string errMsg;
-	auto mdl = f ? pragma::asset::import_model(f,errMsg,outputPath) : pragma::asset::import_model(fileName,errMsg,outputPath);
+	std::shared_ptr<Model> mdl = nullptr;
+	if(f)
+	{
+		fsys::File fp {f};
+		mdl = pragma::asset::import_model(fp,errMsg,outputPath);
+	}
+	else
+		mdl = pragma::asset::import_model(fileName,errMsg,outputPath);
 	if(mdl == nullptr)
 	{
 		Lua::PushBool(l,false);

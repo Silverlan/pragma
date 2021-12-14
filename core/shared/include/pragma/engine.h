@@ -43,7 +43,7 @@ class ConVarMap;
 struct Color;
 namespace Con {enum class MessageFlags : uint8_t;};
 namespace upad {class PackageManager;};
-namespace util {class ParallelJobWrapper;};
+namespace util {class ParallelJobWrapper; class FileAssetManager;};
 namespace pragma::asset {class AssetManager;};
 class DLLNETWORK Engine
 	: public CVarHandler,public CallbackHandler
@@ -206,6 +206,7 @@ public:
 	std::optional<uint64_t> GetServerSteamId() const;
 
 	std::thread::id GetMainThreadId() const;
+	void InitializeAssetManager(util::FileAssetManager &assetManager) const;
 
 	virtual void StartNewGame(const std::string &map,bool singlePlayer);
 

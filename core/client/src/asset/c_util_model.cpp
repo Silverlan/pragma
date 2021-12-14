@@ -271,7 +271,7 @@ static bool load_image(
 	return true;
 }
 
-static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &optFileName,std::string &outErrMsg,const util::Path &outputPath)
+static std::shared_ptr<Model> import_model(ufile::IFile *optFile,const std::string &optFileName,std::string &outErrMsg,const util::Path &outputPath)
 {
 	auto verbose = true; // TODO
 	auto scale = static_cast<float>(util::pragma::metres_to_units(1.f));
@@ -280,10 +280,10 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 	std::string absPathToFile;
 	if(optFile)
 	{
-		auto fptrReal = std::static_pointer_cast<VFilePtrInternalReal>(optFile);
-		if(fptrReal)
+		auto fname = optFile->GetFileName();
+		if(fname.has_value())
 		{
-			fileName = fptrReal->GetPath();
+			fileName = *fname;
 			absPathToFile = fileName;
 			fileName = ufile::get_file_from_filename(fileName);
 		}
@@ -1177,9 +1177,9 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 	mdl->Save(*c_game,::util::CONVERT_PATH +pragma::asset::get_asset_root_directory(pragma::asset::Type::Model) +std::string{"/"} +outputPath.GetString() +mdlName,err);
 	return mdl;
 }
-std::shared_ptr<Model> pragma::asset::import_model(VFilePtr f,std::string &outErrMsg,const util::Path &outputPath)
+std::shared_ptr<Model> pragma::asset::import_model(ufile::IFile &f,std::string &outErrMsg,const util::Path &outputPath)
 {
-	return ::import_model(f,"",outErrMsg,outputPath);
+	return ::import_model(&f,"",outErrMsg,outputPath);
 }
 std::shared_ptr<Model> pragma::asset::import_model(const std::string &fileName,std::string &outErrMsg,const util::Path &outputPath)
 {
@@ -1201,18 +1201,16 @@ bool pragma::asset::import_texture(const std::string &fileName,const TextureImpo
 	}
 	return import_texture(std::static_pointer_cast<Texture>(tex)->GetVkTexture()->GetImage(),texInfo,outputPath,outErrMsg);
 }
-bool pragma::asset::import_texture(VFilePtr f,const TextureImportInfo &texInfo,const std::string &outputPath,std::string &outErrMsg)
+bool pragma::asset::import_texture(std::unique_ptr<ufile::IFile> &&f,const TextureImportInfo &texInfo,const std::string &outputPath,std::string &outErrMsg)
 {
-	auto *fr = dynamic_cast<VFilePtrInternalReal*>(f.get());
-	if(!fr)
+	auto path = f->GetFileName();
+	if(!path.has_value())
 		return false;
-	auto &path = fr->GetPath();
 	std::string ext;
-	if(ufile::get_extension(path,&ext) == false)
+	if(ufile::get_extension(*path,&ext) == false)
 		return false;
-	auto fp = std::make_unique<fsys::File>(f);
 	auto &texManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
-	auto tex = texManager.LoadAsset("",std::move(fp),ext,std::make_unique<msys::TextureLoadInfo>(util::AssetLoadFlags::DontCache));
+	auto tex = texManager.LoadAsset("",std::move(f),ext,std::make_unique<msys::TextureLoadInfo>(util::AssetLoadFlags::DontCache));
 	if(tex == nullptr)
 	{
 		outErrMsg = "Unable to load texture!";

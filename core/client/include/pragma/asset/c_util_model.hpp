@@ -18,6 +18,7 @@
 
 class Model;
 namespace prosper {class IImage; enum class Format : uint32_t;};
+namespace ufile {struct IFile;};
 namespace pragma::asset
 {
 	static std::string EXPORT_PATH = "export/";
@@ -78,11 +79,11 @@ namespace pragma::asset
 		bool greyScaleMap = false;
 	};
 
-	DLLCLIENT std::shared_ptr<Model> import_model(VFilePtr f,std::string &outErrMsg,const util::Path &outputPath={});
+	DLLCLIENT std::shared_ptr<Model> import_model(ufile::IFile &f,std::string &outErrMsg,const util::Path &outputPath={});
 	DLLCLIENT std::shared_ptr<Model> import_model(const std::string &fileName,std::string &outErrMsg,const util::Path &outputPath={});
 
 	DLLCLIENT bool import_texture(const std::string &fileName,const TextureImportInfo &texInfo,const std::string &outputPath,std::string &outErrMsg);
-	DLLCLIENT bool import_texture(VFilePtr f,const TextureImportInfo &texInfo,const std::string &outputPath,std::string &outErrMsg);
+	DLLCLIENT bool import_texture(std::unique_ptr<ufile::IFile> &&f,const TextureImportInfo &texInfo,const std::string &outputPath,std::string &outErrMsg);
 	DLLCLIENT bool import_texture(prosper::IImage &img,const TextureImportInfo &texInfo,const std::string &outputPath,std::string &outErrMsg);
 
 	DLLCLIENT bool export_model(Model &model,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &modelName={});

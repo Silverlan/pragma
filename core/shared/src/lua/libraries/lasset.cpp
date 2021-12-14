@@ -13,6 +13,7 @@
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 #include <material_manager2.hpp>
 #include <luainterface.hpp>
+#include <fsys/ifile.hpp>
 
 extern DLLNETWORK Engine *engine;
 
@@ -66,7 +67,8 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 			return {l,*ext};
 		})),
 		luabind::def("determine_format_from_data",static_cast<opt<std::string>(*)(lua_State*,LFile&,pragma::asset::Type)>([](lua_State *l,LFile &f,pragma::asset::Type type) -> opt<std::string> {
-			auto ext = pragma::asset::determine_format_from_data(f.GetHandle(),type);
+			fsys::File fp {f.GetHandle()};
+			auto ext = pragma::asset::determine_format_from_data(fp,type);
 			if(!ext.has_value())
 				return nil;
 			return {l,*ext};

@@ -71,7 +71,7 @@ extern "C"
 		en = nullptr;
 	}
 }
-
+#pragma optimize("",off)
 DLLCLIENT CEngine *c_engine = NULL;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
@@ -122,7 +122,7 @@ CEngine::CEngine(int argc,char* argv[])
 	pragma::asset::AssetManager::ImporterInfo importerInfo {};
 	importerInfo.name = "glTF";
 	importerInfo.fileExtensions = {"gltf","glb"};
-	GetAssetManager().RegisterImporter(importerInfo,pragma::asset::Type::Model,[](Game &game,VFilePtr f,const std::optional<std::string> &mdlPath,std::string &errMsg) -> std::unique_ptr<pragma::asset::IAssetWrapper> {
+	GetAssetManager().RegisterImporter(importerInfo,pragma::asset::Type::Model,[](Game &game,ufile::IFile &f,const std::optional<std::string> &mdlPath,std::string &errMsg) -> std::unique_ptr<pragma::asset::IAssetWrapper> {
 		auto mdl = pragma::asset::import_model(f,errMsg);
 		if(mdl == nullptr)
 			return nullptr;
@@ -636,46 +636,15 @@ bool CEngine::Initialize(int argc,char *argv[])
 	// Initialize Client Instance
 	auto matManager = msys::CMaterialManager::Create(GetRenderContext());
 	matManager->SetImportDirectory("addons/converted/materials");
-	auto fileHandler = std::make_unique<util::AssetFileHandler>();
-	fileHandler->open = [this](const std::string &fpath,util::AssetFormatType formatType) -> std::unique_ptr<ufile::IFile> {
-		if(FileManager::Exists(fpath) == false)
-		{
-			auto &formats = MaterialManager::get_supported_image_formats();
-			auto *cl = GetClientState();
-			auto path = fpath;
-			ufile::remove_extension_from_filename(path);
-			for(auto &format : formats)
-			{
-				if(util::port_file(cl,path +'.' +format.extension) == true)
-					break;
-			}
-		}
-		auto openMode = filemanager::FileMode::Read;
-		if(formatType == util::AssetFormatType::Binary)
-			openMode |= filemanager::FileMode::Binary;
-		auto fp = filemanager::open_file(fpath,openMode);
-		if(!fp)
-			return nullptr;
-		return std::make_unique<fsys::File>(fp);
+	InitializeAssetManager(*matManager);
+
+	auto &texManager = matManager->GetTextureManager();
+	InitializeAssetManager(texManager);
+	texManager.GetCallbacks().onAssetReloaded = [](const std::string &assetName) {
+		// TODO: Reload all materials using this texture
+		std::cout<<"";
 	};
-	fileHandler->exists = [](const std::string &path) -> bool {
-		return filemanager::exists(path);
-	};
-	/*matManager->SetTextureImporter([this](const std::string &fpath,const std::string &outputPath) -> VFilePtr {
-		if(FileManager::Exists(fpath) == false)
-		{
-			auto &formats = MaterialManager::get_supported_image_formats();
-			auto *cl = GetClientState();
-			auto path = fpath;
-			ufile::remove_extension_from_filename(path);
-			for(auto &format : formats)
-			{
-				if(util::port_file(cl,path +'.' +format.extension,outputPath +'.' +format.extension) == true)
-					break;
-			}
-		}
-		return nullptr;
-	});*/
+
 	auto matErr = matManager->LoadAsset("error");
 	m_clInstance = std::unique_ptr<StateInstance>(new StateInstance{matManager,matErr.get()});
 	//
@@ -1695,3 +1664,4 @@ REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled,[](NetworkState*,ConVar
 		return;
 	c_engine->SetGPUProfilingEnabled(enabled);
 })
+#pragma optimize("",on)

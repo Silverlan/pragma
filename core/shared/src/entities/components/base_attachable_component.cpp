@@ -73,6 +73,7 @@ void BaseAttachableComponent::OnEntitySpawn()
 			AttachToEntity(*it,attInfo);
 		}
 	}
+	UpdateAttachmentData();
 }
 void BaseAttachableComponent::ClearAttachment() {AttachToEntity(nullptr);}
 std::optional<umath::Transform> BaseAttachableComponent::GetLocalPose() const

@@ -733,8 +733,6 @@ msys::MaterialHandle ClientState::CreateMaterial(const std::string &shader)
 Material *ClientState::LoadMaterial(const std::string &path,const std::function<void(Material*)> &onLoaded,bool bReload,bool bLoadInstantly)
 {
 	auto &matManager = GetMaterialManager();
-	if(bReload)
-		matManager.RemoveFromCache(path);
 	auto success = true;
 	Material *mat = nullptr;
 	if(!bLoadInstantly)
@@ -742,6 +740,12 @@ Material *ClientState::LoadMaterial(const std::string &path,const std::function<
 		success = matManager.PreloadAsset(path);
 		if(success)
 			return nullptr;
+	}
+	else if(bReload)
+	{
+		auto asset = matManager.ReloadAsset(path);
+		success = (asset != nullptr);
+		mat = asset.get();
 	}
 	else
 	{

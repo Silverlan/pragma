@@ -234,8 +234,6 @@ Material *NetworkState::LoadMaterial(const std::string &path,bool precache,bool 
 #endif
 	static auto bSkipPort = false;
 	auto &matManager = GetMaterialManager();
-	if(bReload)
-		matManager.RemoveFromCache(path);
 	auto success = true;
 	Material *mat = nullptr;
 	if(precache)
@@ -246,7 +244,7 @@ Material *NetworkState::LoadMaterial(const std::string &path,bool precache,bool 
 	}
 	else
 	{
-		auto asset = matManager.LoadAsset(path);
+		auto asset = bReload ? matManager.ReloadAsset(path) : matManager.LoadAsset(path);
 		success = (asset != nullptr);
 		mat = asset.get();
 	}

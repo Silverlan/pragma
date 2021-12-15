@@ -438,8 +438,6 @@ void ServerState::GetLuaConCommands(std::unordered_map<std::string,ConCommand*> 
 Material *ServerState::LoadMaterial(const std::string &path,bool precache,bool bReload)
 {
 	auto &matManager = GetMaterialManager();
-	if(bReload)
-		matManager.RemoveFromCache(path);
 	auto success = true;
 	Material *mat = nullptr;
 	if(precache)
@@ -447,6 +445,12 @@ Material *ServerState::LoadMaterial(const std::string &path,bool precache,bool b
 		success = matManager.PreloadAsset(path);
 		if(success)
 			return nullptr;
+	}
+	else if(bReload)
+	{
+		auto asset = matManager.ReloadAsset(path);
+		success = (asset != nullptr);
+		mat = asset.get();
 	}
 	else
 	{

@@ -916,12 +916,11 @@ std::shared_ptr<Model> Game::LoadModel(const std::string &mdl,bool bReload)
 #endif
 	if(engine->IsVerbose())
 		Con::cout<<"Loading model '"<<mdl<<"'..."<<Con::endl;
-	if(bReload)
-		GetNetworkState()->GetModelManager().RemoveFromCache(mdl);
 	auto *asset = GetNetworkState()->GetModelManager().FindCachedAsset(mdl);
 	if(asset)
 		return pragma::asset::ModelManager::GetAssetObject(*asset);
-	auto r = GetNetworkState()->GetModelManager().LoadAsset(mdl);
+	auto &mdlMananger = GetNetworkState()->GetModelManager();
+	auto r = bReload ? mdlMananger.ReloadAsset(mdl) : mdlMananger.LoadAsset(mdl);
 	if(r != nullptr)
 	{
 		CallCallbacks<void,std::reference_wrapper<std::shared_ptr<Model>>>("OnModelLoaded",r);

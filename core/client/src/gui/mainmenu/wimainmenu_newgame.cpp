@@ -24,6 +24,7 @@
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_file.h>
 #include <wgui/types/witext.h>
+#include <fsys/ifile.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -211,7 +212,8 @@ void WIMainMenuNewGame::ReloadMapList()
 			auto f = FileManager::OpenFile((std::string("maps/") +fName +".txt").c_str(),"r");
 			if(f != nullptr)
 			{
-				auto root = ds::System::ReadData(f);
+				fsys::File fp {f};
+				auto root = ds::System::ReadData(fp);
 				if(root != nullptr)
 				{
 					auto block = root->GetBlock(fName.c_str(),0);

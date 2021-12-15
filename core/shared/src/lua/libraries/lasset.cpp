@@ -189,7 +189,7 @@ Lua::tb<std::string> Lua::asset::get_supported_import_file_extensions(lua_State 
 	for(auto i=decltype(n){0u};i<n;++i)
 	{
 		for(auto &ext : assetManager.GetImporterInfo(type,i)->fileExtensions)
-			t[idx++] = ext;
+			t[idx++] = ext.first;
 	}
 	if(type == pragma::asset::Type::Model)
 	{
@@ -219,7 +219,7 @@ Lua::tb<std::string> Lua::asset::get_supported_export_file_extensions(lua_State 
 	for(auto i=decltype(n){0u};i<n;++i)
 	{
 		for(auto &ext : assetManager.GetExporterInfo(type,i)->fileExtensions)
-			t[idx++] = ext;
+			t[idx++] = ext.first;
 	}
 	return t;
 }

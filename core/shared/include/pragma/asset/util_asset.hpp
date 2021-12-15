@@ -118,7 +118,7 @@ namespace pragma::asset
 		{
 			std::string name;
 			std::string description;
-			std::vector<std::string> fileExtensions;
+			std::vector<std::pair<std::string,bool /* binary */>> fileExtensions;
 		};
 		using ExporterInfo = ImporterInfo;
 		using ImportHandler = std::function<std::unique_ptr<IAssetWrapper>(Game&,ufile::IFile&,const std::optional<std::string>&,std::string&)>;

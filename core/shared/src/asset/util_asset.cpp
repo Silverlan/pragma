@@ -300,10 +300,10 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 		ufile::remove_extension_from_filename(filePathNoExt);
 		for(auto &importer : m_importers[umath::to_integral(type)])
 		{
-			for(auto &ext : importer.info.fileExtensions)
+			for(auto &extInfo : importer.info.fileExtensions)
 			{
-				auto filePathWithExt = filePathNoExt +'.' +ext;
-				auto f = FileManager::OpenFile(filePathWithExt.c_str(),"rb");
+				auto filePathWithExt = filePathNoExt +'.' +extInfo.first;
+				auto f = FileManager::OpenFile(filePathWithExt.c_str(),extInfo.second ? "rb" : "r");
 				if(f == nullptr)
 					continue;
 				fpath = filePathWithExt;

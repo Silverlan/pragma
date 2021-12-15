@@ -12,6 +12,7 @@
 #include <datasystem.h>
 #include <datasystem_color.h>
 #include <datasystem_vector.h>
+#include <fsys/ifile.hpp>
 
 void Lua::DataBlock::load(lua_State *l,const std::string &fileName)
 {
@@ -25,7 +26,8 @@ void Lua::DataBlock::load(lua_State *l,LFile &f)
 	if(!f.IsValid())
 		return;
 	auto file = f.GetHandle();
-	auto db = ds::System::ReadData(file);
+	fsys::File fp {file};
+	auto db = ds::System::ReadData(fp);
 	if(db == nullptr)
 		return;
 	Lua::Push(l,db);

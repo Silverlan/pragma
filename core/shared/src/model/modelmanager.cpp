@@ -137,8 +137,8 @@ static const std::vector<std::string> &get_model_extensions()
 			if(importerInfo == nullptr)
 				continue;
 			extensions.reserve(extensions.size() +importerInfo->fileExtensions.size());
-			for(auto &ext : importerInfo->fileExtensions)
-				extensions.push_back(ext);
+			for(auto &extInfo : importerInfo->fileExtensions)
+				extensions.push_back(extInfo.first);
 		}
 	}
 	return extensions;
@@ -189,8 +189,8 @@ pragma::asset::ModelManager::ModelManager(NetworkState &nw)
 		auto *importerInfo = assetManager.GetImporterInfo(pragma::asset::Type::Model,i);
 		if(!importerInfo)
 			continue;
-		for(auto &ext : importerInfo->fileExtensions)
-			RegisterImportHandler<AssetManagerFormatHandler>(ext);
+		for(auto &extInfo : importerInfo->fileExtensions)
+			RegisterImportHandler<AssetManagerFormatHandler>(extInfo.first,extInfo.second ? util::AssetFormatType::Binary : util::AssetFormatType::Text);
 	}
 }
 std::shared_ptr<Model> pragma::asset::ModelManager::CreateModel(uint32_t numBones,const std::string &mdlName)

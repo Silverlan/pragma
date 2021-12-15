@@ -1209,7 +1209,8 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			auto f = FileManager::OpenFile(fileName.c_str(),"r");
 			if(f == nullptr)
 				return false;
-			auto root = ds::System::ReadData(f);
+			fsys::File fp {f};
+			auto root = ds::System::ReadData(fp);
 			if(root == nullptr)
 				return false;
 			ufile::remove_extension_from_filename(rpath);

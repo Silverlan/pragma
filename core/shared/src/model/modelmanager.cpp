@@ -92,6 +92,7 @@ bool pragma::asset::ModelProcessor::Load()
 	if(!r)
 		return false;
 	model = mdlHandler.model;
+	model->Update();
 	return true;
 }
 bool pragma::asset::ModelProcessor::Finalize()
@@ -104,15 +105,20 @@ bool pragma::asset::ModelProcessor::Finalize()
 #endif
 
 	auto &assetManager = static_cast<ModelManager&>(handler->GetAssetManager());
-	for(auto &inc : model->GetMetaInfo().includes)
+	auto &includes = model->GetMetaInfo().includes;
+	if(!includes.empty())
 	{
-		auto asset = assetManager.LoadAsset(inc);
-		if(!asset)
+		for(auto &inc : includes)
 		{
-			Con::cwar<<"WARNING: Model '"<<model->GetName()<<"' has include reference to model '"<<inc<<"', but that model could not be loaded! Ignoring..."<<Con::endl;
-			continue;
+			auto asset = assetManager.LoadAsset(inc);
+			if(!asset)
+			{
+				Con::cwar<<"WARNING: Model '"<<model->GetName()<<"' has include reference to model '"<<inc<<"', but that model could not be loaded! Ignoring..."<<Con::endl;
+				continue;
+			}
+			model->Merge(*asset);
 		}
-		model->Merge(*asset);
+		model->Update(); // Need to update again
 	}
 
 	// Note: Collision shapes have to be updated on the main thread, because of the creation of a luabind object

@@ -71,9 +71,9 @@ void CEngine::RegisterConsoleCommands()
 		NetworkState *nw,ConVar *cv,bool oldVal,bool newVal) -> void {
 			//static_cast<msys::CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).SetDownscaleImportedRMATextures(newVal);
 	}});
-	conVarMap.RegisterConVar<bool>(
-		"render_debug_mode",false,ConVarFlags::None,
-		"0 = Disabled, 1 = Ambient Occlusion, 2 = Albedo Colors, 3 = Metalness, 4 = Roughness, 5 = Diffuse Lighting, 6 = Normals, 7 = Normal Map, 8 = Reflectance, 9 = IBL Prefilter, 10 = IBL Irradiance, 11 = Emission, 12 = Lightmaps, 13 = Lightmap Uvs, 14 = Unlit, 15 = Show CSM cascades, 16 = Shadow Map Depth, 17 = Forward+ Heatmap."
+	conVarMap.RegisterConVar<uint8_t>(
+		"render_debug_mode",0,ConVarFlags::None,
+		"0 = Disabled, 1 = Ambient Occlusion, 2 = Albedo Colors, 3 = Metalness, 4 = Roughness, 5 = Diffuse Lighting, 6 = Normals, 7 = Normal Map, 8 = Reflectance, 9 = IBL Prefilter, 10 = IBL Irradiance, 11 = Emission, 12 = Lightmaps, 13 = Lightmap Uvs, 14 = Unlit, 15 = Show CSM cascades, 16 = Shadow Map Depth, 17 = Forward+ Heatmap, 18 = Specular."
 	);
 	conVarMap.RegisterConVar<bool>("render_ibl_enabled",true,ConVarFlags::Archive,"Enables or disables image-based lighting.");
 	conVarMap.RegisterConVar<bool>("render_dynamic_lighting_enabled",true,ConVarFlags::Archive,"Enables or disables dynamic lighting.");

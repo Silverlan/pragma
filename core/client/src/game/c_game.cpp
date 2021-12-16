@@ -1184,6 +1184,7 @@ void CGame::ReloadGameWorldShaderPipelines() const
 				continue;
 			gameWorldShader->ReloadPipelines();
 		}
+		c_engine->GetRenderContext().GetPipelineLoader().Flush();
 	});
 	const_cast<CGame*>(this)->AddCallback("PreRenderScenes",cb);
 }

@@ -179,7 +179,7 @@ vec4 calc_pbr(vec4 albedoColor,vec2 texCoords,uint debugMode)
 	}
 
 	if(CSPEC_DEBUG_MODE_ENABLED == 1)
-		result = apply_debug_mode(debugMode,result,texCoords,diffuseColor,metallic,perceptualRoughness,aoFactor,reflectance);
+		result = apply_debug_mode(debugMode,result,texCoords,diffuseColor,specularColor,metallic,perceptualRoughness,aoFactor,reflectance);
 	return result;
 }
 

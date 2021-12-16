@@ -19,8 +19,9 @@
 #define DEBUG_MODE_CSM_SHOW_CASCADES (DEBUG_MODE_UNLIT +1)
 #define DEBUG_MODE_SHADOW_MAP_DEPTH (DEBUG_MODE_CSM_SHOW_CASCADES +1)
 #define DEBUG_MODE_FORWARD_PLUS_HEATMAP (DEBUG_MODE_SHADOW_MAP_DEPTH +1)
+#define DEBUG_MODE_SPECULAR (DEBUG_MODE_FORWARD_PLUS_HEATMAP +1)
 
-vec4 apply_debug_mode(uint debugMode,vec4 outputColor,vec2 texCoords,vec3 diffuseColor,float metallic,float roughness,float aoFactor,float reflectance)
+vec4 apply_debug_mode(uint debugMode,vec4 outputColor,vec2 texCoords,vec3 diffuseColor,vec3 specularColor,float metallic,float roughness,float aoFactor,float reflectance)
 {
 	if(debugMode == DEBUG_MODE_NONE)
 		return outputColor;
@@ -41,6 +42,8 @@ vec4 apply_debug_mode(uint debugMode,vec4 outputColor,vec2 texCoords,vec3 diffus
 		finalColor = vec4(roughness,roughness,roughness,1.0);
 	else if(debugMode == DEBUG_MODE_DIFFUSE)
 		finalColor = vec4(diffuseColor,1.0);
+	else if(debugMode == DEBUG_MODE_SPECULAR)
+		finalColor = vec4(specularColor,1.0);
 	else if(debugMode == DEBUG_MODE_NORMAL)
 		finalColor = vec4(get_normal_from_map(texCoords),1.0);
 	else if(debugMode == DEBUG_MODE_NORMAL_MAP)

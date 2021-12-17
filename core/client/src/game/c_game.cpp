@@ -308,7 +308,10 @@ CGame::CGame(NetworkState *state)
 
 	auto &texManager = static_cast<msys::CMaterialManager&>(static_cast<ClientState*>(GetNetworkState())->GetMaterialManager()).GetTextureManager();
 	for(auto &tex : g_requiredGameTextures)
+	{
 		texManager.LoadAsset(tex); // Pre-loaded in ClientState constructor
+		texManager.FlagAssetAsAlwaysInUse(tex,true);
+	}
 }
 
 CGame::~CGame() {}

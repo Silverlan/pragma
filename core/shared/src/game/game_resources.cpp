@@ -203,7 +203,7 @@ bool util::port_file(NetworkState *nw,const std::string &path,const std::optiona
 {
 	if(engine->ShouldMountExternalGameResources() == false)
 		return false;
-	if(FileManager::Exists(path))
+	if(filemanager::exists(path))
 		return true;
 	auto dllHandle = load_module(nw);
 	if(dllHandle == nullptr)

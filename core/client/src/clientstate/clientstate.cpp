@@ -356,6 +356,7 @@ void ClientState::ToggleMainMenu()
 
 void ClientState::Close()
 {
+	c_engine->GetRenderContext().GetPipelineLoader().Stop();
 	c_engine->SaveClientConfig();
 	NetworkState::Close();
 

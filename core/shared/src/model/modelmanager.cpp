@@ -92,7 +92,9 @@ bool pragma::asset::ModelProcessor::Load()
 	if(!r)
 		return false;
 	model = mdlHandler.model;
-	model->Update();
+	// Collision shape initialization creates Lua objects and therefore
+	// has to be done on the main thread
+	model->Update(ModelUpdateFlags::AllData &~ModelUpdateFlags::UpdateCollisionShapes);
 	return true;
 }
 bool pragma::asset::ModelProcessor::Finalize()

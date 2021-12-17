@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/asset_types/world.hpp"
 #include "pragma/level/level_info.hpp"
+#include "pragma/model/modelmanager.h"
 #include <util_image.hpp>
 #include <util_texture_info.hpp>
 #include <sharedutils/util_file.h>
@@ -117,13 +118,8 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,Enti
 	}
 
 	udm["materials"](m_materialTable);
-	std::vector<msys::MaterialHandle> materials {};
-	materials.reserve(m_materialTable.size());
 	for(auto &str : m_materialTable)
-	{
-		auto *mat = m_nw.LoadMaterial(str);
-		materials.push_back(mat ? mat->GetHandle() : msys::MaterialHandle{});
-	}
+		m_nw.PrecacheMaterial(str);
 
 	auto udmLightmap = udm["lightmap"];
 	if(udmLightmap)
@@ -155,7 +151,12 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,Enti
 		auto pose = udmEnt["pose"].ToValue<umath::Transform>(umath::Transform{});
 		entData->SetOrigin(pose.GetOrigin());
 
-		udmEnt["keyValues"](entData->GetKeyValues());
+		auto &keyValues = entData->GetKeyValues();
+		udmEnt["keyValues"](keyValues);
+
+		auto itMdl = keyValues.find("model");
+		if(itMdl != keyValues.end())
+			m_nw.GetModelManager().PreloadAsset(itMdl->second);
 		
 		auto &outputs = entData->GetOutputs();
 		auto udmOutputs = udmEnt["outputs"];

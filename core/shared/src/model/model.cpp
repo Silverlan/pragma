@@ -668,7 +668,8 @@ void Model::ClearTextures()
 }
 void Model::OnMaterialMissing(const std::string&) {}
 
-bool Model::FindMaterial(const std::string &texture,std::string &matPath) const
+bool Model::FindMaterial(const std::string &texture,std::string &matPath) const {return FindMaterial(texture,matPath,true);}
+bool Model::FindMaterial(const std::string &texture,std::string &matPath,bool importIfNotFound) const
 {
 	auto &meta = GetMetaInfo();
 	auto &texturePaths = meta.texturePaths;
@@ -685,16 +686,19 @@ bool Model::FindMaterial(const std::string &texture,std::string &matPath) const
 	static auto bSkipPort = false;
 	if(bSkipPort == true || engine->ShouldMountExternalGameResources() == false)
 		return false;
-	// Material not found; Attempt to port
-	for(auto &path : texturePaths)
+	if(importIfNotFound)
 	{
-		auto texPath = path +texture;
-		if(m_networkState->PortMaterial(texPath) == true)
+		// Material not found; Attempt to port
+		for(auto &path : texturePaths)
 		{
-			bSkipPort = true;
-			auto r = FindMaterial(texture,matPath);
-			bSkipPort = false;
-			return r;
+			auto texPath = path +texture;
+			if(m_networkState->PortMaterial(texPath) == true)
+			{
+				bSkipPort = true;
+				auto r = FindMaterial(texture,matPath);
+				bSkipPort = false;
+				return r;
+			}
 		}
 	}
 	return false;
@@ -806,7 +810,7 @@ void Model::LoadMaterials(const std::vector<uint32_t> &textureGroupIds,bool prec
 		for(auto texId : group.textures)
 		{
 			auto &texture = textures[texId];
-			if(FindMaterial(texture,materialPaths[texId]) == false)
+			if(FindMaterial(texture,materialPaths[texId],!precache) == false)
 			{
 				if(!precache)
 					OnMaterialMissing(texture);

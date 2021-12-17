@@ -564,6 +564,7 @@ protected:
 	void AddLoadingMaterial(Material &mat,std::optional<uint32_t> index={});
 	void LoadMaterials(const std::vector<uint32_t> &textureGroups,bool precache,bool bReload);
 	void LoadMaterials(bool precache,bool bReload);
+	bool FindMaterial(const std::string &texture,std::string &matPath,bool importIfNotFound) const;
 
 	virtual std::shared_ptr<VertexAnimation> CreateVertexAnimation(const std::string &name) const;
 	std::vector<std::shared_ptr<VertexAnimation>>::const_iterator FindVertexAnimation(const std::string &name) const;

@@ -443,8 +443,7 @@ Material *ServerState::LoadMaterial(const std::string &path,bool precache,bool b
 	if(precache)
 	{
 		success = matManager.PreloadAsset(path);
-		if(success)
-			return nullptr;
+		return nullptr;
 	}
 	else if(bReload)
 	{

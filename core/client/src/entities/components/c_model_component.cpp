@@ -15,6 +15,7 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_modelmanager.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include <shader/prosper_pipeline_loader.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <cmaterial_manager2.hpp>
@@ -205,6 +206,7 @@ void CModelComponent::UpdateRenderBufferList()
 	m_lodMeshRenderBufferData.clear();
 	m_lodMeshRenderBufferData.reserve(m_lodRenderMeshes.size());
 	auto depthPrepassEnabled = IsDepthPrepassEnabled();
+	c_engine->GetRenderContext().GetPipelineLoader().Flush();
 	for(auto i=decltype(m_lodRenderMeshes.size()){0u};i<m_lodRenderMeshes.size();++i)
 	{
 		auto &mesh = static_cast<CModelSubMesh&>(*m_lodRenderMeshes[i]);

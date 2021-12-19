@@ -643,21 +643,33 @@ void Engine::InitializeAssetManager(util::FileAssetManager &assetManager) const
 {
 	assetManager.SetExternalSourceFileImportHandler([this,&assetManager](const std::string &path,const std::string &outputPath) -> std::optional<std::string> {
 		auto *nw = GetClientState();
-		if(!nw)
-			nw = GetServerNetworkState();
+		if(!nw || !nw->IsGameActive())
+		{
+			auto *nwSv = GetServerNetworkState();
+			if(nwSv && nwSv->IsGameActive())
+				nw = nwSv;
+		}
 		if(!nw)
 			return {};
 		auto &rootDir = assetManager.GetRootDirectory();
 		auto &extensions = assetManager.GetSupportedFormatExtensions();
 		for(auto &extInfo : extensions)
 		{
+			auto relPath = util::Path::CreateFile(path +'.' +extInfo.extension);
 			auto formatPath = rootDir;
-			formatPath += util::Path::CreateFile(path +'.' +extInfo.extension);
+			formatPath += relPath;
 
 			auto p = rootDir;
 			p += util::Path::CreateFile(outputPath +'.' +extInfo.extension);
 
-			if(util::port_file(nw,formatPath.GetString(),p.GetString()))
+			auto portSuccess = false;
+			if(extInfo.extension == "bsp")
+				portSuccess = util::port_hl2_map(nw,relPath.GetString());
+			else if(extInfo.extension == "mdl")
+				portSuccess = util::port_hl2_model(nw,ufile::get_path_from_filename(formatPath.GetString()),ufile::get_file_from_filename(p.GetString()));
+			else
+				portSuccess = util::port_file(nw,formatPath.GetString(),p.GetString());
+			if(portSuccess)
 				return extInfo.extension;
 		}
 		return {};

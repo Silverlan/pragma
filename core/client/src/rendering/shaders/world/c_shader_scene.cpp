@@ -441,8 +441,8 @@ bool pragma::ShaderGameWorld::RecordBindEntity(
 bool pragma::ShaderGameWorld::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor,CMaterial &mat) const
 {
 	auto descSetGroup = mat.GetDescriptorSetGroup(const_cast<pragma::ShaderGameWorld&>(*this));
-	if(descSetGroup == nullptr)
-		descSetGroup = const_cast<pragma::ShaderGameWorld*>(this)->InitializeMaterialDescriptorSet(mat,false); // Attempt to initialize on the fly (TODO: Is this thread safe?)
+	// if(descSetGroup == nullptr)
+	// 	descSetGroup = const_cast<pragma::ShaderGameWorld*>(this)->InitializeMaterialDescriptorSet(mat,false); // Attempt to initialize on the fly (TODO: Is this thread safe?)
 	if(descSetGroup == nullptr)
 		return false;
 	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,shaderProcessor.GetCurrentPipelineLayout(),GetMaterialDescriptorSetIndex(),*descSetGroup->GetDescriptorSet(0));

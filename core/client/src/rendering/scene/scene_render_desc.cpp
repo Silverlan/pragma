@@ -208,6 +208,9 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 		auto *renderQueue = getRenderQueue(renderMode,translucent);
 		if(renderQueue == nullptr)
 			continue;
+		auto matIdx = mat->GetIndex();
+		if(matIdx == std::numeric_limits<decltype(matIdx)>::max())
+			continue;
 		pragma::rendering::RenderQueueItem item {static_cast<CBaseEntity&>(renderC.GetEntity()),meshIdx,*mat,pipelineId,translucent ? &cam : nullptr};
 		if(fOptInsertItemToQueue)
 			fOptInsertItemToQueue(*renderQueue,item);

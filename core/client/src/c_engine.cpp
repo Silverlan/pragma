@@ -838,10 +838,18 @@ void CEngine::SetConsoleType(ConsoleType type)
 }
 bool CEngine::IsConsoleOpen() const
 {
-	auto *pConsole = WIConsole::GetConsole();
-	auto *pFrame = pConsole ? pConsole->GetFrame() : nullptr;
-	return pFrame && pFrame->IsVisible();
-	// Engine::IsConsoleOpen();
+	switch(m_consoleType)
+	{
+	case ConsoleType::Terminal:
+		return Engine::IsConsoleOpen();
+	default:
+	{
+		auto *pConsole = WIConsole::GetConsole();
+		auto *pFrame = pConsole ? pConsole->GetFrame() : nullptr;
+		return pFrame && pFrame->IsVisible();
+	}
+	}
+	return false;
 }
 CallbackHandle CEngine::AddGPUProfilingHandler(const std::function<void(bool)> &handler)
 {

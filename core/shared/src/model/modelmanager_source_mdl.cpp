@@ -17,7 +17,10 @@ pragma::asset::SourceMdlFormatHandler::SourceMdlFormatHandler(util::IAssetManage
 bool pragma::asset::SourceMdlFormatHandler::Import(const std::string &outputPath,std::string &outFilePath)
 {
 	auto &nw = static_cast<ModelManager&>(GetAssetManager()).GetNetworkState();
-	return util::port_hl2_model(&nw,outputPath,outFilePath);
+	auto path = static_cast<ModelManager&>(GetAssetManager()).GetRootDirectory().GetString() +ufile::get_path_from_filename(outputPath);
+	auto fileName = ufile::get_file_from_filename(outputPath);
+	outFilePath = outputPath;
+	return util::port_hl2_model(&nw,path,fileName);
 }
 
 /////////
@@ -28,7 +31,10 @@ pragma::asset::Source2VmdlFormatHandler::Source2VmdlFormatHandler(util::IAssetMa
 bool pragma::asset::Source2VmdlFormatHandler::Import(const std::string &outputPath,std::string &outFilePath)
 {
 	auto &nw = static_cast<ModelManager&>(GetAssetManager()).GetNetworkState();
-	return util::port_source2_model(&nw,outputPath,outFilePath);
+	auto path = static_cast<ModelManager&>(GetAssetManager()).GetRootDirectory().GetString() +ufile::get_path_from_filename(outputPath);
+	auto fileName = ufile::get_file_from_filename(outputPath);
+	outFilePath = outputPath;
+	return util::port_source2_model(&nw,path,fileName);
 }
 
 /////////

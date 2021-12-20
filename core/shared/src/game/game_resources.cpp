@@ -168,9 +168,8 @@ bool util::port_hl2_particle(NetworkState *nw,const std::string &path)
 
 bool util::port_source2_model(NetworkState *nw,const std::string &path,std::string mdlName)
 {
-	std::string ext;
-	if(ufile::get_extension(mdlName,&ext) == false || ext != "vmdl_c")
-		return false;
+	ufile::remove_extension_from_filename(mdlName,std::array<std::string,2>{"vmdl","vmdl_c"});
+	mdlName += ".vmdl_c";
 	static auto *ptrConvertModel = reinterpret_cast<bool(*)(NetworkState*nw,const std::function<std::shared_ptr<Model>()>&,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)>&,const std::string&,const std::string&,std::ostream*)>(impl::get_module_func(nw,"convert_source2_model"));
 	if(ptrConvertModel == nullptr)
 		return false;
@@ -180,9 +179,8 @@ bool util::port_source2_model(NetworkState *nw,const std::string &path,std::stri
 
 bool util::port_hl2_model(NetworkState *nw,const std::string &path,std::string mdlName)
 {
-	std::string ext;
-	if(ufile::get_extension(mdlName,&ext) == false || ext != "mdl")
-		return false;
+	ufile::remove_extension_from_filename(mdlName,std::array<std::string,1>{"mdl"});
+	mdlName += ".mdl";
 	static auto *ptrConvertModel = reinterpret_cast<bool(*)(NetworkState*nw,const std::function<std::shared_ptr<Model>()>&,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)>&,const std::string&,const std::string&,std::ostream*)>(impl::get_module_func(nw,"convert_hl2_model"));
 	if(ptrConvertModel == nullptr)
 		return false;
@@ -203,8 +201,15 @@ bool util::port_file(NetworkState *nw,const std::string &path,const std::optiona
 {
 	if(engine->ShouldMountExternalGameResources() == false)
 		return false;
-	if(filemanager::exists(path))
+	auto outputPath = optOutputPath.has_value() ? *optOutputPath : path;
+	if(filemanager::exists(outputPath))
 		return true;
+	if(outputPath != path && filemanager::exists(path))
+	{
+		auto fullOutputPath = util::IMPORT_PATH +outputPath;
+		filemanager::create_path(ufile::get_path_from_filename(fullOutputPath));
+		return filemanager::copy_file(path,fullOutputPath);
+	}
 	auto dllHandle = load_module(nw);
 	if(dllHandle == nullptr)
 		return false;
@@ -212,7 +217,6 @@ bool util::port_file(NetworkState *nw,const std::string &path,const std::optiona
 	if(ptrExtractResource == nullptr)
 		return false;
 	auto lockWatcher = engine->ScopeLockResourceWatchers();
-	auto outputPath = optOutputPath.has_value() ? *optOutputPath : path;
 	return ptrExtractResource(nw,path,util::IMPORT_PATH +outputPath);
 }
 

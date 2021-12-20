@@ -47,7 +47,7 @@ namespace pragma
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
-
+#pragma optimize("",off)
 static std::shared_ptr<prosper::IUniformResizableBuffer> s_instanceBuffer = nullptr;
 decltype(CRenderComponent::s_ocExemptEntities) CRenderComponent::s_ocExemptEntities = {};
 ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT = INVALID_COMPONENT_ID;
@@ -226,6 +226,8 @@ void CRenderComponent::OnEntitySpawn()
 		auto occlusionCullerC = ent->GetComponent<pragma::COcclusionCullerComponent>();
 		occlusionCullerC->AddEntity(static_cast<CBaseEntity&>(GetEntity()));
 	}
+
+	InitializeRenderBuffers();
 }
 void CRenderComponent::UpdateAbsoluteRenderBounds()
 {
@@ -596,7 +598,8 @@ void CRenderComponent::SetRenderBufferDirty() {umath::set_flag(m_stateFlags,Stat
 void CRenderComponent::SetRenderBoundsDirty() {umath::set_flag(m_stateFlags,StateFlags::RenderBoundsDirty);}
 void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bForceBufferUpdate)
 {
-	InitializeRenderBuffers();
+	// Commented because render buffers must not be initialized on a non-main thread
+	// InitializeRenderBuffers();
 	auto updateRenderBuffer = umath::is_flag_set(m_stateFlags,StateFlags::RenderBufferDirty) || bForceBufferUpdate;
 	auto bufferDirty = false;
 	if(updateRenderBuffer)
@@ -926,3 +929,4 @@ void CEOnRenderBoundsChanged::PushArguments(lua_State *l)
 	Lua::Push<Vector3>(l,sphere.pos);
 	Lua::PushNumber(l,sphere.radius);
 }
+#pragma optimize("",on)

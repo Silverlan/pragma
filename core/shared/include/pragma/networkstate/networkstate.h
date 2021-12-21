@@ -59,8 +59,8 @@ class ResourceWatcherManager;
 class ALSound;
 enum class ALSoundType : int32_t;
 namespace Lua {enum class ErrorColorMode : uint32_t;class Interface;};
-namespace util {class Library;};
-namespace pragma {namespace asset {class EntityData; class WorldData; class ModelManager;};};
+namespace util {class Library; class FileAssetManager;};
+namespace pragma {namespace asset {class EntityData; class WorldData; class ModelManager; enum class Type : uint8_t;};};
 using ALSoundRef = std::reference_wrapper<ALSound>;
 class DLLNETWORK NetworkState
 	: public CallbackHandler,public CVarHandler
@@ -141,6 +141,7 @@ public:
 	virtual msys::MaterialManager &GetMaterialManager()=0;
 	virtual ModelSubMesh *CreateSubMesh() const=0;
 	virtual ModelMesh *CreateMesh() const=0;
+	virtual util::FileAssetManager *GetAssetManager(pragma::asset::Type type);
 
 	void TranslateConsoleCommand(std::string &cmd);
 	void SetConsoleCommandOverride(const std::string &src,const std::string &dst);

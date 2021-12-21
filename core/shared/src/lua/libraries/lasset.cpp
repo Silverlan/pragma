@@ -11,12 +11,13 @@
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
+#include "pragma/lua/converters/optional_converter_t.hpp"
+#include "pragma/lua/converters/pair_converter_t.hpp"
 #include <material_manager2.hpp>
 #include <luainterface.hpp>
 #include <fsys/ifile.hpp>
 
 extern DLLNETWORK Engine *engine;
-
 
 void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 {
@@ -109,6 +110,19 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 		luabind::def("exists",Lua::asset::exists),
 		luabind::def("find_file",Lua::asset::find_file),
 		luabind::def("is_loaded",Lua::asset::is_loaded),
+		luabind::def("precache",+[](lua_State *l,const std::string &name,pragma::asset::Type type)
+			-> Lua::var<bool,std::pair<util::FileAssetManager::PreloadResult::Result,std::optional<util::AssetLoadJobId>>> {
+			auto *manager = engine->GetNetworkState(l)->GetAssetManager(type);
+			if(!manager)
+				return luabind::object{l,false};
+			auto result = manager->PreloadAsset(name);
+			return luabind::object{
+				l,
+				std::pair<util::FileAssetManager::PreloadResult::Result,std::optional<util::AssetLoadJobId>>{
+					result.result,result.jobId
+				}
+			};
+		}),
 		luabind::def("delete",static_cast<bool(*)(lua_State*,const std::string&,pragma::asset::Type)>([](lua_State *l,const std::string &name,pragma::asset::Type type) -> bool {
 			return pragma::asset::remove_asset(name,type);
 		})),
@@ -142,7 +156,12 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 		{"TYPE_MATERIAL",umath::to_integral(pragma::asset::Type::Material)},
 		{"TYPE_TEXTURE",umath::to_integral(pragma::asset::Type::Texture)},
 		{"TYPE_AUDIO",umath::to_integral(pragma::asset::Type::Sound)},
-		{"TYPE_PARTICLE_SYSTEM",umath::to_integral(pragma::asset::Type::ParticleSystem)}
+		{"TYPE_PARTICLE_SYSTEM",umath::to_integral(pragma::asset::Type::ParticleSystem)},
+		
+		{"ASSET_LOAD_FLAG_NONE",umath::to_integral(util::AssetLoadFlags::None)},
+		{"ASSET_LOAD_FLAG_ABSOLUTE_PATH_BIT",umath::to_integral(util::AssetLoadFlags::AbsolutePath)},
+		{"ASSET_LOAD_FLAG_DONT_CACHE_BIT",umath::to_integral(util::AssetLoadFlags::DontCache)},
+		{"ASSET_LOAD_FLAG_IGNORE_CACHE_BIT",umath::to_integral(util::AssetLoadFlags::IgnoreCache)}
 	});
 	static_assert(umath::to_integral(pragma::asset::Type::Count) == 6,"Update this list!");
 

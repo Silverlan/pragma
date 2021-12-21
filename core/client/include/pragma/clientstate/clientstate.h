@@ -133,6 +133,7 @@ public:
 	virtual msys::MaterialManager &GetMaterialManager() override;
 	virtual ModelSubMesh *CreateSubMesh() const override;
 	virtual ModelMesh *CreateMesh() const override;
+	virtual util::FileAssetManager *GetAssetManager(pragma::asset::Type type) override;
 	virtual void Initialize() override;
 	virtual Lua::ErrorColorMode GetLuaErrorColorMode() override;
 

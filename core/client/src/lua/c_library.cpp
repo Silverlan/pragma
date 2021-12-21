@@ -48,6 +48,7 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/policies/core_policies.hpp>
+#include <pragma/model/modelmanager.h>
 #include <pragma/input/inputhelper.h>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
@@ -1139,7 +1140,70 @@ void CGame::RegisterLuaLibraries()
 
 	auto modAsset = luabind::module_(GetLuaState(),"asset");
 	modAsset[
-		luabind::def("clear_unused_textures",static_cast<uint32_t(*)()>([]() -> uint32_t {return static_cast<msys::CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().ClearUnused();}))
+		luabind::def("clear_unused_textures",static_cast<uint32_t(*)()>([]() -> uint32_t {return static_cast<msys::CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().ClearUnused();})),
+		
+		luabind::def("load",+[](lua_State *l,LFile &f,pragma::asset::Type type) -> Lua::var<bool,luabind::object> {
+			// See also core/server/src/lua/library.cpp
+			auto *manager = pragma::get_engine()->GetNetworkState(l)->GetAssetManager(type);
+			if(!manager)
+				return luabind::object{l,false};
+			auto fh = f.GetHandle();
+			if(!fh)
+				return luabind::object{l,false};
+			auto fp = std::make_unique<fsys::File>(fh);
+			auto fileName = fp->GetFileName();
+			if(!fileName.has_value())
+				return luabind::object{l,false};
+			std::string ext;
+			if(ufile::get_extension(*fileName,&ext) == false)
+				return luabind::object{l,false};
+			auto loadInfo = manager->CreateDefaultLoadInfo();
+			loadInfo->flags |= util::AssetLoadFlags::DontCache | util::AssetLoadFlags::IgnoreCache;
+			auto asset = manager->LoadAsset(ufile::get_file_from_filename(*fileName),std::move(fp),ext,std::move(loadInfo));
+			switch(type)
+			{
+			case pragma::asset::Type::Model:
+				return luabind::object{l,std::static_pointer_cast<Model>(asset)};
+			case pragma::asset::Type::Material:
+				return luabind::object{l,std::static_pointer_cast<Material>(asset)};
+			case pragma::asset::Type::Texture:
+				return luabind::object{l,std::static_pointer_cast<Texture>(asset)};
+			}
+			return luabind::object{};
+		}),
+		luabind::def("load",+[](lua_State *l,const std::string &name,pragma::asset::Type type) -> Lua::var<bool,luabind::object> {
+			// See also core/server/src/lua/library.cpp
+			auto *manager = pragma::get_engine()->GetNetworkState(l)->GetAssetManager(type);
+			if(!manager)
+				return luabind::object{l,false};
+			auto asset = manager->LoadAsset(name);
+			switch(type)
+			{
+			case pragma::asset::Type::Model:
+				return luabind::object{l,std::static_pointer_cast<Model>(asset)};
+			case pragma::asset::Type::Material:
+				return luabind::object{l,std::static_pointer_cast<Material>(asset)};
+			case pragma::asset::Type::Texture:
+				return luabind::object{l,std::static_pointer_cast<Texture>(asset)};
+			}
+			return luabind::object{};
+		}),
+		luabind::def("reload",+[](lua_State *l,const std::string &name,pragma::asset::Type type) -> Lua::var<bool,luabind::object> {
+			auto *manager = c_engine->GetNetworkState(l)->GetAssetManager(type);
+			if(!manager)
+				return luabind::object{l,false};
+			auto asset = manager->ReloadAsset(name);
+			switch(type)
+			{
+			case pragma::asset::Type::Model:
+				return luabind::object{l,std::static_pointer_cast<Model>(asset)};
+			case pragma::asset::Type::Material:
+				return luabind::object{l,std::static_pointer_cast<Material>(asset)};
+			case pragma::asset::Type::Texture:
+				return luabind::object{l,std::static_pointer_cast<Texture>(asset)};
+			}
+			return luabind::object{};
+		})
 	];
 	auto defMapExportInfo = luabind::class_<pragma::asset::MapExportInfo>("MapExportInfo");
 	defMapExportInfo.def(luabind::constructor<>());

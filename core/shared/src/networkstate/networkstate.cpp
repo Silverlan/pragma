@@ -204,6 +204,18 @@ bool NetworkState::PortMaterial(const std::string &path)
 	return (mat != nullptr) ? true : false;
 }
 
+util::FileAssetManager *NetworkState::GetAssetManager(pragma::asset::Type type)
+{
+	switch(type)
+	{
+	case pragma::asset::Type::Model:
+		return &GetModelManager();
+	case pragma::asset::Type::Material:
+		return &GetMaterialManager();
+	}
+	return nullptr;
+}
+
 void NetworkState::ClearGameConVars()
 {
 #pragma message ("TODO: What about ConVars that have been created ingame?")

@@ -732,6 +732,19 @@ msys::MaterialHandle ClientState::CreateMaterial(const std::string &shader)
 	return mat;
 }
 
+util::FileAssetManager *ClientState::GetAssetManager(pragma::asset::Type type)
+{
+	switch(type)
+	{
+	case pragma::asset::Type::Texture:
+	{
+		auto &matManager = static_cast<msys::CMaterialManager&>(GetMaterialManager());
+		return &matManager.GetTextureManager();
+	}
+	}
+	return NetworkState::GetAssetManager(type);
+}
+
 Material *ClientState::LoadMaterial(const std::string &path,const std::function<void(Material*)> &onLoaded,bool bReload,bool bLoadInstantly)
 {
 	auto &matManager = GetMaterialManager();

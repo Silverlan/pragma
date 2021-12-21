@@ -13,6 +13,9 @@
 #include "pragma/lua/libraries/s_lutil.h"
 #include "pragma/lua/libraries/s_lsound.h"
 #include "pragma/lua/libraries/s_ldebug.h"
+#include "pragma/lua/libraries/lfile.h"
+#include "pragma/model/model.h"
+#include <pragma/asset/util_asset.hpp>
 #include <pragma/debug/debug_render_info.hpp>
 #include <pragma/util/util_splash_damage_info.hpp>
 #include <pragma/util/giblet_create_info.hpp>
@@ -20,7 +23,9 @@
 #include <pragma/lua/libraries/lasset.hpp>
 #include <pragma/lua/luaapi.h>
 #include <pragma/lua/classes/lalsound.h>
+#include <sharedutils/asset_loader/file_asset_manager.hpp>
 #include <luainterface.hpp>
+#include <fsys/ifile.hpp>
 
 void SGame::RegisterLuaLibraries()
 {
@@ -34,8 +39,69 @@ void SGame::RegisterLuaLibraries()
 		luabind::def("create_explosion",Lua::util::Server::create_explosion),
 		luabind::def("calc_world_direction_from_2d_coordinates",Lua::util::calc_world_direction_from_2d_coordinates)
 	];
-
+	
+	LFile;
 	Game::RegisterLuaLibraries();
+	auto modAsset = luabind::module_(GetLuaState(),"asset");
+	modAsset[
+		luabind::def("load",+[](lua_State *l,LFile &f,pragma::asset::Type type) -> Lua::var<bool,luabind::object> {
+			// See also core/client/src/lua/c_library.cpp
+			auto *manager = pragma::get_engine()->GetNetworkState(l)->GetAssetManager(type);
+			if(!manager)
+				return luabind::object{l,false};
+			auto fh = f.GetHandle();
+			if(!fh)
+				return luabind::object{l,false};
+			auto fp = std::make_unique<fsys::File>(fh);
+			auto fileName = fp->GetFileName();
+			if(!fileName.has_value())
+				return luabind::object{l,false};
+			std::string ext;
+			if(ufile::get_extension(*fileName,&ext) == false)
+				return luabind::object{l,false};
+			auto loadInfo = manager->CreateDefaultLoadInfo();
+			loadInfo->flags |= util::AssetLoadFlags::DontCache | util::AssetLoadFlags::IgnoreCache;
+			auto asset = manager->LoadAsset(ufile::get_file_from_filename(*fileName),std::move(fp),ext,std::move(loadInfo));
+			switch(type)
+			{
+			case pragma::asset::Type::Model:
+				return luabind::object{l,std::static_pointer_cast<Model>(asset)};
+			case pragma::asset::Type::Material:
+				return luabind::object{l,std::static_pointer_cast<Material>(asset)};
+			}
+			return luabind::object{};
+		}),
+		luabind::def("load",+[](lua_State *l,const std::string &name,pragma::asset::Type type) -> Lua::var<bool,luabind::object> {
+			// See also core/client/src/lua/c_library.cpp
+			auto *manager = pragma::get_engine()->GetNetworkState(l)->GetAssetManager(type);
+			if(!manager)
+				return luabind::object{l,false};
+			auto asset = manager->LoadAsset(name);
+			switch(type)
+			{
+			case pragma::asset::Type::Model:
+				return luabind::object{l,std::static_pointer_cast<Model>(asset)};
+			case pragma::asset::Type::Material:
+				return luabind::object{l,std::static_pointer_cast<Material>(asset)};
+			}
+			return luabind::object{};
+		}),
+		luabind::def("reload",+[](lua_State *l,const std::string &name,pragma::asset::Type type) -> Lua::var<bool,luabind::object> {
+			auto *manager = pragma::get_engine()->GetNetworkState(l)->GetAssetManager(type);
+			if(!manager)
+				return luabind::object{l,false};
+			auto asset = manager->ReloadAsset(name);
+			switch(type)
+			{
+			case pragma::asset::Type::Model:
+				return luabind::object{l,std::static_pointer_cast<Model>(asset)};
+			case pragma::asset::Type::Material:
+				return luabind::object{l,std::static_pointer_cast<Material>(asset)};
+			}
+			return luabind::object{};
+		})
+	];
+
 	Lua::asset::register_library(GetLuaInterface(),true);
 
 	auto resMod = luabind::module(GetLuaState(),"resource");

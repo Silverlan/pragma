@@ -177,10 +177,7 @@ bool BaseModelComponent::GetAttachment(const std::string &name,Vector3 *pos,Quat
 	return GetAttachment(hMdl->LookupAttachment(name),pos,rot);
 }
 
-void BaseModelComponent::OnRemove()
-{
-	SetModel(std::shared_ptr<Model>{nullptr});
-}
+void BaseModelComponent::OnRemove() {}
 
 void BaseModelComponent::GetAnimations(Activity activity,std::vector<unsigned int> &animations) const
 {

@@ -301,7 +301,7 @@ CallbackHandle BaseEntityComponent::BindEvent(ComponentEventId eventId,const std
 				pComponent->GetBaseTypeIndex(baseTypeIndex);
 				if(componentTypeIndex != *info.typeIndex && baseTypeIndex != *info.typeIndex)
 					continue;
-				pComponent->AddEventCallback(eventId,hCallback);
+				return pComponent->AddEventCallback(eventId,hCallback);
 			}
 		}
 	}

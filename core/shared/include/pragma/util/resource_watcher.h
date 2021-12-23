@@ -63,6 +63,7 @@ public:
 protected:
 	NetworkState *m_networkState = nullptr;
 	uint32_t m_lockedCount = 0;
+	std::recursive_mutex m_watcherMutex;
 	void OnResourceChanged(const std::string &rootPath,const std::string &path);
 	void ReloadMaterial(const std::string &path);
 	virtual void OnMaterialReloaded(const std::string &path,const std::unordered_set<Model*> &modelMap) {}

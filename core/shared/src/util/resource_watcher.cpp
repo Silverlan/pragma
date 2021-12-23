@@ -29,12 +29,14 @@ ResourceWatcherManager::ResourceWatcherManager(NetworkState *nw)
 
 void ResourceWatcherManager::Poll()
 {
+	std::scoped_lock lock {m_watcherMutex};
 	for(auto &watcher : m_watchers)
 		watcher->Poll();
 }
 
 void ResourceWatcherManager::Lock()
 {
+	std::scoped_lock lock {m_watcherMutex};
 	if(m_lockedCount++ > 0)
 		return;
 	for(auto &dirWatcher : m_watchers)
@@ -42,6 +44,7 @@ void ResourceWatcherManager::Lock()
 }
 void ResourceWatcherManager::Unlock()
 {
+	std::scoped_lock lock {m_watcherMutex};
 	assert(m_lockedCount > 0);
 	if(m_lockedCount == 0)
 		throw std::logic_error{"Attempted to unlock resource watcher more times than it has been locked!"};
@@ -333,16 +336,18 @@ bool ResourceWatcherManager::MountDirectory(const std::string &path,bool bAbsolu
 			watchFlags |= DirectoryWatcherCallback::WatchFlags::AbsolutePath;
 		if(m_lockedCount > 0)
 			watchFlags |= DirectoryWatcherCallback::WatchFlags::StartDisabled;
-		m_watchers.push_back(std::make_shared<DirectoryWatcherCallback>(path,[this,watchPaths](const std::string &fName) {
-			for(auto &resPath : watchPaths)
-			{
-				if(ustring::substr(fName,0,resPath.length()) == resPath)
+		m_watcherMutex.lock();
+			m_watchers.push_back(std::make_shared<DirectoryWatcherCallback>(path,[this,watchPaths](const std::string &fName) {
+				for(auto &resPath : watchPaths)
 				{
-					OnResourceChanged(resPath,ustring::substr(fName,resPath.length() +1));
-					break;
+					if(ustring::substr(fName,0,resPath.length()) == resPath)
+					{
+						OnResourceChanged(resPath,ustring::substr(fName,resPath.length() +1));
+						break;
+					}
 				}
-			}
-		},watchFlags));
+			},watchFlags));
+		m_watcherMutex.unlock();
 	}
 	catch(const DirectoryWatcher::ConstructException &e)
 	{

@@ -97,7 +97,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindLight(CLightComponent &light,
 bool pragma::rendering::ShaderProcessor::RecordBindMaterial(CMaterial &mat)
 {
 	if(m_curShader->RecordBindMaterial(*this,mat) == false)
-		return true;
+		return true; // TODO: This should only return true if we're doing a depth pre-pass and the material isn't transparent
 	auto flags = m_sceneFlags;
 	auto alphaMode = mat.GetAlphaMode();
 	if(alphaMode != AlphaMode::Opaque)

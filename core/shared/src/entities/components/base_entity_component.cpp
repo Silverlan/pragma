@@ -301,7 +301,9 @@ CallbackHandle BaseEntityComponent::BindEvent(ComponentEventId eventId,const std
 				pComponent->GetBaseTypeIndex(baseTypeIndex);
 				if(componentTypeIndex != *info.typeIndex && baseTypeIndex != *info.typeIndex)
 					continue;
-				return pComponent->AddEventCallback(eventId,hCallback);
+				auto cb = pComponent->AddEventCallback(eventId,hCallback);
+				FlagCallbackForRemoval(cb,CallbackType::Component,pComponent.get());
+				return cb;
 			}
 		}
 	}

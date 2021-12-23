@@ -647,6 +647,11 @@ static void shader_handler(Material *mat)
 		return;
 	mat->SetUserData(shader);
 	shader->InitializeMaterialDescriptorSet(cmat,false);
+	
+	// TODO: Cache this
+	auto *prepass = dynamic_cast<pragma::ShaderTexturedBase*>(c_engine->GetShader("prepass").get());
+	if(prepass)
+		prepass->InitializeMaterialDescriptorSet(cmat,false); // TODO: Only if this is a material with masked transparency?
 }
 
 void CGame::ReloadMaterialShader(CMaterial *mat)

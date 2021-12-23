@@ -123,6 +123,12 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 				}
 			};
 		}),
+		luabind::def("normalize_asset_name",+[](lua_State *l,const std::string &name,pragma::asset::Type type) -> std::string {
+			auto *manager = engine->GetNetworkState(l)->GetAssetManager(type);
+			if(!manager)
+				return name;
+			return manager->ToCacheIdentifier(name);
+		}),
 		luabind::def("delete",static_cast<bool(*)(lua_State*,const std::string&,pragma::asset::Type)>([](lua_State *l,const std::string &name,pragma::asset::Type type) -> bool {
 			return pragma::asset::remove_asset(name,type);
 		})),

@@ -27,6 +27,7 @@
 #include <panima/animation_set.hpp>
 #include <panima/animation_manager.hpp>
 #include <panima/slice.hpp>
+#include <luabind/copy_policy.hpp>
 
 namespace Lua::animation
 {
@@ -328,7 +329,9 @@ void Lua::animation::register_library(Lua::Interface &lua)
 			return nil;
 		return {l,channel->shared_from_this()};
 	});
-	cdAnim2.def("GetChannels",static_cast<std::vector<std::shared_ptr<panima::Channel>>&(panima::Animation::*)()>(&panima::Animation::GetChannels));
+	cdAnim2.def("GetChannels",+[](lua_State *l,panima::Animation &anim) -> luabind::tableT<panima::Channel> {
+		return Lua::vector_to_table<std::shared_ptr<panima::Channel>>(l,anim.GetChannels());
+	});
 	cdAnim2.def("FindChannel",+[](lua_State *l,panima::Animation &anim,std::string path) -> opt<std::shared_ptr<panima::Channel>> {
 		auto *channel = anim.FindChannel(std::move(path));
 		if(!channel)

@@ -652,6 +652,12 @@ void Lua::Model::register_class(
 
 	// Flex
 	auto classDefFlex = luabind::class_<::Flex>("Flex");
+	classDefFlex.def("__tostring",+[](const ::Flex &flex) -> std::string {
+		std::stringstream ss;
+		ss<<"Flex";
+		ss<<"["<<flex.GetName()<<"]";
+		return ss.str();
+	});
 	classDefFlex.def("GetName",static_cast<void(*)(lua_State*,::Flex&)>([](lua_State *l,::Flex &flex) {
 		Lua::PushString(l,flex.GetName());
 	}));

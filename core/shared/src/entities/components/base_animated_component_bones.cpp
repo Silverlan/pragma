@@ -459,15 +459,16 @@ static void get_global_bone_transforms(std::vector<umath::ScaledTransform> &tran
 		get_global_bone_transforms(transforms,bone->children,t);
 	}
 }
-void BaseAnimatedComponent::UpdateSkeleton()
+bool BaseAnimatedComponent::UpdateSkeleton()
 {
 	if(umath::is_flag_set(m_stateFlags,StateFlags::AbsolutePosesDirty) == false)
-		return;
+		return false;
 	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
-		return;
+		return false;
 	umath::set_flag(m_stateFlags,StateFlags::AbsolutePosesDirty,false);
 	auto &skeleton = hModel->GetSkeleton();
 	m_processedBones = m_bones;
 	get_global_bone_transforms(m_processedBones,skeleton.GetRootBones());
+	return true;
 }

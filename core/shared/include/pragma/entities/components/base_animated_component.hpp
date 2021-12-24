@@ -201,7 +201,7 @@ namespace pragma
 		void SetBonePosition(UInt32 boneId,const Vector3 &pos,const Quat &rot,const Vector3 *scale,Bool updatePhysics);
 
 		// Transforms all bone positions / rotations to entity space
-		void UpdateSkeleton();
+		bool UpdateSkeleton();
 
 		bool ShouldUpdateBones() const;
 		UInt32 GetBoneCount() const;

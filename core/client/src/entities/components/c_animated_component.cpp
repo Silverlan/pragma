@@ -250,7 +250,8 @@ void CAnimatedComponent::UpdateBoneMatricesMT()
 	auto *bindPose = GetBindPose();
 	if(m_boneMatrices.empty() || bindPose == nullptr)
 		return;
-	UpdateSkeleton(); // Costly
+	if(UpdateSkeleton()) // Costly
+		SetBoneBufferDirty();
 	auto physRootBoneId = OnSkeletonUpdated();
 
 	auto callbacksEnabled = AreSkeletonUpdateCallbacksEnabled();

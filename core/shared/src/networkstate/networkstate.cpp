@@ -749,8 +749,16 @@ void NetworkState::Think()
 const pragma::asset::ModelManager &NetworkState::GetModelManager() const {return const_cast<NetworkState*>(this)->GetModelManager();}
 pragma::asset::ModelManager &NetworkState::GetModelManager() {return *m_modelManager;}
 
+void NetworkState::CallOnNextTick(const std::function<void()> &f) {m_tickCallQueue.push(f);}
+
 void NetworkState::Tick()
 {
+	while(!m_tickCallQueue.empty())
+	{
+		m_tickCallQueue.front()();
+		m_tickCallQueue.pop();
+	}
+
 	CallCallbacks<void>("Tick");
 	Game *game = GetGameState();
 	if(game != NULL)

@@ -73,8 +73,10 @@ luabind::tableT<std::string> Lua::Animation::GetActivityEnums(lua_State *l)
 	auto &reg = pragma::animation::Animation::GetActivityEnumRegister();
 	auto t = luabind::newtable(l);
 	uint32_t idx = 1;
+	reg.Lock();
 	for(auto &name : reg.GetEnums())
 		t[idx++] = name;
+	reg.Unlock();
 	return t;
 }
 luabind::tableT<std::string> Lua::Animation::GetEventEnums(lua_State *l)
@@ -82,8 +84,10 @@ luabind::tableT<std::string> Lua::Animation::GetEventEnums(lua_State *l)
 	auto &reg = pragma::animation::Animation::GetEventEnumRegister();
 	auto t = luabind::newtable(l);
 	uint32_t idx = 1;
+	reg.Lock();
 	for(auto &name : reg.GetEnums())
 		t[idx++] = name;
+	reg.Unlock();
 	return t;
 }
 luabind::optional<std::string> Lua::Animation::GetActivityEnumName(lua_State *l,uint32_t id)

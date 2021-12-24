@@ -1222,18 +1222,30 @@ void Game::RegisterLuaLibraries()
 		{"export_model_asset",Lua::import::export_model_asset}
 	});
 
-	auto activityEnums = pragma::animation::Animation::GetActivityEnumRegister().GetEnums();
+	auto &reg = pragma::animation::Animation::GetActivityEnumRegister();
+	reg.Lock();
+	auto activityEnums = reg.GetEnums();
 	auto _G = luabind::globals(l);
 	for(auto i=decltype(activityEnums.size()){0};i<activityEnums.size();++i)
 		_G["Animation"][activityEnums.at(i)] = i;
 	auto eventEnums = pragma::animation::Animation::GetEventEnumRegister().GetEnums();
 	for(auto i=decltype(eventEnums.size()){0};i<eventEnums.size();++i)
 		_G["Animation"][eventEnums.at(i)] = i;
+	reg.Unlock();
 
 	auto *nw = GetNetworkState();
-	auto fAddEnum = [l](std::reference_wrapper<const std::string> name,uint32_t id) {
-		auto _G = luabind::globals(l);
-		_G["Animation"][name.get()] = id;
+	auto fAddEnum = [l,nw](std::reference_wrapper<const std::string> name,uint32_t id) {
+		auto strName = name.get();
+		// This is called in a separate thread, but we need it on the main thread
+		// to register the Lua value
+		nw->CallOnNextTick([nw,strName=std::move(strName),id]() {
+			auto *game = nw->GetGameState();
+			if(!game)
+				return;
+			auto *l = game->GetLuaState();
+			auto _G = luabind::globals(l);
+			_G["Animation"][strName] = id;
+		});
 	};
 	auto cbAct = pragma::animation::Animation::GetActivityEnumRegister().CallOnRegister(fAddEnum);
 	auto cbEv = pragma::animation::Animation::GetEventEnumRegister().CallOnRegister(fAddEnum);

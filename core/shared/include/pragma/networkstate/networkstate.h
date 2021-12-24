@@ -177,6 +177,8 @@ public:
 	virtual bool RunConsoleCommand(std::string scmd,std::vector<std::string> &argv,pragma::BasePlayerComponent *pl=nullptr,KeyState pressState=KeyState::Press,float magnitude=1.f,const std::function<bool(ConConf*,float&)> &callback=nullptr);
 	virtual ConVar *SetConVar(std::string scmd,std::string value,bool bApplyIfEqual=false) override;
 
+	void CallOnNextTick(const std::function<void()> &f);
+
 	ConVar *CreateConVar(const std::string &scmd,const std::string &value,ConVarFlags flags,const std::string &help="");
 	virtual ConCommand *CreateConCommand(const std::string &scmd,LuaFunction fc,ConVarFlags flags=ConVarFlags::None,const std::string &help="");
 protected:
@@ -201,6 +203,7 @@ protected:
 	std::unordered_set<std::string> m_missingSoundCache;
 	std::vector<CallbackHandle> m_thinkCallbacks;
 	std::vector<CallbackHandle> m_tickCallbacks;
+	std::queue<std::function<void()>> m_tickCallQueue;
 	CallbackHandle m_cbProfilingHandle = {};
 	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_profilingStageManager = nullptr;
 

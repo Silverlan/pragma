@@ -23,7 +23,7 @@
 #include <panima/channel_t.hpp>
 
 using namespace pragma;
-
+#pragma optimize("",off)
 ComponentEventId PanimaComponent::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
 ComponentEventId PanimaComponent::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId PanimaComponent::EVENT_ON_ANIMATION_COMPLETE = pragma::INVALID_COMPONENT_ID;
@@ -497,6 +497,8 @@ void PanimaComponent::ClearAnimationManagers()
 }
 bool PanimaComponent::UpdateAnimations(double dt)
 {
+	if(GetPlaybackRate() == 0.f)
+		return false;
 	return MaintainAnimations(dt);
 }
 bool PanimaComponent::MaintainAnimations(double dt)
@@ -513,6 +515,42 @@ bool PanimaComponent::MaintainAnimations(double dt)
 	return true;
 }
 
+float PanimaComponent::GetCurrentTime(panima::AnimationManager &manager) const {return manager->GetCurrentTime();}
+void PanimaComponent::SetCurrentTime(panima::AnimationManager &manager,float time)
+{
+	if(manager->GetCurrentTime() == time)
+		return;
+	manager->SetCurrentTime(time,true);
+	InvokeValueSubmitters(manager);
+}
+
+float PanimaComponent::GetCurrentTimeFraction(panima::AnimationManager &manager) const {return manager->GetCurrentTimeFraction();}
+void PanimaComponent::SetCurrentTimeFraction(panima::AnimationManager &manager,float t)
+{
+	if(manager->GetCurrentTimeFraction() == t)
+		return;
+	manager->SetCurrentTimeFraction(t,true);
+	InvokeValueSubmitters(manager);
+}
+void PanimaComponent::InvokeValueSubmitters(panima::AnimationManager &manager)
+{
+	auto *anim = manager.GetCurrentAnimation();
+	if(!anim)
+		return;
+	auto &channelValueSubmitters = manager.GetChannelValueSubmitters();
+	auto &channels = anim->GetChannels();
+	auto n = umath::min(channelValueSubmitters.size(),channels.size());
+	auto t = manager->GetCurrentTime();
+	for(auto i=decltype(n){0u};i<n;++i)
+	{
+		auto &submitter = channelValueSubmitters[i];
+		if(!submitter)
+			continue;
+		auto &channel = channels[i];
+		submitter(*channel,manager->GetLastChannelTimestampIndex(i),t);
+	}
+}
+
 void PanimaComponent::AdvanceAnimations(double dt)
 {
 	auto &ent = GetEntity();
@@ -525,21 +563,7 @@ void PanimaComponent::AdvanceAnimations(double dt)
 		auto change = (*manager)->Advance(dt);
 		if(!change)
 			continue;
-		auto *anim = manager->GetCurrentAnimation();
-		if(!anim)
-			continue;
-		auto &channelValueSubmitters = manager->GetChannelValueSubmitters();
-		auto &channels = anim->GetChannels();
-		auto n = umath::min(channelValueSubmitters.size(),channels.size());
-		auto t = (*manager)->GetCurrentTime();
-		for(auto i=decltype(n){0u};i<n;++i)
-		{
-			auto &submitter = channelValueSubmitters[i];
-			if(!submitter)
-				continue;
-			auto &channel = channels[i];
-			submitter(*channel,(*manager)->GetLastChannelTimestampIndex(i),t);
-		}
+		InvokeValueSubmitters(*manager);
 	}
 }
 void PanimaComponent::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
@@ -660,3 +684,4 @@ void CEAnim2InitializeChannelValueSubmitter::HandleReturnValues(lua_State *l)
 {
 	
 }
+#pragma optimize("",on)

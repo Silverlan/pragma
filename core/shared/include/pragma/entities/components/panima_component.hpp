@@ -12,6 +12,8 @@
 #include <panima/types.hpp>
 #include <sharedutils/property/util_property.hpp>
 
+#undef GetCurrentTime
+
 struct AnimationEvent;
 namespace util {class Path;};
 namespace pragma
@@ -52,12 +54,17 @@ namespace pragma
 		virtual void Initialize() override;
 		void PlayAnimation(panima::AnimationManager &manager,panima::Animation &anim);
 		void ReloadAnimation(panima::AnimationManager &manager);
+		float GetCurrentTime(panima::AnimationManager &manager) const;
+		void SetCurrentTime(panima::AnimationManager &manager,float time);
+		float GetCurrentTimeFraction(panima::AnimationManager &manager) const;
+		void SetCurrentTimeFraction(panima::AnimationManager &manager,float t);
 
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		using BaseEntityComponent::Load;
 	protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
+		void InvokeValueSubmitters(panima::AnimationManager &manager);
 		std::vector<std::pair<std::string,panima::PAnimationManager>>::iterator FindAnimationManager(const std::string_view &name);
 		void InitializeAnimationChannelValueSubmitters();
 		void InitializeAnimationChannelValueSubmitters(panima::AnimationManager &manager);

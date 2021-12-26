@@ -15,15 +15,25 @@
 #include <pragma/console/command_options.hpp>
 
 extern DLLNETWORK Engine *engine;
-ConVar *Lua::console::CreateConVar(lua_State *l,const std::string &cmd,const std::string &def,ConVarFlags flags,const std::string &help)
+ConVar *Lua::console::CreateConVar(lua_State *l,const std::string &cmd,::udm::Type type,Lua::udm_type def,ConVarFlags flags,const std::string &help)
 {
 	auto *state = engine->GetNetworkState(l);
 	if(state == nullptr)
 		return 0;
-	auto *cvar = state->CreateConVar(cmd,def,flags,help);
-	if(cvar == nullptr)
+	auto cvar = udm::visit(type,[&def,flags,&help](auto tag) {
+		using T = decltype(tag)::type;
+		constexpr auto type = udm::type_to_enum<T>();
+		if constexpr(type == udm::Type::Element || udm::is_array_type(type))
+			return std::shared_ptr<ConVar>{nullptr};
+		else
+		{
+			auto v = luabind::object_cast<T>(def);
+			return ConVar::Create<T>(v,flags,help);
+		}
+	});
+	if(!cvar)
 		return 0;
-	return cvar;
+	return state->RegisterConVar(cmd,cvar);
 }
 
 void Lua::console::CreateConCommand(lua_State *l,const std::string &name,const Lua::func<void,pragma::BasePlayerComponent,float,Lua::variadic<std::string>> &function,ConVarFlags flags,const std::string &help)

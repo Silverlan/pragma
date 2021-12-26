@@ -683,7 +683,7 @@ void NetworkState::DeregisterLuaModules(void *l,const std::string &identifier)
 
 ConVarMap *NetworkState::GetConVarMap() {return nullptr;}
 
-ConVar *NetworkState::CreateConVar(const std::string &scmd,const std::string &value,ConVarFlags flags,const std::string &help)
+ConVar *NetworkState::RegisterConVar(const std::string &scmd,const std::shared_ptr<ConVar> &cvar)
 {
 	auto lcmd = scmd;
 	ustring::to_lower(lcmd);
@@ -695,8 +695,12 @@ ConVar *NetworkState::CreateConVar(const std::string &scmd,const std::string &va
 			return nullptr;
 		return static_cast<ConVar*>(cf.get());
 	}
-	auto itNew = m_conVars.insert(decltype(m_conVars)::value_type(scmd,ConVar::Create<std::string>(value,flags,help)));
+	auto itNew = m_conVars.insert(decltype(m_conVars)::value_type(scmd,cvar));
 	return static_cast<ConVar*>(itNew.first->second.get());
+}
+ConVar *NetworkState::CreateConVar(const std::string &scmd,const std::string &value,ConVarFlags flags,const std::string &help)
+{
+	return RegisterConVar(scmd,ConVar::Create<std::string>(value,flags,help));
 }
 
 std::unordered_map<std::string,unsigned int> &NetworkState::GetConCommandIDs() {return m_conCommandIDs;}

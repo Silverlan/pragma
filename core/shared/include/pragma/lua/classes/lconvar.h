@@ -7,11 +7,12 @@
 #ifndef __LCONVAR_H__
 #define __LCONVAR_H__
 #include "pragma/networkdefinitions.h"
+#include "pragma/lua/types/udm.hpp"
 #include <pragma/lua/luaapi.h>
 #include <pragma/console/convars.h>
 namespace Lua::console
 {
-	ConVar *CreateConVar(lua_State *l,const std::string &cmd,const std::string &def,ConVarFlags flags=ConVarFlags::None,const std::string &help="");
+	ConVar *CreateConVar(lua_State *l,const std::string &cmd,::udm::Type type,Lua::udm_type def,ConVarFlags flags=ConVarFlags::None,const std::string &help="");
 	void CreateConCommand(lua_State *l,const std::string &name,const Lua::func<void,pragma::BasePlayerComponent,float,Lua::variadic<std::string>> &function,ConVarFlags flags,const std::string &help);
 	void CreateConCommand(lua_State *l,const std::string &name,const Lua::func<void,pragma::BasePlayerComponent,float,Lua::variadic<std::string>> &function,ConVarFlags flags);
 	void CreateConCommand(lua_State *l,const std::string &name,const Lua::func<void,pragma::BasePlayerComponent,float,Lua::variadic<std::string>> &function,const std::string &help);

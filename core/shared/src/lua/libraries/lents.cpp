@@ -247,6 +247,33 @@ void Lua::ents::register_library(lua_State *l)
 	});
 	
 	auto memberInfoDef = luabind::class_<pragma::ComponentMemberInfo>("MemberInfo");
+	memberInfoDef.def("__tostring",+[](const pragma::ComponentMemberInfo &memberInfo) -> std::string {
+		std::stringstream ss;
+		ss<<"MemberInfo";
+		ss<<"["<<memberInfo.GetName()<<"]";
+		ss<<"[Type:"<<magic_enum::enum_name(memberInfo.type)<<"]";
+		ss<<"[Spec:"<<magic_enum::enum_name(memberInfo.GetSpecializationType());
+		auto *c = memberInfo.GetCustomSpecializationType();
+		if(c)
+			ss<<"("<<*c<<")";
+		ss<<"]";
+		if(pragma::ents::is_udm_member_type(memberInfo.type))
+		{
+			udm::visit_ng(pragma::ents::member_type_to_udm_type(memberInfo.type),[&memberInfo,&ss](auto tag) {
+				using T = decltype(tag)::type;
+				if constexpr(udm::is_convertible<T,std::string>())
+				{
+					T def;
+					if(memberInfo.GetDefault<T>(def))
+					{
+						auto defStr = udm::convert<T,std::string>(def);
+						ss<<"[Def:"<<defStr<<"]";
+					}
+				}
+			});
+		}
+		return ss.str();
+	});
 	memberInfoDef.def_readonly("type",&pragma::ComponentMemberInfo::type);
 	memberInfoDef.property("name",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) {
 		return memInfo.GetName();

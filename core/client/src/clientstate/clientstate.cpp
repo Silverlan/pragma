@@ -715,7 +715,8 @@ static void init_shader(Material *mat)
 }
 msys::MaterialHandle ClientState::CreateMaterial(const std::string &path,const std::string &shader)
 {
-	auto mat = GetMaterialManager().CreateMaterial(path,shader,nullptr);
+	auto settings = ds::create_data_settings({});
+	auto mat = GetMaterialManager().CreateMaterial(path,shader,std::make_shared<ds::Block>(*settings));
 	if(mat == nullptr)
 		return mat;
 	static_cast<CMaterial*>(mat.get())->SetOnLoadedCallback(std::bind(init_shader,mat.get()));

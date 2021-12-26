@@ -44,6 +44,8 @@
 #include "pragma/lua/lua_entity_iterator.hpp"
 #include "pragma/lua/libraries/lents.h"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
+#include "pragma/lua/converters/string_view_converter_t.hpp"
+#include "pragma/lua/converters/pair_converter_t.hpp"
 #include "pragma/util/util_splash_damage_info.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/lua/classes/lentity.h"
@@ -766,12 +768,13 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defPath.def("MakeRelative",static_cast<void(*)(lua_State*,util::Path&,const std::string&)>([](lua_State *l,util::Path &p,const std::string &other) {
 		p.MakeRelative(other);
 	}));
-	defPath.def("GetComponentCount",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
-		Lua::PushInt(l,p.GetComponentCount());
-	}));
-	defPath.def("IsEmpty",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
-		Lua::PushBool(l,p.IsEmpty());
-	}));
+	defPath.def("GetComponentCount",&util::Path::GetComponentCount);
+	defPath.def("GetComponent",+[](util::Path &p,size_t offset) -> std::pair<std::string_view,size_t> {
+		size_t nextOffset;
+		auto sv = p.GetComponent(offset,&nextOffset);
+		return {sv,nextOffset};
+	});
+	defPath.def("IsEmpty",&util::Path::IsEmpty);
 	modUtil[defPath];
 
 	// Properties

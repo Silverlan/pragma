@@ -22,4 +22,7 @@ function Component:InitializeReflectionMaterial()
 	mat:UpdateTextures()
 	local matIdx = self:GetEntity():GetModel():AddMaterial(0,mat)
 	mesh:SetSkinTextureIndex(matIdx)
+
+	local mdlC = self:GetEntity():GetComponent(ents.COMPONENT_MODEL)
+	if(mdlC ~= nil) then mdlC:ReloadRenderBufferList(true) end
 end

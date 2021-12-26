@@ -79,9 +79,16 @@ function Component:OnRemove()
 end
 
 function Component:UpdatePoses()
-	if(self.m_t ~= engine.get_current_frame_index()) then
-		self.m_t = engine.get_current_frame_index()
-		self.m_posesDirty = true
+	if(CLIENT) then
+		if(self.m_t ~= engine.get_current_frame_index()) then
+			self.m_t = engine.get_current_frame_index()
+			self.m_posesDirty = true
+		end
+	else
+		if(self.m_t ~= engine.get_tick_count()) then
+			self.m_t = engine.get_tick_count()
+			self.m_posesDirty = true
+		end
 	end
 	if(self.m_posesDirty ~= true) then return end
 	self.m_posesDirty = nil

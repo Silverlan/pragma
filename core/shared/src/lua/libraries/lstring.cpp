@@ -58,6 +58,8 @@ std::string Lua::string::join(lua_State *l,luabind::table<> values,const std::st
 }
 luabind::object Lua::string::split(lua_State *l,const std::string &str,const std::string &delimiter)
 {
+	if(delimiter.empty())
+		return luabind::newtable(l);
 	size_t len = delimiter.length();
 	size_t from = 0;
 	size_t f = str.find(delimiter,from);

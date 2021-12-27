@@ -36,6 +36,7 @@ enum class RenderFlags : uint32_t;
 namespace prosper {class Shader;};
 namespace pragma::rendering
 {
+	extern DLLCLIENT bool VERBOSE_RENDER_OUTPUT_ENABLED;
 	enum class PassType : uint32_t
 	{
 		Generic = 0u,

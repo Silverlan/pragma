@@ -8,6 +8,7 @@
 #include "stdafx_cengine.h"
 #include "pragma/c_engine.h"
 #include "pragma/audio/c_audio.hpp"
+#include "pragma/rendering/render_processor.hpp"
 #include <pragma/asset/util_asset.hpp>
 #include <pragma/lua/libraries/ldebug.h>
 #include <pragma/lua/util.hpp>
@@ -75,6 +76,7 @@ void CEngine::RegisterConsoleCommands()
 		"render_debug_mode",0,ConVarFlags::None,
 		"0 = Disabled, 1 = Ambient Occlusion, 2 = Albedo Colors, 3 = Metalness, 4 = Roughness, 5 = Diffuse Lighting, 6 = Normals, 7 = Normal Map, 8 = Reflectance, 9 = IBL Prefilter, 10 = IBL Irradiance, 11 = Emission, 12 = Lightmaps, 13 = Lightmap Uvs, 14 = Unlit, 15 = Show CSM cascades, 16 = Shadow Map Depth, 17 = Forward+ Heatmap, 18 = Specular."
 	);
+	conVarMap.RegisterConVar<bool>("render_enable_verbose_output",false,ConVarFlags::None,"Enables or disables verbose rendering output.");
 	conVarMap.RegisterConVar<bool>("render_ibl_enabled",true,ConVarFlags::Archive,"Enables or disables image-based lighting.");
 	conVarMap.RegisterConVar<bool>("render_dynamic_lighting_enabled",true,ConVarFlags::Archive,"Enables or disables dynamic lighting.");
 	conVarMap.RegisterConVar<bool>("render_dynamic_shadows_enabled",true,ConVarFlags::Archive,"Enables or disables dynamic shadows.");
@@ -113,6 +115,10 @@ void CEngine::RegisterConsoleCommands()
 	conVarMap.RegisterConVarCallback("render_multithreaded_rendering_enabled",std::function<void(NetworkState*,ConVar*,bool,bool)>{[this](
 		NetworkState *nw,ConVar *cv,bool,bool enabled) -> void {
 			GetRenderContext().SetMultiThreadedRenderingEnabled(enabled);
+	}});
+	conVarMap.RegisterConVarCallback("render_enable_verbose_output",std::function<void(NetworkState*,ConVar*,bool,bool)>{[this](
+		NetworkState *nw,ConVar *cv,bool,bool enabled) -> void {
+		pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED = enabled;
 	}});
 	conVarMap.RegisterConCommand("crash",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		if(!argv.empty() && argv.front() == "exception")

@@ -177,7 +177,15 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 		auto &renderMesh = renderMeshes[meshIdx];
 		auto *mat = mdlC->GetRenderMaterial(renderMesh->GetSkinTextureIndex());
 		if(mat == nullptr)
+		{
+			if(pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED)
+			{
+				Con::cwar<<"[RenderQueue] WARNING: Entity";
+				mdlC->GetEntity().print(Con::cout);
+				Con::cwar<<" has invalid render material!"<<Con::endl;
+			}
 			continue;
+		}
 		auto *shader = static_cast<pragma::ShaderGameWorldLightingPass*>(mat->GetUserData2());
 		if(shader == nullptr)
 		{
@@ -188,7 +196,15 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 		}
 		shader = rasterizer->GetShaderOverride(shader);
 		if(shader == nullptr)
+		{
+			if(pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED)
+			{
+				Con::cwar<<"[RenderQueue] WARNING: Entity";
+				mdlC->GetEntity().print(Con::cout);
+				Con::cwar<<" has invalid render material shader!"<<Con::endl;
+			}
 			continue;
+		}
 		auto specializationFlags = baseShaderSpecializationFlags | renderBufferData[meshIdx].pipelineSpecializationFlags |
 			shader->GetBaseSpecializationFlags();
 		auto pipelineIdx = shader->FindPipelineIndex(
@@ -198,7 +214,15 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 		);
 		prosper::PipelineID pipelineId;
 		if(pipelineIdx.has_value() == false || shader->GetPipelineId(pipelineId,*pipelineIdx) == false || pipelineId == std::numeric_limits<decltype(pipelineId)>::max())
+		{
+			if(pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED)
+			{
+				Con::cwar<<"[RenderQueue] WARNING: Entity";
+				mdlC->GetEntity().print(Con::cout);
+				Con::cwar<<" has specialization flags referring to invalid shader pipeline!"<<Con::endl;
+			}
 			continue;
+		}
 		// shader = rasterizationRenderer->GetShaderOverride(shader);
 		// if(shader == nullptr)
 		// 	continue;
@@ -210,7 +234,15 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 			continue;
 		auto matIdx = mat->GetIndex();
 		if(matIdx == std::numeric_limits<decltype(matIdx)>::max())
+		{
+			if(pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED)
+			{
+				Con::cwar<<"[RenderQueue] WARNING: Entity";
+				mdlC->GetEntity().print(Con::cout);
+				Con::cwar<<" has unindexed material '"<<mat->GetName()<<"'!"<<Con::endl;
+			}
 			continue;
+		}
 		pragma::rendering::RenderQueueItem item {static_cast<CBaseEntity&>(renderC.GetEntity()),meshIdx,*mat,pipelineId,translucent ? &cam : nullptr};
 		if(fOptInsertItemToQueue)
 			fOptInsertItemToQueue(*renderQueue,item);

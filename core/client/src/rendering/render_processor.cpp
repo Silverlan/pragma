@@ -37,6 +37,7 @@ static bool g_collectRenderStats = false;
 static CallbackHandle g_cbPreRenderScene = {};
 static CallbackHandle g_cbPostRenderScene = {};
 static std::unique_ptr<DebugRenderFilter> g_debugRenderFilter = nullptr;
+DLLCLIENT bool pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED = false;
 void set_debug_render_filter(std::unique_ptr<DebugRenderFilter> filter)
 {
 	g_debugRenderFilter = std::move(filter);
@@ -402,17 +403,29 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipe
 
 	m_curShader = shader;
 	if(shader->GetBaseTypeHashCode() != pragma::ShaderGameWorld::HASH_TYPE || shader->IsValid() == false)
+	{
+		if(VERBOSE_RENDER_OUTPUT_ENABLED)
+			Con::cwar<<"[Render] WARNING: Shader "<<shader->GetIdentifier()<<" is not a valid game shader!";
 		return false;
+	}
 	auto *shaderScene = static_cast<pragma::ShaderGameWorld*>(shader);
 	if((g_debugRenderFilter && g_debugRenderFilter->shaderFilter && g_debugRenderFilter->shaderFilter(*shaderScene) == false))
+	{
+		if(VERBOSE_RENDER_OUTPUT_ENABLED)
+			Con::cwar<<"[Render] WARNING: Shader "<<shaderScene->GetIdentifier()<<" has been filtered out!";
 		return false;
+	}
 	
 	auto &scene = *m_drawSceneInfo.drawSceneInfo.scene;
 	auto bView = (m_camType == CameraType::View) ? true : false;
 	auto *renderer = scene.GetRenderer();
 	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : ComponentHandle<pragma::CRasterizationRendererComponent>{};
 	if(raster.expired())
+	{
+		if(VERBOSE_RENDER_OUTPUT_ENABLED)
+			Con::cwar<<"[Render] WARNING: Scene '"<<scene.GetEntity().GetName()<<"' has no valid rasterization renderer!";
 		return false;
+	}
 	m_shaderProcessor.RecordBindShader(scene,*raster,bView,m_baseSceneFlags,*shaderScene,pipelineIdx);
 	m_shaderProcessor.SetClipPlane(m_drawSceneInfo.drawSceneInfo.clipPlane);
 	
@@ -466,13 +479,26 @@ bool pragma::rendering::BaseRenderProcessor::BindMaterial(CMaterial &mat)
 		return umath::is_flag_set(m_stateFlags,StateFlags::MaterialBound);
 	UnbindMaterial();
 	m_curMaterial = &mat;
-	if(
-		umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false || mat.IsInitialized() == false || 
-		(g_debugRenderFilter && g_debugRenderFilter->materialFilter && g_debugRenderFilter->materialFilter(mat) == false) || 
-		m_shaderProcessor.RecordBindMaterial(mat) == false
-		//m_shaderScene->BindMaterial(mat) == false
-	)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false)
 		return false;
+	if(mat.IsInitialized() == false)
+	{
+		if(VERBOSE_RENDER_OUTPUT_ENABLED)
+			Con::cwar<<"[Render] WARNING: Material '"<<mat.GetName()<<"' has not been initialized!";
+		return false;
+	}
+	if(g_debugRenderFilter && g_debugRenderFilter->materialFilter && g_debugRenderFilter->materialFilter(mat) == false)
+	{
+		if(VERBOSE_RENDER_OUTPUT_ENABLED)
+			Con::cwar<<"[Render] WARNING: Material '"<<mat.GetName()<<"' has been filtered out!";
+		return false;
+	}
+	if(m_shaderProcessor.RecordBindMaterial(mat) == false)
+	{
+		if(VERBOSE_RENDER_OUTPUT_ENABLED)
+			Con::cwar<<"[Render] WARNING: Failed to bind material '"<<mat.GetName()<<"'!";
+		return false;
+	}
 
 	if(m_stats)
 	{
@@ -494,17 +520,53 @@ bool pragma::rendering::BaseRenderProcessor::BindEntity(CBaseEntity &ent)
 	UnbindEntity();
 	m_curEntity = &ent;
 	auto *renderC = ent.GetRenderComponent();
-	if(umath::is_flag_set(m_stateFlags,StateFlags::MaterialBound) == false || renderC == nullptr || (g_debugRenderFilter && g_debugRenderFilter->entityFilter && g_debugRenderFilter->entityFilter(ent,*m_curMaterial) == false))
+	if(umath::is_flag_set(m_stateFlags,StateFlags::MaterialBound) == false)
 		return false;
+	if(renderC == nullptr)
+	{
+		if(VERBOSE_RENDER_OUTPUT_ENABLED)
+		{
+			Con::cwar<<"[Render] WARNING: Invalid render component for entity ";
+			ent.print(Con::cout);
+			Con::cwar<<"!"<<Con::endl;
+		}
+		return false;
+	}
+	if(g_debugRenderFilter && g_debugRenderFilter->entityFilter && g_debugRenderFilter->entityFilter(ent,*m_curMaterial))
+	{
+		if(VERBOSE_RENDER_OUTPUT_ENABLED)
+		{
+			Con::cwar<<"[Render] WARNING: Entity ";
+			ent.print(Con::cout);
+			Con::cwar<<" has been filtered out!"<<Con::endl;
+		}
+		return false;
+	}
 	// if(m_stats && umath::is_flag_set(renderC->GetStateFlags(),CRenderComponent::StateFlags::RenderBufferDirty))
 	// 	++m_stats->numEntityBufferUpdates;
 	// renderC->UpdateRenderBuffers(m_drawSceneInfo.commandBuffer);
 	//if(m_shaderScene->BindEntity(ent) == false)
 	//	return false;
 	if(m_shaderProcessor.RecordBindEntity(ent) == false)
+	{
+		if(VERBOSE_RENDER_OUTPUT_ENABLED)
+		{
+			Con::cwar<<"[Render] WARNING: Failed to bind entity ";
+			ent.print(Con::cout);
+			Con::cwar<<"!"<<Con::endl;
+		}
 		return false;
+	}
 	if(m_drawSceneInfo.drawSceneInfo.renderFilter && m_drawSceneInfo.drawSceneInfo.renderFilter(ent) == false)
+	{
+		if(VERBOSE_RENDER_OUTPUT_ENABLED)
+		{
+			Con::cwar<<"[Render] WARNING: Entity ";
+			ent.print(Con::cout);
+			Con::cwar<<" has been filtered out!"<<Con::endl;
+		}
 		return false;
+	}
 	
 	m_curRenderC = renderC;
 	m_curEntityMeshList = &renderC->GetRenderMeshes();
@@ -538,11 +600,28 @@ pragma::ShaderGameWorld *pragma::rendering::BaseRenderProcessor::GetCurrentShade
 
 bool pragma::rendering::BaseRenderProcessor::Render(CModelSubMesh &mesh,pragma::RenderMeshIndex meshIdx,const RenderQueue::InstanceSet *instanceSet)
 {
-	if(umath::is_flag_set(m_stateFlags,StateFlags::EntityBound) == false || m_curRenderC == nullptr || (g_debugRenderFilter && g_debugRenderFilter->meshFilter && g_debugRenderFilter->meshFilter(*m_curEntity,m_curMaterial,mesh,meshIdx) == false))
+	if(umath::is_flag_set(m_stateFlags,StateFlags::EntityBound) == false || m_curRenderC == nullptr)
 		return false;
+	if((g_debugRenderFilter && g_debugRenderFilter->meshFilter && g_debugRenderFilter->meshFilter(*m_curEntity,m_curMaterial,mesh,meshIdx) == false))
+	{
+		if(VERBOSE_RENDER_OUTPUT_ENABLED)
+		{
+			Con::cwar<<"[Render] WARNING: Mesh "<<meshIdx<<" of entity ";
+			m_curEntity->print(Con::cout);
+			Con::cwar<<" has been filtered out!"<<Con::endl;
+		}
+		return false;
+	}
 	++m_numShaderInvocations;
 	
-	return m_shaderProcessor.RecordDraw(mesh,meshIdx,instanceSet);
+	auto r = m_shaderProcessor.RecordDraw(mesh,meshIdx,instanceSet);
+	if(r == false && VERBOSE_RENDER_OUTPUT_ENABLED)
+	{
+		Con::cwar<<"[Render] WARNING: Failed to draw mesh "<<meshIdx<<" of entity ";
+		m_curEntity->print(Con::cout);
+		Con::cwar<<"!"<<Con::endl;
+	}
+	return r;
 #if 0
 	auto bUseVertexAnim = false;
 	auto *mdlComponent = m_curRenderC->GetModelComponent();

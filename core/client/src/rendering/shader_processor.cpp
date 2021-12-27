@@ -26,7 +26,7 @@
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,const pragma::ShaderGameWorld &shader,bool view)
 {
 	auto *dsScene = view ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
@@ -72,7 +72,11 @@ bool pragma::rendering::ShaderProcessor::RecordBindShader(
 	m_depthPrepass = shader.IsDepthPrepassShader();
 
 	if(m_cmdBuffer.RecordBindShaderPipeline(shader,pipelineIdx) == false)
+	{
+		if(VERBOSE_RENDER_OUTPUT_ENABLED)
+			Con::cwar<<"[Render] WARNING: Failed to bind pipeline "<<pipelineIdx<<" of shader "<<shader.GetIdentifier()<<"!"<<Con::endl;
 		return false;
+	}
 
 #if 0
 	// Reset depth bias
@@ -132,10 +136,26 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(CBaseEntity &ent)
 	auto *descSet = renderC->GetRenderDescriptorSet();
 	assert(descSet);
 	if(descSet == nullptr)
+	{
+		if(VERBOSE_RENDER_OUTPUT_ENABLED)
+		{
+			Con::cwar<<"[Render] WARNING: Entity ";
+			ent.print(Con::cout);
+			Con::cwar<<" has invalid render descriptor set!"<<Con::endl;
+		}
 		return false;
+	}
 	auto sceneFlags = m_sceneFlags;
 	if(m_curShader->RecordBindEntity(*this,*renderC,*m_currentPipelineLayout,m_entityInstanceDescriptorSetIndex) == false)
+	{
+		if(VERBOSE_RENDER_OUTPUT_ENABLED)
+		{
+			Con::cwar<<"[Render] WARNING: Failed to bind entity ";
+			ent.print(Con::cout);
+			Con::cwar<<" to shader "<<m_curShader->GetIdentifier()<<"!"<<Con::endl;
+		}
 		return false;
+	}
 
 	auto *clipPlane = renderC->GetRenderClipPlane();
 	if(clipPlane)
@@ -207,8 +227,29 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh,pragma::
 	}
 	auto &vkMesh = mesh.GetSceneMesh();
 	auto &bufferData =  *m_modelC->GetRenderBufferData(meshIdx);
-	if(bufferData.renderBuffer == nullptr || (m_depthPrepass && !bufferData.enableDepthPrepass) || m_cmdBuffer.RecordBindRenderBuffer(*bufferData.renderBuffer) == false)
+	if(bufferData.renderBuffer == nullptr)
+	{
+		if(VERBOSE_RENDER_OUTPUT_ENABLED)
+		{
+			Con::cwar<<"[Render] WARNING: Render buffer data of entity ";
+			m_modelC->GetEntity().print(Con::cout);
+			Con::cwar<<" has invalid render buffer!"<<Con::endl;
+		}
 		return false;
+	}
+	if((m_depthPrepass && !bufferData.enableDepthPrepass))
+		return false;
+	
+	if(m_cmdBuffer.RecordBindRenderBuffer(*bufferData.renderBuffer) == false)
+	{
+		if(VERBOSE_RENDER_OUTPUT_ENABLED)
+		{
+			Con::cwar<<"[Render] WARNING: Failed to bind render buffer of entity ";
+			m_modelC->GetEntity().print(Con::cout);
+			Con::cwar<<"!"<<Con::endl;
+		}
+		return false;
+	}
 
 	uint32_t instanceCount = 1;
 	if(instanceSet)
@@ -238,4 +279,3 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh,pragma::
 }
 inline CBaseEntity &pragma::rendering::ShaderProcessor::GetCurrentEntity() const {return static_cast<CBaseEntity&>(m_modelC->GetEntity());}
 inline const pragma::CSceneComponent &pragma::rendering::ShaderProcessor::GetCurrentScene() const {return *m_sceneC;}
-#pragma optimize("",on)

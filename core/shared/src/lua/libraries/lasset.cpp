@@ -110,6 +110,18 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 		luabind::def("exists",Lua::asset::exists),
 		luabind::def("find_file",Lua::asset::find_file),
 		luabind::def("is_loaded",Lua::asset::is_loaded),
+		luabind::def("wait_until_loaded",+[](lua_State *l,const std::string &name,pragma::asset::Type type) -> bool {
+			auto *manager = engine->GetNetworkState(l)->GetAssetManager(type);
+			if(!manager)
+				return false;
+			return manager->WaitUntilAssetLoaded(name);
+		}),
+		luabind::def("wait_until_all_pending_jobs_complete",+[](lua_State *l,const std::string &name,pragma::asset::Type type) {
+			auto *manager = engine->GetNetworkState(l)->GetAssetManager(type);
+			if(!manager)
+				return;
+			manager->WaitForAllPendingCompleted();
+		}),
 		luabind::def("precache",+[](lua_State *l,const std::string &name,pragma::asset::Type type)
 			-> Lua::var<bool,std::pair<util::FileAssetManager::PreloadResult::Result,std::optional<util::AssetLoadJobId>>> {
 			auto *manager = engine->GetNetworkState(l)->GetAssetManager(type);

@@ -687,6 +687,15 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		debug::get_domain().EndTask();
 		return 0;
 	})
+#else
+	lua_pushtablecfunction(lua.GetState(),"debug","start_profiling_task",+[](lua_State *l) -> int {
+		// Do nothing
+		return 0;
+	})
+	lua_pushtablecfunction(lua.GetState(),"debug","stop_profiling_task",+[](lua_State *l) -> int {
+		// Do nothing
+		return 0;
+	})
 #endif
 
 	lua_register(lua.GetState(),"print",Lua::console::print);

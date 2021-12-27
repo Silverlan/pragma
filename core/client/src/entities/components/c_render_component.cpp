@@ -47,7 +47,7 @@ namespace pragma
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
-#pragma optimize("",off)
+
 static std::shared_ptr<prosper::IUniformResizableBuffer> s_instanceBuffer = nullptr;
 decltype(CRenderComponent::s_ocExemptEntities) CRenderComponent::s_ocExemptEntities = {};
 ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT = INVALID_COMPONENT_ID;
@@ -696,6 +696,8 @@ void CRenderComponent::SetSceneRenderPass(pragma::rendering::SceneRenderPass pas
 
 	if(pass == rendering::SceneRenderPass::None)
 		ClearRenderBuffers();
+	else if(GetEntity().IsSpawned())
+		InitializeRenderBuffers();
 }
 bool CRenderComponent::IsInRenderGroup(pragma::rendering::RenderGroup group) const {return umath::is_flag_set(GetRenderGroups(),group);}
 void CRenderComponent::AddToRenderGroup(pragma::rendering::RenderGroup group) {SetRenderGroups(GetRenderGroups() | group);}
@@ -721,7 +723,7 @@ void CRenderComponent::SetRenderGroups(pragma::rendering::RenderGroup mode)
 void CRenderComponent::InitializeRenderBuffers()
 {
 	// Initialize render buffer if it doesn't exist
-	if(m_renderBuffer != nullptr || pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE.IsValid() == false)
+	if(m_renderBuffer != nullptr || pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE.IsValid() == false || *m_renderPass == rendering::SceneRenderPass::None)
 		return;
 	
 	c_engine->GetRenderContext().WaitIdle();
@@ -929,4 +931,3 @@ void CEOnRenderBoundsChanged::PushArguments(lua_State *l)
 	Lua::Push<Vector3>(l,sphere.pos);
 	Lua::PushNumber(l,sphere.radius);
 }
-#pragma optimize("",on)

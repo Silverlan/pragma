@@ -60,7 +60,7 @@
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_path.hpp>
 #include <fsys/filesystem.h>
-#pragma optimize("",off)
+
 const pragma::IServerState &Engine::GetServerStateInterface() const
 {
 	if(m_libServer == nullptr)
@@ -975,4 +975,3 @@ REGISTER_ENGINE_CONVAR_CALLBACK(debug_profiling_enabled,[](NetworkState*,ConVar*
 		return;
 	engine->SetProfilingEnabled(enabled);
 });
-#pragma optimize("",on)

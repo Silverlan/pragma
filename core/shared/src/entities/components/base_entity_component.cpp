@@ -14,7 +14,7 @@
 #include <udm.hpp>
 
 using namespace pragma;
-#pragma optimize("",off)
+
 DLLNETWORK std::ostream& operator<<(std::ostream &os,const pragma::BaseEntityComponent &component)
 {
 	auto *info = component.GetEntity().GetNetworkState()->GetGameState()->GetEntityComponentManager().GetComponentInfo(component.GetComponentId());
@@ -599,4 +599,3 @@ std::optional<std::string> BaseEntityComponent::GetMemberUri(Game *game,std::var
 	auto q = uri->find('?');
 	return uri->substr(0,q) +"/" +*memberName +uri->substr(q);
 }
-#pragma optimize("",on)

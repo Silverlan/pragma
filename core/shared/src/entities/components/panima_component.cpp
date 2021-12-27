@@ -23,7 +23,7 @@
 #include <panima/channel_t.hpp>
 
 using namespace pragma;
-#pragma optimize("",off)
+
 ComponentEventId PanimaComponent::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
 ComponentEventId PanimaComponent::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId PanimaComponent::EVENT_ON_ANIMATION_COMPLETE = pragma::INVALID_COMPONENT_ID;
@@ -684,4 +684,3 @@ void CEAnim2InitializeChannelValueSubmitter::HandleReturnValues(lua_State *l)
 {
 	
 }
-#pragma optimize("",on)

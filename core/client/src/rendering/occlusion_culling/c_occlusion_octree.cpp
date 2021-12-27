@@ -11,7 +11,7 @@
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/debug/c_debugoverlay.h"
 #include <pragma/math/intersection.h>
-#pragma optimize("",off)
+
 BaseOcclusionOctree::Node::Node(BaseOcclusionOctree *tree,Node *parent)
 	: m_tree(tree),m_parent((parent != nullptr) ? parent->shared_from_this() : std::weak_ptr<BaseOcclusionOctree::Node>{})
 {}
@@ -355,4 +355,3 @@ const typename BaseOcclusionOctree::Node &BaseOcclusionOctree::GetRootNode() con
 float BaseOcclusionOctree::GetMinNodeSize() const {return m_minNodeSize;}
 float BaseOcclusionOctree::GetMaxNodeSize() const {return m_maxNodeSize;}
 void BaseOcclusionOctree::DebugPrint() const {m_root->DebugPrint();}
-#pragma optimize("",on)

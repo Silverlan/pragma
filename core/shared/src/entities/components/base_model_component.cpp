@@ -20,7 +20,7 @@
 #include <udm.hpp>
 
 using namespace pragma;
-#pragma optimize("",off)
+
 ComponentEventId BaseModelComponent::EVENT_ON_MODEL_CHANGED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseModelComponent::EVENT_ON_MODEL_MATERIALS_LOADED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseModelComponent::EVENT_ON_SKIN_CHANGED = pragma::INVALID_COMPONENT_ID;
@@ -480,4 +480,3 @@ void CEOnModelChanged::PushArguments(lua_State *l)
 {
 	Lua::Push<std::shared_ptr<Model>>(l,model);
 }
-#pragma optimize("",on)

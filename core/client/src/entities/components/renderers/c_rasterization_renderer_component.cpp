@@ -31,7 +31,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 LINK_ENTITY_TO_CLASS(rasterization_renderer,CRasterizationRenderer);
 
 ComponentEventId CRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS = INVALID_COMPONENT_ID;
@@ -595,4 +595,3 @@ static void cl_render_ssao_callback(NetworkState*,ConVar*,bool,bool enabled)
 		c.SetSSAOEnabled(enabled);
 }
 REGISTER_CONVAR_CALLBACK_CL(cl_render_ssao,cl_render_ssao_callback);
-#pragma optimize("",on)

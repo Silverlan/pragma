@@ -14,7 +14,7 @@
 #include "pragma/debug/c_debugoverlay.h"
 #include <pragma/math/intersection.h>
 #include <sstream>
-#pragma optimize("",off)
+
 template<class T>
 	std::shared_ptr<typename OcclusionOctree<T>::Node> OcclusionOctree<T>::Node::Create(OcclusionOctree<T> *tree,Node *parent)
 {
@@ -479,6 +479,5 @@ template<class T>
 }
 #endif
 
-#pragma optimize("",on)
 
 #endif

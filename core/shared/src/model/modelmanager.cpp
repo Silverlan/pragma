@@ -17,7 +17,7 @@
 #include <pragma/debug/intel_vtune.hpp>
 
 extern DLLNETWORK Engine *engine;
-#pragma optimize("",off)
+
 pragma::asset::IModelFormatHandler::IModelFormatHandler(util::IAssetManager &assetManager)
 	: util::IAssetFormatHandler{assetManager}
 {}
@@ -357,4 +357,3 @@ void pragma::asset::ModelManager::FlagForRemoval(const Model &mdl,bool flag)
 		return;
 	FlagForRemoval(it->first);
 }
-#pragma optimize("",on)

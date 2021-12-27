@@ -10,7 +10,7 @@
 #include "pragma/game/game_resources.hpp"
 #include "pragma/asset/util_asset.hpp"
 
-#pragma optimize("",off)
+
 pragma::asset::SourceMdlFormatHandler::SourceMdlFormatHandler(util::IAssetManager &assetManager)
 	: util::IImportAssetFormatHandler{assetManager}
 {}
@@ -66,4 +66,3 @@ bool pragma::asset::AssetManagerFormatHandler::Import(const std::string &outputP
 	}
 	return true;
 }
-#pragma optimize("",on)

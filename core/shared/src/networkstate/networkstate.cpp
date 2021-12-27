@@ -240,23 +240,31 @@ Material *NetworkState::LoadMaterial(const std::string &path,bool bReload) {retu
 
 Material *NetworkState::LoadMaterial(const std::string &path,bool precache,bool bReload)
 {
-#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	debug::get_domain().BeginTask("load_material");
-	util::ScopeGuard sgVtune {[]() {debug::get_domain().EndTask();}};
-#endif
 	static auto bSkipPort = false;
 	auto &matManager = GetMaterialManager();
 	auto success = true;
 	Material *mat = nullptr;
 	if(precache)
 	{
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+		debug::get_domain().BeginTask("preload_material");
+#endif
 		success = matManager.PreloadAsset(path);
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+		debug::get_domain().EndTask();
+#endif
 		if(success)
 			return nullptr;
 	}
 	else
 	{
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+		debug::get_domain().BeginTask("load_material");
+#endif
 		auto asset = bReload ? matManager.ReloadAsset(path) : matManager.LoadAsset(path);
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+		debug::get_domain().EndTask();
+#endif
 		success = (asset != nullptr);
 		mat = asset.get();
 	}
@@ -587,6 +595,10 @@ void NetworkState::InitializeDLLModule(lua_State *l,std::shared_ptr<util::Librar
 
 std::shared_ptr<util::Library> NetworkState::InitializeLibrary(std::string library,std::string *err,lua_State *l)
 {
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().BeginTask("load_library_module_" +library);
+	util::ScopeGuard sgVtune {[]() {debug::get_domain().EndTask();}};
+#endif
 	if(l == nullptr)
 		l = GetLuaState();
 	auto libAbs = util::get_normalized_module_path(library,IsClient());
@@ -762,6 +774,14 @@ void NetworkState::Tick()
 		m_tickCallQueue.front()();
 		m_tickCallQueue.pop();
 	}
+
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+		debug::get_domain().BeginTask("poll_model_manager");
+#endif
+	m_modelManager->Poll();
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+		debug::get_domain().EndTask();
+#endif
 
 	CallCallbacks<void>("Tick");
 	Game *game = GetGameState();

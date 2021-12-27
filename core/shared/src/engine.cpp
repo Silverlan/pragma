@@ -642,6 +642,12 @@ bool Engine::Initialize(int argc,char *argv[])
 void Engine::InitializeAssetManager(util::FileAssetManager &assetManager) const
 {
 	assetManager.SetExternalSourceFileImportHandler([this,&assetManager](const std::string &path,const std::string &outputPath) -> std::optional<std::string> {
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().BeginTask("import_asset_file");
+	util::ScopeGuard sg {[]() {
+		::debug::get_domain().EndTask();
+	}};
+#endif
 		auto *nw = GetClientState();
 		if(!nw || !nw->IsGameActive())
 		{

@@ -15,6 +15,7 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_modelmanager.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include <pragma/debug/intel_vtune.hpp>
 #include <shader/prosper_pipeline_loader.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -216,8 +217,15 @@ void CModelComponent::UpdateRenderBufferList()
 		if(shader && shader->IsValid())
 		{
 			renderBuffer = mesh.GetRenderBuffer(*shader);
+
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+			::debug::get_domain().BeginTask("init_mat_desc_set");
+#endif
 			if(!shader->InitializeMaterialDescriptorSet(*mat))
 				mat = nullptr;
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+			::debug::get_domain().EndTask();
+#endif
 		}
 		m_lodMeshRenderBufferData.push_back({});
 		auto &renderBufferData = m_lodMeshRenderBufferData.back();

@@ -38,6 +38,7 @@
 #include <pragma/lua/lua_error_handling.hpp>
 #include <pragma/lua/libraries/lutil.hpp>
 #include <luasystem_file.h>
+#include <pragma/debug/intel_vtune.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/error.hpp>
 #include <pragma/networking/resources.h>
@@ -753,18 +754,36 @@ Material *ClientState::LoadMaterial(const std::string &path,const std::function<
 	Material *mat = nullptr;
 	if(!bLoadInstantly)
 	{
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+		debug::get_domain().BeginTask("preload_material");
+#endif
 		success = matManager.PreloadAsset(path);
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+		debug::get_domain().EndTask();
+#endif
 		return nullptr;
 	}
 	else if(bReload)
 	{
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+		debug::get_domain().BeginTask("load_material");
+#endif
 		auto asset = matManager.ReloadAsset(path);
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+		debug::get_domain().EndTask();
+#endif
 		success = (asset != nullptr);
 		mat = asset.get();
 	}
 	else
 	{
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+		debug::get_domain().BeginTask("load_material");
+#endif
 		auto asset = matManager.LoadAsset(path);
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+		debug::get_domain().EndTask();
+#endif
 		success = (asset != nullptr);
 		mat = asset.get();
 	}

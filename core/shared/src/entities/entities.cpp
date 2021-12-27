@@ -15,8 +15,8 @@
 #include "pragma/entities/baseworld.h"
 #include "pragma/entities/output.h"
 #include "pragma/entities/entity_component_system_t.hpp"
+#include "pragma/debug/intel_vtune.hpp"
 #include "pragma/asset_types/world.hpp"
-
 
 pragma::BaseWorldComponent *Game::GetWorld() {return !m_worldComponents.empty() ? m_worldComponents[0].get() : nullptr;}
 const std::vector<util::TWeakSharedHandle<pragma::BaseWorldComponent>> &Game::GetWorldComponents() const {return m_worldComponents;}
@@ -24,7 +24,14 @@ unsigned int Game::GetEntityCount() {return 0;}
 void Game::RemoveEntity(BaseEntity*) {}
 BaseEntity *Game::CreateEntity() {return NULL;}
 BaseEntity *Game::CreateEntity(std::string classname) {return NULL;}
-void Game::SpawnEntity(BaseEntity *ent) {ent->OnSpawn();}
+void Game::SpawnEntity(BaseEntity *ent)
+{
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().BeginTask("spawn_entity");
+	util::ScopeGuard sgVtune {[]() {debug::get_domain().EndTask();}};
+#endif
+	ent->OnSpawn();
+}
 BaseEntity *Game::GetEntity(unsigned int) {return NULL;}
 BaseEntity *Game::GetEntityByLocalIndex(uint32_t idx) {return GetEntity(idx);}
 

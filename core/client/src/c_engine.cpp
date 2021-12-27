@@ -1225,8 +1225,14 @@ void CEngine::DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t n_curre
 
 	auto ptrDrawCmd = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd.shared_from_this());
 	CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("DrawFrame",std::ref(ptrDrawCmd));
-
+	
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+		debug::get_domain().BeginTask("poll_material_manager");
+#endif
 	static_cast<msys::CMaterialManager&>(*m_clInstance->materialManager).Poll(); // Requires active command buffer
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+		debug::get_domain().EndTask();
+#endif
 
 	StartProfilingStage(CPUProfilingPhase::GUI);
 	auto &gui = WGUI::GetInstance();

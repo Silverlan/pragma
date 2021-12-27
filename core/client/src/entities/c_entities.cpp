@@ -15,6 +15,7 @@
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/game/c_game_entities.h"
 #include <sharedutils/util_string.h>
+#include <pragma/debug/intel_vtune.hpp>
 #include <pragma/game/game_lua_entity.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
@@ -37,6 +38,10 @@ CBaseEntity *CGame::CreateEntity(std::string classname)
 	if(umath::is_flag_set(m_flags,GameFlags::ClosingGame))
 		return nullptr;
 	StringToLower(classname);
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().BeginTask("create_entity");
+	util::ScopeGuard sgVtune {[]() {debug::get_domain().EndTask();}};
+#endif
 	CBaseEntity *entlua = CreateLuaEntity(classname);
 	if(entlua != NULL)
 		return entlua;
@@ -66,8 +71,14 @@ void CGame::RemoveEntity(BaseEntity *ent)
 		m_numPlayers--;
 	unsigned int cIdx = static_cast<CBaseEntity*>(ent)->GetClientIndex();
 	unsigned int idx = ent->GetIndex();
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().BeginTask("remove_entity");
+#endif
 	m_ents[cIdx]->OnRemove();
 	delete m_ents[cIdx];
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().EndTask();
+#endif
 	if(idx > 0)
 	{
 		m_shEnts[idx] = NULL;
@@ -124,6 +135,10 @@ CBaseEntity *CGame::GetEntityByClientIndex(unsigned int idx)
 
 CBaseEntity *CGame::CreateLuaEntity(std::string classname,unsigned int idx,bool bLoadIfNotExists)
 {
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().BeginTask("create_lua_entity");
+	util::ScopeGuard sgVtune {[]() {debug::get_domain().EndTask();}};
+#endif
 	luabind::object oClass {};
 	auto *ent = static_cast<CBaseEntity*>(Game::CreateLuaEntity<CLuaEntity,pragma::lua::CLuaEntityHolder>(classname,oClass,bLoadIfNotExists));
 	if(ent == nullptr)

@@ -22,6 +22,7 @@
 #include "pragma/entities/components/s_vehicle_component.hpp"
 #include "pragma/entities/components/s_weapon_component.hpp"
 #include "pragma/entities/components/s_sound_emitter_component.hpp"
+#include <pragma/debug/intel_vtune.hpp>
 #include <pragma/entities/components/global_component.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/lua/lua_entity_type.hpp>
@@ -41,6 +42,10 @@ SBaseEntity *SGame::CreateEntity(std::string classname)
 	if(umath::is_flag_set(m_flags,GameFlags::ClosingGame))
 		return nullptr;
 	StringToLower(classname);
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().BeginTask("create_entity");
+	util::ScopeGuard sgVtune {[]() {debug::get_domain().EndTask();}};
+#endif
 	auto *entlua = CreateLuaEntity(classname);
 	if(entlua != NULL)
 		return entlua;
@@ -80,8 +85,14 @@ void SGame::RemoveEntity(BaseEntity *ent)
 	if(ent->IsPlayer())
 		m_numPlayers--;
 	unsigned int idx = ent->GetIndex();
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().BeginTask("remove_entity");
+#endif
 	m_ents[idx]->OnRemove();
 	delete m_ents[idx];
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().EndTask();
+#endif
 	m_ents[idx] = NULL;
 	m_baseEnts[idx] = NULL;
 	if(idx == m_ents.size() -1)
@@ -203,6 +214,10 @@ unsigned int SGame::GetFreeEntityIndex()
 
 SBaseEntity *SGame::CreateLuaEntity(std::string classname,bool bLoadIfNotExists)
 {
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().BeginTask("create_lua_entity");
+	util::ScopeGuard sgVtune {[]() {debug::get_domain().EndTask();}};
+#endif
 	luabind::object oClass {};
 	auto *ent = static_cast<SBaseEntity*>(Game::CreateLuaEntity<SLuaEntity,pragma::lua::SLuaEntityHolder>(classname,oClass,bLoadIfNotExists));
 	if(ent == nullptr)

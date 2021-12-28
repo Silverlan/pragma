@@ -198,6 +198,7 @@ public:
 	void HandlePacket(NetPacket &packet);
 	void HandleConnect();
 	void HandleReceiveGameInfo(NetPacket &packet);
+	void SetGameReady();
 	void RequestServerInfo();
 
 	void HandleClientStartResourceTransfer(NetPacket &packet);

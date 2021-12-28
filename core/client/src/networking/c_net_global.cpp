@@ -608,6 +608,13 @@ DLLCLIENT void NET_cl_pl_local(NetPacket packet)
 	game->SetLocalPlayer(pl);
 }
 
+DLLCLIENT void NET_cl_game_ready(NetPacket packet)
+{
+	if(!client->IsGameActive())
+		return;
+	client->SetGameReady();
+}
+
 DLLCLIENT void NET_cl_snapshot(NetPacket packet)
 {
 	if(!client->IsGameActive())

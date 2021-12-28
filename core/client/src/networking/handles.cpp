@@ -338,7 +338,12 @@ void ClientState::HandleReceiveGameInfo(NetPacket &packet)
 	}
 	ChangeLevel(map.c_str());
 	game->ReloadSoundCache();
+}
 
+void ClientState::SetGameReady()
+{
+	if(!m_game)
+		return;
 	SendPacket("game_ready",pragma::networking::Protocol::SlowReliable);
-	game->OnGameReady();
+	m_game->OnGameReady();
 }

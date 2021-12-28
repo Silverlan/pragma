@@ -750,6 +750,8 @@ void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session,NetPacket
 	nwm::write_entity(packetInf,(ptrWorld != nullptr) ? &ptrWorld->GetEntity() : nullptr);
 	server->SendPacket("gameinfo",packetInf,pragma::networking::Protocol::SlowReliable,rp);
 	server->SendPacket("pl_local",p,pragma::networking::Protocol::SlowReliable,session);
+	NetPacket tmp {};
+	server->SendPacket("game_ready",tmp,pragma::networking::Protocol::SlowReliable,rp);
 
 	NetPacket pJoinedInfo;
 	nwm::write_player(pJoinedInfo,pl);

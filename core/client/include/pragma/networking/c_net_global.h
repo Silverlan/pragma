@@ -55,6 +55,7 @@ DECLARE_NETMESSAGE_CL(register_entity_component);
 DECLARE_NETMESSAGE_CL(pl_toggle_noclip);
 
 DECLARE_NETMESSAGE_CL(gameinfo);
+DECLARE_NETMESSAGE_CL(game_ready);
 
 DECLARE_NETMESSAGE_CL(snapshot);
 

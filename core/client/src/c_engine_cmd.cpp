@@ -16,6 +16,7 @@
 #include <pragma/rendering/render_apis.hpp>
 #include <pragma/console/convars.h>
 #include <sharedutils/util_file.h>
+#include <sharedutils/util_library.hpp>
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
 #include <texturemanager/texture.h>
@@ -29,7 +30,7 @@
 #include <shader/prosper_shader_blur.hpp>
 #include <prosper_window.hpp>
 #include <fsys/directory_watcher.h>
-
+#pragma optimize("",off)
 extern DLLCLIENT void debug_render_stats(bool enabled,bool full,bool print,bool continuous);
 void CEngine::RegisterConsoleCommands()
 {
@@ -484,4 +485,31 @@ void CEngine::RegisterConsoleCommands()
 	conVarMap.RegisterConCommand("asset_clear_unused_textures",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		ClearUnusedAssets(pragma::asset::Type::Texture,true);
 	},ConVarFlags::None,"Clears all unused textures from memory.");
+	conVarMap.RegisterConCommand("vr_preinitialize",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		auto *cl = static_cast<ClientState*>(GetClientState());
+		if(!cl)
+			return;
+		std::string err;
+		auto lib = cl->InitializeLibrary("openvr/pr_openvr",&err,cl->GetLuaState());
+		if(!lib)
+		{
+			Con::cwar<<"WARNING: Unable to preinitialize VR: "<<err<<Con::endl;
+			return;
+		}
+		auto *isHmdPresent = lib->FindSymbolAddress<bool(*)()>("is_hmd_present");
+		auto *preInit = lib->FindSymbolAddress<void(*)()>("preinitialize_openvr");
+		if(!isHmdPresent || !preInit)
+		{
+			Con::cwar<<"WARNING: Required VR functions not found in openvr module!"<<Con::endl;
+			return;
+		}
+		if(!isHmdPresent())
+		{
+			Con::cwar<<"WARNING: VR HMD could not be found!"<<Con::endl;
+			if(argv.empty() || !util::to_boolean(argv.front()))
+				return;
+		}
+		preInit();
+	},ConVarFlags::None,"Pre-initializes openvr.");
 }
+#pragma optimize("",on)

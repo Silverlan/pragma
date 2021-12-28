@@ -690,6 +690,51 @@ void Engine::RunLaunchCommands()
 	{
 		auto &cmd = *it;
 		RunConsoleCommand(cmd.command,cmd.args);
+		if(ustring::compare(cmd.command.c_str(),"map",false))
+		{
+			// We'll delay all remaining commands until after the map has been loaded
+			std::vector<LaunchCommand> remainingCommands;
+			++it;
+			for(auto it2=it;it2!=m_launchCommands.rend();++it2)
+			{
+				if(ustring::compare(it2->command.c_str(),"map",false))
+					continue;
+				remainingCommands.push_back(*it2);
+			}
+
+			auto *nw = GetClientState();
+			if(!nw)
+				nw = GetServerState();
+			if(nw)
+			{
+				auto cbOnGameStart = FunctionCallback<void>::Create(nullptr);
+				cbOnGameStart.get<Callback<void>>()->SetFunction([this,cbOnGameStart,nw,remainingCommands=std::move(remainingCommands)]() mutable {
+					auto cmds0 = std::move(remainingCommands);
+					if(cbOnGameStart.IsValid())
+						cbOnGameStart.Remove();
+
+					auto *game = nw->GetGameState();
+					if(game)
+					{
+						auto cbOnGameReady = FunctionCallback<void>::Create(nullptr);
+						cbOnGameReady.get<Callback<void>>()->SetFunction([this,cbOnGameReady,game,cmds0=std::move(cmds0)]() mutable {
+							auto cmds1 = std::move(cmds0);
+							if(cbOnGameReady.IsValid())
+								cbOnGameReady.Remove();
+
+							for(auto it=cmds1.rbegin();it!=cmds1.rend();++it)
+							{
+								auto &cmd = *it;
+								RunConsoleCommand(cmd.command,cmd.args);
+							}
+						});
+						game->AddCallback("OnGameReady",cbOnGameReady);
+					}
+				});
+				nw->AddCallback("OnGameStart",cbOnGameStart);
+			}
+			break;
+		}
 	}
 	m_launchCommands.clear();
 }

@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <pragma/model/modelmesh.h>
 #include <pragma/model/model.h>
-
+#pragma optimize("",off)
 bool Intersection::LineMesh(
 	const Vector3 &_start,const Vector3 &_dir,Model &mdl,LineMeshResult &r,bool precise,const std::vector<uint32_t> *bodyGroups,uint32_t lod,
 	const Vector3 &origin,const Quat &rot
@@ -126,7 +126,10 @@ bool Intersection::LineMesh(const Vector3 &_start,const Vector3 &_dir,ModelSubMe
 			max[i] = min[i] +0.001;
 	}
 	auto tBounds = 0.f;
-	if(umath::intersection::line_aabb(start,dir,min,max,&tBounds) == umath::intersection::Result::NoIntersection)
+	if(
+		!umath::intersection::point_in_aabb(start,min,max) &&
+		umath::intersection::line_aabb(start,dir,min,max,&tBounds) == umath::intersection::Result::NoIntersection
+	)
 		return false;
 	
 	r.precise = r.precise ? r.precise : std::make_shared<LineMeshResult::Precise>();
@@ -169,3 +172,4 @@ bool Intersection::LineMesh(const Vector3 &_start,const Vector3 &_dir,ModelSubMe
 	}
 	return hasFoundBetterCandidate;
 }
+#pragma optimize("",on)

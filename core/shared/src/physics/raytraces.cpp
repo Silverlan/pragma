@@ -23,7 +23,7 @@
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/model/model.h"
 #include <pragma/math/intersection.h>
-
+#pragma optimize("",off)
 void TraceResult::InitializeMeshes()
 {
 	if(meshInfo != nullptr)
@@ -58,13 +58,25 @@ void TraceResult::InitializeMeshes()
 		mesh->GetBounds(min,max);
 		auto dist = umath::min(maxDist,static_cast<float>(res.hitValue));
 		auto t = 0.f;
-		if(umath::intersection::line_aabb(startPosLocal,dir,min,max,&t) != umath::intersection::Result::Intersect || umath::abs(t) > (dist /maxDist))
+		if(
+			!umath::intersection::point_in_aabb(startPosLocal,min,max) &&
+			(
+				umath::intersection::line_aabb(startPosLocal,dir,min,max,&t) != umath::intersection::Result::Intersect ||
+				umath::abs(t) > (dist /maxDist)
+			)
+		)
 			continue;
 		auto &subMeshes = mesh->GetSubMeshes();
 		for(auto &subMesh : subMeshes)
 		{
 			subMesh->GetBounds(min,max);
-			if(umath::intersection::line_aabb(startPosLocal,dir,min,max,&t) != umath::intersection::Result::Intersect || umath::abs(t) > (dist /maxDist))
+			if(
+				!umath::intersection::point_in_aabb(startPosLocal,min,max) &&
+				(
+					umath::intersection::line_aabb(startPosLocal,dir,min,max,&t) != umath::intersection::Result::Intersect ||
+					umath::abs(t) > (dist /maxDist)
+				)
+			)
 				continue;
 			if(Intersection::LineMesh(startPosLocal,dir,*subMesh,res,true,nullptr,nullptr) == false || umath::abs(res.hitValue) > (dist /maxDist))
 				continue;
@@ -216,3 +228,4 @@ bool TraceData::HasFlag(RayCastFlags flag) const {return ((UInt32(m_flags) &UInt
 TraceResult::TraceResult(const TraceData &data)
 	: fraction{1.f},position{data.GetTargetOrigin()},startPosition{data.GetSourceOrigin()}
 {}
+#pragma optimize("",on)

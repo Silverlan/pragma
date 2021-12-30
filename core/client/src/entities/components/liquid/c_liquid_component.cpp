@@ -62,6 +62,10 @@ void CLiquidComponent::Initialize()
 		SetupWater();
 		ReloadSurfaceSimulator();
 	});*/
+	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		BaseFuncLiquidComponent::InitializeWaterSurface();
+		SetupWater();
+	});
 }
 void CLiquidComponent::OnEntitySpawn()
 {
@@ -76,12 +80,6 @@ void CLiquidComponent::OnEntitySpawn()
 		// pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::Water);
 		// pRenderComponent->GetRenderModeProperty()->SetLocked(true);
 	}
-
-	auto &mdl = ent.GetModel();
-	if(mdl == nullptr)
-		return;
-	BaseFuncLiquidComponent::InitializeWaterSurface();
-	SetupWater();
 }
 void CLiquidComponent::ReceiveData(NetPacket &packet) {}
 

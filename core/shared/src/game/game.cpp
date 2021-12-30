@@ -617,10 +617,16 @@ double &Game::GetLastTick() {return m_tLastTick;}
 pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,Game::CPUProfilingPhase> *Game::GetProfilingStageManager() {return m_profilingStageManager.get();}
 bool Game::StartProfilingStage(CPUProfilingPhase stage)
 {
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().BeginTask("stage_" +std::string{magic_enum::enum_name(stage)});
+#endif
 	return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage);
 }
 bool Game::StopProfilingStage(CPUProfilingPhase stage)
 {
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().EndTask();
+#endif
 	return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(stage);
 }
 
@@ -684,14 +690,14 @@ void Game::Tick()
 			continue;
 		hPhysC->PrePhysicsSimulate(); // Has to be called BEFORE PhysicsUpdate (This is where stuff like Character movement is handled)!
 	}
-
+	
 	for(auto &hPhysC : awakePhysics)
 	{
 		if(hPhysC.expired() || hPhysC->GetPhysicsType() == PHYSICSTYPE::NONE)
 			continue;
 		hPhysC->PhysicsUpdate(m_tDeltaTick); // Has to be called AFTER PrePhysicsSimulate (This is where physics objects are updated)!
 	}
-
+	
 	CallCallbacks("PrePhysicsSimulate");
 	CallLuaCallbacks("PrePhysicsSimulate");
 	StartProfilingStage(CPUProfilingPhase::PhysicsSimulation);
@@ -703,7 +709,7 @@ void Game::Tick()
 	StopProfilingStage(CPUProfilingPhase::PhysicsSimulation);
 	CallCallbacks("PostPhysicsSimulate");
 	CallLuaCallbacks("PostPhysicsSimulate");
-
+	
 	for(auto it=awakePhysics.begin();it!=awakePhysics.end();)
 	{
 		auto &hPhysC = *it;
@@ -732,7 +738,7 @@ void Game::Tick()
 	}
 
 	StartProfilingStage(CPUProfilingPhase::GameObjectLogic);
-
+	
 	auto &logicComponents = GetEntityTickComponents();
 	// Note: During the loop, new items may be appended to the end of logicComponents, but no elements
 	// may be erased from outside sources. If an element is removed, it's set to nullptr.

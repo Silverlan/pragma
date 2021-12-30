@@ -488,7 +488,7 @@ public:
 	// Textures
 	uint32_t AddTexture(const std::string &tex,Material *mat);
 	bool SetTexture(uint32_t texIdx,const std::string &tex,Material *mat);
-	uint32_t AddMaterial(uint32_t skin,Material *mat,std::optional<uint32_t> *optOutSkinTexIdx=nullptr);
+	uint32_t AddMaterial(uint32_t skin,Material *mat,const std::optional<std::string> &matName={},std::optional<uint32_t> *optOutSkinTexIdx=nullptr);
 	bool SetMaterial(uint32_t texIdx,Material *mat);
 	void RemoveTexture(uint32_t idx);
 	void ClearTextures();

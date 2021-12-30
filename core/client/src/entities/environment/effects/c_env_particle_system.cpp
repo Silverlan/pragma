@@ -157,7 +157,7 @@ std::shared_ptr<Model> CParticleSystemComponent::GenerateModel(CGame &game,const
 		if(mat == nullptr)
 			continue;
 		std::optional<uint32_t> skinTexIdx {};
-		mdl->AddMaterial(0,mat,&skinTexIdx);
+		mdl->AddMaterial(0,mat,{},&skinTexIdx);
 		if(skinTexIdx.has_value() == false)
 			continue;
 		auto orientationType = pts->GetOrientationType();

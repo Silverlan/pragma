@@ -453,9 +453,12 @@ Material *ServerState::LoadMaterial(const std::string &path,bool precache,bool b
 	}
 	else
 	{
-		auto asset = matManager.LoadAsset(path);
+		util::FileAssetManager::PreloadResult result {};
+		auto asset = matManager.LoadAsset(path,nullptr,&result);
 		success = (asset != nullptr);
 		mat = asset.get();
+		if(!result && !result.firstTimeError)
+			return nullptr;
 	}
 	if(!success)
 	{

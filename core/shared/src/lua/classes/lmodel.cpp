@@ -1768,7 +1768,7 @@ void Lua::Model::AddMaterial(lua_State *l,::Model &mdl,uint32_t textureGroup,Mat
 {
 	//Lua::CheckModel(l,1);
 	std::optional<uint32_t> skinTexIdx {};
-	auto r = mdl.AddMaterial(textureGroup,mat,&skinTexIdx);
+	auto r = mdl.AddMaterial(textureGroup,mat,{},&skinTexIdx);
 	Lua::PushInt(l,r);
 	if(skinTexIdx.has_value())
 		Lua::PushInt(l,*skinTexIdx);

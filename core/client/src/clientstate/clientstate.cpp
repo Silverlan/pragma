@@ -780,12 +780,15 @@ Material *ClientState::LoadMaterial(const std::string &path,const std::function<
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 		debug::get_domain().BeginTask("load_material");
 #endif
-		auto asset = matManager.LoadAsset(path);
+		util::FileAssetManager::PreloadResult result {};
+		auto asset = matManager.LoadAsset(path,nullptr,&result);
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 		debug::get_domain().EndTask();
 #endif
 		success = (asset != nullptr);
 		mat = asset.get();
+		if(!result && !result.firstTimeError)
+			return nullptr;
 	}
 
 	//bLoadInstantly = true;

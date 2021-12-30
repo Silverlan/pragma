@@ -28,7 +28,7 @@
 #include <panima/bone.hpp>
 
 extern DLLNETWORK Engine *engine;
-
+#pragma optimize("",off)
 std::shared_ptr<ModelMeshGroup> ModelMeshGroup::Create(const std::string &name)
 {
 	return std::shared_ptr<ModelMeshGroup>(new ModelMeshGroup{name});
@@ -573,8 +573,7 @@ void Model::AddLoadingMaterial(Material &mat,std::optional<uint32_t> index)
 uint32_t Model::AddTexture(const std::string &tex,Material *mat)
 {
 	auto &meta = GetMetaInfo();
-	auto ntex = tex;
-	ufile::remove_extension_from_filename(ntex,pragma::asset::get_supported_extensions(pragma::asset::Type::Material));
+	auto ntex = pragma::asset::get_normalized_path(tex,pragma::asset::Type::Material);
 	auto it = std::find(meta.textures.begin(),meta.textures.end(),ntex);
 	if(it != meta.textures.end())
 		return it -meta.textures.begin();
@@ -602,14 +601,12 @@ bool Model::SetTexture(uint32_t texIdx,const std::string &tex,Material *mat)
 		return false;
 	return true;
 }
-uint32_t Model::AddMaterial(uint32_t skin,Material *mat,std::optional<uint32_t> *optOutSkinTexIdx)
+uint32_t Model::AddMaterial(uint32_t skin,Material *mat,const std::optional<std::string> &matName,std::optional<uint32_t> *optOutSkinTexIdx)
 {
-	auto texName = mat->GetName();
+	auto texName = matName.has_value() ? *matName : mat->GetName();
+	texName = pragma::asset::get_normalized_path(texName,pragma::asset::Type::Material);
 	AddTexturePath(ufile::get_path_from_filename(texName));
 	texName = ufile::get_file_from_filename(texName);
-	std::string ext;
-	if(ufile::get_extension(texName,&ext) == true && (ustring::compare<std::string>(ext,"wmi",false) || ustring::compare<std::string>(ext,"vmt",false) || ustring::compare<std::string>(ext,"vmat_c",false)))
-		ufile::remove_extension_from_filename(texName);
 	auto r = AddTexture(texName,mat);
 	if(skin < m_textureGroups.size())
 	{
@@ -1395,7 +1392,7 @@ std::optional<uint32_t> Model::AssignDistinctMaterial(const ModelMeshGroup &grou
 	for(auto i=decltype(numSkins){0u};i<numSkins;++i)
 	{
 		if(i == 0u)
-			AddMaterial(i,matNew,&newSkinTexId);
+			AddMaterial(i,matNew,{},&newSkinTexId);
 		else
 			AddMaterial(i,matNew);
 	}
@@ -1998,3 +1995,4 @@ void Model::UpdateShape(const std::vector<SurfaceMaterial>*)
 		cmesh->UpdateShape();
 }
 //void Model::GetWeights(std::vector<VertexWeight*> **weights) {*weights = &m_weights;}
+#pragma optimize("",on)

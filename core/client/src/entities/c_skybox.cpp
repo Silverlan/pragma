@@ -32,7 +32,7 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
-
+#pragma optimize("",off)
 LINK_ENTITY_TO_CLASS(skybox,CSkybox);
 
 void CSkyboxComponent::Initialize()
@@ -245,7 +245,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 		std::string err;
 		if(mat->Save(savePath.GetString(),err,true))
 		{
-			client->LoadMaterial(matName,nullptr,false,true);
+			client->LoadMaterial(matName,nullptr,true,true);
 			Con::cout<<"Skybox material saved as '"<<(matName +".wmi")<<"'"<<Con::endl;
 			return true;
 		}
@@ -303,3 +303,4 @@ static void sky_override(NetworkState*,ConVar*,std::string,std::string skyMat)
 	}
 }
 REGISTER_CONVAR_CALLBACK_CL(sky_override,sky_override);
+#pragma optimize("",on)

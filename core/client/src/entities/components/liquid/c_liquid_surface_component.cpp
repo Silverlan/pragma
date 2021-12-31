@@ -118,29 +118,7 @@ void CLiquidSurfaceComponent::OnEntitySpawn()
 				rtC->CallLuaMethod<void>("SetCamera",cam->GetLuaObject());
 
 			rtC->AddEventCallback(*evId,[this,rtC](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
-				auto *renderer = rtC->CallLuaMethod<pragma::CRendererComponent*>("GetRenderer");
-				if(renderer)
-				{
-					auto *tex = renderer->GetHDRPresentationTexture();
-					if(tex && m_waterScene && m_waterScene->descSetGroupTexEffects)
-					{
-						auto *descSetEffects = m_waterScene->descSetGroupTexEffects->GetDescriptorSet();
-						descSetEffects->SetBindingTexture(*tex,umath::to_integral(pragma::ShaderWater::WaterBinding::RefractionMap));
-
-						auto rasterC = renderer->GetEntity().GetComponent<CRasterizationRendererComponent>();
-						if(rasterC.valid())
-						{
-							auto &texDepth = rasterC->GetHDRInfo().prepass.textureDepth;
-							descSetEffects->SetBindingTexture(*texDepth,umath::to_integral(pragma::ShaderWater::WaterBinding::RefractionDepth));
-							//descSetEffects.SetBindingUniformBuffer(*m_waterScene->settingsBuffer,umath::to_integral(pragma::ShaderWater::WaterBinding::WaterSettings));
-						}
-						descSetEffects->Update();
-
-						auto renderC = GetEntity().GetComponent<CModelComponent>();
-						renderC->SetRenderMeshesDirty();
-						renderC->UpdateRenderMeshes();
-					}
-				}
+				InitializeRenderData();
 				return util::EventReply::Unhandled;
 			});
 		
@@ -188,6 +166,40 @@ void CLiquidSurfaceComponent::OnEntitySpawn()
 	}
 
 	//InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_WATER,evDataLightingStage);
+}
+
+void CLiquidSurfaceComponent::InitializeRenderData()
+{
+	if(m_renderDataInitialized || !m_hEntUnderwater.IsValid())
+		return;
+	auto rtC = m_hEntUnderwater->FindComponent("render_target");
+	if(rtC.expired())
+		return;
+	auto *renderer = rtC->CallLuaMethod<pragma::CRendererComponent*>("GetRenderer");
+	if(renderer)
+	{
+		auto *tex = renderer->GetHDRPresentationTexture();
+		if(tex && m_waterScene && m_waterScene->descSetGroupTexEffects)
+		{
+			m_renderDataInitialized = true;
+
+			auto *descSetEffects = m_waterScene->descSetGroupTexEffects->GetDescriptorSet();
+			descSetEffects->SetBindingTexture(*tex,umath::to_integral(pragma::ShaderWater::WaterBinding::RefractionMap));
+
+			auto rasterC = renderer->GetEntity().GetComponent<CRasterizationRendererComponent>();
+			if(rasterC.valid())
+			{
+				auto &texDepth = rasterC->GetHDRInfo().prepass.textureDepth;
+				descSetEffects->SetBindingTexture(*texDepth,umath::to_integral(pragma::ShaderWater::WaterBinding::RefractionDepth));
+				//descSetEffects.SetBindingUniformBuffer(*m_waterScene->settingsBuffer,umath::to_integral(pragma::ShaderWater::WaterBinding::WaterSettings));
+			}
+			descSetEffects->Update();
+
+			auto renderC = GetEntity().GetComponent<CModelComponent>();
+			renderC->SetRenderMeshesDirty();
+			renderC->UpdateRenderMeshes();
+		}
+	}
 }
 
 void CLiquidSurfaceComponent::ReceiveData(NetPacket &packet) {}
@@ -510,4 +522,5 @@ void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos,const V
 			}
 		}
 	}));
+	InitializeRenderData();
 }

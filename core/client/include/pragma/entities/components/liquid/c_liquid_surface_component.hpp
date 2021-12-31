@@ -65,12 +65,14 @@ namespace pragma
 	private:
 		virtual void OnEntitySpawn() override;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
+		void InitializeRenderData();
 
 		EntityHandle m_hEntUnderwater {};
 		pragma::ComponentHandle<CSurfaceComponent> m_surfaceComponent;
 		std::unique_ptr<WaterScene> m_waterScene = nullptr;
 		umath::geometry::PlaneSide m_curCameraSurfaceSide = umath::geometry::PlaneSide::OnPlane;
 		std::pair<Vector3,Vector3> m_waterAabbBounds = {};
+		bool m_renderDataInitialized = false;
 	};
 };
 

@@ -8,6 +8,7 @@
 
 util.register_class("gui.DebugRenderStats",gui.Base)
 function gui.DebugRenderStats:__init()
+	tool.load_filmmaker_scripts()
 	gui.Base.__init(self)
 end
 function gui.DebugRenderStats:OnRemove()

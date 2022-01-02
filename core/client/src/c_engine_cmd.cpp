@@ -270,7 +270,12 @@ void CEngine::RegisterConsoleCommands()
 		auto &cache = texManager.GetCache();
 		textures.reserve(cache.size());
 		for(auto &pair : cache)
-			textures.push_back(msys::TextureManager::GetAssetObject(*texManager.GetAsset(pair.second)));
+		{
+			auto asset = texManager.GetAsset(pair.second);
+			if(!asset)
+				continue;
+			textures.push_back(msys::TextureManager::GetAssetObject(*asset));
+		}
 		std::vector<prosper::DeviceSize> textureSizes;
 		std::vector<size_t> sortedIndices {};
 		textureSizes.reserve(textures.size());

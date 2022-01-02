@@ -348,13 +348,23 @@ static uint32_t clear_assets(NetworkState *state,pragma::asset::Type type,bool v
 
 			std::unordered_map<Model*,std::string> oldCache;
 			for(auto &pair : cache)
-				oldCache[pragma::asset::ModelManager::GetAssetObject(*mdlManager.GetAsset(pair.second)).get()] = pair.first;
+			{
+				auto asset = mdlManager.GetAsset(pair.second);
+				if(!asset)
+					continue;
+				oldCache[pragma::asset::ModelManager::GetAssetObject(*asset).get()] = pair.first;
+			}
 
 			n = mdlManager.ClearUnused();
 
 			std::unordered_map<Model*,std::string> newCache;
 			for(auto &pair : cache)
-				newCache[pragma::asset::ModelManager::GetAssetObject(*mdlManager.GetAsset(pair.second)).get()] = pair.first;
+			{
+				auto asset = mdlManager.GetAsset(pair.second);
+				if(!asset)
+					continue;
+				newCache[pragma::asset::ModelManager::GetAssetObject(*asset).get()] = pair.first;
+			}
 
 			for(auto &pair : oldCache)
 			{
@@ -377,13 +387,23 @@ static uint32_t clear_assets(NetworkState *state,pragma::asset::Type type,bool v
 
 			std::unordered_map<Material*,std::string> oldCache;
 			for(auto &pair : cache)
-				oldCache[msys::MaterialManager::GetAssetObject(*matManager.GetAsset(pair.second)).get()] = pair.first;
+			{
+				auto asset = matManager.GetAsset(pair.second);
+				if(!asset)
+					continue;
+				oldCache[msys::MaterialManager::GetAssetObject(*asset).get()] = pair.first;
+			}
 
 			n = matManager.ClearUnused();
 
 			std::unordered_map<Material*,std::string> newCache;
 			for(auto &pair : cache)
-				newCache[msys::MaterialManager::GetAssetObject(*matManager.GetAsset(pair.second)).get()] = pair.first;
+			{
+				auto asset = matManager.GetAsset(pair.second);
+				if(!asset)
+					continue;
+				newCache[msys::MaterialManager::GetAssetObject(*asset).get()] = pair.first;
+			}
 
 			for(auto &pair : oldCache)
 			{

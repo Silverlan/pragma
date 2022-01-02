@@ -171,7 +171,10 @@ void CPBRConverterComponent::OnEntitySpawn()
 	auto &matManager = client->GetMaterialManager();
 	for(auto &pair : matManager.GetCache())
 	{
-		auto hMat = msys::CMaterialManager::GetAssetObject(*matManager.GetAsset(pair.second));
+		auto asset = matManager.GetAsset(pair.second);
+		if(!asset)
+			continue;
+		auto hMat = msys::CMaterialManager::GetAssetObject(*asset);
 		if(!hMat || hMat.get()->IsLoaded() == false || ShouldConvertMaterial(static_cast<CMaterial&>(*hMat.get())) == false)
 			continue;
 		ConvertToPBR(static_cast<CMaterial&>(*hMat.get()));
@@ -182,7 +185,10 @@ void CPBRConverterComponent::OnEntitySpawn()
 	for(auto &pair : models)
 	{
 		auto idx = pair.second;
-		UpdateMetalness(*pragma::asset::ModelManager::GetAssetObject(*mdlManager.GetAsset(idx)));
+		auto asset = mdlManager.GetAsset(idx);
+		if(!asset)
+			continue;
+		UpdateMetalness(*pragma::asset::ModelManager::GetAssetObject(*asset));
 		//UpdateAmbientOcclusion(*mdl);
 	}
 }

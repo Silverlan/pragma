@@ -86,7 +86,10 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 		// Iterate all materials and update the ones that use this texture
 		for(auto &pair : matManager.GetCache())
 		{
-			auto hMat = msys::CMaterialManager::GetAssetObject(*matManager.GetAsset(pair.second));
+			auto asset = matManager.GetAsset(pair.second);
+			if(!asset)
+				continue;
+			auto hMat = msys::CMaterialManager::GetAssetObject(*asset);
 			if(!hMat)
 				continue;
 			auto &data = hMat.get()->GetDataBlock();

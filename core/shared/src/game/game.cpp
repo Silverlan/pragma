@@ -261,7 +261,10 @@ void Game::OnRemove()
 	auto &mdlManager = GetNetworkState()->GetModelManager();
 	for(auto &pair : mdlManager.GetCache())
 	{
-		for(auto &colMesh : pragma::asset::ModelManager::GetAssetObject(*mdlManager.GetAsset(pair.second))->GetCollisionMeshes())
+		auto asset = mdlManager.GetAsset(pair.second);
+		if(!asset)
+			continue;
+		for(auto &colMesh : pragma::asset::ModelManager::GetAssetObject(*asset)->GetCollisionMeshes())
 			colMesh->ClearShape();
 	}
 

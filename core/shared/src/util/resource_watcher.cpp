@@ -85,7 +85,10 @@ void ResourceWatcherManager::ReloadMaterial(const std::string &path)
 			std::unordered_set<Model*> modelMap;
 			for(auto &pair : models)
 			{
-				auto mdl = pragma::asset::ModelManager::GetAssetObject(*mdlManager.GetAsset(pair.second));
+				auto asset = mdlManager.GetAsset(pair.second);
+				if(!asset)
+					continue;
+				auto mdl = pragma::asset::ModelManager::GetAssetObject(*asset);
 				auto &textures = mdl->GetTextures();
 				for(auto it=textures.begin();it!=textures.end();++it)
 				{
@@ -207,7 +210,10 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &rootPath,const
 			auto &matManager = nw->GetMaterialManager();
 			for(auto &pair : matManager.GetCache()) // Find all materials which use this texture
 			{
-				auto hMat = msys::MaterialManager::GetAssetObject(*matManager.GetAsset(pair.second));
+				auto asset = matManager.GetAsset(pair.second);
+				if(!asset)
+					continue;
+				auto hMat = msys::MaterialManager::GetAssetObject(*asset);
 				if(!hMat)
 					continue;
 				auto *mat = hMat.get();

@@ -1298,6 +1298,7 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 		auto &fb = rt->GetFramebuffer();
 		StartProfilingStage(GPUProfilingPhase::GUI);
 
+		WGUI::GetInstance().SetLockedForDrawing(true);
 		auto &context = GetRenderContext();
 		for(auto &wpWindow : context.GetWindows())
 		{
@@ -1371,6 +1372,7 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 			auto idx = GetPerformanceTimerIndex(GPUTimer::GUI);
 			m_gpuTimers[idx]->End(*drawCmd);
 		}
+		WGUI::GetInstance().SetLockedForDrawing(false);
 		CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("PostDrawGUI",std::ref(drawCmd));
 
 		if(c_game != nullptr)

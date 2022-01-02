@@ -36,6 +36,7 @@ end
 function ents.ViewerCamera:GetZoom() return self.m_zoom end
 
 function ents.ViewerCamera:GetLookAtTarget() return self.m_lookAtTarget end
+function ents.ViewerCamera:SetLookAtTarget(tgt) self.m_lookAtTarget = tgt end
 
 function ents.ViewerCamera:GetRotation() return self.m_xRot,self.m_yRot end
 function ents.ViewerCamera:SetRotation(xRot,yRot)

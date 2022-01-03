@@ -161,8 +161,10 @@ void Lua::util::register_library(lua_State *l)
 
 	auto retargetMod = luabind::module(l,"retarget");
 	auto defRetargetData = luabind::class_<util::retarget::RetargetData>("RetargetData");
+	auto defRetargetFlexData = luabind::class_<util::retarget::RetargetFlexData>("RetargetFlexData");
 	auto nsRetarget = luabind::namespace_("retarget");
 	nsRetarget[defRetargetData];
+	nsRetarget[defRetargetFlexData];
 
 	utilMod[
 		luabind::def("splash_damage",splash_damage),

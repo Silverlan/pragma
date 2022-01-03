@@ -173,7 +173,7 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 	}});
 
 	map.RegisterConVar<bool>("asset_file_cache_enabled",true,ConVarFlags::Archive,"If enabled, all Pragma files will be indexed to improve lookup times.");
-	map.RegisterConVarCallback("asset_multithreading_enabled",std::function<void(NetworkState*,ConVar*,bool,bool)>{[this](
+	map.RegisterConVarCallback("asset_file_cache_enabled",std::function<void(NetworkState*,ConVar*,bool,bool)>{[this](
 		NetworkState *nw,ConVar *cv,bool oldVal,bool newVal) -> void {
 		filemanager::set_use_file_index_cache(newVal);
 	}});

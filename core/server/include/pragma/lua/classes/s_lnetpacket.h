@@ -19,7 +19,7 @@ namespace Lua
 		{
 			DLLSERVER void register_class(luabind::class_<::NetPacket> &classDef);
 			DLLSERVER void WriteALSound(lua_State *l,::NetPacket &packet,std::shared_ptr<ALSound> snd);
-			DLLSERVER void WriteUniqueEntity(lua_State *l,::NetPacket &packet,EntityHandle *hEnt);
+			DLLSERVER void WriteUniqueEntity(lua_State *l,::NetPacket &packet,BaseEntity *hEnt);
 			DLLSERVER void WriteUniqueEntity(lua_State *l,::NetPacket &packet);
 		};
 	};

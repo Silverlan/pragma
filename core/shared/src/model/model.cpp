@@ -787,10 +787,14 @@ void Model::PrecacheMaterials() {LoadMaterials(true,false);}
 
 void Model::LoadMaterials(const std::vector<uint32_t> &textureGroupIds,bool precache,bool bReload)
 {
-	// Loading materials may require saving materials / textures, which can trigger the resource watcher,
-	// so we'll disable it temporarily. This is a bit of a messy solution...
-	// TODO: Remove this once the VMT/VMAT conversion code has been removed from the material system!
-	auto resWatcherLock = engine->ScopeLockResourceWatchers();
+	util::ScopeGuard resWatcherLock {};
+	if(!precache)
+	{
+		// Loading materials may require saving materials / textures, which can trigger the resource watcher,
+		// so we'll disable it temporarily. This is a bit of a messy solution...
+		// TODO: Remove this once the VMT/VMAT conversion code has been removed from the material system!
+		resWatcherLock = std::move(engine->ScopeLockResourceWatchers());
+	}
 
 	auto &meta = GetMetaInfo();
 	auto &textures = meta.textures;

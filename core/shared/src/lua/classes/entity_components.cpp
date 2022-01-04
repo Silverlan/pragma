@@ -267,14 +267,15 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	entityComponentDef.def("IsValid",static_cast<bool(*)(lua_State*,pragma::BaseEntityComponent*)>([](lua_State *l,pragma::BaseEntityComponent *hComponent) {
 		return hComponent != nullptr;
 	}));
-	entityComponentDef.def("RegisterNetEvent",static_cast<void(*)(lua_State*,pragma::BaseEntityComponent&,const std::string&)>([](lua_State *l,pragma::BaseEntityComponent &hComponent,const std::string &eventName) {
-		hComponent.SetupNetEvent(eventName);
+	entityComponentDef.def("RegisterNetEvent",+[](lua_State *l,pragma::BaseEntityComponent &hComponent,const std::string &eventName) {
+		auto id = hComponent.SetupNetEvent(eventName);
 		auto *nw = pragma::get_engine()->GetNetworkState(l);
 		auto *game = nw->GetGameState();
 		auto *componentInfo = game->GetEntityComponentManager().GetComponentInfo(hComponent.GetComponentId());
 		if(componentInfo && umath::is_flag_set(componentInfo->flags,pragma::ComponentFlags::Networked) == false)
 			::operator<<(::operator<<(::operator<<(::operator<<(Con::cwar,"WARNING: Component '"),componentInfo->name),"' has uses net-events, but was not registered as networked, this means networking will be disabled for this component! Set the 'ents.EntityComponent.FREGISTER_BIT_NETWORKED' flag when registering the component to fix this!"),Con::endl);
-	}));
+		return id;
+	});
 	entityComponentDef.def("GetComponentName",static_cast<std::string(*)(lua_State*,pragma::BaseEntityComponent&)>([](lua_State *l,pragma::BaseEntityComponent &component) {
 		auto *nw = pragma::get_engine()->GetNetworkState(l);
 		auto *game = nw->GetGameState();

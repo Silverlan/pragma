@@ -20,7 +20,7 @@ namespace Lua
 	namespace NetPacket
 	{
 		DLLNETWORK void register_class(luabind::class_<::NetPacket> &classDef);
-		DLLNETWORK void WriteEntity(lua_State *l,::NetPacket &packet,EntityHandle *hEnt);
+		DLLNETWORK void WriteEntity(lua_State *l,::NetPacket &packet,BaseEntity *hEnt);
 		DLLNETWORK void WriteEntity(lua_State *l,::NetPacket &packet);
 		DLLNETWORK void ReadEntity(lua_State *l,::NetPacket &packet);
 		DLLNETWORK void WriteALSound(lua_State *l,::NetPacket &packet,std::shared_ptr<ALSound> snd);

@@ -17,7 +17,7 @@ extern DLLNETWORK Engine *engine;
 void Lua::NetPacket::register_class(luabind::class_<::NetPacket> &classDef)
 {
 	Lua::DataStream::register_class<::NetPacket>(classDef);
-	classDef.def("WriteEntity",static_cast<void(*)(lua_State*,::NetPacket&,EntityHandle*)>(&Lua::NetPacket::WriteEntity));
+	classDef.def("WriteEntity",static_cast<void(*)(lua_State*,::NetPacket&,BaseEntity*)>(&Lua::NetPacket::WriteEntity));
 	classDef.def("WriteEntity",static_cast<void(*)(lua_State*,::NetPacket&)>(&Lua::NetPacket::WriteEntity));
 	classDef.def("ReadEntity",&Lua::NetPacket::ReadEntity);
 	classDef.def("ReadSoundSource",&Lua::NetPacket::ReadALSound);
@@ -93,12 +93,12 @@ DLLNETWORK void Lua_NetPacket_ReadAngles(lua_State *l,NetPacket &packet)
 	luabind::object(l,a).push(l);
 }
 
-void Lua::NetPacket::WriteEntity(lua_State *l,::NetPacket &packet,EntityHandle *hEnt)
+void Lua::NetPacket::WriteEntity(lua_State *l,::NetPacket &packet,BaseEntity *hEnt)
 {
 	if(hEnt == nullptr)
 		nwm::write_entity(packet,static_cast<BaseEntity*>(nullptr));
 	else
-		nwm::write_entity(packet,*hEnt);
+		nwm::write_entity(packet,hEnt);
 }
 
 void Lua::NetPacket::WriteEntity(lua_State*,::NetPacket &packet)

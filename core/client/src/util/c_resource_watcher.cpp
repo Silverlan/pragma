@@ -129,31 +129,32 @@ void CResourceWatcherManager::GetWatchPaths(std::vector<std::string> &paths)
 	paths.push_back("particles");
 }
 
-void CResourceWatcherManager::OnResourceChanged(const std::string &rootPath,const std::string &path,const std::string &ext)
+void CResourceWatcherManager::OnResourceChanged(const util::Path &rootPath,const util::Path &path,const std::string &ext)
 {
 	ResourceWatcherManager::OnResourceChanged(rootPath,path,ext);
+	auto &strPath = path.GetString();
 	auto assetType = pragma::asset::determine_type_from_extension(ext);
 	if(assetType.has_value())
 	{
 		if(*assetType == pragma::asset::Type::ParticleSystem)
 		{
-			if(pragma::CParticleSystemComponent::IsParticleFilePrecached(path) == false)
+			if(pragma::CParticleSystemComponent::IsParticleFilePrecached(strPath) == false)
 				return;
 #if RESOURCE_WATCHER_VERBOSE > 0
-			auto ptPath = "particles\\" +path;
+			auto ptPath = "particles\\" +strPath;
 			Con::cout<<"[ResourceWatcher] Particle has changed: "<<ptPath<<". Attempting to reload..."<<Con::endl;
 #endif
-			pragma::CParticleSystemComponent::Precache(path,true);
-			CallChangeCallbacks(ECResourceWatcherCallbackType::ParticleSystem,path,ext);
+			pragma::CParticleSystemComponent::Precache(strPath,true);
+			CallChangeCallbacks(ECResourceWatcherCallbackType::ParticleSystem,strPath,ext);
 		}
 	}
 	else if(ext == "gls" || ext == "hls")
 	{
 #if RESOURCE_WATCHER_VERBOSE > 0
-		auto shaderPath = "shaders\\" +path;
+		auto shaderPath = "shaders\\" +strPath;
 		Con::cout<<"[ResourceWatcher] Shader has changed: "<<shaderPath<<". Attempting to reload..."<<Con::endl;
 #endif
-		auto canonShader = FileManager::GetCanonicalizedPath(path);
+		auto canonShader = FileManager::GetCanonicalizedPath(strPath);
 		ufile::remove_extension_from_filename(canonShader);
 		ustring::to_lower(canonShader);
 		auto &shaderManager = c_engine->GetShaderManager();
@@ -179,7 +180,7 @@ void CResourceWatcherManager::OnResourceChanged(const std::string &rootPath,cons
 #endif
 			c_engine->ReloadShader(name);
 		}
-		CallChangeCallbacks(ECResourceWatcherCallbackType::Shader,path,ext);
+		CallChangeCallbacks(ECResourceWatcherCallbackType::Shader,strPath,ext);
 	}
 }
 

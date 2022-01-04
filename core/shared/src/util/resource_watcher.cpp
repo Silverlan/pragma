@@ -12,6 +12,7 @@
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/model/modelmanager.h"
 #include "pragma/model/model.h"
+#include "pragma/localization.h"
 #include <material_manager2.hpp>
 #include <sharedutils/util_file.h>
 #include <pragma/asset/util_asset.hpp>
@@ -147,8 +148,9 @@ static bool is_image_format(const std::string &ext)
 		return ustring::compare(format.extension,ext,false);
 	}) != supportedFormats.end();
 }
-void ResourceWatcherManager::OnResourceChanged(const std::string &rootPath,const std::string &path,const std::string &ext)
+void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath,const util::Path &path,const std::string &ext)
 {
+	auto &strPath = path.GetString();
 	auto *nw = m_networkState;
 	auto *game = nw->GetGameState();
 	auto assetType = pragma::asset::determine_type_from_extension(ext);
@@ -158,14 +160,14 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &rootPath,const
 		{
 			if(game != nullptr)
 			{
-				auto *asset = m_networkState->GetModelManager().FindCachedAsset(path);
+				auto *asset = m_networkState->GetModelManager().FindCachedAsset(strPath);
 				if(asset != nullptr)
 				{
 #if RESOURCE_WATCHER_VERBOSE > 0
-					auto mdlPath = "models\\" +path;
+					auto mdlPath = "models\\" +strPath;
 					Con::cout<<"[ResourceWatcher] Model has changed: "<<mdlPath<<". Attempting to reload..."<<Con::endl;
 #endif
-					auto mdl = game->LoadModel(path,true);
+					auto mdl = game->LoadModel(strPath,true);
 					if(mdl != nullptr)
 					{
 #if RESOURCE_WATCHER_VERBOSE > 0
@@ -176,37 +178,37 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &rootPath,const
 						for(auto *ent : entIt)
 						{
 							auto mdlComponent = ent->GetModelComponent();
-							if(!mdlComponent || FileManager::ComparePath(mdlComponent->GetModelName(),path) == false)
+							if(!mdlComponent || FileManager::ComparePath(mdlComponent->GetModelName(),strPath) == false)
 								continue;
 #if RESOURCE_WATCHER_VERBOSE > 0
 							Con::cout<<"[ResourceWatcher] Reloading model for entity "<<ent->GetClass()<<"..."<<Con::endl;
 #endif
 							mdlComponent->SetModel(std::shared_ptr<Model>(nullptr));
-							mdlComponent->SetModel(path);
+							mdlComponent->SetModel(strPath);
 						}
 					}
 				}
 			}
-			CallChangeCallbacks(EResourceWatcherCallbackType::Model,path,ext);
+			CallChangeCallbacks(EResourceWatcherCallbackType::Model,strPath,ext);
 		}
 		else if(*assetType == pragma::asset::Type::Material)
 		{
 #if RESOURCE_WATCHER_VERBOSE > 0
-			auto matPath = "materials\\" +path;
+			auto matPath = "materials\\" +strPath;
 			Con::cout<<"[ResourceWatcher] Material has changed: "<<matPath<<". Attempting to reload..."<<Con::endl;
 #endif
-			ReloadMaterial(path);
-			CallChangeCallbacks(EResourceWatcherCallbackType::Material,path,ext);
+			ReloadMaterial(strPath);
+			CallChangeCallbacks(EResourceWatcherCallbackType::Material,strPath,ext);
 		}
 		else if(*assetType == pragma::asset::Type::Map)
-			CallChangeCallbacks(EResourceWatcherCallbackType::Map,path,ext);
+			CallChangeCallbacks(EResourceWatcherCallbackType::Map,strPath,ext);
 		else if(*assetType == pragma::asset::Type::Texture)
 		{
 #if RESOURCE_WATCHER_VERBOSE > 0
-			auto texPath = "materials\\" +path;
+			auto texPath = "materials\\" +strPath;
 			Con::cout<<"[ResourceWatcher] Texture has changed: "<<texPath<<". Attempting to reload..."<<Con::endl;
 #endif
-			ReloadTexture(path);
+			ReloadTexture(strPath);
 			auto &matManager = nw->GetMaterialManager();
 			for(auto &pair : matManager.GetCache()) // Find all materials which use this texture
 			{
@@ -220,7 +222,7 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &rootPath,const
 				auto &block = mat->GetDataBlock();
 				if(block == nullptr)
 					continue;
-				auto canonName = FileManager::GetCanonicalizedPath(path);
+				auto canonName = FileManager::GetCanonicalizedPath(strPath);
 				ustring::to_lower(canonName);
 				ufile::remove_extension_from_filename(canonName);
 			
@@ -263,44 +265,45 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &rootPath,const
 					ReloadMaterial(matName);
 				}
 			}
-			CallChangeCallbacks(EResourceWatcherCallbackType::Texture,path,ext);
+			CallChangeCallbacks(EResourceWatcherCallbackType::Texture,strPath,ext);
 		}
 		else if(*assetType == pragma::asset::Type::Sound)
 		{
 			if(game != nullptr)
 			{
 #if RESOURCE_WATCHER_VERBOSE > 0
-				auto sndPath = "sounds\\" +path;
+				auto sndPath = "sounds\\" +strPath;
 				Con::cout<<"[ResourceWatcher] Sound has changed: "<<sndPath<<". Attempting to reload..."<<Con::endl;
 #endif
 				// TODO: Reload sounds if they had been loaded previously
-				game->GetNetworkState()->PrecacheSound(path,ALChannel::Both); // TODO: Only precache whatever's been requested before?
+				game->GetNetworkState()->PrecacheSound(strPath,ALChannel::Both); // TODO: Only precache whatever's been requested before?
 			}
-			CallChangeCallbacks(EResourceWatcherCallbackType::Sound,path,ext);
+			CallChangeCallbacks(EResourceWatcherCallbackType::Sound,strPath,ext);
 		}
 	}
-	else if(rootPath == "scripts")
+	else if(rootPath == "scripts/sounds/")
 	{
-		util::Path p {path};
-		if(p.GetFront() == "sounds" && ustring::compare<std::string>(ext,"udm",false))
+		if(ustring::compare<std::string>(ext,"udm",false))
 		{
 			if(game != nullptr)
 			{
 #if RESOURCE_WATCHER_VERBOSE > 0
-				auto scriptPath = "scripts\\" +path;
+				auto scriptPath = "scripts\\" +strPath;
 				Con::cout<<"[ResourceWatcher] Sound-script has changed: "<<scriptPath<<". Attempting to reload..."<<Con::endl;
 #endif
 				// TODO: Reload sound-scripts if they had been loaded previously
-				game->LoadSoundScripts(path.c_str()); // TODO: Only reload if they have been requested before?
+				game->LoadSoundScripts(strPath.c_str()); // TODO: Only reload if they have been requested before?
 			}
-			CallChangeCallbacks(EResourceWatcherCallbackType::SoundScript,path,ext);
+			CallChangeCallbacks(EResourceWatcherCallbackType::SoundScript,strPath,ext);
 		}
 	}
+	else if(rootPath == "scripts/localization/")
+		Locale::ReloadFiles();
 }
 
-void ResourceWatcherManager::OnResourceChanged(const std::string &rootPath,const std::string &path)
+void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath,const util::Path &path)
 {
-	filemanager::update_file_index_cache(rootPath +'/' +path);
+	filemanager::update_file_index_cache((rootPath +path).GetString());
 	/*std::string absPath;
 	if(FileManager::FindAbsolutePath(rootPath +'/' +path,absPath))
 	{
@@ -309,13 +312,13 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &rootPath,const
 		absPath = path.GetString();
 		filemanager::update_file_index_cache(absPath);
 	}*/
-	std::string ext;
-	if(ufile::get_extension(path,&ext) == false)
+	auto ext = path.GetFileExtension();
+	if(!ext)
 		return;
 #if RESOURCE_WATCHER_VERBOSE > 0
 	Con::cout<<"[ResourceWatcher] File changed: "<<path<<" ("<<ext<<")"<<Con::endl;
 #endif
-	OnResourceChanged(rootPath,path,ext);
+	OnResourceChanged(rootPath,path,*ext);
 }
 
 void ResourceWatcherManager::GetWatchPaths(std::vector<std::string> &paths)
@@ -325,6 +328,7 @@ void ResourceWatcherManager::GetWatchPaths(std::vector<std::string> &paths)
 		"materials",
 		"sounds",
 		"scripts/sounds",
+		"scripts/localization",
 		"maps"
 	};
 }
@@ -348,7 +352,7 @@ bool ResourceWatcherManager::MountDirectory(const std::string &path,bool bAbsolu
 				{
 					if(ustring::substr(fName,0,resPath.length()) == resPath)
 					{
-						OnResourceChanged(resPath,ustring::substr(fName,resPath.length() +1));
+						OnResourceChanged(util::Path::CreatePath(resPath),util::Path::CreateFile(ustring::substr(fName,resPath.length() +1)));
 						break;
 					}
 				}

@@ -30,7 +30,7 @@ class DLLSERVER SResourceWatcherManager
 	: public ResourceWatcherManager
 {
 protected:
-	virtual void OnResourceChanged(const std::string &rootPath,const std::string &path,const std::string &ext) override;
+	virtual void OnResourceChanged(const util::Path &rootPath,const util::Path &path,const std::string &ext) override;
 public:
 	using ResourceWatcherManager::ResourceWatcherManager;
 };

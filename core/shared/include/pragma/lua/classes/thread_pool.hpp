@@ -20,6 +20,7 @@ namespace pragma::lua
 		static constexpr void(*NO_RESULT)() {nullptr};
 
 		LuaThreadPool(lua_State *l,uint32_t threadCount);
+		LuaThreadPool(lua_State *l,uint32_t threadCount,const std::string &name);
 		uint32_t AddTask(const std::function<ResultHandler()> &task);
 		bool IsComplete() const {return m_completedTaskCount == m_totalTaskCount;}
 		bool IsComplete(uint32_t taskId) const;

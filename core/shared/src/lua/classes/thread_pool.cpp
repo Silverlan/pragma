@@ -10,8 +10,18 @@
 #include "pragma/lua/classes/thread_pool.hpp"
 
 pragma::lua::LuaThreadPool::LuaThreadPool(lua_State *l,uint32_t threadCount)
-	: m_luaState{l},m_pool{threadCount}
+	: LuaThreadPool{l,threadCount,""}
 {}
+pragma::lua::LuaThreadPool::LuaThreadPool(lua_State *l,uint32_t threadCount,const std::string &name)
+	: m_luaState{l},m_pool{threadCount}
+{
+	auto n = m_pool.size();
+	std::string fullName = "lua";
+	if(!name.empty())
+		fullName += '_' +name;
+	for(auto i=decltype(n){0u};i<n;++i)
+		util::set_thread_name(m_pool.get_thread(i),fullName);
+}
 
 void pragma::lua::LuaThreadPool::Stop(bool execRemainingQueue)
 {
@@ -79,5 +89,8 @@ namespace pragma::lua
 		pragma::lua::define_custom_constructor<LuaThreadPool,[](lua_State *l,uint32_t threadCount) -> std::shared_ptr<LuaThreadPool> {
 			return std::make_shared<LuaThreadPool>(l,threadCount);
 		},lua_State*,uint32_t>(l);
+		pragma::lua::define_custom_constructor<LuaThreadPool,[](lua_State *l,uint32_t threadCount,const std::string &name) -> std::shared_ptr<LuaThreadPool> {
+			return std::make_shared<LuaThreadPool>(l,threadCount,name);
+		},lua_State*,uint32_t,const std::string&>(l);
 	}
 };

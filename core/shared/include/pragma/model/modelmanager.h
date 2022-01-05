@@ -44,7 +44,7 @@ namespace pragma::asset
 	{
 	public:
 		ModelLoader(util::IAssetManager &assetManager)
-			: util::TAssetFormatLoader<ModelProcessor>{assetManager}
+			: util::TAssetFormatLoader<ModelProcessor>{assetManager,"model"}
 		{}
 	protected:
 		virtual std::unique_ptr<util::IAssetProcessor> CreateAssetProcessor(

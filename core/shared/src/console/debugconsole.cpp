@@ -45,6 +45,7 @@ Engine::ConsoleInstance::ConsoleInstance()
 	console = std::make_unique<DebugConsole>();
 	console->open();
 	consoleThread = std::make_unique<std::thread>(std::bind(&KeyboardInput));
+	util::set_thread_name(*consoleThread,"pr_console_input_listener");
 }
 
 Engine::ConsoleInstance::~ConsoleInstance()

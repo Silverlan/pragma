@@ -734,7 +734,10 @@ void BasePhysicsComponent::SetForcePhysicsAwakeCallbacksEnabled(bool enabled,boo
 	if(apply == false)
 		return;
 	if(enabled)
-		OnPhysicsWake(m_physObject.get());
+	{
+		if(!m_physObject->IsSleeping())
+			OnPhysicsWake(m_physObject.get());
+	}
 	else if(m_physObject->IsSleeping())
 		OnPhysicsSleep(m_physObject.get());
 }

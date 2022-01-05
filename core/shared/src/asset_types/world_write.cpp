@@ -245,6 +245,7 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData,const std::string 
 
 		umath::ScaledTransform pose {};
 		pose.SetOrigin(entData->GetOrigin());
+		pose.SetRotation(entData->GetPose().GetRotation());
 		udmEnt["pose"] = pose;
 		udmEnt["keyValues"] = entData->GetKeyValues();
 

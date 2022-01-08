@@ -41,6 +41,8 @@ void WIDetachable::OnRemove()
 	WIBase::OnRemove();
 }
 
+bool WIDetachable::IsDetached() const {return m_detachedWindow != nullptr;}
+
 void WIDetachable::Detach()
 {
 	// if(m_mode == Mode::SimplifiedOverlay)

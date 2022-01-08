@@ -29,6 +29,7 @@ public:
 
 	void Detach();
 	void Reattach();
+	bool IsDetached() const;
 protected:
 	WIHandle m_hBg;
 	WIHandle m_hTitle;

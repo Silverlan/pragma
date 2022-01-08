@@ -129,6 +129,13 @@ void WIFrame::SetCloseButtonEnabled(bool b)
 		return;
 	m_hClose->SetVisible(b);
 }
+bool WIFrame::IsDetached() const
+{
+	auto *detachable = dynamic_cast<const WIDetachable*>(m_hContents.get());
+	if(!detachable)
+		return false;
+	return detachable->IsDetached();
+}
 void WIFrame::Detach()
 {
 	auto *detachable = dynamic_cast<WIDetachable*>(m_hContents.get());

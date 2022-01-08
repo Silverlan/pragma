@@ -20,6 +20,7 @@ public:
 	virtual void OnRemove() override;
 	void Detach();
 	void Reattach();
+	bool IsDetached() const;
 protected:
 	struct DetachedWindow
 	{

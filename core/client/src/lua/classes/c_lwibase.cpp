@@ -12,6 +12,7 @@
 #include "luasystem.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/widropdownmenu.h>
+#include "pragma/lua/libraries/c_gui_callbacks.hpp"
 #include "pragma/gui/wisilkicon.h"
 #include "pragma/gui/wisnaparea.hpp"
 #include "pragma/lua/classes/c_ldef_wgui.h"
@@ -40,6 +41,7 @@
 #include <prosper_render_pass.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 #include <sharedutils/property/util_property_color.hpp>
+#include <sharedutils/util_hash.hpp>
 #include <luabind/out_value_policy.hpp>
 #include <util_formatted_text.hpp>
 #include <prosper_window.hpp>
@@ -1119,6 +1121,24 @@ struct LuaCallbacks
 	std::unordered_map<std::string,std::vector<CallbackInfo>> callbacks;
 };
 
+static std::unordered_map<util::Hash,std::function<CallbackHandle(::WIBase&,lua_State*,const std::function<void(const std::function<void()>&)>&)>> g_uiCallbacks;
+static util::Hash get_gui_callback_hash(const std::string &className,const std::string &callbackName)
+{
+	util::Hash hash = 0;
+	hash = util::hash_combine<size_t>(hash,std::hash<std::string>{}(className));
+	hash = util::hash_combine<size_t>(hash,std::hash<std::string>{}(callbackName));
+	return hash;
+}
+void Lua::gui::register_lua_callback(
+	std::string className,std::string callbackName,
+	const std::function<CallbackHandle(::WIBase&,lua_State*,const std::function<void(const std::function<void()>&)>&)> &fCb
+)
+{
+	ustring::to_lower(className);
+	ustring::to_lower(callbackName);
+	g_uiCallbacks[get_gui_callback_hash(className,callbackName)] = fCb;
+}
+
 void Lua::gui::clear_lua_callbacks(lua_State *l)
 {
 	auto &wgui = WGUI::GetInstance();
@@ -1267,7 +1287,22 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l,::WIBase &panel,std::string
 		panel.SetUserData4(callbackPtr);
 	}
 	auto hPanel = panel.GetHandle();
-	if(name == "ontextchanged")
+	auto it = g_uiCallbacks.find(get_gui_callback_hash(panel.GetClass(),name));
+	if(it != g_uiCallbacks.end())
+	{
+		hCallback = it->second(panel,l,[l,o,&panel](const std::function<void()> &pushArgs) {
+			Lua::CallFunction(l,[&pushArgs,&o,&panel](lua_State *l) mutable {
+				o.push(l);
+
+				auto obj = WGUILuaInterface::GetLuaObject(l,panel);
+				obj.push(l);
+
+				pushArgs();
+				return Lua::StatusCode::Ok;
+			},0);
+		});
+	}
+	else if(name == "ontextchanged")
 	{
 		hCallback = FunctionCallback<void,std::reference_wrapper<const std::string>,bool>::Create([l,hPanel,o](std::reference_wrapper<const std::string> text,bool changedByUser) mutable {
 			if(!hPanel.IsValid())
@@ -1283,7 +1318,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l,::WIBase &panel,std::string
 			},0);
 		});
 	}
-	if(name == "onscrolloffsetchanged")
+	else if(name == "onscrolloffsetchanged")
 	{
 		hCallback = FunctionCallback<void,uint32_t>::Create([l,hPanel,o](uint32_t offset) mutable {
 			if(!hPanel.IsValid())

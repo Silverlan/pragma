@@ -836,6 +836,14 @@ void CEngine::SetConsoleType(ConsoleType type)
 	if(isOpen)
 		OpenConsole();
 }
+CEngine::ConsoleType CEngine::GetConsoleType() const
+{
+	auto *pConsole = WIConsole::GetConsole();
+	auto *pFrame = pConsole ? pConsole->GetFrame() : nullptr;
+	if(pFrame && pFrame->IsVisible())
+		return pFrame->IsDetached() ? ConsoleType::GUIDetached : ConsoleType::GUI;
+	return Engine::GetConsoleType();
+}
 bool CEngine::IsConsoleOpen() const
 {
 	switch(m_consoleType)
@@ -880,6 +888,7 @@ std::shared_ptr<prosper::Window> CEngine::CreateWindow(prosper::WindowSettings &
 	if(!window)
 		return nullptr;
 	auto *pWindow = window.get();
+	pWindow->GetStagingRenderTarget(); // This will initialize the staging target immediately
 	(*pWindow)->SetWindowSizeCallback([pWindow](GLFW::Window &window,Vector2i size) {
 		pWindow->ReloadStagingRenderTarget();
 		auto *el = ::WGUI::GetInstance().GetBaseElement(pWindow);

@@ -186,6 +186,11 @@ void Engine::ClearConsole()
 
 void Engine::SetConsoleType(ConsoleType type) {m_consoleType = type;}
 
+Engine::ConsoleType Engine::GetConsoleType() const
+{
+	return (m_consoleInfo && m_consoleInfo->console) ? ConsoleType::Terminal : ConsoleType::None;
+}
+
 void Engine::SetReplicatedConVar(const std::string &cvar,const std::string &val)
 {
 	auto *client = GetClientState();

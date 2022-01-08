@@ -109,6 +109,7 @@ public:
 	virtual void CloseConsole() override;
 	virtual bool IsConsoleOpen() const override;
 	virtual void SetConsoleType(ConsoleType type) override;
+	virtual ConsoleType GetConsoleType() const override;
 	void UseFullbrightShader(bool b);
 	float GetFPSLimit() const;
 	void StartDefaultGame(const std::string &map,bool singlePlayer);

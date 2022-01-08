@@ -75,7 +75,8 @@ public:
 	};
 	enum class ConsoleType : uint8_t
 	{
-		Terminal = 0,
+		None = 0,
+		Terminal,
 		GUI,
 		GUIDetached
 	};
@@ -188,6 +189,7 @@ public:
 	std::optional<ConsoleOutput> PollConsoleOutput();
 	void SetRecordConsoleOutput(bool record);
 	virtual void SetConsoleType(ConsoleType type);
+	virtual ConsoleType GetConsoleType() const;
 
 	virtual bool IsMultiPlayer() const;
 	bool IsSinglePlayer() const;

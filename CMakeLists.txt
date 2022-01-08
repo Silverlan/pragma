@@ -1024,8 +1024,12 @@ pragma_install_lib_c("${DEPENDENCY_ZLIB_LIBRARY}" zlib1 "${BINARY_OUTPUT_DIR}")
 
 if(WIN32)
 	set(OS_LIB_BIN_EXT ".dll")
+	set(OS_LIB_SHARED_EXT ".lib")
+	set(OS_EXE_EXT ".exe")
 else()
 	set(OS_LIB_BIN_EXT ".so")
+	set(OS_LIB_SHARED_EXT ".so")
+	set(OS_EXE_EXT "")
 endif()
 
 function(pragma_install_file FILE_PATH INSTALL_PATH)

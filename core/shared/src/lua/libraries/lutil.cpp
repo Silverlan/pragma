@@ -21,6 +21,8 @@
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/lua/policies/core_policies.hpp"
+#include "pragma/lua/converters/optional_converter_t.hpp"
+#include "pragma/lua/converters/pair_converter_t.hpp"
 #include <pragma/game/game.h>
 #include "luasystem.h"
 #include "pragma/game/damageinfo.h"
@@ -53,6 +55,7 @@
 #include <panima/skeleton.hpp>
 #include <luabind/class_info.hpp>
 #include <util_zip.h>
+#include <fsys/ifile.hpp>
 
 extern DLLNETWORK Engine *engine;
 
@@ -142,6 +145,43 @@ void Lua::util::register_shared_generic(luabind::module_ &mod)
 		luabind::def("calc_screen_space_distance_to_world_space_position",Lua::util::calc_screenspace_distance_to_worldspace_position),
 		luabind::def("depth_to_distance",Lua::util::depth_to_distance)
 	];
+
+	auto defZip = luabind::class_<ZIPFile>("ZipFile");
+	defZip.add_static_constant("OPEN_FLAG_NONE",umath::to_integral(ZIPFile::OpenFlags::None));
+	defZip.add_static_constant("OPEN_FLAG_CREATE_IF_NOT_EXIST_BIT",umath::to_integral(ZIPFile::OpenFlags::CreateIfNotExist));
+	defZip.add_static_constant("OPEN_FLAG_ERROR_IF_EXIST_BIT",umath::to_integral(ZIPFile::OpenFlags::ErrorIfExist));
+	defZip.add_static_constant("OPEN_FLAG_STRICT_CHECKS_BIT",umath::to_integral(ZIPFile::OpenFlags::StrictChecks));
+	defZip.add_static_constant("OPEN_FLAG_TRUNCATE_IF_EXISTS_BIT",umath::to_integral(ZIPFile::OpenFlags::TruncateIfExists));
+	defZip.add_static_constant("OPEN_FLAG_READ_ONLY_BIT",umath::to_integral(ZIPFile::OpenFlags::ReadOnly));
+	defZip.scope[luabind::def("open",+[](const std::string &filePath,ZIPFile::OpenFlags openFlags) -> std::shared_ptr<ZIPFile> {
+		auto path = ::util::Path::CreateFile(filePath);
+		path.Canonicalize();
+		path = ::util::Path::CreatePath(::util::get_program_path()) +path;
+		auto zipFile = ZIPFile::Open(path.GetString(),openFlags);
+		if(!zipFile)
+			return nullptr;
+		return zipFile;
+	})];
+	defZip.def("GetFileList",+[](ZIPFile &zip) -> std::optional<std::vector<std::string>> {
+		std::vector<std::string> files;
+		if(!zip.GetFileList(files))
+			return {};
+		return files;
+	});
+	defZip.def("ExtractFile",+[](ZIPFile &zip,const std::string &zipFileName,const std::string &outputZipFileName) -> std::pair<bool,std::optional<std::string>> {
+		std::vector<uint8_t> data;
+		std::string err;
+		if(!zip.ReadFile(zipFileName,data,err))
+			return {false,err};
+		filemanager::create_path(ufile::get_path_from_filename(outputZipFileName));
+		auto f = filemanager::open_file(outputZipFileName,filemanager::FileMode::Write | filemanager::FileMode::Binary);
+		if(!f)
+			return {false,"Unable to open output file!"};
+		fsys::File fp {f};
+		fp.Write(data.data(),data.size());
+		return {true,{}};
+	});
+	mod[defZip];
 }
 void Lua::util::register_shared(luabind::module_ &mod)
 {

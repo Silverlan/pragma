@@ -769,10 +769,12 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		p.MakeRelative(other);
 	}));
 	defPath.def("GetComponentCount",&util::Path::GetComponentCount);
-	defPath.def("GetComponent",+[](util::Path &p,size_t offset) -> std::pair<std::string_view,size_t> {
+	defPath.def("GetComponent",+[](util::Path &p,size_t offset) -> std::optional<std::pair<std::string_view,size_t>> {
+		if(offset >= p.GetString().size())
+			return {};
 		size_t nextOffset;
 		auto sv = p.GetComponent(offset,&nextOffset);
-		return {sv,nextOffset};
+		return std::pair<std::string_view,size_t>{sv,nextOffset};
 	});
 	defPath.def("IsEmpty",&util::Path::IsEmpty);
 	modUtil[defPath];

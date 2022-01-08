@@ -1117,6 +1117,8 @@ static void autogenerate()
 
 			cl->InitializeLibrary("pr_dmx");
 			cl->InitializeLibrary("steamworks/pr_steamworks");
+
+			cl->InitializeLibrary("chromium/pr_chromium");
 		}
 
 		auto *sv = pragma::get_engine()->GetServerNetworkState();
@@ -1173,6 +1175,8 @@ static void autogenerate()
 		{"pr_dmx","E:/projects/pragma/build_winx64/modules/pr_dmx/RelWithDebInfo/pr_dmx.pdb"},
 		{"pr_cycles","E:/projects/pragma/build_winx64/modules/pr_cycles/RelWithDebInfo/pr_unirender.pdb"},
 		{"pr_openvr","E:/projects/pragma/build_winx64/modules/pr_openvr/RelWithDebInfo/pr_openvr.pdb"},
+		{"pr_chromium","E:/projects/pragma/build_winx64/modules/pr_chromium/RelWithDebInfo/pr_chromium.pdb"},
+		{"pr_chromium_wrapper","E:/projects/pragma/build_winx64/modules/pr_chromium/external_libs/pr_chromium_wrapper/RelWithDebInfo/pr_chromium_wrapper.pdb"},
 		{"pr_steamworks","E:/projects/pragma/build_winx64/modules/pr_steamworks/RelWithDebInfo/pr_steamworks.pdb"},
 		{"panima","E:/projects/pragma/build_winx64/external_libs/panima/RelWithDebInfo/panima.pdb"}
 	};

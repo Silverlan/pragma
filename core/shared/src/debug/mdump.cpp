@@ -119,7 +119,7 @@ LONG MiniDumper::TopLevelFilter( struct _EXCEPTION_POINTERS *pExceptionInfo )
 					if (bOK)
 					{
 						auto zipName = programPath +std::string("/") +util::get_date_time("crashdumps/crashdump_%Y-%m-%d_%H-%M-%S.zip");
-						auto zipFile = ZIPFile::Open(zipName,ZIPFile::OpenFlags::CreateIfNotExist);
+						auto zipFile = ZIPFile::Open(zipName,ZIPFile::OpenMode::Write);
 						if(zipFile != nullptr)
 						{
 							// Write Exception

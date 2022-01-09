@@ -147,17 +147,13 @@ void Lua::util::register_shared_generic(luabind::module_ &mod)
 	];
 
 	auto defZip = luabind::class_<ZIPFile>("ZipFile");
-	defZip.add_static_constant("OPEN_FLAG_NONE",umath::to_integral(ZIPFile::OpenFlags::None));
-	defZip.add_static_constant("OPEN_FLAG_CREATE_IF_NOT_EXIST_BIT",umath::to_integral(ZIPFile::OpenFlags::CreateIfNotExist));
-	defZip.add_static_constant("OPEN_FLAG_ERROR_IF_EXIST_BIT",umath::to_integral(ZIPFile::OpenFlags::ErrorIfExist));
-	defZip.add_static_constant("OPEN_FLAG_STRICT_CHECKS_BIT",umath::to_integral(ZIPFile::OpenFlags::StrictChecks));
-	defZip.add_static_constant("OPEN_FLAG_TRUNCATE_IF_EXISTS_BIT",umath::to_integral(ZIPFile::OpenFlags::TruncateIfExists));
-	defZip.add_static_constant("OPEN_FLAG_READ_ONLY_BIT",umath::to_integral(ZIPFile::OpenFlags::ReadOnly));
-	defZip.scope[luabind::def("open",+[](const std::string &filePath,ZIPFile::OpenFlags openFlags) -> std::shared_ptr<ZIPFile> {
+	defZip.add_static_constant("OPEN_MODE_READ",umath::to_integral(ZIPFile::OpenMode::Read));
+	defZip.add_static_constant("OPEN_MODE_WRITE",umath::to_integral(ZIPFile::OpenMode::Write));
+	defZip.scope[luabind::def("open",+[](const std::string &filePath,ZIPFile::OpenMode openMode) -> std::shared_ptr<ZIPFile> {
 		auto path = ::util::Path::CreateFile(filePath);
 		path.Canonicalize();
 		path = ::util::Path::CreatePath(::util::get_program_path()) +path;
-		auto zipFile = ZIPFile::Open(path.GetString(),openFlags);
+		auto zipFile = ZIPFile::Open(path.GetString(),openMode);
 		if(!zipFile)
 			return nullptr;
 		return zipFile;
@@ -1322,7 +1318,7 @@ void Lua::util::pack_zip_archive(lua_State *l,const std::string &pzipFileName,co
 		}
 	}
 
-	auto zip = ZIPFile::Open(zipFileName,ZIPFile::OpenFlags::CreateIfNotExist);
+	auto zip = ZIPFile::Open(zipFileName,ZIPFile::OpenMode::Write);
 	if(zip == nullptr)
 	{
 		Lua::PushBool(l,false);

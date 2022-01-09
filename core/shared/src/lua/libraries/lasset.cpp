@@ -23,6 +23,12 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 {
 	auto modAsset = luabind::module_(lua.GetState(),"asset");
 	modAsset[
+		luabind::def("clear_unused",+[](NetworkState &nw,pragma::asset::Type type) -> std::optional<uint32_t> {
+			auto *assetManager = nw.GetAssetManager(type);
+			if(!assetManager)
+				return {};
+			return assetManager->ClearUnused();
+		}),
 		luabind::def("clear_unused_models",static_cast<uint32_t(*)(lua_State*)>([](lua_State *l) -> uint32_t {
 			auto *nw = engine->GetNetworkState(l);
 			return nw->GetModelManager().ClearUnused();

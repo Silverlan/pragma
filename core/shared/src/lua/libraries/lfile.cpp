@@ -344,6 +344,8 @@ bool Lua::file::validate_write_operation(lua_State *l,std::string &path,std::str
 	auto prefix = ustring::substr(fname,0,br +1);
 	outRootPath = prefix;
 	path = FileManager::GetCanonicalizedPath(path);
+	if(util::Path{path}.GetFront() == "cache")
+		outRootPath = ""; // Special case; We'll allow file writes in the cache directory
 	return true;
 }
 

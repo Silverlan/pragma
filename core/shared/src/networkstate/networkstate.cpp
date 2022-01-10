@@ -638,6 +638,10 @@ std::shared_ptr<util::Library> NetworkState::InitializeLibrary(std::string libra
 					return nullptr;
 				}
 			}
+			auto *ptrKeepAlive = dllHandle->FindSymbolAddress<bool(*)()>("pragma_should_keep_alive_until_program_shutdown");
+			if(ptrKeepAlive != nullptr && ptrKeepAlive())
+				dllHandle->SetDontFreeLibraryOnDestruct();
+
 			auto ptrDllHandle = std::make_shared<std::shared_ptr<util::Library>>(dllHandle);
 			m_libHandles.push_back(ptrDllHandle);
 			s_loadedLibraries.insert(decltype(s_loadedLibraries)::value_type(libAbs,ptrDllHandle));

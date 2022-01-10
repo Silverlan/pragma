@@ -114,6 +114,7 @@ std::pair<Vector3,Vector3> CParticleRendererBeam::GetRenderBounds() const
 
 void CParticleRendererBeam::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::ParticleRenderFlags renderFlags)
 {
+#if 0
 	if(m_shader.expired())
 		return;
 	auto *shader = static_cast<pragma::ShaderParticlePolyboard*>(m_shader.get());
@@ -124,6 +125,7 @@ void CParticleRendererBeam::Render(const std::shared_ptr<prosper::IPrimaryComman
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 	shader->Draw(scene,renderer,*m_particleSystem,*m_vertexBuffer,*m_indexBuffer,m_indexCount,GetParticleSystem().GetRadius(),m_curvature); // TODO: bloom
 	shader->EndDraw();
+#endif
 }
 
 

@@ -34,7 +34,7 @@ void ShaderConvoluteCubemapLighting::InitializeGfxPipeline(prosper::GraphicsPipe
 {
 	ShaderCubemap::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CUBEMAP_TEXTURE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_CUBEMAP_TEXTURE);
 }
 
 void ShaderConvoluteCubemapLighting::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
@@ -84,12 +84,13 @@ std::shared_ptr<prosper::Texture> ShaderConvoluteCubemapLighting::ConvoluteCubem
 				success = false;
 				goto endLoop;
 			}
-			if(BeginDraw(setupCmd) == true)
+			prosper::ShaderBindState bindState {*setupCmd};
+			if(RecordBeginDraw(bindState) == true)
 			{
 				pushConstants.view = GetViewMatrix(layerId);
-				success = RecordPushConstants(pushConstants) && RecordBindDescriptorSet(*dsg->GetDescriptorSet()) &&
-					RecordBindVertexBuffer(*vertexBuffer) && RecordDraw(3u,1u,i);
-				EndDraw();
+				success = RecordPushConstants(bindState,pushConstants) && RecordBindDescriptorSet(bindState,*dsg->GetDescriptorSet()) &&
+					RecordBindVertexBuffer(bindState,*vertexBuffer) && RecordDraw(bindState,3u,1u,i);
+				RecordEndDraw(bindState);
 			}
 			success = success && setupCmd->RecordEndRenderPass();
 			success = success && setupCmd->RecordPostRenderPassImageBarrier(img,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal,range);

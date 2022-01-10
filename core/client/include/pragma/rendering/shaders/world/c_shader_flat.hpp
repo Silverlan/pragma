@@ -26,17 +26,8 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
 		ShaderFlat(prosper::IPrContext &context,const std::string &identifier);
-
-		bool BindScene(const pragma::CSceneComponent &scene,bool bView);
-		bool BindEntity(CBaseEntity &ent);
-		bool BindMaterial(CMaterial &mat);
-		bool Draw(CModelSubMesh &mesh);
 	protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-	private:
-		// These are unused
-		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,bool bView) override {return false;}
-		virtual bool BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings) override {return false;}
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override {return std::numeric_limits<uint32_t>::max();}
 		virtual uint32_t GetCameraDescriptorSetIndex() const override {return std::numeric_limits<uint32_t>::max();}
 	};

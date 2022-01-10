@@ -90,10 +90,10 @@ void ShaderSkybox::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pi
 
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
 
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_MATERIAL);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDERER);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_INSTANCE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_MATERIAL);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_RENDERER);
 	ToggleDynamicScissorState(pipelineInfo,true);
 }
 
@@ -119,37 +119,6 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderSkybox::InitializeMaterialDe
 	descSet.Update();
 	return descSetGroup;
 }
-bool ShaderSkybox::BeginDraw(
-	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &drawOrigin,
-	const Vector4 &clipPlane,RecordFlags recordFlags
-)
-{
-	return ShaderScene::BeginDraw(cmdBuffer,0u,recordFlags);
-}
-bool ShaderSkybox::BindEntity(CBaseEntity &ent)
-{
-	if(ShaderGameWorldLightingPass::BindEntity(ent) == false)
-		return false;
-	auto skyC = ent.GetComponent<CSkyboxComponent>();
-	m_skyAngles = skyC.valid() ? skyC->GetSkyAngles() : EulerAngles{};
-	return true;
-}
-bool ShaderSkybox::BindSceneCamera(pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,bool bView)
-{
-	return ShaderGameWorldLightingPass::BindSceneCamera(scene,renderer,bView);
-	/*auto &cam = scene.GetActiveCamera();
-	if(ShaderGameWorldLightingPass::BindSceneCamera(scene,renderer,bView) == false)
-		return false;
-	auto origin = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
-	uvec::rotate(&origin,m_skyAngles);
-	return RecordPushConstants(PushConstants{origin}) == true;*/
-}
-bool ShaderSkybox::BindMaterialParameters(CMaterial &mat) {return true;}
-bool ShaderSkybox::BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings) {return true;}
-bool ShaderSkybox::BindLights(prosper::IDescriptorSet &dsLights) {return true;}
-bool ShaderSkybox::BindVertexAnimationOffset(uint32_t offset) {return true;}
-bool ShaderSkybox::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount) {return ShaderGameWorldLightingPass::Draw(mesh,meshIdx,renderBufferIndexBuffer,false,instanceCount);}
-
 //
 
 void ShaderSkybox::RecordBindScene(

@@ -76,8 +76,8 @@ namespace pragma
 
 		ShaderParticle2DBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 		bool Draw(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const CParticleSystemComponent &ps,CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags renderFlags);
-		bool BeginDraw(
-			const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,
+		bool RecordBeginDraw(
+			prosper::ShaderBindState &bindState,
 			CParticleSystemComponent &pSys,ParticleRenderFlags renderFlags,
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		);
@@ -100,7 +100,7 @@ namespace pragma
 		) const;
 
 		virtual prosper::DescriptorSetInfo &GetAnimationDescriptorSetInfo() const override;
-		bool BindParticleMaterial(const CRasterizationRendererComponent &renderer,const CParticleSystemComponent &ps);
+		bool RecordParticleMaterial(prosper::ShaderBindState &bindState,const CRasterizationRendererComponent &renderer,const CParticleSystemComponent &ps) const;
 
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;
 		virtual uint32_t GetLightDescriptorSetIndex() const override;
@@ -110,8 +110,8 @@ namespace pragma
 		virtual bool ShouldInitializePipeline(uint32_t pipelineIdx) override;
 
 		void RegisterDefaultGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo);
-		void RegisterDefaultGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo);
-		void RegisterDefaultGfxPipelineDescriptorSetGroups(prosper::GraphicsPipelineCreateInfo &pipelineInfo);
+		void RegisterDefaultGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
+		void RegisterDefaultGfxPipelineDescriptorSetGroups(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 
 		void GetParticleSystemOrientationInfo(
 			const Mat4 &matrix,const CParticleSystemComponent &particle,CParticleSystemComponent::OrientationType orientationType,Vector3 &up,Vector3 &right,

@@ -20,11 +20,3 @@ ShaderLoading::ShaderLoading(prosper::IPrContext &context,const std::string &ide
 {
 	// SetBaseShader<ShaderTextured3DBase>();
 }
-
-bool ShaderLoading::BindMaterial(CMaterial&)
-{
-	auto *mat = client->GetMaterialManager().GetErrorMaterial();
-	if(mat == nullptr)
-		return false;
-	return ShaderGameWorldLightingPass::BindMaterial(*static_cast<CMaterial*>(mat));
-}

@@ -35,11 +35,11 @@ void ShaderWaterSurfaceSumEdges::InitializeComputePipeline(prosper::ComputePipel
 {
 	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo,pipelineIdx);
 
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_WATER);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SURFACE_INFO);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_WATER);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SURFACE_INFO);
 }
-bool ShaderWaterSurfaceSumEdges::Compute(prosper::IDescriptorSet &descSetSurfaceInfo,prosper::IDescriptorSet &descSetEdges,uint32_t width,uint32_t length)
+bool ShaderWaterSurfaceSumEdges::RecordCompute(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetSurfaceInfo,prosper::IDescriptorSet &descSetEdges,uint32_t width,uint32_t length) const
 {
-	return RecordBindDescriptorSets({&descSetEdges,&descSetSurfaceInfo},DESCRIPTOR_SET_WATER.setIndex) &&
-		RecordDispatch(umath::ceil(width /8.f),umath::ceil(length /8.f),1);
+	return RecordBindDescriptorSets(bindState,{&descSetEdges,&descSetSurfaceInfo},DESCRIPTOR_SET_WATER.setIndex) &&
+		RecordDispatch(bindState,umath::ceil(width /8.f),umath::ceil(length /8.f),1);
 }

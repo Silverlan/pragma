@@ -45,8 +45,8 @@ void ShaderComputeIrradianceMapRoughness::InitializeGfxPipeline(prosper::Graphic
 {
 	ShaderCubemap::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_IRRADIANCE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_ROUGHNESS);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_IRRADIANCE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_ROUGHNESS);
 }
 
 void ShaderComputeIrradianceMapRoughness::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
@@ -156,12 +156,13 @@ std::shared_ptr<prosper::Texture> ShaderComputeIrradianceMapRoughness::ComputeRo
 					goto endLoop;
 				}
 
-				if(BeginDrawViewport(setupCmd,fb.GetWidth(),fb.GetHeight()) == true)
+				prosper::ShaderBindState bindState {*setupCmd};
+				if(RecordBeginDrawViewport(bindState,fb.GetWidth(),fb.GetHeight()) == true)
 				{
 					pushConstants.view = GetViewMatrix(layerId);
-					success = RecordPushConstants(pushConstants) && RecordBindDescriptorSets({dsg->GetDescriptorSet(),dsgRoughness->GetDescriptorSet()}) &&
-						RecordBindVertexBuffer(*vertexBuffer) && RecordDraw(3u,1u,i);
-					EndDraw();
+					success = RecordPushConstants(bindState,pushConstants) && RecordBindDescriptorSets(bindState,{dsg->GetDescriptorSet(),dsgRoughness->GetDescriptorSet()}) &&
+						RecordBindVertexBuffer(bindState,*vertexBuffer) && RecordDraw(bindState,3u,1u,i);
+					RecordEndDraw(bindState);
 				}
 				success = success && setupCmd->RecordEndRenderPass();
 				success = success && setupCmd->RecordPostRenderPassImageBarrier(*img,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal,range);

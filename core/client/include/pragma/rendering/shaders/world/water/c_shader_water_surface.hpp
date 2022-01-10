@@ -32,7 +32,7 @@ namespace pragma
 		};
 
 		ShaderWaterSurface(prosper::IPrContext &context,const std::string &identifier);
-		bool Compute(prosper::IDescriptorSet &descSetSurfaceInfo,prosper::IDescriptorSet &descSetParticles,uint32_t width,uint32_t length);
+		bool RecordCompute(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetSurfaceInfo,prosper::IDescriptorSet &descSetParticles,uint32_t width,uint32_t length) const;
 	protected:
 		ShaderWaterSurface(prosper::IPrContext &context,const std::string &identifier,const std::string &csShader);
 		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

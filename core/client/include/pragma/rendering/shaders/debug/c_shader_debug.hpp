@@ -41,17 +41,15 @@ namespace pragma
 
 		ShaderDebug(prosper::IPrContext &context,const std::string &identifier);
 
-		bool BeginDraw(const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,Pipeline pipelineIdx=Pipeline::Triangle);
-		bool Draw(prosper::IBuffer &vertexBuffer,uint32_t vertexCount,const Mat4 &mvp=umat::identity(),const Vector4 &color=Vector4(1.f,1.f,1.f,1.f));
+		bool RecordBeginDraw(prosper::ShaderBindState &bindState,Pipeline pipelineIdx=Pipeline::Triangle) const;
+		bool RecordDraw(prosper::ShaderBindState &bindState,prosper::IBuffer &vertexBuffer,uint32_t vertexCount,const Mat4 &mvp=umat::identity(),const Vector4 &color=Vector4(1.f,1.f,1.f,1.f)) const;
 	protected:
 		ShaderDebug(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
-		bool Draw(const std::vector<prosper::IBuffer*> &buffers,uint32_t vertexCount,const Mat4 &mvp,const Vector4 &color=Vector4(1.f,1.f,1.f,1.f));
+		bool RecordDraw(prosper::ShaderBindState &bindState,const std::vector<prosper::IBuffer*> &buffers,uint32_t vertexCount,const Mat4 &mvp,const Vector4 &color=Vector4(1.f,1.f,1.f,1.f)) const;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual bool ShouldInitializePipeline(uint32_t pipelineIdx) override;
 	private:
 		// These are unused
-		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,bool bView) override {return false;}
-		virtual bool BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings) override {return false;}
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override {return std::numeric_limits<uint32_t>::max();}
 		virtual uint32_t GetCameraDescriptorSetIndex() const override {return std::numeric_limits<uint32_t>::max();}
 	};
@@ -68,7 +66,7 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
 
 		ShaderDebugTexture(prosper::IPrContext &context,const std::string &identifier);
-		bool Draw(prosper::IDescriptorSet &descSetTexture,const ShaderDebug::PushConstants &pushConstants);
+		bool RecordDraw(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetTexture,const ShaderDebug::PushConstants &pushConstants) const;
 	protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	private:
@@ -87,7 +85,7 @@ namespace pragma
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_COLOR;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_COLOR;
 
-		bool Draw(prosper::IBuffer &vertexBuffer,prosper::IBuffer &colorBuffer,uint32_t vertexCount,const Mat4 &modelMatrix=umat::identity());
+		bool RecordDraw(prosper::ShaderBindState &bindState,prosper::IBuffer &vertexBuffer,prosper::IBuffer &colorBuffer,uint32_t vertexCount,const Mat4 &modelMatrix=umat::identity()) const;
 	protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};

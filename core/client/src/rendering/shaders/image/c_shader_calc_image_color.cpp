@@ -35,16 +35,18 @@ void ShaderCalcImageColor::InitializeComputePipeline(prosper::ComputePipelineCre
 {
 	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo,pipelineIdx);
 
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::ComputeBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::ComputeBit);
 
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_TEXTURE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_COLOR);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_TEXTURE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_COLOR);
 }
 
-bool ShaderCalcImageColor::Compute(prosper::IDescriptorSet &descSetTexture,prosper::IDescriptorSet &descSetColor,uint32_t sampleCount)
+bool ShaderCalcImageColor::RecordCompute(
+	prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetTexture,prosper::IDescriptorSet &descSetColor,uint32_t sampleCount
+) const
 {
-	return RecordPushConstants(PushConstants{static_cast<int32_t>(sampleCount)}) &&
-		RecordBindDescriptorSet(descSetTexture,DESCRIPTOR_SET_TEXTURE.setIndex) &&
-		RecordBindDescriptorSet(descSetColor,DESCRIPTOR_SET_COLOR.setIndex) &&
-		RecordDispatch();
+	return RecordPushConstants(bindState,PushConstants{static_cast<int32_t>(sampleCount)}) &&
+		RecordBindDescriptorSet(bindState,descSetTexture,DESCRIPTOR_SET_TEXTURE.setIndex) &&
+		RecordBindDescriptorSet(bindState,descSetColor,DESCRIPTOR_SET_COLOR.setIndex) &&
+		ShaderCompute::RecordDispatch(bindState);
 }

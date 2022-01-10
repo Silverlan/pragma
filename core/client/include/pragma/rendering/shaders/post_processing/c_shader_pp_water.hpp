@@ -32,12 +32,13 @@ namespace pragma
 
 		ShaderPPWater(prosper::IPrContext &context,const std::string &identifier);
 		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat);
-		bool BindRefractionMaterial(CMaterial &mat);
-		bool Draw(
+		bool RecordRefractionMaterial(prosper::ShaderBindState &bindState,CMaterial &mat) const;
+		bool RecordDraw(
+			prosper::ShaderBindState &bindState,
 			prosper::IDescriptorSet &descSetTexture,prosper::IDescriptorSet &descSetDepth,
 			prosper::IDescriptorSet &descSetCamera,prosper::IDescriptorSet &descSetTime,
 			prosper::IDescriptorSet &descSetFog,const Vector4 &clipPlane
-		);
+		) const;
 	protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};

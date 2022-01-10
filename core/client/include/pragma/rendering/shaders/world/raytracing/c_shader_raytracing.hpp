@@ -62,13 +62,14 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderRayTracing(prosper::IPrContext &context,const std::string &identifier);
-		bool Compute(
+		bool RecordCompute(
+			prosper::ShaderBindState &bindState,
 			const PushConstants &pushConstants,
 			prosper::IDescriptorSet &descSetOutputImage,prosper::IDescriptorSet &descSetGameScene,
 			prosper::IDescriptorSet &descSetCamera,prosper::IDescriptorSet &descSetLightSources,
 			prosper::IDescriptorSet *descSetIBL,
 			uint32_t workGroupsX,uint32_t workGroupsY
-		);
+		) const;
 	protected:
 		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};

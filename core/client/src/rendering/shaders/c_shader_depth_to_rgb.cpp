@@ -43,23 +43,23 @@ void ShaderDepthToRGB::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_UV);
 
-	AttachPushConstantRange(pipelineInfo,0u,GetPushConstantSize(),prosper::ShaderStageFlags::FragmentBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,GetPushConstantSize(),prosper::ShaderStageFlags::FragmentBit);
 
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET);
 }
 
 template<class TPushConstants>
-	bool ShaderDepthToRGB::Draw(prosper::IDescriptorSet &descSetDepthTex,const TPushConstants &pushConstants)
+	bool ShaderDepthToRGB::RecordDraw(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetDepthTex,const TPushConstants &pushConstants) const
 {
-	return RecordBindVertexBuffers({c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexUvBuffer().get()}) == true &&
-		RecordBindDescriptorSet(descSetDepthTex) == true &&
-		RecordPushConstants(pushConstants) == true &&
-		RecordDraw(prosper::CommonBufferCache::GetSquareVertexCount()) == true;
+	return RecordBindVertexBuffers(bindState,{c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexUvBuffer().get()}) == true &&
+		RecordBindDescriptorSet(bindState,descSetDepthTex) == true &&
+		RecordPushConstants(bindState,pushConstants) == true &&
+		prosper::ShaderGraphics::RecordDraw(bindState,prosper::CommonBufferCache::GetSquareVertexCount()) == true;
 }
 
-bool ShaderDepthToRGB::Draw(prosper::IDescriptorSet &descSetDepthTex,float nearZ,float farZ,float contrastFactor)
+bool ShaderDepthToRGB::RecordDraw(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetDepthTex,float nearZ,float farZ,float contrastFactor) const
 {
-	return Draw(descSetDepthTex,PushConstants{
+	return RecordDraw(bindState,descSetDepthTex,PushConstants{
 		nearZ,farZ,contrastFactor
 	});
 }
@@ -72,9 +72,11 @@ ShaderCubeDepthToRGB::ShaderCubeDepthToRGB(prosper::IPrContext &context,const st
 	: ShaderDepthToRGB(context,identifier,"debug/fs_cube_depth_to_rgb")
 {}
 
-bool ShaderCubeDepthToRGB::Draw(prosper::IDescriptorSet &descSetDepthTex,float nearZ,float farZ,uint32_t cubeSide,float contrastFactor)
+bool ShaderCubeDepthToRGB::RecordDraw(
+	prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetDepthTex,float nearZ,float farZ,uint32_t cubeSide,float contrastFactor
+) const
 {
-	return ShaderDepthToRGB::Draw(descSetDepthTex,PushConstants{
+	return ShaderDepthToRGB::RecordDraw(bindState,descSetDepthTex,PushConstants{
 		{nearZ,farZ,contrastFactor},static_cast<int32_t>(cubeSide)
 	});
 }
@@ -87,9 +89,11 @@ ShaderCSMDepthToRGB::ShaderCSMDepthToRGB(prosper::IPrContext &context,const std:
 	: ShaderDepthToRGB(context,identifier,"debug/fs_csm_depth_to_rgb")
 {}
 
-bool ShaderCSMDepthToRGB::Draw(prosper::IDescriptorSet &descSetDepthTex,float nearZ,float farZ,uint32_t layer,float contrastFactor)
+bool ShaderCSMDepthToRGB::RecordDraw(
+	prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetDepthTex,float nearZ,float farZ,uint32_t layer,float contrastFactor
+) const
 {
-	return ShaderDepthToRGB::Draw(descSetDepthTex,PushConstants{
+	return ShaderDepthToRGB::RecordDraw(bindState,descSetDepthTex,PushConstants{
 		{nearZ,farZ,contrastFactor},static_cast<int32_t>(layer)
 	});
 }

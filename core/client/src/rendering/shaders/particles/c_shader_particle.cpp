@@ -30,7 +30,7 @@ void ShaderParticleRotational::InitializeGfxPipeline(prosper::GraphicsPipelineCr
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_WORLD_ROTATION);
 }
 
-bool ShaderParticleRotational::BindWorldRotationBuffer(prosper::IBuffer &buffer) {return RecordBindVertexBuffer(buffer,VERTEX_BINDING_WORLD_ROTATION.GetBindingIndex());}
+bool ShaderParticleRotational::RecordWorldRotationBuffer(prosper::ShaderBindState &bindState,prosper::IBuffer &buffer) const {return RecordBindVertexBuffer(bindState,buffer,VERTEX_BINDING_WORLD_ROTATION.GetBindingIndex());}
 
 void ShaderParticleRotational::GetParticleSystemOrientationInfo(
 	const Mat4 &matrix,const pragma::CParticleSystemComponent &particle,Vector3 &up,Vector3 &right,

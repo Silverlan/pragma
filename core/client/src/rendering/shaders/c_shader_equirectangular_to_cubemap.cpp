@@ -37,7 +37,7 @@ void ShaderEquirectangularToCubemap::InitializeGfxPipeline(prosper::GraphicsPipe
 {
 	ShaderCubemap::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE);
 }
 
 void ShaderEquirectangularToCubemap::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
@@ -106,12 +106,13 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::Equirectangula
 			success = false;
 			break;
 		}
-		if(BeginDraw(setupCmd) == true)
+		prosper::ShaderBindState bindState {*setupCmd};
+		if(RecordBeginDraw(bindState) == true)
 		{
 			pushConstants.view = GetViewMatrix(layerId);
-			success = RecordPushConstants(pushConstants) && RecordBindDescriptorSet(*dsg->GetDescriptorSet()) &&
-				RecordBindVertexBuffer(*vertexBuffer) && RecordDraw(numVerts);
-			EndDraw();
+			success = RecordPushConstants(bindState,pushConstants) && RecordBindDescriptorSet(bindState,*dsg->GetDescriptorSet()) &&
+				RecordBindVertexBuffer(bindState,*vertexBuffer) && RecordDraw(bindState,numVerts);
+			RecordEndDraw(bindState);
 		}
 		success = success && setupCmd->RecordEndRenderPass();
 		if(success == false)

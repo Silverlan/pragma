@@ -41,7 +41,7 @@ namespace pragma
 
 		ShaderGradient(prosper::IPrContext &context,const std::string &identifier);
 		virtual ~ShaderGradient() override;
-		bool Draw(const PushConstants &pushConstants);
+		bool RecordDraw(prosper::ShaderBindState &bindState,const PushConstants &pushConstants) const;
 	protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};

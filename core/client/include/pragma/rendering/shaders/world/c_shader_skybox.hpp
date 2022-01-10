@@ -26,17 +26,6 @@ namespace pragma
 
 		ShaderSkybox(prosper::IPrContext &context,const std::string &identifier);
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
-		virtual bool BeginDraw(
-			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},
-			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
-		) override;
-		virtual bool BindClipPlane(const Vector4 &clipPlane) override {return true;}
-		virtual bool BindEntity(CBaseEntity &ent) override;
-		virtual bool BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings) override;
-		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,bool bView) override;
-		virtual bool BindLights(prosper::IDescriptorSet &dsLights) override;
-		virtual bool BindVertexAnimationOffset(uint32_t offset) override;
-		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
 		virtual bool GetRenderBufferTargets(
 			CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
 			std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
@@ -66,7 +55,6 @@ namespace pragma
 		virtual uint32_t GetLightDescriptorSetIndex() const override;
 		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
-		virtual bool BindMaterialParameters(CMaterial &mat) override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		EulerAngles m_skyAngles = {};
 	};

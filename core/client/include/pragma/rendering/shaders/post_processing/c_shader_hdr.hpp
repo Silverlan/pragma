@@ -25,11 +25,9 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderHDR(prosper::IPrContext &context,const std::string &identifier);
-		bool Draw(prosper::IDescriptorSet &descSetTexture,float exposure);
+		bool RecordDraw(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetTexture,float exposure) const;
 	protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-	private:
-		bool Draw(prosper::IDescriptorSet &descSetTexture)=delete;
 	};
 };
 

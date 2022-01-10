@@ -157,19 +157,22 @@ void ShaderSSAO::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipe
 
 	AddDefaultVertexAttributes(pipelineInfo);
 
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_PREPASS);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_NOISE_TEXTURE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SAMPLE_BUFFER);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_PREPASS);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_NOISE_TEXTURE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SAMPLE_BUFFER);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SCENE);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 }
 
-bool ShaderSSAO::Draw(const pragma::CSceneComponent &scene,prosper::IDescriptorSet &descSetPrepass,const std::array<uint32_t,2> &renderTargetDimensions)
+bool ShaderSSAO::RecordDraw(
+	prosper::ShaderBindState &bindState,const pragma::CSceneComponent &scene,prosper::IDescriptorSet &descSetPrepass,
+	const std::array<uint32_t,2> &renderTargetDimensions
+) const
 {
 	auto *descSetCamera = scene.GetCameraDescriptorSetGraphics();
-	return RecordBindDescriptorSets({
+	return RecordBindDescriptorSets(bindState,{
 		&descSetPrepass,m_descSetGroupTexture->GetDescriptorSet(),m_descSetGroupKernel->GetDescriptorSet(),
 		descSetCamera
-	}) && RecordPushConstants(renderTargetDimensions.size() *sizeof(renderTargetDimensions.front()),renderTargetDimensions.data()) &&
-		prosper::ShaderBaseImageProcessing::Draw();
+	}) && RecordPushConstants(bindState,renderTargetDimensions.size() *sizeof(renderTargetDimensions.front()),renderTargetDimensions.data()) &&
+		prosper::ShaderBaseImageProcessing::RecordDraw(bindState);
 }

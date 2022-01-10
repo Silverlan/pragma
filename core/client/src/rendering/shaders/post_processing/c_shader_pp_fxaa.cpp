@@ -35,13 +35,13 @@ void ShaderPPFXAA::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pi
 {
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	AddDefaultVertexAttributes(pipelineInfo);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_TEXTURE);
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_TEXTURE);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 }
-bool ShaderPPFXAA::Draw(prosper::IDescriptorSet &descSetTexture,const PushConstants &pushConstants)
+bool ShaderPPFXAA::RecordDraw(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetTexture,const PushConstants &pushConstants) const
 {
-	return RecordPushConstants(pushConstants) &&
-		ShaderPPBase::Draw(descSetTexture);
+	return RecordPushConstants(bindState,pushConstants) &&
+		ShaderPPBase::RecordDraw(bindState,descSetTexture);
 }
 void ShaderPPFXAA::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {

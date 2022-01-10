@@ -29,15 +29,15 @@ void ShaderClearColor::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 }
 
-bool ShaderClearColor::Draw(const PushConstants &pushConstants)
+bool ShaderClearColor::RecordDraw(prosper::ShaderBindState &bindState,const PushConstants &pushConstants) const
 {
 	if(
-		RecordBindVertexBuffer(*GetContext().GetCommonBufferCache().GetSquareVertexBuffer()) == false ||
-		RecordPushConstants(pushConstants) == false ||
-		RecordDraw(prosper::CommonBufferCache::GetSquareVertexCount()) == false
+		RecordBindVertexBuffer(bindState,*GetContext().GetCommonBufferCache().GetSquareVertexBuffer()) == false ||
+		RecordPushConstants(bindState,pushConstants) == false ||
+		prosper::ShaderGraphics::RecordDraw(bindState,prosper::CommonBufferCache::GetSquareVertexCount()) == false
 	)
 		return false;
 	return true;

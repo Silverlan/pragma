@@ -382,10 +382,11 @@ std::shared_ptr<prosper::Texture> CPBRConverterComponent::ConvertSpecularMapToRo
 	// Specular to roughness
 	if(setupCmd->RecordBeginRenderPass(*roughnessRt) == true)
 	{
-		if(shaderSpecularToRoughness->BeginDraw(setupCmd) == true)
+		prosper::ShaderBindState bindState {*setupCmd};
+		if(shaderSpecularToRoughness->RecordBeginDraw(bindState) == true)
 		{
-			shaderSpecularToRoughness->Draw(*dsgSpecular->GetDescriptorSet());
-			shaderSpecularToRoughness->EndDraw();
+			shaderSpecularToRoughness->RecordDraw(bindState,*dsgSpecular->GetDescriptorSet());
+			shaderSpecularToRoughness->RecordEndDraw(bindState);
 		}
 		setupCmd->RecordEndRenderPass();
 	}

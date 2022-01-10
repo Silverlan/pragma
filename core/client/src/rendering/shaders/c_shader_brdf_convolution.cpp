@@ -56,11 +56,12 @@ std::shared_ptr<prosper::Texture> ShaderBRDFConvolution::CreateBRDFConvolutionMa
 	auto success = false;
 	if(setupCmd->RecordBeginRenderPass(*rt))
 	{
-		if(BeginDraw(setupCmd))
+		prosper::ShaderBindState bindState {*setupCmd};
+		if(RecordBeginDraw(bindState))
 		{
 			if(
-				RecordBindVertexBuffers({vertBuffer.get(),uvBuffer.get()}) &&
-				RecordDraw(prosper::CommonBufferCache::GetSquareVertexCount())
+				RecordBindVertexBuffers(bindState,{vertBuffer.get(),uvBuffer.get()}) &&
+				prosper::ShaderGraphics::RecordDraw(bindState,prosper::CommonBufferCache::GetSquareVertexCount())
 			)
 				success = true;
 		}

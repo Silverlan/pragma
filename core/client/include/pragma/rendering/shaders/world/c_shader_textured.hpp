@@ -229,27 +229,13 @@ namespace pragma
 
 		ShaderGameWorldLightingPass(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 		virtual ~ShaderGameWorldLightingPass() override;
-		// TODO: Clean this up, most of these are deprecated!
-		virtual bool BindClipPlane(const Vector4 &clipPlane) override;
-		virtual bool BeginDraw(
-			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},
-			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
-		) override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
-		virtual bool BindMaterial(CMaterial &mat) override;
-		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
-		virtual bool BindDrawOrigin(const Vector4 &drawOrigin) override;
-		virtual bool SetDepthBias(const Vector2 &depthBias) override;
 		virtual bool GetRenderBufferTargets(
 			CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
 			std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
 		) const override;
-		bool BindReflectionProbeIntensity(float intensity);
 		std::optional<MaterialData> UpdateMaterialBuffer(CMaterial &mat) const;
-		virtual bool SetDebugMode(pragma::SceneDebugMode debugMode) override;
-		virtual void Set3DSky(bool is3dSky) override;
-		void SetShadowsEnabled(bool enabled);
-		bool PushSceneConstants(rendering::ShaderProcessor &shaderProcessor,const pragma::CSceneComponent &scene,const Vector4 &drawOrigin) const;
+		bool RecordPushSceneConstants(rendering::ShaderProcessor &shaderProcessor,const pragma::CSceneComponent &scene,const Vector4 &drawOrigin) const;
 
 		virtual uint32_t GetMaterialDescriptorSetIndex() const override;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
@@ -275,17 +261,11 @@ namespace pragma
 		bool IsDepthPrepassEnabled() const;
 		void SetDepthPrepassEnabled(bool enabled) {m_depthPrepassEnabled = enabled;}
 	protected:
-		using ShaderEntity::Draw;
+		using ShaderEntity::RecordDraw;
 		GameShaderSpecializationConstantFlag GetStaticSpecializationConstantFlags(GameShaderSpecialization specialization) const;
-		bool BindLightMapUvBuffer(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,bool &outShouldUseLightmaps);
 		virtual void OnPipelinesInitialized() override;
-		virtual bool BindRenderFlags(SceneFlags flags);
-		virtual void OnBindEntity(CBaseEntity &ent,CRenderComponent &renderC) override;
 		virtual void ApplyMaterialFlags(CMaterial &mat,MaterialFlags &outFlags) const;
 		virtual void UpdateRenderFlags(CModelSubMesh &mesh,SceneFlags &inOutFlags);
-		virtual void OnPipelineBound() override;
-		virtual void OnPipelineUnbound() override;
-		virtual bool BindMaterialParameters(CMaterial &mat);
 		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo);
 		std::optional<MaterialData> InitializeMaterialBuffer(prosper::IDescriptorSet &descSet,CMaterial &mat);
 		virtual void InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);

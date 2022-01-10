@@ -206,6 +206,7 @@ bool CParticleRendererModel::Update()
 
 void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::ParticleRenderFlags renderFlags)
 {
+#if 0
 	if(m_shader.expired())
 		return;
 	auto *shader = static_cast<pragma::ShaderParticleModel*>(m_shader.get());
@@ -264,6 +265,7 @@ void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryComma
 		}
 	}
 	shader->EndDraw();
+#endif
 }
 
 void CParticleRendererModel::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent &light,uint32_t layerId)

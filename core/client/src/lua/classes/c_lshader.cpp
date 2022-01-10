@@ -15,7 +15,7 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,pragma::LuaDescriptorSetInfo &descSetInfo)
+void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx,pragma::LuaDescriptorSetInfo &descSetInfo)
 {
 	auto *shader = pragma::LuaShaderBase::GetShader(pipelineInfo);
 	if(shader == nullptr)
@@ -35,14 +35,14 @@ void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l,prosper::
 		bindingIdx = binding.bindingIndex +1u;
 	}
 	shaderDescSetInfo.setIndex = descSetInfo.setIndex;
-	shader->GetShader().AddDescriptorSetGroup(pipelineInfo,shaderDescSetInfo);
+	shader->GetShader().AddDescriptorSetGroup(pipelineInfo,pipelineIdx,shaderDescSetInfo);
 }
-void Lua::BasePipelineCreateInfo::AttachPushConstantRange(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t offset,uint32_t size,uint32_t shaderStages)
+void Lua::BasePipelineCreateInfo::AttachPushConstantRange(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx,uint32_t offset,uint32_t size,uint32_t shaderStages)
 {
 	auto *shader = pragma::LuaShaderBase::GetShader(pipelineInfo);
 	if(shader == nullptr)
 		return;
-	shader->GetShader().AttachPushConstantRange(pipelineInfo,offset,size,static_cast<prosper::ShaderStageFlags>(shaderStages));
+	shader->GetShader().AttachPushConstantRange(pipelineInfo,pipelineIdx,offset,size,static_cast<prosper::ShaderStageFlags>(shaderStages));
 }
 void Lua::shader::push_shader(lua_State *l,prosper::Shader &shader)
 {
@@ -154,16 +154,16 @@ void Lua::Shader::GetSourceFilePaths(lua_State *l,prosper::Shader &shader)
 		Lua::SetTableValue(l,t);
 	}
 }
-void Lua::Shader::RecordPushConstants(lua_State *l,prosper::Shader &shader,::DataStream &ds,uint32_t offset)
+void Lua::Shader::RecordPushConstants(lua_State *l,prosper::Shader &shader,prosper::ShaderBindState &bindState,::DataStream &ds,uint32_t offset)
 {
-	auto r = shader.RecordPushConstants(ds->GetSize(),ds->GetData(),offset);
+	auto r = shader.RecordPushConstants(bindState,ds->GetSize(),ds->GetData(),offset);
 	Lua::PushBool(l,r);
 }
-static bool record_bind_descriptor_sets(prosper::Shader &shader,const std::vector<prosper::IDescriptorSet*> &descSets,uint32_t firstSet,const std::vector<uint32_t> &dynamicOffsets)
+static bool record_bind_descriptor_sets(prosper::Shader &shader,prosper::ShaderBindState &bindState,const std::vector<prosper::IDescriptorSet*> &descSets,uint32_t firstSet,const std::vector<uint32_t> &dynamicOffsets)
 {
-	return shader.RecordBindDescriptorSets(descSets,firstSet,dynamicOffsets);
+	return shader.RecordBindDescriptorSets(bindState,descSets,firstSet,dynamicOffsets);
 }
-void Lua::Shader::RecordBindDescriptorSet(lua_State *l,prosper::Shader &shader,Lua::Vulkan::DescriptorSet &ds,uint32_t firstSet,luabind::object dynamicOffsets)
+void Lua::Shader::RecordBindDescriptorSet(lua_State *l,prosper::Shader &shader,prosper::ShaderBindState &bindState,Lua::Vulkan::DescriptorSet &ds,uint32_t firstSet,luabind::object dynamicOffsets)
 {
 	std::vector<uint32_t> vDynamicOffsets;
 	if(Lua::IsSet(l,4u))
@@ -172,10 +172,10 @@ void Lua::Shader::RecordBindDescriptorSet(lua_State *l,prosper::Shader &shader,L
 			return static_cast<uint32_t>(Lua::CheckInt(l,idx));
 		});
 	}
-	auto r = record_bind_descriptor_sets(shader,{ds.GetDescriptorSet()},firstSet,vDynamicOffsets);
+	auto r = record_bind_descriptor_sets(shader,bindState,{ds.GetDescriptorSet()},firstSet,vDynamicOffsets);
 	Lua::PushBool(l,r);
 }
-void Lua::Shader::RecordBindDescriptorSets(lua_State *l,prosper::Shader &shader,luabind::object descSets,uint32_t firstSet,luabind::object dynamicOffsets)
+void Lua::Shader::RecordBindDescriptorSets(lua_State *l,prosper::Shader &shader,prosper::ShaderBindState &bindState,luabind::object descSets,uint32_t firstSet,luabind::object dynamicOffsets)
 {
 	auto vDescSets = get_table_values<prosper::IDescriptorSet*>(l,2u,[](lua_State *l,int32_t idx) {
 		return Lua::Check<Lua::Vulkan::DescriptorSet>(l,idx).GetDescriptorSet();
@@ -187,7 +187,7 @@ void Lua::Shader::RecordBindDescriptorSets(lua_State *l,prosper::Shader &shader,
 			return static_cast<uint32_t>(Lua::CheckInt(l,idx));
 		});
 	}
-	auto r = record_bind_descriptor_sets(shader,vDescSets,firstSet,vDynamicOffsets);
+	auto r = record_bind_descriptor_sets(shader,bindState,vDescSets,firstSet,vDynamicOffsets);
 	Lua::PushBool(l,r);
 }
 
@@ -199,10 +199,4 @@ void Lua::Shader::SetPipelineCount(lua_State *l,pragma::LuaShaderBase &shader,ui
 {
 	shader.SetPipelineCount(pipelineCount);
 }
-void Lua::Shader::GetCurrentCommandBuffer(lua_State *l,pragma::LuaShaderBase &shader)
-{
-	auto wpDrawCmd = shader.GetCurrentCommandBuffer();
-	if(wpDrawCmd == nullptr)
-		return;
-	Lua::Push(l,std::static_pointer_cast<prosper::ICommandBuffer>(wpDrawCmd->shared_from_this()));
-}
+

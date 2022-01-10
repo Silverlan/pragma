@@ -27,6 +27,6 @@ void ShaderWaterSurfaceIntegrate::InitializeComputePipeline(prosper::ComputePipe
 {
 	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo,pipelineIdx);
 
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_WATER_PARTICLES);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SURFACE_INFO);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_WATER_PARTICLES);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SURFACE_INFO);
 }

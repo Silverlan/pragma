@@ -55,16 +55,19 @@ void ShaderPPHDR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 {
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	AddDefaultVertexAttributes(pipelineInfo);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_TEXTURE);
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_TEXTURE);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 
 	auto &settings = client->GetGameWorldShaderSettings();
 	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::FragmentBit,0u /* constantId */,static_cast<uint32_t>(settings.bloomEnabled));
 	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::FragmentBit,1u /* constantId */,static_cast<uint32_t>(settings.fxaaEnabled));
 }
 
-bool ShaderPPHDR::Draw(prosper::IDescriptorSet &descSetTexture,pragma::rendering::ToneMapping toneMapping,float exposure,float bloomScale,float glowScale,bool flipVertically)
+bool ShaderPPHDR::RecordDraw(
+	prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetTexture,pragma::rendering::ToneMapping toneMapping,
+	float exposure,float bloomScale,float glowScale,bool flipVertically
+) const
 {
-	return RecordPushConstants(PushConstants{exposure,bloomScale,glowScale,toneMapping,flipVertically ? 1u : 0u}) &&
-		ShaderPPBase::Draw(descSetTexture) == true;
+	return RecordPushConstants(bindState,PushConstants{exposure,bloomScale,glowScale,toneMapping,flipVertically ? 1u : 0u}) &&
+		ShaderPPBase::RecordDraw(bindState,descSetTexture) == true;
 }

@@ -130,28 +130,31 @@ void WIDebugDepthTexture::Setup(float nearZ,float farZ)
 			if(depthImg.IsCubemap())
 			{
 				auto &shader = static_cast<pragma::ShaderCubeDepthToRGB&>(*m_whCubeDepthToRgbShader.get());
-				if(shader.BeginDraw(drawCmd) == true)
+				prosper::ShaderBindState bindState {*drawCmd};
+				if(shader.RecordBeginDraw(bindState) == true)
 				{
-					shader.Draw(*m_dsgSceneDepthTex->GetDescriptorSet(),nearZ,farZ,m_imageLayer,GetContrastFactor());
-					shader.EndDraw();
+					shader.RecordDraw(bindState,*m_dsgSceneDepthTex->GetDescriptorSet(),nearZ,farZ,m_imageLayer,GetContrastFactor());
+					shader.RecordEndDraw(bindState);
 				}
 			}
 			else if(img.GetLayerCount() > 1u)
 			{
 				auto &shader = static_cast<pragma::ShaderCSMDepthToRGB&>(*m_whCsmDepthToRgbShader.get());
-				if(shader.BeginDraw(drawCmd) == true)
+				prosper::ShaderBindState bindState {*drawCmd};
+				if(shader.RecordBeginDraw(bindState) == true)
 				{
-					shader.Draw(*m_dsgSceneDepthTex->GetDescriptorSet(),nearZ,farZ,m_imageLayer,GetContrastFactor());
-					shader.EndDraw();
+					shader.RecordDraw(bindState,*m_dsgSceneDepthTex->GetDescriptorSet(),nearZ,farZ,m_imageLayer,GetContrastFactor());
+					shader.RecordEndDraw(bindState);
 				}
 			}
 			else
 			{
 				auto &shader = static_cast<pragma::ShaderDepthToRGB&>(*m_whDepthToRgbShader.get());
-				if(shader.BeginDraw(drawCmd) == true)
+				prosper::ShaderBindState bindState {*drawCmd};
+				if(shader.RecordBeginDraw(bindState) == true)
 				{
-					shader.Draw(*m_dsgSceneDepthTex->GetDescriptorSet(),nearZ,farZ,GetContrastFactor());
-					shader.EndDraw();
+					shader.RecordDraw(bindState,*m_dsgSceneDepthTex->GetDescriptorSet(),nearZ,farZ,GetContrastFactor());
+					shader.RecordEndDraw(bindState);
 				}
 			}
 			drawCmd->RecordEndRenderPass();

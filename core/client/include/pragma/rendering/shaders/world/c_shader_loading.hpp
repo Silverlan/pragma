@@ -17,7 +17,6 @@ namespace pragma
 	{
 	public:
 		ShaderLoading(prosper::IPrContext &context,const std::string &identifier);
-		virtual bool BindMaterial(CMaterial &mat) override;
 	};
 };
 

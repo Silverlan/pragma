@@ -105,27 +105,28 @@ void ShaderRayTracing::InitializeComputePipeline(prosper::ComputePipelineCreateI
 	// Currently not supported on some GPUs?
 	// AddSpecializationConstant(pipelineInfo,0u /* constant id */,sizeof(TILE_SIZE),&TILE_SIZE);
 
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::ComputeBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::ComputeBit);
 
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_IMAGE_OUTPUT);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_GAME_SCENE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_LIGHTS);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_IBL);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_IMAGE_OUTPUT);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_GAME_SCENE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_LIGHTS);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_IBL);
 }
 
-bool ShaderRayTracing::Compute(
+bool ShaderRayTracing::RecordCompute(
+	prosper::ShaderBindState &bindState,
 	const PushConstants &pushConstants,
 	prosper::IDescriptorSet &descSetOutputImage,prosper::IDescriptorSet &descSetGameScene,
 	prosper::IDescriptorSet &descSetCamera,prosper::IDescriptorSet &descSetLightSources,
 	prosper::IDescriptorSet *descSetIBL,
 	uint32_t workGroupsX,uint32_t workGroupsY
-)
+) const
 {
-	return RecordBindDescriptorSets({
+	return RecordBindDescriptorSets(bindState,{
 		&descSetOutputImage,
 		&descSetGameScene,
 		&descSetCamera,
 		&descSetLightSources
-	}) && (descSetIBL == nullptr || RecordBindDescriptorSet(*descSetIBL,DESCRIPTOR_SET_IBL.setIndex)) && RecordPushConstants(pushConstants) && RecordDispatch(workGroupsX,workGroupsY);
+	}) && (descSetIBL == nullptr || RecordBindDescriptorSet(bindState,*descSetIBL,DESCRIPTOR_SET_IBL.setIndex)) && RecordPushConstants(bindState,pushConstants) && RecordDispatch(bindState,workGroupsX,workGroupsY);
 }

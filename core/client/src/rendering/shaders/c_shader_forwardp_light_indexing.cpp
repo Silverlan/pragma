@@ -34,16 +34,16 @@ void ShaderForwardPLightIndexing::InitializeComputePipeline(prosper::ComputePipe
 {
 	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo,pipelineIdx);
 
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::ComputeBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::ComputeBit);
 
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_VISIBLE_LIGHT);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_VISIBLE_LIGHT);
 }
 
-bool ShaderForwardPLightIndexing::Compute(prosper::IDescriptorSet &descSetLights,uint32_t tileCount)
+bool ShaderForwardPLightIndexing::RecordCompute(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetLights,uint32_t tileCount) const
 {
-	return RecordPushConstants(PushConstants{
+	return RecordPushConstants(bindState,PushConstants{
 			tileCount
 		}) &&
-		RecordBindDescriptorSet(descSetLights,DESCRIPTOR_SET_VISIBLE_LIGHT.setIndex) &&
-		RecordDispatch();
+		RecordBindDescriptorSet(bindState,descSetLights,DESCRIPTOR_SET_VISIBLE_LIGHT.setIndex) &&
+		RecordDispatch(bindState);
 }

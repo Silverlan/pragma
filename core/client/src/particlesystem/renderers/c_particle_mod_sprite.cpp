@@ -58,6 +58,7 @@ pragma::ShaderParticleBase *CParticleRendererSprite::GetShader() const
 
 void CParticleRendererSprite::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::ParticleRenderFlags renderFlags)
 {
+#if 0
 	auto *shader = static_cast<pragma::ShaderParticle2DBase*>(m_shader.get());
 	if(shader == nullptr || shader->BeginDraw(drawCmd,GetParticleSystem(),renderFlags) == false) // prosper TODO: Use unlit pipeline if low shader quality?
 		return;
@@ -72,6 +73,7 @@ void CParticleRendererSprite::Render(const std::shared_ptr<prosper::IPrimaryComm
 		renderFlags
 	);
 	shader->EndDraw();
+#endif
 }
 
 void CParticleRendererSprite::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent &light,uint32_t layerId)

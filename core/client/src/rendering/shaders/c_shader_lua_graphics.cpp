@@ -592,11 +592,11 @@ void Lua::GraphicsPipelineCreateInfo::SetSampleMaskEnabled(lua_State *l,prosper:
 void Lua::GraphicsPipelineCreateInfo::SetSampleShadingEnabled(lua_State *l,prosper::GraphicsPipelineCreateInfo &pipelineInfo,bool bEnabled) {pipelineInfo.ToggleSampleShading(bEnabled);}
 void Lua::GraphicsPipelineCreateInfo::SetStencilTestEnabled(lua_State *l,prosper::GraphicsPipelineCreateInfo &pipelineInfo,bool bEnabled) {pipelineInfo.ToggleStencilTest(bEnabled);}
 
-void Lua::Shader::Graphics::RecordBindVertexBuffer(lua_State *l,prosper::ShaderGraphics &shader,Lua::Vulkan::Buffer &buffer,uint32_t startBinding,uint32_t offset)
+void Lua::Shader::Graphics::RecordBindVertexBuffer(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState,Lua::Vulkan::Buffer &buffer,uint32_t startBinding,uint32_t offset)
 {
-	Lua::PushBool(l,shader.RecordBindVertexBuffer(buffer,startBinding,offset));
+	Lua::PushBool(l,shader.RecordBindVertexBuffer(bindState,buffer,startBinding,offset));
 }
-void Lua::Shader::Graphics::RecordBindVertexBuffers(lua_State *l,prosper::ShaderGraphics &shader,luabind::object buffers,uint32_t startBinding,luabind::object offsets)
+void Lua::Shader::Graphics::RecordBindVertexBuffers(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState,luabind::object buffers,uint32_t startBinding,luabind::object offsets)
 {
 	auto vBuffers = Lua::get_table_values<prosper::IBuffer*>(l,2,[](lua_State *l,int32_t idx) {
 		return &Lua::Check<Lua::Vulkan::Buffer>(l,idx);
@@ -608,36 +608,31 @@ void Lua::Shader::Graphics::RecordBindVertexBuffers(lua_State *l,prosper::Shader
 			return static_cast<ptrdiff_t>(Lua::CheckInt(l,idx));
 		});
 	}
-	Lua::PushBool(l,shader.RecordBindVertexBuffers(vBuffers,startBinding,vOffsets));
+	Lua::PushBool(l,shader.RecordBindVertexBuffers(bindState,vBuffers,startBinding,vOffsets));
 }
-void Lua::Shader::Graphics::RecordBindIndexBuffer(lua_State *l,prosper::ShaderGraphics &shader,Lua::Vulkan::Buffer &indexBuffer,uint32_t indexType,uint32_t offset)
+void Lua::Shader::Graphics::RecordBindIndexBuffer(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState,Lua::Vulkan::Buffer &indexBuffer,uint32_t indexType,uint32_t offset)
 {
-	Lua::PushBool(l,shader.RecordBindIndexBuffer(indexBuffer,static_cast<prosper::IndexType>(indexType),offset));
+	Lua::PushBool(l,shader.RecordBindIndexBuffer(bindState,indexBuffer,static_cast<prosper::IndexType>(indexType),offset));
 }
-void Lua::Shader::Graphics::RecordDraw(lua_State *l,prosper::ShaderGraphics &shader,uint32_t vertCount,uint32_t instanceCount,uint32_t firstVertex,uint32_t firstInstance)
+void Lua::Shader::Graphics::RecordDraw(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState,uint32_t vertCount,uint32_t instanceCount,uint32_t firstVertex,uint32_t firstInstance)
 {
-	Lua::PushBool(l,shader.RecordDraw(vertCount,instanceCount,firstVertex,firstInstance));
+	Lua::PushBool(l,shader.RecordDraw(bindState,vertCount,instanceCount,firstVertex,firstInstance));
 }
-void Lua::Shader::Graphics::RecordDrawIndexed(lua_State *l,prosper::ShaderGraphics &shader,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex,uint32_t firstInstance)
+void Lua::Shader::Graphics::RecordDrawIndexed(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex,uint32_t firstInstance)
 {
-	Lua::PushBool(l,shader.RecordDrawIndexed(indexCount,instanceCount,firstIndex,firstInstance));
+	Lua::PushBool(l,shader.RecordDrawIndexed(bindState,indexCount,instanceCount,firstIndex,firstInstance));
 }
-void Lua::Shader::Graphics::RecordBeginDraw(lua_State *l,prosper::ShaderGraphics &shader,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t pipelineIdx)
+void Lua::Shader::Graphics::RecordBeginDraw(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState,uint32_t pipelineIdx)
 {
-	if(hCommandBuffer.IsPrimary() == false)
-	{
-		Lua::PushBool(l,false);
-		return;
-	}
-	Lua::PushBool(l,shader.BeginDraw(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(hCommandBuffer.shared_from_this()),pipelineIdx));
+	Lua::PushBool(l,shader.RecordBeginDraw(bindState,pipelineIdx));
 }
-void Lua::Shader::Graphics::RecordDraw(lua_State *l,prosper::ShaderGraphics &shader)
+void Lua::Shader::Graphics::RecordDraw(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState)
 {
-	Lua::PushBool(l,shader.Draw());
+	Lua::PushBool(l,shader.RecordDraw(bindState));
 }
-void Lua::Shader::Graphics::RecordEndDraw(lua_State *l,prosper::ShaderGraphics &shader)
+void Lua::Shader::Graphics::RecordEndDraw(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState)
 {
-	shader.EndDraw();
+	shader.RecordEndDraw(bindState);
 	Lua::PushBool(l,true);
 }
 void Lua::Shader::Graphics::GetRenderPass(lua_State *l,prosper::ShaderGraphics &shader,uint32_t pipelineIdx)
@@ -653,44 +648,4 @@ void Lua::Shader::Scene3D::GetRenderPass(lua_State *l,uint32_t pipelineIdx)
 	if(rp == nullptr)
 		return;
 	Lua::Push(l,rp);
-}
-void Lua::Shader::Scene3D::BindSceneCamera(lua_State *l,pragma::ShaderScene &shader,pragma::CSceneComponent &scene,pragma::CRasterizationRendererComponent &renderer,bool bView)
-{
-	Lua::PushBool(l,shader.BindSceneCamera(scene,renderer,bView));
-}
-void Lua::Shader::Scene3D::BindRenderSettings(lua_State *l,pragma::ShaderScene &shader,std::shared_ptr<prosper::IDescriptorSetGroup> &descSet)
-{
-	Lua::PushBool(l,shader.BindRenderSettings(*descSet->GetDescriptorSet()));
-}
-void Lua::Shader::SceneLit3D::BindLights(lua_State *l,pragma::ShaderSceneLit &shader,std::shared_ptr<prosper::IDescriptorSetGroup> &dsLights)
-{
-	Lua::PushBool(l,shader.BindLights(*dsLights->GetDescriptorSet()));
-}
-void Lua::Shader::SceneLit3D::BindScene(lua_State *l,pragma::ShaderSceneLit &shader,pragma::CSceneComponent &scene,pragma::CRasterizationRendererComponent &renderer,bool bView)
-{
-	Lua::PushBool(l,shader.BindScene(scene,renderer,bView));
-}
-void Lua::Shader::ShaderEntity::BindInstanceDescriptorSet(lua_State *l,pragma::ShaderEntity &shader,std::shared_ptr<prosper::IDescriptorSetGroup> &descSet)
-{
-	Lua::PushBool(l,shader.BindInstanceDescriptorSet(*descSet->GetDescriptorSet()));
-}
-void Lua::Shader::ShaderEntity::BindEntity(lua_State *l,pragma::ShaderEntity &shader,BaseEntity &ent)
-{
-	Lua::Push(l,shader.BindEntity(static_cast<CBaseEntity&>(ent)));
-}
-void Lua::Shader::ShaderEntity::BindVertexAnimationOffset(lua_State *l,pragma::ShaderEntity &shader,uint32_t offset)
-{
-	Lua::PushBool(l,shader.BindVertexAnimationOffset(offset));
-}
-void Lua::Shader::ShaderEntity::Draw(lua_State *l,pragma::ShaderEntity &shader,::ModelSubMesh &mesh)
-{
-	Lua::PushBool(l,shader.Draw(static_cast<CModelSubMesh&>(mesh),{},*pragma::CSceneComponent::GetEntityInstanceIndexBuffer()->GetZeroIndexBuffer()));
-}
-void Lua::Shader::TexturedLit3D::BindMaterial(lua_State *l,pragma::ShaderGameWorldLightingPass &shader,::Material &mat)
-{
-	Lua::PushBool(l,shader.BindMaterial(static_cast<CMaterial&>(mat)));
-}
-void Lua::Shader::TexturedLit3D::RecordBindClipPlane(lua_State *l,pragma::ShaderGameWorldLightingPass &shader,const Vector4 &clipPlane)
-{
-	Lua::PushBool(l,shader.BindClipPlane(clipPlane));
 }

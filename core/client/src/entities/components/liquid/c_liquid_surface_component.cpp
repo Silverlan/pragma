@@ -502,9 +502,11 @@ void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos,const V
 				
 				auto *mat = GetWaterMaterial();
 				auto &shaderPPWater = static_cast<pragma::ShaderPPWater&>(*whShaderPPWater.get());
-				if(mat != nullptr && mat->IsLoaded() == true && shaderPPWater.BeginDraw(drawCmd) == true && shaderPPWater.BindRefractionMaterial(*mat))
+				prosper::ShaderBindState bindState {*drawCmd};
+				if(mat != nullptr && mat->IsLoaded() == true && shaderPPWater.RecordBeginDraw(bindState) == true && shaderPPWater.RecordRefractionMaterial(bindState,*mat))
 				{
-					shaderPPWater.Draw(
+					shaderPPWater.RecordDraw(
+						bindState,
 						descSetHdr,
 						*hdrInfo.dsgDepthPostProcessing->GetDescriptorSet(),
 						*scene->GetCameraDescriptorSetGraphics(),
@@ -512,7 +514,7 @@ void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos,const V
 						*waterScene.fogDescSetGroup->GetDescriptorSet(),
 						Vector4{n.x,n.y,n.z,planeDist}
 					);
-					shaderPPWater.EndDraw();
+					shaderPPWater.RecordEndDraw(bindState);
 				}
 				
 				// hdrInfo.BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo.get());

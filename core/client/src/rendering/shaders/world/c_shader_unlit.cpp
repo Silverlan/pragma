@@ -34,7 +34,6 @@ ShaderUnlit::ShaderUnlit(prosper::IPrContext &context,const std::string &identif
 	// SetPipelineCount(umath::to_integral(Pipeline::Count));
 }
 prosper::DescriptorSetInfo &ShaderUnlit::GetMaterialDescriptorSetInfo() const {return ShaderGameWorldLightingPass::DESCRIPTOR_SET_MATERIAL;}//DESCRIPTOR_SET_MATERIAL;}
-bool ShaderUnlit::BindLights(prosper::IDescriptorSet &dsLights) {return true;}
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderUnlit::InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo)
 {
 	return ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(mat,descSetInfo);

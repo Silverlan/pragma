@@ -45,11 +45,11 @@ void ShaderWaterSurface::InitializeComputePipeline(prosper::ComputePipelineCreat
 {
 	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo,pipelineIdx);
 
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_WATER_EFFECT);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SURFACE_INFO);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_WATER_EFFECT);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SURFACE_INFO);
 }
-bool ShaderWaterSurface::Compute(prosper::IDescriptorSet &descSetSurfaceInfo,prosper::IDescriptorSet &descSetParticles,uint32_t width,uint32_t length)
+bool ShaderWaterSurface::RecordCompute(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetSurfaceInfo,prosper::IDescriptorSet &descSetParticles,uint32_t width,uint32_t length) const
 {
-	return RecordBindDescriptorSets({&descSetParticles,&descSetSurfaceInfo},DESCRIPTOR_SET_WATER_EFFECT.setIndex) &&
-		RecordDispatch(umath::ceil(width /8.f),umath::ceil(length /8.f),1);//width,length); // TODO
+	return RecordBindDescriptorSets(bindState,{&descSetParticles,&descSetSurfaceInfo},DESCRIPTOR_SET_WATER_EFFECT.setIndex) &&
+		RecordDispatch(bindState,umath::ceil(width /8.f),umath::ceil(length /8.f),1);//width,length); // TODO
 }

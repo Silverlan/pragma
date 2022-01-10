@@ -45,7 +45,10 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderPPFog(prosper::IPrContext &context,const std::string &identifier);
-		bool Draw(prosper::IDescriptorSet &descSetTexture,prosper::IDescriptorSet &descSetDepth,prosper::IDescriptorSet &descSetCamera,prosper::IDescriptorSet &descSetFog);
+		bool RecordDraw(
+			prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetTexture,
+			prosper::IDescriptorSet &descSetDepth,prosper::IDescriptorSet &descSetCamera,prosper::IDescriptorSet &descSetFog
+		) const;
 	protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};

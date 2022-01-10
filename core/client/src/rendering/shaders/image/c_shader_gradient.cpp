@@ -50,13 +50,13 @@ void ShaderGradient::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
 	AddDefaultVertexAttributes(pipelineInfo);
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 }
 
-bool ShaderGradient::Draw(const PushConstants &pushConstants)
+bool ShaderGradient::RecordDraw(prosper::ShaderBindState &bindState,const PushConstants &pushConstants) const
 {
-	return RecordPushConstants(pushConstants) &&
-		prosper::ShaderBaseImageProcessing::Draw();
+	return RecordPushConstants(bindState,pushConstants) &&
+		prosper::ShaderBaseImageProcessing::RecordDraw(bindState);
 }
 
 /////////////////////////
@@ -84,7 +84,8 @@ bool pragma::util::record_draw_gradient(prosper::IPrContext &context,const std::
 	}
 	auto extents = img.GetExtents();
 	auto &shader = static_cast<ShaderGradient&>(*s_shaderGradient);
-	if(shader.BeginDraw(cmdBuffer) == true)
+	prosper::ShaderBindState bindState {*cmdBuffer};
+	if(shader.RecordBeginDraw(bindState) == true)
 	{
 		auto nodeCount = nodes.size();
 		if(nodeCount > ShaderGradient::MAX_GRADIENT_NODES)
@@ -96,9 +97,9 @@ bool pragma::util::record_draw_gradient(prosper::IPrContext &context,const std::
 		};
 		for(auto i=decltype(nodeCount){0};i<nodeCount;++i)
 			pushConstants.nodes.at(i) = nodes.at(i);
-		shader.Draw(pushConstants);
+		shader.RecordDraw(bindState,pushConstants);
 
-		shader.EndDraw();
+		shader.RecordEndDraw(bindState);
 	}
 	return cmdBuffer->RecordEndRenderPass();
 }

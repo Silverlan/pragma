@@ -17,23 +17,21 @@ void Lua::ComputePipelineCreateInfo::AddSpecializationConstant(lua_State *l,pros
 	Lua::PushBool(l,pipelineInfo.AddSpecializationConstant(constantId,ds->GetSize(),ds->GetData()));
 }
 
-void Lua::Shader::Compute::RecordDispatch(lua_State *l,prosper::ShaderCompute &shader,uint32_t x,uint32_t y,uint32_t z)
+void Lua::Shader::Compute::RecordDispatch(lua_State *l,prosper::ShaderCompute &shader,prosper::ShaderBindState &bindState,uint32_t x,uint32_t y,uint32_t z)
 {
-	Lua::PushBool(l,shader.RecordDispatch(x,y,z));
+	Lua::PushBool(l,shader.RecordDispatch(bindState,x,y,z));
 }
-void Lua::Shader::Compute::RecordBeginCompute(lua_State *l,prosper::ShaderCompute &shader,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t pipelineIdx)
+void Lua::Shader::Compute::RecordBeginCompute(lua_State *l,prosper::ShaderCompute &shader,prosper::ShaderBindState &bindState,uint32_t pipelineIdx)
 {
-	if(hCommandBuffer.IsPrimary() == false)
-		return;
-	Lua::PushBool(l,shader.BeginCompute(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(hCommandBuffer.shared_from_this()),pipelineIdx));
+	Lua::PushBool(l,shader.RecordBeginCompute(bindState,pipelineIdx));
 }
-void Lua::Shader::Compute::RecordCompute(lua_State *l,prosper::ShaderCompute &shader)
+void Lua::Shader::Compute::RecordCompute(lua_State *l,prosper::ShaderCompute &shader,prosper::ShaderBindState &bindState)
 {
-	shader.Compute();
+	shader.RecordCompute(bindState);
 	Lua::PushBool(l,true);
 }
-void Lua::Shader::Compute::RecordEndCompute(lua_State *l,prosper::ShaderCompute &shader)
+void Lua::Shader::Compute::RecordEndCompute(lua_State *l,prosper::ShaderCompute &shader,prosper::ShaderBindState &bindState)
 {
-	shader.EndCompute();
+	shader.RecordEndCompute(bindState);
 	Lua::PushBool(l,true);
 }

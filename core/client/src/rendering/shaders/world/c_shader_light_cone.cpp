@@ -39,42 +39,6 @@ ShaderLightCone::ShaderLightCone(prosper::IPrContext &context,const std::string 
 	umath::set_flag(m_sceneFlags,SceneFlags::LightmapsEnabled,false);
 }
 
-bool ShaderLightCone::BindSceneCamera(pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,bool bView)
-{
-	if(ShaderGameWorldLightingPass::BindSceneCamera(scene,renderer,bView) == false)
-		return false;
-	auto *descSetDepth = renderer.GetDepthDescriptorSet();
-	if(descSetDepth == nullptr)
-		return false;
-	uint32_t resolution = 0;
-	resolution = renderer.GetWidth()<<16 | static_cast<uint16_t>(renderer.GetHeight());
-	return RecordBindDescriptorSet(*descSetDepth,DESCRIPTOR_SET_DEPTH_MAP.setIndex) && RecordPushConstants(resolution,offsetof(PushConstants,resolution));
-}
-
-bool ShaderLightCone::BindEntity(CBaseEntity &ent)
-{
-	if(ShaderGameWorldLightingPass::BindEntity(ent) == false)
-		return false;
-	auto pSpotVolComponent = ent.GetComponent<CLightSpotVolComponent>();
-	auto lightIndex = -1;
-	if(pSpotVolComponent.valid())
-	{
-		auto *entSpotlight = pSpotVolComponent->GetSpotlightTarget();
-		if(entSpotlight != nullptr)
-		{
-			auto pLightComponent = entSpotlight->GetComponent<CLightComponent>();
-			if(pLightComponent.valid())
-			{
-				auto &renderBuffer = pLightComponent->GetRenderBuffer();
-				if(renderBuffer != nullptr)
-					lightIndex = renderBuffer->GetBaseIndex();
-			}
-		}
-	}
-	m_boundLightIndex = lightIndex;
-	return true;
-}
-
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderLightCone::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
 	auto descSetGroup = GetContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
@@ -82,6 +46,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderLightCone::InitializeMateria
 	return descSetGroup;
 }
 
+#if 0
 bool ShaderLightCone::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount)
 {
 	return RecordPushConstants( // Light cone shader doesn't use lightmaps, so we hijack the lightmapFlags push constant for our own purposes
@@ -89,30 +54,17 @@ bool ShaderLightCone::Draw(CModelSubMesh &mesh,const std::optional<pragma::Rende
 		sizeof(ShaderGameWorldLightingPass::PushConstants) +offsetof(PushConstants,boundLightIndex)
 	) && ShaderGameWorldLightingPass::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount);
 }
-
-bool ShaderLightCone::BindMaterialParameters(CMaterial &mat)
-{
-	if(ShaderGameWorldLightingPass::BindMaterialParameters(mat) == false)
-		return false;
-	auto &data = mat.GetDataBlock();
-	float coneLength = 100.f;
-	if(data != nullptr)
-		coneLength = data->GetFloat("cone_height");
-	return RecordPushConstants(
-		coneLength,
-		sizeof(ShaderGameWorldLightingPass::PushConstants) +offsetof(PushConstants,coneLength)
-	);
-}
+#endif
 
 void ShaderLightCone::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderGameWorldLightingPass::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(ShaderGameWorldLightingPass::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
 void ShaderLightCone::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_DEPTH_MAP);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_DEPTH_MAP);
 	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::None);
 	pipelineInfo.ToggleDepthWrites(false);
 }

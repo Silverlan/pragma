@@ -47,10 +47,11 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderForwardPLightCulling(prosper::IPrContext &context,const std::string &identifier);
-		bool Compute(
-			prosper::IDescriptorSet &descSetLights,prosper::IDescriptorSet &descSetCamera,uint32_t vpWidth,uint32_t vpHeight,uint32_t workGroupsX,uint32_t workGroupsY,uint32_t lightCount,
+		bool RecordCompute(
+			prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetLights,prosper::IDescriptorSet &descSetCamera,
+			uint32_t vpWidth,uint32_t vpHeight,uint32_t workGroupsX,uint32_t workGroupsY,uint32_t lightCount,
 			uint32_t sceneIndex
-		);
+		) const;
 	protected:
 		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};

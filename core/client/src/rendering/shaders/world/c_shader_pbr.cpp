@@ -29,7 +29,7 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-
+#pragma optimize("",off)
 decltype(ShaderPBR::DESCRIPTOR_SET_MATERIAL) ShaderPBR::DESCRIPTOR_SET_MATERIAL = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Material settings
@@ -95,38 +95,8 @@ ShaderPBR::ShaderPBR(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderPBR{context,identifier,"world/vs_textured","world/pbr/fs_pbr"}
 {
 }
-bool ShaderPBR::BindMaterialParameters(CMaterial &mat)
-{
-	return ShaderGameWorldLightingPass::BindMaterialParameters(mat);
-}
+
 prosper::DescriptorSetInfo &ShaderPBR::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
-void ShaderPBR::SetForceNonIBLMode(bool b) {m_bNonIBLMode = b;}
-bool ShaderPBR::BeginDraw(
-	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,
-	const Vector4 &drawOrigin,RecordFlags recordFlags
-)
-{
-	m_extRenderFlags = SceneFlags::None;
-	return ShaderGameWorldLightingPass::BeginDraw(cmdBuffer,clipPlane,drawOrigin,recordFlags);
-}
-bool ShaderPBR::BindSceneCamera(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,bool bView)
-{
-	if(ShaderGameWorldLightingPass::BindSceneCamera(scene,renderer,bView) == false)
-		return false;
-	auto hCam = scene.GetActiveCamera();
-	if(hCam.expired())
-		return false;
-	if(m_bNonIBLMode == false)
-	{
-		float iblStrength;
-		auto *ds = CReflectionProbeComponent::FindDescriptorSetForClosestProbe(scene,hCam->GetEntity().GetPosition(),iblStrength);
-		if(ds)
-			return BindReflectionProbeIntensity(iblStrength) && RecordBindDescriptorSet(*ds,DESCRIPTOR_SET_PBR.setIndex);
-	}
-	// No reflection probe and therefore no IBL available. Fallback to non-IBL rendering.
-	m_extRenderFlags |= SceneFlags::NoIBL;
-	return RecordBindDescriptorSet(*m_defaultPbrDsg->GetDescriptorSet(),DESCRIPTOR_SET_PBR.setIndex);
-}
 void ShaderPBR::UpdateRenderFlags(CModelSubMesh &mesh,SceneFlags &inOutFlags)
 {
 	ShaderGameWorldLightingPass::UpdateRenderFlags(mesh,inOutFlags);
@@ -135,7 +105,7 @@ void ShaderPBR::UpdateRenderFlags(CModelSubMesh &mesh,SceneFlags &inOutFlags)
 void ShaderPBR::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderGameWorldLightingPass::InitializeGfxPipelineDescriptorSets(pipelineInfo,pipelineIdx);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_PBR);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_PBR);
 }
 
 bool ShaderPBR::BindDescriptorSetTexture(Material &mat,prosper::IDescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,Texture *optDefaultTex)
@@ -366,7 +336,7 @@ void ShaderPBRBlend::InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipe
 prosper::DescriptorSetInfo &ShaderPBRBlend::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
 void ShaderPBRBlend::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderGameWorldLightingPass::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(ShaderGameWorldLightingPass::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBRBlend::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
@@ -392,24 +362,6 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBRBlend::InitializeMaterial
 	}
 	return descSetGroup;
 }
-bool ShaderPBRBlend::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount)
-{
-	auto numAlpha = 0;
-	auto alphaBuffer = c_engine->GetRenderContext().GetDummyBuffer();
-	auto &vkMesh = mesh.GetSceneMesh();
-	if(vkMesh != nullptr)
-	{
-		auto &meshAlphaBuffer = vkMesh->GetAlphaBuffer();
-		if(meshAlphaBuffer != nullptr)
-		{
-			alphaBuffer = meshAlphaBuffer;
-			numAlpha = mesh.GetAlphaCount();
-		}
-	}
-	return RecordPushConstants(PushConstants{numAlpha},sizeof(ShaderPBR::PushConstants)) == true &&
-		RecordBindVertexBuffer(*alphaBuffer,VERTEX_BINDING_VERTEX.GetBindingIndex() +2u) == true &&
-		ShaderPBR::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount) == true;
-}
 bool ShaderPBRBlend::GetRenderBufferTargets(
 	CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
 	std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
@@ -423,3 +375,4 @@ bool ShaderPBRBlend::GetRenderBufferTargets(
 	outOffsets.push_back(0ull);
 	return true;
 }
+#pragma optimize("",on)

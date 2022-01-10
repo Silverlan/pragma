@@ -30,7 +30,6 @@ namespace pragma
 		ShaderUnlit(prosper::IPrContext &context,const std::string &identifier);
 
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
-		virtual bool BindLights(prosper::IDescriptorSet &dsLights) override;
 	protected:
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
 		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo);

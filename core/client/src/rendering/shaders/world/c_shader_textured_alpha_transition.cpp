@@ -67,30 +67,11 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderTexturedAlphaTransition::Ini
 prosper::DescriptorSetInfo &ShaderTexturedAlphaTransition::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
 void ShaderTexturedAlphaTransition::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderGameWorldLightingPass::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(ShaderGameWorldLightingPass::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
 void ShaderTexturedAlphaTransition::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_ALPHA);
-}
-
-bool ShaderTexturedAlphaTransition::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount)
-{
-	auto numAlpha = 0;
-	auto alphaBuffer = c_engine->GetRenderContext().GetDummyBuffer();
-	auto &vkMesh = mesh.GetSceneMesh();
-	if(vkMesh != nullptr)
-	{
-		auto &meshAlphaBuffer = vkMesh->GetAlphaBuffer();
-		if(meshAlphaBuffer != nullptr)
-		{
-			alphaBuffer = meshAlphaBuffer;
-			numAlpha = mesh.GetAlphaCount();
-		}
-	}
-	return RecordPushConstants(PushConstants{numAlpha},sizeof(ShaderGameWorldLightingPass::PushConstants)) == true &&
-		RecordBindVertexBuffer(*alphaBuffer,VERTEX_BINDING_VERTEX.GetBindingIndex() +2u) == true &&
-		ShaderGameWorldLightingPass::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount) == true;
 }

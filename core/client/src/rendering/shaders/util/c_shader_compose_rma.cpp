@@ -100,13 +100,14 @@ std::shared_ptr<prosper::IImage> pragma::ShaderComposeRMA::ComposeRMA(
 	auto &setupCmd = context.GetSetupCommandBuffer();
 	if(setupCmd->RecordBeginRenderPass(*rt))
 	{
-		if(BeginDraw(setupCmd))
+		prosper::ShaderBindState bindState {*setupCmd};
+		if(RecordBeginDraw(bindState))
 		{
 			PushConstants pushConstants {};
 			pushConstants.flags = flags;
-			if(RecordPushConstants(pushConstants))
-				Draw(ds);
-			EndDraw();
+			if(RecordPushConstants(bindState,pushConstants))
+				RecordDraw(bindState,ds);
+			RecordEndDraw(bindState);
 		}
 		setupCmd->RecordEndRenderPass();
 	}
@@ -157,8 +158,8 @@ void pragma::ShaderComposeRMA::InitializeGfxPipeline(prosper::GraphicsPipelineCr
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
 	AddDefaultVertexAttributes(pipelineInfo);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_TEXTURE);
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_TEXTURE);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 	SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
 }
 

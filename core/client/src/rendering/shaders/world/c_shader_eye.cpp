@@ -59,7 +59,7 @@ bool ShaderEye::BindEyeball(rendering::ShaderProcessor &shaderProcessor,uint32_t
 }
 void ShaderEye::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderPBR::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(ShaderPBR::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
 
 //
@@ -73,7 +73,7 @@ void ShaderEye::RecordBindScene(
 	const Vector4 &drawOrigin,ShaderGameWorld::SceneFlags &inOutSceneFlags
 ) const
 {
-	PushSceneConstants(shaderProcessor,scene,drawOrigin);
+	RecordPushSceneConstants(shaderProcessor,scene,drawOrigin);
 
 	// I'm not sure why we have to push these at this point in time (since the actual constants we want are pushed in :BindEyeball),
 	// but for some reason if we don't do it here, it can cause the Engine to permanently freeze on AMD GPUs

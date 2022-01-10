@@ -98,58 +98,15 @@ ShaderTest::ShaderTest(prosper::IPrContext &context,const std::string &identifie
 	: ShaderTest{context,identifier,"world/vs_test","world/fs_test"}
 {
 }
-bool ShaderTest::BindMaterialParameters(CMaterial &mat)
-{
-	return ShaderGameWorldLightingPass::BindMaterialParameters(mat);
-}
-bool ShaderTest::BindEntity(CBaseEntity &ent)
-{
-	auto pRenderComponent = ent.GetRenderComponent();
-	if(!pRenderComponent)
-		return false;
-	m_boundEntity = &ent;
-	auto *descSet = pRenderComponent->GetRenderDescriptorSet();
-	if(descSet == nullptr)
-	{
-		// Con::cwar<<"WARNING: Attempted to render entity "<<ent.GetClass()<<", but it has an invalid render descriptor set! Skipping..."<<Con::endl;
-		return false;
-	}
-	OnBindEntity(ent,*pRenderComponent);
-	//if(pRenderComponent->GetLastRenderFrame() != c_engine->GetRenderContext().GetLastFrameId())
-	//	Con::cwar<<"WARNING: Entity buffer data for entity "<<ent.GetClass()<<" ("<<ent.GetIndex()<<") hasn't been updated for this frame, but entity is used in rendering! This may cause rendering issues!"<<Con::endl;
-	return true;
-}
-bool ShaderTest::BindMaterial(CMaterial &mat)
-{
-	auto descSetGroup = mat.GetDescriptorSetGroup(*this);
-	if(descSetGroup == nullptr)
-		descSetGroup = InitializeMaterialDescriptorSet(mat); // Attempt to initialize on the fly
-	if(descSetGroup == nullptr)
-		return false;
-	return BindMaterialParameters(mat);
-}
 void ShaderTest::DrawTest(prosper::IBuffer &buf,prosper::IBuffer &ibuf,uint32_t count)
 {
-	auto x = RecordBindIndexBuffer(ibuf) && RecordBindVertexBuffer(buf) &&
+	/*auto x = RecordBindIndexBuffer(ibuf) && RecordBindVertexBuffer(buf) &&
 		ShaderScene::RecordPushConstants(sizeof(Mat4),&m_testMvp) &&
-		RecordDrawIndexed(count);
-}
-bool ShaderTest::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount)
-{
-	if(ShaderScene::RecordPushConstants(sizeof(Mat4),&m_testMvp) == false)
-		return false;
-	auto &vkMesh = mesh.GetSceneMesh();
-	auto &renderBuffer = vkMesh->GetRenderBuffer(mesh,*this,m_currentPipelineIdx);
-	if(RecordBindRenderBuffer(*renderBuffer) == false)
-		return false;
-	return RecordBindVertexBuffer(renderBufferIndexBuffer,0) && RecordDraw(mesh.GetTriangleVertexCount());
-
-	/*if(ShaderScene::RecordPushConstants(sizeof(Mat4),&m_testMvp) == false)
-		return false;
-	return ShaderGameWorldLightingPass::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount);*/
+		RecordDrawIndexed(count);*/
 }
 prosper::DescriptorSetInfo &ShaderTest::GetMaterialDescriptorSetInfo() const {return ShaderGameWorldLightingPass::DESCRIPTOR_SET_MATERIAL;}
 void ShaderTest::SetForceNonIBLMode(bool b) {m_bNonIBLMode = b;}
+#if 0
 bool ShaderTest::BeginDraw(
 	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,
 	const Vector4 &drawOrigin,RecordFlags recordFlags
@@ -158,32 +115,10 @@ bool ShaderTest::BeginDraw(
 	return ShaderGraphics::BeginDraw(cmdBuffer) == true &&
 		cmdBuffer->RecordSetDepthBias(1.f,0.f,0.f);
 }
+#endif
 void ShaderTest::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(Mat4),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
-}
-bool ShaderTest::BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView)
-{
-	return BindSceneCamera(scene,renderer,bView);
-}
-bool ShaderTest::BindSceneCamera(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,bool bView)
-{
-	//if(ShaderGameWorldLightingPass::BindSceneCamera(scene,renderer,bView) == false)
-	//	return false;
-	auto hCam = scene.GetActiveCamera();
-	if(hCam.expired())
-		return false;
-	/*if(m_bNonIBLMode == false)
-	{
-		float iblStrength;
-		auto *ds = CReflectionProbeComponent::FindDescriptorSetForClosestProbe(scene,hCam->GetEntity().GetPosition(),iblStrength);
-		if(ds)
-			return BindReflectionProbeIntensity(iblStrength) && RecordBindDescriptorSet(*ds,DESCRIPTOR_SET_PBR.setIndex);
-	}*/
-	// No reflection probe and therefore no IBL available. Fallback to non-IBL rendering.
-	m_extRenderFlags |= SceneFlags::NoIBL;
-	m_testMvp = hCam->GetProjectionMatrix() *hCam->GetViewMatrix();
-	return true;
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(Mat4),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
 void ShaderTest::UpdateRenderFlags(CModelSubMesh &mesh,SceneFlags &inOutFlags)
 {

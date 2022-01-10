@@ -425,11 +425,12 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_text(WIText *el,const Vec
 			if(pShader != nullptr)
 			{
 				auto drawCmd = c_game->GetCurrentDrawCommandBuffer();
-				if(pShader->BeginDraw(drawCmd) == true)
+				prosper::ShaderBindState bindState {*drawCmd};
+				if(pShader->RecordBeginDraw(bindState) == true)
 				{
 					pragma::ShaderDebug::PushConstants pushConstants {m,Vector4{1.f,1.f,1.f,1.f}};
-					pShader->Draw(*ds,pushConstants);
-					pShader->EndDraw();
+					pShader->RecordDraw(bindState,*ds,pushConstants);
+					pShader->RecordEndDraw(bindState);
 				}
 			}
 		}
@@ -805,7 +806,8 @@ void DebugRenderer::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pra
 		if(meshes.empty())
 			continue;
 		auto itPipeline = shaderPipeline.find(type);
-		if(itPipeline == shaderPipeline.end() || shader->BeginDraw(drawCmd,itPipeline->second) == false)
+		prosper::ShaderBindState bindState {*drawCmd};
+		if(itPipeline == shaderPipeline.end() || shader->RecordBeginDraw(bindState,itPipeline->second) == false)
 			continue;
 		auto pipelineId = itPipeline->second;
 		if(pipelineId == pragma::ShaderDebug::Pipeline::Line || pipelineId == pragma::ShaderDebug::Pipeline::Wireframe || pipelineId == pragma::ShaderDebug::Pipeline::LineStrip)
@@ -824,7 +826,7 @@ void DebugRenderer::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pra
 					auto &colBuffer = ptrO->GetColorBuffer();
 					auto mvp = vp *ptrO->GetModelMatrix();
 					if(colBuffer == nullptr)
-						shader->Draw(*ptrO->GetVertexBuffer(),ptrO->GetVertexCount(),mvp,ptrO->GetColor());
+						shader->RecordDraw(bindState,*ptrO->GetVertexBuffer(),ptrO->GetVertexCount(),mvp,ptrO->GetColor());
 					else
 					{
 						//shader->Draw(ptrO->GetVertexBuffer(),ptrO->GetVertexCount(),mvp);
@@ -836,15 +838,16 @@ void DebugRenderer::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pra
 				++it;
 			}
 		}
-		shader->EndDraw();
+		shader->RecordEndDraw(bindState);
 	}
-	if(outlines.empty() || shader->BeginDraw(drawCmd,pragma::ShaderDebug::Pipeline::Wireframe) == false)
+	prosper::ShaderBindState bindState {*drawCmd};
+	if(outlines.empty() || shader->RecordBeginDraw(bindState,pragma::ShaderDebug::Pipeline::Wireframe) == false)
 		return;
 	while(!outlines.empty())
 	{
 		auto &o = static_cast<DebugRenderer::WorldObject&>(*outlines.front());
-		shader->Draw(*o.GetVertexBuffer(),o.GetVertexCount(),vp *o.GetModelMatrix());
+		shader->RecordDraw(bindState,*o.GetVertexBuffer(),o.GetVertexCount(),vp *o.GetModelMatrix());
 		outlines.pop();
 	}
-	shader->EndDraw();
+	shader->RecordEndDraw(bindState);
 }

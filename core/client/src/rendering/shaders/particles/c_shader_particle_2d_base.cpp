@@ -99,19 +99,19 @@ void ShaderParticle2DBase::RegisterDefaultGfxPipelineVertexAttributes(prosper::G
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_ANIMATION_FRAME_INDICES);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_ANIMATION_INTERP_FACTOR);
 }
-void ShaderParticle2DBase::RegisterDefaultGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo)
+void ShaderParticle2DBase::RegisterDefaultGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
-void ShaderParticle2DBase::RegisterDefaultGfxPipelineDescriptorSetGroups(prosper::GraphicsPipelineCreateInfo &pipelineInfo)
+void ShaderParticle2DBase::RegisterDefaultGfxPipelineDescriptorSetGroups(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_TEXTURE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_DEPTH_MAP);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_ANIMATION);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDER_SETTINGS);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_LIGHTS);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SHADOWS);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_TEXTURE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_DEPTH_MAP);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_ANIMATION);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_RENDER_SETTINGS);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_LIGHTS);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SHADOWS);
 }
 
 void ShaderParticle2DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
@@ -123,11 +123,13 @@ void ShaderParticle2DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreate
 
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	RegisterDefaultGfxPipelineVertexAttributes(pipelineInfo);
-	RegisterDefaultGfxPipelinePushConstantRanges(pipelineInfo);
-	RegisterDefaultGfxPipelineDescriptorSetGroups(pipelineInfo);
+	RegisterDefaultGfxPipelinePushConstantRanges(pipelineInfo,pipelineIdx);
+	RegisterDefaultGfxPipelineDescriptorSetGroups(pipelineInfo,pipelineIdx);
 }
 
-bool ShaderParticle2DBase::BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,pragma::CParticleSystemComponent &pSys,ParticleRenderFlags renderFlags,RecordFlags recordFlags)
+bool ShaderParticle2DBase::RecordBeginDraw(
+	prosper::ShaderBindState &bindState,pragma::CParticleSystemComponent &pSys,ParticleRenderFlags renderFlags,RecordFlags recordFlags
+)
 {
 	uint32_t pipelineIdx;
 	if(umath::is_flag_set(renderFlags,ParticleRenderFlags::DepthOnly))
@@ -137,7 +139,7 @@ bool ShaderParticle2DBase::BeginDraw(const std::shared_ptr<prosper::IPrimaryComm
 		auto alphaMode = GetRenderAlphaMode(pSys);
 		pipelineIdx = /*umath::to_integral(pipeline) **/umath::to_integral(ParticleAlphaMode::Count) +umath::to_integral(alphaMode);
 	}
-	return ShaderSceneLit::BeginDraw(cmdBuffer,pipelineIdx,recordFlags);
+	return ShaderSceneLit::RecordBeginDraw(bindState,pipelineIdx,recordFlags);
 }
 
 uint32_t ShaderParticle2DBase::GetRenderSettingsDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex;}
@@ -271,26 +273,27 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(
 }
 
 prosper::DescriptorSetInfo &ShaderParticle2DBase::GetAnimationDescriptorSetInfo() const {return DESCRIPTOR_SET_ANIMATION;}
-bool ShaderParticle2DBase::BindParticleMaterial(const CRasterizationRendererComponent &renderer,const pragma::CParticleSystemComponent &ps)
+bool ShaderParticle2DBase::RecordParticleMaterial(prosper::ShaderBindState &bindState,const CRasterizationRendererComponent &renderer,const pragma::CParticleSystemComponent &ps) const
 {
 	auto *mat = static_cast<CMaterial*>(ps.GetMaterial());
 	if(mat == nullptr)
 		return false;
-	auto descSetGroupMat = mat->GetDescriptorSetGroup(*this);
-	if(descSetGroupMat == nullptr)
-		descSetGroupMat = InitializeMaterialDescriptorSet(*mat); // Attempt to initialize on the fly
+	auto descSetGroupMat = mat->GetDescriptorSetGroup(const_cast<ShaderParticle2DBase&>(*this));
+	//if(descSetGroupMat == nullptr)
+	//	descSetGroupMat = const_cast<ShaderParticle2DBase*>(this)->InitializeMaterialDescriptorSet(*mat); // Attempt to initialize on the fly
 	if(descSetGroupMat == nullptr)
 		return false;
 	auto &descSetTexture = *descSetGroupMat->GetDescriptorSet(); // prosper TODO: Use dummy descriptor set when not animated
 	auto *descSetDepth = renderer.GetDepthDescriptorSet();
 	if(descSetDepth == nullptr)
 		return false;
-	auto &animDescSet = GetAnimationDescriptorSet(const_cast<pragma::CParticleSystemComponent&>(ps));
-	return RecordBindDescriptorSets({&descSetTexture,descSetDepth,&animDescSet},DESCRIPTOR_SET_TEXTURE.setIndex);
+	auto &animDescSet = const_cast<ShaderParticle2DBase*>(this)->GetAnimationDescriptorSet(const_cast<pragma::CParticleSystemComponent&>(ps));
+	return RecordBindDescriptorSets(bindState,{&descSetTexture,descSetDepth,&animDescSet},DESCRIPTOR_SET_TEXTURE.setIndex);
 }
 
 bool ShaderParticle2DBase::Draw(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const pragma::CParticleSystemComponent &ps,pragma::CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags ptRenderFlags)
 {
+#if 0
 	if(BindParticleMaterial(renderer,ps) == false)
 		return false;
 	auto &cam = scene.GetActiveCamera();
@@ -357,6 +360,8 @@ bool ShaderParticle2DBase::Draw(pragma::CSceneComponent &scene,const CRasterizat
 		ptAnimBuffer = c_engine->GetRenderContext().GetDummyBuffer();
 	return RecordBindVertexBuffers({ps.GetParticleBuffer().get(),ptAnimBuffer.get()}) == true &&
 		RecordDraw(pragma::CParticleSystemComponent::VERTEX_COUNT,ps.GetRenderParticleCount()) == true;
+#endif
+	return false;
 }
 
 static float get_particle_extent(float radius) {return sqrt(umath::pow2(radius) *2.0);}

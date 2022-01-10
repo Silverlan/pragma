@@ -63,16 +63,6 @@ namespace pragma
 		ShaderPrepassBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
 		ShaderPrepassBase(prosper::IPrContext &context,const std::string &identifier);
 
-		virtual bool BeginDraw(
-			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},
-			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
-		) override;
-		virtual bool BindClipPlane(const Vector4 &clipPlane) override;
-		virtual bool BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView) override;
-		virtual bool BindDrawOrigin(const Vector4 &drawOrigin) override;
-		virtual bool SetDepthBias(const Vector2 &depthBias) override;
-		virtual void Set3DSky(bool is3dSky) override;
-		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
 		virtual GameShaderType GetPassType() const {return GameShaderType::DepthPrepass;}
 		virtual bool IsDepthPrepassShader() const override {return true;}
 
@@ -89,7 +79,6 @@ namespace pragma
 		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor,CMaterial &mat) const override;
 	protected:
 		virtual void OnPipelinesInitialized() override;
-		virtual bool BindMaterial(CMaterial &mat) override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
@@ -102,7 +91,6 @@ namespace pragma
 	private:
 		// These are unused
 		virtual uint32_t GetLightDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
-		virtual bool BindLights(prosper::IDescriptorSet &dsLights) override {return false;}
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_dummyMaterialDsg = nullptr;
 		std::optional<float> m_alphaCutoff {};
 	};

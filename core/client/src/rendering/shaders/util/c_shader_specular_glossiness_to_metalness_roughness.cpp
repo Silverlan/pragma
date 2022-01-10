@@ -106,11 +106,12 @@ std::optional<pragma::ShaderSpecularGlossinessToMetalnessRoughness::MetalnessRou
 	pushConstants.pass = Pass::Albedo;
 	if(setupCmd->RecordBeginRenderPass(*rtAlbedo))
 	{
-		if(BeginDraw(setupCmd))
+		prosper::ShaderBindState bindState {*setupCmd};
+		if(RecordBeginDraw(bindState))
 		{
-			if(RecordPushConstants(pushConstants))
-				Draw(ds);
-			EndDraw();
+			if(RecordPushConstants(bindState,pushConstants))
+				RecordDraw(bindState,ds);
+			RecordEndDraw(bindState);
 		}
 		setupCmd->RecordEndRenderPass();
 	}
@@ -120,11 +121,12 @@ std::optional<pragma::ShaderSpecularGlossinessToMetalnessRoughness::MetalnessRou
 	pushConstants.pass = Pass::RMA;
 	if(setupCmd->RecordBeginRenderPass(*rtRMA))
 	{
-		if(BeginDraw(setupCmd))
+		prosper::ShaderBindState bindState {*setupCmd};
+		if(RecordBeginDraw(bindState))
 		{
-			if(RecordPushConstants(pushConstants))
-				Draw(ds);
-			EndDraw();
+			if(RecordPushConstants(bindState,pushConstants))
+				RecordDraw(bindState,ds);
+			RecordEndDraw(bindState);
 		}
 		setupCmd->RecordEndRenderPass();
 	}
@@ -141,8 +143,8 @@ void pragma::ShaderSpecularGlossinessToMetalnessRoughness::InitializeGfxPipeline
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
 	AddDefaultVertexAttributes(pipelineInfo);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_TEXTURE);
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_TEXTURE);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 	SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
 }
 

@@ -52,18 +52,20 @@ void pragma::CRasterizationRendererComponent::RenderFXAA(const util::DrawSceneIn
 
 		if(drawCmd->RecordBeginRenderPass(*hdrInfo.toneMappedPostProcessingRenderTarget) == true)
 		{
-			if(shaderFXAA.BeginDraw(drawCmd) == true)
+			prosper::ShaderBindState bindState {*drawCmd};
+			if(shaderFXAA.RecordBeginDraw(bindState) == true)
 			{
 				pragma::ShaderPPFXAA::PushConstants pushConstants {};
 				pushConstants.subPixelAliasingRemoval = cvFxaaSubPixelAliasingRemoval->GetFloat();
 				pushConstants.edgeThreshold = cvFxaaEdgeThreshold->GetFloat();
 				pushConstants.minEdgeThreshold = cvFxaaMinEdgeThreshold->GetFloat();
 
-				shaderFXAA.Draw(
+				shaderFXAA.RecordDraw(
+					bindState,
 					*hdrInfo.dsgTonemappedPostProcessing->GetDescriptorSet(),
 					pushConstants
 				);
-				shaderFXAA.EndDraw();
+				shaderFXAA.RecordEndDraw(bindState);
 			}
 			drawCmd->RecordEndRenderPass();
 

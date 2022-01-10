@@ -59,23 +59,24 @@ void ShaderForwardPLightCulling::InitializeComputePipeline(prosper::ComputePipel
 {
 	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo,pipelineIdx);
 
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::ComputeBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::ComputeBit);
 	// Currently not supported on some GPUs?
 	// AddSpecializationConstant(pipelineInfo,0u /* constant id */,sizeof(TILE_SIZE),&TILE_SIZE);
 
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_LIGHTS);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_LIGHTS);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SCENE);
 }
 
-bool ShaderForwardPLightCulling::Compute(
-	prosper::IDescriptorSet &descSetLights,prosper::IDescriptorSet &descSetCamera,uint32_t vpWidth,uint32_t vpHeight,uint32_t workGroupsX,uint32_t workGroupsY,uint32_t lightCount,
+bool ShaderForwardPLightCulling::RecordCompute(
+	prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetLights,prosper::IDescriptorSet &descSetCamera,
+	uint32_t vpWidth,uint32_t vpHeight,uint32_t workGroupsX,uint32_t workGroupsY,uint32_t lightCount,
 	uint32_t sceneIndex
-)
+) const
 {
-	return RecordPushConstants(PushConstants{
+	return RecordPushConstants(bindState,PushConstants{
 			lightCount,1u<<sceneIndex,vpWidth<<16 | static_cast<uint16_t>(vpHeight)
 		}) &&
-		RecordBindDescriptorSet(descSetLights,DESCRIPTOR_SET_LIGHTS.setIndex) &&
-		RecordBindDescriptorSet(descSetCamera,DESCRIPTOR_SET_SCENE.setIndex) &&
-		RecordDispatch(workGroupsX,workGroupsY);
+		RecordBindDescriptorSet(bindState,descSetLights,DESCRIPTOR_SET_LIGHTS.setIndex) &&
+		RecordBindDescriptorSet(bindState,descSetCamera,DESCRIPTOR_SET_SCENE.setIndex) &&
+		RecordDispatch(bindState,workGroupsX,workGroupsY);
 }

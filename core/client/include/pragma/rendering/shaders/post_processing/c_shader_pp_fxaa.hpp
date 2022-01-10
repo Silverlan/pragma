@@ -38,7 +38,7 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderPPFXAA(prosper::IPrContext &context,const std::string &identifier);
-		bool Draw(prosper::IDescriptorSet &descSetTexture,const PushConstants &pushConstants=PushConstants{});
+		bool RecordDraw(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetTexture,const PushConstants &pushConstants=PushConstants{}) const;
 	protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;

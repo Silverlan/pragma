@@ -68,10 +68,11 @@ void pragma::CRasterizationRendererComponent::RenderSSAO(const util::DrawSceneIn
 		auto &renderImage = ssaoInfo.renderTarget->GetTexture().GetImage();
 		auto extents = renderImage.GetExtents();
 
-		if(shaderSSAO->BeginDraw(drawCmd) == true)
+		prosper::ShaderBindState bindState {*drawCmd};
+		if(shaderSSAO->RecordBeginDraw(bindState) == true)
 		{
-			shaderSSAO->Draw(scene,*ssaoInfo.descSetGroupPrepass->GetDescriptorSet(),{extents.width,extents.height});
-			shaderSSAO->EndDraw();
+			shaderSSAO->RecordDraw(bindState,scene,*ssaoInfo.descSetGroupPrepass->GetDescriptorSet(),{extents.width,extents.height});
+			shaderSSAO->RecordEndDraw(bindState);
 		}
 
 		drawCmd->RecordEndRenderPass();
@@ -83,10 +84,10 @@ void pragma::CRasterizationRendererComponent::RenderSSAO(const util::DrawSceneIn
 		drawCmd->RecordImageBarrier(ssaoInfo.renderTargetBlur->GetTexture().GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 		drawCmd->RecordBeginRenderPass(*ssaoInfo.renderTargetBlur);
 		
-		if(shaderSSAOBlur->BeginDraw(drawCmd) == true)
+		if(shaderSSAOBlur->RecordBeginDraw(bindState) == true)
 		{
-			shaderSSAOBlur->Draw(*ssaoInfo.descSetGroupOcclusion->GetDescriptorSet());
-			shaderSSAOBlur->EndDraw();
+			shaderSSAOBlur->RecordDraw(bindState,*ssaoInfo.descSetGroupOcclusion->GetDescriptorSet());
+			shaderSSAOBlur->RecordEndDraw(bindState);
 		}
 
 		drawCmd->RecordEndRenderPass();

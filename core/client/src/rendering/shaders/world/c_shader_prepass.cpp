@@ -76,37 +76,10 @@ void ShaderPrepassBase::OnPipelinesInitialized()
 	m_defaultMatDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
 }
 
-bool ShaderPrepassBase::BeginDraw(
-	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,
-	RecordFlags recordFlags
-)
-{
-	if(m_dummyMaterialDsg == nullptr)
-		m_dummyMaterialDsg = CreateDescriptorSetGroup(GetMaterialDescriptorSetIndex());
-	Set3DSky(false);
-	return ShaderScene::BeginDraw(cmdBuffer,0u,recordFlags) == true &&
-		BindClipPlane(clipPlane) == true &&
-		RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin)) &&
-		RecordPushConstants(Vector2{},offsetof(PushConstants,depthBias)) &&
-		RecordBindDescriptorSet(*m_dummyMaterialDsg->GetDescriptorSet(),GetMaterialDescriptorSetIndex()) &&
-		// RecordPushConstants(pragma::SceneDebugMode::None,offsetof(PushConstants,debugMode)) &&
-		cmdBuffer->RecordSetDepthBias() == true;
-}
-
-bool ShaderPrepassBase::BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView)
-{
-	return BindSceneCamera(scene,renderer,bView) && BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
-}
-bool ShaderPrepassBase::BindClipPlane(const Vector4 &clipPlane) {return RecordPushConstants(clipPlane);}
-bool ShaderPrepassBase::BindDrawOrigin(const Vector4 &drawOrigin) {return RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin));}
-bool ShaderPrepassBase::SetDepthBias(const Vector2 &depthBias) {return RecordPushConstants(depthBias,offsetof(PushConstants,depthBias));}
-
 void ShaderPrepassBase::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
 	CreateCachedRenderPass<ShaderPrepassBase>({{get_depth_render_pass_attachment_info(GetSampleCount(pipelineIdx))}},outRenderPass,pipelineIdx);
 }
-
-void ShaderPrepassBase::Set3DSky(bool is3dSky) {umath::set_flag(m_sceneFlags,SceneFlags::RenderAs3DSky,is3dSky);}
 
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPrepassBase::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
@@ -122,42 +95,6 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPrepassBase::InitializeMater
 	descSet.SetBindingTexture(*diffuseTexture->GetVkTexture(),umath::to_integral(MaterialBinding::AlbedoMap));
 	descSet.Update();
 	return descSetGroup;
-}
-
-bool ShaderPrepassBase::BindMaterial(CMaterial &mat)
-{
-	m_alphaCutoff = {};
-	auto alphaMode = mat.GetAlphaMode();
-	if(alphaMode == AlphaMode::Opaque)
-	{
-		// We don't need this material
-		return true;
-	}
-	auto descSetGroup = mat.GetDescriptorSetGroup(*this);
-	if(descSetGroup == nullptr)
-		descSetGroup = InitializeMaterialDescriptorSet(mat); // Attempt to initialize on the fly
-	if(descSetGroup == nullptr)
-		return false;
-	if(RecordBindDescriptorSet(*descSetGroup->GetDescriptorSet(),GetMaterialDescriptorSetIndex()) == false)
-		return false;
-	m_alphaCutoff = (alphaMode == AlphaMode::Mask) ? mat.GetAlphaCutoff() : 0.5f;
-	return true;
-}
-
-bool ShaderPrepassBase::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount)
-{
-	auto flags = SceneFlags::None;
-	if(mesh.GetExtendedVertexWeights().empty() == false)
-		flags |= SceneFlags::UseExtendedVertexWeights;
-	if(umath::is_flag_set(m_sceneFlags,SceneFlags::RenderAs3DSky))
-		flags |= SceneFlags::RenderAs3DSky;
-	if(m_alphaCutoff.has_value())
-	{
-		flags |= SceneFlags::AlphaTest;
-		if(RecordPushConstants(*m_alphaCutoff,offsetof(PushConstants,alphaCutoff)) == false)
-			return false;
-	}
-	return RecordPushConstants(flags,offsetof(PushConstants,flags)) && ShaderEntity::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount);
 }
 
 void ShaderPrepassBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
@@ -182,12 +119,12 @@ void ShaderPrepassBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInf
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_UV);
 
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit);
 
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_MATERIAL);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDER_SETTINGS);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_INSTANCE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_MATERIAL);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_RENDER_SETTINGS);
 }
 
 uint32_t ShaderPrepassBase::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_SCENE.setIndex;}

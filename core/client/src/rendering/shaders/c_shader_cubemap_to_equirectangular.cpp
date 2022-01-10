@@ -87,11 +87,12 @@ std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquir
 		auto pipelineIdx = Pipeline::RGBA16;
 		if(format == prosper::Format::R8G8B8A8_UNorm)
 			pipelineIdx = Pipeline::RGBA8;
-		if(BeginDraw(setupCmd,umath::to_integral(pipelineIdx)) == true)
+		prosper::ShaderBindState bindState {*setupCmd};
+		if(RecordBeginDraw(bindState,umath::to_integral(pipelineIdx)) == true)
 		{
-			success = RecordBindDescriptorSet(*dsg->GetDescriptorSet()) &&
-				RecordBindVertexBuffers({vertBuffer.get(),uvBuffer.get()}) && RecordDraw(numVerts);
-			EndDraw();
+			success = RecordBindDescriptorSet(bindState,*dsg->GetDescriptorSet()) &&
+				RecordBindVertexBuffers(bindState,{vertBuffer.get(),uvBuffer.get()}) && prosper::ShaderGraphics::RecordDraw(bindState,numVerts);
+			RecordEndDraw(bindState);
 		}
 		success = success && setupCmd->RecordEndRenderPass();
 	}

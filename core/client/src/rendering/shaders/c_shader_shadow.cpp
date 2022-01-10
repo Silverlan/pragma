@@ -63,51 +63,7 @@ void ShaderShadow::OnPipelinesInitialized()
 	ShaderGameWorld::OnPipelinesInitialized();
 	m_defaultMatDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
 }
-bool ShaderShadow::BeginDraw(
-	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,
-	RecordFlags recordFlags
-)
-{
-	return ShaderScene::BeginDraw(cmdBuffer,0u,recordFlags);
-}
-bool ShaderShadow::BindEntityDepthMatrix(const Mat4 &depthMVP)
-{
-	return RecordPushConstants(depthMVP);
-}
-bool ShaderShadow::BindMaterial(CMaterial &mat)
-{
-	/*auto &descTexture = mat.GetDescriptorSetGroup(*this);
-	if(descTexture == nullptr)
-		return false;
-	auto *data = mat.GetDataBlock();
-	auto alphaDiscardThreshold = pragma::DefaultAlphaDiscardThreshold;
-	if(data != nullptr)
-		data->GetFloat("alpha_discard_threshold",&alphaDiscardThreshold);
-	cmdBuffer->PushConstants(layout,prosper::ShaderStageFlags::FragmentBit,20,1,&alphaDiscardThreshold);
-	cmdBuffer->BindDescriptorSet(umath::to_integral(DescSet::DiffuseMap),layout,descTexture);
-	return true;*/
-	return true; // TODO
-}
 
-bool ShaderShadow::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount)
-{
-	return true;
-	/*auto flags = Flags::None;
-	if(mesh.GetExtendedVertexWeights().empty() == false)
-		flags |= Flags::UseExtendedVertexWeights;
-	return RecordPushConstants(flags,offsetof(PushConstants,flags)) && ShaderGameWorld::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount);*/
-}
-
-bool ShaderShadow::BindLight(CLightComponent &light,uint32_t layerId)
-{
-	auto &ent = light.GetEntity();
-	auto pTrComponent = ent.GetTransformComponent();
-	auto pRadiusComponent = ent.GetComponent<CRadiusComponent>();
-	auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
-	auto lightPos = Vector4{pos.x,pos.y,pos.z,static_cast<float>(pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f)};
-	auto &depthMVP = light.GetTransformationMatrix(layerId);
-	return RecordPushConstants(lightPos,offsetof(PushConstants,lightPos)) && RecordPushConstants(depthMVP);
-}
 void ShaderShadow::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
 	CreateCachedRenderPass<ShaderShadow>({{{
@@ -122,7 +78,6 @@ uint32_t ShaderShadow::GetCameraDescriptorSetIndex() const {return std::numeric_
 uint32_t ShaderShadow::GetLightDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
 uint32_t ShaderShadow::GetInstanceDescriptorSetIndex() const{return DESCRIPTOR_SET_INSTANCE.setIndex;}
 uint32_t ShaderShadow::GetMaterialDescriptorSetIndex() const {return DESCRIPTOR_SET_MATERIAL.setIndex;}
-bool ShaderShadow::BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView) {return BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());}
 void ShaderShadow::GetVertexAnimationPushConstantInfo(uint32_t &offset) const {offset = offsetof(PushConstants,vertexAnimInfo);}
 void ShaderShadow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
@@ -142,12 +97,12 @@ void ShaderShadow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pi
 
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
 
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit);
 
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_MATERIAL);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDER_SETTINGS);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_INSTANCE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_MATERIAL);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_RENDER_SETTINGS);
 
 	pipelineInfo.ToggleDepthBias(true,SHADOW_DEPTH_BIAS_CONSTANT,0.f,SHADOW_DEPTH_BIAS_SLOPE);
 	uint32_t enableMorphTagetAnimations = (pipelineIdx == umath::to_integral(Pipeline::WithMorphTargetAnimations));

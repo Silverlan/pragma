@@ -42,14 +42,16 @@ void ShaderPPFog::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 {
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	AddDefaultVertexAttributes(pipelineInfo);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_TEXTURE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_DEPTH_BUFFER);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_FOG);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_TEXTURE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_DEPTH_BUFFER);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_FOG);
 }
 
-bool ShaderPPFog::Draw(prosper::IDescriptorSet &descSetTexture,prosper::IDescriptorSet &descSetDepth,prosper::IDescriptorSet &descSetCamera,prosper::IDescriptorSet &descSetFog)
+bool ShaderPPFog::RecordDraw(
+	prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetTexture,prosper::IDescriptorSet &descSetDepth,prosper::IDescriptorSet &descSetCamera,prosper::IDescriptorSet &descSetFog
+) const
 {
-	return RecordBindDescriptorSets({&descSetDepth,&descSetCamera,&descSetFog},DESCRIPTOR_SET_DEPTH_BUFFER.setIndex) &&
-		ShaderPPBase::Draw(descSetTexture);
+	return RecordBindDescriptorSets(bindState,{&descSetDepth,&descSetCamera,&descSetFog},DESCRIPTOR_SET_DEPTH_BUFFER.setIndex) &&
+		ShaderPPBase::RecordDraw(bindState,descSetTexture);
 }

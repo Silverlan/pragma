@@ -228,7 +228,7 @@ GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetMaterialPip
 prosper::DescriptorSetInfo &ShaderGameWorldLightingPass::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
 void ShaderGameWorldLightingPass::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
 void ShaderGameWorldLightingPass::InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
@@ -258,13 +258,13 @@ void ShaderGameWorldLightingPass::InitializeGfxPipelineVertexAttributes(prosper:
 }
 void ShaderGameWorldLightingPass::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo,GetMaterialDescriptorSetInfo());
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDERER);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDER_SETTINGS);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_LIGHTS);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SHADOWS);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_INSTANCE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,GetMaterialDescriptorSetInfo());
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_RENDERER);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_RENDER_SETTINGS);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_LIGHTS);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SHADOWS);
 }
 void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
@@ -329,55 +329,7 @@ void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelin
 }
 
 static auto cvNormalMappingEnabled = GetClientConVar("render_normalmapping_enabled");
-bool ShaderGameWorldLightingPass::BindMaterialParameters(CMaterial &mat) {return true;}
 void ShaderGameWorldLightingPass::ApplyMaterialFlags(CMaterial &mat,MaterialFlags &outFlags) const {}
-bool ShaderGameWorldLightingPass::BindReflectionProbeIntensity(float intensity)
-{
-	return RecordPushConstants(intensity,offsetof(PushConstants,reflectionProbeIntensity));
-}
-bool ShaderGameWorldLightingPass::BindClipPlane(const Vector4 &clipPlane)
-{
-	// TODO
-	//umath::set_flag(m_sceneFlags,SceneFlags::Cli);
-	return RecordPushConstants(clipPlane,offsetof(PushConstants,clipPlane));
-}
-void ShaderGameWorldLightingPass::Set3DSky(bool is3dSky) {umath::set_flag(m_sceneFlags,SceneFlags::RenderAs3DSky,is3dSky);}
-void ShaderGameWorldLightingPass::SetShadowsEnabled(bool enabled) {umath::set_flag(m_sceneFlags,SceneFlags::DisableShadows,!enabled);}
-void ShaderGameWorldLightingPass::OnPipelineBound()
-{
-	// TODO
-	ShaderEntity::OnPipelineBound();
-	//umath::set_flag(m_sceneFlags,SceneFlags::ClipPlaneBound,false);
-}
-void ShaderGameWorldLightingPass::OnPipelineUnbound()
-{
-	// TODO
-	ShaderEntity::OnPipelineUnbound();
-	//umath::set_flag(m_sceneFlags,SceneFlags::ClipPlaneBound,false);
-}
-void ShaderGameWorldLightingPass::OnBindEntity(CBaseEntity &ent,CRenderComponent &renderC)
-{
-	ShaderEntity::OnBindEntity(ent,renderC);
-	SetShadowsEnabled(renderC.IsReceivingShadows());
-}
-bool ShaderGameWorldLightingPass::BindDrawOrigin(const Vector4 &drawOrigin) {return RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin));}
-bool ShaderGameWorldLightingPass::SetDepthBias(const Vector2 &depthBias) {return RecordPushConstants(depthBias,offsetof(PushConstants,depthBias));}
-bool ShaderGameWorldLightingPass::BeginDraw(
-	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,RecordFlags recordFlags
-)
-{
-	Set3DSky(false);
-	return ShaderScene::BeginDraw(cmdBuffer,0u,recordFlags) == true &&
-		BindClipPlane(clipPlane) == true &&
-		RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin)) &&
-		RecordPushConstants(Vector2{},offsetof(PushConstants,depthBias)) &&
-		RecordPushConstants(pragma::SceneDebugMode::None,offsetof(PushConstants,debugMode)) &&
-		cmdBuffer->RecordSetDepthBias() == true;
-}
-bool ShaderGameWorldLightingPass::SetDebugMode(pragma::SceneDebugMode debugMode)
-{
-	return RecordPushConstants(debugMode,offsetof(PushConstants,debugMode));
-}
 std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLightingPass::UpdateMaterialBuffer(CMaterial &mat) const
 {
 	auto *buf = mat.GetSettingsBuffer();
@@ -512,66 +464,17 @@ std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLighting
 	buf->Write(0,matData);
 	return matData;
 }
-bool ShaderGameWorldLightingPass::BindLightMapUvBuffer(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,bool &outShouldUseLightmaps)
-{
-	outShouldUseLightmaps = false;
-	if(umath::is_flag_set(m_sceneFlags,SceneFlags::LightmapsEnabled) == false)
-		return true;
-	auto *pLightMapUvBuffer = c_engine->GetRenderContext().GetDummyBuffer().get();
-	if(m_boundEntity)
-	{
-		auto *renderC = m_boundEntity->GetRenderComponent();
-		if(renderC)
-		{
-			auto *lightMapReceiverC = renderC->GetLightMapReceiverComponent();
-			auto bufIdx = lightMapReceiverC ? (meshIdx.has_value() ? lightMapReceiverC->GetBufferIndex(*meshIdx) : lightMapReceiverC->FindBufferIndex(mesh)) : std::optional<uint32_t>{};
-			if(bufIdx.has_value())
-			{
-				outShouldUseLightmaps = true;
-
-				// Commented because vertex buffers are now bound through render buffer
-#if 0
-				auto *world = c_game->GetWorld();
-				auto pLightMapComponent = world ? world->GetEntity().GetComponent<pragma::CLightMapComponent>() : util::WeakHandle<pragma::CLightMapComponent>{};
-				//auto pLightMapComponent = (m_boundEntity != nullptr) ? m_boundEntity->GetComponent<pragma::CLightMapComponent>() : util::WeakHandle<pragma::CLightMapComponent>{};
-				if(pLightMapComponent.valid())
-				{
-					auto *pUvBuffer = pLightMapComponent->GetMeshLightMapUvBuffer(*bufIdx);
-					if(pUvBuffer != nullptr)
-						pLightMapUvBuffer = pUvBuffer;
-					else
-						pLightMapUvBuffer = c_engine->GetRenderContext().GetDummyBuffer().get();
-				}
-#endif
-			}
-		}
-	}
-	// Commented because vertex buffers are now bound through render buffer
-	// TODO: Restructure this function and clean this up!
-	return true;//RecordBindVertexBuffer(*pLightMapUvBuffer,umath::to_integral(VertexBinding::LightmapUv));
-}
 void ShaderGameWorldLightingPass::UpdateRenderFlags(CModelSubMesh &mesh,SceneFlags &inOutFlags) {}
-bool ShaderGameWorldLightingPass::BindRenderFlags(SceneFlags flags)
+bool ShaderGameWorldLightingPass::IsDepthPrepassEnabled() const {return m_depthPrepassEnabled;}
+uint32_t ShaderGameWorldLightingPass::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_SCENE.setIndex;}
+uint32_t ShaderGameWorldLightingPass::GetRendererDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDERER.setIndex;}
+uint32_t ShaderGameWorldLightingPass::GetInstanceDescriptorSetIndex() const {return DESCRIPTOR_SET_INSTANCE.setIndex;}
+uint32_t ShaderGameWorldLightingPass::GetRenderSettingsDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex;}
+uint32_t ShaderGameWorldLightingPass::GetLightDescriptorSetIndex() const {return DESCRIPTOR_SET_LIGHTS.setIndex;}
+uint32_t ShaderGameWorldLightingPass::GetMaterialDescriptorSetIndex() const {return GetMaterialDescriptorSetInfo().setIndex;}
+void ShaderGameWorldLightingPass::GetVertexAnimationPushConstantInfo(uint32_t &offset) const
 {
-	return RecordPushConstants(flags,offsetof(ShaderGameWorldLightingPass::PushConstants,flags));
-}
-bool ShaderGameWorldLightingPass::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount)
-{
-	/*if(umath::is_flag_set(m_stateFlags,SceneFlags::ClipPlaneBound) == false && BindClipPlane({}) == false)
-		return false;
-	auto shouldUseLightmaps = false;
-	if(BindLightMapUvBuffer(mesh,meshIdx,shouldUseLightmaps) == false)
-		return false;
-	auto renderFlags = RenderFlags::None;
-	umath::set_flag(renderFlags,RenderFlags::LightmapsEnabled,shouldUseLightmaps);
-	umath::set_flag(renderFlags,RenderFlags::UseExtendedVertexWeights,mesh.GetExtendedVertexWeights().empty() == false);
-	if(umath::is_flag_set(m_stateFlags,StateFlags::RenderAs3DSky))
-		umath::set_flag(renderFlags,RenderFlags::Is3DSky);
-	if(umath::is_flag_set(m_stateFlags,StateFlags::DisableShadows))
-		umath::set_flag(renderFlags,RenderFlags::DisableShadows);
-	UpdateRenderFlags(mesh,renderFlags);
-	return BindRenderFlags(renderFlags) && ShaderEntity::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount);*/
-	return true; // TODO
+	offset = offsetof(PushConstants,vertexAnimInfo);
 }
 bool ShaderGameWorldLightingPass::GetRenderBufferTargets(
 	CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
@@ -585,26 +488,6 @@ bool ShaderGameWorldLightingPass::GetRenderBufferTargets(
 	outBuffers.push_back(lightmapUvBuf);
 	outOffsets.push_back(0ull);
 	return true;
-}
-bool ShaderGameWorldLightingPass::IsDepthPrepassEnabled() const {return m_depthPrepassEnabled;}
-uint32_t ShaderGameWorldLightingPass::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_SCENE.setIndex;}
-uint32_t ShaderGameWorldLightingPass::GetRendererDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDERER.setIndex;}
-uint32_t ShaderGameWorldLightingPass::GetInstanceDescriptorSetIndex() const {return DESCRIPTOR_SET_INSTANCE.setIndex;}
-uint32_t ShaderGameWorldLightingPass::GetRenderSettingsDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex;}
-uint32_t ShaderGameWorldLightingPass::GetLightDescriptorSetIndex() const {return DESCRIPTOR_SET_LIGHTS.setIndex;}
-uint32_t ShaderGameWorldLightingPass::GetMaterialDescriptorSetIndex() const {return GetMaterialDescriptorSetInfo().setIndex;}
-void ShaderGameWorldLightingPass::GetVertexAnimationPushConstantInfo(uint32_t &offset) const
-{
-	offset = offsetof(PushConstants,vertexAnimInfo);
-}
-bool ShaderGameWorldLightingPass::BindMaterial(CMaterial &mat)
-{
-	auto descSetGroup = mat.GetDescriptorSetGroup(*this);
-	if(descSetGroup == nullptr)
-		descSetGroup = InitializeMaterialDescriptorSet(mat); // Attempt to initialize on the fly
-	if(descSetGroup == nullptr)
-		return false;
-	return BindMaterialParameters(mat) && RecordBindDescriptorSet(*descSetGroup->GetDescriptorSet(),GetMaterialDescriptorSetIndex());
 }
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo)
 {
@@ -687,12 +570,12 @@ void ShaderGameWorldLightingPass::RecordBindScene(
 		descSets[5] = &dsShadows
 	};
 
-	PushSceneConstants(shaderProcessor,scene,drawOrigin);
+	RecordPushSceneConstants(shaderProcessor,scene,drawOrigin);
 	static const std::vector<uint32_t> dynamicOffsets {};
 	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,shaderProcessor.GetCurrentPipelineLayout(),pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX,descSets,dynamicOffsets);
 }
 
-bool ShaderGameWorldLightingPass::PushSceneConstants(rendering::ShaderProcessor &shaderProcessor,const pragma::CSceneComponent &scene,const Vector4 &drawOrigin) const
+bool ShaderGameWorldLightingPass::RecordPushSceneConstants(rendering::ShaderProcessor &shaderProcessor,const pragma::CSceneComponent &scene,const Vector4 &drawOrigin) const
 {
 	ShaderGameWorldLightingPass::PushConstants pushConstants {};
 	pushConstants.Initialize();

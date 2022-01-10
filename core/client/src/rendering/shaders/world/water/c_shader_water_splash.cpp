@@ -31,14 +31,14 @@ void ShaderWaterSplash::InitializeComputePipeline(prosper::ComputePipelineCreate
 {
 	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo,pipelineIdx);
 
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PhysWaterSurfaceSimulator::SplashInfo),prosper::ShaderStageFlags::ComputeBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PhysWaterSurfaceSimulator::SplashInfo),prosper::ShaderStageFlags::ComputeBit);
 
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_WATER_EFFECT);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_WATER_EFFECT);
 }
 
-bool ShaderWaterSplash::Compute(prosper::IDescriptorSet &descParticles,const PhysWaterSurfaceSimulator::SplashInfo &info)
+bool ShaderWaterSplash::RecordCompute(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descParticles,const PhysWaterSurfaceSimulator::SplashInfo &info) const
 {
-	return RecordPushConstants(info) &&
-		RecordBindDescriptorSet(descParticles,DESCRIPTOR_SET_WATER_EFFECT.setIndex) &&
-		RecordDispatch(umath::ceil(info.width /8.f),umath::ceil(info.length /8.f),1);//width,length); // TODO
+	return RecordPushConstants(bindState,info) &&
+		RecordBindDescriptorSet(bindState,descParticles,DESCRIPTOR_SET_WATER_EFFECT.setIndex) &&
+		RecordDispatch(bindState,umath::ceil(info.width /8.f),umath::ceil(info.length /8.f),1);//width,length); // TODO
 }

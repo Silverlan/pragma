@@ -20,7 +20,10 @@ namespace pragma
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
 
-		bool Draw(prosper::IBuffer &vertexBuffer,uint32_t vertexCount,prosper::IDescriptorSet &descSetTexture,const Mat4 &mvp=umat::identity(),const Vector4 &color=Vector4(1.f,1.f,1.f,1.f));
+		bool RecordDraw(
+			prosper::ShaderBindState &bindState,prosper::IBuffer &vertexBuffer,uint32_t vertexCount,prosper::IDescriptorSet &descSetTexture,const Mat4 &mvp=umat::identity(),
+			const Vector4 &color=Vector4(1.f,1.f,1.f,1.f)
+		) const;
 	protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};

@@ -86,46 +86,52 @@ void ShaderParticleModel::InitializeGfxPipeline(prosper::GraphicsPipelineCreateI
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_ANIMATION_START);
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_ANIMATION);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_BONE_MATRICES);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_ANIMATION);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_BONE_MATRICES);
 }
 void ShaderParticleModel::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderGameWorldLightingPass::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(ShaderGameWorldLightingPass::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
-bool ShaderParticleModel::BindParticleSystem(pragma::CParticleSystemComponent &pSys)
+bool ShaderParticleModel::RecordParticleSystem(prosper::ShaderBindState &bindState,pragma::CParticleSystemComponent &pSys) const
 {
-	auto &descSet = GetAnimationDescriptorSet(pSys);
-	auto r = RecordBindDescriptorSet(descSet,DESCRIPTOR_SET_ANIMATION.setIndex);
+	auto &descSet = const_cast<ShaderParticleModel*>(this)->GetAnimationDescriptorSet(pSys);
+	auto r = RecordBindDescriptorSet(bindState,descSet,DESCRIPTOR_SET_ANIMATION.setIndex);
 	if(r == false)
 		return r;
 	PushConstants pushConstants {
 		umath::to_integral(GetRenderFlags(pSys,ParticleRenderFlags::None)), // TODO: Use correct particle render flags
 		umath::to_integral(pSys.GetAlphaMode())
 	};
-	return RecordPushConstants(sizeof(pushConstants),&pushConstants,sizeof(ShaderGameWorldLightingPass::PushConstants));
+	return RecordPushConstants(bindState,sizeof(pushConstants),&pushConstants,sizeof(ShaderGameWorldLightingPass::PushConstants));
 }
 
-bool ShaderParticleModel::BindParticleBuffers(prosper::IBuffer &particleBuffer,prosper::IBuffer &rotBuffer,prosper::IBuffer &animStartBuffer)
+bool ShaderParticleModel::RecordParticleBuffers(prosper::ShaderBindState &bindState,prosper::IBuffer &particleBuffer,prosper::IBuffer &rotBuffer,prosper::IBuffer &animStartBuffer)
 {
-	return RecordBindVertexBuffers({&particleBuffer,&rotBuffer,&animStartBuffer},VERTEX_BINDING_PARTICLE.GetBindingIndex());
+	return RecordBindVertexBuffers(bindState,{&particleBuffer,&rotBuffer,&animStartBuffer},VERTEX_BINDING_PARTICLE.GetBindingIndex());
 }
 
 bool ShaderParticleModel::Draw(CModelSubMesh &mesh,uint32_t numInstances,uint32_t firstInstance)
 {
+#if 0
 	return ShaderGameWorldLightingPass::Draw(mesh,{},*CSceneComponent::GetEntityInstanceIndexBuffer()->GetZeroIndexBuffer(),[this,numInstances,firstInstance](CModelSubMesh &mesh) {
 		return RecordDrawIndexed(mesh.GetTriangleVertexCount(),numInstances,0u,firstInstance);
 	},true);
+#endif
+	return false;
 }
 
-bool ShaderParticleModel::BeginDraw(
-	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,pragma::CParticleSystemComponent &pSys,
+bool ShaderParticleModel::RecordBeginDraw(
+	prosper::ShaderBindState &bindState,const Vector4 &clipPlane,pragma::CParticleSystemComponent &pSys,
 	const Vector4 &drawOrigin,ShaderScene::RecordFlags recordFlags
-)
+) const
 {
-	return ShaderGameWorldLightingPass::BeginDraw(
-		cmdBuffer,clipPlane,drawOrigin,
+#if 0
+	return ShaderGameWorldLightingPass::RecordBeginDraw(
+		bindState,clipPlane,drawOrigin,
 		//static_cast<ShaderGameWorldPipeline>(umath::to_integral(pipelineIdx) *umath::to_integral(AlphaMode::Count) +umath::to_integral(GetRenderAlphaMode(pSys))),
 		recordFlags
 	);
+#endif
+	return false;
 }

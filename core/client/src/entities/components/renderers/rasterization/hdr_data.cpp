@@ -108,15 +108,17 @@ const Vector3 &HDRData::Exposure::UpdateColor()
 			primCmd->StartRecording(false,true);
 			auto &imgSrc = m_exposureColorSource.lock()->GetImage();
 			m_calcImgColorCmdBuffer->RecordImageBarrier(imgSrc,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
-			if(shader.BeginCompute(m_calcImgColorCmdBuffer) == true)
+			prosper::ShaderBindState bindState {*m_calcImgColorCmdBuffer};
+			if(shader.RecordBeginCompute(bindState) == true)
 			{
 				const auto sampleCount = 32u;
-				shader.Compute(
+				shader.RecordCompute(
+					bindState,
 					*descSetGroupAverageColorTexture->GetDescriptorSet(),
 					*descSetGroupAverageColorBuffer->GetDescriptorSet(),
 					sampleCount
 				);
-				shader.EndCompute();
+				shader.RecordEndCompute(bindState);
 			}
 			m_calcImgColorCmdBuffer->RecordImageBarrier(imgSrc,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 			primCmd->StopRecording();

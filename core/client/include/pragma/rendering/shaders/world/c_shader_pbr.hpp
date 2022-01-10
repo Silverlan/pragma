@@ -48,13 +48,7 @@ namespace pragma
 		ShaderPBR(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
-		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,bool bView) override;
-		virtual bool BeginDraw(
-			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},
-			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
-		) override;
 		prosper::IDescriptorSet &GetDefaultPbrDescriptorSet() const;
-		void SetForceNonIBLMode(bool b);
 
 		//
 		virtual void RecordBindScene(
@@ -75,7 +69,7 @@ namespace pragma
 			Texture *optDefaultTex=nullptr
 		);
 	protected:
-		using ShaderGameWorldLightingPass::Draw;
+		using ShaderGameWorldLightingPass::RecordDraw;
 		void RecordBindSceneDescriptorSets(
 			rendering::ShaderProcessor &shaderProcessor,
 			const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
@@ -87,14 +81,12 @@ namespace pragma
 		virtual void OnPipelinesInitialized() override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void UpdateRenderFlags(CModelSubMesh &mesh,SceneFlags &inOutFlags) override;
-		virtual bool BindMaterialParameters(CMaterial &mat) override;
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
 		virtual void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo);
 		bool BindDescriptorSetBaseTextures(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo,prosper::IDescriptorSet &ds);
 
 		SceneFlags m_extRenderFlags = SceneFlags::None;
-		bool m_bNonIBLMode = false;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_defaultPbrDsg = nullptr;
 	};
 
@@ -120,7 +112,6 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderPBRBlend(prosper::IPrContext &context,const std::string &identifier);
-		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
 		virtual bool GetRenderBufferTargets(
 			CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
 			std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo

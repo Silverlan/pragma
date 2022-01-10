@@ -22,11 +22,11 @@ void ShaderHDR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipel
 {
 	prosper::ShaderBaseImageProcessing::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 }
 
-bool ShaderHDR::Draw(prosper::IDescriptorSet &descSetTexture,float exposure)
+bool ShaderHDR::RecordDraw(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetTexture,float exposure) const
 {
-	return RecordPushConstants(PushConstants{exposure}) &&
-		prosper::ShaderBaseImageProcessing::Draw(descSetTexture);
+	return RecordPushConstants(bindState,PushConstants{exposure}) &&
+		prosper::ShaderBaseImageProcessing::RecordDraw(bindState,descSetTexture);
 }

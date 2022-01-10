@@ -105,26 +105,6 @@ ShaderFlat::ShaderFlat(prosper::IPrContext &context,const std::string &identifie
 {
 	// SetBaseShader<ShaderTextured3DBase>();
 }
-bool ShaderFlat::BindScene(const pragma::CSceneComponent &scene,bool bView)
-{
-	auto descSet = (bView == true) ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
-	return RecordBindDescriptorSet(*descSet,DESCRIPTOR_SET_SCENE.setIndex);
-}
-bool ShaderFlat::BindEntity(CBaseEntity &ent)
-{
-	auto pRenderComponent = ent.GetRenderComponent();
-	if(!pRenderComponent)
-		return false;
-	// pRenderComponent->UpdateRenderData(c_game->GetCurrentDrawCommandBuffer());
-	return RecordBindDescriptorSet(*pRenderComponent->GetRenderDescriptorSet(),DESCRIPTOR_SET_INSTANCE.setIndex,{0u,0u});
-}
-bool ShaderFlat::BindMaterial(CMaterial &mat)
-{
-	auto descSetGroup = mat.GetDescriptorSetGroup(*this);
-	if(descSetGroup == nullptr)
-		return false;
-	return RecordBindDescriptorSet(*descSetGroup->GetDescriptorSet(),DESCRIPTOR_SET_MATERIAL.setIndex);
-}
 void ShaderFlat::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderScene::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
@@ -132,43 +112,7 @@ void ShaderFlat::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipe
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_UV);
 
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_MATERIAL);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
-}
-bool ShaderFlat::Draw(CModelSubMesh &mesh)
-{
-	auto numTriangleVertices = mesh.GetTriangleVertexCount();
-	if(numTriangleVertices > umath::to_integral(GameLimits::MaxMeshVertices))
-	{
-		Con::cerr<<"ERROR: Attempted to draw mesh with more than maximum ("<<umath::to_integral(GameLimits::MaxMeshVertices)<<") amount of vertices!"<<Con::endl;
-		return false;
-	}
-	auto &vkMesh = mesh.GetSceneMesh();
-	auto &vertexBuffer = vkMesh->GetVertexBuffer();
-	auto &indexBuffer = vkMesh->GetIndexBuffer();
-	auto &vertexWeightBuffer = vkMesh->GetVertexWeightBuffer();
-	if(vkMesh == nullptr || vertexBuffer == nullptr || indexBuffer == nullptr)
-	{
-		// TODO: Re-enable this once a logging system with categories is in place
-		/*Con::cwar<<"WARNING: Attempted to render mesh with invalid ";
-		if(vkMesh == nullptr)
-			Con::cwar<<"VKMesh";
-		else if(vertexBuffer == nullptr)
-			Con::cwar<<"Vertex Buffer";
-		else
-			Con::cwar<<"Index Buffer";
-		Con::cwar<<"! Skipping..."<<Con::endl;*/
-		return false;
-	}
-
-	auto *scene = static_cast<CGame*>(c_engine->GetClientState()->GetGameState())->GetRenderScene();
-	if(scene == nullptr)
-		return false;
-	auto &cam = scene->GetActiveCamera();
-	auto mvp = cam.valid() ? cam->GetProjectionMatrix() *cam->GetViewMatrix() : Mat4{1.f};
-	RecordBindVertexBuffer(*vertexBuffer);
-	RecordBindIndexBuffer(*indexBuffer,prosper::IndexType::UInt16);
-	RecordDrawIndexed(mesh.GetTriangleVertexCount());
-	return true;
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_INSTANCE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_MATERIAL);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SCENE);
 }

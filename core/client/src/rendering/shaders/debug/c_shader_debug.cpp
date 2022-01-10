@@ -63,16 +63,16 @@ void ShaderDebug::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 	}
 
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::VertexBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::VertexBit);
 }
 
-bool ShaderDebug::BeginDraw(const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,Pipeline pipelineIdx)
+bool ShaderDebug::RecordBeginDraw(prosper::ShaderBindState &bindState,Pipeline pipelineIdx) const
 {
-	return ShaderGraphics::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx)) == true &&
-		cmdBuffer->RecordSetDepthBias(1.f,0.f,0.f);
+	return ShaderGraphics::RecordBeginDraw(bindState,umath::to_integral(pipelineIdx)) == true &&
+		bindState.commandBuffer.RecordSetDepthBias(1.f,0.f,0.f);
 }
 
-bool ShaderDebug::Draw(const std::vector<prosper::IBuffer*> &buffers,uint32_t vertexCount,const Mat4 &mvp,const Vector4 &color)
+bool ShaderDebug::RecordDraw(prosper::ShaderBindState &bindState,const std::vector<prosper::IBuffer*> &buffers,uint32_t vertexCount,const Mat4 &mvp,const Vector4 &color) const
 {
 	assert(vertexCount <= umath::to_integral(GameLimits::MaxMeshVertices));
 	if(vertexCount > umath::to_integral(GameLimits::MaxMeshVertices))
@@ -83,19 +83,19 @@ bool ShaderDebug::Draw(const std::vector<prosper::IBuffer*> &buffers,uint32_t ve
 
 	PushConstants pushConstants {mvp,color};
 	if(
-		RecordBindVertexBuffers(buffers) == false ||
-		RecordPushConstants(pushConstants) == false
+		RecordBindVertexBuffers(bindState,buffers) == false ||
+		RecordPushConstants(bindState,pushConstants) == false
 	)
 		return false;
 	//c_engine->StartGPUTimer(GPUTimerEvent::DebugMesh); // prosper TODO
-	auto r = RecordDraw(vertexCount);
+	auto r = ShaderGraphics::RecordDraw(bindState,vertexCount);
 	//c_engine->StopGPUTimer(GPUTimerEvent::DebugMesh); // prosper TODO
 	return r;
 }
 
-bool ShaderDebug::Draw(prosper::IBuffer &vertexBuffer,uint32_t vertexCount,const Mat4 &mvp,const Vector4 &color)
+bool ShaderDebug::RecordDraw(prosper::ShaderBindState &bindState,prosper::IBuffer &vertexBuffer,uint32_t vertexCount,const Mat4 &mvp,const Vector4 &color) const
 {
-	return Draw(std::vector<prosper::IBuffer*>{&vertexBuffer},vertexCount,mvp,color);
+	return RecordDraw(bindState,std::vector<prosper::IBuffer*>{&vertexBuffer},vertexCount,mvp,color);
 }
 
 /////////////////////
@@ -119,17 +119,17 @@ void ShaderDebugTexture::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 	ShaderScene::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::None);
 	prosper::util::set_generic_alpha_color_blend_attachment_properties(pipelineInfo);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_TEXTURE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_TEXTURE);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderDebug::PushConstants),prosper::ShaderStageFlags::VertexBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(ShaderDebug::PushConstants),prosper::ShaderStageFlags::VertexBit);
 }
-bool ShaderDebugTexture::Draw(prosper::IDescriptorSet &descSetTexture,const ShaderDebug::PushConstants &pushConstants)
+bool ShaderDebugTexture::RecordDraw(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetTexture,const ShaderDebug::PushConstants &pushConstants) const
 {
 	auto buf = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
-	return RecordBindVertexBuffer(*buf) &&
-		RecordBindDescriptorSet(descSetTexture,DESCRIPTOR_SET_TEXTURE.setIndex) &&
-		RecordPushConstants(pushConstants) &&
-		RecordDraw(prosper::CommonBufferCache::GetSquareVertexCount());
+	return RecordBindVertexBuffer(bindState,*buf) &&
+		RecordBindDescriptorSet(bindState,descSetTexture,DESCRIPTOR_SET_TEXTURE.setIndex) &&
+		RecordPushConstants(bindState,pushConstants) &&
+		ShaderGraphics::RecordDraw(bindState,prosper::CommonBufferCache::GetSquareVertexCount());
 }
 
 /////////////////////
@@ -149,7 +149,7 @@ void ShaderDebugVertexColor::InitializeGfxPipeline(prosper::GraphicsPipelineCrea
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_COLOR);
 }
 
-bool ShaderDebugVertexColor::Draw(prosper::IBuffer &vertexBuffer,prosper::IBuffer &colorBuffer,uint32_t vertexCount,const Mat4 &modelMatrix)
+bool ShaderDebugVertexColor::RecordDraw(prosper::ShaderBindState &bindState,prosper::IBuffer &vertexBuffer,prosper::IBuffer &colorBuffer,uint32_t vertexCount,const Mat4 &modelMatrix) const
 {
-	return ShaderDebug::Draw(std::vector<prosper::IBuffer*>{&vertexBuffer,&colorBuffer},vertexCount,modelMatrix);
+	return ShaderDebug::RecordDraw(bindState,std::vector<prosper::IBuffer*>{&vertexBuffer,&colorBuffer},vertexCount,modelMatrix);
 }

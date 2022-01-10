@@ -136,7 +136,8 @@ void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuf
 	if(m_shaderLightCulling.expired() || m_shadowLightBits.empty() == true)
 		return;
 	auto &shaderLightCulling = static_cast<pragma::ShaderForwardPLightCulling&>(*m_shaderLightCulling.get());
-	if(shaderLightCulling.BeginCompute(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(cmdBuffer.shared_from_this())) == false)
+	prosper::ShaderBindState bindState {cmdBuffer};
+	if(shaderLightCulling.RecordBeginCompute(bindState) == false)
 		return;
 
 	auto &bufLightSources = pragma::CLightComponent::GetGlobalRenderBuffer();
@@ -174,7 +175,7 @@ void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuf
 	auto vpHeight = m_rasterizer.GetHeight();
 	auto &instance = LightDataBufferManager::GetInstance();
 	if(
-		shaderLightCulling.Compute(*m_rasterizer.GetLightSourceDescriptorSetCompute(),descSetCam,vpWidth,vpHeight,workGroupCount.first,workGroupCount.second,instance.GetLightDataBufferCount(),sceneIndex) == false
+		shaderLightCulling.RecordCompute(bindState,*m_rasterizer.GetLightSourceDescriptorSetCompute(),descSetCam,vpWidth,vpHeight,workGroupCount.first,workGroupCount.second,instance.GetLightDataBufferCount(),sceneIndex) == false
 	)
 		return;
 
@@ -185,7 +186,7 @@ void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuf
 		prosper::AccessFlags::ShaderWriteBit,prosper::AccessFlags::HostReadBit
 	);
 
-	shaderLightCulling.EndCompute();
+	shaderLightCulling.RecordEndCompute(bindState);
 	const auto szRead = m_shadowLightBits.size() *sizeof(m_shadowLightBits.front());
 	m_bufVisLightIndex->Read(0ull,szRead,m_shadowLightBits.data());
 }

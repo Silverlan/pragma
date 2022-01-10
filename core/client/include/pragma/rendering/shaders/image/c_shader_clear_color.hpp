@@ -30,7 +30,7 @@ namespace pragma
 		ShaderClearColor(prosper::IPrContext &context,const std::string &identifier);
 		ShaderClearColor(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 
-		bool Draw(const PushConstants &pushConstants={{0.f,0.f,0.f,0.f}});
+		bool RecordDraw(prosper::ShaderBindState &bindState,const PushConstants &pushConstants={{0.f,0.f,0.f,0.f}}) const;
 	protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};

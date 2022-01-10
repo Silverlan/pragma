@@ -26,23 +26,24 @@ void CPhysVisualDebugger::Render(std::shared_ptr<prosper::ICommandBuffer> &drawC
 	auto m = umat::identity();
 	auto &whDebugShader = c_game->GetGameShader(CGame::GameShader::DebugVertex);
 	auto &shader = static_cast<pragma::ShaderDebugVertexColor&>(*whDebugShader.get());
-	if(shader.BeginDraw(drawCmd,pragma::ShaderDebugVertexColor::Pipeline::Line) == true)
+	prosper::ShaderBindState bindState {*drawCmd};
+	if(shader.RecordBeginDraw(bindState,pragma::ShaderDebugVertexColor::Pipeline::Line) == true)
 	{
 		drawCmd->RecordSetLineWidth(2.f);
-		shader.Draw(*m_lineBuffer.buffer,*m_lineBuffer.colorBuffer,m_lineBuffer.instanceCount *decltype(m_lineBuffer)::VERTS_PER_INSTANCE,vp *m);
-		shader.EndDraw();
+		shader.RecordDraw(bindState,*m_lineBuffer.buffer,*m_lineBuffer.colorBuffer,m_lineBuffer.instanceCount *decltype(m_lineBuffer)::VERTS_PER_INSTANCE,vp *m);
+		shader.RecordEndDraw(bindState);
 	}
-	if(shader.BeginDraw(drawCmd,pragma::ShaderDebugVertexColor::Pipeline::Point) == true)
+	if(shader.RecordBeginDraw(bindState,pragma::ShaderDebugVertexColor::Pipeline::Point) == true)
 	{
 		drawCmd->RecordSetLineWidth(2.f);
-		shader.Draw(*m_pointBuffer.buffer,*m_lineBuffer.colorBuffer,m_pointBuffer.instanceCount *decltype(m_pointBuffer)::VERTS_PER_INSTANCE,vp *m);
-		shader.EndDraw();
+		shader.RecordDraw(bindState,*m_pointBuffer.buffer,*m_lineBuffer.colorBuffer,m_pointBuffer.instanceCount *decltype(m_pointBuffer)::VERTS_PER_INSTANCE,vp *m);
+		shader.RecordEndDraw(bindState);
 	}
-	if(shader.BeginDraw(drawCmd,pragma::ShaderDebugVertexColor::Pipeline::Triangle) == true)
+	if(shader.RecordBeginDraw(bindState,pragma::ShaderDebugVertexColor::Pipeline::Triangle) == true)
 	{
 		drawCmd->RecordSetLineWidth(2.f);
-		shader.Draw(*m_triangleBuffer.buffer,*m_lineBuffer.colorBuffer,m_triangleBuffer.instanceCount *decltype(m_triangleBuffer)::VERTS_PER_INSTANCE,vp *m);
-		shader.EndDraw();
+		shader.RecordDraw(bindState,*m_triangleBuffer.buffer,*m_lineBuffer.colorBuffer,m_triangleBuffer.instanceCount *decltype(m_triangleBuffer)::VERTS_PER_INSTANCE,vp *m);
+		shader.RecordEndDraw(bindState);
 	}
 }
 

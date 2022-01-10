@@ -129,15 +129,6 @@ void ShaderScene::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &ou
 	});*/
 	CreateCachedRenderPass<ShaderScene>(rpCreateInfo,outRenderPass,pipelineIdx);
 }
-bool ShaderScene::BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings)
-{
-	return RecordBindDescriptorSet(descSetRenderSettings,GetRenderSettingsDescriptorSetIndex());
-}
-bool ShaderScene::BindSceneCamera(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,bool bView)
-{
-	auto *descSet = (bView == true) ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
-	return RecordBindDescriptorSet(*descSet,GetCameraDescriptorSetIndex());
-}
 
 /////////////////////
 
@@ -176,18 +167,6 @@ decltype(ShaderSceneLit::DESCRIPTOR_SET_SHADOWS) ShaderSceneLit::DESCRIPTOR_SET_
 ShaderSceneLit::ShaderSceneLit(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
 	: ShaderScene(context,identifier,vsShader,fsShader,gsShader)
 {}
-bool ShaderSceneLit::BindLights(prosper::IDescriptorSet &dsLights)
-{
-	auto *descSetShadow = pragma::CShadowComponent::GetDescriptorSet();
-	if(descSetShadow == nullptr)
-		return false;
-	return RecordBindDescriptorSets({&dsLights,descSetShadow},GetLightDescriptorSetIndex());
-}
-bool ShaderSceneLit::BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView)
-{
-	return BindSceneCamera(scene,renderer,bView) && RecordBindDescriptorSet(*renderer.GetRendererDescriptorSet(),GetRendererDescriptorSetIndex()) &&
-		BindLights(*renderer.GetLightSourceDescriptorSet());
-}
 
 /////////////////////
 
@@ -242,32 +221,6 @@ ShaderEntity::ShaderEntity(prosper::IPrContext &context,const std::string &ident
 	: ShaderSceneLit(context,identifier,vsShader,fsShader,gsShader)
 {}
 
-void ShaderEntity::OnBindEntity(CBaseEntity &ent,CRenderComponent &renderC) {}
-
-bool ShaderEntity::BindEntity(CBaseEntity &ent)
-{
-	auto pRenderComponent = ent.GetRenderComponent();
-	if(!pRenderComponent)
-		return false;
-	m_boundEntity = &ent;
-	auto *descSet = pRenderComponent->GetRenderDescriptorSet();
-	if(descSet == nullptr)
-	{
-		// Con::cwar<<"WARNING: Attempted to render entity "<<ent.GetClass()<<", but it has an invalid render descriptor set! Skipping..."<<Con::endl;
-		return false;
-	}
-	OnBindEntity(ent,*pRenderComponent);
-	//if(pRenderComponent->GetLastRenderFrame() != c_engine->GetRenderContext().GetLastFrameId())
-	//	Con::cwar<<"WARNING: Entity buffer data for entity "<<ent.GetClass()<<" ("<<ent.GetIndex()<<") hasn't been updated for this frame, but entity is used in rendering! This may cause rendering issues!"<<Con::endl;
-	return BindInstanceDescriptorSet(*descSet);
-}
-
-void ShaderEntity::EndDraw()
-{
-	ShaderSceneLit::EndDraw();
-	m_boundEntity = nullptr;
-}
-
 bool ShaderEntity::GetRenderBufferTargets(
 	CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
 	std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
@@ -315,111 +268,6 @@ std::shared_ptr<prosper::IRenderBuffer> ShaderEntity::CreateRenderBuffer(CModelS
 	}
 	return GetContext().CreateRenderBuffer(static_cast<const prosper::GraphicsPipelineCreateInfo&>(*GetPipelineCreateInfo(pipelineIdx)),buffers,offsets,indexBufferInfo);
 }
-
-CBaseEntity *ShaderEntity::GetBoundEntity() {return m_boundEntity;}
-
-bool ShaderEntity::BindInstanceDescriptorSet(prosper::IDescriptorSet &descSet)
-{
-	return RecordBindDescriptorSet(descSet,GetInstanceDescriptorSetIndex());//,{0u,0u});
-}
-
-bool ShaderEntity::BindVertexAnimationOffset(uint32_t offset)
-{
-	uint32_t pushConstantOffset;
-	GetVertexAnimationPushConstantInfo(pushConstantOffset);
-	return RecordPushConstants(sizeof(offset),&offset,pushConstantOffset);
-}
-
-bool ShaderEntity::BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView)
-{
-	return ShaderSceneLit::BindScene(scene,renderer,bView) &&
-		BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
-}
-bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,const std::function<bool(CModelSubMesh&)> &fDraw,bool bUseVertexWeightBuffer)
-{
-	auto numTriangleVertices = mesh.GetTriangleVertexCount();
-	if(numTriangleVertices > umath::to_integral(GameLimits::MaxMeshVertices))
-	{
-		Con::cerr<<"ERROR: Attempted to draw mesh with more than maximum ("<<umath::to_integral(GameLimits::MaxMeshVertices)<<") amount of vertices!"<<Con::endl;
-		return false;
-	}
-	auto &vkMesh = mesh.GetSceneMesh();
-	auto &renderBuffer = vkMesh->GetRenderBuffer(mesh,*this,m_currentPipelineIdx);
-	if(renderBuffer == nullptr || RecordBindRenderBuffer(*renderBuffer) == false)
-		return false;
-	return RecordBindVertexBuffer(renderBufferIndexBuffer,umath::to_integral(VertexBinding::RenderBufferIndex)) && fDraw(mesh);
-#if 0
-	auto &vertexBuffer = vkMesh->GetVertexBuffer();
-	auto &indexBuffer = vkMesh->GetIndexBuffer();
-	auto &vertexWeightBuffer = vkMesh->GetVertexWeightBuffer();
-	if(vkMesh == nullptr || vertexBuffer == nullptr || indexBuffer == nullptr)
-	{
-		// TODO: Re-enable this once a logging system with categories is in place
-		/*Con::cwar<<"WARNING: Attempted to render mesh with invalid ";
-		if(vkMesh == nullptr)
-			Con::cwar<<"VKMesh";
-		else if(vertexBuffer == nullptr)
-			Con::cwar<<"Vertex Buffer";
-		else
-			Con::cwar<<"Index Buffer";
-		Con::cwar<<"! Skipping..."<<Con::endl;*/
-		return false;
-	}
-
-	auto &scene = static_cast<CGame*>(c_engine->GetClientState()->GetGameState())->GetRenderScene();
-	auto &cam = scene->GetActiveCamera();
-	auto mvp = cam.valid() ? cam->GetProjectionMatrix() *cam->GetViewMatrix() : Mat4{1.f};
-	std::vector<prosper::IBuffer*> vertexBuffers;
-	std::vector<uint64_t> offsets;
-	vertexBuffers.reserve(3u);
-	offsets.reserve(3u);
-	if(bUseVertexWeightBuffer == true)
-	{
-		vertexBuffers.push_back((vertexWeightBuffer != nullptr) ? vertexWeightBuffer.get() : c_engine->GetRenderContext().GetDummyBuffer().get());
-		offsets.push_back(0ull);
-
-		// Extended vertex weights
-		auto &vertWeights = mesh.GetVertexWeights();
-		auto offset = vertWeights.size() *sizeof(vertWeights.front());
-		vertexBuffers.push_back((vertexWeightBuffer != nullptr) ? vertexWeightBuffer.get() : c_engine->GetRenderContext().GetDummyBuffer().get());
-		offsets.push_back(offset);
-	}
-	vertexBuffers.push_back(vertexBuffer.get());
-	offsets.push_back(0ull);
-	return RecordBindVertexBuffers(vertexBuffers,0u,offsets) &&
-		RecordBindIndexBuffer(*indexBuffer,prosper::IndexType::UInt16) &&
-		fDraw(mesh);
-#endif
-}
-
-bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,bool bUseVertexWeightBuffer,uint32_t instanceCount)
-{
-	return Draw(mesh,meshIdx,renderBufferIndexBuffer,[this,instanceCount](CModelSubMesh &mesh) {
-#if 0
-		static std::shared_ptr<prosper::IBuffer> vertexBuffer = nullptr;
-		if(vertexBuffer == nullptr)
-		{
-			static const GLfloat g_vertex_buffer_data[] = {
-				-1.0f, -1.0f, 0.0f,
-				1.0f, -1.0f, 0.0f,
-				0.0f,  1.0f, 0.0f,
-			};
-			prosper::util::BufferCreateInfo bufCreateInfo {};
-			bufCreateInfo.size = sizeof(GLfloat) *9;
-			bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
-			bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
-			vertexBuffer = GetContext().CreateBuffer(bufCreateInfo,g_vertex_buffer_data);
-		}
-		RecordBindVertexBuffer(*vertexBuffer);
-
-		RecordDraw(9);
-		return true;
-#endif
-		return RecordDrawIndexed(mesh.GetTriangleVertexCount(),instanceCount);
-	},bUseVertexWeightBuffer);
-}
-
-bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount) {return Draw(mesh,meshIdx,renderBufferIndexBuffer,true,instanceCount);}
 
 /////////////
 

@@ -166,17 +166,18 @@ void CPhysWaterSurfaceSimulator::Simulate(double dt)
 	if(computeCmd->StartRecording(false,false) == false)
 		return;
 	// Apply splashes
+	prosper::ShaderBindState bindState {*computeCmd};
 	if(m_splashQueue.empty() == false)
 	{
 		auto &shaderWaterSplash = static_cast<pragma::ShaderWaterSplash&>(*m_whShaderWaterSplash.get());
-		if(shaderWaterSplash.BeginCompute(computeCmd) == true)
+		if(shaderWaterSplash.RecordBeginCompute(bindState) == true)
 		{
 			while(m_splashQueue.empty() == false)
 			{
-				shaderWaterSplash.Compute(*m_descSetGroupSplash->GetDescriptorSet(),m_splashQueue.front());
+				shaderWaterSplash.RecordCompute(bindState,*m_descSetGroupSplash->GetDescriptorSet(),m_splashQueue.front());
 				m_splashQueue.pop();
 			}
-			shaderWaterSplash.EndCompute();
+			shaderWaterSplash.RecordEndCompute(bindState);
 			computeCmd->RecordBufferBarrier(
 				*m_particleBuffer,
 				prosper::PipelineStageFlags::ComputeShaderBit,prosper::PipelineStageFlags::ComputeShaderBit,
@@ -191,10 +192,10 @@ void CPhysWaterSurfaceSimulator::Simulate(double dt)
 
 	// Integrate
 	auto &shaderWaterSurfaceIntegrate = static_cast<pragma::ShaderWaterSurfaceIntegrate&>(*m_whShaderSurfaceIntegrate.get());
-	if(shaderWaterSurfaceIntegrate.BeginCompute(computeCmd) == true)
+	if(shaderWaterSurfaceIntegrate.RecordBeginCompute(bindState) == true)
 	{
-		shaderWaterSurfaceIntegrate.Compute(*m_descSetGroupSurfaceInfo->GetDescriptorSet(),*m_descSetGroupIntegrate->GetDescriptorSet(),width,length);
-		shaderWaterSurfaceIntegrate.EndCompute();
+		shaderWaterSurfaceIntegrate.RecordCompute(bindState,*m_descSetGroupSurfaceInfo->GetDescriptorSet(),*m_descSetGroupIntegrate->GetDescriptorSet(),width,length);
+		shaderWaterSurfaceIntegrate.RecordEndCompute(bindState);
 
 		computeCmd->RecordBufferBarrier(
 			*m_particleBuffer,
@@ -210,10 +211,10 @@ void CPhysWaterSurfaceSimulator::Simulate(double dt)
 	auto sovleEdgeCount = GetEdgeIterationCount();
 	for(auto i=decltype(sovleEdgeCount){0};i<sovleEdgeCount;++i)
 	{
-		if(shaderWaterSolveEdges.BeginCompute(computeCmd) == true)
+		if(shaderWaterSolveEdges.RecordBeginCompute(bindState) == true)
 		{
-			shaderWaterSolveEdges.Compute(*m_descSetGroupSurfaceInfo->GetDescriptorSet(),*m_edgeDescSetGroup->GetDescriptorSet(),width,length);
-			shaderWaterSolveEdges.EndCompute();
+			shaderWaterSolveEdges.RecordCompute(bindState,*m_descSetGroupSurfaceInfo->GetDescriptorSet(),*m_edgeDescSetGroup->GetDescriptorSet(),width,length);
+			shaderWaterSolveEdges.RecordEndCompute(bindState);
 
 			computeCmd->RecordBufferBarrier(
 				*m_edgeBuffer,
@@ -221,10 +222,10 @@ void CPhysWaterSurfaceSimulator::Simulate(double dt)
 				prosper::AccessFlags::ShaderWriteBit,prosper::AccessFlags::ShaderReadBit | prosper::AccessFlags::ShaderWriteBit
 			);
 
-			if(shaderWaterSumEdges.BeginCompute(computeCmd) == true)
+			if(shaderWaterSumEdges.RecordBeginCompute(bindState) == true)
 			{
-				shaderWaterSumEdges.Compute(*m_descSetGroupSurfaceInfo->GetDescriptorSet(),*m_edgeDescSetGroup->GetDescriptorSet(),width,length);
-				shaderWaterSumEdges.EndCompute();
+				shaderWaterSumEdges.RecordCompute(bindState,*m_descSetGroupSurfaceInfo->GetDescriptorSet(),*m_edgeDescSetGroup->GetDescriptorSet(),width,length);
+				shaderWaterSumEdges.RecordEndCompute(bindState);
 
 				computeCmd->RecordBufferBarrier(
 					*m_particleBuffer,
@@ -243,10 +244,10 @@ void CPhysWaterSurfaceSimulator::Simulate(double dt)
 
 	//c_engine->StartGPUTimer(GPUTimerEvent::WaterSurface); // prosper TODO
 	auto &shaderWaterSurface = static_cast<pragma::ShaderWaterSurface&>(*m_whShaderSurface.get());
-	if(shaderWaterSurface.BeginCompute(computeCmd) == true)
+	if(shaderWaterSurface.RecordBeginCompute(bindState) == true)
 	{
-		shaderWaterSurface.Compute(*m_descSetGroupSurfaceInfo->GetDescriptorSet(),*m_descSetGroupParticles->GetDescriptorSet(),width,length);
-		shaderWaterSurface.EndCompute();
+		shaderWaterSurface.RecordCompute(bindState,*m_descSetGroupSurfaceInfo->GetDescriptorSet(),*m_descSetGroupParticles->GetDescriptorSet(),width,length);
+		shaderWaterSurface.RecordEndCompute(bindState);
 	}
 	//c_engine->StopGPUTimer(GPUTimerEvent::WaterSurface); // prosper TODO
 	computeCmd->StopRecording();

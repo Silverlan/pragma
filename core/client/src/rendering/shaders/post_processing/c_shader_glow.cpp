@@ -39,22 +39,18 @@ ShaderGlow::ShaderGlow(prosper::IPrContext &context,const std::string &identifie
 prosper::DescriptorSetInfo &ShaderGlow::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
 void ShaderGlow::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 }
 void ShaderGlow::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo,GetMaterialDescriptorSetInfo());
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_INSTANCE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,GetMaterialDescriptorSetInfo());
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SCENE);
 }
 void ShaderGlow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	pipelineInfo.ToggleDepthBias(true,-180.f /* constant factor */,-180.f /* clamp */,0.f /* slope factor */);
-}
-bool ShaderGlow::BeginDraw(const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer)
-{
-	return ShaderSceneLit::BeginDraw(cmdBuffer);
 }
 uint32_t ShaderGlow::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_SCENE.setIndex;}
 uint32_t ShaderGlow::GetInstanceDescriptorSetIndex() const {return DESCRIPTOR_SET_INSTANCE.setIndex;}
@@ -86,19 +82,14 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGlow::InitializeMaterialDesc
 	descSet.SetBindingTexture(*glowTexture->GetVkTexture(),0u);
 	return descSetGroup;
 }
-bool ShaderGlow::BindClipPlane(const Vector4 &clipPlane)
-{
-	// Clip plane currently not supported for glow shaders
-	return true;
-}
-bool ShaderGlow::BindGlowMaterial(CMaterial &mat)
+bool ShaderGlow::RecordGlowMaterial(prosper::ShaderBindState &bindState,CMaterial &mat) const
 {
 	auto *glowMap = mat.GetGlowMap();
 	if(glowMap == nullptr || glowMap->texture == nullptr)
 		return false;
-	auto descSetGroup = mat.GetDescriptorSetGroup(*this);
+	auto descSetGroup = mat.GetDescriptorSetGroup(const_cast<ShaderGlow&>(*this));
 	if(descSetGroup == nullptr)
-		descSetGroup = InitializeMaterialDescriptorSet(mat); // Attempt to initialize on the fly
+		descSetGroup = const_cast<ShaderGlow*>(this)->InitializeMaterialDescriptorSet(mat); // Attempt to initialize on the fly
 	if(descSetGroup == nullptr)
 		return false;
 	auto &data = mat.GetDataBlock();
@@ -112,7 +103,7 @@ bool ShaderGlow::BindGlowMaterial(CMaterial &mat)
 	if(data != nullptr)
 		data->GetFloat("glow_scale",&scale);
 
-	return RecordPushConstants(PushConstants{scale}) &&
-		RecordBindDescriptorSet(*descSetGroup->GetDescriptorSet(),GetMaterialDescriptorSetIndex());
+	return RecordPushConstants(bindState,PushConstants{scale}) &&
+		RecordBindDescriptorSet(bindState,*descSetGroup->GetDescriptorSet(),GetMaterialDescriptorSetIndex());
 }
 

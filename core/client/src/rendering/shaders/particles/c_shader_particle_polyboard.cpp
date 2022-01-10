@@ -35,14 +35,15 @@ void ShaderParticlePolyboard::InitializeGfxPipeline(prosper::GraphicsPipelineCre
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_COLOR);
 
 	pipelineInfo.SetPrimitiveTopology(prosper::PrimitiveTopology::LineListWithAdjacency);
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(GeometryPushConstants),prosper::ShaderStageFlags::GeometryBit);
-	AttachPushConstantRange(pipelineInfo,sizeof(GeometryPushConstants),sizeof(FragmentPushConstants),prosper::ShaderStageFlags::FragmentBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(GeometryPushConstants),prosper::ShaderStageFlags::GeometryBit);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,sizeof(GeometryPushConstants),sizeof(FragmentPushConstants),prosper::ShaderStageFlags::FragmentBit);
 
-	RegisterDefaultGfxPipelineDescriptorSetGroups(pipelineInfo);
+	RegisterDefaultGfxPipelineDescriptorSetGroups(pipelineInfo,pipelineIdx);
 }
 
 bool ShaderParticlePolyboard::Draw(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const pragma::CParticleSystemComponent &ps,prosper::IBuffer &vertexBuffer,prosper::IBuffer &indexBuffer,uint32_t numIndices,float radius,float curvature)
 {
+#if 0
 	if(BindParticleMaterial(renderer,ps) == false)
 		return false;
 	auto &cam = scene.GetActiveCamera();
@@ -57,4 +58,6 @@ bool ShaderParticlePolyboard::Draw(pragma::CSceneComponent &scene,const CRasteri
 		)
 		return false;
 	return RecordBindVertexBuffer(vertexBuffer) && RecordBindIndexBuffer(indexBuffer) && RecordDrawIndexed(numIndices);
+#endif
+	return false;
 }

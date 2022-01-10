@@ -76,15 +76,17 @@ void pragma::CRasterizationRendererComponent::RenderSceneFog(const util::DrawSce
 	);
 	if(drawCmd->RecordBeginRenderPass(*hdrInfo.hdrPostProcessingRenderTarget) == true)
 	{
-		if(shaderFog.BeginDraw(drawCmd) == true)
+		prosper::ShaderBindState bindState {*drawCmd};
+		if(shaderFog.RecordBeginDraw(bindState) == true)
 		{
-			shaderFog.Draw(
+			shaderFog.RecordDraw(
+				bindState,
 				*hdrInfo.dsgHDRPostProcessing->GetDescriptorSet(),
 				*hdrInfo.dsgDepthPostProcessing->GetDescriptorSet(),
 				*scene.GetCameraDescriptorSetGraphics(),
 				*scene.GetFogDescriptorSetGroup()->GetDescriptorSet()
 			);
-			shaderFog.EndDraw();
+			shaderFog.RecordEndDraw(bindState);
 		}
 		drawCmd->RecordEndRenderPass();
 	}

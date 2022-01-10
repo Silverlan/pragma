@@ -27,7 +27,7 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderForwardPLightIndexing(prosper::IPrContext &context,const std::string &identifier);
-		bool Compute(prosper::IDescriptorSet &descSetLights,uint32_t tileCount);
+		bool RecordCompute(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetLights,uint32_t tileCount) const;
 	protected:
 		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};

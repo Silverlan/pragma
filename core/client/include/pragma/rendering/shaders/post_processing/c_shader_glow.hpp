@@ -31,10 +31,8 @@ namespace pragma
 
 		ShaderGlow(prosper::IPrContext &context,const std::string &identifier);
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
-		bool BeginDraw(const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer);
-		bool BindGlowMaterial(CMaterial &mat);
+		bool RecordGlowMaterial(prosper::ShaderBindState &bindState,CMaterial &mat) const;
 	protected:
-		virtual bool BindClipPlane(const Vector4 &clipPlane) override;
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
 		virtual uint32_t GetInstanceDescriptorSetIndex() const override;

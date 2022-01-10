@@ -46,7 +46,8 @@ void pragma::CRasterizationRendererComponent::RenderToneMapping(const util::Draw
 	{
 		auto &shaderPPHdr = static_cast<pragma::ShaderPPHDR&>(*hShaderTonemapping);
 
-		if(shaderPPHdr.BeginDraw(drawCmd) == true)
+		prosper::ShaderBindState bindState {*drawCmd};
+		if(shaderPPHdr.RecordBeginDraw(bindState) == true)
 		{
 			const float bloomAdditiveScale = 0.5f;
 			auto glowScale = 0.f;//(GetGlowInfo().bGlowScheduled == true) ? 1.f : 0.f;
@@ -68,8 +69,8 @@ void pragma::CRasterizationRendererComponent::RenderToneMapping(const util::Draw
 				}
 			}
 
-			shaderPPHdr.Draw(descSetHdrResolve,toneMapping,GetHDRExposure(),bloomAdditiveScale,glowScale,umath::is_flag_set(drawSceneInfo.flags,util::DrawSceneInfo::Flags::FlipVertically));
-			shaderPPHdr.EndDraw();
+			shaderPPHdr.RecordDraw(bindState,descSetHdrResolve,toneMapping,GetHDRExposure(),bloomAdditiveScale,glowScale,umath::is_flag_set(drawSceneInfo.flags,util::DrawSceneInfo::Flags::FlipVertically));
+			shaderPPHdr.RecordEndDraw(bindState);
 		}
 		drawCmd->RecordEndRenderPass();
 

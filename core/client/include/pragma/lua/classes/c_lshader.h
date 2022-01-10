@@ -29,14 +29,15 @@ namespace prosper
 	class BasePipelineCreateInfo;
 	class ShaderGraphics;
 	class ShaderCompute;
+	struct ShaderBindState;
 };
 
 namespace Lua
 {
 	namespace BasePipelineCreateInfo
 	{
-		DLLCLIENT void AttachPushConstantRange(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t offset,uint32_t size,uint32_t shaderStages);
-		DLLCLIENT void AttachDescriptorSetInfo(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,pragma::LuaDescriptorSetInfo &descSetInfo);
+		DLLCLIENT void AttachPushConstantRange(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx,uint32_t offset,uint32_t size,uint32_t shaderStages);
+		DLLCLIENT void AttachDescriptorSetInfo(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx,pragma::LuaDescriptorSetInfo &descSetInfo);
 	};
 
 	namespace GraphicsPipelineCreateInfo
@@ -168,62 +169,39 @@ namespace Lua
 		DLLCLIENT void GetIdentifier(lua_State *l,prosper::Shader &shader);
 		DLLCLIENT void GetSourceFilePath(lua_State *l,prosper::Shader &shader,uint32_t shaderStage);
 		DLLCLIENT void GetSourceFilePaths(lua_State *l,prosper::Shader &shader);
-		DLLCLIENT void RecordPushConstants(lua_State *l,prosper::Shader &shader,::DataStream &ds,uint32_t offset);
-		DLLCLIENT void RecordBindDescriptorSet(lua_State *l,prosper::Shader &shader,Lua::Vulkan::DescriptorSet &ds,uint32_t firstSet,luabind::object dynamicOffsets);
-		DLLCLIENT void RecordBindDescriptorSets(lua_State *l,prosper::Shader &shader,luabind::object descSets,uint32_t firstSet,luabind::object ynamicOffsets);
+		DLLCLIENT void RecordPushConstants(lua_State *l,prosper::Shader &shader,prosper::ShaderBindState &bindState,::DataStream &ds,uint32_t offset);
+		DLLCLIENT void RecordBindDescriptorSet(lua_State *l,prosper::Shader &shader,prosper::ShaderBindState &bindState,Lua::Vulkan::DescriptorSet &ds,uint32_t firstSet,luabind::object dynamicOffsets);
+		DLLCLIENT void RecordBindDescriptorSets(lua_State *l,prosper::Shader &shader,prosper::ShaderBindState &bindState,luabind::object descSets,uint32_t firstSet,luabind::object ynamicOffsets);
 
 		namespace Graphics
 		{
-			DLLCLIENT void RecordBindVertexBuffer(lua_State *l,prosper::ShaderGraphics &shader,Lua::Vulkan::Buffer &buffer,uint32_t startBinding,uint32_t offset);
-			DLLCLIENT void RecordBindVertexBuffers(lua_State *l,prosper::ShaderGraphics &shader,luabind::object buffers,uint32_t startBinding,luabind::object offsets);
-			DLLCLIENT void RecordBindIndexBuffer(lua_State *l,prosper::ShaderGraphics &shader,Lua::Vulkan::Buffer &indexBuffer,uint32_t indexType,uint32_t offset);
-			DLLCLIENT void RecordDraw(lua_State *l,prosper::ShaderGraphics &shader,uint32_t vertCount,uint32_t instanceCount,uint32_t firstVertex,uint32_t firstInstance);
-			DLLCLIENT void RecordDrawIndexed(lua_State *l,prosper::ShaderGraphics &shader,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex,uint32_t firstInstance);
-			DLLCLIENT void RecordBeginDraw(lua_State *l,prosper::ShaderGraphics &shader,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t pipelineIdx);
-			DLLCLIENT void RecordDraw(lua_State *l,prosper::ShaderGraphics &shader);
-			DLLCLIENT void RecordEndDraw(lua_State *l,prosper::ShaderGraphics &shader);
+			DLLCLIENT void RecordBindVertexBuffer(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState,Lua::Vulkan::Buffer &buffer,uint32_t startBinding,uint32_t offset);
+			DLLCLIENT void RecordBindVertexBuffers(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState,luabind::object buffers,uint32_t startBinding,luabind::object offsets);
+			DLLCLIENT void RecordBindIndexBuffer(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState,Lua::Vulkan::Buffer &indexBuffer,uint32_t indexType,uint32_t offset);
+			DLLCLIENT void RecordDraw(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState,uint32_t vertCount,uint32_t instanceCount,uint32_t firstVertex,uint32_t firstInstance);
+			DLLCLIENT void RecordDrawIndexed(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex,uint32_t firstInstance);
+			DLLCLIENT void RecordBeginDraw(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState,uint32_t pipelineIdx);
+			DLLCLIENT void RecordDraw(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState);
+			DLLCLIENT void RecordEndDraw(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState);
 			DLLCLIENT void GetRenderPass(lua_State *l,prosper::ShaderGraphics &shader,uint32_t pipelineIdx);
 		};
 
 		namespace Scene3D
 		{
 			DLLCLIENT void GetRenderPass(lua_State *l,uint32_t pipelineIdx);
-			DLLCLIENT void BindSceneCamera(lua_State *l,pragma::ShaderScene &shader,pragma::CSceneComponent &scene,pragma::CRasterizationRendererComponent &renderer,bool bView);
-			DLLCLIENT void BindRenderSettings(lua_State *l,pragma::ShaderScene &shader,std::shared_ptr<prosper::IDescriptorSetGroup> &descSet);
-		};
-
-		namespace SceneLit3D
-		{
-			DLLCLIENT void BindLights(lua_State *l,pragma::ShaderSceneLit &shader,std::shared_ptr<prosper::IDescriptorSetGroup> &dsLights);
-			DLLCLIENT void BindScene(lua_State *l,pragma::ShaderSceneLit &shader,pragma::CSceneComponent &scene,pragma::CRasterizationRendererComponent &renderer,bool bView);
-		};
-
-		namespace ShaderEntity
-		{
-			DLLCLIENT void BindInstanceDescriptorSet(lua_State *l,pragma::ShaderEntity &shader,std::shared_ptr<prosper::IDescriptorSetGroup> &descSet);
-			DLLCLIENT void BindEntity(lua_State *l,pragma::ShaderEntity &shader,BaseEntity &hEnt);
-			DLLCLIENT void BindVertexAnimationOffset(lua_State *l,pragma::ShaderEntity &shader,uint32_t offset);
-			DLLCLIENT void Draw(lua_State *l,pragma::ShaderEntity &shader,::ModelSubMesh &mesh);
-		};
-
-		namespace TexturedLit3D
-		{
-			DLLCLIENT void BindMaterial(lua_State *l,pragma::ShaderGameWorldLightingPass &shader,::Material &mat);
-			DLLCLIENT void RecordBindClipPlane(lua_State *l,pragma::ShaderGameWorldLightingPass &shader,const Vector4 &clipPlane);
 		};
 
 		namespace Compute
 		{
-			DLLCLIENT void RecordDispatch(lua_State *l,prosper::ShaderCompute &shader,uint32_t x,uint32_t y,uint32_t z);
-			DLLCLIENT void RecordBeginCompute(lua_State *l,prosper::ShaderCompute &shader,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t pipelineIdx);
-			DLLCLIENT void RecordCompute(lua_State *l,prosper::ShaderCompute &shader);
-			DLLCLIENT void RecordEndCompute(lua_State *l,prosper::ShaderCompute &shader);
+			DLLCLIENT void RecordDispatch(lua_State *l,prosper::ShaderCompute &shader,prosper::ShaderBindState &bindState,uint32_t x,uint32_t y,uint32_t z);
+			DLLCLIENT void RecordBeginCompute(lua_State *l,prosper::ShaderCompute &shader,prosper::ShaderBindState &bindState,uint32_t pipelineIdx);
+			DLLCLIENT void RecordCompute(lua_State *l,prosper::ShaderCompute &shader,prosper::ShaderBindState &bindState);
+			DLLCLIENT void RecordEndCompute(lua_State *l,prosper::ShaderCompute &shader,prosper::ShaderBindState &bindState);
 		};
 
 		// Custom shaders
 		DLLCLIENT void SetStageSourceFilePath(lua_State *l,pragma::LuaShaderBase &shader,uint32_t shaderStage,const std::string &fpath);
 		DLLCLIENT void SetPipelineCount(lua_State *l,pragma::LuaShaderBase &shader,uint32_t pipelineCount);
-		DLLCLIENT void GetCurrentCommandBuffer(lua_State *l,pragma::LuaShaderBase &shader);
 	};
 };
 

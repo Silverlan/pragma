@@ -43,15 +43,15 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderParticleModel(prosper::IPrContext &context,const std::string &identifier);
-		bool BindParticleBuffers(prosper::IBuffer &particleBuffer,prosper::IBuffer &rotBuffer,prosper::IBuffer &animStartBuffer);
+		bool RecordParticleBuffers(prosper::ShaderBindState &bindState,prosper::IBuffer &particleBuffer,prosper::IBuffer &rotBuffer,prosper::IBuffer &animStartBuffer);
 		bool Draw(CModelSubMesh &mesh,uint32_t numInstances,uint32_t firstInstance=0u);
-		bool BindParticleSystem(pragma::CParticleSystemComponent &pSys);
+		bool RecordParticleSystem(prosper::ShaderBindState &bindState,pragma::CParticleSystemComponent &pSys) const;
 
-		bool BeginDraw(
-			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,
+		bool RecordBeginDraw(
+			prosper::ShaderBindState &bindState,const Vector4 &clipPlane,
 			pragma::CParticleSystemComponent &pSys,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},
 			ShaderScene::RecordFlags recordFlags=ShaderScene::RecordFlags::RenderPassTargetAsViewportAndScissor
-		);
+		) const;
 	protected:
 		virtual prosper::DescriptorSetInfo &GetAnimationDescriptorSetInfo() const override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
@@ -60,8 +60,6 @@ namespace pragma
 		virtual bool ShouldInitializePipeline(uint32_t pipelineIdx) override;
 	private:
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_dummyAnimDescSetGroup = nullptr;
-		// These are unused
-		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override {return false;};
 	};
 };
 

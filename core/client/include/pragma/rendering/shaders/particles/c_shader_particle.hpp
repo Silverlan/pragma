@@ -32,7 +32,7 @@ namespace pragma
 			WorldRotation = umath::to_integral(ShaderParticle2DBase::VertexAttribute::Count)
 		};
 
-		bool BindWorldRotationBuffer(prosper::IBuffer &buffer);
+		bool RecordWorldRotationBuffer(prosper::ShaderBindState &bindState,prosper::IBuffer &buffer) const;
 		ShaderParticleRotational(prosper::IPrContext &context,const std::string &identifier);
 	protected:
 		virtual void GetParticleSystemOrientationInfo(

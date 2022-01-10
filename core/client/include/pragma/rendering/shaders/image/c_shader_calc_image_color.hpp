@@ -28,7 +28,7 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_COLOR;
 
 		ShaderCalcImageColor(prosper::IPrContext &context,const std::string &identifier);
-		bool Compute(prosper::IDescriptorSet &descSetTexture,prosper::IDescriptorSet &descSetColor,uint32_t sampleCount);
+		bool RecordCompute(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetTexture,prosper::IDescriptorSet &descSetColor,uint32_t sampleCount) const;
 	protected:
 		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};

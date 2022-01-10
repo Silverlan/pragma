@@ -94,7 +94,7 @@ void register_game_shaders()
 	shaderManager.RegisterShader("eye",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderEye(context,identifier);});
 	shaderManager.RegisterShader("eye_legacy",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderEyeLegacy(context,identifier);});
 
-	shaderManager.RegisterShader("flat",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderFlat(context,identifier);});
+	// shaderManager.RegisterShader("flat",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderFlat(context,identifier);});
 	// shaderManager.RegisterShader("test",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderTest(context,identifier);});
 	shaderManager.RegisterShader("unlit",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderUnlit(context,identifier);}); // TODO: Fixme
 	shaderManager.RegisterShader("wireframe",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderWireframe(context,identifier);});

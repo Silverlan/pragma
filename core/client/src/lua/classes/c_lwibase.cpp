@@ -1121,7 +1121,7 @@ struct LuaCallbacks
 	std::unordered_map<std::string,std::vector<CallbackInfo>> callbacks;
 };
 
-static std::unordered_map<util::Hash,std::function<CallbackHandle(::WIBase&,lua_State*,const std::function<void(const std::function<void()>&)>&)>> g_uiCallbacks;
+static std::unordered_map<util::Hash,Lua::gui::LUA_CALLBACK> g_uiCallbacks;
 static util::Hash get_gui_callback_hash(const std::string &className,const std::string &callbackName)
 {
 	util::Hash hash = 0;
@@ -1131,7 +1131,7 @@ static util::Hash get_gui_callback_hash(const std::string &className,const std::
 }
 void Lua::gui::register_lua_callback(
 	std::string className,std::string callbackName,
-	const std::function<CallbackHandle(::WIBase&,lua_State*,const std::function<void(const std::function<void()>&)>&)> &fCb
+	LUA_CALLBACK fCb
 )
 {
 	ustring::to_lower(className);

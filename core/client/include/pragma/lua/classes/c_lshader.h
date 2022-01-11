@@ -36,8 +36,8 @@ namespace Lua
 {
 	namespace BasePipelineCreateInfo
 	{
-		DLLCLIENT void AttachPushConstantRange(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx,uint32_t offset,uint32_t size,uint32_t shaderStages);
-		DLLCLIENT void AttachDescriptorSetInfo(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx,pragma::LuaDescriptorSetInfo &descSetInfo);
+		DLLCLIENT void AttachPushConstantRange(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t offset,uint32_t size,uint32_t shaderStages);
+		DLLCLIENT void AttachDescriptorSetInfo(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,pragma::LuaDescriptorSetInfo &descSetInfo);
 	};
 
 	namespace GraphicsPipelineCreateInfo

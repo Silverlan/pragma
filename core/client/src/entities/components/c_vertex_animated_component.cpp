@@ -121,7 +121,7 @@ void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 			m_maxVertexAnimations += va->GetMeshAnimations().size();
 		if(m_maxVertexAnimations == 0u)
 			return;
-		m_vertexAnimationBuffer = prosper::SwapBuffer::Create(*globalVertAnimBuffer,sizeof(VertexAnimationData),m_maxVertexAnimations);
+		m_vertexAnimationBuffer = prosper::SwapBuffer::Create(c_engine->GetRenderContext().GetWindow(),*globalVertAnimBuffer,sizeof(VertexAnimationData),m_maxVertexAnimations);
 		if(!m_vertexAnimationBuffer)
 		{
 			m_maxVertexAnimations = 0;

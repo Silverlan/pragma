@@ -140,9 +140,9 @@ bool WILuaBase::DoPosInBounds(const Vector2i &pos) const
 		return res;
 	return WIBase::DoPosInBounds(pos);
 }
-void WILuaBase::Render(const DrawInfo &drawInfo,const Mat4 &matDraw,const Vector2 &scale,uint32_t testStencilLevel,wgui::StencilPipeline stencilPipeline)
+void WILuaBase::Render(const DrawInfo &drawInfo,wgui::DrawState &drawState,const Mat4 &matDraw,const Vector2 &scale,uint32_t testStencilLevel,wgui::StencilPipeline stencilPipeline)
 {
-	WIBase::Render(drawInfo,matDraw,scale,testStencilLevel,stencilPipeline);
+	WIBase::Render(drawInfo,drawState,matDraw,scale,testStencilLevel,stencilPipeline);
 	// No longer supported, since UI rendering is now multi-threaded
 	//CallLuaMember<void,std::reference_wrapper<const DrawInfo>,Mat4,Vector2>("OnDraw",std::ref(drawInfo),matDraw,scale);
 }

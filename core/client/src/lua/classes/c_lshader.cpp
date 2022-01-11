@@ -15,7 +15,7 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx,pragma::LuaDescriptorSetInfo &descSetInfo)
+void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,pragma::LuaDescriptorSetInfo &descSetInfo)
 {
 	auto *shader = pragma::LuaShaderBase::GetShader(pipelineInfo);
 	if(shader == nullptr)
@@ -35,14 +35,14 @@ void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l,prosper::
 		bindingIdx = binding.bindingIndex +1u;
 	}
 	shaderDescSetInfo.setIndex = descSetInfo.setIndex;
-	shader->GetShader().AddDescriptorSetGroup(pipelineInfo,pipelineIdx,shaderDescSetInfo);
+	shader->GetShader().AddDescriptorSetGroup(pipelineInfo,shader->GetCurrentPipelineIndex(),shaderDescSetInfo);
 }
-void Lua::BasePipelineCreateInfo::AttachPushConstantRange(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx,uint32_t offset,uint32_t size,uint32_t shaderStages)
+void Lua::BasePipelineCreateInfo::AttachPushConstantRange(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t offset,uint32_t size,uint32_t shaderStages)
 {
 	auto *shader = pragma::LuaShaderBase::GetShader(pipelineInfo);
 	if(shader == nullptr)
 		return;
-	shader->GetShader().AttachPushConstantRange(pipelineInfo,pipelineIdx,offset,size,static_cast<prosper::ShaderStageFlags>(shaderStages));
+	shader->GetShader().AttachPushConstantRange(pipelineInfo,shader->GetCurrentPipelineIndex(),offset,size,static_cast<prosper::ShaderStageFlags>(shaderStages));
 }
 void Lua::shader::push_shader(lua_State *l,prosper::Shader &shader)
 {

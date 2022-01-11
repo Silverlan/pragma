@@ -70,7 +70,7 @@ void GPUProfiler::InitializeQueries()
 {
 	if(m_timerQueryPool != nullptr || m_statsQueryPool != nullptr)
 		return;
-	auto swapchainImageCount = c_engine->GetRenderContext().GetSwapchainImageCount();
+	auto swapchainImageCount = c_engine->GetRenderContext().GetPrimaryWindowSwapchainImageCount();
 	const auto maxTimestampQueryCount = 200u; // Note: Every timer requires 2 timestamps
 	const auto maxStatisticsQueryCount = 100u;
 	m_timerQueryPool = c_engine->GetRenderContext().CreateQueryPool(prosper::QueryType::Timestamp,maxTimestampQueryCount);

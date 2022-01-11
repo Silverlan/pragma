@@ -69,10 +69,10 @@ namespace Lua
 		DLLCLIENT void GetChild(lua_State *l,::WIBase &hPanel,std::string className,unsigned int idx);
 		DLLCLIENT void PosInBounds(lua_State *l,::WIBase &hPanel,Vector2 pos);
 		DLLCLIENT void GetMousePos(lua_State *l,::WIBase &hPanel);
-		DLLCLIENT void Draw(lua_State *l,::WIBase &hPanel,const ::WIBase::DrawInfo &drawInfo);
-		DLLCLIENT void Draw(lua_State *l,::WIBase &hPanel,const ::WIBase::DrawInfo &drawInfo,const Vector2i &scissorOffset,const Vector2i &scissorSize);
-		DLLCLIENT void Draw(lua_State *l,::WIBase &hPanel,const ::WIBase::DrawInfo &drawInfo,const Vector2i &scissorOffset,const Vector2i &scissorSize,const Vector2i &offsetParent);
-		DLLCLIENT void Draw(lua_State *l,::WIBase &hPanel,const ::WIBase::DrawInfo &drawInfo,const Vector2i &scissorOffset,const Vector2i &scissorSize,const Vector2i &offsetParent,const Vector2 &scale);
+		DLLCLIENT void Draw(lua_State *l,::WIBase &hPanel,const ::WIBase::DrawInfo &drawInfo,wgui::DrawState &drawState);
+		DLLCLIENT void Draw(lua_State *l,::WIBase &hPanel,const ::WIBase::DrawInfo &drawInfo,wgui::DrawState &drawState,const Vector2i &scissorOffset,const Vector2i &scissorSize);
+		DLLCLIENT void Draw(lua_State *l,::WIBase &hPanel,const ::WIBase::DrawInfo &drawInfo,wgui::DrawState &drawState,const Vector2i &scissorOffset,const Vector2i &scissorSize,const Vector2i &offsetParent);
+		DLLCLIENT void Draw(lua_State *l,::WIBase &hPanel,const ::WIBase::DrawInfo &drawInfo,wgui::DrawState &drawState,const Vector2i &scissorOffset,const Vector2i &scissorSize,const Vector2i &offsetParent,const Vector2 &scale);
 		DLLCLIENT void GetX(lua_State *l,::WIBase &hPanel);
 		DLLCLIENT void GetY(lua_State *l,::WIBase &hPanel);
 		DLLCLIENT void SetX(lua_State *l,::WIBase &hPanel,float x); // TODO This should be int, but float-to-int conversion is currently broken with luabind

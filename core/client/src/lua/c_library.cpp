@@ -189,11 +189,6 @@ static void register_gui(Lua::Interface &lua)
 			auto *pFrame = pConsole ? pConsole->GetFrame() : nullptr;
 			return pFrame ? pFrame->IsVisible() : false;
 		})),
-		luabind::def("get_render_scissor_rect",static_cast<std::tuple<uint32_t,uint32_t,uint32_t,uint32_t>(*)(lua_State*)>([](lua_State *l) -> std::tuple<uint32_t,uint32_t,uint32_t,uint32_t> {
-			uint32_t x,y,w,h;
-			WGUI::GetInstance().GetScissor(x,y,w,h);
-			return {x,y,w,h};
-		})),
 		luabind::def("get_delta_time",static_cast<float(*)(lua_State*)>([](lua_State *l) -> float {
 			return WGUI::GetInstance().GetDeltaTime();
 		})),

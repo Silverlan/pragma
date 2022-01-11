@@ -727,8 +727,8 @@ void CRenderComponent::InitializeRenderBuffers()
 		return;
 	
 	c_engine->GetRenderContext().WaitIdle();
-	m_renderBuffer = prosper::SwapBuffer::Create(*s_instanceBuffer);
-	m_renderDescSetGroup = prosper::SwapDescriptorSet::Create(c_engine->GetRenderContext(),pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
+	m_renderBuffer = prosper::SwapBuffer::Create(c_engine->GetRenderContext().GetWindow(),*s_instanceBuffer);
+	m_renderDescSetGroup = prosper::SwapDescriptorSet::Create(c_engine->GetRenderContext().GetWindow(),pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
 	m_renderDescSetGroup->SetBindingUniformBuffer(
 		*m_renderBuffer,umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::Instance)
 	);

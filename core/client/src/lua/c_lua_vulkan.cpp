@@ -786,7 +786,6 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		luabind::def("is_uncompressed_format",::prosper::util::is_uncompressed_format),
 		luabind::def("get_bit_size",::prosper::util::get_bit_size),
 		luabind::def("get_byte_size",::prosper::util::get_byte_size),
-		luabind::def("get_swapchain_image_count",&::prosper::IPrContext::GetSwapchainImageCount,luabind::render_context_policy<1>{}),
 		luabind::def("wait_idle",&::prosper::IPrContext::WaitIdle,luabind::render_context_policy<1>{}),
 		luabind::def("flush",&::prosper::IPrContext::Flush,luabind::render_context_policy<1>{}),
 		luabind::def("get_api_identifier",&::prosper::IPrContext::GetAPIIdentifier,luabind::render_context_policy<1>{}),
@@ -2170,6 +2169,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		window->SetCursor(cursor);
 	}));
 	defWindow.def("Close",&prosper::Window::Close);
+	defWindow.def("GetSwapchainImageCount",&prosper::Window::GetSwapchainImageCount);
 	defWindow.def("IsValid",static_cast<bool(*)(prosper::Window&)>([](prosper::Window &window) -> bool {
 		return window.IsValid();
 	}));

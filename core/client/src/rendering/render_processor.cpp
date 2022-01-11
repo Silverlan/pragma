@@ -232,7 +232,7 @@ DLLCLIENT void debug_render_stats(bool enabled,bool full,bool print,bool continu
 	auto stats = std::make_shared<RenderStatsQueue>();
 	auto first = true;
 	g_cbPreRenderScene = c_game->AddCallback("OnRenderScenes",FunctionCallback<void>::Create([stats,first,full,print]() mutable {
-		auto swapchainIdx = c_engine->GetRenderContext().GetLastAcquiredSwapchainImageIndex();
+		auto swapchainIdx = c_engine->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
 		if(swapchainIdx >= stats->frameStats.size())
 			return;
 		auto &fstats = stats->frameStats[swapchainIdx];
@@ -296,7 +296,7 @@ DLLCLIENT void debug_render_stats(bool enabled,bool full,bool print,bool continu
 		}
 	}));
 	g_cbPostRenderScene = c_game->AddCallback("PostRenderScenes",FunctionCallback<void>::Create([full,stats]() {
-		auto swapchainIdx = c_engine->GetRenderContext().GetLastAcquiredSwapchainImageIndex();
+		auto swapchainIdx = c_engine->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
 		auto &renderScenes = c_game->GetQueuedRenderScenes();
 		FrameRenderStats frameStats {};
 		for(auto &drawSceneInfo : renderScenes)

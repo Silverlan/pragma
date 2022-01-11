@@ -205,9 +205,10 @@ prosper::IDescriptorSet *CRasterizationRendererComponent::GetLightSourceDescript
 void CRasterizationRendererComponent::InitializeCommandBufferGroups()
 {
 	auto &context = c_engine->GetRenderContext();
-	m_prepassCommandBufferGroup = context.CreateSwapCommandBufferGroup();
-	m_shadowCommandBufferGroup = context.CreateSwapCommandBufferGroup();
-	m_lightingCommandBufferGroup = context.CreateSwapCommandBufferGroup();
+	auto &window = context.GetWindow();
+	m_prepassCommandBufferGroup = context.CreateSwapCommandBufferGroup(window);
+	m_shadowCommandBufferGroup = context.CreateSwapCommandBufferGroup(window);
+	m_lightingCommandBufferGroup = context.CreateSwapCommandBufferGroup(window);
 }
 
 void CRasterizationRendererComponent::InitializeLightDescriptorSets()

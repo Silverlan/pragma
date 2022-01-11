@@ -78,6 +78,7 @@ void pragma::LuaShaderBase::InitializePipeline(prosper::BasePipelineCreateInfo &
 {
 	m_currentPipelineInfo = &pipelineInfo;
 	m_currentDescSetIndex = 0u;
+	m_curPipelineIdx = pipelineIdx;
 
 	auto it = s_pipelineToShader.insert(std::make_pair(&pipelineInfo,this)).first;
 	CallLuaMember<void,std::reference_wrapper<prosper::BasePipelineCreateInfo>,uint32_t>("InitializePipeline",std::ref(pipelineInfo),pipelineIdx);
@@ -85,6 +86,7 @@ void pragma::LuaShaderBase::InitializePipeline(prosper::BasePipelineCreateInfo &
 
 	m_currentPipelineInfo = nullptr;
 	m_currentDescSetIndex = 0u;
+	m_curPipelineIdx = std::numeric_limits<uint32_t>::max();
 }
 bool pragma::LuaShaderBase::AttachDescriptorSetInfo(const pragma::LuaDescriptorSetInfo &descSetInfo,uint32_t pipelineIdx)
 {

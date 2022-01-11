@@ -77,7 +77,7 @@ std::unique_ptr<ProfilerResult> GPUSwapchainTimer::GetResult() const
 prosper::TimerQuery *GPUSwapchainTimer::GetTimerQuery()
 {
 	InitializeQueries();
-	auto index = c_engine->GetRenderContext().GetLastAcquiredSwapchainImageIndex();
+	auto index = c_engine->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
 	if(index >= m_swapchainTimers.size())
 		return nullptr;
 	return m_swapchainTimers.at(index).timerQuery.get();
@@ -86,7 +86,7 @@ prosper::TimerQuery *GPUSwapchainTimer::GetTimerQuery()
 prosper::PipelineStatisticsQuery *GPUSwapchainTimer::GetStatisticsQuery()
 {
 	InitializeQueries();
-	auto index = c_engine->GetRenderContext().GetLastAcquiredSwapchainImageIndex();
+	auto index = c_engine->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
 	if(index >= m_swapchainTimers.size())
 		return nullptr;
 	return m_swapchainTimers.at(index).statsQuery.get();
@@ -94,7 +94,7 @@ prosper::PipelineStatisticsQuery *GPUSwapchainTimer::GetStatisticsQuery()
 
 void GPUSwapchainTimer::InitializeQueries()
 {
-	auto index = c_engine->GetRenderContext().GetLastAcquiredSwapchainImageIndex();
+	auto index = c_engine->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
 	if(index < m_swapchainTimers.size())
 		return;
 	auto timerPool = m_wpTimerQueryPool.lock();

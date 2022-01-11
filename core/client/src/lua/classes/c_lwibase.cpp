@@ -109,8 +109,9 @@ static bool render_ui(WIBase &el,prosper::RenderTarget &rt,const Lua::gui::DrawT
 		el.ResetRotation(); // We'll temporarily disable the rotation for this element
 		drawInfo.useStencil = true;
 	}
-	WGUI::GetInstance().SetScissor(0,0,drawInfo.size.x,drawInfo.size.y);
-	el.Draw(drawInfo,{},{},drawInfo.size,el.GetScale());
+	wgui::DrawState drawState {};
+	drawState.SetScissor(0,0,drawInfo.size.x,drawInfo.size.y);
+	el.Draw(drawInfo,drawState,{},{},drawInfo.size,el.GetScale());
 	if(rotMat.has_value())
 		el.SetRotation(*rotMat);
 	drawCmd->GetPrimaryCommandBufferPtr()->RecordEndRenderPass();
@@ -267,9 +268,9 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("IsPosInBounds",&PosInBounds);
 	classDef.def("IsCursorInBounds",&::WIBase::MouseInBounds);
 	classDef.def("GetCursorPos",&GetMousePos);
-	classDef.def("Draw",static_cast<void(*)(lua_State*,::WIBase&,const ::WIBase::DrawInfo&,const Vector2i&,const Vector2i&,const Vector2i&)>(&Draw));
-	classDef.def("Draw",static_cast<void(*)(lua_State*,::WIBase&,const ::WIBase::DrawInfo&,const Vector2i&,const Vector2i&)>(&Draw));
-	classDef.def("Draw",static_cast<void(*)(lua_State*,::WIBase&,const ::WIBase::DrawInfo&)>(&Draw));
+	classDef.def("Draw",static_cast<void(*)(lua_State*,::WIBase&,const ::WIBase::DrawInfo&,wgui::DrawState&,const Vector2i&,const Vector2i&,const Vector2i&)>(&Draw));
+	classDef.def("Draw",static_cast<void(*)(lua_State*,::WIBase&,const ::WIBase::DrawInfo&,wgui::DrawState&,const Vector2i&,const Vector2i&)>(&Draw));
+	classDef.def("Draw",static_cast<void(*)(lua_State*,::WIBase&,const ::WIBase::DrawInfo&,wgui::DrawState&)>(&Draw));
 	classDef.def("DrawToTexture",&render_ui);
 	classDef.def("DrawToTexture",+[](::WIBase &el,prosper::RenderTarget &rt) {return render_ui(el,rt,{});});
 	classDef.def("DrawToTexture",&draw_to_texture);
@@ -1038,25 +1039,25 @@ void Lua::WIBase::GetMousePos(lua_State *l,::WIBase &hPanel)
 	hPanel.GetMousePos(&x,&y);
 	luabind::object(l,Vector2(x,y)).push(l);
 }
-void Lua::WIBase::Draw(lua_State *l,::WIBase &hPanel,const ::WIBase::DrawInfo &drawInfo)
+void Lua::WIBase::Draw(lua_State *l,::WIBase &hPanel,const ::WIBase::DrawInfo &drawInfo,wgui::DrawState &drawState)
 {
 	
-	hPanel.Draw(drawInfo);
+	hPanel.Draw(drawInfo,drawState);
 }
-void Lua::WIBase::Draw(lua_State *l,::WIBase &hPanel,const ::WIBase::DrawInfo &drawInfo,const Vector2i &scissorOffset,const Vector2i &scissorSize)
+void Lua::WIBase::Draw(lua_State *l,::WIBase &hPanel,const ::WIBase::DrawInfo &drawInfo,wgui::DrawState &drawState,const Vector2i &scissorOffset,const Vector2i &scissorSize)
 {
 	
-	hPanel.Draw(drawInfo,Vector2i{},scissorOffset,scissorSize,hPanel.GetScale());
+	hPanel.Draw(drawInfo,drawState,Vector2i{},scissorOffset,scissorSize,hPanel.GetScale());
 }
-void Lua::WIBase::Draw(lua_State *l,::WIBase &hPanel,const ::WIBase::DrawInfo &drawInfo,const Vector2i &scissorOffset,const Vector2i &scissorSize,const Vector2i &offsetParent)
+void Lua::WIBase::Draw(lua_State *l,::WIBase &hPanel,const ::WIBase::DrawInfo &drawInfo,wgui::DrawState &drawState,const Vector2i &scissorOffset,const Vector2i &scissorSize,const Vector2i &offsetParent)
 {
 	
-	hPanel.Draw(drawInfo,offsetParent,scissorOffset,scissorSize,hPanel.GetScale());
+	hPanel.Draw(drawInfo,drawState,offsetParent,scissorOffset,scissorSize,hPanel.GetScale());
 }
-void Lua::WIBase::Draw(lua_State *l,::WIBase &hPanel,const ::WIBase::DrawInfo &drawInfo,const Vector2i &scissorOffset,const Vector2i &scissorSize,const Vector2i &offsetParent,const Vector2 &scale)
+void Lua::WIBase::Draw(lua_State *l,::WIBase &hPanel,const ::WIBase::DrawInfo &drawInfo,wgui::DrawState &drawState,const Vector2i &scissorOffset,const Vector2i &scissorSize,const Vector2i &offsetParent,const Vector2 &scale)
 {
 	
-	hPanel.Draw(drawInfo,offsetParent,scissorOffset,scissorSize,scale);
+	hPanel.Draw(drawInfo,drawState,offsetParent,scissorOffset,scissorSize,scale);
 }
 void Lua::WIBase::GetX(lua_State *l,::WIBase &hPanel)
 {

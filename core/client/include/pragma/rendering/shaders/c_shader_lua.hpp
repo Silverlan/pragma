@@ -119,12 +119,16 @@ namespace pragma
 
 		void Lua_OnPipelineInitialized(uint32_t pipelineIdx) {}
 		static void Lua_default_OnPipelineInitialized(lua_State *l,LuaShaderBase *shader,uint32_t pipelineIdx) {shader->Lua_OnPipelineInitialized(pipelineIdx);}
+
+		// For internal use only!
+		uint32_t GetCurrentPipelineIndex() const {return m_curPipelineIdx;}
 	protected:
 		void OnPipelineInitialized(uint32_t pipelineIdx);
 		void OnInitialized();
 		void OnPipelinesInitialized();
 		void InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 		prosper::Shader &m_shader;
+		uint32_t m_curPipelineIdx = std::numeric_limits<uint32_t>::max();
 
 		prosper::BasePipelineCreateInfo *m_currentPipelineInfo = nullptr;
 	private:

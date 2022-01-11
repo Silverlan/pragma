@@ -216,7 +216,7 @@ void CAnimatedComponent::InitializeBoneBuffer()
 {
 	if(m_boneBuffer != nullptr)
 		return;
-	m_boneBuffer = prosper::SwapBuffer::Create(*pragma::get_instance_bone_buffer());
+	m_boneBuffer = prosper::SwapBuffer::Create(c_engine->GetRenderContext().GetWindow(),*pragma::get_instance_bone_buffer());
 
 	CEOnBoneBufferInitialized evData{m_boneBuffer};
 	BroadcastEvent(EVENT_ON_BONE_BUFFER_INITIALIZED,evData);

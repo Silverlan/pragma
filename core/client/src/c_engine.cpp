@@ -1393,7 +1393,7 @@ uint32_t CEngine::GetPerformanceTimerIndex(uint32_t swapchainIdx,GPUTimer timer)
 {
 	return swapchainIdx *umath::to_integral(GPUTimer::Count) +umath::to_integral(timer);
 }
-uint32_t CEngine::GetPerformanceTimerIndex(GPUTimer timer) const {return GetPerformanceTimerIndex(GetRenderContext().GetLastAcquiredSwapchainImageIndex(),timer);}
+uint32_t CEngine::GetPerformanceTimerIndex(GPUTimer timer) const {return GetPerformanceTimerIndex(GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex(),timer);}
 
 void CEngine::SetGpuPerformanceTimersEnabled(bool enabled)
 {
@@ -1415,7 +1415,7 @@ void CEngine::SetGpuPerformanceTimersEnabled(bool enabled)
 		return;
 	}
 	auto &context = GetRenderContext();
-	auto numSwapchainImages = context.GetSwapchainImageCount();
+	auto numSwapchainImages = context.GetPrimaryWindowSwapchainImageCount();
 	auto numTimers = umath::to_integral(GPUTimer::Count) *numSwapchainImages;
 	m_gpuTimerPool = context.CreateQueryPool(prosper::QueryType::Timestamp,numTimers *2);
 	m_gpuTimers.resize(numTimers);

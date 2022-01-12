@@ -178,6 +178,9 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("GetZPos",&::WIBase::GetZPos);
 	classDef.def("HasFocus",&::WIBase::HasFocus);
 	classDef.def("RequestFocus",&::WIBase::RequestFocus);
+	classDef.def("ClearFocus",+[](::WIBase &el) {
+		return WGUI::GetInstance().ClearFocus(el);
+	});
 	classDef.def("KillFocus",&::WIBase::KillFocus);
 	classDef.def("KillFocus",&::WIBase::KillFocus,luabind::default_parameter_policy<2,false>{});
 	classDef.def("TrapFocus",static_cast<void(*)(lua_State*,::WIBase&,bool)>(&TrapFocus));
@@ -251,12 +254,18 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("Wrap",static_cast<void(*)(lua_State*,::WIBase&,const std::string&)>(&Wrap));
 	classDef.def("Wrap",static_cast<bool(::WIBase::*)(::WIBase&)>(&::WIBase::Wrap));
 	classDef.def("GetParent",&::WIBase::GetParent);
-	classDef.def("SetParent",static_cast<void(*)(lua_State*,::WIBase&,::WIBase&)>([](lua_State *l,::WIBase &hPanel,::WIBase &hParent) {
+	classDef.def("SetParent",+[](lua_State *l,::WIBase &hPanel,::WIBase &hParent) {
 		hPanel.SetParent(&hParent);
-	}));
-	classDef.def("SetParent",static_cast<void(*)(lua_State*,::WIBase&,::WIBase&,uint32_t)>([](lua_State *l,::WIBase &hPanel,::WIBase &hParent,uint32_t index) {
+	});
+	classDef.def("SetParent",+[](lua_State *l,::WIBase &hPanel,::WIBase &hParent,uint32_t index) {
 		hPanel.SetParent(&hParent,index);
-	}));
+	});
+	classDef.def("SetParentAndUpdateWindow",+[](lua_State *l,::WIBase &hPanel,::WIBase &hParent) {
+		hPanel.SetParentAndUpdateWindow(&hParent);
+	});
+	classDef.def("SetParentAndUpdateWindow",+[](lua_State *l,::WIBase &hPanel,::WIBase &hParent,uint32_t index) {
+		hPanel.SetParentAndUpdateWindow(&hParent,index);
+	});
 	classDef.def("ClearParent",&ClearParent);
 	classDef.def("GetChildren",static_cast<std::vector<WIHandle>(*)(lua_State*,::WIBase&)>([](lua_State *l,::WIBase &hPanel) {
 		return *hPanel.GetChildren();

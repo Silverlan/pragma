@@ -15,6 +15,7 @@
 #include "pragma/lua/l_entity_handles.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/lua/lua_call.hpp"
+#include <sharedutils/util_uri.hpp>
 #include <panima/animation_manager.hpp>
 #include <panima/channel.hpp>
 #include <panima/animation.hpp>
@@ -51,7 +52,9 @@ std::optional<std::pair<std::string,util::Path>> PanimaComponent::ParseComponent
 	if(path.path.GetComponent(offset,&offset) != "ec")
 		return {};
 	auto componentName = path.path.GetComponent(offset,&offset);
-	util::Path componentPath {path.path.GetString().substr(offset)};
+	auto pathStr = path.path.GetString().substr(offset);
+	ustring::replace(pathStr,"%20"," ");
+	util::Path componentPath {std::move(pathStr)};
 	return std::pair<std::string,util::Path>{std::string{componentName},std::move(componentPath)};
 }
 PanimaComponent::PanimaComponent(BaseEntity &ent)
@@ -274,6 +277,63 @@ template<uint32_t I> requires(I < 4)
 		return I == 3;
 	}
 	return false;
+}
+
+void PanimaComponent::DebugPrint(std::stringstream &ss)
+{
+	auto printAnimManager = [&ss](const std::string &name,const panima::AnimationManager &manager) {
+		auto *anim = manager.GetCurrentAnimation();
+		ss<<"AnimationManager["<<name<<"]:\n";
+		ss<<"\tCurrent Animation: "<<(anim ? anim->GetName() : "NULL")<<"\n";
+		if(anim)
+		{
+			ss<<"\t\tFlags: "<<magic_enum::flags::enum_name(anim->GetFlags())<<"\n";
+			ss<<"\t\tDuration: "<<anim->GetDuration()<<"\n";
+		}
+		auto &player = manager.GetPlayer();
+		ss<<"\tPlayback offset: "<<player.GetCurrentTime()<<"/"<<player.GetDuration()<<" ("<<player.GetCurrentTimeFraction()<<")\n";
+		ss<<"\tPlayback rate: "<<player.GetPlaybackRate()<<"\n";
+		if(anim)
+		{
+			auto &channels = anim->GetChannels();
+			auto &channelValueSubmitters = manager.GetChannelValueSubmitters();
+			ss<<"\tChannels:\n";
+			for(auto i=decltype(channels.size()){0u};i<channels.size();++i)
+			{
+				auto &channel = channels[i];
+				ss<<"\t\tPath: "<<channel->targetPath.ToUri()<<"\n";
+				ss<<"\t\t\tTime range: ["<<channel->GetMinTime()<<","<<channel->GetMaxTime()<<"]\n";
+				ss<<"\t\t\tValue type: "<<magic_enum::enum_name(channel->GetValueType())<<"\n";
+				ss<<"\t\t\tNumber of times/values: "<<channel->GetTimeCount()<<"/"<<channel->GetValueCount()<<"\n";
+				auto hasSubmitter = (i < channelValueSubmitters.size() && channelValueSubmitters[i] != nullptr);
+				ss<<"\t\t\tHas submitter: "<<(hasSubmitter ? "true" : "false")<<"\n";
+
+				udm::visit_ng(channel->GetValueType(),[&channel,&player,&ss](auto tag) {
+					using T = decltype(tag)::type;
+					if constexpr(is_animatable_type_v<T>)
+					{
+						auto val = channel->GetInterpolatedValue<T>(player.GetCurrentTime());
+						auto valStr = udm::convert<T,udm::String>(val);
+						ss<<"\t\t\tInterpolated value at current timestamp: "<<valStr<<"\n";
+					}
+				});
+
+				auto *expr = channel->GetValueExpression();
+				if(expr)
+					ss<<"\t\t\tExpression: "<<*expr<<"\n";
+			}
+			ss<<"\n";
+		}
+	};
+	for(auto &pair : GetAnimationManagers())
+		printAnimManager(pair.first,*pair.second);
+}
+
+void PanimaComponent::DebugPrint()
+{
+	std::stringstream ss;
+	DebugPrint(ss);
+	Con::cout<<"Animation info: \n"<<ss.str()<<Con::endl;
 }
 
 void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::AnimationManager &manager)
@@ -547,6 +607,8 @@ void PanimaComponent::InvokeValueSubmitters(panima::AnimationManager &manager)
 		if(!submitter)
 			continue;
 		auto &channel = channels[i];
+		if(channel->GetTimeCount() == 0)
+			continue;
 		submitter(*channel,manager->GetLastChannelTimestampIndex(i),t);
 	}
 }

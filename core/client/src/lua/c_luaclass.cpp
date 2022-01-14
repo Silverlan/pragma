@@ -250,6 +250,10 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShaderInfo.def("GetName",&::util::ShaderInfo::GetIdentifier);
 	modShader[defShaderInfo];
 
+	auto defBindState = luabind::class_<prosper::ShaderBindState>("BindState");
+	defBindState.def(luabind::constructor<prosper::ICommandBuffer&>());
+	modShader[defBindState];
+
 	auto defShader = luabind::class_<prosper::Shader>("Shader");
 	defShader.def("RecordBindDescriptorSet",&Lua::Shader::RecordBindDescriptorSet);
 	defShader.def("RecordBindDescriptorSet",+[](lua_State *l,prosper::Shader &shader,prosper::ShaderBindState &bindState,Lua::Vulkan::DescriptorSet &ds,uint32_t firstSet) {

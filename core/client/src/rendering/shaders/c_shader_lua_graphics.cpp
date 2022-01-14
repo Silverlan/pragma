@@ -598,13 +598,13 @@ void Lua::Shader::Graphics::RecordBindVertexBuffer(lua_State *l,prosper::ShaderG
 }
 void Lua::Shader::Graphics::RecordBindVertexBuffers(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState,luabind::object buffers,uint32_t startBinding,luabind::object offsets)
 {
-	auto vBuffers = Lua::get_table_values<prosper::IBuffer*>(l,2,[](lua_State *l,int32_t idx) {
+	auto vBuffers = Lua::get_table_values<prosper::IBuffer*>(l,3,[](lua_State *l,int32_t idx) {
 		return &Lua::Check<Lua::Vulkan::Buffer>(l,idx);
 	});
 	std::vector<uint64_t> vOffsets;
 	if(Lua::IsSet(l,4))
 	{
-		vOffsets = Lua::get_table_values<uint64_t>(l,4,[](lua_State *l,int32_t idx) {
+		vOffsets = Lua::get_table_values<uint64_t>(l,5,[](lua_State *l,int32_t idx) {
 			return static_cast<ptrdiff_t>(Lua::CheckInt(l,idx));
 		});
 	}

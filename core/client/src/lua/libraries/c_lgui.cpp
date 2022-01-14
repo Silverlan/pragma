@@ -25,6 +25,7 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
+#pragma optimize("",off)
 static void initialize_element(::WIBase &p)
 {
 	auto data = p.GetUserData();
@@ -312,6 +313,36 @@ static bool register_skin(lua_State *l,const std::string &skin,const luabind::ta
 	s->Initialize(l,settings);
 	return true;
 }
+void Lua::gui::register_default_skin(const std::string &vars,const std::string &skinData)
+{
+	auto *skin = dynamic_cast<WILuaSkin*>(WGUI::GetInstance().GetSkin("default"));
+	if(!skin)
+		return;
+	auto *l = client->GetGUILuaState();
+	auto resVars = Lua::RunString(l,"return " +vars,1,"register_default_skin",Lua::HandleTracebackError);
+	Lua::CheckTable(l,-1);
+	if(resVars != Lua::StatusCode::Ok)
+	{
+		Lua::Pop(l,1);
+		return;
+	}
+	auto tVars = luabind::object{luabind::from_stack(l,-1)};
+	Lua::Pop(l);
+	auto resSkinData = Lua::RunString(l,"return " +skinData,1,"register_default_skin",Lua::HandleTracebackError);
+	if(resSkinData != Lua::StatusCode::Ok)
+	{
+		Lua::Pop(l,2);
+		return;
+	}
+	Lua::CheckTable(l,-1);
+	auto tSkinData = luabind::object{luabind::from_stack(l,-1)};
+	Lua::Pop(l);
+
+	WILuaSkin::Settings settings;
+	settings.vars = tVars;
+	settings.skin = tSkinData;
+	skin->MergeInto(l,settings);
+}
 bool Lua::gui::register_skin(lua_State *l,const std::string &skin,const luabind::tableT<void> &vars,const luabind::tableT<void> &skinData)
 {
 	return ::register_skin(l,skin,vars,skinData,nullptr);
@@ -473,3 +504,4 @@ float Lua::gui::LastThink(lua_State *l)
 {
 	return client->LastThink();
 }
+#pragma optimize("",on)

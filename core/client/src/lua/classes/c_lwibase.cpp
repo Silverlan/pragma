@@ -253,6 +253,8 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("SetSize",static_cast<void(*)(lua_State*,::WIBase&,float,float)>(&SetSize));
 	classDef.def("Wrap",static_cast<void(*)(lua_State*,::WIBase&,const std::string&)>(&Wrap));
 	classDef.def("Wrap",static_cast<bool(::WIBase::*)(::WIBase&)>(&::WIBase::Wrap));
+	classDef.def("AnchorWithMargin",static_cast<void(::WIBase::*)(uint32_t,uint32_t,uint32_t,uint32_t)>(&::WIBase::AnchorWithMargin));
+	classDef.def("AnchorWithMargin",static_cast<void(::WIBase::*)(uint32_t)>(&::WIBase::AnchorWithMargin));
 	classDef.def("GetParent",&::WIBase::GetParent);
 	classDef.def("SetParent",+[](lua_State *l,::WIBase &hPanel,::WIBase &hParent) {
 		hPanel.SetParent(&hParent);
@@ -724,9 +726,11 @@ void Lua::WIText::register_class(luabind::class_<::WIText,::WIBase> &classDef)
 		hPanel.SetText(text);
 	}));
 	classDef.def("GetText",&::WIText::GetText);
+	classDef.def("GetTextHeight",&::WIText::GetTextHeight);
 	classDef.def("SetFont",static_cast<void(*)(lua_State*,::WIText&,const std::string&)>([](lua_State *l,::WIText &hPanel,const std::string &font) {
 		hPanel.SetFont(font);
 	}));
+	classDef.def("UpdateSubLines",&::WIText::UpdateSubLines);
 	classDef.def("EnableShadow",&::WIText::EnableShadow);
 	classDef.def("IsShadowEnabled",&::WIText::IsShadowEnabled);
 	classDef.def("SetShadowColor",&SetShadowColor);

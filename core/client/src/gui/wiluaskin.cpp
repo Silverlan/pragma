@@ -14,7 +14,7 @@
 #include <queue>
 
 extern DLLCLIENT ClientState *client;
-
+#pragma optimize("",off)
 WILuaSkin::WILuaSkin(std::string id)
 	: WISkin(id),m_lua(nullptr),m_rootClass(nullptr)
 {}
@@ -200,9 +200,8 @@ void WILuaSkin::InitializeBaseClass(WISkinClass &base,WISkinClass &cl)
 	{
 		auto itThis = cl.classes.find(pair.first);
 		if(itThis == cl.classes.end())
-			cl.classes.insert(std::make_pair(pair.first,std::unique_ptr<WISkinClass>(pair.second->Copy())));
-		else
-			InitializeBaseClass(*pair.second,*itThis->second);
+			itThis = cl.classes.insert(std::make_pair(pair.first,std::unique_ptr<WISkinClass>(pair.second->Copy()))).first;
+		InitializeBaseClass(*pair.second,*itThis->second);
 	}
 }
 
@@ -211,6 +210,11 @@ void WILuaSkin::Initialize(lua_State *l,Settings &settings)
 	m_lua = l;
 	m_rootClass.lua = l;
 	m_vars = settings.vars;
+	MergeInto(l,settings);
+}
+
+void WILuaSkin::MergeInto(lua_State *l,Settings &settings)
+{
 	settings.skin->push(l); /* 1 */
 	InitializeClasses();
 	Lua::Pop(l,1); /* 0 */
@@ -237,4 +241,4 @@ WISkinClass *WISkinClass::Copy()
 	}
 	return other;
 }
-
+#pragma optimize("",on)

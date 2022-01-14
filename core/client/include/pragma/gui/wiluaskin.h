@@ -54,6 +54,7 @@ public:
 	virtual void Release(WIBase *el) override;
 	virtual void Initialize(WIBase *el) override;
 	void Initialize(lua_State *l,Settings &settings);
+	void MergeInto(lua_State *l,Settings &settings);
 };
 
 #endif

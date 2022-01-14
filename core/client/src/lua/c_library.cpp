@@ -122,7 +122,8 @@ static void register_gui(Lua::Interface &lua)
 		luabind::def("get_focused_element",&Lua::gui::get_focused_element),
 		luabind::def("register_skin",static_cast<bool(*)(lua_State*,const std::string&,const luabind::tableT<void>&,const luabind::tableT<void>&)>(&Lua::gui::register_skin)),
 		luabind::def("register_skin",static_cast<bool(*)(lua_State*,const std::string&,const luabind::tableT<void>&,const luabind::tableT<void>&,const std::string&)>(&Lua::gui::register_skin)),
-		
+		luabind::def("register_default_skin",&Lua::gui::register_default_skin),
+
 		luabind::def("load_skin",&Lua::gui::load_skin),
 		luabind::def("set_skin",Lua::gui::set_skin),
 		luabind::def("skin_exists",Lua::gui::skin_exists),

@@ -29,7 +29,7 @@
 
 extern DLLNETWORK Engine *engine;
 
-
+#pragma optimize("",off)
 int Lua::import::import_wad(lua_State *l)
 {
 	auto &f = *Lua::CheckFile(l,1);
@@ -512,12 +512,22 @@ int Lua::import::export_model_asset(lua_State *l)
 	return 1;
 }
 
-int Lua::import::import_model_asset(lua_State *l)
+inline static Mat4 Assimp2Glm(const aiMatrix4x4& from) {
+    return Mat4(
+        (double)from.a1, (double)from.b1, (double)from.c1, (double)from.d1,
+        (double)from.a2, (double)from.b2, (double)from.c2, (double)from.d2,
+        (double)from.a3, (double)from.b3, (double)from.c3, (double)from.d3,
+        (double)from.a4, (double)from.b4, (double)from.c4, (double)from.d4
+    );
+}
+
+static bool import_model_asset(NetworkState &nw,VFilePtr hFile,const std::string &outputFilePath,std::string &outErr)
 {
-	auto &f = *Lua::CheckFile(l,1);
-	auto hFile = f.GetHandle();
+	auto *game = nw.GetGameState();
+	if(!game)
+		return false;
 	if(hFile->GetType() != VFILE_LOCAL)
-		return 0;
+		return false;
 	auto hFileLocal = std::static_pointer_cast<VFilePtrInternalReal>(hFile);
 
 	Assimp::Importer importer;
@@ -525,18 +535,17 @@ int Lua::import::import_model_asset(lua_State *l)
 	auto *aiScene = importer.ReadFile(
 		hFileLocal->GetPath(),
 		aiProcess_JoinIdenticalVertices | aiProcess_GenUVCoords | aiProcess_Triangulate | aiProcess_SortByPType | aiProcess_FindDegenerates | 
-		aiProcess_FindInvalidData | aiProcess_LimitBoneWeights | aiProcess_GenSmoothNormals | aiProcess_EmbedTextures
+		aiProcess_FindInvalidData | aiProcess_LimitBoneWeights | aiProcess_GenSmoothNormals | aiProcess_EmbedTextures | aiProcess_FixInfacingNormals
 	);
 	if(aiScene == nullptr)
 	{
 		auto *error = importer.GetErrorString();
-		Con::cwar<<"WARNING: Unable to import model asset: '"<<error<<"'!"<<Con::endl;
-		return 0;
+		outErr = error;
+		return false;
 	}
 
-	auto *nw = engine->GetNetworkState(l);
-	auto fConvertMesh = [nw](aiMesh &mesh) {
-		auto subMesh = std::shared_ptr<ModelSubMesh>(nw->CreateSubMesh());
+	auto fConvertMesh = [&nw,&outErr](aiMesh &mesh) -> std::shared_ptr<ModelSubMesh> {
+		auto subMesh = std::shared_ptr<ModelSubMesh>(nw.CreateSubMesh());
 		auto &verts = subMesh->GetVertices();
 		verts.reserve(mesh.mNumVertices);
 		for(auto j=decltype(mesh.mNumVertices){0};j<mesh.mNumVertices;++j)
@@ -563,30 +572,51 @@ int Lua::import::import_model_asset(lua_State *l)
 		for(auto j=decltype(mesh.mNumFaces){0};j<mesh.mNumFaces;++j)
 		{
 			auto &face = mesh.mFaces[j];
-			//face.mNumIndices // TODO
-			triangles.push_back(face.mIndices[0]);
-			triangles.push_back(face.mIndices[1]);
-			triangles.push_back(face.mIndices[2]);
+			if(face.mNumIndices != 3)
+				continue;
+			for(uint8_t k=0;k<3;++k)
+			{
+				auto idx = face.mIndices[k];
+				constexpr auto maxVerts = std::numeric_limits<util::base_type<decltype(triangles[0])>>::max();
+				if(idx >= maxVerts)
+				{
+
+					outErr = "Mesh has more than " +std::to_string(maxVerts) +" vertices, this is currently not supported!";
+					return nullptr;
+				}
+				triangles.push_back(idx);
+			}
 		}
 		subMesh->SetSkinTextureIndex(mesh.mMaterialIndex);
 		return subMesh;
 	};
 
 	std::vector<std::shared_ptr<ModelSubMesh>> subMeshes {};
-	std::function<void(aiNode&,const umath::ScaledTransform&)> fIterateTree = nullptr;
-	fIterateTree = [aiScene,&fIterateTree,&fConvertMesh,&subMeshes](aiNode &node,const umath::ScaledTransform &parentPose) {
-		aiVector3D scale;
-		aiQuaternion rot;
-		aiVector3D pos;
+	std::function<bool(aiNode&)> fIterateTree = nullptr;
+	fIterateTree = [aiScene,&fIterateTree,&fConvertMesh,&subMeshes](aiNode &node) -> bool {
+		//aiVector3D scale;
+		//aiQuaternion rot;
+		//aiVector3D pos;
 		auto t = node.mTransformation;
-		// t.Inverse();
-		t.Decompose(scale,rot,pos);
+		auto *parent = node.mParent;
+		while(parent)
+		{
+			t = parent->mTransformation *t;
+			parent = parent->mParent;
+		}
+		//t.Decompose(scale,rot,pos);
+		auto m = Assimp2Glm(t);
+		Vector3 translation;
+		Quat rotation;
+		Vector3 scale;
+		umat::decompose(m,translation,rotation,&scale);
 
-		umath::ScaledTransform pose {Vector3{pos.x,pos.y,pos.z},Quat{rot.w,rot.x,rot.y,rot.z},Vector3{scale.x,scale.y,scale.z}};
+		//umath::ScaledTransform pose {Vector3{pos.x,pos.y,pos.z},Quat{rot.w,rot.x,rot.y,rot.z},Vector3{scale.x,scale.y,scale.z}};
+		umath::ScaledTransform pose {translation,rotation,scale};
 		auto ang = EulerAngles{pose.GetRotation()};
 		//umath::swap(ang.r,ang.y);
 		//pose.SetRotation(uquat::identity());//uquat::create(ang));
-		pose = parentPose *pose;
+		//pose = parentPose *pose;
 
 		auto meshScale = pose.GetScale();
 		auto invPose = pose;//pose.GetInverse();
@@ -594,33 +624,32 @@ int Lua::import::import_model_asset(lua_State *l)
 		//invPose.RotateLocal(uquat::create(EulerAngles{0.f,180.f,0.f}));
 		invPose.SetScale(Vector3{1.f,1.f,1.f});
 
-		ang = EulerAngles{invPose.GetRotation()};
+		//ang = EulerAngles{invPose.GetRotation()};
 
 		for(auto i=decltype(node.mNumMeshes){0u};i<node.mNumMeshes;++i)
 		{
 			auto meshIdx = node.mMeshes[i];
 			auto subMesh = fConvertMesh(*aiScene->mMeshes[meshIdx]);
+			if(!subMesh)
+				return false;
 			subMesh->Scale(meshScale);
 			subMesh->Transform(invPose);
 			subMeshes.push_back(subMesh);
 		}
 
 		for(auto i=decltype(node.mNumChildren){0u};i<node.mNumChildren;++i)
-			fIterateTree(*node.mChildren[i],pose);
+		{
+			auto r = fIterateTree(*node.mChildren[i]);
+			if(!r)
+				return false;
+		}
+		return true;
 	};
-	umath::ScaledTransform pose {};
-	fIterateTree(*aiScene->mRootNode,pose);
+	if(!fIterateTree(*aiScene->mRootNode))
+		return false;
 
-	auto t = Lua::CreateTable(l);
-	auto idx = 1;
-	for(auto &subMesh : subMeshes)
-	{
-		Lua::PushInt(l,idx++);
-		Lua::Push<std::shared_ptr<ModelSubMesh>>(l,subMesh);
-		Lua::SetTableValue(l,t);
-	}
 	std::vector<std::string> importedTextures {};
-	auto rfile = std::static_pointer_cast<VFilePtrInternalReal>(f.GetHandle());
+	auto rfile = std::static_pointer_cast<VFilePtrInternalReal>(hFile);
 	auto texturesImported = false;
 	std::optional<std::string> filePath = rfile ? rfile->GetPath() : std::optional<std::string>{};
 	if(filePath.has_value())
@@ -636,7 +665,9 @@ int Lua::import::import_model_asset(lua_State *l)
 		for(auto i=decltype(aiScene->mNumMaterials){0u};i<aiScene->mNumMaterials;++i)
 		{
 			auto *mat = aiScene->mMaterials[i];
-			std::string matName = mat->GetName().C_Str();
+			aiString aiName;
+			mat->Get(AI_MATKEY_NAME,aiName);
+			std::string matName = aiName.C_Str();
 			auto numDiffuseMaps = mat->GetTextureCount(aiTextureType::aiTextureType_DIFFUSE);
 			/*for(auto j=decltype(mat->mNumProperties){0};j<mat->mNumProperties;++j)
 			{
@@ -672,26 +703,21 @@ int Lua::import::import_model_asset(lua_State *l)
 		else
 			subMesh->SetSkinTextureIndex(std::numeric_limits<uint32_t>::max());
 	}
-
-	auto tTextures = Lua::CreateTable(l);
-	for(auto i=decltype(importedTextures.size()){0};i<importedTextures.size();++i)
-	{
-		auto &tex = importedTextures.at(i);
-		Lua::PushInt(l,i +1);
-		Lua::PushString(l,tex);
-		Lua::SetTableValue(l,tTextures);
-	}
+	
+	auto mdl = game->CreateModel();
 
 	// Build skeleton
-	auto skeleton = std::make_shared<panima::Skeleton>();
+	auto &skeleton = mdl->GetSkeleton();
 	auto referencePose = Frame::Create(1);
 	std::function<std::shared_ptr<panima::Bone>(aiNode&,panima::Bone*)> fIterateBones = nullptr;
 	fIterateBones = [&fIterateBones,&skeleton,&referencePose](aiNode &node,panima::Bone *parent) -> std::shared_ptr<panima::Bone> {
 		auto *bone = new panima::Bone{};
 		bone->name = node.mName.C_Str();
-		auto boneIdx = skeleton->AddBone(bone);
+		auto boneIdx = skeleton.AddBone(bone);
+		if(bone->name.empty())
+			bone->name = "bone" +std::to_string(boneIdx);
 		if(parent)
-			parent->children.insert(std::make_pair(boneIdx,skeleton->GetBone(boneIdx).lock()));
+			parent->children.insert(std::make_pair(boneIdx,skeleton.GetBone(boneIdx).lock()));
 
 		aiVector3D scale;
 		aiQuaternion rot;
@@ -704,20 +730,20 @@ int Lua::import::import_model_asset(lua_State *l)
 		if(scale.x != 1.f || scale.y != 1.f || scale.z != 1.f)
 			referencePose->SetBoneScale(boneIdx,Vector3{scale.x,scale.y,scale.z});
 
-		auto numBones = skeleton->GetBones().size() +node.mNumChildren;
-		skeleton->GetBones().reserve(numBones);
+		auto numBones = skeleton.GetBones().size() +node.mNumChildren;
+		skeleton.GetBones().reserve(numBones);
 		referencePose->SetBoneCount(numBones);
 		for(auto i=decltype(node.mNumChildren){0};i<node.mNumChildren;++i)
 		{
 			auto &child = *node.mChildren[i];
 			fIterateBones(child,bone);
 		}
-		return skeleton->GetBone(boneIdx).lock();
+		return skeleton.GetBone(boneIdx).lock();
 	};
 	if(aiScene->mRootNode)
 	{
 		auto rootBone = fIterateBones(*aiScene->mRootNode,nullptr);
-		skeleton->GetRootBones().insert(std::make_pair(rootBone->ID,rootBone));
+		skeleton.GetRootBones().insert(std::make_pair(rootBone->ID,rootBone));
 	}
 	// http://ogldev.atspace.co.uk/www/tutorial38/tutorial38.html
 	/*aiScene->mRootNode;
@@ -731,9 +757,57 @@ int Lua::import::import_model_asset(lua_State *l)
 		anim->
 	}*/
 
-	Lua::Push<std::shared_ptr<panima::Skeleton>>(l,skeleton);
-	Lua::Push<std::shared_ptr<Frame>>(l,referencePose);
+	// Generate model
+	auto meshGroup = mdl->AddMeshGroup("reference");
+	auto mesh = game->CreateModelMesh();
+	meshGroup->AddMesh(mesh);
 
-	return 4;
+	for(auto &subMesh : subMeshes)
+		mesh->AddSubMesh(subMesh);
+
+	mdl->Update();
+	return mdl->Save(*game,"addons/converted/models/" +outputFilePath,outErr);
 }
 
+bool Lua::import::import_model_asset(NetworkState &nw,const std::string &outputPath,std::string &outFilePath,std::string &outErr)
+{
+	auto mdlPath = outputPath +".blend";
+	auto f = filemanager::open_file("models/" +mdlPath,filemanager::FileMode::Read | filemanager::FileMode::Binary);
+	if(!f)
+		return false;
+	outFilePath = outputPath;
+	return ::import_model_asset(nw,f,outFilePath,outErr);
+}
+
+int Lua::import::import_model_asset(lua_State *l)
+{
+#if 0
+	auto &f = *Lua::CheckFile(l,1);
+	auto hFile = f.GetHandle();
+	if(hFile->GetType() != VFILE_LOCAL)
+		return 0;
+	auto t = Lua::CreateTable(l);
+	auto idx = 1;
+	for(auto &subMesh : subMeshes)
+	{
+		Lua::PushInt(l,idx++);
+		Lua::Push<std::shared_ptr<ModelSubMesh>>(l,subMesh);
+		Lua::SetTableValue(l,t);
+	}
+
+	auto tTextures = Lua::CreateTable(l);
+	for(auto i=decltype(importedTextures.size()){0};i<importedTextures.size();++i)
+	{
+		auto &tex = importedTextures.at(i);
+		Lua::PushInt(l,i +1);
+		Lua::PushString(l,tex);
+		Lua::SetTableValue(l,tTextures);
+	}
+
+	Lua::Push<std::shared_ptr<panima::Skeleton>>(l,skeleton);
+	Lua::Push<std::shared_ptr<Frame>>(l,referencePose);
+	return ::import_model_asset(*engine->GetNetworkState(l),f);
+#endif
+	return 0;
+}
+#pragma optimize("",on)

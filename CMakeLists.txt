@@ -604,12 +604,12 @@ if(UNIX)
 	target_compile_options(assimp PUBLIC -Os)
 endif()
 set_target_properties(assimp PROPERTIES FOLDER third_party_libs/assimp)
-set_target_properties(IrrXML PROPERTIES FOLDER third_party_libs/assimp)
+# set_target_properties(IrrXML PROPERTIES FOLDER third_party_libs/assimp)
 set_target_properties(uninstall PROPERTIES FOLDER third_party_libs/assimp)
 if(WIN32)
 	set_target_properties(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER third_party_libs/assimp)
 endif()
-target_include_directories(assimp PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
+# target_include_directories(assimp PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 #
 
 # libbsa

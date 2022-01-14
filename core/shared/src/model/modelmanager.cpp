@@ -189,6 +189,7 @@ pragma::asset::ModelManager::ModelManager(NetworkState &nw)
 	RegisterImportHandler<SourceMdlFormatHandler>("mdl");
 	RegisterImportHandler<Source2VmdlFormatHandler>("vmdl_c");
 	RegisterImportHandler<NifFormatHandler>("nif");
+	RegisterImportHandler<AssimpFormatHandler>("blend");
 
 	auto &assetManager = pragma::get_engine()->GetAssetManager();
 	auto numImporters = assetManager.GetImporterCount(pragma::asset::Type::Model);

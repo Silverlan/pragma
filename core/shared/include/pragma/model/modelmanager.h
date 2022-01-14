@@ -120,6 +120,15 @@ namespace pragma::asset
 		virtual bool Import(const std::string &outputPath,std::string &outFilePath) override;
 	};
 
+	class DLLNETWORK AssimpFormatHandler
+		: public util::IImportAssetFormatHandler
+	{
+	public:
+		AssimpFormatHandler(util::IAssetManager &assetManager);
+		virtual bool Import(const std::string &outputPath,std::string &outFilePath) override;
+	private:
+	};
+
 	class DLLNETWORK AssetManagerFormatHandler
 		: public util::IImportAssetFormatHandler
 	{

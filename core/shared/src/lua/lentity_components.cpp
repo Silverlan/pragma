@@ -365,6 +365,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defAnimated2.def("PlayAnimation",&pragma::PanimaComponent::PlayAnimation);
 	defAnimated2.def("ReloadAnimation",&pragma::PanimaComponent::ReloadAnimation);
 	defAnimated2.def("AdvanceAnimations",&pragma::PanimaComponent::AdvanceAnimations);
+	defAnimated2.def("DebugPrint",static_cast<void(pragma::PanimaComponent::*)()>(&pragma::PanimaComponent::DebugPrint));
 	defAnimated2.add_static_constant("EVENT_HANDLE_ANIMATION_EVENT",pragma::PanimaComponent::EVENT_HANDLE_ANIMATION_EVENT);
 	defAnimated2.add_static_constant("EVENT_ON_PLAY_ANIMATION",pragma::PanimaComponent::EVENT_ON_PLAY_ANIMATION);
 	defAnimated2.add_static_constant("EVENT_ON_ANIMATION_COMPLETE",pragma::PanimaComponent::EVENT_ON_ANIMATION_COMPLETE);

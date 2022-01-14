@@ -50,6 +50,8 @@ namespace pragma
 		bool UpdateAnimations(double dt);
 		bool MaintainAnimations(double dt);
 		void AdvanceAnimations(double dt);
+		void DebugPrint(std::stringstream &ss);
+		void DebugPrint();
 
 		virtual void Initialize() override;
 		void PlayAnimation(panima::AnimationManager &manager,panima::Animation &anim);

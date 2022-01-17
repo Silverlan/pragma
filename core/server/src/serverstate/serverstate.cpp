@@ -24,6 +24,7 @@
 #include <pragma/console/convars.h>
 #include "pragma/model/s_modelmanager.h"
 #include "pragma/entities/components/s_resource_watcher.hpp"
+#include <pragma/asset/util_asset.hpp>
 #include "pragma/networking/networking_modules.hpp"
 #include "pragma/networking/master_server.hpp"
 #include <pragma/networking/game_server_data.hpp>
@@ -56,6 +57,7 @@ ServerState::ServerState()
 
 	m_modelManager = std::make_unique<pragma::asset::SModelManager>(*this);
 	engine->InitializeAssetManager(*m_modelManager);
+	pragma::asset::update_extension_cache(pragma::asset::Type::Model);
 
 	FileManager::AddCustomMountDirectory("cache",static_cast<fsys::SearchFlags>(FSYS_SEARCH_CACHE));
 

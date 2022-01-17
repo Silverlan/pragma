@@ -43,6 +43,12 @@ namespace pragma::asset
 
 		Count
 	};
+	enum class FormatType : uint8_t
+	{
+		Native = 0,
+		Import,
+		All
+	};
 	enum class UDMFormat : uint8_t
 	{
 		Binary = 0,
@@ -55,7 +61,9 @@ namespace pragma::asset
 	DLLNETWORK std::optional<std::string> find_file(const std::string &name,Type type,std::string *optOutFormat=nullptr);
 	DLLNETWORK bool remove_asset(const std::string &name,Type type);
 	DLLNETWORK bool is_loaded(NetworkState &nw,const std::string &name,Type type);
-	DLLNETWORK std::vector<std::string> get_supported_extensions(Type type,bool includeImportTypes=false);
+	DLLNETWORK const std::vector<std::string> &get_supported_extensions(Type type,FormatType formatType=FormatType::Native);
+	DLLNETWORK void update_extension_cache(Type type);
+	DLLNETWORK void update_extension_cache();
 	DLLNETWORK std::optional<std::string> get_legacy_extension(Type type);
 	DLLNETWORK std::optional<std::string> get_binary_udm_extension(Type type);
 	DLLNETWORK std::optional<std::string> get_ascii_udm_extension(Type type);

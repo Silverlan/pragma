@@ -80,6 +80,7 @@ ClientState::ClientState()
 
 	m_modelManager = std::make_unique<pragma::asset::CModelManager>(*this);
 	c_engine->InitializeAssetManager(*m_modelManager);
+	pragma::asset::update_extension_cache(pragma::asset::Type::Model);
 
 	auto &gui = WGUI::GetInstance();
 	gui.SetCreateCallback(WGUILuaInterface::InitializeGUIElement);

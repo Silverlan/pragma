@@ -129,6 +129,16 @@ namespace pragma::asset
 	private:
 	};
 
+	class DLLNETWORK BlenderFormatHandler
+		: public util::IImportAssetFormatHandler
+	{
+	public:
+		BlenderFormatHandler(util::IAssetManager &assetManager,std::string ext);
+		virtual bool Import(const std::string &outputPath,std::string &outFilePath) override;
+	private:
+		std::string m_ext;
+	};
+
 	class DLLNETWORK AssetManagerFormatHandler
 		: public util::IImportAssetFormatHandler
 	{

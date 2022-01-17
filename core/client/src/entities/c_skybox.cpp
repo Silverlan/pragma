@@ -82,7 +82,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 	// Check if this skybox is made of individual textures
 	// (e.g. if it came from the source engine)
 	auto matName = materialPath;
-	ufile::remove_extension_from_filename(matName,pragma::asset::get_supported_extensions(pragma::asset::Type::Material,true));
+	ufile::remove_extension_from_filename(matName,pragma::asset::get_supported_extensions(pragma::asset::Type::Material,pragma::asset::FormatType::All));
 
 	auto containerFormat = uimg::TextureInfo::ContainerFormat::DDS;
 	auto ext = "dds";

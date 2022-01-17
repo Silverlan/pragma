@@ -129,6 +129,7 @@ Engine::Engine(int,char*[])
 #endif
 	Locale::Init();
 	OpenConsole();
+	freopen("CON","w",stdout); // Redirect fprint, etc.
 
 	m_mainThreadId = std::this_thread::get_id();
 	
@@ -630,6 +631,12 @@ bool Engine::Initialize(int argc,char *argv[])
 	auto matManager = msys::MaterialManager::Create();
 	matManager->SetImportDirectory("addons/converted/materials");
 	InitializeAssetManager(*matManager);
+
+	pragma::asset::update_extension_cache(pragma::asset::Type::Map);
+	pragma::asset::update_extension_cache(pragma::asset::Type::Sound);
+	pragma::asset::update_extension_cache(pragma::asset::Type::ParticleSystem);
+	pragma::asset::update_extension_cache(pragma::asset::Type::Texture);
+	pragma::asset::update_extension_cache(pragma::asset::Type::Material);
 
 	auto matErr = matManager->LoadAsset("error");
 	m_svInstance = std::unique_ptr<StateInstance>(new StateInstance{matManager,matErr.get()});

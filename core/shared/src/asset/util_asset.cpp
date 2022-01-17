@@ -141,27 +141,67 @@ std::optional<std::string> pragma::asset::get_ascii_udm_extension(Type type)
 	}
 	return {};
 }
-std::vector<std::string> pragma::asset::get_supported_extensions(Type type,bool includeImportTypes)
+struct AssetFormatExtensionCache
 {
-	// Note: When attempting to find an asset, the Engine will take the order of these into account (i.e. extensions that come first will be prioritized)
+public:
+	struct FormatCache
+	{
+		std::vector<std::string> nativeFormats;
+		std::vector<std::string> importFormats;
+		std::vector<std::string> allFormats;
+	};
+	void Cache(pragma::asset::Type type,std::vector<std::string> nativeExts,std::vector<std::string> importExts)
+	{
+		FormatCache formatCache {};
+		auto &allExts = formatCache.allFormats;
+		allExts.reserve(nativeExts.size() +importExts.size());
+		for(auto &ext : nativeExts)
+			allExts.push_back(ext);
+		for(auto &ext : importExts)
+			allExts.push_back(ext);
+		formatCache.nativeFormats = std::move(nativeExts);
+		formatCache.importFormats = std::move(importExts);
+		m_cache[umath::to_integral(type)] = std::move(formatCache);
+	}
+	const std::vector<std::string> *GetCache(pragma::asset::Type type,pragma::asset::FormatType formatType) const
+	{
+		if(umath::to_integral(type) >= m_cache.size() || m_cache[umath::to_integral(type)].has_value() == false)
+			return nullptr;
+		auto &cache = *m_cache[umath::to_integral(type)];
+		switch(formatType)
+		{
+		case pragma::asset::FormatType::Native:
+			return &cache.nativeFormats;
+		case pragma::asset::FormatType::Import:
+			return &cache.importFormats;
+		case pragma::asset::FormatType::All:
+			return &cache.allFormats;
+		}
+		return nullptr;
+	}
+private:
+	std::array<std::optional<FormatCache>,umath::to_integral(pragma::asset::Type::Count)> m_cache;
+};
+static AssetFormatExtensionCache g_extCache;
+void pragma::asset::update_extension_cache(Type type)
+{
 	switch(type)
 	{
-	case Type::Model:
-		if(includeImportTypes)
-			return {FORMAT_MODEL_BINARY,FORMAT_MODEL_ASCII,FORMAT_MODEL_LEGACY,"mdl","vmdl_c","nif"}; // TODO: Grab import types from import manager
-		return {FORMAT_MODEL_BINARY,FORMAT_MODEL_ASCII,FORMAT_MODEL_LEGACY};
 	case Type::Map:
-		if(includeImportTypes)
-			return {FORMAT_MAP_BINARY,FORMAT_MAP_ASCII,FORMAT_MAP_LEGACY,"bsp"}; // TODO: Grab import types from import manager
-		return {FORMAT_MAP_BINARY,FORMAT_MAP_ASCII,FORMAT_MAP_LEGACY};
-	case Type::Material:
-		if(includeImportTypes)
-			return {FORMAT_MATERIAL_BINARY,FORMAT_MATERIAL_ASCII,FORMAT_MAP_LEGACY,"vmt","vmat_c"}; // TODO: Grab import types from import manager
-		return {FORMAT_MATERIAL_BINARY,FORMAT_MATERIAL_ASCII,FORMAT_MAP_LEGACY};
-	case Type::ParticleSystem:
-		return {FORMAT_PARTICLE_SYSTEM_BINARY,FORMAT_PARTICLE_SYSTEM_ASCII,FORMAT_PARTICLE_SYSTEM_LEGACY};
+	{
+		g_extCache.Cache(type,{FORMAT_MAP_BINARY,FORMAT_MAP_ASCII,FORMAT_MAP_LEGACY},{"bsp"});
+		break;
+	}
 	case Type::Sound:
-		return engine_info::get_supported_audio_formats();
+	{
+		g_extCache.Cache(type,engine_info::get_supported_audio_formats(),{});
+		break;
+	}
+	case Type::ParticleSystem:
+	{
+		g_extCache.Cache(type,{FORMAT_PARTICLE_SYSTEM_BINARY,FORMAT_PARTICLE_SYSTEM_ASCII,FORMAT_PARTICLE_SYSTEM_LEGACY},{});
+		break;
+	}
 	case Type::Texture:
 	{
 		auto &supportedFormats = MaterialManager::get_supported_image_formats();
@@ -169,10 +209,55 @@ std::vector<std::string> pragma::asset::get_supported_extensions(Type type,bool 
 		extensions.reserve(supportedFormats.size());
 		for(auto &format : supportedFormats)
 			extensions.push_back(format.extension);
-		return extensions;
+		g_extCache.Cache(type,std::move(extensions),{});
+		break;
 	}
 	}
-	return {};
+
+	auto *nw = engine->GetClientState();
+	if(!nw)
+		nw = engine->GetServerNetworkState();
+	if(!nw)
+		return;
+
+	auto *assetManager = nw->GetAssetManager(type);
+	if(!assetManager)
+		return;
+	auto &exts = assetManager->GetSupportedFormatExtensions();
+	std::vector<std::string> nativeExts;
+	std::vector<std::string> importExts;
+	nativeExts.reserve(exts.size());
+	importExts.reserve(exts.size());
+	for(auto &extInfo : exts)
+	{
+		switch(extInfo.type)
+		{
+		case util::IAssetManager::FormatExtensionInfo::Type::Native:
+			nativeExts.push_back(extInfo.extension);
+			break;
+		case util::IAssetManager::FormatExtensionInfo::Type::Import:
+			importExts.push_back(extInfo.extension);
+			break;
+		}
+	}
+	nativeExts.shrink_to_fit();
+	importExts.shrink_to_fit();
+	g_extCache.Cache(type,std::move(nativeExts),std::move(importExts));
+}
+void pragma::asset::update_extension_cache()
+{
+	auto n = umath::to_integral(Type::Count);
+	for(auto i=decltype(n){0u};i<n;++i)
+		update_extension_cache(static_cast<Type>(i));
+}
+const std::vector<std::string> &pragma::asset::get_supported_extensions(Type type,FormatType formatType)
+{
+	auto *cache = g_extCache.GetCache(type,formatType);
+	assert(cache);
+	if(cache)
+		return *cache;
+	static std::vector<std::string> empty {};
+	return empty;
 }
 std::string pragma::asset::get_normalized_path(const std::string &name,Type type)
 {

@@ -131,7 +131,7 @@ void WIMainMenuNewGame::ReloadMapList()
 		return;
 	auto *pMap = static_cast<WIDropDownMenu*>(m_hMapList.get());
 	pMap->ClearOptions();
-	auto exts = pragma::asset::get_supported_extensions(pragma::asset::Type::Map,true);
+	auto exts = pragma::asset::get_supported_extensions(pragma::asset::Type::Map,pragma::asset::FormatType::All);
 	std::vector<std::string> files;
 	for(auto &ext : exts)
 		filemanager::find_files("maps/*." +ext,&files,nullptr);

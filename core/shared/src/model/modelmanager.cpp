@@ -136,7 +136,7 @@ static const std::vector<std::string> &get_model_extensions()
 	static std::vector<std::string> extensions {};
 	if(extensions.empty())
 	{
-		extensions = pragma::asset::get_supported_extensions(pragma::asset::Type::Model,true);
+		extensions = pragma::asset::get_supported_extensions(pragma::asset::Type::Model,pragma::asset::FormatType::All);
 		auto &assetManager = engine->GetAssetManager();
 		auto numImporters = assetManager.GetImporterCount(pragma::asset::Type::Model);
 		for(auto i=decltype(numImporters){0u};i<numImporters;++i)
@@ -189,7 +189,19 @@ pragma::asset::ModelManager::ModelManager(NetworkState &nw)
 	RegisterImportHandler<SourceMdlFormatHandler>("mdl");
 	RegisterImportHandler<Source2VmdlFormatHandler>("vmdl_c");
 	RegisterImportHandler<NifFormatHandler>("nif");
-	RegisterImportHandler<AssimpFormatHandler>("blend");
+
+	auto addBlenderFormatHandler = [this](std::string ext) {
+		return RegisterImportHandler(ext,[ext](util::IAssetManager &assetManager) -> std::unique_ptr<util::IImportAssetFormatHandler> {
+			return std::make_unique<BlenderFormatHandler>(assetManager,ext);
+		});
+	};
+	addBlenderFormatHandler("blend");
+	addBlenderFormatHandler("fbx");
+	addBlenderFormatHandler("dae");
+	addBlenderFormatHandler("x3d");
+	addBlenderFormatHandler("obj");
+	addBlenderFormatHandler("abc");
+	addBlenderFormatHandler("usd");
 
 	auto &assetManager = pragma::get_engine()->GetAssetManager();
 	auto numImporters = assetManager.GetImporterCount(pragma::asset::Type::Model);

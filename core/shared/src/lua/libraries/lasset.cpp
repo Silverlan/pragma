@@ -52,9 +52,12 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 		luabind::def("get_supported_export_file_extensions",&Lua::asset::get_supported_export_file_extensions),
 		luabind::def("matches",&pragma::asset::matches),
 		luabind::def("get_normalized_path",&pragma::asset::get_normalized_path),
-		luabind::def("get_supported_extensions",static_cast<tb<std::string>(*)(lua_State*,pragma::asset::Type)>([](lua_State *l,pragma::asset::Type type) -> tb<std::string> {
+		luabind::def("get_supported_extensions",+[](lua_State *l,pragma::asset::Type type) -> tb<std::string> {
 			return Lua::vector_to_table(l,pragma::asset::get_supported_extensions(type));
-		})),
+		}),
+		luabind::def("get_supported_extensions",+[](lua_State *l,pragma::asset::Type type,pragma::asset::FormatType formatType) -> tb<std::string> {
+			return Lua::vector_to_table(l,pragma::asset::get_supported_extensions(type,formatType));
+		}),
 		luabind::def("get_legacy_extension",static_cast<opt<std::string>(*)(lua_State*,pragma::asset::Type)>([](lua_State *l,pragma::asset::Type type) -> opt<std::string> {
 			auto ext = pragma::asset::get_legacy_extension(type);
 			if(!ext.has_value())
@@ -181,6 +184,10 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 		{"TYPE_TEXTURE",umath::to_integral(pragma::asset::Type::Texture)},
 		{"TYPE_AUDIO",umath::to_integral(pragma::asset::Type::Sound)},
 		{"TYPE_PARTICLE_SYSTEM",umath::to_integral(pragma::asset::Type::ParticleSystem)},
+
+		{"FORMAT_TYPE_NATIVE",umath::to_integral(pragma::asset::FormatType::Native)},
+		{"FORMAT_TYPE_IMPORT",umath::to_integral(pragma::asset::FormatType::Import)},
+		{"FORMAT_TYPE_ALL",umath::to_integral(pragma::asset::FormatType::All)},
 		
 		{"ASSET_LOAD_FLAG_NONE",umath::to_integral(util::AssetLoadFlags::None)},
 		{"ASSET_LOAD_FLAG_ABSOLUTE_PATH_BIT",umath::to_integral(util::AssetLoadFlags::AbsolutePath)},

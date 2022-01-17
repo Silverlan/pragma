@@ -637,6 +637,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 	auto matManager = msys::CMaterialManager::Create(GetRenderContext());
 	matManager->SetImportDirectory("addons/converted/materials");
 	InitializeAssetManager(*matManager);
+	pragma::asset::update_extension_cache(pragma::asset::Type::Material);
 
 	auto &texManager = matManager->GetTextureManager();
 	InitializeAssetManager(texManager);

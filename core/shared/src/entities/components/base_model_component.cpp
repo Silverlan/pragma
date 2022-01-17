@@ -58,7 +58,7 @@ void BaseModelComponent::RegisterMembers(pragma::EntityComponentManager &compone
 		auto &metaData = memberInfo.AddMetaData();
 		metaData["assetType"] = "model";
 		metaData["rootPath"] = util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Model)).GetString();
-		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::Model,true);
+		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::Model,pragma::asset::FormatType::All);
 		metaData["stripRootPath"] = true;
 		metaData["stripExtension"] = true;
 		registerMember(std::move(memberInfo));

@@ -8,6 +8,7 @@
 #define __PRAGMA_LUA_ENTITY_COMPONENTS_HPP__
 
 #include "pragma/lua/luaapi.h"
+#include "pragma/lua/types/udm.hpp"
 
 namespace pragma {
 	class BaseAttachableComponent;
@@ -16,6 +17,12 @@ namespace pragma {
 namespace pragma::lua
 {
 	DLLNETWORK void register_entity_component_classes(luabind::module_ &mod);
+	DLLNETWORK std::optional<Lua::udm_type> get_member_value(
+		lua_State *l,pragma::BaseEntityComponent &component,const pragma::ComponentMemberInfo &memberInfo
+	);
+	DLLNETWORK bool set_member_value(
+		lua_State *l,pragma::BaseEntityComponent &component,const pragma::ComponentMemberInfo &memberInfo,Lua::udm_type value
+	);
 };
 
 #endif

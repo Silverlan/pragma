@@ -46,10 +46,13 @@
 #include "pragma/entities/components/base_time_scale_component.hpp"
 #include "pragma/entities/components/base_name_component.hpp"
 #include "pragma/entities/components/basetoggle.h"
+#include "pragma/entities/components/panima_component.hpp"
+#include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/lentity_type.hpp"
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/lua/l_entity_handles.hpp"
 #include "pragma/lua/lua_entity_component.hpp"
+#include <panima/channel.hpp>
 #include <luabind/copy_policy.hpp>
 #include <sharedutils/datastream.h>
 #include <pragma/physics/movetypes.h>
@@ -207,6 +210,32 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	classDef.def("GetAIComponent",&BaseEntity::GetAIComponent);
 	classDef.def("GetModelComponent",&BaseEntity::GetModelComponent);
 	classDef.def("GetAnimatedComponent",&BaseEntity::GetAnimatedComponent);
+	classDef.def("GetMemberValue",+[](lua_State *l,BaseEntity &ent,const std::string &uri) -> std::optional<Lua::udm_type> {
+		auto path = pragma::PanimaComponent::ParseComponentChannelPath(panima::ChannelPath{uri});
+		if(!path.has_value())
+			return {};
+		auto c = ent.FindComponent(path->first);
+		if(c.expired())
+			return {};
+		auto &memberPath = path->second;
+		auto *info = c->FindMemberInfo(memberPath.GetString());
+		if(!info)
+			return {};
+		return pragma::lua::get_member_value(l,*c,*info);
+	});
+	classDef.def("SetMemberValue",+[](lua_State *l,BaseEntity &ent,const std::string &uri,Lua::udm_type value) -> bool {
+		auto path = pragma::PanimaComponent::ParseComponentChannelPath(panima::ChannelPath{uri});
+		if(!path.has_value())
+			return false;
+		auto c = ent.FindComponent(path->first);
+		if(c.expired())
+			return false;
+		auto &memberPath = path->second;
+		auto *info = c->FindMemberInfo(memberPath.GetString());
+		if(!info)
+			return false;
+		return pragma::lua::set_member_value(l,*c,*info,value);
+	});
 	classDef.def("GetUuid",static_cast<std::string(*)(BaseEntity&)>([](BaseEntity &ent) -> std::string {
 		return ::util::uuid_to_string(ent.GetUuid());
 	}));

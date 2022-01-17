@@ -145,7 +145,7 @@ namespace pragma::lua
 	namespace base_liquid_surface_simulation_component {static void register_class(luabind::module_ &mod);};
 	// --template-namespace-declaration-location
 };
-static std::optional<Lua::udm_type> get_member_value(
+std::optional<Lua::udm_type> pragma::lua::get_member_value(
 	lua_State *l,pragma::BaseEntityComponent &component,const pragma::ComponentMemberInfo &memberInfo
 )
 {
@@ -161,7 +161,7 @@ static std::optional<Lua::udm_type> get_member_value(
 		}
 	});
 }
-static bool set_member_value(
+bool pragma::lua::set_member_value(
 	lua_State *l,pragma::BaseEntityComponent &component,const pragma::ComponentMemberInfo &memberInfo,Lua::udm_type value
 )
 {
@@ -256,13 +256,13 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 		auto *info = component.GetMemberInfo(memberIndex);
 		if(!info)
 			return false;
-		return set_member_value(l,component,*info,value);
+		return pragma::lua::set_member_value(l,component,*info,value);
 	});
 	entityComponentDef.def("SetMemberValue",+[](lua_State *l,pragma::BaseEntityComponent &component,const std::string &memberName,Lua::udm_type value) -> bool {
 		auto *info = component.FindMemberInfo(memberName);
 		if(!info)
 			return false;
-		return set_member_value(l,component,*info,value);
+		return pragma::lua::set_member_value(l,component,*info,value);
 	});
 	entityComponentDef.def("IsValid",static_cast<bool(*)(lua_State*,pragma::BaseEntityComponent*)>([](lua_State *l,pragma::BaseEntityComponent *hComponent) {
 		return hComponent != nullptr;

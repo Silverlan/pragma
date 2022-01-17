@@ -13,7 +13,7 @@ function util.ImageRecorder:__init(img)
 	self.m_frameRate = 60
 	self.m_fileName = ""
 	self.m_recording = false
-	self.m_threadPool = util.ThreadPool(10)
+	self.m_threadPool = util.ThreadPool(10,"img_recorder")
 end
 function util.ImageRecorder:__finalize()
 	self:StopRecording()

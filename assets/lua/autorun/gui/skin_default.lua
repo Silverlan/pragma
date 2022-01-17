@@ -568,5 +568,6 @@ skin["bg_gradient"] = {
 	end,
 	Release = clear_element
 }
+-----------------------------------------
 gui.register_skin("default",t,skin)
 gui.set_skin("default")

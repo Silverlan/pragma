@@ -41,7 +41,7 @@ void BaseEnvCameraComponent::RegisterMembers(pragma::EntityComponentManager &com
 		auto memberInfo = create_component_member_info<
 			T,float,
 			static_cast<void(T::*)(float)>(&T::SetNearZ),
-			static_cast<float(T::*)() const>(&T::GetFarZ)
+			static_cast<float(T::*)() const>(&T::GetNearZ)
 		>("nearz",DEFAULT_NEAR_Z,AttributeSpecializationType::Distance);
 		memberInfo.SetMin(0.1f);
 		memberInfo.updateDependenciesFunction = [](BaseEntityComponent &component,std::vector<std::string> &outAffectedProps) {

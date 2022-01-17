@@ -14,16 +14,20 @@
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/game/scene_snapshot.hpp"
 #include "pragma/game/game_resources.hpp"
+#include "pragma/game/game_limits.h"
 #include <pragma/util/util_game.hpp>
 #include <smdmodel.h>
 #include <unordered_set>
 #include <sharedutils/util_file.h>
+#if 0
 #include <assimp/Importer.hpp>
 #include <assimp/Exporter.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <assimp/IOSystem.hpp>
 #include <assimp/IOStream.hpp>
+#include <assimp/DefaultLogger.hpp>
+#endif
 #include <panima/skeleton.hpp>
 #include <panima/bone.hpp>
 
@@ -348,7 +352,7 @@ int Lua::import::import_obj(lua_State *l)
 	auto &f = *Lua::CheckFile(l,1);
 	return import_model_asset(l);
 }
-
+#if 0
 class AssimpPragmaIOStream
 	: public Assimp::IOStream
 {
@@ -405,9 +409,10 @@ public:
 private:
 	VFilePtr m_rootFile = nullptr;
 };
-
+#endif
 std::shared_ptr<aiScene> Lua::import::snapshot_to_assimp_scene(const pragma::SceneSnapshot &snapshot)
 {
+#if 0
 	auto &materials = snapshot.GetMaterials();
 	std::unordered_map<Material*,uint32_t> materialToIndex {};
 	uint32_t matIdx = 0u;
@@ -493,10 +498,13 @@ std::shared_ptr<aiScene> Lua::import::snapshot_to_assimp_scene(const pragma::Sce
 	for(auto i=decltype(nodeIds.size()){0u};i<nodeIds.size();++i)
 		node->mMeshes[i] = nodeIds.at(i);
 	return scene;
+#endif
+	return nullptr;
 }
 
 int Lua::import::export_model_asset(lua_State *l)
 {
+#if 0
 	auto &mdl = Lua::Check<Model>(l,1);
 
 	Assimp::Exporter exporter;
@@ -510,8 +518,10 @@ int Lua::import::export_model_asset(lua_State *l)
 	auto *error = exporter.GetErrorString();
 	Con::cwar<<"WARNING: Export error: '"<<error<<"'!"<<Con::endl;
 	return 1;
+#endif
+	return 0;
 }
-
+#if 0
 inline static Mat4 Assimp2Glm(const aiMatrix4x4& from) {
     return Mat4(
         (double)from.a1, (double)from.b1, (double)from.c1, (double)from.d1,
@@ -520,6 +530,14 @@ inline static Mat4 Assimp2Glm(const aiMatrix4x4& from) {
         (double)from.a4, (double)from.b4, (double)from.c4, (double)from.d4
     );
 }
+
+class myStream : public Assimp::LogStream {
+public:
+    void write(const char* message) {
+		Con::cout<<"[AssImp] "<<message<<Con::endl;
+    }
+};
+
 
 static bool import_model_asset(NetworkState &nw,VFilePtr hFile,const std::string &outputFilePath,std::string &outErr)
 {
@@ -530,8 +548,17 @@ static bool import_model_asset(NetworkState &nw,VFilePtr hFile,const std::string
 		return false;
 	auto hFileLocal = std::static_pointer_cast<VFilePtrInternalReal>(hFile);
 
+	const unsigned int severity = Assimp::Logger::Debugging|Assimp::Logger::Info|Assimp::Logger::Err|Assimp::Logger::Warn;
+	// Attaching it to the default logger
+	Assimp::DefaultLogger::get()->attachStream( new myStream, severity );
+
 	Assimp::Importer importer;
 	importer.SetIOHandler(new AssimpPragmaIo{hFile});
+	importer.SetPropertyInteger(AI_CONFIG_PP_SBBC_MAX_BONES,umath::to_integral(GameLimits::MaxBones));
+	importer.SetPropertyInteger(AI_CONFIG_PP_PTV_NORMALIZE,1);
+	importer.SetPropertyInteger(AI_CONFIG_PP_SLM_VERTEX_LIMIT,umath::to_integral(GameLimits::MaxMeshVertices));
+	importer.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS,4); // umath::to_integral(GameLimits::MaxVertexWeights));
+	importer.SetPropertyInteger(AI_CONFIG_IMPORT_REMOVE_EMPTY_BONES,0);
 	auto *aiScene = importer.ReadFile(
 		hFileLocal->GetPath(),
 		aiProcess_JoinIdenticalVertices | aiProcess_GenUVCoords | aiProcess_Triangulate | aiProcess_SortByPType | aiProcess_FindDegenerates | 
@@ -591,25 +618,60 @@ static bool import_model_asset(NetworkState &nw,VFilePtr hFile,const std::string
 		return subMesh;
 	};
 
-	std::vector<std::shared_ptr<ModelSubMesh>> subMeshes {};
-	std::function<bool(aiNode&)> fIterateTree = nullptr;
-	fIterateTree = [aiScene,&fIterateTree,&fConvertMesh,&subMeshes](aiNode &node) -> bool {
-		//aiVector3D scale;
-		//aiQuaternion rot;
-		//aiVector3D pos;
+	auto fGetAbsolutePose = [](aiNode &node) {
 		auto t = node.mTransformation;
 		auto *parent = node.mParent;
 		while(parent)
 		{
-			t = parent->mTransformation *t;
+			t = t *parent->mTransformation;
 			parent = parent->mParent;
 		}
+		return t;
+	};
+
+	auto mdl = game->CreateModel();
+	auto &skeleton = mdl->GetSkeleton();
+
+	std::function<bool(aiNode&)> x = nullptr;
+	x = [&x,&aiScene](aiNode &node) -> bool {
+		std::cout<<"Node: "<<node.mName.C_Str()<<" ("<<node.mNumMeshes<<")"<<std::endl;
+		for(auto i=decltype(node.mNumMeshes){0u};i<node.mNumMeshes;++i)
+		{
+			auto meshIdx = node.mMeshes[i];
+			auto &aiMesh = *aiScene->mMeshes[meshIdx];
+			for(auto j=decltype(aiMesh.mNumBones){0u};j<aiMesh.mNumBones;++j)
+			{
+				auto &aiBone = *aiMesh.mBones[j];
+				auto &t = aiBone.mOffsetMatrix;
+				std::string boneName = aiBone.mName.C_Str();
+				std::cout<<"Bone: "<<boneName<<std::endl;
+			}
+		}
+
+		for(auto i=decltype(node.mNumChildren){0u};i<node.mNumChildren;++i)
+		{
+			x(*node.mChildren[i]);
+		}
+		return true;
+	};
+	x(*aiScene->mRootNode);
+	for(auto i=decltype(aiScene->mNumMeshes){0u};i<aiScene->mNumMeshes;++i)
+	{
+		auto &aiMesh = aiScene->mMeshes[i];
+		if(aiMesh->HasBones())
+			std::cout<<"!!"<<std::endl;
+	}
+
+	std::vector<std::shared_ptr<ModelSubMesh>> subMeshes {};
+	std::function<bool(aiNode&)> fIterateTree = nullptr;
+	fIterateTree = [aiScene,&skeleton,&fGetAbsolutePose,&fIterateTree,&fConvertMesh,&subMeshes](aiNode &node) -> bool {
+		auto t = fGetAbsolutePose(node);
 		//t.Decompose(scale,rot,pos);
 		auto m = Assimp2Glm(t);
-		Vector3 translation;
-		Quat rotation;
-		Vector3 scale;
-		umat::decompose(m,translation,rotation,&scale);
+		Vector3 translation {};
+		Quat rotation = uquat::identity();
+		Vector3 scale = Vector3{1,1,1};
+		//umat::decompose(m,translation,rotation,&scale);
 
 		//umath::ScaledTransform pose {Vector3{pos.x,pos.y,pos.z},Quat{rot.w,rot.x,rot.y,rot.z},Vector3{scale.x,scale.y,scale.z}};
 		umath::ScaledTransform pose {translation,rotation,scale};
@@ -629,12 +691,25 @@ static bool import_model_asset(NetworkState &nw,VFilePtr hFile,const std::string
 		for(auto i=decltype(node.mNumMeshes){0u};i<node.mNumMeshes;++i)
 		{
 			auto meshIdx = node.mMeshes[i];
-			auto subMesh = fConvertMesh(*aiScene->mMeshes[meshIdx]);
+			auto &aiMesh = *aiScene->mMeshes[meshIdx];
+			auto subMesh = fConvertMesh(aiMesh);
 			if(!subMesh)
 				return false;
 			subMesh->Scale(meshScale);
 			subMesh->Transform(invPose);
 			subMeshes.push_back(subMesh);
+
+			for(auto j=decltype(aiMesh.mNumBones){0u};j<aiMesh.mNumBones;++j)
+			{
+				auto &aiBone = *aiMesh.mBones[j];
+				auto &t = aiBone.mOffsetMatrix;
+				std::string boneName = aiBone.mName.C_Str();
+				if(skeleton.LookupBone(boneName) != -1)
+					continue;
+				auto *bone = new panima::Bone{};
+				bone->name = std::move(boneName);
+				skeleton.AddBone(bone);
+			}
 		}
 
 		for(auto i=decltype(node.mNumChildren){0u};i<node.mNumChildren;++i)
@@ -704,13 +779,10 @@ static bool import_model_asset(NetworkState &nw,VFilePtr hFile,const std::string
 			subMesh->SetSkinTextureIndex(std::numeric_limits<uint32_t>::max());
 	}
 	
-	auto mdl = game->CreateModel();
-
 	// Build skeleton
-	auto &skeleton = mdl->GetSkeleton();
 	auto referencePose = Frame::Create(1);
 	std::function<std::shared_ptr<panima::Bone>(aiNode&,panima::Bone*)> fIterateBones = nullptr;
-	fIterateBones = [&fIterateBones,&skeleton,&referencePose](aiNode &node,panima::Bone *parent) -> std::shared_ptr<panima::Bone> {
+	fIterateBones = [&fIterateBones,&skeleton,&referencePose,&fGetAbsolutePose](aiNode &node,panima::Bone *parent) -> std::shared_ptr<panima::Bone> {
 		auto *bone = new panima::Bone{};
 		bone->name = node.mName.C_Str();
 		auto boneIdx = skeleton.AddBone(bone);
@@ -718,11 +790,11 @@ static bool import_model_asset(NetworkState &nw,VFilePtr hFile,const std::string
 			bone->name = "bone" +std::to_string(boneIdx);
 		if(parent)
 			parent->children.insert(std::make_pair(boneIdx,skeleton.GetBone(boneIdx).lock()));
-
+		
 		aiVector3D scale;
 		aiQuaternion rot;
 		aiVector3D pos;
-		auto t = node.mTransformation;
+		auto t = fGetAbsolutePose(node);
 		// t.Inverse();
 		t.Decompose(scale,rot,pos);
 		referencePose->SetBonePosition(boneIdx,Vector3{pos.x,pos.y,pos.z});
@@ -768,7 +840,7 @@ static bool import_model_asset(NetworkState &nw,VFilePtr hFile,const std::string
 	mdl->Update();
 	return mdl->Save(*game,"addons/converted/models/" +outputFilePath,outErr);
 }
-
+#endif
 bool Lua::import::import_model_asset(NetworkState &nw,const std::string &outputPath,std::string &outFilePath,std::string &outErr)
 {
 	auto mdlPath = outputPath +".blend";
@@ -776,7 +848,7 @@ bool Lua::import::import_model_asset(NetworkState &nw,const std::string &outputP
 	if(!f)
 		return false;
 	outFilePath = outputPath;
-	return ::import_model_asset(nw,f,outFilePath,outErr);
+	return false;//::import_model_asset(nw,f,outFilePath,outErr);
 }
 
 int Lua::import::import_model_asset(lua_State *l)

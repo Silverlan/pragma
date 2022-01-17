@@ -20,12 +20,12 @@
 #include <pragma/util/util_game.hpp>
 #include <pragma/game/scene_snapshot.hpp>
 #include <sharedutils/util_file.h>
-#include <assimp/Importer.hpp>
-#include <assimp/Exporter.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#include <assimp/IOSystem.hpp>
-#include <assimp/IOStream.hpp>
+//#include <assimp/Importer.hpp>
+//#include <assimp/Exporter.hpp>
+//#include <assimp/scene.h>
+//#include <assimp/postprocess.h>
+//#include <assimp/IOSystem.hpp>
+//#include <assimp/IOStream.hpp>
 #include "pragma/lua/libraries/c_limport.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
@@ -37,7 +37,7 @@
 
 extern DLLCLIENT CGame *c_game;
 
-
+#if 0
 static aiVector3D to_assimp_position(const Vector3 &pos)
 {
 	return aiVector3D{pos.x,pos.y,pos.z} *static_cast<float>(util::pragma::units_to_metres(1.f));
@@ -110,9 +110,10 @@ static aiNode &add_node(aiNode &parentNode,uint32_t index,const std::string &nam
 	parentNode.mChildren[index] = node;
 	return *node;
 }
-
+#endif
 int Lua::lib_export::export_scene(lua_State *l)
 {
+#if 0
 	std::string outputPath = FileManager::GetCanonicalizedPath(Lua::CheckString(l,1));
 	if(Lua::file::validate_write_operation(l,outputPath) == false)
 		return 0;
@@ -227,5 +228,7 @@ int Lua::lib_export::export_scene(lua_State *l)
 		return 2;
 	}
 	return 1;
+#endif
+	return 0;
 }
 

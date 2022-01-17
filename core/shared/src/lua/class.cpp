@@ -762,12 +762,12 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defPath.def("RemoveFileExtension",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
 		p.RemoveFileExtension();
 	}));
-	defPath.def("MakeRelative",static_cast<void(*)(lua_State*,util::Path&,util::Path&)>([](lua_State *l,util::Path &p,util::Path &pOther) {
-		p.MakeRelative(pOther);
-	}));
-	defPath.def("MakeRelative",static_cast<void(*)(lua_State*,util::Path&,const std::string&)>([](lua_State *l,util::Path &p,const std::string &other) {
-		p.MakeRelative(other);
-	}));
+	defPath.def("MakeRelative",+[](lua_State *l,util::Path &p,util::Path &pOther) {
+		return p.MakeRelative(pOther);
+	});
+	defPath.def("MakeRelative",+[](lua_State *l,util::Path &p,const std::string &other) {
+		return p.MakeRelative(other);
+	});
 	defPath.def("GetComponentCount",&util::Path::GetComponentCount);
 	defPath.def("GetComponent",+[](util::Path &p,size_t offset) -> std::optional<std::pair<std::string_view,size_t>> {
 		if(offset >= p.GetString().size())

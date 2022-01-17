@@ -183,7 +183,11 @@ void Lua::animation::register_library(Lua::Interface &lua)
 			return luabind::object{l,true};
 		return luabind::object{l,err};
 	});
-	cdChannel.def("GetValueExpression",&panima::Channel::GetValueExpression);
+	cdChannel.def("ClearValueExpression",&panima::Channel::ClearValueExpression);
+	cdChannel.def("GetValueExpression",+[](panima::Channel &channel) -> std::optional<std::string> {
+		auto *expr = channel.GetValueExpression();
+		return expr ? *expr : std::optional<std::string>{};
+	});
 	cdChannel.def("GetValueCount",&panima::Channel::GetValueCount);
 	cdChannel.def("GetTime",&panima::Channel::GetTime);
 	cdChannel.def("GetValue",+[](lua_State *l,panima::Channel &channel,uint32_t idx) -> Lua::udm_ng {
@@ -322,6 +326,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		anim.SetDuration(duration);
 		return duration;
 	});
+	cdAnim2.def("RemoveChannel",&panima::Animation::RemoveChannel);
 	cdAnim2.def("AddChannel",static_cast<void(panima::Animation::*)(panima::Channel&)>(&panima::Animation::AddChannel));
 	cdAnim2.def("AddChannel",+[](lua_State *l,panima::Animation &anim,const std::string &path,::udm::Type valueType) -> opt<std::shared_ptr<panima::Channel>> {
 		auto *channel = anim.AddChannel(path,valueType);

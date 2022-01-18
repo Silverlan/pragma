@@ -1711,6 +1711,14 @@ void Game::RegisterLuaLibraries()
 		{"calc_smallest_enclosing_bbox",Lua::mesh::calc_smallest_enclosing_bbox}
 	});
 
+	Lua::RegisterLibrary(GetLuaState(),"log",{});
+	Lua::RegisterLibraryEnums(GetLuaState(),"log",{
+		{"SEVERITY_INFO",0},
+		{"SEVERITY_WARNING",1},
+		{"SEVERITY_ERROR",2},
+		{"SEVERITY_CRITICAL",3}
+	});
+
 	Lua::RegisterLibrary(GetLuaState(),"regex",{
 		{"match",Lua::regex::match},
 		{"search",Lua::regex::search}

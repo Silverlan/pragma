@@ -44,7 +44,7 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 void pragma::asset::MapExportInfo::AddCamera(CCameraComponent &cam) {m_cameras.push_back(cam.GetHandle<CCameraComponent>());}
 void pragma::asset::MapExportInfo::AddLightSource(CLightComponent &light) {m_lightSources.push_back(light.GetHandle<CLightComponent>());}
 void pragma::asset::ModelExportInfo::SetAnimationList(const std::vector<std::string> &animations)
@@ -299,7 +299,8 @@ static std::shared_ptr<Model> import_model(ufile::IFile *optFile,const std::stri
 
 	auto mdlName = ufile::get_file_from_filename(fileName);
 	ufile::remove_extension_from_filename(mdlName);
-	auto matPath = "materials/models/" +mdlName +'/';
+
+	auto matPath = "materials/models/" +outputPath.GetString() +mdlName +'/';
 
 	tinygltf::TinyGLTF reader {};
 
@@ -653,11 +654,27 @@ static std::shared_ptr<Model> import_model(ufile::IFile *optFile,const std::stri
 	};
 
 	auto &gltfMeshes = gltfMdl.meshes;
-	auto meshGroup = mdl->AddMeshGroup("reference");
 	uint32_t absUnnamedFcIdx = 0;
-	for(auto &gltfMesh : gltfMeshes)
+	std::vector<std::optional<std::string>> nodeMeshNames;
+	nodeMeshNames.resize(gltfMeshes.size());
+	for(auto &node : gltfMdl.nodes)
+	{
+		if(node.mesh >= nodeMeshNames.size() || node.name.empty())
+			continue;
+		nodeMeshNames[node.mesh] = node.name;
+	}
+	for(uint32_t meshIdx = 0; auto &gltfMesh : gltfMeshes)
 	{
 		auto mesh = c_game->CreateModelMesh();
+		std::string name;
+		if(nodeMeshNames[meshIdx].has_value())
+			name = *nodeMeshNames[meshIdx];
+		else if(!gltfMesh.name.empty())
+			name = gltfMesh.name;
+		else
+			name = "mesh" +std::to_string(meshIdx);
+		uint32_t meshGroupId = 0;
+		auto meshGroup = mdl->AddMeshGroup(name,meshGroupId);
 		for(auto &primitive : gltfMesh.primitives)
 		{
 			auto itPos = primitive.attributes.find("POSITION");
@@ -804,6 +821,28 @@ static std::shared_ptr<Model> import_model(ufile::IFile *optFile,const std::stri
 					normBufData = std::unique_ptr<GLTFBufferData>{new GLTFBufferData{normAccessor,normBufView,normBuf}};
 				}
 
+				auto isBeingUsed = false;
+				for(auto i=decltype(posAccessor.count){0u};i<posAccessor.count;++i)
+				{
+					auto pos = TransformPos(posBufData.GetIndexedValue<Vector3>(i));
+					if(!isBeingUsed && uvec::length_sqr(pos) > 0.001f)
+					{
+						isBeingUsed = true;
+						break;
+					}
+					if(normBufData)
+					{
+						auto n = normBufData->GetIndexedValue<Vector3>(i);
+						if(!isBeingUsed && uvec::length_sqr(n) > 0.001f)
+						{
+							isBeingUsed = true;
+							break;
+						}
+					}
+				}
+				if(!isBeingUsed)
+					continue; // Skip this morph target if it's not actually doing anything
+
 				std::string morphTargetName;
 
 				if(gltfMesh.extras.Has("targetNames"))
@@ -862,6 +901,9 @@ static std::shared_ptr<Model> import_model(ufile::IFile *optFile,const std::stri
 		if(gltfMesh.primitives.empty() == false)
 			absUnnamedFcIdx += gltfMesh.primitives.front().targets.size(); // All primitives have same number of targets
 		meshGroup->AddMesh(mesh);
+		auto &bg = mdl->AddBodyGroup(name);
+		bg.meshGroups.push_back(meshGroupId);
+		++meshIdx;
 	}
 
 	std::unordered_map<tinygltf::Node*,uint32_t> nodeToBoneIndex;
@@ -1946,3 +1988,4 @@ bool pragma::asset::export_texture_as_vtf(
 		deleter();
 	return result;
 }
+#pragma optimize("",on)

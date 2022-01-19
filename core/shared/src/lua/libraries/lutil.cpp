@@ -149,6 +149,7 @@ void Lua::util::register_shared_generic(luabind::module_ &mod)
 	auto defZip = luabind::class_<ZIPFile>("ZipFile");
 	defZip.add_static_constant("OPEN_MODE_READ",umath::to_integral(ZIPFile::OpenMode::Read));
 	defZip.add_static_constant("OPEN_MODE_WRITE",umath::to_integral(ZIPFile::OpenMode::Write));
+
 	defZip.scope[luabind::def("open",+[](const std::string &filePath,ZIPFile::OpenMode openMode) -> std::shared_ptr<ZIPFile> {
 		auto path = ::util::Path::CreateFile(filePath);
 		path.Canonicalize();
@@ -167,6 +168,43 @@ void Lua::util::register_shared_generic(luabind::module_ &mod)
 		if(!zipFile)
 			return nullptr;
 		return zipFile;
+	})];
+	defZip.scope[luabind::def("get_supported_format_extensions",+[]() -> std::vector<std::string> {
+		return std::vector<std::string>{
+			"r",
+			"arj",
+			"cab",
+			"chm",
+			"cpio",
+			"cramfs",
+			"dmg",
+			"ext",
+			"fat",
+			"gpt",
+			"hfs",
+			"ihex",
+			"iso",
+			"lzh",
+			"lzma",
+			"mbr",
+			"msi",
+			"nsis",
+			"ntfs",
+			"qcow2",
+			"rar",
+			"rpm",
+			"squashfs",
+			"udf",
+			"uefi",
+			"vdi",
+			"vhd",
+			"vhdx",
+			"vmdk",
+			"wim",
+			"xar",
+			"z",
+			"zip"
+		};
 	})];
 	defZip.def("GetFileList",+[](ZIPFile &zip) -> std::optional<std::vector<std::string>> {
 		std::vector<std::string> files;

@@ -52,6 +52,10 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 		luabind::def("get_supported_export_file_extensions",&Lua::asset::get_supported_export_file_extensions),
 		luabind::def("matches",&pragma::asset::matches),
 		luabind::def("get_normalized_path",&pragma::asset::get_normalized_path),
+		luabind::def("is_supported_extension",+[](lua_State *l,const std::string &ext,pragma::asset::Type type) -> bool {
+			auto &exts = pragma::asset::get_supported_extensions(type);
+			return std::find(exts.begin(),exts.end(),ext) != exts.end();
+		}),
 		luabind::def("get_supported_extensions",+[](lua_State *l,pragma::asset::Type type) -> tb<std::string> {
 			return Lua::vector_to_table(l,pragma::asset::get_supported_extensions(type));
 		}),

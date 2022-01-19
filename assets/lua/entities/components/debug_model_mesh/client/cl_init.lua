@@ -32,7 +32,7 @@ function Component:UpdateDebugMesh()
 				local verts = subMesh:GetVertices()
 				local tris = subMesh:GetTriangles()
 				for _,idx in ipairs(tris) do
-					table.insert(dbgTris,verts[idx +1] *100)
+					table.insert(dbgTris,verts[idx +1])
 				end
 			end
 		end

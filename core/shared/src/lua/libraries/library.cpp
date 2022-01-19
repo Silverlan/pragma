@@ -315,6 +315,16 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	});
 
 	//lua_pushtablecfunction(lua.GetState(),"table","has_value",Lua::table::has_value); // Function is incomplete
+	lua_pushtablecfunction(lua.GetState(),"table","table_to_map",[](lua_State *l) -> int32_t {
+		Lua::CheckTable(l,1);
+		auto t = luabind::object{luabind::from_stack(l,1)};
+		auto val = luabind::object{luabind::from_stack(l,2)};
+		auto nt = luabind::newtable(l);
+		for(luabind::iterator i{t}, e; i != e; ++i)
+			nt[luabind::object{*i}] = val;
+		Lua::Push(l,nt);
+		return 1;
+	});
 	lua_pushtablecfunction(lua.GetState(),"table","random",Lua::table::random);
 	lua_pushtablecfunction(lua.GetState(),"table","randomize",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 		int32_t t = 1;
@@ -1365,6 +1375,20 @@ void Game::RegisterLuaLibraries()
 	];
 
 	auto classDefFile = luabind::class_<LFile>("File");
+	classDefFile.def("__tostring",+[](LFile &f) -> std::string {
+		std::stringstream ss;
+		ss<<"File[";
+		if(!f.IsValid())
+			ss<<"NULL";
+		else
+		{
+			auto *fp = dynamic_cast<VFilePtrInternalReal*>(f.GetHandle().get());
+			if(fp)
+				ss<<fp->GetPath();
+		}
+		ss<<"]";
+		return ss.str();
+	});
 	classDefFile.def("Close",&Lua_LFile_Close);
 	classDefFile.def("Size",&Lua_LFile_Size);
 	classDefFile.def("ReadLine",&Lua_LFile_ReadLine);
@@ -1472,6 +1496,7 @@ void Game::RegisterLuaLibraries()
 	}));
 	classDefFile.def("WriteString",static_cast<void(*)(lua_State*,LFile&,std::string,bool)>(&Lua_LFile_WriteString));
 	classDefFile.def("WriteString",static_cast<void(*)(lua_State*,LFile&,std::string)>(&Lua_LFile_WriteString));
+	classDefFile.def("GetSize",&LFile::Size);
 	classDefFile.def("Seek",&Lua_LFile_Seek);
 	classDefFile.def("Tell",&Lua_LFile_Tell);
 	classDefFile.def("Eof",&Lua_LFile_Eof);

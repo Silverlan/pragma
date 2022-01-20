@@ -8,10 +8,10 @@
 
 pfm = pfm or {}
 
-pfm.LOG_SEVERITY_NORMAL = 0
-pfm.LOG_SEVERITY_WARNING = 1
-pfm.LOG_SEVERITY_ERROR = 2
-pfm.LOG_SEVERITY_CRITICAL = 3
+pfm.LOG_SEVERITY_NORMAL = log.SEVERITY_INFO
+pfm.LOG_SEVERITY_WARNING = log.SEVERITY_WARNING
+pfm.LOG_SEVERITY_ERROR = log.SEVERITY_ERROR
+pfm.LOG_SEVERITY_CRITICAL = log.SEVERITY_CRITICAL
 
 pfm.MAX_LOG_CATEGORIES = 30
 local g_enabledCategories = bit.lshift(1,pfm.MAX_LOG_CATEGORIES) -1 -- Enable all call categories by default

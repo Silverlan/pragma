@@ -29,6 +29,12 @@ extern DLLCLIENT CGame *c_game;
 
 bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,const pragma::ShaderGameWorld &shader,bool view)
 {
+	auto &hCam = scene.GetActiveCamera();
+	if(hCam.expired())
+	{
+		Con::cwar<<"WARNING: Attempted to bind scene with no active camera!"<<Con::endl;
+		return false;
+	}
 	auto *dsScene = view ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
 	auto *dsRenderer = renderer.GetRendererDescriptorSet();
 	auto &dsRenderSettings = c_game->GetGlobalRenderSettingsDescriptorSet();

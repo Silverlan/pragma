@@ -77,8 +77,17 @@ void CSceneComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimar
 		if(item.entity == curEntity)
 			continue;
 		curEntity = item.entity;
-		auto &ent = static_cast<CBaseEntity&>(*c_game->GetEntityByLocalIndex(item.entity));
-		auto *renderC = ent.GetRenderComponent();
+		auto *ent = static_cast<CBaseEntity*>(c_game->GetEntityByLocalIndex(item.entity));
+		assert(ent);
+		if(!ent)
+		{
+			// TODO: This should be unreachable, but there are cases where the entity does
+			// end up as nullptr for some unknown reason.
+			// This could happen if the entity is removed after the render queues have been built,
+			// which is not allowed.
+			continue;
+		}
+		auto *renderC = ent->GetRenderComponent();
 		assert(renderC);
 		if(!renderC)
 		{

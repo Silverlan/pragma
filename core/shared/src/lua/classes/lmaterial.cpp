@@ -44,6 +44,7 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 	classDef.def("GetShaderName",&::Material::GetShaderIdentifier);
 	classDef.def("GetName",&::Material::GetName);
 	classDef.def("GetDataBlock",&::Material::GetDataBlock);
+	classDef.def("SetLoaded",&::Material::SetLoaded);
 	classDef.def("Copy",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
 		auto matCopy = mat.Copy();
 		if(matCopy == nullptr)

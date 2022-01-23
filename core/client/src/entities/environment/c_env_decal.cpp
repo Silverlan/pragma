@@ -147,7 +147,7 @@ bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas,st
 			auto &verts = subMesh->GetVertices();
 
 			std::vector<TriangleInfo> intersectingTris {};
-				subMesh->VisitIndices([&](auto *indexData,uint32_t numIndices) {
+			subMesh->VisitIndices([&](auto *indexData,uint32_t numIndices) {
 				intersectingTris.reserve(numIndices);
 				// Cull triangles that are outside of the projector bounds
 				for(auto i=decltype(numIndices){0u};i<numIndices;i+=3)

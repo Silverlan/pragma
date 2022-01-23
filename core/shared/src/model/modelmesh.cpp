@@ -920,7 +920,6 @@ bool ModelSubMesh::Save(udm::AssetDataArg outData,std::string &outErr)
 	static_assert(sizeof(umath::Vertex) == 48);
 	auto strctVertex = ::udm::StructDescription::Define<Vector3,Vector2,Vector3,Vector4>({"pos","uv","n","t"});
 	udm.AddArray("vertices",strctVertex,GetVertices(),udm::ArrayType::Compressed);
-	auto &indexData = GetIndexData();
 	VisitIndices([&udm](auto *indexData,uint32_t numIndices) {
 		udm.AddArray("indices",numIndices,indexData,udm::ArrayType::Compressed);
 	});

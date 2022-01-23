@@ -441,10 +441,9 @@ void ModelLoadManager::Update()
 				dstVerts.push_back(umath::Vertex{-origin +v,uv,n});
 			}
 		
-			auto &dstIndices = subMesh->GetTriangles();
-			dstIndices.reserve(dstIndices.size() +meshIndices.size());
+			subMesh->ReserveIndices(subMesh->GetIndexCount() +meshIndices.size());
 			for(auto &idx : meshIndices)
-				dstIndices.push_back(static_cast<uint16_t>(idx));
+				subMesh->AddIndex(idx);
 			//
 
 			mesh->AddSubMesh(subMesh);

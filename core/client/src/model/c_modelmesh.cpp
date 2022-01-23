@@ -169,9 +169,10 @@ void CModelSubMesh::Update(ModelUpdateFlags flags)
 	
 	if((flags &ModelUpdateFlags::UpdateIndexBuffer) != ModelUpdateFlags::None)
 	{
-		m_sceneMesh->SetIndexBuffer(nullptr); // Clear the old index buffer
-		auto indexBuffer = s_indexBuffer->AllocateBuffer(m_triangles->size() *sizeof(IndexType),m_triangles->data());
-		m_sceneMesh->SetIndexBuffer(std::move(indexBuffer));
+		m_sceneMesh->SetIndexBuffer(nullptr,pragma::model::IndexType::UInt16); // Clear the old index buffer
+		auto &indexData = GetIndexData();
+		auto indexBuffer = s_indexBuffer->AllocateBuffer(indexData.size(),indexData.data());
+		m_sceneMesh->SetIndexBuffer(std::move(indexBuffer),GetIndexType());
 	}
 	if((flags &ModelUpdateFlags::UpdateVertexBuffer) != ModelUpdateFlags::None)
 		UpdateVertexBuffer();

@@ -272,8 +272,10 @@ static void generate_lightmap_uv_atlas(BaseEntity &ent,uint32_t width,uint32_t h
 			for(auto &v : subMesh->GetVertices())
 				verts.push_back(v);
 
-			for(auto idx : subMesh->GetTriangles())
-				tris.push_back(vertOffset +idx);
+			auto offset = subMesh->GetIndexCount();
+			subMesh->GetIndices(tris);
+			for(auto i=offset;i<subMesh->GetIndexCount();++i)
+				subMesh->SetIndex(i,*subMesh->GetIndex(i) +vertOffset);
 		}
 	}
 

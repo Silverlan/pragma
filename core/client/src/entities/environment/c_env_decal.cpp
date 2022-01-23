@@ -145,29 +145,30 @@ bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas,st
 			if(subMesh->GetGeometryType() != ModelSubMesh::GeometryType::Triangles)
 				continue;
 			auto &verts = subMesh->GetVertices();
-			auto &tris = subMesh->GetTriangles();
 
 			std::vector<TriangleInfo> intersectingTris {};
-			intersectingTris.reserve(tris.size());
-			// Cull triangles that are outside of the projector bounds
-			for(auto i=decltype(tris.size()){0u};i<tris.size();i+=3)
-			{
-				std::array<uint32_t,3> indices = {tris.at(i),tris.at(i +1),tris.at(i +2)};
-				auto &v0 = verts.at(indices.at(0));
-				auto &v1 = verts.at(indices.at(1));
-				auto &v2 = verts.at(indices.at(2));
+				subMesh->VisitIndices([&](auto *indexData,uint32_t numIndices) {
+				intersectingTris.reserve(numIndices);
+				// Cull triangles that are outside of the projector bounds
+				for(auto i=decltype(numIndices){0u};i<numIndices;i+=3)
+				{
+					std::array<uint32_t,3> indices = {indexData[i],indexData[i +1],indexData[i +2]};
+					auto &v0 = verts.at(indices.at(0));
+					auto &v1 = verts.at(indices.at(1));
+					auto &v2 = verts.at(indices.at(2));
 
-				auto p0 = effectivePose *v0.position;
-				auto p1 = effectivePose *v1.position;
-				auto p2 = effectivePose *v2.position;
+					auto p0 = effectivePose *v0.position;
+					auto p1 = effectivePose *v1.position;
+					auto p2 = effectivePose *v2.position;
 
-				if(umath::intersection::aabb_triangle(bounds.first,bounds.second,p0,p1,p2) == false)
-					continue;
-				intersectingTris.push_back({
-					indices,
-					std::array<Vector3,3>{p0,p1,p2}
-				});
-			}
+					if(umath::intersection::aabb_triangle(bounds.first,bounds.second,p0,p1,p2) == false)
+						continue;
+					intersectingTris.push_back({
+						indices,
+						std::array<Vector3,3>{p0,p1,p2}
+					});
+				}
+			});
 
 			std::pair<Vector3,Vector3> projectorAABBBounds = {
 				uvec::project_to_plane(bounds.first,n,d),
@@ -183,7 +184,7 @@ bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas,st
 			// TODO
 			auto vertexOffset = outVerts.size();
 			outVerts.reserve(outVerts.size() +verts.size());
-			outTris.reserve(outTris.size() +tris.size());
+			outTris.reserve(outTris.size() +subMesh->GetIndexCount());
 			for(auto &triInfo : intersectingTris)
 			{
 				// Vertex positions in origin space
@@ -372,7 +373,7 @@ bool CDecalComponent::ApplyDecal(DecalProjector &projector,const std::vector<Dec
 	auto meshGroup = mdl->GetMeshGroup(0);
 	auto subMesh = c_game->CreateModelSubMesh();
 	subMesh->GetVertices() = std::move(verts);
-	subMesh->GetTriangles() = std::move(tris);
+	subMesh->SetIndices(tris);
 	subMesh->SetSkinTextureIndex(0);
 
 	auto mesh = c_game->CreateModelMesh();

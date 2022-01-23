@@ -21,7 +21,7 @@ void Lua::ModelMesh::register_class(luabind::class_<::ModelMesh> &classDef)
 	classDef.def(luabind::const_self == luabind::const_self);
 	classDef.def(luabind::tostring(luabind::self));
 	classDef.def("GetVertexCount",&Lua::ModelMesh::GetVertexCount);
-	classDef.def("GetTriangleVertexCount",&Lua::ModelMesh::GetTriangleVertexCount);
+	classDef.def("GetIndexCount",&Lua::ModelMesh::GetTriangleVertexCount);
 	classDef.def("GetTriangleCount",&Lua::ModelMesh::GetTriangleCount);
 	classDef.def("GetSubMeshes",&Lua::ModelMesh::GetSubMeshes);
 	classDef.def("AddSubMesh",&Lua::ModelMesh::AddSubMesh);
@@ -82,7 +82,7 @@ void Lua::ModelMesh::GetVertexCount(lua_State *l,::ModelMesh &mesh)
 }
 void Lua::ModelMesh::GetTriangleVertexCount(lua_State *l,::ModelMesh &mesh)
 {
-	Lua::PushInt(l,mesh.GetTriangleVertexCount());
+	Lua::PushInt(l,mesh.GetIndexCount());
 }
 void Lua::ModelMesh::GetTriangleCount(lua_State *l,::ModelMesh &mdl)
 {
@@ -143,7 +143,7 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("GetVertexCount",&Lua::ModelSubMesh::GetVertexCount);
 	classDef.def("SetVertexCount",&Lua::ModelSubMesh::SetVertexCount);
 	classDef.def("SetIndexCount",&Lua::ModelSubMesh::SetIndexCount);
-	classDef.def("GetTriangleVertexCount",&Lua::ModelSubMesh::GetTriangleVertexCount);
+	classDef.def("GetIndexCount",&Lua::ModelSubMesh::GetTriangleVertexCount);
 	classDef.def("GetTriangleCount",&Lua::ModelSubMesh::GetTriangleCount);
 	classDef.def("GetVertices",&Lua::ModelSubMesh::GetVertices);
 	classDef.def("GetTriangles",&Lua::ModelSubMesh::GetTriangles);
@@ -186,11 +186,16 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("ApplyUVMapping",static_cast<void(*)(lua_State*,::ModelSubMesh&,const Vector3&,const Vector3&,uint32_t,uint32_t,float,float,float,float)>(&Lua::ModelSubMesh::ApplyUVMapping));
 	classDef.def("Scale",&Lua::ModelSubMesh::Scale);
 	classDef.def("GetTriangle",+[](lua_State *l,::ModelSubMesh &mesh,uint32_t idx) -> std::optional<std::tuple<uint16_t,uint16_t,uint16_t>> {
-		auto &tris = mesh.GetTriangles();
 		idx *= 3;
-		if(idx +2 >= tris.size())
-			return {};
-		return std::tuple<uint16_t,uint16_t,uint16_t>{tris[idx],tris[idx +1],tris[idx +2]};
+		std::optional<std::tuple<uint16_t,uint16_t,uint16_t>> tri {};
+		mesh.VisitIndices([idx,&tri](auto *indexData,uint32_t numIndices) {
+			if(idx +3 > numIndices)
+				return;
+			tri = std::tuple<uint16_t,uint16_t,uint16_t>{
+				indexData[idx],indexData[idx +1],indexData[idx +2]
+			};
+		});
+		return tri;
 	});
 	classDef.def("Copy",static_cast<std::shared_ptr<::ModelSubMesh>(*)(lua_State*,::ModelSubMesh&,bool)>([](lua_State *l,::ModelSubMesh &mesh,bool fullCopy) -> std::shared_ptr<::ModelSubMesh> {
 		return mesh.Copy(fullCopy);
@@ -237,8 +242,8 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("ClearVertices",static_cast<void(*)(lua_State*,::ModelSubMesh&)>([](lua_State *l,::ModelSubMesh &mesh) {
 		mesh.GetVertices().clear();
 	}));
-	classDef.def("ClearTriangles",static_cast<void(*)(lua_State*,::ModelSubMesh&)>([](lua_State *l,::ModelSubMesh &mesh) {
-		mesh.GetTriangles().clear();
+	classDef.def("ClearIndices",static_cast<void(*)(lua_State*,::ModelSubMesh&)>([](lua_State *l,::ModelSubMesh &mesh) {
+		mesh.GetIndexData().clear();
 	}));
 	classDef.def("ClearAlphas",static_cast<void(*)(lua_State*,::ModelSubMesh&)>([](lua_State *l,::ModelSubMesh &mesh) {
 		mesh.GetAlphas().clear();
@@ -253,7 +258,7 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 		mesh.GetExtendedVertexWeights().clear();
 	}));
 	classDef.def("ClearVertexData",static_cast<void(*)(lua_State*,::ModelSubMesh&)>([](lua_State *l,::ModelSubMesh &mesh) {
-		mesh.GetTriangles().clear();
+		mesh.GetIndexData().clear();
 		mesh.GetVertices().clear();
 		mesh.GetAlphas().clear();
 		mesh.GetUVSets().clear();
@@ -268,7 +273,7 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 		mesh.GetVertices().reserve(numVerts);
 	}));
 	classDef.def("ReserveTriangles",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t)>([](lua_State *l,::ModelSubMesh &mesh,uint32_t numTris) {
-		mesh.GetTriangles().reserve(numTris *3);
+		mesh.ReserveIndices(numTris *3);
 	}));
 	classDef.def("ReserveVertexWeights",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t)>([](lua_State *l,::ModelSubMesh &mesh,uint32_t numVerts) {
 		mesh.GetVertexWeights().reserve(numVerts);
@@ -293,11 +298,11 @@ void Lua::ModelSubMesh::SetVertexCount(lua_State *l,::ModelSubMesh &mdl,uint32_t
 }
 void Lua::ModelSubMesh::SetIndexCount(lua_State *l,::ModelSubMesh &mdl,uint32_t n)
 {
-	mdl.GetTriangles().resize(n);
+	mdl.SetIndexCount(n);
 }
 void Lua::ModelSubMesh::GetTriangleVertexCount(lua_State *l,::ModelSubMesh &mdl)
 {
-	Lua::PushInt(l,mdl.GetTriangleVertexCount());
+	Lua::PushInt(l,mdl.GetIndexCount());
 }
 void Lua::ModelSubMesh::GetTriangleCount(lua_State *l,::ModelSubMesh &mdl)
 {
@@ -321,14 +326,15 @@ void Lua::ModelSubMesh::GetVertices(lua_State *l,::ModelSubMesh &mesh)
 }
 void Lua::ModelSubMesh::GetTriangles(lua_State *l,::ModelSubMesh &mesh)
 {
-	auto &triangles = mesh.GetTriangles();
 	lua_newtable(l);
-	int top = lua_gettop(l);
-	for(int i=0;i<triangles.size();i++)
-	{
-		Lua::PushInt(l,triangles[i]);
-		lua_rawseti(l,top,i +1);
-	}
+	mesh.VisitIndices([l](auto *indexData,uint32_t numIndices) {
+		int top = lua_gettop(l);
+		for(int i=0;i<numIndices;i++)
+		{
+			Lua::PushInt(l,indexData[i]);
+			lua_rawseti(l,top,i +1);
+		}
+	});
 }
 void Lua::ModelSubMesh::GetUVMapping(lua_State *l,::ModelSubMesh &mesh)
 {
@@ -672,9 +678,10 @@ void Lua::ModelSubMesh::InitializeBox(lua_State *l,::ModelSubMesh &mesh,const Ve
 void Lua::ModelSubMesh::InitializeSphere(lua_State *l,::ModelSubMesh &mesh,const Vector3 &origin,float radius,uint32_t recursionLevel)
 {
 	auto &meshVerts = mesh.GetVertices();
-	auto &triangles = mesh.GetTriangles();
 	std::vector<Vector3> verts;
+	std::vector<uint16_t> triangles;
 	IcoSphere::Create(origin,radius,verts,triangles,recursionLevel);
+	mesh.SetIndices(triangles);
 	meshVerts.reserve(verts.size());
 	for(auto &v : verts)
 	{
@@ -695,9 +702,10 @@ void Lua::ModelSubMesh::InitializeCylinder(lua_State *l,::ModelSubMesh &mesh,flo
 	auto rot = uquat::create_look_rotation(uvec::FORWARD,uvec::UP);
 
 	auto &meshVerts = mesh.GetVertices();
-	auto &triangles = mesh.GetTriangles();
 	std::vector<Vector3> verts;
+	std::vector<uint16_t> triangles;
 	umath::geometry::generate_truncated_cone_mesh({},startRadius,{0.f,0.f,1.f},length,startRadius,verts,&triangles,nullptr,segmentCount);
+	mesh.SetIndices(triangles);
 	meshVerts.reserve(verts.size());
 	for(auto &v : verts)
 	{
@@ -715,9 +723,10 @@ void Lua::ModelSubMesh::InitializeCone(lua_State *l,::ModelSubMesh &mesh,float s
 	auto rot = uquat::create_look_rotation(uvec::FORWARD,uvec::UP);
 
 	auto &meshVerts = mesh.GetVertices();
-	auto &triangles = mesh.GetTriangles();
 	std::vector<Vector3> verts;
+	std::vector<uint16_t> triangles;
 	umath::geometry::generate_truncated_cone_mesh({},startRadius,{0.f,0.f,1.f},length,endRadius,verts,&triangles,nullptr,segmentCount);
+	mesh.SetIndices(triangles);
 	meshVerts.reserve(verts.size());
 	for(auto &v : verts)
 	{
@@ -730,18 +739,24 @@ void Lua::ModelSubMesh::InitializeCone(lua_State *l,::ModelSubMesh &mesh,float s
 	Lua::Push<std::shared_ptr<::ModelSubMesh>>(l,mesh.shared_from_this());
 }
 
-static void add_back_face(std::vector<uint16_t> &tris)
+static void add_back_face(::ModelSubMesh &mesh)
 {
-	for(auto idx : {tris.at(tris.size() -3),tris.at(tris.size() -1),tris.at(tris.size() -2)})
-		tris.push_back(idx);
+	mesh.VisitIndices([&mesh](auto *indexData,uint32_t numIndices) {
+		auto idx0 = indexData[numIndices -3];
+		auto idx1 = indexData[numIndices -2];
+		auto idx2 = indexData[numIndices -1];
+		mesh.AddTriangle(idx0,idx2,idx1);
+	});
 }
 void Lua::ModelSubMesh::FlipTriangleWindingOrder(lua_State *l,::ModelSubMesh &mesh)
 {
-	auto &tris = mesh.GetTriangles();
-	if((tris.size() %3) != 0)
+	auto numIndices = mesh.GetIndexCount();
+	if((numIndices %3) != 0)
 		return;
-	for(auto i=decltype(tris.size()){0u};i<tris.size();i+=3)
-		umath::swap(tris.at(i),tris.at(i +1));
+	mesh.VisitIndices([](auto *indexData,uint32_t numIndices) {
+		for(auto i=decltype(numIndices){0u};i<numIndices;i+=3)
+			umath::swap(indexData[i],indexData[i +1]);
+	});
 }
 void Lua::ModelSubMesh::InitializeRing(lua_State *l,::ModelSubMesh &mesh,std::optional<float> innerRadius,float outerRadius,bool doubleSided,uint32_t segmentCount)
 {
@@ -750,7 +765,6 @@ void Lua::ModelSubMesh::InitializeRing(lua_State *l,::ModelSubMesh &mesh,std::op
 	auto stepSize = umath::round(360.f /static_cast<float>(segmentCount));
 
 	auto &verts = mesh.GetVertices();
-	auto &triangles = mesh.GetTriangles();
 	auto numVerts = segmentCount;
 	if(innerRadius.has_value())
 		numVerts *= 2;
@@ -758,12 +772,12 @@ void Lua::ModelSubMesh::InitializeRing(lua_State *l,::ModelSubMesh &mesh,std::op
 		++numVerts;
 	verts.reserve(segmentCount +1);
 
-	auto numTris = segmentCount *3;
+	auto numIndices = segmentCount *3;
 	if(doubleSided)
-		numTris *= 2;
+		numIndices *= 2;
 	if(innerRadius.has_value())
-		numTris *= 2;
-	triangles.reserve(numTris);
+		numIndices *= 2;
+	mesh.ReserveIndices(numIndices);
 
 	if(innerRadius.has_value() == false)
 		verts.push_back({});
@@ -782,27 +796,33 @@ void Lua::ModelSubMesh::InitializeRing(lua_State *l,::ModelSubMesh &mesh,std::op
 			continue;
 		if(innerRadius.has_value() == false)
 		{
-			triangles.push_back(0);
-			triangles.push_back(verts.size() -2);
-			triangles.push_back(verts.size() -1);
+			mesh.AddTriangle(
+				0,
+				verts.size() -2,
+				verts.size() -1
+			);
 
 			if(doubleSided)
-				add_back_face(triangles);
+				add_back_face(mesh);
 			continue;
 		}
 		if(i == end)
 			break; // Skip last iteration
-		triangles.push_back(verts.size() -1);
-		triangles.push_back(verts.size() -2);
-		triangles.push_back(verts.size());
+		mesh.AddTriangle(
+			verts.size() -1,
+			verts.size() -2,
+			verts.size()
+		);
 		if(doubleSided)
-			add_back_face(triangles);
+			add_back_face(mesh);
 
-		triangles.push_back(verts.size() -3);
-		triangles.push_back(verts.size() -2);
-		triangles.push_back(verts.size() -1);
+		mesh.AddTriangle(
+			verts.size() -3,
+			verts.size() -2,
+			verts.size() -1
+		);
 		if(doubleSided)
-			add_back_face(triangles);
+			add_back_face(mesh);
 	}
 	mesh.GenerateNormals();
 

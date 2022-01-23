@@ -234,7 +234,7 @@ bool ShaderEntity::GetRenderBufferTargets(
 	{
 		outIndexBufferInfo = prosper::IndexBufferInfo{};
 		outIndexBufferInfo->buffer = indexBuffer;
-		outIndexBufferInfo->indexType = prosper::IndexType::UInt16;
+		outIndexBufferInfo->indexType = (mesh.GetIndexType() == pragma::model::IndexType::UInt16) ? prosper::IndexType::UInt16 : prosper::IndexType::UInt32;
 		outIndexBufferInfo->offset = 0;
 	}
 

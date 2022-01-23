@@ -63,7 +63,6 @@ util::TSharedHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 		auto &mesh = *colMesh->GetSoftBodyMesh();
 
 		auto &meshVerts = mesh.GetVertices();
-		auto &meshTriangles = mesh.GetTriangles();
 		auto numMeshVerts = meshVerts.size();
 		auto &sbTriangles = *colMesh->GetSoftBodyTriangles();
 		if(sbTriangles.empty())
@@ -77,24 +76,26 @@ util::TSharedHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 		auto curVertIdx = 0u;
 		indices.reserve(sbTriangles.size() *3);
 		verts.reserve(meshVerts.size());
-		for(auto triIdx : sbTriangles)
-		{
-			std::array<uint32_t,3> triIndices = {meshTriangles.at(triIdx *3),meshTriangles.at(triIdx *3 +1),meshTriangles.at(triIdx *3 +2)};
-			for(auto idx : triIndices)
+		mesh.VisitIndices([&](auto *indexData,uint32_t numIndices) {
+			for(auto triIdx : sbTriangles)
 			{
-				auto &newIdx = newVertexIndices.at(idx);
-				if(newIdx == std::numeric_limits<uint16_t>::max())
+				std::array<uint32_t,3> triIndices = {indexData[triIdx *3],indexData[triIdx *3 +1],indexData[triIdx *3 +2]};
+				for(auto idx : triIndices)
 				{
-					newVertexList.push_back(idx);
+					auto &newIdx = newVertexIndices.at(idx);
+					if(newIdx == std::numeric_limits<uint16_t>::max())
+					{
+						newVertexList.push_back(idx);
 
-					verts.push_back(meshVerts.at(idx).position);
-					indices.push_back(curVertIdx);
-					newIdx = curVertIdx++;
-					continue;
+						verts.push_back(meshVerts.at(idx).position);
+						indices.push_back(curVertIdx);
+						newIdx = curVertIdx++;
+						continue;
+					}
+					indices.push_back(newIdx);
 				}
-				indices.push_back(newIdx);
 			}
-		}
+		});
 		std::vector<uint16_t> indexTranslations;
 		auto softBody = physEnv->CreateSoftBody(sbInfo,mass,verts,indices,indexTranslations);
 		if(softBody == nullptr)

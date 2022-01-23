@@ -140,13 +140,14 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 		auto subMesh = std::make_shared<CModelSubMesh>();
 		std::vector<Vector3> verts;
 		std::vector<Vector3> normals;
-		umath::geometry::generate_truncated_cone_mesh(startPos,static_cast<float>(segStartRadius),dir,uvec::distance(startPos,endPos),static_cast<float>(segEndRadius),verts,&subMesh->GetTriangles(),&normals,coneDetail,false);
+		std::vector<uint16_t> indices;
+		umath::geometry::generate_truncated_cone_mesh(startPos,static_cast<float>(segStartRadius),dir,uvec::distance(startPos,endPos),static_cast<float>(segEndRadius),verts,&indices,&normals,coneDetail,false);
 
 		auto &meshVerts = subMesh->GetVertices();
 		meshVerts.reserve(verts.size());
 		for(auto idx=decltype(verts.size()){0};idx<verts.size();++idx)
 			meshVerts.push_back(umath::Vertex{verts[idx],normals[idx]});
-
+		subMesh->SetIndices(indices);
 		subMesh->SetSkinTextureIndex(0);
 		mesh->AddSubMesh(subMesh);
 	}

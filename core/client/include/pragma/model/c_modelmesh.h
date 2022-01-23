@@ -36,7 +36,6 @@ public:
 
 	using VertexType = VertexBufferData;
 	using VertexWeightType = umath::VertexWeight;
-	using IndexType = uint16_t;
 	using AlphaType = Vector2;
 private:
 	std::shared_ptr<pragma::SceneMesh> m_sceneMesh;

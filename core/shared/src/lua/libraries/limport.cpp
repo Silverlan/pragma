@@ -263,7 +263,6 @@ int Lua::import::import_wrmi(lua_State *l)
 		{
 			auto subMesh = std::shared_ptr<ModelSubMesh>(nw->CreateSubMesh());
 			auto &meshVerts = subMesh->GetVertices();
-			auto &meshTriangles = subMesh->GetTriangles();
 			auto &meshWeights = subMesh->GetVertexWeights();
 			auto map = f.ReadString();
 			map += ".wmi";
@@ -277,7 +276,7 @@ int Lua::import::import_wrmi(lua_State *l)
 			subMesh->SetSkinTextureIndex(j);
 
 			auto numFaces = f.Read<uint32_t>();
-			meshTriangles.reserve(numFaces *3u);
+			subMesh->ReserveIndices(numFaces *3u);
 			meshVerts.reserve(numFaces *3u);
 			meshWeights.reserve(numFaces *3u);
 			for(auto k=decltype(numFaces){0};k<numFaces;++k)
@@ -286,7 +285,7 @@ int Lua::import::import_wrmi(lua_State *l)
 				for(auto l=0u;l<3u;++l)
 				{
 					auto vertId = f.Read<uint64_t>();
-					meshTriangles.push_back(meshVerts.size());
+					subMesh->AddIndex(meshVerts.size());
 					auto u = f.Read<float>();
 					auto v = 1.f -f.Read<float>();
 

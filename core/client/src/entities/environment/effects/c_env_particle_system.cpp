@@ -174,10 +174,9 @@ std::shared_ptr<Model> CParticleSystemComponent::GenerateModel(CGame &game,const
 		auto subMesh = game.CreateModelSubMesh();
 		subMesh->SetSkinTextureIndex(*skinTexIdx);
 		auto &verts = subMesh->GetVertices();
-		auto &tris = subMesh->GetTriangles();
 		auto numTrisSys = numParticles *numTris;
 		auto numVertsSys = numParticles *numVerts;
-		tris.reserve(numTrisSys *3);
+		subMesh->ReserveIndices(numTrisSys *3);
 		verts.resize(numVertsSys);
 		uint32_t vertOffset = 0;
 		for(auto i=decltype(numParticles){0u};i<numParticles;++i)
@@ -219,7 +218,7 @@ std::shared_ptr<Model> CParticleSystemComponent::GenerateModel(CGame &game,const
 				3,5,4
 			};
 			for(auto idx : indices)
-				tris.push_back(vertOffset +idx);
+				subMesh->AddIndex(vertOffset +idx);
 
 			vertOffset += numVerts;
 		}

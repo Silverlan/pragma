@@ -42,7 +42,7 @@ namespace pragma
 		struct DLLNETWORK Mesh
 		{
 			std::vector<Vertex> verts = {};
-			std::vector<uint16_t> tris = {};
+			std::vector<uint32_t> tris = {};
 			std::vector<Vector2> lightmapUvs = {};
 			msys::MaterialHandle material = {};
 		};

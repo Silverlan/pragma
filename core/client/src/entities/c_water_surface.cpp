@@ -136,8 +136,8 @@ void CWaterSurfaceComponent::InitializeSurface()
 	auto subMesh = std::make_shared<CModelSubMesh>();
 	// Initialize surface
 	auto &verts = subMesh->GetVertices();
-	auto &triangles = subMesh->GetTriangles();
-	triangles = simTriangles;
+	subMesh->SetIndexType(pragma::model::IndexType::UInt16);
+	subMesh->SetIndices(simTriangles);
 
 	sim.LockParticleHeights();
 	auto numParticles = sim.GetParticleCount();
@@ -172,13 +172,14 @@ void CWaterSurfaceComponent::InitializeSurface()
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	auto vertBuffer = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo,verts.data());
 
-	bufCreateInfo.size = triangles.size() *sizeof(triangles.front());
+	auto &indexData = subMesh->GetIndexData();
+	bufCreateInfo.size = indexData.size();
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::IndexBufferBit;
-	auto indexBuffer = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo,triangles.data());
+	auto indexBuffer = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo,indexData.data());
 
 	auto &vkMesh = subMesh->GetSceneMesh();
 	vkMesh->SetVertexBuffer(vertBuffer); //sim.GetPositionBuffer());
-	vkMesh->SetIndexBuffer(indexBuffer);
+	vkMesh->SetIndexBuffer(indexBuffer,pragma::model::IndexType::UInt16);
 	//
 
 	m_waterSurfaceMesh = subMesh;

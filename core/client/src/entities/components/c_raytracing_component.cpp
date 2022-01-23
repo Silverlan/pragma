@@ -167,7 +167,7 @@ void CRaytracingComponent::InitializeModelRaytracingBuffers()
 
 			auto &indexBuffer = vkMesh->GetIndexBuffer();
 			if(indexBuffer)
-				subMeshBufferData.indexBufferStartIndex = indexBuffer->GetStartOffset() /sizeof(CModelSubMesh::IndexType);
+				subMeshBufferData.indexBufferStartIndex = indexBuffer->GetStartOffset() /sizeof(pragma::model::IndexType);
 
 			auto &vertexWeightBuffer = vkMesh->GetVertexWeightBuffer();
 			if(vertexWeightBuffer)

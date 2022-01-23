@@ -225,8 +225,8 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh,pragma::
 	// TODO
 	// umath::set_flag(renderFlags,RenderFlags::UseExtendedVertexWeights,mesh.GetExtendedVertexWeights().empty() == false);
 
-	auto numTriangleVertices = mesh.GetTriangleVertexCount();
-	if(numTriangleVertices > umath::to_integral(GameLimits::MaxMeshVertices))
+	auto numIndices = mesh.GetIndexCount();
+	if(numIndices > umath::to_integral(GameLimits::MaxMeshVertices))
 	{
 		Con::cerr<<"ERROR: Attempted to draw mesh with more than maximum ("<<umath::to_integral(GameLimits::MaxMeshVertices)<<") amount of vertices!"<<Con::endl;
 		return false;
@@ -281,7 +281,7 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh,pragma::
 
 		(*m_stats)->Increment(RenderPassStats::Counter::DrawCalls);
 	}
-	return m_curShader->OnRecordDrawMesh(*this,mesh) && m_cmdBuffer.RecordDrawIndexed(mesh.GetTriangleVertexCount(),instanceCount);
+	return m_curShader->OnRecordDrawMesh(*this,mesh) && m_cmdBuffer.RecordDrawIndexed(mesh.GetIndexCount(),instanceCount);
 }
 inline CBaseEntity &pragma::rendering::ShaderProcessor::GetCurrentEntity() const {return static_cast<CBaseEntity&>(m_modelC->GetEntity());}
 inline const pragma::CSceneComponent &pragma::rendering::ShaderProcessor::GetCurrentScene() const {return *m_sceneC;}

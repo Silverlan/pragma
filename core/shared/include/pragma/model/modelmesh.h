@@ -19,10 +19,20 @@
 namespace umath
 {
 	DLLNETWORK void normalize_uv_coordinates(Vector2 &uv);
-	DLLNETWORK void compute_tangent_basis(std::vector<Vertex> &verts,const std::vector<uint16_t> &triangles);
+	template<typename TIndex>
+		void compute_tangent_basis(std::vector<Vertex> &verts,const TIndex *indices,uint32_t numIndices);
 };
 
 namespace udm {struct AssetData; using Version = uint32_t;};
+
+namespace pragma::model
+{
+	enum class IndexType : uint8_t
+	{
+		UInt16 = 0u,
+		UInt32
+	};
+};
 class DLLNETWORK ModelSubMesh
 	: public std::enable_shared_from_this<ModelSubMesh>
 {
@@ -44,6 +54,22 @@ public:
 		Lines,
 		Points
 	};
+	using Index16 = uint16_t;
+	using Index32 = uint32_t;
+	static constexpr auto MAX_INDEX16 = std::numeric_limits<Index16>::max();
+	static constexpr auto MAX_INDEX32 = std::numeric_limits<Index32>::max();
+	size_t size_of_index(pragma::model::IndexType it)
+	{
+		switch(it)
+		{
+		case pragma::model::IndexType::UInt16:
+			return sizeof(Index16);
+		case pragma::model::IndexType::UInt32:
+			return sizeof(Index32);
+		}
+		return 0;
+	}
+
 	ModelSubMesh();
 	ModelSubMesh(const ModelSubMesh &other);
 	static std::shared_ptr<ModelSubMesh> Load(const udm::AssetData &data,std::string &outErr);
@@ -55,21 +81,28 @@ public:
 	virtual void Centralize(const Vector3 &origin);
 	const Vector3 &GetCenter() const;
 	uint32_t GetVertexCount() const;
-	uint32_t GetTriangleVertexCount() const;
+	uint32_t GetIndexCount() const;
 	uint32_t GetTriangleCount() const;
 	uint32_t GetSkinTextureIndex() const;
+	void SetIndexCount(uint32_t numIndices);
+	void SetTriangleCount(uint32_t numTris);
+	void SetIndices(const std::vector<Index16> &indices);
+	void SetIndices(const std::vector<Index32> &indices);
 	// Only works correctly if there are no duplicate vertices
 	void GenerateNormals();
 	void NormalizeUVCoordinates();
 	void SetSkinTextureIndex(uint32_t texture);
 	std::vector<umath::Vertex> &GetVertices();
 	std::vector<Vector2> &GetAlphas();
-	std::vector<uint16_t> &GetTriangles();
+	std::vector<uint8_t> &GetIndexData();
+	void GetIndices(std::vector<Index32> &outIndices) const;
+	std::optional<Index32> GetIndex(uint32_t i) const;
+	bool SetIndex(uint32_t i,Index32 idx);
 	std::vector<umath::VertexWeight> &GetVertexWeights(); // Vertex weights 0-3
 	std::vector<umath::VertexWeight> &GetExtendedVertexWeights(); // Vertex weights 0-7
 	const std::vector<umath::Vertex> &GetVertices() const {return const_cast<ModelSubMesh*>(this)->GetVertices();}
 	const std::vector<Vector2> &GetAlphas() const {return const_cast<ModelSubMesh*>(this)->GetAlphas();}
-	const std::vector<uint16_t> &GetTriangles() const {return const_cast<ModelSubMesh*>(this)->GetTriangles();}
+	const std::vector<uint8_t> &GetIndexData() const {return const_cast<ModelSubMesh*>(this)->GetIndexData();}
 	const std::vector<umath::VertexWeight> &GetVertexWeights() const {return const_cast<ModelSubMesh*>(this)->GetVertexWeights();}
 	const std::vector<umath::VertexWeight> &GetExtendedVertexWeights() const {return const_cast<ModelSubMesh*>(this)->GetExtendedVertexWeights();}
 	void GetBounds(Vector3 &min,Vector3 &max) const;
@@ -78,12 +111,45 @@ public:
 	uint32_t AddVertex(const umath::Vertex &v);
 	void AddTriangle(const umath::Vertex &v1,const umath::Vertex &v2,const umath::Vertex &v3);
 	void AddTriangle(uint32_t a,uint32_t b,uint32_t c);
+	void AddIndex(Index32 index);
 	void AddLine(uint32_t idx0,uint32_t idx1);
 	void AddPoint(uint32_t idx);
+	void ReserveIndices(size_t num);
+	void ReserveVertices(size_t num);
 	virtual void Update(ModelUpdateFlags flags=ModelUpdateFlags::AllData);
 
 	GeometryType GetGeometryType() const;
 	void SetGeometryType(GeometryType type);
+
+	pragma::model::IndexType GetIndexType() const;
+	void SetIndexType(pragma::model::IndexType type);
+	udm::Type GetUdmIndexType() const;
+	void VisitIndices(auto vs)
+	{
+		auto &indexData = GetIndexData();
+		switch(m_indexType)
+		{
+		case pragma::model::IndexType::UInt16:
+			vs(reinterpret_cast<Index16*>(indexData.data()),GetIndexCount());
+			break;
+		case pragma::model::IndexType::UInt32:
+			vs(reinterpret_cast<Index32*>(indexData.data()),GetIndexCount());
+			break;
+		}
+	}
+	void VisitIndices(auto vs) const
+	{
+		auto &indexData = GetIndexData();
+		switch(m_indexType)
+		{
+		case pragma::model::IndexType::UInt16:
+			vs(reinterpret_cast<const Index16*>(indexData.data()),GetIndexCount());
+			break;
+		case pragma::model::IndexType::UInt32:
+			vs(reinterpret_cast<const Index32*>(indexData.data()),GetIndexCount());
+			break;
+		}
+	}
 
 	void SetVertex(uint32_t idx,const umath::Vertex &v);
 	void SetVertexPosition(uint32_t idx,const Vector3 &pos);
@@ -137,12 +203,13 @@ protected:
 	std::shared_ptr<std::vector<Vector2>> m_alphas;
 	std::shared_ptr<std::unordered_map<std::string,std::vector<Vector2>>> m_uvSets;
 	uint8_t m_numAlphas;
-	std::shared_ptr<std::vector<uint16_t>> m_triangles;
+	std::shared_ptr<std::vector<uint8_t>> m_indexData;
 	std::shared_ptr<std::vector<umath::VertexWeight>> m_vertexWeights;
 	std::shared_ptr<std::vector<umath::VertexWeight>> m_extendedVertexWeights;
 	Vector3 m_min;
 	Vector3 m_max;
 	GeometryType m_geometryType = GeometryType::Triangles;
+	pragma::model::IndexType m_indexType = pragma::model::IndexType::UInt16;
 	uint32_t m_referenceId = std::numeric_limits<uint32_t>::max();
 	umath::ScaledTransform m_pose = umath::ScaledTransform{};
 	void ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clippedMesh,const std::vector<Mat4> *boneMatrices=nullptr,ModelSubMesh *clippedCoverMesh=nullptr);
@@ -166,7 +233,7 @@ public:
 	virtual void AddSubMesh(const std::shared_ptr<ModelSubMesh> &subMesh);
 	std::vector<std::shared_ptr<ModelSubMesh>> &GetSubMeshes();
 	uint32_t GetVertexCount() const;
-	uint32_t GetTriangleVertexCount() const;
+	uint32_t GetIndexCount() const;
 	uint32_t GetTriangleCount() const;
 	uint32_t GetSubMeshCount() const;
 	virtual void Update(ModelUpdateFlags flags=ModelUpdateFlags::AllData);
@@ -183,7 +250,7 @@ protected:
 	Vector3 m_min;
 	Vector3 m_max;
 	uint32_t m_numVerts;
-	uint32_t m_numTriangleVerts;
+	uint32_t m_numIndices;
 	Vector3 m_center;
 	std::vector<std::shared_ptr<ModelSubMesh>> m_subMeshes;
 	uint32_t m_referenceId = std::numeric_limits<uint32_t>::max();

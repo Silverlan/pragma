@@ -12,11 +12,11 @@
 #include <udm.hpp>
 
 ModelMesh::ModelMesh()
-	: std::enable_shared_from_this<ModelMesh>(),m_numVerts(0),m_numTriangleVerts(0)
+	: std::enable_shared_from_this<ModelMesh>(),m_numVerts(0),m_numIndices(0)
 {}
 ModelMesh::ModelMesh(const ModelMesh &other)
 	: m_min(other.m_min),m_max(other.m_max),m_numVerts(other.m_numVerts),
-	m_numTriangleVerts(other.m_numTriangleVerts),m_center(other.m_center),
+	m_numIndices(other.m_numIndices),m_center(other.m_center),
 	m_subMeshes(other.m_subMeshes),m_referenceId{other.m_referenceId}
 {
 	static_assert(sizeof(ModelMesh) == 104,"Update this function when making changes to this class!");
@@ -26,7 +26,7 @@ bool ModelMesh::operator!=(const ModelMesh &other) const {return !operator==(oth
 bool ModelMesh::IsEqual(const ModelMesh &other) const
 {
 	static_assert(sizeof(ModelMesh) == 104,"Update this function when making changes to this class!");
-	if(!(uvec::cmp(m_min,other.m_min) && uvec::cmp(m_max,other.m_max) && m_numVerts == other.m_numVerts && m_numTriangleVerts == other.m_numTriangleVerts &&
+	if(!(uvec::cmp(m_min,other.m_min) && uvec::cmp(m_max,other.m_max) && m_numVerts == other.m_numVerts && m_numIndices == other.m_numIndices &&
 		uvec::cmp(m_center,other.m_center) && m_referenceId == other.m_referenceId && m_subMeshes.size() == other.m_subMeshes.size()))
 		return false;
 	for(auto i=decltype(m_subMeshes.size()){0u};i<m_subMeshes.size();++i)
@@ -56,8 +56,8 @@ void ModelMesh::Translate(const Vector3 &t)
 const Vector3 &ModelMesh::GetCenter() const {return m_center;}
 void ModelMesh::SetCenter(const Vector3 &center) {m_center = center;}
 uint32_t ModelMesh::GetVertexCount() const {return m_numVerts;}
-uint32_t ModelMesh::GetTriangleVertexCount() const {return m_numTriangleVerts;}
-uint32_t ModelMesh::GetTriangleCount() const {return m_numTriangleVerts /3;}
+uint32_t ModelMesh::GetIndexCount() const {return m_numIndices;}
+uint32_t ModelMesh::GetTriangleCount() const {return m_numIndices /3;}
 uint32_t ModelMesh::GetSubMeshCount() const {return static_cast<uint32_t>(m_subMeshes.size());}
 void ModelMesh::Centralize()
 {
@@ -73,7 +73,7 @@ void ModelMesh::Update(ModelUpdateFlags flags)
 	if((flags &ModelUpdateFlags::UpdatePrimitiveCounts) != ModelUpdateFlags::None)
 	{
 		m_numVerts = 0;
-		m_numTriangleVerts = 0;
+		m_numIndices = 0;
 	}
 	if((flags &ModelUpdateFlags::UpdateBounds) != ModelUpdateFlags::None)
 	{
@@ -112,7 +112,7 @@ void ModelMesh::Update(ModelUpdateFlags flags)
 		if((flags &ModelUpdateFlags::UpdatePrimitiveCounts) != ModelUpdateFlags::None)
 		{
 			m_numVerts += subMesh->GetVertexCount();
-			m_numTriangleVerts += subMesh->GetTriangleVertexCount();
+			m_numIndices += subMesh->GetIndexCount();
 		}
 	}
 	if((flags &ModelUpdateFlags::UpdateBounds) != ModelUpdateFlags::None && vertCount > 0)
@@ -158,15 +158,16 @@ void umath::normalize_uv_coordinates(Vector2 &uv)
 
 ModelSubMesh::ModelSubMesh()
 	: std::enable_shared_from_this<ModelSubMesh>(),m_skinTextureIndex(0),m_numAlphas(0),m_alphas(std::make_shared<std::vector<Vector2>>()),
-	m_triangles(std::make_shared<std::vector<uint16_t>>()),m_vertexWeights(std::make_shared<std::vector<umath::VertexWeight>>()),
+	m_indexData(std::make_shared<std::vector<uint8_t>>()),m_vertexWeights(std::make_shared<std::vector<umath::VertexWeight>>()),
 	m_extendedVertexWeights(std::make_shared<std::vector<umath::VertexWeight>>()),m_vertices(std::make_shared<std::vector<umath::Vertex>>()),
 	m_uvSets{std::make_shared<std::unordered_map<std::string,std::vector<Vector2>>>()}
 {}
 ModelSubMesh::ModelSubMesh(const ModelSubMesh &other)
 	: m_skinTextureIndex(other.m_skinTextureIndex),m_center(other.m_center),m_vertices(other.m_vertices),
-	m_alphas(other.m_alphas),m_numAlphas(other.m_numAlphas),m_triangles(other.m_triangles),
+	m_alphas(other.m_alphas),m_numAlphas(other.m_numAlphas),m_indexData(other.m_indexData),
 	m_vertexWeights(other.m_vertexWeights),m_extendedVertexWeights(other.m_extendedVertexWeights),m_min(other.m_min),m_max(other.m_max),
-	m_pose{other.m_pose},m_uvSets{other.m_uvSets},m_geometryType{other.m_geometryType},m_referenceId{other.m_referenceId}
+	m_pose{other.m_pose},m_uvSets{other.m_uvSets},m_geometryType{other.m_geometryType},m_referenceId{other.m_referenceId},
+	m_indexType{other.m_indexType}
 {
 	static_assert(sizeof(ModelSubMesh) == 216,"Update this function when making changes to this class!");
 }
@@ -184,8 +185,10 @@ bool ModelSubMesh::IsEqual(const ModelSubMesh &other) const
 	if(!(m_skinTextureIndex == other.m_skinTextureIndex && uvec::cmp(m_center,other.m_center) && m_numAlphas == other.m_numAlphas && uvec::cmp(m_min,other.m_min) &&
 		uvec::cmp(m_max,other.m_max) && m_geometryType == other.m_geometryType && m_referenceId == other.m_referenceId &&
 		static_cast<bool>(m_vertices) == static_cast<bool>(other.m_vertices) && static_cast<bool>(m_alphas) == static_cast<bool>(other.m_alphas) &&
-		static_cast<bool>(m_uvSets) == static_cast<bool>(other.m_uvSets) && static_cast<bool>(m_triangles) == static_cast<bool>(other.m_triangles) &&
+		static_cast<bool>(m_uvSets) == static_cast<bool>(other.m_uvSets) && static_cast<bool>(m_indexData) == static_cast<bool>(other.m_indexData) &&
 		static_cast<bool>(m_vertexWeights) == static_cast<bool>(other.m_vertexWeights) && static_cast<bool>(m_extendedVertexWeights) == static_cast<bool>(other.m_extendedVertexWeights)))
+		return false;
+	if(m_indexType != other.m_indexType)
 		return false;
 	if(uvec::cmp(m_pose.GetOrigin(),other.m_pose.GetOrigin()) == false || uquat::cmp(m_pose.GetRotation(),other.m_pose.GetRotation()) == false || uvec::cmp(m_pose.GetScale(),other.m_pose.GetScale()) == false)
 		return false;
@@ -228,13 +231,25 @@ bool ModelSubMesh::IsEqual(const ModelSubMesh &other) const
 	}
 	if(m_uvSets && *m_uvSets != *other.m_uvSets)
 		return false;
-	if(m_triangles)
+	if(m_indexData)
 	{
-		for(auto i=decltype(m_triangles->size()){0u};i<m_triangles->size();++i)
-		{
-			if((*m_triangles)[i] != (*other.m_triangles)[i])
-				return false;
-		}
+		if(GetIndexCount() != other.GetIndexCount())
+			return false;
+		auto match = true;
+		VisitIndices([&other,&match](auto *indexDataSrc,uint32_t numIndicesSrc) {
+			other.VisitIndices([indexDataSrc,&match](auto *indexDataDst,uint32_t numIndicesDst) {
+				for(auto i=decltype(numIndicesDst){0u};i<numIndicesDst;++i)
+				{
+					if(indexDataSrc[i] != indexDataDst[i])
+					{
+						match = false;
+						break;
+					}
+				}
+			});
+		});
+		if(!match)
+			return false;
 	}
 	if(m_vertexWeights)
 	{
@@ -258,7 +273,7 @@ void ModelSubMesh::Copy(ModelSubMesh &cpy,bool fullCopy) const
 {
 	cpy.m_vertices = std::make_shared<std::vector<umath::Vertex>>(*cpy.m_vertices);
 	cpy.m_alphas = std::make_shared<std::vector<Vector2>>(*cpy.m_alphas);
-	cpy.m_triangles = std::make_shared<std::vector<uint16_t>>(*cpy.m_triangles);
+	cpy.m_indexData = std::make_shared<std::vector<uint8_t>>(*cpy.m_indexData);
 	cpy.m_vertexWeights = std::make_shared<std::vector<umath::VertexWeight>>(*cpy.m_vertexWeights);
 	cpy.m_extendedVertexWeights = std::make_shared<std::vector<umath::VertexWeight>>(*cpy.m_extendedVertexWeights);
 	cpy.m_uvSets = std::make_shared<std::unordered_map<std::string,std::vector<Vector2>>>(*cpy.m_uvSets);
@@ -301,13 +316,27 @@ void ModelSubMesh::Merge(const ModelSubMesh &other)
 		newVertCount = m_vertices->size();
 	}
 	
-	if(other.m_triangles != nullptr)
+	if(other.m_indexData != nullptr)
 	{
-		if(m_triangles == nullptr)
-			m_triangles = std::make_shared<std::vector<uint16_t>>();
-		m_triangles->reserve(m_triangles->size() +other.m_triangles->size());
-		for(auto &idx : *other.m_triangles)
-			m_triangles->push_back(vertCount +idx);
+		if(m_indexData == nullptr)
+			m_indexData = std::make_shared<std::vector<uint8_t>>();
+		if(GetIndexType() == pragma::model::IndexType::UInt16)
+		{
+			// Check if we need to increase our index size
+			uint32_t maxIndex = 0;
+			other.VisitIndices([&maxIndex](auto *indexData,uint32_t numIndices) {
+				for(auto i=decltype(numIndices){0u};i<numIndices;++i)
+					maxIndex = umath::max(maxIndex,static_cast<Index32>(indexData[i]));
+			});
+			if(vertCount +maxIndex >= MAX_INDEX16)
+				SetIndexType(pragma::model::IndexType::UInt32);
+		}
+		ReserveIndices(GetIndexCount() +other.GetIndexCount());
+		// TODO: Use memcpy if index type matches
+		other.VisitIndices([this](auto *indexData,uint32_t numIndices) {
+			for(auto i=decltype(numIndices){0u};i<numIndices;++i)
+				AddIndex(indexData[i]);
+		});
 	}
 
 	if(other.m_alphas != nullptr && ((m_alphas && !m_alphas->empty()) || !other.m_alphas->empty()))
@@ -359,7 +388,7 @@ void ModelSubMesh::SetShared(const ModelSubMesh &other,ShareMode mode)
 	if((mode &ShareMode::Alphas) != ShareMode::None)
 		m_alphas = other.m_alphas;
 	if((mode &ShareMode::Triangles) != ShareMode::None)
-		m_triangles = other.m_triangles;
+		m_indexData = other.m_indexData;
 	if((mode &ShareMode::VertexWeights) != ShareMode::None)
 	{
 		m_vertexWeights = other.m_vertexWeights;
@@ -368,7 +397,7 @@ void ModelSubMesh::SetShared(const ModelSubMesh &other,ShareMode mode)
 }
 void ModelSubMesh::ClearTriangles()
 {
-	m_triangles = std::make_shared<std::vector<uint16_t>>();
+	m_indexData = std::make_shared<std::vector<uint8_t>>();
 }
 void ModelSubMesh::Centralize(const Vector3 &origin)
 {
@@ -385,31 +414,32 @@ void ModelSubMesh::NormalizeUVCoordinates()
 }
 void ModelSubMesh::GenerateNormals()
 {
-	auto &triangles = GetTriangles();
 	auto &verts = GetVertices();
-	std::unordered_map<decltype(triangles.size()),Vector3> processed {};
+	std::unordered_map<size_t,Vector3> processed {};
 	for(auto vertId=decltype(verts.size()){0};vertId<verts.size();++vertId)
 	{
 		auto &v = verts[vertId];
 		auto &n = v.normal = {};
-		for(auto i=decltype(triangles.size()){0};i<triangles.size();i+=3)
-		{
-			auto idx0 = triangles[i];
-			auto idx1 = triangles[i +1];
-			auto idx2 = triangles[i +2];
-			if(idx0 == vertId || idx1 == vertId || idx2 == vertId) // Vertex is part of this triangle
+		VisitIndices([&processed,&n,vertId,&verts](auto *indexData,uint32_t numIndices) {
+			for(auto i=decltype(numIndices){0};i<numIndices;i+=3)
 			{
-				auto it = processed.find(i);
-				if(it != processed.end()) // Already calculated the normal for this face
+				auto idx0 = indexData[i];
+				auto idx1 = indexData[i +1];
+				auto idx2 = indexData[i +2];
+				if(idx0 == vertId || idx1 == vertId || idx2 == vertId) // Vertex is part of this triangle
 				{
-					n += it->second;
-					continue;
+					auto it = processed.find(i);
+					if(it != processed.end()) // Already calculated the normal for this face
+					{
+						n += it->second;
+						continue;
+					}
+					auto faceNormal = uvec::calc_face_normal(verts[idx0].position,verts[idx1].position,verts[idx2].position);
+					n += faceNormal;
+					processed[i] = faceNormal;
 				}
-				auto faceNormal = uvec::calc_face_normal(verts[idx0].position,verts[idx1].position,verts[idx2].position);
-				n += faceNormal;
-				processed[i] = faceNormal;
 			}
-		}
+		});
 		uvec::normalize(&n);
 	}
 }
@@ -437,13 +467,76 @@ void ModelSubMesh::Transform(const umath::ScaledTransform &pose)
 }
 const Vector3 &ModelSubMesh::GetCenter() const {return m_center;}
 uint32_t ModelSubMesh::GetVertexCount() const {return static_cast<uint32_t>(m_vertices->size());}
-uint32_t ModelSubMesh::GetTriangleVertexCount() const {return static_cast<uint32_t>(m_triangles->size());}
-uint32_t ModelSubMesh::GetTriangleCount() const {return static_cast<uint32_t>(m_triangles->size()) /3;}
+uint32_t ModelSubMesh::GetIndexCount() const
+{
+	switch(m_indexType)
+	{
+	case pragma::model::IndexType::UInt16:
+		return m_indexData->size() /sizeof(Index16);
+	case pragma::model::IndexType::UInt32:
+		return m_indexData->size() /sizeof(Index32);
+	}
+	return 0;
+}
+uint32_t ModelSubMesh::GetTriangleCount() const {return GetIndexCount() /3;}
 uint32_t ModelSubMesh::GetSkinTextureIndex() const {return m_skinTextureIndex;}
+void ModelSubMesh::SetIndexCount(uint32_t numIndices)
+{
+	m_indexData->resize(numIndices *size_of_index(GetIndexType()));
+}
+void ModelSubMesh::SetTriangleCount(uint32_t numTris) {SetIndexCount(numTris *3);}
+void ModelSubMesh::SetIndices(const std::vector<Index16> &indices)
+{
+	SetIndexCount(indices.size());
+	VisitIndices([this,&indices](auto *indexData,uint32_t numIndices) {
+		memcpy(indexData,indices.data(),numIndices *size_of_index(pragma::model::IndexType::UInt16));
+	});
+}
+void ModelSubMesh::SetIndices(const std::vector<Index32> &indices)
+{
+	SetIndexCount(indices.size());
+	VisitIndices([this,&indices](auto *indexData,uint32_t numIndices) {
+		memcpy(indexData,indices.data(),numIndices *size_of_index(pragma::model::IndexType::UInt32));
+	});
+}
 void ModelSubMesh::SetSkinTextureIndex(uint32_t texture) {m_skinTextureIndex = texture;}
 std::vector<umath::Vertex> &ModelSubMesh::GetVertices() {return *m_vertices;}
 std::vector<Vector2> &ModelSubMesh::GetAlphas() {return *m_alphas;}
-std::vector<uint16_t> &ModelSubMesh::GetTriangles() {return *m_triangles;}
+std::vector<uint8_t> &ModelSubMesh::GetIndexData() {return *m_indexData;}
+std::optional<ModelSubMesh::Index32> ModelSubMesh::GetIndex(uint32_t i) const
+{
+	if(i >= GetIndexCount())
+		return {};
+	ModelSubMesh::Index32 idx;
+	VisitIndices([i,&idx](auto *indexData,uint32_t numIndices) {
+		idx = indexData[i];
+	});
+	return idx;
+}
+bool ModelSubMesh::SetIndex(uint32_t i,Index32 idx)
+{
+	if(i >= GetIndexCount())
+		return false;
+	VisitIndices([i,idx](auto *indexData,uint32_t numIndices) {
+		indexData[i] = idx;
+	});
+	return true;
+}
+void ModelSubMesh::GetIndices(std::vector<Index32> &outIndices) const
+{
+	auto offset = outIndices.size();
+	outIndices.resize(outIndices.size() +GetIndexCount());
+	if(GetIndexType() == pragma::model::IndexType::UInt32)
+	{
+		auto &indexData = GetIndexData();
+		memcpy(outIndices.data() +offset,indexData.data(),indexData.size());
+		return;
+	}
+	VisitIndices([offset,&outIndices](auto *indexData,uint32_t numIndices) {
+		for(auto i=decltype(numIndices){0u};i<numIndices;++i)
+			outIndices[offset +i] = indexData[i];
+	});
+}
 std::vector<umath::VertexWeight> &ModelSubMesh::GetVertexWeights() {return *m_vertexWeights;}
 std::vector<umath::VertexWeight> &ModelSubMesh::GetExtendedVertexWeights() {return *m_extendedVertexWeights;}
 uint8_t ModelSubMesh::GetAlphaCount() const {return m_numAlphas;}
@@ -465,26 +558,84 @@ void ModelSubMesh::AddTriangle(const umath::Vertex &v1,const umath::Vertex &v2,c
 	m_vertices->push_back(v3);
 	AddTriangle(static_cast<uint32_t>(numVerts),static_cast<uint32_t>(numVerts +1),static_cast<uint32_t>(numVerts +2));
 }
+void ModelSubMesh::ReserveIndices(size_t num)
+{
+	m_indexData->reserve(num *size_of_index(GetIndexType()));
+}
+void ModelSubMesh::ReserveVertices(size_t num) {m_vertices->reserve(num);}
+void ModelSubMesh::AddIndex(Index32 index)
+{
+	if(m_indexData->size() == m_indexData->capacity())
+		m_indexData->reserve(static_cast<uint32_t>(m_indexData->size() *1.5f));
+	if(m_indexType == pragma::model::IndexType::UInt16 && index >= std::numeric_limits<Index16>::max())
+		SetIndexType(pragma::model::IndexType::UInt32);
+	
+	auto offset = GetIndexCount();
+	m_indexData->resize(m_indexData->size() +size_of_index(m_indexType));
+	VisitIndices([offset,index](auto *indexData,uint32_t numIndices) {
+		indexData[offset] = index;
+	});
+}
 void ModelSubMesh::AddTriangle(uint32_t a,uint32_t b,uint32_t c)
 {
-	if(m_triangles->size() == m_triangles->capacity())
-		m_triangles->reserve(static_cast<uint32_t>(m_triangles->size() *1.5f));
-	m_triangles->push_back(static_cast<uint16_t>(a));
-	m_triangles->push_back(static_cast<uint16_t>(b));
-	m_triangles->push_back(static_cast<uint16_t>(c));
+	AddIndex(a);
+	AddIndex(b);
+	AddIndex(c);
 }
 void ModelSubMesh::AddLine(uint32_t idx0,uint32_t idx1)
 {
-	if(m_triangles->size() == m_triangles->capacity())
-		m_triangles->reserve(static_cast<uint32_t>(m_triangles->size() *1.5f));
-	m_triangles->push_back(idx0);
-	m_triangles->push_back(idx1);
+	AddIndex(idx0);
+	AddIndex(idx1);
 }
 void ModelSubMesh::AddPoint(uint32_t idx)
 {
-	if(m_triangles->size() == m_triangles->capacity())
-		m_triangles->reserve(static_cast<uint32_t>(m_triangles->size() *1.5f));
-	m_triangles->push_back(idx);
+	AddIndex(idx);
+}
+pragma::model::IndexType ModelSubMesh::GetIndexType() const {return m_indexType;}
+udm::Type ModelSubMesh::GetUdmIndexType() const
+{
+	switch(m_indexType)
+	{
+	case pragma::model::IndexType::UInt16:
+		return udm::Type::UInt16;
+	case pragma::model::IndexType::UInt32:
+		return udm::Type::UInt32;
+	}
+	return udm::Type::Invalid;
+}
+void ModelSubMesh::SetIndexType(pragma::model::IndexType type)
+{
+	if(type == m_indexType)
+		return;
+	auto convertIndices = [this,type]<typename TIdxSrc,typename TIdxDst>() {
+		auto numIndices = GetIndexCount();
+		std::vector<uint8_t> oldData = std::move(*m_indexData);
+		std::vector<uint8_t> newData;
+		newData.resize(numIndices *sizeof(TIdxDst));
+		auto *src = reinterpret_cast<TIdxSrc*>(oldData.data());
+		auto *dst = reinterpret_cast<TIdxDst*>(newData.data());
+		for(auto i=decltype(numIndices){0u};i<numIndices;++i)
+		{
+			auto idx = src[i];
+			if constexpr(std::numeric_limits<TIdxSrc>::max() > std::numeric_limits<TIdxDst>::max())
+			{
+				if(idx >= std::numeric_limits<TIdxDst>::max())
+					throw std::runtime_error{"Attempted to change index type of mesh from " +std::string{magic_enum::enum_name(m_indexType)} +" to " +std::string{magic_enum::enum_name(type)} +", but index " +std::to_string(idx) +" exceeds range of target type!"};
+			}
+			dst[i] = idx;
+		}
+		*m_indexData = std::move(newData);
+	};
+	switch(type)
+	{
+	case pragma::model::IndexType::UInt16:
+		convertIndices.template operator()<Index32,Index16>();
+		break;
+	case pragma::model::IndexType::UInt32:
+		convertIndices.template operator()<Index16,Index32>();
+		break;
+	}
+	m_indexType = type;
 }
 ModelSubMesh::GeometryType ModelSubMesh::GetGeometryType() const {return m_geometryType;}
 void ModelSubMesh::SetGeometryType(GeometryType type) {m_geometryType = type;}
@@ -545,7 +696,9 @@ void ModelSubMesh::SetVertexAlpha(uint32_t idx,const Vector2 &alpha)
 }
 void ModelSubMesh::ComputeTangentBasis()
 {
-	umath::compute_tangent_basis(*m_vertices,*m_triangles);
+	VisitIndices([this](auto *indexData,uint32_t numIndices) {
+		umath::compute_tangent_basis(*m_vertices,indexData,numIndices);
+	});
 
 	// Obsolete: Remove this block if there are no issues with the above tangent-generator
 #if 0
@@ -673,8 +826,6 @@ void ModelSubMesh::Optimize(double epsilon)
 {
 	std::vector<umath::Vertex> newVerts;
 	newVerts.reserve(m_vertices->size());
-	std::vector<uint16_t> newTriangles;
-	newTriangles.reserve(m_triangles->size());
 
 	auto bCheckAlphas = (m_alphas->size() == m_vertices->size()) ? true : false;
 	// TODO: Check extended weights as well!
@@ -686,7 +837,7 @@ void ModelSubMesh::Optimize(double epsilon)
 	if(bCheckWeights == true)
 		newVertexWeights.reserve(m_vertexWeights->size());
 
-	std::vector<decltype(newVerts.size())> translate;
+	std::vector<size_t> translate;
 	translate.reserve(m_vertices->size());
 	for(auto i=decltype(m_vertices->size()){0};i<m_vertices->size();++i)
 	{
@@ -718,11 +869,12 @@ void ModelSubMesh::Optimize(double epsilon)
 		}
 		translate.push_back(vertIdx);
 	}
-	for(auto i : *m_triangles)
-		newTriangles.push_back(static_cast<int16_t>(translate[i]));
+	VisitIndices([this,&translate](auto *indexData,uint32_t numIndices) {
+		for(auto i=decltype(numIndices){0u};i<numIndices;++i)
+			indexData[i] = translate[indexData[i]];
+	});
 
 	*m_vertices = newVerts;
-	*m_triangles = newTriangles;
 	if(bCheckAlphas == true)
 		*m_alphas = newAlphas;
 	if(bCheckWeights == true)
@@ -768,7 +920,10 @@ bool ModelSubMesh::Save(udm::AssetDataArg outData,std::string &outErr)
 	static_assert(sizeof(umath::Vertex) == 48);
 	auto strctVertex = ::udm::StructDescription::Define<Vector3,Vector2,Vector3,Vector4>({"pos","uv","n","t"});
 	udm.AddArray("vertices",strctVertex,GetVertices(),udm::ArrayType::Compressed);
-	udm.AddArray("indices",GetTriangles(),udm::ArrayType::Compressed);
+	auto &indexData = GetIndexData();
+	VisitIndices([&udm](auto *indexData,uint32_t numIndices) {
+		udm.AddArray("indices",numIndices,indexData,udm::ArrayType::Compressed);
+	});
 	udm["skinMaterialIndex"] = m_skinTextureIndex;
 
 	auto udmUvSets = udm["uvSets"];
@@ -816,10 +971,25 @@ bool ModelSubMesh::LoadFromAssetData(const udm::AssetData &data,std::string &out
 	
 	// Backwards compatibility
 	udm["vertexData"](GetVertices());
-	udm["indexData"](GetTriangles());
+	auto udmIndexData = udm["indexData"];
+	if(udmIndexData)
+	{
+		std::vector<uint16_t> indexData;
+		udmIndexData(indexData);
+		SetIndices(indexData);
+	}
 
 	udm["vertices"](GetVertices());
-	udm["indices"](GetTriangles());
+	auto udmIndices = udm["indices"];
+	auto *aIndices = udmIndices.GetValuePtr<udm::Array>();
+	if(aIndices)
+	{
+		auto valueType = aIndices->GetValueType();
+		SetIndexType((valueType == udm::Type::UInt16) ? pragma::model::IndexType::UInt16 : pragma::model::IndexType::UInt32);
+		SetIndexCount(aIndices->GetSize());
+		auto &indexData = GetIndexData();
+		memcpy(indexData.data(),aIndices->GetValuePtr(0),indexData.size());
+	}
 	udm["skinMaterialIndex"](m_skinTextureIndex);
 
 	auto udmUvSets = udm["uvSets"];
@@ -843,7 +1013,7 @@ std::ostream &operator<<(std::ostream &out,const ModelMesh &o)
 {
 	out<<"ModelMesh";
 	out<<"[Verts:"<<o.GetVertexCount()<<"]";
-	out<<"[Indices:"<<o.GetTriangleVertexCount()<<"]";
+	out<<"[Indices:"<<o.GetIndexCount()<<"]";
 	out<<"[SubMeshes:"<<o.GetSubMeshCount()<<"]";
 	out<<"[Center:"<<o.GetCenter()<<"]";
 	return out;
@@ -853,7 +1023,7 @@ std::ostream &operator<<(std::ostream &out,const ModelSubMesh &o)
 {
 	out<<"ModelSubMesh";
 	out<<"[Verts:"<<o.GetVertexCount()<<"]";
-	out<<"[Indices:"<<o.GetTriangleVertexCount()<<"]";
+	out<<"[Indices:"<<o.GetIndexCount()<<"]";
 	out<<"[MatIdx:"<<o.GetSkinTextureIndex()<<"]";
 	out<<"[Center:"<<o.GetCenter()<<"]";
 	out<<"[Type:"<<magic_enum::enum_name(o.GetGeometryType())<<"]";

@@ -444,7 +444,6 @@ void pragma::asset::WmdFormatHandler::LoadMeshes(unsigned short version,Model &m
 				{
 					auto subMesh = subMeshFactory();
 					auto &subVertices = subMesh->GetVertices();
-					auto &triangles = subMesh->GetTriangles();
 					auto &vertexWeights = subMesh->GetVertexWeights();
 
 					auto texID = m_file->Read<unsigned short>();
@@ -504,7 +503,7 @@ void pragma::asset::WmdFormatHandler::LoadMeshes(unsigned short version,Model &m
 						{
 							auto localID = m_file->Read<unsigned long long>();
 							//FWMDVertex &vert = vertices[meshVertIDs[localID]];
-							triangles.push_back(static_cast<uint16_t>(localID));
+							subMesh->AddIndex(localID);
 						}
 					}
 					if(subVertices.size() > 0)
@@ -540,7 +539,6 @@ void pragma::asset::WmdFormatHandler::LoadMeshes(unsigned short version,Model &m
 					}
 
 					auto &verts = subMesh->GetVertices();
-					auto &tris = subMesh->GetTriangles();
 					auto &vertWeights = subMesh->GetVertexWeights();
 
 					auto numVerts = m_file->Read<uint64_t>();
@@ -615,9 +613,10 @@ void pragma::asset::WmdFormatHandler::LoadMeshes(unsigned short version,Model &m
 					uint32_t numIndices = m_file->Read<uint32_t>();
 					if(version < 30)
 						numIndices *= 3;
-					tris.resize(numIndices);
-					static_assert(std::is_same_v<std::remove_reference_t<decltype(tris.front())>,uint16_t>);
-					m_file->Read(tris.data(),tris.size() *sizeof(decltype(tris.front())));
+					subMesh->SetIndexType(pragma::model::IndexType::UInt16);
+					subMesh->SetIndexCount(numIndices);
+					auto &indexData = subMesh->GetIndexData();
+					m_file->Read(indexData.data(),indexData.size());
 
 					mesh->AddSubMesh(subMesh);
 				}

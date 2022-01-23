@@ -688,27 +688,33 @@ static std::shared_ptr<Model> import_model(ufile::IFile *optFile,const std::stri
 
 			auto subMesh = c_game->CreateModelSubMesh();
 			subMesh->SetSkinTextureIndex(primitive.material);
-			auto &indices = subMesh->GetTriangles();
 			auto numIndices = idxAccessor.count;
-			indices.resize(numIndices);
 			switch(idxAccessor.componentType)
 			{
 			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
 			{
-				memcpy(indices.data(),srcIndexData,indices.size() *sizeof(indices.front()));
+				subMesh->SetIndexType(pragma::model::IndexType::UInt16);
+				subMesh->SetIndexCount(numIndices);
+				auto &indexData = subMesh->GetIndexData();
+				memcpy(indexData.data(),srcIndexData,indexData.size());
 				break;
 			}
 			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
 			{
-				for(auto i=decltype(numIndices){0u};i<numIndices;++i)
-					indices.at(i) = srcIndexData[i];
+				subMesh->SetIndexType(pragma::model::IndexType::UInt16);
+				subMesh->SetIndexCount(numIndices);
+				subMesh->VisitIndices([srcIndexData](auto *indexData,uint32_t numIndices) {
+					for(auto i=decltype(numIndices){0u};i<numIndices;++i)
+						indexData[i] = srcIndexData[i];
+				});
 				break;
 			}
 			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
 			{
-				auto *uiData = reinterpret_cast<const uint32_t*>(srcIndexData);
-				for(auto i=decltype(numIndices){0u};i<numIndices;++i)
-					indices.at(i) = uiData[i]; // TODO: If index is out of range (uint16), split the mesh into sub-meshes!
+				subMesh->SetIndexType(pragma::model::IndexType::UInt32);
+				subMesh->SetIndexCount(numIndices);
+				auto &indexData = subMesh->GetIndexData();
+				memcpy(indexData.data(),srcIndexData,indexData.size());
 				break;
 			}
 			}

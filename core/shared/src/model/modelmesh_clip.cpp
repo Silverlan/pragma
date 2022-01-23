@@ -27,8 +27,8 @@ static Vector2 calc_barycentric_coordinates(
 }
 
 static void clip_triangle(
-	const std::function<void(uint16_t)> &fAddTriangleIndex,const std::function<void(uint16_t,uint16_t,const Vector3&,const Vector2&)> &fAddNewVertex,
-	const Vector3 &C,const std::vector<umath::Vertex> &verts,const std::array<uint16_t,3> &indices,const std::array<double,3> &distances
+	const std::function<void(uint32_t)> &fAddTriangleIndex,const std::function<void(uint16_t,uint16_t,const Vector3&,const Vector2&)> &fAddNewVertex,
+	const Vector3 &C,const std::vector<umath::Vertex> &verts,const std::array<uint32_t,3> &indices,const std::array<double,3> &distances
 )
 {
 	const auto d0 = distances.at(0);
@@ -105,7 +105,6 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clip
 {
 	const auto &verts = GetVertices();
 	const auto &alphas = GetAlphas();
-	const auto &triangles = GetTriangles();
 	const auto &vertexWeights = GetVertexWeights();
 	auto bUseWeights = vertexWeights.size() >= verts.size();
 	auto fGetVertexPosition = std::function<const Vector3&(uint32_t)>([&verts](uint32_t vertexIndex) -> const Vector3& {
@@ -138,15 +137,14 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clip
 
 	auto &clipMeshVerts = clippedMesh.GetVertices();
 	auto &clippedAlphas = clippedMesh.GetAlphas();
-	auto &clipMeshTriangles = clippedMesh.GetTriangles();
 	auto &clippedVertexWeights = clippedMesh.GetVertexWeights();
 	clipMeshVerts.reserve(verts.size());
 	clippedAlphas.reserve(alphas.size());
-	clipMeshTriangles.reserve(triangles.size());
+	clippedMesh.ReserveIndices(GetIndexCount());
 	clippedVertexWeights.reserve(clipMeshVerts.size());
 
 	std::vector<uint32_t> originalVertexIndicesToClippedVertexIndices(verts.size(),std::numeric_limits<uint32_t>::max());
-	const auto fAddTriangleIndex = [bUseWeights,&originalVertexIndicesToClippedVertexIndices,&triangles,&verts,&alphas,&clipMeshVerts,&clippedAlphas,&clipMeshTriangles,&clippedVertexWeights,&vertexWeights](uint16_t idx) {
+	const auto fAddTriangleIndex = [bUseWeights,&originalVertexIndicesToClippedVertexIndices,&verts,&alphas,&clipMeshVerts,&clippedAlphas,&clippedMesh,&clippedVertexWeights,&vertexWeights](uint16_t idx) {
 		if(originalVertexIndicesToClippedVertexIndices.at(idx) == std::numeric_limits<uint32_t>::max())
 		{
 			originalVertexIndicesToClippedVertexIndices.at(idx) = clipMeshVerts.size();
@@ -156,7 +154,7 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clip
 			if(idx < alphas.size())
 				clippedAlphas.push_back(alphas.at(idx));
 		}
-		clipMeshTriangles.push_back(originalVertexIndicesToClippedVertexIndices.at(idx));
+		clippedMesh.AddIndex(originalVertexIndicesToClippedVertexIndices.at(idx));
 	};
 	struct PointData
 	{
@@ -165,8 +163,8 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clip
 	};
 	using BoneId = int32_t;
 	std::vector<PointData> newPoints {};
-	const auto fAddNewVertex = [bUseWeights,&fApplyVertexBoneTransformations,boneMatrices,&vertexWeights,&clippedVertexWeights,&verts,&alphas,&clipMeshTriangles,&clipMeshVerts,&clippedAlphas,&newPoints](uint16_t idx0,uint16_t idx1,const Vector3 &v,const Vector2 &uv) {
-		clipMeshTriangles.push_back(clipMeshVerts.size());
+	const auto fAddNewVertex = [bUseWeights,&fApplyVertexBoneTransformations,boneMatrices,&vertexWeights,&clippedVertexWeights,&verts,&alphas,&clippedMesh,&clipMeshVerts,&clippedAlphas,&newPoints](uint16_t idx0,uint16_t idx1,const Vector3 &v,const Vector2 &uv) {
+		clippedMesh.AddIndex(clipMeshVerts.size());
 		clipMeshVerts.push_back({v,uv,(verts.at(idx0).normal +verts.at(idx1).normal) /2.f});
 
 		if(bUseWeights)
@@ -230,37 +228,39 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clip
 	};
 
 	auto C = n *static_cast<float>(d);
-	for(auto i=decltype(triangles.size()){0};i<triangles.size();i+=3)
-	{
-		auto idx0 = triangles.at(i);
-		auto idx1 = triangles.at(i +1);
-		auto idx2 = triangles.at(i +2);
-
-		auto &v0 = fGetVertexPosition(idx0);
-		auto &v1 = fGetVertexPosition(idx1);
-		auto &v2 = fGetVertexPosition(idx2);
-
-		auto d0 = uvec::dot(v0,n) -d;
-		auto d1 = uvec::dot(v1,n) -d;
-		auto d2 = uvec::dot(v2,n) -d;
-
-		// a to b crosses the clipping plane
-		if(d0 *d1 < 0.0)
-			clip_triangle(fAddTriangleIndex,fAddNewVertex,C,verts,{idx0,idx1,idx2},{d0,d1,d2});
-		// a to c crosses the clipping plane
-		else if(d0 *d2 < 0.0)
-			clip_triangle(fAddTriangleIndex,fAddNewVertex,C,verts,{idx2,idx0,idx1},{d2,d0,d1});
-		// b to c crosses the clipping plane
-		else if(d1 *d2 < 0.0)
-			clip_triangle(fAddTriangleIndex,fAddNewVertex,C,verts,{idx1,idx2,idx0},{d1,d2,d0});
-		// Full clipping plane intersection; keep the whole triangle
-		else if(d0 < 0.0 || d1 < 0.0 || d2 < 0.0)
+	VisitIndices([&](auto *indexData,uint32_t numIndices) {
+		for(auto i=decltype(numIndices){0};i<numIndices;i+=3)
 		{
-			fAddTriangleIndex(idx0);
-			fAddTriangleIndex(idx1);
-			fAddTriangleIndex(idx2);
+			auto idx0 = indexData[i];
+			auto idx1 = indexData[i +1];
+			auto idx2 = indexData[i +2];
+
+			auto &v0 = fGetVertexPosition(idx0);
+			auto &v1 = fGetVertexPosition(idx1);
+			auto &v2 = fGetVertexPosition(idx2);
+
+			auto d0 = uvec::dot(v0,n) -d;
+			auto d1 = uvec::dot(v1,n) -d;
+			auto d2 = uvec::dot(v2,n) -d;
+
+			// a to b crosses the clipping plane
+			if(d0 *d1 < 0.0)
+				clip_triangle(fAddTriangleIndex,fAddNewVertex,C,verts,{idx0,idx1,idx2},{d0,d1,d2});
+			// a to c crosses the clipping plane
+			else if(d0 *d2 < 0.0)
+				clip_triangle(fAddTriangleIndex,fAddNewVertex,C,verts,{idx2,idx0,idx1},{d2,d0,d1});
+			// b to c crosses the clipping plane
+			else if(d1 *d2 < 0.0)
+				clip_triangle(fAddTriangleIndex,fAddNewVertex,C,verts,{idx1,idx2,idx0},{d1,d2,d0});
+			// Full clipping plane intersection; keep the whole triangle
+			else if(d0 < 0.0 || d1 < 0.0 || d2 < 0.0)
+			{
+				fAddTriangleIndex(idx0);
+				fAddTriangleIndex(idx1);
+				fAddTriangleIndex(idx2);
+			}
 		}
-	}
+	});
 
 	clippedMesh.m_skinTextureIndex = m_skinTextureIndex;
 	clippedMesh.m_center = m_center;
@@ -408,19 +408,19 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clip
 			}
 
 			auto *pCoverVerts = &clipMeshVerts;
-			auto *pCoverTriangles = &clipMeshTriangles;
+			auto *coverMesh = &clippedMesh;
 			auto *pCoverVertexWeights = &clippedVertexWeights;
 			if(clippedCoverMesh != nullptr)
 			{
 				pCoverVerts = &clippedCoverMesh->GetVertices();
-				pCoverTriangles = &clippedCoverMesh->GetTriangles();
+				coverMesh = clippedCoverMesh;
 				pCoverVertexWeights = &clippedCoverMesh->GetVertexWeights();
 			}
 
 			pCoverVerts->reserve(pCoverVerts->size() +newTriangles.size());
-			pCoverTriangles->reserve(pCoverTriangles->size() +newTriangles.size());
+			coverMesh->ReserveIndices(coverMesh->GetIndexCount() +newTriangles.size());
 			pCoverVertexWeights->reserve(pCoverVertexWeights->size() +newTriangles.size());
-			auto triangleIdx = pCoverTriangles->size();
+			auto triangleIdx = coverMesh->GetIndexCount();
 			for(auto i=decltype(newTriangles.size()){0u};i<newTriangles.size();i+=3)
 			{
 				std::array<uint16_t,3> indices = {newTriangles.at(i),newTriangles.at(i +1),newTriangles.at(i +2)};
@@ -439,7 +439,7 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clip
 					umath::geometry::calc_barycentric_coordinates(p0.vertex.position,p1.vertex.position,p2.vertex.position,v.vertex.position,v.vertex.uv.x,v.vertex.uv.y);
 
 					pCoverVerts->push_back(v.vertex);
-					pCoverTriangles->push_back(pCoverVerts->size() -1u);
+					coverMesh->AddIndex(pCoverVerts->size() -1u);
 					pCoverVertexWeights->push_back(v.weight);
 
 				

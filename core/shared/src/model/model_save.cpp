@@ -1309,10 +1309,11 @@ bool Model::SaveLegacy(Game *game,const std::string &name,const std::string &roo
 				}
 				//
 
-				auto &indices = subMesh->GetTriangles();
-				f->Write<uint32_t>(indices.size());
-				static_assert(std::is_same_v<std::remove_reference_t<decltype(indices.front())>,uint16_t>);
-				f->Write(indices.data(),indices.size() *sizeof(decltype(indices.front())));
+				if(subMesh->GetIndexType() != pragma::model::IndexType::UInt16)
+					return false;
+				auto &indexData = subMesh->GetIndexData();
+				f->Write<uint32_t>(subMesh->GetIndexCount());
+				f->Write(indexData.data(),indexData.size());
 			}
 		}
 	}

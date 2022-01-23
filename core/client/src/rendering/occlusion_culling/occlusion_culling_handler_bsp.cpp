@@ -171,22 +171,22 @@ static void debug_bsp_nodes(NetworkState*,ConVar*,int32_t,int32_t val)
 			{
 				auto &meshes = meshGroup->GetMeshes();
 				auto numTotalMeshes = meshes.size();
-				auto numTotalVerts = 0ull;
+				auto numTotalIndices = 0ull;
 				auto numTotalTris = 0ull;
 				for(auto &mesh : meshes)
 				{
-					numTotalVerts += mesh->GetTriangleVertexCount();
+					numTotalIndices += mesh->GetIndexCount();
 					numTotalTris += mesh->GetTriangleCount();
 				}
 
-				const auto fFindVisInfo = [&meshes,pCurrentNode,numTotalVerts,numTotalTris](const std::unordered_set<size_t> &visClusters) {
+				const auto fFindVisInfo = [&meshes,pCurrentNode](const std::unordered_set<size_t> &visClusters) {
 					auto numVerts = 0ull;
 					auto numTris = 0ull;
-					auto numMeshes = std::count_if(meshes.begin(),meshes.end(),[pCurrentNode,&numVerts,&numTris,numTotalVerts,numTotalTris,&visClusters](const std::shared_ptr<ModelMesh> &mesh) {
+					auto numMeshes = std::count_if(meshes.begin(),meshes.end(),[pCurrentNode,&numVerts,&numTris,&visClusters](const std::shared_ptr<ModelMesh> &mesh) {
 						auto it = visClusters.find(mesh->GetReferenceId());
 						if(it == visClusters.end())
 							return false;
-						numVerts += mesh->GetTriangleVertexCount();
+						numVerts += mesh->GetIndexCount();
 						numTris += mesh->GetTriangleCount();
 						return true;
 					});

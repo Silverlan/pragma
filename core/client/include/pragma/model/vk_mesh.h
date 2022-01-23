@@ -21,6 +21,7 @@ namespace prosper
 class CModelSubMesh;
 namespace pragma
 {
+	namespace model {enum class IndexType : uint8_t;};
 	class ShaderEntity;
 	class DLLCLIENT SceneMesh
 	{
@@ -37,7 +38,7 @@ namespace pragma
 		void SetVertexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
 		void SetVertexWeightBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
 		void SetAlphaBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
-		void SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
+		void SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer,pragma::model::IndexType indexType);
 		void SetLightmapUvBuffer(const std::shared_ptr<prosper::IBuffer> &lightmapUvBuffer);
 		void ClearBuffers();
 
@@ -52,6 +53,7 @@ namespace pragma
 		std::shared_ptr<prosper::IBuffer> m_indexBuffer = nullptr;
 		std::shared_ptr<prosper::IBuffer> m_lightmapUvBuffer = nullptr;
 		std::mutex m_renderBufferMutex;
+		pragma::model::IndexType m_indexType;
 	};
 };
 #endif

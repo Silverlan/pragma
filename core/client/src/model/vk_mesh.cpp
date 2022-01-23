@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/model/vk_mesh.h"
+#include "pragma/model/modelmesh.h"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include <buffers/prosper_render_buffer.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -17,12 +18,13 @@ extern DLLCLIENT CEngine *c_engine;
 
 SceneMesh::SceneMesh()
 	: m_vertexBuffer(nullptr),m_vertexWeightBuffer(nullptr),
-	m_alphaBuffer(nullptr),m_indexBuffer(nullptr)
+	m_alphaBuffer(nullptr),m_indexBuffer(nullptr),m_indexType{pragma::model::IndexType::UInt16}
 {}
 SceneMesh::SceneMesh(const SceneMesh &other)
 	: m_renderBuffers{other.m_renderBuffers},m_vertexBuffer{other.m_vertexBuffer},
 	m_vertexWeightBuffer{other.m_vertexWeightBuffer},m_alphaBuffer{other.m_alphaBuffer},
-	m_indexBuffer{other.m_indexBuffer},m_lightmapUvBuffer{other.m_lightmapUvBuffer}
+	m_indexBuffer{other.m_indexBuffer},m_lightmapUvBuffer{other.m_lightmapUvBuffer},
+	m_indexType{other.m_indexType}
 {}
 SceneMesh::~SceneMesh() {}
 SceneMesh &SceneMesh::operator=(const SceneMesh &other)
@@ -44,7 +46,11 @@ const std::shared_ptr<prosper::IBuffer> &SceneMesh::GetLightmapUvBuffer() const 
 void SceneMesh::SetVertexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer) {m_vertexBuffer = buffer; SetDirty();}
 void SceneMesh::SetVertexWeightBuffer(const std::shared_ptr<prosper::IBuffer> &buffer) {m_vertexWeightBuffer = buffer; SetDirty();}
 void SceneMesh::SetAlphaBuffer(const std::shared_ptr<prosper::IBuffer> &buffer) {m_alphaBuffer = buffer; SetDirty();}
-void SceneMesh::SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer) {m_indexBuffer = buffer; SetDirty();}
+void SceneMesh::SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer,pragma::model::IndexType indexType)
+{
+	m_indexBuffer = buffer; SetDirty();
+	m_indexType = indexType;
+}
 void SceneMesh::SetLightmapUvBuffer(const std::shared_ptr<prosper::IBuffer> &lightmapUvBuffer) {m_lightmapUvBuffer = lightmapUvBuffer; SetDirty();}
 void SceneMesh::ClearBuffers()
 {

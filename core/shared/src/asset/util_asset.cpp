@@ -434,12 +434,21 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 
 	if(f)
 	{
+		auto pos = f->Tell();
 		for(auto &importer : m_importers[umath::to_integral(type)])
 		{
 			std::string err;
+			f->Seek(pos);
 			auto aw = importer.handler(game,*f,fpath,err);
 			if(aw && aw->GetType() == type)
+			{
+				auto path = util::Path::CreateFile(*filePath);
+				// path.PopFront();
+				auto *mdl = static_cast<pragma::asset::ModelAssetWrapper&>(*aw).GetModel();
+				if(mdl && mdl->Save(game,::util::CONVERT_PATH +"models/" +path.GetString(),err) == false)
+					return nullptr;
 				return aw;
+			}
 			if(optOutErr)
 				*optOutErr = err;
 		}

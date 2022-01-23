@@ -55,11 +55,7 @@ void SceneSnapshot::AddModel(Model &mdl,uint32_t skin)
 						snapshotMesh->lightmapUvs.push_back(uv);
 				}
 
-				auto &tris = subMesh->GetTriangles();
-				snapshotMesh->tris.reserve(tris.size());
-				for(auto i=decltype(tris.size()){0u};i<tris.size();++i)
-					snapshotMesh->tris.push_back(tris.at(i));
-
+				subMesh->GetIndices(snapshotMesh->tris);
 				auto matIdx = mdl.GetMaterialIndex(*subMesh,skin);
 				auto *mat = matIdx.has_value() ? mdl.GetMaterial(*matIdx) : nullptr;
 				if(mat == nullptr)

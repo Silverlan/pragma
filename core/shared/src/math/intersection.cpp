@@ -133,34 +133,41 @@ bool Intersection::LineMesh(const Vector3 &_start,const Vector3 &_dir,ModelSubMe
 		return false;
 	
 	r.precise = r.precise ? r.precise : std::make_shared<LineMeshResult::Precise>();
-	auto &triangles = subMesh.GetTriangles();
 	auto &verts = subMesh.GetVertices();
 	auto bHit = false;
 	auto hasFoundBetterCandidate = false;
-	for(auto i=decltype(triangles.size()){0};i<triangles.size();i+=3)
-	{
-		auto &va = verts[triangles[i]].position;
-		auto &vb = verts[triangles[i +1]].position;
-		auto &vc = verts[triangles[i +2]].position;
+	auto foundEarlyIntersection = false;
+	subMesh.VisitIndices([&verts,&start,&dir,&r,&hasFoundBetterCandidate,&foundEarlyIntersection,&bHit,&precise](auto *indexDataSrc,uint32_t numIndicesSrc) {
+		for(auto i=decltype(numIndicesSrc){0};i<numIndicesSrc;i+=3)
+		{
+			auto &va = verts[indexDataSrc[i]].position;
+			auto &vb = verts[indexDataSrc[i +1]].position;
+			auto &vc = verts[indexDataSrc[i +2]].position;
 
-		umath::Plane p {va,vb,vc};
-		float tl;
-		auto rCur = umath::intersection::line_plane(start,dir,p.GetNormal(),p.GetDistance(),&tl);
-		if(is_better_candidate(r.result,rCur,r.hitValue,tl) == false)
-			continue;
-		double t,u,v;
-		if(umath::intersection::line_triangle(start,dir,va,vb,vc,t,u,v,true) == false)
-			continue;
-		hasFoundBetterCandidate = true;
-		r.result = rCur;
-		bHit = true;
-		r.precise->triIdx = i /3;
-		r.hitValue = tl;
-		r.hitPos = start +dir *static_cast<float>(r.hitValue);
+			umath::Plane p {va,vb,vc};
+			float tl;
+			auto rCur = umath::intersection::line_plane(start,dir,p.GetNormal(),p.GetDistance(),&tl);
+			if(is_better_candidate(r.result,rCur,r.hitValue,tl) == false)
+				continue;
+			double t,u,v;
+			if(umath::intersection::line_triangle(start,dir,va,vb,vc,t,u,v,true) == false)
+				continue;
+			hasFoundBetterCandidate = true;
+			r.result = rCur;
+			bHit = true;
+			r.precise->triIdx = i /3;
+			r.hitValue = tl;
+			r.hitPos = start +dir *static_cast<float>(r.hitValue);
 
-		if(precise == false && r.result == umath::intersection::Result::Intersect)
-			return true;
-	}
+			if(precise == false && r.result == umath::intersection::Result::Intersect)
+			{
+				foundEarlyIntersection = true;
+				break;
+			}
+		}
+	});
+	if(foundEarlyIntersection)
+		return true;
 	if(bHit == true)
 	{
 		if(r.precise)

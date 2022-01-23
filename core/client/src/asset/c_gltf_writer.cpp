@@ -275,12 +275,12 @@ void pragma::asset::GLTFWriter::GenerateUniqueModelExportList()
 			{
 				for(auto &subMesh : mesh->GetSubMeshes())
 				{
-					if(subMesh->GetTriangles().empty())
+					if(subMesh->GetIndexCount() == 0)
 						continue;
 					if(exportData.exportMeshes.size() == exportData.exportMeshes.capacity())
 						exportData.exportMeshes.reserve(exportData.exportMeshes.size() +100);
 					exportData.exportMeshes.push_back(subMesh);
-					exportData.indexCount += subMesh->GetTriangles().size();
+					exportData.indexCount += subMesh->GetIndexCount();
 					exportData.vertCount += subMesh->GetVertices().size();
 				}
 			}
@@ -442,14 +442,15 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 			for(auto &mesh : exportData.exportMeshes)
 			{
 				util::ScopeGuard sg {[&meshIdx]() {++meshIdx;}};
-				auto &indices = mesh->GetTriangles();
 				auto *gltfIndexData = indexData.data() +indexOffset *sizeof(uint32_t);
-				for(auto i=decltype(indices.size()){0u};i<indices.size();++i)
-				{
-					auto idx = static_cast<uint32_t>(indices.at(i));
-					memcpy(gltfIndexData +i *sizeof(uint32_t),&idx,sizeof(idx));
-				}
-				indexOffset += indices.size();
+				mesh->VisitIndices([gltfIndexData](auto *indexData,uint32_t numIndices) {
+					for(auto i=decltype(numIndices){0u};i<numIndices;++i)
+					{
+						auto idx = static_cast<uint32_t>(indexData[i]);
+						memcpy(gltfIndexData +i *sizeof(uint32_t),&idx,sizeof(idx));
+					}
+				});
+				indexOffset += mesh->GetIndexCount();
 
 				auto &verts = mesh->GetVertices();
 				auto *gltfVertexData = vertexData.data() +vertOffset *szVertex;
@@ -563,9 +564,9 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 			}
 
 			auto &verts = mesh->GetVertices();
-			auto &tris = mesh->GetTriangles();
 			gltfMdl.accessors.reserve(gltfMdl.accessors.size() +4);
-			auto indicesAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_indices",TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT,TINYGLTF_TYPE_SCALAR,indexOffset *sizeof(uint32_t),tris.size(),m_bufferViewIndices.indices);
+			auto numIndices = mesh->GetIndexCount();
+			auto indicesAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_indices",TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT,TINYGLTF_TYPE_SCALAR,indexOffset *sizeof(uint32_t),numIndices,m_bufferViewIndices.indices);
 			auto posAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_positions",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC3,vertOffset *szVertex,verts.size(),m_bufferViewIndices.positions);
 			auto normalAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_normals",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC3,vertOffset *szVertex,verts.size(),m_bufferViewIndices.normals);
 			auto uvAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_uvs",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC2,vertOffset *szVertex,verts.size(),m_bufferViewIndices.texCoords);
@@ -606,11 +607,14 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 			// Calculate index bounds
 			auto minIndex = std::numeric_limits<int64_t>::max();
 			auto maxIndex = std::numeric_limits<int64_t>::lowest();
-			for(auto idx : tris)
-			{
-				minIndex = umath::min(minIndex,static_cast<int64_t>(idx));
-				maxIndex = umath::max(maxIndex,static_cast<int64_t>(idx));
-			}
+			mesh->VisitIndices([&minIndex,&maxIndex](auto *indexData,uint32_t numIndices) {
+				for(auto i=decltype(numIndices){0u};i<numIndices;++i)
+				{
+					auto idx = indexData[i];
+					minIndex = umath::min(minIndex,static_cast<int64_t>(idx));
+					maxIndex = umath::max(maxIndex,static_cast<int64_t>(idx));
+				}
+			});
 			gltfMdl.accessors.at(indicesAccessor).minValues = {static_cast<double>(minIndex)};
 			gltfMdl.accessors.at(indicesAccessor).maxValues = {static_cast<double>(maxIndex)};
 			//
@@ -664,7 +668,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 			if(m_exportInfo.exportMorphTargets)
 				WriteMorphTargets(*mesh,gltfMesh,primitive,nodeIndices);
 
-			indexOffset += tris.size();
+			indexOffset += numIndices;
 			vertOffset += verts.size();
 			++meshIdx;
 		}

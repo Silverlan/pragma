@@ -145,8 +145,10 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("SetIndexCount",&Lua::ModelSubMesh::SetIndexCount);
 	classDef.def("GetIndexCount",&Lua::ModelSubMesh::GetTriangleVertexCount);
 	classDef.def("GetTriangleCount",&Lua::ModelSubMesh::GetTriangleCount);
+	classDef.def("GetIndexType",&::ModelSubMesh::GetIndexType);
+	classDef.def("SetIndexType",&::ModelSubMesh::SetIndexType);
 	classDef.def("GetVertices",&Lua::ModelSubMesh::GetVertices);
-	classDef.def("GetTriangles",&Lua::ModelSubMesh::GetTriangles);
+	classDef.def("GetIndices",&Lua::ModelSubMesh::GetTriangles);
 	classDef.def("AddUVSet",&Lua::ModelSubMesh::AddUVSet);
 	classDef.def("GetUVs",static_cast<void(*)(lua_State*,::ModelSubMesh&)>(&Lua::ModelSubMesh::GetUVMapping));
 	classDef.def("GetUVs",static_cast<luabind::object(*)(lua_State*,::ModelSubMesh&,const std::string&)>(&Lua::ModelSubMesh::GetUVMapping));
@@ -155,6 +157,9 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("GetVertexWeights",&Lua::ModelSubMesh::GetVertexWeights);
 	classDef.def("AddTriangle",static_cast<void(*)(lua_State*,::ModelSubMesh&,const umath::Vertex&,const umath::Vertex&,const umath::Vertex&)>(&Lua::ModelSubMesh::AddTriangle));
 	classDef.def("AddTriangle",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t,uint32_t,uint32_t)>(&Lua::ModelSubMesh::AddTriangle));
+	classDef.def("AddIndex",&::ModelSubMesh::AddIndex);
+	classDef.def("SetIndex",&::ModelSubMesh::SetIndex);
+	classDef.def("GetIndex",&::ModelSubMesh::GetIndex);
 	classDef.def("SetSkinTextureIndex",&Lua::ModelSubMesh::SetSkinTextureIndex);
 	classDef.def("Update",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t)>(&Lua::ModelSubMesh::Update));
 	classDef.def("Update",static_cast<void(*)(lua_State*,::ModelSubMesh&)>(&Lua::ModelSubMesh::Update));
@@ -269,6 +274,7 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 		auto *uvSet = mesh.GetUVSet(uvSetName);
 		Lua::PushBool(l,uvSet ? true : false);
 	}));
+	classDef.def("ReserveIndices",&::ModelSubMesh::ReserveIndices);
 	classDef.def("ReserveVertices",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t)>([](lua_State *l,::ModelSubMesh &mesh,uint32_t numVerts) {
 		mesh.GetVertices().reserve(numVerts);
 	}));
@@ -281,6 +287,12 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.add_static_constant("GEOMETRY_TYPE_TRIANGLES",umath::to_integral(::ModelSubMesh::GeometryType::Triangles));
 	classDef.add_static_constant("GEOMETRY_TYPE_LINES",umath::to_integral(::ModelSubMesh::GeometryType::Lines));
 	classDef.add_static_constant("GEOMETRY_TYPE_POINTS",umath::to_integral(::ModelSubMesh::GeometryType::Points));
+
+	classDef.add_static_constant("INDEX_TYPE_UINT16",umath::to_integral(pragma::model::IndexType::UInt16));
+	classDef.add_static_constant("INDEX_TYPE_UINT32",umath::to_integral(pragma::model::IndexType::UInt32));
+	
+	classDef.add_static_constant("MAX_INDEX16",::ModelSubMesh::MAX_INDEX16);
+	classDef.add_static_constant("MAX_INDEX32",::ModelSubMesh::MAX_INDEX32);
 }
 void Lua::ModelSubMesh::GetSkinTextureIndex(lua_State *l,::ModelSubMesh &mesh)
 {

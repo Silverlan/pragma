@@ -147,6 +147,14 @@ namespace pragma::asset
 		virtual bool Import(const std::string &outputPath,std::string &outFilePath) override;
 	};
 
+	class DLLNETWORK PmxFormatHandler
+		: public AssetManagerFormatHandler
+	{
+	public:
+		PmxFormatHandler(util::IAssetManager &assetManager);
+		virtual bool Import(const std::string &outputPath,std::string &outFilePath) override;
+	};
+
 	class DLLNETWORK ModelManager
 		: public util::TFileAssetManager<Model,ModelLoadInfo>
 	{

@@ -189,6 +189,7 @@ pragma::asset::ModelManager::ModelManager(NetworkState &nw)
 	RegisterImportHandler<SourceMdlFormatHandler>("mdl");
 	RegisterImportHandler<Source2VmdlFormatHandler>("vmdl_c");
 	RegisterImportHandler<NifFormatHandler>("nif");
+	RegisterImportHandler<PmxFormatHandler>("pmx");
 
 	auto addBlenderFormatHandler = [this](std::string ext) {
 		return RegisterImportHandler(ext,[ext](util::IAssetManager &assetManager) -> std::unique_ptr<util::IImportAssetFormatHandler> {
@@ -211,7 +212,11 @@ pragma::asset::ModelManager::ModelManager(NetworkState &nw)
 		if(!importerInfo)
 			continue;
 		for(auto &extInfo : importerInfo->fileExtensions)
+		{
+			if(extInfo.first == "pmx")
+				continue;
 			RegisterImportHandler<AssetManagerFormatHandler>(extInfo.first,extInfo.second ? util::AssetFormatType::Binary : util::AssetFormatType::Text);
+		}
 	}
 }
 std::shared_ptr<Model> pragma::asset::ModelManager::CreateModel(uint32_t numBones,const std::string &mdlName)

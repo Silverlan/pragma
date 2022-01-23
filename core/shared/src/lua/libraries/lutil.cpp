@@ -203,7 +203,8 @@ void Lua::util::register_shared_generic(luabind::module_ &mod)
 			"wim",
 			"xar",
 			"z",
-			"zip"
+			"zip",
+			"7z"
 		};
 	})];
 	defZip.def("GetFileList",+[](ZIPFile &zip) -> std::optional<std::vector<std::string>> {

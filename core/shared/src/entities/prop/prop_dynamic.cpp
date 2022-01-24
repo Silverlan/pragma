@@ -15,6 +15,7 @@ void BasePropDynamicComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	auto &ent = GetEntity();
 	ent.AddComponent("prop");
+	ent.RemoveComponent("physics");
 }
 
 void BasePropDynamicComponent::OnEntitySpawn() {BaseEntityComponent::OnEntitySpawn();}

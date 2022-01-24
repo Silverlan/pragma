@@ -58,7 +58,7 @@ public:
 	using Index32 = uint32_t;
 	static constexpr auto MAX_INDEX16 = std::numeric_limits<Index16>::max();
 	static constexpr auto MAX_INDEX32 = std::numeric_limits<Index32>::max();
-	size_t size_of_index(pragma::model::IndexType it)
+	static size_t size_of_index(pragma::model::IndexType it)
 	{
 		switch(it)
 		{

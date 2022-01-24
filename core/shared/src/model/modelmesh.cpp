@@ -446,7 +446,13 @@ void ModelSubMesh::GenerateNormals()
 void ModelSubMesh::Rotate(const Quat &rot)
 {
 	for(auto &v : *m_vertices)
+	{
 		uvec::rotate(&v.position,rot);
+		uvec::rotate(&v.normal,rot);
+		auto t = Vector3{v.tangent.x,v.tangent.y,v.tangent.z};
+		uvec::rotate(&t,rot);
+		v.tangent = Vector4{t.x,t.y,t.z,v.tangent.w};
+	}
 	uvec::rotate(&m_center,rot);
 	uvec::rotate(&m_min,rot);
 	uvec::rotate(&m_max,rot);
@@ -469,14 +475,7 @@ const Vector3 &ModelSubMesh::GetCenter() const {return m_center;}
 uint32_t ModelSubMesh::GetVertexCount() const {return static_cast<uint32_t>(m_vertices->size());}
 uint32_t ModelSubMesh::GetIndexCount() const
 {
-	switch(m_indexType)
-	{
-	case pragma::model::IndexType::UInt16:
-		return m_indexData->size() /sizeof(Index16);
-	case pragma::model::IndexType::UInt32:
-		return m_indexData->size() /sizeof(Index32);
-	}
-	return 0;
+	return m_indexData->size() /size_of_index(m_indexType);
 }
 uint32_t ModelSubMesh::GetTriangleCount() const {return GetIndexCount() /3;}
 uint32_t ModelSubMesh::GetSkinTextureIndex() const {return m_skinTextureIndex;}
@@ -487,6 +486,8 @@ void ModelSubMesh::SetIndexCount(uint32_t numIndices)
 void ModelSubMesh::SetTriangleCount(uint32_t numTris) {SetIndexCount(numTris *3);}
 void ModelSubMesh::SetIndices(const std::vector<Index16> &indices)
 {
+	m_indexData->clear();
+	SetIndexType(pragma::model::IndexType::UInt16);
 	SetIndexCount(indices.size());
 	VisitIndices([this,&indices](auto *indexData,uint32_t numIndices) {
 		memcpy(indexData,indices.data(),numIndices *size_of_index(pragma::model::IndexType::UInt16));
@@ -494,6 +495,8 @@ void ModelSubMesh::SetIndices(const std::vector<Index16> &indices)
 }
 void ModelSubMesh::SetIndices(const std::vector<Index32> &indices)
 {
+	m_indexData->clear();
+	SetIndexType(pragma::model::IndexType::UInt32);
 	SetIndexCount(indices.size());
 	VisitIndices([this,&indices](auto *indexData,uint32_t numIndices) {
 		memcpy(indexData,indices.data(),numIndices *size_of_index(pragma::model::IndexType::UInt32));

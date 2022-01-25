@@ -542,6 +542,8 @@ public:
 	void SetMaxEyeDeflection(umath::Degree eyeDeflection);
 	umath::Degree GetMaxEyeDeflection() const;
 
+	udm::PropertyWrapper GetExtensionData() const;
+
 	util::WeakHandle<const Model> GetHandle() const;
 	util::WeakHandle<Model> GetHandle();
 
@@ -580,6 +582,7 @@ protected:
 	std::vector<Flex>::iterator FindFlex(const std::string &name);
 private:
 	void Construct();
+	udm::PProperty m_extensions = nullptr;
 	NetworkState *m_networkState = nullptr;
 	mutable MetaInfo m_metaInfo = {};
 	StateFlags m_stateFlags = StateFlags::None;

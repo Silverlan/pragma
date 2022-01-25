@@ -139,6 +139,16 @@ Model::Model(const Model &other)
 	m_collisionMeshes.reserve(other.m_collisionMeshes.size());
 	for(auto &mesh : other.m_collisionMeshes)
 		m_collisionMeshes.push_back(CollisionMesh::Create(*mesh));
+
+	// Copy extension data
+	std::stringstream extStream {};
+	ufile::OutStreamFile extStreamFileOut {std::move(extStream)};
+	other.m_extensions->Write(extStreamFileOut);
+
+	m_extensions = udm::Property::Create(udm::Type::Element);
+	ufile::InStreamFile extStreamFileIn {std::move(extStreamFileOut.MoveStream())};
+	m_extensions->Read(extStreamFileIn);
+	//
 }
 
 Model::~Model()
@@ -218,7 +228,9 @@ bool Model::IsEqual(const Model &other) const
 		return false;
 	if(m_skeleton && *m_skeleton != *other.m_skeleton)
 		return false;
-	static_assert(sizeof(Model) == 992,"Update this function when making changes to this class!");
+#ifdef _WIN32
+	static_assert(sizeof(Model) == 1008,"Update this function when making changes to this class!");
+#endif
 	return true;
 }
 bool Model::operator==(const Model &other) const
@@ -282,7 +294,7 @@ Model &Model::operator=(const Model &other)
 
 const PhonemeMap &Model::GetPhonemeMap() const {return const_cast<Model*>(this)->GetPhonemeMap();}
 PhonemeMap &Model::GetPhonemeMap() {return m_phonemeMap;}
-
+udm::PropertyWrapper Model::GetExtensionData() const {return *m_extensions;}
 void Model::Rotate(const Quat &rot)
 {
 	uvec::rotate(&m_collisionMin,rot);
@@ -504,6 +516,7 @@ void Model::Construct()
 	m_name = "";
 	m_skeleton = std::make_unique<panima::Skeleton>();
 	m_mass = 0.f;
+	m_extensions = udm::Property::Create(udm::Type::Element);
 	uvec::zero(&m_collisionMin);
 	uvec::zero(&m_collisionMax);
 	uvec::zero(&m_renderMin);

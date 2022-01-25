@@ -209,7 +209,20 @@ std::shared_ptr<Model> Model::Copy(Game *game,CopyFlags copyFlags) const
 			flexAnim = std::make_shared<FlexAnimation>(*flexAnim);
 	}
 	// TODO: Copy collision mesh soft body sub mesh reference
-	static_assert(sizeof(Model) == 992,"Update this function when making changes to this class!");
+
+	// Copy extension data
+	std::stringstream extStream {};
+	ufile::OutStreamFile extStreamFileOut {std::move(extStream)};
+	m_extensions->Write(extStreamFileOut);
+
+	mdl->m_extensions = udm::Property::Create(udm::Type::Element);
+	ufile::InStreamFile extStreamFileIn {std::move(extStreamFileOut.MoveStream())};
+	mdl->m_extensions->Read(extStreamFileIn);
+	//
+
+#ifdef _WIN32
+	static_assert(sizeof(Model) == 1008,"Update this function when making changes to this class!");
+#endif
 	return mdl;
 }
 
@@ -665,6 +678,12 @@ bool Model::LoadFromAssetData(Game &game,const udm::AssetData &data,std::string 
 				return false;
 		}
 	}
+
+	auto udmExtensions = udm["extensions"];
+	if(udmExtensions)
+		m_extensions = udmExtensions.ClaimOwnership();
+	else
+		m_extensions = udm::Property::Create(udm::Type::Element);
 	return true;
 }
 
@@ -1029,7 +1048,6 @@ bool Model::Save(Game &game,udm::AssetDataArg outData,std::string &outErr)
 		}
 	}
 
-
 	auto &meshGroups = GetMeshGroups();
 	auto udmMeshGroups = udm.Add("meshGroups");
 	for(auto i=decltype(meshGroups.size()){0u};i<meshGroups.size();++i)
@@ -1054,6 +1072,8 @@ bool Model::Save(Game &game,udm::AssetDataArg outData,std::string &outErr)
 			}
 		}
 	}
+
+	udm["extensions"] = m_extensions;
 	return true;
 }
 

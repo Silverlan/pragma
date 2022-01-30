@@ -59,7 +59,10 @@ bool Locale::LoadFile(const std::string &file,const std::string &lan)
 			std::string key;
 			std::string val;
 			if(ustring::get_key_value(l,key,val))
+			{
+				ustring::replace(val,"\\\"","\"");
 				m_localization.texts[key] = val;
+			}
 		}
 		m_loadedFiles.push_back(file);
 		return true;

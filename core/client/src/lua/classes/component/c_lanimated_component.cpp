@@ -43,6 +43,11 @@ void Lua::Animated::register_class(lua_State *l,luabind::module_ &entsMod)
 	}));
 	defCAnimated.def("GetLocalVertexPosition",static_cast<std::optional<Vector3>(*)(lua_State*,pragma::CAnimatedComponent&,std::shared_ptr<::ModelSubMesh>&,uint32_t)>([](lua_State *l,pragma::CAnimatedComponent &hAnim,std::shared_ptr<::ModelSubMesh> &subMesh,uint32_t vertexId) -> std::optional<Vector3> {
 		Vector3 pos,n;
+		if(vertexId >= subMesh->GetVertexCount())
+			return {};
+		auto &v = subMesh->GetVertices()[vertexId];
+		pos = v.position;
+		n = v.normal;
 		auto b = hAnim.GetLocalVertexPosition(static_cast<CModelSubMesh&>(*subMesh),vertexId,pos,n);
 		if(b == false)
 			return {};

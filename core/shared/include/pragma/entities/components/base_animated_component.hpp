@@ -231,7 +231,8 @@ namespace pragma
 		virtual bool MaintainAnimations(double dt);
 		void UpdateAnimations(double dt);
 		bool MaintainGestures(double dt);
-
+		
+		virtual bool GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId,umath::ScaledTransform &outPose) const;
 		virtual std::optional<Mat4> GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId) const;
 		virtual bool GetLocalVertexPosition(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 &pos,const std::optional<Vector3> &vertexOffset={}) const;
 		bool GetVertexPosition(uint32_t meshGroupId,uint32_t meshId,uint32_t subMeshId,uint32_t vertexId,Vector3 &pos) const;

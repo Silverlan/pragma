@@ -1031,15 +1031,41 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 			}
 		});
 	}));
-
-	def.def("GetVertexPosition",static_cast<std::optional<Vector3>(*)(lua_State*,pragma::BaseAnimatedComponent&,uint32_t,uint32_t,uint32_t,uint32_t)>([](lua_State *l,pragma::BaseAnimatedComponent &hEnt,uint32_t meshGroupId,uint32_t meshId,uint32_t subMeshId,uint32_t vertexId) -> std::optional<Vector3> {
-		auto pos = Vector3{};
+	
+	def.def("GetVertexTransformMatrix",static_cast<std::optional<Mat4>(pragma::BaseAnimatedComponent::*)(const ModelSubMesh&,uint32_t) const>(&pragma::BaseAnimatedComponent::GetVertexTransformMatrix));
+	def.def("GetLocalVertexPosition",+[](lua_State *l,pragma::BaseAnimatedComponent &hEnt,ModelSubMesh &subMesh,uint32_t vertexId) -> std::optional<Vector3> {
+		Vector3 pos,n;
+		if(vertexId >= subMesh.GetVertexCount())
+			return {};
+		auto &v = subMesh.GetVertices()[vertexId];
+		pos = v.position;
+		n = v.normal;
+		if(hEnt.GetLocalVertexPosition(subMesh,vertexId,pos) == false)
+			return {};
+		return pos;
+	});
+	def.def("GetVertexPosition",+[](lua_State *l,pragma::BaseAnimatedComponent &hEnt,uint32_t meshGroupId,uint32_t meshId,uint32_t subMeshId,uint32_t vertexId) -> std::optional<Vector3> {
+		auto &mdl = hEnt.GetEntity().GetModel();
+		if(!mdl)
+			return {};
+		auto *subMesh = mdl->GetSubMesh(meshGroupId,meshId,subMeshId);
+		if(!subMesh)
+			return {};
+		Vector3 pos;
+		if(vertexId >= subMesh->GetVertexCount())
+			return {};
+		auto &v = subMesh->GetVertices()[vertexId];
+		pos = v.position;
 		if(hEnt.GetVertexPosition(meshGroupId,meshId,subMeshId,vertexId,pos) == false)
 			return {};
 		return pos;
-	}));
+	});
 	def.def("GetVertexPosition",static_cast<std::optional<Vector3>(*)(lua_State*,pragma::BaseAnimatedComponent&,const std::shared_ptr<ModelSubMesh>&,uint32_t)>([](lua_State *l,pragma::BaseAnimatedComponent &hEnt,const std::shared_ptr<ModelSubMesh> &subMesh,uint32_t vertexId) -> std::optional<Vector3> {
-		auto pos = Vector3{};
+		Vector3 pos;
+		if(vertexId >= subMesh->GetVertexCount())
+			return {};
+		auto &v = subMesh->GetVertices()[vertexId];
+		pos = v.position;
 		if(hEnt.GetVertexPosition(*subMesh,vertexId,pos) == false)
 			return {};
 		return pos;

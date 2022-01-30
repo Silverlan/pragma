@@ -125,6 +125,10 @@ void CAnimatedComponent::ReceiveData(NetPacket &packet)
 	SetCycle(cycle);
 }
 
+bool CAnimatedComponent::GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId,umath::ScaledTransform &outPose) const
+{
+	return BaseAnimatedComponent::GetVertexTransformMatrix(subMesh,vertexId,outPose);
+}
 std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId) const
 {
 	return GetVertexTransformMatrix(subMesh,vertexId,nullptr,nullptr);

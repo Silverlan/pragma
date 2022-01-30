@@ -55,6 +55,7 @@ namespace pragma
 		void InitializeBoneBuffer();
 		std::optional<Mat4> GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 *optOutNormalOffset=nullptr,float *optOutDelta=nullptr) const;
 		virtual std::optional<Mat4> GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId) const override;
+		virtual bool GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId,umath::ScaledTransform &outPose) const override;
 
 		uint32_t OnSkeletonUpdated();
 		bool MaintainAnimations(double dt) override;

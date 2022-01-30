@@ -14,6 +14,8 @@
 #include "pragma/lua/classes/lvector.h"
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
+#include "pragma/lua/converters/pair_converter_t.hpp"
+#include "pragma/lua/converters/optional_converter_t.hpp"
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/lua/classes/lcollisionmesh.h"
 #include "luasystem.h"
@@ -273,6 +275,30 @@ void Lua::Model::register_class(
 			return;
 		Lua::PushInt(l,*idx);
 	}));
+	classDef.def("GetSubMesh",+[](lua_State *l,::Model &mdl,uint32_t mgId,uint32_t mId,uint32_t smId) -> std::shared_ptr<ModelSubMesh> {
+		auto *sm = mdl.GetSubMesh(mgId,mId,smId);
+		if(!sm)
+			return nullptr;
+		return sm->shared_from_this();
+	});
+	classDef.def("FindSubMeshId",+[](lua_State *l,::Model &mdl,ModelSubMesh &smTgt) -> std::optional<std::tuple<uint32_t,uint32_t,uint32_t>> {
+		auto &meshGroups = mdl.GetMeshGroups();
+		for(uint32_t mgId=0;auto &mg : meshGroups)
+		{
+			for(uint32_t mId=0;auto &m : mg->GetMeshes())
+			{
+				for(uint32_t smId=0;auto &sm : m->GetSubMeshes())
+				{
+					if(sm.get() == &smTgt)
+						return std::tuple<uint32_t,uint32_t,uint32_t>{mgId,mId,smId};
+					++smId;
+				}
+				++mId;
+			}
+			++mgId;
+		}
+		return {};
+	});
 	classDef.def("GetMaterialCount",&Lua::Model::GetMaterialCount);
 	classDef.def("GetMeshGroupCount",&Lua::Model::GetMeshGroupCount);
 	classDef.def("GetMeshCount",&Lua::Model::GetMeshCount);

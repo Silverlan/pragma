@@ -49,7 +49,7 @@
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 DLLCLIENT Con::c_cout & operator<<(Con::c_cout &os,const ::WIBase &handle)
 {
 	const WIBase *p = &handle;
@@ -807,6 +807,12 @@ void Lua::WIText::register_class(luabind::class_<::WIText,::WIBase> &classDef)
 	classDef.def("InsertText",static_cast<bool(*)(::WIText&,const std::string&,util::text::LineIndex,util::text::CharOffset)>([](::WIText &hPanel,const std::string &text,util::text::LineIndex lineIdx,util::text::CharOffset charOffset) {
 		return hPanel.InsertText(text,lineIdx,charOffset);
 	}));
+	classDef.def("SetMaxLineCount",+[](lua_State *l,::WIText &hPanel,uint32_t c) {
+		hPanel.GetFormattedTextObject().SetMaxLineCount(c);
+	});
+	classDef.def("GetMaxLineCount",+[](lua_State *l,::WIText &hPanel) {
+		return hPanel.GetFormattedTextObject().GetMaxLineCount();
+	});
 	classDef.def("AppendText",&::WIText::AppendText);
 	classDef.def("AppendLine",static_cast<void(*)(lua_State*,::WIText&,const std::string&)>([](lua_State *l,::WIText &hPanel,const std::string &line) {
 		
@@ -1330,6 +1336,33 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l,::WIBase &panel,std::string
 				Lua::PushBool(l,changedByUser);
 				return Lua::StatusCode::Ok;
 			},0);
+		});
+	}
+	else if(name == "handlelinktagaction")
+	{
+		hCallback = FunctionCallback<::util::EventReply,std::string>::CreateWithOptionalReturn(
+			[l,hPanel,o](::util::EventReply *reply,std::string arg) mutable -> CallbackReturnType {
+			if(!hPanel.IsValid())
+				return CallbackReturnType::NoReturnValue;
+			if(Lua::CallFunction(l,[&o,hPanel,&arg](lua_State *l) mutable {
+				o.push(l);
+
+				auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
+				obj.push(l);
+
+				Lua::PushString(l,arg);
+
+				return Lua::StatusCode::Ok;
+			},1) == Lua::StatusCode::Ok)
+			{
+				if(Lua::IsSet(l,-1) == false)
+					return CallbackReturnType::NoReturnValue;
+				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l,-1));
+				Lua::Pop(l,1);
+				*reply = result;
+				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
+			}
+			return CallbackReturnType::NoReturnValue;
 		});
 	}
 	else if(name == "onscrolloffsetchanged")
@@ -2012,3 +2045,4 @@ luabind::tableT<::WITableRow> Lua::WITable::GetRows(lua_State *l,::WITable &hTab
 	}
 	return t;
 }
+#pragma optimize("",on)

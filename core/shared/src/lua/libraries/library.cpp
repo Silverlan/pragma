@@ -421,10 +421,15 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		luabind::def("calc_ballistic_position",umath::calc_ballistic_position),
 		luabind::def("calc_ballistic_angle_of_reach",umath::approach<double>),
 		luabind::def("get_frustum_plane_center",umath::frustum::get_plane_center),
-		luabind::def("calc_average_rotation",static_cast<Quat(*)(lua_State*,luabind::table<>)>([](lua_State *l,luabind::table<> t) -> Quat {
+		luabind::def("calc_average_rotation",+[](lua_State *l,luabind::table<> t) -> Quat {
 			auto rotations = Lua::table_to_vector<Quat>(l,t,1);
 			return uquat::calc_average(rotations);
-		})),
+		}),
+		luabind::def("calc_average_rotation",+[](lua_State *l,luabind::table<> t) -> Quat {
+			auto rotations = Lua::table_to_vector<Quat>(l,t,1);
+			auto weights = Lua::table_to_vector<float>(l,t,2);
+			return uquat::calc_average(rotations,weights);
+		}),
 		luabind::def("map_value_to_fraction",static_cast<float(*)(lua_State*,float,float,float)>([](lua_State *l,float v,float c,float i) -> float {
 			auto pivot = 1 /(c -1) *i;
 			auto range = 1 /c;

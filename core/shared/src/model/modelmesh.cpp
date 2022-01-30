@@ -10,7 +10,7 @@
 #include <mathutil/uvec.h>
 #include <pragma/math/intersection.h>
 #include <udm.hpp>
-
+#pragma optimize("",off)
 ModelMesh::ModelMesh()
 	: std::enable_shared_from_this<ModelMesh>(),m_numVerts(0),m_numIndices(0)
 {}
@@ -415,32 +415,64 @@ void ModelSubMesh::NormalizeUVCoordinates()
 void ModelSubMesh::GenerateNormals()
 {
 	auto &verts = GetVertices();
-	std::unordered_map<size_t,Vector3> processed {};
+
+	// Generate list of overlapping vertices (vertices with same position, but maybe different uvs or normals)
+	std::unordered_map<uint32_t,std::vector<uint32_t>> overlappingVerts;
 	for(auto vertId=decltype(verts.size()){0};vertId<verts.size();++vertId)
 	{
-		auto &v = verts[vertId];
-		auto &n = v.normal = {};
-		VisitIndices([&processed,&n,vertId,&verts](auto *indexData,uint32_t numIndices) {
-			for(auto i=decltype(numIndices){0};i<numIndices;i+=3)
+		auto &v0 = verts[vertId];
+		for(auto vertId2=vertId +1;vertId2<verts.size();++vertId2)
+		{
+			auto &v1 = verts[vertId2];
+			if(uvec::distance_sqr(v0.position,v1.position) >= 0.001)
+				continue;
+			for(auto &pair : {std::pair<uint32_t,uint32_t>{vertId,vertId2},std::pair<uint32_t,uint32_t>{vertId2,vertId}})
 			{
-				auto idx0 = indexData[i];
-				auto idx1 = indexData[i +1];
-				auto idx2 = indexData[i +2];
-				if(idx0 == vertId || idx1 == vertId || idx2 == vertId) // Vertex is part of this triangle
-				{
-					auto it = processed.find(i);
-					if(it != processed.end()) // Already calculated the normal for this face
-					{
-						n += it->second;
-						continue;
-					}
-					auto faceNormal = uvec::calc_face_normal(verts[idx0].position,verts[idx1].position,verts[idx2].position);
-					n += faceNormal;
-					processed[i] = faceNormal;
-				}
+				auto it = overlappingVerts.find(pair.first);
+				if(it == overlappingVerts.end())
+					it = overlappingVerts.insert(std::make_pair(pair.first,std::vector<uint32_t>{})).first;
+				it->second.push_back(pair.second);
 			}
-		});
+		}
+	}
+
+	// For each vertex, generate list of face normals that the triangle is a part of
+	std::vector<std::vector<Vector3>> faceNormalsPerVertex;
+	faceNormalsPerVertex.resize(verts.size());
+	VisitIndices([&](auto *indexData,uint32_t numIndices) {
+		for(auto i=decltype(numIndices){0};i<numIndices;i+=3)
+		{
+			auto idx0 = indexData[i];
+			auto idx1 = indexData[i +1];
+			auto idx2 = indexData[i +2];
+			auto faceNormal = uvec::calc_face_normal(verts[idx0].position,verts[idx1].position,verts[idx2].position);
+			for(auto idx : {idx0,idx1,idx2})
+			{
+				faceNormalsPerVertex[idx].push_back(faceNormal);
+				auto it = overlappingVerts.find(idx);
+				if(it == overlappingVerts.end())
+					continue;
+				for(auto idxOverlap : it->second)
+					faceNormalsPerVertex[idxOverlap].push_back(faceNormal);
+			}
+		}
+	});
+
+	// Calculate average face normal for each vertex
+	for(uint32_t vertIdx=0; auto &faceNormals : faceNormalsPerVertex)
+	{
+		Vector3 n {};
+		if(faceNormals.empty())
+		{
+			++vertIdx;
+			continue;
+		}
+		for(auto &fn : faceNormals)
+			n += fn;
+		n /= static_cast<float>(faceNormals.size());
 		uvec::normalize(&n);
+		(*m_vertices)[vertIdx].normal = n;
+		++vertIdx;
 	}
 }
 void ModelSubMesh::Rotate(const Quat &rot)
@@ -1035,3 +1067,4 @@ std::ostream &operator<<(std::ostream &out,const ModelSubMesh &o)
 	out<<"[Bounds:("<<min<<")("<<max<<")]";
 	return out;
 }
+#pragma optimize("",on)

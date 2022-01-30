@@ -2057,6 +2057,15 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	prosperMod[defWindowCreateInfo];
 
 	auto defWindow = luabind::class_<prosper::Window>("Window");
+	defWindow.def("GetMonitorBounds",+[](prosper::Window &window) -> std::optional<std::tuple<Vector2,Vector2,Vector2,Vector2>> {
+		auto bounds = window->GetMonitorBounds();
+		if(!bounds.has_value())
+			return {};
+		return std::tuple<Vector2,Vector2,Vector2,Vector2>{
+			bounds->monitorPos,bounds->monitorSize,
+			bounds->workPos,bounds->workSize
+		};
+	});
 	defWindow.def("SetWindowTitle",static_cast<void(*)(prosper::Window&,const std::string&)>([](prosper::Window &window,const std::string &title) {
 		window->SetWindowTitle(title);
 	}));
@@ -2114,6 +2123,9 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defWindow.def("Restore",static_cast<void(*)(prosper::Window&)>([](prosper::Window &window) {
 		window->Restore();
 	}));
+	defWindow.def("Maximize",static_cast<void(*)(prosper::Window&)>([](prosper::Window &window) {
+		window->Maximize();
+	}));
 	defWindow.def("Show",static_cast<void(*)(prosper::Window&)>([](prosper::Window &window) {
 		window->Show();
 	}));
@@ -2131,6 +2143,9 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	}));
 	defWindow.def("MakeContextCurrent",static_cast<void(*)(prosper::Window&)>([](prosper::Window &window) {
 		window->MakeContextCurrent();
+	}));
+	defWindow.def("IsMaximized",static_cast<bool(*)(prosper::Window&)>([](prosper::Window &window) -> bool {
+		return window->IsMaximized();
 	}));
 	defWindow.def("IsFocused",static_cast<bool(*)(prosper::Window&)>([](prosper::Window &window) -> bool {
 		return window->IsFocused();

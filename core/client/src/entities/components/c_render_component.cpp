@@ -632,7 +632,7 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 	CEOnUpdateRenderBuffers evData {drawCmd};
 	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_BUFFERS,evData);
 }
-void CRenderComponent::UpdateRenderDataMT(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp)
+void CRenderComponent::UpdateRenderDataMT(const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp)
 {
 	m_renderDataMutex.lock();
 		// Note: This is called from the render thread, which is why we can't update the render buffers here
@@ -652,7 +652,7 @@ void CRenderComponent::UpdateRenderDataMT(const std::shared_ptr<prosper::IPrimar
 	if(mdlC)
 		mdlC->UpdateLOD(scene,cam,vp); // TODO: Don't update this every frame for every entity!
 
-	CEOnUpdateRenderData evData {drawCmd};
+	CEOnUpdateRenderData evData {};
 	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_DATA_MT,evData);
 
 	auto pAttComponent = GetAttachableComponent();
@@ -906,8 +906,7 @@ void CEOnUpdateRenderMatrices::HandleReturnValues(lua_State *l)
 
 /////////////////
 
-CEOnUpdateRenderData::CEOnUpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer)
-	: commandBuffer{commandBuffer}
+CEOnUpdateRenderData::CEOnUpdateRenderData()
 {}
 void CEOnUpdateRenderData::PushArguments(lua_State *l) {throw std::runtime_error{"Lua callbacks of multi-threaded events are not allowed!"};}
 

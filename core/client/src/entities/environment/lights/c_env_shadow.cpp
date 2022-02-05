@@ -15,6 +15,8 @@
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/entities/components/c_radius_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/environment/lights/c_env_light_point.h"
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
@@ -279,6 +281,12 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 	auto shadowC = m_hLight->GetShadowComponent();
 	if(m_requiresRenderQueueUpdate == false || ent.IsInScene(scene) == false || shadowC == nullptr)
 		return;
+
+	auto *renderer = drawSceneInfo.scene->GetRenderer();
+	auto rasterizer = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent>{};
+	if(rasterizer.expired())
+		return;
+
 	m_requiresRenderQueueUpdate = false;
 	m_renderQueuesComplete = false;
 	
@@ -294,7 +302,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 	auto renderMask = drawSceneInfo.GetRenderMask(*c_game);
 	// TODO: Use separate shadow queue builder thread
 	auto lodBias = cvLodBias->GetInt();
-	c_game->GetRenderQueueBuilder().Append([this,&drawSceneInfo,&scene,&light,&ent,lodBias,renderMask]() {
+	c_game->GetRenderQueueBuilder().Append([this,&drawSceneInfo,&rasterizer,&scene,&light,&ent,lodBias,renderMask]() {
 		for(auto &renderQueue : m_renderQueues)
 			renderQueue->instanceSets.clear();
 		auto &mainRenderQueue = m_renderQueues.front();
@@ -346,7 +354,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 				auto *renderC = static_cast<CBaseEntity&>(worldC->GetEntity()).GetRenderComponent();
 				if(renderC->ShouldDrawShadow() == false)
 					continue;
-				renderC->UpdateRenderDataMT(drawSceneInfo.commandBuffer,scene,*hCam,vp);
+				renderC->UpdateRenderDataMT(scene,*hCam,vp);
 
 				for(auto *renderQueue : {worldC->GetClusterRenderQueue(node->cluster),worldC->GetClusterRenderQueue(node->cluster,true)})
 				{
@@ -378,7 +386,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			{
 				if(SceneRenderDesc::ShouldConsiderEntity(static_cast<CBaseEntity&>(pRenderComponent->GetEntity()),scene,drawSceneInfo.renderFlags,renderMask) == false || pRenderComponent->ShouldDrawShadow() == false)
 					continue;
-				SceneRenderDesc::AddRenderMeshesToRenderQueue(drawSceneInfo,*pRenderComponent,fGetRenderQueue,scene,*hCam,vp,nullptr);
+				SceneRenderDesc::AddRenderMeshesToRenderQueue(rasterizer.get(),drawSceneInfo.renderFlags,*pRenderComponent,fGetRenderQueue,scene,*hCam,vp,nullptr);
 			}
 
 			auto *culler = scene.FindOcclusionCuller();
@@ -386,7 +394,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			{
 				auto &dynOctree = culler->GetOcclusionOctree();
 				SceneRenderDesc::CollectRenderMeshesFromOctree(
-					drawSceneInfo,dynOctree,scene,*hCam,vp,drawSceneInfo.renderFlags,renderMask,fGetRenderQueue,fShouldCull,nullptr,nullptr,lodBias,
+					rasterizer.get(),drawSceneInfo.renderFlags,drawSceneInfo.clipPlane.has_value(),dynOctree,scene,*hCam,vp,renderMask,fGetRenderQueue,fShouldCull,nullptr,nullptr,lodBias,
 					[](CBaseEntity &ent,const pragma::CSceneComponent&,RenderFlags) -> bool {
 						return ent.GetRenderComponent()->ShouldDrawShadow();
 					}

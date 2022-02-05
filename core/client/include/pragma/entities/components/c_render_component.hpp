@@ -134,7 +134,7 @@ namespace pragma
 		virtual void ReceiveData(NetPacket &packet) override;
 
 		// Note: Called in render thread
-		void UpdateRenderDataMT(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp);
+		void UpdateRenderDataMT(const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp);
 
 		void UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bForceBufferUpdate=false);
 
@@ -273,9 +273,8 @@ namespace pragma
 	struct DLLCLIENT CEOnUpdateRenderData
 		: public ComponentEvent
 	{
-		CEOnUpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer);
+		CEOnUpdateRenderData();
 		virtual void PushArguments(lua_State *l) override;
-		std::shared_ptr<prosper::IPrimaryCommandBuffer> commandBuffer;
 	};
 
 	struct DLLCLIENT CEOnUpdateRenderBuffers

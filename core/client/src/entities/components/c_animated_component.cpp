@@ -93,7 +93,7 @@ void CAnimatedComponent::Initialize()
 	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto isDirty = umath::is_flag_set(m_stateFlags,StateFlags::BoneBufferDirty);
 		umath::set_flag(m_stateFlags,StateFlags::BoneBufferDirty,false);
-		UpdateBoneBuffer(*static_cast<pragma::CEOnUpdateRenderData&>(evData.get()).commandBuffer,isDirty);
+		UpdateBoneBuffer(*static_cast<pragma::CEOnUpdateRenderBuffers&>(evData.get()).commandBuffer,isDirty);
 	});
 	BindEvent(CRenderComponent::EVENT_UPDATE_INSTANTIABILITY,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		// TODO: Allow instantiability for animated entities

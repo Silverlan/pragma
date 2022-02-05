@@ -15,6 +15,10 @@
 #include <shader/prosper_shader.hpp>
 
 struct RenderPassStats;
+namespace pragma {
+	class CCameraComponent;
+	using RenderMeshIndex = uint32_t;
+};
 namespace pragma::rendering
 {
 	struct SortingKey

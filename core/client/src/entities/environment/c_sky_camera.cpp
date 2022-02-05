@@ -77,9 +77,65 @@ void CSkyCameraComponent::Render3dSkybox(pragma::rendering::LightingStageRenderP
 	UnbindFromShader(rsys);
 }
 
+void CSkyCameraComponent::BuildSkyMeshRenderQueues(
+	const pragma::CSceneComponent &scene,RenderFlags renderFlags,pragma::rendering::RenderMask renderMask,bool enableClipping,
+	rendering::RenderQueue &outRenderQueue,rendering::RenderQueue &outTranslucentRenderQueue,pragma::CRasterizationRendererComponent *optRasterizationRenderer
+) const
+{
+	auto &pos = GetEntity().GetPosition();
+
+	EntityIterator entItWorld {*c_game};
+	entItWorld.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
+	std::vector<util::BSPTree::Node*> bspLeafNodes;
+	bspLeafNodes.reserve(entItWorld.GetCount());
+	std::vector<util::BSPTree*> trees;
+	trees.reserve(entItWorld.GetCount());
+	for(auto *entWorld : entItWorld)
+	{
+		if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),scene,renderFlags,renderMask) == false)
+			continue;
+		auto worldC = entWorld->GetComponent<pragma::CWorldComponent>();
+		auto &bspTree = worldC->GetBSPTree();
+		auto *node = bspTree ? bspTree->FindLeafNode(pos) : nullptr;
+		if(node == nullptr)
+			continue;
+		bspLeafNodes.push_back(node);
+		trees.push_back(bspTree.get());
+			
+		auto *renderQueue = worldC->GetClusterRenderQueue(node->cluster,false /* translucent */);
+		auto *renderQueueTranslucent = worldC->GetClusterRenderQueue(node->cluster,true /* translucent */);
+		if(renderQueue)
+			outRenderQueue.Merge(*renderQueue);
+		if(renderQueueTranslucent)
+			outTranslucentRenderQueue.Merge(*renderQueueTranslucent);
+	}
+	
+	auto &hCam = scene.GetActiveCamera();
+	auto *culler = scene.FindOcclusionCuller();
+	if(culler && hCam.valid())
+	{
+		auto vp = hCam->GetProjectionMatrix() *hCam->GetViewMatrix();
+		auto &dynOctree = culler->GetOcclusionOctree();
+		// TODO: Find out why Enable3dOriginBit specialization constant isn't working properly.
+		// (Also see shaders/modules/vs_world.gls)
+		// Also take into account that world render queues are built offline, but don't include the flag for the constant -> How to handle?
+		SceneRenderDesc::CollectRenderMeshesFromOctree(
+			optRasterizationRenderer,renderFlags,enableClipping,dynOctree,scene,*hCam,vp,renderMask,
+			[&outRenderQueue,&outTranslucentRenderQueue](pragma::rendering::SceneRenderPass renderMode,bool translucent) -> pragma::rendering::RenderQueue* {
+				return (renderMode != pragma::rendering::SceneRenderPass::World) ? nullptr : (translucent ? &outTranslucentRenderQueue : &outRenderQueue);
+			},
+			nullptr,&trees,&bspLeafNodes,0,nullptr,pragma::GameShaderSpecializationConstantFlag::None//Enable3dOriginBit
+		);
+	}
+}
+
 void CSkyCameraComponent::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene.expired())
+		return;
+	auto *renderer = drawSceneInfo.scene->GetRenderer();
+	auto hRasterizer = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent>{};
+	if(hRasterizer.expired())
 		return;
 	m_renderQueue->Clear();
 	m_renderQueueTranslucent->Clear();
@@ -87,54 +143,10 @@ void CSkyCameraComponent::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 	m_renderQueueTranslucent->Lock();
 
 	auto renderMask = drawSceneInfo.GetRenderMask(*c_game);
-	c_game->GetRenderQueueBuilder().Append([this,&drawSceneInfo,renderMask]() {
+	auto &rasterizer = *hRasterizer;
+	c_game->GetRenderQueueBuilder().Append([this,&rasterizer,&drawSceneInfo,renderMask]() {
 		auto &scene = *drawSceneInfo.scene.get();
-
-		auto &pos = GetEntity().GetPosition();
-
-		EntityIterator entItWorld {*c_game};
-		entItWorld.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
-		std::vector<util::BSPTree::Node*> bspLeafNodes;
-		bspLeafNodes.reserve(entItWorld.GetCount());
-		std::vector<util::BSPTree*> trees;
-		trees.reserve(entItWorld.GetCount());
-		for(auto *entWorld : entItWorld)
-		{
-			if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),scene,drawSceneInfo.renderFlags,renderMask) == false)
-				continue;
-			auto worldC = entWorld->GetComponent<pragma::CWorldComponent>();
-			auto &bspTree = worldC->GetBSPTree();
-			auto *node = bspTree ? bspTree->FindLeafNode(pos) : nullptr;
-			if(node == nullptr)
-				continue;
-			bspLeafNodes.push_back(node);
-			trees.push_back(bspTree.get());
-			
-			auto *renderQueue = worldC->GetClusterRenderQueue(node->cluster,false /* translucent */);
-			auto *renderQueueTranslucent = worldC->GetClusterRenderQueue(node->cluster,true /* translucent */);
-			if(renderQueue)
-				m_renderQueue->Merge(*renderQueue);
-			if(renderQueueTranslucent)
-				m_renderQueueTranslucent->Merge(*renderQueueTranslucent);
-		}
-		
-		auto &hCam = scene.GetActiveCamera();
-		auto *culler = scene.FindOcclusionCuller();
-		if(culler && hCam.valid())
-		{
-			auto vp = hCam->GetProjectionMatrix() *hCam->GetViewMatrix();
-			auto &dynOctree = culler->GetOcclusionOctree();
-			// TODO: Find out why Enable3dOriginBit specialization constant isn't working properly.
-			// (Also see shaders/modules/vs_world.gls)
-			// Also take into account that world render queues are built offline, but don't include the flag for the constant -> How to handle?
-			SceneRenderDesc::CollectRenderMeshesFromOctree(
-				drawSceneInfo,dynOctree,scene,*hCam,vp,drawSceneInfo.renderFlags,renderMask,
-				[this](pragma::rendering::SceneRenderPass renderMode,bool translucent) -> pragma::rendering::RenderQueue* {
-					return (renderMode != pragma::rendering::SceneRenderPass::World) ? nullptr : (translucent ? m_renderQueueTranslucent.get() : m_renderQueue.get());
-				},
-				nullptr,&trees,&bspLeafNodes,0,nullptr,pragma::GameShaderSpecializationConstantFlag::None//Enable3dOriginBit
-			);
-		}
+		BuildSkyMeshRenderQueues(scene,drawSceneInfo.renderFlags,renderMask,drawSceneInfo.clipPlane.has_value(),*m_renderQueue,*m_renderQueueTranslucent,&rasterizer);
 
 		m_renderQueue->Sort();
 		m_renderQueueTranslucent->Sort();

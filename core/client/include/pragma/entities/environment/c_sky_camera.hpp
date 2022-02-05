@@ -28,6 +28,11 @@ namespace pragma
 		virtual void OnRemove() override;
 		virtual void OnEntitySpawn() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
+		void BuildSkyMeshRenderQueues(
+			const pragma::CSceneComponent &scene,RenderFlags renderFlags,pragma::rendering::RenderMask renderMask,bool enableClipping,
+			rendering::RenderQueue &outRenderQueue,rendering::RenderQueue &outTranslucentRenderQueue,
+			pragma::CRasterizationRendererComponent *optRasterizationRenderer=nullptr
+		) const;
 
 		float GetSkyboxScale() const;
 	private:

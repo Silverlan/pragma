@@ -330,45 +330,20 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defParallelJob.add_static_constant("JOB_STATUS_CANCELLED",umath::to_integral(util::JobStatus::Cancelled));
 	defParallelJob.add_static_constant("JOB_STATUS_PENDING",umath::to_integral(util::JobStatus::Pending));
 	defParallelJob.add_static_constant("JOB_STATUS_INVALID",umath::to_integral(util::JobStatus::Invalid));
-	defParallelJob.def("Cancel",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
-		job.Cancel();
-	}));
-	defParallelJob.def("Wait",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
-		job.Wait();
-	}));
-	defParallelJob.def("Start",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
-		job.Start();
-	}));
-	defParallelJob.def("IsComplete",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
-		Lua::PushBool(l,job.IsComplete());
-	}));
-	defParallelJob.def("IsPending",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
-		Lua::PushBool(l,job.IsPending());
-	}));
-	defParallelJob.def("IsCancelled",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
-		Lua::PushBool(l,job.IsCancelled());
-	}));
-	defParallelJob.def("IsSuccessful",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
-		Lua::PushBool(l,job.IsSuccessful());
-	}));
-	defParallelJob.def("IsThreadActive",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
-		Lua::PushBool(l,job.IsThreadActive());
-	}));
-	defParallelJob.def("GetProgress",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
-		Lua::PushNumber(l,job.GetProgress());
-	}));
-	defParallelJob.def("GetStatus",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
-		Lua::PushInt(l,umath::to_integral(job.GetStatus()));
-	}));
-	defParallelJob.def("GetResultMessage",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
-		Lua::PushString(l,job.GetResultMessage());
-	}));
-	defParallelJob.def("IsValid",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
-		Lua::PushBool(l,job.IsValid());
-	}));
-	defParallelJob.def("Poll",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
-		Lua::PushBool(l,job.Poll());
-	}));
+	defParallelJob.def("Cancel",&util::BaseParallelJob::Cancel);
+	defParallelJob.def("Wait",&util::BaseParallelJob::Wait);
+	defParallelJob.def("Start",&util::BaseParallelJob::Start);
+	defParallelJob.def("IsComplete",&util::BaseParallelJob::IsComplete);
+	defParallelJob.def("IsPending",&util::BaseParallelJob::IsPending);
+	defParallelJob.def("IsCancelled",&util::BaseParallelJob::IsCancelled);
+	defParallelJob.def("IsSuccessful",&util::BaseParallelJob::IsSuccessful);
+	defParallelJob.def("IsThreadActive",&util::BaseParallelJob::IsThreadActive);
+	defParallelJob.def("GetProgress",&util::BaseParallelJob::GetProgress);
+	defParallelJob.def("GetStatus",&util::BaseParallelJob::GetStatus);
+	defParallelJob.def("GetResultMessage",&util::BaseParallelJob::GetResultMessage);
+	defParallelJob.def("GetResultCode",&util::BaseParallelJob::GetResultCode);
+	defParallelJob.def("IsValid",&util::BaseParallelJob::IsValid);
+	defParallelJob.def("Poll",&util::BaseParallelJob::Poll);
 	modUtil[defParallelJob];
 
 	auto defImageBuffer = pragma::lua::register_class<uimg::ImageBuffer>("ImageBuffer");

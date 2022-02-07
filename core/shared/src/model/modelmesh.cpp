@@ -333,9 +333,9 @@ void ModelSubMesh::Merge(const ModelSubMesh &other)
 		}
 		ReserveIndices(GetIndexCount() +other.GetIndexCount());
 		// TODO: Use memcpy if index type matches
-		other.VisitIndices([this](auto *indexData,uint32_t numIndices) {
+		other.VisitIndices([this,vertCount](auto *indexData,uint32_t numIndices) {
 			for(auto i=decltype(numIndices){0u};i<numIndices;++i)
-				AddIndex(indexData[i]);
+				AddIndex(vertCount +indexData[i]);
 		});
 	}
 

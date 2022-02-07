@@ -25,13 +25,6 @@ namespace Lua
 		DLLNETWORK void RemoveEntityOnRemoval(BaseEntity &ent,BaseEntity &entOther,Bool bRemove);
 
 		DLLNETWORK float GetAirDensity(BaseEntity &ent);
-
-		DLLNETWORK void SetEnabled(BaseEntity &ent,bool enabled);
-		DLLNETWORK bool IsEnabled(BaseEntity &ent);
-		DLLNETWORK bool IsDisabled(BaseEntity &ent);
-
-		DLLNETWORK Color GetColor(BaseEntity &ent);
-		DLLNETWORK void SetColor(BaseEntity &ent,const Color &color);
 	};
 };
 

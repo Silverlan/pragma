@@ -174,6 +174,13 @@ public:
 	CollisionMask GetCollisionFilterGroup() const;
 	CollisionMask GetCollisionFilterMask() const;
 
+	void SetEnabled(bool enabled);
+	bool IsEnabled() const;
+	bool IsDisabled() const;
+
+	std::optional<Color> GetColor() const;
+	void SetColor(const Color &color);
+
 	Vector3 GetForward() const;
 	Vector3 GetUp() const;
 	Vector3 GetRight() const;

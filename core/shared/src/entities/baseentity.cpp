@@ -14,10 +14,54 @@
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_networked_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
+#include "pragma/entities/components/base_color_component.hpp"
+#include "pragma/entities/components/basetoggle.h"
 #include "pragma/entities/components/map_component.hpp"
 #include "pragma/model/model.h"
 #include "pragma/entities/baseentity_events.hpp"
 
+void BaseEntity::SetEnabled(bool enabled)
+{
+	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent*>(FindComponent("toggle").get());
+	if(toggleC == nullptr && enabled == true)
+		return;
+	if(toggleC == nullptr)
+		toggleC = dynamic_cast<pragma::BaseToggleComponent*>(AddComponent("toggle").get());
+	if(toggleC == nullptr)
+		return;
+	toggleC->SetTurnedOn(enabled);
+}
+bool BaseEntity::IsEnabled() const
+{
+	auto isEnabled = true;
+	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent*>(FindComponent("toggle").get());
+	if(toggleC != nullptr)
+		isEnabled = toggleC->IsTurnedOn();
+	return isEnabled;
+}
+bool BaseEntity::IsDisabled() const
+{
+	auto isEnabled = true;
+	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent*>(FindComponent("toggle").get());
+	if(toggleC != nullptr)
+		isEnabled = toggleC->IsTurnedOn();
+	return !isEnabled;
+}
+
+std::optional<Color> BaseEntity::GetColor() const
+{
+	auto *colorC = dynamic_cast<pragma::BaseColorComponent*>(FindComponent("color").get());
+	if(colorC == nullptr)
+		return {};
+	return colorC->GetColor();
+}
+void BaseEntity::SetColor(const Color &color)
+{
+	auto *colorC = dynamic_cast<pragma::BaseColorComponent*>(AddComponent("color").get());
+	if(colorC == nullptr)
+		return;
+	colorC->SetColor(color);
+}
 bool BaseEntity::IsStatic() const
 {
 	if(GetAnimatedComponent().valid())

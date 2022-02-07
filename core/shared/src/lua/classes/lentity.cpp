@@ -313,18 +313,23 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 			return nil;
 		return owner->GetLuaObject();
 	}));
-	classDef.def("SetEnabled",&Lua::Entity::SetEnabled);
-	classDef.def("SetTurnedOn",&Lua::Entity::SetEnabled);
-	classDef.def("Enable",static_cast<void(*)(BaseEntity&)>([](BaseEntity &ent) {SetEnabled(ent,true);}));
-	classDef.def("TurnOn",static_cast<void(*)(BaseEntity&)>([](BaseEntity &ent) {SetEnabled(ent,true);}));
-	classDef.def("Disable",static_cast<void(*)(BaseEntity&)>([](BaseEntity &ent) {SetEnabled(ent,false);}));
-	classDef.def("TurnOff",static_cast<void(*)(BaseEntity&)>([](BaseEntity &ent) {SetEnabled(ent,false);}));
-	classDef.def("IsEnabled",&Lua::Entity::IsEnabled);
-	classDef.def("IsTurnedOn",&Lua::Entity::IsEnabled);
-	classDef.def("IsDisabled",&Lua::Entity::IsDisabled);
-	classDef.def("IsTurnedOff",&Lua::Entity::IsDisabled);
-	classDef.def("SetColor",&Lua::Entity::SetColor);
-	classDef.def("GetColor",&Lua::Entity::GetColor);
+	classDef.def("SetEnabled",&BaseEntity::SetEnabled);
+	classDef.def("SetTurnedOn",&BaseEntity::SetEnabled);
+	classDef.def("Enable",static_cast<void(*)(BaseEntity&)>([](BaseEntity &ent) {ent.SetEnabled(true);}));
+	classDef.def("TurnOn",static_cast<void(*)(BaseEntity&)>([](BaseEntity &ent) {ent.SetEnabled(true);}));
+	classDef.def("Disable",static_cast<void(*)(BaseEntity&)>([](BaseEntity &ent) {ent.SetEnabled(false);}));
+	classDef.def("TurnOff",static_cast<void(*)(BaseEntity&)>([](BaseEntity &ent) {ent.SetEnabled(false);}));
+	classDef.def("IsEnabled",&BaseEntity::IsEnabled);
+	classDef.def("IsTurnedOn",&BaseEntity::IsEnabled);
+	classDef.def("IsDisabled",&BaseEntity::IsDisabled);
+	classDef.def("IsTurnedOff",&BaseEntity::IsDisabled);
+	classDef.def("SetColor",&BaseEntity::SetColor);
+	classDef.def("GetColor",+[](BaseEntity &ent) {
+		auto col = ent.GetColor();
+		if(!col.has_value())
+			return Color::White;
+		return *col;
+	});
 	classDef.def("GetPhysicsObject",&BaseEntity::GetPhysicsObject);
 	classDef.def("InitializePhysics",&BaseEntity::InitializePhysics);
 	classDef.def("DestroyPhysicsObject",&BaseEntity::DestroyPhysicsObject);
@@ -421,50 +426,6 @@ void Lua::Entity::RemoveEntityOnRemoval(BaseEntity &ent,BaseEntity &entOther,Boo
 	ent.RemoveEntityOnRemoval(&entOther,remove);
 }
 void Lua::Entity::RemoveEntityOnRemoval(BaseEntity &ent,BaseEntity &entOther) {Lua::Entity::RemoveEntityOnRemoval(ent,entOther,true);}
-void Lua::Entity::SetEnabled(BaseEntity &ent,bool enabled)
-{
-	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent*>(ent.FindComponent("toggle").get());
-	if(toggleC == nullptr && enabled == true)
-		return;
-	if(toggleC == nullptr)
-		toggleC = dynamic_cast<pragma::BaseToggleComponent*>(ent.AddComponent("toggle").get());
-	if(toggleC == nullptr)
-		return;
-	toggleC->SetTurnedOn(enabled);
-}
-
-bool Lua::Entity::IsEnabled(BaseEntity &ent)
-{
-	auto isEnabled = true;
-	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent*>(ent.FindComponent("toggle").get());
-	if(toggleC != nullptr)
-		isEnabled = toggleC->IsTurnedOn();
-	return isEnabled;
-}
-
-bool Lua::Entity::IsDisabled(BaseEntity &ent)
-{
-	auto isEnabled = true;
-	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent*>(ent.FindComponent("toggle").get());
-	if(toggleC != nullptr)
-		isEnabled = toggleC->IsTurnedOn();
-	return !isEnabled;
-}
-
-Color Lua::Entity::GetColor(BaseEntity &ent)
-{
-	auto *colorC = dynamic_cast<pragma::BaseColorComponent*>(ent.FindComponent("color").get());
-	if(colorC == nullptr)
-		return Color::White;
-	return colorC->GetColor();
-}
-void Lua::Entity::SetColor(BaseEntity &ent,const Color &color)
-{
-	auto *colorC = dynamic_cast<pragma::BaseColorComponent*>(ent.AddComponent("color").get());
-	if(colorC == nullptr)
-		return;
-	colorC->SetColor(color);
-}
 
 float Lua::Entity::GetAirDensity(BaseEntity &ent)
 {

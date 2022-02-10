@@ -283,7 +283,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 	auto &context = c_engine->GetRenderContext();
 	for(auto clusterIdx=decltype(meshesPerClusters.size()){0u};clusterIdx<meshesPerClusters.size();++clusterIdx)
 	{
-		clusterRenderQueues.push_back(pragma::rendering::RenderQueue::Create());
+		clusterRenderQueues.push_back(pragma::rendering::RenderQueue::Create("world_cluster_" +std::to_string(clusterIdx)));
 		std::shared_ptr<pragma::rendering::RenderQueue> clusterRenderTranslucentQueue = nullptr;
 		auto &clusterRenderQueue = clusterRenderQueues.back();
 		auto &meshes = meshesPerClusters.at(clusterIdx);
@@ -315,7 +315,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 				continue;
 			if(mat->GetAlphaMode() == AlphaMode::Blend)
 			{
-				clusterRenderTranslucentQueue = clusterRenderTranslucentQueue ? clusterRenderTranslucentQueue : pragma::rendering::RenderQueue::Create();
+				clusterRenderTranslucentQueue = clusterRenderTranslucentQueue ? clusterRenderTranslucentQueue : pragma::rendering::RenderQueue::Create("world_translucent_cluster_" +std::to_string(clusterIdx));
 				clusterRenderTranslucentQueue->Add(static_cast<CBaseEntity&>(GetEntity()),subMeshIdx,*mat,pipelineId);
 				continue;
 			}

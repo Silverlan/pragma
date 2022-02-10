@@ -45,8 +45,12 @@ extern DLLCLIENT CGame *c_game;
 SceneRenderDesc::SceneRenderDesc(pragma::CSceneComponent &scene)
 	: m_scene{scene}
 {
-	for(auto &renderQueue : m_renderQueues)
-		renderQueue = pragma::rendering::RenderQueue::Create();
+	auto name = scene.GetEntity().GetName();
+	std::string prefix = "scene_";
+	if(!name.empty())
+		prefix += name +'_';
+	for(uint32_t i=0;auto &renderQueue : m_renderQueues)
+		renderQueue = pragma::rendering::RenderQueue::Create(prefix +std::string{magic_enum::enum_name(static_cast<RenderQueueId>(i++))});
 	ReloadOcclusionCullingHandler();
 }
 SceneRenderDesc::~SceneRenderDesc()

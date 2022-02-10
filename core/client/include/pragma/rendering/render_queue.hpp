@@ -77,7 +77,7 @@ namespace pragma::rendering
 			uint32_t startSkipIndex;
 			uint32_t GetSkipCount() const {return instanceCount *meshCount;}
 		};
-		static std::shared_ptr<RenderQueue> Create();
+		static std::shared_ptr<RenderQueue> Create(std::string name);
 		void Clear();
 		void Reserve();
 		void Add(const std::vector<RenderQueueItem> &items);
@@ -94,12 +94,14 @@ namespace pragma::rendering
 		void WaitForCompletion(RenderPassStats *optStats=nullptr) const;
 		bool IsComplete() const;
 	private:
-		RenderQueue();
+		RenderQueue(std::string name);
 
 		std::atomic<bool> m_locked = false;
 		mutable std::condition_variable m_threadWaitCondition {};
 		mutable std::mutex m_threadWaitMutex {};
 		std::mutex m_queueMutex {};
+		std::string m_name;
+		std::atomic<bool> m_debugTest = false;
 	};
 
 	class RenderQueueJob

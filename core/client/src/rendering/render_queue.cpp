@@ -14,7 +14,7 @@
 #include <cmaterial.h>
 
 using namespace pragma::rendering;
-
+#pragma optimize("",off)
 SortingKey::SortingKey(MaterialIndex material,prosper::ShaderIndex shader,bool instantiable,bool translucentKey)
 {
 	if(translucentKey)
@@ -76,9 +76,10 @@ RenderQueueItem::RenderQueueItem(CBaseEntity &ent,RenderMeshIndex meshIdx,CMater
 	}
 }
 
-std::shared_ptr<RenderQueue> RenderQueue::Create() {return std::shared_ptr<RenderQueue>{new RenderQueue{}};}
+std::shared_ptr<RenderQueue> RenderQueue::Create(std::string name) {return std::shared_ptr<RenderQueue>{new RenderQueue{std::move(name)}};}
 
-RenderQueue::RenderQueue()
+RenderQueue::RenderQueue(std::string name)
+	: m_name{std::move(name)}
 {}
 
 void RenderQueue::Reserve()
@@ -91,6 +92,8 @@ void RenderQueue::Reserve()
 }
 void RenderQueue::Clear()
 {
+	if(m_debugTest)
+		throw std::runtime_error{"Fatal error"};
 	queue.clear();
 	sortedItemIndices.clear();
 }
@@ -109,6 +112,7 @@ void RenderQueue::Add(const RenderQueueItem &item)
 void RenderQueue::Add(const std::vector<RenderQueueItem> &items)
 {
 	m_queueMutex.lock();
+	m_debugTest = true;
 		auto offset = queue.size();
 		queue.resize(queue.size() +items.size());
 		sortedItemIndices.resize(queue.size());
@@ -117,6 +121,7 @@ void RenderQueue::Add(const std::vector<RenderQueueItem> &items)
 			queue[offset +i] = items[i];
 			sortedItemIndices[offset +i] = {offset +i,items[i].sortingKey};
 		}
+	m_debugTest = false;
 	m_queueMutex.unlock();
 }
 void RenderQueue::Sort()
@@ -236,3 +241,4 @@ void RenderQueueBuilder::BuildRenderQueues()
 {
 
 }
+#pragma optimize("",on)

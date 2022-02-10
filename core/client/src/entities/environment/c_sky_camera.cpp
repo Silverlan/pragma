@@ -65,8 +65,8 @@ void CSkyCameraComponent::Initialize()
 	BindEventUnhandled(CToggleComponent::EVENT_ON_TURN_ON,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {UpdateToggleState();});
 	BindEventUnhandled(CToggleComponent::EVENT_ON_TURN_OFF,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {UpdateToggleState();});
 
-	m_renderQueue = pragma::rendering::RenderQueue::Create();
-	m_renderQueueTranslucent = pragma::rendering::RenderQueue::Create();
+	m_renderQueue = pragma::rendering::RenderQueue::Create("sky_camera");
+	m_renderQueueTranslucent = pragma::rendering::RenderQueue::Create("sky_camera_translucent");
 }
 
 void CSkyCameraComponent::Render3dSkybox(pragma::rendering::LightingStageRenderProcessor &rsys)

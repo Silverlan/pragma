@@ -296,7 +296,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 	for(auto &renderQueue : m_renderQueues)
 	{
 		if(renderQueue == nullptr)
-			renderQueue = rendering::RenderQueue::Create();
+			renderQueue = rendering::RenderQueue::Create("shadow");
 		renderQueue->Lock();
 	}
 

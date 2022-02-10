@@ -552,12 +552,13 @@ void Model::OnMaterialLoaded()
 	umath::set_flag(m_stateFlags,StateFlags::AllMaterialsLoaded,bAllLoaded);
 	if(bAllLoaded == true)
 	{
-		for(auto &hCb : m_onAllMatsLoadedCallbacks)
+		auto onAllMatsLoadedCallbacks = std::move(m_onAllMatsLoadedCallbacks);
+		m_onAllMatsLoadedCallbacks.clear();
+		for(auto &hCb : onAllMatsLoadedCallbacks)
 		{
 			if(hCb.IsValid() == true)
 				hCb();
 		}
-		m_onAllMatsLoadedCallbacks.clear();
 	}
 }
 CallbackHandle Model::CallOnMaterialsLoaded(const std::function<void(void)> &f)

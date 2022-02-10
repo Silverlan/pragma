@@ -278,7 +278,7 @@ std::shared_ptr<ALSound> ClientState::CreateSound(std::string snd,ALSoundType ty
 		}
 	}
 	auto *as = new ALSoundScript(this,std::numeric_limits<uint32_t>::max(),script,this,(flags &ALCreateFlags::Stream) != ALCreateFlags::None);
-	std::shared_ptr<ALSound> pAs(as);
+	std::shared_ptr<ALSound> pAs(as,[](ALSound *snd) {snd->OnRelease(); delete snd;});
 	m_soundScripts.push_back(pAs);
 	as->Initialize();
 	Game *game = GetGameState();
@@ -293,14 +293,6 @@ std::shared_ptr<ALSound> ClientState::CreateSound(std::string snd,ALSoundType ty
 void ClientState::InitializeSound(CALSound &snd)
 {
 	m_sounds.push_back(snd);
-	snd.AddCallback("OnDestroyed",FunctionCallback<void>::Create([this,&snd]() {
-		auto it = std::find_if(m_sounds.begin(),m_sounds.end(),[&snd](const ALSoundRef &sndOther) {
-			return (&sndOther.get() == &snd) ? true : false;
-		});
-		if(it == m_sounds.end())
-			return;
-		m_sounds.erase(it);
-	}));
 	snd.Initialize();
 	auto *game = GetGameState();
 	if(game != nullptr)

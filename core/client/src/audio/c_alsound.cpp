@@ -413,8 +413,12 @@ CALSound::CALSound(NetworkState *nw,const al::PSoundChannel &channel)
 	RegisterCallback<void,std::reference_wrapper<float>>("UpdateGain");
 }
 
-CALSound::~CALSound()
+CALSound::~CALSound() {}
+
+void CALSound::OnRelease()
 {
+	al::SoundSource::OnRelease();
+	ALSound::OnRelease();
 	auto it = s_svIndexedSounds.find(GetIndex());
 	if(it != s_svIndexedSounds.end())
 		s_svIndexedSounds.erase(it);

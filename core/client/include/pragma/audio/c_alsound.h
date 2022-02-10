@@ -33,6 +33,7 @@ public:
 
 	CALSound(NetworkState *nw,const al::PSoundChannel &channel);
 	virtual ~CALSound() override;
+	virtual void OnRelease() override;
 	float GetMaxAudibleDistance() const;
 	void SetPitchModifier(float mod);
 	float GetPitchModifier() const;

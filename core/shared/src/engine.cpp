@@ -740,10 +740,13 @@ void Engine::RunLaunchCommands()
 			if(nw)
 			{
 				auto cbOnGameStart = FunctionCallback<void>::Create(nullptr);
-				cbOnGameStart.get<Callback<void>>()->SetFunction([this,cbOnGameStart,nw,remainingCommands=std::move(remainingCommands)]() mutable {
+				auto skip = false;
+				cbOnGameStart.get<Callback<void>>()->SetFunction([this,cbOnGameStart,nw,skip,remainingCommands=std::move(remainingCommands)]() mutable {
 					auto cmds0 = std::move(remainingCommands);
-					if(cbOnGameStart.IsValid())
-						cbOnGameStart.Remove();
+
+					skip = true;
+					if(skip)
+						return;
 
 					auto *game = nw->GetGameState();
 					if(game)
@@ -762,6 +765,9 @@ void Engine::RunLaunchCommands()
 						});
 						game->AddCallback("OnGameReady",cbOnGameReady);
 					}
+
+					if(cbOnGameStart.IsValid())
+						cbOnGameStart.Remove();
 				});
 				nw->AddCallback("OnGameStart",cbOnGameStart);
 			}

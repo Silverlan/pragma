@@ -44,10 +44,9 @@ ALSound::ALSound(NetworkState *nw)
 	RegisterCallback<void,ALState,ALState>("OnStateChanged");
 }
 
-ALSound::~ALSound()
-{
-	CallCallbacks<void>("OnDestroyed");
-}
+ALSound::~ALSound() {}
+
+void ALSound::OnRelease() {CallCallbacks<void>("OnDestroyed");}
 
 void ALSound::SetRange(float start,float end) {m_range = std::make_unique<std::pair<float,float>>(std::pair<float,float>{start,end});}
 void ALSound::ClearRange() {m_range = nullptr;}

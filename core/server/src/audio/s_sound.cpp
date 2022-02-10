@@ -166,7 +166,7 @@ std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd,ALSoundType ty
 		as = new SALSound(this,idx,duration,snd,flags);
 	else
 		as = new SALSoundScript(this,idx,script,this,snd,flags);
-	pAs = std::shared_ptr<ALSound>(as);
+	pAs = std::shared_ptr<ALSound>(as,[](ALSound *snd) {snd->OnRelease(); delete snd;});
 	m_sounds.push_back(*as);
 	m_serverSounds.push_back(pAs);
 	as->SetType(type);

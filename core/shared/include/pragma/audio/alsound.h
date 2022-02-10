@@ -125,6 +125,7 @@ public:
 	ALSound(NetworkState *nw);
 	virtual ~ALSound();
 	virtual void Initialize();
+	virtual void OnRelease();
 	virtual unsigned int GetIndex() const;
 	void SetIndex(unsigned int idx);
 	virtual void Update()=0;

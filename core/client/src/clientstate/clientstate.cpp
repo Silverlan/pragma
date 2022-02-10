@@ -53,7 +53,7 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_window.hpp>
 
-
+#pragma optimize("",off)
 static std::unordered_map<std::string,std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &ClientState::GetConVarPtrs() {return *conVarPtrs;}
 ConVarHandle ClientState::GetConVarHandle(std::string scvar)
@@ -113,6 +113,8 @@ ClientState::~ClientState()
 {
 	Disconnect();
 	FileManager::RemoveCustomMountDirectory("downloads");
+
+	c_engine->GetSoundSystem()->SetOnReleaseSoundCallback(nullptr);
 }
 
 void ClientState::UpdateGameWorldShaderSettings()
@@ -193,6 +195,16 @@ void ClientState::Initialize()
 		Con::cout<<"Name: "<<i->first<<Con::endl;
 	}*/
 	NetworkState::Initialize();
+
+	c_engine->GetSoundSystem()->SetOnReleaseSoundCallback([this](const al::SoundSource &snd) {
+		auto it = std::find_if(m_sounds.begin(),m_sounds.end(),[&snd](const ALSoundRef &sndOther) {
+			return (static_cast<CALSound*>(&sndOther.get()) == &snd) ? true : false;
+		});
+		if(it == m_sounds.end())
+			return;
+		m_sounds.erase(it);
+	});
+
 	c_engine->LoadClientConfig();
 	InitializeGUILua();
 	auto &gui = WGUI::GetInstance();
@@ -902,3 +914,4 @@ REGISTER_CONVAR_CALLBACK_CL(sv_tickrate,[](NetworkState*,ConVar*,int,int val) {
 		val = 0;
 	c_engine->SetTickRate(val);
 });
+#pragma optimize("",on)

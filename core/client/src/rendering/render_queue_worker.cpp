@@ -10,7 +10,7 @@
 #include "pragma/rendering/render_stats.hpp"
 
 using namespace pragma::rendering;
-
+#pragma optimize("",off)
 RenderQueueWorker::RenderQueueWorker(RenderQueueWorkerManager &manager)
 	: m_manager{manager}
 {
@@ -65,6 +65,7 @@ void RenderQueueWorker::StartThread()
 			}
 		}
 	}};
+	util::set_thread_name(m_thread,"render_queue_worker");
 }
 
 RenderQueueWorker::~RenderQueueWorker()
@@ -143,3 +144,4 @@ void RenderQueueWorkerManager::AddJob(const Job &job)
 		return; // We'll submit the jobs as batches, to reduce the overhead of the mutex
 	FlushPendingJobs();
 }
+#pragma optimize("",on)

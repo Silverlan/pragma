@@ -369,6 +369,11 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 	};
 	buildRenderQueues(drawSceneInfos);
 
+	// Inform the render queue builder that no further render queues will be queued for building.
+	// It will call the render queue completion functions automatically once all render queues have
+	// finished building. No completion functions can be executed before this function is called.
+	GetRenderQueueBuilder().SetReadyForCompletion();
+
 	// Update time
 	UpdateShaderTimeData();
 

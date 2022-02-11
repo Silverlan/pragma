@@ -392,7 +392,7 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 )
 {
 	CollectRenderMeshesFromOctree(optRasterizationRenderer,renderFlags,enableClipping,tree,scene,cam,vp,renderMask,[this](pragma::rendering::SceneRenderPass renderMode,bool translucent) {return GetRenderQueue(renderMode,translucent);},
-	[&frustumPlanes](const Vector3 &min,const Vector3 &max) -> bool {
+	[frustumPlanes](const Vector3 &min,const Vector3 &max) -> bool {
 		return umath::intersection::aabb_in_plane_mesh(min,max,frustumPlanes) == umath::intersection::Intersect::Outside;
 	},bspTrees,bspLeafNodes,0,nullptr);
 }
@@ -621,7 +621,10 @@ bool SceneRenderDesc::AssertRenderQueueThreadInactive()
 static auto cvLockRenderQueues = GetClientConVar("debug_render_lock_render_queues");
 static auto cvFrustumCullingEnabled = GetClientConVar("cl_render_frustum_culling_enabled");
 // Tag: render-queues
-void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo)
+void SceneRenderDesc::BuildRenderQueues(
+	const util::DrawSceneInfo &drawSceneInfo,
+	const std::function<void()> &fBuildAdditionalQueues
+)
 {
 	if(cvLockRenderQueues->GetBool())
 		return;
@@ -649,10 +652,10 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 	auto &posCam = g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->pos : drawSceneInfo.pvsOrigin.has_value() ? *drawSceneInfo.pvsOrigin : cam.GetEntity().GetPosition();
 
 	auto renderMask = drawSceneInfo.GetRenderMask(*c_game);
+	auto tStart = std::chrono::steady_clock::now();
 	c_game->GetRenderQueueBuilder().Append([this,&rasterizer,&cam,posCam,&drawSceneInfo,renderMask]() {
 		++g_activeRenderQueueThreads;
 		auto *stats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->renderQueueBuilderStats : nullptr;
-		std::chrono::steady_clock::time_point tStart;
 		if(stats)
 		{
 			auto &queueWorkerManager = c_game->GetRenderQueueWorkerManager();
@@ -660,7 +663,6 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 			stats->workerStats.resize(numWorkers);
 			for(auto i=decltype(numWorkers){0u};i<numWorkers;++i)
 				queueWorkerManager.GetWorker(i).SetStats(&stats->workerStats[i]);
-			tStart = std::chrono::steady_clock::now();
 		}
 
 		pragma::CSceneComponent::GetEntityInstanceIndexBuffer()->UpdateAndClearUnusedBuffers();
@@ -817,12 +819,11 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 			if(stats)
 				(*stats)->AddTime(RenderQueueBuilderStats::Timer::OctreeProcessing,std::chrono::steady_clock::now() -t);
 		}
-
+	},[this,&drawSceneInfo]() {
+		auto *stats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->renderQueueBuilderStats : nullptr;
+		std::chrono::steady_clock::time_point t;
 		if(stats)
 			t = std::chrono::steady_clock::now();
-		c_game->GetRenderQueueWorkerManager().WaitForCompletion();
-		if(stats)
-			(*stats)->AddTime(RenderQueueBuilderStats::Timer::WorkerWait,std::chrono::steady_clock::now() -t);
 
 		// All render queues (aside from world render queues) need to be sorted
 		for(auto &renderQueue : m_renderQueues)
@@ -841,6 +842,27 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 			renderQueue->Unlock();
 		}
 		// c_game->StopProfilingStage(CGame::CPUProfilingPhase::BuildRenderQueue);
+	});
+
+	if(fBuildAdditionalQueues)
+		fBuildAdditionalQueues(); // Any additional render queues will be processed in parallel to the above
+
+	// As the last operation, we'll wait until all render queues have been built.
+	// No further operations must be appended to the render queue builder after this!
+	c_game->GetRenderQueueBuilder().Append([this,&rasterizer,&cam,posCam,&drawSceneInfo,renderMask]() {
+		auto *stats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->renderQueueBuilderStats : nullptr;
+		std::chrono::steady_clock::time_point t;
+		if(stats)
+			t = std::chrono::steady_clock::now();
+		c_game->GetRenderQueueWorkerManager().WaitForCompletion();
+		if(stats)
+			(*stats)->AddTime(RenderQueueBuilderStats::Timer::WorkerWait,std::chrono::steady_clock::now() -t);
+	},[&drawSceneInfo,tStart]() {
+		// Final completion function. Collect stats and decrease active thread count.
+		auto *stats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->renderQueueBuilderStats : nullptr;
+		std::chrono::steady_clock::time_point t;
+		if(stats)
+			t = std::chrono::steady_clock::now();
 		if(stats)
 		{
 			(*stats)->AddTime(RenderQueueBuilderStats::Timer::TotalExecution,std::chrono::steady_clock::now() -tStart);

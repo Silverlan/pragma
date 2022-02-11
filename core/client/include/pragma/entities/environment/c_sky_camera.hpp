@@ -36,24 +36,25 @@ namespace pragma
 
 		float GetSkyboxScale() const;
 	private:
-		void UpdateScenes();
-		void UpdateToggleState();
-		void BindToShader(pragma::rendering::BaseRenderProcessor &processor);
-		void UnbindFromShader(pragma::rendering::BaseRenderProcessor &processor);
-		void BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo);
-		void Render3dSkybox(pragma::rendering::LightingStageRenderProcessor &rsys);
-		float m_skyboxScale = 1.f;
-		struct SceneCallbacks
+		struct SceneData
 		{
-			~SceneCallbacks();
+			~SceneData();
 			CallbackHandle onBuildRenderQueue = {};
 			CallbackHandle onRendererChanged = {};
 			CallbackHandle renderSkybox = {};
 			CallbackHandle renderPrepass = {};
+
+			std::shared_ptr<pragma::rendering::RenderQueue> renderQueue = nullptr;
+			std::shared_ptr<pragma::rendering::RenderQueue> renderQueueTranslucent = nullptr;
 		};
-		std::unordered_map<pragma::CSceneComponent::SceneIndex,SceneCallbacks> m_sceneCallbacks;
-		std::shared_ptr<pragma::rendering::RenderQueue> m_renderQueue = nullptr;
-		std::shared_ptr<pragma::rendering::RenderQueue> m_renderQueueTranslucent = nullptr;
+		void UpdateScenes();
+		void UpdateToggleState();
+		void BindToShader(pragma::rendering::BaseRenderProcessor &processor) const;
+		void UnbindFromShader(pragma::rendering::BaseRenderProcessor &processor) const;
+		void BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo,SceneData &sceneData);
+
+		float m_skyboxScale = 1.f;
+		std::unordered_map<pragma::CSceneComponent::SceneIndex,std::shared_ptr<SceneData>> m_sceneData;
 	};
 };
 

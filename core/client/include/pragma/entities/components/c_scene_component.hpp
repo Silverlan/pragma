@@ -102,7 +102,10 @@ public:
 	void SetOcclusionCullingMethod(OcclusionCullingMethod method);
 	void ReloadOcclusionCullingHandler();
 
-	void BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo);
+	void BuildRenderQueues(
+		const util::DrawSceneInfo &drawSceneInfo,
+		const std::function<void()> &fBuildAdditionalQueues
+	);
 	void BuildRenderQueueInstanceLists(pragma::rendering::RenderQueue &renderQueue);
 
 	bool IsWorldMeshVisible(uint32_t worldRenderQueueIndex,pragma::RenderMeshIndex meshIdx) const;

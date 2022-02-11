@@ -467,22 +467,23 @@ const std::shared_ptr<prosper::IDescriptorSetGroup> &CSceneComponent::GetFogDesc
 void CSceneComponent::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo)
 {
 	pragma::CEDrawSceneInfo evData {drawSceneInfo};
-	InvokeEventCallbacks(pragma::CSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES,evData);
-	GetSceneRenderDesc().BuildRenderQueues(drawSceneInfo);
+	GetSceneRenderDesc().BuildRenderQueues(drawSceneInfo,[this,&drawSceneInfo,&evData]() {
+		// Start building the render queues for the light sources
+		// that create shadows and were previously visible.
+		// At this point we don't actually know if they're still visible,
+		// but it's very likely.
+		for(auto &hLight : m_previouslyVisibleShadowedLights)
+		{
+			if(hLight.expired())
+				continue;
+			auto *shadowC = hLight->GetShadowComponent();
+			if(shadowC == nullptr)
+				continue;
+			shadowC->GetRenderer().BuildRenderQueues(drawSceneInfo);
+		}
 
-	// Start building the render queues for the light sources
-	// that create shadows and were previously visible.
-	// At this point we don't actually know if they're still visible,
-	// but it's very likely.
-	for(auto &hLight : m_previouslyVisibleShadowedLights)
-	{
-		if(hLight.expired())
-			continue;
-		auto *shadowC = hLight->GetShadowComponent();
-		if(shadowC == nullptr)
-			continue;
-		shadowC->GetRenderer().BuildRenderQueues(drawSceneInfo);
-	}
+		InvokeEventCallbacks(pragma::CSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES,evData);
+	});
 }
 
 WorldEnvironment *CSceneComponent::GetWorldEnvironment() const {return m_worldEnvironment.get();}

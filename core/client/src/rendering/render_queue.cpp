@@ -82,6 +82,8 @@ RenderQueue::RenderQueue(std::string name)
 	: m_name{std::move(name)}
 {}
 
+RenderQueue::~RenderQueue() {}
+
 void RenderQueue::Reserve()
 {
 	if(queue.size() < queue.capacity())
@@ -92,8 +94,6 @@ void RenderQueue::Reserve()
 }
 void RenderQueue::Clear()
 {
-	if(m_debugTest)
-		throw std::runtime_error{"Fatal error"};
 	queue.clear();
 	sortedItemIndices.clear();
 }
@@ -112,7 +112,6 @@ void RenderQueue::Add(const RenderQueueItem &item)
 void RenderQueue::Add(const std::vector<RenderQueueItem> &items)
 {
 	m_queueMutex.lock();
-	m_debugTest = true;
 		auto offset = queue.size();
 		queue.resize(queue.size() +items.size());
 		sortedItemIndices.resize(queue.size());
@@ -121,7 +120,6 @@ void RenderQueue::Add(const std::vector<RenderQueueItem> &items)
 			queue[offset +i] = items[i];
 			sortedItemIndices[offset +i] = {offset +i,items[i].sortingKey};
 		}
-	m_debugTest = false;
 	m_queueMutex.unlock();
 }
 void RenderQueue::Sort()
@@ -195,31 +193,55 @@ void RenderQueueBuilder::Exec()
 		for(;;)
 		{
 			std::unique_lock<std::mutex> mlock {m_workMutex};
-			m_threadWaitCondition.wait(mlock,[this]() -> bool {return !m_threadRunning || m_hasWork;});
+			m_threadWaitCondition.wait(mlock,[this]() -> bool {
+				return !m_threadRunning || m_hasWork || (!m_hasWork && m_readyForCompletion);
+			});
 			
-			if(m_workQueue.empty())
+			if(m_renderQueueBuildQueue.empty())
 			{
+				if(m_readyForCompletion)
+				{
+					// All queues have been built, it's time to finalize them
+					m_readyForCompletion = false;
+					while(!m_renderQueueCompleteQueue.empty())
+					{
+						m_renderQueueCompleteQueue.front()();
+						m_renderQueueCompleteQueue.pop();
+					}
+					continue;
+				}
 				m_hasWork = false;
 				if(m_threadRunning == false)
 					return;
 				continue;
 			}
-			auto worker = m_workQueue.front();
-			m_workQueue.pop();
+			auto worker = std::move(m_renderQueueBuildQueue.front());
+			m_renderQueueBuildQueue.pop();
 
 			mlock.unlock();
 			worker();
 		}
 	}};
+	util::set_thread_name(m_thread,"render_queue_builder");
 }
 
-void RenderQueueBuilder::Append(const std::function<void()> &worker)
+void RenderQueueBuilder::SetReadyForCompletion()
 {
-	m_workMutex.lock();
-		m_workQueue.push(worker);
-		m_hasWork = true;
-		m_threadWaitCondition.notify_one();
-	m_workMutex.unlock();
+	std::scoped_lock lock {m_workMutex};
+	m_readyForCompletion = true;
+	m_threadWaitCondition.notify_one();
+}
+
+void RenderQueueBuilder::Append(const std::function<void()> &workerBuildQueue,const std::function<void()> &workerCompleteQueue)
+{
+	// if(m_readyForCompletion)
+	// 	throw std::runtime_error{"Attempted to append render queue builder job after ready-for-completion flag has been set, this is not allowed!"};
+	std::scoped_lock lock {m_workMutex};
+	m_renderQueueBuildQueue.push(workerBuildQueue);
+	if(workerCompleteQueue)
+		m_renderQueueCompleteQueue.push(workerCompleteQueue);
+	m_hasWork = true;
+	m_threadWaitCondition.notify_one();
 }
 
 void RenderQueueBuilder::Flush()
@@ -232,7 +254,7 @@ bool RenderQueueBuilder::HasWork() const {return m_hasWork;}
 uint32_t RenderQueueBuilder::GetWorkQueueCount() const
 {
 	const_cast<RenderQueueBuilder*>(this)->m_workMutex.lock();
-		auto numEls = m_workQueue.size();
+		auto numEls = m_renderQueueBuildQueue.size() +m_renderQueueCompleteQueue.size();
 	const_cast<RenderQueueBuilder*>(this)->m_workMutex.unlock();
 	return numEls;
 }

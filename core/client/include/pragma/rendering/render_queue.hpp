@@ -103,7 +103,6 @@ namespace pragma::rendering
 		mutable std::mutex m_threadWaitMutex {};
 		std::mutex m_queueMutex {};
 		std::string m_name;
-		std::atomic<bool> m_debugTest = false;
 	};
 
 	class RenderQueueJob
@@ -120,20 +119,23 @@ namespace pragma::rendering
 	public:
 		RenderQueueBuilder();
 		~RenderQueueBuilder();
-		void Append(const std::function<void()> &worker);
+		void Append(const std::function<void()> &workerBuildQueue,const std::function<void()> &workerCompleteQueue);
 		void Flush();
 		bool HasWork() const;
 		uint32_t GetWorkQueueCount() const;
+		void SetReadyForCompletion();
 	private:
 		void Exec();
 		void BuildRenderQueues();
 		std::thread m_thread;
 
 		std::mutex m_workMutex;
-		std::queue<std::function<void()>> m_workQueue;
+		std::queue<std::function<void()>> m_renderQueueBuildQueue;
+		std::queue<std::function<void()>> m_renderQueueCompleteQueue;
 		std::condition_variable m_threadWaitCondition {};
 		std::atomic<bool> m_threadRunning = false;
 		std::atomic<bool> m_hasWork = false;
+		std::atomic<bool> m_readyForCompletion = false;
 	};
 };
 

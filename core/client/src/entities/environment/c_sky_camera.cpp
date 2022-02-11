@@ -36,7 +36,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(sky_camera,CSkyCamera);
 
-CSkyCameraComponent::SceneCallbacks::~SceneCallbacks()
+CSkyCameraComponent::SceneData::~SceneData()
 {
 	if(onRendererChanged.IsValid())
 		onRendererChanged.Remove();
@@ -65,17 +65,6 @@ void CSkyCameraComponent::Initialize()
 	});
 	BindEventUnhandled(CToggleComponent::EVENT_ON_TURN_ON,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {UpdateToggleState();});
 	BindEventUnhandled(CToggleComponent::EVENT_ON_TURN_OFF,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {UpdateToggleState();});
-
-	m_renderQueue = pragma::rendering::RenderQueue::Create("sky_camera");
-	m_renderQueueTranslucent = pragma::rendering::RenderQueue::Create("sky_camera_translucent");
-}
-
-void CSkyCameraComponent::Render3dSkybox(pragma::rendering::LightingStageRenderProcessor &rsys)
-{
-	BindToShader(rsys);
-		rsys.Render(*m_renderQueue);
-		rsys.Render(*m_renderQueueTranslucent);
-	UnbindFromShader(rsys);
 }
 
 void CSkyCameraComponent::BuildSkyMeshRenderQueues(
@@ -133,7 +122,7 @@ void CSkyCameraComponent::BuildSkyMeshRenderQueues(
 	}
 }
 
-void CSkyCameraComponent::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo)
+void CSkyCameraComponent::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo,SceneData &sceneData)
 {
 	if(drawSceneInfo.scene.expired())
 		return;
@@ -141,22 +130,24 @@ void CSkyCameraComponent::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 	auto hRasterizer = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent>{};
 	if(hRasterizer.expired())
 		return;
-	m_renderQueue->Clear();
-	m_renderQueueTranslucent->Clear();
-	m_renderQueue->Lock();
-	m_renderQueueTranslucent->Lock();
+	sceneData.renderQueue->Clear();
+	sceneData.renderQueueTranslucent->Clear();
+	sceneData.renderQueue->Lock();
+	sceneData.renderQueueTranslucent->Lock();
 
 	auto renderMask = drawSceneInfo.GetRenderMask(*c_game);
 	auto &rasterizer = *hRasterizer;
-	c_game->GetRenderQueueBuilder().Append([this,&rasterizer,&drawSceneInfo,renderMask]() {
+	c_game->GetRenderQueueBuilder().Append([this,&rasterizer,&drawSceneInfo,&sceneData,renderMask]() {
 		auto &scene = *drawSceneInfo.scene.get();
-		BuildSkyMeshRenderQueues(scene,drawSceneInfo.renderFlags,renderMask,drawSceneInfo.clipPlane.has_value(),*m_renderQueue,*m_renderQueueTranslucent,&rasterizer,false);
+		// Build render queues
+		BuildSkyMeshRenderQueues(scene,drawSceneInfo.renderFlags,renderMask,drawSceneInfo.clipPlane.has_value(),*sceneData.renderQueue,*sceneData.renderQueueTranslucent,&rasterizer,false);
+	},[&sceneData]() {
+		// Render queues are complete at this point, we can safely work with them again
+		sceneData.renderQueue->Sort();
+		sceneData.renderQueueTranslucent->Sort();
 
-		m_renderQueue->Sort();
-		m_renderQueueTranslucent->Sort();
-
-		m_renderQueue->Unlock();
-		m_renderQueueTranslucent->Unlock();
+		sceneData.renderQueue->Unlock();
+		sceneData.renderQueueTranslucent->Unlock();
 	});
 }
 
@@ -167,7 +158,7 @@ void CSkyCameraComponent::UpdateToggleState()
 	auto isEnabled = toggleC.expired() || toggleC->IsTurnedOn();
 	if(!isEnabled)
 	{
-		m_sceneCallbacks.clear();
+		m_sceneData.clear();
 		return;
 	}
 	UpdateScenes();
@@ -175,51 +166,57 @@ void CSkyCameraComponent::UpdateToggleState()
 
 void CSkyCameraComponent::UpdateScenes()
 {
-	m_sceneCallbacks.clear();
+	m_sceneData.clear();
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	auto scenes = ent.GetScenes();
 	for(auto *scene : scenes)
 	{
 		auto idx = scene->GetSceneIndex();
-		auto &callbacks = m_sceneCallbacks.insert(std::make_pair(idx,SceneCallbacks{})).first->second;
-		callbacks.onBuildRenderQueue = scene->AddEventCallback(pragma::CSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-			BuildRenderQueues(static_cast<pragma::CEDrawSceneInfo&>(evData.get()).drawSceneInfo);
+		auto &sceneData = m_sceneData.insert(std::make_pair(idx,std::shared_ptr<SceneData>{new SceneData{}})).first->second;
+		auto *pSceneData = sceneData.get();
+		sceneData->onBuildRenderQueue = scene->AddEventCallback(pragma::CSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES,
+			[this,pSceneData](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			BuildRenderQueues(static_cast<pragma::CEDrawSceneInfo&>(evData.get()).drawSceneInfo,*pSceneData);
 			return util::EventReply::Unhandled;
 		});
-		callbacks.onRendererChanged = scene->AddEventCallback(pragma::CSceneComponent::EVENT_ON_RENDERER_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		sceneData->onRendererChanged = scene->AddEventCallback(pragma::CSceneComponent::EVENT_ON_RENDERER_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			UpdateToggleState();
 			return util::EventReply::Unhandled;
 		});
+
+		sceneData->renderQueue = pragma::rendering::RenderQueue::Create("sky_camera");
+		sceneData->renderQueueTranslucent = pragma::rendering::RenderQueue::Create("sky_camera_translucent");
+
 		auto *renderer = scene->GetRenderer();
 		if(!renderer)
 			continue;
 		auto rasterizationC = renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>();
 		if(rasterizationC.expired())
 			continue;
-		callbacks.renderSkybox = rasterizationC->AddEventCallback(pragma::CRasterizationRendererComponent::EVENT_MT_END_RECORD_SKYBOX,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		sceneData->renderSkybox = rasterizationC->AddEventCallback(pragma::CRasterizationRendererComponent::EVENT_MT_END_RECORD_SKYBOX,[this,pSceneData](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			auto &stageData = static_cast<pragma::CELightingStageData&>(evData.get());
 			auto &rsys = stageData.renderProcessor;
 			BindToShader(rsys);
-				rsys.Render(*m_renderQueue);
-				rsys.Render(*m_renderQueueTranslucent);
+				rsys.Render(*pSceneData->renderQueue);
+				rsys.Render(*pSceneData->renderQueueTranslucent);
 			UnbindFromShader(rsys);
 			return util::EventReply::Unhandled;
 		});
-		callbacks.renderPrepass = rasterizationC->AddEventCallback(pragma::CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_PREPASS,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		sceneData->renderPrepass = rasterizationC->AddEventCallback(pragma::CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_PREPASS,[this,pSceneData](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			auto &stageData = static_cast<pragma::CEPrepassStageData&>(evData.get());
 			auto &rsys = stageData.renderProcessor;
 			auto &rpDrawInfo = rsys.GetRenderPassDrawInfo();
 			auto &drawSceneInfo = rpDrawInfo.drawSceneInfo;
 			auto &drawCmd = drawSceneInfo.commandBuffer;
 			// Need to update the render buffers for our render queues
-			CSceneComponent::UpdateRenderBuffers(drawCmd,*m_renderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
-			CSceneComponent::UpdateRenderBuffers(drawCmd,*m_renderQueueTranslucent,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
+			CSceneComponent::UpdateRenderBuffers(drawCmd,*pSceneData->renderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
+			CSceneComponent::UpdateRenderBuffers(drawCmd,*pSceneData->renderQueueTranslucent,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
 
 			rsys.UnbindShader();
 			BindToShader(rsys);
 			rsys.BindShader(stageData.shader,umath::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
-				rsys.Render(*m_renderQueue);
-				rsys.Render(*m_renderQueueTranslucent);
+				rsys.Render(*pSceneData->renderQueue);
+				rsys.Render(*pSceneData->renderQueueTranslucent);
 			UnbindFromShader(rsys);
 			rsys.UnbindShader();
 			return util::EventReply::Unhandled;
@@ -227,7 +224,7 @@ void CSkyCameraComponent::UpdateScenes()
 	}
 }
 
-void CSkyCameraComponent::BindToShader(pragma::rendering::BaseRenderProcessor &processor)
+void CSkyCameraComponent::BindToShader(pragma::rendering::BaseRenderProcessor &processor) const
 {
 	processor.Set3DSky(true);
 	auto &ent = GetEntity();
@@ -235,7 +232,7 @@ void CSkyCameraComponent::BindToShader(pragma::rendering::BaseRenderProcessor &p
 	Vector4 drawOrigin {pos.x,pos.y,pos.z,GetSkyboxScale()};
 	processor.SetDrawOrigin(drawOrigin);
 }
-void CSkyCameraComponent::UnbindFromShader(pragma::rendering::BaseRenderProcessor &processor)
+void CSkyCameraComponent::UnbindFromShader(pragma::rendering::BaseRenderProcessor &processor) const
 {
 	processor.Set3DSky(false);
 	processor.SetDrawOrigin({});

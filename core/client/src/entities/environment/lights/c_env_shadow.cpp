@@ -402,16 +402,10 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 				);
 			}
 		}
-		
-		auto *stats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->renderQueueBuilderStats : nullptr;
-		std::chrono::steady_clock::time_point t;
-		if(stats)
-			t = std::chrono::steady_clock::now();
+	},[this,&drawSceneInfo,&ent]() {
 		c_game->GetRenderQueueWorkerManager().WaitForCompletion();
-		if(stats)
-			(*stats)->AddTime(RenderQueueBuilderStats::Timer::WorkerWait,std::chrono::steady_clock::now() -t);
-		
 		// Sorting is technically not necessary, we only use it to lower the number of material state changes (for translucent meshes)
+		auto &mainRenderQueue = m_renderQueues.front();
 		mainRenderQueue->Sort();
 		
 		auto lightPointC = ent.GetComponent<CLightPointComponent>();

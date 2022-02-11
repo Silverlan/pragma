@@ -31,7 +31,7 @@ namespace pragma
 		void BuildSkyMeshRenderQueues(
 			const pragma::CSceneComponent &scene,RenderFlags renderFlags,pragma::rendering::RenderMask renderMask,bool enableClipping,
 			rendering::RenderQueue &outRenderQueue,rendering::RenderQueue &outTranslucentRenderQueue,
-			pragma::CRasterizationRendererComponent *optRasterizationRenderer=nullptr
+			pragma::CRasterizationRendererComponent *optRasterizationRenderer=nullptr,bool waitForRenderQueues=true
 		) const;
 
 		float GetSkyboxScale() const;

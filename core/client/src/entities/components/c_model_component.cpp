@@ -27,7 +27,7 @@ using namespace pragma;
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
-
+#pragma optimize("",off)
 ComponentEventId CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED = INVALID_COMPONENT_ID;
 void CModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CModelComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
@@ -284,21 +284,22 @@ void CModelComponent::UpdateRenderMeshes()
 		}
 	}
 	UpdateRenderBufferList();
+	BroadcastEvent(EVENT_ON_RENDER_MESHES_UPDATED);
 }
 
 void CModelComponent::UpdateLOD(UInt32 lod)
 {
+	m_lod = lod;
 	UpdateRenderMeshes();
 	//std::unordered_map<unsigned int,RenderInstance*>::iterator it = m_renderInstances.find(m_lod);
 	//if(it != m_renderInstances.end())
 	//	it->second->SetEnabled(false);
-	m_lod = lod;//CUChar(lod);
+	//CUChar(lod);
 
 	//UpdateRenderMeshes();
 	//it = m_renderInstances.find(m_lod);
 	//if(it != m_renderInstances.end())
 	//	it->second->SetEnabled(true);
-	BroadcastEvent(EVENT_ON_RENDER_MESHES_UPDATED);
 }
 
 void CModelComponent::SetLOD(uint32_t lod) {m_lod = lod;}
@@ -458,3 +459,4 @@ void CModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 	}
 	BaseModelComponent::OnModelChanged(model);
 }
+#pragma optimize("",on)

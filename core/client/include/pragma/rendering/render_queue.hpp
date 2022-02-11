@@ -78,6 +78,7 @@ namespace pragma::rendering
 			uint32_t GetSkipCount() const {return instanceCount *meshCount;}
 		};
 		static std::shared_ptr<RenderQueue> Create(std::string name);
+		~RenderQueue();
 		void Clear();
 		void Reserve();
 		void Add(const std::vector<RenderQueueItem> &items);
@@ -85,6 +86,7 @@ namespace pragma::rendering
 		void Add(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,prosper::PipelineID pipelineId,const CCameraComponent *optCam=nullptr);
 		void Sort();
 		void Merge(const RenderQueue &other);
+		const std::string &GetName() const {return m_name;}
 		std::vector<RenderQueueItem> queue;
 		RenderQueueSortList sortedItemIndices;
 		std::vector<InstanceSet> instanceSets;

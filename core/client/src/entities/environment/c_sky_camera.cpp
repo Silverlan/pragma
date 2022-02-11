@@ -24,6 +24,7 @@
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/rendering/render_queue_worker.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/baseentity_events.hpp>
 
@@ -79,7 +80,8 @@ void CSkyCameraComponent::Render3dSkybox(pragma::rendering::LightingStageRenderP
 
 void CSkyCameraComponent::BuildSkyMeshRenderQueues(
 	const pragma::CSceneComponent &scene,RenderFlags renderFlags,pragma::rendering::RenderMask renderMask,bool enableClipping,
-	rendering::RenderQueue &outRenderQueue,rendering::RenderQueue &outTranslucentRenderQueue,pragma::CRasterizationRendererComponent *optRasterizationRenderer
+	rendering::RenderQueue &outRenderQueue,rendering::RenderQueue &outTranslucentRenderQueue,
+	pragma::CRasterizationRendererComponent *optRasterizationRenderer,bool waitForRenderQueues
 ) const
 {
 	auto &pos = GetEntity().GetPosition();
@@ -126,6 +128,8 @@ void CSkyCameraComponent::BuildSkyMeshRenderQueues(
 			},
 			nullptr,&trees,&bspLeafNodes,0,nullptr,pragma::GameShaderSpecializationConstantFlag::None//Enable3dOriginBit
 		);
+		if(waitForRenderQueues)
+			c_game->GetRenderQueueWorkerManager().WaitForCompletion();
 	}
 }
 
@@ -146,7 +150,7 @@ void CSkyCameraComponent::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 	auto &rasterizer = *hRasterizer;
 	c_game->GetRenderQueueBuilder().Append([this,&rasterizer,&drawSceneInfo,renderMask]() {
 		auto &scene = *drawSceneInfo.scene.get();
-		BuildSkyMeshRenderQueues(scene,drawSceneInfo.renderFlags,renderMask,drawSceneInfo.clipPlane.has_value(),*m_renderQueue,*m_renderQueueTranslucent,&rasterizer);
+		BuildSkyMeshRenderQueues(scene,drawSceneInfo.renderFlags,renderMask,drawSceneInfo.clipPlane.has_value(),*m_renderQueue,*m_renderQueueTranslucent,&rasterizer,false);
 
 		m_renderQueue->Sort();
 		m_renderQueueTranslucent->Sort();

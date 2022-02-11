@@ -39,6 +39,7 @@ using namespace pragma;
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
 void CWorldComponent::Initialize()
 {
 	BaseWorldComponent::Initialize();
@@ -201,6 +202,18 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 	auto &clusterRenderTranslucentQueues = m_clusterRenderTranslucentQueues;
 	if(rebuild == false && clusterRenderQueues.empty() == false)
 		return;
+	for(auto &queue : clusterRenderQueues)
+	{
+		if(!queue)
+			continue;
+		queue->WaitForCompletion();
+	}
+	for(auto &queue : clusterRenderTranslucentQueues)
+	{
+		if(!queue)
+			continue;
+		queue->WaitForCompletion();
+	}
 	clusterRenderQueues.clear();
 	clusterRenderTranslucentQueues.clear();
 
@@ -423,3 +436,4 @@ std::ostream& CWorld::print(std::ostream &os)
 	os<<"]";
 	return os;
 }
+#pragma optimize("",on)

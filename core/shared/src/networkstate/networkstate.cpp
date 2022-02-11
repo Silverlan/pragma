@@ -36,7 +36,7 @@
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
 #include "pragma/game/isteamworks.hpp"
-
+#pragma optimize("",off)
 ConVarHandle NetworkState::GetConVarHandle(std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &ptrs,std::string scvar) {return CVarHandler::GetConVarHandle(ptrs,scvar);}
 
 UInt8 NetworkState::STATE_COUNT = 0;
@@ -106,7 +106,7 @@ NetworkState::~NetworkState()
 	m_libHandles.clear();
 	for(auto it=s_loadedLibraries.begin();it!=s_loadedLibraries.end();)
 	{
-		auto &hLib = it->second;
+		auto &hLib = it->second.library;
 		if(hLib.use_count() > 1)
 		{
 			++it;
@@ -562,13 +562,19 @@ std::shared_ptr<util::Library> NetworkState::GetLibraryModule(const std::string 
 	auto it = s_loadedLibraries.find(lib);
 	if(it == s_loadedLibraries.end())
 		return nullptr;
-	return *it->second;
+	if(!it->second.WasLoadedInState(*this))
+		return nullptr;
+	return *it->second.library;
 }
 
 void NetworkState::InitializeLuaModules(lua_State *l)
 {
 	for(auto &pair : s_loadedLibraries)
-		InitializeDLLModule(l,*pair.second);
+	{
+		if(!pair.second.WasLoadedInState(*this))
+			continue;
+		InitializeDLLModule(l,*pair.second.library);
+	}
 }
 
 void NetworkState::InitializeDLLModule(lua_State *l,std::shared_ptr<util::Library> module)
@@ -644,18 +650,22 @@ std::shared_ptr<util::Library> NetworkState::InitializeLibrary(std::string libra
 
 			auto ptrDllHandle = std::make_shared<std::shared_ptr<util::Library>>(dllHandle);
 			m_libHandles.push_back(ptrDllHandle);
-			s_loadedLibraries.insert(decltype(s_loadedLibraries)::value_type(libAbs,ptrDllHandle));
+			s_loadedLibraries.insert(decltype(s_loadedLibraries)::value_type(libAbs,{ptrDllHandle,IsServer(),IsClient()}));
 		}
 	}
 	else
 	{
 		if(err != nullptr)
 			*err = "";
-		auto ptrDllHandle = it->second;
+		auto ptrDllHandle = it->second.library;
 		dllHandle = *ptrDllHandle;
-		auto it = std::find(m_libHandles.begin(),m_libHandles.end(),ptrDllHandle);
-		if(it != m_libHandles.end())
+		auto itHandle = std::find(m_libHandles.begin(),m_libHandles.end(),ptrDllHandle);
+		if(itHandle != m_libHandles.end())
 			return dllHandle; // DLL has already been initialized for this network state
+		if(IsServer())
+			it->second.loadedServerside = true;
+		else
+			it->second.loadedClientside = true;
 		m_libHandles.push_back(ptrDllHandle);
 	}
 	if(dllHandle != nullptr)
@@ -804,3 +814,4 @@ void NetworkState::AddTickCallback(CallbackHandle callback)
 {
 	m_tickCallbacks.push_back(callback);
 }
+#pragma optimize("",on)

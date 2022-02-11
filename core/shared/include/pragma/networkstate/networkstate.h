@@ -215,7 +215,17 @@ protected:
 	// network states.
 	std::vector<std::shared_ptr<std::shared_ptr<util::Library>>> m_libHandles;
 	std::shared_ptr<util::Library> m_lastModuleHandle = nullptr;
-	static std::unordered_map<std::string,std::shared_ptr<std::shared_ptr<util::Library>>> s_loadedLibraries;
+	struct DLLNETWORK LibraryInfo
+	{
+		std::shared_ptr<std::shared_ptr<util::Library>> library;
+		bool loadedServerside = false;
+		bool loadedClientside = false;
+		bool WasLoadedInState(const NetworkState &nw) const
+		{
+			return (nw.IsClient() && loadedClientside) || (!nw.IsClient() && loadedServerside);
+		}
+	};
+	static std::unordered_map<std::string,LibraryInfo> s_loadedLibraries;
 	std::unordered_map<lua_State*,std::vector<std::shared_ptr<util::Library>>> m_initializedLibraries;
 
 	void InitializeDLLModule(lua_State *l,std::shared_ptr<util::Library> module);

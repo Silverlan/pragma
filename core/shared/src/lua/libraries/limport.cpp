@@ -33,7 +33,7 @@
 
 extern DLLNETWORK Engine *engine;
 
-#pragma optimize("",off)
+
 int Lua::import::import_wad(lua_State *l)
 {
 	auto &f = *Lua::CheckFile(l,1);
@@ -881,4 +881,3 @@ int Lua::import::import_model_asset(lua_State *l)
 #endif
 	return 0;
 }
-#pragma optimize("",on)

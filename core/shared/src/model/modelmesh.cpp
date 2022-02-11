@@ -10,7 +10,7 @@
 #include <mathutil/uvec.h>
 #include <pragma/math/intersection.h>
 #include <udm.hpp>
-#pragma optimize("",off)
+
 ModelMesh::ModelMesh()
 	: std::enable_shared_from_this<ModelMesh>(),m_numVerts(0),m_numIndices(0)
 {}
@@ -1067,4 +1067,3 @@ std::ostream &operator<<(std::ostream &out,const ModelSubMesh &o)
 	out<<"[Bounds:("<<min<<")("<<max<<")]";
 	return out;
 }
-#pragma optimize("",on)

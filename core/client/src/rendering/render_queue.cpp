@@ -14,7 +14,7 @@
 #include <cmaterial.h>
 
 using namespace pragma::rendering;
-#pragma optimize("",off)
+
 SortingKey::SortingKey(MaterialIndex material,prosper::ShaderIndex shader,bool instantiable,bool translucentKey)
 {
 	if(translucentKey)
@@ -263,4 +263,3 @@ void RenderQueueBuilder::BuildRenderQueues()
 {
 
 }
-#pragma optimize("",on)

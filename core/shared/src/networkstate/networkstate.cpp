@@ -36,7 +36,7 @@
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
 #include "pragma/game/isteamworks.hpp"
-#pragma optimize("",off)
+
 ConVarHandle NetworkState::GetConVarHandle(std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &ptrs,std::string scvar) {return CVarHandler::GetConVarHandle(ptrs,scvar);}
 
 UInt8 NetworkState::STATE_COUNT = 0;
@@ -814,4 +814,3 @@ void NetworkState::AddTickCallback(CallbackHandle callback)
 {
 	m_tickCallbacks.push_back(callback);
 }
-#pragma optimize("",on)

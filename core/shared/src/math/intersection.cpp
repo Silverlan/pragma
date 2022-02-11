@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <pragma/model/modelmesh.h>
 #include <pragma/model/model.h>
-#pragma optimize("",off)
+
 bool Intersection::LineMesh(
 	const Vector3 &_start,const Vector3 &_dir,Model &mdl,LineMeshResult &r,bool precise,const std::vector<uint32_t> *bodyGroups,uint32_t lod,
 	const Vector3 &origin,const Quat &rot
@@ -179,4 +179,3 @@ bool Intersection::LineMesh(const Vector3 &_start,const Vector3 &_dir,ModelSubMe
 	}
 	return hasFoundBetterCandidate;
 }
-#pragma optimize("",on)

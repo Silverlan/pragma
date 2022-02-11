@@ -28,7 +28,7 @@
 #include <panima/bone.hpp>
 
 extern DLLNETWORK Engine *engine;
-#pragma optimize("",off)
+
 std::shared_ptr<ModelMeshGroup> ModelMeshGroup::Create(const std::string &name)
 {
 	return std::shared_ptr<ModelMeshGroup>(new ModelMeshGroup{name});
@@ -2013,4 +2013,3 @@ void Model::UpdateShape(const std::vector<SurfaceMaterial>*)
 		cmesh->UpdateShape();
 }
 //void Model::GetWeights(std::vector<VertexWeight*> **weights) {*weights = &m_weights;}
-#pragma optimize("",on)

@@ -10,7 +10,7 @@
 #include "pragma/game/game_resources.hpp"
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/util/util_python.hpp"
-#pragma optimize("",off)
+
 pragma::asset::BlenderFormatHandler::BlenderFormatHandler(util::IAssetManager &assetManager,std::string ext)
 	: util::IImportAssetFormatHandler{assetManager},m_ext{std::move(ext)}
 {}
@@ -52,4 +52,3 @@ bool pragma::asset::BlenderFormatHandler::Import(const std::string &outputPath,s
 	outFilePath = outputPath;
 	return res;
 }
-#pragma optimize("",on)

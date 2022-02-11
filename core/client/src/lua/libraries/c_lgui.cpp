@@ -25,7 +25,7 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 static void initialize_element(::WIBase &p)
 {
 	auto data = p.GetUserData();
@@ -504,4 +504,3 @@ float Lua::gui::LastThink(lua_State *l)
 {
 	return client->LastThink();
 }
-#pragma optimize("",on)

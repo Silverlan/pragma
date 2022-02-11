@@ -41,7 +41,7 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 SceneRenderDesc::SceneRenderDesc(pragma::CSceneComponent &scene)
 	: m_scene{scene}
 {
@@ -874,4 +874,3 @@ void SceneRenderDesc::BuildRenderQueues(
 		--g_activeRenderQueueThreads;
 	});
 }
-#pragma optimize("",on)

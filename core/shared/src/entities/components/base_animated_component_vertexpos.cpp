@@ -13,7 +13,7 @@
 #include "pragma/model/modelmesh.h"
 
 using namespace pragma;
-#pragma optimize("",off)
+
 bool BaseAnimatedComponent::GetVertexPosition(uint32_t meshGroupId,uint32_t meshId,uint32_t subMeshId,uint32_t vertexId,Vector3 &pos) const
 {
 	auto &hMdl = GetEntity().GetModel();
@@ -166,4 +166,3 @@ bool BaseAnimatedComponent::GetVertexPosition(const ModelSubMesh &subMesh,uint32
 	pos = pose *pos;
 	return true;
 }
-#pragma optimize("",on)

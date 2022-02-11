@@ -23,7 +23,7 @@
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/model/model.h"
 #include <pragma/math/intersection.h>
-#pragma optimize("",off)
+
 void TraceResult::InitializeMeshes()
 {
 	if(meshInfo != nullptr)
@@ -228,4 +228,3 @@ bool TraceData::HasFlag(RayCastFlags flag) const {return ((UInt32(m_flags) &UInt
 TraceResult::TraceResult(const TraceData &data)
 	: fraction{1.f},position{data.GetTargetOrigin()},startPosition{data.GetSourceOrigin()}
 {}
-#pragma optimize("",on)

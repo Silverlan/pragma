@@ -8,7 +8,7 @@
 #include "pragma/model/modelmesh.h"
 #include "model/mikktspace/mikktspace.h"
 #include <pragma/console/conout.h>
-#pragma optimize("",off)
+
 template<typename TIndex>
 	void umath::compute_tangent_basis(std::vector<Vertex> &verts,const TIndex *indices,uint32_t numIndices)
 {
@@ -64,4 +64,3 @@ template<typename TIndex>
 }
 template DLLNETWORK void umath::compute_tangent_basis<uint16_t>(std::vector<Vertex> &verts,const uint16_t *indices,uint32_t numIndices);
 template DLLNETWORK void umath::compute_tangent_basis<uint32_t>(std::vector<Vertex> &verts,const uint32_t *indices,uint32_t numIndices);
-#pragma optimize("",on)

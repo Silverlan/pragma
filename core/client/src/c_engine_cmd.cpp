@@ -30,7 +30,7 @@
 #include <shader/prosper_shader_blur.hpp>
 #include <prosper_window.hpp>
 #include <fsys/directory_watcher.h>
-#pragma optimize("",off)
+
 extern DLLCLIENT void debug_render_stats(bool enabled,bool full,bool print,bool continuous);
 void CEngine::RegisterConsoleCommands()
 {
@@ -517,4 +517,3 @@ void CEngine::RegisterConsoleCommands()
 		preInit();
 	},ConVarFlags::None,"Pre-initializes openvr.");
 }
-#pragma optimize("",on)

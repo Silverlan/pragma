@@ -82,7 +82,7 @@ function util.load_lightmap_uv_cache(fileName)
 								subMesh:SetVertexUV("lightmap",i -1,dsLightmapUvData:ReadVector2())
 							end
 
-							subMesh:ClearTriangles()
+							subMesh:ClearIndices()
 							for i=1,numIndices,3 do
 								local idx0 = dsIndexData:ReadUInt16()
 								local idx1 = dsIndexData:ReadUInt16()
@@ -127,7 +127,7 @@ function util.save_lightmap_uv_cache(fileName,entities)
 						local dsVertexData = util.DataStream(numVerts *util.SIZEOF_VERTEX)
 						for i=0,numVerts -1 do dsVertexData:WriteVertex(subMesh:GetVertex(i)) end
 
-						local indices = subMesh:GetTriangles()
+						local indices = subMesh:GetIndices()
 						local numIndices = #indices
 						local dsIndexData = util.DataStream(numVerts *util.SIZEOF_SHORT)
 						for _,idx in ipairs(indices) do dsIndexData:WriteUInt16(idx) end

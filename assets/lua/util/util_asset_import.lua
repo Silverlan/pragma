@@ -62,7 +62,7 @@ function util.ListAssetImportFileHandler:ExtractFile(fileName,outPath)
 end
 function util.ListAssetImportFileHandler:GetFileList() return self.m_files end
 
-local function import_assets(handler,logCb,basePath,clearFiles)
+local function import_assets(handler,logCb,basePath,clearFiles,callback)
 	basePath = basePath or ""
 	logCb = logCb or function(msg,severity)
 		if(severity ~= log.SEVERITY_INFO) then console.print_warning(msg)
@@ -254,7 +254,7 @@ local function import_assets(handler,logCb,basePath,clearFiles)
 			-- converted to native formats. We do, however, need to keep the textures.
 			for _,f in ipairs(extractedFiles) do
 				local ext = file.get_file_extension(f)
-				if(ext == nil or (asset.is_supported_extension(ext,asset.TYPE_MODEL) == false and asset.is_supported_extension(ext,asset.TYPE_MATERIAL) == false and asset.is_supported_extension(ext,asset.TYPE_MAP) == false)) then
+				if(ext == nil or (asset.is_supported_extension(ext,asset.TYPE_MODEL) == false and asset.is_supported_extension(ext,asset.TYPE_MATERIAL) == false and asset.is_supported_extension(ext,asset.TYPE_TEXTURE) == false and asset.is_supported_extension(ext,asset.TYPE_MAP) == false)) then
 					file.delete(f)
 				end
 			end
@@ -269,6 +269,7 @@ local function import_assets(handler,logCb,basePath,clearFiles)
 		table.remove(mdlAssets,1)
 		time.create_simple_timer(0.25,function()
 			logCb("Importing model '" .. mdl .. "'...",log.SEVERITY_INFO)
+			if(callback ~= nil) then callback(asset.TYPE_MODEL,mdl) end
 			local mdl = game.load_model(mdl)
 			if(mdl ~= nil) then logCb("Model has been imported successfully!",log.SEVERITY_INFO)
 			else logCb("Failed to import model!",log.SEVERITY_ERROR) end
@@ -281,7 +282,7 @@ local function import_assets(handler,logCb,basePath,clearFiles)
 	import_next_model()
 end
 
-function util.import_assets(files,logCb,basePath,dropped)
+function util.import_assets(files,logCb,basePath,dropped,callback)
 	dropped = dropped or false
 	if(type(files) ~= "table") then files = {files} end
 
@@ -289,21 +290,22 @@ function util.import_assets(files,logCb,basePath,dropped)
 	local zipExts = {}
 	for _,ext in ipairs(util.ZipFile.get_supported_format_extensions()) do zipExts[ext] = true end
 	for _,f in ipairs(files) do
-		local ext
-		if(util.get_type_name(f) == "File") then ext = file.get_file_extension(f:GetPath())
-		else ext = file.get_file_extension(f) end
+		local filePath
+		if(util.get_type_name(f) == "File") then filePath = f:GetPath()
+		else filePath = f end
+		local ext = file.get_file_extension(filePath)
 		if(ext ~= nil and zipExts[ext] == true) then
 			local zipFile = util.ZipFile.open(f,util.ZipFile.OPEN_MODE_READ)
 			if(zipFile == nil) then
-				logCb("Unable to open zip-archive '" .. path:GetString() .. "': Unsupported archive format?",log.SEVERITY_ERROR)
+				logCb("Unable to open zip-archive '" .. filePath .. "': Unsupported archive format?",log.SEVERITY_ERROR)
 			else
 				local handler = util.ZipAssetImportFileHandler(zipFile)
 				zipFile = nil
-				import_assets(handler,logCb,basePath)
+				import_assets(handler,logCb,basePath,nil,callback)
 			end
 		else table.insert(nonZipFiles,f) end
 	end
 	if(#nonZipFiles == 0) then return end
 	local handler = dropped and util.DropAssetImportFileHandler(nonZipFiles) or util.ListAssetImportFileHandler(nonZipFiles)
-	import_assets(handler,logCb,basePath)
+	import_assets(handler,logCb,basePath,nil,callback)
 end

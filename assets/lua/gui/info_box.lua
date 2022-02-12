@@ -21,12 +21,20 @@ function InfoBox:OnInitialize()
 	local bar = gui.create("WIRect",self,0,0,3,self:GetHeight(),0,0,0,1)
 	self.m_bar = bar
 
+	self.m_btClose = gui.PFMButton.create(self,"gui/pfm/icon_clear","gui/pfm/icon_clear_activated",function()
+		self:SetVisible(false)
+	end)
+	self.m_btClose:SetSize(11,11)
+	self.m_btClose:SetPos(self:GetWidth() -self.m_btClose:GetWidth() -3,3)
+	self.m_btClose:SetAnchor(1,0,1,0)
+
 	local contents = gui.create("WIBase",self)
 	contents:AnchorWithMargin(20)
 	self.m_contents = contents
 
 	local text = gui.create("WIText",contents)
 	text:SetAutoBreakMode(gui.Text.AUTO_BREAK_WHITESPACE)
+	text:SetTagsEnabled(true)
 	self.m_text = text
 	contents:AddCallback("SetSize",function() text:SetSize(contents:GetSize()) end)
 
@@ -63,11 +71,23 @@ function InfoBox:SetText(text)
 	self.m_text:SetText(text)
 	self:SizeToContents()
 end
+function InfoBox:GetTextElement() return self.m_text end
 function InfoBox:SizeToContents()
 	self.m_text:UpdateSubLines()
 	self:SetHeight(self.m_contents:GetTop() *2 +self.m_text:GetTextHeight())
 end
 gui.register("InfoBox",InfoBox)
+
+gui.create_info_box = function(parent,text,type)
+	local infoBox = gui.create("InfoBox",parent)
+	infoBox:SetType(type or gui.InfoBox.TYPE_INFO)
+	infoBox:SetText(text)
+	infoBox:SizeToContents()
+	parent:AddCallback("SetSize",function()
+		infoBox:SizeToContents()
+	end)
+	return infoBox
+end
 
 gui.register_default_skin([[{}]],[[{
 	["infobox"] = {

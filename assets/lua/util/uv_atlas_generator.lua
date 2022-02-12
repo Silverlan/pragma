@@ -94,7 +94,7 @@ function util.UVAtlasGenerator:Generate()
 				origMesh:SetVertexUV("lightmap",j -1,Vector2(lightmapUvs[j].x,lightmapUvs[j].y))
 			end
 
-			origMesh:ClearTriangles()
+			origMesh:ClearIndices()
 			local numIndices = atlasMesh:GetIndexCount()
 			for i=1,numIndices,3 do
 				origMesh:AddTriangle(atlasMesh:GetIndex(i -1),atlasMesh:GetIndex(i),atlasMesh:GetIndex(i +1))

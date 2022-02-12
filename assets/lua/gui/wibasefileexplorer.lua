@@ -75,10 +75,11 @@ function gui.BaseFileExplorer:FindFiles()
 		tFiles = tFilesFiltered
 	end
 
+	local preSorted = false
 	if(self.m_filter ~= nil) then
-		tFiles,tDirectories = self.m_filter(tFiles,tDirectories)
+		tFiles,tDirectories,preSorted = self.m_filter(tFiles,tDirectories)
 	end
 
-	return tFiles,tDirectories
+	return tFiles,tDirectories,preSorted
 end
 function gui.BaseFileExplorer:ListFiles() end

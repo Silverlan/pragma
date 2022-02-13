@@ -58,7 +58,7 @@
 #include <fsys/ifile.hpp>
 
 extern DLLNETWORK Engine *engine;
-
+#pragma optimize("",off)
 static auto s_bIgnoreIncludeCache = false;
 void Lua::set_ignore_include_cache(bool b) {s_bIgnoreIncludeCache = b;}
 
@@ -104,6 +104,12 @@ void Lua::util::register_shared_generic(luabind::module_ &mod)
 		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const std::string&,const luabind::object&,const luabind::object&)>(Lua::util::register_class)),
 		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const std::string&,const luabind::object&)>(Lua::util::register_class)),
 		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const std::string&)>(Lua::util::register_class)),
+		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const luabind::table<>&,const std::string&,const luabind::object&,const luabind::object&,const luabind::object&,const luabind::object&,const luabind::object&)>(Lua::util::register_class)),
+		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const luabind::table<>&,const std::string&,const luabind::object&,const luabind::object&,const luabind::object&,const luabind::object&)>(Lua::util::register_class)),
+		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const luabind::table<>&,const std::string&,const luabind::object&,const luabind::object&,const luabind::object&)>(Lua::util::register_class)),
+		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const luabind::table<>&,const std::string&,const luabind::object&,const luabind::object&)>(Lua::util::register_class)),
+		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const luabind::table<>&,const std::string&,const luabind::object&)>(Lua::util::register_class)),
+		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const luabind::table<>&,const std::string&)>(Lua::util::register_class)),
 
 		luabind::def("local_to_world",static_cast<Quat(*)(lua_State*,const Quat&,const Quat&)>(local_to_world)),
 		luabind::def("local_to_world",static_cast<Vector3(*)(lua_State*,const Vector3&,const Quat&,const Vector3&)>(local_to_world)),
@@ -680,7 +686,7 @@ luabind::object Lua::util::fire_bullets(lua_State *l,BulletInfo &bulletInfo,bool
 luabind::object Lua::util::fire_bullets(lua_State *l,BulletInfo &bulletInfo,bool hitReport) {return fire_bullets(l,bulletInfo,hitReport,nullptr);}
 luabind::object Lua::util::fire_bullets(lua_State *l,BulletInfo &bulletInfo) {return fire_bullets(l,bulletInfo,false,nullptr);}
 
-static luabind::object register_class(lua_State *l,const std::string &pclassName,uint32_t idxBaseClassStart)
+static luabind::object register_class(lua_State *l,const std::string &pclassName,uint32_t idxBaseClassStart,const luabind::table<> *baseTable=nullptr)
 {
 	auto className = pclassName;
 	auto fullClassName = className;
@@ -757,11 +763,10 @@ static luabind::object register_class(lua_State *l,const std::string &pclassName
 	if(slibs.empty())
 	{
 		// Check if class already exists
-		Lua::GetGlobal(l,className); /* 1 */
-		if(Lua::IsUserData(l,-1))
+		auto oBase = baseTable ? luabind::object{*baseTable} : luabind::globals(l);
+		auto o = oBase[className];
+		if(luabind::type(o) == LUA_TUSERDATA)
 		{
-			Lua::Pop(l,1); /* 0 */
-
 			auto *nw = engine->GetNetworkState(l);
 			auto *game = nw->GetGameState();
 			auto *classInfo = game->GetLuaClassManager().FindClassInfo(fullClassName);
@@ -777,7 +782,6 @@ static luabind::object register_class(lua_State *l,const std::string &pclassName
 
 			return {};
 		}
-		Lua::Pop(l,1); /* 0 */
 	}
 
 	auto restorePreviousGlobalValue = slibs.empty() == false;
@@ -837,13 +841,19 @@ static luabind::object register_class(lua_State *l,const std::string &pclassName
 			Lua::PushNil(l); /* 1 */
 			Lua::SetGlobal(l,className); /* 0 */
 		}
+		else if(baseTable)
+		{
+			(*baseTable)[className] = oClass;
+			Lua::PushNil(l); /* 1 */
+			Lua::SetGlobal(l,className); /* 0 */
+		}
 	}
 
 	if(restorePreviousGlobalValue)
 		Lua::SetGlobal(l,className); /* -1 */
 	return oClass;
 }
-luabind::object Lua::util::register_class(lua_State *l,const std::string &className,const luabind::object &oBase0)
+static luabind::object register_class(lua_State *l,const std::string &className,const luabind::object &oBase0,uint32_t idxBaseClassStart,const luabind::table<> *baseTable=nullptr)
 {
 	if(luabind::type(oBase0) == LUA_TTABLE)
 	{
@@ -854,12 +864,16 @@ luabind::object Lua::util::register_class(lua_State *l,const std::string &classN
 			++n;
 		}
 
-		auto r = ::register_class(l,className,3);
+		auto r = ::register_class(l,className,idxBaseClassStart +1,baseTable);
 		for(auto i=decltype(n){0u};i<n;++i)
 			Lua::RemoveValue(l,-2);
 		return r;
 	}
-	return ::register_class(l,className,2);
+	return ::register_class(l,className,idxBaseClassStart,baseTable);
+}
+luabind::object Lua::util::register_class(lua_State *l,const std::string &className,const luabind::object &oBase0)
+{
+	return ::register_class(l,className,oBase0,2);
 }
 luabind::object Lua::util::register_class(lua_State *l,const std::string &className,const luabind::object &oBase0,const luabind::object &oBase1)
 {
@@ -915,6 +929,25 @@ void Lua::util::splash_damage(
 		};
 	}
 	game->SplashDamage(splashDamageInfo.origin,splashDamageInfo.radius,const_cast<DamageInfo&>(splashDamageInfo.damageInfo),splashDamageInfo.callback);
+}
+
+luabind::object Lua::util::register_class(lua_State *l,const luabind::table<> &t,const std::string &className) {return ::register_class(l,className,3,&t);}
+luabind::object Lua::util::register_class(lua_State *l,const luabind::table<> &t,const std::string &className,const luabind::object &oBase0) {return ::register_class(l,className,oBase0,3,&t);}
+luabind::object Lua::util::register_class(lua_State *l,const luabind::table<> &t,const std::string &className,const luabind::object &oBase0,const luabind::object &oBase1)
+{
+	return ::register_class(l,className,3);
+}
+luabind::object Lua::util::register_class(lua_State *l,const luabind::table<> &t,const std::string &className,const luabind::object &oBase0,const luabind::object &oBase1,const luabind::object &oBase2)
+{
+	return ::register_class(l,className,3);
+}
+luabind::object Lua::util::register_class(lua_State *l,const luabind::table<> &t,const std::string &className,const luabind::object &oBase0,const luabind::object &oBase1,const luabind::object &oBase2,const luabind::object &oBase3)
+{
+	return ::register_class(l,className,3);
+}
+luabind::object Lua::util::register_class(lua_State *l,const luabind::table<> &t,const std::string &className,const luabind::object &oBase0,const luabind::object &oBase1,const luabind::object &oBase2,const luabind::object &oBase3,const luabind::object &oBase4)
+{
+	return ::register_class(l,className,3);
 }
 
 static void shake_screen(lua_State *l,const Vector3 &pos,float radius,float amplitude,float frequency,float duration,float fadeIn,float fadeOut,bool useRadius)
@@ -1425,3 +1458,4 @@ std::string Lua::util::get_addon_path(lua_State *l)
 	path += '/';
 	return path;
 }
+#pragma optimize("",on)

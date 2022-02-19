@@ -51,12 +51,19 @@ namespace Lua
 		DLLNETWORK luabind::object fire_bullets(lua_State *l,BulletInfo &bulletInfo,bool hitReport,const std::function<void(::DamageInfo&,::TraceData&,TraceResult&,uint32_t&)> &f);
 		DLLNETWORK luabind::object fire_bullets(lua_State *l,BulletInfo &bulletInfo,bool hitReport);
 		DLLNETWORK luabind::object fire_bullets(lua_State *l,BulletInfo &bulletInfo);
+		
 		DLLNETWORK luabind::object register_class(lua_State *l,const std::string &className);
 		DLLNETWORK luabind::object register_class(lua_State *l,const std::string &className,const luabind::object &oBase0);
 		DLLNETWORK luabind::object register_class(lua_State *l,const std::string &className,const luabind::object &oBase0,const luabind::object &oBase1);
 		DLLNETWORK luabind::object register_class(lua_State *l,const std::string &className,const luabind::object &oBase0,const luabind::object &oBase1,const luabind::object &oBase2);
 		DLLNETWORK luabind::object register_class(lua_State *l,const std::string &className,const luabind::object &oBase0,const luabind::object &oBase1,const luabind::object &oBase2,const luabind::object &oBase3);
 		DLLNETWORK luabind::object register_class(lua_State *l,const std::string &className,const luabind::object &oBase0,const luabind::object &oBase1,const luabind::object &oBase2,const luabind::object &oBase3,const luabind::object &oBase4);
+		DLLNETWORK luabind::object register_class(lua_State *l,const luabind::table<> &t,const std::string &className);
+		DLLNETWORK luabind::object register_class(lua_State *l,const luabind::table<> &t,const std::string &className,const luabind::object &oBase0);
+		DLLNETWORK luabind::object register_class(lua_State *l,const luabind::table<> &t,const std::string &className,const luabind::object &oBase0,const luabind::object &oBase1);
+		DLLNETWORK luabind::object register_class(lua_State *l,const luabind::table<> &t,const std::string &className,const luabind::object &oBase0,const luabind::object &oBase1,const luabind::object &oBase2);
+		DLLNETWORK luabind::object register_class(lua_State *l,const luabind::table<> &t,const std::string &className,const luabind::object &oBase0,const luabind::object &oBase1,const luabind::object &oBase2,const luabind::object &oBase3);
+		DLLNETWORK luabind::object register_class(lua_State *l,const luabind::table<> &t,const std::string &className,const luabind::object &oBase0,const luabind::object &oBase1,const luabind::object &oBase2,const luabind::object &oBase3,const luabind::object &oBase4);
 
 		DLLNETWORK void shake_screen(lua_State *l,const Vector3 &pos,float radius,float amplitude,float frequency,float duration,float fadeIn,float fadeOut);
 		DLLNETWORK void shake_screen(lua_State *l,float amplitude,float frequency,float duration,float fadeIn,float fadeOut);

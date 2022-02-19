@@ -1699,25 +1699,16 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 
 	auto defBufferImageCopyInfo = luabind::class_<prosper::util::BufferImageCopyInfo>("BufferImageCopyInfo");
 	defBufferImageCopyInfo.def(luabind::constructor<>());
-	defBufferImageCopyInfo.def("SetWidth",static_cast<void(*)(lua_State*,prosper::util::BufferImageCopyInfo&,uint32_t)>([](lua_State *l,prosper::util::BufferImageCopyInfo &copyInfo,uint32_t width) {
-		copyInfo.width = width;
-	}));
-	defBufferImageCopyInfo.def("SetHeight",static_cast<void(*)(lua_State*,prosper::util::BufferImageCopyInfo&,uint32_t)>([](lua_State *l,prosper::util::BufferImageCopyInfo &copyInfo,uint32_t height) {
-		copyInfo.height = height;
-	}));
-	defBufferImageCopyInfo.def("GetWidth",static_cast<std::optional<uint32_t>(*)(lua_State*,prosper::util::BufferImageCopyInfo&)>([](lua_State *l,prosper::util::BufferImageCopyInfo &copyInfo) -> std::optional<uint32_t> {
-		if(copyInfo.width.has_value() == false)
+	defBufferImageCopyInfo.def("SetImageSize",+[](lua_State *l,prosper::util::BufferImageCopyInfo &copyInfo,uint32_t width,uint32_t height) {
+		copyInfo.imageExtent = {width,height};
+	});
+	defBufferImageCopyInfo.def("GetImageSize",+[](lua_State *l,prosper::util::BufferImageCopyInfo &copyInfo) -> std::optional<Vector2i> {
+		if(copyInfo.imageExtent.has_value() == false)
 			return {};
-		return *copyInfo.width;
-	}));
-	defBufferImageCopyInfo.def("GetHeight",static_cast<std::optional<uint32_t>(*)(lua_State*,prosper::util::BufferImageCopyInfo&)>([](lua_State *l,prosper::util::BufferImageCopyInfo &copyInfo) -> std::optional<uint32_t> {
-		if(copyInfo.height.has_value() == false)
-			return {};
-		return *copyInfo.height;
-	}));
+		return *copyInfo.imageExtent;
+	});
 	defBufferImageCopyInfo.def_readwrite("bufferOffset",&prosper::util::BufferImageCopyInfo::bufferOffset);
-	defBufferImageCopyInfo.def_readwrite("width",&prosper::util::BufferImageCopyInfo::width);
-	defBufferImageCopyInfo.def_readwrite("height",&prosper::util::BufferImageCopyInfo::height);
+	defBufferImageCopyInfo.def_readwrite("imageSize",&prosper::util::BufferImageCopyInfo::imageExtent);
 	defBufferImageCopyInfo.def_readwrite("mipLevel",&prosper::util::BufferImageCopyInfo::mipLevel);
 	defBufferImageCopyInfo.def_readwrite("baseArrayLayer",&prosper::util::BufferImageCopyInfo::baseArrayLayer);
 	defBufferImageCopyInfo.def_readwrite("layerCount",&prosper::util::BufferImageCopyInfo::layerCount);

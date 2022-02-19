@@ -194,8 +194,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 		setupCmd->RecordImageBarrier(*imgCubemap,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::TransferSrcOptimal,range);
 		// Note: No buffer barrier required, since we're writing to non-intersecting sections of the buffer
 		prosper::util::BufferImageCopyInfo copyInfo {};
-		copyInfo.width = imgBufferInfo.width;
-		copyInfo.height = imgBufferInfo.height;
+		copyInfo.imageExtent = {imgBufferInfo.width,imgBufferInfo.height};
 		copyInfo.mipLevel = imgBufferInfo.mipmapIndex;
 		copyInfo.bufferOffset = imgBufferInfo.bufferOffset;
 		setupCmd->RecordCopyImageToBuffer(copyInfo,*imgCubemap,prosper::ImageLayout::TransferSrcOptimal,*buf);

@@ -19,7 +19,9 @@ layout(LAYOUT_PUSH_CONSTANTS()) uniform Font {
 	uint glyphMapWidth;
 	uint glyphMapHeight;
 	uint maxGlyphBitmapWidth;
+	uint maxGlyphBitmapHeight;
 	uint yOffset;
+	uint numGlyphsPerRow;
 } u_pushConstants;
 
 #ifdef USE_VERTEX_COLOR
@@ -41,11 +43,17 @@ void main()
 	gl_Position = get_vertex_position(vertPos);
 
 	// Calc uv coordinates
-	float glyphSize = float(u_pushConstants.maxGlyphBitmapWidth) /float(u_pushConstants.glyphMapWidth);
-	float glyphOffset = glyphSize *float(in_glyph_index);
+	uint glyphIndexX = in_glyph_index %u_pushConstants.numGlyphsPerRow;
+	uint glyphIndexY = in_glyph_index /u_pushConstants.numGlyphsPerRow;
+	float glyphSizeW = float(u_pushConstants.maxGlyphBitmapWidth) /float(u_pushConstants.glyphMapWidth);
+	float glyphSizeH = float(u_pushConstants.maxGlyphBitmapHeight) /float(u_pushConstants.glyphMapHeight);
+	vec2 glyphOffset = vec2(
+		glyphSizeW *float(glyphIndexX),
+		glyphSizeH *float(glyphIndexY)
+	);
 	float actualGlyphWidth = in_glyph_bounds[2] /float(u_pushConstants.glyphMapWidth);
 	float actualGlyphHeight = in_glyph_bounds[3] /float(u_pushConstants.glyphMapHeight);
-	vs_vert_uv = vec2(glyphOffset +in_vert_uv.x *actualGlyphWidth,in_vert_uv.y *actualGlyphHeight);
+	vs_vert_uv = glyphOffset +vec2(in_vert_uv.x *actualGlyphWidth,in_vert_uv.y *actualGlyphHeight);
 
 #ifdef USE_VERTEX_COLOR
 	vs_vert_col = in_vert_col;

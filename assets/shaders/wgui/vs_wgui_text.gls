@@ -18,7 +18,9 @@ layout(LAYOUT_PUSH_CONSTANTS()) uniform Font {
 	uint glyphMapWidth;
 	uint glyphMapHeight;
 	uint maxGlyphBitmapWidth;
+	uint maxGlyphBitmapHeight;
 	uint yOffset;
+	uint numGlyphsPerRow;
 } u_font;
 
 void main()
@@ -33,9 +35,15 @@ void main()
 	gl_Position = vec4(vertPos,0.0,1);
 
 	// Calc uv coordinates
-	float glyphSize = float(u_font.maxGlyphBitmapWidth) /float(u_font.glyphMapWidth);
-	float glyphOffset = glyphSize *float(in_glyph_index);
+	uint glyphIndexX = in_glyph_index %u_font.numGlyphsPerRow;
+	uint glyphIndexY = in_glyph_index /u_font.numGlyphsPerRow;
+	float glyphSizeW = float(u_font.maxGlyphBitmapWidth) /float(u_font.glyphMapWidth);
+	float glyphSizeH = float(u_font.maxGlyphBitmapHeight) /float(u_font.glyphMapHeight);
+	vec2 glyphOffset = vec2(
+		glyphSizeW *float(glyphIndexX),
+		glyphSizeH *float(glyphIndexY)
+	);
 	float actualGlyphWidth = in_glyph_bounds[2] /float(u_font.glyphMapWidth);
 	float actualGlyphHeight = in_glyph_bounds[3] /float(u_font.glyphMapHeight);
-	vs_vert_uv = vec2(glyphOffset +in_vert_uv.x *actualGlyphWidth,in_vert_uv.y *actualGlyphHeight);
+	vs_vert_uv = glyphOffset +vec2(in_vert_uv.x *actualGlyphWidth,in_vert_uv.y *actualGlyphHeight);
 }

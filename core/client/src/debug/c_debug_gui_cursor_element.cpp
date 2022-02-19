@@ -7,12 +7,15 @@
 
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar_global_functions.h"
+#include <util_image.hpp>
 #include <wgui/types/witext.h>
 #include <wgui/types/wirect.h>
 #include <prosper_window.hpp>
+#include <fsys/ifile.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
+extern DLLCLIENT CGame *c_game;
 
 class GUIDebugCursorManager
 {
@@ -340,6 +343,39 @@ void Console::commands::debug_gui_cursor(NetworkState *state,pragma::BasePlayerC
 	s_dbgManager = std::make_unique<GUIDebugCursorManager>();
 	if(s_dbgManager->Initialize() == false)
 		s_dbgManager = nullptr;
+}
+
+void Console::commands::debug_dump_font_glyph_map(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+{
+	auto &wgui = WGUI::GetInstance();
+	if(argv.empty())
+	{
+		Con::cwar<<"WARNING: No font specified!"<<Con::endl;
+		return;
+	}
+	auto &fontName = argv.front();
+	auto font = FontManager::GetFont(fontName);
+	if(font == nullptr)
+	{
+		Con::cwar<<"WARNING: No font by name '"<<fontName<<"' found!"<<Con::endl;
+		return;
+	}
+	auto glyphMap = font->GetGlyphMap();
+	if(glyphMap == nullptr)
+	{
+		Con::cwar<<"WARNING: Font '"<<fontName<<"' has invalid glyph map!"<<Con::endl;
+		return;
+	}
+	auto &glyphImg = glyphMap->GetImage();
+	std::string fileName = "tmp/font_" +fontName +"_glyph_map";
+
+	uimg::TextureInfo texInfo {};
+	texInfo.containerFormat = uimg::TextureInfo::ContainerFormat::DDS;
+	if(!prosper::util::save_texture(fileName,glyphImg,texInfo))
+	{
+		Con::cwar<<"WARNING: Failed to save glyph map as '"<<fileName<<"'!"<<Con::endl;
+		return;
+	}
 }
 
 void Console::commands::debug_font_glyph_map(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)

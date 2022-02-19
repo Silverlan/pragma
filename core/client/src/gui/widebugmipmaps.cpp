@@ -47,6 +47,12 @@ void WIDebugMipMaps::SetTexture(const std::shared_ptr<prosper::Texture> &texture
 	auto &img = texture->GetImage();
 	auto *imgView = texture->GetImageView();
 	auto mipmapLevels = img.GetMipmapCount();
+	auto keepSize = (mipmapLevels == 1);
+	if(keepSize)
+	{
+		width = GetWidth();
+		height = GetHeight();
+	}
 	m_hTextures.reserve(mipmapLevels);
 	m_textures.reserve(mipmapLevels);
 	uint32_t xOffset = 0;
@@ -115,5 +121,6 @@ void WIDebugMipMaps::SetTexture(const std::shared_ptr<prosper::Texture> &texture
 			cb.Remove();
 	});
 	c_engine->AddCallback("DrawFrame",cb);
-	SetSize(wContext,hOffset +height);
+	if(!keepSize)
+		SetSize(wContext,hOffset +height);
 }

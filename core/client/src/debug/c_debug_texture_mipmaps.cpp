@@ -45,12 +45,27 @@ void Console::commands::debug_font(NetworkState*,pragma::BasePlayerComponent*,st
 		Con::cout<<"Font has invalid glyph map!"<<Con::endl;
 		return;
 	}
+	uint32_t width = glyphMap->GetImage().GetWidth();
+	uint32_t height = glyphMap->GetImage().GetHeight();
+	std::cout<<"Glyph map size: "<<width<<"x"<<height<<std::endl;
+	if(argv.size() > 1)
+	{
+		width = util::to_int(argv[1]);
+		if(argv.size() > 2)
+			height = util::to_int(argv[2]);
+	}
+	if(width == 0 || height == 0)
+	{
+		Con::cout<<"Invalid resolution: "<<width<<"x"<<height<<Con::endl;
+		return;
+	}
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
 	if(dbg == nullptr)
 	{
-		dbg = std::make_unique<DebugGameGUI>([glyphMap]() {
+		dbg = std::make_unique<DebugGameGUI>([glyphMap,width,height]() {
 			auto &wgui = WGUI::GetInstance();
 			auto *r = wgui.Create<WIDebugMipMaps>();
+			r->SetSize(width,height);
 			r->SetTexture(glyphMap);
 			r->Update();
 			return r->GetHandle();

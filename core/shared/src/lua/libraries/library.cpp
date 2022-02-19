@@ -54,6 +54,7 @@
 #include <pragma/math/util_engine_math.hpp>
 #include "pragma/game/game_coordinate_system.hpp"
 #include "pragma/util/util_variable_type.hpp"
+#include "pragma/lua/converters/vector_converter_t.hpp"
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
 #include <pragma/math/intersection.h>
@@ -415,6 +416,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		luabind::def("clamp",umath::clamp<double>),
 		luabind::def("get_next_power_of_2",umath::next_power_of_2),
 		luabind::def("get_previous_power_of_2",umath::previous_power_of_2),
+		luabind::def("get_power_of_2_values",umath::get_power_of_2_values),
 		luabind::def("smooth_step",umath::smooth_step<double>),
 		luabind::def("smoother_step",umath::smoother_step<double>),
 		luabind::def("calc_ballistic_range",umath::calc_ballistic_range),

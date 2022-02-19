@@ -9,6 +9,7 @@
 #define __LOCALIZATION_H__
 
 #include <pragma/networkdefinitions.h>
+#include <tinyutf8/tinyutf8.h>
 #include <string>
 #include <vector>
 #include <optional>
@@ -22,7 +23,7 @@ public:
 protected:
 	Localization();
 public:
-	std::unordered_map<std::string,std::string> texts;
+	std::unordered_map<std::string,tiny_utf8::string> texts;
 };
 
 class DLLNETWORK Locale
@@ -35,12 +36,16 @@ public:
 	static void SetLanguage(std::string lan);
 	static void ReloadFiles();
 	static bool GetText(const std::string &id,std::string &outText);
+	static bool GetText(const std::string &id,tiny_utf8::string &outText);
 	static bool GetText(const std::string &id,const std::vector<std::string> &args,std::string &outText);
+	static bool GetText(const std::string &id,const std::vector<tiny_utf8::string> &args,tiny_utf8::string &outText);
 	static std::string GetText(const std::string &id,const std::vector<std::string> &args={});
-	static bool SetLocalization(const std::string &id,const std::string &text,bool overwriteIfExists=true);
+	static tiny_utf8::string GetTextUtf8(const std::string &id,const std::vector<tiny_utf8::string> &args={});
+	static bool SetLocalization(const std::string &id,const tiny_utf8::string &text,bool overwriteIfExists=true);
 	static const std::string &GetLanguage();
 	static std::unordered_map<std::string,std::string> GetLanguages();
 	static void Poll();
+	static std::string DetermineSystemLanguage();
 private:
 	static Localization m_localization;
 	static std::vector<std::string> m_loadedFiles;

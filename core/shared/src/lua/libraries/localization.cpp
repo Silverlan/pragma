@@ -13,7 +13,7 @@
 #include <sharedutils/util_path.hpp>
 
 #undef CreateFile
-
+#pragma optimize("",off)
 decltype(Locale::m_localization) Locale::m_localization;
 decltype(Locale::m_language) Locale::m_language;
 decltype(Locale::m_loadedFiles) Locale::m_loadedFiles;
@@ -134,15 +134,17 @@ std::unordered_map<std::string,std::string> Locale::GetLanguages()
 	}
 	return lanOptions;
 }
-bool Locale::SetLocalization(const std::string &id,const std::string &text,bool overwriteIfExists)
+bool Locale::SetLocalization(const std::string &id,const tiny_utf8::string &text,bool overwriteIfExists)
 {
 	if(!overwriteIfExists && m_localization.texts.find(id) != m_localization.texts.end())
 		return false;
 	m_localization.texts[id] = text;
 	return true;
 }
+bool Locale::GetText(const std::string &id,tiny_utf8::string &outText) {return GetText(id,{},outText);}
 bool Locale::GetText(const std::string &id,std::string &outText) {return GetText(id,{},outText);}
-static void insert_arguments(const std::vector<std::string> &args,std::string &inOutText)
+template<class TString>
+	static void insert_arguments(const std::vector<TString> &args,TString &inOutText)
 {
 	for(auto i=decltype(args.size()){0};i<args.size();++i)
 	{
@@ -154,12 +156,21 @@ static void insert_arguments(const std::vector<std::string> &args,std::string &i
 			inOutText = inOutText.replace(pos,3,args[i]);
 	}
 }
-bool Locale::GetText(const std::string &id,const std::vector<std::string> &args,std::string &outText)
+bool Locale::GetText(const std::string &id,const std::vector<tiny_utf8::string> &args,tiny_utf8::string &outText)
 {
 	auto it = m_localization.texts.find(id);
 	if(it == m_localization.texts.end())
 		return false;
 	outText = it->second;
+	insert_arguments(args,outText);
+	return true;
+}
+bool Locale::GetText(const std::string &id,const std::vector<std::string> &args,std::string &outText)
+{
+	auto it = m_localization.texts.find(id);
+	if(it == m_localization.texts.end())
+		return false;
+	outText = it->second.cpp_str();
 	insert_arguments(args,outText);
 	return true;
 }
@@ -171,7 +182,25 @@ std::string Locale::GetText(const std::string &id,const std::vector<std::string>
 		Con::cwar<<"WARNING: Missing localization for '"<<id<<"'!"<<Con::endl;
 		return std::string("<MISSING LOCALIZATION: ") +id +std::string(">");
 	}
+	auto r = it->second.cpp_str();
+	insert_arguments(args,r);
+	return r;
+}
+tiny_utf8::string Locale::GetTextUtf8(const std::string &id,const std::vector<tiny_utf8::string> &args)
+{
+	auto it = m_localization.texts.find(id);
+	if(it == m_localization.texts.end())
+	{
+		Con::cwar<<"WARNING: Missing localization for '"<<id<<"'!"<<Con::endl;
+		return std::string("<MISSING LOCALIZATION: ") +id +std::string(">");
+	}
 	auto r = it->second;
 	insert_arguments(args,r);
 	return r;
 }
+std::string Locale::DetermineSystemLanguage()
+{
+	// TODO
+	return "en";
+}
+#pragma optimize("",on)

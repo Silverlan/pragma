@@ -116,7 +116,7 @@ void CEngine::PreloadClientConfig()
 	m_preloadedConfig = std::make_unique<ConVarInfoList>();
 	auto &cmds = *m_preloadedConfig.get();
 	ExecConfig("client.cfg",cmds.cvars);
-	std::string lan = "en";
+	std::string lan = Locale::DetermineSystemLanguage();
 	auto res = cmds.find("cl_language");
 	if(res != nullptr && !res->argv.empty())
 		lan = res->argv[0];

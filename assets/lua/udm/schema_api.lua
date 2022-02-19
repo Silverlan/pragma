@@ -53,6 +53,9 @@ function udm.BaseSchemaType:GetUdmData() return self.m_udmAssetData or self.m_ud
 function udm.BaseSchemaType:GetTypedChildren() return self.m_typedChildren end
 function udm.BaseSchemaType:GetParent() return self.m_parent end
 function udm.BaseSchemaType:AddChangeListener(keyName,listener)
+	if(self:GetUdmData():Get(keyName):IsValid() == false) then
+		error("Property '" .. keyName .. "' is not a valid property!")
+	end
 	local cb = util.Callback.Create(listener)
 	self.m_changeListeners[keyName] = self.m_changeListeners[keyName] or {}
 	table.insert(self.m_changeListeners[keyName],cb)
@@ -71,6 +74,12 @@ function udm.BaseSchemaType:CallChangeListeners(keyName,newValue)
 			table.remove(listeners,i)
 		end
 	end
+end
+function udm.BaseSchemaType:GetSchema() return self.m_schema end
+function udm.BaseSchemaType:Copy(parent)
+	local el = udm.create_element()
+	el:Merge(self:GetRootUdmData(),udm.MERGE_FLAG_BIT_DEEP_COPY)
+	return udm.create_property_from_schema(self:GetSchema(),self.TypeName,parent,el,false)
 end
 
 function udm.create_property_from_schema(schema,type,parent,el,populate)
@@ -308,15 +317,21 @@ function udm.generate_lua_api_from_schema(schema)
 								table.remove(children,idx +1)
 							end
 						end
-					end
-					class[getterName] = function(self)
-						return self:GetUdmData():GetValue(name,udmType)
-					end
-					local optional = udmChild:GetValue("optional",udm.TYPE_BOOLEAN) or false
-					class[setterName] = function(self,value)
-						if(optional and value == nil) then self:GetUdmData():RemoveValue(name)
-						else self:GetUdmData():SetValue(name,udmType,value) end
-						self:CallChangeListeners(name,value)
+
+						class[getterName] = function(self)
+							if(schemaValueType ~= nil) then return self:GetTypedChildren()[name] end
+							return self:GetUdmData():GetArrayValues(name,udmType)
+						end
+					else
+						class[getterName] = function(self)
+							return self:GetUdmData():GetValue(name,udmType)
+						end
+						local optional = udmChild:GetValue("optional",udm.TYPE_BOOLEAN) or false
+						class[setterName] = function(self,value)
+							if(optional and value == nil) then self:GetUdmData():RemoveValue(name)
+							else self:GetUdmData():SetValue(name,udmType,value) end
+							self:CallChangeListeners(name,value)
+						end
 					end
 				end
 			end

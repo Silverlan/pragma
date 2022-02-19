@@ -7,7 +7,7 @@
 ]]
 
 local function load_udm(fileName)
-    local udmData,err = udm.load("udm_schemas/" .. fileName)
+    local udmData,err = udm.load("udm/schemas/" .. fileName)
     if(udmData == false) then return false,err end
     local assetData = udmData:GetAssetData()
     local data = assetData:GetData()

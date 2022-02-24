@@ -42,6 +42,30 @@ void BaseEnvLightComponent::RegisterMembers(pragma::EntityComponentManager &comp
 		memberInfo.SetMin(0.f);
 		registerMember(std::move(memberInfo));
 	}
+
+	{
+		using TIntensityType = LightIntensityType;
+		auto memberInfo = create_component_member_info<
+			T,TIntensityType,
+			static_cast<void(T::*)(TIntensityType)>(&T::SetLightIntensityType),
+			static_cast<TIntensityType(T::*)() const>(&T::GetLightIntensityType)
+		>("intensityType",LightIntensityType::Candela);
+		registerMember(std::move(memberInfo));
+	}
+
+	{
+		using TCastShadows = bool;
+		auto memberInfo = create_component_member_info<
+			T,TCastShadows,
+			+[](const ComponentMemberInfo&,T &c,bool castShadows) {
+				c.SetShadowType(castShadows ? ShadowType::Full : ShadowType::None);
+			},
+			+[](const ComponentMemberInfo&,T &c,TCastShadows &value) {
+				value = c.GetShadowType() != ShadowType::None;
+			}
+		>("castShadows",true);
+		registerMember(std::move(memberInfo));
+	}
 }
 std::string BaseEnvLightComponent::LightIntensityTypeToString(LightIntensityType type)
 {

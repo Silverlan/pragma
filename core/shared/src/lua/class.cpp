@@ -737,6 +737,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defPath.def("RemoveFileExtension",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
 		p.RemoveFileExtension();
 	}));
+	defPath.def("RemoveFileExtension",+[](lua_State *l,util::Path &p,const std::vector<std::string> &extensions) {
+		p.RemoveFileExtension(extensions);
+	});
 	defPath.def("MakeRelative",+[](lua_State *l,util::Path &p,util::Path &pOther) {
 		return p.MakeRelative(pOther);
 	});

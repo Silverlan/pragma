@@ -76,6 +76,15 @@ void BaseEnvCameraComponent::RegisterMembers(pragma::EntityComponentManager &com
 		};
 		registerMember(std::move(memberInfo));
 	}
+
+	{
+		auto memberInfo = create_component_member_info<
+			T,float,
+			static_cast<void(T::*)(float)>(&T::SetAspectRatio),
+			static_cast<float(T::*)() const>(&T::GetAspectRatio)
+		>("aspectRatio",1.f);
+		registerMember(std::move(memberInfo));
+	}
 }
 
 decltype(BaseEnvCameraComponent::DEFAULT_NEAR_Z) BaseEnvCameraComponent::DEFAULT_NEAR_Z = 1.f;

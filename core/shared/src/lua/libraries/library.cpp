@@ -71,7 +71,7 @@
 #include <luabind/discard_result_policy.hpp>
 
 extern DLLNETWORK Engine *engine;
-
+#pragma optimize("",off)
 static std::ostream &operator<<(std::ostream &out,const CallbackHandle &hCallback)
 {
 	out<<"Callback[";
@@ -1270,7 +1270,11 @@ void Game::RegisterLuaLibraries()
 				return;
 			auto *l = game->GetLuaState();
 			auto _G = luabind::globals(l);
-			_G["Animation"][strName] = id;
+			auto oGame = _G["game"];
+			auto oModel = oGame ? oGame["Model"] : luabind::object{};
+			auto oAnim = oModel ? oModel["Animation"] : luabind::object{};
+			if(oAnim)
+				oAnim[strName] = id;
 		});
 	};
 	auto cbAct = pragma::animation::Animation::GetActivityEnumRegister().CallOnRegister(fAddEnum);
@@ -1793,3 +1797,4 @@ void Game::RegisterLuaLibraries()
 	Lua::doc::register_library(GetLuaInterface());
 	Lua::animation::register_library(GetLuaInterface());
 }
+#pragma optimize("",on)

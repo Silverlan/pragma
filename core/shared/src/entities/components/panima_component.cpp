@@ -52,6 +52,8 @@ std::optional<std::pair<std::string,util::Path>> PanimaComponent::ParseComponent
 	if(path.path.GetComponent(offset,&offset) != "ec")
 		return {};
 	auto componentName = path.path.GetComponent(offset,&offset);
+	if(offset == std::string::npos)
+		return {};
 	auto pathStr = path.path.GetString().substr(offset);
 	ustring::replace(pathStr,"%20"," ");
 	util::Path componentPath {std::move(pathStr)};

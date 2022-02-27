@@ -105,7 +105,7 @@ static bool is_better_candidate(umath::intersection::Result oldResult,umath::int
 }
 bool Intersection::LineMesh(const Vector3 &_start,const Vector3 &_dir,ModelSubMesh &subMesh,LineMeshResult &r,bool precise,const Vector3 *origin,const Quat *rot)
 {
-	if(subMesh.GetTriangleCount() == 0)
+	if(subMesh.GetGeometryType() != ModelSubMesh::GeometryType::Triangles || subMesh.GetTriangleCount() == 0)
 		return false;
 	auto start = _start;
 	auto dir = _dir;

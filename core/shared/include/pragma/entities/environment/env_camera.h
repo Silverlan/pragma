@@ -26,6 +26,7 @@ namespace pragma
 		static const float DEFAULT_FAR_Z;
 		static const float DEFAULT_FOV;
 		static const float DEFAULT_VIEWMODEL_FOV;
+		static const float DEFAULT_FOCAL_DISTANCE;
 		
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
 		BaseEnvCameraComponent(BaseEntity &ent);
@@ -71,6 +72,7 @@ namespace pragma
 		void SetAspectRatio(float aspectRatio);
 		void SetNearZ(float nearZ);
 		void SetFarZ(float farZ);
+		void SetFocalDistance(float focalDistance);
 		const Mat4 &GetProjectionMatrix() const;
 		const Mat4 &GetViewMatrix() const;
 
@@ -84,10 +86,12 @@ namespace pragma
 		const util::PFloatProperty &GetNearZProperty() const;
 		const util::PFloatProperty &GetFarZProperty() const;
 		const util::PFloatProperty &GetFOVProperty() const;
+		const util::PFloatProperty &GetFocalDistanceProperty() const;
 
 		float GetAspectRatio() const;
 		float GetNearZ() const;
 		float GetFarZ() const;
+		float GetFocalDistance() const;
 		void UpdateFrustumPlanes();
 		const std::vector<umath::Plane> &GetFrustumPlanes() const;
 		Vector3 GetNearPlanePoint(const Vector2 &uv) const;
@@ -111,6 +115,7 @@ namespace pragma
 		util::PFloatProperty m_aspectRatio = nullptr;
 		util::PFloatProperty m_nearZ = nullptr;
 		util::PFloatProperty m_farZ = nullptr;
+		util::PFloatProperty m_focalDistance = nullptr;
 		std::vector<umath::Plane> m_frustumPlanes;
 		StateFlags m_stateFlags = StateFlags::None;
 	};

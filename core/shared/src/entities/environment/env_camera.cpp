@@ -80,6 +80,16 @@ void BaseEnvCameraComponent::RegisterMembers(pragma::EntityComponentManager &com
 	{
 		auto memberInfo = create_component_member_info<
 			T,float,
+			static_cast<void(T::*)(float)>(&T::SetFocalDistance),
+			static_cast<float(T::*)() const>(&T::GetFocalDistance)
+		>("focalDistance",DEFAULT_FOCAL_DISTANCE,AttributeSpecializationType::Distance);
+		memberInfo.SetMin(0.f);
+		registerMember(std::move(memberInfo));
+	}
+
+	{
+		auto memberInfo = create_component_member_info<
+			T,float,
 			static_cast<void(T::*)(float)>(&T::SetAspectRatio),
 			static_cast<float(T::*)() const>(&T::GetAspectRatio)
 		>("aspectRatio",1.f);
@@ -91,8 +101,10 @@ decltype(BaseEnvCameraComponent::DEFAULT_NEAR_Z) BaseEnvCameraComponent::DEFAULT
 decltype(BaseEnvCameraComponent::DEFAULT_FAR_Z) BaseEnvCameraComponent::DEFAULT_FAR_Z = 32'768.f;
 decltype(BaseEnvCameraComponent::DEFAULT_FOV) BaseEnvCameraComponent::DEFAULT_FOV = 90.f;
 decltype(BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV) BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV = 70.f;
+decltype(BaseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE) BaseEnvCameraComponent::DEFAULT_FOCAL_DISTANCE = 72.f;
 BaseEnvCameraComponent::BaseEnvCameraComponent(BaseEntity &ent)
 	: BaseEntityComponent{ent},m_nearZ(util::FloatProperty::Create(DEFAULT_NEAR_Z)),m_farZ(util::FloatProperty::Create(DEFAULT_FAR_Z)),
+	m_focalDistance(util::FloatProperty::Create(DEFAULT_FOCAL_DISTANCE)),
 	m_projectionMatrix(util::Matrix4Property::Create()),m_viewMatrix(util::Matrix4Property::Create()),
 	m_fov(util::FloatProperty::Create(75.f)),m_aspectRatio(util::FloatProperty::Create(1.f))
 {}
@@ -113,6 +125,8 @@ void BaseEnvCameraComponent::Save(udm::LinkedPropertyWrapperArg udm)
 	udm["aspectRatio"] = **m_aspectRatio;
 	udm["nearZ"] = **m_nearZ;
 	udm["farZ"] = **m_farZ;
+	auto dof = udm["depthOfField"];
+	dof["focalDistance"] = **m_focalDistance;
 }
 void BaseEnvCameraComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
@@ -123,6 +137,8 @@ void BaseEnvCameraComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t ver
 	udm["aspectRatio"](**m_aspectRatio);
 	udm["nearZ"](**m_nearZ);
 	udm["farZ"](**m_farZ);
+	auto dof = udm["depthOfField"];
+	dof["focalDistance"](**m_farZ);
 }
 
 void BaseEnvCameraComponent::SetOrientation(const Vector3 &forward,const Vector3 &up)
@@ -343,6 +359,7 @@ void BaseEnvCameraComponent::SetFOV(float fov) {*m_fov = fov; m_stateFlags |= St
 void BaseEnvCameraComponent::SetAspectRatio(float aspectRatio) {*m_aspectRatio = aspectRatio; m_stateFlags |= StateFlags::ProjectionMatrixDirtyBit;}
 void BaseEnvCameraComponent::SetNearZ(float nearZ) {*m_nearZ = nearZ; m_stateFlags |= StateFlags::ProjectionMatrixDirtyBit;}
 void BaseEnvCameraComponent::SetFarZ(float farZ) {*m_farZ = farZ; m_stateFlags |= StateFlags::ProjectionMatrixDirtyBit;}
+void BaseEnvCameraComponent::SetFocalDistance(float focalDistance) {*m_focalDistance = focalDistance;}
 const Mat4 &BaseEnvCameraComponent::GetProjectionMatrix() const
 {
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ProjectionMatrixDirtyBit))
@@ -374,10 +391,12 @@ const util::PFloatProperty &BaseEnvCameraComponent::GetAspectRatioProperty() con
 const util::PFloatProperty &BaseEnvCameraComponent::GetNearZProperty() const {return m_nearZ;}
 const util::PFloatProperty &BaseEnvCameraComponent::GetFarZProperty() const {return m_farZ;}
 const util::PFloatProperty &BaseEnvCameraComponent::GetFOVProperty() const {return m_fov;}
+const util::PFloatProperty &BaseEnvCameraComponent::GetFocalDistanceProperty() const {return m_focalDistance;}
 
 float BaseEnvCameraComponent::GetAspectRatio() const {return *m_aspectRatio;}
 float BaseEnvCameraComponent::GetNearZ() const {return *m_nearZ;}
 float BaseEnvCameraComponent::GetFarZ() const {return *m_farZ;}
+float BaseEnvCameraComponent::GetFocalDistance() const {return *m_focalDistance;}
 void BaseEnvCameraComponent::UpdateFrustumPlanes()
 {
 	m_frustumPlanes.clear();

@@ -31,7 +31,7 @@
 #include <luabind/out_value_policy.hpp>
 #include <luabind/copy_policy.hpp>
 #include <luabind/discard_result_policy.hpp>
-
+#pragma optimize("",off)
 namespace Lua
 {
 	template<typename ...Types>
@@ -173,6 +173,21 @@ bool pragma::lua::set_member_value(
 		{
 			if constexpr(Lua::is_native_type<T>)
 			{
+				if(memberInfo.IsEnum())
+				{
+					if(luabind::type(value) == LUA_TSTRING)
+					{
+						auto e = memberInfo.EnumNameToValue(luabind::object_cast<std::string>(value));
+						if(!e.has_value())
+							return false;
+						auto v = *e;
+						memberInfo.setterFunction(memberInfo,component,&v);
+						return true;
+					}
+					auto v = memberInfo.ValueToEnumName(luabind::object_cast<int64_t>(value));
+					memberInfo.setterFunction(memberInfo,component,&v);
+					return true;
+				}
 				auto v = luabind::object_cast<T>(value);
 				memberInfo.setterFunction(memberInfo,component,&v);
 			}
@@ -1216,8 +1231,18 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		def.def("SetFalloffExponent",&pragma::BaseEnvLightComponent::SetFalloffExponent);
 		def.def("SetLightIntensityType",&pragma::BaseEnvLightComponent::SetLightIntensityType);
 		def.def("GetLightIntensityType",&pragma::BaseEnvLightComponent::GetLightIntensityType);
+		def.def("SetLightIntensityType",+[](pragma::BaseEnvLightComponent &c,const std::string &type) {
+			auto e = magic_enum::enum_cast<pragma::BaseEnvLightComponent::LightIntensityType>(type);
+			if(e.has_value())
+				c.SetLightIntensityType(*e);
+		});
 		def.def("SetLightIntensity",static_cast<void(pragma::BaseEnvLightComponent::*)(float)>(&pragma::BaseEnvLightComponent::SetLightIntensity));
 		def.def("SetLightIntensity",static_cast<void(pragma::BaseEnvLightComponent::*)(float,pragma::BaseEnvLightComponent::LightIntensityType)>(&pragma::BaseEnvLightComponent::SetLightIntensity));
+		def.def("SetLightIntensity",+[](pragma::BaseEnvLightComponent &c,float intensity,const std::string &type) {
+			auto e = magic_enum::enum_cast<pragma::BaseEnvLightComponent::LightIntensityType>(type);
+			if(e.has_value())
+				c.SetLightIntensity(intensity,*e);
+		});
 		def.def("GetLightIntensity",&pragma::BaseEnvLightComponent::GetLightIntensity);
 		def.def("GetLightIntensityCandela",static_cast<Candela(pragma::BaseEnvLightComponent::*)() const>(&pragma::BaseEnvLightComponent::GetLightIntensityCandela));
 		def.add_static_constant("INTENSITY_TYPE_CANDELA",umath::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Candela));
@@ -2230,6 +2255,9 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		def.def("GetAspectRatio",&pragma::BaseEnvCameraComponent::GetAspectRatio);
 		def.def("GetNearZ",&pragma::BaseEnvCameraComponent::GetNearZ);
 		def.def("GetFarZ",&pragma::BaseEnvCameraComponent::GetFarZ);
+		def.def("GetFocalDistanceProperty",&pragma::BaseEnvCameraComponent::GetFocalDistanceProperty);
+		def.def("GetFocalDistance",&pragma::BaseEnvCameraComponent::GetFocalDistance);
+		def.def("SetFocalDistance",&pragma::BaseEnvCameraComponent::SetFocalDistance);
 		def.def("GetFrustumPlanes",static_cast<std::vector<umath::Plane>(*)(lua_State*,pragma::BaseEnvCameraComponent&)>([](lua_State *l,pragma::BaseEnvCameraComponent &hComponent) {
 			std::vector<umath::Plane> planes;
 			hComponent.GetFrustumPlanes(planes);
@@ -3364,3 +3392,4 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	}
 
 	// --template-register-definition
+#pragma optimize("",on)

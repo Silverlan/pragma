@@ -62,6 +62,7 @@ ComponentMemberInfo &ComponentMemberInfo::operator=(const ComponentMemberInfo &o
 	m_max = other.m_max;
 	m_stepSize = other.m_stepSize;
 	m_metaData = other.m_metaData;
+	m_enumConverter = other.m_enumConverter ? std::make_unique<EnumConverter>(*other.m_enumConverter) : nullptr;
 	if(other.m_default)
 	{
 		// Default value is currently only allowed for UDM types. Tag: component-member-udm-default
@@ -75,7 +76,7 @@ ComponentMemberInfo &ComponentMemberInfo::operator=(const ComponentMemberInfo &o
 			});
 		}
 	}
-	static_assert(sizeof(*this) == 160);
+	static_assert(sizeof(*this) == 168);
 	return *this;
 }
 void ComponentMemberInfo::SetSpecializationType(AttributeSpecializationType type)
@@ -102,6 +103,26 @@ void ComponentMemberInfo::AddMetaData(const udm::PProperty &prop)
 	m_metaData = prop;
 }
 const udm::PProperty &ComponentMemberInfo::GetMetaData() const {return m_metaData;}
+void ComponentMemberInfo::SetEnum(
+	const EnumConverter::NameToEnumFunction &nameToEnum,
+	const EnumConverter::EnumToNameFunction &enumToName
+)
+{
+	m_enumConverter = std::make_unique<EnumConverter>(nameToEnum,enumToName);
+}
+bool ComponentMemberInfo::IsEnum() const {return m_enumConverter != nullptr;}
+std::optional<int64_t> ComponentMemberInfo::EnumNameToValue(const std::string &name) const
+{
+	if(!m_enumConverter)
+		return {};
+	return m_enumConverter->nameToEnum(name);
+}
+std::optional<std::string> ComponentMemberInfo::ValueToEnumName(int64_t value) const
+{
+	if(!m_enumConverter)
+		return {};
+	return m_enumConverter->enumToName(value);
+}
 void ComponentMemberInfo::UpdateDependencies(BaseEntityComponent &component,std::vector<std::string> &outAffectedProps)
 {
 	if(!updateDependenciesFunction)

@@ -44,6 +44,13 @@ namespace pragma
 	enum class AttributeSpecializationType : uint8_t;
 	struct DLLNETWORK ComponentMemberInfo
 	{
+		struct DLLNETWORK EnumConverter
+		{
+			using NameToEnumFunction = std::function<std::optional<int64_t>(const std::string&)>;
+			using EnumToNameFunction = std::function<std::optional<std::string>(int64_t)>;
+			NameToEnumFunction nameToEnum;
+			EnumToNameFunction enumToName;
+		};
 		using ApplyFunction = void(*)(const ComponentMemberInfo&,BaseEntityComponent&,const void*);
 		using GetFunction = void(*)(const ComponentMemberInfo&,BaseEntityComponent&,void*);
 		using InterpolationFunction = void(*)(const void*,const void*,double,void*);
@@ -144,6 +151,14 @@ namespace pragma
 		template<typename T>
 			void SetDefault(T value);
 
+		void SetEnum(
+			const EnumConverter::NameToEnumFunction &nameToEnum,
+			const EnumConverter::EnumToNameFunction &enumToName
+		);
+		bool IsEnum() const;
+		std::optional<int64_t> EnumNameToValue(const std::string &name) const;
+		std::optional<std::string> ValueToEnumName(int64_t value) const;
+
 		void UpdateDependencies(BaseEntityComponent &component,std::vector<std::string> &outAffectedProps);
 		void ResetToDefault(BaseEntityComponent &component);
 
@@ -171,6 +186,7 @@ namespace pragma
 		std::optional<float> m_max {};
 		std::optional<float> m_stepSize {};
 		std::unique_ptr<void,void(*)(void*)> m_default = std::unique_ptr<void,void(*)(void*)>{nullptr,[](void*) {}};
+		std::unique_ptr<EnumConverter> m_enumConverter = nullptr;
 	};
 
 	enum class ComponentFlags : uint8_t

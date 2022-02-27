@@ -44,6 +44,20 @@ namespace pragma
 		memberInfo.SetGetterFunction<TComponent,T,TGetter>();
 		memberInfo.SetSetterFunction<TComponent,T,TSetter>();
 		memberInfo.SetSpecializationType(specialization);
+		if constexpr(std::is_enum_v<T>)
+		{
+			memberInfo.SetEnum([](const std::string &name) -> int64_t {
+				auto v = magic_enum::enum_cast<T>(name);
+				if(!v.has_value())
+					return {};
+				return static_cast<int64_t>(*v);
+			},[](int64_t value) -> std::optional<std::string> {
+				auto e = magic_enum::enum_name<T>(static_cast<T>(value));
+				if(e.empty())
+					return {};
+				return std::string{e};
+			});
+		}
 		if(defaultValue.has_value())
 			memberInfo.SetDefault<T>(*defaultValue);
 		return memberInfo;

@@ -183,6 +183,7 @@ namespace pragma
 		CallbackHandle BindInitComponentEvent(ComponentId componentId,const std::function<void(std::reference_wrapper<pragma::BaseEntityComponent>)> &callback);
 		CallbackHandle BindNetEvent(pragma::NetEventId eventId,const std::function<void(std::reference_wrapper<NetPacket>,pragma::BasePlayerComponent*)> &callback);
 		virtual void OnEntitySpawn() override;
+		virtual void OnEntityPostSpawn() override;
 		virtual void OnRemove() override;
 		using pragma::BaseEntityComponent::BindEvent;
 
@@ -203,6 +204,9 @@ namespace pragma
 
 		void Lua_OnEntitySpawn() {}
 		static void default_Lua_OnEntitySpawn(lua_State *l,BaseLuaBaseEntityComponent &hComponent) {}
+
+		void Lua_OnEntityPostSpawn() {}
+		static void default_Lua_OnEntityPostSpawn(lua_State *l,BaseLuaBaseEntityComponent &hComponent) {}
 
 		void Lua_OnAttachedToEntity() {}
 		static void default_Lua_OnAttachedToEntity(lua_State *l,BaseLuaBaseEntityComponent &hComponent) {}

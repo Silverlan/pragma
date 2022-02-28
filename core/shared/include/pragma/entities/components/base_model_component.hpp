@@ -8,6 +8,7 @@
 #define __BASE_MODEL_COMPONENT_HPP__
 
 #include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/entities/components/base_entity_component_member_register.hpp"
 #include <sharedutils/property/util_property.hpp>
 
 class Model;
@@ -37,7 +38,8 @@ namespace pragma
 		std::shared_ptr<Model> model;
 	};
 	class DLLNETWORK BaseModelComponent
-		: public BaseEntityComponent
+		: public BaseEntityComponent,
+		public DynamicMemberRegister
 	{
 	public:
 		static ComponentEventId EVENT_ON_MODEL_CHANGED;
@@ -89,8 +91,11 @@ namespace pragma
 
 		uint32_t GetHitboxCount() const;
 		bool GetHitboxBounds(uint32_t boneId,Vector3 &min,Vector3 &max,Vector3 &origin,Quat &rot) const;
+
+		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
 	protected:
 		BaseModelComponent(BaseEntity &ent);
+		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
 		virtual void OnModelChanged(const std::shared_ptr<Model> &model);
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		std::shared_ptr<Model> m_model = nullptr;

@@ -431,10 +431,7 @@ void CModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 	m_lod = 0;
 
 	m_lodRenderMeshes.clear();
-	m_lodRenderMeshes.push_back({});
-
 	m_lodMeshes.clear();
-	m_lodMeshes.push_back({});
 
 	m_lodMeshGroups.clear();
 	m_lodMeshGroups.push_back({0,0});

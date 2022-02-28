@@ -332,6 +332,8 @@ void BaseModelComponent::SetSkin(unsigned int skin)
 
 void BaseModelComponent::SetModel(const std::shared_ptr<Model> &mdl)
 {
+	ClearMembers();
+
 	m_model = mdl;
 	m_bodyGroups.clear();
 	m_bMaterialsLoaded = true;
@@ -340,6 +342,8 @@ void BaseModelComponent::SetModel(const std::shared_ptr<Model> &mdl)
 	if(mdl == NULL)
 	{
 		OnModelChanged(nullptr);
+
+		OnMembersChanged();
 		return;
 	}
 	m_bMaterialsLoaded = false;
@@ -347,6 +351,28 @@ void BaseModelComponent::SetModel(const std::shared_ptr<Model> &mdl)
 		OnModelMaterialsLoaded();
 	});
 	m_bodyGroups.resize(mdl->GetBodyGroupCount());
+
+	ReserveMembers(m_bodyGroups.size());
+	for(uint32_t idx = 0; auto &bg : mdl->GetBodyGroups())
+	{
+		auto memberInfo = pragma::ComponentMemberInfo::CreateDummy();
+		memberInfo.SetName("bodyGroup/" +bg.name);
+		memberInfo.type = ents::EntityMemberType::UInt32;
+		memberInfo.userIndex = idx++;
+		using TValue = uint32_t;
+		using TComponent = BaseModelComponent;
+		memberInfo.SetGetterFunction<TComponent,TValue,static_cast<void(*)(const pragma::ComponentMemberInfo&,TComponent&,TValue&)>(
+			[](const pragma::ComponentMemberInfo &memberInfo,TComponent &component,TValue &outValue) {
+			outValue = component.GetBodyGroup(memberInfo.userIndex);
+		})>();
+		memberInfo.SetSetterFunction<TComponent,TValue,static_cast<void(*)(const pragma::ComponentMemberInfo&,TComponent&,const TValue&)>(
+			[](const pragma::ComponentMemberInfo &memberInfo,TComponent &component,const TValue &value) {
+			component.SetBodyGroup(memberInfo.userIndex,value);
+		})>();
+		RegisterMember(std::move(memberInfo));
+	}
+	OnMembersChanged();
+
 	/*if(skeleton == NULL)
 	{
 		UpdateChildParentInfo();
@@ -361,6 +387,25 @@ void BaseModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 {
 	CEOnModelChanged evData{model};
 	BroadcastEvent(EVENT_ON_MODEL_CHANGED,evData);
+}
+
+const ComponentMemberInfo *BaseModelComponent::GetMemberInfo(ComponentMemberIndex idx) const
+{
+	auto numStatic = GetStaticMemberCount();
+	if(idx < numStatic)
+		return BaseEntityComponent::GetMemberInfo(idx);
+	return DynamicMemberRegister::GetMemberInfo(idx -numStatic);
+}
+
+std::optional<ComponentMemberIndex> BaseModelComponent::DoGetMemberIndex(const std::string &name) const
+{
+	auto idx = BaseEntityComponent::DoGetMemberIndex(name);
+	if(idx.has_value())
+		return idx;
+	idx = DynamicMemberRegister::GetMemberIndex(name);
+	if(idx.has_value())
+		return *idx +GetStaticMemberCount();
+	return std::optional<ComponentMemberIndex>{};
 }
 
 uint32_t BaseModelComponent::GetHitboxCount() const

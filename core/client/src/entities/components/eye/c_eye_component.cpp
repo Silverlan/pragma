@@ -63,6 +63,16 @@ void CEyeComponent::RegisterMembers(pragma::EntityComponentManager &componentMan
 		>("blinkingEnabled",true);
 		registerMember(std::move(memberInfo));
 	}
+
+	{
+		using TLocalViewTargetFactor = float;
+		auto memberInfo = create_component_member_info<
+			T,TLocalViewTargetFactor,
+			static_cast<void(T::*)(TLocalViewTargetFactor)>(&T::SetLocalViewTargetFactor),
+			static_cast<TLocalViewTargetFactor(T::*)() const>(&T::GetLocalViewTargetFactor)
+		>("localViewTargetFactor",1.f);
+		registerMember(std::move(memberInfo));
+	}
 }
 void CEyeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 

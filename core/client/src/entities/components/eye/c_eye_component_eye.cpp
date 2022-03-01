@@ -60,18 +60,14 @@ std::optional<umath::Transform> pragma::CEyeComponent::GetEyePose() const
 	return attPose;
 }
 
+void pragma::CEyeComponent::SetLocalViewTargetFactor(float f) {m_localViewTargetFactor = f;}
+float pragma::CEyeComponent::GetLocalViewTargetFactor() const {return m_localViewTargetFactor;}
+
 Vector3 pragma::CEyeComponent::GetViewTarget() const
 {
-	if(m_viewTarget.has_value())
-		return *m_viewTarget;
-	constexpr auto dist = 500.f; // Arbitrary distance; just has to be far enough
-	auto eyePose = GetEyePose();
-	Vector3 viewTarget {};
-	if(eyePose.has_value())
-		viewTarget = eyePose->GetOrigin() +uquat::forward(eyePose->GetRotation()) *dist;
-	else
-		viewTarget = GetEntity().GetPosition() +GetEntity().GetForward() *dist;
-	return ClampViewTarget(viewTarget);
+	auto pose = GetEntity().GetPose();
+	pose.TranslateLocal(m_viewTarget);
+	return ClampViewTarget(pose.GetOrigin());
 }
 
 void pragma::CEyeComponent::ClearViewTarget() {m_viewTarget = {};}
@@ -101,7 +97,12 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 
 		auto attPose = GetEntity().GetPose();
 		attPose *= umath::Transform{pos,rot};
-		auto localPos = attPose.GetInverse() *tmp;
+		auto invPose = attPose.GetInverse();
+		
+		auto posAbs = invPose *tmp;
+		constexpr Vector3 posLocal {0.f,0.f,500.f}; // Distance is arbitrarily chosen, just has to point forward
+
+		auto localPos = uvec::lerp(posAbs,posLocal,m_localViewTargetFactor);
 		
 		if(localPos.z < 6)
 			localPos.z = 6;
@@ -124,7 +125,8 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 		eyeDeflect.z = 0;
 
 		eyeDeflect = eyeDeflect *(localPos.z *localPos.z);
-		localPos = localPos +eyeDeflect;//Vector3(eyeDeflect.y,-eyeDeflect.z,eyeDeflect.x);
+
+		localPos = localPos +eyeDeflect;
 		uvec::normalize(&localPos);
 
 		auto maxEyeDeflection = umath::cos(umath::deg_to_rad(mdl->GetMaxEyeDeflection()));
@@ -156,9 +158,9 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 void pragma::CEyeComponent::SetViewTarget(const Vector3 &viewTarget)
 {
 	m_viewTarget = viewTarget;
-	static auto clamp = true;
-	if(clamp)
-		m_viewTarget = ClampViewTarget(viewTarget);
+	//static auto clamp = true;
+	//if(clamp)
+	//	m_viewTarget = ClampViewTarget(viewTarget);
 }
 umath::Transform pragma::CEyeComponent::CalcEyeballPose(uint32_t eyeballIndex,umath::Transform *optOutBonePose) const
 {

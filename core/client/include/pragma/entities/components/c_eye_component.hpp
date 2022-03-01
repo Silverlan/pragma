@@ -88,6 +88,9 @@ namespace pragma
 		bool FindEyeballIndex(CModelSubMesh &subMesh,uint32_t &outEyeballIndex) const;
 		bool FindEyeballIndex(uint32_t skinMatIdx,uint32_t &outEyeballIndex) const;
 
+		void SetLocalViewTargetFactor(float f);
+		float GetLocalViewTargetFactor() const;
+
 		umath::Transform CalcEyeballPose(uint32_t eyeballIndex,umath::Transform *optOutBonePose=nullptr) const;
 		
 		void UpdateEyeballsMT();
@@ -101,7 +104,8 @@ namespace pragma
 	private:
 		EyeballConfig m_eyeballConfig = {};
 		std::vector<EyeballData> m_eyeballData = {};
-		std::optional<Vector3> m_viewTarget = {};
+		Vector3 m_viewTarget {};
+		float m_localViewTargetFactor = 1.f;
 		StateFlags m_stateFlags;
 		std::unordered_map<uint32_t,uint32_t> m_skinMaterialIndexToEyeballIndex = {};
 		ComponentHandle<CFlexComponent> m_flexC = {};

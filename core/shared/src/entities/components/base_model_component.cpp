@@ -341,8 +341,9 @@ void BaseModelComponent::SetModel(const std::shared_ptr<Model> &mdl)
 		m_onModelMaterialsLoaded.Remove();
 	if(mdl == NULL)
 	{
+		if(GetEntity().IsRemoved())
+			return;
 		OnModelChanged(nullptr);
-
 		OnMembersChanged();
 		return;
 	}

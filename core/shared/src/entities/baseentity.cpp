@@ -352,6 +352,7 @@ pragma::BasePhysicsComponent *BaseEntity::GetPhysicsComponent() const {return m_
 pragma::BaseModelComponent *BaseEntity::GetModelComponent() const {return m_modelComponent;}
 pragma::BaseGenericComponent *BaseEntity::GetGenericComponent() const {return m_genericComponent;}
 
+bool BaseEntity::IsRemoved() const {return umath::is_flag_set(m_stateFlags,StateFlags::Removed);}
 void BaseEntity::Remove() {}
 void BaseEntity::RemoveSafely() {GetNetworkState()->GetGameState()->ScheduleEntityForRemoval(*this);}
 

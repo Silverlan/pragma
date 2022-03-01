@@ -323,6 +323,7 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	classDef.def("IsTurnedOn",&BaseEntity::IsEnabled);
 	classDef.def("IsDisabled",&BaseEntity::IsDisabled);
 	classDef.def("IsTurnedOff",&BaseEntity::IsDisabled);
+	classDef.def("IsRemoved",&BaseEntity::IsRemoved);
 	classDef.def("SetColor",&BaseEntity::SetColor);
 	classDef.def("GetColor",+[](BaseEntity &ent) {
 		auto col = ent.GetColor();

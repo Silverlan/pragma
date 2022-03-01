@@ -249,6 +249,7 @@ public:
 	virtual Con::c_cout& print(Con::c_cout&);
 	virtual std::ostream& print(std::ostream&);
 	
+	bool IsRemoved() const;
 	virtual void Remove();
 	void RemoveSafely();
 

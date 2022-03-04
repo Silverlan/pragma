@@ -446,6 +446,68 @@ void CLightComponent::UpdateTransformationMatrix(const Mat4 &biasMatrix,const Ma
 	if(m_shadowBuffer != nullptr)
 		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_shadowBuffer,offsetof(ShadowBufferData,depthVP),biasMatrix);
 }
+void CLightComponent::UpdatePos()
+{
+	auto &pos = GetEntity().GetPosition();
+	if(uvec::cmp(pos,reinterpret_cast<Vector3&>(m_bufferData.position)) == false)
+	{
+		reinterpret_cast<Vector3&>(m_bufferData.position) = pos;
+		if(m_renderBuffer)
+			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,position),m_bufferData.position);
+		umath::set_flag(m_stateFlags,StateFlags::FullUpdateRequired);
+	}
+}
+void CLightComponent::UpdateDir()
+{
+	util::pragma::LightType lightType;
+	GetLight(lightType);
+	if(lightType != util::pragma::LightType::Point)
+	{
+		auto &rot = GetEntity().GetRotation();
+		auto dir = uquat::forward(rot);
+		if(uvec::cmp(dir,reinterpret_cast<Vector3&>(m_bufferData.direction)) == false)
+		{
+			reinterpret_cast<Vector3&>(m_bufferData.direction) = dir;
+			if(m_bufferData.direction.x == 0.f && m_bufferData.direction.y == 0.f && m_bufferData.direction.z == 0.f)
+				m_bufferData.direction.z = 1.f;
+			if(m_renderBuffer)
+				c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,direction),m_bufferData.direction);
+			umath::set_flag(m_stateFlags,StateFlags::FullUpdateRequired);
+		}
+	}
+}
+void CLightComponent::UpdateColor()
+{
+	auto colorC = GetEntity().GetComponent<CColorComponent>();
+	if(colorC.expired())
+		return;
+	auto &color = colorC->GetColor();
+	m_bufferData.color = color.ToVector3();
+	if(m_renderBuffer != nullptr)
+		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,color),m_bufferData.color);
+
+	if(color.a == 0 || (color.r == 0 && color.g == 0 && color.b == 0))
+		umath::set_flag(m_bufferData.flags,LightBufferData::BufferFlags::TurnedOn,false);
+	else
+	{
+		auto pToggleComponent = GetEntity().GetComponent<CToggleComponent>();
+		if(pToggleComponent.expired() || pToggleComponent->IsTurnedOn() == true)
+			umath::set_flag(m_bufferData.flags,LightBufferData::BufferFlags::TurnedOn,true);
+	}
+}
+void CLightComponent::UpdateRadius()
+{
+	auto radiusC = GetEntity().GetComponent<CRadiusComponent>();
+	if(radiusC.expired())
+		return;
+	auto radius = radiusC->GetRadius();
+	if(radius == m_bufferData.position.w)
+		return;
+	m_bufferData.position.w = radius;
+	if(m_renderBuffer != nullptr)
+		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,position) +offsetof(Vector4,w),m_bufferData.position.w);
+	umath::set_flag(m_stateFlags,StateFlags::FullUpdateRequired);
+}
 void CLightComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	CBaseLightComponent::OnEntityComponentAdded(component);
@@ -454,65 +516,23 @@ void CLightComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 		auto &trC = static_cast<CTransformComponent&>(component);
 		FlagCallbackForRemoval(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::PositionChanged))
-			{
-				auto &pos = trC.GetPosition();
-				if(uvec::cmp(pos,reinterpret_cast<Vector3&>(m_bufferData.position)) == false)
-				{
-					reinterpret_cast<Vector3&>(m_bufferData.position) = pos;
-					if(m_renderBuffer != nullptr)
-						c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,position),m_bufferData.position);
-					umath::set_flag(m_stateFlags,StateFlags::FullUpdateRequired);
-				}
-			}
+				UpdatePos();
 
 			if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::RotationChanged))
-			{
-				util::pragma::LightType lightType;
-				GetLight(lightType);
-				if(lightType != util::pragma::LightType::Point)
-				{
-					auto &rot = trC.GetRotation();
-					auto dir = uquat::forward(rot);
-					if(uvec::cmp(dir,reinterpret_cast<Vector3&>(m_bufferData.direction)) == false)
-					{
-						reinterpret_cast<Vector3&>(m_bufferData.direction) = dir;
-						if(m_bufferData.direction.x == 0.f && m_bufferData.direction.y == 0.f && m_bufferData.direction.z == 0.f)
-							m_bufferData.direction.z = 1.f;
-						if(m_renderBuffer != nullptr)
-							c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,direction),m_bufferData.direction);
-						umath::set_flag(m_stateFlags,StateFlags::FullUpdateRequired);
-					}
-				}
-			}
+				UpdateDir();
 			return util::EventReply::Unhandled;
 		}),CallbackType::Component,&component);
 	}
 	else if(typeid(component) == typeid(CRadiusComponent))
 	{
 		FlagCallbackForRemoval(static_cast<CRadiusComponent&>(component).GetRadiusProperty()->AddCallback([this](std::reference_wrapper<const float> oldRadius,std::reference_wrapper<const float> radius) {
-			if(radius == m_bufferData.position.w)
-				return;
-			m_bufferData.position.w = radius;
-			if(m_renderBuffer != nullptr)
-				c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,position) +offsetof(Vector4,w),m_bufferData.position.w);
-			umath::set_flag(m_stateFlags,StateFlags::FullUpdateRequired);
+			UpdateRadius();
 		}),CallbackType::Component,&component);
 	}
 	else if(typeid(component) == typeid(CColorComponent))
 	{
 		FlagCallbackForRemoval(static_cast<CColorComponent&>(component).GetColorProperty()->AddCallback([this](std::reference_wrapper<const Color> oldColor,std::reference_wrapper<const Color> color) {
-			m_bufferData.color = color.get().ToVector3();
-			if(m_renderBuffer != nullptr)
-				c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,color),m_bufferData.color);
-
-			if(color.get().a == 0 || (color.get().r == 0 && color.get().g == 0 && color.get().b == 0))
-				umath::set_flag(m_bufferData.flags,LightBufferData::BufferFlags::TurnedOn,false);
-			else
-			{
-				auto pToggleComponent = GetEntity().GetComponent<CToggleComponent>();
-				if(pToggleComponent.expired() || pToggleComponent->IsTurnedOn() == true)
-					umath::set_flag(m_bufferData.flags,LightBufferData::BufferFlags::TurnedOn,true);
-			}
+			UpdateColor();
 		}),CallbackType::Component,&component);
 	}
 	else if(typeid(component) == typeid(CLightSpotComponent))
@@ -556,6 +576,10 @@ void CLightComponent::OnEntitySpawn()
 		if(m_renderBuffer != nullptr)
 			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,flags),m_bufferData.flags);
 	}
+	UpdatePos();
+	UpdateDir();
+	UpdateRadius();
+	UpdateColor();
 }
 
 const pragma::LightBufferData &CLightComponent::GetBufferData() const {return const_cast<CLightComponent*>(this)->GetBufferData();}

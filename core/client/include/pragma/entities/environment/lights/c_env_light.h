@@ -205,6 +205,10 @@ namespace pragma
 		void InitializeShadowBuffer();
 		void DestroyRenderBuffer(bool freeBuffer=true);
 		void DestroyShadowBuffer(bool freeBuffer=true);
+		void UpdatePos();
+		void UpdateDir();
+		void UpdateColor();
+		void UpdateRadius();
 		void InitializeLight(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;

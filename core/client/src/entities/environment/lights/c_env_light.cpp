@@ -29,13 +29,14 @@
 #include <sharedutils/util_shaderinfo.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
+#include <prosper_command_buffer.hpp>
 
 using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 decltype(CLightComponent::s_lightCount) CLightComponent::s_lightCount = 0u;
 prosper::IUniformResizableBuffer &CLightComponent::GetGlobalRenderBuffer() {return pragma::LightDataBufferManager::GetInstance().GetGlobalRenderBuffer();}
 prosper::IUniformResizableBuffer &CLightComponent::GetGlobalShadowBuffer() {return pragma::ShadowDataBufferManager::GetInstance().GetGlobalRenderBuffer();}
@@ -97,25 +98,33 @@ void CLightComponent::InitializeShadowBuffer()
 	BroadcastEvent(EVENT_ON_SHADOW_BUFFER_INITIALIZED,CEOnShadowBufferInitialized{*m_shadowBuffer});
 }
 
-void CLightComponent::DestroyRenderBuffer()
+void CLightComponent::DestroyRenderBuffer(bool freeBuffer)
 {
 	//m_bufferUpdateInfo.clear(); // prosper TODO
 	if(m_renderBuffer == nullptr)
 		return;
-	umath::set_flag(m_bufferData.flags,LightBufferData::BufferFlags::TurnedOn,false);
+	auto flags = m_bufferData.flags;
+	umath::set_flag(flags,LightBufferData::BufferFlags::TurnedOn,false);
 	if(m_renderBuffer != nullptr)
-		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,flags),m_bufferData.flags);
+		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,flags),flags);
 
-	LightDataBufferManager::GetInstance().Free(m_renderBuffer);
+	auto buf = m_renderBuffer;
 	m_renderBuffer = nullptr;
+	if(freeBuffer)
+	{
+		m_bufferData.flags = flags;
+		LightDataBufferManager::GetInstance().Free(buf);
+	}
 }
 
-void CLightComponent::DestroyShadowBuffer()
+void CLightComponent::DestroyShadowBuffer(bool freeBuffer)
 {
 	if(m_shadowBuffer == nullptr)
 		return;
-	ShadowDataBufferManager::GetInstance().Free(m_shadowBuffer);
+	auto buf = m_shadowBuffer;
 	m_shadowBuffer = nullptr;
+	if(freeBuffer)
+		ShadowDataBufferManager::GetInstance().Free(buf);
 }
 
 bool CLightComponent::ShouldRender() {return true;}
@@ -573,13 +582,24 @@ Mat4 &CLightComponent::GetTransformationMatrix(unsigned int j)
 
 const std::shared_ptr<prosper::IBuffer> &CLightComponent::GetRenderBuffer() const {return m_renderBuffer;}
 const std::shared_ptr<prosper::IBuffer> &CLightComponent::GetShadowBuffer() const {return m_shadowBuffer;}
-void CLightComponent::SetRenderBuffer(const std::shared_ptr<prosper::IBuffer> &renderBuffer) {m_renderBuffer = renderBuffer;}
-void CLightComponent::SetShadowBuffer(const std::shared_ptr<prosper::IBuffer> &renderBuffer) {m_shadowBuffer = renderBuffer;}
+void CLightComponent::SetRenderBuffer(const std::shared_ptr<prosper::IBuffer> &renderBuffer,bool freeBuffer)
+{
+	DestroyRenderBuffer(freeBuffer);
+	m_renderBuffer = renderBuffer;
+}
+void CLightComponent::SetShadowBuffer(const std::shared_ptr<prosper::IBuffer> &renderBuffer,bool freeBuffer)
+{
+	DestroyShadowBuffer(freeBuffer);
+	m_shadowBuffer = renderBuffer;
+}
 
 ///////////////////
 
 void Console::commands::debug_light_sources(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
+	auto &context = c_engine->GetRenderContext();
+	context.WaitIdle();
+
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<CLightComponent>>();
 	std::vector<pragma::CLightComponent*> lights;
@@ -598,6 +618,74 @@ void Console::commands::debug_light_sources(NetworkState *state,pragma::BasePlay
 			++numTurnedOn;
 	}
 
+	auto &lightBufManager = LightDataBufferManager::GetInstance();
+	Con::cout<<"Light buffer count: "<<lightBufManager.GetLightDataBufferCount()<<Con::endl;
+	auto numTotal = lightBufManager.GetMaxCount();
+	Con::cout<<"Max light count: "<<numTotal<<Con::endl;
+	Con::cout<<"Allocated buffer instances: "<<lightBufManager.GetGlobalRenderBuffer().GetTotalInstanceCount()<<Con::endl;
+	
+	auto getBufferData = [](prosper::IBuffer &buf) -> LightBufferData {
+		LightBufferData data;
+		buf.Read(0ull,sizeof(data),&data);
+		return data;
+	};
+	auto printBufferData = [](const LightBufferData &data) {
+		std::string type = "Unknown";
+		if((data.flags &LightBufferData::BufferFlags::TypeSpot) != LightBufferData::BufferFlags::None)
+			type = "Spot";
+		else if((data.flags &LightBufferData::BufferFlags::TypePoint) != LightBufferData::BufferFlags::None)
+			type = "Point";
+		else if((data.flags &LightBufferData::BufferFlags::TypeDirectional) != LightBufferData::BufferFlags::None)
+			type = "Directional";
+		Con::cout<<"\t\tPosition: ("<<data.position.x<<","<<data.position.y<<","<<data.position.z<<")"<<Con::endl;
+		Con::cout<<"\t\tShadow Index: "<<data.shadowIndex<<Con::endl;
+		Con::cout<<"\t\tShadow Map Index (static): "<<data.shadowMapIndexStatic<<Con::endl;
+		Con::cout<<"\t\tShadow Map Index (dynamic): "<<data.shadowMapIndexDynamic<<Con::endl;
+		Con::cout<<"\t\tType: "<<type<<Con::endl;
+		Con::cout<<"\t\tColor: ("<<data.color.r<<","<<data.color.g<<","<<data.color.b<<")"<<Con::endl;
+		Con::cout<<"\t\tIntensity (candela): "<<data.intensity<<Con::endl;
+		Con::cout<<"\t\tDirection: ("<<data.direction.x<<","<<data.direction.y<<","<<data.direction.z<<")"<<Con::endl;
+		Con::cout<<"\t\tCone Start Offset: "<<data.direction.w<<Con::endl;
+		Con::cout<<"\t\tDistance: "<<data.position.w<<Con::endl;
+		Con::cout<<"\t\tOuter cutoff angle: "<<umath::rad_to_deg(data.cutoffOuter)<<Con::endl;
+		Con::cout<<"\t\tInner cutoff angle: "<<umath::rad_to_deg(data.cutoffInner)<<Con::endl;
+		Con::cout<<"\t\tAttenuation: "<<data.attenuation<<Con::endl;
+		Con::cout<<"\t\tFlags: "<<umath::to_integral(data.flags)<<Con::endl;
+		Con::cout<<"\t\tTurned On: "<<(((data.flags &LightBufferData::BufferFlags::TurnedOn) == LightBufferData::BufferFlags::TurnedOn) ? "Yes" : "No")<<Con::endl;
+	};
+
+	Con::cout<<"Enabled light buffers:"<<Con::endl;
+	auto &buf = lightBufManager.GetGlobalRenderBuffer();
+
+	auto createInfo = buf.GetCreateInfo();
+	createInfo.usageFlags = prosper::BufferUsageFlags::TransferDstBit;
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUToCPU;
+	auto tmpBuf = context.CreateBuffer(createInfo);
+	auto setupCmd = context.GetSetupCommandBuffer();
+	prosper::util::BufferCopy copyInfo {};
+	copyInfo.size = createInfo.size;
+	setupCmd->RecordCopyBuffer(copyInfo,buf,*tmpBuf);
+	context.FlushSetupCommandBuffer();
+	
+	std::vector<uint8_t> bufData;
+	bufData.resize(buf.GetSize());
+	tmpBuf->Read(0,bufData.size(),bufData.data());
+
+	auto *rawData = bufData.data();
+	for(auto i=decltype(numTotal){0u};i<numTotal;++i)
+	{
+		util::ScopeGuard sg {[&rawData,&buf]() {
+			rawData += buf.GetStride();
+		}};
+		auto &data = *reinterpret_cast<LightBufferData*>(rawData);
+		if(!umath::is_flag_set(data.flags,LightBufferData::BufferFlags::TurnedOn))
+			continue;
+		Con::cout<<"Buffer Index: "<<i<<Con::endl;
+		printBufferData(data);
+	}
+
+	Con::cout<<Con::endl;
+	Con::cout<<"Light sources:"<<Con::endl;
 	auto lightId = 0u;
 	for(auto *l : lights)
 	{
@@ -627,30 +715,8 @@ void Console::commands::debug_light_sources(NetworkState *state,pragma::BasePlay
 			Con::cout<<"\tBuffer: NULL"<<Con::endl;
 		else
 		{
-			LightBufferData data;
-			buf->Read(0ull,sizeof(data),&data);
-			std::string type = "Unknown";
-			if((data.flags &LightBufferData::BufferFlags::TypeSpot) != LightBufferData::BufferFlags::None)
-				type = "Spot";
-			else if((data.flags &LightBufferData::BufferFlags::TypePoint) != LightBufferData::BufferFlags::None)
-				type = "Point";
-			else if((data.flags &LightBufferData::BufferFlags::TypeDirectional) != LightBufferData::BufferFlags::None)
-				type = "Directional";
-			Con::cout<<"\t\tPosition: ("<<data.position.x<<","<<data.position.y<<","<<data.position.z<<")"<<Con::endl;
-			Con::cout<<"\t\tShadow Index: "<<data.shadowIndex<<Con::endl;
-			Con::cout<<"\t\tShadow Map Index (static): "<<data.shadowMapIndexStatic<<Con::endl;
-			Con::cout<<"\t\tShadow Map Index (dynamic): "<<data.shadowMapIndexDynamic<<Con::endl;
-			Con::cout<<"\t\tType: "<<type<<Con::endl;
-			Con::cout<<"\t\tColor: ("<<data.color.r<<","<<data.color.g<<","<<data.color.b<<")"<<Con::endl;
-			Con::cout<<"\t\tIntensity (candela): "<<data.intensity<<Con::endl;
-			Con::cout<<"\t\tDirection: ("<<data.direction.x<<","<<data.direction.y<<","<<data.direction.z<<")"<<Con::endl;
-			Con::cout<<"\t\tCone Start Offset: "<<data.direction.w<<Con::endl;
-			Con::cout<<"\t\tDistance: "<<data.position.w<<Con::endl;
-			Con::cout<<"\t\tOuter cutoff angle: "<<umath::rad_to_deg(data.cutoffOuter)<<Con::endl;
-			Con::cout<<"\t\tInner cutoff angle: "<<umath::rad_to_deg(data.cutoffInner)<<Con::endl;
-			Con::cout<<"\t\tAttenuation: "<<data.attenuation<<Con::endl;
-			Con::cout<<"\t\tFlags: "<<umath::to_integral(data.flags)<<Con::endl;
-			Con::cout<<"\t\tTurned On: "<<(((data.flags &LightBufferData::BufferFlags::TurnedOn) == LightBufferData::BufferFlags::TurnedOn) ? "Yes" : "No")<<Con::endl;
+			auto data = getBufferData(*buf);
+			printBufferData(data);
 		}
 		++lightId;
 	}
@@ -713,3 +779,4 @@ void CEOnShadowBufferInitialized::PushArguments(lua_State *l)
 {
 	Lua::Push<std::shared_ptr<Lua::Vulkan::Buffer>>(l,shadowBuffer.shared_from_this());
 }
+#pragma optimize("",on)

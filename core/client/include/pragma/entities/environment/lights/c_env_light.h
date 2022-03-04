@@ -196,15 +196,15 @@ namespace pragma
 		virtual void SetFalloffExponent(float falloffExponent) override;
 
 		// For internal use only!
-		void SetRenderBuffer(const std::shared_ptr<prosper::IBuffer> &renderBuffer);
-		void SetShadowBuffer(const std::shared_ptr<prosper::IBuffer> &renderBuffer);
+		void SetRenderBuffer(const std::shared_ptr<prosper::IBuffer> &renderBuffer,bool freeBuffer=true);
+		void SetShadowBuffer(const std::shared_ptr<prosper::IBuffer> &renderBuffer,bool freeBuffer=true);
 		void UpdateShadowTypes();
 	protected:
 		static std::size_t s_lightCount;
 		void InitializeRenderBuffer();
 		void InitializeShadowBuffer();
-		void DestroyRenderBuffer();
-		void DestroyShadowBuffer();
+		void DestroyRenderBuffer(bool freeBuffer=true);
+		void DestroyShadowBuffer(bool freeBuffer=true);
 		void InitializeLight(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;

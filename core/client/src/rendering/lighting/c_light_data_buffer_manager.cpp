@@ -101,7 +101,7 @@ void LightDataBufferManager::DoInitialize()
 	prosper::DeviceSize maxBufferSize = 0;
 
 	prosper::util::BufferCreateInfo createInfo {};
-	createInfo.usageFlags = prosper::BufferUsageFlags::TransferDstBit;
+	createInfo.usageFlags = prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
 	std::optional<uint64_t> alignment {};
 #if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
 	createInfo.usageFlags |= prosper::BufferUsageFlags::UniformBufferBit;
@@ -119,7 +119,23 @@ void LightDataBufferManager::DoInitialize()
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 #endif
 	createInfo.size = m_maxCount *lightDataSize;
-	m_masterBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo,lightDataSize,createInfo.size,0.05f,nullptr,alignment);
+
+	std::vector<uint8_t> initialLightBufferData {};
+	{
+		auto stride = prosper::util::get_aligned_size(lightDataSize,alignment.has_value() ? *alignment : 0);
+		initialLightBufferData.resize(createInfo.size);
+		LightBufferData initial {};
+		auto *data = initialLightBufferData.data();
+		for(auto i=decltype(m_maxCount){0u};i<m_maxCount;++i)
+		{
+			memcpy(data,&initial,sizeof(initial));
+			data += stride;
+		}
+	}
+
+	m_masterBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(
+		createInfo,lightDataSize,createInfo.size,0.05f,initialLightBufferData.data(),alignment
+	);
 	m_masterBuffer->SetDebugName("light_data_buf");
 
 	m_bufferIndexToLightSource.resize(m_maxCount,nullptr);
@@ -167,9 +183,9 @@ void LightDataBufferManager::Free(const std::shared_ptr<prosper::IBuffer> &rende
 		assert(pLight != nullptr);
 		if(pLight == nullptr)
 			throw std::logic_error("Expected valid light source at light buffer index " +std::to_string(m_highestBufferIndexInUse) +", but none available!");
-		pLight->SetRenderBuffer(renderBuffer);
 		// TODO: We can just copy the buffer data on the GPU instead
 		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer,0ull,pLight->GetBufferData());
+		pLight->SetRenderBuffer(renderBuffer,false);
 
 		m_bufferIndexToLightSource.at(m_highestBufferIndexInUse--) = nullptr;
 		m_bufferIndexToLightSource.at(baseIndex) = pLight;

@@ -9,12 +9,13 @@
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
+#include "pragma/lua/converters/shader_converter_t.hpp"
 #include <pragma/lua/util.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
-
+#pragma optimize("",off)
 void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,pragma::LuaDescriptorSetInfo &descSetInfo)
 {
 	auto *shader = pragma::LuaShaderBase::GetShader(pipelineInfo);
@@ -44,6 +45,7 @@ void Lua::BasePipelineCreateInfo::AttachPushConstantRange(lua_State *l,prosper::
 		return;
 	shader->GetShader().AttachPushConstantRange(pipelineInfo,shader->GetCurrentPipelineIndex(),offset,size,static_cast<prosper::ShaderStageFlags>(shaderStages));
 }
+
 void Lua::shader::push_shader(lua_State *l,prosper::Shader &shader)
 {
 	auto *luaShader = dynamic_cast<pragma::LuaShaderBase*>(&shader);
@@ -60,25 +62,25 @@ void Lua::shader::push_shader(lua_State *l,prosper::Shader &shader)
 					if(dynamic_cast<pragma::ShaderEntity*>(&shader) != nullptr)
 					{
 						if(dynamic_cast<pragma::ShaderGameWorldLightingPass*>(&shader) != nullptr)
-							Lua::Push<pragma::ShaderGameWorldLightingPass*>(l,static_cast<pragma::ShaderGameWorldLightingPass*>(&shader));
+							Lua::PushRaw<pragma::ShaderGameWorldLightingPass*>(l,static_cast<pragma::ShaderGameWorldLightingPass*>(&shader));
 						else
-							Lua::Push<pragma::ShaderEntity*>(l,static_cast<pragma::ShaderEntity*>(&shader));
+							Lua::PushRaw<pragma::ShaderEntity*>(l,static_cast<pragma::ShaderEntity*>(&shader));
 					}
 					else
-						Lua::Push<pragma::ShaderSceneLit*>(l,static_cast<pragma::ShaderSceneLit*>(&shader));
+						Lua::PushRaw<pragma::ShaderSceneLit*>(l,static_cast<pragma::ShaderSceneLit*>(&shader));
 				}
 				else
-					Lua::Push<pragma::ShaderScene*>(l,static_cast<pragma::ShaderScene*>(&shader));
+					Lua::PushRaw<pragma::ShaderScene*>(l,static_cast<pragma::ShaderScene*>(&shader));
 			}
 			else if(dynamic_cast<pragma::ShaderComposeRMA*>(&shader))
-				Lua::Push<pragma::ShaderComposeRMA*>(l,static_cast<pragma::ShaderComposeRMA*>(&shader));
+				Lua::PushRaw<pragma::ShaderComposeRMA*>(l,static_cast<pragma::ShaderComposeRMA*>(&shader));
 			else
-				Lua::Push<prosper::ShaderGraphics*>(l,static_cast<prosper::ShaderGraphics*>(&shader));
+				Lua::PushRaw<prosper::ShaderGraphics*>(l,static_cast<prosper::ShaderGraphics*>(&shader));
 		}
 		else if(shader.IsComputeShader())
-			Lua::Push<prosper::ShaderCompute*>(l,static_cast<prosper::ShaderCompute*>(&shader));
+			Lua::PushRaw<prosper::ShaderCompute*>(l,static_cast<prosper::ShaderCompute*>(&shader));
 		else
-			Lua::Push<prosper::Shader*>(l,&shader);
+			Lua::PushRaw<prosper::Shader*>(l,&shader);
 	}
 }
 void Lua::Shader::CreateDescriptorSetGroup(lua_State *l,prosper::Shader &shader,uint32_t setIdx,uint32_t pipelineIdx)
@@ -199,4 +201,4 @@ void Lua::Shader::SetPipelineCount(lua_State *l,pragma::LuaShaderBase &shader,ui
 {
 	shader.SetPipelineCount(pipelineCount);
 }
-
+#pragma optimize("",on)

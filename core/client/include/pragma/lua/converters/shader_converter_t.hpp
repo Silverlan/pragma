@@ -57,25 +57,25 @@ void luabind::shader_converter<T,TConverter>::to_lua(lua_State* L, T x)
 					if(dynamic_cast<::pragma::ShaderEntity*>(&shader) != nullptr)
 					{
 						if(dynamic_cast<::pragma::ShaderGameWorldLightingPass*>(&shader) != nullptr)
-							Lua::Push<::pragma::ShaderGameWorldLightingPass*>(L,static_cast<::pragma::ShaderGameWorldLightingPass*>(&shader));
+							Lua::PushRaw<::pragma::ShaderGameWorldLightingPass*>(L,static_cast<::pragma::ShaderGameWorldLightingPass*>(&shader));
 						else
-							Lua::Push<::pragma::ShaderEntity*>(L,static_cast<::pragma::ShaderEntity*>(&shader));
+							Lua::PushRaw<::pragma::ShaderEntity*>(L,static_cast<::pragma::ShaderEntity*>(&shader));
 					}
 					else
-						Lua::Push<::pragma::ShaderSceneLit*>(L,static_cast<::pragma::ShaderSceneLit*>(&shader));
+						Lua::PushRaw<::pragma::ShaderSceneLit*>(L,static_cast<::pragma::ShaderSceneLit*>(&shader));
 				}
 				else
-					Lua::Push<::pragma::ShaderScene*>(L,static_cast<::pragma::ShaderScene*>(&shader));
+					Lua::PushRaw<::pragma::ShaderScene*>(L,static_cast<::pragma::ShaderScene*>(&shader));
 			}
 			else if(dynamic_cast<::pragma::ShaderComposeRMA*>(&shader))
-				Lua::Push<::pragma::ShaderComposeRMA*>(L,static_cast<::pragma::ShaderComposeRMA*>(&shader));
+				Lua::PushRaw<::pragma::ShaderComposeRMA*>(L,static_cast<::pragma::ShaderComposeRMA*>(&shader));
 			else
-				Lua::Push<prosper::ShaderGraphics*>(L,static_cast<prosper::ShaderGraphics*>(&shader));
+				Lua::PushRaw<prosper::ShaderGraphics*>(L,static_cast<prosper::ShaderGraphics*>(&shader));
 		}
 		else if(shader.IsComputeShader())
-			Lua::Push<prosper::ShaderCompute*>(L,static_cast<prosper::ShaderCompute*>(&shader));
+			Lua::PushRaw<prosper::ShaderCompute*>(L,static_cast<prosper::ShaderCompute*>(&shader));
 		else
-			Lua::Push<prosper::Shader*>(L,&shader);
+			Lua::PushRaw<prosper::Shader*>(L,&shader);
 	}
 }
 

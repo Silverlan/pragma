@@ -43,7 +43,7 @@ Watt pragma::math::cycles::get_light_power(const CLightComponent &light)
 		return ulighting::cycles::lumen_to_watt_point(lumen,col.ToVector3());
 	auto spotC = ent.GetComponent<CLightSpotComponent>();
 	if(spotC.valid())
-		return ulighting::cycles::lumen_to_watt_spot(lumen,col.ToVector3(),spotC->GetOuterCutoffAngle());
+		return ulighting::cycles::lumen_to_watt_spot(lumen,col.ToVector3(),spotC->GetOuterConeAngle() /2.f);
 	auto envC = ent.GetComponent<CLightDirectionalComponent>();
 	if(envC.expired())
 		return 0.f;

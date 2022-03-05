@@ -319,7 +319,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			if(lightSpotC.valid())
 			{
 				auto coneDir = ent.GetForward();
-				auto coneAngle = umath::deg_to_rad(lightSpotC->GetOuterCutoffAngle());
+				auto coneAngle = umath::deg_to_rad(lightSpotC->GetOuterConeAngle() /2.f);
 				fShouldCull = [&lightOrigin,lightRadius,coneDir,coneAngle](const Vector3 &min,const Vector3 &max) -> bool {
 					if(umath::intersection::aabb_sphere(min,max,lightOrigin,lightRadius) == false)
 						return true;

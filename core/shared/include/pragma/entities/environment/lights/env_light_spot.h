@@ -24,15 +24,12 @@ namespace pragma
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
 		BaseEnvLightSpotComponent(BaseEntity &ent);
 		virtual void Initialize() override;
-		// Changes the half-angle for for outer cone
-		virtual void SetOuterCutoffAngle(umath::Degree ang);
-		// Changes the half-angle for for inner cone
-		virtual void SetInnerCutoffAngle(umath::Degree ang);
 
-		// The half-angle for for outer cone
-		umath::Degree GetOuterCutoffAngle() const;
-		// The half-angle for for inner cone
-		umath::Degree GetInnerCutoffAngle() const;
+		virtual void SetOuterConeAngle(umath::Degree ang);
+		umath::Degree GetOuterConeAngle() const;
+
+		umath::Fraction GetBlendFraction() const;
+		virtual void SetBlendFraction(umath::Fraction fraction);
 
 		virtual void SetConeStartOffset(float offset);
 		float GetConeStartOffset() const;
@@ -40,8 +37,8 @@ namespace pragma
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 	protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
-		util::PFloatProperty m_angInnerCutoff = nullptr;
-		util::PFloatProperty m_angOuterCutoff = nullptr;
+		util::PFloatProperty m_blendFraction = nullptr;
+		util::PFloatProperty m_outerConeAngle = nullptr;
 		util::PFloatProperty m_coneStartOffset = nullptr;
 		pragma::NetEventId m_netEvSetConeStartOffset = pragma::INVALID_NET_EVENT;
 	};

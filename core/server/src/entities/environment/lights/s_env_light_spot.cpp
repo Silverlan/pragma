@@ -21,8 +21,8 @@ LINK_ENTITY_TO_CLASS(env_light_spot,EnvLightSpot);
 
 void SLightSpotComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
-	packet->Write<float>(*m_angOuterCutoff);
-	packet->Write<float>(*m_angInnerCutoff);
+	packet->Write<float>(*m_outerConeAngle);
+	packet->Write<float>(*m_blendFraction);
 	packet->Write<float>(*m_coneStartOffset);
 }
 
@@ -34,9 +34,9 @@ void SLightSpotComponent::SetConeStartOffset(float offset)
 	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetConeStartOffset,p,pragma::networking::Protocol::SlowReliable);
 }
 
-void SLightSpotComponent::SetOuterCutoffAngle(float ang)
+void SLightSpotComponent::SetOuterConeAngle(float ang)
 {
-	BaseEnvLightSpotComponent::SetOuterCutoffAngle(ang);
+	BaseEnvLightSpotComponent::SetOuterConeAngle(ang);
 	auto &ent = GetEntity();
 	if(!ent.IsSpawned())
 		return;
@@ -46,9 +46,9 @@ void SLightSpotComponent::SetOuterCutoffAngle(float ang)
 	server->SendPacket("env_light_spot_outercutoff_angle",p,pragma::networking::Protocol::SlowReliable);
 }
 
-void SLightSpotComponent::SetInnerCutoffAngle(float ang)
+void SLightSpotComponent::SetBlendFraction(float ang)
 {
-	BaseEnvLightSpotComponent::SetInnerCutoffAngle(ang);
+	BaseEnvLightSpotComponent::SetBlendFraction(ang);
 	auto &ent = GetEntity();
 	if(!ent.IsSpawned())
 		return;

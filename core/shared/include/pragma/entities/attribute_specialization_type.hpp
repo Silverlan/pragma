@@ -22,6 +22,7 @@ namespace pragma
 		Directory,
 		Plane,
 		Normal,
+		Fraction,
 
 		Custom,
 

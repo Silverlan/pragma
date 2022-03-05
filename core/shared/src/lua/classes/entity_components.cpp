@@ -1254,10 +1254,10 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	{
 		auto def = Lua::create_base_entity_component_class<pragma::BaseEnvLightSpotComponent>("BaseEnvLightSpotComponent");
 	util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
-		def.def("SetOuterCutoffAngle",&pragma::BaseEnvLightSpotComponent::SetOuterCutoffAngle);
-		def.def("GetOuterCutoffAngle",&pragma::BaseEnvLightSpotComponent::GetOuterCutoffAngle);
-		def.def("SetInnerCutoffAngle",&pragma::BaseEnvLightSpotComponent::SetInnerCutoffAngle);
-		def.def("GetInnerCutoffAngle",&pragma::BaseEnvLightSpotComponent::GetInnerCutoffAngle);
+		def.def("SetOuterConeAngle",&pragma::BaseEnvLightSpotComponent::SetOuterConeAngle);
+		def.def("GetOuterConeAngle",&pragma::BaseEnvLightSpotComponent::GetOuterConeAngle);
+		def.def("SetBlendFraction",&pragma::BaseEnvLightSpotComponent::SetBlendFraction);
+		def.def("GetBlendFraction",&pragma::BaseEnvLightSpotComponent::GetBlendFraction);
 	}
 #include "pragma/entities/environment/lights/env_light_point.h"
 	void pragma::lua::base_env_light_point_component::register_class(luabind::module_ &mod)

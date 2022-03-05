@@ -37,8 +37,8 @@ namespace pragma
 		uint32_t sceneFlags = 0u;
 		uint32_t shadowIndex = 0u;
 
-		umath::Radian cutoffOuter = 0.f;
-		umath::Radian cutoffInner = 0.f;
+		umath::Radian outerConeHalfAngle = 0.f;
+		umath::Radian innerConeHalfAngle = 0.f;
 		float attenuation = 0.f;
 		BufferFlags flags = BufferFlags::None;
 		uint32_t shadowMapIndexStatic = 0u;

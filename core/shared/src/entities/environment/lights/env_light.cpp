@@ -183,7 +183,7 @@ void BaseEnvLightComponent::SetLightIntensity(float intensity,LightIntensityType
 }
 void BaseEnvLightComponent::SetLightIntensity(float intensity) {SetLightIntensity(intensity,GetLightIntensityType());}
 float BaseEnvLightComponent::GetLightIntensity() const {return m_lightIntensity;}
-Candela BaseEnvLightComponent::GetLightIntensityCandela(float intensity,LightIntensityType type,std::optional<float> outerCutoffAngle)
+Candela BaseEnvLightComponent::GetLightIntensityCandela(float intensity,LightIntensityType type,std::optional<float> outerConeAngle)
 {
 	switch(type)
 	{
@@ -191,8 +191,8 @@ Candela BaseEnvLightComponent::GetLightIntensityCandela(float intensity,LightInt
 		return intensity;
 	case LightIntensityType::Lumen:
 	{
-		auto angle = outerCutoffAngle.has_value() ? *outerCutoffAngle : 180.f; // Note: This is the HALF-angle, so we use 180 degree for point-lights
-		return ulighting::lumens_to_candela(intensity,umath::cos(umath::deg_to_rad(angle)));
+		auto angle = outerConeAngle.has_value() ? *outerConeAngle : 360.f;
+		return ulighting::lumens_to_candela(intensity,umath::cos(umath::deg_to_rad(angle /2.f)));
 	}
 	case LightIntensityType::Lux:
 		// TODO
@@ -200,7 +200,7 @@ Candela BaseEnvLightComponent::GetLightIntensityCandela(float intensity,LightInt
 	}
 	return intensity;
 }
-Lumen BaseEnvLightComponent::GetLightIntensityLumen(float intensity,LightIntensityType type,std::optional<float> outerCutoffAngle)
+Lumen BaseEnvLightComponent::GetLightIntensityLumen(float intensity,LightIntensityType type,std::optional<float> outerConeAngle)
 {
 	switch(type)
 	{
@@ -208,8 +208,8 @@ Lumen BaseEnvLightComponent::GetLightIntensityLumen(float intensity,LightIntensi
 		return intensity;
 	case LightIntensityType::Candela:
 	{
-		auto angle = outerCutoffAngle.has_value() ? *outerCutoffAngle : 180.f; // Note: This is the HALF-angle, so we use 180 degree for point-lights
-		return ulighting::candela_to_lumens(intensity,umath::cos(umath::deg_to_rad(angle)));
+		auto angle = outerConeAngle.has_value() ? *outerConeAngle : 360.f;
+		return ulighting::candela_to_lumens(intensity,umath::cos(umath::deg_to_rad(angle /2.f)));
 	}
 	case LightIntensityType::Lux:
 		// TODO
@@ -220,13 +220,13 @@ Lumen BaseEnvLightComponent::GetLightIntensityLumen(float intensity,LightIntensi
 Candela BaseEnvLightComponent::GetLightIntensityCandela() const
 {
 	auto *spotLightC = static_cast<BaseEnvLightSpotComponent*>(GetEntity().FindComponent("light_spot").get());
-	auto angle = spotLightC ? spotLightC->GetOuterCutoffAngle() : 180.f; // Note: This is the HALF-angle, so we use 180 degree for point-lights
+	auto angle = spotLightC ? spotLightC->GetOuterConeAngle() : 360.f;
 	return GetLightIntensityCandela(GetLightIntensity(),GetLightIntensityType(),angle);
 }
 Lumen BaseEnvLightComponent::GetLightIntensityLumen() const
 {
 	auto *spotLightC = static_cast<BaseEnvLightSpotComponent*>(GetEntity().FindComponent("light_spot").get());
-	auto angle = spotLightC ? spotLightC->GetOuterCutoffAngle() : 180.f; // Note: This is the HALF-angle, so we use 180 degree for point-lights
+	auto angle = spotLightC ? spotLightC->GetOuterConeAngle() : 360.f;
 	return GetLightIntensityLumen(GetLightIntensity(),GetLightIntensityType(),angle);
 }
 BaseEnvLightComponent::ShadowType BaseEnvLightComponent::GetShadowType() const {return m_shadowType;}

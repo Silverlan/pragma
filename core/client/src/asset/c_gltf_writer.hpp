@@ -53,8 +53,8 @@ namespace pragma::asset
 			umath::Transform pose {};
 
 			// Spot lights
-			umath::Degree innerConeAngle = 0.f;
-			umath::Degree outerConeAngle = 45.f;
+			umath::Fraction blendFraction = 0.f;
+			umath::Degree outerConeAngle = 90.f;
 		};
 		struct Camera
 		{

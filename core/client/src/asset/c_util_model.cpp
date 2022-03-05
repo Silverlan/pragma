@@ -1394,8 +1394,8 @@ bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo 
 			if(spotC.valid())
 			{
 				lightScene.type = pragma::asset::GLTFWriter::LightSource::Type::Spot;
-				lightScene.innerConeAngle = spotC->GetInnerCutoffAngle();
-				lightScene.outerConeAngle = spotC->GetOuterCutoffAngle();
+				lightScene.blendFraction = spotC->GetBlendFraction();
+				lightScene.outerConeAngle = spotC->GetOuterConeAngle();
 			}
 
 			auto pointC = ent.GetComponent<CLightPointComponent>();
@@ -1468,9 +1468,9 @@ bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo 
 			{
 				ls.type = pragma::asset::GLTFWriter::LightSource::Type::Spot;
 
-				auto innerCutoff = ent->GetKeyValue("innercutoff");
-				if(innerCutoff.has_value())
-					ls.innerConeAngle = util::to_float(*innerCutoff);
+				auto blendFraction = ent->GetKeyValue("blendfraction");
+				if(blendFraction.has_value())
+					ls.blendFraction = util::to_float(*blendFraction);
 
 				auto outerCutoff = ent->GetKeyValue("outercutoff");
 				if(outerCutoff.has_value())

@@ -20,8 +20,8 @@ namespace pragma
 	public:
 		SLightSpotComponent(BaseEntity &ent) : BaseEnvLightSpotComponent(ent) {}
 		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual void SetOuterCutoffAngle(float ang) override;
-		virtual void SetInnerCutoffAngle(float ang) override;
+		virtual void SetOuterConeAngle(float ang) override;
+		virtual void SetBlendFraction(float fraction) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void SetConeStartOffset(float offset) override;

@@ -245,22 +245,26 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		luabind::def("watts_to_lumens",static_cast<Watt(*)(Lumen)>([](Watt watt) -> Lumen {return ulighting::watts_to_lumens(watt);})),
 		luabind::def("irradiance_to_lux",ulighting::irradiance_to_lux),
 		luabind::def("lux_to_irradiance",ulighting::lux_to_irradiance),
-		luabind::def("convert_light_intensity",static_cast<float(*)(float,pragma::BaseEnvLightComponent::LightIntensityType,pragma::BaseEnvLightComponent::LightIntensityType,float)>([](float intensity,pragma::BaseEnvLightComponent::LightIntensityType srcType,pragma::BaseEnvLightComponent::LightIntensityType dstType,float cutoffAngle) -> float {
+		luabind::def("convert_light_intensity",+[](
+			float intensity,pragma::BaseEnvLightComponent::LightIntensityType srcType,pragma::BaseEnvLightComponent::LightIntensityType dstType,float coneAngle
+		) -> float {
 			auto result = 0.f;
 			switch(dstType)
 			{
 			case pragma::BaseEnvLightComponent::LightIntensityType::Candela:
-				result = pragma::BaseEnvLightComponent::GetLightIntensityCandela(intensity,srcType,cutoffAngle);
+				result = pragma::BaseEnvLightComponent::GetLightIntensityCandela(intensity,srcType,coneAngle);
 				break;
 			case pragma::BaseEnvLightComponent::LightIntensityType::Lumen:
-				result = pragma::BaseEnvLightComponent::GetLightIntensityLumen(intensity,srcType,cutoffAngle);
+				result = pragma::BaseEnvLightComponent::GetLightIntensityLumen(intensity,srcType,coneAngle);
 				break;
 			default:
 				break;
 			}
 			return result;
-		})),
-		luabind::def("convert_light_intensity",static_cast<float(*)(float,pragma::BaseEnvLightComponent::LightIntensityType,pragma::BaseEnvLightComponent::LightIntensityType)>([](float intensity,pragma::BaseEnvLightComponent::LightIntensityType srcType,pragma::BaseEnvLightComponent::LightIntensityType dstType) -> float {
+		}),
+		luabind::def("convert_light_intensity",+[](
+			float intensity,pragma::BaseEnvLightComponent::LightIntensityType srcType,pragma::BaseEnvLightComponent::LightIntensityType dstType
+		) -> float {
 			auto result = 0.f;
 			switch(dstType)
 			{
@@ -274,7 +278,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 				break;
 			}
 			return result;
-		}))
+		})
 	];
 
 	Lua::RegisterLibraryEnums(lua.GetState(),"light",{

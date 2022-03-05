@@ -742,21 +742,23 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 		{
 			auto &lightSource = m_sceneDesc.lightSources.at(i);
 			auto outerConeAngle = lightSource.outerConeAngle;
+			auto blendFraction = lightSource.blendFraction;
+			auto innerConeAngle = 1.f -blendFraction *outerConeAngle;
 			if(lightSource.type == LightSource::Type::Spot)
 			{
-				if(outerConeAngle <= lightSource.innerConeAngle)
+				if(outerConeAngle <= innerConeAngle)
 				{
-					if(lightSource.innerConeAngle <= 0.f)
+					if(innerConeAngle <= 0.f)
 					{
 						Con::cwar<<"WARNING Spot light has cone angle of 0! Skipping..."<<Con::endl;
 						continue;
 					}
 					Con::cwar<<"WARNING Spot light has outer cone angle of "<<
-						outerConeAngle<<", which is smaller or equal to inner cone angle of "<<lightSource.innerConeAngle<<
+						outerConeAngle<<", which is smaller or equal to inner cone angle of "<<innerConeAngle<<
 						"! This is not allowed! Clamping..."<<Con::endl;
-					outerConeAngle = lightSource.innerConeAngle;
-					lightSource.innerConeAngle = umath::max(lightSource.innerConeAngle -10.f,0.1f);
-					if(outerConeAngle <= lightSource.innerConeAngle)
+					outerConeAngle = innerConeAngle;
+					innerConeAngle = umath::max(innerConeAngle -10.f,0.1f);
+					if(outerConeAngle <= innerConeAngle)
 					{
 						Con::cwar<<"WARNING Spot light has cone angle of near 0! Skipping..."<<Con::endl;
 						continue;
@@ -821,7 +823,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 			if(lightSource.type == LightSource::Type::Spot)
 			{
 				light["spot"] = tinygltf::Value{tinygltf::Value::Object{
-					{"innerConeAngle",tinygltf::Value{umath::deg_to_rad(lightSource.innerConeAngle)}},
+					{"innerConeAngle",tinygltf::Value{umath::deg_to_rad(innerConeAngle)}},
 					{"outerConeAngle",tinygltf::Value{umath::deg_to_rad(outerConeAngle)}}
 				}};
 			}

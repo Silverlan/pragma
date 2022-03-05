@@ -926,7 +926,7 @@ DLLCLIENT void NET_cl_env_light_spot_outercutoff_angle(NetPacket packet)
 	if(pLightSpotComponent.expired())
 		return;
 	float cutoffAngle = packet->Read<float>();
-	pLightSpotComponent->SetOuterCutoffAngle(cutoffAngle);
+	pLightSpotComponent->SetOuterConeAngle(cutoffAngle);
 }
 
 DLLCLIENT void NET_cl_env_light_spot_innercutoff_angle(NetPacket packet)
@@ -935,8 +935,8 @@ DLLCLIENT void NET_cl_env_light_spot_innercutoff_angle(NetPacket packet)
 	auto pLightSpotComponent = (light != nullptr) ? light->GetComponent<pragma::CLightSpotComponent>() : pragma::ComponentHandle<pragma::CLightSpotComponent>();
 	if(pLightSpotComponent.expired())
 		return;
-	float cutoffAngle = packet->Read<float>();
-	pLightSpotComponent->SetInnerCutoffAngle(cutoffAngle);
+	float blendFraction = packet->Read<float>();
+	pLightSpotComponent->SetBlendFraction(blendFraction);
 }
 
 DLLCLIENT void NET_cl_envlight_setstate(NetPacket packet)

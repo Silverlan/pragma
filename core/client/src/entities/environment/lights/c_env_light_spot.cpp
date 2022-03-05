@@ -26,6 +26,10 @@ LINK_ENTITY_TO_CLASS(env_light_spot,CEnvLightSpot);
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
+umath::Degree CLightSpotComponent::CalcInnerConeAngle(umath::Degree outerConeAngle,float blendFraction)
+{
+	return outerConeAngle *umath::clamp(1.f -blendFraction,0.f,1.f);
+}
 CLightSpotComponent::CLightSpotComponent(BaseEntity &ent)
 	: BaseEnvLightSpotComponent(ent)
 {}
@@ -45,27 +49,21 @@ void CLightSpotComponent::Initialize()
 		SetShadowDirty();
 		UpdateProjectionMatrix();
 	});
-	m_angInnerCutoff->AddCallback([this](std::reference_wrapper<const float> oldAng,std::reference_wrapper<const float> newAng) {
-		auto pLightComponent = GetEntity().GetComponent<CLightComponent>();
-		if(pLightComponent.expired())
-			return;
-		auto &bufferData = pLightComponent->GetBufferData();
-		bufferData.cutoffInner = static_cast<umath::Radian>(umath::deg_to_rad(newAng.get()));
-		auto &renderBuffer = pLightComponent->GetRenderBuffer();
-		if(renderBuffer != nullptr)
-			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,cutoffInner),bufferData.cutoffInner);
+	m_blendFraction->AddCallback([this](std::reference_wrapper<const float> oldFraction,std::reference_wrapper<const float> newFraction) {
+		UpdateInnerConeAngle();
 	});
-	m_angOuterCutoff->AddCallback([this](std::reference_wrapper<const float> oldAng,std::reference_wrapper<const float> newAng) {
+	m_outerConeAngle->AddCallback([this](std::reference_wrapper<const float> oldAng,std::reference_wrapper<const float> newAng) {
 		SetShadowDirty();
 		UpdateProjectionMatrix();
 		auto pLightComponent = GetEntity().GetComponent<CLightComponent>();
 		if(pLightComponent.expired())
 			return;
 		auto &bufferData = pLightComponent->GetBufferData();
-		bufferData.cutoffOuter = static_cast<umath::Radian>(umath::deg_to_rad(newAng.get()));
+		bufferData.outerConeHalfAngle = static_cast<umath::Radian>(umath::deg_to_rad(newAng.get() /2.f));
 		auto &renderBuffer = pLightComponent->GetRenderBuffer();
 		if(renderBuffer != nullptr)
-			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,cutoffOuter),bufferData.cutoffOuter);
+			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,outerConeHalfAngle),bufferData.outerConeHalfAngle);
+		UpdateInnerConeAngle();
 
 		if(pLightComponent->GetLightIntensityType() == CBaseLightComponent::LightIntensityType::Lumen)
 		{
@@ -78,6 +76,17 @@ void CLightSpotComponent::Initialize()
 	auto pLightComponent = GetEntity().GetComponent<CLightComponent>();
 	if(pLightComponent.valid())
 		pLightComponent->UpdateTransformationMatrix(GetBiasTransformationMatrix(),GetViewMatrix(),GetProjectionMatrix());
+}
+void CLightSpotComponent::UpdateInnerConeAngle()
+{
+	auto pLightComponent = GetEntity().GetComponent<CLightComponent>();
+	if(pLightComponent.expired())
+		return;
+	auto &bufferData = pLightComponent->GetBufferData();
+	bufferData.innerConeHalfAngle = umath::deg_to_rad(CalcInnerConeAngle(GetOuterConeAngle(),GetBlendFraction()) /2.f);
+	auto &renderBuffer = pLightComponent->GetRenderBuffer();
+	if(renderBuffer != nullptr)
+		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,innerConeHalfAngle),bufferData.innerConeHalfAngle);
 }
 Bool CLightSpotComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
 {
@@ -127,8 +136,8 @@ void CLightSpotComponent::UpdateViewMatrices()
 }
 void CLightSpotComponent::ReceiveData(NetPacket &packet)
 {
-	*m_angOuterCutoff = packet->Read<float>();
-	*m_angInnerCutoff = packet->Read<float>();
+	*m_outerConeAngle = packet->Read<float>();
+	*m_blendFraction = packet->Read<float>();
 	auto coneStartOffset = packet->Read<float>();
 	SetConeStartOffset(coneStartOffset);
 }
@@ -168,7 +177,7 @@ void CLightSpotComponent::UpdateProjectionMatrix()
 	};*/
 	//auto p = glm::perspective<float>(CFloat(umath::deg_to_rad(m_angOuterCutoff *2.f)),1.f,1.f,m_distance);
 	auto pRadiusComponent = GetEntity().GetComponent<CRadiusComponent>();
-	auto p = glm::perspectiveRH<float>(CFloat(umath::deg_to_rad(GetOuterCutoffAngle() *2.f)),1.f,2.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
+	auto p = glm::perspectiveRH<float>(CFloat(umath::deg_to_rad(GetOuterConeAngle())),1.f,2.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
 	//p = transform *p;
 	p = glm::scale(p,scale); /* Shadow TODO */
 	SetProjectionMatrix(p);

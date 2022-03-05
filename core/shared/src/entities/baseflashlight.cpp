@@ -26,8 +26,8 @@ void BaseFlashlightComponent::Initialize()
 
 	if(pLightSpotComponent != nullptr)
 	{
-		pLightSpotComponent->SetInnerCutoffAngle(15.f);
-		pLightSpotComponent->SetOuterCutoffAngle(25.f);
+		pLightSpotComponent->SetBlendFraction(0.4f);
+		pLightSpotComponent->SetOuterConeAngle(50.f);
 	}
 	if(pRadiusComponent != nullptr)
 		pRadiusComponent->SetRadius(512.f);

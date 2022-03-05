@@ -49,8 +49,8 @@ namespace pragma
 		};
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
 		static std::string LightIntensityTypeToString(LightIntensityType type);
-		static Candela GetLightIntensityCandela(float intensity,LightIntensityType type,std::optional<float> outerCutoffAngle={});
-		static Lumen GetLightIntensityLumen(float intensity,LightIntensityType type,std::optional<float> outerCutoffAngle={});
+		static Candela GetLightIntensityCandela(float intensity,LightIntensityType type,std::optional<float> outerConeAngle={});
+		static Lumen GetLightIntensityLumen(float intensity,LightIntensityType type,std::optional<float> outerConeAngle={});
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;

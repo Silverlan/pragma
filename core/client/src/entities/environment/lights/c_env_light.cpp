@@ -671,8 +671,8 @@ void Console::commands::debug_light_sources(NetworkState *state,pragma::BasePlay
 		Con::cout<<"\t\tDirection: ("<<data.direction.x<<","<<data.direction.y<<","<<data.direction.z<<")"<<Con::endl;
 		Con::cout<<"\t\tCone Start Offset: "<<data.direction.w<<Con::endl;
 		Con::cout<<"\t\tDistance: "<<data.position.w<<Con::endl;
-		Con::cout<<"\t\tOuter cutoff angle: "<<umath::rad_to_deg(data.cutoffOuter)<<Con::endl;
-		Con::cout<<"\t\tInner cutoff angle: "<<umath::rad_to_deg(data.cutoffInner)<<Con::endl;
+		Con::cout<<"\t\tOuter cone half-angle: "<<umath::rad_to_deg(data.outerConeHalfAngle)<<Con::endl;
+		Con::cout<<"\t\tInner cone half-angle: "<<umath::rad_to_deg(data.innerConeHalfAngle)<<Con::endl;
 		Con::cout<<"\t\tAttenuation: "<<data.attenuation<<Con::endl;
 		Con::cout<<"\t\tFlags: "<<umath::to_integral(data.flags)<<Con::endl;
 		Con::cout<<"\t\tTurned On: "<<(((data.flags &LightBufferData::BufferFlags::TurnedOn) == LightBufferData::BufferFlags::TurnedOn) ? "Yes" : "No")<<Con::endl;

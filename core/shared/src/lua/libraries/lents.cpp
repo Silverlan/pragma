@@ -327,7 +327,8 @@ void Lua::ents::register_library(lua_State *l)
 	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_DIRECTORY",umath::to_integral(pragma::AttributeSpecializationType::Directory));
 	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_PLANE",umath::to_integral(pragma::AttributeSpecializationType::Plane));
 	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_NORMAL",umath::to_integral(pragma::AttributeSpecializationType::Normal));
-	static_assert(umath::to_integral(pragma::AttributeSpecializationType::Count) == 10u);
+	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_FRACTION",umath::to_integral(pragma::AttributeSpecializationType::Fraction));
+	static_assert(umath::to_integral(pragma::AttributeSpecializationType::Count) == 11u);
 	componentInfoDef.scope[memberInfoDef];
 
 	entsMod[componentInfoDef];

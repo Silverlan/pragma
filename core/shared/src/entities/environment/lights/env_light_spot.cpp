@@ -21,46 +21,27 @@ void BaseEnvLightSpotComponent::RegisterMembers(pragma::EntityComponentManager &
 {
 	using T = BaseEnvLightSpotComponent;
 
+	{
+		using TBlend = float;
+		auto memberInfo = create_component_member_info<
+			T,TBlend,
+			static_cast<void(T::*)(TBlend)>(&T::SetBlendFraction),
+			static_cast<TBlend(T::*)() const>(&T::GetBlendFraction)
+		>("blendFraction",0.1f,AttributeSpecializationType::Fraction);
+		memberInfo.SetMin(0.f);
+		memberInfo.SetMax(1.f);
+		registerMember(std::move(memberInfo));
+	}
+	
 	using TConeAngle = float;
 	{
 		auto memberInfo = create_component_member_info<
 			T,TConeAngle,
-			static_cast<void(T::*)(TConeAngle)>(&T::SetInnerCutoffAngle),
-			static_cast<TConeAngle(T::*)() const>(&T::GetInnerCutoffAngle)
-		>("innerConeAngle",0.f,AttributeSpecializationType::Angle);
-		memberInfo.SetMin(0.f);
-		memberInfo.SetMax(179.99f);
-		memberInfo.updateDependenciesFunction = [](BaseEntityComponent &component,std::vector<std::string> &outAffectedProps) {
-			auto &c = static_cast<T&>(component);
-			auto outerAngle = c.GetOuterCutoffAngle();
-			auto innerAngle = c.GetInnerCutoffAngle();
-			if(innerAngle >= outerAngle)
-			{
-				c.SetOuterCutoffAngle(innerAngle +0.01f);
-				outAffectedProps.push_back("outerConeAngle");
-			}
-		};
-		registerMember(std::move(memberInfo));
-	}
-
-	{
-		auto memberInfo = create_component_member_info<
-			T,TConeAngle,
-			static_cast<void(T::*)(TConeAngle)>(&T::SetOuterCutoffAngle),
-			static_cast<TConeAngle(T::*)() const>(&T::GetOuterCutoffAngle)
+			static_cast<void(T::*)(TConeAngle)>(&T::SetOuterConeAngle),
+			static_cast<TConeAngle(T::*)() const>(&T::GetOuterConeAngle)
 		>("outerConeAngle",0.f,AttributeSpecializationType::Angle);
 		memberInfo.SetMin(0.f);
 		memberInfo.SetMax(179.99f);
-		memberInfo.updateDependenciesFunction = [](BaseEntityComponent &component,std::vector<std::string> &outAffectedProps) {
-			auto &c = static_cast<T&>(component);
-			auto outerAngle = c.GetOuterCutoffAngle();
-			auto innerAngle = c.GetInnerCutoffAngle();
-			if(outerAngle < innerAngle)
-			{
-				c.SetInnerCutoffAngle(outerAngle -0.01f);
-				outAffectedProps.push_back("innerConeAngle");
-			}
-		};
 		registerMember(std::move(memberInfo));
 	}
 
@@ -75,8 +56,8 @@ void BaseEnvLightSpotComponent::RegisterMembers(pragma::EntityComponentManager &
 	}
 }
 BaseEnvLightSpotComponent::BaseEnvLightSpotComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent),m_angInnerCutoff(util::FloatProperty::Create(0.f)),
-	m_angOuterCutoff(util::FloatProperty::Create(0.f)),m_coneStartOffset(util::FloatProperty::Create(0.f))
+	: BaseEntityComponent(ent),m_blendFraction(util::FloatProperty::Create(0.1f)),
+	m_outerConeAngle(util::FloatProperty::Create(0.f)),m_coneStartOffset(util::FloatProperty::Create(0.f))
 {}
 void BaseEnvLightSpotComponent::Initialize()
 {
@@ -84,10 +65,12 @@ void BaseEnvLightSpotComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"outercutoff",false))
-			*m_angOuterCutoff = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"innercutoff",false))
-			*m_angInnerCutoff = util::to_float(kvData.value);
+		if(ustring::compare<std::string>(kvData.key,"outerconeangle",false))
+			*m_outerConeAngle = util::to_float(kvData.value);
+		else if(ustring::compare<std::string>(kvData.key,"outercutoff",false))
+			*m_outerConeAngle = util::to_float(kvData.value) *2.f;
+		else if(ustring::compare<std::string>(kvData.key,"blendfraction",false))
+			*m_blendFraction = util::to_float(kvData.value);
 		else if(ustring::compare<std::string>(kvData.key,"cone_start_offset",false))
 			SetConeStartOffset(util::to_float(kvData.value));
 		else
@@ -105,22 +88,22 @@ void BaseEnvLightSpotComponent::Initialize()
 void BaseEnvLightSpotComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
-	udm["innerConeAngle"] = **m_angInnerCutoff;
-	udm["outerConeAngle"] = **m_angOuterCutoff;
+	udm["blendFraction"] = **m_blendFraction;
+	udm["outerConeAngle"] = **m_outerConeAngle;
 	udm["coneStartOffset"] = **m_coneStartOffset;
 }
 void BaseEnvLightSpotComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
-	udm["innerConeAngle"](**m_angInnerCutoff);
-	udm["outerConeAngle"](**m_angOuterCutoff);
+	udm["blendFraction"](**m_blendFraction);
+	udm["outerConeAngle"](**m_outerConeAngle);
 	udm["coneStartOffset"](**m_coneStartOffset);
 }
 
-void BaseEnvLightSpotComponent::SetOuterCutoffAngle(umath::Degree ang) {*m_angOuterCutoff = ang;}
-umath::Degree BaseEnvLightSpotComponent::GetOuterCutoffAngle() const {return *m_angOuterCutoff;}
-void BaseEnvLightSpotComponent::SetInnerCutoffAngle(umath::Degree ang) {*m_angInnerCutoff = ang;}
-umath::Degree BaseEnvLightSpotComponent::GetInnerCutoffAngle() const {return *m_angInnerCutoff;}
+void BaseEnvLightSpotComponent::SetOuterConeAngle(umath::Degree ang) {*m_outerConeAngle = ang;}
+umath::Degree BaseEnvLightSpotComponent::GetOuterConeAngle() const {return *m_outerConeAngle;}
+umath::Fraction BaseEnvLightSpotComponent::GetBlendFraction() const {return *m_blendFraction;}
+void BaseEnvLightSpotComponent::SetBlendFraction(umath::Fraction fraction) {*m_blendFraction = fraction;}
 
 void BaseEnvLightSpotComponent::SetConeStartOffset(float offset) {*m_coneStartOffset = offset;}
 float BaseEnvLightSpotComponent::GetConeStartOffset() const {return *m_coneStartOffset;}

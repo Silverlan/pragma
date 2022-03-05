@@ -360,6 +360,7 @@ void BaseModelComponent::SetModel(const std::shared_ptr<Model> &mdl)
 		memberInfo.SetName("bodyGroup/" +bg.name);
 		memberInfo.type = ents::EntityMemberType::UInt32;
 		memberInfo.userIndex = idx++;
+		memberInfo.SetMax(bg.meshGroups.size());
 		using TValue = uint32_t;
 		using TComponent = BaseModelComponent;
 		memberInfo.SetGetterFunction<TComponent,TValue,static_cast<void(*)(const pragma::ComponentMemberInfo&,TComponent&,TValue&)>(

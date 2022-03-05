@@ -56,7 +56,7 @@ void Lua::ents::register_library(lua_State *l)
 		luabind::def("get_world",get_world),
 		luabind::def("get_by_index",get_by_index),
 		luabind::def("get_by_local_index",get_by_local_index),
-		luabind::def("find_by_unique_index",find_by_unique_index),
+		luabind::def("find_by_uuid",find_by_unique_index),
 		luabind::def("get_null",get_null),
 		luabind::def("find_by_filter",find_by_filter),
 		luabind::def("find_by_class",find_by_class),

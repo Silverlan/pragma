@@ -38,7 +38,7 @@ REGISTER_ENGINE_CONCOMMAND(clear_cache,[](NetworkState*,pragma::BasePlayerCompon
 	engine->ClearCache();
 },ConVarFlags::None,"Deletes all cache files.");
 REGISTER_ENGINE_CONVAR(cache_version,"",ConVarFlags::Archive,"The engine version that the cache files are associated with. If this version doesn't match the current engine version, the cache will be cleared.");
-REGISTER_ENGINE_CONVAR(cache_version_target,"4",ConVarFlags::None,"If cache_version does not match this value, the cache files will be cleared and it will be set to it.");
+REGISTER_ENGINE_CONVAR(cache_version_target,"5",ConVarFlags::None,"If cache_version does not match this value, the cache files will be cleared and it will be set to it.");
 REGISTER_ENGINE_CONVAR(log_enabled,"0",ConVarFlags::Archive,"0 = Log disabled; 1 = Log errors only; 2 = Log errors and warnings; 3 = Log all console output");
 REGISTER_ENGINE_CONVAR(log_file,"log.txt",ConVarFlags::Archive,"The log-file the console output will be logged to.");
 REGISTER_ENGINE_CONVAR(debug_profiling_enabled,"0",ConVarFlags::None,"Enables profiling timers.");

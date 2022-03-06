@@ -45,7 +45,7 @@ void BaseFlexComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 		auto lname = name;
 		ustring::to_lower(lname);
 		auto memberInfo = pragma::ComponentMemberInfo::CreateDummy();
-		memberInfo.SetName(lname);
+		memberInfo.SetName("flexController/" +lname);
 		memberInfo.type = ents::EntityMemberType::Float;
 		memberInfo.SetMin(flexController.min);
 		memberInfo.SetMax(flexController.max);

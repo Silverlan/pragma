@@ -70,6 +70,7 @@ function gui.WIContextMenu:OnInitialize()
 	end)
 	self.m_contents = contents
 end
+function gui.WIContextMenu:IsPopulated() return self:GetItemCount() > 0 end
 function gui.WIContextMenu:IsCursorInMenuBounds()
 	if(self:IsCursorInBounds() == true) then return true end
 	for _,subMenu in ipairs(self.m_subMenues) do

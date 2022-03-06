@@ -269,9 +269,17 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 		hPanel.SetParentAndUpdateWindow(&hParent,index);
 	});
 	classDef.def("ClearParent",&ClearParent);
-	classDef.def("GetChildren",static_cast<std::vector<WIHandle>(*)(lua_State*,::WIBase&)>([](lua_State *l,::WIBase &hPanel) {
-		return *hPanel.GetChildren();
-	}));
+	classDef.def("GetChildren",+[](lua_State *l,::WIBase &hPanel) -> luabind::tableT<::WIBase> {
+		auto &children = *hPanel.GetChildren();
+		auto t = luabind::newtable(l);
+		for(uint32_t idx = 1; auto &hChild : children)
+		{
+			if(hChild.expired())
+				continue;
+			t[idx++] = hChild;
+		}
+		return t;
+	});
 	classDef.def("GetChildren",static_cast<void(*)(lua_State*,::WIBase&,std::string)>(&GetChildren));
 	classDef.def("GetFirstChild",&::WIBase::GetFirstChild);
 	classDef.def("GetChild",static_cast<void(*)(lua_State*,::WIBase&,unsigned int)>(&GetChild));

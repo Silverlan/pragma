@@ -9,6 +9,11 @@
 include("schema.lua")
 
 util.register_class("udm.BaseSchemaType")
+function udm.BaseSchemaType:__tostring()
+	local str = self.TypeName
+	if(self.GetUniqueId) then str = str .. "[" .. tostring(self:GetUniqueId()) .. "]" end
+	return str
+end
 function udm.BaseSchemaType:Initialize(schema,udmData,parent)
 	self.m_schema = schema
 	self.m_udmData = udmData
@@ -25,16 +30,22 @@ function udm.BaseSchemaType:Initialize(schema,udmData,parent)
 			local schemaType = schema:FindTypeData(childType)
 			if(schemaType ~= nil and udm.Schema.is_enum_type(schemaType:GetValue("type",udm.TYPE_STRING)) == false) then
 				self.m_typedChildren[name] = udm.create_property_from_schema(schema,childType,self,self:GetUdmData():Get(name))
-			elseif(udm.ascii_type_to_enum(childType) == udm.TYPE_ARRAY) then
+			elseif(udm.is_array_type(udm.ascii_type_to_enum(childType))) then
 				local childValueType = child:GetValue("valueType",udm.TYPE_STRING)
 				local schemaValueType = schema:FindTypeData(childValueType)
 				if(schemaValueType ~= nil and udm.Schema.is_enum_type(schemaValueType:GetValue("type",udm.TYPE_STRING)) == false) then
 					self.m_typedChildren[name] = {}
+					for _,aChild in ipairs(self:GetUdmData():Get(name):GetArrayValues()) do
+						local prop,err = udm.create_property_from_schema(schema,childValueType,self,aChild,false)
+						table.insert(self:GetTypedChildren()[name],prop)
+					end
 				end
 			end
 		end
 	end
+	self:OnInitialize()
 end
+function udm.BaseSchemaType:OnInitialize() end
 function udm.BaseSchemaType:Remove() self:OnRemove() end
 function udm.BaseSchemaType:OnRemove()
 	for name,listeners in pairs(self.m_changeListeners) do
@@ -52,14 +63,84 @@ function udm.BaseSchemaType:GetRootUdmData() return self.m_udmData end
 function udm.BaseSchemaType:GetUdmData() return self.m_udmAssetData or self.m_udmData end
 function udm.BaseSchemaType:GetTypedChildren() return self.m_typedChildren end
 function udm.BaseSchemaType:GetParent() return self.m_parent end
+function udm.BaseSchemaType:FindAncestor(filter)
+	local parent = self:GetParent()
+	if(parent == nil) then return end
+	if(filter(parent)) then return parent end
+	return parent:FindAncestor(filter)
+end
 function udm.BaseSchemaType:AddChangeListener(keyName,listener)
-	if(self:GetUdmData():Get(keyName):IsValid() == false) then
+	--[[if(self:GetUdmData():Get(keyName):IsValid() == false) then
 		error("Property '" .. keyName .. "' is not a valid property!")
-	end
+	end]]
 	local cb = util.Callback.Create(listener)
 	self.m_changeListeners[keyName] = self.m_changeListeners[keyName] or {}
 	table.insert(self.m_changeListeners[keyName],cb)
 	return cb
+end
+local function get_getter_name(udmChildData,name)
+	local nameUpper = name:sub(1,1):upper() .. name:sub(2)
+	return udmChildData:GetValue("getterName",udm.TYPE_STRING) or ("Get" .. nameUpper)
+end
+local function get_setter_name(udmChildData,name)
+	local nameUpper = name:sub(1,1):upper() .. name:sub(2)
+	return udmChildData:GetValue("setterName",udm.TYPE_STRING) or ("Set" .. nameUpper)
+end
+local function get_property_type(udmChildData)
+	local stype = udmChildData:GetValue("type",udm.TYPE_STRING)
+	if(stype == nil) then
+		local default = udmChildData:Get("default")
+		if(default:IsValid()) then
+			stype = udm.enum_type_to_ascii(default:GetType())
+		end
+	end
+	return stype
+end
+function udm.BaseSchemaType:GetPropertyType(keyName)
+	local schema = self:GetSchema()
+	local schemaType = schema:FindTypeData(self.TypeName)
+	if(schemaType ~= nil) then
+		local propSchemaData = schemaType:Get("children"):Get(keyName)
+		if(propSchemaData ~= nil) then
+			return get_property_type(propSchemaData)
+		end
+	end
+end
+function udm.BaseSchemaType:GetPropertyUdmType(keyName)
+	local type = self:GetPropertyType(keyName)
+	if(type == nil) then return udm.TYPE_INVALID end
+	local schema = self:GetSchema()
+	local schemaType = schema:FindTypeData(type)
+	if(schemaType ~= nil) then
+		if(udm.Schema.is_enum_type(schemaType:GetValue("type",udm.TYPE_STRING))) then
+			return udm.TYPE_INT32
+		end
+	end
+	return udm.ascii_type_to_enum(type)
+end
+function udm.BaseSchemaType:GetPropertyValue(keyName)
+	local schema = self:GetSchema()
+	local schemaType = schema:FindTypeData(self.TypeName)
+	if(schemaType ~= nil) then
+		local propSchemaData = schemaType:Get("children"):Get(keyName)
+		if(propSchemaData ~= nil) then
+			local getterName = get_getter_name(propSchemaData,keyName)
+			if(self[getterName] ~= nil) then return self[getterName](self) end
+		end
+	end
+	return self:GetUdmData():GetValue(keyName)
+end
+function udm.BaseSchemaType:SetPropertyValue(keyName,value,type)
+	local schema = self:GetSchema()
+	local schemaType = schema:FindTypeData(self.TypeName)
+	if(schemaType ~= nil) then
+		local propSchemaData = schemaType:Get("children"):Get(keyName)
+		if(propSchemaData ~= nil) then
+			local setterName = get_setter_name(propSchemaData,keyName)
+			if(self[setterName] ~= nil) then return self[setterName](self,value) end
+		end
+	end
+	return self:GetUdmData():SetValue(keyName,type or self:GetPropertyUdmType(keyName),value)
 end
 function udm.BaseSchemaType:CallChangeListeners(keyName,newValue)
 	if(self.m_changeListeners[keyName] == nil) then return end
@@ -114,7 +195,12 @@ function udm.generate_lua_api_from_schema(schema)
 	for name,udmType in pairs(schema:GetUdmData():GetChildren("types")) do
 		local schemaType = udmType:GetValue("type",udm.TYPE_STRING)
 		if(udm.Schema.is_enum_type(schemaType) == false) then
-			util.register_class(lib,name,udm.BaseSchemaType)
+			local class = util.register_class(lib,name,udm.BaseSchemaType)
+
+			class.create = function(schema,parent)
+				local el = udm.create_element()
+				return udm.create_property_from_schema(schema,class.TypeName,parent,el,true)
+			end
 		else
 			local values = udmType:GetArrayValues("values",udm.TYPE_STRING)
 			if(schemaType == "enum" or schemaType == "enum_flags") then
@@ -149,9 +235,8 @@ function udm.generate_lua_api_from_schema(schema)
 			local class = lib[name]
 			class.TypeName = name
 			for name,udmChild in pairs(udmType:GetChildren("children")) do
-				local nameUpper = name:sub(1,1):upper() .. name:sub(2)
-				local getterName = udmChild:GetValue("getterName",udm.TYPE_STRING) or ("Get" .. nameUpper)
-				local setterName = udmChild:GetValue("setterName",udm.TYPE_STRING) or ("Set" .. nameUpper)
+				local getterName = get_getter_name(udmChild,name)
+				local setterName = get_setter_name(udmChild,name)
 				local stype = udmChild:GetValue("type",udm.TYPE_STRING)
 				local udmType
 				if(stype == nil) then
@@ -254,7 +339,7 @@ function udm.generate_lua_api_from_schema(schema)
 						end
 					end
 				else
-					if(udmType == udm.TYPE_ARRAY) then
+					if(udm.is_array_type(udmType)) then
 						local baseName = udmChild:GetValue("baseName",udm.TYPE_STRING)
 						if(baseName == nil) then baseName = name:sub(1,1):upper() .. name:sub(2,#name -1) end
 						local valueType = udmChild:GetValue("valueType",udm.TYPE_STRING)
@@ -278,7 +363,7 @@ function udm.generate_lua_api_from_schema(schema)
 								if(setValueTypeName ~= nil) then
 									class[setValueTypeName] = function(self,valueType)
 										local udmValue = self:GetUdmData():Get(name)
-										if(udmValue:IsValid() == false) then self:GetUdmData():AddArray(name,0,valueType)
+										if(udmValue:IsValid() == false) then self:GetUdmData():AddArray(name,0,valueType,(udmType == udm.TYPE_ARRAY_LZ4) and udm.ARRAY_TYPE_COMPRESSED or udm.ARRAY_TYPE_RAW)
 										else self:GetUdmData():Get(name):SetValueType(valueType) end
 									end
 								end
@@ -309,18 +394,49 @@ function udm.generate_lua_api_from_schema(schema)
 						local removerName = "Remove" .. baseName
 						if(removerName ~= nil) then
 							class[removerName] = function(self,idx)
+								if(udmValueType == udm.TYPE_INVALID and type(idx) ~= "number") then
+									for i,val in ipairs(class[getterName](self)) do
+										if(util.is_same_object(val,idx)) then
+											idx = i -1
+											break
+										end
+									end
+								end
 								local a = self:GetUdmData():Get(name)
 								if(idx >= a:GetSize()) then return end
-								a:RemoveValue(idx)
 								local children = self:GetTypedChildren()[name]
 								children[idx +1]:OnRemove()
+								a:RemoveValue(idx)
 								table.remove(children,idx +1)
+
+								-- Update UDM data for typed children (due to index change)
+								for i=idx +1,#children do
+									local child = children[i]
+									child.m_udmData = a:Get(i -1)
+								end
 							end
 						end
 
+						local countName = "Get" .. baseName .. "Count"
+						if(countName ~= nil) then
+							class[countName] = function(self,idx)
+								return self:GetUdmData():Get(name):GetSize()
+							end
+						end
+
+						if(udmValueType ~= udm.TYPE_INVALID or schemaValueType ~= nil) then
+							class[getterName] = function(self)
+								if(schemaValueType ~= nil) then return self:GetTypedChildren()[name] end
+								return self:GetUdmData():GetArrayValues(name,udmValueType)
+							end
+						else
+							class[getterName] = function(self)
+								return self:GetUdmData():GetArrayValues(name,self:GetUdmData():Get(name):GetValueType())
+							end
+						end
+					elseif(udmType == udm.TYPE_ELEMENT) then
 						class[getterName] = function(self)
-							if(schemaValueType ~= nil) then return self:GetTypedChildren()[name] end
-							return self:GetUdmData():GetArrayValues(name,udmType)
+							return self:GetUdmData():Get(name)
 						end
 					else
 						class[getterName] = function(self)

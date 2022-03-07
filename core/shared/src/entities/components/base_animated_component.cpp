@@ -230,7 +230,11 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		memberInfoPos.SetGetterFunction<BaseAnimatedComponent,Vector3,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,Vector3&)>(
 			[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,Vector3 &outValue) {
 			auto *pos = component.GetBonePosition(memberInfo.userIndex);
-			assert(pos);
+			if(!pos)
+			{
+				outValue = {};
+				return;
+			}
 			outValue = *pos;
 		})>();
 		memberInfoPos.SetSetterFunction<BaseAnimatedComponent,Vector3,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,const Vector3&)>(
@@ -244,7 +248,11 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		memberInfoRot.SetGetterFunction<BaseAnimatedComponent,Quat,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,Quat&)>(
 			[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,Quat &outValue) {
 			auto *rot = component.GetBoneRotation(memberInfo.userIndex);
-			assert(rot);
+			if(!rot)
+			{
+				outValue = uquat::identity();
+				return;
+			}
 			outValue = *rot;
 		})>();
 		memberInfoRot.SetSetterFunction<BaseAnimatedComponent,Quat,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,const Quat&)>(
@@ -257,7 +265,11 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		memberInfoScale.SetGetterFunction<BaseAnimatedComponent,Vector3,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,Vector3&)>(
 			[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,Vector3 &outValue) {
 			auto *scale = component.GetBoneScale(memberInfo.userIndex);
-			assert(scale);
+			if(!scale)
+			{
+				outValue = Vector3{1.f,1.f,1.f};
+				return;
+			}
 			outValue = *scale;
 		})>();
 		memberInfoScale.SetSetterFunction<BaseAnimatedComponent,Vector3,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,const Vector3&)>(

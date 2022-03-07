@@ -784,7 +784,7 @@ static luabind::object register_class(lua_State *l,const std::string &pclassName
 		}
 	}
 
-	auto restorePreviousGlobalValue = slibs.empty() == false;
+	auto restorePreviousGlobalValue = (!slibs.empty() || baseTable != nullptr);
 	if(restorePreviousGlobalValue)
 		Lua::GetGlobal(l,className); /* +1 */
 	std::stringstream ss;

@@ -20,6 +20,7 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_render_pass.hpp>
 #include <prosper_util.hpp>
+#include <wgui/wibase.h>
 
 extern DLLCLIENT CEngine *c_engine;
 
@@ -219,6 +220,40 @@ void pragma::LuaShaderImageProcessing::Lua_InitializePipeline(prosper::BasePipel
 void pragma::LuaShaderImageProcessing::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {pragma::LuaShaderGraphicsBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);}
 void pragma::LuaShaderImageProcessing::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) {pragma::LuaShaderGraphicsBase::InitializeRenderPass(outRenderPass,pipelineIdx);}
 void pragma::LuaShaderImageProcessing::InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) {prosper::ShaderBaseImageProcessing::InitializeRenderPass(outRenderPass,pipelineIdx);}
+
+/////////////////
+
+pragma::LuaShaderGUI::LuaShaderGUI()
+	: TLuaShaderBase(c_engine->GetRenderContext(),"","","")
+{
+	SetPipelineCount(umath::to_integral(wgui::StencilPipeline::Count) *2);
+}
+
+bool pragma::LuaShaderGUI::RecordBeginDraw(
+	prosper::ShaderBindState &bindState,wgui::DrawState &drawState,uint32_t width,uint32_t height,
+	wgui::StencilPipeline pipelineIdx,bool msaa,uint32_t testStencilLevel
+) const
+{
+	return wgui::Shader::RecordBeginDraw(bindState,drawState,width,height,pipelineIdx,msaa) &&
+		RecordSetStencilReference(bindState,testStencilLevel);
+}
+
+void pragma::LuaShaderGUI::Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+{
+	wgui::Shader::InitializeGfxPipeline(static_cast<prosper::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
+}
+void pragma::LuaShaderGUI::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+{
+	pragma::LuaShaderGraphicsBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+}
+void pragma::LuaShaderGUI::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
+{
+	pragma::LuaShaderGraphicsBase::InitializeRenderPass(outRenderPass,pipelineIdx);
+}
+void pragma::LuaShaderGUI::InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
+{
+	wgui::Shader::InitializeRenderPass(outRenderPass,pipelineIdx);
+}
 
 /////////////////
 

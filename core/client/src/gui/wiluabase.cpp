@@ -11,9 +11,10 @@
 #include "luasystem.h"
 #include <wgui/wihandle.h>
 #include "pragma/lua/classes/c_ldef_wgui.h"
+#include <prosper_prepared_command_buffer.hpp>
 
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 extern ClientState *client;
 WILuaBase::WILuaBase()
 {}
@@ -140,11 +141,48 @@ bool WILuaBase::DoPosInBounds(const Vector2i &pos) const
 		return res;
 	return WIBase::DoPosInBounds(pos);
 }
+
+void WILuaBase::SetRenderCommandBuffer(const std::shared_ptr<prosper::util::PreparedCommandBuffer> &cmd)
+{
+	if(!cmd)
+	{
+		m_renderData = nullptr;
+		return;
+	}
+	m_renderData = std::unique_ptr<RenderData>{new RenderData{}};
+	m_renderData->renderCommandBuffer = cmd;
+}
+
 void WILuaBase::Render(const DrawInfo &drawInfo,wgui::DrawState &drawState,const Mat4 &matDraw,const Vector2 &scale,uint32_t testStencilLevel,wgui::StencilPipeline stencilPipeline)
 {
 	WIBase::Render(drawInfo,drawState,matDraw,scale,testStencilLevel,stencilPipeline);
-	// No longer supported, since UI rendering is now multi-threaded
-	//CallLuaMember<void,std::reference_wrapper<const DrawInfo>,Mat4,Vector2>("OnDraw",std::ref(drawInfo),matDraw,scale);
+	if(!m_renderData)
+		return;
+	auto &drawArgs = m_renderData->drawArgs;
+	if(!m_renderData->renderCommandBuffer->enableDrawArgs)
+		m_renderData->renderCommandBuffer->RecordCommands(*drawInfo.commandBuffer,drawArgs,m_renderData->userData);
+	else
+	{
+		// Some arguments have to be updated at render time,
+		// however since the render-code is multi-threaded and we only have
+		// one container for the draw arguments, we have to secure it
+		// with a mutex. Since the same UI element is usually not rendered multiple times in parallel,
+		// it's unlikely this will cause a significant negative performance impact.
+		using namespace ustring::string_switch;
+		std::scoped_lock lock {m_renderData->drawArgMutex};
+		drawArgs.SetArgumentValue(hash("x"),drawInfo.offset.x);
+		drawArgs.SetArgumentValue(hash("y"),drawInfo.offset.y);
+		drawArgs.SetArgumentValue(hash("w"),drawInfo.size.x);
+		drawArgs.SetArgumentValue(hash("h"),drawInfo.size.y);
+		drawArgs.SetArgumentValue(hash("stencilPipeline"),umath::to_integral(stencilPipeline));
+		drawArgs.SetArgumentValue(hash("testStencilLevel"),testStencilLevel);
+		drawArgs.SetArgumentValue(hash("msaa"),drawInfo.msaa);
+		drawArgs.SetArgumentValue(hash("matDraw"),matDraw);
+		drawArgs.SetArgumentValue(hash("scale"),scale);
+		drawArgs.SetArgumentValue(hash("viewportSize"),wgui::ElementData::ToViewportSize(drawInfo.size));
+		m_renderData->userData.Set(hash("guiDrawState"),drawState);
+		m_renderData->renderCommandBuffer->RecordCommands(*drawInfo.commandBuffer,drawArgs,m_renderData->userData);
+	}
 }
 void WILuaBase::OnCursorEntered()
 {
@@ -230,3 +268,4 @@ void WILuaBase::default_OnRemove(lua_State*,WILuaBase&) {}
 
 bool WILuaBase::Lua_CheckPosInBounds(const Vector2i &pos) {return WIBase::DoPosInBounds(pos);}
 bool WILuaBase::default_CheckPosInBounds(lua_State *l,WILuaBase &hElement,const Vector2i &pos) {return hElement.WIBase::DoPosInBounds(pos);}
+#pragma optimize("",on)

@@ -16,6 +16,7 @@
 #include <pragma/lua/classes/ldef_entity.h>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
+#include <prosper_prepared_command_buffer.hpp>
 #include <prosper_render_pass.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
@@ -596,7 +597,9 @@ void Lua::Shader::Graphics::RecordBindVertexBuffer(lua_State *l,prosper::ShaderG
 {
 	Lua::PushBool(l,shader.RecordBindVertexBuffer(bindState,buffer,startBinding,offset));
 }
-void Lua::Shader::Graphics::RecordBindVertexBuffers(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState,luabind::object buffers,uint32_t startBinding,luabind::object offsets)
+void Lua::Shader::Graphics::RecordBindVertexBuffers(
+	lua_State *l,prosper::ShaderGraphics &shader,const LuaShaderRecordTarget &recordTarget,luabind::object buffers,uint32_t startBinding,luabind::object offsets
+)
 {
 	auto vBuffers = Lua::get_table_values<prosper::IBuffer*>(l,3,[](lua_State *l,int32_t idx) {
 		return &Lua::Check<Lua::Vulkan::Buffer>(l,idx);
@@ -608,32 +611,78 @@ void Lua::Shader::Graphics::RecordBindVertexBuffers(lua_State *l,prosper::Shader
 			return static_cast<ptrdiff_t>(Lua::CheckInt(l,idx));
 		});
 	}
-	Lua::PushBool(l,shader.RecordBindVertexBuffers(bindState,vBuffers,startBinding,vOffsets));
+	auto *bindState = recordTarget.GetBindState();
+	if(bindState)
+		return Lua::PushBool(l,shader.RecordBindVertexBuffers(*bindState,vBuffers,startBinding,vOffsets));
+
+	recordTarget.GetPcb()->PushCommand(
+		[&shader,vBuffers=std::move(vBuffers),vOffsets=std::move(vOffsets),startBinding](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
+		return shader.RecordBindVertexBuffers(*recordState.shaderBindState,vBuffers,startBinding,vOffsets);
+	});
 }
 void Lua::Shader::Graphics::RecordBindIndexBuffer(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState,Lua::Vulkan::Buffer &indexBuffer,uint32_t indexType,uint32_t offset)
 {
 	Lua::PushBool(l,shader.RecordBindIndexBuffer(bindState,indexBuffer,static_cast<prosper::IndexType>(indexType),offset));
 }
-void Lua::Shader::Graphics::RecordDraw(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState,uint32_t vertCount,uint32_t instanceCount,uint32_t firstVertex,uint32_t firstInstance)
+void Lua::Shader::Graphics::RecordDraw(lua_State *l,prosper::ShaderGraphics &shader,const LuaShaderRecordTarget &recordTarget,uint32_t vertCount,uint32_t instanceCount,uint32_t firstVertex,uint32_t firstInstance)
 {
-	Lua::PushBool(l,shader.RecordDraw(bindState,vertCount,instanceCount,firstVertex,firstInstance));
+	auto *bindState = recordTarget.GetBindState();
+	if(bindState)
+		return Lua::PushBool(l,shader.RecordDraw(*bindState,vertCount,instanceCount,firstVertex,firstInstance));
+	recordTarget.GetPcb()->PushCommand(
+		[=,&shader](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
+		return shader.RecordDraw(*recordState.shaderBindState,vertCount,instanceCount,firstVertex,firstInstance);
+	});
 }
-void Lua::Shader::Graphics::RecordDrawIndexed(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex,uint32_t firstInstance)
+void Lua::Shader::Graphics::RecordDrawIndexed(lua_State *l,prosper::ShaderGraphics &shader,const LuaShaderRecordTarget &recordTarget,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex,uint32_t firstInstance)
 {
-	Lua::PushBool(l,shader.RecordDrawIndexed(bindState,indexCount,instanceCount,firstIndex,firstInstance));
+	auto *bindState = recordTarget.GetBindState();
+	if(bindState)
+		return Lua::PushBool(l,shader.RecordDrawIndexed(*bindState,indexCount,instanceCount,firstIndex,firstInstance));
+	recordTarget.GetPcb()->PushCommand(
+		[=,&shader](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
+		return shader.RecordDrawIndexed(*recordState.shaderBindState,indexCount,instanceCount,firstIndex,firstInstance);
+	});
 }
-void Lua::Shader::Graphics::RecordBeginDraw(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState,uint32_t pipelineIdx)
+void Lua::Shader::Graphics::RecordBeginDraw(lua_State *l,prosper::ShaderGraphics &shader,const LuaShaderRecordTarget &recordTarget,uint32_t pipelineIdx)
 {
-	Lua::PushBool(l,shader.RecordBeginDraw(bindState,pipelineIdx));
+	auto *bindState = recordTarget.GetBindState();
+	if(bindState)
+		Lua::PushBool(l,shader.RecordBeginDraw(*bindState,pipelineIdx));
+	else
+	{
+		auto hShader = shader.GetHandle();
+		recordTarget.GetPcb()->PushCommand([hShader,pipelineIdx](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
+			if(hShader.expired()) // We only have to check the validity in BeginDraw!
+				return false;
+			recordState.shaderBindState = std::make_unique<prosper::ShaderBindState>(recordState.commandBuffer);
+			return static_cast<prosper::ShaderGraphics&>(*hShader.get()).RecordBeginDraw(*recordState.shaderBindState,pipelineIdx);
+		});
+	}
 }
-void Lua::Shader::Graphics::RecordDraw(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState)
+void Lua::Shader::Graphics::RecordDraw(lua_State *l,prosper::ShaderGraphics &shader,const LuaShaderRecordTarget &recordTarget)
 {
-	Lua::PushBool(l,shader.RecordDraw(bindState));
+	auto *bindState = recordTarget.GetBindState();
+	if(bindState)
+		return Lua::PushBool(l,shader.RecordDraw(*bindState));
+	recordTarget.GetPcb()->PushCommand(
+		[=,&shader](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
+		return shader.RecordDraw(*recordState.shaderBindState);
+	});
 }
-void Lua::Shader::Graphics::RecordEndDraw(lua_State *l,prosper::ShaderGraphics &shader,prosper::ShaderBindState &bindState)
+void Lua::Shader::Graphics::RecordEndDraw(lua_State *l,prosper::ShaderGraphics &shader,const LuaShaderRecordTarget &recordTarget)
 {
-	shader.RecordEndDraw(bindState);
-	Lua::PushBool(l,true);
+	auto *bindState = recordTarget.GetBindState();
+	if(bindState)
+	{
+		shader.RecordEndDraw(*bindState);
+		Lua::PushBool(l,true);
+		return;
+	}
+	recordTarget.GetPcb()->PushCommand([&shader](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
+		shader.RecordEndDraw(*recordState.shaderBindState);
+		return true;
+	});
 }
 void Lua::Shader::Graphics::GetRenderPass(lua_State *l,prosper::ShaderGraphics &shader,uint32_t pipelineIdx)
 {

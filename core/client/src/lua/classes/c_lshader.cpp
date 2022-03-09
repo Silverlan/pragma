@@ -13,9 +13,18 @@
 #include <pragma/lua/util.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>
+#include <prosper_prepared_command_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #pragma optimize("",off)
+prosper::ShaderBindState *LuaShaderRecordTarget::GetBindState() const
+{
+	return luabind::object_cast_nothrow<prosper::ShaderBindState*>(target,static_cast<prosper::ShaderBindState*>(nullptr));
+}
+prosper::util::PreparedCommandBuffer *LuaShaderRecordTarget::GetPcb() const
+{
+	return luabind::object_cast_nothrow<prosper::util::PreparedCommandBuffer*>(target,static_cast<prosper::util::PreparedCommandBuffer*>(nullptr));
+}
 void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,pragma::LuaDescriptorSetInfo &descSetInfo)
 {
 	auto *shader = pragma::LuaShaderBase::GetShader(pipelineInfo);
@@ -156,10 +165,30 @@ void Lua::Shader::GetSourceFilePaths(lua_State *l,prosper::Shader &shader)
 		Lua::SetTableValue(l,t);
 	}
 }
-void Lua::Shader::RecordPushConstants(lua_State *l,prosper::Shader &shader,prosper::ShaderBindState &bindState,::DataStream &ds,uint32_t offset)
+void Lua::Shader::RecordPushConstants(lua_State *l,prosper::Shader &shader,prosper::util::PreparedCommandBuffer &pcb,udm::Type type,const Lua::Vulkan::PreparedCommandLuaArg &value,uint32_t offset)
 {
-	auto r = shader.RecordPushConstants(bindState,ds->GetSize(),ds->GetData(),offset);
-	Lua::PushBool(l,r);
+	pcb.PushCommand(
+		[&shader,offset,type](const prosper::util::PreparedCommandBufferRecordState &recordState) mutable -> bool {
+			return udm::visit_ng(type,[&recordState,&shader,offset](auto tag) {
+				using T = decltype(tag)::type;
+				auto value = recordState.GetArgument<T>(0);
+				return shader.RecordPushConstants(*recordState.shaderBindState,sizeof(value),&value,offset);
+			});
+	},util::make_vector<prosper::util::PreparedCommand::Argument>(Lua::Vulkan::make_pcb_arg(value,type)));
+}
+void Lua::Shader::RecordPushConstants(lua_State *l,prosper::Shader &shader,const LuaShaderRecordTarget &recordTarget,::DataStream &ds,uint32_t offset)
+{
+	auto *bindState = recordTarget.GetBindState();
+	if(bindState)
+	{
+		auto r = shader.RecordPushConstants(*bindState,ds->GetSize(),ds->GetData(),offset);
+		Lua::PushBool(l,r);
+		return;
+	}
+	recordTarget.GetPcb()->PushCommand(
+		[&shader,ds,offset](const prosper::util::PreparedCommandBufferRecordState &recordState) mutable -> bool {
+		return shader.RecordPushConstants(*recordState.shaderBindState,ds->GetSize(),ds->GetData(),offset);
+	});
 }
 static bool record_bind_descriptor_sets(prosper::Shader &shader,prosper::ShaderBindState &bindState,const std::vector<prosper::IDescriptorSet*> &descSets,uint32_t firstSet,const std::vector<uint32_t> &dynamicOffsets)
 {

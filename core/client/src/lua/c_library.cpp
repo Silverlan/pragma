@@ -62,6 +62,7 @@
 #include <impl_texture_formats.h>
 #include <prosper_window.hpp>
 #include <prosper_command_buffer.hpp>
+#include <prosper_prepared_command_buffer.hpp>
 #include <luabind/copy_policy.hpp>
 #include <fsys/ifile.hpp>
 
@@ -255,6 +256,7 @@ static void register_gui(Lua::Interface &lua)
 	wiBaseWIElement.def("OnFocusGained",&WILuaBase::Lua_OnFocusGained,&WILuaBase::default_OnFocusGained);
 	wiBaseWIElement.def("OnFocusKilled",&WILuaBase::Lua_OnFocusKilled,&WILuaBase::default_OnFocusKilled);
 	wiBaseWIElement.def("OnRemove",&WILuaBase::Lua_OnRemove,&WILuaBase::default_OnRemove);
+	wiBaseWIElement.def("SetRenderCommandBuffer",&WILuaBase::SetRenderCommandBuffer);
 	guiMod[wiBaseWIElement];
 	//
 

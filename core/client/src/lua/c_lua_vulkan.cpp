@@ -740,7 +740,7 @@ static std::shared_ptr<prosper::Texture> get_color_attachment_texture(lua_State 
 	return nullptr;
 }
 
-void register_vulkan_lua_interface2(luabind::module_ &prosperMod); // Registration is split up to avoid compiler errors
+void register_vulkan_lua_interface2(Lua::Interface &lua,luabind::module_ &prosperMod); // Registration is split up to avoid compiler errors
 void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 {
 	auto prosperMod = luabind::module_(lua.GetState(),"prosper");
@@ -2186,7 +2186,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	}));
 	prosperMod[defWindow];
 
-	register_vulkan_lua_interface2(prosperMod);
+	register_vulkan_lua_interface2(lua,prosperMod);
 }
 
 /////////////////////////////////

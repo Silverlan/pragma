@@ -10,6 +10,7 @@
 #include "pragma/clientdefinitions.h"
 #include <wgui/wibase.h>
 #include <pragma/lua/luaapi.h>
+#include <prosper_prepared_command_buffer.hpp>
 #include "pragma/gui/wgui_luainterface.h"
 #include "pragma/lua/luaobjectbase.h"
 #include <pragma/lua/lua_call.hpp>
@@ -64,6 +65,8 @@ public:
 	virtual void OnFocusGained() override;
 	virtual void OnFocusKilled() override;
 	virtual void OnRemove() override;
+
+	void SetRenderCommandBuffer(const std::shared_ptr<prosper::util::PreparedCommandBuffer> &cmd);
 
 	// Lua
 	void Lua_OnInitialize();
@@ -125,6 +128,15 @@ public:
 protected:
 	virtual void DoUpdate() override;
 	virtual bool DoPosInBounds(const Vector2i &pos) const override;
+
+	struct RenderData
+	{
+		std::shared_ptr<prosper::util::PreparedCommandBuffer> renderCommandBuffer = nullptr;
+		prosper::util::PreparedCommandArgumentMap drawArgs;
+		prosper::util::PreparedCommandBufferUserData userData;
+		std::mutex drawArgMutex;
+	};
+	std::unique_ptr<RenderData> m_renderData = nullptr;
 };
 
 namespace pragma::lua

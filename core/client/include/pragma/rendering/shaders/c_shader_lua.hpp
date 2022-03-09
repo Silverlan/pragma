@@ -199,6 +199,24 @@ namespace pragma
 		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 
+	class DLLCLIENT LuaShaderGUI
+		: public TLuaShaderBase<wgui::Shader,LuaShaderGraphicsBase>
+	{
+	public:
+		LuaShaderGUI();
+
+		bool RecordBeginDraw(
+			prosper::ShaderBindState &bindState,wgui::DrawState &drawState,uint32_t width,uint32_t height,
+			wgui::StencilPipeline pipelineIdx,bool msaa,uint32_t testStencilLevel
+		) const;
+
+		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+	protected:
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+	};
+
 	class DLLCLIENT LuaShaderGUITextured
 		: public TLuaShaderBase<wgui::ShaderTextured,LuaShaderGraphicsBase>
 	{

@@ -10,7 +10,9 @@
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
+#include <pragma/lua/types/udm.hpp>
 #include <prosper_util.hpp>
+#include <prosper_prepared_command_buffer.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
 
@@ -41,6 +43,18 @@ namespace Lua
 {
 	namespace Vulkan
 	{
+		struct DLLCLIENT PreparedCommandLuaArg
+		{
+			luabind::object o;
+		};
+		struct DLLCLIENT PreparedCommandLuaDynamicArg
+		{
+			PreparedCommandLuaDynamicArg(std::string argName)
+				: argName{std::move(argName)}
+			{}
+			std::string argName;
+		};
+		DLLCLIENT prosper::util::PreparedCommand::Argument make_pcb_arg(const Lua::Vulkan::PreparedCommandLuaArg &larg,udm::Type type);
 		struct DLLCLIENT ClearValue
 		{
 		public:
@@ -106,5 +120,59 @@ namespace prosper
 		struct ClearImageInfo;
 	};
 };
+
+// PCB Argument converter
+namespace luabind {
+	template<>
+	struct DLLNETWORK default_converter<Lua::Vulkan::PreparedCommandLuaArg>
+		: native_converter_base<Lua::Vulkan::PreparedCommandLuaArg>
+	{
+		enum { consumed_args = 1 };
+
+		template <typename U>
+		Lua::Vulkan::PreparedCommandLuaArg to_cpp(lua_State* L, U u, int index);
+
+		template <class U>
+		static int match(lua_State *l, U u, int index);
+
+		template <class U>
+		void converter_postcall(lua_State*, U u, int) {}
+		
+		void to_lua(lua_State* L, Lua::Vulkan::PreparedCommandLuaArg const& x);
+		void to_lua(lua_State* L, Lua::Vulkan::PreparedCommandLuaArg* x);
+	public:
+		static value_type to_cpp_deferred(lua_State*,int) {return {};}
+		static void to_lua_deferred(lua_State*,param_type) {}
+		static int compute_score(lua_State*,int) {return no_match;}
+	};
+
+	template<>
+	struct DLLNETWORK default_converter< const Lua::Vulkan::PreparedCommandLuaArg >
+		: default_converter< Lua::Vulkan::PreparedCommandLuaArg >
+	{ };
+
+	template<>
+	struct DLLNETWORK default_converter<Lua::Vulkan::PreparedCommandLuaArg const&>
+		: default_converter<Lua::Vulkan::PreparedCommandLuaArg>
+	{};
+
+	template<>
+	struct DLLNETWORK default_converter<Lua::Vulkan::PreparedCommandLuaArg&&>
+		: default_converter<Lua::Vulkan::PreparedCommandLuaArg>
+	{};
+}
+
+template <typename U>
+Lua::Vulkan::PreparedCommandLuaArg luabind::default_converter<Lua::Vulkan::PreparedCommandLuaArg>::to_cpp(lua_State* L, U u, int index)
+{
+	return Lua::Vulkan::PreparedCommandLuaArg{luabind::object{luabind::from_stack(L,index)}};
+}
+
+template <class U>
+int luabind::default_converter<Lua::Vulkan::PreparedCommandLuaArg>::match(lua_State *l, U u, int index)
+{
+	return (luabind::check_udm<true,true,true>(l,index) || Lua::IsType<Lua::Vulkan::PreparedCommandLuaDynamicArg>(l,index)) ? 1 : no_match;
+}
+//
 
 #endif

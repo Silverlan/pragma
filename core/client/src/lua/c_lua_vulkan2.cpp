@@ -14,12 +14,14 @@
 #include <pragma/lua/policies/vector_policy.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
+#include <pragma/lua/custom_constructor.hpp>
 #include <prosper_framebuffer.hpp>
 #include <prosper_fence.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_window.hpp>
 #include <prosper_render_pass.hpp>
+#include <prosper_prepared_command_buffer.hpp>
 #include <image/prosper_render_target.hpp>
 #include <queries/prosper_timestamp_query.hpp>
 #include <queries/prosper_timer_query.hpp>
@@ -31,9 +33,11 @@
 #include "pragma/c_engine.h"
 #include <pragma/rendering/shaders/image/c_shader_gradient.hpp>
 #include <luabind/copy_policy.hpp>
+#include <pragma/lua/types/udm.hpp>
+#include <luainterface.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
-
+#pragma optimize("",off)
 namespace Lua
 {
 	namespace Vulkan
@@ -271,7 +275,28 @@ namespace pragma
 	}
 };
 
-void register_vulkan_lua_interface2(luabind::module_ &prosperMod)
+prosper::util::PreparedCommand::Argument Lua::Vulkan::make_pcb_arg(const Lua::Vulkan::PreparedCommandLuaArg &larg,udm::Type type)
+{
+	auto &o = larg.o;
+	prosper::util::PreparedCommand::Argument arg {};
+	auto *dynArg = luabind::object_cast_nothrow<PreparedCommandLuaDynamicArg*>(larg.o,static_cast<PreparedCommandLuaDynamicArg*>(nullptr));
+	if(dynArg)
+	{
+		arg.SetDynamicValue(dynArg->argName);
+		return arg;
+	}
+	udm::visit(type,[&o,&arg](auto tag) {
+		using T = decltype(tag)::type;
+		constexpr auto type = udm::type_to_enum<T>();
+		if constexpr(udm::is_trivial_type(type))
+			arg.SetStaticValue<T>(luabind::object_cast<T>(o));
+		else
+			throw std::runtime_error{"Expected non-trivial UDM type!"};
+	});
+	return arg;
+}
+
+void register_vulkan_lua_interface2(Lua::Interface &lua,luabind::module_ &prosperMod)
 {
 	auto defVkFramebuffer = luabind::class_<Lua::Vulkan::Framebuffer>("Framebuffer");
 	defVkFramebuffer.def(luabind::tostring(luabind::self));
@@ -581,6 +606,46 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 		mesh.ClearBuffers();
 	}));
 	prosperMod[defVkMesh];
+
+	using PcbArg = prosper::util::PreparedCommand::Argument;
+	auto defPcb = luabind::class_<prosper::util::PreparedCommandBuffer>("PreparedCommandBuffer");
+	defPcb.def("RecordSetScissor",+[](prosper::util::PreparedCommandBuffer &pcb,const Lua::Vulkan::PreparedCommandLuaArg &width,const Lua::Vulkan::PreparedCommandLuaArg &height,const Lua::Vulkan::PreparedCommandLuaArg &x,const Lua::Vulkan::PreparedCommandLuaArg &y) {
+		pcb.PushCommand([](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
+			auto &cmdBuf = recordState.commandBuffer;
+			return cmdBuf.RecordSetScissor(
+				recordState.GetArgument<uint32_t>(0),
+				recordState.GetArgument<uint32_t>(1),
+				recordState.GetArgument<uint32_t>(2),
+				recordState.GetArgument<uint32_t>(3)
+			);
+		},std::move(util::make_vector<PcbArg>(
+			make_pcb_arg(width,udm::Type::UInt32),make_pcb_arg(height,udm::Type::UInt32),
+			make_pcb_arg(x,udm::Type::UInt32),make_pcb_arg(y,udm::Type::UInt32)
+		)));
+	});
+	defPcb.def("RecordSetStencilReference",+[](prosper::util::PreparedCommandBuffer &pcb,const Lua::Vulkan::PreparedCommandLuaArg &faceMask,const Lua::Vulkan::PreparedCommandLuaArg &stencilReference) {
+		pcb.PushCommand([](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
+			auto &cmdBuf = recordState.commandBuffer;
+			return cmdBuf.RecordSetStencilReference(
+				static_cast<prosper::StencilFaceFlags>(recordState.GetArgument<uint8_t>(0)),
+				recordState.GetArgument<uint32_t>(1)
+			);
+		},std::move(util::make_vector<PcbArg>(
+			make_pcb_arg(faceMask,udm::Type::UInt8),make_pcb_arg(stencilReference,udm::Type::UInt32)
+		)));
+	});
+	defPcb.def_readonly("enableDrawArgs",&prosper::util::PreparedCommandBuffer::enableDrawArgs);
+
+	auto defPcbDa = luabind::class_<Lua::Vulkan::PreparedCommandLuaDynamicArg>("DynArg");
+	defPcbDa.def(luabind::constructor<std::string>());
+	defPcb.scope[defPcbDa];
+
+	prosperMod[defPcb];
+
+	pragma::lua::define_custom_constructor<prosper::util::PreparedCommandBuffer,
+		[]() -> std::shared_ptr<prosper::util::PreparedCommandBuffer> {
+		return std::make_shared<prosper::util::PreparedCommandBuffer>();
+	}>(lua.GetState());
 }
 
 /////////////////////////////////
@@ -1067,3 +1132,4 @@ bool Lua::Vulkan::VKDescriptorSet::SetBindingUniformBufferDynamic(lua_State *l,D
 {
 	return hDescSet.GetDescriptorSet()->SetBindingDynamicUniformBuffer(buffer,bindingIdx,startOffset,(size != std::numeric_limits<uint32_t>::max()) ? static_cast<uint64_t>(size) : std::numeric_limits<uint64_t>::max());
 }
+#pragma optimize("",on)

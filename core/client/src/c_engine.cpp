@@ -1027,6 +1027,9 @@ Engine::StateInstance &CEngine::GetClientStateInstance() {return *m_clInstance;}
 	if(IsVerbose() == true)
 		Con::cout<<"Reloading shader "<<name<<"..."<<Con::endl;
 	whShader.get()->Initialize(true);
+	auto nummPipelines = whShader->GetPipelineCount();
+	for(auto i=decltype(nummPipelines){0u};i<nummPipelines;++i)
+		whShader->GetPipelineInfo(i); // Force immediate reload
 	return whShader;
 }
 void CEngine::ReloadShaderPipelines()

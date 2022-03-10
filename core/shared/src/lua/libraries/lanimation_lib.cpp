@@ -104,11 +104,11 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	});
 	cdChannel.def("Resize",&panima::Channel::Resize);
 	cdChannel.def("GetSize",&panima::Channel::GetSize);
-	cdChannel.def("AddValue",+[](lua_State *l,panima::Channel &channel,float t,Lua::udm_ng value) {
-		::udm::visit_ng(channel.GetValueType(),[&channel,t,&value](auto tag) {
+	cdChannel.def("AddValue",+[](lua_State *l,panima::Channel &channel,float t,Lua::udm_ng value) -> uint32_t {
+		return ::udm::visit_ng(channel.GetValueType(),[&channel,t,&value](auto tag) {
 			using T = decltype(tag)::type;
 			auto v = luabind::object_cast<T>(luabind::object{value});
-			channel.AddValue(t,v);
+			return channel.AddValue(t,v);
 		});
 	});
 	cdChannel.def("Save",&panima::Channel::Save);

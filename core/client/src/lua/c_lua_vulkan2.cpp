@@ -79,6 +79,7 @@ namespace Lua
 			static bool RecordCopyBufferToImage(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &bufSrc,Image &imgDst,const prosper::util::BufferImageCopyInfo &copyInfo);
 			static bool RecordCopyBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &bufSrc,Buffer &bufDst,const prosper::util::BufferCopy &copyInfo);
 			static bool RecordUpdateBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buf,uint32_t offset,::DataStream &ds);
+			static bool RecordUpdateBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buf,uint32_t offset,::udm::Type type,Lua::udm_ng value);
 			static bool RecordBlitImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &imgSrc,Image &imgDst,const prosper::util::BlitInfo &blitInfo);
 			static bool RecordResolveImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &imgSrc,Image &imgDst);
 			static bool RecordBlitTexture(lua_State *l,CommandBuffer &hCommandBuffer,Texture &texSrc,Image &imgDst);
@@ -149,8 +150,10 @@ namespace Lua
 		{
 			static bool IsValid(lua_State *l,Buffer &hBuffer);
 			static bool Write(lua_State *l,Buffer &hBuffer,uint32_t offset,::DataStream &ds,uint32_t dsOffset,uint32_t dsSize);
+			static bool Write(lua_State *l,Buffer &hBuffer,uint32_t offset,::udm::Type type,Lua::udm_ng value);
 			static Lua::opt<::DataStream> Read(lua_State *l,Buffer &hBuffer,uint32_t offset,uint32_t size);
 			static bool Read(lua_State *l,Buffer &hBuffer,uint32_t offset,uint32_t size,::DataStream &ds,uint32_t dsOffset);
+			static bool Read(lua_State *l,Buffer &hBuffer,uint32_t offset,::udm::Type type,Lua::udm_ng value);
 			static bool Map(lua_State *l,Buffer &hBuffer,uint32_t offset,uint32_t size,Buffer::MapFlags mapFlags);
 		};
 		namespace VKDescriptorSet
@@ -296,6 +299,38 @@ prosper::util::PreparedCommand::Argument Lua::Vulkan::make_pcb_arg(const Lua::Vu
 	return arg;
 }
 
+using PcbArg = prosper::util::PreparedCommand::Argument;
+using PcbLuaArg = Lua::Vulkan::PreparedCommandLuaArg;
+static void pcb_recordBufferBarrier(
+	prosper::util::PreparedCommandBuffer &pcb,
+	Lua::Vulkan::Buffer &buf,
+	const PcbLuaArg &srcStageMask,const PcbLuaArg &dstStageMask,
+	const PcbLuaArg &srcAccessMask,const PcbLuaArg &dstAccessMask,
+	const PcbLuaArg &offset,const PcbLuaArg &size
+) {
+	auto pbuf = buf.shared_from_this();
+	pcb.PushCommand([pbuf](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
+		auto &cmdBuf = recordState.commandBuffer;
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(pbuf);
+		auto size = recordState.GetArgument<uint32_t>(5);
+		auto lsize = (size != std::numeric_limits<uint32_t>::max()) ? static_cast<uint64_t>(size) : std::numeric_limits<uint64_t>::max();
+		return cmdBuf.RecordBufferBarrier(
+			*pbuf,
+			recordState.GetArgument<prosper::PipelineStageFlags>(0),
+			recordState.GetArgument<prosper::PipelineStageFlags>(1),
+			recordState.GetArgument<prosper::AccessFlags>(2),
+			recordState.GetArgument<prosper::AccessFlags>(3),
+			recordState.GetArgument<uint32_t>(4),lsize
+		);
+	},std::move(util::make_vector<PcbArg>(
+		Lua::Vulkan::make_pcb_arg<prosper::PipelineStageFlags>(srcStageMask),
+		Lua::Vulkan::make_pcb_arg<prosper::PipelineStageFlags>(dstStageMask),
+		Lua::Vulkan::make_pcb_arg<prosper::AccessFlags>(srcAccessMask),
+		Lua::Vulkan::make_pcb_arg<prosper::AccessFlags>(dstAccessMask),
+		Lua::Vulkan::make_pcb_arg<uint32_t>(offset),Lua::Vulkan::make_pcb_arg<uint32_t>(size)
+	)));
+};
+
 void register_vulkan_lua_interface2(Lua::Interface &lua,luabind::module_ &prosperMod)
 {
 	auto defVkFramebuffer = luabind::class_<Lua::Vulkan::Framebuffer>("Framebuffer");
@@ -378,7 +413,8 @@ void register_vulkan_lua_interface2(Lua::Interface &lua,luabind::module_ &prospe
 		return Lua::Vulkan::VKCommandBuffer::RecordCopyBufferToImage(l,hCommandBuffer,bufSrc,imgDst,{});
 	}));
 	defVkCommandBuffer.def("RecordCopyBuffer",&Lua::Vulkan::VKCommandBuffer::RecordCopyBuffer);
-	defVkCommandBuffer.def("RecordUpdateBuffer",&Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer);
+	defVkCommandBuffer.def("RecordUpdateBuffer",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Buffer&,uint32_t,::DataStream&)>(&Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer));
+	defVkCommandBuffer.def("RecordUpdateBuffer",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Buffer&,uint32_t,::udm::Type,Lua::udm_ng)>(&Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer));
 	defVkCommandBuffer.def("RecordBlitImage",&Lua::Vulkan::VKCommandBuffer::RecordBlitImage);
 	defVkCommandBuffer.def("RecordResolveImage",&Lua::Vulkan::VKCommandBuffer::RecordResolveImage);
 	defVkCommandBuffer.def("RecordBlitTexture",&Lua::Vulkan::VKCommandBuffer::RecordBlitTexture);
@@ -522,7 +558,8 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 	devVkBuffer.def("GetCreateInfo",&Lua::Vulkan::Buffer::GetCreateInfo,luabind::copy_policy<0>{});
 	devVkBuffer.def("SetPermanentlyMapped",&Lua::Vulkan::Buffer::SetPermanentlyMapped);
 	devVkBuffer.def("GetParent",static_cast<std::shared_ptr<prosper::IBuffer>(prosper::IBuffer::*)()>(&Lua::Vulkan::Buffer::GetParent));
-	devVkBuffer.def("WriteMemory",&Lua::Vulkan::VKBuffer::Write);
+	devVkBuffer.def("WriteMemory",static_cast<bool(*)(lua_State*,Lua::Vulkan::Buffer&,uint32_t,::DataStream&,uint32_t,uint32_t)>(&Lua::Vulkan::VKBuffer::Write));
+	devVkBuffer.def("WriteMemory",static_cast<bool(*)(lua_State*,Lua::Vulkan::Buffer&,uint32_t,::udm::Type,Lua::udm_ng)>(&Lua::Vulkan::VKBuffer::Write));
 	devVkBuffer.def("WriteMemory",static_cast<bool(*)(lua_State*,Lua::Vulkan::Buffer&,uint32_t,::DataStream&)>([](lua_State *l,Lua::Vulkan::Buffer &hBuffer,uint32_t offset,::DataStream &ds) {
 		return Lua::Vulkan::VKBuffer::Write(l,hBuffer,offset,ds,0u,ds->GetSize());
 	}));
@@ -530,6 +567,7 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 	devVkBuffer.def("ReadMemory",static_cast<bool(*)(lua_State*,Lua::Vulkan::Buffer&,uint32_t,uint32_t,::DataStream&)>([](lua_State *l,Lua::Vulkan::Buffer &hBuffer,uint32_t offset,uint32_t size,::DataStream &ds) {
 		return Lua::Vulkan::VKBuffer::Read(l,hBuffer,offset,size,ds,0u);
 	}));
+	devVkBuffer.def("ReadMemory",static_cast<bool(*)(lua_State*,Lua::Vulkan::Buffer&,uint32_t,::udm::Type,Lua::udm_ng)>(&Lua::Vulkan::VKBuffer::Read));
 	devVkBuffer.def("ReadMemory",static_cast<Lua::opt<::DataStream>(*)(lua_State*,Lua::Vulkan::Buffer&,uint32_t,uint32_t)>(&Lua::Vulkan::VKBuffer::Read));
 	devVkBuffer.def("ReadMemory",static_cast<Lua::opt<::DataStream>(*)(lua_State*,Lua::Vulkan::Buffer&)>([](lua_State *l,Lua::Vulkan::Buffer &hBuffer) {
 		return Lua::Vulkan::VKBuffer::Read(l,hBuffer,0u,hBuffer.GetSize());
@@ -607,9 +645,8 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 	}));
 	prosperMod[defVkMesh];
 
-	using PcbArg = prosper::util::PreparedCommand::Argument;
 	auto defPcb = luabind::class_<prosper::util::PreparedCommandBuffer>("PreparedCommandBuffer");
-	defPcb.def("RecordSetScissor",+[](prosper::util::PreparedCommandBuffer &pcb,const Lua::Vulkan::PreparedCommandLuaArg &width,const Lua::Vulkan::PreparedCommandLuaArg &height,const Lua::Vulkan::PreparedCommandLuaArg &x,const Lua::Vulkan::PreparedCommandLuaArg &y) {
+	defPcb.def("RecordSetScissor",+[](prosper::util::PreparedCommandBuffer &pcb,const PcbLuaArg &width,const PcbLuaArg &height,const PcbLuaArg &x,const PcbLuaArg &y) {
 		pcb.PushCommand([](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
 			auto &cmdBuf = recordState.commandBuffer;
 			return cmdBuf.RecordSetScissor(
@@ -622,6 +659,15 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 			make_pcb_arg(width,udm::Type::UInt32),make_pcb_arg(height,udm::Type::UInt32),
 			make_pcb_arg(x,udm::Type::UInt32),make_pcb_arg(y,udm::Type::UInt32)
 		)));
+	});
+	defPcb.def("RecordBufferBarrier",&pcb_recordBufferBarrier);
+	defPcb.def("RecordBufferBarrier",+[](
+		lua_State *l,prosper::util::PreparedCommandBuffer &pcb,
+		Lua::Vulkan::Buffer &buf,
+		const PcbLuaArg &srcStageMask,const PcbLuaArg &dstStageMask,
+		const PcbLuaArg &srcAccessMask,const PcbLuaArg &dstAccessMask
+	) {
+		pcb_recordBufferBarrier(pcb,buf,srcStageMask,dstStageMask,srcAccessMask,dstAccessMask,PcbLuaArg::CreateValue<uint32_t>(l,0),PcbLuaArg::CreateValue<uint32_t>(l,buf.GetSize()));
 	});
 	defPcb.def("RecordSetStencilReference",+[](prosper::util::PreparedCommandBuffer &pcb,const Lua::Vulkan::PreparedCommandLuaArg &faceMask,const Lua::Vulkan::PreparedCommandLuaArg &stencilReference) {
 		pcb.PushCommand([](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
@@ -801,6 +847,14 @@ bool Lua::Vulkan::VKCommandBuffer::RecordCopyBuffer(lua_State *l,CommandBuffer &
 bool Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buf,uint32_t offset,::DataStream &ds)
 {
 	return hCommandBuffer.RecordUpdateBuffer(buf,offset,ds->GetSize(),ds->GetData());
+}
+bool Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buf,uint32_t offset,::udm::Type type,Lua::udm_ng value)
+{
+	return udm::visit_ng(type,[&buf,&value,&hCommandBuffer,offset](auto tag) {
+		using T = decltype(tag)::type;
+		auto val = luabind::object_cast<T>(value);
+		return hCommandBuffer.RecordUpdateBuffer(buf,offset,sizeof(val),&val);
+	});
 }
 bool Lua::Vulkan::VKCommandBuffer::RecordBlitImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &imgSrc,Image &imgDst,const prosper::util::BlitInfo &blitInfo)
 {
@@ -1043,6 +1097,13 @@ bool Lua::Vulkan::VKBuffer::Write(lua_State *l,Buffer &hBuffer,uint32_t offset,:
 {
 	return hBuffer.Write(offset,dsSize,ds->GetData() +dsOffset);
 }
+bool Lua::Vulkan::VKBuffer::Write(lua_State *l,Buffer &hBuffer,uint32_t offset,::udm::Type type,Lua::udm_ng value)
+{
+	return udm::visit_ng(type,[&hBuffer,&value,offset](auto tag) {
+		using T = decltype(tag)::type;
+		return hBuffer.Write(offset,luabind::object_cast<T>(value));
+	});
+}
 Lua::opt<::DataStream> Lua::Vulkan::VKBuffer::Read(lua_State *l,Buffer &hBuffer,uint32_t offset,uint32_t size)
 {
 	auto ds = ::DataStream(size);
@@ -1050,6 +1111,14 @@ Lua::opt<::DataStream> Lua::Vulkan::VKBuffer::Read(lua_State *l,Buffer &hBuffer,
 	if(r == false)
 		return Lua::nil;
 	return {l,ds};
+}
+bool Lua::Vulkan::VKBuffer::Read(lua_State *l,Buffer &hBuffer,uint32_t offset,::udm::Type type,Lua::udm_ng value)
+{
+	return udm::visit_ng(type,[&hBuffer,&value,offset](auto tag) {
+		using T = decltype(tag)::type;
+		auto val = luabind::object_cast<T>(value);
+		return hBuffer.Read(offset,sizeof(val),&val);
+	});
 }
 bool Lua::Vulkan::VKBuffer::Read(lua_State *l,Buffer &hBuffer,uint32_t offset,uint32_t size,::DataStream &ds,uint32_t dsOffset)
 {

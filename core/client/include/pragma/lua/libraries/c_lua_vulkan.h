@@ -45,6 +45,13 @@ namespace Lua
 	{
 		struct DLLCLIENT PreparedCommandLuaArg
 		{
+			template<typename T>
+				static PreparedCommandLuaArg CreateValue(lua_State *l,T &&value)
+			{
+				PreparedCommandLuaArg r {};
+				r.o = luabind::object{l,value};
+				return r;
+			}
 			luabind::object o;
 		};
 		struct DLLCLIENT PreparedCommandLuaDynamicArg
@@ -55,6 +62,14 @@ namespace Lua
 			std::string argName;
 		};
 		DLLCLIENT prosper::util::PreparedCommand::Argument make_pcb_arg(const Lua::Vulkan::PreparedCommandLuaArg &larg,udm::Type type);
+		template<typename T>
+			prosper::util::PreparedCommand::Argument make_pcb_arg(const Lua::Vulkan::PreparedCommandLuaArg &larg)
+			{
+				if constexpr(std::is_enum_v<T>)
+					return make_pcb_arg(larg,udm::type_to_enum<std::underlying_type_t<T>>());
+				else
+					return make_pcb_arg(larg,udm::type_to_enum<T>());
+			}
 		struct DLLCLIENT ClearValue
 		{
 		public:

@@ -680,6 +680,14 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 			make_pcb_arg(faceMask,udm::Type::UInt8),make_pcb_arg(stencilReference,udm::Type::UInt32)
 		)));
 	});
+	defPcb.def("RecordSetLineWidth",+[](prosper::util::PreparedCommandBuffer &pcb,const Lua::Vulkan::PreparedCommandLuaArg &lineWidth) {
+		pcb.PushCommand([](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
+			auto &cmdBuf = recordState.commandBuffer;
+			return cmdBuf.RecordSetLineWidth(recordState.GetArgument<float>(0));
+		},std::move(util::make_vector<PcbArg>(
+			make_pcb_arg(lineWidth,udm::Type::Float)
+		)));
+	});
 	defPcb.def_readonly("enableDrawArgs",&prosper::util::PreparedCommandBuffer::enableDrawArgs);
 
 	auto defPcbDa = luabind::class_<Lua::Vulkan::PreparedCommandLuaDynamicArg>("DynArg");

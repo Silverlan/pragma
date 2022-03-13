@@ -83,7 +83,7 @@ ClientState::ClientState()
 	pragma::asset::update_extension_cache(pragma::asset::Type::Model);
 
 	auto &gui = WGUI::GetInstance();
-	gui.SetCreateCallback(WGUILuaInterface::InitializeGUIElement);
+	// gui.SetCreateCallback(WGUILuaInterface::InitializeGUIElement);
 	//CVarHandler::Initialize();
 	FileManager::AddCustomMountDirectory("downloads",static_cast<fsys::SearchFlags>(FSYS_SEARCH_RESOURCES));
 

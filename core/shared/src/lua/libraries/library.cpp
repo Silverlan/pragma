@@ -464,6 +464,8 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		luabind::def("round",static_cast<int32_t(*)(float)>(&umath::round)),
 		luabind::def("snap_to_grid",static_cast<int32_t(*)(float)>([](float f) -> int32_t {return umath::snap_to_grid(f);})),
 		luabind::def("snap_to_grid",&umath::snap_to_grid),
+		luabind::def("snap_to_gridf",static_cast<float(*)(float)>([](float f) -> float {return umath::snap_to_gridf(f);})),
+		luabind::def("snap_to_gridf",&umath::snap_to_gridf),
 		luabind::def("calc_hermite_spline",static_cast<luabind::object(*)(lua_State*,const Vector3&,const Vector3&,const Vector3&,const Vector3&,uint32_t)>([](lua_State *l,const Vector3 &p0,const Vector3 &p1,const Vector3 &p2,const Vector3 &p3,uint32_t segmentCount) -> luabind::object {return Lua::math::calc_hermite_spline(l,p0,p1,p2,p3,segmentCount);})),
 		luabind::def("calc_hermite_spline",&Lua::math::calc_hermite_spline),
 		luabind::def("calc_hermite_spline_position",static_cast<Vector3(*)(lua_State*,const Vector3&,const Vector3&,const Vector3&,const Vector3&,float)>([](lua_State *l,const Vector3 &p0,const Vector3 &p1,const Vector3 &p2,const Vector3 &p3,float s) -> Vector3 {return Lua::math::calc_hermite_spline_position(l,p0,p1,p2,p3,s);})),

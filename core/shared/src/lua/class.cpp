@@ -199,6 +199,16 @@ std::ostream &operator<<(std::ostream &out,const umath::ScaledTransform &t)
 	out<<"ScaledTransform["<<origin.x<<","<<origin.y<<","<<origin.z<<"]["<<ang.p<<","<<ang.y<<","<<ang.r<<"]["<<scale.x<<","<<scale.y<<","<<scale.z<<"]";
 	return out;
 }
+template<typename T>
+	static void register_string_to_vector_type_constructor(lua_State *l)
+{
+	pragma::lua::define_custom_constructor<T,[](const std::string &str) -> T {
+		T r;
+		using ValueType = decltype(r)::value_type;
+		ustring::string_to_array<ValueType,Double>(str,reinterpret_cast<ValueType*>(&r[0]),atof,decltype(r)::length());
+		return r;
+	},const std::string&>(l);
+}
 void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 {
 	auto modString = luabind::module_(lua.GetState(),"string");
@@ -1074,6 +1084,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		Lua::PushInt(l,v[idx]);
 	}));
 	modMath[defVectori];
+	register_string_to_vector_type_constructor<Vector3i>(lua.GetState());
 	
 	auto defVector2i = pragma::lua::register_class<Vector2i>("Vector2i");
 	defVector2i.def(luabind::constructor<>());
@@ -1093,6 +1104,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		Lua::PushInt(l,v[idx]);
 	}));
 	modMath[defVector2i];
+	register_string_to_vector_type_constructor<Vector2i>(lua.GetState());
 
 	auto defVector4i = pragma::lua::register_class<Vector4i>("Vector4i");
 	defVector4i.def(luabind::constructor<>());
@@ -1115,6 +1127,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		Lua::PushInt(l,v[idx]);
 	}));
 	modMath[defVector4i];
+	register_string_to_vector_type_constructor<Vector4i>(lua.GetState());
 
 	auto defVector = pragma::lua::register_class<Vector3>("Vector");
 	defVector.def(luabind::constructor<>());
@@ -1197,6 +1210,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector.def("OuterProduct",&uvec::calc_outer_product);
 	defVector.def("ToScreenUv",&umat::to_screen_uv);
 	modMath[defVector];
+	register_string_to_vector_type_constructor<Vector3>(lua.GetState());
 
 	auto defVector2 = pragma::lua::register_class<Vector2>("Vector2");
 	defVector2.def(luabind::constructor<>());
@@ -1234,6 +1248,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	}));
 	defVector2.def("Project",&Lua::Vector2::Project);
 	modMath[defVector2];
+	register_string_to_vector_type_constructor<Vector2>(lua.GetState());
 
 	auto defVector4 = pragma::lua::register_class<Vector4>("Vector4");
 	defVector4.def(luabind::constructor<>());
@@ -1273,6 +1288,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	}));
 	defVector4.def("Project",&Lua::Vector4::Project);
 	modMath[defVector4];
+	register_string_to_vector_type_constructor<Vector4>(lua.GetState());
 
 	auto defEulerAngles = pragma::lua::register_class<EulerAngles>("EulerAngles");
 	defEulerAngles.def(luabind::constructor<>());
@@ -1827,6 +1843,7 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat2.def("Set",static_cast<void(*)(lua_State*,::Mat2&,float,float,float,float)>(&Lua::Mat2::Set));
 	defMat2.def("Set",static_cast<void(*)(lua_State*,::Mat2&,const ::Mat2&)>(&Lua::Mat2::Set));
 	modMath[defMat2];
+	register_string_to_vector_type_constructor<Mat2>(lua.GetState());
 	
 	auto defMat2x3 = luabind::class_<Mat2x3>("Mat2x3");
 	defMat2x3.def(luabind::constructor<float,float,float,float,float,float>());
@@ -1838,6 +1855,7 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat2x3.def("Set",static_cast<void(*)(lua_State*,::Mat2x3&,float,float,float,float,float,float)>(&Lua::Mat2x3::Set));
 	defMat2x3.def("Set",static_cast<void(*)(lua_State*,::Mat2x3&,const ::Mat2x3&)>(&Lua::Mat2x3::Set));
 	modMath[defMat2x3];
+	register_string_to_vector_type_constructor<Mat2x3>(lua.GetState());
 
 	auto defMat2x4 = luabind::class_<Mat2x4>("Mat2x4");
 	defMat2x4.def(luabind::constructor<float,float,float,float,float,float,float,float>());
@@ -1849,6 +1867,7 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat2x4.def("Set",static_cast<void(*)(lua_State*,::Mat2x4&,float,float,float,float,float,float,float,float)>(&Lua::Mat2x4::Set));
 	defMat2x4.def("Set",static_cast<void(*)(lua_State*,::Mat2x4&,const ::Mat2x4&)>(&Lua::Mat2x4::Set));
 	modMath[defMat2x4];
+	register_string_to_vector_type_constructor<Mat2x4>(lua.GetState());
 
 	auto defMat3 = luabind::class_<Mat3>("Mat3");
 	defMat3.def(luabind::constructor<float,float,float,float,float,float,float,float,float>());
@@ -1865,6 +1884,7 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat3.def("Set",static_cast<void(*)(lua_State*,::Mat3&,const ::Mat3&)>(&Lua::Mat3::Set));
 	defMat3.def("CalcEigenValues",&Lua::Mat3::CalcEigenValues);
 	modMath[defMat3];
+	register_string_to_vector_type_constructor<Mat3>(lua.GetState());
 
 	auto defMat3x2 = luabind::class_<Mat3x2>("Mat3x2");
 	defMat3x2.def(luabind::constructor<float,float,float,float,float,float>());
@@ -1876,6 +1896,7 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat3x2.def("Set",static_cast<void(*)(lua_State*,::Mat3x2&,float,float,float,float,float,float)>(&Lua::Mat3x2::Set));
 	defMat3x2.def("Set",static_cast<void(*)(lua_State*,::Mat3x2&,const ::Mat3x2&)>(&Lua::Mat3x2::Set));
 	modMath[defMat3x2];
+	register_string_to_vector_type_constructor<Mat3x2>(lua.GetState());
 
 	auto defMat3x4 = luabind::class_<Mat3x4>("Mat3x4");
 	defMat3x4.def(luabind::constructor<float,float,float,float,float,float,float,float,float,float,float,float>());
@@ -1887,6 +1908,7 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat3x4.def("Set",static_cast<void(*)(lua_State*,::Mat3x4&,float,float,float,float,float,float,float,float,float,float,float,float)>(&Lua::Mat3x4::Set));
 	defMat3x4.def("Set",static_cast<void(*)(lua_State*,::Mat3x4&,const ::Mat3x4&)>(&Lua::Mat3x4::Set));
 	modMath[defMat3x4];
+	register_string_to_vector_type_constructor<Mat3x4>(lua.GetState());
 
 	auto defMat4 = luabind::class_<Mat4>("Mat4");
 	defMat4.def(luabind::constructor<float,float,float,float,float,float,float,float,float,float,float,float,float,float,float,float>());
@@ -1935,6 +1957,7 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat4.def("Set",static_cast<void(*)(lua_State*,::Mat4&,float,float,float,float,float,float,float,float,float,float,float,float,float,float,float,float)>(&Lua::Mat4::Set));
 	defMat4.def("Set",static_cast<void(*)(lua_State*,::Mat4&,const ::Mat4&)>(&Lua::Mat4::Set));
 	modMath[defMat4];
+	register_string_to_vector_type_constructor<Mat4>(lua.GetState());
 	auto _G = luabind::globals(lua.GetState());
 	_G["Mat4"] = _G["math"]["Mat4"];
 
@@ -1948,6 +1971,7 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat4x2.def("Set",static_cast<void(*)(lua_State*,::Mat4x2&,float,float,float,float,float,float,float,float)>(&Lua::Mat4x2::Set));
 	defMat4x2.def("Set",static_cast<void(*)(lua_State*,::Mat4x2&,const ::Mat4x2&)>(&Lua::Mat4x2::Set));
 	modMath[defMat4x2];
+	register_string_to_vector_type_constructor<Mat4x2>(lua.GetState());
 
 	auto defMat4x3 = luabind::class_<Mat4x3>("Mat4x3");
 	defMat4x3.def(luabind::constructor<float,float,float,float,float,float,float,float,float,float,float,float>());
@@ -1959,6 +1983,7 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat4x3.def("Set",static_cast<void(*)(lua_State*,::Mat4x3&,float,float,float,float,float,float,float,float,float,float,float,float)>(&Lua::Mat4x3::Set));
 	defMat4x3.def("Set",static_cast<void(*)(lua_State*,::Mat4x3&,const ::Mat4x3&)>(&Lua::Mat4x3::Set));
 	modMath[defMat4x3];
+	register_string_to_vector_type_constructor<Mat4x3>(lua.GetState());
 }
 
 class IkLuaConstraint

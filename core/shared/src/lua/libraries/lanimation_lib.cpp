@@ -113,6 +113,16 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	});
 	cdChannel.def("Save",&panima::Channel::Save);
 	cdChannel.def("Load",&panima::Channel::Load);
+	cdChannel.def("RemoveValue",+[](lua_State *l,panima::Channel &channel,uint32_t idx) -> bool {
+		auto &times = channel.GetTimesArray();
+		auto &values = channel.GetValueArray();
+		if(idx >= times.GetSize() || idx >= values.GetSize())
+			return false;
+		times.RemoveValue(idx);
+		values.RemoveValue(idx);
+		channel.Update();
+		return true;
+	});
 	cdChannel.def("SetTime",+[](lua_State *l,panima::Channel &channel,uint32_t idx,float time) -> bool {
 		auto r = Lua::udm::set_array_value(l,channel.GetTimesArray(),idx,luabind::object{l,time});
 		channel.Update();

@@ -1,6 +1,8 @@
 key = "Taste"
+key_alt = "Alt"
 key_backspace = "Backspace"
 key_capslock = "Feststelltaste"
+key_ctrl = "Strg"
 key_del = "Entfernen"
 key_downarrow = "Nach unten"
 key_drop_weapon = "Waffe wegwerfen"

@@ -1,6 +1,8 @@
 key = "Key"
+key_alt = "Alt"
 key_backspace = "Backspace"
 key_capslock = "Caps Lock"
+key_ctrl = "Ctrl"
 key_del = "Delete"
 key_downarrow = "Down"
 key_drop_weapon = "Drop Weapon"

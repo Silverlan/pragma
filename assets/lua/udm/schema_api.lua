@@ -353,7 +353,7 @@ function udm.generate_lua_api_from_schema(schema)
 								if(i >= a:GetSize()) then return end
 								local el = a:Get(i)
 								if(el:IsValid() == false) then return end
-								return el:GetValue(valueType)
+								return el:GetValue(a:GetValueType())
 							end
 						end
 

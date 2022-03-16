@@ -47,6 +47,7 @@
 #include "pragma/entities/components/base_name_component.hpp"
 #include "pragma/entities/components/basetoggle.h"
 #include "pragma/entities/components/panima_component.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/lentity_type.hpp"
 #include "pragma/lua/classes/lproperty.hpp"
@@ -399,6 +400,41 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	classDef.def("GetAnimation",&BaseEntity::GetAnimation);
 	classDef.def("GetActivity",&BaseEntity::GetActivity);
 	classDef.def("TakeDamage",&BaseEntity::TakeDamage);
+	classDef.def("DebugPrintComponentProperties",+[](BaseEntity &ent) {
+		ent.print(Con::cout);
+		Con::cout<<Con::endl;
+		auto &components = ent.GetComponents();
+		for(auto &c : components)
+		{
+			if(c.expired())
+				continue;
+			Con::cout<<"\t"<<c->GetComponentInfo()->name<<Con::endl;
+			pragma::ComponentMemberIndex memberIndex = 0;
+			auto *info = c->GetMemberInfo(memberIndex++);
+			if(!info)
+				continue;
+			while(info != nullptr)
+			{
+				Con::cout<<"\t\t"<<info->GetName()<<" (";
+				Con::cout<<magic_enum::enum_name(info->type)<<"): ";
+				pragma::ents::visit_member(info->type,[info,&c](auto tag) {
+					using T = decltype(tag)::type;
+					if constexpr(!udm::is_convertible<T,udm::String>())
+						Con::cout<<"Unknown value";
+					else
+					{
+						T value;
+						info->getterFunction(*info,*c,&value);
+						auto str = udm::convert<T,udm::String>(value);
+						Con::cout<<str;
+					}
+				});
+				Con::cout<<Con::endl;
+
+				info = c->GetMemberInfo(memberIndex++);
+			}
+		}
+	});
 	//
 
 	// Enums

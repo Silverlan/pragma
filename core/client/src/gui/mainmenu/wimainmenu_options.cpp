@@ -287,7 +287,15 @@ void WIMainMenuOptions::InitializeGeneralSettings()
 	// Language
 	std::unordered_map<std::string,std::string> lanOptions {};
 	for(auto &pair : Locale::GetLanguages())
-		lanOptions[pair.second] = pair.first;
+	{
+		auto &lanInfo = pair.second;
+		auto enabled = true;
+		if(lanInfo.configData)
+			(*lanInfo.configData)["enabled"](enabled);
+		if(!enabled)
+			continue;
+		lanOptions[lanInfo.displayName] = pair.first;
+	}
 	WIDropDownMenu *language = pList->AddDropDownMenu(Locale::GetText("language"),lanOptions,"cl_language");
 	//
 

@@ -27,6 +27,7 @@
 #include <pragma/lua/libraries/lengine.h>
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/lua/lua_entity_component.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <image/prosper_render_target.hpp>
 #include <pragma/entities/environment/effects/particlesystemdata.h>
 #include <prosper_window.hpp>
@@ -36,16 +37,28 @@ extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-std::shared_ptr<const FontInfo> Lua::engine::create_font(lua_State *l,const std::string &identifier,const std::string &font,uint32_t size,bool reload) {return FontManager::LoadFont(identifier.c_str(),font.c_str(),size,reload);}
-std::shared_ptr<const FontInfo> Lua::engine::create_font(lua_State *l,const std::string &identifier,const std::string &font,uint32_t size) {return create_font(l,identifier,font,size,false);}
+std::shared_ptr<const FontInfo> Lua::engine::create_font(lua_State *l,const std::string &identifier,const std::string &fontSetName,FontSetFlag features,uint32_t size,bool reload)
+{
+	auto *fontSet = c_engine->FindFontSet(fontSetName);
+	if(!fontSet)
+		return nullptr;
+	auto *fontFileData = fontSet->FindFontFileCandidate(features);
+	if(!fontFileData)
+		return nullptr;
+	return FontManager::LoadFont(identifier.c_str(),fontFileData->fileName,size,reload);
+}
+std::shared_ptr<const FontInfo> Lua::engine::create_font(lua_State *l,const std::string &identifier,const std::string &fontSetName,FontSetFlag features,uint32_t size)
+{
+	return create_font(l,identifier,fontSetName,features,size,false);
+}
 std::shared_ptr<const FontInfo> Lua::engine::get_font(lua_State *l,const std::string &identifier) {return FontManager::GetFont(identifier);}
 
 void Lua::engine::register_library(lua_State *l)
 {
 	auto modEngine = luabind::module_(l,"engine");
 	modEngine[
-		luabind::def("create_font",static_cast<std::shared_ptr<const FontInfo>(*)(lua_State*,const std::string&,const std::string&,uint32_t,bool)>(Lua::engine::create_font)),
-		luabind::def("create_font",static_cast<std::shared_ptr<const FontInfo>(*)(lua_State*,const std::string&,const std::string&,uint32_t)>(Lua::engine::create_font)),
+		luabind::def("create_font",static_cast<std::shared_ptr<const FontInfo>(*)(lua_State*,const std::string&,const std::string&,FontSetFlag,uint32_t,bool)>(Lua::engine::create_font)),
+		luabind::def("create_font",static_cast<std::shared_ptr<const FontInfo>(*)(lua_State*,const std::string&,const std::string&,FontSetFlag,uint32_t)>(Lua::engine::create_font)),
 		luabind::def("get_font",Lua::engine::get_font),
 		luabind::def("set_fixed_frame_delta_time_interpretation",Lua::engine::set_fixed_frame_delta_time_interpretation),
 		luabind::def("clear_fixed_frame_delta_time_interpretation",Lua::engine::clear_fixed_frame_delta_time_interpretation),
@@ -57,8 +70,18 @@ void Lua::engine::register_library(lua_State *l)
 		luabind::def("get_tick_count",&Lua::engine::GetTickCount),
 		luabind::def("shutdown",&Lua::engine::exit),
 		luabind::def("get_working_directory",Lua::engine::get_working_directory),
-		luabind::def("get_current_frame_index",&Lua::engine::get_current_frame_index)
+		luabind::def("get_current_frame_index",&Lua::engine::get_current_frame_index),
+		luabind::def("get_default_font_set_name",&CEngine::GetDefaultFontSetName)
 	];
+
+	Lua::RegisterLibraryEnums(l,"engine",{
+		{"FONT_FEATURE_FLAG_NONE",umath::to_integral(FontSetFlag::None)},
+		{"FONT_FEATURE_FLAG_BOLD_BIT",umath::to_integral(FontSetFlag::Bold)},
+		{"FONT_FEATURE_FLAG_ITALIC_BIT",umath::to_integral(FontSetFlag::Italic)},
+		{"FONT_FEATURE_FLAG_MONO_BIT",umath::to_integral(FontSetFlag::Mono)},
+		{"FONT_FEATURE_FLAG_SERIF_BIT",umath::to_integral(FontSetFlag::Serif)},
+		{"FONT_FEATURE_FLAG_SANS_BIT",umath::to_integral(FontSetFlag::Sans)}
+	});
 }
 
 Vector2i Lua::engine::get_text_size(lua_State *l,const std::string &text,const std::string &font)

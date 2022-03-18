@@ -14,6 +14,7 @@
 #include "pragma/rendering/c_render_context.hpp"
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include "pragma/input/c_keybind.h"
+#include "pragma/util/font_set.hpp"
 #include <sharedutils/util_clock.hpp>
 #include <unordered_map>
 
@@ -102,6 +103,9 @@ public:
 
 	virtual bool Initialize(int argc,char *argv[]) override;
 	StateInstance &GetClientStateInstance();
+	const std::string &GetDefaultFontSetName() const;
+	const FontSet &GetDefaultFontSet() const;
+	const FontSet *FindFontSet(const std::string &name) const;
 	virtual void Start() override;
 	virtual void Close() override;
 	virtual void ClearConsole() override;
@@ -222,6 +226,7 @@ protected:
 	void WriteClientConfig(VFilePtrReal f);
 	void PreloadClientConfig();
 	void OnRenderResolutionChanged(uint32_t width,uint32_t height);
+	void LoadFontSets();
 	uint32_t GetPerformanceTimerIndex(uint32_t swapchainIdx,GPUTimer timer) const;
 	uint32_t GetPerformanceTimerIndex(GPUTimer timer) const;
 	virtual uint32_t DoClearUnusedAssets(pragma::asset::Type type) const override;
@@ -263,6 +268,8 @@ private:
 	std::shared_ptr<pragma::debug::GPUProfiler> m_gpuProfiler;
 	std::vector<CallbackHandle> m_gpuProfileHandlers = {};
 
+	std::string m_defaultFontSet;
+	std::unordered_map<std::string,FontSet> m_fontSets;
 	float m_rawInputJoystickMagnitude = 0.f;
 	std::unordered_map<GLFW::Key,GLFW::KeyState> m_joystickKeyStates;
 	std::unordered_map<short,KeyBind> m_keyMappings;

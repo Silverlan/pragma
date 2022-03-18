@@ -49,7 +49,7 @@ bool Locale::Load(const std::string &file,const std::string &lan,bool bReload)
 
 bool Locale::LoadFile(const std::string &file,const std::string &lan)
 {
-	auto filePath = LOCALIZATION_ROOT_PATH +lan +'/' +file;
+	auto filePath = LOCALIZATION_ROOT_PATH +lan +"/texts/" +file;
 	auto f = FileManager::OpenFile(filePath.c_str(),"r");
 	if(f != nullptr)
 	{
@@ -117,22 +117,44 @@ void Locale::SetLanguage(std::string lan)
 	{}
 }
 const std::string &Locale::GetLanguage() {return m_language;}
-std::unordered_map<std::string,std::string> Locale::GetLanguages()
+static std::unordered_map<std::string,Locale::LanguageInfo> g_languages;
+const Locale::LanguageInfo *Locale::GetLanguageInfo()
 {
-	auto f = FileManager::OpenFile("scripts/localization/languages.txt","r");
-	std::unordered_map<std::string,std::string> lanOptions;
-	if(f != nullptr)
+	auto &languages = GetLanguages();
+	auto it = languages.find(m_language);
+	if(it == languages.end())
+		return nullptr;
+	return &it->second;
+}
+const std::unordered_map<std::string,Locale::LanguageInfo> &Locale::GetLanguages()
+{
+	if(g_languages.empty())
 	{
-		while(!f->Eof())
+		std::vector<std::string> lanDirs;
+		std::string baseDir = "scripts/localization/";
+		filemanager::find_files(baseDir +"*",nullptr,&lanDirs);
+		for(auto &identifier : lanDirs)
 		{
-			std::string l = f->ReadLine();
-			std::string key;
-			std::string val;
-			if(ustring::get_key_value(l,key,val))
-				lanOptions.insert(std::unordered_map<std::string,std::string>::value_type(key,val));
+			auto lanPath = baseDir +identifier +"/";
+			if(!filemanager::exists(lanPath +"language.udm"))
+				continue;
+			LanguageInfo lanInfo {};
+			try
+			{
+				auto udmConfig = udm::Data::Load("scripts/localization/" +identifier +"/language.udm");
+				if(udmConfig)
+				{
+					auto udmData = udmConfig->GetAssetData().GetData()[identifier];
+					udmData["displayName"](lanInfo.displayName);
+					lanInfo.configData = udmData.ClaimOwnership();
+				}
+			}
+			catch(const udm::Exception &e)
+			{}
+			g_languages[identifier] = lanInfo;
 		}
 	}
-	return lanOptions;
+	return g_languages;
 }
 bool Locale::SetLocalization(const std::string &id,const tiny_utf8::string &text,bool overwriteIfExists)
 {

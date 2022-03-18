@@ -655,12 +655,51 @@ bool CEngine::Initialize(int argc,char *argv[])
 	auto matErr = matManager->LoadAsset("error");
 	m_clInstance = std::unique_ptr<StateInstance>(new StateInstance{matManager,matErr.get()});
 	//
+	
+	LoadFontSets();
+	auto &defaultFontSet = m_defaultFontSet;
+	defaultFontSet = "vera";
+	auto *lanInfo = Locale::GetLanguageInfo();
+	if(lanInfo && lanInfo->configData)
+	{
+		std::vector<std::string> characterSetRequirements;
+		(*lanInfo->configData)["font"]["characterSetRequirements"](characterSetRequirements);
+		if(std::find(characterSetRequirements.begin(),characterSetRequirements.end(),"jp") != characterSetRequirements.end())
+		{
+			std::string sourceHanSans = "source-han-sans";
+			if(FindFontSet(sourceHanSans))
+				defaultFontSet = sourceHanSans;
+		}
+	}
 
+	auto fail = [&]() {
+		matManager = nullptr;
+		Close();
+		Release();
+		std::this_thread::sleep_for(std::chrono::seconds(5));
+		return false;
+	};
+
+	if(!FindFontSet(defaultFontSet))
+	{
+		Con::cerr<<"ERROR: Failed to find default font set '"<<defaultFontSet<<"'!"<<Con::endl;
+		fail();
+		return false;
+	}
+	
+	auto &fontSet = GetDefaultFontSet();
 	auto &gui = WGUI::Open(GetRenderContext(),matManager);
 	gui.SetMaterialLoadHandler([this](const std::string &path) -> Material* {
 		return GetClientState()->LoadMaterial(path);
 	});
-	auto r = gui.Initialize(GetRenderResolution());
+	auto *fontData = fontSet.FindFontFileCandidate(FontSetFlag::Sans | FontSetFlag::Bold);
+	if(!fontData)
+	{
+		Con::cerr<<"ERROR: Failed to determine default font for font set '"<<defaultFontSet<<"'!"<<Con::endl;
+		fail();
+		return false;
+	}
+	auto r = gui.Initialize(GetRenderResolution(),fontData->fileName);
 	if(r != WGUI::ResultCode::Ok)
 	{
 		Con::cerr<<"ERROR: Unable to initialize GUI library: ";
@@ -679,10 +718,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 				Con::cout<<"Unknown error!";
 				break;
 		}
-		matManager = nullptr;
-		Close();
-		Release();
-		std::this_thread::sleep_for(std::chrono::seconds(5));
+		fail();
 		return false;
 	}
 	WIContextMenu::SetKeyBindHandler([this](GLFW::Key key,const std::string &cmd) -> std::string {
@@ -768,6 +804,58 @@ bool CEngine::Initialize(int argc,char *argv[])
 	}
 #endif
 	return true;
+}
+const std::string &CEngine::GetDefaultFontSetName() const {return m_defaultFontSet;}
+const FontSet &CEngine::GetDefaultFontSet() const
+{
+	auto *fs = FindFontSet(m_defaultFontSet);
+	assert(fs != nullptr);
+	return *fs;
+}
+const FontSet *CEngine::FindFontSet(const std::string &name) const
+{
+	auto it = m_fontSets.find(name);
+	return (it != m_fontSets.end()) ? &it->second : nullptr;
+}
+void CEngine::LoadFontSets()
+{
+	std::vector<std::string> dirs;
+	filemanager::find_files("fonts/*",nullptr,&dirs);
+	for(auto &dir : dirs)
+	{
+		try
+		{
+			auto data = udm::Data::Load("fonts/" +dir +"/font.udm");
+			if(data)
+			{
+				auto fontData = data->GetAssetData().GetData()[dir];
+				if(fontData)
+				{
+					FontSet fontSet {};
+					if(fontData["fileName"])
+					{
+						FontSetFileData fileData {};
+						fontData["fileName"](fileData.fileName);
+						fileData.fileName = dir +'/' +fileData.fileName;
+						fontSet.fileData.push_back(fileData);
+					}
+					else
+					{
+						for(auto &udmFileData : fontData["files"])
+						{
+							FontSetFileData fileData {};
+							udmFileData["fileName"](fileData.fileName);
+							fileData.fileName = dir +'/' +fileData.fileName;
+							udm::to_flags(udmFileData["features"],fileData.flags);
+							fontSet.fileData.push_back(fileData);
+						}
+					}
+					m_fontSets[dir] = std::move(fontSet);
+				}
+			}
+		}
+		catch(const udm::Exception &e) {}
+	}
 }
 void CEngine::RunLaunchCommands()
 {

@@ -29,6 +29,11 @@ public:
 class DLLNETWORK Locale
 {
 public:
+	struct DLLNETWORK LanguageInfo
+	{
+		std::string displayName;
+		udm::PProperty configData = nullptr;
+	};
 	static void Init();
 	static void Clear();
 
@@ -43,7 +48,8 @@ public:
 	static tiny_utf8::string GetTextUtf8(const std::string &id,const std::vector<tiny_utf8::string> &args={});
 	static bool SetLocalization(const std::string &id,const tiny_utf8::string &text,bool overwriteIfExists=true);
 	static const std::string &GetLanguage();
-	static std::unordered_map<std::string,std::string> GetLanguages();
+	static const LanguageInfo *GetLanguageInfo();
+	static const std::unordered_map<std::string,LanguageInfo> &GetLanguages();
 	static void Poll();
 	static std::string DetermineSystemLanguage();
 private:

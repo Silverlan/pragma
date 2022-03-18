@@ -42,8 +42,8 @@ namespace Lua
 		DLLCLIENT bool precache_particle_system(lua_State *l,const std::string &particle,bool reload);
 		DLLCLIENT bool precache_particle_system(lua_State *l,const std::string &particle);
 		DLLCLIENT int save_particle_system(lua_State *l);
-		DLLCLIENT std::shared_ptr<const FontInfo> create_font(lua_State *l,const std::string &identifier,const std::string &font,uint32_t size,bool reload);
-		DLLCLIENT std::shared_ptr<const FontInfo> create_font(lua_State *l,const std::string &identifier,const std::string &font,uint32_t size);
+		DLLCLIENT std::shared_ptr<const FontInfo> create_font(lua_State *l,const std::string &identifier,const std::string &font,FontSetFlag features,uint32_t size,bool reload);
+		DLLCLIENT std::shared_ptr<const FontInfo> create_font(lua_State *l,const std::string &identifier,const std::string &font,FontSetFlag features,uint32_t size);
 		DLLCLIENT std::shared_ptr<const FontInfo> get_font(lua_State *l,const std::string &identifier);
 		DLLCLIENT Vector2i get_text_size(lua_State *l,const std::string &text,const std::string &font);
 		DLLCLIENT Vector2i get_text_size(lua_State *l,const std::string &text,const FontInfo &font);

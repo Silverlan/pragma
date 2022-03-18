@@ -72,7 +72,7 @@ int Lua::Locale::get_languages(lua_State *l)
 	for(auto &pair : languages)
 	{
 		Lua::PushString(l,pair.first);
-		Lua::PushString(l,pair.second);
+		Lua::PushString(l,pair.second.displayName);
 		Lua::SetTableValue(l,t);
 	}
 	return 1;

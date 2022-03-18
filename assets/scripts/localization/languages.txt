@@ -1,5 +1,0 @@
-en = "English"
-de = "Deutsch"
-fr = "Francais"
-es = "Español"
-pt = "Portuguese"

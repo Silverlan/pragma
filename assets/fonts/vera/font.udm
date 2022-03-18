@@ -1,0 +1,45 @@
+"vera"
+{
+	$array files [element][
+		{
+			$string fileName "Vera.ttf"
+			$string features "Sans"
+		},
+		{
+			$string fileName "VeraBd.ttf"
+			$string features "Sans|Bold"
+		},
+		{
+			$string fileName "VeraBI.ttf"
+			$string features "Sans|Bold|Italic"
+		},
+		{
+			$string fileName "VeraIt.ttf"
+			$string features "Sans|Italic"
+		},
+		{
+			$string fileName "VeraMoBd.ttf"
+			$string features "Sans|Mono|Bold"
+		},
+		{
+			$string fileName "VeraMoBI.ttf"
+			$string features "Sans|Mono|Bold|Italic"
+		},
+		{
+			$string fileName "VeraMoIt.ttf"
+			$string features "Sans|Mono|Italic"
+		},
+		{
+			$string fileName "VeraMono.ttf"
+			$string features "Sans|Mono"
+		},
+		{
+			$string fileName "VeraSe.ttf"
+			$string features "Serif"
+		},
+		{
+			$string fileName "VeraSeBd.ttf"
+			$string features "Serif|Bold"
+		}
+	]
+}

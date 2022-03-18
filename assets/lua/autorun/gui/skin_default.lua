@@ -37,8 +37,7 @@ t.MENU_ITEM_SELECTED_SHADOW_OFFSET = Vector2(0,0)
 t.MENU_ITEM_SHADOW_BLUR = 0.4
 t.MENU_ITEM_SHADOW_TRANSITION_TIME = 0.3
 t.MENU_ITEM_SELECT_SOUND_FILE = "ui/menu_select"
-t.MENU_ITEM_FONT_FILE = "vera/VeraMono.ttf"
-t.CREDITS_FONT_FILE = "vera/VeraBd.ttf"
+t.MENU_ITEM_FONT_SET = engine.get_default_font_set_name()
 
 -- WIProgressMenu
 t.PROGRESS_BAR_LABEL_OVERLAY_COLOR = Color(0,0,0,255)
@@ -94,28 +93,28 @@ t.MENU_ITEM_SELECT_SOUND = function(t)
 end
 t.MENU_ITEM_FONT = function(t)
 	if(t._MENU_ITEM_FONT == nil) then
-		engine.create_font("MainMenu_Regular",t.MENU_ITEM_FONT_FILE,36)
+		engine.create_font("MainMenu_Regular",t.MENU_ITEM_FONT_SET,bit.bor(engine.FONT_FEATURE_FLAG_SANS_BIT,engine.FONT_FEATURE_FLAG_MONO_BIT),36)
 		t._MENU_ITEM_FONT = true
 	end
 	return "MainMenu_Regular"
 end
 t.HEADER_FONT = function(t)
 	if(t._HEADER_FONT == nil) then
-		engine.create_font("header",t.MENU_ITEM_FONT_FILE,48)
+		engine.create_font("header",t.MENU_ITEM_FONT_SET,bit.bor(engine.FONT_FEATURE_FLAG_SANS_BIT,engine.FONT_FEATURE_FLAG_MONO_BIT),48)
 		t._HEADER_FONT = true
 	end
 	return "header"
 end
 t.HEADER2_FONT = function(t)
 	if(t._HEADER2_FONT == nil) then
-		engine.create_font("header2",t.MENU_ITEM_FONT_FILE,30)
+		engine.create_font("header2",t.MENU_ITEM_FONT_SET,bit.bor(engine.FONT_FEATURE_FLAG_SANS_BIT,engine.FONT_FEATURE_FLAG_MONO_BIT),30)
 		t._HEADER2_FONT = true
 	end
 	return "header2"
 end
 t.CREDITS_FONT = function(t)
 	if(t._CREDITS_FONT == nil) then
-		engine.create_font("credits",t.CREDITS_FONT_FILE,18)
+		engine.create_font("credits",t.MENU_ITEM_FONT_SET,bit.bor(engine.FONT_FEATURE_FLAG_SANS_BIT,engine.FONT_FEATURE_FLAG_BOLD_BIT),18)
 		t._CREDITS_FONT = true
 	end
 	return "credits"

@@ -1,6 +1,0 @@
-key_vr = "VR Ctrl {0} Button {1}"
-key_vr_axis = "VR Ctrl {0} Achse {1}"
-vr_hmd = "Head-Mounted Display"
-vr_msg_switch_display = "Bitte wechseln Sie zum Head-Mounted Display"
-vr_msg_error_init = "ERROR: OpenVR konnte nicht initialisiert werden: {0}"
-vr_msg_error_load = "ERROR: OpenVR konnte nicht geladen werden: {0}"

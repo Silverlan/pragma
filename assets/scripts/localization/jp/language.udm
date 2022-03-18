@@ -1,0 +1,10 @@
+"jp"
+{
+	// $string displayName "日本語"
+	$string displayName "Japanese"
+	"font"
+	{
+		$array characterSetRequirements [string]["jp"]
+	}
+	$bool enabled false
+}

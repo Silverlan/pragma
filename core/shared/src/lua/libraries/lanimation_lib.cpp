@@ -17,6 +17,7 @@
 #include <pragma/lua/converters/string_view_converter_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
+#include <pragma/lua/converters/pair_converter_t.hpp>
 #include <luainterface.hpp>
 #include <panima/pose.hpp>
 #include <panima/skeleton.hpp>
@@ -227,6 +228,44 @@ void Lua::animation::register_library(Lua::Interface &lua)
 				t[i +1] = a.GetValue<T>(i);
 		});
 		return t;
+	});
+	cdChannel.def("FindInterpolationIndices",+[](lua_State *l,panima::Channel &channel,float time) -> std::optional<std::tuple<uint32_t,uint32_t,float>> {
+		auto &t = channel.GetTimesArray();
+		float interpFactor;
+		auto indices = channel.FindInterpolationIndices(time,interpFactor);
+		if(indices.first == std::numeric_limits<decltype(indices.first)>::max())
+			return {};
+		return {std::tuple<uint32_t,uint32_t,float>{indices.first,indices.second,interpFactor}};
+	});
+	cdChannel.def("FindIndex",+[](lua_State *l,panima::Channel &channel,float time) -> std::optional<uint32_t> {
+		auto &t = channel.GetTimesArray();
+		float interpFactor;
+		auto indices = channel.FindInterpolationIndices(time,interpFactor);
+		if(indices.first == std::numeric_limits<decltype(indices.first)>::max())
+			return {};
+		if(interpFactor < panima::Channel::VALUE_EPSILON)
+			return indices.first;
+		if(interpFactor > 1.f -panima::Channel::VALUE_EPSILON)
+			return indices.second;
+		return {};
+	});
+	cdChannel.def("RemoveValueRange",+[](lua_State *l,panima::Channel &channel,uint32_t startIndex,uint32_t count) {
+		auto &t = channel.GetTimesArray();
+		auto &v = channel.GetValueArray();
+
+		::udm::Array::Range r0 {0 /* src */,0 /* dst */,startIndex};
+		::udm::Array::Range r1 {startIndex +count /* src */,startIndex /* dst */,t.GetSize() -(startIndex +count)};
+		t.Resize(t.GetSize() -count,r0,r1,false);
+		v.Resize(v.GetSize() -count,r0,r1,false);
+	});
+	cdChannel.def("AddValueRange",+[](lua_State *l,panima::Channel &channel,uint32_t startIndex,uint32_t count) {
+		auto &t = channel.GetTimesArray();
+		auto &v = channel.GetValueArray();
+
+		::udm::Array::Range r0 {0 /* src */,0 /* dst */,startIndex};
+		::udm::Array::Range r1 {startIndex /* src */,startIndex +count /* dst */,t.GetSize() -startIndex};
+		t.Resize(t.GetSize() +count,r0,r1,false);
+		v.Resize(v.GetSize() +count,r0,r1,false);
 	});
 	animMod[cdChannel];
 

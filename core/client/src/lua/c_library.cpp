@@ -450,6 +450,18 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua,bool bGUI)
 		luabind::def("set_cursor_pos",+[](const Vector2 &pos) {
 			c_engine->GetWindow()->SetCursorPos(pos);
 		}),
+		luabind::def("is_ctrl_key_down",+[]() -> bool {
+			return c_engine->GetWindow()->GetKeyState(GLFW::Key::LeftControl) != GLFW::KeyState::Release ||
+				c_engine->GetWindow()->GetKeyState(GLFW::Key::RightControl) != GLFW::KeyState::Release;
+		}),
+		luabind::def("is_alt_key_down",+[]() -> bool {
+			return c_engine->GetWindow()->GetKeyState(GLFW::Key::LeftAlt) != GLFW::KeyState::Release ||
+				c_engine->GetWindow()->GetKeyState(GLFW::Key::RightAlt) != GLFW::KeyState::Release;
+		}),
+		luabind::def("is_shift_key_down",+[]() -> bool {
+			return c_engine->GetWindow()->GetKeyState(GLFW::Key::LeftShift) != GLFW::KeyState::Release ||
+				c_engine->GetWindow()->GetKeyState(GLFW::Key::RightShift) != GLFW::KeyState::Release;
+		}),
 		luabind::def("center_cursor",+[]() {
 			auto *window = WGUI::GetInstance().FindFocusedWindow();
 			if(!window)

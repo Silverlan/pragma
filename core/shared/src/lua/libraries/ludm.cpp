@@ -241,6 +241,38 @@ static luabind::object get_array_values(lua_State *l,::udm::LinkedPropertyWrappe
 	return t;
 }
 
+static luabind::object get_array_value(lua_State *l,::udm::LinkedPropertyWrapperArg p,uint32_t idx,std::optional<::udm::Type> type)
+{
+	auto size = p.GetSize();
+	auto *pArray = p.GetValuePtr<::udm::Array>();
+	if(idx >= size || pArray == nullptr)
+		return Lua::nil;
+
+	if(!type.has_value())
+		type = pArray->GetValueType();
+
+	auto vs = [l,idx,pArray,size](auto tag) {
+		using T = decltype(tag)::type;
+		auto *p = static_cast<T*>(pArray->GetValues());
+		return luabind::object{l,p[idx]};
+	};
+	if(::udm::is_numeric_type(*type) || ::udm::is_generic_type(*type))
+		return udm::visit_ng(*type,vs);
+	else if(::udm::is_non_trivial_type(*type))
+	{
+		return udm::visit<false,false,true>(*type,[l,&vs,size,pArray,idx](auto tag) -> luabind::object {
+			using T = decltype(tag)::type;
+			// TODO: Add support for other non-trivial types
+			if constexpr(std::is_same_v<T,udm::String>)
+				return vs(tag);
+			else if constexpr(std::is_same_v<T,udm::Element>)
+				return luabind::object{l,(*pArray)[idx]};
+			return Lua::nil;
+		});
+	}
+	return Lua::nil;
+}
+
 static luabind::object get_blob_array_values(lua_State *l,const ::udm::PropertyWrapper &p,::udm::Type type)
 {
 	auto t = luabind::newtable(l);
@@ -846,6 +878,32 @@ static void set_array_values(lua_State *l,udm::PropertyWrapper &p,const std::str
 	set_array_values(l,a.GetValue<udm::Array>(),type,t,4,arrayType);
 }
 
+static ::udm::LinkedPropertyWrapper x_get(lua_State *l,::udm::Element &p,const std::string &key)
+{
+	return static_cast<::udm::PropertyWrapper&>(p)[key];
+}
+static ::udm::LinkedPropertyWrapper x_get(lua_State *l,::udm::PropertyWrapper &p,const std::string &key)
+{
+	return static_cast<::udm::PropertyWrapper&>(p)[key];
+}
+static ::udm::LinkedPropertyWrapper x_get(lua_State *l,::udm::Property &p,const std::string &key)
+{
+	return static_cast<::udm::PropertyWrapper>(p)[key];
+}
+
+static ::udm::LinkedPropertyWrapper i_get(lua_State *l,::udm::Element &p,uint32_t idx)
+{
+	return static_cast<::udm::PropertyWrapper&>(p)[idx];
+}
+static ::udm::LinkedPropertyWrapper i_get(lua_State *l,::udm::PropertyWrapper &p,uint32_t idx)
+{
+	return static_cast<::udm::PropertyWrapper&>(p)[idx];
+}
+static ::udm::LinkedPropertyWrapper i_get(lua_State *l,::udm::Property &p,uint32_t idx)
+{
+	return static_cast<::udm::PropertyWrapper>(p)[idx];
+}
+
 template<class T,class TPropertyWrapper,class TClassDef>
 	void register_property_methods(TClassDef &classDef)
 {
@@ -861,12 +919,14 @@ template<class T,class TPropertyWrapper,class TClassDef>
 	.def("ToAssetData",+[](lua_State *l,T &prop) -> ::udm::AssetData {
 		return ::udm::AssetData {static_cast<TPropertyWrapper>(prop)};
 	})
-	.def("Get",+[](lua_State *l,T &p,const std::string &key) -> ::udm::LinkedPropertyWrapper {
-		return static_cast<TPropertyWrapper>(p)[key];
-	})
-	.def("Get",+[](lua_State *l,T &p,uint32_t idx) -> ::udm::LinkedPropertyWrapper {
-		return static_cast<TPropertyWrapper>(p)[idx];
-	})
+	//.def("Get",+[](lua_State *l,T &p,const std::string &key) -> ::udm::LinkedPropertyWrapper {
+	//	return static_cast<TPropertyWrapper>(p)[key];
+	//})
+	.def("Get",static_cast<::udm::LinkedPropertyWrapper(*)(lua_State*,T&,const std::string&)>(&x_get))
+	.def("Get",static_cast<::udm::LinkedPropertyWrapper(*)(lua_State*,T&,uint32_t)>(&i_get))
+	//.def("Get",+[](lua_State *l,T &p,uint32_t idx) -> ::udm::LinkedPropertyWrapper {
+	//	return static_cast<TPropertyWrapper>(p)[idx];
+	//})
 	.def("GetArrayValuesFromBlob",+[](lua_State *l,T &p,::udm::Type type) -> luabind::object {
 		return get_blob_array_values(l,static_cast<TPropertyWrapper>(p),type);
 	})
@@ -896,18 +956,17 @@ template<class T,class TPropertyWrapper,class TClassDef>
 	.def("GetSize",+[](lua_State *l,T &p) -> uint32_t {
 		return static_cast<TPropertyWrapper>(p).GetSize();
 	})
-	.def("GetArrayValues",+[](lua_State *l,T &p) -> luabind::object {
-		TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
-		auto *lp = tp.GetLinked();
-		if(lp)
-			return get_array_values(l,*lp,{});
-		return get_array_values(l,::udm::LinkedPropertyWrapper{tp},{});
-	})
 	.def("GetValueType",+[](lua_State *l,T &p) -> luabind::object {
 		auto *a = static_cast<TPropertyWrapper>(p).GetValuePtr<::udm::Array>();
 		if(!a)
 			return luabind::object{};
 		return luabind::object{l,umath::to_integral(a->GetValueType())};
+	})
+	.def("SetValueType",+[](lua_State *l,T &p,::udm::Type valueType) {
+		auto *a = static_cast<TPropertyWrapper>(p).GetValuePtr<::udm::Array>();
+		if(!a)
+			return;
+		a->SetValueType(valueType);
 	})
 	.def("GetArrayValues",+[](lua_State *l,T &p,::udm::Type type) -> luabind::object {
 		TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
@@ -915,13 +974,6 @@ template<class T,class TPropertyWrapper,class TClassDef>
 		if(lp)
 			return get_array_values(l,*lp,type);
 		return get_array_values(l,::udm::LinkedPropertyWrapper{tp},type);
-	})
-	.def("GetArrayValues",+[](lua_State *l,T &p,::udm::Type type) -> luabind::object {
-		TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
-		auto *lp = tp.GetLinked();
-		if(lp)
-			return get_array_values(l,(*lp),type);
-		return get_array_values(l,tp,type);
 	})
 	.def("GetArrayValues",+[](lua_State *l,T &p) -> luabind::object {
 		TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
@@ -943,6 +995,20 @@ template<class T,class TPropertyWrapper,class TClassDef>
 		if(lp)
 			return get_array_values(l,(*lp)[name],{});
 		return get_array_values(l,tp[name],{});
+	})
+	.def("GetArrayValue",+[](lua_State *l,T &p,uint32_t idx,::udm::Type type) -> luabind::object {
+		TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
+		auto *lp = tp.GetLinked();
+		if(lp)
+			return get_array_value(l,*lp,idx,type);
+		return get_array_value(l,::udm::LinkedPropertyWrapper{tp},idx,type);
+	})
+	.def("GetArrayValue",+[](lua_State *l,T &p,uint32_t idx) -> luabind::object {
+		TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
+		auto *lp = tp.GetLinked();
+		if(lp)
+			return get_array_value(l,(*lp),idx,{});
+		return get_array_value(l,tp,idx,{});
 	})
 	.def("SetArrayValues",+[](lua_State *l,T &p,::udm::Type type,luabind::tableT<void> t) {
 		TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
@@ -978,6 +1044,21 @@ template<class T,class TPropertyWrapper,class TClassDef>
 	})
 	.def("Resize",+[](lua_State *l,T &p,uint32_t size) {
 		static_cast<TPropertyWrapper>(p).Resize(size);
+	})
+	.def("RemoveValue",+[](lua_State *l,T &p,uint32_t idx) {
+		auto *a = static_cast<TPropertyWrapper>(p).GetValuePtr<::udm::Array>();
+		if(!a)
+			return;
+		a->RemoveValue(idx);
+	})
+	.def("RemoveValue",+[](lua_State *l,T &p,const std::string &key) {
+		TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
+		auto *el = tmp.GetValuePtr<::udm::Element>();
+		if(!el)
+			return;
+		auto it = el->children.find(key);
+		if(it != el->children.end())
+			el->children.erase(it);
 	})
 	.def("SetValue",+[](lua_State *l,T &el,const std::string &key,::udm::Type type,luabind::object o) {
 		set_property_value(l,static_cast<TPropertyWrapper>(el)[key],type,o,4);
@@ -1016,6 +1097,12 @@ template<class T,class TPropertyWrapper,class TClassDef>
 	})
 	.def("Merge",+[](lua_State *l,T &prop,::udm::PropertyWrapper &propOther,::udm::MergeFlags mergeFlags) {
 		static_cast<TPropertyWrapper>(prop).Merge(propOther,mergeFlags);
+	})
+	.def("Copy",+[](lua_State *l,T &prop) -> std::shared_ptr<::udm::Property> {
+		auto p = static_cast<TPropertyWrapper>(prop).prop;
+		if(!p)
+			return nullptr;
+		return std::make_shared<::udm::Property>(*p);
 	})
 	.def("ToAscii",+[](lua_State *l,T &prop) -> luabind::object {
 		auto *el = static_cast<TPropertyWrapper>(prop).GetValuePtr<::udm::Element>();
@@ -1247,10 +1334,109 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			return ss.str();
 		}),
 		luabind::def("is_numeric_type",&::udm::is_numeric_type),
+		luabind::def("is_integral_type",+[](::udm::Type type) -> bool {
+			switch(type)
+			{
+			case ::udm::Type::Int8:
+			case ::udm::Type::UInt8:
+			case ::udm::Type::Int16:
+			case ::udm::Type::UInt16:
+			case ::udm::Type::Int32:
+			case ::udm::Type::UInt32:
+			case ::udm::Type::Int64:
+			case ::udm::Type::UInt64:
+			case ::udm::Type::Boolean:
+				return true;
+			}
+			return false;
+		}),
+		luabind::def("is_floating_point_type",+[](::udm::Type type) -> bool {
+			switch(type)
+			{
+			case ::udm::Type::Float:
+			case ::udm::Type::Double:
+			case ::udm::Type::Half:
+				return true;
+			}
+			return false;
+		}),
 		luabind::def("is_generic_type",&::udm::is_generic_type),
 		luabind::def("is_non_trivial_type",&::udm::is_non_trivial_type),
+		luabind::def("get_numeric_component_count",&::udm::get_numeric_component_count),
+		luabind::def("is_vector_type",+[](::udm::Type type) -> bool {
+			return ::udm::visit<true,true,true>(type,[type](auto tag){
+				using T = decltype(tag)::type;
+				return ::udm::is_vector_type<T>;
+			});
+		}),
+		luabind::def("is_matrix_type",+[](::udm::Type type) -> bool {
+			return ::udm::visit<true,true,true>(type,[type](auto tag){
+				using T = decltype(tag)::type;
+				return ::udm::is_matrix_type<T>;
+			});
+		}),
+		luabind::def("get_matrix_row_count",+[](::udm::Type type) -> uint32_t {
+			switch(type)
+			{
+			case ::udm::Type::Mat4:
+				return 4;
+			case ::udm::Type::Mat3x4:
+				return 3;
+			}
+			static_assert(umath::to_integral(::udm::Type::Count) == 36,"Update this when types have been added or removed!");
+			return 0;
+		}),
+		luabind::def("get_matrix_column_count",+[](::udm::Type type) -> uint32_t {
+			switch(type)
+			{
+			case ::udm::Type::Mat4:
+				return 4;
+			case ::udm::Type::Mat3x4:
+				return 4;
+			}
+			static_assert(umath::to_integral(::udm::Type::Count) == 36,"Update this when types have been added or removed!");
+			return 0;
+		}),
 		luabind::def("type_to_string",+[](::udm::Type type) -> std::string {
 			return std::string{magic_enum::enum_name(type)};
+		}),
+		luabind::def("is_array_type",+[](::udm::Type type) -> bool {
+			return ::udm::is_array_type(type);
+		}),
+		luabind::def("get_class_type",+[](lua_State *l,::udm::Type type) -> luabind::object {
+			switch(type)
+			{
+			case ::udm::Type::Vector2:
+				return luabind::globals(l)["math"]["Vector2"];
+			case ::udm::Type::Vector2i:
+				return luabind::globals(l)["math"]["Vector2i"];
+			case ::udm::Type::Vector3:
+				return luabind::globals(l)["math"]["Vector"];
+			case ::udm::Type::Vector3i:
+				return luabind::globals(l)["math"]["Vector3"];
+			case ::udm::Type::Vector4:
+				return luabind::globals(l)["math"]["Vector4"];
+			case ::udm::Type::Vector4i:
+				return luabind::globals(l)["math"]["Vector4i"];
+			case ::udm::Type::Quaternion:
+				return luabind::globals(l)["math"]["Quaternion"];
+			case ::udm::Type::EulerAngles:
+				return luabind::globals(l)["math"]["EulerAngles"];
+			case ::udm::Type::Srgba:
+				return luabind::globals(l)["udm"]["Srgba"];
+			case ::udm::Type::HdrColor:
+				return luabind::globals(l)["udm"]["HdrColor"];
+			case ::udm::Type::Transform:
+				return luabind::globals(l)["math"]["Transform"];
+			case ::udm::Type::ScaledTransform:
+				return luabind::globals(l)["math"]["ScaledTransform"];
+			case ::udm::Type::Mat4:
+				return luabind::globals(l)["math"]["Mat4"];
+			case ::udm::Type::Mat3x4:
+				return luabind::globals(l)["math"]["Mat3x4"];
+			}
+			static_assert(umath::to_integral(::udm::Type::Count) == 36,"Update this when types have been added or removed!");
+			return Lua::nil;
 		})
 	];
 
@@ -1292,12 +1478,14 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		{"TYPE_STRUCT",umath::to_integral(::udm::Type::Struct)},
 		{"TYPE_HALF",umath::to_integral(::udm::Type::Half)},
         {"TYPE_COUNT",umath::to_integral(::udm::Type::Count)},
+        {"TYPE_INVALID",umath::to_integral(::udm::Type::Invalid)},
 
         {"ARRAY_TYPE_COMPRESSED",umath::to_integral(::udm::ArrayType::Compressed)},
         {"ARRAY_TYPE_RAW",umath::to_integral(::udm::ArrayType::Raw)},
 
 		{"MERGE_FLAG_NONE",umath::to_integral(::udm::MergeFlags::None)},
 		{"MERGE_FLAG_BIT_OVERWRITE_EXISTING",umath::to_integral(::udm::MergeFlags::OverwriteExisting)},
+		{"MERGE_FLAG_BIT_DEEP_COPY",umath::to_integral(::udm::MergeFlags::DeepCopy)},
 		
         {"ASCII_SAVE_FLAG_BIT_INCLUDE_HEADER",umath::to_integral(::udm::AsciiSaveFlags::IncludeHeader)},
         {"ASCII_SAVE_FLAG_BIT_DONT_COMPRESS_LZ4_ARRAYS",umath::to_integral(::udm::AsciiSaveFlags::DontCompressLz4Arrays)}

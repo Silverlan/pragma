@@ -235,6 +235,12 @@ static luabind::object copy_table(lua_State *l,const luabind::object &t,bool dee
 	return tCpy;
 }
 
+namespace umath
+{
+	uint32_t find_bezier_roots(float x,float v0,float v1,float v2,float v3,std::array<float,3> &roots);
+	float calc_bezier_point(float f1,float f2,float f3,float f4,float t);
+};
+
 void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 {
 	// Remove sensitive functions and libraries
@@ -517,7 +523,19 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		luabind::def("solve_ballistic_arc",static_cast<luabind::tableT<Vector3>(*)(lua_State*,const Vector3&,double,const Vector3&,double)>(&Lua::math::solve_ballistic_arc)),
 			
 		luabind::def("solve_ballistic_arc_lateral",static_cast<luabind::optional<luabind::mult<Vector3,double,Vector3>>(*)(lua_State*,const Vector3&,double,const Vector3&,const Vector3&,double)>(&Lua::math::solve_ballistic_arc_lateral)),
-		luabind::def("solve_ballistic_arc_lateral",static_cast<luabind::optional<luabind::mult<Vector3,double>>(*)(lua_State*,const Vector3&,double,const Vector3&,double)>(&Lua::math::solve_ballistic_arc_lateral))
+		luabind::def("solve_ballistic_arc_lateral",static_cast<luabind::optional<luabind::mult<Vector3,double>>(*)(lua_State*,const Vector3&,double,const Vector3&,double)>(&Lua::math::solve_ballistic_arc_lateral)),
+			
+		luabind::def("calc_bezier_point",+[](
+			lua_State *l,float time,
+			float cp0Time,float cp0Val,
+			float cp0OutTime,float cp0OutVal,
+			float cp1InTime,float cp1InVal,
+			float cp1Time,float cp1Val
+		) -> float {
+			std::array<float,3> r;
+			auto n = umath::find_bezier_roots(time,cp0Time,cp0OutTime,cp1InTime,cp1Time,r);
+			return umath::calc_bezier_point(cp0Val,cp0OutVal,cp1InVal,cp1Val,r[0]);
+		})
 	];
 	lua_pushtablecfunction(lua.GetState(),"math","parse_expression",parse_math_expression);
 	lua_pushtablecfunction(lua.GetState(),"math","solve_quadric",Lua::math::solve_quadric);

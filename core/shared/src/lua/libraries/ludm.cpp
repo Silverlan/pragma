@@ -936,6 +936,22 @@ template<class T,class TPropertyWrapper,class TClassDef>
 	.def("AddBlobFromArrayValues",+[](lua_State *l,T &p,const std::string &path,::udm::Type type,luabind::tableT<void> t) {
 		return set_blob_array_values(l,static_cast<TPropertyWrapper>(p),path,type,t);
 	})
+	.def("AddValueRange",+[](lua_State *l,T &p,uint32_t startIndex,uint32_t count) {
+		auto *a = static_cast<TPropertyWrapper>(p).GetValuePtr<::udm::Array>();
+		if(!a)
+			return;
+		::udm::Array::Range r0 {0 /* src */,0 /* dst */,startIndex};
+		::udm::Array::Range r1 {startIndex /* src */,startIndex +count /* dst */,a->GetSize() -startIndex};
+		a->Resize(a->GetSize() +count,r0,r1,false);
+	})
+	.def("RemoveValueRange",+[](lua_State *l,T &p,uint32_t startIndex,uint32_t count) {
+		auto *a = static_cast<TPropertyWrapper>(p).GetValuePtr<::udm::Array>();
+		if(!a)
+			return;
+		::udm::Array::Range r0 {0 /* src */,0 /* dst */,startIndex};
+		::udm::Array::Range r1 {startIndex +count /* src */,startIndex /* dst */,a->GetSize() -(startIndex +count)};
+		a->Resize(a->GetSize() -count,r0,r1,false);
+	})
 	.def("GetBlobData",+[](lua_State *l,T &p) {
 		auto type = ::udm::Type::Nil;
 		auto vs = [l,&p,&type](auto tag) {

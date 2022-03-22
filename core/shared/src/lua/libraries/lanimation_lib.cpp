@@ -35,6 +35,20 @@ namespace Lua::animation
 	void register_library(Lua::Interface &lua);
 };
 
+static std::optional<uint32_t> find_channel_value_index(lua_State *l,panima::Channel &channel,float time,float epsilon=panima::Channel::VALUE_EPSILON)
+{
+	auto &t = channel.GetTimesArray();
+	float interpFactor;
+	auto indices = channel.FindInterpolationIndices(time,interpFactor);
+	if(indices.first == std::numeric_limits<decltype(indices.first)>::max())
+		return {};
+	if(interpFactor < epsilon)
+		return indices.first;
+	if(interpFactor > 1.f -epsilon)
+		return indices.second;
+	return {};
+}
+
 void Lua::animation::register_library(Lua::Interface &lua)
 {
 	auto animMod = luabind::module(lua.GetState(),"panima");
@@ -238,17 +252,9 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		return {std::tuple<uint32_t,uint32_t,float>{indices.first,indices.second,interpFactor}};
 	});
 	cdChannel.def("FindIndex",+[](lua_State *l,panima::Channel &channel,float time) -> std::optional<uint32_t> {
-		auto &t = channel.GetTimesArray();
-		float interpFactor;
-		auto indices = channel.FindInterpolationIndices(time,interpFactor);
-		if(indices.first == std::numeric_limits<decltype(indices.first)>::max())
-			return {};
-		if(interpFactor < panima::Channel::VALUE_EPSILON)
-			return indices.first;
-		if(interpFactor > 1.f -panima::Channel::VALUE_EPSILON)
-			return indices.second;
-		return {};
+		return find_channel_value_index(l,channel,time,panima::Channel::VALUE_EPSILON);
 	});
+	cdChannel.def("FindIndex",&find_channel_value_index);
 	cdChannel.def("RemoveValueRange",+[](lua_State *l,panima::Channel &channel,uint32_t startIndex,uint32_t count) {
 		auto &t = channel.GetTimesArray();
 		auto &v = channel.GetValueArray();
@@ -268,6 +274,11 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		v.Resize(v.GetSize() +count,r0,r1,false);
 	});
 	animMod[cdChannel];
+
+	pragma::lua::define_custom_constructor<panima::Channel,
+		[](::udm::LinkedPropertyWrapper &times,::udm::LinkedPropertyWrapper &values) -> std::shared_ptr<panima::Channel> {
+		return std::make_shared<panima::Channel>(times.ClaimOwnership(),values.ClaimOwnership());
+	},::udm::LinkedPropertyWrapper&,::udm::LinkedPropertyWrapper&>(lua.GetState());
 
 	auto cdSet = luabind::class_<panima::AnimationSet>("Set");
 	cdSet.def(luabind::tostring(luabind::self));

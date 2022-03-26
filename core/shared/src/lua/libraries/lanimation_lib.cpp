@@ -30,23 +30,76 @@
 #include <panima/slice.hpp>
 #include <luabind/copy_policy.hpp>
 
+#pragma optimize("",off)
 namespace Lua::animation
 {
 	void register_library(Lua::Interface &lua);
 };
 
-static std::optional<uint32_t> find_channel_value_index(lua_State *l,panima::Channel &channel,float time,float epsilon=panima::Channel::VALUE_EPSILON)
+// See https://stackoverflow.com/a/1267878/2482983
+template<typename T>
+static void reorder(udm::Array &v, std::vector<size_t> const &order )  {   
+    for ( int s = 1, d; s < order.size(); ++ s ) {
+        for ( d = order[s]; d < s; d = order[d] ) ;
+        if ( d == s ) while ( d = order[d], d != s ) std::swap( v.GetValue<T>(s), v.GetValue<T>(d) );
+    }
+}
+
+static std::optional<uint32_t> set_channel_time(lua_State *l,panima::Channel &channel,uint32_t valueIndex,float time,bool resort)
 {
-	auto &t = channel.GetTimesArray();
-	float interpFactor;
-	auto indices = channel.FindInterpolationIndices(time,interpFactor);
-	if(indices.first == std::numeric_limits<decltype(indices.first)>::max())
-		return {};
-	if(interpFactor < epsilon)
-		return indices.first;
-	if(interpFactor > 1.f -epsilon)
-		return indices.second;
-	return {};
+	if(!resort)
+	{
+		auto r = Lua::udm::set_array_value(l,channel.GetTimesArray(),valueIndex,luabind::object{l,time});
+		channel.Update();
+		return r ? valueIndex : std::optional<uint32_t>{};
+	}
+	auto &times = channel.GetTimesArray();
+	auto &values = channel.GetValueArray();
+	auto oldTime = channel.GetTime(valueIndex);
+	times[valueIndex] = time;
+
+	auto numTimes = times.GetSize();
+	auto getTime = [numTimes,&times](uint32_t idx) -> std::optional<float> {
+		if(idx >= numTimes)
+			return {};
+		return times.GetValue<float>(idx);
+	};
+
+	// Since we changed the time value, we may have to re-order
+	auto swapValue = [&times,&values](uint32_t idx0,uint32_t idx1) {
+		auto *time0 = times.GetValuePtr<float>(idx0);
+		auto *time1 = times.GetValuePtr<float>(idx1);
+		std::swap(*time0,*time1);
+
+		::udm::visit_ng(values.GetValueType(),[&values,idx0,idx1](auto tag) {
+			using T = decltype(tag)::type;
+			auto *val0 = values.GetValuePtr<T>(idx0);
+			auto *val1 = values.GetValuePtr<T>(idx1);
+			std::swap(*val0,*val1);
+		});
+	};
+	auto tNext = getTime(valueIndex +1);
+	const std::optional<float> nil {};
+	while(tNext.has_value() && tNext < time)
+	{
+		// Value needs to be moved up
+		swapValue(valueIndex,valueIndex +1);
+		valueIndex = valueIndex +1;
+		tNext = getTime(valueIndex +1);
+	}
+
+	auto tPrev = (valueIndex > 0) ? getTime(valueIndex -1) : nil;
+	while(tPrev.has_value() && tPrev > time)
+	{
+		// Value needs to be moved down
+		swapValue(valueIndex,valueIndex -1);
+		valueIndex = valueIndex -1;
+		tPrev = (valueIndex > 0) ? getTime(valueIndex -1) : nil;
+	}
+	//
+
+	channel.Update();
+	return valueIndex;
 }
 
 void Lua::animation::register_library(Lua::Interface &lua)
@@ -139,10 +192,10 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		return true;
 	});
 	cdChannel.def("SetTime",+[](lua_State *l,panima::Channel &channel,uint32_t idx,float time) -> bool {
-		auto r = Lua::udm::set_array_value(l,channel.GetTimesArray(),idx,luabind::object{l,time});
-		channel.Update();
-		return r;
+		auto r = set_channel_time(l,channel,idx,time,false);
+		return r.has_value();
 	});
+	cdChannel.def("SetTime",&set_channel_time);
 	cdChannel.def("SetValue",+[](lua_State *l,panima::Channel &channel,uint32_t idx,const luabind::object &value) -> bool {
 		auto r = Lua::udm::set_array_value(l,channel.GetValueArray(),idx,value);
 		channel.Update();
@@ -252,9 +305,9 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		return {std::tuple<uint32_t,uint32_t,float>{indices.first,indices.second,interpFactor}};
 	});
 	cdChannel.def("FindIndex",+[](lua_State *l,panima::Channel &channel,float time) -> std::optional<uint32_t> {
-		return find_channel_value_index(l,channel,time,panima::Channel::VALUE_EPSILON);
+		return channel.FindValueIndex(time,panima::Channel::VALUE_EPSILON);
 	});
-	cdChannel.def("FindIndex",&find_channel_value_index);
+	cdChannel.def("FindIndex",&panima::Channel::FindValueIndex);
 	cdChannel.def("RemoveValueRange",+[](lua_State *l,panima::Channel &channel,uint32_t startIndex,uint32_t count) {
 		auto &t = channel.GetTimesArray();
 		auto &v = channel.GetValueArray();
@@ -272,6 +325,23 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		::udm::Array::Range r1 {startIndex /* src */,startIndex +count /* dst */,t.GetSize() -startIndex};
 		t.Resize(t.GetSize() +count,r0,r1,false);
 		v.Resize(v.GetSize() +count,r0,r1,false);
+	});
+	cdChannel.def("SortValues",+[](lua_State *l,panima::Channel &channel) {
+		auto n = channel.GetTimeCount();
+		std::vector<size_t> order;
+		order.resize(n);
+		for(auto i=decltype(n){0u};i<n;++i)
+			order[i] = i;
+		auto &timesArray = channel.GetTimesArray();
+		auto *times = timesArray.GetValuePtr<float>(0);
+		std::sort(order.begin(),order.end(),[times](size_t a,size_t b) {return times[a] < times[b];});
+		reorder<float>(timesArray,order);
+		auto &valueArray = channel.GetValueArray();
+		::udm::visit_ng(valueArray.GetValueType(),[&valueArray,&order](auto tag) {
+			using T = decltype(tag)::type;
+			reorder<T>(valueArray,order);
+		});
+		channel.Update();
 	});
 	animMod[cdChannel];
 
@@ -412,3 +482,4 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	})];
 	animMod[cdAnim2];
 }
+#pragma optimize("",on)

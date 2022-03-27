@@ -11,6 +11,7 @@
 #include "pragma/lua/util.hpp"
 #include "pragma/lua/converters/vector_converter_t.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
+#include "pragma/lua/types/udm.hpp"
 #include "pragma/util/util_game.hpp"
 #include <sharedutils/util_path.hpp>
 #include <luabind/iterator_policy.hpp>
@@ -1216,6 +1217,153 @@ static Lua::var<Lua::mult<bool,std::string>,::udm::Data> create(lua_State *l,::u
 	}
 }
 
+static udm::Type determine_lua_object_udm_type(const luabind::object &o)
+{
+	auto type = static_cast<Lua::Type>(luabind::type(o));
+	if(type == Lua::Type::Bool)
+		return udm::Type::Boolean;
+	if(type == Lua::Type::Number)
+		return udm::Type::Float;
+	if(type == Lua::Type::String)
+		return udm::Type::String;
+
+	auto isType = [&o]<typename T>() -> bool {
+		return luabind::object_cast_nothrow<T*>(o,static_cast<T*>(nullptr)) != nullptr;
+	};
+	if(isType.template operator()<udm::Vector2>())
+		return udm::Type::Vector2;
+	if(isType.template operator()<udm::Vector3>())
+		return udm::Type::Vector3;
+	if(isType.template operator()<udm::Vector4>())
+		return udm::Type::Vector4;
+	if(isType.template operator()<udm::Quaternion>())
+		return udm::Type::Quaternion;
+	if(isType.template operator()<udm::EulerAngles>())
+		return udm::Type::EulerAngles;
+	if(isType.template operator()<udm::Srgba>())
+		return udm::Type::Srgba;
+	if(isType.template operator()<udm::HdrColor>())
+		return udm::Type::HdrColor;
+	if(isType.template operator()<udm::Transform>())
+		return udm::Type::Transform;
+	if(isType.template operator()<udm::ScaledTransform>())
+		return udm::Type::ScaledTransform;
+	if(isType.template operator()<udm::Mat4>())
+		return udm::Type::Mat4;
+	if(isType.template operator()<udm::Mat3x4>())
+		return udm::Type::Mat3x4;
+	if(isType.template operator()<udm::Vector2i>())
+		return udm::Type::Vector2i;
+	if(isType.template operator()<udm::Vector3i>())
+		return udm::Type::Vector3i;
+	if(isType.template operator()<udm::Vector4i>())
+		return udm::Type::Vector4i;
+	return udm::Type::Invalid;
+}
+
+template<typename T>
+	static T &get_lua_object_udm_value(const luabind::object &o) requires(!std::is_arithmetic_v<T>)
+{
+	return *luabind::object_cast<T*>(o);
+}
+
+template<typename T>
+	static T get_lua_object_udm_value(const luabind::object &o) requires(std::is_arithmetic_v<T>)
+{
+	return luabind::object_cast<T>(o);
+}
+
+template<typename T>
+	static udm::underlying_numeric_type<T> get_numeric_component(const T &value,uint32_t idx)
+{
+
+	if constexpr(udm::is_arithmetic<T>)
+		return value;
+	else if constexpr(udm::is_vector_type<T> || std::is_same_v<T,udm::EulerAngles> || std::is_same_v<T,udm::Srgba> || std::is_same_v<T,udm::HdrColor>)
+		return value[idx];
+	else if constexpr(std::is_same_v<T,udm::Quaternion>)
+	{
+		// Quaternion memory order is xyzw, but we want wxyz
+		if(idx == 0)
+			return value[3];
+		return value[idx -1];
+	}
+	else
+	{
+		static_assert(std::is_same_v<udm::underlying_numeric_type<T>,float>);
+		return *(reinterpret_cast<const float*>(&value) +idx);
+	}
+}
+
+template<typename T>
+	static void lerp_value(const T &value0,const T &value1,float f,T &outValue,udm::Type type)
+{
+	using TBase = udm::base_type<T>;
+	if constexpr(std::is_same_v<TBase,udm::Transform> || std::is_same_v<TBase,udm::ScaledTransform>)
+	{
+		outValue.SetOrigin(uvec::lerp(value0.GetOrigin(),value1.GetOrigin(),f));
+		outValue.SetRotation(uquat::slerp(value0.GetRotation(),value1.GetRotation(),f));
+		if constexpr(std::is_same_v<TBase,udm::ScaledTransform>)
+			outValue.SetScale(uvec::lerp(value0.GetScale(),value1.GetScale(),f));
+	}
+	else if constexpr(std::is_same_v<TBase,udm::Half>)
+		outValue = static_cast<float>(umath::lerp(static_cast<float>(value0),static_cast<float>(value1),f));
+	else if constexpr(udm::is_arithmetic<TBase>)
+		outValue = umath::lerp(value0,value1,f);
+	else if constexpr(udm::is_vector_type<TBase>)
+	{
+		if constexpr(std::is_integral_v<TBase::value_type>)
+			; // TODO
+		else
+			outValue = value0 +(value1 -value0) *f;
+	}
+	else if constexpr(std::is_same_v<TBase,udm::EulerAngles>)
+	{
+		auto q0 = uquat::create(value0);
+		auto q1 = uquat::create(value1);
+		auto qr = uquat::slerp(q0,q1,f);
+		outValue = EulerAngles{qr};
+	}
+	else if constexpr(std::is_same_v<TBase,udm::Quaternion>)
+		outValue = uquat::slerp(value0,value1,f);
+	else
+	{
+		outValue = value0;
+		auto n = udm::get_numeric_component_count(type);
+		for(auto i=decltype(n){0u};i<n;++i)
+		{
+			auto &f0 = *(reinterpret_cast<const float*>(&value0) +i);
+			auto &f1 = *(reinterpret_cast<const float*>(&value1) +i);
+
+			*(reinterpret_cast<float*>(&outValue) +i) = umath::lerp(f0,f1,f);
+		}
+	}
+}
+
+static Lua::type<uint32_t> get_numeric_component(lua_State *l,const luabind::object &value,uint32_t idx,udm::Type type)
+{
+	type = (type != udm::Type::Invalid) ? type : determine_lua_object_udm_type(value);
+	return ::udm::visit_ng(type,[l,&value,idx](auto tag){
+		using T = decltype(tag)::type;
+		using BaseType = udm::underlying_numeric_type<T>;
+		if constexpr(std::is_same_v<udm::underlying_numeric_type<T>,void>)
+			return Lua::nil;
+		else
+			return luabind::object{l,get_numeric_component<T>(get_lua_object_udm_value<T>(value),idx)};
+	});
+}
+
+static Lua::udm_ng lerp_value(lua_State *l,const luabind::object &value0,const luabind::object &value1,float t,udm::Type type)
+{
+	type = (type != udm::Type::Invalid) ? type : determine_lua_object_udm_type(value0);
+	return ::udm::visit_ng(type,[l,&value0,&value1,t,type](auto tag){
+		using T = decltype(tag)::type;
+		T valuer;
+		lerp_value<T>(get_lua_object_udm_value<T>(value0),get_lua_object_udm_value<T>(value1),t,valuer,type);
+		return luabind::object{l,valuer};
+	});
+}
+
 void Lua::udm::register_library(Lua::Interface &lua)
 {
 	auto modUdm = luabind::module(lua.GetState(),"udm");
@@ -1453,7 +1601,15 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			}
 			static_assert(umath::to_integral(::udm::Type::Count) == 36,"Update this when types have been added or removed!");
 			return Lua::nil;
-		})
+		}),
+		luabind::def("get_numeric_component",+[](lua_State *l,const luabind::object &value,uint32_t idx) -> Lua::type<uint32_t> {
+			return get_numeric_component(l,value,idx,::udm::Type::Invalid);
+		}),
+		luabind::def("get_numeric_component",static_cast<Lua::type<uint32_t>(*)(lua_State*,const luabind::object&,uint32_t,::udm::Type)>(&get_numeric_component)),
+		luabind::def("lerp",+[](lua_State *l,const luabind::object &value0,const luabind::object &value1,float t) -> Lua::udm_ng {
+			return lerp_value(l,value0,value1,t,::udm::Type::Invalid);
+		}),
+		luabind::def("lerp",static_cast<Lua::udm_ng(*)(lua_State*,const luabind::object&,const luabind::object&,float,::udm::Type)>(&lerp_value))
 	];
 
 	Lua::RegisterLibraryEnums(lua.GetState(),"udm",{

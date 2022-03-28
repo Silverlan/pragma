@@ -102,6 +102,29 @@ static std::optional<uint32_t> set_channel_time(lua_State *l,panima::Channel &ch
 	return valueIndex;
 }
 
+static Lua::opt<Lua::udm_ng> get_interpolated_value(lua_State *l,panima::Channel &channel,float t,bool clampToBounds)
+{
+	if(channel.GetTimeCount() == 0)
+		return Lua::nil;
+	if(clampToBounds)
+	{
+		if(t < channel.GetTime(0) || t > channel.GetTime(channel.GetTimeCount() -1))
+			return Lua::nil;
+	}
+	float factor;
+	auto indices = channel.FindInterpolationIndices(t,factor);
+	if(indices.first == std::numeric_limits<decltype(indices.first)>::max())
+		return Lua::nil;
+	return ::udm::visit_ng(channel.GetValueType(),[l,&channel,indices,factor](auto tag) {
+		using T = decltype(tag)::type;
+		auto &value0 = channel.GetValue<T>(indices.first);
+		auto &value1 = channel.GetValue<T>(indices.second);
+		T result;
+		Lua::udm::lerp_value(value0,value1,factor,result,udm::type_to_enum<T>());
+		return luabind::object{l,result};
+	});
+}
+
 void Lua::animation::register_library(Lua::Interface &lua)
 {
 	auto animMod = luabind::module(lua.GetState(),"panima");
@@ -268,6 +291,12 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	});
 	cdChannel.def("GetValueCount",&panima::Channel::GetValueCount);
 	cdChannel.def("GetTime",&panima::Channel::GetTime);
+	cdChannel.def("GetInterpolatedValue",+[](lua_State *l,panima::Channel &channel,float t,bool clampToBounds) -> Lua::opt<Lua::udm_ng> {
+		return get_interpolated_value(l,channel,t,clampToBounds);
+	});
+	cdChannel.def("GetInterpolatedValue",+[](lua_State *l,panima::Channel &channel,float t) -> Lua::opt<Lua::udm_ng> {
+		return get_interpolated_value(l,channel,t,true);
+	});
 	cdChannel.def("GetValue",+[](lua_State *l,panima::Channel &channel,uint32_t idx) -> Lua::udm_ng {
 		if(idx >= channel.GetValueCount())
 			return Lua::nil;

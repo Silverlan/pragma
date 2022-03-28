@@ -1295,51 +1295,6 @@ template<typename T>
 	}
 }
 
-template<typename T>
-	static void lerp_value(const T &value0,const T &value1,float f,T &outValue,udm::Type type)
-{
-	using TBase = udm::base_type<T>;
-	if constexpr(std::is_same_v<TBase,udm::Transform> || std::is_same_v<TBase,udm::ScaledTransform>)
-	{
-		outValue.SetOrigin(uvec::lerp(value0.GetOrigin(),value1.GetOrigin(),f));
-		outValue.SetRotation(uquat::slerp(value0.GetRotation(),value1.GetRotation(),f));
-		if constexpr(std::is_same_v<TBase,udm::ScaledTransform>)
-			outValue.SetScale(uvec::lerp(value0.GetScale(),value1.GetScale(),f));
-	}
-	else if constexpr(std::is_same_v<TBase,udm::Half>)
-		outValue = static_cast<float>(umath::lerp(static_cast<float>(value0),static_cast<float>(value1),f));
-	else if constexpr(udm::is_arithmetic<TBase>)
-		outValue = umath::lerp(value0,value1,f);
-	else if constexpr(udm::is_vector_type<TBase>)
-	{
-		if constexpr(std::is_integral_v<TBase::value_type>)
-			; // TODO
-		else
-			outValue = value0 +(value1 -value0) *f;
-	}
-	else if constexpr(std::is_same_v<TBase,udm::EulerAngles>)
-	{
-		auto q0 = uquat::create(value0);
-		auto q1 = uquat::create(value1);
-		auto qr = uquat::slerp(q0,q1,f);
-		outValue = EulerAngles{qr};
-	}
-	else if constexpr(std::is_same_v<TBase,udm::Quaternion>)
-		outValue = uquat::slerp(value0,value1,f);
-	else
-	{
-		outValue = value0;
-		auto n = udm::get_numeric_component_count(type);
-		for(auto i=decltype(n){0u};i<n;++i)
-		{
-			auto &f0 = *(reinterpret_cast<const float*>(&value0) +i);
-			auto &f1 = *(reinterpret_cast<const float*>(&value1) +i);
-
-			*(reinterpret_cast<float*>(&outValue) +i) = umath::lerp(f0,f1,f);
-		}
-	}
-}
-
 static Lua::type<uint32_t> get_numeric_component(lua_State *l,const luabind::object &value,uint32_t idx,udm::Type type)
 {
 	type = (type != udm::Type::Invalid) ? type : determine_lua_object_udm_type(value);
@@ -1359,7 +1314,7 @@ static Lua::udm_ng lerp_value(lua_State *l,const luabind::object &value0,const l
 	return ::udm::visit_ng(type,[l,&value0,&value1,t,type](auto tag){
 		using T = decltype(tag)::type;
 		T valuer;
-		lerp_value<T>(get_lua_object_udm_value<T>(value0),get_lua_object_udm_value<T>(value1),t,valuer,type);
+		Lua::udm::lerp_value<T>(get_lua_object_udm_value<T>(value0),get_lua_object_udm_value<T>(value1),t,valuer,type);
 		return luabind::object{l,valuer};
 	});
 }
@@ -1609,7 +1564,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		luabind::def("lerp",+[](lua_State *l,const luabind::object &value0,const luabind::object &value1,float t) -> Lua::udm_ng {
 			return lerp_value(l,value0,value1,t,::udm::Type::Invalid);
 		}),
-		luabind::def("lerp",static_cast<Lua::udm_ng(*)(lua_State*,const luabind::object&,const luabind::object&,float,::udm::Type)>(&lerp_value))
+		luabind::def("lerp",static_cast<Lua::udm_ng(*)(lua_State*,const luabind::object&,const luabind::object&,float,::udm::Type)>(&::lerp_value))
 	];
 
 	Lua::RegisterLibraryEnums(lua.GetState(),"udm",{

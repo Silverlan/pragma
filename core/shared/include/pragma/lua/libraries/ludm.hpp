@@ -9,6 +9,7 @@
 #define __LUDM_HPP__
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/lua/types/udm.hpp"
 #include <udm_types.hpp>
 
 namespace udm {struct Array;};
@@ -23,12 +24,66 @@ namespace Lua
 		DLLNETWORK void table_to_udm(const Lua::tb<void> &t,::udm::LinkedPropertyWrapper &udm);
 		DLLNETWORK luabind::object udm_to_value(lua_State *l,::udm::LinkedPropertyWrapperArg udm);
 		template<typename T>
-			static void lerp_value(const T &value0,const T &value1,float f,T &outValue,::udm::Type type);
+			void lerp_value(const T &value0,const T &value1,float f,T &outValue,::udm::Type type);
+		template<typename T>
+			T cast_object(const Lua::udm_ng &value)
+		{
+			luabind::object o{value};
+			T v;
+			auto type = static_cast<Lua::Type>(luabind::type(o));
+			switch(type)
+			{
+			// Booleans are distinct types in Lua, but we want to treat them as a numeric type (as well as the other way around)
+			case Lua::Type::Bool:
+				if constexpr(::udm::is_convertible<bool,T>())
+					v = ::udm::convert<bool,T>(luabind::object_cast<bool>(o));
+				else
+					v = luabind::object_cast<T>(o);
+				break;
+			case Lua::Type::Number:
+				if constexpr(::udm::is_convertible<double,T>())
+					v = ::udm::convert<double,T>(luabind::object_cast<double>(o));
+				else
+					v = luabind::object_cast<T>(o);
+				break;
+			default:
+				v = luabind::object_cast<T>(o);
+				break;
+			}
+			return v;
+		}
+		template<typename T>
+			T cast_object_nothrow(const Lua::udm_ng &value)
+		{
+			luabind::object o{value};
+			T v;
+			auto type = static_cast<Lua::Type>(luabind::type(o));
+			switch(type)
+			{
+			// Booleans are distinct types in Lua, but we want to treat them as a numeric type (as well as the other way around)
+			case Lua::Type::Bool:
+				if constexpr(::udm::is_convertible<bool,T>())
+					v = ::udm::convert<bool,T>(luabind::object_cast_nothrow<bool>(o,false));
+				else
+					v = luabind::object_cast_nothrow<T>(o,T{});
+				break;
+			case Lua::Type::Number:
+				if constexpr(::udm::is_convertible<double,T>())
+					v = ::udm::convert<double,T>(luabind::object_cast_nothrow<double>(o,0.0));
+				else
+					v = luabind::object_cast_nothrow<T>(o,T{});
+				break;
+			default:
+				v = luabind::object_cast_nothrow<T>(o,T{});
+				break;
+			}
+			return v;
+		}
 	};
 };
 
 template<typename T>
-	static void Lua::udm::lerp_value(const T &value0,const T &value1,float f,T &outValue,::udm::Type type)
+	void Lua::udm::lerp_value(const T &value0,const T &value1,float f,T &outValue,::udm::Type type)
 {
 	using TBase = ::udm::base_type<T>;
 	if constexpr(std::is_same_v<TBase,::udm::Transform> || std::is_same_v<TBase,::udm::ScaledTransform>)

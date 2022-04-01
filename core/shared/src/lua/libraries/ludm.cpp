@@ -83,10 +83,8 @@ static void set_property_value(lua_State *l,::udm::LinkedPropertyWrapper p,::udm
 			using T = decltype(tag)::type;
 			if constexpr(std::is_same_v<T,::udm::Half>)
 				p = ::udm::Half{static_cast<float>(Lua::CheckNumber(l,idx))};
-			else if constexpr(std::is_same_v<T,::udm::Boolean>)
-				p = Lua::CheckBool(l,idx);
 			else
-				p = static_cast<T>(Lua::CheckNumber(l,idx));
+				p = Lua::udm::cast_object<T>(luabind::object{luabind::from_stack(l,idx)});
 		});
 	}
 	if(::udm::is_generic_type(type))
@@ -576,7 +574,7 @@ void Lua::udm::table_to_udm(const Lua::tb<void> &t,::udm::LinkedPropertyWrapper 
 						if constexpr(type != ::udm::Type::Element && !::udm::is_array_type(type))
 						{
 							for(auto i=decltype(actualLen){0u};i<actualLen;++i)
-								a[i] = luabind::object_cast<T>(val[i +1]);
+								a[i] = Lua::udm::cast_object<T>(luabind::object{val[i +1]});
 						}
 					});
 				}
@@ -594,7 +592,7 @@ void Lua::udm::table_to_udm(const Lua::tb<void> &t,::udm::LinkedPropertyWrapper 
 					using T = decltype(tag)::type;
 					constexpr auto type = ::udm::type_to_enum<T>();
 					if constexpr(type != ::udm::Type::Element && !::udm::is_array_type(type))
-						udm[key] = luabind::object_cast<T>(val);
+						udm[key] = Lua::udm::cast_object<T>(val);
 				});
 			}
 		}
@@ -812,7 +810,7 @@ template<typename T>
 	auto *pVal = static_cast<T*>(a.GetValues());
 	for(auto i=decltype(size){0u};i<size;++i)
 	{
-		*pVal = luabind::object_cast_nothrow<T>(t[i +1],T{});
+		*pVal = Lua::udm::cast_object_nothrow<T>(luabind::object{t[i +1]});
 		++pVal;
 	}
 }
@@ -838,13 +836,13 @@ bool Lua::udm::set_array_value(lua_State *l,::udm::Array &a,uint32_t idx,const l
 				if constexpr(::udm::Array::IsValueTypeSupported(::udm::type_to_enum<T>()))
 				{
 					auto *pVal = static_cast<T*>(a.GetValues());
-					pVal[idx] = luabind::object_cast<T>(o);
+					pVal[idx] = cast_object<T>(o);
 				}
 			}
 			else if constexpr(::udm::ArrayLz4::IsValueTypeSupported(::udm::type_to_enum<T>()))
 			{
 				auto *pVal = static_cast<T*>(a.GetValues());
-				pVal[idx] = luabind::object_cast<T>(o);
+				pVal[idx] = cast_object<T>(o);
 			}
 		}
 	});
@@ -1270,11 +1268,17 @@ template<typename T>
 template<typename T>
 	static T get_lua_object_udm_value(const luabind::object &o) requires(std::is_arithmetic_v<T>)
 {
-	return luabind::object_cast<T>(o);
+	return Lua::udm::cast_object<T>(o);
 }
 
 template<typename T>
-	static udm::underlying_numeric_type<T> get_numeric_component(const T &value,uint32_t idx)
+	using lua_udm_underlying_numeric_type = 
+		std::conditional_t<std::is_same_v<T,bool>,uint8_t,
+		udm::underlying_numeric_type<T>
+	>;
+
+template<typename T>
+	static lua_udm_underlying_numeric_type<T> get_numeric_component(const T &value,uint32_t idx)
 {
 
 	if constexpr(udm::is_arithmetic<T>)
@@ -1290,7 +1294,7 @@ template<typename T>
 	}
 	else
 	{
-		static_assert(std::is_same_v<udm::underlying_numeric_type<T>,float>);
+		static_assert(std::is_same_v<lua_udm_underlying_numeric_type<T>,float>);
 		return *(reinterpret_cast<const float*>(&value) +idx);
 	}
 }
@@ -1300,8 +1304,8 @@ static Lua::type<uint32_t> get_numeric_component(lua_State *l,const luabind::obj
 	type = (type != udm::Type::Invalid) ? type : determine_lua_object_udm_type(value);
 	return ::udm::visit_ng(type,[l,&value,idx](auto tag){
 		using T = decltype(tag)::type;
-		using BaseType = udm::underlying_numeric_type<T>;
-		if constexpr(std::is_same_v<udm::underlying_numeric_type<T>,void>)
+		using BaseType = lua_udm_underlying_numeric_type<T>;
+		if constexpr(std::is_same_v<lua_udm_underlying_numeric_type<T>,void>)
 			return Lua::nil;
 		else
 			return luabind::object{l,get_numeric_component<T>(get_lua_object_udm_value<T>(value),idx)};

@@ -125,6 +125,51 @@ static Lua::opt<Lua::udm_ng> get_interpolated_value(lua_State *l,panima::Channel
 	});
 }
 
+static std::optional<std::pair<uint32_t,uint32_t>> find_index_range_in_time_range(
+	panima::Channel &channel,float startTime,float endTime,bool clampToOuterBoundaries
+)
+{
+	float startInterp,endInterp;
+	auto start = channel.FindInterpolationIndices(startTime,startInterp);
+	auto end = channel.FindInterpolationIndices(endTime,endInterp);
+	if(start.first == std::numeric_limits<decltype(start.first)>::max() || start.second == std::numeric_limits<decltype(start.first)>::max())
+		return {};
+	uint32_t startIndex,endIndex;
+	if(clampToOuterBoundaries)
+	{
+		if(start.first == 0)
+			startIndex = 0;
+		else if(startInterp == 0.f)
+			startIndex = start.first;
+		else if(startInterp == 1.f)
+			startIndex = start.second; /* unreachable? */
+		else
+			startIndex = start.first -1;
+			
+		if(end.second == 0)
+			endIndex = 0;
+		else if(endInterp == 0.f)
+			endIndex = end.first;
+		else if(endInterp == 1.f)
+			endIndex = start.second; /* unreachable? */
+		else
+			endIndex = end.second;
+	}
+	else
+	{
+		if(startInterp == 0.f)
+			startIndex = start.first;
+		else
+			startIndex = start.second;
+			
+		if(endInterp == 1.f)
+			endIndex = end.second; /* unreachable? */
+		else
+			endIndex = end.first;
+	}
+	return std::pair<uint32_t,uint32_t>{startIndex,endIndex};
+}
+
 void Lua::animation::register_library(Lua::Interface &lua)
 {
 	auto animMod = luabind::module(lua.GetState(),"panima");
@@ -198,7 +243,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdChannel.def("AddValue",+[](lua_State *l,panima::Channel &channel,float t,Lua::udm_ng value) -> uint32_t {
 		return ::udm::visit_ng(channel.GetValueType(),[&channel,t,&value](auto tag) {
 			using T = decltype(tag)::type;
-			auto v = luabind::object_cast<T>(luabind::object{value});
+			auto v = Lua::udm::cast_object<T>(luabind::object{value});
 			return channel.AddValue(t,v);
 		});
 	});
@@ -271,7 +316,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 			times[i] = tv.first;
 			::udm::visit_ng(type,[&tv,&values,i](auto tag) {
 				using T = decltype(tag)::type;
-				values[i] = luabind::object_cast<T>(tv.second);
+				values[i] = Lua::udm::cast_object<T>(tv.second);
 			});
 			++i;
 		}
@@ -355,6 +400,8 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		t.Resize(t.GetSize() +count,r0,r1,false);
 		v.Resize(v.GetSize() +count,r0,r1,false);
 	});
+	cdChannel.def("FindIndexRangeInTimeRange",&find_index_range_in_time_range);
+	cdChannel.def("FindIndexRangeInTimeRange",&find_index_range_in_time_range,luabind::default_parameter_policy<4,false>{});
 	cdChannel.def("SortValues",+[](lua_State *l,panima::Channel &channel) {
 		auto n = channel.GetTimeCount();
 		std::vector<size_t> order;

@@ -58,6 +58,7 @@
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
 #include <pragma/math/intersection.h>
+#include <panima/channel.hpp>
 #include <mathutil/camera.hpp>
 #include <mathutil/umath_frustum.hpp>
 #include <regex>
@@ -532,6 +533,10 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 			float cp1InTime,float cp1InVal,
 			float cp1Time,float cp1Val
 		) -> float {
+			if(time -panima::Channel::VALUE_EPSILON <= cp0Time)
+				return cp0Val;
+			if(time +panima::Channel::VALUE_EPSILON >= cp1Time)
+				return cp1Val;
 			std::array<float,3> r;
 			auto n = umath::find_bezier_roots(time,cp0Time,cp0OutTime,cp1InTime,cp1Time,r);
 			return umath::calc_bezier_point(cp0Val,cp0OutVal,cp1InVal,cp1Val,r[0]);

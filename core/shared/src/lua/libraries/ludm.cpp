@@ -416,6 +416,15 @@ static luabind::object get_property_value(lua_State *l,const ::udm::PropertyWrap
 	};
 	return udm::visit(type,vs);
 }
+static luabind::object get_property_value(lua_State *l,const ::udm::PropertyWrapper &val,int32_t idx)
+{
+	if(!static_cast<bool>(val))
+		return {};
+	auto *a = val.GetValuePtr<udm::Array>();
+	if(!a || idx < 0 || idx >= a->GetSize())
+		return Lua::nil;
+	return get_property_value(l,a->GetValueType(),a->GetValuePtr(idx));
+}
 
 class LuaUdmArrayIterator
 {
@@ -1113,6 +1122,9 @@ template<class T,class TPropertyWrapper,class TClassDef>
 	})
 	.def("GetValue",+[](lua_State *l,T &p,::udm::Type type) -> luabind::object {
 		return get_property_value(l,static_cast<TPropertyWrapper>(p),type);
+	})
+	.def("GetArrayValueDirect",+[](lua_State *l,T &p,int32_t idx) -> luabind::object {
+		return get_property_value(l,static_cast<TPropertyWrapper>(p),idx);
 	})
 	.def("GetType",+[](lua_State *l,T &prop) -> ::udm::Type {
 		return static_cast<TPropertyWrapper>(prop).GetType();

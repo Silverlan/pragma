@@ -43,7 +43,7 @@ void BaseFlexComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 	{
 		const auto &name = flexController.name;
 		auto lname = name;
-		ustring::to_lower(lname);
+		// ustring::to_lower(lname);
 		auto memberInfo = pragma::ComponentMemberInfo::CreateDummy();
 		memberInfo.SetName("flexController/" +lname);
 		memberInfo.type = ents::EntityMemberType::Float;

@@ -221,7 +221,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 	{
 		const auto &name = bone->name;
 		auto lname = name;
-		ustring::to_lower(lname);
+		// ustring::to_lower(lname);
 
 		auto memberInfoPos = pragma::ComponentMemberInfo::CreateDummy();
 		memberInfoPos.SetName("bone/" +lname +"/position");

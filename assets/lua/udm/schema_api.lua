@@ -20,6 +20,7 @@ function udm.BaseSchemaType:Initialize(schema,udmData,parent)
 	self.m_parent = parent
 	self.m_typedChildren = {}
 	self.m_changeListeners = {}
+	self.m_cachedChildren = {}
 
 	local typeData = schema:FindTypeData(self.TypeName)
 	if(typeData:Get("format"):IsValid()) then self.m_udmAssetData = udmData:Get("assetData") end
@@ -61,6 +62,13 @@ function udm.BaseSchemaType:OnRemove()
 end
 function udm.BaseSchemaType:GetRootUdmData() return self.m_udmData end
 function udm.BaseSchemaType:GetUdmData() return self.m_udmAssetData or self.m_udmData end
+function udm.BaseSchemaType:GetCachedChild(name)
+	if(self.m_cachedChildren[name] == nil) then
+		-- Retrieving an UDM property can be expensive if done frequently, so we'll cache them here
+		self.m_cachedChildren[name] = self:GetUdmData():Get(name)
+	end
+	return self.m_cachedChildren[name]
+end
 function udm.BaseSchemaType:GetTypedChildren() return self.m_typedChildren end
 function udm.BaseSchemaType:GetParent() return self.m_parent end
 function udm.BaseSchemaType:FindAncestor(filter)
@@ -69,6 +77,11 @@ function udm.BaseSchemaType:FindAncestor(filter)
 	if(filter(parent)) then return parent end
 	return parent:FindAncestor(filter)
 end
+udm.BaseSchemaType.ARRAY_EVENT_ADD = 0
+udm.BaseSchemaType.ARRAY_EVENT_REMOVE = 1
+udm.BaseSchemaType.ARRAY_EVENT_SET = 2
+udm.BaseSchemaType.ARRAY_EVENT_ADD_RANGE = 3
+udm.BaseSchemaType.ARRAY_EVENT_REMOVE_RANGE = 4
 function udm.BaseSchemaType:AddChangeListener(keyName,listener)
 	--[[if(self:GetUdmData():Get(keyName):IsValid() == false) then
 		error("Property '" .. keyName .. "' is not a valid property!")
@@ -142,14 +155,14 @@ function udm.BaseSchemaType:SetPropertyValue(keyName,value,type)
 	end
 	return self:GetUdmData():SetValue(keyName,type or self:GetPropertyUdmType(keyName),value)
 end
-function udm.BaseSchemaType:CallChangeListeners(keyName,newValue)
+function udm.BaseSchemaType:CallChangeListeners(keyName,newValue,...)
 	if(self.m_changeListeners[keyName] == nil) then return end
 	local i = 1
 	local listeners = self.m_changeListeners[keyName]
 	while(i <= #listeners) do
 		local cb = listeners[i]
 		if(cb:IsValid()) then
-			cb:Call(self,newValue)
+			cb:Call(self,newValue,...)
 			i = i +1
 		else
 			table.remove(listeners,i)
@@ -343,17 +356,19 @@ function udm.generate_lua_api_from_schema(schema)
 						local baseName = udmChild:GetValue("baseName",udm.TYPE_STRING)
 						if(baseName == nil) then baseName = name:sub(1,1):upper() .. name:sub(2,#name -1) end
 						local valueType = udmChild:GetValue("valueType",udm.TYPE_STRING)
-						local schemaValueType = schema:FindTypeData(valueType,false)
+						local schemaValueType = schema:FindTypeData(valueType)
 						local udmValueType = udm.ascii_type_to_enum(valueType)
+						if(schemaValueType ~= nil and udm.Schema.is_enum_type(schemaValueType:GetValue("type",udm.TYPE_STRING))) then
+							schemaValueType = nil
+							udmValueType = udm.TYPE_UINT32
+						end
 						local elementGetterName = "Get" .. baseName
 						if(elementGetterName ~= nil) then
 							class[elementGetterName] = function(self,i)
 								if(schemaValueType ~= nil) then return self:GetTypedChildren()[name][i +1] end
-								local a = self:GetUdmData():Get(name)
-								if(i >= a:GetSize()) then return end
-								local el = a:Get(i)
-								if(el:IsValid() == false) then return end
-								return el:GetValue(a:GetValueType())
+								local child = self:GetCachedChild(name)
+								if(child == nil) then return end
+								return child:GetArrayValueDirect(i)
 							end
 						end
 
@@ -371,7 +386,9 @@ function udm.generate_lua_api_from_schema(schema)
 							local elementSetterName = "Set" .. baseName
 							if(elementSetterName ~= nil) then
 								class[elementSetterName] = function(self,i,value)
-									self:GetUdmData():Get(name):SetValue(i,value)
+									local child = self:GetCachedChild(name)
+									if(child ~= nil) then child:SetValue(i,udmValueType,value) end
+									self:CallChangeListeners(name,i -1,udm.BaseSchemaType.ARRAY_EVENT_SET)
 								end
 							end
 						end
@@ -379,15 +396,69 @@ function udm.generate_lua_api_from_schema(schema)
 						local adderName = "Add" .. baseName
 						if(adderName ~= nil) then
 							class[adderName] = function(self,value)
-								local el = self:GetUdmData():Get(name)
-								el:Resize(el:GetSize() +1)
+								local el = self:GetCachedChild(name)
+								if(el == nil) then return end
+								local newSize = el:GetSize() +1
+								el:Resize(newSize)
 								if(schemaValueType ~= nil) then
 									local child = el:Get(el:GetSize() -1)
 									local prop,err = udm.create_property_from_schema(schema,valueType,self,child,true)
 									table.insert(self:GetTypedChildren()[name],prop)
+									self:CallChangeListeners(name,newSize -1,udm.BaseSchemaType.ARRAY_EVENT_ADD)
 									return prop
 								end
 								el:SetValue(el:GetSize() -1,el:GetValueType(),value)
+							end
+						end
+
+						local insertValueRangeName = "Insert" .. baseName .. "Range"
+						if(insertValueRangeName ~= nil) then
+							class[insertValueRangeName] = function(self,startIndex,count)
+								local el = self:GetCachedChild(name)
+								if(el == nil) then return end
+								el:AddValueRange(startIndex,count)
+								if(schemaValueType ~= nil) then
+									local children = self:GetTypedChildren()[name]
+									for i=startIndex,startIndex +count -1 do
+										local child = el:Get(i)
+										local prop,err = udm.create_property_from_schema(schema,valueType,self,child,true)
+										table.insert(self:GetTypedChildren()[name],i +1,prop)
+									end
+
+									-- Update UDM data for typed children (due to index change)
+									for i=startIndex +count,el:GetSize() -1 do
+										local child = children[i]
+										child.m_udmData = el:Get(i -1)
+									end
+								end
+								self:CallChangeListeners(name,nil,udm.BaseSchemaType.ARRAY_EVENT_ADD_RANGE,startIndex,count)
+							end
+						end
+
+						local removeValueRangeName = "Remove" .. baseName .. "Range"
+						if(removeValueRangeName ~= nil) then
+							class[removeValueRangeName] = function(self,startIndex,count)
+								local el = self:GetCachedChild(name)
+								if(el == nil) then return end
+								if(schemaValueType ~= nil) then
+									local children = self:GetTypedChildren()[name]
+									for i=startIndex,startIndex +count -1 do
+										children[i]:OnRemove()
+									end
+								end
+								el:RemoveValueRange(startIndex,count)
+								if(schemaValueType ~= nil) then
+									local children = self:GetTypedChildren()[name]
+									-- Update UDM data for typed children (due to index change)
+									local size = el:GetSize()
+									for i=startIndex,size -1 do
+										local child = children[i]
+										child.m_udmData = el:Get(i -1)
+									end
+
+									while(#children > size) do children[#children] = nil end
+								end
+								self:CallChangeListeners(name,nil,udm.BaseSchemaType.ARRAY_EVENT_REMOVE_RANGE,startIndex,count)
 							end
 						end
 
@@ -402,10 +473,12 @@ function udm.generate_lua_api_from_schema(schema)
 										end
 									end
 								end
-								local a = self:GetUdmData():Get(name)
-								if(idx >= a:GetSize()) then return end
+								local a = self:GetCachedChild(name)
+								if(a == nil or idx >= a:GetSize()) then return end
 								local children = self:GetTypedChildren()[name]
-								children[idx +1]:OnRemove()
+								local child = children[idx +1]
+								local curVal = self[elementGetterName](self,idx)
+								child:OnRemove()
 								a:RemoveValue(idx)
 								table.remove(children,idx +1)
 
@@ -414,13 +487,15 @@ function udm.generate_lua_api_from_schema(schema)
 									local child = children[i]
 									child.m_udmData = a:Get(i -1)
 								end
+								self:CallChangeListeners(name,idx,udm.BaseSchemaType.ARRAY_EVENT_REMOVE,curVal)
 							end
 						end
 
 						local countName = "Get" .. baseName .. "Count"
 						if(countName ~= nil) then
 							class[countName] = function(self,idx)
-								return self:GetUdmData():Get(name):GetSize()
+								local a = self:GetCachedChild(name)
+								return (a ~= nil) and a:GetSize() or 0
 							end
 						end
 

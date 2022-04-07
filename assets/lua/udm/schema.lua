@@ -84,7 +84,9 @@ local function initialize_udm_data_from_schema_object(udmData,udmSchemaType,udmS
 				if(valueType == nil) then error("Property '" .. name .. "' is array type, but no value type has been specified for array!") end
 				local udmSchemaValueType = udmSchemaTypes:Get(valueType)
 				local udmValueType
-				if(udmSchemaValueType:IsValid()) then udmValueType = udm.TYPE_ELEMENT
+				if(udmSchemaValueType:IsValid()) then
+					if(is_enum_type(udmSchemaValueType:GetValue("type",udm.TYPE_STRING))) then udmValueType = udm.TYPE_UINT32
+					else udmValueType = udm.TYPE_ELEMENT end
 				else udmValueType = udm.ascii_type_to_enum(valueType) end
 				if(valueType ~= "Any") then -- "any" is a special case where we don't know the actual type yet
 					if(udmValueType == nil or udmValueType == udm.TYPE_INVALID) then error("Property '" .. name .. "' is array type, but specified value type '" .. valueType .. "' is not a known type!") end

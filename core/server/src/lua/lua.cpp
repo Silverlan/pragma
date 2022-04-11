@@ -37,6 +37,7 @@
 #include <pragma/lua/sh_lua_component.hpp>
 #include <pragma/lua/libraries/lnet.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/model/model.h>
 #include <pragma/networking/nwm_util.h>
 #include <luainterface.hpp>
@@ -150,6 +151,7 @@ void SGame::RegisterLua()
 	defEntCmp.def("SendSnapshotData",static_cast<void(*)(lua_State*,pragma::SLuaBaseEntityComponent&,NetPacket,pragma::SPlayerComponent&)>([](lua_State *l,pragma::SLuaBaseEntityComponent &hComponent,NetPacket packet,pragma::SPlayerComponent &pl) {
 		
 	}));
+	register_shared_lua_component_methods<pragma::SLuaBaseEntityComponent>(defEntCmp);
 	modEnts[defEntCmp];
 
 	auto modNet = luabind::module(GetLuaState(),"net");

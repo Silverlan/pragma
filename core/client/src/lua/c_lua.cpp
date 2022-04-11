@@ -403,6 +403,7 @@ void CGame::RegisterLua()
 	defEntCmp.def("ReceiveSnapshotData",static_cast<void(*)(lua_State*,pragma::CLuaBaseEntityComponent&,NetPacket)>([](lua_State *l,pragma::CLuaBaseEntityComponent &hComponent,NetPacket packet) {
 		
 	}));
+	register_shared_lua_component_methods<pragma::CLuaBaseEntityComponent>(defEntCmp);
 	modEnts[defEntCmp];
 
 	auto _G = luabind::globals(GetLuaState());

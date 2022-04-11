@@ -10,9 +10,11 @@
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/entities/components/base_entity_component_member_register.hpp"
 #include "pragma/entities/member_type.hpp"
 #include "pragma/lua/luaobjectbase.h"
 #include "pragma/util/util_variable_type.hpp"
+#include "pragma/lua/types/udm.hpp"
 #include <pragma/lua/luaapi.h>
 #include <udm.hpp>
 #include <any>
@@ -113,7 +115,8 @@ namespace pragma
 		}
 	};
 	class DLLNETWORK BaseLuaBaseEntityComponent
-		: public pragma::BaseEntityComponent
+		: public pragma::BaseEntityComponent,
+		public DynamicMemberRegister
 	{
 	public:
 		using MemberIndex = uint32_t;
@@ -152,6 +155,12 @@ namespace pragma
 
 			std::optional<ComponentMemberInfo> componentMemberInfo {};
 		};
+		struct DLLNETWORK DynamicMemberInfo
+		{
+			bool enabled = false;
+			std::any value;
+			luabind::object onChange;
+		};
 		static MemberIndex RegisterMember(const luabind::object &oClass,const std::string &memberName,ents::EntityMemberType memberType,const std::any &initialValue,MemberFlags memberFlags,const Lua::map<std::string,void> &attributes);
 		static std::vector<MemberInfo> *GetMemberInfos(const luabind::object &oClass);
 		static void ClearMembers(lua_State *l);
@@ -175,6 +184,15 @@ namespace pragma
 
 		const luabind::object &GetLuaObject() const;
 		luabind::object &GetLuaObject();
+		const std::vector<DynamicMemberInfo> &GetDynamicMembers() const {return m_dynamicMembers;}
+		const DynamicMemberInfo *GetDynamicMemberInfo(ComponentMemberIndex idx) const;
+		DynamicMemberInfo *GetDynamicMemberInfo(ComponentMemberIndex idx);
+
+		template<typename T>
+			void SetDynamicMemberValue(ComponentMemberIndex memberIndex,const T &value);
+		template<typename T>
+			bool GetDynamicMemberValue(ComponentMemberIndex memberIndex,T &outValue,ents::EntityMemberType &outType);
+		std::any *GetDynamicMemberValue(ComponentMemberIndex memberIndex,ents::EntityMemberType &outType);
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
@@ -186,6 +204,14 @@ namespace pragma
 		virtual void OnEntityPostSpawn() override;
 		virtual void OnRemove() override;
 		using pragma::BaseEntityComponent::BindEvent;
+
+		void ReserveMembers(uint32_t count);
+		ComponentMemberIndex RegisterMember(ComponentMemberInfo &&memberInfo,luabind::object &onChange);
+		ComponentMemberIndex RegisterMember(const ComponentMemberInfo &memberInfo,luabind::object &onChange);
+		void ClearMembers();
+		void RemoveMember(ComponentMemberIndex idx);
+		void RemoveMember(const std::string &name);
+		void UpdateMemberNameMap();
 
 		// These should only be called through Lua
 		CallbackHandle BindInitComponentEvent(lua_State *l,pragma::ComponentId componentId,luabind::object methodNameOrFunction);
@@ -257,7 +283,12 @@ namespace pragma
 	private:
 		mutable ClassMembers *m_classMembers = nullptr;
 
+		virtual void OnMemberRegistered(const ComponentMemberInfo &memberInfo,ComponentMemberIndex index) override;
+		virtual void OnMemberRemoved(const ComponentMemberInfo &memberInfo,ComponentMemberIndex index) override;
+
 		std::vector<MemberInfo> m_members = {};
+		std::vector<DynamicMemberInfo> m_dynamicMembers;
+		uint32_t m_dynamicMemberStartOffset = 0;
 		std::unordered_map<std::string,size_t> m_memberNameToIndex = {};
 		uint32_t m_classMemberIndex = std::numeric_limits<uint32_t>::max();
 		bool m_bShouldTransmitNetData = false;
@@ -265,7 +296,133 @@ namespace pragma
 		uint32_t m_version = 1u;
 		std::unordered_map<pragma::ComponentId,CallbackHandle> m_initComponentCallbacks;
 	};
+
+	namespace lua
+	{
+		DLLNETWORK std::optional<ComponentMemberInfo> get_component_member_info(
+			lua_State *l,const std::string &functionName,ents::EntityMemberType memberType,
+			const std::any &initialValue,BaseLuaBaseEntityComponent::MemberFlags memberFlags,const Lua::map<std::string,void> &attributes,
+			luabind::object &outOnChange,bool dynamicMember
+		);
+		DLLNETWORK pragma::BaseLuaBaseEntityComponent::MemberFlags string_to_member_flags(lua_State *l,std::string_view strFlags);
+		template<typename T>
+			void register_shared_lua_component_methods(auto &def)
+		{
+			def.def("RegisterMember",+[](
+				lua_State *l,T &hComponent,const std::string &memberName,
+				pragma::ents::EntityMemberType memberType,Lua::udm_type oDefault,const Lua::map<std::string,void> &attributes,
+				pragma::BaseLuaBaseEntityComponent::MemberFlags memberFlags
+			) -> std::optional<pragma::ComponentMemberIndex> {
+				luabind::object onChange;
+				auto anyInitialValue = Lua::GetAnyValue(l,pragma::detail::member_type_to_util_type(memberType),4);
+				auto memberInfo = pragma::lua::get_component_member_info(
+					l,memberName,memberType,
+					anyInitialValue,memberFlags,attributes,
+					onChange,true
+				);
+				if(!memberInfo.has_value())
+					return {};
+				return hComponent.RegisterMember(std::move(*memberInfo),onChange);
+			});
+			def.def("RegisterMember",+[](
+				lua_State *l,T &hComponent,const std::string &memberName,
+				pragma::ents::EntityMemberType memberType,Lua::udm_type oDefault,const std::string &memberFlags
+			) -> std::optional<pragma::ComponentMemberIndex> {
+				luabind::object onChange;
+				auto anyInitialValue = Lua::GetAnyValue(l,pragma::detail::member_type_to_util_type(memberType),4);
+				auto t = luabind::newtable(l);
+				auto memberInfo = pragma::lua::get_component_member_info(
+					l,memberName,memberType,
+					anyInitialValue,pragma::lua::string_to_member_flags(l,memberFlags),t,
+					onChange,true
+				);
+				if(!memberInfo.has_value())
+					return {};
+				return hComponent.RegisterMember(std::move(*memberInfo),onChange);
+			});
+			def.def("RegisterMember",+[](
+				lua_State *l,T &hComponent,const std::string &memberName,
+				pragma::ents::EntityMemberType memberType,Lua::udm_type oDefault,const Lua::map<std::string,void> &attributes,const std::string &memberFlags
+			) -> std::optional<pragma::ComponentMemberIndex> {
+				luabind::object onChange;
+				auto anyInitialValue = Lua::GetAnyValue(l,pragma::detail::member_type_to_util_type(memberType),4);
+				auto memberInfo = pragma::lua::get_component_member_info(
+					l,memberName,memberType,
+					anyInitialValue,pragma::lua::string_to_member_flags(l,memberFlags),attributes,
+					onChange,true
+				);
+				if(!memberInfo.has_value())
+					return {};
+				return hComponent.RegisterMember(std::move(*memberInfo),onChange);
+			});
+			def.def("RegisterMember",+[](
+				lua_State *l,T &hComponent,const std::string &memberName,
+				pragma::ents::EntityMemberType memberType,Lua::udm_type oDefault,const Lua::map<std::string,void> &attributes
+			) -> std::optional<pragma::ComponentMemberIndex> {
+				luabind::object onChange;
+				auto anyInitialValue = Lua::GetAnyValue(l,pragma::detail::member_type_to_util_type(memberType),4);
+				auto memberInfo = pragma::lua::get_component_member_info(
+					l,memberName,memberType,
+					anyInitialValue,pragma::BaseLuaBaseEntityComponent::MemberFlags::Default,attributes,
+					onChange,true
+				);
+				if(!memberInfo.has_value())
+					return {};
+				return hComponent.RegisterMember(std::move(*memberInfo),onChange);
+			});
+			def.def("RegisterMember",+[](
+				lua_State *l,T &hComponent,const std::string &memberName,
+				pragma::ents::EntityMemberType memberType,Lua::udm_type oDefault
+			) -> std::optional<pragma::ComponentMemberIndex> {
+				luabind::object onChange;
+				auto anyInitialValue = Lua::GetAnyValue(l,pragma::detail::member_type_to_util_type(memberType),4);
+				auto t = luabind::newtable(l);
+				auto memberInfo = pragma::lua::get_component_member_info(
+					l,memberName,memberType,
+					anyInitialValue,pragma::BaseLuaBaseEntityComponent::MemberFlags::Default,t,
+					onChange,true
+				);
+				if(!memberInfo.has_value())
+					return {};
+				return hComponent.RegisterMember(std::move(*memberInfo),onChange);
+			});
+			def.def("ClearMembers",static_cast<void(T::*)()>(&T::ClearMembers));
+			def.def("ReserveMembers",static_cast<void(T::*)(uint32_t)>(&T::ReserveMembers));
+			def.def("RemoveMember",static_cast<void(T::*)(pragma::ComponentMemberIndex)>(&T::RemoveMember));
+			def.def("RemoveMember",static_cast<void(T::*)(const std::string&)>(&T::RemoveMember));
+			def.def("UpdateMemberNameMap",static_cast<void(T::*)()>(&T::UpdateMemberNameMap));
+		}
+	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseLuaBaseEntityComponent::MemberFlags)
+
+template<typename T>
+	void pragma::BaseLuaBaseEntityComponent::SetDynamicMemberValue(ComponentMemberIndex memberIndex,const T &value)
+{
+	auto *memberInfo = GetMemberInfo(memberIndex);
+	if(!memberInfo)
+		return;
+	ents::EntityMemberType type;
+	auto *anyVal = GetDynamicMemberValue(memberIndex,type);
+	if(!anyVal)
+		return;
+	udm::visit(pragma::ents::member_type_to_udm_type(memberInfo->type),[this,memberInfo,&value,anyVal](auto tag) {
+		using TMember = decltype(tag)::type;
+		if constexpr(udm::is_convertible<T,TMember>())
+			*anyVal = udm::convert<T,TMember>(value);
+	});
+}
+template<typename T>
+	bool pragma::BaseLuaBaseEntityComponent::GetDynamicMemberValue(ComponentMemberIndex memberIndex,T &outValue,ents::EntityMemberType &outType)
+{
+	auto *anyVal = GetDynamicMemberValue(memberIndex,outType);
+	if(!anyVal)
+		return false;
+	udm::visit(pragma::ents::member_type_to_udm_type(outType),[anyVal,&outValue](auto tag) {
+		using TMember = decltype(tag)::type;
+		if constexpr(udm::is_udm_type<T>() && udm::is_udm_type<TMember>() && is_valid_component_property_type_v<TMember> && udm::is_convertible<TMember,T>())
+			outValue = udm::convert<TMember,T>(std::any_cast<TMember>(*anyVal));
+	});
+}
 
 #endif

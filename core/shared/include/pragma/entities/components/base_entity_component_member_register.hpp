@@ -19,7 +19,7 @@ namespace pragma
 		std::optional<ComponentMemberIndex> GetMemberIndex(const std::string &name) const;
 		const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const;
 
-		const std::vector<ComponentMemberInfo> &GetMembers() const {return m_members;}
+		const std::unordered_map<ComponentMemberIndex,ComponentMemberInfo> &GetMembers() const {return m_members;}
 		const std::unordered_map<std::string,ComponentMemberIndex> &GetMemberIndexMap() const {return m_memberNameToIndex;}
 	protected:
 		virtual void OnMemberRegistered(const ComponentMemberInfo &memberInfo,ComponentMemberIndex index) {}
@@ -32,8 +32,9 @@ namespace pragma
 		void RemoveMember(const std::string &name);
 		void UpdateMemberNameMap();
 	private:
-		std::vector<ComponentMemberInfo> m_members = {};
+		std::unordered_map<ComponentMemberIndex,ComponentMemberInfo> m_members = {};
 		std::unordered_map<std::string,ComponentMemberIndex> m_memberNameToIndex = {};
+		uint32_t m_nextMemberIndex = 0;
 	};
 };
 

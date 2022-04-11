@@ -28,7 +28,7 @@
 #include <udm.hpp>
 
 using namespace pragma;
-
+#pragma optimize("",off)
 struct ClassMembers
 {
 	ClassMembers(const luabind::object &classObject)
@@ -192,53 +192,65 @@ const pragma::BaseLuaBaseEntityComponent::MemberInfo *BaseLuaBaseEntityComponent
 	}
 	return &m_classMembers->memberDeclarations[memberInfo.userIndex];
 }
-BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMember(
-	const luabind::object &oClass,const std::string &functionName,ents::EntityMemberType memberType,const std::any &initialValue,MemberFlags memberFlags,const Lua::map<std::string,void> &attributes
+
+std::optional<ComponentMemberInfo> pragma::lua::get_component_member_info(
+	lua_State *l,const std::string &functionName,ents::EntityMemberType memberType,
+	const std::any &initialValue,BaseLuaBaseEntityComponent::MemberFlags memberFlags,const Lua::map<std::string,void> &attributes,
+	luabind::object &outOnChange,bool dynamicMember
 )
 {
-	if(functionName.empty())
-		return INVALID_MEMBER;
-	auto *l = oClass.interpreter();
-	/*if((memberFlags &MemberFlags::StoreBit) != MemberFlags::None)
-	{
-		std::string err = "If store flag is set, version number mustn't be 0! Please check 'lua_help ents.BaseEntityComponent.RegisterMember' for more information!";
-		lua_pushstring(l,err.c_str());
-		lua_error(l);
-		return INVALID_MEMBER;
-	}*/
 	auto memberName = get_member_name(functionName);
-	auto memberVarName = get_member_variable_name(functionName);
 
-	auto &members = get_class_member_list(l);
-	auto it = std::find_if(members.begin(),members.end(),[&oClass](const std::shared_ptr<ClassMembers> &classMembers) {
-		return oClass == classMembers->classObject;
-	});
-	if(it == members.end())
+	auto tmpMemberName = memberName;
+	std::optional<ComponentMemberInfo> componentMemberInfo {};
+	// TODO: Add support for properties
+	auto &onChange = outOnChange;
+	if(pragma::is_valid_component_property_type(memberType))
 	{
-		members.push_back(std::make_shared<ClassMembers>(oClass));
-		it = members.end() -1;
-	}
-	auto itMember = std::find_if((*it)->memberDeclarations.begin(),(*it)->memberDeclarations.end(),[&functionName](const MemberInfo &memberInfo) {
-		return ustring::compare(functionName,memberInfo.functionName,false);
-	});
-	if(itMember == (*it)->memberDeclarations.end())
-	{
-		auto tmpMemberName = memberName;
-		std::optional<ComponentMemberInfo> componentMemberInfo {};
-		// TODO: Add support for properties
-		luabind::object onChange {};
-		if(pragma::is_valid_component_property_type(memberType))
+		onChange = attributes["onChange"];
+		if(onChange)
 		{
-			onChange = attributes["onChange"];
-			if(onChange)
+			onChange.push(l);
+			Lua::CheckFunction(l,-1);
+			Lua::Pop(l,1);
+		}
+		auto vs = [&tmpMemberName,&functionName,&onChange,memberType,dynamicMember](auto tag) -> pragma::ComponentMemberInfo {
+			using T = decltype(tag)::type;
+			if constexpr(pragma::is_valid_component_property_type_v<T>)
 			{
-				onChange.push(l);
-				Lua::CheckFunction(l,-1);
-				Lua::Pop(l,1);
-			}
-			auto vs = [&tmpMemberName,&functionName,&onChange,memberType](auto tag) -> pragma::ComponentMemberInfo {
-				using T = decltype(tag)::type;
-				if constexpr(pragma::is_valid_component_property_type_v<T>)
+				if(dynamicMember)
+				{
+					constexpr auto getter = +[](const ComponentMemberInfo &memberInfo,BaseLuaBaseEntityComponent &component,T &value) {
+						pragma::ents::EntityMemberType type;
+						component.GetDynamicMemberValue<T>(memberInfo.userIndex,value,type);
+					};
+					if(!onChange)
+					{
+						return create_component_member_info<
+							BaseLuaBaseEntityComponent,T,
+							[](const ComponentMemberInfo &memberInfo,BaseLuaBaseEntityComponent &component,const T &value) {
+								component.SetDynamicMemberValue<T>(memberInfo.userIndex,value);
+							},getter
+						>(std::move(tmpMemberName));
+					}
+					else
+					{
+						return create_component_member_info<
+							BaseLuaBaseEntityComponent,T,
+							[](const ComponentMemberInfo &memberInfo,BaseLuaBaseEntityComponent &component,const T &value) {
+								component.SetDynamicMemberValue<T>(memberInfo.userIndex,value);
+
+								auto *info = component.GetDynamicMemberInfo(memberInfo.userIndex);
+								if(!info)
+									return;
+								auto &o = component.GetLuaObject();
+								if(info->onChange)
+									info->onChange(o);
+							},getter
+						>(std::move(tmpMemberName));
+					}
+				}
+				else
 				{
 					constexpr auto getter = +[](const ComponentMemberInfo &memberInfo,BaseLuaBaseEntityComponent &component,T &value) {
 						auto *info = component.GetLuaMemberInfo(const_cast<ComponentMemberInfo&>(memberInfo));
@@ -277,73 +289,119 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 						>(std::move(tmpMemberName));
 					}
 				}
-				else
-				{
-					// Unreachable
-					throw std::runtime_error{"Member " +functionName +" of type " +std::string{magic_enum::enum_name(memberType)} +" cannot be animated!"};
-					return pragma::ComponentMemberInfo::CreateDummy();
-				}
-			};
-			componentMemberInfo = std::move(ents::visit_member<false>(memberType,vs));
-
-			auto specializationType = pragma::AttributeSpecializationType::None;
-			auto oCustomSpecializationType = attributes["customSpecializationType"];
-			if(oCustomSpecializationType)
-				specializationType = pragma::AttributeSpecializationType::Custom;
-			auto oSpecializationType = attributes["specializationType"];
-			if(oSpecializationType)
-				specializationType = luabind::object_cast<pragma::AttributeSpecializationType>(oSpecializationType);
-			if(specializationType == pragma::AttributeSpecializationType::Custom)
-			{
-				std::string customType;
-				if(oCustomSpecializationType)
-					customType = luabind::object_cast<std::string>(oCustomSpecializationType);
-				componentMemberInfo->SetSpecializationType(customType);
 			}
 			else
-				componentMemberInfo->SetSpecializationType(specializationType);
-
-			auto oMetaData = attributes["metaData"];
-			if(oMetaData)
 			{
-				auto &metaData = componentMemberInfo->AddMetaData();
-				auto wrapper = static_cast<udm::LinkedPropertyWrapper>(metaData);
-				Lua::udm::table_to_udm(Lua::tb<void>{oMetaData},wrapper);
+				// Unreachable
+				throw std::runtime_error{"Member " +functionName +" of type " +std::string{magic_enum::enum_name(memberType)} +" cannot be animated!"};
+				return pragma::ComponentMemberInfo::CreateDummy();
 			}
+		};
+		componentMemberInfo = std::move(ents::visit_member<false>(memberType,vs));
 
-			if(udm::is_numeric_type(ents::member_type_to_udm_type(memberType)))
+		auto specializationType = pragma::AttributeSpecializationType::None;
+		auto oCustomSpecializationType = attributes["customSpecializationType"];
+		if(oCustomSpecializationType)
+			specializationType = pragma::AttributeSpecializationType::Custom;
+		auto oSpecializationType = attributes["specializationType"];
+		if(oSpecializationType)
+			specializationType = luabind::object_cast<pragma::AttributeSpecializationType>(oSpecializationType);
+		if(specializationType == pragma::AttributeSpecializationType::Custom)
+		{
+			std::string customType;
+			if(oCustomSpecializationType)
+				customType = luabind::object_cast<std::string>(oCustomSpecializationType);
+			componentMemberInfo->SetSpecializationType(customType);
+		}
+		else
+			componentMemberInfo->SetSpecializationType(specializationType);
+
+		auto oMetaData = attributes["metaData"];
+		if(oMetaData)
+		{
+			auto &metaData = componentMemberInfo->AddMetaData();
+			auto wrapper = static_cast<udm::LinkedPropertyWrapper>(metaData);
+			Lua::udm::table_to_udm(Lua::tb<void>{oMetaData},wrapper);
+		}
+
+		if(udm::is_numeric_type(ents::member_type_to_udm_type(memberType)))
+		{
+			for(luabind::iterator it{attributes},end;it!=end;++it)
 			{
-				for(luabind::iterator it{attributes},end;it!=end;++it)
+				auto key = luabind::object_cast<std::string>(it.key());
+				luabind::object val {*it};
+				using namespace ustring::string_switch;
+				switch(hash(key))
 				{
-					auto key = luabind::object_cast<std::string>(it.key());
-					luabind::object val {*it};
-					using namespace ustring::string_switch;
-					switch(hash(key))
-					{
-					case "min"_:
-						componentMemberInfo->SetMin(luabind::object_cast<float>(val));
-						break;
-					case "max"_:
-						componentMemberInfo->SetMax(luabind::object_cast<float>(val));
-						break;
-					case "stepSize"_:
-						componentMemberInfo->SetStepSize(luabind::object_cast<float>(val));
-						break;
-					}
+				case "min"_:
+					componentMemberInfo->SetMin(luabind::object_cast<float>(val));
+					break;
+				case "max"_:
+					componentMemberInfo->SetMax(luabind::object_cast<float>(val));
+					break;
+				case "stepSize"_:
+					componentMemberInfo->SetStepSize(luabind::object_cast<float>(val));
+					break;
 				}
 			}
 		}
-		(*it)->memberDeclarations.push_back({functionName,memberName,get_component_member_name_hash(memberName),memberVarName,memberType,initialValue,memberFlags,std::move(onChange),std::move(componentMemberInfo)});
-		itMember = (*it)->memberDeclarations.end() -1;
-		auto &initialValue = itMember->initialValue;
-		// Default value is currently only allowed for UDM types. Tag: component-member-udm-default
-		if(pragma::ents::is_udm_member_type(memberType))
+	}
+
+	// Default value is currently only allowed for UDM types. Tag: component-member-udm-default
+	if(pragma::ents::is_udm_member_type(memberType))
+	{
+		udm::visit(pragma::ents::member_type_to_udm_type(memberType),[&componentMemberInfo,&initialValue](auto tag) {
+			using T = decltype(tag)::type;
+			if constexpr(is_valid_component_property_type_v<T>)
+				componentMemberInfo->SetDefault<T>(std::any_cast<T>(initialValue));
+		});
+	}
+	return componentMemberInfo;
+}
+
+BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMember(
+	const luabind::object &oClass,const std::string &functionName,ents::EntityMemberType memberType,const std::any &initialValue,MemberFlags memberFlags,const Lua::map<std::string,void> &attributes
+)
+{
+	if(functionName.empty())
+		return INVALID_MEMBER;
+	auto *l = oClass.interpreter();
+	/*if((memberFlags &MemberFlags::StoreBit) != MemberFlags::None)
+	{
+		std::string err = "If store flag is set, version number mustn't be 0! Please check 'lua_help ents.BaseEntityComponent.RegisterMember' for more information!";
+		lua_pushstring(l,err.c_str());
+		lua_error(l);
+		return INVALID_MEMBER;
+	}*/
+	auto memberName = get_member_name(functionName);
+	auto memberVarName = get_member_variable_name(functionName);
+
+	auto &members = get_class_member_list(l);
+	auto it = std::find_if(members.begin(),members.end(),[&oClass](const std::shared_ptr<ClassMembers> &classMembers) {
+		return oClass == classMembers->classObject;
+	});
+	if(it == members.end())
+	{
+		members.push_back(std::make_shared<ClassMembers>(oClass));
+		it = members.end() -1;
+	}
+	auto itMember = std::find_if((*it)->memberDeclarations.begin(),(*it)->memberDeclarations.end(),[&functionName](const MemberInfo &memberInfo) {
+		return ustring::compare(functionName,memberInfo.functionName,false);
+	});
+	if(itMember == (*it)->memberDeclarations.end())
+	{
+		luabind::object onChange;
+		auto componentMemberInfo = pragma::lua::get_component_member_info(
+			l,functionName,memberType,
+			initialValue,memberFlags,
+			attributes,
+			onChange,false
+		);
+
+		if(componentMemberInfo.has_value())
 		{
-			udm::visit(pragma::ents::member_type_to_udm_type(memberType),[&componentMemberInfo,&initialValue](auto tag) {
-				using T = decltype(tag)::type;
-				if constexpr(is_valid_component_property_type_v<T>)
-					componentMemberInfo->SetDefault<T>(std::any_cast<T>(initialValue));
-			});
+			(*it)->memberDeclarations.push_back({functionName,memberName,get_component_member_name_hash(memberName),memberVarName,memberType,initialValue,memberFlags,std::move(onChange),std::move(componentMemberInfo)});
+			itMember = (*it)->memberDeclarations.end() -1;
 		}
 	}
 	auto idx = itMember -(*it)->memberDeclarations.begin();
@@ -643,23 +701,114 @@ void BaseLuaBaseEntityComponent::OnTick(double dt)
 
 void BaseLuaBaseEntityComponent::InitializeMember(const MemberInfo &memberInfo) {}
 
+std::any *BaseLuaBaseEntityComponent::GetDynamicMemberValue(ComponentMemberIndex memberIndex,ents::EntityMemberType &outType)
+{
+	auto *info = GetMemberInfo(memberIndex);
+	if(!info)
+		return nullptr;
+	if(memberIndex < m_dynamicMemberStartOffset)
+		return nullptr;
+	memberIndex -= m_dynamicMemberStartOffset;
+	if(memberIndex >= m_dynamicMembers.size() || !m_dynamicMembers[memberIndex].enabled)
+		return nullptr;
+	outType = info->type;
+	return &m_dynamicMembers[memberIndex].value;
+}
+
+void BaseLuaBaseEntityComponent::ReserveMembers(uint32_t count) {DynamicMemberRegister::ReserveMembers(count);}
+BaseLuaBaseEntityComponent::DynamicMemberInfo *BaseLuaBaseEntityComponent::GetDynamicMemberInfo(ComponentMemberIndex memberIndex)
+{
+	if(memberIndex < m_dynamicMemberStartOffset)
+		return nullptr;
+	memberIndex -= m_dynamicMemberStartOffset;
+	if(memberIndex >= m_dynamicMembers.size() || !m_dynamicMembers[memberIndex].enabled)
+		return nullptr;
+	return &m_dynamicMembers[memberIndex];
+}
+ComponentMemberIndex BaseLuaBaseEntityComponent::RegisterMember(ComponentMemberInfo &&memberInfo,luabind::object &onChange)
+{
+	auto idx = DynamicMemberRegister::RegisterMember(std::move(memberInfo));
+	auto *info = GetDynamicMemberInfo(idx);
+	if(info != nullptr)
+		info->onChange = onChange;
+	return idx;
+}
+ComponentMemberIndex BaseLuaBaseEntityComponent::RegisterMember(const ComponentMemberInfo &memberInfo,luabind::object &onChange)
+{
+	auto idx = DynamicMemberRegister::RegisterMember(memberInfo);
+	auto *info = GetDynamicMemberInfo(idx);
+	if(info != nullptr)
+		info->onChange = onChange;
+	return idx;
+}
+void BaseLuaBaseEntityComponent::ClearMembers() {DynamicMemberRegister::ClearMembers();}
+void BaseLuaBaseEntityComponent::RemoveMember(ComponentMemberIndex idx) {DynamicMemberRegister::RemoveMember(idx);}
+void BaseLuaBaseEntityComponent::RemoveMember(const std::string &name) {DynamicMemberRegister::RemoveMember(name);}
+void BaseLuaBaseEntityComponent::UpdateMemberNameMap() {DynamicMemberRegister::UpdateMemberNameMap();}
+
+void BaseLuaBaseEntityComponent::OnMemberRegistered(const ComponentMemberInfo &memberInfo,ComponentMemberIndex index)
+{
+	DynamicMemberRegister::OnMemberRegistered(memberInfo,index);
+
+	if(pragma::ents::is_udm_member_type(memberInfo.type))
+	{
+		const_cast<ComponentMemberInfo&>(memberInfo).userIndex = index;
+		if(m_dynamicMembers.empty())
+			m_dynamicMemberStartOffset = index;
+		index -= m_dynamicMemberStartOffset;
+		if(index >= m_dynamicMembers.size())
+			m_dynamicMembers.resize(index +1);
+		auto &dynMember = m_dynamicMembers[index];
+		dynMember.enabled = true;
+		udm::visit(pragma::ents::member_type_to_udm_type(memberInfo.type),[&memberInfo,&dynMember](auto tag) {
+			using T = decltype(tag)::type;
+			if constexpr(is_valid_component_property_type_v<T>)
+			{
+				T def;
+				memberInfo.GetDefault<T>(def);
+				dynMember.value = def;
+			}
+		});
+	}
+}
+void BaseLuaBaseEntityComponent::OnMemberRemoved(const ComponentMemberInfo &memberInfo,ComponentMemberIndex index)
+{
+	DynamicMemberRegister::OnMemberRemoved(memberInfo,index);
+	if(index < m_dynamicMemberStartOffset)
+		return;
+	index -= m_dynamicMemberStartOffset;
+	if(index >= m_dynamicMembers.size())
+		return;
+	m_dynamicMembers[index].enabled = false;
+	m_dynamicMembers[index].value = {};
+}
+
 std::optional<ComponentMemberIndex> BaseLuaBaseEntityComponent::DoGetMemberIndex(const std::string &name) const
 {
 	auto *o = GetClassObject();
 	if(!o)
 		return {};
-	return find_member_info_index(*o,name);
+	auto idx = find_member_info_index(*o,name);
+	if(idx.has_value())
+		return idx;
+	idx = DynamicMemberRegister::GetMemberIndex(name);
+	if(idx.has_value())
+		return *idx +GetStaticMemberCount();
+	return std::optional<ComponentMemberIndex>{};
 }
 const ComponentMemberInfo *BaseLuaBaseEntityComponent::GetMemberInfo(ComponentMemberIndex idx) const
 {
 	auto &classMembers = get_class_member_list(GetLuaObject().interpreter());
-	if(m_classMemberIndex >= classMembers.size())
-		return nullptr;
-	auto &members = classMembers[m_classMemberIndex];
-	if(idx >= members->memberDeclarations.size())
-		return nullptr;
-	auto &memberInfo = members->memberDeclarations[idx];
-	return memberInfo.componentMemberInfo.has_value() ? &*memberInfo.componentMemberInfo : nullptr;
+	if(m_classMemberIndex < classMembers.size())
+	{
+		auto &members = classMembers[m_classMemberIndex];
+		if(idx < members->memberDeclarations.size())
+		{
+			auto &memberInfo = members->memberDeclarations[idx];
+			return memberInfo.componentMemberInfo.has_value() ? &*memberInfo.componentMemberInfo : nullptr;
+		}
+	}
+	return DynamicMemberRegister::GetMemberInfo(idx -GetStaticMemberCount());
 }
 
 const luabind::object &BaseLuaBaseEntityComponent::GetLuaObject() const {return pragma::BaseEntityComponent::GetLuaObject();}
@@ -1276,7 +1425,7 @@ static pragma::BaseLuaBaseEntityComponent::MemberFlags string_to_member_flag(lua
 	return pragma::BaseLuaBaseEntityComponent::MemberFlags::None;
 }
 
-static pragma::BaseLuaBaseEntityComponent::MemberFlags string_to_member_flags(lua_State *l,std::string_view strFlags)
+pragma::BaseLuaBaseEntityComponent::MemberFlags pragma::lua::string_to_member_flags(lua_State *l,std::string_view strFlags)
 {
 	auto flags = pragma::BaseLuaBaseEntityComponent::MemberFlags::None;
 	auto flagsRem = pragma::BaseLuaBaseEntityComponent::MemberFlags::None;
@@ -1371,11 +1520,11 @@ void Lua::register_base_entity_component(luabind::module_ &modEnts)
 	})];
 	classDef.scope[luabind::def("RegisterMember",+[](lua_State *l,const Lua::classObject &o,const std::string &memberName,pragma::ents::EntityMemberType memberType,Lua::udm_type oDefault,const std::string &memberFlags) {
 		auto anyInitialValue = Lua::GetAnyValue(l,detail::member_type_to_util_type(memberType),4);
-		pragma::BaseLuaBaseEntityComponent::RegisterMember(o,memberName,memberType,anyInitialValue,string_to_member_flags(l,memberFlags),luabind::newtable(l));
+		pragma::BaseLuaBaseEntityComponent::RegisterMember(o,memberName,memberType,anyInitialValue,pragma::lua::string_to_member_flags(l,memberFlags),luabind::newtable(l));
 	})];
 	classDef.scope[luabind::def("RegisterMember",+[](lua_State *l,const Lua::classObject &o,const std::string &memberName,pragma::ents::EntityMemberType memberType,Lua::udm_type oDefault,const Lua::map<std::string,void> &attributes,const std::string &memberFlags) {
 		auto anyInitialValue = Lua::GetAnyValue(l,detail::member_type_to_util_type(memberType),4);
-		pragma::BaseLuaBaseEntityComponent::RegisterMember(o,memberName,memberType,anyInitialValue,string_to_member_flags(l,memberFlags),attributes);
+		pragma::BaseLuaBaseEntityComponent::RegisterMember(o,memberName,memberType,anyInitialValue,pragma::lua::string_to_member_flags(l,memberFlags),attributes);
 	})];
 	classDef.scope[luabind::def("RegisterMember",+[](lua_State *l,const Lua::classObject &o,const std::string &memberName,pragma::ents::EntityMemberType memberType,Lua::udm_type oDefault,const Lua::map<std::string,void> &attributes) {
 		auto anyInitialValue = Lua::GetAnyValue(l,detail::member_type_to_util_type(memberType),4);
@@ -1421,3 +1570,4 @@ void Lua::register_base_entity_component(luabind::module_ &modEnts)
 	classDef.def("Load",&pragma::BaseLuaBaseEntityComponent::Lua_Load,&pragma::BaseLuaBaseEntityComponent::default_Lua_Load);
 	modEnts[classDef];
 }
+#pragma optimize("",on)

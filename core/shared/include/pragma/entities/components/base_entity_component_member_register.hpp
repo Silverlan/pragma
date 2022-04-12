@@ -34,7 +34,7 @@ namespace pragma
 	private:
 		std::unordered_map<ComponentMemberIndex,ComponentMemberInfo> m_members = {};
 		std::unordered_map<std::string,ComponentMemberIndex> m_memberNameToIndex = {};
-		uint32_t m_nextMemberIndex = 0;
+		uint32_t m_nextMemberIndex = std::numeric_limits<uint32_t>::max();
 	};
 };
 

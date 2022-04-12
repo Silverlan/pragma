@@ -359,6 +359,7 @@ std::optional<ComponentMemberInfo> pragma::lua::get_component_member_info(
 	return componentMemberInfo;
 }
 
+
 BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMember(
 	const luabind::object &oClass,const std::string &functionName,ents::EntityMemberType memberType,const std::any &initialValue,MemberFlags memberFlags,const Lua::map<std::string,void> &attributes
 )
@@ -500,6 +501,14 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 		}
 	}
 	return idx;
+}
+uint32_t BaseLuaBaseEntityComponent::GetStaticMemberCount() const
+{
+	auto *co = GetClassObject();
+	if(!co)
+		return 0;
+	auto *infos = GetMemberInfos(*co);
+	return infos ? infos->size() : 0;
 }
 void BaseLuaBaseEntityComponent::OnMemberValueChanged(uint32_t memberIdx)
 {
@@ -793,7 +802,7 @@ std::optional<ComponentMemberIndex> BaseLuaBaseEntityComponent::DoGetMemberIndex
 		return idx;
 	idx = DynamicMemberRegister::GetMemberIndex(name);
 	if(idx.has_value())
-		return *idx +GetStaticMemberCount();
+		return *idx; // +GetStaticMemberCount();
 	return std::optional<ComponentMemberIndex>{};
 }
 const ComponentMemberInfo *BaseLuaBaseEntityComponent::GetMemberInfo(ComponentMemberIndex idx) const
@@ -808,7 +817,7 @@ const ComponentMemberInfo *BaseLuaBaseEntityComponent::GetMemberInfo(ComponentMe
 			return memberInfo.componentMemberInfo.has_value() ? &*memberInfo.componentMemberInfo : nullptr;
 		}
 	}
-	return DynamicMemberRegister::GetMemberInfo(idx -GetStaticMemberCount());
+	return DynamicMemberRegister::GetMemberInfo(idx);// -GetStaticMemberCount());
 }
 
 const luabind::object &BaseLuaBaseEntityComponent::GetLuaObject() const {return pragma::BaseEntityComponent::GetLuaObject();}

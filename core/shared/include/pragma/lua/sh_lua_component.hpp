@@ -169,6 +169,7 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual void InitializeMembers(const std::vector<BaseLuaBaseEntityComponent::MemberInfo> &members);
 		virtual void OnTick(double dt) override;
+		virtual uint32_t GetStaticMemberCount() const override;
 		void SetupLua(const luabind::object &o);
 		void SetNetworked(bool b);
 		bool IsNetworked() const;

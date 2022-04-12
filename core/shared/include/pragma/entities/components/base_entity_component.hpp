@@ -117,7 +117,7 @@ namespace pragma
 
 		std::optional<ComponentMemberIndex> GetMemberIndex(const std::string &name) const;
 		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const;
-		uint32_t GetStaticMemberCount() const;
+		virtual uint32_t GetStaticMemberCount() const;
 
 		const ComponentInfo *GetComponentInfo() const;
 

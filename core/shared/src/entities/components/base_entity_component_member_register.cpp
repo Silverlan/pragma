@@ -76,7 +76,11 @@ pragma::ComponentMemberIndex pragma::DynamicMemberRegister::RegisterMember(pragm
 	if(itName != m_memberNameToIndex.end())
 		idx = itName->second;
 	else
+	{
+		if(m_nextMemberIndex == std::numeric_limits<uint32_t>::max())
+			m_nextMemberIndex = dynamic_cast<BaseEntityComponent*>(this)->GetStaticMemberCount();
 		idx = m_nextMemberIndex++;
+	}
 	auto it = m_members.find(idx);
 	if(it != m_members.end())
 		it->second = std::move(memberInfo);

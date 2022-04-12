@@ -94,7 +94,11 @@ void Lua::ents::register_library(lua_State *l)
 			auto &manager = game.GetEntityComponentManager();
 			auto t = luabind::newtable(l);
 			for(uint32_t idx = 1;auto &componentInfo : manager.GetRegisteredComponentTypes())
+			{
+				if(componentInfo.id == pragma::INVALID_COMPONENT_ID)
+					continue;
 				t[idx++] = componentInfo.id;
+			}
 			return t;
 		}),
 		luabind::def("get_component_info",+[](lua_State *l,Game &game,pragma::ComponentId componentId) {
@@ -199,7 +203,10 @@ void Lua::ents::register_library(lua_State *l)
 		{"MEMBER_TYPE_MULTI_ENTITY",umath::to_integral(pragma::ents::EntityMemberType::MultiEntity)},
 		{"MEMBER_TYPE_COUNT",umath::to_integral(pragma::ents::EntityMemberType::Count)},
 		{"MEMBER_TYPE_LAST",umath::to_integral(pragma::ents::EntityMemberType::Last)},
-		{"MEMBER_TYPE_INVALID",umath::to_integral(pragma::ents::EntityMemberType::Invalid)}
+		{"MEMBER_TYPE_INVALID",umath::to_integral(pragma::ents::EntityMemberType::Invalid)},
+		
+		{"INVALID_COMPONENT_ID",pragma::INVALID_COMPONENT_ID},
+		{"INVALID_COMPONENT_MEMBER_INDEX",pragma::INVALID_COMPONENT_MEMBER_INDEX}
 	});
 
 	auto componentInfoDef = luabind::class_<pragma::ComponentInfo>("ComponentInfo");

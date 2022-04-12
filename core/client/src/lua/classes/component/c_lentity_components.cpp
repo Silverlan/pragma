@@ -891,6 +891,9 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defCTouch];
 
 	auto defCSkybox = pragma::lua::create_entity_component_class<pragma::CSkyboxComponent,pragma::BaseSkyboxComponent>("SkyboxComponent");
+	defCSkybox.def("SetSkyMaterial",&pragma::CSkyboxComponent::SetSkyMaterial);
+	defCSkybox.def("SetSkyAngles",&pragma::CSkyboxComponent::SetSkyAngles);
+	defCSkybox.def("GetSkyAngles",&pragma::CSkyboxComponent::GetSkyAngles);
 	entsMod[defCSkybox];
 
 	auto defCFlashlight = pragma::lua::create_entity_component_class<pragma::CFlashlightComponent,pragma::BaseFlashlightComponent>("FlashlightComponent");

@@ -27,10 +27,18 @@ namespace pragma
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
+
+		void SetSkyAngles(const EulerAngles &ang);
+		const EulerAngles &GetSkyAngles() const;
+		const Vector4 &GetRenderSkyAngles() const;
+
+		void SetSkyMaterial(Material *mat);
+		void ValidateMaterials();
 	private:
 		bool CreateCubemapFromIndividualTextures(const std::string &materialPath,const std::string &postfix="") const;
-		void ValidateMaterials();
 		CallbackHandle m_cbOnModelMaterialsLoaded = {};
+		EulerAngles m_skyAngles;
+		Vector4 m_renderSkyAngles;
 	};
 };
 

@@ -24,6 +24,13 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDERER;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
+#pragma pack(push,1)
+		struct PushConstants
+		{
+			Vector4 skyAngles; // Axis angle (radians)
+		};
+#pragma pack(pop)
+
 		ShaderSkybox(prosper::IPrContext &context,const std::string &identifier);
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual bool GetRenderBufferTargets(
@@ -41,6 +48,10 @@ namespace pragma
 			prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
 			const Vector4 &drawOrigin,ShaderGameWorld::SceneFlags &inOutSceneFlags
 		) const override;
+		virtual bool RecordBindEntity(
+			rendering::ShaderProcessor &shaderProcessor,CRenderComponent &renderC,
+			prosper::IShaderPipelineLayout &layout,uint32_t entityInstanceDescriptorSetIndex
+		) const override;
 		virtual void RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor,SceneFlags sceneFlags) const override {}
 		virtual void RecordClipPlane(rendering::ShaderProcessor &shaderProcessor,const Vector4 &clipPlane) const override {}
 		virtual void RecordDrawOrigin(rendering::ShaderProcessor &shaderProcessor,const Vector4 &drawOrigin) const {}
@@ -56,6 +67,7 @@ namespace pragma
 		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		EulerAngles m_skyAngles = {};
 	};
 

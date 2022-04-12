@@ -9,6 +9,7 @@
 #include "pragma/rendering/shaders/world/c_shader_skybox.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/render_processor.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/environment/c_sky_camera.hpp"
 #include "pragma/entities/c_skybox.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
@@ -138,6 +139,27 @@ void ShaderSkybox::RecordBindScene(
 
 	static const std::vector<uint32_t> dynamicOffsets {};
 	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,shaderProcessor.GetCurrentPipelineLayout(),pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX,descSets,dynamicOffsets);
+}
+
+bool ShaderSkybox::RecordBindEntity(
+	rendering::ShaderProcessor &shaderProcessor,CRenderComponent &renderC,
+	prosper::IShaderPipelineLayout &layout,uint32_t entityInstanceDescriptorSetIndex
+) const
+{
+	if(ShaderGameWorldLightingPass::RecordBindEntity(shaderProcessor,renderC,layout,entityInstanceDescriptorSetIndex) == false)
+		return false;
+	auto skyC = renderC.GetEntity().GetComponent<CSkyboxComponent>();
+	if(skyC.expired())
+		return false;
+	auto &cmd = shaderProcessor.GetCommandBuffer();
+	auto &pushConstants = skyC->GetRenderSkyAngles();
+	static_assert(sizeof(PushConstants) == sizeof(pushConstants));
+	return cmd.RecordPushConstants(layout,prosper::ShaderStageFlags::VertexBit,sizeof(ShaderGameWorldLightingPass::PushConstants),sizeof(PushConstants),&pushConstants);
+}
+
+void ShaderSkybox::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+{
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(ShaderGameWorldLightingPass::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
 
 //////////////

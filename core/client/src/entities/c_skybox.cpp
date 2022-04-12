@@ -12,6 +12,7 @@
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/rendering/shaders/c_shader_equirectangular_to_cubemap.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/model/c_model.h"
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -34,7 +35,7 @@ extern DLLCLIENT CGame *c_game;
 using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(skybox,CSkybox);
-
+#pragma optimize("",off)
 void CSkyboxComponent::Initialize()
 {
 	BaseSkyboxComponent::Initialize();
@@ -57,6 +58,7 @@ void CSkyboxComponent::Initialize()
 			ValidateMaterials();
 		});
 	});
+	SetSkyAngles({});
 }
 void CSkyboxComponent::ReceiveData(NetPacket &packet)
 {
@@ -77,6 +79,16 @@ void CSkyboxComponent::OnRemove()
 		m_cbOnModelMaterialsLoaded.Remove();
 }
 void CSkyboxComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CSkyboxComponent::SetSkyAngles(const EulerAngles &ang)
+{
+	m_skyAngles = ang;
+	Vector3 axis;
+	float angle;
+	uquat::to_axis_angle(uquat::create(ang),axis,angle);
+	m_renderSkyAngles = {axis,angle};
+}
+const EulerAngles &CSkyboxComponent::GetSkyAngles() const {return m_skyAngles;}
+const Vector4 &CSkyboxComponent::GetRenderSkyAngles() const {return m_renderSkyAngles;}
 bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &materialPath,const std::string &postfix) const
 {
 	// Check if this skybox is made of individual textures
@@ -261,19 +273,60 @@ void CSkyboxComponent::ValidateMaterials()
 	auto mdl = GetEntity().GetModel();
 	if(mdl == nullptr)
 		return;
-	auto &textures = mdl->GetMetaInfo().textures;
-	auto &materials = mdl->GetMaterials();
-	auto &texturePaths = mdl->GetMetaInfo().texturePaths;
-	if(materials.empty() || textures.empty() || texturePaths.empty())
+	auto mdlC = GetEntity().GetComponent<CModelComponent>();
+	auto *mat = mdlC->GetRenderMaterial(0);
+	if(!mat)
 		return;
-	auto &mat = materials.front();
-	auto &texture = textures.front();
+	auto &texturePaths = mdl->GetMetaInfo().texturePaths;
 	auto &texturePath = texturePaths.front();
-	if(mat && mat->GetTextureInfo("skybox"))
-		return; // Skybox is valid; Skip the material
+	auto *texInfo = mat ? mat->GetTextureInfo("skybox") : nullptr;
+	if(texInfo)
+	{
+		// Skybox is valid; Skip the material
+		if(texInfo->texture)
+		{
+			auto &tex = *static_cast<Texture*>(texInfo->texture.get());
+			auto &vkTex = tex.GetVkTexture();
+			if(vkTex)
+			{
+				auto &img = vkTex->GetImage();
+				if(img.IsCubemap() == false)
+				{
+					// Equirectangular skybox; We need to convert it to a skybox
+					auto *shader = static_cast<pragma::ShaderEquirectangularToCubemap*>(c_engine->GetShader("equirectangular_to_cubemap").get());
+					if(shader)
+					{
+						constexpr uint32_t resolution = 1024;
+						auto tex = shader->EquirectangularTextureToCubemap(*vkTex,resolution);
+						if(tex)
+						{
+							static_cast<CMaterial*>(mat)->SetTexture("skybox",*tex);
+							static_cast<CMaterial*>(mat)->UpdateTextures();
+						}
+					}
+				}
+			}
+		}
+		return;
+	}
 	// Attempt to use HDR textures, otherwise LDR
+	auto texture = ufile::get_file_from_filename(mat->GetName());
+	ufile::remove_extension_from_filename(texture,pragma::asset::get_supported_extensions(pragma::asset::Type::Material));
 	if(CreateCubemapFromIndividualTextures(texturePath +texture +".pmat","_hdr") || CreateCubemapFromIndividualTextures(texturePath +texture +".pmat"))
 		mdl->LoadMaterials();
+}
+void CSkyboxComponent::SetSkyMaterial(Material *mat)
+{
+	auto &ent = GetEntity();
+	auto mdlC = ent.GetComponent<CModelComponent>();
+	if(mdlC.expired())
+		return;
+	if(mat)
+		mdlC->SetMaterialOverride(0,static_cast<CMaterial&>(*mat));
+	else
+		mdlC->ClearMaterialOverride(0);
+	ValidateMaterials();
+	mdlC->UpdateRenderMeshes();
 }
 
 void CSkybox::Initialize()
@@ -293,12 +346,7 @@ static void sky_override(NetworkState*,ConVar*,std::string,std::string skyMat)
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CSkyboxComponent>>();
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CModelComponent>>();
 	for(auto *ent : entIt)
-	{
-		auto mdlC = ent->GetComponent<CModelComponent>();
-		if(matSky)
-			mdlC->SetMaterialOverride(0,*matSky);
-		else
-			mdlC->ClearMaterialOverride(0);
-	}
+		ent->GetComponent<CSkyboxComponent>()->SetSkyMaterial(matSky);
 }
 REGISTER_CONVAR_CALLBACK_CL(sky_override,sky_override);
+#pragma optimize("",on)

@@ -13,6 +13,7 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/rendering/shaders/c_shader_equirectangular_to_cubemap.hpp"
+#include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/model/c_model.h"
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -349,4 +350,141 @@ static void sky_override(NetworkState*,ConVar*,std::string,std::string skyMat)
 		ent->GetComponent<CSkyboxComponent>()->SetSkyMaterial(matSky);
 }
 REGISTER_CONVAR_CALLBACK_CL(sky_override,sky_override);
+
+#include "pragma/console/c_cvar_global_functions.h"
+#include <cmaterial_manager2.hpp>
+#include <texturemanager/texture_manager2.hpp>
+#include <util_image.hpp>
+#include <fsys/ifile.hpp>
+
+enum class ConversionMode : uint8_t
+{
+	CubemapToEquirectangular = 0,
+	EquirectangularToCubemap
+};
+#include <wgui/types/wirect.h>
+static void util_convert_cubemap_equirect(std::vector<std::string> &argv,ConversionMode conversionMode)
+{
+	if(argv.empty())
+	{
+		Con::cwar<<"WARNING: No image path has been specified!"<<Con::endl;
+		return;
+	}
+	auto &fileName = argv.front();
+	auto assetFileName = pragma::asset::find_file(argv.front(),pragma::asset::Type::Texture);
+	if(!assetFileName.has_value())
+	{
+		Con::cwar<<"WARNING: Failed to locate texture file for '"<<*assetFileName<<"'!"<<Con::endl;
+		return;
+	}
+
+	std::string absPath;
+	if(!FileManager::FindLocalPath("materials/" +*assetFileName,absPath))
+	{
+		Con::cwar<<"WARNING: Failed to determine absolute path for texture file '"<<*assetFileName<<"'!"<<Con::endl;
+		return;
+	}
+
+	auto &matMan = static_cast<msys::CMaterialManager&>(client->GetMaterialManager());
+	auto tex = matMan.GetTextureManager().LoadAsset(fileName,util::AssetLoadFlags::DontCache | util::AssetLoadFlags::IgnoreCache);
+	if(!tex)
+	{
+		Con::cwar<<"WARNING: Texture '"<<fileName<<"' could not be loaded!"<<Con::endl;
+		return;
+	}
+	
+	auto &vkTex = tex->GetVkTexture();
+	{
+		//auto el = WGUI::GetInstance().Create<WITexturedRect>();
+		//el->SetTexture(*vkTex,0);
+		//el->SetSize(512,512);
+		//return;
+		//uimg::TextureInfo texInfo {};
+		//texInfo.containerFormat = uimg::TextureInfo::ContainerFormat::DDS;
+		//prosper::util::save_texture("test.dds",vkTex->GetImage(),texInfo);
+	}
+
+	if(!vkTex)
+	{
+		Con::cwar<<"WARNING: Invalid texture!"<<Con::endl;
+		return;
+	}
+	
+	auto outputFileName = util::Path::CreateFile(absPath);
+	outputFileName.RemoveFileExtension(pragma::asset::get_supported_extensions(pragma::asset::Type::Texture));
+	if(conversionMode == ConversionMode::EquirectangularToCubemap)
+	{
+		auto *shader = static_cast<pragma::ShaderEquirectangularToCubemap*>(c_engine->GetShader("equirectangular_to_cubemap").get());
+		if(!shader)
+		{
+			Con::cwar<<"WARNING: Invalid shader!"<<Con::endl;
+			return;
+		}
+		auto texCubemap = shader->EquirectangularTextureToCubemap(*vkTex,1'024);
+		if(!texCubemap)
+		{
+			Con::cwar<<"WARNING: Conversion failed!"<<Con::endl;
+			return;
+		}
+		uimg::TextureInfo texInfo {};
+		texInfo.containerFormat = uimg::TextureInfo::ContainerFormat::DDS;
+		outputFileName += "_cubemap.dds";
+		auto res = prosper::util::save_texture(outputFileName.GetString(),texCubemap->GetImage(),texInfo);
+		if(!res)
+		{
+			Con::cwar<<"WARNING: Failed to save output texture '"<<outputFileName.GetString()<<"'!"<<Con::endl;
+			return;
+		}
+		Con::cout<<"Successfully saved output file '"<<outputFileName.GetString()<<"'!"<<Con::endl;
+		return;
+	}
+
+	auto *shader = static_cast<pragma::ShaderCubemapToEquirectangular*>(c_engine->GetShader("cubemap_to_equirectangular").get());
+	if(!shader)
+	{
+		Con::cwar<<"WARNING: Invalid shader!"<<Con::endl;
+		return;
+	}
+	auto texEqui = shader->CubemapToEquirectangularTexture(*vkTex);
+	if(!texEqui)
+	{
+		Con::cwar<<"WARNING: Conversion failed!"<<Con::endl;
+		return;
+	}
+
+	// TODO: We should save it as HDR, but that causes weird artifacts. Investigate! Maybe add support for exr?
+	auto saveAsHdr = false;
+	auto imgBuf = texEqui->GetImage().ToHostImageBuffer(uimg::Format::RGBA16,prosper::ImageLayout::ShaderReadOnlyOptimal);
+	if(!imgBuf)
+	{
+		Con::cwar<<"WARNING: Failed to generate host image buffer!"<<Con::endl;
+		return;
+	}
+	if(saveAsHdr)
+		outputFileName += "_equirect.hdr";
+	else
+		outputFileName += "_equirect.png";
+	auto f = filemanager::open_file(outputFileName.GetString(),filemanager::FileMode::Write | filemanager::FileMode::Binary);
+	if(!f)
+	{
+		Con::cwar<<"WARNING: Failed to open output file '"<<outputFileName.GetString()<<"'!"<<Con::endl;
+		return;
+	}
+	fsys::File fp {f};
+	auto res = uimg::save_image(fp,*imgBuf,saveAsHdr ? uimg::ImageFormat::HDR : uimg::ImageFormat::PNG);
+	if(!res)
+	{
+		Con::cwar<<"WARNING: Failed to save output file '"<<outputFileName.GetString()<<"'!"<<Con::endl;
+		return;
+	}
+	Con::cout<<"Successfully saved output file '"<<outputFileName.GetString()<<"'!"<<Con::endl;
+}
+void Console::commands::util_convert_cubemap_to_equirectangular_image(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+{
+	util_convert_cubemap_equirect(argv,ConversionMode::CubemapToEquirectangular);
+}
+void Console::commands::util_convert_equirectangular_image_to_cubemap(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+{
+	util_convert_cubemap_equirect(argv,ConversionMode::EquirectangularToCubemap);
+}
 #pragma optimize("",on)

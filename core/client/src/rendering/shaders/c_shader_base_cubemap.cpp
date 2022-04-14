@@ -89,7 +89,7 @@ std::shared_ptr<prosper::IImage> ShaderCubemap::CreateCubeMap(uint32_t width,uin
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.tiling = prosper::ImageTiling::Optimal;
 	createInfo.flags |= flags | prosper::util::ImageCreateInfo::Flags::Cubemap;
-	createInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit;
+	createInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferSrcBit;
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 
 	return c_engine->GetRenderContext().CreateImage(createInfo);

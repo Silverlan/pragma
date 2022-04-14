@@ -91,6 +91,10 @@ namespace Console
 
 		DLLCLIENT void map_build_reflection_probes(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 		DLLCLIENT void map_rebuild_lightmaps(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
+		
+		DLLCLIENT void util_convert_cubemap_to_equirectangular_image(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
+		DLLCLIENT void util_convert_equirectangular_image_to_cubemap(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
+
 	};
 };
 

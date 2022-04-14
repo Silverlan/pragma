@@ -95,4 +95,7 @@ REGISTER_CONCOMMAND_CL(map_build_reflection_probes,Console::commands::map_build_
 REGISTER_CONCOMMAND_CL(map_rebuild_lightmaps,Console::commands::map_rebuild_lightmaps,ConVarFlags::None,"Rebuilds the lightmaps for the current map. Note that this will only work if the map was compiled with lightmap uvs.");
 REGISTER_CONCOMMAND_CL(debug_lightmaps,Console::commands::debug_lightmaps,ConVarFlags::None,"Displays the lightmaps for the loaded level.");
 
+REGISTER_CONCOMMAND_CL(util_convert_cubemap_to_equirectangular_image,Console::commands::util_convert_cubemap_to_equirectangular_image,ConVarFlags::None,"Converts a cubemap to a equirectangular image.");
+REGISTER_CONCOMMAND_CL(util_convert_equirectangular_image_to_cubemap,Console::commands::util_convert_equirectangular_image_to_cubemap,ConVarFlags::None,"Converts a equirectangular image to a cubemap.");
+
 #endif

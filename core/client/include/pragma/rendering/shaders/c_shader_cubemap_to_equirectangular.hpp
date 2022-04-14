@@ -29,8 +29,8 @@ namespace pragma
 		ShaderCubemapToEquirectangular(prosper::IPrContext &context,const std::string &identifier);
 		std::shared_ptr<prosper::Texture> CubemapToEquirectangularTexture(prosper::Texture &cubemap,uint32_t width=1'600,uint32_t height=800);
 	protected:
-		std::shared_ptr<prosper::IImage> CreateEquirectangularMap(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags) const;
-		std::shared_ptr<prosper::RenderTarget> CreateEquirectangularRenderTarget(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags) const;
+		std::shared_ptr<prosper::IImage> CreateEquirectangularMap(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags,bool hdr) const;
+		std::shared_ptr<prosper::RenderTarget> CreateEquirectangularRenderTarget(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags,bool hdr) const;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 	};
 };

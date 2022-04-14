@@ -21,6 +21,7 @@ namespace Lua
 		DLLCLIENT bool load(const std::string &fileName);
 		DLLCLIENT const std::string &get_language();
 		DLLCLIENT int get_languages(lua_State *l);
+		DLLCLIENT bool localize(const std::string &identifier,const std::string &lan,const std::string &category,const std::string &text);
 	};
 };
 

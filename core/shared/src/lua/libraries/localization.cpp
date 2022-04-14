@@ -47,9 +47,14 @@ bool Locale::Load(const std::string &file,const std::string &lan,bool bReload)
 	return LoadFile(filePath.GetString(),lan);
 }
 
-bool Locale::LoadFile(const std::string &file,const std::string &lan)
+std::string Locale::GetFileLocation(const std::string &file,const std::string &lan)
 {
-	auto filePath = LOCALIZATION_ROOT_PATH +lan +"/texts/" +file;
+	return LOCALIZATION_ROOT_PATH +lan +"/texts/" +file;
+}
+
+bool Locale::LoadFile(const std::string &file,const std::string &lan,Localization &outLoc)
+{
+	auto filePath = GetFileLocation(file,lan);
 	auto f = FileManager::OpenFile(filePath.c_str(),"r");
 	if(f != nullptr)
 	{
@@ -61,13 +66,20 @@ bool Locale::LoadFile(const std::string &file,const std::string &lan)
 			if(ustring::get_key_value(l,key,val))
 			{
 				ustring::replace(val,"\\\"","\"");
-				m_localization.texts[key] = val;
+				outLoc.texts[key] = val;
 			}
 		}
-		m_loadedFiles.push_back(file);
 		return true;
 	}
 	return false;
+}
+
+bool Locale::LoadFile(const std::string &file,const std::string &lan)
+{
+	if(LoadFile(file,lan,m_localization) == false)
+		return false;
+	m_loadedFiles.push_back(file);
+	return true;
 }
 
 bool Locale::Load(const std::string &file,bool bReload)
@@ -224,5 +236,41 @@ std::string Locale::DetermineSystemLanguage()
 {
 	// TODO
 	return "en";
+}
+bool Locale::Localize(const std::string &identifier,const std::string &lan,const std::string &category,const tiny_utf8::string &text)
+{
+	auto fileName = category +".txt";
+	Localization loc {};
+	if(!Locale::LoadFile(fileName,lan,loc))
+		return false;
+	loc.texts[identifier] = text;
+	std::vector<std::string> keys;
+	keys.reserve(loc.texts.size());
+	for(auto &pair : loc.texts)
+		keys.push_back(pair.first);
+	std::sort(keys.begin(),keys.end());
+
+	std::stringstream out;
+	auto first = true;
+	for(auto &key : keys)
+	{
+		if(!first)
+			out<<"\n";
+		else
+			first = false;
+
+		auto val = loc.texts[key];
+		ustring::replace<tiny_utf8::string>(val,"\"","\\\"");
+		out<<key<<" = \""<<val<<"\"";
+	}
+
+	auto fullFileName = Locale::GetFileLocation(fileName,lan);
+	if(!FileManager::FindLocalPath(fullFileName,fullFileName))
+		return false;
+	auto f = filemanager::open_file<VFilePtrReal>(fullFileName,filemanager::FileMode::Write);
+	if(!f)
+		return false;
+	f->WriteString(out.str());
+	return true;
 }
 #pragma optimize("",on)

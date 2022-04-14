@@ -18,11 +18,7 @@
 class Locale;
 struct DLLNETWORK Localization
 {
-public:
-	friend Locale;
-protected:
 	Localization();
-public:
 	std::unordered_map<std::string,tiny_utf8::string> texts;
 };
 
@@ -52,6 +48,9 @@ public:
 	static const std::unordered_map<std::string,LanguageInfo> &GetLanguages();
 	static void Poll();
 	static std::string DetermineSystemLanguage();
+	static bool LoadFile(const std::string &file,const std::string &lan,Localization &outLoc);
+	static std::string GetFileLocation(const std::string &file,const std::string &lan);
+	static bool Localize(const std::string &identifier,const std::string &lan,const std::string &category,const tiny_utf8::string &text);
 private:
 	static Localization m_localization;
 	static std::vector<std::string> m_loadedFiles;

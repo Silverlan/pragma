@@ -26,6 +26,7 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/components/renderers/c_rasterization_renderer_component.hpp>
+#include <pragma/localization.h>
 #include <image/prosper_render_target.hpp>
 #include <shader/prosper_shader_blur.hpp>
 #include <prosper_window.hpp>
@@ -516,4 +517,21 @@ void CEngine::RegisterConsoleCommands()
 		}
 		preInit();
 	},ConVarFlags::None,"Pre-initializes openvr.");
+	conVarMap.RegisterConCommand("locale_localize",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		if(argv.size() < 4)
+		{
+			Con::cwar<<"WARNING: Insufficient arguments supplied!"<<Con::endl;
+			return;
+		}
+		auto identifier = argv[0];
+		auto lan = argv[1];
+		auto category = argv[2];
+		auto text = argv[3];
+		Con::cout<<"Localizing '"<<identifier<<"' in category '"<<category<<"' for language '"<<lan<<"' as '"<<text<<"'..."<<Con::endl;
+		auto res = Locale::Localize(identifier,lan,category,text);
+		if(res)
+			Con::cout<<"Done!"<<Con::endl;
+		else
+			Con::cwar<<"WARNING: Localization failed!"<<Con::endl;
+	},ConVarFlags::None,"Adds the specified text to the localization files. Usage: locale_localize <textIdentifier> <language> <group> <localizedText>");
 }

@@ -77,3 +77,8 @@ int Lua::Locale::get_languages(lua_State *l)
 	}
 	return 1;
 }
+
+bool Lua::Locale::localize(const std::string &identifier,const std::string &lan,const std::string &category,const std::string &text)
+{
+	return ::Locale::Localize(identifier,lan,category,text);
+}

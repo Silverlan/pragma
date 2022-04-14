@@ -349,6 +349,18 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 	}
 	auto &channels = anim->GetChannels();
 	channelValueSubmitters.resize(channels.size());
+	uint32_t numInvalidChannels = 0;
+	auto shouldPrintWarning = [&numInvalidChannels]() {
+		if(numInvalidChannels >= 5)
+		{
+			if(numInvalidChannels == 5)
+				Con::cwar<<"Additional warnings will be suppressed."<<Con::endl;
+			++numInvalidChannels;
+			return false;
+		}
+		++numInvalidChannels;
+		return true;
+	};
 	// TODO: Reload this when animation has changed, or if component data has changed (e.g. animated component has changed model and therefore bone positions and rotational data)
 	for(auto it=channels.begin();it!=channels.end();++it)
 	{
@@ -357,13 +369,15 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 		size_t offset = 0;
 		if(path.path.GetComponent(offset,&offset) != "ec") // First path component denotes the type, which always has to be 'ec' for entity component in this case
 		{
-			Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but path is not a valid entity component URI!"<<Con::endl;
+			if(shouldPrintWarning())
+				Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but path is not a valid entity component URI!"<<Con::endl;
 			continue;
 		}
 		auto componentPath = ParseComponentChannelPath(path);
 		if(!componentPath.has_value())
 		{
-			Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but could not determine path components!"<<Con::endl;
+			if(shouldPrintWarning())
+				Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but could not determine path components!"<<Con::endl;
 			continue;
 		}
 		auto &componentTypeName = componentPath->first;
@@ -371,13 +385,15 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 		auto hComponent = GetEntity().FindComponent(componentTypeName);
 		if(hComponent.expired())
 		{
-			Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but entity has no component of type '"<<componentTypeName<<"'!"<<Con::endl;
+			if(shouldPrintWarning())
+				Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but entity has no component of type '"<<componentTypeName<<"'!"<<Con::endl;
 			continue;
 		}
 		auto &memberName = componentPath->second;
 		if(memberName.IsEmpty())
 		{
-			Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but no member name has been specified!"<<Con::endl;
+			if(shouldPrintWarning())
+				Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but no member name has been specified!"<<Con::endl;
 			continue;
 		}
 		auto memberPath = memberName;
@@ -394,11 +410,18 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 		auto memberIdx = hComponent->GetMemberIndex(memberPath.GetString());
 		if(!memberIdx.has_value())
 		{
-			Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', entity component has no member with name '"<<memberName<<"'!"<<Con::endl;
+			if(shouldPrintWarning())
+				Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', entity component has no member with name '"<<memberName<<"'!"<<Con::endl;
 			continue;
 		}
 		auto channelValueType = channel->GetValueType();
 		auto *memberInfo = hComponent->GetMemberInfo(*memberIdx);
+		if(!memberInfo)
+		{
+			if(shouldPrintWarning())
+				Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but member '"<<memberPath.GetString()<<"' with index '"<<*memberIdx<<"' is not valid!"<<Con::endl;
+			continue;
+		}
 		auto valueType = memberInfo->type;
 		
 		auto &component = *hComponent;

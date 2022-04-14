@@ -57,7 +57,11 @@ std::optional<pragma::ComponentMemberIndex> pragma::DynamicMemberRegister::GetMe
 	auto lname = name;
 	ustring::to_lower(lname);
 	auto it = m_memberNameToIndex.find(lname);
-	return (it != m_memberNameToIndex.end()) ? it->second : std::optional<pragma::ComponentMemberIndex>{};
+	if(it == m_memberNameToIndex.end())
+		return {};
+	if(m_members.find(it->second) == m_members.end())
+		return {};
+	return it->second;
 }
 const pragma::ComponentMemberInfo *pragma::DynamicMemberRegister::GetMemberInfo(ComponentMemberIndex idx) const
 {

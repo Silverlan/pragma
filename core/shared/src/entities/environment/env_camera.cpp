@@ -62,7 +62,7 @@ void BaseEnvCameraComponent::RegisterMembers(pragma::EntityComponentManager &com
 			T,float,
 			static_cast<void(T::*)(float)>(&T::SetFarZ),
 			static_cast<float(T::*)() const>(&T::GetFarZ)
-		>("farz",DEFAULT_NEAR_Z,AttributeSpecializationType::Distance);
+		>("farz",DEFAULT_FAR_Z,AttributeSpecializationType::Distance);
 		memberInfo.SetMin(0.1f);
 		memberInfo.updateDependenciesFunction = [](BaseEntityComponent &component,std::vector<std::string> &outAffectedProps) {
 			auto &c = static_cast<T&>(component);

@@ -427,7 +427,8 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipe
 			Con::cwar<<"[Render] WARNING: Scene '"<<scene.GetEntity().GetName()<<"' has no valid rasterization renderer!";
 		return false;
 	}
-	m_shaderProcessor.RecordBindShader(scene,*raster,bView,m_baseSceneFlags,*shaderScene,pipelineIdx);
+	if(!m_shaderProcessor.RecordBindShader(scene,*raster,bView,m_baseSceneFlags,*shaderScene,pipelineIdx))
+		return false;
 	m_shaderProcessor.SetClipPlane(m_drawSceneInfo.drawSceneInfo.clipPlane);
 	
 	if(m_stats)

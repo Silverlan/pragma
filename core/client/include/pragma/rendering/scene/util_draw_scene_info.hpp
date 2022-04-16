@@ -19,6 +19,7 @@
 #include <mathutil/color.h>
 
 class CBaseEntity;
+class CGame;
 namespace prosper {class IPrimaryCommandBuffer; class ICommandBuffer; class RenderTarget; class IImage;};
 namespace pragma {class CSceneComponent;};
 namespace util

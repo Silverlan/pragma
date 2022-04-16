@@ -220,34 +220,43 @@ std::optional<ComponentMemberInfo> pragma::lua::get_component_member_info(
 			{
 				if(dynamicMember)
 				{
-					constexpr auto getter = +[](const ComponentMemberInfo &memberInfo,BaseLuaBaseEntityComponent &component,T &value) {
-						pragma::ents::EntityMemberType type;
-						component.GetDynamicMemberValue<T>(memberInfo.userIndex,value,type);
-					};
-					if(!onChange)
+					if constexpr(udm::is_udm_type<T>())
 					{
-						return create_component_member_info<
-							BaseLuaBaseEntityComponent,T,
-							[](const ComponentMemberInfo &memberInfo,BaseLuaBaseEntityComponent &component,const T &value) {
-								component.SetDynamicMemberValue<T>(memberInfo.userIndex,value);
-							},getter
-						>(std::move(tmpMemberName));
+						constexpr auto getter = +[](const ComponentMemberInfo &memberInfo,BaseLuaBaseEntityComponent &component,T &value) {
+							pragma::ents::EntityMemberType type;
+							component.GetDynamicMemberValue<T>(memberInfo.userIndex,value,type);
+						};
+						if(!onChange)
+						{
+							return create_component_member_info<
+								BaseLuaBaseEntityComponent,T,
+								[](const ComponentMemberInfo &memberInfo,BaseLuaBaseEntityComponent &component,const T &value) {
+									component.SetDynamicMemberValue<T>(memberInfo.userIndex,value);
+								},getter
+							>(std::move(tmpMemberName));
+						}
+						else
+						{
+							return create_component_member_info<
+								BaseLuaBaseEntityComponent,T,
+								[](const ComponentMemberInfo &memberInfo,BaseLuaBaseEntityComponent &component,const T &value) {
+									component.SetDynamicMemberValue<T>(memberInfo.userIndex,value);
+
+									auto *info = component.GetDynamicMemberInfo(memberInfo.userIndex);
+									if(!info)
+										return;
+									auto &o = component.GetLuaObject();
+									if(info->onChange)
+										info->onChange(o);
+								},getter
+							>(std::move(tmpMemberName));
+						}
 					}
 					else
 					{
-						return create_component_member_info<
-							BaseLuaBaseEntityComponent,T,
-							[](const ComponentMemberInfo &memberInfo,BaseLuaBaseEntityComponent &component,const T &value) {
-								component.SetDynamicMemberValue<T>(memberInfo.userIndex,value);
-
-								auto *info = component.GetDynamicMemberInfo(memberInfo.userIndex);
-								if(!info)
-									return;
-								auto &o = component.GetLuaObject();
-								if(info->onChange)
-									info->onChange(o);
-							},getter
-						>(std::move(tmpMemberName));
+						// TODO: Add support for non-UDM types
+						throw std::runtime_error{"Member " +functionName +" of type " +std::string{magic_enum::enum_name(memberType)} +" cannot be animated!"};
+						return pragma::ComponentMemberInfo::CreateDummy();
 					}
 				}
 				else

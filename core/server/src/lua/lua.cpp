@@ -151,6 +151,22 @@ void SGame::RegisterLua()
 	defEntCmp.def("SendSnapshotData",static_cast<void(*)(lua_State*,pragma::SLuaBaseEntityComponent&,NetPacket,pragma::SPlayerComponent&)>([](lua_State *l,pragma::SLuaBaseEntityComponent &hComponent,NetPacket packet,pragma::SPlayerComponent &pl) {
 		
 	}));
+	defEntCmp.def("SendNetEvent",static_cast<void(*)(lua_State*,pragma::SLuaBaseEntityComponent&,uint32_t,uint32_t,NetPacket&,pragma::networking::TargetRecipientFilter&)>(
+		[](lua_State *l,pragma::SLuaBaseEntityComponent &hComponent,uint32_t protocol,uint32_t eventId,NetPacket &packet,pragma::networking::TargetRecipientFilter &rf) {
+			static_cast<SBaseEntity&>(hComponent.GetEntity()).SendNetEvent(eventId,packet,static_cast<pragma::networking::Protocol>(protocol),rf);
+	}));
+	defEntCmp.def("SendNetEvent",static_cast<void(*)(lua_State*,pragma::SLuaBaseEntityComponent&,uint32_t,uint32_t,NetPacket&)>(
+		[](lua_State *l,pragma::SLuaBaseEntityComponent &hComponent,uint32_t protocol,uint32_t eventId,NetPacket &packet) {
+			static_cast<SBaseEntity&>(hComponent.GetEntity()).SendNetEvent(eventId,packet,static_cast<pragma::networking::Protocol>(protocol));
+	}));
+	defEntCmp.def("SendNetEvent",static_cast<void(*)(lua_State*,pragma::SLuaBaseEntityComponent&,uint32_t,uint32_t)>(
+		[](lua_State *l,pragma::SLuaBaseEntityComponent &hComponent,uint32_t protocol,uint32_t eventId) {
+			static_cast<SBaseEntity&>(hComponent.GetEntity()).SendNetEvent(eventId,static_cast<pragma::networking::Protocol>(protocol));
+	}));
+	defEntCmp.def("SendNetEvent",static_cast<void(*)(lua_State*,pragma::SLuaBaseEntityComponent&,uint32_t,NetPacket&)>(
+		[](lua_State *l,pragma::SLuaBaseEntityComponent &hComponent,uint32_t eventId,NetPacket &packet) {
+			static_cast<SBaseEntity&>(hComponent.GetEntity()).SendNetEvent(eventId,packet);
+	}));
 	register_shared_lua_component_methods<pragma::SLuaBaseEntityComponent>(defEntCmp);
 	modEnts[defEntCmp];
 

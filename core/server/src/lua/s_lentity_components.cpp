@@ -97,22 +97,7 @@
 void SGame::RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponent> &def)
 {
 	Game::RegisterLuaEntityComponent(def);
-	def.def("SendNetEvent",static_cast<void(*)(lua_State*,pragma::BaseEntityComponent&,uint32_t,uint32_t,NetPacket&,pragma::networking::TargetRecipientFilter&)>(
-		[](lua_State *l,pragma::BaseEntityComponent &hComponent,uint32_t protocol,uint32_t eventId,NetPacket &packet,pragma::networking::TargetRecipientFilter &rf) {
-			static_cast<SBaseEntity&>(hComponent.GetEntity()).SendNetEvent(eventId,packet,static_cast<pragma::networking::Protocol>(protocol),rf);
-	}));
-	def.def("SendNetEvent",static_cast<void(*)(lua_State*,pragma::BaseEntityComponent&,uint32_t,uint32_t,NetPacket&)>(
-		[](lua_State *l,pragma::BaseEntityComponent &hComponent,uint32_t protocol,uint32_t eventId,NetPacket &packet) {
-			static_cast<SBaseEntity&>(hComponent.GetEntity()).SendNetEvent(eventId,packet,static_cast<pragma::networking::Protocol>(protocol));
-	}));
-	def.def("SendNetEvent",static_cast<void(*)(lua_State*,pragma::BaseEntityComponent&,uint32_t,uint32_t)>(
-		[](lua_State *l,pragma::BaseEntityComponent &hComponent,uint32_t protocol,uint32_t eventId) {
-			static_cast<SBaseEntity&>(hComponent.GetEntity()).SendNetEvent(eventId,static_cast<pragma::networking::Protocol>(protocol));
-	}));
-	def.def("SendNetEvent",static_cast<void(*)(lua_State*,pragma::BaseEntityComponent&,uint32_t,NetPacket&)>(
-		[](lua_State *l,pragma::BaseEntityComponent &hComponent,uint32_t eventId,NetPacket &packet) {
-			static_cast<SBaseEntity&>(hComponent.GetEntity()).SendNetEvent(eventId,packet);
-	}));
+	// TODO: Remove this function
 }
 void RegisterLuaEntityComponents2(lua_State *l,luabind::module_ &entsMod);
 namespace Lua::SoundEmitter {DLLNETWORK luabind::class_<pragma::BaseSoundEmitterComponent::SoundInfo> RegisterSoundInfo();};

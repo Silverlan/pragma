@@ -184,7 +184,10 @@ void BasePhysicsComponent::UpdatePhysicsData()
 		{
 			std::stringstream ss {};
 			ss<<"UpdatePhysicsData: NaN linear velocity ("<<linVel.x<<","<<linVel.y<<","<<linVel.z<<") for entity "<<ent.GetClass()<<"!";
-			throw std::runtime_error(ss.str());
+			// throw std::runtime_error(ss.str());
+			Con::cwar<<"WARNING: "<<ss.str()<<" Forcing to 0."<<Con::endl;
+			phys->SetLinearVelocity({});
+			linVel = {};
 		}
 		umath::set_flag(m_stateFlags,StateFlags::ApplyingLinearVelocity);
 		pVelComponent->SetRawVelocity(linVel);

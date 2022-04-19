@@ -29,10 +29,9 @@ LINK_ENTITY_TO_CLASS(env_light_spot_vol,CEnvLightSpotVol);
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 void CLightSpotVolComponent::Initialize()
 {
-	BaseEnvLightSpotVolComponent::Initialize();
 	auto &ent = GetEntity();
 	ent.AddComponent<CModelComponent>();
 	auto pRenderComponent = ent.AddComponent<CRenderComponent>();
@@ -46,6 +45,7 @@ void CLightSpotVolComponent::Initialize()
 				static_cast<pragma::CRasterizationRendererComponent*>(renderer)->SetFrameDepthBufferSamplingRequired();
 		}),CallbackType::Entity);*/
 	}
+	BaseEnvLightSpotVolComponent::Initialize();
 }
 
 Bool CLightSpotVolComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
@@ -97,6 +97,7 @@ util::EventReply CLightSpotVolComponent::HandleEvent(ComponentEventId eventId,Co
 	return util::EventReply::Unhandled;
 }
 
+#include "pragma/lua/classes/c_lmaterial.h"
 void CLightSpotVolComponent::InitializeVolumetricLight()
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
@@ -115,6 +116,9 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 	data->AddValue("int","alpha_mode",std::to_string(umath::to_integral(AlphaMode::Blend)));
 	data->AddValue("float","cone_height",std::to_string(maxDist));
 	cmat->SetTexture("albedo_map","error");
+	cmat->UpdateTextures();
+	Lua::Material::Client::InitializeShaderData(nullptr,cmat,false);
+	cmat->SetLoaded(true);
 
 	const uint32_t coneDetail = 64;
 	const uint32_t segmentCount = 20;
@@ -173,3 +177,4 @@ void CEnvLightSpotVol::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CLightSpotVolComponent>();
 }
+#pragma optimize("",on)

@@ -9,6 +9,9 @@
 #include "pragma/rendering/shaders/world/c_shader_light_cone.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include "pragma/rendering/render_processor.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/environment/lights/c_env_light_spot_vol.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/entities/environment/lights/c_env_light_spot_vol.h"
@@ -18,6 +21,7 @@
 #include <prosper_util.hpp>
 #include <datasystem_color.h>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <prosper_command_buffer.hpp>
 #include <cmaterial.h>
 
 using namespace pragma;
@@ -44,6 +48,24 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderLightCone::InitializeMateria
 	auto descSetGroup = GetContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
 	return descSetGroup;
+}
+
+bool ShaderLightCone::RecordBindEntity(
+	rendering::ShaderProcessor &shaderProcessor,CRenderComponent &renderC,
+	prosper::IShaderPipelineLayout &layout,uint32_t entityInstanceDescriptorSetIndex
+) const
+{
+	if(ShaderGameWorldLightingPass::RecordBindEntity(shaderProcessor,renderC,layout,entityInstanceDescriptorSetIndex) == false)
+		return false;
+	auto lightSpotVol = renderC.GetEntity().GetComponent<CLightSpotVolComponent>();
+	if(lightSpotVol.expired())
+		return false;
+	auto &cmd = shaderProcessor.GetCommandBuffer();
+	return false;
+	/*return cmd.RecordPushConstants( // Light cone shader doesn't use lightmaps, so we hijack the lightmapFlags push constant for our own purposes
+		static_cast<uint32_t>(m_boundLightIndex),
+		sizeof(ShaderGameWorldLightingPass::PushConstants) +offsetof(PushConstants,boundLightIndex)
+	);*/
 }
 
 #if 0

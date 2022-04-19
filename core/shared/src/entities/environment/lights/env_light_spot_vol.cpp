@@ -44,9 +44,9 @@ void BaseEnvLightSpotVolComponent::Initialize()
 	ent.AddComponent("transform");
 	ent.AddComponent("color");
 	ent.AddComponent("point_at_target");
-	auto *pRadiusComponent = dynamic_cast<pragma::BaseRadiusComponent*>(ent.AddComponent("radius").get());
-	if(pRadiusComponent != nullptr)
-		pRadiusComponent->SetRadius(100.f);
+	//auto *pRadiusComponent = dynamic_cast<pragma::BaseRadiusComponent*>(ent.AddComponent("radius").get());
+	//if(pRadiusComponent != nullptr)
+	//	pRadiusComponent->SetRadius(100.f);
 	m_netEvSetSpotlightTarget = SetupNetEvent("set_spotlight_target");
 }
 

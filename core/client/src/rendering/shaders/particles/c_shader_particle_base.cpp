@@ -16,9 +16,9 @@
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-
+#pragma optimize("",off)
 // +1 for depth pass
-//uint32_t ShaderParticleBase::PIPELINE_COUNT = umath::to_integral(ParticleAlphaMode::Count) *umath::to_integral(pragma::ShaderScene::Pipeline::Count) +1;
+uint32_t ShaderParticleBase::PIPELINE_COUNT = umath::to_integral(ParticleAlphaMode::Count) +1;
 decltype(ShaderParticleBase::DESCRIPTOR_SET_ANIMATION) ShaderParticleBase::DESCRIPTOR_SET_ANIMATION = {
 	{
 		prosper::DescriptorSetInfo::Binding {
@@ -139,7 +139,6 @@ void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 {
 	auto colorComponents = prosper::ColorComponentFlags::RBit | prosper::ColorComponentFlags::GBit | prosper::ColorComponentFlags::BBit | prosper::ColorComponentFlags::ABit;
 	auto blendOp = prosper::BlendOp::Add;
-
 	if(pipelineIdx == GetDepthPipelineIndex())
 	{
 		// We only care about depth values
@@ -259,5 +258,6 @@ pragma::ParticleAlphaMode ShaderParticleBase::GetRenderAlphaMode(const pragma::C
 
 uint32_t ShaderParticleBase::GetParticlePipelineCount()
 {
-	return 1;//PIPELINE_COUNT;
+	return PIPELINE_COUNT;
 }
+#pragma optimize("",on)

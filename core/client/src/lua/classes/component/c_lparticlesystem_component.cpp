@@ -581,11 +581,13 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		
 		hComponent.Simulate(tDelta);
 		}));
+#if 0
 	defCParticleSystem.def("Render",static_cast<void(*)(lua_State*,pragma::CParticleSystemComponent&,std::shared_ptr<prosper::ICommandBuffer>&,pragma::CSceneComponent&,pragma::CRasterizationRendererComponent&,uint32_t)>([](lua_State *l,pragma::CParticleSystemComponent &hComponent,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pragma::CSceneComponent &scene,pragma::CRasterizationRendererComponent &renderer,uint32_t renderFlags) {
 		if(drawCmd->IsPrimary() == false)
 			return;
 		hComponent.Render(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd),scene,renderer,static_cast<pragma::ParticleRenderFlags>(renderFlags));
 		}));
+#endif
 	defCParticleSystem.def("GetRenderParticleCount",static_cast<void(*)(lua_State*,pragma::CParticleSystemComponent&)>([](lua_State *l,pragma::CParticleSystemComponent &hComponent) {
 		
 		Lua::PushInt(l,hComponent.GetRenderParticleCount());

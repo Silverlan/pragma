@@ -39,8 +39,12 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 using namespace pragma::rendering;
-
-void pragma::CRasterizationRendererComponent::RenderParticleSystems(const util::DrawSceneInfo &drawSceneInfo,std::vector<pragma::CParticleSystemComponent*> &particles,pragma::rendering::SceneRenderPass renderMode,Bool bloom,std::vector<pragma::CParticleSystemComponent*> *bloomParticles)
+#pragma optimize("",off)
+void pragma::CRasterizationRendererComponent::RecordRenderParticleSystems(
+	prosper::ICommandBuffer &cmd,const util::DrawSceneInfo &drawSceneInfo,
+	std::vector<pragma::CParticleSystemComponent*> &particles,pragma::rendering::SceneRenderPass renderMode,
+	Bool bloom,std::vector<pragma::CParticleSystemComponent*> *bloomParticles
+)
 {
 	auto depthOnly = umath::is_flag_set(drawSceneInfo.renderFlags,RenderFlags::ParticleDepth);
 	if((depthOnly && bloom) || drawSceneInfo.scene.expired())
@@ -50,7 +54,6 @@ void pragma::CRasterizationRendererComponent::RenderParticleSystems(const util::
 	umath::set_flag(renderFlags,ParticleRenderFlags::DepthOnly,depthOnly);
 	umath::set_flag(renderFlags,ParticleRenderFlags::Bloom,bloom);
 	auto bFirst = true;
-	auto &drawCmd = drawSceneInfo.commandBuffer;
 	for(auto *particle : particles)
 	{
 		if(particle != nullptr && particle->IsActive() == true && particle->GetSceneRenderPass() == renderMode && particle->GetParent() == nullptr)
@@ -61,6 +64,7 @@ void pragma::CRasterizationRendererComponent::RenderParticleSystems(const util::
 
 				// We need to end the current render pass, because we need the depth buffer with everything
 				// that has been rendered thus far.
+#if 0
 				EndRenderPass(drawSceneInfo);
 
 				auto &hdrInfo = GetHDRInfo();
@@ -69,7 +73,7 @@ void pragma::CRasterizationRendererComponent::RenderParticleSystems(const util::
 				{
 					auto &msaaTex = static_cast<prosper::MSAATexture&>(*prepass.textureDepth);
 					msaaTex.Resolve(
-						*drawCmd,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal,
+						cmd,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal,
 						prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal
 					); // Particles aren't multisampled, but requires scene depth buffer
 					msaaTex.Reset(); // Depth buffer isn't complete yet; We need to reset, otherwise the next resolve will not update it properly
@@ -79,9 +83,10 @@ void pragma::CRasterizationRendererComponent::RenderParticleSystems(const util::
 
 				// Restart render pass
 				BeginRenderPass(drawSceneInfo,hdrInfo.rpPostParticle.get());
+#endif
 			}
 			//scene->ResolveDepthTexture(drawCmd); // Particles aren't multisampled, but requires scene depth buffer
-			particle->Render(drawCmd,const_cast<pragma::CSceneComponent&>(scene),*this,renderFlags);
+			particle->RecordRender(cmd,const_cast<pragma::CSceneComponent&>(scene),*this,renderFlags);
 			if(bloomParticles != nullptr)
 			{
 				if(particle->IsBloomEnabled())
@@ -255,6 +260,9 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 	c_game->StartProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
 
+	// Particles
+	RenderParticles(drawSceneInfo);
+
 	// Fog
 	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuFog,*drawSceneInfo.commandBuffer);
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
@@ -301,3 +309,4 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 		(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpu,*drawSceneInfo.commandBuffer);
 	}
 }
+#pragma optimize("",on)

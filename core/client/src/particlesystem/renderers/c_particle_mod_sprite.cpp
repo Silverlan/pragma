@@ -9,6 +9,7 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/particlesystem/renderers/c_particle_mod_sprite.h"
+#include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_shadow.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
@@ -56,27 +57,35 @@ pragma::ShaderParticleBase *CParticleRendererSprite::GetShader() const
 	return static_cast<pragma::ShaderParticle2DBase*>(m_shader.get());
 }
 
-void CParticleRendererSprite::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::ParticleRenderFlags renderFlags)
+void CParticleRendererSprite::RecordRender(
+	prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
+	pragma::ParticleRenderFlags renderFlags
+)
 {
-#if 0
 	auto *shader = static_cast<pragma::ShaderParticle2DBase*>(m_shader.get());
-	if(shader == nullptr || shader->BeginDraw(drawCmd,GetParticleSystem(),renderFlags) == false) // prosper TODO: Use unlit pipeline if low shader quality?
+	prosper::ShaderBindState bindState {drawCmd};
+	if(shader == nullptr || shader->RecordBeginDraw(bindState,GetParticleSystem(),renderFlags) == false) // prosper TODO: Use unlit pipeline if low shader quality?
 		return;
-	shader->BindLights(*renderer.GetLightSourceDescriptorSet());
-	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
-	shader->BindSceneCamera(scene,renderer,(m_particleSystem->GetSceneRenderPass() == pragma::rendering::SceneRenderPass::View) ? true : false);
-	if(m_bPlanarRotation == false)
-		static_cast<pragma::ShaderParticleRotational&>(*shader).BindWorldRotationBuffer(*m_rotationalBuffer->GetBuffer());
-	shader->Draw(
-		scene,renderer,*m_particleSystem,
+	auto *dsScene = scene.GetCameraDescriptorSetGraphics();
+	auto *dsRenderer = renderer.GetRendererDescriptorSet();
+	auto &dsRenderSettings = c_game->GetGlobalRenderSettingsDescriptorSet();
+	auto *dsLights = renderer.GetLightSourceDescriptorSet();
+	auto *dsShadows = pragma::CShadowComponent::GetDescriptorSet();
+	shader->RecordBindScene(
+		bindState.commandBuffer,scene,renderer,
+		*dsScene,*dsRenderer,
+		dsRenderSettings,*dsLights,
+		*dsShadows
+	);
+	shader->RecordDraw(
+		bindState,scene,renderer,*m_particleSystem,
 		(m_rotationalBuffer != nullptr && m_rotationalBuffer->ShouldRotationAlignVelocity()) ? pragma::CParticleSystemComponent::OrientationType::Velocity : m_particleSystem->GetOrientationType(),
 		renderFlags
 	);
-	shader->EndDraw();
-#endif
+	shader->RecordEndDraw(bindState);
 }
 
-void CParticleRendererSprite::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererSprite::RecordRenderShadow(prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {
 	/*static auto hShader = c_engine->GetShader("particleshadow");
 	if(!hShader.IsValid())

@@ -623,9 +623,11 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShaderParticleBase.def(luabind::constructor<>());
 	defShaderParticleBase.add_static_constant("PUSH_CONSTANTS_SIZE",sizeof(pragma::ShaderParticle2DBase::PushConstants));
 	defShaderParticleBase.add_static_constant("PUSH_CONSTANTS_USER_DATA_OFFSET",sizeof(pragma::ShaderParticle2DBase::PushConstants));
+#if 0
 	defShaderParticleBase.def("RecordDraw",static_cast<bool(*)(lua_State*,pragma::LuaShaderGUIParticle2D&,pragma::CSceneComponent&,pragma::CRasterizationRendererComponent&,pragma::CParticleSystemComponent&,uint32_t)>([](lua_State *l,pragma::LuaShaderGUIParticle2D &shader,pragma::CSceneComponent &scene,pragma::CRasterizationRendererComponent &renderer,pragma::CParticleSystemComponent &ps,uint32_t renderFlags) {
-		return shader.Draw(scene,renderer,ps,ps.GetOrientationType(),static_cast<pragma::ParticleRenderFlags>(renderFlags));
+		return shader.RecordDraw(scene,renderer,ps,ps.GetOrientationType(),static_cast<pragma::ParticleRenderFlags>(renderFlags));
 	}));
+#endif
 	defShaderParticleBase.def("RecordBeginDraw",
 		+[](lua_State *l,pragma::LuaShaderGUIParticle2D &shader,prosper::ShaderBindState &bindState,pragma::CParticleSystemComponent &ps,uint32_t renderFlags) {
 		return shader.RecordBeginDraw(

@@ -75,12 +75,19 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderParticle2DBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
-		bool Draw(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const CParticleSystemComponent &ps,CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags renderFlags);
+		bool RecordDraw(prosper::ShaderBindState &bindState,pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const CParticleSystemComponent &ps,CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags renderFlags);
 		bool RecordBeginDraw(
 			prosper::ShaderBindState &bindState,
 			CParticleSystemComponent &pSys,ParticleRenderFlags renderFlags,
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		);
+		bool RecordBindScene(
+			prosper::ICommandBuffer &cmd,
+			const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
+			prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
+			prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
+			prosper::IDescriptorSet &dsShadows
+		) const;
 
 		void GetParticleSystemOrientationInfo(
 			const Mat4 &matrix,const CParticleSystemComponent &particle,CParticleSystemComponent::OrientationType orientationType,Vector3 &up,Vector3 &right,

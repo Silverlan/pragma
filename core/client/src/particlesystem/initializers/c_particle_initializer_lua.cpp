@@ -41,13 +41,14 @@ void CParticleOperatorLua::Simulate(double tDelta)
 
 //////////////
 
-void CParticleRendererLua::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::ParticleRenderFlags renderFlags)
+void CParticleRendererLua::RecordRender(prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::ParticleRenderFlags renderFlags)
 {
-	CallLuaMember<void,std::reference_wrapper<prosper::ICommandBuffer>,luabind::object,luabind::object,uint32_t>(
-		"Render",std::ref(*drawCmd),scene.GetLuaObject(),renderer.GetLuaObject(),umath::to_integral(renderFlags)
-	);
+	// No longer supported
+	//CallLuaMember<void,std::reference_wrapper<prosper::ICommandBuffer>,luabind::object,luabind::object,uint32_t>(
+	//	"Render",std::ref(*drawCmd),scene.GetLuaObject(),renderer.GetLuaObject(),umath::to_integral(renderFlags)
+	//);
 }
-void CParticleRendererLua::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererLua::RecordRenderShadow(prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {
 	// TODO
 }

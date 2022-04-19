@@ -360,6 +360,13 @@ bool HDRData::Initialize(uint32_t width,uint32_t height,prosper::SampleCountFlag
 
 	dsgDepthPostProcessing = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPPFog::DESCRIPTOR_SET_DEPTH_BUFFER);
 	dsgDepthPostProcessing->GetDescriptorSet()->SetBindingTexture(*resolvedTexture,0u);
+
+	// Initialize particle render target
+	rtParticle = context.CreateRenderTarget(
+		{sceneRenderTarget->GetTexture().shared_from_this(),bloomTexture,prepass.textureDepthSampled},
+		prosper::ShaderGraphics::GetRenderPass<pragma::ShaderParticle2DBase>(c_engine->GetRenderContext())
+	);
+
 	return true;
 }
 
@@ -420,8 +427,8 @@ bool HDRData::InitializeDescriptorSets()
 	if(pragma::ShaderParticle2DBase::DESCRIPTOR_SET_DEPTH_MAP.IsValid() == false)
 		return false;
 	dsgSceneDepth = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderParticle2DBase::DESCRIPTOR_SET_DEPTH_MAP);
+	dsgSceneDepth->GetDescriptorSet()->SetBindingTexture(*prepass.textureDepth,0u);
 
-	// TODO
 	//auto &depthTex = prepass.textureDepthSampled;
 	//dsgSceneDepth->GetDescriptorSet()->SetBindingTexture(*depthTex,0u);
 	return true;

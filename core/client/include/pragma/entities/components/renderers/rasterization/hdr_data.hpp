@@ -103,6 +103,9 @@ namespace pragma::rendering
 		// Render pass used to restart scene pass after particle pass
 		std::shared_ptr<prosper::IRenderPass> rpPostParticle = nullptr;
 
+		// Render target used for particle render pass
+		std::shared_ptr<prosper::RenderTarget> rtParticle = nullptr;
+
 		float exposure = 1.f;
 		float max_exposure = 1,f;
 		std::array<float,3> luminescence = {0.f,0.f,0.f};

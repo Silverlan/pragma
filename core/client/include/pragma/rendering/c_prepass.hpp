@@ -35,7 +35,7 @@ namespace pragma
 			std::shared_ptr<prosper::Texture> textureDepth = nullptr;
 
 			// Depth buffer used for sampling (e.g. particle render pass)
-			// std::shared_ptr<prosper::Texture> textureDepthSampled = nullptr;
+			std::shared_ptr<prosper::Texture> textureDepthSampled = nullptr;
 
 			std::shared_ptr<prosper::RenderTarget> renderTarget = nullptr;
 			std::shared_ptr<prosper::IRenderPass> subsequentRenderPass = nullptr;

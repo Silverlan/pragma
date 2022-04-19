@@ -33,7 +33,7 @@ using namespace pragma::rendering;
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-#define ENABLE_PARTICLE_RENDERING 0
+#define ENABLE_PARTICLE_RENDERING 1
 
 static auto cvDrawParticles = GetClientConVar("render_draw_particles");
 static auto cvDrawGlow = GetClientConVar("render_draw_glow");
@@ -208,35 +208,6 @@ void pragma::CRasterizationRendererComponent::ExecuteLightingPass(const util::Dr
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 
 	//ScopeGuard sgDepthImg {};
-#if ENABLE_PARTICLE_RENDERING == 1
-	auto &culledParticles = scene.GetSceneRenderDesc().GetCulledParticles();
-	auto bShouldDrawParticles = (drawSceneInfo.renderFlags &FRender::Particles) == FRender::Particles && cvDrawParticles->GetBool() == true && culledParticles.empty() == false;
-	if(bShouldDrawParticles == true)
-		SetFrameDepthBufferSamplingRequired();
-#else
-	static std::vector<pragma::CParticleSystemComponent*> culledParticles;
-	auto bShouldDrawParticles = false;
-#endif
-#if 0
-	// TODO
-	if(m_bFrameDepthBufferSamplingRequired == true)
-	{
-		auto &prepass = GetPrepass();
-		auto &dstDepthTex = *prepass.textureDepthSampled;
-		auto &ptrDstDepthImg = dstDepthTex.GetImage();
-		auto &dstDepthImg = ptrDstDepthImg;
-
-		auto &hdrInfo = GetHDRInfo();
-		std::function<void(prosper::ICommandBuffer&)> fTransitionSampleImgToTransferDst = nullptr;
-		hdrInfo.BlitMainDepthBufferToSamplableDepthBuffer(drawSceneInfo,fTransitionSampleImgToTransferDst);
-
-		// If this being commented causes issues, check map test_particles for comparison
-		//sgDepthImg = [fTransitionSampleImgToTransferDst,drawCmd,ptrDstDepthImg]() { // Transfer destination image back to TransferDstOptimal layout after render pass has ended
-		//.RecordImageBarrier(**drawCmd,**ptrDstDepthImg,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferDstOptimal);
-		//fTransitionSampleImgToTransferDst(*drawCmd);
-		//};
-	}
-#endif
 	m_bFrameDepthBufferSamplingRequired = false;
 
 	// Visible light tile index buffer
@@ -352,19 +323,12 @@ void pragma::CRasterizationRendererComponent::StartLightingPassRecording(const u
 
 	m_lightingCommandBufferGroup->EndRecording();
 }
+#include <pragma/entities/entity_iterator.hpp>
 void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &scene = const_cast<pragma::CSceneComponent&>(*drawSceneInfo.scene);
 	auto &cam = scene.GetActiveCamera();
-#if ENABLE_PARTICLE_RENDERING == 1
-	auto &culledParticles = scene.GetSceneRenderDesc().GetCulledParticles();
-	auto bShouldDrawParticles = (drawSceneInfo.renderFlags &FRender::Particles) == FRender::Particles && cvDrawParticles->GetBool() == true && culledParticles.empty() == false;
-#else
-	static std::vector<pragma::CParticleSystemComponent*> gCulledParticles;
-	auto &culledParticles = gCulledParticles;
-	auto bShouldDrawParticles = false;
-#endif
-	m_lightingCommandBufferGroup->Record([this,&scene,&cam,&drawSceneInfo,bShouldDrawParticles,&culledParticles](prosper::ISecondaryCommandBuffer &cmd) {
+	m_lightingCommandBufferGroup->Record([this,&scene,&cam,&drawSceneInfo](prosper::ISecondaryCommandBuffer &cmd) mutable {
 		c_game->StartProfilingStage(CGame::CPUProfilingPhase::RenderWorld);
 		auto pcmd = cmd.shared_from_this();
 		auto bGlow = cvDrawGlow->GetBool();
@@ -428,15 +392,16 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 		}
 	#endif
 
+#if 0
 		if(bShouldDrawParticles)
 		{
-			c_game->StartProfilingStage(CGame::GPUProfilingPhase::Particles);
-			InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_PARTICLES,evDataLightingStage);
+			//c_game->StartProfilingStage(CGame::GPUProfilingPhase::Particles);
+			//InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_PARTICLES,evDataLightingStage);
 
 			//auto &glowInfo = GetGlowInfo();
 
 			// Vertex buffer barrier
-			for(auto *particle : culledParticles)
+			/*for(auto *particle : culledParticles)
 			{
 				auto &ptBuffer = particle->GetParticleBuffer();
 				if (ptBuffer != nullptr)
@@ -470,17 +435,19 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 						prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit
 					);
 				}
-			}
+			}*/
 
+			// RecordRenderParticleSystems(cmd,drawSceneInfo,culledParticles,pragma::rendering::SceneRenderPass::World,false,nullptr);
 			// RenderParticleSystems(drawSceneInfo,culledParticles,RenderMode::World,false,&glowInfo.tmpBloomParticles);
 			//if(bGlow == false)
 			//	glowInfo.tmpBloomParticles.clear();
 			//if(!glowInfo.tmpBloomParticles.empty())
 			//	glowInfo.bGlowScheduled = true;
 			
-			InvokeEventCallbacks(EVENT_MT_END_RECORD_PARTICLES,evDataLightingStage);
-			c_game->StopProfilingStage(CGame::GPUProfilingPhase::Particles);
+			// InvokeEventCallbacks(EVENT_MT_END_RECORD_PARTICLES,evDataLightingStage);
+			// c_game->StopProfilingStage(CGame::GPUProfilingPhase::Particles);
 		}
+#endif
 		//c_engine->StopGPUTimer(GPUTimerEvent::Particles); // prosper TODO
 
 		// c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("Render",std::ref(drawSceneInfo));
@@ -627,8 +594,9 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 			rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::View,false /* translucent */),lightingStageStats);
 			rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::View,true /* translucent */),lightingStageTranslucentStats);
 
-			if((drawSceneInfo.renderFlags &RenderFlags::Particles) == RenderFlags::Particles)
+			//if((drawSceneInfo.renderFlags &RenderFlags::Particles) == RenderFlags::Particles)
 			{
+				//RenderParticleSystems(drawSceneInfo,culledParticles,pragma::rendering::SceneRenderPass::View,false,nullptr);
 				//auto &culledParticles = scene.GetSceneRenderDesc().GetCulledParticles();
 				//auto &glowInfo = GetGlowInfo();
 				//RenderParticleSystems(drawSceneInfo,culledParticles,RenderMode::View,false,&glowInfo.tmpBloomParticles);

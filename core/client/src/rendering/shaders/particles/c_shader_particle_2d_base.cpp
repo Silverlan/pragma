@@ -12,6 +12,7 @@
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
+#include "pragma/rendering/render_processor.hpp"
 #include "pragma/console/c_cvar.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -25,7 +26,7 @@
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-
+#pragma optimize("",off)
 decltype(ShaderParticle2DBase::VERTEX_BINDING_PARTICLE) ShaderParticle2DBase::VERTEX_BINDING_PARTICLE = {prosper::VertexInputRate::Instance,sizeof(pragma::CParticleSystemComponent::ParticleData)};
 decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_POSITION) ShaderParticle2DBase::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_PARTICLE,prosper::Format::R32G32B32_SFloat};
 decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_RADIUS) ShaderParticle2DBase::VERTEX_ATTRIBUTE_RADIUS = {VERTEX_BINDING_PARTICLE,prosper::Format::R32_SFloat};
@@ -122,6 +123,7 @@ void ShaderParticle2DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreate
 	pipelineInfo.ToggleDepthWrites(pipelineIdx == GetDepthPipelineIndex()); // Last pipeline is depth pipeline
 
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
 	RegisterDefaultGfxPipelineVertexAttributes(pipelineInfo);
 	RegisterDefaultGfxPipelinePushConstantRanges(pipelineInfo,pipelineIdx);
 	RegisterDefaultGfxPipelineDescriptorSetGroups(pipelineInfo,pipelineIdx);
@@ -137,7 +139,7 @@ bool ShaderParticle2DBase::RecordBeginDraw(
 	else
 	{
 		auto alphaMode = GetRenderAlphaMode(pSys);
-		pipelineIdx = /*umath::to_integral(pipeline) **/umath::to_integral(ParticleAlphaMode::Count) +umath::to_integral(alphaMode);
+		pipelineIdx = /*umath::to_integral(pipeline) *umath::to_integral(ParticleAlphaMode::Count) +*/umath::to_integral(alphaMode);
 	}
 	return ShaderSceneLit::RecordBeginDraw(bindState,pipelineIdx,recordFlags);
 }
@@ -291,8 +293,96 @@ bool ShaderParticle2DBase::RecordParticleMaterial(prosper::ShaderBindState &bind
 	return RecordBindDescriptorSets(bindState,{&descSetTexture,descSetDepth,&animDescSet},DESCRIPTOR_SET_TEXTURE.setIndex);
 }
 
-bool ShaderParticle2DBase::Draw(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const pragma::CParticleSystemComponent &ps,pragma::CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags ptRenderFlags)
+bool ShaderParticle2DBase::RecordBindScene(
+	prosper::ICommandBuffer &cmd,
+	const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
+	prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
+	prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
+	prosper::IDescriptorSet &dsShadows
+) const
 {
+	std::array<prosper::IDescriptorSet*,4> descSets {
+		&dsScene,
+		&dsRenderSettings,
+		&dsLights,
+		&dsShadows
+	};
+	static const std::vector<uint32_t> dynamicOffsets {};
+	// TODO: Pick correct pipeline index
+	return cmd.RecordBindDescriptorSets(
+		prosper::PipelineBindPoint::Graphics,*cmd.GetContext().GetShaderPipelineLayout(*this,0),//shaderProcessor.GetCurrentPipelineLayout(),
+		DESCRIPTOR_SET_SCENE.setIndex,descSets,dynamicOffsets
+	);
+}
+
+bool ShaderParticle2DBase::RecordDraw(prosper::ShaderBindState &bindState,pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const pragma::CParticleSystemComponent &ps,pragma::CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags ptRenderFlags)
+{
+	if(RecordParticleMaterial(bindState,renderer,ps) == false)
+		return false;
+	auto &cam = scene.GetActiveCamera();
+
+	auto colorFactor = scene.GetParticleSystemColorFactor();
+	if(umath::is_flag_set(ptRenderFlags,ParticleRenderFlags::Bloom))
+	{
+		auto bloomColorFactor = ps.GetEffectiveBloomColorFactor();
+		if(bloomColorFactor.has_value())
+			colorFactor *= *bloomColorFactor;
+	}
+	else
+	{
+		auto *mat = ps.GetMaterial();
+		auto &psColorFactor = ps.GetColorFactor();
+		colorFactor *= psColorFactor;
+		if(mat)
+		{
+			auto &data = mat->GetDataBlock();
+			auto &dColorFactor = data->GetValue("color_factor");
+			if(dColorFactor != nullptr && typeid(*dColorFactor) == typeid(ds::Vector4))
+			{
+				auto &matColorFactor = static_cast<ds::Vector4*>(dColorFactor.get())->GetValue();
+				colorFactor *= matColorFactor;
+			}
+		}
+	}
+
+	auto renderFlags = GetRenderFlags(ps,ptRenderFlags);
+	auto width = c_engine->GetRenderContext().GetWindowWidth();
+	auto height = c_engine->GetRenderContext().GetWindowHeight();
+	assert(width <= std::numeric_limits<uint16_t>::max() && height <= std::numeric_limits<uint16_t>::max());
+
+	auto viewportSize = static_cast<uint32_t>(width);
+	viewportSize<<=16;
+	viewportSize |= height;
+	PushConstants pushConstants {
+		colorFactor,
+		Vector3 {}, /* camRightWs */
+		umath::to_integral(orientationType),
+		Vector3{}, /* camUpWs */
+		0.f, /* nearZ */
+		cam.valid() ? cam->GetEntity().GetPosition() : Vector3{},
+		0.f, /* farZ */
+		viewportSize,
+		umath::to_integral(renderFlags),
+		umath::to_integral(ps.GetAlphaMode()),
+		ps.GetSimulationTime()
+	};
+	Mat4 vp;
+	if(cam.valid())
+	{
+		auto &v = cam->GetViewMatrix();
+		vp = cam->GetProjectionMatrix() *v;
+	}
+	GetParticleSystemOrientationInfo(vp,ps,pushConstants.camUpWs,pushConstants.camRightWs,pushConstants.nearZ,pushConstants.farZ,ps.GetMaterial(),cam.get());
+
+	if(RecordPushConstants(bindState,pushConstants) == false)
+		return false;
+	auto bAnimated = ((renderFlags &RenderFlags::Animated) != RenderFlags::None) ? true : false;
+
+	auto ptAnimBuffer = ps.GetParticleAnimationBuffer();
+	if(ptAnimBuffer == nullptr)
+		ptAnimBuffer = c_engine->GetRenderContext().GetDummyBuffer();
+	return RecordBindVertexBuffers(bindState,{ps.GetParticleBuffer().get(),ptAnimBuffer.get()}) == true &&
+		ShaderSceneLit::RecordDraw(bindState,pragma::CParticleSystemComponent::VERTEX_COUNT,ps.GetRenderParticleCount()) == true;
 #if 0
 	if(BindParticleMaterial(renderer,ps) == false)
 		return false;
@@ -447,3 +537,4 @@ Vector3 ShaderParticle2DBase::CalcVertexPosition(
 {
 	return DoCalcVertexPosition(ptc,ptIdx,get_vertex_index(absVertIdx),camPos,camUpWs,camRightWs,nearZ,farZ);
 }
+#pragma optimize("",on)

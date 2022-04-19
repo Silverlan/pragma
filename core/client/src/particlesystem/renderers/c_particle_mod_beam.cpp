@@ -112,7 +112,7 @@ std::pair<Vector3,Vector3> CParticleRendererBeam::GetRenderBounds() const
 	return bounds;
 }
 
-void CParticleRendererBeam::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::ParticleRenderFlags renderFlags)
+void CParticleRendererBeam::RecordRender(prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::ParticleRenderFlags renderFlags)
 {
 #if 0
 	if(m_shader.expired())
@@ -129,7 +129,7 @@ void CParticleRendererBeam::Render(const std::shared_ptr<prosper::IPrimaryComman
 }
 
 
-void CParticleRendererBeam::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererBeam::RecordRenderShadow(prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {
 	/*static auto hShader = c_engine->GetShader("particlepolyboardshadow");
 	if(!hShader.IsValid())

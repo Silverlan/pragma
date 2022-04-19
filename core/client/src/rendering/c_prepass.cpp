@@ -49,18 +49,13 @@ bool pragma::rendering::Prepass::Initialize(prosper::IPrContext &context,uint32_
 	samplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToEdge;
 	textureDepth = context.CreateTexture(texCreateInfo,*imgDepth,imgViewCreateInfo,samplerCreateInfo);
 
-	/*if(textureDepth->IsMSAATexture())
-		textureDepthSampled = static_cast<prosper::MSAATexture&>(*textureDepth).GetResolvedTexture();
-	else
-	{
-		imgCreateInfo.usage = prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::SampledBit;
-		imgCreateInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
-		imgCreateInfo.samples = prosper::SampleCountFlags::e1Bit;
-		auto imgDepthSampled = context.CreateImage(imgCreateInfo);
+	imgCreateInfo.usage = prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::SampledBit;
+	imgCreateInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
+	imgCreateInfo.samples = prosper::SampleCountFlags::e1Bit;
+	auto imgDepthSampled = context.CreateImage(imgCreateInfo);
 
-		texCreateInfo.flags = {};
-		textureDepthSampled = context.CreateTexture(texCreateInfo,*imgDepthSampled,imgViewCreateInfo,samplerCreateInfo);
-	}*/
+	texCreateInfo.flags = {};
+	textureDepthSampled = context.CreateTexture(texCreateInfo,*imgDepthSampled,imgViewCreateInfo,samplerCreateInfo);
 
 	SetUseExtendedPrepass(bExtended,true);
 	return true;

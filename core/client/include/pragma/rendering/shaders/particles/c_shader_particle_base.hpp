@@ -28,7 +28,7 @@ namespace pragma
 			AdditiveBlendByColor = TextureScrolling<<1,
 			DepthPass = AdditiveBlendByColor<<1
 		};
-		//static uint32_t PIPELINE_COUNT;
+		static uint32_t PIPELINE_COUNT;
 
 		ShaderParticleBase()=default;
 		RenderFlags GetRenderFlags(const CParticleSystemComponent &particle,ParticleRenderFlags ptRenderFlags) const;

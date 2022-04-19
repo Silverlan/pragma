@@ -204,7 +204,7 @@ bool CParticleRendererModel::Update()
 	return bSuccessful;
 }
 
-void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::ParticleRenderFlags renderFlags)
+void CParticleRendererModel::RecordRender(prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::ParticleRenderFlags renderFlags)
 {
 #if 0
 	if(m_shader.expired())
@@ -268,7 +268,7 @@ void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryComma
 #endif
 }
 
-void CParticleRendererModel::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererModel::RecordRenderShadow(prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {
 	/*if(s_instanceDescSet == nullptr)
 		return;

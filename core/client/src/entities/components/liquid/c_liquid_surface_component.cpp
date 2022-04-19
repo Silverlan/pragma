@@ -495,7 +495,7 @@ void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos,const V
 				drawCmd->RecordImageBarrier(*imgTex,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 
 			std::function<void(prosper::ICommandBuffer&)> fTransitionSampleImgToTransferDst = nullptr;
-			hdrInfo.BlitMainDepthBufferToSamplableDepthBuffer(drawSceneInfo.get(),fTransitionSampleImgToTransferDst);
+			// hdrInfo.BlitMainDepthBufferToSamplableDepthBuffer(drawSceneInfo.get(),fTransitionSampleImgToTransferDst);
 			if(drawCmd->RecordBeginRenderPass(*hdrInfo.hdrPostProcessingRenderTarget) == true)
 			{
 				drawCmd->RecordClearAttachment(hdrInfo.hdrPostProcessingRenderTarget->GetTexture().GetImage(),std::array<float,4>{1.f,0.f,0.f,1.f});

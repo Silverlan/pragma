@@ -35,7 +35,7 @@ using namespace pragma;
 
 // 10 MiB
 #define PARTICLE_BUFFER_SIZE 10'485'760
-
+#pragma optimize("",off)
 decltype(CParticleSystemComponent::s_particleData) CParticleSystemComponent::s_particleData;
 decltype(CParticleSystemComponent::s_precached) CParticleSystemComponent::s_precached;
 
@@ -212,14 +212,14 @@ bool CParticleSystemComponent::Precache(std::string fname,bool bReload)
 		return PrecacheLegacy(fname,bReload);
 	}
 	std::string err;
-	auto udmData = util::load_udm_asset(*ptFname,&err);
+	auto udmData = util::load_udm_asset("particles/" +*ptFname,&err);
 	if(udmData == nullptr)
 		return false;
 	auto &ptSystemNames = s_particleFileToSystems.insert(std::make_pair(fname,std::vector<std::string>{})).first->second;
 	ptSystemNames.clear();
 
 	auto &data = *udmData;
-	if(data.GetAssetType() != pragma::asset::PPTSYS_COLLECTION_IDENTIFIER)
+	/*if(data.GetAssetType() != pragma::asset::PPTSYS_COLLECTION_IDENTIFIER)
 	{
 		err = "Incorrect format!";
 		return false;
@@ -230,7 +230,7 @@ bool CParticleSystemComponent::Precache(std::string fname,bool bReload)
 	{
 		err = "Invalid version!";
 		return false;
-	}
+	}*/
 	// if(version > FORMAT_VERSION)
 	// 	return false;
 	
@@ -1101,16 +1101,73 @@ void CParticleSystemComponent::Start()
 				auto *spriteSheetAnim = static_cast<CMaterial*>(m_material.get())->GetSpriteSheetAnimation();
 				m_spriteSheetAnimationData = spriteSheetAnim ? std::make_unique<SpriteSheetAnimation>(*spriteSheetAnim) : nullptr;
 
+				auto &data = m_material->GetDataBlock();
+				if(!m_spriteSheetAnimationData && data != nullptr)
+				{
+					auto &anim = data->GetValue("animation");
+					if(anim)
+					{
+						if(anim->IsBlock())
+						{
+							auto &animBlock = *std::static_pointer_cast<ds::Block>(anim);
+
+							int32_t offset = 0;
+							int32_t numFrames = 0;
+							int32_t fps = 0;
+							int32_t rows = 0;
+							int32_t columns = 0;
+							animBlock.GetInt("offset",&offset);
+							animBlock.GetInt("frames",&numFrames);
+							animBlock.GetInt("fps",&fps);
+							animBlock.GetInt("rows",&rows);
+							animBlock.GetInt("columns",&columns);
+
+							uint32_t w = 0;
+							uint32_t h = 0;
+							auto *albedoMap = m_material->GetAlbedoMap();
+							if(albedoMap)
+							{
+								w = albedoMap->width;
+								h = albedoMap->height;
+							}
+
+							m_spriteSheetAnimationData = std::make_unique<SpriteSheetAnimation>();
+							m_spriteSheetAnimationData->sequences.push_back({});
+							auto &seq = m_spriteSheetAnimationData->sequences.back();
+							
+							auto &frames = seq.frames;
+							frames.reserve(numFrames);
+							auto widthPerFrame = w /static_cast<float>(columns);
+							auto heightPerFrame = h /static_cast<float>(rows);
+							for(auto x=decltype(rows){0u};x<rows;++x)
+							{
+								for(auto y=decltype(columns){0u};y<columns;++y)
+								{
+									frames.push_back({});
+									auto &frame = frames.back();
+									frame.uvStart = Vector2{
+										y *widthPerFrame,
+										x *heightPerFrame
+									};
+									frame.uvEnd = frame.uvStart +Vector2{widthPerFrame /static_cast<float>(w),heightPerFrame /static_cast<float>(h)};
+									frame.duration = 0.1f;
+								}
+							}
+							m_spriteSheetAnimationData->UpdateLookupData();
+						}
+					}
+				}
+
 				if(m_spriteSheetAnimationData)
 				{
 					uint32_t numFrames = 0;
-					for(auto &seq : spriteSheetAnim->sequences)
+					for(auto &seq : m_spriteSheetAnimationData->sequences)
 						numFrames += seq.frames.size();
 
 					std::vector<SpriteSheetTextureAnimationFrame> frames {};
 					frames.resize(numFrames);
 					uint32_t frameIndex = 0;
-					for(auto &seq : spriteSheetAnim->sequences)
+					for(auto &seq : m_spriteSheetAnimationData->sequences)
 					{
 						for(auto &frame : seq.frames)
 						{
@@ -1125,35 +1182,6 @@ void CParticleSystemComponent::Start()
 					m_descSetGroupAnimation->GetDescriptorSet()->SetBindingUniformBuffer(
 						*m_bufSpriteSheet,0u
 					);
-				}
-
-				auto &data = m_material->GetDataBlock();
-				if(data != nullptr)
-				{
-					auto &anim = data->GetValue("animation");
-					if(anim)
-					{
-						if(anim->IsBlock())
-						{
-							// TODO: Re-implement this and translate it to SpriteSheetAnimation data
-#if 0
-							auto &animBlock = *std::static_pointer_cast<ds::Block>(anim);
-							m_animData = std::make_unique<AnimationData>();
-
-							animBlock.GetInt("offset",&m_animData->offset);
-							animBlock.GetInt("frames",&m_animData->frames);
-							animBlock.GetInt("fps",&m_animData->fps);
-							animBlock.GetInt("rows",&m_animData->rows);
-							animBlock.GetInt("columns",&m_animData->columns);
-							m_bufAnim = s_animBuffer->AllocateBuffer(m_animData.get());
-
-							m_descSetGroupAnimation = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION);
-							m_descSetGroupAnimation->GetDescriptorSet()->SetBindingUniformBuffer(
-								*m_bufAnim,0u
-							);
-#endif
-						}
-					}
 				}
 			}
 		}
@@ -1388,7 +1416,7 @@ void CParticleSystemComponent::ResumeEmission()
 }
 void CParticleSystemComponent::SetAlwaysSimulate(bool b) {umath::set_flag(m_flags,Flags::AlwaysSimulate,b);}
 
-void CParticleSystemComponent::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,ParticleRenderFlags renderFlags)
+void CParticleSystemComponent::RecordRender(prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,ParticleRenderFlags renderFlags)
 {
 	if(umath::is_flag_set(renderFlags,ParticleRenderFlags::Bloom) && IsBloomEnabled() == false)
 		return;
@@ -1405,7 +1433,7 @@ void CParticleSystemComponent::Render(const std::shared_ptr<prosper::IPrimaryCom
 		if(hChild.child.expired() || hChild.child->IsActiveOrPaused() == false)
 			continue;
 		numRenderParticles += hChild.child->GetRenderParticleCount();
-		hChild.child->Render(drawCmd,scene,renderer,renderFlags);
+		hChild.child->RecordRender(drawCmd,scene,renderer,renderFlags);
 	}
 	if(numRenderParticles == 0)
 	{
@@ -1417,22 +1445,22 @@ void CParticleSystemComponent::Render(const std::shared_ptr<prosper::IPrimaryCom
 	if(m_bufParticles != nullptr)
 	{
 		for(auto &r : m_renderers)
-			r->Render(drawCmd,scene,renderer,renderFlags);
+			r->RecordRender(drawCmd,scene,renderer,renderFlags);
 	}
 	umath::set_flag(m_flags,Flags::RendererBufferUpdateRequired,false);
 }
 
-void CParticleSystemComponent::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent *light,uint32_t layerId)
+void CParticleSystemComponent::RecordRenderShadow(prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent *light,uint32_t layerId)
 {
 	if(!IsActiveOrPaused() || m_numRenderParticles == 0)
 		return;
 	for(auto &hChild : m_childSystems)
 	{
 		if(hChild.child.valid() && hChild.child->IsActiveOrPaused())
-			hChild.child->RenderShadow(drawCmd,scene,renderer,light,layerId);
+			hChild.child->RecordRenderShadow(drawCmd,scene,renderer,light,layerId);
 	}
 	for(auto &r : m_renderers)
-		r->RenderShadow(drawCmd,scene,renderer,*light,layerId);
+		r->RecordRenderShadow(drawCmd,scene,renderer,*light,layerId);
 }
 
 CParticle &CParticleSystemComponent::CreateParticle(uint32_t idx,float timeCreated,float timeAlive)
@@ -1896,3 +1924,4 @@ void CParticleSystemComponent::OnParticleDestroyed(CParticle &particle)
 	for(auto &r : m_renderers)
 		r->OnParticleDestroyed(particle);
 }
+#pragma optimize("",on)

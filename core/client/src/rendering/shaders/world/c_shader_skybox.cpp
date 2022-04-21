@@ -77,6 +77,7 @@ bool ShaderSkybox::GetRenderBufferTargets(
 
 void ShaderSkybox::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
+	ShaderEntity::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	auto isReflection = (static_cast<rendering::PassType>(GetBasePassType(pipelineIdx)) == rendering::PassType::Reflection);
 	if(isReflection)
 	{
@@ -96,6 +97,7 @@ void ShaderSkybox::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pi
 	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_RENDERER);
 	ToggleDynamicScissorState(pipelineInfo,true);
+	InitializeGfxPipelinePushConstantRanges(pipelineInfo,pipelineIdx);
 }
 
 uint32_t ShaderSkybox::GetRenderSettingsDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}

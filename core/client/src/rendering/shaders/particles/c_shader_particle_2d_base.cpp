@@ -129,7 +129,7 @@ void ShaderParticle2DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreate
 	RegisterDefaultGfxPipelineDescriptorSetGroups(pipelineInfo,pipelineIdx);
 }
 
-bool ShaderParticle2DBase::RecordBeginDraw(
+std::optional<uint32_t> ShaderParticle2DBase::RecordBeginDraw(
 	prosper::ShaderBindState &bindState,pragma::CParticleSystemComponent &pSys,ParticleRenderFlags renderFlags,RecordFlags recordFlags
 )
 {
@@ -141,7 +141,9 @@ bool ShaderParticle2DBase::RecordBeginDraw(
 		auto alphaMode = GetRenderAlphaMode(pSys);
 		pipelineIdx = /*umath::to_integral(pipeline) *umath::to_integral(ParticleAlphaMode::Count) +*/umath::to_integral(alphaMode);
 	}
-	return ShaderSceneLit::RecordBeginDraw(bindState,pipelineIdx,recordFlags);
+	if(!ShaderSceneLit::RecordBeginDraw(bindState,pipelineIdx,recordFlags))
+		return {};
+	return pipelineIdx;
 }
 
 uint32_t ShaderParticle2DBase::GetRenderSettingsDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex;}
@@ -169,7 +171,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticle2DBase::InitializeMa
 void ShaderParticle2DBase::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
 	auto sampleCount = GetSampleCount(GetBasePipelineIndex(pipelineIdx));
-	if(pipelineIdx != GetDepthPipelineIndex())
+	//if(pipelineIdx != GetDepthPipelineIndex())
 	{
 		CreateCachedRenderPass<ShaderParticle2DBase>({{
 			{
@@ -186,7 +188,7 @@ void ShaderParticle2DBase::InitializeRenderPass(std::shared_ptr<prosper::IRender
 			}
 		}},outRenderPass,pipelineIdx);
 	}
-	else
+	/*else
 	{
 		// Depth only
 		CreateCachedRenderPass<ShaderParticle2DBase>({{
@@ -195,7 +197,7 @@ void ShaderParticle2DBase::InitializeRenderPass(std::shared_ptr<prosper::IRender
 				prosper::AttachmentStoreOp::Store,sampleCount,prosper::ImageLayout::DepthStencilAttachmentOptimal
 			}
 		}},outRenderPass,pipelineIdx);
-	}
+	}*/
 }
 
 bool ShaderParticle2DBase::ShouldInitializePipeline(uint32_t pipelineIdx) {return ShaderSceneLit::ShouldInitializePipeline(GetBasePipelineIndex(pipelineIdx));}
@@ -294,7 +296,7 @@ bool ShaderParticle2DBase::RecordParticleMaterial(prosper::ShaderBindState &bind
 }
 
 bool ShaderParticle2DBase::RecordBindScene(
-	prosper::ICommandBuffer &cmd,
+	prosper::ICommandBuffer &cmd,const prosper::IShaderPipelineLayout &layout,
 	const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
 	prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
 	prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
@@ -310,7 +312,7 @@ bool ShaderParticle2DBase::RecordBindScene(
 	static const std::vector<uint32_t> dynamicOffsets {};
 	// TODO: Pick correct pipeline index
 	return cmd.RecordBindDescriptorSets(
-		prosper::PipelineBindPoint::Graphics,*cmd.GetContext().GetShaderPipelineLayout(*this,0),//shaderProcessor.GetCurrentPipelineLayout(),
+		prosper::PipelineBindPoint::Graphics,layout,
 		DESCRIPTOR_SET_SCENE.setIndex,descSets,dynamicOffsets
 	);
 }

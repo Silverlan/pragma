@@ -31,6 +31,10 @@ decltype(ShaderParticleBlob::DESCRIPTOR_SET_CUBEMAP) ShaderParticleBlob::DESCRIP
 		}
 	}
 };
+decltype(ShaderParticleBlob::DESCRIPTOR_SET_SCENE) ShaderParticleBlob::DESCRIPTOR_SET_SCENE = {&ShaderParticle2DBase::DESCRIPTOR_SET_SCENE};
+decltype(ShaderParticleBlob::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderParticleBlob::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderParticle2DBase::DESCRIPTOR_SET_RENDER_SETTINGS};
+decltype(ShaderParticleBlob::DESCRIPTOR_SET_LIGHTS) ShaderParticleBlob::DESCRIPTOR_SET_LIGHTS = {&ShaderParticle2DBase::DESCRIPTOR_SET_LIGHTS};
+decltype(ShaderParticleBlob::DESCRIPTOR_SET_SHADOWS) ShaderParticleBlob::DESCRIPTOR_SET_SHADOWS = {&ShaderParticle2DBase::DESCRIPTOR_SET_SHADOWS};
 ShaderParticleBlob::ShaderParticleBlob(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderParticle2DBase(context,identifier,"particles/blob/vs_particle_blob","particles/blob/fs_particle_blob")
 {

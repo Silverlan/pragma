@@ -64,15 +64,20 @@ void CParticleRendererSprite::RecordRender(
 {
 	auto *shader = static_cast<pragma::ShaderParticle2DBase*>(m_shader.get());
 	prosper::ShaderBindState bindState {drawCmd};
-	if(shader == nullptr || shader->RecordBeginDraw(bindState,GetParticleSystem(),renderFlags) == false) // prosper TODO: Use unlit pipeline if low shader quality?
+	if(!shader)
 		return;
+	auto pipelineIdx = shader->RecordBeginDraw(bindState,GetParticleSystem(),renderFlags);
+	if(!pipelineIdx.has_value()) // prosper TODO: Use unlit pipeline if low shader quality?
+		return;
+	auto layout = c_engine->GetRenderContext().GetShaderPipelineLayout(*shader,*pipelineIdx);
+	assert(layout != nullptr);
 	auto *dsScene = scene.GetCameraDescriptorSetGraphics();
 	auto *dsRenderer = renderer.GetRendererDescriptorSet();
 	auto &dsRenderSettings = c_game->GetGlobalRenderSettingsDescriptorSet();
 	auto *dsLights = renderer.GetLightSourceDescriptorSet();
 	auto *dsShadows = pragma::CShadowComponent::GetDescriptorSet();
 	shader->RecordBindScene(
-		bindState.commandBuffer,scene,renderer,
+		bindState.commandBuffer,*layout,scene,renderer,
 		*dsScene,*dsRenderer,
 		dsRenderSettings,*dsLights,
 		*dsShadows

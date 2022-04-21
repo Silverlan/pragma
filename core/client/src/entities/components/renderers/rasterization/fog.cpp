@@ -109,6 +109,7 @@ void pragma::CRasterizationRendererComponent::RenderParticles(const util::DrawSc
 	cmd.RecordImageBarrier(imgDepthSampled,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 	cmd.RecordImageBarrier(imgDepthRender,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal);
 
+	cmd.RecordImageBarrier(texDepth->GetImage(),prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 	if(cmd.RecordBeginRenderPass(*hdrInfo.rtParticle) == true)
 	{
 		RecordRenderParticleSystems(cmd,drawSceneInfo,culledParticles,pragma::rendering::SceneRenderPass::World,false,nullptr);

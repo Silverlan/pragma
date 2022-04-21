@@ -21,6 +21,11 @@ namespace pragma
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BLOB_NEIGHBORS;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BLOB_NEIGHBORS;
 
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
+
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_PARTICLE_DATA;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CUBEMAP;
 

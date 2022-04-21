@@ -363,7 +363,7 @@ bool HDRData::Initialize(uint32_t width,uint32_t height,prosper::SampleCountFlag
 
 	// Initialize particle render target
 	rtParticle = context.CreateRenderTarget(
-		{sceneRenderTarget->GetTexture().shared_from_this(),bloomTexture,prepass.textureDepthSampled},
+		{sceneRenderTarget->GetTexture().shared_from_this(),bloomTexture,prepass.textureDepth},
 		prosper::ShaderGraphics::GetRenderPass<pragma::ShaderParticle2DBase>(c_engine->GetRenderContext())
 	);
 

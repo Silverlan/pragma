@@ -497,9 +497,12 @@ bool Lua::file::Write(lua_State *l,std::string strPath,const std::string &conten
 	strPath = FileManager::GetCanonicalizedPath(strPath);
 	if(validate_write_operation(l,strPath) == false)
 		return false;
-	auto path = util::Path::CreateFile(strPath);
-	FileManager::CreatePath(path.GetPath().data());
-	auto f = FileManager::OpenFile(path.GetString().c_str(),"w");
+	auto fullPath = util::Path::CreateFile(strPath);
+
+	auto path = std::string{fullPath.GetPath()};
+	FileManager::CreatePath(path.data());
+
+	auto f = FileManager::OpenFile(fullPath.GetString().c_str(),"w");
 	if(f == NULL || f->GetType() != VFILE_LOCAL)
 		return false;
 	auto freal = std::static_pointer_cast<VFilePtrInternalReal>(f);

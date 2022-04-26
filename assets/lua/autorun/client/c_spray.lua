@@ -34,4 +34,4 @@ console.register_command("spray",function(pl,joystickAxisMagnitude)
 	spray()
 end)
 
-console.register_variable("cl_logofile",udm.TYPE_STRING,"error",console.FLAG_BIT_ARCHIVE,"Material name for the spraylogo.")
+console.register_variable("cl_logofile",udm.TYPE_STRING,"logo/test_spray",console.FLAG_BIT_ARCHIVE,"Material name for the spraylogo.")

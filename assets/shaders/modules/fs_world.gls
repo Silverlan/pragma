@@ -33,7 +33,7 @@ const int renderMode = DEBUG_RENDER_NORMAL;
 
 vec4 get_processed_color(vec4 texCol,vec2 texCoords)
 {
-	if(texCol.a <= u_material.alphaDiscardThreshold)
+	if(texCol.a <= u_material.material.alphaDiscardThreshold)
 		discard;
 	vec4 colProcessed = vec4(1.0,1.0,1.0,1.0);
 	vec3 diffuseColor = texCol.rgb;
@@ -48,7 +48,7 @@ vec4 get_processed_color(vec4 texCol,vec2 texCoords)
 		colProcessed.g *= colorMod.g;
 		colProcessed.b *= colorMod.b;
 		colProcessed.a = texCol.a;
-		if((u_material.flags &FMAT_BLACK_TO_ALPHA) != 0)
+		if((u_material.material.flags &FMAT_BLACK_TO_ALPHA) != 0)
 			colProcessed.a = clamp(max(max(colProcessed.r,colProcessed.g),colProcessed.b),0,1);
 		
 		// Deprecated: Fog is now calculated in post-processing

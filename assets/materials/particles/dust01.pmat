@@ -2,14 +2,17 @@
 {
 	"textures"
 	{
-		$string diffusemap "particles/dust01"
+		$string albedo_map "particles/dust01"
 	}
-	"animation"
+	"properties"
 	{
-		$uint32 offset 0
-		$uint32 frames 40
-		$uint32 fps 160
-		$uint32 columns 8
-		$uint32 rows 8
+		"animation"
+		{
+			$uint32 offset 0
+			$uint32 frames 40
+			$uint32 fps 160
+			$uint32 columns 8
+			$uint32 rows 8
+		}
 	}
 }

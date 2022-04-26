@@ -2,6 +2,6 @@
 {
 	"textures"
 	{
-		$string diffusemap "particles/beam_tracer"
+		$string albedo_map "particles/beam_tracer"
 	}
 }

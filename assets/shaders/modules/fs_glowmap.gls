@@ -15,14 +15,14 @@ vec4 add_glow_color(vec4 col,vec2 texCoords,vec4 glowColor,vec4 baseColor)
 {
 #if USE_GLOW_MAP == 1
 	vec3 colGlow = glowColor.rgb *glowColor.a *get_glow_scale();
-	if((u_material.flags &FMAT_GLOW_MODE_1) != 0)
+	if((u_material.material.flags &FMAT_GLOW_MODE_1) != 0)
 		col.rgb += colGlow;
-	else if((u_material.flags &FMAT_GLOW_MODE_2) != 0)
+	else if((u_material.material.flags &FMAT_GLOW_MODE_2) != 0)
 	{
 		for(int i=0;i<3;i++)
 			col[i] += max(colGlow[i] -col[i],0.0);
 	}
-	else if((u_material.flags &FMAT_GLOW_MODE_3) != 0)
+	else if((u_material.material.flags &FMAT_GLOW_MODE_3) != 0)
 	{
 		for(int i=0;i<3;i++)
 		{

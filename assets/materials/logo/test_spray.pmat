@@ -1,0 +1,8 @@
+"pbr"
+{
+	"textures"
+	{
+		$string albedo_map "logo/test_spray"
+		$uint32 alpha_mode 2
+	}
+}

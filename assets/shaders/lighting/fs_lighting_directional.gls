@@ -20,10 +20,10 @@ float get_directional_light_shadow_factor(uint lightIdx)
 	) : 1.0;
 }
 
-float calc_directional_light_attenuation(uint lightIdx)
+float calc_directional_light_attenuation(uint lightIdx,vec3 vertNorm)
 {
 	LightSourceData light = get_light_source(lightIdx);
-	vec3 N = -normalize(transpose(inverse(mat3(get_model_matrix()))) *get_vertex_normal()); // Is this correct?
+	vec3 N = -normalize(transpose(inverse(mat3(get_model_matrix()))) *vertNorm); // Is this correct?
 
 	float lambertTerm = 1.0;
 #if LIGHTING_USE_INCIDENCE_ANGLE == 1
@@ -33,12 +33,12 @@ float calc_directional_light_attenuation(uint lightIdx)
 	return attenuation *get_directional_light_shadow_factor(lightIdx);
 }
 
-vec3 calculate_directional_lighting(int lightIdx,vec3 fragLightColor,vec3 fragColor,vec3 specularColor,float cosTheta)
+vec3 calculate_directional_lighting(int lightIdx,vec3 fragLightColor,vec3 fragColor,vec3 specularColor,float cosTheta,vec3 vertNorm)
 {
 	LightSourceData light = get_light_source(lightIdx);
-	vec3 N = -normalize(transpose(inverse(mat3(get_model_matrix()))) *get_vertex_normal()); // Is this correct?
+	vec3 N = -normalize(transpose(inverse(mat3(get_model_matrix()))) *vertNorm); // Is this correct?
 
-	float attenuation = calc_directional_light_attenuation(lightIdx);
+	float attenuation = calc_directional_light_attenuation(lightIdx,vertNorm);
 	fragLightColor += fragColor *light.color.a *cosTheta *attenuation +specularColor;
 
 #if ENABLE_LIGHT_DEBUG == 1

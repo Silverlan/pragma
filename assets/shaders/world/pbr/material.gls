@@ -1,11 +1,15 @@
 #ifndef F_FS_PBR_MATERIAL_GLS
 #define F_FS_PBR_MATERIAL_GLS
 
-#include "textures.gls"
 #include "lighting/angular_info.gls"
 #include "/modules/sh_math.gls"
 #include "/modules/sh_material.gls"
 #include "/modules/sh_rma.gls"
+#include "/modules/fs_tonemapping.gls"
+
+#ifndef MATERIAL_ENABLE_WRINKLES
+	#define MATERIAL_ENABLE_WRINKLES 1
+#endif
 
 // Khronos
 struct MaterialInfo
@@ -64,6 +68,85 @@ float microfacet_distribution(MaterialInfo materialInfo, AngularInfo angularInfo
 	float alphaRoughnessSq = materialInfo.alphaRoughness * materialInfo.alphaRoughness;
 	float f = (angularInfo.NdotH * alphaRoughnessSq - angularInfo.NdotH) * angularInfo.NdotH + 1.0;
 	return alphaRoughnessSq / (M_PI * f * f);
+}
+
+MaterialInfo build_material_info(MaterialData materialData,vec4 albedoColor,vec4 instanceColor,vec4 rma,float wrinkleData,vec2 wrinkleTexCoords)
+{
+	// Metallic and Roughness material properties are packed together
+	// In glTF, these factors can be specified by fixed scalar values
+	// or from a metallic-roughness map
+	float perceptualRoughness = 0.0;
+	float metallic = 0.0;
+	vec4 baseColor = vec4(0.0, 0.0, 0.0, 1.0);
+	vec3 diffuseColor = vec3(0.0);
+	vec3 specularColor= vec3(0.0);
+	vec3 f0 = vec3(0.04);
+
+	// f0 = specular
+	specularColor = f0;
+	float oneMinusSpecularStrength = 1.0 - max(max(f0.r, f0.g), f0.b);
+	diffuseColor = baseColor.rgb * oneMinusSpecularStrength;
+
+	perceptualRoughness = rma[RMA_CHANNEL_ROUGHNESS] * 1.0;
+	perceptualRoughness *= materialData.roughnessFactor;
+
+	metallic = rma[RMA_CHANNEL_METALNESS] * materialData.metalnessFactor;
+
+	vec4 colorMod = instanceColor;
+	baseColor = albedoColor;
+	if(CSPEC_ENABLE_TRANSLUCENCY == 1)
+		baseColor.a = apply_alpha_mode(baseColor.a *colorMod.a *materialData.color.a,materialData.alphaMode,materialData.alphaCutoff);
+	else
+		baseColor.a = 1.0;
+	baseColor.rgb *= colorMod.rgb *materialData.color.rgb;
+
+#if MATERIAL_ENABLE_WRINKLES == 1
+	if(CSPEC_WRINKLES_ENABLED == 1)
+	{
+		if(wrinkleData != 0.0)
+		{
+			float wrinkle = clamp(-wrinkleData,0,1);
+			float stretch = clamp(wrinkleData,0,1);
+			float baseColorFactor = 1.0 -wrinkle -stretch;
+
+			vec4 wrinkleCol = texture(u_wrinkleCompressMap,wrinkleTexCoords);
+			vec4 stretchCol = texture(u_wrinkleStretchMap,wrinkleTexCoords);
+
+			baseColor.rgb = baseColorFactor *baseColor.rgb +wrinkle *wrinkleCol.rgb +stretch *stretchCol.rgb;
+		}
+	}
+#endif
+
+	if(true)//is_diffuse_srgb()) // TODO
+		baseColor.rgb = srgb_to_linear(baseColor.rgb);
+	//baseColor *= u_DiffuseFactor;
+	diffuseColor = baseColor.rgb * (vec3(1.0) - f0) * (1.0 - metallic);
+	specularColor = mix(f0, baseColor.rgb, metallic);
+
+	perceptualRoughness = clamp(perceptualRoughness, 0.0, 1.0);
+	metallic = clamp(metallic, 0.0, 1.0);
+
+	// Roughness is authored as perceptual roughness; as is convention,
+	// convert to material roughness by squaring the perceptual roughness [2].
+	float alphaRoughness = perceptualRoughness * perceptualRoughness;
+
+	// Compute reflectance.
+	float reflectance = max(max(specularColor.r, specularColor.g), specularColor.b);
+
+	vec3 specularEnvironmentR0 = specularColor.rgb;
+	// Anything less than 2% is physically impossible and is instead considered to be shadowing. Compare to "Real-Time-Rendering" 4th editon on page 325.
+	vec3 specularEnvironmentR90 = vec3(clamp(reflectance * 50.0, 0.0, 1.0));
+
+	float aoFactor = materialData.aoFactor;
+	return MaterialInfo(
+		perceptualRoughness,
+		specularEnvironmentR0,
+		alphaRoughness,
+		diffuseColor,
+		specularEnvironmentR90,
+		specularColor,
+		aoFactor
+	);
 }
 
 #endif

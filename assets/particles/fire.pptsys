@@ -14,16 +14,7 @@
 				$string bloom_scale "0.8"
 				$string sort_particles "1"
 			}
-			$array initializers [element;5][
-				{
-					$string name "color_fade"
-					"keyValues"
-					{
-						$string fade_end "2.66"
-						$string fade_start "2"
-						$string color "255 255 255 0"
-					}
-				},
+			$array initializers [element;6][
 				{
 					$string name "rotation_random"
 					"keyValues"
@@ -55,6 +46,25 @@
 						$string velocity "0 20 0"
 						$string spread_min "-0.3 0 -0.3"
 						$string spread_max "0.3 0 0.3"
+					}
+				},
+				{$string name "initial_animation_frame"}
+			]
+			$array operators [element;2][
+				{
+					$string name "color_fade"
+					"keyValues"
+					{
+						$string fade_end "2.66"
+						$string fade_start "2"
+						$string color "255 255 255 0"
+					}
+				},
+				{
+					$string name "animation_playback"
+					"keyValues"
+					{
+						$string playbackSpeed 0.7
 					}
 				}
 			]
@@ -79,15 +89,6 @@
 			}
 			$array initializers [element;5][
 				{
-					$string name "color_fade"
-					"keyValues"
-					{
-						$string fade_end "2.66"
-						$string fade_start "2"
-						$string color "255 255 255 0"
-					}
-				},
-				{
 					$string name "rotation_random"
 					"keyValues"
 					{
@@ -118,6 +119,25 @@
 						$string velocity "0 80 0"
 						$string spread_min "-0.3 0 -0.3"
 						$string spread_max "0.3 0 0.3"
+					}
+				},
+				{$string name "initial_animation_frame"}
+			]
+			$array operators [element;2][
+				{
+					$string name "color_fade"
+					"keyValues"
+					{
+						$string fade_end "2.66"
+						$string fade_start "2"
+						$string color "255 255 255 0"
+					}
+				},
+				{
+					$string name "animation_playback"
+					"keyValues"
+					{
+						$string playbackSpeed 0.7
 					}
 				}
 			]
@@ -142,15 +162,6 @@
 			}
 			$array initializers [element;5][
 				{
-					$string name "color_fade"
-					"keyValues"
-					{
-						$string fade_end "2.66"
-						$string fade_start "2"
-						$string color "255 255 255 0"
-					}
-				},
-				{
 					$string name "rotation_random"
 					"keyValues"
 					{
@@ -182,6 +193,25 @@
 						$string spread_min "-0.3 0 -0.3"
 						$string spread_max "0.3 0 0.3"
 					}
+				},
+				{$string name "initial_animation_frame"}
+			]
+			$array operators [element;2][
+				{
+					$string name "color_fade"
+					"keyValues"
+					{
+						$string fade_end "2.66"
+						$string fade_start "2"
+						$string color "255 255 255 0"
+					}
+				},
+				{
+					$string name "animation_playback"
+					"keyValues"
+					{
+						$string playbackSpeed 0.7
+					}
 				}
 			]
 			$array renderers [element;0][]
@@ -204,15 +234,6 @@
 				$string sort_particles "1"
 			}
 			$array initializers [element;5][
-				{
-					$string name "color_fade"
-					"keyValues"
-					{
-						$string fade_end "2.66"
-						$string fade_start "2"
-						$string color "255 255 255 0"
-					}
-				},
 				{
 					$string name "rotation_random"
 					"keyValues"
@@ -245,6 +266,25 @@
 						$string spread_min "-0.3 0 -0.3"
 						$string spread_max "0.3 0 0.3"
 					}
+				},
+				{$string name "initial_animation_frame"}
+			]
+			$array operators [element;2][
+				{
+					$string name "color_fade"
+					"keyValues"
+					{
+						$string fade_end "2.66"
+						$string fade_start "2"
+						$string color "255 255 255 0"
+					}
+				},
+				{
+					$string name "animation_playback"
+					"keyValues"
+					{
+						$string playbackSpeed 0.7
+					}
 				}
 			]
 			$array renderers [element;0][]
@@ -267,15 +307,6 @@
 				$string sort_particles "1"
 			}
 			$array initializers [element;5][
-				{
-					$string name "color_fade"
-					"keyValues"
-					{
-						$string fade_end "2.66"
-						$string fade_start "2"
-						$string color "255 255 255 0"
-					}
-				},
 				{
 					$string name "rotation_random"
 					"keyValues"
@@ -307,6 +338,25 @@
 						$string velocity "0 20 0"
 						$string spread_min "-0.3 0 -0.3"
 						$string spread_max "0.3 0 0.3"
+					}
+				},
+				{$string name "initial_animation_frame"}
+			]
+			$array operators [element;2][
+				{
+					$string name "color_fade"
+					"keyValues"
+					{
+						$string fade_end "2.66"
+						$string fade_start "2"
+						$string color "255 255 255 0"
+					}
+				},
+				{
+					$string name "animation_playback"
+					"keyValues"
+					{
+						$string playbackSpeed 0.7
 					}
 				}
 			]

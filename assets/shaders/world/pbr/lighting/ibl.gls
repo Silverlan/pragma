@@ -3,13 +3,12 @@
 
 #include "../material.gls"
 #include "../textures_ibl.gls"
-#include "/modules/sh_instance_info.gls"
 #include "/modules/fs_tonemapping.gls"
 
 const float u_MipCount = 4.0; // TODO
 #define USE_HDR
 #define USE_TEX_LOD
-vec3 get_ibl_contribution(MaterialInfo materialInfo, vec3 n, vec3 v)
+vec3 get_ibl_contribution(MaterialInfo materialInfo, vec3 n, vec3 v,float reflectionProbeIntensity)
 {
 	float NdotV = clamp(dot(n, v), 0.0, 1.0);
 
@@ -28,7 +27,7 @@ vec3 get_ibl_contribution(MaterialInfo materialInfo, vec3 n, vec3 v)
 #else
 	vec4 specularSample = texture(u_prefilterMap, reflection);
 #endif
-	specularSample.rgb *= get_reflection_probe_intensity();
+	specularSample.rgb *= reflectionProbeIntensity;
 
 #ifdef USE_HDR
 	// Already linear.

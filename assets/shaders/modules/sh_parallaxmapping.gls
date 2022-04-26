@@ -33,7 +33,7 @@
 		vec3 viewDir = camPosTs -vertPosTs;
 
 		float height = texture(u_parallaxMap,texCoords).r;
-		vec2 p = viewDir.xy /viewDir.z *(height *u_material.parallaxHeightScale);
+		vec2 p = viewDir.xy /viewDir.z *(height *u_material.material.parallaxHeightScale);
 		return texCoords -p;
 #else
 		return texCoords;

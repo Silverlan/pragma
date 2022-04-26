@@ -9,6 +9,8 @@
 #include "../modules/vs_buffer_locations.gls"
 #include "../modules/vs_instanced_entity_data.gls"
 #include "../modules/sh_rendersettings.gls"
+#include "../modules/sh_instance_info.gls"
+#include "../modules/sh_matrix.gls"
 
 // Unused, but required for correct binding points in OpenGL
 #include "../modules/vs_vertex_animation_frame_data.gls"
@@ -25,4 +27,5 @@ void main()
 	vec3 camOffset = (inverse(get_instanced_model_matrix()) *vec4(u_renderSettings.posCam,1)).xyz;
 	vs_out.color = get_instanced_instance_color();
 	vs_out.cubemap_dir = in_vert_pos -camOffset;
+	vs_out.cubemap_dir = (get_rotation_matrix(u_pushConstants.skyAngles.xyz,u_pushConstants.skyAngles.w) *vec4(vs_out.cubemap_dir,1.0)).xyz;
 }

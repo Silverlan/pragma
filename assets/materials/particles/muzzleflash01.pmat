@@ -2,14 +2,17 @@
 {
 	"textures"
 	{
-		$string diffusemap "particles/muzzleflash01"
+		$string albedo_map "particles/muzzleflash01"
 	}
-	"animation"
+	"properties"
 	{
-		$uint32 offset 0
-		$uint32 frames 8
-		$uint32 fps 80
-		$uint32 columns 4
-		$uint32 rows 2
+		"animation"
+		{
+			$uint32 offset 0
+			$uint32 frames 8
+			$uint32 fps 80
+			$uint32 columns 4
+			$uint32 rows 2
+		}
 	}
 }

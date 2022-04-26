@@ -1,0 +1,83 @@
+"particleSystemDefinitions"
+{
+	"blob_test"
+	{
+		"assetData"
+		{
+			$array children [element;0][]
+			$array operators [element;0][]
+			"keyValues"
+			{
+				$string maxparticles "10"
+				$string material "particles/blob_test"
+				$string emission_rate "5"
+				$string bloom_scale "0.8"
+				$string sort_particles "1"
+			}
+			$array initializers [element;5][
+				{
+					$string name "color_random"
+					"keyValues"
+					{
+						$string color1 "255 0 0 255"
+						$string color2 "0 0 255 255"
+						$string color3 "0 255 0 255"
+					}
+				},
+				{
+					$string name "rotation_random"
+					"keyValues"
+					{
+						$string rotation_min "-45"
+						$string rotation_max "45"
+					}
+				},
+				{
+					$string name "lifetime_random"
+					"keyValues"
+					{
+						$string lifetime_max "2.66"
+						$string lifetime_min "2.66"
+					}
+				},
+				{
+					$string name "initial_velocity"
+					"keyValues"
+					{
+						$string velocity "0 20 0"
+						$string spread_min "-0.6 0 -0.6"
+						$string spread_max "0.6 0 0.6"
+					}
+				}
+			]
+			$array operators [element;1][
+				{
+					$string name "radius_fade"
+					"keyValues"
+					{
+						$string fade_end "1"
+						$string fade_start "0"
+						$string radius "20"
+					}
+				},
+				{
+					$string name "radius_fade"
+					"keyValues"
+					{
+						$string fade_end "2.66"
+						$string fade_start "2"
+						$string radius "0"
+					}
+				}
+			]
+			$array renderers [element;1][
+				{
+					$string name "blob"
+					"keyValues" {}
+				}
+			]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+}

@@ -1,0 +1,10 @@
+"particle_blob"
+{
+	"textures"
+	{}
+	"properties"
+	{
+		$float roughness_factor 0.5
+		$float metalness_factor 0
+	}
+}

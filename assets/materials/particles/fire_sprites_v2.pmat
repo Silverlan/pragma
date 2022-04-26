@@ -2,7 +2,7 @@
 {
 	"textures"
 	{
-		$string diffusemap "particles/fire_sprites_v2"
+		$string albedo_map "particles/fire_sprites_v2"
 	}
 	"animation"
 	{

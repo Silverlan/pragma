@@ -4,11 +4,10 @@
 #include "fs_shadow.gls"
 #include "sh_light_sources.gls"
 
-float get_point_light_shadow_sample(uint lightIdx,bool dynamic)
+float get_point_light_shadow_sample(uint lightIdx,bool dynamic,vec3 fragPosWs)
 {
 	LightSourceData light = get_light_source(lightIdx);
 	vec4 depthCoord = get_light_vertex_position(lightIdx);
-	vec3 fragPosWs = get_vertex_position_ws();
 	depthCoord.z = length(fragPosWs -light.position.xyz) /light.position.w;
 	uint shadowMapIndex = dynamic ? light.shadowMapIndexDynamic : light.shadowMapIndexStatic;
 
@@ -18,11 +17,10 @@ float get_point_light_shadow_sample(uint lightIdx,bool dynamic)
 	return (shadowMapIndex > 0) ? get_shadow_value(shadowCubemaps[shadowMapIndex -1],lightVec,biasDepth) : 1.0;
 }
 
-float get_point_light_shadow_factor(uint lightIdx,bool dynamic)
+float get_point_light_shadow_factor(uint lightIdx,bool dynamic,vec3 fragPosWs)
 {
 	LightSourceData light = get_light_source(lightIdx);
 	vec4 depthCoord = get_light_vertex_position(lightIdx);
-	vec3 fragPosWs = get_vertex_position_ws();
 	depthCoord.z = length(fragPosWs -light.position.xyz) /light.position.w;
 	uint shadowMapIndex = dynamic ? light.shadowMapIndexDynamic : light.shadowMapIndexStatic;
 	return (shadowMapIndex > 0) ? calculate_shadow(
@@ -33,16 +31,15 @@ float get_point_light_shadow_factor(uint lightIdx,bool dynamic)
 	) : 1.0;
 }
 
-float calc_point_light_attenuation(uint lightIdx)
+float calc_point_light_attenuation(uint lightIdx,vec3 fragPosWs)
 {
 	LightSourceData light = get_light_source(lightIdx);
-	vec3 fragPosWs = get_vertex_position_ws();
 	float lightDist = length(light.position.xyz -fragPosWs);
 	float attenuation = calc_light_falloff(lightDist,light.position.w);
 	attenuation = pow(attenuation,light.falloffExponent); // Distance falloff
 	
 	// Apply shadow factor from static and dynamic objects
-	attenuation *= get_point_light_shadow_factor(lightIdx,true) *get_point_light_shadow_factor(lightIdx,false);
+	attenuation *= get_point_light_shadow_factor(lightIdx,true,fragPosWs) *get_point_light_shadow_factor(lightIdx,false,fragPosWs);
 	return attenuation;
 }
 
@@ -50,7 +47,7 @@ vec3 calculate_point_lighting(int lightIdx,int pointIdx,vec3 fragLightColor,vec3
 {
 	LightSourceData light = get_light_source(lightIdx);
 
-	float attenuation = calc_point_light_attenuation(lightIdx);
+	float attenuation = calc_point_light_attenuation(lightIdx,fragPosWs);
 	vec3 localColor = fragColor *light.color.a *cosTheta *attenuation +specularColor;
 	fragLightColor.rgb += localColor.rgb;
 

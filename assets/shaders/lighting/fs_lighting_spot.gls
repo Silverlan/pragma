@@ -4,10 +4,9 @@
 #include "fs_shadow.gls"
 #include "sh_light_sources.gls"
 
-float get_spot_light_shadow_sample(uint lightIdx,bool dynamic)
+float get_spot_light_shadow_sample(uint lightIdx,bool dynamic,vec3 fragPosWs)
 {
 	LightSourceData light = get_light_source(lightIdx);
-	vec3 fragPosWs = get_vertex_position_ws();
 
 	vec4 depthCoord = get_light_vertex_position(lightIdx);
 	depthCoord.z *= light.position.w; // Undo transformation from get_light_vertex_position()
@@ -34,10 +33,10 @@ float get_spot_light_shadow_factor(uint lightIdx,bool dynamic)
 	) : 1.0;
 }
 
-float calc_spot_light_attenuation(uint lightIdx)
+float calc_spot_light_attenuation(uint lightIdx,vec3 fragPosWs)
 {
 	LightSourceData light = get_light_source(lightIdx);
-	vec3 posFromWorldSpace = light.position.xyz -get_vertex_position_ws();
+	vec3 posFromWorldSpace = light.position.xyz -fragPosWs;
 	vec3 dirToLight = normalize(posFromWorldSpace);
 	vec3 lightDir = light.direction.xyz;
 	float cos_cur_angle = dot(-dirToLight,lightDir);
@@ -54,12 +53,12 @@ float calc_spot_light_attenuation(uint lightIdx)
 	return attenuation;
 }
 
-vec3 calculate_spot_lighting(int lightIdx,int spotIdx,vec3 fragLightColor,vec3 fragColor,vec3 specularColor,float cosTheta,vec3 posFromWorldSpace)
+vec3 calculate_spot_lighting(int lightIdx,int spotIdx,vec3 fragLightColor,vec3 fragColor,vec3 specularColor,float cosTheta,vec3 posFromWorldSpace,vec3 fragPosWs)
 {
 	LightSourceData light = get_light_source(lightIdx);
 	vec3 dirToLight = normalize(posFromWorldSpace);
 	
-	float attenuation = calc_spot_light_attenuation(lightIdx);
+	float attenuation = calc_spot_light_attenuation(lightIdx,fragPosWs);
 
 	vec3 diffuseLight = light.color.rgb *attenuation *light.color.a;
 	fragLightColor += diffuseLight *fragColor *cosTheta +specularColor;

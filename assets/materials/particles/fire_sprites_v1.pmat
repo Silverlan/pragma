@@ -2,14 +2,17 @@
 {
 	"textures"
 	{
-		$string diffusemap "particles/fire_sprites_v1"
+		$string albedo_map "particles/fire_sprites_v1"
 	}
-	"animation"
+	"properties"
 	{
-		$uint32 offset 0
-		$uint32 frames 64
-		$uint32 fps 46
-		$uint32 columns 8
-		$uint32 rows 8
+		"animation"
+		{
+			$uint32 offset 0
+			$uint32 frames 64
+			$uint32 fps 46
+			$uint32 columns 8
+			$uint32 rows 8
+		}
 	}
 }

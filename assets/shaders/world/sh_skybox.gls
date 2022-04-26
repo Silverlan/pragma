@@ -1,6 +1,9 @@
 #ifndef F_SH_SKYBOX_GLS
 #define F_SH_SKYBOX_GLS
 
+#define PUSH_USER_CONSTANTS \
+	vec4 skyAngles;
+
 #include "../modules/sh_vertex_data_locations.gls"
 #include "../modules/sh_export.gls"
 

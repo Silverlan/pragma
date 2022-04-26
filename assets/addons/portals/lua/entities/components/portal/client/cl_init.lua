@@ -30,6 +30,7 @@ function Component:UpdateCamera(renderTargetC)
 
 	local gameScene = game.get_scene()
 	local gameCam = gameScene:GetActiveCamera()
+	if(gameCam == nil) then return end
 	local vm
 	local camPose
 	if(self.m_frozenCamData ~= nil) then

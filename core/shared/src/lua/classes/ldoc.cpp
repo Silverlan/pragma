@@ -1180,6 +1180,8 @@ static void autogenerate()
 		{"pr_steamworks","E:/projects/pragma/build_winx64/modules/pr_steamworks/RelWithDebInfo/pr_steamworks.pdb"},
 		{"panima","E:/projects/pragma/build_winx64/external_libs/panima/RelWithDebInfo/panima.pdb"}
 	};
+
+#ifdef ENABLE_PDB_MANAGER
 	pragma::lua::PdbManager pdbManager {};
 	if(pdbManager.Initialize())
 	{
@@ -1187,6 +1189,7 @@ static void autogenerate()
 		for(auto &pair : pdbModules)
 			pdbManager.LoadPdb(pair.first,pair.second);
 	}
+#endif
 	
 	pragma::lua::TypeNameManager typeManager {};
 	for(auto &stateInfo : luaStates)
@@ -1256,7 +1259,9 @@ static void autogenerate()
 		rootCol->AddChild(gCol);
 		
 		pragma::lua::LuaDocGenerator docGenerator {L};
+#ifdef ENABLE_PDB_MANAGER
 		docGenerator.SetPdbManager(&pdbManager);
+#endif
 		docGenerator.SetSymbolHandler(&symHandler);
 		docGenerator.SetTypeManager(&typeManager);
 		docGenerator.IterateLibraries(luabind::globals(L),*rootCol,*gCol);

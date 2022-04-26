@@ -8,6 +8,8 @@
 #ifndef __LUA_AUTO_DOC_PDB_MANAGER_HPP__
 #define __LUA_AUTO_DOC_PDB_MANAGER_HPP__
 
+#ifdef ENABLE_PDB_MANAGER
+
 #include "pragma/networkdefinitions.h"
 #include <string>
 #include <optional>
@@ -195,5 +197,7 @@ namespace pragma::lua
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::lua::ParameterInfo::Flags)
+
+#endif
 
 #endif

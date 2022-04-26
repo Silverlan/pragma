@@ -1159,6 +1159,7 @@ void LuaDocGenerator::ParseLuaProperty(const std::string &name,const luabind::ob
 
 					if(moduleName.has_value())
 					{
+#ifdef ENABLE_PDB_MANAGER
 						auto symbol = m_pdbManager->FindSymbolByRva(*moduleName,fAddress);
 						if(symbol.has_value())
 						{
@@ -1216,6 +1217,7 @@ void LuaDocGenerator::ParseLuaProperty(const std::string &name,const luabind::ob
 								pdbParamInfoToType(*symbol->returnValue,ret);
 							}*/
 						}
+#endif
 
 						if(!fileName.has_value())
 							Con::cwar<<"WARNING: Unable to determine function source for "<<fptr<<" ("<<function_name<<") in module "<<*moduleName<<"!"<<Con::endl;

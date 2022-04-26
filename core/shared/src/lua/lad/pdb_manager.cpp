@@ -6,6 +6,9 @@
  */
 
 #include "stdafx_shared.h"
+
+#ifdef ENABLE_PDB_MANAGER
+
 #include "pragma/lua/lad/pdb_manager.hpp"
 #include <sharedutils/scope_guard.h>
 // C:/Program Files (x86)/Microsoft Visual Studio 14.0/DIA SDK/include
@@ -507,3 +510,5 @@ std::optional<ParameterInfo> PdbManager::SymbolToParameterInfo(IDiaSymbol *pSymb
 	}
 	return paramInfo;
 }
+
+#endif

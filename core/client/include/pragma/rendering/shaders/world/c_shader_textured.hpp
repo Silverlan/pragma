@@ -234,6 +234,7 @@ namespace pragma
 			CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
 			std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
 		) const override;
+		static MaterialData GenerateMaterialData(CMaterial &mat);
 		std::optional<MaterialData> UpdateMaterialBuffer(CMaterial &mat) const;
 		bool RecordPushSceneConstants(rendering::ShaderProcessor &shaderProcessor,const pragma::CSceneComponent &scene,const Vector4 &drawOrigin) const;
 
@@ -260,6 +261,7 @@ namespace pragma
 		virtual bool IsUsingLightmaps() const override {return true;}
 		bool IsDepthPrepassEnabled() const;
 		void SetDepthPrepassEnabled(bool enabled) {m_depthPrepassEnabled = enabled;}
+		static std::optional<MaterialData> InitializeMaterialBuffer(prosper::IDescriptorSet &descSet,CMaterial &mat,uint32_t bindingIdx);
 	protected:
 		using ShaderEntity::RecordDraw;
 		GameShaderSpecializationConstantFlag GetStaticSpecializationConstantFlags(GameShaderSpecialization specialization) const;

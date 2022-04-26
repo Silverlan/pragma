@@ -226,9 +226,9 @@ bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas,st
 						auto &p0Orig = verts.at(triInfo.originalMeshVertexIndex.at(0));
 						auto &p1Orig = verts.at(triInfo.originalMeshVertexIndex.at(1));
 						auto &p2Orig = verts.at(triInfo.originalMeshVertexIndex.at(2));
-
-						v.position = p0Orig.position *f0 +p1Orig.position *f1 +p2Orig.position *f2;
+						
 						v.normal = p0Orig.normal *f0 +p1Orig.normal *f1 +p2Orig.normal *f2;
+						v.position = p0Orig.position *f0 +p1Orig.position *f1 +p2Orig.position *f2;
 						uvec::normalize(&v.normal);
 					}
 					else
@@ -249,8 +249,9 @@ bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas,st
 			}
 			for(auto i=vertexOffset;i<outVerts.size();++i)
 			{
-				// Move the vertex positions into entity space
 				auto &v = outVerts.at(i);
+				v.position += v.normal *0.01f; // Small offset to avoid z-fighting
+				// Move the vertex positions into entity space
 				v.position = meshData.pose *v.position;
 			}
 		}
@@ -305,6 +306,7 @@ void DecalProjector::DebugDraw(float duration) const
 void CDecalComponent::Initialize()
 {
 	BaseEnvDecalComponent::Initialize();
+	GetEntity().AddComponent<pragma::CRenderComponent>();
 	/*auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	auto pSpriteComponent = ent.AddComponent<pragma::CSpriteComponent>();
 	if(pSpriteComponent.valid())
@@ -383,11 +385,11 @@ bool CDecalComponent::ApplyDecal(DecalProjector &projector,const std::vector<Dec
 
 	mdl->Update(ModelUpdateFlags::All);
 
-	auto decalRenderC = GetEntity().AddComponent<pragma::CRenderComponent>();
 	//decalRenderC->SetDepthBias(-1'000.f,0.f,-2.f);
 	// TODO
 
 	GetEntity().SetModel(mdl);
+
 	// GetEntity().SetPose(pose);
 
 	// projector.DebugDraw(15.f);

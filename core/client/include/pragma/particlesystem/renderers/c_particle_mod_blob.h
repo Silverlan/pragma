@@ -22,9 +22,9 @@ class DLLCLIENT CParticleRendererBlob
 {
 private:
 	static bool s_bShowNeighborLinks;
-	//static Vulkan::DescriptorSet s_dsParticles; // prosper TODO
+	static std::shared_ptr<prosper::IDescriptorSetGroup> s_dsParticles;
 	static std::size_t s_activeBlobRendererCount;
-	//static Shader::ParticleBlob *s_shader; // prosper TODO
+	static pragma::ShaderParticleBlob *s_shader;
 	static Shader::ParticleBlobShadow *s_shadowShader;
 protected:
 	static const auto INVALID_BLOB_INDEX = std::numeric_limits<uint16_t>::max();
@@ -35,25 +35,25 @@ protected:
 	};
 	struct LinkContainer
 	{
-		//std::array<Link,Shader::ParticleBlob::MAX_BLOB_NEIGHBORS> links; // First slot is reserved for own particle index // prosper TODO
+		std::array<Link,pragma::ShaderParticleBlob::MAX_BLOB_NEIGHBORS> links; // First slot is reserved for own particle index
 		uint32_t nextLinkId = 1;
 	};
 	std::vector<LinkContainer> m_particleLinks;
 	Vector4 m_specularColor = {};
 	float m_reflectionIntensity = 0.f;
 	float m_refractionIndexRatio = 1.f;
-	//Shader::ParticleBlob::DebugMode m_debugMode = Shader::ParticleBlob::DebugMode::None; // prosper TODO
+	pragma::ShaderParticleBlob::DebugMode m_debugMode = pragma::ShaderParticleBlob::DebugMode::None;
 	uint64_t m_lastFrame = std::numeric_limits<uint64_t>::max();
-	//std::vector<std::array<uint16_t,Shader::ParticleBlob::MAX_BLOB_NEIGHBORS>> m_adjacentParticleIds; // prosper TODO
-	//Vulkan::SwapBuffer m_adjacentBlobBuffer = nullptr; // prosper TODO
+	std::vector<std::array<uint16_t,pragma::ShaderParticleBlob::MAX_BLOB_NEIGHBORS>> m_adjacentParticleIds;
+	std::shared_ptr<prosper::IBuffer> m_adjacentBlobBuffer = nullptr;
 	//Vulkan::RenderTarget m_rtTransparent = nullptr; // prosper TODO
 	void SortParticleLinks();
-	//void UpdateAdjacentParticles(const Vulkan::Buffer &blobIndexBuffer); // prosper TODO
+	void UpdateAdjacentParticles(prosper::IBuffer &blobIndexBuffer);
 
 	// Debug
 	struct DebugInfo
 	{
-		//std::array<std::shared_ptr<DebugRenderer::BaseObject>,Shader::ParticleBlob::MAX_BLOB_NEIGHBORS -1> renderObjects; // prosper TODO
+		std::array<std::shared_ptr<DebugRenderer::BaseObject>,pragma::ShaderParticleBlob::MAX_BLOB_NEIGHBORS -1> renderObjects;
 		bool hide = false;
 	};
 	std::vector<DebugInfo> m_dbgNeighborLinks;
@@ -70,6 +70,8 @@ public:
 	virtual void OnParticleSystemStarted() override;
 	virtual void OnParticleDestroyed(CParticle &particle) override;
 	virtual void OnParticleSystemStopped() override;
+	virtual void PostSimulate(double tDelta) override;
+	virtual bool RequiresDepthPass() const override {return true;}
 	virtual pragma::ShaderParticleBase *GetShader() const override;
 };
 

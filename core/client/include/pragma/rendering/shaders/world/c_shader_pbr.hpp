@@ -68,6 +68,7 @@ namespace pragma
 			Material &mat,prosper::IDescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,
 			Texture *optDefaultTex=nullptr
 		);
+		prosper::IDescriptorSet *GetReflectionProbeDescriptorSet(const pragma::CSceneComponent &scene,float &outIblStrength,ShaderGameWorld::SceneFlags &inOutSceneFlags) const;
 	protected:
 		using ShaderGameWorldLightingPass::RecordDraw;
 		void RecordBindSceneDescriptorSets(

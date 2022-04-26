@@ -262,6 +262,8 @@ Lua::tb<std::string> Lua::asset::get_supported_import_file_extensions(lua_State 
 		t[idx++] = "vmt";
 		t[idx++] = "vmat_c";
 	}
+	else if(type == pragma::asset::Type::ParticleSystem)
+		t[idx++] = "pcf";
 	return t;
 }
 Lua::tb<std::string> Lua::asset::get_supported_export_file_extensions(lua_State *l,pragma::asset::Type type)

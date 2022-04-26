@@ -16,8 +16,7 @@ class DLLCLIENT CParticleInitializerInitialAnimationFrame
 {
 private:
 	float m_minFrame = 0.f;
-	float m_maxFrame = 0.f;
-	bool m_bUseFraction = false;
+	float m_maxFrame = 1.f;
 public:
 	CParticleInitializerInitialAnimationFrame()=default;
 	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;

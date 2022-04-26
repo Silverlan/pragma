@@ -155,7 +155,11 @@ REGISTER_PARTICLE_INITIALIZER(rotation_random,CParticleInitializerRotationRandom
 
 ///////////////////////
 
-void CParticleModifier::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) {m_particleSystem = &pSystem;}
+void CParticleModifier::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+{
+	m_particleSystem = &pSystem;
+	RecordKeyValues(values);
+}
 
 int32_t CParticleModifier::GetPriority() const {return m_priority;}
 void CParticleModifier::SetPriority(int32_t priority) {m_priority = priority;}

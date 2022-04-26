@@ -123,6 +123,7 @@ public:
 	virtual void PostSimulate(double tDelta);
 	virtual std::pair<Vector3,Vector3> GetRenderBounds() const;
 	virtual pragma::ShaderParticleBase *GetShader() const=0;
+	virtual bool RequiresDepthPass() const {return false;}
 };
 #pragma warning(pop)
 

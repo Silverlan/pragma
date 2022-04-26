@@ -43,7 +43,7 @@ using namespace pragma::rendering;
 void pragma::CRasterizationRendererComponent::RecordRenderParticleSystems(
 	prosper::ICommandBuffer &cmd,const util::DrawSceneInfo &drawSceneInfo,
 	std::vector<pragma::CParticleSystemComponent*> &particles,pragma::rendering::SceneRenderPass renderMode,
-	Bool bloom,std::vector<pragma::CParticleSystemComponent*> *bloomParticles
+	bool depthPass,Bool bloom,std::vector<pragma::CParticleSystemComponent*> *bloomParticles
 )
 {
 	auto depthOnly = umath::is_flag_set(drawSceneInfo.renderFlags,RenderFlags::ParticleDepth);
@@ -51,7 +51,7 @@ void pragma::CRasterizationRendererComponent::RecordRenderParticleSystems(
 		return;
 	auto &scene = *drawSceneInfo.scene;
 	auto renderFlags = ParticleRenderFlags::None;
-	umath::set_flag(renderFlags,ParticleRenderFlags::DepthOnly,depthOnly);
+	umath::set_flag(renderFlags,ParticleRenderFlags::DepthOnly,depthOnly || depthPass);
 	umath::set_flag(renderFlags,ParticleRenderFlags::Bloom,bloom);
 	auto bFirst = true;
 	for(auto *particle : particles)
@@ -261,7 +261,7 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
 
 	// Particles
-	RenderParticles(drawSceneInfo);
+	RenderParticles(*drawSceneInfo.commandBuffer,drawSceneInfo,false,drawSceneInfo.commandBuffer.get());
 
 	// Fog
 	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuFog,*drawSceneInfo.commandBuffer);

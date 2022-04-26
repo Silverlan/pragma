@@ -242,6 +242,7 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 	// Update particle systems
 	// TODO: This isn't a good place for this and particle systems should
 	// only be updated if visible (?)
+	auto &cmd = *drawSceneInfo.commandBuffer;
 	EntityIterator itParticles {*this};
 	itParticles.AttachFilter<TEntityIteratorFilterComponent<pragma::CParticleSystemComponent>>();
 	for(auto *ent : itParticles)
@@ -249,7 +250,43 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		auto &tDelta = DeltaTime();
 		auto pt = ent->GetComponent<pragma::CParticleSystemComponent>();
 		if(pt.valid() && pt->GetParent() == nullptr && pt->ShouldAutoSimulate())
+		{
 			pt->Simulate(tDelta);
+
+			// Vertex buffer barrier
+			auto &ptBuffer = pt->GetParticleBuffer();
+			if (ptBuffer != nullptr)
+			{
+				// Particle buffer barrier
+				cmd.RecordBufferBarrier(
+					*ptBuffer,
+					prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexInputBit,
+					prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::VertexAttributeReadBit
+				);
+			}
+
+			auto &animBuffer = pt->GetParticleAnimationBuffer();
+			if (animBuffer != nullptr)
+			{
+				// Animation start buffer barrier
+				cmd.RecordBufferBarrier(
+					*animBuffer,
+					prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexInputBit,
+					prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::VertexAttributeReadBit
+				);
+			}
+
+			auto &spriteSheetBuffer = pt->GetSpriteSheetBuffer();
+			if (spriteSheetBuffer != nullptr)
+			{
+				// Animation buffer barrier
+				cmd.RecordBufferBarrier(
+					*spriteSheetBuffer,
+					prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit,
+					prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit
+				);
+			}
+		}
 	}
 
 	if(drawSceneInfo.scene.expired())

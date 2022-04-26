@@ -330,11 +330,8 @@ void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelin
 
 static auto cvNormalMappingEnabled = GetClientConVar("render_normalmapping_enabled");
 void ShaderGameWorldLightingPass::ApplyMaterialFlags(CMaterial &mat,MaterialFlags &outFlags) const {}
-std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLightingPass::UpdateMaterialBuffer(CMaterial &mat) const
+ShaderGameWorldLightingPass::MaterialData ShaderGameWorldLightingPass::GenerateMaterialData(CMaterial &mat)
 {
-	auto *buf = mat.GetSettingsBuffer();
-	if(buf == nullptr)
-		return {};
 	MaterialData matData {};
 
 	auto &matFlags = matData.flags;
@@ -458,8 +455,18 @@ std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLighting
 	// Obsolete
 	//if(mat.IsTranslucent() == true)
 	//	matFlags |= MaterialFlags::Translucent;
+	return matData;
+}
+std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLightingPass::UpdateMaterialBuffer(
+	CMaterial &mat
+) const
+{
+	auto *buf = mat.GetSettingsBuffer();
+	if(buf == nullptr)
+		return {};
 
-	ApplyMaterialFlags(mat,matFlags);
+	auto matData = GenerateMaterialData(mat);
+	ApplyMaterialFlags(mat,matData.flags);
 
 	buf->Write(0,matData);
 	return matData;
@@ -529,7 +536,26 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::Initi
 
 	return descSetGroup;
 }
-std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLightingPass::InitializeMaterialBuffer(prosper::IDescriptorSet &descSet,CMaterial &mat)
+std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLightingPass::InitializeMaterialBuffer(
+	prosper::IDescriptorSet &descSet,CMaterial &mat,uint32_t bindingIdx
+)
+{
+	auto settingsBuffer = mat.GetSettingsBuffer() ? mat.GetSettingsBuffer()->shared_from_this() : nullptr;
+	if(settingsBuffer == nullptr && g_materialSettingsBuffer)
+		settingsBuffer = g_materialSettingsBuffer->AllocateBuffer();
+	if(settingsBuffer == nullptr)
+		return {};
+	descSet.SetBindingUniformBuffer(*settingsBuffer,bindingIdx);
+	mat.SetSettingsBuffer(*settingsBuffer);
+
+	auto matData = GenerateMaterialData(mat);
+
+	settingsBuffer->Write(0,matData);
+	return matData;
+}
+std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLightingPass::InitializeMaterialBuffer(
+	prosper::IDescriptorSet &descSet,CMaterial &mat
+)
 {
 	auto settingsBuffer = mat.GetSettingsBuffer() ? mat.GetSettingsBuffer()->shared_from_this() : nullptr;
 	if(settingsBuffer == nullptr && g_materialSettingsBuffer)

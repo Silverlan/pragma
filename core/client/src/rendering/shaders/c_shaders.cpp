@@ -22,6 +22,8 @@
 #include "pragma/rendering/shaders/particles/c_shader_particle_model.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_polyboard.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_blob.hpp"
+#include "pragma/rendering/shaders/particles/c_shader_particle_animated_sprites.hpp"
+#include "pragma/rendering/shaders/particles/c_shader_particle_sprite_trail.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_indexing.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
@@ -63,6 +65,7 @@
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
+
 
 REGISTER_CONVAR_CALLBACK_CL(cl_render_shader_quality,[](NetworkState*,ConVar*,int,int val) {
 	if(c_game == nullptr)
@@ -114,10 +117,14 @@ void register_game_shaders()
 	shaderManager.RegisterShader("debug_csm_depth_to_rgb",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderCSMDepthToRGB(context,identifier);});
 
 	shaderManager.RegisterShader("particle",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderParticle(context,identifier);});
+	shaderManager.RegisterShader("particle_blob",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderParticleBlob(context,identifier);});
 	shaderManager.RegisterShader("particle_rotational",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderParticleRotational(context,identifier);});
 	//shaderManager.RegisterShader("particlemodel",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderParticleModel(context,identifier);});
 	shaderManager.RegisterShader("particlepolyboard",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderParticlePolyboard(context,identifier);});
 	
+	shaderManager.RegisterShader("pfm_particle_animated_sprites",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderParticleAnimatedSprites(context,identifier);});
+	shaderManager.RegisterShader("pfm_particle_sprite_trail",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderParticleSpriteTrail(context,identifier);});
+
 	shaderManager.RegisterShader("shadow",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderShadow(context,identifier);});
 	shaderManager.RegisterShader("shadowcsm",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderShadowCSM(context,identifier);});
 	shaderManager.RegisterShader("shadow_spot",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderShadowSpot(context,identifier);});

@@ -38,6 +38,7 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_ANIMATION;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDERER;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
@@ -75,19 +76,20 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderParticle2DBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
-		bool RecordDraw(prosper::ShaderBindState &bindState,pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const CParticleSystemComponent &ps,CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags renderFlags);
+		virtual bool RecordDraw(prosper::ShaderBindState &bindState,pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const CParticleSystemComponent &ps,CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags renderFlags);
 		std::optional<uint32_t> RecordBeginDraw(
 			prosper::ShaderBindState &bindState,
 			CParticleSystemComponent &pSys,ParticleRenderFlags renderFlags,
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		);
-		bool RecordBindScene(
+		virtual bool RecordBindScene(
 			prosper::ICommandBuffer &cmd,const prosper::IShaderPipelineLayout &layout,
 			const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
 			prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
 			prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
 			prosper::IDescriptorSet &dsShadows
 		) const;
+		virtual uint32_t GetSceneDescriptorSetIndex() const;
 
 		void GetParticleSystemOrientationInfo(
 			const Mat4 &matrix,const CParticleSystemComponent &particle,CParticleSystemComponent::OrientationType orientationType,Vector3 &up,Vector3 &right,
@@ -107,7 +109,7 @@ namespace pragma
 		) const;
 
 		virtual prosper::DescriptorSetInfo &GetAnimationDescriptorSetInfo() const override;
-		bool RecordParticleMaterial(prosper::ShaderBindState &bindState,const CRasterizationRendererComponent &renderer,const CParticleSystemComponent &ps) const;
+		virtual bool RecordParticleMaterial(prosper::ShaderBindState &bindState,const CRasterizationRendererComponent &renderer,const CParticleSystemComponent &ps) const;
 
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;
 		virtual uint32_t GetLightDescriptorSetIndex() const override;

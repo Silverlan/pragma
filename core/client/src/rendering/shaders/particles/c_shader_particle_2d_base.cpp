@@ -13,6 +13,7 @@
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/render_processor.hpp"
+#include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/console/c_cvar.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -58,6 +59,7 @@ decltype(ShaderParticle2DBase::DESCRIPTOR_SET_DEPTH_MAP) ShaderParticle2DBase::D
 };
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION) ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION = {&ShaderParticleBase::DESCRIPTOR_SET_ANIMATION};
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_SCENE) ShaderParticle2DBase::DESCRIPTOR_SET_SCENE = {&ShaderSceneLit::DESCRIPTOR_SET_SCENE};
+decltype(ShaderParticle2DBase::DESCRIPTOR_SET_RENDERER) ShaderParticle2DBase::DESCRIPTOR_SET_RENDERER = {&ShaderSceneLit::DESCRIPTOR_SET_RENDERER};
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderParticle2DBase::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderSceneLit::DESCRIPTOR_SET_RENDER_SETTINGS};
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_LIGHTS) ShaderParticle2DBase::DESCRIPTOR_SET_LIGHTS = {&ShaderSceneLit::DESCRIPTOR_SET_LIGHTS};
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_SHADOWS) ShaderParticle2DBase::DESCRIPTOR_SET_SHADOWS = {&ShaderSceneLit::DESCRIPTOR_SET_SHADOWS};
@@ -110,6 +112,7 @@ void ShaderParticle2DBase::RegisterDefaultGfxPipelineDescriptorSetGroups(prosper
 	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_DEPTH_MAP);
 	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_ANIMATION);
 	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_RENDERER);
 	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_RENDER_SETTINGS);
 	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_LIGHTS);
 	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SHADOWS);
@@ -123,7 +126,6 @@ void ShaderParticle2DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreate
 	pipelineInfo.ToggleDepthWrites(pipelineIdx == GetDepthPipelineIndex()); // Last pipeline is depth pipeline
 
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
-	SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
 	RegisterDefaultGfxPipelineVertexAttributes(pipelineInfo);
 	RegisterDefaultGfxPipelinePushConstantRanges(pipelineInfo,pipelineIdx);
 	RegisterDefaultGfxPipelineDescriptorSetGroups(pipelineInfo,pipelineIdx);
@@ -171,7 +173,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticle2DBase::InitializeMa
 void ShaderParticle2DBase::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
 	auto sampleCount = GetSampleCount(GetBasePipelineIndex(pipelineIdx));
-	//if(pipelineIdx != GetDepthPipelineIndex())
+	if(pipelineIdx != GetDepthPipelineIndex())
 	{
 		CreateCachedRenderPass<ShaderParticle2DBase>({{
 			{
@@ -188,16 +190,22 @@ void ShaderParticle2DBase::InitializeRenderPass(std::shared_ptr<prosper::IRender
 			}
 		}},outRenderPass,pipelineIdx);
 	}
-	/*else
+	else
 	{
+		auto sampleCount = GetSampleCount(pipelineIdx);
+		prosper::util::RenderPassCreateInfo rpInfo {{
+			pragma::ShaderPrepass::get_normal_render_pass_attachment_info(sampleCount),
+			pragma::ShaderPrepass::get_depth_render_pass_attachment_info(sampleCount)
+		}};
+		CreateCachedRenderPass<ShaderPrepass>({rpInfo},outRenderPass,pipelineIdx);
 		// Depth only
-		CreateCachedRenderPass<ShaderParticle2DBase>({{
+		/*CreateCachedRenderPass<ShaderParticle2DBase>({{
 			{
 				RENDER_PASS_DEPTH_FORMAT,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AttachmentLoadOp::Load,
 				prosper::AttachmentStoreOp::Store,sampleCount,prosper::ImageLayout::DepthStencilAttachmentOptimal
 			}
-		}},outRenderPass,pipelineIdx);
-	}*/
+		}},outRenderPass,pipelineIdx);*/
+	}
 }
 
 bool ShaderParticle2DBase::ShouldInitializePipeline(uint32_t pipelineIdx) {return ShaderSceneLit::ShouldInitializePipeline(GetBasePipelineIndex(pipelineIdx));}
@@ -283,8 +291,8 @@ bool ShaderParticle2DBase::RecordParticleMaterial(prosper::ShaderBindState &bind
 	if(mat == nullptr)
 		return false;
 	auto descSetGroupMat = mat->GetDescriptorSetGroup(const_cast<ShaderParticle2DBase&>(*this));
-	//if(descSetGroupMat == nullptr)
-	//	descSetGroupMat = const_cast<ShaderParticle2DBase*>(this)->InitializeMaterialDescriptorSet(*mat); // Attempt to initialize on the fly
+	// if(descSetGroupMat == nullptr)
+	// 	descSetGroupMat = const_cast<ShaderParticle2DBase*>(this)->InitializeMaterialDescriptorSet(*mat); // Attempt to initialize on the fly
 	if(descSetGroupMat == nullptr)
 		return false;
 	auto &descSetTexture = *descSetGroupMat->GetDescriptorSet(); // prosper TODO: Use dummy descriptor set when not animated
@@ -295,6 +303,8 @@ bool ShaderParticle2DBase::RecordParticleMaterial(prosper::ShaderBindState &bind
 	return RecordBindDescriptorSets(bindState,{&descSetTexture,descSetDepth,&animDescSet},DESCRIPTOR_SET_TEXTURE.setIndex);
 }
 
+uint32_t ShaderParticle2DBase::GetSceneDescriptorSetIndex() const {return DESCRIPTOR_SET_SCENE.setIndex;}
+
 bool ShaderParticle2DBase::RecordBindScene(
 	prosper::ICommandBuffer &cmd,const prosper::IShaderPipelineLayout &layout,
 	const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
@@ -303,8 +313,9 @@ bool ShaderParticle2DBase::RecordBindScene(
 	prosper::IDescriptorSet &dsShadows
 ) const
 {
-	std::array<prosper::IDescriptorSet*,4> descSets {
+	std::array<prosper::IDescriptorSet*,5> descSets {
 		&dsScene,
+		&dsRenderer,
 		&dsRenderSettings,
 		&dsLights,
 		&dsShadows
@@ -313,7 +324,7 @@ bool ShaderParticle2DBase::RecordBindScene(
 	// TODO: Pick correct pipeline index
 	return cmd.RecordBindDescriptorSets(
 		prosper::PipelineBindPoint::Graphics,layout,
-		DESCRIPTOR_SET_SCENE.setIndex,descSets,dynamicOffsets
+		GetSceneDescriptorSetIndex(),descSets,dynamicOffsets
 	);
 }
 

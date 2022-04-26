@@ -11,6 +11,7 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
+#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/components/c_time_scale_component.hpp"
@@ -147,7 +148,23 @@ std::optional<ParticleSystemFileHeader> CParticleSystemComponent::ReadHeader(VFi
 		static_cast<int8_t>(f->ReadChar())
 	};
 	if(header[0] != 'W' || header[1] != 'P' || header[2] != 'T')
+	{
+		f->Seek(0);
+		auto data = udm::Data::Load(f);
+		if(data)
+		{
+			auto assetData = data->GetAssetData().GetData()["particleSystemDefinitions"];
+			if(assetData)
+			{
+				ParticleSystemFileHeader header {};
+				for(auto udmDef : assetData.ElIt())
+					header.particleSystemNames.push_back(std::string{udmDef.key});
+				header.numParticles = header.particleSystemNames.size();
+				return header;
+			}
+		}
 		return {}; // Incorrect format
+	}
 	ParticleSystemFileHeader fileHeader {};
 	fileHeader.version = f->Read<uint32_t>();
 	fileHeader.numParticles = f->Read<uint32_t>();
@@ -542,6 +559,10 @@ CParticleSystemComponent::~CParticleSystemComponent()
 	}
 }
 
+const std::shared_ptr<prosper::IDynamicResizableBuffer> &CParticleSystemComponent::GetGlobalParticleBuffer() {return s_particleBuffer;}
+const std::shared_ptr<prosper::IDynamicResizableBuffer> &CParticleSystemComponent::GetGlobalAnimationStartBuffer() {return s_animStartBuffer;}
+const std::shared_ptr<prosper::IDynamicResizableBuffer> &CParticleSystemComponent::GetGlobalAnimationBuffer() {return s_animBuffer;}
+
 CParticleSystemComponent::ControlPoint &CParticleSystemComponent::InitializeControlPoint(ControlPointIndex idx)
 {
 	if(idx >= m_controlPoints.size())
@@ -709,7 +730,7 @@ void CParticleSystemComponent::InitializeBuffers()
 		prosper::util::BufferCreateInfo createInfo {};
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 		createInfo.size = instanceSize *maxInstanceCount;
-		createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+		createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::StorageBufferBit;
 		s_particleBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo,instanceSize *maxInstanceCount,0.05f);
 		s_particleBuffer->SetDebugName("particle_instance_buf");
 	}
@@ -1045,6 +1066,23 @@ bool CParticleSystemComponent::IsAnimated() const {return m_descSetGroupAnimatio
 
 void CParticleSystemComponent::Start()
 {
+	if(!umath::is_flag_set(m_flags,pragma::CParticleSystemComponent::Flags::MaterialDescriptorSetInitialized))
+	{
+		m_flags |= pragma::CParticleSystemComponent::Flags::MaterialDescriptorSetInitialized;
+		// Material descriptor set has to be initialized on main thread, before rendering
+		auto &renderers = GetRenderers();
+		auto *mat = static_cast<CMaterial*>(GetMaterial());
+		if(mat && !renderers.empty())
+		{
+			auto *texBase = dynamic_cast<pragma::ShaderTexturedBase*>(renderers.front()->GetShader());
+			if(texBase)
+			{
+				if(!mat->GetDescriptorSetGroup(*dynamic_cast<prosper::Shader*>(texBase)))
+					texBase->InitializeMaterialDescriptorSet(*mat,false);
+			}
+		}
+	}
+
 	CreateParticle();
 	if(IsActiveOrPaused())
 		Stop();
@@ -1149,7 +1187,11 @@ void CParticleSystemComponent::Start()
 										y *widthPerFrame,
 										x *heightPerFrame
 									};
-									frame.uvEnd = frame.uvStart +Vector2{widthPerFrame /static_cast<float>(w),heightPerFrame /static_cast<float>(h)};
+									frame.uvEnd = frame.uvStart +Vector2{widthPerFrame,heightPerFrame};
+
+									frame.uvStart /= Vector2{w,h};
+									frame.uvEnd /= Vector2{w,h};
+
 									frame.duration = 0.1f;
 								}
 							}

@@ -108,6 +108,9 @@ void pragma::CRasterizationRendererComponent::RecordPrepass(const util::DrawScen
 			}
 		}
 		rsys.UnbindShader();
+
+		if((renderPassDrawInfo.drawSceneInfo.renderFlags &RenderFlags::Particles) != RenderFlags::None)
+			RenderParticles(cmd,drawSceneInfo,true);
 	});
 }
 void pragma::CRasterizationRendererComponent::UpdatePrepassRenderBuffers(const util::DrawSceneInfo &drawSceneInfo)

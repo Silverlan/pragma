@@ -203,7 +203,11 @@ namespace pragma
 		pragma::ShaderPrepassBase &GetPrepassShader() const;
 
 		// Render
-		void RecordRenderParticleSystems(prosper::ICommandBuffer &cmd,const util::DrawSceneInfo &drawSceneInfo,std::vector<pragma::CParticleSystemComponent*> &particles,pragma::rendering::SceneRenderPass renderMode,Bool bloom=false,std::vector<pragma::CParticleSystemComponent*> *bloomParticles=nullptr);
+		void RecordRenderParticleSystems(
+			prosper::ICommandBuffer &cmd,const util::DrawSceneInfo &drawSceneInfo,
+			std::vector<pragma::CParticleSystemComponent*> &particles,pragma::rendering::SceneRenderPass renderMode,
+			bool depthPass,Bool bloom=false,std::vector<pragma::CParticleSystemComponent*> *bloomParticles=nullptr
+		);
 
 		// Renders all meshes from m_glowInfo.tmpGlowMeshes, and clears the container when done
 		void RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const CSceneComponent &scene,pragma::rendering::SceneRenderPass renderMode);
@@ -265,7 +269,10 @@ namespace pragma
 		void RenderFXAA(const util::DrawSceneInfo &drawSceneInfo);
 
 		void RenderSceneFog(const util::DrawSceneInfo &drawSceneInfo);
-		void RenderParticles(const util::DrawSceneInfo &drawSceneInfo);
+		void RenderParticles(
+			prosper::ICommandBuffer &cmdBuffer,const util::DrawSceneInfo &drawSceneInfo,bool depthPass,
+			prosper::IPrimaryCommandBuffer *primCmdBuffer=nullptr
+		);
 
 		void InitializeCommandBufferGroups();
 

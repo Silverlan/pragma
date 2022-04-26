@@ -259,28 +259,32 @@ void ShaderPBR::RecordBindSceneDescriptorSets(
 	ShaderGameWorld::SceneFlags &inOutSceneFlags,float &outIblStrength
 ) const
 {
+	outIblStrength = 1.f;
 	std::array<prosper::IDescriptorSet*,7> descSets {
-		descSets[0] = &dsMaterial,
-		descSets[1] = &dsScene,
-		descSets[2] = &dsRenderer,
-		descSets[3] = &dsRenderSettings,
-		descSets[4] = &dsLights,
-		descSets[5] = &dsShadows
+		&dsMaterial,
+		&dsScene,
+		&dsRenderer,
+		&dsRenderSettings,
+		&dsLights,
+		&dsShadows,
+		GetReflectionProbeDescriptorSet(scene,outIblStrength,inOutSceneFlags)
 	};
-		
+
+	static const std::vector<uint32_t> dynamicOffsets {};
+	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,shaderProcessor.GetCurrentPipelineLayout(),pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX,descSets,dynamicOffsets);
+}
+
+prosper::IDescriptorSet *ShaderPBR::GetReflectionProbeDescriptorSet(const pragma::CSceneComponent &scene,float &outIblStrength,ShaderGameWorld::SceneFlags &inOutSceneFlags) const
+{
 	auto &hCam = scene.GetActiveCamera();
 	assert(hCam.valid());
-	outIblStrength = 1.f;
 	auto *dsPbr = CReflectionProbeComponent::FindDescriptorSetForClosestProbe(scene,hCam->GetEntity().GetPosition(),outIblStrength);
 	if(dsPbr == nullptr) // No reflection probe and therefore no IBL available. Fallback to non-IBL rendering.
 	{
 		dsPbr = &GetDefaultPbrDescriptorSet();
 		inOutSceneFlags |= ShaderGameWorld::SceneFlags::NoIBL;
 	}
-	descSets[6] = dsPbr;
-
-	static const std::vector<uint32_t> dynamicOffsets {};
-	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,shaderProcessor.GetCurrentPipelineLayout(),pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX,descSets,dynamicOffsets);
+	return dsPbr;
 }
 
 void ShaderPBR::RecordBindScene(

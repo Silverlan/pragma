@@ -19,8 +19,10 @@
 #include "pragma/lua/libraries/lmatrix.h"
 #include "pragma/lua/libraries/lasset.hpp"
 #include "pragma/lua/classes/ldef_vector.h"
+#include "pragma/lua/libraries/lfile.h"
 #include "pragma/debug/debug_render_info.hpp"
 #include "pragma/debug/intel_vtune.hpp"
+#include "pragma/game/game_resources.hpp"
 #include "luasystem.h"
 #include <pragma/math/angle/wvquaternion.h>
 #include "pragma/lua/classes/lvector.h"
@@ -1270,7 +1272,14 @@ void Game::RegisterLuaLibraries()
 		{"import_smd",Lua::import::import_smd},
 		{"import_obj",Lua::import::import_obj},
 		{"import_model_asset",Lua::import::import_model_asset},
-		{"export_model_asset",Lua::import::export_model_asset}
+		{"export_model_asset",Lua::import::export_model_asset},
+		{"import_file",+[](lua_State *l) {
+			auto *nw = engine->GetNetworkState(l);
+			std::string path = Lua::CheckString(l,1);
+			auto res = util::port_file(nw,path);
+			Lua::PushBool(l,res);
+			return 1;
+		}}
 	});
 
 	auto &reg = pragma::animation::Animation::GetActivityEnumRegister();

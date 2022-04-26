@@ -59,6 +59,9 @@ namespace pragma
 		static std::optional<std::string> FindParticleSystemFile(const std::string ptName);
 		static const std::unordered_map<std::string,std::unique_ptr<CParticleSystemData>> &GetCachedParticleSystemData();
 		static void ClearCache();
+		static const std::shared_ptr<prosper::IDynamicResizableBuffer> &GetGlobalParticleBuffer();
+		static const std::shared_ptr<prosper::IDynamicResizableBuffer> &GetGlobalAnimationStartBuffer();
+		static const std::shared_ptr<prosper::IDynamicResizableBuffer> &GetGlobalAnimationBuffer();
 
 		static CParticleSystemComponent *Create(const std::string &fname,CParticleSystemComponent *parent=nullptr,bool bRecordKeyValues=false,bool bAutoSpawn=true);
 		static CParticleSystemComponent *Create(const std::unordered_map<std::string,std::string> &values,CParticleSystemComponent *parent=nullptr,bool bRecordKeyValues=false,bool bAutoSpawn=true);
@@ -91,7 +94,8 @@ namespace pragma
 			AlwaysSimulate = PremultiplyAlpha<<1u,
 			CastShadows = AlwaysSimulate<<1u,
 			Setup = CastShadows<<1u, /* Has this system been set up already? */
-			AutoSimulate = Setup<<1u
+			AutoSimulate = Setup<<1u,
+			MaterialDescriptorSetInitialized = AutoSimulate<<1u
 		};
 
 		using ControlPointIndex = uint32_t;

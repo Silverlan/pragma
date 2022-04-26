@@ -175,3 +175,6 @@
 [submodule "external_libs/panima"]
 	path = external_libs/panima
 	url = https://github.com/Silverlan/panima.git
+[submodule "third_party_libs/7zip-cpp"]
+	path = third_party_libs/7zip-cpp
+	url = https://github.com/Silverlan/7zip-cpp.git

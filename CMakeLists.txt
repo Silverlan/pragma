@@ -275,6 +275,9 @@ search_lib_recursive(DEPENDENCY_LUABIND_LIBRARY lib/${BINARY_PRAGMA_DIR} luabind
 set(DEPENDENCY_FREETYPE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/freetype/include CACHE STRING "" FORCE)
 search_lib_recursive(DEPENDENCY_FREETYPE_LIBRARY third_party_libs/freetype/${BINARY_PRAGMA_DIR} freetype)
 
+set(DEPENDENCY_7ZPP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/7zip-cpp/include CACHE STRING "" FORCE)
+search_lib_recursive(DEPENDENCY_7ZPP_LIBRARY third_party_libs/7zip-cpp/${BINARY_PRAGMA_DIR} 7zpp)
+
 if(WIN32)
 	search_lib_recursive(DEPENDENCY_LUABIND_BINARY bin/${BINARY_PRAGMA_DIR} luabind)
 else()
@@ -646,6 +649,9 @@ set_target_properties(luabind PROPERTIES FOLDER third_party_libs)
 target_include_directories(luabind PUBLIC ${LUA_INCLUDE_DIR})
 #
 
+# 7zip cpp
+register_third_party_library(7zip-cpp)
+
 # muparserx
 set(BUILD_EXAMPLES OFF CACHE BOOL OFF FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
@@ -874,7 +880,10 @@ add_dependencies(servermanager networkmanager)
 add_dependencies(clientmanager networkmanager)
 add_dependencies(util_pad util_versioned_archive)
 
+add_dependencies(util_zip 7zpp)
+
 add_dependencies(shared materialsystem util_zip wms_shared util_pragma_doc luasystem networkmanager libz2 bzip2 clip2tri-static clipper-static poly2tri-static util_udm panima util_bsp util_smdmodel util_source_script rectangle_bin_pack Recast Detour util_pad noise-static noiseutils-static ogg vorbis vorbisfile)
+add_dependencies(ishared shared)
 add_dependencies(iclient ishared)
 add_dependencies(iserver ishared)
 add_dependencies(server shared servermanager clientmanager util_bsp util_sound iserver)

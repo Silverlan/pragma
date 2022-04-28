@@ -225,6 +225,8 @@ void CParticleOperatorLifespanDecay::Simulate(CParticle&,double,float strength)
 
 void CParticleRenderer::PostSimulate(double tDelta) {}
 
+void CParticleRenderer::PreRender(prosper::ICommandBuffer &cmd) {}
+
 std::pair<Vector3,Vector3> CParticleRenderer::GetRenderBounds() const {return {uvec::ORIGIN,uvec::ORIGIN};}
 
 ///////////////////////

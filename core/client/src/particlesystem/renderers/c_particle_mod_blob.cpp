@@ -354,7 +354,7 @@ void CParticleRendererBlob::OnParticleDestroyed(CParticle &particle)
 	SortParticleLinks();
 }
 
-void CParticleRendererBlob::UpdateAdjacentParticles(prosper::IBuffer &blobIndexBuffer)
+void CParticleRendererBlob::UpdateAdjacentParticles(prosper::ICommandBuffer &cmd,prosper::IBuffer &blobIndexBuffer)
 {
 	auto frameId = c_engine->GetRenderContext().GetLastFrameId();
 	if(m_lastFrame == frameId)
@@ -494,7 +494,6 @@ void CParticleRendererBlob::UpdateAdjacentParticles(prosper::IBuffer &blobIndexB
 	//
 
 	// Update buffer
-	auto &cmd = *c_engine->GetDrawCommandBuffer();
 	for(auto it=particles.begin();it!=itEnd;++it)
 	{
 		auto renderIdx = it -particles.begin();
@@ -510,11 +509,11 @@ void CParticleRendererBlob::UpdateAdjacentParticles(prosper::IBuffer &blobIndexB
 
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
-void CParticleRendererBlob::PostSimulate(double tDelta)
+void CParticleRendererBlob::PreRender(prosper::ICommandBuffer &cmd)
 {
-	CParticleRenderer::PostSimulate(tDelta);
+	CParticleRenderer::PreRender(cmd);
 	auto &blobIndexBuffer = *m_adjacentBlobBuffer;
-	UpdateAdjacentParticles(blobIndexBuffer);
+	UpdateAdjacentParticles(cmd,blobIndexBuffer);
 }
 void CParticleRendererBlob::RecordRender(
 	prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,

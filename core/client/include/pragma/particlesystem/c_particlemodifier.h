@@ -121,6 +121,7 @@ public:
 	virtual void RecordRender(prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::ParticleRenderFlags renderFlags)=0;
 	virtual void RecordRenderShadow(prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent &light,uint32_t layerId=0)=0;
 	virtual void PostSimulate(double tDelta);
+	virtual void PreRender(prosper::ICommandBuffer &cmd);
 	virtual std::pair<Vector3,Vector3> GetRenderBounds() const;
 	virtual pragma::ShaderParticleBase *GetShader() const=0;
 	virtual bool RequiresDepthPass() const {return false;}

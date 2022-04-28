@@ -253,6 +253,13 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		{
 			pt->Simulate(tDelta);
 
+			auto &renderers = pt->GetRenderers();
+			if(!renderers.empty())
+			{
+				auto &renderer = renderers.front();
+				renderer->PreRender(cmd);
+			}
+
 			// Vertex buffer barrier
 			auto &ptBuffer = pt->GetParticleBuffer();
 			if (ptBuffer != nullptr)

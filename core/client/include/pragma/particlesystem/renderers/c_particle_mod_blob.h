@@ -48,7 +48,7 @@ protected:
 	std::shared_ptr<prosper::IBuffer> m_adjacentBlobBuffer = nullptr;
 	//Vulkan::RenderTarget m_rtTransparent = nullptr; // prosper TODO
 	void SortParticleLinks();
-	void UpdateAdjacentParticles(prosper::IBuffer &blobIndexBuffer);
+	void UpdateAdjacentParticles(prosper::ICommandBuffer &cmd,prosper::IBuffer &blobIndexBuffer);
 
 	// Debug
 	struct DebugInfo
@@ -70,7 +70,7 @@ public:
 	virtual void OnParticleSystemStarted() override;
 	virtual void OnParticleDestroyed(CParticle &particle) override;
 	virtual void OnParticleSystemStopped() override;
-	virtual void PostSimulate(double tDelta) override;
+	virtual void PreRender(prosper::ICommandBuffer &cmd) override;
 	virtual bool RequiresDepthPass() const override {return true;}
 	virtual pragma::ShaderParticleBase *GetShader() const override;
 };

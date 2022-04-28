@@ -8,6 +8,7 @@
 #include "stdafx_cengine.h"
 #include "pragma/c_engine.h"
 #include <pragma/console/convars.h>
+#include "pragma/input/input_binding_layer.hpp"
 #include "pragma/localization.h"
 #include <fsys/filesystem.h>
 #include "pragma/input/inputhelper.h"
@@ -58,28 +59,32 @@ void CEngine::SaveClientConfig()
 void CEngine::WriteClientConfig(VFilePtrReal f)
 {
 	f->WriteString("unbindall\n");
-	for(auto &pair : GetKeyMappings())
+	auto inputLayer = GetCoreInputBindingLayer();
+	if(inputLayer)
 	{
-		auto &kb = pair.second;
-		if(kb.GetType() == KeyBind::Type::Regular)
+		for(auto &pair : inputLayer->GetKeyMappings())
 		{
-			std::string key;
-			if(KeyToString(pair.first,&key))
+			auto &kb = pair.second;
+			if(kb.GetType() == KeyBind::Type::Regular)
 			{
-				std::string l = "bind \"" +key +"\" \"" +kb.GetBind() +"\"\n";
-				f->WriteString(l.c_str());
+				std::string key;
+				if(KeyToString(pair.first,&key))
+				{
+					std::string l = "bind \"" +key +"\" \"" +kb.GetBind() +"\"\n";
+					f->WriteString(l.c_str());
+				}
 			}
+			// Deprecated (Replaced by "toggle" console command")
+			/*else if(kb.GetType() == KeyBind::Type::Toggle)
+			{
+				std::string key;
+				if(KeyToString(pair.first,&key))
+				{
+					std::string l = "bindtoggle \"" +key +"\" \"" +kb.GetBind() +"\"\n";
+					f->WriteString(l.c_str());
+				}
+			}*/
 		}
-		// Deprecated (Replaced by "toggle" console command")
-		/*else if(kb.GetType() == KeyBind::Type::Toggle)
-		{
-			std::string key;
-			if(KeyToString(pair.first,&key))
-			{
-				std::string l = "bindtoggle \"" +key +"\" \"" +kb.GetBind() +"\"\n";
-				f->WriteString(l.c_str());
-			}
-		}*/
 	}
 	auto *stateSv = GetServerNetworkState();
 	auto *stateCl = GetClientState();

@@ -20,6 +20,7 @@
 #include "pragma/lua/converters/gui_element_converter_t.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
+#include "pragma/input/input_binding_layer.hpp"
 #include "pragma/audio/c_laleffect.h"
 #include "pragma/audio/c_lalsound.hpp"
 #include "pragma/gui/wiluabase.h"
@@ -48,6 +49,7 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/policies/core_policies.hpp>
+#include <pragma/lua/custom_constructor.hpp>
 #include <pragma/model/modelmanager.h>
 #include <pragma/input/inputhelper.h>
 #include <sharedutils/util_file.h>
@@ -500,6 +502,21 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua,bool bGUI)
 		luabind::def("add_callback",+[](const std::string &identifier,const Lua::func<void> &f) -> CallbackHandle {
 			auto &inputHandler = c_game->GetInputCallbackHandler();
 			return inputHandler.AddLuaCallback(identifier,f);
+		}),
+		luabind::def("add_input_binding_layer",+[](CEngine &en,std::shared_ptr<InputBindingLayer> &layer) {
+			en.AddInputBindingLayer(layer);
+		}),
+		luabind::def("get_input_binding_layers",static_cast<std::vector<std::shared_ptr<InputBindingLayer>>(CEngine::*)()>(&CEngine::GetInputBindingLayers)),
+		luabind::def("get_input_binding_layer",static_cast<std::shared_ptr<InputBindingLayer>(CEngine::*)(const std::string&)>(&CEngine::GetInputBindingLayer)),
+		luabind::def("remove_input_binding_layer",&CEngine::RemoveInputBindingLayer),
+		luabind::def("get_core_input_binding_layers",static_cast<std::shared_ptr<InputBindingLayer>(CEngine::*)()>(&CEngine::GetCoreInputBindingLayer)),
+		luabind::def("update_effective_input_bindings",&CEngine::SetInputBindingsDirty),
+		luabind::def("get_effective_input_binding_layer",&CEngine::GetEffectiveInputBindingLayer),
+		luabind::def("set_binding_layer_enabled",+[](CEngine &en,const std::string &layerName,bool enabled) {
+			auto layer = en.GetInputBindingLayer(layerName);
+			if(!layer)
+				return;
+			layer->enabled = enabled;
 		})
 	];
 
@@ -535,6 +552,60 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua,bool bGUI)
 		{"DISTANCE_MODEL_EXPONENT",umath::to_integral(al::DistanceModel::Exponent)}
 	});
 	Lua::sound::register_enums(lua.GetState());
+	
+	auto defInLay = luabind::class_<InputBindingLayer>("InputBindingLayer");
+	defInLay.def_readwrite("identifier",&InputBindingLayer::identifier);
+	defInLay.def_readwrite("priority",&InputBindingLayer::priority);
+	defInLay.def_readwrite("enabled",&InputBindingLayer::enabled);
+	defInLay.scope[
+		luabind::def("load",+[](lua_State *l,const udm::AssetData &data) -> Lua::var<bool,std::vector<std::shared_ptr<InputBindingLayer>>> {
+			std::vector<std::shared_ptr<InputBindingLayer>> layers;
+			std::string err;
+			if(!InputBindingLayer::Load(data,layers,err))
+				return luabind::object{l,false};
+			return luabind::object{l,layers};
+		}),
+		luabind::def("save",+[](lua_State *l,const udm::AssetData &data,const std::vector<std::shared_ptr<InputBindingLayer>> &layers) {
+			std::string err;
+			return InputBindingLayer::Save(layers,data,err);
+		}),	
+		luabind::def("create",+[](const std::string &name) -> std::shared_ptr<InputBindingLayer> {
+			auto layer = std::make_shared<InputBindingLayer>();
+			layer->identifier = name;
+			static std::vector<std::shared_ptr<InputBindingLayer>> test;
+			test.push_back(layer);
+			return layer;
+		})
+	];
+	defInLay.def("ClearKeyMappings",&InputBindingLayer::ClearKeyMappings);
+	defInLay.def("ClearLuaKeyMappings",&InputBindingLayer::ClearLuaKeyMappings);
+	defInLay.def("BindKey",+[](InputBindingLayer &layer,const std::string &key,const std::string &cmd) {
+		short c;
+		if(!StringToKey(key,&c))
+			return;
+		layer.MapKey(c,cmd);
+		return;
+	});
+	defInLay.def("BindKey",+[](InputBindingLayer &layer,const std::string &key,luabind::object function) {
+		Lua::CheckType(function,Lua::Type::Function);
+		short c;
+		if(!StringToKey(key,&c))
+			return;
+		layer.MapKey(c,function);
+	});
+	defInLay.def("UnbindKey",+[](InputBindingLayer &layer,const std::string &key) {
+		short c;
+		if(!StringToKey(key,&c))
+			return;
+		layer.UnmapKey(c);
+	});
+	inputMod[defInLay];
+	pragma::lua::define_custom_constructor<InputBindingLayer,
+		[](const std::string &name) -> std::shared_ptr<InputBindingLayer> {
+		auto layer = std::make_shared<InputBindingLayer>();
+		layer->identifier = name;
+		return layer;
+	},const std::string&>(lua.GetState());
 
 	auto classDefAlEffect = luabind::class_<al::PEffect>("Effect");
 	classDefAlEffect.def("SetProperties",static_cast<void(*)(lua_State*,al::PEffect&,const al::EfxEaxReverbProperties&)>(&Lua::ALEffect::SetProperties));

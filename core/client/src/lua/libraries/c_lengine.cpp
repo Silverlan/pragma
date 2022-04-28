@@ -103,31 +103,6 @@ Vector2i Lua::engine::get_text_size(lua_State *l,const std::string &text,const F
 	return Vector2i{w,h};
 }
 
-void Lua::engine::bind_key(lua_State *l,const std::string &key,const std::string &cmd)
-{
-	short c;
-	if(!StringToKey(key,&c))
-		return;
-	c_engine->MapKey(c,cmd);
-	return;
-}
-
-void Lua::engine::bind_key(lua_State *l,const std::string &key,luabind::object function)
-{
-	Lua::CheckType(function,Lua::Type::Function);
-	short c;
-	if(!StringToKey(key,&c))
-		return;
-	c_engine->MapKey(c,function);
-}
-
-void Lua::engine::unbind_key(const std::string &key)
-{
-	short c;
-	if(!StringToKey(key,&c))
-		return;
-	c_engine->UnmapKey(c);
-}
 void Lua::engine::precache_material(lua_State *l,const std::string &mat) {client->PrecacheMaterial(mat.c_str());}
 
 void Lua::engine::precache_model(lua_State *l,const std::string &mdl)

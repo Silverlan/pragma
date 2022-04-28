@@ -15,6 +15,7 @@
 #include "pragma/gui/wislider.h"
 #include "pragma/gui/wiscrollcontainer.h"
 #include "pragma/gui/wikeyentry.h"
+#include "pragma/input/input_binding_layer.hpp"
 #include "pragma/localization.h"
 
 LINK_WGUI_TO_CLASS(WIOptionsList,WIOptionsList);
@@ -217,19 +218,22 @@ void WIOptionsList::RunUpdateConVars(bool bClear)
 	}
 	if(bClear == true)
 		m_updateCvars.clear();
+	auto coreLayer = c_engine->GetCoreInputBindingLayer();
 	for(char i=0;i<2;i++)
 	{
 		for(auto it=m_keyBindingsErase[i].begin();it!=m_keyBindingsErase[i].end();++it)
 		{
 			auto &cmd = it->first;
 			auto &key = it->second;
-			c_engine->RemoveKeyMapping(CUInt16(key),cmd);
+			if(coreLayer)
+				coreLayer->RemoveKeyMapping(CUInt16(key),cmd);
 		}
 		m_keyBindingsErase[i].clear();
 		for(auto it=m_keyBindingsAdd[i].begin();it!=m_keyBindingsAdd[i].end();++it)
 		{
 			auto &cmd = it->first;
-			c_engine->AddKeyMapping(umath::to_integral(it->second),cmd);
+			if(coreLayer)
+				coreLayer->AddKeyMapping(umath::to_integral(it->second),cmd);
 		}
 		m_keyBindingsAdd[i].clear();
 	}

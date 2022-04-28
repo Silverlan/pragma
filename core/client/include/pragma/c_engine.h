@@ -22,6 +22,8 @@ class ClientState;
 namespace GLFW {class Joystick;};
 namespace al {class ISoundSystem;class IEffect;};
 namespace prosper {class RenderTarget; class ISwapCommandBufferGroup; class TimerQuery; class IQueryPool;};
+struct InputBindingLayer;
+struct CoreInputBindingLayer;
 #pragma warning(push)
 #pragma warning(disable : 4251)
 class DLLCLIENT CEngine
@@ -75,7 +77,8 @@ public:
 		ConsoleOpen = VulkanValidationEnabled<<1u,
 		TickDeltaTimeTiedToFrameRate = ConsoleOpen<<1u,
 		EnableGpuPerformanceTimers = TickDeltaTimeTiedToFrameRate<<1u,
-		CEClosed = EnableGpuPerformanceTimers<<1u
+		CEClosed = EnableGpuPerformanceTimers<<1u,
+		InputBindingsDirty = CEClosed<<1u
 	};
 	enum class GPUTimer : uint32_t
 	{
@@ -187,15 +190,17 @@ public:
 	void Disconnect();
 	virtual bool IsMultiPlayer() const override;
 	virtual void HandleLocalHostPlayerClientPacket(NetPacket &p) override;
-	// KeyMappings
-	void MapKey(short c,std::string cmd);
-	void MapKey(short c,luabind::function<> function);
-	void AddKeyMapping(short c,std::string cmd);
-	void RemoveKeyMapping(short c,std::string cmd);
-	void ClearLuaKeyMappings();
-	void UnmapKey(short c);
-	const std::unordered_map<short,KeyBind> &GetKeyMappings() const;
-	void ClearKeyMappings();
+
+	void AddInputBindingLayer(const std::shared_ptr<InputBindingLayer> &layer);
+	std::vector<std::shared_ptr<InputBindingLayer>> GetInputBindingLayers();
+	const std::vector<std::shared_ptr<InputBindingLayer>> GetInputBindingLayers() const {return const_cast<CEngine*>(this)->GetInputBindingLayers();}
+	std::shared_ptr<InputBindingLayer> GetInputBindingLayer(const std::string &name);
+	const std::shared_ptr<InputBindingLayer> GetInputBindingLayer(const std::string &name) const {return const_cast<CEngine*>(this)->GetInputBindingLayer(name);}
+	bool RemoveInputBindingLayer(const std::string &name);
+	std::shared_ptr<InputBindingLayer> GetCoreInputBindingLayer();
+	const std::shared_ptr<InputBindingLayer> GetCoreInputBindingLayer() const {return const_cast<CEngine*>(this)->GetCoreInputBindingLayer();}
+	void SetInputBindingsDirty();
+	const InputBindingLayer &GetEffectiveInputBindingLayer();
 
 	// Shaders
 	::util::WeakHandle<prosper::Shader> ReloadShader(const std::string &name);
@@ -222,11 +227,13 @@ public:
 	void SetGpuPerformanceTimersEnabled(bool enabled);
 	std::chrono::nanoseconds GetGpuExecutionTime(uint32_t swapchainIdx,GPUTimer timer) const;
 protected:
+	friend CoreInputBindingLayer;
 	void DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt);
 	void WriteClientConfig(VFilePtrReal f);
 	void PreloadClientConfig();
 	void OnRenderResolutionChanged(uint32_t width,uint32_t height);
 	void LoadFontSets();
+	void UpdateDirtyInputBindings();
 	uint32_t GetPerformanceTimerIndex(uint32_t swapchainIdx,GPUTimer timer) const;
 	uint32_t GetPerformanceTimerIndex(GPUTimer timer) const;
 	virtual uint32_t DoClearUnusedAssets(pragma::asset::Type type) const override;
@@ -272,9 +279,11 @@ private:
 	std::unordered_map<std::string,FontSet> m_fontSets;
 	float m_rawInputJoystickMagnitude = 0.f;
 	std::unordered_map<GLFW::Key,GLFW::KeyState> m_joystickKeyStates;
-	std::unordered_map<short,KeyBind> m_keyMappings;
 	std::unique_ptr<ConVarInfoList> m_preloadedConfig;
 	
+	std::vector<std::shared_ptr<InputBindingLayer>> m_inputBindingLayers;
+	std::shared_ptr<InputBindingLayer> m_coreInputBindingLayer;
+
 	std::shared_ptr<prosper::IQueryPool> m_gpuTimerPool = nullptr;
 	std::vector<std::shared_ptr<prosper::TimerQuery>> m_gpuTimers;
 	std::vector<std::chrono::nanoseconds> m_gpuExecTimes {};
@@ -284,7 +293,6 @@ private:
 	void Input(int key,GLFW::KeyState state,GLFW::Modifier mods={},float magnitude=1.f);
 	void Input(int key,GLFW::KeyState inputState,GLFW::KeyState pressState,GLFW::Modifier mods,float magnitude=1.f);
 	void UpdateFPS(float t);
-	void MapKey(short c,std::unordered_map<std::string,std::vector<std::string>> &binds);
 };
 REGISTER_BASIC_BITWISE_OPERATORS(CEngine::StateFlags)
 

@@ -19,9 +19,6 @@ namespace Lua
 {
 	namespace engine
 	{
-		DLLCLIENT void bind_key(lua_State *l,const std::string &key,const std::string &cmd);
-		DLLCLIENT void bind_key(lua_State *l,const std::string &key,luabind::object function);
-		DLLCLIENT void unbind_key(const std::string &key);
 		DLLCLIENT void precache_material(lua_State *l,const std::string &mat);
 		DLLCLIENT void precache_model(lua_State *l,const std::string &mdl);
 		DLLCLIENT Material *load_material(lua_State *l,const std::string &mat,bool reload,bool loadInstantly);

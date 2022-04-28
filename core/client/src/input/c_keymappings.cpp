@@ -8,120 +8,58 @@
 #include "stdafx_cengine.h"
 #include "pragma/c_engine.h"
 #include "pragma/input/inputhelper.h"
+#include "pragma/input/input_binding_layer.hpp"
 #include <pragma/clientstate/clientstate.h>
 
-void CEngine::MapKey(short c,std::string cmd)
+void CEngine::AddInputBindingLayer(const std::shared_ptr<InputBindingLayer> &layer)
 {
-	UnmapKey(c);
-	if(cmd.empty())
+	RemoveInputBindingLayer(layer->identifier);
+	m_inputBindingLayers.push_back(layer);
+	std::sort(m_inputBindingLayers.begin(),m_inputBindingLayers.end(),[](const std::shared_ptr<InputBindingLayer> &a,const std::shared_ptr<InputBindingLayer> &b) {
+		return a->priority < b->priority;
+	});
+	SetInputBindingsDirty();
+}
+std::vector<std::shared_ptr<InputBindingLayer>> CEngine::GetInputBindingLayers() {return m_inputBindingLayers;}
+std::shared_ptr<InputBindingLayer> CEngine::GetInputBindingLayer(const std::string &name)
+{
+	auto it = std::find_if(m_inputBindingLayers.begin(),m_inputBindingLayers.end(),[&name](const std::shared_ptr<InputBindingLayer> &layer) {
+		return layer->identifier == name;
+	});
+	return (it != m_inputBindingLayers.end()) ? *it : nullptr;
+}
+bool CEngine::RemoveInputBindingLayer(const std::string &name)
+{
+	auto it = std::find_if(m_inputBindingLayers.begin(),m_inputBindingLayers.end(),[&name](const std::shared_ptr<InputBindingLayer> &layer) {
+		return layer->identifier == name;
+	});
+	if(it == m_inputBindingLayers.end())
+		return false;
+	m_inputBindingLayers.erase(it);
+	SetInputBindingsDirty();
+	return true;
+}
+void CEngine::UpdateDirtyInputBindings()
+{
+	if(!umath::is_flag_set(m_stateFlags,StateFlags::InputBindingsDirty))
 		return;
-	m_keyMappings.insert(std::unordered_map<short,KeyBind>::value_type(c,KeyBind(cmd)));
-}
-
-void CEngine::MapKey(short c,luabind::function<> function)
-{
-	UnmapKey(c);
-	m_keyMappings.insert(std::unordered_map<short,KeyBind>::value_type(c,KeyBind(function)));
-}
-
-void CEngine::MapKey(short c,std::unordered_map<std::string,std::vector<std::string>> &binds)
-{
-	std::stringstream cmdNew;
-	for(auto it=binds.begin();it!=binds.end();++it)
+	umath::set_flag(m_stateFlags,StateFlags::InputBindingsDirty,false);
+	auto &keybinds = m_coreInputBindingLayer->GetKeyMappings();
+	keybinds.clear();
+	for(auto &layer : m_inputBindingLayers)
 	{
-		cmdNew<<it->first;
-		auto &argv = it->second;
-		for(auto itArg = argv.begin();itArg!=argv.end();++itArg)
-			cmdNew<<" "<<*itArg;
-		cmdNew<<";";
-	}
-	MapKey(c,cmdNew.str());
-}
-
-void CEngine::AddKeyMapping(short c,std::string cmd)
-{
-	auto it = m_keyMappings.find(c);
-	if(it == m_keyMappings.end())
-	{
-		MapKey(c,cmd);
-		return;
-	}
-	auto &keyBind = it->second;
-	auto &bind = keyBind.GetBind();
-	std::unordered_map<std::string,std::vector<std::string>> binds;
-	auto callback = [&binds](std::string cmd,std::vector<std::string> &argv) {
-		auto it = binds.find(cmd);
-		if(it != binds.end())
-			return;
-		binds.insert(std::unordered_map<std::string,std::vector<std::string>>::value_type(cmd,argv)).first;
-	};
-	ustring::get_sequence_commands(cmd,callback);
-	ustring::get_sequence_commands(bind,callback);
-	MapKey(c,binds);
-}
-void CEngine::RemoveKeyMapping(short c,std::string cmd)
-{
-	auto it = m_keyMappings.find(c);
-	if(it == m_keyMappings.end())
-		return;
-	auto &keyBind = it->second;
-	auto &bind = keyBind.GetBind();
-	std::unordered_map<std::string,std::vector<std::string>> binds;
-	auto callback = [&binds,&cmd](std::string cmdBind,std::vector<std::string> &argv) {
-		auto it = binds.find(cmdBind);
-		if(it != binds.end() || cmdBind == cmd)
-			return;
-		binds.insert(std::unordered_map<std::string,std::vector<std::string>>::value_type(cmdBind,argv)).first;
-	};
-	ustring::get_sequence_commands(bind,callback);
-	MapKey(c,binds);
-}
-
-void CEngine::UnmapKey(short c)
-{
-	auto i = m_keyMappings.find(c);
-	if(i == m_keyMappings.end())
-		return;
-	m_keyMappings.erase(i);
-}
-
-void CEngine::ClearLuaKeyMappings()
-{
-	NetworkState *client = GetClientState();
-	lua_State *lua = NULL;
-	if(client != NULL)
-	{
-		Game *game = client->GetGameState();
-		if(game != NULL)
-			lua = game->GetLuaState();
-	}
-	std::unordered_map<short,KeyBind>::iterator i,j;
-	for(i=m_keyMappings.begin();i!=m_keyMappings.end();)
-	{
-		if(i->second.GetType() == KeyBind::Type::Function)
-		{
-			j = i;
-			++i;
-			m_keyMappings.erase(j);
-		}
-		else ++i;
+		if(!layer->enabled)
+			continue;
+		for(auto &pair : layer->GetKeyMappings())
+			keybinds[pair.first] = pair.second;
 	}
 }
 
-const std::unordered_map<short,KeyBind> &CEngine::GetKeyMappings() const {return m_keyMappings;}
+void CEngine::SetInputBindingsDirty() {umath::set_flag(m_stateFlags,StateFlags::InputBindingsDirty);}
 
-void CEngine::ClearKeyMappings()
-{
-	NetworkState *client = GetClientState();
-	lua_State *lua = NULL;
-	if(client != NULL)
-	{
-		Game *game = client->GetGameState();
-		if(game != NULL)
-			lua = game->GetLuaState();
-	}
-	m_keyMappings.clear();
-}
+const InputBindingLayer &CEngine::GetEffectiveInputBindingLayer() {return *m_coreInputBindingLayer;}
+
+std::shared_ptr<InputBindingLayer> CEngine::GetCoreInputBindingLayer() {return GetInputBindingLayer("core");}
 
 ////////////////////////////
 
@@ -142,7 +80,10 @@ DLLCLIENT void CMD_bind(NetworkState*,pragma::BasePlayerComponent*,std::vector<s
 		Con::cout<<"\""<<argv[0]<<"\" isn't a valid key. Use 'bind_keys' to get a list of all available keys"<<Con::endl;
 		return;
 	}
-	c_engine->MapKey(c,argv[1]);
+	auto bindings = c_engine->GetCoreInputBindingLayer();
+	if(bindings)
+		bindings->MapKey(c,argv[1]);
+	c_engine->SetInputBindingsDirty();
 }
 
 DLLCLIENT void CMD_unbind(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
@@ -154,14 +95,24 @@ DLLCLIENT void CMD_unbind(NetworkState*,pragma::BasePlayerComponent*,std::vector
 		Con::cout<<"\""<<argv[0]<<"\" isn't a valid key. Use 'bind_keys' to get a list of all available keys"<<Con::endl;
 		return;
 	}
-	c_engine->UnmapKey(c);
+	auto bindings = c_engine->GetCoreInputBindingLayer();
+	if(bindings)
+		bindings->UnmapKey(c);
+	c_engine->SetInputBindingsDirty();
 }
 
-DLLCLIENT void CMD_unbindall(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&) {c_engine->ClearKeyMappings();}
+DLLCLIENT void CMD_unbindall(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
+{
+	auto bindings = c_engine->GetCoreInputBindingLayer();
+	if(bindings)
+		bindings->ClearKeyMappings();
+	c_engine->SetInputBindingsDirty();
+}
 
 DLLCLIENT void CMD_keymappings(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
-	auto &mappings = c_engine->GetKeyMappings();
+	auto &bindings = c_engine->GetEffectiveInputBindingLayer();
+	auto &mappings = bindings.GetKeyMappings();
 	std::string key;
 	for(auto &pair : mappings)
 	{

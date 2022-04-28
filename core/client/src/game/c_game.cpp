@@ -10,6 +10,7 @@
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/lua/converters/gui_element_converter_t.hpp"
+#include "pragma/input/input_binding_layer.hpp"
 #include "pragma/model/c_polymesh.h"
 #include "pragma/model/brush/c_brushmesh.h"
 #include "pragma/entities/c_world.h"
@@ -355,7 +356,9 @@ void CGame::OnRemove()
 	m_viewModel = decltype(m_viewModel){};
 	m_viewBody = decltype(m_viewBody){};
 
-	c_engine->ClearLuaKeyMappings();
+	for(auto &layer : c_engine->GetInputBindingLayers())
+		layer->ClearLuaKeyMappings();
+	const_cast<InputBindingLayer&>(c_engine->GetEffectiveInputBindingLayer()).ClearLuaKeyMappings();
 
 	c_physEnv = nullptr;
 	if(m_renderScene.valid())

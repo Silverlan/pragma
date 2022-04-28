@@ -40,6 +40,8 @@ public:
 	KeyBind();
 	KeyBind(std::string bind);
 	KeyBind(luabind::function<> function);
+	KeyBind(const KeyBind &other);
+	KeyBind &operator=(const KeyBind &other);
 	Type GetType() const;
 	const std::string &GetBind() const;
 	std::optional<luabind::function<>> GetFunction() const;

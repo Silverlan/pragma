@@ -7,10 +7,11 @@
 
 #include "stdafx_cengine.h"
 #include "pragma/c_engine.h"
+#include <pragma/input/input_binding_layer.hpp>
 #include <pragma/clientstate/clientstate.h>
 
 extern DLLCLIENT ClientState *client;
-
+#pragma optimize("",off)
 ClientState *CEngine::OpenClientState()
 {
 	CloseClientState();
@@ -27,7 +28,9 @@ void CEngine::CloseClientState()
 	if(cl == nullptr)
 		return;
 	cl->Close();
-	ClearKeyMappings();
+
+	m_inputBindingLayers.clear();
+
 	m_clInstance->state = nullptr;
 	client = nullptr;
 }
@@ -38,3 +41,4 @@ NetworkState *CEngine::GetClientState() const
 		return nullptr;
 	return static_cast<ClientState*>(m_clInstance->state.get());
 }
+#pragma optimize("",on)

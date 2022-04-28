@@ -14,6 +14,7 @@
 #include <pragma/console/c_cvar.h>
 
 extern CEngine *c_engine;
+#pragma optimize("",off)
 KeyBind::KeyBind()
 	: m_type(Type::Invalid)
 {
@@ -31,6 +32,15 @@ KeyBind::KeyBind(luabind::function<> function)
 	m_type = Type::Function;
 	m_function = function;
 	Initialize();
+}
+KeyBind::KeyBind(const KeyBind &other) {operator=(other);}
+KeyBind &KeyBind::operator=(const KeyBind &other)
+{
+	m_bind = other.m_bind ? std::make_unique<std::string>(*other.m_bind) : nullptr;;
+	m_type = other.m_type;
+	m_function = other.m_function;
+	m_cmds = other.m_cmds;
+	return *this;
 }
 KeyBind::Type KeyBind::GetType() const {return m_type;}
 const std::string &KeyBind::GetBind() const
@@ -163,3 +173,4 @@ bool KeyBind::Execute(GLFW::KeyState inputState,GLFW::KeyState pressState,GLFW::
 	}
 	return false;
 }
+#pragma optimize("",on)

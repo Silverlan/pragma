@@ -25,6 +25,7 @@
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include <pragma/rendering/scene/util_draw_scene_info.hpp>
 #include <pragma/entities/environment/lights/c_env_light.h>
+#include <pragma/input/input_binding_layer.hpp>
 #include <pragma/lua/lua_error_handling.hpp>
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
@@ -59,7 +60,7 @@
 #include <pragma/asset/util_asset.hpp>
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
-
+#pragma optimize("",off)
 extern "C"
 {
 	void DLLCLIENT RunCEngine(int argc,char *argv[])
@@ -118,6 +119,10 @@ CEngine::CEngine(int argc,char* argv[])
 		});
 		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 3u,"Added new profiling phase, but did not create associated profiling stage!");
 	});
+	m_coreInputBindingLayer = std::make_shared<CoreInputBindingLayer>();
+	auto inputLayer = std::make_shared<InputBindingLayer>();
+	inputLayer->identifier = "core";
+	AddInputBindingLayer(inputLayer);
 
 	pragma::asset::AssetManager::ImporterInfo importerInfo {};
 	importerInfo.name = "glTF";
@@ -274,19 +279,21 @@ void CEngine::Input(int key,GLFW::KeyState inputState,GLFW::KeyState pressState,
 {
 	if(inputState == GLFW::KeyState::Press || inputState == GLFW::KeyState::Release || inputState == GLFW::KeyState::Held)
 	{
+		auto &inputLayer = GetEffectiveInputBindingLayer();
+		auto &keyMappings = inputLayer.GetKeyMappings();
 		if((mods &GLFW::Modifier::AxisNegative) != GLFW::Modifier::None)
 		{
 			// We need to check if there are any keybindings with a command with the JoystickAxisSingle flag set,
 			// in which case that keybinding has priority
 			auto keyPositive = key -1;
-			auto it = m_keyMappings.find(CInt16(keyPositive));
-			if(it != m_keyMappings.end() && it->second.Execute(inputState,pressState,mods,magnitude) == true)
+			auto it = keyMappings.find(CInt16(keyPositive));
+			if(it != keyMappings.end() && const_cast<KeyBind&>(it->second).Execute(inputState,pressState,mods,magnitude) == true)
 				return;
 			mods &= ~GLFW::Modifier::AxisNegative;
 		}
-		auto it = m_keyMappings.find(CInt16(key));
-		if(it != m_keyMappings.end())
-			it->second.Execute(inputState,pressState,mods,magnitude);
+		auto it = keyMappings.find(CInt16(key));
+		if(it != keyMappings.end())
+			const_cast<KeyBind&>(it->second).Execute(inputState,pressState,mods,magnitude);
 	}
 }
 void CEngine::Input(int key,GLFW::KeyState state,GLFW::Modifier mods,float magnitude) {Input(key,state,state,mods,magnitude);}
@@ -316,35 +323,38 @@ void CEngine::GetMappedKeys(const std::string &cvarName,std::vector<GLFW::Key> &
 		cmd = cmdOther;
 		argv = argvOther;
 	});
-	auto &keyMappings = GetKeyMappings();
-	for(auto &pair : keyMappings)
+	for(auto &layer : GetInputBindingLayers())
 	{
-		auto &keyBind = pair.second;
-		auto bFoundCvar = false;
-		ustring::get_sequence_commands(keyBind.GetBind(),[&cmd,&argv,&bFoundCvar](std::string cmdOther,std::vector<std::string> &argvOther) {
-			if(cmdOther == "toggle" && argvOther.empty() == false)
-				cmdOther += " " +argvOther.front();
-			if(cmdOther == cmd && argv.size() == argvOther.size())
-			{
-				auto bDiscrepancy = false;
-				for(auto i=decltype(argv.size()){0};i<argv.size();++i)
-				{
-					if(argv.at(i) == argvOther.at(i))
-						continue;
-					bDiscrepancy = true;
-					break;
-				}
-				if(bDiscrepancy == false)
-					bFoundCvar = true;
-			}
-		});
-		if(bFoundCvar == true)
+		auto &keyMappings = layer->GetKeyMappings();
+		for(auto &pair : keyMappings)
 		{
-			if(keys.size() == keys.capacity())
-				keys.reserve(keys.size() +10);
-			keys.push_back(static_cast<GLFW::Key>(pair.first));
-			if(keys.size() == maxKeys)
-				break;
+			auto &keyBind = pair.second;
+			auto bFoundCvar = false;
+			ustring::get_sequence_commands(keyBind.GetBind(),[&cmd,&argv,&bFoundCvar](std::string cmdOther,std::vector<std::string> &argvOther) {
+				if(cmdOther == "toggle" && argvOther.empty() == false)
+					cmdOther += " " +argvOther.front();
+				if(cmdOther == cmd && argv.size() == argvOther.size())
+				{
+					auto bDiscrepancy = false;
+					for(auto i=decltype(argv.size()){0};i<argv.size();++i)
+					{
+						if(argv.at(i) == argvOther.at(i))
+							continue;
+						bDiscrepancy = true;
+						break;
+					}
+					if(bDiscrepancy == false)
+						bFoundCvar = true;
+				}
+			});
+			if(bFoundCvar == true)
+			{
+				if(keys.size() == keys.capacity())
+					keys.reserve(keys.size() +10);
+				keys.push_back(static_cast<GLFW::Key>(pair.first));
+				if(keys.size() == maxKeys)
+					break;
+			}
 		}
 	}
 }
@@ -726,7 +736,12 @@ bool CEngine::Initialize(int argc,char *argv[])
 		auto b = KeyToText(umath::to_integral(key),&keyStr);
 		short c;
 		if(StringToKey(keyStr,&c))
-			MapKey(c,cmd);
+		{
+			auto bindingLayer = GetCoreInputBindingLayer();
+			if(bindingLayer)
+				bindingLayer->MapKey(c,cmd);
+		}
+		SetInputBindingsDirty();
 		return keyStr;
 	},[this](const std::string &cmd) -> std::optional<std::string> {
 		std::vector<GLFW::Key> keys;
@@ -1787,3 +1802,4 @@ REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled,[](NetworkState*,ConVar
 		return;
 	c_engine->SetGPUProfilingEnabled(enabled);
 })
+#pragma optimize("",on)

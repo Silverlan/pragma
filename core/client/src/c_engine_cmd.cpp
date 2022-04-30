@@ -521,6 +521,15 @@ void CEngine::RegisterConsoleCommands()
 		if(argv.size() < 4)
 		{
 			Con::cwar<<"WARNING: Insufficient arguments supplied!"<<Con::endl;
+			std::vector<std::string> files;
+			filemanager::find_files("scripts/localization/en/texts/*.txt",&files,nullptr);
+			std::sort(files.begin(),files.end());
+			Con::cout<<"Available groups: "<<Con::endl;
+			for(auto &f : files)
+			{
+				ufile::remove_extension_from_filename(f);
+				Con::cout<<f<<Con::endl;
+			}
 			return;
 		}
 		auto identifier = argv[0];

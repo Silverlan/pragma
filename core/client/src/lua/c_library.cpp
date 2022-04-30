@@ -517,6 +517,12 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua,bool bGUI)
 			if(!layer)
 				return;
 			layer->enabled = enabled;
+		}),
+		luabind::def("is_binding_layer_enabled",+[](CEngine &en,const std::string &layerName) -> std::optional<bool> {
+			auto layer = en.GetInputBindingLayer(layerName);
+			if(!layer)
+				return {};
+			return layer->enabled;
 		})
 	];
 
@@ -568,13 +574,6 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua,bool bGUI)
 		luabind::def("save",+[](lua_State *l,const udm::AssetData &data,const std::vector<std::shared_ptr<InputBindingLayer>> &layers) {
 			std::string err;
 			return InputBindingLayer::Save(layers,data,err);
-		}),	
-		luabind::def("create",+[](const std::string &name) -> std::shared_ptr<InputBindingLayer> {
-			auto layer = std::make_shared<InputBindingLayer>();
-			layer->identifier = name;
-			static std::vector<std::shared_ptr<InputBindingLayer>> test;
-			test.push_back(layer);
-			return layer;
 		})
 	];
 	defInLay.def("ClearKeyMappings",&InputBindingLayer::ClearKeyMappings);
@@ -598,6 +597,21 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua,bool bGUI)
 		if(!StringToKey(key,&c))
 			return;
 		layer.UnmapKey(c);
+	});
+	defInLay.def("FindBoundKeys",+[](const InputBindingLayer &layer,const std::string &cmd) -> std::vector<std::string> {
+		std::vector<std::string> boundKeys;
+		for(auto &pair : layer.GetKeyMappings())
+		{
+			if(pair.second.GetType() != KeyBind::Type::Regular)
+				continue;
+			if(ustring::compare(pair.second.GetBind(),cmd) == false)
+				continue;
+			std::string str;
+			if(!KeyToString(pair.first,&str))
+				continue;
+			boundKeys.push_back(str);
+		}
+		return boundKeys;
 	});
 	inputMod[defInLay];
 	pragma::lua::define_custom_constructor<InputBindingLayer,

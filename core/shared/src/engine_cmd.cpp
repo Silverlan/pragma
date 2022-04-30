@@ -25,7 +25,7 @@
 #include <udm.hpp>
 
 #undef CreateFile
-
+#pragma optimize("",off)
 void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 {
 	map.RegisterConCommand("exec",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
@@ -305,7 +305,12 @@ void Engine::RegisterConsoleCommands()
 			Con::cout<<"Usage: help <cvarname>"<<Con::endl;
 			return;
 		}
-		ConConf *cv = state->GetConVar(argv[0]);
+		auto *en = pragma::get_engine();
+		auto *cl = en ? en->GetClientState() : nullptr;
+		auto *sv = en ? en->GetServerNetworkState() : nullptr;
+		ConConf *cv = cl ? cl->GetConVar(argv[0]) : nullptr;
+		if(!cv)
+			cv = sv->GetConVar(argv[0]);
 		if(cv == NULL)
 		{
 			Con::cout<<"help: no cvar or command named "<<argv[0]<<Con::endl;
@@ -374,3 +379,4 @@ void Engine::RegisterConsoleCommands()
 		ClearUnusedAssets(types,true);
 	},ConVarFlags::None,"Clears all unused assets from memory.");
 }
+#pragma optimize("",on)

@@ -42,6 +42,7 @@
 #include "pragma/lua/classes/lcallback.h"
 #include "pragma/lua/classes/ldatastream.h"
 #include "pragma/lua/libraries/limport.hpp"
+#include "pragma/lua/converters/optional_converter_t.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/math/util_easing.hpp"
 #include "pragma/lua/libraries/lnav.hpp"
@@ -72,6 +73,7 @@
 #include <luabind/out_value_policy.hpp>
 #include <luabind/copy_policy.hpp>
 #include <luabind/discard_result_policy.hpp>
+#include <filesystem>
 
 extern DLLNETWORK Engine *engine;
 #pragma optimize("",off)
@@ -1416,7 +1418,13 @@ void Game::RegisterLuaLibraries()
 			if(Lua::file::validate_write_operation(l,dstFile) == false)
 				return false;
 			return FileManager::CopyFile(srcFile.c_str(),dstFile.c_str());
-		}))
+		})),
+		luabind::def("is_empty",+[](const std::string &path) -> std::optional<bool> {
+			std::string rpath;
+			if(!FileManager::FindAbsolutePath(path,rpath))
+				return {};
+			return std::filesystem::is_empty(rpath);
+		})
 	];
 
 	auto classDefFile = luabind::class_<LFile>("File");

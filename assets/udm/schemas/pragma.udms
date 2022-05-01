@@ -1,0 +1,11 @@
+"schema"
+{
+	"types"
+	{
+		"ImageFormat"
+		{
+			$string type "enum"
+			$array values [string]["png","bmp","tga","jpg","hdr"]
+		}
+	}
+}

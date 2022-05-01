@@ -1,0 +1,68 @@
+"schema"
+{
+	"types"
+	{
+		"ChannelInterpolation"
+		{
+			$string type "enum"
+			$array values [string]["Linear","Step","CubicSpline"]
+		}
+		"Channel"
+		{
+			"children"
+			{
+				"interpolation" {
+					$string type "ChannelInterpolation"
+					$string default "Linear"
+				}
+				"targetPath" {$string default ""}
+				"expression" {
+					$nil default
+					$bool optional true
+					$string type "string"
+				}
+				"times"
+				{
+					$string type "arrayLz4"
+					$string valueType "float"
+				}
+				"values"
+				{
+					$string type "arrayLz4"
+					$string valueType "Any"
+				}
+			}
+		}
+		"AnimationFlags"
+		{
+			$string type "enum_flags"
+			"values"
+			{
+				$uint32 None 0
+				$uint32 LoopBit 1
+			}
+		}
+		"Animation"
+		{
+			"format"
+			{
+				$uint32 version 1
+				$string type "PANIMA"
+			}
+			"children"
+			{
+				"speedFactor" {$float default 1.0}
+				"duration" {$float default 0.0}
+				"channels"
+				{
+					$string type "array"
+					$string valueType "Channel"
+				}
+				"flags" {
+					$string type "AnimationFlags"
+					$string default "None"
+				}
+			}
+		}
+	}
+}

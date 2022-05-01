@@ -289,6 +289,7 @@ function util.import_assets(files,logCb,basePath,dropped,callback)
 	local nonZipFiles = {}
 	local zipExts = {}
 	for _,ext in ipairs(util.ZipFile.get_supported_format_extensions()) do zipExts[ext] = true end
+	local hasZipAssets = false
 	for _,f in ipairs(files) do
 		local filePath
 		if(util.get_type_name(f) == "File") then filePath = f:GetPath()
@@ -299,13 +300,17 @@ function util.import_assets(files,logCb,basePath,dropped,callback)
 			if(zipFile == nil) then
 				logCb("Unable to open zip-archive '" .. filePath .. "': Unsupported archive format?",log.SEVERITY_ERROR)
 			else
+				hasZipAssets = true
 				local handler = util.ZipAssetImportFileHandler(zipFile)
 				zipFile = nil
 				import_assets(handler,logCb,basePath,nil,callback)
 			end
 		else table.insert(nonZipFiles,f) end
 	end
-	if(#nonZipFiles == 0) then return end
+	if(#nonZipFiles == 0) then
+		if(hasZipAssets == false) then logCb("No assets were detected!") end
+		return
+	end
 	local handler = dropped and util.DropAssetImportFileHandler(nonZipFiles) or util.ListAssetImportFileHandler(nonZipFiles)
 	import_assets(handler,logCb,basePath,nil,callback)
 end

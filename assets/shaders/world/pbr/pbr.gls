@@ -6,6 +6,7 @@
 	#define DEBUG_MODE DEBUG_MODE_NONE
 #endif
 
+#include "textures.gls"
 #include "lighting.gls"
 #include "/modules/sh_parallaxmapping.gls"
 #include "/modules/fs_tonemapping.gls"

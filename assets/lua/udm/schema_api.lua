@@ -11,7 +11,8 @@ include("schema.lua")
 util.register_class("udm.BaseSchemaType")
 function udm.BaseSchemaType:__tostring()
 	local str = self.TypeName
-	if(self.GetUniqueId) then str = str .. "[" .. tostring(self:GetUniqueId()) .. "]" end
+	if(self:IsValid() == false) then str = str["INVALID"]
+	elseif(self.GetUniqueId) then str = str .. "[" .. tostring(self:GetUniqueId()) .. "]" end
 	return str
 end
 function udm.BaseSchemaType:Initialize(schema,udmData,parent)
@@ -47,6 +48,7 @@ function udm.BaseSchemaType:Initialize(schema,udmData,parent)
 	self:OnInitialize()
 end
 function udm.BaseSchemaType:OnInitialize() end
+function udm.BaseSchemaType:IsValid() return self:GetUdmData():IsValid() end
 function udm.BaseSchemaType:Remove() self:OnRemove() end
 function udm.BaseSchemaType:OnRemove()
 	for name,listeners in pairs(self.m_changeListeners) do

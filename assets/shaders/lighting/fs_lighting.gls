@@ -26,30 +26,6 @@
 #include "../modules/fs_renderer.gls"
 #include "../compute/cs_forwardp_settings.gls"
 
-bool is_fragment_in_shadow() // Only for spot-lights for the time being
-{
-	if(is_unlit() == true)
-		return false;
-	ivec2 location = ivec2(gl_FragCoord.xy);
-	uint tileSize = get_tile_size();
-	ivec2 tileID = location / ivec2(tileSize, tileSize);
-	uint index = tileID.y * get_number_of_tiles_x() + tileID.x;
-	uint offset = index * MAX_SCENE_LIGHTS;
-	for (uint i = 0; i < MAX_SCENE_LIGHTS && visibleLightTileIndicesBuffer.data[offset + i].index != -1; i++) {
-		uint lightIndex = visibleLightTileIndicesBuffer.data[offset + i].index;
-
-		LightSourceData light = get_light_source(int(lightIndex));
-		// TODO: Check if this is a spot light-source
-		vec4 depthCoord = get_light_vertex_position(int(lightIndex));
-		depthCoord.z *= light.position.w; // Undo transformation from get_light_vertex_position()
-		depthCoord = depthCoord /light.position.w;
-		float shadow = min(get_spot_light_shadow_sample(lightIndex,false),get_spot_light_shadow_sample(lightIndex,true));
-		if(shadow != 1.0)
-			return true;
-	}
-	return false;
-}
-
 vec3 test(int i,vec3 diffuseColor,vec2 texCoords,mat4 mdlMatrix,vec3 fragPosWs,vec3 fragNormal,bool bUseNormal,vec3 fragNormalWs,vec3 finalColor)
 {
 	LightSourceData light = get_light_source(i);

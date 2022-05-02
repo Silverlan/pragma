@@ -260,6 +260,12 @@ jobs:
         run: |
           echo -e "ref: $GITHUB_REF \ncommit: $GITHUB_SHA\nbuild: $(date +"%Y-%m-%dT%H:%M:%SZ")" \
           > ${{ matrix.config.build_dir }}/install/info.txt
+          
+      - name: Remove unnecessary files
+        shell: bash
+        run: |
+          rm -rf "${{ matrix.config.build_dir }}/install/.git"
+          rm -rf "${{ matrix.config.build_dir }}/install/third_party_libs"
 
       - name: Generate release zip
         run: |

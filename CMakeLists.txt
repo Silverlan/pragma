@@ -308,6 +308,8 @@ search_lib_recursive(DEPENDENCY_POLY2TRI_LIBRARY third_party_libs/clip2tri/poly2
 set(DEPENDENCY_MUPARSERX_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/muparserx/parser CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_MUPARSERX_LIBRARY third_party_libs/muparserx/${BINARY_PRAGMA_DIR} muparserx STATIC)
 
+set(DEPENDENCY_RAPIDXML_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/rapidxml CACHE PATH "Path to include directory.")
+
 set(DEPENDENCY_BA2_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/modules/pr_source/third_party/ba2lib/BA2Lib CACHE PATH "Path to include directory.")
 
 # set(DEPENDENCY_BSA_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libbsa/include CACHE PATH "Path to include directory.")
@@ -650,7 +652,9 @@ target_include_directories(luabind PUBLIC ${LUA_INCLUDE_DIR})
 #
 
 # 7zip cpp
+set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
 register_third_party_library(7zpp)
+set(BUILD_SHARED_LIBS ON CACHE BOOL ".." FORCE)
 
 # muparserx
 set(BUILD_EXAMPLES OFF CACHE BOOL OFF FORCE)
@@ -882,12 +886,12 @@ add_dependencies(util_pad util_versioned_archive)
 
 add_dependencies(util_zip 7zpp)
 
-add_dependencies(shared materialsystem util_zip wms_shared util_pragma_doc luasystem networkmanager libz2 bzip2 clip2tri-static clipper-static poly2tri-static util_udm panima util_bsp util_smdmodel util_source_script rectangle_bin_pack Recast Detour util_pad noise-static noiseutils-static ogg vorbis vorbisfile)
+add_dependencies(shared materialsystem util_zip wms_shared util_pragma_doc luasystem networkmanager muparserx libz2 bzip2 clip2tri-static clipper-static poly2tri-static util_udm panima util_bsp util_smdmodel util_source_script rectangle_bin_pack Recast Detour util_pad noise-static noiseutils-static ogg vorbis vorbisfile)
 add_dependencies(ishared util_udm shared)
-add_dependencies(iclient ishared)
-add_dependencies(iserver ishared)
-add_dependencies(server shared servermanager clientmanager util_bsp util_sound iserver)
-add_dependencies(client shared clientmanager freetype wgui alsoundsystem util_timeline_scene util_image iclient)
+add_dependencies(iclient ishared client)
+add_dependencies(iserver ishared server)
+add_dependencies(server shared servermanager clientmanager util_bsp util_sound)
+add_dependencies(client shared clientmanager freetype wgui alsoundsystem util_timeline_scene util_image)
 
 add_dependencies(pragma_server server)
 add_dependencies(pragma client server)
@@ -948,14 +952,14 @@ pragma_install(vfilesystem "${BINARY_OUTPUT_DIR}")
 pragma_install(wgui "${BINARY_OUTPUT_DIR}")
 
 add_custom_target(pragma-install
-	DEPENDS pragma
+	DEPENDS pragma iclient iserver
 	COMMAND 
 		"${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT}
 		-DBUILD_TYPE=${CMAKE_BUILD_TYPE}
 		-P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
 )
 add_custom_target(pragma-install-full
-	DEPENDS pragma-install pr_prosper_opengl
+	DEPENDS pragma-install
 	COMMAND 
 		"${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT_FULL}
 		-DBUILD_TYPE=${CMAKE_BUILD_TYPE}
@@ -975,7 +979,8 @@ function(pragma_install_lib_c INPUT_LIBRARY_FILENAME LIB_NAME DESTINATION_PATH)
 			set(IS_OPTIONAL 1)
 		endif()
 	endif()
-	if((IS_OPTIONAL EQUAL 0) OR (EXISTS "${INPUT_LIBRARY_PATH_BIN}"))
+	# if((IS_OPTIONAL EQUAL 0) OR (EXISTS "${INPUT_LIBRARY_PATH_BIN}"))
+	if(EXISTS "${INPUT_LIBRARY_PATH_BIN}")
 		add_custom_command(TARGET pragma-install POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 				${INPUT_LIBRARY_PATH_BIN}
@@ -997,7 +1002,8 @@ function(pragma_install_lib INPUT_LIBRARY_PATH DESTINATION_PATH)
 			set(IS_OPTIONAL 1)
 		endif()
 	endif()
-	if((IS_OPTIONAL EQUAL 0) OR (EXISTS "${INPUT_LIBRARY_PATH_BIN}"))
+	#if((IS_OPTIONAL EQUAL 0) OR (EXISTS "${INPUT_LIBRARY_PATH_BIN}"))
+	if(EXISTS "${INPUT_LIBRARY_PATH_BIN}")
 		add_custom_command(TARGET pragma-install POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 				${INPUT_LIBRARY_PATH_BIN}

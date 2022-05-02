@@ -51,6 +51,12 @@ if(WIN32)
 	add_compile_options(/bigobj)
 endif()
 
+option(CONFIG_BUILD_WITH_LAD "Build with Lua documentation system?" OFF)
+
+if(${CONFIG_BUILD_WITH_LAD})
+	add_definitions(-DENABLE_PDB_MANAGER)
+endif()
+
 def_project(shared lib)
 
 # Required for networking library

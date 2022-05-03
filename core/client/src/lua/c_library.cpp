@@ -122,10 +122,17 @@ static void register_gui(Lua::Interface &lua)
 			return WGUI::GetInstance().FindWindowUnderCursor();
 		}),luabind::pointer_policy<0>{}),
 		
-		luabind::def("get_focused_element",&Lua::gui::get_focused_element),
+		luabind::def("get_focused_element",static_cast<::WIBase*(*)(lua_State*)>(&Lua::gui::get_focused_element)),
+		luabind::def("get_focused_element",static_cast<::WIBase*(*)(lua_State*,prosper::Window&)>(&Lua::gui::get_focused_element)),
 		luabind::def("register_skin",static_cast<bool(*)(lua_State*,const std::string&,const luabind::tableT<void>&,const luabind::tableT<void>&)>(&Lua::gui::register_skin)),
 		luabind::def("register_skin",static_cast<bool(*)(lua_State*,const std::string&,const luabind::tableT<void>&,const luabind::tableT<void>&,const std::string&)>(&Lua::gui::register_skin)),
 		luabind::def("register_default_skin",&Lua::gui::register_default_skin),
+		luabind::def("set_focus_enabled",+[](const prosper::Window &window,bool focusEnabled) {
+			WGUI::GetInstance().SetFocusEnabled(window,focusEnabled);
+		}),
+		luabind::def("is_focus_enabled",+[](const prosper::Window &window) {
+			return WGUI::GetInstance().IsFocusEnabled(window);
+		}),
 
 		luabind::def("load_skin",&Lua::gui::load_skin),
 		luabind::def("set_skin",Lua::gui::set_skin),

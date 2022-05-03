@@ -234,7 +234,7 @@ void Lua::gui::register_element(const std::string &className,const Lua::classObj
 		return nullptr;
 	return ::WGUI::GetInstance().GetCursorGUIElement(el,[l](::WIBase *el) -> bool {
 		return true;
-	});
+	},window);
 }
 
 ::WIBase *Lua::gui::get_element_at_position(lua_State *l,prosper::Window *window,::WIBase *baseElement,int32_t x,int32_t y,const Lua::func<bool,::WIBase> &condition)
@@ -286,6 +286,11 @@ void Lua::gui::register_element(const std::string &className,const Lua::classObj
 ::WIBase *Lua::gui::get_focused_element(lua_State *l)
 {
 	return WGUI::GetInstance().GetFocusedElement();
+}
+
+::WIBase *Lua::gui::get_focused_element(lua_State *l,prosper::Window &window)
+{
+	return WGUI::GetInstance().GetFocusedElement(&window);
 }
 
 bool Lua::gui::load_skin(const std::string &skinName)

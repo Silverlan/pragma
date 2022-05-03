@@ -57,6 +57,7 @@ namespace Lua
 		DLLCLIENT ::WIBase *get_element_under_cursor(lua_State *l,const Lua::func<bool,::WIBase> &condition);
 		DLLCLIENT ::WIBase *get_element_under_cursor(lua_State *l,const prosper::Window *window=nullptr);
 		DLLCLIENT ::WIBase *get_focused_element(lua_State *l);
+		DLLCLIENT ::WIBase *get_focused_element(lua_State *l,prosper::Window &window);
 		DLLCLIENT bool register_skin(lua_State *l,const std::string &skin,const luabind::tableT<void> &vars,const luabind::tableT<void> &skinData);
 		DLLCLIENT bool register_skin(lua_State *l,const std::string &skin,const luabind::tableT<void> &vars,const luabind::tableT<void> &skinData,const std::string &baseName);
 		DLLCLIENT void register_default_skin(const std::string &vars,const std::string &skinData);

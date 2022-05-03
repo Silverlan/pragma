@@ -46,12 +46,13 @@ void CGame::CalcLocalPlayerOrientation()
 	m_curFrameRotationModifier = uquat::identity();
 	//Con::cerr<<"Actual ("<<pl->GetIndex()<<"): "<<&(*pl->GetViewOrientation())<<Con::endl;
 
-	auto w = c_engine->GetRenderContext().GetWindowWidth();
-	auto h = c_engine->GetRenderContext().GetWindowHeight();
 	float wDelta,hDelta;
 	auto *window = WGUI::GetInstance().FindFocusedWindow();
 	if(window && window->IsValid() && WGUI::GetInstance().GetFocusedElement(window) == nullptr)
 	{
+		auto size = (*window)->GetSize();
+		auto w = size.x;
+		auto h = size.y;
 		auto pos = (*window)->GetCursorPos();
 		(*window)->SetCursorPos(Vector2i(umath::round(w /2.f),umath::round(h /2.f)));
 		wDelta = pos.x -w /2.f;

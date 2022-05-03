@@ -61,10 +61,10 @@ namespace pragma
 		bool IsValidationErrorDisabled(const std::string &id) const;
 	protected:
 		virtual void OnClose();
-		virtual void DrawFrame();
+		virtual void DrawFrameCore();
 		virtual void OnWindowInitialized();
 		virtual void OnResolutionChanged(uint32_t w,uint32_t h);
-		virtual void DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t swapchainImageIdx);
+		virtual void DrawFrame();
 		void ValidationCallback(
 			prosper::DebugMessageSeverityFlags severityFlags,
 			const std::string &message

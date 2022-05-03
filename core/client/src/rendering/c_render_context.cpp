@@ -82,7 +82,7 @@ void RenderContext::InitializeRenderAPI()
 	callbacks.onWindowInitialized = [this]() {OnWindowInitialized();};
 	callbacks.onClose = [this]() {OnClose();};
 	callbacks.onResolutionChanged = [this](uint32_t w,uint32_t h) {OnResolutionChanged(w,h);};
-	callbacks.drawFrame = [this](prosper::IPrimaryCommandBuffer &drawCmd,uint32_t swapchainImageIdx) {DrawFrame(drawCmd,swapchainImageIdx);};
+	callbacks.drawFrame = [this]() {DrawFrame();};
 	m_renderContext->SetCallbacks(callbacks);
 	if(umath::is_flag_set(m_stateFlags,StateFlags::GfxAPIValidationEnabled))
 		m_renderContext->SetValidationEnabled(true);
@@ -124,8 +124,8 @@ void RenderContext::RegisterShader(const std::string &identifier,const std::func
 prosper::Window &RenderContext::GetWindow() {return GetRenderContext().GetWindow();}
 GLFW::Window &RenderContext::GetGlfwWindow() {return *GetRenderContext().GetWindow();}
 const std::shared_ptr<prosper::IPrimaryCommandBuffer> &RenderContext::GetSetupCommandBuffer() {return GetRenderContext().GetSetupCommandBuffer();}
-const std::shared_ptr<prosper::IPrimaryCommandBuffer> &RenderContext::GetDrawCommandBuffer() const {return GetRenderContext().GetDrawCommandBuffer();}
-const std::shared_ptr<prosper::IPrimaryCommandBuffer> &RenderContext::GetDrawCommandBuffer(uint32_t swapchainIdx) const {return GetRenderContext().GetDrawCommandBuffer(swapchainIdx);}
+const std::shared_ptr<prosper::IPrimaryCommandBuffer> &RenderContext::GetDrawCommandBuffer() const {return GetRenderContext().GetWindow().GetDrawCommandBuffer();}
+const std::shared_ptr<prosper::IPrimaryCommandBuffer> &RenderContext::GetDrawCommandBuffer(uint32_t swapchainIdx) const {return GetRenderContext().GetWindow().GetDrawCommandBuffer(swapchainIdx);}
 void RenderContext::FlushSetupCommandBuffer() {GetRenderContext().FlushSetupCommandBuffer();}
 prosper::WindowSettings &RenderContext::GetInitialWindowSettings() {return GetRenderContext().GetInitialWindowSettings();}
 void RenderContext::SetValidationErrorDisabled(const std::string &id,bool disabled)
@@ -191,7 +191,7 @@ void RenderContext::ValidationCallback(
 void RenderContext::OnClose() {}
 
 void RenderContext::OnResolutionChanged(uint32_t w,uint32_t h) {}
-void RenderContext::DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t swapchainImageIdx) {}
+void RenderContext::DrawFrameCore() {}
 void RenderContext::OnWindowInitialized()
 {
 	// TODO: Remove this function
@@ -199,7 +199,7 @@ void RenderContext::OnWindowInitialized()
 
 void RenderContext::DrawFrame()
 {
-	GetRenderContext().DrawFrame();
+	GetRenderContext().DrawFrameCore();
 }
 
 void RenderContext::SetGfxAPIValidationEnabled(bool b) {umath::set_flag(m_stateFlags,StateFlags::GfxAPIValidationEnabled,b);}

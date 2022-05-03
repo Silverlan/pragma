@@ -53,6 +53,7 @@
 #include <image/prosper_render_target.hpp>
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
+#include <prosper_window.hpp>
 #include <textureinfo.h>
 #include <sharedutils/scope_guard.h>
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
@@ -397,7 +398,7 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 				drawSceneInfo.renderFlags &= ~RenderFlags::Particles;
 
 			if(drawSceneInfo.commandBuffer == nullptr)
-				drawSceneInfo.commandBuffer = c_engine->GetRenderContext().GetDrawCommandBuffer();
+				drawSceneInfo.commandBuffer = c_engine->GetRenderContext().GetWindow().GetDrawCommandBuffer();
 			// Modify render flags depending on console variables
 			auto &renderFlags = drawSceneInfo.renderFlags;
 			auto drawWorld = cvDrawWorld->GetBool();

@@ -75,7 +75,7 @@ static bool render_ui(WIBase &el,prosper::RenderTarget &rt,const Lua::gui::DrawT
 	auto &context = rt.GetContext();
 	auto drawCmd = info.commandBuffer;
 	if(!drawCmd)
-		drawCmd = context.GetDrawCommandBuffer();
+		drawCmd = context.GetWindow().GetDrawCommandBuffer();
 	else if(!drawCmd->IsPrimary())
 		return false;
 	auto &img = rt.GetTexture().GetImage();

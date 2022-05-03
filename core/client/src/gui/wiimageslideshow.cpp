@@ -15,6 +15,7 @@
 #include <image/prosper_render_target.hpp>
 #include <shader/prosper_shader_blur.hpp>
 #include <prosper_command_buffer.hpp>
+#include <prosper_window.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 
@@ -123,7 +124,7 @@ void WIImageSlideShow::DisplayPreloadedImage()
 		return;
 	}
 
-	auto &drawCmd = context.GetDrawCommandBuffer();
+	auto &drawCmd = context.GetWindow().GetDrawCommandBuffer();
 	try
 	{
 		prosper::util::record_blur_image(context,drawCmd,*m_blurSet,{

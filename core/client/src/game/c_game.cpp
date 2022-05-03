@@ -841,13 +841,13 @@ void CGame::Resize(bool reloadRenderTarget)
 	cam->UpdateMatrices();
 }
 
-void CGame::PreGUIDraw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void CGame::PreGUIDraw()
 {
-	CallLuaCallbacks<void,std::shared_ptr<prosper::ICommandBuffer>>("PreGUIDraw",drawCmd);
+	CallLuaCallbacks<void>("PreGUIDraw");
 }
-void CGame::PostGUIDraw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void CGame::PostGUIDraw()
 {
-	CallLuaCallbacks<void,std::shared_ptr<prosper::ICommandBuffer>>("PostGUIDraw",drawCmd);
+	CallLuaCallbacks<void>("PostGUIDraw");
 }
 void CGame::SetDefaultGameRenderEnabled(bool enabled) {m_defaultGameRenderEnabled = enabled;}
 bool CGame::IsDefaultGameRenderEnabled() const {return m_defaultGameRenderEnabled;}

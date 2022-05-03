@@ -369,8 +369,8 @@ public:
 	void RenderScene(const util::DrawSceneInfo &drawSceneInfo);
 
 	// GUI
-	void PreGUIDraw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
-	void PostGUIDraw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
+	void PreGUIDraw();
+	void PostGUIDraw();
 
 	// HDR
 	void Resize(bool reloadRenderTarget);

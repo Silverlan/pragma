@@ -92,8 +92,8 @@ CEngine::CEngine(int argc,char* argv[])
 
 	RegisterCallback<void,std::reference_wrapper<const GLFW::Joystick>,bool>("OnJoystickStateChanged");
 	RegisterCallback<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("DrawFrame");
-	RegisterCallback<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("PreDrawGUI");
-	RegisterCallback<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("PostDrawGUI");
+	RegisterCallback<void>("PreDrawGUI");
+	RegisterCallback<void>("PostDrawGUI");
 	RegisterCallback<void>("Draw");
 
 	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<prosper::Window>,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>("OnMouseInput");
@@ -1327,8 +1327,9 @@ void CEngine::UpdateFPS(float t)
 }
 
 static CVar cvProfiling = GetEngineConVar("debug_profiling_enabled");
-void CEngine::DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t n_current_swapchain_image)
+void CEngine::DrawFrame()
 {
+	auto primWindowCmd = GetWindow().GetDrawCommandBuffer();
 	auto perfTimers = umath::is_flag_set(m_stateFlags,StateFlags::EnableGpuPerformanceTimers);
 	if(perfTimers)
 	{
@@ -1340,12 +1341,12 @@ void CEngine::DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t n_curre
 		}
 
 		auto idx = GetPerformanceTimerIndex(GPUTimer::Frame);
-		m_gpuTimers[idx]->Begin(drawCmd);
+		m_gpuTimers[idx]->Begin(*primWindowCmd);
 	}
 	m_gpuProfiler->Reset();
 	StartProfilingStage(GPUProfilingPhase::Frame);
 
-	auto ptrDrawCmd = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd.shared_from_this());
+	auto ptrDrawCmd = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(primWindowCmd);
 	CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("DrawFrame",std::ref(ptrDrawCmd));
 	
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
@@ -1366,18 +1367,18 @@ void CEngine::DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t n_curre
 		umath::set_flag(m_stateFlags,StateFlags::FirstFrame,false);
 	else
 	{
-		drawCmd.RecordImageBarrier(
+		primWindowCmd->RecordImageBarrier(
 			stagingRt->GetTexture().GetImage(),
 			prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal
 		);
 	}
 
-	DrawScene(ptrDrawCmd,stagingRt);
+	DrawScene(stagingRt);
 
 	if(perfTimers)
 	{
 		auto idx = GetPerformanceTimerIndex(GPUTimer::Present);
-		m_gpuTimers[idx]->Begin(drawCmd);
+		m_gpuTimers[idx]->Begin(*primWindowCmd);
 	}
 	for(auto &wpWindow : GetRenderContext().GetWindows())
 	{
@@ -1387,30 +1388,30 @@ void CEngine::DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t n_curre
 		if(window->IsValid() == false || window->GetState() != prosper::Window::State::Active)
 			continue;
 		auto &finalImg = window->GetStagingRenderTarget()->GetTexture().GetImage();
-		drawCmd.RecordImageBarrier(
+		primWindowCmd->RecordImageBarrier(
 			finalImg,
 			prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal
 		);
 
-		drawCmd.RecordPresentImage(finalImg,*window);
+		primWindowCmd->RecordPresentImage(finalImg,*window);
 	}
 
 	if(perfTimers)
 	{
 		auto idx = GetPerformanceTimerIndex(GPUTimer::Present);
-		m_gpuTimers[idx]->End(drawCmd);
+		m_gpuTimers[idx]->End(*primWindowCmd);
 	}
 
 	StopProfilingStage(GPUProfilingPhase::Frame);
 	if(perfTimers)
 	{
 		auto idx = GetPerformanceTimerIndex(GPUTimer::Frame);
-		m_gpuTimers[idx]->End(drawCmd);
+		m_gpuTimers[idx]->End(*primWindowCmd);
 	}
 }
 
 static auto cvHideGui = GetClientConVar("debug_hide_gui");
-void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt)
+void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 {
 	auto perfTimers = umath::is_flag_set(m_stateFlags,StateFlags::EnableGpuPerformanceTimers);
 	auto drawGui = !cvHideGui->GetBool();
@@ -1427,8 +1428,9 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 			auto window = wpWindow.lock();
 			if(!window || window->IsValid() == false)
 				continue;
+			auto &windowRt = window->GetStagingRenderTarget();
 			auto &swapCmdGroup = window->GetSwapCommandBufferGroup();
-			swapCmdGroup.StartRecording(rt->GetRenderPass(),rt->GetFramebuffer());
+			swapCmdGroup.StartRecording(windowRt->GetRenderPass(),windowRt->GetFramebuffer());
 				swapCmdGroup.Record([window](prosper::ISecondaryCommandBuffer &drawCmd) {
 					auto &gui = WGUI::GetInstance();
 					gui.Draw(*window,drawCmd);
@@ -1445,6 +1447,8 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 	{
 		StartProfilingStage(GPUProfilingPhase::DrawScene);
 
+		auto &window = GetWindow();
+		auto &drawCmd = window.GetDrawCommandBuffer();
 		if(perfTimers)
 		{
 			auto idx = GetPerformanceTimerIndex(GPUTimer::Scene);
@@ -1464,14 +1468,15 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 	
 	if(drawGui)
 	{
-		CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("PreDrawGUI",std::ref(drawCmd));
+		CallCallbacks<void>("PreDrawGUI");
 		if(c_game != nullptr)
-			c_game->PreGUIDraw(drawCmd);
+			c_game->PreGUIDraw();
 
+		auto &primWindowCmd = GetWindow().GetDrawCommandBuffer();
 		if(perfTimers)
 		{
 			auto idx = GetPerformanceTimerIndex(GPUTimer::GUI);
-			m_gpuTimers[idx]->Begin(*drawCmd);
+			m_gpuTimers[idx]->Begin(*primWindowCmd);
 		}
 		for(auto &wpWindow : GetRenderContext().GetWindows())
 		{
@@ -1479,6 +1484,7 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 			if(!window || !window->IsValid())
 				continue;
 			auto &rt = window->GetStagingRenderTarget();
+			auto &drawCmd = window->GetDrawCommandBuffer();
 
 			static std::vector<prosper::ClearValue> clearVals = {
 				prosper::ClearValue{},
@@ -1492,13 +1498,13 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 		if(perfTimers)
 		{
 			auto idx = GetPerformanceTimerIndex(GPUTimer::GUI);
-			m_gpuTimers[idx]->End(*drawCmd);
+			m_gpuTimers[idx]->End(*primWindowCmd);
 		}
 		WGUI::GetInstance().SetLockedForDrawing(false);
-		CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("PostDrawGUI",std::ref(drawCmd));
+		CallCallbacks<void>("PostDrawGUI");
 
 		if(c_game != nullptr)
-			c_game->PostGUIDraw(drawCmd);
+			c_game->PostGUIDraw();
 	}
 }
 

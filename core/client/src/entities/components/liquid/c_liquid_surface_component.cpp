@@ -441,6 +441,8 @@ void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos,const V
 	descSetFog.SetBindingUniformBuffer(*m_waterScene->fogBuffer,0u);
 	descSetEffects.SetBindingUniformBuffer(*m_waterScene->fogBuffer,umath::to_integral(pragma::ShaderWater::WaterBinding::WaterFog));
 
+	shaderPPWater.InitializeMaterialDescriptorSet(*mat);
+
 	// auto waterPlaneDist = std::make_shared<float>(std::numeric_limits<float>::max());
 	// auto waterNormal = std::make_shared<Vector3>(surfaceNormal);
 	Mat4 matReflect;
@@ -498,7 +500,7 @@ void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos,const V
 			// hdrInfo.BlitMainDepthBufferToSamplableDepthBuffer(drawSceneInfo.get(),fTransitionSampleImgToTransferDst);
 			if(drawCmd->RecordBeginRenderPass(*hdrInfo.hdrPostProcessingRenderTarget) == true)
 			{
-				drawCmd->RecordClearAttachment(hdrInfo.hdrPostProcessingRenderTarget->GetTexture().GetImage(),std::array<float,4>{1.f,0.f,0.f,1.f});
+				// drawCmd->RecordClearAttachment(hdrInfo.hdrPostProcessingRenderTarget->GetTexture().GetImage(),std::array<float,4>{1.f,0.f,0.f,1.f});
 				
 				auto *mat = GetWaterMaterial();
 				auto &shaderPPWater = static_cast<pragma::ShaderPPWater&>(*whShaderPPWater.get());

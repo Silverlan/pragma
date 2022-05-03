@@ -173,7 +173,7 @@ search_lib_recursive_ext(DEPENDENCY_UTIL_BSP_LIBRARY util_bsp STATIC)
 # search_lib_recursive_ext(DEPENDENCY_UTIL_ARCHIVE_LIBRARY util_archive)
 
 set(DEPENDENCY_UTIL_FGD_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/modules/pr_source/external_libs/util_fgd/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_UTIL_FGD_LIBRARY util_fgd STATIC)
+search_lib_recursive(DEPENDENCY_UTIL_FGD_LIBRARY modules/pr_source/external_libs/util_fgd/${BINARY_PRAGMA_DIR} util_fgd)
 
 set(DEPENDENCY_UTIL_FORMATTED_TEXT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_formatted_text/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_UTIL_FORMATTED_TEXT_LIBRARY util_formatted_text STATIC)

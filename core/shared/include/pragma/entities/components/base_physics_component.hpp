@@ -146,7 +146,7 @@ namespace pragma
 		bool IsOnGround() const;
 		bool IsGroundWalkable() const;
 
-		void SetForcePhysicsAwakeCallbacksEnabled(bool enabled,bool apply=true);
+		void SetForcePhysicsAwakeCallbacksEnabled(bool enabled,bool apply=true,std::optional<bool> isAwakeOverride={});
 		bool AreForcePhysicsAwakeCallbacksEnabled() const;
 
 		BaseEntity *GetGroundEntity() const;

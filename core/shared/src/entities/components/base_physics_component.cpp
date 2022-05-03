@@ -731,17 +731,17 @@ void BasePhysicsComponent::OnSleep()
 
 bool BasePhysicsComponent::IsRagdoll() const {return umath::is_flag_set(m_stateFlags,StateFlags::Ragdoll);}
 
-void BasePhysicsComponent::SetForcePhysicsAwakeCallbacksEnabled(bool enabled,bool apply)
+void BasePhysicsComponent::SetForcePhysicsAwakeCallbacksEnabled(bool enabled,bool apply,std::optional<bool> isAwakeOverride)
 {
 	umath::set_flag(m_stateFlags,StateFlags::ForcePhysicsAwakeCallbacksEnabled,enabled);
 	if(apply == false)
 		return;
 	if(enabled)
 	{
-		if(!m_physObject->IsSleeping())
+		if(!m_physObject->IsSleeping() || (isAwakeOverride.has_value() && *isAwakeOverride))
 			OnPhysicsWake(m_physObject.get());
 	}
-	else if(m_physObject->IsSleeping())
+	else if(m_physObject->IsSleeping() || (isAwakeOverride.has_value() && !*isAwakeOverride))
 		OnPhysicsSleep(m_physObject.get());
 }
 bool BasePhysicsComponent::AreForcePhysicsAwakeCallbacksEnabled() const

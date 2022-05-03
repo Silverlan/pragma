@@ -220,7 +220,7 @@ void BaseTouchComponent::StartTouch(BaseEntity &entOther,PhysObj &physOther,phys
 	
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
 	if(pPhysComponent)
-		pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(true);
+		pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(true,true,true);
 }
 void BaseTouchComponent::EndTouch(BaseEntity &entOther,PhysObj &physOther,physics::ICollisionObject &objThis,physics::ICollisionObject &objOther)
 {
@@ -228,7 +228,7 @@ void BaseTouchComponent::EndTouch(BaseEntity &entOther,PhysObj &physOther,physic
 	
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
 	if(pPhysComponent)
-		pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(true);
+		pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(true,true,false);
 }
 void BaseTouchComponent::Contact(const pragma::physics::ContactInfo &contactInfo)
 {

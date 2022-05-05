@@ -8,6 +8,7 @@
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/entities/components/base_attachable_component.hpp"
 #include "pragma/entities/components/base_game_component.hpp"
+#include "pragma/entities/components/base_entity_component_member_register.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/lua/policies/optional_policy.hpp"
 #include "pragma/lua/policies/game_object_policy.hpp"
@@ -202,6 +203,22 @@ bool pragma::lua::set_member_value(
 		}
 	});
 }
+static void get_dynamic_member_ids(pragma::BaseEntityComponent &c,std::vector<pragma::ComponentMemberIndex> &memberIndices)
+{
+	auto *reg = dynamic_cast<pragma::DynamicMemberRegister*>(&c);
+	if(!reg)
+		return;
+	auto &members = reg->GetMembers();
+	memberIndices.reserve(memberIndices.size() +members.size());
+	for(auto &pair : members)
+		memberIndices.push_back(pair.first);
+}
+static std::vector<pragma::ComponentMemberIndex> get_dynamic_member_ids(pragma::BaseEntityComponent &c)
+{
+	std::vector<pragma::ComponentMemberIndex> memberIndices;
+	get_dynamic_member_ids(c,memberIndices);
+	return memberIndices;
+}
 void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 {
 	auto entityComponentDef = pragma::lua::create_entity_component_class<pragma::BaseEntityComponent>("EntityComponent");
@@ -253,6 +270,18 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	entityComponentDef.def("SetNextTick",&pragma::BaseEntityComponent::SetNextTick);
 	entityComponentDef.def("GetMemberIndex",&pragma::BaseEntityComponent::GetMemberIndex);
 	entityComponentDef.def("GetMemberInfo",&pragma::BaseEntityComponent::GetMemberInfo);
+	entityComponentDef.def("GetDynamicMemberIndices",static_cast<std::vector<pragma::ComponentMemberIndex>(*)(pragma::BaseEntityComponent&)>(&get_dynamic_member_ids));
+	entityComponentDef.def("GetStaticMemberCount",&pragma::BaseEntityComponent::GetStaticMemberCount);
+	entityComponentDef.def("GetMemberIndices",+[](lua_State *l,pragma::BaseEntityComponent &component)
+		-> std::vector<pragma::ComponentMemberIndex> {
+		std::vector<pragma::ComponentMemberIndex> memberIndices;
+		auto numStaticMembers = component.GetStaticMemberCount();
+		memberIndices.reserve(numStaticMembers);
+		for(auto i=decltype(numStaticMembers){0u};i<numStaticMembers;++i)
+			memberIndices.push_back(i);
+		get_dynamic_member_ids(component,memberIndices);
+		return memberIndices;
+	});
 	entityComponentDef.def("GetMemberValue",&get_member_value);
 	entityComponentDef.def("GetMemberValue",+[](lua_State *l,pragma::BaseEntityComponent &component,const std::string &memberName) -> std::optional<Lua::udm_type> {
 		auto *info = component.FindMemberInfo(memberName);

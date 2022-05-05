@@ -396,7 +396,7 @@ const ComponentMemberInfo *BaseModelComponent::GetMemberInfo(ComponentMemberInde
 	auto numStatic = GetStaticMemberCount();
 	if(idx < numStatic)
 		return BaseEntityComponent::GetMemberInfo(idx);
-	return DynamicMemberRegister::GetMemberInfo(idx -numStatic);
+	return DynamicMemberRegister::GetMemberInfo(idx);
 }
 
 std::optional<ComponentMemberIndex> BaseModelComponent::DoGetMemberIndex(const std::string &name) const

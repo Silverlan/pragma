@@ -1342,6 +1342,7 @@ void CGame::RegisterLuaLibraries()
 		luabind::def("draw_line",&Lua::DebugRenderer::Client::DrawLine),
 		luabind::def("draw_box",&Lua::DebugRenderer::Client::DrawBox),
 		luabind::def("draw_mesh",&Lua::DebugRenderer::Client::DrawMeshes),
+		luabind::def("draw_mesh",&Lua::DebugRenderer::Client::DrawMesh),
 		luabind::def("draw_sphere",&Lua::DebugRenderer::Client::DrawSphere,luabind::default_parameter_policy<3,1>{}),
 		luabind::def("draw_sphere",&Lua::DebugRenderer::Client::DrawSphere),
 		luabind::def("draw_truncated_cone",&Lua::DebugRenderer::Client::DrawTruncatedCone,luabind::default_parameter_policy<6,12u>{}),

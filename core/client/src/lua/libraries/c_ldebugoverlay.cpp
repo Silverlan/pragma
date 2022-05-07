@@ -13,6 +13,7 @@
 #include "pragma/lua/classes/ldef_color.h"
 #include <pragma/lua/classes/ldef_vector.h>
 #include "pragma/lua/classes/ldef_plane.h"
+#include <pragma/model/modelmesh.h>
 #include <pragma/debug/debug_render_info.hpp>
 #include "luasystem.h"
 
@@ -57,6 +58,18 @@ std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawMeshe
 	if(renderInfo.outlineColor.has_value())
 		return get_dbg_object(::DebugRenderer::DrawMesh(verts,renderInfo.color,*renderInfo.outlineColor,renderInfo.duration),renderInfo.duration);
 	return get_dbg_object(::DebugRenderer::DrawMesh(verts,renderInfo.color,renderInfo.duration),renderInfo.duration);
+}
+std::shared_ptr<::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawMesh(const ModelSubMesh &mesh,const DebugRenderInfo &renderInfo)
+{
+	if(mesh.GetGeometryType() != ModelSubMesh::GeometryType::Triangles)
+		return nullptr;
+	std::vector<Vector3> dbgVerts;
+	auto &verts = mesh.GetVertices();
+	auto numIndices = mesh.GetIndexCount();
+	dbgVerts.resize(numIndices);
+	for(auto i=decltype(numIndices){0u};i<numIndices;++i)
+		dbgVerts[i] = verts[*mesh.GetIndex(i)].position;
+	return DrawMeshes(dbgVerts,renderInfo);
 }
 std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawTruncatedCone(
 	float startRadius,const Vector3 &dir,float dist,float endRadius,const DebugRenderInfo &renderInfo,uint32_t segmentCount

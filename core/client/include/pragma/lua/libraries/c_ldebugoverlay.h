@@ -12,6 +12,7 @@
 #include "pragma/debug/c_debugoverlay.h"
 
 struct DebugRenderInfo;
+class ModelSubMesh;
 namespace Lua
 {
 	namespace DebugRenderer
@@ -26,6 +27,7 @@ namespace Lua
 				const Vector3 &start,const Vector3 &end,const DebugRenderInfo &renderInfo
 			);
 			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawMeshes(const std::vector<Vector3> &verts,const DebugRenderInfo &renderInfo);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawMesh(const ::ModelSubMesh &mesh,const DebugRenderInfo &renderInfo);
 			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawSphere(
 				float radius,const DebugRenderInfo &renderInfo,uint32_t recursionLevel=1
 			);

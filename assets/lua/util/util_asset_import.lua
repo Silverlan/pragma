@@ -283,6 +283,10 @@ local function import_assets(handler,logCb,basePath,clearFiles,callback)
 end
 
 function util.import_assets(files,logCb,basePath,dropped,callback)
+	logCb = logCb or function(msg,severity)
+		if(severity ~= log.SEVERITY_INFO) then console.print_warning(msg)
+		else print(msg) end
+	end
 	dropped = dropped or false
 	if(type(files) ~= "table") then files = {files} end
 

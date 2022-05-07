@@ -160,7 +160,8 @@ ModelSubMesh::ModelSubMesh()
 	: std::enable_shared_from_this<ModelSubMesh>(),m_skinTextureIndex(0),m_numAlphas(0),m_alphas(std::make_shared<std::vector<Vector2>>()),
 	m_indexData(std::make_shared<std::vector<uint8_t>>()),m_vertexWeights(std::make_shared<std::vector<umath::VertexWeight>>()),
 	m_extendedVertexWeights(std::make_shared<std::vector<umath::VertexWeight>>()),m_vertices(std::make_shared<std::vector<umath::Vertex>>()),
-	m_uvSets{std::make_shared<std::unordered_map<std::string,std::vector<Vector2>>>()}
+	m_uvSets{std::make_shared<std::unordered_map<std::string,std::vector<Vector2>>>()},
+	m_extensions{udm::Property::Create(udm::Type::Element)}
 {}
 ModelSubMesh::ModelSubMesh(const ModelSubMesh &other)
 	: m_skinTextureIndex(other.m_skinTextureIndex),m_center(other.m_center),m_vertices(other.m_vertices),
@@ -169,7 +170,17 @@ ModelSubMesh::ModelSubMesh(const ModelSubMesh &other)
 	m_pose{other.m_pose},m_uvSets{other.m_uvSets},m_geometryType{other.m_geometryType},m_referenceId{other.m_referenceId},
 	m_indexType{other.m_indexType}
 {
-	static_assert(sizeof(ModelSubMesh) == 216,"Update this function when making changes to this class!");
+	// Copy extension data
+	std::stringstream extStream {};
+	ufile::OutStreamFile extStreamFileOut {std::move(extStream)};
+	other.m_extensions->Write(extStreamFileOut);
+
+	m_extensions = udm::Property::Create(udm::Type::Element);
+	ufile::InStreamFile extStreamFileIn {std::move(extStreamFileOut.MoveStream())};
+	m_extensions->Read(extStreamFileIn);
+	//
+
+	static_assert(sizeof(ModelSubMesh) == 232,"Update this function when making changes to this class!");
 }
 std::shared_ptr<ModelSubMesh> ModelSubMesh::Load(const udm::AssetData &data,std::string &outErr)
 {
@@ -177,11 +188,12 @@ std::shared_ptr<ModelSubMesh> ModelSubMesh::Load(const udm::AssetData &data,std:
 	auto result = mesh->LoadFromAssetData(data,outErr);
 	return result ? mesh : nullptr;
 }
+udm::PropertyWrapper ModelSubMesh::GetExtensionData() const {return *m_extensions;}
 bool ModelSubMesh::operator==(const ModelSubMesh &other) const {return this == &other;}
 bool ModelSubMesh::operator!=(const ModelSubMesh &other) const {return !operator==(other);}
 bool ModelSubMesh::IsEqual(const ModelSubMesh &other) const
 {
-	static_assert(sizeof(ModelSubMesh) == 216,"Update this function when making changes to this class!");
+	static_assert(sizeof(ModelSubMesh) == 232,"Update this function when making changes to this class!");
 	if(!(m_skinTextureIndex == other.m_skinTextureIndex && uvec::cmp(m_center,other.m_center) && m_numAlphas == other.m_numAlphas && uvec::cmp(m_min,other.m_min) &&
 		uvec::cmp(m_max,other.m_max) && m_geometryType == other.m_geometryType && m_referenceId == other.m_referenceId &&
 		static_cast<bool>(m_vertices) == static_cast<bool>(other.m_vertices) && static_cast<bool>(m_alphas) == static_cast<bool>(other.m_alphas) &&
@@ -277,7 +289,17 @@ void ModelSubMesh::Copy(ModelSubMesh &cpy,bool fullCopy) const
 	cpy.m_vertexWeights = std::make_shared<std::vector<umath::VertexWeight>>(*cpy.m_vertexWeights);
 	cpy.m_extendedVertexWeights = std::make_shared<std::vector<umath::VertexWeight>>(*cpy.m_extendedVertexWeights);
 	cpy.m_uvSets = std::make_shared<std::unordered_map<std::string,std::vector<Vector2>>>(*cpy.m_uvSets);
-	static_assert(sizeof(ModelSubMesh) == 216,"Update this function when making changes to this class!");
+
+	// Copy extension data
+	std::stringstream extStream {};
+	ufile::OutStreamFile extStreamFileOut {std::move(extStream)};
+	m_extensions->Write(extStreamFileOut);
+
+	cpy.m_extensions = udm::Property::Create(udm::Type::Element);
+	ufile::InStreamFile extStreamFileIn {std::move(extStreamFileOut.MoveStream())};
+	m_extensions->Read(extStreamFileIn);
+	//
+	static_assert(sizeof(ModelSubMesh) == 232,"Update this function when making changes to this class!");
 }
 std::shared_ptr<ModelSubMesh> ModelSubMesh::Copy(bool fullCopy) const
 {
@@ -981,6 +1003,8 @@ bool ModelSubMesh::Save(udm::AssetDataArg outData,std::string &outErr)
 	udm["alphaCount"] = GetAlphaCount();
 	if(!alphas.empty())
 		udm.AddArray("alphas",alphas,udm::ArrayType::Compressed);
+
+	udm["extensions"] = m_extensions;
 	return true;
 }
 bool ModelSubMesh::LoadFromAssetData(const udm::AssetData &data,std::string &outErr)
@@ -1040,6 +1064,12 @@ bool ModelSubMesh::LoadFromAssetData(const udm::AssetData &data,std::string &out
 	udm["extendedVertexWeights"](GetExtendedVertexWeights());
 	udm["alphaCount"](m_numAlphas);
 	udm["alphas"](GetAlphas());
+
+	auto udmExtensions = udm["extensions"];
+	if(udmExtensions)
+		m_extensions = udmExtensions.ClaimOwnership();
+	else
+		m_extensions = udm::Property::Create(udm::Type::Element);
 	return true;
 }
 

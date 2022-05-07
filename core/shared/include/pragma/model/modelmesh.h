@@ -186,6 +186,8 @@ public:
 	umath::ScaledTransform &GetPose();
 	void SetPose(const umath::ScaledTransform &pose);
 
+	udm::PropertyWrapper GetExtensionData() const;
+
 	uint32_t GetReferenceId() const;
 	void SetReferenceId(uint32_t refId);
 
@@ -206,6 +208,7 @@ protected:
 	std::shared_ptr<std::vector<uint8_t>> m_indexData;
 	std::shared_ptr<std::vector<umath::VertexWeight>> m_vertexWeights;
 	std::shared_ptr<std::vector<umath::VertexWeight>> m_extendedVertexWeights;
+	udm::PProperty m_extensions = nullptr;
 	Vector3 m_min;
 	Vector3 m_max;
 	GeometryType m_geometryType = GeometryType::Triangles;

@@ -11,6 +11,7 @@
 #include "pragma/lua/util.hpp"
 #include "pragma/lua/converters/vector_converter_t.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
+#include "pragma/lua/custom_constructor.hpp"
 #include "pragma/lua/types/udm.hpp"
 #include "pragma/util/util_game.hpp"
 #include <sharedutils/util_path.hpp>
@@ -1923,6 +1924,13 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		a.GetData() = prop;
 	});
 	modUdm[cdAssetData];
+	pragma::lua::define_custom_constructor<::udm::AssetData,
+		+[](::udm::LinkedPropertyWrapper &prop,const std::string &identifier,::udm::Version version) -> ::udm::AssetData {
+		::udm::AssetData assetData {prop};
+		assetData.SetAssetType(identifier);
+		assetData.SetAssetVersion(version);
+		return assetData;
+	},::udm::LinkedPropertyWrapper&,const std::string&,::udm::Version>(lua.GetState());
 
 	auto cdArray = luabind::class_<::udm::Array>("Array");
 	cdArray.def(luabind::tostring(luabind::self));

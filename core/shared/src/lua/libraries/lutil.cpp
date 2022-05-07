@@ -52,6 +52,7 @@
 #include <luainterface.hpp>
 #include <se_scene.hpp>
 #include <pragma/math/intersection.h>
+#include <pragma/model/modelmesh.h>
 #include <panima/skeleton.hpp>
 #include <luabind/class_info.hpp>
 #include <util_zip.h>
@@ -87,6 +88,129 @@ luabind::detail::class_rep *Lua::get_crep(luabind::object o)
 	}
 	return crep;
 }
+
+
+
+
+
+#include <sharedutils/util_hair.hpp>
+static Vector3 calc_hair_normal(const Vector3 &flowNormal,const Vector3 &faceNormal)
+{
+	auto hairNormal = flowNormal -uvec::project(flowNormal,faceNormal);
+	auto l = uvec::length(hairNormal);
+	if(l > 0.001f)
+		hairNormal /= l;
+	else
+		hairNormal = faceNormal;
+	return hairNormal;
+}
+
+static Vector3 apply_curvature(const Vector3 &baseHairDir,const Vector3 &surfaceTargetNormal,float curvature,float factor)
+{
+	if(uvec::distance(baseHairDir,surfaceTargetNormal) < 0.001f)
+		return baseHairDir;
+	auto f = factor *curvature;
+	auto n = glm::slerp(baseHairDir,surfaceTargetNormal,f);
+	uvec::normalize(&n); // Probably not needed
+	return n;
+}
+
+static bool save_hair_strand_data(const util::HairStrandData &strandData,udm::AssetDataArg outData,std::string &outErr)
+{
+	outData.SetAssetType("PHD");
+	outData.SetAssetVersion(1);
+	
+	auto udm = *outData;
+	udm["strandCount"] = strandData.hairSegments.size();
+	udm.AddArray("segmentCounts",strandData.hairSegments,udm::ArrayType::Compressed);
+	auto udmStrands = udm["strands"];
+	udmStrands.AddArray("points",strandData.points,udm::ArrayType::Compressed);
+	udmStrands.AddArray("uvs",strandData.uvs,udm::ArrayType::Compressed);
+	udmStrands.AddArray("thickness",strandData.thicknessData,udm::ArrayType::Compressed);
+	return true;
+}
+static bool load_hair_strand_data(util::HairStrandData &strandData,const udm::AssetData &data,std::string &outErr)
+{
+	if(data.GetAssetType() != "PHD" || data.GetAssetVersion() < 1)
+		return false;
+	auto udm = *data;
+	uint32_t numStrands = 0;
+	udm["strandCount"](numStrands);
+	udm["segmentCounts"](strandData.hairSegments);
+	auto udmStrands = udm["strands"];
+	udmStrands["points"](strandData.points);
+	udmStrands["uvs"](strandData.uvs);
+	udmStrands["thickness"](strandData.thicknessData);
+	return true;
+}
+
+static std::unique_ptr<util::HairStrandData> generate_hair_file(const util::HairConfig &hairConfig,const util::HairData &hairData)
+{
+	auto numHair = hairData.hairPoints.size();
+	auto numSegments = hairConfig.numSegments;
+	auto numPoints = numHair *(numSegments +1);
+	auto hairFile = std::make_unique<util::HairStrandData>();
+
+	auto &lxUvs = hairFile->uvs;
+	auto &thicknessData = hairFile->thicknessData;
+	auto &points = hairFile->points;
+	auto &hairSegments = hairFile->hairSegments;
+	points.resize(numPoints);
+	lxUvs.resize(numPoints);
+	thicknessData.resize(numPoints);
+	uint32_t hairIdx = 0;
+	auto fAddHairPoint = [&hairIdx,&points,&lxUvs,&thicknessData](const Vector3 &p,const Vector2 &uv,float thickness) {
+		points[hairIdx] = {p.x,p.y,p.z};
+		lxUvs[hairIdx] = {uv.x,uv.y};
+		thicknessData[hairIdx] = thickness;
+
+		++hairIdx;
+	};
+	hairSegments.resize(hairData.hairPoints.size());
+	for(auto i=decltype(hairData.hairPoints.size()){0u};i<hairData.hairPoints.size();++i)
+	{
+		auto &p = hairData.hairPoints[i];
+		auto &uv = hairData.hairUvs[i];
+		auto &faceNormal = hairData.hairNormals[i];
+
+		auto hairStrength = hairConfig.defaultHairStrength;
+		auto length = hairConfig.defaultLength;
+		auto randomHairLengthFactor = hairConfig.randomHairLengthFactor;
+		auto thickness = hairConfig.defaultThickness;
+
+		Vector3 gravity {0.f,-1.f,0.f};
+		auto lxGravity = gravity;
+		gravity = {lxGravity.x,lxGravity.y,lxGravity.z};
+		const Vector3 flowNormal = gravity;
+		auto baseHairNormal = calc_hair_normal(flowNormal,faceNormal);
+		auto hairNormal = faceNormal *hairStrength +(1.f -hairStrength) *baseHairNormal;
+		uvec::normalize(&hairNormal);
+
+		//hairPoints.push_back(p);
+		//hairPoints.push_back(p +n *length); // TODO: Take adjacent face normals into account for hair direction?
+		auto hairLength = length *(1.f -randomHairLengthFactor) +length *randomHairLengthFactor *umath::random(0.f,1.f);
+
+		fAddHairPoint(p,uv,thickness);
+		auto lenPerSegment = hairLength /static_cast<float>(numSegments);
+		auto p0 = p;
+		hairSegments[i] = numSegments;
+		for(auto j=decltype(numSegments){0u};j<numSegments;++j)
+		{
+			auto f = (j +1) /static_cast<float>(numSegments);
+
+			auto n = apply_curvature(hairNormal,baseHairNormal,hairConfig.curvature,f);
+			//auto p0 = (j > 0) ? hairPoints.back() : p;
+			auto p1 = p0 +n *lenPerSegment;
+			fAddHairPoint(p1,uv,(1.f -f) *thickness);
+			p0 = p1;
+		}
+	}
+	return hairFile;
+}
+
+
+
+
 
 void Lua::util::register_shared_generic(luabind::module_ &mod)
 {
@@ -149,8 +273,93 @@ void Lua::util::register_shared_generic(luabind::module_ &mod)
 		luabind::def("world_space_point_to_screen_space_uv",static_cast<void(*)(lua_State*,const Vector3&,const Mat4&,float,float)>(Lua::util::world_space_point_to_screen_space_uv)),
 		luabind::def("world_space_direction_to_screen_space",Lua::util::world_space_direction_to_screen_space),
 		luabind::def("calc_screen_space_distance_to_world_space_position",Lua::util::calc_screenspace_distance_to_worldspace_position),
-		luabind::def("depth_to_distance",Lua::util::depth_to_distance)
+		luabind::def("depth_to_distance",Lua::util::depth_to_distance),
+
+		luabind::def("generate_hair_file",&generate_hair_file),
+		luabind::def("generate_hair_data",+[](float hairPerArea,const ModelSubMesh &mesh) {
+			struct MeshInterface
+				: public ::util::HairGenerator::MeshInterface
+			{
+				virtual uint32_t GetTriangleCount() const override {return getTriangleCount();}
+				virtual uint32_t GetVertexCount() const override {return getVertexCount();}
+				virtual std::array<uint32_t,3> GetTriangle(uint32_t triIdx) const override {return getTriangle(triIdx);}
+				virtual const Vector3 GetVertexPosition(uint32_t vertIdx) const override {return getVertexPosition(vertIdx);}
+				virtual const Vector3 GetVertexNormal(uint32_t vertIdx) const override {return getVertexNormal(vertIdx);}
+				virtual const Vector2 GetVertexUv(uint32_t vertIdx) const override {return getVertexUv(vertIdx);}
+
+				std::function<uint32_t()> getTriangleCount = nullptr;
+				std::function<uint32_t()> getVertexCount = nullptr;
+				std::function<std::array<uint32_t,3>(uint32_t)> getTriangle = nullptr;
+				std::function<const Vector3&(uint32_t)> getVertexPosition = nullptr;
+				std::function<const Vector3&(uint32_t)> getVertexNormal = nullptr;
+				std::function<const Vector2&(uint32_t)> getVertexUv = nullptr;
+			};
+
+			auto meshInterface = std::make_unique<MeshInterface>();
+			meshInterface->getTriangleCount = [&mesh]() -> uint32_t {return mesh.GetTriangleCount();};
+			meshInterface->getVertexCount = [&mesh]() -> uint32_t {return mesh.GetVertexCount();};
+			meshInterface->getTriangle = [&mesh](uint32_t triIdx) -> std::array<uint32_t,3> {
+				return std::array<uint32_t,3>{
+					*mesh.GetIndex(triIdx *3),
+					*mesh.GetIndex(triIdx *3 +1),
+					*mesh.GetIndex(triIdx *3 +2)
+				};
+			};
+			meshInterface->getVertexPosition = [&mesh](uint32_t vertIdx) -> const Vector3& {
+				return mesh.GetVertexPosition(vertIdx) *static_cast<float>(util::units_to_metres(1.f));
+			};
+			meshInterface->getVertexNormal = [&mesh](uint32_t vertIdx) -> const Vector3& {
+				return mesh.GetVertexNormal(vertIdx);
+			};
+			meshInterface->getVertexUv = [&mesh](uint32_t vertIdx) -> const Vector2& {
+				return mesh.GetVertexUV(vertIdx);
+			};
+
+			::util::HairGenerator gen {};
+			gen.SetMeshDataInterface(std::move(meshInterface));
+			return gen.Generate(hairPerArea);
+		})
 	];
+
+	auto defHairStrandData = luabind::class_<::util::HairStrandData>("HairStrandData");
+	defHairStrandData.def("Save",+[](const ::util::HairStrandData &strandData,udm::AssetDataArg outData) {
+		std::string err;
+		return save_hair_strand_data(strandData,outData,err);
+	});
+	defHairStrandData.def("Load",+[](::util::HairStrandData &strandData,const udm::AssetData &data) {
+		std::string err;
+		return load_hair_strand_data(strandData,data,err);
+	});
+	defHairStrandData.def("GetStrandCount",+[](const ::util::HairStrandData &strandData) {
+		return strandData.hairSegments.size();
+	});
+	defHairStrandData.def("GetSegmentCount",+[](const ::util::HairStrandData &strandData,uint32_t idx) {
+		return strandData.hairSegments[idx];
+	});
+	defHairStrandData.def("GetStrandPoint",+[](const ::util::HairStrandData &strandData,uint32_t idx) {
+		return strandData.points[idx];
+	});
+	defHairStrandData.def("GetStrandUv",+[](const ::util::HairStrandData &strandData,uint32_t idx) {
+		return strandData.uvs[idx];
+	});
+	defHairStrandData.def("GetStrandThickness",+[](const ::util::HairStrandData &strandData,uint32_t idx) {
+		return strandData.thicknessData[idx];
+	});
+	mod[defHairStrandData];
+
+	auto defHairConfig = luabind::class_<::util::HairConfig>("HairConfig");
+	defHairConfig.def(luabind::constructor<>());
+	defHairConfig.def_readwrite("numSegments",&::util::HairConfig::numSegments);
+	defHairConfig.def_readwrite("hairPerSquareMeter",&::util::HairConfig::hairPerSquareMeter);
+	defHairConfig.def_readwrite("defaultThickness",&::util::HairConfig::defaultThickness);
+	defHairConfig.def_readwrite("defaultLength",&::util::HairConfig::defaultLength);
+	defHairConfig.def_readwrite("defaultHairStrength",&::util::HairConfig::defaultHairStrength);
+	defHairConfig.def_readwrite("randomHairLengthFactor",&::util::HairConfig::randomHairLengthFactor);
+	defHairConfig.def_readwrite("curvature",&::util::HairConfig::curvature);
+	mod[defHairConfig];
+
+	auto defHairData = luabind::class_<::util::HairData>("HairData");
+	mod[defHairData];
 
 	auto defZip = luabind::class_<ZIPFile>("ZipFile");
 	defZip.add_static_constant("OPEN_MODE_READ",umath::to_integral(ZIPFile::OpenMode::Read));

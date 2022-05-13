@@ -247,7 +247,7 @@ void GUIDebugCursorManager::SetTargetGUIElement(WIBase *optEl,bool clear)
 	if(pText)
 	{
 		pText->SetText(GetElementInfo(el));
-		Con::cout<<pText->GetText()<<Con::endl;
+		Con::cout<<pText->GetText().cpp_str()<<Con::endl;
 	}
 
 	// Initialize border to highlight the element

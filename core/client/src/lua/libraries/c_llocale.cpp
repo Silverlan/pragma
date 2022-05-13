@@ -61,7 +61,7 @@ int Lua::Locale::get_text(lua_State *l)
 	return numResults;
 }
 
-bool Lua::Locale::load(const std::string &fileName) {return ::Locale::Load(fileName);}
+bool Lua::Locale::load(const std::string &fileName) {return ::Locale::Load(fileName) != ::Locale::LoadResult::Failed;}
 
 const std::string &Lua::Locale::get_language() {return ::Locale::GetLanguage();}
 

@@ -37,7 +37,7 @@ void WICommandLineEntry::Initialize()
 					return;
 				m_bSkipAutoComplete = true;
 				auto &text = pTextEl->GetText();
-				auto insertText = text +' '; // Add a space to the end of the command so the user can add arguments immediately and can skip typing the space themselves
+				auto insertText = text.cpp_str() +' '; // Add a space to the end of the command so the user can add arguments immediately and can skip typing the space themselves
 				SetText(insertText);
 				if(text.empty() == false)
 					SetCaretPos(insertText.length());
@@ -89,7 +89,7 @@ void WICommandLineEntry::OnTextEntered()
 	WITextEntry::OnTextEntered();
 	auto text = GetText();
 	if(text.empty() == false)
-		AddCommandHistoryEntry(text);
+		AddCommandHistoryEntry(text.cpp_str());
 	if(m_hAutoCompleteList.IsValid())
 		m_hAutoCompleteList->Remove();
 	SetText("");
@@ -129,7 +129,7 @@ void WICommandLineEntry::InitializeAutoCompleteList()
 		}
 	}
 	else
-		FindAutocompleteOptions(text,options);
+		FindAutocompleteOptions(text.cpp_str(),options);
 	if(options.empty())
 		return;
 	auto pos = GetAbsolutePos();
@@ -183,7 +183,7 @@ void WICommandLineEntry::SetAutocompleteEnabled(bool enabled)
 		m_hAutoCompleteList->Remove();
 }
 bool WICommandLineEntry::IsAutocompleteEnabled() const {return m_bAutocompleteEnabled;}
-void WICommandLineEntry::OnTextChanged(const std::string &text,bool changedByUser)
+void WICommandLineEntry::OnTextChanged(const util::Utf8String &text,bool changedByUser)
 {
 	WITextEntry::OnTextChanged(text,changedByUser);
 	if(m_bSkipAutoComplete)

@@ -69,8 +69,8 @@ void WITable::OnChildAdded(WIBase *child)
 
 bool WITable::SortRows(bool bAsc,unsigned int col,const WIHandle &a,const WIHandle &b)
 {
-	const std::string *textA = nullptr;
-	const std::string *textB = nullptr;
+	const util::Utf8String *textA = nullptr;
+	const util::Utf8String *textB = nullptr;
 	const WITableRow *rowA = a.get<const WITableRow>();
 	if(rowA != nullptr)
 	{
@@ -852,7 +852,7 @@ bool WITableRow::GetValue(uint32_t col,std::string &val) const
 	auto *pEl = pCell->GetFirstChild("WIText");
 	if(pEl == nullptr)
 		return false;
-	val = static_cast<WIText*>(pEl)->GetText();
+	val = static_cast<WIText*>(pEl)->GetText().cpp_str();
 	return true;
 }
 WITableCell *WITableRow::InsertElement(unsigned int col,WIBase *el)

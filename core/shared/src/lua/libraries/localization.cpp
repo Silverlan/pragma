@@ -34,14 +34,14 @@ void Locale::Clear()
 	m_localization.texts.clear();
 	m_language.clear();
 }
-bool Locale::Load(const std::string &file,const std::string &lan,bool bReload)
+Locale::LoadResult Locale::Load(const std::string &file,const std::string &lan,bool bReload)
 {
 	auto filePath = util::Path::CreateFile(file);
 	auto it = std::find(m_loadedFiles.begin(),m_loadedFiles.end(),filePath.GetString());
 	if(it != m_loadedFiles.end())
 	{
 		if(bReload == false)
-			return true;
+			return Locale::LoadResult::AlreadyLoaded;
 		m_loadedFiles.erase(it);
 	}
 	return LoadFile(filePath.GetString(),lan);
@@ -52,7 +52,7 @@ std::string Locale::GetFileLocation(const std::string &file,const std::string &l
 	return LOCALIZATION_ROOT_PATH +lan +"/texts/" +file;
 }
 
-bool Locale::LoadFile(const std::string &file,const std::string &lan,Localization &outLoc)
+Locale::LoadResult Locale::LoadFile(const std::string &file,const std::string &lan,Localization &outLoc)
 {
 	auto filePath = GetFileLocation(file,lan);
 	auto f = FileManager::OpenFile(filePath.c_str(),"r");
@@ -69,25 +69,25 @@ bool Locale::LoadFile(const std::string &file,const std::string &lan,Localizatio
 				outLoc.texts[key] = val;
 			}
 		}
-		return true;
+		return LoadResult::Success;
 	}
-	return false;
+	return LoadResult::Failed;
 }
 
-bool Locale::LoadFile(const std::string &file,const std::string &lan)
+Locale::LoadResult Locale::LoadFile(const std::string &file,const std::string &lan)
 {
-	if(LoadFile(file,lan,m_localization) == false)
-		return false;
-	m_loadedFiles.push_back(file);
-	return true;
+	auto res = LoadFile(file,lan,m_localization);
+	if(res == LoadResult::Success)
+		m_loadedFiles.push_back(file);
+	return res;
 }
 
-bool Locale::Load(const std::string &file,bool bReload)
+Locale::LoadResult Locale::Load(const std::string &file,bool bReload)
 {
 	auto r = Load(file,"en",bReload);
 	if(m_language == "en")
 		return r;
-	r = Load(file,m_language,bReload);
+	r = Load(file,m_language,bReload || (r == LoadResult::Success));
 	return r;
 }
 
@@ -168,14 +168,14 @@ const std::unordered_map<std::string,Locale::LanguageInfo> &Locale::GetLanguages
 	}
 	return g_languages;
 }
-bool Locale::SetLocalization(const std::string &id,const tiny_utf8::string &text,bool overwriteIfExists)
+bool Locale::SetLocalization(const std::string &id,const util::Utf8String &text,bool overwriteIfExists)
 {
 	if(!overwriteIfExists && m_localization.texts.find(id) != m_localization.texts.end())
 		return false;
 	m_localization.texts[id] = text;
 	return true;
 }
-bool Locale::GetText(const std::string &id,tiny_utf8::string &outText) {return GetText(id,{},outText);}
+bool Locale::GetText(const std::string &id,util::Utf8String &outText) {return GetText(id,{},outText);}
 bool Locale::GetText(const std::string &id,std::string &outText) {return GetText(id,{},outText);}
 template<class TString>
 	static void insert_arguments(const std::vector<TString> &args,TString &inOutText)
@@ -190,7 +190,7 @@ template<class TString>
 			inOutText = inOutText.replace(pos,3,args[i]);
 	}
 }
-bool Locale::GetText(const std::string &id,const std::vector<tiny_utf8::string> &args,tiny_utf8::string &outText)
+bool Locale::GetText(const std::string &id,const std::vector<util::Utf8String> &args,util::Utf8String &outText)
 {
 	auto it = m_localization.texts.find(id);
 	if(it == m_localization.texts.end())
@@ -220,7 +220,7 @@ std::string Locale::GetText(const std::string &id,const std::vector<std::string>
 	insert_arguments(args,r);
 	return r;
 }
-tiny_utf8::string Locale::GetTextUtf8(const std::string &id,const std::vector<tiny_utf8::string> &args)
+util::Utf8String Locale::GetTextUtf8(const std::string &id,const std::vector<util::Utf8String> &args)
 {
 	auto it = m_localization.texts.find(id);
 	if(it == m_localization.texts.end())
@@ -234,14 +234,16 @@ tiny_utf8::string Locale::GetTextUtf8(const std::string &id,const std::vector<ti
 }
 std::string Locale::DetermineSystemLanguage()
 {
-	// TODO
-	return "en";
+	auto lan = util::get_system_language();
+	if(!lan)
+		lan = "en";
+	return *lan;
 }
-bool Locale::Localize(const std::string &identifier,const std::string &lan,const std::string &category,const tiny_utf8::string &text)
+bool Locale::Localize(const std::string &identifier,const std::string &lan,const std::string &category,const util::Utf8String &text)
 {
 	auto fileName = category +".txt";
 	Localization loc {};
-	if(!Locale::LoadFile(fileName,lan,loc))
+	if(Locale::LoadFile(fileName,lan,loc) == LoadResult::Failed)
 		return false;
 	loc.texts[identifier] = text;
 	std::vector<std::string> keys;
@@ -260,7 +262,7 @@ bool Locale::Localize(const std::string &identifier,const std::string &lan,const
 			first = false;
 
 		auto val = loc.texts[key];
-		ustring::replace<tiny_utf8::string>(val,"\"","\\\"");
+		ustring::replace<util::Utf8String>(val,"\"","\\\"");
 		out<<key<<" = \""<<val<<"\"";
 	}
 

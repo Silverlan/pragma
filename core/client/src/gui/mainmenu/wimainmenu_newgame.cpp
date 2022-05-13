@@ -45,9 +45,9 @@ void WIMainMenuNewGame::OnStartGame(GLFW::MouseButton button,GLFW::KeyState stat
 		return;
 	auto *pOptionsList = static_cast<WIOptionsList*>(m_hControlSettings.get());
 	std::string map;
-	std::string serverName;
+	util::Utf8String serverName;
 	std::string gameMode;
-	std::string rconPassword;
+	util::Utf8String rconPassword;
 	UInt32 maxPlayers = 1;
 	if(m_hMapList.IsValid())
 	{
@@ -57,17 +57,17 @@ void WIMainMenuNewGame::OnStartGame(GLFW::MouseButton button,GLFW::KeyState stat
 	if(m_hServerName.IsValid())
 	{
 		auto *pServerName = static_cast<WITextEntry*>(m_hServerName.get());
-		serverName = pServerName->GetText();
+		serverName = pServerName->GetText().to_str();
 	}
 	if(m_hGameMode.IsValid())
 	{
 		auto *pGameMode = static_cast<WIDropDownMenu*>(m_hGameMode.get());
-		gameMode = pGameMode->GetText();
+		gameMode = pGameMode->GetText().cpp_str();
 	}
 	if(m_hRconPassword.IsValid())
 	{
 		auto *pRconPassword = static_cast<WITextEntry*>(m_hRconPassword.get());
-		rconPassword = pRconPassword->GetText();
+		rconPassword = pRconPassword->GetText().to_str();
 	}
 	if(m_hMaxPlayers.IsValid())
 	{

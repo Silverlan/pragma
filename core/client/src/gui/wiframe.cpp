@@ -190,7 +190,7 @@ void WIFrame::SetTitle(std::string title)
 	pText->SizeToContents();
 	pText->SetVisible(!title.empty());
 }
-std::string WIFrame::GetTitle() const
+util::Utf8String WIFrame::GetTitle() const
 {
 	if(!m_hTitle.IsValid())
 		return "";

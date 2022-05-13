@@ -9,17 +9,17 @@
 #define __LOCALIZATION_H__
 
 #include <pragma/networkdefinitions.h>
-#include <tinyutf8/tinyutf8.h>
 #include <string>
 #include <vector>
 #include <optional>
 #include <unordered_map>
+#include <sharedutils/util_utf8.hpp>
 
 class Locale;
 struct DLLNETWORK Localization
 {
 	Localization();
-	std::unordered_map<std::string,tiny_utf8::string> texts;
+	std::unordered_map<std::string,util::Utf8String> texts;
 };
 
 class DLLNETWORK Locale
@@ -30,33 +30,41 @@ public:
 		std::string displayName;
 		udm::PProperty configData = nullptr;
 	};
+
+	enum class LoadResult : uint8_t
+	{
+		Success = 0,
+		Failed,
+		AlreadyLoaded
+	};
+
 	static void Init();
 	static void Clear();
 
-	static bool Load(const std::string &file,bool bReload=false);
+	static LoadResult Load(const std::string &file,bool bReload=false);
 	static void SetLanguage(std::string lan);
 	static void ReloadFiles();
 	static bool GetText(const std::string &id,std::string &outText);
-	static bool GetText(const std::string &id,tiny_utf8::string &outText);
+	static bool GetText(const std::string &id,util::Utf8String &outText);
 	static bool GetText(const std::string &id,const std::vector<std::string> &args,std::string &outText);
-	static bool GetText(const std::string &id,const std::vector<tiny_utf8::string> &args,tiny_utf8::string &outText);
+	static bool GetText(const std::string &id,const std::vector<util::Utf8String> &args,util::Utf8String &outText);
 	static std::string GetText(const std::string &id,const std::vector<std::string> &args={});
-	static tiny_utf8::string GetTextUtf8(const std::string &id,const std::vector<tiny_utf8::string> &args={});
-	static bool SetLocalization(const std::string &id,const tiny_utf8::string &text,bool overwriteIfExists=true);
+	static util::Utf8String GetTextUtf8(const std::string &id,const std::vector<util::Utf8String> &args={});
+	static bool SetLocalization(const std::string &id,const util::Utf8String &text,bool overwriteIfExists=true);
 	static const std::string &GetLanguage();
 	static const LanguageInfo *GetLanguageInfo();
 	static const std::unordered_map<std::string,LanguageInfo> &GetLanguages();
 	static void Poll();
 	static std::string DetermineSystemLanguage();
-	static bool LoadFile(const std::string &file,const std::string &lan,Localization &outLoc);
+	static LoadResult LoadFile(const std::string &file,const std::string &lan,Localization &outLoc);
 	static std::string GetFileLocation(const std::string &file,const std::string &lan);
-	static bool Localize(const std::string &identifier,const std::string &lan,const std::string &category,const tiny_utf8::string &text);
+	static bool Localize(const std::string &identifier,const std::string &lan,const std::string &category,const util::Utf8String &text);
 private:
 	static Localization m_localization;
 	static std::vector<std::string> m_loadedFiles;
 	static std::string m_language;
-	static bool Load(const std::string &file,const std::string &lan,bool bReload);
-	static bool LoadFile(const std::string &file,const std::string &lan);
+	static LoadResult Load(const std::string &file,const std::string &lan,bool bReload);
+	static LoadResult LoadFile(const std::string &file,const std::string &lan);
 };
 
 #endif

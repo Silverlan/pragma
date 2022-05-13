@@ -30,7 +30,7 @@ WIKeyEntry::~WIKeyEntry()
 		m_hMouseTrap->Remove();
 }
 
-void WIKeyEntry::OnTextChanged(const std::string &text,bool changedByUser)
+void WIKeyEntry::OnTextChanged(const util::Utf8String &text,bool changedByUser)
 {
 	WITextEntryBase::OnTextChanged(text,changedByUser);
 	if(!m_hText.IsValid())
@@ -52,7 +52,7 @@ void WIKeyEntry::Initialize()
 	if(m_hText.IsValid())
 	{
 		auto hThis = GetHandle();
-		m_hText->AddCallback("OnTextChanged",FunctionCallback<void,std::reference_wrapper<const std::string>>::Create([hThis](std::reference_wrapper<const std::string> newText) mutable {
+		m_hText->AddCallback("OnTextChanged",FunctionCallback<void,std::reference_wrapper<const util::Utf8String>>::Create([hThis](std::reference_wrapper<const util::Utf8String> newText) mutable {
 			if(!hThis.IsValid())
 				return;
 			static_cast<WIKeyEntry*>(hThis.get())->OnTextChanged(newText,false);
@@ -122,7 +122,7 @@ void WIKeyEntry::OnFocusGained()
 	WITextEntryBase::OnFocusGained();
 	if(m_hMouseTrap.IsValid())
 		m_hMouseTrap->Remove();
-	m_previousKey = GetText();
+	m_previousKey = GetText().cpp_str();
 	SetText(Locale::GetText("press_a_key"));
 	auto *pRect = WGUI::GetInstance().Create<WIBase>();
 	m_hMouseTrap = pRect->GetHandle();

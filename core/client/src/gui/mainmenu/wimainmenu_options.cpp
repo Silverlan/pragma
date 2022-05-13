@@ -57,7 +57,7 @@ void WIMainMenuOptions::ApplyWindowSize()
 	WIDropDownMenu *resMenu = static_cast<WIDropDownMenu*>(m_hResolutionList.get());
 	auto text = resMenu->GetText();
 	std::vector<std::string> res;
-	ustring::explode(std::string{text},"x",res);
+	ustring::explode(std::string{text.cpp_str()},"x",res);
 	if(res.size() < 2)
 		return;
 	int w = atoi(res[0].c_str());

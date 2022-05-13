@@ -421,7 +421,9 @@ static void register_gui(Lua::Interface &lua)
 	wiConsoleClassDef.def("GetCommandLineEntryElement",&WIConsole::GetCommandLineEntryElement);
 	wiConsoleClassDef.def("GetTextLogElement",&WIConsole::GetTextLogElement);
 	wiConsoleClassDef.def("GetFrame",&WIConsole::GetFrame);
-	wiConsoleClassDef.def("GetText",&WIConsole::GetText);
+	wiConsoleClassDef.def("GetText",+[](const ::WIConsole &console) {
+		return console.GetText().cpp_str();
+	});
 	wiConsoleClassDef.def("SetText",&WIConsole::SetText);
 	wiConsoleClassDef.def("AppendText",&WIConsole::AppendText);
 	wiConsoleClassDef.def("Clear",&WIConsole::Clear);

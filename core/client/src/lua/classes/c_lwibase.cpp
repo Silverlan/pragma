@@ -469,8 +469,12 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 
 void Lua::WIButton::register_class(luabind::class_<::WIButton,::WIBase> &classDef)
 {
-	classDef.def("SetText",&::WIButton::SetText);
-	classDef.def("GetText",&::WIButton::GetText);
+	classDef.def("SetText",+[](::WIButton &button,const std::string &text) {
+		button.SetText(text);
+	});
+	classDef.def("GetText",+[](::WIButton &button) {
+		return button.GetText().cpp_str();
+	});
 }
 
 void Lua::WIProgressBar::register_class(luabind::class_<::WIProgressBar,::WIBase> &classDef)
@@ -703,14 +707,22 @@ void Lua::WIDropDownMenu::register_class(luabind::class_<::WIDropDownMenu,luabin
 	classDef.def("SelectOption",static_cast<void(::WIDropDownMenu::*)(uint32_t)>(&::WIDropDownMenu::SelectOption));
 	classDef.def("SelectOption",static_cast<void(::WIDropDownMenu::*)(const std::string&)>(&::WIDropDownMenu::SelectOption));
 	classDef.def("ClearOptions",&::WIDropDownMenu::ClearOptions);
-	classDef.def("SelectOptionByText",&::WIDropDownMenu::SelectOptionByText);
-	classDef.def("GetOptionText",&::WIDropDownMenu::GetOptionText);
+	classDef.def("SelectOptionByText",+[](::WIDropDownMenu &menu,const std::string &text) {
+		return menu.SelectOptionByText(text);
+	});
+	classDef.def("GetOptionText",+[](::WIDropDownMenu &menu,uint32_t idx) {
+		return menu.GetOptionText(idx).cpp_str();
+	});
 	classDef.def("GetOptionValue",&::WIDropDownMenu::GetOptionValue);
 	classDef.def("SetOptionText",&::WIDropDownMenu::SetOptionText);
 	classDef.def("SetOptionValue",&::WIDropDownMenu::SetOptionValue);
 	classDef.def("GetValue",&::WIDropDownMenu::GetValue);
-	classDef.def("GetText",&::WIDropDownMenu::GetText);
-	classDef.def("SetText",&::WIDropDownMenu::SetText);
+	classDef.def("GetText",+[](const ::WIDropDownMenu &menu) {
+		return menu.GetText().cpp_str();
+	});
+	classDef.def("SetText",+[](::WIDropDownMenu &menu,const std::string &text) {
+		return menu.SetText(text);
+	});
 	classDef.def("GetOptionCount",&::WIDropDownMenu::GetOptionCount);
 	classDef.def("AddOption",static_cast<::WIDropDownMenuOption*(::WIDropDownMenu::*)(const std::string&,const std::string&)>(&::WIDropDownMenu::AddOption));
 	classDef.def("AddOption",static_cast<::WIDropDownMenuOption*(::WIDropDownMenu::*)(const std::string&)>(&::WIDropDownMenu::AddOption));
@@ -733,7 +745,9 @@ void Lua::WIText::register_class(luabind::class_<::WIText,::WIBase> &classDef)
 	classDef.def("SetText",static_cast<void(*)(lua_State*,::WIText&,const std::string&)>([](lua_State *l,::WIText &hPanel,const std::string &text) {
 		hPanel.SetText(text);
 	}));
-	classDef.def("GetText",&::WIText::GetText);
+	classDef.def("GetText",+[](const ::WIText &text) {
+		return text.GetText().cpp_str();
+	});
 	classDef.def("GetTextHeight",&::WIText::GetTextHeight);
 	classDef.def("SetFont",static_cast<void(*)(lua_State*,::WIText&,const std::string&)>([](lua_State *l,::WIText &hPanel,const std::string &font) {
 		hPanel.SetFont(font);
@@ -759,7 +773,7 @@ void Lua::WIText::register_class(luabind::class_<::WIText,::WIBase> &classDef)
 		auto *pLine = hPanel.GetLine(lineIndex);
 		if(pLine == nullptr)
 			return {};
-		return pLine->GetUnformattedLine().GetText();
+		return pLine->GetUnformattedLine().GetText().cpp_str();
 	}));
 	classDef.def("GetTextLength",static_cast<uint32_t(*)(lua_State*,::WIText&)>([](lua_State *l,::WIText &hPanel) -> uint32_t {
 		return hPanel.GetText().length();
@@ -821,7 +835,9 @@ void Lua::WIText::register_class(luabind::class_<::WIText,::WIBase> &classDef)
 	classDef.def("GetMaxLineCount",+[](lua_State *l,::WIText &hPanel) {
 		return hPanel.GetFormattedTextObject().GetMaxLineCount();
 	});
-	classDef.def("AppendText",&::WIText::AppendText);
+	classDef.def("AppendText",+[](::WIText &el,const std::string &text) {
+		return el.AppendText(text);
+	});
 	classDef.def("AppendLine",static_cast<void(*)(lua_State*,::WIText&,const std::string&)>([](lua_State *l,::WIText &hPanel,const std::string &line) {
 		
 		hPanel.AppendLine(line);
@@ -832,7 +848,9 @@ void Lua::WIText::register_class(luabind::class_<::WIText,::WIBase> &classDef)
 		Lua::PushBool(l,hPanel.MoveText(lineIdx,startOffset,len,targetLineIdx,targetCharOffset));
 	}));
 	classDef.def("Clear",&::WIText::Clear);
-	classDef.def("Substr",&::WIText::Substr);
+	classDef.def("Substr",+[](::WIText &el,util::text::TextOffset startOffset,util::text::TextLength len) {
+		return el.Substr(startOffset,len);
+	});
 	classDef.add_static_constant("AUTO_BREAK_NONE",umath::to_integral(::WIText::AutoBreak::NONE));
 	classDef.add_static_constant("AUTO_BREAK_ANY",umath::to_integral(::WIText::AutoBreak::ANY));
 	classDef.add_static_constant("AUTO_BREAK_WHITESPACE",umath::to_integral(::WIText::AutoBreak::WHITESPACE));
@@ -840,9 +858,15 @@ void Lua::WIText::register_class(luabind::class_<::WIText,::WIBase> &classDef)
 
 void Lua::WITextEntry::register_class(luabind::class_<::WITextEntry,::WIBase> &classDef)
 {
-	classDef.def("SetText",&::WITextEntry::SetText);
-	classDef.def("GetText",&::WITextEntry::GetText);
-	classDef.def("GetValue",&::WITextEntry::GetText);
+	classDef.def("SetText",+[](::WITextEntry &el,const std::string &text) {
+		return el.SetText(text);
+	});
+	classDef.def("GetText",+[](const ::WITextEntry &el) {
+		return el.GetText().cpp_str();
+	});
+	classDef.def("GetValue",+[](const ::WITextEntry &el) {
+		return el.GetText().cpp_str();
+	});
 	classDef.def("IsNumeric",&::WITextEntry::IsNumeric);
 	classDef.def("IsEditable",&::WITextEntry::IsEditable);
 	classDef.def("SetEditable",&::WITextEntry::SetEditable);
@@ -1332,7 +1356,8 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l,::WIBase &panel,std::string
 	}
 	else if(name == "ontextchanged")
 	{
-		hCallback = FunctionCallback<void,std::reference_wrapper<const std::string>,bool>::Create([l,hPanel,o](std::reference_wrapper<const std::string> text,bool changedByUser) mutable {
+		hCallback = FunctionCallback<void,std::reference_wrapper<const util::Utf8String>,bool>::Create(
+			[l,hPanel,o](std::reference_wrapper<const util::Utf8String> text,bool changedByUser) mutable {
 			if(!hPanel.IsValid())
 				return;
 			Lua::CallFunction(l,[&o,hPanel,text,changedByUser](lua_State *l) mutable {
@@ -1340,7 +1365,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l,::WIBase &panel,std::string
 
 				auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
 				obj.push(l);
-				Lua::PushString(l,text.get());
+				Lua::PushString(l,text.get().cpp_str());
 				Lua::PushBool(l,changedByUser);
 				return Lua::StatusCode::Ok;
 			},0);

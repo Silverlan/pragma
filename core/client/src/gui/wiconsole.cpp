@@ -238,12 +238,12 @@ void WIConsole::Initialize()
 			return;
 		}
 #endif
-		c_engine->ConsoleInput(cmd);
+		c_engine->ConsoleInput(cmd.cpp_str());
 		if(hLog.IsValid())
 		{
 			auto &log = *static_cast<WITextEntry*>(hLog.get());
 			auto *pText = log.GetTextElement();
-			AppendText(std::string{cmd} +'\n');
+			AppendText(cmd.cpp_str() +'\n');
 		}
 	}));
 	pEntry->SetAutocompleteHandler([this,pEntry,hThis](const std::string &cmd,std::vector<std::string> &args) {
@@ -487,7 +487,7 @@ void WIConsole::SetFrame(WIFrame &frame)
 }
 WIFrame *WIConsole::GetFrame() {return static_cast<WIFrame*>(m_hFrame.get());}
 
-const std::string &WIConsole::GetText() const
+const util::Utf8String &WIConsole::GetText() const
 {
 	static std::string s {};
 	if(m_hLog.IsValid())
@@ -560,7 +560,10 @@ std::string_view WIConsole::AppendText(const std::string &text)
 		remaining = std::string_view{text}.substr(lineStartOffset,numCharsInLine);
 	}
 	for(auto &line : lines)
-		pText->AppendText(line);
+	{
+		util::Utf8String str {std::string{line}};
+		pText->AppendText(str);
+	}
 
 	auto maxLines = GetMaxLogLineCount();
 	while(pText->GetTotalLineCount() > maxLines)

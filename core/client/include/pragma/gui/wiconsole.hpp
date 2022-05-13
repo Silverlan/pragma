@@ -9,6 +9,7 @@
 #define __WICONSOLE_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include <sharedutils/util_utf8.hpp>
 #include <wgui/wibase.h>
 #include <queue>
 #include <string_view>
@@ -46,7 +47,7 @@ public:
 	void SetFrame(WIFrame &frame);
 	WIFrame *GetFrame();
 
-	const std::string &GetText() const;
+	const util::Utf8String &GetText() const;
 	void SetText(const std::string &text);
 	// This will only add complete lines (lines which have
 	// been ended with a new-line character). Anything

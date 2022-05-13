@@ -6,7 +6,7 @@ This is the repository for the Pragma Game Engine. For more information, visit t
 
 What platforms and hardware does it work on?
 ------
-- 64-Bit Windows (7, 8.1, 10)
+- 64-Bit Windows (8.1, 10, 11)
 - Graphics card: GTX 1050 Ti or newer
 - Memory: 4 GiB RAM or more
 

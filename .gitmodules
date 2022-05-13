@@ -106,9 +106,6 @@
 [submodule "third_party_libs/bzip2"]
 	path = third_party_libs/bzip2
 	url = https://github.com/sergiud/bzip2.git
-[submodule "third_party_libs/utf8"]
-	path = third_party_libs/utf8
-	url = https://github.com/Silverlan/utf8.git
 [submodule "third_party_libs/libnoise"]
 	path = third_party_libs/libnoise
 	url = https://github.com/qknight/libnoise.git

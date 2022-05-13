@@ -19,6 +19,7 @@
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/lua/converters/optional_converter_t.hpp>
+#include <pragma/lua/converters/pair_converter_t.hpp>
 #include <pragma/lua/classes/lentity.h>
 #include <pragma/lua/classes/ldef_entity.h>
 #include <mathutil/glmutil.h>
@@ -198,7 +199,18 @@ void CGame::RegisterLua()
 		luabind::def("load_sound_scripts",static_cast<void(*)(lua_State*,const std::string&)>(Lua::engine::LoadSoundScripts)),
 		luabind::def("get_model",Lua::engine::get_model),
 		luabind::def("get_number_of_scenes_queued_for_rendering",&CGame::GetNumberOfScenesQueuedForRendering),
-		luabind::def("get_queued_scene_render_info",&CGame::GetQueuedSceneRenderInfo)
+		luabind::def("get_queued_scene_render_info",&CGame::GetQueuedSceneRenderInfo),
+
+		luabind::def("set_gameplay_control_camera",&CGame::SetGameplayControlCamera),
+		luabind::def("reset_gameplay_control_camera",&CGame::ResetGameplayControlCamera),
+		luabind::def("get_gameplay_control_camera",&CGame::GetGameplayControlCamera),
+		luabind::def("clear_gameplay_control_camera",&CGame::ClearGameplayControlCamera),
+		luabind::def("get_primary_camera_render_mask",+[]() -> std::pair<::pragma::rendering::RenderMask,::pragma::rendering::RenderMask> {
+			auto inclusionMask = ::pragma::rendering::RenderMask::None;
+			auto exclusionMask = ::pragma::rendering::RenderMask::None;
+			c_game->GetPrimaryCameraRenderMask(inclusionMask,exclusionMask);
+			return {inclusionMask,exclusionMask};
+		})
 	];
 
 	Lua::ents::register_library(GetLuaState());

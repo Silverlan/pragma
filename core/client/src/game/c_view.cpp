@@ -183,7 +183,7 @@ void CGame::CalcView()
 	CallCallbacks<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>("CalcViewOffset",std::ref(pos),std::ref(orientation));
 	CallLuaCallbacks<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>("CalcViewOffset",std::ref(pos),std::ref(orientation));
 
-	auto *cam = c_game->GetRenderCamera();
+	auto *cam = c_game->GetGameplayControlCamera();
 	if(cam == nullptr)
 		return;
 	cam->GetEntity().SetPosition(pos);

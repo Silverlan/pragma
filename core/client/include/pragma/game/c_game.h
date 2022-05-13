@@ -131,7 +131,8 @@ public:
 	{
 		None = 0u,
 		GameWorldShaderPipelineReloadRequired = 1u,
-		PrepassShaderPipelineReloadRequired = GameWorldShaderPipelineReloadRequired<<1u
+		PrepassShaderPipelineReloadRequired = GameWorldShaderPipelineReloadRequired<<1u,
+		DisableGamplayControlCamera = PrepassShaderPipelineReloadRequired<<1u
 	};
 
 	// List of generic shaders used by the rendering pipeline for direct access to m_gameShaders
@@ -428,6 +429,10 @@ public:
 	pragma::CSceneComponent *GetRenderScene();
 	const pragma::CSceneComponent *GetRenderScene() const;
 	pragma::CCameraComponent *GetRenderCamera() const;
+	void SetGameplayControlCamera(pragma::CCameraComponent &cam);
+	void ClearGameplayControlCamera();
+	void ResetGameplayControlCamera();
+	pragma::CCameraComponent *GetGameplayControlCamera();
 
 	pragma::rendering::RenderQueueBuilder &GetRenderQueueBuilder();
 	pragma::rendering::RenderQueueWorkerManager &GetRenderQueueWorkerManager();
@@ -525,6 +530,8 @@ private:
 	Material *m_matOverride = nullptr;
 	bool m_bMainRenderPass = true;
 	std::weak_ptr<prosper::IPrimaryCommandBuffer> m_currentDrawCmd = {};
+	pragma::ComponentHandle<pragma::CCameraComponent> m_controlCamera {};
+
 	std::array<util::WeakHandle<prosper::Shader>,umath::to_integral(GameShader::Count)> m_gameShaders = {};
 	StateFlags m_stateFlags = StateFlags::None;
 	void RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::Texture &texPostHdr,prosper::IImage *optOutImage,uint32_t layerId=0u);

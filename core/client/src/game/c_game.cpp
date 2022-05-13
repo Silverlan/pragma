@@ -868,6 +868,29 @@ pragma::CCameraComponent *CGame::GetRenderCamera() const
 		return nullptr;
 	return const_cast<pragma::CCameraComponent*>(m_renderScene->GetActiveCamera().get());
 }
+void CGame::SetGameplayControlCamera(pragma::CCameraComponent &cam)
+{
+	m_controlCamera = cam.GetHandle<pragma::CCameraComponent>();
+	m_stateFlags &= ~StateFlags::DisableGamplayControlCamera;
+}
+void CGame::ResetGameplayControlCamera()
+{
+	m_controlCamera = pragma::ComponentHandle<pragma::CCameraComponent>{};
+	m_stateFlags &= ~StateFlags::DisableGamplayControlCamera;
+}
+void CGame::ClearGameplayControlCamera()
+{
+	m_controlCamera = pragma::ComponentHandle<pragma::CCameraComponent>{};
+	m_stateFlags |= StateFlags::DisableGamplayControlCamera;
+}
+pragma::CCameraComponent *CGame::GetGameplayControlCamera()
+{
+	if(m_controlCamera.valid())
+		return m_controlCamera.get();
+	if(umath::is_flag_set(m_stateFlags,StateFlags::DisableGamplayControlCamera))
+		return nullptr;
+	return GetRenderCamera();
+}
 pragma::CCameraComponent *CGame::GetPrimaryCamera() const {return const_cast<pragma::CCameraComponent*>(m_primaryCamera.get());}
 
 void CGame::SetMaterialOverride(Material *mat) {m_matOverride = mat;}

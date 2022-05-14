@@ -99,7 +99,7 @@ template<typename T>
 		outValue = umath::lerp(value0,value1,f);
 	else if constexpr(::udm::is_vector_type<TBase>)
 	{
-		if constexpr(std::is_integral_v<TBase::value_type>)
+		if constexpr(std::is_integral_v<typename TBase::value_type>)
 			; // TODO
 		else
 			outValue = value0 +(value1 -value0) *f;

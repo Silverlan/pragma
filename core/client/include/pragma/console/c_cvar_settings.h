@@ -11,7 +11,7 @@
 #include "pragma/networkdefinitions.h"
 #include <pragma/console/convars.h>
 
-REGISTER_CONVAR_CL(cl_language,"en",ConVarFlags::Archive,"Game language.");
+REGISTER_CONVAR_CL(cl_language,"",ConVarFlags::Archive,"Game language. If empty, the system language will be used (if available, otherwise it will default to English).");
 
 REGISTER_CONVAR_CL(cl_render_lod_bias,"0",ConVarFlags::Archive,"Model LOD-bias. Higher values means higher LOD-Models will be used at lower distance (=Lower quality).");
 REGISTER_CONVAR_CL(cl_render_shadow_lod_bias,"10",ConVarFlags::Archive,"Model LOD-bias for shadows. Higher values means higher LOD-Models will be used at lower distance (=Lower quality). This value is added on top of cl_render_lod_bias!");

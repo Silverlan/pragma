@@ -713,6 +713,16 @@ void Lua::WIDropDownMenu::register_class(luabind::class_<::WIDropDownMenu,luabin
 	classDef.def("GetOptionText",+[](::WIDropDownMenu &menu,uint32_t idx) {
 		return menu.GetOptionText(idx).cpp_str();
 	});
+	classDef.def("FindOptionIndex",+[](::WIDropDownMenu &menu,const std::string &value) -> std::optional<uint32_t> {
+		auto n = menu.GetOptionCount();
+		for(auto i=decltype(n){0u};i<n;++i)
+		{
+			auto val = menu.GetOptionValue(i);
+			if(val == value)
+				return i;
+		}
+		return {};
+	});
 	classDef.def("GetOptionValue",&::WIDropDownMenu::GetOptionValue);
 	classDef.def("SetOptionText",&::WIDropDownMenu::SetOptionText);
 	classDef.def("SetOptionValue",&::WIDropDownMenu::SetOptionValue);

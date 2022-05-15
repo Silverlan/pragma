@@ -176,18 +176,23 @@ bool pragma::lua::set_member_value(
 			{
 				if(memberInfo.IsEnum())
 				{
-					if(luabind::type(value) == LUA_TSTRING)
+					if constexpr(udm::is_numeric_type(udm::type_to_enum<T>()))
 					{
-						auto e = memberInfo.EnumNameToValue(luabind::object_cast<std::string>(value));
-						if(!e.has_value())
-							return false;
-						auto v = *e;
+						if(luabind::type(value) == LUA_TSTRING)
+						{
+							auto e = memberInfo.EnumNameToValue(luabind::object_cast<std::string>(value));
+							if(!e.has_value())
+								return false;
+							auto v = static_cast<T>(*e);
+							memberInfo.setterFunction(memberInfo,component,&v);
+							return true;
+						}
+						auto v = luabind::object_cast<T>(value);
 						memberInfo.setterFunction(memberInfo,component,&v);
 						return true;
 					}
-					auto v = memberInfo.ValueToEnumName(luabind::object_cast<int64_t>(value));
-					memberInfo.setterFunction(memberInfo,component,&v);
-					return true;
+					// Unreachable
+					return false;
 				}
 				auto v = luabind::object_cast<T>(value);
 				memberInfo.setterFunction(memberInfo,component,&v);

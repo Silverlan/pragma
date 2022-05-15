@@ -25,6 +25,7 @@
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/attribute_specialization_type.hpp"
+#include "pragma/lua/converters/optional_converter_t.hpp"
 #include "pragma/lua/lentity_type.hpp"
 #include "pragma/lua/lua_entity_iterator.hpp"
 #include "pragma/lua/sh_lua_component.hpp"
@@ -280,6 +281,15 @@ void Lua::ents::register_library(lua_State *l)
 			});
 		}
 		return ss.str();
+	});
+	memberInfoDef.def("IsEnum",&pragma::ComponentMemberInfo::IsEnum);
+	memberInfoDef.def("ValueToEnumName",&pragma::ComponentMemberInfo::ValueToEnumName);
+	memberInfoDef.def("EnumNameToValue",&pragma::ComponentMemberInfo::EnumNameToValue);
+	memberInfoDef.def("GetEnumValues",+[](const pragma::ComponentMemberInfo &memberInfo) -> std::optional<std::vector<int64_t>> {
+		std::vector<int64_t> values;
+		if(!memberInfo.GetEnumValues(values))
+			return {};
+		return values;
 	});
 	memberInfoDef.def_readonly("type",&pragma::ComponentMemberInfo::type);
 	memberInfoDef.property("name",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) {

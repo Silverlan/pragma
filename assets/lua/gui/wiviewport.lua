@@ -81,7 +81,7 @@ function gui.WIViewport:SetScene(scene,renderer,shouldRender)
 	self.m_pTexture:SetTexture(renderer:GetPresentationTexture())
 
 	util.remove(self.m_cbRenderScenes)
-	if(util.is_same_object(scene,game.get_render_scene())) then return end
+	if(self:IsPrimaryGameSceneViewport()) then return end
 	local incMask,excMask = game.get_primary_camera_render_mask()
 	self.m_cbRenderScenes = game.add_callback("RenderScenes",function(drawSceneInfo)
 		if(shouldRender and shouldRender() == false) then return end
@@ -139,6 +139,7 @@ function gui.WIViewport:SetObjectManager(mngr) self.m_objectManager = mngr end
 function gui.WIViewport:GetObjectManager() return self.m_objectManager end
 function gui.WIViewport:GetScene() return (self.m_scene ~= nil) and self.m_scene.scene or nil end
 function gui.WIViewport:GetSceneCamera() return (self.m_scene ~= nil) and self.m_scene.camera or nil end
+function gui.WIViewport:IsPrimaryGameSceneViewport() return (self.m_scene == nil or util.is_same_object(self.m_scene.scene,game.get_render_scene())) end
 function gui.WIViewport:GetCamera()
 	local scene = self:GetScene()
 	if(scene == nil) then return nil end

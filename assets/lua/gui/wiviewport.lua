@@ -70,14 +70,29 @@ function gui.WIViewport:SetMovementControlsEnabled(enabled)
 	self.m_movementControlsEnabled = enabled
 end
 function gui.WIViewport:AreMovementControlsEnabled() return self.m_movementControlsEnabled end
-function gui.WIViewport:SetScene(scene,renderer)
+function gui.WIViewport:SetScene(scene,renderer,shouldRender)
 	renderer = renderer or scene:GetRenderer()
 	local rasterizer = renderer and renderer:GetEntity():GetComponent(ents.COMPONENT_RASTERIZATION_RENDERER) or nil
 	self.m_scene = {
 		scene = scene,
+		camera = scene:GetActiveCamera(),
 		renderTarget = (rasterizer ~= nil) and rasterizer:GetRenderTarget() or nil
 	}
 	self.m_pTexture:SetTexture(renderer:GetPresentationTexture())
+
+	util.remove(self.m_cbRenderScenes)
+	if(util.is_same_object(scene,game.get_render_scene())) then return end
+	local incMask,excMask = game.get_primary_camera_render_mask()
+	self.m_cbRenderScenes = game.add_callback("RenderScenes",function(drawSceneInfo)
+		if(shouldRender and shouldRender() == false) then return end
+		local drawSceneInfo = game.DrawSceneInfo()
+		drawSceneInfo.toneMapping = shader.TONE_MAPPING_NONE
+		drawSceneInfo.scene = scene
+		drawSceneInfo.renderFlags = bit.band(drawSceneInfo.renderFlags,bit.bnot(game.RENDER_FLAG_BIT_VIEW)) -- Don't render view models
+		drawSceneInfo.inclusionMask = incMask
+		drawSceneInfo.exclusionMask = excMask
+		game.queue_scene_for_rendering(drawSceneInfo)
+	end)
 end
 function gui.WIViewport:SetType(type)
 	if(type == self.m_type) then return end
@@ -123,6 +138,7 @@ function gui.WIViewport:GetType() return self.m_type end
 function gui.WIViewport:SetObjectManager(mngr) self.m_objectManager = mngr end
 function gui.WIViewport:GetObjectManager() return self.m_objectManager end
 function gui.WIViewport:GetScene() return (self.m_scene ~= nil) and self.m_scene.scene or nil end
+function gui.WIViewport:GetSceneCamera() return (self.m_scene ~= nil) and self.m_scene.camera or nil end
 function gui.WIViewport:GetCamera()
 	local scene = self:GetScene()
 	if(scene == nil) then return nil end
@@ -305,6 +321,7 @@ function gui.WIViewport:GetFarZ()
 	return cam:GetFarZ()
 end
 function gui.WIViewport:OnRemove()
+	util.remove(self.m_cbRenderScenes)
 	gui.WIViewport.viewports[self] = nil
 end
 function gui.WIViewport:SetZoomFactor(factor)

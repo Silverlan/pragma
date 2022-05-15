@@ -105,10 +105,11 @@ void ComponentMemberInfo::AddMetaData(const udm::PProperty &prop)
 const udm::PProperty &ComponentMemberInfo::GetMetaData() const {return m_metaData;}
 void ComponentMemberInfo::SetEnum(
 	const EnumConverter::NameToEnumFunction &nameToEnum,
-	const EnumConverter::EnumToNameFunction &enumToName
+	const EnumConverter::EnumToNameFunction &enumToName,
+	const EnumConverter::EnumValueGetFunction &getValues
 )
 {
-	m_enumConverter = std::make_unique<EnumConverter>(nameToEnum,enumToName);
+	m_enumConverter = std::make_unique<EnumConverter>(nameToEnum,enumToName,getValues);
 }
 bool ComponentMemberInfo::IsEnum() const {return m_enumConverter != nullptr;}
 std::optional<int64_t> ComponentMemberInfo::EnumNameToValue(const std::string &name) const
@@ -116,6 +117,13 @@ std::optional<int64_t> ComponentMemberInfo::EnumNameToValue(const std::string &n
 	if(!m_enumConverter)
 		return {};
 	return m_enumConverter->nameToEnum(name);
+}
+bool ComponentMemberInfo::GetEnumValues(std::vector<int64_t> &outValues) const
+{
+	if(!m_enumConverter)
+		return false;
+	outValues = std::move(m_enumConverter->getValues());
+	return true;
 }
 std::optional<std::string> ComponentMemberInfo::ValueToEnumName(int64_t value) const
 {

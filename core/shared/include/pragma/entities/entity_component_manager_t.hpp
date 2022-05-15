@@ -56,7 +56,20 @@ namespace pragma
 				if(e.empty())
 					return {};
 				return std::string{e};
+			},[]() -> std::vector<int64_t> {
+				auto &enumValues = magic_enum::enum_values<T>();
+				std::vector<int64_t> rvalues;
+				rvalues.resize(enumValues.size());
+				for(auto i=decltype(enumValues.size()){0u};i<enumValues.size();++i)
+					rvalues[i] = static_cast<int64_t>(enumValues[i]);
+				return rvalues;
 			});
+			auto &enumValues = magic_enum::enum_values<T>();
+			if(!enumValues.empty())
+			{
+				memberInfo.SetMin(static_cast<float>(enumValues.front()));
+				memberInfo.SetMax(static_cast<float>(enumValues.back()));
+			}
 		}
 		if(defaultValue.has_value())
 			memberInfo.SetDefault<T>(*defaultValue);

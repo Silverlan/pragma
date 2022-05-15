@@ -48,8 +48,10 @@ namespace pragma
 		{
 			using NameToEnumFunction = std::function<std::optional<int64_t>(const std::string&)>;
 			using EnumToNameFunction = std::function<std::optional<std::string>(int64_t)>;
+			using EnumValueGetFunction = std::function<std::vector<int64_t>()>;
 			NameToEnumFunction nameToEnum;
 			EnumToNameFunction enumToName;
+			EnumValueGetFunction getValues;
 		};
 		using ApplyFunction = void(*)(const ComponentMemberInfo&,BaseEntityComponent&,const void*);
 		using GetFunction = void(*)(const ComponentMemberInfo&,BaseEntityComponent&,void*);
@@ -153,11 +155,13 @@ namespace pragma
 
 		void SetEnum(
 			const EnumConverter::NameToEnumFunction &nameToEnum,
-			const EnumConverter::EnumToNameFunction &enumToName
+			const EnumConverter::EnumToNameFunction &enumToName,
+			const EnumConverter::EnumValueGetFunction &getValues
 		);
 		bool IsEnum() const;
 		std::optional<int64_t> EnumNameToValue(const std::string &name) const;
 		std::optional<std::string> ValueToEnumName(int64_t value) const;
+		bool GetEnumValues(std::vector<int64_t> &outValues) const;
 
 		void UpdateDependencies(BaseEntityComponent &component,std::vector<std::string> &outAffectedProps);
 		void ResetToDefault(BaseEntityComponent &component);

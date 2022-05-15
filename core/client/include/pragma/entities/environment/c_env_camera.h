@@ -19,6 +19,7 @@ namespace pragma
 	public:
 		CCameraComponent(BaseEntity &ent) : BaseEnvCameraComponent(ent) {}
 		virtual ~CCameraComponent() override;
+		virtual void Initialize() override;
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;

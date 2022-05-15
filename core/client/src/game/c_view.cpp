@@ -188,5 +188,5 @@ void CGame::CalcView()
 		return;
 	cam->GetEntity().SetPosition(pos);
 	cam->GetEntity().SetRotation(orientation);
-	cam->UpdateViewMatrix();
+	// cam->UpdateViewMatrix();
 }

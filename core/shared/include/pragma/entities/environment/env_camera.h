@@ -108,6 +108,9 @@ namespace pragma
 		static Mat4 CalcProjectionMatrix(float fovRad,float aspectRatio,float nearZ,float farZ);
 		static void GetFrustumPlanes(const std::vector<Vector3> &points,std::vector<umath::Plane> &outPlanes);
 		static void GetFrustumPlanes(std::vector<umath::Plane> &outPlanes,float neard,float fard,float fov,float ratio,const Vector3 &center,const Vector3 &viewDir,const Vector3 &viewUp);
+	protected:
+		void FlagViewMatrixAsDirty();
+		void FlagProjectionMatrixAsDirty();
 	private:
 		util::PMatrix4Property m_projectionMatrix = nullptr;
 		util::PMatrix4Property m_viewMatrix = nullptr;

@@ -9,6 +9,7 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_toggle_component.hpp"
+#include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/shared_spawnflags.h"
 #include <pragma/networking/nwm_util.h>
@@ -38,9 +39,25 @@ void CCameraComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEnvCameraComponent::Load(udm,version);
 }
+void CCameraComponent::Initialize()
+{
+	BaseEnvCameraComponent::Initialize();
+
+	auto &ent = GetEntity();
+	auto pTrComponent = ent.GetTransformComponent();
+	if(pTrComponent != nullptr)
+	{
+		auto &trC = *pTrComponent;
+		FlagCallbackForRemoval(pTrComponent->AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			FlagViewMatrixAsDirty();
+			return util::EventReply::Unhandled;
+		}),CallbackType::Entity);
+	}
+}
 void CCameraComponent::OnEntitySpawn()
 {
 	BaseEnvCameraComponent::OnEntitySpawn();
+	FlagViewMatrixAsDirty();
 	UpdateState();
 }
 void CCameraComponent::UpdateState()

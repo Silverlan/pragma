@@ -370,6 +370,14 @@ const Mat4 &BaseEnvCameraComponent::GetProjectionMatrix() const
 	}
 	return *m_projectionMatrix;
 }
+void BaseEnvCameraComponent::FlagViewMatrixAsDirty()
+{
+	umath::set_flag(const_cast<BaseEnvCameraComponent*>(this)->m_stateFlags,StateFlags::ViewMatrixDirtyBit,true);
+}
+void BaseEnvCameraComponent::FlagProjectionMatrixAsDirty()
+{
+	umath::set_flag(const_cast<BaseEnvCameraComponent*>(this)->m_stateFlags,StateFlags::ProjectionMatrixDirtyBit,true);
+}
 const Mat4 &BaseEnvCameraComponent::GetViewMatrix() const
 {
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ViewMatrixDirtyBit))

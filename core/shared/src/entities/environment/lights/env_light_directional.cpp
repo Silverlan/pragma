@@ -34,8 +34,15 @@ void BaseEnvLightDirectionalComponent::Initialize()
 	});
 
 	auto &ent = GetEntity();
-	ent.AddComponent("light");
+	auto lightC = ent.AddComponent("light");
 	m_netEvSetAmbientColor = SetupNetEvent("set_ambient_color");
+
+	if(lightC.valid())
+	{
+		auto *pLightC = static_cast<BaseEnvLightComponent*>(lightC.get());
+		pLightC->SetLightIntensityType(BaseEnvLightComponent::LightIntensityType::Lux);
+		pLightC->SetLightIntensity(30.f);
+	}
 }
 
 void BaseEnvLightDirectionalComponent::Save(udm::LinkedPropertyWrapperArg udm)

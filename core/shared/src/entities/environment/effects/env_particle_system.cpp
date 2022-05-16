@@ -8,13 +8,54 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/environment/effects/env_particle_system.h"
 #include "pragma/util/util_handled.hpp"
+#include "pragma/asset/util_asset.hpp"
 #include "pragma/networking/nwm_util.h"
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include <algorithm>
 
 using namespace pragma;
 
+void BaseEnvParticleSystemComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
+{
+	using T = BaseEnvParticleSystemComponent;
+
+	{
+		using TParticleSystem = std::string;
+		auto memberInfo = create_component_member_info<
+			T,TParticleSystem,
+			+[](const ComponentMemberInfo&,T &c,TParticleSystem systemName) {
+				c.SetParticleSystem(systemName);
+			},
+			+[](const ComponentMemberInfo&,T &c,TParticleSystem &value) {
+				value = c.GetParticleSystem();
+			}
+		>("particleSystem","");
+		registerMember(std::move(memberInfo));
+	}
+	{
+		using TParticleSystemFile = std::string;
+		auto memberInfo = create_component_member_info<
+			T,TParticleSystemFile,
+			+[](const ComponentMemberInfo&,T &c,TParticleSystemFile fileName) {
+				c.SetParticleFile(fileName);
+			},
+			+[](const ComponentMemberInfo&,T &c,TParticleSystemFile &value) {
+				value = c.GetParticleFile();
+			}
+		>("particleSystemFile","",AttributeSpecializationType::File);
+		auto &metaData = memberInfo.AddMetaData();
+		metaData["assetType"] = "particlesystem";
+		metaData["rootPath"] = util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::ParticleSystem)).GetString();
+		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::ParticleSystem,pragma::asset::FormatType::All);
+		metaData["stripRootPath"] = true;
+		metaData["stripExtension"] = true;
+		registerMember(std::move(memberInfo));
+	}
+}
+void BaseEnvParticleSystemComponent::SetParticleSystem(const std::string &ptName) {m_particleName = ptName;}
+const std::string &BaseEnvParticleSystemComponent::GetParticleSystem() const {return m_particleName;}
 void BaseEnvParticleSystemComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -48,6 +89,7 @@ void BaseEnvParticleSystemComponent::Initialize()
 }
 
 void BaseEnvParticleSystemComponent::SetParticleFile(const std::string &fileName) {m_particleFile = fileName;}
+const std::string &BaseEnvParticleSystemComponent::GetParticleFile() const {return m_particleFile;}
 
 void BaseEnvParticleSystemComponent::OnEntitySpawn()
 {

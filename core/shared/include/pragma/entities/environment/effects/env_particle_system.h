@@ -21,11 +21,15 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
 		virtual void SetRemoveOnComplete(bool b);
 		virtual void SetContinuous(bool b);
 		virtual void SetParticleFile(const std::string &fileName);
+		const std::string &GetParticleFile() const;
+		void SetParticleSystem(const std::string &ptName);
+		const std::string &GetParticleSystem() const;
 		bool IsContinuous() const;
 		bool GetRemoveOnComplete() const;
 		virtual void OnEntitySpawn() override;

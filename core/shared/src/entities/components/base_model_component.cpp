@@ -406,7 +406,7 @@ std::optional<ComponentMemberIndex> BaseModelComponent::DoGetMemberIndex(const s
 		return idx;
 	idx = DynamicMemberRegister::GetMemberIndex(name);
 	if(idx.has_value())
-		return *idx +GetStaticMemberCount();
+		return *idx;// +GetStaticMemberCount();
 	return std::optional<ComponentMemberIndex>{};
 }
 

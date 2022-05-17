@@ -20,7 +20,7 @@ function udm.BaseSchemaType:Initialize(schema,udmData,parent)
 	self.m_udmData = udmData
 	self.m_parent = parent
 	self.m_typedChildren = {}
-	self.m_changeListeners = {}
+	self.m_changeListeners = self.m_changeListeners or {}
 	self.m_cachedChildren = {}
 
 	local typeData = schema:FindTypeData(self.TypeName)
@@ -47,12 +47,39 @@ function udm.BaseSchemaType:Initialize(schema,udmData,parent)
 	end
 	self:OnInitialize()
 end
+function udm.BaseSchemaType:Reinitialize(data)
+	self:CleanUp(false)
+	
+	local oldUniqueId
+	local referenceables = self:GetSchema():GetLibrary().detail.referenceables
+	if(self.GetUniqueId) then
+		oldUniqueId = tostring(self:GetUniqueId())
+		referenceables[oldUniqueId] = nil
+	end
+
+	local curData = self:GetUdmData()
+	curData:Merge(data,bit.bor(udm.MERGE_FLAG_BIT_DEEP_COPY,udm.MERGE_FLAG_BIT_OVERWRITE_EXISTING))
+	self:Initialize(self:GetSchema(),curData,self:GetParent())
+	if(self.GetUniqueId) then
+		local newUniqueId = tostring(self:GetUniqueId())
+		if(referenceables[newUniqueId] ~= nil) then
+			console.print_warning("An object with the unique id " .. newUniqueId .. " already exists, keeping original unique id " .. oldUniqueId .. "!")
+			newUniqueId = oldUniqueId
+			self:SetUniqueId(util.Uuid(newUniqueId))
+		end
+		referenceables[newUniqueId] = self
+	end
+end
 function udm.BaseSchemaType:OnInitialize() end
 function udm.BaseSchemaType:IsValid() return self:GetUdmData():IsValid() end
 function udm.BaseSchemaType:Remove() self:OnRemove() end
-function udm.BaseSchemaType:OnRemove()
-	for name,listeners in pairs(self.m_changeListeners) do
-		util.remove(listeners)
+function udm.BaseSchemaType:OnRemove() self:CleanUp() end
+function udm.BaseSchemaType:CleanUp(clearChangeListeners)
+	if(clearChangeListeners == nil) then clearChangeListeners = true end
+	if(clearChangeListeners == true) then
+		for name,listeners in pairs(self.m_changeListeners) do
+			util.remove(listeners)
+		end
 	end
 	if(self.GetUniqueId) then
 		self.m_schema:GetLibrary().detail.referenceables[tostring(self:GetUniqueId())] = nil

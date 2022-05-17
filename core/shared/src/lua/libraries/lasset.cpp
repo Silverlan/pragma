@@ -18,7 +18,7 @@
 #include <fsys/ifile.hpp>
 
 extern DLLNETWORK Engine *engine;
-
+#pragma optimize("",off)
 void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 {
 	auto modAsset = luabind::module_(lua.GetState(),"asset");
@@ -178,6 +178,22 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 				tFiles[idx++] = f;
 			}
 			return tFiles;
+		}),
+		luabind::def("poll",+[](lua_State *l,pragma::asset::Type type) {
+			auto *manager = engine->GetNetworkState(l)->GetAssetManager(type);
+			if(!manager)
+				return;
+			manager->Poll();
+		}),
+		luabind::def("poll_all",+[](lua_State *l) {
+			auto n = umath::to_integral(pragma::asset::Type::Count);
+			for(auto i=decltype(n){0u};i<n;++i)
+			{
+				auto *manager = engine->GetNetworkState(l)->GetAssetManager(static_cast<pragma::asset::Type>(i));
+				if(!manager)
+					continue;
+				manager->Poll();
+			}
 		})
 	];
 
@@ -279,3 +295,4 @@ Lua::tb<std::string> Lua::asset::get_supported_export_file_extensions(lua_State 
 	}
 	return t;
 }
+#pragma optimize("",on)

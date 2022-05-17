@@ -1150,6 +1150,14 @@ template<class T,class TPropertyWrapper,class TClassDef>
 		el->ToAscii(::udm::AsciiSaveFlags::DontCompressLz4Arrays,ss);
 		return luabind::object{l,ss.str()};
 	})
+	.def("ToAscii",+[](lua_State *l,T &prop,::udm::AsciiSaveFlags saveFlags) -> luabind::object {
+		auto *el = static_cast<TPropertyWrapper>(prop).GetValuePtr<::udm::Element>();
+		if(!el)
+			return {};
+		std::stringstream ss;
+		el->ToAscii(saveFlags,ss);
+		return luabind::object{l,ss.str()};
+	})
 	.def("ToTable",+[](lua_State *l,T &v) -> Lua::tb<void> {
 		auto prop = static_cast<TPropertyWrapper>(v);
 		auto o = Lua::udm::udm_to_value(l,prop);
@@ -1362,6 +1370,14 @@ void Lua::udm::register_library(Lua::Interface &lua)
 				return Lua::mult<bool,std::string>{l,false,"Invalid file handle!"};
 			std::string err;
 			auto udmData = ::util::load_udm_asset(std::make_unique<fsys::File>(file.GetHandle()),&err);
+			if(udmData == nullptr)
+				return Lua::mult<bool,std::string>{l,false,std::move(err)};
+			return luabind::object{l,udmData};
+		}),
+		luabind::def("parse",+[](lua_State *l,const std::string &udmStr) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
+			auto memFile = std::make_unique<ufile::MemoryFile>(reinterpret_cast<uint8_t*>(const_cast<char*>(udmStr.data())),udmStr.length());
+			std::string err;
+			auto udmData = ::util::load_udm_asset(std::move(memFile),&err);
 			if(udmData == nullptr)
 				return Lua::mult<bool,std::string>{l,false,std::move(err)};
 			return luabind::object{l,udmData};
@@ -1641,6 +1657,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		{"MERGE_FLAG_BIT_OVERWRITE_EXISTING",umath::to_integral(::udm::MergeFlags::OverwriteExisting)},
 		{"MERGE_FLAG_BIT_DEEP_COPY",umath::to_integral(::udm::MergeFlags::DeepCopy)},
 		
+        {"ASCII_SAVE_FLAG_NONE",umath::to_integral(::udm::AsciiSaveFlags::None)},
         {"ASCII_SAVE_FLAG_BIT_INCLUDE_HEADER",umath::to_integral(::udm::AsciiSaveFlags::IncludeHeader)},
         {"ASCII_SAVE_FLAG_BIT_DONT_COMPRESS_LZ4_ARRAYS",umath::to_integral(::udm::AsciiSaveFlags::DontCompressLz4Arrays)}
 	});

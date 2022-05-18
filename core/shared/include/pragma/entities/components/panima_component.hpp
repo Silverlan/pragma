@@ -60,6 +60,7 @@ namespace pragma
 		void SetCurrentTime(panima::AnimationManager &manager,float time);
 		float GetCurrentTimeFraction(panima::AnimationManager &manager) const;
 		void SetCurrentTimeFraction(panima::AnimationManager &manager,float t);
+		void ReloadAnimation();
 
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;

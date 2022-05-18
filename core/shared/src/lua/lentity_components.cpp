@@ -341,6 +341,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defAnimated2.scope[
 		luabind::def("parse_component_channel_path",&pragma::PanimaComponent::ParseComponentChannelPath)
 	];
+	defAnimated2.def("ReloadAnimation",static_cast<void(pragma::PanimaComponent::*)()>(&pragma::PanimaComponent::ReloadAnimation));
 	defAnimated2.def("SetPlaybackRate",&pragma::PanimaComponent::SetPlaybackRate);
 	defAnimated2.def("GetPlaybackRate",&pragma::PanimaComponent::GetPlaybackRate);
 	defAnimated2.def("GetPlaybackRateProperty",&pragma::PanimaComponent::GetPlaybackRateProperty);
@@ -363,7 +364,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		return hComponent.GetAnimationManager(name);
 	});
 	defAnimated2.def("PlayAnimation",&pragma::PanimaComponent::PlayAnimation);
-	defAnimated2.def("ReloadAnimation",&pragma::PanimaComponent::ReloadAnimation);
+	defAnimated2.def("ReloadAnimation",static_cast<void(pragma::PanimaComponent::*)(panima::AnimationManager&)>(&pragma::PanimaComponent::ReloadAnimation));
 	defAnimated2.def("AdvanceAnimations",&pragma::PanimaComponent::AdvanceAnimations);
 	defAnimated2.def("DebugPrint",static_cast<void(pragma::PanimaComponent::*)()>(&pragma::PanimaComponent::DebugPrint));
 	defAnimated2.add_static_constant("EVENT_HANDLE_ANIMATION_EVENT",pragma::PanimaComponent::EVENT_HANDLE_ANIMATION_EVENT);

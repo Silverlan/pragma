@@ -548,6 +548,12 @@ void PanimaComponent::Initialize()
 	});
 }
 
+void PanimaComponent::ReloadAnimation()
+{
+	InitializeAnimationChannelValueSubmitters();
+	for(auto &pair : m_animationManagers)
+		ReloadAnimation(*pair.second);
+}
 void PanimaComponent::Save(udm::LinkedPropertyWrapperArg udm) {}
 void PanimaComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) {}
 void PanimaComponent::ResetAnimation(const std::shared_ptr<Model> &mdl) {}

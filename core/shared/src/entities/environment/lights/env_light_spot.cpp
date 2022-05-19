@@ -105,5 +105,9 @@ umath::Degree BaseEnvLightSpotComponent::GetOuterConeAngle() const {return *m_ou
 umath::Fraction BaseEnvLightSpotComponent::GetBlendFraction() const {return *m_blendFraction;}
 void BaseEnvLightSpotComponent::SetBlendFraction(umath::Fraction fraction) {*m_blendFraction = fraction;}
 
+const util::PFloatProperty &BaseEnvLightSpotComponent::GetBlendFractionProperty() const {return m_blendFraction;}
+const util::PFloatProperty &BaseEnvLightSpotComponent::GetOuterConeAngleProperty() const {return m_outerConeAngle;}
+const util::PFloatProperty &BaseEnvLightSpotComponent::GetConeStartOffsetProperty() const {return m_coneStartOffset;}
+
 void BaseEnvLightSpotComponent::SetConeStartOffset(float offset) {*m_coneStartOffset = offset;}
 float BaseEnvLightSpotComponent::GetConeStartOffset() const {return *m_coneStartOffset;}

@@ -34,6 +34,10 @@ namespace pragma
 		virtual void SetConeStartOffset(float offset);
 		float GetConeStartOffset() const;
 
+		const util::PFloatProperty &GetBlendFractionProperty() const;
+		const util::PFloatProperty &GetOuterConeAngleProperty() const;
+		const util::PFloatProperty &GetConeStartOffsetProperty() const;
+
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 	protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;

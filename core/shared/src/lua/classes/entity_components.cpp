@@ -1290,6 +1290,9 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
 		def.def("SetOuterConeAngle",&pragma::BaseEnvLightSpotComponent::SetOuterConeAngle);
 		def.def("GetOuterConeAngle",&pragma::BaseEnvLightSpotComponent::GetOuterConeAngle);
+		def.def("GetBlendFractionProperty",&pragma::BaseEnvLightSpotComponent::GetBlendFractionProperty);
+		def.def("GetOuterConeAngleProperty",&pragma::BaseEnvLightSpotComponent::GetOuterConeAngleProperty);
+		def.def("GetConeStartOffsetProperty",&pragma::BaseEnvLightSpotComponent::GetConeStartOffsetProperty);
 		def.def("SetBlendFraction",&pragma::BaseEnvLightSpotComponent::SetBlendFraction);
 		def.def("GetBlendFraction",&pragma::BaseEnvLightSpotComponent::GetBlendFraction);
 	}

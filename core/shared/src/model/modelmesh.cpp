@@ -1037,7 +1037,25 @@ bool ModelSubMesh::LoadFromAssetData(const udm::AssetData &data,std::string &out
 		SetIndices(indexData);
 	}
 
-	udm["vertices"](GetVertices());
+	auto udmVertices = udm["vertices"];
+	udmVertices(GetVertices());
+	if(udm::is_array_type(udmVertices.GetType()))
+	{
+		// Array of vec3 is also supported
+		auto &a = udmVertices.GetValue<udm::Array>();
+		if(a.GetValueType() == udm::Type::Vector3)
+		{
+			std::vector<Vector3> verts;
+			udmVertices(verts);
+			m_vertices->resize(verts.size());
+			for(uint32_t idx=0; auto &v : verts)
+			{
+				(*m_vertices)[idx].position = v;
+				++idx;
+			}
+		}
+	}
+
 	auto udmIndices = udm["indices"];
 	auto *aIndices = udmIndices.GetValuePtr<udm::Array>();
 	if(aIndices)

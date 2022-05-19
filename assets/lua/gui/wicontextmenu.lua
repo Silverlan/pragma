@@ -116,6 +116,13 @@ function gui.WIContextMenu:OnUpdate()
 		h = self.m_contents:GetHeight()
 	end
 	self:SetSize(w,h)
+
+	if(self:GetBottom() > self:GetParent():GetBottom()) then
+		self:SetY(self:GetY() -self:GetHeight())
+	end
+	if(self:GetRight() > self:GetParent():GetRight()) then
+		self:SetX(self:GetX() -self:GetWidth())
+	end
 end
 function gui.WIContextMenu:GetItemCount() return #self.m_tItems end
 function gui.WIContextMenu:Clear()

@@ -436,7 +436,8 @@ bool CRenderComponent::IsInPvs(const Vector3 &camPos,const CWorldComponent &worl
 }
 GameShaderSpecialization CRenderComponent::GetShaderPipelineSpecialization() const
 {
-	if(GetAnimatedComponent())
+	auto *animC = GetAnimatedComponent();
+	if(animC && animC->IsPlayingAnimation())
 		return GameShaderSpecialization::Animated;
 	if(GetLightMapReceiverComponent())
 		return GameShaderSpecialization::Lightmapped;

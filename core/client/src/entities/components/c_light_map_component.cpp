@@ -16,6 +16,7 @@
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/gui/wiframe.h"
 #include <pragma/util/util_tga.hpp>
@@ -41,6 +42,22 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
+void CLightMapComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
+{
+	using T = CLightMapComponent;
+
+	using TExposure = float;
+	{
+		auto memberInfo = create_component_member_info<
+			T,TExposure,
+			static_cast<void(T::*)(TExposure)>(&T::SetLightMapExposure),
+			static_cast<TExposure(T::*)() const>(&T::GetLightMapExposure)
+		>("exposure",1.f);
+		memberInfo.SetMin(-10.f);
+		memberInfo.SetMax(10.f);
+		registerMember(std::move(memberInfo));
+	}
+}
 CLightMapComponent::CLightMapComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_lightMapExposure{util::FloatProperty::Create(0.f)}
 {}

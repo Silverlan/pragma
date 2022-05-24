@@ -17,6 +17,7 @@ namespace pragma
 	{
 	public:
 		using BaseEntityComponent::BaseEntityComponent;
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 		virtual void SetUnlit(bool b);
 		virtual void SetCastShadows(bool b);

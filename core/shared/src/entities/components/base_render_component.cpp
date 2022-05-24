@@ -8,12 +8,27 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/components/base_render_component.hpp"
 #include "pragma/entities/components/render_component_flags.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
 using namespace pragma;
 
+void BaseRenderComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
+{
+	using T = BaseRenderComponent;
+
+	{
+		using TCastShadows = bool;
+		auto memberInfo = create_component_member_info<
+			T,TCastShadows,
+			static_cast<void(T::*)(TCastShadows)>(&T::SetCastShadows),
+			static_cast<TCastShadows(T::*)() const>(&T::GetCastShadows)
+		>("castShadows",true);
+		registerMember(std::move(memberInfo));
+	}
+}
 void BaseRenderComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

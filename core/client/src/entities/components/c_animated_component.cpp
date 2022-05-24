@@ -117,6 +117,19 @@ void CAnimatedComponent::OnRemove()
 		pRenderComponent->SetRenderBufferDirty();
 }
 
+void CAnimatedComponent::PlayAnimation(int animation,FPlayAnim flags)
+{
+	auto curAnim = m_baseAnim.animation;
+	BaseAnimatedComponent::PlayAnimation(animation,flags);
+	if((curAnim == -1 && m_baseAnim.animation != -1) || (curAnim != -1 && m_baseAnim.animation == -1))
+	{
+		// Render buffer needs to be updated if our animation state changed
+		auto pRenderComponent = GetEntity().GetComponent<CRenderComponent>();
+		if(pRenderComponent.valid())
+			pRenderComponent->SetRenderBufferDirty();
+	}
+}
+
 void CAnimatedComponent::ReceiveData(NetPacket &packet)
 {
 	int anim = packet->Read<int>();

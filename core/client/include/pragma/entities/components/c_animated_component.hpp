@@ -44,6 +44,8 @@ namespace pragma
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void PlayAnimation(int animation,FPlayAnim flags=FPlayAnim::Default) override;
+		using BaseAnimatedComponent::PlayAnimation;
 		
 		prosper::SwapBuffer *GetSwapBoneBuffer();
 		const prosper::SwapBuffer *GetSwapBoneBuffer() const {return const_cast<CAnimatedComponent*>(this)->GetSwapBoneBuffer();}

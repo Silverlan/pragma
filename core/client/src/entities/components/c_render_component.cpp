@@ -617,7 +617,12 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 		auto renderFlags = pragma::ShaderEntity::InstanceData::RenderFlags::None;
 		auto *pMdlComponent = GetModelComponent();
 		auto bWeighted = pMdlComponent && static_cast<const pragma::CModelComponent&>(*pMdlComponent).IsWeighted();
-		if(bWeighted == true)
+		auto *animC = GetAnimatedComponent();
+
+		// Note: If the RenderFlags::Weighted flag is set, 'GetShaderPipelineSpecialization' must not return
+		// something other than GameShaderSpecialization::Animated, otherwise there may be rendering artifacts.
+		// (Usually z-fighting because the prepass and lighting pass shaders will perform different calculations.)
+		if(bWeighted == true && animC && animC->IsPlayingAnimation())
 			renderFlags |= pragma::ShaderEntity::InstanceData::RenderFlags::Weighted;
 		auto &m = GetTransformationMatrix();
 		m_instanceData.modelMatrix = m;

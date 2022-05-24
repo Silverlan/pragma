@@ -82,6 +82,22 @@ CLightComponent::~CLightComponent()
 	DestroyRenderBuffer();
 	DestroyShadowBuffer();
 }
+void CLightComponent::SetBaked(bool baked)
+{
+	BaseEnvLightComponent::SetBaked(baked);
+	if(baked)
+	{
+		DestroyRenderBuffer();
+		return;
+	}
+	if(!m_renderBuffer && GetEntity().IsEnabled())
+	{
+		auto &flags = m_bufferData.flags;
+		umath::set_flag(flags,LightBufferData::BufferFlags::TurnedOn,true);
+		InitializeRenderBuffer();
+		UpdateBuffers();
+	}
+}
 void CLightComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CLightComponent::InitializeRenderBuffer()
 {

@@ -127,6 +127,7 @@ namespace pragma
 		static void ClearBuffers();
 		const std::shared_ptr<prosper::IBuffer> &GetRenderBuffer() const;
 		const std::shared_ptr<prosper::IBuffer> &GetShadowBuffer() const;
+		virtual void SetBaked(bool baked) override;
 
 		enum class StateFlags : uint32_t
 		{

@@ -58,6 +58,9 @@ namespace pragma
 		float GetFalloffExponent() const;
 		virtual void SetFalloffExponent(float falloffExponent);
 
+		bool IsBaked() const;
+		virtual void SetBaked(bool baked);
+
 		void SetLight(BaseEnvLightSpotComponent &light);
 		void SetLight(BaseEnvLightPointComponent &light);
 		void SetLight(BaseEnvLightDirectionalComponent &light);

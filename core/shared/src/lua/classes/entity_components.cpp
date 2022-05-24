@@ -1263,6 +1263,8 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
 		def.def("GetFalloffExponent",&pragma::BaseEnvLightComponent::GetFalloffExponent);
 		def.def("SetFalloffExponent",&pragma::BaseEnvLightComponent::SetFalloffExponent);
+		def.def("IsBaked",&pragma::BaseEnvLightComponent::IsBaked);
+		def.def("SetBaked",&pragma::BaseEnvLightComponent::SetBaked);
 		def.def("SetLightIntensityType",&pragma::BaseEnvLightComponent::SetLightIntensityType);
 		def.def("GetLightIntensityType",&pragma::BaseEnvLightComponent::GetLightIntensityType);
 		def.def("SetLightIntensityType",+[](pragma::BaseEnvLightComponent &c,const std::string &type) {

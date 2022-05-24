@@ -66,7 +66,19 @@ void BaseEnvLightComponent::RegisterMembers(pragma::EntityComponentManager &comp
 		>("castShadows",true);
 		registerMember(std::move(memberInfo));
 	}
+
+	{
+		using TBaked = bool;
+		auto memberInfo = create_component_member_info<
+			T,TBaked,
+			&BaseEnvLightComponent::SetBaked,
+			&BaseEnvLightComponent::IsBaked
+		>("baked",false);
+		registerMember(std::move(memberInfo));
+	}
 }
+bool BaseEnvLightComponent::IsBaked() const {return umath::is_flag_set(m_lightFlags,LightFlags::BakedLightSource);}
+void BaseEnvLightComponent::SetBaked(bool baked) {umath::set_flag(m_lightFlags,LightFlags::BakedLightSource,baked);}
 std::string BaseEnvLightComponent::LightIntensityTypeToString(LightIntensityType type)
 {
 	switch(type)

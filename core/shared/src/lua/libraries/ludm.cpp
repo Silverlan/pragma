@@ -817,6 +817,10 @@ static luabind::object get_children(lua_State *l,const ::udm::PropertyWrapper &p
 	return t;
 }
 
+static void set_array_values(udm::PropertyWrapper &p,const std::string &name,::udm::StructDescription &strct,uint32_t count,DataStream &ds,::udm::ArrayType arrayType)
+{
+	p.AddArray(name,strct,ds->GetData(),count,arrayType);
+}
 template<typename T>
 	static void set_array_values(udm::Array &a,::udm::Type type,luabind::tableT<void> t,size_t size,::udm::ArrayType arrayType)
 {
@@ -1064,6 +1068,12 @@ template<class T,class TPropertyWrapper,class TClassDef>
 			Lua::Error(l,"Invalid array type '" +std::string{::udm::enum_type_to_ascii(arrayType)} +"'!");
 		TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
 		set_array_values(l,tmp,name,type,t,(arrayType == ::udm::Type::ArrayLz4) ? ::udm::ArrayType::Compressed : ::udm::ArrayType::Raw);
+	})
+	.def("SetArrayValues",+[](lua_State *l,T &p,const std::string &name,::udm::StructDescription &strct,uint32_t count,DataStream &ds,::udm::Type arrayType) {
+		if(arrayType != ::udm::Type::Array && arrayType != ::udm::Type::ArrayLz4)
+			Lua::Error(l,"Invalid array type '" +std::string{::udm::enum_type_to_ascii(arrayType)} +"'!");
+		TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
+		set_array_values(tmp,name,strct,count,ds,(arrayType == ::udm::Type::ArrayLz4) ? ::udm::ArrayType::Compressed : ::udm::ArrayType::Raw);
 	})
 	.def("GetChildren",+[](lua_State *l,T &p) -> luabind::object {
 		return get_children(l,static_cast<TPropertyWrapper>(p));

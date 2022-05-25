@@ -160,6 +160,7 @@
 #include "pragma/entities/components/c_ownable_component.hpp"
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <util_image_buffer.hpp>
 #include <luabind/copy_policy.hpp>
 
 namespace Lua
@@ -914,6 +915,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCReflectionProbe.def("CaptureIBLReflectionsFromScene",static_cast<bool(*)(lua_State*,pragma::CReflectionProbeComponent&,bool)>(&reflection_probe_capture_ibl_reflections_from_scene));
 	defCReflectionProbe.def("CaptureIBLReflectionsFromScene",static_cast<bool(*)(lua_State*,pragma::CReflectionProbeComponent&)>(&reflection_probe_capture_ibl_reflections_from_scene));
 	defCReflectionProbe.def("RequiresRebuild",&pragma::CReflectionProbeComponent::RequiresRebuild);
+	defCReflectionProbe.def("GenerateFromEquirectangularImage",&pragma::CReflectionProbeComponent::GenerateFromEquirectangularImage);
 	entsMod[defCReflectionProbe];
 
 	auto defCSkyCamera = pragma::lua::create_entity_component_class<pragma::CSkyCameraComponent,pragma::BaseEntityComponent>("SkyCameraComponent");

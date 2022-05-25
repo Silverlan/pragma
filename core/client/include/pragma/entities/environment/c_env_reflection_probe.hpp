@@ -45,6 +45,7 @@ namespace pragma
 			BakingFailed = 1u,
 			RequiresRebuild = BakingFailed<<1u
 		};
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
 		static void BuildAllReflectionProbes(Game &game,bool rebuild=false);
 		static void BuildReflectionProbes(Game &game,std::vector<CReflectionProbeComponent*> &probes,bool rebuild=false);
 		static prosper::IDescriptorSet *FindDescriptorSetForClosestProbe(const CSceneComponent &scene,const Vector3 &origin,float &outIntensity);
@@ -60,6 +61,7 @@ namespace pragma
 		bool SaveIBLReflectionsToFile();
 		const rendering::IBLData *GetIBLData() const;
 		prosper::IDescriptorSet *GetIBLDescriptorSet();
+		bool GenerateFromEquirectangularImage(uimg::ImageBuffer &imgBuf);
 
 		float GetIBLStrength() const;
 		void SetIBLStrength(float iblStrength);
@@ -68,6 +70,7 @@ namespace pragma
 		bool RequiresRebuild() const;
 
 		std::string GetCubemapIBLMaterialFilePath() const;
+		void SetCubemapIBLMaterialFilePath(const std::string &path);
 	private:
 		static std::shared_ptr<prosper::IImage> CreateCubemapImage();
 		Material *LoadMaterial(bool &outIsDefault);

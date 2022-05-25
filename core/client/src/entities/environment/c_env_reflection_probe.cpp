@@ -46,6 +46,7 @@
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/math/c_util_math.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
+#include <pragma/entities/entity_component_manager_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
@@ -157,13 +158,7 @@ void CReflectionProbeComponent::RaytracingJobManager::Finalize()
 	//auto cubemapImage = probe.CreateCubemapImage();
 	//auto extents = cubemapImage->GetExtents();
 
-	auto *shaderEquiRectToCubemap = static_cast<pragma::ShaderEquirectangularToCubemap*>(c_engine->GetShader("equirectangular_to_cubemap").get());
-	if(shaderEquiRectToCubemap == nullptr)
-		return;
-	auto imgEquirect = c_engine->GetRenderContext().CreateImage(*m_equirectImageBuffer);
-	auto texEquirect = c_engine->GetRenderContext().CreateTexture({},*imgEquirect,prosper::util::ImageViewCreateInfo{},prosper::util::SamplerCreateInfo{});
-	auto cubemapTex = shaderEquiRectToCubemap->EquirectangularTextureToCubemap(*texEquirect,256); // TODO: What resolution?
-	probe.FinalizeCubemap(cubemapTex->GetImage());
+	probe.GenerateFromEquirectangularImage(*m_equirectImageBuffer);
 
 	// TODO: Equirect to cubemap
 	//auto *memBlock = cubemapImage->GetAnvilImage().get_memory_block();
@@ -247,6 +242,40 @@ static void build_next_reflection_probe()
 	hEl.get()->Remove();
 	}),TimerType::RealTime);
 	}*/
+}
+
+void CReflectionProbeComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
+{
+	using T = CReflectionProbeComponent;
+
+	{
+		using TIblStrength = float;
+		registerMember(create_component_member_info<
+			T,TIblStrength,
+			static_cast<void(T::*)(TIblStrength)>(&T::SetIBLStrength),
+			static_cast<TIblStrength(T::*)() const>(&T::GetIBLStrength)
+		>("iblStrength",1.f));
+	}
+
+	{
+		using TMaterial = std::string;
+		auto memberInfo = create_component_member_info<
+			T,TMaterial,
+			&SetCubemapIBLMaterialFilePath,
+			+[](const ComponentMemberInfo &info,T &component,TMaterial &value) {
+				auto path = util::Path::CreateFile(component.GetCubemapIBLMaterialFilePath());
+				path.PopFront();
+				value = path.GetString();
+			}
+		>("iblMaterial","",AttributeSpecializationType::File);
+		auto &metaData = memberInfo.AddMetaData();
+		metaData["assetType"] = "material";
+		metaData["rootPath"] = util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material)).GetString();
+		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::Material,pragma::asset::FormatType::All);
+		metaData["stripRootPath"] = true;
+		metaData["stripExtension"] = true;
+		registerMember(std::move(memberInfo));
+	}
 }
 
 // These have been determined through experimentation and produce good results
@@ -334,6 +363,17 @@ prosper::IDescriptorSet *CReflectionProbeComponent::FindDescriptorSetForClosestP
 	return nullptr;
 }
 
+bool CReflectionProbeComponent::GenerateFromEquirectangularImage(uimg::ImageBuffer &imgBuf)
+{
+	auto *shaderEquiRectToCubemap = static_cast<pragma::ShaderEquirectangularToCubemap*>(c_engine->GetShader("equirectangular_to_cubemap").get());
+	if(shaderEquiRectToCubemap == nullptr)
+		return false;
+	auto imgEquirect = c_engine->GetRenderContext().CreateImage(imgBuf);
+	auto texEquirect = c_engine->GetRenderContext().CreateTexture({},*imgEquirect,prosper::util::ImageViewCreateInfo{},prosper::util::SamplerCreateInfo{});
+	auto cubemapTex = shaderEquiRectToCubemap->EquirectangularTextureToCubemap(*texEquirect,256); // TODO: What resolution?
+	return FinalizeCubemap(cubemapTex->GetImage());
+}
+
 void CReflectionProbeComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -366,6 +406,8 @@ std::string CReflectionProbeComponent::GetCubemapIBLMaterialFilePath() const
 		return "materials/" +m_iblMat;
 	return "materials/" +GetCubemapIBLMaterialPath() +GetCubemapIdentifier() +"." +pragma::asset::FORMAT_MATERIAL_ASCII;
 }
+
+void CReflectionProbeComponent::SetCubemapIBLMaterialFilePath(const std::string &path) {m_iblMat = path;}
 
 bool CReflectionProbeComponent::RequiresRebuild() const
 {
@@ -444,6 +486,7 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	auto rpath = util::Path::CreateFile(relPath +identifier +"." +pragma::asset::FORMAT_MATERIAL_ASCII);
 	auto apath = pragma::asset::relative_path_to_absolute_path(rpath,pragma::asset::Type::Material);
 	std::string err;
+	apath.PopFront();
 	auto result = mat->Save(apath.GetString(),err);
 	if(result)
 		client->LoadMaterial(rpath.GetString(),nullptr,true,true);

@@ -122,6 +122,7 @@ jobs:
           dir: '${{ matrix.config.build_dir }}/install/addons/filmmaker'
           repo_branch: 'master'
           clone_dir: '.'
+          force: '1'
           
       - name: Extract install assets
         shell: bash

@@ -42,6 +42,14 @@ void WIProgressBar::Initialize()
 	UpdateTextPosition();
 }
 
+void WIProgressBar::SetLabelVisible(bool visible)
+{
+	if(m_hLabel.IsValid())
+		m_hLabel->SetVisible(visible);
+	if(m_hLabel2.IsValid())
+		m_hLabel2->SetVisible(visible);
+}
+
 void WIProgressBar::UpdateTextPosition()
 {
 	if(m_hLabel.IsValid() == false)

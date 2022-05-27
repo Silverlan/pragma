@@ -481,6 +481,7 @@ void Lua::WIProgressBar::register_class(luabind::class_<::WIProgressBar,::WIBase
 {
 	classDef.def("SetProgress",&::WIProgressBar::SetProgress);
 	classDef.def("GetProgress",&::WIProgressBar::GetProgress);
+	classDef.def("SetLabelVisible",&::WIProgressBar::SetLabelVisible);
 	classDef.def("SetValue",&::WIProgressBar::SetValue);
 	classDef.def("GetValue",static_cast<float(::WIProgressBar::*)() const>(&::WIProgressBar::GetValue));
 	classDef.def("SetRange",static_cast<void(::WIProgressBar::*)(float,float,float)>(&::WIProgressBar::SetRange));

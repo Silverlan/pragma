@@ -909,6 +909,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defCReflectionProbe = pragma::lua::create_entity_component_class<pragma::CReflectionProbeComponent,pragma::BaseEntityComponent>("ReflectionProbeComponent");
 	defCReflectionProbe.def("GetIBLStrength",&pragma::CReflectionProbeComponent::GetIBLStrength);
 	defCReflectionProbe.def("SetIBLStrength",&pragma::CReflectionProbeComponent::SetIBLStrength);
+	defCReflectionProbe.def("GetLocationIdentifier",&pragma::CReflectionProbeComponent::GetLocationIdentifier);
 	defCReflectionProbe.def("GetIBLMaterialFilePath",&pragma::CReflectionProbeComponent::GetCubemapIBLMaterialFilePath);
 	defCReflectionProbe.def("CaptureIBLReflectionsFromScene",static_cast<bool(*)(lua_State*,pragma::CReflectionProbeComponent&,luabind::table<>,bool)>(&reflection_probe_capture_ibl_reflections_from_scene));
 	defCReflectionProbe.def("CaptureIBLReflectionsFromScene",static_cast<bool(*)(lua_State*,pragma::CReflectionProbeComponent&,luabind::table<>)>(&reflection_probe_capture_ibl_reflections_from_scene));

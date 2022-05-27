@@ -68,6 +68,7 @@ namespace pragma
 
 		UpdateStatus UpdateIBLData(bool rebuild=false);
 		bool RequiresRebuild() const;
+		std::string GetLocationIdentifier() const;
 
 		std::string GetCubemapIBLMaterialFilePath() const;
 		void SetCubemapIBLMaterialFilePath(const std::string &path);

@@ -261,7 +261,10 @@ void CReflectionProbeComponent::RegisterMembers(pragma::EntityComponentManager &
 		using TMaterial = std::string;
 		auto memberInfo = create_component_member_info<
 			T,TMaterial,
-			&SetCubemapIBLMaterialFilePath,
+			+[](const ComponentMemberInfo &info,T &component,const TMaterial &value) {
+				component.SetCubemapIBLMaterialFilePath(value);
+				component.LoadIBLReflectionsFromFile();
+			},
 			+[](const ComponentMemberInfo &info,T &component,TMaterial &value) {
 				auto path = util::Path::CreateFile(component.GetCubemapIBLMaterialFilePath());
 				path.PopFront();
@@ -434,8 +437,22 @@ void CReflectionProbeComponent::InitializeLuaObject(lua_State *l) {return BaseEn
 
 bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 {
-	if(m_iblData == nullptr || m_iblMat.empty() == false)
+	if(m_iblData == nullptr)
 		return false;
+	if(m_iblMat.empty() == false)
+	{
+		if(pragma::asset::exists(m_iblMat,pragma::asset::Type::Material))
+		{
+			auto *curMat = client->LoadMaterial(m_iblMat);
+			if(curMat)
+			{
+				auto generated = curMat->GetDataBlock()->GetBool("generated");
+				if(generated == false)
+					return false; // Don't overwrite non-generated material
+			}
+		}
+	}
+
 	auto relPath = GetCubemapIBLMaterialPath();
 	auto absPath = "materials/" +relPath;
 	FileManager::CreatePath(absPath.c_str());
@@ -483,6 +500,7 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	dataBlock->AddValue("texture","prefilter",relPath +prefix +"prefilter");
 	dataBlock->AddValue("texture","irradiance",relPath +prefix +"irradiance");
 	dataBlock->AddValue("texture","brdf","env/brdf");
+	dataBlock->AddValue("bool","generated","1");
 	auto rpath = util::Path::CreateFile(relPath +identifier +"." +pragma::asset::FORMAT_MATERIAL_ASCII);
 	auto apath = pragma::asset::relative_path_to_absolute_path(rpath,pragma::asset::Type::Material);
 	std::string err;
@@ -893,13 +911,17 @@ std::string CReflectionProbeComponent::GetCubemapIBLMaterialPath() const
 		return ufile::get_path_from_filename(m_iblMat);
 	return "maps/" +c_game->GetMapName() +"/ibl/";
 }
+std::string CReflectionProbeComponent::GetLocationIdentifier() const
+{
+	auto pos = GetEntity().GetPosition();
+	auto identifier = std::to_string(pos.x) +std::to_string(pos.y) +std::to_string(pos.z);
+	return std::to_string(std::hash<std::string>{}(identifier));
+}
 std::string CReflectionProbeComponent::GetCubemapIdentifier() const
 {
 	if(m_srcEnvMap.empty() == false)
 		return std::to_string(std::hash<std::string>{}(m_srcEnvMap));
-	auto pos = GetEntity().GetPosition();
-	auto identifier = std::to_string(pos.x) +std::to_string(pos.y) +std::to_string(pos.z);
-	return std::to_string(std::hash<std::string>{}(identifier));
+	return GetLocationIdentifier();
 }
 prosper::IDescriptorSet *CReflectionProbeComponent::GetIBLDescriptorSet()
 {

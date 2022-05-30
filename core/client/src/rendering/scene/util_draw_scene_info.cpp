@@ -20,7 +20,7 @@ util::DrawSceneInfo::DrawSceneInfo(const DrawSceneInfo &other)
 	prepassFilter{other.prepassFilter},renderFilter{other.renderFilter},outputImage{other.outputImage},
 	clipPlane{other.clipPlane},pvsOrigin{other.pvsOrigin},
 	outputLayerId{other.outputLayerId},flags{other.flags},renderStats{other.renderStats ? std::make_unique<RenderStats>(*other.renderStats) : nullptr},
-	exclusionMask{other.exclusionMask},inclusionMask{other.inclusionMask}
+	exclusionMask{other.exclusionMask},inclusionMask{other.inclusionMask},subPasses{other.subPasses ? std::make_unique<std::vector<DrawSceneInfo>>(*other.subPasses) : nullptr}
 {}
 util::DrawSceneInfo &util::DrawSceneInfo::operator=(const DrawSceneInfo &other)
 {
@@ -43,6 +43,8 @@ util::DrawSceneInfo &util::DrawSceneInfo::operator=(const DrawSceneInfo &other)
 	outputLayerId = other.outputLayerId;
 	flags = other.flags;
 	renderStats = other.renderStats ? std::make_unique<RenderStats>(*other.renderStats) : nullptr;
+
+	subPasses = other.subPasses ? std::make_unique<std::vector<DrawSceneInfo>>(*other.subPasses) : nullptr;
 	return *this;
 }
 

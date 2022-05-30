@@ -31,7 +31,9 @@ namespace util
 			None = 0u,
 			FlipVertically = 1u,
 			DisableRender = FlipVertically<<1u,
-			Reflection = DisableRender<<1u
+			Reflection = DisableRender<<1u,
+			DisablePrepass = Reflection<<1u,
+			DisableLightingPass = DisablePrepass<<1u
 		};
 		DrawSceneInfo();
 		DrawSceneInfo(const DrawSceneInfo &other);

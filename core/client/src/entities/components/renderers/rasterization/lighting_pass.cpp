@@ -146,6 +146,8 @@ void pragma::CRasterizationRendererComponent::UpdateLightingPassRenderBuffers(co
 }
 void pragma::CRasterizationRendererComponent::ExecutePrepass(const util::DrawSceneInfo &drawSceneInfo)
 {
+	if(umath::is_flag_set(drawSceneInfo.flags,util::DrawSceneInfo::Flags::DisablePrepass))
+		return;
 	auto &scene = *drawSceneInfo.scene;
 	auto &hCam = scene.GetActiveCamera();
 	// Pre-render depths and normals (if SSAO is enabled)
@@ -205,6 +207,8 @@ void pragma::CRasterizationRendererComponent::ExecutePrepass(const util::DrawSce
 
 void pragma::CRasterizationRendererComponent::ExecuteLightingPass(const util::DrawSceneInfo &drawSceneInfo)
 {
+	if(umath::is_flag_set(drawSceneInfo.flags,util::DrawSceneInfo::Flags::DisablePrepass))
+		return;
 	auto &scene = const_cast<pragma::CSceneComponent&>(*drawSceneInfo.scene);
 	auto &cam = scene.GetActiveCamera();
 	bool bShadows = (drawSceneInfo.renderFlags &RenderFlags::Shadows) == RenderFlags::Shadows;
@@ -307,9 +311,12 @@ void pragma::CRasterizationRendererComponent::StartPrepassRecording(const util::
 	auto &prepassRt = *prepass.renderTarget;
 	m_prepassCommandBufferGroup->StartRecording(prepassRt.GetRenderPass(),prepassRt.GetFramebuffer());
 	
+	if(!umath::is_flag_set(drawSceneInfo.flags,util::DrawSceneInfo::Flags::DisablePrepass))
+	{
 		RecordPrepass(drawSceneInfo);
 		CEDrawSceneInfo evData {drawSceneInfo};
 		InvokeEventCallbacks(EVENT_ON_RECORD_PREPASS,evData);
+	}
 
 	m_prepassCommandBufferGroup->EndRecording();
 }
@@ -319,10 +326,13 @@ void pragma::CRasterizationRendererComponent::StartLightingPassRecording(const u
 	if(rt == nullptr || drawSceneInfo.scene.expired())
 		return;
 	m_lightingCommandBufferGroup->StartRecording(rt->GetRenderPass(),rt->GetFramebuffer());
-
+	
+	if(!umath::is_flag_set(drawSceneInfo.flags,util::DrawSceneInfo::Flags::DisableLightingPass))
+	{
 		RecordLightingPass(drawSceneInfo);
 		CEDrawSceneInfo evData {drawSceneInfo};
 		InvokeEventCallbacks(EVENT_ON_RECORD_LIGHTING_PASS,evData);
+	}
 
 	m_lightingCommandBufferGroup->EndRecording();
 }

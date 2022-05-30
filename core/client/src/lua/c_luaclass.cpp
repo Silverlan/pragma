@@ -790,6 +790,8 @@ void CGame::RegisterLuaClasses()
 	defDrawSceneInfo.add_static_constant("FLAG_FLIP_VERTICALLY_BIT",umath::to_integral(::util::DrawSceneInfo::Flags::FlipVertically));
 	defDrawSceneInfo.add_static_constant("FLAG_DISABLE_RENDER_BIT",umath::to_integral(::util::DrawSceneInfo::Flags::DisableRender));
 	defDrawSceneInfo.add_static_constant("FLAG_REFLECTION_BIT",umath::to_integral(::util::DrawSceneInfo::Flags::Reflection));
+	defDrawSceneInfo.add_static_constant("FLAG_DISABLE_PREPASS_BIT",umath::to_integral(::util::DrawSceneInfo::Flags::DisablePrepass));
+	defDrawSceneInfo.add_static_constant("FLAG_DISABLE_LIGHTING_PASS_BIT",umath::to_integral(::util::DrawSceneInfo::Flags::DisableLightingPass));
 	defDrawSceneInfo.def(luabind::constructor<>());
 	defDrawSceneInfo.property("scene",static_cast<luabind::object(*)(const ::util::DrawSceneInfo&)>([](const ::util::DrawSceneInfo &drawSceneInfo) -> luabind::object {
 		return drawSceneInfo.scene.valid() ? drawSceneInfo.scene->GetLuaObject() : luabind::object{};
@@ -858,6 +860,7 @@ void CGame::RegisterLuaClasses()
 			return {};
 		return luabind::object{l,drawSceneInfo.renderStats.get()};
 	}));
+	defDrawSceneInfo.def("AddSubPass",&::util::DrawSceneInfo::AddSubPass);
 	defDrawSceneInfo.def("SetEntityRenderFilter",static_cast<void(*)(lua_State*,util::DrawSceneInfo&,luabind::object)>([](lua_State *l,util::DrawSceneInfo &drawSceneInfo,luabind::object f) {
 		Lua::CheckFunction(l,2);
 		drawSceneInfo.renderFilter = [f,l](CBaseEntity &ent) -> bool {

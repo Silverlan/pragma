@@ -113,10 +113,18 @@ void BaseAnimatedComponent::Initialize()
 	// SetTickPolicy(TickPolicy::WhenVisible);
 }
 
+bool BaseAnimatedComponent::IsAnimated() const
+{
+	return umath::is_flag_set(m_stateFlags,StateFlags::IsAnimated);
+}
 void BaseAnimatedComponent::UpdateAnimations(double dt)
 {
 	if(ShouldUpdateBones() == false)
+	{
+		m_stateFlags &= ~StateFlags::IsAnimated;
 		return;
+	}
+	m_stateFlags |= StateFlags::IsAnimated;
 	auto &ent = GetEntity();
 	auto pTimeScaleComponent = ent.GetTimeScaleComponent();
 	MaintainAnimations(dt *(pTimeScaleComponent.valid() ? pTimeScaleComponent->GetEffectiveTimeScale() : 1.f));

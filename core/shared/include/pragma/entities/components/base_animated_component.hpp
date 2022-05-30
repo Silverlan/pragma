@@ -61,7 +61,8 @@ namespace pragma
 		{
 			None = 0u,
 			AbsolutePosesDirty = 1u,
-			BaseAnimationDirty = AbsolutePosesDirty<<1u
+			BaseAnimationDirty = AbsolutePosesDirty<<1u,
+			IsAnimated = BaseAnimationDirty<<1u
 		};
 
 		struct DLLNETWORK AnimationSlotInfo
@@ -110,6 +111,7 @@ namespace pragma
 		const Vector3 *GetBoneScale(uint32_t boneId) const;
 		std::optional<Mat4> GetBoneMatrix(unsigned int boneID) const;
 
+		bool IsAnimated() const;
 		FPlayAnim GetBaseAnimationFlags() const;
 		void SetBaseAnimationFlags(FPlayAnim flags);
 

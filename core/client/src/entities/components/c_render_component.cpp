@@ -437,7 +437,7 @@ bool CRenderComponent::IsInPvs(const Vector3 &camPos,const CWorldComponent &worl
 GameShaderSpecialization CRenderComponent::GetShaderPipelineSpecialization() const
 {
 	auto *animC = GetAnimatedComponent();
-	if(animC && animC->IsPlayingAnimation())
+	if(animC && animC->IsAnimated())
 		return GameShaderSpecialization::Animated;
 	if(GetLightMapReceiverComponent())
 		return GameShaderSpecialization::Lightmapped;
@@ -622,7 +622,7 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 		// Note: If the RenderFlags::Weighted flag is set, 'GetShaderPipelineSpecialization' must not return
 		// something other than GameShaderSpecialization::Animated, otherwise there may be rendering artifacts.
 		// (Usually z-fighting because the prepass and lighting pass shaders will perform different calculations.)
-		if(bWeighted == true && animC && animC->IsPlayingAnimation())
+		if(bWeighted == true && animC && animC->ShouldUpdateBones())
 			renderFlags |= pragma::ShaderEntity::InstanceData::RenderFlags::Weighted;
 		auto &m = GetTransformationMatrix();
 		m_instanceData.modelMatrix = m;

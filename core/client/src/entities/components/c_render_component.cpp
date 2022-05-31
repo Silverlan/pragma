@@ -363,7 +363,10 @@ void CRenderComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	else if(typeid(component) == typeid(pragma::CAnimatedComponent))
 		m_animComponent = static_cast<CAnimatedComponent*>(&component);
 	else if(typeid(component) == typeid(pragma::CLightMapReceiverComponent))
+	{
+		m_stateFlags |= StateFlags::RenderBufferDirty;
 		m_lightMapReceiverComponent = static_cast<CLightMapReceiverComponent*>(&component);
+	}
 }
 void CRenderComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 {
@@ -373,7 +376,10 @@ void CRenderComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 	else if(typeid(component) == typeid(pragma::CAnimatedComponent))
 		m_animComponent = nullptr;
 	else if(typeid(component) == typeid(pragma::CLightMapReceiverComponent))
+	{
+		m_stateFlags &= ~StateFlags::RenderBufferDirty;
 		m_lightMapReceiverComponent = nullptr;
+	}
 }
 bool CRenderComponent::IsInstantiable() const {return umath::is_flag_set(m_stateFlags,StateFlags::IsInstantiable);}
 void CRenderComponent::SetInstaniationEnabled(bool enabled)
@@ -436,11 +442,11 @@ bool CRenderComponent::IsInPvs(const Vector3 &camPos,const CWorldComponent &worl
 }
 GameShaderSpecialization CRenderComponent::GetShaderPipelineSpecialization() const
 {
-	auto *animC = GetAnimatedComponent();
-	if(animC && animC->IsAnimated())
-		return GameShaderSpecialization::Animated;
 	if(GetLightMapReceiverComponent())
 		return GameShaderSpecialization::Lightmapped;
+	auto *animC = GetAnimatedComponent();
+	if(animC)
+		return GameShaderSpecialization::Animated;
 	return GameShaderSpecialization::Generic;
 }
 void CRenderComponent::UpdateMatrices()
@@ -622,7 +628,7 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 		// Note: If the RenderFlags::Weighted flag is set, 'GetShaderPipelineSpecialization' must not return
 		// something other than GameShaderSpecialization::Animated, otherwise there may be rendering artifacts.
 		// (Usually z-fighting because the prepass and lighting pass shaders will perform different calculations.)
-		if(bWeighted == true && animC && animC->ShouldUpdateBones())
+		if(bWeighted == true && animC && !m_lightMapReceiverComponent)// && animC->ShouldUpdateBones())
 			renderFlags |= pragma::ShaderEntity::InstanceData::RenderFlags::Weighted;
 		auto &m = GetTransformationMatrix();
 		m_instanceData.modelMatrix = m;

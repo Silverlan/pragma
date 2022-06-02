@@ -26,7 +26,7 @@ extern DLLCLIENT CGame *c_game;
 #include "pragma/console/c_cvar.h"
 #include <pragma/entities/entity_iterator.hpp>
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#pragma optimize("",off)
+
 static auto cvDrawParticles = GetClientConVar("render_draw_particles");
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include <prosper_descriptor_set_group.hpp>
@@ -194,4 +194,3 @@ void pragma::CRasterizationRendererComponent::RenderSceneFog(const util::DrawSce
 
 	hdrInfo.BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo);
 }
-#pragma optimize("",on)

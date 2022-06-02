@@ -30,7 +30,6 @@
 #include <panima/slice.hpp>
 #include <luabind/copy_policy.hpp>
 
-#pragma optimize("",off)
 namespace Lua::animation
 {
 	void register_library(Lua::Interface &lua);
@@ -558,4 +557,3 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	})];
 	animMod[cdAnim2];
 }
-#pragma optimize("",on)

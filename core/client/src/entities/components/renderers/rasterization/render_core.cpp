@@ -39,7 +39,7 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 using namespace pragma::rendering;
-#pragma optimize("",off)
+
 void pragma::CRasterizationRendererComponent::RecordRenderParticleSystems(
 	prosper::ICommandBuffer &cmd,const util::DrawSceneInfo &drawSceneInfo,
 	std::vector<pragma::CParticleSystemComponent*> &particles,pragma::rendering::SceneRenderPass renderMode,
@@ -309,4 +309,3 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 		(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpu,*drawSceneInfo.commandBuffer);
 	}
 }
-#pragma optimize("",on)

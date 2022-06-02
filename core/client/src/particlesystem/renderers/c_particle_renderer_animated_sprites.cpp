@@ -22,7 +22,7 @@ REGISTER_PARTICLE_RENDERER(source_render_animated_sprites,CParticleRendererAnima
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 void CParticleRendererAnimatedSprites::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
 	CParticleRenderer::Initialize(pSystem,values);
@@ -88,4 +88,3 @@ void CParticleRendererAnimatedSprites::RecordRenderShadow(prosper::ICommandBuffe
 	shader.Draw(m_particleSystem,light,layerId);
 	shader.EndDraw();*/ // prosper TODO
 }
-#pragma optimize("",on)

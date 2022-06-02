@@ -19,7 +19,7 @@ extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 decltype(ShaderParticleBlob::VERTEX_BINDING_BLOB_NEIGHBORS) ShaderParticleBlob::VERTEX_BINDING_BLOB_NEIGHBORS = {prosper::VertexInputRate::Instance,MAX_BLOB_NEIGHBORS *sizeof(uint16_t)};
 decltype(ShaderParticleBlob::VERTEX_ATTRIBUTE_BLOB_NEIGHBORS) ShaderParticleBlob::VERTEX_ATTRIBUTE_BLOB_NEIGHBORS = {VERTEX_BINDING_BLOB_NEIGHBORS,prosper::Format::R32G32B32A32_UInt};
 decltype(ShaderParticleBlob::DESCRIPTOR_SET_PARTICLE_DATA) ShaderParticleBlob::DESCRIPTOR_SET_PARTICLE_DATA = {
@@ -208,4 +208,3 @@ bool ShaderParticleBlob::RecordDraw(
 	return RecordBindVertexBuffers(bindState,{ps.GetParticleBuffer().get(),ptAnimBuffer.get(),&blobIndexBuffer}) == true &&
 		ShaderSceneLit::RecordDraw(bindState,pragma::CParticleSystemComponent::VERTEX_COUNT,ps.GetRenderParticleCount()) == true;
 }
-#pragma optimize("",on)

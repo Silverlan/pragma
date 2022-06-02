@@ -25,7 +25,7 @@
 #include <udm.hpp>
 
 #undef CreateFile
-#pragma optimize("",off)
+
 void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 {
 	map.RegisterConCommand("exec",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
@@ -379,4 +379,3 @@ void Engine::RegisterConsoleCommands()
 		ClearUnusedAssets(types,true);
 	},ConVarFlags::None,"Clears all unused assets from memory.");
 }
-#pragma optimize("",on)

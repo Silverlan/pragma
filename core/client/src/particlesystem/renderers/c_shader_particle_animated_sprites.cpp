@@ -13,7 +13,7 @@
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 static Mat3x4 calc_rotation_matrix_around_axis(const Vector3 &axis,umath::Degree ang)
 {
 	ang = umath::deg_to_rad(ang);
@@ -153,4 +153,3 @@ bool ShaderParticleAnimatedSprites::RecordDraw(
 	pushConstants.camBias = 0.f;
 	return RecordPushConstants(bindState,pushConstants) && ShaderParticle2DBase::RecordDraw(bindState,scene,renderer,ps,orientationType,renderFlags);
 }
-#pragma optimize("",on)

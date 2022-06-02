@@ -14,7 +14,7 @@
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 ShaderParticleSpriteTrail::ShaderParticleSpriteTrail(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderParticle2DBase(context,identifier,"pfm/particles/vs_particle_sprite_trail","particles/fs_particle")
 {}
@@ -100,4 +100,3 @@ bool ShaderParticleSpriteTrail::RecordDraw(
 	pushConstants.animRate = rendererSt.GetAnimationRate();
 	return RecordPushConstants(bindState,pushConstants) && ShaderParticle2DBase::RecordDraw(bindState,scene,r,ps,orientationType,renderFlags);
 }
-#pragma optimize("",on)

@@ -14,7 +14,7 @@
 #include <pragma/console/c_cvar.h>
 
 extern CEngine *c_engine;
-#pragma optimize("",off)
+
 KeyBind::KeyBind()
 	: m_type(Type::Invalid)
 {
@@ -173,4 +173,3 @@ bool KeyBind::Execute(GLFW::KeyState inputState,GLFW::KeyState pressState,GLFW::
 	}
 	return false;
 }
-#pragma optimize("",on)

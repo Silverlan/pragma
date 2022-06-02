@@ -36,7 +36,7 @@ extern DLLCLIENT CGame *c_game;
 using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(skybox,CSkybox);
-#pragma optimize("",off)
+
 void CSkyboxComponent::Initialize()
 {
 	BaseSkyboxComponent::Initialize();
@@ -487,4 +487,3 @@ void Console::commands::util_convert_equirectangular_image_to_cubemap(NetworkSta
 {
 	util_convert_cubemap_equirect(argv,ConversionMode::EquirectangularToCubemap);
 }
-#pragma optimize("",on)

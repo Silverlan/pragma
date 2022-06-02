@@ -38,7 +38,7 @@ static CallbackHandle g_cbPreRenderScene = {};
 static CallbackHandle g_cbPostRenderScene = {};
 static std::unique_ptr<DebugRenderFilter> g_debugRenderFilter = nullptr;
 DLLCLIENT bool pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED = false;
-#pragma optimize("",off)
+
 void set_debug_render_filter(std::unique_ptr<DebugRenderFilter> filter)
 {
 	g_debugRenderFilter = std::move(filter);
@@ -851,4 +851,3 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 	}
 	return numShaderInvocations;
 }
-#pragma optimize("",on)

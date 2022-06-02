@@ -14,7 +14,7 @@
 #include <prosper_prepared_command_buffer.hpp>
 
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 extern ClientState *client;
 WILuaBase::WILuaBase()
 {}
@@ -268,4 +268,3 @@ void WILuaBase::default_OnRemove(lua_State*,WILuaBase&) {}
 
 bool WILuaBase::Lua_CheckPosInBounds(const Vector2i &pos) {return WIBase::DoPosInBounds(pos);}
 bool WILuaBase::default_CheckPosInBounds(lua_State *l,WILuaBase &hElement,const Vector2i &pos) {return hElement.WIBase::DoPosInBounds(pos);}
-#pragma optimize("",on)

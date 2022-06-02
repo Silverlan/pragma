@@ -17,7 +17,6 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-#pragma optimize("",off)
 ShaderCubemapToEquirectangular::ShaderCubemapToEquirectangular(prosper::IPrContext &context,const std::string &identifier)
 	: prosper::ShaderBaseImageProcessing{context,identifier,"screen/fs_cubemap_to_equirectangular"}
 {
@@ -110,4 +109,3 @@ std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquir
 	GetContext().FlushSetupCommandBuffer();
 	return success ? rt->GetTexture().shared_from_this() : nullptr;
 }
-#pragma optimize("",on)

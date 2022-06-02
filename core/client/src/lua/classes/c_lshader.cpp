@@ -16,7 +16,7 @@
 #include <prosper_prepared_command_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
-#pragma optimize("",off)
+
 prosper::ShaderBindState *LuaShaderRecordTarget::GetBindState() const
 {
 	return luabind::object_cast_nothrow<prosper::ShaderBindState*>(target,static_cast<prosper::ShaderBindState*>(nullptr));
@@ -230,4 +230,3 @@ void Lua::Shader::SetPipelineCount(lua_State *l,pragma::LuaShaderBase &shader,ui
 {
 	shader.SetPipelineCount(pipelineCount);
 }
-#pragma optimize("",on)

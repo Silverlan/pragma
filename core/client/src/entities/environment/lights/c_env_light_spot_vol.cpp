@@ -29,7 +29,7 @@ LINK_ENTITY_TO_CLASS(env_light_spot_vol,CEnvLightSpotVol);
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 void CLightSpotVolComponent::Initialize()
 {
 	auto &ent = GetEntity();
@@ -177,4 +177,3 @@ void CEnvLightSpotVol::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CLightSpotVolComponent>();
 }
-#pragma optimize("",on)

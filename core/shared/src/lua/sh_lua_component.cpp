@@ -28,7 +28,7 @@
 #include <udm.hpp>
 
 using namespace pragma;
-#pragma optimize("",off)
+
 struct ClassMembers
 {
 	ClassMembers(const luabind::object &classObject)
@@ -1588,4 +1588,3 @@ void Lua::register_base_entity_component(luabind::module_ &modEnts)
 	classDef.def("Load",&pragma::BaseLuaBaseEntityComponent::Lua_Load,&pragma::BaseLuaBaseEntityComponent::default_Lua_Load);
 	modEnts[classDef];
 }
-#pragma optimize("",on)

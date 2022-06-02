@@ -22,7 +22,7 @@ REGISTER_PARTICLE_RENDERER(blob,CParticleRendererBlob);
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 decltype(CParticleRendererBlob::s_bShowNeighborLinks) CParticleRendererBlob::s_bShowNeighborLinks = false;
 decltype(CParticleRendererBlob::s_dsParticles) CParticleRendererBlob::s_dsParticles = nullptr;
 decltype(CParticleRendererBlob::s_activeBlobRendererCount) CParticleRendererBlob::s_activeBlobRendererCount = 0;
@@ -566,4 +566,3 @@ void CParticleRendererBlob::RecordRenderShadow(prosper::ICommandBuffer &drawCmd,
 	shader.Draw(m_particleSystem,blobIndexBuffer,light,layerId);
 	shader.EndDraw();*/ // prosper TODO
 }
-#pragma optimize("",on)

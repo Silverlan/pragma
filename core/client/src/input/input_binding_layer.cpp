@@ -9,7 +9,7 @@
 #include "pragma/c_engine.h"
 #include "pragma/input/input_binding_layer.hpp"
 #include "pragma/input/inputhelper.h"
-#pragma optimize("",off)
+
 bool InputBindingLayer::Save(const std::vector<std::shared_ptr<InputBindingLayer>> &layers,udm::AssetDataArg outData,std::string &outErr)
 {
 	auto udmData = outData.GetData();
@@ -152,4 +152,3 @@ std::unordered_map<short,KeyBind> &CoreInputBindingLayer::GetKeyMappings()
 	pragma::get_cengine()->UpdateDirtyInputBindings();
 	return InputBindingLayer::GetKeyMappings();
 }
-#pragma optimize("",on)

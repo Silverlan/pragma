@@ -7,7 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/util/font_set.hpp"
-#pragma optimize("",off)
+
 bool FontSet::HasFeature(const std::string_view &feature) const
 {
 	return std::find(features.begin(),features.end(),feature) != features.end();
@@ -42,4 +42,3 @@ FontSetFileData *FontSet::FindFontFileCandidate(FontSetFlag flags)
 	return bestCandidate;
 }
 const FontSetFileData *FontSet::FindFontFileCandidate(FontSetFlag flags) const {return const_cast<FontSet*>(this)->FindFontFileCandidate(flags);}
-#pragma optimize("",on)

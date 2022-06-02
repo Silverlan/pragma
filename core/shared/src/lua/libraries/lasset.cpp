@@ -18,7 +18,7 @@
 #include <fsys/ifile.hpp>
 
 extern DLLNETWORK Engine *engine;
-#pragma optimize("",off)
+
 void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 {
 	auto modAsset = luabind::module_(lua.GetState(),"asset");
@@ -295,4 +295,3 @@ Lua::tb<std::string> Lua::asset::get_supported_export_file_extensions(lua_State 
 	}
 	return t;
 }
-#pragma optimize("",on)

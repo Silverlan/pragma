@@ -32,7 +32,7 @@
 #include <luabind/out_value_policy.hpp>
 #include <luabind/copy_policy.hpp>
 #include <luabind/discard_result_policy.hpp>
-#pragma optimize("",off)
+
 namespace Lua
 {
 	template<typename ...Types>
@@ -3431,4 +3431,3 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	}
 
 	// --template-register-definition
-#pragma optimize("",on)

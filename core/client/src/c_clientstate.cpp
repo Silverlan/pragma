@@ -11,7 +11,7 @@
 #include <pragma/clientstate/clientstate.h>
 
 extern DLLCLIENT ClientState *client;
-#pragma optimize("",off)
+
 ClientState *CEngine::OpenClientState()
 {
 	CloseClientState();
@@ -41,4 +41,3 @@ NetworkState *CEngine::GetClientState() const
 		return nullptr;
 	return static_cast<ClientState*>(m_clInstance->state.get());
 }
-#pragma optimize("",on)

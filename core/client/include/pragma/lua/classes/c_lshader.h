@@ -235,8 +235,12 @@ namespace Lua
 		DLLCLIENT void GetSourceFilePaths(lua_State *l,prosper::Shader &shader);
 		DLLCLIENT void RecordPushConstants(lua_State *l,prosper::Shader &shader,const LuaShaderRecordTarget &recordTarget,::DataStream &ds,uint32_t offset);
 		DLLCLIENT void RecordPushConstants(lua_State *l,prosper::Shader &shader,prosper::util::PreparedCommandBuffer &pcb,udm::Type type,const Lua::Vulkan::PreparedCommandLuaArg &value,uint32_t offset);
-		DLLCLIENT void RecordBindDescriptorSet(lua_State *l,prosper::Shader &shader,prosper::ShaderBindState &bindState,Lua::Vulkan::DescriptorSet &ds,uint32_t firstSet,luabind::object dynamicOffsets);
-		DLLCLIENT void RecordBindDescriptorSets(lua_State *l,prosper::Shader &shader,prosper::ShaderBindState &bindState,luabind::object descSets,uint32_t firstSet,luabind::object ynamicOffsets);
+		DLLCLIENT void RecordBindDescriptorSet(
+			lua_State *l,prosper::Shader &shader,prosper::util::PreparedCommandBuffer &pcb,
+			Lua::Vulkan::DescriptorSet &ds,uint32_t firstSet,luabind::object dynamicOffsets,std::optional<uint32_t> dynamicOffsetIndex={}
+		);
+		DLLCLIENT void RecordBindDescriptorSet(lua_State *l,prosper::Shader &shader,prosper::ShaderBindState &bindState,Lua::Vulkan::DescriptorSet &ds,uint32_t firstSet,luabind::object dynamicOffsets,std::optional<uint32_t> dynamicOffsetIndex={});
+		DLLCLIENT void RecordBindDescriptorSets(lua_State *l,prosper::Shader &shader,prosper::ShaderBindState &bindState,luabind::object descSets,uint32_t firstSet,luabind::object dynamicOffsets);
 
 		namespace Graphics
 		{

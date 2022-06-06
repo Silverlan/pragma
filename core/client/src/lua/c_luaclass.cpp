@@ -24,6 +24,7 @@
 #include "pragma/lua/classes/c_lshaderinfo.h"
 #include "pragma/lua/classes/lshaderinfo.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
@@ -219,6 +220,25 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 				return 0;
 			Lua::shader::push_shader(l,*whShader.get());
 			return 1;
+		}},
+		{"cubemap_to_equirectangular_texture",[](lua_State *l) {
+			auto *shader = static_cast<pragma::ShaderCubemapToEquirectangular*>(
+				c_engine->GetShader("cubemap_to_equirectangular").get()
+			);
+			if(!shader)
+				return 0;
+			auto cubemap = Lua::Check<std::shared_ptr<prosper::Texture>>(l,1);
+			uint32_t width = 1'600;
+			uint32_t height = 800;
+			if(Lua::IsSet(l,2))
+				width = Lua::CheckInt(l,2);
+			if(Lua::IsSet(l,3))
+				height = Lua::CheckInt(l,3);
+			auto tex = shader->CubemapToEquirectangularTexture(*cubemap,width,height);
+			if(!tex)
+				return 0;
+			Lua::Push(l,tex);
+			return 1;
 		}}
 	});
 	
@@ -257,7 +277,9 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	modShader[defBindState];
 
 	auto defShader = luabind::class_<prosper::Shader>("Shader");
-	defShader.def("RecordBindDescriptorSet",&Lua::Shader::RecordBindDescriptorSet);
+	defShader.def("RecordBindDescriptorSet",+[](lua_State *l,prosper::Shader &shader,prosper::ShaderBindState &bindState,Lua::Vulkan::DescriptorSet &ds,uint32_t firstSet,luabind::object dynamicOffsets) {
+		Lua::Shader::RecordBindDescriptorSet(l,shader,bindState,ds,firstSet,dynamicOffsets,5);
+	});
 	defShader.def("RecordBindDescriptorSet",+[](lua_State *l,prosper::Shader &shader,prosper::ShaderBindState &bindState,Lua::Vulkan::DescriptorSet &ds,uint32_t firstSet) {
 		Lua::Shader::RecordBindDescriptorSet(l,shader,bindState,ds,firstSet,{});
 	});
@@ -270,6 +292,9 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	});
 	defShader.def("RecordBindDescriptorSets",+[](lua_State *l,prosper::Shader &shader,prosper::ShaderBindState &bindState,luabind::object descSets) {
 		Lua::Shader::RecordBindDescriptorSets(l,shader,bindState,descSets,0u,{});
+	});
+	defShader.def("RecordBindDescriptorSet",+[](lua_State *l,prosper::Shader &shader,prosper::util::PreparedCommandBuffer &pcb,Lua::Vulkan::DescriptorSet &ds,uint32_t firstSet,luabind::object dynamicOffsets) {
+		Lua::Shader::RecordBindDescriptorSet(l,shader,pcb,ds,firstSet,dynamicOffsets,5);
 	});
 	defShader.def("RecordPushConstants",static_cast<void(*)(lua_State*,prosper::Shader&,const LuaShaderRecordTarget&,::DataStream&,uint32_t)>(&Lua::Shader::RecordPushConstants));
 	defShader.def("RecordPushConstants",static_cast<void(*)(lua_State*,prosper::Shader&,prosper::util::PreparedCommandBuffer&,udm::Type,const Lua::Vulkan::PreparedCommandLuaArg&,uint32_t)>(&Lua::Shader::RecordPushConstants));

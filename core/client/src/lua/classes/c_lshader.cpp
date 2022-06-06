@@ -194,12 +194,26 @@ static bool record_bind_descriptor_sets(prosper::Shader &shader,prosper::ShaderB
 {
 	return shader.RecordBindDescriptorSets(bindState,descSets,firstSet,dynamicOffsets);
 }
-void Lua::Shader::RecordBindDescriptorSet(lua_State *l,prosper::Shader &shader,prosper::ShaderBindState &bindState,Lua::Vulkan::DescriptorSet &ds,uint32_t firstSet,luabind::object dynamicOffsets)
+void Lua::Shader::RecordBindDescriptorSet(
+	lua_State *l,prosper::Shader &shader,prosper::util::PreparedCommandBuffer &pcb,
+	Lua::Vulkan::DescriptorSet &ds,uint32_t firstSet,luabind::object oDynamicOffsets,std::optional<uint32_t> dynamicOffsetIndex
+)
+{
+	auto dynamicOffsets = dynamicOffsetIndex.has_value() ? Lua::table_to_vector<uint32_t>(l,oDynamicOffsets,*dynamicOffsetIndex) : std::vector<uint32_t>{};
+	pcb.PushCommand(
+		[&shader,&ds,firstSet,dynamicOffsets=std::move(dynamicOffsets)](const prosper::util::PreparedCommandBufferRecordState &recordState) mutable -> bool {
+			return shader.RecordBindDescriptorSet(
+				*recordState.shaderBindState,
+				*ds.GetDescriptorSet(),firstSet,dynamicOffsets
+			);
+	});
+}
+void Lua::Shader::RecordBindDescriptorSet(lua_State *l,prosper::Shader &shader,prosper::ShaderBindState &bindState,Lua::Vulkan::DescriptorSet &ds,uint32_t firstSet,luabind::object dynamicOffsets,std::optional<uint32_t> dynamicOffsetIndex)
 {
 	std::vector<uint32_t> vDynamicOffsets;
-	if(Lua::IsSet(l,4u))
+	if(dynamicOffsetIndex.has_value() && Lua::IsSet(l,*dynamicOffsetIndex))
 	{
-		vDynamicOffsets = get_table_values<uint32_t>(l,4u,[](lua_State *l,int32_t idx) {
+		vDynamicOffsets = get_table_values<uint32_t>(l,*dynamicOffsetIndex,[](lua_State *l,int32_t idx) {
 			return static_cast<uint32_t>(Lua::CheckInt(l,idx));
 		});
 	}

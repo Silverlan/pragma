@@ -627,6 +627,9 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 	defVkDescriptorSet.def("GetDebugName",static_cast<std::string(*)(lua_State*,Lua::Vulkan::DescriptorSet&)>([](lua_State *l,Lua::Vulkan::DescriptorSet &ds) {
 		return Lua::Vulkan::VKContextObject::GetDebugName(l,ds);
 	}));
+	defVkDescriptorSet.def("Update",+[](lua_State *l,Lua::Vulkan::DescriptorSet &ds) {
+		return ds.GetDescriptorSet()->Update();
+	});
 	prosperMod[defVkDescriptorSet];
 	
 	auto defVkMesh = luabind::class_<pragma::SceneMesh>("Mesh");
@@ -687,6 +690,16 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 		},std::move(util::make_vector<PcbArg>(
 			make_pcb_arg(lineWidth,udm::Type::Float)
 		)));
+	});
+	defPcb.def("RecordClearImage",+[](prosper::util::PreparedCommandBuffer &pcb,prosper::IImage &img,const Color &color) -> bool {
+		pcb.PushCommand([&img,color](const prosper::util::PreparedCommandBufferRecordState &recordState) -> bool {
+			auto &cmdBuf = recordState.commandBuffer;
+			auto vCol = color.ToVector4();
+			return cmdBuf.RecordClearImage(img,prosper::ImageLayout::TransferDstOptimal,std::array<float,4>{vCol[0],vCol[1],vCol[2],vCol[3]});
+		});
+	});
+	defPcb.def("RecordCommands",+[](prosper::util::PreparedCommandBuffer &pcb,prosper::ICommandBuffer &cmd) -> bool {
+		return pcb.RecordCommands(cmd,{},{});
 	});
 	defPcb.def_readonly("enableDrawArgs",&prosper::util::PreparedCommandBuffer::enableDrawArgs);
 

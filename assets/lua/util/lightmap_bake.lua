@@ -6,6 +6,9 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 ]]
 
+include("uv_atlas_generator.lua")
+include("lightmap_cache.lua")
+
 pfm.register_log_category("lightmap")
 
 local function generate_uv_atlas(origin,tEnts)
@@ -75,9 +78,9 @@ util.load_baked_lightmap_uvs = function(lightmapCachePath,tEnts)
 	return true
 end
 
-util.bake_lightmaps = function(preview)
+util.bake_lightmaps = function(preview,lightIntensityFactor)
 	include("/pfm/unirender.lua")
-	if(pfm.load_cycles() == false) then
+	if(pfm.load_unirender() == false) then
 		log.msg("Cannot bake lightmaps: Unable to load unirender library!",pfm.LOG_CATEGORY_LOG_CATEGORY_LIGHTMAP,pfm.LOG_SEVERITY_WARNING)
 		return false
 	end
@@ -100,7 +103,7 @@ util.bake_lightmaps = function(preview)
 	bakeSettings.exposure = 50.0
 	bakeSettings:SetColorTransform("filmic-blender","Medium Contrast")
 	bakeSettings.rebuildUvAtlas = false
-	bakeSettings.globalLightIntensityFactor = 1
+	bakeSettings.globalLightIntensityFactor = lightIntensityFactor or 1
 	bakeSettings.skyStrength = 0.3
 	-- unirender.PBRShader.set_global_albedo_override_color(Vector(0.8,0.8,0.8))
 	local result = ents.LightMapComponent.bake_lightmaps(bakeSettings)
@@ -128,7 +131,7 @@ function util.bake_map_lightmaps(fileName,tEnts)
 		log.msg("Cannot bake lightmaps: No entities to bake lightmaps for!",pfm.LOG_CATEGORY_LOG_CATEGORY_LIGHTMAP,pfm.LOG_SEVERITY_WARNING)
 		return
 	end
-	if(pfm.load_cycles() == false) then
+	if(pfm.load_unirender() == false) then
 		log.msg("Cannot bake lightmaps: Unable to load unirender library!",pfm.LOG_CATEGORY_LOG_CATEGORY_LIGHTMAP,pfm.LOG_SEVERITY_WARNING)
 		return false
 	end

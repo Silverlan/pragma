@@ -9,7 +9,7 @@
 local LIGHTMAP_CACHE_VERSION = 1
 
 function util.load_lightmap_uv_cache(fileName)
-	fileName = file.remove_file_extension(fileName) .. ".lmdb"
+	fileName = file.remove_file_extension(fileName) .. ".lmd_b"
 
 	local udmData,err = udm.create("PLMD",LIGHTMAP_CACHE_VERSION)
 	if(udmData == false) then
@@ -101,7 +101,7 @@ end
 
 function util.save_lightmap_uv_cache(fileName,entities)
 	file.create_path(file.get_file_path(fileName))
-	fileName = file.remove_file_extension(fileName) .. ".lmdb"
+	fileName = file.remove_file_extension(fileName) .. ".lmd_b"
 
 	local udmData,err = udm.create("PLMD",LIGHTMAP_CACHE_VERSION)
 	if(udmData == false) then
@@ -109,7 +109,7 @@ function util.save_lightmap_uv_cache(fileName,entities)
 		return
 	end
 
-	local assetData = udmData:GetAssetData()
+	local assetData = udmData:GetAssetData():GetData()
 	local udmEntities = assetData:AddArray("entities",#entities)
 	local entIdx = 0
 	for _,ent in ipairs(entities) do
@@ -126,22 +126,15 @@ function util.save_lightmap_uv_cache(fileName,entities)
 						local numVerts = subMesh:GetVertexCount()
 						local dsVertexData = util.DataStream(numVerts *util.SIZEOF_VERTEX)
 						for i=0,numVerts -1 do dsVertexData:WriteVertex(subMesh:GetVertex(i)) end
-
-						local indices = subMesh:GetIndices()
-						local numIndices = #indices
-						local dsIndexData = util.DataStream(numVerts *util.SIZEOF_SHORT)
-						for _,idx in ipairs(indices) do dsIndexData:WriteUInt16(idx) end
-
-						local dsLightmapUvs = util.DataStream(numVerts *util.SIZEOF_VECTOR2)
-						for i=0,numVerts -1 do dsLightmapUvs:WriteVector2(subMesh:GetVertexUV("lightmap",i)) end
-						
+						dsVertexData:Seek(0)
 						table.insert(lightmappedMeshes,{
 							meshGroup = i -1,
 							mesh = j -1,
 							subMesh = k -1,
+							vertexCount = numVerts,
 							vertexData = dsVertexData,
-							indexData = dsIndexData,
-							lightmapUvData = dsLightmapUvs
+							indexData = subMesh:GetIndices(),
+							lightmapUvData = subMesh:GetUVs("lightmap")
 						})
 					end
 				end
@@ -166,13 +159,31 @@ function util.save_lightmap_uv_cache(fileName,entities)
 				udmMesh:SetValue("mesh",udm.TYPE_UINT32,meshInfo.mesh)
 				udmMesh:SetValue("subMesh",udm.TYPE_UINT32,meshInfo.subMesh)
 
-				udmMesh:SetValue("vertexData",udm.TYPE_BLOB_LZ4,udm.compress_lz4(meshInfo.vertexData))
-				udmMesh:SetValue("indexData",udm.TYPE_BLOB_LZ4,udm.compress_lz4(meshInfo.indexData))
-				udmMesh:SetValue("lightmapUvData",udm.TYPE_BLOB_LZ4,udm.compress_lz4(meshInfo.lightmapUvData))
+				local strct = udm.define_struct({
+					{
+						type = udm.TYPE_VECTOR3,
+						name = "pos"
+					},
+					{
+						type = udm.TYPE_VECTOR2,
+						name = "uv"
+					},
+					{
+						type = udm.TYPE_VECTOR3,
+						name = "n"
+					},
+					{
+						type = udm.TYPE_VECTOR4,
+						name = "t"
+					}
+				})
+				udmMesh:SetArrayValues("vertexData",strct,meshInfo.vertexCount,meshInfo.vertexData,udm.TYPE_ARRAY_LZ4)
+				udmMesh:SetArrayValues("indexData",udm.TYPE_UINT32,meshInfo.indexData,udm.TYPE_ARRAY_LZ4)
+				udmMesh:SetArrayValues("lightmapUvData",udm.TYPE_VECTOR2,meshInfo.lightmapUvData,udm.TYPE_ARRAY_LZ4)
 			end
 		end
 	end
 	udmEntities:Resize(entIdx)
 
-	udmData:Save(fileName)
+	return udmData:Save(fileName)
 end

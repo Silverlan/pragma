@@ -49,6 +49,7 @@ void Lua::ents::register_library(lua_State *l)
 		luabind::def("get_all",static_cast<tb<type<BaseEntity>>(*)(lua_State*,EntityIterator::FilterFlags)>(get_all)),
 		luabind::def("get_all",static_cast<tb<type<BaseEntity>>(*)(lua_State*,EntityIterator::FilterFlags,const tb<LuaEntityIteratorFilterBase>&)>(get_all)),
 		luabind::def("get_all",static_cast<tb<type<BaseEntity>>(*)(lua_State*,const tb<LuaEntityIteratorFilterBase>&)>(get_all)),
+		luabind::def("get_all_c",static_cast<tb<type<pragma::BaseEntityComponent>>(*)(lua_State*,func<type<pragma::BaseEntityComponent>>)>(get_all_c)),
 		luabind::def("get_spawned",get_spawned),
 		luabind::def("get_players",get_players),
 		luabind::def("get_npcs",get_npcs),
@@ -574,6 +575,44 @@ Lua::tb<Lua::type<BaseEntity>> Lua::ents::get_all(lua_State *l,func<type<BaseEnt
 {
 	std::vector<BaseEntity*> ents {};
 	iterate_entities(l,[&ents](BaseEntity *ent) {ents.push_back(ent);});
+	if(ents.empty())
+		return luabind::newtable(l);
+	auto t = luabind::newtable(l);
+	auto idx = 1;
+	for(auto *ent : ents)
+	{
+		auto &o = ent->GetLuaObject();
+		//if(!luabind::object_cast<bool>(func(o)))
+		//	continue;
+		t[idx++] = o;
+	}
+	return t;
+}
+static void iterate_entity_components(lua_State *l,const std::function<void(pragma::BaseEntityComponent*)> &fCallback)
+{
+	auto fcIterator = 1;
+	Lua::CheckFunction(l,fcIterator);
+	pragma::BaseEntityComponent *ent = nullptr;
+	do
+	{
+		Lua::PushValue(l,fcIterator); /* 1 */
+		Lua::Call(l,0,2); /* 1 */
+		if(Lua::IsSet(l,-1))
+		{
+			ent = luabind::object_cast<pragma::BaseEntityComponent*>(luabind::object{luabind::from_stack(l,-1)});
+			if(ent != nullptr)
+				fCallback(ent);
+		}
+		else
+			ent = nullptr;
+		Lua::Pop(l,2); /* 0 */
+	}
+	while(ent != nullptr);
+}
+Lua::tb<Lua::type<pragma::BaseEntityComponent>> Lua::ents::get_all_c(lua_State *l,func<type<pragma::BaseEntityComponent>> func)
+{
+	std::vector<pragma::BaseEntityComponent*> ents {};
+	iterate_entity_components(l,[&ents](pragma::BaseEntityComponent *ent) {ents.push_back(ent);});
 	if(ents.empty())
 		return luabind::newtable(l);
 	auto t = luabind::newtable(l);

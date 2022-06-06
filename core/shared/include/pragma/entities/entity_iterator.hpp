@@ -85,6 +85,10 @@ public:
 	bool operator!=(const BaseEntityIterator &other);
 
 	std::size_t GetCount() const;
+
+	// For internal use only!
+	EntityIteratorData *GetIteratorData() {return m_iteratorData.get();}
+	std::size_t GetCurrentIndex() const {return m_currentIndex;}
 protected:
 	std::shared_ptr<EntityIteratorData> m_iteratorData;
 	std::size_t m_currentIndex = 0ull;

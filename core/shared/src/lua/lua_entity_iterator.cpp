@@ -65,6 +65,41 @@ EntityIterator &LuaEntityIterator::GetIterator() {return *m_iterator;}
 
 ////////////
 
+CEntityComponentIterator::CEntityComponentIterator(Game &game,FilterFlags filterFlags)
+	: EntityIterator {game,filterFlags}
+{}
+CEntityComponentIterator::CEntityComponentIterator(Game &game,pragma::ComponentId componentId,FilterFlags filterFlags)
+	: EntityIterator {game,componentId,filterFlags}
+{}
+CEntityComponentIterator::CEntityComponentIterator(Game &game,const std::string &componentName,FilterFlags filterFlags)
+	: EntityIterator {game,componentName,filterFlags}
+{}
+CEntityComponentIterator::CEntityComponentIterator(std::vector<BaseEntity*> &ents)
+	: m_ents(&ents)
+{}
+CEntityComponentIterator &CEntityComponentIterator::operator++()
+{
+	while(++m_currentIndex < m_ents->size())
+	{
+		auto *ent = m_ents->at(m_currentIndex);
+		if(ent != nullptr && ent->HasComponent(m_componentId))
+			break;
+	}
+	return *this;
+}
+CEntityComponentIterator CEntityComponentIterator::operator++(int)
+{
+	auto r = *this;
+	operator++();
+	return r;
+}
+pragma::BaseEntityComponent &CEntityComponentIterator::operator*() {return *operator->();}
+pragma::BaseEntityComponent *CEntityComponentIterator::operator->() {return m_ents->at(m_currentIndex)->FindComponent(m_componentId).get();}
+bool CEntityComponentIterator::operator==(const CEntityComponentIterator &other) {return m_ents == other.m_ents && m_currentIndex == other.m_currentIndex;}
+bool CEntityComponentIterator::operator!=(const CEntityComponentIterator &other) {return !operator==(other);}
+
+////////////
+
 LuaEntityIteratorFilterName::LuaEntityIteratorFilterName(const std::string &name,bool caseSensitive,bool exactMatch)
 	: m_name(name),m_bCaseSensitive(caseSensitive),m_bExactMatch(exactMatch)
 {}
@@ -169,3 +204,57 @@ void LuaEntityIteratorFilterComponent::Attach(EntityIterator &iterator)
 {
 	iterator.AttachFilter<EntityIteratorFilterComponent>(m_componentId);
 }
+
+////////////
+
+LuaBaseEntityComponentIterator::LuaBaseEntityComponentIterator(const BaseEntityIterator &iterator)
+	: m_iterator(iterator)
+{}
+LuaBaseEntityComponentIterator::LuaBaseEntityComponentIterator(const LuaBaseEntityComponentIterator &other)
+	: m_iterator(other.m_iterator)
+{}
+LuaBaseEntityComponentIterator &LuaBaseEntityComponentIterator::operator++()
+{
+	++m_iterator;
+	return *this;
+}
+LuaBaseEntityComponentIterator LuaBaseEntityComponentIterator::operator++(int)
+{
+	return LuaBaseEntityComponentIterator(m_iterator++);
+}
+std::pair<BaseEntity*,pragma::BaseEntityComponent*> LuaBaseEntityComponentIterator::operator*()
+{
+	auto *data = m_iterator.GetIteratorData();
+	auto *c = static_cast<ComponentContainer*>(data->entities.get())->components[m_iterator.GetCurrentIndex()];
+	if(!c)
+		return {nullptr,nullptr};
+	return {&c->GetEntity(),c};
+}
+std::pair<BaseEntity*,pragma::BaseEntityComponent*> LuaBaseEntityComponentIterator::operator->()
+{
+	return operator*();
+}
+bool LuaBaseEntityComponentIterator::operator==(const LuaBaseEntityComponentIterator &other) {return m_iterator == other.m_iterator;}
+bool LuaBaseEntityComponentIterator::operator!=(const LuaBaseEntityComponentIterator &other) {return m_iterator != other.m_iterator;}
+
+////////////
+
+LuaEntityComponentIterator::LuaEntityComponentIterator(lua_State *l,pragma::ComponentId componentId,EntityIterator::FilterFlags filterFlags)
+	: m_iterator(std::make_shared<CEntityComponentIterator>(*engine->GetNetworkState(l)->GetGameState(),componentId,filterFlags))
+{}
+LuaEntityComponentIterator::LuaEntityComponentIterator(lua_State *l,const std::string &componentName,EntityIterator::FilterFlags filterFlags)
+	: m_iterator(std::make_shared<CEntityComponentIterator>(*engine->GetNetworkState(l)->GetGameState(),componentName,filterFlags))
+{}
+LuaBaseEntityComponentIterator LuaEntityComponentIterator::begin() const
+{
+	return LuaBaseEntityComponentIterator(m_iterator->begin());
+}
+LuaBaseEntityComponentIterator LuaEntityComponentIterator::end() const
+{
+	return LuaBaseEntityComponentIterator(m_iterator->end());
+}
+void LuaEntityComponentIterator::AttachFilter(LuaEntityIteratorFilterBase &filter)
+{
+	filter.Attach(*m_iterator);
+}
+EntityIterator &LuaEntityComponentIterator::GetIterator() {return *m_iterator;}

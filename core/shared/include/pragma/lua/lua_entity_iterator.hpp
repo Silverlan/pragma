@@ -151,4 +151,57 @@ private:
 	pragma::ComponentId m_componentId = pragma::INVALID_COMPONENT_ID;
 };
 
+///////////////
+
+class LuaBaseEntityComponentIterator
+{
+public:
+	LuaBaseEntityComponentIterator(const BaseEntityIterator &iterator);
+	LuaBaseEntityComponentIterator(const LuaBaseEntityComponentIterator &other);
+	LuaBaseEntityComponentIterator &operator=(const LuaBaseEntityComponentIterator &other)=delete;
+	LuaBaseEntityComponentIterator &operator++();
+	LuaBaseEntityComponentIterator operator++(int);
+	std::pair<BaseEntity*,pragma::BaseEntityComponent*> operator*();
+	std::pair<BaseEntity*,pragma::BaseEntityComponent*> operator->();
+	bool operator==(const LuaBaseEntityComponentIterator &other);
+	bool operator!=(const LuaBaseEntityComponentIterator &other);
+private:
+	BaseEntityIterator m_iterator;
+};
+
+class CEntityComponentIterator
+	: public EntityIterator
+{
+public:
+	CEntityComponentIterator()=default;
+	CEntityComponentIterator(Game &game,FilterFlags filterFlags=FilterFlags::Default);
+	CEntityComponentIterator(Game &game,pragma::ComponentId componentId,FilterFlags filterFlags=FilterFlags::Default);
+	CEntityComponentIterator(Game &game,const std::string &componentName,FilterFlags filterFlags=FilterFlags::Default);
+	CEntityComponentIterator(std::vector<BaseEntity*> &ents);
+	CEntityComponentIterator &operator++();
+	CEntityComponentIterator operator++(int);
+	pragma::BaseEntityComponent &operator*();
+	pragma::BaseEntityComponent *operator->();
+	bool operator==(const CEntityComponentIterator &other);
+	bool operator!=(const CEntityComponentIterator &other);
+protected:
+	std::size_t m_currentIndex = std::numeric_limits<std::size_t>::max(); // Note: Intentional overflow at first iteration
+	pragma::ComponentId m_componentId = pragma::INVALID_COMPONENT_ID;
+	std::vector<BaseEntity*> *m_ents = nullptr;
+};
+
+class LuaEntityComponentIterator
+{
+public:
+	LuaEntityComponentIterator(lua_State *l,pragma::ComponentId componentId,EntityIterator::FilterFlags filterFlags=EntityIterator::FilterFlags::Default);
+	LuaEntityComponentIterator(lua_State *l,const std::string &componentName,EntityIterator::FilterFlags filterFlags=EntityIterator::FilterFlags::Default);
+	LuaBaseEntityComponentIterator begin() const;
+	LuaBaseEntityComponentIterator end() const;
+	void AttachFilter(LuaEntityIteratorFilterBase &filter);
+
+	EntityIterator &GetIterator();
+private:
+	std::shared_ptr<CEntityComponentIterator> m_iterator = nullptr;
+};
+
 #endif

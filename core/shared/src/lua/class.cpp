@@ -1554,24 +1554,85 @@ LuaEntityIterator Lua::ents::create_lua_entity_iterator(lua_State *l,const tb<Lu
 	return r;
 }
 
+LuaEntityComponentIterator Lua::ents::create_lua_entity_component_iterator(lua_State *l,pragma::ComponentId componentId,const tb<LuaEntityIteratorFilterBase> &filterTable,EntityIterator::FilterFlags filterFlags)
+{
+	auto r = LuaEntityComponentIterator{l,componentId,filterFlags};
+	if(filterTable)
+	{
+		filterTable.push(l);
+		luabind::detail::stack_pop sp {l,1};
+
+		auto t = Lua::GetStackTop(l);
+		Lua::CheckTable(l,t);
+		auto numFilters = Lua::GetObjectLength(l,t);
+		for(auto i=decltype(numFilters){0u};i<numFilters;++i)
+		{
+			Lua::PushInt(l,i +1u);
+			Lua::GetTableValue(l,t);
+
+			auto *filter = Lua::CheckEntityIteratorFilter(l,-1);
+			r.AttachFilter(*filter);
+
+			Lua::Pop(l,1);
+		}
+	}
+	return r;
+}
+
 namespace Lua
 {
 	void register_bullet_info(luabind::module_ &gameMod);
 };
 
+
+
+struct LuaEntityIteratorFilterFunction
+	: public LuaEntityIteratorFilterBase
+{
+	LuaEntityIteratorFilterFunction(Lua::func<bool> oFunc);
+	virtual void Attach(EntityIterator &iterator) override;
+private:
+	luabind::object m_function;
+};
+
+LuaEntityIteratorFilterFunction::LuaEntityIteratorFilterFunction(Lua::func<bool> oFunc)
+	: m_function{oFunc}
+{}
+void LuaEntityIteratorFilterFunction::Attach(EntityIterator &iterator)
+{
+	auto *l = m_function.interpreter();
+	iterator.AttachFilter<EntityIteratorFilterUser>([this,l](BaseEntity &ent) -> bool {
+		auto r = Lua::CallFunction(l,[this,&ent](lua_State *l) -> Lua::StatusCode {
+			m_function.push(l);
+			ent.GetLuaObject().push(l);
+			return Lua::StatusCode::Ok;
+		},1);
+		if(r == Lua::StatusCode::Ok)
+		{
+			auto res = Lua::CheckBool(l,-1);
+			Lua::Pop(l,1);
+			return res;
+		}
+		return false;
+	});
+}
+
+/////////
+
 static std::optional<LuaEntityIterator> s_entIterator {}; // HACK: This is a workaround for a bug in luabind, which causes errors when compiled with gcc.
+static std::optional<LuaEntityComponentIterator> s_centIterator {}; // HACK: This is a workaround for a bug in luabind, which causes errors when compiled with gcc.
 void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 {
 	auto &modEnts = GetLuaInterface().RegisterLibrary("ents");
 	RegisterLuaEntityComponents(modEnts);
 	modEnts[
-		luabind::def("iterator",static_cast<LuaEntityIterator&(*)(lua_State*)>([](lua_State *l) -> LuaEntityIterator& {
+		luabind::def("iterator",+[](lua_State *l) -> LuaEntityIterator& {
 			s_entIterator = LuaEntityIterator{l};
 			return *s_entIterator;
-		}),luabind::return_stl_iterator{})
+		},luabind::return_stl_iterator{})
 	];
 	modEnts[
-		luabind::def("iterator",static_cast<LuaEntityIterator&(*)(lua_State*,const Lua::var<EntityIterator::FilterFlags,Lua::tb<LuaEntityIteratorFilterBase>>&)>([](lua_State *l,const Lua::var<EntityIterator::FilterFlags,Lua::tb<LuaEntityIteratorFilterBase>> &oFilterOrFlags) -> LuaEntityIterator& {
+		luabind::def("iterator",+[](lua_State *l,const Lua::var<EntityIterator::FilterFlags,Lua::tb<LuaEntityIteratorFilterBase>> &oFilterOrFlags) -> LuaEntityIterator& {
 			auto filterFlags = EntityIterator::FilterFlags::Default;
 			luabind::object filterTable {};
 			if(Lua::IsNumber(l,1))
@@ -1580,13 +1641,37 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 				filterTable = oFilterOrFlags;
 			s_entIterator = Lua::ents::create_lua_entity_iterator(l,filterTable,filterFlags);
 			return *s_entIterator;
-		}),luabind::return_stl_iterator{})
+		},luabind::return_stl_iterator{})
 	];
 	modEnts[
-		luabind::def("iterator",static_cast<LuaEntityIterator&(*)(lua_State*,EntityIterator::FilterFlags,const Lua::tb<LuaEntityIteratorFilterBase>&)>([](lua_State *l,EntityIterator::FilterFlags filterFlags,const Lua::tb<LuaEntityIteratorFilterBase> &oFilter) -> LuaEntityIterator& {
+		luabind::def("iterator",+[](lua_State *l,EntityIterator::FilterFlags filterFlags,const Lua::tb<LuaEntityIteratorFilterBase> &oFilter) -> LuaEntityIterator& {
 			s_entIterator = Lua::ents::create_lua_entity_iterator(l,oFilter,filterFlags);
 			return *s_entIterator;
-		}),luabind::return_stl_iterator{})
+		},luabind::return_stl_iterator{})
+	];
+	modEnts[
+		luabind::def("citerator",+[](lua_State *l,pragma::ComponentId componentId) -> LuaEntityComponentIterator& {
+			s_centIterator = LuaEntityComponentIterator{l,componentId};
+			return *s_centIterator;
+		},luabind::return_stl_iterator{})
+	];
+	modEnts[
+		luabind::def("citerator",+[](lua_State *l,pragma::ComponentId componentId,const Lua::var<EntityIterator::FilterFlags,Lua::tb<LuaEntityIteratorFilterBase>> &oFilterOrFlags) -> LuaEntityComponentIterator& {
+			auto filterFlags = EntityIterator::FilterFlags::Default;
+			luabind::object filterTable {};
+			if(Lua::IsNumber(l,2))
+				filterFlags = static_cast<EntityIterator::FilterFlags>(luabind::object_cast<uint32_t>(oFilterOrFlags));
+			else
+				filterTable = oFilterOrFlags;
+			s_centIterator = Lua::ents::create_lua_entity_component_iterator(l,componentId,filterTable,filterFlags);
+			return *s_centIterator;
+		},luabind::return_stl_iterator{})
+	];
+	modEnts[
+		luabind::def("citerator",+[](lua_State *l,pragma::ComponentId componentId,EntityIterator::FilterFlags filterFlags,const Lua::tb<LuaEntityIteratorFilterBase> &oFilter) -> LuaEntityComponentIterator& {
+			s_centIterator = Lua::ents::create_lua_entity_component_iterator(l,componentId,oFilter,filterFlags);
+			return *s_centIterator;
+		},luabind::return_stl_iterator{})
 	];
 
 	auto defItFilter = luabind::class_<LuaEntityIteratorFilterBase>("IteratorFilter");
@@ -1639,6 +1724,10 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	defItFilterComponent.def(luabind::constructor<pragma::ComponentId>());
 	defItFilterComponent.def(luabind::constructor<lua_State*,const std::string&>());
 	modEnts[defItFilterComponent];
+
+	auto defItFilterFunction = luabind::class_<LuaEntityIteratorFilterFunction,LuaEntityIteratorFilterBase>("IteratorFilterFunction");
+	defItFilterFunction.def(luabind::constructor<Lua::func<bool>>());
+	modEnts[defItFilterFunction];
 	
 	Lua::RegisterLibraryEnums(GetLuaState(),"ents",{
 		{"ITERATOR_FILTER_BIT_NONE",umath::to_integral(EntityIterator::FilterFlags::None)},

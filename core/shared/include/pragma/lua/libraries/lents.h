@@ -15,6 +15,7 @@
 extern DLLNETWORK Engine *engine;
 
 class LuaEntityIterator;
+class LuaEntityComponentIterator;
 using LuaEntityObject = luabind::object;
 struct LuaEntityIteratorFilterBase;
 enum class LuaEntityType : uint8_t;
@@ -23,6 +24,7 @@ namespace Lua
 	namespace ents
 	{
 		DLLNETWORK LuaEntityIterator create_lua_entity_iterator(lua_State *l,const tb<LuaEntityIteratorFilterBase> &filterTable,EntityIterator::FilterFlags filterFlags=EntityIterator::FilterFlags::Default);
+		DLLNETWORK LuaEntityComponentIterator create_lua_entity_component_iterator(lua_State *l,pragma::ComponentId componentId,const tb<LuaEntityIteratorFilterBase> &filterTable,EntityIterator::FilterFlags filterFlags=EntityIterator::FilterFlags::Default);
 		
 		DLLNETWORK void register_library(lua_State *l);
 
@@ -38,6 +40,7 @@ namespace Lua
 		DLLNETWORK tb<type<BaseEntity>> get_all(lua_State *l,EntityIterator::FilterFlags filterFlags=EntityIterator::FilterFlags::Default);
 		DLLNETWORK tb<type<BaseEntity>> get_all(lua_State *l,EntityIterator::FilterFlags filterFlags,const tb<LuaEntityIteratorFilterBase> &filters);
 		DLLNETWORK tb<type<BaseEntity>> get_all(lua_State *l,const tb<LuaEntityIteratorFilterBase> &filters);
+		DLLNETWORK tb<type<pragma::BaseEntityComponent>> get_all_c(lua_State *l,func<type<pragma::BaseEntityComponent>> func);
 
 		DLLNETWORK tb<type<BaseEntity>> get_spawned(lua_State *l);
 		DLLNETWORK tb<type<BaseEntity>> get_players(lua_State *l);

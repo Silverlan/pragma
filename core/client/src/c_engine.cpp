@@ -1274,15 +1274,7 @@ void CEngine::Close()
 	auto closeSecondaryWindows = [this]() {
 		auto &renderContext = GetRenderContext();
 		auto &primWindow = renderContext.GetWindow();
-		auto &wpWindows = GetRenderContext().GetWindows();
-		std::vector<std::shared_ptr<prosper::Window>> windows;
-		windows.reserve(wpWindows.size());
-		for(auto &wpWindow : wpWindows)
-		{
-			if(wpWindow.expired())
-				continue;
-			windows.push_back(wpWindow.lock()); // Temporarily claim ownership of the window
-		}
+		auto &windows = GetRenderContext().GetWindows();
 		// Close all windows that aren't the primary window
 		for(auto &w : windows)
 		{
@@ -1290,7 +1282,16 @@ void CEngine::Close()
 				continue;
 			w->Close();
 		}
-		windows.clear(); // Release windows
+		for(auto it=windows.begin();it!=windows.end();)
+		{
+			auto &w = *it;
+			if(w.get() == &primWindow)
+			{
+				++it;
+				continue;
+			}
+			it = windows.erase(it);
+		}
 	};
 	closeSecondaryWindows();
 
@@ -1380,11 +1381,8 @@ void CEngine::DrawFrame()
 		auto idx = GetPerformanceTimerIndex(GPUTimer::Present);
 		m_gpuTimers[idx]->Begin(*primWindowCmd);
 	}
-	for(auto &wpWindow : GetRenderContext().GetWindows())
+	for(auto &window : GetRenderContext().GetWindows())
 	{
-		if(wpWindow.expired())
-			continue;
-		auto window = wpWindow.lock();
 		if(window->IsValid() == false || window->GetState() != prosper::Window::State::Active)
 			continue;
 		auto &finalImg = window->GetStagingRenderTarget()->GetTexture().GetImage();
@@ -1423,10 +1421,9 @@ void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 
 		WGUI::GetInstance().SetLockedForDrawing(true);
 		auto &context = GetRenderContext();
-		for(auto &wpWindow : context.GetWindows())
+		for(auto &window : context.GetWindows())
 		{
-			auto window = wpWindow.lock();
-			if(!window || window->IsValid() == false)
+			if(!window || window->IsValid() == false || window->GetState() != prosper::Window::State::Active)
 				continue;
 			auto &windowRt = window->GetStagingRenderTarget();
 			auto &swapCmdGroup = window->GetSwapCommandBufferGroup();
@@ -1478,10 +1475,9 @@ void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 			auto idx = GetPerformanceTimerIndex(GPUTimer::GUI);
 			m_gpuTimers[idx]->Begin(*primWindowCmd);
 		}
-		for(auto &wpWindow : GetRenderContext().GetWindows())
+		for(auto &window : GetRenderContext().GetWindows())
 		{
-			auto window = wpWindow.lock();
-			if(!window || !window->IsValid())
+			if(!window || !window->IsValid() || window->GetState() != prosper::Window::State::Active)
 				continue;
 			auto &rt = window->GetStagingRenderTarget();
 			auto &drawCmd = window->GetDrawCommandBuffer();
@@ -1599,13 +1595,18 @@ void CEngine::Think()
 	auto &windows = GetRenderContext().GetWindows();
 	for(auto it=windows.begin();it!=windows.end();)
 	{
-		auto &wpWindow = *it;
-		if(wpWindow.expired())
+		auto &window = *it;
+		if(window.use_count() == 1)
 		{
+			window->Close();
 			it = windows.erase(it);
 			continue;
 		}
-		auto window = wpWindow.lock();
+		if(!window->IsValid())
+		{
+			++it;
+			continue;
+		}
 		if((*window)->ShouldClose() == false)
 		{
 			window->UpdateWindow();
@@ -1618,8 +1619,9 @@ void CEngine::Think()
 			return;
 		}
 		window->Close();
-		it = windows.erase(it);
+		++it;
 	}
+	GetRenderContext().CloseWindowsScheduledForClosing();
 }
 
 void CEngine::SetFixedFrameDeltaTimeInterpretation(std::optional<std::chrono::nanoseconds> frameDeltaTime)

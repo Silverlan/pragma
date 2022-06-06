@@ -1600,11 +1600,15 @@ LuaEntityIteratorFilterFunction::LuaEntityIteratorFilterFunction(Lua::func<bool>
 {}
 void LuaEntityIteratorFilterFunction::Attach(EntityIterator &iterator)
 {
+	auto *data = iterator.GetIteratorData();
+	auto *components = (data && data->entities && typeid(*data->entities) == typeid(ComponentContainer)) ? static_cast<ComponentContainer*>(data->entities.get()) : nullptr;
 	auto *l = m_function.interpreter();
-	iterator.AttachFilter<EntityIteratorFilterUser>([this,l](BaseEntity &ent) -> bool {
-		auto r = Lua::CallFunction(l,[this,&ent](lua_State *l) -> Lua::StatusCode {
+	iterator.AttachFilter<EntityIteratorFilterUser>([this,l,components](BaseEntity &ent,std::size_t index) -> bool {
+		auto r = Lua::CallFunction(l,[this,&ent,index,components](lua_State *l) -> Lua::StatusCode {
 			m_function.push(l);
 			ent.GetLuaObject().push(l);
+			if(components)
+				components->components[index]->GetLuaObject().push(l);
 			return Lua::StatusCode::Ok;
 		},1);
 		if(r == Lua::StatusCode::Ok)

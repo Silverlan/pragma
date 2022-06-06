@@ -335,7 +335,7 @@ pragma::COcclusionCullerComponent *CSceneComponent::FindOcclusionCuller()
 {
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::COcclusionCullerComponent>>();
-	entIt.AttachFilter<EntityIteratorFilterUser>([this](BaseEntity &ent) -> bool {
+	entIt.AttachFilter<EntityIteratorFilterUser>([this](BaseEntity &ent,std::size_t index) -> bool {
 		return static_cast<CBaseEntity&>(ent).IsInScene(*this);
 	});
 	auto it = entIt.begin();

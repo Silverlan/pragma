@@ -1302,7 +1302,7 @@ void CGame::InitializeMapEntities(pragma::asset::WorldData &worldData,std::vecto
 		auto mapIdx = entData->GetMapIndex();
 		EntityIterator entIt {*this,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::MapComponent>>();
-		entIt.AttachFilter<EntityIteratorFilterUser>([mapIdx](BaseEntity &ent) -> bool {
+		entIt.AttachFilter<EntityIteratorFilterUser>([mapIdx](BaseEntity &ent,std::size_t index) -> bool {
 			auto pMapComponent = ent.GetComponent<pragma::MapComponent>();
 			return pMapComponent->GetMapIndex() == mapIdx;
 		});

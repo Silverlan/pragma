@@ -135,7 +135,7 @@ bool BaseIOComponent::FireSingleOutput(Output &output,BaseEntity *activator,IoFl
 		std::string className = output.entities;
 		ustring::to_lower(className);
 		EntityIterator entIt {*game};
-		entIt.AttachFilter<EntityIteratorFilterUser>([&className,&output](BaseEntity &ent) -> bool {
+		entIt.AttachFilter<EntityIteratorFilterUser>([&className,&output](BaseEntity &ent,std::size_t index) -> bool {
 			if(ustring::compare(ent.GetClass(),className,false))
 				return true;
 			auto pNameComponent = static_cast<pragma::BaseNameComponent*>(ent.FindComponent("name").get());

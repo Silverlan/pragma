@@ -19,7 +19,7 @@
 EntityIteratorFilterName::EntityIteratorFilterName(Game &game,const std::string &name,bool caseSensitive,bool exactMatch)
 	: m_name(name),m_bCaseSensitive(caseSensitive),m_bExactMatch(exactMatch)
 {}
-bool EntityIteratorFilterName::ShouldPass(BaseEntity &ent)
+bool EntityIteratorFilterName::ShouldPass(BaseEntity &ent,std::size_t index)
 {
 	auto pNameComponent = static_cast<pragma::BaseNameComponent*>(ent.FindComponent("name").get());
 	if(pNameComponent == nullptr)
@@ -32,7 +32,7 @@ bool EntityIteratorFilterName::ShouldPass(BaseEntity &ent)
 EntityIteratorFilterModel::EntityIteratorFilterModel(Game &game,const std::string &mdlName)
 	: m_modelName{mdlName}
 {}
-bool EntityIteratorFilterModel::ShouldPass(BaseEntity &ent)
+bool EntityIteratorFilterModel::ShouldPass(BaseEntity &ent,std::size_t index)
 {
 	auto pMdlComponent = static_cast<pragma::BaseModelComponent*>(ent.FindComponent("model").get());
 	if(pMdlComponent == nullptr)
@@ -45,14 +45,14 @@ bool EntityIteratorFilterModel::ShouldPass(BaseEntity &ent)
 EntityIteratorFilterUuid::EntityIteratorFilterUuid(Game &game,const util::Uuid &uuid)
 	: m_uuid{uuid}
 {}
-bool EntityIteratorFilterUuid::ShouldPass(BaseEntity &ent) {return ent.GetUuid() == m_uuid;}
+bool EntityIteratorFilterUuid::ShouldPass(BaseEntity &ent,std::size_t index) {return ent.GetUuid() == m_uuid;}
 
 /////////////////
 
 EntityIteratorFilterClass::EntityIteratorFilterClass(Game &game,const std::string &name,bool caseSensitive,bool exactMatch)
 	: m_name(name),m_bCaseSensitive(caseSensitive),m_bExactMatch(exactMatch)
 {}
-bool EntityIteratorFilterClass::ShouldPass(BaseEntity &ent)
+bool EntityIteratorFilterClass::ShouldPass(BaseEntity &ent,std::size_t index)
 {
 	return m_bExactMatch ? ustring::match(ent.GetClass(),m_name,m_bCaseSensitive) : ustring::compare(ent.GetClass(),m_name,m_bCaseSensitive);
 }
@@ -62,7 +62,7 @@ bool EntityIteratorFilterClass::ShouldPass(BaseEntity &ent)
 EntityIteratorFilterNameOrClass::EntityIteratorFilterNameOrClass(Game &game,const std::string &name,bool caseSensitive,bool exactMatch)
 	: m_name(name),m_bCaseSensitive(caseSensitive),m_bExactMatch(exactMatch)
 {}
-bool EntityIteratorFilterNameOrClass::ShouldPass(BaseEntity &ent)
+bool EntityIteratorFilterNameOrClass::ShouldPass(BaseEntity &ent,std::size_t index)
 {
 	if(m_bExactMatch ? ustring::match(ent.GetClass(),m_name,m_bCaseSensitive) : ustring::compare(ent.GetClass(),m_name,m_bCaseSensitive))
 		return true;
@@ -91,7 +91,7 @@ EntityIteratorFilterEntity::EntityIteratorFilterEntity(Game &game,const std::str
 		m_filterEnts.push_back(std::static_pointer_cast<pragma::BaseFilterComponent>(pFilterComponent->shared_from_this()));
 	}
 }
-bool EntityIteratorFilterEntity::ShouldPass(BaseEntity &ent)
+bool EntityIteratorFilterEntity::ShouldPass(BaseEntity &ent,std::size_t index)
 {
 	for(auto &hFilter : m_filterEnts)
 	{
@@ -111,7 +111,7 @@ bool EntityIteratorFilterEntity::ShouldPass(BaseEntity &ent)
 EntityIteratorFilterFlags::EntityIteratorFilterFlags(Game &game,EntityIterator::FilterFlags flags)
 	: m_flags(flags)
 {}
-bool EntityIteratorFilterFlags::ShouldPass(BaseEntity &ent)
+bool EntityIteratorFilterFlags::ShouldPass(BaseEntity &ent,std::size_t index)
 {
 	auto bIncludeEntity = false;
 	if(ent.IsSpawned())
@@ -179,20 +179,20 @@ EntityIteratorFilterComponent::EntityIteratorFilterComponent(Game &game,const st
 	componentManager.GetComponentTypeId(componentName,m_componentId);
 }
 
-bool EntityIteratorFilterComponent::ShouldPass(BaseEntity &ent)
+bool EntityIteratorFilterComponent::ShouldPass(BaseEntity &ent,std::size_t index)
 {
 	return ent.HasComponent(m_componentId);
 }
 
 /////////////////
 
-EntityIteratorFilterUser::EntityIteratorFilterUser(Game &game,const std::function<bool(BaseEntity&)> &fUserFilter)
+EntityIteratorFilterUser::EntityIteratorFilterUser(Game &game,const std::function<bool(BaseEntity&,std::size_t)> &fUserFilter)
 	: m_fUserFilter(fUserFilter)
 {}
 
-bool EntityIteratorFilterUser::ShouldPass(BaseEntity &ent)
+bool EntityIteratorFilterUser::ShouldPass(BaseEntity &ent,std::size_t index)
 {
-	return m_fUserFilter(ent);
+	return m_fUserFilter(ent,index);
 }
 
 /////////////////
@@ -201,7 +201,7 @@ EntityIteratorFilterSphere::EntityIteratorFilterSphere(Game &game,const Vector3 
 	: m_origin(origin),m_radius(radius)
 {}
 
-bool EntityIteratorFilterSphere::ShouldPass(BaseEntity &ent,Vector3 &outClosestPointOnEntityBounds,float &outDistToEntity) const
+bool EntityIteratorFilterSphere::ShouldPass(BaseEntity &ent,std::size_t index,Vector3 &outClosestPointOnEntityBounds,float &outDistToEntity) const
 {
 	auto pTrComponent = ent.GetTransformComponent();
 	if(pTrComponent == nullptr)
@@ -223,11 +223,11 @@ bool EntityIteratorFilterSphere::ShouldPass(BaseEntity &ent,Vector3 &outClosestP
 	return outDistToEntity <= m_radius;
 }
 
-bool EntityIteratorFilterSphere::ShouldPass(BaseEntity &ent)
+bool EntityIteratorFilterSphere::ShouldPass(BaseEntity &ent,std::size_t index)
 {
 	Vector3 r;
 	float d;
-	return ShouldPass(ent,r,d);
+	return ShouldPass(ent,index,r,d);
 }
 
 /////////////////
@@ -236,7 +236,7 @@ EntityIteratorFilterBox::EntityIteratorFilterBox(Game &game,const Vector3 &min,c
 	: m_min(min),m_max(max)
 {}
 
-bool EntityIteratorFilterBox::ShouldPass(BaseEntity &ent)
+bool EntityIteratorFilterBox::ShouldPass(BaseEntity &ent,std::size_t index)
 {
 	auto pTrComponent = ent.GetTransformComponent();
 	if(pTrComponent == nullptr)
@@ -255,11 +255,11 @@ EntityIteratorFilterCone::EntityIteratorFilterCone(Game &game,const Vector3 &ori
 	: EntityIteratorFilterSphere(game,origin,radius),m_direction(dir),m_angle(static_cast<float>(umath::cos(static_cast<float>(umath::deg_to_rad(angle)))))
 {}
 
-bool EntityIteratorFilterCone::ShouldPass(BaseEntity &ent)
+bool EntityIteratorFilterCone::ShouldPass(BaseEntity &ent,std::size_t index)
 {
 	Vector3 pos;
 	float dist;
-	if(EntityIteratorFilterSphere::ShouldPass(ent,pos,dist) == false)
+	if(EntityIteratorFilterSphere::ShouldPass(ent,index,pos,dist) == false)
 		return false;
 	auto dirToOrigin = pos -m_origin;
 	uvec::normalize(&dirToOrigin);

@@ -29,11 +29,11 @@ EntityIteratorData::EntityIteratorData(Game &game,const std::vector<pragma::Base
 	: game(game),entities(std::make_unique<ComponentContainer>(components,count))
 {}
 std::size_t EntityIteratorData::GetCount() const {return entities->Count();}
-bool EntityIteratorData::ShouldPass(BaseEntity &ent) const
+bool EntityIteratorData::ShouldPass(BaseEntity &ent,std::size_t index) const
 {
 	for(auto &fFilter : filters)
 	{
-		if(fFilter->ShouldPass(ent) == false)
+		if(fFilter->ShouldPass(ent,index) == false)
 			return false;
 	}
 	return true;
@@ -49,13 +49,13 @@ BaseEntityIterator::BaseEntityIterator(const std::shared_ptr<EntityIteratorData>
 	else
 	{
 		auto *ent = (m_currentIndex < m_iteratorData->entities->Size()) ? m_iteratorData->entities->At(m_currentIndex) : nullptr;
-		if(ent == nullptr || ShouldPass(*ent) == false)
+		if(ent == nullptr || ShouldPass(*ent,m_currentIndex) == false)
 			++(*this);
 	}
 }
-bool BaseEntityIterator::ShouldPass(BaseEntity &ent) const
+bool BaseEntityIterator::ShouldPass(BaseEntity &ent,std::size_t index) const
 {
-	return m_iteratorData->ShouldPass(ent);
+	return m_iteratorData->ShouldPass(ent,index);
 }
 std::size_t BaseEntityIterator::GetCount() const {return m_iteratorData->GetCount();}
 BaseEntityIterator &BaseEntityIterator::operator++()
@@ -64,7 +64,7 @@ BaseEntityIterator &BaseEntityIterator::operator++()
 	while((m_currentIndex = umath::min(m_currentIndex +1u,numEnts)) < numEnts)
 	{
 		auto *ent = m_iteratorData->entities->At(m_currentIndex);
-		if(ent != nullptr && ShouldPass(*ent))
+		if(ent != nullptr && ShouldPass(*ent,m_currentIndex))
 			break;
 	}
 	return *this;

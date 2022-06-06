@@ -23,7 +23,7 @@ struct DLLNETWORK IEntityIteratorFilter
 {
 	IEntityIteratorFilter()=default;
 	IEntityIteratorFilter(Game &game) {}
-	virtual bool ShouldPass(BaseEntity &ent)=0;
+	virtual bool ShouldPass(BaseEntity &ent,std::size_t index)=0;
 };
 
 #pragma warning(push)
@@ -56,7 +56,7 @@ struct EntityIteratorData
 {
 	EntityIteratorData(Game &game);
 	EntityIteratorData(Game &game,const std::vector<pragma::BaseEntityComponent*> &components,std::size_t count);
-	bool ShouldPass(BaseEntity &ent) const;
+	bool ShouldPass(BaseEntity &ent,std::size_t index) const;
 	std::size_t GetCount() const;
 	Game &game;
 	std::unique_ptr<BaseEntityContainer> entities = nullptr;
@@ -93,7 +93,7 @@ protected:
 	std::shared_ptr<EntityIteratorData> m_iteratorData;
 	std::size_t m_currentIndex = 0ull;
 private:
-	bool ShouldPass(BaseEntity &ent) const;
+	bool ShouldPass(BaseEntity &ent,std::size_t index) const;
 };
 
 class DLLNETWORK EntityIterator
@@ -142,6 +142,9 @@ public:
 
 	template<class TFilter,typename... TARGS>
 		void AttachFilter(TARGS ...args);
+
+	// Internal use only!
+	EntityIteratorData *GetIteratorData() {return m_iteratorData.get();}
 protected:
 	EntityIterator()=default;
 	EntityIterator(Game &game,bool /* dummy */);
@@ -180,7 +183,7 @@ struct DLLNETWORK EntityIteratorFilterName
 	: public IEntityIteratorFilter
 {
 	EntityIteratorFilterName(Game &game,const std::string &name,bool caseSensitive=false,bool exactMatch=true);
-	virtual bool ShouldPass(BaseEntity &ent) override;
+	virtual bool ShouldPass(BaseEntity &ent,std::size_t index) override;
 private:
 	std::string m_name;
 	bool m_bCaseSensitive = false;
@@ -191,7 +194,7 @@ struct DLLNETWORK EntityIteratorFilterModel
 	: public IEntityIteratorFilter
 {
 	EntityIteratorFilterModel(Game &game,const std::string &mdlName);
-	virtual bool ShouldPass(BaseEntity &ent) override;
+	virtual bool ShouldPass(BaseEntity &ent,std::size_t index) override;
 private:
 	std::string m_modelName;
 };
@@ -200,7 +203,7 @@ struct DLLNETWORK EntityIteratorFilterUuid
 	: public IEntityIteratorFilter
 {
 	EntityIteratorFilterUuid(Game &game,const util::Uuid &uuid);
-	virtual bool ShouldPass(BaseEntity &ent) override;
+	virtual bool ShouldPass(BaseEntity &ent,std::size_t index) override;
 private:
 	util::Uuid m_uuid;
 };
@@ -209,7 +212,7 @@ struct DLLNETWORK EntityIteratorFilterClass
 	: public IEntityIteratorFilter
 {
 	EntityIteratorFilterClass(Game &game,const std::string &name,bool caseSensitive=false,bool exactMatch=true);
-	virtual bool ShouldPass(BaseEntity &ent) override;
+	virtual bool ShouldPass(BaseEntity &ent,std::size_t index) override;
 private:
 	std::string m_name;
 	bool m_bCaseSensitive = false;
@@ -220,7 +223,7 @@ struct DLLNETWORK EntityIteratorFilterNameOrClass
 	: public IEntityIteratorFilter
 {
 	EntityIteratorFilterNameOrClass(Game &game,const std::string &name,bool caseSensitive=false,bool exactMatch=true);
-	virtual bool ShouldPass(BaseEntity &ent) override;
+	virtual bool ShouldPass(BaseEntity &ent,std::size_t index) override;
 private:
 	std::string m_name;
 	bool m_bCaseSensitive = false;
@@ -231,7 +234,7 @@ struct DLLNETWORK EntityIteratorFilterEntity
 	: public IEntityIteratorFilter
 {
 	EntityIteratorFilterEntity(Game &game,const std::string &name);
-	virtual bool ShouldPass(BaseEntity &ent) override;
+	virtual bool ShouldPass(BaseEntity &ent,std::size_t index) override;
 private:
 	std::vector<util::WeakHandle<pragma::BaseFilterComponent>> m_filterEnts;
 	pragma::ComponentId m_filterNameComponentId = pragma::INVALID_COMPONENT_ID;
@@ -243,7 +246,7 @@ struct DLLNETWORK EntityIteratorFilterFlags
 	: public IEntityIteratorFilter
 {
 	EntityIteratorFilterFlags(Game &game,EntityIterator::FilterFlags flags);
-	virtual bool ShouldPass(BaseEntity &ent) override;
+	virtual bool ShouldPass(BaseEntity &ent,std::size_t index) override;
 private:
 	EntityIterator::FilterFlags m_flags = EntityIterator::FilterFlags::None;
 };
@@ -254,7 +257,7 @@ struct DLLNETWORK EntityIteratorFilterComponent
 	EntityIteratorFilterComponent(Game &game,pragma::ComponentId componentId);
 	EntityIteratorFilterComponent(Game &game,const std::string &componentName);
 
-	virtual bool ShouldPass(BaseEntity &ent) override;
+	virtual bool ShouldPass(BaseEntity &ent,std::size_t index) override;
 private:
 	pragma::ComponentId m_componentId = pragma::INVALID_COMPONENT_ID;
 };
@@ -262,11 +265,11 @@ private:
 struct DLLNETWORK EntityIteratorFilterUser
 	: public IEntityIteratorFilter
 {
-	EntityIteratorFilterUser(Game &game,const std::function<bool(BaseEntity&)> &fUserFilter);
+	EntityIteratorFilterUser(Game &game,const std::function<bool(BaseEntity&,std::size_t)> &fUserFilter);
 
-	virtual bool ShouldPass(BaseEntity &ent) override;
+	virtual bool ShouldPass(BaseEntity &ent,std::size_t index) override;
 private:
-	std::function<bool(BaseEntity&)> m_fUserFilter = nullptr;
+	std::function<bool(BaseEntity&,std::size_t)> m_fUserFilter = nullptr;
 };
 
 struct DLLNETWORK EntityIteratorFilterSphere
@@ -274,9 +277,9 @@ struct DLLNETWORK EntityIteratorFilterSphere
 {
 	EntityIteratorFilterSphere(Game &game,const Vector3 &origin,float radius);
 
-	virtual bool ShouldPass(BaseEntity &ent) override;
+	virtual bool ShouldPass(BaseEntity &ent,std::size_t index) override;
 protected:
-	bool ShouldPass(BaseEntity &ent,Vector3 &outClosestPointOnEntityBounds,float &outDistToEntity) const;
+	bool ShouldPass(BaseEntity &ent,std::size_t index,Vector3 &outClosestPointOnEntityBounds,float &outDistToEntity) const;
 
 	Vector3 m_origin;
 	float m_radius = 0.f;
@@ -287,7 +290,7 @@ struct DLLNETWORK EntityIteratorFilterBox
 {
 	EntityIteratorFilterBox(Game &game,const Vector3 &min,const Vector3 &max);
 
-	virtual bool ShouldPass(BaseEntity &ent) override;
+	virtual bool ShouldPass(BaseEntity &ent,std::size_t index) override;
 private:
 	Vector3 m_min;
 	Vector3 m_max;
@@ -298,7 +301,7 @@ struct DLLNETWORK EntityIteratorFilterCone
 {
 	EntityIteratorFilterCone(Game &game,const Vector3 &origin,const Vector3 &dir,float radius,float angle);
 
-	virtual bool ShouldPass(BaseEntity &ent) override;
+	virtual bool ShouldPass(BaseEntity &ent,std::size_t index) override;
 private:
 	Vector3 m_direction;
 	float m_angle = 0.f;
@@ -311,7 +314,7 @@ template<class TComponent>
 {
 	using IEntityIteratorFilter::IEntityIteratorFilter;
 	static std::type_index GetType() {return std::type_index(typeid(TComponent));}
-	virtual bool ShouldPass(BaseEntity &ent) override
+	virtual bool ShouldPass(BaseEntity &ent,std::size_t index) override
 	{
 		return ent.HasComponent<TComponent>();
 	}

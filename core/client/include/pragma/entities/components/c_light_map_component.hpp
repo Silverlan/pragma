@@ -17,6 +17,7 @@ namespace prosper {class IDynamicResizableBuffer;};
 namespace util::bsp {struct LightMapInfo;};
 namespace pragma
 {
+	struct LightmapDataCache;
 	class DLLCLIENT CLightMapComponent final
 		: public BaseEntityComponent
 	{
@@ -54,6 +55,7 @@ namespace pragma
 			const std::vector<std::shared_ptr<prosper::IBuffer>> &meshUvBuffers
 		);
 		void SetLightMapAtlas(const std::shared_ptr<prosper::Texture> &lightMap);
+		const std::shared_ptr<prosper::Texture> &GetLightMapAtlas() const;
 		void ReloadLightMapData();
 
 		prosper::IBuffer *GetMeshLightMapUvBuffer(uint32_t meshIdx) const;
@@ -69,9 +71,13 @@ namespace pragma
 
 		void UpdateLightmapUvBuffers();
 		std::shared_ptr<prosper::IDynamicResizableBuffer> GetGlobalLightMapUvBuffer() const;
+
+		const LightmapDataCache *GetLightmapDataCache() const;
+		void SetLightmapDataCache(LightmapDataCache *cache);
 	protected:
 		std::shared_ptr<prosper::Texture> m_lightMapAtlas = nullptr;
 		util::PFloatProperty m_lightMapExposure = nullptr;
+		std::shared_ptr<LightmapDataCache> m_lightmapDataCache;
 
 		// Contains the light map uv-buffer for each mesh of the world in the same order
 		// they are in the model's mesh group

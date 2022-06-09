@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_light_map_component.hpp"
+#include "pragma/entities/components/lightmap_data_cache.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -102,6 +103,7 @@ void CLightMapComponent::SetLightMapAtlas(const std::shared_ptr<prosper::Texture
 	// TODO: This method only allows one lightmap atlas globally; Implement this in a way that allows multiple (maybe add to entity descriptor set?)!
 	pragma::CRasterizationRendererComponent::UpdateLightmap(*this);
 }
+const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetLightMapAtlas() const {return m_lightMapAtlas;}
 
 void CLightMapComponent::ReloadLightMapData()
 {
@@ -130,7 +132,6 @@ float CLightMapComponent::CalcLightMapPowExposurePow() const
 {
 	return umath::pow(2.0,static_cast<double>(GetLightMapExposure()));
 }
-
 void CLightMapComponent::UpdateLightmapUvBuffers()
 {
 	// TODO: Move this function to light map receiver component?
@@ -139,6 +140,8 @@ void CLightMapComponent::UpdateLightmapUvBuffers()
 	auto meshGroup = mdl ? mdl->GetMeshGroup(0) : nullptr;
 	if(uvBuffer == nullptr || meshGroup == nullptr || uvBuffer->Map(0ull,uvBuffer->GetSize(),prosper::IBuffer::MapFlags::WriteBit) == false)
 		return;
+	auto *cache = GetLightmapDataCache();
+	
 	auto &uvBuffers = GetMeshLightMapUvBuffers();
 	EntityIterator entIt {*c_game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightMapReceiverComponent>>();
@@ -149,7 +152,11 @@ void CLightMapComponent::UpdateLightmapUvBuffers()
 		{
 			for(auto &subMesh : mesh->GetSubMeshes())
 			{
-				auto *uvSet = subMesh->GetUVSet("lightmap");
+				const std::vector<Vector2> *uvSet = nullptr;
+				if(cache)
+					uvSet = cache->FindLightmapUvs(mdl->GetName(),ent->GetPose(),subMesh->GetUuid());
+				else
+					uvSet = subMesh->GetUVSet("lightmap");
 				auto bufIdx = lightMapReceiverC->FindBufferIndex(static_cast<CModelSubMesh&>(*subMesh));
 				if(uvSet == nullptr || bufIdx.has_value() == false)
 					continue;
@@ -159,6 +166,9 @@ void CLightMapComponent::UpdateLightmapUvBuffers()
 	}
 	uvBuffer->Unmap();
 }
+
+const LightmapDataCache *CLightMapComponent::GetLightmapDataCache() const {return m_lightmapDataCache.get();}
+void CLightMapComponent::SetLightmapDataCache(LightmapDataCache *cache) {m_lightmapDataCache = cache ? cache->shared_from_this() : nullptr;}
 
 std::shared_ptr<prosper::IDynamicResizableBuffer> CLightMapComponent::GenerateLightmapUVBuffers(std::vector<std::shared_ptr<prosper::IBuffer>> &outMeshLightMapUvBuffers)
 {

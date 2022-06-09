@@ -10,6 +10,7 @@
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_light_map_component.hpp"
+#include "pragma/entities/components/lightmap_data_cache.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
@@ -23,7 +24,7 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-void CLightMapReceiverComponent::SetupLightMapUvData(CBaseEntity &ent)
+void CLightMapReceiverComponent::SetupLightMapUvData(CBaseEntity &ent,LightmapDataCache *cache)
 {
 	auto mdl = ent.GetModel();
 	auto meshGroup = mdl ? mdl->GetMeshGroup(0u) : nullptr;
@@ -34,7 +35,11 @@ void CLightMapReceiverComponent::SetupLightMapUvData(CBaseEntity &ent)
 	{
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
-			auto *uvSet = subMesh->GetUVSet("lightmap");
+			const std::vector<Vector2> *uvSet = nullptr;
+			if(cache)
+				uvSet = cache->FindLightmapUvs(mdl->GetName(),ent.GetPose(),subMesh->GetUuid());
+			else
+				uvSet = subMesh->GetUVSet("lightmap");
 			if(uvSet)
 			{
 				hasLightmapUvs = true;
@@ -71,7 +76,7 @@ void CLightMapReceiverComponent::UpdateLightMapUvData()
 	{
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
-			auto *uvSet = subMesh->GetUVSet("lightmap");
+			auto *uvSet = FindLightmapUvSet(*subMesh);
 			if(uvSet == nullptr)
 			{
 				++subMeshIdx;
@@ -84,6 +89,15 @@ void CLightMapReceiverComponent::UpdateLightMapUvData()
 		}
 	}
 	UpdateRenderMeshBufferList();
+}
+const LightmapDataCache *CLightMapReceiverComponent::GetLightmapDataCache() const {return m_lightmapDataCache.get();}
+void CLightMapReceiverComponent::SetLightmapDataCache(LightmapDataCache *cache) {m_lightmapDataCache = cache ? cache->shared_from_this() : nullptr;}
+const std::vector<Vector2> *CLightMapReceiverComponent::FindLightmapUvSet(ModelSubMesh &mesh) const
+{
+	auto *cache = GetLightmapDataCache();
+	if(cache)
+		return cache->FindLightmapUvs(m_modelName,GetEntity().GetPose(),mesh.GetUuid());
+	return mesh.GetUVSet("lightmap");
 }
 void CLightMapReceiverComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CLightMapReceiverComponent::Initialize()
@@ -153,7 +167,7 @@ void CLightMapReceiverComponent::UpdateModelMeshes()
 	{
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
-			auto *uvSet = subMesh->GetUVSet("lightmap");
+			auto *uvSet = FindLightmapUvSet(*subMesh);
 			if(uvSet == nullptr)
 			{
 				++subMeshIdx;

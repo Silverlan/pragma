@@ -10,6 +10,8 @@
 #include "luasystem.h"
 #include "pragma/model/model.h"
 #include "pragma/model/modelmesh.h"
+#include "pragma/lua/policies/core_policies.hpp"
+#include "pragma/lua/libraries/lutil.hpp"
 #include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>
@@ -25,6 +27,10 @@ void Lua::ModelMesh::register_class(luabind::class_<::ModelMesh> &classDef)
 	classDef.def("GetTriangleCount",&Lua::ModelMesh::GetTriangleCount);
 	classDef.def("GetSubMeshes",&Lua::ModelMesh::GetSubMeshes);
 	classDef.def("AddSubMesh",&Lua::ModelMesh::AddSubMesh);
+	classDef.def("AddSubMesh",+[](lua_State *l,::ModelMesh &mesh,::ModelSubMesh &subMesh,uint32_t pos) {
+		auto &subMeshes = mesh.GetSubMeshes();
+		subMeshes.insert(subMeshes.begin() +pos,subMesh.shared_from_this());
+	});
 	classDef.def("Update",static_cast<void(*)(lua_State*,::ModelMesh&)>(&Lua::ModelMesh::Update));
 	classDef.def("Update",static_cast<void(*)(lua_State*,::ModelMesh&,uint32_t)>(&Lua::ModelMesh::Update));
 	classDef.def("GetBounds",&Lua::ModelMesh::GetBounds);
@@ -138,6 +144,17 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 {
 	classDef.def(luabind::const_self == luabind::const_self);
 	classDef.def(luabind::tostring(luabind::self));
+	classDef.def("SetName",&::ModelSubMesh::SetName);
+	classDef.def("GetName",&::ModelSubMesh::GetName);
+	classDef.def("GetUuid",+[](::ModelSubMesh &mesh) -> std::string {
+		return ::util::uuid_to_string(mesh.GetUuid());
+	});
+	classDef.def("SetUuid",+[](::ModelSubMesh &mesh,const std::string &uuid) {
+		mesh.SetUuid(::util::uuid_string_to_bytes(uuid));
+	});
+	classDef.def("SetUuid",+[](::ModelSubMesh &mesh,const Lua::util::Uuid &uuid) {
+		mesh.SetUuid(uuid.value);
+	},luabind::const_ref_policy<2>{});
 	classDef.def("GetSkinTextureIndex",&Lua::ModelSubMesh::GetSkinTextureIndex);
 	classDef.def("FlipTriangleWindingOrder",&Lua::ModelSubMesh::FlipTriangleWindingOrder);
 	classDef.def("GetVertexCount",&Lua::ModelSubMesh::GetVertexCount);
@@ -287,6 +304,27 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("ReserveVertexWeights",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t)>([](lua_State *l,::ModelSubMesh &mesh,uint32_t numVerts) {
 		mesh.GetVertexWeights().reserve(numVerts);
 	}));
+	classDef.def("Save",+[](lua_State *l,::ModelSubMesh &mesh,udm::AssetData &assetData) {
+		auto *nw = engine->GetNetworkState(l);
+		auto *game = nw ? nw->GetGameState() : nullptr;
+		if(game == nullptr)
+			return;
+		std::string err;
+		auto result = mesh.Save(assetData,err);
+		if(result == false)
+			Lua::PushString(l,err);
+		else
+			Lua::PushBool(l,result);
+	});
+	classDef.scope[
+		luabind::def("Load",+[](lua_State *l,::Game &game,udm::AssetData &assetData) -> Lua::var<::ModelSubMesh,std::pair<bool,std::string>> {
+			std::string err;
+			auto mesh = ::ModelSubMesh::Load(game,assetData,err);
+			if(mesh)
+				return luabind::object{l,mesh};
+			return luabind::object{l,std::pair<bool,std::string>{false,err}};
+		})
+	];
 	classDef.add_static_constant("GEOMETRY_TYPE_TRIANGLES",umath::to_integral(::ModelSubMesh::GeometryType::Triangles));
 	classDef.add_static_constant("GEOMETRY_TYPE_LINES",umath::to_integral(::ModelSubMesh::GeometryType::Lines));
 	classDef.add_static_constant("GEOMETRY_TYPE_POINTS",umath::to_integral(::ModelSubMesh::GeometryType::Points));

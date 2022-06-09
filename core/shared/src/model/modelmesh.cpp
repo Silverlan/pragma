@@ -161,14 +161,14 @@ ModelSubMesh::ModelSubMesh()
 	m_indexData(std::make_shared<std::vector<uint8_t>>()),m_vertexWeights(std::make_shared<std::vector<umath::VertexWeight>>()),
 	m_extendedVertexWeights(std::make_shared<std::vector<umath::VertexWeight>>()),m_vertices(std::make_shared<std::vector<umath::Vertex>>()),
 	m_uvSets{std::make_shared<std::unordered_map<std::string,std::vector<Vector2>>>()},
-	m_extensions{udm::Property::Create(udm::Type::Element)}
+	m_extensions{udm::Property::Create(udm::Type::Element)},m_uuid{util::generate_uuid_v4()}
 {}
 ModelSubMesh::ModelSubMesh(const ModelSubMesh &other)
 	: m_skinTextureIndex(other.m_skinTextureIndex),m_center(other.m_center),m_vertices(other.m_vertices),
 	m_alphas(other.m_alphas),m_numAlphas(other.m_numAlphas),m_indexData(other.m_indexData),
 	m_vertexWeights(other.m_vertexWeights),m_extendedVertexWeights(other.m_extendedVertexWeights),m_min(other.m_min),m_max(other.m_max),
 	m_pose{other.m_pose},m_uvSets{other.m_uvSets},m_geometryType{other.m_geometryType},m_referenceId{other.m_referenceId},
-	m_indexType{other.m_indexType}
+	m_indexType{other.m_indexType},m_name{other.m_name}
 {
 	// Copy extension data
 	std::stringstream extStream {};
@@ -180,20 +180,24 @@ ModelSubMesh::ModelSubMesh(const ModelSubMesh &other)
 	m_extensions->Read(extStreamFileIn);
 	//
 
-	static_assert(sizeof(ModelSubMesh) == 232,"Update this function when making changes to this class!");
+	static_assert(sizeof(ModelSubMesh) == 280,"Update this function when making changes to this class!");
 }
-std::shared_ptr<ModelSubMesh> ModelSubMesh::Load(const udm::AssetData &data,std::string &outErr)
+std::shared_ptr<ModelSubMesh> ModelSubMesh::Load(Game &game,const udm::AssetData &data,std::string &outErr)
 {
-	auto mesh = std::make_shared<ModelSubMesh>();
+	auto mesh = game.CreateModelSubMesh();
 	auto result = mesh->LoadFromAssetData(data,outErr);
 	return result ? mesh : nullptr;
 }
+const util::Uuid &ModelSubMesh::GetUuid() const {return m_uuid;}
+void ModelSubMesh::SetUuid(const util::Uuid &uuid) {m_uuid = uuid;}
+const std::string &ModelSubMesh::GetName() const {return m_name;}
+void ModelSubMesh::SetName(const std::string &name) {m_name = name;}
 udm::PropertyWrapper ModelSubMesh::GetExtensionData() const {return *m_extensions;}
 bool ModelSubMesh::operator==(const ModelSubMesh &other) const {return this == &other;}
 bool ModelSubMesh::operator!=(const ModelSubMesh &other) const {return !operator==(other);}
 bool ModelSubMesh::IsEqual(const ModelSubMesh &other) const
 {
-	static_assert(sizeof(ModelSubMesh) == 232,"Update this function when making changes to this class!");
+	static_assert(sizeof(ModelSubMesh) == 280,"Update this function when making changes to this class!");
 	if(!(m_skinTextureIndex == other.m_skinTextureIndex && uvec::cmp(m_center,other.m_center) && m_numAlphas == other.m_numAlphas && uvec::cmp(m_min,other.m_min) &&
 		uvec::cmp(m_max,other.m_max) && m_geometryType == other.m_geometryType && m_referenceId == other.m_referenceId &&
 		static_cast<bool>(m_vertices) == static_cast<bool>(other.m_vertices) && static_cast<bool>(m_alphas) == static_cast<bool>(other.m_alphas) &&
@@ -283,6 +287,7 @@ bool ModelSubMesh::IsEqual(const ModelSubMesh &other) const
 }
 void ModelSubMesh::Copy(ModelSubMesh &cpy,bool fullCopy) const
 {
+	cpy.m_name = m_name;
 	cpy.m_vertices = std::make_shared<std::vector<umath::Vertex>>(*cpy.m_vertices);
 	cpy.m_alphas = std::make_shared<std::vector<Vector2>>(*cpy.m_alphas);
 	cpy.m_indexData = std::make_shared<std::vector<uint8_t>>(*cpy.m_indexData);
@@ -299,7 +304,7 @@ void ModelSubMesh::Copy(ModelSubMesh &cpy,bool fullCopy) const
 	ufile::InStreamFile extStreamFileIn {std::move(extStreamFileOut.MoveStream())};
 	m_extensions->Read(extStreamFileIn);
 	//
-	static_assert(sizeof(ModelSubMesh) == 232,"Update this function when making changes to this class!");
+	static_assert(sizeof(ModelSubMesh) == 280,"Update this function when making changes to this class!");
 }
 std::shared_ptr<ModelSubMesh> ModelSubMesh::Copy(bool fullCopy) const
 {
@@ -970,6 +975,8 @@ bool ModelSubMesh::Save(udm::AssetDataArg outData,std::string &outErr)
 	outData.SetAssetVersion(PMESH_VERSION);
 	
 	auto udm = *outData;
+	udm["uuid"] = util::uuid_to_string(m_uuid);
+	udm["name"] = m_name;
 	udm["referenceId"] = GetReferenceId();
 	udm["pose"] = GetPose();
 	udm["geometryType"] = udm::enum_to_string(GetGeometryType());
@@ -1023,6 +1030,11 @@ bool ModelSubMesh::LoadFromAssetData(const udm::AssetData &data,std::string &out
 		return false;
 	}
 
+	std::string uuid;
+	if(udm["uuid"](uuid))
+		m_uuid = util::uuid_string_to_bytes(uuid);
+
+	udm["name"](m_name);
 	udm["referenceId"](m_referenceId);
 	udm["pose"](m_pose);
 	udm::to_enum_value<GeometryType>(udm["geometryType"],m_geometryType);

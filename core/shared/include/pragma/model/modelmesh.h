@@ -72,7 +72,7 @@ public:
 
 	ModelSubMesh();
 	ModelSubMesh(const ModelSubMesh &other);
-	static std::shared_ptr<ModelSubMesh> Load(const udm::AssetData &data,std::string &outErr);
+	static std::shared_ptr<ModelSubMesh> Load(Game &game,const udm::AssetData &data,std::string &outErr);
 	bool operator==(const ModelSubMesh &other) const;
 	bool operator!=(const ModelSubMesh &other) const;
 	bool IsEqual(const ModelSubMesh &other) const;
@@ -191,6 +191,12 @@ public:
 	uint32_t GetReferenceId() const;
 	void SetReferenceId(uint32_t refId);
 
+	const util::Uuid &GetUuid() const;
+	void SetUuid(const util::Uuid &uuid);
+
+	const std::string &GetName() const;
+	void SetName(const std::string &name);
+
 	bool Save(udm::AssetDataArg outData,std::string &outErr);
 	bool LoadFromAssetData(const udm::AssetData &data,std::string &outErr);
 protected:
@@ -214,6 +220,8 @@ protected:
 	GeometryType m_geometryType = GeometryType::Triangles;
 	pragma::model::IndexType m_indexType = pragma::model::IndexType::UInt16;
 	uint32_t m_referenceId = std::numeric_limits<uint32_t>::max();
+	util::Uuid m_uuid;
+	std::string m_name;
 	umath::ScaledTransform m_pose = umath::ScaledTransform{};
 	void ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clippedMesh,const std::vector<Mat4> *boneMatrices=nullptr,ModelSubMesh *clippedCoverMesh=nullptr);
 };

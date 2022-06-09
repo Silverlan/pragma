@@ -627,6 +627,17 @@ void Lua::Model::register_class(
 	classDef.add_static_constant("OBJECT_ATTACHMENT_TYPE_MODEL",umath::to_integral(ObjectAttachment::Type::Model));
 	classDef.add_static_constant("OBJECT_ATTACHMENT_TYPE_PARTICLE_SYSTEM",umath::to_integral(ObjectAttachment::Type::ParticleSystem));
 
+	classDef.scope[
+		luabind::def("Load",+[](lua_State *l,::Game &game,udm::AssetData &assetData) -> Lua::var<::ModelSubMesh,std::pair<bool,std::string>> {
+			auto mdl = game.CreateModel(false);
+			std::string err;
+			auto result = ::Model::Load(*mdl,*game.GetNetworkState(),assetData,err);
+			if(result)
+				return luabind::object{l,mdl};
+			return luabind::object{l,std::pair<bool,std::string>{false,err}};
+		})
+	];
+
 	// Eyeball
 	auto classDefEyeball = luabind::class_<::Eyeball>("Eyeball");
 	classDefEyeball.def(luabind::constructor<>());

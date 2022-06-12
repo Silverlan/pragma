@@ -163,6 +163,8 @@ std::shared_ptr<Model> Model::Copy(Game *game,CopyFlags copyFlags) const
 				for(auto &subMesh : newMesh->GetSubMeshes())
 				{
 					auto newSubMesh = subMesh->Copy(true);
+					if(umath::is_flag_set(copyFlags,CopyFlags::CopyUniqueIdsBit))
+						newSubMesh->SetUuid(subMesh->GetUuid());
 					oldSubMeshToNewSubMesh[subMesh.get()] = newSubMesh.get();
 					subMesh = newSubMesh;
 				}
@@ -199,7 +201,10 @@ std::shared_ptr<Model> Model::Copy(Game *game,CopyFlags copyFlags) const
 	{
 		for(auto &colMesh : mdl->m_collisionMeshes)
 		{
+			auto oldColMesh = colMesh;
 			colMesh = CollisionMesh::Create(*colMesh);
+			if(umath::is_flag_set(copyFlags,CopyFlags::CopyUniqueIdsBit))
+				colMesh->SetUuid(oldColMesh->GetUuid());
 			// TODO: Update shape?
 		}
 	}
@@ -716,6 +721,9 @@ bool Model::Save(Game &game,const std::string &fileName,std::string &outErr)
 bool Model::Save(Game &game,std::string &outErr)
 {
 	auto mdlName = GetName();
+	ufile::remove_extension_from_filename(mdlName,pragma::asset::get_supported_extensions(pragma::asset::Type::Model));
+	mdlName += '.' +std::string{pragma::asset::FORMAT_MODEL_BINARY};
+
 	std::string absFileName;
 	auto result = FileManager::FindAbsolutePath("models/" +mdlName,absFileName);
 	if(result == false)

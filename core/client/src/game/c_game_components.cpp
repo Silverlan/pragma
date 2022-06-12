@@ -34,6 +34,7 @@
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_raytracing_component.hpp"
+#include "pragma/entities/components/c_light_map_data_cache_component.hpp"
 #include "pragma/entities/components/liquid/c_buoyancy_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_surface_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_volume_component.hpp"
@@ -250,6 +251,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CBSPComponent>("bsp");
 	componentManager.RegisterComponentType<pragma::CLightMapComponent>("light_map");
 	componentManager.RegisterComponentType<pragma::CLightMapReceiverComponent>("light_map_receiver");
+	componentManager.RegisterComponentType<pragma::CLightMapDataCacheComponent>("light_map_data_cache");
 	componentManager.RegisterComponentType<pragma::CRendererComponent>("renderer");
 	componentManager.RegisterComponentType<pragma::CRasterizationRendererComponent>("rasterization_renderer");
 	componentManager.RegisterComponentType<pragma::CRaytracingRendererComponent>("raytracing_renderer");

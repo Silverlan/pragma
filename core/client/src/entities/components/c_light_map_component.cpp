@@ -154,7 +154,7 @@ void CLightMapComponent::UpdateLightmapUvBuffers()
 			{
 				const std::vector<Vector2> *uvSet = nullptr;
 				if(cache)
-					uvSet = cache->FindLightmapUvs(mdl->GetName(),ent->GetPose(),subMesh->GetUuid());
+					uvSet = cache->FindLightmapUvs(ent->GetUuid(),subMesh->GetUuid());
 				else
 					uvSet = subMesh->GetUVSet("lightmap");
 				auto bufIdx = lightMapReceiverC->FindBufferIndex(static_cast<CModelSubMesh&>(*subMesh));

@@ -241,6 +241,7 @@ public:
 		CopyVertexAnimationsBit = CopyAnimationsBit<<1u,
 		CopyCollisionMeshesBit = CopyVertexAnimationsBit<<1u,
 		CopyFlexAnimationsBit = CopyCollisionMeshesBit<<1u,
+		CopyUniqueIdsBit = CopyFlexAnimationsBit<<1u,
 
 		DeepCopy = CopyMeshesBit | CopyAnimationsBit | CopyVertexAnimationsBit | CopyCollisionMeshesBit | CopyFlexAnimationsBit
 	};

@@ -37,7 +37,7 @@ void CLightMapReceiverComponent::SetupLightMapUvData(CBaseEntity &ent,LightmapDa
 		{
 			const std::vector<Vector2> *uvSet = nullptr;
 			if(cache)
-				uvSet = cache->FindLightmapUvs(mdl->GetName(),ent.GetPose(),subMesh->GetUuid());
+				uvSet = cache->FindLightmapUvs(ent.GetUuid(),subMesh->GetUuid());
 			else
 				uvSet = subMesh->GetUVSet("lightmap");
 			if(uvSet)
@@ -96,7 +96,7 @@ const std::vector<Vector2> *CLightMapReceiverComponent::FindLightmapUvSet(ModelS
 {
 	auto *cache = GetLightmapDataCache();
 	if(cache)
-		return cache->FindLightmapUvs(m_modelName,GetEntity().GetPose(),mesh.GetUuid());
+		return cache->FindLightmapUvs(GetEntity().GetUuid(),mesh.GetUuid());
 	return mesh.GetUVSet("lightmap");
 }
 void CLightMapReceiverComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}

@@ -13,6 +13,7 @@
 #include "pragma/lua/policies/property_policy.hpp"
 #include "pragma/entities/components/c_light_map_component.hpp"
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
+#include "pragma/entities/components/c_light_map_data_cache_component.hpp"
 #include "pragma/entities/components/lightmap_data_cache.hpp"
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/property_converter_t.hpp>
@@ -113,9 +114,15 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 			return luabind::object{l,std::pair<bool,std::string>{false,err}};
 		return luabind::object{l,cache};
 	})];
-	defCache.def("AddInstanceData",+[](pragma::LightmapDataCache &cache,const std::string &model,const umath::Transform &pose,const std::string &uuid,const std::vector<Vector2> &uvs) {
+	defCache.def("AddInstanceData",+[](pragma::LightmapDataCache &cache,const std::string &entUuid,const std::string &model,const umath::Transform &pose,const std::string &meshUuid,const std::vector<Vector2> &uvs) {
 		auto tmpUvs = uvs;
-		cache.AddInstanceData(model,pose,util::uuid_string_to_bytes(uuid),std::move(tmpUvs));
+		cache.AddInstanceData(util::uuid_string_to_bytes(entUuid),model,pose,util::uuid_string_to_bytes(meshUuid),std::move(tmpUvs));
+	});
+	defCache.def("FindLightmapUvs",+[](pragma::LightmapDataCache &cache,const std::string &entUuid,const std::string &meshUuid) -> std::optional<std::vector<Vector2>> {
+		auto *uvs = cache.FindLightmapUvs(util::uuid_string_to_bytes(entUuid),util::uuid_string_to_bytes(meshUuid));
+		if(!uvs)
+			return {};
+		return *uvs;
 	});
 	defCache.def("SaveAs",+[](lua_State *l,pragma::LightmapDataCache &cache,const std::string &path) -> Lua::var<bool,std::pair<bool,std::string>> {
 		std::string err;
@@ -123,6 +130,12 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 		if(res)
 			return luabind::object{l,res};
 		return luabind::object{l,std::pair<bool,std::string>{res,err}};
+	});
+	defCache.def("SetLightmapEntity",+[](lua_State *l,pragma::LightmapDataCache &cache,const std::string &uuid) {
+		cache.lightmapEntityId = util::uuid_string_to_bytes(uuid);
+	});
+	defCache.def("GetLightmapEntity",+[](lua_State *l,pragma::LightmapDataCache &cache) -> std::string {
+		return util::uuid_to_string(cache.lightmapEntityId);
 	});
 	defCLightMap.scope[defCache];
 	entsMod[defCLightMap];
@@ -134,4 +147,10 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 	auto defCLightMapReceiver = pragma::lua::create_entity_component_class<pragma::CLightMapReceiverComponent,pragma::BaseEntityComponent>("LightMapReceiverComponent");
 	defCLightMapReceiver.def("UpdateLightmapUvData",&pragma::CLightMapReceiverComponent::UpdateLightMapUvData);
 	entsMod[defCLightMapReceiver];
+
+	auto defCLmCache = pragma::lua::create_entity_component_class<pragma::CLightMapDataCacheComponent,pragma::BaseEntityComponent>("LightMapDataCacheComponent");
+	defCLmCache.def("SetLightMapDataCache",&pragma::CLightMapDataCacheComponent::SetLightMapDataCache);
+	defCLmCache.def("GetLightMapDataCache",&pragma::CLightMapDataCacheComponent::GetLightMapDataCache);
+	defCLmCache.def("ReloadCache",&pragma::CLightMapDataCacheComponent::ReloadCache);
+	entsMod[defCLmCache];
 }

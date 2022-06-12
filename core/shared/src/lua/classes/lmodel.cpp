@@ -607,6 +607,7 @@ void Lua::Model::register_class(
 	classDef.add_static_constant("FCOPY_BIT_VERTEX_ANIMATIONS",umath::to_integral(::Model::CopyFlags::CopyVertexAnimationsBit));
 	classDef.add_static_constant("FCOPY_BIT_COLLISION_MESHES",umath::to_integral(::Model::CopyFlags::CopyCollisionMeshesBit));
 	classDef.add_static_constant("FCOPY_BIT_FLEX_ANIMATIONS",umath::to_integral(::Model::CopyFlags::CopyFlexAnimationsBit));
+	classDef.add_static_constant("FCOPY_BIT_COPY_UNIQUE_IDS",umath::to_integral(::Model::CopyFlags::CopyUniqueIdsBit));
 	classDef.add_static_constant("FCOPY_DEEP",umath::to_integral(::Model::CopyFlags::DeepCopy));
 
 	classDef.add_static_constant("FUPDATE_NONE",umath::to_integral(ModelUpdateFlags::None));

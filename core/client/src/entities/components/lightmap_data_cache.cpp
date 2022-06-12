@@ -69,22 +69,18 @@ bool LightmapDataCache::Save(udm::AssetDataArg outData,std::string &outErr) cons
 	outData.SetAssetType(PLMD_IDENTIFIER);
 	outData.SetAssetVersion(PLMD_VERSION);
 	auto udm = *outData;
+	udm["lightmapEntityId"] = util::uuid_to_string(lightmapEntityId);
 
 	auto udmCacheData = udm["cacheData"];
 	for(auto &pair : cacheData)
 	{
-		for(auto &meshPair : pair.second.meshCacheData)
-		{
-			auto udmMeshCache = udmCacheData[util::uuid_to_string(meshPair.first.uuid)];
-			udmMeshCache["model"] = meshPair.second.model;
-			auto udmInstances = udmMeshCache["instances"];
-			for(auto &instancePair : meshPair.second.instanceCacheData)
-			{
-				auto udmInstance = udmInstances[std::to_string(instancePair.first)];
-				udmInstance["pose"] = instancePair.second.pose;
-				udmInstance.AddArray("lightmapUvs",instancePair.second.uvs,udm::ArrayType::Compressed);
-			}
-		}
+		auto udmEnt = udmCacheData[util::uuid_to_string(pair.first.uuid)];
+		udmEnt["model"] = pair.second.model;
+		udmEnt["pose"] = pair.second.pose;
+
+		auto udmMeshData = udmEnt["meshData"];
+		for(auto &pairMesh : pair.second.meshData)
+			udmMeshData[util::uuid_to_string(pairMesh.first.uuid)].AddArray("lightmapUvs",pairMesh.second.uvs,udm::ArrayType::Compressed);
 	}
 	return true;
 }
@@ -104,70 +100,51 @@ bool LightmapDataCache::LoadFromAssetData(const udm::AssetData &data,std::string
 		return false;
 	}
 	
+	std::string uuid;
+	if(udm["lightmapEntityId"](uuid))
+		lightmapEntityId = util::uuid_string_to_bytes(uuid);
+
 	auto udmCacheData = udm["cacheData"];
+	cacheData.reserve(udmCacheData.GetChildCount());
 	for(auto &pair : udmCacheData.ElIt())
 	{
-		auto uuid = util::uuid_string_to_bytes(std::string{pair.key});
-		std::string model;
-		pair.property["model"](model);
-		auto it = cacheData.find(model);
-		if(it == cacheData.end())
-			it = cacheData.insert(std::make_pair(model,ModelCacheData{})).first;
-		
-		auto &mdlCacheData = it->second;
-		auto itMesh = mdlCacheData.meshCacheData.find(LmUuid{uuid});
-		if(itMesh == mdlCacheData.meshCacheData.end())
-		{
-			itMesh = mdlCacheData.meshCacheData.insert(std::make_pair(uuid,MeshCacheData{})).first;
-			itMesh->second.model = model;
-		}
+		InstanceCacheData instanceData {};
+		pair.property["model"](instanceData.model);
+		pair.property["pose"](instanceData.pose);
 
-		auto &instanceCacheDataMap = itMesh->second.instanceCacheData;
-		auto udmInstances = pair.property["instances"];
-		for(auto &udmInstPair : udmInstances.ElIt())
+		auto udmMeshData = pair.property["meshData"];
+		instanceData.meshData.reserve(udmMeshData.GetChildCount());
+		for(auto &pair : udmMeshData.ElIt())
 		{
-			auto poseHash = util::to_int<int64_t>(udmInstPair.key);
-			auto itInstance = instanceCacheDataMap.find(poseHash);
-			if(itInstance == instanceCacheDataMap.end())
-				itInstance = instanceCacheDataMap.insert(std::make_pair(poseHash,InstanceCacheData{})).first;
-			auto &instanceCacheData = itInstance->second;
-			auto &udmInst = udmInstPair.property;
-			udmInst["pose"](instanceCacheData.pose);
-			udmInst["lightmapUvs"](instanceCacheData.uvs);
+			auto udmMesh = pair.property;
+			MeshCacheData meshData {};
+			udmMesh["lightmapUvs"](meshData.uvs);
+			instanceData.meshData[LmUuid{util::uuid_string_to_bytes(std::string{pair.key})}] = std::move(meshData);
 		}
+		cacheData[LmUuid{util::uuid_string_to_bytes(std::string{pair.key})}] = std::move(instanceData);
 	}
 }
-const std::vector<Vector2> *LightmapDataCache::FindLightmapUvs(const std::string &model,const umath::Transform &pose,const util::Uuid &meshUuid) const
+const std::vector<Vector2> *LightmapDataCache::FindLightmapUvs(const util::Uuid &entUuid,const util::Uuid &meshUuid) const
 {
-	auto it = cacheData.find(model);
+	auto it = cacheData.find(LmUuid{entUuid});
 	if(it == cacheData.end())
 		return nullptr;
-	auto &meshCacheData = it->second.meshCacheData;
-	auto itMeshCache = meshCacheData.find(LmUuid{meshUuid});
-	if(itMeshCache == meshCacheData.end())
-		return nullptr;
-	auto &meshCache = itMeshCache->second.instanceCacheData;
-	auto itInst = meshCache.find(CalcPoseHash(pose));
-	if(itInst == meshCache.end())
+	auto &instanceCache = it->second.meshData;
+	auto itInst = instanceCache.find(LmUuid{meshUuid});
+	if(itInst == instanceCache.end())
 		return nullptr;
 	return &itInst->second.uvs;
 }
-void LightmapDataCache::AddInstanceData(const std::string &model,const umath::Transform &pose,const util::Uuid &meshUuid,std::vector<Vector2> &&uvs)
+void LightmapDataCache::AddInstanceData(
+	const util::Uuid &entUuid,const std::string &model,const umath::Transform &pose,
+	const util::Uuid &meshUuid,std::vector<Vector2> &&uvs
+)
 {
-	auto it = cacheData.find(model);
-	if(it == cacheData.end())
-		it = cacheData.insert(std::make_pair(model,ModelCacheData{})).first;
-	auto itMesh = it->second.meshCacheData.find(LmUuid{meshUuid});
-	if(itMesh == it->second.meshCacheData.end())
-	{
-		itMesh = it->second.meshCacheData.insert(std::make_pair(meshUuid,MeshCacheData{})).first;
-		itMesh->second.model = model;
-	}
-	auto poseHash = CalcPoseHash(pose);
-	auto itInstance = itMesh->second.instanceCacheData.find(poseHash);
-	InstanceCacheData instanceCacheData {};
-	instanceCacheData.pose = pose;
-	instanceCacheData.uvs = std::move(uvs);
-	itMesh->second.instanceCacheData[poseHash] = std::move(instanceCacheData);
+	InstanceCacheData instanceData {};
+	instanceData.entityUuid = entUuid;
+	instanceData.model = model;
+	instanceData.pose = pose;
+	instanceData.meshData[LmUuid{meshUuid}] = {std::move(uvs)};
+	cacheData[LmUuid{entUuid}] = std::move(instanceData);
 }
 #pragma optimize("",on)

@@ -46,24 +46,24 @@ namespace pragma
 		static constexpr udm::Version PLMD_VERSION = 1;
 		static size_t CalcPoseHash(const umath::Transform &pose);
 		static bool Load(const std::string &path,LightmapDataCache &outCache,std::string &outErr);
-		struct InstanceCacheData
-		{
-			umath::Transform pose; // Needed for debugging purposes only
-			std::vector<Vector2> uvs;
-		};
 		struct MeshCacheData
 		{
-			using PoseHash = size_t;
-			std::string model; // Needed for debugging purposes only
-			std::unordered_map<PoseHash,InstanceCacheData> instanceCacheData;
+			std::vector<Vector2> uvs;
 		};
-		struct ModelCacheData
+		struct InstanceCacheData
 		{
-			std::unordered_map<LmUuid,MeshCacheData> meshCacheData;
+			std::string model; // Needed for debugging purposes only
+			umath::Transform pose; // Needed for debugging purposes only
+			util::Uuid entityUuid;
+			std::unordered_map<LmUuid,MeshCacheData> meshData;
 		};
-		std::unordered_map<std::string,ModelCacheData> cacheData;
-		void AddInstanceData(const std::string &model,const umath::Transform &pose,const util::Uuid &meshUuid,std::vector<Vector2> &&uvs);
-		const std::vector<Vector2> *FindLightmapUvs(const std::string &model,const umath::Transform &pose,const util::Uuid &meshUuid) const;
+		std::unordered_map<LmUuid,InstanceCacheData> cacheData;
+		util::Uuid lightmapEntityId {};
+		void AddInstanceData(
+			const util::Uuid &entUuid,const std::string &model,const umath::Transform &pose,
+			const util::Uuid &meshUuid,std::vector<Vector2> &&uvs
+		);
+		const std::vector<Vector2> *FindLightmapUvs(const util::Uuid &entUuid,const util::Uuid &meshUuid) const;
 		bool Save(udm::AssetDataArg outData,std::string &outErr) const;
 		bool SaveAs(const std::string &path,std::string &outErr) const;
 		bool LoadFromAssetData(const udm::AssetData &data,std::string &outErr);

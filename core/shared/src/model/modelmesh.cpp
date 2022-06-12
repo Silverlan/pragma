@@ -302,7 +302,7 @@ void ModelSubMesh::Copy(ModelSubMesh &cpy,bool fullCopy) const
 
 	cpy.m_extensions = udm::Property::Create(udm::Type::Element);
 	ufile::InStreamFile extStreamFileIn {std::move(extStreamFileOut.MoveStream())};
-	m_extensions->Read(extStreamFileIn);
+	cpy.m_extensions->Read(extStreamFileIn);
 	//
 	static_assert(sizeof(ModelSubMesh) == 280,"Update this function when making changes to this class!");
 }

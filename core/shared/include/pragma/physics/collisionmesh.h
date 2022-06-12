@@ -79,6 +79,7 @@ private:
 	int m_surfaceMaterialId = 0;
 	Vector3 m_centerOfMass = {};
 	double m_volume = 0.0;
+	util::Uuid m_uuid;
 	void ClipAgainstPlane(const Vector3 &n,double d,CollisionMesh &clippedMesh);
 	bool LoadFromAssetData(Game &game,Model &mdl,const udm::AssetData &data,std::string &outErr);
 public:
@@ -113,6 +114,9 @@ public:
 	void Translate(const Vector3 &t);
 	void Scale(const Vector3 &scale);
 	void Centralize();
+
+	const util::Uuid &GetUuid() const;
+	void SetUuid(const util::Uuid &uuid);
 
 	// Triangles can be empty if the collision point-cloud was never triangulated
 	const std::vector<uint16_t> &GetTriangles() const;

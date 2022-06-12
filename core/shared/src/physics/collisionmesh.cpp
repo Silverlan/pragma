@@ -43,7 +43,7 @@ bool CollisionMesh::SoftBodyAnchor::operator==(const SoftBodyAnchor &other) cons
 	return vertexIndex == other.vertexIndex && boneId == other.boneId && influence == other.influence && flags == other.flags;
 }
 CollisionMesh::CollisionMesh(Game *game)
-	: std::enable_shared_from_this<CollisionMesh>(),m_game(game)
+	: std::enable_shared_from_this<CollisionMesh>(),m_game(game),m_uuid{util::generate_uuid_v4()}
 {}
 CollisionMesh::CollisionMesh(const CollisionMesh &other)
 {
@@ -62,7 +62,7 @@ CollisionMesh::CollisionMesh(const CollisionMesh &other)
 	m_volume = other.m_volume;
 	m_mass = other.m_mass;
 	m_softBodyInfo = (m_softBodyInfo != nullptr) ? std::make_shared<SoftBodyInfo>(*other.m_softBodyInfo) : nullptr;
-	static_assert(sizeof(CollisionMesh) == 200,"Update this function when making changes to this class!");
+	static_assert(sizeof(CollisionMesh) == 216,"Update this function when making changes to this class!");
 }
 bool CollisionMesh::operator==(const CollisionMesh &other) const
 {
@@ -90,7 +90,7 @@ bool CollisionMesh::operator==(const CollisionMesh &other) const
 		if(uvec::cmp(m_vertices[i],other.m_vertices[i]) == false)
 			return false;
 	}
-	static_assert(sizeof(CollisionMesh) == 200,"Update this function when making changes to this class!");
+	static_assert(sizeof(CollisionMesh) == 216,"Update this function when making changes to this class!");
 	return true;
 }
 void CollisionMesh::SetMass(float mass) {m_mass = mass;}
@@ -106,6 +106,8 @@ void CollisionMesh::SetSurfaceMaterial(const std::string &surfMat)
 	SetSurfaceMaterial(static_cast<int32_t>(mat->GetIndex()));
 }
 std::vector<int> &CollisionMesh::GetSurfaceMaterials() {return m_surfaceMaterials;}
+const util::Uuid &CollisionMesh::GetUuid() const {return m_uuid;}
+void CollisionMesh::SetUuid(const util::Uuid &uuid) {m_uuid = uuid;}
 void CollisionMesh::SetConvex(bool bConvex) {m_bConvex = bConvex;}
 bool CollisionMesh::IsConvex() const {return m_bConvex;}
 void CollisionMesh::AddVertex(const Vector3 &v)
@@ -389,6 +391,7 @@ bool CollisionMesh::Save(Game &game,Model &mdl,udm::AssetDataArg outData,std::st
 	auto udm = *outData;
 	umath::Transform pose {};
 	pose.SetOrigin(GetOrigin());
+	udm["uuid"] = util::uuid_to_string(m_uuid);
 	udm["bone"] = GetBoneParent();
 	udm["pose"] = pose;
 	if(surfMatIdx >= 0 && surfMatIdx < surfaceMaterials.size())
@@ -489,6 +492,10 @@ bool CollisionMesh::LoadFromAssetData(Game &game,Model &mdl,const udm::AssetData
 		outErr = "Invalid version!";
 		return false;
 	}
+
+	std::string uuid;
+	if(udm["uuid"](uuid))
+		m_uuid = util::uuid_string_to_bytes(uuid);
 
 	umath::Transform pose {};
 	pose.SetOrigin(GetOrigin());

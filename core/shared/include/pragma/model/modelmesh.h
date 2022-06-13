@@ -24,6 +24,7 @@ namespace umath
 };
 
 namespace udm {struct AssetData; using Version = uint32_t;};
+namespace util {using Uuid = std::array<uint64_t,2>;};
 
 namespace pragma::model
 {

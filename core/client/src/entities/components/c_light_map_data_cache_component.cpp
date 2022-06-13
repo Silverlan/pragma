@@ -27,8 +27,8 @@ void CLightMapDataCacheComponent::RegisterMembers(pragma::EntityComponentManager
 	{
 		auto memberInfo = create_component_member_info<
 			T,TDataCache,
-			static_cast<void(T::*)(const TDataCache&)>(&T::SetLightMapDataCache),
-			static_cast<const TDataCache&(T::*)() const>(&T::GetLightMapDataCache)
+			static_cast<void(T::*)(const TDataCache&)>(&T::SetLightMapDataCachePath),
+			static_cast<const TDataCache&(T::*)() const>(&T::GetLightMapDataCachePath)
 		>("lightmapDataCache","");
 		registerMember(std::move(memberInfo));
 	}
@@ -42,8 +42,9 @@ void CLightMapDataCacheComponent::Initialize()
 }
 void CLightMapDataCacheComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
-void CLightMapDataCacheComponent::SetLightMapDataCache(const std::string &cachePath) {m_lightmapDataCacheFile = cachePath;}
-const std::string &CLightMapDataCacheComponent::GetLightMapDataCache() const {return m_lightmapDataCacheFile;}
+void CLightMapDataCacheComponent::SetLightMapDataCachePath(const std::string &cachePath) {m_lightmapDataCacheFile = cachePath;}
+const std::string &CLightMapDataCacheComponent::GetLightMapDataCachePath() const {return m_lightmapDataCacheFile;}
+const std::shared_ptr<LightmapDataCache> &CLightMapDataCacheComponent::GetLightMapDataCache() const {return m_lightmapDataCache;}
 
 void CLightMapDataCacheComponent::InitializeUvBuffers()
 {
@@ -114,31 +115,33 @@ void CLightMapDataCacheComponent::ReloadCache()
 		if(itCache != cachedModels.end() && itCache->second == nullptr)
 			continue;
 		auto hasLightmapData = false;
-		for(auto &mg : mdl->GetMeshGroups())
+		if(itCache == cachedModels.end())
 		{
-			for(auto &mesh : mg->GetMeshes())
+			for(auto &mg : mdl->GetMeshGroups())
 			{
-				for(auto &subMesh : mesh->GetSubMeshes())
+				for(auto &mesh : mg->GetMeshes())
 				{
-					if(subMesh->GetExtensionData()["lightmapData"])
+					for(auto &subMesh : mesh->GetSubMeshes())
 					{
-						hasLightmapData = true;
-						goto endLoop;
+						if(subMesh->GetExtensionData()["lightmapData"])
+						{
+							hasLightmapData = true;
+							goto endLoop;
+						}
 					}
 				}
 			}
+		endLoop:
+			;
 		}
-	endLoop:
-		
-		if(!hasLightmapData)
-		{
-			cachedModels[mdl->GetName()] = nullptr;
-			continue; // No need to do anything
-		}
+		else
+			hasLightmapData = (itCache->second != nullptr);
 
-		std::shared_ptr<Model> lmModel;
+		std::shared_ptr<Model> lmModel = nullptr;
 		if(itCache != cachedModels.end())
 			lmModel = itCache->second;
+		else if(!hasLightmapData)
+			cachedModels[mdl->GetName()] = nullptr;
 		else
 		{
 			auto cpy = mdl->Copy(GetEntity().GetNetworkState()->GetGameState(),Model::CopyFlags::CopyMeshesBit | Model::CopyFlags::CopyUniqueIdsBit);
@@ -183,7 +186,8 @@ void CLightMapDataCacheComponent::ReloadCache()
 			cachedModels[cpy->GetName()] = cpy;
 			lmModel = cpy;
 		}
-		ent->SetModel(lmModel);
+		if(lmModel)
+			ent->SetModel(lmModel);
 
 		auto lc = ent->GetComponent<CLightMapReceiverComponent>();
 		if(lc.valid())

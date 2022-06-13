@@ -23,8 +23,9 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 
-		void SetLightMapDataCache(const std::string &cachePath);
-		const std::string &GetLightMapDataCache() const;
+		void SetLightMapDataCachePath(const std::string &cachePath);
+		const std::string &GetLightMapDataCachePath() const;
+		const std::shared_ptr<LightmapDataCache> &GetLightMapDataCache() const;
 		void ReloadCache();
 		void InitializeUvBuffers();
 	protected:

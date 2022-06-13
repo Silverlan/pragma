@@ -40,10 +40,14 @@ bool LightmapDataCache::Load(const std::string &path,LightmapDataCache &outCache
 		else
 			fpath += ".lmd";
 	}
-	auto udmData = udm::Data::Load(fpath);
-	if(!udmData)
+	std::shared_ptr<udm::Data> udmData = nullptr;
+	try
 	{
-		outErr = "Failed to open input file '" +path +"'!";
+		udmData = udm::Data::Load(fpath);
+	}
+	catch(const udm::Exception &e)
+	{
+		outErr = "Failed to open input file '" +path +"': " +e.what() +"!";
 		return false;
 	}
 	return outCache.LoadFromAssetData(udmData->GetAssetData(),outErr);
@@ -140,11 +144,18 @@ void LightmapDataCache::AddInstanceData(
 	const util::Uuid &meshUuid,std::vector<Vector2> &&uvs
 )
 {
-	InstanceCacheData instanceData {};
-	instanceData.entityUuid = entUuid;
-	instanceData.model = model;
-	instanceData.pose = pose;
+	LmUuid lmEntUuid {entUuid};
+	auto it = cacheData.find(lmEntUuid);
+	if(it == cacheData.end())
+	{
+		InstanceCacheData instanceData {};
+		instanceData.entityUuid = entUuid;
+		instanceData.model = model;
+		instanceData.pose = pose;
+		it = cacheData.insert(std::make_pair(lmEntUuid,std::move(instanceData))).first;
+	}
+
+	auto &instanceData = it->second;
 	instanceData.meshData[LmUuid{meshUuid}] = {std::move(uvs)};
-	cacheData[LmUuid{entUuid}] = std::move(instanceData);
 }
 #pragma optimize("",on)

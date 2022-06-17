@@ -13,63 +13,17 @@ pragma::lua::LuaThreadPool::LuaThreadPool(lua_State *l,uint32_t threadCount)
 	: LuaThreadPool{l,threadCount,""}
 {}
 pragma::lua::LuaThreadPool::LuaThreadPool(lua_State *l,uint32_t threadCount,const std::string &name)
-	: m_luaState{l},m_pool{threadCount}
-{
-	auto n = m_pool.size();
-	std::string fullName = "lua";
-	if(!name.empty())
-		fullName += '_' +name;
-	for(auto i=decltype(n){0u};i<n;++i)
-		util::set_thread_name(m_pool.get_thread(i),fullName);
-}
-
-void pragma::lua::LuaThreadPool::Stop(bool execRemainingQueue)
-{
-	m_pool.stop(execRemainingQueue);
-}
-
-void pragma::lua::LuaThreadPool::PushResults(uint32_t taskId)
-{
-	std::scoped_lock slock {m_taskCompletedMutex};
-	if(taskId >= m_taskCompleted.size() || m_taskCompleted[taskId].isComplete == false)
-		return;
-	m_taskCompleted[taskId].resultHandler(m_luaState);
-}
-
-void pragma::lua::LuaThreadPool::WaitForPendingCount(uint32_t count)
-{
-	if(GetPendingTaskCount() < count)
-		return;
-	auto ul = std::unique_lock<std::mutex>(m_taskCompletedMutex);
-	m_taskCompleteCondition.wait(ul,[this,count]() {
-		return GetPendingTaskCount() < count;
-	});
-}
-
-bool pragma::lua::LuaThreadPool::IsComplete(uint32_t taskId) const
-{
-	std::scoped_lock slock {m_taskCompletedMutex};
-	return (taskId < m_taskCompleted.size()) ? m_taskCompleted[taskId].isComplete : false;
-}
+	: m_luaState{l},ThreadPool{threadCount,name,"lua"}
+{}
 
 uint32_t pragma::lua::LuaThreadPool::AddTask(const std::function<ResultHandler()> &task)
 {
-	auto taskId = m_totalTaskCount++;
-	if(m_totalTaskCount >= m_taskCompleted.size())
-	{
-		std::scoped_lock slock {m_taskCompletedMutex};
-		m_taskCompleted.resize(m_totalTaskCount);
-	}
-	m_pool.push([this,task,taskId](int id) {
-		auto resultHandler = task();
-		++m_completedTaskCount;
-
-		std::scoped_lock slock {m_taskCompletedMutex};
-		m_taskCompleted[taskId].resultHandler = std::move(resultHandler);
-		m_taskCompleted[taskId].isComplete = true;
-		m_taskCompleteCondition.notify_one();
+	return ThreadPool::AddTask([this,task]() -> ThreadPool::ResultHandler {
+		auto resHandler = task();
+		return [this,resHandler]() {
+			return resHandler(m_luaState);
+		};
 	});
-	return taskId;
 }
 
 namespace pragma::lua
@@ -82,6 +36,7 @@ namespace pragma::lua
 		.def("Stop",&LuaThreadPool::Stop)
 		.def("PushResults",&LuaThreadPool::PushResults)
 		.def("WaitForPendingCount",&LuaThreadPool::WaitForPendingCount)
+		.def("WaitForCompletion",&LuaThreadPool::WaitForCompletion)
 		.def("GetTaskCount",&LuaThreadPool::GetTotalTaskCount)
 		.def("GetPendingTaskCount",&LuaThreadPool::GetPendingTaskCount)
 		.def("GetCompletedTaskCount",&LuaThreadPool::GetCompletedTaskCount);

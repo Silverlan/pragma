@@ -26,6 +26,8 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
+		static ComponentEventId EVENT_CALC_LIGHT_DIRECTION_TO_POINT;
+		static ComponentEventId EVENT_CALC_LIGHT_INTENSITY_AT_POINT;
 		enum class SpawnFlag : uint32_t
 		{
 			DontCastShadows = 512
@@ -47,10 +49,12 @@ namespace pragma
 			Lumen,
 			Lux // Lumen per square-meter; Directional lights only
 		};
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
 		static std::string LightIntensityTypeToString(LightIntensityType type);
 		static Candela GetLightIntensityCandela(float intensity,LightIntensityType type,std::optional<float> outerConeAngle={});
 		static Lumen GetLightIntensityLumen(float intensity,LightIntensityType type,std::optional<float> outerConeAngle={});
+		static float CalcDistanceFalloff(const Vector3 &lightPos,const Vector3 &point,float radius);
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
@@ -77,6 +81,9 @@ namespace pragma
 		float GetLightIntensity() const;
 		Candela GetLightIntensityCandela() const;
 		Lumen GetLightIntensityLumen() const;
+
+		float CalcLightIntensityAtPoint(const Vector3 &pos) const;
+		Vector3 CalcLightDirectionToPoint(const Vector3 &pos) const;
 	protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		virtual void InitializeLight(BaseEntityComponent &component);
@@ -93,6 +100,22 @@ namespace pragma
 	public:
 		ShadowType GetShadowType() const;
 		virtual void SetShadowType(ShadowType type);
+	};
+	struct DLLNETWORK CECalcLightDirectionToPoint
+		: public ComponentEvent
+	{
+		CECalcLightDirectionToPoint(const Vector3 &pos);
+		virtual void PushArguments(lua_State *l) override;
+		const Vector3 &pos;
+		Vector3 direction = uvec::FORWARD;
+	};
+	struct DLLNETWORK CECalcLightIntensityAtPoint
+		: public ComponentEvent
+	{
+		CECalcLightIntensityAtPoint(const Vector3 &pos);
+		virtual void PushArguments(lua_State *l) override;
+		const Vector3 &pos;
+		Candela intensity = 0.f;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseEnvLightComponent::LightFlags)

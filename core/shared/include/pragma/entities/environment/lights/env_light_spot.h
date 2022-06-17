@@ -21,12 +21,28 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
+		static float CalcInnerConeAngle(float outerConeAngle,float blendFraction);
+		static float CalcBlendFraction(float outerConeAngle,float innerConeAngle);
+		static float CalcConeFalloff(
+			const Vector3 &lightPos,const Vector3 &lightDir,umath::Degree outerConeAngle,umath::Degree innerConeAngle,const Vector3 &point
+		);
+		static Candela CalcIntensityFalloff(
+			const Vector3 &lightPos,float radius,const Vector3 &lightDir,
+			umath::Degree outerConeAngle,umath::Degree innerConeAngle,const Vector3 &point
+		);
+		static Candela CalcIntensityAtPoint(
+			const Vector3 &lightPos,float radius,Candela intensity,const Vector3 &lightDir,
+			umath::Degree outerConeAngle,umath::Degree innerConeAngle,const Vector3 &point
+		);
+
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
 		BaseEnvLightSpotComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 
 		virtual void SetOuterConeAngle(umath::Degree ang);
 		umath::Degree GetOuterConeAngle() const;
+		void SetInnerConeAngle(umath::Degree ang);
+		umath::Degree GetInnerConeAngle() const;
 
 		umath::Fraction GetBlendFraction() const;
 		virtual void SetBlendFraction(umath::Fraction fraction);
@@ -37,10 +53,14 @@ namespace pragma
 		const util::PFloatProperty &GetBlendFractionProperty() const;
 		const util::PFloatProperty &GetOuterConeAngleProperty() const;
 		const util::PFloatProperty &GetConeStartOffsetProperty() const;
+		
+		float CalcConeFalloff(const Vector3 &point) const;
+		float CalcDistanceFalloff(const Vector3 &point) const;
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 	protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
 		util::PFloatProperty m_blendFraction = nullptr;
 		util::PFloatProperty m_outerConeAngle = nullptr;
 		util::PFloatProperty m_coneStartOffset = nullptr;

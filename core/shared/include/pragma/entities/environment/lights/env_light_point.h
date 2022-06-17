@@ -20,8 +20,15 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
+		static Candela CalcIntensityAtPoint(
+			const Vector3 &lightPos,float radius,Candela intensity,const Vector3 &point
+		);
+
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
+		float CalcDistanceFalloff(const Vector3 &point) const;
+	protected:
+		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
 	};
 };
 

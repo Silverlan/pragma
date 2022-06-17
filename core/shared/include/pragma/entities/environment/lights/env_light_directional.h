@@ -21,6 +21,8 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
+		static Candela CalcIntensityAtPoint(Candela intensity,const Vector3 &point);
+
 		BaseEnvLightDirectionalComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void SetAmbientColor(const Color &color);
@@ -30,6 +32,7 @@ namespace pragma
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 	protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
 		util::PColorProperty m_ambientColor = nullptr;
 		Float m_maxExposure = 8.f;
 		pragma::NetEventId m_netEvSetAmbientColor = pragma::INVALID_NET_EVENT;

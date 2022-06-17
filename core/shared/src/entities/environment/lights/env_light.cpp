@@ -21,6 +21,13 @@
 
 using namespace pragma;
 
+ComponentEventId BaseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT = pragma::INVALID_COMPONENT_ID;
+ComponentEventId BaseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT = pragma::INVALID_COMPONENT_ID;
+void BaseEnvLightComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
+{
+	EVENT_CALC_LIGHT_DIRECTION_TO_POINT = registerEvent("CALC_LIGHT_DIRECTION_TO_POINT",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_CALC_LIGHT_INTENSITY_AT_POINT = registerEvent("CALC_LIGHT_INTENSITY_AT_POINT",EntityComponentManager::EventInfo::Type::Broadcast);
+}
 void BaseEnvLightComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {
 	using T = BaseEnvLightComponent;
@@ -241,8 +248,45 @@ Lumen BaseEnvLightComponent::GetLightIntensityLumen() const
 	auto angle = spotLightC ? spotLightC->GetOuterConeAngle() : 360.f;
 	return GetLightIntensityLumen(GetLightIntensity(),GetLightIntensityType(),angle);
 }
+float BaseEnvLightComponent::CalcLightIntensityAtPoint(const Vector3 &pos) const
+{
+	CECalcLightIntensityAtPoint ev {pos};
+	BroadcastEvent(EVENT_CALC_LIGHT_INTENSITY_AT_POINT,ev);
+	return ev.intensity;
+}
+Vector3 BaseEnvLightComponent::CalcLightDirectionToPoint(const Vector3 &pos) const
+{
+	CECalcLightDirectionToPoint ev {pos};
+	BroadcastEvent(EVENT_CALC_LIGHT_DIRECTION_TO_POINT,ev);
+	return ev.direction;
+}
 BaseEnvLightComponent::ShadowType BaseEnvLightComponent::GetShadowType() const {return m_shadowType;}
 void BaseEnvLightComponent::SetShadowType(ShadowType type) {m_shadowType = type;}
 float BaseEnvLightComponent::GetFalloffExponent() const {return m_falloffExponent;}
 void BaseEnvLightComponent::SetFalloffExponent(float falloffExponent) {m_falloffExponent = falloffExponent;}
 
+float BaseEnvLightComponent::CalcDistanceFalloff(const Vector3 &lightPos,const Vector3 &point,float radius)
+{
+	auto dist = uvec::distance(point,lightPos);
+	dist = util::pragma::units_to_metres(dist);
+	radius = util::pragma::units_to_metres(radius);
+	return ulighting::calc_light_falloff(dist,radius);
+}
+
+//////////////
+
+CECalcLightDirectionToPoint::CECalcLightDirectionToPoint(const Vector3 &pos)
+	: pos{pos}
+{}
+void CECalcLightDirectionToPoint::PushArguments(lua_State *l)
+{
+	Lua::Push<Vector3>(l,pos);
+}
+
+CECalcLightIntensityAtPoint::CECalcLightIntensityAtPoint(const Vector3 &pos)
+	: pos{pos}
+{}
+void CECalcLightIntensityAtPoint::PushArguments(lua_State *l)
+{
+	Lua::Push<Vector3>(l,pos);
+}

@@ -1281,6 +1281,8 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		});
 		def.def("GetLightIntensity",&pragma::BaseEnvLightComponent::GetLightIntensity);
 		def.def("GetLightIntensityCandela",static_cast<Candela(pragma::BaseEnvLightComponent::*)() const>(&pragma::BaseEnvLightComponent::GetLightIntensityCandela));
+		def.def("CalcLightIntensityAtPoint",&pragma::BaseEnvLightComponent::CalcLightIntensityAtPoint);
+		def.def("CalcLightDirectionToPoint",&pragma::BaseEnvLightComponent::CalcLightDirectionToPoint);
 		def.add_static_constant("INTENSITY_TYPE_CANDELA",umath::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Candela));
 		def.add_static_constant("INTENSITY_TYPE_LUMEN",umath::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Lumen));
 		def.add_static_constant("INTENSITY_TYPE_LUX",umath::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Lux));
@@ -1289,20 +1291,25 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	void pragma::lua::base_env_light_spot_component::register_class(luabind::module_ &mod)
 	{
 		auto def = Lua::create_base_entity_component_class<pragma::BaseEnvLightSpotComponent>("BaseEnvLightSpotComponent");
-	util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
+		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
 		def.def("SetOuterConeAngle",&pragma::BaseEnvLightSpotComponent::SetOuterConeAngle);
 		def.def("GetOuterConeAngle",&pragma::BaseEnvLightSpotComponent::GetOuterConeAngle);
+		def.def("SetInnerConeAngle",&pragma::BaseEnvLightSpotComponent::SetInnerConeAngle);
+		def.def("GetInnerConeAngle",&pragma::BaseEnvLightSpotComponent::GetInnerConeAngle);
 		def.def("GetBlendFractionProperty",&pragma::BaseEnvLightSpotComponent::GetBlendFractionProperty);
 		def.def("GetOuterConeAngleProperty",&pragma::BaseEnvLightSpotComponent::GetOuterConeAngleProperty);
 		def.def("GetConeStartOffsetProperty",&pragma::BaseEnvLightSpotComponent::GetConeStartOffsetProperty);
 		def.def("SetBlendFraction",&pragma::BaseEnvLightSpotComponent::SetBlendFraction);
 		def.def("GetBlendFraction",&pragma::BaseEnvLightSpotComponent::GetBlendFraction);
+		def.def("CalcConeFalloff",static_cast<float(pragma::BaseEnvLightSpotComponent::*)(const Vector3&) const>(&pragma::BaseEnvLightSpotComponent::CalcConeFalloff));
+		def.def("CalcDistanceFalloff",&pragma::BaseEnvLightSpotComponent::CalcDistanceFalloff);
 	}
 #include "pragma/entities/environment/lights/env_light_point.h"
 	void pragma::lua::base_env_light_point_component::register_class(luabind::module_ &mod)
 	{
 		auto def = Lua::create_base_entity_component_class<pragma::BaseEnvLightPointComponent>("BaseEnvLightPointComponent");
 		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
+		def.def("CalcDistanceFalloff",&pragma::BaseEnvLightPointComponent::CalcDistanceFalloff);
 	}
 #include "pragma/entities/environment/lights/env_light_directional.h"
 	void pragma::lua::base_env_light_directional_component::register_class(luabind::module_ &mod)

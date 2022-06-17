@@ -15,6 +15,10 @@
 
 using namespace pragma;
 
+Candela BaseEnvLightDirectionalComponent::CalcIntensityAtPoint(Candela intensity,const Vector3 &point)
+{
+	return intensity;
+}
 BaseEnvLightDirectionalComponent::BaseEnvLightDirectionalComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_ambientColor(util::ColorProperty::Create(Color(255,255,255,200)))
 {}
@@ -58,6 +62,26 @@ void BaseEnvLightDirectionalComponent::Load(udm::LinkedPropertyWrapperArg udm,ui
 	Vector4 color;
 	udm["ambientColor"](color);
 	*m_ambientColor = Color{color};
+}
+util::EventReply BaseEnvLightDirectionalComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
+{
+	if(eventId == BaseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT)
+	{
+		static_cast<CECalcLightDirectionToPoint&>(evData).direction = GetEntity().GetForward();
+		return util::EventReply::Handled;
+	}
+	else if(eventId == BaseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT)
+	{
+		auto *cLight = dynamic_cast<pragma::BaseEnvLightComponent*>(GetEntity().FindComponent("light").get());
+		if(cLight)
+		{
+			auto intensity = cLight->GetLightIntensityCandela();
+			auto &levData = static_cast<CECalcLightIntensityAtPoint&>(evData);
+			static_cast<CECalcLightIntensityAtPoint&>(evData).intensity = CalcIntensityAtPoint(intensity,levData.pos);
+		}
+		return util::EventReply::Handled;
+	}
+	return BaseEnvLightDirectionalComponent::HandleEvent(eventId,evData);
 }
 
 void BaseEnvLightDirectionalComponent::SetAmbientColor(const Color &color) {*m_ambientColor = color;}

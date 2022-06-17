@@ -26,10 +26,6 @@ LINK_ENTITY_TO_CLASS(env_light_spot,CEnvLightSpot);
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-umath::Degree CLightSpotComponent::CalcInnerConeAngle(umath::Degree outerConeAngle,float blendFraction)
-{
-	return outerConeAngle *umath::clamp(1.f -blendFraction,0.f,1.f);
-}
 CLightSpotComponent::CLightSpotComponent(BaseEntity &ent)
 	: BaseEnvLightSpotComponent(ent)
 {}

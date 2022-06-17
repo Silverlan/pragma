@@ -21,7 +21,6 @@ namespace pragma
 		public MVPBias<1>
 	{
 	public:
-		static float CalcInnerConeAngle(float outerConeAngle,float blendFraction);
 		CLightSpotComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;

@@ -11,8 +11,10 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/c_ldefinitions.h"
 #include "pragma/lua/c_lentity_handles.hpp"
+#include <sharedutils/util_parallel_job.hpp>
 #include <mathutil/uvec.h>
 
+namespace pragma {struct LightmapDataCache;};
 namespace Lua
 {
 	namespace util
@@ -29,6 +31,13 @@ namespace Lua
 			DLLCLIENT int export_material(lua_State *l);
 			DLLCLIENT std::string get_clipboard_string();
 			DLLCLIENT void set_clipboard_string(const std::string &str);
+			DLLCLIENT ::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_directional_lightmap_atlas(
+				const std::vector<pragma::CLightComponent*> &lights,
+				const std::vector<::ModelSubMesh*> meshes,
+				const std::vector<std::string> entityUuids,
+				uint32_t width,uint32_t height,
+				::pragma::LightmapDataCache *optLightmapDataCache=nullptr
+			);
 		};
 	};
 };

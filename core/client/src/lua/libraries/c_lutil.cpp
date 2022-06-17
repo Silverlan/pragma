@@ -17,6 +17,7 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_attachable_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/util/util_baking.hpp"
 #include "pragma/asset/c_util_model.hpp"
 #include <pragma/lua/classes/ldef_color.h>
 #include <pragma/lua/classes/ldef_vector.h>
@@ -285,3 +286,16 @@ int Lua::util::Client::export_material(lua_State *l)
 
 std::string Lua::util::Client::get_clipboard_string() {return c_engine->GetWindow()->GetClipboardString();}
 void Lua::util::Client::set_clipboard_string(const std::string &str) {c_engine->GetWindow()->SetClipboardString(str);}
+
+::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> Lua::util::Client::bake_directional_lightmap_atlas(
+	const std::vector<pragma::CLightComponent*> &lights,
+	const std::vector<::ModelSubMesh*> meshes,
+	const std::vector<std::string> entityUuids,
+	uint32_t width,uint32_t height,
+	::pragma::LightmapDataCache *optLightmapDataCache
+)
+{
+	return ::util::baking::bake_directional_lightmap_atlas(
+		lights,meshes,entityUuids,width,height,optLightmapDataCache
+	);
+}

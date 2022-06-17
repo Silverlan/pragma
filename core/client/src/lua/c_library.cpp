@@ -20,6 +20,7 @@
 #include "pragma/lua/converters/gui_element_converter_t.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
+#include "pragma/entities/components/lightmap_data_cache.hpp"
 #include "pragma/input/input_binding_layer.hpp"
 #include "pragma/audio/c_laleffect.h"
 #include "pragma/audio/c_lalsound.hpp"
@@ -1044,7 +1045,8 @@ void CGame::RegisterLuaLibraries()
 		luabind::def("get_clipboard_string",Lua::util::Client::get_clipboard_string),
 		luabind::def("set_clipboard_string",Lua::util::Client::set_clipboard_string),
 		luabind::def("create_giblet",Lua::util::Client::create_giblet),
-		luabind::def("get_image_format_file_extension",uimg::get_file_extension)
+		luabind::def("get_image_format_file_extension",uimg::get_file_extension),
+		luabind::def("bake_directional_lightmap_atlas",Lua::util::Client::bake_directional_lightmap_atlas)
 	];
 
 	auto imgWriteInfoDef = luabind::class_<uimg::TextureInfo>("TextureInfo");

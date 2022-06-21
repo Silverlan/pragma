@@ -275,6 +275,12 @@ bool BaseModelComponent::HasModelMaterialsLoaded() const {return m_bMaterialsLoa
 
 void BaseModelComponent::SetModel(const std::string &mdl)
 {
+	auto *nw = GetEntity().GetNetworkState();
+	auto *game = nw->GetGameState();
+	auto &mdlManager = nw->GetModelManager();
+	auto normalizedMdl = mdlManager.ToCacheIdentifier(mdl);
+	if(m_modelName && *m_modelName == normalizedMdl)
+		return;
 	m_modelName = nullptr;
 
 	if(mdl.empty() == true)
@@ -283,10 +289,7 @@ void BaseModelComponent::SetModel(const std::string &mdl)
 		return;
 	}
 	
-	auto *nw = GetEntity().GetNetworkState();
-	auto *game = nw->GetGameState();
-	auto &mdlManager = nw->GetModelManager();
-	m_modelName = std::make_unique<std::string>(mdlManager.ToCacheIdentifier(mdl));
+	m_modelName = std::make_unique<std::string>(normalizedMdl);
 	if(!GetEntity().IsSpawned())
 	{
 		mdlManager.PreloadAsset(mdl);

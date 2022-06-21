@@ -22,7 +22,7 @@
 #include <unordered_set>
 
 namespace prosper {class Texture; class IImage;};
-namespace uimg {class ImageBuffer;};
+namespace uimg {class ImageBuffer; struct ImageLayerSet;};
 namespace pragma
 {
 	namespace rendering::cycles {class Scene;};
@@ -32,7 +32,7 @@ namespace pragma
 		util::WeakHandle<Model> hModel = {};
 		msys::MaterialHandle hMaterial = {};
 		EntityHandle hEntity = {};
-		util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> job = {};
+		util::ParallelJob<uimg::ImageLayerSet> job = {};
 		bool isRunning = false;
 		uint32_t width = 512;
 		uint32_t height = 512;

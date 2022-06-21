@@ -25,15 +25,42 @@
 #include <pragma/lua/custom_constructor.hpp>
 #include <util_image_buffer.hpp>
 #include <prosper_command_buffer.hpp>
+#include <luabind/copy_policy.hpp>
 #include <texturemanager/texturemanager.h>
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 
+static void set_lightmap_texture(lua_State *l,pragma::CLightMapComponent &hLightMapC,const std::string &path,bool directional)
+{
+	auto *nw = c_engine->GetNetworkState(l);
+
+	auto &texManager = static_cast<msys::CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).GetTextureManager();
+	auto texture = texManager.LoadAsset(path);
+	if(texture == nullptr)
+		return;
+	auto &vkTex = std::static_pointer_cast<Texture>(texture)->GetVkTexture();
+	if(vkTex == nullptr)
+		return;
+	prosper::util::SamplerCreateInfo samplerCreateInfo {};
+	auto sampler = c_engine->GetRenderContext().CreateSampler(samplerCreateInfo);
+	vkTex->SetSampler(*sampler);
+	if(directional)
+		hLightMapC.SetDirectionalLightMapAtlas(vkTex);
+	else
+		hLightMapC.SetLightMapAtlas(vkTex);
+}
+
 void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 {
 	auto defCLightMap = pragma::lua::create_entity_component_class<pragma::CLightMapComponent,pragma::BaseEntityComponent>("LightMapComponent");
+	defCLightMap.add_static_constant("TEXTURE_DIFFUSE",umath::to_integral(pragma::CLightMapComponent::Texture::DiffuseMap));
+	defCLightMap.add_static_constant("TEXTURE_DIFFUSE_DIRECT",umath::to_integral(pragma::CLightMapComponent::Texture::DiffuseDirectMap));
+	defCLightMap.add_static_constant("TEXTURE_DIFFUSE_INDIRECT",umath::to_integral(pragma::CLightMapComponent::Texture::DiffuseIndirectMap));
+	defCLightMap.add_static_constant("TEXTURE_DOMINANT_DIRECTION",umath::to_integral(pragma::CLightMapComponent::Texture::DominantDirectionMap));
+	defCLightMap.add_static_constant("TEXTURE_COUNT",umath::to_integral(pragma::CLightMapComponent::Texture::Count));
+	
 	defCLightMap.scope[luabind::def("bake_lightmaps",&pragma::CLightMapComponent::BakeLightmaps)];
 	defCLightMap.scope[luabind::def("import_lightmap_atlas",static_cast<bool(*)(const std::string&)>(&pragma::CLightMapComponent::ImportLightmapAtlas))];
 	defCLightMap.scope[luabind::def("import_lightmap_atlas",static_cast<bool(*)(uimg::ImageBuffer&)>(&pragma::CLightMapComponent::ImportLightmapAtlas))];
@@ -44,26 +71,28 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 			return {};
 		return lightMap;
 	}));
+	defCLightMap.def("GetDirectionalLightmapTexture",+[](lua_State *l,pragma::CLightMapComponent &hLightMapC) -> std::optional<std::shared_ptr<prosper::Texture>> {
+		auto lightMap = hLightMapC.GetDirectionalLightMap();
+		if(lightMap == nullptr)
+			return {};
+		return lightMap;
+	});
 	defCLightMap.def("ConvertLightmapToBSPLuxelData",&pragma::CLightMapComponent::ConvertLightmapToBSPLuxelData);
 	defCLightMap.def("UpdateLightmapUvBuffers",&pragma::CLightMapComponent::UpdateLightmapUvBuffers);
 	defCLightMap.def("ReloadLightmapData",&pragma::CLightMapComponent::ReloadLightMapData);
 	defCLightMap.def("GetLightmapAtlas",&pragma::CLightMapComponent::GetLightMapAtlas);
+	defCLightMap.def("GetDirectionalLightmapAtlas",&pragma::CLightMapComponent::GetDirectionalLightMapAtlas);
+	defCLightMap.def("GetLightmapTexture",&pragma::CLightMapComponent::GetTexture,luabind::copy_policy<0>{});
 	defCLightMap.def("SetLightmapAtlas",&pragma::CLightMapComponent::SetLightMapAtlas);
-	defCLightMap.def("SetLightmapAtlas",static_cast<void(*)(lua_State*,pragma::CLightMapComponent&,const std::string &path)>([](lua_State *l,pragma::CLightMapComponent &hLightMapC,const std::string &path) {
-		auto *nw = c_engine->GetNetworkState(l);
-
-		auto &texManager = static_cast<msys::CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).GetTextureManager();
-		auto texture = texManager.LoadAsset(path);
-		if(texture == nullptr)
-			return;
-		auto &vkTex = std::static_pointer_cast<Texture>(texture)->GetVkTexture();
-		if(vkTex == nullptr)
-			return;
-		prosper::util::SamplerCreateInfo samplerCreateInfo {};
-		auto sampler = c_engine->GetRenderContext().CreateSampler(samplerCreateInfo);
-		vkTex->SetSampler(*sampler);
-		hLightMapC.SetLightMapAtlas(vkTex);
-	}));
+	defCLightMap.def("SetLightmapAtlas",
+		+[](lua_State *l,pragma::CLightMapComponent &hLightMapC,const std::string &path) {
+		set_lightmap_texture(l,hLightMapC,path,false);
+	});
+	defCLightMap.def("SetDirectionalLightmapAtlas",&pragma::CLightMapComponent::SetDirectionalLightMapAtlas);
+	defCLightMap.def("SetDirectionalLightmapAtlas",
+		+[](lua_State *l,pragma::CLightMapComponent &hLightMapC,const std::string &path) {
+		set_lightmap_texture(l,hLightMapC,path,true);
+	});
 	defCLightMap.def("SetExposure",&pragma::CLightMapComponent::SetLightMapExposure);
 	defCLightMap.def("GetExposure",&pragma::CLightMapComponent::GetLightMapExposure);
 	defCLightMap.def("GetExposureProperty",&pragma::CLightMapComponent::GetLightMapExposureProperty);

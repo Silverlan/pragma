@@ -45,6 +45,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 	assert(dsLights);
 	assert(dsShadows);
 	m_sceneC = &scene;
+	m_rendererC = &renderer;
 	auto &dsMat = shader.GetDefaultMaterialDescriptorSet();
 	// m_sceneFlags = ShaderGameWorld::SceneFlags::None;
 	shader.RecordBindScene(
@@ -192,7 +193,15 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(CBaseEntity &ent)
 	{
 		m_lightMapReceiverC = renderC->GetLightMapReceiverComponent();
 		if(m_lightMapReceiverC)
+		{
 			sceneFlags |= ShaderGameWorld::SceneFlags::LightmapsEnabled;
+			if(m_rendererC->HasIndirectLightmap())
+			{
+				sceneFlags |= ShaderGameWorld::SceneFlags::IndirectLightmapsEnabled;
+				if(m_rendererC->HasDirectionalLightmap())
+					sceneFlags |= ShaderGameWorld::SceneFlags::DirectionalLightmapsEnabled;
+			}
+		}
 		umath::set_flag(sceneFlags,ShaderGameWorld::SceneFlags::DisableShadows,!renderC->IsReceivingShadows());
 	}
 

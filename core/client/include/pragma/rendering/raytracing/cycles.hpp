@@ -19,7 +19,7 @@
 
 class ClientState;
 class BaseEntity;
-namespace uimg {class ImageBuffer;};
+namespace uimg {class ImageBuffer; struct ImageLayerSet;};
 namespace pragma::rendering::cycles
 {
 	struct DLLCLIENT SceneInfo
@@ -69,10 +69,10 @@ namespace pragma::rendering::cycles
 		std::function<bool(BaseEntity&)> entityFilter = nullptr;
 		const std::vector<BaseEntity*> *entityList = nullptr;
 	};
-	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> render_image(ClientState &client,const SceneInfo &sceneInfo,const RenderImageInfo &renderImageInfo);
-	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_ambient_occlusion(ClientState &client,const SceneInfo &sceneInfo,Model &mdl,uint32_t materialIndex);
-	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_ambient_occlusion(ClientState &client,const SceneInfo &sceneInfo,BaseEntity &ent,uint32_t materialIndex);
-	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_lightmaps(ClientState &client,const SceneInfo &sceneInfo);
+	util::ParallelJob<uimg::ImageLayerSet> render_image(ClientState &client,const SceneInfo &sceneInfo,const RenderImageInfo &renderImageInfo);
+	util::ParallelJob<uimg::ImageLayerSet> bake_ambient_occlusion(ClientState &client,const SceneInfo &sceneInfo,Model &mdl,uint32_t materialIndex);
+	util::ParallelJob<uimg::ImageLayerSet> bake_ambient_occlusion(ClientState &client,const SceneInfo &sceneInfo,BaseEntity &ent,uint32_t materialIndex);
+	util::ParallelJob<uimg::ImageLayerSet> bake_lightmaps(ClientState &client,const SceneInfo &sceneInfo);
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::rendering::cycles::SceneInfo::SceneFlags)
 

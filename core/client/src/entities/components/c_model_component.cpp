@@ -19,6 +19,7 @@
 #include <shader/prosper_pipeline_loader.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <buffers/prosper_render_buffer.hpp>
 #include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
@@ -193,6 +194,13 @@ void CModelComponent::ReloadRenderBufferList(bool immediate)
 		umath::set_flag(m_stateFlags,StateFlags::RenderBufferListUpdateRequired);
 }
 
+void CModelComponent::SetLightmapUvBuffer(const CModelSubMesh &mesh,const std::shared_ptr<prosper::IBuffer> &buffer) {m_lightmapUvBuffers[&mesh] = buffer;}
+std::shared_ptr<prosper::IBuffer> CModelComponent::GetLightmapUvBuffer(const CModelSubMesh &mesh) const
+{
+	auto it = m_lightmapUvBuffers.find(&mesh);
+	return (it != m_lightmapUvBuffers.end()) ? it->second : nullptr;
+}
+
 bool CModelComponent::IsDepthPrepassEnabled() const {return !umath::is_flag_set(m_stateFlags,StateFlags::DepthPrepassDisabled);}
 void CModelComponent::SetDepthPrepassEnabled(bool enabled) {umath::set_flag(m_stateFlags,StateFlags::DepthPrepassDisabled,!enabled);}
 
@@ -217,6 +225,26 @@ void CModelComponent::UpdateRenderBufferList()
 		if(shader && shader->IsValid())
 		{
 			renderBuffer = mesh.GetRenderBuffer(*shader);
+
+			auto uvBuffer = GetLightmapUvBuffer(mesh);
+			if(uvBuffer)
+			{
+				auto &buffers = renderBuffer->GetBuffers();
+				std::vector<prosper::IBuffer*> newBuffers;
+				newBuffers.reserve(buffers.size());
+				for(auto &buffer : buffers)
+					newBuffers.push_back(buffer.get());
+				auto *indexBuffer = renderBuffer->GetIndexBufferInfo();
+				auto lightmapUvIndex = umath::to_integral(pragma::ShaderGameWorldLightingPass::VertexBinding::LightmapUv);
+				if(lightmapUvIndex < newBuffers.size())
+				{
+					newBuffers[lightmapUvIndex] = uvBuffer.get();
+					renderBuffer = c_engine->GetRenderContext().CreateRenderBuffer(
+						renderBuffer->GetPipelineCreateInfo(),newBuffers,renderBuffer->GetOffsets(),
+						indexBuffer ? std::optional<prosper::IndexBufferInfo>{*indexBuffer} : std::optional<prosper::IndexBufferInfo>{}
+					);
+				}
+			}
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 			::debug::get_domain().BeginTask("init_mat_desc_set");
@@ -439,6 +467,7 @@ void CModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 	m_lodRenderMeshGroups.push_back({0,0});
 
 	m_materialOverrides.clear();
+	m_lightmapUvBuffers.clear();
 
 	SetRenderMeshesDirty();
 

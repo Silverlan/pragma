@@ -131,7 +131,7 @@ CReflectionProbeComponent::RaytracingJobManager::~RaytracingJobManager()
 void CReflectionProbeComponent::RaytracingJobManager::StartNextJob()
 {
 	auto preprocessCompletionHandler = job.GetCompletionHandler();
-	job.SetCompletionHandler([this,preprocessCompletionHandler](util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> &worker) {
+	job.SetCompletionHandler([this,preprocessCompletionHandler](util::ParallelWorker<uimg::ImageLayerSet> &worker) {
 		if(worker.IsSuccessful() == false)
 		{
 			Con::cwar<<"WARNING: Raytracing scene for reflection probe has failed: "<<worker.GetResultMessage()<<Con::endl;
@@ -140,7 +140,7 @@ void CReflectionProbeComponent::RaytracingJobManager::StartNextJob()
 		}
 		if(preprocessCompletionHandler)
 			preprocessCompletionHandler(worker);
-		auto imgBuffer = worker.GetResult();
+		auto imgBuffer = worker.GetResult().images.begin()->second;
 		m_equirectImageBuffer = imgBuffer;
 		auto pThis = std::move(probe.m_raytracingJobManager); // Keep alive until end of scope
 		Finalize();
@@ -511,7 +511,7 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	return result;
 }
 
-util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CReflectionProbeComponent::CaptureRaytracedIBLReflectionsFromScene(
+util::ParallelJob<uimg::ImageLayerSet> CReflectionProbeComponent::CaptureRaytracedIBLReflectionsFromScene(
 	uint32_t width,uint32_t height,const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov,
 	float exposure,const std::vector<BaseEntity*> *optEntityList,bool renderJob
 )
@@ -561,7 +561,7 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CReflectionProbeComponent:
 	auto job = rendering::cycles::render_image(*client,sceneInfo,renderImgInfo);
 	if(job.IsValid() == false)
 		return {};
-	job.SetCompletionHandler([](util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> &worker) {
+	job.SetCompletionHandler([](util::ParallelWorker<uimg::ImageLayerSet> &worker) {
 		if(worker.IsSuccessful() == false)
 		{
 			Con::cwar<<"WARNING: Raytracing scene for IBL reflections has failed: "<<worker.GetResultMessage()<<Con::endl;

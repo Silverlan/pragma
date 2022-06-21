@@ -27,6 +27,7 @@ namespace pragma
 	class CVertexAnimatedComponent;
 	class CModelComponent;
 	class CLightMapReceiverComponent;
+	class CRasterizationRendererComponent;
 	class ShaderTextured3DBase;
 	enum class ShaderGameWorldPipeline : uint32_t;
 };
@@ -44,7 +45,7 @@ namespace pragma::rendering
 
 		Count
 	};
-
+	
 	class DLLCLIENT ShaderProcessor
 	{
 	public:
@@ -82,6 +83,7 @@ namespace pragma::rendering
 		std::optional<Vector2> m_depthBias {};
 		Vector4 m_drawOrigin {};
 		const pragma::CSceneComponent *m_sceneC = nullptr;
+		const CRasterizationRendererComponent *m_rendererC = nullptr;
 		pragma::CVertexAnimatedComponent *m_vertexAnimC = nullptr;
 		pragma::CModelComponent *m_modelC = nullptr;
 		pragma::CLightMapReceiverComponent *m_lightMapReceiverC = nullptr;
@@ -100,7 +102,6 @@ namespace pragma::rendering
 		bool m_depthPrepass = false;
 	};
 
-	class CRasterizationRendererComponent;
 	class DLLCLIENT BaseRenderProcessor
 	{
 	public:

@@ -24,8 +24,10 @@
 #include <pragma/level/mapgeometry.h>
 #include <pragma/entities/entity_iterator.hpp>
 #include <GuillotineBinPack.h>
+#include <texturemanager/texture.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/asset/util_asset.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <prosper_command_buffer.hpp>
@@ -58,6 +60,26 @@ void CLightMapComponent::RegisterMembers(pragma::EntityComponentManager &compone
 		memberInfo.SetMax(10.f);
 		registerMember(std::move(memberInfo));
 	}
+
+	{
+		using TMaterial = std::string;
+		auto memberInfo = create_component_member_info<
+			T,TMaterial,
+			+[](const ComponentMemberInfo &info,T &component,const TMaterial &value) {
+				component.SetLightMapMaterial(value);
+			},
+			+[](const ComponentMemberInfo &info,T &component,TMaterial &value) {
+				value = component.GetLightMapMaterialName();
+			}
+		>("lightmapMaterial","",AttributeSpecializationType::File);
+		auto &metaData = memberInfo.AddMetaData();
+		metaData["assetType"] = "material";
+		metaData["rootPath"] = util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Material)).GetString();
+		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::Material,pragma::asset::FormatType::All);
+		metaData["stripRootPath"] = true;
+		metaData["stripExtension"] = true;
+		registerMember(std::move(memberInfo));
+	}
 }
 CLightMapComponent::CLightMapComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_lightMapExposure{util::FloatProperty::Create(0.f)}
@@ -72,10 +94,16 @@ void CLightMapComponent::Initialize()
 void CLightMapComponent::InitializeLightMapData(
 	const std::shared_ptr<prosper::Texture> &lightMap,
 	const std::shared_ptr<prosper::IDynamicResizableBuffer> &lightMapUvBuffer,
-	const std::vector<std::shared_ptr<prosper::IBuffer>> &meshUvBuffers
+	const std::vector<std::shared_ptr<prosper::IBuffer>> &meshUvBuffers,
+	const std::shared_ptr<prosper::Texture> &directionalLightmap,
+	bool keepCurrentTextures
 )
 {
-	m_lightMapAtlas = lightMap;
+	if(!keepCurrentTextures)
+	{
+		m_textures[umath::to_integral(Texture::DiffuseMap)] = lightMap;
+		m_textures[umath::to_integral(Texture::DominantDirectionMap)] = directionalLightmap;
+	}
 	m_meshLightMapUvBuffer = lightMapUvBuffer;
 	m_meshLightMapUvBuffers = meshUvBuffers;
 
@@ -96,24 +124,88 @@ void CLightMapComponent::InitializeLightMapData(
 	CRasterizationRendererComponent::UpdateLightmap(*this);
 }
 
+const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetTexture(Texture tex) const
+{
+	return m_textures[umath::to_integral(tex)];
+}
+
+void CLightMapComponent::InitializeFromMaterial()
+{
+	for(auto &tex : m_textures)
+		tex = nullptr;
+	m_lightMapMaterial = {};
+	if(m_lightMapMaterialName.empty())
+		return;
+	auto *mat = client->LoadMaterial(m_lightMapMaterialName);
+	if(!mat)
+		return;
+	m_lightMapMaterial = mat->GetHandle();
+	auto getTexture = [this](const std::string &identifier) -> std::shared_ptr<prosper::Texture> {
+		if(!m_lightMapMaterial)
+			return nullptr;
+		auto *map = m_lightMapMaterial->GetTextureInfo(identifier);
+		if(!map)
+			return nullptr;
+		auto *tex = static_cast<::Texture*>(map->texture.get());
+		return tex->GetVkTexture();
+	};
+	m_textures[umath::to_integral(Texture::DiffuseMap)] = getTexture("diffuse_map");
+	m_textures[umath::to_integral(Texture::DiffuseDirectMap)] = getTexture("diffuse_direct_map");
+	m_textures[umath::to_integral(Texture::DiffuseIndirectMap)] = getTexture("diffuse_indirect_map");
+	m_textures[umath::to_integral(Texture::DominantDirectionMap)] = getTexture("dominant_direction_map");
+
+	pragma::CRasterizationRendererComponent::UpdateLightmap(*this);
+}
+
 void CLightMapComponent::SetLightMapAtlas(const std::shared_ptr<prosper::Texture> &lightMap)
 {
-	m_lightMapAtlas = lightMap;
+	m_textures[umath::to_integral(Texture::DiffuseMap)] = lightMap;
 
 	// TODO: This method only allows one lightmap atlas globally; Implement this in a way that allows multiple (maybe add to entity descriptor set?)!
 	pragma::CRasterizationRendererComponent::UpdateLightmap(*this);
 }
-const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetLightMapAtlas() const {return m_lightMapAtlas;}
+const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetLightMapAtlas() const {return m_textures[umath::to_integral(Texture::DiffuseMap)];}
+void CLightMapComponent::SetDirectionalLightMapAtlas(const std::shared_ptr<prosper::Texture> &lightMap)
+{
+	m_textures[umath::to_integral(Texture::DominantDirectionMap)] = lightMap;
+
+	// TODO: This method only allows one lightmap atlas globally; Implement this in a way that allows multiple (maybe add to entity descriptor set?)!
+	pragma::CRasterizationRendererComponent::UpdateLightmap(*this);
+}
+const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetDirectionalLightMapAtlas() const {return m_textures[umath::to_integral(Texture::DominantDirectionMap)];}
+
+bool CLightMapComponent::HasValidLightMap() const
+{
+	return m_textures[umath::to_integral(Texture::DiffuseMap)] != nullptr ||
+		m_textures[umath::to_integral(Texture::DiffuseDirectMap)];
+}
+
+void CLightMapComponent::SetLightMapMaterial(const std::string &matName)
+{
+	m_lightMapMaterialName = matName;
+	client->PrecacheMaterial(m_lightMapMaterialName);
+	if(GetEntity().IsSpawned())
+		InitializeFromMaterial();
+}
+
+const std::string &CLightMapComponent::GetLightMapMaterialName() const {return m_lightMapMaterialName;}
+
+void CLightMapComponent::OnEntitySpawn()
+{
+	BaseEntityComponent::OnEntitySpawn();
+	InitializeFromMaterial();
+}
 
 void CLightMapComponent::ReloadLightMapData()
 {
 	std::vector<std::shared_ptr<prosper::IBuffer>> buffers {};
 	auto globalLightmapUvBuffer = pragma::CLightMapComponent::GenerateLightmapUVBuffers(buffers);
-	InitializeLightMapData(m_lightMapAtlas,globalLightmapUvBuffer,buffers);
+	InitializeLightMapData(nullptr,globalLightmapUvBuffer,buffers,nullptr,true);
 	UpdateLightmapUvBuffers();
 }
 
-const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetLightMap() const {return m_lightMapAtlas;}
+const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetLightMap() const {return m_textures[umath::to_integral(Texture::DiffuseMap)];}
+const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetDirectionalLightMap() const {return m_textures[umath::to_integral(Texture::DominantDirectionMap)];}
 
 prosper::IBuffer *CLightMapComponent::GetMeshLightMapUvBuffer(uint32_t meshIdx) const
 {
@@ -431,14 +523,14 @@ static void generate_lightmaps(
 		Con::cwar<<"WARNING: Unable to initialize cycles scene for lightmap baking!"<<Con::endl;
 		return;
 	}
-	job.SetCompletionHandler([hdrOutput](util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> &worker) {
+	job.SetCompletionHandler([hdrOutput](util::ParallelWorker<uimg::ImageLayerSet> &worker) {
 		if(worker.IsSuccessful() == false)
 		{
 			Con::cwar<<"WARNING: Unable to bake lightmaps: "<<worker.GetResultMessage()<<Con::endl;
 			return;
 		}
 
-		auto imgBuffer = worker.GetResult();
+		auto imgBuffer = worker.GetResult().images.begin()->second;
 		if(hdrOutput == false)
 		{
 			// No HDR output, but we'll still use HDR data

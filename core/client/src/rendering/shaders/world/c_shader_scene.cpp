@@ -75,6 +75,14 @@ decltype(ShaderScene::DESCRIPTOR_SET_RENDERER) ShaderScene::DESCRIPTOR_SET_RENDE
 		prosper::DescriptorSetInfo::Binding { // Light Map
 			prosper::DescriptorType::CombinedImageSampler,
 			prosper::ShaderStageFlags::FragmentBit
+		},
+		prosper::DescriptorSetInfo::Binding { // Indirect Light Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
+		},
+		prosper::DescriptorSetInfo::Binding { // Directional Light Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };

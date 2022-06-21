@@ -74,7 +74,7 @@ void CPBRConverterComponent::ProcessQueue()
 		return;
 	auto hMat = item.hMaterial;
 	auto hMdl = item.hModel;
-	item.job.SetCompletionHandler([this,hMat,hMdl](util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> &worker) {
+	item.job.SetCompletionHandler([this,hMat,hMdl](util::ParallelWorker<uimg::ImageLayerSet> &worker) {
 		if(worker.IsSuccessful() == false)
 		{
 			Con::cwar<<"WARNING: Generating ambient occlusion map failed: "<<worker.GetResultMessage()<<Con::endl;
@@ -82,7 +82,7 @@ void CPBRConverterComponent::ProcessQueue()
 		}
 		if(hMat == nullptr || hMdl.expired())
 			return;
-		auto imgBuffer = worker.GetResult();
+		auto imgBuffer = worker.GetResult().images.begin()->second;
 		WriteAOMap(*hMdl.get(),static_cast<CMaterial&>(*hMat.get()),*imgBuffer,imgBuffer->GetWidth(),imgBuffer->GetHeight());
 	});
 	item.job.Start();

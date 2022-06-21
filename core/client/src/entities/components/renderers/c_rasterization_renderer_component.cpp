@@ -91,7 +91,7 @@ void CRasterizationRendererComponent::InitializeLuaObject(lua_State *l) {return 
 static pragma::ComponentHandle<pragma::CLightMapComponent> g_lightmapC = {};
 void CRasterizationRendererComponent::UpdateLightmap(CLightMapComponent &lightMapC)
 {
-	if(!lightMapC.GetLightMap())
+	if(!lightMapC.HasValidLightMap())
 		return;
 	for(auto &renderer : EntityCIterator<CRasterizationRendererComponent>{*c_game})
 		renderer.SetLightMap(lightMapC);
@@ -306,7 +306,9 @@ bool CRasterizationRendererComponent::ReloadRenderTarget(uint32_t width,uint32_t
 	}
 	auto &dummyTex = c_engine->GetRenderContext().GetDummyTexture();
 	auto &ds = *m_descSetGroupRenderer->GetDescriptorSet();
-	ds.SetBindingTexture(*dummyTex,umath::to_integral(pragma::ShaderScene::RendererBinding::LightMap));
+	ds.SetBindingTexture(*dummyTex,umath::to_integral(pragma::ShaderScene::RendererBinding::LightMapDiffuse));
+	ds.SetBindingTexture(*dummyTex,umath::to_integral(pragma::ShaderScene::RendererBinding::LightMapDiffuseIndirect));
+	ds.SetBindingTexture(*dummyTex,umath::to_integral(pragma::ShaderScene::RendererBinding::LightMapDominantDirection));
 
 	m_lightMapInfo.lightMapTexture = nullptr;
 	if(g_lightmapC.expired() == false)
@@ -495,10 +497,20 @@ void CRasterizationRendererComponent::UpdateFrustumPlanes(pragma::CSceneComponen
 void CRasterizationRendererComponent::SetLightMap(pragma::CLightMapComponent &lightMapC)
 {
 	m_rendererData.lightmapExposurePow = lightMapC.CalcLightMapPowExposurePow();
-	if(m_lightMapInfo.lightMapComponent.get() == &lightMapC && lightMapC.GetLightMap() == m_lightMapInfo.lightMapTexture)
-		return;
+	/*if(
+		m_lightMapInfo.lightMapComponent.get() == &lightMapC &&
+		lightMapC.GetLightMap() == m_lightMapInfo.lightMapTexture &&
+		lightMapC.GetDirectionalLightMap() == m_lightMapInfo.directionalLightMapTexture
+	)
+		return;*/
+	m_lightMapInfo.lightMapTexture = lightMapC.GetTexture(pragma::CLightMapComponent::Texture::DiffuseMap);
+	if(!m_lightMapInfo.lightMapTexture)
+	{
+		m_lightMapInfo.lightMapTexture = lightMapC.GetTexture(pragma::CLightMapComponent::Texture::DiffuseDirectMap);
+		m_lightMapInfo.lightMapIndirectTexture = lightMapC.GetTexture(pragma::CLightMapComponent::Texture::DiffuseIndirectMap);
+		m_lightMapInfo.lightMapDominantDirectionTexture = lightMapC.GetTexture(pragma::CLightMapComponent::Texture::DominantDirectionMap);
+	}
 	m_lightMapInfo.lightMapComponent = lightMapC.GetHandle<CLightMapComponent>();
-	m_lightMapInfo.lightMapTexture = lightMapC.GetLightMap();
 	if(m_lightMapInfo.cbExposure.IsValid())
 		m_lightMapInfo.cbExposure.Remove();
 	m_lightMapInfo.cbExposure = lightMapC.GetLightMapExposureProperty()->AddCallback([this,&lightMapC](std::reference_wrapper<const float> oldValue,std::reference_wrapper<const float> newValue) {
@@ -507,9 +519,27 @@ void CRasterizationRendererComponent::SetLightMap(pragma::CLightMapComponent &li
 	if(m_lightMapInfo.lightMapTexture == nullptr)
 		return;
 	auto &ds = *m_descSetGroupRenderer->GetDescriptorSet();
-	ds.SetBindingTexture(*m_lightMapInfo.lightMapTexture,umath::to_integral(pragma::ShaderScene::RendererBinding::LightMap));
+
+	auto &dummyTex = c_engine->GetRenderContext().GetDummyTexture();
+	auto getTex = [&dummyTex](const std::shared_ptr<prosper::Texture> &tex) {
+		return tex ? tex : dummyTex;
+	};
+	ds.SetBindingTexture(
+		*getTex(m_lightMapInfo.lightMapTexture),
+		umath::to_integral(pragma::ShaderScene::RendererBinding::LightMapDiffuse)
+	);
+	ds.SetBindingTexture(
+		*getTex(m_lightMapInfo.lightMapIndirectTexture),
+		umath::to_integral(pragma::ShaderScene::RendererBinding::LightMapDiffuseIndirect)
+	);
+	ds.SetBindingTexture(
+		*getTex(m_lightMapInfo.lightMapDominantDirectionTexture),
+		umath::to_integral(pragma::ShaderScene::RendererBinding::LightMapDominantDirection)
+	);
 }
 const pragma::ComponentHandle<pragma::CLightMapComponent> &CRasterizationRendererComponent::GetLightMap() const {return m_lightMapInfo.lightMapComponent;}
+bool CRasterizationRendererComponent::HasIndirectLightmap() const {return m_lightMapInfo.lightMapIndirectTexture != nullptr;}
+bool CRasterizationRendererComponent::HasDirectionalLightmap() const {return m_lightMapInfo.lightMapDominantDirectionTexture != nullptr;}
 
 void CRasterizationRendererComponent::ReloadPresentationRenderTarget()
 {

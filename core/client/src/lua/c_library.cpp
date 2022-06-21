@@ -72,7 +72,7 @@
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CEngine *c_engine;
-
+#pragma optimize("",off)
 static void register_gui(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();
@@ -969,7 +969,7 @@ static luabind::object load_image(lua_State *l,const std::string &fileName)
 	return load_image(l,fileName,false);
 }
 
-static util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> capture_raytraced_screenshot(lua_State *l,uint32_t width,uint32_t height,uint32_t samples,bool hdrOutput,bool denoise)
+static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua_State *l,uint32_t width,uint32_t height,uint32_t samples,bool hdrOutput,bool denoise)
 {
 	pragma::rendering::cycles::RenderImageInfo renderImgInfo {};
 	auto *pCam = c_game->GetRenderCamera();
@@ -989,15 +989,15 @@ static util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> capture_raytraced_s
 	sceneInfo.hdrOutput = hdrOutput;
 	return pragma::rendering::cycles::render_image(*client,sceneInfo,renderImgInfo);
 }
-static util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> capture_raytraced_screenshot(lua_State *l,uint32_t width,uint32_t height,uint32_t samples,bool hdrOutput)
+static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua_State *l,uint32_t width,uint32_t height,uint32_t samples,bool hdrOutput)
 {
 	return capture_raytraced_screenshot(l,width,height,samples,hdrOutput,true);
 }
-static util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> capture_raytraced_screenshot(lua_State *l,uint32_t width,uint32_t height,uint32_t samples)
+static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua_State *l,uint32_t width,uint32_t height,uint32_t samples)
 {
 	return capture_raytraced_screenshot(l,width,height,samples,false,true);
 }
-static util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> capture_raytraced_screenshot(lua_State *l,uint32_t width,uint32_t height)
+static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua_State *l,uint32_t width,uint32_t height)
 {
 	return capture_raytraced_screenshot(l,width,height,1'024,false,true);
 }
@@ -1026,10 +1026,10 @@ void CGame::RegisterLuaLibraries()
 		luabind::def("load_image",static_cast<luabind::object(*)(lua_State*,const std::string&,bool,uimg::Format)>(load_image)),
 		luabind::def("load_image",static_cast<luabind::object(*)(lua_State*,const std::string&,bool)>(load_image)),
 		luabind::def("load_image",static_cast<luabind::object(*)(lua_State*,const std::string&)>(load_image)),
-		luabind::def("capture_raytraced_screenshot",static_cast<util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>(*)(lua_State*,uint32_t,uint32_t,uint32_t,bool,bool)>(capture_raytraced_screenshot)),
-		luabind::def("capture_raytraced_screenshot",static_cast<util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>(*)(lua_State*,uint32_t,uint32_t,uint32_t,bool)>(capture_raytraced_screenshot)),
-		luabind::def("capture_raytraced_screenshot",static_cast<util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>(*)(lua_State*,uint32_t,uint32_t,uint32_t)>(capture_raytraced_screenshot)),
-		luabind::def("capture_raytraced_screenshot",static_cast<util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>(*)(lua_State*,uint32_t,uint32_t)>(capture_raytraced_screenshot)),
+		luabind::def("capture_raytraced_screenshot",static_cast<util::ParallelJob<uimg::ImageLayerSet>(*)(lua_State*,uint32_t,uint32_t,uint32_t,bool,bool)>(capture_raytraced_screenshot)),
+		luabind::def("capture_raytraced_screenshot",static_cast<util::ParallelJob<uimg::ImageLayerSet>(*)(lua_State*,uint32_t,uint32_t,uint32_t,bool)>(capture_raytraced_screenshot)),
+		luabind::def("capture_raytraced_screenshot",static_cast<util::ParallelJob<uimg::ImageLayerSet>(*)(lua_State*,uint32_t,uint32_t,uint32_t)>(capture_raytraced_screenshot)),
+		luabind::def("capture_raytraced_screenshot",static_cast<util::ParallelJob<uimg::ImageLayerSet>(*)(lua_State*,uint32_t,uint32_t)>(capture_raytraced_screenshot)),
 		luabind::def("cubemap_to_equirectangular_texture",static_cast<luabind::object(*)(lua_State*,prosper::Texture&)>([](lua_State *l,prosper::Texture &cubemap) -> luabind::object {
 			auto *shader = static_cast<pragma::ShaderCubemapToEquirectangular*>(c_engine->GetShader("cubemap_to_equirectangular").get());
 			if(shader == nullptr)
@@ -1381,3 +1381,4 @@ void CGame::RegisterLuaLibraries()
 		)
 	];
 }
+#pragma optimize("",on)

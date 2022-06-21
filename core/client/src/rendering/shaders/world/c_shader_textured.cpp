@@ -491,8 +491,7 @@ bool ShaderGameWorldLightingPass::GetRenderBufferTargets(
 	if(ShaderEntity::GetRenderBufferTargets(mesh,pipelineIdx,outBuffers,outOffsets,outIndexBufferInfo) == false)
 		return false;
 	auto &sceneMesh = mesh.GetSceneMesh();
-	auto *lightmapUvBuf = sceneMesh->GetLightmapUvBuffer().get();
-	outBuffers.push_back(lightmapUvBuf);
+	outBuffers.push_back(nullptr); // Lightmap uv buffer is instance-based and handled by the model entity component
 	outOffsets.push_back(0ull);
 	return true;
 }

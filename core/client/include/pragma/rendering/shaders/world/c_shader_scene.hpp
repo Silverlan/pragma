@@ -49,7 +49,9 @@ namespace pragma
 		{
 			Renderer = 0u,
 			SSAOMap,
-			LightMap
+			LightMapDiffuse,
+			LightMapDiffuseIndirect,
+			LightMapDominantDirection
 		};
 
 		enum class RenderSettingsBinding : uint32_t
@@ -213,7 +215,9 @@ namespace pragma
 			AlphaTest = RenderAs3DSky<<1u,
 			LightmapsEnabled = AlphaTest<<1u,
 			NoIBL = LightmapsEnabled<<1u,
-			DisableShadows = NoIBL<<1u
+			DisableShadows = NoIBL<<1u,
+			IndirectLightmapsEnabled = DisableShadows<<1u,
+			DirectionalLightmapsEnabled = IndirectLightmapsEnabled<<1u
 		};
 		enum class GameShaderType : uint8_t
 		{

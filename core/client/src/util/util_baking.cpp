@@ -14,6 +14,7 @@
 #include "pragma/entities/environment/lights/env_light_spot.h"
 #include "pragma/entities/environment/lights/env_light_point.h"
 #include "pragma/entities/environment/lights/env_light_directional.h"
+#include <mathutil/umath_geometry.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_image.hpp>
@@ -26,41 +27,32 @@
 
 extern DLLCLIENT CEngine *c_engine;
 #pragma optimize("",off)
-struct LightSource
+static double calc_light_luminance(
+	const util::baking::LightSource &light,const Vector3 &pos,const Vector3 &n,
+	const Vector3 &p0,const Vector3 &p1,const Vector3 &p2
+)
 {
-	enum class Type : uint8_t
-	{
-		Point = 0,
-		Spot,
-		Directional
-	};
-	Vector3 position;
-	Vector3 direction;
-	umath::Degree innerConeAngle;
-	umath::Degree outerConeAngle;
-	Candela intensity;
-	float radius;
-	Vector3 color;
-	Type type;
-};
-
-static double calc_light_luminance(const LightSource &light,const Vector3 &pos)
-{
+	Vector3 planeNormal;
+	float planeDist;
+	uvec::calc_plane(p0,p1,p2,planeNormal,planeDist);
+	auto side = umath::geometry::get_side_of_point_to_plane(planeNormal,planeDist,light.position);
+	if(side == umath::geometry::PlaneSide::Back)
+		return 0.0;
 	Candela intensity;
 	switch(light.type)
 	{
-	case LightSource::Type::Spot:
+	case util::baking::LightSource::Type::Spot:
 		intensity = ::pragma::BaseEnvLightSpotComponent::CalcIntensityAtPoint(
-			light.position,light.radius,light.intensity,light.direction,
+			light.position,light.intensity,light.direction,
 			light.outerConeAngle,light.innerConeAngle,pos
 		);
 		break;
-	case LightSource::Type::Point:
+	case util::baking::LightSource::Type::Point:
 		intensity = ::pragma::BaseEnvLightPointComponent::CalcIntensityAtPoint(
-			light.position,light.radius,light.intensity,pos
+			light.position,light.intensity,pos
 		);
 		break;
-	case LightSource::Type::Directional:
+	case util::baking::LightSource::Type::Directional:
 		intensity = ::pragma::BaseEnvLightDirectionalComponent::CalcIntensityAtPoint(
 			light.intensity,pos
 		);
@@ -68,12 +60,12 @@ static double calc_light_luminance(const LightSource &light,const Vector3 &pos)
 	}
 	return ulighting::srgb_to_luminance(light.color *intensity);
 }
-static Vector3 calc_light_direction_to_point(const LightSource &light,const Vector3 &pos)
+static Vector3 calc_light_direction_to_point(const util::baking::LightSource &light,const Vector3 &pos)
 {
 	switch(light.type)
 	{
-	case LightSource::Type::Spot:
-	case LightSource::Type::Point:
+	case util::baking::LightSource::Type::Spot:
+	case util::baking::LightSource::Type::Point:
 	{
 		auto n = pos -light.position;
 		auto l = uvec::length(n);
@@ -83,20 +75,23 @@ static Vector3 calc_light_direction_to_point(const LightSource &light,const Vect
 			n = uvec::UP;
 		return n;
 	}
-	case LightSource::Type::Directional:
+	case util::baking::LightSource::Type::Directional:
 		return light.direction;
 	}
 	return uvec::UP;
 }
 
-static std::vector<float> calc_light_weights(const std::vector<LightSource> &lights,const Vector3 &pos)
+static std::vector<float> calc_light_weights(
+	const std::vector<util::baking::LightSource> &lights,const Vector3 &pos,const Vector3 &n,
+	const Vector3 &p0,const Vector3 &p1,const Vector3 &p2
+)
 {
 	std::vector<float> weights;
 	weights.resize(lights.size());
 	float weightSum = 0.f;
 	for(uint32_t idx = 0; auto &l : lights)
 	{
-		auto weight = calc_light_luminance(l,pos);
+		auto weight = calc_light_luminance(l,pos,n,p0,p1,p2);
 		weights[idx] = weight;
 		weightSum += weight;
 		++idx;
@@ -109,7 +104,7 @@ static std::vector<float> calc_light_weights(const std::vector<LightSource> &lig
 	return weights;
 }
 
-static Vector3 calc_dominant_light_direction(const std::vector<LightSource> &lights,const std::vector<float> &weights,const Vector3 &pos)
+static Vector3 calc_dominant_light_direction(const std::vector<util::baking::LightSource> &lights,const std::vector<float> &weights,const Vector3 &pos)
 {
 	Vector3 n {};
 	for(uint32_t i=0;auto &l : lights)
@@ -124,14 +119,21 @@ static Vector3 calc_dominant_light_direction(const std::vector<LightSource> &lig
 	return n;
 }
 
-static Vector3 triangle_point_normal(const Vector3 &v0,const Vector3 &v1,const Vector3 &v2, float u, float v)
+static Vector3 triangle_point(const Vector3 &v0,const Vector3 &v1,const Vector3 &v2, float u, float v)
 {
 	float t = 1.0f -u -v;
 	return (u *v0 +v *v1 +t *v2);
 }
+static Vector3 triangle_normal(const Vector3 &n0,const Vector3 &n1,const Vector3 &n2, float u, float v)
+{
+	float t = 1.0f -u -v;
+	auto n = (u *n0 +v *n1 +t *n2);
+	uvec::normalize(&n);
+	return n;
+}
 static void generate_sh_normals(
 	const std::vector<util::baking::BakePixel> &bps,
-	const std::vector<LightSource> &lights,
+	const std::vector<util::baking::LightSource> &lights,
 	const std::vector<std::shared_ptr<ModelSubMesh>> meshes,
 	Vector3 *outNormals
 )
@@ -164,14 +166,20 @@ static void generate_sh_normals(
 			auto dvdx = bp.dv_dx;
 			auto dvdy = bp.dv_dy;
 
-			auto p = triangle_point_normal(
-				mesh->GetVertexPosition(indices[0]),
-				mesh->GetVertexPosition(indices[1]),
-				mesh->GetVertexPosition(indices[2]),
+			auto p0 = mesh->GetVertexPosition(indices[0]);
+			auto p1 = mesh->GetVertexPosition(indices[1]);
+			auto p2 = mesh->GetVertexPosition(indices[2]);
+			auto p = triangle_point(
+				p0,p1,p2,
 				uv.x,uv.y
 			);
-
-			auto weights = calc_light_weights(lights,p);
+			auto n = triangle_normal(
+				mesh->GetVertexNormal(indices[0]),
+				mesh->GetVertexNormal(indices[1]),
+				mesh->GetVertexNormal(indices[2]),
+				uv.x,uv.y
+			);
+			auto weights = calc_light_weights(lights,p,n,p0,p1,p2);
 			auto dir = calc_dominant_light_direction(lights,weights,p);
 			outNormals[idx] = dir;
 		}
@@ -186,13 +194,21 @@ static void generate_sh_normals(
 
 static std::shared_ptr<uimg::ImageBuffer> generate_sh_normal_map(
 	const std::vector<util::baking::BakePixel> &bps,
-	const std::vector<LightSource> &lights,
+	const std::vector<util::baking::LightSource> &lights,
 	const std::vector<std::shared_ptr<ModelSubMesh>> meshes,
 	uint32_t width,uint32_t height
 )
 {
 	auto imgBuf = uimg::ImageBuffer::Create(width,height,uimg::Format::RGB32);
 	generate_sh_normals(bps,lights,meshes,static_cast<Vector3*>(imgBuf->GetData()));
+	/*auto f = filemanager::open_file("test_nm.png",filemanager::FileMode::Write | filemanager::FileMode::Binary);
+	if(f)
+	{
+		auto tmp = imgBuf->Copy();
+		fsys::File fp {f};
+		uimg::save_image(fp,*tmp,uimg::ImageFormat::PNG);
+	}
+	f = nullptr;*/
 
 	auto *n = static_cast<Vector3*>(imgBuf->GetData());
 	auto numPixels = imgBuf->GetPixelCount();
@@ -214,27 +230,6 @@ static std::shared_ptr<uimg::ImageBuffer> generate_sh_normal_map(
 #include "pragma/entities/environment/lights/c_env_light_point.h"
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/components/c_radius_component.hpp"
-
-/*using PRenderer = std::shared_ptr<Renderer>;
-class RenderWorker
-	: public util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>>
-{
-public:
-	friend Renderer;
-	RenderWorker(Renderer &renderer);
-	using util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>>::Cancel;
-	virtual void Wait() override;
-	virtual std::shared_ptr<uimg::ImageBuffer> GetResult() override;
-
-	using util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>>::SetResultMessage;
-	using util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>>::AddThread;
-	using util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>>::UpdateProgress;
-private:
-	virtual void DoCancel(const std::string &resultMsg,std::optional<int32_t> resultCode) override;
-	PRenderer m_renderer = nullptr;
-	template<typename TJob,typename... TARGS>
-		friend util::ParallelJob<typename TJob::RESULT_TYPE> util::create_parallel_job(TARGS&& ...args);
-};*/
 
 util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> util::baking::bake_directional_lightmap_atlas(
 	const std::vector<::pragma::CLightComponent*> &lights,
@@ -334,9 +329,6 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> util::baking::bake_directi
 		auto col = l->GetEntity().GetColor();
 		ld.color = col.has_value() ? col->ToVector3() : Color::White.ToVector3();
 		ld.intensity = l->GetLightIntensityCandela();
-
-		auto radiusC = l->GetEntity().GetComponent<::pragma::CRadiusComponent>();
-		ld.radius = radiusC.valid() ? radiusC->GetRadius() : 0.f;
 
 		auto spotC = l->GetEntity().GetComponent<::pragma::CLightSpotComponent>();
 		if(spotC.valid())

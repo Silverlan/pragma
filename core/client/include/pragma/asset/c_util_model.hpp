@@ -122,7 +122,7 @@ namespace pragma::asset
 		AOJobReady
 	};
 	DLLCLIENT AOResult generate_ambient_occlusion(
-		Model &mdl,Material &mat,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &outJob,std::string &outErrMsg,bool forceRebuild=false,uint32_t aoResolution=512,
+		Model &mdl,Material &mat,util::ParallelJob<uimg::ImageLayerSet> &outJob,std::string &outErrMsg,bool forceRebuild=false,uint32_t aoResolution=512,
 		uint32_t aoSamples=40,pragma::rendering::cycles::SceneInfo::DeviceType aoDevice=pragma::rendering::cycles::SceneInfo::DeviceType::CPU
 	);
 

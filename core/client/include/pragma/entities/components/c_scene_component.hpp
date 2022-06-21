@@ -164,7 +164,12 @@ namespace pragma
 		Unlit,
 		CsmShowCascades,
 		ShadowMapDepth,
-		ForwardPlusHeatmap
+		ForwardPlusHeatmap,
+		Specular,
+		IndirectLightmap,
+		DirectionalLightmap,
+
+		Count
 	};
 	class DLLCLIENT CSceneComponent final
 		: public BaseEntityComponent

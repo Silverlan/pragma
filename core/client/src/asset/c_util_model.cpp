@@ -1669,7 +1669,7 @@ class ModelAOWorker
 	: public util::ParallelWorker<pragma::asset::ModelAOWorkerResult>
 {
 public:
-	ModelAOWorker(const std::vector<util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>> &matAoJobs)
+	ModelAOWorker(const std::vector<util::ParallelJob<uimg::ImageLayerSet>> &matAoJobs)
 		: m_matAoJobs{matAoJobs}
 	{
 		AddThread([this]() {
@@ -1711,7 +1711,7 @@ public:
 private:
 	template<typename TJob,typename... TARGS>
 		friend util::ParallelJob<typename TJob::RESULT_TYPE> util::create_parallel_job(TARGS&& ...args);
-	std::vector<util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>> m_matAoJobs {};
+	std::vector<util::ParallelJob<uimg::ImageLayerSet>> m_matAoJobs {};
 	pragma::asset::ModelAOWorkerResult m_result {};
 };
 std::optional<util::ParallelJob<pragma::asset::ModelAOWorkerResult>> pragma::asset::generate_ambient_occlusion(
@@ -1719,7 +1719,7 @@ std::optional<util::ParallelJob<pragma::asset::ModelAOWorkerResult>> pragma::ass
 	uint32_t aoSamples,pragma::rendering::cycles::SceneInfo::DeviceType aoDevice
 )
 {
-	std::vector<util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>> aoJobs {};
+	std::vector<util::ParallelJob<uimg::ImageLayerSet>> aoJobs {};
 	std::unordered_set<std::string> builtRMAs {};
 	auto &materials = mdl.GetMaterials();
 	aoJobs.reserve(materials.size());
@@ -1733,7 +1733,7 @@ std::optional<util::ParallelJob<pragma::asset::ModelAOWorkerResult>> pragma::ass
 		if(builtRMAs.find(rmaMap->name) != builtRMAs.end())
 			continue; // AO has already been built (maybe by a different skin material)
 		builtRMAs.insert(rmaMap->name);
-		util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> aoJob {};
+		util::ParallelJob<uimg::ImageLayerSet> aoJob {};
 		auto eResult = generate_ambient_occlusion(mdl,*mat.get(),aoJob,outErrMsg,forceRebuild,aoResolution,aoSamples,aoDevice);
 		if(eResult != AOResult::AOJobReady)
 			continue;
@@ -1791,7 +1791,7 @@ template<class T>
 }
 
 pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(
-	Model &mdl,Material &mat,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &outJob,std::string &outErrMsg,bool forceRebuild,uint32_t aoResolution,
+	Model &mdl,Material &mat,util::ParallelJob<uimg::ImageLayerSet> &outJob,std::string &outErrMsg,bool forceRebuild,uint32_t aoResolution,
 	uint32_t aoSamples,pragma::rendering::cycles::SceneInfo::DeviceType aoDevice
 )
 {
@@ -1856,7 +1856,7 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(
 	}
 
 	auto hMat = mat.GetHandle();
-	outJob.SetCompletionHandler([rmaPath,hMat](::util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> &worker) mutable {
+	outJob.SetCompletionHandler([rmaPath,hMat](::util::ParallelWorker<uimg::ImageLayerSet> &worker) mutable {
 		auto *shaderComposeRMA = static_cast<pragma::ShaderComposeRMA*>(c_engine->GetShader("compose_rma").get());
 		if(worker.IsSuccessful() == false)
 			return;
@@ -1870,7 +1870,7 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(
 			worker.SetStatus(util::JobStatus::Failed,"Shader is not valid!");
 			return;
 		}
-		auto aoImg = worker.GetResult();
+		auto aoImg = worker.GetResult().images.begin()->second;
 		std::string errMsg;
 		auto result = save_ambient_occlusion<uimg::ImageBuffer>(*hMat.get(),rmaPath,*aoImg,errMsg);
 		if(result == false)

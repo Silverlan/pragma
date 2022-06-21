@@ -419,7 +419,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		auto job = pragma::rendering::cycles::render_image(*client,sceneInfo,renderImgInfo);
 		if(job.IsValid())
 		{
-			job.SetCompletionHandler([format,quality,toneMapping](util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> &worker) {
+			job.SetCompletionHandler([format,quality,toneMapping](util::ParallelWorker<uimg::ImageLayerSet> &worker) {
 				if(worker.IsSuccessful() == false)
 				{
 					Con::cwar<<"WARNING: Raytraced screenshot failed: "<<worker.GetResultMessage()<<Con::endl;
@@ -434,7 +434,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 					Con::cwar<<"WARNING: Unable to open file '"<<path<<"' for writing!"<<Con::endl;
 					return;
 				}
-				auto imgBuffer = worker.GetResult();
+				auto imgBuffer = worker.GetResult().images.begin()->second;
 				if(imgBuffer->IsHDRFormat())
 					imgBuffer = imgBuffer->ApplyToneMapping(toneMapping);
 				fsys::File f {fp};

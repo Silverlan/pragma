@@ -92,6 +92,9 @@ namespace pragma
 
 		bool IsDepthPrepassEnabled() const;
 		void SetDepthPrepassEnabled(bool enabled);
+
+		void SetLightmapUvBuffer(const CModelSubMesh &mesh,const std::shared_ptr<prosper::IBuffer> &buffer);
+		std::shared_ptr<prosper::IBuffer> GetLightmapUvBuffer(const CModelSubMesh &mesh) const;
 		
 		void UpdateRenderMeshes();
 		void ReloadRenderBufferList(bool immediate=false);
@@ -102,6 +105,7 @@ namespace pragma
 		virtual void OnModelChanged(const std::shared_ptr<Model> &model) override;
 		void UpdateRenderBufferList();
 
+		std::unordered_map<const CModelSubMesh*,std::shared_ptr<prosper::IBuffer>> m_lightmapUvBuffers {};
 		std::vector<msys::MaterialHandle> m_materialOverrides = {};
 		uint32_t m_lod = 0u;
 		float m_tNextLodUpdate = 0.f;

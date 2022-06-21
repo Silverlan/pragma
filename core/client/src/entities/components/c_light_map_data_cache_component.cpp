@@ -78,7 +78,7 @@ void CLightMapDataCacheComponent::InitializeUvBuffers()
 			{
 				// lightMapC->SetLightMapIntensity(worldData.GetLightMapIntensity());
 				// lightMapC->SetLightMapExposure(worldData.GetLightMapExposure());
-				lightMapC->InitializeLightMapData(lightMapC->GetLightMapAtlas(),globalLightmapUvBuffer,buffers);
+				lightMapC->InitializeLightMapData(nullptr,globalLightmapUvBuffer,buffers,nullptr,true);
 				auto *scene = c_game->GetRenderScene();
 				if(scene)
 					scene->SetLightMap(*lightMapC);

@@ -148,6 +148,8 @@ namespace pragma
 					cbExposure.Remove();
 			}
 			std::shared_ptr<prosper::Texture> lightMapTexture = nullptr;
+			std::shared_ptr<prosper::Texture> lightMapIndirectTexture = nullptr;
+			std::shared_ptr<prosper::Texture> lightMapDominantDirectionTexture = nullptr;
 			ComponentHandle<pragma::CLightMapComponent> lightMapComponent {};
 			CallbackHandle cbExposure {};
 		};
@@ -166,6 +168,8 @@ namespace pragma
 
 		void SetLightMap(pragma::CLightMapComponent &lightMapC);
 		const ComponentHandle<pragma::CLightMapComponent> &GetLightMap() const;
+		bool HasIndirectLightmap() const;
+		bool HasDirectionalLightmap() const;
 
 		void SetShaderOverride(const std::string &srcShader,const std::string &shaderOverride);
 		pragma::ShaderGameWorldLightingPass *GetShaderOverride(pragma::ShaderGameWorldLightingPass *srcShader) const;

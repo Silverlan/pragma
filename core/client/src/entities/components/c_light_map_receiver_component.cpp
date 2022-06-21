@@ -221,9 +221,8 @@ void CLightMapReceiverComponent::UpdateMeshLightmapUvBuffers(CLightMapComponent 
 	{
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
-			auto &sceneMesh = static_cast<CModelSubMesh*>(subMesh.get())->GetSceneMesh();
 			auto bufIdx = FindBufferIndex(*static_cast<CModelSubMesh*>(subMesh.get()));
-			if(bufIdx.has_value() == false || sceneMesh == nullptr)
+			if(bufIdx.has_value() == false)
 				continue;
 			auto *pUvBuffer = lightMapC.GetMeshLightMapUvBuffer(*bufIdx);
 			prosper::IBuffer *pLightMapUvBuffer = nullptr;
@@ -231,7 +230,7 @@ void CLightMapReceiverComponent::UpdateMeshLightmapUvBuffers(CLightMapComponent 
 				pLightMapUvBuffer = pUvBuffer;
 			else
 				pLightMapUvBuffer = c_engine->GetRenderContext().GetDummyBuffer().get();
-			sceneMesh->SetLightmapUvBuffer(pLightMapUvBuffer->shared_from_this());
+			mdlC->SetLightmapUvBuffer(*static_cast<CModelSubMesh*>(subMesh.get()),pLightMapUvBuffer->shared_from_this());
 		}
 	}
 }

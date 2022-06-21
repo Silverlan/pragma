@@ -14,6 +14,7 @@
 #include <pragma/entities/components/base_entity_component.hpp>
 
 namespace prosper {class Texture; class DescriptorSetGroup;};
+namespace uimg {struct ImageLayerSet;};
 namespace pragma
 {
 	class CSceneComponent;
@@ -77,7 +78,7 @@ namespace pragma
 		Material *LoadMaterial(bool &outIsDefault);
 
 		void InitializeDescriptorSet();
-		util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CaptureRaytracedIBLReflectionsFromScene(
+		util::ParallelJob<uimg::ImageLayerSet> CaptureRaytracedIBLReflectionsFromScene(
 			uint32_t width,uint32_t height,const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov,
 			float exposure,const std::vector<BaseEntity*> *optEntityList=nullptr,bool renderJob=false
 		);
@@ -91,7 +92,7 @@ namespace pragma
 		{
 			RaytracingJobManager(CReflectionProbeComponent &probe);
 			~RaytracingJobManager();
-			util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> job = {};
+			util::ParallelJob<uimg::ImageLayerSet> job = {};
 			std::shared_ptr<uimg::ImageBuffer> m_equirectImageBuffer = nullptr;
 			CReflectionProbeComponent &probe;
 			void StartNextJob();

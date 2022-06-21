@@ -22,6 +22,15 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
+		enum class Texture : uint32_t
+		{
+			DiffuseDirectMap = 0,
+			DiffuseIndirectMap,
+			DiffuseMap,
+			DominantDirectionMap,
+
+			Count
+		};
 		struct DLLCLIENT LightmapBakeSettings
 		{
 			std::optional<uint32_t> width {};
@@ -47,15 +56,22 @@ namespace pragma
 		CLightMapComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void OnEntitySpawn() override;
 		const std::shared_ptr<prosper::Texture> &GetLightMap() const;
+		const std::shared_ptr<prosper::Texture> &GetDirectionalLightMap() const;
 
 		void InitializeLightMapData(
 			const std::shared_ptr<prosper::Texture> &lightMap,
 			const std::shared_ptr<prosper::IDynamicResizableBuffer> &lightMapUvBuffer,
-			const std::vector<std::shared_ptr<prosper::IBuffer>> &meshUvBuffers
+			const std::vector<std::shared_ptr<prosper::IBuffer>> &meshUvBuffers,
+			const std::shared_ptr<prosper::Texture> &directionalLightmap=nullptr,
+			bool keepCurrentTextures=false
 		);
 		void SetLightMapAtlas(const std::shared_ptr<prosper::Texture> &lightMap);
 		const std::shared_ptr<prosper::Texture> &GetLightMapAtlas() const;
+		void SetDirectionalLightMapAtlas(const std::shared_ptr<prosper::Texture> &lightMap);
+		const std::shared_ptr<prosper::Texture> &GetDirectionalLightMapAtlas() const;
+		bool HasValidLightMap() const;
 		void ReloadLightMapData();
 
 		prosper::IBuffer *GetMeshLightMapUvBuffer(uint32_t meshIdx) const;
@@ -74,8 +90,17 @@ namespace pragma
 
 		const LightmapDataCache *GetLightmapDataCache() const;
 		void SetLightmapDataCache(LightmapDataCache *cache);
+
+		const std::shared_ptr<prosper::Texture> &GetTexture(Texture tex) const;
+		void SetLightMapMaterial(const std::string &matName);
+		const std::string &GetLightMapMaterialName() const;
 	protected:
-		std::shared_ptr<prosper::Texture> m_lightMapAtlas = nullptr;
+		void InitializeFromMaterial();
+
+		std::string m_lightMapMaterialName;
+		msys::MaterialHandle m_lightMapMaterial;
+		std::array<std::shared_ptr<prosper::Texture>,umath::to_integral(Texture::Count)> m_textures;
+
 		util::PFloatProperty m_lightMapExposure = nullptr;
 		std::shared_ptr<LightmapDataCache> m_lightmapDataCache;
 

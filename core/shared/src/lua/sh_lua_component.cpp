@@ -20,6 +20,7 @@
 #include "pragma/lua/base_lua_handle_method.hpp"
 #include "pragma/lua/sh_lua_component_t.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
+#include "pragma/lua/converters/vector_converter_t.hpp"
 #include "pragma/lua/lua_util_component.hpp"
 #include "pragma/lua/types/udm.hpp"
 #include <sharedutils/scope_guard.h>
@@ -28,7 +29,7 @@
 #include <udm.hpp>
 
 using namespace pragma;
-
+#pragma optimize("",off)
 struct ClassMembers
 {
 	ClassMembers(const luabind::object &classObject)
@@ -325,6 +326,30 @@ std::optional<ComponentMemberInfo> pragma::lua::get_component_member_info(
 		else
 			componentMemberInfo->SetSpecializationType(specializationType);
 
+		auto oEnumValues = attributes["enumValues"];
+		if(oEnumValues)
+		{
+			auto nameToValue = luabind::object_cast<std::unordered_map<std::string,int64_t>>(oEnumValues);
+			std::unordered_map<int64_t,std::string> valueToName;
+			std::vector<int64_t> values;
+			valueToName.reserve(nameToValue.size());
+			values.reserve(nameToValue.size());
+			for(auto &pair : nameToValue)
+			{
+				valueToName[pair.second] = pair.first;
+				values.push_back(pair.second);
+			}
+			componentMemberInfo->SetEnum([nameToValue=std::move(nameToValue)](const std::string &enumName) -> std::optional<int64_t> {
+				auto it = nameToValue.find(enumName);
+				return (it != nameToValue.end()) ? it->second : std::optional<int64_t>{};
+			},[valueToName=std::move(valueToName)](int64_t enumValue) -> std::optional<std::string> {
+				auto it = valueToName.find(enumValue);
+				return (it != valueToName.end()) ? it->second : std::optional<std::string>{};
+			},[values=std::move(values)]() -> std::vector<int64_t> {
+				return values;
+			});
+		}
+
 		auto oMetaData = attributes["metaData"];
 		if(oMetaData)
 		{
@@ -368,6 +393,25 @@ std::optional<ComponentMemberInfo> pragma::lua::get_component_member_info(
 	return componentMemberInfo;
 }
 
+static std::string name_to_keyvalue_name(const std::string &name)
+{
+	std::string kvName;
+	size_t pos = 0;
+	while(pos < name.length())
+	{
+		auto c = name[pos];
+		if(std::isupper(c))
+		{
+			if(!kvName.empty())
+				kvName += '_';
+			kvName += std::tolower(c);
+		}
+		else
+			kvName += c;
+		++pos;
+	}
+	return kvName;
+}
 
 BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMember(
 	const luabind::object &oClass,const std::string &functionName,ents::EntityMemberType memberType,const std::any &initialValue,MemberFlags memberFlags,const Lua::map<std::string,void> &attributes
@@ -415,6 +459,20 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 		}
 	}
 	auto idx = itMember -(*it)->memberDeclarations.begin();
+
+	auto oEnumValues = attributes["enumValues"];
+	if(oEnumValues)
+	{
+		auto nameToValue = luabind::object_cast<std::unordered_map<std::string,int64_t>>(oEnumValues);
+		for(auto &pair : nameToValue)
+		{
+			auto name = memberName +pair.first;
+			name = name_to_keyvalue_name(name);
+			for(auto &c : name)
+				c = std::toupper(c);
+			oClass[name] = pair.second;
+		}
+	}
 
 	std::string getterName = "Get";
 	auto bProperty = (memberFlags &MemberFlags::PropertyBit) != MemberFlags::None;
@@ -608,26 +666,6 @@ void BaseLuaBaseEntityComponent::Initialize()
 	auto &ent = GetEntity();
 	CallLuaMethod("OnAttachedToEntity");
 	pragma::BaseEntityComponent::Initialize();
-}
-
-static std::string name_to_keyvalue_name(const std::string &name)
-{
-	std::string kvName;
-	size_t pos = 0;
-	while(pos < name.length())
-	{
-		auto c = name[pos];
-		if(std::isupper(c))
-		{
-			if(!kvName.empty())
-				kvName += '_';
-			kvName += std::tolower(c);
-		}
-		else
-			kvName += c;
-		++pos;
-	}
-	return kvName;
 }
 
 void BaseLuaBaseEntityComponent::InitializeMembers(const std::vector<BaseLuaBaseEntityComponent::MemberInfo> &members)
@@ -1588,3 +1626,4 @@ void Lua::register_base_entity_component(luabind::module_ &modEnts)
 	classDef.def("Load",&pragma::BaseLuaBaseEntityComponent::Lua_Load,&pragma::BaseLuaBaseEntityComponent::default_Lua_Load);
 	modEnts[classDef];
 }
+#pragma optimize("",on)

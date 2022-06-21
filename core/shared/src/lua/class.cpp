@@ -46,6 +46,7 @@
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/lua/converters/string_view_converter_t.hpp"
 #include "pragma/lua/converters/pair_converter_t.hpp"
+#include "pragma/lua/converters/vector_converter_t.hpp"
 #include "pragma/util/util_splash_damage_info.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/lua/classes/lentity.h"
@@ -197,6 +198,11 @@ std::ostream &operator<<(std::ostream &out,const umath::ScaledTransform &t)
 	auto ang = EulerAngles{rot};
 	auto &scale = t.GetScale();
 	out<<"ScaledTransform["<<origin.x<<","<<origin.y<<","<<origin.z<<"]["<<ang.p<<","<<ang.y<<","<<ang.r<<"]["<<scale.x<<","<<scale.y<<","<<scale.z<<"]";
+	return out;
+}
+std::ostream &operator<<(std::ostream &out,const uimg::ImageLayerSet &layerSet)
+{
+	out<<"ImageLayerSet["<<layerSet.images.size()<<"]";
 	return out;
 }
 template<typename T>
@@ -568,12 +574,35 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		Lua::PushNumber(l,logAvgLuminance);
 	}));
 	modUtil[defImageBuffer];
+	
+	auto defImageLayerSet = pragma::lua::register_class<uimg::ImageLayerSet>("ImageLayerSet");
+	defImageLayerSet.def("GetImage",+[](const uimg::ImageLayerSet &layerSet,const std::string &name) -> std::shared_ptr<uimg::ImageBuffer> {
+		auto it = layerSet.images.find(name);
+		if(it == layerSet.images.end())
+			return nullptr;
+		return it->second;
+	});
+	defImageLayerSet.def("GetImages",+[](const uimg::ImageLayerSet &layerSet) {
+		return layerSet.images;
+	});
+	modUtil[defImageLayerSet];
 
 	auto defImgParallelJob = luabind::class_<util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>,util::BaseParallelJob>("ParallelJobImage");
 	defImgParallelJob.def("GetResult",static_cast<void(*)(lua_State*,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>&)>([](lua_State *l,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &job) {
 		Lua::Push(l,job.GetResult());
 	}));
 	modUtil[defImgParallelJob];
+
+	auto defImgLayerSetParallelJob = luabind::class_<util::ParallelJob<uimg::ImageLayerSet>,util::BaseParallelJob>("ParallelJobImageLayerSet");
+	defImgLayerSetParallelJob.def("GetResult",+[](lua_State *l,util::ParallelJob<uimg::ImageLayerSet> &job) {
+		Lua::Push(l,job.GetResult());
+	});
+	defImgLayerSetParallelJob.def("GetImage",+[](lua_State *l,util::ParallelJob<uimg::ImageLayerSet> &job) -> std::shared_ptr<uimg::ImageBuffer> {
+		if(job.GetResult().images.empty())
+			return nullptr;
+		return job.GetResult().images.begin()->second;
+	});
+	modUtil[defImgLayerSetParallelJob];
 
 	auto defStringParallelJob = luabind::class_<util::ParallelJob<const std::string&>,util::BaseParallelJob>("ParallelJobString");
 	defStringParallelJob.def("GetResult",static_cast<void(*)(lua_State*,util::ParallelJob<const std::string&>&)>([](lua_State *l,util::ParallelJob<const std::string&> &job) {

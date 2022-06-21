@@ -54,7 +54,7 @@ namespace pragma
 		static std::string LightIntensityTypeToString(LightIntensityType type);
 		static Candela GetLightIntensityCandela(float intensity,LightIntensityType type,std::optional<float> outerConeAngle={});
 		static Lumen GetLightIntensityLumen(float intensity,LightIntensityType type,std::optional<float> outerConeAngle={});
-		static float CalcDistanceFalloff(const Vector3 &lightPos,const Vector3 &point,float radius);
+		static float CalcDistanceFalloff(const Vector3 &lightPos,const Vector3 &point,std::optional<float> radius={});
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;

@@ -106,18 +106,20 @@ float BaseEnvLightSpotComponent::CalcConeFalloff(
 }
 
 Candela BaseEnvLightSpotComponent::CalcIntensityFalloff(
-	const Vector3 &lightPos,float radius,const Vector3 &lightDir,
-	umath::Degree outerConeAngle,umath::Degree innerConeAngle,const Vector3 &point
+	const Vector3 &lightPos,const Vector3 &lightDir,
+	umath::Degree outerConeAngle,umath::Degree innerConeAngle,const Vector3 &point,
+	std::optional<float> radius
 )
 {
 	return BaseEnvLightComponent::CalcDistanceFalloff(lightPos,point,radius) *CalcConeFalloff(lightPos,lightDir,outerConeAngle,innerConeAngle,point);
 }
 Candela BaseEnvLightSpotComponent::CalcIntensityAtPoint(
-	const Vector3 &lightPos,float radius,Candela intensity,const Vector3 &lightDir,
-	umath::Degree outerConeAngle,umath::Degree innerConeAngle,const Vector3 &point
+	const Vector3 &lightPos,Candela intensity,const Vector3 &lightDir,
+	umath::Degree outerConeAngle,umath::Degree innerConeAngle,const Vector3 &point,
+	std::optional<float> radius
 )
 {
-	intensity *= CalcIntensityFalloff(lightPos,radius,lightDir,outerConeAngle,innerConeAngle,point);
+	intensity *= CalcIntensityFalloff(lightPos,lightDir,outerConeAngle,innerConeAngle,point,radius);
 	return intensity;
 }
 util::EventReply BaseEnvLightSpotComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
@@ -139,8 +141,8 @@ util::EventReply BaseEnvLightSpotComponent::HandleEvent(ComponentEventId eventId
 			auto *radiusC = dynamic_cast<pragma::BaseRadiusComponent*>(GetEntity().FindComponent("radius").get());
 			auto radius = radiusC ? radiusC->GetRadius() : 0.f;
 			static_cast<CECalcLightIntensityAtPoint&>(evData).intensity = CalcIntensityAtPoint(
-				GetEntity().GetPosition(),radius,cLight->GetLightIntensityCandela(),GetEntity().GetForward(),
-				GetOuterConeAngle(),GetInnerConeAngle(),levData.pos
+				GetEntity().GetPosition(),cLight->GetLightIntensityCandela(),GetEntity().GetForward(),
+				GetOuterConeAngle(),GetInnerConeAngle(),levData.pos,radius
 			);
 		}
 		return util::EventReply::Handled;

@@ -27,12 +27,14 @@ namespace pragma
 			const Vector3 &lightPos,const Vector3 &lightDir,umath::Degree outerConeAngle,umath::Degree innerConeAngle,const Vector3 &point
 		);
 		static Candela CalcIntensityFalloff(
-			const Vector3 &lightPos,float radius,const Vector3 &lightDir,
-			umath::Degree outerConeAngle,umath::Degree innerConeAngle,const Vector3 &point
+			const Vector3 &lightPos,const Vector3 &lightDir,
+			umath::Degree outerConeAngle,umath::Degree innerConeAngle,const Vector3 &point,
+			std::optional<float> radius={}
 		);
 		static Candela CalcIntensityAtPoint(
-			const Vector3 &lightPos,float radius,Candela intensity,const Vector3 &lightDir,
-			umath::Degree outerConeAngle,umath::Degree innerConeAngle,const Vector3 &point
+			const Vector3 &lightPos,Candela intensity,const Vector3 &lightDir,
+			umath::Degree outerConeAngle,umath::Degree innerConeAngle,const Vector3 &point,
+			std::optional<float> radius={}
 		);
 
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);

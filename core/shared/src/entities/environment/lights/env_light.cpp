@@ -265,12 +265,13 @@ void BaseEnvLightComponent::SetShadowType(ShadowType type) {m_shadowType = type;
 float BaseEnvLightComponent::GetFalloffExponent() const {return m_falloffExponent;}
 void BaseEnvLightComponent::SetFalloffExponent(float falloffExponent) {m_falloffExponent = falloffExponent;}
 
-float BaseEnvLightComponent::CalcDistanceFalloff(const Vector3 &lightPos,const Vector3 &point,float radius)
+float BaseEnvLightComponent::CalcDistanceFalloff(const Vector3 &lightPos,const Vector3 &point,std::optional<float> radius)
 {
 	auto dist = uvec::distance(point,lightPos);
 	dist = util::pragma::units_to_metres(dist);
-	radius = util::pragma::units_to_metres(radius);
-	return ulighting::calc_light_falloff(dist,radius);
+	if(radius.has_value())
+		return ulighting::calc_light_falloff(dist,util::pragma::units_to_metres(*radius));
+	return ulighting::calc_light_falloff(dist);
 }
 
 //////////////

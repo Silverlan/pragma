@@ -21,7 +21,7 @@ namespace pragma
 	{
 	public:
 		static Candela CalcIntensityAtPoint(
-			const Vector3 &lightPos,float radius,Candela intensity,const Vector3 &point
+			const Vector3 &lightPos,Candela intensity,const Vector3 &point,std::optional<float> radius={}
 		);
 
 		using BaseEntityComponent::BaseEntityComponent;

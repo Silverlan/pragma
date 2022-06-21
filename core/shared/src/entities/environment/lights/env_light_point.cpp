@@ -14,7 +14,7 @@
 using namespace pragma;
 
 Candela BaseEnvLightPointComponent::CalcIntensityAtPoint(
-	const Vector3 &lightPos,float radius,Candela intensity,const Vector3 &point
+	const Vector3 &lightPos,Candela intensity,const Vector3 &point,std::optional<float> radius
 )
 {
 	return intensity *BaseEnvLightComponent::CalcDistanceFalloff(lightPos,point,radius);
@@ -45,7 +45,7 @@ util::EventReply BaseEnvLightPointComponent::HandleEvent(ComponentEventId eventI
 			auto *radiusC = dynamic_cast<pragma::BaseRadiusComponent*>(GetEntity().FindComponent("radius").get());
 			auto radius = radiusC ? radiusC->GetRadius() : 0.f;
 			static_cast<CECalcLightIntensityAtPoint&>(evData).intensity = CalcIntensityAtPoint(
-				GetEntity().GetPosition(),radius,cLight->GetLightIntensityCandela(),levData.pos
+				GetEntity().GetPosition(),cLight->GetLightIntensityCandela(),levData.pos,radius
 			);
 		}
 		return util::EventReply::Handled;

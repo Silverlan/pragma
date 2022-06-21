@@ -20,6 +20,8 @@
 #define DEBUG_MODE_SHADOW_MAP_DEPTH (DEBUG_MODE_CSM_SHOW_CASCADES +1)
 #define DEBUG_MODE_FORWARD_PLUS_HEATMAP (DEBUG_MODE_SHADOW_MAP_DEPTH +1)
 #define DEBUG_MODE_SPECULAR (DEBUG_MODE_FORWARD_PLUS_HEATMAP +1)
+#define DEBUG_MODE_LIGHTMAP_INDIRECT (DEBUG_MODE_SPECULAR +1)
+#define DEBUG_MODE_LIGHTMAP_DOMINANT (DEBUG_MODE_LIGHTMAP_INDIRECT +1)
 
 vec4 apply_debug_mode(uint debugMode,vec4 outputColor,vec2 texCoords,vec3 diffuseColor,vec3 specularColor,float metallic,float roughness,float aoFactor,float reflectance)
 {
@@ -60,7 +62,29 @@ vec4 apply_debug_mode(uint debugMode,vec4 outputColor,vec2 texCoords,vec3 diffus
 	{
 		if(is_light_map_enabled())
 		{
-			vec4 colLightMap = texture(u_lightMap,fs_in.vert_uv_lightmap.xy);
+			vec4 colLightMap = vec4(fs_in.vert_uv_lightmap.xy,0,1);//texture(u_lightMap,fs_in.vert_uv_lightmap.xy);
+			//colLightMap.rgb /= 255.0;
+			finalColor = colLightMap.rgba;
+		}
+		else
+			finalColor = vec4(0,0,0,1);
+	}
+	else if(debugMode == DEBUG_MODE_LIGHTMAP_INDIRECT)
+	{
+		if(is_light_map_enabled() && is_indirect_light_map_enabled())
+		{
+			vec4 colLightMap = texture(u_lightMapIndirect,fs_in.vert_uv_lightmap.xy);
+			//colLightMap.rgb /= 255.0;
+			finalColor = colLightMap.rgba;
+		}
+		else
+			finalColor = vec4(0,0,0,1);
+	}
+	else if(debugMode == DEBUG_MODE_LIGHTMAP_DOMINANT)
+	{
+		if(is_light_map_enabled() && is_directional_light_map_enabled())
+		{
+			vec4 colLightMap = texture(u_lightMapDominant,fs_in.vert_uv_lightmap.xy);
 			//colLightMap.rgb /= 255.0;
 			finalColor = colLightMap.rgba;
 		}

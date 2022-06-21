@@ -14,47 +14,42 @@ function util.load_lightmap_uv_cache(fileName)
 	local udmData,err = udm.create("PLMD",LIGHTMAP_CACHE_VERSION)
 	if(udmData == false) then
 		console.print_warning(err)
-		return
+		return false
 	end
 
-	local udmData,err = udm.load(fileName,LIGHTMAP_CACHE_VERSION)
+	local udmData,err = udm.load(fileName)
 	if(udmData == false) then
 		console.print_warning(err)
-		return
+		return false
 	end
 
 	local lightmapData = {}
-	local assetData = udmData:GetAssetData()
+	local assetData = udmData:GetAssetData():GetData()
 	local udmEntities = assetData:Get("entities")
 	for udmEntity in udmEntities:It() do
 		local pose = udmEntity:GetValue("pose")
 		local model = udmEntity:GetValue("model")
-		local udmMeshes = udmEntity:Get("meshes")
-		local meshData = {}
-		for udmMesh in udmMeshes:It() do
-			local meshGroup = udmMesh:GetValue("meshGroup")
-			local mesh = udmMesh:GetValue("mesh")
-			local subMesh = udmMesh:GetValue("subMesh")
-			local dsVertexData = udmMesh:Get("vertexData"):GetBlobData()
-			local dsIndexData = udmMesh:Get("indexData"):GetBlobData()
-			local dsLightmapUvData = udmMesh:Get("lightmapUvData"):GetBlobData()
-			table.insert(meshData,{
-				meshGroup = meshGroup,
-				mesh = mesh,
-				subMesh = subMesh,
-				dsVertexData = dsVertexData,
-				dsIndexData = dsIndexData,
-				dsLightmapUvData = dsLightmapUvData
-			})
+
+		local data = udmEntity:Get("data")
+		local err
+		if(data:IsValid()) then
+			local mdl
+			mdl,err = game.Model.Load(udm.AssetData(udmEntity:Get("data"),"PMDL",1))
+			if(mdl ~= false) then
+				lightmapData[model] = {
+					pose = pose,
+					meshData = meshData,
+					model = mdl
+				}
+			end
+		else
+			err = "Invalid UDM model data"
 		end
-		lightmapData[model] = {
-			pose = pose,
-			meshData = meshData
-		}
+		if(err ~= nil) then console.print_warning("Failed to load lightmapped model '" .. (model or "unknown") .. "': " .. err) end
 	end
 
 	local tEnts = {}
-	for ent in ents.iterator({ents.IteratorFilterComponent(ents.COMPONENT_MODEL),ents.IteratorFilterComponent(ents.COMPONENT_RENDER),ents.IteratorFilterComponent(ents.COMPONENT_TRANSFORM)}) do
+	--[[for ent in ents.iterator({ents.IteratorFilterComponent(ents.COMPONENT_MODEL),ents.IteratorFilterComponent(ents.COMPONENT_RENDER),ents.IteratorFilterComponent(ents.COMPONENT_TRANSFORM)}) do
 		local mdl = ent:GetModel()
 		if(mdl ~= nil) then
 			local mdlName = asset.get_normalized_path(mdl:GetName(),asset.TYPE_MODEL)
@@ -63,39 +58,11 @@ function util.load_lightmap_uv_cache(fileName)
 				local pose = ent:GetPose()
 				if(pose:GetOrigin():DistanceSqr(lmData.pose:GetOrigin()) < 0.001 and math.abs(pose:GetRotation():Distance(lmData.pose:GetRotation())) < 0.001) then
 					table.insert(tEnts,ent)
-					for _,meshData in ipairs(lmData.meshData) do
-						local meshGroup = mdl:GetMeshGroup(meshData.meshGroup)
-						local mesh = (meshGroup ~= nil) and meshGroup:GetMesh(meshData.mesh) or nil
-						local subMesh = (mesh ~= nil) and mesh:GetSubMesh(meshData.subMesh) or nil
-						if(subMesh ~= nil) then
-							subMesh:AddUVSet("lightmap")
-
-							local dsVertexData = meshData.dsVertexData
-							local dsIndexData = meshData.dsIndexData
-							local dsLightmapUvData = meshData.dsLightmapUvData
-							local numVerts = dsVertexData:GetSize() /util.SIZEOF_VERTEX
-							local numIndices = dsIndexData:GetSize() /util.SIZEOF_SHORT
-
-							subMesh:SetVertexCount(numVerts)
-							for i=1,numVerts do
-								subMesh:SetVertex(i -1,dsVertexData:ReadVertex())
-								subMesh:SetVertexUV("lightmap",i -1,dsLightmapUvData:ReadVector2())
-							end
-
-							subMesh:ClearIndices()
-							for i=1,numIndices,3 do
-								local idx0 = dsIndexData:ReadUInt16()
-								local idx1 = dsIndexData:ReadUInt16()
-								local idx2 = dsIndexData:ReadUInt16()
-								subMesh:AddTriangle(idx0,idx1,idx2)
-							end
-						end
-						subMesh:Update(game.Model.FUPDATE_ALL)
-					end
+					ent:SetModel(lmData.model)
 				end
 			end
 		end
-	end
+	end]]
 	return tEnts
 end
 
@@ -115,7 +82,7 @@ function util.save_lightmap_uv_cache(fileName,entities)
 	for _,ent in ipairs(entities) do
 		local mdl = ent:GetModel()
 		local meshGroups = mdl:GetMeshGroups()
-		local lightmappedMeshes = {}
+		local hasLightmappedMeshes = false
 		for i,meshGroup in ipairs(meshGroups) do
 			local meshes = meshGroup:GetMeshes()
 			for j,mesh in ipairs(meshes) do
@@ -123,25 +90,16 @@ function util.save_lightmap_uv_cache(fileName,entities)
 				for k,subMesh in ipairs(subMeshes) do
 					local hasLightmapSet = subMesh:HasUVSet("lightmap")
 					if(hasLightmapSet) then
-						local numVerts = subMesh:GetVertexCount()
-						local dsVertexData = util.DataStream(numVerts *util.SIZEOF_VERTEX)
-						for i=0,numVerts -1 do dsVertexData:WriteVertex(subMesh:GetVertex(i)) end
-						dsVertexData:Seek(0)
-						table.insert(lightmappedMeshes,{
-							meshGroup = i -1,
-							mesh = j -1,
-							subMesh = k -1,
-							vertexCount = numVerts,
-							vertexData = dsVertexData,
-							indexData = subMesh:GetIndices(),
-							lightmapUvData = subMesh:GetUVs("lightmap")
-						})
+						hasLightmappedMeshes = true
+						break
 					end
 				end
+				if(hasLightmappedMeshes) then break end
 			end
+			if(hasLightmappedMeshes) then break end
 		end
 
-		if(#lightmappedMeshes > 0) then
+		if(hasLightmappedMeshes) then
 			local pose = ent:GetPose()
 			local model = asset.get_normalized_path(ent:GetModel():GetName(),asset.TYPE_MODEL)
 
@@ -152,35 +110,7 @@ function util.save_lightmap_uv_cache(fileName,entities)
 			udmEntity:Set("pose",math.Transform(pose:GetOrigin(),pose:GetRotation()))
 			udmEntity:Set("model",model)
 
-			local udmMeshes = udmEntity:AddArray("meshes",#lightmappedMeshes)
-			for i,meshInfo in ipairs(lightmappedMeshes) do
-				local udmMesh = udmMeshes:Get(i -1)
-				udmMesh:SetValue("meshGroup",udm.TYPE_UINT32,meshInfo.meshGroup)
-				udmMesh:SetValue("mesh",udm.TYPE_UINT32,meshInfo.mesh)
-				udmMesh:SetValue("subMesh",udm.TYPE_UINT32,meshInfo.subMesh)
-
-				local strct = udm.define_struct({
-					{
-						type = udm.TYPE_VECTOR3,
-						name = "pos"
-					},
-					{
-						type = udm.TYPE_VECTOR2,
-						name = "uv"
-					},
-					{
-						type = udm.TYPE_VECTOR3,
-						name = "n"
-					},
-					{
-						type = udm.TYPE_VECTOR4,
-						name = "t"
-					}
-				})
-				udmMesh:SetArrayValues("vertexData",strct,meshInfo.vertexCount,meshInfo.vertexData,udm.TYPE_ARRAY_LZ4)
-				udmMesh:SetArrayValues("indexData",udm.TYPE_UINT32,meshInfo.indexData,udm.TYPE_ARRAY_LZ4)
-				udmMesh:SetArrayValues("lightmapUvData",udm.TYPE_VECTOR2,meshInfo.lightmapUvData,udm.TYPE_ARRAY_LZ4)
-			end
+			ent:GetModel():Save(udm.AssetData(udmEntity:Get("data"),"PMDL",1))
 		end
 	end
 	udmEntities:Resize(entIdx)

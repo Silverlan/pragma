@@ -64,12 +64,14 @@ pfm.register_log_category = function(name)
 	return catId
 end
 
+-- TODO: Move these to filmmaker addon
 pfm.register_log_category("pfm")
 pfm.register_log_category("pfm_game")
 pfm.register_log_category("pfm_interface")
 pfm.register_log_category("pfm_render")
 pfm.register_log_category("pfm_cache")
 pfm.register_log_category("pfm_unirender")
+pfm.register_log_category("pfm_bake")
 
 log = log or {}
 log.register_category = pfm.register_log_category

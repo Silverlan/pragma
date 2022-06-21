@@ -7,7 +7,7 @@
 ]]
 
 util.register_class("util.UVAtlasGenerator")
-function util.UVAtlasGenerator:__init()
+function util.UVAtlasGenerator:__init(lmUuid)
 	local r = engine.load_library("pr_xatlas")
 	if(r ~= true) then
 		console.print_warning("Unable to load openvr module: " .. r)
@@ -15,7 +15,12 @@ function util.UVAtlasGenerator:__init()
 	end
 	self.m_atlas = xatlas.create()
 	self.m_entities = {}
+	self.m_lightmapEntityUuid = lmUuid
 	self.m_numInputMeshes = 0
+end
+
+function util.UVAtlasGenerator:AddEntity(ent,meshFilter)
+
 end
 
 function util.UVAtlasGenerator:AddEntity(ent,meshFilter)
@@ -25,7 +30,7 @@ function util.UVAtlasGenerator:AddEntity(ent,meshFilter)
 	if(mdl == nil or mdlC == nil or renderC == nil) then return end
 	local name = mdl:GetName()
 	if(self.m_entities[ent] ~= nil) then return end
-	mdl = mdl:Copy(game.Model.FCOPY_DEEP)
+	mdl = mdl:Copy(bit.bor(game.Model.FCOPY_DEEP,game.Model.FCOPY_BIT_COPY_UNIQUE_IDS))
 
 	local skin = mdlC:GetSkin()
 	local bodyGroups = mdlC:GetBodyGroups()
@@ -52,30 +57,61 @@ function util.UVAtlasGenerator:AddEntity(ent,meshFilter)
 	end
 end
 
-function util.UVAtlasGenerator:Generate()
+function util.UVAtlasGenerator:Generate(lightmapCachePath)
 	local meshes = self.m_atlas:Generate()
 	if(#meshes ~= self.m_numInputMeshes) then
 		error("Number of output meshes doesn't match number of input meshes!")
 		return
 	end
-	-- Clear buffers (to free up memory)
-	for ent,meshes in pairs(self.m_entities) do
+
+	for ent,entMeshes in pairs(self.m_entities) do
 		if(ent:IsValid()) then
-			for _,meshInfo in ipairs(meshes) do
+			for _,meshInfo in ipairs(entMeshes) do
 				local mesh = meshInfo.subMesh
-				local sceneMesh = mesh:GetSceneMesh()
-				if(sceneMesh ~= nil) then sceneMesh:ClearBuffers() end
+				local atlasMesh = meshes[meshInfo.xatlasMeshIndex]
+				local origIndexCount = mesh:GetIndexCount()
+				local newIndexCount = atlasMesh:GetIndexCount()
+				meshInfo.restructuredMesh = (newIndexCount ~= origIndexCount)
 			end
 		end
 	end
 
+	-- Clear buffers (to free up memory)
+	for ent,meshes in pairs(self.m_entities) do
+		if(ent:IsValid()) then
+			for _,meshInfo in ipairs(meshes) do
+				if(meshInfo.restructuredMesh == true) then
+					local mesh = meshInfo.subMesh
+					local sceneMesh = mesh:GetSceneMesh()
+					if(sceneMesh ~= nil) then sceneMesh:ClearBuffers() end
+				end
+			end
+		end
+	end
+
+	local models = {}
+	local lmCache = ents.LightMapComponent.DataCache()
+	lmCache:SetLightmapEntity(self.m_lightmapEntityUuid)
 	for ent,entMeshes in pairs(self.m_entities) do
+		local hasRestructuredMeshes = false
+		for _,meshInfo in ipairs(entMeshes) do
+			if(meshInfo.restructuredMesh) then
+				hasRestructuredMeshes = true
+				break
+			end
+		end
+		if(hasRestructuredMeshes == true) then
+			local mdl = ent:GetModel()
+			models[mdl:GetName()] = mdl
+		end
 		for _,meshInfo in ipairs(entMeshes) do
 			local origMesh = meshInfo.subMesh
 			local atlasMesh = meshes[meshInfo.xatlasMeshIndex]
 			local numVerts = atlasMesh:GetVertexCount()
 			local newVerts = {}
 			local lightmapUvs = {}
+			local dsVerts = util.DataStream()
+			dsVerts:Resize(numVerts *(util.SIZEOF_VECTOR3 *2 +util.SIZEOF_VECTOR2 +util.SIZEOF_VECTOR4))
 			for j=1,numVerts do
 				local atlasData = atlasMesh:GetVertex(j -1)
 				local uv = atlasData.uv
@@ -84,29 +120,80 @@ function util.UVAtlasGenerator:Generate()
 				local newVertex = oldVertex:Copy()
 				table.insert(newVerts,newVertex)
 				table.insert(lightmapUvs,uv)
-			end
-			origMesh:ClearVertices()
-			origMesh:ClearUVSets()
-			origMesh:SetVertexCount(#newVerts)
-			origMesh:AddUVSet("lightmap")
-			for j,v in ipairs(newVerts) do
-				origMesh:SetVertex(j -1,v)
-				origMesh:SetVertexUV("lightmap",j -1,Vector2(lightmapUvs[j].x,lightmapUvs[j].y))
+
+				dsVerts:WriteVector(oldVertex.position)
+				dsVerts:WriteVector2(oldVertex.uv)
+				dsVerts:WriteVector(oldVertex.normal)
+				dsVerts:WriteVector4(oldVertex.tangent)
 			end
 
-			origMesh:ClearIndices()
-			local numIndices = atlasMesh:GetIndexCount()
-			for i=1,numIndices,3 do
-				origMesh:AddTriangle(atlasMesh:GetIndex(i -1),atlasMesh:GetIndex(i),atlasMesh:GetIndex(i +1))
+			lmCache:AddInstanceData(ent:GetUuid(),ent:GetModelName(),ent:GetPose(),origMesh:GetUuid(),lightmapUvs)
+
+			if(meshInfo.restructuredMesh == true) then
+				origMesh:ClearVertices()
+				origMesh:ClearUVSets()
+				-- origMesh:SetVertexCount(#newVerts)
+				origMesh:AddUVSet("lightmap")
+				for j,v in ipairs(newVerts) do
+					origMesh:SetVertex(j -1,v)
+					-- origMesh:SetVertexUV("lightmap",j -1,Vector2(lightmapUvs[j].x,lightmapUvs[j].y))
+				end
+
+				origMesh:ClearIndices()
+				local numIndices = atlasMesh:GetIndexCount()
+				local indices = {}
+				local maxIndex = -1
+				for i=1,numIndices do
+					maxIndex = math.max(maxIndex,atlasMesh:GetIndex(i -1))
+				end
+				local indexType = (maxIndex > util.MAX_UINT16) and game.Model.Mesh.Sub.INDEX_TYPE_UINT32 or game.Model.Mesh.Sub.INDEX_TYPE_UINT16
+				for i=1,numIndices,3 do
+					local triIndices = {atlasMesh:GetIndex(i -1),atlasMesh:GetIndex(i),atlasMesh:GetIndex(i +1)}
+					origMesh:AddTriangle(triIndices[1],triIndices[2],triIndices[3])
+
+					for _,idx in ipairs(triIndices) do table.insert(indices,idx) end
+				end
+				origMesh:Update(game.Model.FUPDATE_ALL)
+
+				local extData = origMesh:GetExtensionData()
+				local udmLightmapData = extData:Get("lightmapData")
+				local udmMeshData = udmLightmapData:Get("meshData")
+				local strct = udm.define_struct({
+					{
+						type = udm.TYPE_VECTOR3,
+						name = "pos"
+					},
+					{
+						type = udm.TYPE_VECTOR2,
+						name = "uv"
+					},
+					{
+						type = udm.TYPE_VECTOR3,
+						name = "n"
+					},
+					{
+						type = udm.TYPE_VECTOR4,
+						name = "t"
+					}
+				})
+				udmMeshData:SetArrayValues("vertices",strct,numVerts,dsVerts,udm.TYPE_ARRAY_LZ4)
+				udmMeshData:SetArrayValues("indices",(indexType == game.Model.Mesh.Sub.INDEX_TYPE_UINT32) and udm.TYPE_UINT32 or udm.TYPE_UINT16,indices,udm.TYPE_ARRAY_LZ4)
 			end
-			origMesh:Update(game.Model.FUPDATE_ALL)
 		end
+	end
+
+	-- We need to save the models because we changed the extension data
+	for mdlName,mdl in pairs(models) do
+		mdl:Save()
 	end
 
 	for ent,_ in pairs(self.m_entities) do
 		if(ent:IsValid()) then
 			local mdl = ent:GetModel()
-			if(mdl ~= nil) then mdl:Update() end
+			if(mdl ~= nil and models[mdl:GetName()] ~= nil) then mdl:Update() end
 		end
 	end
+	file.remove_file_extension(lightmapCachePath,{"lmd","lmd_b"})
+	lightmapCachePath = lightmapCachePath .. ".lmd_b"
+	lmCache:SaveAs(lightmapCachePath)
 end

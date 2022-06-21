@@ -7,6 +7,8 @@
 #include "../sh_uniform_locations.gls"
 
 layout(LAYOUT_ID(DESCRIPTOR_SET_RENDERER,DESCRIPTOR_SET_RENDERER_BINDING_LIGHT_MAP)) uniform sampler2D u_lightMap;
+layout(LAYOUT_ID(DESCRIPTOR_SET_RENDERER,DESCRIPTOR_SET_RENDERER_BINDING_LIGHT_MAP_INDIRECT)) uniform sampler2D u_lightMapIndirect;
+layout(LAYOUT_ID(DESCRIPTOR_SET_RENDERER,DESCRIPTOR_SET_RENDERER_BINDING_LIGHT_MAP_DOMINANT)) uniform sampler2D u_lightMapDominant;
 #endif
 
 #endif

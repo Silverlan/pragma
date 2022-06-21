@@ -11,9 +11,9 @@ include("lightmap_cache.lua")
 
 pfm.register_log_category("lightmap")
 
-local function generate_uv_atlas(origin,tEnts)
+local function generate_uv_atlas(entLm,origin,tEnts,lightmapCachePath)
 	log.msg("Generating lightmap UV atlas...",pfm.LOG_CATEGORY_LIGHTMAP)
-	local generator = util.UVAtlasGenerator()
+	local generator = util.UVAtlasGenerator(entLm:GetUuid())
 	for _,ent in ipairs(tEnts) do
 		if(ent:IsWorld() and origin ~= nil) then
 			local ent = ents.get_world()
@@ -34,7 +34,7 @@ local function generate_uv_atlas(origin,tEnts)
 			generator:AddEntity(ent)
 		end
 	end
-	generator:Generate()
+	generator:Generate(lightmapCachePath)
 	log.msg("Done!",pfm.LOG_CATEGORY_LOG_CATEGORY_LIGHTMAP)
 end
 
@@ -54,22 +54,22 @@ local function update_lightmap_data(tEnts)
 	end
 end
 
-util.bake_lightmap_uvs = function(tEnts,lightmapCachePath,origin)
+util.bake_lightmap_uvs = function(entLm,tEnts,lightmapCachePath,origin)
 	log.msg("Baking lightmap UV data...",pfm.LOG_CATEGORY_LOG_CATEGORY_LIGHTMAP)
-	generate_uv_atlas(origin,tEnts)
-	update_lightmap_data(tEnts)
+	generate_uv_atlas(entLm,origin,tEnts,lightmapCachePath)
+	--update_lightmap_data(tEnts)
 
 	-- Lightmap uv cache
-	local success = util.save_lightmap_uv_cache(lightmapCachePath,tEnts)
+	--[[local success = util.save_lightmap_uv_cache(lightmapCachePath,tEnts)
 	if(success) then log.msg("Successfully saved lightmap UV cache as '" .. lightmapCachePath .. "'!",pfm.LOG_CATEGORY_LOG_CATEGORY_LIGHTMAP)
 	else log.msg("Failed to save lightmap UV cache as '" .. lightmapCachePath .. "'!",pfm.LOG_CATEGORY_LOG_CATEGORY_LIGHTMAP,pfm.LOG_SEVERITY_WARNING) end
-	return success
+	return success]]
 end
 
 util.load_baked_lightmap_uvs = function(lightmapCachePath,tEnts)
 	log.msg("Loading baked lightmap UVs from '" .. lightmapCachePath .. "'...",pfm.LOG_CATEGORY_LOG_CATEGORY_LIGHTMAP)
 	local models = util.load_lightmap_uv_cache(lightmapCachePath)
-	if(models == false) then
+	if(models ~= false) then
 		log.msg("Successfully loaded lightmap UV cache from '" .. lightmapCachePath .. "'!",pfm.LOG_CATEGORY_LOG_CATEGORY_LIGHTMAP)
 		return false
 	end
@@ -113,7 +113,7 @@ util.bake_lightmaps = function(preview,lightIntensityFactor)
 	return result
 end
 
-function util.bake_map_lightmaps(fileName,tEnts)
+function util.bake_map_lightmaps(entLm,fileName,tEnts)
 	if(tEnts == nil) then
 		tEnts = {}
 		-- TODO: Static props only?

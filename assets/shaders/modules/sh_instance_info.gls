@@ -22,6 +22,8 @@ layout(LAYOUT_PUSH_CONSTANTS()) uniform PushConstants
 } u_pushConstants;
 
 bool is_light_map_enabled() {return (u_pushConstants.scene.flags &SCENE_FLAG_BIT_LIGHTMAPS_ENABLED) != 0;}
+bool is_directional_light_map_enabled() {return (u_pushConstants.scene.flags &SCENE_FLAG_BIT_DIRECTIONAL_LIGHTMAPS_ENABLED) != 0;}
+bool is_indirect_light_map_enabled() {return (u_pushConstants.scene.flags &SCENE_FLAG_BIT_INDIRECT_LIGHTMAPS_ENABLED) != 0;}
 bool is_ibl_enabled() {return (u_pushConstants.scene.flags &SCENE_FLAG_BIT_NO_IBL) == 0;}
 bool is_weighted_ext() {return (u_pushConstants.scene.flags &SCENE_FLAG_BIT_USE_EXTENDED_VERTEX_WEIGHTS) != 0;}
 bool is_3d_sky() {return (u_pushConstants.scene.flags &SCENE_FLAG_BIT_RENDER_AS_3D_SKY) != 0;}

@@ -14,7 +14,7 @@
 #include <udm.hpp>
 
 using namespace pragma;
-
+#pragma optimize("",off)
 Candela BaseEnvLightDirectionalComponent::CalcIntensityAtPoint(Candela intensity,const Vector3 &point)
 {
 	return intensity;
@@ -77,13 +77,14 @@ util::EventReply BaseEnvLightDirectionalComponent::HandleEvent(ComponentEventId 
 		{
 			auto intensity = cLight->GetLightIntensityCandela();
 			auto &levData = static_cast<CECalcLightIntensityAtPoint&>(evData);
-			static_cast<CECalcLightIntensityAtPoint&>(evData).intensity = CalcIntensityAtPoint(intensity,levData.pos);
+			static_cast<CECalcLightIntensityAtPoint&>(evData).intensity = BaseEnvLightDirectionalComponent::CalcIntensityAtPoint(intensity,levData.pos);
 		}
 		return util::EventReply::Handled;
 	}
-	return BaseEnvLightDirectionalComponent::HandleEvent(eventId,evData);
+	return BaseEntityComponent::HandleEvent(eventId,evData);
 }
 
 void BaseEnvLightDirectionalComponent::SetAmbientColor(const Color &color) {*m_ambientColor = color;}
 const Color &BaseEnvLightDirectionalComponent::GetAmbientColor() const {return *m_ambientColor;}
 const util::PColorProperty &BaseEnvLightDirectionalComponent::GetAmbientColorProperty() const {return m_ambientColor;}
+#pragma optimize("",on)

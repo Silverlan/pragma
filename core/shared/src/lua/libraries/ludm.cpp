@@ -817,8 +817,18 @@ static luabind::object get_children(lua_State *l,const ::udm::PropertyWrapper &p
 	return t;
 }
 
+static void remove_array(udm::PropertyWrapper &p,const std::string &name)
+{
+	auto *el = p.GetValuePtr<udm::Element>();
+	if(!el)
+		return;
+	auto it = el->children.find(name);
+	if(it != el->children.end())
+		el->children.erase(it);
+}
 static void set_array_values(udm::PropertyWrapper &p,const std::string &name,::udm::StructDescription &strct,uint32_t count,DataStream &ds,::udm::ArrayType arrayType)
 {
+	remove_array(p,name);
 	p.AddArray(name,strct,ds->GetData(),count,arrayType);
 }
 template<typename T>
@@ -835,6 +845,7 @@ template<typename T>
 template<typename T>
 	static void set_array_values(udm::PropertyWrapper &p,const std::string &name,::udm::Type type,luabind::tableT<void> t,size_t size,::udm::ArrayType arrayType)
 {
+	remove_array(p,name);
 	auto a = p.AddArray(name,size,type,arrayType);
 	set_array_values<T>(a.GetValue<udm::Array>(),type,t,size,arrayType);
 }

@@ -234,7 +234,7 @@ static std::shared_ptr<uimg::ImageBuffer> generate_sh_normal_map(
 util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> util::baking::bake_directional_lightmap_atlas(
 	const std::vector<::pragma::CLightComponent*> &lights,
 	const std::vector<ModelSubMesh*> meshes,
-	const std::vector<std::string> &entityUuids,
+	const std::vector<BaseEntity*> &entities,
 	uint32_t width,uint32_t height,
 	::pragma::LightmapDataCache *optLightmapDataCache
 )
@@ -245,10 +245,12 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> util::baking::bake_directi
 	public:
 		LightmapBakeJob(
 			uint32_t width,uint32_t height,std::vector<LightSource> &&lights,std::vector<std::shared_ptr<ModelSubMesh>> &&meshes,
-			std::vector<std::string> &&meshEntityUuids,const std::shared_ptr<::pragma::LightmapDataCache> &lmdCache
+			std::vector<std::string> &&meshEntityUuids,std::vector<umath::ScaledTransform> &&meshEntityPoses,
+			const std::shared_ptr<::pragma::LightmapDataCache> &lmdCache
 		)
 			: m_width{width},m_height{height},m_lightData{std::move(lights)},m_meshes{std::move(meshes)},
-			m_meshEntityUuids{std::move(meshEntityUuids)},m_lightmapDataCache{lmdCache}
+			m_meshEntityUuids{std::move(meshEntityUuids)},m_lightmapDataCache{lmdCache},
+			m_meshEntityPoses{std::move(meshEntityPoses)}
 		{
 			AddThread([this]() {
 				Run();
@@ -265,6 +267,15 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> util::baking::bake_directi
 	private:
 		void Run()
 		{
+			// Transform meshes to world space
+			auto n = m_meshes.size();
+			for(auto i=decltype(n){0};i<n;++i)
+			{
+				auto &mesh = m_meshes.at(i);
+				auto &pose = m_meshEntityPoses.at(i);
+				mesh->Transform(pose);
+			}
+
 			std::vector<util::baking::BakePixel> bps;
 			bps.resize(m_width *m_height,util::baking::BakePixel{});
 
@@ -314,6 +325,7 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> util::baking::bake_directi
 		std::vector<LightSource> m_lightData;
 		std::vector<std::shared_ptr<ModelSubMesh>> m_meshes;
 		std::vector<std::string> m_meshEntityUuids;
+		std::vector<umath::ScaledTransform> m_meshEntityPoses;
 		std::shared_ptr<::pragma::LightmapDataCache> m_lightmapDataCache;
 		std::shared_ptr<uimg::ImageBuffer> m_imgBuffer;
 	};
@@ -353,10 +365,18 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> util::baking::bake_directi
 		meshCopies.push_back(mesh->Copy(true));
 		meshCopies.back()->SetUuid(mesh->GetUuid());
 	}
-	auto eu = entityUuids;
+	std::vector<umath::ScaledTransform> entityPoses;
+	std::vector<std::string> entityUuids;
+	entityPoses.reserve(entities.size());
+	entityUuids.reserve(entities.size());
+	for(auto *ent : entities)
+	{
+		entityUuids.push_back(util::uuid_to_string(ent->GetUuid()));
+		entityPoses.push_back(ent->GetPose());
+	}
 	return util::create_parallel_job<LightmapBakeJob>(
 		width,height,std::move(lightData),std::move(meshCopies),
-		std::move(eu),pLmdc
+		std::move(entityUuids),std::move(entityPoses),pLmdc
 	);
 }
 #pragma optimize("",on)

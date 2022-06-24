@@ -36,7 +36,7 @@ namespace util::baking
 	DLLCLIENT util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_directional_lightmap_atlas(
 		const std::vector<::pragma::CLightComponent*> &lights,
 		const std::vector<ModelSubMesh*> meshes,
-		const std::vector<std::string> &entityUuids,
+		const std::vector<BaseEntity*> &entities,
 		uint32_t width,uint32_t height,
 		::pragma::LightmapDataCache *optLightmapDataCache=nullptr
 	);

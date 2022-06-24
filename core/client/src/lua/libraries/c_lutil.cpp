@@ -289,13 +289,13 @@ void Lua::util::Client::set_clipboard_string(const std::string &str) {c_engine->
 
 ::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> Lua::util::Client::bake_directional_lightmap_atlas(
 	const std::vector<pragma::CLightComponent*> &lights,
-	const std::vector<::ModelSubMesh*> meshes,
-	const std::vector<std::string> entityUuids,
+	const std::vector<::ModelSubMesh*> &meshes,
+	const std::vector<BaseEntity*> &entities,
 	uint32_t width,uint32_t height,
 	::pragma::LightmapDataCache *optLightmapDataCache
 )
 {
 	return ::util::baking::bake_directional_lightmap_atlas(
-		lights,meshes,entityUuids,width,height,optLightmapDataCache
+		lights,meshes,entities,width,height,optLightmapDataCache
 	);
 }

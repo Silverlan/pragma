@@ -812,6 +812,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	classDefTransform.def(luabind::constructor<const Vector3&>());
 	classDefTransform.def(luabind::constructor<const Quat&>());
 	classDefTransform.def(luabind::constructor<>());
+	classDefTransform.def(luabind::const_self ==luabind::const_self);
 	classDefTransform.def(luabind::tostring(luabind::self));
 	classDefTransform.def("Copy",static_cast<umath::Transform(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &t) -> umath::Transform {return t;}));
 	classDefTransform.property("x",static_cast<float(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &pose) {
@@ -902,6 +903,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	classDefScaledTransform.def(luabind::constructor<const umath::Transform&,const Vector3&>());
 	classDefScaledTransform.def(luabind::constructor<const umath::Transform&>());
 	classDefScaledTransform.def(luabind::constructor<>());
+	classDefScaledTransform.def(luabind::const_self ==luabind::const_self);
 	classDefScaledTransform.def(luabind::tostring(luabind::self));
 	classDefScaledTransform.def("Copy",static_cast<umath::ScaledTransform(*)(lua_State*,umath::ScaledTransform&)>([](lua_State *l,umath::ScaledTransform &t) -> umath::ScaledTransform {
 		return t;

@@ -20,10 +20,6 @@ function util.UVAtlasGenerator:__init(lmUuid)
 end
 
 function util.UVAtlasGenerator:AddEntity(ent,meshFilter)
-
-end
-
-function util.UVAtlasGenerator:AddEntity(ent,meshFilter)
 	local mdl = ent:GetModel()
 	local mdlC = ent:GetComponent(ents.COMPONENT_MODEL)
 	local renderC = ent:GetComponent(ents.COMPONENT_RENDER)
@@ -71,7 +67,7 @@ function util.UVAtlasGenerator:Generate(lightmapCachePath)
 				local atlasMesh = meshes[meshInfo.xatlasMeshIndex]
 				local origIndexCount = mesh:GetIndexCount()
 				local newIndexCount = atlasMesh:GetIndexCount()
-				meshInfo.restructuredMesh = (newIndexCount ~= origIndexCount)
+				meshInfo.restructuredMesh = true -- (newIndexCount ~= origIndexCount)
 			end
 		end
 	end
@@ -130,16 +126,16 @@ function util.UVAtlasGenerator:Generate(lightmapCachePath)
 			lmCache:AddInstanceData(ent:GetUuid(),ent:GetModelName(),ent:GetPose(),origMesh:GetUuid(),lightmapUvs)
 
 			if(meshInfo.restructuredMesh == true) then
-				origMesh:ClearVertices()
-				origMesh:ClearUVSets()
-				-- origMesh:SetVertexCount(#newVerts)
-				origMesh:AddUVSet("lightmap")
-				for j,v in ipairs(newVerts) do
+				--origMesh:ClearVertices()
+				--origMesh:ClearUVSets()
+				--origMesh:SetVertexCount(#newVerts)
+				--origMesh:AddUVSet("lightmap")
+				--[[for j,v in ipairs(newVerts) do
 					origMesh:SetVertex(j -1,v)
-					-- origMesh:SetVertexUV("lightmap",j -1,Vector2(lightmapUvs[j].x,lightmapUvs[j].y))
-				end
+					origMesh:SetVertexUV("lightmap",j -1,Vector2(lightmapUvs[j].x,lightmapUvs[j].y))
+				end]]
 
-				origMesh:ClearIndices()
+				--origMesh:ClearIndices()
 				local numIndices = atlasMesh:GetIndexCount()
 				local indices = {}
 				local maxIndex = -1
@@ -149,11 +145,11 @@ function util.UVAtlasGenerator:Generate(lightmapCachePath)
 				local indexType = (maxIndex > util.MAX_UINT16) and game.Model.Mesh.Sub.INDEX_TYPE_UINT32 or game.Model.Mesh.Sub.INDEX_TYPE_UINT16
 				for i=1,numIndices,3 do
 					local triIndices = {atlasMesh:GetIndex(i -1),atlasMesh:GetIndex(i),atlasMesh:GetIndex(i +1)}
-					origMesh:AddTriangle(triIndices[1],triIndices[2],triIndices[3])
+					--origMesh:AddTriangle(triIndices[1],triIndices[2],triIndices[3])
 
 					for _,idx in ipairs(triIndices) do table.insert(indices,idx) end
 				end
-				origMesh:Update(game.Model.FUPDATE_ALL)
+				--origMesh:Update(game.Model.FUPDATE_ALL)
 
 				local extData = origMesh:GetExtensionData()
 				local udmLightmapData = extData:Get("lightmapData")

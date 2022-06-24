@@ -70,6 +70,13 @@ function udm.BaseSchemaType:Reinitialize(data)
 		referenceables[newUniqueId] = self
 	end
 end
+function udm.BaseSchemaType:ChangeUniqueId(uuid)
+	if(self.GetUniqueId == nil) then return end
+	local referenceables = self:GetSchema():GetLibrary().detail.referenceables
+	local newUniqueId = tostring(uuid)
+	self:SetUniqueId(util.Uuid(newUniqueId))
+	referenceables[newUniqueId] = self
+end
 function udm.BaseSchemaType:OnInitialize() end
 function udm.BaseSchemaType:IsValid() return self:GetUdmData():IsValid() end
 function udm.BaseSchemaType:Remove() self:OnRemove() end

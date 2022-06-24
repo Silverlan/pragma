@@ -147,6 +147,19 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 		auto tmpUvs = uvs;
 		cache.AddInstanceData(util::uuid_string_to_bytes(entUuid),model,pose,util::uuid_string_to_bytes(meshUuid),std::move(tmpUvs));
 	});
+	defCache.def("GetInstanceIds",+[](pragma::LightmapDataCache &cache) -> std::vector<std::string> {
+		std::vector<std::string> uuids;
+		uuids.reserve(cache.cacheData.size());
+		for(auto &pair : cache.cacheData)
+			uuids.push_back(util::uuid_to_string(pair.first.uuid));
+		return uuids;
+	});
+	defCache.def("GetInstancePose",+[](pragma::LightmapDataCache &cache,const std::string &uuid) -> std::optional<umath::Transform> {
+		auto it = cache.cacheData.find(pragma::LmUuid{util::uuid_string_to_bytes(uuid)});
+		if(it == cache.cacheData.end())
+			return {};
+		return it->second.pose;
+	});
 	defCache.def("FindLightmapUvs",+[](pragma::LightmapDataCache &cache,const std::string &entUuid,const std::string &meshUuid) -> std::optional<std::vector<Vector2>> {
 		auto *uvs = cache.FindLightmapUvs(util::uuid_string_to_bytes(entUuid),util::uuid_string_to_bytes(meshUuid));
 		if(!uvs)

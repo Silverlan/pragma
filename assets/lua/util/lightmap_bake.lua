@@ -11,7 +11,7 @@ include("lightmap_cache.lua")
 
 pfm.register_log_category("lightmap")
 
-local function generate_uv_atlas(entLm,origin,tEnts,lightmapCachePath)
+local function generate_uv_atlas(entLm,origin,tEnts,lightmapCachePath,meshFilter)
 	log.msg("Generating lightmap UV atlas...",pfm.LOG_CATEGORY_LIGHTMAP)
 	local generator = util.UVAtlasGenerator(entLm:GetUuid())
 	for _,ent in ipairs(tEnts) do
@@ -25,13 +25,20 @@ local function generate_uv_atlas(entLm,origin,tEnts,lightmapCachePath)
 				if(leafNode ~= nil) then
 					log.msg("Including world entity '" .. tostring(ent) .. "' for UV atlas...",pfm.LOG_CATEGORY_LOG_CATEGORY_LIGHTMAP)
 					generator:AddEntity(ent,function(mesh,subMesh)
+						if(meshFilter ~= nil and meshFilter(ent,mesh,subMesh) == false) then return false end
 						return bspTree:IsClusterVisible(leafNode:GetCluster(),mesh:GetReferenceId())
 					end)
 				end
 			end
 		else
 			log.msg("Including entity '" .. tostring(ent) .. "' for UV atlas...",pfm.LOG_CATEGORY_LOG_CATEGORY_LIGHTMAP)
-			generator:AddEntity(ent)
+			local f
+			if(meshFilter ~= nil) then
+				f = function(mesh,subMesh)
+					return meshFilter(ent,mesh,subMesh)
+				end
+			end
+			generator:AddEntity(ent,f)
 		end
 	end
 	generator:Generate(lightmapCachePath)
@@ -54,9 +61,9 @@ local function update_lightmap_data(tEnts)
 	end
 end
 
-util.bake_lightmap_uvs = function(entLm,tEnts,lightmapCachePath,origin)
+util.bake_lightmap_uvs = function(entLm,tEnts,lightmapCachePath,origin,meshFilter)
 	log.msg("Baking lightmap UV data...",pfm.LOG_CATEGORY_LOG_CATEGORY_LIGHTMAP)
-	generate_uv_atlas(entLm,origin,tEnts,lightmapCachePath)
+	generate_uv_atlas(entLm,origin,tEnts,lightmapCachePath,meshFilter)
 	--update_lightmap_data(tEnts)
 
 	-- Lightmap uv cache

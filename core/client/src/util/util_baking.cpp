@@ -292,14 +292,20 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> util::baking::bake_directi
 			for(uint32_t idx=0;auto &subMesh : m_meshes)
 			{
 				if(subMesh->GetGeometryType() != ModelSubMesh::GeometryType::Triangles)
+				{
+					++idx;
 					continue;
+				}
 				const std::vector<Vector2> *uvs = nullptr;
 				if(m_lightmapDataCache)
 					uvs = m_lightmapDataCache->FindLightmapUvs(util::uuid_string_to_bytes(m_meshEntityUuids[idx]),subMesh->GetUuid());
 				else
 					uvs = subMesh->GetUVSet("lightmap");
 				if(!uvs)
+				{
+					++idx;
 					continue;
+				}
 				util::baking::MeshInterface meshInterface;
 				meshInterface.getUv = [uvs](uint32_t idx) -> util::baking::Uv {
 					auto &uv = (*uvs)[idx];

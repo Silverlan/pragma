@@ -19,10 +19,12 @@
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/renderers/c_raytracing_renderer_component.hpp"
 #include "pragma/entities/components/c_raytracing_component.hpp"
+#include "pragma/entities/components/c_bvh_component.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include <pragma/debug/intel_vtune.hpp>
 #include <pragma/lua/classes/ldef_mat4.h>
 #include <pragma/model/model.h>
 #include <pragma/entities/parentinfo.h>
@@ -495,6 +497,12 @@ void CRenderComponent::ReceiveData(NetPacket &packet)
 }
 std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersection(const Vector3 &start,const Vector3 &dir,bool precise) const
 {
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().BeginTask("render_component_calc_ray_intersection");
+	util::ScopeGuard sg {[]() {
+		::debug::get_domain().EndTask();
+	}};
+#endif
 	auto &lodMeshes = GetLODMeshes();
 	if(lodMeshes.empty())
 		return {};
@@ -520,7 +528,30 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 	if(umath::intersection::line_aabb(lstart,n,aabb.min,aabb.max,&dIntersect) == umath::intersection::Result::NoIntersection || dIntersect > d)
 		return {};
 
-	auto mdlC = GetEntity().GetModelComponent();
+	auto &ent = GetEntity();
+	auto bvhC = ent.GetComponent<pragma::CBvhComponent>();
+	if(bvhC.valid())
+	{
+		auto res = bvhC->IntersectionTest(lstart,n,0.f,d);
+		if(!res.has_value())
+			return {};
+		Intersection::LineMeshResult result {};
+		result.hitPos = start +dir *res->distance;
+		result.hitValue = res->distance;
+		result.result = umath::intersection::Result::Intersect;
+		if(precise)
+		{
+			result.precise = std::make_shared<Intersection::LineMeshResult::Precise>();
+			result.precise->subMesh = res->mesh;
+			result.precise->triIdx = res->primitiveIndex;
+			result.precise->u = res->u;
+			result.precise->v = res->v;
+			result.precise->t = res->t;
+		}
+		return result;
+	}
+
+	auto mdlC = ent.GetModelComponent();
 	auto mdl = mdlC ? mdlC->GetModel() : nullptr;
 	if(mdl)
 	{

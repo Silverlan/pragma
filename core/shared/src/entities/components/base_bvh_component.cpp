@@ -9,6 +9,7 @@
 #include "pragma/entities/components/base_bvh_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
+#include "pragma/entities/components/base_static_bvh_cache_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <bvh/bvh.hpp>
@@ -31,25 +32,17 @@ namespace pragma
 			bvh::ClosestPrimitiveIntersector<bvh::Bvh<float>, bvh::Triangle<float>> primitiveIntersector;
 			bvh::SingleRayTraverser<bvh::Bvh<float>> traverser;
 		};
-		struct MeshRange
-		{
-			std::shared_ptr<ModelSubMesh> mesh;
-			size_t start;
-			size_t end;
-			bool operator<(const MeshRange &other) const
-			{
-				return start < other.start;
-			}
-		};
 		BvhData();
 		bvh::Bvh<float> bvh;
 		std::vector<Primitive> primitives;
-		std::vector<MeshRange> meshRanges;
+		std::vector<BvhMeshRange> meshRanges;
 
 		void InitializeIntersectorData();
 		std::unique_ptr<IntersectorData> intersectorData;
 	};
 };
+
+std::vector<BvhMeshRange> &pragma::get_bvh_mesh_ranges(BvhData &bvhData) {return bvhData.meshRanges;}
 
 pragma::BvhData::BvhData()
 {}
@@ -59,10 +52,10 @@ void pragma::BvhData::InitializeIntersectorData()
 	auto [bboxes, centers] = bvh::compute_bounding_boxes_and_centers(primitives.data(),primitives.size());
 	auto global_bbox = bvh::compute_bounding_boxes_union(bboxes.get(),primitives.size());
 
-	bvh::SweepSahBuilder<bvh::Bvh<float>> builder(bvh);
-	builder.build(global_bbox, bboxes.get(), centers.get(), primitives.size());
-	bvh::ClosestPrimitiveIntersector<bvh::Bvh<float>, bvh::Triangle<float>> primitive_intersector(bvh, primitives.data());
-	bvh::SingleRayTraverser<bvh::Bvh<float>> traverser(bvh);
+	bvh::SweepSahBuilder<bvh::Bvh<float>> builder {bvh};
+	builder.build(global_bbox,bboxes.get(),centers.get(),primitives.size());
+	bvh::ClosestPrimitiveIntersector<bvh::Bvh<float>,bvh::Triangle<float>> primitive_intersector(bvh,primitives.data());
+	bvh::SingleRayTraverser<bvh::Bvh<float>> traverser {bvh};
 	intersectorData = std::make_unique<IntersectorData>(
 		std::move(builder),
 		std::move(primitive_intersector),
@@ -72,23 +65,44 @@ void pragma::BvhData::InitializeIntersectorData()
 
 void BaseBvhComponent::ClearBvh() {m_bvhData = nullptr;}
 
-bool BaseBvhComponent::RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh>> &meshes)
+void BaseBvhComponent::RebuildBvh()
 {
-	m_bvhData = std::make_unique<pragma::BvhData>();
+	ClearBvh();
+	if(m_staticCache.valid())
+	{
+		m_staticCache->SetCacheDirty();
+		return;
+	}
+	DoRebuildBvh();
+}
+
+void BaseBvhComponent::SetStaticCache(BaseStaticBvhCacheComponent *staticCache)
+{
+	m_staticCache = staticCache ? staticCache->GetHandle<BaseStaticBvhCacheComponent>() : ComponentHandle<BaseStaticBvhCacheComponent>{};
+}
+
+std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(
+	const std::vector<std::shared_ptr<ModelSubMesh>> &meshes,const std::vector<umath::ScaledTransform> *optPoses,
+	util::BaseParallelWorker *optWorker
+)
+{
+	auto bvhData = std::make_unique<pragma::BvhData>();
 
 	auto shouldUseMesh = [](const ModelSubMesh &mesh) {
 		return mesh.GetGeometryType() == ModelSubMesh::GeometryType::Triangles;
 	};
 	size_t numVerts = 0;
-	m_bvhData->meshRanges.reserve(meshes.size());
+	bvhData->meshRanges.reserve(meshes.size());
 	size_t primitiveOffset = 0;
 	for(auto &mesh : meshes)
 	{
+		if(optWorker && optWorker->IsCancelled())
+			return nullptr;
 		if(shouldUseMesh(*mesh) == false)
 			continue;
-		m_bvhData->meshRanges.push_back({});
+		bvhData->meshRanges.push_back({});
 
-		auto &rangeInfo = m_bvhData->meshRanges.back();
+		auto &rangeInfo = bvhData->meshRanges.back();
 		rangeInfo.mesh = mesh;
 		rangeInfo.start = primitiveOffset;
 		rangeInfo.end = rangeInfo.start +mesh->GetIndexCount();
@@ -97,20 +111,33 @@ bool BaseBvhComponent::RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh
 		primitiveOffset += mesh->GetIndexCount();
 	}
 	
-	auto &primitives = m_bvhData->primitives;
+	auto &primitives = bvhData->primitives;
 	primitives.resize(numVerts /3);
 	primitiveOffset = 0;
-	for(auto &mesh : meshes)
+	for(uint32_t meshIdx=0;auto &mesh : meshes)
 	{
+		if(optWorker && optWorker->IsCancelled())
+			return nullptr;
 		if(shouldUseMesh(*mesh) == false)
+		{
+			++meshIdx;
 			continue;
+		}
+		auto *pose = optPoses ? &(*optPoses)[meshIdx] : nullptr;
 		auto &verts = mesh->GetVertices();
-		mesh->VisitIndices([&verts,primitiveOffset,&primitives](auto *indexDataSrc,uint32_t numIndicesSrc) {
+		mesh->VisitIndices([&verts,primitiveOffset,&primitives,pose](auto *indexDataSrc,uint32_t numIndicesSrc) {
 			for(auto i=decltype(numIndicesSrc){0};i<numIndicesSrc;i+=3)
 			{
-				auto &va = verts[indexDataSrc[i]].position;
-				auto &vb = verts[indexDataSrc[i +1]].position;
-				auto &vc = verts[indexDataSrc[i +2]].position;
+				auto va = verts[indexDataSrc[i]].position;
+				auto vb = verts[indexDataSrc[i +1]].position;
+				auto vc = verts[indexDataSrc[i +2]].position;
+
+				if(pose)
+				{
+					va = *pose *va;
+					vb = *pose *vb;
+					vc = *pose *vc;
+				}
 
 				auto &prim = primitives[(primitiveOffset +i) /3];
 				prim = {
@@ -121,11 +148,14 @@ bool BaseBvhComponent::RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh
 			}
 		});
 		primitiveOffset += mesh->GetIndexCount();
+		++meshIdx;
 	}
 	
-	m_bvhData->InitializeIntersectorData();
-	return true;
+	bvhData->InitializeIntersectorData();
+	return std::move(bvhData);
 }
+
+std::vector<BvhMeshRange> &BaseBvhComponent::GetMeshRanges() {return m_bvhData->meshRanges;}
 
 void BaseBvhComponent::RebuildAnimatedBvh()
 {
@@ -191,9 +221,10 @@ bool BaseBvhComponent::IntersectionTest(
 	};
 	if(auto hit = traverser.traverse(ray, primitiveIntersector))
 	{
-		BvhData::MeshRange search {};
-		search.start = hit->primitive_index;
+		BvhMeshRange search {};
+		search.start = hit->primitive_index *3;
 		auto it = std::upper_bound(m_bvhData->meshRanges.begin(),m_bvhData->meshRanges.end(),search);
+		assert(it != m_bvhData->meshRanges.begin());
 		--it;
 
 		auto &hitInfo = outHitInfo;
@@ -203,6 +234,7 @@ bool BaseBvhComponent::IntersectionTest(
 		hitInfo.v = hit->intersection.v;
 		hitInfo.t = hit->intersection.t;
 		hitInfo.mesh = it->mesh;
+		hitInfo.entity = it->entity ? it->entity->GetHandle() : GetEntity().GetHandle();
 		return true;
 	}
 	return false;

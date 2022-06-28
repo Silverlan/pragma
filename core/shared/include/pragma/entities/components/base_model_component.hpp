@@ -37,6 +37,8 @@ namespace pragma
 		virtual void PushArguments(lua_State *l) override;
 		std::shared_ptr<Model> model;
 	};
+	class BaseBvhComponent;
+	class BaseStaticBvhCacheComponent;
 	class DLLNETWORK BaseModelComponent
 		: public BaseEntityComponent,
 		public DynamicMemberRegister
@@ -91,6 +93,9 @@ namespace pragma
 
 		uint32_t GetHitboxCount() const;
 		bool GetHitboxBounds(uint32_t boneId,Vector3 &min,Vector3 &max,Vector3 &origin,Quat &rot) const;
+		
+		const BaseBvhComponent *GetBvhComponent() const;
+		BaseBvhComponent *GetBvhComponent();
 
 		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
 	protected:
@@ -100,6 +105,7 @@ namespace pragma
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		std::shared_ptr<Model> m_model = nullptr;
 
+		BaseBvhComponent *m_bvhComponent = nullptr;
 		std::vector<unsigned int> m_bodyGroups;
 		std::unique_ptr<std::string> m_modelName = nullptr;
 		std::shared_ptr<util::UInt32Property> m_skin = nullptr;

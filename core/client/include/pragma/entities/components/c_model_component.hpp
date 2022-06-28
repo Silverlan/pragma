@@ -55,6 +55,9 @@ namespace pragma
 		CMaterial *GetRenderMaterial(uint32_t idx) const;
 		CMaterial *GetRenderMaterial(uint32_t idx,uint32_t skin) const;
 
+		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
+		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
+
 		bool IsWeighted() const;
 
 		void UpdateLOD(uint32_t lod);

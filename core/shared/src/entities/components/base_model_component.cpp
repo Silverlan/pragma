@@ -420,6 +420,8 @@ uint32_t BaseModelComponent::GetHitboxCount() const
 		return 0;
 	return mdl.get()->GetHitboxCount();
 }
+const BaseBvhComponent *BaseModelComponent::GetBvhComponent() const {return const_cast<BaseModelComponent*>(this)->GetBvhComponent();}
+BaseBvhComponent *BaseModelComponent::GetBvhComponent() {return m_bvhComponent;}
 bool BaseModelComponent::GetHitboxBounds(uint32_t boneId,Vector3 &min,Vector3 &max,Vector3 &origin,Quat &rot) const
 {
 	if(HasModel() == false)

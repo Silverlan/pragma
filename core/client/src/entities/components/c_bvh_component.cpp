@@ -44,7 +44,7 @@ bool CBvhComponent::IntersectionTest(
 	return BaseBvhComponent::IntersectionTest(origin,dir,minDist,maxDist,outHitInfo);
 }
 
-void CBvhComponent::RebuildBvh()
+void CBvhComponent::DoRebuildBvh()
 {
 	ClearBvh();
 	auto *mdlC = static_cast<CModelComponent*>(GetEntity().GetModelComponent());

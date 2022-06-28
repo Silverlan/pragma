@@ -5,30 +5,26 @@
  * Copyright (c) 2021 Silverlan
  */
 
-#ifndef __C_BVH_COMPONENT_HPP__
-#define __C_BVH_COMPONENT_HPP__
+#ifndef __C_STATIC_BVH_CACHE_COMPONENT_HPP__
+#define __C_STATIC_BVH_CACHE_COMPONENT_HPP__
 
 #include "pragma/clientdefinitions.h"
-#include <pragma/entities/components/base_bvh_component.hpp>
+#include <pragma/entities/components/base_static_bvh_cache_component.hpp>
 #include <unordered_set>
 
 namespace pragma
 {
-	class DLLCLIENT CBvhComponent final
-		: public BaseBvhComponent
+	class DLLCLIENT CStaticBvhCacheComponent final
+		: public BaseStaticBvhCacheComponent
 	{
 	public:
-		CBvhComponent(BaseEntity &ent) : BaseBvhComponent(ent) {}
+		CStaticBvhCacheComponent(BaseEntity &ent) : BaseStaticBvhCacheComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool IntersectionTest(
-			const Vector3 &origin,const Vector3 &dir,float minDist,float maxDist,
-			BvhHitInfo &outHitInfo
-		) const override;
-		using BaseBvhComponent::IntersectionTest;
+		virtual void TestRebuildBvh() override;
+		void TestPopulate();
 	private:
 		virtual void DoRebuildBvh() override;
-		bool m_bvhDirty = true;
 	};
 };
 

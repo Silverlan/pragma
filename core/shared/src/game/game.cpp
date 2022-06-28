@@ -36,6 +36,7 @@
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/animation_driver_component.hpp"
+#include "pragma/entities/components/base_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/entity_component_manager.hpp"
 #include "pragma/entities/prop/prop_base.h"
@@ -868,12 +869,24 @@ bool Game::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Enti
 	// Load entities
 	Con::cout<<"Loading entities..."<<Con::endl;
 
+	auto *entBvh = CreateEntity();
+	auto *bvhC = static_cast<pragma::BaseStaticBvhCacheComponent*>(entBvh->AddComponent("static_bvh_cache").get());
+	if(!bvhC)
+	{
+		entBvh->Remove();
+		entBvh = nullptr;
+	}
+	else
+		entBvh->Spawn();
+
 	std::vector<EntityHandle> ents {};
 	InitializeMapEntities(*worldData,ents);
 	for(auto &hEnt : ents)
 	{
 		if(hEnt.valid() == false)
 			continue;
+		if(bvhC && hEnt->IsStatic())
+			bvhC->AddEntity(*hEnt);
 		hEnt->Spawn();
 	}
 	for(auto &hEnt : ents)

@@ -528,9 +528,9 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 	if(umath::intersection::line_aabb(lstart,n,aabb.min,aabb.max,&dIntersect) == umath::intersection::Result::NoIntersection || dIntersect > d)
 		return {};
 
-	auto &ent = GetEntity();
-	auto bvhC = ent.GetComponent<pragma::CBvhComponent>();
-	if(bvhC.valid())
+	auto *mdlC = GetModelComponent();
+	auto *bvhC = mdlC ? mdlC->GetBvhComponent() : nullptr;
+	if(bvhC)
 	{
 		auto res = bvhC->IntersectionTest(lstart,n,0.f,d);
 		if(!res.has_value())
@@ -551,7 +551,6 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 		return result;
 	}
 
-	auto mdlC = ent.GetModelComponent();
 	auto mdl = mdlC ? mdlC->GetModel() : nullptr;
 	if(mdl)
 	{

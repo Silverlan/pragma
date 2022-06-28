@@ -14,6 +14,7 @@ namespace pragma
 	struct DLLNETWORK BvhHitInfo
 	{
 		std::shared_ptr<ModelSubMesh> mesh;
+		EntityHandle entity;
 		size_t primitiveIndex;
 		float distance;
 		float t;
@@ -21,7 +22,21 @@ namespace pragma
 		float v;
 	};
 
+	struct DLLNETWORK BvhMeshRange
+	{
+		BaseEntity *entity = nullptr;
+		std::shared_ptr<ModelSubMesh> mesh;
+		size_t start;
+		size_t end;
+		bool operator<(const BvhMeshRange &other) const
+		{
+			return start < other.start;
+		}
+	};
+
 	struct BvhData;
+	class BaseStaticBvhCacheComponent;
+	DLLNETWORK std::vector<BvhMeshRange> &get_bvh_mesh_ranges(BvhData &bvhData);
 	class DLLNETWORK BaseBvhComponent
 		: public BaseEntityComponent
 	{
@@ -36,12 +51,21 @@ namespace pragma
 			const Vector3 &origin,const Vector3 &dir,float minDist,float maxDist,
 			BvhHitInfo &outHitInfo
 		) const;
+		void SetStaticCache(BaseStaticBvhCacheComponent *staticCache);
+		virtual bool IsStaticBvh() const {return false;}
 	protected:
 		BaseBvhComponent(BaseEntity &ent);
 		void RebuildAnimatedBvh();
-		bool RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh>> &meshes);
+		void RebuildBvh();
+		std::shared_ptr<pragma::BvhData> RebuildBvh(
+			const std::vector<std::shared_ptr<ModelSubMesh>> &meshes,const std::vector<umath::ScaledTransform> *optPoses=nullptr,
+			util::BaseParallelWorker *optWorker=nullptr
+		);
+		virtual void DoRebuildBvh()=0;
+		std::vector<BvhMeshRange> &GetMeshRanges();
 		void ClearBvh();
-		std::unique_ptr<BvhData> m_bvhData = nullptr;
+		std::shared_ptr<BvhData> m_bvhData = nullptr;
+		ComponentHandle<BaseStaticBvhCacheComponent> m_staticCache;
 	};
 };
 

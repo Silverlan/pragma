@@ -10,6 +10,8 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
+#include "pragma/entities/components/c_bvh_component.hpp"
+#include "pragma/entities/components/c_static_bvh_cache_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -441,6 +443,19 @@ RenderMeshGroup &CModelComponent::GetLodRenderMeshGroup(uint32_t lod)
 	return m_lodRenderMeshGroups[lod];
 }
 const RenderMeshGroup &CModelComponent::GetLodRenderMeshGroup(uint32_t lod) const {return const_cast<CModelComponent*>(this)->GetLodRenderMeshGroup(lod);}
+
+void CModelComponent::OnEntityComponentAdded(BaseEntityComponent &component)
+{
+	BaseModelComponent::OnEntityComponentAdded(component);
+	if(typeid(component) == typeid(CBvhComponent))
+		m_bvhComponent = static_cast<CBvhComponent*>(&component);
+}
+void CModelComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
+{
+	BaseModelComponent::OnEntityComponentRemoved(component);
+	if(typeid(component) == typeid(CBvhComponent))
+		m_bvhComponent = nullptr;
+}
 
 bool CModelComponent::SetBodyGroup(UInt32 groupId,UInt32 id)
 {

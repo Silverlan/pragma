@@ -1,0 +1,90 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2021 Silverlan
+ */
+
+#include "stdafx_shared.h"
+#include "pragma/entities/components/base_static_bvh_user_component.hpp"
+#include "pragma/entities/components/base_static_bvh_cache_component.hpp"
+#include "pragma/entities/components/base_transform_component.hpp"
+#include "pragma/entities/components/base_physics_component.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
+
+using namespace pragma;
+#pragma optimize("",off)
+BaseStaticBvhUserComponent::BaseStaticBvhUserComponent(BaseEntity &ent)
+	: BaseEntityComponent(ent)
+{}
+BaseStaticBvhUserComponent::~BaseStaticBvhUserComponent() {}
+void BaseStaticBvhUserComponent::Initialize()
+{
+	BaseEntityComponent::Initialize();
+	auto &ent = GetEntity();
+	auto pTrComponent = ent.GetTransformComponent();
+	if(pTrComponent != nullptr)
+	{
+		auto &trC = *pTrComponent;
+		if(m_cbOnPoseChanged.IsValid())
+			m_cbOnPoseChanged.Remove();
+		m_cbOnPoseChanged = pTrComponent->AddEventCallback(BaseTransformComponent::EVENT_ON_POSE_CHANGED,
+			[this,&trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			if(m_staticBvhComponent.valid())
+				m_staticBvhComponent->SetEntityDirty(GetEntity());
+			return util::EventReply::Unhandled;
+		});
+	}
+
+	if(ent.IsSpawned())
+		UpdateBvhStatus();
+}
+void BaseStaticBvhUserComponent::OnEntitySpawn()
+{
+	BaseEntityComponent::OnEntitySpawn();
+	UpdateBvhStatus();
+}
+void BaseStaticBvhUserComponent::UpdateBvhStatus()
+{
+	auto isStatic = GetEntity().IsStatic();
+	if(GetEntity().FindComponent("panima").valid())
+		isStatic = false;
+
+	if(m_staticBvhComponent.expired())
+		return;
+	if(isStatic)
+		m_staticBvhComponent->AddEntity(GetEntity());
+	else
+		m_staticBvhComponent->RemoveEntity(GetEntity(),false);
+}
+void BaseStaticBvhUserComponent::OnEntityComponentAdded(BaseEntityComponent &component)
+{
+	BaseEntityComponent::OnEntityComponentAdded(component);
+	if(GetEntity().IsSpawned())
+		UpdateBvhStatus();
+}
+void BaseStaticBvhUserComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
+{
+	BaseEntityComponent::OnEntityComponentAdded(component);
+	if(GetEntity().IsSpawned())
+		UpdateBvhStatus();
+}
+util::EventReply BaseStaticBvhUserComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
+{
+	if(eventId == BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED || eventId == BasePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED)
+		UpdateBvhStatus();
+	return BaseEntityComponent::HandleEvent(eventId,evData);
+}
+void BaseStaticBvhUserComponent::OnRemove()
+{
+	BaseEntityComponent::OnRemove();
+	if(m_cbOnPoseChanged.IsValid())
+		m_cbOnPoseChanged.Remove();
+	if(m_staticBvhComponent.valid())
+		m_staticBvhComponent->RemoveEntity(GetEntity());
+}
+void BaseStaticBvhUserComponent::SetStaticBvhCacheComponent(BaseStaticBvhCacheComponent *component)
+{
+	m_staticBvhComponent = component ? component->GetHandle<BaseStaticBvhCacheComponent>() : pragma::ComponentHandle<BaseStaticBvhCacheComponent>{};
+}
+#pragma optimize("",on)

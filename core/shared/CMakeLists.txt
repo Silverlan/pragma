@@ -38,6 +38,7 @@ add_include_dir(libogg_build)
 add_include_dir(pr_steamworks)
 add_include_dir(eigen)
 add_include_dir(miniball)
+add_include_dir(bvh)
 add_include_dir(client)
 # add_include_dir(exprtk)
 

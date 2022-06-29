@@ -22,7 +22,6 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void TestRebuildBvh() override;
-		void TestPopulate();
 	private:
 		virtual void DoRebuildBvh() override;
 	};

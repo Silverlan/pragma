@@ -26,19 +26,6 @@ void CStaticBvhCacheComponent::Initialize()
 
 }
 
-void CStaticBvhCacheComponent::TestPopulate()
-{
-	EntityIterator entIt {*c_game};
-	entIt.AttachFilter<EntityIteratorFilterComponent>("pfm_actor");
-	m_entities.clear();
-	for(auto *ent : entIt)
-	{
-		if(ent->FindComponent("panima").valid() || ent->FindComponent("animated").valid())
-			continue;
-		AddEntity(*ent);
-	}
-}
-
 void CStaticBvhCacheComponent::DoRebuildBvh()
 {
 

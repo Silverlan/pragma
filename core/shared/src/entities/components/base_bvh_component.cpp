@@ -83,7 +83,7 @@ void BaseBvhComponent::SetStaticCache(BaseStaticBvhCacheComponent *staticCache)
 
 std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(
 	const std::vector<std::shared_ptr<ModelSubMesh>> &meshes,const std::vector<umath::ScaledTransform> *optPoses,
-	util::BaseParallelWorker *optWorker
+	const std::function<bool()> &fIsCancelled
 )
 {
 	auto bvhData = std::make_unique<pragma::BvhData>();
@@ -96,7 +96,7 @@ std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(
 	size_t primitiveOffset = 0;
 	for(auto &mesh : meshes)
 	{
-		if(optWorker && optWorker->IsCancelled())
+		if(fIsCancelled && fIsCancelled())
 			return nullptr;
 		if(shouldUseMesh(*mesh) == false)
 			continue;
@@ -116,7 +116,7 @@ std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(
 	primitiveOffset = 0;
 	for(uint32_t meshIdx=0;auto &mesh : meshes)
 	{
-		if(optWorker && optWorker->IsCancelled())
+		if(fIsCancelled && fIsCancelled())
 			return nullptr;
 		if(shouldUseMesh(*mesh) == false)
 		{

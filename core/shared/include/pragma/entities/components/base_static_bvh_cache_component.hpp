@@ -39,6 +39,7 @@ namespace pragma
 		virtual bool IsStaticBvh() const override {return true;}
 	protected:
 		BaseStaticBvhCacheComponent(BaseEntity &ent);
+		void UpdateBuild();
 
 		void Build(
 			std::vector<std::shared_ptr<ModelSubMesh>> &&meshes,

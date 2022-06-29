@@ -26,31 +26,13 @@ void RegisterLuaEntityComponents2(lua_State *l,luabind::module_ &entsMod)
 	auto defLiquidSurfaceSimulation = pragma::lua::create_entity_component_class<pragma::CLiquidSurfaceSimulationComponent,pragma::BaseLiquidSurfaceSimulationComponent>("LiquidSurfaceSimulationComponent");
 	entsMod[defLiquidSurfaceSimulation];
 
-	auto defBvhHitInfo = luabind::class_<pragma::BvhHitInfo>("HitInfo");
-	defBvhHitInfo.def_readonly("mesh",&pragma::BvhHitInfo::mesh);
-	defBvhHitInfo.def_readonly("entity",&pragma::BvhHitInfo::entity);
-	defBvhHitInfo.def_readonly("primitiveIndex",&pragma::BvhHitInfo::primitiveIndex);
-	defBvhHitInfo.def_readonly("distance",&pragma::BvhHitInfo::distance);
-	defBvhHitInfo.def_readonly("t",&pragma::BvhHitInfo::t);
-	defBvhHitInfo.def_readonly("u",&pragma::BvhHitInfo::u);
-	defBvhHitInfo.def_readonly("v",&pragma::BvhHitInfo::v);
-
-	auto defBvh = pragma::lua::create_entity_component_class<pragma::CBvhComponent,pragma::BaseEntityComponent>("BvhComponent");
-	defBvh.def("IntersectionTest",static_cast<std::optional<pragma::BvhHitInfo>(pragma::CBvhComponent::*)(const Vector3&,const Vector3&,float,float) const>(&pragma::CBvhComponent::IntersectionTest));
-	defBvh.scope[defBvhHitInfo];
+	auto defBvh = pragma::lua::create_entity_component_class<pragma::CBvhComponent,pragma::BaseBvhComponent>("BvhComponent");
 	entsMod[defBvh];
 
-	auto defStaticBvh = pragma::lua::create_entity_component_class<pragma::CStaticBvhCacheComponent,pragma::BaseEntityComponent>("StaticBvhCacheComponent");
-	defStaticBvh.def("IntersectionTest",static_cast<std::optional<pragma::BvhHitInfo>(pragma::CStaticBvhCacheComponent::*)(const Vector3&,const Vector3&,float,float) const>(&pragma::CStaticBvhCacheComponent::IntersectionTest));
-	defStaticBvh.def("TestRebuildBvh",&pragma::CStaticBvhCacheComponent::TestRebuildBvh);
-	defStaticBvh.def("TestPopulate",&pragma::CStaticBvhCacheComponent::TestPopulate);
-
-	defStaticBvh.def("SetEntityDirty",&pragma::CStaticBvhCacheComponent::SetEntityDirty);
-	defStaticBvh.def("AddEntity",&pragma::CStaticBvhCacheComponent::AddEntity);
-	defStaticBvh.def("RemoveEntity",+[](pragma::CStaticBvhCacheComponent &component,BaseEntity &ent) {component.RemoveEntity(ent);});
+	auto defStaticBvh = pragma::lua::create_entity_component_class<pragma::CStaticBvhCacheComponent,pragma::BaseStaticBvhCacheComponent>("StaticBvhCacheComponent");
 	entsMod[defStaticBvh];
 
-	auto defStaticBvhUser = pragma::lua::create_entity_component_class<pragma::CStaticBvhUserComponent,pragma::BaseEntityComponent>("StaticBvhUserComponent");
+	auto defStaticBvhUser = pragma::lua::create_entity_component_class<pragma::CStaticBvhUserComponent,pragma::BaseStaticBvhUserComponent>("StaticBvhUserComponent");
 	entsMod[defStaticBvhUser];
 	// --template-component-register-location
 }

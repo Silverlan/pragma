@@ -9,6 +9,9 @@
 #include "pragma/entities/components/base_attachable_component.hpp"
 #include "pragma/entities/components/base_game_component.hpp"
 #include "pragma/entities/components/base_entity_component_member_register.hpp"
+#include "pragma/entities/components/base_bvh_component.hpp"
+#include "pragma/entities/components/base_static_bvh_cache_component.hpp"
+#include "pragma/entities/components/base_static_bvh_user_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/lua/policies/optional_policy.hpp"
 #include "pragma/lua/policies/game_object_policy.hpp"
@@ -410,6 +413,29 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	entityComponentDef.add_static_constant("LOG_SEVERITY_CRITICAL",umath::to_integral(pragma::BaseEntityComponent::LogSeverity::Critical));
 	entityComponentDef.add_static_constant("LOG_SEVERITY_DEBUG",umath::to_integral(pragma::BaseEntityComponent::LogSeverity::Debug));
 	mod[entityComponentDef];
+
+	auto defBvhHitInfo = luabind::class_<pragma::BvhHitInfo>("HitInfo");
+	defBvhHitInfo.def_readonly("mesh",&pragma::BvhHitInfo::mesh);
+	defBvhHitInfo.def_readonly("entity",&pragma::BvhHitInfo::entity);
+	defBvhHitInfo.def_readonly("primitiveIndex",&pragma::BvhHitInfo::primitiveIndex);
+	defBvhHitInfo.def_readonly("distance",&pragma::BvhHitInfo::distance);
+	defBvhHitInfo.def_readonly("t",&pragma::BvhHitInfo::t);
+	defBvhHitInfo.def_readonly("u",&pragma::BvhHitInfo::u);
+	defBvhHitInfo.def_readonly("v",&pragma::BvhHitInfo::v);
+
+	auto defBvh = Lua::create_base_entity_component_class<pragma::BaseBvhComponent>("BaseBvhComponent");
+	defBvh.def("IntersectionTest",static_cast<std::optional<pragma::BvhHitInfo>(pragma::BaseBvhComponent::*)(const Vector3&,const Vector3&,float,float) const>(&pragma::BaseBvhComponent::IntersectionTest));
+	defBvh.scope[defBvhHitInfo];
+	mod[defBvh];
+
+	auto defStaticBvh = pragma::lua::create_entity_component_class<pragma::BaseStaticBvhCacheComponent,pragma::BaseBvhComponent>("BaseStaticBvhCacheComponent");
+	defStaticBvh.def("SetEntityDirty",&pragma::BaseStaticBvhCacheComponent::SetEntityDirty);
+	defStaticBvh.def("AddEntity",&pragma::BaseStaticBvhCacheComponent::AddEntity);
+	defStaticBvh.def("RemoveEntity",+[](pragma::BaseStaticBvhCacheComponent &component,BaseEntity &ent) {component.RemoveEntity(ent);});
+	mod[defStaticBvh];
+
+	auto defStaticBvhUser = pragma::lua::create_entity_component_class<pragma::BaseStaticBvhUserComponent>("BaseStaticBvhUserComponent");
+	mod[defStaticBvhUser];
 
 	base_ai_component::register_class(mod);
 	base_animated_component::register_class(mod);

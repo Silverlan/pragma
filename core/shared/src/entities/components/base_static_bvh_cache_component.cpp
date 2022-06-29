@@ -151,6 +151,7 @@ bool BaseStaticBvhCacheComponent::IntersectionTest(
 	BvhHitInfo &outHitInfo
 ) const
 {
+	const_cast<BaseStaticBvhCacheComponent*>(this)->UpdateBuild();
 	if(m_buildWorker)
 		m_buildWorker->WaitForTask();
 	m_bvhMutex.lock();
@@ -181,7 +182,9 @@ void BaseStaticBvhCacheComponent::Build(
 	m_bvhMutex.unlock();
 	m_buildWorker->ResetTask([this,meshes=std::move(meshes),meshPoses=std::move(meshPoses),meshToEntity=std::move(meshToEntity)]
 		(FunctionalParallelWorker &worker) {
-		auto bvhData = BaseBvhComponent::RebuildBvh(meshes,&meshPoses);
+		auto bvhData = BaseBvhComponent::RebuildBvh(meshes,&meshPoses,[this]() -> bool {
+			return m_buildWorker->IsTaskCancelled();
+		});
 		if(!bvhData)
 			return;
 		if(worker.IsTaskCancelled())
@@ -217,6 +220,10 @@ void BaseStaticBvhCacheComponent::SetCacheDirty()
 void BaseStaticBvhCacheComponent::OnTick(double tDelta)
 {
 	SetTickPolicy(TickPolicy::Never);
+	UpdateBuild();
+}
+void BaseStaticBvhCacheComponent::UpdateBuild()
+{
 	if(!m_staticBvhDirty)
 		return;
 	m_staticBvhDirty = false;

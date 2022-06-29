@@ -59,7 +59,7 @@ namespace pragma
 		void RebuildBvh();
 		std::shared_ptr<pragma::BvhData> RebuildBvh(
 			const std::vector<std::shared_ptr<ModelSubMesh>> &meshes,const std::vector<umath::ScaledTransform> *optPoses=nullptr,
-			util::BaseParallelWorker *optWorker=nullptr
+			const std::function<bool()> &fIsCancelled=nullptr
 		);
 		virtual void DoRebuildBvh()=0;
 		std::vector<BvhMeshRange> &GetMeshRanges();

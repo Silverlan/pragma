@@ -39,6 +39,7 @@
 #include "pragma/entities/components/damageable_component.hpp"
 #include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
+#include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 #include "pragma/lua/policies/game_object_policy.hpp"
 #include "pragma/lua/policies/optional_policy.hpp"

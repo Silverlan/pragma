@@ -162,16 +162,10 @@ bool BaseStaticBvhCacheComponent::IntersectionTest(
 
 void BaseStaticBvhCacheComponent::Build(
 	std::vector<std::shared_ptr<ModelSubMesh>> &&meshes,
-	std::unordered_map<ModelSubMesh*,BaseEntity*> &&meshToEntity,
+	std::vector<BaseEntity*> &&meshToEntity,
 	std::vector<umath::ScaledTransform> &&meshPoses
 )
 {
-	// If entity added while bvh is being rebuilt -> cancel
-	// If entity removed while bvh is being rebuild -> cancel
-	// If render meshes are changed while bvh is being rebuild -> cancel
-	// If entity is moved while bvh is being rebuild -> Update meshe vertices on trhead? (Dont rebuild all)
-	// If intersection is requested while bvh is being rebuild -> wait
-
 	if(!m_buildWorker)
 	{
 		m_buildWorker = std::make_unique<FunctionalParallelWorker>();
@@ -182,19 +176,18 @@ void BaseStaticBvhCacheComponent::Build(
 	m_bvhMutex.unlock();
 	m_buildWorker->ResetTask([this,meshes=std::move(meshes),meshPoses=std::move(meshPoses),meshToEntity=std::move(meshToEntity)]
 		(FunctionalParallelWorker &worker) {
+		std::vector<size_t> meshIndices;
 		auto bvhData = BaseBvhComponent::RebuildBvh(meshes,&meshPoses,[this]() -> bool {
 			return m_buildWorker->IsTaskCancelled();
-		});
+		},&meshIndices);
 		if(!bvhData)
 			return;
 		if(worker.IsTaskCancelled())
 			return;
 		auto &meshRanges = get_bvh_mesh_ranges(*bvhData);
-		for(auto &range : meshRanges)
+		for(uint32_t i=0;auto &range : meshRanges)
 		{
-			auto it = meshToEntity.find(range.mesh.get());
-			assert(it != meshToEntity.end());
-			range.entity = it->second;
+			range.entity = meshToEntity[meshIndices[i++]];
 			if(worker.IsTaskCancelled())
 				return;
 		}

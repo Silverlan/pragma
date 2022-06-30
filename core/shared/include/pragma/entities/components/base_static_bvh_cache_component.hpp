@@ -43,7 +43,7 @@ namespace pragma
 
 		void Build(
 			std::vector<std::shared_ptr<ModelSubMesh>> &&meshes,
-			std::unordered_map<ModelSubMesh*,BaseEntity*> &&meshToEntity,
+			std::vector<BaseEntity*> &&meshToEntity,
 			std::vector<umath::ScaledTransform> &&meshPoses
 		);
 

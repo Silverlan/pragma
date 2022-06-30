@@ -34,7 +34,7 @@ void CStaticBvhCacheComponent::DoRebuildBvh()
 void CStaticBvhCacheComponent::TestRebuildBvh()
 {
 	std::vector<std::shared_ptr<ModelSubMesh>> meshes;
-	std::unordered_map<ModelSubMesh*,BaseEntity*> meshToEntity;
+	std::vector<BaseEntity*> meshToEntity;
 	std::vector<umath::ScaledTransform> meshPoses;
 	for(auto *c : m_entities)
 	{
@@ -53,7 +53,7 @@ void CStaticBvhCacheComponent::TestRebuildBvh()
 		for(auto &mesh : renderMeshes)
 		{
 			meshes.push_back(mesh);
-			meshToEntity[mesh.get()] = &ent;
+			meshToEntity.push_back(&ent);
 			meshPoses.push_back(pose);
 		}
 	}

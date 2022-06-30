@@ -83,7 +83,7 @@ void BaseBvhComponent::SetStaticCache(BaseStaticBvhCacheComponent *staticCache)
 
 std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(
 	const std::vector<std::shared_ptr<ModelSubMesh>> &meshes,const std::vector<umath::ScaledTransform> *optPoses,
-	const std::function<bool()> &fIsCancelled
+	const std::function<bool()> &fIsCancelled,std::vector<size_t> *optOutMeshIndices
 )
 {
 	auto bvhData = std::make_unique<pragma::BvhData>();
@@ -93,13 +93,21 @@ std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(
 	};
 	size_t numVerts = 0;
 	bvhData->meshRanges.reserve(meshes.size());
+	if(optOutMeshIndices)
+		optOutMeshIndices->reserve(meshes.size());
 	size_t primitiveOffset = 0;
-	for(auto &mesh : meshes)
+	for(uint32_t meshIdx=0;auto &mesh : meshes)
 	{
 		if(fIsCancelled && fIsCancelled())
+		{
+			++meshIdx;
 			return nullptr;
+		}
 		if(shouldUseMesh(*mesh) == false)
+		{
+			++meshIdx;
 			continue;
+		}
 		bvhData->meshRanges.push_back({});
 
 		auto &rangeInfo = bvhData->meshRanges.back();
@@ -109,6 +117,9 @@ std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(
 
 		numVerts += mesh->GetIndexCount();
 		primitiveOffset += mesh->GetIndexCount();
+		if(optOutMeshIndices)
+			optOutMeshIndices->push_back(meshIdx);
+		++meshIdx;
 	}
 	
 	auto &primitives = bvhData->primitives;

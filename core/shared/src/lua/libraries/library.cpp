@@ -53,6 +53,7 @@
 #include "pragma/model/modelmesh.h"
 #include "pragma/model/model.h"
 #include "pragma/util/util_ballistic.h"
+#include "pragma/util/util_game.hpp"
 #include <pragma/math/vector/util_winding_order.hpp>
 #include <pragma/math/util_engine_math.hpp>
 #include "pragma/game/game_coordinate_system.hpp"
@@ -296,7 +297,37 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		luabind::def("create_from_string",static_cast<Vector3(*)(const std::string&)>(uvec::create)),
 		luabind::def("calc_average",Lua::vector::calc_average),
 		luabind::def("calc_best_fitting_plane",Lua::vector::calc_best_fitting_plane,luabind::meta::join<luabind::pure_out_value<3>,luabind::pure_out_value<4>>::type{}),
-		luabind::def("calc_linear_velocity_from_angular",util::angular_velocity_to_linear)
+		luabind::def("calc_linear_velocity_from_angular",util::angular_velocity_to_linear),
+		luabind::def("calc_spherical_stereo_transform",+[](const Vector3 &p,const Vector3 &d,float interocularDistance,float convergenceDistance)
+			-> std::pair<Vector3,Vector3> {
+			auto pr = p;
+			auto dr = d;
+			uvec::calc_spherical_stereo_transform(
+				pr,dr,::util::pragma::metres_to_units(interocularDistance),
+				::util::pragma::metres_to_units(convergenceDistance)
+			);
+			return std::pair<Vector3,Vector3>{pr,dr};
+		}),
+		luabind::def("calc_spherical_stereo_transform",+[](const Vector3 &p,const Vector3 &d,float interocularDistance)
+			-> std::pair<Vector3,Vector3> {
+			auto pr = p;
+			auto dr = d;
+			uvec::calc_spherical_stereo_transform(
+				pr,dr,::util::pragma::metres_to_units(interocularDistance),
+				::util::pragma::metres_to_units(30.0f *0.065f)
+			);
+			return std::pair<Vector3,Vector3>{pr,dr};
+		}),
+		luabind::def("calc_spherical_stereo_transform",+[](const Vector3 &p,const Vector3 &d)
+			-> std::pair<Vector3,Vector3> {
+			auto pr = p;
+			auto dr = d;
+			uvec::calc_spherical_stereo_transform(
+				pr,dr,::util::pragma::metres_to_units(0.065f),
+				::util::pragma::metres_to_units(30.0f *0.065f)
+			);
+			return std::pair<Vector3,Vector3>{pr,dr};
+		})
 	];
 
 	Lua::RegisterLibraryValue<Vector3>(lua.GetState(),"vector","ORIGIN",uvec::ORIGIN);

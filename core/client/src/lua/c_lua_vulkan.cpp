@@ -1827,20 +1827,33 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		return img.Copy(cmd,img.GetCreateInfo());
 	}));
 	defVkImage.def("GetCreateInfo",static_cast<prosper::util::ImageCreateInfo&(prosper::IImage::*)()>(&prosper::IImage::GetCreateInfo),luabind::copy_policy<0>{});
-	defVkImage.def("ToImageBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,bool,bool,uint32_t)>([](lua_State *l,Lua::Vulkan::Image &img,bool includeLayers,bool includeMipmaps,uint32_t targetFormat) {
+	defVkImage.def("ToImageBuffer",+[](
+		lua_State *l,Lua::Vulkan::Image &img,bool includeLayers,bool includeMipmaps,uint32_t targetFormat,
+		prosper::ImageLayout inputImageLayout
+		) {
+		std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> imgBuffers;
+		auto result = util::to_image_buffer(
+			img,static_cast<uimg::Format>(targetFormat),imgBuffers,includeLayers,includeMipmaps,
+			inputImageLayout
+		);
+		if(result == false || imgBuffers.empty())
+			return;
+		push_image_buffers(l,includeLayers,includeMipmaps,imgBuffers);
+	});
+	defVkImage.def("ToImageBuffer",+[](lua_State *l,Lua::Vulkan::Image &img,bool includeLayers,bool includeMipmaps,uint32_t targetFormat) {
 		std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> imgBuffers;
 		auto result = util::to_image_buffer(img,static_cast<uimg::Format>(targetFormat),imgBuffers,includeLayers,includeMipmaps);
 		if(result == false || imgBuffers.empty())
 			return;
 		push_image_buffers(l,includeLayers,includeMipmaps,imgBuffers);
-	}));
-	defVkImage.def("ToImageBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,bool,bool)>([](lua_State *l,Lua::Vulkan::Image &img,bool includeLayers,bool includeMipmaps) {
+	});
+	defVkImage.def("ToImageBuffer",+[](lua_State *l,Lua::Vulkan::Image &img,bool includeLayers,bool includeMipmaps) {
 		std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> imgBuffers;
 		auto result = util::to_image_buffer(img,imgBuffers,includeLayers,includeMipmaps);
 		if(result == false || imgBuffers.empty())
 			return;
 		push_image_buffers(l,includeLayers,includeMipmaps,imgBuffers);
-	}));
+	});
 	defVkImage.def("GetMemoryBuffer",static_cast<prosper::IBuffer*(*)(lua_State*,Lua::Vulkan::Image&)>([](lua_State *l,Lua::Vulkan::Image &img) -> prosper::IBuffer* {
 		auto *buf = img.GetMemoryBuffer();
 		if(buf == nullptr)

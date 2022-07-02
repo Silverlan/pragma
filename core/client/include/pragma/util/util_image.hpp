@@ -18,11 +18,11 @@ namespace util
 {
 	DLLCLIENT bool to_image_buffer(
 		prosper::IImage &image,uimg::Format targetFormat,std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers,
-		bool includeLayers=false,bool includeMipmaps=false
+		bool includeLayers=false,bool includeMipmaps=false,prosper::ImageLayout inputImageLayout=prosper::ImageLayout::ShaderReadOnlyOptimal
 	);
 	DLLCLIENT bool to_image_buffer(
 		prosper::IImage &image,std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers,
-		bool includeLayers=false,bool includeMipmaps=false
+		bool includeLayers=false,bool includeMipmaps=false,prosper::ImageLayout inputImageLayout=prosper::ImageLayout::ShaderReadOnlyOptimal
 	);
 };
 

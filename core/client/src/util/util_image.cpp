@@ -13,10 +13,9 @@
 
 extern DLLCLIENT CEngine *c_engine;
 
-
 bool util::to_image_buffer(
 	prosper::IImage &image,uimg::Format targetFormat,std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers,
-	bool includeLayers,bool includeMipmaps
+	bool includeLayers,bool includeMipmaps,prosper::ImageLayout inputImageLayout
 )
 {
 	auto outputFormat = targetFormat;
@@ -51,9 +50,9 @@ bool util::to_image_buffer(
 	copyCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 	copyCreateInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
 	copyCreateInfo.tiling = prosper::ImageTiling::Optimal; // Needs to be in optimal tiling because some GPUs do not support linear tiling with mipmaps
-	setupCmd->RecordImageBarrier(image,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferSrcOptimal);
+	setupCmd->RecordImageBarrier(image,inputImageLayout,prosper::ImageLayout::TransferSrcOptimal);
 	auto imgRead = image.Copy(*setupCmd,copyCreateInfo);
-	setupCmd->RecordImageBarrier(image,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+	setupCmd->RecordImageBarrier(image,prosper::ImageLayout::TransferSrcOptimal,inputImageLayout);
 
 	// Copy the image data to a buffer
 	uint64_t size = 0;
@@ -152,7 +151,7 @@ bool util::to_image_buffer(
 }
 bool util::to_image_buffer(
 	prosper::IImage &image,std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers,
-	bool includeLayers,bool includeMipmaps
+	bool includeLayers,bool includeMipmaps,prosper::ImageLayout inputImageLayout
 )
 {
 	auto format = image.GetFormat();
@@ -304,6 +303,5 @@ bool util::to_image_buffer(
 		targetFormat = uimg::Format::RGBA32;
 		break;
 	}
-	return to_image_buffer(image,targetFormat,outImageBuffers,includeLayers,includeMipmaps);
+	return to_image_buffer(image,targetFormat,outImageBuffers,includeLayers,includeMipmaps,inputImageLayout);
 }
-

@@ -869,7 +869,8 @@ bool Game::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Enti
 	// Load entities
 	Con::cout<<"Loading entities..."<<Con::endl;
 
-	auto *entBvh = CreateEntity();
+	auto *entBvh = CreateEntity("entity");
+	assert(entBvh);
 	auto *bvhC = static_cast<pragma::BaseStaticBvhCacheComponent*>(entBvh->AddComponent("static_bvh_cache").get());
 	if(!bvhC)
 	{

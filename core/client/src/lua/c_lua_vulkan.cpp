@@ -1675,6 +1675,42 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defBlitInfo.def(luabind::constructor<>());
 	defBlitInfo.def_readwrite("srcSubresourceLayer",&prosper::util::BlitInfo::srcSubresourceLayer);
 	defBlitInfo.def_readwrite("dstSubresourceLayer",&prosper::util::BlitInfo::dstSubresourceLayer);
+	defBlitInfo.property("offsetSrc",+[](const prosper::util::BlitInfo &blitInfo) -> Vector2i {
+		return {blitInfo.offsetSrc[0],blitInfo.offsetSrc[1]};
+	},+[](lua_State *l,prosper::util::BlitInfo &blitInfo,const Vector2i &offsetSrc) {
+		blitInfo.offsetSrc = {offsetSrc.x,offsetSrc.y};
+	});
+	defBlitInfo.property("offsetDst",+[](const prosper::util::BlitInfo &blitInfo) -> Vector2i {
+		return {blitInfo.offsetDst[0],blitInfo.offsetDst[1]};
+	},+[](lua_State *l,prosper::util::BlitInfo &blitInfo,const Vector2i &offsetDst) {
+		blitInfo.offsetDst = {offsetDst.x,offsetDst.y};
+	});
+	defBlitInfo.property("extentsSrc",+[](const prosper::util::BlitInfo &blitInfo) -> std::optional<Vector2i> {
+		if(!blitInfo.extentsSrc.has_value())
+			return {};
+		return Vector2i{blitInfo.extentsSrc->width,blitInfo.extentsSrc->height};
+	},+[](lua_State *l,prosper::util::BlitInfo &blitInfo,const luabind::object &ext) {
+		if(luabind::type(ext) == LUA_TNIL)
+		{
+			blitInfo.extentsSrc = {};
+			return;
+		}
+		auto v = luabind::object_cast<Vector2i>(ext);
+		blitInfo.extentsSrc = prosper::Extent2D{static_cast<uint32_t>(v.x),static_cast<uint32_t>(v.y)};
+	});
+	defBlitInfo.property("extentsDst",+[](const prosper::util::BlitInfo &blitInfo) -> std::optional<Vector2i> {
+		if(!blitInfo.extentsDst.has_value())
+			return {};
+		return Vector2i{blitInfo.extentsDst->width,blitInfo.extentsDst->height};
+	},+[](lua_State *l,prosper::util::BlitInfo &blitInfo,const luabind::object &ext) {
+		if(luabind::type(ext) == LUA_TNIL)
+		{
+			blitInfo.extentsDst = {};
+			return;
+		}
+		auto v = luabind::object_cast<Vector2i>(ext);
+		blitInfo.extentsDst = prosper::Extent2D{static_cast<uint32_t>(v.x),static_cast<uint32_t>(v.y)};
+	});
 	prosperMod[defBlitInfo];
 
 	static_assert(sizeof(prosper::Offset3D) == sizeof(Vector3i));

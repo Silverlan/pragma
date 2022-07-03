@@ -85,14 +85,23 @@ function ents.ClickComponent.inject_click_input(action,pressed,filter)
 	end
 	return util.EVENT_REPLY_UNHANDLED,clickActor,hitPos,startPos
 end
-function ents.ClickComponent.get_ray_data()
+function ents.ClickComponent.world_space_point_to_screen_space_uv(point,callback)
 	local vpData = get_viewport_data()
 
 	local cam = vpData.camera
 	if(util.is_valid(cam) == false) then return end
+	if(callback ~= nil) then callback(vpData,cam) end
+	return cam:WorldSpaceToScreenSpace(point)
+end
+function ents.ClickComponent.get_ray_data(callback)
+	local vpData = get_viewport_data()
+
+	local cam = vpData.camera
+	if(util.is_valid(cam) == false) then return end
+	if(callback ~= nil) then callback(vpData,cam) end
 	local dir = cam:CalcRayDirection(Vector2(vpData.cursorPos.x /vpData.width,vpData.cursorPos.y /vpData.height))
 	local entCam = cam:GetEntity()
-	return entCam:GetPos() +entCam:GetForward() *cam:GetNearZ(),dir
+	return entCam:GetPos() +entCam:GetForward() *cam:GetNearZ(),dir,vpData
 end
 function ents.ClickComponent.get_camera()
 	local vpData = get_viewport_data()
@@ -110,7 +119,62 @@ function ents.ClickComponent.raycast(pos,dir,filter)
 	local distClosest = math.huge
 	local actorClosest = nil
 	local hitPos
-	for ent in ents.iterator({ents.IteratorFilterComponent(ents.COMPONENT_CLICK),ents.IteratorFilterComponent(ents.COMPONENT_MODEL),ents.IteratorFilterComponent(ents.COMPONENT_RENDER)}) do
+	debug.start_profiling_task("click_component_picking")
+
+	-- Check static BVH caches
+	for ent,c in ents.citerator(ents.COMPONENT_STATIC_BVH_CACHE) do
+		local hitData = c:IntersectionTest(pos,dir,0.0,32768.0)
+		if(hitData ~= nil) then
+			if(hitData.distance < distClosest) then -- and hitData.distance > 0.0) then
+				--debug.print("Clicked actor: ",hitData.entity)
+				distClosest = hitData.distance
+				hitPos = pos +dir *hitData.distance
+				actorClosest = hitData.entity
+			end
+		end
+	end
+
+	-- Check dynamic actors
+	local function testEntity(ent)
+		local mdl = ent:GetModel()
+		local renderC = ent:GetComponent(ents.COMPONENT_RENDER)
+		if(mdl ~= nil and ent ~= entPl and renderC ~= nil and renderC:GetSceneRenderPass() ~= game.SCENE_RENDER_PASS_VIEW and renderC:GetSceneRenderPass() ~= game.SCENE_RENDER_PASS_NONE and (filter == nil or filter(ent,renderC) == true)) then
+			if(ent:HasComponent(ents.COMPONENT_STATIC_BVH_USER) == false) then
+				local r,hitData = renderC:CalcRayIntersection(pos,dir *32768,false)
+				-- print("Intersection with ",ent,": ",r)
+				-- Note: Distance of 0 usually means we're inside the object, in which case we probably don't intend to select it
+				if(r == intersect.RESULT_INTERSECT and hitData.distance < distClosest) then -- and hitData.distance > 0.0) then
+					-- print("Clicked actor: ",ent)
+					distClosest = hitData.distance
+					hitPos = hitData.position
+					actorClosest = ent
+				end
+			end
+		end
+	end
+	local entCache = {}
+	for ent in ents.iterator({ents.IteratorFilterComponent(ents.COMPONENT_ANIMATED),ents.IteratorFilterComponent(ents.COMPONENT_CLICK),ents.IteratorFilterComponent(ents.COMPONENT_MODEL),ents.IteratorFilterComponent(ents.COMPONENT_RENDER)}) do
+		entCache[ent:GetLocalIndex()] = true
+		testEntity(ent)
+	end
+
+	for ent in ents.iterator({ents.IteratorFilterComponent(ents.COMPONENT_PANIMA),ents.IteratorFilterComponent(ents.COMPONENT_CLICK),ents.IteratorFilterComponent(ents.COMPONENT_MODEL),ents.IteratorFilterComponent(ents.COMPONENT_RENDER)}) do
+		if(entCache[ent:GetLocalIndex()] ~= true) then testEntity(ent) end
+	end
+
+	for ent in ents.iterator({ents.IteratorFilterComponent(ents.COMPONENT_PHYSICS),ents.IteratorFilterComponent(ents.COMPONENT_CLICK),ents.IteratorFilterComponent(ents.COMPONENT_MODEL),ents.IteratorFilterComponent(ents.COMPONENT_RENDER)}) do
+		if(ent:HasComponent(ents.COMPONENT_STATIC_BVH_USER) == false and entCache[ent:GetLocalIndex()] ~= true) then testEntity(ent) end
+	end
+	--
+
+	--[[if(hitPos ~= nil) then
+		local drawInfo = debug.DrawInfo()
+		drawInfo:SetDuration(12)
+		drawInfo:SetColor(Color.Aqua)
+		debug.draw_line(hitPos,hitPos +Vector(0,100,0),drawInfo)
+	end]]
+
+	--[[for ent in ents.iterator({ents.IteratorFilterComponent(ents.COMPONENT_CLICK),ents.IteratorFilterComponent(ents.COMPONENT_MODEL),ents.IteratorFilterComponent(ents.COMPONENT_RENDER)}) do
 		local mdl = ent:GetModel()
 		local renderC = ent:GetComponent(ents.COMPONENT_RENDER)
 		if(mdl ~= nil and ent ~= entPl and renderC ~= nil and renderC:GetSceneRenderPass() ~= game.SCENE_RENDER_PASS_VIEW and renderC:GetSceneRenderPass() ~= game.SCENE_RENDER_PASS_NONE and (filter == nil or filter(ent,renderC) == true)) then
@@ -124,7 +188,8 @@ function ents.ClickComponent.raycast(pos,dir,filter)
 				actorClosest = ent
 			end
 		end
-	end
+	end]]
+	debug.stop_profiling_task()
 	return actorClosest,hitPos,pos
 end
 function ents.ClickComponent.find_actor_under_cursor(filter)

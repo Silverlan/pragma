@@ -394,6 +394,7 @@ namespace Lua
 #include "pragma/lua/converters/vector_converter.hpp"
 #include "pragma/lua/converters/alias_types.hpp"
 #include "pragma/lua/converters/property_converter.hpp"
+#include "pragma/lua/converters/thread_pool_converter.hpp"
 #include "pragma/lua/user_type_info.hpp"
 
 #endif

@@ -63,6 +63,8 @@
 #include "pragma/lua/custom_constructor.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
 #include "pragma/lua/converters/alias_converter_t.hpp"
+#include "pragma/lua/converters/thread_pool_converter_t.hpp"
+#include "pragma/lua/classes/thread_pool.hpp"
 #include <pragma/util/transform.h>
 #include <sharedutils/datastream.h>
 #include <sharedutils/util_parallel_job.hpp>
@@ -79,7 +81,7 @@
 #include <sharedutils/magic_enum.hpp>
 #include <fsys/directory_watcher.h>
 #include <glm/gtx/matrix_decompose.hpp>
-
+#pragma optimize("",off)
 extern DLLNETWORK Engine *engine;
 std::ostream &operator<<(std::ostream &out,const ALSound &snd)
 {
@@ -215,6 +217,7 @@ template<typename T>
 		return r;
 	},const std::string&>(l);
 }
+
 void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 {
 	auto modString = luabind::module_(lua.GetState(),"string");
@@ -486,6 +489,17 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defImageBuffer.def("Convert",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t format) {
 		imgBuffer.Convert(static_cast<uimg::Format>(format));
 	}));
+	defImageBuffer.def("ToLDR",+[](lua_State *l,uimg::ImageBuffer &imgBuffer,const pragma::lua::LuaThreadWrapper &tw) {
+		auto pImgBuffer = imgBuffer.shared_from_this();
+		auto task = [pImgBuffer]() -> pragma::lua::LuaThreadPool::ResultHandler {
+			pImgBuffer->ToLDR();
+			return {};
+		};
+		if(tw.IsTask())
+			tw.GetTask()->AddSubTask(task);
+		else
+			tw.GetPool().AddTask(task);
+	});
 	defImageBuffer.def("ToLDR",static_cast<void(*)(lua_State*,uimg::ImageBuffer&)>([](lua_State *l,uimg::ImageBuffer &imgBuffer) {
 		imgBuffer.ToLDR();
 	}));
@@ -2178,3 +2192,4 @@ static void RegisterIk(Lua::Interface &lua)
 	modIk[defCcdSolver];
 	modIk[defFABRIKSolver];
 }
+#pragma optimize("",on)

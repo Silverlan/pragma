@@ -22,11 +22,15 @@ namespace pragma
 		ThreadPool(uint32_t threadCount);
 		ThreadPool(uint32_t threadCount,const std::string &name,const std::string &baseName="tp");
 		uint32_t AddTask(const std::function<ResultHandler()> &task);
+		void AddBarrier();
 		bool IsComplete() const {return m_completedTaskCount == m_totalTaskCount;}
 		bool IsComplete(uint32_t taskId) const;
 		void Stop(bool execRemainingQueue=false);
 		void PushResults(uint32_t taskId);
 		void BatchProcess(uint32_t numJobs,uint32_t numItemsPerJob,const std::function<ResultHandler(uint32_t,uint32_t)> &f);
+
+		ctpl::thread_pool *operator->() {return &m_pool;}
+		ctpl::thread_pool &operator*() {return m_pool;}
 
 		void WaitForPendingCount(uint32_t count);
 		void WaitForCompletion();

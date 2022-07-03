@@ -72,6 +72,8 @@ bool pragma::ThreadPool::IsComplete(uint32_t taskId) const
 	return (taskId < m_taskCompleted.size()) ? m_taskCompleted[taskId].isComplete : false;
 }
 
+void pragma::ThreadPool::AddBarrier() {m_pool.barrier();}
+
 uint32_t pragma::ThreadPool::AddTask(const std::function<ResultHandler()> &task)
 {
 	auto taskId = m_totalTaskCount++;

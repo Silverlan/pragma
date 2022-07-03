@@ -13,6 +13,14 @@
 
 namespace pragma::lua
 {
+	struct DLLNETWORK LuaThreadTask
+	{
+		void AddSubTask(const std::function<void()> &subTask)
+		{
+			subTasks.push_back(subTask);
+		}
+		std::vector<std::function<void()>> subTasks;
+	};
 	class DLLNETWORK LuaThreadPool
 		: public pragma::ThreadPool
 	{
@@ -22,8 +30,23 @@ namespace pragma::lua
 		LuaThreadPool(lua_State *l,uint32_t threadCount);
 		LuaThreadPool(lua_State *l,uint32_t threadCount,const std::string &name);
 		uint32_t AddTask(const std::function<ResultHandler()> &task);
+		uint32_t AddTask(const std::shared_ptr<LuaThreadTask> &task);
 	private:
 		lua_State *m_luaState = nullptr;
+	};
+	struct DLLNETWORK LuaThreadWrapper
+	{
+		LuaThreadWrapper()=default;
+		LuaThreadWrapper(std::shared_ptr<LuaThreadTask> &luaThreadTask);
+		LuaThreadWrapper(LuaThreadPool &luaThreadTask);
+
+		std::shared_ptr<LuaThreadTask> &GetTask() const;
+		LuaThreadPool &GetPool() const;
+		bool IsPool() const;
+		bool IsTask() const;
+	private:
+		bool m_isPool = false;
+		mutable void *m_ptr = nullptr;
 	};
 };
 

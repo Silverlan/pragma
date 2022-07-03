@@ -11,13 +11,18 @@ layout(LAYOUT_ID(0,0)) uniform samplerCube u_cubemap;
 
 layout(location = 0) out vec4 fs_color;
 
+layout(LAYOUT_PUSH_CONSTANTS()) uniform PushConstants
+{
+	float xFactor;
+} u_pushConstants;
+
 // Source: https://stackoverflow.com/a/35050222/2482983
 void main()
 {
 	vec2 uv = vs_vert_uv *2.0 -vec2(1.0,1.0);
 
 	// Convert to (lat, lon) angle
-	vec2 a = (uv *vec2(M_PI,M_PI_2)) -vec2(M_PI /2,0);
+	vec2 a = (uv *vec2(M_PI *u_pushConstants.xFactor,M_PI_2)) -vec2(M_PI /2,0);
 	// Convert to cartesian coordinates
 	vec2 c = cos(a);
 	vec2 s = sin(a);

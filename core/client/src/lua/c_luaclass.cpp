@@ -234,7 +234,10 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 				width = Lua::CheckInt(l,2);
 			if(Lua::IsSet(l,3))
 				height = Lua::CheckInt(l,3);
-			auto tex = shader->CubemapToEquirectangularTexture(*cubemap,width,height);
+			umath::Degree range = 360.f;
+			if(Lua::IsSet(l,4))
+				range = Lua::CheckNumber(l,4);
+			auto tex = shader->CubemapToEquirectangularTexture(*cubemap,width,height,range);
 			if(!tex)
 				return 0;
 			Lua::Push(l,tex);

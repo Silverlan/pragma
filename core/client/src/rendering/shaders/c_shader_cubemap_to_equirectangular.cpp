@@ -29,6 +29,12 @@ void ShaderCubemapToEquirectangular::InitializeRenderPass(std::shared_ptr<prospe
 	CreateCachedRenderPass<ShaderCubemapToEquirectangular>({{prosper::util::RenderPassCreateInfo::AttachmentInfo{format}}},outRenderPass,pipelineIdx);
 }
 
+void ShaderCubemapToEquirectangular::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+{
+	ShaderBaseImageProcessing::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
+}
+
 std::shared_ptr<prosper::IImage> ShaderCubemapToEquirectangular::CreateEquirectangularMap(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags,bool hdr) const
 {
 	prosper::util::ImageCreateInfo createInfo {};
@@ -60,7 +66,10 @@ std::shared_ptr<prosper::RenderTarget> ShaderCubemapToEquirectangular::CreateEqu
 	return c_engine->GetRenderContext().CreateRenderTarget({tex},GetRenderPass(),rtCreateInfo);
 }
 
-std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquirectangularTexture(prosper::Texture &cubemap,uint32_t width,uint32_t height)
+std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquirectangularTexture(
+	prosper::Texture &cubemap,uint32_t width,uint32_t height,
+	umath::Degree range
+)
 {
 	auto inputFormat = cubemap.GetImage().GetFormat();
 	// TODO: If compressed, check if compressed HDR format
@@ -88,10 +97,14 @@ std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquir
 		auto pipelineIdx = Pipeline::RGBA16;
 		if(format == prosper::Format::R8G8B8A8_UNorm)
 			pipelineIdx = Pipeline::RGBA8;
+
+		PushConstants pushConstants {};
+		pushConstants.xFactor = range /360.f;
+
 		prosper::ShaderBindState bindState {*setupCmd};
 		if(RecordBeginDraw(bindState,umath::to_integral(pipelineIdx)) == true)
 		{
-			success = RecordBindDescriptorSet(bindState,*dsg->GetDescriptorSet()) &&
+			success = RecordPushConstants(bindState,pushConstants) && RecordBindDescriptorSet(bindState,*dsg->GetDescriptorSet()) &&
 				RecordBindVertexBuffers(bindState,{vertBuffer.get(),uvBuffer.get()}) && prosper::ShaderGraphics::RecordDraw(bindState,numVerts);
 			RecordEndDraw(bindState);
 		}

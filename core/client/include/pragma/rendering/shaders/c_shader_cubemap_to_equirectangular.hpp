@@ -26,12 +26,23 @@ namespace pragma
 			Count
 		};
 
+#pragma pack(push,1)
+		struct PushConstants
+		{
+			float xFactor=1.f;
+		};
+#pragma pack(pop)
+
 		ShaderCubemapToEquirectangular(prosper::IPrContext &context,const std::string &identifier);
-		std::shared_ptr<prosper::Texture> CubemapToEquirectangularTexture(prosper::Texture &cubemap,uint32_t width=1'600,uint32_t height=800);
+		std::shared_ptr<prosper::Texture> CubemapToEquirectangularTexture(
+			prosper::Texture &cubemap,uint32_t width=1'600,uint32_t height=800,
+			umath::Degree range=360.f
+		);
 	protected:
 		std::shared_ptr<prosper::IImage> CreateEquirectangularMap(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags,bool hdr) const;
 		std::shared_ptr<prosper::RenderTarget> CreateEquirectangularRenderTarget(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags,bool hdr) const;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 };
 

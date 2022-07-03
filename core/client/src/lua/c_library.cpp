@@ -1030,7 +1030,7 @@ void CGame::RegisterLuaLibraries()
 		luabind::def("capture_raytraced_screenshot",static_cast<util::ParallelJob<uimg::ImageLayerSet>(*)(lua_State*,uint32_t,uint32_t,uint32_t,bool)>(capture_raytraced_screenshot)),
 		luabind::def("capture_raytraced_screenshot",static_cast<util::ParallelJob<uimg::ImageLayerSet>(*)(lua_State*,uint32_t,uint32_t,uint32_t)>(capture_raytraced_screenshot)),
 		luabind::def("capture_raytraced_screenshot",static_cast<util::ParallelJob<uimg::ImageLayerSet>(*)(lua_State*,uint32_t,uint32_t)>(capture_raytraced_screenshot)),
-		luabind::def("cubemap_to_equirectangular_texture",static_cast<luabind::object(*)(lua_State*,prosper::Texture&)>([](lua_State *l,prosper::Texture &cubemap) -> luabind::object {
+		luabind::def("cubemap_to_equirectangular_texture",+[](lua_State *l,prosper::Texture &cubemap) -> luabind::object {
 			auto *shader = static_cast<pragma::ShaderCubemapToEquirectangular*>(c_engine->GetShader("cubemap_to_equirectangular").get());
 			if(shader == nullptr)
 				return {};
@@ -1038,7 +1038,7 @@ void CGame::RegisterLuaLibraries()
 			if(equiRect == nullptr)
 				return {};
 			return {l,equiRect};
-		}))
+		})
 	];
 	utilMod[
 		// luabind::def("fire_bullets",static_cast<int32_t(*)(lua_State*)>(Lua::util::fire_bullets)),

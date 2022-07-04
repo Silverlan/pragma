@@ -792,6 +792,7 @@ void CGame::RegisterLuaClasses()
     defRenderStats.add_static_constant("TIMER_LIGHT_CULLING_GPU",umath::to_integral(RenderStats::RenderStage::LightCullingGpu));
     defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU",umath::to_integral(RenderStats::RenderStage::PostProcessingGpu));
     defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_FOG",umath::to_integral(RenderStats::RenderStage::PostProcessingGpuFog));
+    defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_DOF",umath::to_integral(RenderStats::RenderStage::PostProcessingGpuDoF));
     defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_BLOOM",umath::to_integral(RenderStats::RenderStage::PostProcessingGpuBloom));
     defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_TONE_MAPPING",umath::to_integral(RenderStats::RenderStage::PostProcessingGpuToneMapping));
     defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_FXAA",umath::to_integral(RenderStats::RenderStage::PostProcessingGpuFxaa));
@@ -802,7 +803,7 @@ void CGame::RegisterLuaClasses()
     defRenderStats.add_static_constant("TIMER_POST_PROCESSING_EXECUTION_CPU",umath::to_integral(RenderStats::RenderStage::PostProcessingExecutionCpu));
     defRenderStats.add_static_constant("TIMER_UPDATE_RENDER_BUFFERS_CPU",umath::to_integral(RenderStats::RenderStage::UpdateRenderBuffersCpu));
     defRenderStats.add_static_constant("TIMER_COUNT",umath::to_integral(RenderStats::RenderStage::Count));
-	static_assert(umath::to_integral(RenderStats::RenderStage::Count) == 12);
+	static_assert(umath::to_integral(RenderStats::RenderStage::Count) == 13);
 	defRenderStats.def("Copy",static_cast<RenderStats(*)(lua_State*,RenderStats&)>([](lua_State *l,RenderStats &renderStats) -> RenderStats {
 		return renderStats;
 	}));

@@ -136,6 +136,7 @@ namespace pragma
 			PPBloom,
 			PPToneMapping,
 			PPFXAA,
+			PPDoF,
 
 			Final
 		};
@@ -273,6 +274,7 @@ namespace pragma
 		void RenderFXAA(const util::DrawSceneInfo &drawSceneInfo);
 
 		void RenderSceneFog(const util::DrawSceneInfo &drawSceneInfo);
+		void RenderSceneDoF(const util::DrawSceneInfo &drawSceneInfo);
 		void RenderParticles(
 			prosper::ICommandBuffer &cmdBuffer,const util::DrawSceneInfo &drawSceneInfo,bool depthPass,
 			prosper::IPrimaryCommandBuffer *primCmdBuffer=nullptr

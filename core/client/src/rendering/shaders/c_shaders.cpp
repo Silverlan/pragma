@@ -29,8 +29,9 @@
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/shaders/image/c_shader_calc_image_color.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
-#include "pragma/rendering/shaders/image/c_shader_clear_color.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
+#include "pragma/rendering/shaders/image/c_shader_clear_color.hpp"
+#include "pragma/rendering/shaders/post_processing/c_shader_pp_dof.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_water.hpp"
 #include "pragma/rendering/shaders/world/c_shader_skybox.hpp"
 #include "pragma/rendering/shaders/world/c_shader_loading.hpp"
@@ -151,6 +152,7 @@ void register_game_shaders()
 	shaderManager.RegisterShader("glow",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderGlow(context,identifier);});
 	shaderManager.RegisterShader("pp_hdr",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPHDR(context,identifier);});
 	shaderManager.RegisterShader("pp_fog",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPFog(context,identifier);});
+	shaderManager.RegisterShader("pp_dof",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPDoF(context,identifier);});
 
 	shaderManager.RegisterShader("pp_water",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPWater(context,identifier);});
 	shaderManager.RegisterShader("pp_fxaa",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPFXAA(context,identifier);});
@@ -180,6 +182,7 @@ void CGame::InitShaders()
 	
 	shaderManager.GetShader("copy_image");
 	m_gameShaders.at(umath::to_integral(GameShader::PPTonemapping)) = shaderManager.GetShader("pp_hdr");
+	m_gameShaders.at(umath::to_integral(GameShader::PPDoF)) = shaderManager.GetShader("pp_dof");
 	m_gameShaders.at(umath::to_integral(GameShader::PPFog)) = shaderManager.GetShader("pp_fog");
 	m_gameShaders.at(umath::to_integral(GameShader::PPFXAA)) = shaderManager.GetShader("pp_fxaa");
 
@@ -191,6 +194,7 @@ void CGame::InitShaders()
 	m_gameShaders.at(umath::to_integral(GameShader::Prepass)) = shaderManager.GetShader("prepass");
 	shaderManager.GetShader("shadow");
 	shaderManager.GetShader("pp_fog");
+	shaderManager.GetShader("pp_dof");
 	shaderManager.GetShader("pp_hdr");
 	shaderManager.GetShader("ssao");
 	shaderManager.GetShader("particle");

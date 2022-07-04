@@ -270,6 +270,13 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
 	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuFog,*drawSceneInfo.commandBuffer);
 	
+	// DoF
+	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuDoF,*drawSceneInfo.commandBuffer);
+	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingDoF);
+	RenderSceneDoF(drawSceneInfo);
+	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingDoF);
+	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuDoF,*drawSceneInfo.commandBuffer);
+
 	// Glow
 	// RenderGlowObjects(drawSceneInfo);
 	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing",drawSceneInfo);

@@ -260,6 +260,7 @@ struct DLLCLIENT RenderStats
 		LightCullingGpu = 0,
 		PostProcessingGpu,
 		PostProcessingGpuFog,
+		PostProcessingGpuDoF,
 		PostProcessingGpuBloom,
 		PostProcessingGpuToneMapping,
 		PostProcessingGpuFxaa,

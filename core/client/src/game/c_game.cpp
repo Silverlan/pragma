@@ -272,6 +272,7 @@ CGame::CGame(NetworkState *state)
 			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"View",defaultStage,stageScene.get()),
 
 			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"PostProcessingFog",defaultStage,stagePostProcessing.get()),
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"PostProcessingDoF",defaultStage,stagePostProcessing.get()),
 			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"PostProcessingFXAA",defaultStage,stagePostProcessing.get()),
 			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"PostProcessingGlow",defaultStage,stagePostProcessing.get()),
 			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"PostProcessingBloom",defaultStage,stagePostProcessing.get()),
@@ -279,7 +280,7 @@ CGame::CGame(NetworkState *state)
 			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"CullLightSources",defaultStage,stageScene.get()),
 			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"Shadows",defaultStage,stageScene.get())
 		});
-		static_assert(umath::to_integral(GPUProfilingPhase::Count) == 18u,"Added new profiling phase, but did not create associated profiling stage!");
+		static_assert(umath::to_integral(GPUProfilingPhase::Count) == 19u,"Added new profiling phase, but did not create associated profiling stage!");
 	});
 	m_cbProfilingHandle = c_engine->AddProfilingHandler([this](bool profilingEnabled) {
 		if(profilingEnabled == false)

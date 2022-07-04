@@ -148,6 +148,7 @@ public:
 		PPFog,
 		PPFXAA,
 		PPTonemapping,
+		PPDoF,
 
 		Debug,
 		DebugTexture,
@@ -187,6 +188,7 @@ public:
 		View,
 
 		PostProcessingFog,
+		PostProcessingDoF,
 		PostProcessingFXAA,
 		PostProcessingGlow,
 		PostProcessingBloom,

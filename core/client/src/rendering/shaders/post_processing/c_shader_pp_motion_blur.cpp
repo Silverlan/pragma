@@ -1,0 +1,43 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2021 Silverlan
+ */
+
+#include "stdafx_client.h"
+#include "pragma/rendering/shaders/post_processing/c_shader_pp_motion_blur.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
+#include <prosper_util.hpp>
+#include <shader/prosper_shader_copy_image.hpp>
+
+using namespace pragma;
+
+decltype(ShaderPPMotionBlur::DESCRIPTOR_SET_TEXTURE) ShaderPPMotionBlur::DESCRIPTOR_SET_TEXTURE = {ShaderPPBase::DESCRIPTOR_SET_TEXTURE};
+decltype(ShaderPPMotionBlur::DESCRIPTOR_SET_TEXTURE_VELOCITY) ShaderPPMotionBlur::DESCRIPTOR_SET_TEXTURE_VELOCITY = {
+	{
+		prosper::DescriptorSetInfo::Binding { // Velocity Texture
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
+		}
+	}
+};
+
+ShaderPPMotionBlur::ShaderPPMotionBlur(prosper::IPrContext &context,const std::string &identifier)
+	: ShaderPPBase(context,identifier,"screen/fs_motion_blur")
+{
+	SetBaseShader<prosper::ShaderCopyImage>();
+}
+void ShaderPPMotionBlur::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+{
+	ShaderPPBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_TEXTURE_VELOCITY);
+}
+bool ShaderPPMotionBlur::RecordDraw(
+	prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetTexture,
+	prosper::IDescriptorSet &descSetTextureVelocity
+) const
+{
+	return RecordBindDescriptorSets(bindState,{&descSetTextureVelocity},DESCRIPTOR_SET_TEXTURE_VELOCITY.setIndex) &&
+		ShaderPPBase::RecordDraw(bindState,descSetTexture);
+}

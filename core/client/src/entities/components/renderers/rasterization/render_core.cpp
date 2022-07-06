@@ -137,6 +137,8 @@ void pragma::CRasterizationRendererComponent::RecordCommandBuffers(const util::D
 
 	StartLightingPassRecording(drawSceneInfo);
 }
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/c_render_motion_blur_component.hpp"
 void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene.expired())
@@ -276,6 +278,12 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 	RenderSceneDoF(drawSceneInfo);
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingDoF);
 	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuDoF,*drawSceneInfo.commandBuffer);
+
+	// Motion Blur
+	auto motionBlurC = scene.GetRenderer()->GetEntity().GetComponent<CRenderMotionBlurComponent>();
+	if(motionBlurC.valid())
+		motionBlurC->PPTest(drawSceneInfo);
+	//
 
 	// Glow
 	// RenderGlowObjects(drawSceneInfo);

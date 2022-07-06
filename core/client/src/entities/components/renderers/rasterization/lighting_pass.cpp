@@ -11,13 +11,17 @@
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
+#include "pragma/rendering/shaders/info/c_shader_velocity_buffer.hpp"
 #include "pragma/rendering/c_renderflags.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/c_render_motion_blur_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
+#include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/debug/c_debugoverlay.h"
 #include "pragma/game/c_game.h"
 #include "pragma/console/c_cvar.h"
@@ -50,6 +54,7 @@ static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
 #include "pragma/entities/entity_component_system_t.hpp"
 int g_dbgMode = 5;
 #endif
+#pragma optimize("",off)
 void pragma::CRasterizationRendererComponent::RecordPrepass(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
@@ -404,7 +409,6 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 	#if DEBUG_RENDER_PERFORMANCE_TEST_ENABLED == 1
 		}
 	#endif
-
 #if 0
 		if(bShouldDrawParticles)
 		{
@@ -625,3 +629,4 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 		}
 	});
 }
+#pragma optimize("",on)

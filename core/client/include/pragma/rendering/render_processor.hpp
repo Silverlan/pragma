@@ -125,9 +125,9 @@ namespace pragma::rendering
 		void Set3DSky(bool enabled);
 		void SetDrawOrigin(const Vector4 &drawOrigin);
 		bool BindShader(prosper::PipelineID pipelineId);
-		bool BindShader(prosper::Shader &shader,uint32_t pipelineIdx=0u);
+		virtual bool BindShader(prosper::Shader &shader,uint32_t pipelineIdx=0u);
 		bool BindMaterial(CMaterial &mat);
-		bool BindEntity(CBaseEntity &ent);
+		virtual bool BindEntity(CBaseEntity &ent);
 		void SetDepthBias(float d,float delta);
 		bool Render(CModelSubMesh &mesh,pragma::RenderMeshIndex meshIdx,const RenderQueue::InstanceSet *instanceSet=nullptr);
 		pragma::ShaderGameWorld *GetCurrentShader();

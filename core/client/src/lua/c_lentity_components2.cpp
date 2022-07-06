@@ -12,6 +12,7 @@
 #include "pragma/entities/components/c_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
 #include "pragma/entities/components/c_optical_camera_component.hpp"
+#include "pragma/entities/components/c_render_motion_blur_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
@@ -38,5 +39,8 @@ void RegisterLuaEntityComponents2(lua_State *l,luabind::module_ &entsMod)
 
 	auto defOpticalCamera = pragma::lua::create_entity_component_class<pragma::COpticalCameraComponent,pragma::BaseEntityComponent>("OpticalCameraComponent");
 	entsMod[defOpticalCamera];
+
+	auto defMotionBlur = pragma::lua::create_entity_component_class<pragma::CRenderMotionBlurComponent,pragma::BaseEntityComponent>("RenderMotionBlurComponent");
+	entsMod[defMotionBlur];
 	// --template-component-register-location
 }

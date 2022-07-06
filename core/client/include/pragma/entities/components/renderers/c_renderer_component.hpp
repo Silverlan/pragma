@@ -30,6 +30,7 @@ namespace pragma
 		static ComponentEventId EVENT_GET_HDR_PRESENTATION_TEXTURE;
 		static ComponentEventId EVENT_RECORD_COMMAND_BUFFERS;
 		static ComponentEventId EVENT_RENDER;
+		static ComponentEventId EVENT_ON_RENDER_TARGET_RELOADED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		CRendererComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
@@ -115,6 +116,14 @@ namespace pragma
 		CERender(const util::DrawSceneInfo &drawSceneInfo);
 		virtual void PushArguments(lua_State *l) override;
 		const util::DrawSceneInfo &drawSceneInfo;
+	};
+
+	struct DLLCLIENT CEOnRenderTargetReloaded
+		: public ComponentEvent
+	{
+		CEOnRenderTargetReloaded(bool success);
+		virtual void PushArguments(lua_State *l) override;
+		bool success;
 	};
 
 	struct DLLCLIENT CEUpdateRendererBuffer

@@ -30,6 +30,7 @@ ComponentEventId CRendererComponent::EVENT_GET_PRESENTATION_TEXTURE = INVALID_CO
 ComponentEventId CRendererComponent::EVENT_GET_HDR_PRESENTATION_TEXTURE = INVALID_COMPONENT_ID;
 ComponentEventId CRendererComponent::EVENT_RECORD_COMMAND_BUFFERS = INVALID_COMPONENT_ID;
 ComponentEventId CRendererComponent::EVENT_RENDER = INVALID_COMPONENT_ID;
+ComponentEventId CRendererComponent::EVENT_ON_RENDER_TARGET_RELOADED = INVALID_COMPONENT_ID;
 void CRendererComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
 	EVENT_RELOAD_RENDER_TARGET = registerEvent("EVENT_RELOAD_RENDER_TARGET",EntityComponentManager::EventInfo::Type::Explicit);
@@ -44,6 +45,7 @@ void CRendererComponent::RegisterEvents(pragma::EntityComponentManager &componen
 	EVENT_GET_HDR_PRESENTATION_TEXTURE = registerEvent("EVENT_GET_HDR_PRESENTATION_TEXTURE",EntityComponentManager::EventInfo::Type::Explicit);
 	EVENT_RECORD_COMMAND_BUFFERS = registerEvent("EVENT_RECORD_COMMAND_BUFFERS",EntityComponentManager::EventInfo::Type::Explicit);
 	EVENT_RENDER = registerEvent("EVENT_RENDER",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_RENDER_TARGET_RELOADED = registerEvent("EVENT_ON_RENDER_TARGET_RELOADED",EntityComponentManager::EventInfo::Type::Explicit);
 }
 
 void CRendererComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
@@ -103,6 +105,8 @@ bool CRendererComponent::ReloadRenderTarget(pragma::CSceneComponent &scene,uint3
 		m_width = width;
 		m_height = height;
 	}
+	CEOnRenderTargetReloaded evDataReloaded {evData.resultSuccess};
+	InvokeEventCallbacks(EVENT_ON_RENDER_TARGET_RELOADED,evDataReloaded);
 	return evData.resultSuccess;
 }
 
@@ -196,4 +200,14 @@ CEUpdateRendererBuffer::CEUpdateRendererBuffer(const std::shared_ptr<prosper::IP
 void CEUpdateRendererBuffer::PushArguments(lua_State *l)
 {
 	Lua::Push<std::shared_ptr<Lua::Vulkan::CommandBuffer>>(l,std::static_pointer_cast<Lua::Vulkan::CommandBuffer>(drawCommandBuffer));
+}
+
+////////////
+
+CEOnRenderTargetReloaded::CEOnRenderTargetReloaded(bool success)
+	: success{success}
+{}
+void CEOnRenderTargetReloaded::PushArguments(lua_State *l)
+{
+	Lua::PushBool(l,success);
 }

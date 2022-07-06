@@ -38,6 +38,7 @@ namespace pragma
 		CRenderMotionBlurComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void OnRemove() override;
 
 		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetSwapCommandBuffer() const;
 		const std::shared_ptr<prosper::RenderTarget> &GetRenderTarget() const;
@@ -45,6 +46,7 @@ namespace pragma
 	private:
 		void RecordVelocityPass(const util::DrawSceneInfo &drawSceneInfo);
 		void ExecuteVelocityPass(const util::DrawSceneInfo &drawSceneInfo);
+		void ReloadVelocityTexture();
 		util::WeakHandle<prosper::Shader> m_velocityShader {};
 		std::shared_ptr<prosper::ISwapCommandBufferGroup> m_swapCmd = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_velocityTexDsg;
@@ -52,6 +54,8 @@ namespace pragma
 		std::shared_ptr<prosper::IBuffer> m_motionBlurDataBuffer;
 		std::shared_ptr<prosper::RenderTarget> m_renderTarget;
 		MotionBlurTemporalData m_motionBlurData {};
+		WIHandle m_debugTex;
+		bool m_valid = false;
 	};
 };
 

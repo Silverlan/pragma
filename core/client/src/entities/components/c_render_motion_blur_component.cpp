@@ -99,6 +99,43 @@ CRenderMotionBlurComponent::CRenderMotionBlurComponent(BaseEntity &ent)
 }
 void CRenderMotionBlurComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
+void CRenderMotionBlurComponent::ReloadVelocityTexture()
+{
+	if(m_velocityShader.expired())
+		return;
+	auto rendererC = GetEntity().GetComponent<pragma::CRendererComponent>();
+	auto cRenderer = GetEntity().GetComponent<CRasterizationRendererComponent>();
+	if(rendererC.expired() || cRenderer.expired())
+		return;
+	c_engine->GetRenderContext().WaitIdle();
+
+	prosper::util::ImageCreateInfo createInfo {};
+	createInfo.width = rendererC->GetWidth();
+	createInfo.height = rendererC->GetHeight();
+	createInfo.format = prosper::Format::R32G32B32A32_SFloat;
+	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit;
+
+	auto &context = c_engine->GetRenderContext();
+	auto img = context.CreateImage(createInfo);
+	auto tex = context.CreateTexture({},*img,prosper::util::ImageViewCreateInfo{},prosper::util::SamplerCreateInfo{});
+	auto rt = context.CreateRenderTarget(
+		{tex,cRenderer->GetPrepass().textureDepth},
+		static_cast<prosper::ShaderGraphics*>(m_velocityShader.get())->GetRenderPass()
+	);
+	m_renderTarget = rt;
+
+	m_velocityTexDsg->GetDescriptorSet()->SetBindingTexture(*tex,0);
+	m_valid = true;
+
+	auto *el = WGUI::GetInstance().Create<WITexturedRect>();
+	el->SetTexture(*tex);
+	el->SetSize(512,512);
+	if(m_debugTex.IsValid())
+		m_debugTex.Remove();
+	m_debugTex = el->GetHandle();
+	luabind::globals(c_game->GetLuaState())["_el"] = el->GetHandle();
+}
+
 void CRenderMotionBlurComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -110,44 +147,37 @@ void CRenderMotionBlurComponent::Initialize()
 	m_velocityShader = velShader->GetHandle();
 
 	BindEventUnhandled(pragma::CRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		if(!m_valid)
+			return;
 		RecordVelocityPass(static_cast<CEDrawSceneInfo&>(evData.get()).drawSceneInfo);
 	});
 	BindEventUnhandled(pragma::CRasterizationRendererComponent::EVENT_POST_PREPASS,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		if(!m_valid)
+			return;
 		ExecuteVelocityPass(static_cast<CEDrawSceneInfo&>(evData.get()).drawSceneInfo);
+	});
+	BindEventUnhandled(pragma::CRendererComponent::EVENT_ON_RENDER_TARGET_RELOADED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		m_valid = false;
+		auto evDataReloaded = static_cast<CEOnRenderTargetReloaded&>(evData.get());
+		if(!evDataReloaded.success)
+			return;
+		ReloadVelocityTexture();
 	});
 	
 	auto &context = c_engine->GetRenderContext();
 	m_swapCmd = context.CreateSwapCommandBufferGroup(context.GetWindow());
 
-	// TODO: Reload when rasterization component is reloaded
-	prosper::util::ImageCreateInfo createInfo {};
-	createInfo.width = 1920;
-	createInfo.height = 1061;
-	createInfo.format = prosper::Format::R32G32B32A32_SFloat;
-	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit;
-
-	auto cRenderer = GetEntity().GetComponent<CRasterizationRendererComponent>();
-
-	auto img = context.CreateImage(createInfo);
-	auto tex = context.CreateTexture({},*img,prosper::util::ImageViewCreateInfo{},prosper::util::SamplerCreateInfo{});
-	auto rt = context.CreateRenderTarget({tex,cRenderer->GetPrepass().textureDepth},velShader->GetRenderPass());
-	m_renderTarget = rt;
-
 	m_velocityTexDsg = shaderMotionBlur->CreateDescriptorSetGroup(pragma::ShaderPPMotionBlur::DESCRIPTOR_SET_TEXTURE_VELOCITY.setIndex);
-	m_velocityTexDsg->GetDescriptorSet()->SetBindingTexture(*tex,0);
 
 	prosper::util::BufferCreateInfo motionBlurBufCreateInfo {};
 	motionBlurBufCreateInfo.size = sizeof(MotionBlurData);
-	motionBlurBufCreateInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
+	motionBlurBufCreateInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
 	auto buf = context.CreateBuffer(motionBlurBufCreateInfo);
 	m_motionBlurDataDsg = velShader->CreateDescriptorSetGroup(pragma::ShaderVelocityBuffer::DESCRIPTOR_SET_MOTION_BLUR.setIndex);
 	m_motionBlurDataDsg->GetDescriptorSet()->SetBindingUniformBuffer(*buf,0);
 	m_motionBlurDataBuffer = buf;
 
-	auto *el = WGUI::GetInstance().Create<WITexturedRect>();
-	el->SetTexture(*tex);
-	el->SetSize(512,512);
-	luabind::globals(c_game->GetLuaState())["_el"] = el->GetHandle();
+	ReloadVelocityTexture();
 }
 
 void CRenderMotionBlurComponent::RecordVelocityPass(const util::DrawSceneInfo &drawSceneInfo)
@@ -172,8 +202,17 @@ void CRenderMotionBlurComponent::RecordVelocityPass(const util::DrawSceneInfo &d
 	MotionBlurData motionBlurData;
 	motionBlurData.linearCameraVelocity = {camVel,0.f};
 	motionBlurData.angularCameraVelocity = {angVel,0.f};
-	// TODO: Barriers
+	drawSceneInfo.commandBuffer->RecordBufferBarrier(
+		*m_motionBlurDataBuffer,
+		prosper::PipelineStageFlags::VertexShaderBit,prosper::PipelineStageFlags::TransferBit,
+		prosper::AccessFlags::UniformReadBit,prosper::AccessFlags::TransferWriteBit
+	);
 	drawSceneInfo.commandBuffer->RecordUpdateBuffer(*m_motionBlurDataBuffer,0u,motionBlurData);
+	drawSceneInfo.commandBuffer->RecordBufferBarrier(
+		*m_motionBlurDataBuffer,
+		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexShaderBit,
+		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::UniformReadBit
+	);
 
 	cmd->StartRecording(rt->GetRenderPass(),rt->GetFramebuffer());
 	cmd->Record([this,&drawSceneInfo,velShader,&worldRenderQueues,&sceneRenderDesc](prosper::ISecondaryCommandBuffer &cmd) {
@@ -229,6 +268,12 @@ void CRenderMotionBlurComponent::RecordVelocityPass(const util::DrawSceneInfo &d
 	});
 	cmd->EndRecording();
 }
+void CRenderMotionBlurComponent::OnRemove()
+{
+	BaseEntityComponent::OnRemove();
+	if(m_debugTex.IsValid())
+		m_debugTex.Remove();
+}
 void CRenderMotionBlurComponent::ExecuteVelocityPass(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(m_velocityShader.expired())
@@ -241,8 +286,9 @@ void CRenderMotionBlurComponent::ExecuteVelocityPass(const util::DrawSceneInfo &
 	
 	auto *velShader = static_cast<pragma::ShaderVelocityBuffer*>(m_velocityShader.get());
 	auto &drawCmd = drawSceneInfo.commandBuffer;
+	auto &rt = motionBlurC->GetRenderTarget();
 	drawCmd->RecordBeginRenderPass(
-		*motionBlurC->GetRenderTarget(),std::vector<prosper::ClearValue>{prosper::ClearDepthStencilValue{}},
+		*rt,std::vector<prosper::ClearValue>{prosper::ClearDepthStencilValue{}},
 		prosper::IPrimaryCommandBuffer::RenderPassFlags::SecondaryCommandBuffers
 	);
 
@@ -277,6 +323,12 @@ void CRenderMotionBlurComponent::PPTest(const util::DrawSceneInfo &drawSceneInfo
 		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
 		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
+	auto &texVelocity = m_renderTarget->GetTexture();
+	drawCmd->RecordImageBarrier(
+		texVelocity.GetImage(),
+		prosper::ImageLayout::ColorAttachmentOptimal,
+		prosper::ImageLayout::ShaderReadOnlyOptimal
+	);
 	if(drawCmd->RecordBeginRenderPass(*hdrInfo.hdrPostProcessingRenderTarget) == true)
 	{
 		prosper::ShaderBindState bindState {*drawCmd};
@@ -291,6 +343,11 @@ void CRenderMotionBlurComponent::PPTest(const util::DrawSceneInfo &drawSceneInfo
 		}
 		drawCmd->RecordEndRenderPass();
 	}
+	drawCmd->RecordImageBarrier(
+		texVelocity.GetImage(),
+		prosper::ImageLayout::ShaderReadOnlyOptimal,
+		prosper::ImageLayout::ColorAttachmentOptimal
+	);
 
 	hdrInfo.BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo);
 }

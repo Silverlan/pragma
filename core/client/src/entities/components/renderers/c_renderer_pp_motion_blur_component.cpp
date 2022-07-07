@@ -6,7 +6,7 @@
  */
 
 #include "stdafx_client.h"
-#include "pragma/entities/components/c_render_motion_blur_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_motion_blur_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
@@ -82,8 +82,8 @@ bool VelocityStageRenderProcessor::BindEntity(CBaseEntity &ent)
 }
 
 #include <wgui/types/wirect.h>
-CRenderMotionBlurComponent::CRenderMotionBlurComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
+CRendererPpMotionBlurComponent::CRendererPpMotionBlurComponent(BaseEntity &ent)
+	: CRendererPpBaseComponent(ent)
 {
 	static auto g_shadersRegistered = false;
 	if(!g_shadersRegistered)
@@ -97,9 +97,9 @@ CRenderMotionBlurComponent::CRenderMotionBlurComponent(BaseEntity &ent)
 		);
 	}
 }
-void CRenderMotionBlurComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CRendererPpMotionBlurComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
-void CRenderMotionBlurComponent::ReloadVelocityTexture()
+void CRendererPpMotionBlurComponent::ReloadVelocityTexture()
 {
 	if(m_velocityShader.expired())
 		return;
@@ -136,9 +136,9 @@ void CRenderMotionBlurComponent::ReloadVelocityTexture()
 	luabind::globals(c_game->GetLuaState())["_el"] = el->GetHandle();
 }
 
-void CRenderMotionBlurComponent::Initialize()
+void CRendererPpMotionBlurComponent::Initialize()
 {
-	BaseEntityComponent::Initialize();
+	CRendererPpBaseComponent::Initialize();
 
 	auto *velShader = static_cast<pragma::ShaderVelocityBuffer*>(c_engine->GetShader("velocity_buffer").get());
 	auto *shaderMotionBlur = static_cast<pragma::ShaderPPMotionBlur*>(c_engine->GetShader("pp_motion_blur").get());
@@ -180,7 +180,7 @@ void CRenderMotionBlurComponent::Initialize()
 	ReloadVelocityTexture();
 }
 
-void CRenderMotionBlurComponent::RecordVelocityPass(const util::DrawSceneInfo &drawSceneInfo)
+void CRendererPpMotionBlurComponent::RecordVelocityPass(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(m_velocityShader.expired())
 		return;
@@ -268,19 +268,19 @@ void CRenderMotionBlurComponent::RecordVelocityPass(const util::DrawSceneInfo &d
 	});
 	cmd->EndRecording();
 }
-void CRenderMotionBlurComponent::OnRemove()
+void CRendererPpMotionBlurComponent::OnRemove()
 {
 	BaseEntityComponent::OnRemove();
 	if(m_debugTex.IsValid())
 		m_debugTex.Remove();
 }
-void CRenderMotionBlurComponent::ExecuteVelocityPass(const util::DrawSceneInfo &drawSceneInfo)
+void CRendererPpMotionBlurComponent::ExecuteVelocityPass(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(m_velocityShader.expired())
 		return;
 	auto *renderer = drawSceneInfo.scene->GetRenderer();
 	assert(renderer != nullptr);
-	auto motionBlurC = renderer->GetEntity().GetComponent<CRenderMotionBlurComponent>();
+	auto motionBlurC = renderer->GetEntity().GetComponent<CRendererPpMotionBlurComponent>();
 	if(motionBlurC.expired())
 		return;
 	
@@ -297,7 +297,8 @@ void CRenderMotionBlurComponent::ExecuteVelocityPass(const util::DrawSceneInfo &
 
 	drawCmd->RecordEndRenderPass();
 }
-void CRenderMotionBlurComponent::PPTest(const util::DrawSceneInfo &drawSceneInfo)
+void CRendererPpMotionBlurComponent::DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo) {RenderPostProcessing(drawSceneInfo);}
+void CRendererPpMotionBlurComponent::RenderPostProcessing(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene.expired())
 		return;
@@ -352,6 +353,6 @@ void CRenderMotionBlurComponent::PPTest(const util::DrawSceneInfo &drawSceneInfo
 	hdrInfo.BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo);
 }
 
-const std::shared_ptr<prosper::ISwapCommandBufferGroup> &CRenderMotionBlurComponent::GetSwapCommandBuffer() const {return m_swapCmd;}
-const std::shared_ptr<prosper::RenderTarget> &CRenderMotionBlurComponent::GetRenderTarget() const {return m_renderTarget;}
+const std::shared_ptr<prosper::ISwapCommandBufferGroup> &CRendererPpMotionBlurComponent::GetSwapCommandBuffer() const {return m_swapCmd;}
+const std::shared_ptr<prosper::RenderTarget> &CRendererPpMotionBlurComponent::GetRenderTarget() const {return m_renderTarget;}
 #pragma optimize("",on)

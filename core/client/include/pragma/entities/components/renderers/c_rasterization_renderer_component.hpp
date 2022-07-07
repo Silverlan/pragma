@@ -193,6 +193,7 @@ namespace pragma
 
 		prosper::IDescriptorSet *GetDepthDescriptorSet() const;
 		void SetFogOverride(const std::shared_ptr<prosper::IDescriptorSetGroup> &descSetGroup);
+		const std::shared_ptr<prosper::IDescriptorSetGroup> &GetFogOverride() const;
 		prosper::IDescriptorSet *GetRendererDescriptorSet() const;
 
 		pragma::rendering::Prepass &GetPrepass();
@@ -269,12 +270,7 @@ namespace pragma
 		void CullLightSources(const util::DrawSceneInfo &drawSceneInfo);
 		void RenderShadows(const util::DrawSceneInfo &drawSceneInfo);
 		void RenderGlowObjects(const util::DrawSceneInfo &drawSceneInfo);
-		void RenderBloom(const util::DrawSceneInfo &drawSceneInfo);
-		void RenderToneMapping(const util::DrawSceneInfo &drawSceneInfo,prosper::IDescriptorSet &descSetHdrResolve);
-		void RenderFXAA(const util::DrawSceneInfo &drawSceneInfo);
 
-		void RenderSceneFog(const util::DrawSceneInfo &drawSceneInfo);
-		void RenderSceneDoF(const util::DrawSceneInfo &drawSceneInfo);
 		void RenderParticles(
 			prosper::ICommandBuffer &cmdBuffer,const util::DrawSceneInfo &drawSceneInfo,bool depthPass,
 			prosper::IPrimaryCommandBuffer *primCmdBuffer=nullptr

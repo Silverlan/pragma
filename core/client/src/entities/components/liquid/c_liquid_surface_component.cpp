@@ -29,6 +29,7 @@
 #include <pragma/model/modelmesh.h>
 #include <pragma/util/util_game.hpp>
 #include <prosper_command_buffer.hpp>
+#include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/base_lua_handle_method.hpp>
 
@@ -206,8 +207,13 @@ void CLiquidSurfaceComponent::ReceiveData(NetPacket &packet) {}
 
 WaterScene::~WaterScene()
 {
-	if(hPostProcessing.IsValid())
-		hPostProcessing.Remove();
+	for(auto &cb : hPostProcessing)
+	{
+		if(cb.IsValid())
+			cb.Remove();
+	}
+	if(hComponentCreationCallback.IsValid())
+		hComponentCreationCallback.Remove();
 }
 
 CMaterial *CLiquidSurfaceComponent::GetWaterMaterial() const
@@ -252,6 +258,7 @@ void CLiquidSurfaceComponent::InitializeWaterScene(const WaterScene &scene)
 	m_waterScene->sceneReflection = scene.sceneReflection;
 	m_waterScene->descSetGroupTexEffects = scene.descSetGroupTexEffects;
 	m_waterScene->hPostProcessing = scene.hPostProcessing;
+	m_waterScene->hComponentCreationCallback = scene.hComponentCreationCallback;
 	m_waterScene->settingsBuffer = scene.settingsBuffer;
 
 	m_waterScene->fogBuffer = scene.fogBuffer;
@@ -326,6 +333,7 @@ void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos,const V
 	if(shader == nullptr || whShaderPPWater.expired())
 		return;
 	auto &shaderPPWater = static_cast<pragma::ShaderPPWater&>(*whShaderPPWater.get());
+	m_shaderPpWater = shaderPPWater.GetHandle();
 
 	auto *cam = c_game->GetPrimaryCamera();
 	auto width = scene->GetWidth() /2u;
@@ -443,88 +451,105 @@ void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos,const V
 
 	shaderPPWater.InitializeMaterialDescriptorSet(*mat);
 
-	// auto waterPlaneDist = std::make_shared<float>(std::numeric_limits<float>::max());
-	// auto waterNormal = std::make_shared<Vector3>(surfaceNormal);
-	Mat4 matReflect;
-	m_waterScene->hPostProcessing = c_game->AddCallback("RenderPostProcessing",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([this,whShaderPPWater](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
-		auto renderFlags = drawSceneInfo.get().renderFlags;
-		if(cvDrawWater->GetBool() == false || (renderFlags &RenderFlags::Water) == RenderFlags::None)
-			return;
-		if(c_game->GetRenderScene() != c_game->GetScene())
-			return;
-		auto *scene = c_game->GetRenderScene();
-		auto *renderer = scene->GetRenderer();
-		auto rasterC = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent>{};
-		auto camScene = scene ? scene->GetActiveCamera() : pragma::ComponentHandle<pragma::CCameraComponent>{};
-		if(rasterC.expired() || camScene.expired())
-			return;
-		auto &waterScene = *m_waterScene;
+	EntityIterator entIt {*c_game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRendererComponent>>();
+	for(auto *ent : entIt)
+		InitializeRenderer(*ent->GetComponent<pragma::CRendererComponent>());
 
-		//scene->GetDepthTexture()->GetImage()->SetDrawLayout(prosper::ImageLayout::ShaderReadOnlyOptimal); // prosper TODO
-		//auto &n = *waterNormal;
-		//auto &planeDist = *waterPlaneDist;
-		auto surfC = GetEntity().GetComponent<CSurfaceComponent>();
-		if(surfC.expired())
-			return;
-		auto plane = surfC->GetPlaneWs();
-		auto &n = plane.GetNormal();
-		auto planeDist = plane.GetDistance();
+	m_waterScene->hComponentCreationCallback = c_game->GetEntityComponentManager().AddCreationCallback("renderer",
+		[this](std::reference_wrapper<pragma::BaseEntityComponent> component) {
+		InitializeRenderer(static_cast<pragma::CRendererComponent&>(component.get()));
+	});
 
-		bool bCameraSubmerged;
-		bool bCameraFullySubmerged;
-		umath::geometry::PlaneSide camCenterPlaneSide;
-		is_camera_submerged(
-			*camScene,n,planeDist,m_waterAabbBounds.first,m_waterAabbBounds.second,
-			bCameraSubmerged,bCameraFullySubmerged,camCenterPlaneSide
-		);
-		
-		if(camCenterPlaneSide != m_curCameraSurfaceSide)
-		{
-			m_curCameraSurfaceSide = camCenterPlaneSide;
-			auto portalC = GetEntity().FindComponent("portal");
-			if(portalC.valid())
-				portalC->CallLuaMethod<void>("SetMirrored",camCenterPlaneSide == umath::geometry::PlaneSide::Front);
-		}
-		
-		if(bCameraSubmerged == true)
-		{
-			auto &hdrInfo = rasterC->GetHDRInfo();
-
-			auto &descSetHdr = *hdrInfo.dsgHDRPostProcessing->GetDescriptorSet();
-			auto *imgTex = descSetHdr.GetBoundImage(umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Texture));
-			auto drawCmd = c_game->GetCurrentDrawCommandBuffer();
-			if(imgTex != nullptr)
-				drawCmd->RecordImageBarrier(*imgTex,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
-
-			std::function<void(prosper::ICommandBuffer&)> fTransitionSampleImgToTransferDst = nullptr;
-			// hdrInfo.BlitMainDepthBufferToSamplableDepthBuffer(drawSceneInfo.get(),fTransitionSampleImgToTransferDst);
-			if(drawCmd->RecordBeginRenderPass(*hdrInfo.hdrPostProcessingRenderTarget) == true)
-			{
-				// drawCmd->RecordClearAttachment(hdrInfo.hdrPostProcessingRenderTarget->GetTexture().GetImage(),std::array<float,4>{1.f,0.f,0.f,1.f});
-				
-				auto *mat = GetWaterMaterial();
-				auto &shaderPPWater = static_cast<pragma::ShaderPPWater&>(*whShaderPPWater.get());
-				prosper::ShaderBindState bindState {*drawCmd};
-				if(mat != nullptr && mat->IsLoaded() == true && shaderPPWater.RecordBeginDraw(bindState) == true && shaderPPWater.RecordRefractionMaterial(bindState,*mat))
-				{
-					shaderPPWater.RecordDraw(
-						bindState,
-						descSetHdr,
-						*hdrInfo.dsgDepthPostProcessing->GetDescriptorSet(),
-						*scene->GetCameraDescriptorSetGraphics(),
-						c_game->GetGlobalRenderSettingsDescriptorSet(),
-						*waterScene.fogDescSetGroup->GetDescriptorSet(),
-						Vector4{n.x,n.y,n.z,planeDist}
-					);
-					shaderPPWater.RecordEndDraw(bindState);
-				}
-				
-				// hdrInfo.BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo.get());
-
-				drawCmd->RecordEndRenderPass();
-				hdrInfo.BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo);
-			}
-		}
-	}));
 	InitializeRenderData();
+}
+
+void CLiquidSurfaceComponent::InitializeRenderer(pragma::CRendererComponent &component)
+{
+	auto handle = component.AddPostProcessingEffect("pp_water_overlay",[this](const util::DrawSceneInfo &drawSceneInfo) {
+		RenderPostProcessingOverlay(drawSceneInfo);
+	},380'000);
+	m_waterScene->hPostProcessing.push_back(handle);
+}
+
+void CLiquidSurfaceComponent::RenderPostProcessingOverlay(const util::DrawSceneInfo &drawSceneInfo)
+{
+	auto renderFlags = drawSceneInfo.renderFlags;
+	if(cvDrawWater->GetBool() == false || (renderFlags &RenderFlags::Water) == RenderFlags::None)
+		return;
+	if(c_game->GetRenderScene() != c_game->GetScene())
+		return;
+	auto *scene = c_game->GetRenderScene();
+	auto *renderer = scene->GetRenderer();
+	auto rasterC = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent>{};
+	auto camScene = scene ? scene->GetActiveCamera() : pragma::ComponentHandle<pragma::CCameraComponent>{};
+	if(rasterC.expired() || camScene.expired())
+		return;
+	auto &waterScene = *m_waterScene;
+
+	//scene->GetDepthTexture()->GetImage()->SetDrawLayout(prosper::ImageLayout::ShaderReadOnlyOptimal); // prosper TODO
+	//auto &n = *waterNormal;
+	//auto &planeDist = *waterPlaneDist;
+	auto surfC = GetEntity().GetComponent<CSurfaceComponent>();
+	if(surfC.expired())
+		return;
+	auto plane = surfC->GetPlaneWs();
+	auto &n = plane.GetNormal();
+	auto planeDist = plane.GetDistance();
+
+	bool bCameraSubmerged;
+	bool bCameraFullySubmerged;
+	umath::geometry::PlaneSide camCenterPlaneSide;
+	is_camera_submerged(
+		*camScene,n,planeDist,m_waterAabbBounds.first,m_waterAabbBounds.second,
+		bCameraSubmerged,bCameraFullySubmerged,camCenterPlaneSide
+	);
+		
+	if(camCenterPlaneSide != m_curCameraSurfaceSide)
+	{
+		m_curCameraSurfaceSide = camCenterPlaneSide;
+		auto portalC = GetEntity().FindComponent("portal");
+		if(portalC.valid())
+			portalC->CallLuaMethod<void>("SetMirrored",camCenterPlaneSide == umath::geometry::PlaneSide::Front);
+	}
+		
+	if(bCameraSubmerged == true)
+	{
+		auto &hdrInfo = rasterC->GetHDRInfo();
+
+		auto &descSetHdr = *hdrInfo.dsgHDRPostProcessing->GetDescriptorSet();
+		auto *imgTex = descSetHdr.GetBoundImage(umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Texture));
+		auto drawCmd = c_game->GetCurrentDrawCommandBuffer();
+		if(imgTex != nullptr)
+			drawCmd->RecordImageBarrier(*imgTex,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+
+		std::function<void(prosper::ICommandBuffer&)> fTransitionSampleImgToTransferDst = nullptr;
+		// hdrInfo.BlitMainDepthBufferToSamplableDepthBuffer(drawSceneInfo.get(),fTransitionSampleImgToTransferDst);
+		if(drawCmd->RecordBeginRenderPass(*hdrInfo.hdrPostProcessingRenderTarget) == true)
+		{
+			// drawCmd->RecordClearAttachment(hdrInfo.hdrPostProcessingRenderTarget->GetTexture().GetImage(),std::array<float,4>{1.f,0.f,0.f,1.f});
+				
+			auto *mat = GetWaterMaterial();
+			auto &shaderPPWater = static_cast<pragma::ShaderPPWater&>(*m_shaderPpWater.get());
+			prosper::ShaderBindState bindState {*drawCmd};
+			if(mat != nullptr && mat->IsLoaded() == true && shaderPPWater.RecordBeginDraw(bindState) == true && shaderPPWater.RecordRefractionMaterial(bindState,*mat))
+			{
+				shaderPPWater.RecordDraw(
+					bindState,
+					descSetHdr,
+					*hdrInfo.dsgDepthPostProcessing->GetDescriptorSet(),
+					*scene->GetCameraDescriptorSetGraphics(),
+					c_game->GetGlobalRenderSettingsDescriptorSet(),
+					*waterScene.fogDescSetGroup->GetDescriptorSet(),
+					Vector4{n.x,n.y,n.z,planeDist}
+				);
+				shaderPPWater.RecordEndDraw(bindState);
+			}
+				
+			// hdrInfo.BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo.get());
+
+			drawCmd->RecordEndRenderPass();
+			hdrInfo.BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo);
+		}
+	}
 }

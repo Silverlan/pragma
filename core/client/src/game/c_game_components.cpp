@@ -39,7 +39,6 @@
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
 #include "pragma/entities/components/c_light_map_data_cache_component.hpp"
 #include "pragma/entities/components/c_optical_camera_component.hpp"
-#include "pragma/entities/components/c_render_motion_blur_component.hpp"
 #include "pragma/entities/components/liquid/c_buoyancy_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_surface_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_volume_component.hpp"
@@ -133,6 +132,12 @@
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_fog_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_dof_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_bloom_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_tone_mapping_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_fxaa_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_motion_blur_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 void CGame::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
@@ -256,7 +261,13 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CStaticBvhCacheComponent>("static_bvh_cache");
 	componentManager.RegisterComponentType<pragma::CStaticBvhUserComponent>("static_bvh_user");
 	componentManager.RegisterComponentType<pragma::COpticalCameraComponent>("optical_camera");
-	componentManager.RegisterComponentType<pragma::CRenderMotionBlurComponent>("render_motion_blur");
+
+	componentManager.RegisterComponentType<pragma::CRendererPpFogComponent>("renderer_pp_fog");
+	componentManager.RegisterComponentType<pragma::CRendererPpDoFComponent>("renderer_pp_dof");
+	componentManager.RegisterComponentType<pragma::CRendererPpBloomComponent>("renderer_pp_bloom");
+	componentManager.RegisterComponentType<pragma::CRendererPpToneMappingComponent>("renderer_pp_tone_mapping");
+	componentManager.RegisterComponentType<pragma::CRendererPpFxaaComponent>("renderer_pp_fxaa");
+	componentManager.RegisterComponentType<pragma::CRendererPpMotionBlurComponent>("renderer_pp_motion_blur");
 
 	componentManager.RegisterComponentType<pragma::CBSPComponent>("bsp");
 	componentManager.RegisterComponentType<pragma::CLightMapComponent>("light_map");

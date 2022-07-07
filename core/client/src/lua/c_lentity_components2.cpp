@@ -12,7 +12,12 @@
 #include "pragma/entities/components/c_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
 #include "pragma/entities/components/c_optical_camera_component.hpp"
-#include "pragma/entities/components/c_render_motion_blur_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_fog_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_dof_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_bloom_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_tone_mapping_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_fxaa_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_motion_blur_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
@@ -40,7 +45,29 @@ void RegisterLuaEntityComponents2(lua_State *l,luabind::module_ &entsMod)
 	auto defOpticalCamera = pragma::lua::create_entity_component_class<pragma::COpticalCameraComponent,pragma::BaseEntityComponent>("OpticalCameraComponent");
 	entsMod[defOpticalCamera];
 
-	auto defMotionBlur = pragma::lua::create_entity_component_class<pragma::CRenderMotionBlurComponent,pragma::BaseEntityComponent>("RenderMotionBlurComponent");
-	entsMod[defMotionBlur];
+	auto defPpFog =
+		pragma::lua::create_entity_component_class<pragma::CRendererPpFogComponent,pragma::BaseEntityComponent>("RendererPpFogComponent");
+	entsMod[defPpFog];
+
+	auto defPpDof =
+		pragma::lua::create_entity_component_class<pragma::CRendererPpDoFComponent,pragma::BaseEntityComponent>("RendererPpDoFComponent");
+	entsMod[defPpDof];
+
+	auto defPpBloom =
+		pragma::lua::create_entity_component_class<pragma::CRendererPpBloomComponent,pragma::BaseEntityComponent>("RendererPpBloomComponent");
+	entsMod[defPpBloom];
+
+	auto defPpToneMapping =
+		pragma::lua::create_entity_component_class<pragma::CRendererPpToneMappingComponent,pragma::BaseEntityComponent>("RendererPpToneMappingComponent");
+	entsMod[defPpToneMapping];
+
+	auto defPpFxaa =
+		pragma::lua::create_entity_component_class<pragma::CRendererPpFxaaComponent,pragma::BaseEntityComponent>("RendererPpFxaaComponent");
+	entsMod[defPpFxaa];
+
+	auto defPpMotionBlur =
+		pragma::lua::create_entity_component_class<pragma::CRendererPpMotionBlurComponent,pragma::BaseEntityComponent>("RendererPpMotionBlurComponent");
+	entsMod[defPpMotionBlur];
+
 	// --template-component-register-location
 }

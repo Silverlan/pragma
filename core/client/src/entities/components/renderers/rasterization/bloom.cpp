@@ -27,38 +27,6 @@ extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-static auto cvBloomEnabled = GetClientConVar("render_bloom_enabled");
-static auto cvBloomAmount = GetClientConVar("render_bloom_amount");
-void pragma::CRasterizationRendererComponent::RenderBloom(const util::DrawSceneInfo &drawSceneInfo)
-{
-	if(cvBloomEnabled->GetBool() == false)
-		return;
-	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingBloom);
-	auto &hdrInfo = GetHDRInfo();
-	auto bloomTexMsaa = hdrInfo.sceneRenderTarget->GetTexture(1u);
-	auto &drawCmd = drawSceneInfo.commandBuffer;
-	// Blit high-res bloom image into low-res image, which is cheaper to blur
-	drawCmd->RecordImageBarrier(hdrInfo.bloomTexture->GetImage(),prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal);
-	drawCmd->RecordImageBarrier(hdrInfo.bloomBlurRenderTarget->GetTexture().GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferDstOptimal);
-	drawCmd->RecordBlitTexture(*hdrInfo.bloomTexture,hdrInfo.bloomBlurRenderTarget->GetTexture().GetImage());
-
-	static auto blurSize = 5.f;
-	static int32_t kernelSize = 9u;
-	uint32_t blurAmount = umath::clamp(cvBloomAmount->GetInt(),0,20);
-
-	drawCmd->RecordImageBarrier(hdrInfo.bloomBlurRenderTarget->GetTexture().GetImage(),prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
-	for(auto i=decltype(blurAmount){0};i<blurAmount;++i)
-	{
-		prosper::util::record_blur_image(c_engine->GetRenderContext(),drawCmd,*hdrInfo.bloomBlurSet,{
-			Vector4(1.f,1.f,1.f,1.f),
-			blurSize,
-			kernelSize
-		});
-	}
-	drawCmd->RecordImageBarrier(hdrInfo.bloomTexture->GetImage(),prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
-	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingBloom);
-}
-
 void pragma::CRasterizationRendererComponent::RenderGlowObjects(const util::DrawSceneInfo &drawSceneInfo)
 {
 #if 0

@@ -11,6 +11,7 @@
 #include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
 #include "pragma/entities/components/renderers/rasterization/glow_data.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_glow.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
@@ -137,8 +138,6 @@ void pragma::CRasterizationRendererComponent::RecordCommandBuffers(const util::D
 
 	StartLightingPassRecording(drawSceneInfo);
 }
-#include "pragma/entities/components/renderers/c_renderer_component.hpp"
-#include "pragma/entities/components/c_render_motion_blur_component.hpp"
 void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene.expired())
@@ -265,57 +264,33 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 	// Particles
 	RenderParticles(*drawSceneInfo.commandBuffer,drawSceneInfo,false,drawSceneInfo.commandBuffer.get());
 
-	// Fog
-	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuFog,*drawSceneInfo.commandBuffer);
-	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
-	RenderSceneFog(drawSceneInfo);
-	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
-	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuFog,*drawSceneInfo.commandBuffer);
-	
-	// Motion Blur
-	auto motionBlurC = scene.GetRenderer()->GetEntity().GetComponent<CRenderMotionBlurComponent>();
-	if(motionBlurC.valid())
-		motionBlurC->PPTest(drawSceneInfo);
-	//
+	auto *renderer = scene.GetRenderer();
+	auto &postProcessing = renderer->GetPostProcessingEffects();
+	auto applyToneMapped = !umath::is_flag_set(drawSceneInfo.renderFlags,RenderFlags::HDR);
+	for(auto &pp : postProcessing)
+	{
+		if(pp.render.IsValid())
+		{
+			if(!applyToneMapped && umath::is_flag_set(pp.flags,pragma::PostProcessingEffectData::Flags::ToneMapped))
+				break;
+			pp.render.Call<void,const util::DrawSceneInfo&>(drawSceneInfo);
+		}
+	}
 
-	// DoF
-	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuDoF,*drawSceneInfo.commandBuffer);
-	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingDoF);
-	RenderSceneDoF(drawSceneInfo);
-	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingDoF);
-	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuDoF,*drawSceneInfo.commandBuffer);
-
-	// Glow
-	// RenderGlowObjects(drawSceneInfo);
-	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing",drawSceneInfo);
-	c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*>("RenderPostProcessing",&drawSceneInfo);
-
-	// Bloom
-	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuBloom,*drawSceneInfo.commandBuffer);
-	RenderBloom(drawSceneInfo);
-	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuBloom,*drawSceneInfo.commandBuffer);
-	
-	// Tone mapping
-	if(umath::is_flag_set(drawSceneInfo.renderFlags,RenderFlags::HDR))
+	if(!applyToneMapped)
 	{
 		// Don't bother resolving HDR; Just apply the barrier
 		drawCmd->RecordImageBarrier(
 			GetHDRInfo().sceneRenderTarget->GetTexture().GetImage(),
 			prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal
 		);
-		return;
 	}
-	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuToneMapping,*drawSceneInfo.commandBuffer);
-	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingHDR);
-	auto &dsgBloomTonemapping = GetHDRInfo().dsgBloomTonemapping;
-	RenderToneMapping(drawSceneInfo,*dsgBloomTonemapping->GetDescriptorSet());
-	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingHDR);
-	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuToneMapping,*drawSceneInfo.commandBuffer);
-	
-	// FXAA
-	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuFxaa,*drawSceneInfo.commandBuffer);
-	RenderFXAA(drawSceneInfo);
-	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuFxaa,*drawSceneInfo.commandBuffer);
+
+	// Glow
+	// RenderGlowObjects(drawSceneInfo);
+	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing",drawSceneInfo);
+	c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*>("RenderPostProcessing",&drawSceneInfo);
+
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
 	if(drawSceneInfo.renderStats)

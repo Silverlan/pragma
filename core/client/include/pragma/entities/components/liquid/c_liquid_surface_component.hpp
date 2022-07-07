@@ -31,7 +31,8 @@ namespace pragma
 
 		std::shared_ptr<prosper::IDescriptorSetGroup> descSetGroupTexEffects = nullptr;
 
-		CallbackHandle hPostProcessing = {};
+		std::vector<CallbackHandle> hPostProcessing = {};
+		CallbackHandle hComponentCreationCallback = {};
 
 		std::shared_ptr<prosper::Texture> texScene = nullptr;
 		std::shared_ptr<prosper::Texture> texSceneDepth = nullptr;
@@ -65,11 +66,14 @@ namespace pragma
 	private:
 		virtual void OnEntitySpawn() override;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
+		void RenderPostProcessingOverlay(const util::DrawSceneInfo &drawSceneInfo);
 		void InitializeRenderData();
+		void InitializeRenderer(pragma::CRendererComponent &component);
 
 		EntityHandle m_hEntUnderwater {};
 		pragma::ComponentHandle<CSurfaceComponent> m_surfaceComponent;
 		std::unique_ptr<WaterScene> m_waterScene = nullptr;
+		util::WeakHandle<prosper::Shader> m_shaderPpWater {};
 		umath::geometry::PlaneSide m_curCameraSurfaceSide = umath::geometry::PlaneSide::OnPlane;
 		std::pair<Vector3,Vector3> m_waterAabbBounds = {};
 		bool m_renderDataInitialized = false;

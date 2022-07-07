@@ -14,6 +14,18 @@
 
 namespace pragma
 {
+	struct DLLCLIENT PostProcessingEffectData
+	{
+		enum class Flags : uint32_t
+		{
+			None = 0,
+			ToneMapped = 1
+		};
+		std::string name;
+		uint32_t weight;
+		mutable CallbackHandle render;
+		Flags flags = Flags::None;
+	};
 	class DLLCLIENT CRendererComponent final
 		: public BaseEntityComponent
 	{
@@ -31,13 +43,32 @@ namespace pragma
 		static ComponentEventId EVENT_RECORD_COMMAND_BUFFERS;
 		static ComponentEventId EVENT_RENDER;
 		static ComponentEventId EVENT_ON_RENDER_TARGET_RELOADED;
+
+		enum class StandardPostProcessingWeight : uint32_t
+		{
+			Fog = 100'000,
+			MotionBlur = 200'000,
+			DoF = 300'000,
+			Bloom = 400'000,
+			ToneMapping = 500'000,
+			Fxaa = 600'000
+		};
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		CRendererComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 
 		void RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo);
 		void Render(const util::DrawSceneInfo &drawSceneInfo);
+
+		CallbackHandle AddPostProcessingEffect(
+			const std::string &name,const std::function<void(const util::DrawSceneInfo&)> &render,uint32_t weight,
+			PostProcessingEffectData::Flags flags=PostProcessingEffectData::Flags::None
+		);
+		void RemovePostProcessingEffect(const std::string &name);
+		const std::vector<PostProcessingEffectData> &GetPostProcessingEffects() const;
 
 		bool ReloadRenderTarget(pragma::CSceneComponent &scene,uint32_t width,uint32_t height);
 
@@ -57,6 +88,7 @@ namespace pragma
 	private:
 		uint32_t m_width = 0;
 		uint32_t m_height = 0;
+		std::vector<PostProcessingEffectData> m_postProcessingEffects;
 	};
 
 	struct DLLCLIENT CEReloadRenderTarget
@@ -136,5 +168,6 @@ namespace pragma
 	using CEGetPresentationTexture = CEGetSceneTexture;
 	using CEGetHdrPresentationTexture = CEGetSceneTexture;
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::PostProcessingEffectData::Flags)
 
 #endif

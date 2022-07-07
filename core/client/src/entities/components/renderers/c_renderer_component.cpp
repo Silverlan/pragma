@@ -7,17 +7,24 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_bloom_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_dof_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_fog_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_tone_mapping_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_fxaa_component.hpp"
+#include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <prosper_command_buffer.hpp>
 
+extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-
+#pragma optimize("",off)
 ComponentEventId CRendererComponent::EVENT_RELOAD_RENDER_TARGET = INVALID_COMPONENT_ID;
 ComponentEventId CRendererComponent::EVENT_RELOAD_BLOOM_RENDER_TARGET = INVALID_COMPONENT_ID;
 ComponentEventId CRendererComponent::EVENT_BEGIN_RENDERING = INVALID_COMPONENT_ID;
@@ -48,6 +55,16 @@ void CRendererComponent::RegisterEvents(pragma::EntityComponentManager &componen
 	EVENT_ON_RENDER_TARGET_RELOADED = registerEvent("EVENT_ON_RENDER_TARGET_RELOADED",EntityComponentManager::EventInfo::Type::Explicit);
 }
 
+void CRendererComponent::Initialize()
+{
+	BaseEntityComponent::Initialize();
+
+	GetEntity().AddComponent<CRendererPpFogComponent>();
+	GetEntity().AddComponent<CRendererPpDoFComponent>();
+	GetEntity().AddComponent<CRendererPpBloomComponent>();
+	GetEntity().AddComponent<CRendererPpToneMappingComponent>();
+	GetEntity().AddComponent<CRendererPpFxaaComponent>();
+}
 void CRendererComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void CRendererComponent::UpdateRenderSettings() {InvokeEventCallbacks(EVENT_UPDATE_RENDER_SETTINGS);}
@@ -116,6 +133,43 @@ bool CRendererComponent::ReloadBloomRenderTarget(uint32_t width)
 	InvokeEventCallbacks(EVENT_RELOAD_BLOOM_RENDER_TARGET,evData);
 	return evData.resultSuccess;
 }
+
+CallbackHandle CRendererComponent::AddPostProcessingEffect(
+	const std::string &name,const std::function<void(const util::DrawSceneInfo&)> &render,uint32_t weight,
+	PostProcessingEffectData::Flags flags
+)
+{
+	auto cb = FunctionCallback<void,const util::DrawSceneInfo&>::Create(render);
+	PostProcessingEffectData effectData {};
+	effectData.name = name;
+	effectData.render = cb;
+	effectData.weight = weight;
+	effectData.flags = flags;
+	for(auto it=m_postProcessingEffects.begin();it!=m_postProcessingEffects.end();++it)
+	{
+		auto &effectDataOther = *it;
+		if(weight <= effectDataOther.weight)
+		{
+			m_postProcessingEffects.insert(it,effectData);
+			return cb;
+		}
+	}
+	m_postProcessingEffects.push_back(effectData);
+	return cb;
+}
+
+void CRendererComponent::RemovePostProcessingEffect(const std::string &name)
+{
+	auto it = std::find_if(m_postProcessingEffects.begin(),m_postProcessingEffects.end(),
+		[&name](const PostProcessingEffectData &data) {
+		return data.name == name;
+	});
+	if(it == m_postProcessingEffects.end())
+		return;
+	m_postProcessingEffects.erase(it);
+}
+
+const std::vector<PostProcessingEffectData> &CRendererComponent::GetPostProcessingEffects() const {return m_postProcessingEffects;}
 
 void CRendererComponent::EndRendering() {InvokeEventCallbacks(EVENT_END_RENDERING);}
 void CRendererComponent::BeginRendering(const util::DrawSceneInfo &drawSceneInfo)
@@ -211,3 +265,4 @@ void CEOnRenderTargetReloaded::PushArguments(lua_State *l)
 {
 	Lua::PushBool(l,success);
 }
+#pragma optimize("",on)

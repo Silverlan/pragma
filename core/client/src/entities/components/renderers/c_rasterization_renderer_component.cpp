@@ -272,6 +272,7 @@ void CRasterizationRendererComponent::UpdateCSMDescriptorSet(pragma::CLightDirec
 }
 
 void CRasterizationRendererComponent::SetFogOverride(const std::shared_ptr<prosper::IDescriptorSetGroup> &descSetGroup) {m_descSetGroupFogOverride = descSetGroup;}
+const std::shared_ptr<prosper::IDescriptorSetGroup> &CRasterizationRendererComponent::GetFogOverride() const {return m_descSetGroupFogOverride;}
 
 // TODO: Remove this
 #if DEBUG_RENDER_PERFORMANCE_TEST_ENABLED == 1

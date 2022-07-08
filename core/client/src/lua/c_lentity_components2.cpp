@@ -67,6 +67,16 @@ void RegisterLuaEntityComponents2(lua_State *l,luabind::module_ &entsMod)
 
 	auto defPpMotionBlur =
 		pragma::lua::create_entity_component_class<pragma::CRendererPpMotionBlurComponent,pragma::BaseEntityComponent>("RendererPpMotionBlurComponent");
+	defPpMotionBlur.add_static_constant("MOTION_BLUR_QUALITY_LOW",umath::to_integral(pragma::MotionBlurQuality::Low));
+	defPpMotionBlur.add_static_constant("MOTION_BLUR_QUALITY_MEDIUM",umath::to_integral(pragma::MotionBlurQuality::Medium));
+	defPpMotionBlur.add_static_constant("MOTION_BLUR_QUALITY_HIGH",umath::to_integral(pragma::MotionBlurQuality::High));
+	defPpMotionBlur.def("SetAutoUpdateMotionData",&pragma::CRendererPpMotionBlurComponent::SetAutoUpdateMotionData);
+	defPpMotionBlur.def("SetMotionBlurIntensity",&pragma::CRendererPpMotionBlurComponent::SetMotionBlurIntensity);
+	defPpMotionBlur.def("GetMotionBlurIntensity",&pragma::CRendererPpMotionBlurComponent::GetMotionBlurIntensity);
+	defPpMotionBlur.def("SetMotionBlurQuality",&pragma::CRendererPpMotionBlurComponent::SetMotionBlurQuality);
+	defPpMotionBlur.def("GetMotionBlurQuality",&pragma::CRendererPpMotionBlurComponent::GetMotionBlurQuality);
+	defPpMotionBlur.def("UpdateMotionBlurData",&pragma::CRendererPpMotionBlurComponent::UpdateMotionBlurData);
+	defPpMotionBlur.def("UpdatePoses",&pragma::CRendererPpMotionBlurComponent::UpdatePoses);
 	entsMod[defPpMotionBlur];
 
 	// --template-component-register-location

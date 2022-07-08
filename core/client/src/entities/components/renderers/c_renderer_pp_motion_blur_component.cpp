@@ -11,15 +11,20 @@
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/rendering/shaders/info/c_shader_velocity_buffer.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_motion_blur.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include <pragma/entities/entity_component_manager_t.hpp>
+#include <pragma/entities/entity_iterator.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_command_buffer.hpp>
 #include <buffers/prosper_buffer_create_info.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#if MOTION_BLUR_DEBUG_ELEMENT_ENABLED == 1
+#include <wgui/types/wirect.h>
+#endif
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
@@ -68,12 +73,9 @@ bool VelocityStageRenderProcessor::BindEntity(CBaseEntity &ent)
 
 	auto it = m_motionBlurData.prevModelMatrices.find(&ent);
 	if(it != m_motionBlurData.prevModelMatrices.end())
-		pushConstants.prevPose = it->second;
+		pushConstants.prevPose = it->second.matrix;
 	else
-		pushConstants.prevPose = ent.GetRenderComponent()->GetTransformationMatrix();
-
-	m_motionBlurData.curModelMatrices[&ent] = ent.GetRenderComponent()->GetTransformationMatrix();
-
+		pushConstants.prevPose = umat::identity();
 	return m_shaderProcessor.GetCommandBuffer().RecordPushConstants(
 		m_shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit,
 		pragma::ShaderVelocityBuffer::MotionBlurPushConstants::Offset,
@@ -81,7 +83,22 @@ bool VelocityStageRenderProcessor::BindEntity(CBaseEntity &ent)
 	);
 }
 
-#include <wgui/types/wirect.h>
+void CRendererPpMotionBlurComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
+{
+	using T = CRendererPpMotionBlurComponent;
+
+	{
+		using TMotionBlurIntensity = float;
+		auto memberInfo = create_component_member_info<
+			T,TMotionBlurIntensity,
+			static_cast<void(T::*)(TMotionBlurIntensity)>(&T::SetMotionBlurIntensity),
+			static_cast<TMotionBlurIntensity(T::*)() const>(&T::GetMotionBlurIntensity)
+		>("motionBlurIntensity",4.f);
+		memberInfo.SetMin(0.f);
+		memberInfo.SetMax(10.f);
+		registerMember(std::move(memberInfo));
+	}
+}
 CRendererPpMotionBlurComponent::CRendererPpMotionBlurComponent(BaseEntity &ent)
 	: CRendererPpBaseComponent(ent)
 {
@@ -127,6 +144,7 @@ void CRendererPpMotionBlurComponent::ReloadVelocityTexture()
 	m_velocityTexDsg->GetDescriptorSet()->SetBindingTexture(*tex,0);
 	m_valid = true;
 
+#if MOTION_BLUR_DEBUG_ELEMENT_ENABLED == 1
 	auto *el = WGUI::GetInstance().Create<WITexturedRect>();
 	el->SetTexture(*tex);
 	el->SetSize(512,512);
@@ -134,6 +152,7 @@ void CRendererPpMotionBlurComponent::ReloadVelocityTexture()
 		m_debugTex.Remove();
 	m_debugTex = el->GetHandle();
 	luabind::globals(c_game->GetLuaState())["_el"] = el->GetHandle();
+#endif
 }
 
 void CRendererPpMotionBlurComponent::Initialize()
@@ -189,19 +208,28 @@ void CRendererPpMotionBlurComponent::RecordVelocityPass(const util::DrawSceneInf
 	auto &rt = GetRenderTarget();
 	auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
 	auto &worldRenderQueues = sceneRenderDesc.GetWorldRenderQueues();
-
-	auto camVel = m_motionBlurData.curCamPose.GetOrigin() -m_motionBlurData.prevCamPose.GetOrigin();
-	camVel *= (1.f /60.f);
-
-	auto rot = m_motionBlurData.curCamPose.GetRotation() *uquat::get_inverse(m_motionBlurData.prevCamPose.GetRotation());
-	Vector3 axis;
-	float angle;
-	uquat::to_axis_angle(rot,axis,angle);
-	auto angVel = axis *angle;
-
 	MotionBlurData motionBlurData;
-	motionBlurData.linearCameraVelocity = {camVel,0.f};
-	motionBlurData.angularCameraVelocity = {angVel,0.f};
+
+	auto &cam = drawSceneInfo.scene->GetActiveCamera();
+	auto &entCam = cam->GetEntity();
+	auto itCur = m_motionBlurData.curModelMatrices.find(&entCam);
+	auto itPrev = m_motionBlurData.prevModelMatrices.find(&entCam);
+	if(itCur != m_motionBlurData.curModelMatrices.end() && itPrev != m_motionBlurData.prevModelMatrices.end())
+	{
+		auto &curCamPose = itCur->second.pose;
+		auto &prevCamPose = itPrev->second.pose;
+		auto camVel = curCamPose.GetOrigin() -prevCamPose.GetOrigin();
+		camVel *= (1.f /60.f);
+
+		auto rot = curCamPose.GetRotation() *uquat::get_inverse(prevCamPose.GetRotation());
+		Vector3 axis;
+		float angle;
+		uquat::to_axis_angle(rot,axis,angle);
+		auto angVel = axis *angle;
+		motionBlurData.linearCameraVelocity = {camVel,0.f};
+		motionBlurData.angularCameraVelocity = {angVel,0.f};
+	}
+
 	drawSceneInfo.commandBuffer->RecordBufferBarrier(
 		*m_motionBlurDataBuffer,
 		prosper::PipelineStageFlags::VertexShaderBit,prosper::PipelineStageFlags::TransferBit,
@@ -221,14 +249,6 @@ void CRendererPpMotionBlurComponent::RecordVelocityPass(const util::DrawSceneInf
 			*velShader,renderPassDrawInfo,{} /* drawOrigin */,
 			m_motionBlurData,*m_motionBlurDataDsg->GetDescriptorSet()
 		};
-		
-		auto tick = c_game->GetLastTick();
-		auto updatePoses = (tick != m_motionBlurData.lastTick);
-		if(updatePoses)
-		{
-			m_motionBlurData.prevCamPose = m_motionBlurData.curCamPose;
-			m_motionBlurData.curCamPose = drawSceneInfo.scene->GetActiveCamera()->GetEntity().GetPose();
-		}
 		
 		rsys.BindShader(*velShader,umath::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
 		// Render static world geometry
@@ -259,20 +279,33 @@ void CRendererPpMotionBlurComponent::RecordVelocityPass(const util::DrawSceneInf
 			}
 		}
 		rsys.UnbindShader();
-
-		if(updatePoses)
-		{
-			m_motionBlurData.lastTick = tick;
-			std::swap(m_motionBlurData.prevModelMatrices,m_motionBlurData.curModelMatrices);
-		}
 	});
 	cmd->EndRecording();
 }
+void CRendererPpMotionBlurComponent::UpdatePoses()
+{
+	EntityIterator entIt {*c_game};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
+	for(auto *ent : entIt)
+	{
+		auto &r = *static_cast<CBaseEntity*>(ent)->GetRenderComponent();
+		auto curPose = r.GetTransformationMatrix();
+		auto it = m_motionBlurData.curModelMatrices.find(ent);
+
+		if(it != m_motionBlurData.curModelMatrices.end())
+			m_motionBlurData.prevModelMatrices[ent] = it->second;
+		else
+			m_motionBlurData.prevModelMatrices[ent] = {curPose,ent->GetPose()};
+		m_motionBlurData.curModelMatrices[ent] = {curPose,ent->GetPose()};
+	}
+}
 void CRendererPpMotionBlurComponent::OnRemove()
 {
-	BaseEntityComponent::OnRemove();
+	CRendererPpBaseComponent::OnRemove();
+#if MOTION_BLUR_DEBUG_ELEMENT_ENABLED == 1
 	if(m_debugTex.IsValid())
 		m_debugTex.Remove();
+#endif
 }
 void CRendererPpMotionBlurComponent::ExecuteVelocityPass(const util::DrawSceneInfo &drawSceneInfo)
 {
@@ -335,8 +368,11 @@ void CRendererPpMotionBlurComponent::RenderPostProcessing(const util::DrawSceneI
 		prosper::ShaderBindState bindState {*drawCmd};
 		if(shaderMotionBlur->RecordBeginDraw(bindState) == true)
 		{
+			ShaderPPMotionBlur::PushConstants pushConstants {};
+			pushConstants.velocityScale = GetMotionBlurIntensity();
+			pushConstants.blurQuality = umath::to_integral(GetMotionBlurQuality());
 			shaderMotionBlur->RecordDraw(
-				bindState,
+				bindState,pushConstants,
 				*hdrInfo.dsgHDRPostProcessing->GetDescriptorSet(),
 				*m_velocityTexDsg->GetDescriptorSet()
 			);
@@ -352,6 +388,16 @@ void CRendererPpMotionBlurComponent::RenderPostProcessing(const util::DrawSceneI
 
 	hdrInfo.BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo);
 }
+
+void CRendererPpMotionBlurComponent::UpdateMotionBlurData() {m_motionDataUpdateRequired = true;}
+
+void CRendererPpMotionBlurComponent::SetAutoUpdateMotionData(bool updateMotionPerFrame) {m_autoUpdateMotionData = updateMotionPerFrame;}
+
+void CRendererPpMotionBlurComponent::SetMotionBlurIntensity(float intensity) {m_motionBlurIntensityFactor = intensity;}
+float CRendererPpMotionBlurComponent::GetMotionBlurIntensity() const {return m_motionBlurIntensityFactor;}
+
+void CRendererPpMotionBlurComponent::SetMotionBlurQuality(MotionBlurQuality quality) {m_motionBlurQuality = quality;}
+MotionBlurQuality CRendererPpMotionBlurComponent::GetMotionBlurQuality() const {return m_motionBlurQuality;}
 
 const std::shared_ptr<prosper::ISwapCommandBufferGroup> &CRendererPpMotionBlurComponent::GetSwapCommandBuffer() const {return m_swapCmd;}
 const std::shared_ptr<prosper::RenderTarget> &CRendererPpMotionBlurComponent::GetRenderTarget() const {return m_renderTarget;}

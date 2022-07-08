@@ -32,12 +32,13 @@ void ShaderPPMotionBlur::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 {
 	ShaderPPBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_TEXTURE_VELOCITY);
+	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 }
 bool ShaderPPMotionBlur::RecordDraw(
-	prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetTexture,
-	prosper::IDescriptorSet &descSetTextureVelocity
+	prosper::ShaderBindState &bindState,const PushConstants &pushConstants,
+	prosper::IDescriptorSet &descSetTexture,prosper::IDescriptorSet &descSetTextureVelocity
 ) const
 {
 	return RecordBindDescriptorSets(bindState,{&descSetTextureVelocity},DESCRIPTOR_SET_TEXTURE_VELOCITY.setIndex) &&
-		ShaderPPBase::RecordDraw(bindState,descSetTexture);
+		RecordPushConstants(bindState,pushConstants) && ShaderPPBase::RecordDraw(bindState,descSetTexture);
 }

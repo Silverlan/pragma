@@ -14,14 +14,26 @@
 #include <wgui/types.hpp>
 #include <mathutil/transform.hpp>
 
+#define MOTION_BLUR_DEBUG_ELEMENT_ENABLED 0
+
 namespace pragma
 {
+	enum class MotionBlurQuality : uint32_t
+	{
+		Low = 0,
+		Medium,
+		High
+	};
+
 	struct DLLCLIENT MotionBlurTemporalData
 	{
-		std::unordered_map<const BaseEntity*,Mat4> prevModelMatrices;
-		std::unordered_map<const BaseEntity*,Mat4> curModelMatrices;
-		umath::Transform prevCamPose {};
-		umath::Transform curCamPose {};
+		struct PoseData
+		{
+			Mat4 matrix;
+			umath::Transform pose;
+		};
+		std::unordered_map<const BaseEntity*,PoseData> prevModelMatrices;
+		std::unordered_map<const BaseEntity*,PoseData> curModelMatrices;
 		double lastTick = 0.0;
 	};
 
@@ -37,12 +49,24 @@ namespace pragma
 		: public CRendererPpBaseComponent
 	{
 	public:
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+
 		CRendererPpMotionBlurComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnRemove() override;
 		virtual std::string GetIdentifier() const override {return "motion_blur";}
 		virtual uint32_t GetPostProcessingWeight() const override {return umath::to_integral(CRendererComponent::StandardPostProcessingWeight::MotionBlur);}
+
+		void SetAutoUpdateMotionData(bool updateMotionPerFrame);
+		void UpdateMotionBlurData();
+		void UpdatePoses();
+
+		void SetMotionBlurIntensity(float intensity);
+		float GetMotionBlurIntensity() const;
+
+		void SetMotionBlurQuality(MotionBlurQuality quality);
+		MotionBlurQuality GetMotionBlurQuality() const;
 
 		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetSwapCommandBuffer() const;
 		const std::shared_ptr<prosper::RenderTarget> &GetRenderTarget() const;
@@ -59,8 +83,14 @@ namespace pragma
 		std::shared_ptr<prosper::IBuffer> m_motionBlurDataBuffer;
 		std::shared_ptr<prosper::RenderTarget> m_renderTarget;
 		MotionBlurTemporalData m_motionBlurData {};
+#if MOTION_BLUR_DEBUG_ELEMENT_ENABLED == 1
 		WIHandle m_debugTex;
+#endif
+		float m_motionBlurIntensityFactor = 4.f;
+		MotionBlurQuality m_motionBlurQuality = MotionBlurQuality::Low;
 		bool m_valid = false;
+		bool m_autoUpdateMotionData = true;
+		bool m_motionDataUpdateRequired = false;
 	};
 };
 

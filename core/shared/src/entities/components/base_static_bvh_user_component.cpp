@@ -14,6 +14,12 @@
 
 using namespace pragma;
 #pragma optimize("",off)
+ComponentEventId BaseStaticBvhUserComponent::EVENT_ON_ACTIVATION_STATE_CHANGED = INVALID_COMPONENT_ID;
+void BaseStaticBvhUserComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
+{
+	EVENT_ON_ACTIVATION_STATE_CHANGED = registerEvent("ON_ACTIVATION_STATE_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+}
+
 BaseStaticBvhUserComponent::BaseStaticBvhUserComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)
 {}
@@ -51,11 +57,32 @@ void BaseStaticBvhUserComponent::UpdateBvhStatus()
 		isStatic = false;
 
 	if(m_staticBvhComponent.expired())
+	{
+		if(m_isActive)
+		{
+			m_isActive = false;
+			BroadcastEvent(EVENT_ON_ACTIVATION_STATE_CHANGED);
+		}
 		return;
+	}
 	if(isStatic)
+	{
 		m_staticBvhComponent->AddEntity(GetEntity());
+		if(!m_isActive)
+		{
+			m_isActive = true;
+			BroadcastEvent(EVENT_ON_ACTIVATION_STATE_CHANGED);
+		}
+	}
 	else
+	{
 		m_staticBvhComponent->RemoveEntity(GetEntity(),false);
+		if(m_isActive)
+		{
+			m_isActive = false;
+			BroadcastEvent(EVENT_ON_ACTIVATION_STATE_CHANGED);
+		}
+	}
 }
 void BaseStaticBvhUserComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
@@ -69,6 +96,7 @@ void BaseStaticBvhUserComponent::OnEntityComponentRemoved(BaseEntityComponent &c
 	if(GetEntity().IsSpawned())
 		UpdateBvhStatus();
 }
+bool BaseStaticBvhUserComponent::IsActive() const {return m_isActive;}
 util::EventReply BaseStaticBvhUserComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
 {
 	if(eventId == BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED || eventId == BasePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED)

@@ -434,7 +434,9 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	defStaticBvh.def("RemoveEntity",+[](pragma::BaseStaticBvhCacheComponent &component,BaseEntity &ent) {component.RemoveEntity(ent);});
 	mod[defStaticBvh];
 
-	auto defStaticBvhUser = pragma::lua::create_entity_component_class<pragma::BaseStaticBvhUserComponent>("BaseStaticBvhUserComponent");
+	auto defStaticBvhUser = Lua::create_base_entity_component_class<pragma::BaseStaticBvhUserComponent>("BaseStaticBvhUserComponent");
+	defStaticBvhUser.add_static_constant("EVENT_ON_ACTIVATION_STATE_CHANGED",pragma::BaseStaticBvhUserComponent::EVENT_ON_ACTIVATION_STATE_CHANGED);
+	defStaticBvhUser.def("IsActive",&pragma::BaseStaticBvhUserComponent::IsActive);
 	mod[defStaticBvhUser];
 
 	base_ai_component::register_class(mod);

@@ -17,6 +17,9 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
+		static ComponentEventId EVENT_ON_ACTIVATION_STATE_CHANGED;
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		virtual void OnEntitySpawn() override;
@@ -25,6 +28,7 @@ namespace pragma
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 
 		void SetStaticBvhCacheComponent(BaseStaticBvhCacheComponent *component);
+		bool IsActive() const;
 	protected:
 		BaseStaticBvhUserComponent(BaseEntity &ent);
 		friend BaseStaticBvhCacheComponent;
@@ -32,6 +36,7 @@ namespace pragma
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
 		CallbackHandle m_cbOnPoseChanged;
 		pragma::ComponentHandle<BaseStaticBvhCacheComponent> m_staticBvhComponent {};
+		bool m_isActive = false;
 	};
 };
 

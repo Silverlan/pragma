@@ -51,6 +51,6 @@ void CBvhComponent::DoRebuildBvh()
 	if(!mdlC)
 		return;
 	auto &renderMeshes = mdlC->GetRenderMeshes();
-	BaseBvhComponent::RebuildBvh(renderMeshes);
+	m_bvhData = BaseBvhComponent::RebuildBvh(renderMeshes);
 	RebuildAnimatedBvh();
 }

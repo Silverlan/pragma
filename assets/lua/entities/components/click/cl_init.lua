@@ -139,7 +139,7 @@ function ents.ClickComponent.raycast(pos,dir,filter)
 		local mdl = ent:GetModel()
 		local renderC = ent:GetComponent(ents.COMPONENT_RENDER)
 		if(mdl ~= nil and ent ~= entPl and renderC ~= nil and renderC:GetSceneRenderPass() ~= game.SCENE_RENDER_PASS_VIEW and renderC:GetSceneRenderPass() ~= game.SCENE_RENDER_PASS_NONE and (filter == nil or filter(ent,renderC) == true)) then
-			if(ent:HasComponent(ents.COMPONENT_STATIC_BVH_USER) == false) then
+			if(ent:HasComponent(ents.COMPONENT_STATIC_BVH_USER) == false or ent:GetComponent(ents.COMPONENT_STATIC_BVH_USER):IsActive() == false) then
 				local r,hitData = renderC:CalcRayIntersection(pos,dir *32768,false)
 				-- print("Intersection with ",ent,": ",r)
 				-- Note: Distance of 0 usually means we're inside the object, in which case we probably don't intend to select it
@@ -153,9 +153,13 @@ function ents.ClickComponent.raycast(pos,dir,filter)
 		end
 	end
 	local entCache = {}
-	for ent in ents.iterator({ents.IteratorFilterComponent(ents.COMPONENT_ANIMATED),ents.IteratorFilterComponent(ents.COMPONENT_CLICK),ents.IteratorFilterComponent(ents.COMPONENT_MODEL),ents.IteratorFilterComponent(ents.COMPONENT_RENDER)}) do
+	for ent in ents.iterator({ents.IteratorFilterComponent(ents.COMPONENT_BVH),ents.IteratorFilterComponent(ents.COMPONENT_CLICK),ents.IteratorFilterComponent(ents.COMPONENT_MODEL),ents.IteratorFilterComponent(ents.COMPONENT_RENDER)}) do
 		entCache[ent:GetLocalIndex()] = true
 		testEntity(ent)
+	end
+
+	--[[for ent in ents.iterator({ents.IteratorFilterComponent(ents.COMPONENT_PANIMA),ents.IteratorFilterComponent(ents.COMPONENT_CLICK),ents.IteratorFilterComponent(ents.COMPONENT_MODEL),ents.IteratorFilterComponent(ents.COMPONENT_RENDER)}) do
+		if(entCache[ent:GetLocalIndex()] ~= true) then testEntity(ent) end
 	end
 
 	for ent in ents.iterator({ents.IteratorFilterComponent(ents.COMPONENT_PANIMA),ents.IteratorFilterComponent(ents.COMPONENT_CLICK),ents.IteratorFilterComponent(ents.COMPONENT_MODEL),ents.IteratorFilterComponent(ents.COMPONENT_RENDER)}) do
@@ -164,7 +168,7 @@ function ents.ClickComponent.raycast(pos,dir,filter)
 
 	for ent in ents.iterator({ents.IteratorFilterComponent(ents.COMPONENT_PHYSICS),ents.IteratorFilterComponent(ents.COMPONENT_CLICK),ents.IteratorFilterComponent(ents.COMPONENT_MODEL),ents.IteratorFilterComponent(ents.COMPONENT_RENDER)}) do
 		if(ent:HasComponent(ents.COMPONENT_STATIC_BVH_USER) == false and entCache[ent:GetLocalIndex()] ~= true) then testEntity(ent) end
-	end
+	end]]
 	--
 
 	--[[if(hitPos ~= nil) then

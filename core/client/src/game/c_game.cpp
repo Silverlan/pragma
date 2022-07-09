@@ -790,6 +790,7 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 					m_scene->SetWorldEnvironment(GetWorldEnvironment());
 				}
 			}
+			entRenderer->Spawn();
 		}
 
 		SetRenderScene(*scene);

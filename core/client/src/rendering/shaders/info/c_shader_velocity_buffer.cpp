@@ -23,6 +23,14 @@ decltype(ShaderVelocityBuffer::DESCRIPTOR_SET_MOTION_BLUR) ShaderVelocityBuffer:
 		}
 	}
 };
+decltype(ShaderVelocityBuffer::DESCRIPTOR_SET_BONE_BUFFER) ShaderVelocityBuffer::DESCRIPTOR_SET_BONE_BUFFER = {
+	{
+		prosper::DescriptorSetInfo::Binding { // Bone Matrices
+			prosper::DescriptorType::UniformBuffer,
+			prosper::ShaderStageFlags::VertexBit
+		}
+	}
+};
 ShaderVelocityBuffer::ShaderVelocityBuffer(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderPrepassBase{context,identifier,"world/vs_velocity_buffer","world/fs_velocity_buffer"}
 {
@@ -55,4 +63,5 @@ void ShaderVelocityBuffer::InitializeGfxPipeline(prosper::GraphicsPipelineCreate
 
 	AttachPushConstantRange(pipelineInfo,pipelineIdx,sizeof(PushConstants),sizeof(MotionBlurPushConstants),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit);
 	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_MOTION_BLUR);
+	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_BONE_BUFFER);
 }

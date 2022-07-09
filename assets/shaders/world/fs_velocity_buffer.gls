@@ -10,9 +10,6 @@
 	mat4 prevPose;
 
 #include "prepass/sh_prepass.gls"
-//#include "prepass/sh_prepass_vertex_data.gls"
-
-//layout(LAYOUT_ID(DESCRIPTOR_SET_MATERIAL,DESCRIPTOR_SET_MATERIAL_BINDING_ALBEDO_MAP)) uniform sampler2D u_albedoMap;
 
 layout(location = 0) out vec4 fs_normalBuffer;
 
@@ -34,22 +31,10 @@ void main()
 
 	vec4 curPos = fs_in.curPos;
 	vec4 prevPos = fs_in.prevPos;
-	//prevPos.xy -= vec2(5,4);
-	vec2 a = (curPos.xy / curPos.w) * 0.5 + 0.5;
-	vec2 b = (prevPos.xy / prevPos.w) * 0.5 + 0.5;
-	vec2 oVelocity = a - b;
+	vec2 a = (curPos.xy /curPos.w) *0.5 +0.5;
+	vec2 b = (prevPos.xy /prevPos.w) *0.5 +0.5;
+	vec2 oVelocity = b -a;
+	oVelocity /= 200.0;
 
 	fs_normalBuffer = vec4(oVelocity,0,0);
-	/*if(CSPEC_ENABLE_ALPHA_TEST == 1)
-	{
-		if(is_alpha_test_enabled())
-		{
-			vec2 texCoords = fs_in.vert_uv; // apply_parallax(use_parallax_map(),fs_in.vert_uv);
-			vec4 albedoColor = texture(u_albedoMap,texCoords);
-			if(albedoColor.a < u_pushConstants.alphaCutoff)
-				discard;
-		}
-	}
-	if(CSPEC_ENABLE_NORMAL_OUTPUT == 1)
-		fs_normalBuffer = vec4(fs_in.vert_normal_cs,1.0);*/
 }

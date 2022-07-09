@@ -12,6 +12,7 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/rendering/shaders/info/c_shader_velocity_buffer.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_motion_blur.hpp"
@@ -21,6 +22,8 @@
 #include <image/prosper_render_target.hpp>
 #include <prosper_command_buffer.hpp>
 #include <buffers/prosper_buffer_create_info.hpp>
+#include <buffers/prosper_swap_buffer.hpp>
+#include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #if MOTION_BLUR_DEBUG_ELEMENT_ENABLED == 1
 #include <wgui/types/wirect.h>
@@ -38,7 +41,7 @@ class DLLCLIENT VelocityStageRenderProcessor
 public:
 	VelocityStageRenderProcessor(
 		pragma::ShaderVelocityBuffer &shaderVelocity,const util::RenderPassDrawInfo &drawSceneInfo,const Vector4 &drawOrigin,
-		pragma::MotionBlurTemporalData &motionBlurData,prosper::IDescriptorSet &dsMotionData
+		pragma::MotionBlurTemporalData &motionBlurData,prosper::IDescriptorSet &dsMotionData,prosper::IDescriptorSet &dsBoneGeneric
 	);
 	virtual bool BindEntity(CBaseEntity &ent) override;
 	virtual bool BindShader(prosper::Shader &shader,uint32_t pipelineIdx=0u) override;
@@ -46,13 +49,14 @@ private:
 	pragma::ShaderVelocityBuffer &m_shaderVelocity;
 	pragma::MotionBlurTemporalData &m_motionBlurData;
 	prosper::IDescriptorSet &m_dsMotionData;
+	prosper::IDescriptorSet &m_dsBoneGeneric;
 };
 VelocityStageRenderProcessor::VelocityStageRenderProcessor(
 	pragma::ShaderVelocityBuffer &shaderVelocity,const util::RenderPassDrawInfo &drawSceneInfo,const Vector4 &drawOrigin,
-	pragma::MotionBlurTemporalData &motionBlurData,prosper::IDescriptorSet &dsMotionData
+	pragma::MotionBlurTemporalData &motionBlurData,prosper::IDescriptorSet &dsMotionData,prosper::IDescriptorSet &dsBoneGeneric
 )
 	: pragma::rendering::DepthStageRenderProcessor{drawSceneInfo,drawOrigin},m_shaderVelocity{shaderVelocity},
-	m_motionBlurData{motionBlurData},m_dsMotionData{dsMotionData}
+	m_motionBlurData{motionBlurData},m_dsMotionData{dsMotionData},m_dsBoneGeneric{dsBoneGeneric}
 {}
 bool VelocityStageRenderProcessor::BindShader(prosper::Shader &shader,uint32_t pipelineIdx)
 {
@@ -69,9 +73,17 @@ bool VelocityStageRenderProcessor::BindEntity(CBaseEntity &ent)
 	auto res = pragma::rendering::DepthStageRenderProcessor::BindEntity(ent);
 	if(res == false)
 		return false;
-	pragma::ShaderVelocityBuffer::MotionBlurPushConstants pushConstants {};
-
+	auto *dsBone = &m_dsBoneGeneric;
 	auto it = m_motionBlurData.prevModelMatrices.find(&ent);
+	if(it != m_motionBlurData.prevModelMatrices.end() && it->second.boneDsg != nullptr)
+		dsBone = it->second.boneDsg->GetDescriptorSet();
+	if(!m_shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(
+		prosper::PipelineBindPoint::Graphics,m_shaderProcessor.GetCurrentPipelineLayout(),
+		pragma::ShaderVelocityBuffer::DESCRIPTOR_SET_BONE_BUFFER.setIndex,*dsBone
+	))
+		return false;
+
+	pragma::ShaderVelocityBuffer::MotionBlurPushConstants pushConstants {};
 	if(it != m_motionBlurData.prevModelMatrices.end())
 		pushConstants.prevPose = it->second.matrix;
 	else
@@ -196,6 +208,8 @@ void CRendererPpMotionBlurComponent::Initialize()
 	m_motionBlurDataDsg->GetDescriptorSet()->SetBindingUniformBuffer(*buf,0);
 	m_motionBlurDataBuffer = buf;
 
+	m_genericBoneDsg = velShader->CreateDescriptorSetGroup(pragma::ShaderVelocityBuffer::DESCRIPTOR_SET_BONE_BUFFER.setIndex);
+
 	ReloadVelocityTexture();
 }
 
@@ -242,12 +256,15 @@ void CRendererPpMotionBlurComponent::RecordVelocityPass(const util::DrawSceneInf
 		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::UniformReadBit
 	);
 
+	DoUpdatePoses(*drawSceneInfo.commandBuffer);
+
 	cmd->StartRecording(rt->GetRenderPass(),rt->GetFramebuffer());
 	cmd->Record([this,&drawSceneInfo,velShader,&worldRenderQueues,&sceneRenderDesc](prosper::ISecondaryCommandBuffer &cmd) {
 		util::RenderPassDrawInfo renderPassDrawInfo {drawSceneInfo,cmd};
 		VelocityStageRenderProcessor rsys {
 			*velShader,renderPassDrawInfo,{} /* drawOrigin */,
-			m_motionBlurData,*m_motionBlurDataDsg->GetDescriptorSet()
+			m_motionBlurData,*m_motionBlurDataDsg->GetDescriptorSet(),
+			*m_genericBoneDsg->GetDescriptorSet()
 		};
 		
 		rsys.BindShader(*velShader,umath::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
@@ -282,8 +299,13 @@ void CRendererPpMotionBlurComponent::RecordVelocityPass(const util::DrawSceneInf
 	});
 	cmd->EndRecording();
 }
-void CRendererPpMotionBlurComponent::UpdatePoses()
+void CRendererPpMotionBlurComponent::DoUpdatePoses(prosper::IPrimaryCommandBuffer &cmd)
 {
+	if(!m_poseUpdateScheduled)
+		return;
+	m_poseUpdateScheduled = false;
+
+	auto *velShader = static_cast<pragma::ShaderVelocityBuffer*>(m_velocityShader.get());
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 	for(auto *ent : entIt)
@@ -291,13 +313,59 @@ void CRendererPpMotionBlurComponent::UpdatePoses()
 		auto &r = *static_cast<CBaseEntity*>(ent)->GetRenderComponent();
 		auto curPose = r.GetTransformationMatrix();
 		auto it = m_motionBlurData.curModelMatrices.find(ent);
-
+		
+		auto *animC = static_cast<CAnimatedComponent*>(ent->GetAnimatedComponent().get());
+		auto curBoneBuffer = animC ? animC->GetBoneBuffer() : nullptr;
 		if(it != m_motionBlurData.curModelMatrices.end())
 			m_motionBlurData.prevModelMatrices[ent] = it->second;
 		else
+		{
 			m_motionBlurData.prevModelMatrices[ent] = {curPose,ent->GetPose()};
+		}
+
+		if(curBoneBuffer)
+		{
+			if(!m_motionBlurData.prevModelMatrices[ent].boneBuffer)
+			{
+				auto boneBuffer = pragma::get_instance_bone_buffer()->AllocateBuffer();
+				m_motionBlurData.prevModelMatrices[ent].boneBuffer = boneBuffer;
+
+				auto dsg = velShader->CreateDescriptorSetGroup(pragma::ShaderVelocityBuffer::DESCRIPTOR_SET_BONE_BUFFER.setIndex);
+				dsg->GetDescriptorSet()->SetBindingUniformBuffer(
+					*boneBuffer,0
+				);
+				m_motionBlurData.prevModelMatrices[ent].boneDsg = dsg;
+			}
+
+			auto &bufferDst = *m_motionBlurData.prevModelMatrices[ent].boneBuffer;
+			auto &bufferSrc = const_cast<prosper::IBuffer&>(*curBoneBuffer);
+			cmd.RecordBufferBarrier(
+				bufferSrc,prosper::PipelineStageFlags::VertexShaderBit,prosper::PipelineStageFlags::TransferBit,
+				prosper::AccessFlags::UniformReadBit,prosper::AccessFlags::TransferReadBit
+			);
+			cmd.RecordBufferBarrier(
+				bufferDst,prosper::PipelineStageFlags::VertexShaderBit,prosper::PipelineStageFlags::TransferBit,
+				prosper::AccessFlags::UniformReadBit,prosper::AccessFlags::TransferWriteBit
+			);
+			prosper::util::BufferCopy cpyInfo {};
+			cpyInfo.size = bufferSrc.GetSize();
+			cmd.RecordCopyBuffer(cpyInfo,bufferSrc,bufferDst);
+			cmd.RecordBufferBarrier(
+				bufferSrc,prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexShaderBit,
+				prosper::AccessFlags::TransferReadBit,prosper::AccessFlags::UniformReadBit
+			);
+			cmd.RecordBufferBarrier(
+				bufferDst,prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexShaderBit,
+				prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::UniformReadBit
+			);
+		}
+
 		m_motionBlurData.curModelMatrices[ent] = {curPose,ent->GetPose()};
 	}
+}
+void CRendererPpMotionBlurComponent::UpdatePoses()
+{
+	m_poseUpdateScheduled = true;
 }
 void CRendererPpMotionBlurComponent::OnRemove()
 {

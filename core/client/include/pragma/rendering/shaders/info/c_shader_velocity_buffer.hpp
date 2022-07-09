@@ -18,6 +18,7 @@ namespace pragma
 	{
 	public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MOTION_BLUR;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_BONE_BUFFER;
 
 #pragma pack(push,1)
 		struct MotionBlurPushConstants

@@ -7,7 +7,7 @@
 	float padding0; \
 	float padding1; \
 	float padding2; \
-	mat4 prevPose; // Last row is angular camera velocity
+	mat4 prevPose;
 
 #include "prepass/sh_prepass.gls"
 #include "/modules/vs_weighted.gls"
@@ -32,6 +32,12 @@ layout(std140,LAYOUT_ID(4,0)) uniform MotionBlurData
 	vec4 linearCameraVelocity;
 	vec4 angularCameraVelocity;
 } u_motionBlurData;
+
+// DESCRIPTOR_SET_INSTANCE
+layout(std140,LAYOUT_ID(5,0)) uniform PrevBones
+{
+	mat4 matrices[MAX_BONES];
+} u_prevBones;
 
 layout(location = SHADER_VERTEX_BUFFER_LOCATION) in vec3 in_vert_pos;
 
@@ -82,19 +88,27 @@ void main()
 	// Prev pos
 	mat4 prevMdlMatrix = u_pushConstants.prevPose;
 	vec3 angularVelocity = u_motionBlurData.angularCameraVelocity.xyz /100.0;
-	vec4 vposWsPrev = prevMdlMatrix *weightedVertPos;
+	mat4 mBonePrev = calc_bone_matrix(is_weighted(),is_weighted_ext(),u_prevBones.matrices);
+	vec4 weightedVertPosPrev = mBonePrev *vec4(vertPos,1.0);
+	vec4 vposWsPrev = prevMdlMatrix *weightedVertPosPrev;
+
+	vposWsPrev.xyz /= vposWsPrev.w;
+	vposWsPrev.w = 1.0;
+
+	apply_clip_plane(u_pushConstants.scene.clipPlane,vposWsPrev.xyz);
 
 	vec3 camVel = u_motionBlurData.linearCameraVelocity.xyz;
 	mat4 TEST = inverse(V);
-	vec3 camPos = vec3(TEST[3][0],TEST[3][1],TEST[3][2]);//94.0427 ,64.4967 ,-274.699);//V[0][3],V[1][3],V[2][3]);
+	vec3 camPos = vec3(TEST[3][0],TEST[3][1],TEST[3][2]);
 
 	vec3 r = origPos.xyz - camPos;
 	camVel = camVel + cross(angularVelocity, r);
 
-	vposWs.xyz += camVel;
+	vposWs = origPos;
+	vposWs.xyz += camVel *100;
 
-	//vposWsPrev.xyz /= vposWsPrev.w;
-	//vposWsPrev.w = 1.0;
+	vposWsPrev.xyz /= vposWsPrev.w;
+	vposWsPrev.w = 1.0;
 
 	vec4 prevPos = API_COORD_TRANSFORM(u_camera.P) *V *vposWsPrev;
 

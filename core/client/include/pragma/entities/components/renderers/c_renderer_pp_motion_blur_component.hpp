@@ -16,6 +16,7 @@
 
 #define MOTION_BLUR_DEBUG_ELEMENT_ENABLED 0
 
+namespace prosper {class SwapBuffer;};
 namespace pragma
 {
 	enum class MotionBlurQuality : uint32_t
@@ -31,6 +32,8 @@ namespace pragma
 		{
 			Mat4 matrix;
 			umath::Transform pose;
+			std::shared_ptr<prosper::IBuffer> boneBuffer;
+			std::shared_ptr<prosper::IDescriptorSetGroup> boneDsg;
 		};
 		std::unordered_map<const BaseEntity*,PoseData> prevModelMatrices;
 		std::unordered_map<const BaseEntity*,PoseData> curModelMatrices;
@@ -61,6 +64,7 @@ namespace pragma
 		void SetAutoUpdateMotionData(bool updateMotionPerFrame);
 		void UpdateMotionBlurData();
 		void UpdatePoses();
+		void DoUpdatePoses(prosper::IPrimaryCommandBuffer &cmd);
 
 		void SetMotionBlurIntensity(float intensity);
 		float GetMotionBlurIntensity() const;
@@ -80,6 +84,7 @@ namespace pragma
 		std::shared_ptr<prosper::ISwapCommandBufferGroup> m_swapCmd = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_velocityTexDsg;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_motionBlurDataDsg;
+		std::shared_ptr<prosper::IDescriptorSetGroup> m_genericBoneDsg;
 		std::shared_ptr<prosper::IBuffer> m_motionBlurDataBuffer;
 		std::shared_ptr<prosper::RenderTarget> m_renderTarget;
 		MotionBlurTemporalData m_motionBlurData {};
@@ -91,6 +96,7 @@ namespace pragma
 		bool m_valid = false;
 		bool m_autoUpdateMotionData = true;
 		bool m_motionDataUpdateRequired = false;
+		bool m_poseUpdateScheduled = false;
 	};
 };
 

@@ -1670,6 +1670,29 @@ void LuaEntityIteratorFilterFunction::Attach(EntityIterator &iterator)
 
 static std::optional<LuaEntityIterator> s_entIterator {}; // HACK: This is a workaround for a bug in luabind, which causes errors when compiled with gcc.
 static std::optional<LuaEntityComponentIterator> s_centIterator {}; // HACK: This is a workaround for a bug in luabind, which causes errors when compiled with gcc.
+
+static LuaEntityComponentIterator& citerator(lua_State *l,pragma::ComponentId componentId)
+{
+	s_centIterator = LuaEntityComponentIterator{l,componentId};
+	return *s_centIterator;
+}
+static LuaEntityComponentIterator& citerator(lua_State *l,pragma::ComponentId componentId,const Lua::var<EntityIterator::FilterFlags,Lua::tb<LuaEntityIteratorFilterBase>> &oFilterOrFlags)
+{
+	auto filterFlags = EntityIterator::FilterFlags::Default;
+	luabind::object filterTable {};
+	if(Lua::IsNumber(l,2))
+		filterFlags = static_cast<EntityIterator::FilterFlags>(luabind::object_cast<uint32_t>(oFilterOrFlags));
+	else
+		filterTable = oFilterOrFlags;
+	s_centIterator = Lua::ents::create_lua_entity_component_iterator(l,componentId,filterTable,filterFlags);
+	return *s_centIterator;
+}
+static LuaEntityComponentIterator& citerator(lua_State *l,pragma::ComponentId componentId,EntityIterator::FilterFlags filterFlags,const Lua::tb<LuaEntityIteratorFilterBase> &oFilter)
+{
+	s_centIterator = Lua::ents::create_lua_entity_component_iterator(l,componentId,oFilter,filterFlags);
+	return *s_centIterator;
+}
+
 void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 {
 	auto &modEnts = GetLuaInterface().RegisterLibrary("ents");
@@ -1699,27 +1722,37 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 		},luabind::return_stl_iterator{})
 	];
 	modEnts[
-		luabind::def("citerator",+[](lua_State *l,pragma::ComponentId componentId) -> LuaEntityComponentIterator& {
-			s_centIterator = LuaEntityComponentIterator{l,componentId};
-			return *s_centIterator;
+		luabind::def("citerator",static_cast<LuaEntityComponentIterator&(*)(lua_State*,pragma::ComponentId)>(&citerator),luabind::return_stl_iterator{})
+	];
+	modEnts[
+		luabind::def("citerator",static_cast<LuaEntityComponentIterator&(*)(lua_State*,pragma::ComponentId,const Lua::var<EntityIterator::FilterFlags,Lua::tb<LuaEntityIteratorFilterBase>>&)>(&citerator),luabind::return_stl_iterator{})
+	];
+	modEnts[
+		luabind::def("citerator",static_cast<LuaEntityComponentIterator&(*)(lua_State*,pragma::ComponentId,EntityIterator::FilterFlags,const Lua::tb<LuaEntityIteratorFilterBase>&)>(&citerator),luabind::return_stl_iterator{})
+	];
+
+	modEnts[
+		luabind::def("citerator",+[](lua_State *l,Game &game,const std::string &componentName) -> LuaEntityComponentIterator& {
+			pragma::ComponentId componentId;
+			if(!game.GetEntityComponentManager().GetComponentTypeId(componentName,componentId))
+				Lua::Error(l,"Unknown component type '" +componentName +"'!");
+			return citerator(l,componentId);
 		},luabind::return_stl_iterator{})
 	];
 	modEnts[
-		luabind::def("citerator",+[](lua_State *l,pragma::ComponentId componentId,const Lua::var<EntityIterator::FilterFlags,Lua::tb<LuaEntityIteratorFilterBase>> &oFilterOrFlags) -> LuaEntityComponentIterator& {
-			auto filterFlags = EntityIterator::FilterFlags::Default;
-			luabind::object filterTable {};
-			if(Lua::IsNumber(l,2))
-				filterFlags = static_cast<EntityIterator::FilterFlags>(luabind::object_cast<uint32_t>(oFilterOrFlags));
-			else
-				filterTable = oFilterOrFlags;
-			s_centIterator = Lua::ents::create_lua_entity_component_iterator(l,componentId,filterTable,filterFlags);
-			return *s_centIterator;
+		luabind::def("citerator",+[](lua_State *l,Game &game,const std::string &componentName,const Lua::var<EntityIterator::FilterFlags,Lua::tb<LuaEntityIteratorFilterBase>> &oFilterOrFlags) -> LuaEntityComponentIterator& {
+			pragma::ComponentId componentId;
+			if(!game.GetEntityComponentManager().GetComponentTypeId(componentName,componentId))
+				Lua::Error(l,"Unknown component type '" +componentName +"'!");
+			return citerator(l,componentId,oFilterOrFlags);
 		},luabind::return_stl_iterator{})
 	];
 	modEnts[
-		luabind::def("citerator",+[](lua_State *l,pragma::ComponentId componentId,EntityIterator::FilterFlags filterFlags,const Lua::tb<LuaEntityIteratorFilterBase> &oFilter) -> LuaEntityComponentIterator& {
-			s_centIterator = Lua::ents::create_lua_entity_component_iterator(l,componentId,oFilter,filterFlags);
-			return *s_centIterator;
+		luabind::def("citerator",+[](lua_State *l,Game &game,const std::string &componentName,EntityIterator::FilterFlags filterFlags,const Lua::tb<LuaEntityIteratorFilterBase> &oFilter) -> LuaEntityComponentIterator& {
+			pragma::ComponentId componentId;
+			if(!game.GetEntityComponentManager().GetComponentTypeId(componentName,componentId))
+				Lua::Error(l,"Unknown component type '" +componentName +"'!");
+			return citerator(l,componentId,filterFlags,oFilter);
 		},luabind::return_stl_iterator{})
 	];
 

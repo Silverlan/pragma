@@ -536,7 +536,7 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 		if(!res.has_value())
 			return {};
 		Intersection::LineMeshResult result {};
-		result.hitPos = start +dir *res->distance;
+		result.hitPos = start +uvec::get_normal(dir) *res->distance;
 		result.hitValue = res->distance;
 		result.result = umath::intersection::Result::Intersect;
 		if(precise)

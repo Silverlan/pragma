@@ -41,6 +41,30 @@ layout(std140,LAYOUT_ID(5,0)) uniform PrevBones
 
 layout(location = SHADER_VERTEX_BUFFER_LOCATION) in vec3 in_vert_pos;
 
+mat4 calc_bone_matrix_prev(bool weighted,bool weightedExt)
+{
+	if(weighted == false)
+		return mat4(1.0);
+	mat4 mat = mat4(0.0);
+	for(int i=0;i<4;i++)
+	{
+		if(in_boneWeightIDs[i] != -1)
+			mat += in_weights[i] *u_prevBones.matrices[in_boneWeightIDs[i]];
+	}
+	if(CSPEC_ENABLE_EXTENDED_VERTEX_WEIGHTS == 1)
+	{
+		if(weightedExt)
+		{
+			for(int i=4;i<8;i++)
+			{
+				if(in_boneWeightExtIDs[i] != -1)
+					mat += in_weightsExt[i] *u_prevBones.matrices[in_boneWeightExtIDs[i]];
+			}
+		}
+	}
+	return mat;
+}
+
 void main()
 {
 	vec3 vertPos = in_vert_pos.xyz;
@@ -88,7 +112,7 @@ void main()
 	// Prev pos
 	mat4 prevMdlMatrix = u_pushConstants.prevPose;
 	vec3 angularVelocity = u_motionBlurData.angularCameraVelocity.xyz /100.0;
-	mat4 mBonePrev = calc_bone_matrix(is_weighted(),is_weighted_ext(),u_prevBones.matrices);
+	mat4 mBonePrev = calc_bone_matrix_prev(is_weighted(),is_weighted_ext());
 	vec4 weightedVertPosPrev = mBonePrev *vec4(vertPos,1.0);
 	vec4 vposWsPrev = prevMdlMatrix *weightedVertPosPrev;
 

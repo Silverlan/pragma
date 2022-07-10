@@ -23,6 +23,7 @@ namespace Lua
 			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawLines(const std::vector<Vector3> &linePoints,const DebugRenderInfo &renderInfo);
 			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawPoint(const DebugRenderInfo &renderInfo);
 			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawLine(const Vector3 &start,const Vector3 &end,const DebugRenderInfo &renderInfo);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawLine(const Vector3 &start,const Vector3 &end);
 			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawBox(
 				const Vector3 &start,const Vector3 &end,const DebugRenderInfo &renderInfo
 			);

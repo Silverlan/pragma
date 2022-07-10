@@ -13,6 +13,7 @@
 #include "pragma/entities/components/base_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/base_static_bvh_user_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
+#include "pragma/model/modelmesh.h"
 #include "pragma/lua/policies/optional_policy.hpp"
 #include "pragma/lua/policies/game_object_policy.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
@@ -422,6 +423,21 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	defBvhHitInfo.def_readonly("t",&pragma::BvhHitInfo::t);
 	defBvhHitInfo.def_readonly("u",&pragma::BvhHitInfo::u);
 	defBvhHitInfo.def_readonly("v",&pragma::BvhHitInfo::v);
+	defBvhHitInfo.def("CalcHitNormal",+[](const pragma::BvhHitInfo &hitInfo) -> std::optional<Vector3> {
+		if(!hitInfo.mesh)
+			return {};
+		auto idx = hitInfo.primitiveIndex *3;
+		auto vIdx0 = hitInfo.mesh->GetIndex(idx);
+		auto vIdx1 = hitInfo.mesh->GetIndex(idx +1);
+		auto vIdx2 = hitInfo.mesh->GetIndex(idx +2);
+		if(!vIdx0.has_value() || !vIdx1.has_value() || !vIdx2.has_value())
+			return {};
+		auto n0 = hitInfo.mesh->GetVertexNormal(*vIdx0);
+		auto n1 = hitInfo.mesh->GetVertexNormal(*vIdx1);
+		auto n2 = hitInfo.mesh->GetVertexNormal(*vIdx2);
+		auto n = hitInfo.t *n0 +hitInfo.u *n1 +hitInfo.v *n2;
+		return n;
+	});
 
 	auto defBvh = Lua::create_base_entity_component_class<pragma::BaseBvhComponent>("BaseBvhComponent");
 	defBvh.def("IntersectionTest",static_cast<std::optional<pragma::BvhHitInfo>(pragma::BaseBvhComponent::*)(const Vector3&,const Vector3&,float,float) const>(&pragma::BaseBvhComponent::IntersectionTest));

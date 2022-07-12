@@ -112,6 +112,12 @@ void DebugRenderer::CollectionObject::SetAngles(const EulerAngles &ang)
 	for(auto &o : m_objects)
 		o->SetAngles(ang);
 }
+void DebugRenderer::CollectionObject::Remove()
+{
+	BaseObject::Remove();
+	for(auto &o : m_objects)
+		o->Remove();
+}
 void DebugRenderer::CollectionObject::SetScale(const Vector3 &scale)
 {
 	BaseObject::SetScale(scale);

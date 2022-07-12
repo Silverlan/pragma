@@ -73,7 +73,7 @@ namespace DebugRenderer
 		const Mat4 &GetModelMatrix() const;
 		bool IsVisible() const;
 		void SetVisible(bool b);
-		void Remove();
+		virtual void Remove();
 		bool IsValid() const;
 		virtual ObjectType GetType() const=0;
 	};
@@ -90,6 +90,7 @@ namespace DebugRenderer
 		virtual void SetAngles(const EulerAngles &ang) override;
 		virtual void SetScale(const Vector3 &scale) override;
 		virtual ObjectType GetType() const override;
+		virtual void Remove() override;
 	};
 	class DLLCLIENT WorldObject
 		: public BaseObject

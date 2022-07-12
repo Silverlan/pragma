@@ -38,6 +38,7 @@ void CRendererPpBaseComponent::Initialize()
 }
 void CRendererPpBaseComponent::OnRemove()
 {
+	c_engine->GetRenderContext().WaitIdle();
 	BaseEntityComponent::OnRemove();
 	if(m_cbEffect.IsValid())
 		m_cbEffect.Remove();

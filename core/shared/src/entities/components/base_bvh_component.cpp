@@ -22,6 +22,7 @@
 using namespace pragma;
 #pragma optimize("",off)
 using Primitive = bvh::Triangle<float>;
+static_assert(sizeof(BvhTriangle) == sizeof(Primitive));
 namespace pragma
 {
 	struct BvhData
@@ -63,7 +64,19 @@ void pragma::BvhData::InitializeIntersectorData()
 	);
 }
 
-void BaseBvhComponent::ClearBvh() {m_bvhData = nullptr;}
+ComponentEventId BaseBvhComponent::EVENT_ON_CLEAR_BVH = INVALID_COMPONENT_ID;
+ComponentEventId BaseBvhComponent::EVENT_ON_BVH_REBUILT = INVALID_COMPONENT_ID;
+void BaseBvhComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
+{
+	EVENT_ON_CLEAR_BVH = registerEvent("EVENT_ON_CLEAR_BVH",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_BVH_REBUILT = registerEvent("EVENT_ON_BVH_REBUILT",EntityComponentManager::EventInfo::Type::Explicit);
+}
+
+void BaseBvhComponent::ClearBvh()
+{
+	InvokeEventCallbacks(EVENT_ON_CLEAR_BVH);
+	m_bvhData = nullptr;
+}
 
 void BaseBvhComponent::RebuildBvh()
 {
@@ -74,11 +87,33 @@ void BaseBvhComponent::RebuildBvh()
 		return;
 	}
 	DoRebuildBvh();
+
+	InvokeEventCallbacks(EVENT_ON_BVH_REBUILT);
 }
 
 void BaseBvhComponent::SetStaticCache(BaseStaticBvhCacheComponent *staticCache)
 {
 	m_staticCache = staticCache ? staticCache->GetHandle<BaseStaticBvhCacheComponent>() : ComponentHandle<BaseStaticBvhCacheComponent>{};
+}
+
+bool BaseBvhComponent::SetVertexData(const std::vector<BvhTriangle> &data)
+{
+	if(m_bvhData->primitives.size() != data.size())
+		return false;
+	memcpy(m_bvhData->primitives.data(),data.data(),util::size_of_container(data));
+	
+	// Update bounding boxes
+	bvh::HierarchyRefitter<bvh::Bvh<float>> refitter {m_bvhData->bvh};
+	refitter.refit([&] (bvh::Bvh<float>::Node& leaf) {
+		assert(leaf.is_leaf());
+		auto bbox = bvh::BoundingBox<float>::empty();
+		for (size_t i = 0; i < leaf.primitive_count; ++i) {
+			auto& triangle = m_bvhData->primitives[m_bvhData->bvh.primitive_indices[leaf.first_child_or_primitive + i]];
+			bbox.extend(triangle.bounding_box());
+		}
+		leaf.bounding_box_proxy() = bbox;
+	});
+	return true;
 }
 
 std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(
@@ -167,53 +202,6 @@ std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(
 }
 
 std::vector<BvhMeshRange> &BaseBvhComponent::GetMeshRanges() {return m_bvhData->meshRanges;}
-
-void BaseBvhComponent::RebuildAnimatedBvh()
-{
-	auto *mdlC = GetEntity().GetModelComponent();
-	auto animC = GetEntity().GetAnimatedComponent();
-	if(!mdlC || animC.expired())
-		return;
-	// Update vertices
-	for(auto &range : m_bvhData->meshRanges)
-	{
-		auto &mesh = range.mesh;
-		auto numIndices = mesh->GetIndexCount();
-		auto &verts = mesh->GetVertices();
-		auto &vertWeights = mesh->GetVertexWeights();
-		mesh->VisitIndices([this,&mesh,&range,&verts,&animC,&vertWeights](auto *indexData,uint32_t numIndices) {
-			for(auto i=decltype(numIndices){0};i<numIndices;i+=3)
-			{
-				std::array<Vector3,3> tri;
-				for(uint8_t j=0;j<3;++j)
-				{
-					// TODO: This could probably be optimized
-					auto &pos = tri[j];
-					auto idx = indexData[i +j];
-					pos = verts[idx].position;
-					animC->GetLocalVertexPosition(*mesh,idx,pos);
-				}
-				m_bvhData->primitives[(range.start +i) /3] = {
-					{tri[0].x,tri[0].y,tri[0].z},
-					{tri[1].x,tri[1].y,tri[1].z},
-					{tri[2].x,tri[2].y,tri[2].z}
-				};
-			}
-		});
-	}
-
-	// Update bounding boxes
-	bvh::HierarchyRefitter<bvh::Bvh<float>> refitter {m_bvhData->bvh};
-	refitter.refit([&] (bvh::Bvh<float>::Node& leaf) {
-		assert(leaf.is_leaf());
-		auto bbox = bvh::BoundingBox<float>::empty();
-		for (size_t i = 0; i < leaf.primitive_count; ++i) {
-			auto& triangle = m_bvhData->primitives[m_bvhData->bvh.primitive_indices[leaf.first_child_or_primitive + i]];
-			bbox.extend(triangle.bounding_box());
-		}
-		leaf.bounding_box_proxy() = bbox;
-	});
-}
 
 bool BaseBvhComponent::IntersectionTest(
 	const Vector3 &origin,const Vector3 &dir,float minDist,float maxDist,

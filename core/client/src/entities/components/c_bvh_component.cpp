@@ -9,12 +9,14 @@
 #include "pragma/entities/components/c_bvh_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
+#include "pragma/entities/components/c_animated_bvh_component.hpp"
+#include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/c_modelmesh.h"
 
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-
+#pragma optimize("",off)
 void CBvhComponent::InitializeLuaObject(lua_State *l) {return BaseBvhComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void CBvhComponent::Initialize()
@@ -23,9 +25,6 @@ void CBvhComponent::Initialize()
 
 	BindEventUnhandled(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		RebuildBvh();
-	});
-	BindEventUnhandled(CAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		m_bvhDirty = true;
 	});
 	if(GetEntity().IsSpawned())
 		RebuildBvh();
@@ -36,12 +35,35 @@ bool CBvhComponent::IntersectionTest(
 	BvhHitInfo &outHitInfo
 ) const
 {
-	if(m_bvhDirty)
-	{
-		const_cast<CBvhComponent*>(this)->RebuildAnimatedBvh();
-		const_cast<CBvhComponent*>(this)->m_bvhDirty = false;
-	}
+	// TODO: If dirty?
 	return BaseBvhComponent::IntersectionTest(origin,dir,minDist,maxDist,outHitInfo);
+}
+
+void CBvhComponent::OnEntityComponentAdded(BaseEntityComponent &component)
+{
+	BaseEntityComponent::OnEntityComponentAdded(component);
+	if(GetEntity().IsSpawned() && typeid(component) == typeid(CAnimatedComponent))
+		UpdateBvhStatus();
+}
+void CBvhComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
+{
+	BaseEntityComponent::OnEntityComponentAdded(component);
+	if(GetEntity().IsSpawned() && typeid(component) == typeid(CAnimatedComponent))
+		UpdateBvhStatus();
+}
+void CBvhComponent::OnRemove()
+{
+	BaseEntityComponent::OnRemove();
+	GetEntity().RemoveComponent<CAnimatedBvhComponent>();
+}
+
+void CBvhComponent::UpdateBvhStatus()
+{
+	auto useAnimatedBvh = GetEntity().HasComponent<CAnimatedComponent>();
+	if(useAnimatedBvh)
+		GetEntity().AddComponent<CAnimatedBvhComponent>();
+	else
+		GetEntity().RemoveComponent<CAnimatedBvhComponent>();
 }
 
 void CBvhComponent::DoRebuildBvh()
@@ -52,5 +74,5 @@ void CBvhComponent::DoRebuildBvh()
 		return;
 	auto &renderMeshes = mdlC->GetRenderMeshes();
 	m_bvhData = BaseBvhComponent::RebuildBvh(renderMeshes);
-	RebuildAnimatedBvh();
 }
+#pragma optimize("",on)

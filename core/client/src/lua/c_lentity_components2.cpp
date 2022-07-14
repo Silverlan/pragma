@@ -9,6 +9,7 @@
 #include "pragma/entities/components/liquid/c_liquid_control_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_surface_simulation_component.hpp"
 #include "pragma/entities/components/c_bvh_component.hpp"
+#include "pragma/entities/components/c_animated_bvh_component.hpp"
 #include "pragma/entities/components/c_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
 #include "pragma/entities/components/c_optical_camera_component.hpp"
@@ -35,6 +36,9 @@ void RegisterLuaEntityComponents2(lua_State *l,luabind::module_ &entsMod)
 
 	auto defBvh = pragma::lua::create_entity_component_class<pragma::CBvhComponent,pragma::BaseBvhComponent>("BvhComponent");
 	entsMod[defBvh];
+
+	auto defAnimatedBvh = pragma::lua::create_entity_component_class<pragma::CAnimatedBvhComponent,pragma::BaseEntityComponent>("AnimatedBvhComponent");
+	entsMod[defAnimatedBvh];
 
 	auto defStaticBvh = pragma::lua::create_entity_component_class<pragma::CStaticBvhCacheComponent,pragma::BaseStaticBvhCacheComponent>("StaticBvhCacheComponent");
 	entsMod[defStaticBvh];

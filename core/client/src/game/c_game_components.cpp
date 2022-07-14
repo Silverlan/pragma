@@ -35,6 +35,7 @@
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_raytracing_component.hpp"
 #include "pragma/entities/components/c_bvh_component.hpp"
+#include "pragma/entities/components/c_animated_bvh_component.hpp"
 #include "pragma/entities/components/c_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
 #include "pragma/entities/components/c_light_map_data_cache_component.hpp"
@@ -258,6 +259,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CRaytracingComponent>("raytracing");
 	componentManager.RegisterComponentType<pragma::CEyeComponent>("eye");
 	componentManager.RegisterComponentType<pragma::CBvhComponent>("bvh");
+	componentManager.RegisterComponentType<pragma::CAnimatedBvhComponent>("animated_bvh");
 	componentManager.RegisterComponentType<pragma::CStaticBvhCacheComponent>("static_bvh_cache");
 	componentManager.RegisterComponentType<pragma::CStaticBvhUserComponent>("static_bvh_user");
 	componentManager.RegisterComponentType<pragma::COpticalCameraComponent>("optical_camera");

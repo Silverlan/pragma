@@ -34,6 +34,17 @@ namespace pragma
 		}
 	};
 
+	struct DLLNETWORK BvhTriangle
+	{
+		Vector3 p0,e1,e2,n;
+		BvhTriangle()=default;
+		BvhTriangle(const Vector3 &p0, const Vector3 &p1, const Vector3 &p2)
+			: p0(p0), e1(p0 - p1), e2(p2 - p0)
+		{
+			n = cross(e1,e2);
+		}
+	};
+
 	struct BvhData;
 	class BaseStaticBvhCacheComponent;
 	DLLNETWORK std::vector<BvhMeshRange> &get_bvh_mesh_ranges(BvhData &bvhData);
@@ -41,6 +52,10 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
+		static ComponentEventId EVENT_ON_CLEAR_BVH;
+		static ComponentEventId EVENT_ON_BVH_REBUILT;
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+
 		virtual void Initialize() override;
 
 		virtual ~BaseBvhComponent() override;
@@ -53,9 +68,10 @@ namespace pragma
 		) const;
 		void SetStaticCache(BaseStaticBvhCacheComponent *staticCache);
 		virtual bool IsStaticBvh() const {return false;}
+
+		bool SetVertexData(const std::vector<BvhTriangle> &data);
 	protected:
 		BaseBvhComponent(BaseEntity &ent);
-		void RebuildAnimatedBvh();
 		void RebuildBvh();
 		std::shared_ptr<pragma::BvhData> RebuildBvh(
 			const std::vector<std::shared_ptr<ModelSubMesh>> &meshes,const std::vector<umath::ScaledTransform> *optPoses=nullptr,

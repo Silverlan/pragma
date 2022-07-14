@@ -21,14 +21,17 @@ namespace pragma
 		CBvhComponent(BaseEntity &ent) : BaseBvhComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void OnRemove() override;
+		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
+		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 		virtual bool IntersectionTest(
 			const Vector3 &origin,const Vector3 &dir,float minDist,float maxDist,
 			BvhHitInfo &outHitInfo
 		) const override;
 		using BaseBvhComponent::IntersectionTest;
 	private:
+		void UpdateBvhStatus();
 		virtual void DoRebuildBvh() override;
-		bool m_bvhDirty = true;
 	};
 };
 

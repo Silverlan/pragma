@@ -11,9 +11,12 @@
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include <pragma/lua/converters/vector_converter_t.hpp>
+#include <pragma/debug/intel_vtune.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
+extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
 
@@ -24,7 +27,6 @@ static pragma::ThreadPool &get_thread_pool() {return *g_threadPool;}
 static void init_thread_pool() {g_threadPool = std::make_unique<pragma::ThreadPool>(8,"bvh_animated");}
 static void free_thread_pool() {g_threadPool = nullptr;}
 
-#pragma optimize("",off)
 CAnimatedBvhComponent::CAnimatedBvhComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)
 {
@@ -72,7 +74,8 @@ void CAnimatedBvhComponent::OnRemove()
 		m_cbOnMatricesUpdated.Remove();
 	if(m_cbOnBvhCleared.IsValid())
 		m_cbOnBvhCleared.Remove();
-
+	if(m_cbRebuildScheduled.IsValid())
+		m_cbRebuildScheduled.Remove();
 
 	auto animC = GetEntity().GetComponent<CAnimatedComponent>();
 	if(animC.valid())
@@ -87,6 +90,11 @@ void CAnimatedBvhComponent::Cancel()
 {
 	m_cancelled = true;
 }
+bool CAnimatedBvhComponent::IsBusy() const
+{
+	std::unique_lock<std::mutex> lock {m_animatedBvhData.completeMutex};
+	return m_animatedBvhData.completeCount != m_numJobs;
+}
 void CAnimatedBvhComponent::WaitForCompletion()
 {
 	std::unique_lock<std::mutex> lock {m_animatedBvhData.completeMutex};
@@ -97,11 +105,34 @@ void CAnimatedBvhComponent::WaitForCompletion()
 
 void CAnimatedBvhComponent::RebuildAnimatedBvh()
 {
-	// TODO: If already updating, mark for update, but wait for current work to be completed
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().BeginTask("bvh_animated_prepare");
+#endif
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	util::ScopeGuard sg {[]() {
+		::debug::get_domain().EndTask();
+	}};
+#endif
+	if(IsBusy())
+	{
+		if(m_rebuildScheduled)
+			return;
+		m_rebuildScheduled = true;
+		if(m_cbRebuildScheduled.IsValid())
+			m_cbRebuildScheduled.Remove();
+		m_cbRebuildScheduled = c_engine->AddCallback("Think",FunctionCallback<void>::Create([this]() {
+			RebuildAnimatedBvh();
+		}));
+		return;
+	}
+	if(m_cbRebuildScheduled.IsValid())
+		m_cbRebuildScheduled.Remove();
+
 	Clear();
 	m_numJobs = 0;
 	m_animatedBvhData.completeCount = 0;
 	m_cancelled = false;
+	m_rebuildScheduled = false;
 
 	auto *animC = static_cast<CAnimatedComponent*>(GetEntity().GetAnimatedComponent().get());
 	auto *mdlC = static_cast<CModelComponent*>(GetEntity().GetModelComponent());
@@ -130,6 +161,9 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh()
 			++numJobs;
 		numIndices += renderMesh->GetIndexCount();
 	}
+	if(numIndices == 0)
+		return;
+	m_busy = true;
 	m_animatedBvhData.transformedTris.resize(numIndices /3);
 
 	auto bvhC = GetEntity().GetComponent<CBvhComponent>();
@@ -149,6 +183,8 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh()
 
 		// TODO: Add thread safety
 		bvhC->SetVertexData(m_animatedBvhData.transformedTris);
+
+		m_busy = false;
 		return {};
 	};
 	for(auto i=decltype(renderMeshes.size()){0u};i<renderMeshes.size();++i)
@@ -156,14 +192,15 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh()
 		auto &mesh = *renderMeshes[i];
 		auto numVerts = mesh.GetVertexCount();
 		auto &meshData = meshDatas[i];
-		meshData.vertexMatrices.resize(numVerts);
 		meshData.transformedVerts.resize(numVerts);
 
 		pool.BatchProcess(numVerts,numVerticesPerBatch,
 			[this,numJobs,&mesh,&meshData,&animBvhData,finalize](uint32_t start,uint32_t end) mutable -> pragma::ThreadPool::ResultHandler {
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+			::debug::get_domain().BeginTask("bvh_animated_compute");
+#endif
 			auto &verts = mesh.GetVertices();
 			auto &vertexWeights = mesh.GetVertexWeights();
-			auto &vertexMatrices = meshData.vertexMatrices;
 			auto &transformedVerts = meshData.transformedVerts;
 			for(auto i=start;i<end;++i)
 			{
@@ -182,13 +219,22 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh()
 				}
 
 				Vector4 vpos {v.position.x,v.position.y,v.position.z,1.f};
-				vpos = vertexMatrices[i] *vpos;
+				vpos = mat *vpos;
 				transformedVerts[i] = Vector3{vpos.x,vpos.y,vpos.z} /vpos.w;
 			}
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+			::debug::get_domain().EndTask();
+#endif
 			m_animatedBvhData.completeMutex.lock();
 				if(++m_animatedBvhData.completeCount == numJobs)
 				{
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+					::debug::get_domain().BeginTask("bvh_animated_finalize");
+#endif
 					finalize();
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+					::debug::get_domain().EndTask();
+#endif
 					m_animatedBvhData.completeCondition.notify_one();
 				}
 			m_animatedBvhData.completeMutex.unlock();
@@ -196,4 +242,3 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh()
 		});
 	}
 }
-#pragma optimize("",on)

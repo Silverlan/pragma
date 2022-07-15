@@ -21,14 +21,13 @@ namespace pragma
 		};
 		struct DLLCLIENT MeshData
 		{
-			std::vector<Mat4> vertexMatrices;
 			std::vector<Vector3> transformedVerts;
 		};
 		AnimationBvhData animationBvhData;
 		std::vector<MeshData> meshData;
 		std::vector<BvhTriangle> transformedTris;
 		std::condition_variable completeCondition;
-		std::mutex completeMutex;
+		mutable std::mutex completeMutex;
 		uint32_t completeCount = 0;
 	};
 	class DLLCLIENT CAnimatedBvhComponent final
@@ -44,11 +43,15 @@ namespace pragma
 		void Clear();
 		void Cancel();
 		void WaitForCompletion();
+		bool IsBusy() const;
 
 		AnimatedBvhData m_animatedBvhData;
 		CallbackHandle m_cbOnMatricesUpdated;
 		CallbackHandle m_cbOnBvhCleared;
+		CallbackHandle m_cbRebuildScheduled;
+		bool m_rebuildScheduled = false;
 		std::atomic<bool> m_cancelled = false;
+		std::atomic<bool> m_busy = false;
 		uint32_t m_numJobs = 0;
 	};
 };

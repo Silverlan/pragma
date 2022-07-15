@@ -23,7 +23,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 static auto cvToneMapping = GetClientConVar("cl_render_tone_mapping");
 CRendererPpToneMappingComponent::CRendererPpToneMappingComponent(BaseEntity &ent)
 	: CRendererPpBaseComponent(ent)
@@ -103,4 +103,3 @@ void CRendererPpToneMappingComponent::DoRenderEffect(const util::DrawSceneInfo &
 	}
 }
 void CRendererPpToneMappingComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-#pragma optimize("",on)

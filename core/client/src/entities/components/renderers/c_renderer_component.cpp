@@ -24,7 +24,7 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-#pragma optimize("",off)
+
 ComponentEventId CRendererComponent::EVENT_RELOAD_RENDER_TARGET = INVALID_COMPONENT_ID;
 ComponentEventId CRendererComponent::EVENT_RELOAD_BLOOM_RENDER_TARGET = INVALID_COMPONENT_ID;
 ComponentEventId CRendererComponent::EVENT_BEGIN_RENDERING = INVALID_COMPONENT_ID;
@@ -265,4 +265,3 @@ void CEOnRenderTargetReloaded::PushArguments(lua_State *l)
 {
 	Lua::PushBool(l,success);
 }
-#pragma optimize("",on)

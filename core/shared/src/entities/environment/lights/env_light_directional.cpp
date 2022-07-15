@@ -14,7 +14,7 @@
 #include <udm.hpp>
 
 using namespace pragma;
-#pragma optimize("",off)
+
 Candela BaseEnvLightDirectionalComponent::CalcIntensityAtPoint(Candela intensity,const Vector3 &point)
 {
 	return intensity;
@@ -87,4 +87,3 @@ util::EventReply BaseEnvLightDirectionalComponent::HandleEvent(ComponentEventId 
 void BaseEnvLightDirectionalComponent::SetAmbientColor(const Color &color) {*m_ambientColor = color;}
 const Color &BaseEnvLightDirectionalComponent::GetAmbientColor() const {return *m_ambientColor;}
 const util::PColorProperty &BaseEnvLightDirectionalComponent::GetAmbientColorProperty() const {return m_ambientColor;}
-#pragma optimize("",on)

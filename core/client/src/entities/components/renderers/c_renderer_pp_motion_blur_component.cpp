@@ -33,7 +33,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 
 class DLLCLIENT VelocityStageRenderProcessor
 	: public pragma::rendering::DepthStageRenderProcessor
@@ -469,4 +469,3 @@ MotionBlurQuality CRendererPpMotionBlurComponent::GetMotionBlurQuality() const {
 
 const std::shared_ptr<prosper::ISwapCommandBufferGroup> &CRendererPpMotionBlurComponent::GetSwapCommandBuffer() const {return m_swapCmd;}
 const std::shared_ptr<prosper::RenderTarget> &CRendererPpMotionBlurComponent::GetRenderTarget() const {return m_renderTarget;}
-#pragma optimize("",on)

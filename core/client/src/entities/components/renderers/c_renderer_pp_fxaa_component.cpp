@@ -23,7 +23,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 static auto cvAntiAliasing = GetClientConVar("cl_render_anti_aliasing");
 static auto cvFxaaSubPixelAliasingRemoval = GetClientConVar("cl_render_fxaa_sub_pixel_aliasing_removal_amount");
 static auto cvFxaaEdgeThreshold = GetClientConVar("cl_render_fxaa_edge_threshold");
@@ -100,4 +100,3 @@ void CRendererPpFxaaComponent::DoRenderEffect(const util::DrawSceneInfo &drawSce
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingFXAA);
 }
 void CRendererPpFxaaComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-#pragma optimize("",on)

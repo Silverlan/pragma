@@ -9,7 +9,7 @@
 #include "pragma/entities/components/lightmap_data_cache.hpp"
 
 using namespace pragma;
-#pragma optimize("",off)
+
 size_t LightmapDataCache::CalcPoseHash(const umath::Transform &pose)
 {
 	auto ang = pose.GetAngles();
@@ -158,4 +158,3 @@ void LightmapDataCache::AddInstanceData(
 	auto &instanceData = it->second;
 	instanceData.meshData[LmUuid{meshUuid}] = {std::move(uvs)};
 }
-#pragma optimize("",on)

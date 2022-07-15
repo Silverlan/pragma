@@ -18,7 +18,7 @@
 extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 void CLightMapDataCacheComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {
 	using T = CLightMapDataCacheComponent;
@@ -195,4 +195,3 @@ void CLightMapDataCacheComponent::ReloadCache()
 	}
 	InitializeUvBuffers();
 }
-#pragma optimize("",on)

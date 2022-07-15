@@ -20,7 +20,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 CRendererPpBaseComponent::CRendererPpBaseComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)
 {}
@@ -50,4 +50,3 @@ void CRendererPpBaseComponent::RenderEffect(const util::DrawSceneInfo &drawScene
 		return;
 	DoRenderEffect(drawSceneInfo);
 }
-#pragma optimize("",on)

@@ -12,7 +12,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 void CStaticBvhUserComponent::InitializeLuaObject(lua_State *l) {return BaseStaticBvhUserComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void CStaticBvhUserComponent::Initialize()
@@ -20,4 +20,3 @@ void CStaticBvhUserComponent::Initialize()
 	BaseStaticBvhUserComponent::Initialize();
 
 }
-#pragma optimize("",on)

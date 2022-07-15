@@ -53,7 +53,7 @@ static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
 #include "pragma/entities/entity_component_system_t.hpp"
 int g_dbgMode = 5;
 #endif
-#pragma optimize("",off)
+
 void pragma::CRasterizationRendererComponent::RecordPrepass(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
@@ -628,4 +628,3 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 		}
 	});
 }
-#pragma optimize("",on)

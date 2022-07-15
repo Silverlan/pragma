@@ -24,7 +24,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 CRendererPpDoFComponent::CRendererPpDoFComponent(BaseEntity &ent)
 	: CRendererPpBaseComponent(ent)
 {}
@@ -127,4 +127,3 @@ void CRendererPpDoFComponent::DoRenderEffect(const util::DrawSceneInfo &drawScen
 	hdrInfo.BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo);
 }
 void CRendererPpDoFComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-#pragma optimize("",on)

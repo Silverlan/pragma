@@ -12,7 +12,7 @@
 #include <shader/prosper_shader_copy_image.hpp>
 
 using namespace pragma;
-#pragma optimize("",off)
+
 decltype(ShaderPPDoF::DESCRIPTOR_SET_TEXTURE) ShaderPPDoF::DESCRIPTOR_SET_TEXTURE = {ShaderPPBase::DESCRIPTOR_SET_TEXTURE};
 decltype(ShaderPPDoF::DESCRIPTOR_SET_DEPTH_BUFFER) ShaderPPDoF::DESCRIPTOR_SET_DEPTH_BUFFER = {
 	{
@@ -52,4 +52,3 @@ void ShaderPPDoF::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &ou
 		prosper::AttachmentStoreOp::Store,prosper::SampleCountFlags::e1Bit,prosper::ImageLayout::ColorAttachmentOptimal
 	}}},outRenderPass,pipelineIdx);
 }
-#pragma optimize("",on)

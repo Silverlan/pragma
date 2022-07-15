@@ -22,7 +22,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 static auto cvBloomEnabled = GetClientConVar("render_bloom_enabled");
 static auto cvBloomAmount = GetClientConVar("render_bloom_amount");
 CRendererPpBloomComponent::CRendererPpBloomComponent(BaseEntity &ent)
@@ -64,4 +64,3 @@ void CRendererPpBloomComponent::DoRenderEffect(const util::DrawSceneInfo &drawSc
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingBloom);
 }
 void CRendererPpBloomComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-#pragma optimize("",on)

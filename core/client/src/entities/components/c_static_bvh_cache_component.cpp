@@ -17,7 +17,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 void CStaticBvhCacheComponent::InitializeLuaObject(lua_State *l) {return BaseBvhComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void CStaticBvhCacheComponent::Initialize()
@@ -60,4 +60,3 @@ void CStaticBvhCacheComponent::TestRebuildBvh()
 
 	Build(std::move(meshes),std::move(meshToEntity),std::move(meshPoses));
 }
-#pragma optimize("",on)

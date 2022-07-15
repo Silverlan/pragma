@@ -13,7 +13,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 void COpticalCameraComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {
 	using T = COpticalCameraComponent;
@@ -270,4 +270,3 @@ void COpticalCameraComponent::SetVignettingOuterBorder(float vignettingOuter) {m
 float COpticalCameraComponent::GetVignettingOuterBorder() const {return m_vignetteOuterBorder;}
 void COpticalCameraComponent::SetPentagonShapeFeather(float pentagonShapeFeather) {m_pentagonShapeFeather = pentagonShapeFeather;}
 float COpticalCameraComponent::GetPentagonShapeFeather() const {return m_pentagonShapeFeather;}
-#pragma optimize("",on)

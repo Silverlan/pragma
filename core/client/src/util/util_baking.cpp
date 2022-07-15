@@ -26,7 +26,7 @@
 #include <fsys/ifile.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
-#pragma optimize("",off)
+
 static double calc_light_luminance(
 	const util::baking::LightSource &light,const Vector3 &pos,const Vector3 &n,
 	const Vector3 &p0,const Vector3 &p1,const Vector3 &p2
@@ -385,4 +385,3 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> util::baking::bake_directi
 		std::move(entityUuids),std::move(entityPoses),pLmdc
 	);
 }
-#pragma optimize("",on)

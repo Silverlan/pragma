@@ -16,7 +16,7 @@
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 void CBvhComponent::InitializeLuaObject(lua_State *l) {return BaseBvhComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void CBvhComponent::Initialize()
@@ -75,4 +75,3 @@ void CBvhComponent::DoRebuildBvh()
 	auto &renderMeshes = mdlC->GetRenderMeshes();
 	m_bvhData = BaseBvhComponent::RebuildBvh(renderMeshes);
 }
-#pragma optimize("",on)

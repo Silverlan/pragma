@@ -13,7 +13,7 @@
 #include "pragma/entities/entity_component_manager_t.hpp"
 
 using namespace pragma;
-#pragma optimize("",off)
+
 ComponentEventId BaseStaticBvhUserComponent::EVENT_ON_ACTIVATION_STATE_CHANGED = INVALID_COMPONENT_ID;
 void BaseStaticBvhUserComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
@@ -115,4 +115,3 @@ void BaseStaticBvhUserComponent::SetStaticBvhCacheComponent(BaseStaticBvhCacheCo
 {
 	m_staticBvhComponent = component ? component->GetHandle<BaseStaticBvhCacheComponent>() : pragma::ComponentHandle<BaseStaticBvhCacheComponent>{};
 }
-#pragma optimize("",on)

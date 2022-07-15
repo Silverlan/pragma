@@ -11,7 +11,7 @@
 #include "pragma/entities/entity_component_manager_t.hpp"
 
 using namespace pragma;
-#pragma optimize("",off)
+
 
 class FunctionalParallelWorker
 	: public util::ParallelWorker<void>
@@ -253,4 +253,3 @@ void BaseStaticBvhCacheComponent::RemoveEntity(BaseEntity &ent,bool removeFinal)
 	SetCacheDirty();
 	m_entities.erase(it);
 }
-#pragma optimize("",on)

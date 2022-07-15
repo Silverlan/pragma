@@ -82,6 +82,7 @@ namespace pragma
 		void ClearBvh();
 		std::shared_ptr<BvhData> m_bvhData = nullptr;
 		ComponentHandle<BaseStaticBvhCacheComponent> m_staticCache;
+		mutable std::mutex m_bvhDataMutex;
 	};
 };
 

@@ -20,7 +20,7 @@
 #include <bvh/hierarchy_refitter.hpp>
 
 using namespace pragma;
-#pragma optimize("",off)
+
 using Primitive = bvh::Triangle<float>;
 static_assert(sizeof(BvhTriangle) == sizeof(Primitive));
 namespace pragma
@@ -75,7 +75,9 @@ void BaseBvhComponent::RegisterEvents(pragma::EntityComponentManager &componentM
 void BaseBvhComponent::ClearBvh()
 {
 	InvokeEventCallbacks(EVENT_ON_CLEAR_BVH);
-	m_bvhData = nullptr;
+	m_bvhDataMutex.lock();
+		m_bvhData = nullptr;
+	m_bvhDataMutex.unlock();
 }
 
 void BaseBvhComponent::RebuildBvh()
@@ -98,6 +100,7 @@ void BaseBvhComponent::SetStaticCache(BaseStaticBvhCacheComponent *staticCache)
 
 bool BaseBvhComponent::SetVertexData(const std::vector<BvhTriangle> &data)
 {
+	std::scoped_lock lock {m_bvhDataMutex};
 	if(m_bvhData->primitives.size() != data.size())
 		return false;
 	memcpy(m_bvhData->primitives.data(),data.data(),util::size_of_container(data));
@@ -218,7 +221,10 @@ bool BaseBvhComponent::IntersectionTest(
 		minDist, // minimum distance
 		maxDist // maximum distance
 	};
-	if(auto hit = traverser.traverse(ray, primitiveIntersector))
+	m_bvhDataMutex.lock();
+	auto hit = traverser.traverse(ray, primitiveIntersector);
+	m_bvhDataMutex.unlock();
+	if(hit)
 	{
 		BvhMeshRange search {};
 		search.start = hit->primitive_index *3;
@@ -257,4 +263,3 @@ void BaseBvhComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 }
-#pragma optimize("",on)

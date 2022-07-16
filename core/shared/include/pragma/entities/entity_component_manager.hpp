@@ -42,6 +42,7 @@ namespace pragma
 	DLLNETWORK size_t get_component_member_name_hash(const std::string &name);
 
 	enum class AttributeSpecializationType : uint8_t;
+	enum class ComponentMemberFlags : uint32_t;
 	struct DLLNETWORK ComponentMemberInfo
 	{
 		struct DLLNETWORK EnumConverter
@@ -166,6 +167,11 @@ namespace pragma
 		void UpdateDependencies(BaseEntityComponent &component,std::vector<std::string> &outAffectedProps);
 		void ResetToDefault(BaseEntityComponent &component);
 
+		void SetFlags(ComponentMemberFlags flags);
+		ComponentMemberFlags GetFlags() const;
+		bool HasFlag(ComponentMemberFlags flag) const;
+		void SetFlag(ComponentMemberFlags flag,bool set=true);
+
 		ents::EntityMemberType type;
 		ApplyFunction setterFunction = nullptr;
 		GetFunction getterFunction = nullptr;
@@ -181,6 +187,7 @@ namespace pragma
 		ComponentMemberInfo();
 		std::string m_name;
 		size_t m_nameHash = 0;
+		ComponentMemberFlags m_flags = static_cast<ComponentMemberFlags>(0);
 
 		AttributeSpecializationType m_specializationType;
 		std::unique_ptr<std::string> m_customSpecializationType = nullptr;

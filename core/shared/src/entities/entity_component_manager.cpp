@@ -9,6 +9,7 @@
 #include "pragma/entities/entity_component_manager.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/entities/components/component_member_flags.hpp"
 #include "pragma/entities/attribute_specialization_type.hpp"
 #include <udm.hpp>
 
@@ -62,6 +63,7 @@ ComponentMemberInfo &ComponentMemberInfo::operator=(const ComponentMemberInfo &o
 	m_max = other.m_max;
 	m_stepSize = other.m_stepSize;
 	m_metaData = other.m_metaData;
+	m_flags = other.m_flags;
 	m_enumConverter = other.m_enumConverter ? std::make_unique<EnumConverter>(*other.m_enumConverter) : nullptr;
 	if(other.m_default)
 	{
@@ -146,6 +148,10 @@ void ComponentMemberInfo::ResetToDefault(BaseEntityComponent &component)
 		setterFunction(*this,component,m_default.get());
 	});
 }
+void ComponentMemberInfo::SetFlags(ComponentMemberFlags flags) {m_flags = flags;}
+ComponentMemberFlags ComponentMemberInfo::GetFlags() const {return m_flags;}
+bool ComponentMemberInfo::HasFlag(ComponentMemberFlags flag) const {return umath::is_flag_set(m_flags,flag);}
+void ComponentMemberInfo::SetFlag(ComponentMemberFlags flag,bool set) {umath::set_flag(m_flags,flag,set);}
 void ComponentMemberInfo::SetName(const std::string &name)
 {
 	m_name = name;

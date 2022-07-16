@@ -24,7 +24,9 @@
 #include "pragma/entities/components/base_weapon_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
+#include "pragma/entities/components/component_member_flags.hpp"
 #include "pragma/entities/attribute_specialization_type.hpp"
+#include "pragma/lua/policies/default_parameter_policy.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
 #include "pragma/lua/lentity_type.hpp"
 #include "pragma/lua/lua_entity_iterator.hpp"
@@ -256,6 +258,8 @@ void Lua::ents::register_library(lua_State *l)
 	});
 	
 	auto memberInfoDef = luabind::class_<pragma::ComponentMemberInfo>("MemberInfo");
+	memberInfoDef.add_static_constant("FLAG_NONE",umath::to_integral(pragma::ComponentMemberFlags::None));
+	memberInfoDef.add_static_constant("FLAG_HIDE_IN_INTERFACE_BIT",umath::to_integral(pragma::ComponentMemberFlags::HideInInterface));
 	memberInfoDef.def("__tostring",+[](const pragma::ComponentMemberInfo &memberInfo) -> std::string {
 		std::stringstream ss;
 		ss<<"MemberInfo";
@@ -283,6 +287,13 @@ void Lua::ents::register_library(lua_State *l)
 		}
 		return ss.str();
 	});
+	
+	memberInfoDef.def("SetFlags",&pragma::ComponentMemberInfo::SetFlags);
+	memberInfoDef.def("GetFlags",&pragma::ComponentMemberInfo::GetFlags);
+	memberInfoDef.def("HasFlag",&pragma::ComponentMemberInfo::HasFlag);
+	memberInfoDef.def("SetFlag",&pragma::ComponentMemberInfo::SetFlag);
+	memberInfoDef.def("SetFlag",&pragma::ComponentMemberInfo::SetFlag,luabind::default_parameter_policy<3,true>{});
+
 	memberInfoDef.def("IsEnum",&pragma::ComponentMemberInfo::IsEnum);
 	memberInfoDef.def("ValueToEnumName",&pragma::ComponentMemberInfo::ValueToEnumName);
 	memberInfoDef.def("EnumNameToValue",&pragma::ComponentMemberInfo::EnumNameToValue);

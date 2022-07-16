@@ -225,6 +225,8 @@ void CRendererPpMotionBlurComponent::RecordVelocityPass(const util::DrawSceneInf
 	MotionBlurData motionBlurData;
 
 	auto &cam = drawSceneInfo.scene->GetActiveCamera();
+	if(cam.expired())
+		return;
 	auto &entCam = cam->GetEntity();
 	auto itCur = m_motionBlurData.curModelMatrices.find(&entCam);
 	auto itPrev = m_motionBlurData.prevModelMatrices.find(&entCam);

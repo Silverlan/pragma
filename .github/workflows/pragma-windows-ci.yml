@@ -220,6 +220,28 @@ jobs:
       #    ls -R
       #    echo "-- Post-build files -- "
 
+      - name: Clear disk space
+        shell: bash
+        run:   |
+          rm -rf "third_party_libs/boost/bin.v2/libs/math/build/msvc-14.3/release/link-static/threading-multi"
+          rm -rf "third_party_libs/boost/bin.v2/libs/math/build/msvc-14.3/release/threading-multi"
+
+      - name: List large directories
+        shell: pwsh
+        run: |
+          echo "Cur pwd: $(pwd)"
+          $colItems = (Get-ChildItem -path $(pwd) $startFolder -recurse | Where-Object {$_.PSIsContainer -eq $True} | Sort-Object)
+          foreach ($i in $colItems)
+              {
+                  $child = Get-ChildItem $i.FullName
+                  $subFolderItems = ($child | Measure-Object -ErrorAction SilentlyContinue -property length -sum)
+                  $size = $subFolderItems.sum / 1MB
+                  if ($size -gt 50)
+                  {
+                        $i.FullName + " -- " + "{0:N2}" -f $size + " MB"
+                  }
+              }
+
       - uses: Silverlan/common_actions/build_cmake@main
         name: CMake Build
         with:

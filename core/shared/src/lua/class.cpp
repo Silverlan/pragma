@@ -543,6 +543,17 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defImageBuffer.def("SwapChannels",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uimg::Channel,uimg::Channel)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uimg::Channel channel0,uimg::Channel channel1) {
 		imgBuffer.SwapChannels(channel0,channel1);
 	}));
+	defImageBuffer.def("SwapChannels",+[](lua_State *l,uimg::ImageBuffer &imgBuffer,uimg::Channel channel0,uimg::Channel channel1,const pragma::lua::LuaThreadWrapper &tw) {
+		auto pImgBuffer = imgBuffer.shared_from_this();
+		auto task = [pImgBuffer,channel0,channel1]() -> pragma::lua::LuaThreadPool::ResultHandler {
+			pImgBuffer->SwapChannels(channel0,channel1);
+			return {};
+		};
+		if(tw.IsTask())
+			tw.GetTask()->AddSubTask(task);
+		else
+			tw.GetPool().AddTask(task);
+	});
 	defImageBuffer.def("ApplyToneMapping",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t toneMapping) {
 		auto tonemappedImg = imgBuffer.ApplyToneMapping(static_cast<uimg::ToneMapping>(toneMapping));
 		if(tonemappedImg == nullptr)

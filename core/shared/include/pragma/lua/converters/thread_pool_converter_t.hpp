@@ -4,7 +4,7 @@
  *
  * Copyright (c) 2021 Silverlan */
 
-#include "pragma/lua/converters/string_view_converter.hpp"
+#include "pragma/lua/converters/thread_pool_converter.hpp"
 #include <luabind/object.hpp>
 
 #ifndef __LUA_THREAD_POOL_CONVERTER_T_HPP__

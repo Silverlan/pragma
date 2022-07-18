@@ -148,6 +148,14 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 				}
 			};
 		}),
+		luabind::def("get_asset_state",+[](lua_State *l,const std::string &name,pragma::asset::Type type)
+			-> Lua::opt<util::AssetState> {
+			auto *manager = engine->GetNetworkState(l)->GetAssetManager(type);
+			if(!manager)
+				return luabind::object{};
+			auto result = manager->GetAssetState(name);
+			return luabind::object{l,result};
+		}),
 		luabind::def("normalize_asset_name",+[](lua_State *l,const std::string &name,pragma::asset::Type type) -> std::string {
 			auto *manager = engine->GetNetworkState(l)->GetAssetManager(type);
 			if(!manager)
@@ -212,7 +220,12 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 		{"ASSET_LOAD_FLAG_NONE",umath::to_integral(util::AssetLoadFlags::None)},
 		{"ASSET_LOAD_FLAG_ABSOLUTE_PATH_BIT",umath::to_integral(util::AssetLoadFlags::AbsolutePath)},
 		{"ASSET_LOAD_FLAG_DONT_CACHE_BIT",umath::to_integral(util::AssetLoadFlags::DontCache)},
-		{"ASSET_LOAD_FLAG_IGNORE_CACHE_BIT",umath::to_integral(util::AssetLoadFlags::IgnoreCache)}
+		{"ASSET_LOAD_FLAG_IGNORE_CACHE_BIT",umath::to_integral(util::AssetLoadFlags::IgnoreCache)},
+
+		{"ASSET_STATE_NOT_LOADED",umath::to_integral(util::AssetState::NotLoaded)},
+		{"ASSET_STATE_LOADED",umath::to_integral(util::AssetState::Loaded)},
+		{"ASSET_STATE_FAILED_TO_LOAD",umath::to_integral(util::AssetState::FailedToLoad)},
+		{"ASSET_STATE_LOADING",umath::to_integral(util::AssetState::Loading)}
 	});
 	static_assert(umath::to_integral(pragma::asset::Type::Count) == 6,"Update this list!");
 

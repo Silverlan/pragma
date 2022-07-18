@@ -1880,7 +1880,7 @@ bool CGame::SaveImage(
 bool CGame::SaveImage(uimg::ImageBuffer &imgBuffer,const std::string &fileName,const uimg::TextureInfo &imageWriteInfo,bool cubemap) const
 {
 	auto path = ufile::get_path_from_filename(fileName);
-	FileManager::CreatePath(path.c_str());
+	filemanager::create_path(path);
 	uimg::TextureSaveInfo texSaveInfo;
 	texSaveInfo.texInfo = imageWriteInfo;
 	texSaveInfo.cubemap = cubemap;

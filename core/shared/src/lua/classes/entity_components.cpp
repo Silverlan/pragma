@@ -436,6 +436,7 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 		auto n1 = hitInfo.mesh->GetVertexNormal(*vIdx1);
 		auto n2 = hitInfo.mesh->GetVertexNormal(*vIdx2);
 		auto n = hitInfo.t *n0 +hitInfo.u *n1 +hitInfo.v *n2;
+		uvec::normalize(&n);
 		return n;
 	});
 

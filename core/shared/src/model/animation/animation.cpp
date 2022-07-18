@@ -345,6 +345,11 @@ bool pragma::animation::Animation::LoadFromAssetData(const udm::AssetData &data,
 		{
 			uint16_t nodeId = 0;
 			udmChannel["node"](nodeId);
+			if(nodeId >= nodeToLocalBoneId.size())
+			{
+				Con::cwar<<"WARNING: Node "<<nodeId<<" of animation UDM channel exceeds number of bones ("<<nodeToLocalBoneId.size()<<")! Ignoring..."<<Con::endl;
+				continue;
+			}
 			auto localBoneId = nodeToLocalBoneId[nodeId];
 
 			std::vector<float> times;

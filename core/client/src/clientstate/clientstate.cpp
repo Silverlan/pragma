@@ -79,6 +79,7 @@ ClientState::ClientState()
 	m_soundScriptManager = std::make_unique<CSoundScriptManager>();
 
 	m_modelManager = std::make_unique<pragma::asset::CModelManager>(*this);
+	// m_modelManager->SetVerbose(true);
 	c_engine->InitializeAssetManager(*m_modelManager);
 	pragma::asset::update_extension_cache(pragma::asset::Type::Model);
 

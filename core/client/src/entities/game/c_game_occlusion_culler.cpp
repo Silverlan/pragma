@@ -99,6 +99,9 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 			it->second.push_back(pGenericComponent->BindEventUnhandled(BaseEntity::EVENT_ON_REMOVE,[this,pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
 				auto *ent = static_cast<CBaseEntity*>(&pGenericComponent->GetEntity());
 				auto it = m_callbacks.find(ent);
+
+				// We need to copy the this pointer because removing the callback invalidates the captured variable
+				auto *thisCpy = this;
 				if(it != m_callbacks.end())
 				{
 					for(auto &hCb : it->second)
@@ -107,10 +110,10 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 							continue;
 						hCb.Remove();
 					}
-					m_callbacks.erase(it);
+					thisCpy->m_callbacks.erase(it);
 				}
 				SceneRenderDesc::AssertRenderQueueThreadInactive();
-				m_occlusionOctree->RemoveObject(ent);
+				thisCpy->m_occlusionOctree->RemoveObject(ent);
 			}));
 		}
 	};

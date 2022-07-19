@@ -154,9 +154,9 @@ bool BaseStaticBvhCacheComponent::IntersectionTest(
 	const_cast<BaseStaticBvhCacheComponent*>(this)->UpdateBuild();
 	if(m_buildWorker)
 		m_buildWorker->WaitForTask();
-	m_bvhMutex.lock();
+	m_bvhDataMutex.lock();
 		auto res = BaseBvhComponent::IntersectionTest(origin,dir,minDist,maxDist,outHitInfo);
-	m_bvhMutex.unlock();
+	m_bvhDataMutex.unlock();
 	return res;
 }
 
@@ -171,9 +171,9 @@ void BaseStaticBvhCacheComponent::Build(
 		m_buildWorker = std::make_unique<FunctionalParallelWorker>();
 		m_buildWorker->Start();
 	}
-	m_bvhMutex.lock();
+	m_bvhDataMutex.lock();
 		m_bvhData = nullptr; // No longer valid
-	m_bvhMutex.unlock();
+	m_bvhDataMutex.unlock();
 	m_buildWorker->ResetTask([this,meshes=std::move(meshes),meshPoses=std::move(meshPoses),meshToEntity=std::move(meshToEntity)]
 		(FunctionalParallelWorker &worker) {
 		std::vector<size_t> meshIndices;
@@ -193,9 +193,9 @@ void BaseStaticBvhCacheComponent::Build(
 		}
 		if(worker.IsTaskCancelled())
 			return;
-		m_bvhMutex.lock();
+		m_bvhDataMutex.lock();
 			m_bvhData = std::move(bvhData);
-		m_bvhMutex.unlock();
+		m_bvhDataMutex.unlock();
 	});
 }
 
@@ -206,9 +206,9 @@ void BaseStaticBvhCacheComponent::SetCacheDirty()
 	
 	if(m_buildWorker)
 		m_buildWorker->CancelTask();
-	m_bvhMutex.lock();
+	m_bvhDataMutex.lock();
 		m_bvhData = nullptr;
-	m_bvhMutex.unlock();
+	m_bvhDataMutex.unlock();
 }
 void BaseStaticBvhCacheComponent::OnTick(double tDelta)
 {

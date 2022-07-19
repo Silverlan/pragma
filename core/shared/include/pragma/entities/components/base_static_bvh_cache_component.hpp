@@ -51,7 +51,6 @@ namespace pragma
 		bool m_staticBvhDirty = true;
 		std::shared_ptr<FunctionalParallelWorker> m_buildWorker = nullptr;
 		std::unordered_set<BaseStaticBvhUserComponent*> m_entities;
-		mutable std::mutex m_bvhMutex;
 	};
 };
 

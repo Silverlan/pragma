@@ -154,10 +154,7 @@ bool BaseStaticBvhCacheComponent::IntersectionTest(
 	const_cast<BaseStaticBvhCacheComponent*>(this)->UpdateBuild();
 	if(m_buildWorker)
 		m_buildWorker->WaitForTask();
-	m_bvhDataMutex.lock();
-		auto res = BaseBvhComponent::IntersectionTest(origin,dir,minDist,maxDist,outHitInfo);
-	m_bvhDataMutex.unlock();
-	return res;
+	return BaseBvhComponent::IntersectionTest(origin,dir,minDist,maxDist,outHitInfo);
 }
 
 void BaseStaticBvhCacheComponent::Build(

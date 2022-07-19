@@ -1038,6 +1038,9 @@ void CGame::RegisterLuaLibraries()
 		luabind::def("save_image",+[](lua_State *l,uimg::ImageBuffer &imgBuffer,std::string fileName,uimg::ImageFormat format,float quality) {
 			return save_image(l,imgBuffer,fileName,format,quality);
 		}),
+		luabind::def("save_image",+[](lua_State *l,uimg::ImageBuffer &imgBuffer,std::string fileName,uimg::ImageFormat format,float quality,const pragma::lua::LuaThreadWrapper &tw) {
+			return save_image(l,imgBuffer,fileName,format,quality,const_cast<pragma::lua::LuaThreadWrapper*>(&tw));
+		}),
 		luabind::def("save_image",static_cast<bool(*)(lua_State*,uimg::ImageBuffer&,std::string,uimg::ImageFormat)>(save_image)),
 		luabind::def("save_image",static_cast<bool(*)(lua_State*,luabind::table<>,std::string,uimg::TextureInfo&,bool)>(save_image)),
 		luabind::def("save_image",static_cast<bool(*)(lua_State*,luabind::table<>,std::string,uimg::TextureInfo&)>(save_image)),

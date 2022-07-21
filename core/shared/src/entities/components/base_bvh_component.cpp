@@ -233,7 +233,7 @@ bool BaseBvhComponent::IntersectionTest(
 		--it;
 
 		auto &hitInfo = outHitInfo;
-		hitInfo.primitiveIndex = hit->primitive_index -it->start;
+		hitInfo.primitiveIndex = hit->primitive_index -it->start /3;
 		hitInfo.distance = hit->distance();
 		hitInfo.u = hit->intersection.u;
 		hitInfo.v = hit->intersection.v;

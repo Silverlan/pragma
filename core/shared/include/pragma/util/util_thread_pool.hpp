@@ -44,7 +44,6 @@ namespace pragma
 			ResultHandler resultHandler = nullptr;
 		};
 		ctpl::thread_pool m_pool;
-		std::mutex m_taskMutex;
 
 		std::condition_variable m_taskCompleteCondition;
 		std::vector<TaskState> m_taskCompleted;

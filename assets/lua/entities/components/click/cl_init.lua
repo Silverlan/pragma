@@ -143,15 +143,44 @@ function ents.ClickComponent.raycast(pos,dir,filter,maxDist)
 		local renderC = ent:GetComponent(ents.COMPONENT_RENDER)
 		if(mdl ~= nil and ent ~= entPl and renderC ~= nil and renderC:GetSceneRenderPass() ~= game.SCENE_RENDER_PASS_VIEW and renderC:GetSceneRenderPass() ~= game.SCENE_RENDER_PASS_NONE and (filter == nil or filter(ent,renderC) == true)) then
 			if(ent:HasComponent(ents.COMPONENT_STATIC_BVH_USER) == false or ent:GetComponent(ents.COMPONENT_STATIC_BVH_USER):IsActive() == false) then
-				local r,hitData = renderC:CalcRayIntersection(pos,dir *maxDist,false)
-				-- print("Intersection with ",ent,": ",r)
-				-- Note: Distance of 0 usually means we're inside the object, in which case we probably don't intend to select it
-				if(r == intersect.RESULT_INTERSECT and hitData.distance < distClosest) then -- and hitData.distance > 0.0) then
-					-- print("Clicked actor: ",ent)
-					distClosest = hitData.distance
-					hitPos = hitData.position
-					hitDataClosest = hitData
-					actorClosest = ent
+				local scale = ent:GetScale()
+				if(scale.x > 0.001 and scale.y > 0.001 and scale.z > 0.001) then
+					local pose = ent:GetPose():GetInverse()
+					pose:SetScale(Vector(1,1,1))
+
+					-- Move ray into entity space
+					local lpos = pose *pos
+					local ldir = dir:Copy()
+					ldir:Rotate(pose:GetRotation())
+					
+					lpos = Vector(lpos.x /scale.x,lpos.y /scale.y,lpos.z /scale.z)
+					ldir = ldir *maxDist
+					ldir = Vector(ldir.x /scale.x,ldir.y /scale.y,ldir.z /scale.z)
+					local lMaxDist = ldir:Length()
+					ldir = ldir /lMaxDist
+
+					local bvhC = ent:GetComponent(ents.COMPONENT_BVH)
+					local hitData = bvhC:IntersectionTest(lpos,ldir,0.0,lMaxDist)
+					if(hitData ~= nil) then
+						if(hitData.distance < distClosest) then -- and hitData.distance > 0.0) then
+							--debug.print("Clicked actor: ",hitData.entity)
+							distClosest = hitData.distance
+							hitPos = pos +dir *hitData.distance
+							actorClosest = hitData.entity
+							hitDataClosest = hitData
+						end
+					end
+
+					--[[local r,hitData = renderC:CalcRayIntersection(pos,dir *maxDist,false)
+					-- print("Intersection with ",ent,": ",r)
+					-- Note: Distance of 0 usually means we're inside the object, in which case we probably don't intend to select it
+					if(r == intersect.RESULT_INTERSECT and hitData.distance < distClosest) then -- and hitData.distance > 0.0) then
+						-- print("Clicked actor: ",ent)
+						distClosest = hitData.distance
+						hitPos = hitData.position
+						hitDataClosest = hitData
+						actorClosest = ent
+					end]]
 				end
 			end
 		end

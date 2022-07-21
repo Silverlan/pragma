@@ -45,7 +45,7 @@ namespace pragma::lua
 		.def("IsComplete",static_cast<bool(LuaThreadPool::*)() const>(&LuaThreadPool::IsComplete))
 		.def("IsComplete",static_cast<bool(LuaThreadPool::*)(uint32_t) const>(&LuaThreadPool::IsComplete))
 		.def("AddBarrier",&LuaThreadPool::AddBarrier)
-		.def("AddTask",+[](LuaThreadPool &pool,const std::shared_ptr<LuaThreadTask> &threadTask) {
+		.def("AddTask",+[](LuaThreadPool &pool,std::shared_ptr<LuaThreadTask> &threadTask) {
 			return pool.AddTask(threadTask);
 		})
 		.def("Stop",&LuaThreadPool::Stop)

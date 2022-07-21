@@ -30,9 +30,19 @@ void BaseEntityComponentSystem::ClearComponents()
 	while(m_components.empty() == false)
 	{
 		auto numComponents = m_components.size();
-		RemoveComponent(m_components.back()->GetComponentId());
+		auto componentId = m_components.back()->GetComponentId();
+		RemoveComponent(componentId);
+		
 		if(m_components.size() == numComponents)
-			throw std::logic_error("An unknown error occured when trying to remove an entity component!");
+		{
+			std::stringstream entStr;
+			if(!m_entity)
+				entStr<<"NULL";
+			else
+				m_entity->print(entStr);
+			throw std::logic_error("An unknown error occured when trying to remove entity component "
+				+std::to_string(componentId) +" of entity " +entStr.str() +"!");
+		}
 	}
 }
 util::EventReply BaseEntityComponentSystem::BroadcastEvent(ComponentEventId ev,ComponentEvent &evData,const BaseEntityComponent *src) const

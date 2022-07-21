@@ -326,7 +326,7 @@ void BaseEntity::OnSpawn() {}
 
 void BaseEntity::OnPostSpawn() {BroadcastEvent(EVENT_ON_POST_SPAWN);}
 
-bool BaseEntity::IsSpawned() const {return (m_stateFlags &StateFlags::Spawned) != StateFlags::None;}
+bool BaseEntity::IsSpawned() const {return (m_stateFlags &StateFlags::Spawned) != StateFlags::None && !IsRemoved();}
 
 bool BaseEntity::IsInert() const
 {

@@ -399,8 +399,8 @@ bool HDRData::ReloadBloomRenderTarget(uint32_t width)
 	// We don't really care about the quality of the blur image though, so we're using a smaller
 	// version of the bloom image for post-processing.
 	auto aspectRatio = width /static_cast<float>(height);
-	imgCreateInfo.width = cvBloomResolution->GetInt();
-	imgCreateInfo.height = static_cast<uint32_t>(imgCreateInfo.width /aspectRatio);
+	imgCreateInfo.width = width;
+	imgCreateInfo.height = static_cast<uint32_t>(imgCreateInfo.width *aspectRatio);
 
 	if((imgCreateInfo.height %2) != 0)
 		++imgCreateInfo.height;

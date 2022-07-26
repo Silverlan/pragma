@@ -56,6 +56,7 @@
 #include "pragma/entities/components/c_observable_component.hpp"
 #include "pragma/entities/components/c_physics_component.hpp"
 #include "pragma/entities/components/c_radius_component.hpp"
+#include "pragma/entities/components/c_field_angle_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/entities/components/c_toggle_component.hpp"
@@ -515,6 +516,9 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 
 	auto defCRadius = pragma::lua::create_entity_component_class<pragma::CRadiusComponent,pragma::BaseRadiusComponent>("RadiusComponent");
 	entsMod[defCRadius];
+
+	auto defCFieldAngle = pragma::lua::create_entity_component_class<pragma::CFieldAngleComponent,pragma::BaseFieldAngleComponent>("FieldAngleComponent");
+	entsMod[defCFieldAngle];
 
 	auto defCWorld = pragma::lua::create_entity_component_class<pragma::CWorldComponent,pragma::BaseWorldComponent>("WorldComponent");
 	defCWorld.def("GetBSPTree",&pragma::CWorldComponent::GetBSPTree);

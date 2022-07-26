@@ -21,6 +21,7 @@
 #include "pragma/entities/components/s_observable_component.hpp"
 #include "pragma/entities/components/s_physics_component.hpp"
 #include "pragma/entities/components/s_radius_component.hpp"
+#include "pragma/entities/components/s_field_angle_component.hpp"
 #include "pragma/entities/components/s_render_component.hpp"
 #include "pragma/entities/components/s_sound_emitter_component.hpp"
 #include "pragma/entities/components/s_toggle_component.hpp"
@@ -147,6 +148,9 @@ void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 
 	auto defSRadius = pragma::lua::create_entity_component_class<pragma::SRadiusComponent,pragma::BaseRadiusComponent>("RadiusComponent");
 	entsMod[defSRadius];
+
+	auto defSFieldAngle = pragma::lua::create_entity_component_class<pragma::SFieldAngleComponent,pragma::BaseFieldAngleComponent>("FieldAngleComponent");
+	entsMod[defSFieldAngle];
 
 	auto defSRender = pragma::lua::create_entity_component_class<pragma::SRenderComponent,pragma::BaseRenderComponent>("RenderComponent");
 	entsMod[defSRender];

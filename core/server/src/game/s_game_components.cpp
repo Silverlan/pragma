@@ -25,6 +25,7 @@
 #include "pragma/entities/components/s_observable_component.hpp"
 #include "pragma/entities/components/s_physics_component.hpp"
 #include "pragma/entities/components/s_radius_component.hpp"
+#include "pragma/entities/components/s_field_angle_component.hpp"
 #include "pragma/entities/components/s_render_component.hpp"
 #include "pragma/entities/components/s_sound_emitter_component.hpp"
 #include "pragma/entities/components/s_toggle_component.hpp"
@@ -130,6 +131,7 @@ void SGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::SPhysicsComponent>("physics");
 	componentManager.RegisterComponentType<pragma::SPlayerComponent>("player");
 	componentManager.RegisterComponentType<pragma::SRadiusComponent>("radius");
+	componentManager.RegisterComponentType<pragma::SFieldAngleComponent>("field_angle");
 	componentManager.RegisterComponentType<pragma::SRenderComponent>("render");
 	componentManager.RegisterComponentType<pragma::SSoundEmitterComponent>("sound_emitter");
 	componentManager.RegisterComponentType<pragma::SToggleComponent>("toggle");

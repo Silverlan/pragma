@@ -127,6 +127,7 @@ namespace pragma::lua
 	namespace base_prop_dynamic_component {static void register_class(luabind::module_ &mod);};
 	namespace base_prop_physics_component {static void register_class(luabind::module_ &mod);};
 	namespace base_radius_component {static void register_class(luabind::module_ &mod);};
+	namespace base_field_angle_component {static void register_class(luabind::module_ &mod);};
 	namespace base_render_component {static void register_class(luabind::module_ &mod);};
 	namespace base_score_component {static void register_class(luabind::module_ &mod);};
 	namespace base_shooter_component {static void register_class(luabind::module_ &mod);};
@@ -533,6 +534,7 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	base_prop_dynamic_component::register_class(mod);
 	base_prop_physics_component::register_class(mod);
 	base_radius_component::register_class(mod);
+	base_field_angle_component::register_class(mod);
 	base_render_component::register_class(mod);
 	base_score_component::register_class(mod);
 	base_shooter_component::register_class(mod);
@@ -2299,6 +2301,17 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		def.def("GetRadius",&pragma::BaseRadiusComponent::GetRadius);
 		def.def("SetRadius",&pragma::BaseRadiusComponent::SetRadius);
 		def.add_static_constant("EVENT_ON_RADIUS_CHANGED",pragma::BaseRadiusComponent::EVENT_ON_RADIUS_CHANGED);
+	}
+
+	#include "pragma/entities/components/base_field_angle_component.hpp"
+		void pragma::lua::base_field_angle_component::register_class(luabind::module_ &mod)
+	{
+		auto def = Lua::create_base_entity_component_class<pragma::BaseFieldAngleComponent>("BaseFieldAngleComponent");
+		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
+		def.def("GetFieldAngleProperty",&pragma::BaseFieldAngleComponent::GetFieldAngleProperty);
+		def.def("GetFieldAngle",&pragma::BaseFieldAngleComponent::GetFieldAngle);
+		def.def("SetFieldAngle",&pragma::BaseFieldAngleComponent::SetFieldAngle);
+		def.add_static_constant("EVENT_ON_FIELD_ANGLE_CHANGED",pragma::BaseFieldAngleComponent::EVENT_ON_FIELD_ANGLE_CHANGED);
 	}
 
 	#include "pragma/entities/environment/audio/env_sound_dsp.h"

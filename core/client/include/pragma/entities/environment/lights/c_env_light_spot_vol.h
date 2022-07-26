@@ -28,8 +28,14 @@ namespace pragma
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void OnEntitySpawn() override;
 	protected:
+		float CalcEndRadius() const;
+		uint32_t CalcSegmentCount() const;
+		bool UpdateMeshData();
 		void InitializeVolumetricLight();
 		virtual bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
+		std::vector<std::shared_ptr<CModelSubMesh>> m_subMeshes;
+		std::shared_ptr<Model> m_model;
+		msys::MaterialHandle m_material;
 	};
 };
 

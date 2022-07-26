@@ -20,18 +20,22 @@ namespace pragma
 	{
 	public:
 		using BaseEntityComponent::BaseEntityComponent;
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 
 		BaseEntity *GetSpotlightTarget() const;
+
+		void SetIntensityFactor(float intensityFactor);
+		float GetIntensityFactor() const;
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 	protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		virtual void SetSpotlightTarget(BaseEntity &ent);
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
-		float m_coneAngle = 45.f;
 		float m_coneStartOffset = 0.f;
+		float m_intensityFactor = 1.f;
 		EntityHandle m_hSpotlightTarget = {};
 		std::string m_kvSpotlightTargetName = "";
 		pragma::NetEventId m_netEvSetSpotlightTarget = pragma::INVALID_NET_EVENT;

@@ -2502,6 +2502,8 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	void pragma::lua::base_env_light_spot_vol_component::register_class(luabind::module_ &mod)
 	{
 		auto def = Lua::create_base_entity_component_class<pragma::BaseEnvLightSpotVolComponent>("BaseEnvLightSpotVolComponent");
+		def.def("SetIntensity",&pragma::BaseEnvLightSpotVolComponent::SetIntensityFactor);
+		def.def("GetIntensity",&pragma::BaseEnvLightSpotVolComponent::GetIntensityFactor);
 		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
 	}
 

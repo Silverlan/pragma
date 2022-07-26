@@ -185,7 +185,7 @@ prosper::IDescriptorSet &ShaderGameWorld::GetDefaultMaterialDescriptorSet() cons
 /////////////////////
 
 decltype(ShaderEntity::VERTEX_BINDING_RENDER_BUFFER_INDEX) ShaderEntity::VERTEX_BINDING_RENDER_BUFFER_INDEX = {prosper::VertexInputRate::Instance};
-decltype(ShaderEntity::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX) ShaderEntity::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX = {VERTEX_BINDING_LIGHTMAP,prosper::Format::R32_UInt};
+decltype(ShaderEntity::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX) ShaderEntity::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX = {VERTEX_BINDING_RENDER_BUFFER_INDEX,prosper::Format::R32_UInt};
 
 decltype(ShaderEntity::VERTEX_BINDING_BONE_WEIGHT) ShaderEntity::VERTEX_BINDING_BONE_WEIGHT = {prosper::VertexInputRate::Vertex};
 decltype(ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID) ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID = {VERTEX_BINDING_BONE_WEIGHT,prosper::Format::R32G32B32A32_SInt};

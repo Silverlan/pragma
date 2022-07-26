@@ -12,6 +12,7 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_radius_component.hpp"
+#include "pragma/entities/components/c_field_angle_component.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/networking/c_nwm_util.h"
@@ -29,7 +30,7 @@ LINK_ENTITY_TO_CLASS(env_light_spot_vol,CEnvLightSpotVol);
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 void CLightSpotVolComponent::Initialize()
 {
 	auto &ent = GetEntity();
@@ -45,7 +46,124 @@ void CLightSpotVolComponent::Initialize()
 				static_cast<pragma::CRasterizationRendererComponent*>(renderer)->SetFrameDepthBufferSamplingRequired();
 		}),CallbackType::Entity);*/
 	}
+	BindEventUnhandled(CRadiusComponent::EVENT_ON_RADIUS_CHANGED,[this](std::reference_wrapper<ComponentEvent> evData) {
+		if(!m_model)
+			return;
+		UpdateMeshData();
+	});
+	BindEventUnhandled(CFieldAngleComponent::EVENT_ON_FIELD_ANGLE_CHANGED,[this](std::reference_wrapper<ComponentEvent> evData) {
+		if(!m_model)
+			return;
+		UpdateMeshData();
+	});
 	BaseEnvLightSpotVolComponent::Initialize();
+}
+
+constexpr uint32_t segmentCount = 20;
+float CLightSpotVolComponent::CalcEndRadius() const
+{
+	auto pRadiusComponent = GetEntity().GetComponent<CRadiusComponent>();
+	auto pFieldAngleComponent = GetEntity().GetComponent<CFieldAngleComponent>();
+	auto maxDist = pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 100.f;
+	auto fieldAngle = pFieldAngleComponent.valid() ? pFieldAngleComponent->GetFieldAngle() : 0.f;
+	return maxDist *umath::tan(umath::deg_to_rad(fieldAngle /2.f));
+}
+uint32_t CLightSpotVolComponent::CalcSegmentCount() const
+{
+	auto endRadius = CalcEndRadius();
+	uint32_t segCount = 0;
+	for(auto i=decltype(segmentCount){0};i<segmentCount;++i)
+	{
+		auto startSc = i /static_cast<float>(segmentCount);
+		auto endSc = (i +1) /static_cast<float>(segmentCount);
+		
+		auto segEndRadius = endRadius *endSc;
+		if(segEndRadius < m_coneStartOffset)
+			continue; // Skip this segment
+		++segCount;
+	}
+	return segCount;
+}
+
+bool CLightSpotVolComponent::UpdateMeshData()
+{
+	auto pRadiusComponent = GetEntity().GetComponent<CRadiusComponent>();
+	auto maxDist = pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 100.f;
+	auto endRadius = CalcEndRadius();
+
+	if(m_material)
+		m_material->GetDataBlock()->AddValue("float","cone_height",std::to_string(maxDist));
+
+	const uint32_t coneDetail = 64;
+	const Vector3 dir {0.f,0.f,1.f};
+	struct ConeSegment
+	{
+		std::vector<Vector3> verts;
+		std::vector<Vector3> normals;
+		std::vector<uint16_t> indices;
+	};
+	std::vector<ConeSegment> coneSegments;
+	coneSegments.reserve(segmentCount);
+	for(auto i=decltype(segmentCount){0};i<segmentCount;++i)
+	{
+		auto startSc = i /static_cast<float>(segmentCount);
+		auto endSc = (i +1) /static_cast<float>(segmentCount);
+		
+		auto segEndRadius = endRadius *endSc;
+		if(segEndRadius < m_coneStartOffset)
+			continue; // Skip this segment
+		auto segStartRadius = endRadius *startSc;
+		if(segStartRadius < m_coneStartOffset)
+		{
+			// Clamp this segment
+			segStartRadius = m_coneStartOffset;
+		}
+
+		auto startPos = dir *maxDist *static_cast<float>(segStartRadius /endRadius);
+		auto endPos = dir *maxDist *static_cast<float>(segEndRadius /endRadius);
+		ConeSegment segment;
+		umath::geometry::generate_truncated_cone_mesh(startPos,static_cast<float>(segStartRadius),dir,uvec::distance(startPos,endPos),static_cast<float>(segEndRadius),segment.verts,&segment.indices,&segment.normals,coneDetail,false);
+		coneSegments.push_back(std::move(segment));
+	}
+
+	auto newMeshes = false;
+	if(m_subMeshes.size() != coneSegments.size())
+	{
+		m_subMeshes.clear();
+		m_subMeshes.reserve(coneSegments.size());
+		for(auto &segData : coneSegments)
+		{
+			auto subMesh = std::make_shared<CModelSubMesh>();
+			subMesh->SetIndexCount(segData.indices.size());
+			subMesh->GetVertices().resize(segData.verts.size());
+			subMesh->SetSkinTextureIndex(0);
+			m_subMeshes.push_back(subMesh);
+		}
+		newMeshes = true;
+	}
+
+	for(uint32_t idx=0; auto &segData : coneSegments)
+	{
+		auto &subMesh = m_subMeshes[idx];
+		auto &verts = subMesh->GetVertices();
+		if(verts.size() != segData.verts.size() || subMesh->GetIndexCount() != segData.indices.size())
+		{
+			// TODO: This can happen if the radius is 0, how to deal with this case?
+			// TODO: Hide the model?
+			return false;
+		}
+		for(auto i=decltype(segData.verts.size()){0u};i<segData.verts.size();++i)
+			verts[i] = umath::Vertex{segData.verts[i],segData.normals[i]};
+		subMesh->VisitIndices([&segData](auto *indexData,uint32_t numIndices) {
+			assert(util::size_of_container(segData.indices) == sizeof(indexData[0]) *numIndices);
+			if(util::size_of_container(segData.indices) != sizeof(indexData[0]) *numIndices)
+				throw std::runtime_error{"Volumetric mesh index data size mismatch!"};
+			memcpy(indexData,segData.indices.data(),util::size_of_container(segData.indices));
+		});
+		subMesh->Update(ModelUpdateFlags::UpdateVertexBuffer | ModelUpdateFlags::UpdateIndexBuffer);
+		++idx;
+	}
+	return newMeshes;
 }
 
 Bool CLightSpotVolComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
@@ -65,7 +183,6 @@ Bool CLightSpotVolComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacke
 
 void CLightSpotVolComponent::ReceiveData(NetPacket &packet)
 {
-	m_coneAngle = packet->Read<float>();
 	m_coneStartOffset = packet->Read<float>();
 	auto hEnt = GetHandle();
 	nwm::read_unique_entity(packet,[this,hEnt](BaseEntity *ent) {
@@ -103,63 +220,33 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 	auto mdlComponent = GetEntity().GetModelComponent();
 	if(!mdlComponent)
 		return;
+	auto newMeshes = UpdateMeshData();
+	if(!newMeshes)
+		return;
+	m_model = nullptr;
 	auto mdl = c_game->CreateModel();
 	auto group = mdl->AddMeshGroup("reference");
-
-	auto pRadiusComponent = GetEntity().GetComponent<CRadiusComponent>();
-	auto maxDist = pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 100.f;
-	auto endRadius = maxDist *umath::tan(umath::deg_to_rad(m_coneAngle));
 
 	auto mat = client->CreateMaterial("lightcone","light_cone");
 	auto *cmat = static_cast<CMaterial*>(mat.get());
 	auto &data = mat->GetDataBlock();
 	data->AddValue("int","alpha_mode",std::to_string(umath::to_integral(AlphaMode::Blend)));
-	data->AddValue("float","cone_height",std::to_string(maxDist));
+	data->AddValue("float","cone_height",std::to_string(CalcEndRadius()));
 	cmat->SetTexture("albedo_map","error");
 	cmat->UpdateTextures();
 	Lua::Material::Client::InitializeShaderData(nullptr,cmat,false);
 	cmat->SetLoaded(true);
+	m_material = mat->GetHandle();
 
-	const uint32_t coneDetail = 64;
-	const uint32_t segmentCount = 20;
-	const Vector3 dir {0.f,0.f,1.f};
 	auto mesh = std::make_shared<CModelMesh>();
-	for(auto i=decltype(segmentCount){0};i<segmentCount;++i)
-	{
-		auto startSc = i /static_cast<float>(segmentCount);
-		auto endSc = (i +1) /static_cast<float>(segmentCount);
-		
-		auto segEndRadius = endRadius *endSc;
-		if(segEndRadius < m_coneStartOffset)
-			continue; // Skip this segment
-		auto segStartRadius = endRadius *startSc;
-		if(segStartRadius < m_coneStartOffset)
-		{
-			// Clamp this segment
-			segStartRadius = m_coneStartOffset;
-		}
-
-		auto startPos = dir *maxDist *static_cast<float>(segStartRadius /endRadius);
-		auto endPos = dir *maxDist *static_cast<float>(segEndRadius /endRadius);
-		auto subMesh = std::make_shared<CModelSubMesh>();
-		std::vector<Vector3> verts;
-		std::vector<Vector3> normals;
-		std::vector<uint16_t> indices;
-		umath::geometry::generate_truncated_cone_mesh(startPos,static_cast<float>(segStartRadius),dir,uvec::distance(startPos,endPos),static_cast<float>(segEndRadius),verts,&indices,&normals,coneDetail,false);
-
-		auto &meshVerts = subMesh->GetVertices();
-		meshVerts.reserve(verts.size());
-		for(auto idx=decltype(verts.size()){0};idx<verts.size();++idx)
-			meshVerts.push_back(umath::Vertex{verts[idx],normals[idx]});
-		subMesh->SetIndices(indices);
-		subMesh->SetSkinTextureIndex(0);
+	for(auto &subMesh : m_subMeshes)
 		mesh->AddSubMesh(subMesh);
-	}
 	group->AddMesh(mesh);
 	mdl->AddMaterial(0,mat.get());
-	mdl->Update(ModelUpdateFlags::All);
 
+	mdl->Update(ModelUpdateFlags::All);
 	mdlComponent->SetModel(mdl);
+	m_model = mdl;
 }
 
 void CLightSpotVolComponent::OnEntitySpawn()
@@ -177,3 +264,4 @@ void CEnvLightSpotVol::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CLightSpotVolComponent>();
 }
+#pragma optimize("",on)

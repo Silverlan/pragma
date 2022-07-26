@@ -24,7 +24,6 @@ void SLightSpotVolComponent::Initialize()
 }
 void SLightSpotVolComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
-	packet->Write<float>(m_coneAngle);
 	packet->Write<float>(m_coneStartOffset);
 	nwm::write_unique_entity(packet,m_hSpotlightTarget.get());
 }

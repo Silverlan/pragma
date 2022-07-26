@@ -11,6 +11,7 @@
 #include "pragma/util/util_game.hpp"
 #include "pragma/entities/components/base_render_component.hpp"
 #include "pragma/entities/components/base_radius_component.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include <algorithm>
@@ -18,6 +19,21 @@
 
 using namespace pragma;
 
+void BaseEnvLightSpotVolComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
+{
+	using T = BaseEnvLightSpotVolComponent;
+	using TIntensity = float;
+	{
+		auto memberInfo = create_component_member_info<
+			T,TIntensity,
+			static_cast<void(T::*)(TIntensity)>(&T::SetIntensityFactor),
+			static_cast<TIntensity(T::*)() const>(&T::GetIntensityFactor)
+		>("intensity",1.f);
+		memberInfo.SetMin(0.f);
+		memberInfo.SetMax(5.f);
+		registerMember(std::move(memberInfo));
+	}
+}
 void BaseEnvLightSpotVolComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -26,8 +42,6 @@ void BaseEnvLightSpotVolComponent::Initialize()
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
 		if(ustring::compare<std::string>(kvData.key,"cone_height",false))
 			GetEntity().SetKeyValue("radius",kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"cone_angle",false))
-			m_coneAngle = ustring::to_float(kvData.value);
 		else if(ustring::compare<std::string>(kvData.key,"cone_color",false))
 			GetEntity().SetKeyValue("color",kvData.value);
 		else if(ustring::compare<std::string>(kvData.key,"cone_start_offset",false))
@@ -43,6 +57,7 @@ void BaseEnvLightSpotVolComponent::Initialize()
 	ent.AddComponent("toggle");
 	ent.AddComponent("transform");
 	ent.AddComponent("color");
+	ent.AddComponent("field_angle");
 	ent.AddComponent("point_at_target");
 	//auto *pRadiusComponent = dynamic_cast<pragma::BaseRadiusComponent*>(ent.AddComponent("radius").get());
 	//if(pRadiusComponent != nullptr)
@@ -53,7 +68,6 @@ void BaseEnvLightSpotVolComponent::Initialize()
 void BaseEnvLightSpotVolComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
-	udm["coneAngle"] = m_coneAngle;
 	udm["coneStartOffset"] = m_coneStartOffset;
 	udm["spotlightTargetName"] = m_kvSpotlightTargetName;
 	util::write_udm_entity(udm["spotlightTarget"],m_hSpotlightTarget);
@@ -61,11 +75,13 @@ void BaseEnvLightSpotVolComponent::Save(udm::LinkedPropertyWrapperArg udm)
 void BaseEnvLightSpotVolComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
-	udm["coneAngle"](m_coneAngle);
 	udm["coneStartOffset"](m_coneStartOffset);
 	udm["spotlightTargetName"](m_kvSpotlightTargetName);
 	m_hSpotlightTarget = util::read_udm_entity(*this,udm["spotlightTarget"]);
 }
+
+void BaseEnvLightSpotVolComponent::SetIntensityFactor(float intensityFactor) {m_intensityFactor = intensityFactor;}
+float BaseEnvLightSpotVolComponent::GetIntensityFactor() const {return m_intensityFactor;}
 
 BaseEntity *BaseEnvLightSpotVolComponent::GetSpotlightTarget() const {return const_cast<BaseEntity*>(m_hSpotlightTarget.get());}
 

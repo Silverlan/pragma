@@ -140,6 +140,7 @@
 #include "pragma/entities/components/renderers/c_renderer_pp_tone_mapping_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_fxaa_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_motion_blur_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_volumetric_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 void CGame::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
@@ -272,6 +273,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CRendererPpToneMappingComponent>("renderer_pp_tone_mapping");
 	componentManager.RegisterComponentType<pragma::CRendererPpFxaaComponent>("renderer_pp_fxaa");
 	componentManager.RegisterComponentType<pragma::CRendererPpMotionBlurComponent>("renderer_pp_motion_blur");
+	componentManager.RegisterComponentType<pragma::CRendererPpVolumetricComponent>("renderer_pp_volumetric");
 
 	componentManager.RegisterComponentType<pragma::CBSPComponent>("bsp");
 	componentManager.RegisterComponentType<pragma::CLightMapComponent>("light_map");

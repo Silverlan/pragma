@@ -19,6 +19,7 @@
 #include "pragma/entities/components/renderers/c_renderer_pp_tone_mapping_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_fxaa_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_motion_blur_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_volumetric_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
@@ -82,6 +83,10 @@ void RegisterLuaEntityComponents2(lua_State *l,luabind::module_ &entsMod)
 	defPpMotionBlur.def("UpdateMotionBlurData",&pragma::CRendererPpMotionBlurComponent::UpdateMotionBlurData);
 	defPpMotionBlur.def("UpdatePoses",&pragma::CRendererPpMotionBlurComponent::UpdatePoses);
 	entsMod[defPpMotionBlur];
+
+	auto defPpVol =
+		pragma::lua::create_entity_component_class<pragma::CRendererPpVolumetricComponent,pragma::BaseEntityComponent>("RendererPpVolumetricComponent");
+	entsMod[defPpVol];
 
 	// --template-component-register-location
 }

@@ -169,10 +169,26 @@ void CModelSubMesh::Update(ModelUpdateFlags flags)
 	
 	if((flags &ModelUpdateFlags::UpdateIndexBuffer) != ModelUpdateFlags::None)
 	{
-		m_sceneMesh->SetIndexBuffer(nullptr,pragma::model::IndexType::UInt16); // Clear the old index buffer
 		auto &indexData = GetIndexData();
-		auto indexBuffer = s_indexBuffer->AllocateBuffer(indexData.size(),size_of_index(GetIndexType()),indexData.data());
-		m_sceneMesh->SetIndexBuffer(std::move(indexBuffer),GetIndexType());
+		auto &indexBuffer = m_sceneMesh->GetIndexBuffer();
+		auto newBuffer = true;
+		if(indexBuffer)
+		{
+			auto alignedSize = prosper::util::get_aligned_size(indexData.size(),size_of_index(GetIndexType()));
+			if(alignedSize == indexBuffer->GetSize())
+			{
+				newBuffer = false;
+				indexBuffer->Write(0ull,util::size_of_container(indexData),indexData.data());
+			}
+		}
+		if(newBuffer)
+		{
+			m_sceneMesh->SetIndexBuffer(nullptr,pragma::model::IndexType::UInt16); // Clear the old index buffer
+			auto indexBuffer = s_indexBuffer->AllocateBuffer(
+				indexData.size(),size_of_index(GetIndexType()),indexData.data()
+			);
+			m_sceneMesh->SetIndexBuffer(std::move(indexBuffer),GetIndexType());
+		}
 	}
 	if((flags &ModelUpdateFlags::UpdateVertexBuffer) != ModelUpdateFlags::None)
 		UpdateVertexBuffer();

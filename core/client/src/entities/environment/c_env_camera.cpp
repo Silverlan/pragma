@@ -9,6 +9,7 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_toggle_component.hpp"
+#include "pragma/entities/components/c_field_angle_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/shared_spawnflags.h"
@@ -129,6 +130,12 @@ void CCameraComponent::UpdateState()
 			}
 		}
 	}
+}
+void CCameraComponent::OnEntityComponentAdded(BaseEntityComponent &component)
+{
+	BaseEnvCameraComponent::OnEntityComponentAdded(component);
+	if(typeid(component) == typeid(CFieldAngleComponent))
+		SetFieldAngleComponent(static_cast<CFieldAngleComponent&>(component));
 }
 util::EventReply CCameraComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
 {

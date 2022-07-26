@@ -20,6 +20,8 @@ namespace pragma
 	public:
 		SCameraComponent(BaseEntity &ent) : BaseEnvCameraComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
+	protected:
+		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 	};
 };
 

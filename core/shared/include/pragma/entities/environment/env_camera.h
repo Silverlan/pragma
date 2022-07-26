@@ -18,6 +18,7 @@ enum class FrustumPlane : uint32_t;
 enum class FrustumPoint : uint32_t;
 namespace pragma
 {
+	class BaseFieldAngleComponent;
 	class DLLNETWORK BaseEnvCameraComponent
 		: public BaseEntityComponent
 	{
@@ -111,16 +112,17 @@ namespace pragma
 	protected:
 		void FlagViewMatrixAsDirty();
 		void FlagProjectionMatrixAsDirty();
+		virtual void SetFieldAngleComponent(BaseFieldAngleComponent &c);
 	private:
 		util::PMatrix4Property m_projectionMatrix = nullptr;
 		util::PMatrix4Property m_viewMatrix = nullptr;
-		util::PFloatProperty m_fov = nullptr;
 		util::PFloatProperty m_aspectRatio = nullptr;
 		util::PFloatProperty m_nearZ = nullptr;
 		util::PFloatProperty m_farZ = nullptr;
 		util::PFloatProperty m_focalDistance = nullptr;
 		std::vector<umath::Plane> m_frustumPlanes;
 		StateFlags m_stateFlags = StateFlags::None;
+		ComponentHandle<BaseFieldAngleComponent> m_fieldAngleComponent;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseEnvCameraComponent::StateFlags)

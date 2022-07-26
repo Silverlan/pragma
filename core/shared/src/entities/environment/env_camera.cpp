@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/environment/env_camera.h"
 #include "pragma/entities/components/base_transform_component.hpp"
+#include "pragma/entities/components/base_field_angle_component.hpp"
 #include "pragma/entities/components/component_member_flags.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/math/e_frustum.h"
@@ -108,7 +109,7 @@ BaseEnvCameraComponent::BaseEnvCameraComponent(BaseEntity &ent)
 	: BaseEntityComponent{ent},m_nearZ(util::FloatProperty::Create(DEFAULT_NEAR_Z)),m_farZ(util::FloatProperty::Create(DEFAULT_FAR_Z)),
 	m_focalDistance(util::FloatProperty::Create(DEFAULT_FOCAL_DISTANCE)),
 	m_projectionMatrix(util::Matrix4Property::Create()),m_viewMatrix(util::Matrix4Property::Create()),
-	m_fov(util::FloatProperty::Create(75.f)),m_aspectRatio(util::FloatProperty::Create(1.f))
+	m_aspectRatio(util::FloatProperty::Create(1.f))
 {}
 void BaseEnvCameraComponent::Initialize()
 {
@@ -116,6 +117,17 @@ void BaseEnvCameraComponent::Initialize()
 	auto &ent = GetEntity();
 	ent.AddComponent("toggle");
 	ent.AddComponent("transform");
+	SetFieldAngleComponent(*ent.AddComponent("field_angle").get<BaseFieldAngleComponent>());
+
+	SetFOV(75.f);
+}
+
+void BaseEnvCameraComponent::SetFieldAngleComponent(BaseFieldAngleComponent &c)
+{
+	m_fieldAngleComponent = c.GetHandle<BaseFieldAngleComponent>();
+	c.GetFieldAngleProperty()->AddCallback([this](std::reference_wrapper<const float> oldAng,std::reference_wrapper<const float> newAng) {
+		m_stateFlags |= StateFlags::ProjectionMatrixDirtyBit;
+	});
 }
 
 void BaseEnvCameraComponent::Save(udm::LinkedPropertyWrapperArg udm)
@@ -123,7 +135,6 @@ void BaseEnvCameraComponent::Save(udm::LinkedPropertyWrapperArg udm)
 	BaseEntityComponent::Save(udm);
 	udm["projectionMatrix"] = **m_projectionMatrix;
 	udm["viewMatrix"] = **m_viewMatrix;
-	udm["fov"] = **m_fov;
 	udm["aspectRatio"] = **m_aspectRatio;
 	udm["nearZ"] = **m_nearZ;
 	udm["farZ"] = **m_farZ;
@@ -135,7 +146,6 @@ void BaseEnvCameraComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t ver
 	BaseEntityComponent::Load(udm,version);
 	udm["projectionMatrix"](**m_projectionMatrix);
 	udm["viewMatrix"](**m_viewMatrix);
-	udm["fov"](**m_fov);
 	udm["aspectRatio"](**m_aspectRatio);
 	udm["nearZ"](**m_nearZ);
 	udm["farZ"](**m_farZ);
@@ -357,7 +367,12 @@ void BaseEnvCameraComponent::GetPlaneBoundaries(float z,std::array<Vector3,4> &o
 	outPoints = umath::frustum::get_plane_boundaries(pos,forward,up,GetFOVRad(),z,*m_aspectRatio,wNear,hNear);
 }
 
-void BaseEnvCameraComponent::SetFOV(float fov) {*m_fov = fov; m_stateFlags |= StateFlags::ProjectionMatrixDirtyBit;}
+void BaseEnvCameraComponent::SetFOV(float fov)
+{
+	if(m_fieldAngleComponent.expired())
+		return;
+	m_fieldAngleComponent->SetFieldAngle(fov);
+}
 void BaseEnvCameraComponent::SetAspectRatio(float aspectRatio) {*m_aspectRatio = aspectRatio; m_stateFlags |= StateFlags::ProjectionMatrixDirtyBit;}
 void BaseEnvCameraComponent::SetNearZ(float nearZ) {*m_nearZ = nearZ; m_stateFlags |= StateFlags::ProjectionMatrixDirtyBit;}
 void BaseEnvCameraComponent::SetFarZ(float farZ) {*m_farZ = farZ; m_stateFlags |= StateFlags::ProjectionMatrixDirtyBit;}
@@ -391,8 +406,13 @@ const Mat4 &BaseEnvCameraComponent::GetViewMatrix() const
 	return *m_viewMatrix;
 }
 
-float BaseEnvCameraComponent::GetFOV() const {return *m_fov;}
-float BaseEnvCameraComponent::GetFOVRad() const {return umath::deg_to_rad(*m_fov);}
+float BaseEnvCameraComponent::GetFOV() const
+{
+	if(m_fieldAngleComponent.expired())
+		return 0.f;
+	return m_fieldAngleComponent->GetFieldAngle();
+}
+float BaseEnvCameraComponent::GetFOVRad() const {return umath::deg_to_rad(GetFOV());}
 
 const util::PMatrix4Property &BaseEnvCameraComponent::GetProjectionMatrixProperty() const {return m_projectionMatrix;}
 const util::PMatrix4Property &BaseEnvCameraComponent::GetViewMatrixProperty() const {return m_viewMatrix;}
@@ -400,7 +420,15 @@ const util::PMatrix4Property &BaseEnvCameraComponent::GetViewMatrixProperty() co
 const util::PFloatProperty &BaseEnvCameraComponent::GetAspectRatioProperty() const {return m_aspectRatio;}
 const util::PFloatProperty &BaseEnvCameraComponent::GetNearZProperty() const {return m_nearZ;}
 const util::PFloatProperty &BaseEnvCameraComponent::GetFarZProperty() const {return m_farZ;}
-const util::PFloatProperty &BaseEnvCameraComponent::GetFOVProperty() const {return m_fov;}
+const util::PFloatProperty &BaseEnvCameraComponent::GetFOVProperty() const
+{
+	if(m_fieldAngleComponent.expired())
+	{
+		static util::PFloatProperty nptr = nullptr;
+		return nptr;
+	}
+	return m_fieldAngleComponent->GetFieldAngleProperty();
+}
 const util::PFloatProperty &BaseEnvCameraComponent::GetFocalDistanceProperty() const {return m_focalDistance;}
 
 float BaseEnvCameraComponent::GetAspectRatio() const {return *m_aspectRatio;}

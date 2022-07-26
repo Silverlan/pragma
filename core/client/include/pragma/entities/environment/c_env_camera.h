@@ -27,6 +27,7 @@ namespace pragma
 		virtual void OnEntitySpawn() override;
 	protected:
 		void UpdateState();
+		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		CallbackHandle m_cbCameraUpdate;
 	};
 };

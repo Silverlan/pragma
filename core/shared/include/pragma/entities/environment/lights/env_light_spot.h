@@ -17,6 +17,7 @@
 
 namespace pragma
 {
+	class BaseFieldAngleComponent;
 	class DLLNETWORK BaseEnvLightSpotComponent
 		: public BaseEntityComponent
 	{
@@ -63,10 +64,11 @@ namespace pragma
 	protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
+		virtual void SetFieldAngleComponent(BaseFieldAngleComponent &c);
 		util::PFloatProperty m_blendFraction = nullptr;
-		util::PFloatProperty m_outerConeAngle = nullptr;
 		util::PFloatProperty m_coneStartOffset = nullptr;
 		pragma::NetEventId m_netEvSetConeStartOffset = pragma::INVALID_NET_EVENT;
+		ComponentHandle<BaseFieldAngleComponent> m_fieldAngleComponent;
 	};
 };
 

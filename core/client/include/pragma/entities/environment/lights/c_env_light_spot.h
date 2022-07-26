@@ -30,6 +30,7 @@ namespace pragma
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
+		virtual void SetFieldAngleComponent(BaseFieldAngleComponent &c) override;
 		void SetShadowDirty();
 
 		void UpdateInnerConeAngle();

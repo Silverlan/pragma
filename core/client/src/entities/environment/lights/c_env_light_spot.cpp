@@ -13,6 +13,7 @@
 #include "pragma/entities/components/c_radius_component.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/components/c_field_angle_component.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -48,7 +49,15 @@ void CLightSpotComponent::Initialize()
 	m_blendFraction->AddCallback([this](std::reference_wrapper<const float> oldFraction,std::reference_wrapper<const float> newFraction) {
 		UpdateInnerConeAngle();
 	});
-	m_outerConeAngle->AddCallback([this](std::reference_wrapper<const float> oldAng,std::reference_wrapper<const float> newAng) {
+
+	auto pLightComponent = GetEntity().GetComponent<CLightComponent>();
+	if(pLightComponent.valid())
+		pLightComponent->UpdateTransformationMatrix(GetBiasTransformationMatrix(),GetViewMatrix(),GetProjectionMatrix());
+}
+void CLightSpotComponent::SetFieldAngleComponent(BaseFieldAngleComponent &c)
+{
+	BaseEnvLightSpotComponent::SetFieldAngleComponent(c);
+	c.GetFieldAngleProperty()->AddCallback([this](std::reference_wrapper<const float> oldAng,std::reference_wrapper<const float> newAng) {
 		SetShadowDirty();
 		UpdateProjectionMatrix();
 		auto pLightComponent = GetEntity().GetComponent<CLightComponent>();
@@ -68,10 +77,6 @@ void CLightSpotComponent::Initialize()
 			pLightComponent->UpdateLightIntensity();
 		}
 	});
-
-	auto pLightComponent = GetEntity().GetComponent<CLightComponent>();
-	if(pLightComponent.valid())
-		pLightComponent->UpdateTransformationMatrix(GetBiasTransformationMatrix(),GetViewMatrix(),GetProjectionMatrix());
 }
 void CLightSpotComponent::UpdateInnerConeAngle()
 {
@@ -111,6 +116,8 @@ void CLightSpotComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 			return util::EventReply::Unhandled;
 		}),CallbackType::Component,&component);
 	}
+	else if(typeid(component) == typeid(CFieldAngleComponent))
+		SetFieldAngleComponent(static_cast<CFieldAngleComponent&>(component));
 }
 void CLightSpotComponent::SetShadowDirty()
 {
@@ -132,7 +139,6 @@ void CLightSpotComponent::UpdateViewMatrices()
 }
 void CLightSpotComponent::ReceiveData(NetPacket &packet)
 {
-	*m_outerConeAngle = packet->Read<float>();
 	*m_blendFraction = packet->Read<float>();
 	auto coneStartOffset = packet->Read<float>();
 	SetConeStartOffset(coneStartOffset);

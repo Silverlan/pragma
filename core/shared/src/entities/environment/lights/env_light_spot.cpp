@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/environment/lights/env_light_spot.h"
 #include "pragma/entities/components/base_radius_component.hpp"
+#include "pragma/entities/components/base_field_angle_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include <sharedutils/util.h>
 #include "pragma/util/util_handled.hpp"
@@ -67,7 +68,7 @@ void BaseEnvLightSpotComponent::RegisterMembers(pragma::EntityComponentManager &
 }
 BaseEnvLightSpotComponent::BaseEnvLightSpotComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_blendFraction(util::FloatProperty::Create(0.1f)),
-	m_outerConeAngle(util::FloatProperty::Create(0.f)),m_coneStartOffset(util::FloatProperty::Create(0.f))
+	m_coneStartOffset(util::FloatProperty::Create(0.f))
 {}
 void BaseEnvLightSpotComponent::Initialize()
 {
@@ -76,9 +77,15 @@ void BaseEnvLightSpotComponent::Initialize()
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
 		if(ustring::compare<std::string>(kvData.key,"outerconeangle",false))
-			*m_outerConeAngle = util::to_float(kvData.value);
+		{
+			if(m_fieldAngleComponent.valid())
+				m_fieldAngleComponent->SetFieldAngle(util::to_float(kvData.value));
+		}
 		else if(ustring::compare<std::string>(kvData.key,"outercutoff",false))
-			*m_outerConeAngle = util::to_float(kvData.value) *2.f;
+		{
+			if(m_fieldAngleComponent.valid())
+				m_fieldAngleComponent->SetFieldAngle(util::to_float(kvData.value) *2.f);
+		}
 		else if(ustring::compare<std::string>(kvData.key,"blendfraction",false))
 			*m_blendFraction = util::to_float(kvData.value);
 		else if(ustring::compare<std::string>(kvData.key,"cone_start_offset",false))
@@ -91,9 +98,12 @@ void BaseEnvLightSpotComponent::Initialize()
 	auto &ent = GetEntity();
 	ent.AddComponent("light");
 	ent.AddComponent("radius");
+	SetFieldAngleComponent(*ent.AddComponent("field_angle").get<BaseFieldAngleComponent>());
 	ent.AddComponent("point_at_target");
 	m_netEvSetConeStartOffset = SetupNetEvent("set_cone_start_offset");
 }
+
+void BaseEnvLightSpotComponent::SetFieldAngleComponent(BaseFieldAngleComponent &c) {m_fieldAngleComponent = c.GetHandle<BaseFieldAngleComponent>();}
 
 float BaseEnvLightSpotComponent::CalcConeFalloff(
 	const Vector3 &lightPos,const Vector3 &lightDir,umath::Degree outerConeAngle,umath::Degree innerConeAngle,const Vector3 &point
@@ -154,19 +164,27 @@ void BaseEnvLightSpotComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	udm["blendFraction"] = **m_blendFraction;
-	udm["outerConeAngle"] = **m_outerConeAngle;
 	udm["coneStartOffset"] = **m_coneStartOffset;
 }
 void BaseEnvLightSpotComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	udm["blendFraction"](**m_blendFraction);
-	udm["outerConeAngle"](**m_outerConeAngle);
 	udm["coneStartOffset"](**m_coneStartOffset);
 }
 
-void BaseEnvLightSpotComponent::SetOuterConeAngle(umath::Degree ang) {*m_outerConeAngle = ang;}
-umath::Degree BaseEnvLightSpotComponent::GetOuterConeAngle() const {return *m_outerConeAngle;}
+void BaseEnvLightSpotComponent::SetOuterConeAngle(umath::Degree ang)
+{
+	if(m_fieldAngleComponent.expired())
+		return;
+	m_fieldAngleComponent->SetFieldAngle(ang);
+}
+umath::Degree BaseEnvLightSpotComponent::GetOuterConeAngle() const
+{
+	if(m_fieldAngleComponent.expired())
+		return 0.f;
+	return m_fieldAngleComponent->GetFieldAngle();
+}
 
 void BaseEnvLightSpotComponent::SetInnerConeAngle(umath::Degree ang)
 {
@@ -180,7 +198,15 @@ umath::Fraction BaseEnvLightSpotComponent::GetBlendFraction() const {return *m_b
 void BaseEnvLightSpotComponent::SetBlendFraction(umath::Fraction fraction) {*m_blendFraction = fraction;}
 
 const util::PFloatProperty &BaseEnvLightSpotComponent::GetBlendFractionProperty() const {return m_blendFraction;}
-const util::PFloatProperty &BaseEnvLightSpotComponent::GetOuterConeAngleProperty() const {return m_outerConeAngle;}
+const util::PFloatProperty &BaseEnvLightSpotComponent::GetOuterConeAngleProperty() const
+{
+	if(m_fieldAngleComponent.expired())
+	{
+		static util::PFloatProperty nptr = nullptr;
+		return nptr;
+	}
+	return m_fieldAngleComponent->GetFieldAngleProperty();
+}
 const util::PFloatProperty &BaseEnvLightSpotComponent::GetConeStartOffsetProperty() const {return m_coneStartOffset;}
 
 void BaseEnvLightSpotComponent::SetConeStartOffset(float offset) {*m_coneStartOffset = offset;}

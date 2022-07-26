@@ -7,6 +7,7 @@
 #include "stdafx_server.h"
 #include "pragma/networking/s_nwm_util.h"
 #include "pragma/entities/environment/lights/s_env_light_spot.h"
+#include "pragma/entities/components/s_field_angle_component.hpp"
 #include "pragma/entities/s_entityfactories.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include <pragma/networking/nwm_util.h>
@@ -21,7 +22,6 @@ LINK_ENTITY_TO_CLASS(env_light_spot,EnvLightSpot);
 
 void SLightSpotComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
-	packet->Write<float>(*m_outerConeAngle);
 	packet->Write<float>(*m_blendFraction);
 	packet->Write<float>(*m_coneStartOffset);
 }
@@ -65,6 +65,8 @@ void SLightSpotComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	BaseEntityComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(SLightComponent))
 		static_cast<SLightComponent&>(component).SetLight(*this);
+	else if(typeid(component) == typeid(SFieldAngleComponent))
+		SetFieldAngleComponent(static_cast<SFieldAngleComponent&>(component));
 }
 
 ///////////

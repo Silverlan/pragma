@@ -115,12 +115,16 @@ prosper::Texture *CRendererComponent::GetHDRPresentationTexture()
 
 bool CRendererComponent::ReloadRenderTarget(pragma::CSceneComponent &scene,uint32_t width,uint32_t height)
 {
+	auto oldWidth = m_width;
+	auto oldHeight = m_height;
+	m_width = width;
+	m_height = height;
 	pragma::CEReloadRenderTarget evData {scene,width,height};
 	InvokeEventCallbacks(EVENT_RELOAD_RENDER_TARGET,evData);
-	if(evData.resultSuccess)
+	if(!evData.resultSuccess)
 	{
-		m_width = width;
-		m_height = height;
+		m_width = oldWidth;
+		m_height = oldHeight;
 	}
 	CEOnRenderTargetReloaded evDataReloaded {evData.resultSuccess};
 	InvokeEventCallbacks(EVENT_ON_RENDER_TARGET_RELOADED,evDataReloaded);

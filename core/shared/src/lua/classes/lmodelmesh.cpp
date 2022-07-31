@@ -15,6 +15,7 @@
 #include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>
+#include <pragma/lua/converters/vector_converter_t.hpp>
 
 extern DLLNETWORK Engine *engine;
 
@@ -240,6 +241,36 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("Rotate",static_cast<void(*)(lua_State*,::ModelSubMesh&,const Quat&)>([](lua_State *l,::ModelSubMesh &mesh,const Quat &rotation) {
 		mesh.Rotate(rotation);
 	}));
+	classDef.def("MakeVerticesUnique",+[](lua_State *l,::ModelSubMesh &mesh) {
+		auto &verts = mesh.GetVertices();
+		auto &vws = mesh.GetVertexWeights();
+		std::vector<umath::Vertex> newVerts;
+		std::vector<umath::VertexWeight> newVertWeights;
+		mesh.VisitIndices([&newVerts,&verts,&newVertWeights,&vws](auto *indexData,uint32_t numIndices) {
+			newVerts.resize(numIndices);
+			for(auto i=decltype(numIndices){0u};i<numIndices;++i)
+				newVerts[i] = verts[indexData[i]];
+
+			if(vws.empty())
+				return;
+			newVertWeights.resize(numIndices);
+			for(auto i=decltype(numIndices){0u};i<numIndices;++i)
+				newVertWeights[i] = vws[indexData[i]];
+		});
+		verts = std::move(newVerts);
+		vws = std::move(newVertWeights);
+	});
+	classDef.def("SetVertices",+[](lua_State *l,::ModelSubMesh &mesh,std::vector<umath::Vertex> verts) {
+		mesh.GetVertices() == std::move(verts);
+	});
+	classDef.def("SetIndices",+[](lua_State *l,::ModelSubMesh &mesh,const std::vector<uint32_t> &indices) {
+		mesh.SetIndices(indices);
+		uint32_t highestIndex = 0;
+		for(auto idx : indices)
+			highestIndex = umath::max(highestIndex,idx);
+		if(highestIndex <= std::numeric_limits<uint16_t>::max())
+			mesh.SetIndexType(pragma::model::IndexType::UInt16);
+	});
 	classDef.def("GetReferenceId",static_cast<void(*)(lua_State*,::ModelSubMesh&)>([](lua_State *l,::ModelSubMesh &mesh) {
 		Lua::PushInt(l,mesh.GetReferenceId());
 	}));

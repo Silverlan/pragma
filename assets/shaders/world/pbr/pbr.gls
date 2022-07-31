@@ -6,6 +6,15 @@
 	#define DEBUG_MODE DEBUG_MODE_NONE
 #endif
 
+#define DEBUG_FORWARDP_OUTPUT_MODE_DEPTH_NONE 0
+#define DEBUG_FORWARDP_OUTPUT_MODE_DEPTH_BUFFER 1
+#define DEBUG_FORWARDP_OUTPUT_MODE_UV_X 2
+#define DEBUG_FORWARDP_OUTPUT_MODE_UV_Y 3
+#define DEBUG_FORWARDP_OUTPUT_MODE_LOCATION_X 4
+#define DEBUG_FORWARDP_OUTPUT_MODE_LOCATION_Y 5
+
+#define DEBUG_FORWARDP_OUTPUT_MODE DEBUG_FORWARDP_OUTPUT_MODE_DEPTH_NONE
+
 #include "textures.gls"
 #include "lighting.gls"
 #include "/modules/sh_parallaxmapping.gls"
@@ -13,6 +22,7 @@
 #include "/modules/fs_scene.gls"
 #include "/modules/fs_glowmap.gls"
 #include "/modules/fs_renderer.gls"
+#include "/functions/fs_linearize_depth.gls"
 #include "/debug/fs_debug_csm.gls"
 #include "debug.gls"
 
@@ -135,6 +145,24 @@ vec4 calc_pbr(vec4 albedoColor,vec2 texCoords,uint debugMode)
 
 	// Lighting
 	vec3 color;
+#if DEBUG_FORWARDP_OUTPUT_MODE != DEBUG_FORWARDP_OUTPUT_MODE_NONE
+    ivec2 location = ivec2(gl_FragCoord.xy);
+    uint tileSize = get_tile_size();
+    ivec2 tileID = location /ivec2(tileSize,tileSize);
+    uint index = tileID.y *get_number_of_tiles_x() +tileID.x;
+    uint tileStartOffset = index *MAX_SCENE_LIGHTS;
+	#if DEBUG_FORWARDP_OUTPUT_MODE == DEBUG_FORWARDP_OUTPUT_MODE_DEPTH_BUFFER
+		float d = intBitsToFloat(visibleLightTileIndicesBuffer.data[tileStartOffset].index);
+		d = get_linearized_depth(d,u_renderSettings.nearZ,u_renderSettings.farZ);
+		color = vec3(d,d,d);
+	#elif DEBUG_FORWARDP_OUTPUT_MODE == DEBUG_FORWARDP_OUTPUT_MODE_UV_X || DEBUG_FORWARDP_OUTPUT_MODE == DEBUG_FORWARDP_OUTPUT_MODE_UV_Y
+		float uvx = intBitsToFloat(visibleLightTileIndicesBuffer.data[tileStartOffset].index);
+		color = vec3(uvx,uvx,uvx);
+	#elif DEBUG_FORWARDP_OUTPUT_MODE == DEBUG_FORWARDP_OUTPUT_MODE_LOCATION_X || DEBUG_FORWARDP_OUTPUT_MODE == DEBUG_FORWARDP_OUTPUT_MODE_LOCATION_Y
+		int v = visibleLightTileIndicesBuffer.data[tileStartOffset].index;
+		color = vec3(v,v,v) /5000.0;
+	#endif
+#else
 	if(CSPEC_DEBUG_MODE_ENABLED == 0)
 		color = calc_pbr_lighting(texCoords,materialInfo,baseColor);
 	else
@@ -150,6 +178,7 @@ vec4 calc_pbr(vec4 albedoColor,vec2 texCoords,uint debugMode)
 			apply_debug_heatmap_color(SCENE_DIRECTIONAL_LIGHT_BUFFER_START,SCENE_DIRECTIONAL_LIGHT_BUFFER_END,color);
 		}
 	}
+#endif
 
 	// Ao
     float ao = rma[RMA_CHANNEL_AO];

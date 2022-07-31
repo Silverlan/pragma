@@ -39,6 +39,15 @@ layout(LAYOUT_ID(DESCRIPTOR_SET_LIGHTS,DESCRIPTOR_SET_LIGHTS_BINDING_DEPTH_MAP))
 // layout(constant_id = 1) const uint FORWARDP_TILE_SIZE = 16;
 #define FORWARDP_TILE_SIZE 16
 
+#define DEBUG_FORWARDP_OUTPUT_MODE_DEPTH_NONE 0
+#define DEBUG_FORWARDP_OUTPUT_MODE_DEPTH_BUFFER 1
+#define DEBUG_FORWARDP_OUTPUT_MODE_UV_X 2
+#define DEBUG_FORWARDP_OUTPUT_MODE_UV_Y 3
+#define DEBUG_FORWARDP_OUTPUT_MODE_LOCATION_X 4
+#define DEBUG_FORWARDP_OUTPUT_MODE_LOCATION_Y 5
+
+#define DEBUG_FORWARDP_OUTPUT_MODE DEBUG_FORWARDP_OUTPUT_MODE_DEPTH_NONE
+
 // Shared values between all the threads in the group
 shared uint minDepthInt;
 shared uint maxDepthInt;
@@ -261,7 +270,37 @@ void main()
 
 	memoryBarrierShared();
 	barrier();
-
+#if DEBUG_FORWARDP_OUTPUT_MODE == DEBUG_FORWARDP_OUTPUT_MODE_DEPTH_BUFFER
+	if(gl_LocalInvocationIndex == 0)
+	{
+		uint startOffset = index *MAX_SCENE_LIGHTS;
+		visibleLightTileIndicesBuffer.data[startOffset].index = floatBitsToInt(minDepth);
+	}
+#elif DEBUG_FORWARDP_OUTPUT_MODE == DEBUG_FORWARDP_OUTPUT_MODE_UV_X
+	if(gl_LocalInvocationIndex == 0)
+	{
+		uint startOffset = index *MAX_SCENE_LIGHTS;
+		visibleLightTileIndicesBuffer.data[startOffset].index = floatBitsToInt(uv.x);
+	}
+#elif DEBUG_FORWARDP_OUTPUT_MODE == DEBUG_FORWARDP_OUTPUT_MODE_UV_Y
+	if(gl_LocalInvocationIndex == 0)
+	{
+		uint startOffset = index *MAX_SCENE_LIGHTS;
+		visibleLightTileIndicesBuffer.data[startOffset].index = floatBitsToInt(uv.y);
+	}
+#elif DEBUG_FORWARDP_OUTPUT_MODE == DEBUG_FORWARDP_OUTPUT_MODE_LOCATION_X
+	if(gl_LocalInvocationIndex == 0)
+	{
+		uint startOffset = index *MAX_SCENE_LIGHTS;
+		visibleLightTileIndicesBuffer.data[startOffset].index = location.x;
+	}
+#elif DEBUG_FORWARDP_OUTPUT_MODE == DEBUG_FORWARDP_OUTPUT_MODE_LOCATION_Y
+	if(gl_LocalInvocationIndex == 0)
+	{
+		uint startOffset = index *MAX_SCENE_LIGHTS;
+		visibleLightTileIndicesBuffer.data[startOffset].index = location.y;
+	}
+#else
 	// One thread should fill the global light buffer
 	if(gl_LocalInvocationIndex == 0)
 	{
@@ -321,4 +360,5 @@ void main()
 		if(startOffset +idirectional != SCENE_DIRECTIONAL_LIGHT_BUFFER_END)
 			visibleLightTileIndicesBuffer.data[startOffset +SCENE_DIRECTIONAL_LIGHT_BUFFER_START +idirectional].index = -1;
 	}
+#endif
 }

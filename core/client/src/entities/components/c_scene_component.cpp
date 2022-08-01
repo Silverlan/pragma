@@ -464,6 +464,11 @@ prosper::IDescriptorSet *CSceneComponent::GetCameraDescriptorSetCompute() const 
 prosper::IDescriptorSet *CSceneComponent::GetViewCameraDescriptorSet() const {return m_camViewDescSetGroup->GetDescriptorSet();}
 const std::shared_ptr<prosper::IDescriptorSetGroup> &CSceneComponent::GetFogDescriptorSetGroup() const {return m_fogDescSetGroup;}
 
+void CSceneComponent::SetExclusionRenderMask(::pragma::rendering::RenderMask renderMask) {m_exclusionRenderMask = renderMask;}
+::pragma::rendering::RenderMask CSceneComponent::GetExclusionRenderMask() const {return m_exclusionRenderMask;}
+void CSceneComponent::SetInclusionRenderMask(::pragma::rendering::RenderMask renderMask) {m_inclusionRenderMask = renderMask;}
+::pragma::rendering::RenderMask CSceneComponent::GetInclusionRenderMask() const {return m_inclusionRenderMask;}
+
 void CSceneComponent::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo)
 {
 	pragma::CEDrawSceneInfo evData {drawSceneInfo};

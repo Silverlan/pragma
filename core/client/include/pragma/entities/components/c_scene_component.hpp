@@ -225,6 +225,11 @@ namespace pragma
 		void SetActiveCamera(pragma::CCameraComponent &cam);
 		void SetActiveCamera();
 
+		void SetExclusionRenderMask(::pragma::rendering::RenderMask renderMask);
+		::pragma::rendering::RenderMask GetExclusionRenderMask() const;
+		void SetInclusionRenderMask(::pragma::rendering::RenderMask renderMask);
+		::pragma::rendering::RenderMask GetInclusionRenderMask() const;
+
 		void Link(const CSceneComponent &other,bool linkCamera=true);
 		uint32_t GetWidth() const;
 		uint32_t GetHeight() const;
@@ -310,6 +315,9 @@ namespace pragma
 		pragma::CameraData m_cameraData = {};
 		SceneDebugMode m_debugMode = SceneDebugMode::None;
 		Vector4 m_particleSystemColorFactor {1.f,1.f,1.f,1.f};
+
+		::pragma::rendering::RenderMask m_exclusionRenderMask = ::pragma::rendering::RenderMask::None;
+		::pragma::rendering::RenderMask m_inclusionRenderMask = ::pragma::rendering::RenderMask::None;
 
 		// Fog
 		pragma::FogData m_fogData = {};

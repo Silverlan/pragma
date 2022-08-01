@@ -163,7 +163,10 @@ void CGame::RegisterLua()
 			return 1;
 		})},
 		{"register_render_mask",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-			auto mask = c_game->RegisterRenderMask(Lua::CheckString(l,1));
+			auto inclusiveByDefault = true;
+			if(Lua::IsSet(l,2))
+				inclusiveByDefault = Lua::CheckBool(l,2);
+			auto mask = c_game->RegisterRenderMask(Lua::CheckString(l,1),inclusiveByDefault);
 			Lua::Push(l,mask);
 			return 1;
 		})}

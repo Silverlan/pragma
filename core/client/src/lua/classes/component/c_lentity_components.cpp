@@ -634,6 +634,10 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.def("SetOcclusionCullingMethod",static_cast<void(*)(lua_State*,pragma::CSceneComponent&,uint32_t)>([](lua_State *l,pragma::CSceneComponent &scene,uint32_t method) {
 		scene.GetSceneRenderDesc().SetOcclusionCullingMethod(static_cast<SceneRenderDesc::OcclusionCullingMethod>(method));
 	}));
+	defCScene.def("SetExclusionRenderMask",&pragma::CSceneComponent::SetExclusionRenderMask);
+	defCScene.def("GetExclusionRenderMask",&pragma::CSceneComponent::GetExclusionRenderMask);
+	defCScene.def("SetInclusionRenderMask",&pragma::CSceneComponent::SetInclusionRenderMask);
+	defCScene.def("GetInclusionRenderMask",&pragma::CSceneComponent::GetInclusionRenderMask);
 	defCScene.def("GetWidth",&pragma::CSceneComponent::GetWidth);
 	defCScene.def("GetHeight",&pragma::CSceneComponent::GetHeight);
 	defCScene.def("GetSize",static_cast<std::pair<uint32_t,uint32_t>(*)(const pragma::CSceneComponent&)>([](const pragma::CSceneComponent &scene) -> std::pair<uint32_t,uint32_t> {

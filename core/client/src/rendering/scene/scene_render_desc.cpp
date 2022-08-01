@@ -652,6 +652,8 @@ void SceneRenderDesc::BuildRenderQueues(
 	auto &posCam = g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->pos : drawSceneInfo.pvsOrigin.has_value() ? *drawSceneInfo.pvsOrigin : cam.GetEntity().GetPosition();
 
 	auto renderMask = drawSceneInfo.GetRenderMask(*c_game);
+	renderMask |= drawSceneInfo.scene->GetInclusionRenderMask();
+	renderMask |= drawSceneInfo.scene->GetExclusionRenderMask();
 	auto tStart = std::chrono::steady_clock::now();
 	c_game->GetRenderQueueBuilder().Append([this,&rasterizer,&cam,posCam,&drawSceneInfo,renderMask]() {
 		++g_activeRenderQueueThreads;

@@ -31,6 +31,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
 #include "pragma/rendering/shaders/image/c_shader_clear_color.hpp"
+#include "pragma/rendering/shaders/image/c_shader_resize_image.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_dof.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_water.hpp"
 #include "pragma/rendering/shaders/world/c_shader_skybox.hpp"
@@ -67,6 +68,7 @@
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
+
 
 REGISTER_CONVAR_CALLBACK_CL(cl_render_shader_quality,[](NetworkState*,ConVar*,int,int val) {
 	if(c_game == nullptr)
@@ -153,6 +155,7 @@ void register_game_shaders()
 	shaderManager.RegisterShader("pp_hdr",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPHDR(context,identifier);});
 	shaderManager.RegisterShader("pp_fog",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPFog(context,identifier);});
 	shaderManager.RegisterShader("pp_dof",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPDoF(context,identifier);});
+	shaderManager.RegisterShader("resize_image",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderResizeImage(context,identifier);});
 
 	shaderManager.RegisterShader("pp_water",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPWater(context,identifier);});
 	shaderManager.RegisterShader("pp_fxaa",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPFXAA(context,identifier);});

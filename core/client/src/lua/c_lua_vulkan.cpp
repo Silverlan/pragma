@@ -9,6 +9,7 @@
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
+#include "pragma/rendering/shaders/image/c_shader_resize_image.hpp"
 #include <pragma/lua/classes/ldef_color.h>
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/lerrorcode.h>
@@ -824,7 +825,48 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 			luabind::def("get_line_vertex_buffer",&Lua::Vulkan::get_line_vertex_buffer),
 			luabind::def("get_line_vertices",&prosper::CommonBufferCache::GetLineVertices),
 			luabind::def("get_line_vertex_count",&prosper::CommonBufferCache::GetLineVertexCount),
-			luabind::def("get_line_vertex_format",&prosper::CommonBufferCache::GetLineVertexFormat)
+			luabind::def("get_line_vertex_format",&prosper::CommonBufferCache::GetLineVertexFormat),
+			luabind::def("record_resize_image",+[](Lua::Vulkan::CommandBuffer &cmd,Lua::Vulkan::DescriptorSet &dsg,Lua::Vulkan::RenderTarget &dstRt) {
+				if(!cmd.IsPrimary())
+					return;
+				auto &primaryCmdBuffer = dynamic_cast<prosper::IPrimaryCommandBuffer&>(cmd);
+				if(primaryCmdBuffer.RecordBeginRenderPass(dstRt))
+				{
+					auto *shader = static_cast<pragma::ShaderResizeImage*>(c_engine->GetShader("resize_image").get());
+					if(shader)
+					{
+						auto *ds = dsg.GetDescriptorSet();
+						auto *imgSrc = ds ? ds->GetBoundImage(0) : nullptr;
+						auto &imgDst = dstRt.GetTexture().GetImage();
+						auto wSrc = imgSrc->GetWidth();
+						auto wDst = imgDst.GetWidth();
+						std::optional<pragma::ShaderResizeImage::LanczosFilter::Scale> scale {};
+						if(wSrc == wDst *2)
+							scale = pragma::ShaderResizeImage::LanczosFilter::Scale::e2;
+						else if(wSrc == wDst *4)
+							scale = pragma::ShaderResizeImage::LanczosFilter::Scale::e4;
+						if(scale.has_value())
+						{
+							pragma::ShaderResizeImage::LanczosFilter filter {};
+							filter.scale = *scale;
+							shader->RecordDraw(primaryCmdBuffer,*ds,filter);
+						}
+						else
+						{
+							pragma::ShaderResizeImage::BicubicFilter filter {};
+							shader->RecordDraw(primaryCmdBuffer,*ds,filter);
+						}
+					}
+				}
+			}),
+			luabind::def("create_generic_image_descriptor_set",+[](Lua::Vulkan::Texture &tex) -> std::shared_ptr<Lua::Vulkan::DescriptorSet> {
+				auto *shader = static_cast<pragma::ShaderResizeImage*>(c_engine->GetShader("resize_image").get()); // TODO: use a generic shader
+				if(!shader)
+					return nullptr;
+				auto ds = shader->CreateDescriptorSetGroup(0);
+				ds->GetDescriptorSet()->SetBindingTexture(tex,0u);
+				return ds;
+			})
 		]
 	];
 

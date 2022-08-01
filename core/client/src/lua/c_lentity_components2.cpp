@@ -64,6 +64,7 @@ void RegisterLuaEntityComponents2(lua_State *l,luabind::module_ &entsMod)
 
 	auto defPpToneMapping =
 		pragma::lua::create_entity_component_class<pragma::CRendererPpToneMappingComponent,pragma::BaseEntityComponent>("RendererPpToneMappingComponent");
+	defPpToneMapping.def("SetApplyToHdrImage",&pragma::CRendererPpToneMappingComponent::SetApplyToHdrImage);
 	entsMod[defPpToneMapping];
 
 	auto defPpFxaa =

@@ -23,6 +23,15 @@ namespace pragma
 	public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
 		static prosper::Format RENDER_PASS_FORMAT;
+		static prosper::Format RENDER_PASS_FORMAT_HDR;
+
+		enum class Pipeline : uint32_t
+		{
+			LDR = 0,
+			HDR,
+
+			Count
+		};
 
 		enum class TextureBinding : uint32_t
 		{

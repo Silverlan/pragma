@@ -140,7 +140,7 @@ bool CRendererComponent::ReloadBloomRenderTarget(uint32_t width)
 
 CallbackHandle CRendererComponent::AddPostProcessingEffect(
 	const std::string &name,const std::function<void(const util::DrawSceneInfo&)> &render,uint32_t weight,
-	PostProcessingEffectData::Flags flags
+	const std::function<PostProcessingEffectData::Flags()> &fGetFlags
 )
 {
 	auto cb = FunctionCallback<void,const util::DrawSceneInfo&>::Create(render);
@@ -148,7 +148,7 @@ CallbackHandle CRendererComponent::AddPostProcessingEffect(
 	effectData.name = name;
 	effectData.render = cb;
 	effectData.weight = weight;
-	effectData.flags = flags;
+	effectData.getFlags = fGetFlags;
 	for(auto it=m_postProcessingEffects.begin();it!=m_postProcessingEffects.end();++it)
 	{
 		auto &effectDataOther = *it;

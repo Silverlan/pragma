@@ -22,9 +22,12 @@ namespace pragma
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual std::string GetIdentifier() const override {return "tone_mapping";}
 		virtual uint32_t GetPostProcessingWeight() const override {return umath::to_integral(CRendererComponent::StandardPostProcessingWeight::ToneMapping);}
-		virtual PostProcessingEffectData::Flags GetFlags() const override {return PostProcessingEffectData::Flags::ToneMapped;}
+		virtual PostProcessingEffectData::Flags GetFlags() const override;
+
+		void SetApplyToHdrImage(bool applyToHdrImage);
 	private:
 		virtual void DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo) override;
+		bool m_applyToHdrImage = false;
 	};
 };
 

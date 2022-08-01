@@ -255,6 +255,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 		Uncharted,
 		Aces,
 		GranTurismo,
+		Hdr,
 
 		Count
 	};
@@ -266,6 +267,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 		{"TONE_MAPPING_UNCHARTED",umath::to_integral(ToneMapping::Uncharted)},
 		{"TONE_MAPPING_ACES",umath::to_integral(ToneMapping::Aces)},
 		{"TONE_MAPPING_GRAN_TURISMO",umath::to_integral(ToneMapping::GranTurismo)},
+		{"TONE_MAPPING_HDR",umath::to_integral(ToneMapping::Hdr)},
 
 		{"TONE_MAPPING_COUNT",umath::to_integral(ToneMapping::Count)}
 	});

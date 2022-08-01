@@ -34,7 +34,7 @@ void CRendererPpBaseComponent::Initialize()
 		return;
 	m_cbEffect = rendererC->AddPostProcessingEffect(GetIdentifier(),[this](const util::DrawSceneInfo &drawSceneInfo) {
 		RenderEffect(drawSceneInfo);
-	},GetPostProcessingWeight(),GetFlags());
+	},GetPostProcessingWeight(),[this]() {return GetFlags();});
 }
 void CRendererPpBaseComponent::OnRemove()
 {

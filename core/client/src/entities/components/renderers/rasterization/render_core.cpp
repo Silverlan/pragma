@@ -271,7 +271,8 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 	{
 		if(pp.render.IsValid())
 		{
-			if(!applyToneMapped && umath::is_flag_set(pp.flags,pragma::PostProcessingEffectData::Flags::ToneMapped))
+			auto flags = pp.getFlags ? pp.getFlags() : PostProcessingEffectData::Flags::None;
+			if(!applyToneMapped && umath::is_flag_set(flags,pragma::PostProcessingEffectData::Flags::ToneMapped))
 				break;
 			pp.render.Call<void,const util::DrawSceneInfo&>(drawSceneInfo);
 		}

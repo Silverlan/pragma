@@ -14,7 +14,8 @@ const float INV_GAMMA = 1.0 /GAMMA;
 #define TONE_MAPPING_UNCHARTED (TONE_MAPPING_HEJIL_RICHARD +1)
 #define TONE_MAPPING_ACES (TONE_MAPPING_UNCHARTED +1)
 #define TONE_MAPPING_GRAN_TURISMO (TONE_MAPPING_ACES +1)
-#define TONE_MAPPING_COUNT (TONE_MAPPING_GRAN_TURISMO +1)
+#define TONE_MAPPING_HDR (TONE_MAPPING_GRAN_TURISMO +1)
+#define TONE_MAPPING_COUNT (TONE_MAPPING_HDR +1)
 
 // linear to sRGB approximation
 // see http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
@@ -115,23 +116,25 @@ vec3 tone_mapping_gran_turismo(vec3 x)
 
 vec3 apply_tone_mapping(vec3 color,uint algorithm,float exposure)
 {
-	color *= exposure;
+	vec3 effColor = color *exposure;
 	switch(algorithm)
 	{
 	case TONE_MAPPING_GAMMA_CORRECTION:
-		return linear_to_srgb(color);
+		return linear_to_srgb(effColor);
 	case TONE_MAPPING_REINHARD:
-		return tone_mapping_reinhard(color);
+		return tone_mapping_reinhard(effColor);
 	case TONE_MAPPING_HEJIL_RICHARD:
-		return tone_mapping_hejil_richard(color);
+		return tone_mapping_hejil_richard(effColor);
 	case TONE_MAPPING_UNCHARTED:
-		return tone_mapping_uncharted(color);
+		return tone_mapping_uncharted(effColor);
 	case TONE_MAPPING_ACES:
-		return tone_mapping_aces(color);
+		return tone_mapping_aces(effColor);
 	case TONE_MAPPING_GRAN_TURISMO:
-		return tone_mapping_gran_turismo(color);
+		return tone_mapping_gran_turismo(effColor);
+	case TONE_MAPPING_HDR:
+		return color;
 	}
-	return linear_to_srgb(color);
+	return linear_to_srgb(effColor);
 }
 
 #endif

@@ -24,7 +24,7 @@ namespace pragma
 		std::string name;
 		uint32_t weight;
 		mutable CallbackHandle render;
-		Flags flags = Flags::None;
+		std::function<PostProcessingEffectData::Flags()> getFlags = nullptr;
 	};
 	class DLLCLIENT CRendererComponent final
 		: public BaseEntityComponent
@@ -65,7 +65,7 @@ namespace pragma
 
 		CallbackHandle AddPostProcessingEffect(
 			const std::string &name,const std::function<void(const util::DrawSceneInfo&)> &render,uint32_t weight,
-			PostProcessingEffectData::Flags flags=PostProcessingEffectData::Flags::None
+			const std::function<PostProcessingEffectData::Flags()> &fGetFlags=nullptr
 		);
 		void RemovePostProcessingEffect(const std::string &name);
 		const std::vector<PostProcessingEffectData> &GetPostProcessingEffects() const;

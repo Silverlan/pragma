@@ -46,13 +46,17 @@ bool util::to_image_buffer(
 	auto &setupCmd = context.GetSetupCommandBuffer();
 
 	auto copyCreateInfo = image.GetCreateInfo();
-	copyCreateInfo.format = dstFormat;
-	copyCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
-	copyCreateInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
-	copyCreateInfo.tiling = prosper::ImageTiling::Optimal; // Needs to be in optimal tiling because some GPUs do not support linear tiling with mipmaps
-	setupCmd->RecordImageBarrier(image,inputImageLayout,prosper::ImageLayout::TransferSrcOptimal);
-	auto imgRead = image.Copy(*setupCmd,copyCreateInfo);
-	setupCmd->RecordImageBarrier(image,prosper::ImageLayout::TransferSrcOptimal,inputImageLayout);
+	auto imgRead = image.shared_from_this();
+	if(copyCreateInfo.format != dstFormat)
+	{
+		copyCreateInfo.format = dstFormat;
+		copyCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
+		copyCreateInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
+		copyCreateInfo.tiling = prosper::ImageTiling::Optimal; // Needs to be in optimal tiling because some GPUs do not support linear tiling with mipmaps
+		setupCmd->RecordImageBarrier(image,inputImageLayout,prosper::ImageLayout::TransferSrcOptimal);
+		imgRead = image.Copy(*setupCmd,copyCreateInfo);
+		setupCmd->RecordImageBarrier(image,prosper::ImageLayout::TransferSrcOptimal,inputImageLayout);
+	}
 
 	// Copy the image data to a buffer
 	uint64_t size = 0;

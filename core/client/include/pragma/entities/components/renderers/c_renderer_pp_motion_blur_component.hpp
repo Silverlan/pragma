@@ -25,29 +25,9 @@ namespace pragma
 		Medium,
 		High
 	};
-
-	struct DLLCLIENT MotionBlurTemporalData
-	{
-		struct PoseData
-		{
-			Mat4 matrix;
-			umath::Transform pose;
-			std::shared_ptr<prosper::IBuffer> boneBuffer;
-			std::shared_ptr<prosper::IDescriptorSetGroup> boneDsg;
-		};
-		std::unordered_map<const BaseEntity*,PoseData> prevModelMatrices;
-		std::unordered_map<const BaseEntity*,PoseData> curModelMatrices;
-		double lastTick = 0.0;
-	};
-
-#pragma pack(push,1)
-	struct DLLCLIENT MotionBlurData
-	{
-		Vector4 linearCameraVelocity;
-		Vector4 angularCameraVelocity;
-	};
-#pragma pack(pop)
 	
+	class CMotionBlurDataComponent;
+	struct MotionBlurTemporalData;
 	class DLLCLIENT CRendererPpMotionBlurComponent final
 		: public CRendererPpBaseComponent
 	{
@@ -63,8 +43,6 @@ namespace pragma
 
 		void SetAutoUpdateMotionData(bool updateMotionPerFrame);
 		void UpdateMotionBlurData();
-		void UpdatePoses();
-		void DoUpdatePoses(prosper::IPrimaryCommandBuffer &cmd);
 
 		void SetMotionBlurIntensity(float intensity);
 		float GetMotionBlurIntensity() const;
@@ -76,18 +54,17 @@ namespace pragma
 		const std::shared_ptr<prosper::RenderTarget> &GetRenderTarget() const;
 	private:
 		virtual void DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo) override;
+		void DoUpdatePoses(const CMotionBlurDataComponent &motionBlurDataC,const MotionBlurTemporalData &motionBlurData,prosper::IPrimaryCommandBuffer &cmd);
 		void RecordVelocityPass(const util::DrawSceneInfo &drawSceneInfo);
 		void ExecuteVelocityPass(const util::DrawSceneInfo &drawSceneInfo);
 		void RenderPostProcessing(const util::DrawSceneInfo &drawSceneInfo);
 		void ReloadVelocityTexture();
-		util::WeakHandle<prosper::Shader> m_velocityShader {};
 		std::shared_ptr<prosper::ISwapCommandBufferGroup> m_swapCmd = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_velocityTexDsg;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_motionBlurDataDsg;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_genericBoneDsg;
 		std::shared_ptr<prosper::IBuffer> m_motionBlurDataBuffer;
 		std::shared_ptr<prosper::RenderTarget> m_renderTarget;
-		MotionBlurTemporalData m_motionBlurData {};
 #if MOTION_BLUR_DEBUG_ELEMENT_ENABLED == 1
 		WIHandle m_debugTex;
 #endif
@@ -96,7 +73,7 @@ namespace pragma
 		bool m_valid = false;
 		bool m_autoUpdateMotionData = true;
 		bool m_motionDataUpdateRequired = false;
-		bool m_poseUpdateScheduled = false;
+		size_t m_lastMotionDataBufferUpdateIndex = std::numeric_limits<size_t>::max();
 	};
 };
 

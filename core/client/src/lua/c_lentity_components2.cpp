@@ -13,6 +13,7 @@
 #include "pragma/entities/components/c_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
 #include "pragma/entities/components/c_optical_camera_component.hpp"
+#include "pragma/entities/components/c_motion_blur_data_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_fog_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_dof_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_bloom_component.hpp"
@@ -82,12 +83,16 @@ void RegisterLuaEntityComponents2(lua_State *l,luabind::module_ &entsMod)
 	defPpMotionBlur.def("SetMotionBlurQuality",&pragma::CRendererPpMotionBlurComponent::SetMotionBlurQuality);
 	defPpMotionBlur.def("GetMotionBlurQuality",&pragma::CRendererPpMotionBlurComponent::GetMotionBlurQuality);
 	defPpMotionBlur.def("UpdateMotionBlurData",&pragma::CRendererPpMotionBlurComponent::UpdateMotionBlurData);
-	defPpMotionBlur.def("UpdatePoses",&pragma::CRendererPpMotionBlurComponent::UpdatePoses);
 	entsMod[defPpMotionBlur];
 
 	auto defPpVol =
 		pragma::lua::create_entity_component_class<pragma::CRendererPpVolumetricComponent,pragma::BaseEntityComponent>("RendererPpVolumetricComponent");
 	entsMod[defPpVol];
+
+	auto defMotionBlurData =
+		pragma::lua::create_entity_component_class<pragma::CMotionBlurDataComponent,pragma::BaseEntityComponent>("MotionBlurDataComponent");
+	defMotionBlurData.def("UpdatePoses",&pragma::CMotionBlurDataComponent::UpdateEntityPoses);
+	entsMod[defMotionBlurData];
 
 	// --template-component-register-location
 }

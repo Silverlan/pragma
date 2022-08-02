@@ -75,7 +75,9 @@ void ShaderPPHDR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 
 	auto &settings = client->GetGameWorldShaderSettings();
 	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::FragmentBit,0u /* constantId */,static_cast<uint32_t>(settings.bloomEnabled));
-	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::FragmentBit,1u /* constantId */,static_cast<uint32_t>(settings.fxaaEnabled));
+
+	auto fxaaEnabled = (settings.fxaaEnabled && static_cast<Pipeline>(pipelineIdx) != Pipeline::HDR);
+	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::FragmentBit,1u /* constantId */,static_cast<uint32_t>(fxaaEnabled));
 }
 
 bool ShaderPPHDR::RecordDraw(

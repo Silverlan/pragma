@@ -292,7 +292,6 @@ void CRendererPpMotionBlurComponent::DoUpdatePoses(const CMotionBlurDataComponen
 		return;
 	m_lastMotionDataBufferUpdateIndex = lastUpdateIdx;
 
-	std::cout<<"DoUpdatePoses"<<c_engine->GetFrameTime()<<std::endl;
 	auto *velShader = pragma::get_velocity_buffer_shader();
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();

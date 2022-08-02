@@ -283,10 +283,14 @@ void CEngine::RegisterConsoleCommands()
 		sortedIndices.reserve(textures.size());
 
 		auto fGetImageSize = [](prosper::IImage &img) -> prosper::DeviceSize {
-			auto *buf = img.GetMemoryBuffer();
-			if(buf)
-				return buf->GetSize();
-			return 0;
+			auto size = img.GetStorageSize();
+			if(size.has_value())
+			{
+				auto *buf = img.GetMemoryBuffer();
+				if(buf)
+					size = buf->GetSize();
+			}
+			return size.has_value() ? *size : 0;
 		};
 
 		for(auto &tex : textures)

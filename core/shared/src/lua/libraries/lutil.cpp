@@ -25,6 +25,7 @@
 #include "pragma/lua/converters/pair_converter_t.hpp"
 #include <pragma/game/game.h>
 #include "luasystem.h"
+#include "pragma/util/util_python.hpp"
 #include "pragma/game/damageinfo.h"
 #include "pragma/model/model.h"
 #include "pragma/physics/raytraces.h"
@@ -443,6 +444,7 @@ void Lua::util::register_shared_generic(luabind::module_ &mod)
 	});
 	mod[defZip];
 }
+
 void Lua::util::register_shared(luabind::module_ &mod)
 {
 	register_shared_generic(mod);
@@ -454,10 +456,45 @@ void Lua::util::register_shared(luabind::module_ &mod)
 		luabind::def("read_scene_file",Lua::util::read_scene_file)
 	];
 }
+static Lua::mult<bool,Lua::opt<std::string>> exec_python(lua_State *l,const std::string &fileName,const std::vector<std::string> &args)
+{
+	std::vector<const char*> cargs;
+	cargs.reserve(args.size());
+	for(auto &arg : args)
+		cargs.push_back(arg.c_str());
+	auto fullPath = filemanager::get_canonicalized_path(fileName);
+	auto res = pragma::python::exec(fullPath.c_str(),cargs.size(),cargs.data());
+	if(res == false)
+	{
+		auto err = pragma::python::get_last_error();
+		if(!err.has_value())
+			err = "Unknown Error";
+		return luabind::object{l,std::pair<bool,std::string>{res,*err}};
+	}
+	return luabind::object{l,res};
+}
+static Lua::mult<bool,Lua::opt<std::string>> exec_python(lua_State *l,const std::string &fileName) {return exec_python(l,fileName,{});}
 void Lua::util::register_library(lua_State *l)
 {
-	auto utilMod = luabind::module(l,"util");
+	auto pythonMod = luabind::module(l,"python");
+	pythonMod[
+		luabind::def("run",+[](lua_State *l,const std::string &code) -> Lua::mult<bool,Lua::opt<std::string>> {
+			auto res = pragma::python::run(code.c_str());
+			if(res == false)
+			{
+				auto err = pragma::python::get_last_error();
+				if(!err.has_value())
+					err = "Unknown Error";
+				return luabind::object{l,std::pair<bool,std::string>{res,*err}};
+			}
+			return luabind::object{l,res};
+		}),
+		luabind::def("exec",static_cast<Lua::mult<bool,Lua::opt<std::string>>(*)(lua_State*,const std::string&)>(&exec_python)),
+		luabind::def("exec",static_cast<Lua::mult<bool,Lua::opt<std::string>>(*)(lua_State*,const std::string&,const std::vector<std::string>&)>(&exec_python)),
+		luabind::def("init_blender",&pragma::python::init_blender)
+	];
 
+	auto utilMod = luabind::module(l,"util");
 	auto retargetMod = luabind::module(l,"retarget");
 	auto defRetargetData = luabind::class_<util::retarget::RetargetData>("RetargetData");
 	auto defRetargetFlexData = luabind::class_<util::retarget::RetargetFlexData>("RetargetFlexData");

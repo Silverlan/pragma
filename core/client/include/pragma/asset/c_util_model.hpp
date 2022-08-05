@@ -86,7 +86,7 @@ namespace pragma::asset
 	DLLCLIENT bool import_texture(std::unique_ptr<ufile::IFile> &&f,const TextureImportInfo &texInfo,const std::string &outputPath,std::string &outErrMsg);
 	DLLCLIENT bool import_texture(prosper::IImage &img,const TextureImportInfo &texInfo,const std::string &outputPath,std::string &outErrMsg);
 
-	DLLCLIENT bool export_model(Model &model,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &modelName={});
+	DLLCLIENT bool export_model(Model &model,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &modelName={},std::string *optOutPath=nullptr);
 	DLLCLIENT bool export_animation(Model &model,const std::string &animName,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &modelName={});
 	DLLCLIENT bool export_map(const std::string &mapName,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<MapExportInfo> &mapExportInfo={});
 	DLLCLIENT bool export_texture(

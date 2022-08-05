@@ -82,11 +82,11 @@ namespace pragma::asset
 			CameraList cameras {};
 		};
 
-		static bool Export(const SceneDesc &sceneDesc,const std::string &outputFileName,const ModelExportInfo &exportInfo,std::string &outErrMsg);
-		static bool Export(const SceneDesc &sceneDesc,const std::string &outputFileName,const std::string &animName,const ModelExportInfo &exportInfo,std::string &outErrMsg);
+		static bool Export(const SceneDesc &sceneDesc,const std::string &outputFileName,const ModelExportInfo &exportInfo,std::string &outErrMsg,std::string *optOutPath=nullptr);
+		static bool Export(const SceneDesc &sceneDesc,const std::string &outputFileName,const std::string &animName,const ModelExportInfo &exportInfo,std::string &outErrMsg,std::string *optOutPath=nullptr);
 
-		static bool Export(::Model &model,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &outputFileName={});
-		static bool Export(::Model &model,const std::string &animName,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &outputFileName={});
+		static bool Export(::Model &model,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &outputFileName={},std::string *optOutPath=nullptr);
+		static bool Export(::Model &model,const std::string &animName,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &outputFileName={},std::string *optOutPath=nullptr);
 	private:
 		GLTFWriter(const SceneDesc &sceneDesc,const ModelExportInfo &exportInfo,const std::optional<std::string> &animName);
 		using BufferIndex = uint32_t;
@@ -143,7 +143,7 @@ namespace pragma::asset
 		};
 		Vector3 TransformPos(const Vector3 &v) const;
 
-		bool Export(std::string &outErrMsg,const std::string &outputFileName);
+		bool Export(std::string &outErrMsg,const std::string &outputFileName,std::string *optOutPath=nullptr);
 		void GenerateUniqueModelExportList();
 		void WriteSkeleton(ModelExportData &mdlData);
 		void WriteAnimations(::Model &mdl);

@@ -23,10 +23,13 @@ extern DLLCLIENT CGame *c_game;
 void Lua::Model::Client::Export(lua_State *l,::Model &mdl,const pragma::asset::ModelExportInfo &exportInfo)
 {
 	std::string errMsg;
-	auto result = pragma::asset::export_model(mdl,exportInfo,errMsg);
+	std::string outputPath;
+	auto result = pragma::asset::export_model(mdl,exportInfo,errMsg,{},&outputPath);
 	Lua::PushBool(l,result);
 	if(result == false)
 		Lua::PushString(l,errMsg);
+	else
+		Lua::PushString(l,outputPath);
 }
 void Lua::Model::Client::ExportAnimation(lua_State *l,::Model &mdl,const std::string &animName,const pragma::asset::ModelExportInfo &exportInfo)
 {

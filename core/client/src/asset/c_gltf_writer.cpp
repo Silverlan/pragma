@@ -40,26 +40,26 @@
 
 extern DLLCLIENT ClientState *client;
 
-bool pragma::asset::GLTFWriter::Export(const SceneDesc &sceneDesc,const std::string &outputFileName,const pragma::asset::ModelExportInfo &exportInfo,std::string &outErrMsg)
+bool pragma::asset::GLTFWriter::Export(const SceneDesc &sceneDesc,const std::string &outputFileName,const pragma::asset::ModelExportInfo &exportInfo,std::string &outErrMsg,std::string *optOutPath)
 {
 	GLTFWriter writer {sceneDesc,exportInfo,std::optional<std::string>{}};
-	return writer.Export(outErrMsg,outputFileName);
+	return writer.Export(outErrMsg,outputFileName,optOutPath);
 }
-bool pragma::asset::GLTFWriter::Export(const SceneDesc &sceneDesc,const std::string &outputFileName,const std::string &animName,const pragma::asset::ModelExportInfo &exportInfo,std::string &outErrMsg)
+bool pragma::asset::GLTFWriter::Export(const SceneDesc &sceneDesc,const std::string &outputFileName,const std::string &animName,const pragma::asset::ModelExportInfo &exportInfo,std::string &outErrMsg,std::string *optOutPath)
 {
 	GLTFWriter writer {sceneDesc,exportInfo,animName};
-	return writer.Export(outErrMsg,outputFileName);
+	return writer.Export(outErrMsg,outputFileName,optOutPath);
 }
 
-bool pragma::asset::GLTFWriter::Export(::Model &model,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &outputFileName)
+bool pragma::asset::GLTFWriter::Export(::Model &model,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &outputFileName,std::string *optOutPath)
 {
 	auto fileName = outputFileName.has_value() ? *outputFileName : model.GetName();
-	return Export({{model}},fileName,exportInfo,outErrMsg);
+	return Export({{model}},fileName,exportInfo,outErrMsg,optOutPath);
 }
-bool pragma::asset::GLTFWriter::Export(::Model &model,const std::string &animName,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &outputFileName)
+bool pragma::asset::GLTFWriter::Export(::Model &model,const std::string &animName,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &outputFileName,std::string *optOutPath)
 {
 	auto fileName = outputFileName.has_value() ? *outputFileName : model.GetName();
-	return Export({{model}},fileName,animName,exportInfo,outErrMsg);
+	return Export({{model}},fileName,animName,exportInfo,outErrMsg,optOutPath);
 }
 
 pragma::asset::GLTFWriter::GLTFWriter(const SceneDesc &sceneDesc,const ModelExportInfo &exportInfo,const std::optional<std::string> &animName)
@@ -308,7 +308,7 @@ void pragma::asset::GLTFWriter::ToGLTFPose(const umath::Transform &pose,std::vec
 	outRot = {rot.x,rot.y,rot.z,rot.w};
 }
 
-bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string &outputFileName)
+bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string &outputFileName,std::string *optOutPath)
 {
 	// HACK: If the model was just ported, we need to make sure the material and textures are in order by invoking the
 	// resource watcher (in case they have been changed)
@@ -868,7 +868,10 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 		ext = "glb";
 
 	auto fileName = ufile::get_file_from_filename(name) +'.' +ext;
+
 	auto writePath = FileManager::GetProgramPath() +'/' +outputPath +fileName;
+	if(optOutPath)
+		*optOutPath = outputPath +fileName;
 	tinygltf::TinyGLTF writer {};
 	std::string err;
 	std::string warn;

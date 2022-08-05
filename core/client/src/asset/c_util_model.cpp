@@ -1542,9 +1542,9 @@ bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo 
 	return true;
 }
 
-bool pragma::asset::export_model(::Model &mdl,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &modelName)
+bool pragma::asset::export_model(::Model &mdl,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &modelName,std::string *optOutPath)
 {
-	return GLTFWriter::Export(mdl,exportInfo,outErrMsg,modelName);
+	return GLTFWriter::Export(mdl,exportInfo,outErrMsg,modelName,optOutPath);
 }
 bool pragma::asset::export_animation(Model &mdl,const std::string &animName,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &modelName)
 {

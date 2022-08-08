@@ -137,6 +137,13 @@ jobs:
           7z x '${{ matrix.config.build_dir }}/install/modules/unirender/cycles/UniRender_Cycles.zip' -aos -y -o'${{ matrix.config.build_dir }}/install/modules/unirender/cycles/'
           rm -f '${{ matrix.config.build_dir }}/install/modules/unirender/cycles/UniRender_Cycles.zip'
         
+      - name: Generate release zip
+        shell: bash
+        run: |
+          7z a pragma.zip ".\${{ matrix.config.build_dir }}/install/**"
+          rm -rf ".\${{ matrix.config.build_dir }}/install"
+          mkdir -p ".\${{ matrix.config.build_dir }}/install"
+        
       - name: Build boost (with cache)
         uses: Silverlan/common_actions/build_cached_boost@main
         
@@ -208,8 +215,11 @@ jobs:
             echo "Building UDM library..."
             curDir="$(pwd)"
             cd "${{ env.GA_ROOT_DIR }}"
+            mv "./pragma.zip" "./pragma_tmp.zip"
             curl -LJO "https://pragma-engine.com/git/github_actions/pragma.zip"
             7z x pragma.zip -aos -y
+            rm -rf "./pragma.zip"
+            mv "./pragma_tmp.zip" "./pragma.zip"
             cd "$curDir"
             
       #- name: Print all files
@@ -253,8 +263,11 @@ jobs:
           pre_build_cmd: |
             curDir="$(pwd)"
             cd "${{ env.GA_ROOT_DIR }}"
+            mv "./pragma.zip" "./pragma_tmp.zip"
             curl -LJO "https://pragma-engine.com/git/github_actions/pragma.zip"
             7z x pragma.zip -aos -y
+            rm -rf "./pragma.zip"
+            mv "./pragma_tmp.zip" "./pragma.zip"
             cd "$curDir"
             
             #echo "--ALL FILES START--"
@@ -262,6 +275,12 @@ jobs:
             #echo "--ALL FILES END--"
             # cp ./build/third_party_libs/libpng/pnglibconf.h ./third_party_libs/libpng/pnglibconf.h
             # cp ./build/third_party_libs/zlib/zconf.h ./third_party_libs/zlib/zconf.h
+            
+      - name: Clear disk space
+        shell: bash
+        run: |
+          find . -name "*.pdb" -type f -delete
+          find . -name "*.obj" -type f -delete
             
       - name: Run test
         shell: bash
@@ -294,7 +313,7 @@ jobs:
         run: |
           rm -rf "${{ matrix.config.build_dir }}/install/third_party_libs"
 
-      - name: Generate release zip
+      - name: Finalize release zip
         run: |
           7z a pragma.zip ".\${{ matrix.config.build_dir }}/install/**"
 

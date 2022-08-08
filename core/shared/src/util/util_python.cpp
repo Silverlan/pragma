@@ -19,6 +19,7 @@ struct IPythonWrapper final
 	bool(*run)(const char *code) = nullptr;
 	bool(*exec)(const char *fileName,uint32_t argc,const char **argv) = nullptr;
 	bool(*get_last_error)(std::string&) = nullptr;
+	void(*reload)() = nullptr;
 
 	bool valid() const {return m_bValid;}
 private:
@@ -32,7 +33,8 @@ IPythonWrapper::IPythonWrapper(util::Library &lib)
 	m_bValid = 
 		PR_PYTHON_FIND_SYMBOL(lib,run) &&
 		PR_PYTHON_FIND_SYMBOL(lib,exec) &&
-		PR_PYTHON_FIND_SYMBOL(lib,get_last_error);
+		PR_PYTHON_FIND_SYMBOL(lib,get_last_error) &&
+		PR_PYTHON_FIND_SYMBOL(lib,reload);
 }
 
 ////////////////
@@ -99,13 +101,13 @@ std::optional<std::string> pragma::python::get_last_error()
 	return wrapper->get_last_error(err) ? err : std::optional<std::string>{};
 }
 
+static auto g_blenderInitialized = false;
+static auto g_blenderInitSuccess = false;
 bool pragma::python::init_blender()
 {
-	static auto initialized = false;
-	static auto initSuccess = false;
-	if(initialized)
-		return initSuccess;
-	initialized = true;
+	if(g_blenderInitialized)
+		return g_blenderInitSuccess;
+	g_blenderInitialized = true;
 	auto programPath = util::Path::CreatePath(util::get_program_path());
 	auto scriptsPath = programPath +util::Path::CreatePath("modules/blender/3.2/scripts");
 	if(!util::set_env_variable("BLENDER_SYSTEM_SCRIPTS",scriptsPath.GetString().c_str()))
@@ -113,6 +115,16 @@ bool pragma::python::init_blender()
 	if(!run("import sys"))
 		return false;
 	auto sitePackagesPath = programPath +util::Path::CreatePath("modules/blender/site-packages");
-	initSuccess = run(("sys.path.append(\"" +sitePackagesPath.GetString() +"\")").c_str());
-	return initSuccess;
+	g_blenderInitSuccess = run(("sys.path.append(\"" +sitePackagesPath.GetString() +"\")").c_str());
+	return g_blenderInitSuccess;
+}
+
+void pragma::python::reload()
+{
+	auto *wrapper = get_py_wrapper();
+	if(!wrapper)
+		return;
+	wrapper->reload();
+	g_blenderInitialized = false;
+	g_blenderInitSuccess = false;
 }

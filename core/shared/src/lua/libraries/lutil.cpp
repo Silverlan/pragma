@@ -491,7 +491,8 @@ void Lua::util::register_library(lua_State *l)
 		}),
 		luabind::def("exec",static_cast<Lua::mult<bool,Lua::opt<std::string>>(*)(lua_State*,const std::string&)>(&exec_python)),
 		luabind::def("exec",static_cast<Lua::mult<bool,Lua::opt<std::string>>(*)(lua_State*,const std::string&,const std::vector<std::string>&)>(&exec_python)),
-		luabind::def("init_blender",&pragma::python::init_blender)
+		luabind::def("init_blender",&pragma::python::init_blender),
+		luabind::def("reload",&pragma::python::reload)
 	];
 
 	auto utilMod = luabind::module(l,"util");

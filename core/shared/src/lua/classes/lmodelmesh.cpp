@@ -174,6 +174,9 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("HasUvSet",+[](lua_State *l,::ModelSubMesh &mesh,const std::string &name) {
 		return mesh.GetUVSet(name) != nullptr;
 	});
+	classDef.def("HasVertexWeights",+[](lua_State *l,::ModelSubMesh &mesh) {
+		return mesh.GetVertexWeights().empty();
+	});
 	classDef.def("GetNormals",&Lua::ModelSubMesh::GetNormalMapping);
 	classDef.def("GetVertexWeights",&Lua::ModelSubMesh::GetVertexWeights);
 	classDef.def("AddTriangle",static_cast<void(*)(lua_State*,::ModelSubMesh&,const umath::Vertex&,const umath::Vertex&,const umath::Vertex&)>(&Lua::ModelSubMesh::AddTriangle));

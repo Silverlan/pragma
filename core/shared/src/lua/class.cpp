@@ -588,6 +588,14 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defImageBuffer.def("SetPixelValueHDR",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t,uint32_t,uint32_t,uint16_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t x,uint32_t y,uint32_t channel,uint16_t value) {
 		imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x,y)).SetValue(static_cast<uimg::Channel>(channel),value);
 	}));
+	defImageBuffer.def("SetPixelColor",static_cast<void(uimg::ImageBuffer::*)(uint32_t,uint32_t,const Vector4&)>(&uimg::ImageBuffer::SetPixelColor));
+	defImageBuffer.def("SetPixelColor",static_cast<void(uimg::ImageBuffer::*)(uimg::ImageBuffer::PixelIndex,const Vector4&)>(&uimg::ImageBuffer::SetPixelColor));
+	defImageBuffer.def("SetPixelColor",+[](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t x,uint32_t y,const Color &color) {
+		imgBuffer.SetPixelColor(x,y,color.ToVector4());
+	});
+	defImageBuffer.def("SetPixelColor",+[](lua_State *l,uimg::ImageBuffer &imgBuffer,uimg::ImageBuffer::PixelIndex pixelIdx,const Color &color) {
+		imgBuffer.SetPixelColor(pixelIdx,color.ToVector4());
+	});
 	defImageBuffer.def("CalcLuminance",static_cast<void(*)(lua_State*,uimg::ImageBuffer&)>([](lua_State *l,uimg::ImageBuffer &imgBuffer) {
 		float avgLuminance,minLuminance,maxLuminance,logAvgLuminance;
 		Vector3 avgIntensity;

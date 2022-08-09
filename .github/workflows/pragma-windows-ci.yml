@@ -316,6 +316,10 @@ jobs:
       - name: Finalize release zip
         run: |
           7z a pragma.zip ".\${{ matrix.config.build_dir }}/install/**"
+          7z d pragma.zip .git
+          7z d pragma.zip .gitignore
+          7z d pragma.zip addons/filmmaker/.git
+          7z d pragma.zip addons/filmmaker/.gitignore
 
       #- name: Publish release
       #  uses: softprops/action-gh-release@v1

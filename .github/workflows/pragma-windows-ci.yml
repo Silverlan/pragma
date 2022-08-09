@@ -282,13 +282,13 @@ jobs:
           find . -name "*.pdb" -type f -delete
           find . -name "*.obj" -type f -delete
             
-      - name: Run test
-        shell: bash
-        run: |
-          curDir="$(pwd)"
-          cd ${{ matrix.config.build_dir }}/install
-          ./pragma_server +exit
-          cd "$curDir"
+      #- name: Run test
+      #  shell: bash
+      #  run: |
+      #    curDir="$(pwd)"
+      #    cd ${{ matrix.config.build_dir }}/install
+      #    ./pragma_server +exit
+      #    cd "$curDir"
           
       #- uses: actions/upload-artifact@v2.2.4
       #  with:

@@ -579,7 +579,7 @@ static std::shared_ptr<Model> import_model(ufile::IFile *optFile,const std::stri
 			auto &baseColorFactor = gltfMat.pbrMetallicRoughness.baseColorFactor;
 			if(baseColorFactor != std::vector<double>{1.0,1.0,1.0,1.0})
 			{
-				dataBlock->AddValue("color","color",
+				dataBlock->AddValue("color","color_factor",
 					std::to_string(baseColorFactor.at(0) *255.f) +' ' +
 					std::to_string(baseColorFactor.at(1) *255.f) +' ' +
 					std::to_string(baseColorFactor.at(2) *255.f) +' ' +

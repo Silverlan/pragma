@@ -655,20 +655,54 @@ static std::shared_ptr<Model> import_model(ufile::IFile *optFile,const std::stri
 
 	auto &gltfMeshes = gltfMdl.meshes;
 	uint32_t absUnnamedFcIdx = 0;
-	std::vector<std::optional<std::string>> nodeMeshNames;
-	nodeMeshNames.resize(gltfMeshes.size());
+	struct NodeMeshData
+	{
+		std::optional<std::string> name;
+		umath::ScaledTransform pose;
+	};
+	std::vector<NodeMeshData> nodeMeshDatas;
+	nodeMeshDatas.resize(gltfMeshes.size());
 	for(auto &node : gltfMdl.nodes)
 	{
-		if(node.mesh >= nodeMeshNames.size() || node.name.empty())
+		if(node.mesh >= nodeMeshDatas.size() || node.name.empty())
 			continue;
-		nodeMeshNames[node.mesh] = node.name;
+		umath::ScaledTransform pose {};
+		if(node.translation.size() == 3)
+		{
+			pose.SetOrigin(TransformPos(Vector3{
+				static_cast<float>(node.translation[0]),
+				static_cast<float>(node.translation[1]),
+				static_cast<float>(node.translation[2])
+			}));
+		}
+		if(node.rotation.size() == 4)
+		{
+			pose.SetRotation(Quat{
+				static_cast<float>(node.rotation[0]),
+				static_cast<float>(node.rotation[1]),
+				static_cast<float>(node.rotation[2]),
+				static_cast<float>(node.rotation[3])
+			});
+		}
+		if(node.scale.size() == 3)
+		{
+			pose.SetScale(TransformPos(Vector3{
+				static_cast<float>(node.scale[0]),
+				static_cast<float>(node.scale[1]),
+				static_cast<float>(node.scale[2])
+			}));
+		}
+		nodeMeshDatas[node.mesh] = {
+			node.name,pose	
+		};
 	}
 	for(uint32_t meshIdx = 0; auto &gltfMesh : gltfMeshes)
 	{
 		auto mesh = c_game->CreateModelMesh();
 		std::string name;
-		if(nodeMeshNames[meshIdx].has_value())
-			name = *nodeMeshNames[meshIdx];
+		auto &nodeMeshData = nodeMeshDatas[meshIdx];
+		if(nodeMeshData.name.has_value())
+			name = *nodeMeshData.name;
 		else if(!gltfMesh.name.empty())
 			name = gltfMesh.name;
 		else
@@ -757,6 +791,15 @@ static std::shared_ptr<Model> import_model(ufile::IFile *optFile,const std::stri
 					v.uv = texCoordBufData->GetIndexedValue<Vector2>(i);
 				if(lightmapUvs)
 					(*lightmapUvs).at(i) = texCoordBufData1->GetIndexedValue<Vector2>(i);
+			}
+
+			if(nodeMeshData.pose != umath::ScaledTransform{})
+			{
+				for(auto &v : verts)
+				{
+					v.position = nodeMeshData.pose *v.position;
+					uvec::rotate(&v.normal,nodeMeshData.pose.GetRotation());
+				}
 			}
 
 			if(jointsBufData.has_value() && weightsBufData.has_value())

@@ -536,9 +536,9 @@ void CEngine::RegisterConsoleCommands()
 			}
 			return;
 		}
-		auto identifier = argv[0];
+		auto category = argv[0];
 		auto lan = argv[1];
-		auto category = argv[2];
+		auto identifier = argv[2];
 		auto text = argv[3];
 		Con::cout<<"Localizing '"<<identifier<<"' in category '"<<category<<"' for language '"<<lan<<"' as '"<<text<<"'..."<<Con::endl;
 		auto res = Locale::Localize(identifier,lan,category,text);
@@ -546,5 +546,5 @@ void CEngine::RegisterConsoleCommands()
 			Con::cout<<"Done!"<<Con::endl;
 		else
 			Con::cwar<<"WARNING: Localization failed!"<<Con::endl;
-	},ConVarFlags::None,"Adds the specified text to the localization files. Usage: locale_localize <textIdentifier> <language> <group> <localizedText>");
+	},ConVarFlags::None,"Adds the specified text to the localization files. Usage: locale_localize <group> <language> <textIdentifier> <localizedText>");
 }

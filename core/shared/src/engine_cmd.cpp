@@ -387,7 +387,7 @@ void Engine::RegisterConsoleCommands()
 		for(auto idx : similarElements)
 			Con::cout<<ids[idx]<<": "<<baseTexts[idx]<<Con::endl;
 		Con::cout<<Con::endl;
-	},ConVarFlags::None,"Reloads all localization files.");
+	},ConVarFlags::None,"Searches for the specified text in all currently loaded text strings.");
 
 	conVarMap.RegisterConCommand("asset_clear_unused_models",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		ClearUnusedAssets(pragma::asset::Type::Model,true);

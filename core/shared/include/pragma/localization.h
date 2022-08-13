@@ -54,6 +54,7 @@ public:
 	static const std::string &GetLanguage();
 	static const LanguageInfo *GetLanguageInfo();
 	static const std::unordered_map<std::string,LanguageInfo> &GetLanguages();
+	static std::unordered_map<std::string,util::Utf8String> &GetTexts();
 	static void Poll();
 	static std::string DetermineSystemLanguage();
 	static LoadResult LoadFile(const std::string &file,const std::string &lan,Localization &outLoc);

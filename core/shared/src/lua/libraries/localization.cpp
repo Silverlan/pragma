@@ -138,6 +138,7 @@ const Locale::LanguageInfo *Locale::GetLanguageInfo()
 		return nullptr;
 	return &it->second;
 }
+std::unordered_map<std::string,util::Utf8String> &Locale::GetTexts() {return m_localization.texts;}
 const std::unordered_map<std::string,Locale::LanguageInfo> &Locale::GetLanguages()
 {
 	if(g_languages.empty())

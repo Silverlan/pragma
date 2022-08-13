@@ -364,6 +364,31 @@ void Engine::RegisterConsoleCommands()
 		Locale::ReloadFiles();
 	},ConVarFlags::None,"Reloads all localization files.");
 
+	conVarMap.RegisterConCommand("loc_find",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		if(argv.empty())
+		{
+			Con::cwar<<"WARNING: No argument specified!"<<Con::endl;
+			return;
+		}
+		auto &texts = Locale::GetTexts();
+		std::vector<std::string> baseTexts;
+		std::vector<std::string> ids;
+		baseTexts.reserve(texts.size());
+		ids.reserve(texts.size());
+		for(auto &pair : texts)
+		{
+			ids.push_back(pair.first);
+			baseTexts.push_back(pair.second.cpp_str());
+		}
+		std::vector<size_t> similarElements {};
+		std::vector<float> similarities {};
+		ustring::gather_similar_elements(argv.front(),baseTexts,similarElements,6,&similarities);
+		Con::cout<<"Found "<<similarElements.size()<<" similar matches:"<<Con::endl;
+		for(auto idx : similarElements)
+			Con::cout<<ids[idx]<<": "<<baseTexts[idx]<<Con::endl;
+		Con::cout<<Con::endl;
+	},ConVarFlags::None,"Reloads all localization files.");
+
 	conVarMap.RegisterConCommand("asset_clear_unused_models",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		ClearUnusedAssets(pragma::asset::Type::Model,true);
 	},ConVarFlags::None,"Clears all unused models from memory.");

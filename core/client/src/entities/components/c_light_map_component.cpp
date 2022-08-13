@@ -144,7 +144,7 @@ void CLightMapComponent::InitializeFromMaterial()
 		if(!m_lightMapMaterial)
 			return nullptr;
 		auto *map = m_lightMapMaterial->GetTextureInfo(identifier);
-		if(!map)
+		if(!map || !map->texture)
 			return nullptr;
 		auto *tex = static_cast<::Texture*>(map->texture.get());
 		return tex->GetVkTexture();

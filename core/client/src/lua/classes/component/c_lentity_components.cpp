@@ -744,6 +744,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCDecal.def("DebugDraw",static_cast<void(*)(lua_State*,pragma::CDecalComponent&,float)>([](lua_State *l,pragma::CDecalComponent &hEnt,float duration) {
 		hEnt.GetProjector().DebugDraw(duration);
 	}));
+	defCDecal.def("ApplyDecal",static_cast<bool(pragma::CDecalComponent::*)()>(&pragma::CDecalComponent::ApplyDecal));
 	entsMod[defCDecal];
 
 	auto defCExplosion = pragma::lua::create_entity_component_class<pragma::CExplosionComponent,pragma::BaseEnvExplosionComponent>("ExplosionComponent");

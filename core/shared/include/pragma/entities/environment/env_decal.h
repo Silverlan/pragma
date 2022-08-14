@@ -17,9 +17,12 @@ namespace pragma
 	{
 	public:
 		using BaseEntityComponent::BaseEntityComponent;
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 
+		virtual void SetSize(float size);
 		float GetSize() const;
+		virtual void SetMaterial(const std::string &mat);
 		const std::string &GetMaterial() const;
 		bool GetStartDisabled() const;
 	protected:

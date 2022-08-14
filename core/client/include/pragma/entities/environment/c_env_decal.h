@@ -65,11 +65,18 @@ namespace pragma
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 
+		virtual void SetSize(float size) override;
+		virtual void SetMaterial(const std::string &mat) override;
+
 		DecalProjector GetProjector() const;
 		bool ApplyDecal(const std::vector<DecalProjector::MeshData> &meshes);
-	protected:
 		bool ApplyDecal();
+
+		virtual void OnTick(double dt) override;
+	protected:
 		bool ApplyDecal(DecalProjector &projector,const std::vector<DecalProjector::MeshData> &meshes);
+
+		bool m_decalDirty = true;
 	};
 };
 

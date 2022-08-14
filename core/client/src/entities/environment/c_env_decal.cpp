@@ -9,6 +9,9 @@
 #include "pragma/entities/environment/c_env_decal.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_physics_component.hpp"
+#include "pragma/entities/components/c_static_bvh_cache_component.hpp"
+#include "pragma/entities/components/c_bvh_component.hpp"
+#include "pragma/entities/components/c_static_bvh_user_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/model/c_modelmesh.h"
@@ -130,6 +133,10 @@ bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas,st
 	GetOrthogonalBasis(forward,right,up);
 	auto &n = forward;
 	auto d = 0.f;
+
+	// umath::Plane p {n,d};
+	// p = GetPose() *p;
+	// c_game->DrawPlane(p.GetNormal(),p.GetDistance(),Color{0,0,255,64},12.f);
 
 	struct TriangleInfo
 	{
@@ -339,7 +346,25 @@ void CDecalComponent::OnEntitySpawn()
 	if(pSpriteComponent != nullptr)
 		pSpriteComponent->StartParticle();*/
 	if(m_startDisabled == false)
+		SetTickPolicy(pragma::TickPolicy::Always);
+}
+
+void CDecalComponent::OnTick(double dt)
+{
+	if(m_decalDirty)
 		ApplyDecal();
+	SetTickPolicy(pragma::TickPolicy::Never);
+}
+
+void CDecalComponent::SetSize(float size)
+{
+	BaseEnvDecalComponent::SetSize(size);
+
+}
+void CDecalComponent::SetMaterial(const std::string &mat)
+{
+	BaseEnvDecalComponent::SetMaterial(mat);
+
 }
 
 DecalProjector CDecalComponent::GetProjector() const
@@ -398,6 +423,7 @@ bool CDecalComponent::ApplyDecal(DecalProjector &projector,const std::vector<Dec
 
 bool CDecalComponent::ApplyDecal()
 {
+	m_decalDirty = false;
 	auto *mat = client->LoadMaterial(GetMaterial());
 	if(mat == nullptr)
 		return false;
@@ -409,77 +435,56 @@ bool CDecalComponent::ApplyDecal()
 	projectorAABB.first += projectorOrigin;
 	projectorAABB.second += projectorOrigin;
 
-	EntityIterator entIt {*c_game};
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CPhysicsComponent>>();
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
-	targetEnts.reserve(entIt.GetCount());
-	for(auto *ent : entIt)
-	{
-		auto physC = ent->GetComponent<CPhysicsComponent>();
-		if(physC->GetPhysicsType() != PHYSICSTYPE::STATIC)
-			continue;
-		// TODO: We can speed this up by using the BSP Tree for occlusion culling
-		auto &aabb = static_cast<CBaseEntity*>(ent)->GetAbsoluteRenderBounds();
+	// c_game->DrawBox(projectorAABB.first,projectorAABB.second,{},Color::Red,12.f);
 
-		if(umath::intersection::aabb_in_aabb(projectorAABB.first,projectorAABB.second,aabb.min,aabb.max) == false)
-			continue;
-
-		targetEnts.push_back(static_cast<CBaseEntity*>(ent));
-	}
-	if(targetEnts.empty())
-		return false;
-
+	pragma::BvhIntersectionInfo bvhIntersectInfo {};
 	std::vector<DecalProjector::MeshData> meshDatas {};
-	meshDatas.reserve(targetEnts.size());
-	for(auto *ent : targetEnts)
+	std::unordered_set<ModelSubMesh*> coveredMeshes;
+	auto findIntersectionMeshes = [&projectorAABB,&bvhIntersectInfo,&meshDatas,&coveredMeshes](const pragma::BaseBvhComponent &bvhC) {
+		if(!bvhC.IntersectionTestAabb(projectorAABB.first,projectorAABB.second,bvhIntersectInfo))
+		{
+			bvhIntersectInfo.Clear();
+			return;
+		}
+		for(auto idx : bvhIntersectInfo.primitives)
+		{
+			auto *meshInfo = bvhC.FindPrimitiveMeshInfo(idx);
+			if(!meshInfo)
+				continue;
+			if(coveredMeshes.find(meshInfo->mesh.get()) != coveredMeshes.end())
+				continue;
+			coveredMeshes.insert(meshInfo->mesh.get());
+			if(!meshInfo->entity || meshInfo->entity->HasComponent<CDecalComponent>())
+				continue;
+			meshDatas.push_back({});
+			auto &meshData = meshDatas.back();
+			meshData.pose = meshInfo->entity->GetPose();
+			meshData.subMeshes.push_back(meshInfo->mesh.get());
+		}
+		bvhIntersectInfo.Clear();
+	};
+
 	{
-		auto &pose = ent->GetPose();
-
-		auto renderC = ent->GetComponent<CRenderComponent>();
-		auto targetMeshes = renderC->GetLODMeshes();
-		if(ent->IsWorld())
+		EntityIterator entIt {*c_game};
+		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CStaticBvhCacheComponent>>();
+		for(auto *ent : entIt)
 		{
-			// If this is a world entity, we can do some optimizations
-			auto worldC = ent->GetComponent<CWorldComponent>();
-			auto bspTree = worldC.valid() ? worldC->GetBSPTree() : nullptr;
-			if(bspTree)
-			{
-				// Filter out meshes outside the projector AABB
-				auto leafNodes = bspTree->FindLeafNodesInAabb(projectorAABB.first,projectorAABB.second);
-				for(auto it=targetMeshes.begin();it!=targetMeshes.end();)
-				{
-					auto &mesh = *it;
-					auto clusterIndex = mesh->GetReferenceId();
-					if(clusterIndex == std::numeric_limits<uint32_t>::max())
-					{
-						++it;
-						continue;
-					}
-					auto itVisLeaf = std::find_if(leafNodes.begin(),leafNodes.end(),[&bspTree,clusterIndex](const util::BSPTree::Node *node) {
-						return bspTree->IsClusterVisible(node->cluster,clusterIndex);
-					});
-					if(itVisLeaf == leafNodes.end())
-					{
-						it = targetMeshes.erase(it);
-						continue;
-					}
-					++it;
-				}
-			}
+			auto bvhC = ent->GetComponent<pragma::CStaticBvhCacheComponent>();
+			findIntersectionMeshes(*bvhC);
 		}
+	}
 
-		meshDatas.push_back({});
-		auto &meshData = meshDatas.back();
-		uint32_t meshCount = 0u;
-		for(auto &mesh : targetMeshes)
-			meshCount += mesh->GetSubMeshCount();
-		meshData.subMeshes.reserve(meshCount);
-		for(auto &mesh : targetMeshes)
+	{
+		EntityIterator entIt {*c_game};
+		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CBvhComponent>>();
+		for(auto *ent : entIt)
 		{
-			for(auto &subMesh : mesh->GetSubMeshes())
-				meshData.subMeshes.push_back(subMesh.get());
+			auto bvhC = ent->GetComponent<pragma::CBvhComponent>();
+			auto userC = ent->GetComponent<pragma::CStaticBvhUserComponent>();
+			if(userC.valid() && userC->IsActive())
+				continue; // Already covered by static BVH cache
+			findIntersectionMeshes(*bvhC);
 		}
-		meshData.pose = ent->GetPose();
 	}
 	return ApplyDecal(projector,meshDatas);
 }

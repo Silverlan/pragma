@@ -66,6 +66,7 @@ namespace pragma
 			const Vector3 &origin,const Vector3 &dir,float minDist,float maxDist,
 			BvhHitInfo &outHitInfo
 		) const;
+		bool IntersectionTestAabb(const Vector3 &min,const Vector3 &max) const;
 		void SetStaticCache(BaseStaticBvhCacheComponent *staticCache);
 		virtual bool IsStaticBvh() const {return false;}
 

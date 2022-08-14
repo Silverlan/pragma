@@ -12,6 +12,7 @@
 #include "pragma/entities/components/base_static_bvh_cache_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include <mathutil/umath_geometry.hpp>
 #include <bvh/bvh.hpp>
 #include <bvh/triangle.hpp>
 #include <bvh/sweep_sah_builder.hpp>
@@ -44,6 +45,45 @@ namespace pragma
 };
 
 std::vector<BvhMeshRange> &pragma::get_bvh_mesh_ranges(BvhData &bvhData) {return bvhData.meshRanges;}
+
+static bool test_bvh_intersection_with_aabb(const pragma::BvhData &bvhData,const Vector3 &min,const Vector3 &max,size_t nodeIdx=0)
+{
+	auto &bvh = bvhData.bvh;
+	auto &node = bvh.nodes.get()[nodeIdx];
+	auto bbProxy = node.bounding_box_proxy();
+	auto bb = bbProxy.to_bounding_box();
+	constexpr auto epsilon = 0.001f;
+	Vector3 v0{umath::min(bb.min.values[0],bb.max.values[0]) -epsilon,umath::min(bb.min.values[1],bb.max.values[1]) -epsilon,umath::min(bb.min.values[2],bb.max.values[2]) -epsilon};
+	Vector3 v1{umath::max(bb.min.values[0],bb.max.values[0]) +epsilon,umath::max(bb.min.values[1],bb.max.values[1]) +epsilon,umath::max(bb.min.values[2],bb.max.values[2]) +epsilon};
+	auto intersect = umath::intersection::aabb_aabb(
+		min,max,
+		Vector3{umath::min(v0.x,v1.x) -epsilon,umath::min(v0.y,v1.y) -epsilon,umath::min(v0.z,v1.z) -epsilon},
+		Vector3{umath::max(v0.x,v1.x) +epsilon,umath::max(v0.y,v1.y) +epsilon,umath::max(v0.z,v1.z) +epsilon}
+	);
+	if(intersect == umath::intersection::Intersect::Outside)
+		return false;
+	if(node.is_leaf())
+	{
+		for(auto i=decltype(node.primitive_count){0u};i<node.primitive_count;++i)
+		{
+			auto primIdx = bvh.primitive_indices[node.first_child_or_primitive +i];
+			auto &prim = bvhData.primitives[primIdx];
+			auto p1 = prim.p1();
+			auto p2 = prim.p2();
+			auto res = umath::intersection::aabb_triangle(
+				min,max,
+				*reinterpret_cast<const Vector3*>(&prim.p0.values),
+				*reinterpret_cast<const Vector3*>(&p1.values),
+				*reinterpret_cast<const Vector3*>(&p2.values)
+			);
+			if(res)
+				return true;
+		}
+		return false;
+	}
+	return test_bvh_intersection_with_aabb(bvhData,min,max,node.first_child_or_primitive) ||
+		test_bvh_intersection_with_aabb(bvhData,min,max,node.first_child_or_primitive +1);
+}
 
 pragma::BvhData::BvhData()
 {}
@@ -206,6 +246,11 @@ std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(
 
 std::vector<BvhMeshRange> &BaseBvhComponent::GetMeshRanges() {return m_bvhData->meshRanges;}
 
+bool BaseBvhComponent::IntersectionTestAabb(const Vector3 &min,const Vector3 &max) const
+{
+	std::scoped_lock lock {m_bvhDataMutex};
+	return test_bvh_intersection_with_aabb(*m_bvhData,min,max);
+}
 bool BaseBvhComponent::IntersectionTest(
 	const Vector3 &origin,const Vector3 &dir,float minDist,float maxDist,
 	BvhHitInfo &outHitInfo

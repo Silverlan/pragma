@@ -22,6 +22,12 @@ namespace pragma
 		float v;
 	};
 
+	struct DLLNETWORK BvhIntersectionInfo
+	{
+		void Clear();
+		std::vector<size_t> primitives;
+	};
+
 	struct DLLNETWORK BvhMeshRange
 	{
 		BaseEntity *entity = nullptr;
@@ -67,8 +73,10 @@ namespace pragma
 			BvhHitInfo &outHitInfo
 		) const;
 		bool IntersectionTestAabb(const Vector3 &min,const Vector3 &max) const;
+		bool IntersectionTestAabb(const Vector3 &min,const Vector3 &max,BvhIntersectionInfo &outIntersectionInfo) const;
 		void SetStaticCache(BaseStaticBvhCacheComponent *staticCache);
 		virtual bool IsStaticBvh() const {return false;}
+		const BvhMeshRange *FindPrimitiveMeshInfo(size_t primIdx) const;
 
 		bool SetVertexData(const std::vector<BvhTriangle> &data);
 	protected:

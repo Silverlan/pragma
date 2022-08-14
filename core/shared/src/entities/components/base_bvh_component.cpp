@@ -46,7 +46,12 @@ namespace pragma
 
 std::vector<BvhMeshRange> &pragma::get_bvh_mesh_ranges(BvhData &bvhData) {return bvhData.meshRanges;}
 
-static bool test_bvh_intersection_with_aabb(const pragma::BvhData &bvhData,const Vector3 &min,const Vector3 &max,size_t nodeIdx=0)
+void pragma::BvhIntersectionInfo::Clear()
+{
+	primitives.clear();
+}
+
+static bool test_bvh_intersection_with_aabb(const pragma::BvhData &bvhData,const Vector3 &min,const Vector3 &max,size_t nodeIdx=0,BvhIntersectionInfo *outIntersectionInfo=nullptr)
 {
 	auto &bvh = bvhData.bvh;
 	auto &node = bvh.nodes.get()[nodeIdx];
@@ -77,12 +82,20 @@ static bool test_bvh_intersection_with_aabb(const pragma::BvhData &bvhData,const
 				*reinterpret_cast<const Vector3*>(&p2.values)
 			);
 			if(res)
+			{
+				if(outIntersectionInfo)
+				{
+					if(outIntersectionInfo->primitives.size() == outIntersectionInfo->primitives.capacity())
+						outIntersectionInfo->primitives.reserve(outIntersectionInfo->primitives.size() *1.75);
+					outIntersectionInfo->primitives.push_back(primIdx);
+				}
 				return true;
+			}
 		}
 		return false;
 	}
-	return test_bvh_intersection_with_aabb(bvhData,min,max,node.first_child_or_primitive) ||
-		test_bvh_intersection_with_aabb(bvhData,min,max,node.first_child_or_primitive +1);
+	return test_bvh_intersection_with_aabb(bvhData,min,max,node.first_child_or_primitive,outIntersectionInfo) ||
+		test_bvh_intersection_with_aabb(bvhData,min,max,node.first_child_or_primitive +1,outIntersectionInfo);
 }
 
 pragma::BvhData::BvhData()
@@ -246,8 +259,17 @@ std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(
 
 std::vector<BvhMeshRange> &BaseBvhComponent::GetMeshRanges() {return m_bvhData->meshRanges;}
 
+bool BaseBvhComponent::IntersectionTestAabb(const Vector3 &min,const Vector3 &max,BvhIntersectionInfo &outIntersectionInfo) const
+{
+	if(!m_bvhData || m_bvhData->primitives.empty())
+		return false;
+	std::scoped_lock lock {m_bvhDataMutex};
+	return test_bvh_intersection_with_aabb(*m_bvhData,min,max,0u,&outIntersectionInfo);
+}
 bool BaseBvhComponent::IntersectionTestAabb(const Vector3 &min,const Vector3 &max) const
 {
+	if(!m_bvhData || m_bvhData->primitives.empty())
+		return false;
 	std::scoped_lock lock {m_bvhDataMutex};
 	return test_bvh_intersection_with_aabb(*m_bvhData,min,max);
 }
@@ -256,7 +278,7 @@ bool BaseBvhComponent::IntersectionTest(
 	BvhHitInfo &outHitInfo
 ) const
 {
-	if(!m_bvhData)
+	if(!m_bvhData || m_bvhData->primitives.empty())
 		return false;
 	auto &traverser = m_bvhData->intersectorData->traverser;
 	auto &primitiveIntersector = m_bvhData->intersectorData->primitiveIntersector;
@@ -288,6 +310,17 @@ bool BaseBvhComponent::IntersectionTest(
 		return true;
 	}
 	return false;
+}
+
+const BvhMeshRange *BaseBvhComponent::FindPrimitiveMeshInfo(size_t primIdx) const
+{
+	BvhMeshRange search {};
+	search.start = primIdx *3;
+	auto it = std::upper_bound(m_bvhData->meshRanges.begin(),m_bvhData->meshRanges.end(),search);
+	if(it == m_bvhData->meshRanges.begin())
+		return nullptr;
+	--it;
+	return &*it;
 }
 
 std::optional<pragma::BvhHitInfo> BaseBvhComponent::IntersectionTest(

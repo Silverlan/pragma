@@ -41,7 +41,7 @@ void BaseEnvDecalComponent::RegisterMembers(pragma::EntityComponentManager &comp
 			static_cast<TSize(T::*)() const>(&T::GetSize)
 		>("size",1.f);
 		memberInfo.SetMin(0.f);
-		memberInfo.SetMax(500.f);
+		memberInfo.SetMax(50.f);
 		registerMember(std::move(memberInfo));
 	}
 }

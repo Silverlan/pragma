@@ -444,6 +444,28 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	auto defBvh = Lua::create_base_entity_component_class<pragma::BaseBvhComponent>("BaseBvhComponent");
 	defBvh.def("IntersectionTest",static_cast<std::optional<pragma::BvhHitInfo>(pragma::BaseBvhComponent::*)(const Vector3&,const Vector3&,float,float) const>(&pragma::BaseBvhComponent::IntersectionTest));
 	defBvh.def("IntersectionTestAabb",static_cast<bool(pragma::BaseBvhComponent::*)(const Vector3&,const Vector3&) const>(&pragma::BaseBvhComponent::IntersectionTestAabb));
+	defBvh.def("IntersectionTestAabb",
+		+[](const pragma::BaseBvhComponent &bvhC,const Vector3 &min,const Vector3 &max,bool returnPrimitives)
+		-> std::pair<bool,std::optional<std::vector<uint64_t>>>
+		{
+		if(!returnPrimitives)
+		{
+			auto res = bvhC.IntersectionTestAabb(min,max);
+			return std::pair<bool,std::optional<std::vector<uint64_t>>>{res,{}};
+		}
+		pragma::BvhIntersectionInfo info {};
+		auto res = bvhC.IntersectionTestAabb(min,max,info);
+		if(!res)
+			return std::pair<bool,std::optional<std::vector<uint64_t>>>{res,{}};
+		return std::pair<bool,std::optional<std::vector<uint64_t>>>{res,std::move(info.primitives)};
+	});
+	defBvh.def("FindPrimitiveMeshInfo",
+		+[](const pragma::BaseBvhComponent &bvhC,size_t primIdx) -> std::optional<std::pair<EntityHandle,std::shared_ptr<ModelSubMesh>>> {
+		auto *range = bvhC.FindPrimitiveMeshInfo(primIdx);
+		if(!range)
+			return std::optional<std::pair<EntityHandle,std::shared_ptr<ModelSubMesh>>>{};
+		return std::pair<EntityHandle,std::shared_ptr<ModelSubMesh>>{range->entity->GetHandle(),range->mesh};
+	});
 	defBvh.scope[defBvhHitInfo];
 	mod[defBvh];
 

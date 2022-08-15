@@ -69,6 +69,7 @@ static bool test_bvh_intersection_with_aabb(const pragma::BvhData &bvhData,const
 		return false;
 	if(node.is_leaf())
 	{
+		auto hasHit = false;
 		for(auto i=decltype(node.primitive_count){0u};i<node.primitive_count;++i)
 		{
 			auto primIdx = bvh.primitive_indices[node.first_child_or_primitive +i];
@@ -83,19 +84,25 @@ static bool test_bvh_intersection_with_aabb(const pragma::BvhData &bvhData,const
 			);
 			if(res)
 			{
-				if(outIntersectionInfo)
-				{
-					if(outIntersectionInfo->primitives.size() == outIntersectionInfo->primitives.capacity())
-						outIntersectionInfo->primitives.reserve(outIntersectionInfo->primitives.size() *1.75);
-					outIntersectionInfo->primitives.push_back(primIdx);
-				}
-				return true;
+				if(!outIntersectionInfo)
+					return true;
+				if(outIntersectionInfo->primitives.size() == outIntersectionInfo->primitives.capacity())
+					outIntersectionInfo->primitives.reserve(outIntersectionInfo->primitives.size() *1.75);
+				outIntersectionInfo->primitives.push_back(primIdx);
+				hasHit = true;
 			}
 		}
-		return false;
+		return hasHit;
 	}
-	return test_bvh_intersection_with_aabb(bvhData,min,max,node.first_child_or_primitive,outIntersectionInfo) ||
-		test_bvh_intersection_with_aabb(bvhData,min,max,node.first_child_or_primitive +1,outIntersectionInfo);
+	if(!outIntersectionInfo)
+	{
+		return test_bvh_intersection_with_aabb(bvhData,min,max,node.first_child_or_primitive,outIntersectionInfo) ||
+			test_bvh_intersection_with_aabb(bvhData,min,max,node.first_child_or_primitive +1,outIntersectionInfo);
+	}
+	// We have to visit both
+	auto a = test_bvh_intersection_with_aabb(bvhData,min,max,node.first_child_or_primitive,outIntersectionInfo);
+	auto b = test_bvh_intersection_with_aabb(bvhData,min,max,node.first_child_or_primitive +1,outIntersectionInfo);
+	return a || b;
 }
 
 pragma::BvhData::BvhData()

@@ -359,12 +359,14 @@ void CDecalComponent::OnTick(double dt)
 void CDecalComponent::SetSize(float size)
 {
 	BaseEnvDecalComponent::SetSize(size);
-
+	m_decalDirty = true;
+	SetTickPolicy(pragma::TickPolicy::Always);
 }
 void CDecalComponent::SetMaterial(const std::string &mat)
 {
 	BaseEnvDecalComponent::SetMaterial(mat);
-
+	m_decalDirty = true;
+	SetTickPolicy(pragma::TickPolicy::Always);
 }
 
 DecalProjector CDecalComponent::GetProjector() const

@@ -442,6 +442,7 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	});
 
 	auto defBvh = Lua::create_base_entity_component_class<pragma::BaseBvhComponent>("BaseBvhComponent");
+	defBvh.def("RebuildBvh",static_cast<void(pragma::BaseBvhComponent::*)()>(&pragma::BaseBvhComponent::RebuildBvh));
 	defBvh.def("IntersectionTest",static_cast<std::optional<pragma::BvhHitInfo>(pragma::BaseBvhComponent::*)(const Vector3&,const Vector3&,float,float) const>(&pragma::BaseBvhComponent::IntersectionTest));
 	defBvh.def("IntersectionTestAabb",static_cast<bool(pragma::BaseBvhComponent::*)(const Vector3&,const Vector3&) const>(&pragma::BaseBvhComponent::IntersectionTestAabb));
 	defBvh.def("IntersectionTestAabb",

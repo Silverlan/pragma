@@ -79,9 +79,9 @@ namespace pragma
 		const BvhMeshRange *FindPrimitiveMeshInfo(size_t primIdx) const;
 
 		bool SetVertexData(const std::vector<BvhTriangle> &data);
+		void RebuildBvh();
 	protected:
 		BaseBvhComponent(BaseEntity &ent);
-		void RebuildBvh();
 		std::shared_ptr<pragma::BvhData> RebuildBvh(
 			const std::vector<std::shared_ptr<ModelSubMesh>> &meshes,const std::vector<umath::ScaledTransform> *optPoses=nullptr,
 			const std::function<bool()> &fIsCancelled=nullptr,std::vector<size_t> *optOutMeshIndices=nullptr

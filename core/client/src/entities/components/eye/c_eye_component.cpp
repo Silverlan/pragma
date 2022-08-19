@@ -16,6 +16,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_component_manager_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/entities/components/component_member_flags.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
@@ -39,8 +40,28 @@ void CEyeComponent::RegisterMembers(pragma::EntityComponentManager &componentMan
 		auto memberInfo = create_component_member_info<
 			T,TViewTarget,
 			static_cast<void(T::*)(const Vector3&)>(&T::SetViewTarget),
-			static_cast<Vector3(T::*)() const>(&T::GetViewTarget)
+			[](const ComponentMemberInfo&,T &c,TViewTarget &value) {
+				value = c.m_viewTarget;
+			}
 		>("viewTarget",Vector3{});
+		memberInfo.SetFlag(pragma::ComponentMemberFlags::HideInInterface);
+		registerMember(std::move(memberInfo));
+	}
+
+	{
+		using TViewTarget = Vector3;
+		auto memberInfo = create_component_member_info<
+			T,TViewTarget,
+			[](const ComponentMemberInfo&,T &c,TViewTarget value) {
+				auto pose = c.GetEntity().GetPose();
+				value = pose.GetInverse() *value;
+				c.m_viewTarget = value;
+			},
+			[](const ComponentMemberInfo&,T &c,TViewTarget &value) {
+				auto pose = c.GetEntity().GetPose();
+				value = pose *c.m_viewTarget;
+			}
+		>("viewTargetWs",Vector3{});
 		registerMember(std::move(memberInfo));
 	}
 

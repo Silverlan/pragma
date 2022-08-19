@@ -92,6 +92,8 @@ void CEyeComponent::RegisterMembers(pragma::EntityComponentManager &componentMan
 			static_cast<void(T::*)(TLocalViewTargetFactor)>(&T::SetLocalViewTargetFactor),
 			static_cast<TLocalViewTargetFactor(T::*)() const>(&T::GetLocalViewTargetFactor)
 		>("localViewTargetFactor",1.f);
+		memberInfo.SetMin(0.f);
+		memberInfo.SetMax(1.f);
 		registerMember(std::move(memberInfo));
 	}
 }

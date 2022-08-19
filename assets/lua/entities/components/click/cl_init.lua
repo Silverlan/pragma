@@ -99,9 +99,9 @@ function ents.ClickComponent.get_ray_data(callback)
 	local cam = vpData.camera
 	if(util.is_valid(cam) == false) then return end
 	if(callback ~= nil) then callback(vpData,cam) end
-	local dir = cam:CalcRayDirection(Vector2(vpData.cursorPos.x /vpData.width,vpData.cursorPos.y /vpData.height))
-	local entCam = cam:GetEntity()
-	return entCam:GetPos() +entCam:GetForward() *cam:GetNearZ(),dir,vpData
+	local uv = Vector2(vpData.cursorPos.x /vpData.width,vpData.cursorPos.y /vpData.height)
+	local dir = cam:CalcRayDirection(uv)
+	return cam:GetPlanePoint(cam:GetNearZ(),uv),dir,vpData
 end
 function ents.ClickComponent.get_camera()
 	local vpData = get_viewport_data()

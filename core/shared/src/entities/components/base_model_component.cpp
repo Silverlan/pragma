@@ -50,7 +50,7 @@ void BaseModelComponent::RegisterMembers(pragma::EntityComponentManager &compone
 		using TModel = std::string;
 		auto memberInfo = create_component_member_info<
 			T,TModel,
-			+[](const ComponentMemberInfo &info,T &component,const TModel &mdl) {
+			[](const ComponentMemberInfo &info,T &component,const TModel &mdl) {
 				component.SetModel(mdl);
 			},
 			static_cast<TModel(T::*)() const>(&T::GetModelName)

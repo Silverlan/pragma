@@ -64,10 +64,10 @@ void BaseEnvLightComponent::RegisterMembers(pragma::EntityComponentManager &comp
 		using TCastShadows = bool;
 		auto memberInfo = create_component_member_info<
 			T,TCastShadows,
-			+[](const ComponentMemberInfo&,T &c,bool castShadows) {
+			[](const ComponentMemberInfo&,T &c,bool castShadows) {
 				c.SetShadowType(castShadows ? ShadowType::Full : ShadowType::None);
 			},
-			+[](const ComponentMemberInfo&,T &c,TCastShadows &value) {
+			[](const ComponentMemberInfo&,T &c,TCastShadows &value) {
 				value = c.GetShadowType() != ShadowType::None;
 			}
 		>("castShadows",true);

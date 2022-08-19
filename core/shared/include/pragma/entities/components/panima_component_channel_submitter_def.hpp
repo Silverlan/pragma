@@ -8,6 +8,7 @@
 #define __PANIMA_COMPONENT_CHANNEL_SUBMITTER_DEF_HPP__
 
 #include <panima/types.hpp>
+#include <panima/channel.hpp>
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/components/panima_component_channel_submitter.hpp"
 

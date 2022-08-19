@@ -5,6 +5,7 @@
  * Copyright (c) 2021 Silverlan
  */
 
+#include "stdafx_shared.h"
 #include "pragma/physics/raycast_filter.hpp"
 #include "pragma/physics/raytraces.h"
 

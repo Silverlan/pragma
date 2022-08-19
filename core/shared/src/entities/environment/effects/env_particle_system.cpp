@@ -25,10 +25,10 @@ void BaseEnvParticleSystemComponent::RegisterMembers(pragma::EntityComponentMana
 		using TParticleSystem = std::string;
 		auto memberInfo = create_component_member_info<
 			T,TParticleSystem,
-			+[](const ComponentMemberInfo&,T &c,TParticleSystem systemName) {
+			[](const ComponentMemberInfo&,T &c,TParticleSystem systemName) {
 				c.SetParticleSystem(systemName);
 			},
-			+[](const ComponentMemberInfo&,T &c,TParticleSystem &value) {
+			[](const ComponentMemberInfo&,T &c,TParticleSystem &value) {
 				value = c.GetParticleSystem();
 			}
 		>("particleSystem","");
@@ -38,10 +38,10 @@ void BaseEnvParticleSystemComponent::RegisterMembers(pragma::EntityComponentMana
 		using TParticleSystemFile = std::string;
 		auto memberInfo = create_component_member_info<
 			T,TParticleSystemFile,
-			+[](const ComponentMemberInfo&,T &c,TParticleSystemFile fileName) {
+			[](const ComponentMemberInfo&,T &c,TParticleSystemFile fileName) {
 				c.SetParticleFile(fileName);
 			},
-			+[](const ComponentMemberInfo&,T &c,TParticleSystemFile &value) {
+			[](const ComponentMemberInfo&,T &c,TParticleSystemFile &value) {
 				value = c.GetParticleFile();
 			}
 		>("particleSystemFile","",AttributeSpecializationType::File);

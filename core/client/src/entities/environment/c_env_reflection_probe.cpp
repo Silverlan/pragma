@@ -261,11 +261,11 @@ void CReflectionProbeComponent::RegisterMembers(pragma::EntityComponentManager &
 		using TMaterial = std::string;
 		auto memberInfo = create_component_member_info<
 			T,TMaterial,
-			+[](const ComponentMemberInfo &info,T &component,const TMaterial &value) {
+			[](const ComponentMemberInfo &info,T &component,const TMaterial &value) {
 				component.SetCubemapIBLMaterialFilePath(value);
 				component.LoadIBLReflectionsFromFile();
 			},
-			+[](const ComponentMemberInfo &info,T &component,TMaterial &value) {
+			[](const ComponentMemberInfo &info,T &component,TMaterial &value) {
 				auto path = util::Path::CreateFile(component.GetCubemapIBLMaterialFilePath());
 				path.PopFront();
 				value = path.GetString();

@@ -1963,7 +1963,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 	});
 	modUdm[cdAssetData];
 	pragma::lua::define_custom_constructor<::udm::AssetData,
-		+[](::udm::LinkedPropertyWrapper &prop,const std::string &identifier,::udm::Version version) -> ::udm::AssetData {
+		[](::udm::LinkedPropertyWrapper &prop,const std::string &identifier,::udm::Version version) -> ::udm::AssetData {
 		::udm::AssetData assetData {prop};
 		assetData.SetAssetType(identifier);
 		assetData.SetAssetVersion(version);

@@ -65,10 +65,10 @@ void CLightMapComponent::RegisterMembers(pragma::EntityComponentManager &compone
 		using TMaterial = std::string;
 		auto memberInfo = create_component_member_info<
 			T,TMaterial,
-			+[](const ComponentMemberInfo &info,T &component,const TMaterial &value) {
+			[](const ComponentMemberInfo &info,T &component,const TMaterial &value) {
 				component.SetLightMapMaterial(value);
 			},
-			+[](const ComponentMemberInfo &info,T &component,TMaterial &value) {
+			[](const ComponentMemberInfo &info,T &component,TMaterial &value) {
 				value = component.GetLightMapMaterialName();
 			}
 		>("lightmapMaterial","",AttributeSpecializationType::File);

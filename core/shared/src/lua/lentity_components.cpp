@@ -99,12 +99,15 @@ template<typename TMemberId> requires(std::is_same_v<TMemberId,pragma::Component
 	hComponent.AddDriver(componentId,memberIdx,std::move(descriptor));
 }
 
+static int lua_match_component_member_reference(lua_State *l,int index) {return lua_isstring(l,index) ? 0 : luabind::no_match;}
+static pragma::ComponentMemberReference lua_to_component_member_reference(lua_State *l,int index) {return pragma::ComponentMemberReference{Lua::CheckString(l,index)};}
+
 template<uint32_t N>
-	using ComponentMemberReferencePolicy = luabind::generic_policy<N,pragma::ComponentMemberReference,[](lua_State *l,int index) -> int {
-		return lua_isstring(l,index) ? 0 : luabind::no_match;
-	},[](lua_State *l,int index) -> pragma::ComponentMemberReference {
-		return pragma::ComponentMemberReference{Lua::CheckString(l,index)};
-	}>;
+	using ComponentMemberReferencePolicy = luabind::generic_policy<
+		N,pragma::ComponentMemberReference,
+		&lua_match_component_member_reference,
+		&lua_to_component_member_reference
+	>;
 
 /*template<uint32_t N>
 	using UniversalReferencePolicy = luabind::generic_policy<N,util::Uuid,[](lua_State *l,int index) -> int {

@@ -1,4 +1,5 @@
 util.register_class("ents.ClickComponent",BaseEntityComponent)
+ents.ClickComponent:RegisterMember("Priority",udm.TYPE_UINT32,0,{},ents.BaseEntityComponent.MEMBER_FLAG_DEFAULT)
 
 local numClickComponents = 0
 local cbClick
@@ -118,6 +119,7 @@ function ents.ClickComponent.raycast(pos,dir,filter,maxDist)
 	drawInfo:SetColor(Color.Aqua)
 	debug.draw_line(pos,pos +dir *1000,drawInfo)]]
 	local distClosest = math.huge
+	local priorityClosest = 0
 	local actorClosest = nil
 	local hitDataClosest
 	local hitPos
@@ -162,12 +164,15 @@ function ents.ClickComponent.raycast(pos,dir,filter,maxDist)
 					local bvhC = ent:GetComponent(ents.COMPONENT_BVH)
 					local hitData = bvhC:IntersectionTest(lpos,ldir,0.0,lMaxDist)
 					if(hitData ~= nil) then
-						if(hitData.distance < distClosest) then -- and hitData.distance > 0.0) then
+						local clickC = ent:GetComponent(ents.COMPONENT_CLICK)
+						local priority = (clickC ~= nil) and clickC:GetPriority() or 0
+						if(hitData.distance < distClosest or priority >= priorityClosest) then -- and hitData.distance > 0.0) then
 							--debug.print("Clicked actor: ",hitData.entity)
 							distClosest = hitData.distance
 							hitPos = pos +dir *hitData.distance
 							actorClosest = hitData.entity
 							hitDataClosest = hitData
+							priorityClosest = priority
 						end
 					end
 

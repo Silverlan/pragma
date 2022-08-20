@@ -166,10 +166,21 @@ function ents.ClickComponent.raycast(pos,dir,filter,maxDist)
 					if(hitData ~= nil) then
 						local clickC = ent:GetComponent(ents.COMPONENT_CLICK)
 						local priority = (clickC ~= nil) and clickC:GetPriority() or 0
-						if(hitData.distance < distClosest or priority >= priorityClosest) then -- and hitData.distance > 0.0) then
-							--debug.print("Clicked actor: ",hitData.entity)
-							distClosest = hitData.distance
-							hitPos = pos +dir *hitData.distance
+						local hitDist = hitData.distance
+
+						if(math.abs(scale:LengthSqr() -1.0) > 0.001) then
+							-- Object is scaled; We have to calculate hit distance
+							-- for unscaled space
+							local lhitPos = lpos +ldir *hitDist
+							lhitPos = lhitPos *scale
+							lhitPos = pose:GetInverse() *lhitPos
+							local diff = lhitPos -pos
+							hitDist = diff:Length()
+						end
+
+						if(hitDist < distClosest or priority >= priorityClosest) then -- and hitData.distance > 0.0) then
+							distClosest = hitDist
+							hitPos = pos +dir *hitDist
 							actorClosest = hitData.entity
 							hitDataClosest = hitData
 							priorityClosest = priority

@@ -22,8 +22,8 @@ ComponentEventId BaseToggleComponent::EVENT_ON_TURN_ON = INVALID_COMPONENT_ID;
 ComponentEventId BaseToggleComponent::EVENT_ON_TURN_OFF = INVALID_COMPONENT_ID;
 void BaseToggleComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_TURN_ON = registerEvent("ON_TURN_ON",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_TURN_OFF = registerEvent("ON_TURN_OFF",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_TURN_ON = registerEvent("ON_TURN_ON",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_TURN_OFF = registerEvent("ON_TURN_OFF",ComponentEventInfo::Type::Broadcast);
 }
 void BaseToggleComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {

@@ -20,8 +20,8 @@ ComponentEventId BaseFlammableComponent::EVENT_ON_IGNITED = pragma::INVALID_COMP
 ComponentEventId BaseFlammableComponent::EVENT_ON_EXTINGUISHED = pragma::INVALID_COMPONENT_ID;
 void BaseFlammableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_IGNITED = registerEvent("ON_IGNITED",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_EXTINGUISHED = registerEvent("ON_EXTINGUISHED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_IGNITED = registerEvent("ON_IGNITED",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_EXTINGUISHED = registerEvent("ON_EXTINGUISHED",ComponentEventInfo::Type::Broadcast);
 }
 BaseFlammableComponent::BaseFlammableComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_bIsOnFire(util::BoolProperty::Create(false)),

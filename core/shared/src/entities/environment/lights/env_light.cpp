@@ -25,8 +25,8 @@ ComponentEventId BaseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT = pr
 ComponentEventId BaseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT = pragma::INVALID_COMPONENT_ID;
 void BaseEnvLightComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_CALC_LIGHT_DIRECTION_TO_POINT = registerEvent("CALC_LIGHT_DIRECTION_TO_POINT",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_CALC_LIGHT_INTENSITY_AT_POINT = registerEvent("CALC_LIGHT_INTENSITY_AT_POINT",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_CALC_LIGHT_DIRECTION_TO_POINT = registerEvent("CALC_LIGHT_DIRECTION_TO_POINT",ComponentEventInfo::Type::Broadcast);
+	EVENT_CALC_LIGHT_INTENSITY_AT_POINT = registerEvent("CALC_LIGHT_INTENSITY_AT_POINT",ComponentEventInfo::Type::Broadcast);
 }
 void BaseEnvLightComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {

@@ -293,7 +293,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 		"ON_UPDATE_RENDER_DATA",
 		"ON_RENDER_BUFFERS_INITIALIZED"
 	})
-		componentManager.RegisterEvent(evName,typeid(BaseEntity),pragma::EntityComponentManager::EventInfo::Type::Broadcast);
+		componentManager.RegisterEvent(evName,typeid(BaseEntity),pragma::ComponentEventInfo::Type::Broadcast);
 }
 
 pragma::BaseEntityComponent *CGame::CreateLuaEntityComponent(BaseEntity &ent,std::string classname)

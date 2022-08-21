@@ -28,8 +28,8 @@ ComponentEventId BaseTransformComponent::EVENT_ON_POSE_CHANGED = pragma::INVALID
 ComponentEventId BaseTransformComponent::EVENT_ON_TELEPORT = pragma::INVALID_COMPONENT_ID;
 void BaseTransformComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_POSE_CHANGED = registerEvent("ON_POSE_CHANGED",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_TELEPORT = registerEvent("ON_TELEPORT",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_POSE_CHANGED = registerEvent("ON_POSE_CHANGED",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_TELEPORT = registerEvent("ON_TELEPORT",ComponentEventInfo::Type::Broadcast);
 }
 void BaseTransformComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {

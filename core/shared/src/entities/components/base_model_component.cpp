@@ -27,10 +27,10 @@ ComponentEventId BaseModelComponent::EVENT_ON_SKIN_CHANGED = pragma::INVALID_COM
 ComponentEventId BaseModelComponent::EVENT_ON_BODY_GROUP_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseModelComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_MODEL_CHANGED = registerEvent("ON_MODEL_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_MODEL_MATERIALS_LOADED = registerEvent("ON_MODEL_MATERIALS_LOADED",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_SKIN_CHANGED = registerEvent("ON_SKIN_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_BODY_GROUP_CHANGED = registerEvent("ON_BODY_GROUP_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_MODEL_CHANGED = registerEvent("ON_MODEL_CHANGED",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_MODEL_MATERIALS_LOADED = registerEvent("ON_MODEL_MATERIALS_LOADED",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_SKIN_CHANGED = registerEvent("ON_SKIN_CHANGED",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_BODY_GROUP_CHANGED = registerEvent("ON_BODY_GROUP_CHANGED",ComponentEventInfo::Type::Broadcast);
 }
 void BaseModelComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {

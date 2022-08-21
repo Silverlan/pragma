@@ -40,19 +40,19 @@ ComponentEventId CRendererComponent::EVENT_RENDER = INVALID_COMPONENT_ID;
 ComponentEventId CRendererComponent::EVENT_ON_RENDER_TARGET_RELOADED = INVALID_COMPONENT_ID;
 void CRendererComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_RELOAD_RENDER_TARGET = registerEvent("EVENT_RELOAD_RENDER_TARGET",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_RELOAD_BLOOM_RENDER_TARGET = registerEvent("EVENT_RELOAD_BLOOM_RENDER_TARGET",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_BEGIN_RENDERING = registerEvent("EVENT_BEGIN_RENDERING",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_END_RENDERING = registerEvent("EVENT_END_RENDERING",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_UPDATE_CAMERA_DATA = registerEvent("EVENT_UPDATE_CAMERA_DATA",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_UPDATE_RENDER_SETTINGS = registerEvent("EVENT_UPDATE_RENDER_SETTINGS",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_UPDATE_RENDERER_BUFFER = registerEvent("EVENT_UPDATE_RENDERER_BUFFER",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_GET_SCENE_TEXTURE = registerEvent("EVENT_GET_SCENE_TEXTURE",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_GET_PRESENTATION_TEXTURE = registerEvent("EVENT_GET_PRESENTATION_TEXTURE",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_GET_HDR_PRESENTATION_TEXTURE = registerEvent("EVENT_GET_HDR_PRESENTATION_TEXTURE",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_RECORD_COMMAND_BUFFERS = registerEvent("EVENT_RECORD_COMMAND_BUFFERS",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_RENDER = registerEvent("EVENT_RENDER",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_RENDER_TARGET_RELOADED = registerEvent("EVENT_ON_RENDER_TARGET_RELOADED",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_RELOAD_RENDER_TARGET = registerEvent("EVENT_RELOAD_RENDER_TARGET",ComponentEventInfo::Type::Explicit);
+	EVENT_RELOAD_BLOOM_RENDER_TARGET = registerEvent("EVENT_RELOAD_BLOOM_RENDER_TARGET",ComponentEventInfo::Type::Explicit);
+	EVENT_BEGIN_RENDERING = registerEvent("EVENT_BEGIN_RENDERING",ComponentEventInfo::Type::Explicit);
+	EVENT_END_RENDERING = registerEvent("EVENT_END_RENDERING",ComponentEventInfo::Type::Explicit);
+	EVENT_UPDATE_CAMERA_DATA = registerEvent("EVENT_UPDATE_CAMERA_DATA",ComponentEventInfo::Type::Explicit);
+	EVENT_UPDATE_RENDER_SETTINGS = registerEvent("EVENT_UPDATE_RENDER_SETTINGS",ComponentEventInfo::Type::Explicit);
+	EVENT_UPDATE_RENDERER_BUFFER = registerEvent("EVENT_UPDATE_RENDERER_BUFFER",ComponentEventInfo::Type::Explicit);
+	EVENT_GET_SCENE_TEXTURE = registerEvent("EVENT_GET_SCENE_TEXTURE",ComponentEventInfo::Type::Explicit);
+	EVENT_GET_PRESENTATION_TEXTURE = registerEvent("EVENT_GET_PRESENTATION_TEXTURE",ComponentEventInfo::Type::Explicit);
+	EVENT_GET_HDR_PRESENTATION_TEXTURE = registerEvent("EVENT_GET_HDR_PRESENTATION_TEXTURE",ComponentEventInfo::Type::Explicit);
+	EVENT_RECORD_COMMAND_BUFFERS = registerEvent("EVENT_RECORD_COMMAND_BUFFERS",ComponentEventInfo::Type::Explicit);
+	EVENT_RENDER = registerEvent("EVENT_RENDER",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_RENDER_TARGET_RELOADED = registerEvent("EVENT_ON_RENDER_TARGET_RELOADED",ComponentEventInfo::Type::Explicit);
 }
 
 void CRendererComponent::Initialize()

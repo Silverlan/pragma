@@ -52,13 +52,13 @@ ComponentEventId CLightComponent::EVENT_HANDLE_SHADOW_MAP = pragma::INVALID_COMP
 ComponentEventId CLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED = pragma::INVALID_COMPONENT_ID;
 void CLightComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_SHOULD_PASS_ENTITY = registerEvent("SHOULD_PASS_ENTITY",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_SHOULD_PASS_ENTITY_MESH = registerEvent("SHOULD_PASS_ENTITY_MESH",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_SHOULD_PASS_MESH = registerEvent("SHOULD_PASS_MESH",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_SHOULD_UPDATE_RENDER_PASS = registerEvent("SHOULD_UPDATE_RENDER_PASS",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_GET_TRANSFORMATION_MATRIX = registerEvent("GET_TRANSFORMATION_MATRIX",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_HANDLE_SHADOW_MAP = registerEvent("HANDLE_SHADOW_MAP",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_SHADOW_BUFFER_INITIALIZED = registerEvent("ON_SHADOW_BUFFER_INITIALIZED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_SHOULD_PASS_ENTITY = registerEvent("SHOULD_PASS_ENTITY",ComponentEventInfo::Type::Explicit);
+	EVENT_SHOULD_PASS_ENTITY_MESH = registerEvent("SHOULD_PASS_ENTITY_MESH",ComponentEventInfo::Type::Explicit);
+	EVENT_SHOULD_PASS_MESH = registerEvent("SHOULD_PASS_MESH",ComponentEventInfo::Type::Explicit);
+	EVENT_SHOULD_UPDATE_RENDER_PASS = registerEvent("SHOULD_UPDATE_RENDER_PASS",ComponentEventInfo::Type::Explicit);
+	EVENT_GET_TRANSFORMATION_MATRIX = registerEvent("GET_TRANSFORMATION_MATRIX",ComponentEventInfo::Type::Explicit);
+	EVENT_HANDLE_SHADOW_MAP = registerEvent("HANDLE_SHADOW_MAP",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_SHADOW_BUFFER_INITIALIZED = registerEvent("ON_SHADOW_BUFFER_INITIALIZED",ComponentEventInfo::Type::Broadcast);
 }
 void CLightComponent::InitializeBuffers()
 {

@@ -9,6 +9,7 @@
 
 #include "pragma/entities/components/base_entity_component_handle_wrapper.hpp"
 #include "pragma/entities/entity_component_event.hpp"
+#include "pragma/entities/entity_component_event_info.hpp"
 #include "pragma/entities/entity_component_info.hpp"
 #include "pragma/entities/baseentity_net_event_manager.hpp"
 #include "pragma/util/util_handled.hpp"

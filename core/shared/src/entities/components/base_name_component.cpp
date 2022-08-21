@@ -18,7 +18,7 @@ using namespace pragma;
 ComponentEventId BaseNameComponent::EVENT_ON_NAME_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseNameComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_NAME_CHANGED = registerEvent("ON_NAME_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_NAME_CHANGED = registerEvent("ON_NAME_CHANGED",ComponentEventInfo::Type::Broadcast);
 }
 void BaseNameComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {

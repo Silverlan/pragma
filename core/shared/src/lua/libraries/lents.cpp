@@ -993,6 +993,6 @@ Lua::opt<pragma::ComponentEventId> Lua::ents::register_component_event(lua_State
 	}
 
 	auto netName = componentInfo->name +'_' +std::string{name};
-	auto eventId = componentManager.RegisterEventById(netName,componentId,pragma::EntityComponentManager::EventInfo::Type::Broadcast);
+	auto eventId = componentManager.RegisterEventById(netName,componentId,pragma::ComponentEventInfo::Type::Broadcast);
 	return {l,eventId};
 }

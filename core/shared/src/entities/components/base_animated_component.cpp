@@ -52,31 +52,31 @@ ComponentEventId BaseAnimatedComponent::EVENT_PLAY_ANIMATION = pragma::INVALID_C
 ComponentEventId BaseAnimatedComponent::EVENT_ON_ANIMATION_RESET = pragma::INVALID_COMPONENT_ID;
 void BaseAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_HANDLE_ANIMATION_EVENT = registerEvent("HANDLE_ANIMATION_EVENT",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_PLAY_ANIMATION = registerEvent("ON_PLAY_ANIMATION",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_PLAY_LAYERED_ANIMATION = registerEvent("ON_PLAY_LAYERED_ANIMATION",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_PLAY_LAYERED_ACTIVITY = registerEvent("ON_PLAY_LAYERED_ACTIVITY",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_ANIMATION_COMPLETE = registerEvent("ON_ANIMATION_COMPLETE",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_LAYERED_ANIMATION_START = registerEvent("ON_LAYERED_ANIMATION_START",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_LAYERED_ANIMATION_COMPLETE = registerEvent("ON_LAYERED_ANIMATION_COMPLETE",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_ANIMATION_START = registerEvent("ON_ANIMATION_START",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_TRANSLATE_LAYERED_ANIMATION = registerEvent("TRANSLATE_LAYERED_ANIMATION",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_TRANSLATE_ANIMATION = registerEvent("TRANSLATE_ANIMATION",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_TRANSLATE_ACTIVITY = registerEvent("TRANSLATE_ACTIVITY",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_MAINTAIN_ANIMATIONS = registerEvent("MAINTAIN_ANIMATIONS",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_MAINTAIN_ANIMATION = registerEvent("MAINTAIN_ANIMATION",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_MAINTAIN_ANIMATION_MOVEMENT = registerEvent("MAINTAIN_ANIMATION_MOVEMENT",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_SHOULD_UPDATE_BONES = registerEvent("SHOULD_UPDATE_BONES",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_HANDLE_ANIMATION_EVENT = registerEvent("HANDLE_ANIMATION_EVENT",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_PLAY_ANIMATION = registerEvent("ON_PLAY_ANIMATION",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_PLAY_LAYERED_ANIMATION = registerEvent("ON_PLAY_LAYERED_ANIMATION",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_PLAY_LAYERED_ACTIVITY = registerEvent("ON_PLAY_LAYERED_ACTIVITY",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_ANIMATION_COMPLETE = registerEvent("ON_ANIMATION_COMPLETE",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_LAYERED_ANIMATION_START = registerEvent("ON_LAYERED_ANIMATION_START",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_LAYERED_ANIMATION_COMPLETE = registerEvent("ON_LAYERED_ANIMATION_COMPLETE",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_ANIMATION_START = registerEvent("ON_ANIMATION_START",ComponentEventInfo::Type::Explicit);
+	EVENT_TRANSLATE_LAYERED_ANIMATION = registerEvent("TRANSLATE_LAYERED_ANIMATION",ComponentEventInfo::Type::Explicit);
+	EVENT_TRANSLATE_ANIMATION = registerEvent("TRANSLATE_ANIMATION",ComponentEventInfo::Type::Explicit);
+	EVENT_TRANSLATE_ACTIVITY = registerEvent("TRANSLATE_ACTIVITY",ComponentEventInfo::Type::Explicit);
+	EVENT_MAINTAIN_ANIMATIONS = registerEvent("MAINTAIN_ANIMATIONS",ComponentEventInfo::Type::Explicit);
+	EVENT_MAINTAIN_ANIMATION = registerEvent("MAINTAIN_ANIMATION",ComponentEventInfo::Type::Explicit);
+	EVENT_MAINTAIN_ANIMATION_MOVEMENT = registerEvent("MAINTAIN_ANIMATION_MOVEMENT",ComponentEventInfo::Type::Explicit);
+	EVENT_SHOULD_UPDATE_BONES = registerEvent("SHOULD_UPDATE_BONES",ComponentEventInfo::Type::Explicit);
 
-	EVENT_ON_PLAY_ACTIVITY = registerEvent("ON_PLAY_ACTIVITY",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_STOP_LAYERED_ANIMATION = registerEvent("ON_STOP_LAYERED_ANIMATION",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_BONE_TRANSFORM_CHANGED = registerEvent("ON_BONE_TRANSFORM_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_ANIMATIONS_UPDATED = registerEvent("ON_ANIMATIONS_UPDATED",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_UPDATE_BONE_POSES = registerEvent("UPDATE_BONE_POSES",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_BONE_POSES_FINALIZED = registerEvent("ON_BONE_POSES_FINALIZED",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_BLEND_ANIMATION = registerEvent("ON_BLEND_ANIMATION",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_PLAY_ANIMATION = registerEvent("PLAY_ANIMATION",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_ANIMATION_RESET = registerEvent("ON_ANIMATION_RESET",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_PLAY_ACTIVITY = registerEvent("ON_PLAY_ACTIVITY",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_STOP_LAYERED_ANIMATION = registerEvent("ON_STOP_LAYERED_ANIMATION",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_BONE_TRANSFORM_CHANGED = registerEvent("ON_BONE_TRANSFORM_CHANGED",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_ANIMATIONS_UPDATED = registerEvent("ON_ANIMATIONS_UPDATED",ComponentEventInfo::Type::Explicit);
+	EVENT_UPDATE_BONE_POSES = registerEvent("UPDATE_BONE_POSES",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_BONE_POSES_FINALIZED = registerEvent("ON_BONE_POSES_FINALIZED",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_BLEND_ANIMATION = registerEvent("ON_BLEND_ANIMATION",ComponentEventInfo::Type::Explicit);
+	EVENT_PLAY_ANIMATION = registerEvent("PLAY_ANIMATION",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_ANIMATION_RESET = registerEvent("ON_ANIMATION_RESET",ComponentEventInfo::Type::Broadcast);
 }
 
 BaseAnimatedComponent::BaseAnimatedComponent(BaseEntity &ent)

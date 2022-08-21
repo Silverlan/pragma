@@ -30,7 +30,7 @@ ComponentEventId CFlexComponent::EVENT_ON_FLEX_CONTROLLERS_UPDATED = INVALID_COM
 void CFlexComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
 	BaseFlexComponent::RegisterEvents(componentManager,registerEvent);
-	EVENT_ON_FLEX_CONTROLLERS_UPDATED = registerEvent("ON_FLEX_CONTROLLERS_UPDATED",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_FLEX_CONTROLLERS_UPDATED = registerEvent("ON_FLEX_CONTROLLERS_UPDATED",ComponentEventInfo::Type::Explicit);
 }
 
 void CFlexComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}

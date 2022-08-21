@@ -22,8 +22,8 @@ ComponentEventId BaseHealthComponent::EVENT_ON_TAKEN_DAMAGE = pragma::INVALID_CO
 ComponentEventId BaseHealthComponent::EVENT_ON_HEALTH_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseHealthComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_TAKEN_DAMAGE = registerEvent("ON_TAKEN_DAMAGE",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_HEALTH_CHANGED = registerEvent("ON_HEALTH_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_TAKEN_DAMAGE = registerEvent("ON_TAKEN_DAMAGE",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_HEALTH_CHANGED = registerEvent("ON_HEALTH_CHANGED",ComponentEventInfo::Type::Broadcast);
 }
 void BaseHealthComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {

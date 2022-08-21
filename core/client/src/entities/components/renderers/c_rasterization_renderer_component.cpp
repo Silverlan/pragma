@@ -60,30 +60,30 @@ ComponentEventId CRasterizationRendererComponent::EVENT_MT_END_RECORD_VIEW = INV
 ComponentEventId CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_PREPASS = INVALID_COMPONENT_ID;
 void CRasterizationRendererComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_RECORD_PREPASS = registerEvent("ON_RECORD_PREPASS",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_RECORD_LIGHTING_PASS = registerEvent("ON_RECORD_LIGHTING_PASS",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_PRE_EXECUTE_PREPASS = registerEvent("PRE_EXECUTE_PREPASS",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_POST_EXECUTE_PREPASS = registerEvent("POST_EXECUTE_PREPASS",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_PRE_EXECUTE_LIGHTING_PASS = registerEvent("PRE_EXECUTE_LIGHTING_PASS",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_POST_EXECUTE_LIGHTING_PASS = registerEvent("POST_EXECUTE_LIGHTING_PASS",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_PRE_PREPASS = registerEvent("PRE_PREPASS",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_POST_PREPASS = registerEvent("POST_PREPASS",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_PRE_LIGHTING_PASS = registerEvent("PRE_LIGHTING_PASS",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_POST_LIGHTING_PASS = registerEvent("POST_LIGHTING_PASS",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_RECORD_PREPASS = registerEvent("ON_RECORD_PREPASS",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_RECORD_LIGHTING_PASS = registerEvent("ON_RECORD_LIGHTING_PASS",ComponentEventInfo::Type::Explicit);
+	EVENT_PRE_EXECUTE_PREPASS = registerEvent("PRE_EXECUTE_PREPASS",ComponentEventInfo::Type::Explicit);
+	EVENT_POST_EXECUTE_PREPASS = registerEvent("POST_EXECUTE_PREPASS",ComponentEventInfo::Type::Explicit);
+	EVENT_PRE_EXECUTE_LIGHTING_PASS = registerEvent("PRE_EXECUTE_LIGHTING_PASS",ComponentEventInfo::Type::Explicit);
+	EVENT_POST_EXECUTE_LIGHTING_PASS = registerEvent("POST_EXECUTE_LIGHTING_PASS",ComponentEventInfo::Type::Explicit);
+	EVENT_PRE_PREPASS = registerEvent("PRE_PREPASS",ComponentEventInfo::Type::Explicit);
+	EVENT_POST_PREPASS = registerEvent("POST_PREPASS",ComponentEventInfo::Type::Explicit);
+	EVENT_PRE_LIGHTING_PASS = registerEvent("PRE_LIGHTING_PASS",ComponentEventInfo::Type::Explicit);
+	EVENT_POST_LIGHTING_PASS = registerEvent("POST_LIGHTING_PASS",ComponentEventInfo::Type::Explicit);
 	
-	EVENT_MT_BEGIN_RECORD_SKYBOX = registerEvent("MT_BEGIN_RECORD_SKYBOX",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_MT_END_RECORD_SKYBOX = registerEvent("MT_END_RECORD_SKYBOX",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_MT_BEGIN_RECORD_WORLD = registerEvent("MT_BEGIN_RECORD_WORLD",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_MT_END_RECORD_WORLD = registerEvent("MT_END_RECORD_WORLD",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_MT_BEGIN_RECORD_PARTICLES = registerEvent("MT_BEGIN_RECORD_PARTICLES",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_MT_END_RECORD_PARTICLES = registerEvent("MT_END_RECORD_PARTICLES",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_MT_BEGIN_RECORD_DEBUG = registerEvent("MT_BEGIN_RECORD_DEBUG",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_MT_END_RECORD_DEBUG = registerEvent("MT_END_RECORD_DEBUG",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_MT_BEGIN_RECORD_WATER = registerEvent("MT_BEGIN_RECORD_WATER",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_MT_END_RECORD_WATER = registerEvent("MT_END_RECORD_WATER",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_MT_BEGIN_RECORD_VIEW = registerEvent("MT_BEGIN_RECORD_VIEW",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_MT_END_RECORD_VIEW = registerEvent("MT_END_RECORD_VIEW",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_MT_BEGIN_RECORD_PREPASS = registerEvent("MT_BEGIN_RECORD_PREPASS",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_MT_BEGIN_RECORD_SKYBOX = registerEvent("MT_BEGIN_RECORD_SKYBOX",ComponentEventInfo::Type::Explicit);
+	EVENT_MT_END_RECORD_SKYBOX = registerEvent("MT_END_RECORD_SKYBOX",ComponentEventInfo::Type::Explicit);
+	EVENT_MT_BEGIN_RECORD_WORLD = registerEvent("MT_BEGIN_RECORD_WORLD",ComponentEventInfo::Type::Explicit);
+	EVENT_MT_END_RECORD_WORLD = registerEvent("MT_END_RECORD_WORLD",ComponentEventInfo::Type::Explicit);
+	EVENT_MT_BEGIN_RECORD_PARTICLES = registerEvent("MT_BEGIN_RECORD_PARTICLES",ComponentEventInfo::Type::Explicit);
+	EVENT_MT_END_RECORD_PARTICLES = registerEvent("MT_END_RECORD_PARTICLES",ComponentEventInfo::Type::Explicit);
+	EVENT_MT_BEGIN_RECORD_DEBUG = registerEvent("MT_BEGIN_RECORD_DEBUG",ComponentEventInfo::Type::Explicit);
+	EVENT_MT_END_RECORD_DEBUG = registerEvent("MT_END_RECORD_DEBUG",ComponentEventInfo::Type::Explicit);
+	EVENT_MT_BEGIN_RECORD_WATER = registerEvent("MT_BEGIN_RECORD_WATER",ComponentEventInfo::Type::Explicit);
+	EVENT_MT_END_RECORD_WATER = registerEvent("MT_END_RECORD_WATER",ComponentEventInfo::Type::Explicit);
+	EVENT_MT_BEGIN_RECORD_VIEW = registerEvent("MT_BEGIN_RECORD_VIEW",ComponentEventInfo::Type::Explicit);
+	EVENT_MT_END_RECORD_VIEW = registerEvent("MT_END_RECORD_VIEW",ComponentEventInfo::Type::Explicit);
+	EVENT_MT_BEGIN_RECORD_PREPASS = registerEvent("MT_BEGIN_RECORD_PREPASS",ComponentEventInfo::Type::Explicit);
 }
 
 void CRasterizationRendererComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}

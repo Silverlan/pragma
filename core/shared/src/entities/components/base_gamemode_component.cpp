@@ -23,14 +23,14 @@ ComponentEventId BaseGamemodeComponent::EVENT_ON_MAP_INITIALIZED = INVALID_COMPO
 ComponentEventId BaseGamemodeComponent::EVENT_ON_GAME_READY = INVALID_COMPONENT_ID;
 void BaseGamemodeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_PLAYER_DEATH = registerEvent("ON_PLAYER_DEATH",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_PLAYER_SPAWNED = registerEvent("ON_PLAYER_SPAWNED",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_PLAYER_DROPPED = registerEvent("ON_PLAYER_DROPPED",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_PLAYER_READY = registerEvent("ON_PLAYER_READY",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_PLAYER_JOINED = registerEvent("ON_PLAYER_JOINED",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_GAME_INITIALIZED = registerEvent("ON_GAME_INITIALIZED",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_MAP_INITIALIZED = registerEvent("ON_MAP_INITIALIZED",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_GAME_READY = registerEvent("ON_GAME_READY",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_PLAYER_DEATH = registerEvent("ON_PLAYER_DEATH",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_PLAYER_SPAWNED = registerEvent("ON_PLAYER_SPAWNED",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_PLAYER_DROPPED = registerEvent("ON_PLAYER_DROPPED",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_PLAYER_READY = registerEvent("ON_PLAYER_READY",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_PLAYER_JOINED = registerEvent("ON_PLAYER_JOINED",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_GAME_INITIALIZED = registerEvent("ON_GAME_INITIALIZED",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_MAP_INITIALIZED = registerEvent("ON_MAP_INITIALIZED",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_GAME_READY = registerEvent("ON_GAME_READY",ComponentEventInfo::Type::Explicit);
 }
 BaseGamemodeComponent::BaseGamemodeComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)

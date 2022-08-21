@@ -17,8 +17,8 @@ ComponentEventId BaseLiquidControlComponent::EVENT_ON_SPLASH = pragma::INVALID_C
 ComponentEventId BaseLiquidControlComponent::EVENT_ON_PROPERTIES_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseLiquidControlComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_SPLASH = registerEvent("ON_SPLASH",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_PROPERTIES_CHANGED = registerEvent("ON_PROPERTIES_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_SPLASH = registerEvent("ON_SPLASH",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_PROPERTIES_CHANGED = registerEvent("ON_PROPERTIES_CHANGED",ComponentEventInfo::Type::Broadcast);
 }
 
 void BaseLiquidControlComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)

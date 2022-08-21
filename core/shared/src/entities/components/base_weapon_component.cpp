@@ -33,17 +33,17 @@ ComponentEventId BaseWeaponComponent::EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED = pragm
 ComponentEventId BaseWeaponComponent::EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseWeaponComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_DEPLOY = registerEvent("ON_DEPLOY",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_HOLSTER = registerEvent("ON_HOLSTER",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_PRIMARY_ATTACK = registerEvent("ON_PRIMARY_ATTACK",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_SECONDARY_ATTACK = registerEvent("ON_SECONDARY_ATTACK",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_TERTIARY_ATTACK = registerEvent("ON_TERTIARY_ATTACK",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_ATTACK4 = registerEvent("ON_ATTACK4",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_END_PRIMARY_ATTACK = registerEvent("ON_END_PRIMARY_ATTACK",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_END_SECONDARY_ATTACK = registerEvent("ON_END_SECONDARY_ATTACK",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_RELOAD = registerEvent("ON_RELOAD",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED = registerEvent("ON_PRIMARY_CLIP_SIZE_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED = registerEvent("ON_SECONDARY_CLIP_SIZE_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_DEPLOY = registerEvent("ON_DEPLOY",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_HOLSTER = registerEvent("ON_HOLSTER",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_PRIMARY_ATTACK = registerEvent("ON_PRIMARY_ATTACK",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_SECONDARY_ATTACK = registerEvent("ON_SECONDARY_ATTACK",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_TERTIARY_ATTACK = registerEvent("ON_TERTIARY_ATTACK",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_ATTACK4 = registerEvent("ON_ATTACK4",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_END_PRIMARY_ATTACK = registerEvent("ON_END_PRIMARY_ATTACK",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_END_SECONDARY_ATTACK = registerEvent("ON_END_SECONDARY_ATTACK",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_RELOAD = registerEvent("ON_RELOAD",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED = registerEvent("ON_PRIMARY_CLIP_SIZE_CHANGED",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED = registerEvent("ON_SECONDARY_CLIP_SIZE_CHANGED",ComponentEventInfo::Type::Broadcast);
 }
 BaseWeaponComponent::BaseWeaponComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_clipPrimary(util::UInt16Property::Create(0)),

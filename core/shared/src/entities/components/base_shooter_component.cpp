@@ -22,8 +22,8 @@ ComponentEventId BaseShooterComponent::EVENT_ON_FIRE_BULLETS = INVALID_COMPONENT
 ComponentEventId BaseShooterComponent::EVENT_ON_BULLETS_FIRED = INVALID_COMPONENT_ID;
 void BaseShooterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_FIRE_BULLETS = registerEvent("ON_FIRE_BULLETS",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_BULLETS_FIRED = registerEvent("ON_BULLETS_FIRED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_FIRE_BULLETS = registerEvent("ON_FIRE_BULLETS",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_BULLETS_FIRED = registerEvent("ON_BULLETS_FIRED",ComponentEventInfo::Type::Broadcast);
 }
 BaseShooterComponent::BaseShooterComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)

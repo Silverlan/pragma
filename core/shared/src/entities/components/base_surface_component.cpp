@@ -18,8 +18,8 @@ ComponentEventId BaseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED = INVALID_
 ComponentEventId BaseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED = INVALID_COMPONENT_ID;
 void BaseSurfaceComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_SURFACE_PLANE_CHANGED = registerEvent("ON_SURFACE_PLANE_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_SURFACE_MESH_CHANGED = registerEvent("ON_SURFACE_MESH_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_SURFACE_PLANE_CHANGED = registerEvent("ON_SURFACE_PLANE_CHANGED",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_SURFACE_MESH_CHANGED = registerEvent("ON_SURFACE_MESH_CHANGED",ComponentEventInfo::Type::Broadcast);
 }
 
 void BaseSurfaceComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)

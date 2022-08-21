@@ -21,7 +21,7 @@ using namespace pragma;
 ComponentEventId BaseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseLiquidSurfaceSimulationComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = registerEvent("ON_WATER_SURFACE_SIMULATOR_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = registerEvent("ON_WATER_SURFACE_SIMULATOR_CHANGED",ComponentEventInfo::Type::Broadcast);
 }
 
 void BaseLiquidSurfaceSimulationComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)

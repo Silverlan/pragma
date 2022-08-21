@@ -15,9 +15,9 @@ decltype(BaseGenericComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED) BaseGenericCom
 decltype(BaseGenericComponent::EVENT_ON_MEMBERS_CHANGED) BaseGenericComponent::EVENT_ON_MEMBERS_CHANGED = INVALID_COMPONENT_ID;
 void BaseGenericComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_ENTITY_COMPONENT_ADDED = registerEvent("GENERIC_ON_ENTITY_COMPONENT_ADDED",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_ENTITY_COMPONENT_REMOVED = registerEvent("GENERIC_ON_ENTITY_COMPONENT_REMOVED",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_MEMBERS_CHANGED = registerEvent("GENERIC_ON_MEMBERS_CHANGED",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_ENTITY_COMPONENT_ADDED = registerEvent("GENERIC_ON_ENTITY_COMPONENT_ADDED",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_ENTITY_COMPONENT_REMOVED = registerEvent("GENERIC_ON_ENTITY_COMPONENT_REMOVED",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_MEMBERS_CHANGED = registerEvent("GENERIC_ON_MEMBERS_CHANGED",ComponentEventInfo::Type::Explicit);
 }
 
 BaseGenericComponent::BaseGenericComponent(BaseEntity &ent)

@@ -35,9 +35,9 @@ ComponentEventId BaseActorComponent::EVENT_ON_RESPAWN = INVALID_COMPONENT_ID;
 ComponentEventId BaseActorComponent::EVENT_ON_DEATH = INVALID_COMPONENT_ID;
 void BaseActorComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_KILLED = registerEvent("ON_KILLED",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_RESPAWN = registerEvent("ON_RESPAWN",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_DEATH = registerEvent("ON_DEATH",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_KILLED = registerEvent("ON_KILLED",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_RESPAWN = registerEvent("ON_RESPAWN",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_DEATH = registerEvent("ON_DEATH",ComponentEventInfo::Type::Broadcast);
 }
 BaseActorComponent::BaseActorComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_bAlive(true),m_bFrozen(util::BoolProperty::Create(false))

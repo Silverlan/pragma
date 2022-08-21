@@ -27,11 +27,11 @@ ComponentEventId BaseTouchComponent::EVENT_ON_TRIGGER = INVALID_COMPONENT_ID;
 ComponentEventId BaseTouchComponent::EVENT_ON_TRIGGER_INITIALIZED = INVALID_COMPONENT_ID;
 void BaseTouchComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_CAN_TRIGGER = registerEvent("CAN_TRIGGER",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_START_TOUCH = registerEvent("ON_START_TOUCH",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_END_TOUCH = registerEvent("ON_END_TOUCH",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_TRIGGER = registerEvent("ON_TRIGGER",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_TRIGGER_INITIALIZED = registerEvent("ON_TRIGGER_INITIALIZED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_CAN_TRIGGER = registerEvent("CAN_TRIGGER",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_START_TOUCH = registerEvent("ON_START_TOUCH",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_END_TOUCH = registerEvent("ON_END_TOUCH",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_TRIGGER = registerEvent("ON_TRIGGER",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_TRIGGER_INITIALIZED = registerEvent("ON_TRIGGER_INITIALIZED",ComponentEventInfo::Type::Broadcast);
 }
 BaseTouchComponent::BaseTouchComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)

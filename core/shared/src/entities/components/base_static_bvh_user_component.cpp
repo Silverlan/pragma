@@ -17,7 +17,7 @@ using namespace pragma;
 ComponentEventId BaseStaticBvhUserComponent::EVENT_ON_ACTIVATION_STATE_CHANGED = INVALID_COMPONENT_ID;
 void BaseStaticBvhUserComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_ACTIVATION_STATE_CHANGED = registerEvent("ON_ACTIVATION_STATE_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_ACTIVATION_STATE_CHANGED = registerEvent("ON_ACTIVATION_STATE_CHANGED",ComponentEventInfo::Type::Broadcast);
 }
 
 BaseStaticBvhUserComponent::BaseStaticBvhUserComponent(BaseEntity &ent)

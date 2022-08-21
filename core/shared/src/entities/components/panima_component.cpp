@@ -37,15 +37,15 @@ ComponentEventId PanimaComponent::EVENT_TRANSLATE_ANIMATION = pragma::INVALID_CO
 ComponentEventId PanimaComponent::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER = pragma::INVALID_COMPONENT_ID;
 void PanimaComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_HANDLE_ANIMATION_EVENT = registerEvent("A2_HANDLE_ANIMATION_EVENT",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_PLAY_ANIMATION = registerEvent("A2_ON_PLAY_ANIMATION",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_ANIMATION_COMPLETE = registerEvent("A2_ON_ANIMATION_COMPLETE",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_ANIMATION_START = registerEvent("A2_ON_ANIMATION_START",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_MAINTAIN_ANIMATIONS = registerEvent("A2_MAINTAIN_ANIMATIONS",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_ANIMATIONS_UPDATED = registerEvent("A2_ON_ANIMATIONS_UPDATED",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_PLAY_ANIMATION = registerEvent("A2_PLAY_ANIMATION",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_TRANSLATE_ANIMATION = registerEvent("A2_TRANSLATE_ANIMATION",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER = registerEvent("A2_INITIALIZE_CHANNEL_VALUE_SUBMITTER",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_HANDLE_ANIMATION_EVENT = registerEvent("A2_HANDLE_ANIMATION_EVENT",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_PLAY_ANIMATION = registerEvent("A2_ON_PLAY_ANIMATION",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_ANIMATION_COMPLETE = registerEvent("A2_ON_ANIMATION_COMPLETE",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_ANIMATION_START = registerEvent("A2_ON_ANIMATION_START",ComponentEventInfo::Type::Broadcast);
+	EVENT_MAINTAIN_ANIMATIONS = registerEvent("A2_MAINTAIN_ANIMATIONS",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_ANIMATIONS_UPDATED = registerEvent("A2_ON_ANIMATIONS_UPDATED",ComponentEventInfo::Type::Broadcast);
+	EVENT_PLAY_ANIMATION = registerEvent("A2_PLAY_ANIMATION",ComponentEventInfo::Type::Broadcast);
+	EVENT_TRANSLATE_ANIMATION = registerEvent("A2_TRANSLATE_ANIMATION",ComponentEventInfo::Type::Broadcast);
+	EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER = registerEvent("A2_INITIALIZE_CHANNEL_VALUE_SUBMITTER",ComponentEventInfo::Type::Broadcast);
 }
 std::optional<std::pair<std::string,util::Path>> PanimaComponent::ParseComponentChannelPath(const panima::ChannelPath &path)
 {

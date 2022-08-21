@@ -128,8 +128,8 @@ ComponentEventId BaseBvhComponent::EVENT_ON_CLEAR_BVH = INVALID_COMPONENT_ID;
 ComponentEventId BaseBvhComponent::EVENT_ON_BVH_REBUILT = INVALID_COMPONENT_ID;
 void BaseBvhComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_CLEAR_BVH = registerEvent("EVENT_ON_CLEAR_BVH",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_BVH_REBUILT = registerEvent("EVENT_ON_BVH_REBUILT",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_CLEAR_BVH = registerEvent("EVENT_ON_CLEAR_BVH",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_BVH_REBUILT = registerEvent("EVENT_ON_BVH_REBUILT",ComponentEventInfo::Type::Explicit);
 }
 
 void BaseBvhComponent::ClearBvh()

@@ -18,7 +18,7 @@ using namespace pragma;
 ComponentEventId BaseFieldAngleComponent::EVENT_ON_FIELD_ANGLE_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseFieldAngleComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_FIELD_ANGLE_CHANGED = registerEvent("ON_FIELD_ANGLE_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_FIELD_ANGLE_CHANGED = registerEvent("ON_FIELD_ANGLE_CHANGED",ComponentEventInfo::Type::Broadcast);
 }
 void BaseFieldAngleComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {

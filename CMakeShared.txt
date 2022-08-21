@@ -157,6 +157,12 @@ function(def_project PROJ_NAME PROJ_TYPE)
 	if(DEFINED PRECOMPILED_HEADER)
 		message("Using precompiled header src/${PRECOMPILED_HEADER}.h for project ${PROJ_NAME}")
 		target_precompile_headers(${PROJ_NAME} PRIVATE "src/${PRECOMPILED_HEADER}.h")
+
+		# Disable precompiled headers for c-files
+		file(GLOB_RECURSE SRC_C_FILES
+		    "${CMAKE_CURRENT_LIST_DIR}/src/*.c"
+		)
+		set_source_files_properties("${SRC_C_FILES}" PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
 	endif()
 	set_target_properties(${PROJ_NAME} PROPERTIES ${TARGET_PROPERTIES})
 endfunction(def_project)

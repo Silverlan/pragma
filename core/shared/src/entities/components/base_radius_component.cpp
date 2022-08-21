@@ -18,7 +18,7 @@ using namespace pragma;
 ComponentEventId BaseRadiusComponent::EVENT_ON_RADIUS_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseRadiusComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_RADIUS_CHANGED = registerEvent("ON_RADIUS_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_RADIUS_CHANGED = registerEvent("ON_RADIUS_CHANGED",ComponentEventInfo::Type::Broadcast);
 }
 void BaseRadiusComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {

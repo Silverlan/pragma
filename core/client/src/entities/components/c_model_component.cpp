@@ -36,7 +36,7 @@ void CModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityCompon
 void CModelComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
 	BaseModelComponent::RegisterEvents(componentManager,registerEvent);
-	EVENT_ON_RENDER_MESHES_UPDATED = registerEvent("EVENT_ON_RENDER_MESHES_UPDATED",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_RENDER_MESHES_UPDATED = registerEvent("EVENT_ON_RENDER_MESHES_UPDATED",ComponentEventInfo::Type::Explicit);
 }
 
 CModelComponent::CModelComponent(BaseEntity &ent)

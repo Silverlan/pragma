@@ -15,7 +15,7 @@ using namespace pragma;
 ComponentEventId DamageableComponent::EVENT_ON_TAKE_DAMAGE = pragma::INVALID_COMPONENT_ID;
 void DamageableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_TAKE_DAMAGE = registerEvent("ON_TAKE_DAMAGE",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_TAKE_DAMAGE = registerEvent("ON_TAKE_DAMAGE",ComponentEventInfo::Type::Broadcast);
 }
 DamageableComponent::DamageableComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)

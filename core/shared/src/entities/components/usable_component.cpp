@@ -17,8 +17,8 @@ pragma::ComponentEventId UsableComponent::EVENT_ON_USE = pragma::INVALID_COMPONE
 pragma::ComponentEventId UsableComponent::EVENT_CAN_USE = pragma::INVALID_COMPONENT_ID;
 void UsableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_USE = registerEvent("ON_USE",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_CAN_USE = registerEvent("CAN_USE",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_USE = registerEvent("ON_USE",ComponentEventInfo::Type::Broadcast);
+	EVENT_CAN_USE = registerEvent("CAN_USE",ComponentEventInfo::Type::Broadcast);
 }
 UsableComponent::UsableComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)

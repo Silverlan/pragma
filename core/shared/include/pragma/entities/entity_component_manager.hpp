@@ -11,6 +11,9 @@
 #include "pragma/entities/entity_component_info.hpp"
 #include "pragma/entities/component_member_reference.hpp"
 #include "pragma/entities/member_type.hpp"
+#include "pragma/entities/entity_component_info.hpp"
+#include "pragma/entities/entity_component_member_info.hpp"
+#include "pragma/entities/entity_component_event_info.hpp"
 #include "pragma/types.hpp"
 #include <cinttypes>
 #include <string>
@@ -43,163 +46,6 @@ namespace pragma
 
 	enum class AttributeSpecializationType : uint8_t;
 	enum class ComponentMemberFlags : uint32_t;
-	struct DLLNETWORK ComponentMemberInfo
-	{
-		struct DLLNETWORK EnumConverter
-		{
-			using NameToEnumFunction = std::function<std::optional<int64_t>(const std::string&)>;
-			using EnumToNameFunction = std::function<std::optional<std::string>(int64_t)>;
-			using EnumValueGetFunction = std::function<std::vector<int64_t>()>;
-			NameToEnumFunction nameToEnum;
-			EnumToNameFunction enumToName;
-			EnumValueGetFunction getValues;
-		};
-		using ApplyFunction = void(*)(const ComponentMemberInfo&,BaseEntityComponent&,const void*);
-		using GetFunction = void(*)(const ComponentMemberInfo&,BaseEntityComponent&,void*);
-		using InterpolationFunction = void(*)(const void*,const void*,double,void*);
-		using UpdateDependenciesFunction = void(*)(BaseEntityComponent&,std::vector<std::string>&);
-		static ComponentMemberInfo CreateDummy();
-		ComponentMemberInfo(std::string &&name,ents::EntityMemberType type,const ApplyFunction &applyFunc,const GetFunction &getFunc);
-
-		template<typename TComponent,typename T,void(*TApply)(const ComponentMemberInfo&,TComponent&,const T&)>
-		void SetSetterFunction()
-		{
-			setterFunction = [](const ComponentMemberInfo &memberInfo,BaseEntityComponent &component,const void *value) {
-				TApply(memberInfo,static_cast<TComponent&>(component),*static_cast<const T*>(value));
-			};
-		}
-		template<typename TComponent,typename T,void(*TApply)(const ComponentMemberInfo&,TComponent&,T)>
-		void SetSetterFunction()
-		{
-			setterFunction = [](const ComponentMemberInfo &memberInfo,BaseEntityComponent &component,const void *value) {
-				TApply(memberInfo,static_cast<TComponent&>(component),*static_cast<const T*>(value));
-			};
-		}
-		template<typename TComponent,typename T,void(TComponent::*TApply)(const T&)>
-		void SetSetterFunction()
-		{
-			setterFunction = [](const ComponentMemberInfo &memberInfo,BaseEntityComponent &component,const void *value) {
-				(static_cast<TComponent&>(component).*TApply)(*static_cast<const T*>(value));
-			};
-		}
-		template<typename TComponent,typename T,void(TComponent::*TApply)(T)>
-		void SetSetterFunction()
-		{
-			setterFunction = [](const ComponentMemberInfo &memberInfo,BaseEntityComponent &component,const void *value) {
-				(static_cast<TComponent&>(component).*TApply)(*static_cast<const T*>(value));
-			};
-		}
-
-		template<typename TComponent,typename T,void(*TGetter)(const ComponentMemberInfo&,TComponent&,T&)>
-		void SetGetterFunction()
-		{
-			getterFunction = [](const ComponentMemberInfo &memberInfo,BaseEntityComponent &component,void *value) {
-				TGetter(memberInfo,static_cast<TComponent&>(component),*static_cast<T*>(value));
-			};
-		}
-		template<typename TComponent,typename T,auto(*TGetter)()>
-		void SetGetterFunction()
-		{
-			getterFunction = [](const ComponentMemberInfo &memberInfo,BaseEntityComponent &component,void *value) {
-				*static_cast<T*>(value) = TGetter();
-			};
-		}
-		template<typename TComponent,typename T,auto(TComponent::*TGetter)()>
-		void SetGetterFunction()
-		{
-			getterFunction = [](const ComponentMemberInfo &memberInfo,BaseEntityComponent &component,void *value) {
-				*static_cast<T*>(value) = (static_cast<TComponent&>(component).*TGetter)();
-			};
-		}
-		template<typename TComponent,typename T,auto(TComponent::*TGetter)() const>
-		void SetGetterFunction()
-		{
-			getterFunction = [](const ComponentMemberInfo &memberInfo,BaseEntityComponent &component,void *value) {
-				*static_cast<T*>(value) = (static_cast<TComponent&>(component).*TGetter)();
-			};
-		}
-
-		template<typename TComponent,typename T,void(*TInterp)(const T&,const T&,double,T&)>
-		void SetInterpolationFunction()
-		{
-			interpolationFunction = [](const void *v0,const void *v1,double t,void *out) {
-				TInterp(*static_cast<const T*>(v0),*static_cast<const T*>(v1),t,*static_cast<T*>(out));
-			};
-		}
-
-		void SetName(const std::string &name);
-		void SetName(std::string &&name);
-		const std::string &GetName() const {return m_name;}
-		size_t GetNameHash() const {return m_nameHash;}
-
-		AttributeSpecializationType GetSpecializationType() const {return m_specializationType;}
-		const std::string *GetCustomSpecializationType() const {return m_customSpecializationType.get();}
-		void SetSpecializationType(AttributeSpecializationType type);
-		void SetSpecializationType(std::string customType);
-		
-		ComponentMemberInfo(const ComponentMemberInfo&);
-		ComponentMemberInfo &operator=(const ComponentMemberInfo &other);
-
-		void SetMin(float min);
-		void SetMax(float max);
-		void SetStepSize(float stepSize);
-		udm::Property &AddMetaData();
-		void AddMetaData(const udm::PProperty &prop);
-		const udm::PProperty &GetMetaData() const;
-		std::optional<float> GetMin() const {return m_min;}
-		std::optional<float> GetMax() const {return m_max;}
-		std::optional<float> GetStepSize() const {return m_stepSize;}
-		template<typename T>
-			bool GetDefault(T &outValue) const;
-		template<typename T>
-			void SetDefault(T value);
-
-		void SetEnum(
-			const EnumConverter::NameToEnumFunction &nameToEnum,
-			const EnumConverter::EnumToNameFunction &enumToName,
-			const EnumConverter::EnumValueGetFunction &getValues
-		);
-		bool IsEnum() const;
-		std::optional<int64_t> EnumNameToValue(const std::string &name) const;
-		std::optional<std::string> ValueToEnumName(int64_t value) const;
-		bool GetEnumValues(std::vector<int64_t> &outValues) const;
-
-		void UpdateDependencies(BaseEntityComponent &component,std::vector<std::string> &outAffectedProps);
-		void ResetToDefault(BaseEntityComponent &component);
-
-		void SetFlags(ComponentMemberFlags flags);
-		ComponentMemberFlags GetFlags() const;
-		bool HasFlag(ComponentMemberFlags flag) const;
-		void SetFlag(ComponentMemberFlags flag,bool set=true);
-
-		ents::EntityMemberType type;
-		ApplyFunction setterFunction = nullptr;
-		GetFunction getterFunction = nullptr;
-		InterpolationFunction interpolationFunction = nullptr;
-		UpdateDependenciesFunction updateDependenciesFunction = nullptr;
-
-		union
-		{
-			uint64_t userIndex;
-			void *userData = nullptr;
-		};
-	private:
-		ComponentMemberInfo();
-		std::string m_name;
-		size_t m_nameHash = 0;
-		ComponentMemberFlags m_flags = static_cast<ComponentMemberFlags>(0);
-
-		AttributeSpecializationType m_specializationType;
-		std::unique_ptr<std::string> m_customSpecializationType = nullptr;
-		
-		udm::PProperty m_metaData = nullptr;
-		std::optional<float> m_min {};
-		std::optional<float> m_max {};
-		std::optional<float> m_stepSize {};
-		std::unique_ptr<void,void(*)(void*)> m_default = std::unique_ptr<void,void(*)(void*)>{nullptr,[](void*) {}};
-		std::unique_ptr<EnumConverter> m_enumConverter = nullptr;
-	};
-
 	enum class ComponentFlags : uint8_t
 	{
 		None = 0u,
@@ -250,25 +96,6 @@ namespace pragma
 		EntityComponentManager(const EntityComponentManager&)=delete;
 		EntityComponentManager &operator=(const EntityComponentManager&)=delete;
 
-		struct DLLNETWORK EventInfo
-		{
-			enum class Type : uint8_t
-			{
-				Broadcast = 0,
-				Explicit
-			};
-			EventInfo(const std::string &name,std::optional<ComponentId> componentId={},std::optional<std::type_index> typeIndex={},Type type=Type::Broadcast)
-				: name(name),type{type},typeIndex{typeIndex},componentId{componentId.has_value() ? *componentId : INVALID_COMPONENT_ID}
-			{}
-			ComponentEventId id = std::numeric_limits<ComponentEventId>::max();
-			std::string name;
-			ComponentId componentId = INVALID_COMPONENT_ID;
-			Type type = Type::Broadcast;
-
-			// Only set if this is a C++ component
-			std::optional<std::type_index> typeIndex {};
-		};
-
 		util::TSharedHandle<BaseEntityComponent> CreateComponent(const std::string &name,BaseEntity &ent) const;
 		util::TSharedHandle<BaseEntityComponent> CreateComponent(ComponentId componentId,BaseEntity &ent) const;
 		template<class TComponent,typename=std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<BaseEntityComponent,TComponent>::value>>
@@ -293,19 +120,19 @@ namespace pragma
 		ComponentInfo *GetComponentInfo(ComponentId id);
 
 		template<class T>
-			ComponentEventId RegisterEvent(const std::string &evName,EventInfo::Type type=EventInfo::Type::Broadcast)
+			ComponentEventId RegisterEvent(const std::string &evName,ComponentEventInfo::Type type=ComponentEventInfo::Type::Broadcast)
 		{
 			return RegisterEvent(evName,typeid(T),type);
 		}
-		ComponentEventId RegisterEvent(const std::string &evName,std::type_index typeIndex,EventInfo::Type type=EventInfo::Type::Broadcast);
-		ComponentEventId RegisterEventById(const std::string &evName,ComponentId componentId,EventInfo::Type type=EventInfo::Type::Broadcast);
+		ComponentEventId RegisterEvent(const std::string &evName,std::type_index typeIndex,ComponentEventInfo::Type type=ComponentEventInfo::Type::Broadcast);
+		ComponentEventId RegisterEventById(const std::string &evName,ComponentId componentId,ComponentEventInfo::Type type=ComponentEventInfo::Type::Broadcast);
 		std::optional<ComponentEventId> FindEventId(ComponentId componentId,const std::string &evName) const;
 		std::optional<ComponentEventId> FindEventId(const std::string &componentName,const std::string &evName) const;
 		bool GetEventId(const std::string &evName,ComponentEventId &evId) const;
 		ComponentEventId GetEventId(const std::string &evName) const;
 		bool GetEventName(ComponentEventId evId,std::string &outEvName) const;
 		std::string GetEventName(ComponentEventId evId) const;
-		const std::unordered_map<ComponentEventId,EventInfo> &GetEvents() const;
+		const std::unordered_map<ComponentEventId,ComponentEventInfo> &GetEvents() const;
 
 		struct DLLNETWORK ComponentContainerInfo
 		{
@@ -342,9 +169,8 @@ namespace pragma
 		// List of all created components by component id
 		mutable std::vector<ComponentContainerInfo> m_components;
 
-		std::unordered_map<ComponentEventId,EventInfo> m_componentEvents;
+		std::unordered_map<ComponentEventId,ComponentEventInfo> m_componentEvents;
 	};
-	using TRegisterComponentEvent = const std::function<ComponentEventId(const std::string&,EntityComponentManager::EventInfo::Type)>&;
 	using TRegisterComponentMember = const std::function<ComponentMemberIndex(ComponentMemberInfo&&)>&;
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ComponentFlags);
@@ -356,7 +182,7 @@ template<class TComponent,typename>
 	if(std::is_base_of<pragma::BaseNetComponent,TComponent>::value)
 		flags |= ComponentFlags::Networked;
 	auto componentId = PreRegisterComponentType(name);
-	TComponent::RegisterEvents(*this,[this,componentId](const std::string &evName,EventInfo::Type type) {
+	TComponent::RegisterEvents(*this,[this,componentId](const std::string &evName,ComponentEventInfo::Type type) {
 		auto id = RegisterEvent<TComponent>(evName,type);
 		auto it = m_componentEvents.find(id);
 		assert(it != m_componentEvents.end());

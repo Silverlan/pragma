@@ -43,16 +43,16 @@ ComponentEventId BasePhysicsComponent::EVENT_INITIALIZE_PHYSICS = INVALID_COMPON
 
 void BasePhysicsComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_PHYSICS_INITIALIZED = registerEvent("ON_PHYSICS_INITIALIZED",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_PHYSICS_DESTROYED = registerEvent("ON_PHYSICS_DESTROYED",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_PHYSICS_UPDATED = registerEvent("ON_PHYSICS_UPDATED",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_DYNAMIC_PHYSICS_UPDATED = registerEvent("ON_DYNAMIC_PHYSICS_UPDATED",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_PRE_PHYSICS_SIMULATE = registerEvent("ON_PRE_PHYSICS_SIMULATE",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_POST_PHYSICS_SIMULATE = registerEvent("ON_POST_PHYSICS_SIMULATE",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_SLEEP = registerEvent("EVENT_ON_SLEEP",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_WAKE = registerEvent("EVENT_ON_WAKE",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_HANDLE_RAYCAST = registerEvent("HANDLE_RAYCAST",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_INITIALIZE_PHYSICS = registerEvent("INITIALIZE_PHYSICS",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_PHYSICS_INITIALIZED = registerEvent("ON_PHYSICS_INITIALIZED",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_PHYSICS_DESTROYED = registerEvent("ON_PHYSICS_DESTROYED",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_PHYSICS_UPDATED = registerEvent("ON_PHYSICS_UPDATED",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_DYNAMIC_PHYSICS_UPDATED = registerEvent("ON_DYNAMIC_PHYSICS_UPDATED",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_PRE_PHYSICS_SIMULATE = registerEvent("ON_PRE_PHYSICS_SIMULATE",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_POST_PHYSICS_SIMULATE = registerEvent("ON_POST_PHYSICS_SIMULATE",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_SLEEP = registerEvent("EVENT_ON_SLEEP",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_WAKE = registerEvent("EVENT_ON_WAKE",ComponentEventInfo::Type::Explicit);
+	EVENT_HANDLE_RAYCAST = registerEvent("HANDLE_RAYCAST",ComponentEventInfo::Type::Explicit);
+	EVENT_INITIALIZE_PHYSICS = registerEvent("INITIALIZE_PHYSICS",ComponentEventInfo::Type::Broadcast);
 }
 BasePhysicsComponent::BasePhysicsComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_collisionType(COLLISIONTYPE::NONE),

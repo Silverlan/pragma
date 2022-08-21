@@ -85,18 +85,18 @@ ComponentEventId BaseCharacterComponent::EVENT_ON_JUMP = INVALID_COMPONENT_ID;
 void BaseCharacterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
 	BaseActorComponent::RegisterEvents(componentManager,registerEvent);
-	EVENT_ON_FOOT_STEP = registerEvent("ON_FOOT_STEP",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_CHARACTER_ORIENTATION_CHANGED = registerEvent("ON_CHARACTER_ORIENTATION_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_DEPLOY_WEAPON = registerEvent("ON_DEPLOY_WEAPON",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_SET_ACTIVE_WEAPON = registerEvent("ON_SET_ACTIVE_WEAPON",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_PLAY_FOOTSTEP_SOUND = registerEvent("PLAY_FOOTSTEP_SOUND",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_CALC_MOVEMENT_SPEED = registerEvent("CALC_MOVEMENT_SPEED",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_CALC_AIR_MOVEMENT_MODIFIER = registerEvent("CALC_AIR_MOVEMENT_MODIFIER",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_CALC_MOVEMENT_ACCELERATION = registerEvent("CALC_MOVEMENT_ACCELERATION",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_CALC_MOVEMENT_DIRECTION = registerEvent("CALC_MOVEMENT_DIRECTION",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_IS_MOVING = registerEvent("IS_MOVING",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_HANDLE_VIEW_ROTATION = registerEvent("HANDLE_VIEW_ROTATION",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_JUMP = registerEvent("ON_JUMP",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_FOOT_STEP = registerEvent("ON_FOOT_STEP",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_CHARACTER_ORIENTATION_CHANGED = registerEvent("ON_CHARACTER_ORIENTATION_CHANGED",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_DEPLOY_WEAPON = registerEvent("ON_DEPLOY_WEAPON",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_SET_ACTIVE_WEAPON = registerEvent("ON_SET_ACTIVE_WEAPON",ComponentEventInfo::Type::Broadcast);
+	EVENT_PLAY_FOOTSTEP_SOUND = registerEvent("PLAY_FOOTSTEP_SOUND",ComponentEventInfo::Type::Broadcast);
+	EVENT_CALC_MOVEMENT_SPEED = registerEvent("CALC_MOVEMENT_SPEED",ComponentEventInfo::Type::Explicit);
+	EVENT_CALC_AIR_MOVEMENT_MODIFIER = registerEvent("CALC_AIR_MOVEMENT_MODIFIER",ComponentEventInfo::Type::Explicit);
+	EVENT_CALC_MOVEMENT_ACCELERATION = registerEvent("CALC_MOVEMENT_ACCELERATION",ComponentEventInfo::Type::Explicit);
+	EVENT_CALC_MOVEMENT_DIRECTION = registerEvent("CALC_MOVEMENT_DIRECTION",ComponentEventInfo::Type::Explicit);
+	EVENT_IS_MOVING = registerEvent("IS_MOVING",ComponentEventInfo::Type::Explicit);
+	EVENT_HANDLE_VIEW_ROTATION = registerEvent("HANDLE_VIEW_ROTATION",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_JUMP = registerEvent("ON_JUMP",ComponentEventInfo::Type::Broadcast);
 }
 
 BaseCharacterComponent::BaseCharacterComponent(BaseEntity &ent)

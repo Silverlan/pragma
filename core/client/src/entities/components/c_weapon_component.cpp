@@ -29,7 +29,7 @@ ComponentEventId CWeaponComponent::EVENT_ATTACH_TO_OWNER = INVALID_COMPONENT_ID;
 void CWeaponComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
 	BaseWeaponComponent::RegisterEvents(componentManager,registerEvent);
-	EVENT_ATTACH_TO_OWNER = registerEvent("ATTACH_TO_OWNER",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ATTACH_TO_OWNER = registerEvent("ATTACH_TO_OWNER",ComponentEventInfo::Type::Explicit);
 }
 
 std::vector<CWeaponComponent*> CWeaponComponent::s_weapons;

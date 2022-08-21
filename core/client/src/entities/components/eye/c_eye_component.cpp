@@ -28,7 +28,7 @@ using namespace pragma;
 void CEyeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
 	BaseAnimatedComponent::RegisterEvents(componentManager,registerEvent);
-	// EVENT_ON_EYEBALLS_UPDATED = registerEvent("ON_EYEBALLS_UPDATED",EntityComponentManager::EventInfo::Type::Explicit);
+	// EVENT_ON_EYEBALLS_UPDATED = registerEvent("ON_EYEBALLS_UPDATED",ComponentEventInfo::Type::Explicit);
 	// EVENT_ON_BLINK = registerEvent("EVENT_ON_BLINK");
 }
 void CEyeComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)

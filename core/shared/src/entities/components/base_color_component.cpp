@@ -18,7 +18,7 @@ using namespace pragma;
 ComponentEventId BaseColorComponent::EVENT_ON_COLOR_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseColorComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_COLOR_CHANGED = registerEvent("ON_COLOR_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_COLOR_CHANGED = registerEvent("ON_COLOR_CHANGED",ComponentEventInfo::Type::Broadcast);
 }
 void BaseColorComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {

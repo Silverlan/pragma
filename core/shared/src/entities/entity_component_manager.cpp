@@ -428,15 +428,15 @@ ComponentMemberIndex EntityComponentManager::RegisterMember(ComponentInfo &compo
 }
 const std::vector<ComponentInfo> &EntityComponentManager::GetRegisteredComponentTypes() const {return m_componentInfos;}
 void EntityComponentManager::OnComponentTypeRegistered(const ComponentInfo &componentInfo) {}
-ComponentEventId EntityComponentManager::RegisterEvent(const std::string &evName,std::type_index typeIndex,EventInfo::Type type)
+ComponentEventId EntityComponentManager::RegisterEvent(const std::string &evName,std::type_index typeIndex,ComponentEventInfo::Type type)
 {
-	auto it = std::find_if(m_componentEvents.begin(),m_componentEvents.end(),[&evName](const std::pair<const ComponentEventId,EventInfo> &pair) {
+	auto it = std::find_if(m_componentEvents.begin(),m_componentEvents.end(),[&evName](const std::pair<const ComponentEventId,ComponentEventInfo> &pair) {
 		return evName == pair.second.name;
 	});
 	if(it == m_componentEvents.end())
 	{
 		auto id = get_component_event_id(evName);
-		it = m_componentEvents.insert(std::make_pair(id,EventInfo{evName,{},typeIndex,type})).first;
+		it = m_componentEvents.insert(std::make_pair(id,ComponentEventInfo{evName,{},typeIndex,type})).first;
 		it->second.id = id;
 	}
 	return it->first;
@@ -454,28 +454,28 @@ std::optional<ComponentEventId> EntityComponentManager::FindEventId(ComponentId 
 	if(!componentInfo)
 		return {};
 	auto fullName = componentInfo->name +'_' +evName;
-	auto it = std::find_if(m_componentEvents.begin(),m_componentEvents.end(),[componentId,&fullName](const std::pair<ComponentEventId,EventInfo> &pair) {
+	auto it = std::find_if(m_componentEvents.begin(),m_componentEvents.end(),[componentId,&fullName](const std::pair<ComponentEventId,ComponentEventInfo> &pair) {
 		return pair.second.componentId == componentId && pair.second.name == fullName;
 	});
 	if(it == m_componentEvents.end())
 		return {};
 	return it->first;
 }
-ComponentEventId EntityComponentManager::RegisterEventById(const std::string &evName,ComponentId componentId,EventInfo::Type type)
+ComponentEventId EntityComponentManager::RegisterEventById(const std::string &evName,ComponentId componentId,ComponentEventInfo::Type type)
 {
-	auto it = std::find_if(m_componentEvents.begin(),m_componentEvents.end(),[&evName](const std::pair<const ComponentEventId,EventInfo> &pair) {
+	auto it = std::find_if(m_componentEvents.begin(),m_componentEvents.end(),[&evName](const std::pair<const ComponentEventId,ComponentEventInfo> &pair) {
 		return evName == pair.second.name;
 	});
 	if(it == m_componentEvents.end())
 	{
 		auto id = get_component_event_id(evName);
-		it = m_componentEvents.insert(std::make_pair(id,EventInfo{evName,componentId,{},type})).first;
+		it = m_componentEvents.insert(std::make_pair(id,ComponentEventInfo{evName,componentId,{},type})).first;
 	}
 	return it->first;
 }
 bool EntityComponentManager::GetEventId(const std::string &evName,ComponentEventId &evId) const
 {
-	auto it = std::find_if(m_componentEvents.begin(),m_componentEvents.end(),[&evName](const std::pair<const ComponentEventId,EventInfo> &pair) {
+	auto it = std::find_if(m_componentEvents.begin(),m_componentEvents.end(),[&evName](const std::pair<const ComponentEventId,ComponentEventInfo> &pair) {
 		return evName == pair.second.name;
 	});
 	if(it == m_componentEvents.end())
@@ -505,7 +505,7 @@ std::string EntityComponentManager::GetEventName(ComponentEventId evId) const
 		throw std::logic_error("Entity component event '" +std::to_string(evId) +"' has not been registered!");
 	return name;
 }
-const std::unordered_map<pragma::ComponentEventId,EntityComponentManager::EventInfo> &EntityComponentManager::GetEvents() const {return m_componentEvents;}
+const std::unordered_map<pragma::ComponentEventId,ComponentEventInfo> &EntityComponentManager::GetEvents() const {return m_componentEvents;}
 const std::vector<EntityComponentManager::ComponentContainerInfo> &EntityComponentManager::GetComponents() const {return const_cast<EntityComponentManager*>(this)->GetComponents();}
 std::vector<EntityComponentManager::ComponentContainerInfo> &EntityComponentManager::GetComponents() {return m_components;}
 const std::vector<BaseEntityComponent*> &EntityComponentManager::GetComponents(ComponentId componentId) const

@@ -46,9 +46,9 @@ BaseEntityComponent::~BaseEntityComponent()
 }
 void BaseEntityComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_ENTITY_COMPONENT_ADDED = registerEvent("ON_ENTITY_COMPONENT_ADDED",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_ENTITY_COMPONENT_REMOVED = registerEvent("ON_ENTITY_COMPONENT_REMOVED",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_MEMBERS_CHANGED = registerEvent("ON_MEMBERS_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_ENTITY_COMPONENT_ADDED = registerEvent("ON_ENTITY_COMPONENT_ADDED",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_ENTITY_COMPONENT_REMOVED = registerEvent("ON_ENTITY_COMPONENT_REMOVED",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_MEMBERS_CHANGED = registerEvent("ON_MEMBERS_CHANGED",ComponentEventInfo::Type::Broadcast);
 }
 void BaseEntityComponent::Log(const std::string &msg,LogSeverity severity) const
 {

@@ -7,6 +7,8 @@
 #ifndef __ENTITY_COMPONENT_INFO_HPP__
 #define __ENTITY_COMPONENT_INFO_HPP__
 
+#include <cinttypes>
+
 namespace pragma
 {
 	using ComponentId = uint32_t;

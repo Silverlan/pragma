@@ -51,8 +51,8 @@ ComponentEventId BasePlayerComponent::EVENT_HANDLE_ACTION_INPUT = pragma::INVALI
 ComponentEventId BasePlayerComponent::EVENT_ON_OBSERVATION_MODE_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BasePlayerComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_HANDLE_ACTION_INPUT = registerEvent("HANDLE_ACTION_INPUT",EntityComponentManager::EventInfo::Type::Explicit);
-	EVENT_ON_OBSERVATION_MODE_CHANGED = registerEvent("ON_OBSERVATION_MODE_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_HANDLE_ACTION_INPUT = registerEvent("HANDLE_ACTION_INPUT",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_OBSERVATION_MODE_CHANGED = registerEvent("ON_OBSERVATION_MODE_CHANGED",ComponentEventInfo::Type::Broadcast);
 }
 
 void BasePlayerComponent::SetStandHeight(float height)

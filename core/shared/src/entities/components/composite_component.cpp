@@ -91,8 +91,8 @@ ComponentEventId CompositeComponent::EVENT_ON_ENTITY_ADDED = INVALID_COMPONENT_I
 ComponentEventId CompositeComponent::EVENT_ON_ENTITY_REMOVED = INVALID_COMPONENT_ID;
 void CompositeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_ENTITY_ADDED = registerEvent("ON_COMPOSITE_ENTITY_ADDED",EntityComponentManager::EventInfo::Type::Broadcast);
-	EVENT_ON_ENTITY_REMOVED = registerEvent("ON_COMPOSITE_ENTITY_REMOVED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_ENTITY_ADDED = registerEvent("ON_COMPOSITE_ENTITY_ADDED",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_ENTITY_REMOVED = registerEvent("ON_COMPOSITE_ENTITY_REMOVED",ComponentEventInfo::Type::Broadcast);
 }
 
 CompositeComponent::CompositeComponent(BaseEntity &ent)

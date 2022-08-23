@@ -260,6 +260,7 @@ void Lua::ents::register_library(lua_State *l)
 	auto memberInfoDef = luabind::class_<pragma::ComponentMemberInfo>("MemberInfo");
 	memberInfoDef.add_static_constant("FLAG_NONE",umath::to_integral(pragma::ComponentMemberFlags::None));
 	memberInfoDef.add_static_constant("FLAG_HIDE_IN_INTERFACE_BIT",umath::to_integral(pragma::ComponentMemberFlags::HideInInterface));
+	memberInfoDef.add_static_constant("FLAG_CONTROLLER_BIT",umath::to_integral(pragma::ComponentMemberFlags::Controller));
 	memberInfoDef.def("__tostring",+[](const pragma::ComponentMemberInfo &memberInfo) -> std::string {
 		std::stringstream ss;
 		ss<<"MemberInfo";

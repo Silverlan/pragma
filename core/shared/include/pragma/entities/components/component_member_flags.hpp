@@ -14,7 +14,8 @@ namespace pragma
 	enum class ComponentMemberFlags : uint32_t
 	{
 		None = 0,
-		HideInInterface = 1
+		HideInInterface = 1,
+		Controller = HideInInterface<<1u
 	};
 };
 

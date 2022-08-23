@@ -62,6 +62,9 @@ void CEyeComponent::RegisterMembers(pragma::EntityComponentManager &componentMan
 				value = pose *c.m_viewTarget;
 			}
 		>("viewTargetWs",Vector3{});
+		memberInfo.SetFlag(pragma::ComponentMemberFlags::Controller);
+		auto &meta = memberInfo.AddMetaData();
+		meta["controllerTarget"] = "ec/eye/viewTarget";
 		registerMember(std::move(memberInfo));
 	}
 

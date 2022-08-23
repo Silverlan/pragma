@@ -229,6 +229,38 @@ static std::vector<pragma::ComponentMemberIndex> get_dynamic_member_ids(pragma::
 	get_dynamic_member_ids(c,memberIndices);
 	return memberIndices;
 }
+
+enum class BvhIntersectionFlags : uint32_t
+{
+	None = 0u,
+	ReturnPrimitives = 1u,
+	DiscontinueOnFirstHitPerMesh = ReturnPrimitives<<1u
+};
+REGISTER_BASIC_BITWISE_OPERATORS(BvhIntersectionFlags)
+static std::pair<bool,std::optional<std::vector<uint64_t>>> bvh_intersection_test(
+	const std::function<bool(pragma::BvhIntersectionInfo*)> &fTest,BvhIntersectionFlags flags
+)
+{
+	if(!umath::is_flag_set(flags,BvhIntersectionFlags::ReturnPrimitives))
+	{
+		auto res = fTest(nullptr);
+		return std::pair<bool,std::optional<std::vector<uint64_t>>>{res,{}};
+	}
+	if(umath::is_flag_set(flags,BvhIntersectionFlags::DiscontinueOnFirstHitPerMesh))
+	{
+		pragma::BvhMeshIntersectionInfo info {};
+		auto res = fTest(&info);
+		if(!res)
+			return std::pair<bool,std::optional<std::vector<uint64_t>>>{res,{}};
+		return std::pair<bool,std::optional<std::vector<uint64_t>>>{res,std::move(info.primitives)};
+	}
+	pragma::BvhIntersectionInfo info {};
+	auto res = fTest(&info);
+	if(!res)
+		return std::pair<bool,std::optional<std::vector<uint64_t>>>{res,{}};
+	return std::pair<bool,std::optional<std::vector<uint64_t>>>{res,std::move(info.primitives)};
+}
+
 void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 {
 	auto entityComponentDef = pragma::lua::create_entity_component_class<pragma::BaseEntityComponent>("EntityComponent");
@@ -446,28 +478,42 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	defBvh.def("IntersectionTest",static_cast<std::optional<pragma::BvhHitInfo>(pragma::BaseBvhComponent::*)(const Vector3&,const Vector3&,float,float) const>(&pragma::BaseBvhComponent::IntersectionTest));
 	defBvh.def("IntersectionTestAabb",static_cast<bool(pragma::BaseBvhComponent::*)(const Vector3&,const Vector3&) const>(&pragma::BaseBvhComponent::IntersectionTestAabb));
 	defBvh.def("IntersectionTestAabb",
-		+[](const pragma::BaseBvhComponent &bvhC,const Vector3 &min,const Vector3 &max,bool returnPrimitives)
+		+[](const pragma::BaseBvhComponent &bvhC,const Vector3 &min,const Vector3 &max,BvhIntersectionFlags flags)
 		-> std::pair<bool,std::optional<std::vector<uint64_t>>>
 		{
-		if(!returnPrimitives)
+			return bvh_intersection_test([&bvhC,&min,&max](pragma::BvhIntersectionInfo *info) {
+				return info ? bvhC.IntersectionTestAabb(min,max,*info) : bvhC.IntersectionTestAabb(min,max);
+			},flags);
+		});
+	defBvh.def("IntersectionTestKDop",static_cast<bool(pragma::BaseBvhComponent::*)(const std::vector<umath::Plane>&) const>(&pragma::BaseBvhComponent::IntersectionTestKDop));
+	defBvh.def("IntersectionTestKDop",
+		+[](const pragma::BaseBvhComponent &bvhC,const std::vector<umath::Plane> &planes,BvhIntersectionFlags flags)
+		-> std::pair<bool,std::optional<std::vector<uint64_t>>>
 		{
-			auto res = bvhC.IntersectionTestAabb(min,max);
-			return std::pair<bool,std::optional<std::vector<uint64_t>>>{res,{}};
-		}
-		pragma::BvhIntersectionInfo info {};
-		auto res = bvhC.IntersectionTestAabb(min,max,info);
-		if(!res)
-			return std::pair<bool,std::optional<std::vector<uint64_t>>>{res,{}};
-		return std::pair<bool,std::optional<std::vector<uint64_t>>>{res,std::move(info.primitives)};
-	});
+			return bvh_intersection_test([&bvhC,&planes](pragma::BvhIntersectionInfo *info) {
+				return info ? bvhC.IntersectionTestKDop(planes,*info) : bvhC.IntersectionTestKDop(planes);
+			},flags);
+		});
 	defBvh.def("FindPrimitiveMeshInfo",
 		+[](const pragma::BaseBvhComponent &bvhC,size_t primIdx) -> std::optional<std::pair<EntityHandle,std::shared_ptr<ModelSubMesh>>> {
 		auto *range = bvhC.FindPrimitiveMeshInfo(primIdx);
 		if(!range)
 			return std::optional<std::pair<EntityHandle,std::shared_ptr<ModelSubMesh>>>{};
-		return std::pair<EntityHandle,std::shared_ptr<ModelSubMesh>>{range->entity->GetHandle(),range->mesh};
+		auto *ent = range->entity ? range->entity : &bvhC.GetEntity();
+		return std::pair<EntityHandle,std::shared_ptr<ModelSubMesh>>{ent->GetHandle(),range->mesh};
 	});
 	defBvh.scope[defBvhHitInfo];
+
+	defBvh.add_static_constant("BVH_INTERSECTION_FLAG_NONE",umath::to_integral(BvhIntersectionFlags::None));
+	defBvh.add_static_constant("BVH_INTERSECTION_FLAG_BIT_RETURN_PRIMITIVES",umath::to_integral(BvhIntersectionFlags::ReturnPrimitives));
+	defBvh.add_static_constant("BVH_INTERSECTION_FLAG_BIT_DISCONTINUE_ON_FIRST_HIT_PER_MESH",umath::to_integral(BvhIntersectionFlags::DiscontinueOnFirstHitPerMesh));
+
+	/*auto defBvhIntersectionInfo = luabind::class_<pragma::BvhIntersectionInfo>("IntersectionInfo");
+	defBvhIntersectionInfo.def_readonly("primitives",&pragma::BvhIntersectionInfo::primitives);
+	defBvh.scope[defBvhIntersectionInfo];
+
+	auto defBvhMeshIntersectionInfo = luabind::class_<pragma::BvhMeshIntersectionInfo,pragma::BvhIntersectionInfo>("MeshIntersectionInfo");
+	defBvh.scope[defBvhMeshIntersectionInfo];*/
 	mod[defBvh];
 
 	auto defStaticBvh = pragma::lua::create_entity_component_class<pragma::BaseStaticBvhCacheComponent,pragma::BaseBvhComponent>("BaseStaticBvhCacheComponent");

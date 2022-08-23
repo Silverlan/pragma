@@ -22,10 +22,32 @@ namespace pragma
 		float v;
 	};
 
+	struct BvhMeshIntersectionInfo;
 	struct DLLNETWORK BvhIntersectionInfo
 	{
 		void Clear();
 		std::vector<size_t> primitives;
+
+		BvhMeshIntersectionInfo *GetMeshIntersectionInfo();
+	protected:
+		bool m_isMeshIntersectionInfo = false;
+	};
+
+	struct BvhMeshRange;
+	struct DLLNETWORK BvhMeshIntersectionInfo
+		: public BvhIntersectionInfo
+	{
+		BvhMeshIntersectionInfo()
+		{
+			m_isMeshIntersectionInfo = true;
+		}
+
+		// For internal use only
+		std::vector<const pragma::BvhMeshRange*> &GetTemporaryMeshRanges() {return m_tmpMeshRanges;}
+		std::unordered_set<size_t> &GetTemporarMeshMap() {return m_tmpMeshes;}
+	protected:
+		std::vector<const pragma::BvhMeshRange*> m_tmpMeshRanges;
+		std::unordered_set<size_t> m_tmpMeshes;
 	};
 
 	struct DLLNETWORK BvhMeshRange
@@ -74,6 +96,8 @@ namespace pragma
 		) const;
 		bool IntersectionTestAabb(const Vector3 &min,const Vector3 &max) const;
 		bool IntersectionTestAabb(const Vector3 &min,const Vector3 &max,BvhIntersectionInfo &outIntersectionInfo) const;
+		bool IntersectionTestKDop(const std::vector<umath::Plane> &planes) const;
+		bool IntersectionTestKDop(const std::vector<umath::Plane> &planes,BvhIntersectionInfo &outIntersectionInfo) const;
 		void SetStaticCache(BaseStaticBvhCacheComponent *staticCache);
 		virtual bool IsStaticBvh() const {return false;}
 		const BvhMeshRange *FindPrimitiveMeshInfo(size_t primIdx) const;

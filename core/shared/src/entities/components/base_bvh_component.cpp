@@ -13,6 +13,7 @@
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <mathutil/umath_geometry.hpp>
+#include <sharedutils/util_hash.hpp>
 #include <bvh/bvh.hpp>
 #include <bvh/triangle.hpp>
 #include <bvh/sweep_sah_builder.hpp>
@@ -39,10 +40,23 @@ namespace pragma
 		std::vector<Primitive> primitives;
 		std::vector<BvhMeshRange> meshRanges;
 
+		const BvhMeshRange *FindMeshRange(size_t primIdx) const
+		{
+			BvhMeshRange search {};
+			search.start = primIdx *3;
+			auto it = std::upper_bound(meshRanges.begin(),meshRanges.end(),search);
+			if(it == meshRanges.begin())
+				return nullptr;
+			--it;
+			return &*it;
+		}
+
 		void InitializeIntersectorData();
 		std::unique_ptr<IntersectorData> intersectorData;
 	};
 };
+
+BvhMeshIntersectionInfo *pragma::BvhIntersectionInfo::GetMeshIntersectionInfo() {return m_isMeshIntersectionInfo ? static_cast<BvhMeshIntersectionInfo*>(this) : nullptr;}
 
 std::vector<BvhMeshRange> &pragma::get_bvh_mesh_ranges(BvhData &bvhData) {return bvhData.meshRanges;}
 
@@ -51,58 +65,135 @@ void pragma::BvhIntersectionInfo::Clear()
 	primitives.clear();
 }
 
-static bool test_bvh_intersection_with_aabb(const pragma::BvhData &bvhData,const Vector3 &min,const Vector3 &max,size_t nodeIdx=0,BvhIntersectionInfo *outIntersectionInfo=nullptr)
+static void get_bvh_bounds(const bvh::BoundingBox<float> &bb,Vector3 &outMin,Vector3 &outMax)
+{
+	constexpr auto epsilon = 0.001f;
+	outMin = Vector3{umath::min(bb.min.values[0],bb.max.values[0]) -epsilon,umath::min(bb.min.values[1],bb.max.values[1]) -epsilon,umath::min(bb.min.values[2],bb.max.values[2]) -epsilon};
+	outMax = Vector3{umath::max(bb.min.values[0],bb.max.values[0]) +epsilon,umath::max(bb.min.values[1],bb.max.values[1]) +epsilon,umath::max(bb.min.values[2],bb.max.values[2]) +epsilon};
+}
+static bool test_bvh_intersection(
+	const pragma::BvhData &bvhData,
+	const std::function<bool(const Vector3&,const Vector3&)> &testAabb,
+	const std::function<bool(const Primitive&)> &testTri,
+	size_t nodeIdx=0,BvhIntersectionInfo *outIntersectionInfo=nullptr
+)
 {
 	auto &bvh = bvhData.bvh;
 	auto &node = bvh.nodes.get()[nodeIdx];
-	auto bbProxy = node.bounding_box_proxy();
-	auto bb = bbProxy.to_bounding_box();
-	constexpr auto epsilon = 0.001f;
-	Vector3 v0{umath::min(bb.min.values[0],bb.max.values[0]) -epsilon,umath::min(bb.min.values[1],bb.max.values[1]) -epsilon,umath::min(bb.min.values[2],bb.max.values[2]) -epsilon};
-	Vector3 v1{umath::max(bb.min.values[0],bb.max.values[0]) +epsilon,umath::max(bb.min.values[1],bb.max.values[1]) +epsilon,umath::max(bb.min.values[2],bb.max.values[2]) +epsilon};
-	auto intersect = umath::intersection::aabb_aabb(
-		min,max,
-		Vector3{umath::min(v0.x,v1.x) -epsilon,umath::min(v0.y,v1.y) -epsilon,umath::min(v0.z,v1.z) -epsilon},
-		Vector3{umath::max(v0.x,v1.x) +epsilon,umath::max(v0.y,v1.y) +epsilon,umath::max(v0.z,v1.z) +epsilon}
-	);
-	if(intersect == umath::intersection::Intersect::Outside)
+	Vector3 v0,v1;
+	get_bvh_bounds(node.bounding_box_proxy().to_bounding_box(),v0,v1);
+	auto intersect = testAabb(v0,v1);
+	if(!intersect)
 		return false;
 	if(node.is_leaf())
 	{
 		auto hasHit = false;
+		auto *meshIntersectionInfo = outIntersectionInfo ? outIntersectionInfo->GetMeshIntersectionInfo() : nullptr;
 		for(auto i=decltype(node.primitive_count){0u};i<node.primitive_count;++i)
 		{
 			auto primIdx = bvh.primitive_indices[node.first_child_or_primitive +i];
+
+			if(meshIntersectionInfo)
+			{
+				auto skip = false;
+				auto idx = primIdx *3;
+				for(auto *meshRange : meshIntersectionInfo->GetTemporaryMeshRanges())
+				{
+					if(idx >= meshRange->start && idx < meshRange->end)
+					{
+						skip = true;
+						break;
+					}
+				}
+				if(skip)
+					continue;
+			}
+
 			auto &prim = bvhData.primitives[primIdx];
 			auto p1 = prim.p1();
 			auto p2 = prim.p2();
-			auto res = umath::intersection::aabb_triangle(
+			auto res = testTri(prim);
+			if(res)
+			{
+				if(!outIntersectionInfo)
+					return true;
+				auto addPrim = true;
+				if(meshIntersectionInfo)
+				{
+					auto *meshRange = bvhData.FindMeshRange(primIdx);
+					assert(meshRange != nullptr);
+					meshIntersectionInfo->GetTemporaryMeshRanges().push_back(meshRange);
+
+					auto &tmpMeshes = meshIntersectionInfo->GetTemporarMeshMap();
+					auto hash = util::hash_combine<uint64_t>(util::hash_combine<uint64_t>(0,reinterpret_cast<uint64_t>(meshRange->mesh.get())),reinterpret_cast<uint64_t>(meshRange->entity));
+					auto it = tmpMeshes.find(hash);
+					if(it != tmpMeshes.end())
+						addPrim = false;
+					else
+						tmpMeshes.insert(hash);
+				}
+				if(addPrim)
+				{
+					if(outIntersectionInfo->primitives.size() == outIntersectionInfo->primitives.capacity())
+						outIntersectionInfo->primitives.reserve(outIntersectionInfo->primitives.size() *1.75);
+					outIntersectionInfo->primitives.push_back(primIdx);
+				}
+				hasHit = true;
+			}
+		}
+		if(meshIntersectionInfo)
+			meshIntersectionInfo->GetTemporaryMeshRanges().clear();
+		return hasHit;
+	}
+	if(!outIntersectionInfo)
+	{
+		return test_bvh_intersection(bvhData,testAabb,testTri,node.first_child_or_primitive,outIntersectionInfo) ||
+			test_bvh_intersection(bvhData,testAabb,testTri,node.first_child_or_primitive +1,outIntersectionInfo);
+	}
+	// We have to visit both
+	auto a = test_bvh_intersection(bvhData,testAabb,testTri,node.first_child_or_primitive,outIntersectionInfo);
+	auto b = test_bvh_intersection(bvhData,testAabb,testTri,node.first_child_or_primitive +1,outIntersectionInfo);
+	return a || b;
+}
+static std::unique_ptr<std::vector<const pragma::BvhMeshRange*>> get_temp_intersection_data(BvhIntersectionInfo *outIntersectionInfo=nullptr)
+{
+}
+static bool test_bvh_intersection_with_aabb(const pragma::BvhData &bvhData,const Vector3 &min,const Vector3 &max,size_t nodeIdx=0,BvhIntersectionInfo *outIntersectionInfo=nullptr)
+{
+	return test_bvh_intersection(
+		bvhData,[&min,&max](const Vector3 &aabbMin,const Vector3 &aabbMax) -> bool {
+			return umath::intersection::aabb_aabb(
+				min,max,
+				aabbMin,
+				aabbMax
+			) != umath::intersection::Intersect::Outside;
+		},[&min,&max](const Primitive &prim) -> bool {
+			auto p1 = prim.p1();
+			auto p2 = prim.p2();
+			return umath::intersection::aabb_triangle(
 				min,max,
 				*reinterpret_cast<const Vector3*>(&prim.p0.values),
 				*reinterpret_cast<const Vector3*>(&p1.values),
 				*reinterpret_cast<const Vector3*>(&p2.values)
 			);
-			if(res)
-			{
-				if(!outIntersectionInfo)
-					return true;
-				if(outIntersectionInfo->primitives.size() == outIntersectionInfo->primitives.capacity())
-					outIntersectionInfo->primitives.reserve(outIntersectionInfo->primitives.size() *1.75);
-				outIntersectionInfo->primitives.push_back(primIdx);
-				hasHit = true;
-			}
-		}
-		return hasHit;
-	}
-	if(!outIntersectionInfo)
-	{
-		return test_bvh_intersection_with_aabb(bvhData,min,max,node.first_child_or_primitive,outIntersectionInfo) ||
-			test_bvh_intersection_with_aabb(bvhData,min,max,node.first_child_or_primitive +1,outIntersectionInfo);
-	}
-	// We have to visit both
-	auto a = test_bvh_intersection_with_aabb(bvhData,min,max,node.first_child_or_primitive,outIntersectionInfo);
-	auto b = test_bvh_intersection_with_aabb(bvhData,min,max,node.first_child_or_primitive +1,outIntersectionInfo);
-	return a || b;
+		},nodeIdx,outIntersectionInfo
+	);
+}
+static bool test_bvh_intersection_with_kdop(const pragma::BvhData &bvhData,const std::vector<umath::Plane> &kdop,size_t nodeIdx=0,BvhIntersectionInfo *outIntersectionInfo=nullptr)
+{
+	return test_bvh_intersection(
+		bvhData,[&kdop](const Vector3 &aabbMin,const Vector3 &aabbMax) -> bool {
+			return umath::intersection::aabb_in_plane_mesh(
+				aabbMin,aabbMax,kdop
+			) != umath::intersection::Intersect::Outside;
+		},[&kdop](const Primitive &prim) -> bool {
+			Vector3 v0,v1;
+			get_bvh_bounds(prim.bounding_box(),v0,v1);
+			return umath::intersection::aabb_in_plane_mesh(
+				v0,v1,kdop
+			) != umath::intersection::Intersect::Outside;
+		},nodeIdx,outIntersectionInfo
+	);
 }
 
 pragma::BvhData::BvhData()
@@ -280,6 +371,20 @@ bool BaseBvhComponent::IntersectionTestAabb(const Vector3 &min,const Vector3 &ma
 	std::scoped_lock lock {m_bvhDataMutex};
 	return test_bvh_intersection_with_aabb(*m_bvhData,min,max);
 }
+bool BaseBvhComponent::IntersectionTestKDop(const std::vector<umath::Plane> &planes,BvhIntersectionInfo &outIntersectionInfo) const
+{
+	if(!m_bvhData || m_bvhData->primitives.empty())
+		return false;
+	std::scoped_lock lock {m_bvhDataMutex};
+	return test_bvh_intersection_with_kdop(*m_bvhData,planes,0u,&outIntersectionInfo);
+}
+bool BaseBvhComponent::IntersectionTestKDop(const std::vector<umath::Plane> &planes) const
+{
+	if(!m_bvhData || m_bvhData->primitives.empty())
+		return false;
+	std::scoped_lock lock {m_bvhDataMutex};
+	return test_bvh_intersection_with_kdop(*m_bvhData,planes);
+}
 bool BaseBvhComponent::IntersectionTest(
 	const Vector3 &origin,const Vector3 &dir,float minDist,float maxDist,
 	BvhHitInfo &outHitInfo
@@ -321,13 +426,7 @@ bool BaseBvhComponent::IntersectionTest(
 
 const BvhMeshRange *BaseBvhComponent::FindPrimitiveMeshInfo(size_t primIdx) const
 {
-	BvhMeshRange search {};
-	search.start = primIdx *3;
-	auto it = std::upper_bound(m_bvhData->meshRanges.begin(),m_bvhData->meshRanges.end(),search);
-	if(it == m_bvhData->meshRanges.begin())
-		return nullptr;
-	--it;
-	return &*it;
+	return m_bvhData->FindMeshRange(primIdx);
 }
 
 std::optional<pragma::BvhHitInfo> BaseBvhComponent::IntersectionTest(

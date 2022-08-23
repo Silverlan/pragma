@@ -109,6 +109,74 @@ function ents.ClickComponent.get_camera()
 	return vpData.camera
 end
 function ents.ClickComponent.get_viewport_data() return get_viewport_data() end
+local function get_local_planes(planes,ent)
+	local pose = ent:GetPose():GetInverse()
+	local localPlanes = {}
+	for _,plane in ipairs(planes) do
+		table.insert(localPlanes,pose *plane)
+	end
+	return localPlanes
+end
+local function should_entity_pass(ent,entPl,filter)
+	local mdl = ent:GetModel()
+	local renderC = ent:GetComponent(ents.COMPONENT_RENDER)
+	return mdl ~= nil and ent ~= entPl and renderC ~= nil and renderC:GetSceneRenderPass() ~= game.SCENE_RENDER_PASS_VIEW and renderC:GetSceneRenderPass() ~= game.SCENE_RENDER_PASS_NONE and (filter == nil or filter(ent,renderC) == true) and
+		(ent:HasComponent(ents.COMPONENT_STATIC_BVH_USER) == false or ent:GetComponent(ents.COMPONENT_STATIC_BVH_USER):IsActive() == false)
+end
+function ents.ClickComponent.find_entities_in_kdop(planes,filter)
+	local pl = ents.get_local_player()
+	if(pl == nil) then return end
+	local entPl = pl:GetEntity()
+
+	debug.start_profiling_task("click_find_entities_in_kdop")
+	local flags = bit.bor(
+		ents.BvhComponent.BVH_INTERSECTION_FLAG_BIT_RETURN_PRIMITIVES,
+		ents.BvhComponent.BVH_INTERSECTION_FLAG_BIT_DISCONTINUE_ON_FIRST_HIT_PER_MESH
+	)
+	local results = {}
+	local entToResultIdx = {}
+	local meshMap = {}
+	local function populate_results(c,indices)
+		for _,idx in ipairs(indices) do
+			local ent,subMesh = c:FindPrimitiveMeshInfo(idx)
+			if(ent ~= nil) then
+				local idx = entToResultIdx[ent]
+				if(idx == nil) then
+					table.insert(results,{
+						entity = ent,
+						meshes = {}
+					})
+					entToResultIdx[ent] = #results
+					idx = #results
+				end
+				local uuid = tostring(subMesh:GetUuid())
+				if(meshMap[uuid] == nil) then
+					table.insert(results[idx].meshes,subMesh)
+					meshMap[uuid] = true
+				end
+			end
+		end
+	end
+	for ent,c in ents.citerator(ents.COMPONENT_STATIC_BVH_CACHE) do
+		local localPlanes = get_local_planes(planes,ent)
+		local r,indices = c:IntersectionTestKDop(localPlanes,flags)
+		if(r ~= false) then
+			populate_results(c,indices)
+		end
+	end
+
+	for ent,c in ents.citerator(ents.COMPONENT_BVH,{ents.IteratorFilterComponent(ents.COMPONENT_CLICK),ents.IteratorFilterComponent(ents.COMPONENT_MODEL),ents.IteratorFilterComponent(ents.COMPONENT_RENDER)}) do
+		if(should_entity_pass(ent,entPl,filter)) then
+			local localPlanes = get_local_planes(planes,ent)
+			local r,indices = c:IntersectionTestKDop(localPlanes,flags)
+			if(r ~= false) then
+				populate_results(c,indices)
+			end
+		end
+	end
+	debug.stop_profiling_task()
+	return results
+end
 function ents.ClickComponent.raycast(pos,dir,filter,maxDist)
 	maxDist = maxDist or 32768.0
 	local pl = ents.get_local_player()
@@ -143,61 +211,59 @@ function ents.ClickComponent.raycast(pos,dir,filter,maxDist)
 	local function testEntity(ent)
 		local mdl = ent:GetModel()
 		local renderC = ent:GetComponent(ents.COMPONENT_RENDER)
-		if(mdl ~= nil and ent ~= entPl and renderC ~= nil and renderC:GetSceneRenderPass() ~= game.SCENE_RENDER_PASS_VIEW and renderC:GetSceneRenderPass() ~= game.SCENE_RENDER_PASS_NONE and (filter == nil or filter(ent,renderC) == true)) then
-			if(ent:HasComponent(ents.COMPONENT_STATIC_BVH_USER) == false or ent:GetComponent(ents.COMPONENT_STATIC_BVH_USER):IsActive() == false) then
-				local scale = ent:GetScale()
-				if(scale.x > 0.001 and scale.y > 0.001 and scale.z > 0.001) then
-					local pose = ent:GetPose():GetInverse()
-					pose:SetScale(Vector(1,1,1))
+		if(should_entity_pass(ent,entPl,filter)) then
+			local scale = ent:GetScale()
+			if(scale.x > 0.001 and scale.y > 0.001 and scale.z > 0.001) then
+				local pose = ent:GetPose():GetInverse()
+				pose:SetScale(Vector(1,1,1))
 
-					-- Move ray into entity space
-					local lpos = pose *pos
-					local ldir = dir:Copy()
-					ldir:Rotate(pose:GetRotation())
-					
-					lpos = Vector(lpos.x /scale.x,lpos.y /scale.y,lpos.z /scale.z)
-					ldir = ldir *maxDist
-					ldir = Vector(ldir.x /scale.x,ldir.y /scale.y,ldir.z /scale.z)
-					local lMaxDist = ldir:Length()
-					ldir = ldir /lMaxDist
+				-- Move ray into entity space
+				local lpos = pose *pos
+				local ldir = dir:Copy()
+				ldir:Rotate(pose:GetRotation())
+				
+				lpos = Vector(lpos.x /scale.x,lpos.y /scale.y,lpos.z /scale.z)
+				ldir = ldir *maxDist
+				ldir = Vector(ldir.x /scale.x,ldir.y /scale.y,ldir.z /scale.z)
+				local lMaxDist = ldir:Length()
+				ldir = ldir /lMaxDist
 
-					local bvhC = ent:GetComponent(ents.COMPONENT_BVH)
-					local hitData = bvhC:IntersectionTest(lpos,ldir,0.0,lMaxDist)
-					if(hitData ~= nil) then
-						local clickC = ent:GetComponent(ents.COMPONENT_CLICK)
-						local priority = (clickC ~= nil) and clickC:GetPriority() or 0
-						local hitDist = hitData.distance
+				local bvhC = ent:GetComponent(ents.COMPONENT_BVH)
+				local hitData = bvhC:IntersectionTest(lpos,ldir,0.0,lMaxDist)
+				if(hitData ~= nil) then
+					local clickC = ent:GetComponent(ents.COMPONENT_CLICK)
+					local priority = (clickC ~= nil) and clickC:GetPriority() or 0
+					local hitDist = hitData.distance
 
-						if(math.abs(scale:LengthSqr() -1.0) > 0.001) then
-							-- Object is scaled; We have to calculate hit distance
-							-- for unscaled space
-							local lhitPos = lpos +ldir *hitDist
-							lhitPos = lhitPos *scale
-							lhitPos = pose:GetInverse() *lhitPos
-							local diff = lhitPos -pos
-							hitDist = diff:Length()
-						end
-
-						if(hitDist < distClosest or priority >= priorityClosest) then -- and hitData.distance > 0.0) then
-							distClosest = hitDist
-							hitPos = pos +dir *hitDist
-							actorClosest = hitData.entity
-							hitDataClosest = hitData
-							priorityClosest = priority
-						end
+					if(math.abs(scale:LengthSqr() -1.0) > 0.001) then
+						-- Object is scaled; We have to calculate hit distance
+						-- for unscaled space
+						local lhitPos = lpos +ldir *hitDist
+						lhitPos = lhitPos *scale
+						lhitPos = pose:GetInverse() *lhitPos
+						local diff = lhitPos -pos
+						hitDist = diff:Length()
 					end
 
-					--[[local r,hitData = renderC:CalcRayIntersection(pos,dir *maxDist,false)
-					-- print("Intersection with ",ent,": ",r)
-					-- Note: Distance of 0 usually means we're inside the object, in which case we probably don't intend to select it
-					if(r == intersect.RESULT_INTERSECT and hitData.distance < distClosest) then -- and hitData.distance > 0.0) then
-						-- print("Clicked actor: ",ent)
-						distClosest = hitData.distance
-						hitPos = hitData.position
+					if(hitDist < distClosest or priority >= priorityClosest) then -- and hitData.distance > 0.0) then
+						distClosest = hitDist
+						hitPos = pos +dir *hitDist
+						actorClosest = hitData.entity
 						hitDataClosest = hitData
-						actorClosest = ent
-					end]]
+						priorityClosest = priority
+					end
 				end
+
+				--[[local r,hitData = renderC:CalcRayIntersection(pos,dir *maxDist,false)
+				-- print("Intersection with ",ent,": ",r)
+				-- Note: Distance of 0 usually means we're inside the object, in which case we probably don't intend to select it
+				if(r == intersect.RESULT_INTERSECT and hitData.distance < distClosest) then -- and hitData.distance > 0.0) then
+					-- print("Clicked actor: ",ent)
+					distClosest = hitData.distance
+					hitPos = hitData.position
+					hitDataClosest = hitData
+					actorClosest = ent
+				end]]
 			end
 		end
 	end

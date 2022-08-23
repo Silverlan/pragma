@@ -476,7 +476,12 @@ void Lua::Model::register_class(
 	classDef.def("IsStatic",static_cast<void(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) {
 		Lua::PushBool(l,umath::is_flag_set(mdl.GetMetaInfo().flags,::Model::Flags::Static));
 	}));
-
+	classDef.def("GetEyeball",+[](lua_State *l,::Model &mdl,uint32_t eyeIdx) {
+		auto *eyeball = mdl.GetEyeball(eyeIdx);
+		if(!eyeball)
+			return;
+		Lua::Push<Eyeball*>(l,eyeball);
+	});
 	classDef.def("GetEyeballs",static_cast<void(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) {
 		auto &eyeballs = mdl.GetEyeballs();
 		auto t = Lua::CreateTable(l);

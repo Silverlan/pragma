@@ -582,6 +582,19 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		auto pose = hEye.CalcEyeballPose(eyeIndex,&bonePose);
 		return {pose,bonePose};
 	}));
+	defCEye.def("FindEyeballIndex",+[](lua_State *l,pragma::CEyeComponent &hEye,uint32_t skinMatIdx) -> std::optional<uint32_t> {
+		uint32_t eyeballIdx;
+		if(!hEye.FindEyeballIndex(skinMatIdx,eyeballIdx))
+			return {};
+		return eyeballIdx;
+	});
+	defCEye.def("GetEyeballProjectionVectors",+[](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeballIndex)
+		-> std::optional<std::pair<Vector4,Vector4>> {
+		Vector4 projU,projV;
+		if(!hEye.GetEyeballProjectionVectors(eyeballIndex,projU,projV))
+			return {};
+		return std::pair<Vector4,Vector4>{projU,projV};
+	});
 	defCEye.def("GetEyeballState",static_cast<pragma::CEyeComponent::EyeballState*(*)(lua_State*,pragma::CEyeComponent&,uint32_t)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex) -> pragma::CEyeComponent::EyeballState* {
 		auto *eyeballData = hEye.GetEyeballData(eyeIndex);
 		if(eyeballData == nullptr)

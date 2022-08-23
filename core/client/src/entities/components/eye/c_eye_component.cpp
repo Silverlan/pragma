@@ -44,7 +44,7 @@ void CEyeComponent::RegisterMembers(pragma::EntityComponentManager &componentMan
 				value = c.m_viewTarget;
 			}
 		>("viewTarget",Vector3{});
-		memberInfo.SetFlag(pragma::ComponentMemberFlags::HideInInterface);
+		memberInfo.SetFlag(pragma::ComponentMemberFlags::ObjectSpace);
 		registerMember(std::move(memberInfo));
 	}
 
@@ -62,7 +62,7 @@ void CEyeComponent::RegisterMembers(pragma::EntityComponentManager &componentMan
 				value = pose *c.m_viewTarget;
 			}
 		>("viewTargetWs",Vector3{});
-		memberInfo.SetFlag(pragma::ComponentMemberFlags::Controller);
+		memberInfo.SetFlag(pragma::ComponentMemberFlags::HideInInterface | pragma::ComponentMemberFlags::Controller);
 		auto &meta = memberInfo.AddMetaData();
 		meta["controllerTarget"] = "ec/eye/viewTarget";
 		registerMember(std::move(memberInfo));

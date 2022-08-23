@@ -8,6 +8,7 @@
 #define __PRAGMA_COMPONENT_MEMBER_FLAGS_HPP__
 
 #include <cinttypes>
+#include <mathutil/umath.h>
 
 namespace pragma
 {
@@ -15,8 +16,11 @@ namespace pragma
 	{
 		None = 0,
 		HideInInterface = 1,
-		Controller = HideInInterface<<1u
+		Controller = HideInInterface<<1u,
+		WorldSpace = Controller<<1u,
+		ObjectSpace = WorldSpace<<1u
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::ComponentMemberFlags)
 
 #endif

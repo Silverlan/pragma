@@ -26,6 +26,7 @@ function gui.WIMenuBar:OnInitialize()
 	self:SetBackgroundElement(pMain)
 	pMain:SetParent(self)
 	pMain:SetColor(Color.Beige)
+	pMain:AddStyleClass("menu_bar_background")
 	self.m_pMain = pMain
 
 	self.m_tItems = {}
@@ -43,6 +44,8 @@ function gui.WIMenuBar:OnInitialize()
 	--[[pClose:SetSize(self:GetHeight(),self:GetHeight())
 	pClose:SetRight(self:GetRight())
 	pClose:SetAnchor(1,0,1,0)]]
+	self:AddStyleClass("menu_bar")
+	self:ScheduleUpdate()
 end
 function gui.WIMenuBar:SetBackgroundColor(col) self.m_pMain:SetColor(col) end
 function gui.WIMenuBar:IsContextMenuOpen()
@@ -50,6 +53,42 @@ function gui.WIMenuBar:IsContextMenuOpen()
 		if(item:IsValid() and item:IsContextMenuOpen()) then return true end
 	end
 	return false
+end
+function gui.WIMenuBar:UpdateItem(item)
+	item:SetHeight(self:GetHeight())
+
+	local elText = item:GetTextElement()
+	if(util.is_valid(elText)) then
+		elText:SizeToContents()
+		elText:CenterToParent()
+
+		item:SetWidth(elText:GetWidth() +10)
+	end
+
+	item:Update()
+end
+function gui.WIMenuBar:OnSizeChanged(w,h)
+	if(self.m_tItems == nil) then return end
+	self:OnUpdate()
+end
+function gui.WIMenuBar:OnUpdate()
+	if(self.m_tItems == nil) then return end
+	local x = 0
+	for _,item in ipairs(self.m_tItems) do
+		if(item:IsValid()) then
+			item:SetX(x)
+			item:SetHeight(self:GetHeight())
+
+			local elText = item:GetTextElement()
+			elText:SizeToContents()
+
+			item:SetWidth(elText:GetWidth() +20)
+			item:Update()
+
+			elText:CenterToParent()
+			x = x +item:GetWidth()
+		end
+	end
 end
 function gui.WIMenuBar:AddItem(name,fcContextCallback)
 	local pItem = gui.create("WIMenuItem",self)
@@ -61,6 +100,7 @@ function gui.WIMenuBar:AddItem(name,fcContextCallback)
 		if(selected) then pItem:OpenContextMenu() end
 	end)
 	table.insert(self.m_tItems,pItem)
+	self:UpdateItem(pItem)
 	return pItem
 end
 gui.register("WIMenuBar",gui.WIMenuBar)

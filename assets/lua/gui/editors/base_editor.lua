@@ -64,7 +64,7 @@ function gui.WIBaseEditor:AddWindowsMenuBarItem()
 				self:GoToWindow(identifier)
 			end)
 		end
-		pContext:Update()
+		pContext:ScheduleUpdate()
 	end)
 end
 

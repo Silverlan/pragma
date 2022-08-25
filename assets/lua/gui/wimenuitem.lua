@@ -6,43 +6,34 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 ]]
 
-include("hbox.lua")
-
-util.register_class("gui.WIMenuItem",gui.HBox)
-function gui.WIMenuItem:__init()
-	gui.HBox.__init(self)
-end
+util.register_class("gui.WIMenuItem",gui.Base)
 function gui.WIMenuItem:OnInitialize()
-	gui.HBox.OnInitialize(self)
+	gui.Base.OnInitialize(self)
 
 	self:SetSize(128,16)
 	--self:SetAutoFillContents(true)
 
 	self:SetMouseInputEnabled(true)
 	local pBg = gui.create("WIRect")
-	self:SetBackgroundElement(pBg)
 	pBg:SetParent(self)
 	pBg:SetAutoAlignToParent(true)
 	pBg:SetColor(Color.SkyBlue)
+	pBg:AddStyleClass("menu_item_selected_background")
 	self.m_pBg = pBg
 
 	local pBgOutline = gui.create("WIOutlinedRect")
-	self:SetBackgroundElement(pBgOutline)
 	pBgOutline:SetParent(self)
 	pBgOutline:SetAutoAlignToParent(true)
 	pBgOutline:SetColor(Color.RoyalBlue)
+	pBgOutline:AddStyleClass("menu_item_selected_outline")
 	self.m_pBgOutline = pBgOutline
-
-	local gap = 8
-	gui.create("WIBase",self,0,0,gap,1) -- Gap
 
 	local pText = gui.create("WIText",self)
 	pText:SetColor(Color.Black)
 	self.m_pText = pText
 
-	gui.create("WIBase",self,0,0,gap,1) -- Gap
-
 	self:SetSelected(false)
+	self:AddStyleClass("menu_item")
 end
 
 function gui.WIMenuItem:SetRightText(text)
@@ -106,7 +97,7 @@ function gui.WIMenuItem:SetTitle(title)
 	self.m_pText:SetText(title)
 	self.m_pText:SizeToContents()
 end
---local border = 8
+local border = 8
 function gui.WIMenuItem:UpdateRightText()
 	--[[if(util.is_valid(self.m_pTextRight) == false) then return end
 	self.m_pTextRight:SetX(self:GetWidth() -self.m_pTextRight:GetWidth() -border)
@@ -115,12 +106,14 @@ end
 function gui.WIMenuItem:OnSizeChanged(width,height)
 	self:UpdateRightText()
 end
+function gui.WIMenuItem:GetTextElement() return self.m_pText end
 function gui.WIMenuItem:SizeToContents()
-	--[[if(util.is_valid(self) == false or util.is_valid(self.m_pText) == false) then return end
+	if(util.is_valid(self) == false or util.is_valid(self.m_pText) == false) then return end
 	local sz = self.m_pText:GetSize()
 	sz.x = sz.x +border *2
+	sz.y = sz.y +2
 	self:SetSize(sz)
 	self.m_pText:SetX(border)
-	self.m_pText:SetY(self:GetHeight() *0.5 -self.m_pText:GetHeight() *0.5)]]
+	self.m_pText:SetY(self:GetHeight() *0.5 -self.m_pText:GetHeight() *0.5)
 end
 gui.register("WIMenuItem",gui.WIMenuItem)

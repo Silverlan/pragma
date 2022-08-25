@@ -34,6 +34,7 @@ function gui.WIContextMenu:OnInitialize()
 	local pBg = gui.create("WIRect",self)
 	pBg:SetBackgroundElement(true)
 	pBg:SetAutoAlignToParent(true)
+	pBg:AddStyleClass("context_menu_background")
 	self:SetKeyboardInputEnabled(true)
 	pBg:SetColor(Color.Beige)
 	self.m_pBg = pBg
@@ -41,6 +42,7 @@ function gui.WIContextMenu:OnInitialize()
 	local pBgOutline = gui.create("WIOutlinedRect",self)
 	pBgOutline:SetBackgroundElement(true)
 	pBgOutline:SetAutoAlignToParent(true)
+	pBgOutline:AddStyleClass("context_menu_outline")
 	pBgOutline:SetColor(Color.Gray)
 	self.m_pBgOutline = pBgOutline
 	if(util.is_valid(gui.impl.cbMouseInput) == false) then
@@ -69,6 +71,9 @@ function gui.WIContextMenu:OnInitialize()
 		end
 	end)
 	self.m_contents = contents
+
+	self:AddStyleClass("context_menu")
+	if(gui.impl.contextMenu.skin ~= nil) then self:SetSkin(gui.impl.contextMenu.skin) end
 end
 function gui.WIContextMenu:IsPopulated() return self:GetItemCount() > 0 end
 function gui.WIContextMenu:IsCursorInMenuBounds()
@@ -104,11 +109,27 @@ function gui.WIContextMenu:AddLine()
 	-- TODO
 end
 function gui.WIContextMenu:OnUpdate()
-	self.m_contents:Update()
+	local function updateAutoSize(item)
+		for _,menu in ipairs(item.m_subMenues) do
+			updateAutoSize(menu)
+		end
+		for _,subItem in ipairs(item.m_tItems) do
+			if(subItem:IsValid()) then
+				subItem:Update()
+			end
+		end
+
+		item.m_contents:SetAutoSizeToContents(true,false)
+		item.m_contents:Update()
+
+		item.m_scrollContainer:Update()
+	end
+	updateAutoSize(self)
 
 	local w = 108
 	local h = self:GetHeight()
 	for _,item in ipairs(self.m_tItems) do
+		item:SizeToContents()
 		if(item:IsValid()) then w = math.max(w,item:GetWidth()) end
 	end
 	w = w +20
@@ -148,6 +169,7 @@ function gui.WIContextMenu:AddItem(name,fcOnClick,keybind)
 		end
 		gui.close_context_menu()
 	end)
+	pItem:SizeToContents()
 	table.insert(self.m_tItems,pItem)
 	return pItem
 end
@@ -187,10 +209,14 @@ function gui.WIContextMenu:AddSubMenu(name,onClick)
 	table.insert(self.m_subMenues,pSubMenu)
 
 	local pIcon = gui.create("WIArrow",pItem)
-	pIcon:CenterToParentY()
-	--pIcon:SetX(pItem:GetWidth() -pIcon:GetWidth() -5)
-	--pIcon:SetAnchor(1,0,1,0)
+	local function updateIcon()
+		pIcon:CenterToParentY()
+		pIcon:SetX(pItem:GetWidth() -pIcon:GetWidth() -5)
+	end
+	updateIcon()
+	pItem:AddCallback("SetSize",updateIcon)
 	pIcon:SetDirection(gui.Arrow.DIRECTION_RIGHT)
+	pIcon:AddStyleClass("context_menu_arrow")
 
 	return pItem,pSubMenu
 end
@@ -218,4 +244,5 @@ end
 gui.is_context_menu_open = function()
 	return (gui.impl.contextMenu.menu ~= nil and util.is_valid(gui.impl.contextMenu.menu) == true) and true or false
 end
+gui.set_context_menu_skin = function(skin) gui.impl.contextMenu.skin = skin end
 gui.register("WIContextMenu",gui.WIContextMenu)

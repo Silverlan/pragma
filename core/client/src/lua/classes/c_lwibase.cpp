@@ -203,6 +203,15 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 		
 		hPanel.SetAutoSizeToContents(x,y);
 	}));
+	classDef.def("SetAutoSizeToContents",+[](lua_State *l,::WIBase &hPanel,bool x,bool y,bool updateImmediately) {
+		
+		hPanel.SetAutoSizeToContents(x,y,updateImmediately);
+	});
+	classDef.def("UpdateAutoSizeToContents",+[](lua_State *l,::WIBase &hPanel) {
+		hPanel.UpdateAutoSizeToContents(hPanel.ShouldAutoSizeToContentsX(),hPanel.ShouldAutoSizeToContentsY());
+	});
+	classDef.def("ShouldAutoSizeToContentsX",&::WIBase::ShouldAutoSizeToContentsX);
+	classDef.def("ShouldAutoSizeToContentsY",&::WIBase::ShouldAutoSizeToContentsY);
 	classDef.def("SetStencilEnabled",&::WIBase::SetStencilEnabled);
 	classDef.def("IsStencilEnabled",&::WIBase::IsStencilEnabled);
 	classDef.def("ResetRotation",&::WIBase::ResetRotation);

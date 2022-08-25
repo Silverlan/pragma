@@ -210,6 +210,17 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("UpdateAutoSizeToContents",+[](lua_State *l,::WIBase &hPanel) {
 		hPanel.UpdateAutoSizeToContents(hPanel.ShouldAutoSizeToContentsX(),hPanel.ShouldAutoSizeToContentsY());
 	});
+	classDef.def("FindAncestorByClass",+[](lua_State *l,::WIBase &hPanel,std::string className) -> ::WIBase* {
+		ustring::to_lower(className);
+		auto *parent = hPanel.GetParent();
+		while(parent)
+		{
+			if(parent->GetClass() == className)
+				return parent;
+			parent = parent->GetParent();
+		}
+		return nullptr;
+	});
 	classDef.def("ShouldAutoSizeToContentsX",&::WIBase::ShouldAutoSizeToContentsX);
 	classDef.def("ShouldAutoSizeToContentsY",&::WIBase::ShouldAutoSizeToContentsY);
 	classDef.def("SetStencilEnabled",&::WIBase::SetStencilEnabled);

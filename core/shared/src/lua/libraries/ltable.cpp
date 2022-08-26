@@ -41,3 +41,24 @@ int Lua::table::random(lua_State *l)
 	Lua::GetTableValue(l,1);
 	return 1;
 }
+
+int Lua::table::is_empty(lua_State *l)
+{
+	Lua::CheckTable(l,1);
+	luabind::object t {l,1};
+
+	luabind::iterator it{t};
+	auto nonEmpty = (it != luabind::iterator{});
+	Lua::PushBool(l,!nonEmpty);
+	return 1;
+}
+int Lua::table::count(lua_State *l)
+{
+	Lua::CheckTable(l,1);
+	luabind::object t {l,1};
+	uint32_t count = 0;
+	for(luabind::iterator it{t},end;it!=end;++it)
+		++count;
+	Lua::PushInt(l,count);
+	return 1;
+}

@@ -369,6 +369,8 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		return 1;
 	});
 	lua_pushtablecfunction(lua.GetState(),"table","random",Lua::table::random);
+	lua_pushtablecfunction(lua.GetState(),"table","count",Lua::table::count);
+	lua_pushtablecfunction(lua.GetState(),"table","is_empty",Lua::table::is_empty);
 	lua_pushtablecfunction(lua.GetState(),"table","randomize",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 		int32_t t = 1;
 		Lua::CheckTable(l,t);

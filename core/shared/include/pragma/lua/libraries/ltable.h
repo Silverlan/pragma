@@ -16,6 +16,8 @@ namespace Lua
 	{
 		DLLNETWORK int has_value(lua_State *l);
 		DLLNETWORK int random(lua_State *l);
+		DLLNETWORK int is_empty(lua_State *l);
+		DLLNETWORK int count(lua_State *l);
 	};
 };
 

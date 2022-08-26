@@ -202,7 +202,9 @@ void Lua::util::retarget::apply_retarget_rig(Lua::util::retarget::RetargetData &
 		auto boneId = bone.ID;
 		auto pose = retargetData.absBonePoses[boneId] *retargetData.origBindPoseToRetargetBindPose[boneId];
 		auto relPose = parentPose.GetInverse() *pose;
-		relPose.SetScale(*animSrc.GetBoneScale(boneId));
+		auto *srcScale = animSrc.GetBoneScale(boneId);
+		if(srcScale)
+			relPose.SetScale(*srcScale);
 		animSrc.SetBonePosition(boneId,relPose.GetOrigin(),relPose.GetRotation(),relPose.GetScale());
 		// TODO: There are currently a few issues with scaling (e.g. broken eyes), so we'll disable it for now. This should be re-enabled once the issues have been resolved!
 		// UPDATE: Broken eyes should now be fixed with scaling, so it should work properly now? (TODO: TESTME and remove the line below if all is in order)

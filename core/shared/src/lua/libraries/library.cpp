@@ -471,9 +471,9 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 			auto rotations = Lua::table_to_vector<Quat>(l,t,1);
 			return uquat::calc_average(rotations);
 		}),
-		luabind::def("calc_average_rotation",+[](lua_State *l,luabind::table<> t) -> Quat {
-			auto rotations = Lua::table_to_vector<Quat>(l,t,1);
-			auto weights = Lua::table_to_vector<float>(l,t,2);
+		luabind::def("calc_average_rotation",+[](lua_State *l,luabind::table<> tRotations,luabind::table<> tWeights) -> Quat {
+			auto rotations = Lua::table_to_vector<Quat>(l,tRotations,1);
+			auto weights = Lua::table_to_vector<float>(l,tWeights,2);
 			return uquat::calc_average(rotations,weights);
 		}),
 		luabind::def("map_value_to_fraction",static_cast<float(*)(lua_State*,float,float,float)>([](lua_State *l,float v,float c,float i) -> float {

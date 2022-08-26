@@ -175,7 +175,7 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 		return mesh.GetUVSet(name) != nullptr;
 	});
 	classDef.def("HasVertexWeights",+[](lua_State *l,::ModelSubMesh &mesh) {
-		return mesh.GetVertexWeights().empty();
+		return !mesh.GetVertexWeights().empty();
 	});
 	classDef.def("GetNormals",&Lua::ModelSubMesh::GetNormalMapping);
 	classDef.def("GetVertexWeights",&Lua::ModelSubMesh::GetVertexWeights);

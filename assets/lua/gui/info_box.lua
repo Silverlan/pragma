@@ -22,6 +22,10 @@ function InfoBox:OnInitialize()
 	self.m_bar = bar
 
 	self.m_btClose = gui.PFMButton.create(self,"gui/pfm/icon_clear","gui/pfm/icon_clear_activated",function()
+		if(self.m_removeOnClose) then
+			self:RemoveSafely()
+			return
+		end
 		self:SetVisible(false)
 	end)
 	self.m_btClose:SetSize(11,11)
@@ -40,6 +44,7 @@ function InfoBox:OnInitialize()
 
 	self:SetType(InfoBox.TYPE_INFO)
 end
+function InfoBox:SetRemoveOnClose(removeOnClose) self.m_removeOnClose = removeOnClose end
 function InfoBox:SetType(type)
 	self.m_type = type
 

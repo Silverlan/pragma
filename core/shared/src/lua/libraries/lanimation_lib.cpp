@@ -462,6 +462,13 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		[](lua_State *l,panima::Player &player) {
 		return &player.GetCurrentSlice();
 	}));
+	cdPlayer.def("GetAnimation",+
+		[](lua_State *l,panima::Player &player) -> std::shared_ptr<const panima::Animation> {
+		auto *anim = player.GetAnimation();
+		if(!anim)
+			return nullptr;
+		return anim->shared_from_this();
+	});
 	cdPlayer.def("SetLooping",&panima::Player::SetLooping);
 	cdPlayer.def("IsLooping",&panima::Player::IsLooping);
 	cdPlayer.def("SetAnimation",&panima::Player::SetAnimation);

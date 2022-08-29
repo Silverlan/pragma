@@ -15,6 +15,7 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/entities/entity_component_manager_t.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
@@ -24,6 +25,28 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
+void CLightMapReceiverComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
+{
+	using T = CLightMapReceiverComponent;
+
+	using TRemoveOutOfBoundsGeometry = bool;
+	{
+		auto memberInfo = create_component_member_info<
+			T,TRemoveOutOfBoundsGeometry,
+			static_cast<void(T::*)(TRemoveOutOfBoundsGeometry)>(&T::SetRemoveOutOfBoundsGeometry),
+			static_cast<TRemoveOutOfBoundsGeometry(T::*)() const>(&T::ShouldRemoveOutOfBoundsGeometry)
+		>("removeOutOfBoundsGeometry",false);
+		registerMember(std::move(memberInfo));
+	}
+}
+void CLightMapReceiverComponent::SetRemoveOutOfBoundsGeometry(bool b)
+{
+	umath::set_flag(m_stateFlags,StateFlags::RemoveOutOfBoundsGeometry,b);
+}
+bool CLightMapReceiverComponent::ShouldRemoveOutOfBoundsGeometry() const
+{
+	return umath::is_flag_set(m_stateFlags,StateFlags::RemoveOutOfBoundsGeometry);
+}
 void CLightMapReceiverComponent::SetupLightMapUvData(CBaseEntity &ent,LightmapDataCache *cache)
 {
 	auto mdl = ent.GetModel();

@@ -19,12 +19,14 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
 		static void SetupLightMapUvData(CBaseEntity &ent,LightmapDataCache *cache=nullptr);
 		enum class StateFlags : uint8_t
 		{
 			None = 0,
 			IsModelBakedWithLightMaps = 1u,
-			RenderMeshBufferIndexTableDirty = IsModelBakedWithLightMaps<<1u
+			RenderMeshBufferIndexTableDirty = IsModelBakedWithLightMaps<<1u,
+			RemoveOutOfBoundsGeometry = RenderMeshBufferIndexTableDirty<<1u
 		};
 		using MeshIdx = uint32_t;
 		using BufferIdx = uint32_t;
@@ -38,6 +40,9 @@ namespace pragma
 		void AssignBufferIndex(MeshIdx meshIdx,BufferIdx bufIdx);
 		std::optional<BufferIdx> FindBufferIndex(CModelSubMesh &mesh) const;
 		std::optional<BufferIdx> GetBufferIndex(RenderMeshIndex meshIdx) const;
+
+		void SetRemoveOutOfBoundsGeometry(bool b);
+		bool ShouldRemoveOutOfBoundsGeometry() const;
 
 		void UpdateMeshLightmapUvBuffers(CLightMapComponent &lightMapC);
 

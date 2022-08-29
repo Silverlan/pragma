@@ -66,6 +66,7 @@ Locale::LoadResult Locale::LoadFile(const std::string &file,const std::string &l
 			if(ustring::get_key_value(l,key,val))
 			{
 				ustring::replace(val,"\\\"","\"");
+				ustring::replace(val,"\\n","\n");
 				outLoc.texts[key] = val;
 			}
 		}

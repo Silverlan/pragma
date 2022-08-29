@@ -306,7 +306,8 @@ std::shared_ptr<prosper::IDynamicResizableBuffer> CLightMapComponent::GenerateLi
 			auto subBuf = lightMapUvBuffer->AllocateBuffer(uvSet.size() *sizeof(uvSet.front()));
 			outMeshLightMapUvBuffers.push_back(subBuf);
 
-			lightMapUvBuffer->Write(subBuf->GetStartOffset(),uvSet.size() *sizeof(uvSet.front()),uvSet.data());
+			if(subBuf)
+				lightMapUvBuffer->Write(subBuf->GetStartOffset(),uvSet.size() *sizeof(uvSet.front()),uvSet.data());
 			lightMapReceiverC->AssignBufferIndex(pair.first,bufIdx++);
 		}
 	}

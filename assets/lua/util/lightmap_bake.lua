@@ -11,9 +11,10 @@ include("lightmap_cache.lua")
 
 pfm.register_log_category("lightmap")
 
-local function generate_uv_atlas(entLm,origin,tEnts,lightmapCachePath,meshFilter)
+local function generate_uv_atlas(entLm,origin,tEnts,lightmapCachePath,meshFilter,minArea,maxArea)
 	log.msg("Generating lightmap UV atlas...",pfm.LOG_CATEGORY_LIGHTMAP)
 	local generator = util.UVAtlasGenerator(entLm:GetUuid())
+	if(minArea ~= nil) then generator:SetCuboidBounds(minArea,maxArea) end
 	for _,ent in ipairs(tEnts) do
 		if(ent:IsWorld() and origin ~= nil) then
 			local ent = ents.get_world()
@@ -61,9 +62,9 @@ local function update_lightmap_data(tEnts)
 	end
 end
 
-util.bake_lightmap_uvs = function(entLm,tEnts,lightmapCachePath,origin,meshFilter)
+util.bake_lightmap_uvs = function(entLm,tEnts,lightmapCachePath,origin,meshFilter,minArea,maxArea)
 	log.msg("Baking lightmap UV data...",pfm.LOG_CATEGORY_LOG_CATEGORY_LIGHTMAP)
-	generate_uv_atlas(entLm,origin,tEnts,lightmapCachePath,meshFilter)
+	generate_uv_atlas(entLm,origin,tEnts,lightmapCachePath,meshFilter,minArea,maxArea)
 	--update_lightmap_data(tEnts)
 
 	-- Lightmap uv cache

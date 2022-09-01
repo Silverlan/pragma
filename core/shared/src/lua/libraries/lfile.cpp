@@ -517,6 +517,20 @@ std::string Lua::file::GetCanonicalizedPath(const std::string &path)
 	return r;
 }
 
+luabind::object Lua::file::GetFileExtension(lua_State *l,const std::string &path,const std::vector<std::string> &exts)
+{
+	std::string ext;
+	auto r = ufile::get_extension(path,&ext);
+	if(r == false)
+		return {};
+	for(auto &extOther : exts)
+	{
+		if(ext == extOther)
+			return luabind::object{l,ext};
+	}
+	return {};
+}
+
 luabind::object Lua::file::GetFileExtension(lua_State *l,const std::string &path)
 {
 	std::string ext;

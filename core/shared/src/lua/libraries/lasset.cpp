@@ -19,6 +19,50 @@
 
 extern DLLNETWORK Engine *engine;
 
+static std::unordered_map<pragma::asset::Type,std::string> g_assetTypeToIdentifier;
+static std::unordered_map<std::string,pragma::asset::Type> g_identifierToAssetType;
+static void init_asset_type_maps()
+{
+	auto n = umath::to_integral(pragma::asset::Type::Count);
+	for(auto i=decltype(n){0u};i<n;++i)
+	{
+		auto type = static_cast<pragma::asset::Type>(i);
+		std::string strType {magic_enum::enum_name(type)};
+		std::string normalizedTypeName;
+		normalizedTypeName.reserve(strType.size() *2);
+		for(auto c : strType)
+		{
+			if(std::isupper(c))
+			{
+				if(!normalizedTypeName.empty())
+					normalizedTypeName += '_';
+				normalizedTypeName += std::tolower(c);
+			}
+			else
+				normalizedTypeName += c;
+		}
+		g_assetTypeToIdentifier[type] = normalizedTypeName;
+		g_identifierToAssetType[normalizedTypeName] = type;
+	}
+}
+static std::optional<pragma::asset::Type> get_asset_type_from_identifier(const std::string &identifier)
+{
+	if(g_assetTypeToIdentifier.empty())
+		init_asset_type_maps();
+	auto it = g_identifierToAssetType.find(identifier);
+	if(it == g_identifierToAssetType.end())
+		return {};
+	return it->second;
+}
+static std::optional<std::string> get_asset_identifier_from_type(pragma::asset::Type type)
+{
+	if(g_assetTypeToIdentifier.empty())
+		init_asset_type_maps();
+	auto it = g_assetTypeToIdentifier.find(type);
+	if(it == g_assetTypeToIdentifier.end())
+		return {};
+	return it->second;
+}
 void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 {
 	auto modAsset = luabind::module_(lua.GetState(),"asset");
@@ -45,6 +89,8 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 			auto *nw = engine->GetNetworkState(l);
 			return nw->GetMaterialManager().ClearUnused();
 		})),
+		luabind::def("get_type_identifier",&get_asset_identifier_from_type),
+		luabind::def("get_type_enum",&get_asset_type_from_identifier),
 		luabind::def("lock_asset_watchers",&::Engine::LockResourceWatchers),
 		luabind::def("unlock_asset_watchers",&::Engine::UnlockResourceWatchers),
 		luabind::def("poll_asset_watchers",&::Engine::PollResourceWatchers),

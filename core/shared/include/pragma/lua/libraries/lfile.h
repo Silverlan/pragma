@@ -138,6 +138,7 @@ namespace Lua
 		DLLNETWORK bool Write(lua_State *l,std::string path,const std::string &content);
 		DLLNETWORK std::string GetCanonicalizedPath(const std::string &path);
 		DLLNETWORK luabind::object GetFileExtension(lua_State *l,const std::string &path);
+		DLLNETWORK luabind::object GetFileExtension(lua_State *l,const std::string &path,const std::vector<std::string> &exts);
 		DLLNETWORK bool ComparePath(const std::string &path0,const std::string &path1);
 	};
 };

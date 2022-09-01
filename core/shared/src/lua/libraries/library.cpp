@@ -1441,7 +1441,8 @@ void Game::RegisterLuaLibraries()
 		luabind::def("get_canonicalized_path",Lua::file::GetCanonicalizedPath),
 		luabind::def("get_file_path",ufile::get_path_from_filename),
 		luabind::def("get_file_name",ufile::get_file_from_filename),
-		luabind::def("get_file_extension",Lua::file::GetFileExtension),
+		luabind::def("get_file_extension",static_cast<luabind::object(*)(lua_State*,const std::string&,const std::vector<std::string>&)>(Lua::file::GetFileExtension)),
+		luabind::def("get_file_extension",static_cast<luabind::object(*)(lua_State*,const std::string&)>(Lua::file::GetFileExtension)),
 		luabind::def("get_size",FileManager::GetFileSize),
 		luabind::def("get_size",static_cast<uint64_t(*)(std::string)>([](std::string path) {
 			return FileManager::GetFileSize(path);

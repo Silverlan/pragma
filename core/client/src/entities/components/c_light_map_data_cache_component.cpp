@@ -29,7 +29,9 @@ void CLightMapDataCacheComponent::RegisterMembers(pragma::EntityComponentManager
 			T,TDataCache,
 			static_cast<void(T::*)(const TDataCache&)>(&T::SetLightMapDataCachePath),
 			static_cast<const TDataCache&(T::*)() const>(&T::GetLightMapDataCachePath)
-		>("lightmapDataCache","");
+		>("lightmapDataCache","",AttributeSpecializationType::File);
+		auto &metaData = memberInfo.AddMetaData();
+		metaData["extensions"] = std::vector<std::string>{LightmapDataCache::FORMAT_MODEL_BINARY,LightmapDataCache::FORMAT_MODEL_ASCII};
 		registerMember(std::move(memberInfo));
 	}
 }

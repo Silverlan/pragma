@@ -44,6 +44,8 @@ namespace pragma
 	{
 		static constexpr auto PLMD_IDENTIFIER = "PLMD";
 		static constexpr udm::Version PLMD_VERSION = 1;
+		static constexpr auto FORMAT_MODEL_BINARY = "lmd_b";
+		static constexpr auto FORMAT_MODEL_ASCII = "lmd";
 		static size_t CalcPoseHash(const umath::Transform &pose);
 		static bool Load(const std::string &path,LightmapDataCache &outCache,std::string &outErr);
 		struct MeshCacheData

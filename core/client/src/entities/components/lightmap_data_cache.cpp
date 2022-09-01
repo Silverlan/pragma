@@ -33,12 +33,12 @@ bool LightmapDataCache::Load(const std::string &path,LightmapDataCache &outCache
 {
 	auto fpath = path;
 	std::string ext;
-	if(!ufile::get_extension(fpath,&ext) || (ext != "lmd_b" && ext != "lmd"))
+	if(!ufile::get_extension(fpath,&ext) || (ext != FORMAT_MODEL_BINARY && ext != FORMAT_MODEL_ASCII))
 	{
-		if(filemanager::exists(fpath +".lmd_b"))
-			fpath += ".lmd_b";
+		if(filemanager::exists(fpath +"." +std::string{FORMAT_MODEL_BINARY}))
+			fpath += "." +std::string{FORMAT_MODEL_BINARY};
 		else
-			fpath += ".lmd";
+			fpath += "." +std::string{FORMAT_MODEL_ASCII};
 	}
 	std::shared_ptr<udm::Data> udmData = nullptr;
 	try

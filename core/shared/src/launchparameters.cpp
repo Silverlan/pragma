@@ -190,6 +190,13 @@ DLLNETWORK void LPARAM_help(const std::vector<std::string> &argv)
 	Con::cout<<"Available parameters:"<<Con::endl<<map->LAUNCHPARAMETERS_HELP.str()<<Con::endl;
 }
 
+DLLNETWORK std::optional<std::string> g_customTitle {};
+static void LPARAM_title(const std::vector<std::string> &argv)
+{
+	if(!argv.empty())
+		g_customTitle = argv.front();
+}
+
 static void LPARAM_luaext(const std::vector<std::string> &argv)
 {
 	Lua::set_extended_lua_modules_enabled(true);
@@ -215,5 +222,6 @@ REGISTER_LAUNCH_PARAMETER_HELP(-tcponly,LPARAM_tcponly,"","use TCP for all commu
 REGISTER_LAUNCH_PARAMETER_HELP(-connect,LPARAM_connect,"<ip>[:<port>]","connect to server immediately. Default port is 29150");
 
 REGISTER_LAUNCH_PARAMETER_HELP(-help,LPARAM_help,"-? /?","show this help message");
+REGISTER_LAUNCH_PARAMETER_HELP(-title,LPARAM_title,"<title>","changes the window title");
 REGISTER_LAUNCH_PARAMETER(/?,LPARAM_help);
 REGISTER_LAUNCH_PARAMETER(-?,LPARAM_help);

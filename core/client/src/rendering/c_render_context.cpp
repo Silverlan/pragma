@@ -27,6 +27,7 @@ RenderContext::~RenderContext()
 {
 	m_graphicsAPILib = nullptr;
 }
+DLLNETWORK std::optional<std::string> g_customTitle;
 void RenderContext::InitializeRenderAPI()
 {
 	auto &renderAPI = GetRenderAPI();
@@ -65,7 +66,8 @@ void RenderContext::InitializeRenderAPI()
 		else
 		{
 			std::string errMsg;
-			auto success = fInitRenderAPI(engine_info::get_name(),false,m_renderContext,errMsg);
+			auto title = g_customTitle.has_value() ? *g_customTitle : engine_info::get_name();
+			auto success = fInitRenderAPI(title,false,m_renderContext,errMsg);
 			if(success == false)
 				err = errMsg;
 		}

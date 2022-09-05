@@ -69,6 +69,17 @@ static void LPARAM_audio_api(const std::vector<std::string> &argv)
 	c_engine->SetAudioAPI(argv.front());
 }
 
+extern std::optional<std::vector<std::string>> g_autoExecScripts;
+static void LPARAM_auto_exec(const std::vector<std::string> &argv)
+{
+	if(argv.empty())
+		return;
+	if(!g_autoExecScripts)
+		g_autoExecScripts = std::vector<std::string>{};
+	for(auto &arg : argv)
+		g_autoExecScripts->push_back(arg);
+}
+
 extern std::optional<std::string> g_customWindowIcon;
 static void LPARAM_icon(const std::vector<std::string> &argv)
 {
@@ -96,4 +107,5 @@ REGISTER_LAUNCH_PARAMETER_HELP(-fullbright,LPARAM_fullbright,"","start in fullbr
 REGISTER_LAUNCH_PARAMETER_HELP(-enable_gfx_validation,LPARAM_vk_enable_validation,"<1/0>","Enables or disables graphics API validation.");
 REGISTER_LAUNCH_PARAMETER_HELP(-graphics_api,LPARAM_render_api,"<moduleName>","Changes the graphics API to use for rendering.");
 REGISTER_LAUNCH_PARAMETER_HELP(-audio_api,LPARAM_audio_api,"<moduleName>","Changes the audio API to use for audio playback.");
+REGISTER_LAUNCH_PARAMETER_HELP(-auto_exec,LPARAM_auto_exec,"<script>","Auto-execute this Lua-script on launch.");
 REGISTER_LAUNCH_PARAMETER_HELP(-icon,LPARAM_icon,"<iconPath>","Path to custom window icon location.");

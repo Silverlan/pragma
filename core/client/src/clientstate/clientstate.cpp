@@ -14,6 +14,7 @@
 #include <cmaterial_manager2.hpp>
 #include "pragma/model/c_modelmanager.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
+#include "pragma/lua/libraries/c_lglobal.h"
 #include "pragma/gui/mainmenu/wimainmenu.h"
 #include "pragma/c_engine.h"
 #include "pragma/console/convarhandle.h"
@@ -249,6 +250,7 @@ lua_State *ClientState::GetGUILuaState() {return (m_luaGUI != nullptr) ? m_luaGU
 Lua::Interface &ClientState::GetGUILuaInterface() {return *m_luaGUI;}
 
 __declspec(dllimport) void test_lua_policies(lua_State *l);
+std::optional<std::vector<std::string>> g_autoExecScripts {};
 #include "pragma/lua/policies/gui_element_policy.hpp"
 void ClientState::InitializeGUILua()
 {
@@ -315,6 +317,11 @@ void ClientState::InitializeGUILua()
 	Lua::ExecuteFiles(GetGUILuaState(),"autorun\\gui\\",Lua::HandleTracebackError,[this](Lua::StatusCode code,const std::string &luaFile) {
 		Lua::HandleSyntaxError(GetGUILuaState(),code,luaFile);
 	});
+	if(g_autoExecScripts.has_value())
+	{
+		for(auto &f : *g_autoExecScripts)
+			Lua::ExecuteFile(GetGUILuaState(),f,Lua::HandleTracebackError);
+	}
 }
 
 void ClientState::AddGUILuaWrapperFactory(const std::function<luabind::object(lua_State*,WIBase&)> &f) {m_guiLuaWrapperFactories.push_back(f);}

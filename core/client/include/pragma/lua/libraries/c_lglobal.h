@@ -15,6 +15,8 @@ namespace Lua
 {
 	DLLCLIENT double ServerTime(lua_State *l);
 	DLLCLIENT double FrameTime(lua_State *l);
+
+	DLLCLIENT void register_shared_client_state(lua_State *l);
 };
 
 #endif

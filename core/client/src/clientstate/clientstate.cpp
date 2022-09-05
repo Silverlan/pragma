@@ -265,6 +265,7 @@ void ClientState::InitializeGUILua()
 	ClientState::RegisterSharedLuaLibraries(*m_luaGUI,true);
 	NetworkState::RegisterSharedLuaGlobals(GetGUILuaInterface());
 	ClientState::RegisterSharedLuaGlobals(*m_luaGUI);
+	Lua::register_shared_client_state(m_luaGUI->GetState());
 	
 	auto timeMod = luabind::module(m_luaGUI->GetState(),"time");
 	timeMod[

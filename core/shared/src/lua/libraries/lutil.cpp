@@ -1043,7 +1043,8 @@ static luabind::object register_class(lua_State *l,const std::string &pclassName
 		auto *game = nw->GetGameState();
 		oClass = luabind::globals(l)[className];
 		luabind::object regFc {luabind::from_stack(l,-1)};
-		game->GetLuaClassManager().RegisterClass(fullClassName,oClass,regFc);
+		if(game && l == game->GetLuaState())
+			game->GetLuaClassManager().RegisterClass(fullClassName,oClass,regFc);
 
 		// Init default constructor and print methods; They can still be overwritten by the Lua script
 		oClass["__init"] = luabind::make_function(l,+[](lua_State *l,const luabind::object &o) {

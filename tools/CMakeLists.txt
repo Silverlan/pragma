@@ -14,7 +14,7 @@ foreach(TOOL_PATH ${TOOL_LIST})
 	if(IS_DIRECTORY ${TOOL_PATH})
 		get_filename_component(TOOL_NAME ${TOOL_PATH} NAME)
 		register_tool(${TOOL_NAME})
-		set_target_properties(${TOOL_NAME} PROPERTIES FOLDER tools)
+		set_target_properties(${PROJ_NAME} PROPERTIES FOLDER tools)
 	endif()
 endforeach()
 

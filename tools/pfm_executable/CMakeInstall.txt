@@ -1,0 +1,1 @@
+pragma_install_file("${CMAKE_CURRENT_BINARY_DIR}/tools/pfm_executable/${CONFIG_BUILD_TYPE}/pfm${OS_EXE_EXT}" "/" OPTIONAL)

@@ -123,6 +123,8 @@ function(search_lib_recursive VAR_NAME FILE_PATH LIB_NAME)
 	search_lib_recursive_full(${VAR_NAME} ${ROOT_DIR}/${FILE_PATH}/${LIB_NAME} ${ARG_STATIC_LIBRARY})
 endfunction(search_lib_recursive)
 
+set(DEPENDENCY_PRAGMA_EXECUTABLE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/core/pragma/include CACHE PATH "Path to include directory.")
+
 set(DEPENDENCY_DATASYSTEM_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/datasystem/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_DATASYSTEM_LIBRARY datasystem)
 
@@ -1081,6 +1083,15 @@ foreach(MODULE_PATH ${PR_MODULES})
 				COMPONENT ${PRAGMA_INSTALL_COMPONENT}
 			)
 		endif()
+	endif()
+endforeach()
+
+# Tools
+file(GLOB PR_MODULES "tools/*")
+foreach(MODULE_PATH ${PR_MODULES})
+	get_filename_component(MODULE_NAME "${MODULE_PATH}" NAME)
+	if(EXISTS "${MODULE_PATH}/CMakeInstall.txt")
+		include("${MODULE_PATH}/CMakeInstall.txt" OPTIONAL)
 	endif()
 endforeach()
 

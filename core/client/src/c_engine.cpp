@@ -55,6 +55,8 @@
 #include <wgui/types/wicontextmenu.hpp>
 #include <wgui/types/witext.h>
 #include <wgui/types/witext_tags.hpp>
+#include <util_image.hpp>
+#include <util_image_buffer.hpp>
 #include <queries/prosper_query_pool.hpp>
 #include <queries/prosper_timer_query.hpp>
 #include <pragma/asset/util_asset.hpp>
@@ -1030,10 +1032,23 @@ void CEngine::InitializeWindowInputCallbacks(prosper::Window &window)
 		OnFilesDropped(window,files);
 	});
 }
+DLLCLIENT std::optional<std::string> g_customWindowIcon {};
 void CEngine::OnWindowInitialized()
 {
 	pragma::RenderContext::OnWindowInitialized();
-	InitializeWindowInputCallbacks(GetRenderContext().GetWindow());
+	auto &window = GetRenderContext().GetWindow();
+	InitializeWindowInputCallbacks(window);
+
+	if(g_customWindowIcon.has_value())
+	{
+		auto imgBuf = uimg::load_image(*g_customWindowIcon,uimg::PixelFormat::LDR);
+		if(imgBuf)
+		{
+			imgBuf->ToLDRFormat(uimg::Format::RGBA32);
+			window->SetWindowIcon(imgBuf->GetWidth(),imgBuf->GetHeight(),static_cast<uint8_t*>(imgBuf->GetData()));
+			GLFW::poll_events();
+		}
+	}
 }
 void CEngine::InitializeExternalArchiveManager() {util::initialize_external_archive_manager(GetClientState());}
 bool CEngine::StartProfilingStage(CPUProfilingPhase stage)

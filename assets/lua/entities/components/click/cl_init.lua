@@ -78,13 +78,13 @@ function ents.ClickComponent.inject_click_input(action,pressed,filter)
 		if(pressed == false and handled == util.EVENT_REPLY_HANDLED) then return handled end
 	end
 	if(pressed == false) then return util.EVENT_REPLY_UNHANDLED end
-	local clickActor,hitPos,startPos = ents.ClickComponent.find_actor_under_cursor(filter)
+	local clickActor,hitPos,startPos,hitData = ents.ClickComponent.find_actor_under_cursor(filter)
 	local clickC = (clickActor ~= nil) and clickActor:GetComponent(ents.COMPONENT_CLICK) or nil
 	if(clickC ~= nil) then
 		lastActorsClicked[action] = clickC
-		return (clickC:BroadcastEvent(ents.ClickComponent.EVENT_ON_CLICK,{action,true,hitPos}) or util.EVENT_REPLY_UNHANDLED),clickActor,hitPos,startPos
+		return (clickC:BroadcastEvent(ents.ClickComponent.EVENT_ON_CLICK,{action,true,hitPos}) or util.EVENT_REPLY_UNHANDLED),clickActor,hitPos,startPos,hitData
 	end
-	return util.EVENT_REPLY_UNHANDLED,clickActor,hitPos,startPos
+	return util.EVENT_REPLY_UNHANDLED,clickActor,hitPos,startPos,hitData
 end
 function ents.ClickComponent.world_space_point_to_screen_space_uv(point,callback)
 	local vpData = get_viewport_data()

@@ -14,6 +14,8 @@ int main(int argc,char* argv[])
 {
 	std::vector<std::string> extraArgs {
 		"-title","Pragma Filmmaker",
+		"-auto_exec","pfm/startup.lua",
+		"-icon","materials/pfm/logo/icon_window.png",
 		"+map empty",
 		"+pfm"
 	};

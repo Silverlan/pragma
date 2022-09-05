@@ -740,14 +740,8 @@ void Engine::RunLaunchCommands()
 			if(nw)
 			{
 				auto cbOnGameStart = FunctionCallback<void>::Create(nullptr);
-				auto skip = false;
-				cbOnGameStart.get<Callback<void>>()->SetFunction([this,cbOnGameStart,nw,skip,remainingCommands=std::move(remainingCommands)]() mutable {
+				cbOnGameStart.get<Callback<void>>()->SetFunction([this,cbOnGameStart,nw,remainingCommands=std::move(remainingCommands)]() mutable {
 					auto cmds0 = std::move(remainingCommands);
-
-					skip = true;
-					if(skip)
-						return;
-
 					auto *game = nw->GetGameState();
 					if(game)
 					{

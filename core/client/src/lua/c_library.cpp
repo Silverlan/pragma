@@ -1401,6 +1401,11 @@ void CGame::RegisterLuaLibraries()
 		),
 		luabind::def("draw_frustum",
 			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const std::vector<Vector3>&,const DebugRenderInfo&)>(&Lua::DebugRenderer::Client::DrawFrustum)
+		),
+		luabind::def("create_collection",
+			+[](const std::vector<std::shared_ptr<::DebugRenderer::BaseObject>> &objects) -> std::shared_ptr<::DebugRenderer::BaseObject> {
+				return std::make_shared<::DebugRenderer::CollectionObject>(objects);
+			}
 		)
 	];
 }

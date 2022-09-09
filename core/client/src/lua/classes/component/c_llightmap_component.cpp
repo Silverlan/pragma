@@ -188,8 +188,6 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 
 	auto defCLightMapReceiver = pragma::lua::create_entity_component_class<pragma::CLightMapReceiverComponent,pragma::BaseEntityComponent>("LightMapReceiverComponent");
 	defCLightMapReceiver.def("UpdateLightmapUvData",&pragma::CLightMapReceiverComponent::UpdateLightMapUvData);
-	defCLightMapReceiver.def("SetRemoveOutOfBoundsGeometry",&pragma::CLightMapReceiverComponent::SetRemoveOutOfBoundsGeometry);
-	defCLightMapReceiver.def("ShouldRemoveOutOfBoundsGeometry",&pragma::CLightMapReceiverComponent::ShouldRemoveOutOfBoundsGeometry);
 	entsMod[defCLightMapReceiver];
 
 	auto defCLmCache = pragma::lua::create_entity_component_class<pragma::CLightMapDataCacheComponent,pragma::BaseEntityComponent>("LightMapDataCacheComponent");

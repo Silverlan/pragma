@@ -29,23 +29,6 @@ void CLightMapReceiverComponent::RegisterMembers(pragma::EntityComponentManager 
 {
 	using T = CLightMapReceiverComponent;
 
-	using TRemoveOutOfBoundsGeometry = bool;
-	{
-		auto memberInfo = create_component_member_info<
-			T,TRemoveOutOfBoundsGeometry,
-			static_cast<void(T::*)(TRemoveOutOfBoundsGeometry)>(&T::SetRemoveOutOfBoundsGeometry),
-			static_cast<TRemoveOutOfBoundsGeometry(T::*)() const>(&T::ShouldRemoveOutOfBoundsGeometry)
-		>("removeOutOfBoundsGeometry",false);
-		registerMember(std::move(memberInfo));
-	}
-}
-void CLightMapReceiverComponent::SetRemoveOutOfBoundsGeometry(bool b)
-{
-	umath::set_flag(m_stateFlags,StateFlags::RemoveOutOfBoundsGeometry,b);
-}
-bool CLightMapReceiverComponent::ShouldRemoveOutOfBoundsGeometry() const
-{
-	return umath::is_flag_set(m_stateFlags,StateFlags::RemoveOutOfBoundsGeometry);
 }
 void CLightMapReceiverComponent::SetupLightMapUvData(CBaseEntity &ent,LightmapDataCache *cache)
 {

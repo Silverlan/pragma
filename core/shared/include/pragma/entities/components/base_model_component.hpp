@@ -68,6 +68,7 @@ namespace pragma
 		virtual void SetModel(const std::shared_ptr<Model> &mdl);
 		const std::shared_ptr<Model> &GetModel() const;
 		std::string GetModelName() const;
+		void SetModelName(const std::string &name);
 		bool HasModel() const;
 		unsigned int GetSkin() const;
 		const std::shared_ptr<util::UInt32Property> &GetSkinProperty() const;

@@ -3409,7 +3409,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 				hModel.SetBodyGroup(i,bodyGroups[i]);
 		}));
 		def.def("LookupAnimation",&pragma::BaseModelComponent::LookupAnimation);
-
+		def.def("SetModelName",&pragma::BaseModelComponent::SetModelName);
 		def.def("GetModelName",&pragma::BaseModelComponent::GetModelName);
 		def.def("LookupBlendController",&pragma::BaseModelComponent::LookupBlendController);
 		def.def("LookupAttachment",&pragma::BaseModelComponent::LookupAttachment);

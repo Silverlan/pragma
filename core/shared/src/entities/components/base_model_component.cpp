@@ -235,6 +235,7 @@ std::string BaseModelComponent::GetModelName() const
 		return "";
 	return *m_modelName;
 }
+void BaseModelComponent::SetModelName(const std::string &name) {m_modelName = std::make_unique<std::string>(name);}
 bool BaseModelComponent::HasModel() const {return m_model != nullptr;}
 
 const std::vector<uint32_t> &BaseModelComponent::GetBodyGroups() const {return m_bodyGroups;}
@@ -346,6 +347,7 @@ void BaseModelComponent::SetModel(const std::shared_ptr<Model> &mdl)
 	{
 		if(GetEntity().IsRemoved())
 			return;
+		m_modelName = nullptr;
 		OnModelChanged(nullptr);
 		OnMembersChanged();
 		return;

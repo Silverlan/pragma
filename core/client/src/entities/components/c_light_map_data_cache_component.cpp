@@ -111,9 +111,12 @@ void CLightMapDataCacheComponent::ReloadCache()
 		if(!ent)
 			continue;
 		auto &mdl = ent->GetModel();
-		if(!mdl || mdl->GetName() != pair.second.model)
+		if(!mdl)
 			continue;
-		auto itCache = cachedModels.find(mdl->GetName());
+		auto mdlName = mdl->GetName();
+		if(mdlName != pair.second.model)
+			continue;
+		auto itCache = cachedModels.find(mdlName);
 		if(itCache != cachedModels.end() && itCache->second == nullptr)
 			continue;
 		auto hasLightmapData = false;
@@ -143,7 +146,7 @@ void CLightMapDataCacheComponent::ReloadCache()
 		if(itCache != cachedModels.end())
 			lmModel = itCache->second;
 		else if(!hasLightmapData)
-			cachedModels[mdl->GetName()] = nullptr;
+			cachedModels[mdlName] = nullptr;
 		else
 		{
 			auto cpy = mdl->Copy(GetEntity().GetNetworkState()->GetGameState(),Model::CopyFlags::CopyMeshesBit | Model::CopyFlags::CopyUniqueIdsBit);

@@ -57,6 +57,26 @@ void Lua::ModelMesh::register_class(luabind::class_<::ModelMesh> &classDef)
 			return;
 		subMeshes.erase(subMeshes.begin() +i);
 	}));
+	classDef.def("RemoveSubMesh",+[](lua_State *l,::ModelMesh &mesh,const std::string &uuid) {
+		auto &subMeshes = mesh.GetSubMeshes();
+		auto uuidValue = ::util::uuid_string_to_bytes(uuid);
+		auto it = std::find_if(subMeshes.begin(),subMeshes.end(),[&uuidValue](const std::shared_ptr<::ModelSubMesh> &subMesh) {
+			return subMesh->GetUuid() == uuidValue;
+		});
+		if(it == subMeshes.end())
+			return;
+		subMeshes.erase(it);
+	});
+	classDef.def("FindSubMesh",+[](lua_State *l,::ModelMesh &mesh,const std::string &uuid) -> std::shared_ptr<::ModelSubMesh> {
+		auto &subMeshes = mesh.GetSubMeshes();
+		auto uuidValue = ::util::uuid_string_to_bytes(uuid);
+		auto it = std::find_if(subMeshes.begin(),subMeshes.end(),[&uuidValue](const std::shared_ptr<::ModelSubMesh> &subMesh) {
+			return subMesh->GetUuid() == uuidValue;
+		});
+		if(it == subMeshes.end())
+			return nullptr;
+		return *it;
+	});
 	classDef.def("SetSubMeshes",static_cast<void(*)(lua_State*,::ModelMesh&,luabind::object)>([](lua_State *l,::ModelMesh &mesh,luabind::object tSubMeshes) {
 		auto idxSubMeshes = 2;
 		Lua::CheckTable(l,idxSubMeshes);

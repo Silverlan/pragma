@@ -84,7 +84,7 @@ void CLightMapReceiverComponent::UpdateLightMapUvData()
 	auto mdl = GetEntity().GetModel();
 	if(mdlC.expired() || mdl == nullptr)
 		return;
-	m_modelName = GetEntity().GetModelName();
+	m_modelName = mdl->GetName();
 	umath::set_flag(m_stateFlags,StateFlags::IsModelBakedWithLightMaps,true);
 	m_uvDataPerMesh.clear();
 	m_meshes.clear();

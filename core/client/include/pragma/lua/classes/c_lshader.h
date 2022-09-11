@@ -16,9 +16,9 @@ namespace pragma
 	class ShaderScene;
 	class ShaderSceneLit;
 	class ShaderEntity;
-	class LuaShaderBase;
-	class LuaShaderGraphicsBase;
-	class LuaShaderComputeBase;
+	class LuaShaderWrapperBase;
+	class LuaShaderWrapperGraphicsBase;
+	class LuaShaderWrapperComputeBase;
 	struct LuaVertexBinding;
 	struct LuaVertexAttribute;
 	struct LuaDescriptorSetInfo;
@@ -269,8 +269,8 @@ namespace Lua
 		};
 
 		// Custom shaders
-		DLLCLIENT void SetStageSourceFilePath(lua_State *l,pragma::LuaShaderBase &shader,uint32_t shaderStage,const std::string &fpath);
-		DLLCLIENT void SetPipelineCount(lua_State *l,pragma::LuaShaderBase &shader,uint32_t pipelineCount);
+		DLLCLIENT void SetStageSourceFilePath(lua_State *l,pragma::LuaShaderWrapperBase &shader,uint32_t shaderStage,const std::string &fpath);
+		DLLCLIENT void SetPipelineCount(lua_State *l,pragma::LuaShaderWrapperBase &shader,uint32_t pipelineCount);
 	};
 };
 

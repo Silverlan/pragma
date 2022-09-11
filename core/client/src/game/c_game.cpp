@@ -371,6 +371,7 @@ void CGame::OnRemove()
 	m_luaParticleModifierManager = nullptr;
 	m_gpuProfilingStageManager = nullptr;
 	m_profilingStageManager = nullptr;
+	pragma::reset_lua_shaders();
 
 	ClearSoundCache();
 

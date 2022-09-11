@@ -27,7 +27,7 @@ prosper::util::PreparedCommandBuffer *LuaShaderRecordTarget::GetPcb() const
 }
 void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,pragma::LuaDescriptorSetInfo &descSetInfo)
 {
-	auto *shader = pragma::LuaShaderBase::GetShader(pipelineInfo);
+	auto *shader = pragma::LuaShaderWrapperBase::GetShader(pipelineInfo);
 	if(shader == nullptr)
 		return;
 	prosper::DescriptorSetInfo shaderDescSetInfo {};
@@ -49,7 +49,7 @@ void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l,prosper::
 }
 void Lua::BasePipelineCreateInfo::AttachPushConstantRange(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t offset,uint32_t size,uint32_t shaderStages)
 {
-	auto *shader = pragma::LuaShaderBase::GetShader(pipelineInfo);
+	auto *shader = pragma::LuaShaderWrapperBase::GetShader(pipelineInfo);
 	if(shader == nullptr)
 		return;
 	shader->GetShader().AttachPushConstantRange(pipelineInfo,shader->GetCurrentPipelineIndex(),offset,size,static_cast<prosper::ShaderStageFlags>(shaderStages));
@@ -57,7 +57,7 @@ void Lua::BasePipelineCreateInfo::AttachPushConstantRange(lua_State *l,prosper::
 
 void Lua::shader::push_shader(lua_State *l,prosper::Shader &shader)
 {
-	auto *luaShader = dynamic_cast<pragma::LuaShaderBase*>(&shader);
+	auto *luaShader = dynamic_cast<pragma::LuaShaderWrapperBase*>(&shader);
 	if(luaShader != nullptr)
 		luaShader->GetLuaObject().push(l);
 	else
@@ -236,11 +236,11 @@ void Lua::Shader::RecordBindDescriptorSets(lua_State *l,prosper::Shader &shader,
 	Lua::PushBool(l,r);
 }
 
-void Lua::Shader::SetStageSourceFilePath(lua_State *l,pragma::LuaShaderBase &shader,uint32_t shaderStage,const std::string &fpath)
+void Lua::Shader::SetStageSourceFilePath(lua_State *l,pragma::LuaShaderWrapperBase &shader,uint32_t shaderStage,const std::string &fpath)
 {
-	shader.GetShader().SetStageSourceFilePath(static_cast<prosper::ShaderStage>(shaderStage),fpath);
+	shader.SetStageSourceFilePath(static_cast<prosper::ShaderStage>(shaderStage),fpath);
 }
-void Lua::Shader::SetPipelineCount(lua_State *l,pragma::LuaShaderBase &shader,uint32_t pipelineCount)
+void Lua::Shader::SetPipelineCount(lua_State *l,pragma::LuaShaderWrapperBase &shader,uint32_t pipelineCount)
 {
 	shader.SetPipelineCount(pipelineCount);
 }

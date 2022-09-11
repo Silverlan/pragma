@@ -436,17 +436,17 @@ void Lua::ParticleSystemModifier::register_modifier_class(luabind::class_<pragma
 	defPtRendererBase.def("OnParticleCreated",&CParticleRendererLua::Lua_OnParticleCreated,&CParticleRendererLua::Lua_default_OnParticleCreated);
 	defPtRendererBase.def("OnParticleDestroyed",&CParticleRendererLua::Lua_OnParticleDestroyed,&CParticleRendererLua::Lua_default_OnParticleDestroyed);
 	defPtRendererBase.def("Render",&CParticleRendererLua::Lua_Render,&CParticleRendererLua::Lua_default_Render);
-	defPtRendererBase.def("SetShader",static_cast<void(*)(lua_State*,::CParticleRendererLua&,::pragma::LuaShaderGUIParticle2D&)>([](lua_State *l,::CParticleRendererLua &renderer,::pragma::LuaShaderGUIParticle2D &shader) {
-		renderer.SetShader(&shader);
+	defPtRendererBase.def("SetShader",static_cast<void(*)(lua_State*,::CParticleRendererLua&,::pragma::LuaShaderWrapperParticle2D&)>([](lua_State *l,::CParticleRendererLua &renderer,::pragma::LuaShaderWrapperParticle2D &shader) {
+		renderer.SetShader(&static_cast<pragma::LShaderParticle2D&>(shader.GetShader()));
 	}));
 	defPtRendererBase.def("GetShader",static_cast<void(*)(lua_State*,::CParticleRendererLua&)>([](lua_State *l,::CParticleRendererLua &renderer) {
-		auto *shader = dynamic_cast<prosper::ShaderGraphics*>(renderer.GetShader());
+		auto *shader = dynamic_cast<pragma::LShaderParticle2D*>(renderer.GetShader());
 		if(shader == nullptr)
 			return;
-		auto *lShader = dynamic_cast<pragma::LuaShaderGraphicsBase*>(shader);
-		if(lShader)
+		auto *wrapper = dynamic_cast<pragma::LuaShaderWrapperParticle2D*>(shader->GetWrapper());
+		if(wrapper)
 		{
-			lShader->GetLuaObject().push(l);
+			wrapper->GetLuaObject().push(l);
 			return;
 		}
 		Lua::Push(l,shader);

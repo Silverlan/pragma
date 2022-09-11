@@ -17,7 +17,7 @@ namespace pragma
 	class ShaderSceneLit;
 	class ShaderScene;
 	class ShaderComposeRMA;
-	class LuaShaderBase;
+	class LuaShaderWrapperBase;
 };
 
 namespace prosper
@@ -43,10 +43,10 @@ void luabind::shader_converter<T,TConverter>::to_lua(lua_State* L, T x)
 		pshader = &static_cast<prosper::Shader&>(x);
 	auto &shader = *pshader;
 
-	auto *luaShader = dynamic_cast<::pragma::LuaShaderBase*>(&shader);
-	if(luaShader != nullptr)
-		luaShader->GetLuaObject().push(L);
-	else
+	// auto *luaShader = dynamic_cast<::pragma::LShaderBase*>(&shader);
+	// if(luaShader != nullptr)
+	// 	luaShader->GetShaderObject().push(L);
+	// else
 	{
 		if(shader.IsGraphicsShader())
 		{

@@ -487,7 +487,7 @@ void Lua::GraphicsPipelineCreateInfo::AttachVertexAttribute(lua_State *l,prosper
 	auto vertexAttributes = Lua::get_table_values<pragma::LuaVertexAttribute>(l,3u,[](lua_State *l,int32_t idx) {
 		return *Lua::CheckVertexAttribute(l,idx);
 	});
-	auto *shader = static_cast<pragma::LuaShaderGraphicsBase*>(pragma::LuaShaderBase::GetShader(pipelineInfo));
+	auto *shader = static_cast<pragma::LuaShaderWrapperGraphicsBase*>(pragma::LuaShaderWrapperBase::GetShader(pipelineInfo));
 	if(shader == nullptr)
 	{
 		Lua::PushBool(l,false);

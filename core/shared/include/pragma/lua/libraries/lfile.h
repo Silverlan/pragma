@@ -130,6 +130,7 @@ namespace Lua
 		DLLNETWORK bool CreateDir(lua_State *l,std::string path);
 		DLLNETWORK bool CreatePath(lua_State *l,std::string path);
 		DLLNETWORK bool Delete(lua_State *l,std::string path);
+		DLLNETWORK bool DeleteDir(lua_State *l,std::string path);
 		DLLNETWORK void Find(lua_State *l,const std::string &path,fsys::SearchFlags searchFlags,luabind::object &outFiles,luabind::object &outDirs);
 		DLLNETWORK luabind::object FindLuaFiles(lua_State *l,const std::string &path,fsys::SearchFlags searchFlags=fsys::SearchFlags::All);
 		DLLNETWORK void find_external_game_resource_files(lua_State *l,const std::string &path,luabind::object &outFiles,luabind::object &outDirs);

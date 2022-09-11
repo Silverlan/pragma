@@ -15,6 +15,11 @@
 
 extern DLLNETWORK Engine *engine;
 
+static bool is_permitted_root_dir(const std::string_view &str)
+{
+	return str == "cache" or str == "temp";
+}
+
 LFile::LFile()
 {}
 
@@ -344,7 +349,7 @@ bool Lua::file::validate_write_operation(lua_State *l,std::string &path,std::str
 	auto prefix = ustring::substr(fname,0,br +1);
 	outRootPath = prefix;
 	path = FileManager::GetCanonicalizedPath(path);
-	if(util::Path{path}.GetFront() == "cache")
+	if(is_permitted_root_dir(util::Path{path}.GetFront()))
 		outRootPath = ""; // Special case; We'll allow file writes in the cache directory
 	return true;
 }
@@ -407,6 +412,16 @@ bool Lua::file::Delete(lua_State *l,std::string ppath)
 	if(Lua::get_extended_lua_modules_enabled() && FileManager::Exists(path) == false && FileManager::Exists(ppath))
 		return FileManager::RemoveFile(ppath.c_str());
 	return FileManager::RemoveFile(path.c_str());
+}
+
+bool Lua::file::DeleteDir(lua_State *l,std::string ppath)
+{
+	auto path = ppath;
+	if(validate_write_operation(l,path) == false)
+		return false;
+	if(Lua::get_extended_lua_modules_enabled() && FileManager::Exists(path) == false && FileManager::Exists(ppath))
+		return FileManager::RemoveDirectory(ppath.c_str());
+	return FileManager::RemoveDirectory(path.c_str());
 }
 
 std::shared_ptr<LFile> Lua::file::open_external_asset_file(lua_State *l,const std::string &path,const std::optional<std::string> &game)

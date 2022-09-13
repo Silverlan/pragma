@@ -275,6 +275,16 @@ jobs:
             #echo "--ALL FILES END--"
             # cp ./build/third_party_libs/libpng/pnglibconf.h ./third_party_libs/libpng/pnglibconf.h
             # cp ./build/third_party_libs/zlib/zconf.h ./third_party_libs/zlib/zconf.h
+
+      - uses: Silverlan/common_actions/build_cmake@main
+        name: CMake Build PFM Executable
+        with:
+          build_type: ${{ matrix.config.build_type }}
+          build_generator: ${{ matrix.config.generators }}
+          build_target: pfm
+          build_dir: '${{ matrix.config.build_dir }}/.'
+          configure: '0'
+          cmake_script_location: '.'
             
       - name: Clear disk space
         shell: bash

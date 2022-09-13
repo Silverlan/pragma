@@ -172,6 +172,8 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def(luabind::self ==luabind::self);
 	classDef.def("IsValid",&IsValid);
 	classDef.def("GetIndex",&::WIBase::GetIndex);
+	classDef.def("GetDepth",&::WIBase::GetDepth);
+	classDef.def("SetSkinCallbacksEnabled",&::WIBase::SetSkinCallbacksEnabled);
 	classDef.def("Remove",&::WIBase::Remove);
 	classDef.def("RemoveSafely",&::WIBase::RemoveSafely);
 	classDef.def("SetZPos",&::WIBase::SetZPos);
@@ -783,6 +785,12 @@ void Lua::WIText::register_class(luabind::class_<::WIText,::WIBase> &classDef)
 	classDef.def("SetFont",static_cast<void(*)(lua_State*,::WIText&,const std::string&)>([](lua_State *l,::WIText &hPanel,const std::string &font) {
 		hPanel.SetFont(font);
 	}));
+	classDef.def("GetFont",+[](lua_State *l,::WIText &hPanel) -> std::optional<std::string> {
+		auto *font = hPanel.GetFont();
+		if(!font)
+			return {};
+		return font->GetName();
+	});
 	classDef.def("UpdateSubLines",&::WIText::UpdateSubLines);
 	classDef.def("EnableShadow",&::WIText::EnableShadow);
 	classDef.def("IsShadowEnabled",&::WIText::IsShadowEnabled);

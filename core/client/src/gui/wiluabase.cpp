@@ -38,6 +38,12 @@ void WILuaBase::Initialize()
 	CallLuaMember("OnInitialize");
 }
 
+void WILuaBase::OnSkinApplied()
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::SkinCallbacksEnabled))
+		CallLuaMember("OnSkinApplied");
+}
+
 void WILuaBase::Think()
 {
 	auto hThis = GetHandle();

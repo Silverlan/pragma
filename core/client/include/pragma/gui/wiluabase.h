@@ -128,6 +128,7 @@ public:
 protected:
 	virtual void DoUpdate() override;
 	virtual bool DoPosInBounds(const Vector2i &pos) const override;
+	virtual void OnSkinApplied() override;
 
 	struct RenderData
 	{

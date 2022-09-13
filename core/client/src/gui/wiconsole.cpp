@@ -489,7 +489,7 @@ WIFrame *WIConsole::GetFrame() {return static_cast<WIFrame*>(m_hFrame.get());}
 
 const util::Utf8String &WIConsole::GetText() const
 {
-	static std::string s {};
+	static util::Utf8String s {};
 	if(m_hLog.IsValid())
 	{
 		auto *pTextEntry = static_cast<const WITextEntry*>(m_hLog.get());

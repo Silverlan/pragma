@@ -70,6 +70,9 @@ function gui.WIContextMenu:OnInitialize()
 			if(item:IsValid()) then item:SetWidth(el:GetWidth()) end
 		end
 	end)
+	contents:AddCallback("OnUpdated",function(el)
+		self.m_scrollContainer:ScheduleUpdate()
+	end)
 	self.m_contents = contents
 
 	self:AddStyleClass("context_menu")
@@ -109,6 +112,7 @@ function gui.WIContextMenu:AddLine()
 	-- TODO
 end
 function gui.WIContextMenu:OnUpdate()
+	local updateItems = {}
 	local function updateAutoSize(item)
 		for _,menu in ipairs(item.m_subMenues) do
 			updateAutoSize(menu)
@@ -122,7 +126,7 @@ function gui.WIContextMenu:OnUpdate()
 		item.m_contents:SetAutoSizeToContents(true,false)
 		item.m_contents:Update()
 
-		item.m_scrollContainer:Update()
+		table.insert(updateItems,item.m_scrollContainer)
 	end
 	updateAutoSize(self)
 
@@ -144,6 +148,8 @@ function gui.WIContextMenu:OnUpdate()
 	if(self:GetRight() > self:GetParent():GetRight()) then
 		self:SetX(self:GetX() -self:GetWidth())
 	end
+
+	for _,item in ipairs(updateItems) do item:Update() end
 end
 function gui.WIContextMenu:GetItemCount() return #self.m_tItems end
 function gui.WIContextMenu:Clear()

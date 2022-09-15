@@ -125,10 +125,10 @@ namespace pragma
 
 		// For internal use only!
 		uint32_t GetCurrentPipelineIndex() const {return m_curPipelineIdx;}
-	protected:
 		void OnPipelineInitialized(uint32_t pipelineIdx);
 		void OnInitialized();
 		void OnPipelinesInitialized();
+	protected:
 		void InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 		prosper::Shader *m_shader = nullptr;
 		uint32_t m_curPipelineIdx = std::numeric_limits<uint32_t>::max();
@@ -196,12 +196,45 @@ namespace pragma
 		void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 	};
 
-	class LuaShaderWrapperGraphics;
-	struct DLLCLIENT LShaderGraphics
-		: public LShaderBase,public prosper::ShaderGraphics
+	template<typename TShader>
+		class TLShaderBase
+			: public LShaderBase,public TShader
 	{
 	public:
 		using TBaseShader = prosper::ShaderGraphics;
+		using TShader::TShader;
+	protected:
+		virtual void OnInitialized() override
+		{
+			TShader::OnInitialized();
+			auto *wrapper = GetWrapper();
+			if(!wrapper)
+				return;
+			wrapper->OnInitialized();
+		}
+		virtual void OnPipelinesInitialized() override
+		{
+			TShader::OnPipelinesInitialized();
+			auto *wrapper = GetWrapper();
+			if(!wrapper)
+				return;
+			wrapper->OnPipelinesInitialized();
+		}
+		virtual void OnPipelineInitialized(uint32_t pipelineIdx) override
+		{
+			TShader::OnPipelineInitialized(pipelineIdx);
+			auto *wrapper = GetWrapper();
+			if(!wrapper)
+				return;
+			wrapper->OnPipelineInitialized(pipelineIdx);
+		}
+	};
+
+	class LuaShaderWrapperGraphics;
+	struct DLLCLIENT LShaderGraphics
+		: public TLShaderBase<prosper::ShaderGraphics>
+	{
+	public:
 		friend LuaShaderWrapperGraphics;
 		LShaderGraphics();
 
@@ -210,11 +243,11 @@ namespace pragma
 	protected:
 		void BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 		{
-			prosper::ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+			TBaseShader::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 		}
 		void BaseInitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 		{
-			prosper::ShaderGraphics::InitializeRenderPass(outRenderPass,pipelineIdx);
+			TBaseShader::InitializeRenderPass(outRenderPass,pipelineIdx);
 		}
 
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
@@ -237,7 +270,7 @@ namespace pragma
 
 	class LuaShaderWrapperCompute;
 	struct DLLCLIENT LShaderCompute
-		: public LShaderBase,public prosper::ShaderCompute
+		: public TLShaderBase<prosper::ShaderCompute>
 	{
 	public:
 		using TBaseShader = prosper::ShaderCompute;
@@ -249,7 +282,7 @@ namespace pragma
 		friend LuaShaderWrapperCompute;
 		void BaseInitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 		{
-			prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo,pipelineIdx);
+			TBaseShader::InitializeComputePipeline(pipelineInfo,pipelineIdx);
 		}
 		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
@@ -267,7 +300,7 @@ namespace pragma
 
 	class LuaShaderWrapperGUI;
 	struct DLLCLIENT LShaderGui
-		: public LShaderBase,public wgui::Shader
+		: public TLShaderBase<wgui::Shader>
 	{
 	public:
 		using TBaseShader = wgui::Shader;
@@ -284,11 +317,11 @@ namespace pragma
 		friend LuaShaderWrapperGUI;
 		void BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 		{
-			prosper::ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+			TBaseShader::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 		}
 		void BaseInitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 		{
-			prosper::ShaderGraphics::InitializeRenderPass(outRenderPass,pipelineIdx);
+			TBaseShader::InitializeRenderPass(outRenderPass,pipelineIdx);
 		}
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
@@ -310,7 +343,7 @@ namespace pragma
 
 	class LuaShaderWrapperGUITextured;
 	struct DLLCLIENT LShaderGuiTextured
-		: public LShaderBase,public wgui::ShaderTextured
+		: public TLShaderBase<wgui::ShaderTextured>
 	{
 	public:
 		using TBaseShader = wgui::ShaderTextured;
@@ -322,11 +355,11 @@ namespace pragma
 		friend LuaShaderWrapperGUITextured;
 		void BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 		{
-			prosper::ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+			TBaseShader::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 		}
 		void BaseInitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 		{
-			prosper::ShaderGraphics::InitializeRenderPass(outRenderPass,pipelineIdx);
+			TBaseShader::InitializeRenderPass(outRenderPass,pipelineIdx);
 		}
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
@@ -348,7 +381,7 @@ namespace pragma
 
 	class LuaShaderWrapperParticle2D;
 	struct DLLCLIENT LShaderParticle2D
-		: public LShaderBase,public pragma::ShaderParticle2DBase
+		: public TLShaderBase<pragma::ShaderParticle2DBase>
 	{
 	public:
 		using TBaseShader = pragma::ShaderParticle2DBase;
@@ -360,11 +393,11 @@ namespace pragma
 		friend LuaShaderWrapperParticle2D;
 		void BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 		{
-			prosper::ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+			TBaseShader::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 		}
 		void BaseInitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 		{
-			prosper::ShaderGraphics::InitializeRenderPass(outRenderPass,pipelineIdx);
+			TBaseShader::InitializeRenderPass(outRenderPass,pipelineIdx);
 		}
 		virtual Vector3 DoCalcVertexPosition(
 			const pragma::CParticleSystemComponent &ptc,uint32_t ptIdx,uint32_t localVertIdx,
@@ -404,7 +437,7 @@ namespace pragma
 
 	class LuaShaderWrapperImageProcessing;
 	struct DLLCLIENT LShaderImageProcessing
-		: public LShaderBase,public prosper::ShaderBaseImageProcessing
+		: public TLShaderBase<prosper::ShaderBaseImageProcessing>
 	{
 	public:
 		using TBaseShader = prosper::ShaderBaseImageProcessing;
@@ -416,11 +449,11 @@ namespace pragma
 		friend LuaShaderWrapperImageProcessing;
 		void BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 		{
-			prosper::ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+			TBaseShader::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 		}
 		void BaseInitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 		{
-			prosper::ShaderGraphics::InitializeRenderPass(outRenderPass,pipelineIdx);
+			TBaseShader::InitializeRenderPass(outRenderPass,pipelineIdx);
 		}
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
@@ -442,7 +475,7 @@ namespace pragma
 
 	class LuaShaderWrapperPostProcessing;
 	struct DLLCLIENT LShaderPostProcessing
-		: public LShaderBase,public ShaderPPBase
+		: public TLShaderBase<ShaderPPBase>
 	{
 	public:
 		using TBaseShader = ShaderPPBase;
@@ -454,11 +487,11 @@ namespace pragma
 		friend LuaShaderWrapperPostProcessing;
 		void BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 		{
-			prosper::ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+			TBaseShader::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 		}
 		void BaseInitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 		{
-			prosper::ShaderGraphics::InitializeRenderPass(outRenderPass,pipelineIdx);
+			TBaseShader::InitializeRenderPass(outRenderPass,pipelineIdx);
 		}
 		void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx);
 	};
@@ -478,7 +511,7 @@ namespace pragma
 
 	class LuaShaderWrapperTextured3D;
 	struct DLLCLIENT LShaderGameWorldLightingPass
-		: public LShaderBase,public ShaderGameWorldLightingPass
+		: public TLShaderBase<ShaderGameWorldLightingPass>
 	{
 	public:
 		using TBaseShader = ShaderGameWorldLightingPass;
@@ -549,7 +582,7 @@ namespace pragma
 
 	class LuaShaderWrapperPbr;
 	struct DLLCLIENT LShaderPbr
-		: public LShaderBase,public ShaderPBR
+		: public TLShaderBase<ShaderPBR>
 	{
 	public:
 		using TBaseShader = ShaderPBR;
@@ -561,23 +594,23 @@ namespace pragma
 		friend LuaShaderWrapperPbr;
 		void BaseInitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 		{
-			ShaderPBR::InitializeGfxPipelineVertexAttributes(pipelineInfo,pipelineIdx);
+			TBaseShader::InitializeGfxPipelineVertexAttributes(pipelineInfo,pipelineIdx);
 		}
 		void BaseInitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 		{
-			ShaderPBR::InitializeGfxPipelinePushConstantRanges(pipelineInfo,pipelineIdx);
+			TBaseShader::InitializeGfxPipelinePushConstantRanges(pipelineInfo,pipelineIdx);
 		}
 		void BaseInitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 		{
-			ShaderPBR::InitializeGfxPipelineDescriptorSets(pipelineInfo,pipelineIdx);
+			TBaseShader::InitializeGfxPipelineDescriptorSets(pipelineInfo,pipelineIdx);
 		}
 		void BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 		{
-			ShaderPBR::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+			TBaseShader::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 		}
 		void BaseInitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 		{
-			ShaderPBR::InitializeRenderPass(outRenderPass,pipelineIdx);
+			TBaseShader::InitializeRenderPass(outRenderPass,pipelineIdx);
 		}
 		virtual void InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

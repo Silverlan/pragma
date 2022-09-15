@@ -199,7 +199,7 @@ void pragma::LuaShaderWrapperComputeBase::InitializeComputePipeline(prosper::Com
 /////////////////
 
 pragma::LShaderGraphics::LShaderGraphics()
-	: prosper::ShaderGraphics(c_engine->GetRenderContext(),"","","")
+	: TLShaderBase<prosper::ShaderGraphics>(c_engine->GetRenderContext(),"","","")
 {}
 void pragma::LShaderGraphics::InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
@@ -219,7 +219,7 @@ void pragma::LuaShaderWrapperGraphics::InitializeDefaultRenderPass(std::shared_p
 /////////////////
 
 pragma::LShaderCompute::LShaderCompute()
-	: prosper::ShaderCompute(c_engine->GetRenderContext(),"","")
+	: TLShaderBase<prosper::ShaderCompute>(c_engine->GetRenderContext(),"","")
 {}
 pragma::LuaShaderWrapperCompute::LuaShaderWrapperCompute()
 {}
@@ -235,7 +235,7 @@ void pragma::LShaderCompute::InitializeComputePipeline(prosper::ComputePipelineC
 	static_cast<LuaShaderWrapperCompute*>(m_wrapper)->InitializeComputePipeline(pipelineInfo,pipelineIdx);
 }
 pragma::LShaderGui::LShaderGui()
-	: wgui::Shader(c_engine->GetRenderContext(),"","","")
+	: TLShaderBase<wgui::Shader>(c_engine->GetRenderContext(),"","","")
 {
 	SetPipelineCount(umath::to_integral(wgui::StencilPipeline::Count) *2);
 }
@@ -274,7 +274,7 @@ void pragma::LuaShaderWrapperGUI::InitializeDefaultRenderPass(std::shared_ptr<pr
 /////////////////
 
 pragma::LShaderGuiTextured::LShaderGuiTextured()
-	: wgui::ShaderTextured(c_engine->GetRenderContext(),"","","")
+	: TLShaderBase<wgui::ShaderTextured>(c_engine->GetRenderContext(),"","","")
 {}
 void pragma::LShaderGuiTextured::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
@@ -303,7 +303,7 @@ void pragma::LuaShaderWrapperGUITextured::InitializeDefaultRenderPass(std::share
 /////////////////
 
 pragma::LShaderParticle2D::LShaderParticle2D()
-	: pragma::ShaderParticle2DBase(c_engine->GetRenderContext(),"","","")
+	: TLShaderBase<pragma::ShaderParticle2DBase>(c_engine->GetRenderContext(),"","","")
 {}
 Vector3 pragma::LShaderParticle2D::DoCalcVertexPosition(
 	const pragma::CParticleSystemComponent &ptc,uint32_t ptIdx,uint32_t localVertIdx,
@@ -376,7 +376,7 @@ void pragma::LuaShaderWrapperParticle2D::InitializeDefaultRenderPass(std::shared
 /////////////////
 
 pragma::LShaderImageProcessing::LShaderImageProcessing()
-	: prosper::ShaderBaseImageProcessing(c_engine->GetRenderContext(),"","","")
+	: TLShaderBase<prosper::ShaderBaseImageProcessing>(c_engine->GetRenderContext(),"","","")
 {
 	SetBaseShader<prosper::ShaderCopyImage>();
 }
@@ -408,7 +408,7 @@ void pragma::LuaShaderWrapperImageProcessing::InitializeDefaultRenderPass(std::s
 /////////////////
 
 pragma::LShaderPostProcessing::LShaderPostProcessing()
-	: ShaderPPBase(c_engine->GetRenderContext(),"","","")
+	: TLShaderBase<ShaderPPBase>(c_engine->GetRenderContext(),"","","")
 {
 	SetBaseShader<prosper::ShaderCopyImage>();
 }
@@ -432,7 +432,7 @@ void pragma::LuaShaderWrapperPostProcessing::InitializeDefaultRenderPass(std::sh
 /////////////////
 
 pragma::LShaderGameWorldLightingPass::LShaderGameWorldLightingPass()
-	: ShaderGameWorldLightingPass(c_engine->GetRenderContext(),"","","")
+	: TLShaderBase<ShaderGameWorldLightingPass>(c_engine->GetRenderContext(),"","","")
 {
 	// SetBaseShader<ShaderTextured3DBase>();
 }
@@ -524,7 +524,7 @@ void pragma::LuaShaderWrapperTextured3D::InitializeDefaultRenderPass(std::shared
 /////////////////
 
 pragma::LShaderPbr::LShaderPbr()
-	: ShaderPBR(c_engine->GetRenderContext(),"","","")
+	: TLShaderBase<ShaderPBR>(c_engine->GetRenderContext(),"","","")
 {
 	// SetBaseShader<ShaderTextured3DBase>();
 }

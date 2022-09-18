@@ -232,7 +232,8 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 		return;
 	}
 	auto &channels = anim->GetChannels();
-	channelValueSubmitters.resize(channels.size());
+	channelValueSubmitters.clear();
+	channelValueSubmitters.resize(channels.size(),nullptr);
 	uint32_t numInvalidChannels = 0;
 	auto shouldPrintWarning = [&numInvalidChannels]() {
 		if(numInvalidChannels >= 5)

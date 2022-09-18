@@ -58,7 +58,7 @@ function udm.BaseSchemaType:Reinitialize(data)
 	end
 
 	local curData = self:GetUdmData()
-	curData:Merge(data,bit.bor(udm.MERGE_FLAG_BIT_DEEP_COPY,udm.MERGE_FLAG_BIT_OVERWRITE_EXISTING))
+	if(util.is_same_object(data,curData) == false) then curData:Merge(data,bit.bor(udm.MERGE_FLAG_BIT_DEEP_COPY,udm.MERGE_FLAG_BIT_OVERWRITE_EXISTING)) end
 	self:Initialize(self:GetSchema(),curData,self:GetParent())
 	if(self.GetUniqueId) then
 		local newUniqueId = tostring(self:GetUniqueId())
@@ -502,15 +502,18 @@ function udm.generate_lua_api_from_schema(schema)
 						if(removerName ~= nil) then
 							class[removerName] = function(self,idx)
 								if(udmValueType == udm.TYPE_INVALID and type(idx) ~= "number") then
+									local found = false
 									for i,val in ipairs(class[getterName](self)) do
 										if(util.is_same_object(val,idx)) then
 											idx = i -1
+											found = true
 											break
 										end
 									end
+									if(found == false) then return false end
 								end
 								local a = self:GetCachedChild(name)
-								if(a == nil or idx >= a:GetSize()) then return end
+								if(a == nil or idx >= a:GetSize()) then return false end
 								local children = self:GetTypedChildren()[name]
 								local child = children[idx +1]
 								local curVal = self[elementGetterName](self,idx)
@@ -524,6 +527,7 @@ function udm.generate_lua_api_from_schema(schema)
 									child.m_udmData = a:Get(i -1)
 								end
 								self:CallChangeListeners(name,idx,udm.BaseSchemaType.ARRAY_EVENT_REMOVE,curVal)
+								return true
 							end
 						end
 

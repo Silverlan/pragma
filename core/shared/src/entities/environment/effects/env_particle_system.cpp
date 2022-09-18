@@ -53,6 +53,19 @@ void BaseEnvParticleSystemComponent::RegisterMembers(pragma::EntityComponentMana
 		metaData["stripExtension"] = true;
 		registerMember(std::move(memberInfo));
 	}
+	{
+		using TContinuous = bool;
+		auto memberInfo = create_component_member_info<
+			T,TContinuous,
+			[](const ComponentMemberInfo&,T &c,TContinuous enabled) {
+				c.SetContinuous(enabled);
+			},
+			[](const ComponentMemberInfo&,T &c,TContinuous &value) {
+				value = c.IsContinuous();
+			}
+		>("continuous","");
+		registerMember(std::move(memberInfo));
+	}
 }
 void BaseEnvParticleSystemComponent::SetParticleSystem(const std::string &ptName) {m_particleName = ptName;}
 const std::string &BaseEnvParticleSystemComponent::GetParticleSystem() const {return m_particleName;}

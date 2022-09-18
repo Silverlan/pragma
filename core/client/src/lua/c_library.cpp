@@ -35,6 +35,7 @@
 #include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
 #include "pragma/asset/c_util_model.hpp"
 #include <pragma/debug/debug_render_info.hpp>
+#include <pragma/game/game_resources.hpp>
 #include <pragma/util/giblet_create_info.hpp>
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
@@ -226,10 +227,35 @@ static void register_gui(Lua::Interface &lua)
 		})),
 		luabind::def("add_base_element",static_cast<::WIBase*(*)()>([]() -> ::WIBase* {
 			return WGUI::GetInstance().AddBaseElement();
-		}))
+		})),
+		luabind::def("get_supported_video_modes",+[]() -> auto {
+			auto &context = WGUI::GetInstance().GetContext();
+			auto &window = context.GetWindow();
+			auto *monitor = window->GetMonitor();
+			auto primaryMonitor = GLFW::get_primary_monitor();
+			if(monitor == nullptr)
+				monitor = &primaryMonitor;
+			return monitor->GetSupportedVideoModes();
+		})
 	];
 
 	//
+	auto videoModeDef = luabind::class_<GLFW::Monitor::VideoMode>("VideoMode");
+	videoModeDef.def("__tostring",+[](const GLFW::Monitor::VideoMode &videoMode) -> std::string {
+		std::stringstream ss;
+		ss<<"VideoMode[resolution:";
+		ss<<videoMode.width<<"x"<<videoMode.height<<"][";
+		ss<<"refreshRate:"<<videoMode.refreshRate<<"]";
+		return ss.str();
+	});
+	videoModeDef.def_readonly("width",&GLFW::Monitor::VideoMode::width);
+	videoModeDef.def_readonly("height",&GLFW::Monitor::VideoMode::height);
+	videoModeDef.def_readonly("redBits",&GLFW::Monitor::VideoMode::redBits);
+	videoModeDef.def_readonly("greenBits",&GLFW::Monitor::VideoMode::greenBits);
+	videoModeDef.def_readonly("blueBits",&GLFW::Monitor::VideoMode::blueBits);
+	videoModeDef.def_readonly("refreshRate",&GLFW::Monitor::VideoMode::refreshRate);
+	guiMod[videoModeDef];
+
 	auto wiElementClassDef = luabind::class_<::WIBase>("Element");
 	Lua::WIBase::register_class(wiElementClassDef);
 	guiMod[wiElementClassDef];
@@ -1331,6 +1357,14 @@ void CGame::RegisterLuaLibraries()
 				return luabind::object{l,std::static_pointer_cast<Texture>(asset)};
 			}
 			return luabind::object{};
+		}),
+		luabind::def("import",+[](NetworkState &nw,const std::string &name,pragma::asset::Type type) -> bool {
+			if(type == pragma::asset::Type::Map)
+				return util::port_hl2_map(&nw,name);
+			auto *manager = nw.GetAssetManager(type);
+			if(!manager)
+				return false;
+			return manager->Import(name);
 		})
 	];
 	auto defMapExportInfo = luabind::class_<pragma::asset::MapExportInfo>("MapExportInfo");

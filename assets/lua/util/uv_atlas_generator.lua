@@ -36,21 +36,18 @@ function util.UVAtlasGenerator:AddEntity(ent,meshFilter)
 	mdlC:SetBodyGroups(bodyGroups)
 
 	self.m_entities[ent] = {}
-	local renderMeshes = renderC:GetLODMeshes()
-	for _,mesh in ipairs(renderMeshes) do
-		for _,subMesh in ipairs(mesh:GetSubMeshes()) do
-			-- if(subMesh:HasUVSet("lightmap")) then
-				local mat = mdl:GetMaterial(subMesh:GetSkinTextureIndex()) -- mdlC:GetRenderMaterial(subMesh:GetSkinTextureIndex())
-				if(mat ~= nil and (meshFilter == nil or meshFilter(mesh,subMesh))) then
-					self.m_atlas:AddMesh(subMesh,mat)
-					self.m_numInputMeshes = self.m_numInputMeshes +1
-					table.insert(self.m_entities[ent],{
-						subMesh = subMesh,
-						xatlasMeshIndex = self.m_numInputMeshes
-					})
-				end
-			-- end
-		end
+	for _,subMesh in ipairs(renderC:GetRenderMeshes()) do
+		-- if(subMesh:HasUVSet("lightmap")) then
+			local mat = mdl:GetMaterial(subMesh:GetSkinTextureIndex()) -- mdlC:GetRenderMaterial(subMesh:GetSkinTextureIndex())
+			if(mat ~= nil and (meshFilter == nil or meshFilter(mesh,subMesh))) then
+				self.m_atlas:AddMesh(subMesh,mat)
+				self.m_numInputMeshes = self.m_numInputMeshes +1
+				table.insert(self.m_entities[ent],{
+					subMesh = subMesh,
+					xatlasMeshIndex = self.m_numInputMeshes
+				})
+			end
+		-- end
 	end
 end
 
@@ -191,7 +188,16 @@ function util.UVAtlasGenerator:Generate(lightmapCachePath)
 			local newMdl = asset.load(mdl:GetName(),asset.TYPE_MODEL)
 			if(newMdl ~= nil and models[newMdl:GetName()] ~= nil) then
 				newMdl:Update()
+
+				local bodygroups = {}
+				local skin = ent:GetSkin()
+				local mdlC = ent:GetComponent(ents.COMPONENT_MODEL)
+				if(mdlC ~= nil) then bodygroups = mdlC:GetBodyGroups() end
 				ent:SetModel(newMdl)
+				if(util.is_valid(mdlC)) then
+					mdlC:SetSkin(skin)
+					mdlC:SetBodyGroups(bodygroups)
+				end
 			end
 		end
 	end

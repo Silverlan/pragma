@@ -33,23 +33,25 @@ void CLightMapReceiverComponent::RegisterMembers(pragma::EntityComponentManager 
 void CLightMapReceiverComponent::SetupLightMapUvData(CBaseEntity &ent,LightmapDataCache *cache)
 {
 	auto mdl = ent.GetModel();
-	auto meshGroup = mdl ? mdl->GetMeshGroup(0u) : nullptr;
-	if(meshGroup == nullptr)
+	if(!mdl)
 		return;
 	auto hasLightmapUvs = false;
-	for(auto &mesh : meshGroup->GetMeshes())
+	for(auto &mg : mdl->GetMeshGroups())
 	{
-		for(auto &subMesh : mesh->GetSubMeshes())
+		for(auto &mesh : mg->GetMeshes())
 		{
-			const std::vector<Vector2> *uvSet = nullptr;
-			if(cache)
-				uvSet = cache->FindLightmapUvs(ent.GetUuid(),subMesh->GetUuid());
-			else
-				uvSet = subMesh->GetUVSet("lightmap");
-			if(uvSet)
+			for(auto &subMesh : mesh->GetSubMeshes())
 			{
-				hasLightmapUvs = true;
-				goto endLoop;
+				const std::vector<Vector2> *uvSet = nullptr;
+				if(cache)
+					uvSet = cache->FindLightmapUvs(ent.GetUuid(),subMesh->GetUuid());
+				else
+					uvSet = subMesh->GetUVSet("lightmap");
+				if(uvSet)
+				{
+					hasLightmapUvs = true;
+					goto endLoop;
+				}
 			}
 		}
 	}
@@ -65,7 +67,8 @@ void CLightMapReceiverComponent::UpdateLightMapUvData()
 {
 	auto mdlC = GetEntity().GetComponent<CModelComponent>();
 	auto mdl = GetEntity().GetModel();
-	if(mdlC.expired() || mdl == nullptr)
+	auto renderC = GetEntity().GetComponent<CRenderComponent>();
+	if(mdlC.expired() || renderC.expired() || mdl == nullptr)
 		return;
 	m_modelName = mdl->GetName();
 	umath::set_flag(m_stateFlags,StateFlags::IsModelBakedWithLightMaps,true);
@@ -76,23 +79,18 @@ void CLightMapReceiverComponent::UpdateLightMapUvData()
 	umath::set_flag(m_stateFlags,StateFlags::RenderMeshBufferIndexTableDirty);
 	uint32_t subMeshIdx = 0u;
 	auto wasInitialized = false;
-	std::vector<std::shared_ptr<ModelMesh>> meshes;
-	mdlC->GetBaseModelMeshes(meshes);
-	for(auto &mesh : meshes)
+	for(auto &subMesh : renderC->GetRenderMeshes())
 	{
-		for(auto &subMesh : mesh->GetSubMeshes())
+		auto *uvSet = FindLightmapUvSet(*subMesh);
+		if(uvSet == nullptr)
 		{
-			auto *uvSet = FindLightmapUvSet(*subMesh);
-			if(uvSet == nullptr)
-			{
-				++subMeshIdx;
-				continue;
-			}
-			m_uvDataPerMesh.insert(std::make_pair(subMeshIdx,*uvSet));
-			m_meshes.insert(std::make_pair(subMeshIdx,subMesh));
-			m_meshToMeshIdx.insert(std::make_pair(static_cast<CModelSubMesh*>(subMesh.get()),subMeshIdx));
 			++subMeshIdx;
+			continue;
 		}
+		m_uvDataPerMesh.insert(std::make_pair(subMeshIdx,*uvSet));
+		m_meshes.insert(std::make_pair(subMeshIdx,subMesh));
+		m_meshToMeshIdx.insert(std::make_pair(static_cast<CModelSubMesh*>(subMesh.get()),subMeshIdx));
+		++subMeshIdx;
 	}
 	UpdateRenderMeshBufferList();
 }

@@ -12,6 +12,7 @@
 #include "pragma/entities/components/lightmap_data_cache.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
+#include <pragma/entities/components/base_model_component.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_manager_t.hpp>
 
@@ -192,7 +193,24 @@ void CLightMapDataCacheComponent::ReloadCache()
 			lmModel = cpy;
 		}
 		if(lmModel)
+		{
+			uint32_t skin = 0;
+			std::vector<uint32_t> bgs;
+			auto *mdlC = ent->GetModelComponent();
+			if(mdlC)
+			{
+				skin = mdlC->GetSkin();
+				bgs = mdlC->GetBodyGroups();
+			}
 			ent->SetModel(lmModel);
+			mdlC = ent->GetModelComponent();
+			if(mdlC)
+			{
+				mdlC->SetSkin(skin);
+				for(auto i=decltype(bgs.size()){0u};i<bgs.size();++i)
+					mdlC->SetBodyGroup(i,bgs[i]);
+			}
+		}
 
 		auto lc = ent->GetComponent<CLightMapReceiverComponent>();
 		if(lc.valid())

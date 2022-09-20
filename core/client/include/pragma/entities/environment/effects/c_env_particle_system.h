@@ -20,6 +20,7 @@
 
 class CParticleSystemData;
 class CGame;
+namespace udm {struct LinkedPropertyWrapper;};
 namespace pragma
 {
 	struct DLLCLIENT ParticleSystemFileHeader
@@ -55,6 +56,7 @@ namespace pragma
 		static std::optional<ParticleSystemFileHeader> ReadHeader(VFilePtr &f);
 		static bool Precache(std::string fname,bool bReload=false);
 		static bool PrecacheLegacy(std::string fname,bool bReload=false);
+		static bool InitializeFromAssetData(const std::string &ptName,const ::udm::LinkedPropertyWrapper &udm,std::string &outErr);
 		static const std::vector<std::string> &GetPrecachedParticleSystemFiles();
 		static std::optional<std::string> FindParticleSystemFile(const std::string ptName);
 		static const std::unordered_map<std::string,std::unique_ptr<CParticleSystemData>> &GetCachedParticleSystemData();
@@ -149,6 +151,7 @@ namespace pragma
 		virtual void SetParticleFile(const std::string &fileName) override;
 		void ToParticleSystemData(CParticleSystemData &outData);
 		static bool LoadFromAssetData(CParticleSystemData &ptData,const udm::AssetData &data,std::string &outErr);
+		static bool LoadFromAssetData(CParticleSystemData &ptData,const ::udm::LinkedPropertyWrapper &data,std::string &outErr);
 
 		// Particle
 		// Returns the buffer index for the specified particle. Only particles which are alive have a valid buffer index!
@@ -168,6 +171,7 @@ namespace pragma
 		void SetExtent(float ext);
 		float GetRadius() const;
 		float GetExtent() const;
+		void Clear();
 		const std::vector<ParticleData> &GetRenderParticleData() const;
 		const std::vector<ParticleAnimationData> &GetParticleAnimationData() const;
 		void SetMaterial(Material *mat);

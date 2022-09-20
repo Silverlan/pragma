@@ -16,6 +16,7 @@
 #include "pragma/lua/libraries/c_lrender.h"
 #include "pragma/lua/libraries/lengine.h"
 #include "pragma/entities/environment/c_env_camera.h"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/lua/converters/optional_converter_t.hpp>
@@ -185,7 +186,15 @@ void CGame::RegisterLua()
 			auto mask = c_game->RegisterRenderMask(Lua::CheckString(l,1),inclusiveByDefault);
 			Lua::Push(l,mask);
 			return 1;
-		})}
+		})},
+		{"register_particle_system",+[](lua_State *l) -> int32_t {
+			std::string ptName = Lua::CheckString(l,1);
+			auto &udmData = Lua::Check<udm::LinkedPropertyWrapper>(l,2);
+			std::string err;
+			auto res = pragma::CParticleSystemComponent::InitializeFromAssetData(ptName,udmData,err);
+			Lua::PushBool(l,res);
+			return 1;
+		}}
 		
 		/*{"debug_vehicle",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			Con::cout<<"Creating vehicle..."<<Con::endl;

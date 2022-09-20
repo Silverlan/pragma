@@ -1861,7 +1861,7 @@ void CParticleSystemComponent::Simulate(double tDelta)
 			data.radius = radius;
 			data.prevPos = Vector3{prevPos.x +origin.x,prevPos.y +origin.y,prevPos.z +origin.z};
 			data.age = p.GetTimeAlive();
-			if(umath::is_flag_set(m_flags,Flags::MoveWithEmitter))
+			//if(umath::is_flag_set(m_flags,Flags::MoveWithEmitter))
 			{
 				for(auto i=0u;i<3u;++i)
 					data.position[i] += psPos[i];

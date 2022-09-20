@@ -744,6 +744,7 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 			return;
 		Lua::Push(l,mdl);
 	}));
+	defCParticleSystem.def("Clear",&pragma::CParticleSystemComponent::Clear);
 #if 0
 	defCParticleSystem.def("GetAnimationFrameCount",static_cast<void(*)(lua_State*,pragma::CParticleSystemComponent&)>([](lua_State *l,pragma::CParticleSystemComponent &hComponent) {
 		

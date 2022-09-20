@@ -116,6 +116,16 @@ void CParticleSystemComponent::CreateParticle()
 }
 void CParticleSystemComponent::SetRemoveOnComplete(bool b) {BaseEnvParticleSystemComponent::SetRemoveOnComplete(b);}
 
+void CParticleSystemComponent::Clear()
+{
+	Stop();
+	m_particleSystemName.clear();
+	m_initializers.clear();
+	m_operators.clear();
+	m_renderers.clear();
+	umath::set_flag(m_flags,Flags::Setup,false);
+}
+
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>
@@ -239,24 +249,20 @@ std::shared_ptr<Model> CParticleSystemComponent::GenerateModel() const
 
 void CParticleSystemComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
-bool CParticleSystemComponent::LoadFromAssetData(CParticleSystemData &ptData,const udm::AssetData &data,std::string &outErr)
+bool CParticleSystemComponent::InitializeFromAssetData(
+	const std::string &ptName,const ::udm::LinkedPropertyWrapper &udm,std::string &outErr
+)
 {
-	if(data.GetAssetType() != pragma::asset::PPTSYS_IDENTIFIER)
-	{
-		outErr = "Incorrect format!";
+	auto ptData = std::make_unique<CParticleSystemData>();
+	auto res = LoadFromAssetData(*ptData,udm,outErr);
+	if(res == false)
 		return false;
-	}
+	s_particleData[ptName] = std::move(ptData);
+	return true;
+}
 
-	auto version = data.GetAssetVersion();
-	if(version < 1)
-	{
-		outErr = "Invalid version!";
-		return false;
-	}
-	// if(version > FORMAT_VERSION)
-	// 	return false;
-	
-	auto udm = *data;
+bool CParticleSystemComponent::LoadFromAssetData(CParticleSystemData &ptData,const ::udm::LinkedPropertyWrapper &udm,std::string &outErr)
+{
 	udm["keyValues"](ptData.settings);
 
 	auto itMat = ptData.settings.find("material");
@@ -267,10 +273,8 @@ bool CParticleSystemComponent::LoadFromAssetData(CParticleSystemData &ptData,con
 		auto udmModifiers = udm[name];
 		auto numModifiers = udmModifiers.GetSize();
 		modifiers.reserve(numModifiers);
-		for(auto i=decltype(numModifiers){0u};i<numModifiers;++i)
+		for(auto &udmModifier : udmModifiers)
 		{
-			auto &modifier = modifiers.back();
-			auto udmModifier = udmModifiers[i];
 			std::string name;
 			udmModifier["name"](name);
 			if(name.empty())
@@ -300,6 +304,26 @@ bool CParticleSystemComponent::LoadFromAssetData(CParticleSystemData &ptData,con
 		udmChild["delay"](childData.delay);
 	}
 	return true;
+}
+bool CParticleSystemComponent::LoadFromAssetData(CParticleSystemData &ptData,const udm::AssetData &data,std::string &outErr)
+{
+	if(data.GetAssetType() != pragma::asset::PPTSYS_IDENTIFIER)
+	{
+		outErr = "Incorrect format!";
+		return false;
+	}
+
+	auto version = data.GetAssetVersion();
+	if(version < 1)
+	{
+		outErr = "Invalid version!";
+		return false;
+	}
+	// if(version > FORMAT_VERSION)
+	// 	return false;
+	
+	auto udm = *data;
+	return LoadFromAssetData(ptData,udm,outErr);
 }
 
 ///////////////

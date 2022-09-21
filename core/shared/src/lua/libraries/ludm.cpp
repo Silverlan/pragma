@@ -13,6 +13,7 @@
 #include "pragma/lua/converters/optional_converter_t.hpp"
 #include "pragma/lua/custom_constructor.hpp"
 #include "pragma/lua/types/udm.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/util/util_game.hpp"
 #include <sharedutils/util_path.hpp>
 #include <luabind/iterator_policy.hpp>
@@ -1511,6 +1512,31 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		}),
 		luabind::def("enum_type_to_ascii",&::udm::enum_type_to_ascii),
 		luabind::def("ascii_type_to_enum",&::udm::ascii_type_to_enum),
+		luabind::def("convert",+[](lua_State *l,const luabind::object &o0,::udm::Type t0,::udm::Type t1) -> luabind::object {
+			return ::udm::visit<true,true,true>(t0,[l,&o0,t1](auto tag){
+				using T0 = decltype(tag)::type;
+				if constexpr(pragma::is_valid_component_property_type(::udm::type_to_enum<T0>()))
+				{
+					auto v0 = luabind::object_cast<T0>(o0);
+					return ::udm::visit<true,true,true>(t1,[l,&v0](auto tag){
+						using T1 = decltype(tag)::type;
+						if constexpr(::udm::is_convertible<T0,T1>())
+						{
+							auto v1 = ::udm::convert<T0,T1>(v0);
+							return luabind::object{l,v1};
+						}
+						else
+						{
+							return Lua::nil;
+						}
+					});
+				}
+				else
+				{
+					return Lua::nil;
+				}
+			});
+		}),
 		luabind::def("to_json",+[](::udm::LinkedPropertyWrapper &udm) -> std::string {
 			std::stringstream ss;
 			::udm::to_json(udm,ss);

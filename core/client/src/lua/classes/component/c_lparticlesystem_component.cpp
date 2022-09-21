@@ -509,7 +509,7 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 			if(hChild.child.expired())
 				continue;
 			Lua::PushInt(l,idx++);
-			Lua::Push(l,hChild);
+			Lua::Push(l,hChild.child.get());
 			Lua::SetTableValue(l,t);
 		}
 		}));

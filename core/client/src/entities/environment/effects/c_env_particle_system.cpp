@@ -123,6 +123,15 @@ void CParticleSystemComponent::Clear()
 	m_initializers.clear();
 	m_operators.clear();
 	m_renderers.clear();
+	for(auto &hChild : m_childSystems)
+	{
+		if(hChild.child.expired())
+			continue;
+		hChild.child->GetEntity().Remove();
+	}
+	m_childSystems.clear();
+	m_state = State::Initial;
+
 	umath::set_flag(m_flags,Flags::Setup,false);
 }
 

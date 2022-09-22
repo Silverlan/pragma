@@ -321,6 +321,14 @@ namespace pragma
 		const SpriteSheetAnimation *GetSpriteSheetAnimation() const;
 
 		std::shared_ptr<Model> GenerateModel() const;
+
+		uint32_t GetMaxNodes() const {return m_maxNodes;}
+		void SetMaxNodes(uint32_t maxNodes) {m_maxNodes = maxNodes;}
+
+		// For internal use only
+		Flags GetFlags() const {return m_flags;}
+		void SetFlags(Flags flags) {m_flags = flags;}
+		void SetMaxParticleCount(uint32_t count);
 	protected:
 		util::EventReply HandleKeyValue(const std::string &key,const std::string &value);
 

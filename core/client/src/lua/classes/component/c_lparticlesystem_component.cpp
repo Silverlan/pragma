@@ -137,9 +137,29 @@ static void push_particle_system_definition_data(lua_State *l,const CParticleSys
 void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 {
 	auto defCParticleSystem = pragma::lua::create_entity_component_class<pragma::CParticleSystemComponent,pragma::BaseEnvParticleSystemComponent>("ParticleSystemComponent");
+	
+	defCParticleSystem.add_static_constant("SF_PARTICLE_SYSTEM_CONTINUOUS",SF_PARTICLE_SYSTEM_CONTINUOUS);
+	
 	defCParticleSystem.add_static_constant("RENDER_FLAG_NONE",umath::to_integral(pragma::ParticleRenderFlags::None));
 	defCParticleSystem.add_static_constant("RENDER_FLAG_BIT_BLOOM",umath::to_integral(pragma::ParticleRenderFlags::Bloom));
 	defCParticleSystem.add_static_constant("RENDER_FLAG_BIT_DEPTH_ONLY",umath::to_integral(pragma::ParticleRenderFlags::DepthOnly));
+
+	defCParticleSystem.add_static_constant("FLAG_NONE",umath::to_integral(pragma::CParticleSystemComponent::Flags::None));
+	defCParticleSystem.add_static_constant("FLAG_BIT_SOFT_PARTICLES",umath::to_integral(pragma::CParticleSystemComponent::Flags::SoftParticles));
+	defCParticleSystem.add_static_constant("FLAG_BIT_TEXTURE_SCROLLING_ENABLED",umath::to_integral(pragma::CParticleSystemComponent::Flags::TextureScrollingEnabled));
+	defCParticleSystem.add_static_constant("FLAG_BIT_RENDERER_BUFFER_UPDATE_REQUIRED",umath::to_integral(pragma::CParticleSystemComponent::Flags::RendererBufferUpdateRequired));
+	defCParticleSystem.add_static_constant("FLAG_BIT_HAS_MOVING_PARTICLES",umath::to_integral(pragma::CParticleSystemComponent::Flags::HasMovingParticles));
+	defCParticleSystem.add_static_constant("FLAG_BIT_MOVE_WITH_EMITTER",umath::to_integral(pragma::CParticleSystemComponent::Flags::MoveWithEmitter));
+	defCParticleSystem.add_static_constant("FLAG_BIT_ROTATE_WITH_EMITTER",umath::to_integral(pragma::CParticleSystemComponent::Flags::RotateWithEmitter));
+	defCParticleSystem.add_static_constant("FLAG_BIT_SORT_PARTICLES",umath::to_integral(pragma::CParticleSystemComponent::Flags::SortParticles));
+	defCParticleSystem.add_static_constant("FLAG_BIT_DYING",umath::to_integral(pragma::CParticleSystemComponent::Flags::Dying));
+	defCParticleSystem.add_static_constant("FLAG_BIT_RANDOM_START_FRAME",umath::to_integral(pragma::CParticleSystemComponent::Flags::RandomStartFrame));
+	defCParticleSystem.add_static_constant("FLAG_BIT_PREMULTIPLY_ALPHA",umath::to_integral(pragma::CParticleSystemComponent::Flags::PremultiplyAlpha));
+	defCParticleSystem.add_static_constant("FLAG_BIT_ALWAYS_SIMULATE",umath::to_integral(pragma::CParticleSystemComponent::Flags::AlwaysSimulate));
+	defCParticleSystem.add_static_constant("FLAG_BIT_CAST_SHADOWS",umath::to_integral(pragma::CParticleSystemComponent::Flags::CastShadows));
+	defCParticleSystem.add_static_constant("FLAG_BIT_SETUP",umath::to_integral(pragma::CParticleSystemComponent::Flags::Setup));
+	defCParticleSystem.add_static_constant("FLAG_BIT_AUTO_SIMULATE",umath::to_integral(pragma::CParticleSystemComponent::Flags::AutoSimulate));
+	defCParticleSystem.add_static_constant("FLAG_BIT_MATERIAL_DESCRIPT_SET_INITIALIZED",umath::to_integral(pragma::CParticleSystemComponent::Flags::MaterialDescriptorSetInitialized));
 
 	defCParticleSystem.def("Start",static_cast<void(*)(lua_State*,pragma::CParticleSystemComponent&)>([](lua_State *l,pragma::CParticleSystemComponent &hComponent) {
 		
@@ -159,6 +179,10 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		
 		hComponent.Die(t);
 	}));
+	defCParticleSystem.def("GetFlags",&pragma::CParticleSystemComponent::GetFlags);
+	defCParticleSystem.def("SetFlags",&pragma::CParticleSystemComponent::SetFlags);
+	defCParticleSystem.def("GetMaxNodes",&pragma::CParticleSystemComponent::GetMaxNodes);
+	defCParticleSystem.def("SetMaxNodes",&pragma::CParticleSystemComponent::SetMaxNodes);
 	defCParticleSystem.def("AddInitializer",+[](lua_State *l,pragma::CParticleSystemComponent &hComponent,std::string name,luabind::object o) {
 		
 		return Lua::ParticleSystem::AddInitializer(l,hComponent,name,o);
@@ -467,10 +491,8 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 			Lua::SetTableValue(l,t);
 		}
 	}));
-	defCParticleSystem.def("GetMaxParticleCount",static_cast<void(*)(lua_State*,pragma::CParticleSystemComponent&)>([](lua_State *l,pragma::CParticleSystemComponent &hComponent) {
-		
-		Lua::PushInt(l,hComponent.GetMaxParticleCount());
-		}));
+	defCParticleSystem.def("GetMaxParticleCount",&pragma::CParticleSystemComponent::GetMaxParticleCount);
+	defCParticleSystem.def("SetMaxParticleCount",&pragma::CParticleSystemComponent::SetMaxParticleCount);
 	defCParticleSystem.def("IsActive",static_cast<void(*)(lua_State*,pragma::CParticleSystemComponent&)>([](lua_State *l,pragma::CParticleSystemComponent &hComponent) {
 		
 		Lua::PushBool(l,hComponent.IsActive());

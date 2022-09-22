@@ -150,7 +150,15 @@ std::optional<ParticleSystemFileHeader> CParticleSystemComponent::ReadHeader(VFi
 	if(header[0] != 'W' || header[1] != 'P' || header[2] != 'T')
 	{
 		f->Seek(0);
-		auto data = udm::Data::Load(f);
+		std::shared_ptr<udm::Data> data = nullptr;
+		try
+		{
+			data = udm::Data::Load(f);
+		}
+		catch(const udm::Exception &e)
+		{
+			data = nullptr;
+		}
 		if(data)
 		{
 			auto assetData = data->GetAssetData().GetData()["particleSystemDefinitions"];
@@ -1312,6 +1320,7 @@ bool CParticleSystemComponent::IsActiveOrPaused() const {return IsActive() || Is
 uint32_t CParticleSystemComponent::GetParticleCount() const {return m_numParticles;}
 uint32_t CParticleSystemComponent::GetRenderParticleCount() const {return m_numRenderParticles;}
 uint32_t CParticleSystemComponent::GetMaxParticleCount() const {return m_maxParticles;}
+void CParticleSystemComponent::SetMaxParticleCount(uint32_t count) {m_maxParticles = count;}
 
 void CParticleSystemComponent::OnRemove()
 {

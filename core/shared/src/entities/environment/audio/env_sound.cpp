@@ -11,9 +11,87 @@
 #include "pragma/util/util_handled.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
+#include "pragma/asset/util_asset.hpp"
 
 using namespace pragma;
 
+void BaseEnvSoundComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
+{
+	using T = BaseEnvSoundComponent;
+	{
+		using TSound = std::string;
+		auto memberInfo = create_component_member_info<
+			T,TSound,
+			[](const ComponentMemberInfo &info,T &component,const TSound &mdl) {
+				component.SetSoundSource(mdl);
+			},
+			static_cast<const TSound&(T::*)() const>(&T::GetSoundSource)
+		>("sound","",AttributeSpecializationType::File);
+		auto &metaData = memberInfo.AddMetaData();
+		metaData["assetType"] = "sound";
+		metaData["rootPath"] = util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Sound)).GetString();
+		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::Sound,pragma::asset::FormatType::All);
+		metaData["stripRootPath"] = true;
+		metaData["stripExtension"] = true;
+		registerMember(std::move(memberInfo));
+	}
+
+	{
+		auto memberInfo = create_component_member_info<
+			T,float,
+			static_cast<void(T::*)(float)>(&T::SetPitch),
+			static_cast<float(T::*)() const>(&T::GetPitch)
+		>("pitch",1.f);
+		memberInfo.SetMin(0.f);
+		memberInfo.SetMax(1.f);
+		registerMember(std::move(memberInfo));
+	}
+
+	{
+		auto memberInfo = create_component_member_info<
+			T,float,
+			static_cast<void(T::*)(float)>(&T::SetGain),
+			static_cast<float(T::*)() const>(&T::GetGain)
+		>("volume",1.f);
+		memberInfo.SetMin(0.f);
+		memberInfo.SetMax(1.f);
+		registerMember(std::move(memberInfo));
+	}
+
+	{
+		auto memberInfo = create_component_member_info<
+			T,float,
+			static_cast<void(T::*)(float)>(&T::SetMaxDistance),
+			static_cast<float(T::*)() const>(&T::GetMaxDistance)
+		>("maxDist",1024.f,AttributeSpecializationType::Distance);
+		memberInfo.SetMin(0.f);
+		memberInfo.SetMax(8'192.f);
+		registerMember(std::move(memberInfo));
+	}
+
+	{
+		auto memberInfo = create_component_member_info<
+			T,float,
+			static_cast<void(T::*)(float)>(&T::SetReferenceDistance),
+			static_cast<float(T::*)() const>(&T::GetReferenceDistance)
+		>("refDist",1.f,AttributeSpecializationType::Distance);
+		memberInfo.SetMin(0.f);
+		memberInfo.SetMax(8'192.f);
+		registerMember(std::move(memberInfo));
+	}
+
+	{
+		auto memberInfo = create_component_member_info<
+			T,float,
+			static_cast<void(T::*)(float)>(&T::SetRolloffFactor),
+			static_cast<float(T::*)() const>(&T::GetRolloffFactor)
+		>("rolloffFactor",1.f);
+		memberInfo.SetMin(0.f);
+		memberInfo.SetMax(1.f);
+		registerMember(std::move(memberInfo));
+	}
+}
 void BaseEnvSoundComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -108,6 +186,62 @@ void BaseEnvSoundComponent::OnRemove()
 	BaseEntityComponent::OnRemove();
 }
 
+float BaseEnvSoundComponent::GetPitch() const
+{
+	if(m_sound)
+		return m_sound->GetPitch();
+	return m_kvPitch;
+}
+float BaseEnvSoundComponent::GetGain() const
+{
+	if(m_sound)
+		return m_sound->GetGain();
+	return m_kvGain;
+}
+float BaseEnvSoundComponent::GetRolloffFactor() const
+{
+	if(m_sound)
+		return m_sound->GetRolloffFactor();
+	return m_kvRolloff;
+}
+float BaseEnvSoundComponent::GetMinGain() const
+{
+	if(m_sound)
+		return m_sound->GetMinGain();
+	return m_kvMinGain;
+}
+float BaseEnvSoundComponent::GetMaxGain() const
+{
+	if(m_sound)
+		return m_sound->GetMaxGain();
+	return m_kvMaxGain;
+}
+float BaseEnvSoundComponent::GetInnerConeAngle() const
+{
+	if(m_sound)
+		return m_sound->GetInnerConeAngle();
+	return m_kvInnerCone;
+}
+float BaseEnvSoundComponent::GetOuterConeAngle() const
+{
+	if(m_sound)
+		return m_sound->GetOuterConeAngle();
+	return m_kvOuterCone;
+}
+float BaseEnvSoundComponent::GetReferenceDistance() const
+{
+	if(m_sound)
+		return m_sound->GetReferenceDistance();
+	return m_kvReferenceDist;
+}
+float BaseEnvSoundComponent::GetMaxDistance() const
+{
+	if(m_sound)
+		return m_sound->GetMaxDistance();
+	return m_kvMaxDist;
+}
+
+const std::string &BaseEnvSoundComponent::GetSoundSource() const {return m_kvSoundName;}
 void BaseEnvSoundComponent::SetSoundSource(const std::string &sndName) {m_kvSoundName = sndName;}
 void BaseEnvSoundComponent::SetPitch(float pitch)
 {

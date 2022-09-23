@@ -38,10 +38,22 @@ namespace pragma
 		};
 		
 		using BaseEntityComponent::BaseEntityComponent;
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		virtual void InjectStateChange(ALState oldState,ALState newState);
 		virtual void OnEntitySpawn() override;
+
+		const std::string &GetSoundSource() const;
+		float GetPitch() const;
+		float GetGain() const;
+		float GetRolloffFactor() const;
+		float GetMinGain() const;
+		float GetMaxGain() const;
+		float GetInnerConeAngle() const;
+		float GetOuterConeAngle() const;
+		float GetReferenceDistance() const;
+		float GetMaxDistance() const;
 
 		void SetSoundSource(const std::string &sndName);
 		void SetPitch(float pitch);

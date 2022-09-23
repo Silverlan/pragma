@@ -677,7 +677,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShaderImageProcessing.add_static_constant("DESCRIPTOR_SET_TEXTURE",0);
 	defShaderImageProcessing.add_static_constant("DESCRIPTOR_SET_TEXTURE_BINDING_TEXTURE",0);
 	defShaderImageProcessing.def(luabind::constructor<>());
-	defShaderImageProcessing.def("RecordDraw",+[](prosper::ShaderBindState &bindState,pragma::LuaShaderWrapperImageProcessing &shader,prosper::IDescriptorSetGroup &dsg) -> bool {
+	defShaderImageProcessing.def("RecordDraw",+[](pragma::LuaShaderWrapperImageProcessing &shader,prosper::ShaderBindState &bindState,prosper::IDescriptorSetGroup &dsg) -> bool {
 		return static_cast<prosper::ShaderBaseImageProcessing&>(shader.GetShader()).RecordDraw(bindState,*dsg.GetDescriptorSet());
 	});
 	modShader[defShaderImageProcessing];

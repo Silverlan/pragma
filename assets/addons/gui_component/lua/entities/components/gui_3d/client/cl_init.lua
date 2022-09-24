@@ -299,7 +299,7 @@ function ents.GUI3D:DrawGUIElement()
 	drawCmd:RecordImageBarrier(imgDst,prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,prosper.IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL)
 	drawCmd:RecordBeginRenderPass(prosper.RenderPassInfo(self.m_renderTargetDst))
 		local srgbToLinearShader = shader.get("srgb_to_linear")
-		srgbToLinearShader:Draw(drawCmd,self.m_dsTex)
+		srgbToLinearShader:GetWrapper():Draw(drawCmd,self.m_dsTex)
 	drawCmd:RecordEndRenderPass()
 	drawCmd:RecordImageBarrier(imgDst,prosper.IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
 

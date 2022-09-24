@@ -20,10 +20,11 @@ function shader.SRGBToLinear:InitializePipeline(pipelineInfo,pipelineIdx)
 	shader.BaseImageProcessing.InitializePipeline(self,pipelineInfo,pipelineIdx)
 end
 function shader.SRGBToLinear:Draw(drawCmd,ds)
-	if(self:IsValid() == false) then return end
+	local baseShader = self:GetShader()
+	if(baseShader:IsValid() == false) then return end
 	local bindState = shader.BindState(drawCmd)
-	if(self:RecordBeginDraw(bindState) == false) then return end
+	if(baseShader:RecordBeginDraw(bindState) == false) then return end
 	self:RecordDraw(bindState,ds)
-	self:RecordEndDraw(bindState)
+	baseShader:RecordEndDraw(bindState)
 end
 shader.register("srgb_to_linear",shader.SRGBToLinear)

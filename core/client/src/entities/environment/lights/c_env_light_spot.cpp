@@ -54,6 +54,11 @@ void CLightSpotComponent::Initialize()
 	if(pLightComponent.valid())
 		pLightComponent->UpdateTransformationMatrix(GetBiasTransformationMatrix(),GetViewMatrix(),GetProjectionMatrix());
 }
+void CLightSpotComponent::OnEntitySpawn()
+{
+	BaseEnvLightSpotComponent::OnEntitySpawn();
+	UpdateViewMatrices();
+}
 void CLightSpotComponent::SetFieldAngleComponent(BaseFieldAngleComponent &c)
 {
 	BaseEnvLightSpotComponent::SetFieldAngleComponent(c);

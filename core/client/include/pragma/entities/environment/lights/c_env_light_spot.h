@@ -26,6 +26,7 @@ namespace pragma
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void SetConeStartOffset(float offset) override;
+		virtual void OnEntitySpawn() override;
 	protected:
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void ReceiveData(NetPacket &packet) override;

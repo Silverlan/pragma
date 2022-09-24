@@ -202,25 +202,34 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh()
 			auto &verts = mesh.GetVertices();
 			auto &vertexWeights = mesh.GetVertexWeights();
 			auto &transformedVerts = meshData.transformedVerts;
-			for(auto i=start;i<end;++i)
+			assert(transformedVerts.size() == vertexWeights.size());
+			if(transformedVerts.size() != vertexWeights.size())
 			{
-				if(m_cancelled)
-					break;
-				auto &v = verts[i];
-				auto &vw = vertexWeights[i];
-				Mat4 mat {0.f};
-				for(auto i=0u;i<4u;++i)
+				for(auto i=start;i<end;++i)
+					transformedVerts[i] = verts[i].position;
+			}
+			else
+			{
+				for(auto i=start;i<end;++i)
 				{
-					auto boneId = vw.boneIds[i];
-					if(boneId == -1)
-						continue;
-					auto weight = vw.weights[i];
-					mat += weight *animBvhData.boneMatrices[boneId];
-				}
+					if(m_cancelled)
+						break;
+					auto &v = verts[i];
+					auto &vw = vertexWeights[i];
+					Mat4 mat {0.f};
+					for(auto i=0u;i<4u;++i)
+					{
+						auto boneId = vw.boneIds[i];
+						if(boneId == -1)
+							continue;
+						auto weight = vw.weights[i];
+						mat += weight *animBvhData.boneMatrices[boneId];
+					}
 
-				Vector4 vpos {v.position.x,v.position.y,v.position.z,1.f};
-				vpos = mat *vpos;
-				transformedVerts[i] = Vector3{vpos.x,vpos.y,vpos.z} /vpos.w;
+					Vector4 vpos {v.position.x,v.position.y,v.position.z,1.f};
+					vpos = mat *vpos;
+					transformedVerts[i] = Vector3{vpos.x,vpos.y,vpos.z} /vpos.w;
+				}
 			}
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 			::debug::get_domain().EndTask();

@@ -142,14 +142,26 @@ function gui.WIContextMenu:OnUpdate()
 	end
 	self:SetSize(w,h)
 
-	if(self:GetBottom() > self:GetParent():GetBottom()) then
-		self:SetY(self:GetY() -self:GetHeight())
-	end
-	if(self:GetRight() > self:GetParent():GetRight()) then
-		self:SetX(self:GetX() -self:GetWidth())
-	end
-
 	for _,item in ipairs(updateItems) do item:Update() end
+
+	self:UpdateFlipState()
+end
+function gui.WIContextMenu:UpdateFlipState()
+	local xBase = self:GetLeft()
+	local yBase = self:GetTop()
+
+	self.m_xFlipped = false
+	self.m_yFlipped = false
+	if(yBase +self:GetHeight() > self:GetParent():GetBottom()) then
+		local y = yBase -self:GetHeight()
+		if(#self.m_tItems > 0) then y = y +self.m_tItems[1]:GetHeight() end
+		self:SetY(y)
+		self.m_yFlipped = true
+	else self:SetY(yBase) end
+	if(xBase +self:GetWidth() > self:GetParent():GetRight()) then
+		self:SetX(xBase -self:GetWidth())
+		self.m_xFlipped = true
+	else self:SetX(xBase) end
 end
 function gui.WIContextMenu:GetItemCount() return #self.m_tItems end
 function gui.WIContextMenu:Clear()
@@ -190,6 +202,7 @@ function gui.WIContextMenu:AddSubMenu(name,onClick)
 			local pos = pItem:GetAbsolutePos()
 			pSubMenu:SetX(pos.x +self:GetWidth())
 			pSubMenu:SetY(pos.y)
+			pSubMenu:UpdateFlipState()
 			--pSubMenu:RequestFocus()
 		end
 	end)

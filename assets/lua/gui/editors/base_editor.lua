@@ -58,10 +58,15 @@ function gui.WIBaseEditor:IsDeveloperModeEnabled() return self.m_devModeEnabled 
 
 function gui.WIBaseEditor:AddWindowsMenuBarItem()
 	self.m_menuBar:AddItem(locale.get_text("windows"),function(pContext)
+		local windows = {}
 		for identifier,data in pairs(self.m_windowFactories) do
-			pContext:AddItem(data.title,function(pItem)
-				self:OpenWindow(identifier)
-				self:GoToWindow(identifier)
+			table.insert(windows,{data.title,identifier})
+		end
+		table.sort(windows,function(a,b) return a[1] < b[1] end)
+		for _,wdata in ipairs(windows) do
+			pContext:AddItem(wdata[1],function(pItem)
+				self:OpenWindow(wdata[2])
+				self:GoToWindow(wdata[2])
 			end)
 		end
 		pContext:ScheduleUpdate()

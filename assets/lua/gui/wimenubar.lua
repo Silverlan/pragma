@@ -30,6 +30,7 @@ function gui.WIMenuBar:OnInitialize()
 	self.m_pMain = pMain
 
 	self.m_tItems = {}
+	self.m_idToItem = {}
 	--[[local pClose = gui.create("WIButton",self)
 	pClose:SetText("X")
 	pClose:AddCallback("OnPressed",function(pClose)
@@ -90,7 +91,8 @@ function gui.WIMenuBar:OnUpdate()
 		end
 	end
 end
-function gui.WIMenuBar:AddItem(name,fcContextCallback)
+function gui.WIMenuBar:FindItemByIdentifier(identifier) return self.m_idToItem[identifier] end
+function gui.WIMenuBar:AddItem(name,fcContextCallback,identifier)
 	local pItem = gui.create("WIMenuItem",self)
 	if(util.is_valid(pItem) == false) then return end
 	pItem:SetTitle(name)
@@ -101,6 +103,7 @@ function gui.WIMenuBar:AddItem(name,fcContextCallback)
 	end)
 	table.insert(self.m_tItems,pItem)
 	self:UpdateItem(pItem)
+	if(identifier ~= nil) then self.m_idToItem[identifier] = pItem end
 	return pItem
 end
 gui.register("WIMenuBar",gui.WIMenuBar)

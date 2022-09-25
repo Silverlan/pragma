@@ -12,14 +12,15 @@
 using namespace pragma;
 
 ShaderWireframe::ShaderWireframe(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderGameWorldLightingPass(context,identifier,"world/vs_wireframe","world/fs_wireframe")
+	: ShaderPBR(context,identifier,"world/vs_textured","world/fs_wireframe")
 {
 	// SetBaseShader<ShaderTextured3DBase>();
 }
 
 void ShaderWireframe::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	ShaderPBR::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	prosper::util::set_graphics_pipeline_polygon_mode(pipelineInfo,prosper::PolygonMode::Line);
-	prosper::util::set_graphics_pipeline_line_width(pipelineInfo,1.f);
+	prosper::util::set_graphics_pipeline_line_width(pipelineInfo,2.f);
+	pipelineInfo.ToggleDepthWrites(true);
 }

@@ -206,6 +206,40 @@ std::shared_ptr<prosper::IBuffer> CModelComponent::GetLightmapUvBuffer(const CMo
 bool CModelComponent::IsDepthPrepassEnabled() const {return !umath::is_flag_set(m_stateFlags,StateFlags::DepthPrepassDisabled);}
 void CModelComponent::SetDepthPrepassEnabled(bool enabled) {umath::set_flag(m_stateFlags,StateFlags::DepthPrepassDisabled,!enabled);}
 
+void CModelComponent::SetRenderBufferData(const std::vector<rendering::RenderBufferData> &renderBufferData)
+{
+	m_lodMeshRenderBufferData = renderBufferData;
+}
+
+void CModelComponent::AddRenderMesh(CModelSubMesh &mesh,CMaterial &mat,bool enableDepthPrepass)
+{
+	if(m_lodRenderMeshGroups.empty())
+		return;
+	auto *shader = dynamic_cast<pragma::ShaderGameWorldLightingPass*>(mat.GetPrimaryShader());
+	if(!shader || !shader->IsValid())
+		return;
+	if(!shader->InitializeMaterialDescriptorSet(mat))
+		return;
+	auto &renderBuffer = mesh.GetRenderBuffer(*shader);
+	if(!renderBuffer)
+		return;
+	auto &lodGroup = m_lodRenderMeshGroups.front();
+	auto insertIdx = lodGroup.first +lodGroup.second;
+
+	pragma::rendering::RenderBufferData renderBufferData {};
+	renderBufferData.material = mat.GetHandle();
+	renderBufferData.renderBuffer = renderBuffer;
+	renderBufferData.enableDepthPrepass = enableDepthPrepass && shader && shader->IsDepthPrepassEnabled();
+	renderBufferData.pipelineSpecializationFlags = shader->GetMaterialPipelineSpecializationRequirements(mat);
+
+	m_lodRenderMeshes.insert(m_lodRenderMeshes.begin() +insertIdx,mesh.shared_from_this());
+	m_lodMeshRenderBufferData.insert(m_lodMeshRenderBufferData.begin() +insertIdx,std::move(renderBufferData));
+
+	++lodGroup.second;
+	for(auto i=decltype(m_lodRenderMeshGroups.size()){1u};i<m_lodRenderMeshGroups.size();++i)
+		++m_lodRenderMeshGroups[i].first;
+}
+
 void CModelComponent::UpdateRenderBufferList()
 {
 	if(std::this_thread::get_id() != c_engine->GetMainThreadId())

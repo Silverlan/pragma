@@ -7,15 +7,20 @@
 
 #include "stdafx_client.h"
 #include "pragma/model/c_model.h"
+#include "pragma/model/c_modelmesh.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include <pragma/lua/converters/cast_converter_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>
+#include <pragma/lua/custom_constructor.hpp>
 #include <pragma/asset/util_asset.hpp>
 #include <prosper_command_buffer.hpp>
+#include <buffers/prosper_render_buffer.hpp>
+#include <luabind/copy_policy.hpp>
 #include <cmaterial.h>
 
 void Lua::ModelDef::register_class(lua_State *l,luabind::module_ &entsMod)
@@ -49,9 +54,33 @@ void Lua::ModelDef::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCModel.def("SetMaxDrawDistance",&pragma::CModelComponent::SetMaxDrawDistance);
 	defCModel.def("GetMaxDrawDistance",&pragma::CModelComponent::GetMaxDrawDistance);
 	defCModel.def("UpdateRenderMeshes",&pragma::CModelComponent::UpdateRenderMeshes);
+	defCModel.def("SetRenderMeshesDirty",&pragma::CModelComponent::SetRenderMeshesDirty);
 	defCModel.def("ReloadRenderBufferList",&pragma::CModelComponent::ReloadRenderBufferList,luabind::default_parameter_policy<2,false>{});
 	defCModel.def("ReloadRenderBufferList",&pragma::CModelComponent::ReloadRenderBufferList);
 	defCModel.def("IsDepthPrepassEnabled",&pragma::CModelComponent::IsDepthPrepassEnabled);
 	defCModel.def("SetDepthPrepassEnabled",&pragma::CModelComponent::SetDepthPrepassEnabled);
+	defCModel.def("SetRenderBufferData",&pragma::CModelComponent::SetRenderBufferData);
+	defCModel.def("GetRenderBufferData",+[](pragma::CModelComponent &c) -> std::vector<pragma::rendering::RenderBufferData> {
+		return c.GetRenderBufferData();
+	});
+	defCModel.def("AddRenderMesh",&pragma::CModelComponent::AddRenderMesh);
+	defCModel.def("AddRenderMesh",&pragma::CModelComponent::AddRenderMesh,luabind::default_parameter_policy<4,true>{});
+	defCModel.def("GetRenderMeshes",+[](pragma::CModelComponent &c) -> std::vector<std::shared_ptr<ModelSubMesh>> {
+		return c.GetRenderMeshes();
+	});
+
+	auto defRenderBufferData = luabind::class_<pragma::rendering::RenderBufferData>("RenderBufferData");
+	defRenderBufferData.def(luabind::constructor<>());
+	defRenderBufferData.def_readwrite("enableDepthPrepass",&pragma::rendering::RenderBufferData::enableDepthPrepass);
+	defRenderBufferData.def_readwrite("pipelineSpecializationFlags",&pragma::rendering::RenderBufferData::pipelineSpecializationFlags);
+	defRenderBufferData.def_readwrite("material",&pragma::rendering::RenderBufferData::material);
+	defRenderBufferData.def_readwrite("renderBuffer",&pragma::rendering::RenderBufferData::renderBuffer);
+	defCModel.scope[defRenderBufferData];
+
 	entsMod[defCModel];
+
+	pragma::lua::define_custom_constructor<pragma::rendering::RenderBufferData,
+		[](const pragma::rendering::RenderBufferData &renderBufferData) -> pragma::rendering::RenderBufferData {
+		return renderBufferData;
+	},const pragma::rendering::RenderBufferData&>(l);
 }

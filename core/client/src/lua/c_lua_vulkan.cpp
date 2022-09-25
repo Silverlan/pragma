@@ -31,6 +31,7 @@
 #include <image/prosper_image_view.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <buffers/prosper_swap_buffer.hpp>
+#include <buffers/prosper_render_buffer.hpp>
 #include <queries/prosper_timer_query.hpp>
 #include <queries/prosper_timestamp_query.hpp>
 #include <image/prosper_render_target.hpp>
@@ -2276,6 +2277,9 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		});
 	}));
 	prosperMod[defWindow];
+	
+	auto defRenderBuffer = luabind::class_<prosper::IRenderBuffer>("RenderBuffer");
+	prosperMod[defRenderBuffer];
 
 	register_vulkan_lua_interface2(lua,prosperMod);
 }

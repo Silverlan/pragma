@@ -15,7 +15,13 @@ namespace Lua
 	namespace game
 	{
 		// Standard Lua API
-		DLLNETWORK int call_callbacks(lua_State *l);
+		DLLNETWORK luabind::object call_callbacks(lua_State *l,Game &game,const std::string &identifier);
+		DLLNETWORK luabind::object call_callbacks(lua_State *l,Game &game,const std::string &identifier,luabind::object arg0);
+		DLLNETWORK luabind::object call_callbacks(lua_State *l,Game &game,const std::string &identifier,luabind::object arg0,luabind::object arg1);
+		DLLNETWORK luabind::object call_callbacks(lua_State *l,Game &game,const std::string &identifier,luabind::object arg0,luabind::object arg1,luabind::object arg2);
+		DLLNETWORK luabind::object call_callbacks(lua_State *l,Game &game,const std::string &identifier,luabind::object arg0,luabind::object arg1,luabind::object arg2,luabind::object arg3);
+		DLLNETWORK luabind::object call_callbacks(lua_State *l,Game &game,const std::string &identifier,luabind::object arg0,luabind::object arg1,luabind::object arg2,luabind::object arg3,luabind::object arg4);
+		DLLNETWORK luabind::object call_callbacks(lua_State *l,Game &game,const std::string &identifier,luabind::object arg0,luabind::object arg1,luabind::object arg2,luabind::object arg3,luabind::object arg4,luabind::object arg5);
 
 		DLLNETWORK opt<type<CallbackHandle>> add_callback(lua_State *l,const std::string &identifier,const func<void> &function);
 		DLLNETWORK void clear_callbacks(lua_State *l,const std::string &identifier);

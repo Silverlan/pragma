@@ -77,7 +77,6 @@ void SGame::RegisterLua()
 	];
 	
 	Lua::RegisterLibrary(GetLuaState(),"game",{
-		{"call_callbacks",Lua::game::call_callbacks},
 		//{"create_light",Lua::engine::CreateLight},
 		//{"remove_lights",Lua::engine::RemoveLights},
 		//{"create_sprite",Lua::engine::CreateSprite},

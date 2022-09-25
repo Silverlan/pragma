@@ -37,7 +37,7 @@
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/ai/navsystem.h"
 #include <pragma/math/intersection.h>
-
+#pragma optimize("",off)
 extern DLLNETWORK Engine *engine;
 Lua::opt<Lua::type<CallbackHandle>> Lua::game::add_callback(lua_State *l,const std::string &identifier,const func<void> &function)
 {
@@ -51,74 +51,71 @@ Lua::opt<Lua::type<CallbackHandle>> Lua::game::add_callback(lua_State *l,const s
 	return Lua::type<CallbackHandle>{l,hCallback};
 }
 
-int Lua::game::call_callbacks(lua_State *l)
+static luabind::object call_callbacks(lua_State *l,Game &game,const std::string &identifier,const std::vector<luabind::object> &args)
 {
-	auto bMultiReturn = false;
-	int32_t argIdx = 1;
-	if(Lua::IsBool(l,1))
-		bMultiReturn = Lua::CheckBool(l,argIdx++);
-	auto identifier = Lua::CheckString(l,argIdx);
-
-	auto *state = engine->GetNetworkState(l);
-	auto *game = state->GetGameState();
-	auto *callbacks = game->GetLuaCallbacks(identifier);
-	if(callbacks == nullptr)
-		return 0;
-	auto numArgs = Lua::GetStackTop(l) -argIdx;
-	std::vector<int32_t> args;
-	args.reserve(numArgs);
-	for(auto i=decltype(numArgs){0};i<numArgs;++i)
-		args.push_back(Lua::CreateReference(l,LUA_REGISTRYINDEX));
-	//
-	uint32_t numResults = 0;
-	int32_t t = -1;
-	uint32_t tIdx = 1;
-	if(bMultiReturn == true)
-		t = Lua::CreateTable(l);
+	auto tReturn = luabind::newtable(l);
+	uint32_t returnIdx = 1u;
+	auto *callbacks = game.GetLuaCallbacks(identifier);
+	if(!callbacks)
+		return tReturn;
 	for(auto &hCallback : *callbacks)
 	{
-		if(hCallback.IsValid())
+		if(!hCallback.IsValid())
+			continue;
+		auto *callback = static_cast<LuaCallback*>(hCallback.get());
+		auto &o = callback->GetLuaObject();
+		auto top = Lua::GetStackTop(l);
+		auto r = Lua::CallFunction(l,[&o,&args](lua_State *l) -> Lua::StatusCode {
+			o.push(l);
+
+			for(auto &arg : args)
+				arg.push(l);
+			return Lua::StatusCode::Ok;
+		},LUA_MULTRET);
+		if(r == Lua::StatusCode::Ok)
 		{
-			auto *callback = static_cast<LuaCallback*>(hCallback.get());
-			auto &o = callback->GetLuaObject();
-			auto top = Lua::GetStackTop(l);
-			auto c = Lua::CallFunction(l,[&o,&args](lua_State *l) -> Lua::StatusCode {
-				o.push(l);
-
-				for(auto it=args.rbegin();it!=args.rend();++it)
-					Lua::PushRegistryValue(l,*it);
-				return Lua::StatusCode::Ok;
-			},LUA_MULTRET);
-			if(c == Lua::StatusCode::Ok)
+			auto numResults = Lua::GetStackTop(l) -top;
+			if(numResults > 0) // Results will be forwarded to caller
 			{
-				numResults = Lua::GetStackTop(l) -top;
-				if(numResults > 0) // Results will be forwarded to caller
-				{
-					if(t == -1)
-						break;
-					auto top = Lua::GetStackTop(l);
-					auto tSub = Lua::CreateTable(l); /* 1 */
-					uint32_t tSubIdx = 1;
-					for(auto i=top -(static_cast<int32_t>(numResults) -1);i<=top;++i)
-					{
-						Lua::PushInt(l,tSubIdx++); /* 2 */
-						Lua::PushValue(l,i); /* 3 */
-						Lua::SetTableValue(l,tSub); /* 1 */
-					}
-					Lua::PushInt(l,tIdx++); /* 2 */
-					Lua::PushValue(l,tSub); /* 3 */
-					Lua::SetTableValue(l,t); /* 1 */
-					Lua::Pop(l,1); /* 0 */
-
-					Lua::Pop(l,numResults); // Don't need these anymore
-				}
+				top = Lua::GetStackTop(l);
+				auto tReturnSub = luabind::newtable(l);
+				for(auto i=decltype(numResults){0u};i<numResults;++i)
+					tReturnSub[i +1] = luabind::object{luabind::from_stack(l,top -numResults +i +1)};
+				tReturn[returnIdx++] = tReturnSub;
+				Lua::Pop(l,numResults);
 			}
 		}
 	}
-	//
-	for(auto arg : args)
-		Lua::ReleaseReference(l,LUA_REGISTRYINDEX,arg);
-	return (t == -1) ? numResults : 1;
+	return tReturn;
+}
+
+luabind::object Lua::game::call_callbacks(lua_State *l,Game &game,const std::string &identifier)
+{
+	return ::call_callbacks(l,game,identifier,std::vector<luabind::object>{});
+}
+luabind::object Lua::game::call_callbacks(lua_State *l,Game &game,const std::string &identifier,luabind::object arg0)
+{
+	return ::call_callbacks(l,game,identifier,std::vector<luabind::object>{arg0});
+}
+luabind::object Lua::game::call_callbacks(lua_State *l,Game &game,const std::string &identifier,luabind::object arg0,luabind::object arg1)
+{
+	return ::call_callbacks(l,game,identifier,std::vector<luabind::object>{arg0,arg1});
+}
+luabind::object Lua::game::call_callbacks(lua_State *l,Game &game,const std::string &identifier,luabind::object arg0,luabind::object arg1,luabind::object arg2)
+{
+	return ::call_callbacks(l,game,identifier,std::vector<luabind::object>{arg0,arg1,arg2});
+}
+luabind::object Lua::game::call_callbacks(lua_State *l,Game &game,const std::string &identifier,luabind::object arg0,luabind::object arg1,luabind::object arg2,luabind::object arg3)
+{
+	return ::call_callbacks(l,game,identifier,std::vector<luabind::object>{arg0,arg1,arg2,arg3});
+}
+luabind::object Lua::game::call_callbacks(lua_State *l,Game &game,const std::string &identifier,luabind::object arg0,luabind::object arg1,luabind::object arg2,luabind::object arg3,luabind::object arg4)
+{
+	return ::call_callbacks(l,game,identifier,std::vector<luabind::object>{arg0,arg1,arg2,arg3,arg4});
+}
+luabind::object Lua::game::call_callbacks(lua_State *l,Game &game,const std::string &identifier,luabind::object arg0,luabind::object arg1,luabind::object arg2,luabind::object arg3,luabind::object arg4,luabind::object arg5)
+{
+	return ::call_callbacks(l,game,identifier,std::vector<luabind::object>{arg0,arg1,arg2,arg3,arg4,arg5});
 }
 
 void Lua::game::clear_callbacks(lua_State *l,const std::string &identifier)
@@ -387,7 +384,13 @@ void Lua::game::register_shared_functions(luabind::module_ &modGame)
 {
 	modGame[
 		luabind::def("add_callback",Lua::game::add_callback),
-		luabind::def("call_callbacks",Lua::game::call_callbacks),
+		luabind::def("call_callbacks",static_cast<luabind::object(*)(lua_State*,Game&,const std::string&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object)>(Lua::game::call_callbacks)),
+		luabind::def("call_callbacks",static_cast<luabind::object(*)(lua_State*,Game&,const std::string&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object)>(Lua::game::call_callbacks)),
+		luabind::def("call_callbacks",static_cast<luabind::object(*)(lua_State*,Game&,const std::string&,luabind::object,luabind::object,luabind::object,luabind::object)>(Lua::game::call_callbacks)),
+		luabind::def("call_callbacks",static_cast<luabind::object(*)(lua_State*,Game&,const std::string&,luabind::object,luabind::object,luabind::object)>(Lua::game::call_callbacks)),
+		luabind::def("call_callbacks",static_cast<luabind::object(*)(lua_State*,Game&,const std::string&,luabind::object,luabind::object)>(Lua::game::call_callbacks)),
+		luabind::def("call_callbacks",static_cast<luabind::object(*)(lua_State*,Game&,const std::string&,luabind::object)>(Lua::game::call_callbacks)),
+		luabind::def("call_callbacks",static_cast<luabind::object(*)(lua_State*,Game&,const std::string&)>(Lua::game::call_callbacks)),
 		luabind::def("clear_callbacks",Lua::game::clear_callbacks),
 		luabind::def("register_ammo_type",Lua::game::register_ammo_type),
 		luabind::def("register_ammo_type",+[](lua_State *l,const std::string &name,int32_t damage,float force) {return Lua::game::register_ammo_type(l,name,damage,force);}),
@@ -449,3 +452,4 @@ void Lua::game::register_shared_functions(luabind::module_ &modGame)
 	classDefDescriptor.def("GetReferences",&pragma::ValueDriverDescriptor::GetReferences);
 	modGame[classDefDescriptor];
 }
+#pragma optimize("",on)

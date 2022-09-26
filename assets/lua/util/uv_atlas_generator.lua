@@ -40,7 +40,7 @@ function util.UVAtlasGenerator:AddEntity(ent,meshFilter)
 		-- if(subMesh:HasUVSet("lightmap")) then
 			local mat = mdl:GetMaterial(subMesh:GetSkinTextureIndex()) -- mdlC:GetRenderMaterial(subMesh:GetSkinTextureIndex())
 			if(mat ~= nil and (meshFilter == nil or meshFilter(mesh,subMesh))) then
-				self.m_atlas:AddMesh(subMesh,mat)
+				self.m_atlas:AddMesh(subMesh,mat,ent:GetScale())
 				self.m_numInputMeshes = self.m_numInputMeshes +1
 				table.insert(self.m_entities[ent],{
 					subMesh = subMesh,

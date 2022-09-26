@@ -241,7 +241,11 @@ function ents.GUI3D:InitializeGUICallbacks()
       		local pos = self:CalcCursorPos()
 			if(pos ~= nil) then
 				local elFocus = gui.get_focused_element()
-				self.m_pGui:InjectMouseInput(pos,bt,state)
+				local res = self.m_pGui:InjectMouseInput(pos,bt,state)
+				if(res == util.EVENT_REPLY_UNHANDLED) then
+					self:BroadcastEvent(ents.GUI3D.EVENT_ON_UNHANDLED_MOUSE_INPUT,{pos,bt,state})
+				end
+				-- debug.print("InjectMouseInput ",self.m_pGui,pos,bt,state)
 				-- We don't want the element focus to change to any of the 3D elements, so we'll restore the focus back
 				if(util.is_valid(elFocus) and gui.get_focused_element() ~= elFocus) then elFocus:RequestFocus() end
 			end
@@ -392,3 +396,4 @@ function ents.GUI3D:OnRemove()
 	util.remove(self.m_cbDrawGUI)
 end
 ents.COMPONENT_GUI3D = ents.register_component("gui_3d",ents.GUI3D)
+ents.GUI3D.EVENT_ON_UNHANDLED_MOUSE_INPUT = ents.register_component_event(ents.COMPONENT_GUI3D,"unhandled_mouse_input")

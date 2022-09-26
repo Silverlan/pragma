@@ -12,6 +12,7 @@
 #include "pragma/entities/components/base_static_bvh_cache_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include "pragma/debug/intel_vtune.hpp"
 #include <mathutil/umath_geometry.hpp>
 #include <sharedutils/util_hash.hpp>
 #include <bvh/bvh.hpp>
@@ -155,9 +156,6 @@ static bool test_bvh_intersection(
 	auto b = test_bvh_intersection(bvhData,testAabb,testTri,node.first_child_or_primitive +1,outIntersectionInfo);
 	return a || b;
 }
-static std::unique_ptr<std::vector<const pragma::BvhMeshRange*>> get_temp_intersection_data(BvhIntersectionInfo *outIntersectionInfo=nullptr)
-{
-}
 static bool test_bvh_intersection_with_aabb(const pragma::BvhData &bvhData,const Vector3 &min,const Vector3 &max,size_t nodeIdx=0,BvhIntersectionInfo *outIntersectionInfo=nullptr)
 {
 	return test_bvh_intersection(
@@ -226,7 +224,13 @@ void BaseBvhComponent::RegisterEvents(pragma::EntityComponentManager &componentM
 void BaseBvhComponent::ClearBvh()
 {
 	InvokeEventCallbacks(EVENT_ON_CLEAR_BVH);
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().BeginTask("bvh_mutex_wait");
+#endif
 	m_bvhDataMutex.lock();
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().EndTask();
+#endif
 		m_bvhData = nullptr;
 	m_bvhDataMutex.unlock();
 }
@@ -251,7 +255,14 @@ void BaseBvhComponent::SetStaticCache(BaseStaticBvhCacheComponent *staticCache)
 
 bool BaseBvhComponent::SetVertexData(const std::vector<BvhTriangle> &data)
 {
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().BeginTask("bvh_mutex_wait");
+#endif
 	std::scoped_lock lock {m_bvhDataMutex};
+
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().EndTask();
+#endif
 	if(m_bvhData->primitives.size() != data.size())
 		return false;
 	memcpy(m_bvhData->primitives.data(),data.data(),util::size_of_container(data));
@@ -361,28 +372,56 @@ bool BaseBvhComponent::IntersectionTestAabb(const Vector3 &min,const Vector3 &ma
 {
 	if(!m_bvhData || m_bvhData->primitives.empty())
 		return false;
+
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().BeginTask("bvh_mutex_wait");
+#endif
 	std::scoped_lock lock {m_bvhDataMutex};
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().EndTask();
+#endif
 	return test_bvh_intersection_with_aabb(*m_bvhData,min,max,0u,&outIntersectionInfo);
 }
 bool BaseBvhComponent::IntersectionTestAabb(const Vector3 &min,const Vector3 &max) const
 {
 	if(!m_bvhData || m_bvhData->primitives.empty())
 		return false;
+
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().BeginTask("bvh_mutex_wait");
+#endif
 	std::scoped_lock lock {m_bvhDataMutex};
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().EndTask();
+#endif
 	return test_bvh_intersection_with_aabb(*m_bvhData,min,max);
 }
 bool BaseBvhComponent::IntersectionTestKDop(const std::vector<umath::Plane> &planes,BvhIntersectionInfo &outIntersectionInfo) const
 {
 	if(!m_bvhData || m_bvhData->primitives.empty())
 		return false;
+
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().BeginTask("bvh_mutex_wait");
+#endif
 	std::scoped_lock lock {m_bvhDataMutex};
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().EndTask();
+#endif
 	return test_bvh_intersection_with_kdop(*m_bvhData,planes,0u,&outIntersectionInfo);
 }
 bool BaseBvhComponent::IntersectionTestKDop(const std::vector<umath::Plane> &planes) const
 {
 	if(!m_bvhData || m_bvhData->primitives.empty())
 		return false;
+
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().BeginTask("bvh_mutex_wait");
+#endif
 	std::scoped_lock lock {m_bvhDataMutex};
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().EndTask();
+#endif
 	return test_bvh_intersection_with_kdop(*m_bvhData,planes);
 }
 bool BaseBvhComponent::IntersectionTest(
@@ -400,7 +439,14 @@ bool BaseBvhComponent::IntersectionTest(
 		minDist, // minimum distance
 		maxDist // maximum distance
 	};
+
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().BeginTask("bvh_mutex_wait");
+#endif
 	m_bvhDataMutex.lock();
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().EndTask();
+#endif
 	auto hit = traverser.traverse(ray, primitiveIntersector);
 	m_bvhDataMutex.unlock();
 	if(hit)

@@ -18,6 +18,7 @@
 #include <pragma/physics/environment.hpp>
 #include <pragma/networking/networking_modules.hpp>
 #include <pragma/util/util_game.hpp>
+#include <pragma/debug/intel_vtune.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
 #include <util_pragma_doc.hpp>
@@ -403,4 +404,15 @@ void Engine::RegisterConsoleCommands()
 			types.push_back(static_cast<pragma::asset::Type>(i));
 		ClearUnusedAssets(types,true);
 	},ConVarFlags::None,"Clears all unused assets from memory.");
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	conVarMap.RegisterConCommand("debug_vtune_prof_start",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		std::string name = "cmd";
+		if(!argv.empty())
+			name = argv.front();
+		::debug::get_domain().BeginTask(name);
+	},ConVarFlags::None,"Start the VTune profiler.");
+	conVarMap.RegisterConCommand("debug_vtune_prof_end",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		::debug::get_domain().EndTask();
+	},ConVarFlags::None,"End the VTune profiler.");
+#endif
 }

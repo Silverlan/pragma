@@ -24,6 +24,7 @@ namespace pragma
 			std::vector<Vector3> transformedVerts;
 		};
 		AnimationBvhData animationBvhData;
+		std::vector<std::shared_ptr<ModelSubMesh>> renderMeshes;
 		std::vector<MeshData> meshData;
 		std::vector<BvhTriangle> transformedTris;
 		std::condition_variable completeCondition;

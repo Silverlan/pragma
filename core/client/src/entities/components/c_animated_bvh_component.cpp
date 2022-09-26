@@ -92,12 +92,24 @@ void CAnimatedBvhComponent::Cancel()
 }
 bool CAnimatedBvhComponent::IsBusy() const
 {
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().BeginTask("bvh_mutex_wait");
+#endif
 	std::unique_lock<std::mutex> lock {m_animatedBvhData.completeMutex};
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().EndTask();
+#endif
 	return m_animatedBvhData.completeCount != m_numJobs;
 }
 void CAnimatedBvhComponent::WaitForCompletion()
 {
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().BeginTask("bvh_mutex_wait");
+#endif
 	std::unique_lock<std::mutex> lock {m_animatedBvhData.completeMutex};
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().EndTask();
+#endif
 	m_animatedBvhData.completeCondition.wait(lock,[this]() {
 		return m_animatedBvhData.completeCount == m_numJobs;
 	});
@@ -142,8 +154,9 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh()
 	// Need to copy the current bone matrices
 	auto &animBvhData = m_animatedBvhData.animationBvhData;
 	animBvhData.boneMatrices = animC->GetBoneMatrices();
+	m_animatedBvhData.renderMeshes = mdlC->GetRenderMeshes();
 	
-	auto &renderMeshes = mdlC->GetRenderMeshes();
+	auto &renderMeshes = m_animatedBvhData.renderMeshes;
 	auto &pool = get_thread_pool();
 
 	// Prepare mesh data
@@ -173,7 +186,7 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh()
 		for(auto &renderMesh : renderMeshes)
 		{
 			renderMesh->VisitIndices([this,meshIdx,&indexOffset](auto *indexDataSrc,uint32_t numIndicesSrc) {
-				auto &verts = m_animatedBvhData.meshData[meshIdx].transformedVerts;
+				auto &verts = m_animatedBvhData.meshData.at(meshIdx).transformedVerts;
 				for(auto i=decltype(numIndicesSrc){0};i<numIndicesSrc;i+=3)
 					m_animatedBvhData.transformedTris[(indexOffset +i) /3] = {verts[indexDataSrc[i]],verts[indexDataSrc[i +1]],verts[indexDataSrc[i +2]]};
 				indexOffset += numIndicesSrc;
@@ -233,8 +246,12 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh()
 			}
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 			::debug::get_domain().EndTask();
+			::debug::get_domain().BeginTask("bvh_mutex_wait");
 #endif
 			m_animatedBvhData.completeMutex.lock();
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+			::debug::get_domain().EndTask();
+#endif
 				if(++m_animatedBvhData.completeCount == numJobs)
 				{
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING

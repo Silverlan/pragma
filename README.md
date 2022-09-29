@@ -83,7 +83,7 @@ TODO
 Modules
 ------
 There are various optional modules available for Pragma, some of which are already included with this repository, and some of which can be found online:
-- pr_chromium: https://github.com/Silverlan/pragma/tree/master/modules/pr_chromium
+- pr_chromium: https://github.com/Silverlan/pr_chromium
 - pr_curl: https://github.com/Silverlan/pr_curl
 - pr_mysql: https://github.com/Silverlan/pragma/tree/master/modules/pr_mysql
 - pr_pcl: https://github.com/Silverlan/pragma/tree/master/modules/pr_pcl

@@ -12,6 +12,7 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/lua/lua_entity_component.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
+#include <shader/prosper_shader_t.hpp>
 #include <pragma/lua/util.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
 #include <buffers/prosper_buffer.hpp>

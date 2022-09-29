@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_indexing.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
+#include <shader/prosper_shader_t.hpp>
 
 using namespace pragma;
 

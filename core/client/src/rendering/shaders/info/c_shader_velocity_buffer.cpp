@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/info/c_shader_velocity_buffer.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
+#include <shader/prosper_shader_t.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

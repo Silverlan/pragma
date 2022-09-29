@@ -10,6 +10,7 @@
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
+#include <shader/prosper_shader_t.hpp>
 
 using namespace pragma;
 

@@ -14,6 +14,7 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
+#include <shader/prosper_shader_t.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_util.hpp>
 #include <cmaterial.h>

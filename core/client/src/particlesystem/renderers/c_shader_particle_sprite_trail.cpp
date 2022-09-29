@@ -10,6 +10,7 @@
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/particlesystem/renderers/c_particle_renderer_sprite_trail.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
+#include <shader/prosper_shader_t.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 

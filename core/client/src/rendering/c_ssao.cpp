@@ -20,6 +20,7 @@
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <shader/prosper_shader_t.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

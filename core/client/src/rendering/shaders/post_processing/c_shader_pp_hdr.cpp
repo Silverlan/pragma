@@ -9,6 +9,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/c_settings.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
+#include <shader/prosper_shader_t.hpp>
 #include <pragma/console/convars.h>
 #include <prosper_util.hpp>
 #include <shader/prosper_shader_copy_image.hpp>

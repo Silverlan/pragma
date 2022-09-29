@@ -9,6 +9,7 @@
 #include "pragma/rendering/shaders/particles/c_shader_particle_animated_sprites.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
+#include <shader/prosper_shader_t.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 

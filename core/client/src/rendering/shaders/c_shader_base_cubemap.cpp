@@ -9,6 +9,7 @@
 #include "pragma/rendering/shaders/c_shader_base_cubemap.hpp"
 #include "pragma/math/c_util_math.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
+#include <shader/prosper_shader_t.hpp>
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_descriptor_set_group.hpp>

@@ -11,6 +11,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_glow.hpp"
 #include <prosper_util.hpp>
 #include <shader/prosper_shader_blur.hpp>
+#include <shader/prosper_shader_t.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_sampler.hpp>

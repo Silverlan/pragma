@@ -9,6 +9,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
+#include <shader/prosper_shader_t.hpp>
 
 using namespace pragma;
 

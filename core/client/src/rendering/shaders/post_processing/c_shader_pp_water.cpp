@@ -11,6 +11,7 @@
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
+#include <shader/prosper_shader_t.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <cmaterial.h>

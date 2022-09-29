@@ -16,6 +16,7 @@
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include <shader/prosper_shader_t.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>

@@ -68,6 +68,7 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_render_pass.hpp>
+#include <shader/prosper_shader_t.hpp>
 #include <pragma/lua/lua_call.hpp>
 #include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <luainterface.hpp>

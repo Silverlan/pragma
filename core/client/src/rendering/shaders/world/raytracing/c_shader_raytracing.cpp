@@ -12,6 +12,7 @@
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/rendering/renderers/raytracing_renderer.hpp"
+#include <shader/prosper_shader_t.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <wgui/types/wirect.h>
 

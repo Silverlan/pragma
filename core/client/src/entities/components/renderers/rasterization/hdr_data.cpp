@@ -36,6 +36,7 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <shader/prosper_shader_blur.hpp>
+#include <shader/prosper_shader_t.hpp>
 #include <image/prosper_sampler.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 

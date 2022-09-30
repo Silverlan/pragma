@@ -10,7 +10,11 @@
 
 int main(int argc,char* argv[]) //try
 {
-	auto hModule = pragma::launch_pragma(argc,argv);
+	std::vector<std::string> extraArgs {
+		"-icon","materials/logo/pragma_window_icon.png"
+	};
+	auto cargs = pragma::merge_arguments(argc,argv,extraArgs);
+	auto hModule = pragma::launch_pragma(cargs.size(),cargs.data());
 	return hModule ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 /*catch (...) {

@@ -364,6 +364,7 @@ jobs:
         run:   |
           curDate=$(date -u '+%Y-%m-%d %H:%M:%S %Z')
           printf "This is an auto-generated pre-release, built from the latest version of the source code.\nIt includes all files necessary to run Pragma, as well as the latest version of the Pragma Filmmaker, however functionality and stability are **not** guaranteed.\n\nLatest release date: $curDate" > tag_text.txt
+          mv "/c/release/pragma.zip" "./pragma.zip"
 
       - name: Update nightly tag description
         uses: softprops/action-gh-release@v0.1.14
@@ -378,4 +379,4 @@ jobs:
           tag: nightly
           rm: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: "/c/release/pragma.zip"
+          files: "pragma.zip"

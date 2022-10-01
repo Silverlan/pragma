@@ -31,7 +31,13 @@ jobs:
       - uses: actions/checkout@v3.0.2
         with:
           submodules: 'recursive'
-
+          
+      - name: Print Volumes
+        shell: pwsh
+        run: |
+          echo "Volumes:"
+          Get-Volume
+          
       - name: Setup
         id: setup
         uses: Silverlan/common_actions/setup@main
@@ -140,9 +146,14 @@ jobs:
       - name: Generate release zip
         shell: bash
         run: |
+          curDir="$(pwd)"
+          cd "/c"
+          mkdir "release"
+          cd "$curDir"
           7z a pragma.zip ".\${{ matrix.config.build_dir }}/install/**"
           rm -rf ".\${{ matrix.config.build_dir }}/install"
           mkdir -p ".\${{ matrix.config.build_dir }}/install"
+          mv pragma.zip "/c/release/pragma.zip"
         
       - name: Build boost (with cache)
         uses: Silverlan/common_actions/build_cached_boost@main
@@ -215,11 +226,9 @@ jobs:
             echo "Building UDM library..."
             curDir="$(pwd)"
             cd "${{ env.GA_ROOT_DIR }}"
-            mv "./pragma.zip" "./pragma_tmp.zip"
             curl -LJO "https://pragma-engine.com/git/github_actions/pragma.zip"
             7z x pragma.zip -aos -y
             rm -rf "./pragma.zip"
-            mv "./pragma_tmp.zip" "./pragma.zip"
             cd "$curDir"
             
       #- name: Print all files
@@ -239,6 +248,7 @@ jobs:
       - name: List large directories
         shell: pwsh
         run: |
+          cd "/"
           echo "Cur pwd: $(pwd)"
           $colItems = (Get-ChildItem -path $(pwd) $startFolder -recurse | Where-Object {$_.PSIsContainer -eq $True} | Sort-Object)
           foreach ($i in $colItems)
@@ -263,11 +273,9 @@ jobs:
           pre_build_cmd: |
             curDir="$(pwd)"
             cd "${{ env.GA_ROOT_DIR }}"
-            mv "./pragma.zip" "./pragma_tmp.zip"
             curl -LJO "https://pragma-engine.com/git/github_actions/pragma.zip"
             7z x pragma.zip -aos -y
             rm -rf "./pragma.zip"
-            mv "./pragma_tmp.zip" "./pragma.zip"
             cd "$curDir"
             
             #echo "--ALL FILES START--"
@@ -335,11 +343,11 @@ jobs:
 
       - name: Finalize release zip
         run: |
-          7z a pragma.zip ".\${{ matrix.config.build_dir }}/install/**"
-          7z d pragma.zip .git
-          7z d pragma.zip .gitignore
-          7z d pragma.zip addons/filmmaker/.git
-          7z d pragma.zip addons/filmmaker/.gitignore
+          7z a /c/release/pragma.zip ".\${{ matrix.config.build_dir }}/install/**"
+          7z d /c/release/pragma.zip .git
+          7z d /c/release/pragma.zip .gitignore
+          7z d /c/release/pragma.zip addons/filmmaker/.git
+          7z d /c/release/pragma.zip addons/filmmaker/.gitignore
 
       #- name: Publish release
       #  uses: softprops/action-gh-release@v1
@@ -370,4 +378,4 @@ jobs:
           tag: nightly
           rm: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: "pragma.zip"
+          files: "/c/release/pragma.zip"

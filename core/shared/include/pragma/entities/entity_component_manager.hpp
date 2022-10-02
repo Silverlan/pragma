@@ -98,8 +98,6 @@ namespace pragma
 
 		util::TSharedHandle<BaseEntityComponent> CreateComponent(const std::string &name,BaseEntity &ent) const;
 		util::TSharedHandle<BaseEntityComponent> CreateComponent(ComponentId componentId,BaseEntity &ent) const;
-		template<class TComponent,typename=std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<BaseEntityComponent,TComponent>::value>>
-			util::TSharedHandle<TComponent> CreateComponent(BaseEntity &ent) const;
 		ComponentId PreRegisterComponentType(const std::string &name);
 		ComponentId RegisterComponentType(const std::string &name,const std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity&)> &factory,ComponentFlags flags,std::type_index typeIndex);
 		ComponentId RegisterComponentType(const std::string &name,const std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity&)> &factory,ComponentFlags flags);
@@ -197,21 +195,6 @@ template<class TComponent,typename>
 	});
 	return componentId;
 }
-
-    template<class TComponent,typename>
-        util::TSharedHandle<TComponent> pragma::EntityComponentManager::CreateComponent(BaseEntity &ent) const
-    {
-            //TODO: Is this even sane?
-        ComponentId componentId;
-        if(!GetComponentTypeId<TComponent>(componentId))
-            return {};
-        auto &componentInfo = m_componentInfos[componentId];
-        auto r = componentInfo.factory(ent);
-        if(r == nullptr)
-            return nullptr;
-        r->m_componentId = componentInfo.id;
-        return r;
-    }
 
 template<class TComponent,typename>
 	bool pragma::EntityComponentManager::GetComponentTypeId(ComponentId &outId) const

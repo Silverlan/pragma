@@ -704,9 +704,12 @@ set_target_properties(muparserx PROPERTIES FOLDER third_party_libs/muparserx)
 #
 
 # clip2tri
-#BUG: CMakeLists parser strips quotes making this effectively set(M_LIBRARY FORCE)
-#set(M_LIBRARY "" FORCE)
-unset(M_LIBRARY)
+if(WIN32)
+	set(M_LIBRARY "" FORCE)
+else()
+	#BUG: CMakeLists parser strips quotes making this effectively set(M_LIBRARY FORCE)
+	unset(M_LIBRARY)
+endif()
 register_third_party_library(clip2tri)
 set_target_properties(clip2tri PROPERTIES FOLDER third_party_libs/clip2tri)
 set_target_properties(clip2tri-static PROPERTIES FOLDER third_party_libs/clip2tri)

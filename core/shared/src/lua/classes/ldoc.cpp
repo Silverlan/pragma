@@ -5,7 +5,11 @@
  * Copyright (c) 2021 Silverlan
  */
 
+<<<<<<< HEAD
 #include "pragma/lua/lua_doc.hpp"
+=======
+//#define ENABLE_LAD 1
+>>>>>>> 32eceafa (Root repo fixes)
 
 #if ENABLE_LAD == 1
 #include "pragma/lua/libraries/lfile.h"

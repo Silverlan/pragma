@@ -196,6 +196,24 @@ template<class TComponent,typename>
 	return componentId;
 }
 
+<<<<<<< HEAD
+=======
+    template<class TComponent,typename>
+        util::TSharedHandle<TComponent> pragma::EntityComponentManager::CreateComponent(BaseEntity &ent) const
+    {
+            //TODO: Is this even sane?
+        ComponentId componentId;
+        if(!GetComponentTypeId<TComponent>(componentId))
+            return {};
+        auto &componentInfo = m_componentInfos[componentId];
+        auto r = componentInfo.factory(ent);
+        if(r == nullptr)
+            return nullptr;
+        r->m_componentId = componentInfo.id;
+        return r;
+    }
+
+>>>>>>> 32eceafa (Root repo fixes)
 template<class TComponent,typename>
 	bool pragma::EntityComponentManager::GetComponentTypeId(ComponentId &outId) const
 {

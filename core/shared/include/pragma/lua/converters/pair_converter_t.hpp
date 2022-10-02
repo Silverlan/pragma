@@ -45,8 +45,8 @@ void luabind::default_converter<std::pair<T0,T1>>::to_lua(lua_State* L, std::pai
 template <class ...T>
 template<size_t I, typename... Tp>
 int luabind::default_converter<std::tuple<T...>>::match_all(lua_State *L,int index,std::tuple<default_converter<Tp>...>&) { // tuple parameter is unused but required for overload resolution for some reason
-	using T = std::tuple_element<I, std::tuple<Tp...> >::type;
-		if(std::get<I>(m_converters).match(L,decorate_type_t<base_type<T>>(),index) != 0)
+    using T2 = typename std::tuple_element<I, std::tuple<Tp...> >::type; //HEY!
+        if(std::get<I>(m_converters).match(L,decorate_type_t<base_type<T2>>(),index) != 0)
 			return no_match;
 		if constexpr(I+1 != sizeof...(Tp))
 		return match_all<I +1>(L,index +1,m_converters);

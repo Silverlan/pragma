@@ -17,7 +17,7 @@ namespace pragma::physics
 	{
 	protected:
 		template<class TType>
-			friend class TTypeManager;
+            friend class pragma::TTypeManager;
 		SurfaceType(TypeId id,const std::string &name);
 	};
 

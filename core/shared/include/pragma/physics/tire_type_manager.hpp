@@ -24,7 +24,7 @@ namespace pragma::physics
 		const std::unordered_map<SurfaceType*,float> &GetFrictionModifiers() const;
 	protected:
 		template<class TType>
-			friend class TTypeManager;
+            friend class pragma::TTypeManager; //this must be explicit for some reason.
 		TireType(TypeId id,const std::string &name);
 	private:
 		std::unordered_map<SurfaceType*,float> m_frictionModifiers = {};

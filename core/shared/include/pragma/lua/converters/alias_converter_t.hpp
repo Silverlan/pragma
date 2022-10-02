@@ -13,25 +13,25 @@ template <class TBase,class ...T>
 template<size_t I, typename... Tp>
 bool luabind::alias_converter<TBase,T...>::match_any(lua_State *L,int index)
 {
-	using T = std::tuple_element<I, std::tuple<Tp...> >::type;
-	if constexpr(!std::is_same_v<T,TBase>) // Base type has already been covered by 'match'
+    using T2 = typename std::tuple_element<I, std::tuple<Tp...> >::type;
+    if constexpr(!std::is_same_v<T2,TBase>) // Base type has already been covered by 'match'
 	{
-		if constexpr(is_native_type<T>)
+        if constexpr(is_native_type<T2>)
 		{
-			default_converter<T> converter;
-			if(converter.match(L,decorate_type_t<T>(),index) != no_match)
+            default_converter<T2> converter;
+            if(converter.match(L,decorate_type_t<T2>(),index) != no_match)
 			{
 				m_tmp = std::make_unique<UNDERLYING_TYPE>();
-				detail::AliasTypeConverter<UNDERLYING_TYPE,T>::convert(converter.to_cpp(L,decorate_type_t<T>(),index),*m_tmp);
+                detail::AliasTypeConverter<UNDERLYING_TYPE,T2>::convert(converter.to_cpp(L,decorate_type_t<T2>(),index),*m_tmp);
 				return true;
 			}
 		}
 		else
 		{
-			if(m_converter.match(L,decorate_type_t<copy_qualifiers_t<TBase,T>>(),index) != no_match)
+            if(m_converter.match(L,decorate_type_t<copy_qualifiers_t<TBase,T2>>(),index) != no_match)
 			{
 				m_tmp = std::make_unique<UNDERLYING_TYPE>();
-				detail::AliasTypeConverter<UNDERLYING_TYPE,T>::convert(m_converter.to_cpp(L,decorate_type_t<copy_qualifiers_t<TBase,T>>(),index),*m_tmp);
+                detail::AliasTypeConverter<UNDERLYING_TYPE,T2>::convert(m_converter.to_cpp(L,decorate_type_t<copy_qualifiers_t<TBase,T2>>(),index),*m_tmp);
 				return true;
 			}
 		}

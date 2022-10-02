@@ -4,6 +4,7 @@
  *
  * Copyright (c) 2021 Silverlan */
 
+#include "pragma/physics/raytraces.h"
 #include "stdafx_shared.h"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/entities/components/base_attachable_component.hpp"
@@ -32,6 +33,7 @@
 #include "pragma/lua/types/udm.hpp"
 #include "pragma/entities/components/base_parent_component.hpp"
 #include "pragma/physics/shape.hpp"
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include <udm.hpp>
 #include <luabind/out_value_policy.hpp>
 #include <luabind/copy_policy.hpp>
@@ -156,7 +158,7 @@ std::optional<Lua::udm_type> pragma::lua::get_member_value(
 )
 {
 	return pragma::ents::visit_member(memberInfo.type,[&memberInfo,&component,l](auto tag) -> std::optional<Lua::udm_type> {
-		using T = decltype(tag)::type;
+        using T = typename decltype(tag)::type;
 		if constexpr(!pragma::is_valid_component_property_type_v<T>)
 			return {};
 		else
@@ -172,7 +174,7 @@ bool pragma::lua::set_member_value(
 )
 {
 	return pragma::ents::visit_member(memberInfo.type,[&memberInfo,&component,l,&value](auto tag) -> bool {
-		using T = decltype(tag)::type;
+        using T = typename decltype(tag)::type;
 		if constexpr(!pragma::is_valid_component_property_type_v<T>)
 			return false;
 		else
@@ -230,6 +232,7 @@ static std::vector<pragma::ComponentMemberIndex> get_dynamic_member_ids(pragma::
 	return memberIndices;
 }
 
+
 enum class BvhIntersectionFlags : uint32_t
 {
 	None = 0u,
@@ -260,6 +263,21 @@ static std::pair<bool,std::optional<std::vector<uint64_t>>> bvh_intersection_tes
 		return std::pair<bool,std::optional<std::vector<uint64_t>>>{res,{}};
 	return std::pair<bool,std::optional<std::vector<uint64_t>>>{res,std::move(info.primitives)};
 }
+
+
+
+
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma,BaseEntityComponent);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util,Path);
+/* namespace panima
+{
+std::ostream &operator<<(std::ostream &out,const panima::Bone &o)
+{
+    return ::operator<<(out,o);
+}
+}; */
+
 
 void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 {

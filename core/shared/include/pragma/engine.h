@@ -285,7 +285,7 @@ protected:
 	long long m_lastTick;
 	uint64_t m_tickCount = 0;
 	std::shared_ptr<VFilePtrInternalReal> m_logFile;
-	std::unique_ptr<pragma::asset::AssetManager> m_assetManager = nullptr;
+    std::unique_ptr<pragma::asset::AssetManager> m_assetManager;
 
 	struct JobInfo
 	{

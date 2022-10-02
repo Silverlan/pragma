@@ -4,7 +4,7 @@
  *
  * Copyright (c) 2021 Silverlan
  */
-
+#ifdef _MSC_VER
 #include "stdafx_shared.h"
 
 #ifdef ENABLE_PDB_MANAGER
@@ -511,4 +511,5 @@ std::optional<ParameterInfo> PdbManager::SymbolToParameterInfo(IDiaSymbol *pSymb
 	return paramInfo;
 }
 
+#endif
 #endif

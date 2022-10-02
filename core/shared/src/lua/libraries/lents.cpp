@@ -276,7 +276,7 @@ void Lua::ents::register_library(lua_State *l)
 		if(pragma::ents::is_udm_member_type(memberInfo.type))
 		{
 			udm::visit_ng(pragma::ents::member_type_to_udm_type(memberInfo.type),[&memberInfo,&ss](auto tag) {
-				using T = decltype(tag)::type;
+                using T = typename decltype(tag)::type;
 				if constexpr(udm::is_convertible<T,std::string>())
 				{
 					T def;
@@ -336,7 +336,7 @@ void Lua::ents::register_library(lua_State *l)
 		if(!pragma::ents::is_udm_member_type(memInfo.type))
 			return nil;
 		return udm::visit(pragma::ents::member_type_to_udm_type(memInfo.type),[&memInfo,l](auto tag) {
-			using T = decltype(tag)::type;
+            using T = typename decltype(tag)::type;
 			constexpr auto type = udm::type_to_enum<T>();
 			if constexpr(type != udm::Type::Element && !udm::is_array_type(type))
 			{

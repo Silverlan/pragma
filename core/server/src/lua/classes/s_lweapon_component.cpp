@@ -15,6 +15,10 @@
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
+#include <pragma/lua/ostream_operator_alias.hpp>
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma,BaseWeaponComponent);
+
 void Lua::register_sv_weapon_component(lua_State *l,luabind::module_ &module)
 {
 	auto def = pragma::lua::create_entity_component_class<pragma::SWeaponComponent,pragma::BaseWeaponComponent>("WeaponComponent");

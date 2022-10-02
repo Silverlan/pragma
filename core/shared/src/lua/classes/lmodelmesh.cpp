@@ -225,7 +225,11 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("GetVertexAlpha",&Lua::ModelSubMesh::GetVertexAlpha);
 	classDef.def("GetVertexWeight",&Lua::ModelSubMesh::GetVertexWeight);
 	classDef.def("Optimize",&::ModelSubMesh::Optimize);
-	classDef.def("Optimize",&::ModelSubMesh::Optimize,luabind::default_parameter_policy<2,double{umath::VERTEX_EPSILON}>{});
+#ifdef _WIN32
+    classDef.def("Optimize",&::ModelSubMesh::Optimize,luabind::default_parameter_policy<2,double{umath::VERTEX_EPSILON}>{});
+#else
+    classDef.def("Optimize",+[](::ModelSubMesh &mesh) {return mesh.Optimize();});
+#endif
 	classDef.def("GenerateNormals",&Lua::ModelSubMesh::GenerateNormals);
 	classDef.def("NormalizeUVCoordinates",&Lua::ModelSubMesh::NormalizeUVCoordinates);
 	classDef.def("ClipAgainstPlane",static_cast<void(*)(lua_State*,::ModelSubMesh&,const Vector3&,double,bool,luabind::object)>(&Lua::ModelSubMesh::ClipAgainstPlane));

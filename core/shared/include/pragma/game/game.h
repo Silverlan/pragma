@@ -371,7 +371,7 @@ protected:
 	std::vector<pragma::BaseEntityComponent*> m_entityTickComponents;
 	std::vector<pragma::BaseGamemodeComponent*> m_gamemodeComponents;
 	std::shared_ptr<Lua::Interface> m_lua = nullptr;
-	std::unique_ptr<pragma::lua::ClassManager> m_luaClassManager = nullptr;
+    std::unique_ptr<pragma::lua::ClassManager> m_luaClassManager;
 	std::unique_ptr<LuaDirectoryWatcherManager> m_scriptWatcher = nullptr;
 	std::unique_ptr<SurfaceMaterialManager> m_surfaceMaterialManager = nullptr;
 	std::unordered_map<std::string,std::vector<std::shared_ptr<CvarCallback>>> m_cvarCallbacks;

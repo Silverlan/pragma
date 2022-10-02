@@ -80,7 +80,7 @@ public:
 	static ConVarHandle GetConVarHandle(std::string scvar);
 //
 private:
-	std::unique_ptr<pragma::networking::IClient> m_client = nullptr;
+    std::unique_ptr<pragma::networking::IClient> m_client;
 	std::unique_ptr<ServerInfo> m_svInfo;
 	std::unique_ptr<ResourceDownload> m_resDownload; // Current resource file being downloaded
 

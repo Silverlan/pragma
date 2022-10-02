@@ -20,6 +20,9 @@
  *
  */
 
+//Alterations:
+//Remove register keyword to fix compile errors with some linux compilers (clang)
+
 #include "stdafx_shared.h"
 #include "pragma/buss_ik/LinearR2.h"
 
@@ -51,14 +54,14 @@ LinearMapR2 LinearMapR2::Inverse() const			// Returns inverse
 {
 
 
-	register double detInv = 1.0/(m11*m22 - m12*m21) ;
+    double detInv = 1.0/(m11*m22 - m12*m21) ;
 
 	return( LinearMapR2( m22*detInv, -m21*detInv, -m12*detInv, m11*detInv ) );
 }
 
 LinearMapR2& LinearMapR2::Invert() 			// Converts into inverse.
 {
-	register double detInv = 1.0/(m11*m22 - m12*m21) ;
+    double detInv = 1.0/(m11*m22 - m12*m21) ;
 
 	double temp;
 	temp = m11*detInv;

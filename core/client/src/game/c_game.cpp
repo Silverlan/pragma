@@ -165,7 +165,7 @@ namespace pragma::rendering {class LightingStageRenderProcessor; class DepthStag
 static auto cvWorkerThreadCount = GetClientConVar("render_queue_worker_thread_count");
 CGame::CGame(NetworkState *state)
 	: Game(state),
-	m_tServer(0),m_renderScene({}),
+    m_tServer(0),m_renderScene(util::TWeakSharedHandle<pragma::CSceneComponent>{}),
 	m_matOverride(NULL),m_colScale(1,1,1,1),
 	//m_shaderOverride(NULL), // prosper TODO
 	m_matLoad(),m_scene(nullptr),

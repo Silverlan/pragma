@@ -8,7 +8,16 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/classes/lmodel.h"
 #include "pragma/lua/classes/lskeleton.h"
+
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include <panima/bone.hpp>
+
+
+
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima,Bone);
+
+
 
 void Lua::Bone::register_class(lua_State *l,luabind::class_<panima::Skeleton> &classDef)
 {

@@ -40,7 +40,7 @@ template<typename T>
 	T *pragma::lua::HandleHolder<T>::get() const
 {
 	if(m_hasHandle)
-		return m_handle.get<T>();
+        return m_handle.template get<T>();
 	return m_ptr;
 }
 template<typename T>

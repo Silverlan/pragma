@@ -63,7 +63,7 @@ ConVarValue create_convar_value(udm::Type type,const void *value)
 	if(!value)
 		return ConVarValue{nullptr,[](void*){}};
 	return console::visit<false>(type,[type,value](auto tag) -> ConVarValue {
-		using T = decltype(tag)::type;
+        using T = typename decltype(tag)::type;
 		if constexpr(console::is_valid_convar_type_v<T>)
 		{
 			return ConVarValue{new T{*static_cast<const T*>(value)},[](void *val) {
@@ -89,7 +89,7 @@ ConVar::ConVar(udm::Type type,const void *value,ConVarFlags flags,const std::str
 void ConVar::SetValue(const std::string &val)
 {
 	console::visit(m_varType,[this,&val](auto tag) {
-		using T = decltype(tag)::type;
+        using T = typename decltype(tag)::type;
 		if constexpr(udm::is_convertible<std::string,T>())
 			*static_cast<T*>(m_value.get()) = udm::convert<std::string,T>(val);
 	});
@@ -97,7 +97,7 @@ void ConVar::SetValue(const std::string &val)
 std::string ConVar::GetString() const
 {
 	return console::visit(m_varType,[this](auto tag) {
-		using T = decltype(tag)::type;
+        using T = typename decltype(tag)::type;
 		if constexpr(udm::is_convertible<T,std::string>())
 			return udm::convert<T,std::string>(*static_cast<T*>(m_value.get()));
 		return std::string{};
@@ -106,7 +106,7 @@ std::string ConVar::GetString() const
 std::string ConVar::GetDefault() const
 {
 	return console::visit(m_varType,[this](auto tag) {
-		using T = decltype(tag)::type;
+        using T = typename decltype(tag)::type;
 		if constexpr(udm::is_convertible<T,std::string>())
 			return udm::convert<T,std::string>(*static_cast<T*>(m_default.get()));
 		return std::string{};
@@ -115,7 +115,7 @@ std::string ConVar::GetDefault() const
 int32_t ConVar::GetInt() const
 {
 	return console::visit(m_varType,[this](auto tag) {
-		using T = decltype(tag)::type;
+        using T = typename decltype(tag)::type;
 		if constexpr(udm::is_convertible<T,int32_t>())
 			return udm::convert<T,int32_t>(*static_cast<T*>(m_value.get()));
 		return 0;
@@ -124,7 +124,7 @@ int32_t ConVar::GetInt() const
 float ConVar::GetFloat() const
 {
 	return console::visit(m_varType,[this](auto tag) {
-		using T = decltype(tag)::type;
+        using T = typename decltype(tag)::type;
 		if constexpr(udm::is_convertible<T,float>())
 			return udm::convert<T,float>(*static_cast<T*>(m_value.get()));
 		return 0.f;
@@ -133,7 +133,7 @@ float ConVar::GetFloat() const
 bool ConVar::GetBool() const
 {
 	return console::visit(m_varType,[this](auto tag) {
-		using T = decltype(tag)::type;
+        using T = typename decltype(tag)::type;
 		if constexpr(udm::is_convertible<T,bool>())
 			return udm::convert<T,bool>(*static_cast<T*>(m_value.get()));
 		return false;
@@ -388,7 +388,7 @@ std::shared_ptr<ConVar> ConVarMap::RegisterConVar(
 	else if(type == udm::Type::Boolean)
 		usageHelp = "1/0";
 	auto cv = console::visit(type,[value,flags,&help,&usageHelp](auto tag) {
-		using T = decltype(tag)::type;
+        using T = typename decltype(tag)::type;
 		return ConVar::Create<T>(*static_cast<const T*>(value),flags,help,usageHelp);
 	});
 	cv->m_ID = m_conVarID;

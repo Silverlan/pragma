@@ -4,7 +4,7 @@
  *
  * Copyright (c) 2021 Silverlan
  */
-
+#ifdef _MSC_VER
 #include "stdafx_shared.h"
 #include "pragma/lua/lad/type_name_manager.hpp"
 
@@ -104,3 +104,4 @@ void TypeNameManager::AssignType(const std::string &name)
 	else
 		m_assignedTypes[name] = nullptr;
 }
+#endif

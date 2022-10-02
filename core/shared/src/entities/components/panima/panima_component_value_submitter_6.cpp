@@ -14,7 +14,7 @@
 void __panima_cvs_6()
 {
 	udm::visit_ng({},[](auto tag) {
-		using TChannel = decltype(tag)::type;
+        using TChannel = typename decltype(tag)::type;
 		if constexpr(std::is_same_v<TChannel,udm::Vector2i> || std::is_same_v<TChannel,udm::Vector3i> || std::is_same_v<TChannel,udm::Vector4i>)
 			instantiate_get_member_channel_submitter<TChannel>();
 	});

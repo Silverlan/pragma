@@ -58,7 +58,7 @@ namespace luabind
 			for(auto type : types)
 			{
 				auto r = udm::visit<LENABLE_NUMERIC,LENABLE_GENERIC,LENABLE_NON_TRIVIAL>(type,[L,idx](auto tag) {
-					using T = decltype(tag)::type;
+                    using T = typename decltype(tag)::type;
 					return Lua::IsType<T>(L,idx);
 				});
 				if(r)

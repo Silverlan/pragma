@@ -30,12 +30,20 @@ namespace pragma
 {
 	struct BvhData
 	{
-		struct IntersectorData
-		{
-			bvh::SweepSahBuilder<bvh::Bvh<float>> builder;
-			bvh::ClosestPrimitiveIntersector<bvh::Bvh<float>, bvh::Triangle<float>> primitiveIntersector;
-			bvh::SingleRayTraverser<bvh::Bvh<float>> traverser;
-		};
+        struct IntersectorData
+               {
+                   IntersectorData(
+                       bvh::SweepSahBuilder<bvh::Bvh<float>> builder,
+                       bvh::ClosestPrimitiveIntersector<bvh::Bvh<float>, bvh::Triangle<float>> primitiveIntersector,
+                       bvh::SingleRayTraverser<bvh::Bvh<float>> traverser
+                   )
+                       : builder{std::move(builder)},primitiveIntersector{std::move(primitiveIntersector)},
+                       traverser{std::move(traverser)}
+                   {}
+                   bvh::SweepSahBuilder<bvh::Bvh<float>> builder;
+                   bvh::ClosestPrimitiveIntersector<bvh::Bvh<float>, bvh::Triangle<float>> primitiveIntersector;
+                   bvh::SingleRayTraverser<bvh::Bvh<float>> traverser;
+               };
 		BvhData();
 		bvh::Bvh<float> bvh;
 		std::vector<Primitive> primitives;

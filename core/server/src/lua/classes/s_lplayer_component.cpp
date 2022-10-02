@@ -15,6 +15,8 @@
 #include <pragma/lua/luaapi.h>
 #include <pragma/lua/lentity_components_base_types.hpp>
 
+#include <pragma/lua/ostream_operator_alias.hpp>
+
 namespace Lua
 {
 	namespace Player
@@ -30,6 +32,8 @@ namespace Lua
 };
 
 extern DLLSERVER ServerState *server;
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma,BasePlayerComponent);
 
 void Lua::register_sv_player_component(lua_State *l,luabind::module_ &module)
 {

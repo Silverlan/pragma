@@ -46,11 +46,11 @@ public:
 private:
 	std::unordered_map<std::string,ConCommand*> m_luaConCommands;
 	unsigned int m_conCommandID;
-	std::unique_ptr<pragma::networking::IServer> m_server = nullptr;
+    std::unique_ptr<pragma::networking::IServer> m_server;
 	std::shared_ptr<pragma::networking::IServerClient> m_localClient = {};
 
 	// Handles the connection to the master server
-	std::unique_ptr<pragma::networking::MasterServerRegistration> m_serverReg = nullptr;
+    std::unique_ptr<pragma::networking::MasterServerRegistration> m_serverReg;
 
 	ChronoTimePoint m_tNextWMSConnect;
 	unsigned int m_alsoundID;

@@ -111,7 +111,7 @@ void BaseColorComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version
 	BaseEntityComponent::Load(udm,version);
 	Vector4 color;
 	udm["color"](color);
-	(*m_color) = color;
+    (*m_color) = Color{color};
 }
 const Color &BaseColorComponent::GetColor() const {return *m_color;}
 const util::PColorProperty &BaseColorComponent::GetColorProperty() const {return m_color;}

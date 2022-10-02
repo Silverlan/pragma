@@ -15,6 +15,8 @@
 #include <pragma/lua/lentity_components_base_types.hpp>
 #include <pragma/lua/lua_entity_component.hpp>
 
+#include <pragma/lua/ostream_operator_alias.hpp>
+
 namespace Lua
 {
 	namespace Vehicle
@@ -25,6 +27,9 @@ namespace Lua
 		};
 	};
 };
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma,BaseVehicleComponent);
+
 void Lua::register_sv_vehicle_component(lua_State *l,luabind::module_ &module)
 {
 	auto def = pragma::lua::create_entity_component_class<pragma::SVehicleComponent,pragma::BaseVehicleComponent>("VehicleComponent");

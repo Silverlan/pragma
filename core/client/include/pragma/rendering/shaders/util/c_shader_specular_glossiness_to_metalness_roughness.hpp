@@ -48,9 +48,11 @@ namespace pragma
 #pragma pack(push,1)
 		struct PushConstants
 		{
+
+            PushConstants(){};
 			Vector4 diffuseFactor = {1.f,1.f,1.f,1.f};
 			Vector4 specularFactor = {1.f,1.f,1.f,1.f}; // Alpha is glossiness factor
-			Pass pass = Pass::Albedo;
+            Pass pass = Pass::Albedo;
 		};
 #pragma pack(pop)
 

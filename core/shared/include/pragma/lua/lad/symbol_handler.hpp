@@ -5,6 +5,7 @@
  * Copyright (c) 2021 Silverlan
  */
 
+#ifdef _MSC_VER
 #ifndef __LUA_AUTO_DOC_SYMBAL_HANDLER_HPP__
 #define __LUA_AUTO_DOC_SYMBAL_HANDLER_HPP__
 
@@ -37,4 +38,5 @@ namespace pragma::lua
 	};
 };
 
+#endif
 #endif

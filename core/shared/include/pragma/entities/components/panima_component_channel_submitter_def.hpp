@@ -107,7 +107,7 @@ template<typename TChannel>
 		if constexpr(pragma::is_animatable_type_v<TChannel>)
 		{
 			udm::visit_ng({},[](auto tag) {
-				using TMember = decltype(tag)::type;
+                using TMember = typename decltype(tag)::type;
 				if constexpr(pragma::is_animatable_type_v<TMember> && is_type_compatible(udm::type_to_enum<TChannel>(),udm::type_to_enum<TMember>()))
 				{
 					pragma::BaseEntityComponent *component;

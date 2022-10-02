@@ -11,6 +11,8 @@
 #include "pragma/lua/libraries/ludm.hpp"
 #include "pragma/lua/types/udm.hpp"
 #include "pragma/lua/custom_constructor.hpp"
+
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include "pragma/model/model.h"
 #include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <pragma/lua/policies/shared_from_this_policy.hpp>
@@ -71,7 +73,7 @@ static std::optional<uint32_t> set_channel_time(lua_State *l,panima::Channel &ch
 		std::swap(*time0,*time1);
 
 		::udm::visit_ng(values.GetValueType(),[&values,idx0,idx1](auto tag) {
-			using T = decltype(tag)::type;
+            using T = typename decltype(tag)::type;
 			auto *val0 = values.GetValuePtr<T>(idx0);
 			auto *val1 = values.GetValuePtr<T>(idx1);
 			std::swap(*val0,*val1);
@@ -115,7 +117,7 @@ static Lua::opt<Lua::udm_ng> get_interpolated_value(lua_State *l,panima::Channel
 	if(indices.first == std::numeric_limits<decltype(indices.first)>::max())
 		return Lua::nil;
 	return ::udm::visit_ng(channel.GetValueType(),[l,&channel,indices,factor](auto tag) {
-		using T = decltype(tag)::type;
+        using T = typename decltype(tag)::type;
 		auto &value0 = channel.GetValue<T>(indices.first);
 		auto &value1 = channel.GetValue<T>(indices.second);
 		T result;
@@ -168,6 +170,17 @@ static std::optional<std::pair<uint32_t,uint32_t>> find_index_range_in_time_rang
 	}
 	return std::pair<uint32_t,uint32_t>{startIndex,endIndex};
 }
+
+
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima,TimeFrame);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima,ChannelPath);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima,Channel);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima,AnimationSet);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima,Player);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima,Slice);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima,AnimationManager);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima,Animation);
 
 void Lua::animation::register_library(Lua::Interface &lua)
 {
@@ -241,7 +254,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdChannel.def("GetSize",&panima::Channel::GetSize);
 	cdChannel.def("AddValue",+[](lua_State *l,panima::Channel &channel,float t,Lua::udm_ng value) -> uint32_t {
 		return ::udm::visit_ng(channel.GetValueType(),[&channel,t,&value](auto tag) {
-			using T = decltype(tag)::type;
+            using T = typename decltype(tag)::type;
 			auto v = Lua::udm::cast_object<T>(luabind::object{value});
 			return channel.AddValue(t,v);
 		});
@@ -314,7 +327,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 			auto &tv = timeValues[idx];
 			times[i] = tv.first;
 			::udm::visit_ng(type,[&tv,&values,i](auto tag) {
-				using T = decltype(tag)::type;
+                using T = typename decltype(tag)::type;
 				values[i] = Lua::udm::cast_object<T>(tv.second);
 			});
 			++i;
@@ -345,7 +358,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		if(idx >= channel.GetValueCount())
 			return Lua::nil;
 		return ::udm::visit_ng(channel.GetValueType(),[l,&channel,idx](auto tag) {
-			using T = decltype(tag)::type;
+            using T = typename decltype(tag)::type;
 			auto value = channel.GetValue<T>(idx);
 			return luabind::object{l,value};
 		});
@@ -363,7 +376,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		auto t = luabind::newtable(l);
 		auto c = a.GetSize();
 		::udm::visit_ng(channel.GetValueType(),[l,&channel,c,&a,&t](auto tag) {
-			using T = decltype(tag)::type;
+            using T = typename decltype(tag)::type;
 			for(auto i=decltype(c){0u};i<c;++i)
 				t[i +1] = a.GetValue<T>(i);
 		});
@@ -413,7 +426,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		reorder<float>(timesArray,order);
 		auto &valueArray = channel.GetValueArray();
 		::udm::visit_ng(valueArray.GetValueType(),[&valueArray,&order](auto tag) {
-			using T = decltype(tag)::type;
+            using T = typename decltype(tag)::type;
 			reorder<T>(valueArray,order);
 		});
 		channel.Update();

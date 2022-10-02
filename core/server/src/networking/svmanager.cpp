@@ -25,7 +25,7 @@ void ServerState::OnMasterServerRegistered(bool b,std::string reason)
 {
 	if(b == false)
 	{
-		m_tNextWMSConnect = std::chrono::high_resolution_clock::now();
+        m_tNextWMSConnect = std::chrono::steady_clock::now();
 		Con::cwar<<"WARNING: Unable to connect to master server ("<<reason<<")"<<Con::endl;
 	}
 }

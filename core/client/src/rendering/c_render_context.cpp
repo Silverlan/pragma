@@ -30,34 +30,36 @@ RenderContext::~RenderContext()
 DLLNETWORK std::optional<std::string> g_customTitle;
 void RenderContext::InitializeRenderAPI()
 {
-	auto &renderAPI = GetRenderAPI();
-	auto getRenderApiPath = [](const std::string &renderAPI,std::string &outLocation,std::string &outModulePath) {
-		outLocation = pragma::rendering::get_graphics_api_module_location(renderAPI);
-		outModulePath = util::get_normalized_module_path(outLocation);
-	};
-	auto loadRenderApiModule = [this,&getRenderApiPath](const std::string &renderAPI) -> bool {
-		std::string location;
-		std::string modulePath;
-		getRenderApiPath(renderAPI,location,modulePath);
-		m_graphicsAPILib = util::load_library_module(modulePath,util::get_default_additional_library_search_directories(modulePath));
-		return (m_graphicsAPILib != nullptr);
-	};
-	if(loadRenderApiModule(renderAPI) == false)
-	{
-		// Fallback
-		SetRenderAPI("vulkan");
-		if(loadRenderApiModule(renderAPI) == false)
-		{
-			SetRenderAPI("opengl");
-			loadRenderApiModule(renderAPI);
-		}
-	}
+    auto &renderAPI = GetRenderAPI();
+    auto getRenderApiPath = [](const std::string &renderAPI,std::string &outLocation,std::string &outModulePath) {
+        outLocation = pragma::rendering::get_graphics_api_module_location(renderAPI);
+        outModulePath = util::get_normalized_module_path(outLocation);
+    };
+    auto loadRenderApiModule = [this,&getRenderApiPath](const std::string &renderAPI,std::string &outErr) -> bool {
+        std::string location;
+        std::string modulePath;
+        getRenderApiPath(renderAPI,location,modulePath);
+        m_graphicsAPILib = util::load_library_module(modulePath,util::get_default_additional_library_search_directories(modulePath),{},&outErr);
+        return (m_graphicsAPILib != nullptr);
+    };
+    std::string err;
+    if(loadRenderApiModule(renderAPI,err) == false)
+    {
+        Con::cwar<<"WARNING: Failed to load default render API '"<<renderAPI<<"': "<<err<<". Falling back to alternatives..."<<Con::endl;
+        // Fallback
+        SetRenderAPI("vulkan");
+        if(loadRenderApiModule(renderAPI,err) == false)
+        {
+            SetRenderAPI("opengl");
+            loadRenderApiModule(renderAPI,err);
+        }
+    }
 	auto lib = m_graphicsAPILib;
 	std::string location;
 	std::string modulePath;
 	getRenderApiPath(renderAPI,location,modulePath);
 
-	std::string err;
+    //std::string err;
 	if(lib != nullptr)
 	{
 		auto fInitRenderAPI = lib->FindSymbolAddress<bool(*)(const std::string&,bool,std::shared_ptr<prosper::IPrContext>&,std::string&)>("initialize_render_api");

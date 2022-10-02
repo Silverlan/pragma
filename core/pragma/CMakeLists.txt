@@ -4,7 +4,7 @@ set(PRECOMPILED_HEADER "stdafx_weave")
 set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/appicon.rc")
 def_project(pragma exe ${APP_ICON_RESOURCE_WINDOWS})
 
-add_custom_target(build_core ALL DEPENDS shared server engine client cengine)
+add_custom_target(build_core ALL DEPENDS shared server client)
 add_dependencies(pragma pragma_server)
 add_dependencies(build_core pragma)
 if(UNIX)

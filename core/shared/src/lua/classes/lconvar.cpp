@@ -21,7 +21,7 @@ ConVar *Lua::console::CreateConVar(lua_State *l,const std::string &cmd,::udm::Ty
 	if(state == nullptr)
 		return 0;
 	auto cvar = udm::visit(type,[&def,flags,&help](auto tag) {
-		using T = decltype(tag)::type;
+        using T = typename decltype(tag)::type;
 		constexpr auto type = udm::type_to_enum<T>();
 		if constexpr(type == udm::Type::Element || udm::is_array_type(type))
 			return std::shared_ptr<ConVar>{nullptr};

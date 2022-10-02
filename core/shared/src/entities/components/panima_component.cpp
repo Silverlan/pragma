@@ -195,7 +195,7 @@ void PanimaComponent::DebugPrint(std::stringstream &ss)
 				ss<<"\t\t\tHas submitter: "<<(hasSubmitter ? "true" : "false")<<"\n";
 
 				udm::visit_ng(channel->GetValueType(),[&channel,&player,&ss](auto tag) {
-					using T = decltype(tag)::type;
+                    using T = typename decltype(tag)::type;
 					if constexpr(is_animatable_type_v<T>)
 					{
 						auto val = channel->GetInterpolatedValue<T>(player.GetCurrentTime());
@@ -312,7 +312,7 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 		auto &component = *hComponent;
 		auto *valueComponents = path.GetComponents();
 		auto vsGetMemberChannelSubmitter = [valueComponents,&path,&memberIdx,channelIdx,&channelValueSubmitters,&component]<typename TMember>(auto tag) mutable {
-			using TChannel = decltype(tag)::type;
+            using TChannel = typename decltype(tag)::type;
 			constexpr auto setMemberValue = [](const pragma::ComponentMemberInfo &memberInfo,pragma::BaseEntityComponent &component,const void *value,void *userData) {
 				memberInfo.setterFunction(memberInfo,component,value);
 			};
@@ -422,17 +422,17 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 					++idx;
 				}
 				channelValueSubmitters[channelIdx] = runtime_array_to_compile_time<
-					TChannel,TMember,decltype(componentIndices)::value_type,0,componentIndices.size(),numComponentsMember,get_member_channel_submitter_wrapper
+                    TChannel,TMember,typename decltype(componentIndices)::value_type,0,componentIndices.size(),numComponentsMember,get_member_channel_submitter_wrapper
 				>(component,*memberIdx,setMemberValue,nullptr,componentIndices);
 			}
 		};
 
 		auto vs = [&vsGetMemberChannelSubmitter,channelValueType](auto tag) mutable {
-			using TMember = decltype(tag)::type;
+            using TMember = typename decltype(tag)::type;
 			if constexpr(is_animatable_type_v<TMember>)
 			{
 				auto vs = [&vsGetMemberChannelSubmitter](auto tag) {
-					using TChannel = decltype(tag)::type;
+                    using TChannel = typename decltype(tag)::type;
 					if constexpr(is_animatable_type_v<TChannel>)
 						vsGetMemberChannelSubmitter.template operator()<TMember>(tag);
 				};

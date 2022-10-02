@@ -32,20 +32,20 @@ namespace nwm
 	DLLNETWORK CallbackHandle read_entity(NetPacket &packet,const std::function<void(BaseEntity*)> &onCreated);
 	template<class T>
 		T *read_entity(NetPacket &packet);
-	template<class T>
-		T *read_entity(NetPacket &packet,const std::function<void(BaseEntity*)> &onCreated);
+    //template<class T>
+        //T *read_entity(NetPacket &packet,const std::function<void(BaseEntity*)> &onCreated);
 
 	DLLNETWORK void write_player(NetPacket &packet,const BaseEntity *pl);
 	DLLNETWORK void write_player(NetPacket &packet,const pragma::BasePlayerComponent *pl);
 	DLLNETWORK pragma::BasePlayerComponent *read_player(NetPacket &packet);
 };
 
-template<class T>
+/*template<class T>
 	T *nwm::read_entity(NetPacket &packet,const std::function<void(BaseEntity*)> &onCreated)
 {
 	auto *ent = nwm::read_entity(packet,onCreated);
 	return dynamic_cast<T*>(ent);
-}
+}*/
 
 template<class T>
 	T *nwm::read_entity(NetPacket &packet)

@@ -26,6 +26,8 @@
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/model/animation/flex_animation.hpp"
 #include "pragma/model/modelmesh.h"
+
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include <material_manager2.hpp>
 #include <luabind/iterator_policy.hpp>
 #include <pragma/lua/lua_call.hpp>
@@ -182,6 +184,15 @@ static std::ostream &operator<<(std::ostream &out,const Model &mdl)
 	out<<"[Eyeballs:"<<mdl.GetEyeballs().size()<<"]";
 	return out;
 }
+
+
+
+
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath,Vertex);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath,VertexWeight);
+
+
 
 void Lua::Model::register_class(
 	lua_State *l,

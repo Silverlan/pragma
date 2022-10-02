@@ -5,6 +5,7 @@
  * Copyright (c) 2021 Silverlan
  */
 
+#ifdef _MSC_VER
 #ifndef __LUA_AUTO_DOC_TYPE_NAME_MANAGER_HPP__
 #define __LUA_AUTO_DOC_TYPE_NAME_MANAGER_HPP__
 
@@ -40,4 +41,5 @@ namespace pragma::lua
 	};
 };
 
+#endif
 #endif

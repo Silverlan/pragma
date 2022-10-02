@@ -19,5 +19,9 @@ std::vector<std::string> pragma::rendering::get_available_graphics_apis()
 }
 std::string pragma::rendering::get_graphics_api_module_location(const std::string &graphicsAPI)
 {
+#ifdef _WIN32
 	return "graphics/" +graphicsAPI +"/pr_prosper_" +graphicsAPI;
+#else
+    return "graphics/" +graphicsAPI +"/libpr_prosper_" +graphicsAPI;
+#endif
 }

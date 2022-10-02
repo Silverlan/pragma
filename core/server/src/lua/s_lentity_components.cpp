@@ -95,6 +95,8 @@
 #include <pragma/lua/lua_call.hpp>
 #include <sharedutils/netpacket.hpp>
 
+#include <pragma/lua/ostream_operator_alias.hpp>
+
 void SGame::RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponent> &def)
 {
 	Game::RegisterLuaEntityComponent(def);
@@ -102,6 +104,12 @@ void SGame::RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityCompone
 }
 void RegisterLuaEntityComponents2(lua_State *l,luabind::module_ &entsMod);
 namespace Lua::SoundEmitter {DLLNETWORK luabind::class_<pragma::BaseSoundEmitterComponent::SoundInfo> RegisterSoundInfo();};
+
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma,BaseEntityComponent);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma,BaseEnvSoundDspComponent);
+
+
 void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {
 	Game::RegisterLuaEntityComponents(entsMod);

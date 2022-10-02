@@ -428,7 +428,7 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 				Con::cout<<"\t\t"<<info->GetName()<<" (";
 				Con::cout<<magic_enum::enum_name(info->type)<<"): ";
 				pragma::ents::visit_member(info->type,[info,&c](auto tag) {
-					using T = decltype(tag)::type;
+                    using T = typename decltype(tag)::type;
 					if constexpr(!udm::is_convertible<T,udm::String>())
 						Con::cout<<"Unknown value";
 					else

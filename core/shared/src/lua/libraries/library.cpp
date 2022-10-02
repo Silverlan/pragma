@@ -59,6 +59,7 @@
 #include "pragma/game/game_coordinate_system.hpp"
 #include "pragma/util/util_variable_type.hpp"
 #include "pragma/lua/converters/vector_converter_t.hpp"
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
 #include <pragma/math/intersection.h>
@@ -246,6 +247,11 @@ namespace umath
 	uint32_t find_bezier_roots(float x,float v0,float v1,float v2,float v3,std::array<float,3> &roots);
 	float calc_bezier_point(float f1,float f2,float f3,float f4,float t);
 };
+
+
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util,HSV);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(std,match_results<const char*>);//I HAD TO DO THIS!!! I wanted to avoid this shit, but no.
 
 void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 {
@@ -516,9 +522,16 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		luabind::def("calc_hermite_spline_position",&Lua::math::calc_hermite_spline_position),
 		luabind::def("is_in_range",&Lua::math::is_in_range),
 		luabind::def("normalize_uv_coordinates",&umath::normalize_uv_coordinates),
-		luabind::def("is_nan",static_cast<double(*)(double)>([](double val) -> double {return std::isnan<double>(val);})),
-		luabind::def("is_inf",static_cast<double(*)(double)>([](double val) -> double {return std::isinf<double>(val);})),
-		luabind::def("is_finite",static_cast<double(*)(double)>([](double val) -> double {return std::isfinite<double>(val);})),
+#ifdef __GLIBC__
+                //GLIBC provides overloads instead of templates for FP types.
+        luabind::def("is_nan",static_cast<double(*)(double)>([](double val) -> double {return std::isnan(val);})),
+        luabind::def("is_inf",static_cast<double(*)(double)>([](double val) -> double {return std::isinf(val);})),
+        luabind::def("is_finite",static_cast<double(*)(double)>([](double val) -> double {return std::isfinite(val);})),
+#else
+        luabind::def("is_nan",static_cast<double(*)(double)>([](double val) -> double {return std::isnan<double>(val);})),
+        luabind::def("is_inf",static_cast<double(*)(double)>([](double val) -> double {return std::isinf<double>(val);})),
+        luabind::def("is_finite",static_cast<double(*)(double)>([](double val) -> double {return std::isfinite<double>(val);})),
+#endif
 		luabind::def("cot",umath::cot),
 		luabind::def("calc_fov_from_lens",&::umath::camera::calc_fov_from_lens),
 		luabind::def("calc_focal_length_from_fov",&::umath::camera::calc_focal_length_from_fov),
@@ -1422,10 +1435,10 @@ void Game::RegisterLuaLibraries()
 			return Lua::file::FindLuaFiles(l,path);
 		})),
 		luabind::def("get_attributes",FileManager::GetFileAttributes),
-		luabind::def("get_flags",static_cast<uint64_t(*)(std::string,fsys::SearchFlags)>([](std::string path,fsys::SearchFlags searchFlags) {
+        luabind::def("get_flags",static_cast<uint64_t(*)(std::string,fsys::SearchFlags)>(+[](std::string path,fsys::SearchFlags searchFlags) {
 			return FileManager::GetFileFlags(path,searchFlags);
 		})),
-		luabind::def("get_flags",static_cast<uint64_t(*)(std::string)>([](std::string path) {
+        luabind::def("get_flags",static_cast<uint64_t(*)(std::string)>(+[](std::string path) {
 			return FileManager::GetFileFlags(path);
 		})),
 		luabind::def("find_absolute_path",static_cast<luabind::object(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &path) -> luabind::object {
@@ -1445,7 +1458,7 @@ void Game::RegisterLuaLibraries()
 		luabind::def("get_file_extension",static_cast<luabind::object(*)(lua_State*,const std::string&,const std::vector<std::string>&)>(Lua::file::GetFileExtension)),
 		luabind::def("get_file_extension",static_cast<luabind::object(*)(lua_State*,const std::string&)>(Lua::file::GetFileExtension)),
 		luabind::def("get_size",FileManager::GetFileSize),
-		luabind::def("get_size",static_cast<uint64_t(*)(std::string)>([](std::string path) {
+        luabind::def("get_size",static_cast<uint64_t(*)(std::string)>(+[](std::string path) {
 			return FileManager::GetFileSize(path);
 		})),
 		luabind::def("compare_path",Lua::file::ComparePath),

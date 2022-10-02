@@ -10,6 +10,8 @@
 #include "pragma/lua/l_entity_handles.hpp"
 #include "pragma/lua/lua_entity_component.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
+
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include "pragma/lua/lua_util_component.hpp"
 
 namespace Lua
@@ -19,6 +21,14 @@ namespace Lua
 		static void CalcBallisticVelocity(lua_State *l,pragma::GravityComponent &hEnt,const Vector3 &origin,const Vector3 &destPos,float fireAngle,float maxSpeed,float spread,float maxPitch,float maxYaw);
 	};
 };
+
+
+
+
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma,BaseEntityComponent);
+
+
 void Lua::register_gravity_component(luabind::module_ &module)
 {
 	auto def = pragma::lua::create_entity_component_class<pragma::GravityComponent,pragma::BaseEntityComponent>("GravityComponent");

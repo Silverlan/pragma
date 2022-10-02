@@ -36,6 +36,8 @@
 #include <luabind/iterator_policy.hpp>
 #include <luabind/copy_policy.hpp>
 
+#include <luabind/detail/type_traits.hpp>
+
 extern DLLNETWORK Engine *engine;
 
 // #define ENABLE_DEPRECATED_PHYSICS
@@ -139,8 +141,25 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		luabind::def("create_dof_spring_constraint",create_dof_spring_constraint),
 		luabind::def("create_surface_material",create_surface_material),
 		luabind::def("create_material",create_material),
-		luabind::def("create_box_controller",create_box_controller,luabind::meta::join<luabind::default_parameter_policy<4,45.f>,luabind::default_parameter_policy<5,umath::Transform{}>>::type{}),
-		luabind::def("create_capsule_controller",create_capsule_controller,luabind::meta::join<luabind::default_parameter_policy<5,45.f>,luabind::default_parameter_policy<6,umath::Transform{}>>::type{}),
+        #ifdef _WIN32
+                luabind::def("create_box_controller",create_box_controller,luabind::meta::join<luabind::default_parameter_policy<4,45.f>,luabind::default_parameter_policy<5,umath::Transform{}>>::type{}),
+                luabind::def("create_capsule_controller",create_capsule_controller,luabind::meta::join<luabind::default_parameter_policy<5,45.f>,luabind::default_parameter_policy<6,umath::Transform{}>>::type{}),
+        #else
+                luabind::def("create_box_controller",create_box_controller),
+                luabind::def("create_box_controller",+[](pragma::physics::IEnvironment *env,const Vector3 &halfExtents,float stepHeight,float slopeLimit) {
+                    return create_box_controller(env,halfExtents,stepHeight,slopeLimit);
+                }),
+                luabind::def("create_box_controller",+[](pragma::physics::IEnvironment *env,const Vector3 &halfExtents,float stepHeight) {
+                    return create_box_controller(env,halfExtents,stepHeight);
+                }),
+                luabind::def("create_capsule_controller",create_capsule_controller),
+                luabind::def("create_capsule_controller",+[](pragma::physics::IEnvironment *env,float halfWidth,float halfHeight,float stepHeight,float slopeLimit) {
+                    return create_capsule_controller(env,halfWidth,halfHeight,stepHeight,slopeLimit);
+                }),
+                luabind::def("create_capsule_controller",+[](pragma::physics::IEnvironment *env,float halfWidth,float halfHeight,float stepHeight) {
+                    return create_capsule_controller(env,halfWidth,halfHeight,stepHeight);
+                }),
+        #endif
 		luabind::def("create_vehicle",static_cast<util::TSharedHandle<pragma::physics::IVehicle>(*)(pragma::physics::IEnvironment*,const pragma::physics::VehicleCreateInfo&)>([](pragma::physics::IEnvironment *env,const pragma::physics::VehicleCreateInfo &vhcCreateInfo) -> util::TSharedHandle<pragma::physics::IVehicle> {
 			if(env == nullptr)
 				return nullptr;

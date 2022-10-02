@@ -31,11 +31,11 @@ template<class T0,class T1>
 {
 	auto *memPtr0 = reinterpret_cast<const uint8_t*>(src.data());
 	auto *memPtr1 = reinterpret_cast<uint8_t*>(dst.data());
-	memPtr0 += srcStartIndex *sizeof(T0::value_type);
-	memPtr1 += dstStartIndex *sizeof(T1::value_type);
+    memPtr0 += srcStartIndex *sizeof(typename T0::value_type);
+    memPtr1 += dstStartIndex *sizeof(typename T1::value_type);
 
-	auto *memPtr0End = memPtr0 +sizeof(T0::value_type) *src.size();
-	auto *memPtr1End = memPtr1 +sizeof(T1::value_type) *dst.size();
+    auto *memPtr0End = memPtr0 +sizeof(typename T0::value_type) *src.size();
+    auto *memPtr1End = memPtr1 +sizeof(typename T1::value_type) *dst.size();
 
 	if(memPtr0 > memPtr0End)
 		throw std::runtime_error{"Memory out of bounds!"};
@@ -43,8 +43,8 @@ template<class T0,class T1>
 	if(memPtr1 > memPtr1End)
 		throw std::runtime_error{"Memory out of bounds!"};
 
-	auto *memPtr0Write = memPtr0 +count *sizeof(T0::value_type);
-	auto *memPtr1WriteEnd = memPtr1 +count *sizeof(T0::value_type);
+    auto *memPtr0Write = memPtr0 +count *sizeof(typename T0::value_type);
+    auto *memPtr1WriteEnd = memPtr1 +count *sizeof(typename T0::value_type);
 
 	if(memPtr0Write > memPtr0End)
 		throw std::runtime_error{"Memory out of bounds!"};
@@ -52,7 +52,7 @@ template<class T0,class T1>
 	if(memPtr1WriteEnd > memPtr1End)
 		throw std::runtime_error{"Memory out of bounds!"};
 
-	memcpy(memPtr1,memPtr0,count *sizeof(T0::value_type));
+    memcpy(memPtr1,memPtr0,count *sizeof(typename T0::value_type));
 }
 
 template<typename T>
@@ -272,7 +272,7 @@ bool pragma::animation::Animation::LoadFromAssetData(const udm::AssetData &data,
 			{
 				frame = Frame::Create(numBones);
 				auto &frameTransforms = frame->GetBoneTransforms();
-				copy_safe(transforms,frameTransforms,offset,0,frameTransforms.size());
+                copy_safe(transforms,frameTransforms,offset,0,frameTransforms.size());
 				offset += frameTransforms.size();
 			}
 		}
@@ -991,7 +991,9 @@ pragma::animation::Animation::Animation(const Animation &other,ShareMode share)
 				events.push_back(std::make_unique<AnimationEvent>(*ev));
 		}
 	}
+#ifdef _MSC_VER
 	static_assert(sizeof(Animation) == 312,"Update this function when making changes to this class!");
+#endif
 }
 
 void pragma::animation::Animation::Reverse()
@@ -1232,8 +1234,10 @@ bool pragma::animation::Animation::operator==(const Animation &other) const
 	{
 		if(umath::abs(m_boneWeights[i] -other.m_boneWeights[i]) > 0.001f)
 			return false;
-	}
-	static_assert(sizeof(Animation) == 312,"Update this function when making changes to this class!");
+    }
+#ifdef _MSC_VER
+            static_assert(sizeof(Animation) == 312,"Update this function when making changes to this class!");
+        #endif
 	return m_boneIds == other.m_boneIds && m_boneIdMap == other.m_boneIdMap && m_flags == other.m_flags && m_activity == other.m_activity &&
 		m_activityWeight == other.m_activityWeight && uvec::cmp(m_renderBounds.first,other.m_renderBounds.first) && uvec::cmp(m_renderBounds.second,other.m_renderBounds.second) && m_blendController == other.m_blendController;
 }

@@ -36,6 +36,7 @@
 #include "pragma/game/value_driver.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/ai/navsystem.h"
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include <pragma/math/intersection.h>
 #pragma optimize("",off)
 extern DLLNETWORK Engine *engine;
@@ -380,6 +381,8 @@ bool Lua::game::raycast(lua_State *l,const ::TraceData &data)
 	return false;
 }
 
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma,ValueDriverDescriptor);
 void Lua::game::register_shared_functions(luabind::module_ &modGame)
 {
 	modGame[
@@ -434,7 +437,7 @@ void Lua::game::register_shared_functions(luabind::module_ &modGame)
 		for(auto type : udm::GENERIC_TYPES)
 		{
 			auto r = udm::visit<false,true,false>(type,[&udmType,&descriptor,&name](auto tag) mutable -> bool {
-				using T = decltype(tag)::type;
+                using T = typename decltype(tag)::type;
 				auto *o = luabind::object_cast_nothrow<T*>(udmType,luabind::pointer_policy<0>{},static_cast<T*>(nullptr));
 				if(o)
 				{

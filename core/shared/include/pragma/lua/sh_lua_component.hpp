@@ -10,6 +10,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/components/base_entity_component_member_register.hpp"
 #include "pragma/entities/member_type.hpp"
 #include "pragma/lua/luaobjectbase.h"
@@ -408,7 +409,7 @@ template<typename T>
 	if(!anyVal)
 		return;
 	udm::visit(pragma::ents::member_type_to_udm_type(memberInfo->type),[this,memberInfo,&value,anyVal](auto tag) {
-		using TMember = decltype(tag)::type;
+        using TMember = typename decltype(tag)::type;
 		if constexpr(udm::is_convertible<T,TMember>())
 			*anyVal = udm::convert<T,TMember>(value);
 	});
@@ -420,7 +421,7 @@ template<typename T>
 	if(!anyVal)
 		return false;
 	udm::visit(pragma::ents::member_type_to_udm_type(outType),[anyVal,&outValue](auto tag) {
-		using TMember = decltype(tag)::type;
+        using TMember = typename decltype(tag)::type;
 		if constexpr(udm::is_udm_type<T>() && udm::is_udm_type<TMember>() && is_valid_component_property_type_v<TMember> && udm::is_convertible<TMember,T>())
 			outValue = udm::convert<TMember,T>(std::any_cast<TMember>(*anyVal));
 	});

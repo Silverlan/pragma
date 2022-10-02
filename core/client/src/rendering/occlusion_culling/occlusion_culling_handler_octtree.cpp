@@ -112,34 +112,34 @@ void OcclusionCullingHandlerOctTree::PerformCulling(
 		});
 	}
 
-	EntityIterator worldIt {*c_game};
-	worldIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
-	for(auto *entWorld : worldIt)
-	{
-		auto worldC = entWorld->GetComponent<pragma::CWorldComponent>();
-		auto wrldTree = worldC->GetMeshTree();
-		if(wrldTree == nullptr)
-			continue;
-		//if(bUpdateLod == true)
-		//	entWorld->UpdateLOD(posCam); // TODO: Makes no sense for world geometry?
-		// TODO: Assign tree to ModelMesh instead of ModelSubMesh!!!
-		auto &entWorld = static_cast<CBaseEntity&>(worldC->GetEntity());
-		auto bViewModel = false;
-		std::vector<umath::Plane> *planes = nullptr;
-		if(ShouldExamine(scene,renderer,entWorld,bViewModel,cullByViewFrustum ? &planes : nullptr) == true)
-		{
-			auto &root = wrldTree->GetRootNode();
-			auto pTrComponent = entWorld.GetTransformComponent();
-			auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
-			std::size_t numMeshes = 2; // Value doesn't matter, but has to be > 1
-			iterate_occlusion_tree<std::shared_ptr<ModelMesh>>(root,culledMeshesOut,planes,[this,&pos,&bViewModel,&planes,&entWorld,numMeshes,&culledMeshesOut](const std::shared_ptr<ModelMesh> &mesh) {
-				auto *cmesh = static_cast<CModelMesh*>(mesh.get());
-				if(ShouldExamine(*cmesh,pos,bViewModel,numMeshes,planes) == false)
-					return;
-				if(culledMeshesOut.capacity() -culledMeshesOut.size() == 0)
-					culledMeshesOut.reserve(culledMeshesOut.capacity() +100);
-				culledMeshesOut.push_back(OcclusionMeshInfo{entWorld,*cmesh});
-			});
-		}
-	}
+    EntityIterator worldIt {*c_game};
+    worldIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
+    for(auto *entWorld : worldIt)
+    {
+        auto worldC = entWorld->GetComponent<pragma::CWorldComponent>();
+        auto wrldTree = worldC->GetMeshTree();
+        if(wrldTree == nullptr)
+            continue;
+        //if(bUpdateLod == true)
+        //    entWorld->UpdateLOD(posCam); // TODO: Makes no sense for world geometry?
+        // TODO: Assign tree to ModelMesh instead of ModelSubMesh!!!
+        auto &centWorld = static_cast<CBaseEntity&>(worldC->GetEntity());
+        auto bViewModel = false;
+        std::vector<umath::Plane> *planes = nullptr;
+        if(ShouldExamine(scene,renderer,centWorld,bViewModel,cullByViewFrustum ? &planes : nullptr) == true)
+        {
+            auto &root = wrldTree->GetRootNode();
+            auto pTrComponent = centWorld.GetTransformComponent();
+            auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
+            std::size_t numMeshes = 2; // Value doesn't matter, but has to be > 1
+            iterate_occlusion_tree<std::shared_ptr<ModelMesh>>(root,culledMeshesOut,planes,[this,&pos,&bViewModel,&planes,&centWorld,numMeshes,&culledMeshesOut](const std::shared_ptr<ModelMesh> &mesh) {
+                auto *cmesh = static_cast<CModelMesh*>(mesh.get());
+                if(ShouldExamine(*cmesh,pos,bViewModel,numMeshes,planes) == false)
+                    return;
+                if(culledMeshesOut.capacity() -culledMeshesOut.size() == 0)
+                    culledMeshesOut.reserve(culledMeshesOut.capacity() +100);
+                culledMeshesOut.push_back(OcclusionMeshInfo{centWorld,*cmesh});
+            });
+        }
+    }
 }

@@ -68,7 +68,13 @@ if(WIN32)
 	add_compile_options(/bigobj)
 endif()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    add_compile_options("-Wno-c++11-narrowing")
+endif()
+
 def_project(client lib)
+
+add_dependencies(client util_vmf)
 
 link_boost_library(client DEPENDENCY_BOOST_DATE_TIME_LIBRARY date_time)
 link_boost_library(client DEPENDENCY_BOOST_REGEX_LIBRARY regex)

@@ -19,7 +19,7 @@
 #include "pragma/physics/collisionmasks.h"
 #include "pragma/networking/nwm_velocity_correction.hpp"
 #include <vector>
-#ifdef __linux__
+#if 0
 #include "pragma/physics/physmotionstate.h"
 #endif
 

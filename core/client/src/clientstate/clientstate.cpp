@@ -249,8 +249,11 @@ REGISTER_CONVAR_CALLBACK_CL(cl_show_fps,[](NetworkState*,ConVar*,bool,bool val) 
 lua_State *ClientState::GetGUILuaState() {return (m_luaGUI != nullptr) ? m_luaGUI->GetState() : nullptr;}
 Lua::Interface &ClientState::GetGUILuaInterface() {return *m_luaGUI;}
 
-__declspec(dllimport) void test_lua_policies(lua_State *l);
+
+//__declspec(dllimport) void test_lua_policies(lua_State *l);
 std::optional<std::vector<std::string>> g_autoExecScripts {};
+
+
 #include "pragma/lua/policies/gui_element_policy.hpp"
 void ClientState::InitializeGUILua()
 {

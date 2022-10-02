@@ -8,7 +8,11 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/libraries/ldebug.h"
 #include <pragma/console/conout.h>
-
+#ifdef __linux__
+#include <sys/ioctl.h>
+#include <linux/kd.h>
+#include <fcntl.h>
+#endif
 int Lua::debug::collectgarbage(lua_State *l)
 {
 	// Calling twice on purpose: https://stackoverflow.com/a/28320364/2482983
@@ -50,7 +54,10 @@ void Lua::debug::beep(lua_State *l)
 #ifdef _WIN32
 	Beep(freq,ms);
 #else
-	ioctl(fd,KDMKTONE,(ms<<16 | 1193180 /freq));
+    //HACK: This should point to console owning pragma
+    size_t fd = open("/dev/tty0",O_NONBLOCK | O_RDONLY);
+    ioctl(fd,KDMKTONE,(ms<<16 | 1193180 /freq));
+    close(fd);
 #endif
 }
 

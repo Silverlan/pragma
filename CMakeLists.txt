@@ -1,6 +1,13 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.9) # for GENERATOR_IS_MULTI_CONFIG
 project(pragma)
 
+
+#variable_watch(LINKS_RESULT)
+#variable_watch(DEPENDENCY_ANVIL_INCLUDE)
+#variable_watch(_STR_LEN)
+#variable_watch(TMP_VAR)
+set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE CACHE INTERNAL "" FORCE)
+#set_target_properties(freetype PROPERTIES CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE)
 if(WIN32)
 	set(CONFIG_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build Type")
 else()
@@ -14,7 +21,9 @@ if(UNIX)
 endif()
 
 set(CMAKE_BUILD_TYPE ${CONFIG_BUILD_TYPE} CACHE STRING "" FORCE)
-if(WIN32)
+
+get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(is_multi_config)
 	set(BINARY_PRAGMA_DIR ${CONFIG_BUILD_TYPE} CACHE INTERNAL "" FORCE)
 else()
 	set(BINARY_PRAGMA_DIR "" CACHE INTERNAL "" FORCE)
@@ -53,7 +62,7 @@ function(search_lib_recursive_full VAR_NAME FILE_PATH)
 		if(NOT ${FOUND_RESULT} STREQUAL "")
 			get_filename_component(FOUND_RESULT "${FOUND_RESULT}" NAME)
 			string(STRIP ${FOUND_RESULT} FOUND_RESULT)
-			# message("FIND: ${FILE_PATH_DIRECTORY}/${FILE_PATH_NAME}* -> ${FOUND_RESULT}")
+                        #message("FIND: ${FILE_PATH_DIRECTORY}/${FILE_PATH_NAME}* -> ${FOUND_RESULT}")
 			set(FILE_PATH_WITH_EXT "${FILE_PATH_DIRECTORY}/${FOUND_RESULT}")
 		endif()
 		#
@@ -171,6 +180,9 @@ search_lib_recursive_ext(DEPENDENCY_SMDMODEL_LIBRARY smdmodel)
 set(DEPENDENCY_UTIL_BSP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_bsp/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_UTIL_BSP_LIBRARY util_bsp STATIC)
 
+set(DEPENDENCY_UTIL_VMF_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_vmf/include CACHE PATH "Path to include directory.")
+search_lib_recursive_ext(DEPENDENCY_UTIL_VMF_LIBRARY util_vmf STATIC)
+
 # set(DEPENDENCY_UTIL_ARCHIVE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_archive/include CACHE PATH "Path to include directory.")
 # search_lib_recursive_ext(DEPENDENCY_UTIL_ARCHIVE_LIBRARY util_archive)
 
@@ -211,25 +223,31 @@ search_lib_recursive_ext(DEPENDENCY_PANIMA_LIBRARY panima STATIC)
 
 set(DEPENDENCY_UTIL_ZIP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_zip/include CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_UTIL_ZIP_LIBRARY external_libs/util_zip/${BINARY_PRAGMA_DIR} util_zip STATIC)
+
 if(WIN32)
 	set(ZLIB_LIB_NAME "zlib" CACHE INTERNAL "" FORCE)
 else()
 	set(ZLIB_LIB_NAME "z" CACHE INTERNAL "" FORCE)
+
+
 endif()
 search_lib_recursive(DEPENDENCY_ZLIB_LIBRARY third_party_libs/zlib/${BINARY_PRAGMA_DIR} ${ZLIB_LIB_NAME})
+
+
+
 set(DEPENDENCY_ZLIB_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib CACHE PATH "Path to include directory.")
 
 set(DEPENDENCY_UTIL_IMAGE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_image/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_UTIL_IMAGE_LIBRARY util_image STATIC)
-search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC6H_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/bc6h/${BINARY_PRAGMA_DIR} bc6h)
-search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC7_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/bc7/${BINARY_PRAGMA_DIR} bc7)
-search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_CORE_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/nvcore/${BINARY_PRAGMA_DIR} nvcore)
-search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_IMAGE_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/nvimage/${BINARY_PRAGMA_DIR} nvimage)
-search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/nvtt/${BINARY_PRAGMA_DIR} nvtt)
-search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_MATH_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/nvmath/${BINARY_PRAGMA_DIR} nvmath)
-search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_THREAD_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/nvthread/${BINARY_PRAGMA_DIR} nvthread)
-search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_SQUISH_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/nvtt/squish/${BINARY_PRAGMA_DIR} nvsquish)
-search_lib_recursive(DEPENDENCY_SQUISH_LIBRARY external_libs/util_image/third_party_libs/nvtt/extern/libsquish-1.15/${BINARY_PRAGMA_DIR} squish)
+search_lib_recursive_ext(DEPENDENCY_UTIL_IMAGE_LIBRARY util_image)
+search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC6H_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/bc6h/${BINARY_PRAGMA_DIR} bc6h STATIC)
+search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC7_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/bc7/${BINARY_PRAGMA_DIR} bc7 STATIC)
+search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_CORE_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/nvcore/${BINARY_PRAGMA_DIR} nvcore STATIC)
+search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_IMAGE_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/nvimage/${BINARY_PRAGMA_DIR} nvimage STATIC)
+search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/nvtt/${BINARY_PRAGMA_DIR} nvtt STATIC)
+search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_MATH_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/nvmath/${BINARY_PRAGMA_DIR} nvmath STATIC)
+search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_THREAD_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/nvthread/${BINARY_PRAGMA_DIR} nvthread STATIC)
+search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_SQUISH_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/nvtt/squish/${BINARY_PRAGMA_DIR} nvsquish STATIC)
+search_lib_recursive(DEPENDENCY_SQUISH_LIBRARY external_libs/util_image/third_party_libs/nvtt/extern/libsquish-1.15/${BINARY_PRAGMA_DIR} squish STATIC)
 
 set(DEPENDENCY_UTIL_SOURCE2_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_source2/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_UTIL_SOURCE2_LIBRARY util_source2 STATIC)
@@ -268,8 +286,13 @@ set(OGG_LIBRARIES ${DEPENDENCY_LIBOGG_LIBRARY} CACHE STRING "" FORCE)
 set(DEPENDENCY_BZIP2_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/bzip2 CACHE STRING "" FORCE)
 search_lib_recursive(DEPENDENCY_BZIP2_LIBRARY third_party_libs/bzip2/${BINARY_PRAGMA_DIR} bz2)
 
-set(DEPENDENCY_LZ4_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_source2/third_party_libs/lz4/lib CACHE STRING "" FORCE)
-search_lib_recursive(DEPENDENCY_LZ4_LIBRARY external_libs/util_source2/third_party_libs/lz4/${BINARY_PRAGMA_DIR} lz4)
+
+set(DEPENDENCY_LZ4_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_source2/third_party_libs/lz4/lib CACHE STRING "Path to include directory." FORCE)
+search_lib_recursive(DEPENDENCY_LZ4_LIBRARY external_libs/util_source2/third_party_libs/lz4/${BINARY_PRAGMA_DIR} lz4 STATIC)
+
+set(DEPENDENCY_LIBLZMA_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_bsp/third_party_libs/liblzma/include CACHE STRING "Path to include directory." FORCE)
+search_lib_recursive(DEPENDENCY_LIBLZMA_LIBRARY external_libs/util_bsp/third_party_libs/liblzma/${BINARY_PRAGMA_DIR} lzma STATIC)
+
 
 set(DEPENDENCY_LUABIND_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luabind CACHE STRING "" FORCE)
 search_lib_recursive(DEPENDENCY_LUABIND_LIBRARY lib/${BINARY_PRAGMA_DIR} luabind)
@@ -277,8 +300,17 @@ search_lib_recursive(DEPENDENCY_LUABIND_LIBRARY lib/${BINARY_PRAGMA_DIR} luabind
 set(DEPENDENCY_FREETYPE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/freetype/include CACHE STRING "" FORCE)
 search_lib_recursive(DEPENDENCY_FREETYPE_LIBRARY third_party_libs/freetype/${BINARY_PRAGMA_DIR} freetype)
 
-set(DEPENDENCY_7ZPP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/7zpp/include CACHE STRING "" FORCE)
-search_lib_recursive(DEPENDENCY_7ZPP_LIBRARY third_party_libs/7zpp/${BINARY_PRAGMA_DIR} 7zpp)
+
+
+#set(DEPENDENCY_ANVIL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/include CACHE PATH "Path to include directory." FORCE)
+#set(DEPENDENCY_ANVIL_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/include CACHE PATH  "Path to include directory." FORCE)
+#set(DEPENDENCY_ANVIL_DEPS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/deps CACHE PATH "Path to include directory." FORCE)
+
+
+if(WIN32)
+    set(DEPENDENCY_7ZPP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/7zpp/include CACHE STRING "" FORCE)
+    search_lib_recursive(DEPENDENCY_7ZPP_LIBRARY third_party_libs/7zpp/${BINARY_PRAGMA_DIR} 7zpp)
+endif()
 
 if(WIN32)
 	search_lib_recursive(DEPENDENCY_LUABIND_BINARY bin/${BINARY_PRAGMA_DIR} luabind)
@@ -349,11 +381,11 @@ search_lib_recursive(DEPENDENCY_VTFLIB_LIBRARY third_party_libs/vtflib/src/${BIN
 
 set(DEPENDENCY_LUAJIT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luajit/src CACHE PATH "Path to include directory.")
 if(WIN32)
-	search_lib_recursive(DEPENDENCY_LUAJIT_LIBRARY third_party_libs/luajit/src luajit STATIC ${CMAKE_CURRENT_LIST_DIR})
-	search_lib_recursive(DEPENDENCY_LUA_LIBRARY third_party_libs/luajit/src lua51 STATIC ${CMAKE_CURRENT_LIST_DIR})
+    search_lib_recursive(DEPENDENCY_LUAJIT_LIBRARY third_party_libs/luajit/src luajit STATIC ${CMAKE_CURRENT_LIST_DIR})
+    search_lib_recursive(DEPENDENCY_LUA_LIBRARY third_party_libs/luajit/src lua51 STATIC ${CMAKE_CURRENT_LIST_DIR})
 else()
-	search_lib_recursive(DEPENDENCY_LUAJIT_LIBRARY third_party_libs/luajit/src luajit DYNAMIC ${CMAKE_CURRENT_LIST_DIR})
-	search_lib_recursive(DEPENDENCY_LUA_LIBRARY third_party_libs/luajit/src luajit DYNAMIC ${CMAKE_CURRENT_LIST_DIR})
+    search_lib_recursive(DEPENDENCY_LUAJIT_LIBRARY third_party_libs/luajit/src luajit-p DYNAMIC ${CMAKE_CURRENT_LIST_DIR})
+    search_lib_recursive(DEPENDENCY_LUA_LIBRARY third_party_libs/luajit/src luajit-p DYNAMIC ${CMAKE_CURRENT_LIST_DIR})
 endif()
 
 set(DEPENDENCY_LIBSAMPLERATE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libsamplerate/src CACHE PATH "Path to include directory.")
@@ -477,7 +509,8 @@ if(UNIX)
 	resolve_links(DEPENDENCY_VTFLIB_LIBRARY)
 	resolve_links(DEPENDENCY_WGUI_LIBRARY)
 	resolve_links(DEPENDENCY_WMS_SHARED_LIBRARY)
-	resolve_links(DEPENDENCY_ZLIB_LIBRARY)
+        resolve_links(DEPENDENCY_ZLIB_LIBRARY)
+
 	#
 endif()
 set(BOOST_INCLUDEDIR ${DEPENDENCY_BOOST_INCLUDE} CACHE PATH "Path to include directory." FORCE)
@@ -536,6 +569,9 @@ message("Processing third-party libaries...")
 target_include_directories(libcurl PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 
 set(LIBRARY_OUTPUT_PATH "" CACHE PATH "" FORCE)
+
+
+
 
 # Assimp
 # set(ASSIMP_BUILD_TESTS OFF CACHE BOOL ".." FORCE)
@@ -653,9 +689,11 @@ target_include_directories(luabind PUBLIC ${LUA_INCLUDE_DIR})
 #
 
 # 7zip cpp
+if(WIN32)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
 register_third_party_library(7zpp)
 set(BUILD_SHARED_LIBS ON CACHE BOOL ".." FORCE)
+endif()
 
 # muparserx
 set(BUILD_EXAMPLES OFF CACHE BOOL OFF FORCE)
@@ -666,7 +704,9 @@ set_target_properties(muparserx PROPERTIES FOLDER third_party_libs/muparserx)
 #
 
 # clip2tri
-set(M_LIBRARY "" FORCE)
+#BUG: CMakeLists parser strips quotes making this effectively set(M_LIBRARY FORCE)
+#set(M_LIBRARY "" FORCE)
+unset(M_LIBRARY)
 register_third_party_library(clip2tri)
 set_target_properties(clip2tri PROPERTIES FOLDER third_party_libs/clip2tri)
 set_target_properties(clip2tri-static PROPERTIES FOLDER third_party_libs/clip2tri)
@@ -675,6 +715,7 @@ set_target_properties(clipper-static PROPERTIES FOLDER third_party_libs/clip2tri
 set_target_properties(poly2tri PROPERTIES FOLDER third_party_libs/clip2tri)
 set_target_properties(poly2tri-static PROPERTIES FOLDER third_party_libs/clip2tri)
 #
+#BUG: M_LIBRARY is not restored to previous value breaking anything using it.
 
 # eigen
 # register_third_party_library(eigen)
@@ -847,6 +888,7 @@ set_target_properties(Recast PROPERTIES FOLDER third_party_libs/recast)
 
 # freetype2
 register_third_party_library(freetype)
+
 set_target_properties(freetype PROPERTIES FOLDER third_party_libs)
 target_include_directories(freetype PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 #
@@ -856,6 +898,7 @@ if(WIN32)
 	include_external_msproject(hllib ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/sln/vs17/HLLib/HLLib.vcxproj)
 	set_target_properties(hllib PROPERTIES FOLDER third_party_libs)
 endif()
+#TODO - HLLib is compilable in linux via makefile. Can we use it?
 #
 
 # dependencies
@@ -866,6 +909,10 @@ add_dependencies(vorbis ogg)
 add_dependencies(util_pad zip)
 # add_dependencies(util_archive bsa)
 
+
+
+add_dependencies(util_image mathutil vfilesystem sharedutils png)
+add_dependencies(materialsystem datasystem util_image png VTFLib13 util_source2 util_udm)
 add_dependencies(mathutil sharedutils-static)
 add_dependencies(sharedutils mathutil)
 add_dependencies(vfilesystem sharedutils)
@@ -874,7 +921,7 @@ add_dependencies(luasystem vfilesystem luabind)
 add_dependencies(materialsystem datasystem util_image png VTFLib13 util_source2)
 add_dependencies(iglfw glfw)
 add_dependencies(iglfw vfilesystem)
-add_dependencies(prosper vfilesystem iglfw util_image muparserx)
+add_dependencies(prosper vfilesystem iglfw util_image util_udm muparserx lz4)
 
 add_dependencies(cmaterialsystem materialsystem util_image prosper VTFLib13)
 add_dependencies(wgui cmaterialsystem freetype util_formatted_text)
@@ -885,7 +932,9 @@ add_dependencies(servermanager networkmanager)
 add_dependencies(clientmanager networkmanager)
 add_dependencies(util_pad util_versioned_archive)
 
+if(WIN32)
 add_dependencies(util_zip 7zpp)
+endif()
 
 add_dependencies(shared materialsystem util_zip wms_shared util_pragma_doc luasystem networkmanager muparserx libz2 bzip2 clip2tri-static clipper-static poly2tri-static util_udm panima util_bsp util_smdmodel util_source_script rectangle_bin_pack Recast Detour util_pad noise-static noiseutils-static ogg vorbis vorbisfile)
 add_dependencies(ishared util_udm shared)
@@ -900,8 +949,8 @@ add_dependencies(pragma client server)
 set_property(TARGET pragma PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_PREFIX}")
 set_property(TARGET pragma_server PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_PREFIX}")
 
-set_property(TARGET pragma PROPERTY VS_DEBUGGER_COMMAND "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_PREFIX}/pragma.exe")
-set_property(TARGET pragma_server PROPERTY VS_DEBUGGER_COMMAND "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_PREFIX}/pragma_server.exe")
+set_property(TARGET pragma PROPERTY VS_DEBUGGER_COMMAND "${CMAKE_INSTALL_PREFIX}/pragma.exe")
+set_property(TARGET pragma_server PROPERTY VS_DEBUGGER_COMMAND "${CMAKE_INSTALL_PREFIX}/pragma_server.exe")
 
 set_property(TARGET pragma PROPERTY VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext -graphics_api vulkan")
 set_property(TARGET pragma_server PROPERTY VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext")
@@ -913,22 +962,43 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT p
 if(WIN32)
 	set(BINARY_OUTPUT_DIR "bin")
 else()
-	set(BINARY_OUTPUT_DIR "lib")
+        set(BINARY_OUTPUT_DIR "lib")
 endif()
 
+#variable_watch(PRAGMA_INSTALL_COMPONENT)
+#variable_watch(PRAGMA_INSTALL_COMPONENT_FULL)
 set(PRAGMA_INSTALL_COMPONENT "pragma")
 set(PRAGMA_INSTALL_COMPONENT_FULL "pragma-full")
 function(pragma_install TARGET_NAME DESTINATION_PATH)
-	install(
-		TARGETS ${TARGET_NAME}
-		RUNTIME DESTINATION "./${DESTINATION_PATH}"
-		COMPONENT ${PRAGMA_INSTALL_COMPONENT}
-	)
+    #TODO: Depending if target is library or executable we should change type of target install
+    #Win32: all runtime
+    #otherwise: pragma and pragma_server runtime, otherwise library
+    set(TARGET_INSTALL_TYPE "")
+    if(WIN32)
+        set(TARGET_INSTALL_TYPE "RUNTIME")
+    else()
+        get_target_property(TARGET_TYPE ${TARGET_NAME} TYPE)
+        if (TARGET_TYPE STREQUAL "EXECUTABLE")
+            set(TARGET_INSTALL_TYPE "RUNTIME")
+          # Process executable target
+          elseif(TARGET_TYPE STREQUAL "SHARED_LIBRARY")
+              set(TARGET_INSTALL_TYPE "LIBRARY")
+          else()
+              #this is not usable to us. bail.
+              return()
+        endif ()
+    endif()
+        install(
+                TARGETS ${TARGET_NAME} ${TARGET_INSTALL_TYPE}
+                DESTINATION "${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}"
+                COMPONENT ${PRAGMA_INSTALL_COMPONENT}
+        )
 endfunction(pragma_install)
 
 pragma_install(pragma "")
 pragma_install(pragma_server "")
 pragma_install(alsoundsystem "${BINARY_OUTPUT_DIR}")
+
 pragma_install(client "${BINARY_OUTPUT_DIR}")
 pragma_install(cmaterialsystem "${BINARY_OUTPUT_DIR}")
 pragma_install(datasystem "${BINARY_OUTPUT_DIR}")
@@ -968,57 +1038,117 @@ add_custom_target(pragma-install-full
 )
 
 function(pragma_install_lib_c INPUT_LIBRARY_FILENAME LIB_NAME DESTINATION_PATH)
-	get_filename_component(INPUT_LIBRARY_PATH "${INPUT_LIBRARY_FILENAME}" DIRECTORY)
-	if(WIN32)
-		set(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH}/${LIB_NAME}.dll")
-	else()
-		set(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH}/${LIB_NAME}.so")
-	endif()
+    set(LIB_FILES_TO_COPY "") #Four unix systems
+        get_filename_component(INPUT_LIBRARY_PATH "${INPUT_LIBRARY_FILENAME}" DIRECTORY REALPATH)
+        if(WIN32)
+                set(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH}/${LIB_NAME}.dll")
+        else()
+                set(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH}/lib${LIB_NAME}.so")
+        endif()
+
+
+
 	set(IS_OPTIONAL 0)
 	if(${ARGC} GREATER 3)
 		if(${ARGN} STREQUAL "OPTIONAL")
 			set(IS_OPTIONAL 1)
 		endif()
-	endif()
+        endif()
+        if(UNIX)
+            #linux: resolve symlinks and copy those instead.
+            get_filename_component(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH_BIN}" REALPATH)
+
+        endif()
 	# if((IS_OPTIONAL EQUAL 0) OR (EXISTS "${INPUT_LIBRARY_PATH_BIN}"))
 	if(EXISTS "${INPUT_LIBRARY_PATH_BIN}")
 		add_custom_command(TARGET pragma-install POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 				${INPUT_LIBRARY_PATH_BIN}
-				${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}
+                                ${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}/
 		)
 	endif()
 endfunction(pragma_install_lib_c)
 
+
 function(pragma_install_lib INPUT_LIBRARY_PATH DESTINATION_PATH)
-	string(REGEX REPLACE "\\.[^.]*$" "" INPUT_LIBRARY_PATH_NO_EXT ${INPUT_LIBRARY_PATH})
-	if(WIN32)
-		set(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH_NO_EXT}.dll")
-	else()
-		set(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH_NO_EXT}.so")
-	endif()
+
+
+    set(LIB_FILES_TO_COPY "") #Four unix systems
+    if(WIN32)
+                string(REGEX REPLACE "\\.[^.]*$" "" INPUT_LIBRARY_PATH_NO_EXT ${INPUT_LIBRARY_PATH})
+
+            set(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH_NO_EXT}.dll")
+        else()
+                    set(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH}")
+            endif()
+
+
+
 	set(IS_OPTIONAL 0)
 	if(${ARGC} GREATER 2)
 		if(${ARGN} STREQUAL "OPTIONAL")
 			set(IS_OPTIONAL 1)
 		endif()
-	endif()
-	#if((IS_OPTIONAL EQUAL 0) OR (EXISTS "${INPUT_LIBRARY_PATH_BIN}"))
+        endif()
+
+        if(UNIX)
+            #Part one: bail if we're trying to install static library
+            cmake_path(GET INPUT_LIBRARY_PATH_BIN EXTENSION LIB_EXTENSION)
+            if(LIB_EXTENSION STREQUAL ".a")
+                return()
+            endif()
+
+            #Part two: resolve symlinks.
+            get_filename_component(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH_BIN}" REALPATH)
+            #Part three: check for symlinks and add those to a list. (Ensure that we're not copying original element twice.)
+            #find -L $(pwd) -samefile libbz2.so.1
+            cmake_path(GET INPUT_LIBRARY_PATH_BIN PARENT_PATH INPUT_LIB_DIR)
+
+            execute_process(
+                    COMMAND find -L "${INPUT_LIB_DIR}" -samefile "${INPUT_LIBRARY_PATH_BIN}"
+                    WORKING_DIRECTORY "${INPUT_LIB_DIR}"
+                    OUTPUT_VARIABLE LINKS_RESULT
+            )
+
+            unset(INPUT_LIBRARY_PATH_BIN) #Safe to unset now.
+            string(REPLACE "\n" ";" LIB_FILES_TO_COPY "${LINKS_RESULT}")
+
+            string(LENGTH "${LIB_FILES_TO_COPY}" _STR_LEN)
+            math(EXPR _STR_LEN "${_STR_LEN}-1")
+            string(SUBSTRING "${LIB_FILES_TO_COPY}" 0 ${_STR_LEN} LIB_FILES_TO_COPY)
+            #TODO: Wrap code below this into a loop.
+        endif()
+        #if((IS_OPTIONAL EQUAL 0) OR (EXISTS "${INPUT_LIBRARY_PATH_BIN}")LIB_FILES_TO_COPY)
 	if(EXISTS "${INPUT_LIBRARY_PATH_BIN}")
 		add_custom_command(TARGET pragma-install POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 				${INPUT_LIBRARY_PATH_BIN}
-				${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}
+                                ${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}
 		)
-	endif()
+        endif()
+
+        if(LIB_FILES_TO_COPY)
+            if(NOT UNIX)
+                return()
+            endif()
+            foreach(FILE_TO_COPY IN LISTS LIB_FILES_TO_COPY)
+                add_custom_command(TARGET pragma-install POST_BUILD
+                        COMMAND cp -a -u
+                                ${FILE_TO_COPY}
+                                ${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}
+                )
+            endforeach()
+        endif()
 endfunction(pragma_install_lib)
 
 function(pragma_install_create_directory DIR_NAME)
 	add_custom_command(TARGET pragma-install POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E make_directory
-			${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_PREFIX}/${DIR_NAME}
+                        ${CMAKE_INSTALL_PREFIX}/${DIR_NAME}
 	)
 endfunction(pragma_install_create_directory)
+
+
 
 pragma_install_create_directory(modules)
 # pragma_install_lib("${DEPENDENCY_ASSIMP_LIBRARY}" "${BINARY_OUTPUT_DIR}")
@@ -1035,23 +1165,33 @@ pragma_install_lib("${DEPENDENCY_LIBVORBISFILE_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_VTFLIB_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_LIBZIP_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_LPNG_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-
+if(WIN32)
 pragma_install_lib_c("${DEPENDENCY_ZLIB_LIBRARY}" zlib1 "${BINARY_OUTPUT_DIR}")
+else()
+    pragma_install_lib("${DEPENDENCY_ZLIB_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+endif()
 
 if(WIN32)
-	set(OS_LIB_BIN_EXT ".dll")
-	set(OS_LIB_SHARED_EXT ".lib")
-	set(OS_EXE_EXT ".exe")
+    set(OS_LIB_BIN_EXT ".dll")
+    set(OS_LIB_BIN_PRE "")
+    set(OS_LIB_SHARED_EXT ".lib")
+    set(OS_EXE_EXT ".exe")
 else()
-	set(OS_LIB_BIN_EXT ".so")
-	set(OS_LIB_SHARED_EXT ".so")
-	set(OS_EXE_EXT "")
+    set(OS_LIB_BIN_EXT ".so")
+    set(OS_LIB_BIN_PRE "lib")
+    set(OS_LIB_SHARED_EXT ".so")
+    set(OS_EXE_EXT "")
+endif()
+if(is_multi_config)
+    set(PR_MODULE_INSTALL_SUBDIR "${CONFIG_BUILD_TYPE}")
+else()
+    set(PR_MODULE_INSTALL_SUBDIR "")
 endif()
 
 function(pragma_install_file FILE_PATH INSTALL_PATH)
 	set(extra_macro_args ${ARGN})
 	INSTALL(
-		FILES "${FILE_PATH}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_PREFIX}/${INSTALL_PATH}"
+                FILES "${FILE_PATH}" DESTINATION "${CMAKE_INSTALL_PREFIX}/${INSTALL_PATH}"
 		COMPONENT ${PRAGMA_INSTALL_COMPONENT} ${extra_macro_args}
 	)
 endfunction(pragma_install_file)
@@ -1059,7 +1199,7 @@ endfunction(pragma_install_file)
 function(pragma_install_directory FILE_PATH INSTALL_PATH)
 	set(extra_macro_args ${ARGN})
 	INSTALL(
-		DIRECTORY "${FILE_PATH}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_PREFIX}/${INSTALL_PATH}"
+                DIRECTORY "${FILE_PATH}" DESTINATION "${CMAKE_INSTALL_PREFIX}/${INSTALL_PATH}"
 		COMPONENT ${PRAGMA_INSTALL_COMPONENT} ${extra_macro_args}
 	)
 endfunction(pragma_install_directory)
@@ -1067,11 +1207,11 @@ endfunction(pragma_install_directory)
 # Modules
 file(GLOB PR_MODULES "modules/pr_*")
 foreach(MODULE_PATH ${PR_MODULES})
-	get_filename_component(MODULE_NAME "${MODULE_PATH}" NAME)
+        get_filename_component(MODULE_NAME "${MODULE_PATH}" NAME)
 	if(WIN32)
-		set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${CONFIG_BUILD_TYPE}/${MODULE_NAME}.dll")
+                set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/${MODULE_NAME}.dll")
 	else()
-		set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${CONFIG_BUILD_TYPE}/${MODULE_NAME}.so")
+                set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/${MODULE_NAME}.so")
 	endif()
 	if(EXISTS "${MODULE_PATH}/CMakeInstall.txt")
 		include("${MODULE_PATH}/CMakeInstall.txt" OPTIONAL)
@@ -1079,7 +1219,7 @@ foreach(MODULE_PATH ${PR_MODULES})
 		# Default behavior
 		if(EXISTS "${PR_MODULE_PATH_WITH_EXT}")
 			INSTALL(
-				FILES "${PR_MODULE_PATH_WITH_EXT}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_PREFIX}/modules/"
+                                FILES "${PR_MODULE_PATH_WITH_EXT}" DESTINATION "${CMAKE_INSTALL_PREFIX}/modules/"
 				COMPONENT ${PRAGMA_INSTALL_COMPONENT}
 			)
 		endif()
@@ -1097,7 +1237,7 @@ endforeach()
 
 # Install assets
 INSTALL(
-	DIRECTORY assets/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_PREFIX}
+        DIRECTORY assets/ DESTINATION ${CMAKE_INSTALL_PREFIX}
 	COMPONENT ${PRAGMA_INSTALL_COMPONENT_FULL}
 )
 

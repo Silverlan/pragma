@@ -236,7 +236,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		memberInfoPos.type = ents::EntityMemberType::Vector3;
 		memberInfoPos.userIndex = bone->ID;
 		memberInfoPos.SetGetterFunction<BaseAnimatedComponent,Vector3,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,Vector3&)>(
-			[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,Vector3 &outValue) {
+            +[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,Vector3 &outValue) {
 			auto *pos = component.GetBonePosition(memberInfo.userIndex);
 			if(!pos)
 			{
@@ -246,7 +246,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 			outValue = *pos;
 		})>();
 		memberInfoPos.SetSetterFunction<BaseAnimatedComponent,Vector3,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,const Vector3&)>(
-			[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,const Vector3 &value) {
+            +[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,const Vector3 &value) {
 			component.SetBonePosition(memberInfo.userIndex,value);
 		})>();
 
@@ -254,7 +254,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		memberInfoRot.SetName("bone/" +lname +"/rotation");
 		memberInfoRot.type = ents::EntityMemberType::Quaternion;
 		memberInfoRot.SetGetterFunction<BaseAnimatedComponent,Quat,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,Quat&)>(
-			[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,Quat &outValue) {
+            +[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,Quat &outValue) {
 			auto *rot = component.GetBoneRotation(memberInfo.userIndex);
 			if(!rot)
 			{
@@ -264,14 +264,14 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 			outValue = *rot;
 		})>();
 		memberInfoRot.SetSetterFunction<BaseAnimatedComponent,Quat,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,const Quat&)>(
-			[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,const Quat &value) {
+            +[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,const Quat &value) {
 			component.SetBoneRotation(memberInfo.userIndex,value);
 		})>();
 
 		auto memberInfoScale = memberInfoPos;
 		memberInfoScale.SetName("bone/" +lname +"/scale");
 		memberInfoScale.SetGetterFunction<BaseAnimatedComponent,Vector3,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,Vector3&)>(
-			[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,Vector3 &outValue) {
+            +[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,Vector3 &outValue) {
 			auto *scale = component.GetBoneScale(memberInfo.userIndex);
 			if(!scale)
 			{
@@ -281,7 +281,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 			outValue = *scale;
 		})>();
 		memberInfoScale.SetSetterFunction<BaseAnimatedComponent,Vector3,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,const Vector3&)>(
-			[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,const Vector3 &value) {
+            +[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,const Vector3 &value) {
 			component.SetBoneScale(memberInfo.userIndex,value);
 		})>();
 

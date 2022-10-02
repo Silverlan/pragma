@@ -45,7 +45,7 @@ std::vector<T> luabind::default_converter<std::vector<T>>::to_cpp(lua_State* L, 
 
 template<typename T>
 template <class U>
-static int luabind::default_converter<std::vector<T>>::match(lua_State *l, U u, int index)
+int luabind::default_converter<std::vector<T>>::match(lua_State *l, U u, int index)
 {
 	return lua_istable(l,index) ? 0 : no_match;
 }

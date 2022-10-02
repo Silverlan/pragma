@@ -4,7 +4,7 @@
  *
  * Copyright (c) 2021 Silverlan
  */
-
+#ifdef _MSC_VER
 #include "stdafx_shared.h"
 #include "pragma/lua/lad/doc_validator.hpp"
 
@@ -93,3 +93,4 @@ void DocValidator::GetClassInfo(lua_State *L,luabind::detail::class_rep * crep)
 		}
 	}
 }
+#endif

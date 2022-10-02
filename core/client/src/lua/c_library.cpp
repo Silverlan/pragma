@@ -1423,7 +1423,14 @@ void CGame::RegisterLuaLibraries()
 			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const std::string&,const DebugRenderInfo&)>(&Lua::DebugRenderer::Client::DrawText)
 		),
 		luabind::def("draw_path",&Lua::DebugRenderer::Client::DrawPath),
-		luabind::def("draw_spline",&Lua::DebugRenderer::Client::DrawSpline,luabind::default_parameter_policy<4,1.f>{}),
+#ifdef __clang__
+        luabind::def("draw_spline",&Lua::DebugRenderer::Client::DrawSpline),
+        luabind::def("draw_spline",+[](const std::vector<Vector3> &path,uint32_t numSegments,const DebugRenderInfo &renderInfo){
+            return Lua::DebugRenderer::Client::DrawSpline(path,numSegments,renderInfo,1.f);
+        }),
+#else
+        luabind::def("draw_spline",&Lua::DebugRenderer::Client::DrawSpline,luabind::default_parameter_policy<4,1.f>{}),
+#endif
 		luabind::def("draw_plane",
 			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const umath::Plane&,const DebugRenderInfo&)>(&Lua::DebugRenderer::Client::DrawPlane)
 		),

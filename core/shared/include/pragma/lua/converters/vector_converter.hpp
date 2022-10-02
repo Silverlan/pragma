@@ -54,8 +54,8 @@ namespace luabind {
 	struct map_converter
 		: native_converter_base<TMap>
 	{
-		using T0 = TMap::key_type;
-		using T1 = TMap::value_type::second_type;
+        using T0 = typename TMap::key_type;
+        using T1 = typename TMap::value_type::second_type;
 		enum { consumed_args = 1 };
 
 		template <typename U>

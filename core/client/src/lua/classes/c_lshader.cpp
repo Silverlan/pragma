@@ -170,7 +170,7 @@ void Lua::Shader::RecordPushConstants(lua_State *l,prosper::Shader &shader,prosp
 	pcb.PushCommand(
 		[&shader,offset,type](const prosper::util::PreparedCommandBufferRecordState &recordState) mutable -> bool {
 			return udm::visit_ng(type,[&recordState,&shader,offset](auto tag) {
-				using T = decltype(tag)::type;
+                using T = typename decltype(tag)::type;
 				auto value = recordState.GetArgument<T>(0);
 				return shader.RecordPushConstants(*recordState.shaderBindState,sizeof(value),&value,offset);
 			});

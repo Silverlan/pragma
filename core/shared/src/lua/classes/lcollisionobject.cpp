@@ -14,6 +14,8 @@
 #include "pragma/lua/classes/ldef_quaternion.h"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 
+#include "pragma/lua/ostream_operator_alias.hpp"
+
 extern DLLNETWORK Engine *engine;
 
 namespace Lua
@@ -193,6 +195,13 @@ namespace Lua
 		static void NodeIndexToMeshVertexIndex(lua_State *l,pragma::physics::ISoftBody * &hPhys,uint32_t nodeIndex);
 	};
 };
+
+
+
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::physics,ICollisionObject);
+
+
 
 void Lua::PhysCollisionObj::register_class(lua_State *l,luabind::module_ &mod)
 {

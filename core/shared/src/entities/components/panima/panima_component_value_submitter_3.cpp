@@ -14,7 +14,7 @@
 void __panima_cvs_3()
 {
 	udm::visit_ng({},[](auto tag) {
-		using TChannel = decltype(tag)::type;
+        using TChannel = typename decltype(tag)::type;
 		if constexpr(udm::is_matrix_type<TChannel>)
 			instantiate_get_member_channel_submitter<TChannel>();
 	});

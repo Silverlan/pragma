@@ -11,7 +11,7 @@
 #include "pragma/clientstate/clientstate.h"
 #include <wgui/wibase.h>
 #include <pragma/lua/ldefinitions.h>
-class ::WIBase;
+class WIBase;
 class WIShape;
 class WITexturedShape;
 class WIText;

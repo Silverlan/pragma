@@ -26,6 +26,9 @@
 #include "pragma/ai/ai_task_wait.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
+
+#include <pragma/lua/ostream_operator_alias.hpp>
+
 extern DLLSERVER SGame *s_game;
 
 namespace Lua
@@ -227,6 +230,9 @@ inline std::ostream &operator<<(std::ostream &s,const Lua::ai::TaskWrapper &task
 	task->DebugPrint(nullptr,ss);
 	return s<<ss.str();
 }
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(Lua::ai,TaskWrapper);
+
 void Lua::AIBehaviorNode::register_class(lua_State *l,luabind::module_ &mod)
 {
 	auto classDef = luabind::class_<ai::TaskWrapper>("BehaviorTask");

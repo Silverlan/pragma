@@ -18,7 +18,9 @@ IKController::IKController(const IKController &other)
 	m_chainLength{other.m_chainLength},m_method{other.m_method},
 	m_keyValues{other.m_keyValues}
 {
+#ifdef _MSC_VER
 	static_assert(sizeof(IKController) == 152,"Update this function when making changes to this class!");
+#endif
 }
 const std::string &IKController::GetEffectorName() const {return m_effectorName;}
 uint32_t IKController::GetChainLength() const {return m_chainLength;}
@@ -36,6 +38,8 @@ std::unordered_map<std::string,std::string> &IKController::GetKeyValues() {retur
 
 bool IKController::operator==(const IKController &other) const
 {
+#ifdef _MSC_VER
 	static_assert(sizeof(IKController) == 152,"Update this function when making changes to this class!");
+#endif
 	return m_effectorName == other.m_effectorName && m_type == other.m_type && m_chainLength == other.m_chainLength && m_method == other.m_method && m_keyValues == other.m_keyValues;
 }

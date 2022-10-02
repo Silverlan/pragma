@@ -66,7 +66,7 @@ LUA_DEFINE_PTR_TYPE(util,util::WeakHandle,weak_handle);
 		{ \
 			using is_native = std::false_type; \
 			template <class U> \
-			int match(lua_State* L, U, int index) \
+            int match(lua_State* L, U, int index) \
 			{ \
 				return default_converter<T*>::match(L, decorate_type_t<T*>(), index); \
 			} \
@@ -82,7 +82,7 @@ LUA_DEFINE_PTR_TYPE(util,util::WeakHandle,weak_handle);
 						return TClass<T>(); \
 					} else { \
 						auto h = raw_ptr->GetHandle(); \
-						return util::CastFunc<decltype(h)::value_type,T>(h); \
+                        return util::CastFunc<typename decltype(h)::value_type,T>(h); \
 					} \
 				} \
 			} \

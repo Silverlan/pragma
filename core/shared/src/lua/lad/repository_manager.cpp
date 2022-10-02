@@ -4,7 +4,7 @@
  *
  * Copyright (c) 2021 Silverlan
  */
-
+#ifdef _MSC_VER
 #include "stdafx_shared.h"
 #include "pragma/lua/lad/repository_manager.hpp"
 #include <sharedutils/util_library.hpp>
@@ -123,3 +123,4 @@ bool RepositoryManager::LoadRepositoryReferences(std::string &outErr)
 	}
 	return true;
 }
+#endif

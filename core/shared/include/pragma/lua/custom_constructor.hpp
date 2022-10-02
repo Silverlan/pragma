@@ -18,7 +18,7 @@ namespace pragma::lua
 	static void custom_constructor(luabind::argument const &self_, TArgs... args)
 	{
 		luabind::detail::object_rep* self = luabind::touserdata<luabind::detail::object_rep>(self_);
-		using TResult = decltype(std::function{TCnstrct})::result_type;
+        using TResult = typename decltype(std::function{TCnstrct})::result_type;
 		if constexpr(!util::is_specialization<TResult,std::shared_ptr>::value)
 		{
 			using holder_type = luabind::detail::value_holder<TResult>;

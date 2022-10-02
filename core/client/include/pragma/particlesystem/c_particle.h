@@ -125,12 +125,12 @@ public:
 	// Generates a random int, but gurantees to always return the same int for a specific particle and a specific seed
 	template<typename T,typename = std::enable_if_t<std::is_integral<T>::value>>
 		T PseudoRandomInt(T min,T max,uint32_t seed=0u) const;
-	template<typename T,typename = std::enable_if_t<std::is_integral<T>::value>>
+    template<typename T>
 		T PseudoRandomInt(const std::uniform_int_distribution<T> &dis,uint32_t seed=0u) const;
 	// Generates a random real, but gurantees to always return the same real for a specific particle and a specific seed
 	template<typename T,typename = std::enable_if_t<std::is_floating_point<T>::value>>
 		T PseudoRandomReal(T min,T max,uint32_t seed=0u) const;
-	template<typename T,typename = std::enable_if_t<std::is_floating_point<T>::value>>
+    template<typename T>
 		T PseudoRandomReal(const std::uniform_real_distribution<T> &dis,uint32_t seed=0u) const;
 
 	template<typename T,typename = std::enable_if_t<std::is_floating_point<T>::value>>
@@ -176,8 +176,8 @@ private:
 };
 #pragma warning(pop)
 
-template<typename T,typename = std::enable_if_t<std::is_integral<T>::value>>
-	T CParticle::PseudoRandomInt(const std::uniform_int_distribution<T> &dis,uint32_t seed) const
+template<typename T>
+    T CParticle::PseudoRandomInt(const std::uniform_int_distribution<T> &dis,uint32_t seed) const
 {
 	m_mt.seed(m_seed +seed);
 	return const_cast<std::uniform_int_distribution<T>&>(dis)(m_mt);
@@ -189,7 +189,7 @@ template<typename T,typename>
 	return PseudoRandomInt(std::uniform_int_distribution<T>(min,max),seed);
 }
 
-template<typename T,typename = std::enable_if_t<std::is_floating_point<T>::value>>
+template<typename T>
 	T CParticle::PseudoRandomReal(const std::uniform_real_distribution<T> &dis,uint32_t seed) const
 {
 	m_mt.seed(m_seed +seed);

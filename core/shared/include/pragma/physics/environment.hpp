@@ -18,7 +18,7 @@
 #include <pragma/math/vector/wvvector3.h>
 #include <vector>
 #include <unordered_map>
-#ifdef __linux__
+#if 0
 #include <BulletSoftBody/btSoftBody.h>
 #include <BulletSoftBody/btSoftBodySolvers.h>
 #endif
@@ -226,7 +226,7 @@ namespace pragma::physics
 		virtual RemainingDeltaTime DoStepSimulation(float timeStep,int maxSubSteps=1,float fixedTimeStep=(1.f /60.f))=0;
 		virtual void UpdateSurfaceTypes()=0;
 
-		std::unique_ptr<pragma::physics::IVisualDebugger> m_visualDebugger = nullptr;
+        std::unique_ptr<pragma::physics::IVisualDebugger> m_visualDebugger;
 	private:
 		NetworkState &m_nwState;
 		StateFlags m_stateFlags = StateFlags::SurfacesDirty;

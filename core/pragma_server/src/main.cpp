@@ -92,7 +92,7 @@ int main(int argc,char* argv[]) try
 		std::string path = "lib/";
 		path += library;
 		std::replace(path.begin(),path.end(),'\\','/');
-		void *hEngine = dlopen(path.c_str(),RTLD_LAZY);
+       void *hEngine = dlopen(path.c_str(),RTLD_LAZY);
 		if(hEngine == nullptr)
 		{
 			char *err = dlerror();
@@ -101,7 +101,7 @@ int main(int argc,char* argv[]) try
 			return EXIT_FAILURE;
 		}
 #ifdef LINUX_THREAD_TEST
-		std::thread t([]() {std::cout<<"Linux Thread Test";});
+        //std::thread t([]() {std::cout<<"Linux Thread Test";});
 #endif
 		void(*runEngine)(int,char*[]) = (void(*)(int,char*[]))dlsym(hEngine,"RunEngine");
 		if(runEngine != nullptr)
@@ -112,10 +112,15 @@ int main(int argc,char* argv[]) try
 #endif
 	return 0;
 }
-catch (...) {
+catch(const std::exception& e) //it would not work if you pass by value
+{
+        std::cout << e.what();
+
 	// Note: Calling std::current_exception in a std::set_terminate handler will return NULL due to a bug in the VS libraries.
 	// Catching all unhandled exceptions here and then calling the handler works around that issue.
-	std::get_terminate()();
+
+    std::get_terminate()();
+
 }
 
 #ifdef _WIN32

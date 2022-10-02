@@ -27,7 +27,6 @@
 #include "pragma/lua/classes/lmodel.h"
 #include "pragma/model/model.h"
 #include "luasystem.h"
-#include "pragma/game/gamemode/gamemode.h"
 #include "pragma/physics/shape.hpp"
 #include "pragma/physics/collision_object.hpp"
 #include "pragma/lua/libraries/lnoise.h"
@@ -63,6 +62,7 @@
 #include "pragma/lua/custom_constructor.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
 #include "pragma/lua/converters/alias_converter_t.hpp"
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include "pragma/lua/converters/thread_pool_converter_t.hpp"
 #include "pragma/lua/classes/thread_pool.hpp"
 #include <pragma/util/transform.h>
@@ -212,11 +212,73 @@ template<typename T>
 {
 	pragma::lua::define_custom_constructor<T,[](const std::string &str) -> T {
 		T r;
-		using ValueType = decltype(r)::value_type;
+        using ValueType = typename decltype(r)::value_type;
 		ustring::string_to_array<ValueType,Double>(str,reinterpret_cast<ValueType*>(&r[0]),atof,decltype(r)::length());
 		return r;
 	},const std::string&>(l);
 }
+
+
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util,BaseParallelJob);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util,Path);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util,Version);
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(uimg,ImageBuffer);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(uimg,ImageLayerSet);
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath,Transform);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath,ScaledTransform);
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm,Vector3i);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm,Vector4i);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm,Vector2);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm,Vector3);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm,Vector4);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm,Quat);
+
+/* namespace panima
+{
+std::ostream &operator<<(std::ostream &out,const panima::Bone &o)
+{
+    return ::operator<<(out,o);
+}
+}; */
+
+
+#undef DEFINE_OSTEAM_OPERATOR_NAMESPACE_ALIAS
+
+
+namespace glm
+{
+std::ostream &operator<<(std::ostream &out,Vector3 &o)
+{
+    return ::operator<<(out,o);
+}
+std::ostream &operator<<(std::ostream &out,Vector4 &o)
+{
+    return ::operator<<(out,o);
+}
+
+#define DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(type) \
+    std::ostream &operator<<(std::ostream &out,const Mat##type &o) \
+{\
+    return ::operator<<(out,o);\
+}\
+
+
+DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(2x2)
+DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(2x3)
+DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(2x4)
+DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(3x2)
+DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(3x3)
+DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(3x4)
+DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(4x2)
+DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(4x3)
+DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(4x4)
+
+
+};
 
 void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 {

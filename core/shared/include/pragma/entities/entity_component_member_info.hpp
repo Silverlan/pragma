@@ -35,7 +35,11 @@ namespace pragma
 			NameToEnumFunction nameToEnum;
 			EnumToNameFunction enumToName;
 			EnumValueGetFunction getValues;
-		};
+            EnumConverter() = default;
+            EnumConverter(NameToEnumFunction nameToEnum,EnumToNameFunction enumToName,EnumValueGetFunction getValues)
+                : nameToEnum(std::move(nameToEnum)), enumToName(std::move(enumToName)), getValues(std::move(getValues))
+            {}
+        };
 		using ApplyFunction = void(*)(const ComponentMemberInfo&,BaseEntityComponent&,const void*);
 		using GetFunction = void(*)(const ComponentMemberInfo&,BaseEntityComponent&,void*);
 		using InterpolationFunction = void(*)(const void*,const void*,double,void*);
@@ -100,6 +104,16 @@ namespace pragma
 				*static_cast<T*>(value) = (static_cast<TComponent&>(component).*TGetter)();
 			};
 		}
+
+#if defined(__GNUC__) && !defined(__clang__)
+        template<typename TComponent,typename T,bool(TComponent::*TGetter)() const>
+        void SetGetterFunction()
+        {
+            getterFunction = [](const ComponentMemberInfo &memberInfo,BaseEntityComponent &component,void *value) {
+                *static_cast<T*>(value) = (static_cast<TComponent&>(component).*TGetter)();
+            };
+        }
+#endif
 
 		template<typename TComponent,typename T,void(*TInterp)(const T&,const T&,double,T&)>
 		void SetInterpolationFunction()

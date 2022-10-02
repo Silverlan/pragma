@@ -63,31 +63,33 @@
 
 const pragma::IServerState &Engine::GetServerStateInterface() const
 {
-	if(m_libServer == nullptr)
-	{
-		auto path = util::Path::CreatePath(util::get_program_path());
+    if(m_libServer == nullptr)
+    {
+        auto path = util::Path::CreatePath(util::get_program_path());
 #ifdef _WIN32
-		path += "bin/";
+        path += "bin/";
+        path += "server";
 #else
-		path += "lib/";
+        path += "lib/";
+        path += "libserver";
 #endif
-		auto modPath = (path +"server").GetString();
-		std::string err;
-		m_libServer = util::Library::Load(modPath,{},&err);
-		if(m_libServer == nullptr)
-		{
-			throw std::logic_error{"Unable to load module '" +modPath +"': " +err};
-			exit(EXIT_FAILURE);
-		}
+        auto modPath = path.GetString();
+        std::string err;
+        m_libServer = util::Library::Load(modPath,{},&err);
+        if(m_libServer == nullptr)
+        {
+            throw std::logic_error{"Unable to load module '" +modPath +"': " +err};
+            exit(EXIT_FAILURE);
+        }
 
-		m_iServerState.Initialize(*m_libServer);
-		if(m_iServerState.valid() == false)
-		{
-			throw std::logic_error{"Unresolved server state functions!"};
-			exit(EXIT_FAILURE);
-		}
-	}
-	return m_iServerState;
+        m_iServerState.Initialize(*m_libServer);
+        if(m_iServerState.valid() == false)
+        {
+            throw std::logic_error{"Unresolved server state functions!"};
+            exit(EXIT_FAILURE);
+        }
+    }
+    return m_iServerState;
 }
 
 decltype(Engine::DEFAULT_TICK_RATE) Engine::DEFAULT_TICK_RATE = ENGINE_DEFAULT_TICK_RATE;
@@ -128,8 +130,10 @@ Engine::Engine(int,char*[])
 	debug::open_domain();
 #endif
 	Locale::Init();
-	OpenConsole();
-	freopen("CON","w",stdout); // Redirect fprint, etc.
+    OpenConsole();
+#ifdef _WIN32
+            freopen("CON","w",stdout); // Redirect fprint, etc.
+        #endif
 
 	m_mainThreadId = std::this_thread::get_id();
 	
@@ -659,7 +663,7 @@ bool Engine::Initialize(int argc,char *argv[])
 		ClearCache();
 	}
 	
-	ServerState *server = OpenServerState();
+    ServerState *server = OpenServerState();
 	if(server != nullptr && IsServerOnly())
 		LoadConfig();
 

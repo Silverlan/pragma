@@ -58,6 +58,9 @@ namespace pragma
 		struct AmbientOcclusionInfo
 		{
 			// These values are a good compromise between quality and render time
+            //haha very funny clang
+            AmbientOcclusionInfo() {};
+            AmbientOcclusionInfo(uint32_t width,uint32_t height,uint32_t samples,bool rebuild) : width(width), height(height),samples(samples),rebuild(rebuild) {};
 			uint32_t width = 512;
 			uint32_t height = 512;
 			uint32_t samples = 512;

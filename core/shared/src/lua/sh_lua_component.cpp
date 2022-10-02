@@ -21,6 +21,7 @@
 #include "pragma/lua/sh_lua_component_t.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/lua/converters/vector_converter_t.hpp"
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include "pragma/lua/lua_util_component.hpp"
 #include "pragma/lua/types/udm.hpp"
 #include <sharedutils/scope_guard.h>
@@ -216,7 +217,7 @@ std::optional<ComponentMemberInfo> pragma::lua::get_component_member_info(
 			Lua::Pop(l,1);
 		}
 		auto vs = [&tmpMemberName,&functionName,&onChange,memberType,dynamicMember](auto tag) -> pragma::ComponentMemberInfo {
-			using T = decltype(tag)::type;
+            using T = typename decltype(tag)::type;
 			if constexpr(pragma::is_valid_component_property_type_v<T>)
 			{
 				if(dynamicMember)
@@ -385,7 +386,7 @@ std::optional<ComponentMemberInfo> pragma::lua::get_component_member_info(
 	if(pragma::ents::is_udm_member_type(memberType))
 	{
 		udm::visit(pragma::ents::member_type_to_udm_type(memberType),[&componentMemberInfo,&initialValue](auto tag) {
-			using T = decltype(tag)::type;
+            using T = typename decltype(tag)::type;
 			if constexpr(is_valid_component_property_type_v<T>)
 				componentMemberInfo->SetDefault<T>(std::any_cast<T>(initialValue));
 		});
@@ -817,7 +818,7 @@ void BaseLuaBaseEntityComponent::OnMemberRegistered(const ComponentMemberInfo &m
 		auto &dynMember = m_dynamicMembers[index];
 		dynMember.enabled = true;
 		udm::visit(pragma::ents::member_type_to_udm_type(memberInfo.type),[&memberInfo,&dynMember](auto tag) {
-			using T = decltype(tag)::type;
+            using T = typename decltype(tag)::type;
 			if constexpr(is_valid_component_property_type_v<T>)
 			{
 				T def;
@@ -1521,6 +1522,10 @@ pragma::BaseLuaBaseEntityComponent::MemberFlags pragma::lua::string_to_member_fl
 	flags &= ~flagsRem;
 	return flags;
 }
+
+
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma,BaseEntityComponent);
 
 void Lua::register_base_entity_component(luabind::module_ &modEnts)
 {

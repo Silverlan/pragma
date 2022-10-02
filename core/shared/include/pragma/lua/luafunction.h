@@ -12,7 +12,7 @@
 #include <memory>
 #include <string>
 
-namespace luabind{class object;}
+//namespace luabind{class object;}
 class DLLNETWORK LuaFunction
 {
 protected:

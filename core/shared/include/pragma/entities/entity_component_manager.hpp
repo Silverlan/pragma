@@ -170,8 +170,7 @@ namespace pragma
 		mutable std::vector<ComponentContainerInfo> m_components;
 
 		std::unordered_map<ComponentEventId,ComponentEventInfo> m_componentEvents;
-	};
-	using TRegisterComponentMember = const std::function<ComponentMemberIndex(ComponentMemberInfo&&)>&;
+    };
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ComponentFlags);
 
@@ -199,18 +198,20 @@ template<class TComponent,typename>
 	return componentId;
 }
 
-template<class TComponent,typename>
-	util::TSharedHandle<TComponent> pragma::EntityComponentManager::CreateComponent(BaseEntity &ent) const
-{
-	auto it = std::find(m_componentInfos.begin(),m_componentInfos.end(),std::type_index(typeid(TComponent)));
-	if(it == m_componentInfos.end())
-		throw std::invalid_argument("Attempted to create unregistered entity component!");
-	auto r = it->factory(ent);
-	if(r == nullptr)
-		return nullptr;
-	r->m_componentId = it->id;
-	return r;
-}
+    template<class TComponent,typename>
+        util::TSharedHandle<TComponent> pragma::EntityComponentManager::CreateComponent(BaseEntity &ent) const
+    {
+            //TODO: Is this even sane?
+        ComponentId componentId;
+        if(!GetComponentTypeId<TComponent>(componentId))
+            return {};
+        auto &componentInfo = m_componentInfos[componentId];
+        auto r = componentInfo.factory(ent);
+        if(r == nullptr)
+            return nullptr;
+        r->m_componentId = componentInfo.id;
+        return r;
+    }
 
 template<class TComponent,typename>
 	bool pragma::EntityComponentManager::GetComponentTypeId(ComponentId &outId) const

@@ -185,7 +185,7 @@ struct DLLNETWORK ConVarCreateInfo
 		: type{type},name{name},flags{flags},helpText{helpText},usageHelp{usageHelp}
 	{
 		console::visit(type,[this,type,pdefaultValue](auto tag) {
-			using T = decltype(tag)::type;
+            using T = typename decltype(tag)::type;
 			defaultValue = create_convar_value(type,pdefaultValue);
 		});
 	}

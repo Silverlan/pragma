@@ -175,7 +175,7 @@ void CLightMapDataCacheComponent::ReloadCache()
 							if(a)
 							{
 								udm::visit<true,false,false>(a->GetValueType(),[&udmMeshData,&subMesh](auto tag) {
-									using T = decltype(tag)::type;
+                                    using T = typename decltype(tag)::type;
 									if constexpr(std::is_same_v<T,uint16_t> || std::is_same_v<T,uint32_t>)
 									{
 										std::vector<T> indices;

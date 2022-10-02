@@ -289,7 +289,7 @@ prosper::util::PreparedCommand::Argument Lua::Vulkan::make_pcb_arg(const Lua::Vu
 		return arg;
 	}
 	udm::visit(type,[&o,&arg](auto tag) {
-		using T = decltype(tag)::type;
+        using T = typename decltype(tag)::type;
 		constexpr auto type = udm::type_to_enum<T>();
 		if constexpr(udm::is_trivial_type(type))
 			arg.SetStaticValue<T>(luabind::object_cast<T>(o));
@@ -872,7 +872,7 @@ bool Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer(lua_State *l,CommandBuffer
 bool Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buf,uint32_t offset,::udm::Type type,Lua::udm_ng value)
 {
 	return udm::visit_ng(type,[&buf,&value,&hCommandBuffer,offset](auto tag) {
-		using T = decltype(tag)::type;
+        using T = typename decltype(tag)::type;
 		auto val = luabind::object_cast<T>(value);
 		return hCommandBuffer.RecordUpdateBuffer(buf,offset,sizeof(val),&val);
 	});
@@ -1121,7 +1121,7 @@ bool Lua::Vulkan::VKBuffer::Write(lua_State *l,Buffer &hBuffer,uint32_t offset,:
 bool Lua::Vulkan::VKBuffer::Write(lua_State *l,Buffer &hBuffer,uint32_t offset,::udm::Type type,Lua::udm_ng value)
 {
 	return udm::visit_ng(type,[&hBuffer,&value,offset](auto tag) {
-		using T = decltype(tag)::type;
+        using T = typename decltype(tag)::type;
 		return hBuffer.Write(offset,luabind::object_cast<T>(value));
 	});
 }
@@ -1136,7 +1136,7 @@ Lua::opt<::DataStream> Lua::Vulkan::VKBuffer::Read(lua_State *l,Buffer &hBuffer,
 bool Lua::Vulkan::VKBuffer::Read(lua_State *l,Buffer &hBuffer,uint32_t offset,::udm::Type type,Lua::udm_ng value)
 {
 	return udm::visit_ng(type,[&hBuffer,&value,offset](auto tag) {
-		using T = decltype(tag)::type;
+        using T = typename decltype(tag)::type;
 		auto val = luabind::object_cast<T>(value);
 		return hBuffer.Read(offset,sizeof(val),&val);
 	});

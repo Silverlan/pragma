@@ -22,3 +22,5 @@ check_git_status.sh
 build_winx64_vs19/
 third_party_libs/bullet/
 build/
+.cache/
+CMakeLists.txt.user

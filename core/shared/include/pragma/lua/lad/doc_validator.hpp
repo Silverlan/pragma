@@ -5,6 +5,8 @@
  * Copyright (c) 2021 Silverlan
  */
 
+
+#ifdef _MSC_VER
 #ifndef __LUA_AUTO_DOC_VALIDATOR_HPP__
 #define __LUA_AUTO_DOC_VALIDATOR_HPP__
 
@@ -33,7 +35,7 @@ namespace pragma::lua
 };
 
 template<class TItem>
-	static const TItem *pragma::lua::DocValidator::FindItem(const pragma::doc::Collection &collection,const std::string &name,const std::vector<TItem>&(pragma::doc::Collection::*fPt)() const)
+    const TItem *pragma::lua::DocValidator::FindItem(const pragma::doc::Collection &collection,const std::string &name,const std::vector<TItem>&(pragma::doc::Collection::*fPt)() const)
 {
 	auto &items = (collection.*fPt)();
 	auto it = std::find_if(items.begin(),items.end(),[&name](const TItem &el) {
@@ -50,4 +52,5 @@ template<class TItem>
 	return nullptr;
 }
 
+#endif
 #endif

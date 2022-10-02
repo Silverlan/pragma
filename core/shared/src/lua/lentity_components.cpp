@@ -48,6 +48,7 @@
 #include "pragma/lua/converters/pair_converter_t.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
 #include "pragma/lua/lua_util_component.hpp"
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include <pragma/physics/movetypes.h>
 #include <luabind/copy_policy.hpp>
 #include <panima/animation.hpp>
@@ -177,6 +178,9 @@ static std::string to_string(Game &game,const pragma::EntityUComponentMemberRef 
 	ss<<"]";
 	return ss.str();
 }
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma,BaseEntityComponent);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma,ValueDriver);
 
 void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {

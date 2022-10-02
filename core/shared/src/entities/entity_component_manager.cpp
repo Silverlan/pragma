@@ -71,7 +71,7 @@ ComponentMemberInfo &ComponentMemberInfo::operator=(const ComponentMemberInfo &o
 		if(ents::is_udm_member_type(type))
 		{
 			udm::visit(ents::member_type_to_udm_type(type),[this,&other](auto tag) {
-				using T = decltype(tag)::type;
+                using T = typename decltype(tag)::type;
 				constexpr auto eType = udm::type_to_enum<T>();
 				if constexpr(eType != udm::Type::Element && !udm::is_array_type(eType))
 					SetDefault<T>(*static_cast<T*>(other.m_default.get()));
@@ -144,7 +144,7 @@ void ComponentMemberInfo::ResetToDefault(BaseEntityComponent &component)
 	if(!m_default)
 		return;
 	ents::visit_member(type,[this,&component](auto tag) {
-		using T = decltype(tag)::type;
+        using T = typename decltype(tag)::type;
 		setterFunction(*this,component,m_default.get());
 	});
 }
@@ -189,7 +189,9 @@ ComponentInfo &ComponentInfo::operator=(const ComponentInfo &other)
 		for(auto &cb : *other.onCreateCallbacks)
 			onCreateCallbacks->push_back(cb);
 	}
-	static_assert(sizeof(*this) == 200);
+#ifdef _MSVC_VER
+    static_assert(sizeof(*this) == 200);
+#endif
 	return *this;
 }
 ComponentInfo &ComponentInfo::operator=(ComponentInfo &&other)
@@ -201,7 +203,9 @@ ComponentInfo &ComponentInfo::operator=(ComponentInfo &&other)
 	members = std::move(other.members);
 	memberNameToIndex = std::move(other.memberNameToIndex);
 	onCreateCallbacks = std::move(other.onCreateCallbacks);
+#ifdef _MSVC_VER
 	static_assert(sizeof(*this) == 200);
+#endif
 	return *this;
 }
 std::optional<ComponentMemberIndex> ComponentInfo::FindMember(const std::string &name) const

@@ -15,6 +15,7 @@
 #include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/classes/lproperty.hpp>
+#include <pragma/lua/ostream_operator_alias.hpp>
 #include <pragma/physics/raytraces.h>
 #include <pragma/lua/lentity_components_base_types.hpp>
 #include <pragma/lua/lentity_components.hpp>
@@ -42,6 +43,8 @@ namespace Lua
 		};
 	};
 };
+
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma,BaseEntityComponent);
 
 void Lua::register_sv_character_component(lua_State *l,luabind::module_ &module)
 {

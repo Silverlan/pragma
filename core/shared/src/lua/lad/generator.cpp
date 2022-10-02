@@ -4,7 +4,7 @@
  *
  * Copyright (c) 2021 Silverlan
  */
-
+#ifdef _MSC_VER
 #include "stdafx_shared.h"
 #include "pragma/lua/lad/lad.hpp"
 #include "pragma/lua/lad/generator.hpp"
@@ -526,22 +526,22 @@ void LuaDocGenerator::GenerateDocParameters(const luabind::detail::TypeInfo &inp
 		variant.name = name;
 		applyFlags(variant);
 	};
-	if(input.typeInfo == &typeid(char) || input.type == luabind::detail::TypeInfo::FundamentalType::Char)
+    if(input.typeInfo == &typeid(std::int8_t) || input.type == luabind::detail::TypeInfo::FundamentalType::Char)
 		createFundamentalVariant("int8");
-	else if(input.typeInfo == &typeid(unsigned char) || input.type == luabind::detail::TypeInfo::FundamentalType::UChar)
+    else if(input.typeInfo == &typeid(std::uint8_t) || input.type == luabind::detail::TypeInfo::FundamentalType::UChar)
 		createFundamentalVariant("uint8");
-	else if(input.typeInfo == &typeid(short) || input.type == luabind::detail::TypeInfo::FundamentalType::Short)
+    else if(input.typeInfo == &typeid(std::int16_t) || input.type == luabind::detail::TypeInfo::FundamentalType::Short)
 		createFundamentalVariant("int16");
-	else if(input.typeInfo == &typeid(unsigned short) || input.type == luabind::detail::TypeInfo::FundamentalType::UShort)
+    else if(input.typeInfo == &typeid(std::uint16_t) || input.type == luabind::detail::TypeInfo::FundamentalType::UShort)
 		createFundamentalVariant("uint16");
-	else if(input.typeInfo == &typeid(int) || input.type == luabind::detail::TypeInfo::FundamentalType::Int)
+    else if(input.typeInfo == &typeid(std::int32_t) || input.type == luabind::detail::TypeInfo::FundamentalType::Int)
 		createFundamentalVariant("int32");
-	else if(input.typeInfo == &typeid(unsigned int) || input.type == luabind::detail::TypeInfo::FundamentalType::UInt)
+    else if(input.typeInfo == &typeid(std::uint32_t) || input.type == luabind::detail::TypeInfo::FundamentalType::UInt)
 		createFundamentalVariant("uint32");
-	else if(input.typeInfo == &typeid(long) || input.type == luabind::detail::TypeInfo::FundamentalType::Long)
-		createFundamentalVariant("int32");
-	else if(input.typeInfo == &typeid(unsigned long) || input.type == luabind::detail::TypeInfo::FundamentalType::ULong)
-		createFundamentalVariant("uint32");
+    else if(input.typeInfo == &typeid(std::int64_t) || input.type == luabind::detail::TypeInfo::FundamentalType::Long)
+        createFundamentalVariant("int64");
+    else if(input.typeInfo == &typeid(std::uint64_t) || input.type == luabind::detail::TypeInfo::FundamentalType::ULong)
+        createFundamentalVariant("uint64");
 	else if(input.typeInfo == &typeid(void) || input.type == luabind::detail::TypeInfo::FundamentalType::Void)
 		createFundamentalVariant("nil");
 	else if(input.typeInfo == &typeid(bool) || input.type == luabind::detail::TypeInfo::FundamentalType::Bool)
@@ -1302,3 +1302,4 @@ void LuaDocGenerator::ParseLuaProperty(const std::string &name,const luabind::ob
 #endif
 	}
 };
+#endif

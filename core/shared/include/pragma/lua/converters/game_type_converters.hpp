@@ -7,6 +7,7 @@
 #ifndef __LUA_GAME_TYPE_CONVERTERS_HPP__
 #define __LUA_GAME_TYPE_CONVERTERS_HPP__
 
+#include <fsys/filesystem.h>
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/core.hpp"
 #include <luabind/detail/conversion_policies/native_converter.hpp>

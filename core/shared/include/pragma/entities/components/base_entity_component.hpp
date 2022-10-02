@@ -23,6 +23,7 @@
 #include <sharedutils/util_weak_handle.hpp>
 #include <sharedutils/functioncallback.h>
 #include <typeindex>
+#include "pragma/entities/entity_component_manager.hpp"
 
 class BaseEntity;
 namespace pragma
@@ -46,6 +47,7 @@ namespace udm {struct LinkedPropertyWrapper; using LinkedPropertyWrapperArg = co
 class DataStream;
 namespace pragma
 {
+using TRegisterComponentMember = const std::function<ComponentMemberIndex(ComponentMemberInfo&&)>&;
 	struct ComponentInfo;
 	struct ComponentEvent;
 	class BaseEntityComponentSystem;
@@ -70,13 +72,15 @@ namespace pragma
 		: public pragma::BaseLuaHandle,
 		public std::enable_shared_from_this<BaseEntityComponent>
 	{
+
+
 	public:
 		// Note: Use BaseEntityComponent::OnEntityComponentAdded to initialize data for other components
 		// instead of using this event!
 		static ComponentEventId EVENT_ON_ENTITY_COMPONENT_ADDED;
 		static ComponentEventId EVENT_ON_ENTITY_COMPONENT_REMOVED;
 		static ComponentEventId EVENT_ON_MEMBERS_CHANGED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+        static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
 		enum class StateFlags : uint32_t
 		{
@@ -266,6 +270,7 @@ template<class TComponent>
 {
 	return pragma::BaseLuaHandle::GetHandle<TComponent>();
 }
+
 
 #include "pragma/lua/converters/entity_component_converter.hpp"
 

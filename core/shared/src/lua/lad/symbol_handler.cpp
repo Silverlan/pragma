@@ -4,7 +4,7 @@
  *
  * Copyright (c) 2021 Silverlan
  */
-
+#ifdef _MSC_VER
 #include "stdafx_shared.h"
 #include "pragma/lua/lad/symbol_handler.hpp"
 
@@ -132,3 +132,4 @@ std::optional<pragma::os::windows::RVA> SymbolHandler::FindSymbol(const std::str
 	return symbolInfo.rva;
 #endif
 }
+#endif

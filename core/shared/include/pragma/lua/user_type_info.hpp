@@ -47,9 +47,20 @@ LUA_DEFINE_TEMPLATE_TYPE_IDENTIFIER_C(std::optional,"optional",{
 LUA_DEFINE_TEMPLATE_TYPE_IDENTIFIER(std::pair,"pair");
 LUA_DEFINE_TEMPLATE_TYPE_IDENTIFIER(std::tuple,"tuple");
 LUA_DEFINE_TEMPLATE_TYPE_IDENTIFIER(std::vector,"vector");
-LUA_DEFINE_TEMPLATE_TYPE_IDENTIFIER(std::array,"array");
 LUA_DEFINE_TEMPLATE_TYPE_IDENTIFIER(std::shared_ptr,"shared_ptr");
 LUA_DEFINE_TEMPLATE_TYPE_IDENTIFIER(std::unique_ptr,"unique_ptr");
 LUA_DEFINE_TEMPLATE_TYPE_IDENTIFIER(std::unordered_map,"map");
+
+namespace luabind::detail
+{
+	template <class T> requires(util::is_specialization_array<base_type<T>>::value)
+	struct get_user_type_info<T>
+	{
+		static void get(lua_State* L,TypeInfo &outTypeInfo)
+		{
+			outTypeInfo.typeIdentifier = "array";
+		}
+	};
+};
 
 #endif

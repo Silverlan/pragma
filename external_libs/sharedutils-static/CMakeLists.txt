@@ -42,6 +42,11 @@ if(WIN32)
 	target_compile_options(${PROJ_NAME} PRIVATE /wd4996)
 endif()
 
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    target_compile_options(${PROJ_NAME} PRIVATE -Wno-c++11-narrowing)
+endif()
+
 target_link_libraries(${PROJ_NAME} ${DEPENDENCY_MATHUTIL_LIBRARY})
 
 set_target_properties(${PROJ_NAME} PROPERTIES LINKER_LANGUAGE CXX)

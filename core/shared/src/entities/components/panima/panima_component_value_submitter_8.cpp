@@ -14,7 +14,7 @@
 void __panima_cvs_8()
 {
 	udm::visit_ng({},[](auto tag) {
-		using TChannel = decltype(tag)::type;
+        using TChannel = typename decltype(tag)::type;
 		if constexpr(
 			std::is_same_v<TChannel,udm::Int32> ||
 			std::is_same_v<TChannel,udm::UInt32>

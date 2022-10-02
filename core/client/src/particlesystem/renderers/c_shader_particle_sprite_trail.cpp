@@ -12,6 +12,8 @@
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_t.hpp>
 
+#include <cmath>
+
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
@@ -46,7 +48,7 @@ Vector3 ShaderParticleSpriteTrail::DoCalcVertexPosition(
 	auto lengthScale = (age >= lengthFadeInTime) and 1.0 or (age /lengthFadeInTime);
 	auto ptLen = pt->GetLength();
 	l = lengthScale *l *ptLen; // *dt
-	l = std::logf(l +2) *12;
+    l = logf(l +2) *12; //GCC stl: It still smells.
 	if(l <= 0.0)
 		return camPos;
 	l = umath::clamp(l,rendererSt.GetMinLength(),rendererSt.GetMaxLength());

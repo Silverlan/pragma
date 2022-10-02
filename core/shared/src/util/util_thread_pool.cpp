@@ -13,7 +13,7 @@ pragma::ThreadPool::ThreadPool(uint32_t threadCount)
 	: ThreadPool{threadCount,""}
 {}
 pragma::ThreadPool::ThreadPool(uint32_t threadCount,const std::string &name,const std::string &baseName)
-	: m_pool{threadCount}
+    : m_pool{static_cast<int>(threadCount)}
 {
 	auto n = m_pool.size();
 	std::string fullName = baseName;

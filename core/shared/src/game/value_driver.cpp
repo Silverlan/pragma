@@ -113,7 +113,7 @@ bool pragma::ValueDriver::Apply(BaseEntity &ent)
 		return false;
 	luabind::object arg;
 	udm::visit_ng(udmType,[l,&arg,member,&component](auto tag) {
-		using T = decltype(tag)::type;
+        using T = typename decltype(tag)::type;
 		T value;
 		member->getterFunction(*member,*component,&value);
 		arg = luabind::object{l,value};
@@ -131,7 +131,7 @@ bool pragma::ValueDriver::Apply(BaseEntity &ent)
 		{
 			auto *c = var.memberRef.GetComponent(game);
 			auto o = udm::visit_ng(udmType,[memInfo,c,l](auto tag) {
-				using T = decltype(tag)::type;
+                using T = typename decltype(tag)::type;
 				T value;
 				memInfo->getterFunction(*memInfo,*c,&value);
 				return luabind::object{l,value};
@@ -226,7 +226,7 @@ bool pragma::ValueDriver::Apply(BaseEntity &ent)
 	if(!result)
 		return false;
 	udm::visit_ng(udmType,[l,this,&result,&member,&component](auto tag) {
-		using T = decltype(tag)::type;
+        using T = typename decltype(tag)::type;
 		try
 		{
 			auto ret = luabind::object_cast<T>(result);

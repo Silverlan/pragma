@@ -6,10 +6,10 @@
 	url = https://github.com/Silverlan/alsoundsystem.git
 [submodule "external_libs/materialsystem"]
 	path = external_libs/materialsystem
-	url = https://github.com/Slaweknowy/materialsystem.git
+	url = https://github.com/Silverlan/materialsystem.git
 [submodule "external_libs/vfilesystem"]
 	path = external_libs/vfilesystem
-	url = https://github.com/Slaweknowy/vfilesystem.git
+	url = https://github.com/Silverlan/vfilesystem.git
 [submodule "external_libs/iglfw"]
 	path = external_libs/iglfw
 	url = https://github.com/Silverlan/iglfw.git
@@ -18,10 +18,10 @@
 	url = https://github.com/Silverlan/luasystem.git
 [submodule "external_libs/mathutil"]
 	path = external_libs/mathutil
-	url = https://github.com/Slaweknowy/mathutil.git
+	url = https://github.com/Silverlan/mathutil.git
 [submodule "external_libs/sharedutils"]
 	path = external_libs/sharedutils
-	url = https://github.com/Slaweknowy/sharedutils.git
+	url = https://github.com/Silverlan/sharedutils.git
 [submodule "external_libs/networkmanager"]
 	path = external_libs/networkmanager
 	url = https://github.com/Silverlan/networkmanager.git
@@ -114,7 +114,7 @@
 	url = https://github.com/discord/rapidxml.git
 [submodule "third_party_libs/hllib"]
 	path = third_party_libs/hllib
-	url = https://github.com/Slaweknowy/hllib-1.git
+	url = https://github.com/Silverlan/hllib.git
 [submodule "third_party_libs/libpng"]
 	path = third_party_libs/libpng
 	url = https://github.com/glennrp/libpng.git
@@ -156,7 +156,7 @@
 	url = https://github.com/Silverlan/VTFLib.git
 [submodule "modules/pr_audio_dummy"]
 	path = modules/pr_audio_dummy
-	url = https://github.com/Slaweknowy/pr_audio_dummy.git
+	url = https://github.com/Silverlan/pr_audio_dummy.git
 [submodule "third_party_libs/eigen"]
 	path = third_party_libs/eigen
 	url = https://gitlab.com/libeigen/eigen.git
@@ -168,10 +168,10 @@
 	url = https://github.com/Silverlan/miniball.git
 [submodule "external_libs/util_bsp"]
 	path = external_libs/util_bsp
-	url = https://github.com/Slaweknowy/util_bsp.git
+	url = https://github.com/Silverlan/util_bsp.git
 [submodule "external_libs/panima"]
 	path = external_libs/panima
-	url = https://github.com/Slaweknowy/panima.git
+	url = https://github.com/Silverlan/panima.git
 [submodule "third_party_libs/7zpp"]
 	path = third_party_libs/7zpp
 	url = https://github.com/Silverlan/7zip-cpp.git

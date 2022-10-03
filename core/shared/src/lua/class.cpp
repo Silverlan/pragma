@@ -219,15 +219,7 @@ template<typename T>
 }
 
 
-<<<<<<< HEAD
-
-=======
-<<<<<<< HEAD
 #ifdef __linux__
-=======
-
->>>>>>> 32eceafa (Root repo fixes)
->>>>>>> tmp
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util,BaseParallelJob);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util,Path);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util,Version);
@@ -287,13 +279,7 @@ DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(4x4)
 
 
 };
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 #endif
-=======
->>>>>>> 32eceafa (Root repo fixes)
->>>>>>> tmp
 
 void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 {

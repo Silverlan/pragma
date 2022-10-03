@@ -380,6 +380,6 @@ jobs:
         uses: pyTooling/Actions/releaser/composite@main
         with:
           tag: nightly
-          rm: false
+          rm: true
           token: ${{ secrets.GITHUB_TOKEN }}
           files: "pragma.zip"

@@ -39,7 +39,9 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnRemove() override;
-		void RebuildAnimatedBvh();
+		void SetUpdateLazily(bool updateLazily);
+		bool ShouldUpdateLazily() const;
+		void RebuildAnimatedBvh(bool force=false);
 	private:
 		void Clear();
 		void Cancel();
@@ -50,9 +52,11 @@ namespace pragma
 		CallbackHandle m_cbOnMatricesUpdated;
 		CallbackHandle m_cbOnBvhCleared;
 		CallbackHandle m_cbRebuildScheduled;
+		CallbackHandle m_cbOnBvhUpdateRequested;
 		bool m_rebuildScheduled = false;
 		std::atomic<bool> m_cancelled = false;
 		std::atomic<bool> m_busy = false;
+		bool m_updateLazily = false;
 		uint32_t m_numJobs = 0;
 	};
 };

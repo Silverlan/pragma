@@ -5,12 +5,12 @@
  * Copyright (c) 2021 Silverlan
  */
 
-//#define ENABLE_LAD 1
+#include "pragma/lua/lua_doc.hpp"
+
 
 #if ENABLE_LAD == 1
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/lua/util.hpp"
-#include "pragma/lua/lua_doc.hpp"
 #include "pragma/lua/lad/pdb_manager.hpp"
 #include "pragma/lua/lad/symbol_handler.hpp"
 #include "pragma/lua/lad/generator.hpp"

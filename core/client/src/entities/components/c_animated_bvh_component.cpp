@@ -57,8 +57,20 @@ void CAnimatedBvhComponent::Initialize()
 			Clear();
 			return util::EventReply::Unhandled;
 		});
+		m_cbOnBvhUpdateRequested = bvhC->AddEventCallback(CBvhComponent::EVENT_ON_BVH_UPDATE_REQUESTED,
+			[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			if(m_updateLazily && m_rebuildScheduled)
+			{
+				RebuildAnimatedBvh(true);
+				WaitForCompletion();
+			}
+			return util::EventReply::Unhandled;
+		});
 	}
 }
+
+void CAnimatedBvhComponent::SetUpdateLazily(bool updateLazily) {m_updateLazily = updateLazily;}
+bool CAnimatedBvhComponent::ShouldUpdateLazily() const {return m_updateLazily;}
 
 void CAnimatedBvhComponent::Clear()
 {
@@ -74,6 +86,8 @@ void CAnimatedBvhComponent::OnRemove()
 		m_cbOnMatricesUpdated.Remove();
 	if(m_cbOnBvhCleared.IsValid())
 		m_cbOnBvhCleared.Remove();
+	if(m_cbOnBvhUpdateRequested.IsValid())
+		m_cbOnBvhUpdateRequested.Remove();
 	if(m_cbRebuildScheduled.IsValid())
 		m_cbRebuildScheduled.Remove();
 
@@ -115,8 +129,19 @@ void CAnimatedBvhComponent::WaitForCompletion()
 	});
 }
 
-void CAnimatedBvhComponent::RebuildAnimatedBvh()
+void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force)
 {
+	if(!force && m_updateLazily)
+	{
+		m_rebuildScheduled = true;
+		if(m_cbRebuildScheduled.IsValid())
+			m_cbRebuildScheduled.Remove();
+
+		auto bvhC = GetEntity().GetComponent<CBvhComponent>();
+		if(bvhC.valid())
+			bvhC->SendBvhUpdateRequestOnInteraction();
+		return;
+	}
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("bvh_animated_prepare");
 #endif
@@ -125,7 +150,7 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh()
 		::debug::get_domain().EndTask();
 	}};
 #endif
-	if(IsBusy())
+	if(!force && IsBusy())
 	{
 		if(m_rebuildScheduled)
 			return;

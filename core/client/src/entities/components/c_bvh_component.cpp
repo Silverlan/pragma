@@ -61,7 +61,11 @@ void CBvhComponent::UpdateBvhStatus()
 {
 	auto useAnimatedBvh = GetEntity().HasComponent<CAnimatedComponent>();
 	if(useAnimatedBvh)
-		GetEntity().AddComponent<CAnimatedBvhComponent>();
+	{
+		auto animBvh = GetEntity().AddComponent<CAnimatedBvhComponent>();
+		if(animBvh.valid())
+			animBvh->SetUpdateLazily(true);
+	}
 	else
 		GetEntity().RemoveComponent<CAnimatedBvhComponent>();
 }

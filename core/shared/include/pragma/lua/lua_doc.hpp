@@ -8,6 +8,10 @@
 #ifndef __LUA_DOC_HPP__
 #define __LUA_DOC_HPP__
 
+#ifdef _WIN32
+#define ENABLE_LAD 1
+#endif
+
 namespace pragma {namespace doc {class BaseCollectionObject;};};
 namespace Lua
 {

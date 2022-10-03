@@ -81,6 +81,7 @@ namespace pragma
 	{
 	public:
 		static ComponentEventId EVENT_ON_CLEAR_BVH;
+		static ComponentEventId EVENT_ON_BVH_UPDATE_REQUESTED;
 		static ComponentEventId EVENT_ON_BVH_REBUILT;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
@@ -101,9 +102,11 @@ namespace pragma
 		void SetStaticCache(BaseStaticBvhCacheComponent *staticCache);
 		virtual bool IsStaticBvh() const {return false;}
 		const BvhMeshRange *FindPrimitiveMeshInfo(size_t primIdx) const;
-
+		
+		void SendBvhUpdateRequestOnInteraction();
 		bool SetVertexData(const std::vector<BvhTriangle> &data);
 		void RebuildBvh();
+		void ClearBvh();
 	protected:
 		BaseBvhComponent(BaseEntity &ent);
 		std::shared_ptr<pragma::BvhData> RebuildBvh(
@@ -111,11 +114,12 @@ namespace pragma
 			const std::function<bool()> &fIsCancelled=nullptr,std::vector<size_t> *optOutMeshIndices=nullptr
 		);
 		virtual void DoRebuildBvh()=0;
+		const std::shared_ptr<BvhData> &GetUpdatedBvh() const;
 		std::vector<BvhMeshRange> &GetMeshRanges();
-		void ClearBvh();
 		std::shared_ptr<BvhData> m_bvhData = nullptr;
 		ComponentHandle<BaseStaticBvhCacheComponent> m_staticCache;
 		mutable std::mutex m_bvhDataMutex;
+		bool m_sendBvhUpdateRequestOnInteraction = false;
 	};
 };
 

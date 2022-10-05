@@ -27,7 +27,7 @@ std::string get_pretty_engine_version()
 		<<"Win32"
 	#endif
 #else
-	#ifdef _M_X64
+	#if INTPTR_MAX == INT64_MAX
 		<<"Lin64"
 	#else
 		<<"Lin32"

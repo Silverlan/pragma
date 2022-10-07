@@ -6,7 +6,7 @@ on:
     branches: [ main, master, actions ]
 
 concurrency:
-  group: environment-${{ github.ref }}
+  group: environment-win-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -268,6 +268,7 @@ jobs:
           build_type: ${{ matrix.config.build_type }}
           build_generator: ${{ matrix.config.generators }}
           build_target: pragma-install-full
+          cmake_definitions_tmp: " -DCMAKE_INSTALL_PREFIX=install "
           build_dir: '${{ matrix.config.build_dir }}/.'
           cmake_script_location: '.'
           pre_build_cmd: |
@@ -278,9 +279,9 @@ jobs:
             rm -rf "./pragma.zip"
             cd "$curDir"
             
-            #echo "--ALL FILES START--"
-            #ls -R
-            #echo "--ALL FILES END--"
+            # echo "--ALL FILES START--"
+            # ls -R
+            # echo "--ALL FILES END--"
             # cp ./build/third_party_libs/libpng/pnglibconf.h ./third_party_libs/libpng/pnglibconf.h
             # cp ./build/third_party_libs/zlib/zconf.h ./third_party_libs/zlib/zconf.h
 
@@ -290,6 +291,7 @@ jobs:
           build_type: ${{ matrix.config.build_type }}
           build_generator: ${{ matrix.config.generators }}
           build_target: pfm
+          cmake_definitions_tmp: " -DCMAKE_INSTALL_PREFIX=install "
           build_dir: '${{ matrix.config.build_dir }}/.'
           configure: '0'
           cmake_script_location: '.'
@@ -300,6 +302,7 @@ jobs:
           build_type: ${{ matrix.config.build_type }}
           build_generator: ${{ matrix.config.generators }}
           build_target: pragma-install
+          cmake_definitions_tmp: " -DCMAKE_INSTALL_PREFIX=install "
           build_dir: '${{ matrix.config.build_dir }}/.'
           configure: '0'
           cmake_script_location: '.'

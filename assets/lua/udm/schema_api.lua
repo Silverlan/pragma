@@ -423,7 +423,11 @@ function udm.generate_lua_api_from_schema(schema)
 							if(elementSetterName ~= nil) then
 								class[elementSetterName] = function(self,i,value)
 									local child = self:GetCachedChild(name)
-									if(child ~= nil) then child:SetValue(i,udmValueType,value) end
+									if(child ~= nil) then
+										local type = udmValueType
+										if(type == udm.TYPE_INVALID) then type = child:GetValueType() end
+										child:SetValue(i,type,value)
+									end
 									self:CallChangeListeners(name,i -1,udm.BaseSchemaType.ARRAY_EVENT_SET)
 								end
 							end
@@ -539,6 +543,9 @@ function udm.generate_lua_api_from_schema(schema)
 							end
 						end
 
+						class["Get" .. baseName .. "ArrayValueType"] = function(self)
+							return self:GetUdmData():Get(name):GetValueType()
+						end
 						if(udmValueType ~= udm.TYPE_INVALID or schemaValueType ~= nil) then
 							class[getterName] = function(self)
 								if(schemaValueType ~= nil) then return self:GetTypedChildren()[name] end

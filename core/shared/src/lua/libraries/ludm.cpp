@@ -23,6 +23,7 @@
 #include <datasystem_vector.h>
 #include <datasystem_color.h>
 #include <sharedutils/util_file.h>
+#include <sharedutils/util_ifile.hpp>
 #include <fsys/ifile.hpp>
 
 extern DLLNETWORK Engine *engine;
@@ -940,6 +941,30 @@ static ::udm::LinkedPropertyWrapper i_get(lua_State *l,::udm::Property &p,int32_
 	return static_cast<::udm::PropertyWrapper>(p)[idx];
 }
 
+static std::string serialize(::udm::PropertyWrapper &p)
+{
+	auto data = udm::Data::Create();
+	data->GetAssetData().GetData().Merge(p,::udm::MergeFlags::DeepCopy);
+	std::stringstream ss;
+	data->ToAscii(ss,::udm::AsciiSaveFlags::DontCompressLz4Arrays);
+	return ss.str();
+}
+
+static Lua::var<::udm::PProperty,std::pair<bool,std::string>> deserialize(lua_State *l,const std::string &str)
+{
+	auto memFile = std::make_unique<::ufile::MemoryFile>(reinterpret_cast<uint8_t*>(const_cast<char*>(str.data())),str.size());
+	std::shared_ptr<::udm::Data> data = nullptr;
+	try
+	{
+		data = ::udm::Data::Load(std::move(memFile));
+	}
+	catch(const udm::AsciiException &e)
+	{
+		return luabind::object{l,std::pair<bool,std::string>{false,e.what()}};
+	}
+	return luabind::object{l,data->GetAssetData().GetData().ClaimOwnership()};
+}
+
 template<class T,class TPropertyWrapper,class TClassDef>
 	void register_property_methods(TClassDef &classDef)
 {
@@ -1522,6 +1547,8 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		}),
 		luabind::def("enum_type_to_ascii",&::udm::enum_type_to_ascii),
 		luabind::def("ascii_type_to_enum",&::udm::ascii_type_to_enum),
+		luabind::def("serialize",&::serialize),
+		luabind::def("deserialize",&::deserialize),
 		luabind::def("convert",+[](lua_State *l,const luabind::object &o0,::udm::Type t0,::udm::Type t1) -> luabind::object {
 			return ::udm::visit<true,true,true>(t0,[l,&o0,t1](auto tag){
 				using T0 = decltype(tag)::type;

@@ -159,7 +159,8 @@ function gui.WIContextMenu:UpdateFlipState()
 		self.m_yFlipped = true
 	else self:SetY(yBase) end
 	if(xBase +self:GetWidth() > self:GetParent():GetRight()) then
-		self:SetX(xBase -self:GetWidth())
+		if(util.is_valid(self.m_parentMenu)) then self:SetX(self.m_parentMenu:GetX() -self:GetWidth())
+		else self:SetX(xBase -self:GetWidth()) end
 		self.m_xFlipped = true
 	else self:SetX(xBase) end
 end
@@ -192,6 +193,8 @@ function gui.WIContextMenu:AddItem(name,fcOnClick,keybind)
 	return pItem
 end
 function gui.WIContextMenu:GetContents() return self.m_contents end
+function gui.WIContextMenu:SetParentMenu(menu) self.m_parentMenu = menu end
+function gui.WIContextMenu:GetParentMenu() return self.m_parentMenu end
 function gui.WIContextMenu:AddSubMenu(name,onClick)
 	local pSubMenu
 	local pItem = self:AddItem(name,onClick or function() return false end)
@@ -218,6 +221,7 @@ function gui.WIContextMenu:AddSubMenu(name,onClick)
 		end
 	end)
 	pSubMenu = gui.create("WIContextMenu",self:GetParent())
+	pSubMenu:SetParentMenu(self)
 	pSubMenu:AddCallback("OnCursorExited",function()
 		pSubMenu:KillFocus()
 		pSubMenu:SetVisible(false)

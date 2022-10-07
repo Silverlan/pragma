@@ -150,7 +150,7 @@
 	url = https://github.com/Silverlan/util_source2.git
 [submodule "external_libs/util_udm"]
 	path = external_libs/util_udm
-	url = https://github.com/Silverlan/util_udm.git
+	url = https://github.com/Slaweknowy/util_udm.git
 [submodule "third_party_libs/vtflib"]
 	path = third_party_libs/vtflib
 	url = https://github.com/Silverlan/VTFLib.git

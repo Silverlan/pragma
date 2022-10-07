@@ -186,7 +186,7 @@ protected:
 	virtual Material *LoadMaterial(const std::string &path,bool precache,bool bReload);
 
 	static UInt8 STATE_COUNT;
-	std::unique_ptr<MapInfo> m_mapInfo = nullptr;
+    std::unique_ptr<MapInfo> m_mapInfo;
 	bool m_bTCPOnly;
 	bool m_bTerminateSocket;
 	std::vector<CallbackHandle> m_luaEnumRegisterCallbacks;
@@ -200,7 +200,7 @@ protected:
 
 	std::unique_ptr<Game,void(*)(Game*)> m_game = std::unique_ptr<Game,void(*)(Game*)>{nullptr,[](Game*) {}};
 	std::shared_ptr<pragma::asset::ModelManager> m_modelManager = nullptr;
-	std::unique_ptr<SoundScriptManager> m_soundScriptManager = nullptr;
+    std::unique_ptr<SoundScriptManager> m_soundScriptManager;
 	std::unordered_set<std::string> m_missingSoundCache;
 	std::vector<CallbackHandle> m_thinkCallbacks;
 	std::vector<CallbackHandle> m_tickCallbacks;

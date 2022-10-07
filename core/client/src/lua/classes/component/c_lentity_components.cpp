@@ -470,7 +470,7 @@ namespace pragma
 	}
 };
 
-void RegisterLuaEntityComponents2(lua_State *l,luabind::module_ &entsMod);
+void RegisterLuaEntityComponents2_cl(lua_State *l,luabind::module_ &entsMod);
 void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {
 	Game::RegisterLuaEntityComponents(entsMod);
@@ -1035,7 +1035,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defCGeneric = pragma::lua::create_entity_component_class<pragma::CGenericComponent,pragma::BaseGenericComponent>("GenericComponent");
 	entsMod[defCGeneric];
 
-	RegisterLuaEntityComponents2(l,entsMod);
+    RegisterLuaEntityComponents2_cl(l,entsMod);
 }
 
 //////////////

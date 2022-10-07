@@ -1524,12 +1524,12 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		luabind::def("ascii_type_to_enum",&::udm::ascii_type_to_enum),
 		luabind::def("convert",+[](lua_State *l,const luabind::object &o0,::udm::Type t0,::udm::Type t1) -> luabind::object {
 			return ::udm::visit<true,true,true>(t0,[l,&o0,t1](auto tag){
-				using T0 = decltype(tag)::type;
+                using T0 = typename decltype(tag)::type;
 				if constexpr(pragma::is_valid_component_property_type(::udm::type_to_enum<T0>()))
 				{
 					auto v0 = luabind::object_cast<T0>(o0);
 					return ::udm::visit<true,true,true>(t1,[l,&v0](auto tag){
-						using T1 = decltype(tag)::type;
+                        using T1 = typename decltype(tag)::type;
 						if constexpr(::udm::is_convertible<T0,T1>())
 						{
 							auto v1 = ::udm::convert<T0,T1>(v0);

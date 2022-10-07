@@ -6,6 +6,7 @@ project(pragma)
 #variable_watch(DEPENDENCY_ANVIL_INCLUDE)
 #variable_watch(_STR_LEN)
 #variable_watch(TMP_VAR)
+variable_watch(DEPENDENCY_UTIL_ARCHIVE_LIBRARY)
 set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE CACHE INTERNAL "" FORCE)
 #set_target_properties(freetype PROPERTIES CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE)
 if(WIN32)
@@ -900,6 +901,19 @@ target_include_directories(freetype PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_pa
 if(WIN32)
 	include_external_msproject(hllib ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/sln/vs17/HLLib/HLLib.vcxproj)
 	set_target_properties(hllib PROPERTIES FOLDER third_party_libs)
+else()
+        #Command needed for makefile: make -C HLLib -f Makefile
+        add_custom_command(OUTPUT "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/HLLib/libhl.so"
+            COMMAND "make"
+            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/HLLib"
+        )
+    add_custom_target(hllib
+        #SOURCES "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/HLLib/"
+        DEPENDS "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/HLLib/libhl.so"
+    )
+    set_target_properties(hllib PROPERTIES FOLDER third_party_libs)
+
+
 endif()
 #TODO - HLLib is compilable in linux via makefile. Can we use it?
 #

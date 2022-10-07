@@ -102,7 +102,7 @@ void SGame::RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityCompone
 	Game::RegisterLuaEntityComponent(def);
 	// TODO: Remove this function
 }
-void RegisterLuaEntityComponents2(lua_State *l,luabind::module_ &entsMod);
+void RegisterLuaEntityComponents2_sv(lua_State *l,luabind::module_ &entsMod);
 namespace Lua::SoundEmitter {DLLNETWORK luabind::class_<pragma::BaseSoundEmitterComponent::SoundInfo> RegisterSoundInfo();};
 
 
@@ -305,5 +305,5 @@ void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defSBot = pragma::lua::create_entity_component_class<pragma::SBotComponent,pragma::BaseBotComponent>("BotComponent");
 	entsMod[defSBot];
 
-	RegisterLuaEntityComponents2(l,entsMod); // Split up to prevent compiler errors
+    RegisterLuaEntityComponents2_sv(l,entsMod); // Split up to prevent compiler errors
 }

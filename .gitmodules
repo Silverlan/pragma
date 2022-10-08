@@ -120,7 +120,7 @@
 	url = https://github.com/glennrp/libpng.git
 [submodule "third_party_libs/luajit"]
 	path = third_party_libs/luajit
-	url = https://github.com/Silverlan/LuaJIT.git
+	url = https://github.com/Slaweknowy/LuaJIT.git
 [submodule "external_libs/util_formatted_text"]
 	path = external_libs/util_formatted_text
 	url = https://github.com/Silverlan/util_formatted_text.git

@@ -753,13 +753,10 @@ Lua::opt<Lua::type<BaseEntity>> Lua::ents::find_by_unique_index(lua_State *l,con
 	auto uniqueIndex = util::uuid_string_to_bytes(uuid);
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
-	EntityIterator entIt {*game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
-	auto it = std::find_if(entIt.begin(),entIt.end(),[uniqueIndex](const BaseEntity *ent) {
-		return ent->GetUuid() == uniqueIndex;
-	});
-	if(it == entIt.end())
+	auto *ent = game->FindEntityByUniqueId(util::uuid_string_to_bytes(uuid));
+	if(!ent)
 		return nil;
-	return it->GetLuaObject();
+	return ent->GetLuaObject();
 }
 
 namespace luabind::detail

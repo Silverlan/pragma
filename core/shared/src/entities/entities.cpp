@@ -34,6 +34,11 @@ void Game::SpawnEntity(BaseEntity *ent)
 }
 BaseEntity *Game::GetEntity(unsigned int) {return NULL;}
 BaseEntity *Game::GetEntityByLocalIndex(uint32_t idx) {return GetEntity(idx);}
+BaseEntity *Game::FindEntityByUniqueId(const util::Uuid &uuid)
+{
+	auto it = m_uuidToEnt.find(util::get_uuid_hash(uuid));
+	return (it != m_uuidToEnt.end()) ? it->second : nullptr;
+}
 
 BaseEntity *Game::CreateMapEntity(pragma::asset::EntityData &entData)
 {

@@ -142,6 +142,11 @@ void BaseEntity::OnRemove()
 	BroadcastEvent(EVENT_ON_REMOVE);
 	ClearComponents();
 	pragma::BaseLuaHandle::InvalidateHandle();
+
+	auto &uuidMap = GetNetworkState()->GetGameState()->GetEntityUuidMap();
+	auto it = uuidMap.find(util::get_uuid_hash(m_uuid));
+	if(it != uuidMap.end())
+		uuidMap.erase(it);
 }
 
 void BaseEntity::Construct(unsigned int idx)
@@ -220,8 +225,21 @@ void BaseEntity::RegisterEvents(pragma::EntityComponentManager &componentManager
 	EVENT_ON_REMOVE = componentManager.RegisterEvent("ON_REMOVE",typeIndex);
 }
 
+void BaseEntity::SetUuid(const util::Uuid &uuid)
+{
+	auto &uuidMap = GetNetworkState()->GetGameState()->GetEntityUuidMap();
+	auto it = uuidMap.find(util::get_uuid_hash(m_uuid));
+	if(it != uuidMap.end())
+		uuidMap.erase(it);
+	m_uuid = uuid;
+	uuidMap[util::get_uuid_hash(m_uuid)] = this;
+}
+
 void BaseEntity::Initialize()
 {
+	auto &uuidMap = GetNetworkState()->GetGameState()->GetEntityUuidMap();
+	uuidMap[util::get_uuid_hash(m_uuid)] = this;
+
 	InitializeLuaObject(GetLuaState());
 
 	BaseEntityComponentSystem::Initialize(*this,GetNetworkState()->GetGameState()->GetEntityComponentManager());

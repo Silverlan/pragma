@@ -36,6 +36,8 @@ namespace pragma
 		bool HasEntityReference() const;
 		static void AttachEntityFilter(EntityIterator &it,const EntityIdentifier &identifier);
 		const EntityIdentifier *GetIdentifier() const {return m_identifier.get();}
+		std::optional<util::Uuid> GetUuid() const;
+		std::optional<std::string> GetClassOrName() const;
 	protected:
 		std::unique_ptr<EntityIdentifier> m_identifier = nullptr;
 		EntityHandle m_hEntity;

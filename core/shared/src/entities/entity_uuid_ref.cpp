@@ -66,6 +66,28 @@ BaseEntity *EntityURef::GetEntity(Game &game)
 	}
 	return m_hEntity.get();
 }
+std::optional<util::Uuid> EntityURef::GetUuid() const
+{
+	if(!m_identifier)
+		return {};
+	return std::visit([](auto &val) -> std::optional<util::Uuid> {
+		using T = decltype(val);
+		if constexpr(std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>,util::Uuid>)
+			return val;
+		return {};
+	},*m_identifier);
+}
+std::optional<std::string> EntityURef::GetClassOrName() const
+{
+	if(!m_identifier)
+		return {};
+	return std::visit([](auto &val) -> std::optional<std::string> {
+		using T = decltype(val);
+		if constexpr(!std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>,util::Uuid>)
+			return val;
+		return {};
+	},*m_identifier);
+}
 bool EntityURef::HasEntityReference() const
 {
 	return m_identifier != nullptr;

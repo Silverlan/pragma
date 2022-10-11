@@ -13,6 +13,8 @@
 namespace pragma {
 	class BaseAttachableComponent;
 	class BaseAnimatedComponent;
+	struct EntityURef;
+	struct MultiEntityURef;
 };
 namespace pragma::lua
 {
@@ -22,6 +24,12 @@ namespace pragma::lua
 	);
 	DLLNETWORK bool set_member_value(
 		lua_State *l,pragma::BaseEntityComponent &component,const pragma::ComponentMemberInfo &memberInfo,Lua::udm_type value
+	);
+	DLLNETWORK bool set_member_value(
+		lua_State *l,pragma::BaseEntityComponent &component,const pragma::ComponentMemberInfo &memberInfo,const pragma::EntityURef &eref
+	);
+	DLLNETWORK bool set_member_value(
+		lua_State *l,pragma::BaseEntityComponent &component,const pragma::ComponentMemberInfo &memberInfo,const pragma::MultiEntityURef &eref
 	);
 };
 

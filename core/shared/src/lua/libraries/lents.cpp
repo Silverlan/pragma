@@ -316,8 +316,11 @@ void Lua::ents::register_library(lua_State *l)
 	memberInfoDef.property("specializationType",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) {
 		return memInfo.GetSpecializationType();
 	});
-	memberInfoDef.property("customSpecializationType",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) {
-		return memInfo.GetCustomSpecializationType();
+	memberInfoDef.property("customSpecializationType",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) -> std::optional<std::string> {
+		auto *type = memInfo.GetCustomSpecializationType();
+		if(!type)
+			return {};
+		return *type;
 	});
 	memberInfoDef.property("minValue",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) {
 		return memInfo.GetMin();

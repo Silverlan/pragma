@@ -6,7 +6,7 @@ project(pragma)
 #variable_watch(DEPENDENCY_ANVIL_INCLUDE)
 #variable_watch(_STR_LEN)
 #variable_watch(TMP_VAR)
-variable_watch(DEPENDENCY_UTIL_ARCHIVE_LIBRARY)
+#variable_watch(DEPENDENCY_UTIL_ARCHIVE_LIBRARY)
 set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE CACHE INTERNAL "" FORCE)
 #set_target_properties(freetype PROPERTIES CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE)
 if(WIN32)
@@ -1205,6 +1205,7 @@ else()
     set(PR_MODULE_INSTALL_SUBDIR "")
 endif()
 
+
 function(pragma_install_file FILE_PATH INSTALL_PATH)
 	set(extra_macro_args ${ARGN})
 	INSTALL(
@@ -1212,6 +1213,15 @@ function(pragma_install_file FILE_PATH INSTALL_PATH)
 		COMPONENT ${PRAGMA_INSTALL_COMPONENT} ${extra_macro_args}
 	)
 endfunction(pragma_install_file)
+
+
+function(pragma_install_program FILE_PATH INSTALL_PATH)
+    set(extra_macro_args ${ARGN})
+    INSTALL(
+                PROGRAMS "${FILE_PATH}" DESTINATION "${INSTALL_PATH}"
+        COMPONENT ${PRAGMA_INSTALL_COMPONENT} ${extra_macro_args}
+    )
+endfunction(pragma_install_program)
 
 function(pragma_install_directory FILE_PATH INSTALL_PATH)
 	set(extra_macro_args ${ARGN})
@@ -1228,7 +1238,7 @@ foreach(MODULE_PATH ${PR_MODULES})
 	if(WIN32)
                 set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/${MODULE_NAME}.dll")
 	else()
-                set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/${MODULE_NAME}.so")
+                set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/lib${MODULE_NAME}.so")
 	endif()
 	if(EXISTS "${MODULE_PATH}/CMakeInstall.txt")
 		include("${MODULE_PATH}/CMakeInstall.txt" OPTIONAL)

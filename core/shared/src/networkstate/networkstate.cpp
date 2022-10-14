@@ -166,10 +166,10 @@ bool NetworkState::PortMaterial(const std::string &path)
 
 	// TODO: This doesn't belong here! Move it into the source module
 	auto matPath = pathWithoutExt +".vmat_c";
-	if(util::port_file(this,"materials\\" +matPath) == false)
+    if(util::port_file(this,"materials/" +matPath) == false)
 	{
 		matPath = pathWithoutExt +".vmt";
-		if(util::port_file(this,"materials\\" +matPath) == false)
+        if(util::port_file(this,"materials/" +matPath) == false)
 			return false;
 	}
 
@@ -192,7 +192,7 @@ bool NetworkState::PortMaterial(const std::string &path)
 					auto dataTex = std::dynamic_pointer_cast<ds::Texture>(v);
 					if(dataTex)
 					{
-						auto path = "materials\\" +dataTex->GetValue().name;
+                        auto path = "materials/" +dataTex->GetValue().name;
 						if(FileManager::Exists(path) == false && util::port_file(this,path +".vtf") == false && util::port_file(this,path +".vtex_c") == false)
 							Con::cwar<<"WARNING: Unable to port texture '"<<dataTex->GetValue().name<<"'!"<<Con::endl;
 					}
@@ -275,7 +275,7 @@ Material *NetworkState::LoadMaterial(const std::string &path,bool precache,bool 
 			auto vmtPath = path;
 			ufile::remove_extension_from_filename(vmtPath);
 			vmtPath += ".vmt";
-			if(util::port_file(this,"materials\\" +vmtPath) == true)
+            if(util::port_file(this,"materials/" +vmtPath) == true)
 			{
 				bSkipPort = true;
 				mat = LoadMaterial(path,false);

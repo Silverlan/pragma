@@ -38,6 +38,8 @@
 
 extern DLLNETWORK Engine *engine;
 
+
+
 //void test_lua_policies(lua_State *l);
 void Lua::ents::register_library(lua_State *l)
 {
@@ -990,9 +992,11 @@ Lua::opt<pragma::ComponentEventId> Lua::ents::register_component_event(lua_State
 	auto &componentManager = game->GetEntityComponentManager();
 	auto *componentInfo = componentManager.GetComponentInfo(componentId);
 	if(componentInfo == nullptr)
-	{
+    {
+
 		Con::cwar<<"WARNING: Attempted to register component event '"<<name<<"' to unknown component type "<<componentId<<"!"<<Con::endl;
 		return nil;
+
 	}
 
 	auto netName = componentInfo->name +'_' +std::string{name};

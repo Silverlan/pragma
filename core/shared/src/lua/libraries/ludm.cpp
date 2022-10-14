@@ -11,6 +11,7 @@
 #include "pragma/lua/util.hpp"
 #include "pragma/lua/converters/vector_converter_t.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
+#include "pragma/lua/converters/string_view_converter_t.hpp"
 #include "pragma/lua/custom_constructor.hpp"
 #include "pragma/lua/types/udm.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"

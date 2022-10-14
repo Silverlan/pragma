@@ -43,3 +43,18 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
+
+
+
+#ifdef __linux__
+#include <wgui/wihandle.h>
+#include "pragma/lua/policies/gui_element_policy.hpp"
+
+#include "pragma/lua/converters/cast_converter.hpp"
+#include "pragma/lua/converters/cast_converter_t.hpp"
+#include "pragma/lua/converters/gui_element_converter.hpp"
+#include "pragma/lua/converters/gui_element_converter_t.hpp"
+#include "pragma/lua/converters/shader_converter.hpp"
+#include "pragma/lua/converters/shader_converter_t.hpp"
+#endif
+

@@ -58,3 +58,39 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
+
+
+
+#ifdef __linux__
+#include "pragma/lua/policies/core_policies.hpp"
+#include "pragma/lua/policies/default_parameter_policy.hpp"
+#include "pragma/lua/policies/file_policy.hpp"
+#include "pragma/lua/policies/game_object_policy.hpp"
+#include "pragma/lua/policies/game_policy.hpp"
+#include "pragma/lua/policies/generic_policy.hpp"
+#include "pragma/lua/policies/handle_policy.hpp"
+#include "pragma/lua/policies/network_state_policy.hpp"
+#include "pragma/lua/policies/optional_policy.hpp"
+#include "pragma/lua/policies/pair_policy.hpp"
+#include "pragma/lua/policies/property_policy.hpp"
+#include "pragma/lua/policies/shared_from_this_policy.hpp"
+#include "pragma/lua/policies/string_view_policy.hpp"
+#include "pragma/lua/policies/tuple_policy.hpp"
+#include "pragma/lua/policies/vector_policy.hpp"
+#include <pragma/entities/components/panima_component_channel_submitter_def.hpp>
+
+
+#include "pragma/lua/converters/alias_converter_t.hpp"
+#include "pragma/lua/converters/cast_converter_t.hpp"
+#include "pragma/lua/converters/file_converter_t.hpp"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
+#include "pragma/lua/converters/optional_converter_t.hpp"
+#include "pragma/lua/converters/pair_converter_t.hpp"
+#include "pragma/lua/converters/property_converter_t.hpp"
+#include "pragma/lua/converters/string_view_converter_t.hpp"
+#include "pragma/lua/converters/thread_pool_converter_t.hpp"
+#include "pragma/lua/converters/vector_converter_t.hpp"
+#include <pragma/entities/entity_component_manager_t.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
+#endif
+

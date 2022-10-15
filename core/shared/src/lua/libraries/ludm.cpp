@@ -11,6 +11,7 @@
 #include "pragma/lua/util.hpp"
 #include "pragma/lua/converters/vector_converter_t.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
+#include "pragma/lua/policies/default_parameter_policy.hpp"
 #include "pragma/lua/custom_constructor.hpp"
 #include "pragma/lua/types/udm.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
@@ -1410,6 +1411,17 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm,::udm::HdrColor);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm,::udm::Data);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm,::udm::Array);
 
+static bool is_supported_array_value_type(::udm::Type valueType,::udm::ArrayType arrayType)
+{
+	switch(arrayType)
+	{
+	case ::udm::ArrayType::Compressed:
+		return ::udm::ArrayLz4::IsValueTypeSupported(valueType);
+	default:
+		return ::udm::Array::IsValueTypeSupported(valueType);
+	}
+	return false;
+}
 
 void Lua::udm::register_library(Lua::Interface &lua)
 {
@@ -1549,6 +1561,8 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		luabind::def("ascii_type_to_enum",&::udm::ascii_type_to_enum),
 		luabind::def("serialize",&::serialize),
 		luabind::def("deserialize",&::deserialize),
+		luabind::def("is_supported_array_value_type",&is_supported_array_value_type),
+		luabind::def("is_supported_array_value_type",&is_supported_array_value_type,luabind::default_parameter_policy<2,::udm::ArrayType::Raw>{}),
 		luabind::def("convert",+[](lua_State *l,const luabind::object &o0,::udm::Type t0,::udm::Type t1) -> luabind::object {
 			return ::udm::visit<true,true,true>(t0,[l,&o0,t1](auto tag){
 				using T0 = decltype(tag)::type;

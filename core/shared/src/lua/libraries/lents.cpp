@@ -116,6 +116,7 @@ void Lua::ents::register_library(lua_State *l)
 				return {};
 			return componentId;
 		}),
+		luabind::def("load_component",&Game::LoadLuaComponentByName),
 		luabind::def("find_installed_custom_components",+[](lua_State *l,Game &game) -> Lua::tb<std::string> {
 			std::vector<std::string> dirs;
 			std::string rootPath {"lua/entities/components/"};

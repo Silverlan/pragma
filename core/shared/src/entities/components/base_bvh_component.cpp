@@ -263,32 +263,62 @@ void BaseBvhComponent::SetStaticCache(BaseStaticBvhCacheComponent *staticCache)
 	m_staticCache = staticCache ? staticCache->GetHandle<BaseStaticBvhCacheComponent>() : ComponentHandle<BaseStaticBvhCacheComponent>{};
 }
 
+bool BaseBvhComponent::HasBvhData() const
+{
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().BeginTask("bvh_mutex_wait");
+#endif
+	std::scoped_lock lock {m_bvhDataMutex};
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().EndTask();
+#endif
+	return m_bvhData != nullptr;
+}
+
+std::shared_ptr<BvhData> BaseBvhComponent::SetBvhData(std::shared_ptr<BvhData> &bvhData)
+{
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().BeginTask("bvh_mutex_wait");
+#endif
+	std::scoped_lock lock {m_bvhDataMutex};
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().EndTask();
+#endif
+	auto tmp = bvhData;
+	m_bvhData = bvhData;
+	return tmp;
+}
+
+bool BaseBvhComponent::SetVertexData(pragma::BvhData &bvhData,const std::vector<BvhTriangle> &data)
+{
+	if(bvhData.primitives.size() != data.size())
+		return false;
+	memcpy(bvhData.primitives.data(),data.data(),util::size_of_container(data));
+	
+	// Update bounding boxes
+	bvh::HierarchyRefitter<bvh::Bvh<float>> refitter {bvhData.bvh};
+	refitter.refit([&] (bvh::Bvh<float>::Node& leaf) {
+		assert(leaf.is_leaf());
+		auto bbox = bvh::BoundingBox<float>::empty();
+		for (size_t i = 0; i < leaf.primitive_count; ++i) {
+			auto& triangle = bvhData.primitives[bvhData.bvh.primitive_indices[leaf.first_child_or_primitive + i]];
+			bbox.extend(triangle.bounding_box());
+		}
+		leaf.bounding_box_proxy() = bbox;
+	});
+	return true;
+}
+
 bool BaseBvhComponent::SetVertexData(const std::vector<BvhTriangle> &data)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("bvh_mutex_wait");
 #endif
 	std::scoped_lock lock {m_bvhDataMutex};
-
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().EndTask();
 #endif
-	if(m_bvhData->primitives.size() != data.size())
-		return false;
-	memcpy(m_bvhData->primitives.data(),data.data(),util::size_of_container(data));
-	
-	// Update bounding boxes
-	bvh::HierarchyRefitter<bvh::Bvh<float>> refitter {m_bvhData->bvh};
-	refitter.refit([&] (bvh::Bvh<float>::Node& leaf) {
-		assert(leaf.is_leaf());
-		auto bbox = bvh::BoundingBox<float>::empty();
-		for (size_t i = 0; i < leaf.primitive_count; ++i) {
-			auto& triangle = m_bvhData->primitives[m_bvhData->bvh.primitive_indices[leaf.first_child_or_primitive + i]];
-			bbox.extend(triangle.bounding_box());
-		}
-		leaf.bounding_box_proxy() = bbox;
-	});
-	return true;
+	return SetVertexData(*m_bvhData,data);
 }
 
 std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(

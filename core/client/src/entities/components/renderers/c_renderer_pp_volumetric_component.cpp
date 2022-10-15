@@ -63,13 +63,15 @@ void CRendererPpVolumetricComponent::ReloadRenderTarget()
 	if(m_renderer.expired())
 		return;
 	c_engine->GetRenderContext().WaitIdle();
+	auto &hdrInfo = m_renderer->GetHDRInfo();
+	if(!hdrInfo.sceneRenderTarget)
+		return;
 	m_renderTarget = nullptr;
 	auto rendererC = GetEntity().GetComponent<pragma::CRendererComponent>();
 	auto cRenderer = GetEntity().GetComponent<CRasterizationRendererComponent>();
 	if(rendererC.expired() || cRenderer.expired() || g_shader.expired())
 		return;
 	auto &shaderLightCone = *static_cast<pragma::ShaderPPLightCone*>(g_shader.get());
-	auto &hdrInfo = m_renderer->GetHDRInfo();
 	m_renderTarget = c_engine->GetRenderContext().CreateRenderTarget(
 		{hdrInfo.sceneRenderTarget->GetTexture(0)->shared_from_this(),hdrInfo.bloomTexture,hdrInfo.prepass.textureDepth},
 		shaderLightCone.GetRenderPass()
@@ -88,7 +90,7 @@ void CRendererPpVolumetricComponent::Initialize()
 }
 void CRendererPpVolumetricComponent::DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo)
 {
-	if(drawSceneInfo.scene.expired() || m_renderer.expired() || g_shader.expired())
+	if(drawSceneInfo.scene.expired() || m_renderer.expired() || g_shader.expired() || !m_renderTarget)
 		return;
 	auto &shaderLightCone = *static_cast<pragma::ShaderPPLightCone*>(g_shader.get());
 	auto &scene = *drawSceneInfo.scene;

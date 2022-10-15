@@ -993,7 +993,7 @@ function(pragma_install TARGET_NAME DESTINATION_PATH)
     endif()
         install(
                 TARGETS ${TARGET_NAME} ${TARGET_INSTALL_TYPE}
-                DESTINATION "${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}"
+                DESTINATION "${DESTINATION_PATH}"
                 COMPONENT ${PRAGMA_INSTALL_COMPONENT}
         )
 endfunction(pragma_install)
@@ -1194,7 +1194,7 @@ endif()
 function(pragma_install_file FILE_PATH INSTALL_PATH)
 	set(extra_macro_args ${ARGN})
 	INSTALL(
-                FILES "${FILE_PATH}" DESTINATION "${CMAKE_INSTALL_PREFIX}/${INSTALL_PATH}"
+                FILES "${FILE_PATH}" DESTINATION "${INSTALL_PATH}"
 		COMPONENT ${PRAGMA_INSTALL_COMPONENT} ${extra_macro_args}
 	)
 endfunction(pragma_install_file)
@@ -1202,7 +1202,7 @@ endfunction(pragma_install_file)
 function(pragma_install_directory FILE_PATH INSTALL_PATH)
 	set(extra_macro_args ${ARGN})
 	INSTALL(
-                DIRECTORY "${FILE_PATH}" DESTINATION "${CMAKE_INSTALL_PREFIX}/${INSTALL_PATH}"
+                DIRECTORY "${FILE_PATH}" DESTINATION "${INSTALL_PATH}"
 		COMPONENT ${PRAGMA_INSTALL_COMPONENT} ${extra_macro_args}
 	)
 endfunction(pragma_install_directory)
@@ -1222,7 +1222,7 @@ foreach(MODULE_PATH ${PR_MODULES})
 		# Default behavior
 		if(EXISTS "${PR_MODULE_PATH_WITH_EXT}")
 			INSTALL(
-                                FILES "${PR_MODULE_PATH_WITH_EXT}" DESTINATION "${CMAKE_INSTALL_PREFIX}/modules/"
+                                FILES "${PR_MODULE_PATH_WITH_EXT}" DESTINATION "modules/"
 				COMPONENT ${PRAGMA_INSTALL_COMPONENT}
 			)
 		endif()
@@ -1240,7 +1240,7 @@ endforeach()
 
 # Install assets
 INSTALL(
-        DIRECTORY assets/ DESTINATION ${CMAKE_INSTALL_PREFIX}
+        DIRECTORY assets/ DESTINATION ""
 	COMPONENT ${PRAGMA_INSTALL_COMPONENT_FULL}
 )
 

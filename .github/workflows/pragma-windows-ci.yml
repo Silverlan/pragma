@@ -261,6 +261,11 @@ jobs:
                         $i.FullName + " -- " + "{0:N2}" -f $size + " MB"
                   }
               }
+              
+      - name: Define CMake Variable
+        uses: Silverlan/common_actions/define_cmake_var@main
+        with:
+          cmake_var: ' -DCMAKE_INSTALL_PREFIX=install '
 
       - uses: Silverlan/common_actions/build_cmake@main
         name: CMake Build
@@ -284,6 +289,11 @@ jobs:
             # echo "--ALL FILES END--"
             # cp ./build/third_party_libs/libpng/pnglibconf.h ./third_party_libs/libpng/pnglibconf.h
             # cp ./build/third_party_libs/zlib/zconf.h ./third_party_libs/zlib/zconf.h
+            
+      - name: Print cmake_install
+        shell: bash
+        run:   |
+          cat "${{ matrix.config.build_dir }}/cmake_install.cmake"
 
       - uses: Silverlan/common_actions/build_cmake@main
         name: CMake Build PFM Executable

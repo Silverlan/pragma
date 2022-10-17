@@ -1240,7 +1240,7 @@ endforeach()
 
 # Install assets
 INSTALL(
-        DIRECTORY assets/ DESTINATION ""
+        DIRECTORY assets/ DESTINATION "."
 	COMPONENT ${PRAGMA_INSTALL_COMPONENT_FULL}
 )
 

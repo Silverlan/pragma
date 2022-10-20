@@ -54,26 +54,35 @@ std::string util::get_normalized_module_path(const std::string &lib,std::optiona
 
 std::shared_ptr<util::Library> util::load_library_module(const std::string &lib,const std::vector<std::string> &additionalSearchDirectories,std::optional<bool> checkForClientSide,std::string *err)
 {
-	auto libPath = get_normalized_module_path(lib,checkForClientSide);
-	std::string lpath;
-	if(FileManager::FindAbsolutePath(libPath,lpath) == false)
-		lpath = libPath;
+    auto libPath = get_normalized_module_path(lib,checkForClientSide);
+    std::string lpath;
+    if(FileManager::FindAbsolutePath(libPath,lpath) == false)
+        lpath = libPath;
 #ifdef __linux__
-	std::replace(lpath.begin(),lpath.end(),'\\','/');
+    std::replace(lpath.begin(),lpath.end(),'\\','/');
+
+    auto modPath = util::Path::CreatePath(util::get_program_path()) +
+        util::Path::CreatePath("modules/") +
+        util::Path::CreatePath(ufile::get_path_from_filename(lib));
+    auto linAdditionalSearchDirectories = additionalSearchDirectories;
+    linAdditionalSearchDirectories.push_back(modPath.GetString());
+    return util::Library::Load(lpath,linAdditionalSearchDirectories,err);
+#else
+    return util::Library::Load(lpath,additionalSearchDirectories,err);
 #endif
-	return util::Library::Load(lpath,additionalSearchDirectories,err);
 }
 
 std::vector<std::string> util::get_default_additional_library_search_directories(const std::string &libModulePath)
 {
-	auto brLast = libModulePath.find_last_of('\\');
+    //prefer platform agnostic forward slash here.
+    auto brLast = libModulePath.find_last_of('/');
 	auto programPath = FileManager::GetProgramPath();
 #ifdef _WIN32
-	auto pathBin = programPath +"\\bin";
+    auto pathBin = programPath +"/bin";
 #else
-	auto pathBin = programPath +"\\lib";
+    auto pathBin = programPath +"/lib";
 #endif
-	auto pathModules = programPath +std::string("\\") +libModulePath.substr(0,brLast);
+    auto pathModules = programPath +std::string("/") +libModulePath.substr(0,brLast);
 	return std::vector<std::string> {
 		pathBin,
 		pathModules

@@ -12,6 +12,7 @@
 #include "pragma/lua/converters/vector_converter_t.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
+#include "pragma/lua/converters/string_view_converter_t.hpp"
 #include "pragma/lua/custom_constructor.hpp"
 #include "pragma/lua/types/udm.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
@@ -1565,12 +1566,12 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		luabind::def("is_supported_array_value_type",&is_supported_array_value_type,luabind::default_parameter_policy<2,::udm::ArrayType::Raw>{}),
 		luabind::def("convert",+[](lua_State *l,const luabind::object &o0,::udm::Type t0,::udm::Type t1) -> luabind::object {
 			return ::udm::visit<true,true,true>(t0,[l,&o0,t1](auto tag){
-				using T0 = decltype(tag)::type;
+                using T0 = typename decltype(tag)::type;
 				if constexpr(pragma::is_valid_component_property_type(::udm::type_to_enum<T0>()))
 				{
 					auto v0 = luabind::object_cast<T0>(o0);
 					return ::udm::visit<true,true,true>(t1,[l,&v0](auto tag){
-						using T1 = decltype(tag)::type;
+                        using T1 = typename decltype(tag)::type;
 						if constexpr(::udm::is_convertible<T0,T1>())
 						{
 							auto v1 = ::udm::convert<T0,T1>(v0);

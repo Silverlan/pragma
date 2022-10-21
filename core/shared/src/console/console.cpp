@@ -34,6 +34,7 @@ void DebugConsole::open()
     this->_console_cerr.open("CONOUT$");
     std::cerr.rdbuf(this->_console_cerr.rdbuf());
 #else
+// this will barf out everything.
     this->_cinbuf = std::cin.rdbuf();
     this->_coutbuf = std::cout.rdbuf();
     this->_cerrbuf = std::cerr.rdbuf();

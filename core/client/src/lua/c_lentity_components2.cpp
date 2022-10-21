@@ -28,7 +28,7 @@
 #include <pragma/lua/lua_util_component_stream.hpp>
 // --template-include-location
 
-void RegisterLuaEntityComponents2(lua_State *l,luabind::module_ &entsMod)
+void RegisterLuaEntityComponents2_cl(lua_State *l,luabind::module_ &entsMod)
 {
 	auto defLiquidControl = pragma::lua::create_entity_component_class<pragma::CLiquidControlComponent,pragma::BaseLiquidControlComponent>("LiquidControlComponent");
 	entsMod[defLiquidControl];

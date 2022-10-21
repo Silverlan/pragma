@@ -220,15 +220,15 @@ public:
 	const std::string *FindRenderMaskName(pragma::rendering::RenderMask mask) const;
 
 	std::shared_ptr<prosper::IPrimaryCommandBuffer> GetCurrentDrawCommandBuffer() const;
-	void InitializeLua();
-	void SetupLua();
-	void SetUp();
-	bool IsServer();
-	bool IsClient();
-	bool IsInMainRenderPass() const;
-	void RegisterLua();
-	void RegisterLuaLibraries();
-	void RegisterLuaClasses();
+    virtual void InitializeLua() override;
+    virtual void SetupLua() override;
+    virtual void SetUp() override;
+    virtual bool IsServer() override;
+    virtual bool IsClient() override;
+    bool IsInMainRenderPass() const;
+    virtual void RegisterLua() override;
+    virtual void RegisterLuaLibraries() override;
+    virtual void RegisterLuaClasses() override;
 	void HandleLuaNetPacket(NetPacket &packet);
 	void SendUserInput();
 	void CreateGiblet(const GibletCreateInfo &info,pragma::CParticleSystemComponent **particle);

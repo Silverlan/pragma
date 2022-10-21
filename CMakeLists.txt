@@ -6,7 +6,8 @@ project(pragma)
 #variable_watch(DEPENDENCY_ANVIL_INCLUDE)
 #variable_watch(_STR_LEN)
 #variable_watch(TMP_VAR)
-set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE CACHE INTERNAL "" FORCE)
+variable_watch(DEPENDENCY_UTIL_DMX_INCLUDE)
+#set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE CACHE INTERNAL "" FORCE)
 #set_target_properties(freetype PROPERTIES CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE)
 if(WIN32)
 	set(CONFIG_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build Type")
@@ -900,6 +901,19 @@ target_include_directories(freetype PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_pa
 if(WIN32)
 	include_external_msproject(hllib ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/sln/vs17/HLLib/HLLib.vcxproj)
 	set_target_properties(hllib PROPERTIES FOLDER third_party_libs)
+else()
+        #Command needed for makefile: make -C HLLib -f Makefile
+        add_custom_command(OUTPUT "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/HLLib/libhl.so"
+            COMMAND "make"
+            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/HLLib"
+        )
+    add_custom_target(hllib
+        #SOURCES "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/HLLib/"
+        DEPENDS "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/HLLib/libhl.so"
+    )
+    set_target_properties(hllib PROPERTIES FOLDER third_party_libs)
+
+
 endif()
 #TODO - HLLib is compilable in linux via makefile. Can we use it?
 #
@@ -1191,6 +1205,7 @@ else()
     set(PR_MODULE_INSTALL_SUBDIR "")
 endif()
 
+
 function(pragma_install_file FILE_PATH INSTALL_PATH)
 	set(extra_macro_args ${ARGN})
 	INSTALL(
@@ -1198,6 +1213,15 @@ function(pragma_install_file FILE_PATH INSTALL_PATH)
 		COMPONENT ${PRAGMA_INSTALL_COMPONENT} ${extra_macro_args}
 	)
 endfunction(pragma_install_file)
+
+
+function(pragma_install_program FILE_PATH INSTALL_PATH)
+    set(extra_macro_args ${ARGN})
+    INSTALL(
+                PROGRAMS "${FILE_PATH}" DESTINATION "${INSTALL_PATH}"
+        COMPONENT ${PRAGMA_INSTALL_COMPONENT} ${extra_macro_args}
+    )
+endfunction(pragma_install_program)
 
 function(pragma_install_directory FILE_PATH INSTALL_PATH)
 	set(extra_macro_args ${ARGN})
@@ -1214,7 +1238,7 @@ foreach(MODULE_PATH ${PR_MODULES})
 	if(WIN32)
                 set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/${MODULE_NAME}.dll")
 	else()
-                set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/${MODULE_NAME}.so")
+                set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/lib${MODULE_NAME}.so")
 	endif()
 	if(EXISTS "${MODULE_PATH}/CMakeInstall.txt")
 		include("${MODULE_PATH}/CMakeInstall.txt" OPTIONAL)

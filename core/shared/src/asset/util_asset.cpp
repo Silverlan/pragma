@@ -300,7 +300,7 @@ bool pragma::asset::remove_asset(const std::string &name,Type type)
 }
 std::optional<std::string> pragma::asset::find_file(const std::string &name,Type type,std::string *optOutFormat)
 {
-	auto normalizedName = get_normalized_path(name,type);
+    auto normalizedName = get_normalized_path(name,type);
 	switch(type)
 	{
 	case Type::Model:

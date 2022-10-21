@@ -18,6 +18,7 @@
 #include <pragma/math/vector/wvvector3.h>
 #include <vector>
 #include <unordered_map>
+#include <pragma/networkstate/networkstate.h>
 #if 0
 #include <BulletSoftBody/btSoftBody.h>
 #include <BulletSoftBody/btSoftBodySolvers.h>

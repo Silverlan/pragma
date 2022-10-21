@@ -18,8 +18,8 @@ namespace bsp {class File;};
 namespace util
 {
 	class Library;
-	static const std::string IMPORT_PATH = "addons\\imported\\";
-	static const std::string CONVERT_PATH = "addons\\converted\\";
+    static const std::string IMPORT_PATH = "addons/imported/";
+    static const std::string CONVERT_PATH = "addons/converted/";
 	namespace impl
 	{
 		DLLNETWORK void *get_module_func(NetworkState *nw,const std::string &name);

@@ -124,7 +124,7 @@ Engine::Engine(int,char*[])
 {
 	// TODO: File cache doesn't work with absolute paths at the moment
 	// (e.g. addons/imported/models/some_model.pmdl would return false even if the file exists)
-    filemanager::set_use_file_index_cache(true);
+	filemanager::set_use_file_index_cache(true);
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::open_domain();

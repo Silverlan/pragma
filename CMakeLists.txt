@@ -2,11 +2,6 @@ cmake_minimum_required(VERSION 3.9) # for GENERATOR_IS_MULTI_CONFIG
 project(pragma)
 
 
-#variable_watch(LINKS_RESULT)
-#variable_watch(DEPENDENCY_ANVIL_INCLUDE)
-#variable_watch(_STR_LEN)
-#variable_watch(TMP_VAR)
-variable_watch(DEPENDENCY_UTIL_DMX_INCLUDE)
 #set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE CACHE INTERNAL "" FORCE)
 #set_target_properties(freetype PROPERTIES CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE)
 if(WIN32)
@@ -982,8 +977,6 @@ else()
         set(BINARY_OUTPUT_DIR "lib")
 endif()
 
-#variable_watch(PRAGMA_INSTALL_COMPONENT)
-#variable_watch(PRAGMA_INSTALL_COMPONENT_FULL)
 set(PRAGMA_INSTALL_COMPONENT "pragma")
 set(PRAGMA_INSTALL_COMPONENT_FULL "pragma-full")
 function(pragma_install TARGET_NAME DESTINATION_PATH)

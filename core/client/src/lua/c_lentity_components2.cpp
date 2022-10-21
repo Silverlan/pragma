@@ -52,7 +52,6 @@ void RegisterLuaEntityComponents2_cl(lua_State *l,luabind::module_ &entsMod)
 	auto defOpticalCamera = pragma::lua::create_entity_component_class<pragma::COpticalCameraComponent,pragma::BaseEntityComponent>("OpticalCameraComponent");
 	entsMod[defOpticalCamera];
 
-    Con::cout<<"RendererPpFogComponent registration"<<Con::endl;
 	auto defPpFog =
 		pragma::lua::create_entity_component_class<pragma::CRendererPpFogComponent,pragma::BaseEntityComponent>("RendererPpFogComponent");
 	entsMod[defPpFog];

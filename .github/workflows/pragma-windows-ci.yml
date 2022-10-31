@@ -357,6 +357,12 @@ jobs:
       - name: Finalize release zip
         shell: bash
         run: |
+          curDir=$PWD
+          cd ./${{ matrix.config.build_dir }}/install
+          mv ./bin/pragma.exe ./pragma.exe
+          mv ./bin/pragma_server.exe ./pragma_server.exe
+          cd $curDir
+          
           mv "/c/release/pragma.zip" "./pragma.zip"
           7z a pragma.zip ".\${{ matrix.config.build_dir }}/install/**"
           7z d pragma.zip .git

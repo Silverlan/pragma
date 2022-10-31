@@ -8,6 +8,7 @@
 #ifndef __PRAGMA_ENTITY_MEMBER_TYPE_HPP__
 #define __PRAGMA_ENTITY_MEMBER_TYPE_HPP__
 
+#include "pragma/networkdefinitions.h"
 #include <mathutil/umath.h>
 #include <udm.hpp>
 #include "pragma/entities/entity_uuid_ref.hpp"
@@ -48,7 +49,6 @@ namespace pragma::ents
 		// Blob = umath::to_integral(udm::Type::Blob),
 		// BlobLz4 = umath::to_integral(udm::Type::BlobLz4),
 
-		// Element = umath::to_integral(udm::Type::Element),
 		// Array = umath::to_integral(udm::Type::Array),
 		// ArrayLz4 = umath::to_integral(udm::Type::ArrayLz4),
 		// Reference = umath::to_integral(udm::Type::Reference),
@@ -61,26 +61,42 @@ namespace pragma::ents
 		// Managed types
 		Entity = umath::to_integral(udm::Type::Count) +1,
 		MultiEntity,
+		Element,
 
 		Count,
 		Last = Count -1,
-		Invalid = umath::to_integral(udm::Type::Invalid)
+		Invalid = umath::to_integral(udm::Type::Invalid),
+		VersionIndex = 0 // Increment this when adding or removing enums
 	};
+
+	using Element = udm::PProperty;
 
 	template<class T>struct tag_t{using type=T;};
 	template<class T>constexpr tag_t<T> tag={};
-	constexpr std::variant<tag_t<EntityURef>,tag_t<MultiEntityURef>> get_managed_member_type_tag(EntityMemberType e)
+	constexpr std::variant<tag_t<EntityURef>,tag_t<MultiEntityURef>,tag_t<Element>> get_managed_member_type_tag(EntityMemberType e)
 	{
 		switch(e)
 		{
 			case EntityMemberType::Entity: return tag<EntityURef>;
 			case EntityMemberType::MultiEntity: return tag<MultiEntityURef>;
+			case EntityMemberType::Element: return tag<Element>;
 		}
 	}
 
 	constexpr bool is_udm_member_type(EntityMemberType type)
 	{
-		return umath::to_integral(type) < umath::to_integral(udm::Type::Count);
+		return umath::to_integral(type) < umath::to_integral(udm::Type::Count) && type != EntityMemberType::Element;
+	}
+	constexpr bool is_managed_member_type_f(EntityMemberType type)
+	{
+		switch(type)
+		{
+		case EntityMemberType::Entity:
+		case EntityMemberType::MultiEntity:
+		case EntityMemberType::Element:
+			return true;
+		}
+		return false;
 	}
 	constexpr udm::Type member_type_to_udm_type(EntityMemberType type)
 	{
@@ -90,13 +106,13 @@ namespace pragma::ents
 	template<bool ENABLE_DEFAULT_RETURN=true,typename T>
 		constexpr decltype(auto) visit_member(EntityMemberType type,T vs)
 		{
-			if(is_udm_member_type(type))
-				return udm::visit<true,true,true,ENABLE_DEFAULT_RETURN>(member_type_to_udm_type(type),vs);
-			else
+			if(is_managed_member_type_f(type))
 				return std::visit(vs,get_managed_member_type_tag(type));
+			else
+				return udm::visit<true,true,true,ENABLE_DEFAULT_RETURN>(member_type_to_udm_type(type),vs);
 		}
 	template<typename T>
-		concept is_managed_member_type = std::is_same_v<T,EntityURef> || std::is_same_v<T,MultiEntityURef>;
+		concept is_managed_member_type = std::is_same_v<T,EntityURef> || std::is_same_v<T,MultiEntityURef> || std::is_same_v<T,Element>;
 
 	template<typename T>
 		constexpr EntityMemberType member_type_to_enum()
@@ -107,6 +123,8 @@ namespace pragma::ents
 				return EntityMemberType::Entity;
 			if constexpr(std::is_same_v<T,MultiEntityURef>)
 				return EntityMemberType::MultiEntity;
+			if constexpr(std::is_same_v<T,Element>)
+				return EntityMemberType::Element;
 		}
 		else
 			return static_cast<EntityMemberType>(udm::type_to_enum<T>());

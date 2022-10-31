@@ -178,6 +178,7 @@ void Lua::ents::register_library(lua_State *l)
 			});
 		})
 	];
+	static_assert(umath::to_integral(pragma::ents::EntityMemberType::VersionIndex) == 0);
 	Lua::RegisterLibraryEnums(l,"ents",{
 		{"MEMBER_TYPE_STRING",umath::to_integral(pragma::ents::EntityMemberType::String)},
 		{"MEMBER_TYPE_INT8",umath::to_integral(pragma::ents::EntityMemberType::Int8)},
@@ -206,6 +207,7 @@ void Lua::ents::register_library(lua_State *l)
 		{"MEMBER_TYPE_VECTOR2I",umath::to_integral(pragma::ents::EntityMemberType::Vector2i)},
 		{"MEMBER_TYPE_VECTOR3I",umath::to_integral(pragma::ents::EntityMemberType::Vector3i)},
 		{"MEMBER_TYPE_VECTOR4I",umath::to_integral(pragma::ents::EntityMemberType::Vector4i)},
+		{"MEMBER_TYPE_ELEMENT",umath::to_integral(pragma::ents::EntityMemberType::Element)},
 		{"MEMBER_TYPE_ENTITY",umath::to_integral(pragma::ents::EntityMemberType::Entity)},
 		{"MEMBER_TYPE_MULTI_ENTITY",umath::to_integral(pragma::ents::EntityMemberType::MultiEntity)},
 		{"MEMBER_TYPE_COUNT",umath::to_integral(pragma::ents::EntityMemberType::Count)},

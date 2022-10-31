@@ -1504,9 +1504,13 @@ void Game::RegisterLuaLibraries()
 			ss<<"NULL";
 		else
 		{
-			auto *fp = dynamic_cast<VFilePtrInternalReal*>(f.GetHandle().get());
+			auto fp = f.GetHandle();
 			if(fp)
-				ss<<fp->GetPath();
+			{
+				auto fileName = fp->GetFileName();
+				if(fileName.has_value())
+					ss<<*fileName;
+			}
 		}
 		ss<<"]";
 		return ss.str();

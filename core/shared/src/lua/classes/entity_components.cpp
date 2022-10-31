@@ -165,6 +165,11 @@ std::optional<Lua::udm_type> pragma::lua::get_member_value(
 		{
 			T value;
 			memberInfo.getterFunction(memberInfo,component,&value);
+			if constexpr(std::is_same_v<T,pragma::ents::Element>)
+			{
+				if(!value)
+					return Lua::nil;
+			}
 			return Lua::udm_type{luabind::object{l,value}};
 		}
 	});
@@ -175,7 +180,7 @@ bool pragma::lua::set_member_value(
 {
 	return pragma::ents::visit_member(memberInfo.type,[&memberInfo,&component,l,&value](auto tag) -> bool {
         using T = typename decltype(tag)::type;
-		if constexpr(!pragma::is_valid_component_property_type_v<T>)
+		if constexpr(!pragma::is_valid_component_property_type_v<T> || std::is_same_v<T,pragma::ents::Element>)
 			return false;
 		else
 		{
@@ -215,6 +220,7 @@ bool pragma::lua::set_member_value(
 		}
 	});
 }
+static_assert(umath::to_integral(pragma::ents::EntityMemberType::VersionIndex) == 0);
 bool pragma::lua::set_member_value(
 	lua_State *l,pragma::BaseEntityComponent &component,const pragma::ComponentMemberInfo &memberInfo,const pragma::EntityURef &eref
 )

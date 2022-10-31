@@ -50,6 +50,7 @@ namespace pragma
 		void SetMaterialOverride(uint32_t idx,const std::string &matOverride);
 		void SetMaterialOverride(uint32_t idx,CMaterial &mat);
 		void ClearMaterialOverride(uint32_t idx);
+		void ClearMaterialOverrides();
 		CMaterial *GetMaterialOverride(uint32_t idx) const;
 		const std::vector<msys::MaterialHandle> &GetMaterialOverrides() const;
 		CMaterial *GetRenderMaterial(uint32_t idx) const;

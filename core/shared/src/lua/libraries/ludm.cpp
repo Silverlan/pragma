@@ -967,6 +967,53 @@ static Lua::var<::udm::PProperty,std::pair<bool,std::string>> deserialize(lua_St
 	return luabind::object{l,data->GetAssetData().GetData().ClaimOwnership()};
 }
 
+template<class TPropertyWrapper>
+	void clear(TPropertyWrapper &prop)
+{
+	if constexpr(std::is_same_v<TPropertyWrapper,::udm::Element>)
+		prop.children.clear();
+	else
+	{
+		auto *el = prop.GetValuePtr<::udm::Element>();
+		if(el)
+		{
+			el->children.clear();
+			return;
+		}
+		auto *a = prop.GetValuePtr<::udm::Array>();
+		if(a)
+			a->Resize(0);
+	}
+}
+
+static void debug_print_wrapper(const udm::PropertyWrapper &lp,const std::string &t)
+{
+	std::cout<<t<<"arrayIndex: "<<lp.arrayIndex<<std::endl;
+	std::cout<<t<<"prop: ";
+	if(!lp.prop)
+		std::cout<<"NULL";
+	else
+		std::cout<<udm::enum_to_string(lp.prop->type);
+	std::cout<<std::endl;
+	auto *linked = lp.GetLinked();
+	if(linked)
+	{
+		std::cout<<t<<"propName: "<<linked->propName<<std::endl;
+		std::cout<<"prev: ";
+		if(!linked->prev)
+			std::cout<<"NULL"<<std::endl;
+		else
+		{
+			std::cout<<std::endl;
+			debug_print_wrapper(*linked->prev,t +"\t");
+		}
+	}
+}
+static void debug_print_wrapper(const udm::PropertyWrapper &lp)
+{
+	debug_print_wrapper(lp,"");
+}
+
 template<class T,class TPropertyWrapper,class TClassDef>
 	void register_property_methods(TClassDef &classDef)
 {
@@ -1178,8 +1225,12 @@ template<class T,class TPropertyWrapper,class TClassDef>
 		return get_property_value(l,static_cast<TPropertyWrapper>(p),idx);
 	})
 	.def("GetType",+[](lua_State *l,T &prop) -> ::udm::Type {
-		return static_cast<TPropertyWrapper>(prop).GetType();
+		if constexpr(std::is_same_v<T,::udm::Element>)
+			return ::udm::Type::Element;
+		else
+			return static_cast<TPropertyWrapper>(prop).GetType();
 	})
+	.def("Clear",&clear<T>)
 	.def("Merge",+[](lua_State *l,T &prop,::udm::PropertyWrapper &propOther) {
 		static_cast<TPropertyWrapper>(prop).Merge(propOther);
 	})
@@ -2028,6 +2079,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		g_it = LuaUdmArrayIterator{p};
 		return *g_it;
 	},luabind::return_stl_iterator{});
+	cdPropWrap.def("DebugPrint",static_cast<void(*)(const ::udm::PropertyWrapper&)>(&debug_print_wrapper));
 	register_property_methods<::udm::PropertyWrapper,::udm::PropertyWrapper&>(cdPropWrap);
 	modUdm[cdPropWrap];
 
@@ -2044,6 +2096,10 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		return prop.ClaimOwnership();
 	});
 	modUdm[cdLinkedPropWrap];
+	pragma::lua::define_custom_constructor<::udm::LinkedPropertyWrapper,
+		[](::udm::Property &prop) -> ::udm::LinkedPropertyWrapper {
+		return ::udm::LinkedPropertyWrapper{prop};
+	},::udm::Property&>(lua.GetState());
 
 	auto cdAssetData = luabind::class_<::udm::AssetData,::udm::LinkedPropertyWrapper,::udm::PropertyWrapper>("AssetData");
 	cdAssetData.def(luabind::tostring(luabind::self));
@@ -2078,9 +2134,9 @@ void Lua::udm::register_library(Lua::Interface &lua)
 	auto cdProp = luabind::class_<::udm::Property>("Property");
 	cdProp.def(luabind::tostring(luabind::self));
 	register_property_methods<::udm::Property,::udm::PropertyWrapper>(cdProp);
-	cdProp.def("GetType",+[](lua_State *l,::udm::Property &prop) -> ::udm::Type {
-		return prop.type;
-	});
+	//cdProp.def("GetType",+[](lua_State *l,::udm::Property &prop) -> ::udm::Type {
+	//	return prop.type;
+	//});
 	cdProp.def("ToAscii",+[](lua_State *l,::udm::Property &prop,const std::string &propName,const std::string &prefix) -> std::string {
 		std::stringstream ss;
 		prop.ToAscii(::udm::AsciiSaveFlags::None,ss,propName,prefix);

@@ -1408,6 +1408,15 @@ void Game::RegisterLuaLibraries()
 		})),
 		luabind::def("create_directory",Lua::file::CreateDir),
 		luabind::def("create_path",Lua::file::CreatePath),
+		luabind::def("create_virtual",+[](const std::string &contents) -> LFile {
+			std::vector<uint8_t> data;
+			data.resize(contents.size());
+			memcpy(data.data(),contents.data(),contents.size());
+			auto vf = std::make_shared<ufile::VectorFile>(std::move(data));
+			LFile lf {};
+			lf.Construct(vf);
+			return lf;
+		}),
 		luabind::def("exists",static_cast<bool(*)(std::string,fsys::SearchFlags)>([](std::string path,fsys::SearchFlags searchFlags) {
 			return FileManager::Exists(path,searchFlags);
 		})),

@@ -38,7 +38,7 @@
 #include <luabind/out_value_policy.hpp>
 #include <luabind/copy_policy.hpp>
 #include <luabind/discard_result_policy.hpp>
-
+#pragma optimize("",off)
 namespace Lua
 {
 	template<typename ...Types>
@@ -531,6 +531,17 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 
 	auto defBvh = Lua::create_base_entity_component_class<pragma::BaseBvhComponent>("BaseBvhComponent");
 	defBvh.def("RebuildBvh",static_cast<void(pragma::BaseBvhComponent::*)()>(&pragma::BaseBvhComponent::RebuildBvh));
+	defBvh.def("IntersectionTest2",+[](pragma::BaseBvhComponent &c,const Vector3 &origin,const Vector3 &dir,float minDist,float maxDist) {
+		auto t = std::chrono::steady_clock::now();
+		c.IntersectionTest(origin,dir,minDist,maxDist);
+		auto dt = std::chrono::steady_clock::now() -t;
+		std::cout<<"Internal2: "<<(dt.count() /1'000'000.0)<<"ms"<<std::endl;
+	});
+	defBvh.def("IntersectionTest3",+[](lua_State *l,size_t tStart) {
+		auto t = std::chrono::steady_clock::now();
+		auto dt = std::chrono::steady_clock::now().time_since_epoch().count() -tStart;
+		std::cout<<"Lua Overhead: "<<(dt /1'000'000.0)<<"ms"<<std::endl;
+	});
 	defBvh.def("IntersectionTest",static_cast<std::optional<pragma::BvhHitInfo>(pragma::BaseBvhComponent::*)(const Vector3&,const Vector3&,float,float) const>(&pragma::BaseBvhComponent::IntersectionTest));
 	defBvh.def("IntersectionTestAabb",static_cast<bool(pragma::BaseBvhComponent::*)(const Vector3&,const Vector3&) const>(&pragma::BaseBvhComponent::IntersectionTestAabb));
 	defBvh.def("IntersectionTestAabb",
@@ -3624,3 +3635,4 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	}
 
 	// --template-register-definition
+	#pragma optimize("",on)

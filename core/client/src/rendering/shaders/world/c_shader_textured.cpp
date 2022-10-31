@@ -376,7 +376,8 @@ ShaderGameWorldLightingPass::MaterialData ShaderGameWorldLightingPass::GenerateM
 		auto &emissionFactor = data->GetValue("emission_factor");
 		if(emissionFactor != nullptr && typeid(*emissionFactor) == typeid(ds::Vector))
 		{
-			auto &f = static_cast<ds::Vector*>(emissionFactor.get())->GetValue();
+			auto f = static_cast<ds::Vector*>(emissionFactor.get())->GetValue();
+			f *= data->GetFloat("emission_strength",1.f);
 			matData.emissionFactor = {f.r,f.g,f.b,1.f};
 		}
 

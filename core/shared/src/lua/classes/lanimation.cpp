@@ -40,7 +40,7 @@ void Lua::Animation::Load(lua_State *l,LFile &f)
 	fptr->Seek(offset);
 	if(isUdmFormat)
 	{
-		auto udmData = util::load_udm_asset(std::make_unique<fsys::File>(fptr));
+		auto udmData = util::load_udm_asset(std::make_unique<ufile::FileWrapper>(fptr));
 		if(udmData == nullptr)
 			return;
 		std::string err;
@@ -52,8 +52,7 @@ void Lua::Animation::Load(lua_State *l,LFile &f)
 	}
 
 	FWAD wad;
-	fsys::File fp {f.GetHandle()};
-	auto anim = std::shared_ptr<pragma::animation::Animation>(wad.ReadData(33,fp)); // Animation version has been introduced at model version 33, after which the model version is no longer taken into account, so we'll always treat it as model version 33 here
+	auto anim = std::shared_ptr<pragma::animation::Animation>(wad.ReadData(33,*f.GetHandle())); // Animation version has been introduced at model version 33, after which the model version is no longer taken into account, so we'll always treat it as model version 33 here
 	if(anim == nullptr)
 		return;
 	Lua::Push<std::shared_ptr<pragma::animation::Animation>>(l,anim);

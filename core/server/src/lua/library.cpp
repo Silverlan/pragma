@@ -52,7 +52,7 @@ void SGame::RegisterLuaLibraries()
 			auto fh = f.GetHandle();
 			if(!fh)
 				return luabind::object{l,false};
-			auto fp = std::make_unique<fsys::File>(fh);
+			auto fp = std::make_unique<ufile::FileWrapper>(fh);
 			auto fileName = fp->GetFileName();
 			if(!fileName.has_value())
 				return luabind::object{l,false};

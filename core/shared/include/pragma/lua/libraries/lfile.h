@@ -13,6 +13,7 @@
 #include "luasystem.h"
 #include "pragma/lua/ldefinitions.h"
 #include <sharedutils/datastream.h>
+#include <sharedutils/util_ifile.hpp>
 #include <optional>
 
 enum class FileOpenMode : uint32_t
@@ -32,12 +33,13 @@ public:
 	LFile();
 	~LFile();
 private:
-	VFilePtr m_file;
+	std::shared_ptr<ufile::IFile> m_file = nullptr;
 public:
 	void Construct(const VFilePtr &f);
+	void Construct(const std::shared_ptr<ufile::IFile> &f);
 	bool Construct(const char *path,const char *mode,fsys::SearchFlags fsearchmode=fsys::SearchFlags::All);
 	bool IsValid() const;
-	VFilePtr GetHandle();
+	std::shared_ptr<ufile::IFile> GetHandle();
 	void Close();
 	unsigned long long Size();
 	long long Tell();

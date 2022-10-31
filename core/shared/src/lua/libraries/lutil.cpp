@@ -376,11 +376,13 @@ void Lua::util::register_shared_generic(luabind::module_ &mod)
 		return zipFile;
 	})];
 	defZip.scope[luabind::def("open",+[](LFile &f,ZIPFile::OpenMode openMode) -> std::shared_ptr<ZIPFile> {
-		auto *ptr = dynamic_cast<VFilePtrInternalReal*>(f.GetHandle().get());
+		auto ptr = f.GetHandle();
 		if(!ptr)
 			return nullptr;
-		auto &filePath = ptr->GetPath();
-		auto zipFile = ZIPFile::Open(filePath,openMode);
+		auto filePath = ptr->GetFileName();
+		if(!filePath.has_value())
+			return nullptr;
+		auto zipFile = ZIPFile::Open(*filePath,openMode);
 		if(!zipFile)
 			return nullptr;
 		return zipFile;

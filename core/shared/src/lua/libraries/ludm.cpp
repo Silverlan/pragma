@@ -1439,7 +1439,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			if(!file.GetHandle())
 				return Lua::mult<bool,std::string>{l,false,"Invalid file handle!"};
 			std::string err;
-			auto udmData = ::util::load_udm_asset(std::make_unique<fsys::File>(file.GetHandle()),&err);
+			auto udmData = ::util::load_udm_asset(std::make_unique<ufile::FileWrapper>(file.GetHandle()),&err);
 			if(udmData == nullptr)
 				return Lua::mult<bool,std::string>{l,false,std::move(err)};
 			return luabind::object{l,udmData};
@@ -1466,7 +1466,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		luabind::def("open",+[](lua_State *l,LFile &file) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
 			try
 			{
-				auto udmData = ::udm::Data::Open(file.GetHandle());
+				auto udmData = ::udm::Data::Open(std::make_unique<ufile::FileWrapper>(file.GetHandle()));
 				return luabind::object{l,udmData};
 			}
 			catch(const ::udm::Exception &e)
@@ -1947,12 +1947,12 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		}
 	});
 	cdData.def("Save",+[](lua_State *l,::udm::Data &udmData,LFile &f) {
-		auto fptr = std::dynamic_pointer_cast<VFilePtrInternalReal>(f.GetHandle());
+		auto fptr = f.GetHandle();
 		if(fptr == nullptr)
 			return;
 		try
 		{
-			udmData.Save(fptr);
+			udmData.Save(*fptr);
 			Lua::PushBool(l,true);
 		}
 		catch(const ::udm::Exception &e)
@@ -1962,12 +1962,12 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		}
 	});
 	cdData.def("SaveAscii",+[](lua_State *l,::udm::Data &udmData,LFile &f) {
-		auto fptr = std::dynamic_pointer_cast<VFilePtrInternalReal>(f.GetHandle());
+		auto fptr = f.GetHandle();
 		if(fptr == nullptr)
 			return;
 		try
 		{
-			udmData.SaveAscii(fptr);
+			udmData.SaveAscii(*fptr);
 			Lua::PushBool(l,true);
 		}
 		catch(const ::udm::Exception &e)
@@ -1977,12 +1977,12 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		}
 	});
 	cdData.def("SaveAscii",+[](lua_State *l,::udm::Data &udmData,LFile &f,::udm::AsciiSaveFlags flags) {
-		auto fptr = std::dynamic_pointer_cast<VFilePtrInternalReal>(f.GetHandle());
+		auto fptr = f.GetHandle();
 		if(fptr == nullptr)
 			return;
 		try
 		{
-			udmData.SaveAscii(fptr,flags);
+			udmData.SaveAscii(*fptr,flags);
 			Lua::PushBool(l,true);
 		}
 		catch(const ::udm::Exception &e)

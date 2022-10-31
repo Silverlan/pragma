@@ -122,12 +122,14 @@ std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const s
 
 static std::optional<std::string> get_extension(const LFile &file)
 {
-	auto *fp = dynamic_cast<VFilePtrInternalReal*>(const_cast<LFile&>(file).GetHandle().get());
+	auto *fp = const_cast<LFile&>(file).GetHandle().get();
 	if(!fp)
 		return {};
-	auto path = fp->GetPath();
+	auto path = fp->GetFileName();
+	if(path.has_value() == false)
+		return {};
 	std::string ext;
-	return ufile::get_extension(path,&ext) ? ext : std::optional<std::string>{};
+	return ufile::get_extension(*path,&ext) ? ext : std::optional<std::string>{};
 }
 std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const LFile &file,const std::string &cacheName,util::AssetLoadFlags loadFlags)
 {
@@ -138,7 +140,7 @@ std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const L
 	if(!ext.has_value())
 		return nullptr;
 	auto &texManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
-	auto f = std::make_unique<fsys::File>(const_cast<LFile&>(file).GetHandle());
+	auto f = std::make_unique<ufile::FileWrapper>(const_cast<LFile&>(file).GetHandle());
 	auto tex = texManager.LoadAsset("",std::move(f),*ext,std::make_unique<msys::TextureLoadInfo>(loadFlags | util::AssetLoadFlags::DontCache));
 	if(tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
 		return nullptr;
@@ -154,7 +156,7 @@ std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const L
 	if(!ext.has_value())
 		return nullptr;
 	auto &texManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
-	auto f = std::make_unique<fsys::File>(const_cast<LFile&>(file).GetHandle());
+	auto f = std::make_unique<ufile::FileWrapper>(const_cast<LFile&>(file).GetHandle());
 	auto tex = texManager.LoadAsset("",std::move(f),*ext,std::make_unique<msys::TextureLoadInfo>(loadFlags));
 	if(tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
 		return nullptr;

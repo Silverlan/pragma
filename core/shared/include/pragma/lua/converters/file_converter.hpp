@@ -11,12 +11,13 @@
 #include <luabind/detail/conversion_policies/conversion_policies.hpp>
 #include <memory>
 
+namespace ufile {struct IFile;};
+
 class LFile;
-class VFilePtrInternal;
 namespace luabind {
 	template<>
-	struct DLLNETWORK default_converter<std::shared_ptr<VFilePtrInternal> >
-		: default_converter<VFilePtrInternal*>
+	struct DLLNETWORK default_converter<std::shared_ptr<ufile::IFile> >
+		: default_converter<ufile::IFile*>
 	{
 		using is_native = std::false_type;
 
@@ -24,9 +25,9 @@ namespace luabind {
 		int match(lua_State* L, U, int index);
 
 		template <class U>
-		std::shared_ptr<VFilePtrInternal> to_cpp(lua_State* L, U u, int index);
+		std::shared_ptr<ufile::IFile> to_cpp(lua_State* L, U u, int index);
 
-		void to_lua(lua_State* L, std::shared_ptr<VFilePtrInternal> const& p);
+		void to_lua(lua_State* L, std::shared_ptr<ufile::IFile> const& p);
 
 		template <class U>
 		void converter_postcall(lua_State*, U const&, int)

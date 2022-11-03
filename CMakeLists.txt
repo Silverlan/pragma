@@ -1,14 +1,9 @@
 cmake_minimum_required(VERSION 3.9) # for GENERATOR_IS_MULTI_CONFIG
 project(pragma)
 
-
 #set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE CACHE INTERNAL "" FORCE)
 #set_target_properties(freetype PROPERTIES CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE)
-if(WIN32)
-	set(CONFIG_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build Type")
-else()
-	set(CONFIG_BUILD_TYPE "Release" CACHE STRING "Build Type")
-endif()
+set(CONFIG_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build Type")
 set_property(CACHE CONFIG_BUILD_TYPE PROPERTY STRINGS RelWithDebInfo Release Debug)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -921,8 +916,6 @@ add_dependencies(vorbis ogg)
 add_dependencies(util_pad zip)
 # add_dependencies(util_archive bsa)
 
-
-
 add_dependencies(util_image mathutil vfilesystem sharedutils png)
 add_dependencies(materialsystem datasystem util_image png VTFLib13 util_source2 util_udm)
 add_dependencies(mathutil sharedutils-static)
@@ -1179,6 +1172,10 @@ if(WIN32)
 pragma_install_lib_c("${DEPENDENCY_ZLIB_LIBRARY}" zlib1 "${BINARY_OUTPUT_DIR}")
 else()
     pragma_install_lib("${DEPENDENCY_ZLIB_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+endif()
+
+if(UNIX)
+    pragma_install_lib("${DEPENDENCY_LIBTOOL_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 endif()
 
 if(WIN32)

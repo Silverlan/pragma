@@ -281,27 +281,27 @@ jobs:
           sudo sh ./patch_library.sh ./lib/libmaterialsystem.so '$ORIGIN'
           
           # pr_source
-          wget https://github.com/Silverlan/tmp_pr_source_ci6/releases/download/latest/binaries_linux64.tar.gz
+          wget https://github.com/Silverlan/pr_source/releases/download/latest/binaries_linux64.tar.gz
           tar xvfz binaries_linux64.tar.gz
           rm -f binaries_linux64.tar.gz
           
           # pr_curl
-          wget https://github.com/Silverlan/tmp_pr_curl_ci/releases/download/latest/binaries_linux64.tar.gz
+          wget https://github.com/Silverlan/pr_curl/releases/download/latest/binaries_linux64.tar.gz
           tar xvfz binaries_linux64.tar.gz
           rm -f binaries_linux64.tar.gz
           
           # pr_dmx
-          wget https://github.com/Silverlan/tmp_pr_dmx_ci2/releases/download/latest/binaries_linux64.tar.gz
+          wget https://github.com/Silverlan/pr_dmx/releases/download/latest/binaries_linux64.tar.gz
           tar xvfz binaries_linux64.tar.gz
           rm -f binaries_linux64.tar.gz
           
           # pr_python
-          wget https://github.com/Silverlan/tmp_pr_python_ci/releases/download/latest/binaries_linux64.tar.gz
+          wget https://github.com/Silverlan/pr_python/releases/download/latest/binaries_linux64.tar.gz
           tar xvfz binaries_linux64.tar.gz
           rm -f binaries_linux64.tar.gz
           
           # pr_bullet
-          wget https://github.com/Silverlan/tmp_pr_bullet_ci2/releases/download/latest/binaries_linux64.tar.gz
+          wget https://github.com/Silverlan/pr_bullet/releases/download/latest/binaries_linux64.tar.gz
           tar xvfz binaries_linux64.tar.gz
           rm -f binaries_linux64.tar.gz
           
@@ -311,7 +311,7 @@ jobs:
           rm -f binaries_linux64.tar.gzgz
           
           # pr_openvr
-          wget https://github.com/Silverlan/tmp_pr_openvr_ci/releases/download/latest/binaries_linux64.tar.gz
+          wget https://github.com/Silverlan/pr_openvr/releases/download/latest/binaries_linux64.tar.gz
           tar xvfz binaries_linux64.tar.gz
           rm -f binaries_linux64.tar.gz
           

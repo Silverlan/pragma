@@ -974,13 +974,13 @@ template<class TPropertyWrapper>
 		prop.children.clear();
 	else
 	{
-		auto *el = prop.GetValuePtr<::udm::Element>();
+        auto *el = prop.template GetValuePtr<::udm::Element>();
 		if(el)
 		{
 			el->children.clear();
 			return;
 		}
-		auto *a = prop.GetValuePtr<::udm::Array>();
+        auto *a = prop.template GetValuePtr<::udm::Array>();
 		if(a)
 			a->Resize(0);
 	}

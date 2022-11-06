@@ -6,7 +6,7 @@ on:
     branches: [ main, master, actions ]
 
 concurrency:
-  group: environment-${{ github.ref }}
+  group: environment-win-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -261,6 +261,11 @@ jobs:
                         $i.FullName + " -- " + "{0:N2}" -f $size + " MB"
                   }
               }
+              
+      - name: Define CMake Variable
+        uses: Silverlan/common_actions/define_cmake_var@main
+        with:
+          cmake_var: ' -DCMAKE_INSTALL_PREFIX=install '
 
       - uses: Silverlan/common_actions/build_cmake@main
         name: CMake Build
@@ -268,6 +273,7 @@ jobs:
           build_type: ${{ matrix.config.build_type }}
           build_generator: ${{ matrix.config.generators }}
           build_target: pragma-install-full
+          cmake_definitions_tmp: " -DCMAKE_INSTALL_PREFIX=install "
           build_dir: '${{ matrix.config.build_dir }}/.'
           cmake_script_location: '.'
           pre_build_cmd: |
@@ -278,11 +284,16 @@ jobs:
             rm -rf "./pragma.zip"
             cd "$curDir"
             
-            #echo "--ALL FILES START--"
-            #ls -R
-            #echo "--ALL FILES END--"
+            # echo "--ALL FILES START--"
+            # ls -R
+            # echo "--ALL FILES END--"
             # cp ./build/third_party_libs/libpng/pnglibconf.h ./third_party_libs/libpng/pnglibconf.h
             # cp ./build/third_party_libs/zlib/zconf.h ./third_party_libs/zlib/zconf.h
+            
+      - name: Print cmake_install
+        shell: bash
+        run:   |
+          cat "${{ matrix.config.build_dir }}/cmake_install.cmake"
 
       - uses: Silverlan/common_actions/build_cmake@main
         name: CMake Build PFM Executable
@@ -290,6 +301,7 @@ jobs:
           build_type: ${{ matrix.config.build_type }}
           build_generator: ${{ matrix.config.generators }}
           build_target: pfm
+          cmake_definitions_tmp: " -DCMAKE_INSTALL_PREFIX=install "
           build_dir: '${{ matrix.config.build_dir }}/.'
           configure: '0'
           cmake_script_location: '.'
@@ -300,6 +312,7 @@ jobs:
           build_type: ${{ matrix.config.build_type }}
           build_generator: ${{ matrix.config.generators }}
           build_target: pragma-install
+          cmake_definitions_tmp: " -DCMAKE_INSTALL_PREFIX=install "
           build_dir: '${{ matrix.config.build_dir }}/.'
           configure: '0'
           cmake_script_location: '.'
@@ -344,6 +357,12 @@ jobs:
       - name: Finalize release zip
         shell: bash
         run: |
+          curDir=$PWD
+          cd ./${{ matrix.config.build_dir }}/install
+          mv ./bin/pragma.exe ./pragma.exe
+          mv ./bin/pragma_server.exe ./pragma_server.exe
+          cd $curDir
+          
           mv "/c/release/pragma.zip" "./pragma.zip"
           7z a pragma.zip ".\${{ matrix.config.build_dir }}/install/**"
           7z d pragma.zip .git

@@ -12,6 +12,7 @@
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_path.hpp>
+#include <fsys/ifile.hpp>
 
 extern DLLNETWORK Engine *engine;
 
@@ -23,17 +24,21 @@ static bool is_permitted_root_dir(const std::string_view &str)
 LFile::LFile()
 {}
 
-void LFile::Construct(const VFilePtr &f) {m_file = f;}
+void LFile::Construct(const VFilePtr &f) {m_file = std::make_shared<fsys::File>(f);}
+void LFile::Construct(const std::shared_ptr<ufile::IFile> &f) {m_file = f;}
 
 bool LFile::Construct(const char *path,const char *mode,fsys::SearchFlags fsearchmode)
 {
-	m_file = FileManager::OpenFile(path,mode,fsearchmode);
-	return (m_file != nullptr) ? true : false;
+	auto f = FileManager::OpenFile(path,mode,fsearchmode);
+	if(!f)
+		return false;
+	m_file = std::make_shared<fsys::File>(f);
+	return true;
 }
 
 LFile::~LFile() {Close();}
 
-VFilePtr LFile::GetHandle()
+std::shared_ptr<ufile::IFile> LFile::GetHandle()
 {
 	if(!IsValid())
 		return NULL;
@@ -90,20 +95,14 @@ void LFile::Write(void *c,unsigned long long l)
 {
 	if(!IsValid())
 		return;
-	if(m_file->GetType() != VFILE_LOCAL)
-		return;
-	auto freal = std::static_pointer_cast<VFilePtrInternalReal>(m_file);
-	freal->Write(c,l);
+	m_file->Write(c,l);
 }
 
 void LFile::WriteString(std::string str)
 {
 	if(!IsValid())
 		return;
-	if(m_file->GetType() != VFILE_LOCAL)
-		return;
-	auto freal = std::static_pointer_cast<VFilePtrInternalReal>(m_file);
-	freal->WriteString(str);
+	m_file->WriteString(str);
 }
 
 std::string LFile::ReadLine()
@@ -124,7 +123,7 @@ void LFile::IgnoreComments(std::string start,std::string end)
 {
 	if(!IsValid())
 		return;
-	m_file->IgnoreComments(start,end);
+	//m_file->IgnoreComments(start,end);
 }
 
 ////////////////////////////////////
@@ -167,13 +166,10 @@ DLLNETWORK void Lua_LFile_WriteString(lua_State*,LFile &f,std::string str,bool b
 	if(!f.IsValid())
 		return;
 	auto file = f.GetHandle();
-	if(file->GetType() != VFILE_LOCAL)
-		return;
-	auto freal = std::static_pointer_cast<VFilePtrInternalReal>(file);
 	if(bNullTerminated == true)
-		freal->WriteString(str);
+		file->WriteString(str);
 	else
-		freal->Write(str.data(),str.length());
+		file->Write(str.data(),str.length());
 }
 
 DLLNETWORK void Lua_LFile_WriteString(lua_State *l,LFile &f,std::string str)
@@ -294,10 +290,10 @@ void Lua_LFile_GetPath(lua_State *l,LFile &f)
 	if(!f.IsValid())
 		return;
 	auto file = f.GetHandle();
-	if(file->GetType() != VFILE_LOCAL)
+	auto fileName = file->GetFileName();
+	if(!fileName.has_value())
 		return;
-	auto freal = std::static_pointer_cast<VFilePtrInternalReal>(file);
-	Lua::PushString(l,freal->GetPath());
+	Lua::PushString(l,*fileName);
 }
 
 ////////////////////////////////////

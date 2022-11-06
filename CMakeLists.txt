@@ -1,19 +1,9 @@
 cmake_minimum_required(VERSION 3.9) # for GENERATOR_IS_MULTI_CONFIG
 project(pragma)
 
-
-#variable_watch(LINKS_RESULT)
-#variable_watch(DEPENDENCY_ANVIL_INCLUDE)
-#variable_watch(_STR_LEN)
-#variable_watch(TMP_VAR)
-variable_watch(DEPENDENCY_UTIL_DMX_INCLUDE)
 #set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE CACHE INTERNAL "" FORCE)
 #set_target_properties(freetype PROPERTIES CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE)
-if(WIN32)
-	set(CONFIG_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build Type")
-else()
-	set(CONFIG_BUILD_TYPE "Release" CACHE STRING "Build Type")
-endif()
+set(CONFIG_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build Type")
 set_property(CACHE CONFIG_BUILD_TYPE PROPERTY STRINGS RelWithDebInfo Release Debug)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -926,8 +916,6 @@ add_dependencies(vorbis ogg)
 add_dependencies(util_pad zip)
 # add_dependencies(util_archive bsa)
 
-
-
 add_dependencies(util_image mathutil vfilesystem sharedutils png)
 add_dependencies(materialsystem datasystem util_image png VTFLib13 util_source2 util_udm)
 add_dependencies(mathutil sharedutils-static)
@@ -982,8 +970,6 @@ else()
         set(BINARY_OUTPUT_DIR "lib")
 endif()
 
-#variable_watch(PRAGMA_INSTALL_COMPONENT)
-#variable_watch(PRAGMA_INSTALL_COMPONENT_FULL)
 set(PRAGMA_INSTALL_COMPONENT "pragma")
 set(PRAGMA_INSTALL_COMPONENT_FULL "pragma-full")
 function(pragma_install TARGET_NAME DESTINATION_PATH)
@@ -1007,7 +993,7 @@ function(pragma_install TARGET_NAME DESTINATION_PATH)
     endif()
         install(
                 TARGETS ${TARGET_NAME} ${TARGET_INSTALL_TYPE}
-                DESTINATION "${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}"
+                DESTINATION "${DESTINATION_PATH}"
                 COMPONENT ${PRAGMA_INSTALL_COMPONENT}
         )
 endfunction(pragma_install)
@@ -1188,6 +1174,10 @@ else()
     pragma_install_lib("${DEPENDENCY_ZLIB_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 endif()
 
+if(UNIX)
+    pragma_install_lib("${DEPENDENCY_LIBTOOL_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+endif()
+
 if(WIN32)
     set(OS_LIB_BIN_EXT ".dll")
     set(OS_LIB_BIN_PRE "")
@@ -1209,7 +1199,7 @@ endif()
 function(pragma_install_file FILE_PATH INSTALL_PATH)
 	set(extra_macro_args ${ARGN})
 	INSTALL(
-                FILES "${FILE_PATH}" DESTINATION "${CMAKE_INSTALL_PREFIX}/${INSTALL_PATH}"
+                FILES "${FILE_PATH}" DESTINATION "${INSTALL_PATH}"
 		COMPONENT ${PRAGMA_INSTALL_COMPONENT} ${extra_macro_args}
 	)
 endfunction(pragma_install_file)
@@ -1226,7 +1216,7 @@ endfunction(pragma_install_program)
 function(pragma_install_directory FILE_PATH INSTALL_PATH)
 	set(extra_macro_args ${ARGN})
 	INSTALL(
-                DIRECTORY "${FILE_PATH}" DESTINATION "${CMAKE_INSTALL_PREFIX}/${INSTALL_PATH}"
+                DIRECTORY "${FILE_PATH}" DESTINATION "${INSTALL_PATH}"
 		COMPONENT ${PRAGMA_INSTALL_COMPONENT} ${extra_macro_args}
 	)
 endfunction(pragma_install_directory)
@@ -1246,7 +1236,7 @@ foreach(MODULE_PATH ${PR_MODULES})
 		# Default behavior
 		if(EXISTS "${PR_MODULE_PATH_WITH_EXT}")
 			INSTALL(
-                                FILES "${PR_MODULE_PATH_WITH_EXT}" DESTINATION "${CMAKE_INSTALL_PREFIX}/modules/"
+                                FILES "${PR_MODULE_PATH_WITH_EXT}" DESTINATION "modules/"
 				COMPONENT ${PRAGMA_INSTALL_COMPONENT}
 			)
 		endif()
@@ -1264,7 +1254,7 @@ endforeach()
 
 # Install assets
 INSTALL(
-        DIRECTORY assets/ DESTINATION ${CMAKE_INSTALL_PREFIX}
+        DIRECTORY assets/ DESTINATION "."
 	COMPONENT ${PRAGMA_INSTALL_COMPONENT_FULL}
 )
 

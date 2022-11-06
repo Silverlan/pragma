@@ -43,6 +43,7 @@ namespace pragma
 		bool ShouldUpdateLazily() const;
 		void RebuildAnimatedBvh(bool force=false);
 	private:
+		void RebuildTemporaryBvhData();
 		void Clear();
 		void Cancel();
 		void WaitForCompletion();
@@ -53,6 +54,8 @@ namespace pragma
 		CallbackHandle m_cbOnBvhCleared;
 		CallbackHandle m_cbRebuildScheduled;
 		CallbackHandle m_cbOnBvhUpdateRequested;
+		CallbackHandle m_cbOnBvhRebuilt;
+		std::shared_ptr<BvhData> m_tmpBvhData = nullptr;
 		bool m_rebuildScheduled = false;
 		std::atomic<bool> m_cancelled = false;
 		std::atomic<bool> m_busy = false;

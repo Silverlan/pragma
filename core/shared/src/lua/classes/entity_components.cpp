@@ -38,7 +38,7 @@
 #include <luabind/out_value_policy.hpp>
 #include <luabind/copy_policy.hpp>
 #include <luabind/discard_result_policy.hpp>
-
+#pragma optimize("",off)
 namespace Lua
 {
 	template<typename ...Types>
@@ -165,6 +165,11 @@ std::optional<Lua::udm_type> pragma::lua::get_member_value(
 		{
 			T value;
 			memberInfo.getterFunction(memberInfo,component,&value);
+			if constexpr(std::is_same_v<T,pragma::ents::Element>)
+			{
+				if(!value)
+					return Lua::nil;
+			}
 			return Lua::udm_type{luabind::object{l,value}};
 		}
 	});
@@ -175,7 +180,7 @@ bool pragma::lua::set_member_value(
 {
 	return pragma::ents::visit_member(memberInfo.type,[&memberInfo,&component,l,&value](auto tag) -> bool {
         using T = typename decltype(tag)::type;
-		if constexpr(!pragma::is_valid_component_property_type_v<T>)
+		if constexpr(!pragma::is_valid_component_property_type_v<T> || std::is_same_v<T,pragma::ents::Element>)
 			return false;
 		else
 		{
@@ -214,6 +219,25 @@ bool pragma::lua::set_member_value(
 			return true;
 		}
 	});
+}
+static_assert(umath::to_integral(pragma::ents::EntityMemberType::VersionIndex) == 0);
+bool pragma::lua::set_member_value(
+	lua_State *l,pragma::BaseEntityComponent &component,const pragma::ComponentMemberInfo &memberInfo,const pragma::EntityURef &eref
+)
+{
+	if(memberInfo.type != pragma::ents::EntityMemberType::Entity)
+		return false;
+	memberInfo.setterFunction(memberInfo,component,&eref);
+	return true;
+}
+bool pragma::lua::set_member_value(
+	lua_State *l,pragma::BaseEntityComponent &component,const pragma::ComponentMemberInfo &memberInfo,const pragma::MultiEntityURef &eref
+)
+{
+	if(memberInfo.type != pragma::ents::EntityMemberType::MultiEntity)
+		return false;
+	memberInfo.setterFunction(memberInfo,component,&eref);
+	return true;
 }
 static void get_dynamic_member_ids(pragma::BaseEntityComponent &c,std::vector<pragma::ComponentMemberIndex> &memberIndices)
 {
@@ -355,7 +379,9 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 			return {};
 		return get_member_value(l,component,*info);
 	});
-	entityComponentDef.def("SetMemberValue",&set_member_value);
+	entityComponentDef.def("SetMemberValue",static_cast<bool(*)(lua_State*,pragma::BaseEntityComponent&,const pragma::ComponentMemberInfo&,Lua::udm_type)>(&set_member_value));
+	entityComponentDef.def("SetMemberValue",static_cast<bool(*)(lua_State*,pragma::BaseEntityComponent&,const pragma::ComponentMemberInfo&,const pragma::EntityURef&)>(&set_member_value));
+	entityComponentDef.def("SetMemberValue",static_cast<bool(*)(lua_State*,pragma::BaseEntityComponent&,const pragma::ComponentMemberInfo&,const pragma::MultiEntityURef&)>(&set_member_value));
 	entityComponentDef.def("SetMemberValue",+[](lua_State *l,pragma::BaseEntityComponent &component,uint32_t memberIndex,Lua::udm_type value) -> bool {
 		auto *info = component.GetMemberInfo(memberIndex);
 		if(!info)
@@ -367,6 +393,18 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 		if(!info)
 			return false;
 		return pragma::lua::set_member_value(l,component,*info,value);
+	});
+	entityComponentDef.def("SetMemberValue",+[](lua_State *l,pragma::BaseEntityComponent &component,const std::string &memberName,const pragma::EntityURef &eref) -> bool {
+		auto *info = component.FindMemberInfo(memberName);
+		if(!info)
+			return false;
+		return pragma::lua::set_member_value(l,component,*info,eref);
+	});
+	entityComponentDef.def("SetMemberValue",+[](lua_State *l,pragma::BaseEntityComponent &component,const std::string &memberName,const pragma::MultiEntityURef &eref) -> bool {
+		auto *info = component.FindMemberInfo(memberName);
+		if(!info)
+			return false;
+		return pragma::lua::set_member_value(l,component,*info,eref);
 	});
 	entityComponentDef.def("IsValid",static_cast<bool(*)(lua_State*,pragma::BaseEntityComponent*)>([](lua_State *l,pragma::BaseEntityComponent *hComponent) {
 		return hComponent != nullptr;
@@ -493,6 +531,17 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 
 	auto defBvh = Lua::create_base_entity_component_class<pragma::BaseBvhComponent>("BaseBvhComponent");
 	defBvh.def("RebuildBvh",static_cast<void(pragma::BaseBvhComponent::*)()>(&pragma::BaseBvhComponent::RebuildBvh));
+	defBvh.def("IntersectionTest2",+[](pragma::BaseBvhComponent &c,const Vector3 &origin,const Vector3 &dir,float minDist,float maxDist) {
+		auto t = std::chrono::steady_clock::now();
+		c.IntersectionTest(origin,dir,minDist,maxDist);
+		auto dt = std::chrono::steady_clock::now() -t;
+		std::cout<<"Internal2: "<<(dt.count() /1'000'000.0)<<"ms"<<std::endl;
+	});
+	defBvh.def("IntersectionTest3",+[](lua_State *l,size_t tStart) {
+		auto t = std::chrono::steady_clock::now();
+		auto dt = std::chrono::steady_clock::now().time_since_epoch().count() -tStart;
+		std::cout<<"Lua Overhead: "<<(dt /1'000'000.0)<<"ms"<<std::endl;
+	});
 	defBvh.def("IntersectionTest",static_cast<std::optional<pragma::BvhHitInfo>(pragma::BaseBvhComponent::*)(const Vector3&,const Vector3&,float,float) const>(&pragma::BaseBvhComponent::IntersectionTest));
 	defBvh.def("IntersectionTestAabb",static_cast<bool(pragma::BaseBvhComponent::*)(const Vector3&,const Vector3&) const>(&pragma::BaseBvhComponent::IntersectionTestAabb));
 	defBvh.def("IntersectionTestAabb",
@@ -3586,3 +3635,4 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	}
 
 	// --template-register-definition
+	#pragma optimize("",on)

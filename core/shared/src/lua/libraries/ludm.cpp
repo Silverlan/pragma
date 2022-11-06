@@ -11,6 +11,7 @@
 #include "pragma/lua/util.hpp"
 #include "pragma/lua/converters/vector_converter_t.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
+#include "pragma/lua/policies/default_parameter_policy.hpp"
 #include "pragma/lua/converters/string_view_converter_t.hpp"
 #include "pragma/lua/custom_constructor.hpp"
 #include "pragma/lua/types/udm.hpp"
@@ -24,6 +25,7 @@
 #include <datasystem_vector.h>
 #include <datasystem_color.h>
 #include <sharedutils/util_file.h>
+#include <sharedutils/util_ifile.hpp>
 #include <fsys/ifile.hpp>
 
 extern DLLNETWORK Engine *engine;
@@ -941,6 +943,77 @@ static ::udm::LinkedPropertyWrapper i_get(lua_State *l,::udm::Property &p,int32_
 	return static_cast<::udm::PropertyWrapper>(p)[idx];
 }
 
+static std::string serialize(::udm::PropertyWrapper &p)
+{
+	auto data = udm::Data::Create();
+	data->GetAssetData().GetData().Merge(p,::udm::MergeFlags::DeepCopy);
+	std::stringstream ss;
+	data->ToAscii(ss,::udm::AsciiSaveFlags::DontCompressLz4Arrays);
+	return ss.str();
+}
+
+static Lua::var<::udm::PProperty,std::pair<bool,std::string>> deserialize(lua_State *l,const std::string &str)
+{
+	auto memFile = std::make_unique<::ufile::MemoryFile>(reinterpret_cast<uint8_t*>(const_cast<char*>(str.data())),str.size());
+	std::shared_ptr<::udm::Data> data = nullptr;
+	try
+	{
+		data = ::udm::Data::Load(std::move(memFile));
+	}
+	catch(const udm::AsciiException &e)
+	{
+		return luabind::object{l,std::pair<bool,std::string>{false,e.what()}};
+	}
+	return luabind::object{l,data->GetAssetData().GetData().ClaimOwnership()};
+}
+
+template<class TPropertyWrapper>
+	void clear(TPropertyWrapper &prop)
+{
+	if constexpr(std::is_same_v<TPropertyWrapper,::udm::Element>)
+		prop.children.clear();
+	else
+	{
+		auto *el = prop.GetValuePtr<::udm::Element>();
+		if(el)
+		{
+			el->children.clear();
+			return;
+		}
+		auto *a = prop.GetValuePtr<::udm::Array>();
+		if(a)
+			a->Resize(0);
+	}
+}
+
+static void debug_print_wrapper(const udm::PropertyWrapper &lp,const std::string &t)
+{
+	std::cout<<t<<"arrayIndex: "<<lp.arrayIndex<<std::endl;
+	std::cout<<t<<"prop: ";
+	if(!lp.prop)
+		std::cout<<"NULL";
+	else
+		std::cout<<udm::enum_to_string(lp.prop->type);
+	std::cout<<std::endl;
+	auto *linked = lp.GetLinked();
+	if(linked)
+	{
+		std::cout<<t<<"propName: "<<linked->propName<<std::endl;
+		std::cout<<"prev: ";
+		if(!linked->prev)
+			std::cout<<"NULL"<<std::endl;
+		else
+		{
+			std::cout<<std::endl;
+			debug_print_wrapper(*linked->prev,t +"\t");
+		}
+	}
+}
+static void debug_print_wrapper(const udm::PropertyWrapper &lp)
+{
+	debug_print_wrapper(lp,"");
+}
+
 template<class T,class TPropertyWrapper,class TClassDef>
 	void register_property_methods(TClassDef &classDef)
 {
@@ -1152,8 +1225,12 @@ template<class T,class TPropertyWrapper,class TClassDef>
 		return get_property_value(l,static_cast<TPropertyWrapper>(p),idx);
 	})
 	.def("GetType",+[](lua_State *l,T &prop) -> ::udm::Type {
-		return static_cast<TPropertyWrapper>(prop).GetType();
+		if constexpr(std::is_same_v<T,::udm::Element>)
+			return ::udm::Type::Element;
+		else
+			return static_cast<TPropertyWrapper>(prop).GetType();
 	})
+	.def("Clear",&clear<T>)
 	.def("Merge",+[](lua_State *l,T &prop,::udm::PropertyWrapper &propOther) {
 		static_cast<TPropertyWrapper>(prop).Merge(propOther);
 	})
@@ -1386,6 +1463,17 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm,::udm::HdrColor);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm,::udm::Data);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm,::udm::Array);
 
+static bool is_supported_array_value_type(::udm::Type valueType,::udm::ArrayType arrayType)
+{
+	switch(arrayType)
+	{
+	case ::udm::ArrayType::Compressed:
+		return ::udm::ArrayLz4::IsValueTypeSupported(valueType);
+	default:
+		return ::udm::Array::IsValueTypeSupported(valueType);
+	}
+	return false;
+}
 
 void Lua::udm::register_library(Lua::Interface &lua)
 {
@@ -1402,7 +1490,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			if(!file.GetHandle())
 				return Lua::mult<bool,std::string>{l,false,"Invalid file handle!"};
 			std::string err;
-			auto udmData = ::util::load_udm_asset(std::make_unique<fsys::File>(file.GetHandle()),&err);
+			auto udmData = ::util::load_udm_asset(std::make_unique<ufile::FileWrapper>(file.GetHandle()),&err);
 			if(udmData == nullptr)
 				return Lua::mult<bool,std::string>{l,false,std::move(err)};
 			return luabind::object{l,udmData};
@@ -1429,7 +1517,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		luabind::def("open",+[](lua_State *l,LFile &file) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
 			try
 			{
-				auto udmData = ::udm::Data::Open(file.GetHandle());
+				auto udmData = ::udm::Data::Open(std::make_unique<ufile::FileWrapper>(file.GetHandle()));
 				return luabind::object{l,udmData};
 			}
 			catch(const ::udm::Exception &e)
@@ -1523,6 +1611,10 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		}),
 		luabind::def("enum_type_to_ascii",&::udm::enum_type_to_ascii),
 		luabind::def("ascii_type_to_enum",&::udm::ascii_type_to_enum),
+		luabind::def("serialize",&::serialize),
+		luabind::def("deserialize",&::deserialize),
+		luabind::def("is_supported_array_value_type",&is_supported_array_value_type),
+		luabind::def("is_supported_array_value_type",&is_supported_array_value_type,luabind::default_parameter_policy<2,::udm::ArrayType::Raw>{}),
 		luabind::def("convert",+[](lua_State *l,const luabind::object &o0,::udm::Type t0,::udm::Type t1) -> luabind::object {
 			return ::udm::visit<true,true,true>(t0,[l,&o0,t1](auto tag){
                 using T0 = typename decltype(tag)::type;
@@ -1906,12 +1998,12 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		}
 	});
 	cdData.def("Save",+[](lua_State *l,::udm::Data &udmData,LFile &f) {
-		auto fptr = std::dynamic_pointer_cast<VFilePtrInternalReal>(f.GetHandle());
+		auto fptr = f.GetHandle();
 		if(fptr == nullptr)
 			return;
 		try
 		{
-			udmData.Save(fptr);
+			udmData.Save(*fptr);
 			Lua::PushBool(l,true);
 		}
 		catch(const ::udm::Exception &e)
@@ -1921,12 +2013,12 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		}
 	});
 	cdData.def("SaveAscii",+[](lua_State *l,::udm::Data &udmData,LFile &f) {
-		auto fptr = std::dynamic_pointer_cast<VFilePtrInternalReal>(f.GetHandle());
+		auto fptr = f.GetHandle();
 		if(fptr == nullptr)
 			return;
 		try
 		{
-			udmData.SaveAscii(fptr);
+			udmData.SaveAscii(*fptr);
 			Lua::PushBool(l,true);
 		}
 		catch(const ::udm::Exception &e)
@@ -1936,12 +2028,12 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		}
 	});
 	cdData.def("SaveAscii",+[](lua_State *l,::udm::Data &udmData,LFile &f,::udm::AsciiSaveFlags flags) {
-		auto fptr = std::dynamic_pointer_cast<VFilePtrInternalReal>(f.GetHandle());
+		auto fptr = f.GetHandle();
 		if(fptr == nullptr)
 			return;
 		try
 		{
-			udmData.SaveAscii(fptr,flags);
+			udmData.SaveAscii(*fptr,flags);
 			Lua::PushBool(l,true);
 		}
 		catch(const ::udm::Exception &e)
@@ -1987,6 +2079,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		g_it = LuaUdmArrayIterator{p};
 		return *g_it;
 	},luabind::return_stl_iterator{});
+	cdPropWrap.def("DebugPrint",static_cast<void(*)(const ::udm::PropertyWrapper&)>(&debug_print_wrapper));
 	register_property_methods<::udm::PropertyWrapper,::udm::PropertyWrapper&>(cdPropWrap);
 	modUdm[cdPropWrap];
 
@@ -2003,6 +2096,10 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		return prop.ClaimOwnership();
 	});
 	modUdm[cdLinkedPropWrap];
+	pragma::lua::define_custom_constructor<::udm::LinkedPropertyWrapper,
+		[](::udm::Property &prop) -> ::udm::LinkedPropertyWrapper {
+		return ::udm::LinkedPropertyWrapper{prop};
+	},::udm::Property&>(lua.GetState());
 
 	auto cdAssetData = luabind::class_<::udm::AssetData,::udm::LinkedPropertyWrapper,::udm::PropertyWrapper>("AssetData");
 	cdAssetData.def(luabind::tostring(luabind::self));
@@ -2037,9 +2134,9 @@ void Lua::udm::register_library(Lua::Interface &lua)
 	auto cdProp = luabind::class_<::udm::Property>("Property");
 	cdProp.def(luabind::tostring(luabind::self));
 	register_property_methods<::udm::Property,::udm::PropertyWrapper>(cdProp);
-	cdProp.def("GetType",+[](lua_State *l,::udm::Property &prop) -> ::udm::Type {
-		return prop.type;
-	});
+	//cdProp.def("GetType",+[](lua_State *l,::udm::Property &prop) -> ::udm::Type {
+	//	return prop.type;
+	//});
 	cdProp.def("ToAscii",+[](lua_State *l,::udm::Property &prop,const std::string &propName,const std::string &prefix) -> std::string {
 		std::stringstream ss;
 		prop.ToAscii(::udm::AsciiSaveFlags::None,ss,propName,prefix);

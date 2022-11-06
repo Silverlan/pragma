@@ -43,17 +43,25 @@ al::ISoundSystem *CEngine::InitializeSoundEngine()
 		outLocation = pragma::audio::get_audio_api_module_location(audioAPI);
 		outModulePath = util::get_normalized_module_path(outLocation);
 	};
-	auto loadAudioApiModule = [this,&getAudioApiPath](const std::string &renderAPI) -> bool {
+	auto loadAudioApiModule = [this,&getAudioApiPath](const std::string &renderAPI,std::string &outErr) -> bool {
 		std::string location;
 		std::string modulePath;
 		getAudioApiPath(renderAPI,location,modulePath);
-		m_audioAPILib = util::load_library_module(modulePath,util::get_default_additional_library_search_directories(modulePath));
+		m_audioAPILib = util::load_library_module(modulePath,util::get_default_additional_library_search_directories(modulePath),{},&outErr);
 		return (m_audioAPILib != nullptr);
 	};
-	if(loadAudioApiModule(audioAPI) == false)
+	std::string err;
+	if(loadAudioApiModule(audioAPI,err) == false)
 	{
-		// Fallback
-		loadAudioApiModule("dummy");
+		Con::cwar<<"WARNING: Failed to load default audio engine '"<<audioAPI<<"': "<<err<<Con::endl;
+		// Fallback 1
+		if(loadAudioApiModule("soloud",err) == false)
+		{
+			Con::cwar<<"WARNING: Failed to load 'soloud' fallback audio engine: "<<err<<Con::endl;
+			// Fallback 2
+			if(!loadAudioApiModule("dummy",err))
+				Con::cwar<<"WARNING: Failed to load 'dummy' fallback audio engine: "<<err<<Con::endl;
+		}
 	}
 	if(!m_audioAPILib)
 		Con::crit<<"ERROR: No valid audio module found!"<<Con::endl;
@@ -62,7 +70,6 @@ al::ISoundSystem *CEngine::InitializeSoundEngine()
 	std::string modulePath;
 	getAudioApiPath(audioAPI,location,modulePath);
 
-	std::string err;
 	if(lib != nullptr)
 	{
 		auto fInitAudioAPI = lib->FindSymbolAddress<bool(*)(float,std::shared_ptr<al::ISoundSystem>&,std::string&)>("initialize_audio_api");

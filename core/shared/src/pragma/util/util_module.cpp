@@ -61,10 +61,18 @@ std::shared_ptr<util::Library> util::load_library_module(const std::string &lib,
 #ifdef __linux__
     std::replace(lpath.begin(),lpath.end(),'\\','/');
 
-    auto modPath = util::Path::CreatePath("modules/") +
-        util::Path::CreatePath(ufile::get_path_from_filename(lib));
-    auto linAdditionalSearchDirectories = additionalSearchDirectories;
-    linAdditionalSearchDirectories.push_back(modPath.GetString());
+    
+    util::Path modPath;
+    if(ufile::get_path_from_filename(lib).find("modules/")==std::string::npos)
+        modPath = util::Path::CreatePath("modules/");
+    modPath += util::Path::CreatePath(ufile::get_path_from_filename(lib));
+    auto linAdditionalSearchDirectories = util::get_default_additional_library_search_directories(modPath.GetString());
+
+    linAdditionalSearchDirectories.insert(linAdditionalSearchDirectories.end(),additionalSearchDirectories.begin(),additionalSearchDirectories.end());
+    //ensure we do not have dupes.
+    sort( linAdditionalSearchDirectories.begin(), linAdditionalSearchDirectories.end() );
+    linAdditionalSearchDirectories.erase( unique( linAdditionalSearchDirectories.begin(), linAdditionalSearchDirectories.end() ), linAdditionalSearchDirectories.end() );
+    //linAdditionalSearchDirectories.push_back(modPath.GetString());
     return util::Library::Load(lpath,linAdditionalSearchDirectories,err);
 #else
     return util::Library::Load(lpath,additionalSearchDirectories,err);

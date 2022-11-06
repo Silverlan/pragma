@@ -7,7 +7,7 @@
 #include "pragma/lua/converters/file_converter.hpp"
 #include "pragma/lua/libraries/lfile.h"
 
-void luabind::default_converter<std::shared_ptr<VFilePtrInternal> >::to_lua(lua_State* L, std::shared_ptr<VFilePtrInternal> const& p)
+void luabind::default_converter<std::shared_ptr<ufile::IFile> >::to_lua(lua_State* L, std::shared_ptr<ufile::IFile> const& p)
 {
 	auto f = std::make_shared<LFile>();
 	f->Construct(p);

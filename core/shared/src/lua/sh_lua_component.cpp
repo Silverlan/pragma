@@ -475,6 +475,7 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 		}
 	}
 
+	static_assert(umath::to_integral(pragma::ents::EntityMemberType::VersionIndex) == 0);
 	std::string getterName = "Get";
 	auto bProperty = (memberFlags &MemberFlags::PropertyBit) != MemberFlags::None;
 	if((memberFlags &MemberFlags::GetterBit) != MemberFlags::None)
@@ -703,6 +704,10 @@ void BaseLuaBaseEntityComponent::InitializeMembers(const std::vector<BaseLuaBase
 		}
 
 		totalMemberFlags |= member.flags;
+
+		if(member.type == ents::EntityMemberType::Element)
+			o[memberVarName] = ::udm::Property::Create<::udm::Element>();
+
 		InitializeMember(member);
 
 		if((member.flags &(MemberFlags::KeyValueBit | MemberFlags::InputBit)) != MemberFlags::None)

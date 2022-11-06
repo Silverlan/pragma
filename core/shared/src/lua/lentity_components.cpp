@@ -192,6 +192,8 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	classDefEntRef.def(luabind::constructor<util::Uuid>());
 	classDefEntRef.def(luabind::constructor<const std::string&>());
 	classDefEntRef.def("GetEntity",static_cast<BaseEntity*(pragma::EntityURef::*)(Game&)>(&pragma::EntityURef::GetEntity));
+	classDefEntRef.def("GetUuid",static_cast<std::optional<util::Uuid>(pragma::EntityURef::*)() const>(&pragma::EntityURef::GetUuid));
+	classDefEntRef.def("GetClassOrName",static_cast<std::optional<std::string>(pragma::EntityURef::*)() const>(&pragma::EntityURef::GetClassOrName));
 	classDefEntRef.def("__tostring",+[](Game &game,const pragma::EntityURef &ref) -> std::string {
 		std::stringstream ss;
 		ss<<"UniversalEntityReference"<<to_string(game,ref);

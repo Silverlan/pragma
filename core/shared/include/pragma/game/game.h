@@ -90,6 +90,11 @@ namespace pragma
 	namespace networking {enum class DropReason : int8_t;};
 };
 
+namespace util
+{
+	using Uuid = std::array<uint64_t,2>;
+};
+
 struct BaseEntityComponentHandleWrapper;
 namespace pragma::physics {class IEnvironment;};
 class DLLNETWORK Game
@@ -171,6 +176,10 @@ public:
 	void RemoveEntities();
 	virtual BaseEntity *GetEntity(unsigned int idx);
 	virtual BaseEntity *GetEntityByLocalIndex(uint32_t idx);
+	const BaseEntity *FindEntityByUniqueId(const util::Uuid &uuid) const {return const_cast<Game*>(this)->FindEntityByUniqueId(uuid);}
+	BaseEntity *FindEntityByUniqueId(const util::Uuid &uuid);
+	const std::unordered_map<size_t,BaseEntity*> &GetEntityUuidMap() const {return const_cast<Game*>(this)->GetEntityUuidMap();}
+	std::unordered_map<size_t,BaseEntity*> &GetEntityUuidMap() {return m_uuidToEnt;}
 	pragma::BaseWorldComponent *GetWorld();
 	const std::vector<util::TWeakSharedHandle<pragma::BaseWorldComponent>> &GetWorldComponents() const;
 	unsigned char GetPlayerCount();
@@ -366,6 +375,7 @@ protected:
 	pragma::ComponentId m_animated2ComponentId = std::numeric_limits<pragma::ComponentId>::max();
 	pragma::ComponentId m_animationDriverComponentId = std::numeric_limits<pragma::ComponentId>::max();
 	std::vector<BaseEntity*> m_baseEnts;
+	std::unordered_map<size_t,BaseEntity*> m_uuidToEnt;
 	std::queue<EntityHandle> m_entsScheduledForRemoval;
 	std::vector<pragma::ComponentHandle<pragma::BasePhysicsComponent>> m_awakePhysicsEntities;
 	std::vector<pragma::BaseEntityComponent*> m_entityTickComponents;

@@ -6,5 +6,5 @@
 	{
 		$array characterSetRequirements [string]["jp"]
 	}
-	$bool enabled false
+	$bool enabled true
 }

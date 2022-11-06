@@ -108,9 +108,9 @@ static bool port_model(
 	},[game,formatName](const std::shared_ptr<Model> &mdl,const std::string &path,const std::string &mdlName) {
 		auto outPath = ustring::substr(path,7) // Remove "models/"-prefix
 			+mdlName +'.' +pragma::asset::FORMAT_MODEL_BINARY;
-        if(FileManager::CreatePath((ufile::get_path_from_filename(util::CONVERT_PATH +"models/" +outPath)).c_str()) == false)
+		if(FileManager::CreatePath((ufile::get_path_from_filename(util::CONVERT_PATH +"models/" +outPath)).c_str()) == false)
 			return false;
-        auto f = FileManager::OpenFile<VFilePtrReal>((util::CONVERT_PATH +"models/" +outPath).c_str(),"wb");
+		auto f = FileManager::OpenFile<VFilePtrReal>((util::CONVERT_PATH +"models/" +outPath).c_str(),"wb");
 		if(f == nullptr)
 		{
 			Con::cwar<<"WARNING: Unable to save model '"<<outPath<<"': Unable to open file!"<<Con::endl;
@@ -126,7 +126,7 @@ static bool port_model(
 		auto r = udmData->Save(f);
 		if(r)
 			filemanager::update_file_index_cache("models/" +outPath);
-        r = r ? FileManager::Exists(util::CONVERT_PATH +"models/" +outPath) : false;
+		r = r ? FileManager::Exists(util::CONVERT_PATH +"models/" +outPath) : false;
 		if(r == true)
 			Con::cout<<"Successfully ported "<<formatName<<" Model '"<<(path +mdlName)<<"' and saved it as '"<<outPath<<"'!"<<Con::endl;
 		return r;

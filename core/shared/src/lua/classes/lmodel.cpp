@@ -927,12 +927,6 @@ void Lua::Model::register_class(
 				Lua::PushString(l,err);
 			else
 				Lua::PushBool(l,result);
-		}))
-		.def("SaveLegacy",static_cast<void(*)(lua_State*,pragma::animation::Animation&,LFile&)>([](lua_State *l,pragma::animation::Animation &anim,LFile &f) {
-			auto fptr = std::dynamic_pointer_cast<VFilePtrInternalReal>(f.GetHandle());
-			if(fptr == nullptr)
-				return;
-			anim.SaveLegacy(fptr);
 		}));
 	classDefAnimation.scope[
 		luabind::def("Create",&Lua::Animation::Create),
@@ -1041,18 +1035,11 @@ void Lua::Model::register_class(
 		else
 			Lua::PushBool(l,result);
 	}));
-	classDefFlexAnim.def("SaveLegacy",static_cast<bool(*)(lua_State*,FlexAnimation&,LFile&)>([](lua_State *l,FlexAnimation &flexAnim,LFile &f) -> bool {
-		auto fptr = std::dynamic_pointer_cast<VFilePtrInternalReal>(f.GetHandle());
-		if(fptr == nullptr)
-			return false;
-		return flexAnim.SaveLegacy(fptr);
-	}));
 	classDefFlexAnim.scope[luabind::def("Load",static_cast<luabind::object(*)(lua_State*,LFile&)>([](lua_State *l,LFile &f) -> luabind::object {
-		auto fptr = std::dynamic_pointer_cast<VFilePtrInternal>(f.GetHandle());
+		auto fptr = f.GetHandle();
 		if(fptr == nullptr)
 			return {};
-		fsys::File fp {fptr};
-		return luabind::object{l,FlexAnimation::Load(fp)};
+		return luabind::object{l,FlexAnimation::Load(*fptr)};
 	}))];
 	classDefFlexAnim.scope[luabind::def("Load",static_cast<void(*)(lua_State*,udm::AssetData&)>([](lua_State *l,udm::AssetData &assetData) {
 		std::string err;

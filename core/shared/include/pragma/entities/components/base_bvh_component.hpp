@@ -104,15 +104,20 @@ namespace pragma
 		const BvhMeshRange *FindPrimitiveMeshInfo(size_t primIdx) const;
 		
 		void SendBvhUpdateRequestOnInteraction();
+		static bool SetVertexData(pragma::BvhData &bvhData,const std::vector<BvhTriangle> &data);
 		bool SetVertexData(const std::vector<BvhTriangle> &data);
 		void RebuildBvh();
 		void ClearBvh();
-	protected:
-		BaseBvhComponent(BaseEntity &ent);
-		std::shared_ptr<pragma::BvhData> RebuildBvh(
+
+		// For internal use only
+		static std::shared_ptr<pragma::BvhData> RebuildBvh(
 			const std::vector<std::shared_ptr<ModelSubMesh>> &meshes,const std::vector<umath::ScaledTransform> *optPoses=nullptr,
 			const std::function<bool()> &fIsCancelled=nullptr,std::vector<size_t> *optOutMeshIndices=nullptr
 		);
+		std::shared_ptr<BvhData> SetBvhData(std::shared_ptr<BvhData> &bvhData);
+		bool HasBvhData() const;
+	protected:
+		BaseBvhComponent(BaseEntity &ent);
 		virtual void DoRebuildBvh()=0;
 		const std::shared_ptr<BvhData> &GetUpdatedBvh() const;
 		std::vector<BvhMeshRange> &GetMeshRanges();

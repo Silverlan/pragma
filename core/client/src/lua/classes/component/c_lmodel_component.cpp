@@ -30,7 +30,7 @@ void Lua::ModelDef::register_class(lua_State *l,luabind::module_ &entsMod)
 	//Lua::register_base_model_component_methods<luabind::class_<CModelHandle,BaseEntityComponentHandle>,CModelHandle>(l,defCModel);
 	defCModel.def("SetMaterialOverride",static_cast<void(pragma::CModelComponent::*)(uint32_t,const std::string&)>(&pragma::CModelComponent::SetMaterialOverride));
 	defCModel.def("SetMaterialOverride",static_cast<void(pragma::CModelComponent::*)(uint32_t,CMaterial&)>(&pragma::CModelComponent::SetMaterialOverride));
-	defCModel.def("SetMaterialOverride",static_cast<void(*)(lua_State*,pragma::CModelComponent&,const std::string&,const std::string&)>([](lua_State *l,pragma::CModelComponent &hModel,const std::string &matSrc,const std::string &matDst) {
+	defCModel.def("SetMaterialOverride",+[](lua_State *l,pragma::CModelComponent &hModel,const std::string &matSrc,const std::string &matDst) {
 		auto &mdl = hModel.GetModel();
 		if(!mdl)
 			return;
@@ -43,8 +43,37 @@ void Lua::ModelDef::register_class(lua_State *l,luabind::module_ &entsMod)
 		if(it == mats.end())
 			return;
 		hModel.SetMaterialOverride(it -mats.begin(),matDst);
-	}));
+	});
+	defCModel.def("SetMaterialOverride",+[](lua_State *l,pragma::CModelComponent &hModel,const std::string &matSrc,CMaterial &matDst) {
+		auto &mdl = hModel.GetModel();
+		if(!mdl)
+			return;
+		auto &mats = mdl->GetMaterials();
+		auto it = std::find_if(mats.begin(),mats.end(),[&matSrc](const msys::MaterialHandle &hMat) {
+			if(!hMat)
+				return false;
+			return pragma::asset::matches(hMat.get()->GetName(),matSrc,pragma::asset::Type::Material);
+		});
+		if(it == mats.end())
+			return;
+		hModel.SetMaterialOverride(it -mats.begin(),matDst);
+	});
+	defCModel.def("ClearMaterialOverride",+[](lua_State *l,pragma::CModelComponent &hModel,const std::string &matSrc) {
+		auto &mdl = hModel.GetModel();
+		if(!mdl)
+			return;
+		auto &mats = mdl->GetMaterials();
+		auto it = std::find_if(mats.begin(),mats.end(),[&matSrc](const msys::MaterialHandle &hMat) {
+			if(!hMat)
+				return false;
+			return pragma::asset::matches(hMat.get()->GetName(),matSrc,pragma::asset::Type::Material);
+		});
+		if(it == mats.end())
+			return;
+		hModel.ClearMaterialOverride(it -mats.begin());
+	});
 	defCModel.def("ClearMaterialOverride",&pragma::CModelComponent::ClearMaterialOverride);
+	defCModel.def("ClearMaterialOverrides",&pragma::CModelComponent::ClearMaterialOverrides);
 	defCModel.def("GetMaterialOverride",&pragma::CModelComponent::GetMaterialOverride);
 	defCModel.def("GetRenderMaterial",static_cast<CMaterial*(pragma::CModelComponent::*)(uint32_t,uint32_t) const>(&pragma::CModelComponent::GetRenderMaterial));
 	defCModel.def("GetRenderMaterial",static_cast<CMaterial*(pragma::CModelComponent::*)(uint32_t) const>(&pragma::CModelComponent::GetRenderMaterial));

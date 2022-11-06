@@ -245,7 +245,7 @@ function ents.ClickComponent.raycast(pos,dir,filter,maxDist)
 						hitDist = diff:Length()
 					end
 
-					if(hitDist < distClosest or priority >= priorityClosest) then -- and hitData.distance > 0.0) then
+					if(hitDist < distClosest or priority > priorityClosest) then -- and hitData.distance > 0.0) then
 						distClosest = hitDist
 						hitPos = pos +dir *hitDist
 						actorClosest = hitData.entity

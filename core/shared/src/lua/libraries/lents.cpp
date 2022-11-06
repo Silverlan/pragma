@@ -118,6 +118,7 @@ void Lua::ents::register_library(lua_State *l)
 				return {};
 			return componentId;
 		}),
+		luabind::def("load_component",&Game::LoadLuaComponentByName),
 		luabind::def("find_installed_custom_components",+[](lua_State *l,Game &game) -> Lua::tb<std::string> {
 			std::vector<std::string> dirs;
 			std::string rootPath {"lua/entities/components/"};
@@ -177,6 +178,7 @@ void Lua::ents::register_library(lua_State *l)
 			});
 		})
 	];
+	static_assert(umath::to_integral(pragma::ents::EntityMemberType::VersionIndex) == 0);
 	Lua::RegisterLibraryEnums(l,"ents",{
 		{"MEMBER_TYPE_STRING",umath::to_integral(pragma::ents::EntityMemberType::String)},
 		{"MEMBER_TYPE_INT8",umath::to_integral(pragma::ents::EntityMemberType::Int8)},
@@ -205,6 +207,7 @@ void Lua::ents::register_library(lua_State *l)
 		{"MEMBER_TYPE_VECTOR2I",umath::to_integral(pragma::ents::EntityMemberType::Vector2i)},
 		{"MEMBER_TYPE_VECTOR3I",umath::to_integral(pragma::ents::EntityMemberType::Vector3i)},
 		{"MEMBER_TYPE_VECTOR4I",umath::to_integral(pragma::ents::EntityMemberType::Vector4i)},
+		{"MEMBER_TYPE_ELEMENT",umath::to_integral(pragma::ents::EntityMemberType::Element)},
 		{"MEMBER_TYPE_ENTITY",umath::to_integral(pragma::ents::EntityMemberType::Entity)},
 		{"MEMBER_TYPE_MULTI_ENTITY",umath::to_integral(pragma::ents::EntityMemberType::MultiEntity)},
 		{"MEMBER_TYPE_COUNT",umath::to_integral(pragma::ents::EntityMemberType::Count)},
@@ -318,8 +321,11 @@ void Lua::ents::register_library(lua_State *l)
 	memberInfoDef.property("specializationType",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) {
 		return memInfo.GetSpecializationType();
 	});
-	memberInfoDef.property("customSpecializationType",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) {
-		return memInfo.GetCustomSpecializationType();
+	memberInfoDef.property("customSpecializationType",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) -> std::optional<std::string> {
+		auto *type = memInfo.GetCustomSpecializationType();
+		if(!type)
+			return {};
+		return *type;
 	});
 	memberInfoDef.property("minValue",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) {
 		return memInfo.GetMin();
@@ -755,13 +761,10 @@ Lua::opt<Lua::type<BaseEntity>> Lua::ents::find_by_unique_index(lua_State *l,con
 	auto uniqueIndex = util::uuid_string_to_bytes(uuid);
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
-	EntityIterator entIt {*game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
-	auto it = std::find_if(entIt.begin(),entIt.end(),[uniqueIndex](const BaseEntity *ent) {
-		return ent->GetUuid() == uniqueIndex;
-	});
-	if(it == entIt.end())
+	auto *ent = game->FindEntityByUniqueId(util::uuid_string_to_bytes(uuid));
+	if(!ent)
 		return nil;
-	return it->GetLuaObject();
+	return ent->GetLuaObject();
 }
 
 namespace luabind::detail

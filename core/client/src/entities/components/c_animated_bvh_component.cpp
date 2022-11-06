@@ -55,18 +55,37 @@ void CAnimatedBvhComponent::Initialize()
 		m_cbOnBvhCleared = bvhC->AddEventCallback(CBvhComponent::EVENT_ON_CLEAR_BVH,
 			[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			Clear();
+			m_tmpBvhData = nullptr;
 			return util::EventReply::Unhandled;
 		});
 		m_cbOnBvhUpdateRequested = bvhC->AddEventCallback(CBvhComponent::EVENT_ON_BVH_UPDATE_REQUESTED,
 			[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-			if(m_updateLazily && m_rebuildScheduled)
+			/*if(m_updateLazily && m_rebuildScheduled)
 			{
 				RebuildAnimatedBvh(true);
 				WaitForCompletion();
-			}
+			}*/
 			return util::EventReply::Unhandled;
 		});
+		m_cbOnBvhRebuilt = bvhC->AddEventCallback(CBvhComponent::EVENT_ON_BVH_REBUILT,
+			[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			RebuildTemporaryBvhData();
+			return util::EventReply::Unhandled;
+		});
+
+		if(bvhC->HasBvhData())
+			RebuildTemporaryBvhData();
 	}
+}
+
+void CAnimatedBvhComponent::RebuildTemporaryBvhData()
+{
+	auto *mdlC = static_cast<CModelComponent*>(GetEntity().GetModelComponent());
+	if(!mdlC)
+		return;
+	auto &renderMeshes = mdlC->GetRenderMeshes();
+	Clear();
+	m_tmpBvhData = BaseBvhComponent::RebuildBvh(renderMeshes);
 }
 
 void CAnimatedBvhComponent::SetUpdateLazily(bool updateLazily) {m_updateLazily = updateLazily;}
@@ -81,6 +100,7 @@ void CAnimatedBvhComponent::Clear()
 void CAnimatedBvhComponent::OnRemove()
 {
 	Clear();
+	m_tmpBvhData = nullptr;
 	
 	if(m_cbOnMatricesUpdated.IsValid())
 		m_cbOnMatricesUpdated.Remove();
@@ -131,7 +151,9 @@ void CAnimatedBvhComponent::WaitForCompletion()
 
 void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force)
 {
-	if(!force && m_updateLazily)
+	if(IsBusy())
+		return;
+	/*if(!force && m_updateLazily)
 	{
 		m_rebuildScheduled = true;
 		if(m_cbRebuildScheduled.IsValid())
@@ -141,7 +163,7 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force)
 		if(bvhC.valid())
 			bvhC->SendBvhUpdateRequestOnInteraction();
 		return;
-	}
+	}*/
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("bvh_animated_prepare");
 #endif
@@ -219,8 +241,10 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force)
 			++meshIdx;
 		}
 
-		// TODO: Add thread safety
-		bvhC->SetVertexData(m_animatedBvhData.transformedTris);
+		// Swap Bvh
+		CBvhComponent::SetVertexData(*m_tmpBvhData,m_animatedBvhData.transformedTris);
+		auto oldBvh = bvhC->SetBvhData(m_tmpBvhData);
+		m_tmpBvhData = oldBvh;
 
 		m_busy = false;
 		return {};

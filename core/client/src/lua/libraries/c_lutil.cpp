@@ -140,7 +140,7 @@ luabind::object Lua::util::Client::create_giblet(GibletCreateInfo &createInfo)
 
 int Lua::util::Client::import_model(lua_State *l)
 {
-	VFilePtr f = nullptr;
+	std::shared_ptr<ufile::IFile> f = nullptr;
 	std::string fileName;
 	if(Lua::IsString(l,1))
 		fileName = Lua::CheckString(l,1);
@@ -158,8 +158,7 @@ int Lua::util::Client::import_model(lua_State *l)
 	std::shared_ptr<Model> mdl = nullptr;
 	if(f)
 	{
-		fsys::File fp {f};
-		mdl = pragma::asset::import_model(fp,errMsg,outputPath);
+		mdl = pragma::asset::import_model(*f,errMsg,outputPath);
 	}
 	else
 		mdl = pragma::asset::import_model(fileName,errMsg,outputPath);

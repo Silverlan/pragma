@@ -94,7 +94,7 @@ public:
 	EntityHandle GetHandle() const;
 
 	const util::Uuid GetUuid() const {return m_uuid;}
-	void SetUuid(const util::Uuid &uuid) {m_uuid = uuid;}
+	void SetUuid(const util::Uuid &uuid);
 
 	friend Engine;
 public:

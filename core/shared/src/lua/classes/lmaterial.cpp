@@ -9,6 +9,7 @@
 #include "pragma/lua/classes/lmaterial.h"
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
+#include <material_manager2.hpp>
 #include "luasystem.h"
 #include "material.h"
 #include <detail_mode.hpp>
@@ -45,6 +46,9 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 	classDef.def("GetName",&::Material::GetName);
 	classDef.def("GetDataBlock",&::Material::GetDataBlock);
 	classDef.def("SetLoaded",&::Material::SetLoaded);
+	classDef.def("MergeData",+[](lua_State *l,::Material &mat,::udm::LinkedPropertyWrapper &data) -> bool {
+		return msys::udm_to_data_block(data,*mat.GetDataBlock());
+	});
 	classDef.def("Copy",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
 		auto matCopy = mat.Copy();
 		if(matCopy == nullptr)

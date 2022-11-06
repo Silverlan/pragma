@@ -1,0 +1,331 @@
+name: Build Linux
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+concurrency:
+  group: environment-lin-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build - ${{ matrix.config.os }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: ubuntu-22.04
+            name: "Ubuntu GCC-11"
+            artifact: "ubuntu_gcc.7z"
+            build_type: "RelWithDebInfo"
+            cc: "clang-14"
+            cxx: "clang++-14"
+            archiver: "7z a"
+            generators: "Unix Makefiles"
+            build_dir: 'build'
+    steps:
+      - uses: actions/checkout@v3.0.2
+        with:
+          submodules: 'recursive'
+
+      - name: Setup
+        id: setup
+        uses: Silverlan/common_actions/setup@main
+        with:
+          cc_version: ${{ matrix.cc }}
+          cxx_version: ${{ matrix.cxx }}
+          
+      - name: Set Clang Compiler
+        shell: bash
+        run:   |
+          echo "CC=/usr/bin/clang-14" >> $GITHUB_ENV
+          echo "CXX=/usr/bin/clang++-14" >> $GITHUB_ENV
+          
+      - name: Download binaries
+        uses: Silverlan/common_actions/download_build_binaries@main
+        continue-on-error: true
+          
+      #- name: Build
+      #  id: build
+      #  uses: Silverlan/test_pragma_ga4/github_actions/build@master
+      #  with:
+      #    root_dir: "${{ env.GA_ROOT_DIR }}"
+      #    should_checkout: "0"
+      #    github_token: ${{ secrets.GITHUB_TOKEN }}
+      #    dir: '.'
+          
+      - name: Initialize Env
+        id: init-env
+        uses: Silverlan/common_actions/set_common_env_vars@main
+        
+      - name: Install prerequisites
+        shell: bash
+        run:   |
+          sudo add-apt-repository ppa:savoury1/llvm-defaults-14
+          sudo apt update
+          sudo apt install clang-14
+          sudo apt install libstdc++-12-dev
+          sudo apt install libstdc++6
+          
+      - name: Install libltdl prerequisites
+        shell: bash
+        run:   |
+          sudo apt-get install help2man
+        
+      - name: Create install directory
+        shell: bash
+        run:   |
+          mkdir -p "${{ matrix.config.build_dir }}"
+          mkdir -p "${{ matrix.config.build_dir }}/install"
+        
+      - name: Create addon directories
+        shell: bash
+        run:   |
+          mkdir -p "${{ matrix.config.build_dir }}/install/addons"
+          mkdir -p "${{ matrix.config.build_dir }}/install/addons/virtual_reality"
+          mkdir -p "${{ matrix.config.build_dir }}/install/addons/halflife_campaign"
+          mkdir -p "${{ matrix.config.build_dir }}/install/addons/tf2"
+          mkdir -p "${{ matrix.config.build_dir }}/install/addons/filmmaker"
+          mkdir -p "${{ matrix.config.build_dir }}/install/addons/tool_model_editor"
+          
+      - uses: Silverlan/common_actions/get_submodule@main
+        name: Get PragmaVR
+        with:
+          repo: 'Silverlan/PragmaVR'
+          repo_name: 'PragmaVR'
+          dir: '${{ matrix.config.build_dir }}/install/addons/virtual_reality'
+          repo_branch: 'main'
+          clone_dir: '.'
+          
+      - uses: Silverlan/common_actions/get_submodule@main
+        name: Get PragmaHL
+        with:
+          repo: 'Silverlan/pragma_hl'
+          repo_name: 'pragma_hl'
+          dir: '${{ matrix.config.build_dir }}/install/addons/halflife_campaign'
+          repo_branch: 'main'
+          clone_dir: '.'
+          
+      - uses: Silverlan/common_actions/get_submodule@main
+        name: Get PragmaTF2
+        with:
+          repo: 'Silverlan/pragma_tf2'
+          repo_name: 'pragma_tf2'
+          dir: '${{ matrix.config.build_dir }}/install/addons/tf2'
+          repo_branch: 'main'
+          clone_dir: '.'
+          
+      - uses: Silverlan/common_actions/get_submodule@main
+        name: Get PragmaMdlEd
+        with:
+          repo: 'Silverlan/pragma_model_editor'
+          repo_name: 'pragma_model_editor'
+          dir: '${{ matrix.config.build_dir }}/install/addons/tool_model_editor'
+          repo_branch: 'main'
+          clone_dir: '.'
+          
+      - uses: Silverlan/common_actions/get_submodule@main
+        name: Get PFM
+        with:
+          repo: 'Silverlan/pfm'
+          repo_name: 'pfm'
+          dir: '${{ matrix.config.build_dir }}/install/addons/filmmaker'
+          repo_branch: 'master'
+          clone_dir: '.'
+          force: '1'
+          
+      - name: Build boost (with cache)
+        uses: Silverlan/common_actions/build_cached_boost@main
+        
+      - name: Build Geometric tools
+        uses: Silverlan/common_actions/build_geometric_tools@main
+        
+      # TODO: This should be output from build-boost action above
+      - shell: bash
+        name: Set boost shared suffix
+        id: set-boost-var
+        run: |
+          boostSuffixShared="vc143-mt-x64-1_79.lib"
+          echo ::set-output name=boostSuffixShared::$(echo $boostSuffixShared)
+          
+      - name: Set boost dependency CMake variables
+        uses: Silverlan/common_actions/define_cmake_var@main
+        with:
+          cmake_var: ' -DDEPENDENCY_BOOST_INCLUDE=${{ env.GA_ROOT_DIR }}/third_party_libs/boost -DDEPENDENCY_BOOST_CHRONO_LIBRARY=${{ env.GA_ROOT_DIR }}/third_party_libs/boost/stage/lib/boost_chrono-${{ steps.set-boost-var.outputs.boostSuffixShared }} -DDEPENDENCY_BOOST_DATE_TIME_LIBRARY=${{ env.GA_ROOT_DIR }}/third_party_libs/boost/stage/lib/boost_date_time-${{ steps.set-boost-var.outputs.boostSuffixShared }} -DDEPENDENCY_BOOST_REGEX_LIBRARY=${{ env.GA_ROOT_DIR }}/third_party_libs/boost/stage/lib/boost_regex-${{ steps.set-boost-var.outputs.boostSuffixShared }} -DDEPENDENCY_BOOST_SYSTEM_LIBRARY=${{ env.GA_ROOT_DIR }}/third_party_libs/boost/stage/lib/boost_system-${{ steps.set-boost-var.outputs.boostSuffixShared }} -DDEPENDENCY_BOOST_THREAD_LIBRARY=${{ env.GA_ROOT_DIR }}/third_party_libs/boost/stage/lib/boost_thread-${{ steps.set-boost-var.outputs.boostSuffixShared }}'
+          
+      - name: Set external dependency CMake variables
+        uses: Silverlan/common_actions/define_cmake_var@main
+        with:
+          cmake_var: ' -DDEPENDENCY_LIBVORBISFILE_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/vorbis/lib/RelWithDebInfo/vorbisfile.lib -DDEPENDENCY_LIBVORBIS_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/vorbis/lib/RelWithDebInfo/vorbis.lib -DDEPENDENCY_7ZPP_INCLUDE=${{ env.GA_ROOT_DIR }}/third_party_libs/7zpp/Include -DDEPENDENCY_7ZPP_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/7zpp/RelWithDebInfo/7zpp.lib -DDEPENDENCY_LIBLZMA_INCLUDE=${{ env.GA_ROOT_DIR }}/external_libs/util_bsp/third_party_libs/liblzma/include -DDEPENDENCY_LIBZIP_CONF_INCLUDE=${{ env.GA_ROOT_DIR }}/build/third_party_libs/libzip -DDEPENDENCY_UTIL_VMF_INCLUDE=${{ env.GA_ROOT_DIR }}/external_libs/util_vmf/include -DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_INCLUDE=${{ env.GA_ROOT_DIR }}/external_libs/util_image/third_party_libs/nvtt/src -DDEPENDENCY_LPNG_BUILD_INCLUDE=${{ env.GA_ROOT_DIR }}/build/third_party_libs/libpng -DDEPENDENCY_ZLIB_BUILD_INCLUDE=${{ env.GA_ROOT_DIR }}/build/third_party_libs/zlib -DDEPENDENCY_LIBOGG_INCLUDE=${{ env.GA_ROOT_DIR }}/third_party_libs/ogg/include -DDEPENDENCY_GEOMETRIC_TOOLS_INCLUDE=${{ env.GA_ROOT_DIR }}/third_party_libs/GeometricTools/GTE'
+      
+      - name: Prepare Vulkan SDK
+        uses: humbletim/setup-vulkan-sdk@v1.2.0
+        with:
+          vulkan-query-version: 1.3.211.0
+          vulkan-components: Vulkan-Headers, Vulkan-Loader, Glslang
+          vulkan-use-cache: true
+
+      - name: Get spirv-tools
+        uses: Silverlan/common_actions/get_submodule@main
+        with:
+          repo: 'https://github.com/KhronosGroup/SPIRV-Tools.git'
+          repo_name: 'spirv-tools'
+          repo_branch: 'sdk-1.3.211'
+          dir: 'VULKAN_SDK'
+          clone_dir: 'spirv-tools'
+
+      - name: Get spirv-headers
+        uses: Silverlan/common_actions/get_submodule@main
+        with:
+          repo: 'https://github.com/KhronosGroup/SPIRV-Headers.git'
+          repo_name: 'spirv-tools'
+          repo_branch: 'sdk-1.3.211'
+          dir: 'VULKAN_SDK/spirv-tools/external'
+          clone_dir: 'spirv-headers'
+          
+      - name: Install pkg-config
+        id: install-pkg-config
+        shell: bash
+        run:   |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            # Required for GLFW
+            sudo apt install xorg-dev
+          else
+            choco install pkgconfiglite --allow-empty-checksums
+          fi
+          
+      - name: Install xorg-dev
+        shell: bash
+        run:   |
+          sudo apt install xorg-dev
+        
+      - uses: Silverlan/common_actions/build_cmake@main
+        name: Build UDM
+        with:
+          build_type: ${{ matrix.config.build_type }}
+          build_generator: ${{ matrix.config.generators }}
+          build_target: util_udm
+          build_dir: '${{ matrix.config.build_dir }}/.'
+          cmake_script_location: '.'
+          pre_build_cmd: |
+            echo "Building UDM library..."
+            curDir="$(pwd)"
+            cd "${{ env.GA_ROOT_DIR }}"
+            curl -LJO "https://pragma-engine.com/git/github_actions/pragma.zip"
+            7z x pragma.zip -aos -y
+            rm -rf "./pragma.zip"
+            cd "$curDir"
+
+      - name: Define CMake Variable
+        uses: Silverlan/common_actions/define_cmake_var@main
+        with:
+          cmake_var: ' -DCMAKE_INSTALL_PREFIX=install '
+          
+      - name: Build LuaJIT
+        shell: bash
+        run: |
+          cd third_party_libs/luajit
+          make
+          
+      - name: Build Pragma
+        continue-on-error: true
+        shell: bash
+        run: |
+          mkdir build_pragma
+          cd build_pragma
+          cmake ../ -G "Unix Makefiles" -DDEPENDENCY_GEOMETRIC_TOOLS_INCLUDE="../third_party_libs/GeometricTools/GTE/" -DDEPENDENCY_BOOST_INCLUDE="../third_party_libs/boost/" -DDEPENDENCY_LIBZIP_CONF_INCLUDE="../build/third_party_libs/libzip/" -DDEPENDENCY_LIBOGG_INCLUDE="../third_party_libs/ogg/include/" \
+              -DDEPENDENCY_BOOST_LIBRARY_LOCATION="./third_party_libs/boost/stage/lib/" -DENABLE_OPENSSL=OFF --install-prefix=$PWD/install
+          cmake --build ./ --verbose --target pragma-install-full --config RelWithDebInfo
+          #-DDEPENDENCY_BOOST_CHRONO_LIBRARY="./third_party_libs/boost/stage/lib/libboost_chrono.a" \
+          #-DDEPENDENCY_BOOST_DATE_TIME_LIBRARY="./third_party_libs/boost/stage/lib/libboost_date_time.a" \
+          #-DDEPENDENCY_BOOST_FILESYSTEM_LIBRARY="./third_party_libs/boost/stage/lib/libboost_filesystem.a" \
+          #-DDEPENDENCY_BOOST_LOCALE_LIBRARY="./third_party_libs/boost/stage/lib/libboost_locale.a" \
+          #-DDEPENDENCY_BOOST_REGEX_LIBRARY="./third_party_libs/boost/stage/lib/libboost_regex.a" \
+          #-DDEPENDENCY_BOOST_SYSTEM_LIBRARY="./third_party_libs/boost/stage/lib/libboost_system.a" \
+          #-DDEPENDENCY_BOOST_THREAD_LIBRARY="./third_party_libs/boost/stage/lib/libboost_thread.a"
+
+      #- uses: mxschmitt/action-tmate@v3
+      #  continue-on-error: true
+      #  name: CI
+
+      - name: Create Release Files
+        shell: bash
+        run: |
+          mv build_pragma/install release
+          cp -R build/install/* release/
+          rm -rf build/install/
+          rsync build_pragma/third_party_libs/vtflib/src/libVTFLib13.so release/lib/
+          cd release
+          mv bin/pragma ./pragma
+          mv bin/pragma_server ./pragma_server
+          
+      - name: Copy additional binaries
+        continue-on-error: true
+        shell: bash
+        run: |
+          cp ./build_pragma/third_party_libs/ogg/libogg.so.0 release/lib/
+          cp ./build_pragma/third_party_libs/libzip/lib/libzip.so.5 release/lib/
+          cp ./build_pragma/third_party_libs/bzip2/libbz2.so.1.0.6 release/lib/
+          cp ./build_pragma/third_party_libs/vorbis/lib/libvorbisfile.so.3.3.7 release/lib/
+          cp ./build_pragma/third_party_libs/vorbis/lib/libvorbis.so.0.4.8 release/lib
+          
+      - name: Patch binaries
+        continue-on-error: true
+        shell: bash
+        run: |
+          cd release
+          cp ../core/pragma/patch_library.sh patch_library.sh
+          sudo sh ./patch_library.sh ./lib/libmaterialsystem.so '$ORIGIN'
+          
+          # pr_source
+          wget https://github.com/Silverlan/pr_source/releases/download/latest/binaries_linux64.tar.gz
+          tar xvfz binaries_linux64.tar.gz
+          rm -f binaries_linux64.tar.gz
+          
+          # pr_curl
+          wget https://github.com/Silverlan/pr_curl/releases/download/latest/binaries_linux64.tar.gz
+          tar xvfz binaries_linux64.tar.gz
+          rm -f binaries_linux64.tar.gz
+          
+          # pr_dmx
+          wget https://github.com/Silverlan/pr_dmx/releases/download/latest/binaries_linux64.tar.gz
+          tar xvfz binaries_linux64.tar.gz
+          rm -f binaries_linux64.tar.gz
+          
+          # pr_python
+          wget https://github.com/Silverlan/pr_python/releases/download/latest/binaries_linux64.tar.gz
+          tar xvfz binaries_linux64.tar.gz
+          rm -f binaries_linux64.tar.gz
+          
+          # pr_bullet
+          wget https://github.com/Silverlan/pr_bullet/releases/download/latest/binaries_linux64.tar.gz
+          tar xvfz binaries_linux64.tar.gz
+          rm -f binaries_linux64.tar.gz
+          
+          # pr_xatlas
+          wget https://github.com/Silverlan/pr_xatlas/releases/download/latest/binaries_linux64.tar.gz
+          tar xvfz binaries_linux64.tar.gz
+          rm -f binaries_linux64.tar.gzgz
+          
+          # pr_openvr
+          wget https://github.com/Silverlan/pr_openvr/releases/download/latest/binaries_linux64.tar.gz
+          tar xvfz binaries_linux64.tar.gz
+          rm -f binaries_linux64.tar.gz
+          
+          # TODO: Build pfm exectuable
+          
+          sudo sh ./patch_library.sh ./modules/mount_external/libpr_mount_external.so '$ORIGIN'
+          sudo sh ./patch_library.sh ./modules/mount_external/libutil_archive.so '$ORIGIN'
+          sudo sh ./patch_library.sh ./lib/libvorbisfile.so.3.3.7 '$ORIGIN'
+          rm -f patch_library.sh
+          
+          # cp /lib/x86_64-linux-gnu/libcrypto.so.3 release/lib
+          
+      - name: Upload Release
+        uses: Silverlan/common_actions/release_nightly_binaries@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit: ${{ github.ref_name }}

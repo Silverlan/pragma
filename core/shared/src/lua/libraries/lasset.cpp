@@ -127,8 +127,7 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 			return {l,*ext};
 		})),
 		luabind::def("determine_format_from_data",static_cast<opt<std::string>(*)(lua_State*,LFile&,pragma::asset::Type)>([](lua_State *l,LFile &f,pragma::asset::Type type) -> opt<std::string> {
-			fsys::File fp {f.GetHandle()};
-			auto ext = pragma::asset::determine_format_from_data(fp,type);
+			auto ext = pragma::asset::determine_format_from_data(*f.GetHandle(),type);
 			if(!ext.has_value())
 				return nil;
 			return {l,*ext};

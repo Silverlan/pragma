@@ -106,6 +106,13 @@ void CModelComponent::ClearMaterialOverride(uint32_t idx)
 	m_materialOverrides.at(idx) = {};
 	umath::set_flag(m_stateFlags,StateFlags::RenderMeshUpdateRequired);
 }
+void CModelComponent::ClearMaterialOverrides()
+{
+	if(m_materialOverrides.empty())
+		return;
+	m_materialOverrides.clear();
+	umath::set_flag(m_stateFlags,StateFlags::RenderMeshUpdateRequired);
+}
 CMaterial *CModelComponent::GetMaterialOverride(uint32_t idx) const
 {
 	return (idx < m_materialOverrides.size()) ? static_cast<CMaterial*>(m_materialOverrides.at(idx).get()) : nullptr;

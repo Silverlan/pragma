@@ -25,9 +25,7 @@ void Lua::DataBlock::load(lua_State *l,LFile &f)
 {
 	if(!f.IsValid())
 		return;
-	auto file = f.GetHandle();
-	fsys::File fp {file};
-	auto db = ds::System::ReadData(fp);
+	auto db = ds::System::ReadData(*f.GetHandle());
 	if(db == nullptr)
 		return;
 	Lua::Push(l,db);

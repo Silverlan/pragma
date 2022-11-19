@@ -231,7 +231,6 @@ jobs:
           make
           
       - name: Build Pragma
-        continue-on-error: true
         shell: bash
         run: |
           mkdir build_pragma
@@ -246,6 +245,13 @@ jobs:
           #-DDEPENDENCY_BOOST_REGEX_LIBRARY="./third_party_libs/boost/stage/lib/libboost_regex.a" \
           #-DDEPENDENCY_BOOST_SYSTEM_LIBRARY="./third_party_libs/boost/stage/lib/libboost_system.a" \
           #-DDEPENDENCY_BOOST_THREAD_LIBRARY="./third_party_libs/boost/stage/lib/libboost_thread.a"
+
+      - name: Build PFM Executable
+        shell: bash
+        run: |
+          cd build_pragma
+          cmake --build ./ --verbose --target pfm --config RelWithDebInfo
+          cmake --build ./ --verbose --target pragma-install --config RelWithDebInfo
 
       #- uses: mxschmitt/action-tmate@v3
       #  continue-on-error: true
@@ -263,7 +269,6 @@ jobs:
           mv bin/pragma_server ./pragma_server
           
       - name: Copy additional binaries
-        continue-on-error: true
         shell: bash
         run: |
           cp ./build_pragma/third_party_libs/ogg/libogg.so.0 release/lib/
@@ -272,8 +277,7 @@ jobs:
           cp ./build_pragma/third_party_libs/vorbis/lib/libvorbisfile.so.3.3.7 release/lib/
           cp ./build_pragma/third_party_libs/vorbis/lib/libvorbis.so.0.4.8 release/lib
           
-      - name: Patch binaries
-        continue-on-error: true
+      - name: Install Modules
         shell: bash
         run: |
           cd release
@@ -282,6 +286,16 @@ jobs:
           
           # pr_source
           wget https://github.com/Silverlan/pr_source/releases/download/latest/binaries_linux64.tar.gz
+          tar xvfz binaries_linux64.tar.gz
+          rm -f binaries_linux64.tar.gz
+          
+          # pr_audio_dummy
+          wget https://github.com/Silverlan/pr_audio_dummy/releases/download/latest/binaries_linux64.tar.gz
+          tar xvfz binaries_linux64.tar.gz
+          rm -f binaries_linux64.tar.gz
+          
+          # pr_audio_soloud
+          wget https://github.com/Silverlan/pr_soloud/releases/download/latest/binaries_linux64.tar.gz
           tar xvfz binaries_linux64.tar.gz
           rm -f binaries_linux64.tar.gz
           
@@ -315,17 +329,50 @@ jobs:
           tar xvfz binaries_linux64.tar.gz
           rm -f binaries_linux64.tar.gz
           
-          # TODO: Build pfm exectuable
+          # pr_prosper_vulkan
+          wget https://github.com/Silverlan/pr_prosper_vulkan/releases/download/latest/binaries_linux64.tar.gz
+          tar xvfz binaries_linux64.tar.gz
+          rm -f binaries_linux64.tar.gz
           
+          # TODO: Build pfm exectuable
+          # cp /lib/x86_64-linux-gnu/libcrypto.so.3 release/lib
+          
+
+      - name: Patch binaries
+        shell: bash
+        run: |
+          cd release
+          FILES="./lib/*.so*"
+          for f in $FILES
+          do
+            echo "Processing $f file..."
+            sudo sh ./patch_library.sh $f '$ORIGIN'
+          done
+
+          sudo sh ./patch_library.sh ./modules/graphics/vulkan/libpr_prosper_vulkan.so '$ORIGIN'
+          sudo sh ./patch_library.sh ./modules/graphics/vulkan/libprosper_vulkan.so '$ORIGIN'
+
           sudo sh ./patch_library.sh ./modules/mount_external/libpr_mount_external.so '$ORIGIN'
           sudo sh ./patch_library.sh ./modules/mount_external/libutil_archive.so '$ORIGIN'
-          sudo sh ./patch_library.sh ./lib/libvorbisfile.so.3.3.7 '$ORIGIN'
+
+          sudo sh ./patch_library.sh ./modules/audio/soloud/libpr_audio_soloud.so '$ORIGIN'
+
+          sudo sh ./patch_library.sh ./modules/curl/libpr_curl.so '$ORIGIN'
+          sudo sh ./patch_library.sh ./modules/curl/libcurl.so '$ORIGIN'
+          
           rm -f patch_library.sh
           
-          # cp /lib/x86_64-linux-gnu/libcrypto.so.3 release/lib
+          # Remove git files
+          ( find . -type d -name ".git" \
+            && find . -name ".gitignore" \
+            && find . -name ".gitmodules" ) | xargs rm -rf
           
       - name: Upload Release
         uses: Silverlan/common_actions/release_nightly_binaries@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit: ${{ github.ref_name }}
+
+      - name: Handle Error
+        uses: Silverlan/common_actions/action_handle_error@main
+        if: failure()

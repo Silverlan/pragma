@@ -160,6 +160,8 @@ jobs:
         
       - name: Build Geometric tools
         uses: Silverlan/common_actions/build_geometric_tools@main
+        with:
+          working-directory: ${{ github.workspace }}
         
       # TODO: This should be output from build-boost action above
       - shell: bash
@@ -371,34 +373,40 @@ jobs:
           7z d pragma.zip addons/filmmaker/.gitignore
           du -sh "./pragma.zip"
           zipinfo -1 "./pragma.zip"
+          
+          cd $curDir
+          rm -fr release
+          mkdir release
+          cd release
+          7z x $curDir/pragma.zip
 
-      #- name: Publish release
-      #  uses: softprops/action-gh-release@v1
-      #  #if: startsWith(github.ref, 'refs/tags/')
-      #  with:
-      #    files: "pragma.zip"
-      #    prerelease: 1
-      #    tag_name: 'nightly'
-      #    #body: 'Test Description 2'
-      #    #generate_release_notes: 1
-
-      - name: Generate nightly tag description
-        shell: bash
-        run:   |
-          curDate=$(date -u '+%Y-%m-%d %H:%M:%S %Z')
-          printf "This is an auto-generated pre-release, built from the latest version of the source code.\nIt includes all files necessary to run Pragma, as well as the latest version of the Pragma Filmmaker, however functionality and stability are **not** guaranteed.\n\nLatest release date: $curDate" > tag_text.txt
-
-      - name: Update nightly tag description
-        uses: softprops/action-gh-release@v0.1.14
+      - name: Upload Release
+        uses: Silverlan/common_actions/release_nightly_binaries@main
         with:
-          body_path: tag_text.txt
-          tag_name: nightly
-          prerelease: true
-
-      - name: Update nightly release
-        uses: pyTooling/Actions/releaser/composite@main
-        with:
-          tag: nightly
-          rm: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: "pragma.zip"
+          commit: ${{ github.ref_name }}
+
+      #- name: Generate nightly tag description
+      #  shell: bash
+      #  run:   |
+      #    curDate=$(date -u '+%Y-%m-%d %H:%M:%S %Z')
+      #    printf "This is an auto-generated pre-release, built from the latest version of the source code.\nIt includes all files necessary to run Pragma, as well as the latest version of the Pragma Filmmaker, however functionality and stability are **not** guaranteed.\n\nLatest release date: $curDate" > tag_text.txt
+
+      #- name: Update nightly tag description
+      #  uses: softprops/action-gh-release@v0.1.14
+      #  with:
+      #    body_path: tag_text.txt
+      #    tag_name: nightly
+      #    prerelease: true
+
+      #- name: Update nightly release
+      #  uses: pyTooling/Actions/releaser/composite@main
+      #  with:
+      #    tag: nightly
+      #    rm: true
+      #    token: ${{ secrets.GITHUB_TOKEN }}
+      #    files: "pragma.zip"
+          
+      - name: Handle Error
+        uses: Silverlan/common_actions/action_handle_error@main
+        if: failure()

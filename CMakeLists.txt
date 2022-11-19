@@ -189,6 +189,9 @@ search_lib_recursive_ext(DEPENDENCY_UTIL_SMDMODEL_LIBRARY util_smdmodel STATIC)
 set(DEPENDENCY_UTIL_PAD_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_pad/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_UTIL_PAD_LIBRARY util_pad STATIC)
 
+set(DEPENDENCY_UTIL_OCIO_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_ocio/include CACHE PATH "Path to include directory.")
+search_lib_recursive_ext(DEPENDENCY_UTIL_OCIO_LIBRARY util_ocio STATIC)
+
 unset(CONFIG_ENABLE_EXECUTABLE_FLAG CACHE)
 SET(CONFIG_ENABLE_EXECUTABLE_FLAG OFF CACHE BOOL "")
 set(DEPENDENCY_UTIL_PRAGMA_DOC_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_pragma_doc/include CACHE PATH "Path to include directory.")
@@ -998,8 +1001,8 @@ function(pragma_install TARGET_NAME DESTINATION_PATH)
         )
 endfunction(pragma_install)
 
-pragma_install(pragma "")
-pragma_install(pragma_server "")
+pragma_install(pragma ".")
+pragma_install(pragma_server ".")
 pragma_install(alsoundsystem "${BINARY_OUTPUT_DIR}")
 
 pragma_install(client "${BINARY_OUTPUT_DIR}")
@@ -1063,13 +1066,15 @@ function(pragma_install_lib_c INPUT_LIBRARY_FILENAME LIB_NAME DESTINATION_PATH)
 
         endif()
 	# if((IS_OPTIONAL EQUAL 0) OR (EXISTS "${INPUT_LIBRARY_PATH_BIN}"))
-	if(EXISTS "${INPUT_LIBRARY_PATH_BIN}")
-		add_custom_command(TARGET pragma-install POST_BUILD
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different
-				${INPUT_LIBRARY_PATH_BIN}
-                                ${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}/
-		)
-	endif()
+	set(InstallSrc "${INPUT_LIBRARY_PATH_BIN}")
+	set(InstallDst "${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}")
+	add_custom_command(TARGET pragma-install
+	   POST_BUILD
+	   COMMAND ${CMAKE_COMMAND}
+	       -DInstallSrc=${InstallSrc}
+	       -DInstallDst=${InstallDst}
+	       -P ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/install_file.cmake
+	   COMMENT "Copying ${InstallSrc} to ${InstallDst}...")
 endfunction(pragma_install_lib_c)
 
 
@@ -1122,26 +1127,39 @@ function(pragma_install_lib INPUT_LIBRARY_PATH DESTINATION_PATH)
             #TODO: Wrap code below this into a loop.
         endif()
         #if((IS_OPTIONAL EQUAL 0) OR (EXISTS "${INPUT_LIBRARY_PATH_BIN}")LIB_FILES_TO_COPY)
-	if(EXISTS "${INPUT_LIBRARY_PATH_BIN}")
-		add_custom_command(TARGET pragma-install POST_BUILD
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different
-				${INPUT_LIBRARY_PATH_BIN}
-                                ${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}
-		)
-        endif()
 
-        if(LIB_FILES_TO_COPY)
-            if(NOT UNIX)
-                return()
-            endif()
-            foreach(FILE_TO_COPY IN LISTS LIB_FILES_TO_COPY)
-                add_custom_command(TARGET pragma-install POST_BUILD
-                        COMMAND cp -a -u
-                                ${FILE_TO_COPY}
-                                ${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}
-                )
-            endforeach()
-        endif()
+
+		set(InstallSrc "${INPUT_LIBRARY_PATH_BIN}")
+		set(InstallDst "${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}")
+		add_custom_command(TARGET pragma-install
+		   POST_BUILD
+		   COMMAND ${CMAKE_COMMAND}
+		       -DInstallSrc=${InstallSrc}
+		       -DInstallDst=${InstallDst}
+		       -P ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/install_file.cmake
+		   COMMENT "Copying ${InstallSrc} to ${InstallDst}...")
+
+
+	#if(EXISTS "${INPUT_LIBRARY_PATH_BIN}")
+	#	add_custom_command(TARGET pragma-install POST_BUILD
+	#		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+	#			${INPUT_LIBRARY_PATH_BIN}
+    #                            ${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}
+	#	)
+    #    endif()
+    #
+    #    if(LIB_FILES_TO_COPY)
+    #        if(NOT UNIX)
+    #            return()
+    #        endif()
+    #        foreach(FILE_TO_COPY IN LISTS LIB_FILES_TO_COPY)
+    #            add_custom_command(TARGET pragma-install POST_BUILD
+    #                    COMMAND cp -a -u
+    #                            ${FILE_TO_COPY}
+    #                            ${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}
+    #            )
+    #        endforeach()
+    #    endif()
 endfunction(pragma_install_lib)
 
 function(pragma_install_create_directory DIR_NAME)

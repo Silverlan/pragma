@@ -1,0 +1,8 @@
+if(EXISTS "${InstallSrc}")
+	message("Copying \"${InstallSrc}\" to \"${InstallDst}\"...")
+	file(COPY "${InstallSrc}" DESTINATION "${InstallDst}")
+else()
+	if( NOT "${InstallSrc}" STREQUAL "" )
+		# message("Unable to copy ${InstallSrc}: File not found.")
+	endif()
+endif()

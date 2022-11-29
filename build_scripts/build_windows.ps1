@@ -1,5 +1,4 @@
 param (
-    [string]$toolset = "msvc-14.2",
     [string]$generator = "Visual Studio 17 2022",
     [string]$vcvars = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat",
     [switch]$with_essential_client_modules = $true,
@@ -25,9 +24,6 @@ Function display_help() {
     Write-Host "This script will download and setup all of the required dependencies for building Pragma."
     Write-Host "Usage: ./build_scripts/build_windows.ps1 [option...]"
     Write-Host ""
-
-    Write-Host "   -toolset                          The toolset to use. Default: " -NoNewline
-    Write-Host "`"msvc-14.2`""
 
     Write-Host "   -generator                        The generator to use. Default: " -NoNewline
     Write-Host "`"Visual Studio 17 2022`""
@@ -81,10 +77,10 @@ Function display_help() {
 
     Write-Host "Examples:"
     Write-Host "- Build Pragma for Visual Studio 2022:"
-    Write-Host "./build_scripts/build_windows.ps1 -toolset `"msvc-14.2`" -generator `"Visual Studio 17 2022`" -vcvars `"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat`"" -ForegroundColor Gray
+    Write-Host "./build_scripts/build_windows.ps1 -generator `"Visual Studio 17 2022`" -vcvars `"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat`"" -ForegroundColor Gray
     Write-Host ""
     Write-Host "- Build Pragma with PFM and VR support for Visual Studio 2022:"
-    Write-Host "./build_scripts/build_windows.ps1 -with_pfm -with_all_pfm_modules -with_vr -toolset `"msvc-14.2`" -generator `"Visual Studio 17 2022`" -vcvars `"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat`"" -ForegroundColor Gray
+    Write-Host "./build_scripts/build_windows.ps1 -with_pfm -with_all_pfm_modules -with_vr -generator `"Visual Studio 17 2022`" -vcvars `"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat`"" -ForegroundColor Gray
     Exit 1
 }
 
@@ -95,7 +91,6 @@ if($help){
 
 # Print Inputs
 echo "Inputs:"
-echo "toolset: $toolset"
 echo "generator: $generator"
 echo "vcvars: $vcvars"
 echo "with_essential_client_modules: $with_essential_client_modules"
@@ -299,25 +294,25 @@ if($with_essential_client_modules) {
 
 if($with_common_modules) {
     $modules += "pr_bullet:`"https://github.com/Silverlan/pr_bullet.git`""
-    $modules += "pr_audio_soloud:`"https://github.com/Silverlan/pr_soloud.git`"
+    $modules += "pr_audio_soloud:`"https://github.com/Silverlan/pr_soloud.git`""
 }
 
 if($with_pfm) {
     if($with_core_pfm_modules -Or $with_all_pfm_modules) {
-        $modules += "pr_curl:https://github.com/Silverlan/pr_curl.git"
-        $modules += "pr_dmx:https://github.com/Silverlan/pr_dmx.git"
+        $modules += "pr_curl:`"https://github.com/Silverlan/pr_curl.git`""
+        $modules += "pr_dmx:`"https://github.com/Silverlan/pr_dmx.git`""
     }
     if($with_all_pfm_modules) {
-        $modules += "pr_chromium:https://github.com/Silverlan/pr_chromium.git"
-        $modules += "pr_unirender:https://github.com/Silverlan/pr_cycles.git"
-        $modules += "pr_curl:https://github.com/Silverlan/pr_curl.git"
-        $modules += "pr_dmx:https://github.com/Silverlan/pr_dmx.git"
-        $modules += "pr_xatlas:https://github.com/Silverlan/pr_xatlas.git"
+        $modules += "pr_chromium:`"https://github.com/Silverlan/pr_chromium.git`""
+        $modules += "pr_unirender:`"https://github.com/Silverlan/pr_cycles.git`""
+        $modules += "pr_curl:`"https://github.com/Silverlan/pr_curl.git`""
+        $modules += "pr_dmx:`"https://github.com/Silverlan/pr_dmx.git`""
+        $modules += "pr_xatlas:`"https://github.com/Silverlan/pr_xatlas.git`""
     }
 }
 
 if($with_vr) {
-    $modules += "pr_openvr:https://github.com/Silverlan/pr_openvr.git"
+    $modules += "pr_openvr:`"https://github.com/Silverlan/pr_openvr.git`""
 }
 
 $moduleList=""

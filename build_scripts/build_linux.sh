@@ -466,7 +466,7 @@ cmakeConfigure="$cmakeConfigure -DDEPENDENCY_GEOMETRIC_TOOLS_INCLUDE=\"$deps/Geo
 cmakeConfigure="$cmakeConfigure -DDEPENDENCY_LIBZIP_CONF_INCLUDE=\"$buildDir/third_party_libs/libzip\" "
 cmakeConfigure="$cmakeConfigure -DCMAKE_INSTALL_PREFIX:PATH=\"$installDir\" "
 cmakeConfigure="$cmakeConfigure -DDEPENDENCY_SPIRV_TOOLS_DIR=\"$deps/SPIRV-Tools\" "
-cmakeConfigure="$cmakeConfigure -DDEPENDENCY_VULKAN_LIBRARY=\"$vulkan_lib\" "
+# cmakeConfigure="$cmakeConfigure -DDEPENDENCY_VULKAN_LIBRARY=\"$vulkan_lib\" "
 cmakeConfigure="$cmakeConfigure -DBUILD_TESTING=OFF "
 cmakeConfigure="$cmakeConfigure $cmakeArgs "
 echo "Running configure command:"

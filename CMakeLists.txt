@@ -17,7 +17,7 @@ get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(is_multi_config)
 	set(BINARY_PRAGMA_DIR ${CONFIG_BUILD_TYPE} CACHE INTERNAL "" FORCE)
 else()
-	set(BINARY_PRAGMA_DIR "" CACHE INTERNAL "" FORCE)
+	set(BINARY_PRAGMA_DIR "." CACHE INTERNAL "" FORCE)
 endif()
 
 function(search_lib_recursive_full VAR_NAME FILE_PATH)
@@ -222,12 +222,8 @@ if(WIN32)
 	set(ZLIB_LIB_NAME "zlib" CACHE INTERNAL "" FORCE)
 else()
 	set(ZLIB_LIB_NAME "z" CACHE INTERNAL "" FORCE)
-
-
 endif()
 search_lib_recursive(DEPENDENCY_ZLIB_LIBRARY third_party_libs/zlib/${BINARY_PRAGMA_DIR} ${ZLIB_LIB_NAME})
-
-
 
 set(DEPENDENCY_ZLIB_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib CACHE PATH "Path to include directory.")
 
@@ -312,6 +308,7 @@ else()
 	search_lib_recursive(DEPENDENCY_LUABIND_BINARY lib/${BINARY_PRAGMA_DIR} luabind)
 endif()
 
+set(DEPENDENCY_LUAJIT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luajit/src CACHE PATH "Path to include directory.")
 set(DEPENDENCY_LUA_INCLUDE ${DEPENDENCY_LUAJIT_INCLUDE} CACHE STRING "" FORCE)
 
 # Third-party libraries
@@ -373,14 +370,22 @@ set(DEPENDENCY_VTFLIB_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vtflib/
 set(DEPENDENCY_VTFLIB_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/vtflib/src CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_VTFLIB_LIBRARY third_party_libs/vtflib/src/${BINARY_PRAGMA_DIR} VTFLib13)
 
-set(DEPENDENCY_LUAJIT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luajit/src CACHE PATH "Path to include directory.")
-#if(WIN32)
-#    search_lib_recursive(DEPENDENCY_LUAJIT_LIBRARY third_party_libs/luajit/src luajit STATIC ${CMAKE_CURRENT_LIST_DIR})
-#    search_lib_recursive(DEPENDENCY_LUA_LIBRARY third_party_libs/luajit/src lua51 STATIC ${CMAKE_CURRENT_LIST_DIR})
-#else()
-#    search_lib_recursive(DEPENDENCY_LUAJIT_LIBRARY third_party_libs/luajit/src luajit-p DYNAMIC ${CMAKE_CURRENT_LIST_DIR})
-#    search_lib_recursive(DEPENDENCY_LUA_LIBRARY third_party_libs/luajit/src luajit-p DYNAMIC ${CMAKE_CURRENT_LIST_DIR})
-#endif()
+if(WIN32)
+	if("${DEPENDENCY_LUAJIT_LIBRARY}" STREQUAL "")
+    	search_lib_recursive(DEPENDENCY_LUAJIT_LIBRARY third_party_libs/luajit/src luajit STATIC ${CMAKE_CURRENT_LIST_DIR})
+	endif()
+    #search_lib_recursive(DEPENDENCY_LUA_LIBRARY third_party_libs/luajit/src lua51 STATIC ${CMAKE_CURRENT_LIST_DIR})
+	if("${DEPENDENCY_LUA_LIBRARY}" STREQUAL "")
+		search_lib_recursive(DEPENDENCY_LUA_LIBRARY third_party_libs/luajit/src luajit STATIC ${CMAKE_CURRENT_LIST_DIR})
+	endif()
+else()
+	if("${DEPENDENCY_LUAJIT_LIBRARY}" STREQUAL "")
+    	search_lib_recursive(DEPENDENCY_LUAJIT_LIBRARY third_party_libs/luajit/src luajit-p DYNAMIC ${CMAKE_CURRENT_LIST_DIR})
+	endif()
+	if("${DEPENDENCY_LUA_LIBRARY}" STREQUAL "")
+    	search_lib_recursive(DEPENDENCY_LUA_LIBRARY third_party_libs/luajit/src luajit-p DYNAMIC ${CMAKE_CURRENT_LIST_DIR})
+	endif()
+endif()
 
 set(DEPENDENCY_LIBSAMPLERATE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libsamplerate/src CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_LIBSAMPLERATE_LIBRARY third_party_libs/libsamplerate/${BINARY_PRAGMA_DIR} samplerate STATIC)
@@ -509,6 +514,16 @@ if(UNIX)
 endif()
 set(BOOST_INCLUDEDIR ${DEPENDENCY_BOOST_INCLUDE} CACHE PATH "Path to include directory." FORCE)
 set(BOOST_ROOT ${DEPENDENCY_BOOST_INCLUDE} CACHE PATH "Path to include directory." FORCE)
+
+set(OGG_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/ogg/include CACHE STRING "" FORCE)
+set(DEPENDENCY_LIBOGG_INCLUDE ${OGG_INCLUDE_DIRS} CACHE STRING "" FORCE)
+
+set(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/zlib CACHE STRING "" FORCE)
+set(DEPENDENCY_ZLIB_INCLUDE ${ZLIB_INCLUDE_DIR} CACHE STRING "" FORCE)
+
+set(ZLIB_VERSION_STRING "1.2.0" CACHE STRING "" FORCE) # Arbitrary version number larger then 1.1.2 to disable an error message from libzip, because the zlib-library does not exist at this point in time yet
+set(ZLIB_INCLUDE_DIR ${DEPENDENCY_ZLIB_INCLUDE} CACHE STRING "" FORCE)
+set(ZLIB_LIBRARY ${DEPENDENCY_ZLIB_LIBRARY} CACHE STRING "" FORCE)
 
 function(register_third_party_library LIB_NAME)
 	message("Processing third-party library '${LIB_NAME}'...")
@@ -729,8 +744,6 @@ set_target_properties(glfw PROPERTIES FOLDER third_party_libs/glfw)
 #
 
 # libogg
-set(OGG_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/ogg/include CACHE STRING "" FORCE)
-set(DEPENDENCY_LIBOGG_INCLUDE ${OGG_INCLUDE_DIRS} CACHE STRING "" FORCE)
 register_third_party_library(ogg)
 set_target_properties(ogg PROPERTIES FOLDER third_party_libs)
 #
@@ -745,8 +758,6 @@ target_include_directories(vorbis PUBLIC "${DEPENDENCY_LIBOGG_BUILD_INCLUDE}")
 
 # zlib
 register_third_party_library(zlib)
-set(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/zlib CACHE STRING "" FORCE)
-set(DEPENDENCY_ZLIB_INCLUDE ${ZLIB_INCLUDE_DIR} CACHE STRING "" FORCE)
 target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 target_include_directories(zlibstatic PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 set_target_properties(example PROPERTIES FOLDER third_party_libs/zlib)
@@ -758,10 +769,9 @@ target_include_directories(materialsystem PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/thi
 #
 
 # libzip
-set(ZLIB_VERSION_STRING "1.2.0" CACHE STRING "" FORCE) # Arbitrary version number larger then 1.1.2 to disable an error message from libzip, because the zlib-library does not exist at this point in time yet
-set(ZLIB_INCLUDE_DIR ${DEPENDENCY_ZLIB_INCLUDE} CACHE STRING "" FORCE)
-set(ZLIB_LIBRARY ${DEPENDENCY_ZLIB_LIBRARY} CACHE STRING "" FORCE)
 set(LIBZIP_DO_INSTALL OFF CACHE BOOL ".." FORCE)
+set(ENABLE_BZIP2 OFF CACHE BOOL ".." FORCE)
+set(ENABLE_LZMA OFF CACHE BOOL ".." FORCE)
 register_third_party_library(libzip)
 target_include_directories(zip PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 set_target_properties(add_from_filep PROPERTIES FOLDER third_party_libs/libzip)
@@ -825,6 +835,7 @@ set_target_properties(pngtest PROPERTIES FOLDER third_party_libs/libpng)
 set_target_properties(pngunknown PROPERTIES FOLDER third_party_libs/libpng)
 set_target_properties(pngvalid PROPERTIES FOLDER third_party_libs/libpng)
 
+message("ASSING LIBPNG INCLUDE DIRECTORY FOR ZLIB: ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib")
 target_include_directories(png PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 #
 
@@ -884,7 +895,17 @@ set_target_properties(Recast PROPERTIES FOLDER third_party_libs/recast)
 #
 
 # freetype2
+if(WIN32)
+	set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE)
+	set(CMAKE_DISABLE_FIND_PACKAGE_BZip2 TRUE)
+	set(CMAKE_DISABLE_FIND_PACKAGE_PNG TRUE)
+endif()
 register_third_party_library(freetype)
+if(WIN32)
+	unset(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz)
+	unset(CMAKE_DISABLE_FIND_PACKAGE_BZip2)
+	unset(CMAKE_DISABLE_FIND_PACKAGE_PNG)
+endif()
 
 set_target_properties(freetype PROPERTIES FOLDER third_party_libs)
 target_include_directories(freetype PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
@@ -994,6 +1015,7 @@ function(pragma_install TARGET_NAME DESTINATION_PATH)
               return()
         endif ()
     endif()
+		message("Adding install rule for target \"${TARGET_NAME}\" to \"${DESTINATION_PATH}\"...")
         install(
                 TARGETS ${TARGET_NAME} ${TARGET_INSTALL_TYPE}
                 DESTINATION "${DESTINATION_PATH}"
@@ -1044,30 +1066,33 @@ add_custom_target(pragma-install-full
 )
 
 function(pragma_install_lib_c INPUT_LIBRARY_FILENAME LIB_NAME DESTINATION_PATH)
-    set(LIB_FILES_TO_COPY "") #Four unix systems
-        get_filename_component(INPUT_LIBRARY_PATH "${INPUT_LIBRARY_FILENAME}" DIRECTORY REALPATH)
-        if(WIN32)
-                set(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH}/${LIB_NAME}.dll")
-        else()
-                set(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH}/lib${LIB_NAME}.so")
-        endif()
+    if("${INPUT_LIBRARY_FILENAME}" STREQUAL "")
+        return()
+    endif()
 
+	string(LENGTH "${INPUT_LIBRARY_FILENAME}" "INPUT_LIBRARY_FILENAME_LENGTH")
+	if(${INPUT_LIBRARY_FILENAME_LENGTH} EQUAL 0)
+		set(INPUT_LIBRARY_FILENAME_LAST_CHAR "")
+	else()
+		MATH(EXPR INPUT_LIBRARY_FILENAME_LENGTH "${INPUT_LIBRARY_FILENAME_LENGTH}-1")
+		string(SUBSTRING "${INPUT_LIBRARY_FILENAME}" ${INPUT_LIBRARY_FILENAME_LENGTH} 1 "INPUT_LIBRARY_FILENAME_LAST_CHAR")
+	endif()
 
+	if("${INPUT_LIBRARY_FILENAME_LAST_CHAR}" STREQUAL "/" OR "${INPUT_LIBRARY_FILENAME_LAST_CHAR}" STREQUAL "\\")
+		set(INPUT_LIBRARY_PATH "${INPUT_LIBRARY_FILENAME}")
+	else()
+		get_filename_component(INPUT_LIBRARY_PATH "${INPUT_LIBRARY_FILENAME}" DIRECTORY REALPATH)
+	endif()
 
-	set(IS_OPTIONAL 0)
-	if(${ARGC} GREATER 3)
-		if(${ARGN} STREQUAL "OPTIONAL")
-			set(IS_OPTIONAL 1)
-		endif()
-        endif()
-        if(UNIX)
-            #linux: resolve symlinks and copy those instead.
-            get_filename_component(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH_BIN}" REALPATH)
+    if(WIN32)
+            set(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH}/${LIB_NAME}.dll")
+    else()
+            set(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH}/lib${LIB_NAME}.so")
+    endif()
 
-        endif()
-	# if((IS_OPTIONAL EQUAL 0) OR (EXISTS "${INPUT_LIBRARY_PATH_BIN}"))
 	set(InstallSrc "${INPUT_LIBRARY_PATH_BIN}")
 	set(InstallDst "${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}")
+	message("Adding install rule for \"${InstallSrc}\" to \"${InstallDst}\"...")
 	add_custom_command(TARGET pragma-install
 	   POST_BUILD
 	   COMMAND ${CMAKE_COMMAND}
@@ -1079,87 +1104,35 @@ endfunction(pragma_install_lib_c)
 
 
 function(pragma_install_lib INPUT_LIBRARY_PATH DESTINATION_PATH)
-
-
+    if("${INPUT_LIBRARY_PATH}" STREQUAL "")
+        return()
+    endif()
     set(LIB_FILES_TO_COPY "") #Four unix systems
     if(WIN32)
-                string(REGEX REPLACE "\\.[^.]*$" "" INPUT_LIBRARY_PATH_NO_EXT ${INPUT_LIBRARY_PATH})
+        string(REGEX REPLACE "\\.[^.]*$" "" INPUT_LIBRARY_PATH_NO_EXT ${INPUT_LIBRARY_PATH})
 
-            set(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH_NO_EXT}.dll")
-        else()
-                    set(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH}")
-            endif()
+        set(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH_NO_EXT}.dll")
+    else()
+        set(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH}")
+    endif()
 
-
-
-	set(IS_OPTIONAL 0)
-	if(${ARGC} GREATER 2)
-		if(${ARGN} STREQUAL "OPTIONAL")
-			set(IS_OPTIONAL 1)
-		endif()
+    if(UNIX)
+        cmake_path(GET INPUT_LIBRARY_PATH_BIN EXTENSION LIB_EXTENSION)
+        if(LIB_EXTENSION STREQUAL ".a")
+            return()
         endif()
+    endif()
 
-        if(UNIX)
-            #Part one: bail if we're trying to install static library
-            cmake_path(GET INPUT_LIBRARY_PATH_BIN EXTENSION LIB_EXTENSION)
-            if(LIB_EXTENSION STREQUAL ".a")
-                return()
-            endif()
-
-            #Part two: resolve symlinks.
-            get_filename_component(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH_BIN}" REALPATH)
-            #Part three: check for symlinks and add those to a list. (Ensure that we're not copying original element twice.)
-            #find -L $(pwd) -samefile libbz2.so.1
-            cmake_path(GET INPUT_LIBRARY_PATH_BIN PARENT_PATH INPUT_LIB_DIR)
-
-            execute_process(
-                    COMMAND find -L "${INPUT_LIB_DIR}" -samefile "${INPUT_LIBRARY_PATH_BIN}"
-                    WORKING_DIRECTORY "${INPUT_LIB_DIR}"
-                    OUTPUT_VARIABLE LINKS_RESULT
-            )
-
-            unset(INPUT_LIBRARY_PATH_BIN) #Safe to unset now.
-            string(REPLACE "\n" ";" LIB_FILES_TO_COPY "${LINKS_RESULT}")
-
-            string(LENGTH "${LIB_FILES_TO_COPY}" _STR_LEN)
-            math(EXPR _STR_LEN "${_STR_LEN}-1")
-            string(SUBSTRING "${LIB_FILES_TO_COPY}" 0 ${_STR_LEN} LIB_FILES_TO_COPY)
-            #TODO: Wrap code below this into a loop.
-        endif()
-        #if((IS_OPTIONAL EQUAL 0) OR (EXISTS "${INPUT_LIBRARY_PATH_BIN}")LIB_FILES_TO_COPY)
-
-
-		set(InstallSrc "${INPUT_LIBRARY_PATH_BIN}")
-		set(InstallDst "${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}")
-		add_custom_command(TARGET pragma-install
-		   POST_BUILD
-		   COMMAND ${CMAKE_COMMAND}
-		       -DInstallSrc=${InstallSrc}
-		       -DInstallDst=${InstallDst}
-		       -P ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/install_file.cmake
-		   COMMENT "Copying ${InstallSrc} to ${InstallDst}...")
-
-
-	#if(EXISTS "${INPUT_LIBRARY_PATH_BIN}")
-	#	add_custom_command(TARGET pragma-install POST_BUILD
-	#		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-	#			${INPUT_LIBRARY_PATH_BIN}
-    #                            ${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}
-	#	)
-    #    endif()
-    #
-    #    if(LIB_FILES_TO_COPY)
-    #        if(NOT UNIX)
-    #            return()
-    #        endif()
-    #        foreach(FILE_TO_COPY IN LISTS LIB_FILES_TO_COPY)
-    #            add_custom_command(TARGET pragma-install POST_BUILD
-    #                    COMMAND cp -a -u
-    #                            ${FILE_TO_COPY}
-    #                            ${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}
-    #            )
-    #        endforeach()
-    #    endif()
+    set(InstallSrc "${INPUT_LIBRARY_PATH_BIN}")
+    set(InstallDst "${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}")
+	message("Adding install rule for \"${InstallSrc}\" to \"${InstallDst}\"...")
+    add_custom_command(TARGET pragma-install
+       POST_BUILD
+       COMMAND ${CMAKE_COMMAND}
+           -DInstallSrc=${InstallSrc}
+           -DInstallDst=${InstallDst}
+           -P ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/install_file.cmake
+       COMMENT "Copying ${InstallSrc} to ${InstallDst}...")
 endfunction(pragma_install_lib)
 
 function(pragma_install_create_directory DIR_NAME)
@@ -1192,10 +1165,6 @@ else()
     pragma_install_lib("${DEPENDENCY_ZLIB_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 endif()
 
-if(UNIX)
-    pragma_install_lib("${DEPENDENCY_LIBTOOL_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-endif()
-
 if(WIN32)
     set(OS_LIB_BIN_EXT ".dll")
     set(OS_LIB_BIN_PRE "")
@@ -1210,12 +1179,16 @@ endif()
 if(is_multi_config)
     set(PR_MODULE_INSTALL_SUBDIR "${CONFIG_BUILD_TYPE}")
 else()
-    set(PR_MODULE_INSTALL_SUBDIR "")
+    set(PR_MODULE_INSTALL_SUBDIR ".")
 endif()
 
 
 function(pragma_install_file FILE_PATH INSTALL_PATH)
+    if("${FILE_PATH}" STREQUAL "")
+        return()
+    endif()
 	set(extra_macro_args ${ARGN})
+	message("Adding install rule for \"${FILE_PATH}\" to \"${INSTALL_PATH}\"...")
 	INSTALL(
                 FILES "${FILE_PATH}" DESTINATION "${INSTALL_PATH}"
 		COMPONENT ${PRAGMA_INSTALL_COMPONENT} ${extra_macro_args}
@@ -1224,7 +1197,11 @@ endfunction(pragma_install_file)
 
 
 function(pragma_install_program FILE_PATH INSTALL_PATH)
+    if("${FILE_PATH}" STREQUAL "")
+        return()
+    endif()
     set(extra_macro_args ${ARGN})
+	message("Adding install rule for \"${FILE_PATH}\" to \"${INSTALL_PATH}\"...")
     INSTALL(
                 PROGRAMS "${FILE_PATH}" DESTINATION "${INSTALL_PATH}"
         COMPONENT ${PRAGMA_INSTALL_COMPONENT} ${extra_macro_args}
@@ -1232,7 +1209,11 @@ function(pragma_install_program FILE_PATH INSTALL_PATH)
 endfunction(pragma_install_program)
 
 function(pragma_install_directory FILE_PATH INSTALL_PATH)
+    if("${FILE_PATH}" STREQUAL "")
+        return()
+    endif()
 	set(extra_macro_args ${ARGN})
+	message("Adding install rule for \"${FILE_PATH}\" to \"${INSTALL_PATH}\"...")
 	INSTALL(
                 DIRECTORY "${FILE_PATH}" DESTINATION "${INSTALL_PATH}"
 		COMPONENT ${PRAGMA_INSTALL_COMPONENT} ${extra_macro_args}
@@ -1249,15 +1230,18 @@ foreach(MODULE_PATH ${PR_MODULES})
                 set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/lib${MODULE_NAME}.so")
 	endif()
 	if(EXISTS "${MODULE_PATH}/CMakeInstall.txt")
+        message("Running install script for module '${MODULE_PATH}'...")
 		include("${MODULE_PATH}/CMakeInstall.txt" OPTIONAL)
 	else()
 		# Default behavior
-		if(EXISTS "${PR_MODULE_PATH_WITH_EXT}")
-			INSTALL(
-                                FILES "${PR_MODULE_PATH_WITH_EXT}" DESTINATION "modules/"
-				COMPONENT ${PRAGMA_INSTALL_COMPONENT}
-			)
-		endif()
+        message("Adding default installation rule for module \"${MODULE_PATH}\": \"${PR_MODULE_PATH_WITH_EXT}\" to \"${CMAKE_INSTALL_PREFIX}/modules/\"...")
+		add_custom_command(TARGET pragma-install
+	       POST_BUILD
+	       COMMAND ${CMAKE_COMMAND}
+	           -DInstallSrc=${PR_MODULE_PATH_WITH_EXT}
+	           -DInstallDst=\"${CMAKE_INSTALL_PREFIX}/modules/\"
+	           -P ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/install_file.cmake
+	       COMMENT "Copying ${PR_MODULE_PATH_WITH_EXT} to ${CMAKE_INSTALL_PREFIX}/modules/...")
 	endif()
 endforeach()
 
@@ -1266,6 +1250,7 @@ file(GLOB PR_MODULES "tools/*")
 foreach(MODULE_PATH ${PR_MODULES})
 	get_filename_component(MODULE_NAME "${MODULE_PATH}" NAME)
 	if(EXISTS "${MODULE_PATH}/CMakeInstall.txt")
+        message("Running install script for tool '${MODULE_PATH}'...")
 		include("${MODULE_PATH}/CMakeInstall.txt" OPTIONAL)
 	endif()
 endforeach()
@@ -1275,6 +1260,21 @@ INSTALL(
         DIRECTORY assets/ DESTINATION "."
 	COMPONENT ${PRAGMA_INSTALL_COMPONENT_FULL}
 )
+
+if(UNIX)
+    add_custom_command(TARGET pragma-install
+       POST_BUILD
+       COMMAND ${CMAKE_COMMAND}
+           -DINSTALL_LOCATION=${CMAKE_INSTALL_PREFIX}
+           -P ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/patch_libraries.cmake
+       COMMENT "Patching libraries...")
+    add_custom_command(TARGET pragma-install-full
+       POST_BUILD
+       COMMAND ${CMAKE_COMMAND}
+           -DINSTALL_LOCATION=${CMAKE_INSTALL_PREFIX}
+           -P ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/patch_libraries.cmake
+       COMMENT "Patching libraries...")
+endif()
 
 set_target_properties(pragma-install PROPERTIES FOLDER core)
 set_target_properties(pragma-install-full PROPERTIES FOLDER core)

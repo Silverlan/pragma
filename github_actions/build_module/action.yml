@@ -1,0 +1,21 @@
+name: Build Pragma Module
+description: 'Build Pragma Module'
+inputs:
+  module:
+    description: 'The module to build'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: Silverlan/common_actions/action_start@main
+      with:
+        name: "pragma > build_module"
+  
+    - name: Build Module
+      shell: bash
+      working-directory: 'pragma'
+      run: |
+        cd build
+        cmake --build "." --target "${{inputs.module}}" "pragma-install"
+  
+    - uses: Silverlan/common_actions/action_end@main

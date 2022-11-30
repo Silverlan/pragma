@@ -1,0 +1,25 @@
+name: Build Generic Module
+description: 'Build Generic Module'
+inputs:
+  module:
+    description: 'Module name'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Pragma
+      uses: Silverlan/pragma/github_actions/setup@master
+
+    - name: "Download Module"
+      uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+        path: 'pragma/modules/${{inputs.module}}'
+
+    - name: Build Pragma
+      uses: Silverlan/pragma/github_actions/build@master
+
+    - name: Build Module
+      uses: Silverlan/pragma/github_actions/build_module@master
+      with:
+        module: '${{inputs.module}}'

@@ -354,14 +354,11 @@ foreach ( $module in $modules )
 cd ..
 print_hmsg "Done!"
 
-#if($false){
 # Configure
 print_hmsg "Configuring Pragma..."
 $rootDir=normalize_path $PWD
 cd $buildDir
 print_hmsg "Additional CMake args: $global:cmakeArgs"
-
-$testZlibConfDir="C:\pragma\build\third_party_libs\zlib"
 
 $cmdCmake="cmake `$root` -G `"$generator`" ```
     -DDEPENDENCY_BOOST_INCLUDE=`"$boostRoot/build/_deps/boost-src`" ```
@@ -374,7 +371,8 @@ $cmdCmake="cmake `$root` -G `"$generator`" ```
     -DDEPENDENCY_GEOMETRIC_TOOLS_INCLUDE=`"$depsDir/GeometricTools/GTE`" ```
     -DDEPENDENCY_LUAJIT_LIBRARY=`"$luaJitLib`" ```
     -DDEPENDENCY_LUA_LIBRARY=`"$luaJitLib`" ```
-    -DDEPENDENCY_LIBZIP_CONF_INCLUDE=`"$testZlibConfDir`" ```
+    -DBOOST_ROOT=`"$boostRoot`" ```
+    -DBOOST_LIBRARYDIR=`"$boostRoot/build/lib/Release/`" ```
     -DZLIB_INCLUDE_DIRS=`"$rootDir/build/third_party_libs/zlib $zlibConfRoot`" ```
     -DCMAKE_INSTALL_PREFIX:PATH=`"$installDir`" ```
     -DDEPENDENCY_SPIRV_TOOLS_DIR=`"$deps/SPIRV-Tools`" ```
@@ -458,14 +456,14 @@ cd $curDir
 
 if($build) {
     print_hmsg "Building Pragma..."
-    $targets="pragma-install-full $moduleList"
+    $targets="pragma-install-full $moduleList "
     if($with_pfm) {
-        $targets+=" pfm"
+        $targets+=" pfm "
     }
+    $targets+=$global:additionalBuildTargets
     $targets+=" pragma-install"
 
     $cmakeBuild="cmake --build `".`" --config `"$buildConfig`" --target $targets "
-    $cmakeBuild+=$global:additionalBuildTargets
     echo "Running build command:"
     echo "$cmakeBuild"
     iex $cmakeBuild

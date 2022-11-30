@@ -534,10 +534,10 @@ if [ "$build" == 1 ]; then
 	if [ "$with_pfm" == 1 ]; then
 	  targets="$targets pfm"
 	fi
-	targets="$targets pragma-install"
+	targets="$targets $additionalBuildTargets pragma-install"
 
 	cd "$buildDir"
-	cmakeBuild="cmake --build \".\" --config \"$buildConfig\" --target $targets $additionalBuildTargets"
+	cmakeBuild="cmake --build \".\" --config \"$buildConfig\" --target $targets"
 	echo "Running build command:"
 	echo "$cmakeBuild"
   	eval "$cmakeBuild"

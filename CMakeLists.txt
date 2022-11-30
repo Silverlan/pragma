@@ -395,14 +395,6 @@ set(DEPENDENCY_LIBNOISEUTILS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/
 search_lib_recursive(DEPENDENCY_LIBNOISE_LIBRARY third_party_libs/libnoise/src/${BINARY_PRAGMA_DIR} noise STATIC)
 search_lib_recursive(DEPENDENCY_LIBNOISEUTILS_LIBRARY third_party_libs/libnoise/noiseutils/${BINARY_PRAGMA_DIR} noiseutils-static STATIC)
 
-set(DEPENDENCY_HLLIB_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/HLLib CACHE PATH "Path to include directory.")
-
-if(WIN32)
-	search_lib_recursive_custom(DEPENDENCY_HLLIB_LIBRARY HLLib "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/sln/vs17/HLLib/x64/Release")
-else()
-	search_lib_recursive_custom(DEPENDENCY_HLLIB_LIBRARY hl "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/HLLib")
-endif()
-
 # if(WIN32)
 # 	set(ASSIMP_LIB_NAME assimp-vc140-mt)
 # else()
@@ -453,7 +445,6 @@ if(UNIX)
 	resolve_links(DEPENDENCY_GLSLANG_LIBRARY)
 	resolve_links(DEPENDENCY_GLSLANG_OGL_COMPILER_LIBRARY)
 	resolve_links(DEPENDENCY_GLSLANG_OS_DEPENDENT_LIBRARY)
-	resolve_links(DEPENDENCY_HLLIB_LIBRARY)
 	resolve_links(DEPENDENCY_ICLIENT_LIBRARY)
 	resolve_links(DEPENDENCY_IGLFW_LIBRARY)
 	resolve_links(DEPENDENCY_ISHARED_LIBRARY)
@@ -909,27 +900,6 @@ endif()
 
 set_target_properties(freetype PROPERTIES FOLDER third_party_libs)
 target_include_directories(freetype PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
-#
-
-# hllib
-if(WIN32)
-	include_external_msproject(hllib ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/sln/vs17/HLLib/HLLib.vcxproj)
-	set_target_properties(hllib PROPERTIES FOLDER third_party_libs)
-else()
-        #Command needed for makefile: make -C HLLib -f Makefile
-        add_custom_command(OUTPUT "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/HLLib/libhl.so"
-            COMMAND "make"
-            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/HLLib"
-        )
-    add_custom_target(hllib
-        #SOURCES "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/HLLib/"
-        DEPENDS "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/HLLib/libhl.so"
-    )
-    set_target_properties(hllib PROPERTIES FOLDER third_party_libs)
-
-
-endif()
-#TODO - HLLib is compilable in linux via makefile. Can we use it?
 #
 
 # dependencies

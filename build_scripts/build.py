@@ -111,7 +111,7 @@ if platform == "linux":
 
 def normalize_path(path):
 	normalizedPath = path
-	normalizedPath.replace('\\','/')
+	normalizedPath = normalizedPath.replace('\\','/')
 	return normalizedPath
 
 def mkpath(path):
@@ -525,8 +525,9 @@ else:
 	    "-DDEPENDENCY_BOOST_THREAD_LIBRARY=" +boost_root +"/build/lib/Release/boost_thread.lib",
 	    "-DBOOST_ROOT=" +boost_root +"",
 	    "-DBOOST_LIBRARYDIR=" +boost_root +"/build/lib/Release/",
-	    "-DZLIB_INCLUDE_DIRS=" +build_dir +"/third_party_libs/zlib " +zlib_conf_root +""
-	    "-DDEPENDENCY_LUAJIT_LIBRARY=" +lua_jit_lib +""
+	    "-DZLIB_INCLUDE_DIRS=" +build_dir +"/third_party_libs/zlib " +zlib_conf_root +"",
+	    "-DDEPENDENCY_LUAJIT_LIBRARY=" +lua_jit_lib +"",
+	    "-DDEPENDENCY_LUA_LIBRARY=" +lua_jit_lib +""
 	]
 
 cmake_configure(root,generator,cmake_args)

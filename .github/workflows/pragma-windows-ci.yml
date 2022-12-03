@@ -29,10 +29,10 @@ jobs:
             build_dir: 'build'
     steps:
       - name: Setup Pragma
-        uses: Silverlan/pragma/github_actions/setup@main
+        uses: Silverlan/pragma/github_actions/setup@master
 
       - name: Build Pragma
-        uses: Silverlan/pragma/github_actions/build@main
+        uses: Silverlan/pragma/github_actions/build@master
         id: build-pragma
         with:
           build-args: "--with-pfm --with-all-pfm-modules --with-vr --vcvars \"C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat\""

@@ -4,6 +4,20 @@ inputs:
   module:
     description: 'Module name'
     required: true
+  build-config:
+    description: 'The build configuration to use.'
+    required: true
+    default: "RelWithDebInfo"
+outputs:
+  build-dir:
+    description: 'The directory where the build files are written to.'
+    value: ${{ steps.set-output-vars.outputs.build-dir }}
+  deps-dir:
+    description: 'The directory where the dependencies are written to.'
+    value: ${{ steps.set-output-vars.outputs.deps-dir }}
+  install-dir:
+    description: 'The directory where the installation files are written to.'
+    value: ${{ steps.set-output-vars.outputs.install-dir }}
 runs:
   using: "composite"
   steps:
@@ -14,12 +28,23 @@ runs:
       uses: actions/checkout@v3
       with:
         submodules: 'recursive'
-        path: 'pragma/modules/${{inputs.module}}'
+        path: 'pragma/modules/${{ inputs.module }}'
 
     - name: Build Pragma
+      id: build-pragma
       uses: Silverlan/pragma/github_actions/build@master
 
     - name: Build Module
       uses: Silverlan/pragma/github_actions/build_module@master
       with:
-        module: '${{inputs.module}}'
+        module: '${{ inputs.module }}'
+        build-dir: '${{ steps.build-pragma.outputs.build-dir }}'
+        build-config: '${{ inputs.build-config }}'
+
+    - name: Set Output Variables
+      shell: bash
+      id: set-output-vars
+      run: |
+        echo "::set-output name=build-dir::$(echo \"${{ steps.build-pragma.outputs.build-dir }}\")"
+        echo "::set-output name=deps-dir::$(echo \"${{ steps.build-pragma.outputs.deps-dir }}\")"
+        echo "::set-output name=install-dir::$(echo \"${{ steps.build-pragma.outputs.install-dir }}\")"

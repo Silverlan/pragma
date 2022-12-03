@@ -7,6 +7,13 @@ runs:
       with:
         name: "pragma > install_requirements"
   
+    # For Cycles
+    - name: Install Cuda
+      uses: Jimver/cuda-toolkit@v0.2.8
+      with:
+        cuda: '11.7.0'
+    # TODO: Install OptiX
+  
     - name: Maximize build space
       if: runner.os == 'Linux'
       uses: easimon/maximize-build-space@master
@@ -21,7 +28,7 @@ runs:
         vulkan-query-version: 1.3.211.0
         vulkan-components: Vulkan-Headers, Vulkan-Loader, Glslang
         vulkan-use-cache: true
-  
+
     - name: Install Packages
       if: runner.os == 'Linux'
       shell: bash
@@ -32,6 +39,9 @@ runs:
         sudo apt install clang-14
         sudo apt install libstdc++-12-dev
         sudo apt install libstdc++6
+
+        # Required for running build-scripts
+        sudo apt-get install python3
         
         # Vulkan
         sudo apt-get install libxcb-keysyms1-dev

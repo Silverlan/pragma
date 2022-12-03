@@ -4,6 +4,14 @@ inputs:
   module:
     description: 'The module to build'
     required: true
+  build-dir:
+    description: 'The build directory location.'
+    required: true
+    default: 'build'
+  build-config:
+    description: 'The build configuration to use.'
+    required: true
+    default: "RelWithDebInfo"
 runs:
   using: "composite"
   steps:
@@ -13,9 +21,8 @@ runs:
   
     - name: Build Module
       shell: bash
-      working-directory: 'pragma'
       run: |
-        cd build
-        cmake --build "." --target "${{inputs.module}}" "pragma-install"
+        cd "${{inputs.build-dir}}"
+        cmake --build "." --target "${{inputs.module}}" "pragma-install" --config "${{inputs.build-config}}"
   
     - uses: Silverlan/common_actions/action_end@main

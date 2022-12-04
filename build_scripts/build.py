@@ -26,8 +26,8 @@ parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev
 
 # See https://stackoverflow.com/a/43357954/1879228 for boolean args
 if platform == "linux":
-	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-14')
-	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-14')
+	#parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-14')
+	#parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-14')
 	defaultGenerator = "Unix Makefiles"
 else:
 	defaultGenerator = "Visual Studio 17 2022"
@@ -63,12 +63,12 @@ args = parser.parse_args()
 #
 #		logging.info("Running Pragma Build Script")
 
-if platform == "linux":
-	c_compiler = args.c_compiler
-	cxx_compiler = args.cxx_compiler
+#if platform == "linux":
+#	c_compiler = args.c_compiler
+#	cxx_compiler = args.cxx_compiler
 generator = args.generator
-if platform == "win32":
-	vcvars = args.vcvars
+#if platform == "win32":
+#	vcvars = args.vcvars
 with_essential_client_modules = args.with_essential_client_modules
 with_common_modules = args.with_common_modules
 with_pfm = args.with_pfm
@@ -86,12 +86,12 @@ modules = args.module
 
 
 print("Inputs:")
-if platform == "linux":
-	print("cxx_compiler: " +cxx_compiler)
-	print("c_compiler: " +c_compiler)
+#if platform == "linux":
+#	print("cxx_compiler: " +cxx_compiler)
+#	print("c_compiler: " +c_compiler)
 print("generator: " +generator)
-if platform == "win32":
-	print("vcvars: " +vcvars)
+#if platform == "win32":
+#	print("vcvars: " +vcvars)
 print("with_essential_client_modules: " +str(with_essential_client_modules))
 print("with_common_modules: " +str(with_common_modules))
 print("with_pfm: " +str(with_pfm))
@@ -105,9 +105,9 @@ print("deps_directory: " +deps_directory)
 print("install_directory: " +install_directory)
 print("modules: " +', '.join(modules))
 
-if platform == "linux":
-	os.environ["CC"] = c_compiler
-	os.environ["CXX"] = cxx_compiler
+#if platform == "linux":
+#	os.environ["CC"] = c_compiler
+#	os.environ["CXX"] = cxx_compiler
 
 def normalize_path(path):
 	normalizedPath = path
@@ -241,9 +241,12 @@ def replace_text_in_file(filepath,srcStr,dstStr):
 os.chdir(deps_dir)
 zlib_root = os.getcwd() +"/zlib-1.2.8"
 if platform == "linux":
-	zlib_lib = zlib_root +"/build/build/libz.a"
+	zlib_lib_path = zlib_root +"/build"
+	zlib_lib = zlib_lib_path +"/libz.a"
 else:
-	zlib_lib = zlib_root +"/build/" +build_config +"/zlibstatic.lib"
+	zlib_lib_path = zlib_root +"/build/" +build_config
+	zlib_lib = zlib_lib_path +"/zlibstatic.lib"
+zlib_include_dirs = zlib_root +" " +zlib_lib_path
 if not Path(zlib_root).is_dir():
 	print_msg("zlib not found. Downloading...")
 	git_clone("https://github.com/fmrico/zlib-1.2.8.git")
@@ -280,9 +283,9 @@ else:
 print_msg("Building boost...")
 
 os.chdir(boost_root)
-ZLIB_SOURCE = normalize_path(deps_dir +"/zlib-1.2.8")
-ZLIB_INCLUDE = normalize_path(deps_dir +"/zlib-1.2.8")
-ZLIB_LIBPATH = normalize_path(deps_dir +"/zlib-1.2.8/build/" +build_config)
+ZLIB_SOURCE = normalize_path(zlib_root)
+ZLIB_INCLUDE = normalize_path(zlib_root)
+ZLIB_LIBPATH = normalize_path(zlib_lib_path)
 if platform == "linux":
 	subprocess.run([boost_root +"/bootstrap.sh"],check=True,shell=True)
 	subprocess.run(["./b2","address-model=64","stage","variant=release","link=shared","runtime-link=shared","-j3"],check=True,shell=True)
@@ -430,6 +433,8 @@ def execbuildscript(filepath):
 
 		"zlib_root": zlib_root,
 		"zlib_lib": zlib_lib,
+		"zlib_lib_dir": zlib_lib_path,
+		"zlib_include_dirs": zlib_include_dirs,
 		"boost_root": boost_root,
 		"geometric_tools_root": geometric_tools_root,
 
@@ -448,11 +453,11 @@ def execbuildscript(filepath):
 		"execfile": execfile,
 		"execbuildscript": execbuildscript
 	}
-	if platform == "linux":
-		l["c_compiler"] = "c_compiler"
-		l["cxx_compiler"] = "cxx_compiler"
-	else:
-		l["vcvars"] = "vcvars"
+	#if platform == "linux":
+	#	l["c_compiler"] = "c_compiler"
+	#	l["cxx_compiler"] = "cxx_compiler"
+	#else:
+	#	l["vcvars"] = "vcvars"
 
 	execfile(filepath,g,l)
 
@@ -481,6 +486,7 @@ for module in modules:
 		subprocess.run(["git","pull"],check=True)
 
 	scriptPath = moduleDir +"build_scripts/setup.py"
+	
 	if Path(scriptPath).is_file():
 		print_msg("Executing module setup script...")
 		execbuildscript(scriptPath)

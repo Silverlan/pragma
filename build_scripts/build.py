@@ -26,8 +26,8 @@ parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev
 
 # See https://stackoverflow.com/a/43357954/1879228 for boolean args
 if platform == "linux":
-	#parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-14')
-	#parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-14')
+	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-14')
+	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-14')
 	defaultGenerator = "Unix Makefiles"
 else:
 	defaultGenerator = "Visual Studio 17 2022"
@@ -63,9 +63,9 @@ args = parser.parse_args()
 #
 #		logging.info("Running Pragma Build Script")
 
-#if platform == "linux":
-#	c_compiler = args.c_compiler
-#	cxx_compiler = args.cxx_compiler
+if platform == "linux":
+	c_compiler = args.c_compiler
+	cxx_compiler = args.cxx_compiler
 generator = args.generator
 #if platform == "win32":
 #	vcvars = args.vcvars
@@ -86,9 +86,9 @@ modules = args.module
 
 
 print("Inputs:")
-#if platform == "linux":
-#	print("cxx_compiler: " +cxx_compiler)
-#	print("c_compiler: " +c_compiler)
+if platform == "linux":
+	print("cxx_compiler: " +cxx_compiler)
+	print("c_compiler: " +c_compiler)
 print("generator: " +generator)
 #if platform == "win32":
 #	print("vcvars: " +vcvars)
@@ -105,9 +105,9 @@ print("deps_directory: " +deps_directory)
 print("install_directory: " +install_directory)
 print("modules: " +', '.join(modules))
 
-#if platform == "linux":
-#	os.environ["CC"] = c_compiler
-#	os.environ["CXX"] = cxx_compiler
+if platform == "linux":
+	os.environ["CC"] = c_compiler
+	os.environ["CXX"] = cxx_compiler
 
 def normalize_path(path):
 	normalizedPath = path
@@ -453,9 +453,9 @@ def execbuildscript(filepath):
 		"execfile": execfile,
 		"execbuildscript": execbuildscript
 	}
-	#if platform == "linux":
-	#	l["c_compiler"] = "c_compiler"
-	#	l["cxx_compiler"] = "cxx_compiler"
+	if platform == "linux":
+		l["c_compiler"] = "c_compiler"
+		l["cxx_compiler"] = "cxx_compiler"
 	#else:
 	#	l["vcvars"] = "vcvars"
 

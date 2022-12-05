@@ -10,6 +10,9 @@
 #include "pragma/networkdefinitions.h"
 #include <luabind/detail/conversion_policies/conversion_policies.hpp>
 #include <memory>
+#ifdef __linux__
+#include <sharedutils/util_ifile.hpp>
+#endif
 
 namespace ufile {struct IFile;};
 

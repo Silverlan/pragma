@@ -469,6 +469,13 @@ def execbuildscript(filepath):
 
 	os.chdir(curDir)
 
+os.chdir(root)
+subprocess.run(["git","submodule","update","--recursive"],check=True)
+
+# These modules are shipped with the Pragma repository and will have to be excluded from the
+# CMake configuration explicitly if they should be disabled.
+shippedModules = ["pr_audio_dummy","pr_prosper_opengl","pr_prosper_vulkan","pr_curl"]
+
 for module in modules:
 	os.chdir(root +"/modules")
 	global moduleName
@@ -489,7 +496,7 @@ for module in modules:
 	if not Path(moduleDir).is_dir():
 		print_msg("Downloading module '" +moduleName +"'...")
 		git_clone(moduleUrl,moduleName)
-	else:
+	elif not moduleName in shippedModules: # Shipped modules are already updated by the git submodule update command above
 		curDir = os.getcwd()
 		os.chdir(moduleDir)
 		print_msg("Updating module '" +moduleName +"'...")
@@ -504,14 +511,12 @@ for module in modules:
 
 	module_list.append(moduleName)
 
-# These modules are shipped with the Pragma repository and will have to be excluded from the
-# CMake configuration explicitly if they should be disabled.
-shippedModules = ["pr_audio_dummy","pr_prosper_opengl","pr_prosper_vulkan"] # "pr_curl" is currently required
 for module in shippedModules:
-	if not module in module_list:
-		cmake_args.append("-DPRAGMA_DISABLE_MODULE_" +module +"=ON")
-	else:
-		cmake_args.append("-DPRAGMA_DISABLE_MODULE_" +module +"=OFF")
+	if module != "pr_curl": # Curl is currently required
+		if not module in module_list:
+			cmake_args.append("-DPRAGMA_DISABLE_MODULE_" +module +"=ON")
+		else:
+			cmake_args.append("-DPRAGMA_DISABLE_MODULE_" +module +"=OFF")
 
 os.chdir(install_dir)
 for module in modules_prebuilt:

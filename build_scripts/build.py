@@ -83,6 +83,7 @@ install_directory = args.install_directory
 #log_file = args.log_file
 verbose = args.verbose
 modules = args.module
+modules_prebuilt = []
 
 
 print("Inputs:")
@@ -361,6 +362,7 @@ if with_essential_client_modules:
 if with_common_modules:
 	modules.append( "pr_bullet:\"https://github.com/Silverlan/pr_bullet.git\"" )
 	modules.append( "pr_audio_soloud:\"https://github.com/Silverlan/pr_soloud.git\"" )
+	modules_prebuilt.append( "Silverlan/pr_mount_external_prebuilt" )
 
 if with_pfm:
 	if with_core_pfm_modules or with_all_pfm_modules:
@@ -468,10 +470,15 @@ def execbuildscript(filepath):
 	os.chdir(curDir)
 
 for module in modules:
-	index = module.find(':')
 	global moduleName
-	moduleName = module[0:index].strip('\"')
-	moduleUrl = module[index +1:].strip('\"')
+	index = module.find(':')
+	if index == -1:
+		moduleName = module
+		moduleUrl = ""
+	else:
+		moduleName = module[0:index].strip('\"')
+		moduleUrl = module[index +1:].strip('\"')
+
 	moduleDir = os.getcwd() +"/" +moduleName +"/"
 
 	print("Module Name: " +moduleName)
@@ -492,6 +499,15 @@ for module in modules:
 		execbuildscript(scriptPath)
 
 	module_list.append(moduleName)
+
+os.chdir(install_dir)
+for module in modules_prebuilt:
+	print_msg("Downloading prebuilt binaries for module '" +module +"'...")
+	baseUrl = "https://github.com/" +module +"/releases/download/latest/"
+	if platform == "linux":
+		http_extract(baseUrl +"binaries_linux64.tar.gz",format="tar.gz")
+	else:
+		http_extract(baseUrl +"binaries_windows64.zip")
 
 print("Modules:" +', '.join(module_list))
 print("Additional CMake Arguments:" +', '.join(cmake_args))

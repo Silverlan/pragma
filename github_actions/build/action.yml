@@ -32,7 +32,7 @@ runs:
       shell: bash
       working-directory: 'pragma'
       run: |
-        python build_scripts/build.py ${{inputs.build-args}} --build-config "${{inputs.build-config}}"
+        python build_scripts/build.py --build-config "${{inputs.build-config}}" ${{inputs.build-args}}
         
     - name: Build Pragma
       if: runner.os == 'Windows'
@@ -41,7 +41,7 @@ runs:
       working-directory: 'pragma'
       run: |
         # We write the dependencies and build files to c:/ because the workspace disk provided by the runner isn't large enough
-        python build_scripts/build.py ${{inputs.build-args}} --build-config "${{inputs.build-config}}" --build-directory "c:/pragma/build" --deps-directory "c:/pragma/deps"
+        python build_scripts/build.py --build-config "${{inputs.build-config}}" --build-directory "c:/pragma/build" --deps-directory "c:/pragma/deps" ${{inputs.build-args}}
         
     - name: Set Output Variables
       shell: bash

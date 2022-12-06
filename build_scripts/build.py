@@ -356,6 +356,10 @@ os.chdir("../../")
 print_msg("Downloading modules...")
 os.chdir(root +"/modules")
 
+module_list = []
+cmake_args = []
+additional_build_targets = []
+
 if with_essential_client_modules:
 	modules.append( "pr_prosper_vulkan:\"https://github.com/Silverlan/pr_prosper_vulkan.git\"" )
 
@@ -377,10 +381,6 @@ if with_pfm:
 	
 if with_vr:
 	modules.append( "pr_openvr:https://github.com/Silverlan/pr_openvr.git" )
-
-module_list = []
-cmake_args = []
-additional_build_targets = []
 
 def execfile(filepath, globals=None, locals=None):
     if globals is None:
@@ -470,6 +470,7 @@ def execbuildscript(filepath):
 	os.chdir(curDir)
 
 for module in modules:
+	os.chdir(root +"/modules")
 	global moduleName
 	index = module.find(':')
 	if index == -1:
@@ -489,8 +490,11 @@ for module in modules:
 		print_msg("Downloading module '" +moduleName +"'...")
 		git_clone(moduleUrl,moduleName)
 	else:
+		curDir = os.getcwd()
+		os.chdir(moduleDir)
 		print_msg("Updating module '" +moduleName +"'...")
 		subprocess.run(["git","pull"],check=True)
+		os.chdir(curDir)
 
 	scriptPath = moduleDir +"build_scripts/setup.py"
 	
@@ -499,6 +503,15 @@ for module in modules:
 		execbuildscript(scriptPath)
 
 	module_list.append(moduleName)
+
+# These modules are shipped with the Pragma repository and will have to be excluded from the
+# CMake configuration explicitly if they should be disabled.
+shippedModules = ["pr_audio_dummy","pr_prosper_opengl","pr_prosper_vulkan"] # "pr_curl" is currently required
+for module in shippedModules:
+	if not module in module_list:
+		cmake_args.append("-DPRAGMA_DISABLE_MODULE_" +module +"=ON")
+	else:
+		cmake_args.append("-DPRAGMA_DISABLE_MODULE_" +module +"=OFF")
 
 os.chdir(install_dir)
 for module in modules_prebuilt:

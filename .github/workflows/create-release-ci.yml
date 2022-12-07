@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Description'
+        description: 'Version'
         required: true
         type: string
 
@@ -95,7 +95,7 @@ jobs:
         id: windows-version
         shell: bash
         run:   |
-          wget https://github.com/Silverlan/pragma/releases/download/latest/pragma.zip
+          wget https://github.com/Silverlan/pragma/releases/download/nightly/pragma.zip
           filename="pragma-v${{ steps.determine-version.outputs.version }}-win64.zip"
           mv pragma.zip "$filename"
           echo "filename=$filename" >> $GITHUB_OUTPUT
@@ -104,7 +104,7 @@ jobs:
         id: linux-version
         shell: bash
         run:   |
-          wget https://github.com/Silverlan/tmp_UniRender_Cycles_ci3/releases/download/latest/pragma.tar.gz
+          wget https://github.com/Silverlan/pragma/releases/download/nightly/pragma.tar.gz
           filename="pragma-v${{ steps.determine-version.outputs.version }}-lin64.tar.gz"
           mv pragma.tar.gz "$filename"
           echo "filename=$filename" >> $GITHUB_OUTPUT

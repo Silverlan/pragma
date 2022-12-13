@@ -32,7 +32,7 @@ runs:
       shell: bash
       working-directory: 'pragma'
       run: |
-        python build_scripts/build.py --build-config "${{inputs.build-config}}" ${{inputs.build-args}}
+        python build_scripts/build.py --no-confirm --build-config "${{inputs.build-config}}" ${{inputs.build-args}}
         
     - name: Build Pragma
       if: runner.os == 'Windows'

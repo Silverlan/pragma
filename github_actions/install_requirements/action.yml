@@ -21,41 +21,5 @@ runs:
         root-reserve-mb: 512
         swap-size-mb: 1024
         remove-dotnet: 'true'
-
-    - name: Install Packages
-      if: runner.os == 'Linux'
-      shell: bash
-      run: |
-        sudo apt install build-essential
-        sudo add-apt-repository ppa:savoury1/llvm-defaults-14
-        sudo apt update
-        sudo apt install clang-14
-        sudo apt install libstdc++-12-dev
-        sudo apt install libstdc++6
-
-        # Required for running build-scripts
-        sudo apt-get install python3
-        
-        # Vulkan
-        sudo apt-get -qq install -y libwayland-dev libxrandr-dev
-
-        sudo apt-get install libxcb-keysyms1-dev
-        sudo apt-get install xcb libxcb-xkb-dev x11-xkb-utils libx11-xcb-dev libxkbcommon-x11-dev
-        
-        # GLFW
-        sudo apt install xorg-dev
-        
-        # OIDN
-        sudo apt install git-lfs
-        
-        # Cycles
-        sudo apt-get install subversion
-        
-        # Curl
-        sudo apt-get install libssl-dev
-        sudo apt install libssh2-1
-        
-        # OIIO
-        sudo apt-get install python3-distutils
         
     - uses: Silverlan/common_actions/action_end@main

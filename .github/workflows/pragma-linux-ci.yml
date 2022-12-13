@@ -30,7 +30,16 @@ jobs:
       - name: Setup Pragma
         uses: Silverlan/pragma/github_actions/setup@master
 
-      - name: Build Pragma
+      # We split up the build step into two steps, so we don't reach the maximum GitHub action step time limit.
+      # The first step downloads and builds all dependencies, but not Pragma itself.
+      # Step 2 re-runs the build script to build the core project and modules.
+      - name: Build Pragma - Dependencies
+        uses: Silverlan/pragma/github_actions/build@master
+        id: build-pragma
+        with:
+          build-args: "--with-pfm --with-all-pfm-modules --with-vr --build 0"
+
+      - name: Build Pragma - Core and Modules
         uses: Silverlan/pragma/github_actions/build@master
         id: build-pragma
         with:

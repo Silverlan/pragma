@@ -1908,9 +1908,9 @@ void Lua::udm::register_library(Lua::Interface &lua)
 	auto cdHdr = luabind::class_<::udm::HdrColor>("HdrColor");
 	cdHdr.def(luabind::constructor<>());
 #ifdef _WIN32
-    cdSrgba.def(luabind::tostring(luabind::self));
+    cdHdr.def(luabind::tostring(luabind::self));
 #else
-    cdSrgba.def("__tostring",+[](const ::udm::HdrColor &value) -> std::string {
+    cdHdr.def("__tostring",+[](const ::udm::HdrColor &value) -> std::string {
         std::stringstream ss;
         ss<<value;
         return ss.str();

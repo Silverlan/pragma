@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import subprocess
 from sys import platform
+from distutils.dir_util import copy_tree
 import pathlib
 import argparse
 import shutil
@@ -33,7 +34,7 @@ else:
 	defaultGenerator = "Visual Studio 17 2022"
 parser.add_argument('--generator', help='The generator to use.', default=defaultGenerator)
 if platform == "win32":
-	parser.add_argument('--vcvars', help='Path to vcvars64.bat.', default="\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat\"")
+	parser.add_argument('--vcvars', help='Path to vcvars64.bat.', default="\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat\"")
 parser.add_argument("--with-essential-client-modules", type=str2bool, nargs='?', const=True, default=True, help="Include essential modules required to run Pragma.")
 parser.add_argument("--with-common-modules", type=str2bool, nargs='?', const=True, default=True, help="Include non-essential but commonly used modules (e.g. audio and physics modules).")
 parser.add_argument("--with-pfm", type=str2bool, nargs='?', const=True, default=False, help="Include the Pragma Filmmaker.")
@@ -48,6 +49,9 @@ parser.add_argument('--install-directory', help='Installation directory. Can be 
 parser.add_argument('--module', help='Custom modules to install. Use this argument multiple times to use multiple modules. Usage example: --module pr_physx:\"https://github.com/Silverlan/pr_physx.git\"', action='append', default=[])
 # parser.add_argument('--log-file', help='Script output will be written to this file.', default='build_log.txt')
 parser.add_argument("--verbose", type=str2bool, nargs='?', const=True, default=False, help="Print additional verbose output.")
+if platform == "linux":
+	parser.add_argument("--no-sudo", type=str2bool, nargs='?', const=True, default=False, help="Will not run sudo commands. System packages will have to be installed manually.")
+	parser.add_argument("--no-confirm", type=str2bool, nargs='?', const=True, default=False, help="Disable any interaction with user (suitable for automated run).")
 args = parser.parse_args()
 
 #log_file = args.log_file
@@ -66,6 +70,8 @@ args = parser.parse_args()
 if platform == "linux":
 	c_compiler = args.c_compiler
 	cxx_compiler = args.cxx_compiler
+	no_sudo = args.no_sudo
+	no_confirm = args.no_confirm
 generator = args.generator
 #if platform == "win32":
 #	vcvars = args.vcvars
@@ -104,6 +110,9 @@ print("build_config: " +build_config)
 print("build_directory: " +build_directory)
 print("deps_directory: " +deps_directory)
 print("install_directory: " +install_directory)
+if platform == "linux":
+	print("no_sudo: " +str(no_sudo))
+	print("no_confirm: " +str(no_confirm))
 print("modules: " +', '.join(modules))
 
 if platform == "linux":
@@ -224,6 +233,9 @@ def http_extract(url,removeZip=True,format="zip"):
 def cp(src,dst):
 	shutil.copy2(src,dst)
 
+def cp_dir(src,dst):
+	shutil.copytree(src,dst,dirs_exist_ok=True)
+
 def replace_text_in_file(filepath,srcStr,dstStr):
 	filedata = None
 	with open(filepath, 'r') as file :
@@ -236,6 +248,68 @@ def replace_text_in_file(filepath,srcStr,dstStr):
 		# Write the file out again
 		with open(filepath, 'w') as file:
 			file.write(filedata)
+
+########## System packages ##########
+if platform == "linux":
+	if(no_sudo):
+		print_msg("--no-sudo has been specified. System packages will be skipped, this may cause errors later on...")
+	else:
+		commands = [
+			# Required for the build script
+			"apt-get install python3",
+
+			# Required for Pragma core
+			"apt install build-essential",
+			"add-apt-repository ppa:savoury1/llvm-defaults-14",
+			"apt update",
+			"apt install clang-14",
+			"apt install libstdc++-12-dev",
+			"apt install libstdc++6",
+			"apt-get install patchelf",
+
+			# Required for Vulkan
+			"apt-get -qq install -y libwayland-dev libxrandr-dev",
+
+			"apt-get install libxcb-keysyms1-dev",
+			"apt-get install xcb libxcb-xkb-dev x11-xkb-utils libx11-xcb-dev libxkbcommon-x11-dev",
+
+			# Required for GLFW
+			"apt install xorg-dev",
+
+			# Required for OIDN
+			"apt install git-lfs",
+
+			# Required for Cycles
+			"apt-get install subversion",
+			"apt-get install meson", # epoxy
+
+			# Required for Curl
+			"apt-get install libssl-dev",
+			"apt install libssh2-1",
+
+			# Required for OIIO
+			"apt-get install python3-distutils"
+		]
+
+		print("")
+		print_msg("The following system packages will be installed:")
+		for cmd in commands:
+			print(cmd)
+
+		if not no_confirm:
+			user_input = input("Your password may be required to install them. Do you want to continue (Y/n)?")
+			if user_input.lower() == 'yes' or user_input.lower() == 'y':
+				pass
+			elif user_input.lower() == 'no' or user_input.lower() == 'n':
+				sys.exit(0)
+			else:
+				print("Invalid input, please type 'y' for yes or 'n' for no. Aborting...")
+				sys.exit(0)
+
+		print_msg("Installing system packages...")
+		for cmd in commands:
+			print_msg("Running " +cmd +"...")
+			subprocess.run(["sudo"] +cmd.split() +["-y"],check=True)
 
 ########## zlib ##########
 # Download
@@ -382,13 +456,15 @@ if with_pfm:
 if with_vr:
 	modules.append( "pr_openvr:https://github.com/Silverlan/pr_openvr.git" )
 
-def execfile(filepath, globals=None, locals=None):
+def execfile(filepath, globals=None, locals=None, args=None):
     if globals is None:
         globals = {}
     globals.update({
         "__file__": filepath,
         "__name__": "__main__",
     })
+    if args is not None:
+        sys.argv = [filepath] + args
     with open(filepath, 'rb') as file:
         exec(compile(file.read(), filepath, 'exec'), globals, locals)
 
@@ -426,6 +502,8 @@ def execbuildscript(filepath):
 		"deps_directory": deps_directory,
 		"install_directory": install_directory,
 		"verbose": verbose,
+		"no_confirm": no_confirm,
+		"no_sudo": no_sudo,
 
 		"root": root,
 		"build_dir": build_dir,
@@ -450,6 +528,7 @@ def execbuildscript(filepath):
 		"http_download": http_download,
 		"http_extract": http_extract,
 		"cp": cp,
+		"cp_dir": cp_dir,
 		"replace_text_in_file": replace_text_in_file,
 		"extract": extract,
 		"execfile": execfile,
@@ -500,7 +579,10 @@ for module in modules:
 		curDir = os.getcwd()
 		os.chdir(moduleDir)
 		print_msg("Updating module '" +moduleName +"'...")
-		subprocess.run(["git","pull"],check=True)
+		result = subprocess.run(["git","pull"],check=False)
+		exitCode = result.returncode
+		if exitCode != 0:
+			print_warning("'git pull' failed for submodule '" +moduleName +"' with exit code " +str(exitCode) +"! This is expected if you have made any changes to the submodule. Build script will continue...")
 		os.chdir(curDir)
 
 	scriptPath = moduleDir +"build_scripts/setup.py"

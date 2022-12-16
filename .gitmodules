@@ -112,9 +112,6 @@
 [submodule "third_party_libs/rapidxml"]
 	path = third_party_libs/rapidxml
 	url = https://github.com/discord/rapidxml.git
-[submodule "third_party_libs/hllib"]
-	path = third_party_libs/hllib
-	url = https://github.com/Slaweknowy/hllib-1.git
 [submodule "third_party_libs/libpng"]
 	path = third_party_libs/libpng
 	url = https://github.com/glennrp/libpng.git

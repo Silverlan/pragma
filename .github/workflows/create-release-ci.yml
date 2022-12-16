@@ -1,0 +1,138 @@
+name: Create Stable Release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version'
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: Publish Release
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: ubuntu-22.04
+            name: "Ubuntu GCC-11"
+            artifact: "ubuntu_gcc.7z"
+            build_type: "RelWithDebInfo"
+            cc: "clang-14"
+            cxx: "clang++-14"
+            archiver: "7z a"
+            generators: "Unix Makefiles"
+            build_dir: 'build'
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Install prerequisites
+        shell: bash
+        run:   |
+          sudo apt-get install unzip
+          
+      - name: Determine Version
+        shell: bash
+        id: determine-version
+        run:   |
+          mkdir source
+          wget https://github.com/Silverlan/pragma/archive/refs/tags/nightly.zip
+          unzip nightly.zip -d source
+          rm nightly.zip
+          fileName="./source/pragma-nightly/core/shared/include/pragma/engine_version.h"
+          readarray -t a < "$fileName"
+          rm -r source
+          
+          strindex() { 
+            x="${1%%"$2"*}"
+            [[ "$x" = "$1" ]] && echo -1 || echo "${#x}"
+          }
+          
+          getver() {
+             strMajor="#define ENGINE_VERSION_$2 "
+             idx=$(strindex "$1" "$strMajor")
+             ver=-1
+             if [ ! $idx -eq -1 ]; then
+              ver=${i:${#strMajor}:${#i}}
+             fi
+             echo $ver
+          }
+          
+          major=-1
+          minor=-1
+          rev=-1
+          for i in "${a[@]}"
+          do
+             :
+             v=$(getver "$i" "MAJOR")
+             if [ ! $v -eq -1 ]; then
+               major=$v
+             fi
+             v=$(getver "$i" "MINOR")
+             if [ ! $v -eq -1 ]; then
+               minor=$v
+             fi
+             v=$(getver "$i" "REVISION")
+             if [ ! $v -eq -1 ]; then
+               rev=$v
+             fi
+          done
+          
+          if [ $major -eq -1 ] || [ $minor -eq -1 ] || [ $rev -eq -1 ]; then
+            exit 1
+          else
+            version="$major.$minor.$rev"
+            echo "version=$version" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Print Version
+        shell: bash
+        run:   |
+          echo "Determined Version: ${{ steps.determine-version.outputs.version }}"
+
+      - name: Get latest Windows Version
+        id: windows-version
+        shell: bash
+        run:   |
+          wget https://github.com/Silverlan/pragma/releases/download/nightly/pragma.zip
+          filename="pragma-v${{ steps.determine-version.outputs.version }}-win64.zip"
+          mv pragma.zip "$filename"
+          echo "filename=$filename" >> $GITHUB_OUTPUT
+          
+      - name: Get latest Linux Version
+        id: linux-version
+        shell: bash
+        run:   |
+          wget https://github.com/Silverlan/pragma/releases/download/nightly/pragma.tar.gz
+          filename="pragma-v${{ steps.determine-version.outputs.version }}-lin64.tar.gz"
+          mv pragma.tar.gz "$filename"
+          echo "filename=$filename" >> $GITHUB_OUTPUT
+          
+      - name: Generate nightly tag description
+        shell: bash
+        run:   |
+          curDate=$(date -u '+%Y-%m-%d %H:%M:%S %Z')
+          printf "This release includes all files necessary to run Pragma, as well as the latest version of the Pragma Filmmaker.\nFor information on how to work with Pragma/PFM, please visit the [wiki](https://wiki.pragma-engine.com/).\n\nLatest release date: $curDate" > tag_text.txt
+
+      - name: Update nightly tag description
+        uses: softprops/action-gh-release@v0.1.14
+        with:
+          body_path: tag_text.txt
+          tag_name: "v${{ steps.determine-version.outputs.version }}"
+          prerelease: false
+
+      - name: Publish Windows Release
+        uses: pyTooling/Actions/releaser/composite@main
+        with:
+          tag: "v${{ steps.determine-version.outputs.version }}"
+          rm: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: ${{ steps.windows-version.outputs.filename }}
+            
+      - name: Publish Linux Release
+        uses: pyTooling/Actions/releaser/composite@main
+        with:
+          tag: "v${{ steps.determine-version.outputs.version }}"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: ${{ steps.linux-version.outputs.filename }}

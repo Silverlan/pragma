@@ -1,0 +1,7 @@
+"wireframe"
+{
+	"textures"
+	{
+		$string albedo_map "white"
+	}
+}

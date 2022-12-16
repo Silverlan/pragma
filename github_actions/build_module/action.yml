@@ -1,0 +1,28 @@
+name: Build Pragma Module
+description: 'Build Pragma Module'
+inputs:
+  module:
+    description: 'The module to build'
+    required: true
+  build-dir:
+    description: 'The build directory location.'
+    required: true
+    default: 'build'
+  build-config:
+    description: 'The build configuration to use.'
+    required: true
+    default: "RelWithDebInfo"
+runs:
+  using: "composite"
+  steps:
+    - uses: Silverlan/common_actions/action_start@main
+      with:
+        name: "pragma > build_module"
+  
+    - name: Build Module
+      shell: bash
+      run: |
+        cd "${{inputs.build-dir}}"
+        cmake --build "." --target "${{inputs.module}}" "pragma-install" --config "${{inputs.build-config}}"
+  
+    - uses: Silverlan/common_actions/action_end@main

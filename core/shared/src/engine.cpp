@@ -7,27 +7,6 @@
 
 #include "stdafx_shared.h"
 
-// Link Libraries
-#pragma comment(lib,"vfilesystem.lib")
-#pragma comment(lib,"Winmm.lib")
-#ifdef USE_LUAJIT
-	#pragma comment(lib,"lua51.lib")
-#else
-	#pragma comment(lib,"lua530.lib")
-#endif
-#pragma comment(lib,"luabind.lib")
-#pragma comment(lib,"Shlwapi.lib")
-#pragma comment(lib,"bz2.lib")
-#pragma comment(lib,"sharedutils.lib")
-#pragma comment(lib,"mathutil.lib")
-#pragma comment(lib,"luasystem.lib")
-#pragma comment(lib,"materialsystem.lib")
-#pragma comment(lib,"util_zip.lib")
-#pragma comment(lib,"util_pad.lib")
-#pragma comment(lib,"util_versioned_archive.lib")
-#pragma comment(lib,"util_pragma_doc.lib")
-//
-
 #include "pragma/engine.h"
 #include "pragma/engine_init.hpp"
 #include "pragma/lua/libraries/ldebug.h"

@@ -28,7 +28,6 @@
 #include <cinttypes>
 #include <queue>
 #include <cstring>
-#include <vorbis/vorbisfile.h>
 #include <assert.h>
 #ifdef __linux__
 #include <dlfcn.h>

@@ -1,0 +1,25 @@
+name: Install Requirements
+description: 'Install Requirements'
+runs:
+  using: "composite"
+  steps:
+    - uses: Silverlan/common_actions/action_start@main
+      with:
+        name: "pragma > install_requirements"
+  
+    # For Cycles
+    - name: Install Cuda
+      uses: Jimver/cuda-toolkit@v0.2.8
+      with:
+        cuda: '11.7.0'
+    # TODO: Install OptiX
+  
+    - name: Maximize build space
+      if: runner.os == 'Linux'
+      uses: easimon/maximize-build-space@master
+      with:
+        root-reserve-mb: 512
+        swap-size-mb: 1024
+        remove-dotnet: 'true'
+        
+    - uses: Silverlan/common_actions/action_end@main

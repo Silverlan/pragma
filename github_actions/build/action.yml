@@ -1,0 +1,60 @@
+name: Build Pragma
+description: 'Build Pragma'
+inputs:
+  build-args:
+    description: 'Pragma build arguments'
+    required: true
+    default: ''
+  build-config:
+    description: 'The build configuration to use.'
+    required: true
+    default: "RelWithDebInfo"
+outputs:
+  build-dir:
+    description: 'The directory where the build files are written to.'
+    value: ${{ steps.set-output-vars.outputs.build-dir }}
+  deps-dir:
+    description: 'The directory where the dependencies are written to.'
+    value: ${{ steps.set-output-vars.outputs.deps-dir }}
+  install-dir:
+    description: 'The directory where the installation files are written to.'
+    value: ${{ steps.set-output-vars.outputs.install-dir }}
+runs:
+  using: "composite"
+  steps:
+    - uses: Silverlan/common_actions/action_start@main
+      with:
+        name: "pragma > build"
+  
+    - name: Build Pragma
+      if: runner.os == 'Linux'
+      id: build-linux
+      shell: bash
+      working-directory: 'pragma'
+      run: |
+        python build_scripts/build.py --no-confirm --build-config "${{inputs.build-config}}" ${{inputs.build-args}}
+        
+    - name: Build Pragma
+      if: runner.os == 'Windows'
+      id: build-windows
+      shell: bash
+      working-directory: 'pragma'
+      run: |
+        # We write the dependencies and build files to c:/ because the workspace disk provided by the runner isn't large enough
+        python build_scripts/build.py --build-config "${{inputs.build-config}}" --build-directory "c:/pragma/build" --deps-directory "c:/pragma/deps" ${{inputs.build-args}}
+        
+    - name: Set Output Variables
+      shell: bash
+      id: set-output-vars
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          echo "build-dir=$PWD/pragma/build" >> $GITHUB_OUTPUT
+          echo "deps-dir=$PWD/pragma/deps" >> $GITHUB_OUTPUT
+          echo "install-dir=$PWD/pragma/build/install" >> $GITHUB_OUTPUT
+        else
+          echo "build-dir=c:/pragma/build" >> $GITHUB_OUTPUT
+          echo "deps-dir=c:/pragma/deps" >> $GITHUB_OUTPUT
+          echo "install-dir=c:/pragma/build/install" >> $GITHUB_OUTPUT
+        fi
+
+    - uses: Silverlan/common_actions/action_end@main

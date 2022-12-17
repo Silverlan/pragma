@@ -669,6 +669,49 @@ if platform == "win32":
 	os.chdir(curDir)
 	#
 
+########## Lua Extensions ##########
+lua_ext_dir = deps_dir +"/lua_extensions"
+mkdir(lua_ext_dir,cd=True)
+
+# MoDebug
+mob_debug_root = lua_ext_dir +"/MobDebug-0.80"
+if not Path(mob_debug_root).is_dir():
+	print_msg("MobDebug not found. Downloading...")
+	if platform == "win32":
+		zipName = "0.80.zip"
+		http_extract("https://github.com/pkulchenko/MobDebug/archive/refs/tags/" +zipName)
+	else:
+		zipName = "0.80.tar.gz"
+		http_extract("https://github.com/pkulchenko/MobDebug/archive/refs/tags/" +zipName,format="tar.gz")
+mkdir(install_dir +"/lua/modules/")
+cp(lua_ext_dir +"/MobDebug-0.80/src/mobdebug.lua",install_dir +"/lua/modules/")
+
+# Socket
+curDir = os.getcwd()
+os.chdir(lua_ext_dir)
+luasocket_root = lua_ext_dir +"/luasocket"
+if not Path(luasocket_root).is_dir():
+	print_msg("luasocket not found. Downloading...")
+	git_clone("https://github.com/LuaDist/luasocket.git")
+
+print_msg("Building luasocket...")
+os.chdir(luasocket_root)
+mkdir("build",cd=True)
+luasocket_args = ["-DLUA_INCLUDE_DIR=" +root +"/third_party_libs/luajit/src"]
+if platform == "win32":
+	luasocket_args.append("-DLUA_LIBRARY=" +deps_dir +"/luajit_build/src/Release/luajit.lib")
+else:
+    luasocket_args.append("-DLUA_LIBRARY=" +root +"/third_party_libs/luajit/src/libluajit-p.so")
+cmake_configure("..",generator,luasocket_args)
+cmake_build(build_config)
+cp(luasocket_root +"/src/socket.lua",install_dir +"/lua/modules/")
+mkdir(install_dir +"/modules/socket/")
+if platform == "win32":
+	cp(luasocket_root +"/build/socket/" +build_config +"/core.dll",install_dir +"/modules/socket/")
+else:
+    cp(luasocket_root +"/build/socket/core.so",install_dir +"/modules/socket/")
+os.chdir(curDir)
+
 ########## Addons ##########
 def download_addon(name,addonName,url):
     print_msg("Downloading " +name +" addon...")

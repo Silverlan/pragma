@@ -53,19 +53,6 @@ void CPBRConverterComponent::Initialize()
 
 	auto &ent = GetEntity();
 	ent.AddComponent<LogicComponent>();
-	auto libGpl = client->InitializeLibrary("pr_gpl");
-	if(libGpl == nullptr)
-	{
-		GetEntity().RemoveSafely();
-		return;
-	}
-	auto *fCalcGeometryData = libGpl->FindSymbolAddress<void(*)(const std::vector<Vector3>&,const std::vector<uint16_t>&,std::vector<float>*,std::vector<Vector3>*,uint32_t)>("pr_gpl_calc_geometry_data");
-	if(fCalcGeometryData == nullptr)
-	{
-		GetEntity().RemoveSafely();
-		return;
-	}
-	m_fCalcGeometryData = fCalcGeometryData;
 }
 
 void CPBRConverterComponent::OnTick(double dt)

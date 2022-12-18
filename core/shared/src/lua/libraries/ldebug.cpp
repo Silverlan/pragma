@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/libraries/ldebug.h"
 #include <pragma/console/conout.h>
+#include <algorithm>
 #ifdef __linux__
 #include <sys/ioctl.h>
 #include <linux/kd.h>
@@ -89,7 +90,14 @@ void Lua::debug::enable_remote_debugging(lua_State *l)
 	auto programPath = util::get_program_path();
 	auto path = FileManager::GetNormalizedPath(programPath +"/lua/?.lua");
 	path += ";" +FileManager::GetNormalizedPath(programPath +"/lua/modules/?.lua");
-	auto cpath = FileManager::GetNormalizedPath(programPath +"/modules/?.dll");
+#ifdef _WIN32
+	std::string ext = ".dll";
+#else
+	std::string ext = ".so";
+#endif
+	auto cpath = FileManager::GetNormalizedPath(programPath +"/modules/?" +ext);
+	std::replace(path.begin(),path.end(),'\\','/');
+	std::replace(cpath.begin(),cpath.end(),'\\','/');
 	luabind::object oPackage = _G["package"];
 	if(!oPackage)
 	{

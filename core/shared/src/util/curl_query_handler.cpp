@@ -56,6 +56,9 @@ void pragma::CurlQueryHandler::AddResource(const std::string &url,const std::str
 	m_files.push_back(f);
 	struct FileData
 	{
+		FileData(const VFilePtrReal &f)
+			: file{f}
+		{}
 		VFilePtrReal file;
 	};
 	auto fd = std::make_shared<FileData>(f);

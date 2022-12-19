@@ -457,6 +457,30 @@ subprocess.run(["git","reset","--hard","4995a2f2723c401eb0ea3e10c81298906bf1422b
 os.chdir("../../")
 os.chdir("../../")
 
+########## vcpkg ##########
+os.chdir(deps_dir)
+if platform == "win32":
+	os.environ["VCPKG_DEFAULT_TRIPLET"] = "x64-windows"
+vcpkg_root = deps_dir +"/vcpkg"
+if not Path(vcpkg_root).is_dir():
+	print_msg("vcpkg not found, downloading...")
+	git_clone("https://github.com/Microsoft/vcpkg.git")
+
+if platform == "linux":
+	os.chdir("vcpkg")
+	subprocess.run(["git","reset","--hard","7d9775a3c3ffef3cbad688d7271a06803d3a2f51"],check=True)
+	os.chdir("..")
+
+	subprocess.run([vcpkg_root +"/bootstrap-vcpkg.sh","-disableMetrics"],check=True,shell=True)
+else:
+	subprocess.run([vcpkg_root +"/bootstrap-vcpkg.bat","-disableMetrics"],check=True,shell=True)
+
+########## 7zip ##########
+if platform == "win32":
+	print_msg("Building 7zip...")
+	subprocess.run([vcpkg_root +"/vcpkg","install","7zip"],check=True)
+	cp(deps_dir +"/vcpkg/installed/x64-windows/bin/7zip.dll",install_dir +"/bin/")
+
 ########## Modules ##########
 print_msg("Downloading modules...")
 os.chdir(root +"/modules")
@@ -547,6 +571,7 @@ def execbuildscript(filepath):
 		"zlib_include_dirs": zlib_include_dirs,
 		"boost_root": boost_root,
 		"geometric_tools_root": geometric_tools_root,
+		"vcpkg_root": vcpkg_root,
 
 		"normalize_path": normalize_path,
 		"mkpath": mkpath,

@@ -126,12 +126,24 @@ There are also various pre-made binary modules available for Pragma, some of whi
 - pr_audio_fmod: https://github.com/Silverlan/pr_audio_fmod
 - pr_audio_alure: https://github.com/Silverlan/pr_audio_alure
 
-To install a module, simply run the build-script with the following parameter:
+To build a module, simply run the build-script with the following parameter:
 ```console
 --module <moduleName>:<gitUrl>
 ```
 
 The build script will clone, build and install the module automatically.
+
+If you only want to install a module without building it, you can also run the following console command from within Pragma to download and install the module automatically:
+```console
+install_module <githubModuleName> [<version>]
+```
+The `githubModuleName` consists of the GitHub username and the repository name.
+If no version is specified, the latest release binaries will be used.
+
+Example:
+```console
+install_module Silverlan/pr_curl
+```
 
 Addons
 ------

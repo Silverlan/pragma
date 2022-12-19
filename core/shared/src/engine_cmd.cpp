@@ -27,6 +27,7 @@
 
 #undef CreateFile
 
+static void install_binary_module(const std::string &module,const std::optional<std::string> &version={});
 void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 {
 	map.RegisterConCommand("exec",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
@@ -404,6 +405,17 @@ void Engine::RegisterConsoleCommands()
 			types.push_back(static_cast<pragma::asset::Type>(i));
 		ClearUnusedAssets(types,true);
 	},ConVarFlags::None,"Clears all unused assets from memory.");
+	conVarMap.RegisterConCommand("install_module",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		if(argv.empty())
+		{
+			Con::cwar<<"WARNING: No module specified!"<<Con::endl;
+			return;
+		}
+		std::optional<std::string> version {};
+		if(argv.size() > 1)
+			version = argv[1];
+		install_binary_module(argv[0],version);
+	},ConVarFlags::None,"Install the specified binary module. Usage: install_module <module> <version>. If no version is specified, the latest version will be downloaded.");
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	conVarMap.RegisterConCommand("debug_vtune_prof_start",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		std::string name = "cmd";
@@ -415,4 +427,123 @@ void Engine::RegisterConsoleCommands()
 		::debug::get_domain().EndTask();
 	},ConVarFlags::None,"End the VTune profiler.");
 #endif
+}
+
+#include "pragma/util/curl_query_handler.hpp"
+#include <util_zip.h>
+
+class ModuleInstallJob
+	: public util::ParallelWorker<bool>
+{
+public:
+	ModuleInstallJob(const std::string &module,const std::optional<std::string> &version)
+		: m_module{module},m_version{version}
+	{
+		AddThread([this]() {Install();});
+	}
+	virtual bool GetResult() override {return m_success;}
+private:
+	virtual void DoCancel(const std::string &resultMsg,std::optional<int32_t> resultCode) override
+	{
+		m_curl.CancelDownload();
+	}
+	void Install();
+	template<typename TJob,typename... TARGS>
+		friend util::ParallelJob<typename TJob::RESULT_TYPE> util::create_parallel_job(TARGS&& ...args);
+
+	std::atomic<bool> m_success = false;
+	std::chrono::steady_clock::time_point m_lastProgressTime;
+	pragma::CurlQueryHandler m_curl {};
+	std::string m_module;
+	std::optional<std::string> m_version {};
+};
+
+void ModuleInstallJob::Install()
+{
+#ifdef _WIN32
+	std::string archiveName = "binaries_windows64.zip";
+#else
+	std::string archiveName = "binaries_linux64.tar.gz";
+#endif
+	std::string url = std::string{"https://github.com/"} +m_module +"/releases/download/";
+	if(m_version.has_value())
+		url += "v" +*m_version;
+	else
+		url += "latest";
+	url += "/" +archiveName;
+
+#ifdef __linux__
+	{
+		Con::cwar<<"WARNING: Automatic installation of binary modules using the 'install_module' console command is currently not supported on Linux! You will have to install the module manually."<<Con::endl;
+		Con::cwar<<"The download should automatically start through your browser. If not, you can download the module here: "<<url<<Con::endl;
+		Con::cwar<<"Once downloaded, simply extract the archive over your Pragma installation."<<Con::endl;
+		util::open_url_in_browser(url);
+		UpdateProgress(1.f);
+		SetStatus(util::JobStatus::Successful);
+		return;
+	}
+#endif
+
+	filemanager::create_directory("temp");
+	auto archivePath = "temp/" +archiveName;
+	m_lastProgressTime = std::chrono::steady_clock::now();
+	Con::cout<<"Downloading module from '"<<url<<"'..."<<Con::endl;
+	m_curl.AddResource(url,archivePath,[this](int64_t dltotal,int64_t dlnow,int64_t ultotal,int64_t ulnow) {
+		if(dltotal == 0)
+			return;
+		auto t = std::chrono::steady_clock::now();
+		auto dt = t -m_lastProgressTime;
+		if(dt < std::chrono::seconds{5})
+			return;
+		m_lastProgressTime = t;
+		auto fprogress = dlnow /static_cast<float>(dltotal);
+		auto progress = util::round_string(fprogress *100.f,2);
+		Con::cout<<"Module download at "<<progress<<"%"<<Con::endl;
+		UpdateProgress(fprogress *0.9f);
+	},[this,archivePath](int code) {
+		UpdateProgress(0.9f);
+		if(code == 0)
+		{
+			auto zip = ZIPFile::Open(archivePath,ZIPFile::OpenMode::Read);
+			if(!zip)
+			{
+				std::string msg = "Failed to open module archive '" +archivePath +"'!";
+				Con::cwar<<"WARNING: "<<msg<<Con::endl;
+				SetStatus(util::JobStatus::Failed,msg);
+				return;
+			}
+			
+			Con::cout<<"Extracting module archive '"<<archivePath<<"'..."<<Con::endl;
+			std::string err;
+			if(!zip->ExtractFiles(util::get_program_path(),err))
+			{
+				std::string msg = "Failed to extract module archive '" +archivePath +"'!";
+				Con::cwar<<"WARNING: "<<msg<<Con::endl;
+				SetStatus(util::JobStatus::Failed,msg);
+				return;
+			}
+		}
+		else
+		{
+			std::string msg = "Failed to download module '" +m_module +"'!";
+			Con::cwar<<"WARNING: "<<msg<<Con::endl;
+			SetStatus(util::JobStatus::Failed,msg);
+			return;
+		}
+		filemanager::remove_file(archivePath);
+
+		UpdateProgress(1.f);
+		SetStatus(util::JobStatus::Successful);
+		Con::cout<<"Binary module '"<<archivePath<<"' has been installed successfully!"<<Con::endl;
+	});
+	m_curl.StartDownload();
+	while(!m_curl.IsComplete())
+		std::this_thread::sleep_for(std::chrono::milliseconds{500});
+}
+
+void install_binary_module(const std::string &module,const std::optional<std::string> &version)
+{
+	auto job = util::create_parallel_job<ModuleInstallJob>(module,version);
+	job.Start();
+	pragma::get_engine()->AddParallelJob(job,"Install Binary Module '" +module +"'");
 }

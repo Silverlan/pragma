@@ -92,7 +92,6 @@ namespace pragma
 		CallbackHandle m_cbOnModelLoaded = {};
 		CallbackHandle m_cbOnMaterialLoaded = {};
 		std::unordered_map<Model*,ModelUpdateInfo> m_scheduledModelUpdates = {};
-		void(*m_fCalcGeometryData)(const std::vector<Vector3>&,const std::vector<uint16_t>&,std::vector<float>*,std::vector<Vector3>*,uint32_t) = nullptr;
 	};
 };
 

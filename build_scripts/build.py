@@ -42,6 +42,7 @@ parser.add_argument("--with-core-pfm-modules", type=str2bool, nargs='?', const=T
 parser.add_argument("--with-all-pfm-modules", type=str2bool, nargs='?', const=True, default=False, help="Include non-essential PFM modules (e.g. chromium and cycles).")
 parser.add_argument("--with-vr", type=str2bool, nargs='?', const=True, default=False, help="Include Virtual Reality support.")
 parser.add_argument("--build", type=str2bool, nargs='?', const=True, default=True, help="Build Pragma after configurating and generating build files.")
+parser.add_argument("--build-all", type=str2bool, nargs='?', const=True, default=False, help="Build all dependencies instead of downloading prebuilt binaries where available. Enabling this may significantly increase the disk space requirement and build time.")
 parser.add_argument('--build-config', help='The build configuration to use.', default='RelWithDebInfo')
 parser.add_argument('--build-directory', help='Directory to write the build files to. Can be relative or absolute.', default='build')
 parser.add_argument('--deps-directory', help='Directory to write the dependency files to. Can be relative or absolute.', default='deps')
@@ -49,10 +50,13 @@ parser.add_argument('--install-directory', help='Installation directory. Can be 
 parser.add_argument('--module', help='Custom modules to install. Use this argument multiple times to use multiple modules. Usage example: --module pr_physx:\"https://github.com/Silverlan/pr_physx.git\"', action='append', default=[])
 # parser.add_argument('--log-file', help='Script output will be written to this file.', default='build_log.txt')
 parser.add_argument("--verbose", type=str2bool, nargs='?', const=True, default=False, help="Print additional verbose output.")
+parser.add_argument("--update", type=str2bool, nargs='?', const=True, default=False, help="Update Pragma and all submodules and modules to the latest versions.")
 if platform == "linux":
 	parser.add_argument("--no-sudo", type=str2bool, nargs='?', const=True, default=False, help="Will not run sudo commands. System packages will have to be installed manually.")
 	parser.add_argument("--no-confirm", type=str2bool, nargs='?', const=True, default=False, help="Disable any interaction with user (suitable for automated run).")
-args = parser.parse_args()
+args,unknown = parser.parse_known_args()
+args = vars(args)
+input_args = args
 
 #log_file = args.log_file
 #if log_file != "":
@@ -67,30 +71,47 @@ args = parser.parse_args()
 #
 #		logging.info("Running Pragma Build Script")
 
-if platform == "linux":
-	c_compiler = args.c_compiler
-	cxx_compiler = args.cxx_compiler
-	no_sudo = args.no_sudo
-	no_confirm = args.no_confirm
-generator = args.generator
-#if platform == "win32":
-#	vcvars = args.vcvars
-with_essential_client_modules = args.with_essential_client_modules
-with_common_modules = args.with_common_modules
-with_pfm = args.with_pfm
-with_core_pfm_modules = args.with_core_pfm_modules
-with_all_pfm_modules = args.with_all_pfm_modules
-with_vr = args.with_vr
-build = args.build
-build_config = args.build_config
-build_directory = args.build_directory
-deps_directory = args.deps_directory
-install_directory = args.install_directory
-#log_file = args.log_file
-verbose = args.verbose
-modules = args.module
-modules_prebuilt = []
+def normalize_path(path):
+	normalizedPath = path
+	normalizedPath = normalizedPath.replace('\\','/')
+	return normalizedPath
 
+if args["update"]:
+	build_dir = normalize_path(args["build_directory"])
+	if not os.path.isabs(build_dir):
+		build_dir = os.getcwd() +"/" +build_dir
+
+	import json
+	cfg = json.load(open(build_dir +"/build_config.json"))
+	for key,value in cfg["args"].items():
+		args[key] = value
+	args["update"] = True
+
+if platform == "linux":
+	c_compiler = args["c_compiler"]
+	cxx_compiler = args["cxx_compiler"]
+	no_sudo = args["no_sudo"]
+	no_confirm = args["no_confirm"]
+generator = args["generator"]
+#if platform == "win32":
+#	vcvars = args["vcvars
+with_essential_client_modules = args["with_essential_client_modules"]
+with_common_modules = args["with_common_modules"]
+with_pfm = args["with_pfm"]
+with_core_pfm_modules = args["with_core_pfm_modules"]
+with_all_pfm_modules = args["with_all_pfm_modules"]
+with_vr = args["with_vr"]
+build = args["build"]
+build_all = args["build_all"]
+build_config = args["build_config"]
+build_directory = args["build_directory"]
+deps_directory = args["deps_directory"]
+install_directory = args["install_directory"]
+#log_file = args["log_file"]
+verbose = args["verbose"]
+modules = args["module"]
+update = args["update"]
+modules_prebuilt = []
 
 print("Inputs:")
 if platform == "linux":
@@ -105,7 +126,9 @@ print("with_pfm: " +str(with_pfm))
 print("with_core_pfm_modules: " +str(with_core_pfm_modules))
 print("with_all_pfm_modules: " +str(with_all_pfm_modules))
 print("with_vr: " +str(with_vr))
+print("update: " +str(update))
 print("build: " +str(build))
+print("build_all: " +str(build_all))
 print("build_config: " +build_config)
 print("build_directory: " +build_directory)
 print("deps_directory: " +deps_directory)
@@ -119,33 +142,8 @@ if platform == "linux":
 	os.environ["CC"] = c_compiler
 	os.environ["CXX"] = cxx_compiler
 
-def normalize_path(path):
-	normalizedPath = path
-	normalizedPath = normalizedPath.replace('\\','/')
-	return normalizedPath
-
 def mkpath(path):
 	pathlib.Path(path).mkdir(parents=True, exist_ok=True)
-
-root = normalize_path(os.getcwd())
-build_dir = normalize_path(build_directory)
-deps_dir = normalize_path(deps_directory)
-install_dir = install_directory
-tools = root +"/tools"
-
-if not os.path.isabs(build_dir):
-	build_dir = os.getcwd() +"/" +build_dir
-
-if not os.path.isabs(deps_dir):
-	deps_dir = os.getcwd() +"/" +deps_dir
-
-if not os.path.isabs(install_dir):
-	install_dir = build_dir +"/" +install_dir
-
-mkpath(build_dir)
-mkpath(deps_dir)
-mkpath(install_dir)
-mkpath(tools)
 
 class bcolors:
     HEADER = '\033[95m'
@@ -165,6 +163,32 @@ def print_msg(msg):
 def print_warning(msg):
 	print(bcolors.FAIL +msg +bcolors.ENDC)
 	sys.stdout.flush()
+
+root = normalize_path(os.getcwd())
+build_dir = normalize_path(build_directory)
+deps_dir = normalize_path(deps_directory)
+install_dir = install_directory
+tools = root +"/tools"
+
+if not os.path.isabs(build_dir):
+	build_dir = os.getcwd() +"/" +build_dir
+
+if not os.path.isabs(deps_dir):
+	deps_dir = os.getcwd() +"/" +deps_dir
+
+if not os.path.isabs(install_dir):
+	install_dir = build_dir +"/" +install_dir
+
+if update:
+	os.chdir(root)
+
+	print_msg("Updating Pragma repository...")
+	subprocess.run(["git","pull","--recurse-submodules"],check=True)
+
+mkpath(build_dir)
+mkpath(deps_dir)
+mkpath(install_dir)
+mkpath(tools)
 
 def git_clone(url,directory=None):
 	args = ["git","clone",url,"--recurse-submodules"]
@@ -186,7 +210,7 @@ def cmake_build(buildConfig,targets=None):
 
 def mkdir(dirName,cd=False):
 	if not Path(dirName).is_dir():
-		os.mkdir(dirName)
+		os.makedirs(dirName)
 	if cd:
 		os.chdir(dirName)
 
@@ -229,6 +253,13 @@ def extract(zipName,removeZip=True,format="zip"):
 def http_extract(url,removeZip=True,format="zip"):
 	fileName = http_download(url)
 	extract(fileName,removeZip,format)
+
+def install_prebuilt_binaries(baseUrl):
+	if platform == "linux":
+		http_extract(baseUrl +"binaries_linux64.tar.gz",format="tar.gz")
+	else:
+		http_extract(baseUrl +"binaries_windows64.zip")
+
 
 def cp(src,dst):
 	shutil.copy2(src,dst)
@@ -426,6 +457,31 @@ subprocess.run(["git","reset","--hard","4995a2f2723c401eb0ea3e10c81298906bf1422b
 os.chdir("../../")
 os.chdir("../../")
 
+########## vcpkg ##########
+os.chdir(deps_dir)
+if platform == "win32":
+	os.environ["VCPKG_DEFAULT_TRIPLET"] = "x64-windows"
+vcpkg_root = deps_dir +"/vcpkg"
+if not Path(vcpkg_root).is_dir():
+	print_msg("vcpkg not found, downloading...")
+	git_clone("https://github.com/Microsoft/vcpkg.git")
+
+if platform == "linux":
+	os.chdir("vcpkg")
+	subprocess.run(["git","reset","--hard","7d9775a3c3ffef3cbad688d7271a06803d3a2f51"],check=True)
+	os.chdir("..")
+
+	subprocess.run([vcpkg_root +"/bootstrap-vcpkg.sh","-disableMetrics"],check=True,shell=True)
+else:
+	subprocess.run([vcpkg_root +"/bootstrap-vcpkg.bat","-disableMetrics"],check=True,shell=True)
+
+########## 7zip ##########
+if platform == "win32":
+	print_msg("Building 7zip...")
+	subprocess.run([vcpkg_root +"/vcpkg","install","7zip"],check=True)
+	mkpath(install_dir +"/bin/")
+	cp(deps_dir +"/vcpkg/installed/x64-windows/bin/7zip.dll",install_dir +"/bin/")
+
 ########## Modules ##########
 print_msg("Downloading modules...")
 os.chdir(root +"/modules")
@@ -502,8 +558,6 @@ def execbuildscript(filepath):
 		"deps_directory": deps_directory,
 		"install_directory": install_directory,
 		"verbose": verbose,
-		"no_confirm": no_confirm,
-		"no_sudo": no_sudo,
 
 		"root": root,
 		"build_dir": build_dir,
@@ -511,12 +565,14 @@ def execbuildscript(filepath):
 		"install_dir": install_dir,
 		"tools": tools,
 
+		"build_all": build_all,
 		"zlib_root": zlib_root,
 		"zlib_lib": zlib_lib,
 		"zlib_lib_dir": zlib_lib_path,
 		"zlib_include_dirs": zlib_include_dirs,
 		"boost_root": boost_root,
 		"geometric_tools_root": geometric_tools_root,
+		"vcpkg_root": vcpkg_root,
 
 		"normalize_path": normalize_path,
 		"mkpath": mkpath,
@@ -532,11 +588,15 @@ def execbuildscript(filepath):
 		"replace_text_in_file": replace_text_in_file,
 		"extract": extract,
 		"execfile": execfile,
-		"execbuildscript": execbuildscript
+		"execbuildscript": execbuildscript,
+		"str2bool": str2bool,
+		"install_prebuilt_binaries": install_prebuilt_binaries
 	}
 	if platform == "linux":
-		l["c_compiler"] = "c_compiler"
-		l["cxx_compiler"] = "cxx_compiler"
+		l["c_compiler"] = c_compiler
+		l["cxx_compiler"] = cxx_compiler
+		l["no_confirm"] = no_confirm
+		l["no_sudo"] = no_sudo
 	#else:
 	#	l["vcvars"] = "vcvars"
 
@@ -579,14 +639,13 @@ for module in modules:
 		curDir = os.getcwd()
 		os.chdir(moduleDir)
 		print_msg("Updating module '" +moduleName +"'...")
-		result = subprocess.run(["git","pull"],check=False)
+		result = subprocess.run(["git","pull","--recurse-submodules"],check=False)
 		exitCode = result.returncode
 		if exitCode != 0:
 			print_warning("'git pull' failed for submodule '" +moduleName +"' with exit code " +str(exitCode) +"! This is expected if you have made any changes to the submodule. Build script will continue...")
 		os.chdir(curDir)
 
 	scriptPath = moduleDir +"build_scripts/setup.py"
-	
 	if Path(scriptPath).is_file():
 		print_msg("Executing module setup script...")
 		execbuildscript(scriptPath)
@@ -603,11 +662,7 @@ for module in shippedModules:
 os.chdir(install_dir)
 for module in modules_prebuilt:
 	print_msg("Downloading prebuilt binaries for module '" +module +"'...")
-	baseUrl = "https://github.com/" +module +"/releases/download/latest/"
-	if platform == "linux":
-		http_extract(baseUrl +"binaries_linux64.tar.gz",format="tar.gz")
-	else:
-		http_extract(baseUrl +"binaries_windows64.zip")
+	install_prebuilt_binaries("https://github.com/" +module +"/releases/download/latest/")
 
 print("Modules:" +', '.join(module_list))
 print("Additional CMake Arguments:" +', '.join(cmake_args))
@@ -669,6 +724,49 @@ if platform == "win32":
 	os.chdir(curDir)
 	#
 
+########## Lua Extensions ##########
+lua_ext_dir = deps_dir +"/lua_extensions"
+mkdir(lua_ext_dir,cd=True)
+
+# MoDebug
+mob_debug_root = lua_ext_dir +"/MobDebug-0.80"
+if not Path(mob_debug_root).is_dir():
+	print_msg("MobDebug not found. Downloading...")
+	if platform == "win32":
+		zipName = "0.80.zip"
+		http_extract("https://github.com/pkulchenko/MobDebug/archive/refs/tags/" +zipName)
+	else:
+		zipName = "0.80.tar.gz"
+		http_extract("https://github.com/pkulchenko/MobDebug/archive/refs/tags/" +zipName,format="tar.gz")
+mkdir(install_dir +"/lua/modules/")
+cp(lua_ext_dir +"/MobDebug-0.80/src/mobdebug.lua",install_dir +"/lua/modules/")
+
+# Socket
+curDir = os.getcwd()
+os.chdir(lua_ext_dir)
+luasocket_root = lua_ext_dir +"/luasocket"
+if not Path(luasocket_root).is_dir():
+	print_msg("luasocket not found. Downloading...")
+	git_clone("https://github.com/LuaDist/luasocket.git")
+
+print_msg("Building luasocket...")
+os.chdir(luasocket_root)
+mkdir("build",cd=True)
+luasocket_args = ["-DLUA_INCLUDE_DIR=" +root +"/third_party_libs/luajit/src"]
+if platform == "win32":
+	luasocket_args.append("-DLUA_LIBRARY=" +deps_dir +"/luajit_build/src/Release/luajit.lib")
+else:
+    luasocket_args.append("-DLUA_LIBRARY=" +root +"/third_party_libs/luajit/src/libluajit-p.so")
+cmake_configure("..",generator,luasocket_args)
+cmake_build(build_config)
+cp(luasocket_root +"/src/socket.lua",install_dir +"/lua/modules/")
+mkdir(install_dir +"/modules/socket/")
+if platform == "win32":
+	cp(luasocket_root +"/build/socket/" +build_config +"/core.dll",install_dir +"/modules/socket/")
+else:
+    cp(luasocket_root +"/build/socket/core.so",install_dir +"/modules/socket/")
+os.chdir(curDir)
+
 ########## Addons ##########
 def download_addon(name,addonName,url):
     print_msg("Downloading " +name +" addon...")
@@ -690,10 +788,21 @@ if with_vr:
 	download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git")
 os.chdir(curDir)
 
+########## Write Build Configuration ##########
+if not update:
+	cfg = {}
+	cfg["args"] = {}
+	for key, value in input_args.items():
+		cfg["args"][key] = value
+
+	import json
+	json.dump(cfg,open(build_dir +"/build_config.json",'w'))
+
 ########## Build Pragma ##########
 if build:
     print_msg("Building Pragma...")
 
+    os.chdir(build_dir)
     targets = ["pragma-install-full"] +module_list
     if with_pfm:
     	targets.append("pfm")

@@ -5,11 +5,9 @@
  * Copyright (c) 2021 Silverlan
  */
 
-#include "stdafx_client.h"
+#include "stdafx_shared.h"
 #include "pragma/util/curl_query_handler.hpp"
 #include <sharedutils/util_library.hpp>
-
-extern DLLCLIENT ClientState *client;
 
 decltype(pragma::CurlQueryHandler::s_bInitialized) pragma::CurlQueryHandler::s_bInitialized = false;
 decltype(pragma::CurlQueryHandler::s_fCreate) pragma::CurlQueryHandler::s_fCreate = nullptr;
@@ -50,22 +48,32 @@ pragma::CurlQueryHandler::~CurlQueryHandler()
 	else
 		s_fRelease(m_curl);
 }
-void pragma::CurlQueryHandler::AddResource(const std::string &url,const std::string &fname,const std::function<void(int32_t)> &onComplete)
+void pragma::CurlQueryHandler::AddResource(const std::string &url,const std::string &fname,const std::function<void(int64_t,int64_t,int64_t,int64_t)> &progressCallback,const std::function<void(int32_t)> &onComplete)
 {
 	auto f = FileManager::OpenFile<VFilePtrReal>(fname.c_str(),"wb");
 	if(f == nullptr)
 		return;
 	m_files.push_back(f);
+	struct FileData
+	{
+		FileData(const VFilePtrReal &f)
+			: file{f}
+		{}
+		VFilePtrReal file;
+	};
+	auto fd = std::make_shared<FileData>(f);
 	auto *fptr = f.get();
-	s_fAddResource(m_curl,url,[f](void *data,size_t size,size_t nmemb) -> size_t {
-		f->Write(data,size *nmemb);
+	s_fAddResource(m_curl,url,[fptr](void *data,size_t size,size_t nmemb) -> size_t {
+		fptr->Write(data,size *nmemb);
 		return size *nmemb;
-	},f,[this,onComplete,fptr](int32_t code) {
+	},nullptr,progressCallback,[this,onComplete,fd](int32_t code) {
+		auto fptr = fd->file.get();
 		auto it = std::find_if(m_files.begin(),m_files.end(),[fptr](const std::shared_ptr<VFilePtrInternalReal> &fOther) {
 			return (fOther.get() == fptr) ? true : false;
 		});
 		if(it != m_files.end())
 			m_files.erase(it);
+		fd->file = nullptr;
 		if(onComplete != nullptr)
 			onComplete(code);
 	});
@@ -84,13 +92,21 @@ void pragma::CurlQueryHandler::Initialize()
 		return;
 	s_bInitialized = true;
 	std::string err;
+#ifdef _WIN32
 	const std::string curlPath = "curl/pr_curl.dll";
-	if(client->InitializeLibrary(curlPath,&err) == nullptr)
+#else
+	const std::string curlPath = "curl/libpr_curl.so";
+#endif
+	auto *nw = static_cast<NetworkState*>(pragma::get_engine()->GetServerNetworkState());
+	if(!nw)
+		nw = pragma::get_engine()->GetClientState();
+	
+	if(!nw || nw->InitializeLibrary(curlPath,&err) == nullptr)
 	{
 		Con::cerr<<"ERROR: Unable to load 'curl' library: "<<err<<Con::endl;
 		return;
 	}
-	auto dllHandle = client->GetLibraryModule(curlPath);
+	auto dllHandle = nw->GetLibraryModule(curlPath);
 	assert(dllHandle != nullptr);
 	if(dllHandle == nullptr)
 		return;

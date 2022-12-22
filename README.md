@@ -40,7 +40,7 @@ git clone https://github.com/Silverlan/pragma.git --recurse-submodules && cd pra
 ```
 
 This will clone Pragma and run the build-script, which will automatically download all dependencies, configure CMake, and build and install the project (this will take several hours).
-If you don't need the filmmaker, you can omit the `--with-pfm --with-all-pfm-modules` arguments, which will *significantly* reduce the build time and the required amount of disk space.
+If you don't need the filmmaker, you can omit the `--with-pfm --with-all-pfm-modules` arguments, which will reduce the build time and the required amount of disk space.
 > :warning: Linux<br/>
 > Do **not** run the script as superuser.<br/>
 > The script will automatically install all required system packages. Since this requires admin priviliges, you may be prompted for your password several times.<br/>
@@ -52,6 +52,12 @@ Once the build script has been completed, you should find the build files in `pr
 If you make any code changes to the core engine code, you can build the `pragma-install` target to build them. This will also re-install the binaries.
 
 If you make any code changes to a module, you will have to build the module build target first, and then build `pragma-install` afterwards.
+
+After the initial run of the main build script, you can run the following command from the root directory of Pragma to update Pragma to a newer version:
+```console
+python build_scripts/build.py --update
+```
+This will pull all of the latest changes for the Pragma repository and the modules. The `--update` option will re-use all of the arguments used in the last execution of the build script, so you don't have to specify them again.
 
 ### Build Customization
 
@@ -72,11 +78,13 @@ Running the build-script with the arguments above will build and install Pragma 
 | `--with-all-pfm-modules <1/0>`          | Include non-essential PFM modules (e.g. chromium and cycles).                                | `0`              |
 | `--with-vr <1/0>`                       | Include Virtual Reality support.                                                             | `0`              |
 | `--build <1/0>`                         | Build Pragma after configurating and generating build files.                                 | `1`              |
+| `--build-all <1/0>`                     | Build all dependencies instead of downloading prebuilt binaries where available.             | `0`              |
 | `--build-config <config>`               | The build configuration to use.                                                              | `RelWithDebInfo` |
 | `--build-directory <path>`              | Directory to write the build files to. Can be relative or absolute.                          | `build`          |
 | `--deps-directory <path>`               | Directory to write the dependency files to. Can be relative or absolute.                     | `deps`           |
 | `--install-directory <path>`            | Installation directory. Can be relative (to build directory) or absolute.                    | `install`        |
 | `--verbose <1/0>`                       | Print additional debug information.                                                          | `0`              |
+| `--update <1/0>`                        | Update Pragma and all submodules and modules to the latest versions.                         | `0`              |
 | `--module <moduleName>:<gitUrl>`        | Custom modules to install. Use this argument multiple times to use multiple modules.         |                  |
 
 Example for using the `--module` parameter:
@@ -118,14 +126,30 @@ There are also various pre-made binary modules available for Pragma, some of whi
 - pr_audio_fmod: https://github.com/Silverlan/pr_audio_fmod
 - pr_audio_alure: https://github.com/Silverlan/pr_audio_alure
 
-To install a module, simply run the build-script with the following parameter:
+To build a module, simply run the build-script with the following parameter:
 ```console
 --module <moduleName>:<gitUrl>
 ```
 
 The build script will clone, build and install the module automatically.
 
+If you only want to install a module without building it, you can also run the following console command from within Pragma to download and install the module automatically:
+```console
+install_module <githubModuleName> [<version>]
+```
+The `githubModuleName` consists of the GitHub username and the repository name.
+If no version is specified, the latest release binaries will be used.
+
+Example:
+```console
+install_module Silverlan/pr_curl
+```
+
 Addons
 ------
 In addition to binary modules, Pragma also uses Lua as scripting language, with thousands of available function, class and library bindings. To get more information about the Lua API, check out the [official wiki](https://wiki.pragma-engine.com/books/lua-api).
 An example for a Lua-addon is the [Pragma Filmmaker](https://github.com/Silverlan/pfm).
+
+Special Thanks
+------
+- [SlawekNowy](https://github.com/SlawekNowy): For helping to make Linux support possible

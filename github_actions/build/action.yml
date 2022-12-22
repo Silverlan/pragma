@@ -19,6 +19,9 @@ outputs:
   install-dir:
     description: 'The directory where the installation files are written to.'
     value: ${{ steps.set-output-vars.outputs.install-dir }}
+  root-dir:
+    description: 'The directory where the Pragma repository resides.'
+    value: ${{ steps.set-output-vars.outputs.root-dir }}
 runs:
   using: "composite"
   steps:
@@ -47,6 +50,7 @@ runs:
       shell: bash
       id: set-output-vars
       run: |
+        echo "root-dir=$PWD/pragma" >> $GITHUB_OUTPUT
         if [ "$RUNNER_OS" == "Linux" ]; then
           echo "build-dir=$PWD/pragma/build" >> $GITHUB_OUTPUT
           echo "deps-dir=$PWD/pragma/deps" >> $GITHUB_OUTPUT

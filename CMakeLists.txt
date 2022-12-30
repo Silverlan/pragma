@@ -289,7 +289,10 @@ search_lib_recursive(DEPENDENCY_LUABIND_LIBRARY lib/${BINARY_PRAGMA_DIR} luabind
 
 set(DEPENDENCY_FREETYPE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/freetype/include CACHE STRING "" FORCE)
 search_lib_recursive(DEPENDENCY_FREETYPE_LIBRARY third_party_libs/freetype/${BINARY_PRAGMA_DIR} freetype)
-
+if(UNIX)
+set(DEPENDENCY_HARFBUZZ_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/harfbuzz/include CACHE STRING "" FORCE)
+search_lib_recursive(DEPENDENCY_HARFBUZZ_LIBRARY third_party_libs/harfbuzz/${BINARY_PRAGMA_DIR} harfbuzz)
+endif()
 
 
 #set(DEPENDENCY_ANVIL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/include CACHE PATH "Path to include directory." FORCE)
@@ -444,7 +447,8 @@ if(UNIX)
 	resolve_links(DEPENDENCY_GLFW_LIBRARY)
 	resolve_links(DEPENDENCY_GLSLANG_LIBRARY)
 	resolve_links(DEPENDENCY_GLSLANG_OGL_COMPILER_LIBRARY)
-	resolve_links(DEPENDENCY_GLSLANG_OS_DEPENDENT_LIBRARY)
+        resolve_links(DEPENDENCY_GLSLANG_OS_DEPENDENT_LIBRARY)
+        resolve_links(DEPENDENCY_HARFBUZZ_LIBRARY)
 	resolve_links(DEPENDENCY_ICLIENT_LIBRARY)
 	resolve_links(DEPENDENCY_IGLFW_LIBRARY)
 	resolve_links(DEPENDENCY_ISHARED_LIBRARY)
@@ -885,13 +889,24 @@ set_target_properties(Recast PROPERTIES FOLDER third_party_libs/recast)
 # endif()
 #
 
-# freetype2
+# freetype2 and harfbuzz
+# From Freetype:
+# BZIP2: trivial, uses soname libbzip2.so.1.0, possible swap with our own version.
+# PNG: trivial, uses major 1.6 (libpng16.so.16), possible swap with our own version.
+# TODO: this may be no longer the case. future proof this.
+# Harfbuzz's most of deps can be disabled
+# add boostrap frretype as first step?
 if(WIN32)
 	set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE)
 	set(CMAKE_DISABLE_FIND_PACKAGE_BZip2 TRUE)
 	set(CMAKE_DISABLE_FIND_PACKAGE_PNG TRUE)
 endif()
 register_third_party_library(freetype)
+if(UNIX)
+
+    register_third_party_library(harfbuzz)
+    add_dependencies(harfbuzz freetype)
+endif()
 if(WIN32)
 	unset(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz)
 	unset(CMAKE_DISABLE_FIND_PACKAGE_BZip2)

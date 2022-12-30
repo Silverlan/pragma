@@ -588,8 +588,8 @@ if platform == "linux":
 	cmake_build("Release")
 	cmake_build("Release",["install"])
 
-	freetype_include_dir += deps_dir+"/harfbuzz_prefix/include"
-	freetype_lib += deps_dir+"/harfbuzz_prefix/lib/libharfbuzz.so"
+	freetype_include_dir += deps_dir+"/freetype_prefix/include/freetype2"
+	freetype_lib += deps_dir+"/freetype_prefix/lib/libfreetype.so"
 
 
 ########## Modules ##########

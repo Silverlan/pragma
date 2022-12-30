@@ -508,16 +508,17 @@ else:
 	freetype_cmake_args += [
 
 		"-DCMAKE_DISABLE_FIND_PACKAGE_HarfBuzz=TRUE", # we don't want to pick up the system one by accident
-		"-DCMAKE_INSTALL_PREFIX="+deps_dir+"/freetype_bootstrap"
+		"-DCMAKE_INSTALL_PREFIX="+deps_dir+"/freetype_bootstrap",
+		"-DBUILD_SHARED_LIBS=ON"
 		]
 
 print_msg("Building freetype...")
 cmake_configure(freetype_root,generator,freetype_cmake_args)
-cmake_build(configuration)
+cmake_build("Release")
 if platform =="linux":
 	print_msg("Installing freetype to custom prefix...")
-	cmake_build(configuration,["install"])
-else
+	cmake_build("Release",["install"])
+else:
 	freetype_include_dir += freetype_root+"/include"
 	freetype_lib += freetype_root+"/build/freetype.lib"
 ########## harfbuzz (linux only) ##########
@@ -540,13 +541,15 @@ if platform == "linux":
 	mkdir("build",cd=True)
 	harfbuzz_cmake_args = [
 		"-DCMAKE_PREFIX_PATH="+deps_dir+"/freetype_bootstrap",
-		"-DCMAKE_INSTALL_PREFIX="+deps_dir+"/harfbuzz_prefix"
+		"-DCMAKE_INSTALL_PREFIX="+deps_dir+"/harfbuzz_prefix",
+		"-DHB_HAVE_FREETYPE=ON",
+		"-DBUILD_SHARED_LIBS=ON"
 		]
 
 	print_msg("Building harfbuzz...")
 	cmake_configure(harfbuzz_root,generator,harfbuzz_cmake_args)
-	cmake_build(configuration)
-	cmake_build(configuration,["install"])
+	cmake_build("Release")
+	cmake_build("Release",["install"])
 	harfbuzz_include_dir += deps_dir+"/harfbuzz_prefix/include"
 	harfbuzz_lib += deps_dir+"/harfbuzz_prefix/lib/libharfbuzz.so"
 
@@ -557,18 +560,19 @@ if platform == "linux":
 		if path.is_file():
 			path.unlink()
 		elif path.is_dir():
-			rmtree(path)
+			shutil.rmtree(path)
 
 	print_msg("Rebuilding freetype against harfbuzz")
 	mkdir(freetype_root+"/build",cd=True)
 	freetype_cmake_args = [
 		"-DCMAKE_PREFIX_PATH="+deps_dir+"/harfbuzz_prefix",
 		"-DCMAKE_INSTALL_PREFIX="+deps_dir+"/freetype_prefix",
-		 "-DCMAKE_MODULE_PATH="+deps_dir+"/freetype_prefix"
+		 "-DCMAKE_MODULE_PATH="+deps_dir+"/freetype_prefix",
+		"-DBUILD_SHARED_LIBS=ON"
 		]
 	cmake_configure(freetype_root,generator,freetype_cmake_args)
-	cmake_build(configuration)
-	cmake_build(configuration,["install"])
+	cmake_build("Release")
+	cmake_build("Release",["install"])
 
 	freetype_include_dir += deps_dir+"/harfbuzz_prefix/include"
 	freetype_lib += deps_dir+"/harfbuzz_prefix/lib/libharfbuzz.so"

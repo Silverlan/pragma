@@ -927,7 +927,8 @@ target_include_directories(freetype INTERFACE ${DEPENDENCY_FREETYPE_INCLUDE})
 
 if(UNIX)
 	add_library(harfbuzz SHARED IMPORTED)
-	set_property(TARGET harfbuzz "${DEPENDENCY_HARFBUZZ_LIBRARY}")
+	set_property(TARGET harfbuzz PROPERTY
+	IMPORTED_LOCATION "${DEPENDENCY_HARFBUZZ_LIBRARY}")
 	target_include_directories(harfbuzz INTERFACE ${DEPENDENCY_HARFBUZZ_INCLUDE})
 endif()
 
@@ -1035,7 +1036,7 @@ pragma_install(alsoundsystem "${BINARY_OUTPUT_DIR}")
 pragma_install(client "${BINARY_OUTPUT_DIR}")
 pragma_install(cmaterialsystem "${BINARY_OUTPUT_DIR}")
 pragma_install(datasystem "${BINARY_OUTPUT_DIR}")
-pragma_install(freetype "${BINARY_OUTPUT_DIR}")
+#pragma_install(freetype "${BINARY_OUTPUT_DIR}")
 pragma_install(glfw "${BINARY_OUTPUT_DIR}")
 pragma_install(iclient "${BINARY_OUTPUT_DIR}")
 pragma_install(iglfw "${BINARY_OUTPUT_DIR}")

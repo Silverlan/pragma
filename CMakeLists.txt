@@ -935,12 +935,12 @@ endif()
 
 
 set_target_properties(freetype PROPERTIES FOLDER third_party_libs)
-target_include_directories(freetype PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
+#target_include_directories(freetype PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 #
 
 # dependencies
 add_dependencies(png zlib)
-add_dependencies(freetype zlib)
+#add_dependencies(freetype zlib)
 add_dependencies(zip zlib)
 add_dependencies(vorbis ogg)
 add_dependencies(util_pad zip)
@@ -959,7 +959,7 @@ add_dependencies(iglfw vfilesystem)
 add_dependencies(prosper vfilesystem iglfw util_image util_udm muparserx lz4)
 
 add_dependencies(cmaterialsystem materialsystem util_image prosper VTFLib13)
-add_dependencies(wgui cmaterialsystem freetype util_formatted_text)
+add_dependencies(wgui cmaterialsystem util_formatted_text)
 
 add_dependencies(alsoundsystem vorbis vorbisfile vfilesystem util_sound samplerate)
 
@@ -976,7 +976,7 @@ add_dependencies(ishared util_udm shared)
 add_dependencies(iclient ishared client)
 add_dependencies(iserver ishared server)
 add_dependencies(server shared servermanager clientmanager util_bsp util_sound)
-add_dependencies(client shared clientmanager freetype wgui alsoundsystem util_timeline_scene util_image)
+add_dependencies(client shared clientmanager wgui alsoundsystem util_timeline_scene util_image)
 
 add_dependencies(pragma_server server)
 add_dependencies(pragma client server)

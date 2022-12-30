@@ -482,6 +482,17 @@ if platform == "win32":
 	mkpath(install_dir +"/bin/")
 	cp(deps_dir +"/vcpkg/installed/x64-windows/bin/7zip.dll",install_dir +"/bin/")
 
+########## zlib (for freetype) ############
+
+os.chdir(deps_dir)
+mkdir("zlib_build",cd=True)
+zlib_cmake_args = [
+		"-DCMAKE_INSTALL_PREFIX="+deps_dir+"/zlib_prefix",
+		"-DBUILD_SHARED_LIBS=ON"
+		]
+cmake_configure(root+"/third_party_libs/zlib",generator,zlib_cmake_args)
+cmake_build("Release")
+cmake_build("Release",["install"])
 
 ########## freetype (interim, no harfbuzz; final in win32) ##########
 
@@ -496,7 +507,10 @@ freetype_root = deps_dir+"/freetype"
 os.chdir("freetype")
 subprocess.run(["git","reset","--hard","fbbcf50367403a6316a013b51690071198962920"],check=True)
 mkdir("build",cd=True)
-freetype_cmake_args =[]
+freetype_cmake_args =[
+	"-DCMAKE_MODULE_PATH="+deps_dir+"/zlib_prefix",
+	"-DCMAKE_PREFIX_PATH="+deps_dir+"/zlib_prefix"
+]
 if platform == "win32":
 	freetype_cmake_args += [
 		"-DCMAKE_DISABLE_FIND_PACKAGE_HarfBuzz=TRUE",
@@ -565,9 +579,9 @@ if platform == "linux":
 	print_msg("Rebuilding freetype against harfbuzz")
 	mkdir(freetype_root+"/build",cd=True)
 	freetype_cmake_args = [
-		"-DCMAKE_PREFIX_PATH="+deps_dir+"/harfbuzz_prefix",
+		"-DCMAKE_PREFIX_PATH="+deps_dir+"/harfbuzz_prefix"+deps_dir+"/zlib_prefix",
 		"-DCMAKE_INSTALL_PREFIX="+deps_dir+"/freetype_prefix",
-		 "-DCMAKE_MODULE_PATH="+deps_dir+"/freetype_prefix",
+		 "-DCMAKE_MODULE_PATH="+deps_dir+"/harfbuzz_prefix"+";"+deps_dir+"/zlib_prefix",
 		"-DBUILD_SHARED_LIBS=ON"
 		]
 	cmake_configure(freetype_root,generator,freetype_cmake_args)

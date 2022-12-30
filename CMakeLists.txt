@@ -886,17 +886,19 @@ set_target_properties(Recast PROPERTIES FOLDER third_party_libs/recast)
 #
 
 # freetype2
+
+set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE)
 if(WIN32)
-	set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE)
 	set(CMAKE_DISABLE_FIND_PACKAGE_BZip2 TRUE)
 	set(CMAKE_DISABLE_FIND_PACKAGE_PNG TRUE)
 endif()
 register_third_party_library(freetype)
+
 if(WIN32)
-	unset(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz)
 	unset(CMAKE_DISABLE_FIND_PACKAGE_BZip2)
 	unset(CMAKE_DISABLE_FIND_PACKAGE_PNG)
 endif()
+unset(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz)
 
 set_target_properties(freetype PROPERTIES FOLDER third_party_libs)
 target_include_directories(freetype PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)

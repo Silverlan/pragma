@@ -932,6 +932,11 @@ if build:
     print_msg("Running build command...")
     cmake_build(build_config,targets)
 
+	if platform == "linux":
+		#HACK: For some reason hafbuzz is not named libharfbuzz.so.0. Fix that by adding a symlink.
+		os.chdir(install_dir+"/lib")
+		os.symlink("libharfbuzz.so","libharfbuzz.so.0")
+
     print_msg("Build Successful! Pragma has been installed to \"" +normalize_path(install_dir) +"\".")
     print_msg("If you make any changes to the core source code, you can build the \"pragma-install\" target to compile the changes and re-install the binaries automatically.")
     print_msg("If you make any changes to a module, you will have to build the module target first, and then build \"pragma-install\".")

@@ -172,6 +172,3 @@
 [submodule "third_party_libs/bvh"]
 	path = third_party_libs/bvh
 	url = https://github.com/madmann91/bvh.git
-[submodule "harfbuzz"]
-	path = harfbuzz
-	url = https://github.com/harfbuzz/harfbuzz

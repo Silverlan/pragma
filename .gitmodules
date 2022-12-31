@@ -121,9 +121,6 @@
 [submodule "external_libs/util_formatted_text"]
 	path = external_libs/util_formatted_text
 	url = https://github.com/Silverlan/util_formatted_text.git
-[submodule "third_party_libs/freetype"]
-	path = third_party_libs/freetype
-	url = https://github.com/aseprite/freetype2.git
 [submodule "modules/pr_curl"]
 	path = modules/pr_curl
 	url = https://github.com/Silverlan/pr_curl.git
@@ -177,7 +174,4 @@
 	url = https://github.com/madmann91/bvh.git
 [submodule "harfbuzz"]
 	path = harfbuzz
-	url = https://github.com/harfbuzz/harfbuzz
-[submodule "third_party_libs/harfbuzz"]
-	path = third_party_libs/harfbuzz
 	url = https://github.com/harfbuzz/harfbuzz

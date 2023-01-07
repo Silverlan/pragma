@@ -175,3 +175,6 @@
 [submodule "third_party_libs/zlib"]
 	path = third_party_libs/zlib
 	url = https://github.com/Silverlan/zlib.git
+[submodule "third_party_libs/cppbepuik"]
+	path = third_party_libs/cppbepuik
+	url = https://github.com/Silverlan/cppbepuik.git

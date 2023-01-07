@@ -290,8 +290,6 @@ search_lib_recursive(DEPENDENCY_LUABIND_LIBRARY lib/${BINARY_PRAGMA_DIR} luabind
 set(DEPENDENCY_FREETYPE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/freetype/include CACHE STRING "" FORCE)
 search_lib_recursive(DEPENDENCY_FREETYPE_LIBRARY third_party_libs/freetype/${BINARY_PRAGMA_DIR} freetype)
 
-
-
 #set(DEPENDENCY_ANVIL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/include CACHE PATH "Path to include directory." FORCE)
 #set(DEPENDENCY_ANVIL_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/include CACHE PATH  "Path to include directory." FORCE)
 #set(DEPENDENCY_ANVIL_DEPS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/deps CACHE PATH "Path to include directory." FORCE)
@@ -688,6 +686,13 @@ set_target_properties(luabind PROPERTIES FOLDER third_party_libs)
 target_include_directories(luabind PUBLIC ${LUA_INCLUDE_DIR})
 #
 
+# cppbepuik
+register_third_party_library(cppbepuik)
+set(DEPENDENCY_CPPBEPUIK_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/cppbepuik/include CACHE PATH "Path to include directory.")
+search_lib_recursive_ext(DEPENDENCY_CPPBEPUIK_LIBRARY cppbepuik STATIC)
+set_target_properties(cppbepuik PROPERTIES FOLDER third_party_libs/cppbepuik)
+#
+
 # 7zip cpp
 if(WIN32)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
@@ -935,7 +940,7 @@ if(WIN32)
 add_dependencies(util_zip 7zpp)
 endif()
 
-add_dependencies(shared materialsystem util_zip wms_shared util_pragma_doc luasystem networkmanager muparserx libz2 bzip2 clip2tri-static clipper-static poly2tri-static util_udm panima util_bsp util_smdmodel util_source_script rectangle_bin_pack Recast Detour util_pad noise-static noiseutils-static ogg vorbis vorbisfile)
+add_dependencies(shared materialsystem util_zip wms_shared util_pragma_doc luasystem networkmanager muparserx libz2 bzip2 clip2tri-static clipper-static poly2tri-static util_udm panima util_bsp util_smdmodel util_source_script rectangle_bin_pack Recast Detour util_pad noise-static noiseutils-static ogg vorbis vorbisfile cppbepuik)
 add_dependencies(ishared util_udm shared)
 add_dependencies(iclient ishared client)
 add_dependencies(iserver ishared server)

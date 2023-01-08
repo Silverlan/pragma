@@ -1,0 +1,6 @@
+key_vr = "VR Ctrl {0} ボタン {1}"
+key_vr_axis = "VR Ctrl {0} 軸 {1}"
+vr_hmd = "ヘッドマウントディスプレイ"
+vr_msg_switch_display = "ヘッドマウントディスプレイに切り替えてください"
+vr_msg_error_init = "エラー: OpenVRを初期化できません: {0}"
+vr_msg_error_load = "エラー: OpenVRをロードできません: {0}"

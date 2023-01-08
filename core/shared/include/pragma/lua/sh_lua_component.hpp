@@ -178,6 +178,7 @@ namespace pragma
 
 		bool ShouldTransmitSnapshotData() const;
 
+		virtual void OnMembersChanged() override {pragma::BaseEntityComponent::OnMembersChanged();}
 		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
 
@@ -393,6 +394,7 @@ namespace pragma
 			def.def("RemoveMember",static_cast<void(T::*)(pragma::ComponentMemberIndex)>(&T::RemoveMember));
 			def.def("RemoveMember",static_cast<void(T::*)(const std::string&)>(&T::RemoveMember));
 			def.def("UpdateMemberNameMap",static_cast<void(T::*)()>(&T::UpdateMemberNameMap));
+			def.def("OnMembersChanged",static_cast<void(T::*)()>(&T::OnMembersChanged));
 		}
 	};
 };

@@ -51,7 +51,10 @@ namespace Lua
 		static Lua::var<bool,luabind::tableT<TraceResult>,TraceResult> overlap(lua_State *l,Game &game,const ::TraceData &traceData);
 		static util::TSharedHandle<pragma::physics::IRigidBody> create_rigid_body(pragma::physics::IEnvironment *env,pragma::physics::IShape &shape,bool dynamic=true);
 		static std::shared_ptr<pragma::physics::IConvexHullShape> create_convex_hull_shape(pragma::physics::IEnvironment *env,pragma::physics::IMaterial &material);
-
+		
+		static std::shared_ptr<pragma::physics::IConvexShape> create_convex_shape(pragma::physics::IEnvironment *env,const std::vector<Vector3> &verts,pragma::physics::IMaterial &material);
+		static std::shared_ptr<pragma::physics::IConvexShape> create_convex_shape(pragma::physics::IEnvironment *env,const std::vector<Vector3> &verts,const std::vector<uint16_t> &tris,pragma::physics::IMaterial &material);
+		static std::shared_ptr<pragma::physics::ITriangleShape> create_triangle_shape(pragma::physics::IEnvironment *env,const std::vector<Vector3> &verts,const std::vector<uint16_t> &tris,pragma::physics::IMaterial &material);
 		static std::shared_ptr<pragma::physics::IConvexShape> create_box_shape(pragma::physics::IEnvironment *env,const Vector3 &halfExtents,pragma::physics::IMaterial &material);
 		static std::shared_ptr<pragma::physics::IConvexShape> create_capsule_shape(pragma::physics::IEnvironment *env,float halfWidth,float halfHeight,pragma::physics::IMaterial &material);
 		static std::shared_ptr<pragma::physics::IConvexShape> create_sphere_shape(pragma::physics::IEnvironment *env,float radius,pragma::physics::IMaterial &material);
@@ -121,6 +124,9 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	auto &modPhys = lua.RegisterLibrary(libName);
 	modPhys[
 		//luabind::def("create_character_controller",create_character_controller},
+		luabind::def("create_convex_shape",static_cast<std::shared_ptr<pragma::physics::IConvexShape>(*)(pragma::physics::IEnvironment*,const std::vector<Vector3>&,const std::vector<uint16_t>&,pragma::physics::IMaterial&)>(create_convex_shape)),
+		luabind::def("create_convex_shape",static_cast<std::shared_ptr<pragma::physics::IConvexShape>(*)(pragma::physics::IEnvironment*,const std::vector<Vector3>&,pragma::physics::IMaterial&)>(create_convex_shape)),
+		luabind::def("create_triangle_shape",create_triangle_shape),
 		luabind::def("create_convex_hull_shape",create_convex_hull_shape),
 		luabind::def("create_box_shape",create_box_shape),
 		luabind::def("create_capsule_shape",create_capsule_shape),
@@ -919,6 +925,50 @@ std::shared_ptr<pragma::physics::IConvexHullShape> Lua::physenv::create_convex_h
 	if(!env)
 		return nullptr;
 	return env->CreateConvexHullShape(material);
+}
+
+std::shared_ptr<pragma::physics::ITriangleShape> Lua::physenv::create_triangle_shape(pragma::physics::IEnvironment *env,const std::vector<Vector3> &verts,const std::vector<uint16_t> &tris,pragma::physics::IMaterial &material)
+{
+	if(!env)
+		return nullptr;
+	auto shape = env->CreateTriangleShape(material);
+	if(!shape)
+		return nullptr;
+	shape->ReserveTriangles(tris.size() /3);
+	for(auto i=decltype(tris.size()){0u};i<tris.size();i+=3)
+		shape->AddTriangle(verts[tris[i]],verts[tris[i +1]],verts[tris[i +2]]);
+	shape->Build();
+	return shape;
+}
+std::shared_ptr<pragma::physics::IConvexShape> Lua::physenv::create_convex_shape(pragma::physics::IEnvironment *env,const std::vector<Vector3> &verts,const std::vector<uint16_t> &tris,pragma::physics::IMaterial &material)
+{
+	if(!env)
+		return nullptr;
+	auto shape = env->CreateConvexHullShape(material);
+	if(!shape)
+		return nullptr;
+	shape->ReservePoints(verts.size());
+	for(auto &v : verts)
+		shape->AddPoint(v);
+	shape->ReserveTriangles(tris.size() /3);
+	for(auto i=decltype(tris.size()){0u};i<tris.size();i+=3)
+		shape->AddTriangle(tris[i],tris[i +1],tris[i +2]);
+	shape->Build();
+	return shape;
+}
+
+std::shared_ptr<pragma::physics::IConvexShape> Lua::physenv::create_convex_shape(pragma::physics::IEnvironment *env,const std::vector<Vector3> &verts,pragma::physics::IMaterial &material)
+{
+	if(!env)
+		return nullptr;
+	auto shape = env->CreateConvexHullShape(material);
+	if(!shape)
+		return nullptr;
+	shape->ReservePoints(verts.size());
+	for(auto &v : verts)
+		shape->AddPoint(v);
+	shape->Build();
+	return shape;
 }
 
 std::shared_ptr<pragma::physics::IConvexShape> Lua::physenv::create_box_shape(pragma::physics::IEnvironment *env,const Vector3 &halfExtents,pragma::physics::IMaterial &material)

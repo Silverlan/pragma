@@ -326,6 +326,13 @@ std::optional<ComponentMemberInfo> pragma::lua::get_component_member_info(
 		}
 		else
 			componentMemberInfo->SetSpecializationType(specializationType);
+		
+		auto oFlags = attributes["flags"];
+		if(oFlags)
+		{
+			auto flags = luabind::object_cast<ComponentMemberFlags>(oFlags);
+			componentMemberInfo->SetFlags(flags);
+		}
 
 		auto oEnumValues = attributes["enumValues"];
 		if(oEnumValues)

@@ -1328,6 +1328,10 @@ namespace Lua::animation
 {
 	void register_library(Lua::Interface &lua);
 };
+namespace Lua::ik
+{
+	void register_library(Lua::Interface &lua);
+};
 
 void Game::RegisterLuaLibraries()
 {
@@ -1920,4 +1924,5 @@ void Game::RegisterLuaLibraries()
 	Lua::physenv::register_library(GetLuaInterface());
 	Lua::doc::register_library(GetLuaInterface());
 	Lua::animation::register_library(GetLuaInterface());
+	Lua::ik::register_library(GetLuaInterface());
 }

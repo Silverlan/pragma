@@ -294,6 +294,8 @@ search_lib_recursive(DEPENDENCY_FREETYPE_LIBRARY third_party_libs/freetype/${BIN
 #set(DEPENDENCY_ANVIL_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/include CACHE PATH  "Path to include directory." FORCE)
 #set(DEPENDENCY_ANVIL_DEPS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/deps CACHE PATH "Path to include directory." FORCE)
 
+set(DEPENDENCY_CPPBEPUIK_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/cppbepuik/include CACHE PATH "Path to include directory.")
+search_lib_recursive(DEPENDENCY_CPPBEPUIK_LIBRARY third_party_libs/cppbepuik/${BINARY_PRAGMA_DIR} cppbepuik STATIC)
 
 if(WIN32)
     set(DEPENDENCY_7ZPP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/7zpp/include CACHE STRING "" FORCE)
@@ -688,9 +690,7 @@ target_include_directories(luabind PUBLIC ${LUA_INCLUDE_DIR})
 
 # cppbepuik
 register_third_party_library(cppbepuik)
-set(DEPENDENCY_CPPBEPUIK_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/cppbepuik/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_CPPBEPUIK_LIBRARY cppbepuik STATIC)
-set_target_properties(cppbepuik PROPERTIES FOLDER third_party_libs/cppbepuik)
+set_target_properties(cppbepuik PROPERTIES FOLDER third_party_libs)
 #
 
 # 7zip cpp

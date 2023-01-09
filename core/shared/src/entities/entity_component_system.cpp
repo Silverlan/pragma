@@ -143,9 +143,14 @@ void BaseEntityComponentSystem::RemoveComponent(pragma::BaseEntityComponent &com
 			continue;
 		ptrComponentOther->OnEntityComponentRemoved(component);
 	}
+	// Keep component alive temporarily
+	auto tmpHandle = *it;
+	m_components.erase(it);
 	component.OnRemove();
 	OnComponentRemoved(component);
-	m_components.erase(it);
+
+	// Safe to free now
+	tmpHandle = util::TSharedHandle<BaseEntityComponent>{};
 
 	auto itType = m_componentLookupTable.find(componentId);
 	if(itType != m_componentLookupTable.end())

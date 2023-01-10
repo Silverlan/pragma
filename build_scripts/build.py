@@ -570,14 +570,8 @@ if platform == "linux":
 
 	########## freetype with harfbuzz (linux only)  ##########
 	os.chdir(freetype_root)
-	for path in Path(freetype_root+"/build").glob("**/*"):
-		if path.is_file():
-			path.unlink()
-		elif path.is_dir():
-			shutil.rmtree(path)
-
 	print_msg("Rebuilding freetype against harfbuzz")
-	mkdir(freetype_root+"/build",cd=True)
+	mkdir(freetype_root+"/build_final",cd=True)
 	freetype_cmake_args = [
 		"-DCMAKE_PREFIX_PATH="+deps_dir+"/harfbuzz_prefix"+deps_dir+"/zlib_prefix",
 		"-DCMAKE_INSTALL_PREFIX="+deps_dir+"/freetype_prefix",
@@ -936,7 +930,8 @@ if build:
 	#HACK: For some reason hafbuzz is not named libharfbuzz.so.0. Fix that by adding a symlink.
 	if platform=="linux":
 		os.chdir(install_dir+"/lib")
-		os.symlink("libharfbuzz.so","libharfbuzz.so.0")
+		if not Path(os.getcwd()+"/libharfbuzz.so.0").is_symlink():
+			os.symlink("libharfbuzz.so","libharfbuzz.so.0")
 
 
 

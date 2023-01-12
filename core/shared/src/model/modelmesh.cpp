@@ -874,7 +874,7 @@ Vector2 ModelSubMesh::GetVertexAlpha(uint32_t idx) const
 }
 umath::VertexWeight ModelSubMesh::GetVertexWeight(uint32_t idx) const
 {
-	auto &vertexWeights = GetVertexWeightSet(idx);
+	auto &vertexWeights = GetVertexWeightSet(0);
 	if(idx >= vertexWeights.size())
 		return {};
 	return vertexWeights.at(idx);

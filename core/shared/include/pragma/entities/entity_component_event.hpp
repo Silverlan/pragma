@@ -31,6 +31,13 @@ namespace pragma
 		BaseEntityComponent &component;
 		virtual void PushArguments(lua_State *l) override;
 	};
+	struct DLLNETWORK CEOnMembersChanged
+		: public ComponentEvent
+	{
+		CEOnMembersChanged(BaseEntityComponent &component);
+		BaseEntityComponent &component;
+		virtual void PushArguments(lua_State *l) override;
+	};
 	using CEOnEntityComponentRemoved = CEOnEntityComponentAdded;
 };
 

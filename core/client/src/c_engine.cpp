@@ -396,6 +396,8 @@ void CEngine::JoystickAxisInput(prosper::Window &window,const GLFW::Joystick &jo
 static auto cvAxisInputThreshold = GetClientConVar("cl_controller_axis_input_threshold");
 bool CEngine::IsValidAxisInput(float axisInput) const
 {
+	if(!client)
+		return false;
 	return (umath::abs(axisInput) > cvAxisInputThreshold->GetFloat()) ? true : false;
 }
 

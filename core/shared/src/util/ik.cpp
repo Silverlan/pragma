@@ -32,19 +32,19 @@
 //#define SWITCH_HANDEDNESS
 static auto to_bepu_scale = static_cast<float>(::util::pragma::units_to_metres(1.f));
 static auto to_pragma_scale = static_cast<float>(::util::pragma::metres_to_units(1.f));
-static BEPUmath::Vector3 operator*(const BEPUmath::Vector3 &v,float f)
+static BEPUik::Vector3 operator*(const BEPUik::Vector3 &v,float f)
 {
-	return BEPUik::vector3::Multiply(const_cast<BEPUmath::Vector3&>(v),f);
+	return BEPUik::vector3::Multiply(const_cast<BEPUik::Vector3&>(v),f);
 }
-static BEPUmath::Vector3 to_bepu_vector3(const Vector3 &v)
+static BEPUik::Vector3 to_bepu_vector3(const Vector3 &v)
 {
 #ifdef SWITCH_HANDEDNESS
-	return BEPUmath::Vector3{v.z,v.y,v.x} *to_bepu_scale;
+	return BEPUik::Vector3{v.z,v.y,v.x} *to_bepu_scale;
 #else
-	return BEPUmath::Vector3{v.x,v.y,v.z} *to_bepu_scale;
+	return BEPUik::Vector3{v.x,v.y,v.z} *to_bepu_scale;
 #endif
 }
-static Vector3 from_bepu_vector3(const BEPUmath::Vector3 &v)
+static Vector3 from_bepu_vector3(const BEPUik::Vector3 &v)
 {
 #ifdef SWITCH_HANDEDNESS
 	return Vector3{v.Z,v.Y,v.X} *to_pragma_scale;
@@ -52,15 +52,15 @@ static Vector3 from_bepu_vector3(const BEPUmath::Vector3 &v)
 	return Vector3{v.x,v.y,v.z} *to_pragma_scale;
 #endif
 }
-static BEPUmath::Vector3 to_bepu_axis(const Vector3 &v)
+static BEPUik::Vector3 to_bepu_axis(const Vector3 &v)
 {
 #ifdef SWITCH_HANDEDNESS
-	return BEPUmath::Vector3{v.z,v.y,v.x};
+	return BEPUik::Vector3{v.z,v.y,v.x};
 #else
-	return BEPUmath::Vector3{v.x,v.y,v.z};
+	return BEPUik::Vector3{v.x,v.y,v.z};
 #endif
 }
-static Vector3 from_bepu_axis(const BEPUmath::Vector3 &v)
+static Vector3 from_bepu_axis(const BEPUik::Vector3 &v)
 {
 #ifdef SWITCH_HANDEDNESS
 	return Vector3{v.Z,v.Y,v.X};
@@ -68,20 +68,20 @@ static Vector3 from_bepu_axis(const BEPUmath::Vector3 &v)
 	return Vector3{v.x,v.y,v.z};
 #endif
 }
-static BEPUmath::Quaternion to_bepu_quaternion(const Quat &r)
+static BEPUik::Quaternion to_bepu_quaternion(const Quat &r)
 {
 #ifdef SWITCH_HANDEDNESS
-	return BEPUmath::Quaternion{-r.w,r.z,r.y,r.x};
+	return BEPUik::Quaternion{-r.w,r.z,r.y,r.x};
 #else
 	return BEPUik::quaternion::Create(r.x,r.y,r.z,r.w);
 #endif
 }
-static Quat from_bepu_quaternion(const BEPUmath::Quaternion &r)
+static Quat from_bepu_quaternion(const BEPUik::Quaternion &r)
 {
 #ifdef SWITCH_HANDEDNESS
 	return Quat{-r.W,r.Z,r.Y,r.X};
 #else
-	return Quat{r.W,r.X,r.Y,r.Z};
+	return Quat{r.w,r.x,r.y,r.z};
 #endif
 	
 }

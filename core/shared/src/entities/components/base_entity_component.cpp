@@ -78,7 +78,10 @@ void BaseEntityComponent::OnMembersChanged()
 
 	auto *genericC = GetEntity().GetGenericComponent();
 	if(genericC)
-		genericC->InvokeEventCallbacks(BaseGenericComponent::EVENT_ON_MEMBERS_CHANGED);
+	{
+		CEOnMembersChanged ev {*this};
+		genericC->InvokeEventCallbacks(BaseGenericComponent::EVENT_ON_MEMBERS_CHANGED,ev);
+	}
 }
 void BaseEntityComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember) {}
 const ComponentMemberInfo *BaseEntityComponent::FindMemberInfo(const std::string &name) const

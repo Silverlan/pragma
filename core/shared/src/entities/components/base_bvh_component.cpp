@@ -289,6 +289,32 @@ std::shared_ptr<BvhData> BaseBvhComponent::SetBvhData(std::shared_ptr<BvhData> &
 	return tmp;
 }
 
+std::optional<Vector3> BaseBvhComponent::GetVertex(size_t idx) const
+{
+	std::scoped_lock lock {m_bvhDataMutex};
+	auto primIdx = idx /3;
+	if(primIdx >= m_bvhData->primitives.size())
+		return {};
+	auto &prim = m_bvhData->primitives[primIdx];
+	auto subIdx = idx %3;
+	switch(subIdx)
+	{
+	case 0:
+		return *reinterpret_cast<const Vector3*>(&prim.p0.values);
+	case 1:
+	{
+		auto p1 = prim.p1();
+		return *reinterpret_cast<const Vector3*>(&p1.values);
+	}
+	case 2:
+	{
+		auto p2 = prim.p2();
+		return *reinterpret_cast<const Vector3*>(&p2.values);
+	}
+	}
+	return {};
+}
+
 bool BaseBvhComponent::SetVertexData(pragma::BvhData &bvhData,const std::vector<BvhTriangle> &data)
 {
 	if(bvhData.primitives.size() != data.size())

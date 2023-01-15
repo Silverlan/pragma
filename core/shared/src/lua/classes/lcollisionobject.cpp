@@ -244,11 +244,6 @@ void Lua::PhysCollisionObj::register_class(lua_State *l,luabind::module_ &mod)
 			return;
 		hPhys->PutToSleep();
 	}));
-	classDef.def("WakeUp",static_cast<void(*)(lua_State*,pragma::physics::ICollisionObject*)>([](lua_State *l,pragma::physics::ICollisionObject *hPhys) {
-		if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l,hPhys) == false)
-			return;
-		hPhys->WakeUp();
-	}));
 	classDef.def("IsAsleep",static_cast<void(*)(lua_State*,pragma::physics::ICollisionObject*)>([](lua_State *l,pragma::physics::ICollisionObject *hPhys) {
 		if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l,hPhys) == false)
 			return;

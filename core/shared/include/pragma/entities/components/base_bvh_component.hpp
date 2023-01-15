@@ -108,6 +108,7 @@ namespace pragma
 		bool SetVertexData(const std::vector<BvhTriangle> &data);
 		void RebuildBvh();
 		void ClearBvh();
+		std::optional<Vector3> GetVertex(size_t idx) const;
 
 		// For internal use only
 		static std::shared_ptr<pragma::BvhData> RebuildBvh(

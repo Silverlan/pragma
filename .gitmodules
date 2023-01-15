@@ -94,9 +94,6 @@
 [submodule "third_party_libs/luabind"]
 	path = third_party_libs/luabind
 	url = https://github.com/Silverlan/luabind-deboostified.git
-[submodule "third_party_libs/zlib"]
-	path = third_party_libs/zlib
-	url = https://github.com/madler/zlib.git
 [submodule "third_party_libs/vorbis"]
 	path = third_party_libs/vorbis
 	url = https://github.com/xiph/vorbis.git
@@ -175,3 +172,9 @@
 [submodule "third_party_libs/bvh"]
 	path = third_party_libs/bvh
 	url = https://github.com/madmann91/bvh.git
+[submodule "third_party_libs/zlib"]
+	path = third_party_libs/zlib
+	url = https://github.com/Silverlan/zlib.git
+[submodule "third_party_libs/cppbepuik"]
+	path = third_party_libs/cppbepuik
+	url = https://github.com/Silverlan/cppbepuik.git

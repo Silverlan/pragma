@@ -24,7 +24,7 @@ void pragma::physics::IConstraint::OnRemove()
 
 void pragma::physics::IConstraint::SetCollisionsEnabled(Bool b)
 {
-	if(m_bCollisionsEnabled == m_bCollisionsEnabled)
+	if(b == m_bCollisionsEnabled)
 		return;
 	m_bCollisionsEnabled = b;
 	DoSetCollisionsEnabled(b);

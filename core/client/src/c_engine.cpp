@@ -167,9 +167,12 @@ void CEngine::DumpDebugInformation(ZIPFile &zip) const
 	Engine::DumpDebugInformation(zip);
 
 	auto &renderContext = GetRenderContext();
-	auto budget = renderContext.DumpMemoryBudget();
-	if(budget.has_value())
-		zip.AddFile("mem_budget.txt",*budget);
+
+	// Disabled because 'DumpMemoryBudget' can cause stack corruption?
+	//auto budget = renderContext.DumpMemoryBudget();
+	//if(budget.has_value())
+	//	zip.AddFile("mem_budget.txt",*budget);
+
 	auto stats = renderContext.DumpMemoryStats();
 	if(stats.has_value())
 		zip.AddFile("mem_stats.txt",*stats);

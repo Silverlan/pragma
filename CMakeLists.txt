@@ -125,7 +125,7 @@ endfunction(search_lib_recursive)
 
 function(set_target_folder TARGET FOLDER)
 	if (TARGET ${TARGET})
-		set_target_folder(${TARGET} ${FOLDER})
+		set_target_properties(${TARGET} PROPERTIES FOLDER ${FOLDER})
 	endif()
 endfunction(set_target_folder)
 

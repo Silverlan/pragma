@@ -181,6 +181,7 @@ void CEngine::DumpDebugInformation(ZIPFile &zip) const
 		ss<<"Vulkan API Version: "<<deviceInfo.apiVersion<<"\n";
 		ss<<"Device Name: "<<deviceInfo.deviceName<<"\n";
 		ss<<"Device Type: "<<prosper::util::to_string(deviceInfo.deviceType)<<"\n";
+		ss<<"Device ID: "<<deviceInfo.deviceId<<"\n";
 		ss<<"Driver Version: "<<deviceInfo.driverVersion<<"\n";
 		ss<<"Vendor: "<<prosper::util::to_string(deviceInfo.vendor)<<"\n";
 		ss<<"Vendor ID: "<<umath::to_integral(deviceInfo.vendor);

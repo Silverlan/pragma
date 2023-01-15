@@ -401,26 +401,33 @@ static luabind::object get_property_value(lua_State *l,const ::udm::PropertyWrap
 		return {};
 	return get_property_value(l,type,ptr);
 }
-static luabind::object get_property_value(lua_State *l,const ::udm::PropertyWrapper &val,::udm::Type type)
+static luabind::object get_property_value(lua_State* l, const ::udm::PropertyWrapper& val, ::udm::Type type)
 {
-	if(!static_cast<bool>(val))
+	if (!static_cast<bool>(val))
 		return {};
 	udm::Type valType;
-	auto *ptr = val.GetValuePtr(valType);
-	if(ptr == nullptr)
+	auto* ptr = val.GetValuePtr(valType);
+	if (ptr == nullptr)
 		return {};
-	if(valType == type)
-		return get_property_value(l,val);
-	if(!::udm::is_convertible(valType,type))
+	if (valType == type)
+		return get_property_value(l, val);
+	if (!::udm::is_convertible(valType, type))
 		return {};
-	auto vs = [l,ptr,&val,type](auto tag) {
-        using T = typename decltype(tag)::type;
+	return udm::visit(type, [l, ptr, &val, type, valType](auto tag) {
+		using T = typename decltype(tag)::type;
+	return udm::visit(valType, [l, ptr, &val, type, valType](auto tag) {
+		using TVal = typename decltype(tag)::type;
+	if constexpr (::udm::is_convertible<TVal, T>())
+	{
 		auto v = val.ToValue<T>();
-		if(!v.has_value())
+		if (!v.has_value())
 			return luabind::object{};
-		return get_property_value(l,type,&*v);
-	};
-	return udm::visit(type,vs);
+		return get_property_value(l, type, &*v);
+	}
+	else
+		return luabind::object{};
+		});
+		});
 }
 static luabind::object get_property_value(lua_State *l,const ::udm::PropertyWrapper &val,int32_t idx)
 {

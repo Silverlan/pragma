@@ -10,6 +10,7 @@
 #include "pragma/entities/entity_component_manager.hpp"
 #include "pragma/entities/attribute_specialization_type.hpp"
 #include "pragma/entities/member_type.hpp"
+#include <panima/types.hpp>
 #include <sharedutils/util.h>
 #include <udm.hpp>
 
@@ -18,9 +19,7 @@ namespace pragma
 {
 	constexpr bool is_animatable_type(udm::Type type)
 	{
-		return !udm::is_non_trivial_type(type) && type != udm::Type::HdrColor && type != udm::Type::Srgba &&
-			type != udm::Type::Transform && type != udm::Type::ScaledTransform && type != udm::Type::Nil &&
-			type != udm::Type::Half;
+		return panima::is_animatable_type(type);
 	}
 	constexpr bool is_valid_component_property_type(udm::Type type)
 	{

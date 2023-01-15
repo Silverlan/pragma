@@ -232,6 +232,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdChannel.def("SetTimeFrame",&panima::Channel::SetTimeFrame);
 	cdChannel.def("GetValueType",&panima::Channel::GetValueType);
 	cdChannel.def("SetValueType",&panima::Channel::SetValueType);
+	cdChannel.def("MergeValues",&panima::Channel::MergeValues);
 	cdChannel.def("GetInterpolation",+[](lua_State *l,panima::Channel &channel) -> panima::ChannelInterpolation {
 		return channel.interpolation;
 	});
@@ -534,6 +535,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 			return luabind::object{l,false};
 		return luabind::object{l,anim};
 	})];
+	cdAnim2.def("Merge",&panima::Animation::Merge);
 	cdAnim2.def("GetChannelCount",&panima::Animation::GetChannelCount);
 	cdAnim2.def("GetAnimationSpeedFactor",&panima::Animation::GetAnimationSpeedFactor);
 	cdAnim2.def("SetAnimationSpeedFactor",&panima::Animation::SetAnimationSpeedFactor);

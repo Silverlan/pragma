@@ -1077,17 +1077,13 @@ template<class T,class TPropertyWrapper,class TClassDef>
         auto *a = static_cast<TPropertyWrapper>(p).template GetValuePtr<::udm::Array>();
 		if(!a)
 			return;
-		::udm::Array::Range r0 {0 /* src */,0 /* dst */,startIndex};
-		::udm::Array::Range r1 {startIndex /* src */,startIndex +count /* dst */,a->GetSize() -startIndex};
-		a->Resize(a->GetSize() +count,r0,r1,false);
+		a->AddValueRange(startIndex,count);
 	})
 	.def("RemoveValueRange",+[](lua_State *l,T &p,uint32_t startIndex,uint32_t count) {
         auto *a = static_cast<TPropertyWrapper>(p).template GetValuePtr<::udm::Array>();
 		if(!a)
 			return;
-		::udm::Array::Range r0 {0 /* src */,0 /* dst */,startIndex};
-		::udm::Array::Range r1 {startIndex +count /* src */,startIndex /* dst */,a->GetSize() -(startIndex +count)};
-		a->Resize(a->GetSize() -count,r0,r1,false);
+		a->RemoveValueRange(startIndex,count);
 	})
 	.def("GetBlobData",+[](lua_State *l,T &p) {
 		auto type = ::udm::Type::Nil;

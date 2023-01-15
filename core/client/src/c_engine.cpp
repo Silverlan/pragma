@@ -177,17 +177,36 @@ void CEngine::DumpDebugInformation(ZIPFile &zip) const
 	if(stats.has_value())
 		zip.AddFile("mem_stats.txt",*stats);
 
+	auto printDeviceInfo = [](std::stringstream &ss,const prosper::util::VendorDeviceInfo &deviceInfo) {
+		ss<<"Vulkan API Version: "<<deviceInfo.apiVersion<<"\n";
+		ss<<"Device Name: "<<deviceInfo.deviceName<<"\n";
+		ss<<"Device Type: "<<prosper::util::to_string(deviceInfo.deviceType)<<"\n";
+		ss<<"Driver Version: "<<deviceInfo.driverVersion<<"\n";
+		ss<<"Vendor: "<<prosper::util::to_string(deviceInfo.vendor)<<"\n";
+		ss<<"Vendor ID: "<<umath::to_integral(deviceInfo.vendor);
+	};
 	auto deviceInfo = renderContext.GetVendorDeviceInfo();
 	if(deviceInfo.has_value())
 	{
 		std::stringstream ss;
-		ss<<"Vulkan API Version: "<<deviceInfo->apiVersion<<"\n";
-		ss<<"Device Name: "<<deviceInfo->deviceName<<"\n";
-		ss<<"Device Type: "<<prosper::util::to_string(deviceInfo->deviceType)<<"\n";
-		ss<<"Driver Version: "<<deviceInfo->driverVersion<<"\n";
-		ss<<"Vendor: "<<prosper::util::to_string(deviceInfo->vendor)<<"\n";
-		ss<<"Vendor ID: "<<umath::to_integral(deviceInfo->vendor);
+		printDeviceInfo(ss,*deviceInfo);
 		zip.AddFile("gpu.txt",ss.str());
+		ss.str(std::string());
+		ss.clear();
+	}
+
+	auto deviceInfos = renderContext.GetAvailableVendorDevices();
+	if(deviceInfos.has_value())
+	{
+		std::stringstream ss;
+		size_t idx = 1;
+		for(auto &devInfo : *deviceInfos)
+		{
+			ss<<"GPU "<<idx++<<":\n";
+			printDeviceInfo(ss,devInfo);
+			ss<<"\n";
+		}
+		zip.AddFile("available_gpus.txt",ss.str());
 		ss.str(std::string());
 		ss.clear();
 	}

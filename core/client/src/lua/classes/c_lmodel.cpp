@@ -20,6 +20,71 @@
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
+static std::shared_ptr<Model> create_generic_model(Game &game)
+{
+	auto *l = game.GetLuaState();
+	auto subMesh = luabind::object_cast<std::shared_ptr<::ModelSubMesh>>(luabind::object{luabind::from_stack(l,-1)});
+	Lua::Pop(l,1);
+
+	auto mesh = game.CreateModelMesh();
+	mesh->AddSubMesh(subMesh);
+
+	auto mat = game.GetNetworkState()->LoadMaterial("white");
+	if(!mat)
+		return nullptr;
+	auto mdl = game.CreateModel();
+	if(!mdl)
+		return nullptr;
+	auto group = mdl->AddMeshGroup("reference");
+	mdl->AddMaterial(0,mat);
+
+	mdl->GetMeshGroup("reference")->AddMesh(mesh);
+	mdl->Update(ModelUpdateFlags::All);
+	return mdl;
+}
+
+#include "pragma/lua/classes/c_lmodelmesh.h"
+std::shared_ptr<::Model> Lua::Model::Client::create_quad(lua_State *l,Game &game,float size)
+{
+	Lua::ModelSubMesh::Client::CreateQuad(l,size);
+	return create_generic_model(game);
+}
+std::shared_ptr<::Model> Lua::Model::Client::create_box(lua_State *l,Game &game,const Vector3 &min,const Vector3 &max)
+{
+	Lua::ModelSubMesh::Client::CreateBox(l,min,max);
+	return create_generic_model(game);
+}
+std::shared_ptr<::Model> Lua::Model::Client::create_sphere(lua_State *l,Game &game,const Vector3 &origin,float radius,uint32_t recursionLevel)
+{
+	Lua::ModelSubMesh::Client::CreateSphere(l,origin,radius,recursionLevel);
+	return create_generic_model(game);
+}
+std::shared_ptr<::Model> Lua::Model::Client::create_sphere(lua_State *l,Game &game,const Vector3 &origin,float radius)
+{
+	Lua::ModelSubMesh::Client::CreateSphere(l,origin,radius);
+	return create_generic_model(game);
+}
+std::shared_ptr<::Model> Lua::Model::Client::create_cylinder(lua_State *l,Game &game,float startRadius,float length,uint32_t segmentCount)
+{
+	Lua::ModelSubMesh::Client::CreateCylinder(l,startRadius,length,segmentCount);
+	return create_generic_model(game);
+}
+std::shared_ptr<::Model> Lua::Model::Client::create_cone(lua_State *l,Game &game,float startRadius,float length,float endRadius,uint32_t segmentCount)
+{
+	Lua::ModelSubMesh::Client::CreateCone(l,startRadius,length,endRadius,segmentCount);
+	return create_generic_model(game);
+}
+std::shared_ptr<::Model> Lua::Model::Client::create_circle(lua_State *l,Game &game,float radius,bool doubleSided,uint32_t segmentCount)
+{
+	Lua::ModelSubMesh::Client::CreateCircle(l,radius,doubleSided,segmentCount);
+	return create_generic_model(game);
+}
+std::shared_ptr<::Model> Lua::Model::Client::create_ring(lua_State *l,Game &game,float innerRadius,float outerRadius,bool doubleSided,uint32_t segmentCount)
+{
+	Lua::ModelSubMesh::Client::CreateRing(l,innerRadius,outerRadius,doubleSided,segmentCount);
+	return create_generic_model(game);
+}
+
 void Lua::Model::Client::Export(lua_State *l,::Model &mdl,const pragma::asset::ModelExportInfo &exportInfo)
 {
 	std::string errMsg;

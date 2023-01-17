@@ -1068,6 +1068,14 @@ void CGame::RegisterLuaClasses()
 	modelClassDef.scope[defMdlExportInfo];
 
 	Lua::Model::register_class(GetLuaState(),modelClassDef,modelMeshClassDef,subModelMeshClassDef);
+	modelClassDef.scope[luabind::def("create_quad",&::Lua::Model::Client::create_quad)];
+	modelClassDef.scope[luabind::def("create_box",&::Lua::Model::Client::create_box)];
+	modelClassDef.scope[luabind::def("create_sphere",static_cast<std::shared_ptr<::Model>(*)(lua_State*,Game&,const Vector3&,float,uint32_t)>(&::Lua::Model::Client::create_sphere))];
+	modelClassDef.scope[luabind::def("create_sphere",static_cast<std::shared_ptr<::Model>(*)(lua_State*,Game&,const Vector3&,float)>(&::Lua::Model::Client::create_sphere))];
+	modelClassDef.scope[luabind::def("create_cylinder",&::Lua::Model::Client::create_cylinder)];
+	modelClassDef.scope[luabind::def("create_cone",&::Lua::Model::Client::create_cone)];
+	modelClassDef.scope[luabind::def("create_circle",&::Lua::Model::Client::create_circle)];
+	modelClassDef.scope[luabind::def("create_ring",&::Lua::Model::Client::create_ring)];
 	modelClassDef.def("AddMaterial",&Lua::Model::Client::AddMaterial);
 	modelClassDef.def("SetMaterial",&Lua::Model::Client::SetMaterial);
 	modelClassDef.def("GetVertexAnimationBuffer",&Lua::Model::Client::GetVertexAnimationBuffer);

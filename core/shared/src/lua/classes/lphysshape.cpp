@@ -22,13 +22,19 @@ extern DLLNETWORK Engine *engine;
 void Lua::PhysShape::register_class(lua_State *l,luabind::module_ &mod)
 {
 	auto classDef = luabind::class_<pragma::physics::IShape,pragma::physics::IBase>("Shape");
-	classDef.def("GetBounds",&pragma::physics::IShape::GetAABB,luabind::meta::join<luabind::out_value<2>,luabind::out_value<3>>::type{});
+	classDef.def("GetBounds",+[](pragma::physics::IShape &shape) -> std::pair<Vector3,Vector3> {
+		Vector3 min,max;
+		shape.GetAABB(min,max);
+		return {min,max};
+	});
 	classDef.def("IsConvex",&pragma::physics::IShape::IsConvex);
 	classDef.def("IsConvexHull",&pragma::physics::IShape::IsConvexHull);
 	classDef.def("IsHeightfield",&pragma::physics::IShape::IsHeightfield);
 	classDef.def("IsTriangleShape",&pragma::physics::IShape::IsTriangleShape);
 	classDef.def("SetMass",&pragma::physics::IShape::SetMass);
 	classDef.def("GetMass",&pragma::physics::IShape::GetMass);
+	classDef.def("SetLocalPose",&pragma::physics::IShape::SetLocalPose);
+	classDef.def("GetLocalPose",&pragma::physics::IShape::GetLocalPose);
 	classDef.def("CalculateLocalInertia",&pragma::physics::IShape::CalculateLocalInertia,luabind::out_value<3>{});
 	mod[classDef];
 

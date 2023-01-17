@@ -21,4 +21,14 @@ void CEOnEntityComponentAdded::PushArguments(lua_State *l)
 
 /////////////
 
+CEOnMembersChanged::CEOnMembersChanged(BaseEntityComponent &component)
+	: component(component)
+{}
+void CEOnMembersChanged::PushArguments(lua_State *l)
+{
+	component.PushLuaObject(l);
+}
+
+/////////////
+
 void CEGenericComponentEvent::PushArguments(lua_State *l) {}

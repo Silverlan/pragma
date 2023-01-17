@@ -23,6 +23,7 @@ link_external_library(muparserx)
 link_external_library(wms_shared)
 link_external_library(util_udm)
 link_external_library(panima)
+link_external_library(cppbepuik)
 
 add_external_library(luajit)
 add_external_library(luabind)

@@ -401,26 +401,33 @@ static luabind::object get_property_value(lua_State *l,const ::udm::PropertyWrap
 		return {};
 	return get_property_value(l,type,ptr);
 }
-static luabind::object get_property_value(lua_State *l,const ::udm::PropertyWrapper &val,::udm::Type type)
+static luabind::object get_property_value(lua_State* l, const ::udm::PropertyWrapper& val, ::udm::Type type)
 {
-	if(!static_cast<bool>(val))
+	if (!static_cast<bool>(val))
 		return {};
 	udm::Type valType;
-	auto *ptr = val.GetValuePtr(valType);
-	if(ptr == nullptr)
+	auto* ptr = val.GetValuePtr(valType);
+	if (ptr == nullptr)
 		return {};
-	if(valType == type)
-		return get_property_value(l,val);
-	if(!::udm::is_convertible(valType,type))
+	if (valType == type)
+		return get_property_value(l, val);
+	if (!::udm::is_convertible(valType, type))
 		return {};
-	auto vs = [l,ptr,&val,type](auto tag) {
-        using T = typename decltype(tag)::type;
+	return udm::visit(type, [l, ptr, &val, type, valType](auto tag) {
+		using T = typename decltype(tag)::type;
+	return udm::visit(valType, [l, ptr, &val, type, valType](auto tag) {
+		using TVal = typename decltype(tag)::type;
+	if constexpr (::udm::is_convertible<TVal, T>())
+	{
 		auto v = val.ToValue<T>();
-		if(!v.has_value())
+		if (!v.has_value())
 			return luabind::object{};
-		return get_property_value(l,type,&*v);
-	};
-	return udm::visit(type,vs);
+		return get_property_value(l, type, &*v);
+	}
+	else
+		return luabind::object{};
+		});
+		});
 }
 static luabind::object get_property_value(lua_State *l,const ::udm::PropertyWrapper &val,int32_t idx)
 {
@@ -856,6 +863,33 @@ template<typename T>
 }
 template<typename T>
 	concept is_assignable_type = !std::is_same_v<T,::udm::Element> && !std::is_same_v<T,::udm::Utf8String> && !std::is_same_v<T,::udm::Array> && !std::is_same_v<T,::udm::ArrayLz4>;
+static void insert_array_value(lua_State *l,udm::PropertyWrapper &p,uint32_t idx,const luabind::object &o)
+{
+	auto *a = p.GetValuePtr<udm::Array>();
+	if(!a)
+		return;
+	auto arrayType = a->GetArrayType();
+	::udm::visit(a->GetValueType(),[&a,idx,&o,arrayType](auto tag) {
+		using T = typename decltype(tag)::type;
+		if constexpr(is_assignable_type<T>)
+		{
+			if(arrayType == ::udm::ArrayType::Raw)
+			{
+				if constexpr(::udm::Array::IsValueTypeSupported(::udm::type_to_enum<T>()))
+					a->InsertValue<T>(idx,Lua::udm::cast_object<T>(o));
+			}
+			else if constexpr(::udm::ArrayLz4::IsValueTypeSupported(::udm::type_to_enum<T>()))
+				a->InsertValue<T>(idx,Lua::udm::cast_object<T>(o));
+		}
+	});
+}
+static void push_array_value(lua_State *l,udm::PropertyWrapper &p,const luabind::object &o)
+{
+	auto *a = p.GetValuePtr<udm::Array>();
+	if(!a)
+		return;
+	insert_array_value(l,p,a->GetSize(),o);
+}
 bool Lua::udm::set_array_value(lua_State *l,::udm::Array &a,int32_t idx,const luabind::object &o)
 {
 	if(idx < 0 || idx >= a.GetSize())
@@ -1161,6 +1195,14 @@ template<class T,class TPropertyWrapper,class TClassDef>
 			Lua::Error(l,"Invalid array type '" +std::string{::udm::enum_type_to_ascii(arrayType)} +"'!");
 		TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
 		set_array_values(tmp,name,strct,count,ds,(arrayType == ::udm::Type::ArrayLz4) ? ::udm::ArrayType::Compressed : ::udm::ArrayType::Raw);
+	})
+	.def("InsertValue",+[](lua_State *l,T &p,uint32_t idx,const luabind::object &o) {
+		TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
+		insert_array_value(l,tmp,idx,o);
+	})
+	.def("InsertValue",+[](lua_State *l,T &p,const luabind::object &o) {
+		TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
+		push_array_value(l,tmp,o);
 	})
 	.def("GetChildren",+[](lua_State *l,T &p) -> luabind::object {
 		return get_children(l,static_cast<TPropertyWrapper>(p));

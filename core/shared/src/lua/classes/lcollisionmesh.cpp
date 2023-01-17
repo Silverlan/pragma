@@ -24,6 +24,8 @@ void Lua::CollisionMesh::register_class(luabind::class_<::CollisionMesh> &classD
 	classDef.scope[luabind::def("CreateBox",static_cast<std::shared_ptr<::CollisionMesh>(*)(lua_State*,const Vector3&,const Vector3&)>(&CreateBox))];
 	classDef.def("GetVertices",&GetVertices);
 	classDef.def("GetAABB",&GetAABB);
+	classDef.def("GetMass",&::CollisionMesh::GetMass);
+	classDef.def("SetMass",&::CollisionMesh::SetMass);
 	classDef.def("GetBoneParentId",&::CollisionMesh::GetBoneParent);
 	classDef.def("GetOrigin",static_cast<const Vector3&(::CollisionMesh::*)() const>(&::CollisionMesh::GetOrigin),luabind::copy_policy<0>{});
 	classDef.def("GetShape",&GetShape);

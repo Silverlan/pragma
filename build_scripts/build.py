@@ -29,7 +29,7 @@ parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev
 if platform == "linux":
 	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-14')
 	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-14')
-	defaultGenerator = "Unix Makefiles"
+	defaultGenerator = "Ninja Multi-Config"
 else:
 	defaultGenerator = "Visual Studio 17 2022"
 parser.add_argument('--generator', help='The generator to use.', default=defaultGenerator)
@@ -320,6 +320,9 @@ if platform == "linux":
 
 			# Required for OIIO
 			"apt-get install python3-distutils"
+
+			#Ninja
+			"apt-get install ninja"
 		]
 
 		print("")
@@ -764,7 +767,11 @@ mkdir(install_dir +"/modules/socket/")
 if platform == "win32":
 	cp(luasocket_root +"/build/socket/" +build_config +"/core.dll",install_dir +"/modules/socket/")
 else:
-    cp(luasocket_root +"/build/socket/core.so",install_dir +"/modules/socket/")
+	if(generator == "Ninja Multi-Config"):
+		cp(luasocket_root +"/build/socket/" +build_config +"/core.so",install_dir +"/modules/socket/")
+	else:
+		cp(luasocket_root +"/build/socket/core.so",install_dir +"/modules/socket/")
+
 os.chdir(curDir)
 
 ########## Addons ##########

@@ -419,7 +419,6 @@ void CGame::RegisterLua()
 	Lua::register_base_entity_component(modEnts);
 	auto defEntCmp = pragma::lua::create_entity_component_class<pragma::CLuaBaseEntityComponent,luabind::bases<pragma::BaseLuaBaseEntityComponent,pragma::BaseEntityComponent>,pragma::lua::CLuaBaseEntityComponentHolder>("BaseEntityComponent");
 	defEntCmp.def(luabind::constructor<CBaseEntity&>());
-	defEntCmp.def(luabind::tostring(luabind::self));
 	defEntCmp.def("ReceiveData",static_cast<void(*)(lua_State*,pragma::CLuaBaseEntityComponent&,NetPacket)>([](lua_State *l,pragma::CLuaBaseEntityComponent &hComponent,NetPacket packet) {
 
 	}));

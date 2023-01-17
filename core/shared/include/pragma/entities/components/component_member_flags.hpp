@@ -18,7 +18,9 @@ namespace pragma
 		HideInInterface = 1,
 		Controller = HideInInterface<<1u,
 		WorldSpace = Controller<<1u,
-		ObjectSpace = WorldSpace<<1u
+		ObjectSpace = WorldSpace<<1u,
+		// This is merely a hint flag for interfaces not to allow writing this property
+		ReadOnly = ObjectSpace<<1u
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ComponentMemberFlags)

@@ -545,6 +545,14 @@ void Lua::util::register_library(lua_State *l)
 	defUuid.def("__tostring",+[](const util::Uuid &uuid) {
 		return ::util::uuid_to_string(uuid.value);
 	});
+	defUuid.def("IsValid",+[](const util::Uuid &uuid) {
+		for(auto v : uuid.value)
+		{
+			if(v != 0)
+				return true;
+		}
+		return false;
+	});
 	utilMod[defUuid];
 	pragma::lua::define_custom_constructor<util::Uuid,[](const std::string &uuid) -> util::Uuid {
 		return util::Uuid{::util::uuid_string_to_bytes(uuid)};

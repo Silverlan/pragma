@@ -268,6 +268,7 @@ void Lua::ents::register_library(lua_State *l)
 	memberInfoDef.add_static_constant("FLAG_CONTROLLER_BIT",umath::to_integral(pragma::ComponentMemberFlags::Controller));
 	memberInfoDef.add_static_constant("FLAG_WORLD_SPACE_BIT",umath::to_integral(pragma::ComponentMemberFlags::WorldSpace));
 	memberInfoDef.add_static_constant("FLAG_OBJECT_SPACE_BIT",umath::to_integral(pragma::ComponentMemberFlags::ObjectSpace));
+	memberInfoDef.add_static_constant("FLAG_READ_ONLY_BIT",umath::to_integral(pragma::ComponentMemberFlags::ReadOnly));
 	memberInfoDef.def("__tostring",+[](const pragma::ComponentMemberInfo &memberInfo) -> std::string {
 		std::stringstream ss;
 		ss<<"MemberInfo";

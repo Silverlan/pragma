@@ -1395,20 +1395,39 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l,::WIBase &panel,std::string
 	}
 	else if(name == "ontextchanged")
 	{
-		hCallback = FunctionCallback<void,std::reference_wrapper<const util::Utf8String>,bool>::Create(
-			[l,hPanel,o](std::reference_wrapper<const util::Utf8String> text,bool changedByUser) mutable {
-			if(!hPanel.IsValid())
-				return;
-			Lua::CallFunction(l,[&o,hPanel,text,changedByUser](lua_State *l) mutable {
-				o.push(l);
+		if(ustring::compare(panel.GetClass(),std::string{"witext"},false))
+		{
+			hCallback = FunctionCallback<void,std::reference_wrapper<const util::Utf8String>>::Create(
+				[l,hPanel,o](std::reference_wrapper<const util::Utf8String> text) mutable {
+				if(!hPanel.IsValid())
+					return;
+				Lua::CallFunction(l,[&o,hPanel,text](lua_State *l) mutable {
+					o.push(l);
 
-				auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
-				obj.push(l);
-				Lua::PushString(l,text.get().cpp_str());
-				Lua::PushBool(l,changedByUser);
-				return Lua::StatusCode::Ok;
-			},0);
-		});
+					auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
+					obj.push(l);
+					Lua::PushString(l,text.get().cpp_str());
+					return Lua::StatusCode::Ok;
+				},0);
+			});
+		}
+		else
+		{
+			hCallback = FunctionCallback<void,std::reference_wrapper<const util::Utf8String>,bool>::Create(
+				[l,hPanel,o](std::reference_wrapper<const util::Utf8String> text,bool changedByUser) mutable {
+				if(!hPanel.IsValid())
+					return;
+				Lua::CallFunction(l,[&o,hPanel,text,changedByUser](lua_State *l) mutable {
+					o.push(l);
+
+					auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
+					obj.push(l);
+					Lua::PushString(l,text.get().cpp_str());
+					Lua::PushBool(l,changedByUser);
+					return Lua::StatusCode::Ok;
+				},0);
+			});
+		}
 	}
 	else if(name == "handlelinktagaction")
 	{

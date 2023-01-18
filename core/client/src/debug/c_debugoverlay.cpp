@@ -793,6 +793,8 @@ void DebugRenderer::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pra
 	auto *shader = static_cast<pragma::ShaderDebug*>(whDebugShader.get());
 	auto *shaderVertex = static_cast<pragma::ShaderDebugVertexColor*>(whDebugVertexShader.get());
 	std::queue<std::shared_ptr<DebugRenderer::BaseObject>> outlines;
+	static std::mutex g_renderDbgMutex;
+	g_renderDbgMutex.lock();
 	for(auto &pair : s_debugObjects)
 	{
 		auto type = pair.first;
@@ -846,6 +848,7 @@ void DebugRenderer::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pra
 		}
 		shader->RecordEndDraw(bindState);
 	}
+	g_renderDbgMutex.unlock();
 	prosper::ShaderBindState bindState {*drawCmd};
 	if(outlines.empty() || shader->RecordBeginDraw(bindState,pragma::ShaderDebug::Pipeline::Wireframe) == false)
 		return;

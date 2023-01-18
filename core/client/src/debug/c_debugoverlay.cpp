@@ -37,6 +37,7 @@ namespace DebugRenderer
 	{}
 }
 
+static constexpr uint32_t s_maxDebugObjectCount = 100'000;
 static std::unordered_map<DebugRenderer::Type,std::vector<DebugRenderer::RuntimeObject>> s_debugObjects {
 	{
 		DebugRenderer::Type::Triangles,
@@ -63,6 +64,36 @@ static std::unordered_map<DebugRenderer::Type,std::vector<DebugRenderer::Runtime
 		{}
 	}
 };
+
+static bool is_obj_valid(DebugRenderer::RuntimeObject &o,double t)
+{
+	return o.obj != nullptr && o.obj->IsValid() && (t <= o.time || o.obj.use_count() != 1);
+}
+
+static void cleanup()
+{
+	// Clean up old debug objects once in a while
+	static uint32_t g_lastCleanupN = 0;
+	if(++g_lastCleanupN < 1'000)
+		return;
+	g_lastCleanupN = 0;
+	auto &t = client->RealTime();
+	for(auto &pair : s_debugObjects)
+	{
+		auto &objs = pair.second;
+		size_t i = 0;
+		for(auto it=objs.begin();it!=objs.end();)
+		{
+			if(is_obj_valid(*it,t) && i < s_maxDebugObjectCount)
+			{
+				++it;
+				++i;
+				continue;
+			}
+			it = objs.erase(it);
+		}
+	}
+}
 
 DebugRenderer::BaseObject::BaseObject()
 	: m_bValid(true)
@@ -246,6 +277,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoints(const std::
 	auto o = std::make_shared<DebugRenderer::WorldObject>(color.ToVector4());
 	if(o->InitializeBuffers(vertexBuffer,vertexCount) == false)
 		return nullptr;
+	cleanup();
 	auto &objs = s_debugObjects[DebugRenderer::Type::PointsVertex];
 	objs.push_back(DebugRenderer::RuntimeObject{o,duration});
 	return objs.back().obj;
@@ -260,6 +292,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoints(const std::
 	oVerts = points;
 	if(o->InitializeBuffers() == false)
 		return nullptr;
+	cleanup();
 	auto &objs = s_debugObjects[DebugRenderer::Type::Points];
 	objs.push_back(DebugRenderer::RuntimeObject{o,duration});
 	return objs.back().obj;
@@ -277,6 +310,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawLines(const std::v
 	oVerts = lines;
 	if(o->InitializeBuffers() == false)
 		return nullptr;
+	cleanup();
 	auto &objs = s_debugObjects[DebugRenderer::Type::Lines];
 	objs.push_back(DebugRenderer::RuntimeObject{o,duration});
 	return objs.back().obj;
@@ -361,6 +395,7 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_box(const Vector3 &center
 	};
 	if(oOutline->InitializeBuffers() == false)
 		return nullptr;
+	cleanup();
 	auto &objs = s_debugObjects[DebugRenderer::Type::Lines];
 	objs.push_back(DebugRenderer::RuntimeObject{oOutline,duration});
 	r->AddObject(oOutline);
@@ -444,6 +479,7 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_text(WIText *el,const Vec
 		//el->Draw(scale.x,scale.y,Vector2i((scale.x *0.5f) -el->GetWidth() *0.5f,(scale.y *0.5f) -el->GetHeight() *0.5f),Vector2i(0,0),Vector2i(0,0),Vector2i(0,0),umat::identity(),false,&m);
 	}));
 	o->Initialize(cb);
+	cleanup();
 	auto &objs = s_debugObjects[DebugRenderer::Type::Other];
 	objs.push_back(DebugRenderer::RuntimeObject{o,duration});
 	return objs.back().obj;
@@ -506,6 +542,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawMesh(const std::ve
 	oVerts = verts;
 	if(o->InitializeBuffers() == false)
 		return nullptr;
+	cleanup();
 	auto &triangleObjs = s_debugObjects[DebugRenderer::Type::Triangles];
 	triangleObjs.push_back(DebugRenderer::RuntimeObject{o,duration});
 	return triangleObjs.back().obj;
@@ -823,7 +860,7 @@ void DebugRenderer::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pra
 		for(auto it=meshes.begin();it!=meshes.end();)
 		{
 			auto &mesh = *it;
-			if(!mesh.obj->IsValid() || (t > mesh.time && mesh.obj.use_count() == 1))
+			if(!is_obj_valid(mesh,t))
 				it = meshes.erase(it);
 			else
 			{

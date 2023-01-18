@@ -93,7 +93,7 @@ void register_game_shaders()
 	// shaderManager.RegisterShader("forwardp_light_indexing",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderForwardPLightIndexing(context,identifier);});
 	shaderManager.RegisterShader("forwardp_light_culling",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderForwardPLightCulling(context,identifier);});
 
-	shaderManager.RegisterShader("raytracing",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderRayTracing(context,identifier);});
+	// shaderManager.RegisterShader("raytracing",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderRayTracing(context,identifier);});
 	shaderManager.RegisterShader("pbr",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPBR(context,identifier);});
 	// shaderManager.RegisterShader("pbr_blend",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPBRBlend(context,identifier);}); // TODO: Fixme
 	shaderManager.RegisterShader("pbr_blend",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPBR(context,identifier);});
@@ -106,9 +106,9 @@ void register_game_shaders()
 	shaderManager.RegisterShader("wireframe",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderWireframe(context,identifier);});
 	// shaderManager.RegisterShader("texturedalphatransition",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderTexturedAlphaTransition(context,identifier);});
 	shaderManager.RegisterShader("skybox",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderSkybox(context,identifier);});
-	shaderManager.RegisterShader("skybox_equirect",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderSkyboxEquirect(context,identifier);});
-	shaderManager.RegisterShader("loading",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderLoading(context,identifier);});
-	shaderManager.RegisterShader("light_cone",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderLightCone(context,identifier);});
+	// shaderManager.RegisterShader("skybox_equirect",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderSkyboxEquirect(context,identifier);});
+	// shaderManager.RegisterShader("loading",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderLoading(context,identifier);});
+	// shaderManager.RegisterShader("light_cone",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderLightCone(context,identifier);});
 	shaderManager.RegisterShader("water",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderWater(context,identifier);});
 
 	shaderManager.RegisterShader("debug",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderDebug(context,identifier);});
@@ -121,9 +121,9 @@ void register_game_shaders()
 
 	shaderManager.RegisterShader("particle",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderParticle(context,identifier);});
 	shaderManager.RegisterShader("particle_blob",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderParticleBlob(context,identifier);});
-	shaderManager.RegisterShader("particle_rotational",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderParticleRotational(context,identifier);});
-	//shaderManager.RegisterShader("particlemodel",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderParticleModel(context,identifier);});
-	shaderManager.RegisterShader("particlepolyboard",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderParticlePolyboard(context,identifier);});
+	// shaderManager.RegisterShader("particle_rotational",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderParticleRotational(context,identifier);});
+	// shaderManager.RegisterShader("particlemodel",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderParticleModel(context,identifier);});
+	// shaderManager.RegisterShader("particlepolyboard",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderParticlePolyboard(context,identifier);});
 	
 	shaderManager.RegisterShader("pfm_particle_animated_sprites",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderParticleAnimatedSprites(context,identifier);});
 	shaderManager.RegisterShader("pfm_particle_sprite_trail",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderParticleSpriteTrail(context,identifier);});
@@ -151,7 +151,7 @@ void register_game_shaders()
 
 	shaderManager.RegisterShader("ssao",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderSSAO(context,identifier);});
 	shaderManager.RegisterShader("ssao_blur",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderSSAOBlur(context,identifier);});
-	shaderManager.RegisterShader("glow",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderGlow(context,identifier);});
+	// shaderManager.RegisterShader("glow",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderGlow(context,identifier);});
 	shaderManager.RegisterShader("pp_hdr",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPHDR(context,identifier);});
 	shaderManager.RegisterShader("pp_fog",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPFog(context,identifier);});
 	shaderManager.RegisterShader("pp_dof",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPDoF(context,identifier);});

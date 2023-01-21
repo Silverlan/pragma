@@ -103,7 +103,7 @@ void Console::commands::map_build_reflection_probes(NetworkState *state,pragma::
 		}
 		if(probeClosest == nullptr)
 		{
-			Con::cwar<<"WARNING: No reflection probe found!"<<Con::endl;
+			Con::cwar<<"No reflection probe found!"<<Con::endl;
 			return;
 		}
 		std::vector<CReflectionProbeComponent*> probes {probeClosest};
@@ -134,7 +134,7 @@ void CReflectionProbeComponent::RaytracingJobManager::StartNextJob()
 	job.SetCompletionHandler([this,preprocessCompletionHandler](util::ParallelWorker<uimg::ImageLayerSet> &worker) {
 		if(worker.IsSuccessful() == false)
 		{
-			Con::cwar<<"WARNING: Raytracing scene for reflection probe has failed: "<<worker.GetResultMessage()<<Con::endl;
+			Con::cwar<<"Raytracing scene for reflection probe has failed: "<<worker.GetResultMessage()<<Con::endl;
 			probe.m_raytracingJobManager = nullptr;
 			return;
 		}
@@ -229,7 +229,7 @@ static void build_next_reflection_probe()
 		if(status == CReflectionProbeComponent::UpdateStatus::Pending)
 			break; // Next reflection probe will automatically be generated once this one has completed rendering!
 		if(status == CReflectionProbeComponent::UpdateStatus::Failed)
-			Con::cwar<<"WARNING: Unable to update reflection probe data for probe at position ("<<pos.x<<","<<pos.y<<","<<pos.z<<"). Probe will be unavailable!"<<Con::endl;
+			Con::cwar<<"Unable to update reflection probe data for probe at position ("<<pos.x<<","<<pos.y<<","<<pos.z<<"). Probe will be unavailable!"<<Con::endl;
 	}
 
 	/*auto &wgui = WGUI::GetInstance();
@@ -315,7 +315,7 @@ void CReflectionProbeComponent::BuildReflectionProbes(Game &game,std::vector<CRe
 				Con::cout<<"Removing probe IBL file '"<<fpath<<"'..."<<Con::endl;
 				if(FileManager::RemoveFile(("materials/" +*fileName).c_str()))
 					continue;
-				Con::cwar<<"WARNING: Unable to remove IBL file '"<<fpath<<"'! This reflection probe may not be rebuilt!"<<Con::endl;
+				Con::cwar<<"Unable to remove IBL file '"<<fpath<<"'! This reflection probe may not be rebuilt!"<<Con::endl;
 			}
 		}
 	}
@@ -400,7 +400,7 @@ void CReflectionProbeComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
 	if(LoadIBLReflectionsFromFile() == false)
-		Con::cwar<<"WARNING: Invalid/missing IBL reflection resources for cubemap "<<GetCubemapIdentifier()<<"! Please run 'map_build_reflection_probes' to build all reflection probes!"<<Con::endl;
+		Con::cwar<<"Invalid/missing IBL reflection resources for cubemap "<<GetCubemapIdentifier()<<"! Please run 'map_build_reflection_probes' to build all reflection probes!"<<Con::endl;
 }
 
 std::string CReflectionProbeComponent::GetCubemapIBLMaterialFilePath() const
@@ -463,7 +463,7 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	auto &imgIrradiance = m_iblData->irradianceMap->GetImage();
 
 	auto fErrorHandler = [](const std::string &errMsg) {
-		Con::cwar<<"WARNING: Unable to create IBL reflection files: "<<errMsg<<Con::endl;
+		Con::cwar<<"Unable to create IBL reflection files: "<<errMsg<<Con::endl;
 	};
 	const std::string pathBrdf = "materials/env/brdf.ktx";
 	if(FileManager::Exists(pathBrdf) == false)
@@ -564,7 +564,7 @@ util::ParallelJob<uimg::ImageLayerSet> CReflectionProbeComponent::CaptureRaytrac
 	job.SetCompletionHandler([](util::ParallelWorker<uimg::ImageLayerSet> &worker) {
 		if(worker.IsSuccessful() == false)
 		{
-			Con::cwar<<"WARNING: Raytracing scene for IBL reflections has failed: "<<worker.GetResultMessage()<<Con::endl;
+			Con::cwar<<"Raytracing scene for IBL reflections has failed: "<<worker.GetResultMessage()<<Con::endl;
 			return;
 		}
 	});
@@ -599,14 +599,14 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene(const std::vector
 	auto hCam = scene->GetActiveCamera();
 	if(hCam.expired())
 	{
-		Con::cwar<<"WARNING: Unable to capture scene: Game scene camera is invalid!"<<Con::endl;
+		Con::cwar<<"Unable to capture scene: Game scene camera is invalid!"<<Con::endl;
 		return false;
 	}
 
 	auto hShaderPbr = c_engine->GetShader("pbr");
 	if(hShaderPbr.expired())
 	{
-		Con::cwar<<"WARNING: Unable to capture scene: PBR shader is not valid!"<<Con::endl;
+		Con::cwar<<"Unable to capture scene: PBR shader is not valid!"<<Con::endl;
 		return false;
 	}
 
@@ -617,7 +617,7 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene(const std::vector
 	auto job = CaptureRaytracedIBLReflectionsFromScene(width,height,pos,uquat::identity(),hCam->GetNearZ(),hCam->GetFarZ(),90.f /* fov */,exposure,optEntityList,renderJob);
 	if(job.IsValid() == false)
 	{
-		Con::cwar<<"WARNING: Unable to set scene up for reflection probe raytracing!"<<Con::endl;
+		Con::cwar<<"Unable to set scene up for reflection probe raytracing!"<<Con::endl;
 		m_raytracingJobManager = nullptr;
 		return false;
 	}
@@ -663,7 +663,7 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene(const std::vector
 		}
 		if(numJobs < 6)
 		{
-			Con::cwar<<"WARNING: Unable to set scene up for reflection probe raytracing!"<<Con::endl;
+			Con::cwar<<"Unable to set scene up for reflection probe raytracing!"<<Con::endl;
 			m_raytracingJobManager = nullptr;
 			return false;
 		}
@@ -680,7 +680,7 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene(const std::vector
 	auto oldRenderResolution = c_engine->GetRenderResolution();
 	if(useRaytracing == false)
 	{
-		Con::cerr<<"ERROR: Custom render resolutions currently not supported for reflection probes!"<<Con::endl;
+		Con::cerr<<"Custom render resolutions currently not supported for reflection probes!"<<Con::endl;
 		c_engine->SetRenderResolution(Vector2i{CUBEMAP_LAYER_WIDTH,CUBEMAP_LAYER_HEIGHT});
 	}
 
@@ -751,7 +751,7 @@ bool CReflectionProbeComponent::FinalizeCubemap(prosper::IImage &imgCubemap)
 	auto result = GenerateIBLReflectionsFromCubemap(*tex);
 	if(result == false)
 	{
-		Con::cwar<<"WARNING: Generating IBL reflection textures has failed! Reflection probe will be unavailable."<<Con::endl;
+		Con::cwar<<"Generating IBL reflection textures has failed! Reflection probe will be unavailable."<<Con::endl;
 		build_next_reflection_probe();
 		return result;
 	}

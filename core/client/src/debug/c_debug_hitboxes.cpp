@@ -65,7 +65,7 @@ void Console::commands::debug_hitboxes(NetworkState *state,pragma::BasePlayerCom
 	{
 		if(bWasValid == true)
 			return;
-		Con::cwar<<"WARNING: No entity targets found!"<<Con::endl;
+		Con::cwar<<"No entity targets found!"<<Con::endl;
 		return;
 	}
 	debugHitboxes = std::make_unique<DebugHitboxes>();

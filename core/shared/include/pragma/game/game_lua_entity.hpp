@@ -49,7 +49,7 @@ template<class TLuaEntity,class THandle>
 #endif
 	if(!el)
 	{
-		Con::cwar<<"WARNING: Unable to create lua entity '"<<classname<<"'!"<<Con::endl;
+		Con::cwar<<"Unable to create lua entity '"<<classname<<"'!"<<Con::endl;
 		return nullptr;
 	}
 	oClass = *o;

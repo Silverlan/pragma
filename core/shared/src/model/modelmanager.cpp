@@ -115,7 +115,7 @@ bool pragma::asset::ModelProcessor::Finalize()
 			auto asset = assetManager.LoadAsset(inc);
 			if(!asset)
 			{
-				Con::cwar<<"WARNING: Model '"<<model->GetName()<<"' has include reference to model '"<<inc<<"', but that model could not be loaded! Ignoring..."<<Con::endl;
+				Con::cwar<<"Model '"<<model->GetName()<<"' has include reference to model '"<<inc<<"', but that model could not be loaded! Ignoring..."<<Con::endl;
 				continue;
 			}
 			model->Merge(*asset);

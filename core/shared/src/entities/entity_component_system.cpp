@@ -77,7 +77,7 @@ pragma::ComponentHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::
 	auto ptrComponent = m_componentManager->CreateComponent(componentId,*m_entity);
 	if(ptrComponent == nullptr)
 	{
-		Con::cwar<<"WARNING: Unable to create entity component of type "<<componentId<<"!"<<this<<Con::endl;
+		Con::cwar<<"Unable to create entity component of type "<<componentId<<"!"<<this<<Con::endl;
 		return {};
 	}
 	if(m_components.size() == m_components.capacity())
@@ -120,7 +120,7 @@ pragma::ComponentHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::
 			m_componentManager->GetComponentTypeId(name,componentId) == false
 		)
 		{
-			Con::cwar<<"WARNING: Attempted to add unknown component '"<<name<<"' to game object "<<this<<Con::endl;
+			Con::cwar<<"Attempted to add unknown component '"<<name<<"' to game object "<<this<<Con::endl;
 			return {};
 		}
 	}

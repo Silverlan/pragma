@@ -164,7 +164,7 @@ void Console::commands::debug_render_validation_error_enabled(NetworkState *stat
 {
 	if(argv.empty())
 	{
-		Con::cwar<<"WARNING: No validation error id specified!"<<Con::endl;
+		Con::cwar<<"No validation error id specified!"<<Con::endl;
 		return;
 	}
 	auto &id = argv.front();
@@ -197,7 +197,7 @@ void Console::commands::debug_render_depth_buffer(NetworkState *state,pragma::Ba
 			auto sceneC = hEnt.get()->GetComponent<pragma::CSceneComponent>();
 			if(sceneC.expired())
 			{
-				Con::cwar<<"WARNING: Scene not found!"<<Con::endl;
+				Con::cwar<<"Scene not found!"<<Con::endl;
 				return WIHandle{};
 			}
 			scene = sceneC.get();
@@ -305,12 +305,12 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 	auto &scene = drawSceneInfo.scene;
 	if(scene.expired())
 	{
-		Con::cwar<<"WARNING: No active render scene!"<<Con::endl;
+		Con::cwar<<"No active render scene!"<<Con::endl;
 		return;
 	}
 	if(scene->IsValid() == false)
 	{
-		Con::cwar<<"WARNING: Attempted to render invalid scene!"<<Con::endl;
+		Con::cwar<<"Attempted to render invalid scene!"<<Con::endl;
 		return;
 	}
 	CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes",std::ref(drawSceneInfo));

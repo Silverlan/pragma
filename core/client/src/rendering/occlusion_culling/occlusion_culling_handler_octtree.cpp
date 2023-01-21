@@ -18,6 +18,7 @@
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/logging.hpp>
 
 using namespace pragma;
 
@@ -76,7 +77,7 @@ void OcclusionCullingHandlerOctTree::PerformCulling(
 			if(ent == nullptr)
 			{
 				// This should NEVER occur, but seems to anyway in some rare cases
-				Con::cerr<<"ERROR: NULL Entity in dynamic scene occlusion octree! Ignoring..."<<Con::endl;
+				spdlog::error("NULL Entity in dynamic scene occlusion octree! Ignoring...");
 				return;
 			}
 			// World geometry is handled separately

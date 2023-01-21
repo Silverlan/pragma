@@ -114,5 +114,5 @@ void WIChromiumPage::InitializeChromium()
 		}
 	}
 	else
-		Con::cwar<<"ERROR: Unable to load 'chromium' libary: "<<err<<Con::endl;
+		Con::cerr<<"Unable to load 'chromium' libary: "<<err<<Con::endl;
 }

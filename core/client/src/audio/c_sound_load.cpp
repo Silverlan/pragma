@@ -20,7 +20,7 @@ static bool al_check_error(const std::string &path,uint32_t alBuffer,ALResource 
 	/*auto err = alGetError();
 	if(err != AL_NO_ERROR)
 	{
-		Con::cwar<<"WARNING: OpenAL Error for '"<<path<<"': "<<alGetString(err)<<"!"<<Con::endl;
+		Con::cwar<<"OpenAL Error for '"<<path<<"': "<<alGetString(err)<<"!"<<Con::endl;
 		if(alIsBuffer(alBuffer))
 			alDeleteBuffers(1,&alBuffer);
 		res.buffer = 0;
@@ -189,7 +189,7 @@ bool openal::load_ffmpeg(std::string &path,VFilePtr f,ALChannel mode,ALAudio *au
 	sound = getAVAudioStream(audiofile,0);
 	if(!sound)
 	{
-		Con::cwar<<"WARNING: Unable to load sound file '"<<path<<"'!"<<Con::endl;
+		Con::cwar<<"Unable to load sound file '"<<path<<"'!"<<Con::endl;
 		return false;
 	}
 	ALuint rate;
@@ -197,7 +197,7 @@ bool openal::load_ffmpeg(std::string &path,VFilePtr f,ALChannel mode,ALAudio *au
 	ALenum type;
 	if(getAVAudioInfo(sound,&rate,&channels,&type) != 0)
 	{
-		Con::cwar<<"WARNING: Unable to get audio info for '"<<path<<"'!"<<Con::endl;
+		Con::cwar<<"Unable to get audio info for '"<<path<<"'!"<<Con::endl;
 		closeAVFile(audiofile);
 		return false;
 	}
@@ -205,7 +205,7 @@ bool openal::load_ffmpeg(std::string &path,VFilePtr f,ALChannel mode,ALAudio *au
 	ALenum format = GetFormat(channels,type,alIsBufferFormatSupportedSOFT);
 	if(format == AL_NONE)
 	{
-		Con::cwar<<"WARNING: Unsupported format ("<<ChannelsName(channels)<<","<<TypeName(type)<<") for '"<<path<<"'!"<<Con::endl;
+		Con::cwar<<"Unsupported format ("<<ChannelsName(channels)<<","<<TypeName(type)<<") for '"<<path<<"'!"<<Con::endl;
 		closeAVFile(audiofile);
 		return false;
 	}
@@ -213,7 +213,7 @@ bool openal::load_ffmpeg(std::string &path,VFilePtr f,ALChannel mode,ALAudio *au
 	data = decodeAVAudioStream(sound,&datalen);
 	if(!data)
 	{
-		Con::cwar<<"WARNING: Failed to read audio from '"<<path<<"'!"<<Con::endl;
+		Con::cwar<<"Failed to read audio from '"<<path<<"'!"<<Con::endl;
 		closeAVFile(audiofile);
 		return false;
 	}

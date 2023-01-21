@@ -1323,7 +1323,7 @@ void WIMainMenuOptions::InitializeControlSettings()
 			}
 			catch(const rapidxml::parse_error &err)
 			{
-				Con::cwar<<"WARNING: Unable to parse 'menu.xml' for addon '"<<info.GetLocalPath()<<"': "<<err.what()<<"!"<<Con::endl;
+				Con::cwar<<"Unable to parse 'menu.xml' for addon '"<<info.GetLocalPath()<<"': "<<err.what()<<"!"<<Con::endl;
 			}
 		}
 	}

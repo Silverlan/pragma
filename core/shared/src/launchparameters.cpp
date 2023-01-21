@@ -9,6 +9,7 @@
 #include "pragma/launchparameters.h"
 #include "pragma/engine.h"
 #include "pragma/console/conout.h"
+#include "pragma/logging_wrapper.hpp"
 
 Engine::LaunchCommand::LaunchCommand(const std::string &cmd,const std::vector<std::string> &_args)
 	: command(cmd),args(_args)
@@ -123,15 +124,29 @@ DLLNETWORK void LPARAM_dev(const std::vector<std::string> &argv)
 	engine->SetDeveloperMode(true);
 }
 
+DLLNETWORK std::optional<std::string> g_lpLogFile = pragma::DEFAULT_LOG_FILE;
+DLLNETWORK void LPARAM_log_file(const std::vector<std::string> &argv)
+{
+	if(argv.empty())
+		g_lpLogFile = {};
+	else
+		g_lpLogFile = argv.front();
+}
+
+DLLNETWORK util::LogSeverity g_lpLogLevelCon = pragma::DEFAULT_CONSOLE_LOG_LEVEL;
+DLLNETWORK util::LogSeverity g_lpLogLevelFile = pragma::DEFAULT_FILE_LOG_LEVEL;
 DLLNETWORK void LPARAM_log(const std::vector<std::string> &argv)
 {
-	std::string log;
-	if(argv.size() == 2)
-		log = argv[1];
-	else log = "3";
-	if(argv.empty() == false)
-		engine->AddLaunchConVar("log_file",argv[0]);
-	engine->AddLaunchConVar("log_enabled",log);
+	auto logLevelCon = pragma::DEFAULT_CONSOLE_LOG_LEVEL;
+	auto logLevelFile = pragma::DEFAULT_FILE_LOG_LEVEL;
+	if(argv.size() > 0)
+	{
+		logLevelCon = static_cast<util::LogSeverity>(util::to_int(argv[0]));
+		if(argv.size() > 1)
+			logLevelFile = static_cast<util::LogSeverity>(util::to_int(argv[1]));
+	}
+	g_lpLogLevelCon = logLevelCon;
+	g_lpLogLevelFile = logLevelFile;
 }
 
 std::string __lp_map = "";
@@ -210,7 +225,7 @@ static void LPARAM_verbose(const std::vector<std::string> &argv)
 
 REGISTER_LAUNCH_PARAMETER_HELP(-console,LPARAM_console,"","start with the console open");
 REGISTER_LAUNCH_PARAMETER_HELP(-dev,LPARAM_dev,"","enable developer mode");
-REGISTER_LAUNCH_PARAMETER_HELP(-log,LPARAM_log,"[<logfile>][<errorlevel>]","enable logging. Default log file is log.txt");
+REGISTER_LAUNCH_PARAMETER_HELP(-log,LPARAM_log,"[<conLevel>][<logfile>][<fileLevel>]","enable logging. Default log file is log.txt. error level can be: 0 = trace, 1 = debug, 2 = info, 3 = warning, 4 = error, 5 = critical, 6 = disabled.");
 REGISTER_LAUNCH_PARAMETER_HELP(-map,LPARAM_map,"<map>","load this map on start");
 REGISTER_LAUNCH_PARAMETER_HELP(-gamemode,LPARAM_gamemode,"<gamemode>","load this gamemode on start");
 REGISTER_LAUNCH_PARAMETER_HELP(-luaext,LPARAM_luaext,"","enables several additional lua modules (e.g. package and io)");

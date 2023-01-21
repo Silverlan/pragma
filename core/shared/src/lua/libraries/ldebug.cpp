@@ -83,7 +83,7 @@ void Lua::debug::enable_remote_debugging(lua_State *l)
 {
 	if(get_extended_lua_modules_enabled() == false)
 	{
-		Con::cwar<<"WARNING: Unable to enable remote debugging: Game has to be started with -luaext launch parameter!"<<Con::endl;
+		Con::cwar<<"Unable to enable remote debugging: Game has to be started with -luaext launch parameter!"<<Con::endl;
 		return;
 	}
 	auto _G = luabind::globals(l);
@@ -101,7 +101,7 @@ void Lua::debug::enable_remote_debugging(lua_State *l)
 	luabind::object oPackage = _G["package"];
 	if(!oPackage)
 	{
-		Con::cwar<<"WARNING: Unable to enable remote debugging: package library is missing!"<<Con::endl;
+		Con::cwar<<"Unable to enable remote debugging: package library is missing!"<<Con::endl;
 		return;
 	}
 	oPackage["path"] = path;
@@ -118,5 +118,5 @@ void Lua::debug::enable_remote_debugging(lua_State *l)
 		Lua::Pop(l,1); // Pop return value of "require" from stack
 	}
 	if(r != Lua::StatusCode::Ok)
-		Con::cwar<<"WARNING: Unable to enable remote debugging: "<<err<<Con::endl;
+		Con::cwar<<"Unable to enable remote debugging: "<<err<<Con::endl;
 }

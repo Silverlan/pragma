@@ -44,7 +44,7 @@ void ClientState::Connect(std::string ip,std::string sport)
 		return;
 	pragma::networking::Error err;
 	if(m_client->Connect(ip,port,err) == false)
-		Con::cwar<<"WARNING: Unable to connect to '"<<ip<<":"<<port<<"': "<<err.GetMessage()<<"!"<<Con::endl;
+		Con::cwar<<"Unable to connect to '"<<ip<<":"<<port<<"': "<<err.GetMessage()<<"!"<<Con::endl;
 }
 
 void ClientState::Connect(uint64_t steamId)
@@ -61,7 +61,7 @@ void ClientState::Connect(uint64_t steamId)
 		return;
 	pragma::networking::Error err;
 	if(m_client->Connect(steamId,err) == false)
-		Con::cwar<<"WARNING: Unable to connect to host with Steam ID "<<steamId<<": "<<err.GetMessage()<<"!"<<Con::endl;
+		Con::cwar<<"Unable to connect to host with Steam ID "<<steamId<<": "<<err.GetMessage()<<"!"<<Con::endl;
 }
 
 ///////////////////////////
@@ -186,7 +186,7 @@ void CMD_cl_debug_netmessages(NetworkState *state,pragma::BasePlayerComponent *p
 	auto *cl = client->GetClient();
 	if(cl == nullptr)
 	{
-		Con::cwar<<"WARNING: No client is active!"<<Con::endl;
+		Con::cwar<<"No client is active!"<<Con::endl;
 		return;
 	}
 	if(argv.size() > 0)

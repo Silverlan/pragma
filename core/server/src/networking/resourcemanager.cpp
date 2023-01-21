@@ -65,12 +65,12 @@ bool ResourceManager::AddResource(std::string res,bool stream)
 		checkName = res.substr(0,res.length() -4) +"lua";
 	if(!IsValidResource(res))
 	{
-		Con::cwar<<"WARNING: Attempted to add invalid resource '"<<res<<"'! Skipping..."<<Con::endl;
+		Con::cwar<<"Attempted to add invalid resource '"<<res<<"'! Skipping..."<<Con::endl;
 		return false;
 	}
 	if(!FileManager::Exists(checkName))
 	{
-		Con::cwar<<"WARNING: Unable to add resource file '"<<res<<"': File not found! Skipping..."<<Con::endl;
+		Con::cwar<<"Unable to add resource file '"<<res<<"': File not found! Skipping..."<<Con::endl;
 		return false;
 	}
 	auto it = std::find_if(m_resources.begin(),m_resources.end(),[&res](const ResourceInfo &info) {

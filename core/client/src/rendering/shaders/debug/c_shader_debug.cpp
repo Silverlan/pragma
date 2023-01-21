@@ -12,6 +12,7 @@
 #include <mathutil/vertex.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
+#include <pragma/logging.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 
@@ -78,7 +79,7 @@ bool ShaderDebug::RecordDraw(prosper::ShaderBindState &bindState,const std::vect
 	assert(vertexCount <= umath::to_integral(GameLimits::MaxMeshVertices));
 	if(vertexCount > umath::to_integral(GameLimits::MaxMeshVertices))
 	{
-		Con::cerr<<"ERROR: Attempted to draw debug mesh with more than maximum ("<<umath::to_integral(GameLimits::MaxMeshVertices)<<") amount of vertices!"<<Con::endl;
+		spdlog::error("Attempted to draw debug mesh with more than maximum ({}) amount of vertices!",umath::to_integral(GameLimits::MaxMeshVertices));
 		return false;
 	}
 

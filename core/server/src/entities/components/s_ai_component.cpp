@@ -30,6 +30,7 @@
 #include <pragma/entities/components/damageable_component.hpp>
 #include <sharedutils/netpacket.hpp>
 #include <pragma/networking/nwm_util.h>
+#include <pragma/logging.hpp>
 
 extern DLLSERVER SGame *s_game;
 
@@ -264,11 +265,11 @@ bool SAIComponent::OnInput(std::string input,BaseEntity *activator,BaseEntity *c
 			auto r = MoveTo(pTrComponentActivator->GetPosition(),mvInfo);
 			if(r == BaseAIComponent::MoveResult::TargetUnreachable)
 			{
-				Con::cout<<"Unable to move on path; Attempting to move by LoS..."<<Con::endl;
+				spdlog::info("Unable to move on path; Attempting to move by LoS...");
 				mvInfo.moveOnPath = false;
 				r = MoveTo(pTrComponentActivator->GetPosition(),mvInfo);
 			}
-			Con::cout<<"MoveTo result: "<<BaseAIComponent::MoveResultToString(r)<<Con::endl;
+			spdlog::info("MoveTo result: {}",BaseAIComponent::MoveResultToString(r));
 		}
 	}
 #endif

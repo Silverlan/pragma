@@ -28,6 +28,7 @@
 #include <se_scene.hpp>
 #include <steam_audio/alsound_steam_audio.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
+#include <pragma/logging.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -139,7 +140,7 @@ bool ClientState::PrecacheSound(std::string snd,std::pair<al::ISoundBuffer*,al::
 		}
 		if(bPort == false)
 		{
-			Con::cwar<<"WARNING: Unable to precache sound '"<<snd<<"': File not found!"<<Con::endl;
+			spdlog::warn("Unable to precache sound '{}': File not found!",snd);
 			if(c_game != nullptr)
 				c_game->RequestResource(path);
 			return false;
@@ -149,7 +150,7 @@ bool ClientState::PrecacheSound(std::string snd,std::pair<al::ISoundBuffer*,al::
 	auto duration = 0.f;
 	if(util::sound::get_duration(path,duration) == false || duration == 0.f)
 	{
-		Con::cwar<<"WARNING: Unable to precache sound '"<<snd<<"': Invalid format!"<<Con::endl;
+		spdlog::warn("Unable to precache sound '{}': Invalid format!",snd);
 		return false;
 	}
 
@@ -177,12 +178,12 @@ bool ClientState::PrecacheSound(std::string snd,std::pair<al::ISoundBuffer*,al::
 	}
 	catch(const std::runtime_error &err)
 	{
-		Con::cwar<<"WARNING: Unable to precache sound '"<<snd<<"': "<<err.what()<<"!"<<Con::endl;
+		spdlog::warn("Unable to precache sound '{}': {}!",snd,err.what());
 		return false;
 	}
 	if(buf == nullptr)
 	{
-		Con::cwar<<"WARNING: Unable to precache sound '"<<snd<<"': Invalid format!"<<Con::endl;
+		spdlog::warn("Unable to precache sound '{}': Invalid format!",snd);
 		return false;
 	}
 	std::string ext;
@@ -250,7 +251,7 @@ std::shared_ptr<ALSound> ClientState::CreateSound(std::string snd,ALSoundType ty
 				static auto bSkipPrecache = false;
 				if(bSkipPrecache == false)
 				{
-					Con::cwar<<"WARNING: Attempted to create unprecached sound '"<<snd<<"'! Loading asynchronously..."<<Con::endl;
+					spdlog::warn("Attempted to create unprecached sound '{}'! Loading asynchronously...",snd);
 					auto channel = ((flags &ALCreateFlags::Mono) != ALCreateFlags::None) ? ALChannel::Mono : ALChannel::Auto;
 					if(PrecacheSound(snd,nullptr,channel) == true)
 					{
@@ -270,7 +271,7 @@ std::shared_ptr<ALSound> ClientState::CreateSound(std::string snd,ALSoundType ty
 			auto decoder = soundSys->CreateDecoder(path,((flags &ALCreateFlags::Mono) != ALCreateFlags::None) ? true : false);
 			if(decoder == nullptr)
 			{
-				Con::cwar<<"WARNING: Unable to create streaming decoder for sound '"<<snd<<"'!"<<Con::endl;
+				spdlog::warn("Unable to create streaming decoder for sound '{}'!",snd);
 				m_missingSoundCache.insert(normPath);
 				return nullptr;
 			}
@@ -310,7 +311,7 @@ std::shared_ptr<ALSound> ClientState::CreateSound(al::ISoundBuffer &buffer,ALSou
 	auto snd = std::static_pointer_cast<CALSound>(soundSys->CreateSource(buffer));
 	if(snd == nullptr)
 	{
-		Con::cwar<<"WARNING: Error creating sound '"<<buffer.GetFilePath()<<"'!"<<Con::endl;
+		spdlog::warn("Error creating sound '{}'!",buffer.GetFilePath());
 		return nullptr;
 	}
 	snd->SetType(type);
@@ -326,7 +327,7 @@ std::shared_ptr<ALSound> ClientState::CreateSound(al::Decoder &decoder,ALSoundTy
 	auto snd = std::static_pointer_cast<CALSound>(soundSys->CreateSource(decoder));
 	if(snd == nullptr)
 	{
-		Con::cwar<<"WARNING: Error creating sound '"<<decoder.GetFilePath()<<"'!"<<Con::endl;
+		spdlog::warn("Error creating sound '{}'!",decoder.GetFilePath());
 		return nullptr;
 	}
 	snd->SetType(type);

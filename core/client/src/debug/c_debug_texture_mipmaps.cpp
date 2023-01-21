@@ -79,7 +79,7 @@ void Console::commands::debug_texture_mipmaps(NetworkState*,pragma::BasePlayerCo
 {
 	if(argv.empty())
 	{
-		Con::cwar<<"WARNING: No texture given!"<<Con::endl;
+		Con::cwar<<"No texture given!"<<Con::endl;
 		return;
 	}
 	auto &texPath = argv.front();
@@ -97,7 +97,7 @@ void Console::commands::debug_texture_mipmaps(NetworkState*,pragma::BasePlayerCo
 		auto *diffuseMap = (mat != nullptr) ? mat->GetDiffuseMap() : nullptr;
 		if(diffuseMap == nullptr || diffuseMap->texture == nullptr || static_cast<Texture*>(diffuseMap->texture.get())->HasValidVkTexture() == false)
 		{
-			Con::cwar<<"WARNING: No texture or material with name '"<<texPath<<"' found or loaded!"<<Con::endl;
+			Con::cwar<<"No texture or material with name '"<<texPath<<"' found or loaded!"<<Con::endl;
 			return;
 		}
 		texture = std::static_pointer_cast<Texture>(diffuseMap->texture);

@@ -100,13 +100,13 @@ bool Lua::doc::load_documentation_file(const std::string &fileName)
 	auto udmData = util::load_udm_asset(fileName,&err);
 	if(udmData == nullptr)
 	{
-		Con::cwar<<"WARNING: Unable to load Lua documentation '"<<fileName<<"': "<<err<<Con::endl;
+		Con::cwar<<"Unable to load Lua documentation '"<<fileName<<"': "<<err<<Con::endl;
 		return false;
 	}
 	auto col = pragma::doc::Collection::Load(udmData->GetAssetData(),err);
 	if(!col)
 	{
-		Con::cwar<<"WARNING: Unable to load Lua documentation '"<<fileName<<"': "<<err<<Con::endl;
+		Con::cwar<<"Unable to load Lua documentation '"<<fileName<<"': "<<err<<Con::endl;
 		return false;
 	}
 	s_docInfo.AddCollections(col->GetChildren());

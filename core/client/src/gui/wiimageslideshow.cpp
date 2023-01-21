@@ -135,7 +135,7 @@ void WIImageSlideShow::DisplayPreloadedImage()
 	}
 	catch(const std::logic_error &e)
 	{
-		Con::cwar<<"WARNING: Unable to blur menu background image: '"<<e.what()<<"'!"<<Con::endl;
+		Con::cwar<<"Unable to blur menu background image: '"<<e.what()<<"'!"<<Con::endl;
 	}
 	texPreload = m_blurSet->GetFinalRenderTarget()->GetTexture().shared_from_this();
 

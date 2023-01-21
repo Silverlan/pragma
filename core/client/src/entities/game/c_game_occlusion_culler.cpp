@@ -185,13 +185,13 @@ DLLCLIENT void CMD_debug_render_octree_static_print(NetworkState*,pragma::BasePl
 	auto *entWorld = c_game->GetWorld();
 	if(entWorld == nullptr)
 	{
-		Con::cwar<<"WARNING: No world entity found!"<<Con::endl;
+		Con::cwar<<"No world entity found!"<<Con::endl;
 		return;
 	}
 	auto meshTree = static_cast<pragma::CWorldComponent*>(entWorld)->GetMeshTree();
 	if(meshTree == nullptr)
 	{
-		Con::cwar<<"WARNING: World-entity has no octree!"<<Con::endl;
+		Con::cwar<<"World-entity has no octree!"<<Con::endl;
 		return;
 	}
 	meshTree->DebugPrint();
@@ -265,13 +265,13 @@ static void CVAR_CALLBACK_debug_render_octree_static_draw(NetworkState*,ConVar*,
 	auto *entWorld = c_game->GetWorld();
 	if(entWorld == nullptr)
 	{
-		Con::cwar<<"WARNING: No world entity found!"<<Con::endl;
+		Con::cwar<<"No world entity found!"<<Con::endl;
 		return;
 	}
 	auto meshTree = static_cast<pragma::CWorldComponent*>(entWorld)->GetMeshTree();
 	if(meshTree == nullptr)
 	{
-		Con::cwar<<"WARNING: World-entity has no octree!"<<Con::endl;
+		Con::cwar<<"World-entity has no octree!"<<Con::endl;
 		return;
 	}
 	meshTree->SetDebugModeEnabled(val);

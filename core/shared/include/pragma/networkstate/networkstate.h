@@ -106,7 +106,7 @@ public:
 	virtual void Tick();
 	// Lua
 	lua_State *GetLuaState();
-	virtual Lua::ErrorColorMode GetLuaErrorColorMode()=0;
+	virtual std::string GetLuaErrorMessagePrefix() const=0;
 	static void RegisterSharedLuaGlobals(Lua::Interface &lua);
 	static void RegisterSharedLuaClasses(Lua::Interface &lua);
 	static void RegisterSharedLuaLibraries(Lua::Interface &lua);

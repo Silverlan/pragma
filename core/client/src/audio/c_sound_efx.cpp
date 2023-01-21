@@ -23,7 +23,7 @@ void Console::commands::debug_audio_aux_effect(NetworkState *state,pragma::BaseP
 	auto *soundSys = c_engine->GetSoundSystem();
 	if(soundSys == nullptr)
 	{
-		Con::cwar<<"WARNING: Sound engine hasn't been initialized!"<<Con::endl;
+		Con::cwar<<"Sound engine hasn't been initialized!"<<Con::endl;
 		return;
 	}
 	if(argv.empty() == true)
@@ -33,19 +33,19 @@ void Console::commands::debug_audio_aux_effect(NetworkState *state,pragma::BaseP
 			soundSys->RemoveGlobalEffect(s_globalEffectId);
 			return;
 		}
-		Con::cwar<<"WARNING: No effect has been specified!"<<Con::endl;
+		Con::cwar<<"No effect has been specified!"<<Con::endl;
 		return;
 	}
 	auto &dspName = argv.front();
 	auto effect = c_engine->GetAuxEffect(dspName);
 	if(effect == nullptr)
 	{
-		Con::cwar<<"WARNING: No auxiliary effect found with name '"<<dspName<<"'!"<<Con::endl;
+		Con::cwar<<"No auxiliary effect found with name '"<<dspName<<"'!"<<Con::endl;
 		return;
 	}
 	s_globalEffectId = soundSys->AddGlobalEffect(*effect); // TODO: Gain
 	if(s_globalEffectId == std::numeric_limits<uint32_t>::max())
-		Con::cwar<<"WARNING: Unable to apply auxiliary effect '"<<dspName<<"'!"<<Con::endl;
+		Con::cwar<<"Unable to apply auxiliary effect '"<<dspName<<"'!"<<Con::endl;
 	else
 		Con::cout<<"Auxiliary effect '"<<dspName<<"' has been applied!"<<Con::endl;
 }

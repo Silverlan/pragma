@@ -34,7 +34,7 @@ static std::shared_ptr<util::Library> load_module(NetworkState *nw)
 			if(bPrintError == true)
 			{
 				bPrintError = false;
-				Con::cwar<<"WARNING: Unable to load pr_mount_external module: "<<err<<Con::endl;
+				Con::cwar<<"Unable to load pr_mount_external module: "<<err<<Con::endl;
 			}
 			return nullptr;
 		}
@@ -113,14 +113,14 @@ static bool port_model(
 		auto f = FileManager::OpenFile<VFilePtrReal>((util::CONVERT_PATH +"models/" +outPath).c_str(),"wb");
 		if(f == nullptr)
 		{
-			Con::cwar<<"WARNING: Unable to save model '"<<outPath<<"': Unable to open file!"<<Con::endl;
+			Con::cwar<<"Unable to save model '"<<outPath<<"': Unable to open file!"<<Con::endl;
 			return false;
 		}
 		auto udmData = udm::Data::Create();
 		std::string err;
 		if(mdl->Save(*game,udmData->GetAssetData(),err) == false)
 		{
-			Con::cwar<<"WARNING: Unable to save model '"<<outPath<<"': "<<err<<Con::endl;
+			Con::cwar<<"Unable to save model '"<<outPath<<"': "<<err<<Con::endl;
 			return false;
 		}
 		auto r = udmData->Save(f);

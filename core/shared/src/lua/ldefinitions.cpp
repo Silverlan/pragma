@@ -37,20 +37,17 @@ void Lua::PushObject(lua_State *l,BaseLuaObj *o)
 	o->GetLuaObject()->push(l);
 }
 
-Lua::StatusCode Lua::Execute(lua_State *l,const std::function<Lua::StatusCode(int(*traceback)(lua_State*))> &target,ErrorColorMode colorMode)
+Lua::StatusCode Lua::Execute(lua_State *l,const std::function<Lua::StatusCode(int(*traceback)(lua_State*))> &target)
 {
 	auto r = target(Lua::HandleTracebackError);
 	Lua::HandleSyntaxError(l,r);
 	return r;
 }
 
-void Lua::Execute(lua_State*,const std::function<void(int(*traceback)(lua_State*),void(*syntaxHandle)(lua_State*,Lua::StatusCode))> &target,ErrorColorMode colorMode)
+void Lua::Execute(lua_State*,const std::function<void(int(*traceback)(lua_State*),void(*syntaxHandle)(lua_State*,Lua::StatusCode))> &target)
 {
 	target(Lua::HandleTracebackError,Lua::HandleSyntaxError);
 }
-
-Lua::StatusCode Lua::Execute(lua_State *l,const std::function<Lua::StatusCode(int(*traceback)(lua_State*))> &target) {return Execute(l,target,GetErrorColorMode(l));}
-void Lua::Execute(lua_State *l,const std::function<void(int(*traceback)(lua_State*),void(*syntaxHandle)(lua_State*,Lua::StatusCode))> &target) {Execute(l,target,GetErrorColorMode(l));}
 
 void Lua::HandleLuaError(lua_State *l)
 {
@@ -63,10 +60,10 @@ void Lua::HandleLuaError(lua_State *l,Lua::StatusCode s)
 	Lua::HandleSyntaxError(l,s);
 }
 
-Lua::ErrorColorMode Lua::GetErrorColorMode(lua_State *l)
+std::string Lua::GetErrorMessagePrefix(lua_State *l)
 {
 	auto *state = engine->GetNetworkState(l);
 	if(state != nullptr)
-		return state->GetLuaErrorColorMode();
-	return ErrorColorMode::White;
+		return state->GetLuaErrorMessagePrefix();
+	return "";
 }

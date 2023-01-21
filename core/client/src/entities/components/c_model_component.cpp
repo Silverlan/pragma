@@ -251,7 +251,7 @@ void CModelComponent::UpdateRenderBufferList()
 {
 	if(std::this_thread::get_id() != c_engine->GetMainThreadId())
 	{
-		Con::cwar<<"WARNING: Attempted to update render meshes from non-main thread, this is illegal!"<<Con::endl;
+		Con::cwar<<"Attempted to update render meshes from non-main thread, this is illegal!"<<Con::endl;
 		return;
 	}
 	umath::set_flag(m_stateFlags,StateFlags::RenderBufferListUpdateRequired,false);
@@ -317,7 +317,7 @@ void CModelComponent::UpdateRenderMeshes()
 		return;
 	if(std::this_thread::get_id() != c_engine->GetMainThreadId())
 	{
-		Con::cwar<<"WARNING: Attempted to update render meshes from non-main thread, this is illegal!"<<Con::endl;
+		Con::cwar<<"Attempted to update render meshes from non-main thread, this is illegal!"<<Con::endl;
 		return;
 	}
 	if(umath::is_flag_set(m_stateFlags,StateFlags::RenderMeshUpdateRequired))

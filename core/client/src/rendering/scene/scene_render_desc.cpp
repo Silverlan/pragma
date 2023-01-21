@@ -343,7 +343,7 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 					if(ent == nullptr)
 					{
 						// This should NEVER occur, but seems to anyway in some rare cases
-						Con::cerr<<"ERROR: NULL Entity in dynamic scene occlusion octree! Ignoring..."<<Con::endl;
+						Con::cerr<<"NULL Entity in dynamic scene occlusion octree! Ignoring..."<<Con::endl;
 						continue;
 					}
 
@@ -613,7 +613,7 @@ bool SceneRenderDesc::AssertRenderQueueThreadInactive()
 {
 	if(SceneRenderDesc::GetActiveRenderQueueThreadCount() == 0)
 		return true;
-	std::string msg = "ERROR: Game scene was changed during rendering, this is not allowed!";
+	std::string msg = "Game scene was changed during rendering, this is not allowed!";
 	Con::crit<<msg<<Con::endl;
 	throw std::logic_error{msg};
 	return false;

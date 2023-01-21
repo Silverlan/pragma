@@ -44,6 +44,7 @@
 #include "pragma/entities/components/velocity_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/model.h"
+#include "pragma/logging.hpp"
 
 using namespace pragma;
 
@@ -771,7 +772,7 @@ void BasePlayerComponent::Crouch()
 		auto *controllerPhys = static_cast<ControllerPhysObj*>(phys);
 		assert(controllerPhys->IsCapsule());
 		if(!controllerPhys->IsCapsule())
-			Con::cwar<<"WARNING: Box-controller crouching not implemented!"<<Con::endl;
+			spdlog::warn("Box-controller crouching not implemented!");
 		auto *controller = controllerPhys->GetController();
 		auto shape = controller->GetShape();
 		if(shape != nullptr && controllerPhys->IsCapsule())

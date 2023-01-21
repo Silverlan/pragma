@@ -350,20 +350,20 @@ void Console::commands::debug_dump_font_glyph_map(NetworkState *state,pragma::Ba
 	auto &wgui = WGUI::GetInstance();
 	if(argv.empty())
 	{
-		Con::cwar<<"WARNING: No font specified!"<<Con::endl;
+		Con::cwar<<"No font specified!"<<Con::endl;
 		return;
 	}
 	auto &fontName = argv.front();
 	auto font = FontManager::GetFont(fontName);
 	if(font == nullptr)
 	{
-		Con::cwar<<"WARNING: No font by name '"<<fontName<<"' found!"<<Con::endl;
+		Con::cwar<<"No font by name '"<<fontName<<"' found!"<<Con::endl;
 		return;
 	}
 	auto glyphMap = font->GetGlyphMap();
 	if(glyphMap == nullptr)
 	{
-		Con::cwar<<"WARNING: Font '"<<fontName<<"' has invalid glyph map!"<<Con::endl;
+		Con::cwar<<"Font '"<<fontName<<"' has invalid glyph map!"<<Con::endl;
 		return;
 	}
 	auto &glyphImg = glyphMap->GetImage();
@@ -373,7 +373,7 @@ void Console::commands::debug_dump_font_glyph_map(NetworkState *state,pragma::Ba
 	texInfo.containerFormat = uimg::TextureInfo::ContainerFormat::DDS;
 	if(!prosper::util::save_texture(fileName,glyphImg,texInfo))
 	{
-		Con::cwar<<"WARNING: Failed to save glyph map as '"<<fileName<<"'!"<<Con::endl;
+		Con::cwar<<"Failed to save glyph map as '"<<fileName<<"'!"<<Con::endl;
 		return;
 	}
 }
@@ -389,20 +389,20 @@ void Console::commands::debug_font_glyph_map(NetworkState *state,pragma::BasePla
 	}
 	if(argv.empty())
 	{
-		Con::cwar<<"WARNING: No font specified!"<<Con::endl;
+		Con::cwar<<"No font specified!"<<Con::endl;
 		return;
 	}
 	auto &fontName = argv.front();
 	auto font = FontManager::GetFont(fontName);
 	if(font == nullptr)
 	{
-		Con::cwar<<"WARNING: No font by name '"<<fontName<<"' found!"<<Con::endl;
+		Con::cwar<<"No font by name '"<<fontName<<"' found!"<<Con::endl;
 		return;
 	}
 	auto glyphMap = font->GetGlyphMap();
 	if(glyphMap == nullptr)
 	{
-		Con::cwar<<"WARNING: Font '"<<fontName<<"' has invalid glyph map!"<<Con::endl;
+		Con::cwar<<"Font '"<<fontName<<"' has invalid glyph map!"<<Con::endl;
 		return;
 	}
 	auto &glyphImg = glyphMap->GetImage();

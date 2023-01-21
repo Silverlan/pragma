@@ -46,7 +46,7 @@ CParticleModifierLua *pragma::LuaParticleModifierManager::CreateModifier(std::st
 #endif
 	if(!r)
 	{
-		Con::ccl<<"WARNING: Unable to create lua particle modifier '"<<className<<"'!"<<Con::endl;
+		Con::cwar<<Con::PREFIX_CLIENT<<"Unable to create lua particle modifier '"<<className<<"'!"<<Con::endl;
 		return nullptr;
 	}
 
@@ -77,7 +77,7 @@ CParticleModifierLua *pragma::LuaParticleModifierManager::CreateModifier(std::st
 	if(modifier == nullptr)
 	{
 		// TODO: Can we check this when the particle modifier is being registered?
-		Con::ccl<<"WARNING: Unable to create lua particle modifier '"<<className<<"': Lua class is not derived from valid particle modifier base!"<<Con::endl;
+		Con::cwar<<Con::PREFIX_CLIENT<<"Unable to create lua particle modifier '"<<className<<"': Lua class is not derived from valid particle modifier base!"<<Con::endl;
 		return nullptr;
 	}
 	r.push(l); /* 1 */
@@ -96,9 +96,9 @@ bool pragma::LuaParticleModifierManager::RegisterModifier(Type type,std::string 
 	auto itShader = m_modifiers.find(className);
 	if(itShader != m_modifiers.end())
 	{
-		Con::cwar<<"WARNING: Attempted to register particle modifier '"<<className<<"', which has already been registered previously! Ignoring..."<<Con::endl;
+		Con::cwar<<"Attempted to register particle modifier '"<<className<<"', which has already been registered previously! Ignoring..."<<Con::endl;
 		return false;
-		//Con::cwar<<"WARNING: Attempted to register particle modifier '"<<className<<"', which has already been registered previously! Overwriting previous definition..."<<Con::endl;
+		//Con::cwar<<"Attempted to register particle modifier '"<<className<<"', which has already been registered previously! Overwriting previous definition..."<<Con::endl;
 	}
 	auto &pair = m_modifiers[className] = {};
 	pair.luaClassObject = o;

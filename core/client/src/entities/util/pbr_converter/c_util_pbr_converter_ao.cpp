@@ -77,7 +77,7 @@ void CPBRConverterComponent::ProcessQueue()
 	item.job.SetCompletionHandler([this,hMat,hMdl](util::ParallelWorker<uimg::ImageLayerSet> &worker) {
 		if(worker.IsSuccessful() == false)
 		{
-			Con::cwar<<"WARNING: Generating ambient occlusion map failed: "<<worker.GetResultMessage()<<Con::endl;
+			Con::cwar<<"Generating ambient occlusion map failed: "<<worker.GetResultMessage()<<Con::endl;
 			return;
 		}
 		if(hMat == nullptr || hMdl.expired())

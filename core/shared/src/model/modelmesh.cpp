@@ -771,7 +771,7 @@ void ModelSubMesh::ComputeTangentBasis()
 	{
 		if(triangles[i] >= numVerts || triangles[i +1] >= numVerts || triangles[i +2] >= numVerts)
 		{
-			Con::cwar<<"WARNING: Triangle vertices ("<<triangles[i]<<","<<triangles[i +1]<<","<<triangles[i +2]<<") out of bounds for mesh "<<this<<" ("<<numVerts<<" vertices)!"<<Con::endl;
+			Con::cwar<<"Triangle vertices ("<<triangles[i]<<","<<triangles[i +1]<<","<<triangles[i +2]<<") out of bounds for mesh "<<this<<" ("<<numVerts<<" vertices)!"<<Con::endl;
 			return;
 		}
 		auto &v0 = verts[triangles[i]];

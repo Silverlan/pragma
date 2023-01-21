@@ -21,6 +21,7 @@
 #include "pragma/entities/components/base_attachable_component.hpp"
 #include "pragma/physics/raytraces.h"
 #include "pragma/util/util_game.hpp"
+#include "pragma/logging.hpp"
 
 //#define ENABLE_DEPRECATED_PHYSICS
 
@@ -93,7 +94,7 @@ void BaseVehicleComponent::InitializeVehiclePhysics(PHYSICSTYPE type,BasePhysics
 			continue;
 		if(shape->IsCompoundShape())
 		{
-			Con::cwar<<"WARNING: Vehicle wheel is a compound shape, which is not supported for wheels! Skipping..."<<Con::endl;
+			spdlog::warn("Vehicle wheel is a compound shape, which is not supported for wheels! Skipping...");
 			continue;
 		}
 		m_vhcCreateInfo.wheels.at(wheelIndex).shapeIndex = wheelMeshOffset;

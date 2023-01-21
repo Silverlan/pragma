@@ -46,7 +46,7 @@ template<class TComponent,class THolder>
 #endif
 	if(!r)
 	{
-		Con::cwar<<"WARNING: Unable to create lua entity component '"<<classname<<"'!"<<Con::endl;
+		Con::cwar<<"Unable to create lua entity component '"<<classname<<"'!"<<Con::endl;
 		return nullptr;
 	}
 	return el;

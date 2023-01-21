@@ -10,6 +10,7 @@
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/model/modelmesh.h"
+#include "pragma/logging.hpp"
 #include <pragma/math/intersection.h>
 
 using namespace pragma;
@@ -206,7 +207,7 @@ std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssig
 	if(minDot == std::numeric_limits<float>::max())
 	{
 		Clear();
-		Con::cwar<<"WARNING: No water plane found for func_water entity '"<<ent.GetClass()<<" ("<<ent.GetIndex()<<")"<<"'!"<<Con::endl;
+		spdlog::warn("No water plane found for func_water entity '{} ({})'!",ent.GetClass(),ent.GetIndex());
 		return {};
 	}
 	else

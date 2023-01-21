@@ -382,7 +382,7 @@ bool CParticleSystemComponent::SetupParticleSystem(std::string fname,CParticleSy
 	auto it = s_particleData.find(fname);
 	if(it == s_particleData.end())
 	{
-		Con::cwar<<"WARNING: Attempted to create unknown particle system '"<<fname<<"'!"<<Con::endl;
+		Con::cwar<<"Attempted to create unknown particle system '"<<fname<<"'!"<<Con::endl;
 		return false;
 	}
 	auto &data = it->second;
@@ -457,7 +457,7 @@ const auto PARTICLE_ANIM_BUFFER_INSTANCE_SIZE = sizeof(Vector2) *2;
 	if(ustring::compare<std::string>(key,"maxparticles",false))
 	{
 		if(m_state != State::Initial)
-			Con::cwar<<"WARNING: Attempted to change max particle count for particle system which has already been started! Ignoring..."<<Con::endl;
+			Con::cwar<<"Attempted to change max particle count for particle system which has already been started! Ignoring..."<<Con::endl;
 		else
 			m_maxParticles = ::util::to_int(value);
 	}
@@ -863,7 +863,7 @@ CParticleInitializer *CParticleSystemComponent::AddInitializer(std::string ident
 	auto factory = map->FindInitializer(identifier);
 	if(factory == nullptr)
 	{
-		Con::cwar<<"WARNING: Attempted to create unknown particle initializer '"<<identifier<<"'! Ignoring..."<<Con::endl;
+		Con::cwar<<"Attempted to create unknown particle initializer '"<<identifier<<"'! Ignoring..."<<Con::endl;
 		return nullptr;
 	}
 	auto initializer = factory(*this,values);
@@ -881,7 +881,7 @@ CParticleOperator *CParticleSystemComponent::AddOperator(std::string identifier,
 	auto factory = map->FindOperator(identifier);
 	if(factory == nullptr)
 	{
-		Con::cwar<<"WARNING: Attempted to create unknown particle operator '"<<identifier<<"'! Ignoring..."<<Con::endl;
+		Con::cwar<<"Attempted to create unknown particle operator '"<<identifier<<"'! Ignoring..."<<Con::endl;
 		return nullptr;
 	}
 	auto op = factory(*this,values);
@@ -899,7 +899,7 @@ CParticleRenderer *CParticleSystemComponent::AddRenderer(std::string identifier,
 	auto factory = map->FindRenderer(identifier);
 	if(factory == nullptr)
 	{
-		Con::cwar<<"WARNING: Attempted to create unknown particle renderer '"<<identifier<<"'! Ignoring..."<<Con::endl;
+		Con::cwar<<"Attempted to create unknown particle renderer '"<<identifier<<"'! Ignoring..."<<Con::endl;
 		return nullptr;
 	}
 	auto op = factory(*this,values);

@@ -23,6 +23,7 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/debug/debug_render_filter.hpp"
+#include <pragma/logging.hpp>
 #include <sharedutils/magic_enum.hpp>
 #include <prosper_framebuffer.hpp>
 #include <prosper_command_buffer.hpp>
@@ -406,14 +407,14 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipe
 	if(shader->GetBaseTypeHashCode() != pragma::ShaderGameWorld::HASH_TYPE || shader->IsValid() == false)
 	{
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
-			Con::cwar<<"[Render] WARNING: Shader "<<shader->GetIdentifier()<<" is not a valid game shader!";
+			spdlog::warn("[Render] WARNING: Shader {} is not a valid game shader!",shader->GetIdentifier());
 		return false;
 	}
 	auto *shaderScene = static_cast<pragma::ShaderGameWorld*>(shader);
 	if((g_debugRenderFilter && g_debugRenderFilter->shaderFilter && g_debugRenderFilter->shaderFilter(*shaderScene) == false))
 	{
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
-			Con::cwar<<"[Render] WARNING: Shader "<<shaderScene->GetIdentifier()<<" has been filtered out!";
+			spdlog::warn("[Render] WARNING: Shader {} has been filtered out!",shaderScene->GetIdentifier());
 		return false;
 	}
 	
@@ -424,7 +425,7 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipe
 	if(raster.expired())
 	{
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
-			Con::cwar<<"[Render] WARNING: Scene '"<<scene.GetEntity().GetName()<<"' has no valid rasterization renderer!";
+			spdlog::warn("[Render] WARNING: Scene '{}' has no valid rasterization renderer!",scene.GetEntity().GetName());
 		return false;
 	}
 	if(!m_shaderProcessor.RecordBindShader(scene,*raster,bView,m_baseSceneFlags,*shaderScene,pipelineIdx))
@@ -486,19 +487,19 @@ bool pragma::rendering::BaseRenderProcessor::BindMaterial(CMaterial &mat)
 	if(mat.IsInitialized() == false)
 	{
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
-			Con::cwar<<"[Render] WARNING: Material '"<<mat.GetName()<<"' has not been initialized!";
+			spdlog::warn("[Render] WARNING: Material '{}' has not been initialized!",mat.GetName());
 		return false;
 	}
 	if(g_debugRenderFilter && g_debugRenderFilter->materialFilter && g_debugRenderFilter->materialFilter(mat) == false)
 	{
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
-			Con::cwar<<"[Render] WARNING: Material '"<<mat.GetName()<<"' has been filtered out!";
+			spdlog::warn("[Render] WARNING: Material '{}' has been filtered out!",mat.GetName());
 		return false;
 	}
 	if(m_shaderProcessor.RecordBindMaterial(mat) == false)
 	{
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
-			Con::cwar<<"[Render] WARNING: Failed to bind material '"<<mat.GetName()<<"'!";
+			spdlog::warn("[Render] WARNING: Failed to bind material '{}'!",mat.GetName());
 		return false;
 	}
 
@@ -527,21 +528,13 @@ bool pragma::rendering::BaseRenderProcessor::BindEntity(CBaseEntity &ent)
 	if(renderC == nullptr)
 	{
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
-		{
-			Con::cwar<<"[Render] WARNING: Invalid render component for entity ";
-			ent.print(Con::cout);
-			Con::cwar<<"!"<<Con::endl;
-		}
+			spdlog::warn("[Render] WARNING: Invalid render component for entity {}!",ent);
 		return false;
 	}
 	if(g_debugRenderFilter && g_debugRenderFilter->entityFilter && g_debugRenderFilter->entityFilter(ent,*m_curMaterial))
 	{
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
-		{
-			Con::cwar<<"[Render] WARNING: Entity ";
-			ent.print(Con::cout);
-			Con::cwar<<" has been filtered out!"<<Con::endl;
-		}
+			spdlog::warn("[Render] WARNING: Entity {} has been filtered out!",ent);
 		return false;
 	}
 	// if(m_stats && umath::is_flag_set(renderC->GetStateFlags(),CRenderComponent::StateFlags::RenderBufferDirty))
@@ -552,21 +545,13 @@ bool pragma::rendering::BaseRenderProcessor::BindEntity(CBaseEntity &ent)
 	if(m_shaderProcessor.RecordBindEntity(ent) == false)
 	{
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
-		{
-			Con::cwar<<"[Render] WARNING: Failed to bind entity ";
-			ent.print(Con::cout);
-			Con::cwar<<"!"<<Con::endl;
-		}
+			spdlog::warn("[Render] WARNING: Failed to bind entity {}!",ent);
 		return false;
 	}
 	if(m_drawSceneInfo.drawSceneInfo.renderFilter && m_drawSceneInfo.drawSceneInfo.renderFilter(ent) == false)
 	{
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
-		{
-			Con::cwar<<"[Render] WARNING: Entity ";
-			ent.print(Con::cout);
-			Con::cwar<<" has been filtered out!"<<Con::endl;
-		}
+			spdlog::warn("[Render] WARNING: Entity {} has been filtered out!",ent);
 		return false;
 	}
 	
@@ -607,22 +592,14 @@ bool pragma::rendering::BaseRenderProcessor::Render(CModelSubMesh &mesh,pragma::
 	if((g_debugRenderFilter && g_debugRenderFilter->meshFilter && g_debugRenderFilter->meshFilter(*m_curEntity,m_curMaterial,mesh,meshIdx) == false))
 	{
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
-		{
-			Con::cwar<<"[Render] WARNING: Mesh "<<meshIdx<<" of entity ";
-			m_curEntity->print(Con::cout);
-			Con::cwar<<" has been filtered out!"<<Con::endl;
-		}
+			spdlog::warn("[Render] WARNING: Mesh {} of entity {} has been filtered out!",meshIdx,*m_curEntity);
 		return false;
 	}
 	++m_numShaderInvocations;
 	
 	auto r = m_shaderProcessor.RecordDraw(mesh,meshIdx,instanceSet);
 	if(r == false && VERBOSE_RENDER_OUTPUT_ENABLED)
-	{
-		Con::cwar<<"[Render] WARNING: Failed to draw mesh "<<meshIdx<<" of entity ";
-		m_curEntity->print(Con::cout);
-		Con::cwar<<"!"<<Con::endl;
-	}
+		spdlog::warn("[Render] WARNING: Failed to draw mesh {} of entity {}!",meshIdx,*m_curEntity);
 	return r;
 #if 0
 	auto bUseVertexAnim = false;

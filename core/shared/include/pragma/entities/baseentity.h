@@ -14,6 +14,7 @@
 #include "pragma/types.hpp"
 #include <pragma/console/conout.h>
 #include <sharedutils/util_shared_handle.hpp>
+#include <format>
 
 class Engine;
 class NetworkState;
@@ -302,6 +303,17 @@ DLLNETWORK Con::c_cout& operator<<(Con::c_cout &os,const EntityHandle &ent);
 DLLNETWORK std::ostream& operator<<(std::ostream &os,const EntityHandle ent);
 
 DLLNETWORK bool operator==(const EntityHandle &a,const EntityHandle &b);
+
+template<>
+struct std::formatter<BaseEntity> : std::formatter<std::string>
+{
+    auto format(BaseEntity &ent, format_context &ctx) -> decltype(ctx.out())
+    {
+		std::stringstream ss;
+		ent.print(ss);
+        return std::format_to(ctx.out(), "{}",ss.str());
+    }
+};
 
 #include "pragma/lua/converters/entity_converter.hpp"
 

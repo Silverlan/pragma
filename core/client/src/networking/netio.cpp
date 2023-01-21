@@ -22,7 +22,7 @@ void ClientState::SendPacket(const std::string &name,NetPacket &packet,pragma::n
 	packet.SetMessageID(ID);
 	pragma::networking::Error err;
 	if(m_client->SendPacket(protocol,packet,err) == false)
-		Con::cwar<<"WARNING: Unable to send packet '"<<name<<"': "<<err.GetMessage()<<Con::endl;
+		Con::cwar<<"Unable to send packet '"<<name<<"': "<<err.GetMessage()<<Con::endl;
 }
 void ClientState::SendPacket(const std::string &name,NetPacket &packet)
 {

@@ -289,7 +289,7 @@ void CGame::ReloadSoundCache(bool bReloadBakedCache,SoundCacheFlags cacheFlags,f
 							iplScene->AddProbeSphere(probe.min,probe.spacing);
 							break;
 						case pragma::CEnvSoundProbeComponent::Placement::Octree:
-							Con::cwar<<"WARNING: Octree sound probes currently not supported!"<<Con::endl;
+							Con::cwar<<"Octree sound probes currently not supported!"<<Con::endl;
 							break;
 						case pragma::CEnvSoundProbeComponent::Placement::UniformFloor:
 							iplScene->AddProbeBox(probe.min,probe.max,probe.spacing,probe.heightAboveFloor);

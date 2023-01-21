@@ -39,7 +39,7 @@ void ClientState::HandlePacket(NetPacket &packet)
 	CLNetMessage *msg = GetNetMessage(ID);
 	if(msg == NULL)
 	{
-		Con::cwar<<"WARNING: (CLIENT) Unhandled net message: "<<ID<<Con::endl;
+		Con::cwar<<"(CLIENT) Unhandled net message: "<<ID<<Con::endl;
 		return;
 	}
 	// packet->SetClient(true); // WVTODO
@@ -53,7 +53,7 @@ void ClientState::HandleConnect()
 
 void ClientState::RequestServerInfo()
 {
-	Con::ccl<<"[CLIENT] Sending serverinfo request..."<<Con::endl;
+	Con::ccl<<"Sending serverinfo request..."<<Con::endl;
 	NetPacket packet;
 	packet->WriteString(GetConVarString("password"));
 	SendPacket("serverinfo_request",packet,pragma::networking::Protocol::SlowReliable);
@@ -85,7 +85,7 @@ void ClientState::HandleClientReceiveServerInfo(NetPacket &packet)
 		if(libSteamworks == nullptr)
 		{
 			m_svInfo = nullptr;
-			Con::cerr<<"ERROR: Unable to authenticate client: Steamworks module could not be loaded: "<<err<<Con::endl;
+			Con::cerr<<"Unable to authenticate client: Steamworks module could not be loaded: "<<err<<Con::endl;
 			Disconnect();
 			return;
 		}
@@ -96,7 +96,7 @@ void ClientState::HandleClientReceiveServerInfo(NetPacket &packet)
 		if(fRequestAuthTicket == nullptr || fRequestAuthTicket(token,steamId,tokenHandle) == false)
 		{
 			m_svInfo = nullptr;
-			Con::cerr<<"ERROR: Authentication failed! Disconnecting from server..."<<Con::endl;
+			Con::cerr<<"Authentication failed! Disconnecting from server..."<<Con::endl;
 			Disconnect();
 			return;
 		}
@@ -137,7 +137,7 @@ void ClientState::LoadLuaCache(std::string cache,unsigned int cacheSize)
 	auto f = FileManager::OpenFile(path.c_str(),"rb");
 	if(f == NULL)
 	{
-		Con::cout<<"WARNING: Unable to open lua-cache file!"<<Con::endl;
+		Con::cwar<<"Unable to open lua-cache '"<<cache<<"' file!"<<Con::endl;
 		return;
 	}
 	unsigned int sourceLength = CUInt32(f->GetSize());
@@ -165,7 +165,7 @@ void ClientState::LoadLuaCache(std::string cache,unsigned int cacheSize)
 		}
 	}
 	else
-		Con::cwar<<"WARNING: Unable to decompress lua-cache ("<<err<<")!"<<Con::endl;
+		Con::cwar<<"Unable to decompress lua-cache ("<<err<<")!"<<Con::endl;
 	delete[] dest;
 	delete[] source;
 }
@@ -211,7 +211,7 @@ void ClientState::HandleReceiveGameInfo(NetPacket &packet)
 	if(IsGameActive())
 		EndGame();
 #ifdef DEBUG_SOCKET
-	Con::ccl<<"[CLIENT] Received Game Information!"<<Con::endl;
+	Con::ccl<<"Received Game Information!"<<Con::endl;
 #endif
 	// Read replicated ConVars
 	auto numReplicated = packet->Read<uint32_t>();
@@ -242,7 +242,7 @@ void ClientState::HandleReceiveGameInfo(NetPacket &packet)
 				}
 			}
 			else
-				Con::cwar<<"WARNING: Replicated ConVar "<<cvar<<" doesn't exist"<<Con::endl;
+				Con::cwar<<"Replicated ConVar "<<cvar<<" doesn't exist"<<Con::endl;
 		}
 	}
 	//

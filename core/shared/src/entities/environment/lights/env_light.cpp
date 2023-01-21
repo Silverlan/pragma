@@ -189,12 +189,12 @@ void BaseEnvLightComponent::SetLightIntensity(float intensity,LightIntensityType
 {
 	if(m_lightType == util::pragma::LightType::Directional && type != LightIntensityType::Lux)
 	{
-		Con::cwar<<"WARNING: Attempted to use intensity type "<<LightIntensityTypeToString(type)<<" for a directional light source. This is not allowed!"<<Con::endl;
+		Con::cwar<<"Attempted to use intensity type "<<LightIntensityTypeToString(type)<<" for a directional light source. This is not allowed!"<<Con::endl;
 		return;
 	}
 	if((m_lightType == util::pragma::LightType::Point || m_lightType == util::pragma::LightType::Spot) && type == LightIntensityType::Lux)
 	{
-		Con::cwar<<"WARNING: Attempted to use intensity type "<<LightIntensityTypeToString(type)<<" for a point or spot light source. This is not allowed!"<<Con::endl;
+		Con::cwar<<"Attempted to use intensity type "<<LightIntensityTypeToString(type)<<" for a point or spot light source. This is not allowed!"<<Con::endl;
 		return;
 	}
 	m_lightIntensity = intensity;

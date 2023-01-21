@@ -12,6 +12,7 @@
 #include "pragma/localization.h"
 #include <fsys/filesystem.h>
 #include "pragma/input/inputhelper.h"
+#include <pragma/logging.hpp>
 
 CEngine::ConVarInfo *CEngine::ConVarInfoList::find(const std::string &cmd)
 {
@@ -50,7 +51,7 @@ void CEngine::SaveClientConfig()
 	auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"w");
 	if(f == NULL)
 	{
-		Con::cwar<<"WARNING: Unable to save client.cfg"<<Con::endl;
+		spdlog::warn("Unable to save client.cfg");
 		return;
 	}
 	WriteClientConfig(f);

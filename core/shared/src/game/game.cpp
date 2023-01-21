@@ -21,6 +21,7 @@
 #include "pragma/physics/constraint.hpp"
 #include "pragma/lua/libraries/ltimer.h"
 #include "pragma/game/gamemode/gamemodemanager.h"
+#include "pragma/logging.hpp"
 #include <pragma/console/convars.h>
 #include "pragma/console/engine_cvar.h"
 #include "pragma/game/game_callback.h"
@@ -393,7 +394,7 @@ bool Game::LoadNavMesh(bool bReload)
 
 	m_navMesh = LoadNavMesh(path);
 	if(m_navMesh == nullptr)
-		Con::cwar<<"WARNING: Unable to load navigation mesh!"<<Con::endl;
+		Con::cwar<<"Unable to load navigation mesh!"<<Con::endl;
 	pragma::BaseAIComponent::ReloadNavThread(*this);
 	return m_navMesh != nullptr;
 }
@@ -408,7 +409,7 @@ void Game::Initialize()
 	r = r && m_componentManager->GetComponentTypeId("animation_driver",m_animationDriverComponentId);
 	assert(r);
 	if(!r)
-		Con::crit<<"ERROR: Unable to determine animated component id!"<<Con::endl;
+		Con::crit<<"Unable to determine animated component id!"<<Con::endl;
 
 	InitializeLuaScriptWatcher();
 	m_scriptWatcher->MountDirectory("lua");
@@ -510,6 +511,7 @@ void Game::InitializeGame()
 
 	auto physEngineName = GetConVarString("phys_engine");
 	auto physEngineLibName = pragma::physics::IEnvironment::GetPhysicsEngineModuleLocation(physEngineName);
+	spdlog::info("Loading physics module '{}'...",physEngineLibName);
 	std::string err;
 	auto dllHandle = GetNetworkState()->InitializeLibrary(physEngineLibName,&err);
 	if(dllHandle)
@@ -518,10 +520,10 @@ void Game::InitializeGame()
 		if(fInitPhysicsEngine != nullptr)
 			fInitPhysicsEngine(*GetNetworkState(),m_physEnvironment);
 		else
-			Con::cerr<<"ERROR: Unable to initialize physics engine '"<<physEngineName<<"': Function 'initialize_physics_engine' not found!"<<Con::endl;
+			Con::cerr<<"Unable to initialize physics engine '"<<physEngineName<<"': Function 'initialize_physics_engine' not found!"<<Con::endl;
 	}
 	else
-		Con::cerr<<"ERROR: Unable to initialize physics engine '"<<physEngineName<<"': "<<err<<Con::endl;
+		Con::cerr<<"Unable to initialize physics engine '"<<physEngineName<<"': "<<err<<Con::endl;
 	if(m_physEnvironment)
 	{
 		m_surfaceMaterialManager = std::make_unique<SurfaceMaterialManager>(*m_physEnvironment);
@@ -799,7 +801,7 @@ bool Game::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Enti
 		static auto bPort = true;
 		if(bPort == true)
 		{
-			Con::cwar<<"WARNING: Map '"<<map<<"' not found."<<Con::endl;
+			Con::cwar<<"Map '"<<map<<"' not found."<<Con::endl;
 			auto path = pragma::asset::relative_path_to_absolute_path(normPath,pragma::asset::Type::Map);
 			if(util::port_source2_map(GetNetworkState(),path.GetString()) == false && util::port_hl2_map(GetNetworkState(),path.GetString()) == false)
 				Con::cwar<<" Loading empty map..."<<Con::endl;
@@ -823,7 +825,7 @@ bool Game::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Enti
 	}};
 
 	auto error = [this,&map](const std::string_view &msg) {
-		Con::cwar<<"WARNING: Unable to load map '"<<map<<"': "<<msg<<Con::endl;
+		Con::cwar<<"Unable to load map '"<<map<<"': "<<msg<<Con::endl;
 	};
 
 	auto f = FileManager::OpenFile(m_mapInfo.fileName.c_str(),"rb");
@@ -918,8 +920,7 @@ std::shared_ptr<Model> Game::CreateModel(const std::string &mdl) const {return m
 std::shared_ptr<Model> Game::CreateModel(bool bAddReference) const {return m_stateNetwork->GetModelManager().CreateModel("",bAddReference);}
 bool Game::PrecacheModel(const std::string &mdl)
 {
-	if(engine->IsVerbose())
-		Con::cout<<"Precaching model '"<<mdl<<"'..."<<Con::endl;
+	spdlog::info("Precaching model '{}'...",mdl);
 	auto *asset = GetNetworkState()->GetModelManager().FindCachedAsset(mdl);
 	if(asset)
 		return true;
@@ -938,8 +939,7 @@ std::shared_ptr<Model> Game::LoadModel(const std::string &mdl,bool bReload)
 	debug::get_domain().BeginTask("load_model");
 	util::ScopeGuard sgVtune {[]() {debug::get_domain().EndTask();}};
 #endif
-	if(engine->IsVerbose())
-		Con::cout<<"Loading model '"<<mdl<<"'..."<<Con::endl;
+	spdlog::info("Loading model '{}'...",mdl);
 	auto *asset = GetNetworkState()->GetModelManager().FindCachedAsset(mdl);
 	if(asset)
 		return pragma::asset::ModelManager::GetAssetObject(*asset);

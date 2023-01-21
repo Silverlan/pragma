@@ -102,7 +102,7 @@ std::unique_ptr<pragma::networking::NWMClientConnection> pragma::networking::NWM
 	}
 	if(cl == nullptr)
 	{
-		Con::cwar<<"WARNING: Unable to connect to server '"<<serverIp<<":"<<serverPort<<": "<<lastException.what()<<Con::endl;
+		Con::cwar<<"Unable to connect to server '"<<serverIp<<":"<<serverPort<<": "<<lastException.what()<<Con::endl;
 		return nullptr;
 	}
 #ifdef _DEBUG

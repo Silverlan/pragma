@@ -515,7 +515,7 @@ int Lua::import::export_model_asset(lua_State *l)
 	Lua::PushBool(l,result == aiReturn::aiReturn_SUCCESS);
 	
 	auto *error = exporter.GetErrorString();
-	Con::cwar<<"WARNING: Export error: '"<<error<<"'!"<<Con::endl;
+	Con::cwar<<"Export error: '"<<error<<"'!"<<Con::endl;
 	return 1;
 #endif
 	return 0;

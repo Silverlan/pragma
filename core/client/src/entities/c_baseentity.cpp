@@ -21,6 +21,7 @@
 #include "pragma/rendering/rendersystem.h"
 #include <materialmanager.h>
 #include "pragma/model/c_modelmesh.h"
+#include <pragma/logging.hpp>
 #include <pragma/lua/luacallback.h>
 #include <pragma/networking/nwm_util.h>
 #include "luasystem.h"
@@ -216,7 +217,7 @@ Bool CBaseEntity::ReceiveNetEvent(UInt32 eventId,NetPacket &p)
 		if(pNetComponent->ReceiveNetEvent(eventId,p))
 			return true;
 	}
-	Con::ccl<<"WARNING: Unhandled net event '"<<eventId<<"' for entity "<<GetClass()<<Con::endl;
+	Con::cwar<<Con::PREFIX_CLIENT<<"Unhandled net event '"<<eventId<<"' for entity "<<GetClass()<<Con::endl;
 	return false;
 }
 
@@ -260,19 +261,11 @@ void CBaseEntity::ReceiveData(NetPacket &packet)
 						netComponent->ReceiveData(packet);
 				}
 				else
-				{
-					Con::cwar<<"WARNING: Net data for entity ";
-					print(Con::cout);
-					Con::cwar<<" contained component data for component '"<<componentInfo->name<<"' which hasn't been attached to the entity clientside! Skipping..."<<Con::endl;
-				}
+					spdlog::warn("Net data for entity {} contained component data for component '{}' which hasn't been attached to the entity clientside! Skipping...",*this,componentInfo->name);
 			}
 		}
 		else
-		{
-			Con::cwar<<"WARNING: Net data for entity ";
-			print(Con::cout);
-			Con::cwar<<" contained component data for component type with non-existing clientside representation! Skipping..."<<Con::endl;
-		}
+			spdlog::warn("Net data for entity {} contained component data for component type with non-existing clientside representation! Skipping...",*this);
 		packet->SetOffset(offset +componentSize);
 	}
 }
@@ -323,7 +316,7 @@ void CBaseEntity::SendNetEventTCP(UInt32 eventId,NetPacket &data) const
 	eventId = c_game->LocalNetEventIdToShared(eventId);
 	if(eventId == std::numeric_limits<pragma::NetEventId>::max())
 	{
-		Con::cwar<<"WARNING: Attempted to send net event "<<eventId<<" which has no known serverside id associated!"<<Con::endl;
+		Con::cwar<<"Attempted to send net event "<<eventId<<" which has no known serverside id associated!"<<Con::endl;
 		return;
 	}
 	nwm::write_entity(data,this);
@@ -344,7 +337,7 @@ void CBaseEntity::SendNetEventUDP(UInt32 eventId,NetPacket &data) const
 	eventId = c_game->LocalNetEventIdToShared(eventId);
 	if(eventId == std::numeric_limits<pragma::NetEventId>::max())
 	{
-		Con::cwar<<"WARNING: Attempted to send net event "<<eventId<<" which has no known serverside id associated!"<<Con::endl;
+		Con::cwar<<"Attempted to send net event "<<eventId<<" which has no known serverside id associated!"<<Con::endl;
 		return;
 	}
 	nwm::write_entity(data,this);

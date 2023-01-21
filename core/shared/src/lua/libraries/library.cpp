@@ -1875,12 +1875,28 @@ void Game::RegisterLuaLibraries()
 		{"calc_smallest_enclosing_bbox",Lua::mesh::calc_smallest_enclosing_bbox}
 	});
 
-	Lua::RegisterLibrary(GetLuaState(),"log",{});
+	Lua::RegisterLibrary(GetLuaState(),"log",{
+		{"info",Lua::log::info},
+		{"warn",Lua::log::warn},
+		{"error",Lua::log::error},
+		{"critical",Lua::log::critical},
+		{"debug",Lua::log::debug},
+		{"prefix",+[](lua_State *l) {
+			std::string msg = Lua::CheckString(l,1);
+			auto colorFlags = Lua::Check<util::ConsoleColorFlags>(l,2);
+			auto strColorFlags = util::get_ansi_color_code(colorFlags);
+			auto strColorFlagsClear = util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+			auto prefix = "[" +strColorFlags +msg +strColorFlagsClear +"] ";
+			Lua::PushString(l,prefix);
+			return 1;
+		}}
+	});
 	Lua::RegisterLibraryEnums(GetLuaState(),"log",{
 		{"SEVERITY_INFO",0},
 		{"SEVERITY_WARNING",1},
 		{"SEVERITY_ERROR",2},
-		{"SEVERITY_CRITICAL",3}
+		{"SEVERITY_CRITICAL",3},
+		{"SEVERITY_DEBUG",4}
 	});
 
 	Lua::RegisterLibrary(GetLuaState(),"regex",{

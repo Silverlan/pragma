@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/engine.h"
 #include "pragma/console/conout.h"
+#include "pragma/logging.hpp"
 #include <fsys/filesystem.h>
 #include <pragma/serverstate/serverstate.h>
 #include <pragma/console/convars.h>
@@ -22,7 +23,7 @@ bool Engine::ExecConfig(const std::string &cfg,const std::function<void(std::str
 	auto f = FileManager::OpenFile(path.c_str(),"r");
 	if(f == NULL)
 	{
-		Con::cwar<<"'"<<cfg<<"' not present; not executing."<<Con::endl;
+		spdlog::warn("'{}' not present; not executing.",cfg);
 		return false;
 	}
 	while(!f->Eof())
@@ -57,7 +58,7 @@ void Engine::SaveServerConfig()
 	auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"w");
 	if(f == NULL)
 	{
-		Con::cwar<<"WARNING: Unable to save server.cfg"<<Con::endl;
+		spdlog::warn("Unable to save server.cfg");
 		return;
 	}
 	WriteServerConfig(f);
@@ -70,7 +71,7 @@ void Engine::SaveEngineConfig()
 	auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"w");
 	if(f == NULL)
 	{
-		Con::cwar<<"WARNING: Unable to save engine.cfg"<<Con::endl;
+		spdlog::warn("Unable to save engine.cfg");
 		return;
 	}
 	WriteEngineConfig(f);

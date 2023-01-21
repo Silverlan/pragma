@@ -148,7 +148,7 @@ bool pragma::ValueDriver::Apply(BaseEntity &ent)
 			if(!umath::is_flag_set(m_stateFlags,StateFlags::MemberRefFailed))
 			{
 				ResetFailureState(); // Clear other failure flags
-				Con::cwar<<"WARNING: Unable to apply value driver with expression '"<<m_descriptor.GetExpression()<<"': Variable '"<<pair.first<<"' is member reference, but is pointing to invalid ";
+				Con::cwar<<"Unable to apply value driver with expression '"<<m_descriptor.GetExpression()<<"': Variable '"<<pair.first<<"' is member reference, but is pointing to invalid ";
 				if(!var.memberRef.GetEntity(game))
 					Con::cwar<<"entity";
 				else if(!var.memberRef.GetComponent(game))
@@ -177,7 +177,7 @@ bool pragma::ValueDriver::Apply(BaseEntity &ent)
 			if(!umath::is_flag_set(m_stateFlags,StateFlags::ComponentRefFailed))
 			{
 				ResetFailureState(); // Clear other failure flags
-				Con::cwar<<"WARNING: Unable to apply value driver with expression '"<<m_descriptor.GetExpression()<<"': Variable '"<<pair.first<<"' is component reference, but is pointing to invalid ";
+				Con::cwar<<"Unable to apply value driver with expression '"<<m_descriptor.GetExpression()<<"': Variable '"<<pair.first<<"' is component reference, but is pointing to invalid ";
 				if(!var.memberRef.GetEntity(game))
 					Con::cwar<<"entity";
 				else
@@ -202,7 +202,7 @@ bool pragma::ValueDriver::Apply(BaseEntity &ent)
 		if(!umath::is_flag_set(m_stateFlags,StateFlags::EntityRefFailed))
 		{
 			ResetFailureState(); // Clear other failure flags
-			Con::cwar<<"WARNING: Unable to apply value driver with expression '"<<m_descriptor.GetExpression()<<"': Variable '"<<pair.first<<"' is entity reference, but is pointing to invalid entity!"<<Con::endl;
+			Con::cwar<<"Unable to apply value driver with expression '"<<m_descriptor.GetExpression()<<"': Variable '"<<pair.first<<"' is entity reference, but is pointing to invalid entity!"<<Con::endl;
 			umath::set_flag(m_stateFlags,StateFlags::EntityRefFailed);
 		}
 		break;
@@ -234,7 +234,7 @@ bool pragma::ValueDriver::Apply(BaseEntity &ent)
 		}
 		catch(const luabind::cast_failed &e)
 		{
-			Con::cwar<<"WARNING: Driver expression '"<<m_descriptor.GetExpression()<<"' return value is incompatible with expected type '"<<magic_enum::enum_name(member->type)<<"'!"<<Con::endl;
+			Con::cwar<<"Driver expression '"<<m_descriptor.GetExpression()<<"' return value is incompatible with expected type '"<<magic_enum::enum_name(member->type)<<"'!"<<Con::endl;
 		}
 	});
 	return true;

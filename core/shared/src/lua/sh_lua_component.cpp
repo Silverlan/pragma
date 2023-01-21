@@ -498,7 +498,7 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 
 		std::string err;
 		if(Lua::PushLuaFunctionFromString(l,getter,"EntityComponentGetter",err) == false)
-			Con::cwar<<"WARNING: Unable to register getter-function for member '"<<functionName<<"' for entity component: "<<err<<Con::endl;
+			Con::cwar<<"Unable to register getter-function for member '"<<functionName<<"' for entity component: "<<err<<Con::endl;
 		else
 		{
 			if((memberFlags &MemberFlags::UseHasGetterBit) != MemberFlags::None)
@@ -520,7 +520,7 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 			std::string getterProperty = "function(self) return self." +memberVarName +" end";
 			std::string err;
 			if(Lua::PushLuaFunctionFromString(l,getterProperty,"EntityComponentGetterProperty",err) == false)
-				Con::cwar<<"WARNING: Unable to register property-get-function for member '"<<functionName<<"' for entity component: "<<err<<Con::endl;
+				Con::cwar<<"Unable to register property-get-function for member '"<<functionName<<"' for entity component: "<<err<<Con::endl;
 			else
 			{
 				auto idxFunc = Lua::GetStackTop(l);
@@ -563,7 +563,7 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 		if(Lua::PushLuaFunctionFromString(l,setter,"EntityComponentSetter",err) == false)
 		{
 			bSetterValid = false;
-			Con::cwar<<"WARNING: Unable to register setter-function for member '"<<functionName<<"' for entity component: "<<err<<Con::endl;
+			Con::cwar<<"Unable to register setter-function for member '"<<functionName<<"' for entity component: "<<err<<Con::endl;
 		} /* else 1 */
 		if(bSetterValid)
 		{
@@ -696,7 +696,7 @@ void BaseLuaBaseEntityComponent::InitializeMembers(const std::vector<BaseLuaBase
 		else
 			Lua::PushAny(l,detail::member_type_to_util_type(member.type),member.initialValue); /* 3 */
 		if(Lua::IsNil(l,-1) && ents::is_udm_member_type(member.type))
-			Con::cwar<<"WARNING: Invalid member type '"<<magic_enum::enum_name(member.type)<<"' for member '"<<member.functionName<<"' of entity component '"<<GetEntity().GetNetworkState()->GetGameState()->GetEntityComponentManager().GetComponentInfo(GetComponentId())->name<<"'! Ignoring..."<<Con::endl;
+			Con::cwar<<"Invalid member type '"<<magic_enum::enum_name(member.type)<<"' for member '"<<member.functionName<<"' of entity component '"<<GetEntity().GetNetworkState()->GetGameState()->GetEntityComponentManager().GetComponentInfo(GetComponentId())->name<<"'! Ignoring..."<<Con::endl;
 		Lua::SetTableValue(l,t); /* 1 */
 
 		if((member.flags &MemberFlags::NetworkedBit) != MemberFlags::None)

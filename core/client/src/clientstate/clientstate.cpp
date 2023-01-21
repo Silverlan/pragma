@@ -45,6 +45,7 @@
 #include <pragma/networking/resources.h>
 #include <pragma/networking/networking_modules.hpp>
 #include <pragma/engine_version.h>
+#include <pragma/logging.hpp>
 #include <luainterface.hpp>
 #include <alsoundsystem.hpp>
 #include <shader/prosper_pipeline_loader.hpp>
@@ -167,10 +168,10 @@ void ClientState::InitializeGameClient(bool singlePlayerLocalGame)
 			if(fInitNetLib != nullptr)
 				fInitNetLib(*this,m_client);
 			else
-				Con::cerr<<"ERROR: Unable to initialize networking system '"<<netLibName<<"': Function 'initialize_game_client' not found in module!"<<Con::endl;
+				spdlog::error("Unable to initialize networking system '{}': Function 'initialize_game_client' not found in module!",netLibName);
 		}
 		else
-			Con::cerr<<"ERROR: Unable to initialize networking system '"<<netLibName<<"': "<<err<<Con::endl;
+			spdlog::error("Unable to initialize networking system '{}': {}",netLibName,err);
 		if(m_client == nullptr)
 			ResetGameClient();
 	}
@@ -610,7 +611,7 @@ void ClientState::Disconnect()
 	{
 		pragma::networking::Error err;
 		if(m_client->Disconnect(err) == false)
-			Con::cwar<<"WARNING: Unable to disconnect from server: "<<err.GetMessage()<<Con::endl;
+			Con::cwar<<"Unable to disconnect from server: "<<err.GetMessage()<<Con::endl;
 		DestroyClient();
 	}
 }
@@ -642,7 +643,7 @@ bool ClientState::LoadGUILuaFile(std::string f)
 
 void ClientState::SendUserInfo()
 {
-	Con::ccl<<"[CLIENT] Sending user info..."<<Con::endl;
+	Con::ccl<<"Sending user info..."<<Con::endl;
 
 	NetPacket packet;
 	auto &version = get_engine_version();
@@ -690,7 +691,10 @@ void ClientState::SendUserInfo()
 	client->SendPacket("clientinfo",packet,pragma::networking::Protocol::SlowReliable);
 }
 
-Lua::ErrorColorMode ClientState::GetLuaErrorColorMode() {return Lua::ErrorColorMode::Magenta;}
+std::string ClientState::GetLuaErrorMessagePrefix() const
+{
+	return std::string{Con::PREFIX_CLIENT} +Con::PREFIX_LUA;
+}
 
 void ClientState::StartGame(bool) {StartNewGame("");}
 void ClientState::StartNewGame(const std::string &gameMode)
@@ -723,8 +727,7 @@ ModelMesh *ClientState::CreateMesh() const {return new CModelMesh;}
 static auto cvMatStreaming = GetClientConVar("cl_material_streaming_enabled");
 Material *ClientState::LoadMaterial(const std::string &path,bool precache,bool bReload)
 {
-	if(c_engine->IsVerbose())
-		Con::cout<<"Loading material '"<<path<<"'..."<<Con::endl;
+	spdlog::info("Loading material '{}'...",path);
 	return LoadMaterial(path,nullptr,bReload,!precache/*!cvMatStreaming->GetBool()*/);
 }
 
@@ -872,7 +875,7 @@ Material *ClientState::LoadMaterial(const std::string &path,const std::function<
 		}
 		if(c_game)
 			c_game->RequestResource(path);
-		Con::cwar<<"WARNING: Unable to load material '"<<path<<"': File not found!"<<Con::endl;
+		spdlog::warn("Unable to load material '{}': File not found!",path);
 	}
 	else if(bShaderInitialized.use_count() > 1)
 		init_shader(mat);

@@ -23,20 +23,7 @@ extern DLLNETWORK Engine *engine;
 
 static void print_lua_error_message(lua_State *l,const std::stringstream &ssMsg)
 {
-	auto colorMode = Lua::GetErrorColorMode(l);
-	switch(colorMode)
-	{
-		case Lua::ErrorColorMode::White:
-			util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
-			break;
-		case Lua::ErrorColorMode::Cyan:
-			util::set_console_color(util::ConsoleColorFlags::Cyan | util::ConsoleColorFlags::Intensity);
-			break;
-		case Lua::ErrorColorMode::Magenta:
-			util::set_console_color(util::ConsoleColorFlags::Magenta | util::ConsoleColorFlags::Intensity);
-			break;
-	}
-	Con::cout<<ssMsg.str()<<Con::endl;
+	Con::cerr<<Lua::GetErrorMessagePrefix(l)<<ssMsg.str()<<Con::endl;
 }
 
 static auto cvOpenEditorOnError = GetConVar("lua_open_editor_on_error");
@@ -238,7 +225,6 @@ bool Lua::PrintTraceback(lua_State *l,std::stringstream &ssOut,std::string *pOpt
 
 	auto errMsg = pOptErrMsg ? *pOptErrMsg : "";
 	auto hasMsg = true;
-	ssOut<<"[LUA] ";
 	if(bFoundSrc == true)
 	{
 		if(!errMsg.empty() && errMsg.front() != '[')
@@ -343,7 +329,6 @@ static void handle_syntax_error(lua_State *l,Lua::StatusCode r,const std::string
 		std::string err = Lua::ToString(l,-1);
 		//transform_path(err);
 		std::stringstream ssMsg;
-		ssMsg<<"[LUA] ";
 		auto brSt = err.find('[');
 		auto brEn = err.find(']',brSt +1);
 		auto bErrPrinted = false;
@@ -407,7 +392,6 @@ void Lua::initialize_error_handler()
 				++level;
 			}
 
-			ssMsg<<"[LUA] ";
 			if(bFoundSrc == true)
 			{
 				if(!luaMsg.empty() && luaMsg.front() != '[')

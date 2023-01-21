@@ -256,7 +256,7 @@ void SGame::SetUp()
 	assert(entGame != nullptr);
 	if(entGame == nullptr)
 	{
-		Con::crit<<"ERROR: Unable to create game entity!"<<Con::endl;
+		Con::crit<<"Unable to create game entity!"<<Con::endl;
 		// Unreachable
 	}
 	m_entGame = entGame->GetHandle();
@@ -336,7 +336,7 @@ void SGame::Tick()
 			auto it = worldState.find(globalName);
 			if(it != worldState.end())
 			{
-				Con::cwar<<"WARNING: More than one entity found with global name '"<<globalName<<"'! This may cause issues."<<Con::endl;
+				Con::cwar<<"More than one entity found with global name '"<<globalName<<"'! This may cause issues."<<Con::endl;
 				continue;
 			}
 			auto prop = udm::Property::Create<udm::Element>();
@@ -660,9 +660,11 @@ void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session,NetPacket
 		OnClientConVarChanged(*pl,cmd,val);
 	}
 	
-	Con::csv<<"Player "<<pl<<" authenticated."<<Con::endl;
+	Con::csv<<"Player ";
+	plEnt->print(Con::cout);
+	Con::csv<<" authenticated."<<Con::endl;
 	//unsigned char clPlIdx = pl->GetIndex();
-	Con::csv<<"[SERVER] Sending Game Information..."<<Con::endl;
+	Con::csv<<"Sending Game Information..."<<Con::endl;
 
 	pragma::networking::ClientRecipientFilter rp {*pl->GetClientSession()};
 

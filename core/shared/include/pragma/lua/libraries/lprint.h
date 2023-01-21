@@ -23,6 +23,15 @@ namespace Lua::console
 	DLLNETWORK int msge(lua_State *l);
 };
 
+namespace Lua::log
+{
+	DLLNETWORK int info(lua_State *l);
+	DLLNETWORK int warn(lua_State *l);
+	DLLNETWORK int error(lua_State *l);
+	DLLNETWORK int critical(lua_State *l);
+	DLLNETWORK int debug(lua_State *l);
+};
+
 namespace Lua::debug
 {
 	DLLNETWORK int print(lua_State *l);

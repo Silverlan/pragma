@@ -241,7 +241,7 @@ void Model::Merge(const Model &other,MergeFlags flags)
 				if(bc == nullptr)
 				{
 					anim->ClearBlendController();
-					Con::cwar<<"WARNING: Animation with invalid blend controller! Skipping..."<<Con::endl;
+					Con::cwar<<"Animation with invalid blend controller! Skipping..."<<Con::endl;
 				}
 				else
 				{
@@ -257,13 +257,13 @@ void Model::Merge(const Model &other,MergeFlags flags)
 								transition.animation = it->second;
 							else
 							{
-								Con::cwar<<"WARNING: Blend controller with invalid animation transition reference! Skipping..."<<Con::endl;
+								Con::cwar<<"Blend controller with invalid animation transition reference! Skipping..."<<Con::endl;
 								transition.animation = -1;
 							}
 						}
 					}
 					else
-						Con::cwar<<"WARNING: Unknown blend controller '"<<bc->name<<"'! Skipping..."<<Con::endl;
+						Con::cwar<<"Unknown blend controller '"<<bc->name<<"'! Skipping..."<<Con::endl;
 				}
 			}
 		}

@@ -25,7 +25,7 @@ template<class TWorld,class TPolyMesh,class TPoly,class TBrushMesh>
 	VFilePtr *f = FileManager::OpenFile(cPath,"rb");
 	if(f == NULL)
 	{
-		Con::cwar<<"WARNING: Unable to open vmf '"<<map<<"'!"<<Con::endl;
+		Con::cwar<<"Unable to open vmf '"<<map<<"'!"<<Con::endl;
 		return;
 	}
 
@@ -36,13 +36,13 @@ template<class TWorld,class TPolyMesh,class TPoly,class TBrushMesh>
 	buffer = (char*) malloc(sizeof(char) *lSize);
 	if(buffer == NULL)
 	{
-		Con::cwar<<"WARNING: Unable to read vmf '"<<map<<"': Not enough memory."<<Con::endl;
+		Con::cwar<<"Unable to read vmf '"<<map<<"': Not enough memory."<<Con::endl;
 		return;
 	}
 	result = f->Read(buffer,lSize);
 	if(result != lSize)
 	{
-		Con::cwar<<"WARNING: Unable to read vmf '"<<map<<"': Reading error."<<Con::endl;
+		Con::cwar<<"Unable to read vmf '"<<map<<"': Reading error."<<Con::endl;
 		return;
 	}
 	std::string md5 = MD5(std::string(buffer,lSize)).hexdigest();
@@ -53,7 +53,7 @@ template<class TWorld,class TPolyMesh,class TPoly,class TBrushMesh>
 	DataFileBlock *vmf = DataFile::ReadBlock(f);
 	if(vmf == NULL)
 	{
-		Con::cwar<<"WARNING: Unable to read vmf '"<<map<<"'!"<<Con::endl;
+		Con::cwar<<"Unable to read vmf '"<<map<<"'!"<<Con::endl;
 		return;
 	}
 	std::unordered_map<std::string,std::vector<DataFileBlock*>*>::iterator i = vmf->blocks.find("world");

@@ -309,7 +309,7 @@ template<class T>
 	{
 		recursiveCount = std::numeric_limits<uint32_t>::max();
 		InsertObject(o,&root); // Force object into root node
-		// Con::cwar<<"WARNING: Object "<<o<<" outside of occlusion tree bounds! Forcing in root node..."<<Con::endl;
+		// Con::cwar<<"Object "<<o<<" outside of occlusion tree bounds! Forcing in root node..."<<Con::endl;
 		return;
 	}
 	--recursiveCount;
@@ -340,7 +340,7 @@ template<class T>
 	assert(pFurthest != nullptr);
 	if(pFurthest == nullptr) // Can happen if object bounds are NaN or similar
 	{
-		Con::cwar<<"WARNING: Object "<<o<<" has invalid bounds ("<<min.x<<","<<min.y<<","<<min.z<<") ("<<max.x<<","<<max.y<<","<<max.z<<")! Object will not be rendered!"<<Con::endl;
+		Con::cwar<<"Object "<<o<<" has invalid bounds ("<<min.x<<","<<min.y<<","<<min.z<<") ("<<max.x<<","<<max.y<<","<<max.z<<")! Object will not be rendered!"<<Con::endl;
 		return;
 	}
 	ExtendRoot(*pFurthest);

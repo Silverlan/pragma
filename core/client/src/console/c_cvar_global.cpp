@@ -216,7 +216,7 @@ DLLCLIENT void CMD_status_cl(NetworkState*,pragma::BasePlayerComponent*,std::vec
 	auto *cl = client->GetClient();
 	if(cl == nullptr)
 	{
-		Con::cwar<<"WARNING: Not connected to a server!"<<Con::endl;
+		Con::cwar<<"Not connected to a server!"<<Con::endl;
 		return;
 	}
 	Con::cout<<"hostname:\t"<<"Unknown"<<Con::endl;
@@ -367,7 +367,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 			if(eCustomFormat.has_value())
 				format = *eCustomFormat;
 			else
-				Con::cwar<<"WARNING: Unsupported format '"<<customFormat<<"'! Using PNG instead..."<<Con::endl;
+				Con::cwar<<"Unsupported format '"<<customFormat<<"'! Using PNG instead..."<<Con::endl;
 		}
 		auto resolution = c_engine->GetRenderResolution();
 		pragma::rendering::cycles::SceneInfo sceneInfo {};
@@ -398,7 +398,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		{
 			auto customToneMapping = uimg::string_to_tone_mapping(itToneMapping->second.parameters.front());
 			if(customToneMapping.has_value() == false)
-				Con::cwar<<"WARNING: '"<<itToneMapping->second.parameters.front()<<"' is not a valid tone mapper!"<<Con::endl;
+				Con::cwar<<"'"<<itToneMapping->second.parameters.front()<<"' is not a valid tone mapper!"<<Con::endl;
 			else
 				toneMapping = *customToneMapping;
 		}
@@ -422,7 +422,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 			job.SetCompletionHandler([format,quality,toneMapping](util::ParallelWorker<uimg::ImageLayerSet> &worker) {
 				if(worker.IsSuccessful() == false)
 				{
-					Con::cwar<<"WARNING: Raytraced screenshot failed: "<<worker.GetResultMessage()<<Con::endl;
+					Con::cwar<<"Raytraced screenshot failed: "<<worker.GetResultMessage()<<Con::endl;
 					return;
 				}
 
@@ -431,7 +431,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 				auto fp = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"wb");
 				if(fp == nullptr)
 				{
-					Con::cwar<<"WARNING: Unable to open file '"<<path<<"' for writing!"<<Con::endl;
+					Con::cwar<<"Unable to open file '"<<path<<"' for writing!"<<Con::endl;
 					return;
 				}
 				auto imgBuffer = worker.GetResult().images.begin()->second;
@@ -439,7 +439,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 					imgBuffer = imgBuffer->ApplyToneMapping(toneMapping);
 				fsys::File f {fp};
 				if(uimg::save_image(f,*imgBuffer,format,quality) == false)
-					Con::cwar<<"WARNING: Unable to save screenshot as '"<<path<<"'!"<<Con::endl;
+					Con::cwar<<"Unable to save screenshot as '"<<path<<"'!"<<Con::endl;
 
 				// Obsolete
 				// imgBuffer->Convert(util::ImageBuffer::Format::RGB8);
@@ -716,25 +716,25 @@ void CMD_shader_optimize(NetworkState *state,pragma::BasePlayerComponent *pl,std
 	pragma::console::parse_command_options(argv,commandOptions);
 	if(argv.empty())
 	{
-		Con::cwar<<"WARNING: No shader specified!"<<Con::endl;
+		Con::cwar<<"No shader specified!"<<Con::endl;
 		return;
 	}
 	auto &shaderName = argv.front();
 	auto &renderContext = c_engine->GetRenderContext();
 	if(renderContext.GetAPIAbbreviation() != "VK")
 	{
-		Con::cwar<<"WARNING: Shader optimization only supported for Vulkan!"<<Con::endl;
+		Con::cwar<<"Shader optimization only supported for Vulkan!"<<Con::endl;
 		return;
 	}
 	auto shader = renderContext.GetShader(shaderName);
 	if(shader.expired())
 	{
-		Con::cwar<<"WARNING: Shader '"<<shaderName<<"' not found!"<<Con::endl;
+		Con::cwar<<"Shader '"<<shaderName<<"' not found!"<<Con::endl;
 		return;
 	}
 	if(shader->IsValid() == false)
 	{
-		Con::cwar<<"WARNING: Shader '"<<shaderName<<"' is invalid!"<<Con::endl;
+		Con::cwar<<"Shader '"<<shaderName<<"' is invalid!"<<Con::endl;
 		return;
 	}
 	std::unordered_map<prosper::ShaderStage,std::string> shaderStages;
@@ -748,7 +748,7 @@ void CMD_shader_optimize(NetworkState *state,pragma::BasePlayerComponent *pl,std
 	auto optimizedShaders = renderContext.OptimizeShader(shaderStages,infoLog);
 	if(optimizedShaders.has_value() == false)
 	{
-		Con::cwar<<"WARNING: Unable to optimize shader: "<<infoLog<<Con::endl;
+		Con::cwar<<"Unable to optimize shader: "<<infoLog<<Con::endl;
 		return;
 	}
 	auto validate = pragma::console::get_command_option_parameter_value(commandOptions,"validate","0");
@@ -768,7 +768,7 @@ void CMD_shader_optimize(NetworkState *state,pragma::BasePlayerComponent *pl,std
 		auto shaderFile = renderContext.FindShaderFile("shaders/" +itSrc->second);
 		if(shaderFile.has_value() == false)
 		{
-			Con::cwar<<"WARNING: Unable to find shader file for '"<<pair.second<<"'!"<<Con::endl;
+			Con::cwar<<"Unable to find shader file for '"<<pair.second<<"'!"<<Con::endl;
 			return;
 		}
 		auto fileName = outputPath +*shaderFile;
@@ -780,7 +780,7 @@ void CMD_shader_optimize(NetworkState *state,pragma::BasePlayerComponent *pl,std
 		auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(),"w");
 		if(f == nullptr)
 		{
-			Con::cwar<<"WARNING: Unable to open file '"<<fileName<<"' for writing!"<<Con::endl;
+			Con::cwar<<"Unable to open file '"<<fileName<<"' for writing!"<<Con::endl;
 			return;
 		}
 		f->WriteString(pair.second);
@@ -845,7 +845,7 @@ void CMD_debug_ai_schedule_print(NetworkState *state,pragma::BasePlayerComponent
 	}
 	if(npc == nullptr)
 	{
-		Con::cwar<<"WARNING: No valid NPC target found!"<<Con::endl;
+		Con::cwar<<"No valid NPC target found!"<<Con::endl;
 		return;
 	}
 	Con::cout<<"Querying schedule data for NPC "<<*npc<<"..."<<Con::endl;
@@ -889,7 +889,7 @@ void Console::commands::cl_find(NetworkState *state,pragma::BasePlayerComponent*
 {
 	if(argv.empty())
 	{
-		Con::cwar<<"WARNING: No argument given!"<<Con::endl;
+		Con::cwar<<"No argument given!"<<Con::endl;
 		return;
 	}
 	auto similar = state->FindSimilarConVars(argv.front());
@@ -985,7 +985,7 @@ void Console::commands::vk_print_memory_stats(NetworkState *state,pragma::BasePl
 	auto r = prosper::util::get_memory_stats(c_engine->GetRenderContext(),prosper::MemoryPropertyFlags::DeviceLocalBit,availableSize,allocatedSize,&memIndices);
 	if(r == false)
 	{
-		Con::cwar<<"WARNING: No device local memory types found!"<<Con::endl;
+		Con::cwar<<"No device local memory types found!"<<Con::endl;
 		return;
 	}
 	std::stringstream ss;
@@ -1121,7 +1121,7 @@ void Console::commands::vk_print_memory_stats(NetworkState *state,pragma::BasePl
 	{
 		if(argv.size() == 1)
 		{
-			Con::cwar<<"WARNING: Not enough arguments given!"<<Con::endl;
+			Con::cwar<<"Not enough arguments given!"<<Con::endl;
 			return;
 		}
 		auto id = util::to_int(argv.at(1));
@@ -1129,7 +1129,7 @@ void Console::commands::vk_print_memory_stats(NetworkState *state,pragma::BasePl
 		{
 			if(id >= stats.memoryHeap.size())
 			{
-				Con::cwar<<"WARNING: Second argument has to be in the range [0,"<<stats.memoryHeap.size()<<"]!"<<Con::endl;
+				Con::cwar<<"Second argument has to be in the range [0,"<<stats.memoryHeap.size()<<"]!"<<Con::endl;
 				return;
 			}
 			Con::cout<<"Memory usage for heap "<<id<<":"<<Con::endl;
@@ -1142,7 +1142,7 @@ void Console::commands::vk_print_memory_stats(NetworkState *state,pragma::BasePl
 		{
 			if(id >= stats.memoryType.size())
 			{
-				Con::cwar<<"WARNING: Second argument has to be in the range [0,"<<stats.memoryType.size()<<"]!"<<Con::endl;
+				Con::cwar<<"Second argument has to be in the range [0,"<<stats.memoryType.size()<<"]!"<<Con::endl;
 				return;
 			}
 			Con::cout<<"Memory usage for type "<<id<<":"<<Con::endl;

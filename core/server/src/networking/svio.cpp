@@ -63,7 +63,7 @@ void ServerState::DropClient(pragma::networking::IServerClient &session,pragma::
 
 	pragma::networking::Error err;
 	if(session.Drop(reason,err) == false)
-		Con::cwar<<"WARNING: An error has occurred trying to drop client: '"<<err.GetMessage()<<"'!"<<Con::endl;
+		Con::cwar<<"An error has occurred trying to drop client: '"<<err.GetMessage()<<"'!"<<Con::endl;
 	if(pl == nullptr)
 		return;
 	auto *game = GetGameState();
@@ -88,7 +88,7 @@ static bool check_message_id(uint32_t id,const std::string &name)
 	assert(id != 0);
 	if(id == 0)
 	{
-		Con::csv<<"WARNING: Attempted to send unregistered message '"<<name<<"'!"<<Con::endl;
+		Con::cwar<<Con::PREFIX_SERVER<<"Attempted to send unregistered message '"<<name<<"'!"<<Con::endl;
 		return false;
 	}
 	return true;
@@ -104,7 +104,7 @@ void ServerState::SendPacket(const std::string &name,NetPacket &packet,pragma::n
 	pragma::networking::Error err;
 	if(m_server->SendPacket(protocol,packet,rf,err) == true)
 		return;
-	Con::cwar<<"WARNING: Unable to broadcast packet "<<ID<<": "<<err.GetMessage()<<Con::endl;
+	Con::cwar<<"Unable to broadcast packet "<<ID<<": "<<err.GetMessage()<<Con::endl;
 }
 void ServerState::SendPacket(const std::string &name,NetPacket &packet,pragma::networking::Protocol protocol)
 {

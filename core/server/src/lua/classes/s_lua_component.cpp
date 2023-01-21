@@ -43,7 +43,7 @@ void SLuaBaseEntityComponent::OnMemberValueChanged(uint32_t memberIdx)
 	const auto maxNwVars = std::numeric_limits<uint8_t>::max();
 	if(nwIndex > maxNwVars)
 	{
-		Con::cwar<<"WARNING: Networked member index of '"<<member.functionName<<"' exceeds maximum allowed number of networked variables ("<<maxNwVars<<")!"<<Con::endl;
+		Con::cwar<<"Networked member index of '"<<member.functionName<<"' exceeds maximum allowed number of networked variables ("<<maxNwVars<<")!"<<Con::endl;
 		return;
 	}
 

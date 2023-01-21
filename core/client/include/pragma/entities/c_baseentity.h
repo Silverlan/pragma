@@ -112,4 +112,15 @@ protected:
 
 inline DLLCLIENT Con::c_cout& operator<<(Con::c_cout &os,CBaseEntity &ent) {return ent.print(os);}
 
+template<>
+struct std::formatter<CBaseEntity> : std::formatter<std::string>
+{
+    auto format(CBaseEntity &ent, format_context &ctx) -> decltype(ctx.out())
+    {
+		std::stringstream ss;
+		ent.print(ss);
+        return std::format_to(ctx.out(), "{}",ss.str());
+    }
+};
+
 #endif

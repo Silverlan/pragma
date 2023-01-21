@@ -24,6 +24,7 @@ link_external_library(wms_shared)
 link_external_library(util_udm)
 link_external_library(panima)
 link_external_library(cppbepuik)
+link_external_library(spdlog)
 
 add_external_library(luajit)
 add_external_library(luabind)

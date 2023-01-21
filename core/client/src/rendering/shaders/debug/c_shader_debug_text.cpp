@@ -40,7 +40,7 @@ bool ShaderDebugText::RecordDraw(
 	assert(vertexCount <= umath::to_integral(GameLimits::MaxMeshVertices));
 	if(vertexCount > umath::to_integral(GameLimits::MaxMeshVertices))
 	{
-		Con::cerr<<"ERROR: Attempted to draw debug mesh with more than maximum ("<<umath::to_integral(GameLimits::MaxMeshVertices)<<") amount of vertices!"<<Con::endl;
+		Con::cerr<<"Attempted to draw debug mesh with more than maximum ("<<umath::to_integral(GameLimits::MaxMeshVertices)<<") amount of vertices!"<<Con::endl;
 		return false;
 	}
 	return RecordBindDescriptorSet(bindState,descSetTexture) && ShaderDebug::RecordDraw(bindState,vertexBuffer,vertexCount,mvp,color);

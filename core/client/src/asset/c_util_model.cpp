@@ -340,9 +340,9 @@ static std::shared_ptr<Model> import_model(ufile::IFile *optFile,const std::stri
 		if(result)
 			Con::cout<<"Successfully loaded file '"<<absPathToFile<<"'! Creating model..."<<Con::endl;
 		else if(err.empty() == false)
-			Con::cwar<<"WARNING: Unable to load file '"<<absPathToFile<<"': "<<err<<Con::endl;
+			Con::cwar<<"Unable to load file '"<<absPathToFile<<"': "<<err<<Con::endl;
 		else
-			Con::cwar<<"WARNING: Unable to load file '"<<absPathToFile<<"': "<<warn<<Con::endl;
+			Con::cwar<<"Unable to load file '"<<absPathToFile<<"': "<<warn<<Con::endl;
 	}
 	if(result == false)
 	{
@@ -768,7 +768,7 @@ static std::shared_ptr<Model> import_model(ufile::IFile *optFile,const std::stri
 
 			uint32_t iWeightChannel = 1;
 			while(fGetVertexBufferData("JOINTS_" +std::to_string(iWeightChannel++)).has_value())
-				Con::cwar<<"WARNING: Model has more than 4 bone weights, this is not supported!"<<Con::endl;
+				Con::cwar<<"Model has more than 4 bone weights, this is not supported!"<<Con::endl;
 
 			auto &verts = subMesh->GetVertices();
 			auto numVerts = posBufData->accessor.count;
@@ -1475,7 +1475,7 @@ bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo 
 			auto mdl = c_game->LoadModel(*strMdl);
 			if(mdl == nullptr)
 			{
-				Con::cwar<<"WARNING: Unable to load model '"<<*strMdl<<"'! Model will not be included in level export!"<<Con::endl;
+				Con::cwar<<"Unable to load model '"<<*strMdl<<"'! Model will not be included in level export!"<<Con::endl;
 				continue;
 			}
 			if(sceneDesc.modelCollection.size() == sceneDesc.modelCollection.capacity())
@@ -1580,7 +1580,7 @@ bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo 
 	if(success == false)
 	{
 		if(exportInfo.verbose)
-			Con::cout<<"WARNING: Unable to export lightmap atlas: "<<outErrMsg<<Con::endl;
+			Con::cwar<<"Unable to export lightmap atlas: "<<outErrMsg<<Con::endl;
 	}
 	return true;
 }

@@ -82,7 +82,7 @@ void ClientState::HandleClientResource(NetPacket &packet)
 		if(f == NULL)
 		{
 			response->Write<bool>(false);
-			Con::ccl<<"WARNING: [ResourceManager] Unable to write file '"<<fileDst<<"'. Skipping..."<<Con::endl;
+			Con::cwar<<Con::PREFIX_CLIENT<<"[ResourceManager] Unable to write file '"<<fileDst<<"'. Skipping..."<<Con::endl;
 		}
 		else
 		{
@@ -348,7 +348,7 @@ void ModelLoadManager::Update()
 			dllHandle = client->LoadLibraryModule("pcl/util_pcl",{},&err);
 			if(dllHandle == nullptr)
 			{
-				Con::cwar<<"WARNING: Unable to load PCL module. Rough models will not be generated!"<<Con::endl;
+				Con::cwar<<"Unable to load PCL module. Rough models will not be generated!"<<Con::endl;
 				return;
 			}
 		}

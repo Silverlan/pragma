@@ -49,13 +49,13 @@ void PhysObj::OnCollisionObjectWake(pragma::physics::ICollisionObject &o)
 
 	// Sanity check
 	if(m_colObjAwakeCount > m_collisionObjects.size())
-		Con::cwar<<"WARNING: Collision object wake counter exceeds number of collision objects!"<<Con::endl;
+		Con::cwar<<"Collision object wake counter exceeds number of collision objects!"<<Con::endl;
 }
 void PhysObj::OnCollisionObjectSleep(pragma::physics::ICollisionObject &o)
 {
 	if(m_colObjAwakeCount == 0)
 	{
-		Con::cwar<<"WARNING: Collision object of physics object fell asleep, but previous information indicated all collision objects were already asleep!"<<Con::endl;
+		Con::cwar<<"Collision object of physics object fell asleep, but previous information indicated all collision objects were already asleep!"<<Con::endl;
 		return;
 	}
 	if(--m_colObjAwakeCount == 0)

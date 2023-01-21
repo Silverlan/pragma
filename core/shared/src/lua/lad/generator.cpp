@@ -167,7 +167,7 @@ std::optional<std::string> LuaDocGenerator::SourceToUrl(const pragma::doc::Sourc
 		return url;
 	}
 	else
-		Con::cwar<<"WARNING: No repository specified for module '"<<moduleName<<"'!"<<Con::endl;
+		Con::cwar<<"No repository specified for module '"<<moduleName<<"'!"<<Con::endl;
 	return {};
 }
 
@@ -324,7 +324,7 @@ void LuaDocGenerator::GenerateDocParameters(const luabind::detail::TypeInfo &inp
 		};
 		if(input.templateTypes.empty())
 		{
-			Con::cwar<<"WARNING: Got template type without template parameters!"<<Con::endl;
+			Con::cwar<<"Got template type without template parameters!"<<Con::endl;
 			createUnknown();
 		}
 		else
@@ -335,7 +335,7 @@ void LuaDocGenerator::GenerateDocParameters(const luabind::detail::TypeInfo &inp
 			auto checkParamCount = [&subParams,&createUnknown](uint32_t expected,bool atLeast=false) -> bool {
 				if((!atLeast && subParams.size() != expected) || (atLeast && subParams.size() < expected))
 				{
-					Con::cwar<<"WARNING: Unexpected number of template parameters for template type!"<<Con::endl;
+					Con::cwar<<"Unexpected number of template parameters for template type!"<<Con::endl;
 					createUnknown();
 					return false;
 				}
@@ -513,7 +513,7 @@ void LuaDocGenerator::GenerateDocParameters(const luabind::detail::TypeInfo &inp
 				}
 			}
 			else
-				Con::cwar<<"WARNING: Unknown template type!"<<Con::endl;
+				Con::cwar<<"Unknown template type!"<<Con::endl;
 		}
 		return;
 	}
@@ -568,7 +568,7 @@ void LuaDocGenerator::GenerateDocParameters(const luabind::detail::TypeInfo &inp
 			typeName = magic_enum::enum_name(input.type);
 		param.GetType().flags |= pragma::doc::Variant::Flags::UnknownType;
 		applyFlags(param.GetType());
-		Con::cwar<<"WARNING: Unknown type '"<<typeName<<"'!"<<Con::endl;
+		Con::cwar<<"Unknown type '"<<typeName<<"'!"<<Con::endl;
 	}
 	else
 	{
@@ -1220,10 +1220,10 @@ void LuaDocGenerator::ParseLuaProperty(const std::string &name,const luabind::ob
 #endif
 
 						if(!fileName.has_value())
-							Con::cwar<<"WARNING: Unable to determine function source for "<<fptr<<" ("<<function_name<<") in module "<<*moduleName<<"!"<<Con::endl;
+							Con::cwar<<"Unable to determine function source for "<<fptr<<" ("<<function_name<<") in module "<<*moduleName<<"!"<<Con::endl;
 					}
 					else
-						Con::cwar<<"WARNING: Unable to determine module for function "<<fptr<<" ("<<function_name<<")"<<"!"<<Con::endl;
+						Con::cwar<<"Unable to determine module for function "<<fptr<<" ("<<function_name<<")"<<"!"<<Con::endl;
 
 					if(fileName.has_value())
 					{

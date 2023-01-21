@@ -10,6 +10,7 @@
 #include "pragma/audio/c_alsound.h"
 #include "pragma/c_engine.h"
 #include <pragma/networking/nwm_util.h>
+#include <pragma/logging.hpp>
 #include "pragma/console/c_cvar.h"
 #include "pragma/networking/c_nwm_util.h"
 #include "luasystem.h"
@@ -391,7 +392,7 @@ DLLCLIENT void NET_cl_snd_ev(NetPacket packet)
 		}
 	default:
 		{
-			Con::cwar<<"WARNING: Unhandled sound net event "<<ev<<"!"<<Con::endl;
+			spdlog::warn("Unhandled sound net event {}!",ev);
 			break;
 		}
 	}
@@ -604,7 +605,7 @@ void CALSound::Play()
 		}
 		catch(const std::runtime_error &err)
 		{
-			Con::cwar<<"WARNING: Unable to play sound "<<GetIndex()<<": "<<err.what()<<Con::endl;
+			spdlog::warn("Unable to play sound {}: {}",GetIndex(),err.what());
 			return;
 		}
 	}

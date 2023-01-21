@@ -38,7 +38,7 @@ Bool CLuaBaseEntityComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPack
 		auto nwIdx = packet->Read<uint8_t>();
 		if(nwIdx >= m_networkedMemberInfo->networkedMembers.size())
 		{
-			Con::cwar<<"WARNING: Invalid networked variable index '"<<nwIdx<<"'!"<<Con::endl;
+			Con::cwar<<"Invalid networked variable index '"<<nwIdx<<"'!"<<Con::endl;
 			return true;
 		}
 		auto memberIdx = m_networkedMemberInfo->networkedMembers.at(nwIdx);

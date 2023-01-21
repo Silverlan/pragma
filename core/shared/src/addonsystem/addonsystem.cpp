@@ -103,7 +103,7 @@ static bool mount_linked_addon(const std::string &pathLink,std::vector<AddonInfo
 	ufile::remove_extension_from_filename(lnkPath);
 	if(util::resolve_link(lnkPath,resolvedPath) == false)
 	{
-		Con::cwar<<"WARNING: Unable to resolve link path for '"<<lnkPath<<"'! This addon will not be mounted."<<Con::endl;
+		Con::cwar<<"Unable to resolve link path for '"<<lnkPath<<"'! This addon will not be mounted."<<Con::endl;
 		return false;
 	}
 	FileManager::AddCustomMountDirectory(resolvedPath.c_str(),true,static_cast<fsys::SearchFlags>(FSYS_SEARCH_ADDON));
@@ -196,7 +196,7 @@ void AddonSystem::MountAddons()
 	}
 	catch(const DirectoryWatcher::ConstructException &e)
 	{
-		Con::cwar<<"WARNING: [AddonSystem] Unable to watch addons directory: "<<e.what()<<Con::endl;
+		Con::cwar<<"[AddonSystem] Unable to watch addons directory: "<<e.what()<<Con::endl;
 	}
 }
 

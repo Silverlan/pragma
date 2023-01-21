@@ -61,7 +61,6 @@ void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 	auto *renderer = const_cast<pragma::CSceneComponent*>(scene.get())->GetRenderer();
 	if(renderer)
 	{
-
 		prosper::Texture *presentationTexture = nullptr;
 		if(umath::is_flag_set(drawSceneInfo.renderFlags,RenderFlags::HDR))
 			presentationTexture = drawSceneInfo.renderTarget ? &drawSceneInfo.renderTarget->GetTexture() : renderer->GetHDRPresentationTexture();

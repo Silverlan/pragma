@@ -68,7 +68,7 @@ void Lua::initialize_lua_state(Lua::Interface &lua)
 	Lua::initialize_error_handler();
 	lua_atpanic(l,[](lua_State *l) -> int32_t {
 		Lua::HandleLuaError(l);
-		Con::crit<<"ERROR: Lua Panic!"<<Con::endl;
+		Con::crit<<"Lua Panic!"<<Con::endl;
 		return 0;
 	});
 }

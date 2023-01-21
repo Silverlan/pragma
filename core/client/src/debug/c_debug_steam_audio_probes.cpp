@@ -32,7 +32,7 @@ static void debug_steam_audio_probe_boxes(NetworkState *state,ConVar*,bool,bool 
 		return;
 	if(iplScene->IsComplete() == false)
 	{
-		Con::cwar<<"WARNING: Steam audio is still initializing. Cannot display probe boxes at this time!"<<Con::endl;
+		Con::cwar<<"Steam audio is still initializing. Cannot display probe boxes at this time!"<<Con::endl;
 		return;
 	}
 	std::vector<ipl::Scene::ProbeSphere> spheres {};
@@ -61,13 +61,13 @@ void Console::commands::debug_steam_audio_dump_scene(NetworkState *state,pragma:
 	auto *sndSys = c_engine->GetSoundSystem();
 	if(sndSys == nullptr)
 	{
-		Con::cwar<<"WARNING: Unable to dump steam audio scene: No sound system found!"<<Con::endl;
+		Con::cwar<<"Unable to dump steam audio scene: No sound system found!"<<Con::endl;
 		return;
 	}
 	auto *iplScene = sndSys->GetSteamAudioScene();
 	if(iplScene == nullptr)
 	{
-		Con::cwar<<"WARNING: Unable to dump steam audio scene: Steam audio has not been initialized!"<<Con::endl;
+		Con::cwar<<"Unable to dump steam audio scene: Steam audio has not been initialized!"<<Con::endl;
 		return;
 	}
 	std::string mapName = "unknown";
@@ -82,7 +82,7 @@ void Console::commands::debug_steam_audio_dump_scene(NetworkState *state,pragma:
 	auto r = iplScene->DumpScene(path);
 	if(r == false)
 	{
-		Con::cwar<<"WARNING: Unable to dump steam audio scene: Has steam audio scene been finalized?"<<Con::endl;
+		Con::cwar<<"Unable to dump steam audio scene: Has steam audio scene been finalized?"<<Con::endl;
 		return;
 	}
 	Con::cout<<"Steam audio scene successfully dumped as '"<<path<<"'!"<<Con::endl;
@@ -91,6 +91,6 @@ void Console::commands::debug_steam_audio_dump_scene(NetworkState *state,pragma:
 #else
 void Console::commands::debug_steam_audio_dump_scene(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
-	Con::cwar<<"WARNING: Steam audio is disabled! Scene cannot be dumped."<<Con::endl;
+	Con::cwar<<"Steam audio is disabled! Scene cannot be dumped."<<Con::endl;
 }
 #endif

@@ -12,6 +12,7 @@
 #include <sharedutils/util_library.hpp>
 #include <pragma/util/util_game.hpp>
 #include <pragma/util/util_module.hpp>
+#include <pragma/logging.hpp>
 #include <alsoundsystem.hpp>
 #include <alsound_coordinate_system.hpp>
 
@@ -53,18 +54,18 @@ al::ISoundSystem *CEngine::InitializeSoundEngine()
 	std::string err;
 	if(loadAudioApiModule(audioAPI,err) == false)
 	{
-		Con::cwar<<"WARNING: Failed to load default audio engine '"<<audioAPI<<"': "<<err<<Con::endl;
+		spdlog::warn("Failed to load default audio engine '{}': {}",audioAPI,err);
 		// Fallback 1
 		if(loadAudioApiModule("soloud",err) == false)
 		{
-			Con::cwar<<"WARNING: Failed to load 'soloud' fallback audio engine: "<<err<<Con::endl;
+			spdlog::warn("Failed to load 'soloud' fallback audio engine: ",err);
 			// Fallback 2
 			if(!loadAudioApiModule("dummy",err))
-				Con::cwar<<"WARNING: Failed to load 'dummy' fallback audio engine: "<<err<<Con::endl;
+				spdlog::warn("Failed to load 'dummy' fallback audio engine: ",err);
 		}
 	}
 	if(!m_audioAPILib)
-		Con::crit<<"ERROR: No valid audio module found!"<<Con::endl;
+		Con::crit<<"No valid audio module found!"<<Con::endl;
 	auto lib = m_audioAPILib;
 	std::string location;
 	std::string modulePath;
@@ -72,6 +73,7 @@ al::ISoundSystem *CEngine::InitializeSoundEngine()
 
 	if(lib != nullptr)
 	{
+		spdlog::info("Loading audio module '{}'...",location);
 		auto fInitAudioAPI = lib->FindSymbolAddress<bool(*)(float,std::shared_ptr<al::ISoundSystem>&,std::string&)>("initialize_audio_api");
 		if(fInitAudioAPI == nullptr)
 			err = "Symbol 'initialize_audio_api' not found in library '" +location +"'!";
@@ -120,6 +122,6 @@ void CEngine::SetHRTFEnabled(bool b)
 	{
 		soundSys->SetHRTF(0);
 		if(soundSys->IsHRTFEnabled() == false)
-			Con::cwar<<"WARNING: Unable to activate HRTF. Please make sure *.mhr-file is in correct directory!"<<Con::endl;
+			Con::cwar<<"Unable to activate HRTF. Please make sure *.mhr-file is in correct directory!"<<Con::endl;
 	}
 }

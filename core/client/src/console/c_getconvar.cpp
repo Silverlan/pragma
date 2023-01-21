@@ -35,7 +35,7 @@ bool CEngine::RunConsoleCommand(std::string cmd,std::vector<std::string> &argv,K
 		return RunEngineConsoleCommand(cmd,argv,pressState,magnitude,callback);
 	if(stateCl == NULL || !stateCl->RunConsoleCommand(cmd,argv,pl,pressState,magnitude,callback))
 	{
-		Con::cwar<<"WARNING: Unknown console command '"<<cmd<<"'!"<<Con::endl;
+		Con::cwar<<"Unknown console command '"<<cmd<<"'!"<<Con::endl;
 		auto similar = (stateCl != nullptr) ? stateCl->FindSimilarConVars(cmd) : FindSimilarConVars(cmd);
 		if(similar.empty() == true)
 			Con::cout<<"No similar matches found!"<<Con::endl;

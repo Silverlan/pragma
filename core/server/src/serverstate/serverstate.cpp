@@ -32,6 +32,7 @@
 #include <pragma/engine_version.h>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
+#include <pragma/logging.hpp>
 
 static std::unordered_map<std::string,std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &ServerState::GetConVarPtrs() {return *conVarPtrs;}
@@ -122,15 +123,15 @@ void ServerState::InitializeGameServer(bool singlePlayerLocalGame)
 					{
 						m_server = nullptr;
 						m_serverReg = nullptr;
-						Con::cerr<<"ERROR: Unable to start "<<netLibName<<" server: "<<err.GetMessage()<<Con::endl;
+						Con::cerr<<"Unable to start "<<netLibName<<" server: "<<err.GetMessage()<<Con::endl;
 					}
 				}
 			}
 			else
-				Con::cerr<<"ERROR: Unable to initialize networking system '"<<netLibName<<"': Function 'initialize_game_server' not found in module!"<<Con::endl;
+				Con::cerr<<"Unable to initialize networking system '"<<netLibName<<"': Function 'initialize_game_server' not found in module!"<<Con::endl;
 		}
 		else
-			Con::cerr<<"ERROR: Unable to initialize networking system '"<<netLibName<<"': "<<err<<Con::endl;
+			Con::cerr<<"Unable to initialize networking system '"<<netLibName<<"': "<<err<<Con::endl;
 
 		if(m_server)
 		{
@@ -177,7 +178,7 @@ void ServerState::InitializeGameServer(bool singlePlayerLocalGame)
 				}
 			}
 			else
-				Con::cerr<<"ERROR: Steamworks module could not be loaded! Server will not show up in steam server browser!"<<Con::endl;
+				Con::cerr<<"Steamworks module could not be loaded! Server will not show up in steam server browser!"<<Con::endl;
 		}
 	}
 	else
@@ -193,7 +194,7 @@ void ServerState::OnClientAuthenticated(pragma::networking::IServerClient &sessi
 {
 	if(wasAuthenticationSuccessful.has_value() && wasAuthenticationSuccessful == false)
 	{
-		Con::cout<<"Authentication for client with steam id '"<<session.GetSteamId()<<"' has failed, dropping client..."<<Con::endl;
+		spdlog::info("Authentication for client with steam id '{}' has failed, dropping client...",session.GetSteamId());
 		DropClient(session,pragma::networking::DropReason::AuthenticationFailed);
 		return;
 	}
@@ -264,7 +265,7 @@ void ServerState::Think()
 		{
 			pragma::networking::Error err;
 			if(m_server->PollEvents(err) == false)
-				Con::cwar<<"WARNING: Server polling failed: "<<err.GetMessage()<<Con::endl;
+				Con::cwar<<"Server polling failed: "<<err.GetMessage()<<Con::endl;
 		}
 		if(m_serverReg)
 			m_serverReg->UpdateServerData();
@@ -359,7 +360,10 @@ void ServerState::StartGame(bool singlePlayer)
 		RegisterServerInfo();
 }
 
-Lua::ErrorColorMode ServerState::GetLuaErrorColorMode() {return Lua::ErrorColorMode::Cyan;}
+std::string ServerState::GetLuaErrorMessagePrefix() const
+{
+	return std::string{Con::PREFIX_SERVER} +Con::PREFIX_LUA;
+}
 
 void ServerState::ChangeLevel(const std::string &map)
 {
@@ -473,7 +477,7 @@ Material *ServerState::LoadMaterial(const std::string &path,bool precache,bool b
 			if(b == true)
 				return mat;
 		}
-		Con::cwar<<"WARNING: Unable to load material '"<<path<<"': File not found!"<<Con::endl;
+		Con::cwar<<"Unable to load material '"<<path<<"': File not found!"<<Con::endl;
 	}
 	return mat;
 }

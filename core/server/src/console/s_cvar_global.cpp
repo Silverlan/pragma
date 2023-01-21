@@ -79,7 +79,7 @@ void CMD_kick(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string
 	}
 	if(kickTarget == nullptr)
 	{
-		Con::cwar<<"WARNING: No player with id or name '"<<identifier<<"' found!"<<Con::endl;
+		Con::cwar<<"No player with id or name '"<<identifier<<"' found!"<<Con::endl;
 		return;
 	}
 	std::string reason;

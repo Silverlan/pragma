@@ -142,7 +142,7 @@ void pragma::AddonInstallManager::QueryFile(const std::shared_ptr<AddonUpdateQue
 									;
 							}
 							else
-								Con::cwar<<"WARNING: Unable to finalize archive file '"<<addon->addonPath<<"'!"<<Con::endl;
+								Con::cwar<<"Unable to finalize archive file '"<<addon->addonPath<<"'!"<<Con::endl;
 						}
 
 						// Re-open file handle for existing archives

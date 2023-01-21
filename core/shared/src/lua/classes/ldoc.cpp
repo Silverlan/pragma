@@ -276,7 +276,7 @@ static void normalize_type_name(pragma::lua::TypeNameManager &nameManager,std::s
 			if(g_typeWarningCache.find(type) == g_typeWarningCache.end())
 			{
 				g_typeWarningCache.insert(type);
-				Con::cwar<<"WARNING: Unknown type '"<<type<<"' ('"<<baseType<<"')!"<<Con::endl;
+				Con::cwar<<"Unknown type '"<<type<<"' ('"<<baseType<<"')!"<<Con::endl;
 			}
 		}
 	}
@@ -339,7 +339,7 @@ static std::vector<pragma::doc::Variant> normalize_type_namee(const pragma::doc:
 				if(g_typeWarningCache.find(type) == g_typeWarningCache.end())
 				{
 					g_typeWarningCache.insert(type);
-					Con::cwar<<"WARNING: Unknown type '"<<type<<"'!"<<Con::endl;
+					Con::cwar<<"Unknown type '"<<type<<"'!"<<Con::endl;
 				}
 			}
 		}
@@ -490,7 +490,7 @@ static void apply(pragma::lua::TypeNameManager &nameManager,pragma::doc::Variant
 		if(typeInfo.templateParameterTypes.empty())
 		{
 			variant.name = "nil";
-			Con::cwar<<"WARNING: Missing optional template type"<<Con::endl;
+			Con::cwar<<"Missing optional template type"<<Con::endl;
 		}
 		else
 		{
@@ -505,7 +505,7 @@ static void apply(pragma::lua::TypeNameManager &nameManager,pragma::doc::Variant
 		if(typeInfo.templateParameterTypes.empty())
 		{
 			variant.name = "nil";
-			Con::cwar<<"WARNING: Missing typehint template type"<<Con::endl;
+			Con::cwar<<"Missing typehint template type"<<Con::endl;
 		}
 		else
 		{
@@ -518,7 +518,7 @@ static void apply(pragma::lua::TypeNameManager &nameManager,pragma::doc::Variant
 	{
 		variant.name = "table";
 		if(typeInfo.templateParameterTypes.empty())
-			Con::cwar<<"WARNING: Missing tableT template type"<<Con::endl;
+			Con::cwar<<"Missing tableT template type"<<Con::endl;
 		else
 		{
 			variant.typeParameters.push_back({});
@@ -531,7 +531,7 @@ static void apply(pragma::lua::TypeNameManager &nameManager,pragma::doc::Variant
 	{
 		variant.name = "table";
 		if(typeInfo.templateParameterTypes.empty())
-			Con::cwar<<"WARNING: Missing tableTT template type"<<Con::endl;
+			Con::cwar<<"Missing tableTT template type"<<Con::endl;
 		else
 		{
 			variant.typeParameters.push_back({});
@@ -548,7 +548,7 @@ static void apply(pragma::lua::TypeNameManager &nameManager,pragma::doc::Variant
 	{
 		variant.name = "variant";
 		if(typeInfo.templateParameterTypes.empty())
-			Con::cwar<<"WARNING: Missing variant template type"<<Con::endl;
+			Con::cwar<<"Missing variant template type"<<Con::endl;
 		else
 		{
 			variant.typeParameters.reserve(typeInfo.templateParameterTypes.size());
@@ -564,7 +564,7 @@ static void apply(pragma::lua::TypeNameManager &nameManager,pragma::doc::Variant
 	{
 		variant.name = "mult";
 		if(typeInfo.templateParameterTypes.empty())
-			Con::cwar<<"WARNING: Missing mult template type"<<Con::endl;
+			Con::cwar<<"Missing mult template type"<<Con::endl;
 		else
 		{
 			variant.typeParameters.reserve(typeInfo.templateParameterTypes.size());
@@ -613,7 +613,7 @@ static void normalize_variant(pragma::lua::TypeNameManager &nameManager,pragma::
 		/*if(typeInfo.templateParameterTypes.empty())
 		{
 			variant.name = "nil";
-			Con::cwar<<"WARNING: Missing optional template type"<<Con::endl;
+			Con::cwar<<"Missing optional template type"<<Con::endl;
 		}
 		else
 		{
@@ -628,7 +628,7 @@ static void normalize_variant(pragma::lua::TypeNameManager &nameManager,pragma::
 	{
 		variant.name = "table";
 		if(typeInfo.templateParameterTypes.empty())
-			Con::cwar<<"WARNING: Missing tableT template type"<<Con::endl;
+			Con::cwar<<"Missing tableT template type"<<Con::endl;
 		else
 		{
 			variant.typeParameters.push_back({});
@@ -641,7 +641,7 @@ static void normalize_variant(pragma::lua::TypeNameManager &nameManager,pragma::
 	{
 		variant.name = "table";
 		if(typeInfo.templateParameterTypes.empty())
-			Con::cwar<<"WARNING: Missing tableTT template type"<<Con::endl;
+			Con::cwar<<"Missing tableTT template type"<<Con::endl;
 		else
 		{
 			variant.typeParameters.push_back({});
@@ -663,7 +663,7 @@ static void normalize_variant(pragma::lua::TypeNameManager &nameManager,pragma::
 	{
 		variant.name = "table";
 		if(typeInfo.templateParameterTypes.empty())
-			Con::cwar<<"WARNING: Missing tableT template type"<<Con::endl;
+			Con::cwar<<"Missing tableT template type"<<Con::endl;
 		else
 		{
 			variant.typeParameters.push_back({});
@@ -1282,7 +1282,7 @@ static void autogenerate()
 				auto it = classMap.find(base.base);
 				if(it == classMap.end())
 				{
-					Con::cwar<<"WARNING: Missing class '"<<base.base->name()<<"'"<<Con::endl;
+					Con::cwar<<"Missing class '"<<base.base->name()<<"'"<<Con::endl;
 					continue;
 				}
 				auto fullName = it->second->GetFullName();
@@ -1300,7 +1300,7 @@ static void autogenerate()
 	{
 		if(pair.second->bestMatch.has_value())
 			continue;
-		Con::cwar<<"WARNING: Unassigned type '"<<pair.second->luaName<<"' ("<<pair.second->name<<")"<<Con::endl;
+		Con::cwar<<"Unassigned type '"<<pair.second->luaName<<"' ("<<pair.second->name<<")"<<Con::endl;
 	}
 	for(auto &pair : assignedTypes)
 	{
@@ -1463,10 +1463,10 @@ static void autogenerate()
 	if(repoMan)
 	{
 		if(!repoMan->LoadRepositoryReferences(err))
-			Con::cwar<<"WARNING: LAD repository manager failed: "<<err<<Con::endl;
+			Con::cwar<<"LAD repository manager failed: "<<err<<Con::endl;
 	}
 	else
-		Con::cwar<<"WARNING: Unable to create LAD repository manager: "<<err<<Con::endl;
+		Con::cwar<<"Unable to create LAD repository manager: "<<err<<Con::endl;
 
 	// Merge with old documentation
 	std::string docLocation = std::string{Lua::doc::FILE_LOCATION} +"pragma." +std::string{Lua::doc::FILE_EXTENSION_ASCII};

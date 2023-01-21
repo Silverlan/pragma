@@ -39,8 +39,6 @@ REGISTER_ENGINE_CONCOMMAND(clear_cache,[](NetworkState*,pragma::BasePlayerCompon
 },ConVarFlags::None,"Deletes all cache files.");
 REGISTER_ENGINE_CONVAR(cache_version,"",ConVarFlags::Archive,"The engine version that the cache files are associated with. If this version doesn't match the current engine version, the cache will be cleared.");
 REGISTER_ENGINE_CONVAR(cache_version_target,"7",ConVarFlags::None,"If cache_version does not match this value, the cache files will be cleared and it will be set to it.");
-REGISTER_ENGINE_CONVAR(log_enabled,"0",ConVarFlags::Archive,"0 = Log disabled; 1 = Log errors only; 2 = Log errors and warnings; 3 = Log all console output");
-REGISTER_ENGINE_CONVAR(log_file,"log.txt",ConVarFlags::Archive,"The log-file the console output will be logged to.");
 REGISTER_ENGINE_CONVAR(debug_profiling_enabled,"0",ConVarFlags::None,"Enables profiling timers.");
 REGISTER_ENGINE_CONVAR(sh_mount_external_game_resources,"1",ConVarFlags::Archive,"If set to 1, the game will attempt to load missing resources from external games.");
 REGISTER_ENGINE_CONVAR(sh_lua_remote_debugging,"0",ConVarFlags::Archive,"0 = Remote debugging is disabled; 1 = Remote debugging is enabled serverside; 2 = Remote debugging is enabled clientside.\nCannot be changed during an active game. Also requires the \"-luaext\" launch parameter.\nRemote debugging cannot be enabled clientside and serverside at the same time.");
@@ -164,7 +162,7 @@ static void compile_lua_file(lua_State *l,Game &game,std::string f)
 	path += ".clua";
 	auto r = Lua::compile_file(l,path);
 	if(r == false)
-		Con::cwar<<"WARNING: Unable to write file '"<<path.c_str()<<"'..."<<Con::endl;
+		Con::cwar<<"Unable to write file '"<<path.c_str()<<"'..."<<Con::endl;
 	else
 		Con::cout<<"Successfully compiled as '"<<path.c_str()<<"'."<<Con::endl;
 }
@@ -239,7 +237,7 @@ REGISTER_SHARED_CONCOMMAND(list,[](NetworkState *state,pragma::BasePlayerCompone
 REGISTER_SHARED_CONCOMMAND(find,[](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv) {
 	if(argv.empty())
 	{
-		Con::cwar<<"WARNING: No argument given!"<<Con::endl;
+		Con::cwar<<"No argument given!"<<Con::endl;
 		return;
 	}
 	auto similar = state->FindSimilarConVars(argv.front());

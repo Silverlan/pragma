@@ -31,7 +31,7 @@ void SResourceWatcherManager::OnResourceChanged(const util::Path &rootPath,const
 			if(s_game->LoadNavMesh(true) == false)
 			{
 #if RESOURCE_WATCHER_VERBOSE > 0
-			Con::cwar<<"WARNING: [ResourceWatcher] Unable to reload navigation mesh!"<<Con::endl;
+			Con::cwar<<"[ResourceWatcher] Unable to reload navigation mesh!"<<Con::endl;
 #endif
 			}
 		}

@@ -37,7 +37,7 @@ void SGame::HandleLuaNetPacket(pragma::networking::IServerClient &session,NetPac
 	std::unordered_map<std::string,int>::iterator i = m_luaNetMessages.find(*ident);
 	if(i == m_luaNetMessages.end())
 	{
-		Con::csv<<"WARNING: Unhandled lua net message: "<<*ident<<Con::endl;
+		Con::cwar<<Con::PREFIX_SERVER<<"Unhandled lua net message: "<<*ident<<Con::endl;
 		return;
 	}
 	ProtectedLuaCall([&i,&pl,&packet](lua_State *l) {
@@ -79,7 +79,7 @@ void Lua::net::server::broadcast(pragma::networking::Protocol protocol,const std
 	NetPacket packetNew;
 	if(!NetIncludePacketID(::server,identifier,packet,packetNew))
 	{
-		Con::csv<<"WARNING: Attempted to send unindexed lua net message: "<<identifier<<Con::endl;
+		Con::cwar<<Con::PREFIX_SERVER<<"Attempted to send unindexed lua net message: "<<identifier<<Con::endl;
 		return;
 	}
 	::server->SendPacket("luanet",packetNew,protocol);
@@ -90,7 +90,7 @@ static void send(lua_State *l,pragma::networking::Protocol protocol,const std::s
 	NetPacket packetNew;
 	if(!NetIncludePacketID(::server,identifier,packet,packetNew))
 	{
-		Con::csv<<"WARNING: Attempted to send unindexed lua net message: "<<identifier<<Con::endl;
+		Con::cwar<<Con::PREFIX_SERVER<<"Attempted to send unindexed lua net message: "<<identifier<<Con::endl;
 		return;
 	}
 	::server->SendPacket("luanet",packetNew,protocol,rp);

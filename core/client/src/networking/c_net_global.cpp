@@ -76,7 +76,7 @@ CBaseEntity *NET_cl_ent_create(NetPacket &packet,bool bSpawn,bool bIgnoreMapInit
 	CBaseEntity*(*factory)(unsigned int) = g_ClEntityNetworkMap->GetFactory(factoryID);
 	if(factory == NULL)
 	{
-		Con::cwar<<"WARNING: Unable to create entity with factory ID '"<<factoryID<<"': Factory not found!"<<Con::endl;
+		Con::cwar<<"Unable to create entity with factory ID '"<<factoryID<<"': Factory not found!"<<Con::endl;
 		return NULL;
 	}
 	unsigned int idx = packet->Read<unsigned int>();
@@ -90,7 +90,7 @@ CBaseEntity *NET_cl_ent_create(NetPacket &packet,bool bSpawn,bool bIgnoreMapInit
 	}
 	else if(bIgnoreMapInit == false && game->IsMapInitialized())
 	{
-		Con::cwar<<"WARNING: Map-entity created after map initialization. Removing..."<<Con::endl;
+		Con::cwar<<"Map-entity created after map initialization. Removing..."<<Con::endl;
 		ent->RemoveSafely();
 		return NULL;
 	}
@@ -130,7 +130,7 @@ CBaseEntity *NET_cl_ent_create_lua(NetPacket &packet,bool bSpawn,bool bIgnoreMap
 	CBaseEntity *ent = game->CreateLuaEntity(classname,idx,true);
 	if(ent == NULL)
 	{
-		Con::cwar<<"WARNING: Attempted to create unregistered entity '"<<classname<<"'!"<<Con::endl;
+		Con::cwar<<"Attempted to create unregistered entity '"<<classname<<"'!"<<Con::endl;
 		return nullptr;
 	}
 	ent->ReceiveData(packet);
@@ -142,7 +142,7 @@ CBaseEntity *NET_cl_ent_create_lua(NetPacket &packet,bool bSpawn,bool bIgnoreMap
 	}
 	else if(bIgnoreMapInit == false && game->IsMapInitialized())
 	{
-		Con::cwar<<"WARNING: Map-entity created after map initialization. Removing..."<<Con::endl;
+		Con::cwar<<"Map-entity created after map initialization. Removing..."<<Con::endl;
 		ent->RemoveSafely();
 		return NULL;
 	}
@@ -479,7 +479,7 @@ void NET_cl_ent_event(NetPacket packet)
 	auto localId = c_game->SharedNetEventIdToLocal(eventId);
 	if(localId == std::numeric_limits<pragma::NetEventId>::max())
 	{
-		Con::cwar<<"WARNING: Unknown net event with shared id "<<eventId<<"!"<<Con::endl;
+		Con::cwar<<"Unknown net event with shared id "<<eventId<<"!"<<Con::endl;
 		return;
 	}
 	packet->SetOffset(0);
@@ -594,7 +594,7 @@ DLLCLIENT void NET_cl_map_load(NetPacket packet)
 	else
 		r = c_game->LoadMap(mapName.c_str(),origin);
 	if(r == false)
-		Con::cwar<<"WARNING: Unable to load map '"<<mapName<<"'! Ignoring..."<<Con::endl;
+		Con::cwar<<"Unable to load map '"<<mapName<<"'! Ignoring..."<<Con::endl;
 }
 
 DLLCLIENT void NET_cl_pl_local(NetPacket packet)
@@ -1219,7 +1219,7 @@ void CMD_debug_ai_schedule(NetworkState *state,pragma::BasePlayerComponent *pl,s
 	}
 	if(npc == nullptr)
 	{
-		Con::cwar<<"WARNING: No valid NPC target found!"<<Con::endl;
+		Con::cwar<<"No valid NPC target found!"<<Con::endl;
 		return;
 	}
 	Con::cout<<"Querying schedule data for NPC "<<*npc<<"..."<<Con::endl;

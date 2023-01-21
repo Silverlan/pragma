@@ -102,13 +102,13 @@ bool pragma::asset::WmdFormatHandler::LoadData(ModelProcessor &processor,ModelLo
 	auto &mdlName = processor.identifier;
 	if(hd[0] != 'W' || hd[1] != 'M' || hd[2] != 'D')
 	{
-		Con::cwar<<"WARNING: Invalid file format for model '"<<mdlName<<"'!"<<Con::endl;
+		Con::cwar<<"Invalid file format for model '"<<mdlName<<"'!"<<Con::endl;
 		return false;
 	}
 	unsigned short ver = f.Read<unsigned short>();
 	if(ver > WMD_VERSION)
 	{
-		Con::cwar<<"WARNING: Incompatible model format version "<<ver<<"!"<<Con::endl;
+		Con::cwar<<"Incompatible model format version "<<ver<<"!"<<Con::endl;
 		return false;
 	}
 	auto flags = f.Read<Model::Flags>();
@@ -860,7 +860,7 @@ void pragma::asset::WmdFormatHandler::LoadAnimations(unsigned short version,Mode
 						if(subMesh == nullptr)
 						{
 							m_file->Seek(endOfFrameOffset);
-							Con::cwar<<"WARNING: Invalid mesh reference in vertex animation '"<<name<<"'! Skipping..."<<Con::endl;
+							Con::cwar<<"Invalid mesh reference in vertex animation '"<<name<<"'! Skipping..."<<Con::endl;
 						}
 						else
 						{
@@ -919,7 +919,7 @@ void pragma::asset::WmdFormatHandler::LoadAnimations(unsigned short version,Mode
 						}
 						else
 						{
-							Con::cwar<<"WARNING: Invalid mesh reference in vertex animation '"<<name<<"'! Skipping..."<<Con::endl;
+							Con::cwar<<"Invalid mesh reference in vertex animation '"<<name<<"'! Skipping..."<<Con::endl;
 							auto szPerVertex = sizeof(uint16_t) *3;
 							if(umath::is_flag_set(flags,MeshVertexFrame::Flags::HasDeltaValues))
 								szPerVertex += sizeof(uint16_t);

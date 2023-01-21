@@ -255,14 +255,14 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 		if(path.path.GetComponent(offset,&offset) != "ec") // First path component denotes the type, which always has to be 'ec' for entity component in this case
 		{
 			if(shouldPrintWarning())
-				Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but path is not a valid entity component URI!"<<Con::endl;
+				Con::cwar<<"Attempted to play animation channel with path '"<<path.ToUri()<<"', but path is not a valid entity component URI!"<<Con::endl;
 			continue;
 		}
 		auto componentPath = ParseComponentChannelPath(path);
 		if(!componentPath.has_value())
 		{
 			if(shouldPrintWarning())
-				Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but could not determine path components!"<<Con::endl;
+				Con::cwar<<"Attempted to play animation channel with path '"<<path.ToUri()<<"', but could not determine path components!"<<Con::endl;
 			continue;
 		}
 		auto &componentTypeName = componentPath->first;
@@ -271,14 +271,14 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 		if(hComponent.expired())
 		{
 			if(shouldPrintWarning())
-				Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but entity has no component of type '"<<componentTypeName<<"'!"<<Con::endl;
+				Con::cwar<<"Attempted to play animation channel with path '"<<path.ToUri()<<"', but entity has no component of type '"<<componentTypeName<<"'!"<<Con::endl;
 			continue;
 		}
 		auto &memberName = componentPath->second;
 		if(memberName.IsEmpty())
 		{
 			if(shouldPrintWarning())
-				Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but no member name has been specified!"<<Con::endl;
+				Con::cwar<<"Attempted to play animation channel with path '"<<path.ToUri()<<"', but no member name has been specified!"<<Con::endl;
 			continue;
 		}
 		auto memberPath = memberName;
@@ -296,7 +296,7 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 		if(!memberIdx.has_value())
 		{
 			if(shouldPrintWarning())
-				Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', entity component has no member with name '"<<memberName<<"'!"<<Con::endl;
+				Con::cwar<<"Attempted to play animation channel with path '"<<path.ToUri()<<"', entity component has no member with name '"<<memberName<<"'!"<<Con::endl;
 			continue;
 		}
 		auto channelValueType = channel->GetValueType();
@@ -304,7 +304,7 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 		if(!memberInfo)
 		{
 			if(shouldPrintWarning())
-				Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but member '"<<memberPath.GetString()<<"' with index '"<<*memberIdx<<"' is not valid!"<<Con::endl;
+				Con::cwar<<"Attempted to play animation channel with path '"<<path.ToUri()<<"', but member '"<<memberPath.GetString()<<"' with index '"<<*memberIdx<<"' is not valid!"<<Con::endl;
 			continue;
 		}
 		auto valueType = memberInfo->type;
@@ -330,7 +330,7 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 			{
 				if(valueComponents->empty() || valueComponents->size() > numComponentsChannel)
 				{
-					Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but member component count is not in the allowed range of [1,"<<numComponentsChannel<<"] for the type of the specified member!"<<Con::endl;
+					Con::cwar<<"Attempted to play animation channel with path '"<<path.ToUri()<<"', but member component count is not in the allowed range of [1,"<<numComponentsChannel<<"] for the type of the specified member!"<<Con::endl;
 					return;
 				}
 				std::array<uint32_t,numComponentsChannel> componentIndices;
@@ -347,7 +347,7 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 							componentIndices[idx] = 1;
 						else
 						{
-							Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but member component '"<<strComponent<<"' is not recognized as a valid identifier for the member type!"<<Con::endl;
+							Con::cwar<<"Attempted to play animation channel with path '"<<path.ToUri()<<"', but member component '"<<strComponent<<"' is not recognized as a valid identifier for the member type!"<<Con::endl;
 							return; // Unknown component type
 						}
 						break;
@@ -363,7 +363,7 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 							componentIndices[idx] = 2;
 						else
 						{
-							Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but member component '"<<strComponent<<"' is not recognized as a valid identifier for the member type!"<<Con::endl;
+							Con::cwar<<"Attempted to play animation channel with path '"<<path.ToUri()<<"', but member component '"<<strComponent<<"' is not recognized as a valid identifier for the member type!"<<Con::endl;
 							return; // Unknown component type
 						}
 						break;
@@ -381,7 +381,7 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 							componentIndices[idx] = 3;
 						else
 						{
-							Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but member component '"<<strComponent<<"' is not recognized as a valid identifier for the member type!"<<Con::endl;
+							Con::cwar<<"Attempted to play animation channel with path '"<<path.ToUri()<<"', but member component '"<<strComponent<<"' is not recognized as a valid identifier for the member type!"<<Con::endl;
 							return; // Unknown component type
 						}
 						break;
@@ -398,7 +398,7 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 							componentIndices[idx] = 3;
 						else
 						{
-							Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but member component '"<<strComponent<<"' is not recognized as a valid identifier for the member type!"<<Con::endl;
+							Con::cwar<<"Attempted to play animation channel with path '"<<path.ToUri()<<"', but member component '"<<strComponent<<"' is not recognized as a valid identifier for the member type!"<<Con::endl;
 							return; // Unknown component type
 						}
 						break;
@@ -413,7 +413,7 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 							componentIndices[idx] = 2;
 						else
 						{
-							Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but member component '"<<strComponent<<"' is not recognized as a valid identifier for the member type!"<<Con::endl;
+							Con::cwar<<"Attempted to play animation channel with path '"<<path.ToUri()<<"', but member component '"<<strComponent<<"' is not recognized as a valid identifier for the member type!"<<Con::endl;
 							return; // Unknown component type
 						}
 						break;

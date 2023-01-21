@@ -18,6 +18,7 @@
 #include <pragma/engine_version.h>
 #include <pragma/networking/error.hpp>
 #include <networkmanager/nwm_error_handle.h>
+#include <pragma/logging.hpp>
 
 extern DLLNETWORK Engine *engine;
 extern DLLSERVER SGame *s_game;
@@ -26,7 +27,7 @@ void ServerState::OnMasterServerRegistered(bool b,std::string reason)
 	if(b == false)
 	{
         m_tNextWMSConnect = std::chrono::steady_clock::now();
-		Con::cwar<<"WARNING: Unable to connect to master server ("<<reason<<")"<<Con::endl;
+		Con::cwar<<"Unable to connect to master server ("<<reason<<")"<<Con::endl;
 	}
 }
 
@@ -88,7 +89,7 @@ void ServerState::CloseServer()
 	pragma::networking::Error err;
 	if(m_server->Shutdown(err) == true)
 		return;
-	Con::cerr<<"ERROR: Unable to shut down server: "<<err.GetMessage()<<Con::endl;
+	spdlog::error("Unable to shut down server: ",err.GetMessage());
 }
 
 /////////////////////////////////

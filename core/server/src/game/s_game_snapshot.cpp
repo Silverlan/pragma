@@ -140,7 +140,7 @@ void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 
 				if(++numComponents == std::numeric_limits<uint8_t>::max())
 				{
-					Con::csv<<"WARNING: Attempted to send data for more than "<<std::numeric_limits<uint8_t>::max()<<" components for a single entity! This is not allowed!"<<Con::endl;
+					Con::cwar<<Con::PREFIX_SERVER<<"Attempted to send data for more than "<<std::numeric_limits<uint8_t>::max()<<" components for a single entity! This is not allowed!"<<Con::endl;
 					break;
 				}
 			}
@@ -185,7 +185,7 @@ void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 
 void SGame::SendSnapshot()
 {
-	//Con::csv<<"[SERVER] Sending snapshot.."<<Con::endl;
+	//Con::csv<<"Sending snapshot.."<<Con::endl;
 	auto &players = pragma::SPlayerComponent::GetAll();
 	//unsigned char numPlayersValid = 0;
 	for(auto *plComponent : players)

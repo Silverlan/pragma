@@ -45,7 +45,7 @@ bool SymbolHandler::Initialize()
     m_hProcess = GetCurrentProcess();
     if(!SymInitialize(m_hProcess,nullptr,TRUE))
 	{
-		Con::cwar<<"WARNING: Unable to initialize symbol handler: "<<os::windows::get_last_error_as_string()<<Con::endl;
+		Con::cwar<<"Unable to initialize symbol handler: "<<os::windows::get_last_error_as_string()<<Con::endl;
 		m_valid = false;
         return false;
 	}
@@ -91,7 +91,7 @@ std::optional<std::string> SymbolHandler::FindSource(DWORD64 rva,uint32_t &outLi
 		return line.FileName;
 	}
 	else
-		Con::cwar<<"WARNING: "<<os::windows::get_last_error_as_string()<<Con::endl;
+		Con::cwar<<""<<os::windows::get_last_error_as_string()<<Con::endl;
 	return {};
 }
 std::optional<pragma::os::windows::RVA> SymbolHandler::FindSymbol(const std::string &symbol) const

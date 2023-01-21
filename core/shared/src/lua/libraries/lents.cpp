@@ -441,7 +441,7 @@ Lua::type<BaseEntity> Lua::ents::create_trigger(lua_State *l,const Vector3 &orig
 {
 	if(shape.IsConvex() == false)
 	{
-		Con::cwar<<"WARNING: Cannot create trigger_touch entity with non-convex physics shape!"<<Con::endl;
+		Con::cwar<<"Cannot create trigger_touch entity with non-convex physics shape!"<<Con::endl;
 		return nil;
 	}
 	auto cvShape = std::dynamic_pointer_cast<pragma::physics::IConvexShape>(shape.shared_from_this());
@@ -933,7 +933,7 @@ void Lua::ents::register_class(lua_State *l,const std::string &className,const l
 				if(game->LoadLuaComponentByName(name) == true && componentManager.GetComponentTypeId(name,id,false) == true)
 					components.push_back(id);
 				else
-					Con::cwar<<"WARNING: Attempted to add unknown entity component '"<<name<<"' to registration of entity '"<<className<<"'! Skipping..."<<Con::endl;
+					Con::cwar<<"Attempted to add unknown entity component '"<<name<<"' to registration of entity '"<<className<<"'! Skipping..."<<Con::endl;
 			}
 		}
 		else
@@ -942,7 +942,7 @@ void Lua::ents::register_class(lua_State *l,const std::string &className,const l
 			if(id != pragma::INVALID_COMPONENT_ID)
 				components.push_back(id);
 			else
-				Con::cwar<<"WARNING: Attempted to add unknown entity component to registration of entity '"<<className<<"'! Skipping..."<<Con::endl;
+				Con::cwar<<"Attempted to add unknown entity component to registration of entity '"<<className<<"'! Skipping..."<<Con::endl;
 		}
 	}
 
@@ -981,7 +981,7 @@ Lua::opt<pragma::NetEventId> Lua::ents::register_component_net_event(lua_State *
 	auto *componentInfo = componentManager.GetComponentInfo(componentId);
 	if(componentInfo == nullptr)
 	{
-		Con::cwar<<"WARNING: Attempted to register component net event '"<<name<<"' to unknown component type "<<componentId<<"!"<<Con::endl;
+		Con::cwar<<"Attempted to register component net event '"<<name<<"' to unknown component type "<<componentId<<"!"<<Con::endl;
 		return nil;
 	}
 
@@ -998,7 +998,7 @@ Lua::opt<pragma::ComponentEventId> Lua::ents::register_component_event(lua_State
 	if(componentInfo == nullptr)
     {
 
-		Con::cwar<<"WARNING: Attempted to register component event '"<<name<<"' to unknown component type "<<componentId<<"!"<<Con::endl;
+		Con::cwar<<"Attempted to register component event '"<<name<<"' to unknown component type "<<componentId<<"!"<<Con::endl;
 		return nil;
 
 	}

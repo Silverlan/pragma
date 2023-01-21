@@ -411,7 +411,7 @@ static void generate_lightmap_uv_atlas(BaseEntity &ent,uint32_t width,uint32_t h
 	job.SetCompletionHandler([hEnt,callback](util::ParallelWorker<std::vector<Vector2>&> &worker) {
 		if(worker.IsSuccessful() == false)
 		{
-			Con::cwar<<"WARNING: Atlas generation failed: "<<worker.GetResultMessage()<<Con::endl;
+			Con::cwar<<"Atlas generation failed: "<<worker.GetResultMessage()<<Con::endl;
 			callback(false);
 			return;
 		}
@@ -421,7 +421,7 @@ static void generate_lightmap_uv_atlas(BaseEntity &ent,uint32_t width,uint32_t h
 		auto lightmapC = hEnt.valid() ? hEnt.get()->GetComponent<pragma::CLightMapComponent>() : pragma::ComponentHandle<pragma::CLightMapComponent>{};
 		if(meshGroup == nullptr || lightmapC.expired())
 		{
-			Con::cwar<<"WARNING: Resources used for atlas generation are no longer valid!"<<Con::endl;
+			Con::cwar<<"Resources used for atlas generation are no longer valid!"<<Con::endl;
 			callback(false);
 			return;
 		}
@@ -521,13 +521,13 @@ static void generate_lightmaps(
 		return;
 	if(job.IsValid() == false)
 	{
-		Con::cwar<<"WARNING: Unable to initialize cycles scene for lightmap baking!"<<Con::endl;
+		Con::cwar<<"Unable to initialize cycles scene for lightmap baking!"<<Con::endl;
 		return;
 	}
 	job.SetCompletionHandler([hdrOutput](util::ParallelWorker<uimg::ImageLayerSet> &worker) {
 		if(worker.IsSuccessful() == false)
 		{
-			Con::cwar<<"WARNING: Unable to bake lightmaps: "<<worker.GetResultMessage()<<Con::endl;
+			Con::cwar<<"Unable to bake lightmaps: "<<worker.GetResultMessage()<<Con::endl;
 			return;
 		}
 
@@ -567,7 +567,7 @@ bool CLightMapComponent::BakeLightmaps(const LightmapBakeSettings &bakeSettings)
 	auto it = entIt.begin();
 	if(it == entIt.end())
 	{
-		Con::cwar<<"WARNING: No lightmap entity found!"<<Con::endl;
+		Con::cwar<<"No lightmap entity found!"<<Con::endl;
 		return false;
 	}
 	auto *ent = *it;

@@ -136,6 +136,6 @@ void Console::commands::debug_water(NetworkState *state,pragma::BasePlayerCompon
 		}
 	}
 	if(bFoundWater == false)
-		Con::cwar<<"WARNING: No water entity found!"<<Con::endl;
+		Con::cwar<<"No water entity found!"<<Con::endl;
 }
 

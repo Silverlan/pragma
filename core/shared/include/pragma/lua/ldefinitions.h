@@ -106,19 +106,11 @@ inline void lua_removereference(lua_State *l,int index)
 namespace Lua
 {
 	enum class StatusCode : decltype(LUA_OK);
-	enum class DLLNETWORK ErrorColorMode : uint32_t
-	{
-		White = 0,
-		Cyan = 1,
-		Magenta = 2
-	};
-	DLLNETWORK Lua::StatusCode Execute(lua_State *l,const std::function<Lua::StatusCode(int(*traceback)(lua_State*))> &target,ErrorColorMode colorMode);
-	DLLNETWORK void Execute(lua_State *l,const std::function<void(int(*traceback)(lua_State*),void(*syntaxHandle)(lua_State*,Lua::StatusCode))> &target,ErrorColorMode colorMode);
 	DLLNETWORK Lua::StatusCode Execute(lua_State *l,const std::function<Lua::StatusCode(int(*traceback)(lua_State*))> &target);
 	DLLNETWORK void Execute(lua_State *l,const std::function<void(int(*traceback)(lua_State*),void(*syntaxHandle)(lua_State*,Lua::StatusCode))> &target);
 	DLLNETWORK void HandleLuaError(lua_State *l);
 	DLLNETWORK void HandleLuaError(lua_State *l,Lua::StatusCode s);
-	DLLNETWORK ErrorColorMode GetErrorColorMode(lua_State *l);
+	DLLNETWORK std::string GetErrorMessagePrefix(lua_State *l);
 	template<typename T>
 		void table_to_vector(lua_State *l,const luabind::object &t,int32_t tableStackIndex,std::vector<T> &outData);
 	template<typename T>

@@ -38,7 +38,7 @@ void pragma::initialize_vertex_animation_buffer()
 	if(alignment > 0 && (sizeof(CVertexAnimatedComponent::VertexAnimationData) %alignment) != 0)
 	{
 		Con::cwar<<
-			"WARNING: Minimum storage buffer alignment is "<<alignment<<
+			"Minimum storage buffer alignment is "<<alignment<<
 			", but only alignment values of <="<<sizeof(CVertexAnimatedComponent::VertexAnimationData)<<
 			" are supported! Morph target animations will be disabled!"<<
 			Con::endl;

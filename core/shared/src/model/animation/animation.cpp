@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/model/animation/animation.hpp"
 #include "pragma/model/animation/activities.h"
+#include "pragma/logging.hpp"
 #include <udm.hpp>
 #include <mathutil/umath.h>
 #include <panima/skeleton.hpp>
@@ -347,7 +348,7 @@ bool pragma::animation::Animation::LoadFromAssetData(const udm::AssetData &data,
 			udmChannel["node"](nodeId);
 			if(nodeId >= nodeToLocalBoneId.size())
 			{
-				Con::cwar<<"WARNING: Node "<<nodeId<<" of animation UDM channel exceeds number of bones ("<<nodeToLocalBoneId.size()<<")! Ignoring..."<<Con::endl;
+				spdlog::warn("WARNING: Node {} of animation UDM channel exceeds number of bones ({})! Ignoring...",nodeId,nodeToLocalBoneId.size());
 				continue;
 			}
 			auto localBoneId = nodeToLocalBoneId[nodeId];

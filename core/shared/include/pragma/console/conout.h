@@ -11,6 +11,8 @@
 #include "pragma/console/util_console_color.hpp"
 #include <iostream>
 #include <sstream>
+#include <atomic>
+#include <mutex>
 #include <functional>
 #include <string_view>
 #ifdef _WIN32
@@ -32,14 +34,30 @@ namespace Con {class c_crit;};
 template <class T> Con::c_crit& operator<< (Con::c_crit &con,const T &t);
 namespace Con
 {
+	enum class MessageFlags : uint8_t
+	{
+		None = 0u,
+		Generic = 1u,
+		Warning = Generic<<1u,
+		Error = Warning<<1u,
+		Critical = Error<<1u,
+
+		ServerSide = Critical<<1u,
+		ClientSide = ServerSide<<1u
+	};
+
+	namespace detail
+	{
+		extern DLLNETWORK std::atomic<bool> flushed;
+		extern DLLNETWORK std::function<void(const std::string_view&,Con::MessageFlags,const Color*)> outputCallback;
+	};
 	class DLLNETWORK c_cout {};
 	class DLLNETWORK c_cwar {};
 	class DLLNETWORK c_cerr {};
 	class DLLNETWORK c_crit
 	{
 	private:
-		std::stringstream m_message;
-		bool m_bActivated = false;
+		std::atomic<bool> m_bActivated = false;
 	public:
 		friend DLLNETWORK std::basic_ostream<char,std::char_traits<char>> &endl(std::basic_ostream<char,std::char_traits<char>>& os);
 		template <class T>
@@ -60,17 +78,6 @@ namespace Con
 	DLLNETWORK void WriteToLog(std::string str);
 	DLLNETWORK int GetLogLevel();
 
-	enum class MessageFlags : uint8_t
-	{
-		None = 0u,
-		Generic = 1u,
-		Warning = Generic<<1u,
-		Error = Warning<<1u,
-		Critical = Error<<1u,
-
-		ServerSide = Critical<<1u,
-		ClientSide = ServerSide<<1u
-	};
 	DLLNETWORK void set_output_callback(const std::function<void(const std::string_view&,MessageFlags,const ::Color*)> &callback);
 	DLLNETWORK const std::function<void(const std::string_view&,MessageFlags,const ::Color*)> &get_output_callback();
 	DLLNETWORK void print(const std::string_view &sv,const ::Color &color,MessageFlags flags=MessageFlags::None);
@@ -86,20 +93,53 @@ namespace Con
 		ss<<value;
 		outputCallback(ss.str(),flags,color.has_value() ? &(*color) : nullptr);
 	}
+
+	constexpr const char *PREFIX_WARNING = "[\u001b[33;1mwarning\u001b[0m] ";
+	constexpr const char *PREFIX_ERROR = "[\u001b[31;1merror\u001b[0m] ";
+	constexpr const char *PREFIX_CRITICAL = "[\u001b[41m\u001b[37;1mcritical\u001b[0m] ";
+	constexpr const char *PREFIX_SERVER = "[\u001b[36;1mserver\u001b[0m] ";
+	constexpr const char *PREFIX_CLIENT = "[\u001b[35;1mclient\u001b[0m] ";
+	constexpr const char *PREFIX_LUA = "[\u001b[34;1mlua\u001b[0m] ";
+	constexpr const char *PREFIX_GUI = "[\u001b[37;1mgui\u001b[0m] ";
 };
 REGISTER_BASIC_BITWISE_OPERATORS(Con::MessageFlags)
+
+namespace pragma::logging::detail
+{
+	enum class Type : uint8_t
+	{
+		None = 0,
+		Info,
+		Warn,
+		Err,
+		Crit
+	};
+	extern DLLNETWORK std::atomic<bool> shouldLogOutput;
+	extern DLLNETWORK std::mutex logOutputMutex;
+	extern DLLNETWORK std::stringstream logOutput;
+	extern DLLNETWORK Type type;
+};
+
+#define PRAGMA_DETAIL_LOG_OUTPUT(v,etype) \
+	if(pragma::logging::detail::shouldLogOutput) \
+	{ \
+		pragma::logging::detail::logOutputMutex.lock(); \
+			pragma::logging::detail::type = etype; \
+			pragma::logging::detail::logOutput<<v; \
+		pragma::logging::detail::logOutputMutex.unlock(); \
+	}
+
+#define PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(v,type) \
+	if(Con::detail::outputCallback != nullptr) \
+		Con::invoke_output_callback(v,type);
 
 // c_cout
 template <class T> Con::c_cout& operator<<(Con::c_cout &con,const T &t)
 {
+	Con::detail::flushed = false;
 	std::cout<<t;
-	if(Con::GetLogLevel() >= 3)
-	{
-		std::stringstream ss;
-		ss<<t;
-		Con::WriteToLog(ss);
-	}
-	invoke_output_callback(t,Con::MessageFlags::Generic);
+	PRAGMA_DETAIL_LOG_OUTPUT(t,pragma::logging::detail::Type::Info)
+	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t,Con::MessageFlags::Generic);
 	return con;
 }
 typedef std::ostream& (*conmanipulator) (std::ostream&);
@@ -109,15 +149,15 @@ DLLNETWORK Con::c_cout& operator<<(Con::c_cout& con,conmanipulator manipulator);
 // c_cwar
 template <class T> Con::c_cwar& operator<< (Con::c_cwar &con,const T &t)
 {
-	util::set_console_color(util::ConsoleColorFlags::Yellow | util::ConsoleColorFlags::Intensity);
-	std::cout<<t;
-	if(Con::GetLogLevel() >= 2)
+	if(Con::detail::flushed)
 	{
-		std::stringstream ss;
-		ss<<t;
-		Con::WriteToLog(ss);
+		Con::detail::flushed = false;
+		std::cout<<Con::PREFIX_WARNING;
 	}
-	invoke_output_callback(t,Con::MessageFlags::Warning);
+	
+	std::cout<<t;
+	PRAGMA_DETAIL_LOG_OUTPUT(t,pragma::logging::detail::Type::Warn)
+	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t,Con::MessageFlags::Warning);
 	return con;
 }
 typedef std::ostream& (*conmanipulator) (std::ostream&);
@@ -127,15 +167,15 @@ DLLNETWORK Con::c_cwar& operator<<(Con::c_cwar &con,conmanipulator manipulator);
 // c_cerr
 template <class T> Con::c_cerr& operator<< (Con::c_cerr &con,const T &t)
 {
-	util::set_console_color(util::ConsoleColorFlags::Red | util::ConsoleColorFlags::Intensity);
-	std::cout<<t;
-	if(Con::GetLogLevel() >= 1)
+	if(Con::detail::flushed)
 	{
-		std::stringstream ss;
-		ss<<t;
-		Con::WriteToLog(ss);
+		Con::detail::flushed = false;
+		std::cout<<Con::PREFIX_ERROR;
 	}
-	invoke_output_callback(t,Con::MessageFlags::Error);
+
+	std::cout<<t;
+	PRAGMA_DETAIL_LOG_OUTPUT(t,pragma::logging::detail::Type::Err)
+	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t,Con::MessageFlags::Error);
 	return con;
 }
 typedef std::ostream& (*conmanipulator) (std::ostream&);
@@ -145,14 +185,16 @@ DLLNETWORK Con::c_cerr& operator<<(Con::c_cerr &con,conmanipulator manipulator);
 // c_crit
 template <class T> Con::c_crit& operator<< (Con::c_crit &con,const T &t)
 {
-	util::set_console_color(util::ConsoleColorFlags::BackgroundRed | util::ConsoleColorFlags::BackgroundIntensity | util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::White);
-	std::stringstream ss;
-	ss<<t;
-	if(Con::GetLogLevel() >= 1)
-		Con::WriteToLog(ss);
-	invoke_output_callback(t,Con::MessageFlags::Critical);
 	Con::crit.m_bActivated = true;
-	Con::crit.m_message<<t;
+	if(Con::detail::flushed)
+	{
+		Con::detail::flushed = false;
+		std::cout<<Con::PREFIX_CRITICAL;
+	}
+
+	std::cout<<t;
+	PRAGMA_DETAIL_LOG_OUTPUT(t,pragma::logging::detail::Type::Crit)
+	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t,Con::MessageFlags::Critical);
 	return con;
 }
 typedef std::ostream& (*conmanipulator) (std::ostream&);
@@ -162,15 +204,22 @@ DLLNETWORK Con::c_crit& operator<<(Con::c_crit &con,conmanipulator manipulator);
 // c_csv
 template <class T> Con::c_csv& operator<< (Con::c_csv &con,const T &t)
 {
-	util::set_console_color(util::ConsoleColorFlags::Cyan | util::ConsoleColorFlags::Intensity);
-	std::cout<<t;
-	if(Con::GetLogLevel() >= 2)
+	if(Con::detail::flushed)
 	{
-		std::stringstream ss;
-		ss<<t;
-		Con::WriteToLog(ss);
+		Con::detail::flushed = false;
+		std::cout<<Con::PREFIX_SERVER;
 	}
-	invoke_output_callback(t,Con::MessageFlags::ServerSide);
+	std::cout<<t;
+	if(pragma::logging::detail::shouldLogOutput)
+	{
+		pragma::logging::detail::logOutputMutex.lock();
+			if(pragma::logging::detail::type == pragma::logging::detail::Type::None)
+				pragma::logging::detail::logOutput<<Con::PREFIX_SERVER;
+			pragma::logging::detail::type = pragma::logging::detail::Type::Info;
+			pragma::logging::detail::logOutput<<t;
+		pragma::logging::detail::logOutputMutex.unlock();
+	}
+	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t,Con::MessageFlags::ServerSide);
 	return con;
 }
 typedef std::ostream& (*conmanipulator) (std::ostream&);
@@ -180,15 +229,22 @@ DLLNETWORK Con::c_csv& operator<<(Con::c_csv &con,conmanipulator manipulator);
 // c_ccl
 template <class T> Con::c_ccl& operator<< (Con::c_ccl &con,const T &t)
 {
-	util::set_console_color(util::ConsoleColorFlags::Magenta | util::ConsoleColorFlags::Intensity);
-	std::cout<<t;
-	if(Con::GetLogLevel() >= 2)
+	if(Con::detail::flushed)
 	{
-		std::stringstream ss;
-		ss<<t;
-		Con::WriteToLog(ss);
+		Con::detail::flushed = false;
+		std::cout<<Con::PREFIX_CLIENT;
 	}
-	invoke_output_callback(t,Con::MessageFlags::ClientSide);
+	std::cout<<t;
+	if(pragma::logging::detail::shouldLogOutput)
+	{
+		pragma::logging::detail::logOutputMutex.lock();
+			if(pragma::logging::detail::type == pragma::logging::detail::Type::None)
+				pragma::logging::detail::logOutput<<Con::PREFIX_CLIENT;
+			pragma::logging::detail::type = pragma::logging::detail::Type::Info;
+			pragma::logging::detail::logOutput<<t;
+		pragma::logging::detail::logOutputMutex.unlock();
+	}
+	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t,Con::MessageFlags::ClientSide);
 	return con;
 }
 typedef std::ostream& (*conmanipulator) (std::ostream&);

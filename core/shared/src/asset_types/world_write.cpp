@@ -563,7 +563,7 @@ bool pragma::asset::WorldData::SaveLightmapAtlas(const std::string &mapName)
 	FileManager::CreatePath(matPath.c_str());
 	auto filePath = matPath +"/lightmap_atlas.dds";
 	auto result = uimg::save_texture(filePath,*m_lightMapAtlas,saveInfo,[](const std::string &msg) {
-		Con::cwar<<"WARNING: Unable to save lightmap atlas: "<<msg<<Con::endl;
+		Con::cwar<<"Unable to save lightmap atlas: "<<msg<<Con::endl;
 	});
 	if(result)
 		m_messageLogger("Lightmap atlas has been saved as '" +filePath +"'!");

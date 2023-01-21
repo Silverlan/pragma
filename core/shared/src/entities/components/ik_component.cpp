@@ -64,7 +64,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 	auto chainLen = ikController->GetChainLength();
 	if(chainLen <= 1)
 	{
-		Con::cwar<<"WARNING: Unable to initialize ik controller for "<<ikController->GetEffectorName()<<": Chain length has to be at least 1!"<<Con::endl;
+		Con::cwar<<"Unable to initialize ik controller for "<<ikController->GetEffectorName()<<": Chain length has to be at least 1!"<<Con::endl;
 		return false;
 	}
 	auto &skeleton = hMdl->GetSkeleton();
@@ -72,13 +72,13 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 	auto boneId = skeleton.LookupBone(boneName);
 	if(boneId < 0)
 	{
-		Con::cwar<<"WARNING: Unable to initialize ik controller for "<<ikController->GetEffectorName()<<": Invalid bone '"<<boneName<<"'!"<<Con::endl;
+		Con::cwar<<"Unable to initialize ik controller for "<<ikController->GetEffectorName()<<": Invalid bone '"<<boneName<<"'!"<<Con::endl;
 		return false;
 	}
 	auto wpBone = skeleton.GetBone(boneId);
 	if(wpBone.expired())
 	{
-		Con::cwar<<"WARNING: Unable to initialize ik controller for "<<ikController->GetEffectorName()<<": Invalid bone '"<<boneName<<"'!"<<Con::endl;
+		Con::cwar<<"Unable to initialize ik controller for "<<ikController->GetEffectorName()<<": Invalid bone '"<<boneName<<"'!"<<Con::endl;
 		return false;
 	}
 	auto &reference = hMdl->GetReference();
@@ -105,7 +105,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 		auto parent = bone->parent;
 		if(parent.expired())
 		{
-			Con::cwar<<"WARNING: Unable to initialize ik controller for "<<ikController->GetEffectorName()<<": Total chain length exceeds bone hierarchy!"<<Con::endl;
+			Con::cwar<<"Unable to initialize ik controller for "<<ikController->GetEffectorName()<<": Total chain length exceeds bone hierarchy!"<<Con::endl;
 			return false;
 		}
 		bone = parent.lock();
@@ -131,7 +131,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 		});
 		if(itJoint == joints.end())
 		{
-			Con::cwar<<"WARNING: Unable to initialize ik controller for "<<ikController->GetEffectorName()<<": Joint for bone "<<ikJoint.boneId<<" in chain does not have joint assigned to it!"<<Con::endl;
+			Con::cwar<<"Unable to initialize ik controller for "<<ikController->GetEffectorName()<<": Joint for bone "<<ikJoint.boneId<<" in chain does not have joint assigned to it!"<<Con::endl;
 			return false; // All bones in chain need to have a valid joint assigned to them
 		}
 		ikJoint.jointId = itJoint -joints.begin();

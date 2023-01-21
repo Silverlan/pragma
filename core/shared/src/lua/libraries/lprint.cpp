@@ -9,6 +9,7 @@
 #include "pragma/lua/libraries/lprint.h"
 #include "pragma/lua/libraries/ldebug.h"
 #include <pragma/console/conout.h>
+#include "pragma/logging.hpp"
 #include "pragma/lua/ldefinitions.h"
 #include <pragma/engine.h>
 #include <mathutil/color.h>
@@ -191,7 +192,7 @@ int Lua::console::msgw(lua_State *l)
 	int argc = lua_gettop(l);
 	if(argc == 0)
 		return 0;
-	Con::cwar<<"WARNING: ";
+	Con::cwar<<"";
 	for(int i=1;i<=argc;i++)
 	{
 		auto status = -1;
@@ -209,7 +210,7 @@ int Lua::console::msge(lua_State *l)
 	int argc = lua_gettop(l);
 	if(argc == 0)
 		return 0;
-	Con::cerr<<"ERROR: ";
+	Con::cerr<<"";
 	for(int i=1;i<=argc;i++)
 	{
 		auto status = -1;
@@ -221,3 +222,27 @@ int Lua::console::msge(lua_State *l)
 	Con::cerr<<Con::endl;
 	return 0;
 }
+
+static int log(lua_State *l,spdlog::level::level_enum lv)
+{
+	int n = lua_gettop(l);  /* number of arguments */
+	int i;
+	std::stringstream ss;
+	for (i=1; i<=n; i++) {
+		auto status = -1;
+		std::string val;
+		if(lua_value_to_string(l,i,&status,&val) == false)
+			return status;
+		if (i>1)
+			ss<<"\t";
+		ss<<val;
+	}
+	spdlog::log(lv,ss.str());
+	return 0;
+}
+
+int Lua::log::info(lua_State *l) {return ::log(l,spdlog::level::info);}
+int Lua::log::warn(lua_State *l) {return ::log(l,spdlog::level::warn);}
+int Lua::log::error(lua_State *l) {return ::log(l,spdlog::level::err);}
+int Lua::log::critical(lua_State *l) {return ::log(l,spdlog::level::critical);}
+int Lua::log::debug(lua_State *l) {return ::log(l,spdlog::level::debug);}

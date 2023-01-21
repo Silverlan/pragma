@@ -140,7 +140,7 @@ bool Engine::RunConsoleCommand(std::string cmd,std::vector<std::string> &argv,Ke
 		return RunEngineConsoleCommand(cmd,argv,pressState,magnitude,callback);
 	if(stateSv == NULL || !stateSv->RunConsoleCommand(cmd,argv,nullptr,pressState,magnitude,callback))
 	{
-		Con::cwar<<"WARNING: Unknown console command '"<<cmd<<"'!"<<Con::endl;
+		Con::cwar<<"Unknown console command '"<<cmd<<"'!"<<Con::endl;
 		auto similar = (stateSv != nullptr) ? stateSv->FindSimilarConVars(cmd) : FindSimilarConVars(cmd);
 		if(similar.empty() == true)
 			Con::cout<<"No similar matches found!"<<Con::endl;

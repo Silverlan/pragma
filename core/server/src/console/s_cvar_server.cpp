@@ -87,7 +87,7 @@ DLLSERVER void CMD_ent_input(NetworkState *state,pragma::BasePlayerComponent *pl
 			}
 		}
 		if(bFound == false)
-			Con::cwar<<"WARNING: No targets found by name '"<<argv[0]<<"'!"<<Con::endl;
+			Con::cwar<<"No targets found by name '"<<argv[0]<<"'!"<<Con::endl;
 		return;
 	}
 	if(argv.size() < 1 || activator == nullptr || activator->IsCharacter() == false)
@@ -111,7 +111,7 @@ DLLSERVER void CMD_ent_input(NetworkState *state,pragma::BasePlayerComponent *pl
 		}
 	}
 	if(bFound == false)
-		Con::cwar<<"WARNING: No raycast target found!"<<Con::endl;
+		Con::cwar<<"No raycast target found!"<<Con::endl;
 }
 
 void CMD_ent_scale(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
@@ -159,7 +159,7 @@ DLLSERVER void CMD_ent_remove(NetworkState *state,pragma::BasePlayerComponent *p
 	auto ents = command::find_target_entity(state,*charComponent,argv);
 	if(ents.empty())
 	{
-		Con::cwar<<"WARNING: No entity found to remove!"<<Con::endl;
+		Con::cwar<<"No entity found to remove!"<<Con::endl;
 		return;
 	}
 	for(auto *ent : ents)
@@ -188,7 +188,7 @@ DLLSERVER void CMD_ent_create(NetworkState *state,pragma::BasePlayerComponent *p
 	auto r = s_game->RayCast(trData);
 	if(r.hitType == RayCastHitType::None)
 	{
-		Con::cwar<<"WARNING: No place to spawn entity!"<<Con::endl;
+		Con::cwar<<"No place to spawn entity!"<<Con::endl;
 		return;
 	}
 	std::string className = argv[0];
@@ -239,7 +239,7 @@ DLLSERVER void CMD_nav_generate(NetworkState*,pragma::BasePlayerComponent*,std::
 	};
 	auto rcNavMesh = pragma::nav::generate(*s_game,navCfg,&err);
 	if(rcNavMesh == nullptr)
-		Con::cwar<<"WARNING: Unable to generate navigation mesh: "<<err<<Con::endl;
+		Con::cwar<<"Unable to generate navigation mesh: "<<err<<Con::endl;
 	else
 	{
 		auto navMesh = pragma::nav::Mesh::Create(rcNavMesh,navCfg);
@@ -248,7 +248,7 @@ DLLSERVER void CMD_nav_generate(NetworkState*,pragma::BasePlayerComponent*,std::
 		path += "." +std::string{pragma::nav::PNAV_EXTENSION_BINARY};
 		std::string err;
 		if(navMesh->Save(*s_game,path,err) == false)
-			Con::cwar<<"WARNING: Unable to save navigation mesh as '"<<path<<"': "<<err<<"!"<<Con::endl;
+			Con::cwar<<"Unable to save navigation mesh as '"<<path<<"': "<<err<<"!"<<Con::endl;
 	}
 }
 
@@ -267,7 +267,7 @@ void CMD_sv_debug_netmessages(NetworkState *state,pragma::BasePlayerComponent *p
 	auto *sv = server->GetServer();
 	if(sv == nullptr)
 	{
-		Con::cwar<<"WARNING: No server is active!"<<Con::endl;
+		Con::cwar<<"No server is active!"<<Con::endl;
 		return;
 	}
 	if(argv.size() > 0)

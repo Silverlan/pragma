@@ -103,7 +103,7 @@ void BaseTouchComponent::OnPhysicsInitialized()
 				return hColObj.IsValid() && !hColObj->IsTrigger();
 			});
 			if(it != colObjs.end())
-				Con::cwar<<"WARNING: Trigger entity has non-trigger physics shapes!"<<Con::endl;
+				Con::cwar<<"Trigger entity has non-trigger physics shapes!"<<Con::endl;
 		}
 	}
 	BroadcastEvent(EVENT_ON_TRIGGER_INITIALIZED);

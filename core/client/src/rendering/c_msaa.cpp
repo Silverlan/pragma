@@ -19,7 +19,7 @@ int GetMaxMSAASampleCount()
 	});
 	if(props.has_value() == false)
 	{
-		Con::cwar<<"WARNING: Unable to retrieve max MSAA sample count! Setting sample count to 1..."<<Con::endl;
+		Con::cwar<<"Unable to retrieve max MSAA sample count! Setting sample count to 1..."<<Con::endl;
 		return 1;
 	}
 	return umath::get_highest_bit(umath::to_integral(props->sampleCount));

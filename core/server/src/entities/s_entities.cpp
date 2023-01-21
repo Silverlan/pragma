@@ -60,7 +60,7 @@ SBaseEntity *SGame::CreateEntity(std::string classname)
 			skipSecondAttempt = false;
 			return r;
 		}
-		Con::cwar<<"WARNING: Unable to create entity '"<<classname<<"': Factory not found!"<<Con::endl;
+		Con::cwar<<"Unable to create entity '"<<classname<<"': Factory not found!"<<Con::endl;
 		return NULL;
 	}
 	return factory();

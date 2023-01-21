@@ -194,7 +194,7 @@ bool NetworkState::PortMaterial(const std::string &path)
 					{
                         auto path = "materials/" +dataTex->GetValue().name;
 						if(FileManager::Exists(path) == false && util::port_file(this,path +".vtf") == false && util::port_file(this,path +".vtex_c") == false)
-							Con::cwar<<"WARNING: Unable to port texture '"<<dataTex->GetValue().name<<"'!"<<Con::endl;
+							Con::cwar<<"Unable to port texture '"<<dataTex->GetValue().name<<"'!"<<Con::endl;
 					}
 				}
 			}
@@ -288,7 +288,7 @@ Material *NetworkState::LoadMaterial(const std::string &path,bool precache,bool 
 				return mat;
 			}
 		}
-		Con::cwar<<"WARNING: Unable to load material '"<<path<<"': File not found!"<<Con::endl;
+		Con::cwar<<"Unable to load material '"<<path<<"': File not found!"<<Con::endl;
 	}
 	return mat;
 }
@@ -760,7 +760,7 @@ void NetworkState::Think()
 	m_tDelta = m_tReal -m_tLast;
 	if(m_tDelta > 1.0f)
 	{
-		Con::cwar<<"WARNING: Delta time surpassed 0.5 seconds. Clamping..."<<Con::endl;
+		Con::cwar<<"Delta time surpassed 0.5 seconds. Clamping..."<<Con::endl;
 		m_tDelta = 0.5f;
 	}
 	StartProfilingStage(CPUProfilingPhase::UpdateSounds);

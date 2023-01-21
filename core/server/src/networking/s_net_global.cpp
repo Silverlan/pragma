@@ -198,14 +198,14 @@ DLLSERVER void NET_sv_authenticate(pragma::networking::IServerClient &session,Ne
 	{
 		if(hasAuth == false)
 		{
-			Con::cerr<<"ERROR: Unable to authenticate client '"<<session.GetIdentifier()<<"': Client did not transmit authentication information!"<<Con::endl;
+			Con::cerr<<"Unable to authenticate client '"<<session.GetIdentifier()<<"': Client did not transmit authentication information!"<<Con::endl;
 			server->DropClient(session,pragma::networking::DropReason::AuthenticationFailed);
 			return;
 		}
 		auto *reg = server->GetMasterServerRegistration();
 		if(reg == nullptr)
 		{
-			Con::cerr<<"ERROR: Unable to authenticate client '"<<session.GetIdentifier()<<"': Server is not connected to master server!"<<Con::endl;
+			Con::cerr<<"Unable to authenticate client '"<<session.GetIdentifier()<<"': Server is not connected to master server!"<<Con::endl;
 			server->DropClient(session,pragma::networking::DropReason::AuthenticationFailed);
 			return;
 		}
@@ -219,7 +219,7 @@ DLLSERVER void NET_sv_authenticate(pragma::networking::IServerClient &session,Ne
 		auto libSteamworks = server->InitializeLibrary("steamworks/pr_steamworks",&err);
 		if(libSteamworks == nullptr)
 		{
-			Con::cerr<<"ERROR: Unable to authenticate client with steam id '"<<steamId<<"': Steamworks module could not be loaded: "<<err<<Con::endl;
+			Con::cerr<<"Unable to authenticate client with steam id '"<<steamId<<"': Steamworks module could not be loaded: "<<err<<Con::endl;
 			server->DropClient(session,pragma::networking::DropReason::AuthenticationFailed);
 			reg->DropClient(steamId);
 			return;

@@ -103,7 +103,7 @@ static void debug_bsp_nodes(NetworkState*,ConVar*,int32_t,int32_t val)
 	auto bspTree = world ? static_cast<CWorldComponent*>(world)->GetBSPTree() : nullptr;
 	if(bspTree == nullptr)
 	{
-		Con::cwar<<"WARNING: Scene does not have BSP tree!"<<Con::endl;
+		Con::cwar<<"Scene does not have BSP tree!"<<Con::endl;
 		return;
 	}
 	auto *cam = c_game->GetRenderCamera();
@@ -111,7 +111,7 @@ static void debug_bsp_nodes(NetworkState*,ConVar*,int32_t,int32_t val)
 	auto *pCurrentNode = bspTree->FindLeafNode(camPos);
 	if(pCurrentNode == nullptr)
 	{
-		Con::cwar<<"WARNING: Camera not located in any leaf node!"<<Con::endl;
+		Con::cwar<<"Camera not located in any leaf node!"<<Con::endl;
 		return;
 	}
 	auto &clusterVisibility = bspTree->GetClusterVisibility();
@@ -120,7 +120,7 @@ static void debug_bsp_nodes(NetworkState*,ConVar*,int32_t,int32_t val)
 	Con::cout<<"Leaf bounds: ("<<pCurrentNode->min.x<<","<<pCurrentNode->min.y<<","<<pCurrentNode->min.z<<") ("<<pCurrentNode->max.x<<","<<pCurrentNode->max.y<<","<<pCurrentNode->max.z<<")"<<Con::endl;
 	Con::cout<<"Absolute leaf bounds: ("<<pCurrentNode->minVisible.x<<","<<pCurrentNode->minVisible.y<<","<<pCurrentNode->minVisible.z<<") ("<<pCurrentNode->maxVisible.x<<","<<pCurrentNode->maxVisible.y<<","<<pCurrentNode->maxVisible.z<<")"<<Con::endl;
 	if(pCurrentNode->cluster >= clusterVisibility.size() || pCurrentNode->cluster == std::numeric_limits<uint16_t>::max())
-		Con::cwar<<"WARNING: Invalid cluster id "<<pCurrentNode->cluster<<"!"<<Con::endl;
+		Con::cwar<<"Invalid cluster id "<<pCurrentNode->cluster<<"!"<<Con::endl;
 	else
 	{
 		auto numClusters = bspTree->GetClusterCount();
@@ -160,7 +160,7 @@ static void debug_bsp_nodes(NetworkState*,ConVar*,int32_t,int32_t val)
 		dbgObjects.clear();
 		auto *pWorld = c_game->GetWorld();
 		if(pWorld == nullptr)
-			Con::cwar<<"WARNING: No world entity found!"<<Con::endl;
+			Con::cwar<<"No world entity found!"<<Con::endl;
 		else
 		{
 			auto &entWorld = pWorld->GetEntity();
@@ -247,7 +247,7 @@ static void debug_bsp_nodes(NetworkState*,ConVar*,int32_t,int32_t val)
 				auto *pNode = (visClusterId < clusterNodes.size()) ? clusterNodes.at(visClusterId) : nullptr;
 				if(pNode == nullptr)
 				{
-					Con::cwar<<"WARNING: Reference to invalid cluster id "<<clusterId<<Con::endl;
+					Con::cwar<<"Reference to invalid cluster id "<<clusterId<<Con::endl;
 					continue;
 				}
 				dbgObjects.push_back(DebugRenderer::DrawBox(pNode->min,pNode->max,EulerAngles{},Color{0,255,0,64},Color::ForestGreen));
@@ -266,7 +266,7 @@ static void debug_bsp_lock_callback(NetworkState*,ConVar*,int32_t,int32_t val)
 	auto bspTree = world ? static_cast<CWorldComponent*>(world)->GetBSPTree() : nullptr;
 	if(true)//bspTree == nullptr)
 	{
-		Con::cwar<<"WARNING: Scene does not have BSP tree!"<<Con::endl;
+		Con::cwar<<"Scene does not have BSP tree!"<<Con::endl;
 		return;
 	}
 	//bspTree->SetCurrentNodeLocked(val != 0);

@@ -56,7 +56,7 @@ CBaseEntity *CGame::CreateEntity(std::string classname)
 			skipSecondAttempt = false;
 			return r;
 		}
-		Con::cwar<<"WARNING: Unable to create entity '"<<classname<<"': Factory not found!"<<Con::endl;
+		Con::cwar<<"Unable to create entity '"<<classname<<"': Factory not found!"<<Con::endl;
 		return NULL;
 	}
 	return factory();
@@ -164,7 +164,7 @@ void CGame::SetupEntity(BaseEntity *ent,unsigned int idx)
 	{
 		if(m_shEnts[idx] != nullptr)
 		{
-			Con::cwar<<"WARNING: New entity ";
+			Con::cwar<<"New entity ";
 			ent->print(Con::cout);
 			Con::cwar<<" shares server index "<<idx<<" with existing entity ";
 			m_shEnts[idx]->print(Con::cout);

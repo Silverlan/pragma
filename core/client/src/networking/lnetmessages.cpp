@@ -26,7 +26,7 @@ void CGame::HandleLuaNetPacket(NetPacket &packet)
 	std::unordered_map<std::string,int>::iterator i = m_luaNetMessages.find(*ident);
 	if(i == m_luaNetMessages.end())
 	{
-		Con::ccl<<"WARNING: Unhandled lua net message: "<<*ident<<Con::endl;
+		Con::cwar<<Con::PREFIX_CLIENT<<"Unhandled lua net message: "<<*ident<<Con::endl;
 		return;
 	}
 	ProtectedLuaCall([this,&i,&packet](lua_State*) {
@@ -45,7 +45,7 @@ void Lua::net::client::send(nwm::Protocol protocol,const std::string &identifier
 	NetPacket packetNew;
 	if(!NetIncludePacketID(::client,identifier,packet,packetNew))
 	{
-		Con::ccl<<"WARNING: Attempted to send unindexed lua net message: "<<identifier<<Con::endl;
+		Con::cwar<<Con::PREFIX_CLIENT<<"Attempted to send unindexed lua net message: "<<identifier<<Con::endl;
 		return;
 	}
 	switch(protocol)

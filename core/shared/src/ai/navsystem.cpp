@@ -1029,7 +1029,7 @@ bool pragma::nav::Mesh::Save(Game &game,udm::AssetDataArg outData,std::string &o
 			surfaceMaterialNames.push_back(surfMat->GetIdentifier());
 		else
 		{
-			Con::cwar<<"WARNING: Nav mesh poly with unknown surface material index "<<+areaIdx<<"! Setting to 0..."<<Con::endl;
+			Con::cwar<<"Nav mesh poly with unknown surface material index "<<+areaIdx<<"! Setting to 0..."<<Con::endl;
 			surfaceMaterialNames.push_back("");
 		}
 	}
@@ -1084,7 +1084,7 @@ bool pragma::nav::Mesh::LoadFromAssetData(Game &game,const udm::AssetData &data,
 		auto *surfMat = game.GetSurfaceMaterial(name);
 		surfaceMaterialTable.push_back((surfMat != nullptr) ? surfMat->GetIndex() : 0u);
 		if(surfMat == nullptr)
-			Con::cwar<<"WARNING: Nav mesh poly with unknown surface material '"<<name<<"'! Setting to 0..."<<Con::endl;
+			Con::cwar<<"Nav mesh poly with unknown surface material '"<<name<<"'! Setting to 0..."<<Con::endl;
 	}
 
 	auto polyMesh = std::shared_ptr<rcPolyMesh>(rcAllocPolyMesh(),[](rcPolyMesh *polyMesh) {

@@ -54,7 +54,7 @@ void pragma::networking::DefaultMasterServerQueryDispatcher::DoPingServer(uint32
 				else
 				{
 #ifdef _DEBUG
-					Con::cwar<<"WARNING: Unable to add server '"<<sv->ip<<":"<<sv->tcpPort<<"' to list: "<<err.message()<<" ("<<err.value()<<")"<<Con::endl;
+					Con::cwar<<"Unable to add server '"<<sv->ip<<":"<<sv->tcpPort<<"' to list: "<<err.message()<<" ("<<err.value()<<")"<<Con::endl;
 #endif
 					OnServerPingResponse(serverIdx,false);
 				}

@@ -117,7 +117,7 @@ endLoop:;
 		assert(numMeshes == 0);
 		if(numMeshes > 0)
 		{
-			Con::cwar<<"WARNING: Model '"<<mdlName<<"' has invalid mesh count. Unable to generate rough mesh!"<<Con::endl;
+			Con::cwar<<"Model '"<<mdlName<<"' has invalid mesh count. Unable to generate rough mesh!"<<Con::endl;
 			return;
 		}
 	}
@@ -161,7 +161,7 @@ void ServerState::HandleServerNextResource(pragma::networking::IServerClient &se
 			for(auto &res : resources)
 			{
 				if(session.AddResource(res.fileName,res.stream) == false)
-					Con::csv<<"WARNING: [ResourceManager] Unable to open file '"<<res.fileName<<"'. Skipping..."<<Con::endl;
+					Con::cwar<<Con::PREFIX_SERVER<<"[ResourceManager] Unable to open file '"<<res.fileName<<"'. Skipping..."<<Con::endl;
 			}
 		}
 		numResources = resTransfer.size();
@@ -213,7 +213,7 @@ void ServerState::HandleServerResourceStart(pragma::networking::IServerClient &s
 	auto &resTransfer = session.GetResourceTransfer();
 	if(resTransfer.empty())
 	{
-		Con::cwar<<"WARNING: Attempted to send invalid resource fragment to client "<<session.GetIdentifier()<<Con::endl;
+		Con::cwar<<"Attempted to send invalid resource fragment to client "<<session.GetIdentifier()<<Con::endl;
 		return;
 	}
 	bool send = packet->Read<bool>();
@@ -231,7 +231,7 @@ void ServerState::HandleServerResourceFragment(pragma::networking::IServerClient
 	auto &resTransfer = session.GetResourceTransfer();
 	if(resTransfer.empty())
 	{
-		Con::cwar<<"WARNING: Attempted to send invalid resource fragment to client "<<session.GetIdentifier()<<Con::endl;
+		Con::cwar<<"Attempted to send invalid resource fragment to client "<<session.GetIdentifier()<<Con::endl;
 		return;
 	}
 	auto &r = resTransfer[0];

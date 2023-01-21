@@ -297,7 +297,7 @@ std::shared_ptr<::pragma::ai::BehaviorNode> Lua::ai::server::create_lua_task(lua
 #endif
 	if(!r)
 	{
-		Con::csv<<"WARNING: Unable to create lua AI Task!"<<Con::endl;
+		Con::cwar<<Con::PREFIX_SERVER<<"Unable to create lua AI Task!"<<Con::endl;
 		return nullptr;
 	}
 	auto *ptr = luabind::object_cast_nothrow<AILuaBehaviorNodeWrapper*>(r,static_cast<AILuaBehaviorNodeWrapper*>(nullptr));
@@ -308,7 +308,7 @@ std::shared_ptr<::pragma::ai::BehaviorNode> Lua::ai::server::create_lua_task(lua
 		luaNode.SetLuaClass(oClass);
 		return std::static_pointer_cast<::pragma::ai::BehaviorNode>(luaNode.shared_from_this());
 	}
-	Con::csv<<"WARNING: Unable to create lua AI Task: Lua class is not derived from valid AI Task base!"<<Con::endl;
+	Con::cwar<<Con::PREFIX_SERVER<<"Unable to create lua AI Task: Lua class is not derived from valid AI Task base!"<<Con::endl;
 	return nullptr;
 }
 

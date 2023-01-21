@@ -191,11 +191,11 @@ void pragma::networking::NWMActiveServer::Heartbeat()
 		{
 			m_dispatcher->Dispatch(body,GetMasterServerIP(),GetMasterServerPort(),[](const nwm::ErrorCode err,UDPMessageDispatcher::Message*) -> void {
 				if(err)
-					Con::cwar<<"WARNING: Unable to reach master server: "<<err.Message()<<". The server will not show up in the server browser."<<Con::endl;
+					Con::cwar<<"Unable to reach master server: "<<err.Message()<<". The server will not show up in the server browser."<<Con::endl;
 				});
 		}
 		else
-			Con::cwar<<"WARNING: Unable to reach master server: "<<err.Message()<<". The server will not show up in the server browser."<<Con::endl;
+			Con::cwar<<"Unable to reach master server: "<<err.Message()<<". The server will not show up in the server browser."<<Con::endl;
 		});
 }
 std::shared_ptr<nwm::ServerClient> pragma::networking::NWMActiveServer::CreateClient() {return Server::CreateClient<pragma::networking::NWMActiveServerClient>();}

@@ -681,7 +681,7 @@ luabind::object Lua::global::include(lua_State *l,const std::string &f,std::vect
 					lua_error(l);
 				else
 				{
-					Con::cwar<<"WARNING: File not found: '"<<fileName<<"'!"<<Con::endl;
+					Con::cwar<<"File not found: '"<<fileName<<"'!"<<Con::endl;
 					return {};
 				}
 				/* unreachable */

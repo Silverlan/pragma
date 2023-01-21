@@ -52,6 +52,7 @@
 #include <pragma/rendering/shaders/image/c_shader_clear_color.hpp>
 #include <pragma/rendering/shaders/image/c_shader_gradient.hpp>
 #include <pragma/localization.h>
+#include <pragma/logging.hpp>
 #include <wgui/types/wicontextmenu.hpp>
 #include <wgui/types/witext.h>
 #include <wgui/types/witext_tags.hpp>
@@ -83,6 +84,7 @@ decltype(CEngine::AXIS_PRESS_THRESHOLD) CEngine::AXIS_PRESS_THRESHOLD = 0.5f;
 // If set to true, each joystick axes will be split into a positive and a negative axis, which
 // can be bound individually
 static const auto SEPARATE_JOYSTICK_AXES = true;
+
 CEngine::CEngine(int argc,char* argv[])
 	: Engine(argc,argv),pragma::RenderContext(),
 	m_nearZ(pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z),//10.0f), //0.1f
@@ -578,7 +580,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 	}
 	catch(const std::runtime_error &err)
 	{
-		Con::cerr<<"ERROR: Unable to initialize graphics API: "<<err.what()<<Con::endl;
+		spdlog::error("Unable to initialize graphics API: {}",err.what());
 		std::this_thread::sleep_for(std::chrono::seconds(5));
 		Close();
 		return false;
@@ -719,7 +721,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 
 	if(!FindFontSet(defaultFontSet))
 	{
-		Con::cerr<<"ERROR: Failed to find default font set '"<<defaultFontSet<<"'!"<<Con::endl;
+		spdlog::error("Failed to find default font set '{}'!",defaultFontSet);
 		fail();
 		return false;
 	}
@@ -732,14 +734,14 @@ bool CEngine::Initialize(int argc,char *argv[])
 	auto *fontData = fontSet.FindFontFileCandidate(FontSetFlag::Sans | FontSetFlag::Bold);
 	if(!fontData)
 	{
-		Con::cerr<<"ERROR: Failed to determine default font for font set '"<<defaultFontSet<<"'!"<<Con::endl;
+		spdlog::error("Failed to determine default font for font set '{}'!",defaultFontSet);
 		fail();
 		return false;
 	}
 	auto r = gui.Initialize(GetRenderResolution(),fontData->fileName);
 	if(r != WGUI::ResultCode::Ok)
 	{
-		Con::cerr<<"ERROR: Unable to initialize GUI library: ";
+		Con::cerr<<"Unable to initialize GUI library: ";
 		switch(r)
 		{
 			case WGUI::ResultCode::UnableToInitializeFontManager:
@@ -1163,12 +1165,10 @@ Engine::StateInstance &CEngine::GetClientStateInstance() {return *m_clInstance;}
 	auto whShader = GetRenderContext().GetShader(name);
 	if(whShader.expired())
 	{
-		if(IsVerbose())
-			Con::cwar<<"WARNING: No shader found with name '"<<name<<"'!"<<Con::endl;
+		spdlog::warn("No shader found with name '{}'!",name);
 		return {};
 	}
-	if(IsVerbose() == true)
-		Con::cout<<"Reloading shader "<<name<<"..."<<Con::endl;
+	spdlog::info("Reloading shader {}...",name);
 	whShader.get()->Initialize(true);
 	auto nummPipelines = whShader->GetPipelineCount();
 	for(auto i=decltype(nummPipelines){0u};i<nummPipelines;++i)
@@ -1178,8 +1178,7 @@ Engine::StateInstance &CEngine::GetClientStateInstance() {return *m_clInstance;}
 void CEngine::ReloadShaderPipelines()
 {
 	GetRenderContext().WaitIdle();
-	if(IsVerbose() == true)
-		Con::cout<<"Reloading shaders"<<Con::endl;
+	spdlog::info("Reloading shaders");
 	auto &shaderManager = GetRenderContext().GetShaderManager();
 	auto &shaders = shaderManager.GetShaders();
 	for(auto &shader : shaders)
@@ -1787,7 +1786,7 @@ uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 					auto it = newCache.find(pair.first);
 					if(it != newCache.end())
 						continue;
-					Con::cout<<"Texture "<<pair.second<<" was cleared from cache!"<<Con::endl;
+					spdlog::info("Texture {} was cleared from cache!",pair.second);
 				}
 			}
 		}

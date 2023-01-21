@@ -1002,7 +1002,7 @@ bool Model::Save(Game &game,udm::AssetDataArg outData,std::string &outErr)
 				if(name.empty())
 				{
 					name = "eyeball" +std::to_string(eyeballIdx);
-					Con::cwar<<"WARNING: Eyeball with no name found, assigning name '"<<name<<"'"<<Con::endl;
+					Con::cwar<<"Eyeball with no name found, assigning name '"<<name<<"'"<<Con::endl;
 				}
 				auto udmEyeball = udmEyeballs[name];
 				udmEyeball["index"] = eyeballIdx++;
@@ -1607,7 +1607,7 @@ bool Model::SaveLegacy(Game *game,const std::string &name,const std::string &roo
 				}
 				if(subMeshId == std::numeric_limits<uint32_t>::max())
 				{
-					Con::cwar<<"WARNING: Invalid mesh reference in vertex animation '"<<va->GetName()<<"'! Skipping..."<<Con::endl;
+					Con::cwar<<"Invalid mesh reference in vertex animation '"<<va->GetName()<<"'! Skipping..."<<Con::endl;
 					continue;
 				}
 				++meshAnimCount;

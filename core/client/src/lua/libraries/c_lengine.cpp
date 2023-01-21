@@ -357,7 +357,7 @@ int Lua::engine::save_particle_system(lua_State *l)
 					auto *ps = hChild.child.get();
 					if(ps->IsRecordingKeyValues() == false)
 					{
-						Con::cwar<<"WARNING: Cannot save particle system '"<<ps->GetParticleSystemName()<<"', which wasn't created with the \"record key-values\" flag set! Skipping..."<<Con::endl;
+						Con::cwar<<"Cannot save particle system '"<<ps->GetParticleSystemName()<<"', which wasn't created with the \"record key-values\" flag set! Skipping..."<<Con::endl;
 						return;
 					}
 					particleSystems.push_back(hChild.child.get());
@@ -370,7 +370,7 @@ int Lua::engine::save_particle_system(lua_State *l)
 				Lua::GetTableValue(l,t);
 				auto &ps = Lua::Check<pragma::CParticleSystemComponent>(l,-1);
 				if(ps.IsRecordingKeyValues() == false)
-					Con::cwar<<"WARNING: Cannot save particle system '"<<ps.GetParticleSystemName()<<"', which wasn't created with the \"record key-values\" flag set! Skipping..."<<Con::endl;
+					Con::cwar<<"Cannot save particle system '"<<ps.GetParticleSystemName()<<"', which wasn't created with the \"record key-values\" flag set! Skipping..."<<Con::endl;
 				else
 				{
 					particleSystems.push_back(&ps);
@@ -380,7 +380,7 @@ int Lua::engine::save_particle_system(lua_State *l)
 			}
 			if(particleSystems.empty())
 			{
-				Con::cwar<<"WARNING: No particles to save. Particle file will not be generated!"<<Con::endl;
+				Con::cwar<<"No particles to save. Particle file will not be generated!"<<Con::endl;
 				Lua::PushBool(l,false);
 				return 1;
 			}

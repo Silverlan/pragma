@@ -14,6 +14,7 @@
 #include <sharedutils/util_library.hpp>
 #include <pragma/util/util_module.hpp>
 #include <pragma/lua/lua_error_handling.hpp>
+#include <pragma/logging.hpp>
 #include <prosper_window.hpp>
 
 using namespace pragma;
@@ -45,7 +46,7 @@ void RenderContext::InitializeRenderAPI()
     std::string err;
     if(loadRenderApiModule(renderAPI,err) == false)
     {
-        Con::cwar<<"WARNING: Failed to load default render API '"<<renderAPI<<"': "<<err<<". Falling back to alternatives..."<<Con::endl;
+        Con::cwar<<"Failed to load default render API '"<<renderAPI<<"': "<<err<<". Falling back to alternatives..."<<Con::endl;
         // Fallback
         SetRenderAPI("vulkan");
         if(loadRenderApiModule(renderAPI,err) == false)
@@ -79,6 +80,8 @@ void RenderContext::InitializeRenderAPI()
 	if(m_renderContext == nullptr)
 		throw std::runtime_error{"Unable to load Vulkan implementation library for Prosper: " +err +"!"};
 
+	m_renderContext->SetLogHandler(&pragma::log,&pragma::is_log_level_enabled);
+
 	prosper::Callbacks callbacks {};
 	callbacks.validationCallback = [this](prosper::DebugMessageSeverityFlags severityFlags,const std::string &message) {
 		ValidationCallback(severityFlags,message);
@@ -93,17 +96,18 @@ void RenderContext::InitializeRenderAPI()
 
 	GetRenderContext().GetInitialWindowSettings().resizable = false;
 	prosper::Shader::SetLogCallback([](prosper::Shader &shader,prosper::ShaderStage stage,const std::string &infoLog,const std::string &debugInfoLog) {
-		Con::cwar<<"Unable to load shader '"<<shader.GetIdentifier()<<"':"<<Con::endl;
-		Con::cwar<<"Shader Stage: "<<prosper::util::to_string(stage)<<Con::endl;
+		spdlog::warn("Unable to load shader '{}':",shader.GetIdentifier());
+		spdlog::warn("Shader Stage: {}",prosper::util::to_string(stage));
 		auto filePath = (stage != prosper::ShaderStage::Unknown) ? shader.GetStageSourceFilePath(stage) : std::optional<std::string>{};
 		if(filePath.has_value())
-			Con::cwar<<"Shader Stage Filename: "<<*filePath<<Con::endl;
-		Con::cwar<<infoLog<<Con::endl<<Con::endl;
-		Con::cwar<<debugInfoLog<<Con::endl;
-		});
+			spdlog::warn("Shader Stage Filename: {}",*filePath);
+		spdlog::warn(infoLog);
+		spdlog::warn("");
+		spdlog::warn(debugInfoLog);
+	});
 	prosper::debug::set_debug_validation_callback([](prosper::DebugReportObjectTypeEXT objectType,const std::string &msg) {
-		Con::cerr<<"[PR] "<<msg<<Con::endl;
-		});
+		spdlog::error("[prosper] {}",msg);
+	});
 	GLFW::initialize();
 }
 void RenderContext::Release()

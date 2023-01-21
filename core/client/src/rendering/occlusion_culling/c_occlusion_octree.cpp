@@ -314,7 +314,7 @@ void BaseOcclusionOctree::ExtendRoot(const Vector3 &origin)
 	if(closestNode == nullptr)
 	{
 		auto &bounds = newNode->GetWorldBounds();
-		Con::cwar<<"WARNING: Unable to extend occlusion tree node. Invalid dimensions? ("<<
+		Con::cwar<<"Unable to extend occlusion tree node. Invalid dimensions? ("<<
 			origin.x<<","<<origin.y<<","<<origin.z<<") ("<<
 			bounds.first.x<<","<<bounds.first.y<<","<<bounds.first.x<<") ("<<
 			bounds.second.x<<","<<bounds.second.y<<","<<bounds.second.z<<")"<<Con::endl;

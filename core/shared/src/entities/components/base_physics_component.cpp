@@ -20,6 +20,7 @@
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/physics/raytraces.h"
+#include "pragma/logging.hpp"
 #include <sharedutils/netpacket.hpp>
 #include <pragma/physics/movetypes.h>
 #include <pragma/physics/collisiontypes.h>
@@ -182,10 +183,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 		// Sanity check
 		if(std::isnan(linVel.x) || std::isnan(linVel.y) || std::isnan(linVel.z))
 		{
-			std::stringstream ss {};
-			ss<<"UpdatePhysicsData: NaN linear velocity ("<<linVel.x<<","<<linVel.y<<","<<linVel.z<<") for entity "<<ent.GetClass()<<"!";
-			// throw std::runtime_error(ss.str());
-			Con::cwar<<"WARNING: "<<ss.str()<<" Forcing to 0."<<Con::endl;
+			spdlog::warn("UpdatePhysicsData: NaN linear velocity ({},{},{}) for entity {}! Forcing to 0.",linVel.x,linVel.y,linVel.z,ent.GetClass());
 			phys->SetLinearVelocity({});
 			linVel = {};
 		}
@@ -219,6 +217,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 			{
 				std::stringstream ss {};
 				ss<<"UpdatePhysicsData: NaN rotation ("<<rot.w<<","<<rot.x<<","<<rot.y<<","<<rot.z<<") for entity "<<ent.GetClass()<<"!";
+				spdlog::error(ss.str());
 				throw std::runtime_error(ss.str());
 			}
 			umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsRotation);
@@ -234,6 +233,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 				{
 					std::stringstream ss {};
 					ss<<"UpdatePhysicsData: NaN angular velocity ("<<angVel.x<<","<<angVel.y<<","<<angVel.z<<") for entity "<<ent.GetClass()<<"!";
+					spdlog::error(ss.str());
 					throw std::runtime_error(ss.str());
 				}
 				umath::set_flag(m_stateFlags,StateFlags::ApplyingAngularVelocity);
@@ -260,6 +260,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 			{
 				std::stringstream ss {};
 				ss<<"UpdatePhysicsData: NaN position ("<<pos.x<<","<<pos.y<<","<<pos.z<<") for entity "<<ent.GetClass()<<"!";
+				spdlog::error(ss.str());
 				throw std::runtime_error(ss.str());
 			}
 			umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsPosition);

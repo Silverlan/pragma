@@ -22,6 +22,7 @@
 #include <sharedutils/util_file.h>
 #include <pragma/audio/sound_util.hpp>
 #include <pragma/game/game_resources.hpp>
+#include <pragma/logging.hpp>
 #include <util_sound.hpp>
 
 void ServerState::SendSoundSourceToClient(SALSound &sound,bool sendFullUpdate,const pragma::networking::ClientRecipientFilter *rf)
@@ -112,7 +113,7 @@ std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd,ALSoundType ty
 			static auto bSkipPrecache = false;
 			if(bSkipPrecache == false)
 			{
-				Con::cwar<<"WARNING: Attempted to create unprecached sound '"<<snd<<"'! Precaching now..."<<Con::endl;
+				Con::cwar<<"Attempted to create unprecached sound '"<<snd<<"'! Precaching now..."<<Con::endl;
 				auto channel = ((flags &ALCreateFlags::Mono) != ALCreateFlags::None) ? ALChannel::Mono : ALChannel::Auto;
 				if(PrecacheSound(snd,channel) == true)
 				{
@@ -133,7 +134,7 @@ std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd,ALSoundType ty
 				static auto bSkipPrecache = false;
 				if(bSkipPrecache == false)
 				{
-					Con::cwar<<"WARNING: Attempted to create sound '"<<snd<<"' as unprecached mono! Precaching now..."<<Con::endl;
+					Con::cwar<<"Attempted to create sound '"<<snd<<"' as unprecached mono! Precaching now..."<<Con::endl;
 					auto channel = ((flags &ALCreateFlags::Mono) != ALCreateFlags::None) ? ALChannel::Mono : ALChannel::Auto;
 					if(PrecacheSound(snd,channel) == true)
 					{
@@ -246,14 +247,14 @@ bool ServerState::PrecacheSound(std::string snd,ALChannel mode)
 		}
 		if(bPort == false)
 		{
-			Con::cwar<<"WARNING: Unable to precache sound '"<<snd<<"': File not found!"<<Con::endl;
+			spdlog::warn("Unable to precache sound '{}': File not found!",snd);
 			return false;
 		}
 	}
 	auto duration = 0.f;
 	if(util::sound::get_duration(subPath,duration) == false || duration == 0.f)
 	{
-		Con::cwar<<"WARNING: Unable to precache sound '"<<snd<<"': Invalid format!"<<Con::endl;
+		spdlog::warn("Unable to precache sound '{}': Invalid format!",snd);
 		return false;
 	}
 	if(inf == NULL)

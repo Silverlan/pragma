@@ -11,6 +11,7 @@
 #include "pragma/engine_init.hpp"
 #include "pragma/lua/libraries/ldebug.h"
 #include "pragma/lua/lua_error_handling.hpp"
+#include "pragma/logging.hpp"
 #include <pragma/serverstate/serverstate.h>
 #include <pragma/console/convarhandle.h>
 #include "luasystem.h"
@@ -95,6 +96,10 @@ ConVarHandle Engine::GetConVarHandle(std::string scvar)
 }
 
 DLLNETWORK Engine *engine = NULL;
+
+extern std::optional<std::string> g_lpLogFile;
+extern util::LogSeverity g_lpLogLevelCon;
+extern util::LogSeverity g_lpLogLevelFile;
 Engine::Engine(int,char*[])
 	: CVarHandler(),
 	m_logFile(nullptr),
@@ -111,37 +116,34 @@ Engine::Engine(int,char*[])
 	Locale::Init();
     OpenConsole();
 #ifdef _WIN32
-            freopen("CON","w",stdout); // Redirect fprint, etc.
-        #endif
+	freopen("CON","w",stdout); // Redirect fprint, etc.
+
+	// Enable ANSI color codes under Windows
+	HANDLE handleOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	if(handleOut)
+	{
+		DWORD consoleMode;
+		if(GetConsoleMode(handleOut ,&consoleMode))
+		{
+			consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+			consoleMode |= DISABLE_NEWLINE_AUTO_RETURN;            
+			SetConsoleMode(handleOut,consoleMode);
+		}
+	}
+	//
+#endif
 
 	m_mainThreadId = std::this_thread::get_id();
 	
 	m_lastTick = static_cast<long long>(m_ctTick());
 	engine = this;
 
-	// These need to exist, so they can be automatically mounted
-	if(FileManager::Exists("addons/imported") == false)
-		FileManager::CreatePath("addons/imported");
-	if(FileManager::Exists("addons/converted") == false)
-		FileManager::CreatePath("addons/converted");
-
 	// Link package system to file system
 	m_padPackageManager = upad::link_to_file_system();
 	m_assetManager = std::make_unique<pragma::asset::AssetManager>();
 
-	pragma::register_engine_animation_events();
-	pragma::register_engine_activities();
-
 	RegisterCallback<void>("Think");
 
-	Con::set_output_callback([this](const std::string_view &output,Con::MessageFlags flags,const Color *color) {
-		if(m_bRecordConsoleOutput == false)
-			return;
-		m_consoleOutputMutex.lock();
-			m_consoleOutput.push({std::string{output},flags,color ? std::make_shared<Color>(*color) : nullptr});
-		m_consoleOutputMutex.unlock();
-	});
-	
 	m_cpuProfiler = pragma::debug::CPUProfiler::Create<pragma::debug::CPUProfiler>();
 	AddProfilingHandler([this](bool profilingEnabled) {
 		if(profilingEnabled == false)
@@ -182,7 +184,8 @@ void Engine::SetReplicatedConVar(const std::string &cvar,const std::string &val)
 		return;
 	auto flags = client->GetConVarFlags(cvar);
 	if((flags &ConVarFlags::Notify) == ConVarFlags::Notify)
-		Con::cout<<"ConVar '"<<cvar<<"' has been changed to '"<<val<<"'"<<Con::endl;
+		spdlog::info("ConVar '{}' has been changed to '{}'",cvar,val);
+	//Con::cout<<"ConVar '"<<cvar<<"' has been changed to '"<<val<<"'"<<Con::endl;
 	if((flags &ConVarFlags::Replicated) == ConVarFlags::None)
 		return;
 	client->SetConVar(cvar,val);
@@ -360,7 +363,7 @@ static uint32_t clear_assets(NetworkState *state,pragma::asset::Type type,bool v
 				auto it = newCache.find(pair.first);
 				if(it != newCache.end())
 					continue;
-				Con::cout<<"Model "<<pair.second<<" was cleared from cache!"<<Con::endl;
+				spdlog::info("Model {} was cleared from cache!",pair.second);
 			}
 		}
 		break;
@@ -399,7 +402,7 @@ static uint32_t clear_assets(NetworkState *state,pragma::asset::Type type,bool v
 				auto it = newCache.find(pair.first);
 				if(it != newCache.end())
 					continue;
-				Con::cout<<"Material "<<pair.second<<" was cleared from cache!"<<Con::endl;
+				spdlog::info("Material {} was cleared from cache!",pair.second);
 			}
 		}
 		break;
@@ -418,7 +421,7 @@ uint32_t Engine::ClearUnusedAssets(pragma::asset::Type type,bool verbose) const
 {
 	auto n = DoClearUnusedAssets(type);
 	if(verbose)
-		Con::cout<<n<<" assets have been cleared!"<<Con::endl;
+		spdlog::info("{} assets have been cleared!",n);
 	return n;
 }
 void Engine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
@@ -438,19 +441,19 @@ uint32_t Engine::ClearUnusedAssets(const std::vector<pragma::asset::Type> &types
 	for(auto type : types)
 		n += ClearUnusedAssets(type,false);
 	if(verbose)
-		Con::cout<<n<<" assets have been cleared!"<<Con::endl;
+		spdlog::info("{} assets have been cleared!",n);
 	return n;
 }
 
 void Engine::ClearCache()
 {
 	constexpr auto clearAssetFiles = false;
-	Con::cout<<"Clearing cached files..."<<Con::endl;
+	spdlog::info("Clearing cached files...");
 	auto fRemoveDir = [](const std::string &name) {
-		Con::cout<<"Removing '"<<name<<"'..."<<Con::endl;
+		spdlog::info("Removing '{}'",name);
 		auto result = FileManager::RemoveDirectory(name.c_str());
 		if(result == false)
-			Con::cwar<<"WARNING: Unable to remove directory! Please remove it manually!"<<Con::endl;
+			spdlog::warn("Unable to remove directory! Please remove it manually!");
 		return result;
 	};
 	fRemoveDir("cache");
@@ -460,14 +463,14 @@ void Engine::ClearCache()
 		fRemoveDir("addons/converted");
 	}
 
-	Con::cout<<"Removing addon cache directories..."<<Con::endl;
+	spdlog::info("Removing addon cache directories...");
 	for(auto &addonInfo : AddonSystem::GetMountedAddons())
 	{
 		auto path = addonInfo.GetAbsolutePath() +"\\cache";
 		if(FileManager::ExistsSystem(path) == false)
 			continue;
 		if(FileManager::RemoveSystemDirectory(path.c_str()) == false)
-			Con::cwar<<"WARNING: Unable to remove '"<<path<<"'! Please remove it manually!"<<Con::endl;
+			spdlog::warn("Unable to remove '{}'! Please remove it manually!",path);
 	}
 
 	// Give it a bit of time to complete
@@ -607,6 +610,46 @@ void Engine::Release()
 
 bool Engine::Initialize(int argc,char *argv[])
 {
+	InitLaunchOptions(argc,argv);
+
+	pragma::detail::initialize_logger(g_lpLogLevelCon,g_lpLogLevelFile,g_lpLogFile);
+
+#if 0
+	Con::cout<<"----- Logger test -----"<<Con::endl;
+	Con::cout<<"cout output"<<Con::endl;
+	Con::cwar<<"cwar output"<<Con::endl;
+	Con::cerr<<"cerr output"<<Con::endl;
+	Con::crit<<"crit output"<<Con::endl;
+	Con::csv<<"csv output"<<Con::endl;
+	Con::ccl<<"ccl output"<<Con::endl;
+	
+	spdlog::trace("trace log");
+	spdlog::debug("debug log");
+	spdlog::info("info log");
+	spdlog::warn("warn log");
+	spdlog::error("error log");
+	spdlog::critical("critical log");
+	Con::cout<<"----- Logger test -----"<<Con::endl;
+	spdlog::default_logger()->flush();
+#endif
+
+	// These need to exist, so they can be automatically mounted
+	if(FileManager::Exists("addons/imported") == false)
+		FileManager::CreatePath("addons/imported");
+	if(FileManager::Exists("addons/converted") == false)
+		FileManager::CreatePath("addons/converted");
+
+	pragma::register_engine_animation_events();
+	pragma::register_engine_activities();
+
+	Con::set_output_callback([this](const std::string_view &output,Con::MessageFlags flags,const Color *color) {
+		if(m_bRecordConsoleOutput == false)
+			return;
+		m_consoleOutputMutex.lock();
+			m_consoleOutput.push({std::string{output},flags,color ? std::make_shared<Color>(*color) : nullptr});
+		m_consoleOutputMutex.unlock();
+	});
+
 	CVarHandler::Initialize();
 	RegisterConsoleCommands();
 
@@ -624,7 +667,7 @@ bool Engine::Initialize(int argc,char *argv[])
 	auto matErr = matManager->LoadAsset("error");
 	m_svInstance = std::unique_ptr<StateInstance>(new StateInstance{matManager,matErr.get()});
 	//
-	InitLaunchOptions(argc,argv);
+
 	if(Lua::get_extended_lua_modules_enabled())
 	{
 		RegisterConCommand("l",[this](NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
@@ -656,6 +699,7 @@ bool Engine::Initialize(int argc,char *argv[])
 
 void Engine::InitializeAssetManager(util::FileAssetManager &assetManager) const
 {
+	assetManager.SetLogHandler(&pragma::log);
 	assetManager.SetExternalSourceFileImportHandler([this,&assetManager](const std::string &path,const std::string &outputPath) -> std::optional<std::string> {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("import_asset_file");
@@ -921,6 +965,15 @@ void Engine::DumpDebugInformation(ZIPFile &zip) const
 		}
 	}
 	zip.AddFile("engine.txt",engineInfo.str());
+
+	auto logFileName = pragma::detail::get_log_file_name();
+	if(logFileName.has_value())
+	{
+		pragma::detail::close_logger();
+		auto logContents = filemanager::read_file(*logFileName);
+		if(logContents.has_value())
+			zip.AddFile("log.txt",*logContents);
+	}
 
 	auto fWriteConvars = [&zip](const std::map<std::string,std::shared_ptr<ConConf>> &cvarMap,const std::string &fileName) {
 		std::stringstream convars;

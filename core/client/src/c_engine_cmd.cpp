@@ -169,7 +169,7 @@ void CEngine::RegisterConsoleCommands()
 		auto result = GetRenderContext().GetParsedShaderSourceCode(*shader,glslCodePerStage,glslCodeStages,infoLog,debugInfoLog,errStage);
 		if(result == false)
 		{
-			Con::cwar<<"WARNING: Parsing shader '"<<shaderName<<"' has failed:"<<Con::endl;
+			Con::cwar<<"Parsing shader '"<<shaderName<<"' has failed:"<<Con::endl;
 			Con::cwar<<"Info Log: "<<infoLog<<Con::endl;
 			Con::cwar<<"Debug info Log: "<<debugInfoLog<<Con::endl;
 			Con::cwar<<"Stage: "<<prosper::util::to_string(errStage)<<Con::endl;
@@ -212,7 +212,7 @@ void CEngine::RegisterConsoleCommands()
 				f = nullptr;
 			}
 			else
-				Con::cwar<<"WARNING: Unable to write file '"<<stageFileName<<"'!"<<Con::endl;
+				Con::cwar<<"Unable to write file '"<<stageFileName<<"'!"<<Con::endl;
 		}
 		Con::cout<<"Done! Written shader files to '"<<path<<"'!"<<Con::endl;
 	},ConVarFlags::None,"Dumps the glsl code for the specified shader.");
@@ -503,19 +503,19 @@ void CEngine::RegisterConsoleCommands()
 		auto lib = cl->InitializeLibrary("openvr/pr_openvr",&err,cl->GetLuaState());
 		if(!lib)
 		{
-			Con::cwar<<"WARNING: Unable to preinitialize VR: "<<err<<Con::endl;
+			Con::cwar<<"Unable to preinitialize VR: "<<err<<Con::endl;
 			return;
 		}
 		auto *isHmdPresent = lib->FindSymbolAddress<bool(*)()>("is_hmd_present");
 		auto *preInit = lib->FindSymbolAddress<void(*)()>("preinitialize_openvr");
 		if(!isHmdPresent || !preInit)
 		{
-			Con::cwar<<"WARNING: Required VR functions not found in openvr module!"<<Con::endl;
+			Con::cwar<<"Required VR functions not found in openvr module!"<<Con::endl;
 			return;
 		}
 		if(!isHmdPresent())
 		{
-			Con::cwar<<"WARNING: VR HMD could not be found!"<<Con::endl;
+			Con::cwar<<"VR HMD could not be found!"<<Con::endl;
 			if(argv.empty() || !util::to_boolean(argv.front()))
 				return;
 		}
@@ -524,7 +524,7 @@ void CEngine::RegisterConsoleCommands()
 	conVarMap.RegisterConCommand("locale_localize",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		if(argv.size() < 4)
 		{
-			Con::cwar<<"WARNING: Insufficient arguments supplied!"<<Con::endl;
+			Con::cwar<<"Insufficient arguments supplied!"<<Con::endl;
 			std::vector<std::string> files;
 			filemanager::find_files("scripts/localization/en/texts/*.txt",&files,nullptr);
 			std::sort(files.begin(),files.end());
@@ -545,6 +545,6 @@ void CEngine::RegisterConsoleCommands()
 		if(res)
 			Con::cout<<"Done!"<<Con::endl;
 		else
-			Con::cwar<<"WARNING: Localization failed!"<<Con::endl;
+			Con::cwar<<"Localization failed!"<<Con::endl;
 	},ConVarFlags::None,"Adds the specified text to the localization files. Usage: locale_localize <group> <language> <textIdentifier> <localizedText>");
 }

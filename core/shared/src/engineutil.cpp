@@ -27,7 +27,7 @@ void Engine::SetTickRate(UInt32 tickRate)
 	assert(tickRate != 0);
 	if(tickRate == 0)
 	{
-		Con::cwar<<"WARNING: Invalid tick rate '"<<tickRate<<"'. Clamping to '1'..."<<Con::endl;
+		Con::cwar<<"Invalid tick rate '"<<tickRate<<"'. Clamping to '1'..."<<Con::endl;
 		tickRate = 1;
 	}
 	m_tickRate = tickRate;

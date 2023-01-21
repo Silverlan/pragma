@@ -132,7 +132,7 @@ static bool bind_default_texture(prosper::IDescriptorSet &ds,const std::string &
 	auto *asset = texManager.FindCachedAsset(defaultTexName);
 	if(!asset)
 	{
-		Con::cwar<<"WARNING: Attempted to bind texture '"<<defaultTexName<<"' to material descriptor set, but texture has not been loaded!"<<Con::endl;
+		Con::cwar<<"Attempted to bind texture '"<<defaultTexName<<"' to material descriptor set, but texture has not been loaded!"<<Con::endl;
 		return false;
 	}
 	auto ptrTex = msys::TextureManager::GetAssetObject(*asset);

@@ -933,7 +933,7 @@ WIBase *CGame::CreateGUIElement(std::string className,WIBase *parent)
 			}
 			else
 			{
-				Con::csv<<"WARNING: Unable to create lua GUI Element '"<<className<<"': Lua class is not derived from valid GUI base!"<<Con::endl;
+				Con::cwar<<Con::PREFIX_CLIENT<<"Unable to create lua GUI Element '"<<className<<"': Lua class is not derived from valid GUI base!"<<Con::endl;
 				return nullptr;
 			}
 
@@ -947,7 +947,7 @@ WIBase *CGame::CreateGUIElement(std::string className,WIBase *parent)
 #endif
 		if(!r)
 		{
-			Con::csv<<"WARNING: Unable to create lua GUI Element '"<<className<<"'!"<<Con::endl;
+			Con::cwar<<Con::PREFIX_CLIENT<<"Unable to create lua GUI Element '"<<className<<"'!"<<Con::endl;
 			return nullptr;
 		}
 	}
@@ -1563,7 +1563,7 @@ uint32_t CGame::GetLostPacketCount()
 #include <pragma/physics/controller.hpp>
 void CGame::ReceiveSnapshot(NetPacket &packet)
 {
-	//Con::ccl<<"[CLIENT] Received snapshot.."<<Con::endl;
+	//Con::ccl<<"Received snapshot.."<<Con::endl;
 	//auto tOld = m_tServer;
 	auto latency = GetLatency() /2.f; // Latency is entire roundtrip; We need the time for one way
 	auto tActivated = (util::clock::to_int(util::clock::get_duration_since_start()) -packet.GetTimeActivated()) /1'000'000.0;
@@ -1856,7 +1856,7 @@ bool CGame::SaveImage(prosper::IImage &image,const std::string &fileName,const u
 	auto path = ufile::get_path_from_filename(fileName);
 	FileManager::CreatePath(path.c_str());
 	return prosper::util::save_texture(fileName,image,imageWriteInfo,[fileName](const std::string &err) {
-		Con::cwar<<"WARNING: Unable to save image '"<<fileName<<"': "<<err<<Con::endl;
+		Con::cwar<<"Unable to save image '"<<fileName<<"': "<<err<<Con::endl;
 	});
 }
 
@@ -1874,7 +1874,7 @@ bool CGame::SaveImage(
 	texSaveInfo.szPerPixel = szPerPixel;
 	texSaveInfo.cubemap = cubemap;
 	return uimg::save_texture(fileName,imgLayerMipmapData,texSaveInfo,[fileName](const std::string &err) {
-		Con::cwar<<"WARNING: Unable to save image '"<<fileName<<"': "<<err<<Con::endl;
+		Con::cwar<<"Unable to save image '"<<fileName<<"': "<<err<<Con::endl;
 	});
 }
 
@@ -1886,7 +1886,7 @@ bool CGame::SaveImage(uimg::ImageBuffer &imgBuffer,const std::string &fileName,c
 	texSaveInfo.texInfo = imageWriteInfo;
 	texSaveInfo.cubemap = cubemap;
 	return uimg::save_texture(fileName,imgBuffer,texSaveInfo,[fileName](const std::string &err) {
-		Con::cwar<<"WARNING: Unable to save image '"<<fileName<<"': "<<err<<Con::endl;
+		Con::cwar<<"Unable to save image '"<<fileName<<"': "<<err<<Con::endl;
 	});
 }
 

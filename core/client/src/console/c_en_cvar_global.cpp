@@ -29,7 +29,7 @@ extern DLLCLIENT ClientState *client;
 		auto *l = static_cast<ClientState*>(state)->GetGUILuaState();
 		Lua::Execute(l,[l,&lua](int(*traceback)(lua_State*)) {
 			return Lua::RunString(l,lua,"lua_run_gui",traceback);
-		},Lua::ErrorColorMode::White);
+		});
 	}
 #endif
 

@@ -16,6 +16,7 @@
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/logging.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <image/prosper_texture.hpp>
 #include <image/prosper_image_view.hpp>
@@ -118,7 +119,7 @@ CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(T
 	if(set.buffers.size() >= set.limit)
 		return {};
 
-	Con::cerr<<"Initializing new shadow map..."<<Con::endl;
+	spdlog::info("Initializing new shadow map...");
 	auto layerCount = (type == Type::Cube) ? 6u : 1u;
 	prosper::util::ImageCreateInfo createInfo {};
 	createInfo.width = size;

@@ -362,7 +362,7 @@ bool ResourceWatcherManager::MountDirectory(const std::string &path,bool bAbsolu
 	catch(const DirectoryWatcher::ConstructException &e)
 	{
 #if RESOURCE_WATCHER_VERBOSE > 1
-		Con::cwar<<"WARNING: [ResourceWatcher] Unable to mount directory '"<<path<<"': "<<e.what()<<Con::endl;
+		Con::cwar<<"[ResourceWatcher] Unable to mount directory '"<<path<<"': "<<e.what()<<Con::endl;
 #endif
 	}
 	return true;

@@ -60,7 +60,7 @@ template<typename TIndex>
 	context.m_pUserData = &meshData;
 	auto result = genTangSpaceDefault(&context);
 	if(result == false)
-		Con::cwar<<"WARNING: Unable to calculate mesh tangents!"<<Con::endl;
+		Con::cwar<<"Unable to calculate mesh tangents!"<<Con::endl;
 }
 template DLLNETWORK void umath::compute_tangent_basis<uint16_t>(std::vector<Vertex> &verts,const uint16_t *indices,uint32_t numIndices);
 template DLLNETWORK void umath::compute_tangent_basis<uint32_t>(std::vector<Vertex> &verts,const uint32_t *indices,uint32_t numIndices);

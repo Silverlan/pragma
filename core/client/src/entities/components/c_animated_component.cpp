@@ -17,6 +17,7 @@
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include <pragma/model/model.h>
+#include <pragma/logging.hpp>
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
@@ -180,7 +181,7 @@ void CAnimatedComponent::ResetAnimation(const std::shared_ptr<Model> &mdl)
 		switch(objAttachment.type)
 		{
 			case ObjectAttachment::Type::Model:
-				Con::cwar<<"WARNING: Unsupported object attachment type '"<<umath::to_integral(objAttachment.type)<<"'!"<<Con::endl;
+				spdlog::warn("Unsupported object attachment type '{}' for model '{}'!",magic_enum::enum_name(objAttachment.type),mdl->GetName());
 				break;
 			case ObjectAttachment::Type::ParticleSystem:
 				auto itParticleFile = objAttachment.keyValues.find("particle_file");
@@ -312,7 +313,7 @@ void CAnimatedComponent::UpdateBoneMatricesMT()
 				mat = umat::identity();
 		}
 		else
-			Con::cwar<<"WARNING: Attempted to update bone "<<i<<" in "<<mdl->GetName()<<" which doesn't exist in the reference pose! Ignoring..."<<Con::endl;
+			Con::cwar<<"Attempted to update bone "<<i<<" in "<<mdl->GetName()<<" which doesn't exist in the reference pose! Ignoring..."<<Con::endl;
 	}
 	if(callbacksEnabled)
 		InvokeEventCallbacks(EVENT_ON_BONE_MATRICES_UPDATED);

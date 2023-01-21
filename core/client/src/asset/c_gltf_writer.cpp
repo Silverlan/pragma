@@ -34,7 +34,7 @@
 #define GLTF_ASSERT(c,msg) \
 	if(!(c)) \
 	{ \
-		Con::cwar<<"WARNING: glTF assertion failure: "<<msg<<Con::endl; \
+		Con::cwar<<"glTF assertion failure: "<<msg<<Con::endl; \
 		throw std::logic_error{"glTF assertion failed!"}; \
 	}
 
@@ -886,9 +886,9 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 		if(result)
 			Con::cout<<"Successfully exported model '"<<name<<"' as '"<<output_filename<<"'!"<<Con::endl;
 		else if(err.empty() == false)
-			Con::cwar<<"WARNING: Unable to export model '"<<name<<"' as '"<<output_filename<<"': "<<err<<Con::endl;
+			Con::cwar<<"Unable to export model '"<<name<<"' as '"<<output_filename<<"': "<<err<<Con::endl;
 		else
-			Con::cwar<<"WARNING: Unable to export model '"<<name<<"' as '"<<output_filename<<"': "<<warn<<Con::endl;
+			Con::cwar<<"Unable to export model '"<<name<<"' as '"<<output_filename<<"': "<<warn<<Con::endl;
 	}
 	if(result == false)
 	{
@@ -914,7 +914,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 				if(pragma::asset::export_animation(exportData.model,pair.first,m_exportInfo,errMsg))
 					continue;
 				if(m_exportInfo.verbose)
-					Con::cwar<<"WARNING: Unable to export animation '"<<pair.first<<"': "<<errMsg<<Con::endl;
+					Con::cwar<<"Unable to export animation '"<<pair.first<<"': "<<errMsg<<Con::endl;
 			}
 		}
 	}
@@ -1034,7 +1034,7 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 			if(it != traversedJoints.end())
 				continue;
 			if(m_exportInfo.verbose)
-				Con::cwar<<"WARNING: Bone '"<<skeleton.GetBone(i).lock()->name<<"' has no parent but is not in list of root bones! Forcing into root bone list manually..."<<Con::endl;
+				Con::cwar<<"Bone '"<<skeleton.GetBone(i).lock()->name<<"' has no parent but is not in list of root bones! Forcing into root bone list manually..."<<Con::endl;
 			fIterateSkeleton(*skeleton.GetBone(i).lock(),m_gltfMdl.nodes.at(gltfRootNodeIdx));
 		}
 
@@ -1460,7 +1460,7 @@ void pragma::asset::GLTFWriter::GenerateAO(::Model &mdl)
 	if(job.has_value() == false)
 	{
 		if(m_exportInfo.verbose)
-			Con::cwar<<"WARNING: Unable to create parallel jobs for ambient occlusion map generation! Ambient occlusion maps will not be available."<<Con::endl;
+			Con::cwar<<"Unable to create parallel jobs for ambient occlusion map generation! Ambient occlusion maps will not be available."<<Con::endl;
 	}
 	else
 	{
@@ -1484,7 +1484,7 @@ void pragma::asset::GLTFWriter::GenerateAO(::Model &mdl)
 		if(job->IsSuccessful() == false)
 		{
 			if(m_exportInfo.verbose)
-				Con::cwar<<"WARNING: Ao job has failed: "<<job->GetResultMessage()<<". Ambient occlusion maps will not be available."<<Con::endl;
+				Con::cwar<<"Ao job has failed: "<<job->GetResultMessage()<<". Ambient occlusion maps will not be available."<<Con::endl;
 		}
 	}
 	// Ambient occlusion generator may have applied some changes to some of the materials and/or textures.

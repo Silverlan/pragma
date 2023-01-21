@@ -169,7 +169,7 @@ void pragma::physics::ICompoundShape::GetAABB(Vector3 &min,Vector3 &max) const
 }
 void pragma::physics::ICompoundShape::SetMass(float mass)
 {
-	Con::cwar<<"WARNING: Attempted to set mass of compound shape. This is illegal, change the mass of the individual sub-shapes instead!"<<Con::endl;
+	Con::cwar<<"Attempted to set mass of compound shape. This is illegal, change the mass of the individual sub-shapes instead!"<<Con::endl;
 }
 float pragma::physics::ICompoundShape::GetMass() const
 {

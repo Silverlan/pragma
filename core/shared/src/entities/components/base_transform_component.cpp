@@ -194,14 +194,14 @@ void BaseTransformComponent::SetPosition(const Vector3 &pos,Bool bForceUpdate)
 	auto &ent = GetEntity();
 	if(std::isnan(pos.x) || std::isnan(pos.y) || std::isnan(pos.z))
 	{
-		Con::cwar<<"WARNING: NaN position ("<<pos.x<<","<<pos.y<<","<<pos.z<<") for entity ";
+		Con::cwar<<"NaN position ("<<pos.x<<","<<pos.y<<","<<pos.z<<") for entity ";
 		ent.print(Con::cout);
 		Con::cwar<<"! Ignoring..."<<Con::endl;
 		return;
 	}
 	if(std::isinf(pos.x) || std::isinf(pos.y) || std::isinf(pos.z))
 	{
-		Con::cwar<<"WARNING: inf position ("<<pos.x<<","<<pos.y<<","<<pos.z<<") for entity ";
+		Con::cwar<<"inf position ("<<pos.x<<","<<pos.y<<","<<pos.z<<") for entity ";
 		ent.print(Con::cout);
 		Con::cwar<<"! Ignoring..."<<Con::endl;
 		return;
@@ -228,7 +228,7 @@ void BaseTransformComponent::SetRotation(const Quat &q)
 	auto &ent = GetEntity();
 	if(std::isnan(q.w) || std::isnan(q.x) || std::isnan(q.y) || std::isnan(q.z))
 	{
-		Con::cwar<<"WARNING: NaN rotation ("<<q.w<<","<<q.x<<","<<q.y<<","<<q.z<<") for entity ";
+		Con::cwar<<"NaN rotation ("<<q.w<<","<<q.x<<","<<q.y<<","<<q.z<<") for entity ";
 		ent.print(Con::cout);
 		Con::cwar<<"! Ignoring..."<<Con::endl;
 		return;

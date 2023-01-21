@@ -47,7 +47,7 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 	map.RegisterConCommand("udm_convert",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		if(argv.empty())
 		{
-			Con::cwar<<"WARNING: No file specified to convert!"<<Con::endl;
+			Con::cwar<<"No file specified to convert!"<<Con::endl;
 			return;
 		}
 		auto &fileName = argv.front();
@@ -55,19 +55,19 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 		auto formatType = udm::Data::GetFormatType(fileName,err);
 		if(formatType.has_value() == false)
 		{
-			Con::cwar<<"WARNING: Unable to load UDM data: "<<err<<Con::endl;
+			Con::cwar<<"Unable to load UDM data: "<<err<<Con::endl;
 			return;
 		}
 		auto udmData = util::load_udm_asset(fileName,&err);
 		if(udmData == nullptr)
 		{
-			Con::cwar<<"WARNING: Unable to load UDM data: "<<err<<Con::endl;
+			Con::cwar<<"Unable to load UDM data: "<<err<<Con::endl;
 			return;
 		}
 		std::string rpath;
 		if(FileManager::FindAbsolutePath(fileName,rpath) == false)
 		{
-			Con::cwar<<"WARNING: Unable to locate UDM file on disk!"<<Con::endl;
+			Con::cwar<<"Unable to locate UDM file on disk!"<<Con::endl;
 			return;
 		}
 		auto path = util::Path::CreateFile(rpath);
@@ -92,7 +92,7 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 			}
 			catch(const udm::Exception &e)
 			{
-				Con::cwar<<"WARNING: Unable to save UDM data: "<<e.what()<<Con::endl;
+				Con::cwar<<"Unable to save UDM data: "<<e.what()<<Con::endl;
 			}
 		}
 		else
@@ -108,7 +108,7 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 			}
 			catch(const udm::Exception &e)
 			{
-				Con::cwar<<"WARNING: Unable to save UDM data: "<<e.what()<<Con::endl;
+				Con::cwar<<"Unable to save UDM data: "<<e.what()<<Con::endl;
 			}
 		}
 		auto absPath = util::get_program_path() +'/' +outFileName;
@@ -117,7 +117,7 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 	map.RegisterConCommand("udm_validate",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		if(argv.empty())
 		{
-			Con::cwar<<"WARNING: No file specified to convert!"<<Con::endl;
+			Con::cwar<<"No file specified to convert!"<<Con::endl;
 			return;
 		}
 		auto &fileName = argv.front();
@@ -255,7 +255,7 @@ void Engine::RegisterConsoleCommands()
 		auto *game = state ? state->GetGameState() : nullptr;
 		if(game == nullptr)
 		{
-			Con::cwar<<"WARNING: Cannot create savegame: No active game!"<<Con::endl;
+			Con::cwar<<"Cannot create savegame: No active game!"<<Con::endl;
 			return;
 		}
 		auto path = "savegames/" +util::get_date_time("%Y-%m-%d_%H-%M-%S") +".psav_b";
@@ -263,14 +263,14 @@ void Engine::RegisterConsoleCommands()
 		std::string err;
 		auto result = pragma::savegame::save(*game,path,err);
 		if(result == false)
-			Con::cwar<<"WARNING: Cannot create savegame: "<<err<<Con::endl;
+			Con::cwar<<"Cannot create savegame: "<<err<<Con::endl;
 		else
 			Con::cout<<"Created savegame as '"<<path<<"'!"<<Con::endl;
 	},ConVarFlags::None);
 	conVarMap.RegisterConCommand("load",[](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		if(argv.empty())
 		{
-			Con::cwar<<"WARNING: Cannot load savegame: No savegame specified!"<<Con::endl;
+			Con::cwar<<"Cannot load savegame: No savegame specified!"<<Con::endl;
 			return;
 		}
 		state->EndGame();
@@ -278,7 +278,7 @@ void Engine::RegisterConsoleCommands()
 		auto *game = state ? state->GetGameState() : nullptr;
 		if(game == nullptr)
 		{
-			Con::cwar<<"WARNING: Cannot load savegame: No active game!"<<Con::endl;
+			Con::cwar<<"Cannot load savegame: No active game!"<<Con::endl;
 			return;
 		}
 		auto path = "savegames/" +util::get_date_time() +".psav";
@@ -286,7 +286,7 @@ void Engine::RegisterConsoleCommands()
 		std::string err;
 		auto result = pragma::savegame::load(*game,path,err);
 		if(result == false)
-			Con::cwar<<"WARNING: Cannot load savegame: "<<err<<Con::endl;
+			Con::cwar<<"Cannot load savegame: "<<err<<Con::endl;
 	},ConVarFlags::None);
 
 	conVarMap.RegisterConCommand("lua_help",[](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
@@ -369,7 +369,7 @@ void Engine::RegisterConsoleCommands()
 	conVarMap.RegisterConCommand("loc_find",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		if(argv.empty())
 		{
-			Con::cwar<<"WARNING: No argument specified!"<<Con::endl;
+			Con::cwar<<"No argument specified!"<<Con::endl;
 			return;
 		}
 		auto &texts = Locale::GetTexts();
@@ -408,7 +408,7 @@ void Engine::RegisterConsoleCommands()
 	conVarMap.RegisterConCommand("install_module",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		if(argv.empty())
 		{
-			Con::cwar<<"WARNING: No module specified!"<<Con::endl;
+			Con::cwar<<"No module specified!"<<Con::endl;
 			return;
 		}
 		std::optional<std::string> version {};
@@ -474,7 +474,7 @@ void ModuleInstallJob::Install()
 
 #ifdef __linux__
 	{
-		Con::cwar<<"WARNING: Automatic installation of binary modules using the 'install_module' console command is currently not supported on Linux! You will have to install the module manually."<<Con::endl;
+		Con::cwar<<"Automatic installation of binary modules using the 'install_module' console command is currently not supported on Linux! You will have to install the module manually."<<Con::endl;
 		Con::cwar<<"The download should automatically start through your browser. If not, you can download the module here: "<<url<<Con::endl;
 		Con::cwar<<"Once downloaded, simply extract the archive over your Pragma installation."<<Con::endl;
 		util::open_url_in_browser(url);
@@ -508,7 +508,7 @@ void ModuleInstallJob::Install()
 			if(!zip)
 			{
 				std::string msg = "Failed to open module archive '" +archivePath +"'!";
-				Con::cwar<<"WARNING: "<<msg<<Con::endl;
+				Con::cwar<<""<<msg<<Con::endl;
 				SetStatus(util::JobStatus::Failed,msg);
 				return;
 			}
@@ -518,7 +518,7 @@ void ModuleInstallJob::Install()
 			if(!zip->ExtractFiles(util::get_program_path(),err))
 			{
 				std::string msg = "Failed to extract module archive '" +archivePath +"'!";
-				Con::cwar<<"WARNING: "<<msg<<Con::endl;
+				Con::cwar<<""<<msg<<Con::endl;
 				SetStatus(util::JobStatus::Failed,msg);
 				return;
 			}
@@ -526,7 +526,7 @@ void ModuleInstallJob::Install()
 		else
 		{
 			std::string msg = "Failed to download module '" +m_module +"'!";
-			Con::cwar<<"WARNING: "<<msg<<Con::endl;
+			Con::cwar<<""<<msg<<Con::endl;
 			SetStatus(util::JobStatus::Failed,msg);
 			return;
 		}

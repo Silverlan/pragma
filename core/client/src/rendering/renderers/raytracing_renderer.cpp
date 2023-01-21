@@ -117,12 +117,12 @@ bool RaytracingRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 	auto width = extents.width;
 	auto height = extents.height;
 	if((width %localWorkGroupSize) != 0 || (height %localWorkGroupSize) != 0)
-		Con::cwar<<"WARNING: Raytracing output image resolution "<<width<<"x"<<height<<" is not a multiple of 4! Image may become partially black."<<Con::endl;
+		Con::cwar<<"Raytracing output image resolution "<<width<<"x"<<height<<" is not a multiple of 4! Image may become partially black."<<Con::endl;
 
 	// Resolution is limited by ShaderRaytracing::PushConstants::pxOffset only
 	constexpr auto maxResolution = std::numeric_limits<uint16_t>::max();
 	if(width > maxResolution || height > maxResolution)
-		Con::cwar<<"WARNING: Raytracing output image resolution exceeds limit of "<<maxResolution<<"! Image may become partially black."<<Con::endl;
+		Con::cwar<<"Raytracing output image resolution exceeds limit of "<<maxResolution<<"! Image may become partially black."<<Con::endl;
 	width = umath::min(width,static_cast<uint32_t>(maxResolution));
 	height = umath::min(height,static_cast<uint32_t>(maxResolution));
 

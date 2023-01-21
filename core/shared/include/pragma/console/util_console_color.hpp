@@ -27,6 +27,8 @@ namespace util
 		BackgroundBlue = BackgroundGreen<<1u,
 		BackgroundIntensity = BackgroundBlue<<1u,
 
+		Reset = BackgroundIntensity<<1u,
+
 		Yellow = Red | Green,
 		Magenta = Red | Blue,
 		Cyan = Blue | Green,
@@ -44,6 +46,7 @@ namespace util
 	DLLNETWORK ConsoleColorFlags get_active_console_color_flags();
 	DLLNETWORK std::optional<Color> console_color_flags_to_color(ConsoleColorFlags flags);
 	DLLNETWORK ConsoleColorFlags color_to_console_color_flags(const Color &color);
+	DLLNETWORK std::string get_ansi_color_code(ConsoleColorFlags flags);
 };
 REGISTER_BASIC_BITWISE_OPERATORS(util::ConsoleColorFlags);
 

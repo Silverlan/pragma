@@ -233,7 +233,7 @@ Bool SBaseEntity::ReceiveNetEvent(pragma::BasePlayerComponent &pl,pragma::NetEve
 		if(pNetComponent->ReceiveNetEvent(pl,eventId,packet))
 			return true;
 	}
-	Con::csv<<"WARNING: Unhandled net event '"<<eventId<<"' for entity "<<GetClass()<<Con::endl;
+	Con::cwar<<Con::PREFIX_SERVER<<"Unhandled net event '"<<eventId<<"' for entity "<<GetClass()<<Con::endl;
 	return false;
 }
 

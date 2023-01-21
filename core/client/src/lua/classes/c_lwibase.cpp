@@ -1316,7 +1316,7 @@ namespace Lua
 								bReturn = true;
 						}
 						return r;
-					},Lua::GetErrorColorMode(l));
+					});
 					if(bReturn == true)
 						break;
 					++it;

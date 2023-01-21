@@ -7,6 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/localization.h"
+#include "pragma/logging.hpp"
 #include <fsys/directory_watcher.h>
 #include <fsys/filesystem.h>
 #include <sharedutils/util_string.h>
@@ -215,7 +216,7 @@ std::string Locale::GetText(const std::string &id,const std::vector<std::string>
 	auto it = m_localization.texts.find(id);
 	if(it == m_localization.texts.end())
 	{
-		Con::cwar<<"WARNING: Missing localization for '"<<id<<"'!"<<Con::endl;
+		spdlog::warn("Missing localization for '{}'!",id);
 		return std::string("<MISSING LOCALIZATION: ") +id +std::string(">");
 	}
 	auto r = it->second.cpp_str();
@@ -227,7 +228,7 @@ util::Utf8String Locale::GetTextUtf8(const std::string &id,const std::vector<uti
 	auto it = m_localization.texts.find(id);
 	if(it == m_localization.texts.end())
 	{
-		Con::cwar<<"WARNING: Missing localization for '"<<id<<"'!"<<Con::endl;
+		spdlog::warn("Missing localization for '{}'!",id);
 		return std::string("<MISSING LOCALIZATION: ") +id +std::string(">");
 	}
 	auto r = it->second;

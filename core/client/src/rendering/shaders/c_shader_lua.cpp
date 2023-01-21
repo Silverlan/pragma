@@ -638,7 +638,7 @@ void pragma::LuaShaderManager::RegisterShader(std::string className,luabind::obj
 	auto itShader = m_shaders.find(className);
 	if(itShader != m_shaders.end())
 	{
-		Con::cwar<<"WARNING: Attempted to register shader '"<<className<<"', which has already been registered previously! Ignoring..."<<Con::endl;
+		Con::cwar<<"Attempted to register shader '"<<className<<"', which has already been registered previously! Ignoring..."<<Con::endl;
 		return;
 	}
 	auto *l = o.interpreter();
@@ -658,7 +658,7 @@ void pragma::LuaShaderManager::RegisterShader(std::string className,luabind::obj
 #endif
 	if(!r)
 	{
-		Con::ccl<<"WARNING: Unable to create lua shader '"<<className<<"'!"<<Con::endl;
+		Con::cwar<<Con::PREFIX_CLIENT<<"Unable to create lua shader '"<<className<<"'!"<<Con::endl;
 		return;
 	}
 	
@@ -679,7 +679,7 @@ void pragma::LuaShaderManager::RegisterShader(std::string className,luabind::obj
 		shaderWrapper = oShaderCompute ? dynamic_cast<pragma::LuaShaderWrapperBase*>(oShaderCompute) : nullptr;
 		if(shaderWrapper == nullptr)
 		{
-			Con::ccl<<"WARNING: Unable to create lua shader '"<<className<<"': Lua class is not derived from valid shader base!"<<Con::endl;
+			Con::cwar<<Con::PREFIX_CLIENT<<"Unable to create lua shader '"<<className<<"': Lua class is not derived from valid shader base!"<<Con::endl;
 			return;
 		}
 		shaderType = ShaderType::Compute;

@@ -32,7 +32,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 	auto &hCam = scene.GetActiveCamera();
 	if(hCam.expired())
 	{
-		Con::cwar<<"WARNING: Attempted to bind scene with no active camera!"<<Con::endl;
+		Con::cwar<<"Attempted to bind scene with no active camera!"<<Con::endl;
 		return false;
 	}
 	auto *dsScene = view ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
@@ -237,7 +237,7 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh,pragma::
 	auto numIndices = mesh.GetIndexCount();
 	if(numIndices > umath::to_integral(GameLimits::MaxMeshVertices))
 	{
-		Con::cerr<<"ERROR: Attempted to draw mesh with more than maximum ("<<umath::to_integral(GameLimits::MaxMeshVertices)<<") amount of vertices!"<<Con::endl;
+		Con::cerr<<"Attempted to draw mesh with more than maximum ("<<umath::to_integral(GameLimits::MaxMeshVertices)<<") amount of vertices!"<<Con::endl;
 		return false;
 	}
 	auto &vkMesh = mesh.GetSceneMesh();

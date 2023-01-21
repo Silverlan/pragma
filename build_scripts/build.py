@@ -29,7 +29,7 @@ parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev
 if platform == "linux":
 	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-14')
 	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-14')
-	defaultGenerator = "Ninja Multi-Config"
+	defaultGenerator = "Unix Makefiles"
 else:
 	defaultGenerator = "Visual Studio 17 2022"
 parser.add_argument('--generator', help='The generator to use.', default=defaultGenerator)

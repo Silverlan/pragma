@@ -13,7 +13,7 @@
 #include <spdlog/formatter.h>
 #include <spdlog/fmt/bundled/format.h>
 
-static spdlog::level::level_enum severity_to_spdlog_level(util::LogSeverity severity)
+int32_t pragma::logging::severity_to_spdlog_level(util::LogSeverity severity)
 {
 	switch(severity)
 	{
@@ -36,12 +36,12 @@ static spdlog::level::level_enum severity_to_spdlog_level(util::LogSeverity seve
 
 void pragma::log(const std::string &msg,util::LogSeverity severity)
 {
-	spdlog::log(severity_to_spdlog_level(severity),msg);
+	spdlog::log(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(severity)),msg);
 }
 
 bool pragma::is_log_level_enabled(::util::LogSeverity severity)
 {
-	return spdlog::should_log(severity_to_spdlog_level(severity));
+	return spdlog::should_log(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(severity)));
 }
 
 /////////////////////////////
@@ -177,6 +177,40 @@ public:
     }
 };
 
+class color_formatter : public spdlog::custom_flag_formatter
+{
+public:
+    virtual void format(const spdlog::details::log_msg &msg, const std::tm &tm, spdlog::memory_buf_t &dest) override
+    {
+		switch(msg.level)
+		{
+		case spdlog::level::level_enum::warn:
+		{
+			constexpr const char *str = PRAGMA_CON_COLOR_WARNING;
+			dest.append(str,str +ustring::length(PRAGMA_CON_COLOR_WARNING));
+			break;
+		}
+		case spdlog::level::level_enum::err:
+		{
+			constexpr const char *str = PRAGMA_CON_COLOR_ERROR;
+			dest.append(str,str +ustring::length(PRAGMA_CON_COLOR_ERROR));
+			break;
+		}
+		case spdlog::level::level_enum::critical:
+		{
+			constexpr const char *str = PRAGMA_CON_COLOR_CRITICAL;
+			dest.append(str,str +ustring::length(PRAGMA_CON_COLOR_CRITICAL));
+			break;
+		}
+		}
+    }
+
+    virtual std::unique_ptr<custom_flag_formatter> clone() const override
+    {
+        return spdlog::details::make_unique<color_formatter>();
+    }
+};
+
 void pragma::detail::initialize_logger(
 	::util::LogSeverity conLogLevel,
 	::util::LogSeverity fileLogLevel,
@@ -185,7 +219,7 @@ void pragma::detail::initialize_logger(
 {
 	g_logFileName = logFile;
     auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    consoleSink->set_level(severity_to_spdlog_level(conLogLevel));
+    consoleSink->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(conLogLevel)));
 
     auto formatter = std::make_unique<spdlog::pattern_formatter>();
     formatter->add_flag<SpdPragmaPrefixFormatter>('*');
@@ -199,10 +233,12 @@ void pragma::detail::initialize_logger(
 	if(logFile.has_value())
 	{
 		auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(*logFile,true);
-		fileSink->set_level(severity_to_spdlog_level(fileLogLevel));
+		fileSink->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(fileLogLevel)));
 		auto formatter = std::make_unique<spdlog::pattern_formatter>();
 		formatter->add_flag<short_level_formatter_c>('q');
-		formatter->set_pattern("[%H:%M:%S %z] [%^%q%$] %v");
+		formatter->add_flag<color_reset_formatter>('Q');
+		formatter->add_flag<color_formatter>('w');
+		formatter->set_pattern("[%H:%M:%S %z] [%^%q%$] %w%v%Q");
 		fileSink->set_formatter(std::move(formatter));
 
 		sinks.push_back(fileSink);
@@ -216,9 +252,9 @@ void pragma::detail::initialize_logger(
 
 	auto logger = std::make_shared<spdlog::logger>("pragma_logger",sinks.begin(),sinks.end());
 	logger->set_level(
-		severity_to_spdlog_level(
+		static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(
 			static_cast<::util::LogSeverity>(umath::min(umath::to_integral(conLogLevel),umath::to_integral(fileLogLevel)))
-		)
+		))
 	);
 	spdlog::set_default_logger(logger);
 

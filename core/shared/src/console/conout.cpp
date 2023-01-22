@@ -134,42 +134,42 @@ static void log_output()
 Con::c_cout& operator<<(Con::c_cout& con,conmanipulator manipulator)
 {
 	std::cout<<manipulator;
-	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator,Con::MessageFlags::Generic);
+	// PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator,Con::MessageFlags::Generic);
 	return con;
 }
 
 Con::c_cwar& operator<<(Con::c_cwar &con,conmanipulator manipulator)
 {
 	std::cout<<manipulator;
-	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator,Con::MessageFlags::Warning);
+	// PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator,Con::MessageFlags::Warning);
 	return con;
 }
 
 Con::c_cerr& operator<<(Con::c_cerr &con,conmanipulator manipulator)
 {
 	std::cout<<manipulator;
-	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator,Con::MessageFlags::Error);
+	// PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator,Con::MessageFlags::Error);
 	return con;
 }
 
 Con::c_crit& operator<<(Con::c_crit &con,conmanipulator manipulator)
 {
 	std::cout<<manipulator;
-	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator,Con::MessageFlags::Critical);
+	// PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator,Con::MessageFlags::Critical);
 	return con;
 }
 
 Con::c_csv& operator<<(Con::c_csv &con,conmanipulator manipulator)
 {
 	std::cout<<manipulator;
-	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator,Con::MessageFlags::ServerSide);
+	// PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator,Con::MessageFlags::ServerSide);
 	return con;
 }
 
 Con::c_ccl& operator<<(Con::c_ccl &con,conmanipulator manipulator)
 {
 	std::cout<<manipulator;
-	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator,Con::MessageFlags::ClientSide);
+	// PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(manipulator,Con::MessageFlags::ClientSide);
 	return con;
 }
 

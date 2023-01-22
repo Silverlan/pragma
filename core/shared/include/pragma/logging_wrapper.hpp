@@ -17,6 +17,10 @@ namespace pragma
 	constexpr auto DEFAULT_CONSOLE_LOG_LEVEL = ::util::LogSeverity::Warning;
 	constexpr auto DEFAULT_FILE_LOG_LEVEL = ::util::LogSeverity::Info;
 	constexpr auto DEFAULT_LOG_FILE = "log.txt";
+	namespace logging
+	{
+		DLLNETWORK int32_t severity_to_spdlog_level(::util::LogSeverity severity);
+	};
 	DLLNETWORK void log(const std::string &msg,::util::LogSeverity severity=::util::LogSeverity::Info);
 	DLLNETWORK bool is_log_level_enabled(::util::LogSeverity severity);
 

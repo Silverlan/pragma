@@ -226,16 +226,44 @@ int Lua::console::msge(lua_State *l)
 static int log(lua_State *l,spdlog::level::level_enum lv)
 {
 	int n = lua_gettop(l);  /* number of arguments */
-	int i;
+	int i = 1;
 	std::stringstream ss;
-	for (i=1; i<=n; i++) {
+	if(Lua::IsSet(l,1) && Lua::IsTable(l,1))
+	{
+		++i;
+
+		for(luabind::iterator i{luabind::object{luabind::from_stack(l,1)}}, e; i != e; ++i)
+			ss<<luabind::object_cast<std::string>(*i);
+		switch(lv)
+		{
+		case spdlog::level::level_enum::warn:
+			ss<<PRAGMA_CON_COLOR_WARNING;
+			break;
+		case spdlog::level::level_enum::err:
+			ss<<PRAGMA_CON_COLOR_ERROR;
+			break;
+		case spdlog::level::level_enum::critical:
+			ss<<PRAGMA_CON_COLOR_CRITICAL;
+			break;
+		}
+	}
+	auto istart = i;
+	for (; i<=n; i++) {
 		auto status = -1;
 		std::string val;
 		if(lua_value_to_string(l,i,&status,&val) == false)
 			return status;
-		if (i>1)
+		if (i>istart)
 			ss<<"\t";
 		ss<<val;
+	}
+	switch(lv)
+	{
+	case spdlog::level::level_enum::warn:
+	case spdlog::level::level_enum::err:
+	case spdlog::level::level_enum::critical:
+		ss<<PRAGMA_CON_COLOR_RESET;
+		break;
 	}
 	spdlog::log(lv,ss.str());
 	return 0;
@@ -246,3 +274,22 @@ int Lua::log::warn(lua_State *l) {return ::log(l,spdlog::level::warn);}
 int Lua::log::error(lua_State *l) {return ::log(l,spdlog::level::err);}
 int Lua::log::critical(lua_State *l) {return ::log(l,spdlog::level::critical);}
 int Lua::log::debug(lua_State *l) {return ::log(l,spdlog::level::debug);}
+int Lua::log::color(lua_State *l)
+{
+	auto level = static_cast<util::LogSeverity>(Lua::CheckInt(l,1));
+	std::string c {};
+	switch(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(level)))
+	{
+	case spdlog::level::level_enum::warn:
+		c = PRAGMA_CON_COLOR_WARNING;
+		break;
+	case spdlog::level::level_enum::err:
+		c = PRAGMA_CON_COLOR_ERROR;
+		break;
+	case spdlog::level::level_enum::critical:
+		c = PRAGMA_CON_COLOR_CRITICAL;
+		break;
+	}
+	Lua::PushString(l,c);
+	return 1;
+}

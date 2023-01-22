@@ -30,6 +30,7 @@ namespace Lua::log
 	DLLNETWORK int error(lua_State *l);
 	DLLNETWORK int critical(lua_State *l);
 	DLLNETWORK int debug(lua_State *l);
+	DLLNETWORK int color(lua_State *l);
 };
 
 namespace Lua::debug

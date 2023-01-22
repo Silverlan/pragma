@@ -1883,7 +1883,7 @@ void Game::RegisterLuaLibraries()
 		{"debug",Lua::log::debug},
 		{"prefix",+[](lua_State *l) {
 			std::string msg = Lua::CheckString(l,1);
-			auto colorFlags = Lua::Check<util::ConsoleColorFlags>(l,2);
+			auto colorFlags = static_cast<util::ConsoleColorFlags>(Lua::CheckInt(l,2));
 			auto strColorFlags = util::get_ansi_color_code(colorFlags);
 			auto strColorFlagsClear = util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
 			auto prefix = "[" +strColorFlags +msg +strColorFlagsClear +"] ";

@@ -615,7 +615,7 @@ bool Engine::Initialize(int argc,char *argv[])
 	Con::cout<<"----- Logger test -----"<<Con::endl;
 	spdlog::default_logger()->flush();
 #endif
-
+	
 	// These need to exist, so they can be automatically mounted
 	if(FileManager::Exists("addons/imported") == false)
 		FileManager::CreatePath("addons/imported");

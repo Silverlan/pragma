@@ -96,7 +96,7 @@ public:
 	void UpdatePlayerScore(pragma::SPlayerComponent &pl,int32_t score);
 	void UpdatePlayerName(pragma::SPlayerComponent &pl,const std::string &name);
 
-	virtual std::string GetLuaErrorMessagePrefix() const override;
+	virtual std::string GetMessagePrefix() const override;
 	void OnClientConVarChanged(pragma::BasePlayerComponent &pl,std::string cvar,std::string value);
 	// if 'wasAuthenticationSuccessful' is not set, no authentication was required
 	void OnClientAuthenticated(pragma::networking::IServerClient &session,std::optional<bool> wasAuthenticationSuccessful);

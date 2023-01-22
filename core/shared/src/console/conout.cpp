@@ -96,7 +96,7 @@ namespace pragma::logging::detail
 
 namespace Con::detail
 {
-	DLLNETWORK std::atomic<bool> flushed = true;
+	DLLNETWORK std::atomic<util::LogSeverity> currentLevel = util::LogSeverity::Disabled;
 	DLLNETWORK std::function<void(const std::string_view&,Con::MessageFlags,const Color*)> outputCallback = nullptr;
 };
 
@@ -185,14 +185,65 @@ std::basic_ostream<char,std::char_traits<char>> &Con::endl(std::basic_ostream<ch
 	os<<"\n";
 	//os<<"\033[0m"<<"\n";
 #endif
+	switch(Con::detail::currentLevel)
+	{
+	case util::LogSeverity::Warning:
+	case util::LogSeverity::Error:
+	case util::LogSeverity::Critical:
+		os<<PRAGMA_CON_COLOR_RESET;
+		if(pragma::logging::detail::shouldLogOutput)
+		{
+			pragma::logging::detail::logOutputMutex.lock();
+				pragma::logging::detail::logOutput<<PRAGMA_CON_COLOR_RESET;
+			pragma::logging::detail::logOutputMutex.unlock();
+		}
+		break;
+	}
 	std::cout.flush();
-	Con::detail::flushed = true;
+	Con::detail::currentLevel = util::LogSeverity::Disabled;
 	if(pragma::logging::detail::shouldLogOutput)
 		log_output();
 	if(bCrit == true)
 	{
 		bCrit = false;
 		std::this_thread::sleep_for(std::chrono::seconds(5));
+	}
+	return os;
+}
+
+std::basic_ostream<char,std::char_traits<char>> &Con::prefix(std::basic_ostream<char,std::char_traits<char>>& os)
+{
+	// If the message has a prefix, the prefix may overwrite the color of the main message, so we
+	// have to reset the color here.
+	switch(Con::detail::currentLevel)
+	{
+	case util::LogSeverity::Warning:
+		os<<PRAGMA_CON_COLOR_WARNING;
+		if(pragma::logging::detail::shouldLogOutput)
+		{
+			pragma::logging::detail::logOutputMutex.lock();
+				pragma::logging::detail::logOutput<<PRAGMA_CON_COLOR_WARNING;
+			pragma::logging::detail::logOutputMutex.unlock();
+		}
+		break;
+	case util::LogSeverity::Error:
+		os<<PRAGMA_CON_COLOR_ERROR;
+		if(pragma::logging::detail::shouldLogOutput)
+		{
+			pragma::logging::detail::logOutputMutex.lock();
+				pragma::logging::detail::logOutput<<PRAGMA_CON_COLOR_ERROR;
+			pragma::logging::detail::logOutputMutex.unlock();
+		}
+		break;
+	case util::LogSeverity::Critical:
+		os<<PRAGMA_CON_COLOR_CRITICAL;
+		if(pragma::logging::detail::shouldLogOutput)
+		{
+			pragma::logging::detail::logOutputMutex.lock();
+				pragma::logging::detail::logOutput<<PRAGMA_CON_COLOR_CRITICAL;
+			pragma::logging::detail::logOutputMutex.unlock();
+		}
+		break;
 	}
 	return os;
 }

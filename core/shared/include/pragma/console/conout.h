@@ -9,6 +9,7 @@
 #define __CONOUT_H__
 #include "pragma/definitions.h"
 #include "pragma/console/util_console_color.hpp"
+#include <sharedutils/util_log.hpp>
 #include <iostream>
 #include <sstream>
 #include <atomic>
@@ -32,6 +33,16 @@
 struct Color;
 namespace Con {class c_crit;};
 template <class T> Con::c_crit& operator<< (Con::c_crit &con,const T &t);
+
+#define PRAGMA_CON_COLOR_WARNING "\u001b[33;1m"
+#define PRAGMA_CON_COLOR_ERROR "\u001b[31;1m"
+#define PRAGMA_CON_COLOR_CRITICAL "\u001b[41m\u001b[37;1m"
+#define PRAGMA_CON_COLOR_SERVER "\u001b[36;1m"
+#define PRAGMA_CON_COLOR_CLIENT "\u001b[35;1m"
+#define PRAGMA_CON_COLOR_LUA "\u001b[34;1m"
+#define PRAGMA_CON_COLOR_GUI "\u001b[37;1m"
+#define PRAGMA_CON_COLOR_RESET "\u001b[0m"
+
 namespace Con
 {
 	enum class MessageFlags : uint8_t
@@ -48,7 +59,7 @@ namespace Con
 
 	namespace detail
 	{
-		extern DLLNETWORK std::atomic<bool> flushed;
+		extern DLLNETWORK std::atomic<::util::LogSeverity> currentLevel;
 		extern DLLNETWORK std::function<void(const std::string_view&,Con::MessageFlags,const Color*)> outputCallback;
 	};
 	class DLLNETWORK c_cout {};
@@ -72,6 +83,7 @@ namespace Con
 	extern DLLNETWORK c_csv csv;
 	extern DLLNETWORK c_ccl ccl;
 	DLLNETWORK std::basic_ostream<char,std::char_traits<char>> &endl(std::basic_ostream<char,std::char_traits<char>>& os);
+	DLLNETWORK std::basic_ostream<char,std::char_traits<char>> &prefix(std::basic_ostream<char,std::char_traits<char>>& os);
 	DLLNETWORK void flush();
 	DLLNETWORK void attr(DWORD attr);
 	DLLNETWORK void WriteToLog(std::stringstream &ss);
@@ -94,13 +106,13 @@ namespace Con
 		outputCallback(ss.str(),flags,color.has_value() ? &(*color) : nullptr);
 	}
 
-	constexpr const char *PREFIX_WARNING = "[\u001b[33;1mwarning\u001b[0m] ";
-	constexpr const char *PREFIX_ERROR = "[\u001b[31;1merror\u001b[0m] ";
-	constexpr const char *PREFIX_CRITICAL = "[\u001b[41m\u001b[37;1mcritical\u001b[0m] ";
-	constexpr const char *PREFIX_SERVER = "[\u001b[36;1mserver\u001b[0m] ";
-	constexpr const char *PREFIX_CLIENT = "[\u001b[35;1mclient\u001b[0m] ";
-	constexpr const char *PREFIX_LUA = "[\u001b[34;1mlua\u001b[0m] ";
-	constexpr const char *PREFIX_GUI = "[\u001b[37;1mgui\u001b[0m] ";
+	constexpr const char *PREFIX_WARNING = PRAGMA_CON_COLOR_RESET "[" PRAGMA_CON_COLOR_WARNING "warning" PRAGMA_CON_COLOR_RESET "] ";
+	constexpr const char *PREFIX_ERROR = PRAGMA_CON_COLOR_RESET "[" PRAGMA_CON_COLOR_ERROR "error" PRAGMA_CON_COLOR_RESET "] ";
+	constexpr const char *PREFIX_CRITICAL = PRAGMA_CON_COLOR_RESET "[" PRAGMA_CON_COLOR_CRITICAL "critical" PRAGMA_CON_COLOR_RESET "] ";
+	constexpr const char *PREFIX_SERVER = PRAGMA_CON_COLOR_RESET "[" PRAGMA_CON_COLOR_SERVER "server" PRAGMA_CON_COLOR_RESET "] ";
+	constexpr const char *PREFIX_CLIENT = PRAGMA_CON_COLOR_RESET "[" PRAGMA_CON_COLOR_CLIENT "client" PRAGMA_CON_COLOR_RESET "] ";
+	constexpr const char *PREFIX_LUA = PRAGMA_CON_COLOR_RESET "[" PRAGMA_CON_COLOR_LUA "lua" PRAGMA_CON_COLOR_RESET "] ";
+	constexpr const char *PREFIX_GUI = PRAGMA_CON_COLOR_RESET "[" PRAGMA_CON_COLOR_GUI "gui" PRAGMA_CON_COLOR_RESET "] ";
 };
 REGISTER_BASIC_BITWISE_OPERATORS(Con::MessageFlags)
 
@@ -136,7 +148,7 @@ namespace pragma::logging::detail
 // c_cout
 template <class T> Con::c_cout& operator<<(Con::c_cout &con,const T &t)
 {
-	Con::detail::flushed = false;
+	Con::detail::currentLevel = ::util::LogSeverity::Info;
 	std::cout<<t;
 	PRAGMA_DETAIL_LOG_OUTPUT(t,pragma::logging::detail::Type::Info)
 	PRAGMA_DETAIL_INVOKE_CONSOLE_OUTPUT_CALLBACK(t,Con::MessageFlags::Generic);
@@ -149,10 +161,10 @@ DLLNETWORK Con::c_cout& operator<<(Con::c_cout& con,conmanipulator manipulator);
 // c_cwar
 template <class T> Con::c_cwar& operator<< (Con::c_cwar &con,const T &t)
 {
-	if(Con::detail::flushed)
+	if(Con::detail::currentLevel == ::util::LogSeverity::Disabled)
 	{
-		Con::detail::flushed = false;
-		std::cout<<Con::PREFIX_WARNING;
+		Con::detail::currentLevel = ::util::LogSeverity::Warning;
+		std::cout<<Con::PREFIX_WARNING<<Con::prefix;
 	}
 	
 	std::cout<<t;
@@ -167,10 +179,10 @@ DLLNETWORK Con::c_cwar& operator<<(Con::c_cwar &con,conmanipulator manipulator);
 // c_cerr
 template <class T> Con::c_cerr& operator<< (Con::c_cerr &con,const T &t)
 {
-	if(Con::detail::flushed)
+	if(Con::detail::currentLevel == ::util::LogSeverity::Disabled)
 	{
-		Con::detail::flushed = false;
-		std::cout<<Con::PREFIX_ERROR;
+		Con::detail::currentLevel = ::util::LogSeverity::Error;
+		std::cout<<Con::PREFIX_ERROR<<Con::prefix;
 	}
 
 	std::cout<<t;
@@ -186,10 +198,10 @@ DLLNETWORK Con::c_cerr& operator<<(Con::c_cerr &con,conmanipulator manipulator);
 template <class T> Con::c_crit& operator<< (Con::c_crit &con,const T &t)
 {
 	Con::crit.m_bActivated = true;
-	if(Con::detail::flushed)
+	if(Con::detail::currentLevel == ::util::LogSeverity::Disabled)
 	{
-		Con::detail::flushed = false;
-		std::cout<<Con::PREFIX_CRITICAL;
+		Con::detail::currentLevel = ::util::LogSeverity::Critical;
+		std::cout<<Con::PREFIX_CRITICAL<<Con::prefix;
 	}
 
 	std::cout<<t;
@@ -204,17 +216,17 @@ DLLNETWORK Con::c_crit& operator<<(Con::c_crit &con,conmanipulator manipulator);
 // c_csv
 template <class T> Con::c_csv& operator<< (Con::c_csv &con,const T &t)
 {
-	if(Con::detail::flushed)
+	if(Con::detail::currentLevel == ::util::LogSeverity::Disabled)
 	{
-		Con::detail::flushed = false;
-		std::cout<<Con::PREFIX_SERVER;
+		Con::detail::currentLevel = ::util::LogSeverity::Info;
+		std::cout<<Con::PREFIX_SERVER<<Con::prefix;
 	}
 	std::cout<<t;
 	if(pragma::logging::detail::shouldLogOutput)
 	{
 		pragma::logging::detail::logOutputMutex.lock();
 			if(pragma::logging::detail::type == pragma::logging::detail::Type::None)
-				pragma::logging::detail::logOutput<<Con::PREFIX_SERVER;
+				pragma::logging::detail::logOutput<<Con::PREFIX_SERVER<<Con::prefix;
 			pragma::logging::detail::type = pragma::logging::detail::Type::Info;
 			pragma::logging::detail::logOutput<<t;
 		pragma::logging::detail::logOutputMutex.unlock();
@@ -229,17 +241,17 @@ DLLNETWORK Con::c_csv& operator<<(Con::c_csv &con,conmanipulator manipulator);
 // c_ccl
 template <class T> Con::c_ccl& operator<< (Con::c_ccl &con,const T &t)
 {
-	if(Con::detail::flushed)
+	if(Con::detail::currentLevel == ::util::LogSeverity::Disabled)
 	{
-		Con::detail::flushed = false;
-		std::cout<<Con::PREFIX_CLIENT;
+		Con::detail::currentLevel = ::util::LogSeverity::Info;
+		std::cout<<Con::PREFIX_CLIENT<<Con::prefix;
 	}
 	std::cout<<t;
 	if(pragma::logging::detail::shouldLogOutput)
 	{
 		pragma::logging::detail::logOutputMutex.lock();
 			if(pragma::logging::detail::type == pragma::logging::detail::Type::None)
-				pragma::logging::detail::logOutput<<Con::PREFIX_CLIENT;
+				pragma::logging::detail::logOutput<<Con::PREFIX_CLIENT<<Con::prefix;
 			pragma::logging::detail::type = pragma::logging::detail::Type::Info;
 			pragma::logging::detail::logOutput<<t;
 		pragma::logging::detail::logOutputMutex.unlock();

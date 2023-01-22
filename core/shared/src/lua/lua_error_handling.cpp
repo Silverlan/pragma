@@ -23,7 +23,10 @@ extern DLLNETWORK Engine *engine;
 
 static void print_lua_error_message(lua_State *l,const std::stringstream &ssMsg)
 {
-	Con::cerr<<Lua::GetErrorMessagePrefix(l)<<ssMsg.str()<<Con::endl;
+	Con::cerr<<
+		Lua::GetErrorMessagePrefix(l)<<Con::prefix<<
+		Con::PREFIX_LUA<<Con::prefix<<
+		ssMsg.str()<<Con::endl;
 }
 
 static auto cvOpenEditorOnError = GetConVar("lua_open_editor_on_error");

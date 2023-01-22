@@ -55,29 +55,29 @@ public:
 		{
 		case spdlog::level::level_enum::warn:
 		{
-			constexpr const char *prefix = "[warning] ";
+			constexpr const char *prefix = "[warning] " PRAGMA_CON_COLOR_WARNING;
 			constexpr uint32_t prefixLen = 10;
 			msg.color_range_start = dest.size() +1;
 			msg.color_range_end = dest.size() +prefixLen -2;
-			dest.append(prefix,prefix +prefixLen);
+			dest.append(prefix,prefix +prefixLen +ustring::length(PRAGMA_CON_COLOR_WARNING));
 			break;
 		}
 		case spdlog::level::level_enum::err:
 		{
-			constexpr const char *prefix = "[error] ";
+			constexpr const char *prefix = "[error] " PRAGMA_CON_COLOR_ERROR;
 			constexpr uint32_t prefixLen = 8;
 			msg.color_range_start = dest.size() +1;
 			msg.color_range_end = dest.size() +prefixLen -2;
-			dest.append(prefix,prefix +prefixLen);
+			dest.append(prefix,prefix +prefixLen +ustring::length(PRAGMA_CON_COLOR_ERROR));
 			break;
 		}
 		case spdlog::level::level_enum::critical:
 		{
-			constexpr const char *prefix = "[critical] ";
+			constexpr const char *prefix = "[critical] " PRAGMA_CON_COLOR_CRITICAL;
 			constexpr uint32_t prefixLen = 11;
 			msg.color_range_start = dest.size() +1;
 			msg.color_range_end = dest.size() +prefixLen -2;
-			dest.append(prefix,prefix +prefixLen);
+			dest.append(prefix,prefix +prefixLen +ustring::length(PRAGMA_CON_COLOR_CRITICAL));
 			break;
 		}
 		case spdlog::level::level_enum::debug:
@@ -160,6 +160,23 @@ public:
         return spdlog::details::make_unique<short_level_formatter_c>();
     }
 };
+
+class color_reset_formatter : public spdlog::custom_flag_formatter
+{
+public:
+    virtual void format(const spdlog::details::log_msg &msg, const std::tm &tm, spdlog::memory_buf_t &dest) override
+    {
+		constexpr const char *prefix = PRAGMA_CON_COLOR_RESET;
+		constexpr uint32_t prefixLen = ustring::length(PRAGMA_CON_COLOR_RESET);
+		dest.append(prefix,prefix +prefixLen);
+    }
+
+    virtual std::unique_ptr<custom_flag_formatter> clone() const override
+    {
+        return spdlog::details::make_unique<color_reset_formatter>();
+    }
+};
+
 void pragma::detail::initialize_logger(
 	::util::LogSeverity conLogLevel,
 	::util::LogSeverity fileLogLevel,
@@ -173,7 +190,8 @@ void pragma::detail::initialize_logger(
     auto formatter = std::make_unique<spdlog::pattern_formatter>();
     formatter->add_flag<SpdPragmaPrefixFormatter>('*');
     formatter->add_flag<short_level_formatter_c>('q');
-	formatter->set_pattern("%*%v");
+    formatter->add_flag<color_reset_formatter>('Q');
+	formatter->set_pattern("%*%v%Q");
 	consoleSink->set_formatter(std::move(formatter));
 	
 	std::vector<spdlog::sink_ptr> sinks {};

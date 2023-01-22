@@ -691,9 +691,9 @@ void ClientState::SendUserInfo()
 	client->SendPacket("clientinfo",packet,pragma::networking::Protocol::SlowReliable);
 }
 
-std::string ClientState::GetLuaErrorMessagePrefix() const
+std::string ClientState::GetMessagePrefix() const
 {
-	return std::string{Con::PREFIX_CLIENT} +Con::PREFIX_LUA;
+	return std::string{Con::PREFIX_CLIENT};
 }
 
 void ClientState::StartGame(bool) {StartNewGame("");}

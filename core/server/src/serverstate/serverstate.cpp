@@ -360,9 +360,9 @@ void ServerState::StartGame(bool singlePlayer)
 		RegisterServerInfo();
 }
 
-std::string ServerState::GetLuaErrorMessagePrefix() const
+std::string ServerState::GetMessagePrefix() const
 {
-	return std::string{Con::PREFIX_SERVER} +Con::PREFIX_LUA;
+	return std::string{Con::PREFIX_SERVER};
 }
 
 void ServerState::ChangeLevel(const std::string &map)

@@ -135,7 +135,7 @@ public:
 	virtual ModelMesh *CreateMesh() const override;
 	virtual util::FileAssetManager *GetAssetManager(pragma::asset::Type type) override;
 	virtual void Initialize() override;
-	virtual std::string GetLuaErrorMessagePrefix() const override;
+	virtual std::string GetMessagePrefix() const override;
 
 	pragma::rendering::GameWorldShaderSettings &GetGameWorldShaderSettings() {return m_worldShaderSettings;}
 	const pragma::rendering::GameWorldShaderSettings &GetGameWorldShaderSettings() const {return const_cast<ClientState*>(this)->GetGameWorldShaderSettings();}

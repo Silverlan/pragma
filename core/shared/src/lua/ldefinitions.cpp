@@ -64,6 +64,6 @@ std::string Lua::GetErrorMessagePrefix(lua_State *l)
 {
 	auto *state = engine->GetNetworkState(l);
 	if(state != nullptr)
-		return state->GetLuaErrorMessagePrefix();
+		return state->GetMessagePrefix();
 	return "";
 }

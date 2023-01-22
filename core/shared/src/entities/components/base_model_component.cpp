@@ -301,7 +301,7 @@ void BaseModelComponent::SetModel(const std::string &mdl)
 	auto model = game->LoadModel(*m_modelName);
 	if(model == nullptr)
 	{
-		model = game->LoadModel("error.wmd");
+		model = game->LoadModel("error");
 		if(model == nullptr)
 		{
 			if(GetModel() == prevMdl) // Model might have been changed during TModelLoader::Load-call in single player (on the client)

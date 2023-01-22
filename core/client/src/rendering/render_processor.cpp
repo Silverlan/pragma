@@ -528,13 +528,13 @@ bool pragma::rendering::BaseRenderProcessor::BindEntity(CBaseEntity &ent)
 	if(renderC == nullptr)
 	{
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
-			spdlog::warn("[Render] WARNING: Invalid render component for entity {}!",ent);
+			spdlog::warn("[Render] WARNING: Invalid render component for entity {}!",ent.ToString());
 		return false;
 	}
 	if(g_debugRenderFilter && g_debugRenderFilter->entityFilter && g_debugRenderFilter->entityFilter(ent,*m_curMaterial))
 	{
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
-			spdlog::warn("[Render] WARNING: Entity {} has been filtered out!",ent);
+			spdlog::warn("[Render] WARNING: Entity {} has been filtered out!",ent.ToString());
 		return false;
 	}
 	// if(m_stats && umath::is_flag_set(renderC->GetStateFlags(),CRenderComponent::StateFlags::RenderBufferDirty))
@@ -545,13 +545,13 @@ bool pragma::rendering::BaseRenderProcessor::BindEntity(CBaseEntity &ent)
 	if(m_shaderProcessor.RecordBindEntity(ent) == false)
 	{
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
-			spdlog::warn("[Render] WARNING: Failed to bind entity {}!",ent);
+			spdlog::warn("[Render] WARNING: Failed to bind entity {}!",ent.ToString());
 		return false;
 	}
 	if(m_drawSceneInfo.drawSceneInfo.renderFilter && m_drawSceneInfo.drawSceneInfo.renderFilter(ent) == false)
 	{
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
-			spdlog::warn("[Render] WARNING: Entity {} has been filtered out!",ent);
+			spdlog::warn("[Render] WARNING: Entity {} has been filtered out!",ent.ToString());
 		return false;
 	}
 	
@@ -592,14 +592,14 @@ bool pragma::rendering::BaseRenderProcessor::Render(CModelSubMesh &mesh,pragma::
 	if((g_debugRenderFilter && g_debugRenderFilter->meshFilter && g_debugRenderFilter->meshFilter(*m_curEntity,m_curMaterial,mesh,meshIdx) == false))
 	{
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
-			spdlog::warn("[Render] WARNING: Mesh {} of entity {} has been filtered out!",meshIdx,*m_curEntity);
+			spdlog::warn("[Render] WARNING: Mesh {} of entity {} has been filtered out!",meshIdx,m_curEntity->ToString());
 		return false;
 	}
 	++m_numShaderInvocations;
 	
 	auto r = m_shaderProcessor.RecordDraw(mesh,meshIdx,instanceSet);
 	if(r == false && VERBOSE_RENDER_OUTPUT_ENABLED)
-		spdlog::warn("[Render] WARNING: Failed to draw mesh {} of entity {}!",meshIdx,*m_curEntity);
+		spdlog::warn("[Render] WARNING: Failed to draw mesh {} of entity {}!",meshIdx,m_curEntity->ToString());
 	return r;
 #if 0
 	auto bUseVertexAnim = false;

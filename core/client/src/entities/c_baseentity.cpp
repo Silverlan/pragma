@@ -261,11 +261,11 @@ void CBaseEntity::ReceiveData(NetPacket &packet)
 						netComponent->ReceiveData(packet);
 				}
 				else
-					spdlog::warn("Net data for entity {} contained component data for component '{}' which hasn't been attached to the entity clientside! Skipping...",*this,componentInfo->name);
+					spdlog::warn("Net data for entity {} contained component data for component '{}' which hasn't been attached to the entity clientside! Skipping...",ToString(),componentInfo->name);
 			}
 		}
 		else
-			spdlog::warn("Net data for entity {} contained component data for component type with non-existing clientside representation! Skipping...",*this);
+			spdlog::warn("Net data for entity {} contained component data for component type with non-existing clientside representation! Skipping...",ToString());
 		packet->SetOffset(offset +componentSize);
 	}
 }

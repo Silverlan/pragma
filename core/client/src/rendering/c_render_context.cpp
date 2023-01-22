@@ -96,14 +96,16 @@ void RenderContext::InitializeRenderAPI()
 
 	GetRenderContext().GetInitialWindowSettings().resizable = false;
 	prosper::Shader::SetLogCallback([](prosper::Shader &shader,prosper::ShaderStage stage,const std::string &infoLog,const std::string &debugInfoLog) {
-		spdlog::warn("Unable to load shader '{}':",shader.GetIdentifier());
-		spdlog::warn("Shader Stage: {}",prosper::util::to_string(stage));
+		std::stringstream msg;
+		msg<<"Unable to load shader '"<<shader.GetIdentifier()<<"':\r\n";
+		msg<<"Shader Stage: "<<prosper::util::to_string(stage)<<"\r\n";
 		auto filePath = (stage != prosper::ShaderStage::Unknown) ? shader.GetStageSourceFilePath(stage) : std::optional<std::string>{};
 		if(filePath.has_value())
-			spdlog::warn("Shader Stage Filename: {}",*filePath);
-		spdlog::warn(infoLog);
-		spdlog::warn("");
-		spdlog::warn(debugInfoLog);
+			msg<<"Shader Stage Filename: "<<*filePath<<"\r\n";
+		msg<<infoLog<<"\r\n";
+		msg<<"\r\n";
+		msg<<debugInfoLog;
+		spdlog::warn(msg.str());
 	});
 	prosper::debug::set_debug_validation_callback([](prosper::DebugReportObjectTypeEXT objectType,const std::string &msg) {
 		spdlog::error("[prosper] {}",msg);

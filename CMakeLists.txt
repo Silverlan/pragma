@@ -554,8 +554,6 @@ endfunction(register_third_party_library_custom)
 message("Processing core libraries...")
 add_subdirectory(core)
 
-set_target_folder(build_core core)
-
 message("Processing external libraries...")
 add_subdirectory(external_libs)
 
@@ -973,6 +971,7 @@ add_dependencies(client shared clientmanager freetype wgui alsoundsystem util_ti
 
 add_dependencies(pragma_server server)
 add_dependencies(pragma client server)
+add_dependencies(pragma pragma_server)
 
 set_property(TARGET pragma PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
 set_property(TARGET pragma_server PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")

@@ -225,7 +225,8 @@ static void LPARAM_verbose(const std::vector<std::string> &argv)
 
 REGISTER_LAUNCH_PARAMETER_HELP(-console,LPARAM_console,"","start with the console open");
 REGISTER_LAUNCH_PARAMETER_HELP(-dev,LPARAM_dev,"","enable developer mode");
-REGISTER_LAUNCH_PARAMETER_HELP(-log,LPARAM_log,"[<conLevel>][<logfile>][<fileLevel>]","enable logging. Default log file is log.txt. error level can be: 0 = trace, 1 = debug, 2 = info, 3 = warning, 4 = error, 5 = critical, 6 = disabled.");
+REGISTER_LAUNCH_PARAMETER_HELP(-log,LPARAM_log,"[<conLevel>][<fileLevel>]","enable logging. error level can be: 0 = trace, 1 = debug, 2 = info, 3 = warning, 4 = error, 5 = critical, 6 = disabled.");
+REGISTER_LAUNCH_PARAMETER_HELP(-log_file,LPARAM_log_file,"[<logfile>]","file to write the log to. Default log file is log.txt");
 REGISTER_LAUNCH_PARAMETER_HELP(-map,LPARAM_map,"<map>","load this map on start");
 REGISTER_LAUNCH_PARAMETER_HELP(-gamemode,LPARAM_gamemode,"<gamemode>","load this gamemode on start");
 REGISTER_LAUNCH_PARAMETER_HELP(-luaext,LPARAM_luaext,"","enables several additional lua modules (e.g. package and io)");

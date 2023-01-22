@@ -86,13 +86,15 @@ static std::string get_last_system_error_string(DWORD errorMessageID)
 
 namespace pragma
 {
-	static MODULE_HANDLE launch_pragma(int argc,char* argv[])
+	static MODULE_HANDLE launch_pragma(int argc,char* argv[],bool server=false)
 	{
 		#ifdef __linux__
-			const char *library = "libclient.so";
+			const char *library = server ? "libshared.so" : "libclient.so";
 		#else
-			const char *library = "client.dll";
+			const char *library = server ? "shared.dll" : "client.dll";
 		#endif
+			const char *runEngineSymbol = server ? "RunEngine" : "RunCEngine";
+
 		#ifdef _WIN32
 			// Check if Vulkan drivers are installed
 			auto bt = IDTRYAGAIN;
@@ -112,7 +114,7 @@ namespace pragma
 			}
 			//
 	#if ENABLE_GDEBUGGER_SUPPORT == 1
-			HINSTANCE hEngine = LoadLibrary("client.dll");
+			HINSTANCE hEngine = LoadLibrary(library);
 	#else
 			std::string path = GetAppPath();
 			path += "\\bin\\";
@@ -127,7 +129,7 @@ namespace pragma
 				MessageBox(nullptr,msg.str().c_str(),"Critical Error",MB_OK | MB_ICONERROR);
 				return MODULE_NULL;
 			}
-			void(*runEngine)(int,char*[]) = (void(*)(int,char*[]))GetProcAddress(hEngine,"RunCEngine");
+			void(*runEngine)(int,char*[]) = (void(*)(int,char*[]))GetProcAddress(hEngine,runEngineSymbol);
 			if(runEngine != nullptr)
 			{
 				runEngine(argc,argv);

@@ -6,9 +6,6 @@
  */
 
 #include "pragma/pragma_executable.hpp"
-#include <vector>
-#include <array>
-#include <string>
 
 int main(int argc,char* argv[]) try
 {

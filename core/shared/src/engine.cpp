@@ -453,7 +453,7 @@ void Engine::ClearCache()
 		spdlog::info("Removing '{}'",name);
 		auto result = FileManager::RemoveDirectory(name.c_str());
 		if(result == false)
-			spdlog::warn("Unable to remove directory! Please remove it manually!");
+			spdlog::warn("Failed to remove cache directory '{}'! Please remove it manually.",name);
 		return result;
 	};
 	fRemoveDir("cache");
@@ -470,7 +470,7 @@ void Engine::ClearCache()
 		if(FileManager::ExistsSystem(path) == false)
 			continue;
 		if(FileManager::RemoveSystemDirectory(path.c_str()) == false)
-			spdlog::warn("Unable to remove '{}'! Please remove it manually!",path);
+			spdlog::warn("Failed to remove cache directory '{}'! Please remove it manually.",path);
 	}
 
 	// Give it a bit of time to complete

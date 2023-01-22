@@ -5,7 +5,6 @@
  * Copyright (c) 2021 Silverlan
  */
 
-#include "stdafx_weave.h"
 #include "pragma/pragma_executable.hpp"
 
 int main(int argc,char* argv[]) try

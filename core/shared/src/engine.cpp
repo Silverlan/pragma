@@ -958,6 +958,13 @@ void Engine::DumpDebugInformation(ZIPFile &zip) const
 			zip.AddFile("log.txt",*logContents);
 	}
 
+	if(filemanager::exists("info.txt"))
+	{
+		auto infoContents = filemanager::read_file("info.txt");
+		if(infoContents.has_value())
+			zip.AddFile("info.txt",*infoContents);
+	}
+
 	auto fWriteConvars = [&zip](const std::map<std::string,std::shared_ptr<ConConf>> &cvarMap,const std::string &fileName) {
 		std::stringstream convars;
 		for(auto &pair : cvarMap)

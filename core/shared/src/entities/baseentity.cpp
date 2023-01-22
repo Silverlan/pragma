@@ -102,6 +102,13 @@ std::ostream& BaseEntity::print(std::ostream &os)
 	return os;
 }
 
+std::string BaseEntity::ToString() const
+{
+	std::stringstream ss;
+	const_cast<BaseEntity*>(this)->print(ss);
+	return ss.str();
+}
+
 pragma::ComponentEventId BaseEntity::EVENT_HANDLE_KEY_VALUE = pragma::INVALID_COMPONENT_ID;
 pragma::ComponentEventId BaseEntity::EVENT_ON_SPAWN = pragma::INVALID_COMPONENT_ID;
 pragma::ComponentEventId BaseEntity::EVENT_ON_POST_SPAWN = pragma::INVALID_COMPONENT_ID;

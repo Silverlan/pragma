@@ -14,7 +14,9 @@
 #include "pragma/types.hpp"
 #include <pragma/console/conout.h>
 #include <sharedutils/util_shared_handle.hpp>
+#ifdef _WIN32
 #include <format>
+#endif
 
 class Engine;
 class NetworkState;
@@ -249,6 +251,7 @@ public:
 
 	virtual Con::c_cout& print(Con::c_cout&);
 	virtual std::ostream& print(std::ostream&);
+	std::string ToString() const;
 	
 	bool IsRemoved() const;
 	virtual void Remove();
@@ -304,6 +307,7 @@ DLLNETWORK std::ostream& operator<<(std::ostream &os,const EntityHandle ent);
 
 DLLNETWORK bool operator==(const EntityHandle &a,const EntityHandle &b);
 
+#ifdef _WIN32
 template<>
 struct std::formatter<BaseEntity> : std::formatter<std::string>
 {
@@ -314,6 +318,7 @@ struct std::formatter<BaseEntity> : std::formatter<std::string>
         return std::format_to(ctx.out(), "{}",ss.str());
     }
 };
+#endif
 
 #include "pragma/lua/converters/entity_converter.hpp"
 

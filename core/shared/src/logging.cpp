@@ -214,28 +214,3 @@ void pragma::detail::initialize_logger(
 	else
 		spdlog::info("Log file has been disabled, log will not be written to disk.");
 }
-
-namespace pragma::logging
-{
-	struct client_type
-	{};
-	struct server_type
-	{};
-};
-
-template<>
-struct std::formatter<pragma::logging::client_type> : std::formatter<std::string>
-{
-    auto format(pragma::logging::client_type o, format_context &ctx) -> decltype(ctx.out())
-    {
-        return std::format_to(ctx.out(), "[\u001b[95mclient\u001b[0m]");
-    }
-};
-template<>
-struct std::formatter<pragma::logging::server_type> : std::formatter<std::string>
-{
-    auto format(pragma::logging::server_type o, format_context &ctx) -> decltype(ctx.out())
-    {
-        return std::format_to(ctx.out(), "[\u001b[96mserver\u001b[0m]");
-    }
-};

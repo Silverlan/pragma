@@ -112,6 +112,7 @@ protected:
 
 inline DLLCLIENT Con::c_cout& operator<<(Con::c_cout &os,CBaseEntity &ent) {return ent.print(os);}
 
+#ifdef _WIN32
 template<>
 struct std::formatter<CBaseEntity> : std::formatter<std::string>
 {
@@ -122,5 +123,6 @@ struct std::formatter<CBaseEntity> : std::formatter<std::string>
         return std::format_to(ctx.out(), "{}",ss.str());
     }
 };
+#endif
 
 #endif

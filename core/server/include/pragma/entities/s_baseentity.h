@@ -78,6 +78,7 @@ public:
 
 inline DLLSERVER Con::c_cout& operator<<(Con::c_cout &os,SBaseEntity &ent) {return ent.print(os);}
 
+#ifdef _WIN32
 template<>
 struct std::formatter<SBaseEntity> : std::formatter<std::string>
 {
@@ -88,5 +89,6 @@ struct std::formatter<SBaseEntity> : std::formatter<std::string>
         return std::format_to(ctx.out(), "{}",ss.str());
     }
 };
+#endif
 
 #endif

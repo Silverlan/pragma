@@ -33,6 +33,22 @@ void DebugConsole::open()
     this->_cerrbuf = std::cerr.rdbuf();
     this->_console_cerr.open("CONOUT$");
     std::cerr.rdbuf(this->_console_cerr.rdbuf());
+
+	freopen("CON","w",stdout); // Redirect printf, etc.
+
+	// Enable ANSI color codes under Windows
+	HANDLE handleOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	if(handleOut)
+	{
+		DWORD consoleMode;
+		if(GetConsoleMode(handleOut ,&consoleMode))
+		{
+			consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+			consoleMode |= DISABLE_NEWLINE_AUTO_RETURN;            
+			SetConsoleMode(handleOut,consoleMode);
+		}
+	}
+	//
 #else
 // this will barf out everything.
     this->_cinbuf = std::cin.rdbuf();

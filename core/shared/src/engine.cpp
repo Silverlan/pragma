@@ -115,23 +115,6 @@ Engine::Engine(int,char*[])
 #endif
 	Locale::Init();
     OpenConsole();
-#ifdef _WIN32
-	freopen("CON","w",stdout); // Redirect fprint, etc.
-
-	// Enable ANSI color codes under Windows
-	HANDLE handleOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	if(handleOut)
-	{
-		DWORD consoleMode;
-		if(GetConsoleMode(handleOut ,&consoleMode))
-		{
-			consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-			consoleMode |= DISABLE_NEWLINE_AUTO_RETURN;            
-			SetConsoleMode(handleOut,consoleMode);
-		}
-	}
-	//
-#endif
 
 	m_mainThreadId = std::this_thread::get_id();
 	

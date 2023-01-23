@@ -1068,6 +1068,9 @@ Engine::~Engine()
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::close_domain();
 #endif
+
+	spdlog::info("Closing logger...");
+	pragma::detail::close_logger();
 }
 
 Engine *pragma::get_engine() {return engine;}

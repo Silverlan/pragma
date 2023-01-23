@@ -9,6 +9,7 @@
 #include "pragma/model/model.h"
 #include "pragma/model/modelmesh.h"
 #include "pragma/physics/collisionmesh.h"
+#include "pragma/logging.hpp"
 #include <panima/skeleton.hpp>
 #include <panima/bone.hpp>
 
@@ -43,7 +44,7 @@ static void add_frame(Frame &frame,const Frame &frameToAdd)
 
 void Model::Merge(const Model &other,MergeFlags flags)
 {
-	Con::cout<<"Merging model '"<<other.GetName()<<"' into '"<<GetName()<<"'..."<<Con::endl;
+	spdlog::info("Merging model '{}' into '{}'...",other.GetName(),GetName());
 	std::vector<std::size_t> boneTranslations; // 'other' bone Id to 'this' bone Id
 	auto bMerged = false;
 	const auto fMergeSkeletons = [this,&other,&boneTranslations,&bMerged]() {
@@ -241,7 +242,7 @@ void Model::Merge(const Model &other,MergeFlags flags)
 				if(bc == nullptr)
 				{
 					anim->ClearBlendController();
-					Con::cwar<<"Animation with invalid blend controller! Skipping..."<<Con::endl;
+					spdlog::warn("Animation {} of model {} has invalid blend controller! Skipping...",GetAnimationName(i),other.GetName());
 				}
 				else
 				{
@@ -257,13 +258,13 @@ void Model::Merge(const Model &other,MergeFlags flags)
 								transition.animation = it->second;
 							else
 							{
-								Con::cwar<<"Blend controller with invalid animation transition reference! Skipping..."<<Con::endl;
+								spdlog::warn("Blend controller '{}' of animation '{}' of model '{}' has invalid animation transition reference! Skipping...",bc->name,GetAnimationName(i),other.GetName());
 								transition.animation = -1;
 							}
 						}
 					}
 					else
-						Con::cwar<<"Unknown blend controller '"<<bc->name<<"'! Skipping..."<<Con::endl;
+						spdlog::warn("Blend controller '{}' not found in model '{}'! Skipping...",bc->name,GetName());
 				}
 			}
 		}

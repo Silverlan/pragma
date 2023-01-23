@@ -32,11 +32,13 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 
 ComponentEventId CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED = INVALID_COMPONENT_ID;
+ComponentEventId CModelComponent::EVENT_ON_MATERIAL_OVERRIDES_CLEARED = INVALID_COMPONENT_ID;
 void CModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CModelComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
 	BaseModelComponent::RegisterEvents(componentManager,registerEvent);
 	EVENT_ON_RENDER_MESHES_UPDATED = registerEvent("EVENT_ON_RENDER_MESHES_UPDATED",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_MATERIAL_OVERRIDES_CLEARED = registerEvent("EVENT_ON_MATERIAL_OVERRIDES_CLEARED",ComponentEventInfo::Type::Broadcast);
 }
 
 CModelComponent::CModelComponent(BaseEntity &ent)
@@ -112,6 +114,7 @@ void CModelComponent::ClearMaterialOverrides()
 		return;
 	m_materialOverrides.clear();
 	umath::set_flag(m_stateFlags,StateFlags::RenderMeshUpdateRequired);
+	BroadcastEvent(EVENT_ON_MATERIAL_OVERRIDES_CLEARED);
 }
 CMaterial *CModelComponent::GetMaterialOverride(uint32_t idx) const
 {

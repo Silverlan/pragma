@@ -27,6 +27,7 @@ namespace pragma
 	{
 	public:
 		static ComponentEventId EVENT_ON_RENDER_MESHES_UPDATED;
+		static ComponentEventId EVENT_ON_MATERIAL_OVERRIDES_CLEARED;
 
 		enum class StateFlags : uint8_t
 		{

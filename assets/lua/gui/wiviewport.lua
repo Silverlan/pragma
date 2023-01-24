@@ -81,7 +81,7 @@ function gui.WIViewport:SetScene(scene,renderer,shouldRender)
 	self.m_pTexture:SetTexture(renderer:GetPresentationTexture())
 
 	util.remove(self.m_cbRenderScenes)
-	if(self:IsPrimaryGameSceneViewport()) then return end
+	if(self:IsPrimaryGameSceneViewport() or shouldRender == false) then return end
 	local incMask,excMask = game.get_primary_camera_render_mask()
 	self.m_cbRenderScenes = game.add_callback("RenderScenes",function(drawSceneInfo)
 		if(shouldRender and shouldRender() == false) then return end

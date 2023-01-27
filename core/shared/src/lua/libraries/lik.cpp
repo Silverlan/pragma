@@ -100,7 +100,7 @@ void Lua::ik::register_library(Lua::Interface &lua)
 	auto classSolver = luabind::class_<pragma::ik::Solver>("Solver");
 	classSolver.def("Solve",&pragma::ik::Solver::Solve);
 	classSolver.def("AddDragControl",&pragma::ik::Solver::AddDragControl);
-	classSolver.def("RemoveDragControl",&pragma::ik::Solver::RemoveDragControl);
+	classSolver.def("RemoveControl",&pragma::ik::Solver::RemoveControl);
 	classSolver.def("AddAngularPlaneControl",&pragma::ik::Solver::AddAngularPlaneControl);
 	classSolver.def("AddStateControl",&pragma::ik::Solver::AddStateControl);
 	classSolver.def("AddBallSocketJoint",&pragma::ik::Solver::AddBallSocketJoint);

@@ -37,19 +37,20 @@ ComponentEventId BaseAnimatedComponent::EVENT_TRANSLATE_LAYERED_ANIMATION = prag
 ComponentEventId BaseAnimatedComponent::EVENT_TRANSLATE_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_TRANSLATE_ACTIVITY = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_MAINTAIN_ANIMATIONS = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseAnimatedComponent::EVENT_MAINTAIN_ANIMATION = pragma::INVALID_COMPONENT_ID;
+ComponentEventId BaseAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MT = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MOVEMENT = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_SHOULD_UPDATE_BONES = pragma::INVALID_COMPONENT_ID;
 
 ComponentEventId BaseAnimatedComponent::EVENT_ON_PLAY_ACTIVITY = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_STOP_LAYERED_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_BONE_TRANSFORM_CHANGED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseAnimatedComponent::EVENT_UPDATE_BONE_POSES = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseAnimatedComponent::EVENT_ON_BONE_POSES_FINALIZED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId BaseAnimatedComponent::EVENT_ON_BLEND_ANIMATION = pragma::INVALID_COMPONENT_ID;
+ComponentEventId BaseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED_MT = pragma::INVALID_COMPONENT_ID;
+ComponentEventId BaseAnimatedComponent::EVENT_UPDATE_BONE_POSES_MT = pragma::INVALID_COMPONENT_ID;
+ComponentEventId BaseAnimatedComponent::EVENT_ON_BONE_POSES_FINALIZED_MT = pragma::INVALID_COMPONENT_ID;
+ComponentEventId BaseAnimatedComponent::EVENT_ON_BLEND_ANIMATION_MT = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_ANIMATION_RESET = pragma::INVALID_COMPONENT_ID;
+ComponentEventId BaseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED = pragma::INVALID_COMPONENT_ID;
 void BaseAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
 	EVENT_HANDLE_ANIMATION_EVENT = registerEvent("HANDLE_ANIMATION_EVENT",ComponentEventInfo::Type::Explicit);
@@ -64,19 +65,20 @@ void BaseAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &compo
 	EVENT_TRANSLATE_ANIMATION = registerEvent("TRANSLATE_ANIMATION",ComponentEventInfo::Type::Explicit);
 	EVENT_TRANSLATE_ACTIVITY = registerEvent("TRANSLATE_ACTIVITY",ComponentEventInfo::Type::Explicit);
 	EVENT_MAINTAIN_ANIMATIONS = registerEvent("MAINTAIN_ANIMATIONS",ComponentEventInfo::Type::Explicit);
-	EVENT_MAINTAIN_ANIMATION = registerEvent("MAINTAIN_ANIMATION",ComponentEventInfo::Type::Explicit);
+	EVENT_MAINTAIN_ANIMATION_MT = registerEvent("MAINTAIN_ANIMATION",ComponentEventInfo::Type::Explicit);
 	EVENT_MAINTAIN_ANIMATION_MOVEMENT = registerEvent("MAINTAIN_ANIMATION_MOVEMENT",ComponentEventInfo::Type::Explicit);
 	EVENT_SHOULD_UPDATE_BONES = registerEvent("SHOULD_UPDATE_BONES",ComponentEventInfo::Type::Explicit);
 
 	EVENT_ON_PLAY_ACTIVITY = registerEvent("ON_PLAY_ACTIVITY",ComponentEventInfo::Type::Explicit);
 	EVENT_ON_STOP_LAYERED_ANIMATION = registerEvent("ON_STOP_LAYERED_ANIMATION",ComponentEventInfo::Type::Explicit);
 	EVENT_ON_BONE_TRANSFORM_CHANGED = registerEvent("ON_BONE_TRANSFORM_CHANGED",ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_ANIMATIONS_UPDATED = registerEvent("ON_ANIMATIONS_UPDATED",ComponentEventInfo::Type::Explicit);
-	EVENT_UPDATE_BONE_POSES = registerEvent("UPDATE_BONE_POSES",ComponentEventInfo::Type::Explicit);
-	EVENT_ON_BONE_POSES_FINALIZED = registerEvent("ON_BONE_POSES_FINALIZED",ComponentEventInfo::Type::Explicit);
-	EVENT_ON_BLEND_ANIMATION = registerEvent("ON_BLEND_ANIMATION",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_ANIMATIONS_UPDATED_MT = registerEvent("ON_ANIMATIONS_UPDATED_MT",ComponentEventInfo::Type::Explicit);
+	EVENT_UPDATE_BONE_POSES_MT = registerEvent("UPDATE_BONE_POSES",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_BONE_POSES_FINALIZED_MT = registerEvent("ON_BONE_POSES_FINALIZED",ComponentEventInfo::Type::Explicit);
+	EVENT_ON_BLEND_ANIMATION_MT = registerEvent("ON_BLEND_ANIMATION",ComponentEventInfo::Type::Explicit);
 	EVENT_PLAY_ANIMATION = registerEvent("PLAY_ANIMATION",ComponentEventInfo::Type::Explicit);
 	EVENT_ON_ANIMATION_RESET = registerEvent("ON_ANIMATION_RESET",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_ANIMATIONS_UPDATED = registerEvent("ON_ANIMATIONS_UPDATED",ComponentEventInfo::Type::Explicit);
 }
 
 BaseAnimatedComponent::BaseAnimatedComponent(BaseEntity &ent)
@@ -472,7 +474,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 	if(hModel == nullptr)
 		return false;
 	CEMaintainAnimation evData{animInfo,dt};
-	if(InvokeEventCallbacks(EVENT_MAINTAIN_ANIMATION,evData) == util::EventReply::Handled)
+	if(InvokeEventCallbacks(EVENT_MAINTAIN_ANIMATION_MT,evData) == util::EventReply::Handled)
 		return false;
 	if(animInfo.animation == -1)
 		return false;
@@ -502,13 +504,17 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 		cycle = 1.f;
 		if(&animInfo == &m_baseAnim) // Only if this is the main animation
 		{
-			CEOnAnimationComplete evData{animId,act};
-			InvokeEventCallbacks(EVENT_ON_ANIMATION_COMPLETE,evData);
+			ComponentEventQueueInfo evInfo {};
+			evInfo.id = EVENT_ON_ANIMATION_COMPLETE;
+			evInfo.eventData = std::make_unique<CEOnAnimationComplete>(animId,act);
+			m_queuedEvents.push(std::move(evInfo));
 		}
 		else
 		{
-			CELayeredAnimationInfo evData{layeredSlot,animId,act};
-			InvokeEventCallbacks(EVENT_ON_LAYERED_ANIMATION_COMPLETE,evData);
+			ComponentEventQueueInfo evInfo {};
+			evInfo.id = EVENT_ON_LAYERED_ANIMATION_COMPLETE;
+			evInfo.eventData = std::make_unique<CELayeredAnimationInfo>(layeredSlot,animId,act);
+			m_queuedEvents.push(std::move(evInfo));
 		}
 		if(cycleLast > 0.f) // If current cycle is 0 but we're also complete, that means the animation was started and finished within a single frame. Calling the block below may result in endless recursion, so we need to make sure the animation stays for this frame.
 		{
@@ -735,7 +741,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 	animInfo.boneScales = std::move(boneScales);
 
 	CEOnBlendAnimation evDataBlend{animInfo,act,animInfo.bonePoses,(animInfo.boneScales.empty() == false) ? &animInfo.boneScales : nullptr};
-	InvokeEventCallbacks(EVENT_ON_BLEND_ANIMATION,evDataBlend);
+	InvokeEventCallbacks(EVENT_ON_BLEND_ANIMATION_MT,evDataBlend);
 
 	// Animation events
 	auto frameLast = (cycleLast != 0.f) ? static_cast<int32_t>((numFrames -1) *cycleLast) : -1;
@@ -792,19 +798,23 @@ bool BaseAnimatedComponent::MaintainGestures(double dt)
 	}
 	return true;
 }
+bool BaseAnimatedComponent::PreMaintainAnimations(double dt)
+{
+	CEMaintainAnimations evData{dt};
+	if(InvokeEventCallbacks(EVENT_MAINTAIN_ANIMATIONS,evData) == util::EventReply::Handled)
+	{
+		InvokeEventCallbacks(EVENT_ON_ANIMATIONS_UPDATED_MT);
+		InvokeEventCallbacks(EVENT_UPDATE_BONE_POSES_MT);
+		InvokeEventCallbacks(EVENT_ON_BONE_POSES_FINALIZED_MT);
+		return false;
+	}
+	return true;
+}
 bool BaseAnimatedComponent::MaintainAnimations(double dt)
 {
 	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return false;
-	CEMaintainAnimations evData{dt};
-	if(InvokeEventCallbacks(EVENT_MAINTAIN_ANIMATIONS,evData) == util::EventReply::Handled)
-	{
-		InvokeEventCallbacks(EVENT_ON_ANIMATIONS_UPDATED);
-		InvokeEventCallbacks(EVENT_UPDATE_BONE_POSES);
-		InvokeEventCallbacks(EVENT_ON_BONE_POSES_FINALIZED);
-		return true;
-	}
 
 	auto r = MaintainAnimation(m_baseAnim,dt);
 	if(r == true)
@@ -828,11 +838,19 @@ bool BaseAnimatedComponent::MaintainAnimations(double dt)
 			SetBoneScale(boneId,boneScales.at(i));
 	}
 
-	InvokeEventCallbacks(EVENT_ON_ANIMATIONS_UPDATED);
-	InvokeEventCallbacks(EVENT_UPDATE_BONE_POSES);
-	InvokeEventCallbacks(EVENT_ON_BONE_POSES_FINALIZED);
-
-	// It's now safe to execute animation events
+	InvokeEventCallbacks(EVENT_ON_ANIMATIONS_UPDATED_MT);
+	InvokeEventCallbacks(EVENT_UPDATE_BONE_POSES_MT);
+	InvokeEventCallbacks(EVENT_ON_BONE_POSES_FINALIZED_MT);
+	return r;
+}
+void BaseAnimatedComponent::HandleAnimationEvents()
+{
+	while(!m_queuedEvents.empty())
+	{
+		auto &evData = m_queuedEvents.front();
+		InvokeEventCallbacks(evData.id,*evData.eventData);
+		m_queuedEvents.pop();
+	}
 	const auto fHandleAnimationEvents = [this](uint32_t animId,const std::shared_ptr<pragma::animation::Animation> &anim,int32_t frameId) {
 		auto *events = anim->GetEvents(frameId);
 		if(events)
@@ -879,7 +897,8 @@ bool BaseAnimatedComponent::MaintainAnimations(double dt)
 
 		m_animEventQueue.pop();
 	}
-	return r;
+
+	InvokeEventCallbacks(EVENT_ON_ANIMATIONS_UPDATED);
 }
 Activity BaseAnimatedComponent::TranslateActivity(Activity act)
 {

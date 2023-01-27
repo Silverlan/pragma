@@ -221,14 +221,14 @@ void BaseAIComponent::Initialize()
 		m_animMoveInfo.blend = !anim->HasFlag(FAnim::NoMoveBlend);
 		m_animMoveInfo.moving = (anim->HasFlag(FAnim::MoveX) || anim->HasFlag(FAnim::MoveZ)) ? true : false;
 	});
-	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_BLEND_ANIMATION,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_BLEND_ANIMATION_MT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto animComponent = GetEntity().GetAnimatedComponent();
 		if(animComponent.expired())
 			return;
 		auto &evDataBlend = static_cast<CEOnBlendAnimation&>(evData.get());
 		auto &animInfo = evDataBlend.slotInfo;
 		if(&animInfo == &animComponent->GetBaseAnimationInfo()) // Only apply for base animation, not for gestures
-			BaseAIComponent::BlendAnimationMovement(evDataBlend.bonePoses,evDataBlend.boneScales);
+			BaseAIComponent::BlendAnimationMovementMT(evDataBlend.bonePoses,evDataBlend.boneScales);
 	});
 	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		OnPhysicsInitialized();

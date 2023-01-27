@@ -1355,7 +1355,6 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_TRANSLATE_ANIMATION",pragma::BaseAnimatedComponent::EVENT_TRANSLATE_ANIMATION);
 	def.add_static_constant("EVENT_TRANSLATE_ACTIVITY",pragma::BaseAnimatedComponent::EVENT_TRANSLATE_ACTIVITY);
 	def.add_static_constant("EVENT_MAINTAIN_ANIMATIONS",pragma::BaseAnimatedComponent::EVENT_MAINTAIN_ANIMATIONS);
-	def.add_static_constant("EVENT_MAINTAIN_ANIMATION",pragma::BaseAnimatedComponent::EVENT_MAINTAIN_ANIMATION);
 	def.add_static_constant("EVENT_MAINTAIN_ANIMATION_MOVEMENT",pragma::BaseAnimatedComponent::EVENT_MAINTAIN_ANIMATION_MOVEMENT);
 	def.add_static_constant("EVENT_SHOULD_UPDATE_BONES",pragma::BaseAnimatedComponent::EVENT_SHOULD_UPDATE_BONES);
 
@@ -1363,9 +1362,6 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_STOP_LAYERED_ANIMATION",pragma::BaseAnimatedComponent::EVENT_ON_STOP_LAYERED_ANIMATION);
 	def.add_static_constant("EVENT_ON_BONE_TRANSFORM_CHANGED",pragma::BaseAnimatedComponent::EVENT_ON_BONE_TRANSFORM_CHANGED);
 	def.add_static_constant("EVENT_ON_ANIMATIONS_UPDATED",pragma::BaseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED);
-	def.add_static_constant("EVENT_UPDATE_BONE_POSES",pragma::BaseAnimatedComponent::EVENT_UPDATE_BONE_POSES);
-	def.add_static_constant("EVENT_ON_BONE_POSES_FINALIZED",pragma::BaseAnimatedComponent::EVENT_ON_BONE_POSES_FINALIZED);
-	def.add_static_constant("EVENT_ON_BLEND_ANIMATION",pragma::BaseAnimatedComponent::EVENT_ON_BLEND_ANIMATION);
 	def.add_static_constant("EVENT_PLAY_ANIMATION",pragma::BaseAnimatedComponent::EVENT_PLAY_ANIMATION);
 	def.add_static_constant("EVENT_ON_ANIMATION_RESET",pragma::BaseAnimatedComponent::EVENT_ON_ANIMATION_RESET);
 

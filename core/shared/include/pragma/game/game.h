@@ -81,6 +81,7 @@ namespace pragma
 	class BasePlayerComponent;
 	class BaseGamemodeComponent;
 	class BaseGameComponent;
+	struct AnimationUpdateManager;
 	namespace nav
 	{
 		class Mesh;
@@ -231,6 +232,7 @@ public:
 	virtual void Tick();
 	void PostThink();
 	void PostTick();
+	void UpdateAnimations(double dt);
 	std::string GetMapName();
 	void PrecacheModel(const char *mdl);
 	bool LoadSoundScripts(const char *file);
@@ -356,9 +358,6 @@ public:
 	std::vector<pragma::BaseEntityComponent*> &GetEntityTickComponents() {return m_entityTickComponents;}
 	std::vector<pragma::BaseGamemodeComponent*> &GetGamemodeComponents() {return m_gamemodeComponents;}
 
-	void UpdateEntityAnimations(double dt);
-	void UpdateEntityAnimationDrivers(double dt);
-
 	// Debug
 	virtual void DrawLine(const Vector3 &start,const Vector3 &end,const Color &color,float duration=0.f)=0;
 	virtual void DrawBox(const Vector3 &start,const Vector3 &end,const EulerAngles &ang,const Color &color,float duration=0.f)=0;
@@ -371,9 +370,7 @@ protected:
 	void GetLuaRegisteredEntities(std::vector<std::string> &luaClasses) const;
 
 	GameFlags m_flags = GameFlags::InitialTick;
-	pragma::ComponentId m_animatedComponentId = std::numeric_limits<pragma::ComponentId>::max();
-	pragma::ComponentId m_animated2ComponentId = std::numeric_limits<pragma::ComponentId>::max();
-	pragma::ComponentId m_animationDriverComponentId = std::numeric_limits<pragma::ComponentId>::max();
+	std::unique_ptr<pragma::AnimationUpdateManager> m_animUpdateManager;
 	std::vector<BaseEntity*> m_baseEnts;
 	std::unordered_map<size_t,BaseEntity*> m_uuidToEnt;
 	std::queue<EntityHandle> m_entsScheduledForRemoval;

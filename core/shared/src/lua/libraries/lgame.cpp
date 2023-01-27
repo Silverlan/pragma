@@ -414,8 +414,7 @@ void Lua::game::register_shared_functions(luabind::module_ &modGame)
 		luabind::def("get_map_name",Lua::game::get_map_name),
 		luabind::def("get_game_state_flags",Lua::game::get_game_state_flags),
 		luabind::def("update_animations",+[](Game &game,float dt) {
-			game.UpdateEntityAnimations(dt);
-			game.UpdateEntityAnimationDrivers(dt);
+			game.UpdateAnimations(dt);
 		})
 	];
 

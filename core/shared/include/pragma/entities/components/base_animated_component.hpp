@@ -42,19 +42,20 @@ namespace pragma
 		static ComponentEventId EVENT_TRANSLATE_ANIMATION;
 		static ComponentEventId EVENT_TRANSLATE_ACTIVITY;
 		static ComponentEventId EVENT_MAINTAIN_ANIMATIONS;
-		static ComponentEventId EVENT_MAINTAIN_ANIMATION;
+		static ComponentEventId EVENT_MAINTAIN_ANIMATION_MT;
 		static ComponentEventId EVENT_MAINTAIN_ANIMATION_MOVEMENT;
 		static ComponentEventId EVENT_SHOULD_UPDATE_BONES;
 
 		static ComponentEventId EVENT_ON_PLAY_ACTIVITY;
 		static ComponentEventId EVENT_ON_STOP_LAYERED_ANIMATION;
 		static ComponentEventId EVENT_ON_BONE_TRANSFORM_CHANGED;
-		static ComponentEventId EVENT_ON_ANIMATIONS_UPDATED;
-		static ComponentEventId EVENT_UPDATE_BONE_POSES;
-		static ComponentEventId EVENT_ON_BONE_POSES_FINALIZED;
-		static ComponentEventId EVENT_ON_BLEND_ANIMATION;
+		static ComponentEventId EVENT_ON_ANIMATIONS_UPDATED_MT;
+		static ComponentEventId EVENT_UPDATE_BONE_POSES_MT;
+		static ComponentEventId EVENT_ON_BONE_POSES_FINALIZED_MT;
+		static ComponentEventId EVENT_ON_BLEND_ANIMATION_MT;
 		static ComponentEventId EVENT_PLAY_ANIMATION;
 		static ComponentEventId EVENT_ON_ANIMATION_RESET;
+		static ComponentEventId EVENT_ON_ANIMATIONS_UPDATED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		enum class StateFlags : uint8_t
@@ -179,6 +180,7 @@ namespace pragma
 		float GetBlendController(unsigned int controller) const;
 		const std::unordered_map<unsigned int,float> &GetBlendControllers() const;
 
+		void HandleAnimationEvents();
 		void AddAnimationEvent(const std::string &name,uint32_t frameId,const AnimationEvent &ev);
 		CallbackHandle AddAnimationEvent(const std::string &name,uint32_t frameId,const std::function<void(void)> &f);
 		CallbackHandle AddAnimationEvent(const std::string &name,uint32_t frameId,const CallbackHandle &cb);
@@ -230,6 +232,7 @@ namespace pragma
 			std::vector<umath::Transform> &tgt,std::vector<Vector3> *tgtScales,std::vector<umath::Transform> &add,std::vector<Vector3> *addScales,float blendScale
 		) const;
 
+		bool PreMaintainAnimations(double dt);
 		virtual bool MaintainAnimations(double dt);
 		void UpdateAnimations(double dt);
 		bool MaintainGestures(double dt);
@@ -327,6 +330,13 @@ namespace pragma
 
 		std::vector<TemplateAnimationEvent> m_animEventTemplates;
 		std::unordered_map<uint32_t,std::unordered_map<uint32_t,std::vector<CustomAnimationEvent>>> m_animEvents;
+
+		struct ComponentEventQueueInfo
+		{
+			ComponentEventId id;
+			std::unique_ptr<ComponentEvent> eventData;
+		};
+		std::queue<ComponentEventQueueInfo> m_queuedEvents;
 		
 		StateFlags m_stateFlags = StateFlags::AbsolutePosesDirty;
 		std::shared_ptr<const Frame> m_bindPose = nullptr;

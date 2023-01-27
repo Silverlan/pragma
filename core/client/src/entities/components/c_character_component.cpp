@@ -48,7 +48,7 @@ CCharacterComponent::CCharacterComponent(BaseEntity &ent)
 void CCharacterComponent::Initialize()
 {
 	BaseCharacterComponent::Initialize();
-	BindEventUnhandled(CAnimatedComponent::EVENT_ON_BLEND_ANIMATION,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(CAnimatedComponent::EVENT_ON_BLEND_ANIMATION_MT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &ent = GetEntity();
 		auto animComponent = ent.GetAnimatedComponent();
 		auto &hMdl = ent.GetModel();

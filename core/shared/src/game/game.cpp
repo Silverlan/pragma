@@ -25,6 +25,7 @@
 #include <pragma/console/convars.h>
 #include "pragma/console/engine_cvar.h"
 #include "pragma/game/game_callback.h"
+#include "pragma/game/animation_update_manager.hpp"
 #include "pragma/lua/luafunction_call.h"
 #include "pragma/addonsystem/addonsystem.h"
 #include "pragma/lua/lua_script_watcher.h"
@@ -404,12 +405,7 @@ void Game::Initialize()
 	m_componentManager = InitializeEntityComponentManager();
 	InitializeEntityComponents(*m_componentManager);
 
-	auto r = m_componentManager->GetComponentTypeId("animated",m_animatedComponentId);
-	r = r && m_componentManager->GetComponentTypeId("panima",m_animated2ComponentId);
-	r = r && m_componentManager->GetComponentTypeId("animation_driver",m_animationDriverComponentId);
-	assert(r);
-	if(!r)
-		Con::crit<<"Unable to determine animated component id!"<<Con::endl;
+	m_animUpdateManager = std::make_unique<pragma::AnimationUpdateManager>(*this);
 
 	InitializeLuaScriptWatcher();
 	m_scriptWatcher->MountDirectory("lua");
@@ -644,20 +640,9 @@ std::size_t Game::GetBaseEntityCount() const {return m_numEnts;}
 
 void Game::ScheduleEntityForRemoval(BaseEntity &ent) {m_entsScheduledForRemoval.push(ent.GetHandle());}
 
-void Game::UpdateEntityAnimations(double dt)
+void Game::UpdateAnimations(double dt)
 {
-	for(auto *ent : EntityIterator{*this,m_animatedComponentId})
-		ent->GetAnimatedComponent()->UpdateAnimations(dt);
-	EntityIterator entIt {*this};
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::PanimaComponent>>();
-	for(auto *ent : entIt)
-		ent->GetComponent<pragma::PanimaComponent>()->UpdateAnimations(dt);
-}
-
-void Game::UpdateEntityAnimationDrivers(double dt)
-{
-	for(auto *ent : EntityIterator{*this,m_animationDriverComponentId})
-		ent->GetComponent<pragma::AnimationDriverComponent>()->ApplyDrivers();
+	m_animUpdateManager->UpdateAnimations(dt);
 }
 
 void Game::Tick()
@@ -676,16 +661,16 @@ void Game::Tick()
 			ent->ResetStateChangeFlags();
 	}
 
-	StartProfilingStage(CPUProfilingPhase::Animations);
 	// Order:
 	// Animations are updated before logic and physics, because:
-	// 1) They may affect logic/physics-based properties like entity positions or rotations
-	// 2) They may generate logic-based animation events
-	UpdateEntityAnimations(m_tDeltaTick);
-
-	// Animation drivers require animations to be fully processed, so they are executed next.
-	UpdateEntityAnimationDrivers(m_tDeltaTick);
+	// - They may affect logic/physics-based properties like entity positions or rotations
+	// - They may generate logic-based animation events
+	// TODO: This is current inefficient because we're not really doing anything
+	// while the animations are being calculated, resulting in wasted CPU cycles.
+	StartProfilingStage(CPUProfilingPhase::Animations);
+		UpdateAnimations(m_tDeltaTick);
 	StopProfilingStage(CPUProfilingPhase::Animations);
+
 
 	StartProfilingStage(CPUProfilingPhase::Physics);
 

@@ -359,7 +359,7 @@ pragma::ik::DragControl &pragma::ik::Solver::AddDragControl(Bone &bone)
 	m_bepuControls.push_back(**ctrl);
 	return *ctrl;
 }
-void pragma::ik::Solver::RemoveDragControl(const IControl &ctrl)
+void pragma::ik::Solver::RemoveControl(const IControl &ctrl)
 {
 	auto it = std::find_if(m_controls.begin(),m_controls.end(),[&ctrl](const std::shared_ptr<IControl> &other) {
 		return &ctrl == other.get();
@@ -376,6 +376,17 @@ pragma::ik::AngularPlaneControl &pragma::ik::Solver::AddAngularPlaneControl(Bone
 	m_controls.push_back(ctrl);
 	m_bepuControls.push_back(**ctrl);
 	return *ctrl;
+}
+pragma::ik::IControl *pragma::ik::Solver::FindControl(Bone &bone)
+{
+	auto *bepuIkBone = *bone;
+	for(auto &ctrl : m_controls)
+	{
+		auto *bepuCtrl = **ctrl;
+		if(bepuCtrl->GetTargetBone() == bepuIkBone)
+			return ctrl.get();
+	}
+	return nullptr;
 }
 pragma::ik::StateControl &pragma::ik::Solver::AddStateControl(Bone &bone)
 {
@@ -461,11 +472,13 @@ pragma::ik::SwivelHingeJoint &pragma::ik::Solver::AddSwivelHingeJoint(Bone &bone
 	m_bepuJoints.push_back(**joint);
 	return *joint;
 }
-pragma::ik::Bone &pragma::ik::Solver::AddBone(const Vector3 &pos,const Quat &rot,float radius,float length)
+pragma::ik::Bone &pragma::ik::Solver::AddBone(const Vector3 &pos,const Quat &rot,float radius,float length,BoneId *optOutBoneId)
 {
 	auto bone = std::make_shared<Bone>(pos,rot,radius,length,1.f);
 	m_bones.push_back(bone);
 	m_bepuBones.push_back(**bone);
+	if(optOutBoneId)
+		*optOutBoneId = m_bones.size() -1;
 	return *bone;
 }
 
@@ -474,7 +487,7 @@ size_t pragma::ik::Solver::GetBoneCount() const {return m_bones.size();}
 size_t pragma::ik::Solver::GetJointCount() const {return m_joints.size();}
 
 pragma::ik::IControl *pragma::ik::Solver::GetControl(size_t index) {return (index < m_controls.size()) ? m_controls[index].get() : nullptr;}
-pragma::ik::Bone *pragma::ik::Solver::GetBone(size_t index) {return (index < m_bones.size()) ? m_bones[index].get() : nullptr;}
+pragma::ik::Bone *pragma::ik::Solver::GetBone(BoneId index) {return (index < m_bones.size()) ? m_bones[index].get() : nullptr;}
 pragma::ik::IJoint *pragma::ik::Solver::GetJoint(size_t index) {return (index < m_joints.size()) ? m_joints[index].get() : nullptr;}
 
 const std::vector<std::shared_ptr<pragma::ik::IControl>> &pragma::ik::Solver::GetControls() const {return m_controls;}

@@ -31,6 +31,7 @@
 #include "pragma/entities/components/submergible_component.hpp"
 #include "pragma/entities/components/logic_component.hpp"
 #include "pragma/entities/components/ik_component.hpp"
+#include "pragma/entities/components/ik_solver_component.hpp"
 #include "pragma/entities/components/map_component.hpp"
 #include "pragma/entities/components/usable_component.hpp"
 #include "pragma/entities/components/base_weapon_component.hpp"
@@ -39,6 +40,7 @@
 #include "pragma/entities/components/global_component.hpp"
 #include "pragma/entities/components/damageable_component.hpp"
 #include "pragma/entities/components/animation_driver_component.hpp"
+#include "pragma/entities/components/ik_solver/rig_config.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
@@ -429,6 +431,42 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defIK.def("SetIKEffectorPos",&pragma::IKComponent::SetIKEffectorPos);
 	defIK.def("GetIKEffectorPos",&pragma::IKComponent::GetIKEffectorPos);
 	entsMod[defIK];
+
+	auto defRigConfig = luabind::class_<pragma::ik::RigConfig>("RigConfig");
+	defRigConfig.scope[luabind::def("load",&pragma::ik::RigConfig::load)];
+	defRigConfig.scope[luabind::def("load_from_udm_data",&pragma::ik::RigConfig::load_from_udm_data)];
+	defRigConfig.scope[luabind::def("get_supported_extensions",&pragma::ik::RigConfig::get_supported_extensions)];
+	defRigConfig.def("DebugPrint",&pragma::ik::RigConfig::DebugPrint);
+	defRigConfig.def("ToUdmData",&pragma::ik::RigConfig::ToUdmData);
+	defRigConfig.def("AddBone",&pragma::ik::RigConfig::AddBone);
+	defRigConfig.def("RemoveBone",&pragma::ik::RigConfig::RemoveBone);
+	defRigConfig.def("HasBone",&pragma::ik::RigConfig::HasBone);
+	defRigConfig.def("IsBoneLocked",&pragma::ik::RigConfig::IsBoneLocked);
+	defRigConfig.def("SetBoneLocked",&pragma::ik::RigConfig::SetBoneLocked);
+	defRigConfig.def("RemoveControl",&pragma::ik::RigConfig::RemoveControl);
+	defRigConfig.def("HasControl",&pragma::ik::RigConfig::HasControl);
+	defRigConfig.def("AddControl",&pragma::ik::RigConfig::AddControl);
+	defRigConfig.def("RemoveConstraints",&pragma::ik::RigConfig::RemoveConstraints);
+	defRigConfig.def("AddFixedConstraint",&pragma::ik::RigConfig::AddFixedConstraint);
+	defRigConfig.def("AddHingeConstraint",&pragma::ik::RigConfig::AddHingeConstraint);
+	defRigConfig.def("AddBallSocketConstraint",&pragma::ik::RigConfig::AddBallSocketConstraint);
+	defRigConfig.def("Save",&pragma::ik::RigConfig::Save);
+
+	auto defIkSolver = pragma::lua::create_entity_component_class<pragma::IkSolverComponent,pragma::BaseEntityComponent>("IkSolverComponent");
+	defIkSolver.def("SetIkRigFile",&pragma::IkSolverComponent::SetIkRigFile);
+	defIkSolver.def("GetIkRigFile",&pragma::IkSolverComponent::GetIkRigFile);
+	defIkSolver.def("AddSkeletalBone",&pragma::IkSolverComponent::AddSkeletalBone);
+	defIkSolver.def("SetBoneLocked",&pragma::IkSolverComponent::SetBoneLocked);
+	defIkSolver.def("GetBone",&pragma::IkSolverComponent::GetBone);
+	defIkSolver.def("AddDragControl",&pragma::IkSolverComponent::AddDragControl);
+	defIkSolver.def("AddStateControl",&pragma::IkSolverComponent::AddStateControl);
+	defIkSolver.def("AddFixedConstraint",&pragma::IkSolverComponent::AddFixedConstraint);
+	defIkSolver.def("AddHingeConstraint",&pragma::IkSolverComponent::AddHingeConstraint);
+	defIkSolver.def("AddBallSocketConstraint",&pragma::IkSolverComponent::AddBallSocketConstraint);
+	defIkSolver.def("GetIkRig",&pragma::IkSolverComponent::GetIkRig);
+	defIkSolver.def("Solve",&pragma::IkSolverComponent::Solve);
+	defIkSolver.scope[defRigConfig];
+	entsMod[defIkSolver];
 
 	auto defLogic = pragma::lua::create_entity_component_class<pragma::LogicComponent,pragma::BaseEntityComponent>("LogicComponent");
 	defLogic.add_static_constant("EVENT_ON_TICK",pragma::LogicComponent::EVENT_ON_TICK);

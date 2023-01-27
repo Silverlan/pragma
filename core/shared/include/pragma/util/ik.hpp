@@ -25,6 +25,7 @@ namespace BEPUik
 
 namespace pragma::ik
 {
+	using BoneId = uint32_t;
 	class DLLNETWORK Bone
 	{
 	public:
@@ -194,8 +195,9 @@ namespace pragma::ik
 		~Solver();
 		void Solve();
 		DragControl &AddDragControl(Bone &bone);
-		void RemoveDragControl(const IControl &ctrl);
+		void RemoveControl(const IControl &ctrl);
 		AngularPlaneControl &AddAngularPlaneControl(Bone &bone);
+		IControl *FindControl(Bone &bone);
 		StateControl &AddStateControl(Bone &bone);
 		DistanceJoint &AddDistanceJoint(Bone &bone0,Bone &bone1);
 		BallSocketJoint &AddBallSocketJoint(Bone &bone0,Bone &bone1,const Vector3 &anchor);
@@ -214,14 +216,14 @@ namespace pragma::ik
 		TwistJoint &AddTwistJoint(Bone &bone0,Bone &bone1,const Vector3 &axisA,const Vector3 &axisB);
 		TwistLimit &AddTwistLimit(Bone &bone0,Bone &bone1,const Vector3 &axisA,const Vector3 &axisB,float maxAngle);
 		SwivelHingeJoint &AddSwivelHingeJoint(Bone &bone0,Bone &bone1,const Vector3 &worldHingeAxis,const Vector3 &worldTwistAxis);
-		Bone &AddBone(const Vector3 &pos,const Quat &rot,float radius,float length);
+		Bone &AddBone(const Vector3 &pos,const Quat &rot,float radius,float length,BoneId *optOutBoneId=nullptr);
 
 		size_t GetControlCount() const;
 		size_t GetBoneCount() const;
 		size_t GetJointCount() const;
 
 		IControl *GetControl(size_t index);
-		Bone *GetBone(size_t index);
+		Bone *GetBone(BoneId index);
 		IJoint *GetJoint(size_t index);
 
 		const std::vector<std::shared_ptr<IControl>> &GetControls() const;

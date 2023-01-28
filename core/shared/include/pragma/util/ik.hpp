@@ -198,6 +198,7 @@ namespace pragma::ik
 		void RemoveControl(const IControl &ctrl);
 		AngularPlaneControl &AddAngularPlaneControl(Bone &bone);
 		IControl *FindControl(Bone &bone);
+		std::shared_ptr<IControl> FindControlPtr(Bone &bone);
 		StateControl &AddStateControl(Bone &bone);
 		DistanceJoint &AddDistanceJoint(Bone &bone0,Bone &bone1);
 		BallSocketJoint &AddBallSocketJoint(Bone &bone0,Bone &bone1,const Vector3 &anchor);

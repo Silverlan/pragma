@@ -60,6 +60,8 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(u
 		{
 			float minAngle = 0.f;
 			float maxAngle = 0.f;
+			udmConstraint["minAngle"](minAngle);
+			udmConstraint["maxAngle"](maxAngle);
 			rig.AddHingeConstraint(bone0,bone1,minAngle,maxAngle);
 			break;
 		}
@@ -67,6 +69,8 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(u
 		{
 			EulerAngles minAngles {};
 			EulerAngles maxAngles {};
+			udmConstraint["minAngles"](minAngles);
+			udmConstraint["maxAngles"](maxAngles);
 			rig.AddBallSocketConstraint(bone0,bone1,minAngles,maxAngles);
 			break;
 		}
@@ -159,8 +163,21 @@ void pragma::ik::RigConfig::AddFixedConstraint(const std::string &bone0,const st
 	c.bone1 = bone1;
 	c.type = RigConfigConstraint::Type::Fixed;
 }
+static void clamp_angles(float &min,float &max)
+{
+	// If the span range is too small it can cause instability,
+	// so we'll force a minimum span angle
+	constexpr umath::Degree minSpan = 0.5f;
+	if(umath::abs(max -min) < minSpan)
+	{
+		auto baseAngle = (min +max) /2.f;
+		min = baseAngle -minSpan;
+		max = baseAngle +minSpan;
+	}
+}
 void pragma::ik::RigConfig::AddHingeConstraint(const std::string &bone0,const std::string &bone1,umath::Degree minAngle,umath::Degree maxAngle)
 {
+	clamp_angles(minAngle,maxAngle);
 	m_constraints.push_back({});
 	auto &c = m_constraints.back();
 	c.bone0 = bone0;
@@ -178,6 +195,8 @@ void pragma::ik::RigConfig::AddBallSocketConstraint(const std::string &bone0,con
 	c.type = RigConfigConstraint::Type::BallSocket;
 	c.minLimits = minAngles;
 	c.maxLimits = maxAngles;
+	for(uint8_t i=0;i<3;++i)
+		clamp_angles(c.minLimits[i],c.maxLimits[i]);
 }
 
 void pragma::ik::RigConfig::DebugPrint() const

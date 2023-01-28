@@ -10,6 +10,7 @@
 #include "pragma/entities/attribute_specialization_type.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/components/ik_solver/rig_config.hpp"
+#include "pragma/entities/components/component_member_flags.hpp"
 #include "pragma/model/model.h"
 #include "pragma/logging.hpp"
 #include <panima/skeleton.hpp>
@@ -24,6 +25,10 @@ void IkSolverComponent::RegisterEvents(pragma::EntityComponentManager &component
 	EVENT_INITIALIZE_SOLVER = registerEvent("INITIALIZE_SOLVER",ComponentEventInfo::Type::Broadcast);
 	EVENT_UPDATE_IK = registerEvent("UPDATE_IK",ComponentEventInfo::Type::Explicit);
 }
+static void set_ik_rig(const ComponentMemberInfo &memberInfo,IkSolverComponent &component,const pragma::ents::Element &value)
+{
+	component.UpdateIkRig();
+}
 static void get_ik_rig(const ComponentMemberInfo &memberInfo,IkSolverComponent &component,pragma::ents::Element &value)
 {
 	value = component.GetIkRig();
@@ -36,9 +41,10 @@ void IkSolverComponent::RegisterMembers(pragma::EntityComponentManager &componen
 		using TRigConfig = pragma::ents::Element;
 		auto memberInfo = create_component_member_info<
 			T,TRigConfig,
-			+[](const ComponentMemberInfo &memberInfo,T &component,const TRigConfig &value) {},
+			// For some reasons these don't work as lambdas (VS compiler bug?)
+			&set_ik_rig,
 			&get_ik_rig
-		>("RigConfig");
+		>("rigConfig");
 		registerMember(std::move(memberInfo));
 	}
 	{
@@ -47,7 +53,7 @@ void IkSolverComponent::RegisterMembers(pragma::EntityComponentManager &componen
 			T,TRigConfigFile,
 			static_cast<void(T::*)(const TRigConfigFile&)>(&T::SetIkRigFile),
 			static_cast<const TRigConfigFile&(T::*)() const>(&T::GetIkRigFile)
-		>("RigConfigFile","",AttributeSpecializationType::File);
+		>("rigConfigFile","",AttributeSpecializationType::File);
 		auto &metaData = memberInfo.AddMetaData();
 		metaData["rootPath"] = "scripts/ik_rigs/";
 		metaData["extensions"] = pragma::ik::RigConfig::get_supported_extensions();
@@ -56,7 +62,7 @@ void IkSolverComponent::RegisterMembers(pragma::EntityComponentManager &componen
 	}
 }
 IkSolverComponent::IkSolverComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
+	: BaseEntityComponent(ent),m_ikRig{udm::Property::Create<udm::Element>()}
 {}
 void IkSolverComponent::Initialize()
 {
@@ -71,15 +77,19 @@ const std::string &IkSolverComponent::GetIkRigFile() const {return m_ikRigFile;}
 void IkSolverComponent::UpdateIkRigFile()
 {
 	InitializeSolver(); // Clear Rig
-	if(m_ikRigFile.empty())
-		return;
-	auto rigConfig = pragma::ik::RigConfig::load("scripts/ik_rigs/" +m_ikRigFile);
-	if(rigConfig)
-		AddIkSolverByRig(*rigConfig);
+	if(!m_ikRigFile.empty())
+	{
+		auto rigConfig = pragma::ik::RigConfig::load("scripts/ik_rigs/" +m_ikRigFile);
+		if(rigConfig)
+			AddIkSolverByRig(*rigConfig);
+	}
 	UpdateIkRig();
 }
 void IkSolverComponent::InitializeSolver()
 {
+	m_ikControls.clear();
+	m_boneIdToIkBoneId.clear();
+	m_ikBoneIdToBoneId.clear();
 	m_ikSolver = std::make_unique<pragma::ik::Solver>(100,10);
 
 	ClearMembers();
@@ -89,29 +99,52 @@ void IkSolverComponent::InitializeSolver()
 }
 bool IkSolverComponent::AddIkSolverByChain(const std::string &boneName,uint32_t chainLength)
 {
-	if(chainLength < 2)
+	constexpr uint32_t minChainLength = 2;
+	if(chainLength < minChainLength)
+	{
+		spdlog::debug(
+			"Failed to add ik chain to ik solver {} with boneName={} and chainLength={}: Chain length has to be at least {}.",
+			GetEntity(),boneName,chainLength,minChainLength
+		);
 		return false;
+	}
 	auto &ent = GetEntity();
 	auto &mdl = ent.GetModel();
 	if(!mdl)
+	{
+		spdlog::debug(
+			"Failed to add ik chain to ik solver {} with boneName={} and chainLength={}: Entity has no model.",
+			GetEntity(),boneName,chainLength
+		);
 		return false;
+	}
 	auto &skeleton = mdl->GetSkeleton();
 	auto &ref = mdl->GetReference();
-
+	auto effectiveChainLength = chainLength +1;
 	std::vector<BoneId> ikChain;
-	ikChain.reserve(chainLength);
+	ikChain.reserve(effectiveChainLength);
 	auto boneId = skeleton.LookupBone(boneName);
 	if(boneId == -1)
+	{
+		spdlog::debug(
+			"Failed to add ik chain to ik solver {} with boneName={} and chainLength={}: Bone not found in skeleton.",
+			GetEntity(),boneName,chainLength
+		);
 		return false;
-
-	// TODO: Remove existing solver?
+	}
 
 	auto bone = skeleton.GetBone(boneId).lock();
-	for(auto i=decltype(chainLength){0};i<chainLength;++i)
+	for(auto i=decltype(effectiveChainLength){0};i<effectiveChainLength;++i)
 	{
 		if(bone == nullptr)
+		{
+			spdlog::debug(
+				"Failed to add ik chain to ik solver {} with boneName={} and chainLength={}: Chain length exceeds number of parents.",
+				GetEntity(),boneName,chainLength
+			);
 			return false;
-		ikChain.push_back(bone->ID);
+		}
+		ikChain.insert(ikChain.begin(),bone->ID);
 		bone = bone->parent.lock();
 	}
 
@@ -168,11 +201,22 @@ void IkSolverComponent::AddSkeletalBone(BoneId boneId)
 }
 void IkSolverComponent::AddDragControl(BoneId boneId)
 {
-	//return self:AddControl(boneId,true,false)
+	AddControl(boneId,true,false);
 }
 void IkSolverComponent::AddStateControl(BoneId boneId)
 {
-
+	AddControl(boneId,true,true);
+}
+size_t IkSolverComponent::GetBoneCount() const
+{
+	return m_ikSolver->GetBoneCount();
+}
+pragma::ik::IControl *IkSolverComponent::GetControl(BoneId boneId)
+{
+	auto it = m_ikControls.find(boneId);
+	if(it == m_ikControls.end())
+		return nullptr;
+	return it->second.get();
 }
 pragma::ik::Bone *IkSolverComponent::GetBone(BoneId boneId)
 {
@@ -192,13 +236,25 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 {
 	auto mdl = GetEntity().GetModel();
 	if(!mdl)
+	{
+		spdlog::debug(
+			"Failed to add ik rig to ik solver {}: Entity has no model.",
+			GetEntity()
+		);
 		return false;
+	}
 	auto &skeleton = mdl->GetSkeleton();
 	for(auto &boneData : rigConfig.GetBones())
 	{
 		auto boneId = skeleton.LookupBone(boneData.name);
 		if(boneId == -1)
+		{
+			spdlog::debug(
+				"Failed to add ik rig to ik solver {}: Bone {} does not exist in skeleton.",
+				GetEntity(),boneData.name
+			);
 			return false;
+		}
 		AddSkeletalBone(boneId);
 		if(boneData.locked)
 			SetBoneLocked(boneId,true);
@@ -208,7 +264,13 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 	{
 		auto boneId = skeleton.LookupBone(controlData.bone);
 		if(boneId == -1)
+		{
+			spdlog::debug(
+				"Failed to add ik rig to ik solver {}: Control bone {} does not exist in skeleton.",
+				GetEntity(),controlData.bone
+			);
 			return false;
+		}
 		switch(controlData.type)
 		{
 		case pragma::ik::RigConfigControl::Type::Drag:
@@ -225,7 +287,13 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 		auto boneId0 = skeleton.LookupBone(constraintData.bone0);
 		auto boneId1 = skeleton.LookupBone(constraintData.bone1);
 		if(boneId0 == -1 || boneId1 == -1)
+		{
+			spdlog::debug(
+				"Failed to add ik rig to ik solver {}: Constraint bone {} or {} does not exist in skeleton.",
+				GetEntity(),constraintData.bone0,constraintData.bone1
+			);
 			return false;
+		}
 		switch(constraintData.type)
 		{
 		case pragma::ik::RigConfigConstraint::Type::Fixed:
@@ -252,22 +320,54 @@ std::optional<umath::ScaledTransform> IkSolverComponent::GetReferenceBonePose(Bo
 		return {};
 	return pose;
 }
-void IkSolverComponent::AddFixedConstraint(BoneId boneId0,BoneId boneId1)
+bool IkSolverComponent::GetConstraintBones(
+	BoneId boneId0,BoneId boneId1,
+	pragma::ik::Bone **bone0,pragma::ik::Bone **bone1,
+	umath::ScaledTransform &pose0,umath::ScaledTransform &pose1
+) const
 {
 	auto itBone0 = m_boneIdToIkBoneId.find(boneId0);
 	auto itBone1 = m_boneIdToIkBoneId.find(boneId1);
 	if(itBone0 == m_boneIdToIkBoneId.end() || itBone1 == m_boneIdToIkBoneId.end())
-		return;
-	auto *bone0 = m_ikSolver->GetBone(itBone0->second);
-	auto *bone1 = m_ikSolver->GetBone(itBone1->second);
-	if(!bone0 || !bone1)
-		return;
+	{
+		spdlog::debug(
+			"Failed to add fixed constraint to ik solver {}: Bone {} or {} do not exist.",
+			const_cast<BaseEntity&>(GetEntity()),boneId0,boneId1
+		);
+		return false;
+	}
+	*bone0 = m_ikSolver->GetBone(itBone0->second);
+	*bone1 = m_ikSolver->GetBone(itBone1->second);
+	if(!*bone0 || !*bone1)
+	{
+		spdlog::debug(
+			"Failed to add fixed constraint to ik solver {}: Bone {} or {} do not exist in solver.",
+			const_cast<BaseEntity&>(GetEntity()),boneId0,boneId1
+		);
+		return false;
+	}
 	auto refPose0 = GetReferenceBonePose(boneId0);
 	auto refPose1 = GetReferenceBonePose(boneId1);
 	if(!refPose0.has_value() || !refPose1.has_value())
+	{
+		spdlog::debug(
+			"Failed to add fixed constraint to ik solver {}: Bone {} or {} do not exist in reference pose.",
+			const_cast<BaseEntity&>(GetEntity()),boneId0,boneId1
+		);
+		return false;
+	}
+	pose0 = *refPose0;
+	pose1 = *refPose1;
+	return true;
+}
+void IkSolverComponent::AddFixedConstraint(BoneId boneId0,BoneId boneId1)
+{
+	pragma::ik::Bone *bone0,*bone1;
+	umath::ScaledTransform refPose0,refPose1;
+	if(!GetConstraintBones(boneId0,boneId1,&bone0,&bone1,refPose0,refPose1))
 		return;
-	auto &rotBone0 = refPose0->GetRotation();
-	auto &rotBone1 = refPose1->GetRotation();
+	auto &rotBone0 = refPose0.GetRotation();
+	auto &rotBone1 = refPose1.GetRotation();
 
 	// Lock distance and rotation to the parent
 	m_ikSolver->AddBallSocketJoint(*bone0,*bone1,bone1->GetPos());
@@ -284,21 +384,12 @@ void IkSolverComponent::AddFixedConstraint(BoneId boneId0,BoneId boneId1)
 }
 void IkSolverComponent::AddHingeConstraint(BoneId boneId0,BoneId boneId1,umath::Degree minAngle,umath::Degree maxAngle)
 {
-	auto itBone0 = m_boneIdToIkBoneId.find(boneId0);
-	auto itBone1 = m_boneIdToIkBoneId.find(boneId1);
-	if(itBone0 == m_boneIdToIkBoneId.end() || itBone1 == m_boneIdToIkBoneId.end())
+	pragma::ik::Bone *bone0,*bone1;
+	umath::ScaledTransform refPose0,refPose1;
+	if(!GetConstraintBones(boneId0,boneId1,&bone0,&bone1,refPose0,refPose1))
 		return;
-	auto *bone0 = m_ikSolver->GetBone(itBone0->second);
-	auto *bone1 = m_ikSolver->GetBone(itBone1->second);
-	if(!bone0 || !bone1)
-		return;
-
-	auto refPose0 = GetReferenceBonePose(boneId0);
-	auto refPose1 = GetReferenceBonePose(boneId1);
-	if(!refPose0.has_value() || !refPose1.has_value())
-		return;
-	auto &rotBone0 = refPose0->GetRotation();
-	auto &rotBone1 = refPose1->GetRotation();
+	auto &rotBone0 = refPose0.GetRotation();
+	auto &rotBone1 = refPose1.GetRotation();
 
 	// The IK system only allows us to specify a general swing limit (in any direction). Since we want to be able to specify it in each
 	// direction independently, we have to shift the rotation axes accordingly.
@@ -341,21 +432,12 @@ void IkSolverComponent::AddHingeConstraint(BoneId boneId0,BoneId boneId1,umath::
 }
 void IkSolverComponent::AddBallSocketConstraint(BoneId boneId0,BoneId boneId1,const EulerAngles &minLimits,const EulerAngles &maxLimits)
 {
-	auto itBone0 = m_boneIdToIkBoneId.find(boneId0);
-	auto itBone1 = m_boneIdToIkBoneId.find(boneId1);
-	if(itBone0 == m_boneIdToIkBoneId.end() || itBone1 == m_boneIdToIkBoneId.end())
+	pragma::ik::Bone *bone0,*bone1;
+	umath::ScaledTransform refPose0,refPose1;
+	if(!GetConstraintBones(boneId0,boneId1,&bone0,&bone1,refPose0,refPose1))
 		return;
-	auto *bone0 = m_ikSolver->GetBone(itBone0->second);
-	auto *bone1 = m_ikSolver->GetBone(itBone1->second);
-	if(!bone0 || !bone1)
-		return;
-
-	auto refPose0 = GetReferenceBonePose(boneId0);
-	auto refPose1 = GetReferenceBonePose(boneId1);
-	if(!refPose0.has_value() || !refPose1.has_value())
-		return;
-	auto &rotBone0 = refPose0->GetRotation();
-	auto &rotBone1 = refPose1->GetRotation();
+	auto &rotBone0 = refPose0.GetRotation();
+	auto &rotBone1 = refPose1.GetRotation();
 
 	// The IK system only allows us to specify a general swing limit (in any direction). Since we want to be able to specify it in each
 	// direction independently, we have to shift the rotation axes accordingly.
@@ -415,9 +497,8 @@ bool IkSolverComponent::UpdateIkRig()
 {
 	udm::LinkedPropertyWrapper prop {*m_ikRig};
 	auto rig = pragma::ik::RigConfig::load_from_udm_data(prop);
-	if(!rig)
-		return false;
-	AddIkSolverByRig(*rig);
+	if(rig)
+		AddIkSolverByRig(*rig);
 	OnMembersChanged();
 	return true;
 }
@@ -435,6 +516,13 @@ std::optional<IkSolverComponent::IkBoneId> IkSolverComponent::GetIkBoneId(BoneId
 		return {};
 	return it->second;
 }
+std::optional<BoneId> IkSolverComponent::GetSkeletalBoneId(IkBoneId boneId) const
+{
+	auto it = m_ikBoneIdToBoneId.find(boneId);
+	if(it == m_ikBoneIdToBoneId.end())
+		return {};
+	return it->second;
+}
 pragma::ik::Bone *IkSolverComponent::GetIkBone(BoneId boneId)
 {
 	auto rigConfigBoneId = GetIkBoneId(boneId);
@@ -442,35 +530,62 @@ pragma::ik::Bone *IkSolverComponent::GetIkBone(BoneId boneId)
 		return nullptr;
 	return m_ikSolver->GetBone(*rigConfigBoneId);
 }
-void IkSolverComponent::AddControl(BoneId boneId,const Vector3 &translation,const Quat *rotation)
+void IkSolverComponent::AddControl(BoneId boneId,bool translation,bool rotation)
 {
+	assert((translation && rotation) || (translation && !rotation));
 	auto &mdl = GetEntity().GetModel();
 	if(!mdl)
+	{
+		spdlog::debug(
+			"Failed to add control to ik solver {}: Entity has no model.",
+			GetEntity()
+		);
 		return;
+	}
 	auto &skeleton = mdl->GetSkeleton();
 	auto bone = skeleton.GetBone(boneId).lock();
 	if(!bone)
+	{
+		spdlog::debug(
+			"Failed to add control to ik solver {}: Control bone {} does not exist in skeleton.",
+			GetEntity(),boneId
+		);
 		return;
+	}
 	auto rigConfigBoneId = GetIkBoneId(boneId);
 	if(rigConfigBoneId.has_value() == false)
+	{
+		spdlog::debug(
+			"Failed to add control to ik solver {}: Control bone {} does not exist in ik rig.",
+			GetEntity(),boneId
+		);
 		return;
+	}
 	auto *rigConfigBone = m_ikSolver->GetBone(*rigConfigBoneId);
-	if(!rigConfigBone || m_ikSolver->FindControl(*rigConfigBone) != nullptr)
+	if(!rigConfigBone)
+	{
+		spdlog::debug(
+			"Failed to add control to ik solver {}: Control bone {} does not exist in ik rig.",
+			GetEntity(),boneId
+		);
+		return;
+	}
+	if(m_ikSolver->FindControl(*rigConfigBone) != nullptr)
 		return;
 	pragma::ik::IControl *control = nullptr;
 	pragma::ik::RigConfigControl::Type type;
 	if(rotation)
 	{
 		auto &stateControl = m_ikSolver->AddStateControl(*rigConfigBone);
-		stateControl.SetTargetPosition(translation);
-		stateControl.SetTargetOrientation(*rotation);
+		stateControl.SetTargetPosition(rigConfigBone->GetPos());
+		stateControl.SetTargetOrientation(rigConfigBone->GetRot());
 		control = &stateControl;
 		type = pragma::ik::RigConfigControl::Type::State;
 	}
 	else
 	{
 		auto &dragControl = m_ikSolver->AddDragControl(*rigConfigBone);
-		dragControl.SetTargetPosition(translation);
+		dragControl.SetTargetPosition(rigConfigBone->GetPos());
 		control = &dragControl;
 		type = pragma::ik::RigConfigControl::Type::Drag;
 	}
@@ -483,6 +598,7 @@ void IkSolverComponent::AddControl(BoneId boneId,const Vector3 &translation,cons
 		memberInfoPos.SetName("control/" +name +"/position");
 		memberInfoPos.type = ents::EntityMemberType::Vector3;
 		memberInfoPos.userIndex = boneId;
+		memberInfoPos.SetFlag(pragma::ComponentMemberFlags::ObjectSpace);
 		using TValue = Vector3;
 		memberInfoPos.SetGetterFunction<TComponent,TValue,static_cast<void(*)(const pragma::ComponentMemberInfo&,TComponent&,TValue&)>(
 			[](const pragma::ComponentMemberInfo &memberInfo,TComponent &component,TValue &outValue) {
@@ -511,6 +627,7 @@ void IkSolverComponent::AddControl(BoneId boneId,const Vector3 &translation,cons
 			memberInfoRot.SetName("control/" +name +"/rotation");
 			memberInfoRot.type = ents::EntityMemberType::Quaternion;
 			memberInfoRot.userIndex = boneId;
+			memberInfoRot.SetFlag(pragma::ComponentMemberFlags::ObjectSpace);
 			using TValue = Quat;
 			memberInfoRot.SetGetterFunction<TComponent,TValue,static_cast<void(*)(const pragma::ComponentMemberInfo&,TComponent&,TValue&)>(
 				[](const pragma::ComponentMemberInfo &memberInfo,TComponent &component,TValue &outValue) {
@@ -534,6 +651,15 @@ void IkSolverComponent::AddControl(BoneId boneId,const Vector3 &translation,cons
 			ctrl.SetTargetOrientation(rigConfigBone->GetRot());
 		}
 	};
+	switch(type)
+	{
+	case pragma::ik::RigConfigControl::Type::State:
+		defGetSet(static_cast<pragma::ik::StateControl&>(*control));
+		break;
+	case pragma::ik::RigConfigControl::Type::Drag:
+		defGetSet(static_cast<pragma::ik::DragControl&>(*control));
+		break;
+	}
 	auto memberInfoLocked = pragma::ComponentMemberInfo::CreateDummy();
 	memberInfoLocked.SetName("control/" +name +"/locked");
 	memberInfoLocked.type = ents::EntityMemberType::Boolean;
@@ -568,7 +694,26 @@ void IkSolverComponent::AddControl(BoneId boneId,const Vector3 &translation,cons
 	RegisterMember(std::move(memberInfoLocked));
 
 	// TODO: Position weight and rotation weight
-	OnMembersChanged();
+
+	m_ikControls[boneId] = m_ikSolver->FindControlPtr(*rigConfigBone);
+}
+const ComponentMemberInfo *IkSolverComponent::GetMemberInfo(ComponentMemberIndex idx) const
+{
+	auto numStatic = GetStaticMemberCount();
+	if(idx < numStatic)
+		return BaseEntityComponent::GetMemberInfo(idx);
+	return DynamicMemberRegister::GetMemberInfo(idx);
+}
+
+std::optional<ComponentMemberIndex> IkSolverComponent::DoGetMemberIndex(const std::string &name) const
+{
+	auto idx = BaseEntityComponent::DoGetMemberIndex(name);
+	if(idx.has_value())
+		return idx;
+	idx = DynamicMemberRegister::GetMemberIndex(name);
+	if(idx.has_value())
+		return *idx;// +GetStaticMemberCount();
+	return std::optional<ComponentMemberIndex>{};
 }
 pragma::ik::Bone *IkSolverComponent::AddBone(BoneId boneId,const umath::Transform &pose,float radius,float length)
 {

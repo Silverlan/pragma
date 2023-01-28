@@ -39,6 +39,10 @@ namespace pragma
 		void AddSkeletalBone(BoneId boneId);
 		void SetBoneLocked(BoneId boneId,bool locked);
 		pragma::ik::Bone *GetBone(BoneId boneId);
+		pragma::ik::IControl *GetControl(BoneId boneId);
+		size_t GetBoneCount() const;
+		std::optional<BoneId> GetSkeletalBoneId(IkBoneId boneId) const;
+		std::optional<IkBoneId> GetIkBoneId(BoneId boneId) const;
 
 		void AddDragControl(BoneId boneId);
 		void AddStateControl(BoneId boneId);
@@ -49,18 +53,28 @@ namespace pragma
 
 		udm::PProperty &GetIkRig() {return m_ikRig;}
 		void Solve();
+		
+		bool AddIkSolverByRig(const ik::RigConfig &ikRig);
+		bool AddIkSolverByChain(const std::string &boneName,uint32_t chainLength);
+		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
+
+		// Internal use only
+		bool UpdateIkRig();
 	protected:
+		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
 		void ResetIkBones();
 		void UpdateIkRigFile();
 		void InitializeSolver();
-		bool AddIkSolverByRig(const ik::RigConfig &ikRig);
-		bool AddIkSolverByChain(const std::string &boneName,uint32_t chainLength);
-		bool UpdateIkRig();
 		std::optional<umath::ScaledTransform> GetReferenceBonePose(BoneId boneId) const;
 		pragma::ik::Bone *AddBone(BoneId boneId,const umath::Transform &pose,float radius,float length);
-		void AddControl(BoneId boneId,const Vector3 &translation,const Quat *rotation);
-		std::optional<IkBoneId> GetIkBoneId(BoneId boneId) const;
+		void AddControl(BoneId boneId,bool translation,bool rotation);
 		pragma::ik::Bone *GetIkBone(BoneId boneId);
+
+		bool GetConstraintBones(
+			BoneId boneId0,BoneId boneId1,
+			pragma::ik::Bone **bone0,pragma::ik::Bone **bone1,
+			umath::ScaledTransform &pose0,umath::ScaledTransform &pose1
+		) const;
 
 		udm::PProperty m_ikRig;
 		std::string m_ikRigFile;

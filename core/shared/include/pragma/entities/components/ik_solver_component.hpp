@@ -53,6 +53,7 @@ namespace pragma
 
 		udm::PProperty &GetIkRig() {return m_ikRig;}
 		void Solve();
+		void ResetIkRig();
 		
 		bool AddIkSolverByRig(const ik::RigConfig &ikRig);
 		bool AddIkSolverByChain(const std::string &boneName,uint32_t chainLength);

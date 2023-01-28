@@ -48,6 +48,9 @@ namespace pragma::ik
 		EulerAngles maxLimits;
 	};
 
+	using PRigConfigBone = std::shared_ptr<RigConfigBone>;
+	using PRigConfigControl = std::shared_ptr<RigConfigControl>;
+	using PRigConfigConstraint = std::shared_ptr<RigConfigConstraint>;
 	class RigConfig
 	{
 	public:
@@ -59,7 +62,7 @@ namespace pragma::ik
 		void DebugPrint() const;
 		void ToUdmData(udm::LinkedPropertyWrapper &udmData) const;
 
-		void AddBone(const std::string &name);
+		PRigConfigBone AddBone(const std::string &name);
 		void RemoveBone(const std::string &name);
 		bool HasBone(const std::string &name) const;
 		bool IsBoneLocked(const std::string &name) const;
@@ -68,29 +71,33 @@ namespace pragma::ik
 		void RemoveControl(const std::string &name);
 		bool HasControl(const std::string &name) const;
 
-		void AddControl(const std::string &bone,RigConfigControl::Type type);
+		PRigConfigControl AddControl(const std::string &bone,RigConfigControl::Type type);
 
 		void RemoveConstraints(const std::string &bone0,const std::string &bone1);
-		void AddFixedConstraint(const std::string &bone0,const std::string &bone1);
-		void AddHingeConstraint(const std::string &bone0,const std::string &bone1,umath::Degree minAngle,umath::Degree maxAngle);
-		void AddBallSocketConstraint(const std::string &bone0,const std::string &bone1,const EulerAngles &minAngles,const EulerAngles &maxAngles);
-	
-		const std::vector<RigConfigBone> &GetBones() const {return m_bones;}
-		const std::vector<RigConfigControl> &GetControls() const {return m_controls;}
-		const std::vector<RigConfigConstraint> &GetConstraints() const {return m_constraints;}
+		void RemoveConstraint(const RigConfigConstraint &constraint);
+		void RemoveControl(const RigConfigControl &control);
+		void RemoveBone(const RigConfigBone &bone);
+		PRigConfigConstraint AddFixedConstraint(const std::string &bone0,const std::string &bone1);
+		PRigConfigConstraint AddHingeConstraint(const std::string &bone0,const std::string &bone1,umath::Degree minAngle,umath::Degree maxAngle);
+		PRigConfigConstraint AddBallSocketConstraint(const std::string &bone0,const std::string &bone1,const EulerAngles &minAngles,const EulerAngles &maxAngles);
+
+		const std::vector<PRigConfigBone> &GetBones() const {return m_bones;}
+		const std::vector<PRigConfigControl> &GetControls() const {return m_controls;}
+		const std::vector<PRigConfigConstraint> &GetConstraints() const {return m_constraints;}
 
 		bool Save(const std::string &fileName);
 	private:
-		std::vector<RigConfigBone>::iterator FindBone(const std::string &name);
-		const std::vector<RigConfigBone>::iterator FindBone(const std::string &name) const;
+		std::vector<PRigConfigBone>::iterator FindBone(const std::string &name);
+		const std::vector<PRigConfigBone>::iterator FindBone(const std::string &name) const;
 
-		std::vector<RigConfigControl>::iterator FindControl(const std::string &name);
-		const std::vector<RigConfigControl>::iterator FindControl(const std::string &name) const;
+		std::vector<PRigConfigControl>::iterator FindControl(const std::string &name);
+		const std::vector<PRigConfigControl>::iterator FindControl(const std::string &name) const;
 
-		std::vector<RigConfigBone> m_bones;
-		std::vector<RigConfigControl> m_controls;
-		std::vector<RigConfigConstraint> m_constraints;
+		std::vector<PRigConfigBone> m_bones;
+		std::vector<PRigConfigControl> m_controls;
+		std::vector<PRigConfigConstraint> m_constraints;
 	};
 };
+std::ostream &operator<<(std::ostream &out,const pragma::ik::RigConfig &config);
 
 #endif

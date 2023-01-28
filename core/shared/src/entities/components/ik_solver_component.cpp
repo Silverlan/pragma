@@ -104,7 +104,7 @@ bool IkSolverComponent::AddIkSolverByChain(const std::string &boneName,uint32_t 
 	{
 		spdlog::debug(
 			"Failed to add ik chain to ik solver {} with boneName={} and chainLength={}: Chain length has to be at least {}.",
-			GetEntity(),boneName,chainLength,minChainLength
+			GetEntity().ToString(),boneName,chainLength,minChainLength
 		);
 		return false;
 	}
@@ -114,7 +114,7 @@ bool IkSolverComponent::AddIkSolverByChain(const std::string &boneName,uint32_t 
 	{
 		spdlog::debug(
 			"Failed to add ik chain to ik solver {} with boneName={} and chainLength={}: Entity has no model.",
-			GetEntity(),boneName,chainLength
+			GetEntity().ToString(),boneName,chainLength
 		);
 		return false;
 	}
@@ -128,7 +128,7 @@ bool IkSolverComponent::AddIkSolverByChain(const std::string &boneName,uint32_t 
 	{
 		spdlog::debug(
 			"Failed to add ik chain to ik solver {} with boneName={} and chainLength={}: Bone not found in skeleton.",
-			GetEntity(),boneName,chainLength
+			GetEntity().ToString(),boneName,chainLength
 		);
 		return false;
 	}
@@ -140,7 +140,7 @@ bool IkSolverComponent::AddIkSolverByChain(const std::string &boneName,uint32_t 
 		{
 			spdlog::debug(
 				"Failed to add ik chain to ik solver {} with boneName={} and chainLength={}: Chain length exceeds number of parents.",
-				GetEntity(),boneName,chainLength
+				GetEntity().ToString(),boneName,chainLength
 			);
 			return false;
 		}
@@ -239,39 +239,39 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 	{
 		spdlog::debug(
 			"Failed to add ik rig to ik solver {}: Entity has no model.",
-			GetEntity()
+			GetEntity().ToString()
 		);
 		return false;
 	}
 	auto &skeleton = mdl->GetSkeleton();
 	for(auto &boneData : rigConfig.GetBones())
 	{
-		auto boneId = skeleton.LookupBone(boneData.name);
+		auto boneId = skeleton.LookupBone(boneData->name);
 		if(boneId == -1)
 		{
 			spdlog::debug(
 				"Failed to add ik rig to ik solver {}: Bone {} does not exist in skeleton.",
-				GetEntity(),boneData.name
+				GetEntity().ToString(),boneData->name
 			);
 			return false;
 		}
 		AddSkeletalBone(boneId);
-		if(boneData.locked)
+		if(boneData->locked)
 			SetBoneLocked(boneId,true);
 	}
 
 	for(auto &controlData : rigConfig.GetControls())
 	{
-		auto boneId = skeleton.LookupBone(controlData.bone);
+		auto boneId = skeleton.LookupBone(controlData->bone);
 		if(boneId == -1)
 		{
 			spdlog::debug(
 				"Failed to add ik rig to ik solver {}: Control bone {} does not exist in skeleton.",
-				GetEntity(),controlData.bone
+				GetEntity().ToString(),controlData->bone
 			);
 			return false;
 		}
-		switch(controlData.type)
+		switch(controlData->type)
 		{
 		case pragma::ik::RigConfigControl::Type::Drag:
 			AddDragControl(boneId);
@@ -284,26 +284,26 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 
 	for(auto &constraintData : rigConfig.GetConstraints())
 	{
-		auto boneId0 = skeleton.LookupBone(constraintData.bone0);
-		auto boneId1 = skeleton.LookupBone(constraintData.bone1);
+		auto boneId0 = skeleton.LookupBone(constraintData->bone0);
+		auto boneId1 = skeleton.LookupBone(constraintData->bone1);
 		if(boneId0 == -1 || boneId1 == -1)
 		{
 			spdlog::debug(
 				"Failed to add ik rig to ik solver {}: Constraint bone {} or {} does not exist in skeleton.",
-				GetEntity(),constraintData.bone0,constraintData.bone1
+				GetEntity().ToString(),constraintData->bone0,constraintData->bone1
 			);
 			return false;
 		}
-		switch(constraintData.type)
+		switch(constraintData->type)
 		{
 		case pragma::ik::RigConfigConstraint::Type::Fixed:
 			AddFixedConstraint(boneId0,boneId1);
 			break;
 		case pragma::ik::RigConfigConstraint::Type::Hinge:
-			AddHingeConstraint(boneId0,boneId1,constraintData.minLimits.p,constraintData.maxLimits.p);
+			AddHingeConstraint(boneId0,boneId1,constraintData->minLimits.p,constraintData->maxLimits.p);
 			break;
 		case pragma::ik::RigConfigConstraint::Type::BallSocket:
-			AddBallSocketConstraint(boneId0,boneId1,constraintData.minLimits,constraintData.maxLimits);
+			AddBallSocketConstraint(boneId0,boneId1,constraintData->minLimits,constraintData->maxLimits);
 			break;
 		}
 	}
@@ -332,7 +332,7 @@ bool IkSolverComponent::GetConstraintBones(
 	{
 		spdlog::debug(
 			"Failed to add fixed constraint to ik solver {}: Bone {} or {} do not exist.",
-			const_cast<BaseEntity&>(GetEntity()),boneId0,boneId1
+			GetEntity().ToString(),boneId0,boneId1
 		);
 		return false;
 	}
@@ -342,7 +342,7 @@ bool IkSolverComponent::GetConstraintBones(
 	{
 		spdlog::debug(
 			"Failed to add fixed constraint to ik solver {}: Bone {} or {} do not exist in solver.",
-			const_cast<BaseEntity&>(GetEntity()),boneId0,boneId1
+			GetEntity().ToString(),boneId0,boneId1
 		);
 		return false;
 	}
@@ -352,13 +352,25 @@ bool IkSolverComponent::GetConstraintBones(
 	{
 		spdlog::debug(
 			"Failed to add fixed constraint to ik solver {}: Bone {} or {} do not exist in reference pose.",
-			const_cast<BaseEntity&>(GetEntity()),boneId0,boneId1
+			GetEntity().ToString(),boneId0,boneId1
 		);
 		return false;
 	}
 	pose0 = *refPose0;
 	pose1 = *refPose1;
 	return true;
+}
+static void clamp_angles(float &min,float &max)
+{
+	// If the span range is too small it can cause instability,
+	// so we'll force a minimum span angle
+	constexpr umath::Degree minSpan = 0.5f;
+	if(umath::abs(max -min) < minSpan)
+	{
+		auto baseAngle = (min +max) /2.f;
+		min = baseAngle -minSpan;
+		max = baseAngle +minSpan;
+	}
 }
 void IkSolverComponent::AddFixedConstraint(BoneId boneId0,BoneId boneId1)
 {
@@ -393,6 +405,7 @@ void IkSolverComponent::AddHingeConstraint(BoneId boneId0,BoneId boneId1,umath::
 
 	// The IK system only allows us to specify a general swing limit (in any direction). Since we want to be able to specify it in each
 	// direction independently, we have to shift the rotation axes accordingly.
+	clamp_angles(minAngle,maxAngle);
 	auto rotBone1WithOffset = rotBone1 *uquat::create(EulerAngles(-(maxAngle +minAngle),0,0));
 
 	// BallSocket is required to ensure the distance and rotation to the parent is locked
@@ -436,12 +449,17 @@ void IkSolverComponent::AddBallSocketConstraint(BoneId boneId0,BoneId boneId1,co
 	umath::ScaledTransform refPose0,refPose1;
 	if(!GetConstraintBones(boneId0,boneId1,&bone0,&bone1,refPose0,refPose1))
 		return;
+	auto effectiveMinLimits = minLimits;
+	auto effectiveMaxLimits = maxLimits;
+	for(uint8_t i=0;i<3;++i)
+		clamp_angles(effectiveMinLimits[i],effectiveMaxLimits[i]);
+
 	auto &rotBone0 = refPose0.GetRotation();
 	auto &rotBone1 = refPose1.GetRotation();
 
 	// The IK system only allows us to specify a general swing limit (in any direction). Since we want to be able to specify it in each
 	// direction independently, we have to shift the rotation axes accordingly.
-	auto rotBone1WithOffset = rotBone1 *uquat::create(EulerAngles(-(maxLimits.y +minLimits.y),-(maxLimits.p +minLimits.p),-(maxLimits.r +minLimits.r)));
+	auto rotBone1WithOffset = rotBone1 *uquat::create(EulerAngles(-(effectiveMaxLimits.y +effectiveMinLimits.y),-(effectiveMaxLimits.p +effectiveMinLimits.p),-(effectiveMaxLimits.r +effectiveMinLimits.r)));
 
 	// BallSocket is required to ensure the distance and rotation to the parent is locked
 	m_ikSolver->AddBallSocketJoint(*bone0,*bone1,bone1->GetPos());
@@ -450,7 +468,7 @@ void IkSolverComponent::AddBallSocketConstraint(BoneId boneId0,BoneId boneId1,co
 	//self.m_solver:AddRevoluteJoint(bone0,bone1,rotBone0:GetUp()) -- Test
 
 	// Apply the swing limit
-	//self.m_solver:AddSwingLimit(bone0,bone1,rotBone1WithOffset:GetForward(),rotBone1:GetForward(),math.rad(maxLimits.y -minLimits.y)):SetRigidity(16)
+	//self.m_solver:AddSwingLimit(bone0,bone1,rotBone1WithOffset:GetForward(),rotBone1:GetForward(),math.rad(effectiveMaxLimits.y -effectiveMinLimits.y)):SetRigidity(16)
 	//self.m_solver:AddSwingLimit(bone0,bone1,rotBone1:GetForward(),rotBone1:GetForward(),math.rad(45)):SetRigidity(16)
 	GetEntity().GetNetworkState()->GetGameState()->DrawLine(
 		(GetReferenceBonePose(boneId1))->GetOrigin(),(GetReferenceBonePose(boneId1))->GetOrigin() +uquat::up(rotBone1) *-200.f,Color::Red,12.f
@@ -459,14 +477,14 @@ void IkSolverComponent::AddBallSocketConstraint(BoneId boneId0,BoneId boneId1,co
 		*bone0,*bone1,
 		uquat::forward(rotBone1WithOffset),uquat::forward(rotBone1),
 		uquat::up(rotBone1WithOffset),
-		umath::deg_to_rad(maxLimits.p -minLimits.p),umath::deg_to_rad(maxLimits.y -minLimits.y)
+		umath::deg_to_rad(effectiveMaxLimits.p -effectiveMinLimits.p),umath::deg_to_rad(effectiveMaxLimits.y -effectiveMinLimits.y)
 	);
 	ellipseSwingLimit.SetRigidity(1'000);
 
 	auto &twistLimit = m_ikSolver->AddTwistLimit(
 		*bone0,*bone1,
 		uquat::forward(rotBone1WithOffset),uquat::forward(rotBone1),
-		umath::deg_to_rad(maxLimits.r -minLimits.r)
+		umath::deg_to_rad(effectiveMaxLimits.r -effectiveMinLimits.r)
 	);
 	twistLimit.SetRigidity(1'000);
 
@@ -475,14 +493,14 @@ void IkSolverComponent::AddBallSocketConstraint(BoneId boneId0,BoneId boneId1,co
 	/*local pose0 = self:GetReferenceBonePose(boneId0)
 	local pose1 = self:GetReferenceBonePose(boneId1)
 	local rot = pose0:GetRotation()
-	local angOffset = (maxLimits -minLimits) /2.0
+	local angOffset = (effectiveMaxLimits -effectiveMinLimits) /2.0
 	rot = rot *angOffset:ToQuaternion()
 
 	local swingSpan = math.max(
-		maxLimits.p -minLimits.p,
-		maxLimits.y -minLimits.y
+		effectiveMaxLimits.p -effectiveMinLimits.p,
+		effectiveMaxLimits.y -effectiveMinLimits.y
 	)
-	local twistSpan = maxLimits.r -minLimits.r
+	local twistSpan = effectiveMaxLimits.r -effectiveMinLimits.r
 
 	local bone0 = self.m_solver:GetBone(self.m_boneIdToRigConfigBoneId[boneId0])
 	local bone1 = self.m_solver:GetBone(self.m_boneIdToRigConfigBoneId[boneId1])
@@ -538,7 +556,7 @@ void IkSolverComponent::AddControl(BoneId boneId,bool translation,bool rotation)
 	{
 		spdlog::debug(
 			"Failed to add control to ik solver {}: Entity has no model.",
-			GetEntity()
+			GetEntity().ToString()
 		);
 		return;
 	}
@@ -548,7 +566,7 @@ void IkSolverComponent::AddControl(BoneId boneId,bool translation,bool rotation)
 	{
 		spdlog::debug(
 			"Failed to add control to ik solver {}: Control bone {} does not exist in skeleton.",
-			GetEntity(),boneId
+			GetEntity().ToString(),boneId
 		);
 		return;
 	}
@@ -557,7 +575,7 @@ void IkSolverComponent::AddControl(BoneId boneId,bool translation,bool rotation)
 	{
 		spdlog::debug(
 			"Failed to add control to ik solver {}: Control bone {} does not exist in ik rig.",
-			GetEntity(),boneId
+			GetEntity().ToString(),boneId
 		);
 		return;
 	}
@@ -566,7 +584,7 @@ void IkSolverComponent::AddControl(BoneId boneId,bool translation,bool rotation)
 	{
 		spdlog::debug(
 			"Failed to add control to ik solver {}: Control bone {} does not exist in ik rig.",
-			GetEntity(),boneId
+			GetEntity().ToString(),boneId
 		);
 		return;
 	}
@@ -726,6 +744,7 @@ pragma::ik::Bone *IkSolverComponent::AddBone(BoneId boneId,const umath::Transfor
 	m_ikBoneIdToBoneId[rigConfigBoneId] = boneId;
 	return rigConfigBone;
 }
+void IkSolverComponent::ResetIkRig() {InitializeSolver();}
 void IkSolverComponent::Solve()
 {
 	InvokeEventCallbacks(EVENT_UPDATE_IK);

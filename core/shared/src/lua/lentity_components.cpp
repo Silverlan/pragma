@@ -433,17 +433,21 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defIK];
 
 	auto defRigConfig = luabind::class_<pragma::ik::RigConfig>("RigConfig");
+	defRigConfig.def(luabind::constructor<>());
+	defRigConfig.def(luabind::tostring(luabind::self));
 	defRigConfig.scope[luabind::def("load",&pragma::ik::RigConfig::load)];
 	defRigConfig.scope[luabind::def("load_from_udm_data",&pragma::ik::RigConfig::load_from_udm_data)];
 	defRigConfig.scope[luabind::def("get_supported_extensions",&pragma::ik::RigConfig::get_supported_extensions)];
 	defRigConfig.def("DebugPrint",&pragma::ik::RigConfig::DebugPrint);
 	defRigConfig.def("ToUdmData",&pragma::ik::RigConfig::ToUdmData);
 	defRigConfig.def("AddBone",&pragma::ik::RigConfig::AddBone);
-	defRigConfig.def("RemoveBone",&pragma::ik::RigConfig::RemoveBone);
+	defRigConfig.def("RemoveBone",static_cast<void(pragma::ik::RigConfig::*)(const std::string&)>(&pragma::ik::RigConfig::RemoveBone));
+	defRigConfig.def("RemoveControl",static_cast<void(pragma::ik::RigConfig::*)(const pragma::ik::RigConfigControl&)>(&pragma::ik::RigConfig::RemoveControl));
+	defRigConfig.def("RemoveConstraint",static_cast<void(pragma::ik::RigConfig::*)(const pragma::ik::RigConfigConstraint&)>(&pragma::ik::RigConfig::RemoveConstraint));
+	defRigConfig.def("RemoveBone",static_cast<void(pragma::ik::RigConfig::*)(const pragma::ik::RigConfigBone&)>(&pragma::ik::RigConfig::RemoveBone));
 	defRigConfig.def("HasBone",&pragma::ik::RigConfig::HasBone);
 	defRigConfig.def("IsBoneLocked",&pragma::ik::RigConfig::IsBoneLocked);
 	defRigConfig.def("SetBoneLocked",&pragma::ik::RigConfig::SetBoneLocked);
-	defRigConfig.def("RemoveControl",&pragma::ik::RigConfig::RemoveControl);
 	defRigConfig.def("HasControl",&pragma::ik::RigConfig::HasControl);
 	defRigConfig.def("AddControl",&pragma::ik::RigConfig::AddControl);
 	defRigConfig.def("RemoveConstraints",&pragma::ik::RigConfig::RemoveConstraints);
@@ -497,6 +501,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defIkSolver.def("GetIkBoneId",&pragma::IkSolverComponent::GetIkBoneId);
 	defIkSolver.def("GetSkeletalBoneId",&pragma::IkSolverComponent::GetSkeletalBoneId);
 	defIkSolver.def("Solve",&pragma::IkSolverComponent::Solve);
+	defIkSolver.def("ResetIkRig",&pragma::IkSolverComponent::ResetIkRig);
 	defIkSolver.scope[defRigConfig];
 	entsMod[defIkSolver];
 

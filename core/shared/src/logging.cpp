@@ -89,6 +89,15 @@ public:
 			dest.append(prefix,prefix +prefixLen);
 			break;
 		}
+		case spdlog::level::level_enum::info:
+		{
+			constexpr const char *prefix = "[info] ";
+			constexpr uint32_t prefixLen = 7;
+			msg.color_range_start = dest.size() +1;
+			msg.color_range_end = dest.size() +prefixLen -2;
+			dest.append(prefix,prefix +prefixLen);
+			break;
+		}
 		}
     }
 

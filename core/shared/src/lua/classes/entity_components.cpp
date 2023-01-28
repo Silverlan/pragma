@@ -366,6 +366,26 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 		get_dynamic_member_ids(component,memberIndices);
 		return memberIndices;
 	});
+	entityComponentDef.def("InvokeElementMemberChangeCallback",+[](pragma::BaseEntityComponent &component,const std::string &memberName) {
+		auto *info = component.FindMemberInfo(memberName);
+		if(!info || info->type != ents::EntityMemberType::Element)
+			return;
+		ents::Element el;
+		info->getterFunction(*info,component,&el);
+		// The property will not actually be changed, but this will invoke the setter-function,
+		// which acts as a change callback.
+		info->setterFunction(*info,component,&el);
+	});
+	entityComponentDef.def("InvokeElementMemberChangeCallback",+[](pragma::BaseEntityComponent &component,uint32_t memberIndex) {
+		auto *info = component.GetMemberInfo(memberIndex);
+		if(!info || info->type != ents::EntityMemberType::Element)
+			return;
+		ents::Element el;
+		info->getterFunction(*info,component,&el);
+		// The property will not actually be changed, but this will invoke the setter-function,
+		// which acts as a change callback.
+		info->setterFunction(*info,component,&el);
+	});
 	entityComponentDef.def("GetMemberValue",&get_member_value);
 	entityComponentDef.def("GetMemberValue",+[](lua_State *l,pragma::BaseEntityComponent &component,const std::string &memberName) -> std::optional<Lua::udm_type> {
 		auto *info = component.FindMemberInfo(memberName);

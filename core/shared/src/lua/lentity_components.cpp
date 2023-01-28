@@ -12,6 +12,7 @@
 #include "pragma/lua/sh_lua_component_wrapper.hpp"
 #include "pragma/lua/l_entity_handles.hpp"
 #include "pragma/lua/lua_entity_component.hpp"
+#include "pragma/lua/libraries/lfile.h"
 #include "pragma/lua/classes/ldef_physobj.h"
 #include "pragma/lua/classes/ldef_entity.h"
 #include "pragma/lua/classes/lphysics.h"
@@ -441,6 +442,9 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defRigConfig.def("DebugPrint",&pragma::ik::RigConfig::DebugPrint);
 	defRigConfig.def("ToUdmData",&pragma::ik::RigConfig::ToUdmData);
 	defRigConfig.def("AddBone",&pragma::ik::RigConfig::AddBone);
+	defRigConfig.def("GetBones",&pragma::ik::RigConfig::GetBones);
+	defRigConfig.def("GetConstraints",&pragma::ik::RigConfig::GetConstraints);
+	defRigConfig.def("GetControls",&pragma::ik::RigConfig::GetControls);
 	defRigConfig.def("RemoveBone",static_cast<void(pragma::ik::RigConfig::*)(const std::string&)>(&pragma::ik::RigConfig::RemoveBone));
 	defRigConfig.def("RemoveControl",static_cast<void(pragma::ik::RigConfig::*)(const pragma::ik::RigConfigControl&)>(&pragma::ik::RigConfig::RemoveControl));
 	defRigConfig.def("RemoveConstraint",static_cast<void(pragma::ik::RigConfig::*)(const pragma::ik::RigConfigConstraint&)>(&pragma::ik::RigConfig::RemoveConstraint));
@@ -454,7 +458,15 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defRigConfig.def("AddFixedConstraint",&pragma::ik::RigConfig::AddFixedConstraint);
 	defRigConfig.def("AddHingeConstraint",&pragma::ik::RigConfig::AddHingeConstraint);
 	defRigConfig.def("AddBallSocketConstraint",&pragma::ik::RigConfig::AddBallSocketConstraint);
-	defRigConfig.def("Save",&pragma::ik::RigConfig::Save);
+	defRigConfig.def("Save",+[](lua_State *l,pragma::ik::RigConfig &rigConfig,const std::string &fileName) -> std::pair<bool,std::optional<std::string>> {
+		auto fname = fileName;
+		if(Lua::file::validate_write_operation(l,fname) == false)
+			return std::pair<bool,std::optional<std::string>>{false,"Invalid write location!"};
+		auto res = rigConfig.Save(fname);
+		if(!res)
+			return std::pair<bool,std::optional<std::string>>{false,"Unknown error"};
+		return std::pair<bool,std::optional<std::string>>{true,{}};
+	});
 	
 	auto defRigBone = luabind::class_<pragma::ik::RigConfigBone>("Bone");
 	defRigBone.def_readwrite("locked",&pragma::ik::RigConfigBone::locked);

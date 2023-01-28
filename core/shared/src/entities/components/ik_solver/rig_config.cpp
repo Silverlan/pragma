@@ -299,7 +299,8 @@ bool pragma::ik::RigConfig::Save(const std::string &fileName)
 	auto assetData = udmData->GetAssetData().GetData();
 	ToUdmData(assetData);
 
-	if(filemanager::create_path(filePath.GetString()) == false)
+	std::string path {filePath.GetPath()};
+	if(filemanager::create_path(path) == false)
 	{
 		spdlog::error("Failed to create path '{}' for ik rig.",filePath.GetString());
 		return false;

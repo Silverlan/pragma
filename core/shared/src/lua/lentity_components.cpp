@@ -185,6 +185,7 @@ static std::string to_string(Game &game,const pragma::EntityUComponentMemberRef 
 
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma,BaseEntityComponent);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma,ValueDriver);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma,pragma::ik::RigConfig);
 
 void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {

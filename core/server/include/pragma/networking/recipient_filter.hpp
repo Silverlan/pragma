@@ -10,30 +10,23 @@
 #include "pragma/serverdefinitions.h"
 #include <functional>
 
-namespace pragma::networking
-{
+namespace pragma::networking {
 	class IServerClient;
-	class DLLSERVER ClientRecipientFilter
-	{
-	public:
-		enum class FilterType : uint8_t
-		{
-			Include = 0,
-			Exclude
-		};
+	class DLLSERVER ClientRecipientFilter {
+	  public:
+		enum class FilterType : uint8_t { Include = 0, Exclude };
 
-		ClientRecipientFilter(const std::function<bool(const IServerClient&)> &filter);
-		ClientRecipientFilter(const IServerClient &client,FilterType filterType=FilterType::Include);
+		ClientRecipientFilter(const std::function<bool(const IServerClient &)> &filter);
+		ClientRecipientFilter(const IServerClient &client, FilterType filterType = FilterType::Include);
 		ClientRecipientFilter();
-		bool operator()(const IServerClient&) const;
-	private:
-		std::function<bool(const IServerClient&)> m_filter = nullptr;
+		bool operator()(const IServerClient &) const;
+	  private:
+		std::function<bool(const IServerClient &)> m_filter = nullptr;
 	};
 
-	class DLLSERVER TargetRecipientFilter
-	{
-	public:
-		TargetRecipientFilter()=default;
+	class DLLSERVER TargetRecipientFilter {
+	  public:
+		TargetRecipientFilter() = default;
 		const std::vector<util::WeakHandle<const IServerClient>> &GetRecipients() const;
 		void AddRecipient(const IServerClient &client);
 		void RemoveRecipient(const IServerClient &client);
@@ -43,7 +36,7 @@ namespace pragma::networking
 		ClientRecipientFilter::FilterType GetFilterType() const;
 
 		operator ClientRecipientFilter() const;
-	private:
+	  private:
 		std::vector<util::WeakHandle<const IServerClient>> m_recipients = {};
 		ClientRecipientFilter::FilterType m_filterType = ClientRecipientFilter::FilterType::Include;
 	};

@@ -35,52 +35,49 @@
 extern DLLSERVER ServerState *server;
 extern DLLSERVER SGame *s_game;
 extern DLLNETWORK Engine *engine;
-DLLSERVER void NET_sv_disconnect(pragma::networking::IServerClient &session,NetPacket packet)
+DLLSERVER void NET_sv_disconnect(pragma::networking::IServerClient &session, NetPacket packet)
 {
 #ifdef DEBUG_SOCKET
-	Con::csv<<"Client '"<<session.GetIdentifier()<<"' has disconnected."<<Con::endl;
+	Con::csv << "Client '" << session.GetIdentifier() << "' has disconnected." << Con::endl;
 #endif
 	server->DropClient(session);
 }
 
-DLLSERVER void NET_sv_userinput(pragma::networking::IServerClient &session,NetPacket packet)
-{
-	server->ReceiveUserInput(session,packet);
-}
+DLLSERVER void NET_sv_userinput(pragma::networking::IServerClient &session, NetPacket packet) { server->ReceiveUserInput(session, packet); }
 
-DLLSERVER void NET_sv_ent_event(pragma::networking::IServerClient &session,NetPacket packet)
+DLLSERVER void NET_sv_ent_event(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!server->IsGameActive())
 		return;
 	auto *pl = s_game->GetPlayer(session);
 	if(pl == nullptr)
 		return;
-	packet->SetOffset(packet->GetDataSize() -sizeof(UInt32) -sizeof(unsigned int));
-	auto *ent = static_cast<SBaseEntity*>(nwm::read_entity(packet));
+	packet->SetOffset(packet->GetDataSize() - sizeof(UInt32) - sizeof(unsigned int));
+	auto *ent = static_cast<SBaseEntity *>(nwm::read_entity(packet));
 	if(ent == nullptr)
 		return;
 	auto eventId = packet->Read<UInt32>();
 	packet->SetOffset(0);
-	ent->ReceiveNetEvent(*pl,eventId,packet);
+	ent->ReceiveNetEvent(*pl, eventId, packet);
 }
 
-DLLSERVER void NET_sv_clientinfo(pragma::networking::IServerClient &session,NetPacket packet)
+DLLSERVER void NET_sv_clientinfo(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!server->IsGameActive())
 		return;
 	SGame *game = server->GetGameState();
-	game->ReceiveUserInfo(session,packet);
+	game->ReceiveUserInfo(session, packet);
 }
 
-void NET_sv_game_ready(pragma::networking::IServerClient &session,NetPacket packet)
+void NET_sv_game_ready(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!server->IsGameActive())
 		return;
 	auto *game = server->GetGameState();
-	game->ReceiveGameReady(session,packet);
+	game->ReceiveGameReady(session, packet);
 }
 
-DLLSERVER void NET_sv_cmd_setpos(pragma::networking::IServerClient &session,NetPacket packet)
+DLLSERVER void NET_sv_cmd_setpos(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(server->CheatsEnabled() == false)
 		return;
@@ -96,7 +93,7 @@ DLLSERVER void NET_sv_cmd_setpos(pragma::networking::IServerClient &session,NetP
 	pTrComponent->SetPosition(pos);
 }
 
-DLLSERVER void NET_sv_cmd_call(pragma::networking::IServerClient &session,NetPacket packet)
+DLLSERVER void NET_sv_cmd_call(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	auto *pl = s_game->GetPlayer(session);
 	std::string cmd = packet->ReadString();
@@ -104,16 +101,16 @@ DLLSERVER void NET_sv_cmd_call(pragma::networking::IServerClient &session,NetPac
 	auto magnitude = packet->Read<float>();
 	unsigned char argc = packet->Read<unsigned char>();
 	std::vector<std::string> argv;
-	for(unsigned char i=0;i<argc;i++)
+	for(unsigned char i = 0; i < argc; i++)
 		argv.push_back(packet->ReadString());
 
 	auto bActionCmd = (cmd.empty() == false && cmd.front() == '+') ? true : false;
 	auto bReleased = (pressState == KeyState::Release) ? true : false;
-	auto r = server->RunConsoleCommand(cmd,argv,pl,pressState,magnitude,[bActionCmd,bReleased](ConConf *cf,float &magnitude) -> bool {
+	auto r = server->RunConsoleCommand(cmd, argv, pl, pressState, magnitude, [bActionCmd, bReleased](ConConf *cf, float &magnitude) -> bool {
 		if(bReleased == false || bActionCmd == true)
 			return true;
 		auto flags = cf->GetFlags();
-		if((flags &(ConVarFlags::JoystickAxisContinuous | ConVarFlags::JoystickAxisSingle)) == ConVarFlags::None)
+		if((flags & (ConVarFlags::JoystickAxisContinuous | ConVarFlags::JoystickAxisSingle)) == ConVarFlags::None)
 			return false;
 		return true;
 	});
@@ -123,58 +120,52 @@ DLLSERVER void NET_sv_cmd_call(pragma::networking::IServerClient &session,NetPac
 	auto *cv = server->GetConVar(cmd);
 	if(r == false || cv == nullptr)
 		p->Write<uint8_t>(static_cast<uint8_t>(0));
-	else
-	{
-		if(cv->GetType() == ConType::Var)
-		{
+	else {
+		if(cv->GetType() == ConType::Var) {
 			p->Write<uint8_t>(2);
-			p->WriteString(static_cast<ConVar*>(cv)->GetString());
+			p->WriteString(static_cast<ConVar *>(cv)->GetString());
 		}
-		else
-		{
+		else {
 			p->Write<uint8_t>(1);
 			p->WriteString("");
 		}
 	}
-	server->SendPacket("cmd_call_response",p,pragma::networking::Protocol::SlowReliable,session);
+	server->SendPacket("cmd_call_response", p, pragma::networking::Protocol::SlowReliable, session);
 }
 
-DLLSERVER void NET_sv_rcon(pragma::networking::IServerClient &session,NetPacket packet)
+DLLSERVER void NET_sv_rcon(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!server->IsGameActive())
 		return;
 	std::string passCl = packet->ReadString();
 	std::string cvar = packet->ReadString();
 	std::string pass = server->GetConVarString("rcon_password");
-	if(pass.empty() || pass != passCl)
-	{
+	if(pass.empty() || pass != passCl) {
 		/*Game *game = server->GetGameState();
 		Player *pl = game->GetPlayer(session);
 		if(pl == NULL)
 			return;
 		pl->PrintMessage("Bad RCON password",MESSAGE::PRINTCONSOLE);*/
-		Con::crit<<"Incorrect RCON Password! ("<<passCl<<")"<<Con::endl; // WEAVETODO
+		Con::crit << "Incorrect RCON Password! (" << passCl << ")" << Con::endl; // WEAVETODO
 		return;
 	}
-	Con::csv<<"Remote console input from "<<session.GetIdentifier()<<": '"<<cvar<<"'"<<Con::endl;
+	Con::csv << "Remote console input from " << session.GetIdentifier() << ": '" << cvar << "'" << Con::endl;
 	engine->ConsoleInput(cvar.c_str());
 }
 
-DLLSERVER void NET_sv_serverinfo_request(pragma::networking::IServerClient &session,NetPacket packet)
+DLLSERVER void NET_sv_serverinfo_request(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	std::string password = packet->ReadString();
 	std::string passSv = server->GetConVarString("sv_password").c_str();
-	if(passSv.empty() == false && passSv != password && session.IsListenServerHost() == false)
-	{
+	if(passSv.empty() == false && passSv != password && session.IsListenServerHost() == false) {
 		NetPacket p;
-		server->SendPacket("invalidpassword",p,pragma::networking::Protocol::SlowReliable,session);
+		server->SendPacket("invalidpassword", p, pragma::networking::Protocol::SlowReliable, session);
 		server->DropClient(session);
 		return;
 	}
 	NetPacket p;
 	auto *sv = server->GetServer();
-	if(sv && sv->GetHostPort().has_value())
-	{
+	if(sv && sv->GetHostPort().has_value()) {
 		auto port = sv->GetHostPort();
 		p->Write<unsigned char>(1);
 		p->Write<unsigned short>(*port);
@@ -183,58 +174,51 @@ DLLSERVER void NET_sv_serverinfo_request(pragma::networking::IServerClient &sess
 		p->Write<unsigned char>((unsigned char)(0));
 
 	p->Write<bool>(server->IsClientAuthenticationRequired());
-	server->SendPacket("serverinfo",p,pragma::networking::Protocol::SlowReliable,session);
+	server->SendPacket("serverinfo", p, pragma::networking::Protocol::SlowReliable, session);
 }
 
-bool ServerState::IsClientAuthenticationRequired() const
-{
-	return IsMultiPlayer() && server->GetConVarBool("sv_require_authentication");
-}
+bool ServerState::IsClientAuthenticationRequired() const { return IsMultiPlayer() && server->GetConVarBool("sv_require_authentication"); }
 
-DLLSERVER void NET_sv_authenticate(pragma::networking::IServerClient &session,NetPacket packet)
+DLLSERVER void NET_sv_authenticate(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	auto hasAuth = packet->Read<bool>();
-	if(server->IsClientAuthenticationRequired())
-	{
-		if(hasAuth == false)
-		{
-			Con::cerr<<"Unable to authenticate client '"<<session.GetIdentifier()<<"': Client did not transmit authentication information!"<<Con::endl;
-			server->DropClient(session,pragma::networking::DropReason::AuthenticationFailed);
+	if(server->IsClientAuthenticationRequired()) {
+		if(hasAuth == false) {
+			Con::cerr << "Unable to authenticate client '" << session.GetIdentifier() << "': Client did not transmit authentication information!" << Con::endl;
+			server->DropClient(session, pragma::networking::DropReason::AuthenticationFailed);
 			return;
 		}
 		auto *reg = server->GetMasterServerRegistration();
-		if(reg == nullptr)
-		{
-			Con::cerr<<"Unable to authenticate client '"<<session.GetIdentifier()<<"': Server is not connected to master server!"<<Con::endl;
-			server->DropClient(session,pragma::networking::DropReason::AuthenticationFailed);
+		if(reg == nullptr) {
+			Con::cerr << "Unable to authenticate client '" << session.GetIdentifier() << "': Server is not connected to master server!" << Con::endl;
+			server->DropClient(session, pragma::networking::DropReason::AuthenticationFailed);
 			return;
 		}
 		auto steamId = packet->Read<uint64_t>();
 		auto lenToken = packet->Read<uint16_t>();
 		std::vector<char> token;
 		token.resize(lenToken);
-		packet->Read(token.data(),token.size() *sizeof(token.front()));
+		packet->Read(token.data(), token.size() * sizeof(token.front()));
 
 		std::string err;
-		auto libSteamworks = server->InitializeLibrary("steamworks/pr_steamworks",&err);
-		if(libSteamworks == nullptr)
-		{
-			Con::cerr<<"Unable to authenticate client with steam id '"<<steamId<<"': Steamworks module could not be loaded: "<<err<<Con::endl;
-			server->DropClient(session,pragma::networking::DropReason::AuthenticationFailed);
+		auto libSteamworks = server->InitializeLibrary("steamworks/pr_steamworks", &err);
+		if(libSteamworks == nullptr) {
+			Con::cerr << "Unable to authenticate client with steam id '" << steamId << "': Steamworks module could not be loaded: " << err << Con::endl;
+			server->DropClient(session, pragma::networking::DropReason::AuthenticationFailed);
 			reg->DropClient(steamId);
 			return;
 		}
 		session.SetSteamId(steamId);
 		// Authentication will end with 'OnClientAuthenticated' callback,
 		// which will handle the rest
-		reg->AuthenticateAndAddClient(steamId,token,"Player");
+		reg->AuthenticateAndAddClient(steamId, token, "Player");
 		return;
 	}
 	// No authentication required; Continue immediately
-	server->OnClientAuthenticated(session,{});
+	server->OnClientAuthenticated(session, {});
 }
 
-DLLSERVER void NET_sv_cvar_set(pragma::networking::IServerClient &session,NetPacket packet)
+DLLSERVER void NET_sv_cvar_set(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!server->IsGameActive())
 		return;
@@ -244,13 +228,13 @@ DLLSERVER void NET_sv_cvar_set(pragma::networking::IServerClient &session,NetPac
 		return;
 	std::string cvar = packet->ReadString();
 	std::string val = packet->ReadString();
-	std::unordered_map<std::string,std::string> *cvars;
+	std::unordered_map<std::string, std::string> *cvars;
 	pl->GetConVars(&cvars);
 	(*cvars)[cvar] = val;
-	game->OnClientConVarChanged(*pl,cvar,val);
+	game->OnClientConVarChanged(*pl, cvar, val);
 }
 
-DLLSERVER void NET_sv_noclip(pragma::networking::IServerClient &session,NetPacket packet)
+DLLSERVER void NET_sv_noclip(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!server->CheatsEnabled())
 		return;
@@ -261,52 +245,50 @@ DLLSERVER void NET_sv_noclip(pragma::networking::IServerClient &session,NetPacke
 	if(pPhysComponent == nullptr)
 		return;
 	auto bNoclip = pPhysComponent->GetMoveType() != MOVETYPE::NOCLIP;
-	if(bNoclip == false)
-	{
+	if(bNoclip == false) {
 		pPhysComponent->SetMoveType(MOVETYPE::WALK);
 		pPhysComponent->SetCollisionFilterGroup(CollisionMask::Player);
 	}
-	else
-	{
+	else {
 		pPhysComponent->SetMoveType(MOVETYPE::NOCLIP);
 		pPhysComponent->SetCollisionFilterGroup(CollisionMask::NoCollision);
 		//pl->SetCollisionsEnabled(false); // Bugged due to CCD
 	}
 	NetPacket p;
-	nwm::write_entity(p,&pl->GetEntity());
+	nwm::write_entity(p, &pl->GetEntity());
 	p->Write<bool>(bNoclip);
-	server->SendPacket("pl_toggle_noclip",p,pragma::networking::Protocol::SlowReliable);
+	server->SendPacket("pl_toggle_noclip", p, pragma::networking::Protocol::SlowReliable);
 }
 
-void NET_sv_notarget(pragma::networking::IServerClient &session,NetPacket packet)
+void NET_sv_notarget(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!server->CheatsEnabled())
 		return;
 	auto *pl = server->GetPlayer(session);
 	if(pl == nullptr)
 		return;
-	auto *charComponent = static_cast<pragma::SCharacterComponent*>(pl->GetEntity().GetCharacterComponent().get());
+	auto *charComponent = static_cast<pragma::SCharacterComponent *>(pl->GetEntity().GetCharacterComponent().get());
 	if(charComponent == nullptr)
 		return;
 	charComponent->SetNoTarget(!charComponent->GetNoTarget());
-	pl->PrintMessage(std::string("Notarget turned ") +((charComponent->GetNoTarget() == true) ? "ON" : "OFF"),MESSAGE::PRINTCONSOLE);
+	pl->PrintMessage(std::string("Notarget turned ") + ((charComponent->GetNoTarget() == true) ? "ON" : "OFF"), MESSAGE::PRINTCONSOLE);
 }
 
-void NET_sv_godmode(pragma::networking::IServerClient &session,NetPacket packet)
+void NET_sv_godmode(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!server->CheatsEnabled())
 		return;
 	auto *pl = server->GetPlayer(session);
 	if(pl == nullptr)
 		return;
-	auto *charComponent = static_cast<pragma::SCharacterComponent*>(pl->GetEntity().GetCharacterComponent().get());
+	auto *charComponent = static_cast<pragma::SCharacterComponent *>(pl->GetEntity().GetCharacterComponent().get());
 	if(charComponent == nullptr)
 		return;
 	charComponent->SetGodMode(!charComponent->GetGodMode());
-	pl->PrintMessage(std::string("God mode turned ") +((charComponent->GetGodMode() == true) ? "ON" : "OFF"),MESSAGE::PRINTCONSOLE);
+	pl->PrintMessage(std::string("God mode turned ") + ((charComponent->GetGodMode() == true) ? "ON" : "OFF"), MESSAGE::PRINTCONSOLE);
 }
 
-void NET_sv_suicide(pragma::networking::IServerClient &session,NetPacket packet)
+void NET_sv_suicide(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!server->CheatsEnabled())
 		return;
@@ -319,7 +301,7 @@ void NET_sv_suicide(pragma::networking::IServerClient &session,NetPacket packet)
 	charComponent->Kill();
 }
 
-void NET_sv_hurtme(pragma::networking::IServerClient &session,NetPacket packet)
+void NET_sv_hurtme(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!server->CheatsEnabled())
 		return;
@@ -339,36 +321,36 @@ void NET_sv_hurtme(pragma::networking::IServerClient &session,NetPacket packet)
 	pDamageableComponent->TakeDamage(dmgInfo);
 }
 
-void NET_sv_weapon_next(pragma::networking::IServerClient &session,NetPacket packet)
+void NET_sv_weapon_next(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	auto *pl = server->GetPlayer(session);
 	if(pl == nullptr)
 		return;
-	auto sCharComponent = static_cast<pragma::SCharacterComponent*>(pl->GetEntity().GetCharacterComponent().get());
+	auto sCharComponent = static_cast<pragma::SCharacterComponent *>(pl->GetEntity().GetCharacterComponent().get());
 	if(sCharComponent == nullptr)
 		return;
 	sCharComponent->SelectNextWeapon();
 }
 
-void NET_sv_weapon_previous(pragma::networking::IServerClient &session,NetPacket packet)
+void NET_sv_weapon_previous(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	auto *pl = server->GetPlayer(session);
 	if(pl == nullptr)
 		return;
-	auto sCharComponent = static_cast<pragma::SCharacterComponent*>(pl->GetEntity().GetCharacterComponent().get());
+	auto sCharComponent = static_cast<pragma::SCharacterComponent *>(pl->GetEntity().GetCharacterComponent().get());
 	if(sCharComponent == nullptr)
 		return;
 	sCharComponent->SelectPreviousWeapon();
 }
 
-void NET_sv_give_weapon(pragma::networking::IServerClient &session,NetPacket packet)
+void NET_sv_give_weapon(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!server->CheatsEnabled() || s_game == nullptr)
 		return;
 	auto *pl = server->GetPlayer(session);
 	if(pl == nullptr)
 		return;
-	auto sCharComponent = static_cast<pragma::SCharacterComponent*>(pl->GetEntity().GetCharacterComponent().get());
+	auto sCharComponent = static_cast<pragma::SCharacterComponent *>(pl->GetEntity().GetCharacterComponent().get());
 	if(sCharComponent == nullptr)
 		return;
 	auto weaponClass = packet->ReadString();
@@ -378,20 +360,20 @@ void NET_sv_give_weapon(pragma::networking::IServerClient &session,NetPacket pac
 	sCharComponent->DeployWeapon(*wep);
 }
 
-void NET_sv_strip_weapons(pragma::networking::IServerClient &session,NetPacket packet)
+void NET_sv_strip_weapons(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!server->CheatsEnabled() || s_game == nullptr)
 		return;
 	auto *pl = server->GetPlayer(session);
 	if(pl == nullptr)
 		return;
-	auto sCharComponent = static_cast<pragma::SCharacterComponent*>(pl->GetEntity().GetCharacterComponent().get());
+	auto sCharComponent = static_cast<pragma::SCharacterComponent *>(pl->GetEntity().GetCharacterComponent().get());
 	if(sCharComponent == nullptr)
 		return;
 	sCharComponent->RemoveWeapons();
 }
 
-void NET_sv_give_ammo(pragma::networking::IServerClient &session,NetPacket packet)
+void NET_sv_give_ammo(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!server->CheatsEnabled() || s_game == nullptr)
 		return;
@@ -400,17 +382,17 @@ void NET_sv_give_ammo(pragma::networking::IServerClient &session,NetPacket packe
 		return;
 	auto ammoTypeClass = packet->ReadString();
 	uint32_t ammoTypeId;
-	if(s_game->GetAmmoType(ammoTypeClass,&ammoTypeId) == nullptr)
+	if(s_game->GetAmmoType(ammoTypeClass, &ammoTypeId) == nullptr)
 		return;
-	auto sCharComponent = static_cast<pragma::SCharacterComponent*>(pl->GetEntity().GetCharacterComponent().get());
+	auto sCharComponent = static_cast<pragma::SCharacterComponent *>(pl->GetEntity().GetCharacterComponent().get());
 	if(sCharComponent == nullptr)
 		return;
 	auto am = packet->Read<uint32_t>();
 	am += sCharComponent->GetAmmoCount(ammoTypeId);
-	sCharComponent->SetAmmoCount(ammoTypeId,static_cast<uint16_t>(am));
+	sCharComponent->SetAmmoCount(ammoTypeId, static_cast<uint16_t>(am));
 }
 
-void NET_sv_debug_ai_schedule_print(pragma::networking::IServerClient &session,NetPacket packet)
+void NET_sv_debug_ai_schedule_print(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!server->CheatsEnabled() || s_game == nullptr)
 		return;
@@ -425,17 +407,16 @@ void NET_sv_debug_ai_schedule_print(pragma::networking::IServerClient &session,N
 	NetPacket response;
 	if(schedule == nullptr)
 		response->Write<bool>(false);
-	else
-	{
+	else {
 		response->Write<bool>(true);
 		std::stringstream ss;
 		schedule->DebugPrint(ss);
 		response->WriteString(ss.str());
 	}
-	server->SendPacket("debug_ai_schedule_print",response,pragma::networking::Protocol::SlowReliable,session);
+	server->SendPacket("debug_ai_schedule_print", response, pragma::networking::Protocol::SlowReliable, session);
 }
 
-void NET_sv_debug_ai_schedule_tree(pragma::networking::IServerClient &session,NetPacket packet)
+void NET_sv_debug_ai_schedule_tree(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	if(!server->CheatsEnabled() || s_game == nullptr)
 		return;
@@ -447,29 +428,26 @@ void NET_sv_debug_ai_schedule_tree(pragma::networking::IServerClient &session,Ne
 		return;
 	auto hPl = pl->GetHandle<pragma::SPlayerComponent>();
 	auto sAiComponent = ent->GetComponent<pragma::SAIComponent>();
-	auto hSAiComponent = (sAiComponent.expired() == false) ? sAiComponent.get()->GetHandle<pragma::SAIComponent>() : pragma::ComponentHandle<pragma::SAIComponent>{};
+	auto hSAiComponent = (sAiComponent.expired() == false) ? sAiComponent.get()->GetHandle<pragma::SAIComponent>() : pragma::ComponentHandle<pragma::SAIComponent> {};
 	auto dbgTree = std::make_shared<DebugBehaviorTreeNode>();
 	std::shared_ptr<pragma::ai::Schedule> aiSchedule = nullptr;
 	auto tLastScheduleUpdate = 0.f;
 	auto hCbTick = FunctionCallback<void>::Create(nullptr);
-	auto hCbOnGameEnd = FunctionCallback<void,SGame*>::Create(nullptr);
-	auto fClearCallbacks = [hCbTick,hCbOnGameEnd]() mutable {
+	auto hCbOnGameEnd = FunctionCallback<void, SGame *>::Create(nullptr);
+	auto fClearCallbacks = [hCbTick, hCbOnGameEnd]() mutable {
 		if(hCbTick.IsValid())
 			hCbTick.Remove();
 		if(hCbOnGameEnd.IsValid())
 			hCbOnGameEnd.Remove();
 	};
-	hCbTick.get<Callback<void>>()->SetFunction([hPl,hSAiComponent,hCbTick,hCbOnGameEnd,fClearCallbacks,dbgTree,aiSchedule,tLastScheduleUpdate]() mutable {
-		if(hPl.expired() || hSAiComponent.expired())
-		{
+	hCbTick.get<Callback<void>>()->SetFunction([hPl, hSAiComponent, hCbTick, hCbOnGameEnd, fClearCallbacks, dbgTree, aiSchedule, tLastScheduleUpdate]() mutable {
+		if(hPl.expired() || hSAiComponent.expired()) {
 			fClearCallbacks();
 			return;
 		}
-		hSAiComponent.get()->_debugSendScheduleInfo(*hPl.get(),dbgTree,aiSchedule,tLastScheduleUpdate);
+		hSAiComponent.get()->_debugSendScheduleInfo(*hPl.get(), dbgTree, aiSchedule, tLastScheduleUpdate);
 	});
-	hCbOnGameEnd.get<Callback<void,SGame*>>()->SetFunction([fClearCallbacks](SGame *game) mutable {
-		fClearCallbacks();
-	});
-	s_game->AddCallback("Tick",hCbTick);
-	s_game->AddCallback("OnGameEnd",hCbOnGameEnd);
+	hCbOnGameEnd.get<Callback<void, SGame *>>()->SetFunction([fClearCallbacks](SGame *game) mutable { fClearCallbacks(); });
+	s_game->AddCallback("Tick", hCbTick);
+	s_game->AddCallback("OnGameEnd", hCbOnGameEnd);
 }

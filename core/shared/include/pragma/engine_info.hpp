@@ -12,8 +12,7 @@
 #include <string>
 #include <vector>
 
-namespace engine_info
-{
+namespace engine_info {
 	DLLNETWORK std::string get_identifier();
 	DLLNETWORK std::string get_name();
 	DLLNETWORK std::string get_executable_name();

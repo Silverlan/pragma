@@ -13,20 +13,16 @@
 #include <pragma/entities/components/base_ownable_component.hpp>
 #include <pragma/lua/luaapi.h>
 
-namespace pragma
-{
-	class DLLCLIENT COwnableComponent final
-		: public BaseOwnableComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT COwnableComponent final : public BaseOwnableComponent, public CBaseNetComponent {
+	  public:
 		COwnableComponent(BaseEntity &ent) : BaseOwnableComponent(ent) {}
 
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
-	protected:
-		virtual bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
+	  protected:
+		virtual bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 	};
 };
 

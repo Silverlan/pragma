@@ -10,6 +10,6 @@
 #include "pragma/networkdefinitions.h"
 #include "pragma/networking/netmessages.h"
 
-DLLSERVER void NET_cl_send(pragma::networking::IServerClient &session,NetPacket packet);
-REGISTER_NETMESSAGE_SV(cl_send,NET_cl_send);
+DLLSERVER void NET_cl_send(pragma::networking::IServerClient &session, NetPacket packet);
+REGISTER_NETMESSAGE_SV(cl_send, NET_cl_send);
 #endif

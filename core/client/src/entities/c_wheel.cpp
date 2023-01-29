@@ -15,7 +15,7 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(vhc_wheel,CWheel);
+LINK_ENTITY_TO_CLASS(vhc_wheel, CWheel);
 
 void CWheel::Initialize()
 {
@@ -25,7 +25,7 @@ void CWheel::Initialize()
 
 /////////
 
-void CWheelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CWheelComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CWheelComponent::ReceiveData(NetPacket &packet)
 {
 	// TODO
@@ -45,12 +45,12 @@ void CWheelComponent::ReceiveSnapshotData(NetPacket &packet)
 	if(info == nullptr)
 		return;
 	auto &t = info->m_worldTransform;
-	t.setOrigin(btVector3(origin.x,origin.y,origin.z));
-	t.setRotation(btQuaternion(rot.x,rot.y,rot.z,rot.w));
+	t.setOrigin(btVector3(origin.x, origin.y, origin.z));
+	t.setRotation(btQuaternion(rot.x, rot.y, rot.z, rot.w));
 #endif
 }
 
-Bool CWheelComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
+Bool CWheelComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
 #if 0
 	if(eventId == m_netEvAttach)

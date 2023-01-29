@@ -18,17 +18,16 @@
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-REGISTER_PARTICLE_RENDERER(source_render_sprite_trail,CParticleRendererSpriteTrail);
+REGISTER_PARTICLE_RENDERER(source_render_sprite_trail, CParticleRendererSpriteTrail);
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-void CParticleRendererSpriteTrail::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleRendererSpriteTrail::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleRenderer::Initialize(pSystem,values);
+	CParticleRenderer::Initialize(pSystem, values);
 	auto bAlignVelocity = false;
-	for(auto &pair : values)
-	{
+	for(auto &pair : values) {
 		auto key = pair.first;
 		ustring::to_lower(key);
 		if(key == "min_length")
@@ -43,45 +42,30 @@ void CParticleRendererSpriteTrail::Initialize(pragma::CParticleSystemComponent &
 	m_shader = c_engine->GetShader("pfm_particle_sprite_trail");
 }
 
-pragma::ShaderParticleBase *CParticleRendererSpriteTrail::GetShader() const
-{
-	return static_cast<pragma::ShaderParticle2DBase*>(m_shader.get());
-}
+pragma::ShaderParticleBase *CParticleRendererSpriteTrail::GetShader() const { return static_cast<pragma::ShaderParticle2DBase *>(m_shader.get()); }
 
-void CParticleRendererSpriteTrail::RecordRender(
-	prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
-	pragma::ParticleRenderFlags renderFlags
-)
+void CParticleRendererSpriteTrail::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ParticleRenderFlags renderFlags)
 {
-	auto *shader = static_cast<pragma::ShaderParticle2DBase*>(m_shader.get());
+	auto *shader = static_cast<pragma::ShaderParticle2DBase *>(m_shader.get());
 	prosper::ShaderBindState bindState {drawCmd};
 	if(!shader)
 		return;
-	auto pipelineIdx = shader->RecordBeginDraw(bindState,GetParticleSystem(),renderFlags);
+	auto pipelineIdx = shader->RecordBeginDraw(bindState, GetParticleSystem(), renderFlags);
 	if(!pipelineIdx.has_value()) // prosper TODO: Use unlit pipeline if low shader quality?
 		return;
-	auto layout = c_engine->GetRenderContext().GetShaderPipelineLayout(*shader,*pipelineIdx);
+	auto layout = c_engine->GetRenderContext().GetShaderPipelineLayout(*shader, *pipelineIdx);
 	assert(layout != nullptr);
 	auto *dsScene = scene.GetCameraDescriptorSetGraphics();
 	auto *dsRenderer = renderer.GetRendererDescriptorSet();
 	auto &dsRenderSettings = c_game->GetGlobalRenderSettingsDescriptorSet();
 	auto *dsLights = renderer.GetLightSourceDescriptorSet();
 	auto *dsShadows = pragma::CShadowComponent::GetDescriptorSet();
-	shader->RecordBindScene(
-		bindState.commandBuffer,*layout,scene,renderer,
-		*dsScene,*dsRenderer,
-		dsRenderSettings,*dsLights,
-		*dsShadows
-	);
-	shader->RecordDraw(
-		bindState,scene,renderer,*m_particleSystem,
-		m_particleSystem->GetOrientationType(),
-		renderFlags
-	);
+	shader->RecordBindScene(bindState.commandBuffer, *layout, scene, renderer, *dsScene, *dsRenderer, dsRenderSettings, *dsLights, *dsShadows);
+	shader->RecordDraw(bindState, scene, renderer, *m_particleSystem, m_particleSystem->GetOrientationType(), renderFlags);
 	shader->RecordEndDraw(bindState);
 }
 
-void CParticleRendererSpriteTrail::RecordRenderShadow(prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererSpriteTrail::RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId)
 {
 	/*static auto hShader = c_engine->GetShader("particleshadow");
 	if(!hShader.IsValid())

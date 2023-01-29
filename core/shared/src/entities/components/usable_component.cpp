@@ -15,38 +15,34 @@ using namespace pragma;
 
 pragma::ComponentEventId UsableComponent::EVENT_ON_USE = pragma::INVALID_COMPONENT_ID;
 pragma::ComponentEventId UsableComponent::EVENT_CAN_USE = pragma::INVALID_COMPONENT_ID;
-void UsableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
+void UsableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_USE = registerEvent("ON_USE",ComponentEventInfo::Type::Broadcast);
-	EVENT_CAN_USE = registerEvent("CAN_USE",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_USE = registerEvent("ON_USE", ComponentEventInfo::Type::Broadcast);
+	EVENT_CAN_USE = registerEvent("CAN_USE", ComponentEventInfo::Type::Broadcast);
 }
-UsableComponent::UsableComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+UsableComponent::UsableComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 void UsableComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	GetEntity().AddComponent("transform");
 }
-void UsableComponent::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void UsableComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 bool UsableComponent::CanUse(BaseEntity *ent) const
 {
-	pragma::CECanUseData evCanUse{ent};
-	BroadcastEvent(EVENT_CAN_USE,evCanUse);
+	pragma::CECanUseData evCanUse {ent};
+	BroadcastEvent(EVENT_CAN_USE, evCanUse);
 	return evCanUse.canUse;
 }
 void UsableComponent::OnUse(BaseEntity *ent)
 {
-	pragma::CEOnUseData evData{ent};
-	BroadcastEvent(EVENT_ON_USE,evData);
+	pragma::CEOnUseData evData {ent};
+	BroadcastEvent(EVENT_ON_USE, evData);
 }
 
 ////////
 
-CEOnUseData::CEOnUseData(BaseEntity *ent)
-	: entity(ent)
-{}
+CEOnUseData::CEOnUseData(BaseEntity *ent) : entity(ent) {}
 void CEOnUseData::PushArguments(lua_State *l)
 {
 	if(entity != nullptr)
@@ -57,9 +53,7 @@ void CEOnUseData::PushArguments(lua_State *l)
 
 ////////
 
-CECanUseData::CECanUseData(BaseEntity *ent)
-	: entity(ent)
-{}
+CECanUseData::CECanUseData(BaseEntity *ent) : entity(ent) {}
 void CECanUseData::PushArguments(lua_State *l)
 {
 	if(entity != nullptr)
@@ -67,9 +61,9 @@ void CECanUseData::PushArguments(lua_State *l)
 	else
 		Lua::PushNil(l);
 }
-uint32_t CECanUseData::GetReturnCount() {return 1u;}
+uint32_t CECanUseData::GetReturnCount() { return 1u; }
 void CECanUseData::HandleReturnValues(lua_State *l)
 {
-	if(Lua::IsBool(l,-1))
-		canUse = Lua::CheckBool(l,-1);
+	if(Lua::IsBool(l, -1))
+		canUse = Lua::CheckBool(l, -1);
 }

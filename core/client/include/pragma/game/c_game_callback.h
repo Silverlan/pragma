@@ -11,8 +11,7 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/game/game_callback.h"
 
-DECLARE_STATIC_GAME_CALLBACKS(DLLCLIENT,client);
-#define ADD_STATIC_CLIENT_GAME_CALLBACK(name,callback) \
-	ADD_STATIC_GAME_CALLBACK(name,callback,client);
+DECLARE_STATIC_GAME_CALLBACKS(DLLCLIENT, client);
+#define ADD_STATIC_CLIENT_GAME_CALLBACK(name, callback) ADD_STATIC_GAME_CALLBACK(name, callback, client);
 
 #endif

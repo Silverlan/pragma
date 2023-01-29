@@ -14,14 +14,14 @@
 #include <array>
 
 enum class LightType : uint8_t;
-namespace pragma {class CLightComponent;};
-namespace pragma::math
-{
-	DLLCLIENT const std::array<Mat4,6> &get_cubemap_view_matrices();
-	DLLCLIENT const Mat4 &get_cubemap_projection_matrix(float aspectRatio=1.f,float nearZ=0.1f,float farZ=10.f);
+namespace pragma {
+	class CLightComponent;
+};
+namespace pragma::math {
+	DLLCLIENT const std::array<Mat4, 6> &get_cubemap_view_matrices();
+	DLLCLIENT const Mat4 &get_cubemap_projection_matrix(float aspectRatio = 1.f, float nearZ = 0.1f, float farZ = 10.f);
 
-	namespace cycles
-	{
+	namespace cycles {
 		Watt get_light_power(const CLightComponent &light);
 	};
 };

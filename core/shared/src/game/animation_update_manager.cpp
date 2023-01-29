@@ -14,23 +14,21 @@
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 
-pragma::AnimationUpdateManager::AnimationUpdateManager(Game &game)
-	: game{game},m_threadPool{10,"animation_update"}
+pragma::AnimationUpdateManager::AnimationUpdateManager(Game &game) : game {game}, m_threadPool {10, "animation_update"}
 {
 	auto &componentManager = game.GetEntityComponentManager();
-	auto r = componentManager.GetComponentTypeId("animated",m_animatedComponentId);
-	r = r && componentManager.GetComponentTypeId("panima",m_panimaComponentId);
-	r = r && componentManager.GetComponentTypeId("animation_driver",m_animationDriverComponentId);
+	auto r = componentManager.GetComponentTypeId("animated", m_animatedComponentId);
+	r = r && componentManager.GetComponentTypeId("panima", m_panimaComponentId);
+	r = r && componentManager.GetComponentTypeId("animation_driver", m_animationDriverComponentId);
 	assert(r);
-	if(!r)
-	{
-		Con::crit<<"Unable to determine animated component ids!"<<Con::endl;
+	if(!r) {
+		Con::crit << "Unable to determine animated component ids!" << Con::endl;
 		exit(EXIT_FAILURE);
 	}
 }
 void pragma::AnimationUpdateManager::UpdateEntityAnimationDrivers(double dt)
 {
-	for(auto *ent : EntityIterator{game,m_animationDriverComponentId})
+	for(auto *ent : EntityIterator {game, m_animationDriverComponentId})
 		ent->GetComponent<pragma::AnimationDriverComponent>()->ApplyDrivers();
 }
 void pragma::AnimationUpdateManager::UpdateConstraints(double dt)
@@ -39,12 +37,11 @@ void pragma::AnimationUpdateManager::UpdateConstraints(double dt)
 }
 void pragma::AnimationUpdateManager::UpdateAnimations(double dt)
 {
-	EntityIterator entIt {game,m_animatedComponentId};
-	for(auto *ent : entIt)
-	{
+	EntityIterator entIt {game, m_animatedComponentId};
+	for(auto *ent : entIt) {
 		auto animC = ent->GetAnimatedComponent();
 		auto maintainAnimations = animC->PreMaintainAnimations(dt);
-		m_threadPool.AddTask([this,ent,dt,maintainAnimations]() -> pragma::ThreadPool::ResultHandler {
+		m_threadPool.AddTask([this, ent, dt, maintainAnimations]() -> pragma::ThreadPool::ResultHandler {
 			if(maintainAnimations)
 				ent->GetAnimatedComponent()->UpdateAnimations(dt);
 
@@ -67,9 +64,8 @@ void pragma::AnimationUpdateManager::UpdateAnimations(double dt)
 	UpdateConstraints(dt);
 
 	{
-		EntityIterator entIt {game,m_animatedComponentId};
-		for(auto *ent : entIt)
-		{
+		EntityIterator entIt {game, m_animatedComponentId};
+		for(auto *ent : entIt) {
 			auto animC = ent->GetAnimatedComponent();
 			animC->HandleAnimationEvents();
 		}

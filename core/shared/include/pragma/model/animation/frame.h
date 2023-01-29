@@ -15,48 +15,47 @@
 #include <vector>
 #include <unordered_map>
 
-namespace pragma::animation {class Animation;};
+namespace pragma::animation {
+	class Animation;
+};
 class Model;
-namespace umath {class Transform; class ScaledTransform;};
+namespace umath {
+	class Transform;
+	class ScaledTransform;
+};
 
-struct DLLNETWORK FlexFrameData
-{
+struct DLLNETWORK FlexFrameData {
 	std::vector<float> flexControllerWeights;
 	std::vector<uint32_t> flexControllerIds;
 
-	bool operator==(const FlexFrameData &other) const
-	{
-		return flexControllerWeights == other.flexControllerWeights && flexControllerIds == other.flexControllerIds;
-	}
-	bool operator!=(const FlexFrameData &other) const {return !operator==(other);}
+	bool operator==(const FlexFrameData &other) const { return flexControllerWeights == other.flexControllerWeights && flexControllerIds == other.flexControllerIds; }
+	bool operator!=(const FlexFrameData &other) const { return !operator==(other); }
 };
 
-class DLLNETWORK Frame
-	: public std::enable_shared_from_this<Frame>
-{
-public:
+class DLLNETWORK Frame : public std::enable_shared_from_this<Frame> {
+  public:
 	static std::shared_ptr<Frame> Create(unsigned int numBones);
 	static std::shared_ptr<Frame> Create(const Frame &other);
 
-	void SetBonePosition(unsigned int boneID,const Vector3 &pos);
-	void SetBoneOrientation(unsigned int boneID,const Quat &orientation);
-	void SetBoneScale(uint32_t boneId,const Vector3 &scale);
+	void SetBonePosition(unsigned int boneID, const Vector3 &pos);
+	void SetBoneOrientation(unsigned int boneID, const Quat &orientation);
+	void SetBoneScale(uint32_t boneId, const Vector3 &scale);
 	Vector3 *GetBonePosition(unsigned int boneID);
 	Quat *GetBoneOrientation(unsigned int boneID);
 	Vector3 *GetBoneScale(uint32_t boneId);
 	const Vector3 *GetBonePosition(unsigned int boneID) const;
 	const Quat *GetBoneOrientation(unsigned int boneID) const;
 	const Vector3 *GetBoneScale(uint32_t boneId) const;
-	bool GetBonePose(uint32_t boneId,umath::ScaledTransform &outTransform) const;
-	void SetBonePose(uint32_t boneId,const umath::ScaledTransform &pose);
-	void SetBonePose(uint32_t boneId,const umath::Transform &pose);
-	bool GetBoneMatrix(unsigned int boneID,Mat4 *mat);
+	bool GetBonePose(uint32_t boneId, umath::ScaledTransform &outTransform) const;
+	void SetBonePose(uint32_t boneId, const umath::ScaledTransform &pose);
+	void SetBonePose(uint32_t boneId, const umath::Transform &pose);
+	bool GetBoneMatrix(unsigned int boneID, Mat4 *mat);
 	Vector2 *GetMoveOffset();
-	void GetMoveOffset(float *x,float *z);
-	void SetMoveOffset(float x,float z=0);
+	void GetMoveOffset(float *x, float *z);
+	void SetMoveOffset(float x, float z = 0);
 	void SetMoveOffset(Vector2 move);
-	void Localize(const pragma::animation::Animation &anim,const panima::Skeleton &skeleton);
-	void Globalize(const pragma::animation::Animation &anim,const panima::Skeleton &skeleton);
+	void Localize(const pragma::animation::Animation &anim, const panima::Skeleton &skeleton);
+	void Globalize(const pragma::animation::Animation &anim, const panima::Skeleton &skeleton);
 
 	// These assume that the bones of the frame match the skeleton exactly
 	void Localize(const panima::Skeleton &skeleton);
@@ -64,13 +63,13 @@ public:
 
 	uint32_t GetBoneCount() const;
 	void SetBoneCount(uint32_t numBones);
-	std::pair<Vector3,Vector3> CalcRenderBounds(const pragma::animation::Animation &anim,const Model &mdl) const;
+	std::pair<Vector3, Vector3> CalcRenderBounds(const pragma::animation::Animation &anim, const Model &mdl) const;
 	void Rotate(const Quat &rot);
 	void Translate(const Vector3 &t);
-	void Rotate(const panima::Skeleton &skeleton,const Quat &rot);
-	void Translate(const panima::Skeleton &skeleton,const Vector3 &t);
-	void Rotate(const pragma::animation::Animation &anim,const panima::Skeleton &skeleton,const Quat &rot);
-	void Translate(const pragma::animation::Animation &anim,const panima::Skeleton &skeleton,const Vector3 &t);
+	void Rotate(const panima::Skeleton &skeleton, const Quat &rot);
+	void Translate(const panima::Skeleton &skeleton, const Vector3 &t);
+	void Rotate(const pragma::animation::Animation &anim, const panima::Skeleton &skeleton, const Quat &rot);
+	void Translate(const pragma::animation::Animation &anim, const panima::Skeleton &skeleton, const Vector3 &t);
 	void Scale(const Vector3 &scale);
 
 	const FlexFrameData &GetFlexFrameData() const;
@@ -86,15 +85,15 @@ public:
 	const umath::Transform *GetBoneTransform(uint32_t idx) const;
 
 	bool operator==(const Frame &other) const;
-	bool operator!=(const Frame &other) const {return !operator==(other);}
-private:
+	bool operator!=(const Frame &other) const { return !operator==(other); }
+  private:
 	Frame(unsigned int numBones);
 	Frame(const Frame &other);
 	std::vector<umath::Transform> m_bones;
 	std::vector<Vector3> m_scales;
 	std::unique_ptr<Vector2> m_move;
 	FlexFrameData m_flexFrameData {};
-	std::vector<uint32_t> GetLocalRootBoneIds(const pragma::animation::Animation &anim,const panima::Skeleton &skeleton) const;
+	std::vector<uint32_t> GetLocalRootBoneIds(const pragma::animation::Animation &anim, const panima::Skeleton &skeleton) const;
 
 	void UpdateScales();
 };

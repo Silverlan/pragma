@@ -8,7 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/classes/ldef_entity.h"
 
-void LuaEntityManager::RegisterEntity(std::string className,luabind::object &o,const std::vector<pragma::ComponentId> &components)
+void LuaEntityManager::RegisterEntity(std::string className, luabind::object &o, const std::vector<pragma::ComponentId> &components)
 {
 	EntityInfo entInfo {};
 	entInfo.classObject = o;
@@ -36,7 +36,7 @@ LuaEntityManager::EntityInfo *LuaEntityManager::GetEntityInfo(std::string classN
 	return &it->second;
 }
 
-void LuaEntityManager::RegisterComponent(std::string className,luabind::object &o)
+void LuaEntityManager::RegisterComponent(std::string className, luabind::object &o)
 {
 	ustring::to_lower(className);
 	m_components[className] = o;

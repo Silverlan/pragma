@@ -11,30 +11,19 @@
 #include <sharedutils/property/util_property_vector.h>
 #include <sharedutils/property/util_property_quat.hpp>
 
-namespace pragma
-{
-	enum class TransformChangeFlags : uint8_t
-	{
-		None = 0,
-		PositionChanged = 1u,
-		RotationChanged = PositionChanged<<1u,
-		ScaleChanged = RotationChanged<<1u
-	};
-	struct DLLNETWORK CEOnPoseChanged
-		: public ComponentEvent
-	{
+namespace pragma {
+	enum class TransformChangeFlags : uint8_t { None = 0, PositionChanged = 1u, RotationChanged = PositionChanged << 1u, ScaleChanged = RotationChanged << 1u };
+	struct DLLNETWORK CEOnPoseChanged : public ComponentEvent {
 		CEOnPoseChanged(TransformChangeFlags changeFlags);
 		virtual void PushArguments(lua_State *l) override;
 		TransformChangeFlags changeFlags;
 	};
-	class DLLNETWORK BaseTransformComponent
-		: public BaseEntityComponent
-	{
-	public:
+	class DLLNETWORK BaseTransformComponent : public BaseEntityComponent {
+	  public:
 		static pragma::ComponentEventId EVENT_ON_POSE_CHANGED;
 		static pragma::ComponentEventId EVENT_ON_TELEPORT;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 
 		void SetPosition(const Vector3 &pos);
@@ -58,26 +47,26 @@ namespace pragma
 		Vector3 GetRight() const;
 		float GetDistance(const Vector3 &p) const;
 		float GetDistance(const BaseEntity &ent) const;
-		void GetOrientation(Vector3 *forward,Vector3 *right,Vector3 *up=nullptr) const;
-		
+		void GetOrientation(Vector3 *forward, Vector3 *right, Vector3 *up = nullptr) const;
+
 		void Teleport(const umath::Transform &targetPose);
 
 		void LocalToWorld(Vector3 *origin) const;
 		void LocalToWorld(Quat *rot) const;
-		void LocalToWorld(Vector3 *origin,Quat *rot) const;
+		void LocalToWorld(Vector3 *origin, Quat *rot) const;
 
 		void WorldToLocal(Vector3 *origin) const;
 		void WorldToLocal(Quat *rot) const;
-		void WorldToLocal(Vector3 *origin,Quat *rot) const;
+		void WorldToLocal(Vector3 *origin, Quat *rot) const;
 
 		Vector3 GetOrigin() const;
 
-		Vector3 GetDirection(const BaseEntity &ent,bool bIgnoreYAxis=false) const;
-		EulerAngles GetAngles(const BaseEntity &ent,bool bIgnoreYAxis=false) const;
-		float GetDotProduct(const BaseEntity &ent,bool bIgnoreYAxis=false) const;
-		Vector3 GetDirection(const Vector3 &pos,bool bIgnoreYAxis=false) const;
-		EulerAngles GetAngles(const Vector3 &pos,bool bIgnoreYAxis=false) const;
-		float GetDotProduct(const Vector3 &pos,bool bIgnoreYAxis=false) const;
+		Vector3 GetDirection(const BaseEntity &ent, bool bIgnoreYAxis = false) const;
+		EulerAngles GetAngles(const BaseEntity &ent, bool bIgnoreYAxis = false) const;
+		float GetDotProduct(const BaseEntity &ent, bool bIgnoreYAxis = false) const;
+		Vector3 GetDirection(const Vector3 &pos, bool bIgnoreYAxis = false) const;
+		EulerAngles GetAngles(const Vector3 &pos, bool bIgnoreYAxis = false) const;
+		float GetDotProduct(const Vector3 &pos, bool bIgnoreYAxis = false) const;
 
 		float GetMaxAxisScale() const;
 		float GetAbsMaxAxisScale() const;
@@ -90,11 +79,11 @@ namespace pragma
 		virtual void SetEyeOffset(const Vector3 &offset);
 
 		double GetLastMoveTime() const;
-		
-		void SetPosition(const Vector3 &pos,Bool bForceUpdate);
+
+		void SetPosition(const Vector3 &pos, Bool bForceUpdate);
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
-		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
+		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 
 		// Same as SetPosition / SetRotation / SetScale, but don't invoke callbacks
 		void SetRawPosition(const Vector3 &pos);
@@ -102,18 +91,16 @@ namespace pragma
 		void SetRawScale(const Vector3 &scale);
 
 		void UpdateLastMovedTime();
-		void OnPoseChanged(TransformChangeFlags changeFlags,bool updatePhysics=true);
-	protected:
+		void OnPoseChanged(TransformChangeFlags changeFlags, bool updatePhysics = true);
+	  protected:
 		BaseTransformComponent(BaseEntity &ent);
 		pragma::NetEventId m_netEvSetScale = pragma::INVALID_NET_EVENT;
 		double m_tLastMoved = 0.0; // Last time the entity moved or changed rotation
 		Vector3 m_eyeOffset = {};
 		umath::ScaledTransform m_pose {};
 	};
-	struct DLLNETWORK CETeleport
-		: public ComponentEvent
-	{
-		CETeleport(const umath::Transform &originalPose,const umath::Transform &targetPose,const umath::Transform &deltaPose);
+	struct DLLNETWORK CETeleport : public ComponentEvent {
+		CETeleport(const umath::Transform &originalPose, const umath::Transform &targetPose, const umath::Transform &deltaPose);
 		virtual void PushArguments(lua_State *l) override;
 		umath::Transform originalPose;
 		umath::Transform targetPose;

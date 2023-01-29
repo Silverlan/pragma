@@ -11,10 +11,8 @@
 #include "pragma/clientdefinitions.h"
 #include <pragma/model/animation/vertex_animation.hpp>
 
-class DLLCLIENT CVertexAnimation
-	: public VertexAnimation
-{
-public:
+class DLLCLIENT CVertexAnimation : public VertexAnimation {
+  public:
 	static std::shared_ptr<CVertexAnimation> Create();
 	static std::shared_ptr<CVertexAnimation> Create(const CVertexAnimation &other);
 	static std::shared_ptr<CVertexAnimation> Create(const std::string &name);
@@ -22,7 +20,7 @@ public:
 	virtual std::shared_ptr<VertexAnimation> Copy() const override;
 
 	void UpdateBuffer();
-protected:
+  protected:
 	CVertexAnimation();
 	CVertexAnimation(const CVertexAnimation &other);
 	CVertexAnimation(const std::string &name);

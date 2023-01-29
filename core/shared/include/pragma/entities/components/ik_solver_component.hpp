@@ -12,22 +12,17 @@
 #include "pragma/util/ik.hpp"
 #include <mathutil/uvec.h>
 
-namespace pragma
-{
-	namespace ik
-	{
+namespace pragma {
+	namespace ik {
 		class RigConfig;
 	};
-	class DLLNETWORK IkSolverComponent final
-		: public BaseEntityComponent,
-		public DynamicMemberRegister
-	{
-	public:
+	class DLLNETWORK IkSolverComponent final : public BaseEntityComponent, public DynamicMemberRegister {
+	  public:
 		using IkBoneId = pragma::ik::BoneId;
 		static ComponentEventId EVENT_INITIALIZE_SOLVER;
 		static ComponentEventId EVENT_UPDATE_IK;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		IkSolverComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
@@ -37,7 +32,7 @@ namespace pragma
 		const std::string &GetIkRigFile() const;
 
 		void AddSkeletalBone(BoneId boneId);
-		void SetBoneLocked(BoneId boneId,bool locked);
+		void SetBoneLocked(BoneId boneId, bool locked);
 		pragma::ik::Bone *GetBone(BoneId boneId);
 		pragma::ik::IControl *GetControl(BoneId boneId);
 		size_t GetBoneCount() const;
@@ -47,42 +42,38 @@ namespace pragma
 		void AddDragControl(BoneId boneId);
 		void AddStateControl(BoneId boneId);
 
-		void AddFixedConstraint(BoneId boneId0,BoneId boneId1);
-		void AddHingeConstraint(BoneId boneId0,BoneId boneId1,umath::Degree minAngle,umath::Degree maxAngle);
-		void AddBallSocketConstraint(BoneId boneId0,BoneId boneId1,const EulerAngles &minLimits,const EulerAngles &maxLimits);
+		void AddFixedConstraint(BoneId boneId0, BoneId boneId1);
+		void AddHingeConstraint(BoneId boneId0, BoneId boneId1, umath::Degree minAngle, umath::Degree maxAngle);
+		void AddBallSocketConstraint(BoneId boneId0, BoneId boneId1, const EulerAngles &minLimits, const EulerAngles &maxLimits);
 
-		udm::PProperty &GetIkRig() {return m_ikRig;}
+		udm::PProperty &GetIkRig() { return m_ikRig; }
 		void Solve();
 		void ResetIkRig();
-		
+
 		bool AddIkSolverByRig(const ik::RigConfig &ikRig);
-		bool AddIkSolverByChain(const std::string &boneName,uint32_t chainLength);
+		bool AddIkSolverByChain(const std::string &boneName, uint32_t chainLength);
 		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
 
 		// Internal use only
 		bool UpdateIkRig();
-	protected:
+	  protected:
 		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
 		void ResetIkBones();
 		void UpdateIkRigFile();
 		void InitializeSolver();
 		std::optional<umath::ScaledTransform> GetReferenceBonePose(BoneId boneId) const;
-		pragma::ik::Bone *AddBone(BoneId boneId,const umath::Transform &pose,float radius,float length);
-		void AddControl(BoneId boneId,bool translation,bool rotation);
+		pragma::ik::Bone *AddBone(BoneId boneId, const umath::Transform &pose, float radius, float length);
+		void AddControl(BoneId boneId, bool translation, bool rotation);
 		pragma::ik::Bone *GetIkBone(BoneId boneId);
 
-		bool GetConstraintBones(
-			BoneId boneId0,BoneId boneId1,
-			pragma::ik::Bone **bone0,pragma::ik::Bone **bone1,
-			umath::ScaledTransform &pose0,umath::ScaledTransform &pose1
-		) const;
+		bool GetConstraintBones(BoneId boneId0, BoneId boneId1, pragma::ik::Bone **bone0, pragma::ik::Bone **bone1, umath::ScaledTransform &pose0, umath::ScaledTransform &pose1) const;
 
 		udm::PProperty m_ikRig;
 		std::string m_ikRigFile;
 		std::unique_ptr<pragma::ik::Solver> m_ikSolver;
-		std::unordered_map<BoneId,IkBoneId> m_boneIdToIkBoneId;
-		std::unordered_map<IkBoneId,BoneId> m_ikBoneIdToBoneId;
-		std::unordered_map<BoneId,std::shared_ptr<pragma::ik::IControl>> m_ikControls;
+		std::unordered_map<BoneId, IkBoneId> m_boneIdToIkBoneId;
+		std::unordered_map<IkBoneId, BoneId> m_ikBoneIdToBoneId;
+		std::unordered_map<BoneId, std::shared_ptr<pragma::ik::IControl>> m_ikControls;
 		bool m_updateRequired = false;
 	};
 };

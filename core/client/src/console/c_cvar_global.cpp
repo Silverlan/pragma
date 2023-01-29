@@ -62,258 +62,242 @@ extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-DLLCLIENT void CMD_entities_cl(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+DLLCLIENT void CMD_entities_cl(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(!state->IsGameActive())
 		return;
-	auto sortedEnts = util::cmd::get_sorted_entities(*c_game,pl);
+	auto sortedEnts = util::cmd::get_sorted_entities(*c_game, pl);
 	std::optional<std::string> className = {};
 	if(argv.empty() == false)
-		className = '*' +argv.front() +'*';
+		className = '*' + argv.front() + '*';
 	std::optional<std::string> modelName {};
 	if(argv.size() > 1)
-		modelName = '*' +argv[1] +'*';
-	for(auto &pair : sortedEnts)
-	{
-		if(className.has_value() && ustring::match(pair.first->GetClass(),*className) == false)
+		modelName = '*' + argv[1] + '*';
+	for(auto &pair : sortedEnts) {
+		if(className.has_value() && ustring::match(pair.first->GetClass(), *className) == false)
 			continue;
-		if(modelName.has_value() && ustring::match(pair.first->GetModelName(),*modelName) == false)
+		if(modelName.has_value() && ustring::match(pair.first->GetModelName(), *modelName) == false)
 			continue;
-		Con::cout<<*pair.first<<Con::endl;
+		Con::cout << *pair.first << Con::endl;
 	}
 }
 
-void CMD_thirdperson(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+void CMD_thirdperson(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(pl == nullptr)
 		return;
-	auto *cstate = static_cast<ClientState*>(state);
-	CHECK_CHEATS("thirdperson",cstate,);
+	auto *cstate = static_cast<ClientState *>(state);
+	CHECK_CHEATS("thirdperson", cstate, );
 	auto bThirdPerson = false;
 	if(!argv.empty())
 		bThirdPerson = (atoi(argv.front().c_str()) != 0) ? true : false;
 	else
 		bThirdPerson = (pl->GetObserverMode() != OBSERVERMODE::THIRDPERSON) ? true : false;
 	auto obsTarget = pl->GetObserverTarget();
-	if(obsTarget)
-	{
-		if(
-			(bThirdPerson && obsTarget->IsCameraEnabled(pragma::BaseObservableComponent::CameraType::ThirdPerson) == false) ||
-			(bThirdPerson == false && obsTarget->IsCameraEnabled(pragma::BaseObservableComponent::CameraType::FirstPerson) == false)
-		)
+	if(obsTarget) {
+		if((bThirdPerson && obsTarget->IsCameraEnabled(pragma::BaseObservableComponent::CameraType::ThirdPerson) == false) || (bThirdPerson == false && obsTarget->IsCameraEnabled(pragma::BaseObservableComponent::CameraType::FirstPerson) == false))
 			return;
 	}
 	pl->SetObserverMode((bThirdPerson == true) ? OBSERVERMODE::THIRDPERSON : OBSERVERMODE::FIRSTPERSON);
 }
 
-DLLCLIENT void CMD_setpos(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
+DLLCLIENT void CMD_setpos(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.size() < 3)
 		return;
-	ClientState *cstate = static_cast<ClientState*>(state);
-	CHECK_CHEATS("setpos",cstate,);
-	Vector3 pos(atof(argv[0].c_str()),atof(argv[1].c_str()),atof(argv[2].c_str()));
+	ClientState *cstate = static_cast<ClientState *>(state);
+	CHECK_CHEATS("setpos", cstate, );
+	Vector3 pos(atof(argv[0].c_str()), atof(argv[1].c_str()), atof(argv[2].c_str()));
 	NetPacket p;
-	nwm::write_vector(p,pos);
-	cstate->SendPacket("cmd_setpos",p,pragma::networking::Protocol::SlowReliable);
+	nwm::write_vector(p, pos);
+	cstate->SendPacket("cmd_setpos", p, pragma::networking::Protocol::SlowReliable);
 }
 
-DLLCLIENT void CMD_getpos(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string>&)
+DLLCLIENT void CMD_getpos(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
-	CGame *game = static_cast<CGame*>(state->GetGameState());
-	if(pl == NULL)
-	{
-		Con::cout<<"0 0 0"<<Con::endl;
+	CGame *game = static_cast<CGame *>(state->GetGameState());
+	if(pl == NULL) {
+		Con::cout << "0 0 0" << Con::endl;
 		return;
 	}
 	auto *cPl = game->GetLocalPlayer();
 	auto pTrComponent = cPl->GetEntity().GetTransformComponent();
-	if(pTrComponent == nullptr)
-	{
-		Con::cout<<"0 0 0"<<Con::endl;
+	if(pTrComponent == nullptr) {
+		Con::cout << "0 0 0" << Con::endl;
 		return;
 	}
 	auto &pos = pTrComponent->GetPosition();
-	Con::cout<<pos.x<<" "<<pos.y<<" "<<pos.z<<Con::endl;
+	Con::cout << pos.x << " " << pos.y << " " << pos.z << Con::endl;
 }
 
-DLLCLIENT void CMD_getcampos(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+DLLCLIENT void CMD_getcampos(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(!state->IsGameActive())
 		return;
-	auto *game = static_cast<CGame*>(state->GetGameState());
+	auto *game = static_cast<CGame *>(state->GetGameState());
 	auto *pCam = game->GetRenderCamera();
 	if(pCam == nullptr)
 		return;
 	auto &pos = pCam->GetEntity().GetPosition();
-	Con::cout<<pos.x<<" "<<pos.y<<" "<<pos.z<<Con::endl;
+	Con::cout << pos.x << " " << pos.y << " " << pos.z << Con::endl;
 }
 
-DLLCLIENT void CMD_setang(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+DLLCLIENT void CMD_setang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	if(argv.size() < 3)
 		return;
-	ClientState *cstate = static_cast<ClientState*>(state);
+	ClientState *cstate = static_cast<ClientState *>(state);
 	if(!cstate->IsGameActive())
 		return;
 	if(pl == NULL)
 		return;
-	CHECK_CHEATS("setang",cstate,);
+	CHECK_CHEATS("setang", cstate, );
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
 	if(charComponent.expired())
 		return;
-	EulerAngles ang(util::to_float(argv[0]),util::to_float(argv[1]),util::to_float(argv[2]));
+	EulerAngles ang(util::to_float(argv[0]), util::to_float(argv[1]), util::to_float(argv[2]));
 	charComponent->SetViewAngles(ang);
 }
 
-DLLCLIENT void CMD_getang(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string>&)
+DLLCLIENT void CMD_getang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
-	if(pl == NULL)
-	{
-		Con::cout<<"0 0 0"<<Con::endl;
+	if(pl == NULL) {
+		Con::cout << "0 0 0" << Con::endl;
 		return;
 	}
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
 	if(charComponent.expired())
 		return;
 	EulerAngles ang = charComponent->GetViewAngles();
-	Con::cout<<ang.p<<" "<<ang.y<<" "<<ang.r<<Con::endl;
+	Con::cout << ang.p << " " << ang.y << " " << ang.r << Con::endl;
 }
 
-DLLCLIENT void CMD_getcamang(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string>&)
+DLLCLIENT void CMD_getcamang(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
 	if(!state->IsGameActive())
 		return;
-	auto *game = static_cast<CGame*>(state->GetGameState());
+	auto *game = static_cast<CGame *>(state->GetGameState());
 	auto *pCam = game->GetRenderCamera();
 	if(pCam == nullptr)
 		return;
-	auto ang = EulerAngles{pCam->GetEntity().GetRotation()};
-	Con::cout<<ang.p<<" "<<ang.y<<" "<<ang.r<<Con::endl;
+	auto ang = EulerAngles {pCam->GetEntity().GetRotation()};
+	Con::cout << ang.p << " " << ang.y << " " << ang.r << Con::endl;
 }
 
-DLLCLIENT void CMD_sound_play(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
+DLLCLIENT void CMD_sound_play(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
 	if(client->PrecacheSound(argv[0]) == 0)
 		return;
-	client->PlaySound(argv[0],ALSoundType::GUI,ALCreateFlags::None);
+	client->PlaySound(argv[0], ALSoundType::GUI, ALCreateFlags::None);
 }
 
-DLLCLIENT void CMD_sound_stop(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
-{
-	client->StopSounds();
-}
+DLLCLIENT void CMD_sound_stop(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { client->StopSounds(); }
 
-DLLCLIENT void CMD_status_cl(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
+DLLCLIENT void CMD_status_cl(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	auto &players = pragma::CPlayerComponent::GetAll();
 	auto *cl = client->GetClient();
-	if(cl == nullptr)
-	{
-		Con::cwar<<"Not connected to a server!"<<Con::endl;
+	if(cl == nullptr) {
+		Con::cwar << "Not connected to a server!" << Con::endl;
 		return;
 	}
-	Con::cout<<"hostname:\t"<<"Unknown"<<Con::endl;
-	Con::cout<<"udp/ip:\t\t"<<cl->GetIdentifier()<<Con::endl;
-	Con::cout<<"map:\t\t"<<"Unknown"<<Con::endl;
-	Con::cout<<"players:\t"<<players.size()<<" ("<<0<<" max)"<<Con::endl<<Con::endl;
-	Con::cout<<"#  userid\tname    \tconnected\tping";
-	Con::cout<<Con::endl;
+	Con::cout << "hostname:\t"
+	          << "Unknown" << Con::endl;
+	Con::cout << "udp/ip:\t\t" << cl->GetIdentifier() << Con::endl;
+	Con::cout << "map:\t\t"
+	          << "Unknown" << Con::endl;
+	Con::cout << "players:\t" << players.size() << " (" << 0 << " max)" << Con::endl << Con::endl;
+	Con::cout << "#  userid\tname    \tconnected\tping";
+	Con::cout << Con::endl;
 	auto i = 0u;
-	for(auto *plComponent : players)
-	{
+	for(auto *plComponent : players) {
 		auto nameC = plComponent->GetEntity().GetNameComponent();
-		Con::cout<<"# \t"<<i<<"\t"<<"\""<<(nameC.valid() ? nameC->GetName() : "")<<"\""<<"\t"<<FormatTime(plComponent->TimeConnected())<<"     \t";
+		Con::cout << "# \t" << i << "\t"
+		          << "\"" << (nameC.valid() ? nameC->GetName() : "") << "\""
+		          << "\t" << FormatTime(plComponent->TimeConnected()) << "     \t";
 		if(plComponent->IsLocalPlayer() == true)
-			Con::cout<<cl->GetLatency();
+			Con::cout << cl->GetLatency();
 		else
-			Con::cout<<"?";
-		Con::cout<<Con::endl;
+			Con::cout << "?";
+		Con::cout << Con::endl;
 		++i;
 	}
 }
 
 #ifdef _DEBUG
-void CMD_cl_dump_sounds(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
+void CMD_cl_dump_sounds(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	auto &sounds = client->GetSounds();
-	for(auto &sndInfo : sounds)
-	{
+	for(auto &sndInfo : sounds) {
 		auto &snd = sndInfo.sound;
-		if(sndInfo.container == false)
-		{
-			Con::cout<<sndInfo.index<<": ";
+		if(sndInfo.container == false) {
+			Con::cout << sndInfo.index << ": ";
 			if(snd == nullptr)
-				Con::cout<<"NULL";
-			else
-			{
-				auto *csnd = static_cast<CALSound*>(snd.get());
+				Con::cout << "NULL";
+			else {
+				auto *csnd = static_cast<CALSound *>(snd.get());
 				auto src = csnd->GetSource();
 				auto buf = csnd->GetBuffer();
-				Con::cout<<"Buffer "<<buf<<" on source "<<src<<";";
+				Con::cout << "Buffer " << buf << " on source " << src << ";";
 				auto state = csnd->GetState();
-				Con::cout<<" State: ";
-				switch(state)
-				{
-					case AL_INITIAL:
-						Con::cout<<"Initial";
-						break;
-					case AL_PLAYING:
-						Con::cout<<"Playing";
-						break;
-					case AL_PAUSED:
-						Con::cout<<"Paused";
-						break;
-					case AL_STOPPED:
-						Con::cout<<"Stopped";
-						break;
-					default:
-						Con::cout<<"Unknown";
-						break;
+				Con::cout << " State: ";
+				switch(state) {
+				case AL_INITIAL:
+					Con::cout << "Initial";
+					break;
+				case AL_PLAYING:
+					Con::cout << "Playing";
+					break;
+				case AL_PAUSED:
+					Con::cout << "Paused";
+					break;
+				case AL_STOPPED:
+					Con::cout << "Stopped";
+					break;
+				default:
+					Con::cout << "Unknown";
+					break;
 				}
-				Con::cout<<"; Source: ";
+				Con::cout << "; Source: ";
 				std::string name;
-				if(client->GetSoundName(buf,name) == true)
-					Con::cout<<name;
+				if(client->GetSoundName(buf, name) == true)
+					Con::cout << name;
 				else
-					Con::cout<<"Unknown";
+					Con::cout << "Unknown";
 			}
-			Con::cout<<Con::endl;
+			Con::cout << Con::endl;
 		}
 	}
 }
 
-void CMD_cl_dump_netmessages(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
+void CMD_cl_dump_netmessages(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	auto *map = GetClientMessageMap();
-	std::unordered_map<std::string,unsigned int> *netmessages;
+	std::unordered_map<std::string, unsigned int> *netmessages;
 	map->GetNetMessages(&netmessages);
-	if(!argv.empty())
-	{
+	if(!argv.empty()) {
 		auto id = atoi(argv.front().c_str());
-		for(auto it=netmessages->begin();it!=netmessages->end();++it)
-		{
-			if(it->second == id)
-			{
-				Con::cout<<"Message Identifier: "<<it->first<<Con::endl;
+		for(auto it = netmessages->begin(); it != netmessages->end(); ++it) {
+			if(it->second == id) {
+				Con::cout << "Message Identifier: " << it->first << Con::endl;
 				return;
 			}
 		}
-		Con::cout<<"No message with id "<<id<<" found!"<<Con::endl;
+		Con::cout << "No message with id " << id << " found!" << Con::endl;
 		return;
 	}
-	for(auto it=netmessages->begin();it!=netmessages->end();++it)
-		Con::cout<<it->first<<" = "<<it->second<<Con::endl;
+	for(auto it = netmessages->begin(); it != netmessages->end(); ++it)
+		Con::cout << it->first << " = " << it->second << Con::endl;
 }
 #endif
 
-static std::string get_screenshot_name(Game *game,uimg::ImageFormat format)
+static std::string get_screenshot_name(Game *game, uimg::ImageFormat format)
 {
 	std::string map;
 	if(game == nullptr)
@@ -322,21 +306,19 @@ static std::string get_screenshot_name(Game *game,uimg::ImageFormat format)
 		map = game->GetMapName();
 	std::string path;
 	int i = 1;
-	do
-	{
+	do {
 		path = "screenshots\\";
 		path += map;
-		path += ustring::fill_zeroes(std::to_string(i),4);
-		path += "." +uimg::get_image_output_format_extension(format);
+		path += ustring::fill_zeroes(std::to_string(i), 4);
+		path += "." + uimg::get_image_output_format_extension(format);
 		i++;
-	}
-	while(FileManager::Exists(path.c_str()/*,fsys::SearchFlags::Local*/));
+	} while(FileManager::Exists(path.c_str() /*,fsys::SearchFlags::Local*/));
 	return path;
 }
 
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_texture.hpp>
-void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
+void CMD_screenshot(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	auto *game = client->GetGameState();
 	if(game == nullptr)
@@ -344,22 +326,20 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 	// Determine file name for screenshot
 	FileManager::CreateDirectory("screenshot");
 
-	std::unordered_map<std::string,pragma::console::CommandOption> commandOptions {};
-	pragma::console::parse_command_options(argv,commandOptions);
+	std::unordered_map<std::string, pragma::console::CommandOption> commandOptions {};
+	pragma::console::parse_command_options(argv, commandOptions);
 
-	auto mode = pragma::console::get_command_option_parameter_value(commandOptions,"mode");
-	if(ustring::compare<std::string>(mode,"raytracing",false))
-	{
+	auto mode = pragma::console::get_command_option_parameter_value(commandOptions, "mode");
+	if(ustring::compare<std::string>(mode, "raytracing", false)) {
 		auto *pCam = c_game->GetRenderCamera();
-		Con::cout<<"Taking raytraced screenshot..."<<Con::endl;
-		Con::cout<<"Preparing scene for raytracing..."<<Con::endl;
+		Con::cout << "Taking raytraced screenshot..." << Con::endl;
+		Con::cout << "Preparing scene for raytracing..." << Con::endl;
 
 		// A raytracing screenshot has been requested; We'll have to re-render the scene with raytracing enabled
 
 		auto format = uimg::ImageFormat::PNG;
 		auto itFormat = commandOptions.find("format");
-		if(itFormat != commandOptions.end())
-		{
+		if(itFormat != commandOptions.end()) {
 			std::string customFormat {};
 			if(itFormat->second.parameters.empty() == false)
 				customFormat = itFormat->second.parameters.front();
@@ -367,17 +347,16 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 			if(eCustomFormat.has_value())
 				format = *eCustomFormat;
 			else
-				Con::cwar<<"Unsupported format '"<<customFormat<<"'! Using PNG instead..."<<Con::endl;
+				Con::cwar << "Unsupported format '" << customFormat << "'! Using PNG instead..." << Con::endl;
 		}
 		auto resolution = c_engine->GetRenderResolution();
 		pragma::rendering::cycles::SceneInfo sceneInfo {};
-		sceneInfo.width = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"width",std::to_string(resolution.x)));
-		sceneInfo.height = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"height",std::to_string(resolution.y)));
-		sceneInfo.samples = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"samples","1024"));
-		sceneInfo.hdrOutput = false;//;//(format == pragma::image::ImageOutputFormat::HDR);
+		sceneInfo.width = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "width", std::to_string(resolution.x)));
+		sceneInfo.height = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "height", std::to_string(resolution.y)));
+		sceneInfo.samples = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "samples", "1024"));
+		sceneInfo.hdrOutput = false; //;//(format == pragma::image::ImageOutputFormat::HDR);
 		pragma::rendering::cycles::RenderImageInfo renderImgInfo {};
-		if(pCam)
-		{
+		if(pCam) {
 			renderImgInfo.camPose = pCam->GetEntity().GetPose();
 			renderImgInfo.farZ = pCam->GetFarZ();
 			renderImgInfo.fov = pCam->GetFOV();
@@ -394,11 +373,10 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 
 		auto toneMapping = uimg::ToneMapping::GammaCorrection;
 		auto itToneMapping = commandOptions.find("tone_mapping");
-		if(itToneMapping != commandOptions.end() && itToneMapping->second.parameters.empty() == false)
-		{
+		if(itToneMapping != commandOptions.end() && itToneMapping->second.parameters.empty() == false) {
 			auto customToneMapping = uimg::string_to_tone_mapping(itToneMapping->second.parameters.front());
 			if(customToneMapping.has_value() == false)
-				Con::cwar<<"'"<<itToneMapping->second.parameters.front()<<"' is not a valid tone mapper!"<<Con::endl;
+				Con::cwar << "'" << itToneMapping->second.parameters.front() << "' is not a valid tone mapper!" << Con::endl;
 			else
 				toneMapping = *customToneMapping;
 		}
@@ -413,40 +391,37 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 
 		auto itSkyAngles = commandOptions.find("sky_angles");
 		if(itSkyAngles != commandOptions.end() && itSkyAngles->second.parameters.empty() == false)
-			sceneInfo.skyAngles = EulerAngles{itSkyAngles->second.parameters.front()};
+			sceneInfo.skyAngles = EulerAngles {itSkyAngles->second.parameters.front()};
 
-		Con::cout<<"Executing raytracer... This may take a few minutes!"<<Con::endl;
-		auto job = pragma::rendering::cycles::render_image(*client,sceneInfo,renderImgInfo);
-		if(job.IsValid())
-		{
-			job.SetCompletionHandler([format,quality,toneMapping](util::ParallelWorker<uimg::ImageLayerSet> &worker) {
-				if(worker.IsSuccessful() == false)
-				{
-					Con::cwar<<"Raytraced screenshot failed: "<<worker.GetResultMessage()<<Con::endl;
+		Con::cout << "Executing raytracer... This may take a few minutes!" << Con::endl;
+		auto job = pragma::rendering::cycles::render_image(*client, sceneInfo, renderImgInfo);
+		if(job.IsValid()) {
+			job.SetCompletionHandler([format, quality, toneMapping](util::ParallelWorker<uimg::ImageLayerSet> &worker) {
+				if(worker.IsSuccessful() == false) {
+					Con::cwar << "Raytraced screenshot failed: " << worker.GetResultMessage() << Con::endl;
 					return;
 				}
 
-				auto path = get_screenshot_name(client ? client->GetGameState() : nullptr,format);
-				Con::cout<<"Raytracing complete! Saving screenshot as '"<<path<<"'..."<<Con::endl;
-				auto fp = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"wb");
-				if(fp == nullptr)
-				{
-					Con::cwar<<"Unable to open file '"<<path<<"' for writing!"<<Con::endl;
+				auto path = get_screenshot_name(client ? client->GetGameState() : nullptr, format);
+				Con::cout << "Raytracing complete! Saving screenshot as '" << path << "'..." << Con::endl;
+				auto fp = FileManager::OpenFile<VFilePtrReal>(path.c_str(), "wb");
+				if(fp == nullptr) {
+					Con::cwar << "Unable to open file '" << path << "' for writing!" << Con::endl;
 					return;
 				}
 				auto imgBuffer = worker.GetResult().images.begin()->second;
 				if(imgBuffer->IsHDRFormat())
 					imgBuffer = imgBuffer->ApplyToneMapping(toneMapping);
 				fsys::File f {fp};
-				if(uimg::save_image(f,*imgBuffer,format,quality) == false)
-					Con::cwar<<"Unable to save screenshot as '"<<path<<"'!"<<Con::endl;
+				if(uimg::save_image(f, *imgBuffer, format, quality) == false)
+					Con::cwar << "Unable to save screenshot as '" << path << "'!" << Con::endl;
 
 				// Obsolete
 				// imgBuffer->Convert(util::ImageBuffer::Format::RGB8);
 				// util::tga::write_tga(f,imgBuffer->GetWidth(),imgBuffer->GetHeight(),static_cast<uint8_t*>(imgBuffer->GetData()));
 			});
 			job.Start();
-			c_engine->AddParallelJob(job,"Raytraced screenshot");
+			c_engine->AddParallelJob(job, "Raytraced screenshot");
 		}
 		return;
 	}
@@ -537,19 +512,14 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 #endif
 	{
 		// Just use the last rendered image
-		auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent*>(scene->GetRenderer()) : nullptr;
+		auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent *>(scene->GetRenderer()) : nullptr;
 		if(renderer == nullptr)
 			return;
 
-		enum class ImageStage : uint8_t
-		{
-			GameScene = 0,
-			ScreenOutput
-		};
+		enum class ImageStage : uint8_t { GameScene = 0, ScreenOutput };
 		auto stage = ImageStage::ScreenOutput;
 		std::shared_ptr<prosper::RenderTarget> rt = nullptr;
-		switch(stage)
-		{
+		switch(stage) {
 		case ImageStage::GameScene:
 			rt = renderer->GetHDRInfo().toneMappedRenderTarget;
 			break;
@@ -573,32 +543,30 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		// TODO: Check if image formats are compatible (https://www.khronos.org/registry/vulkan/specs/1.1-extensions/html/vkspec.html#features-formats-compatibility)
 		// before issuing the copy command
 		uint32_t queueFamilyIndex;
-		auto cmdBuffer = c_engine->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Universal,queueFamilyIndex);
+		auto cmdBuffer = c_engine->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Universal, queueFamilyIndex);
 		cmdBuffer->StartRecording();
-		cmdBuffer->RecordImageBarrier(img,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal);
-		cmdBuffer->RecordCopyImageToBuffer({},img,prosper::ImageLayout::TransferDstOptimal,*bufScreenshot);
-		cmdBuffer->RecordImageBarrier(img,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+		cmdBuffer->RecordImageBarrier(img, prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferSrcOptimal);
+		cmdBuffer->RecordCopyImageToBuffer({}, img, prosper::ImageLayout::TransferDstOptimal, *bufScreenshot);
+		cmdBuffer->RecordImageBarrier(img, prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 		// Note: Blit can't be used because some Nvidia GPUs don't support blitting for images with linear tiling
 		//.RecordBlitImage(**cmdBuffer,{},**img,**imgDst);
 		cmdBuffer->StopRecording();
-		c_engine->GetRenderContext().SubmitCommandBuffer(*cmdBuffer,true);
+		c_engine->GetRenderContext().SubmitCommandBuffer(*cmdBuffer, true);
 	}
 	if(bufScreenshot == nullptr)
 		return;
 	auto imgFormat = uimg::ImageFormat::PNG;
-	auto path = get_screenshot_name(game,imgFormat);
-	auto fp = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"wb");
+	auto path = get_screenshot_name(game, imgFormat);
+	auto fp = FileManager::OpenFile<VFilePtrReal>(path.c_str(), "wb");
 	if(fp == nullptr)
 		return;
 	auto format = imgScreenshot->GetFormat();
 	auto bSwapped = false;
-	if(format == prosper::Format::B8G8R8A8_UNorm)
-	{
+	if(format == prosper::Format::B8G8R8A8_UNorm) {
 		format = prosper::Format::R8G8B8A8_UNorm;
 		bSwapped = true;
 	}
-	else if(format == prosper::Format::B8G8R8_UNorm_PoorCoverage)
-	{
+	else if(format == prosper::Format::B8G8R8_UNorm_PoorCoverage) {
 		format = prosper::Format::R8G8B8_UNorm_PoorCoverage;
 		bSwapped = true;
 	}
@@ -606,8 +574,8 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 	void *data;
 	auto byteSize = prosper::util::get_byte_size(format);
 	auto extents = imgScreenshot->GetExtents();
-	auto numBytes = extents.width *extents.height *byteSize;
-	bufScreenshot->Map(0ull,numBytes,prosper::IBuffer::MapFlags::None,&data);
+	auto numBytes = extents.width * extents.height * byteSize;
+	bufScreenshot->Map(0ull, numBytes, prosper::IBuffer::MapFlags::None, &data);
 #if 0
 	auto layout = imgScreenshot->GetSubresourceLayout();
 	if(layout.has_value() == false)
@@ -686,101 +654,89 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		}
 	}
 #endif
-	auto imgBuf = uimg::ImageBuffer::Create(data,extents.width,extents.height,uimg::Format::RGBA8);
+	auto imgBuf = uimg::ImageBuffer::Create(data, extents.width, extents.height, uimg::Format::RGBA8);
 	fsys::File f {fp};
-	uimg::save_image(f,*imgBuf,imgFormat);
+	uimg::save_image(f, *imgBuf, imgFormat);
 	bufScreenshot->Unmap();
 	//util::tga::write_tga(f,extents.width,extents.height,pixels);
-	Con::cout<<"Saved screenshot as '"<<path<<"'!"<<Con::endl;
+	Con::cout << "Saved screenshot as '" << path << "'!" << Con::endl;
 }
 
-DLLCLIENT void CMD_shader_reload(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
+DLLCLIENT void CMD_shader_reload(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
-	if(argv.empty())
-	{
+	if(argv.empty()) {
 		auto &shaderManager = c_engine->GetShaderManager();
-		for(auto &pair : shaderManager.GetShaderNameToIndexTable())
-		{
-			Con::cout<<"Reloading shader '"<<pair.first<<"'..."<<Con::endl;
+		for(auto &pair : shaderManager.GetShaderNameToIndexTable()) {
+			Con::cout << "Reloading shader '" << pair.first << "'..." << Con::endl;
 			c_engine->ReloadShader(pair.first);
 		}
-		Con::cout<<"All shaders have been reloaded!"<<Con::endl;
+		Con::cout << "All shaders have been reloaded!" << Con::endl;
 		return;
 	}
 	c_engine->ReloadShader(argv.front());
 }
 
-void CMD_shader_optimize(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+void CMD_shader_optimize(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	std::unordered_map<std::string,pragma::console::CommandOption> commandOptions {};
-	pragma::console::parse_command_options(argv,commandOptions);
-	if(argv.empty())
-	{
-		Con::cwar<<"No shader specified!"<<Con::endl;
+	std::unordered_map<std::string, pragma::console::CommandOption> commandOptions {};
+	pragma::console::parse_command_options(argv, commandOptions);
+	if(argv.empty()) {
+		Con::cwar << "No shader specified!" << Con::endl;
 		return;
 	}
 	auto &shaderName = argv.front();
 	auto &renderContext = c_engine->GetRenderContext();
-	if(renderContext.GetAPIAbbreviation() != "VK")
-	{
-		Con::cwar<<"Shader optimization only supported for Vulkan!"<<Con::endl;
+	if(renderContext.GetAPIAbbreviation() != "VK") {
+		Con::cwar << "Shader optimization only supported for Vulkan!" << Con::endl;
 		return;
 	}
 	auto shader = renderContext.GetShader(shaderName);
-	if(shader.expired())
-	{
-		Con::cwar<<"Shader '"<<shaderName<<"' not found!"<<Con::endl;
+	if(shader.expired()) {
+		Con::cwar << "Shader '" << shaderName << "' not found!" << Con::endl;
 		return;
 	}
-	if(shader->IsValid() == false)
-	{
-		Con::cwar<<"Shader '"<<shaderName<<"' is invalid!"<<Con::endl;
+	if(shader->IsValid() == false) {
+		Con::cwar << "Shader '" << shaderName << "' is invalid!" << Con::endl;
 		return;
 	}
-	std::unordered_map<prosper::ShaderStage,std::string> shaderStages;
-	for(auto &stageData : shader->GetStages())
-	{
+	std::unordered_map<prosper::ShaderStage, std::string> shaderStages;
+	for(auto &stageData : shader->GetStages()) {
 		if(stageData == nullptr)
 			continue;
 		shaderStages[stageData->stage] = stageData->path;
 	}
 	std::string infoLog;
-	auto optimizedShaders = renderContext.OptimizeShader(shaderStages,infoLog);
-	if(optimizedShaders.has_value() == false)
-	{
-		Con::cwar<<"Unable to optimize shader: "<<infoLog<<Con::endl;
+	auto optimizedShaders = renderContext.OptimizeShader(shaderStages, infoLog);
+	if(optimizedShaders.has_value() == false) {
+		Con::cwar << "Unable to optimize shader: " << infoLog << Con::endl;
 		return;
 	}
-	auto validate = pragma::console::get_command_option_parameter_value(commandOptions,"validate","0");
-	if(util::to_boolean(validate))
-	{
-		Con::cout<<"Optimization complete!"<<Con::endl;
+	auto validate = pragma::console::get_command_option_parameter_value(commandOptions, "validate", "0");
+	if(util::to_boolean(validate)) {
+		Con::cout << "Optimization complete!" << Con::endl;
 		return; // Don't save shaders
 	}
-	Con::cout<<"Optimization complete! Saving optimized shader files..."<<Con::endl;
+	Con::cout << "Optimization complete! Saving optimized shader files..." << Con::endl;
 	std::string outputPath = "addons/vulkan/";
-	auto reload = util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions,"reload","0"));
-	for(auto &pair : *optimizedShaders)
-	{
+	auto reload = util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions, "reload", "0"));
+	for(auto &pair : *optimizedShaders) {
 		auto itSrc = shaderStages.find(pair.first);
 		if(itSrc == shaderStages.end())
 			continue;
-		auto shaderFile = renderContext.FindShaderFile("shaders/" +itSrc->second);
-		if(shaderFile.has_value() == false)
-		{
-			Con::cwar<<"Unable to find shader file for '"<<pair.second<<"'!"<<Con::endl;
+		auto shaderFile = renderContext.FindShaderFile("shaders/" + itSrc->second);
+		if(shaderFile.has_value() == false) {
+			Con::cwar << "Unable to find shader file for '" << pair.second << "'!" << Con::endl;
 			return;
 		}
-		auto fileName = outputPath +*shaderFile;
+		auto fileName = outputPath + *shaderFile;
 		ufile::remove_extension_from_filename(fileName);
 		fileName += "_vk.gls";
 		if(reload == false && FileManager::Exists(fileName))
 			continue;
 		FileManager::CreatePath(ufile::get_path_from_filename(fileName).c_str());
-		auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(),"w");
-		if(f == nullptr)
-		{
-			Con::cwar<<"Unable to open file '"<<fileName<<"' for writing!"<<Con::endl;
+		auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(), "w");
+		if(f == nullptr) {
+			Con::cwar << "Unable to open file '" << fileName << "' for writing!" << Con::endl;
 			return;
 		}
 		f->WriteString(pair.second);
@@ -788,7 +744,7 @@ void CMD_shader_optimize(NetworkState *state,pragma::BasePlayerComponent *pl,std
 	}
 }
 
-void CMD_shader_list(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
+void CMD_shader_list(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	auto &shaderManager = c_engine->GetShaderManager();
 	std::vector<std::shared_ptr<prosper::Shader>> shaderList;
@@ -796,27 +752,24 @@ void CMD_shader_list(NetworkState*,pragma::BasePlayerComponent*,std::vector<std:
 	shaderList.reserve(shaders.size());
 	for(auto &hShader : shaders)
 		shaderList.push_back(hShader);
-	std::sort(shaderList.begin(),shaderList.end(),[](const std::shared_ptr<prosper::Shader> &a,const std::shared_ptr<prosper::Shader> &b) {
-		return (a->GetIdentifier() < b->GetIdentifier()) ? true : false;
-	});
-	for(auto &shader : shaderList)
-	{
+	std::sort(shaderList.begin(), shaderList.end(), [](const std::shared_ptr<prosper::Shader> &a, const std::shared_ptr<prosper::Shader> &b) { return (a->GetIdentifier() < b->GetIdentifier()) ? true : false; });
+	for(auto &shader : shaderList) {
 		auto &id = shader->GetIdentifier();
-		Con::cout<<id;
+		Con::cout << id;
 		if(shader->IsComputeShader())
-			Con::cout<<" (Compute)";
+			Con::cout << " (Compute)";
 		else if(shader->IsGraphicsShader())
-			Con::cout<<" (Graphics)";
+			Con::cout << " (Graphics)";
 		else
-			Con::cout<<" (Unknown)";
+			Con::cout << " (Unknown)";
 		auto shaderSources = shader->GetSourceFilePaths();
 		for(auto &src : shaderSources)
-			Con::cout<<" ("<<src<<")";
-		Con::cout<<Con::endl;
+			Con::cout << " (" << src << ")";
+		Con::cout << Con::endl;
 	}
 }
 
-DLLCLIENT void CMD_flashlight_toggle(NetworkState*,pragma::BasePlayerComponent *pl,std::vector<std::string>&)
+DLLCLIENT void CMD_flashlight_toggle(NetworkState *, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
 	CGame *game = client->GetGameState();
 	if(game == NULL)
@@ -826,109 +779,97 @@ DLLCLIENT void CMD_flashlight_toggle(NetworkState*,pragma::BasePlayerComponent *
 	pl->ToggleFlashlight();
 }
 
-void CMD_debug_ai_schedule_print(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+void CMD_debug_ai_schedule_print(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	CHECK_CHEATS("debug_ai_schedule_print",state,);
+	CHECK_CHEATS("debug_ai_schedule_print", state, );
 	if(c_game == nullptr || pl == nullptr)
 		return;
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
 	if(charComponent.expired())
 		return;
-	auto ents = command::find_target_entity(state,*charComponent,argv);
+	auto ents = command::find_target_entity(state, *charComponent, argv);
 	BaseEntity *npc = nullptr;
-	for(auto *ent : ents)
-	{
+	for(auto *ent : ents) {
 		if(ent->IsNPC() == false)
 			continue;
 		npc = ent;
 		break;
 	}
-	if(npc == nullptr)
-	{
-		Con::cwar<<"No valid NPC target found!"<<Con::endl;
+	if(npc == nullptr) {
+		Con::cwar << "No valid NPC target found!" << Con::endl;
 		return;
 	}
-	Con::cout<<"Querying schedule data for NPC "<<*npc<<"..."<<Con::endl;
+	Con::cout << "Querying schedule data for NPC " << *npc << "..." << Con::endl;
 	NetPacket p;
-	nwm::write_entity(p,npc);
-	client->SendPacket("debug_ai_schedule_print",p,pragma::networking::Protocol::SlowReliable);
+	nwm::write_entity(p, npc);
+	client->SendPacket("debug_ai_schedule_print", p, pragma::networking::Protocol::SlowReliable);
 }
 
-DLLCLIENT void CMD_reloadmaterial(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
+DLLCLIENT void CMD_reloadmaterial(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
-	CHECK_CHEATS("reloadmaterial",state,);
+	CHECK_CHEATS("reloadmaterial", state, );
 	if(argv.empty())
 		return;
-	Con::cout<<"Reloading '"<<argv[0]<<"'..."<<Con::endl;
-	client->LoadMaterial(argv[0].c_str(),nullptr,true);
+	Con::cout << "Reloading '" << argv[0] << "'..." << Con::endl;
+	client->LoadMaterial(argv[0].c_str(), nullptr, true);
 }
 
-DLLCLIENT void CMD_reloadmaterials(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string>&)
-{
-	CHECK_CHEATS("reloadmaterials",state,);
+DLLCLIENT void CMD_reloadmaterials(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &) { CHECK_CHEATS("reloadmaterials", state, ); }
 
-}
-
-void Console::commands::cl_list(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string>&)
+void Console::commands::cl_list(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	auto &convars = state->GetConVars();
 	std::vector<std::string> cvars(convars.size());
 	size_t idx = 0;
-	for(auto &pair : convars)
-	{
+	for(auto &pair : convars) {
 		cvars[idx] = pair.first;
 		idx++;
 	}
-	std::sort(cvars.begin(),cvars.end());
+	std::sort(cvars.begin(), cvars.end());
 	std::vector<std::string>::iterator it;
-	for(it=cvars.begin();it!=cvars.end();it++)
-		Con::cout<<*it<<Con::endl;
+	for(it = cvars.begin(); it != cvars.end(); it++)
+		Con::cout << *it << Con::endl;
 }
 
-void Console::commands::cl_find(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
+void Console::commands::cl_find(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
-	if(argv.empty())
-	{
-		Con::cwar<<"No argument given!"<<Con::endl;
+	if(argv.empty()) {
+		Con::cwar << "No argument given!" << Con::endl;
 		return;
 	}
 	auto similar = state->FindSimilarConVars(argv.front());
-	if(similar.empty())
-	{
-		Con::cout<<"No potential candidates found!"<<Con::endl;
+	if(similar.empty()) {
+		Con::cout << "No potential candidates found!" << Con::endl;
 		return;
 	}
-	Con::cout<<"Found "<<similar.size()<<" potential candidates:"<<Con::endl;
+	Con::cout << "Found " << similar.size() << " potential candidates:" << Con::endl;
 	for(auto &name : similar)
-		Con::cout<<"- "<<name<<Con::endl;
+		Con::cout << "- " << name << Con::endl;
 }
 
-void CMD_fps(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
-{
-	Con::cout<<"FPS: "<<util::round_string(c_engine->GetFPS(),0)<<Con::endl<<"Frame Time: "<<util::round_string(c_engine->GetFrameTime(),2)<<"ms"<<Con::endl;
-}
+void CMD_fps(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { Con::cout << "FPS: " << util::round_string(c_engine->GetFPS(), 0) << Con::endl << "Frame Time: " << util::round_string(c_engine->GetFrameTime(), 2) << "ms" << Con::endl; }
 
-void Console::commands::vk_dump_limits(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
+void Console::commands::vk_dump_limits(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	// prosper::debug::dump_limits(c_engine->GetRenderContext(),"vk_limits.txt");
 }
-void Console::commands::vk_dump_features(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
+void Console::commands::vk_dump_features(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	// prosper::debug::dump_features(c_engine->GetRenderContext(),"vk_features.txt");
 }
-void Console::commands::vk_dump_format_properties(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
+void Console::commands::vk_dump_format_properties(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	// prosper::debug::dump_format_properties(c_engine->GetRenderContext(),"vk_format_properties.txt");
 }
-void Console::commands::vk_dump_image_format_properties(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
+void Console::commands::vk_dump_image_format_properties(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	// prosper::debug::dump_image_format_properties(c_engine->GetRenderContext(),"vk_image_format_properties.txt");
 }
-void Console::commands::vk_dump_layers(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
+void Console::commands::vk_dump_layers(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	// prosper::debug::dump_layers(c_engine->GetRenderContext(),"vk_layers.txt");
 }
-void Console::commands::vk_dump_extensions(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
+void Console::commands::vk_dump_extensions(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	// prosper::debug::dump_extensions(c_engine->GetRenderContext(),"vk_extensions.txt");
 }
@@ -948,7 +889,7 @@ void Console::commands::vk_dump_extensions(NetworkState*,pragma::BasePlayerCompo
 		util::get_pretty_bytes(info.unusedRangeSizeMax)<<"\n";
 	ss<<"\n";
 }*/ // prosper TODO
-void Console::commands::vk_dump_memory_stats(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+void Console::commands::vk_dump_memory_stats(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	/*auto &context = c_engine->GetRenderContext();
 	auto &memoryMan = context.GetMemoryManager();
@@ -976,7 +917,7 @@ void Console::commands::vk_dump_memory_stats(NetworkState *state,pragma::BasePla
 	f->WriteString(ss.str());*/ // prosper TODO
 }
 
-void Console::commands::vk_print_memory_stats(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+void Console::commands::vk_print_memory_stats(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 #if 0
 	//bool prosper::util::get_memory_stats(IPrContext &context,MemoryPropertyFlags memPropFlags,DeviceSize &outAvailableSize,DeviceSize &outAllocatedSize)
@@ -1158,16 +1099,15 @@ void Console::commands::vk_print_memory_stats(NetworkState *state,pragma::BasePl
 static void cvar_net_graph(bool val)
 {
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
-	if(dbg == nullptr)
-	{
+	if(dbg == nullptr) {
 		if(val == false)
 			return;
 		dbg = std::make_unique<DebugGameGUI>([]() {
 			auto &wgui = WGUI::GetInstance();
 			auto sz = wgui.GetContext().GetWindow()->GetSize();
 			auto el = wgui.Create<WINetGraph>();
-			el->SetSize(540,180);
-			el->SetPos(sz.x -el->GetWidth(),0);
+			el->SetSize(540, 180);
+			el->SetPos(sz.x - el->GetWidth(), 0);
 			return el->GetHandle();
 		});
 		return;
@@ -1176,6 +1116,4 @@ static void cvar_net_graph(bool val)
 		return;
 	dbg = nullptr;
 }
-REGISTER_CONVAR_CALLBACK_CL(net_graph,[](NetworkState*,ConVar*,bool,bool val) {
-	cvar_net_graph(val);
-})
+REGISTER_CONVAR_CALLBACK_CL(net_graph, [](NetworkState *, ConVar *, bool, bool val) { cvar_net_graph(val); })

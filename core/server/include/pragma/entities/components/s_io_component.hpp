@@ -11,12 +11,9 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_io_component.hpp>
 
-namespace pragma
-{
-	class DLLSERVER SIOComponent final
-		: public BaseIOComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SIOComponent final : public BaseIOComponent {
+	  public:
 		SIOComponent(BaseEntity &ent) : BaseIOComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;

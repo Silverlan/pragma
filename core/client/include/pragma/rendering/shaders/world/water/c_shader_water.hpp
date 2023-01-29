@@ -11,24 +11,19 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include <pragma/types.hpp>
 
-namespace pragma
-{
-	class DLLCLIENT ShaderWater
-		: public ShaderGameWorldLightingPass
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT ShaderWater : public ShaderGameWorldLightingPass {
+	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_WATER;
-		enum class MaterialBinding : uint32_t
-		{
+		enum class MaterialBinding : uint32_t {
 			DuDvMap = 0u,
 			NormalMap,
 
 			Count
 		};
 
-		enum class WaterBinding : uint32_t
-		{
+		enum class WaterBinding : uint32_t {
 			ReflectionMap = 0u,
 			RefractionMap,
 			RefractionDepth,
@@ -38,28 +33,24 @@ namespace pragma
 			Count
 		};
 
-#pragma pack(push,1)
-		struct PushConstants
-		{
+#pragma pack(push, 1)
+		struct PushConstants {
 			float waterFogIntensity;
 			uint32_t enableReflection;
 		};
 #pragma pack(pop)
 
-		ShaderWater(prosper::IPrContext &context,const std::string &identifier);
+		ShaderWater(prosper::IPrContext &context, const std::string &identifier);
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 
-		virtual bool RecordBindEntity(
-			rendering::ShaderProcessor &shaderProcessor,CRenderComponent &renderC,
-			prosper::IShaderPipelineLayout &layout,uint32_t entityInstanceDescriptorSetIndex
-		) const override;
+		virtual bool RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const override;
 		virtual GameShaderSpecializationConstantFlag GetBaseSpecializationFlags() const override;
-	protected:
-		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		virtual void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+	  protected:
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const;
-	private:
+	  private:
 		bool UpdateBindFogDensity();
 	};
 };

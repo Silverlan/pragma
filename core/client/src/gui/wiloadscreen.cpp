@@ -16,48 +16,43 @@
 
 extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
-WILoadScreen::WILoadScreen()
-	: WIMainMenuBase()
-{}
+WILoadScreen::WILoadScreen() : WIMainMenuBase() {}
 
-WILoadScreen::~WILoadScreen()
-{}
+WILoadScreen::~WILoadScreen() {}
 
 void WILoadScreen::Initialize()
 {
 	WIMainMenuBase::Initialize();
-	AddMenuItem(Locale::GetText("cancel"),FunctionCallback<void,WIMainMenuElement*>::Create([this](WIMainMenuElement*) {
-		auto *mainMenu = dynamic_cast<WIMainMenu*>(GetParent());
+	AddMenuItem(Locale::GetText("cancel"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
+		auto *mainMenu = dynamic_cast<WIMainMenu *>(GetParent());
 		if(mainMenu == nullptr)
 			return;
 		mainMenu->OpenMainMenu();
 	}));
 	m_hText = CreateChild<WIText>();
-	auto *pText = static_cast<WIText*>(m_hText.get());
+	auto *pText = static_cast<WIText *>(m_hText.get());
 	pText->SetText("LOADING...");
-	pText->SetColor(1.f,1.f,1.f,1.f);
+	pText->SetColor(1.f, 1.f, 1.f, 1.f);
 	pText->SizeToContents();
 	pText->SetAutoCenterToParentX(true);
 
 	m_hProgress = CreateChild<WIProgressBar>();
-	auto *pProgressBar = static_cast<WIProgressBar*>(m_hProgress.get());
+	auto *pProgressBar = static_cast<WIProgressBar *>(m_hProgress.get());
 	pProgressBar->SetAutoCenterToParentX(true);
 }
 
-void WILoadScreen::SetSize(int x,int y)
+void WILoadScreen::SetSize(int x, int y)
 {
-	WIMainMenuBase::SetSize(x,y);
+	WIMainMenuBase::SetSize(x, y);
 	auto yOffset = 0;
-	if(m_hText.IsValid())
-	{
-		yOffset = CInt32(CFloat(y) *0.6f);
-		auto *pText = static_cast<WIText*>(m_hText.get());
+	if(m_hText.IsValid()) {
+		yOffset = CInt32(CFloat(y) * 0.6f);
+		auto *pText = static_cast<WIText *>(m_hText.get());
 		pText->SetY(yOffset);
 		yOffset += pText->GetHeight();
 	}
-	if(m_hProgress.IsValid())
-	{
-		auto *pProgressBar = static_cast<WIProgressBar*>(m_hProgress.get());
+	if(m_hProgress.IsValid()) {
+		auto *pProgressBar = static_cast<WIProgressBar *>(m_hProgress.get());
 		pProgressBar->SetProgress(0.5f);
 		pProgressBar->SetY(yOffset);
 		pProgressBar->SetWidth(512);

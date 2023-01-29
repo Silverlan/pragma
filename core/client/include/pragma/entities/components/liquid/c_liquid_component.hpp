@@ -15,13 +15,9 @@
 #include <pragma/entities/components/liquid/base_liquid_component.hpp>
 
 class CWaterSurface;
-namespace pragma
-{
-	class DLLCLIENT CLiquidComponent final
-		: public BaseFuncLiquidComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CLiquidComponent final : public BaseFuncLiquidComponent, public CBaseNetComponent {
+	  public:
 		CLiquidComponent(BaseEntity &ent);
 		virtual ~CLiquidComponent() override;
 		virtual void Initialize() override;
@@ -29,8 +25,8 @@ namespace pragma
 		void UpdateSurfaceSimulator();
 
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
-	protected:
+		virtual bool ShouldTransmitNetData() const override { return true; }
+	  protected:
 		virtual void OnEntitySpawn() override;
 		void SetupWater();
 		bool m_bUsingClientsideSimulation = false;
@@ -40,10 +36,8 @@ namespace pragma
 };
 
 class CWaterSurface;
-class DLLCLIENT CFuncWater
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CFuncWater : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

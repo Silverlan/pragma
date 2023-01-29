@@ -11,19 +11,15 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/basetoggle.h>
 
-namespace pragma
-{
-	class DLLSERVER SToggleComponent final
-		: public BaseToggleComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SToggleComponent final : public BaseToggleComponent, public SBaseNetComponent {
+	  public:
 		SToggleComponent(BaseEntity &ent) : BaseToggleComponent(ent) {}
 		virtual void TurnOn() override;
 		virtual void TurnOff() override;
 
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };

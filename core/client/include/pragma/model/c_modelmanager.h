@@ -14,16 +14,13 @@
 class CModel;
 class CModelMesh;
 class CModelSubMesh;
-namespace pragma::asset
-{
-	class DLLCLIENT CModelManager
-		: public ModelManager
-	{
-	public:
+namespace pragma::asset {
+	class DLLCLIENT CModelManager : public ModelManager {
+	  public:
 		using ModelManager::ModelManager;
 
-		virtual std::shared_ptr<Model> CreateModel(uint32_t numBones,const std::string &mdlName) override;
-	private:
+		virtual std::shared_ptr<Model> CreateModel(uint32_t numBones, const std::string &mdlName) override;
+	  private:
 	};
 };
 

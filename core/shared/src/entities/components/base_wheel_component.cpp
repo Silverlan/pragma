@@ -17,9 +17,7 @@
 
 using namespace pragma;
 
-BaseWheelComponent::BaseWheelComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+BaseWheelComponent::BaseWheelComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void BaseWheelComponent::Initialize()
 {
@@ -30,7 +28,7 @@ void BaseWheelComponent::Initialize()
 	ent.AddComponent("transform");
 	ent.AddComponent("model");
 	SetTickPolicy(TickPolicy::Always); // TODO
-	/*m_netEvAttach = SetupNetEvent("attach");
+	                                   /*m_netEvAttach = SetupNetEvent("attach");
 	m_netEvDetach = SetupNetEvent("detach");
 	m_netEvFrontWheel = SetupNetEvent("front_wheel");
 	m_netEvAxle = SetupNetEvent("axle");
@@ -150,16 +148,15 @@ void BaseWheelComponent::UpdateWheel()
 	m_wheelInfo.steeringAngle = CFloat(umath::rad_to_deg(info->m_steering));
 	m_wheelInfo.wheelRotation = CFloat(info->m_rotation);
 	auto &t = info->m_worldTransform;
-	auto btOrigin = t.getOrigin() /PhysEnv::WORLD_SCALE;
+	auto btOrigin = t.getOrigin() / PhysEnv::WORLD_SCALE;
 	auto btRot = t.getRotation();
 
-	auto origin = Vector3(btOrigin.x(),btOrigin.y(),btOrigin.z());
+	auto origin = Vector3(btOrigin.x(), btOrigin.y(), btOrigin.z());
 	origin += GetModelTranslation();
-	auto rotation = Quat(CFloat(btRot.w()),CFloat(btRot.x()),CFloat(btRot.y()),CFloat(btRot.z()));
-	rotation = rotation *GetModelRotation();
+	auto rotation = Quat(CFloat(btRot.w()), CFloat(btRot.x()), CFloat(btRot.y()), CFloat(btRot.z()));
+	rotation = rotation * GetModelRotation();
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent != nullptr)
-	{
+	if(pTrComponent != nullptr) {
 		pTrComponent->SetPosition(origin);
 		pTrComponent->SetOrientation(rotation);
 	}
@@ -172,7 +169,7 @@ void BaseWheelComponent::OnTick(double dt)
 	UpdatePose();
 }
 
-void BaseWheelComponent::SetupWheel(BaseVehicleComponent &vhc,const pragma::physics::WheelCreateInfo &createInfo,uint8_t wheelId)
+void BaseWheelComponent::SetupWheel(BaseVehicleComponent &vhc, const pragma::physics::WheelCreateInfo &createInfo, uint8_t wheelId)
 {
 	m_createInfo = createInfo;
 	m_vehicle = vhc.GetHandle<BaseVehicleComponent>();
@@ -191,7 +188,7 @@ void BaseWheelComponent::UpdatePose()
 	if(pose.has_value() == false)
 		return;
 	auto &entVhc = m_vehicle->GetEntity();
-	auto t = umath::Transform{entVhc.GetPosition(),entVhc.GetRotation()};
+	auto t = umath::Transform {entVhc.GetPosition(), entVhc.GetRotation()};
 	t *= *pose;
 
 	auto &ent = GetEntity();

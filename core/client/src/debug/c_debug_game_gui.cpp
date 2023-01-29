@@ -13,12 +13,9 @@
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-DebugGameGUI::DebugGameGUI(const std::function<WIHandle(void)> &guiFactory)
-	: m_guiFactory(guiFactory)
+DebugGameGUI::DebugGameGUI(const std::function<WIHandle(void)> &guiFactory) : m_guiFactory(guiFactory)
 {
-	m_initCallback = client->AddCallback("OnGameStart",FunctionCallback<void,CGame*>::Create([this](CGame*) {
-		Initialize();
-	}));
+	m_initCallback = client->AddCallback("OnGameStart", FunctionCallback<void, CGame *>::Create([this](CGame *) { Initialize(); }));
 	Initialize();
 }
 
@@ -28,8 +25,7 @@ DebugGameGUI::~DebugGameGUI()
 		m_initCallback.Remove();
 	if(m_guiElement.IsValid())
 		m_guiElement->Remove();
-	for(auto &it : m_callbacks)
-	{
+	for(auto &it : m_callbacks) {
 		if(it.second.IsValid())
 			it.second.Remove();
 	}
@@ -37,7 +33,7 @@ DebugGameGUI::~DebugGameGUI()
 		f();
 }
 
-void DebugGameGUI::SetUserData(uint32_t idx,const std::shared_ptr<void> &data) {m_userData[idx] = data;}
+void DebugGameGUI::SetUserData(uint32_t idx, const std::shared_ptr<void> &data) { m_userData[idx] = data; }
 std::shared_ptr<void> DebugGameGUI::GetUserData(uint32_t idx) const
 {
 	auto it = m_userData.find(idx);
@@ -46,7 +42,7 @@ std::shared_ptr<void> DebugGameGUI::GetUserData(uint32_t idx) const
 	return it->second;
 }
 
-WIBase *DebugGameGUI::GetGUIElement() {return m_guiElement.get();}
+WIBase *DebugGameGUI::GetGUIElement() { return m_guiElement.get(); }
 
 void DebugGameGUI::Initialize()
 {
@@ -55,20 +51,20 @@ void DebugGameGUI::Initialize()
 	if(m_guiFactory == nullptr)
 		return;
 	auto hEl = m_guiFactory();
-	AddCallback("OnGameEnd",FunctionCallback<>::Create([hEl]() {
+	AddCallback("OnGameEnd", FunctionCallback<>::Create([hEl]() {
 		if(hEl.IsValid())
-			const_cast<WIBase*>(hEl.get())->Remove();
+			const_cast<WIBase *>(hEl.get())->Remove();
 	}));
 	m_guiElement = hEl;
 }
 
-void DebugGameGUI::CallOnRemove(const std::function<void(void)> &f) {m_callOnRemove.push_back(f);}
+void DebugGameGUI::CallOnRemove(const std::function<void(void)> &f) { m_callOnRemove.push_back(f); }
 
-void DebugGameGUI::AddCallback(const std::string &identifier,const CallbackHandle &hCallback)
+void DebugGameGUI::AddCallback(const std::string &identifier, const CallbackHandle &hCallback)
 {
 	auto it = m_callbacks.find(identifier);
 	if(it != m_callbacks.end() && it->second.IsValid())
 		it->second.Remove();
 	m_callbacks[identifier] = hCallback;
-	c_game->AddCallback(identifier,hCallback);
+	c_game->AddCallback(identifier, hCallback);
 }

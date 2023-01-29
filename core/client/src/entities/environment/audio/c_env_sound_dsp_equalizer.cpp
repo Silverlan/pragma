@@ -22,7 +22,7 @@ using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
 
-LINK_ENTITY_TO_CLASS(env_sound_dsp_equalizer,CEnvSoundDspEqualizer);
+LINK_ENTITY_TO_CLASS(env_sound_dsp_equalizer, CEnvSoundDspEqualizer);
 
 void CSoundDspEqualizerComponent::ReceiveData(NetPacket &packet)
 {
@@ -57,7 +57,7 @@ void CSoundDspEqualizerComponent::OnEntitySpawn()
 	props.flHighCutoff = m_highCutoff;
 	m_dsp = soundSys->CreateEffect(props);
 }
-void CSoundDspEqualizerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CSoundDspEqualizerComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 //////////////////
 

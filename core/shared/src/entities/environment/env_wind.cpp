@@ -16,11 +16,11 @@ void BaseEnvWindComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"wind_direction",false))
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "wind_direction", false))
 			SetWindDirection(uvec::create(kvData.value));
-		else if(ustring::compare<std::string>(kvData.key,"wind_speed",false))
+		else if(ustring::compare<std::string>(kvData.key, "wind_speed", false))
 			SetWindSpeed(util::to_float(kvData.value));
 		else
 			return util::EventReply::Unhandled;
@@ -28,9 +28,9 @@ void BaseEnvWindComponent::Initialize()
 	});
 }
 
-void BaseEnvWindComponent::SetWindForce(const Vector3 &force) {m_windForce = force;}
-void BaseEnvWindComponent::SetWindDirection(const Vector3 &dir) {SetWindForce(dir *GetWindSpeed());}
-void BaseEnvWindComponent::SetWindSpeed(float speed) {SetWindForce(GetWindDirection() *speed);}
-const Vector3 &BaseEnvWindComponent::GetWindForce() const {return m_windForce;}
-Vector3 BaseEnvWindComponent::GetWindDirection() const {return uvec::get_normal(GetWindForce());}
-float BaseEnvWindComponent::GetWindSpeed() const {return uvec::length(GetWindForce());}
+void BaseEnvWindComponent::SetWindForce(const Vector3 &force) { m_windForce = force; }
+void BaseEnvWindComponent::SetWindDirection(const Vector3 &dir) { SetWindForce(dir * GetWindSpeed()); }
+void BaseEnvWindComponent::SetWindSpeed(float speed) { SetWindForce(GetWindDirection() * speed); }
+const Vector3 &BaseEnvWindComponent::GetWindForce() const { return m_windForce; }
+Vector3 BaseEnvWindComponent::GetWindDirection() const { return uvec::get_normal(GetWindForce()); }
+float BaseEnvWindComponent::GetWindSpeed() const { return uvec::length(GetWindForce()); }

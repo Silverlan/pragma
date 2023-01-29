@@ -18,11 +18,8 @@
 extern DLLSERVER ServerState *server;
 extern DLLSERVER SGame *s_game;
 
-luabind::object Lua::util::Server::fire_bullets(lua_State *l,const BulletInfo &bulletInfo)
-{
-	return fire_bullets(l,bulletInfo,false);
-}
-luabind::object Lua::util::Server::fire_bullets(lua_State *l,const BulletInfo &bulletInfo,bool hitReport)
+luabind::object Lua::util::Server::fire_bullets(lua_State *l, const BulletInfo &bulletInfo) { return fire_bullets(l, bulletInfo, false); }
+luabind::object Lua::util::Server::fire_bullets(lua_State *l, const BulletInfo &bulletInfo, bool hitReport)
 {
 	uint8_t tracerSettings = 0;
 	if(bulletInfo.tracerRadius != BulletInfo::DEFAULT_TRACER_RADIUS)
@@ -49,9 +46,8 @@ luabind::object Lua::util::Server::fire_bullets(lua_State *l,const BulletInfo &b
 	std::vector<int32_t> hitSurfaceMaterials;
 	Vector3 start;
 	uint32_t numTracer = 0;
-	auto r = Lua::util::fire_bullets(l,const_cast<BulletInfo&>(bulletInfo),hitReport,[&hitPositions,&hitNormals,&hitSurfaceMaterials,&start,&numTracer](DamageInfo &dmg,TraceData&,TraceResult &result,uint32_t &tracerCount) {
-		if(result.hitType != RayCastHitType::None)
-		{
+	auto r = Lua::util::fire_bullets(l, const_cast<BulletInfo &>(bulletInfo), hitReport, [&hitPositions, &hitNormals, &hitSurfaceMaterials, &start, &numTracer](DamageInfo &dmg, TraceData &, TraceResult &result, uint32_t &tracerCount) {
+		if(result.hitType != RayCastHitType::None) {
 			hitPositions.push_back(result.position);
 			hitNormals.push_back(result.normal);
 
@@ -61,31 +57,29 @@ luabind::object Lua::util::Server::fire_bullets(lua_State *l,const BulletInfo &b
 		start = dmg.GetSource();
 		numTracer = tracerCount;
 	});
-	auto numHits = umath::min(hitPositions.size(),static_cast<std::size_t>(255));
+	auto numHits = umath::min(hitPositions.size(), static_cast<std::size_t>(255));
 	packet->Write<uint8_t>(static_cast<uint8_t>(numTracer));
 	packet->Write<uint8_t>(tracerSettings);
-	if(tracerSettings &1)
+	if(tracerSettings & 1)
 		packet->Write<float>(bulletInfo.tracerRadius);
-	if(tracerSettings &2)
-	{
+	if(tracerSettings & 2) {
 		packet->Write<uint8_t>(static_cast<uint8_t>(bulletInfo.tracerColor.r));
 		packet->Write<uint8_t>(static_cast<uint8_t>(bulletInfo.tracerColor.g));
 		packet->Write<uint8_t>(static_cast<uint8_t>(bulletInfo.tracerColor.b));
 		packet->Write<uint8_t>(static_cast<uint8_t>(bulletInfo.tracerColor.a));
 	}
-	if(tracerSettings &4)
+	if(tracerSettings & 4)
 		packet->Write<float>(bulletInfo.tracerLength);
-	if(tracerSettings &8)
+	if(tracerSettings & 8)
 		packet->Write<float>(bulletInfo.tracerSpeed);
-	if(tracerSettings &16)
+	if(tracerSettings & 16)
 		packet->WriteString(bulletInfo.tracerMaterial);
-	if(tracerSettings &32)
+	if(tracerSettings & 32)
 		packet->Write<float>(bulletInfo.tracerBloom);
 
 	packet->Write<Vector3>(start);
 	packet->Write<uint8_t>(static_cast<uint8_t>(numHits));
-	for(auto i=decltype(numHits){0};i<numHits;++i)
-	{
+	for(auto i = decltype(numHits) {0}; i < numHits; ++i) {
 		auto &p = hitPositions[i];
 		auto &n = hitNormals[i];
 		auto surfaceMaterial = hitSurfaceMaterials[i];
@@ -93,16 +87,10 @@ luabind::object Lua::util::Server::fire_bullets(lua_State *l,const BulletInfo &b
 		packet->Write<Vector3>(n);
 		packet->Write<int32_t>(surfaceMaterial);
 	}
-	server->SendPacket("fire_bullet",packet,pragma::networking::Protocol::FastUnreliable);
+	server->SendPacket("fire_bullet", packet, pragma::networking::Protocol::FastUnreliable);
 	return r;
 }
 
-void Lua::util::Server::create_giblet(lua_State *l,const GibletCreateInfo &gibletInfo)
-{
-	s_game->CreateGiblet(gibletInfo);
-}
+void Lua::util::Server::create_giblet(lua_State *l, const GibletCreateInfo &gibletInfo) { s_game->CreateGiblet(gibletInfo); }
 
-void Lua::util::Server::create_explosion(lua_State *l,const ::util::SplashDamageInfo &splashDamageInfo)
-{
-	Lua::util::splash_damage(l,splashDamageInfo);
-}
+void Lua::util::Server::create_explosion(lua_State *l, const ::util::SplashDamageInfo &splashDamageInfo) { Lua::util::splash_damage(l, splashDamageInfo); }

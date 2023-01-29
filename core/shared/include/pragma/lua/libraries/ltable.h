@@ -10,10 +10,8 @@
 #include "pragma/networkdefinitions.h"
 #include <pragma/lua/luaapi.h>
 
-namespace Lua
-{
-	namespace table
-	{
+namespace Lua {
+	namespace table {
 		DLLNETWORK int has_value(lua_State *l);
 		DLLNETWORK int random(lua_State *l);
 		DLLNETWORK int is_empty(lua_State *l);

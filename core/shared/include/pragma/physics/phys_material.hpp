@@ -12,26 +12,23 @@
 #include "pragma/physics/base.hpp"
 
 class SurfaceMaterial;
-namespace pragma::physics
-{
-	class DLLNETWORK IMaterial
-		: public IBase
-	{
-	public:
+namespace pragma::physics {
+	class DLLNETWORK IMaterial : public IBase {
+	  public:
 		using IBase::IBase;
-		virtual ~IMaterial()=default;
+		virtual ~IMaterial() = default;
 		void SetFriction(float friction);
-		virtual float GetStaticFriction() const=0;
-		virtual void SetStaticFriction(float friction)=0;
-		virtual float GetDynamicFriction() const=0;
-		virtual void SetDynamicFriction(float friction)=0;
-		virtual float GetRestitution() const=0;
-		virtual void SetRestitution(float restitution)=0;
+		virtual float GetStaticFriction() const = 0;
+		virtual void SetStaticFriction(float friction) = 0;
+		virtual float GetDynamicFriction() const = 0;
+		virtual void SetDynamicFriction(float friction) = 0;
+		virtual float GetRestitution() const = 0;
+		virtual void SetRestitution(float restitution) = 0;
 
 		void SetSurfaceMaterial(SurfaceMaterial &surfMat);
 		SurfaceMaterial *GetSurfaceMaterial() const;
 		virtual void InitializeLuaObject(lua_State *lua) override;
-	private:
+	  private:
 		uint32_t m_surfMatIdx = std::numeric_limits<uint32_t>::max();
 	};
 };

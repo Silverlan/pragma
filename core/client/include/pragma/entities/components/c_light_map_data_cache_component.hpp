@@ -11,14 +11,11 @@
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-namespace pragma
-{
+namespace pragma {
 	struct LightmapDataCache;
-	class DLLCLIENT CLightMapDataCacheComponent final
-		: public BaseEntityComponent
-	{
-	public:
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+	class DLLCLIENT CLightMapDataCacheComponent final : public BaseEntityComponent {
+	  public:
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		CLightMapDataCacheComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
@@ -28,7 +25,7 @@ namespace pragma
 		const std::shared_ptr<LightmapDataCache> &GetLightMapDataCache() const;
 		void ReloadCache();
 		void InitializeUvBuffers();
-	protected:
+	  protected:
 		std::shared_ptr<LightmapDataCache> m_lightmapDataCache = nullptr;
 		std::string m_lightmapDataCacheFile;
 	};

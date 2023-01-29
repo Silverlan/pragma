@@ -11,22 +11,17 @@
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/func/basefuncbutton.h"
 
-namespace pragma
-{
-	class DLLCLIENT CButtonComponent final
-		: public BaseFuncButtonComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CButtonComponent final : public BaseFuncButtonComponent {
+	  public:
 		CButtonComponent(BaseEntity &ent) : BaseFuncButtonComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLCLIENT CFuncButton
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CFuncButton : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

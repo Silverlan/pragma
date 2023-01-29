@@ -16,7 +16,7 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(trigger_push,TriggerPush);
+LINK_ENTITY_TO_CLASS(trigger_push, TriggerPush);
 
 void STriggerPushComponent::Initialize()
 {
@@ -27,7 +27,7 @@ void STriggerPushComponent::Initialize()
 
 ///////
 
-void STriggerPushComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void STriggerPushComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void TriggerPush::Initialize()
 {

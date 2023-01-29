@@ -35,56 +35,53 @@
 
 using namespace pragma;
 
-namespace pragma
-{
+namespace pragma {
 	using ::operator<<;
 };
 
 extern ServerState *server;
 
-std::vector<SPlayerComponent*> SPlayerComponent::s_players;
-const std::vector<SPlayerComponent*> &SPlayerComponent::GetAll() {return s_players;}
-unsigned int SPlayerComponent::GetPlayerCount() {return CUInt32(s_players.size());}
+std::vector<SPlayerComponent *> SPlayerComponent::s_players;
+const std::vector<SPlayerComponent *> &SPlayerComponent::GetAll() { return s_players; }
+unsigned int SPlayerComponent::GetPlayerCount() { return CUInt32(s_players.size()); }
 
-Con::c_cout& SPlayerComponent::print(Con::c_cout &os)
+Con::c_cout &SPlayerComponent::print(Con::c_cout &os)
 {
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	auto nameC = ent.GetNameComponent();
-	os<<"Player["<<(nameC.valid() ? nameC->GetName() : "")<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
+	os << "Player[" << (nameC.valid() ? nameC->GetName() : "") << "][" << ent.GetIndex() << "]"
+	   << "[" << ent.GetClass() << "]"
+	   << "[";
 	auto mdlComponent = ent.GetModelComponent();
 	if(!mdlComponent || mdlComponent->GetModel() == nullptr)
-		os<<"NULL";
+		os << "NULL";
 	else
-		os<<mdlComponent->GetModel()->GetName();
-	os<<"]";
+		os << mdlComponent->GetModel()->GetName();
+	os << "]";
 	return os;
 }
 
-std::ostream& SPlayerComponent::print(std::ostream &os)
+std::ostream &SPlayerComponent::print(std::ostream &os)
 {
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	auto nameC = ent.GetNameComponent();
-	os<<"Player["<<(nameC.valid() ? nameC->GetName() : "")<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
+	os << "Player[" << (nameC.valid() ? nameC->GetName() : "") << "][" << ent.GetIndex() << "]"
+	   << "[" << ent.GetClass() << "]"
+	   << "[";
 	auto mdlComponent = ent.GetModelComponent();
 	if(!mdlComponent || mdlComponent->GetModel() == nullptr)
-		os<<"NULL";
+		os << "NULL";
 	else
-		os<<mdlComponent->GetModel()->GetName();
-	os<<"]";
+		os << mdlComponent->GetModel()->GetName();
+	os << "]";
 	return os;
 }
 
-SPlayerComponent::SPlayerComponent(BaseEntity &ent)
-	: BasePlayerComponent(ent),SBaseNetComponent(),
-	m_session(NULL),m_bAuthed(false),
-	m_bGameReady(false)
-{
-	s_players.push_back(this);
-}
+SPlayerComponent::SPlayerComponent(BaseEntity &ent) : BasePlayerComponent(ent), SBaseNetComponent(), m_session(NULL), m_bAuthed(false), m_bGameReady(false) { s_players.push_back(this); }
 
 SPlayerComponent::~SPlayerComponent()
 {
-	auto it = std::find(s_players.begin(),s_players.end(),this);
+	auto it = std::find(s_players.begin(), s_players.end(), this);
 	if(it != s_players.end())
 		s_players.erase(it);
 }
@@ -98,32 +95,26 @@ bool SPlayerComponent::SendResource(const std::string &fileName) const
 	return r;
 }
 
-void SPlayerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SPlayerComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SPlayerComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BasePlayerComponent::OnEntityComponentAdded(component);
-	auto *pCharComponent = dynamic_cast<BaseCharacterComponent*>(&component);
-	if(pCharComponent != nullptr)
-	{
+	auto *pCharComponent = dynamic_cast<BaseCharacterComponent *>(&component);
+	if(pCharComponent != nullptr) {
 		auto &pFrozenProp = pCharComponent->GetFrozenProperty();
-		FlagCallbackForRemoval(pCharComponent->BindEventUnhandled(SCharacterComponent::EVENT_HANDLE_VIEW_ROTATION,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-			OnSetViewOrientation(static_cast<CEViewRotation&>(evData.get()).rotation);
-		}),CallbackType::Component,pCharComponent);
+		FlagCallbackForRemoval(pCharComponent->BindEventUnhandled(SCharacterComponent::EVENT_HANDLE_VIEW_ROTATION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnSetViewOrientation(static_cast<CEViewRotation &>(evData.get()).rotation); }), CallbackType::Component,
+		  pCharComponent);
 		auto &pSlopeLimitProp = pCharComponent->GetSlopeLimitProperty();
-		FlagCallbackForRemoval(pSlopeLimitProp->AddCallback([this](std::reference_wrapper<const float> oldVal,std::reference_wrapper<const float> newVal) {
-			OnSetSlopeLimit(newVal);
-		}),CallbackType::Component,pCharComponent);
+		FlagCallbackForRemoval(pSlopeLimitProp->AddCallback([this](std::reference_wrapper<const float> oldVal, std::reference_wrapper<const float> newVal) { OnSetSlopeLimit(newVal); }), CallbackType::Component, pCharComponent);
 		auto &pStepOffsetProp = pCharComponent->GetStepOffsetProperty();
-		FlagCallbackForRemoval(pStepOffsetProp->AddCallback([this](std::reference_wrapper<const float> oldVal,std::reference_wrapper<const float> newVal) {
-			OnSetStepOffset(newVal);
-		}),CallbackType::Component,pCharComponent);
+		FlagCallbackForRemoval(pStepOffsetProp->AddCallback([this](std::reference_wrapper<const float> oldVal, std::reference_wrapper<const float> newVal) { OnSetStepOffset(newVal); }), CallbackType::Component, pCharComponent);
 	}
 }
 
 void SPlayerComponent::SetViewRotation(const Quat &rot)
 {
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	auto charC = ent.GetCharacterComponent();
 	if(charC.valid())
 		charC->SetViewOrientation(rot);
@@ -134,12 +125,12 @@ void SPlayerComponent::SetViewRotation(const Quat &rot)
 		return;
 	NetPacket p;
 	p->Write<Quat>(rot);
-	ent.SendNetEvent(m_netEvSetViewOrientation,p,pragma::networking::Protocol::SlowReliable,*session);
+	ent.SendNetEvent(m_netEvSetViewOrientation, p, pragma::networking::Protocol::SlowReliable, *session);
 }
 
-util::EventReply SPlayerComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
+util::EventReply SPlayerComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BasePlayerComponent::HandleEvent(eventId,evData) == util::EventReply::Handled)
+	if(BasePlayerComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	if(eventId == BaseCharacterComponent::EVENT_ON_RESPAWN)
 		OnRespawn();
@@ -148,18 +139,18 @@ util::EventReply SPlayerComponent::HandleEvent(ComponentEventId eventId,Componen
 
 void SPlayerComponent::OnRespawn()
 {
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
 		pPhysComponent->InitializePhysics(PHYSICSTYPE::CAPSULECONTROLLER);
 	SetObserverMode(OBSERVERMODE::FIRSTPERSON);
 
-	ent.SendNetEvent(m_netEvRespawn,pragma::networking::Protocol::SlowReliable);
+	ent.SendNetEvent(m_netEvRespawn, pragma::networking::Protocol::SlowReliable);
 }
 
-void SPlayerComponent::PrintMessage(std::string message,MESSAGE type)
+void SPlayerComponent::PrintMessage(std::string message, MESSAGE type)
 {
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared() == false)
 		return;
 	NetPacket p;
@@ -168,66 +159,64 @@ void SPlayerComponent::PrintMessage(std::string message,MESSAGE type)
 
 	auto *session = GetClientSession();
 	if(session)
-		ent.SendNetEvent(m_netEvPrintMessage,p,pragma::networking::Protocol::FastUnreliable,{*session});
+		ent.SendNetEvent(m_netEvPrintMessage, p, pragma::networking::Protocol::FastUnreliable, {*session});
 }
 
-void SPlayerComponent::Kick(const std::string&)
+void SPlayerComponent::Kick(const std::string &)
 {
 	auto *session = GetClientSession();
 	if(session != nullptr)
-		server->DropClient(*session,pragma::networking::DropReason::Kicked);
-	else
-	{
-		auto &ent = static_cast<SBaseEntity&>(GetEntity());
+		server->DropClient(*session, pragma::networking::DropReason::Kicked);
+	else {
+		auto &ent = static_cast<SBaseEntity &>(GetEntity());
 		ent.RemoveSafely();
 	}
 }
 
-bool SPlayerComponent::IsGameReady() const {return m_bGameReady;}
-void SPlayerComponent::SetGameReady(bool b) {m_bGameReady = b;}
+bool SPlayerComponent::IsGameReady() const { return m_bGameReady; }
+void SPlayerComponent::SetGameReady(bool b) { m_bGameReady = b; }
 
 void SPlayerComponent::DoSetObserverMode(OBSERVERMODE mode)
 {
 	BasePlayerComponent::DoSetObserverMode(mode);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(ent.IsShared())
-	{
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
+	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p,&ent);
+		nwm::write_entity(p, &ent);
 		p->Write<UChar>(CUChar(mode));
 
 		auto *session = GetClientSession();
 		if(session)
-			server->SendPacket("pl_observermode",p,pragma::networking::Protocol::SlowReliable,*session);
+			server->SendPacket("pl_observermode", p, pragma::networking::Protocol::SlowReliable, *session);
 	}
 }
 
 void SPlayerComponent::SetObserverTarget(BaseObservableComponent *ent)
 {
 	BasePlayerComponent::SetObserverTarget(ent);
-	auto &entThis = static_cast<SBaseEntity&>(GetEntity());
+	auto &entThis = static_cast<SBaseEntity &>(GetEntity());
 	if(entThis.IsShared() == false)
 		return;
 	NetPacket p {};
-	nwm::write_entity(p,&ent->GetEntity());
+	nwm::write_entity(p, &ent->GetEntity());
 
 	auto *session = GetClientSession();
 	if(session)
-		entThis.SendNetEvent(m_netEvSetObserverTarget,p,pragma::networking::Protocol::SlowReliable,*session);
+		entThis.SendNetEvent(m_netEvSetObserverTarget, p, pragma::networking::Protocol::SlowReliable, *session);
 }
 
 void SPlayerComponent::OnEntitySpawn()
 {
 	BasePlayerComponent::OnEntitySpawn();
 	InitializeFlashlight();
-	
+
 	InitializeGlobalNameComponent(); // Initialize global name component for level transitions
 }
 
 void SPlayerComponent::InitializeFlashlight()
 {
 	SGame *game = server->GetGameState();
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
 	if(pTrComponent == nullptr)
@@ -236,8 +225,7 @@ void SPlayerComponent::InitializeFlashlight()
 	if(light == nullptr)
 		return;
 	auto pTrComponentLight = light->GetTransformComponent();
-	if(pTrComponentLight)
-	{
+	if(pTrComponentLight) {
 		pTrComponentLight->SetPosition(pTrComponent->GetPosition());
 		pTrComponentLight->SetRotation(charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetRotation());
 	}
@@ -245,12 +233,12 @@ void SPlayerComponent::InitializeFlashlight()
 	m_entFlashlight = light->GetHandle();
 }
 
-std::vector<InputAction> &SPlayerComponent::GetKeyStack() {return m_keyStack;}
-void SPlayerComponent::ClearKeyStack() {m_keyStack.clear();}
+std::vector<InputAction> &SPlayerComponent::GetKeyStack() { return m_keyStack; }
+void SPlayerComponent::ClearKeyStack() { m_keyStack.clear(); }
 
-void SPlayerComponent::ApplyViewRotationOffset(const EulerAngles &ang,float dur)
+void SPlayerComponent::ApplyViewRotationOffset(const EulerAngles &ang, float dur)
 {
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared() == false)
 		return;
 	auto *session = GetClientSession();
@@ -258,9 +246,9 @@ void SPlayerComponent::ApplyViewRotationOffset(const EulerAngles &ang,float dur)
 		return;
 
 	NetPacket p;
-	nwm::write_angles(p,ang);
+	nwm::write_angles(p, ang);
 	p->Write<float>(dur);
-	ent.SendNetEvent(m_netEvApplyViewRotationOffset,p,pragma::networking::Protocol::SlowReliable,*session);
+	ent.SendNetEvent(m_netEvApplyViewRotationOffset, p, pragma::networking::Protocol::SlowReliable, *session);
 }
 
 void SPlayerComponent::InitializeGlobalNameComponent()
@@ -275,7 +263,7 @@ networking::IPAddress SPlayerComponent::GetClientIPAddress() const
 	if(m_session.expired())
 		return {};
 	auto ipAddress = m_session->GetIPAddress();
-	return ipAddress.has_value() ? *ipAddress : networking::IPAddress{};
+	return ipAddress.has_value() ? *ipAddress : networking::IPAddress {};
 }
 
 std::string SPlayerComponent::GetClientIP()
@@ -298,41 +286,33 @@ void SPlayerComponent::Initialize()
 {
 	BasePlayerComponent::Initialize();
 
-	BindEventUnhandled(DamageableComponent::EVENT_ON_TAKE_DAMAGE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		OnTakeDamage(static_cast<CEOnTakeDamage&>(evData.get()).damageInfo);
-	});
-	BindEventUnhandled(BaseScoreComponent::EVENT_ON_SCORE_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		server->UpdatePlayerScore(*this,static_cast<CEOnScoreChanged&>(evData.get()).score);
-	});
-	BindEventUnhandled(BaseNameComponent::EVENT_ON_NAME_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		server->UpdatePlayerName(*this,static_cast<CEOnNameChanged&>(evData.get()).name);
-	});
+	BindEventUnhandled(DamageableComponent::EVENT_ON_TAKE_DAMAGE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnTakeDamage(static_cast<CEOnTakeDamage &>(evData.get()).damageInfo); });
+	BindEventUnhandled(BaseScoreComponent::EVENT_ON_SCORE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { server->UpdatePlayerScore(*this, static_cast<CEOnScoreChanged &>(evData.get()).score); });
+	BindEventUnhandled(BaseNameComponent::EVENT_ON_NAME_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { server->UpdatePlayerName(*this, static_cast<CEOnNameChanged &>(evData.get()).name); });
 }
 
 void SPlayerComponent::OnSetSlopeLimit(float limit)
 {
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(ent.IsShared())
-	{
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
+	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p,&ent);
+		nwm::write_entity(p, &ent);
 		p->Write<float>(limit);
-		server->SendPacket("pl_slopelimit",p,pragma::networking::Protocol::SlowReliable);
+		server->SendPacket("pl_slopelimit", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPlayerComponent::OnSetStepOffset(float offset)
 {
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(ent.IsShared())
-	{
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
+	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p,&ent);
+		nwm::write_entity(p, &ent);
 		p->Write<float>(offset);
-		server->SendPacket("pl_stepoffset",p,pragma::networking::Protocol::SlowReliable);
+		server->SendPacket("pl_stepoffset", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
-void SPlayerComponent::SetClientSession(networking::IServerClient &session) {m_session = session.shared_from_this();}
+void SPlayerComponent::SetClientSession(networking::IServerClient &session) { m_session = session.shared_from_this(); }
 
 void SPlayerComponent::UpdateViewOrientation(const Quat &rot)
 {
@@ -355,105 +335,98 @@ void SPlayerComponent::OnSetViewOrientation(const Quat &orientation)
 	ent.SendNetEvent(m_netEvSetViewOrientation,p,pragma::networking::Protocol::FastUnreliable,*session);*/
 }
 
-networking::IServerClient *SPlayerComponent::GetClientSession() {return m_session.get();}
+networking::IServerClient *SPlayerComponent::GetClientSession() { return m_session.get(); }
 
-void SPlayerComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SPlayerComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->Write<double>(ConnectionTime());
 	if(m_entFlashlight.expired())
-		nwm::write_unique_entity(packet,nullptr);
+		nwm::write_unique_entity(packet, nullptr);
 	else
-		nwm::write_unique_entity(packet,m_entFlashlight.get());
+		nwm::write_unique_entity(packet, m_entFlashlight.get());
 }
 
-bool SPlayerComponent::IsAuthed() {return m_bAuthed;}
-void SPlayerComponent::SetAuthed(bool b) {m_bAuthed = b;}
+bool SPlayerComponent::IsAuthed() { return m_bAuthed; }
+void SPlayerComponent::SetAuthed(bool b) { m_bAuthed = b; }
 
 void SPlayerComponent::SetWalkSpeed(float speed)
 {
 	BasePlayerComponent::SetWalkSpeed(speed);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(ent.IsShared())
-	{
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
+	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p,&ent);
+		nwm::write_entity(p, &ent);
 		p->Write<float>(speed);
-		server->SendPacket("pl_speed_walk",p,pragma::networking::Protocol::SlowReliable);
+		server->SendPacket("pl_speed_walk", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
 void SPlayerComponent::SetRunSpeed(float speed)
 {
 	BasePlayerComponent::SetRunSpeed(speed);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(ent.IsShared())
-	{
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
+	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p,&ent);
+		nwm::write_entity(p, &ent);
 		p->Write<float>(speed);
-		server->SendPacket("pl_speed_run",p,pragma::networking::Protocol::SlowReliable);
+		server->SendPacket("pl_speed_run", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
 void SPlayerComponent::SetCrouchedWalkSpeed(float speed)
 {
 	BasePlayerComponent::SetCrouchedWalkSpeed(speed);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(ent.IsShared())
-	{
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
+	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p,&ent);
+		nwm::write_entity(p, &ent);
 		p->Write<float>(speed);
-		server->SendPacket("pl_speed_crouch_walk",p,pragma::networking::Protocol::SlowReliable);
+		server->SendPacket("pl_speed_crouch_walk", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
 void SPlayerComponent::SetStandHeight(float height)
 {
 	BasePlayerComponent::SetStandHeight(height);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(ent.IsShared())
-	{
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
+	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p,&ent);
+		nwm::write_entity(p, &ent);
 		p->Write<float>(height);
-		server->SendPacket("pl_height_stand",p,pragma::networking::Protocol::SlowReliable);
+		server->SendPacket("pl_height_stand", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPlayerComponent::SetCrouchHeight(float height)
 {
 	BasePlayerComponent::SetCrouchHeight(height);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(ent.IsShared())
-	{
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
+	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p,&ent);
+		nwm::write_entity(p, &ent);
 		p->Write<float>(height);
-		server->SendPacket("pl_height_crouch",p,pragma::networking::Protocol::SlowReliable);
+		server->SendPacket("pl_height_crouch", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPlayerComponent::SetStandEyeLevel(float eyelevel)
 {
 	BasePlayerComponent::SetStandEyeLevel(eyelevel);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(ent.IsShared())
-	{
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
+	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p,&ent);
+		nwm::write_entity(p, &ent);
 		p->Write<float>(eyelevel);
-		server->SendPacket("pl_eyelevel_stand",p,pragma::networking::Protocol::SlowReliable);
+		server->SendPacket("pl_eyelevel_stand", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPlayerComponent::SetCrouchEyeLevel(float eyelevel)
 {
 	BasePlayerComponent::SetCrouchEyeLevel(eyelevel);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(ent.IsShared())
-	{
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
+	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p,&ent);
+		nwm::write_entity(p, &ent);
 		p->Write<float>(eyelevel);
-		server->SendPacket("pl_eyelevel_crouch",p,pragma::networking::Protocol::SlowReliable);
+		server->SendPacket("pl_eyelevel_crouch", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -461,26 +434,25 @@ bool SPlayerComponent::PlaySharedActivity(Activity activity)
 {
 	auto &ent = GetEntity();
 	auto animComponent = ent.GetAnimatedComponent();
-	return animComponent.valid() ? animComponent->PlayActivity(activity,pragma::FPlayAnim::None) : false;
+	return animComponent.valid() ? animComponent->PlayActivity(activity, pragma::FPlayAnim::None) : false;
 }
 
 void SPlayerComponent::SetSprintSpeed(float speed)
 {
 	BasePlayerComponent::SetSprintSpeed(speed);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(ent.IsShared())
-	{
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
+	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p,&ent);
+		nwm::write_entity(p, &ent);
 		p->Write<float>(speed);
-		server->SendPacket("pl_speed_sprint",p,pragma::networking::Protocol::SlowReliable);
+		server->SendPacket("pl_speed_sprint", p, pragma::networking::Protocol::SlowReliable);
 	}
 }
-void SPlayerComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BasePlayerComponent));}
+void SPlayerComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BasePlayerComponent)); }
 void SPlayerComponent::OnTakeDamage(DamageInfo &info)
 {
 	auto &ent = GetEntity();
-	auto *charComponent = static_cast<pragma::SCharacterComponent*>(ent.GetCharacterComponent().get());
+	auto *charComponent = static_cast<pragma::SCharacterComponent *>(ent.GetCharacterComponent().get());
 	if(charComponent != nullptr && charComponent->GetGodMode() == true)
 		info.SetDamage(0);
 }

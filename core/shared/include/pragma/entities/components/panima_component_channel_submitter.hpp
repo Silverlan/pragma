@@ -16,8 +16,7 @@ static constexpr uint8_t get_component_count(udm::Type type)
 {
 	if(udm::is_numeric_type(type))
 		return 1;
-	switch(type)
-	{
+	switch(type) {
 	case udm::Type::Vector2:
 	case udm::Type::Vector2i:
 		return 2;
@@ -32,27 +31,21 @@ static constexpr uint8_t get_component_count(udm::Type type)
 	return 0;
 }
 
-static constexpr bool is_type_compatible(udm::Type channelType,udm::Type memberType)
-{
-	return get_component_count(channelType) <= get_component_count(memberType);
-}
+static constexpr bool is_type_compatible(udm::Type channelType, udm::Type memberType) { return get_component_count(channelType) <= get_component_count(memberType); }
 
-template<typename TChannel,typename TMember,auto TMapArray>
-	requires(pragma::is_animatable_type_v<TChannel> && pragma::is_animatable_type_v<TMember> && is_type_compatible(udm::type_to_enum<TChannel>(),udm::type_to_enum<TMember>()))
-panima::ChannelValueSubmitter get_member_channel_submitter(
-	pragma::BaseEntityComponent &component,uint32_t memberIdx,
-	void(*setter)(const pragma::ComponentMemberInfo&,pragma::BaseEntityComponent&,const void*,void*),
-	void *userData=nullptr
-);
+template<typename TChannel, typename TMember, auto TMapArray>
+    requires(pragma::is_animatable_type_v<TChannel> && pragma::is_animatable_type_v<TMember> && is_type_compatible(udm::type_to_enum<TChannel>(), udm::type_to_enum<TMember>()))
+panima::ChannelValueSubmitter get_member_channel_submitter(pragma::BaseEntityComponent &component, uint32_t memberIdx, void (*setter)(const pragma::ComponentMemberInfo &, pragma::BaseEntityComponent &, const void *, void *), void *userData = nullptr);
 
-template<typename TChannel,typename TMember,typename T,uint32_t I,uint32_t ARRAY_INDEX_COUNT,T MAX_ARRAY_VALUE,template<typename,typename,auto TTFunc> class TFunc,T... values>
-	panima::ChannelValueSubmitter runtime_array_to_compile_time(pragma::BaseEntityComponent &component,uint32_t memberIdx,void(*setter)(const pragma::ComponentMemberInfo&,pragma::BaseEntityComponent&,const void*,void*),void *userData,const std::array<T,ARRAY_INDEX_COUNT> &rtValues);
+template<typename TChannel, typename TMember, typename T, uint32_t I, uint32_t ARRAY_INDEX_COUNT, T MAX_ARRAY_VALUE, template<typename, typename, auto TTFunc> class TFunc, T... values>
+panima::ChannelValueSubmitter runtime_array_to_compile_time(pragma::BaseEntityComponent &component, uint32_t memberIdx, void (*setter)(const pragma::ComponentMemberInfo &, pragma::BaseEntityComponent &, const void *, void *), void *userData,
+  const std::array<T, ARRAY_INDEX_COUNT> &rtValues);
 
-template<typename TChannel,typename TMember,auto TMapArray>
+template<typename TChannel, typename TMember, auto TMapArray>
 struct get_member_channel_submitter_wrapper {
-    panima::ChannelValueSubmitter operator()(pragma::BaseEntityComponent &component,uint32_t memberIdx,void(*setter)(const pragma::ComponentMemberInfo&,pragma::BaseEntityComponent&,const void*,void*),void *userData) const
+	panima::ChannelValueSubmitter operator()(pragma::BaseEntityComponent &component, uint32_t memberIdx, void (*setter)(const pragma::ComponentMemberInfo &, pragma::BaseEntityComponent &, const void *, void *), void *userData) const
 	{
-		return get_member_channel_submitter<TChannel,TMember,TMapArray>(component,memberIdx,setter,userData);
+		return get_member_channel_submitter<TChannel, TMember, TMapArray>(component, memberIdx, setter, userData);
 	}
 };
 

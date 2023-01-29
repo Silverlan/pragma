@@ -12,25 +12,19 @@
 #include "pragma/entities/environment/effects/env_smoke_trail.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLSERVER SSmokeTrailComponent final
-		: public BaseEnvSmokeTrailComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SSmokeTrailComponent final : public BaseEnvSmokeTrailComponent, public SBaseNetComponent {
+	  public:
 		SSmokeTrailComponent(BaseEntity &ent) : BaseEnvSmokeTrailComponent(ent) {}
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLSERVER EnvSmokeTrail
-	: public SBaseEntity
-{
-protected:
-public:
+class DLLSERVER EnvSmokeTrail : public SBaseEntity {
+  protected:
+  public:
 	virtual void Initialize() override;
 };
 

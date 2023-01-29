@@ -9,5 +9,5 @@
 #define __C_LDEF_SHADERINFO_H__
 #include <pragma/lua/ldefinitions.h>
 
-lua_registercheck(Shader,ShaderInfo);
+lua_registercheck(Shader, ShaderInfo);
 #endif

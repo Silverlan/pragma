@@ -18,7 +18,7 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(func_button,FuncButton);
+LINK_ENTITY_TO_CLASS(func_button, FuncButton);
 
 extern ServerState *server;
 extern SGame *s_game;
@@ -27,9 +27,9 @@ void SButtonComponent::Initialize()
 {
 	BaseFuncButtonComponent::Initialize();
 
-	BindEvent(UsableComponent::EVENT_CAN_USE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &bCanUse = static_cast<CECanUseData&>(evData.get()).canUse;
-		bCanUse = (m_tNextUse -s_game->CurTime()) <= 0.f;
+	BindEvent(UsableComponent::EVENT_CAN_USE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &bCanUse = static_cast<CECanUseData &>(evData.get()).canUse;
+		bCanUse = (m_tNextUse - s_game->CurTime()) <= 0.f;
 		return util::EventReply::Handled;
 	});
 
@@ -39,7 +39,7 @@ void SButtonComponent::Initialize()
 
 ////////////
 
-void SButtonComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SButtonComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void FuncButton::Initialize()
 {

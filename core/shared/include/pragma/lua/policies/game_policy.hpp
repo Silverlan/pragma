@@ -52,4 +52,3 @@ namespace luabind {
 #endif
 
 #endif
-

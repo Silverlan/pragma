@@ -3,19 +3,18 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
  * Copyright (c) 2021 Silverlan
- */
+ */
+
 #ifndef __BASE_LIQUID_CONTROL_COMPONENT_HPP__
-#define __BASE_LIQUID_CONTROL_COMPONENT_HPP__
-#include "pragma/entities/components/base_entity_component.hpp"
+#define __BASE_LIQUID_CONTROL_COMPONENT_HPP__
+
+#include "pragma/entities/components/base_entity_component.hpp"
+
 struct BulletInfo;
-namespace pragma
-{
-	class DLLNETWORK BaseLiquidControlComponent
-		: public BaseEntityComponent
-	{
-	public:
-		struct DLLNETWORK SplashInfo
-		{
+namespace pragma {
+	class DLLNETWORK BaseLiquidControlComponent : public BaseEntityComponent {
+	  public:
+		struct DLLNETWORK SplashInfo {
 			Vector3 origin = {};
 			float radius = 0.f;
 			float force = 0.f;
@@ -23,8 +22,8 @@ namespace pragma
 
 		static ComponentEventId EVENT_ON_SPLASH;
 		static ComponentEventId EVENT_ON_PROPERTIES_CHANGED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 
@@ -48,16 +47,15 @@ namespace pragma
 		float GetPropagation() const;
 		virtual void SetPropagation(float propagation);
 
-		virtual void CreateSplash(const Vector3 &origin,float radius,float force);
-	protected:
+		virtual void CreateSplash(const Vector3 &origin, float radius, float force);
+	  protected:
 		BaseLiquidControlComponent(BaseEntity &ent);
-		struct LocalRayResult
-		{
+		struct LocalRayResult {
 			float fraction;
 			float friction;
 			Vector3 hitNormalLocal;
 		};
-		virtual bool OnBulletHit(const BulletInfo &bulletInfo,const TraceData &data,PhysObj *phys,pragma::physics::ICollisionObject *col,const LocalRayResult &result);
+		virtual bool OnBulletHit(const BulletInfo &bulletInfo, const TraceData &data, PhysObj *phys, pragma::physics::ICollisionObject *col, const LocalRayResult &result);
 		void SetSurfaceMaterial(const std::string &mat);
 		void SetSurfaceMaterial(const SurfaceMaterial *mat);
 		Vector3 m_liquidVelocity;
@@ -67,9 +65,7 @@ namespace pragma
 
 		std::queue<SplashInfo> m_splashes;
 	};
-	struct DLLNETWORK CEOnSplash
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CEOnSplash : public ComponentEvent {
 		CEOnSplash(const BaseLiquidControlComponent::SplashInfo &splashInfo);
 		virtual void PushArguments(lua_State *l) override;
 		const BaseLiquidControlComponent::SplashInfo &splashInfo;

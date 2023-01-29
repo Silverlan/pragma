@@ -18,36 +18,30 @@ using namespace pragma;
 
 ComponentEventId BaseFlammableComponent::EVENT_ON_IGNITED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseFlammableComponent::EVENT_ON_EXTINGUISHED = pragma::INVALID_COMPONENT_ID;
-void BaseFlammableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
+void BaseFlammableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_IGNITED = registerEvent("ON_IGNITED",ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_EXTINGUISHED = registerEvent("ON_EXTINGUISHED",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_IGNITED = registerEvent("ON_IGNITED", ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_EXTINGUISHED = registerEvent("ON_EXTINGUISHED", ComponentEventInfo::Type::Broadcast);
 }
-BaseFlammableComponent::BaseFlammableComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent),m_bIsOnFire(util::BoolProperty::Create(false)),
-	m_bIgnitable(util::BoolProperty::Create(true))
-{}
-BaseFlammableComponent::~BaseFlammableComponent()
-{
-	Extinguish();
-}
+BaseFlammableComponent::BaseFlammableComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_bIsOnFire(util::BoolProperty::Create(false)), m_bIgnitable(util::BoolProperty::Create(true)) {}
+BaseFlammableComponent::~BaseFlammableComponent() { Extinguish(); }
 void BaseFlammableComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"flammable",false))
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "flammable", false))
 			*m_bIgnitable = util::to_boolean(kvData.value);
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &inputData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare<std::string>(inputData.input,"setflammable",false))
+	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &inputData = static_cast<CEInputData &>(evData.get());
+		if(ustring::compare<std::string>(inputData.input, "setflammable", false))
 			*m_bIgnitable = util::to_boolean(inputData.data);
-		else if(ustring::compare<std::string>(inputData.input,"ignite",false))
+		else if(ustring::compare<std::string>(inputData.input, "ignite", false))
 			Ignite(util::to_float(inputData.data));
 		else
 			return util::EventReply::Unhandled;
@@ -62,16 +56,15 @@ void BaseFlammableComponent::Initialize()
 }
 void BaseFlammableComponent::OnTick(double dt)
 {
-	if(IsOnFire() && m_tExtinguishTime > 0.f)
-	{
+	if(IsOnFire() && m_tExtinguishTime > 0.f) {
 		auto &t = GetEntity().GetNetworkState()->GetGameState()->CurTime();
 		if(t >= m_tExtinguishTime)
 			Extinguish();
 	}
 }
-util::EventReply BaseFlammableComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
+util::EventReply BaseFlammableComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId,evData) == util::EventReply::Handled)
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	if(eventId == pragma::SubmergibleComponent::EVENT_ON_WATER_SUBMERGED)
 		Extinguish();
@@ -88,9 +81,9 @@ void BaseFlammableComponent::Save(udm::LinkedPropertyWrapperArg udm)
 		tExtinguish -= tCur;
 	udm["timeUntilExtinguish"] = tExtinguish;
 }
-void BaseFlammableComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
+void BaseFlammableComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version)
 {
-	BaseEntityComponent::Load(udm,version);
+	BaseEntityComponent::Load(udm, version);
 	auto ignitable = IsIgnitable();
 	udm["ignitable"](ignitable);
 	SetIgnitable(ignitable);
@@ -99,17 +92,16 @@ void BaseFlammableComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t ver
 	udm["isOnFire"](isOnFire);
 
 	auto tExtinguish = 0.f;
-	if(isOnFire == true)
-	{
+	if(isOnFire == true) {
 		udm["timeUntilExtinguish"](tExtinguish);
 		Ignite(tExtinguish); // TODO: Attacker, inflictor?
 	}
 }
-const util::PBoolProperty &BaseFlammableComponent::GetOnFireProperty() const {return m_bIsOnFire;}
-const util::PBoolProperty &BaseFlammableComponent::GetIgnitableProperty() const {return m_bIgnitable;}
-bool BaseFlammableComponent::IsOnFire() const {return *m_bIsOnFire;}
-bool BaseFlammableComponent::IsIgnitable() const {return *m_bIgnitable;}
-util::EventReply BaseFlammableComponent::Ignite(float duration,BaseEntity *attacker,BaseEntity *inflictor)
+const util::PBoolProperty &BaseFlammableComponent::GetOnFireProperty() const { return m_bIsOnFire; }
+const util::PBoolProperty &BaseFlammableComponent::GetIgnitableProperty() const { return m_bIgnitable; }
+bool BaseFlammableComponent::IsOnFire() const { return *m_bIsOnFire; }
+bool BaseFlammableComponent::IsIgnitable() const { return *m_bIgnitable; }
+util::EventReply BaseFlammableComponent::Ignite(float duration, BaseEntity *attacker, BaseEntity *inflictor)
 {
 	auto &ent = GetEntity();
 	auto pSubmergibleComponent = ent.GetComponent<pragma::SubmergibleComponent>();
@@ -119,15 +111,13 @@ util::EventReply BaseFlammableComponent::Ignite(float duration,BaseEntity *attac
 	SetTickPolicy(TickPolicy::Always);
 	if(duration == 0.f)
 		m_tExtinguishTime = 0.f;
-	else
-	{
-		auto tNew = ent.GetNetworkState()->GetGameState()->CurTime() +duration;
+	else {
+		auto tNew = ent.GetNetworkState()->GetGameState()->CurTime() + duration;
 		if(tNew > m_tExtinguishTime)
 			m_tExtinguishTime = static_cast<float>(tNew);
 	}
-	CEOnIgnited igniteData {duration,attacker,inflictor};
-	return BroadcastEvent(EVENT_ON_IGNITED,igniteData);
-
+	CEOnIgnited igniteData {duration, attacker, inflictor};
+	return BroadcastEvent(EVENT_ON_IGNITED, igniteData);
 }
 void BaseFlammableComponent::Extinguish()
 {
@@ -147,13 +137,10 @@ void BaseFlammableComponent::SetIgnitable(bool b)
 
 ////////////
 
-CEOnIgnited::CEOnIgnited(float duration,BaseEntity *attacker,BaseEntity *inflictor)
-	: duration{duration},attacker{attacker ? attacker->GetHandle() : EntityHandle{}},
-	inflictor{inflictor ? inflictor->GetHandle() : EntityHandle{}}
-{}
+CEOnIgnited::CEOnIgnited(float duration, BaseEntity *attacker, BaseEntity *inflictor) : duration {duration}, attacker {attacker ? attacker->GetHandle() : EntityHandle {}}, inflictor {inflictor ? inflictor->GetHandle() : EntityHandle {}} {}
 void CEOnIgnited::PushArguments(lua_State *l)
 {
-	Lua::PushNumber(l,duration);
+	Lua::PushNumber(l, duration);
 
 	if(attacker.valid())
 		attacker->GetLuaObject().push(l);

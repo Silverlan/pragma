@@ -9,54 +9,51 @@
 #include "pragma/util/util_ballistic.h"
 #include <mathutil/umath_equation_solver.h>
 
-Vector3 umath::calc_ballistic_position(const Vector3 &start,const Vector3 &vel,float gravity,float t)
-{
-	return start +vel *t +0.5f *Vector3{0.f,-gravity,0.f} *t *t;
-}
+Vector3 umath::calc_ballistic_position(const Vector3 &start, const Vector3 &vel, float gravity, float t) { return start + vel * t + 0.5f * Vector3 {0.f, -gravity, 0.f} * t * t; }
 
-bool umath::calc_ballistic_velocity(const Vector3 &start,const Vector3 &end,float angle,float gravity,Vector3 &vel)
+bool umath::calc_ballistic_velocity(const Vector3 &start, const Vector3 &end, float angle, float gravity, Vector3 &vel)
 {
 	// Source: http://www.theappguruz.com/blog/hit-target-using-ballistic-trajectory
-	auto dir = end -start;
+	auto dir = end - start;
 	auto h = dir.y;
 
 	auto dist = uvec::length(dir);
 	auto a = angle;
-	dir.y += dist *umath::tan(a);
+	dir.y += dist * umath::tan(a);
 	uvec::normalize(&dir);
 
 	auto ta = umath::tan(a);
 	if(ta == 0.f)
 		return false;
-	dist += h /ta;
-	auto s = umath::sin(2.0 *a);
+	dist += h / ta;
+	auto s = umath::sin(2.0 * a);
 	if(s == 0.f)
 		return false;
-	vel = dir *sqrtf(dist *gravity /s);
+	vel = dir * sqrtf(dist * gravity / s);
 	return true;
 }
 
-float umath::calc_ballistic_time_of_flight(const Vector3 &start,float launchAngle,float velocity,float gravity)
+float umath::calc_ballistic_time_of_flight(const Vector3 &start, float launchAngle, float velocity, float gravity)
 {
 	// Source: https://en.wikipedia.org/wiki/Trajectory_of_a_projectile
 	launchAngle = launchAngle;
 	auto s = umath::sin(launchAngle);
 	auto y0 = start.y;
-	return (velocity *s +sqrtf((velocity *s) *(velocity *s) +2.f *gravity *y0)) /gravity;
+	return (velocity * s + sqrtf((velocity * s) * (velocity * s) + 2.f * gravity * y0)) / gravity;
 }
-float umath::calc_ballistic_time_of_flight(const Vector3 &start,const Vector3 &vel,float gravity)
+float umath::calc_ballistic_time_of_flight(const Vector3 &start, const Vector3 &vel, float gravity)
 {
 	auto l = uvec::length(vel);
-	auto ang = uvec::to_angle(vel /l);
-	return calc_ballistic_time_of_flight(start,-ang.p,l,gravity);
+	auto ang = uvec::to_angle(vel / l);
+	return calc_ballistic_time_of_flight(start, -ang.p, l, gravity);
 }
-float umath::calc_ballistic_time_of_flight(const Vector3 &start,const Vector3 &end,float launchAngle,float velocity,float gravity) {return calc_ballistic_time_of_flight(start -end,launchAngle,velocity,gravity);}
-float umath::calc_ballistic_time_of_flight(const Vector3 &start,const Vector3 &end,const Vector3 &vel,float gravity) {return calc_ballistic_time_of_flight(start -end,vel,gravity);}
+float umath::calc_ballistic_time_of_flight(const Vector3 &start, const Vector3 &end, float launchAngle, float velocity, float gravity) { return calc_ballistic_time_of_flight(start - end, launchAngle, velocity, gravity); }
+float umath::calc_ballistic_time_of_flight(const Vector3 &start, const Vector3 &end, const Vector3 &vel, float gravity) { return calc_ballistic_time_of_flight(start - end, vel, gravity); }
 
-float umath::calc_ballistic_angle_of_reach(const Vector3 &start,float distance,float initialVelocity,float gravity)
+float umath::calc_ballistic_angle_of_reach(const Vector3 &start, float distance, float initialVelocity, float gravity)
 {
 	// Source: https://en.wikipedia.org/wiki/Trajectory_of_a_projectile
-	return 0.5f *umath::asin((gravity *distance) /(initialVelocity *initialVelocity));
+	return 0.5f * umath::asin((gravity * distance) / (initialVelocity * initialVelocity));
 }
 
 /////////////////////////////////////
@@ -70,7 +67,7 @@ float umath::calc_ballistic_angle_of_reach(const Vector3 &start,float distance,f
 // initial_height (float): distance above flat terrain
 //
 // return (float): maximum range
-float umath::calc_ballistic_range(float speed,float gravity,float initialHeight)
+float umath::calc_ballistic_range(float speed, float gravity, float initialHeight)
 {
 	// Handling these cases is up to your project's coding standards
 	assert(speed > 0.f && gravity > 0.f && initialHeight >= 0.f);
@@ -84,7 +81,7 @@ float umath::calc_ballistic_range(float speed,float gravity,float initialHeight)
 	auto cos = umath::cos(angle);
 	auto sin = umath::sin(angle);
 
-	return (speed *cos /gravity) *(speed *sin +sqrtf(speed *speed *sin *sin +2 *gravity *initialHeight));
+	return (speed * cos / gravity) * (speed * sin + sqrtf(speed * speed * sin * sin + 2 * gravity * initialHeight));
 }
 
 // Solve firing angles for a ballistic projectile with speed and gravity to hit a fixed position.
@@ -94,11 +91,11 @@ float umath::calc_ballistic_range(float speed,float gravity,float initialHeight)
 // target (Vector3): point projectile is trying to hit
 // gravity (float): force of gravity, positive down
 //
-// s0 (out Vector3): firing solution (low angle) 
+// s0 (out Vector3): firing solution (low angle)
 // s1 (out Vector3): firing solution (high angle)
 //
 // return (int): number of unique solutions found: 0, 1, or 2.
-int32_t umath::solve_ballistic_arc(const Vector3 &projPos,float projSpeed,const Vector3 &target,float gravity,std::array<Vector3,2> &s)
+int32_t umath::solve_ballistic_arc(const Vector3 &projPos, float projSpeed, const Vector3 &target, float gravity, std::array<Vector3, 2> &s)
 {
 	// Handling these cases is up to your project's coding standards
 	assert(projPos != target && projSpeed > 0.f && gravity > 0.f);
@@ -110,7 +107,7 @@ int32_t umath::solve_ballistic_arc(const Vector3 &projPos,float projSpeed,const 
 	// Derivation
 	//   (1) x = v*t*cos O
 	//   (2) y = v*t*sin O - .5*g*t^2
-	// 
+	//
 	//   (3) t = x/(cos O*v)                                        [solve t from (1)]
 	//   (4) y = v*x*sin O/(cos O * v) - .5*g*x^2/(cos^2 O*v^2)     [plug t into y=...]
 	//   (5) y = x*tan O - g*x^2/(2*v^2*cos^2 O)                    [reduce; cos/sin = tan]
@@ -123,17 +120,17 @@ int32_t umath::solve_ballistic_arc(const Vector3 &projPos,float projSpeed,const 
 	//   (10) p = (v^2 +- sqrt(v^4 - g(g*x^2 + 2*y*v^2)))/gx        [multiply top/bottom by -2*v*v/x; move 4*v^4/x^2 into root]
 	//   (11) O = atan(p)
 
-	auto diff = target -projPos;
-	auto diffXZ = Vector3(diff.x,0.f,diff.z);
+	auto diff = target - projPos;
+	auto diffXZ = Vector3(diff.x, 0.f, diff.z);
 	auto groundDist = uvec::length(diffXZ);
 
-	auto speed2 = projSpeed *projSpeed;
-	auto speed4 = projSpeed *projSpeed *projSpeed *projSpeed;
+	auto speed2 = projSpeed * projSpeed;
+	auto speed4 = projSpeed * projSpeed * projSpeed * projSpeed;
 	auto y = diff.y;
 	auto x = groundDist;
-	auto gx = gravity *x;
+	auto gx = gravity * x;
 
-	auto root = speed4 -gravity *(gravity *x *x +2 *y *speed2);
+	auto root = speed4 - gravity * (gravity * x * x + 2 * y * speed2);
 
 	// No solution
 	if(root < 0)
@@ -141,14 +138,14 @@ int32_t umath::solve_ballistic_arc(const Vector3 &projPos,float projSpeed,const 
 
 	root = sqrtf(root);
 
-	auto lowAng = umath::atan2(speed2 -root,gx);
-	auto highAng = umath::atan2(speed2 +root,gx);
+	auto lowAng = umath::atan2(speed2 - root, gx);
+	auto highAng = umath::atan2(speed2 + root, gx);
 	int32_t numSolutions = (lowAng != highAng) ? 2 : 1;
 
 	auto groundDir = uvec::get_normal(diffXZ);
-	s[0] = groundDir *static_cast<float>(umath::cos(lowAng) *projSpeed) +uvec::UP *static_cast<float>(umath::sin(lowAng) *projSpeed);
+	s[0] = groundDir * static_cast<float>(umath::cos(lowAng) * projSpeed) + uvec::UP * static_cast<float>(umath::sin(lowAng) * projSpeed);
 	if(numSolutions > 1)
-		s[1] = groundDir *static_cast<float>(umath::cos(highAng) *projSpeed) +uvec::UP *static_cast<float>(umath::sin(highAng) *projSpeed);
+		s[1] = groundDir * static_cast<float>(umath::cos(highAng) * projSpeed) + uvec::UP * static_cast<float>(umath::sin(highAng) * projSpeed);
 	return numSolutions;
 }
 
@@ -160,19 +157,19 @@ int32_t umath::solve_ballistic_arc(const Vector3 &projPos,float projSpeed,const 
 // target_velocity (Vector3): velocity of target
 // gravity (float): force of gravity, positive down
 //
-// s0 (out Vector3): firing solution (fastest time impact) 
+// s0 (out Vector3): firing solution (fastest time impact)
 // s1 (out Vector3): firing solution (next impact)
 // s2 (out Vector3): firing solution (next impact)
 // s3 (out Vector3): firing solution (next impact)
 //
 // return (int): number of unique solutions found: 0, 1, 2, 3, or 4.
-int32_t umath::solve_ballistic_arc(const Vector3 &projPos,float projSpeed,const Vector3 &targetPos,const Vector3 &targetVelocity,float gravity,std::array<Vector3,2> &s)
+int32_t umath::solve_ballistic_arc(const Vector3 &projPos, float projSpeed, const Vector3 &targetPos, const Vector3 &targetVelocity, float gravity, std::array<Vector3, 2> &s)
 {
 	// Initialize output parameters
 	s[0] = uvec::ORIGIN;
 	s[1] = uvec::ORIGIN;
 
-	// Derivation 
+	// Derivation
 	//
 	//  For full derivation see: blog.forrestthewoods.com
 	//  Here is an abbreviated version.
@@ -210,41 +207,34 @@ int32_t umath::solve_ballistic_arc(const Vector3 &projPos,float projSpeed,const 
 	auto R = targetVelocity.z;
 	auto S = projSpeed;
 
-	auto H = M -A;
-	auto J = O -C;
-	auto K = N -B;
-	auto L = -.5f *G;
+	auto H = M - A;
+	auto J = O - C;
+	auto K = N - B;
+	auto L = -.5f * G;
 
 	// Quartic Coeffecients
-	std::array<double,5> c = {
-		L *L,
-		2 *Q *L,
-		Q *Q +2 *K *L -S *S +P *P +R *R,
-		2 *K *Q +2 *H *P +2 *J *R,
-		K *K +H *H +J *J
-	};
+	std::array<double, 5> c = {L * L, 2 * Q * L, Q * Q + 2 * K * L - S * S + P * P + R * R, 2 * K * Q + 2 * H * P + 2 * J * R, K * K + H * H + J * J};
 
 	// Solve quartic
-	std::array<double,4> times;
-	auto numTimes = solve_quartic(c,times);
+	std::array<double, 4> times;
+	auto numTimes = solve_quartic(c, times);
 
 	// Sort so faster collision is found first
-	std::sort(times.begin(),times.end());
+	std::sort(times.begin(), times.end());
 
 	// Plug quartic solutions into base equations
 	// There should never be more than 2 positive, real roots.
-	std::array<Vector3,2> solutions;
+	std::array<Vector3, 2> solutions;
 	int32_t numSolutions = 0;
 
-	for(auto i=decltype(numSolutions){0};i<2;++i)
-	{
+	for(auto i = decltype(numSolutions) {0}; i < 2; ++i) {
 		auto t = times[i];
 		if(t <= 0)
 			continue;
 
-		solutions[numSolutions].x = static_cast<float>((H +P *t) /t);
-		solutions[numSolutions].y = static_cast<float>((K +Q *t -L *t *t) /t);
-		solutions[numSolutions].z = static_cast<float>((J +R *t) /t);
+		solutions[numSolutions].x = static_cast<float>((H + P * t) / t);
+		solutions[numSolutions].y = static_cast<float>((K + Q * t - L * t * t) / t);
+		solutions[numSolutions].z = static_cast<float>((J + R * t) / t);
 		++numSolutions;
 	}
 
@@ -256,7 +246,7 @@ int32_t umath::solve_ballistic_arc(const Vector3 &projPos,float projSpeed,const 
 	return numSolutions;
 }
 
-// Solve the firing arc with a fixed lateral speed. Vertical speed and gravity varies. 
+// Solve the firing arc with a fixed lateral speed. Vertical speed and gravity varies.
 // This enables a visually pleasing arc.
 //
 // proj_pos (Vector3): point projectile will fire from
@@ -268,7 +258,7 @@ int32_t umath::solve_ballistic_arc(const Vector3 &projPos,float projSpeed,const 
 // gravity (out float): gravity necessary to projectile to hit precisely max_height
 //
 // return (bool): true if a valid solution was found
-bool umath::solve_ballistic_arc_lateral(const Vector3 &projPos,float lateralSpeed,const Vector3 &targetPos,float maxHeight,Vector3 &fireVelocity,float &gravity)
+bool umath::solve_ballistic_arc_lateral(const Vector3 &projPos, float lateralSpeed, const Vector3 &targetPos, float maxHeight, Vector3 &fireVelocity, float &gravity)
 {
 	// Handling these cases is up to your project's coding standards
 	assert(projPos != targetPos && lateralSpeed > 0.f && maxHeight > projPos.y);
@@ -276,32 +266,32 @@ bool umath::solve_ballistic_arc_lateral(const Vector3 &projPos,float lateralSpee
 	fireVelocity = uvec::ORIGIN;
 	gravity = std::numeric_limits<float>::quiet_NaN();
 
-	auto diff = targetPos -projPos;
-	auto diffXZ = Vector3(diff.x,0.f,diff.z);
+	auto diff = targetPos - projPos;
+	auto diffXZ = Vector3(diff.x, 0.f, diff.z);
 	auto lateralDist = uvec::length(diffXZ);
 
 	if(lateralDist == 0.f)
 		return false;
 
-	auto time = lateralDist /lateralSpeed;
+	auto time = lateralDist / lateralSpeed;
 
-	fireVelocity = uvec::get_normal(diffXZ) *lateralSpeed;
+	fireVelocity = uvec::get_normal(diffXZ) * lateralSpeed;
 
 	// System of equations. Hit max_height at t=.5*time. Hit target at t=time.
 	//
 	// peak = y0 + vertical_speed*halfTime + .5*gravity*halfTime^2
 	// end = y0 + vertical_speed*time + .5*gravity*time^s
 	// Wolfram Alpha: solve b = a + .5*v*t + .5*g*(.5*t)^2, c = a + vt + .5*g*t^2 for g, v
-	auto a = projPos.y; // initial
-	auto b = maxHeight; // peak
+	auto a = projPos.y;   // initial
+	auto b = maxHeight;   // peak
 	auto c = targetPos.y; // final
 
-	gravity = -4 *(a -2 *b +c) /(time *time);
-	fireVelocity.y = -(3 *a -4 *b +c) /time;
+	gravity = -4 * (a - 2 * b + c) / (time * time);
+	fireVelocity.y = -(3 * a - 4 * b + c) / time;
 	return true;
 }
 
-// Solve the firing arc with a fixed lateral speed. Vertical speed and gravity varies. 
+// Solve the firing arc with a fixed lateral speed. Vertical speed and gravity varies.
 // This enables a visually pleasing arc.
 //
 // proj_pos (Vector3): point projectile will fire from
@@ -314,66 +304,62 @@ bool umath::solve_ballistic_arc_lateral(const Vector3 &projPos,float lateralSpee
 // impact_point (out Vector3): point where moving target will be hit
 //
 // return (bool): true if a valid solution was found
-bool umath::solve_ballistic_arc_lateral(const Vector3 &projPos,float lateralSpeed,const Vector3 &target,const Vector3 &targetVelocity,float maxHeightOffset,Vector3 &fireVelocity,float &gravity,Vector3 &impactPoint)
+bool umath::solve_ballistic_arc_lateral(const Vector3 &projPos, float lateralSpeed, const Vector3 &target, const Vector3 &targetVelocity, float maxHeightOffset, Vector3 &fireVelocity, float &gravity, Vector3 &impactPoint)
 {
-    // Handling these cases is up to your project's coding standards
+	// Handling these cases is up to your project's coding standards
 	assert(projPos != target && lateralSpeed > 0.f);
 
-    // Initialize output variables
-    fireVelocity = uvec::ORIGIN;
-    gravity = 0.f;
-    impactPoint = uvec::ORIGIN;
+	// Initialize output variables
+	fireVelocity = uvec::ORIGIN;
+	gravity = 0.f;
+	impactPoint = uvec::ORIGIN;
 
-    // Ground plane terms
-    auto targetVelXZ = Vector3(targetVelocity.x,0.f,targetVelocity.z);
-    auto diffXZ = target -projPos;
-    diffXZ.y = 0.f;
+	// Ground plane terms
+	auto targetVelXZ = Vector3(targetVelocity.x, 0.f, targetVelocity.z);
+	auto diffXZ = target - projPos;
+	diffXZ.y = 0.f;
 
-    // Derivation
-    //   (1) Base formula: |P + V*t| = S*t
-    //   (2) Substitute variables: |diffXZ + targetVelXZ*t| = S*t
-    //   (3) Square both sides: Dot(diffXZ,diffXZ) + 2*Dot(diffXZ, targetVelXZ)*t + Dot(targetVelXZ, targetVelXZ)*t^2 = S^2 * t^2
-    //   (4) Quadratic: (Dot(targetVelXZ,targetVelXZ) - S^2)t^2 + (2*Dot(diffXZ, targetVelXZ))*t + Dot(diffXZ, diffXZ) = 0
-	std::array<double,3> c = {
-		uvec::dot(targetVelXZ,targetVelXZ) -lateralSpeed *lateralSpeed,
-		2.f *uvec::dot(diffXZ,targetVelXZ),
-		uvec::dot(diffXZ, diffXZ)
-	};
+	// Derivation
+	//   (1) Base formula: |P + V*t| = S*t
+	//   (2) Substitute variables: |diffXZ + targetVelXZ*t| = S*t
+	//   (3) Square both sides: Dot(diffXZ,diffXZ) + 2*Dot(diffXZ, targetVelXZ)*t + Dot(targetVelXZ, targetVelXZ)*t^2 = S^2 * t^2
+	//   (4) Quadratic: (Dot(targetVelXZ,targetVelXZ) - S^2)t^2 + (2*Dot(diffXZ, targetVelXZ))*t + Dot(diffXZ, diffXZ) = 0
+	std::array<double, 3> c = {uvec::dot(targetVelXZ, targetVelXZ) - lateralSpeed * lateralSpeed, 2.f * uvec::dot(diffXZ, targetVelXZ), uvec::dot(diffXZ, diffXZ)};
 
-	std::array<double,2> t;
-	auto n = solve_quadric(c,t);
+	std::array<double, 2> t;
+	auto n = solve_quadric(c, t);
 
-    // pick smallest, positive time
-    auto valid0 = (n > 0) && t[0] > 0;
-    auto valid1 = (n > 1) && t[1] > 0;
-            
-    float tr;
-    if(!valid0 && !valid1)
-        return false;
-    else if(valid0 && valid1)
-        tr = umath::min(static_cast<float>(t[0]),static_cast<float>(t[1]));
-    else
-        tr = valid0 ? static_cast<float>(t[0]) : static_cast<float>(t[1]);
+	// pick smallest, positive time
+	auto valid0 = (n > 0) && t[0] > 0;
+	auto valid1 = (n > 1) && t[1] > 0;
 
-    // Calculate impact point
-    impactPoint = target +(targetVelocity *tr);
+	float tr;
+	if(!valid0 && !valid1)
+		return false;
+	else if(valid0 && valid1)
+		tr = umath::min(static_cast<float>(t[0]), static_cast<float>(t[1]));
+	else
+		tr = valid0 ? static_cast<float>(t[0]) : static_cast<float>(t[1]);
 
-    // Calculate fire velocity along XZ plane
-    auto dir = impactPoint -projPos;
+	// Calculate impact point
+	impactPoint = target + (targetVelocity * tr);
+
+	// Calculate fire velocity along XZ plane
+	auto dir = impactPoint - projPos;
 	dir.y = 0.f;
 	uvec::normalize(&dir);
-    fireVelocity = dir *lateralSpeed;
+	fireVelocity = dir * lateralSpeed;
 
-    // Solve system of equations. Hit max_height at t=.5*time. Hit target at t=time.
-    //
-    // peak = y0 + vertical_speed*halfTime + .5*gravity*halfTime^2
-    // end = y0 + vertical_speed*time + .5*gravity*time^s
-    // Wolfram Alpha: solve b = a + .5*v*t + .5*g*(.5*t)^2, c = a + vt + .5*g*t^2 for g, v
-    auto a = projPos.y; // initial
-    auto b = umath::max(projPos.y,impactPoint.y) +maxHeightOffset; // peak
-    auto cr = impactPoint.y; // final
+	// Solve system of equations. Hit max_height at t=.5*time. Hit target at t=time.
+	//
+	// peak = y0 + vertical_speed*halfTime + .5*gravity*halfTime^2
+	// end = y0 + vertical_speed*time + .5*gravity*time^s
+	// Wolfram Alpha: solve b = a + .5*v*t + .5*g*(.5*t)^2, c = a + vt + .5*g*t^2 for g, v
+	auto a = projPos.y;                                              // initial
+	auto b = umath::max(projPos.y, impactPoint.y) + maxHeightOffset; // peak
+	auto cr = impactPoint.y;                                         // final
 
-    gravity = -4 *(a -2 *b +cr) /(tr *tr);
-    fireVelocity.y = -(3 *a -4 *b +cr) /tr;
-    return true;
+	gravity = -4 * (a - 2 * b + cr) / (tr * tr);
+	fireVelocity.y = -(3 * a - 4 * b + cr) / tr;
+	return true;
 }

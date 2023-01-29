@@ -7,7 +7,6 @@
 
 #include "pragma/lua/lua_doc.hpp"
 
-
 #if ENABLE_LAD == 1
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/lua/util.hpp"
@@ -33,20 +32,19 @@
 
 #undef GetClassInfo
 
-static const pragma::doc::Collection *find_class(const std::vector<pragma::doc::PCollection> &collections,const std::string &className)
+static const pragma::doc::Collection *find_class(const std::vector<pragma::doc::PCollection> &collections, const std::string &className)
 {
-	for(auto &col : collections)
-	{
+	for(auto &col : collections) {
 		if(col->GetName() == className)
 			return col.get();
-		auto *child = find_class(col->GetChildren(),className);
+		auto *child = find_class(col->GetChildren(), className);
 		if(child)
 			return child;
 	}
 	return nullptr;
 }
 
-static void GetClassInfo(lua_State *L,luabind::detail::class_rep * crep)
+static void GetClassInfo(lua_State *L, luabind::detail::class_rep *crep)
 {
 	crep->get_table(L);
 	luabind::object table(luabind::from_stack(L, -1));
@@ -54,31 +52,29 @@ static void GetClassInfo(lua_State *L,luabind::detail::class_rep * crep)
 
 	std::size_t index = 1;
 
-	for(luabind::iterator i(table), e; i != e; ++i)
-	{
+	for(luabind::iterator i(table), e; i != e; ++i) {
 		std::string key;
 		auto lkey = i.key();
 		lkey.push(L);
-		if(Lua::IsString(L,-1))
-			key = Lua::CheckString(L,-1);
-		Lua::Pop(L,1);
+		if(Lua::IsString(L, -1))
+			key = Lua::CheckString(L, -1);
+		Lua::Pop(L, 1);
 
 		auto type = luabind::type(*i);
-		switch(type)
-		{
+		switch(type) {
 		case LUA_TFUNCTION:
-		{
-			std::cout<<"FUNC: "<<key<<std::endl;
-			
-			/*auto *f = FindItem<pragma::doc::Function>(key,&pragma::doc::Collection::GetFunctions);
+			{
+				std::cout << "FUNC: " << key << std::endl;
+
+				/*auto *f = FindItem<pragma::doc::Function>(key,&pragma::doc::Collection::GetFunctions);
 			if(f == nullptr)
 			{
 				std::stringstream ss;
 				ss<<"Function '"<<key<<"' not found!";
 				WriteToLog(ss);
 			}*/
-			break;
-		}
+				break;
+			}
 		case LUA_TBOOLEAN:
 			break;
 		case LUA_TNUMBER:
@@ -93,9 +89,8 @@ static void GetClassInfo(lua_State *L,luabind::detail::class_rep * crep)
 			break;
 		}
 		if(type != LUA_TFUNCTION)
-			Con::cout<<"Type: "<<type<<Con::endl;
-		if(type == LUA_TNUMBER)
-		{
+			Con::cout << "Type: " << type << Con::endl;
+		if(type == LUA_TNUMBER) {
 		}
 		if(type != LUA_TFUNCTION)
 			continue;
@@ -107,89 +102,32 @@ static void GetClassInfo(lua_State *L,luabind::detail::class_rep * crep)
 		member.push(L);
 		luabind::detail::stack_pop pop(L, 1);
 
-		luabind::detail::function_object const* impl_const = *(luabind::detail::function_object const**)lua_touserdata(L, -1);
-		std::cout<<impl_const<<std::endl;
+		luabind::detail::function_object const *impl_const = *(luabind::detail::function_object const **)lua_touserdata(L, -1);
+		std::cout << impl_const << std::endl;
 
-		if(lua_tocfunction(L, -1) == &luabind::detail::property_tag)
-		{
+		if(lua_tocfunction(L, -1) == &luabind::detail::property_tag) {
 			//result.attributes[index++] = i.key();
-		} else
-		{
+		}
+		else {
 			//result.methods[i.key()] = *i;
 		}
 	}
 }
 
-static std::unordered_map<std::string,std::string> g_typeTranslationTable {
-	{"std::string","string"},
-	{"short","int16"},
-	{"unsigned char","uint8"},
-	{"unsigned int","uint32"},
-	{"double","float"},
-	{"__int64","int64"},
-	{"luabind::object","any"},
-	{"File","file.File"},
-	{"Vector","math.Vector"},
-	{"Vertex","game.Model.Vertex"},
-	{"Skeleton","game.Model.Skeleton"},
-	{"Model","game.Model"},
-	{"Sub","game.Model.Mesh.Sub"},
-	{"ModelSubMesh","game.Model.Mesh.Sub"},
-	{"FlexAnimation","game.Model.FlexAnimation"},
-	{"CollisionMesh","game.Model.CollisionMesh"},
-	{"MeshGroup","game.Model.MeshGroup"},
-	{"Joint","game.Model.Joint"},
-	{"Eyeball","game.Model.Eyeball"},
-	{"VertexAnimation","game.Model.VertexAnimation"},
-	{"MeshAnimation","game.Model.VertexAnimation.MeshAnimation"},
-	{"VertexWeight","game.Model.VertexWeight"},
-	{"Flex","game.Model.Flex"},
-	{"Bone","game.Model.Skeleton.Bone"},
-	{"char","char"},
-	{"signed char","char"},
-	{"unsigned short","uint16"},
-	{"unsigned __int64","uint64"},
-	{"int","int32"},
-	{"float","float"},
-	{"bool","bool"},
-	{"FlexAnimationFrame","game.Model.FlexAnimation.Frame"},
-	{"TimerHandle","time.Timer"},
-	{"pragma::ai::Schedule","ai.Schedule"},
-	{"LFile","file.File"},
-	{"Version","util.Version"},
-	{"std::basic_string","string"},
-	{"glm::qua","Quaternion"},
-	{"luabind::argument","any"},
-	{"luabind::object","any"},
-	{"CallbackHandle","Callback"},
-	{"void","nil"},
-	{"BaseGamemodeComponent",""},
-	{"Material","game.Material"},
-	{"ModelMesh","game.Model.Mesh"},
-	{"pragma::nav::Mesh","nav.Mesh"},
-	{"ConVar","console.Var"},
-	{"pragma::animation::AnimatedPose","panima.Pose"},
-	{"pragma::animation::AnimationSlice","panima.Slice"},
-	{"pragma::animation::AnimationPlayer","panima.Player"},
-	{"pragma::animation::AnimationChannel","panima.Channel"},
-	{"pragma::physics::ISliderConstraint","phys.SliderConstraint"},
-	{"pragma::physics::IRigidBody","phys.RigidBody"},
-	{"pragma::physics::IConvexHullShape","phys.ConvexHullShape"},
-	{"pragma::physics::IGhostObject","phys.GhostObj"},
-	{"pragma::physics::IBoxShape","phys.BoxShape"},
-	{"pragma::physics::ISoftBody","phys.SoftBody"},
-	{"pragma::physics::IConeTwistConstraint","phys.ConeTwistConstraint"},
-	{"pragma::physics::IController","phys.Controller"},
-	{"pragma::physics::IConvexShape","phys.ConvexShape"},
-	{"pragma::physics::IVehicle","phys.Vehicle"},
-	{"pragma::physics::IConstraint","phys.Constraint"}
-};
+static std::unordered_map<std::string, std::string> g_typeTranslationTable {{"std::string", "string"}, {"short", "int16"}, {"unsigned char", "uint8"}, {"unsigned int", "uint32"}, {"double", "float"}, {"__int64", "int64"}, {"luabind::object", "any"}, {"File", "file.File"},
+  {"Vector", "math.Vector"}, {"Vertex", "game.Model.Vertex"}, {"Skeleton", "game.Model.Skeleton"}, {"Model", "game.Model"}, {"Sub", "game.Model.Mesh.Sub"}, {"ModelSubMesh", "game.Model.Mesh.Sub"}, {"FlexAnimation", "game.Model.FlexAnimation"}, {"CollisionMesh", "game.Model.CollisionMesh"},
+  {"MeshGroup", "game.Model.MeshGroup"}, {"Joint", "game.Model.Joint"}, {"Eyeball", "game.Model.Eyeball"}, {"VertexAnimation", "game.Model.VertexAnimation"}, {"MeshAnimation", "game.Model.VertexAnimation.MeshAnimation"}, {"VertexWeight", "game.Model.VertexWeight"},
+  {"Flex", "game.Model.Flex"}, {"Bone", "game.Model.Skeleton.Bone"}, {"char", "char"}, {"signed char", "char"}, {"unsigned short", "uint16"}, {"unsigned __int64", "uint64"}, {"int", "int32"}, {"float", "float"}, {"bool", "bool"}, {"FlexAnimationFrame", "game.Model.FlexAnimation.Frame"},
+  {"TimerHandle", "time.Timer"}, {"pragma::ai::Schedule", "ai.Schedule"}, {"LFile", "file.File"}, {"Version", "util.Version"}, {"std::basic_string", "string"}, {"glm::qua", "Quaternion"}, {"luabind::argument", "any"}, {"luabind::object", "any"}, {"CallbackHandle", "Callback"},
+  {"void", "nil"}, {"BaseGamemodeComponent", ""}, {"Material", "game.Material"}, {"ModelMesh", "game.Model.Mesh"}, {"pragma::nav::Mesh", "nav.Mesh"}, {"ConVar", "console.Var"}, {"pragma::animation::AnimatedPose", "panima.Pose"}, {"pragma::animation::AnimationSlice", "panima.Slice"},
+  {"pragma::animation::AnimationPlayer", "panima.Player"}, {"pragma::animation::AnimationChannel", "panima.Channel"}, {"pragma::physics::ISliderConstraint", "phys.SliderConstraint"}, {"pragma::physics::IRigidBody", "phys.RigidBody"},
+  {"pragma::physics::IConvexHullShape", "phys.ConvexHullShape"}, {"pragma::physics::IGhostObject", "phys.GhostObj"}, {"pragma::physics::IBoxShape", "phys.BoxShape"}, {"pragma::physics::ISoftBody", "phys.SoftBody"}, {"pragma::physics::IConeTwistConstraint", "phys.ConeTwistConstraint"},
+  {"pragma::physics::IController", "phys.Controller"}, {"pragma::physics::IConvexShape", "phys.ConvexShape"}, {"pragma::physics::IVehicle", "phys.Vehicle"}, {"pragma::physics::IConstraint", "phys.Constraint"}};
 
 std::unordered_set<std::string> g_typeWarningCache;
-std::unordered_map<std::string,std::string> g_classNameToFullName;
+std::unordered_map<std::string, std::string> g_classNameToFullName;
 
-struct TypeInfo
-{
+struct TypeInfo {
 	std::string typeName;
 	std::vector<TypeInfo> templateParameterTypes;
 };
@@ -199,41 +137,36 @@ static TypeInfo parse_type(std::string_view &str)
 	uint32_t idx = 0;
 	while(idx < str.length() && str[idx] != '\0' && str[idx] != '<' && str[idx] != '>' && str[idx] != ',')
 		++idx;
-	typeInfo.typeName = str.substr(0,idx);
-	str = (idx < str.length()) ? str.substr(idx) : std::string_view{};
+	typeInfo.typeName = str.substr(0, idx);
+	str = (idx < str.length()) ? str.substr(idx) : std::string_view {};
 
-	if(!str.empty())
-	{
-		if(str[0] == '<')
-		{
-			do
-			{
+	if(!str.empty()) {
+		if(str[0] == '<') {
+			do {
 				str = str.substr(1);
 				typeInfo.templateParameterTypes.push_back(parse_type(str));
 				ustring::remove_whitespace(str);
-			}
-			while(!str.empty() && str[0] == ',');
+			} while(!str.empty() && str[0] == ',');
 			if(!str.empty() && str[0] == '>')
 				str = str.substr(1);
 		}
 	}
-	
+
 	return typeInfo;
 }
 
-static void normalize_type_name(pragma::lua::TypeNameManager &nameManager,std::string &type,const TypeInfo *typeInfo=nullptr)
+static void normalize_type_name(pragma::lua::TypeNameManager &nameManager, std::string &type, const TypeInfo *typeInfo = nullptr)
 {
 	auto typeTranslated = nameManager.TranslateType(type);
-	if(typeTranslated.has_value())
-	{
+	if(typeTranslated.has_value()) {
 		type = *typeTranslated;
 		return;
 	}
-	Con::cout<<"Normalize Type Name: "<<type<<Con::endl;
+	Con::cout << "Normalize Type Name: " << type << Con::endl;
 	ustring::remove_whitespace(type);
-	if(ustring::compare(type.data(),"[struct",true,7))
+	if(ustring::compare(type.data(), "[struct", true, 7))
 		type = type.substr(7);
-	if(ustring::compare(type.data(),"[class",true,6))
+	if(ustring::compare(type.data(), "[class", true, 6))
 		type = type.substr(6);
 
 	//ustring::replace(paramName,"util::TSharedHandle<","");
@@ -248,14 +181,14 @@ static void normalize_type_name(pragma::lua::TypeNameManager &nameManager,std::s
 	//	dtype.flags |= pragma::doc::Variant::Flags::Pointer;
 	//if(isConst)
 	//	dtype.flags |= pragma::doc::Variant::Flags::Const;
-	ustring::replace(type,"[","");
-	ustring::replace(type,"]","");
-	ustring::replace(type,"&","");
-	ustring::replace(type,"*","");
-	ustring::replace(type," const","");
-	ustring::replace(type,"luabind::adl::","");
-	ustring::replace(type,"custom","");
-	ustring::replace(type,"enum","");
+	ustring::replace(type, "[", "");
+	ustring::replace(type, "]", "");
+	ustring::replace(type, "&", "");
+	ustring::replace(type, "*", "");
+	ustring::replace(type, " const", "");
+	ustring::replace(type, "luabind::adl::", "");
+	ustring::replace(type, "custom", "");
+	ustring::replace(type, "enum", "");
 	//ustring::replace(paramName,">","");
 	ustring::remove_whitespace(type);
 
@@ -266,17 +199,14 @@ static void normalize_type_name(pragma::lua::TypeNameManager &nameManager,std::s
 	auto it = g_typeTranslationTable.find(baseType);
 	if(it != g_typeTranslationTable.end())
 		type = it->second;
-	else
-	{
+	else {
 		auto it = g_classNameToFullName.find(baseType);
 		if(it != g_classNameToFullName.end())
 			type = it->second;
-		else
-		{
-			if(g_typeWarningCache.find(type) == g_typeWarningCache.end())
-			{
+		else {
+			if(g_typeWarningCache.find(type) == g_typeWarningCache.end()) {
 				g_typeWarningCache.insert(type);
-				Con::cwar<<"Unknown type '"<<type<<"' ('"<<baseType<<"')!"<<Con::endl;
+				Con::cwar << "Unknown type '" << type << "' ('" << baseType << "')!" << Con::endl;
 			}
 		}
 	}
@@ -288,21 +218,20 @@ static std::vector<pragma::doc::Variant> normalize_type_namee(const pragma::doc:
 	auto &newType = newTypes.back();
 	auto &paramName = newType.name;
 	if(paramName.find("luabind::adl") != std::string::npos)
-		std::cout<<"";
-	ustring::replace(paramName,"custom ","");
-	ustring::replace(paramName,"class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >","string");
+		std::cout << "";
+	ustring::replace(paramName, "custom ", "");
+	ustring::replace(paramName, "class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >", "string");
 
-	struct TypeInfo
-	{
+	struct TypeInfo {
 		std::string name;
 		std::vector<TypeInfo> templateTypes;
 		pragma::doc::Variant::Flags flags = pragma::doc::Variant::Flags::None;
 	};
-	auto normalize = [](std::string &type,TypeInfo &dtype) {
+	auto normalize = [](std::string &type, TypeInfo &dtype) {
 		ustring::remove_whitespace(type);
-		if(ustring::compare(type.data(),"[struct",true,7))
+		if(ustring::compare(type.data(), "[struct", true, 7))
 			type = type.substr(7);
-		if(ustring::compare(type.data(),"[class",true,6))
+		if(ustring::compare(type.data(), "[class", true, 6))
 			type = type.substr(6);
 
 		//ustring::replace(paramName,"util::TSharedHandle<","");
@@ -317,29 +246,26 @@ static std::vector<pragma::doc::Variant> normalize_type_namee(const pragma::doc:
 			dtype.flags |= pragma::doc::Variant::Flags::Pointer;
 		if(isConst)
 			dtype.flags |= pragma::doc::Variant::Flags::Const;
-		ustring::replace(type,"[","");
-		ustring::replace(type,"]","");
-		ustring::replace(type,"&","");
-		ustring::replace(type,"*","");
-		ustring::replace(type," const","");
-		ustring::replace(type,"luabind::adl::","");
+		ustring::replace(type, "[", "");
+		ustring::replace(type, "]", "");
+		ustring::replace(type, "&", "");
+		ustring::replace(type, "*", "");
+		ustring::replace(type, " const", "");
+		ustring::replace(type, "luabind::adl::", "");
 		//ustring::replace(paramName,">","");
 		ustring::remove_whitespace(type);
 
 		auto it = g_typeTranslationTable.find(type);
 		if(it != g_typeTranslationTable.end())
 			type = it->second;
-		else
-		{
+		else {
 			auto it = g_classNameToFullName.find(type);
 			if(it != g_classNameToFullName.end())
 				type = it->second;
-			else
-			{
-				if(g_typeWarningCache.find(type) == g_typeWarningCache.end())
-				{
+			else {
+				if(g_typeWarningCache.find(type) == g_typeWarningCache.end()) {
 					g_typeWarningCache.insert(type);
-					Con::cwar<<"Unknown type '"<<type<<"'!"<<Con::endl;
+					Con::cwar << "Unknown type '" << type << "'!" << Con::endl;
 				}
 			}
 		}
@@ -350,11 +276,9 @@ static std::vector<pragma::doc::Variant> normalize_type_namee(const pragma::doc:
 			return std::string::npos;
 		uint32_t idx = 0;
 		uint32_t depth = 1;
-		while(idx < str.length())
-		{
+		while(idx < str.length()) {
 			auto c = str[idx];
-			if(c == '>')
-			{
+			if(c == '>') {
 				if(--depth == 0)
 					return idx;
 			}
@@ -365,17 +289,16 @@ static std::vector<pragma::doc::Variant> normalize_type_namee(const pragma::doc:
 		return std::string::npos;
 	};
 
-	std::function<void(TypeInfo&)> parseTemplateTypes = nullptr;
+	std::function<void(TypeInfo &)> parseTemplateTypes = nullptr;
 	std::string_view vpn {paramName};
-	parseTemplateTypes = [&parseTemplateTypes,&vpn,&normalize,&fFindClosingTag](TypeInfo &type) {
+	parseTemplateTypes = [&parseTemplateTypes, &vpn, &normalize, &fFindClosingTag](TypeInfo &type) {
 		auto pStart = vpn.find('<');
 		auto pEnd = vpn.find('>');
-		if(pStart < pEnd)
-		{
-			type.name = vpn.substr(0,pStart);
-			normalize(type.name,type);
-			vpn = vpn.substr(pStart +1);
-			
+		if(pStart < pEnd) {
+			type.name = vpn.substr(0, pStart);
+			normalize(type.name, type);
+			vpn = vpn.substr(pStart + 1);
+
 			if(type.name == "typehint") // We'll skip this one
 				return parseTemplateTypes(type);
 			uint32_t maxTypes = 1;
@@ -383,13 +306,11 @@ static std::vector<pragma::doc::Variant> normalize_type_namee(const pragma::doc:
 				maxTypes = 2;
 			else if(type.name == "variant" || type.name == "mult")
 				maxTypes = std::numeric_limits<decltype(maxTypes)>::max();
-			for(;;)
-			{
+			for(;;) {
 				type.templateTypes.push_back({});
 				parseTemplateTypes(type.templateTypes.back());
 				auto &t = type.templateTypes.back();
-				if(t.name == "std::shared_ptr" && t.templateTypes.size() == 1)
-				{
+				if(t.name == "std::shared_ptr" && t.templateTypes.size() == 1) {
 					auto tmp = std::move(t.templateTypes[0]);
 					t = std::move(tmp);
 				}
@@ -404,20 +325,19 @@ static std::vector<pragma::doc::Variant> normalize_type_namee(const pragma::doc:
 			if(pEnd == std::string::npos)
 				vpn = {};
 			else
-				vpn = vpn.substr(pEnd +1);
+				vpn = vpn.substr(pEnd + 1);
 			return;
 		}
-		type.name = vpn.substr(0,pEnd);
-		normalize(type.name,type);
+		type.name = vpn.substr(0, pEnd);
+		normalize(type.name, type);
 		if(pEnd == std::string::npos)
 			vpn = {};
 		else
-			vpn = vpn.substr(pEnd +1);
+			vpn = vpn.substr(pEnd + 1);
 	};
 
-	std::string_view strView{paramName};
+	std::string_view strView {paramName};
 	auto typeInfo = parse_type(strView);
-
 
 	return newTypes;
 	/*TypeInfo typeInfo {};
@@ -481,123 +401,104 @@ static std::vector<pragma::doc::Variant> normalize_type_namee(const pragma::doc:
 		return;
 	}*/
 }
-static void apply(pragma::lua::TypeNameManager &nameManager,pragma::doc::Variant &variant,const TypeInfo &typeInfo)
+static void apply(pragma::lua::TypeNameManager &nameManager, pragma::doc::Variant &variant, const TypeInfo &typeInfo)
 {
 	variant.name = typeInfo.typeName;
-	normalize_type_name(nameManager,variant.name,&typeInfo);
-	if(variant.name == "optional")
-	{
-		if(typeInfo.templateParameterTypes.empty())
-		{
+	normalize_type_name(nameManager, variant.name, &typeInfo);
+	if(variant.name == "optional") {
+		if(typeInfo.templateParameterTypes.empty()) {
 			variant.name = "nil";
-			Con::cwar<<"Missing optional template type"<<Con::endl;
+			Con::cwar << "Missing optional template type" << Con::endl;
 		}
-		else
-		{
+		else {
 			auto tmp = std::move(typeInfo.templateParameterTypes.front());
-			apply(nameManager,variant,tmp);
+			apply(nameManager, variant, tmp);
 			variant.flags |= pragma::doc::Variant::Flags::Optional;
 		}
 		return;
 	}
-	if(variant.name == "typehint")
-	{
-		if(typeInfo.templateParameterTypes.empty())
-		{
+	if(variant.name == "typehint") {
+		if(typeInfo.templateParameterTypes.empty()) {
 			variant.name = "nil";
-			Con::cwar<<"Missing typehint template type"<<Con::endl;
+			Con::cwar << "Missing typehint template type" << Con::endl;
 		}
-		else
-		{
+		else {
 			auto tmp = std::move(typeInfo.templateParameterTypes.front());
-			apply(nameManager,variant,tmp);
+			apply(nameManager, variant, tmp);
 		}
 		return;
 	}
-	if(variant.name == "tableT")
-	{
+	if(variant.name == "tableT") {
 		variant.name = "table";
 		if(typeInfo.templateParameterTypes.empty())
-			Con::cwar<<"Missing tableT template type"<<Con::endl;
-		else
-		{
+			Con::cwar << "Missing tableT template type" << Con::endl;
+		else {
 			variant.typeParameters.push_back({});
 			auto &p = variant.typeParameters.back();
-			apply(nameManager,p,typeInfo.templateParameterTypes.front());
+			apply(nameManager, p, typeInfo.templateParameterTypes.front());
 		}
 		return;
 	}
-	if(variant.name == "tableTT")
-	{
+	if(variant.name == "tableTT") {
 		variant.name = "table";
 		if(typeInfo.templateParameterTypes.empty())
-			Con::cwar<<"Missing tableTT template type"<<Con::endl;
-		else
-		{
+			Con::cwar << "Missing tableTT template type" << Con::endl;
+		else {
 			variant.typeParameters.push_back({});
-			apply(nameManager,variant.typeParameters.back(),typeInfo.templateParameterTypes.front());
-			if(typeInfo.templateParameterTypes.size() > 1)
-			{
+			apply(nameManager, variant.typeParameters.back(), typeInfo.templateParameterTypes.front());
+			if(typeInfo.templateParameterTypes.size() > 1) {
 				variant.typeParameters.push_back({});
-				apply(nameManager,variant.typeParameters.back(),typeInfo.templateParameterTypes[1]);
+				apply(nameManager, variant.typeParameters.back(), typeInfo.templateParameterTypes[1]);
 			}
 		}
 		return;
 	}
-	if(variant.name == "variant")
-	{
+	if(variant.name == "variant") {
 		variant.name = "variant";
 		if(typeInfo.templateParameterTypes.empty())
-			Con::cwar<<"Missing variant template type"<<Con::endl;
-		else
-		{
+			Con::cwar << "Missing variant template type" << Con::endl;
+		else {
 			variant.typeParameters.reserve(typeInfo.templateParameterTypes.size());
-			for(auto &type : typeInfo.templateParameterTypes)
-			{
+			for(auto &type : typeInfo.templateParameterTypes) {
 				variant.typeParameters.push_back({});
-				apply(nameManager,variant.typeParameters.back(),type);
+				apply(nameManager, variant.typeParameters.back(), type);
 			}
 		}
 		return;
 	}
-	if(variant.name == "mult")
-	{
+	if(variant.name == "mult") {
 		variant.name = "mult";
 		if(typeInfo.templateParameterTypes.empty())
-			Con::cwar<<"Missing mult template type"<<Con::endl;
-		else
-		{
+			Con::cwar << "Missing mult template type" << Con::endl;
+		else {
 			variant.typeParameters.reserve(typeInfo.templateParameterTypes.size());
-			for(auto &type : typeInfo.templateParameterTypes)
-			{
+			for(auto &type : typeInfo.templateParameterTypes) {
 				variant.typeParameters.push_back({});
-				apply(nameManager,variant.typeParameters.back(),type);
+				apply(nameManager, variant.typeParameters.back(), type);
 			}
 		}
 		return;
 	}
-	std::cout<<"";
+	std::cout << "";
 }
-static void normalize_variant(pragma::lua::TypeNameManager &nameManager,pragma::doc::Variant &variant)
+static void normalize_variant(pragma::lua::TypeNameManager &nameManager, pragma::doc::Variant &variant)
 {
 	auto &name = variant.name;
 	if(name.empty())
 		return;
-	static const std::vector<std::pair<std::string,char>> templatePrefixes = {
-		{"std::shared_ptr<",'>'},
-		{"util::WeakHandle<",'>'},
-		{"custom [",']'},
+	static const std::vector<std::pair<std::string, char>> templatePrefixes = {
+	  {"std::shared_ptr<", '>'},
+	  {"util::WeakHandle<", '>'},
+	  {"custom [", ']'},
 	};
-	for(auto &prefix : templatePrefixes)
-	{
-		if(!ustring::compare(name.c_str(),prefix.first.c_str(),true,prefix.first.length()))
+	for(auto &prefix : templatePrefixes) {
+		if(!ustring::compare(name.c_str(), prefix.first.c_str(), true, prefix.first.length()))
 			continue;
 		name = name.substr(prefix.first.length());
-		name = name.substr(0,name.rfind(prefix.second));
+		name = name.substr(0, name.rfind(prefix.second));
 	}
 	auto typeTranslated = nameManager.TranslateType(name);
-	if(typeTranslated.has_value())
-	{
+	if(typeTranslated.has_value()) {
 		name = *typeTranslated;
 		return;
 	}
@@ -607,8 +508,7 @@ static void normalize_variant(pragma::lua::TypeNameManager &nameManager,pragma::
 	auto typeInfo = parse_type(v);
 	//std::cout<<"TEST: "<<variant.name<<std::endl;
 	//apply(nameManager,variant,typeInfo);
-	if(typeInfo.typeName == "optional")
-	{
+	if(typeInfo.typeName == "optional") {
 		//apply(variant,typeInfo);
 		/*if(typeInfo.templateParameterTypes.empty())
 		{
@@ -748,47 +648,46 @@ static void strip_base_class_methods(std::unordered_map<luabind::detail::class_r
 
 #include "pragma/lua/libraries/lutil.hpp"
 
-class class_rep_public
-{
-public:
+class class_rep_public {
+  public:
 	luabind::type_id m_type;
 	std::vector<luabind::detail::class_rep::base_info> m_bases;
-	const char* m_name;
+	const char *m_name;
 	luabind::detail::lua_reference m_self_ref;
 	luabind::handle m_table;
 	luabind::handle m_default_table;
 	luabind::detail::class_rep::class_type m_class_type;
 	int m_instance_metatable;
-	std::map<const char*, int, luabind::detail::ltstr> m_static_constants;
+	std::map<const char *, int, luabind::detail::ltstr> m_static_constants;
 	int m_operator_cache;
-	luabind::detail::cast_graph* m_casts;
-	luabind::detail::class_id_map* m_classes;
+	luabind::detail::cast_graph *m_casts;
+	luabind::detail::class_id_map *m_classes;
 };
 static_assert(sizeof(luabind::detail::class_rep) == sizeof(class_rep_public));
 
-static int static_class_gettable(lua_State* L) // Same as luabind::detail::class_rep::static_class_gettable, but without invoking an error if the key doesn't exist
+static int static_class_gettable(lua_State *L) // Same as luabind::detail::class_rep::static_class_gettable, but without invoking an error if the key doesn't exist
 {
-	luabind::detail::class_rep* crep = static_cast<luabind::detail::class_rep*>(lua_touserdata(L, 1));
+	luabind::detail::class_rep *crep = static_cast<luabind::detail::class_rep *>(lua_touserdata(L, 1));
 
 	// look in the static function table
 	crep->get_default_table(L);
 	lua_pushvalue(L, 2);
 	lua_gettable(L, -2);
-	if(!lua_isnil(L, -1)) return 1;
-	else lua_pop(L, 2);
+	if(!lua_isnil(L, -1))
+		return 1;
+	else
+		lua_pop(L, 2);
 
-	const char* key = lua_tostring(L, 2);
+	const char *key = lua_tostring(L, 2);
 
-	if(std::strlen(key) != lua_objlen(L, 2))
-	{
+	if(std::strlen(key) != lua_objlen(L, 2)) {
 		lua_pushnil(L);
 		return 1;
 	}
 
-	std::map<const char*, int, luabind::detail::ltstr>::const_iterator j = reinterpret_cast<class_rep_public*>(crep)->m_static_constants.find(key);
+	std::map<const char *, int, luabind::detail::ltstr>::const_iterator j = reinterpret_cast<class_rep_public *>(crep)->m_static_constants.find(key);
 
-	if(j != reinterpret_cast<class_rep_public*>(crep)->m_static_constants.end())
-	{
+	if(j != reinterpret_cast<class_rep_public *>(crep)->m_static_constants.end()) {
 		lua_pushnumber(L, j->second);
 		return 1;
 	}
@@ -800,308 +699,257 @@ static int static_class_gettable(lua_State* L) // Same as luabind::detail::class
 	return 1;
 }
 
-static void merge_function(pragma::doc::Function &a,const pragma::doc::Function &b)
+static void merge_function(pragma::doc::Function &a, const pragma::doc::Function &b)
 {
 	a.SetFlags(a.GetFlags() | b.GetFlags());
 	a.SetGameStateFlags(a.GetGameStateFlags() | b.GetGameStateFlags());
-	
+
 	auto &overloadsA = a.GetOverloads();
 	auto &overloadsB = b.GetOverloads();
-	for(auto &overloadB : overloadsB)
-	{
-		auto it = std::find_if(overloadsA.begin(),overloadsA.end(),[&overloadB](const pragma::doc::Overload &overloadA) {
-			return overloadA == overloadB;
-		});
-		if(it == overloadsA.end())
-		{
+	for(auto &overloadB : overloadsB) {
+		auto it = std::find_if(overloadsA.begin(), overloadsA.end(), [&overloadB](const pragma::doc::Overload &overloadA) { return overloadA == overloadB; });
+		if(it == overloadsA.end()) {
 			overloadsA.push_back(overloadB);
 			continue;
 		}
 	}
 }
 
-static void merge_member(pragma::doc::Member &a,const pragma::doc::Member &b)
+static void merge_member(pragma::doc::Member &a, const pragma::doc::Member &b)
 {
 	a.SetFlags(a.GetFlags() | b.GetFlags());
 	a.SetGameStateFlags(a.GetGameStateFlags() | b.GetGameStateFlags());
 }
 
-static void merge_enum(pragma::doc::Enum &a,const pragma::doc::Enum &b)
-{
-	a.SetGameStateFlags(a.GetGameStateFlags() | b.GetGameStateFlags());
-}
+static void merge_enum(pragma::doc::Enum &a, const pragma::doc::Enum &b) { a.SetGameStateFlags(a.GetGameStateFlags() | b.GetGameStateFlags()); }
 
-static void merge_enum_set(pragma::doc::EnumSet &a,const pragma::doc::EnumSet &b)
+static void merge_enum_set(pragma::doc::EnumSet &a, const pragma::doc::EnumSet &b)
 {
 	a.SetFlags(a.GetFlags() | b.GetFlags());
-	
+
 	auto &enumsA = a.GetEnums();
 	auto &enumsB = b.GetEnums();
-	for(auto &eB : enumsB)
-	{
-		auto it = std::find_if(enumsA.begin(),enumsA.end(),[&eB](const pragma::doc::Enum &eA) {
-			return eA == eB;
-		});
-		if(it == enumsA.end())
-		{
+	for(auto &eB : enumsB) {
+		auto it = std::find_if(enumsA.begin(), enumsA.end(), [&eB](const pragma::doc::Enum &eA) { return eA == eB; });
+		if(it == enumsA.end()) {
 			enumsA.push_back(eB);
 			enumsA.back().SetCollection(*a.GetCollection());
 			continue;
 		}
-		merge_enum(*it,eB);
+		merge_enum(*it, eB);
 	}
 }
 
-static void merge_collection(pragma::doc::Collection &a,const pragma::doc::Collection &b)
+static void merge_collection(pragma::doc::Collection &a, const pragma::doc::Collection &b)
 {
 	a.SetFlags(a.GetFlags() | b.GetFlags());
-	
+
 	auto &functionsA = a.GetFunctions();
 	auto &functionsB = b.GetFunctions();
-	for(auto &funcB : functionsB)
-	{
-		auto it = std::find_if(functionsA.begin(),functionsA.end(),[&funcB](const pragma::doc::Function &funcA) {
-			return funcA == funcB;
-		});
-		if(it == functionsA.end())
-		{
+	for(auto &funcB : functionsB) {
+		auto it = std::find_if(functionsA.begin(), functionsA.end(), [&funcB](const pragma::doc::Function &funcA) { return funcA == funcB; });
+		if(it == functionsA.end()) {
 			functionsA.push_back(funcB);
 			functionsA.back().SetCollection(a);
 			continue;
 		}
-		merge_function(*it,funcB);
+		merge_function(*it, funcB);
 	}
 
 	auto &membersA = a.GetMembers();
 	auto &membersB = b.GetMembers();
-	for(auto &memB : membersB)
-	{
-		auto it = std::find_if(membersA.begin(),membersA.end(),[&memB](const pragma::doc::Member &memA) {
-			return memA == memB;
-		});
-		if(it == membersA.end())
-		{
+	for(auto &memB : membersB) {
+		auto it = std::find_if(membersA.begin(), membersA.end(), [&memB](const pragma::doc::Member &memA) { return memA == memB; });
+		if(it == membersA.end()) {
 			membersA.push_back(memB);
 			membersA.back().SetCollection(a);
 			continue;
 		}
-		merge_member(*it,memB);
+		merge_member(*it, memB);
 	}
 
 	auto &enumSetA = a.GetEnumSets();
 	auto &enumSetB = b.GetEnumSets();
-	for(auto &esB : enumSetB)
-	{
-		auto it = std::find_if(enumSetA.begin(),enumSetA.end(),[&esB](const std::shared_ptr<pragma::doc::EnumSet> &esA) {
-			return *esA == *esB;
-		});
-		if(it == enumSetA.end())
-		{
+	for(auto &esB : enumSetB) {
+		auto it = std::find_if(enumSetA.begin(), enumSetA.end(), [&esB](const std::shared_ptr<pragma::doc::EnumSet> &esA) { return *esA == *esB; });
+		if(it == enumSetA.end()) {
 			enumSetA.push_back(esB);
 			enumSetA.back()->SetCollection(a);
 			continue;
 		}
-		merge_enum_set(**it,*esB);
+		merge_enum_set(**it, *esB);
 	}
-	
+
 	auto &derivedFromA = a.GetDerivedFrom();
 	auto &derivedFromB = b.GetDerivedFrom();
-	for(auto &derivedFrom : derivedFromB)
-	{
-		auto it = std::find_if(derivedFromA.begin(),derivedFromA.end(),[&derivedFrom](const std::shared_ptr<pragma::doc::DerivedFrom> &derivedFromOther) {
-			return derivedFromOther->GetName() == derivedFrom->GetName();
-		});
+	for(auto &derivedFrom : derivedFromB) {
+		auto it = std::find_if(derivedFromA.begin(), derivedFromA.end(), [&derivedFrom](const std::shared_ptr<pragma::doc::DerivedFrom> &derivedFromOther) { return derivedFromOther->GetName() == derivedFrom->GetName(); });
 		if(it != derivedFromA.end())
 			continue;
-		derivedFromA.push_back(pragma::doc::DerivedFrom::Create((*it)->GetName(),(*it)->GetParent().get()));
+		derivedFromA.push_back(pragma::doc::DerivedFrom::Create((*it)->GetName(), (*it)->GetParent().get()));
 	}
 
 	auto &childrenA = a.GetChildren();
 	auto &childrenB = b.GetChildren();
-	for(auto &cB : childrenB)
-	{
-		auto it = std::find_if(childrenA.begin(),childrenA.end(),[&cB](const pragma::doc::PCollection &cA) {
-			return *cA == *cB;
-		});
-		if(it == childrenA.end())
-		{
+	for(auto &cB : childrenB) {
+		auto it = std::find_if(childrenA.begin(), childrenA.end(), [&cB](const pragma::doc::PCollection &cA) { return *cA == *cB; });
+		if(it == childrenA.end()) {
 			a.AddChild(cB);
 			continue;
 		}
-		merge_collection(**it,*cB);
+		merge_collection(**it, *cB);
 	}
 }
 
-FARPROC customGetProcAddress(HMODULE module, const PSTR functionName) 
-{ 
-  PIMAGE_DOS_HEADER pDosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(module); 
-  if(!pDosHeader || pDosHeader->e_magic != IMAGE_DOS_SIGNATURE) 
-    throw std::runtime_error("Process::customGetProcAddress Error : DOS PE header is invalid."); 
+FARPROC customGetProcAddress(HMODULE module, const PSTR functionName)
+{
+	PIMAGE_DOS_HEADER pDosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(module);
+	if(!pDosHeader || pDosHeader->e_magic != IMAGE_DOS_SIGNATURE)
+		throw std::runtime_error("Process::customGetProcAddress Error : DOS PE header is invalid.");
 
-  PIMAGE_NT_HEADERS pNtHeader = reinterpret_cast<PIMAGE_NT_HEADERS>(reinterpret_cast<PCHAR>(module) + pDosHeader->e_lfanew); 
-  if(pNtHeader->Signature != IMAGE_NT_SIGNATURE) 
-    throw std::runtime_error("Process::customGetProcAddress Error : NT PE header is invalid."); 
+	PIMAGE_NT_HEADERS pNtHeader = reinterpret_cast<PIMAGE_NT_HEADERS>(reinterpret_cast<PCHAR>(module) + pDosHeader->e_lfanew);
+	if(pNtHeader->Signature != IMAGE_NT_SIGNATURE)
+		throw std::runtime_error("Process::customGetProcAddress Error : NT PE header is invalid.");
 
-  PVOID pExportDirTemp        = reinterpret_cast<PBYTE>(module) + pNtHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress; 
-  PIMAGE_EXPORT_DIRECTORY pExportDir  = reinterpret_cast<PIMAGE_EXPORT_DIRECTORY>(pExportDirTemp); 
-  if(pExportDir->AddressOfNames == NULL) 
-    throw std::runtime_error("Process::customGetProcAddress Error : Symbol names missing entirely."); 
+	PVOID pExportDirTemp = reinterpret_cast<PBYTE>(module) + pNtHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
+	PIMAGE_EXPORT_DIRECTORY pExportDir = reinterpret_cast<PIMAGE_EXPORT_DIRECTORY>(pExportDirTemp);
+	if(pExportDir->AddressOfNames == NULL)
+		throw std::runtime_error("Process::customGetProcAddress Error : Symbol names missing entirely.");
 
-  PDWORD pNamesRvas      = reinterpret_cast<PDWORD>(reinterpret_cast<PBYTE>(module) + pExportDir->AddressOfNames); 
-  PWORD pNameOrdinals      = reinterpret_cast<PWORD>(reinterpret_cast<PBYTE>(module) + pExportDir->AddressOfNameOrdinals); 
-  PDWORD pFunctionAddresses  = reinterpret_cast<PDWORD>( reinterpret_cast<PBYTE>(module) + pExportDir->AddressOfFunctions); 
+	PDWORD pNamesRvas = reinterpret_cast<PDWORD>(reinterpret_cast<PBYTE>(module) + pExportDir->AddressOfNames);
+	PWORD pNameOrdinals = reinterpret_cast<PWORD>(reinterpret_cast<PBYTE>(module) + pExportDir->AddressOfNameOrdinals);
+	PDWORD pFunctionAddresses = reinterpret_cast<PDWORD>(reinterpret_cast<PBYTE>(module) + pExportDir->AddressOfFunctions);
 
-  for (DWORD n = 0; n < pExportDir->NumberOfNames; n++) 
-  { 
-    PSTR CurrentName = reinterpret_cast<PSTR>(reinterpret_cast<PBYTE>(module) + pNamesRvas[n]);   
-    if(strcmp(functionName, CurrentName) == 0) 
-    { 
-      WORD Ordinal = pNameOrdinals[n]; 
-      return reinterpret_cast<FARPROC>(reinterpret_cast<PBYTE>(module) + pFunctionAddresses[Ordinal]); 
-    } 
-  } 
+	for(DWORD n = 0; n < pExportDir->NumberOfNames; n++) {
+		PSTR CurrentName = reinterpret_cast<PSTR>(reinterpret_cast<PBYTE>(module) + pNamesRvas[n]);
+		if(strcmp(functionName, CurrentName) == 0) {
+			WORD Ordinal = pNameOrdinals[n];
+			return reinterpret_cast<FARPROC>(reinterpret_cast<PBYTE>(module) + pFunctionAddresses[Ordinal]);
+		}
+	}
 
-  return 0; 
+	return 0;
 }
 
 #include <Tlhelp32.h>
-MODULEENTRY32 GetModuleInfo(std::uint32_t ProcessID, const char* ModuleName)
+MODULEENTRY32 GetModuleInfo(std::uint32_t ProcessID, const char *ModuleName)
 {
-    void* hSnap = nullptr;
-    MODULEENTRY32 Mod32 = {0};
+	void *hSnap = nullptr;
+	MODULEENTRY32 Mod32 = {0};
 
-    if ((hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, ProcessID)) == INVALID_HANDLE_VALUE)
-        return Mod32;
+	if((hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, ProcessID)) == INVALID_HANDLE_VALUE)
+		return Mod32;
 
-    Mod32.dwSize = sizeof(MODULEENTRY32);
-    while (Module32Next(hSnap, &Mod32))
-    {
-        if (!strcmp(ModuleName, Mod32.szModule))
-        {
-            CloseHandle(hSnap);
-            return Mod32;
-        }
-    }
+	Mod32.dwSize = sizeof(MODULEENTRY32);
+	while(Module32Next(hSnap, &Mod32)) {
+		if(!strcmp(ModuleName, Mod32.szModule)) {
+			CloseHandle(hSnap);
+			return Mod32;
+		}
+	}
 
-    CloseHandle(hSnap);
-    return {0};
+	CloseHandle(hSnap);
+	return {0};
 }
 
-namespace dbg
-{
-    class Help
-    {
-    public:
-        bool Initialize();
-        void LoadSymbolModule();
-    private:
-        void EnumerateSymbols();
-        static BOOL CALLBACK EnumSymProc( 
-            PSYMBOL_INFO pSymInfo,   
-            ULONG SymbolSize,      
-            PVOID UserContext);
-        HANDLE m_hProcess;
-    };
+namespace dbg {
+	class Help {
+	  public:
+		bool Initialize();
+		void LoadSymbolModule();
+	  private:
+		void EnumerateSymbols();
+		static BOOL CALLBACK EnumSymProc(PSYMBOL_INFO pSymInfo, ULONG SymbolSize, PVOID UserContext);
+		HANDLE m_hProcess;
+	};
 };
 
 bool dbg::Help::Initialize()
 {
-    DWORD  error;
+	DWORD error;
 
-    SymSetOptions(SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS);
+	SymSetOptions(SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS);
 
-    m_hProcess = GetCurrentProcess();
+	m_hProcess = GetCurrentProcess();
 
-    if (!SymInitialize(m_hProcess, NULL, TRUE))
-    {
-        // SymInitialize failed
-        error = GetLastError();
-        printf("SymInitialize returned error : %d\n", error);
-        return FALSE;
-    }
-    return TRUE;
+	if(!SymInitialize(m_hProcess, NULL, TRUE)) {
+		// SymInitialize failed
+		error = GetLastError();
+		printf("SymInitialize returned error : %d\n", error);
+		return FALSE;
+	}
+	return TRUE;
 }
 
-void dbg::Help::EnumerateSymbols()
+void dbg::Help::EnumerateSymbols() {}
+
+BOOL CALLBACK dbg::Help::EnumSymProc(PSYMBOL_INFO pSymInfo, ULONG SymbolSize, PVOID UserContext)
 {
+	UNREFERENCED_PARAMETER(UserContext);
 
-}
+	printf("%08X %4u %s\n", pSymInfo->Address, SymbolSize, pSymInfo->Name);
 
-BOOL CALLBACK dbg::Help::EnumSymProc( 
-    PSYMBOL_INFO pSymInfo,   
-    ULONG SymbolSize,      
-    PVOID UserContext)
-{
-    UNREFERENCED_PARAMETER(UserContext);
-    
-    printf("%08X %4u %s\n", 
-           pSymInfo->Address, SymbolSize, pSymInfo->Name);
+	{
+		IMAGEHLP_LINE64 imgHlp;
+		auto *hlp = static_cast<Help *>(UserContext);
+		DWORD displacement;
+		if(SymGetLineFromAddr64(hlp->m_hProcess, pSymInfo->Address, &displacement, &imgHlp) == TRUE) {
+			std::cout << "Filename: " << imgHlp.FileName << std::endl;
+		}
+	}
 
-    {
-        IMAGEHLP_LINE64 imgHlp;
-        auto *hlp = static_cast<Help*>(UserContext);
-        DWORD displacement;
-        if(SymGetLineFromAddr64(hlp->m_hProcess,pSymInfo->Address,&displacement,&imgHlp) == TRUE)
-        {
-            std::cout<<"Filename: "<<imgHlp.FileName<<std::endl;
-        }
-    }
-
-
-    return TRUE;
+	return TRUE;
 }
 
 #include <Winbase.h>
 void dbg::Help::LoadSymbolModule()
 {
-    std::string szImageName = "E:/projects/pragma/build_winx64/install/bin/shared.dll";
-    DWORD64 dwBaseAddr = 0;
+	std::string szImageName = "E:/projects/pragma/build_winx64/install/bin/shared.dll";
+	DWORD64 dwBaseAddr = 0;
 	AddDllDirectory(L"E:/projects/pragma/build_winx64/install/bin/");
-    auto dllBase = SymLoadModuleEx(m_hProcess,    // target process 
-                        NULL,        // handle to image - not used
-                        szImageName.c_str(), // name of image file
-                        NULL,        // name of module - not required
-                        dwBaseAddr,  // base address - not required
-                        0,           // size of image - not required
-                        NULL,        // MODLOAD_DATA used for special cases 
-                        0);
-    if (dllBase)          // flags - not required
-    {
-        // SymLoadModuleEx returned success
-    }
-    else
-    {
-        // SymLoadModuleEx failed
-        DWORD error = GetLastError();
-        //printf("SymLoadModuleEx returned error : %d\n", error);
-		std::cout<<"ERR: "<<pragma::os::windows::get_last_error_as_string()<<std::endl;
-    }
+	auto dllBase = SymLoadModuleEx(m_hProcess, // target process
+	  NULL,                                    // handle to image - not used
+	  szImageName.c_str(),                     // name of image file
+	  NULL,                                    // name of module - not required
+	  dwBaseAddr,                              // base address - not required
+	  0,                                       // size of image - not required
+	  NULL,                                    // MODLOAD_DATA used for special cases
+	  0);
+	if(dllBase) // flags - not required
+	{
+		// SymLoadModuleEx returned success
+	}
+	else {
+		// SymLoadModuleEx failed
+		DWORD error = GetLastError();
+		//printf("SymLoadModuleEx returned error : %d\n", error);
+		std::cout << "ERR: " << pragma::os::windows::get_last_error_as_string() << std::endl;
+	}
 
-    // Enum
-    const char *Mask = "?testt@@YA?AV?$shared_ptr@VSchedule@ai@pragma@@@std@@XZ";
-    if (SymEnumSymbols(m_hProcess,     // Process handle from SymInitialize.
-                        dllBase,   // Base address of module.
-                        NULL,        // Name of symbols to match.
-                        EnumSymProc, // Symbol handler procedure.
-                        this))       // User context.
-    {
-        // SymEnumSymbols succeeded
-    }
-    else
-    {
-        // SymEnumSymbols failed
-        //printf("SymEnumSymbols failed: %d\n", GetLastError());
-        std::cout<<pragma::os::windows::get_last_error_as_string()<<std::endl;
-    }
+	// Enum
+	const char *Mask = "?testt@@YA?AV?$shared_ptr@VSchedule@ai@pragma@@@std@@XZ";
+	if(SymEnumSymbols(m_hProcess, // Process handle from SymInitialize.
+	     dllBase,                 // Base address of module.
+	     NULL,                    // Name of symbols to match.
+	     EnumSymProc,             // Symbol handler procedure.
+	     this))                   // User context.
+	{
+		// SymEnumSymbols succeeded
+	}
+	else {
+		// SymEnumSymbols failed
+		//printf("SymEnumSymbols failed: %d\n", GetLastError());
+		std::cout << pragma::os::windows::get_last_error_as_string() << std::endl;
+	}
 }
 
 class DLLNETWORK ThisIsATestClass {
-public:
-	ThisIsATestClass()=default;
+  public:
+	ThisIsATestClass() = default;
 };
-ThisIsATestClass test_test_test() {return ThisIsATestClass{};}
+ThisIsATestClass test_test_test() { return ThisIsATestClass {}; }
 
-#pragma comment(lib,"Dbghelp.lib")
+#pragma comment(lib, "Dbghelp.lib")
 
 #include <luabind/make_function.hpp>
 #include "pragma/lua/libraries/lasset.hpp"
@@ -1110,8 +958,7 @@ static void autogenerate()
 {
 	{
 		auto *cl = pragma::get_engine()->GetClientState();
-		if(cl)
-		{
+		if(cl) {
 			cl->InitializeLibrary("unirender/pr_unirender");
 			cl->InitializeLibrary("openvr/pr_openvr");
 
@@ -1122,31 +969,27 @@ static void autogenerate()
 		}
 
 		auto *sv = pragma::get_engine()->GetServerNetworkState();
-		if(sv)
-		{
+		if(sv) {
 			sv->InitializeLibrary("pr_dmx");
 			sv->InitializeLibrary("steamworks/pr_steamworks");
 		}
 	}
 
 	g_typeWarningCache.clear();
-	struct LuaStateInfo
-	{
+	struct LuaStateInfo {
 		lua_State *l;
 		pragma::doc::PCollection collection;
 	};
 	std::vector<LuaStateInfo> luaStates;
 	auto &en = *pragma::get_engine();
 	auto *sv = en.GetServerNetworkState();
-	if(sv)
-	{
+	if(sv) {
 		auto *lsv = sv->GetLuaState();
 		if(lsv)
 			luaStates.push_back({lsv});
 	}
 	auto *cl = en.GetClientState();
-	if(cl)
-	{
+	if(cl) {
 		auto *lcl = cl->GetLuaState();
 		if(lcl)
 			luaStates.push_back({lcl});
@@ -1154,62 +997,44 @@ static void autogenerate()
 	if(luaStates.empty())
 		return;
 
-	const std::unordered_map<std::string,std::string> pdbModules = {
-		{"server","E:/projects/pragma/build_winx64/core/server/RelWithDebInfo/server.pdb"},
-		{"client","E:/projects/pragma/build_winx64/core/client/RelWithDebInfo/client.pdb"},
-		{"shared","E:/projects/pragma/build_winx64/core/shared/RelWithDebInfo/shared.pdb"},
-		{"mathutil","E:/projects/pragma/build_winx64/external_libs/mathutil/RelWithDebInfo/mathutil.pdb"},
-		{"sharedutils","E:/projects/pragma/build_winx64/external_libs/sharedutils/RelWithDebInfo/sharedutils.pdb"},
-		{"prosper","E:/projects/pragma/build_winx64/external_libs/prosper/RelWithDebInfo/prosper.pdb"},
-		{"vfilesystem","E:/projects/pragma/build_winx64/external_libs/vfilesystem/RelWithDebInfo/vfilesystem.pdb"},
-		{"alsoundsystem","E:/projects/pragma/build_winx64/external_libs/alsoundsystem/RelWithDebInfo/alsoundsystem.pdb"},
-		{"datasystem","E:/projects/pragma/build_winx64/external_libs/datasystem/RelWithDebInfo/datasystem.pdb"},
-		{"iglfw","E:/projects/pragma/build_winx64/external_libs/iglfw/RelWithDebInfo/iglfw.pdb"},
-		{"materialsystem","E:/projects/pragma/build_winx64/external_libs/materialsystem/RelWithDebInfo/materialsystem.pdb"},
-		{"cmaterialsystem","E:/projects/pragma/build_winx64/external_libs/materialsystem/RelWithDebInfo/cmaterialsystem.pdb"},
-		{"util_image","E:/projects/pragma/build_winx64/external_libs/util_image/RelWithDebInfo/util_image.pdb"},
-		{"util_pragma_doc","E:/projects/pragma/build_winx64/external_libs/util_pragma_doc/RelWithDebInfo/util_pragma_doc.pdb"},
-		{"util_sound","E:/projects/pragma/build_winx64/external_libs/util_sound/RelWithDebInfo/util_sound.pdb"},
-		{"util_udm","E:/projects/pragma/build_winx64/external_libs/util_udm/RelWithDebInfo/util_udm.pdb"},
-		{"wgui","E:/projects/pragma/build_winx64/external_libs/wgui/RelWithDebInfo/wgui.pdb"},
-		{"pr_dmx","E:/projects/pragma/build_winx64/modules/pr_dmx/RelWithDebInfo/pr_dmx.pdb"},
-		{"pr_cycles","E:/projects/pragma/build_winx64/modules/pr_cycles/RelWithDebInfo/pr_unirender.pdb"},
-		{"pr_openvr","E:/projects/pragma/build_winx64/modules/pr_openvr/RelWithDebInfo/pr_openvr.pdb"},
-		{"pr_chromium","E:/projects/pragma/build_winx64/modules/pr_chromium/RelWithDebInfo/pr_chromium.pdb"},
-		{"pr_chromium_wrapper","E:/projects/pragma/build_winx64/modules/pr_chromium/external_libs/pr_chromium_wrapper/RelWithDebInfo/pr_chromium_wrapper.pdb"},
-		{"pr_steamworks","E:/projects/pragma/build_winx64/modules/pr_steamworks/RelWithDebInfo/pr_steamworks.pdb"},
-		{"panima","E:/projects/pragma/build_winx64/external_libs/panima/RelWithDebInfo/panima.pdb"}
-	};
+	const std::unordered_map<std::string, std::string> pdbModules
+	  = {{"server", "E:/projects/pragma/build_winx64/core/server/RelWithDebInfo/server.pdb"}, {"client", "E:/projects/pragma/build_winx64/core/client/RelWithDebInfo/client.pdb"}, {"shared", "E:/projects/pragma/build_winx64/core/shared/RelWithDebInfo/shared.pdb"},
+	    {"mathutil", "E:/projects/pragma/build_winx64/external_libs/mathutil/RelWithDebInfo/mathutil.pdb"}, {"sharedutils", "E:/projects/pragma/build_winx64/external_libs/sharedutils/RelWithDebInfo/sharedutils.pdb"},
+	    {"prosper", "E:/projects/pragma/build_winx64/external_libs/prosper/RelWithDebInfo/prosper.pdb"}, {"vfilesystem", "E:/projects/pragma/build_winx64/external_libs/vfilesystem/RelWithDebInfo/vfilesystem.pdb"},
+	    {"alsoundsystem", "E:/projects/pragma/build_winx64/external_libs/alsoundsystem/RelWithDebInfo/alsoundsystem.pdb"}, {"datasystem", "E:/projects/pragma/build_winx64/external_libs/datasystem/RelWithDebInfo/datasystem.pdb"},
+	    {"iglfw", "E:/projects/pragma/build_winx64/external_libs/iglfw/RelWithDebInfo/iglfw.pdb"}, {"materialsystem", "E:/projects/pragma/build_winx64/external_libs/materialsystem/RelWithDebInfo/materialsystem.pdb"},
+	    {"cmaterialsystem", "E:/projects/pragma/build_winx64/external_libs/materialsystem/RelWithDebInfo/cmaterialsystem.pdb"}, {"util_image", "E:/projects/pragma/build_winx64/external_libs/util_image/RelWithDebInfo/util_image.pdb"},
+	    {"util_pragma_doc", "E:/projects/pragma/build_winx64/external_libs/util_pragma_doc/RelWithDebInfo/util_pragma_doc.pdb"}, {"util_sound", "E:/projects/pragma/build_winx64/external_libs/util_sound/RelWithDebInfo/util_sound.pdb"},
+	    {"util_udm", "E:/projects/pragma/build_winx64/external_libs/util_udm/RelWithDebInfo/util_udm.pdb"}, {"wgui", "E:/projects/pragma/build_winx64/external_libs/wgui/RelWithDebInfo/wgui.pdb"}, {"pr_dmx", "E:/projects/pragma/build_winx64/modules/pr_dmx/RelWithDebInfo/pr_dmx.pdb"},
+	    {"pr_cycles", "E:/projects/pragma/build_winx64/modules/pr_cycles/RelWithDebInfo/pr_unirender.pdb"}, {"pr_openvr", "E:/projects/pragma/build_winx64/modules/pr_openvr/RelWithDebInfo/pr_openvr.pdb"},
+	    {"pr_chromium", "E:/projects/pragma/build_winx64/modules/pr_chromium/RelWithDebInfo/pr_chromium.pdb"}, {"pr_chromium_wrapper", "E:/projects/pragma/build_winx64/modules/pr_chromium/external_libs/pr_chromium_wrapper/RelWithDebInfo/pr_chromium_wrapper.pdb"},
+	    {"pr_steamworks", "E:/projects/pragma/build_winx64/modules/pr_steamworks/RelWithDebInfo/pr_steamworks.pdb"}, {"panima", "E:/projects/pragma/build_winx64/external_libs/panima/RelWithDebInfo/panima.pdb"}};
 
 #ifdef ENABLE_PDB_MANAGER
 	pragma::lua::PdbManager pdbManager {};
-	if(pdbManager.Initialize())
-	{
+	if(pdbManager.Initialize()) {
 		// TODO: Determine the paths automatically somehow?
 		for(auto &pair : pdbModules)
-			pdbManager.LoadPdb(pair.first,pair.second);
+			pdbManager.LoadPdb(pair.first, pair.second);
 	}
 #endif
-	
+
 	pragma::lua::TypeNameManager typeManager {};
-	for(auto &stateInfo : luaStates)
-	{
+	for(auto &stateInfo : luaStates) {
 		auto *L = stateInfo.l;
 
 		auto *reg = luabind::detail::class_registry::get_registry(L);
 		auto &classes = reg->get_classes();
-		for(auto &pair : classes)
-		{
-			static_assert(sizeof(luabind::type_id) == sizeof(std::type_info*));
-			auto &typeInfo = **(reinterpret_cast<std::type_info* const *>(&pair.second->type()));
-			typeManager.RegisterType(typeInfo,*pair.second);
+		for(auto &pair : classes) {
+			static_assert(sizeof(luabind::type_id) == sizeof(std::type_info *));
+			auto &typeInfo = **(reinterpret_cast<std::type_info *const *>(&pair.second->type()));
+			typeManager.RegisterType(typeInfo, *pair.second);
 		}
 	}
 
 	pragma::lua::SymbolHandler symHandler {};
 	symHandler.Initialize();
-	for(auto &stateInfo : luaStates)
-	{
+	for(auto &stateInfo : luaStates) {
 		//
 		/*for(auto &pair : pdbModules)
 		{
@@ -1247,7 +1072,6 @@ static void autogenerate()
 		Con::cout<<Con::endl;*/
 		//
 
-		
 		auto *L = stateInfo.l;
 
 		auto rootCol = pragma::doc::Collection::Create();
@@ -1257,15 +1081,15 @@ static void autogenerate()
 		gCol->SetName("_G");
 		gCol->SetFlags(gCol->GetFlags() | pragma::doc::Collection::Flags::AutoGenerated);
 		rootCol->AddChild(gCol);
-		
-        //LAD_ENABLED
+
+		//LAD_ENABLED
 		pragma::lua::LuaDocGenerator docGenerator {L};
 #ifdef ENABLE_PDB_MANAGER
 		docGenerator.SetPdbManager(&pdbManager);
 #endif
 		docGenerator.SetSymbolHandler(&symHandler);
 		docGenerator.SetTypeManager(&typeManager);
-		docGenerator.IterateLibraries(luabind::globals(L),*rootCol,*gCol);
+		docGenerator.IterateLibraries(luabind::globals(L), *rootCol, *gCol);
 
 		// All class information has now been collected, so we have the full type names for all registered types now, which we
 		// need to generate the correct parameters and return values for our methods.
@@ -1273,20 +1097,17 @@ static void autogenerate()
 		//
 
 		auto &classMap = docGenerator.GetClassMap();
-		for(auto &pair : classMap)
-		{
+		for(auto &pair : classMap) {
 			auto &crep = *pair.first;
 			auto &bases = crep.bases();
-			for(auto &base : bases)
-			{
+			for(auto &base : bases) {
 				auto it = classMap.find(base.base);
-				if(it == classMap.end())
-				{
-					Con::cwar<<"Missing class '"<<base.base->name()<<"'"<<Con::endl;
+				if(it == classMap.end()) {
+					Con::cwar << "Missing class '" << base.base->name() << "'" << Con::endl;
 					continue;
 				}
 				auto fullName = it->second->GetFullName();
-				fullName = fullName.substr(rootColName.length() +1);
+				fullName = fullName.substr(rootColName.length() + 1);
 				auto derivedFrom = pragma::doc::DerivedFrom::Create(fullName);
 				pair.second->AddDerivedFrom(*derivedFrom);
 			}
@@ -1296,47 +1117,39 @@ static void autogenerate()
 	}
 
 	auto &assignedTypes = typeManager.GetAssignedTypes();
-	for(auto &pair : typeManager.GetTypes())
-	{
+	for(auto &pair : typeManager.GetTypes()) {
 		if(pair.second->bestMatch.has_value())
 			continue;
-		Con::cwar<<"Unassigned type '"<<pair.second->luaName<<"' ("<<pair.second->name<<")"<<Con::endl;
+		Con::cwar << "Unassigned type '" << pair.second->luaName << "' (" << pair.second->name << ")" << Con::endl;
 	}
-	for(auto &pair : assignedTypes)
-	{
+	for(auto &pair : assignedTypes) {
 		if(!pair.second)
 			continue;
 		auto *ti = typeManager.GetTypeInfo(pair.second);
-		Con::cout<<pair.first<<" = "<<ti->luaName<<" ("<<ti->name<<")"<<Con::endl;
+		Con::cout << pair.first << " = " << ti->luaName << " (" << ti->name << ")" << Con::endl;
 	}
 
 	// Merge collections from all Lua states
 	auto &rootCol = luaStates.front().collection;
-	for(auto it=luaStates.begin() +1;it!=luaStates.end();++it)
-	{
+	for(auto it = luaStates.begin() + 1; it != luaStates.end(); ++it) {
 		auto &stateInfo = *it;
-		merge_collection(*rootCol,*it->collection);
+		merge_collection(*rootCol, *it->collection);
 	}
 	//
 
 	// Merge base types into derived types (where applicable)
 	auto *colEnts = rootCol->FindChildCollection("ents");
 	std::vector<pragma::doc::PCollection> removeQueue;
-	if(colEnts)
-	{
+	if(colEnts) {
 		auto &children = colEnts->GetChildren();
-		for(auto it=children.begin();it!=children.end();++it)
-		{
+		for(auto it = children.begin(); it != children.end(); ++it) {
 			auto &child = *it;
 			auto isComponentType = false;
 			auto *derivedFrom = &child->GetDerivedFrom();
-			if(derivedFrom && !derivedFrom->empty())
-			{
+			if(derivedFrom && !derivedFrom->empty()) {
 				auto *df = derivedFrom->front().get();
-				while(df)
-				{
-					if(df->GetName() == "ents.EntityComponent")
-					{
+				while(df) {
+					if(df->GetName() == "ents.EntityComponent") {
 						isComponentType = true;
 						break;
 					}
@@ -1353,20 +1166,18 @@ static void autogenerate()
 				continue; // Directly derived from BaseEntityComponent
 			derivedFrom->clear();
 			auto *colDerived = rootCol->FindChildCollection(df->GetName());
-			if(colDerived)
-			{
-				merge_collection(*child,*colDerived);
+			if(colDerived) {
+				merge_collection(*child, *colDerived);
 				removeQueue.push_back(colDerived->shared_from_this());
 			}
 		}
 	}
-	for(auto &col : removeQueue)
-	{
+	for(auto &col : removeQueue) {
 		auto *colParent = col->GetParent();
 		if(!colParent)
 			continue;
 		auto &children = colParent->GetChildren();
-		auto it = std::find(children.begin(),children.end(),col);
+		auto it = std::find(children.begin(), children.end(), col);
 		if(it != children.end())
 			children.erase(it);
 	}
@@ -1374,21 +1185,20 @@ static void autogenerate()
 
 	// Get class names
 	g_classNameToFullName.clear();
-	std::unordered_map<std::string,uint32_t> classNameCount;
-	std::function<void(pragma::doc::Collection&)> getClassNames = nullptr;
-	getClassNames = [&getClassNames,&classNameCount](pragma::doc::Collection &col) {
+	std::unordered_map<std::string, uint32_t> classNameCount;
+	std::function<void(pragma::doc::Collection &)> getClassNames = nullptr;
+	getClassNames = [&getClassNames, &classNameCount](pragma::doc::Collection &col) {
 		auto &name = col.GetName();
 		auto fullName = col.GetFullName();
-		if(ustring::compare(fullName.c_str(),"root",true,4))
+		if(ustring::compare(fullName.c_str(), "root", true, 4))
 			fullName = fullName.substr(4);
-		if(ustring::compare(fullName.c_str(),".",true,1))
+		if(ustring::compare(fullName.c_str(), ".", true, 1))
 			fullName = fullName.substr(1);
-		if(fullName.empty() == false)
-		{
+		if(fullName.empty() == false) {
 			g_classNameToFullName[name] = std::move(fullName);
 			auto it = classNameCount.find(name);
 			if(it == classNameCount.end())
-				it = classNameCount.insert(std::make_pair(name,0)).first;
+				it = classNameCount.insert(std::make_pair(name, 0)).first;
 			++it->second;
 		}
 
@@ -1396,8 +1206,7 @@ static void autogenerate()
 			getClassNames(*child);
 	};
 	getClassNames(*rootCol);
-	for(auto &pair : classNameCount)
-	{
+	for(auto &pair : classNameCount) {
 		if(pair.second == 1)
 			continue;
 		auto it = g_classNameToFullName.find(pair.first);
@@ -1407,26 +1216,22 @@ static void autogenerate()
 	//
 
 	// Translate parameter and return types
-	std::function<void(pragma::doc::Collection&)> translateCollectionTypes = nullptr;
-	translateCollectionTypes = [&translateCollectionTypes,&typeManager](pragma::doc::Collection &col) {
-		auto isClass = umath::is_flag_set(col.GetFlags(),pragma::doc::Collection::Flags::Class);
+	std::function<void(pragma::doc::Collection &)> translateCollectionTypes = nullptr;
+	translateCollectionTypes = [&translateCollectionTypes, &typeManager](pragma::doc::Collection &col) {
+		auto isClass = umath::is_flag_set(col.GetFlags(), pragma::doc::Collection::Flags::Class);
 		auto &functions = col.GetFunctions();
-		for(auto &f : functions)
-		{
+		for(auto &f : functions) {
 			auto &overloads = f.GetOverloads();
-			for(auto &overload : overloads)
-			{
+			for(auto &overload : overloads) {
 				auto &params = overload.GetParameters();
-				for(auto it=params.begin();it!=params.end();)
-				{
+				for(auto it = params.begin(); it != params.end();) {
 					auto &param = *it;
 					auto variant = param.GetType();
-					if(variant.name == "lua_State")
-					{
+					if(variant.name == "lua_State") {
 						it = params.erase(it);
 						continue;
 					}
-					normalize_variant(typeManager,variant);
+					normalize_variant(typeManager, variant);
 					param.SetType(std::move(variant));
 					++it;
 				}
@@ -1435,20 +1240,18 @@ static void autogenerate()
 				auto isMethod = isClass;
 				if(isMethod && !params.empty())
 					params.erase(params.begin());
-				for(auto &ret : overload.GetReturnValues())
-				{
+				for(auto &ret : overload.GetReturnValues()) {
 					auto variant = ret.GetType();
-					normalize_variant(typeManager,variant);
+					normalize_variant(typeManager, variant);
 					ret.SetType(std::move(variant));
 				}
 			}
 		}
 
 		auto &members = col.GetMembers();
-		for(auto &member : members)
-		{
+		for(auto &member : members) {
 			auto type = member.GetType();
-			normalize_type_name(typeManager,type.name);
+			normalize_type_name(typeManager, type.name);
 			member.SetType(std::move(type));
 		}
 
@@ -1457,40 +1260,33 @@ static void autogenerate()
 	};
 	translateCollectionTypes(*rootCol);
 	//
-	
+
 	std::string err;
-	auto repoMan = pragma::lua::RepositoryManager::Create(luaStates.front().l,err);
-	if(repoMan)
-	{
+	auto repoMan = pragma::lua::RepositoryManager::Create(luaStates.front().l, err);
+	if(repoMan) {
 		if(!repoMan->LoadRepositoryReferences(err))
-			Con::cwar<<"LAD repository manager failed: "<<err<<Con::endl;
+			Con::cwar << "LAD repository manager failed: " << err << Con::endl;
 	}
 	else
-		Con::cwar<<"Unable to create LAD repository manager: "<<err<<Con::endl;
+		Con::cwar << "Unable to create LAD repository manager: " << err << Con::endl;
 
 	// Merge with old documentation
-	std::string docLocation = std::string{Lua::doc::FILE_LOCATION} +"pragma." +std::string{Lua::doc::FILE_EXTENSION_ASCII};
-	auto udmData = util::load_udm_asset(docLocation,&err);
-	if(udmData)
-	{
-		auto docOld = pragma::doc::Collection::Load(udmData->GetAssetData(),err);
-		if(docOld)
-		{
-			std::function<void(pragma::doc::Collection&,pragma::doc::Collection&)> mergeOldDocIntoNew = nullptr;
-			mergeOldDocIntoNew = [&mergeOldDocIntoNew](pragma::doc::Collection &colNew,pragma::doc::Collection &colOld) {
+	std::string docLocation = std::string {Lua::doc::FILE_LOCATION} + "pragma." + std::string {Lua::doc::FILE_EXTENSION_ASCII};
+	auto udmData = util::load_udm_asset(docLocation, &err);
+	if(udmData) {
+		auto docOld = pragma::doc::Collection::Load(udmData->GetAssetData(), err);
+		if(docOld) {
+			std::function<void(pragma::doc::Collection &, pragma::doc::Collection &)> mergeOldDocIntoNew = nullptr;
+			mergeOldDocIntoNew = [&mergeOldDocIntoNew](pragma::doc::Collection &colNew, pragma::doc::Collection &colOld) {
 				auto &newFunctions = colNew.GetFunctions();
-				for(auto &f : colOld.GetFunctions())
-				{
-					if(umath::is_flag_set(f.GetFlags(),pragma::doc::Function::Flags::AutoGenerated))
+				for(auto &f : colOld.GetFunctions()) {
+					if(umath::is_flag_set(f.GetFlags(), pragma::doc::Function::Flags::AutoGenerated))
 						continue;
 					auto &name = f.GetName();
-					auto it = std::find_if(newFunctions.begin(),newFunctions.end(),[&name](const pragma::doc::Function &f) {
-						return f.GetName() == name;
-					});
-					if(it == newFunctions.end())
-					{
+					auto it = std::find_if(newFunctions.begin(), newFunctions.end(), [&name](const pragma::doc::Function &f) { return f.GetName() == name; });
+					if(it == newFunctions.end()) {
 						newFunctions.push_back(f);
-						it = newFunctions.end() -1;
+						it = newFunctions.end() - 1;
 					}
 					else
 						*it = f;
@@ -1498,18 +1294,14 @@ static void autogenerate()
 				}
 
 				auto &newMembers = colNew.GetMembers();
-				for(auto &m : colOld.GetMembers())
-				{
-					if(umath::is_flag_set(m.GetFlags(),pragma::doc::Member::Flags::AutoGenerated))
+				for(auto &m : colOld.GetMembers()) {
+					if(umath::is_flag_set(m.GetFlags(), pragma::doc::Member::Flags::AutoGenerated))
 						continue;
 					auto &name = m.GetName();
-					auto it = std::find_if(newMembers.begin(),newMembers.end(),[&name](const pragma::doc::Member &m) {
-						return m.GetName() == name;
-					});
-					if(it == newMembers.end())
-					{
+					auto it = std::find_if(newMembers.begin(), newMembers.end(), [&name](const pragma::doc::Member &m) { return m.GetName() == name; });
+					if(it == newMembers.end()) {
 						newMembers.push_back(m);
-						it = newMembers.end() -1;
+						it = newMembers.end() - 1;
 					}
 					else
 						*it = m;
@@ -1517,18 +1309,14 @@ static void autogenerate()
 				}
 
 				auto &newEnumSets = colNew.GetEnumSets();
-				for(auto &es : colOld.GetEnumSets())
-				{
-					if(umath::is_flag_set(es->GetFlags(),pragma::doc::EnumSet::Flags::AutoGenerated))
+				for(auto &es : colOld.GetEnumSets()) {
+					if(umath::is_flag_set(es->GetFlags(), pragma::doc::EnumSet::Flags::AutoGenerated))
 						continue;
 					auto &name = es->GetName();
-					auto it = std::find_if(newEnumSets.begin(),newEnumSets.end(),[&name](const pragma::doc::PEnumSet &es) {
-						return es->GetName() == name;
-					});
-					if(it == newEnumSets.end())
-					{
+					auto it = std::find_if(newEnumSets.begin(), newEnumSets.end(), [&name](const pragma::doc::PEnumSet &es) { return es->GetName() == name; });
+					if(it == newEnumSets.end()) {
 						newEnumSets.push_back(es);
-						it = newEnumSets.end() -1;
+						it = newEnumSets.end() - 1;
 					}
 					else
 						*it = es;
@@ -1538,27 +1326,22 @@ static void autogenerate()
 				}
 
 				auto &newChildren = colNew.GetChildren();
-				for(auto &child : colOld.GetChildren())
-				{
+				for(auto &child : colOld.GetChildren()) {
 					auto &name = child->GetName();
-					auto it = std::find_if(newChildren.begin(),newChildren.end(),[&name](const pragma::doc::PCollection &c) {
-						return c->GetName() == name;
-					});
-					if(it == newChildren.end())
-					{
+					auto it = std::find_if(newChildren.begin(), newChildren.end(), [&name](const pragma::doc::PCollection &c) { return c->GetName() == name; });
+					if(it == newChildren.end()) {
 						auto c = pragma::doc::Collection::Create();
 						newChildren.push_back(c);
 						*c = *child;
 						c->SetParent(&colNew);
 						continue;
 					}
-					mergeOldDocIntoNew(**it,*child);
+					mergeOldDocIntoNew(**it, *child);
 				}
 			};
-			mergeOldDocIntoNew(*rootCol,*docOld);
+			mergeOldDocIntoNew(*rootCol, *docOld);
 		}
 	}
-	
 
 #if 0
 	/*for(auto *base : classInfo.bases)
@@ -1611,22 +1394,18 @@ static void autogenerate()
 
 	filemanager::create_path(Lua::doc::FILE_LOCATION);
 	udmData = udm::Data::Create();
-	rootCol->Save(udmData->GetAssetData(),err);
-	try
-	{
-	udmData->SaveAscii(docLocation);
+	rootCol->Save(udmData->GetAssetData(), err);
+	try {
+		udmData->SaveAscii(docLocation);
 	}
-	catch(const udm::Exception &e)
-	{
-		std::cout<<e.what()<<std::endl;
+	catch(const udm::Exception &e) {
+		std::cout << e.what() << std::endl;
 	}
-	catch(const std::exception &e)
-	{
-		std::cout<<e.what()<<std::endl;
+	catch(const std::exception &e) {
+		std::cout << e.what() << std::endl;
 	}
-	catch(...)
-	{
-		std::cout<<"Unknown!"<<std::endl;
+	catch(...) {
+		std::cout << "Unknown!" << std::endl;
 	}
 	Lua::doc::reset();
 
@@ -1655,8 +1434,7 @@ static void autogenerate()
 #endif
 }
 
-namespace Lua::doc
-{
+namespace Lua::doc {
 	void register_library(Lua::Interface &lua);
 };
 
@@ -1665,34 +1443,26 @@ static void generate_launch_param_doc()
 	// TODO
 }
 
-enum class CvarStateFlag : uint32_t
-{
-	None = 0,
-	Engine,
-	Client,
-	Server
-};
+enum class CvarStateFlag : uint32_t { None = 0, Engine, Client, Server };
 REGISTER_BASIC_BITWISE_OPERATORS(CvarStateFlag)
 static std::string generate_convar_doc()
 {
 	auto *en = pragma::get_engine();
 	if(!en)
 		return "";
-	struct CvarInfo
-	{
+	struct CvarInfo {
 		std::string name;
 		CvarStateFlag stateFlags = CvarStateFlag::None;
 		std::shared_ptr<ConConf> cvar;
 	};
-	std::unordered_map<std::string,CvarInfo> uniqueCvarList;
-	auto getAllVars = [&uniqueCvarList](ConVarMap &cvMap,CvarStateFlag flag) {
+	std::unordered_map<std::string, CvarInfo> uniqueCvarList;
+	auto getAllVars = [&uniqueCvarList](ConVarMap &cvMap, CvarStateFlag flag) {
 		auto &cvars = cvMap.GetConVars();
-		uniqueCvarList.reserve(uniqueCvarList.size() +cvars.size());
-		for(auto &pair : cvars)
-		{
+		uniqueCvarList.reserve(uniqueCvarList.size() + cvars.size());
+		for(auto &pair : cvars) {
 			auto it = uniqueCvarList.find(pair.first);
 			if(it == uniqueCvarList.end())
-				it = uniqueCvarList.insert(std::make_pair(pair.first,CvarInfo{})).first;
+				it = uniqueCvarList.insert(std::make_pair(pair.first, CvarInfo {})).first;
 			it->second.name = pair.first;
 			it->second.stateFlags |= flag;
 			it->second.cvar = pair.second;
@@ -1700,31 +1470,29 @@ static std::string generate_convar_doc()
 	};
 	auto *cvMap = en->GetConVarMap();
 	if(cvMap)
-		getAllVars(*cvMap,CvarStateFlag::Engine);
+		getAllVars(*cvMap, CvarStateFlag::Engine);
 
 	auto *sv = en->GetServerNetworkState();
 	auto *svMap = sv ? sv->GetConVarMap() : nullptr;
 	if(svMap)
-		getAllVars(*svMap,CvarStateFlag::Server);
-	
+		getAllVars(*svMap, CvarStateFlag::Server);
+
 	auto *cl = en->GetClientState();
 	auto *clMap = cl ? cl->GetConVarMap() : nullptr;
 	if(clMap)
-		getAllVars(*clMap,CvarStateFlag::Client);
-
+		getAllVars(*clMap, CvarStateFlag::Client);
 
 	std::vector<std::string> cvarNames;
 	std::vector<std::string> cmdNames;
-	for(auto &pair : uniqueCvarList)
-	{
+	for(auto &pair : uniqueCvarList) {
 		auto &cvarInfo = pair.second;
 		if(cvarInfo.cvar->GetType() == ConType::Variable)
 			cvarNames.push_back(cvarInfo.name);
 		else if(cvarInfo.cvar->GetType() == ConType::Command)
 			cmdNames.push_back(cvarInfo.name);
 	}
-	std::sort(cvarNames.begin(),cvarNames.end());
-	std::sort(cmdNames.begin(),cmdNames.end());
+	std::sort(cvarNames.begin(), cvarNames.end());
+	std::sort(cmdNames.begin(), cmdNames.end());
 
 	auto getConVar = [&uniqueCvarList](const std::string &name) -> std::shared_ptr<ConConf> {
 		auto it = uniqueCvarList.find(name);
@@ -1733,36 +1501,34 @@ static std::string generate_convar_doc()
 	};
 
 	auto replaceSpecialChars = [](std::string &str) {
-		ustring::replace(str,"<","&lt;");
-		ustring::replace(str,">","&gt;");
+		ustring::replace(str, "<", "&lt;");
+		ustring::replace(str, ">", "&gt;");
 	};
-	auto listToStr = [&getConVar,&replaceSpecialChars](const std::vector<std::string> &list,std::stringstream &ss,bool isVar) {
-		for(auto name : list)
-		{
+	auto listToStr = [&getConVar, &replaceSpecialChars](const std::vector<std::string> &list, std::stringstream &ss, bool isVar) {
+		for(auto name : list) {
 			auto cf = getConVar(name);
 			replaceSpecialChars(name);
 			auto help = cf->GetUsageHelp();
 			if(isVar && help.empty())
 				help = "<value>";
 			replaceSpecialChars(help);
-			ss<<"<h5>"<<name<<" "<<help<<"</h5>\n";
-			ss<<"<p>";
-			if(cf->GetType() == ConType::Variable)
-			{
-				auto &cv = *static_cast<ConVar*>(cf.get());
-				ss<<"<strong>Type:</strong> "<<magic_enum::enum_name(cv.GetVarType())<<"</p>\n";
+			ss << "<h5>" << name << " " << help << "</h5>\n";
+			ss << "<p>";
+			if(cf->GetType() == ConType::Variable) {
+				auto &cv = *static_cast<ConVar *>(cf.get());
+				ss << "<strong>Type:</strong> " << magic_enum::enum_name(cv.GetVarType()) << "</p>\n";
 			}
 			auto helpText = cf->GetHelpText();
 			replaceSpecialChars(helpText);
-			ss<<"<p>"<<helpText<<"</p>\n";
+			ss << "<p>" << helpText << "</p>\n";
 		}
 	};
 	std::stringstream ss;
-	ss<<"<h1>Variables</h1>\n";
-	listToStr(cvarNames,ss,true);
+	ss << "<h1>Variables</h1>\n";
+	listToStr(cvarNames, ss, true);
 
-	ss<<"\n<h1>Commands</h1>\n";
-	listToStr(cmdNames,ss,false);
+	ss << "\n<h1>Commands</h1>\n";
+	listToStr(cmdNames, ss, false);
 	return ss.str();
 }
 
@@ -1772,362 +1538,264 @@ void Lua::doc::register_library(Lua::Interface &lua)
 
 	const auto *libName = "doc";
 	auto &docLib = lua.RegisterLibrary(libName);
-	docLib[
-		luabind::def("load",static_cast<luabind::optional<pragma::doc::Collection>(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &fileName) -> luabind::optional<pragma::doc::Collection> {
-			auto fname = fileName;
-			if(Lua::file::validate_write_operation(l,fname) == false)
-				return nil;
-			std::string err;
-			auto udmData = ::util::load_udm_asset(fname,&err);
-			if(udmData == nullptr)
-				return nil;
+	docLib[luabind::def("load", static_cast<luabind::optional<pragma::doc::Collection> (*)(lua_State *, const std::string &)>([](lua_State *l, const std::string &fileName) -> luabind::optional<pragma::doc::Collection> {
+		auto fname = fileName;
+		if(Lua::file::validate_write_operation(l, fname) == false)
+			return nil;
+		std::string err;
+		auto udmData = ::util::load_udm_asset(fname, &err);
+		if(udmData == nullptr)
+			return nil;
 
-			auto col = pragma::doc::Collection::Load(udmData->GetAssetData(),err);
-			if(!col)
-				return nil;
-			return luabind::object{l,col};
-		})),
-		luabind::def("autogenerate",&autogenerate),
-		luabind::def("generate_lad_assets",static_cast<void(*)(lua_State*)>([](lua_State *l) {
-			Lua::RunString(l,"doc.autogenerate() local el = udm.load('doc/lua/pragma.ldoc'):GetAssetData():GetData() local js = udm.to_json(el) file.write('doc/lua/web_api.json',js) doc.generate_zerobrane_autocomplete_script()","internal");
-		})),
-		luabind::def("generate_zerobrane_autocomplete_script",static_cast<void(*)(lua_State*)>([](lua_State *l) {
-			Lua::doc::generate_autocomplete_script();
-		})),
-		luabind::def("generate_convar_documentation",generate_convar_doc)
-	];
-	Lua::RegisterLibraryEnums(l,libName,{
-		{"GAME_STATE_FLAG_NONE",umath::to_integral(pragma::doc::GameStateFlags::None)},
-		{"GAME_STATE_FLAG_BIT_SERVER",umath::to_integral(pragma::doc::GameStateFlags::Server)},
-		{"GAME_STATE_FLAG_BIT_CLIENT",umath::to_integral(pragma::doc::GameStateFlags::Client)},
-		{"GAME_STATE_FLAG_BIT_GUI",umath::to_integral(pragma::doc::GameStateFlags::GUI)},
-		{"GAME_STATE_FLAG_SHARED",umath::to_integral(pragma::doc::GameStateFlags::Shared)},
-		{"GAME_STATE_FLAG_ANY",umath::to_integral(pragma::doc::GameStateFlags::Any)}
-	});
+		auto col = pragma::doc::Collection::Load(udmData->GetAssetData(), err);
+		if(!col)
+			return nil;
+		return luabind::object {l, col};
+	})),
+	  luabind::def("autogenerate", &autogenerate), luabind::def("generate_lad_assets", static_cast<void (*)(lua_State *)>([](lua_State *l) {
+		  Lua::RunString(l, "doc.autogenerate() local el = udm.load('doc/lua/pragma.ldoc'):GetAssetData():GetData() local js = udm.to_json(el) file.write('doc/lua/web_api.json',js) doc.generate_zerobrane_autocomplete_script()", "internal");
+	  })),
+	  luabind::def("generate_zerobrane_autocomplete_script", static_cast<void (*)(lua_State *)>([](lua_State *l) { Lua::doc::generate_autocomplete_script(); })), luabind::def("generate_convar_documentation", generate_convar_doc)];
+	Lua::RegisterLibraryEnums(l, libName,
+	  {{"GAME_STATE_FLAG_NONE", umath::to_integral(pragma::doc::GameStateFlags::None)}, {"GAME_STATE_FLAG_BIT_SERVER", umath::to_integral(pragma::doc::GameStateFlags::Server)}, {"GAME_STATE_FLAG_BIT_CLIENT", umath::to_integral(pragma::doc::GameStateFlags::Client)},
+	    {"GAME_STATE_FLAG_BIT_GUI", umath::to_integral(pragma::doc::GameStateFlags::GUI)}, {"GAME_STATE_FLAG_SHARED", umath::to_integral(pragma::doc::GameStateFlags::Shared)}, {"GAME_STATE_FLAG_ANY", umath::to_integral(pragma::doc::GameStateFlags::Any)}});
 
 	auto classDefBase = luabind::class_<pragma::doc::BaseCollectionObject>("BaseCollectionObject");
-	classDefBase.def("GetFullName",static_cast<void(*)(lua_State*,pragma::doc::BaseCollectionObject&)>([](lua_State *l,pragma::doc::BaseCollectionObject &o) {
-		Lua::PushString(l,o.GetFullName());
-	}));
-	classDefBase.def("GetWikiURL",static_cast<void(*)(lua_State*,pragma::doc::BaseCollectionObject&)>([](lua_State *l,pragma::doc::BaseCollectionObject &o) {
-		Lua::PushString(l,o.GetWikiURL());
-	}));
+	classDefBase.def("GetFullName", static_cast<void (*)(lua_State *, pragma::doc::BaseCollectionObject &)>([](lua_State *l, pragma::doc::BaseCollectionObject &o) { Lua::PushString(l, o.GetFullName()); }));
+	classDefBase.def("GetWikiURL", static_cast<void (*)(lua_State *, pragma::doc::BaseCollectionObject &)>([](lua_State *l, pragma::doc::BaseCollectionObject &o) { Lua::PushString(l, o.GetWikiURL()); }));
 	docLib[classDefBase];
 
 	auto cdefGroup = luabind::class_<pragma::doc::Group>("Group");
-	cdefGroup.def("GetName",static_cast<void(*)(lua_State*,pragma::doc::Group&)>([](lua_State *l,pragma::doc::Group &group) {
-		Lua::PushString(l,group.GetName());
-	}));
+	cdefGroup.def("GetName", static_cast<void (*)(lua_State *, pragma::doc::Group &)>([](lua_State *l, pragma::doc::Group &group) { Lua::PushString(l, group.GetName()); }));
 	docLib[cdefGroup];
 
 	auto cdefOverload = luabind::class_<pragma::doc::Overload>("Overload");
-	cdefOverload.def("GetParameters",static_cast<void(*)(lua_State*,pragma::doc::Overload&)>([](lua_State *l,pragma::doc::Overload &overload) {
+	cdefOverload.def("GetParameters", static_cast<void (*)(lua_State *, pragma::doc::Overload &)>([](lua_State *l, pragma::doc::Overload &overload) {
 		auto &params = overload.GetParameters();
 		auto t = Lua::CreateTable(l);
 		auto idx = 1;
-		for(auto &param : params)
-		{
-			Lua::PushInt(l,idx++);
-			Lua::Push<pragma::doc::Parameter*>(l,&const_cast<pragma::doc::Parameter&>(param));
-			Lua::SetTableValue(l,t);
+		for(auto &param : params) {
+			Lua::PushInt(l, idx++);
+			Lua::Push<pragma::doc::Parameter *>(l, &const_cast<pragma::doc::Parameter &>(param));
+			Lua::SetTableValue(l, t);
 		}
 	}));
-	cdefOverload.def("GetParameters",static_cast<void(*)(lua_State*,pragma::doc::Overload&)>([](lua_State *l,pragma::doc::Overload &overload) {
+	cdefOverload.def("GetParameters", static_cast<void (*)(lua_State *, pragma::doc::Overload &)>([](lua_State *l, pragma::doc::Overload &overload) {
 		auto &retVals = overload.GetReturnValues();
 		auto t = Lua::CreateTable(l);
 		auto idx = 1;
-		for(auto &retVal : retVals)
-		{
-			Lua::PushInt(l,idx++);
-			Lua::Push<pragma::doc::Parameter*>(l,&const_cast<pragma::doc::Parameter&>(retVal));
-			Lua::SetTableValue(l,t);
+		for(auto &retVal : retVals) {
+			Lua::PushInt(l, idx++);
+			Lua::Push<pragma::doc::Parameter *>(l, &const_cast<pragma::doc::Parameter &>(retVal));
+			Lua::SetTableValue(l, t);
 		}
 	}));
 	docLib[cdefOverload];
-	
-	auto cdefFunction = luabind::class_<pragma::doc::Function>("Function");
-	cdefFunction.add_static_constant("TYPE_FUNCTION",umath::to_integral(pragma::doc::Function::Type::Function));
-	cdefFunction.add_static_constant("TYPE_METHOD",umath::to_integral(pragma::doc::Function::Type::Method));
-	cdefFunction.add_static_constant("TYPE_HOOK",umath::to_integral(pragma::doc::Function::Type::Hook));
 
-	cdefFunction.add_static_constant("FLAG_NONE",umath::to_integral(pragma::doc::Function::Flags::None));
-	cdefFunction.add_static_constant("FLAG_BIT_DEBUG",umath::to_integral(pragma::doc::Function::Flags::Debug));
-	cdefFunction.add_static_constant("FLAG_VANILLA",umath::to_integral(pragma::doc::Function::Flags::Vanilla));
-	cdefFunction.add_static_constant("FLAG_DEPRECATED",umath::to_integral(pragma::doc::Function::Flags::Deprecated));
-	cdefFunction.def("GetName",static_cast<void(*)(lua_State*,pragma::doc::Function&)>([](lua_State *l,pragma::doc::Function &fc) {
-		Lua::PushString(l,fc.GetName());
-	}));
-	cdefFunction.def("GetFullName",static_cast<void(*)(lua_State*,pragma::doc::Function&)>([](lua_State *l,pragma::doc::Function &fc) {
-		Lua::PushString(l,fc.GetFullName());
-	}));
-	cdefFunction.def("GetDescription",static_cast<void(*)(lua_State*,pragma::doc::Function&)>([](lua_State *l,pragma::doc::Function &fc) {
-		Lua::PushString(l,fc.GetDescription());
-	}));
-	cdefFunction.def("GetURL",static_cast<void(*)(lua_State*,pragma::doc::Function&)>([](lua_State *l,pragma::doc::Function &fc) {
-		Lua::PushString(l,fc.GetURL());
-	}));
-	cdefFunction.def("GetType",static_cast<void(*)(lua_State*,pragma::doc::Function&)>([](lua_State *l,pragma::doc::Function &fc) {
-		Lua::PushInt(l,umath::to_integral(fc.GetType()));
-	}));
-	cdefFunction.def("GetFlags",static_cast<void(*)(lua_State*,pragma::doc::Function&)>([](lua_State *l,pragma::doc::Function &fc) {
-		Lua::PushInt(l,umath::to_integral(fc.GetFlags()));
-	}));
-	cdefFunction.def("GetGameStateFlags",static_cast<void(*)(lua_State*,pragma::doc::Function&)>([](lua_State *l,pragma::doc::Function &fc) {
-		Lua::PushInt(l,umath::to_integral(fc.GetGameStateFlags()));
-	}));
-	cdefFunction.def("GetExampleCode",static_cast<void(*)(lua_State*,pragma::doc::Function&)>([](lua_State *l,pragma::doc::Function &fc) {
+	auto cdefFunction = luabind::class_<pragma::doc::Function>("Function");
+	cdefFunction.add_static_constant("TYPE_FUNCTION", umath::to_integral(pragma::doc::Function::Type::Function));
+	cdefFunction.add_static_constant("TYPE_METHOD", umath::to_integral(pragma::doc::Function::Type::Method));
+	cdefFunction.add_static_constant("TYPE_HOOK", umath::to_integral(pragma::doc::Function::Type::Hook));
+
+	cdefFunction.add_static_constant("FLAG_NONE", umath::to_integral(pragma::doc::Function::Flags::None));
+	cdefFunction.add_static_constant("FLAG_BIT_DEBUG", umath::to_integral(pragma::doc::Function::Flags::Debug));
+	cdefFunction.add_static_constant("FLAG_VANILLA", umath::to_integral(pragma::doc::Function::Flags::Vanilla));
+	cdefFunction.add_static_constant("FLAG_DEPRECATED", umath::to_integral(pragma::doc::Function::Flags::Deprecated));
+	cdefFunction.def("GetName", static_cast<void (*)(lua_State *, pragma::doc::Function &)>([](lua_State *l, pragma::doc::Function &fc) { Lua::PushString(l, fc.GetName()); }));
+	cdefFunction.def("GetFullName", static_cast<void (*)(lua_State *, pragma::doc::Function &)>([](lua_State *l, pragma::doc::Function &fc) { Lua::PushString(l, fc.GetFullName()); }));
+	cdefFunction.def("GetDescription", static_cast<void (*)(lua_State *, pragma::doc::Function &)>([](lua_State *l, pragma::doc::Function &fc) { Lua::PushString(l, fc.GetDescription()); }));
+	cdefFunction.def("GetURL", static_cast<void (*)(lua_State *, pragma::doc::Function &)>([](lua_State *l, pragma::doc::Function &fc) { Lua::PushString(l, fc.GetURL()); }));
+	cdefFunction.def("GetType", static_cast<void (*)(lua_State *, pragma::doc::Function &)>([](lua_State *l, pragma::doc::Function &fc) { Lua::PushInt(l, umath::to_integral(fc.GetType())); }));
+	cdefFunction.def("GetFlags", static_cast<void (*)(lua_State *, pragma::doc::Function &)>([](lua_State *l, pragma::doc::Function &fc) { Lua::PushInt(l, umath::to_integral(fc.GetFlags())); }));
+	cdefFunction.def("GetGameStateFlags", static_cast<void (*)(lua_State *, pragma::doc::Function &)>([](lua_State *l, pragma::doc::Function &fc) { Lua::PushInt(l, umath::to_integral(fc.GetGameStateFlags())); }));
+	cdefFunction.def("GetExampleCode", static_cast<void (*)(lua_State *, pragma::doc::Function &)>([](lua_State *l, pragma::doc::Function &fc) {
 		auto &exampleCode = fc.GetExampleCode();
 		if(exampleCode.has_value() == false)
 			return;
-		Lua::Push<pragma::doc::Function::ExampleCode*>(l,&const_cast<pragma::doc::Function::ExampleCode&>(*exampleCode));
+		Lua::Push<pragma::doc::Function::ExampleCode *>(l, &const_cast<pragma::doc::Function::ExampleCode &>(*exampleCode));
 	}));
-	cdefFunction.def("GetOverloads",static_cast<void(*)(lua_State*,pragma::doc::Function&)>([](lua_State *l,pragma::doc::Function &fc) {
+	cdefFunction.def("GetOverloads", static_cast<void (*)(lua_State *, pragma::doc::Function &)>([](lua_State *l, pragma::doc::Function &fc) {
 		auto &overloads = fc.GetOverloads();
 		auto t = Lua::CreateTable(l);
 		auto idx = 1;
-		for(auto &overload : overloads)
-		{
-			Lua::PushInt(l,idx++);
-			Lua::Push<pragma::doc::Overload*>(l,&const_cast<pragma::doc::Overload&>(overload));
-			Lua::SetTableValue(l,t);
+		for(auto &overload : overloads) {
+			Lua::PushInt(l, idx++);
+			Lua::Push<pragma::doc::Overload *>(l, &const_cast<pragma::doc::Overload &>(overload));
+			Lua::SetTableValue(l, t);
 		}
 	}));
-	cdefFunction.def("GetRelated",static_cast<void(*)(lua_State*,pragma::doc::Function&)>([](lua_State *l,pragma::doc::Function &fc) {
+	cdefFunction.def("GetRelated", static_cast<void (*)(lua_State *, pragma::doc::Function &)>([](lua_State *l, pragma::doc::Function &fc) {
 		auto &related = fc.GetRelated();
 		auto t = Lua::CreateTable(l);
 		auto idx = 1;
-		for(auto &r : related)
-		{
-			Lua::PushInt(l,idx++);
-			Lua::PushString(l,r);
-			Lua::SetTableValue(l,t);
+		for(auto &r : related) {
+			Lua::PushInt(l, idx++);
+			Lua::PushString(l, r);
+			Lua::SetTableValue(l, t);
 		}
 	}));
-	cdefFunction.def("GetGroups",static_cast<void(*)(lua_State*,pragma::doc::Function&)>([](lua_State *l,pragma::doc::Function &fc) {
+	cdefFunction.def("GetGroups", static_cast<void (*)(lua_State *, pragma::doc::Function &)>([](lua_State *l, pragma::doc::Function &fc) {
 		auto &groups = fc.GetGroups();
 		auto t = Lua::CreateTable(l);
 		auto idx = 1;
-		for(auto &group : groups)
-		{
-			Lua::PushInt(l,idx++);
-			Lua::Push<pragma::doc::Group*>(l,&const_cast<pragma::doc::Group&>(group));
-			Lua::SetTableValue(l,t);
+		for(auto &group : groups) {
+			Lua::PushInt(l, idx++);
+			Lua::Push<pragma::doc::Group *>(l, &const_cast<pragma::doc::Group &>(group));
+			Lua::SetTableValue(l, t);
 		}
 	}));
 
 	auto cdefExCode = luabind::class_<pragma::doc::Function::ExampleCode>("ExampleCode");
-	cdefExCode.def_readwrite("description",&pragma::doc::Function::ExampleCode::description);
-	cdefExCode.def_readwrite("code",&pragma::doc::Function::ExampleCode::code);
+	cdefExCode.def_readwrite("description", &pragma::doc::Function::ExampleCode::description);
+	cdefExCode.def_readwrite("code", &pragma::doc::Function::ExampleCode::code);
 	cdefFunction.scope[cdefExCode];
 	docLib[cdefFunction];
 
 	auto cdefMember = luabind::class_<pragma::doc::Member>("Member");
-	cdefMember.add_static_constant("MODE_NONE",umath::to_integral(pragma::doc::Member::Mode::None));
-	cdefMember.add_static_constant("MODE_READ",umath::to_integral(pragma::doc::Member::Mode::Read));
-	cdefMember.add_static_constant("MODE_WRITE",umath::to_integral(pragma::doc::Member::Mode::Write));
-	cdefMember.def("GetName",static_cast<void(*)(lua_State*,pragma::doc::Member&)>([](lua_State *l,pragma::doc::Member &member) {
-		Lua::PushString(l,member.GetName());
-	}));
-	cdefMember.def("GetFullName",static_cast<void(*)(lua_State*,pragma::doc::Member&)>([](lua_State *l,pragma::doc::Member &member) {
-		Lua::PushString(l,member.GetFullName());
-	}));
-	cdefMember.def("GetType",static_cast<pragma::doc::Variant*(*)(lua_State*,pragma::doc::Member&)>([](lua_State *l,pragma::doc::Member &member) {
-		return &const_cast<pragma::doc::Variant&>(member.GetType());
-	}));
-	cdefMember.def("GetWikiURL",static_cast<void(*)(lua_State*,pragma::doc::Member&)>([](lua_State *l,pragma::doc::Member &member) {
-		Lua::PushString(l,member.GetWikiURL());
-	}));
-	cdefMember.def("GetDescription",static_cast<void(*)(lua_State*,pragma::doc::Member&)>([](lua_State *l,pragma::doc::Member &member) {
-		Lua::PushString(l,member.GetDescription());
-	}));
-	cdefMember.def("GetGameStateFlags",static_cast<void(*)(lua_State*,pragma::doc::Member&)>([](lua_State *l,pragma::doc::Member &member) {
-		Lua::PushInt(l,umath::to_integral(member.GetGameStateFlags()));
-	}));
-	cdefMember.def("GetMode",static_cast<void(*)(lua_State*,pragma::doc::Member&)>([](lua_State *l,pragma::doc::Member &member) {
-		Lua::PushInt(l,umath::to_integral(member.GetMode()));
-	}));
-	cdefMember.def("GetDefault",static_cast<void(*)(lua_State*,pragma::doc::Member&)>([](lua_State *l,pragma::doc::Member &member) {
+	cdefMember.add_static_constant("MODE_NONE", umath::to_integral(pragma::doc::Member::Mode::None));
+	cdefMember.add_static_constant("MODE_READ", umath::to_integral(pragma::doc::Member::Mode::Read));
+	cdefMember.add_static_constant("MODE_WRITE", umath::to_integral(pragma::doc::Member::Mode::Write));
+	cdefMember.def("GetName", static_cast<void (*)(lua_State *, pragma::doc::Member &)>([](lua_State *l, pragma::doc::Member &member) { Lua::PushString(l, member.GetName()); }));
+	cdefMember.def("GetFullName", static_cast<void (*)(lua_State *, pragma::doc::Member &)>([](lua_State *l, pragma::doc::Member &member) { Lua::PushString(l, member.GetFullName()); }));
+	cdefMember.def("GetType", static_cast<pragma::doc::Variant *(*)(lua_State *, pragma::doc::Member &)>([](lua_State *l, pragma::doc::Member &member) { return &const_cast<pragma::doc::Variant &>(member.GetType()); }));
+	cdefMember.def("GetWikiURL", static_cast<void (*)(lua_State *, pragma::doc::Member &)>([](lua_State *l, pragma::doc::Member &member) { Lua::PushString(l, member.GetWikiURL()); }));
+	cdefMember.def("GetDescription", static_cast<void (*)(lua_State *, pragma::doc::Member &)>([](lua_State *l, pragma::doc::Member &member) { Lua::PushString(l, member.GetDescription()); }));
+	cdefMember.def("GetGameStateFlags", static_cast<void (*)(lua_State *, pragma::doc::Member &)>([](lua_State *l, pragma::doc::Member &member) { Lua::PushInt(l, umath::to_integral(member.GetGameStateFlags())); }));
+	cdefMember.def("GetMode", static_cast<void (*)(lua_State *, pragma::doc::Member &)>([](lua_State *l, pragma::doc::Member &member) { Lua::PushInt(l, umath::to_integral(member.GetMode())); }));
+	cdefMember.def("GetDefault", static_cast<void (*)(lua_State *, pragma::doc::Member &)>([](lua_State *l, pragma::doc::Member &member) {
 		auto &def = member.GetDefault();
 		if(def.has_value() == false)
 			return;
-		Lua::PushString(l,*def);
+		Lua::PushString(l, *def);
 	}));
 	docLib[cdefMember];
 
 	auto cdefEnum = luabind::class_<pragma::doc::Enum>("Enum");
-	cdefEnum.add_static_constant("TYPE_REGULAR",umath::to_integral(pragma::doc::Enum::Type::Regular));
-	cdefEnum.add_static_constant("TYPE_BIT",umath::to_integral(pragma::doc::Enum::Type::Bit));
-	cdefEnum.def("GetName",static_cast<void(*)(lua_State*,pragma::doc::Enum&)>([](lua_State *l,pragma::doc::Enum &e) {
-		Lua::PushString(l,e.GetName());
-	}));
-	cdefEnum.def("GetFullName",static_cast<void(*)(lua_State*,pragma::doc::Enum&)>([](lua_State *l,pragma::doc::Enum &e) {
-		Lua::PushString(l,e.GetFullName());
-	}));
-	cdefEnum.def("GetValue",static_cast<void(*)(lua_State*,pragma::doc::Enum&)>([](lua_State *l,pragma::doc::Enum &e) {
-		Lua::PushString(l,e.GetValue());
-	}));
-	cdefEnum.def("GetDescription",static_cast<void(*)(lua_State*,pragma::doc::Enum&)>([](lua_State *l,pragma::doc::Enum &e) {
-		Lua::PushString(l,e.GetDescription());
-	}));
-	cdefEnum.def("GetWikiURL",static_cast<void(*)(lua_State*,pragma::doc::Enum&)>([](lua_State *l,pragma::doc::Enum &e) {
-		Lua::PushString(l,e.GetWikiURL());
-	}));
-	cdefEnum.def("GetType",static_cast<void(*)(lua_State*,pragma::doc::Enum&)>([](lua_State *l,pragma::doc::Enum &e) {
-		Lua::PushInt(l,umath::to_integral(e.GetType()));
-	}));
-	cdefEnum.def("GetGameStateFlags",static_cast<void(*)(lua_State*,pragma::doc::Enum&)>([](lua_State *l,pragma::doc::Enum &e) {
-		Lua::PushInt(l,umath::to_integral(e.GetGameStateFlags()));
-	}));
+	cdefEnum.add_static_constant("TYPE_REGULAR", umath::to_integral(pragma::doc::Enum::Type::Regular));
+	cdefEnum.add_static_constant("TYPE_BIT", umath::to_integral(pragma::doc::Enum::Type::Bit));
+	cdefEnum.def("GetName", static_cast<void (*)(lua_State *, pragma::doc::Enum &)>([](lua_State *l, pragma::doc::Enum &e) { Lua::PushString(l, e.GetName()); }));
+	cdefEnum.def("GetFullName", static_cast<void (*)(lua_State *, pragma::doc::Enum &)>([](lua_State *l, pragma::doc::Enum &e) { Lua::PushString(l, e.GetFullName()); }));
+	cdefEnum.def("GetValue", static_cast<void (*)(lua_State *, pragma::doc::Enum &)>([](lua_State *l, pragma::doc::Enum &e) { Lua::PushString(l, e.GetValue()); }));
+	cdefEnum.def("GetDescription", static_cast<void (*)(lua_State *, pragma::doc::Enum &)>([](lua_State *l, pragma::doc::Enum &e) { Lua::PushString(l, e.GetDescription()); }));
+	cdefEnum.def("GetWikiURL", static_cast<void (*)(lua_State *, pragma::doc::Enum &)>([](lua_State *l, pragma::doc::Enum &e) { Lua::PushString(l, e.GetWikiURL()); }));
+	cdefEnum.def("GetType", static_cast<void (*)(lua_State *, pragma::doc::Enum &)>([](lua_State *l, pragma::doc::Enum &e) { Lua::PushInt(l, umath::to_integral(e.GetType())); }));
+	cdefEnum.def("GetGameStateFlags", static_cast<void (*)(lua_State *, pragma::doc::Enum &)>([](lua_State *l, pragma::doc::Enum &e) { Lua::PushInt(l, umath::to_integral(e.GetGameStateFlags())); }));
 	docLib[cdefEnum];
 
 	auto cdefEnumSet = luabind::class_<pragma::doc::EnumSet>("EnumSet");
-	cdefEnumSet.def("GetEnums",static_cast<void(*)(lua_State*,pragma::doc::EnumSet&)>([](lua_State *l,pragma::doc::EnumSet &eSet) {
+	cdefEnumSet.def("GetEnums", static_cast<void (*)(lua_State *, pragma::doc::EnumSet &)>([](lua_State *l, pragma::doc::EnumSet &eSet) {
 		auto &enums = eSet.GetEnums();
 		auto t = Lua::CreateTable(l);
 		auto idx = 1;
-		for(auto &e : enums)
-		{
-			Lua::PushInt(l,idx++);
-			Lua::Push<pragma::doc::Enum*>(l,&const_cast<pragma::doc::Enum&>(e));
-			Lua::SetTableValue(l,t);
+		for(auto &e : enums) {
+			Lua::PushInt(l, idx++);
+			Lua::Push<pragma::doc::Enum *>(l, &const_cast<pragma::doc::Enum &>(e));
+			Lua::SetTableValue(l, t);
 		}
 	}));
-	cdefEnumSet.def("GetName",static_cast<void(*)(lua_State*,pragma::doc::EnumSet&)>([](lua_State *l,pragma::doc::EnumSet &eSet) {
-		Lua::PushString(l,eSet.GetName());
-	}));
-	cdefEnumSet.def("GetFullName",static_cast<void(*)(lua_State*,pragma::doc::EnumSet&)>([](lua_State *l,pragma::doc::EnumSet &eSet) {
-		Lua::PushString(l,eSet.GetFullName());
-	}));
-	cdefEnumSet.def("GetUnderlyingType",static_cast<void(*)(lua_State*,pragma::doc::EnumSet&)>([](lua_State *l,pragma::doc::EnumSet &eSet) {
-		Lua::PushString(l,eSet.GetUnderlyingType());
-	}));
-	cdefEnumSet.def("GetWikiURL",static_cast<void(*)(lua_State*,pragma::doc::EnumSet&)>([](lua_State *l,pragma::doc::EnumSet &eSet) {
-		Lua::PushString(l,eSet.GetWikiURL());
-	}));
+	cdefEnumSet.def("GetName", static_cast<void (*)(lua_State *, pragma::doc::EnumSet &)>([](lua_State *l, pragma::doc::EnumSet &eSet) { Lua::PushString(l, eSet.GetName()); }));
+	cdefEnumSet.def("GetFullName", static_cast<void (*)(lua_State *, pragma::doc::EnumSet &)>([](lua_State *l, pragma::doc::EnumSet &eSet) { Lua::PushString(l, eSet.GetFullName()); }));
+	cdefEnumSet.def("GetUnderlyingType", static_cast<void (*)(lua_State *, pragma::doc::EnumSet &)>([](lua_State *l, pragma::doc::EnumSet &eSet) { Lua::PushString(l, eSet.GetUnderlyingType()); }));
+	cdefEnumSet.def("GetWikiURL", static_cast<void (*)(lua_State *, pragma::doc::EnumSet &)>([](lua_State *l, pragma::doc::EnumSet &eSet) { Lua::PushString(l, eSet.GetWikiURL()); }));
 	docLib[cdefEnumSet];
 
 	auto cdefModule = luabind::class_<pragma::doc::Module>("Module");
-	cdefModule.def("GetWikiURL",static_cast<void(*)(lua_State*,pragma::doc::Module&)>([](lua_State *l,pragma::doc::Module &mod) {
-		Lua::PushString(l,mod.GetName());
-	}));
-	cdefModule.def("GetTarget",static_cast<void(*)(lua_State*,pragma::doc::Module&)>([](lua_State *l,pragma::doc::Module &mod) {
-		Lua::PushString(l,mod.GetTarget());
-	}));
+	cdefModule.def("GetWikiURL", static_cast<void (*)(lua_State *, pragma::doc::Module &)>([](lua_State *l, pragma::doc::Module &mod) { Lua::PushString(l, mod.GetName()); }));
+	cdefModule.def("GetTarget", static_cast<void (*)(lua_State *, pragma::doc::Module &)>([](lua_State *l, pragma::doc::Module &mod) { Lua::PushString(l, mod.GetTarget()); }));
 	docLib[cdefModule];
 
 	auto cdefDerivedFrom = luabind::class_<pragma::doc::DerivedFrom>("DerivedFrom");
-	cdefDerivedFrom.def("GetName",static_cast<void(*)(lua_State*,pragma::doc::DerivedFrom&)>([](lua_State *l,pragma::doc::DerivedFrom &df) {
-		Lua::PushString(l,df.GetName());
-	}));
-	cdefDerivedFrom.def("GetParent",static_cast<void(*)(lua_State*,pragma::doc::DerivedFrom&)>([](lua_State *l,pragma::doc::DerivedFrom &df) {
+	cdefDerivedFrom.def("GetName", static_cast<void (*)(lua_State *, pragma::doc::DerivedFrom &)>([](lua_State *l, pragma::doc::DerivedFrom &df) { Lua::PushString(l, df.GetName()); }));
+	cdefDerivedFrom.def("GetParent", static_cast<void (*)(lua_State *, pragma::doc::DerivedFrom &)>([](lua_State *l, pragma::doc::DerivedFrom &df) {
 		auto &parent = df.GetParent();
 		if(parent == nullptr)
 			return;
-		Lua::Push<pragma::doc::DerivedFrom*>(l,parent.get());
+		Lua::Push<pragma::doc::DerivedFrom *>(l, parent.get());
 	}));
 	docLib[cdefDerivedFrom];
 
 	auto cdefCollection = luabind::class_<pragma::doc::Collection>("Collection");
-	cdefCollection.add_static_constant("FLAG_NONE",umath::to_integral(pragma::doc::Collection::Flags::None));
-	cdefCollection.add_static_constant("FLAG_BIT_BASE",umath::to_integral(pragma::doc::Collection::Flags::Base));
-	cdefCollection.add_static_constant("FLAG_BIT_LIBRARY",umath::to_integral(pragma::doc::Collection::Flags::Library));
-	cdefCollection.add_static_constant("FLAG_BIT_CLASS",umath::to_integral(pragma::doc::Collection::Flags::Class));
-	cdefCollection.def("GetFunctions",static_cast<void(*)(lua_State*,pragma::doc::Collection&)>([](lua_State *l,pragma::doc::Collection &collection) {
+	cdefCollection.add_static_constant("FLAG_NONE", umath::to_integral(pragma::doc::Collection::Flags::None));
+	cdefCollection.add_static_constant("FLAG_BIT_BASE", umath::to_integral(pragma::doc::Collection::Flags::Base));
+	cdefCollection.add_static_constant("FLAG_BIT_LIBRARY", umath::to_integral(pragma::doc::Collection::Flags::Library));
+	cdefCollection.add_static_constant("FLAG_BIT_CLASS", umath::to_integral(pragma::doc::Collection::Flags::Class));
+	cdefCollection.def("GetFunctions", static_cast<void (*)(lua_State *, pragma::doc::Collection &)>([](lua_State *l, pragma::doc::Collection &collection) {
 		auto &fcs = collection.GetFunctions();
 		auto t = Lua::CreateTable(l);
 		auto idx = 1;
-		for(auto &f : fcs)
-		{
-			Lua::PushInt(l,idx++);
-			Lua::Push<pragma::doc::Function*>(l,&const_cast<pragma::doc::Function&>(f));
-			Lua::SetTableValue(l,t);
+		for(auto &f : fcs) {
+			Lua::PushInt(l, idx++);
+			Lua::Push<pragma::doc::Function *>(l, &const_cast<pragma::doc::Function &>(f));
+			Lua::SetTableValue(l, t);
 		}
 	}));
-	cdefCollection.def("GetMembers",static_cast<void(*)(lua_State*,pragma::doc::Collection&)>([](lua_State *l,pragma::doc::Collection &collection) {
+	cdefCollection.def("GetMembers", static_cast<void (*)(lua_State *, pragma::doc::Collection &)>([](lua_State *l, pragma::doc::Collection &collection) {
 		auto &members = collection.GetMembers();
 		auto t = Lua::CreateTable(l);
 		auto idx = 1;
-		for(auto &m : members)
-		{
-			Lua::PushInt(l,idx++);
-			Lua::Push<pragma::doc::Member*>(l,&const_cast<pragma::doc::Member&>(m));
-			Lua::SetTableValue(l,t);
+		for(auto &m : members) {
+			Lua::PushInt(l, idx++);
+			Lua::Push<pragma::doc::Member *>(l, &const_cast<pragma::doc::Member &>(m));
+			Lua::SetTableValue(l, t);
 		}
 	}));
-	cdefCollection.def("GetEnumSets",static_cast<void(*)(lua_State*,pragma::doc::Collection&)>([](lua_State *l,pragma::doc::Collection &collection) {
+	cdefCollection.def("GetEnumSets", static_cast<void (*)(lua_State *, pragma::doc::Collection &)>([](lua_State *l, pragma::doc::Collection &collection) {
 		auto &eSets = collection.GetEnumSets();
 		auto t = Lua::CreateTable(l);
 		auto idx = 1;
-		for(auto &eSet : eSets)
-		{
-			Lua::PushInt(l,idx++);
-			Lua::Push<pragma::doc::EnumSet*>(l,&const_cast<pragma::doc::EnumSet&>(*eSet));
-			Lua::SetTableValue(l,t);
+		for(auto &eSet : eSets) {
+			Lua::PushInt(l, idx++);
+			Lua::Push<pragma::doc::EnumSet *>(l, &const_cast<pragma::doc::EnumSet &>(*eSet));
+			Lua::SetTableValue(l, t);
 		}
 	}));
-	cdefCollection.def("GetRelated",static_cast<void(*)(lua_State*,pragma::doc::Collection&)>([](lua_State *l,pragma::doc::Collection &collection) {
+	cdefCollection.def("GetRelated", static_cast<void (*)(lua_State *, pragma::doc::Collection &)>([](lua_State *l, pragma::doc::Collection &collection) {
 		auto &related = collection.GetRelated();
 		auto t = Lua::CreateTable(l);
 		auto idx = 1;
-		for(auto &r : related)
-		{
-			Lua::PushInt(l,idx++);
-			Lua::PushString(l,r);
-			Lua::SetTableValue(l,t);
+		for(auto &r : related) {
+			Lua::PushInt(l, idx++);
+			Lua::PushString(l, r);
+			Lua::SetTableValue(l, t);
 		}
 	}));
-	cdefCollection.def("GetChildren",static_cast<void(*)(lua_State*,pragma::doc::Collection&)>([](lua_State *l,pragma::doc::Collection &collection) {
+	cdefCollection.def("GetChildren", static_cast<void (*)(lua_State *, pragma::doc::Collection &)>([](lua_State *l, pragma::doc::Collection &collection) {
 		auto &children = collection.GetChildren();
 		auto t = Lua::CreateTable(l);
 		auto idx = 1;
-		for(auto &child : children)
-		{
-			Lua::PushInt(l,idx++);
-			Lua::Push<pragma::doc::Collection*>(l,&const_cast<pragma::doc::Collection&>(*child));
-			Lua::SetTableValue(l,t);
+		for(auto &child : children) {
+			Lua::PushInt(l, idx++);
+			Lua::Push<pragma::doc::Collection *>(l, &const_cast<pragma::doc::Collection &>(*child));
+			Lua::SetTableValue(l, t);
 		}
 	}));
-	cdefCollection.def("GetDerivedFrom",static_cast<void(*)(lua_State*,pragma::doc::Collection&)>([](lua_State *l,pragma::doc::Collection &collection) {
+	cdefCollection.def("GetDerivedFrom", static_cast<void (*)(lua_State *, pragma::doc::Collection &)>([](lua_State *l, pragma::doc::Collection &collection) {
 		auto &derivedFrom = collection.GetDerivedFrom();
 		auto t = Lua::CreateTable(l);
 		auto idx = 1;
-		for(auto &df : derivedFrom)
-		{
-			Lua::PushInt(l,idx++);
-			Lua::Push(l,const_cast<std::shared_ptr<pragma::doc::DerivedFrom>&>(df));
-			Lua::SetTableValue(l,t);
+		for(auto &df : derivedFrom) {
+			Lua::PushInt(l, idx++);
+			Lua::Push(l, const_cast<std::shared_ptr<pragma::doc::DerivedFrom> &>(df));
+			Lua::SetTableValue(l, t);
 		}
 	}));
-	cdefCollection.def("GetName",static_cast<void(*)(lua_State*,pragma::doc::Collection&)>([](lua_State *l,pragma::doc::Collection &collection) {
-		Lua::PushString(l,collection.GetName());
-	}));
-	cdefCollection.def("GetFullName",static_cast<void(*)(lua_State*,pragma::doc::Collection&)>([](lua_State *l,pragma::doc::Collection &collection) {
-		Lua::PushString(l,collection.GetFullName());
-	}));
-	cdefCollection.def("GetDescription",static_cast<void(*)(lua_State*,pragma::doc::Collection&)>([](lua_State *l,pragma::doc::Collection &collection) {
-		Lua::PushString(l,collection.GetDescription());
-	}));
-	cdefCollection.def("GetURL",static_cast<void(*)(lua_State*,pragma::doc::Collection&)>([](lua_State *l,pragma::doc::Collection &collection) {
-		Lua::PushString(l,collection.GetURL());
-	}));
-	cdefCollection.def("GetWikiURL",static_cast<void(*)(lua_State*,pragma::doc::Collection&)>([](lua_State *l,pragma::doc::Collection &collection) {
-		Lua::PushString(l,collection.GetWikiURL());
-	}));
-	cdefCollection.def("GetFlags",static_cast<void(*)(lua_State*,pragma::doc::Collection&)>([](lua_State *l,pragma::doc::Collection &collection) {
-		Lua::PushInt(l,umath::to_integral(collection.GetFlags()));
-	}));
-	cdefCollection.def("GetParent",static_cast<void(*)(lua_State*,pragma::doc::Collection&)>([](lua_State *l,pragma::doc::Collection &collection) {
+	cdefCollection.def("GetName", static_cast<void (*)(lua_State *, pragma::doc::Collection &)>([](lua_State *l, pragma::doc::Collection &collection) { Lua::PushString(l, collection.GetName()); }));
+	cdefCollection.def("GetFullName", static_cast<void (*)(lua_State *, pragma::doc::Collection &)>([](lua_State *l, pragma::doc::Collection &collection) { Lua::PushString(l, collection.GetFullName()); }));
+	cdefCollection.def("GetDescription", static_cast<void (*)(lua_State *, pragma::doc::Collection &)>([](lua_State *l, pragma::doc::Collection &collection) { Lua::PushString(l, collection.GetDescription()); }));
+	cdefCollection.def("GetURL", static_cast<void (*)(lua_State *, pragma::doc::Collection &)>([](lua_State *l, pragma::doc::Collection &collection) { Lua::PushString(l, collection.GetURL()); }));
+	cdefCollection.def("GetWikiURL", static_cast<void (*)(lua_State *, pragma::doc::Collection &)>([](lua_State *l, pragma::doc::Collection &collection) { Lua::PushString(l, collection.GetWikiURL()); }));
+	cdefCollection.def("GetFlags", static_cast<void (*)(lua_State *, pragma::doc::Collection &)>([](lua_State *l, pragma::doc::Collection &collection) { Lua::PushInt(l, umath::to_integral(collection.GetFlags())); }));
+	cdefCollection.def("GetParent", static_cast<void (*)(lua_State *, pragma::doc::Collection &)>([](lua_State *l, pragma::doc::Collection &collection) {
 		auto *parent = collection.GetParent();
 		if(parent == nullptr)
 			return;
-		Lua::Push<pragma::doc::Collection*>(l,const_cast<pragma::doc::Collection*>(parent));
+		Lua::Push<pragma::doc::Collection *>(l, const_cast<pragma::doc::Collection *>(parent));
 	}));
 	docLib[cdefCollection];
 }
 
 #else
-namespace Lua::doc
-{
+namespace Lua::doc {
 	void register_library(Lua::Interface &lua) {}
 };
 #endif

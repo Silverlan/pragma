@@ -27,25 +27,17 @@
 
 using namespace pragma;
 
-ai::navigation::PathInfo::PathInfo(const std::shared_ptr<RcPathResult> &path)
-	: path(path),pathIdx(0)
-{}
+ai::navigation::PathInfo::PathInfo(const std::shared_ptr<RcPathResult> &path) : path(path), pathIdx(0) {}
 
 //////////////////
 
-BaseAIComponent::MoveInfo::MoveInfo(Activity act)
-	: MoveInfo()
-{
-	activity = act;
-}
-BaseAIComponent::MoveInfo::MoveInfo(Activity act,bool bMoveOnPath)
-	: MoveInfo()
+BaseAIComponent::MoveInfo::MoveInfo(Activity act) : MoveInfo() { activity = act; }
+BaseAIComponent::MoveInfo::MoveInfo(Activity act, bool bMoveOnPath) : MoveInfo()
 {
 	activity = act;
 	moveOnPath = bMoveOnPath;
 }
-BaseAIComponent::MoveInfo::MoveInfo(Activity act,bool bMoveOnPath,const Vector3 &faceTarget,float moveSpeed,float turnSpeed)
-	: MoveInfo()
+BaseAIComponent::MoveInfo::MoveInfo(Activity act, bool bMoveOnPath, const Vector3 &faceTarget, float moveSpeed, float turnSpeed) : MoveInfo()
 {
 	activity = act;
 	moveOnPath = bMoveOnPath;
@@ -61,22 +53,17 @@ void BaseAIComponent::UpdatePath()
 	auto charComponent = GetEntity().GetCharacterComponent();
 	if((charComponent.valid() && charComponent->CanMove() == false) || m_moveInfo.moveOnPath == false)
 		return;
-	if(m_navInfo.queuedPath != nullptr)
-	{
+	if(m_navInfo.queuedPath != nullptr) {
 		if(s_navThread == nullptr)
 			m_navInfo.queuedPath = nullptr;
-		else
-		{
+		else {
 			auto bPathChanged = false;
-			if(m_navInfo.queuedPath->complete == true)
-			{
-				if(m_navInfo.queuedPath->pathInfo != nullptr)
-				{
+			if(m_navInfo.queuedPath->complete == true) {
+				if(m_navInfo.queuedPath->pathInfo != nullptr) {
 					m_navInfo.pathInfo = m_navInfo.queuedPath->pathInfo;
 					m_navInfo.pathState = PathResult::Success;
 				}
-				else
-				{
+				else {
 					//Con::cerr<<"Failed to generate path!"<<Con::endl;
 					m_navInfo.pathState = PathResult::Failed;
 				}
@@ -88,8 +75,7 @@ void BaseAIComponent::UpdatePath()
 		}
 	}
 	auto bPathUpdateRequired = (m_navInfo.pathInfo == nullptr || m_navInfo.bPathUpdateRequired == true) ? true : false;
-	if(bPathUpdateRequired == false)
-	{
+	if(bPathUpdateRequired == false) {
 		//auto &pos = m_entity->GetPosition();
 		/*Vector3 startPos {};
 		if(m_pathInfo->path->GetNode(0,pos,startPos) == true)
@@ -103,10 +89,7 @@ void BaseAIComponent::UpdatePath()
 			auto d = uvec::distance(
 		}*/ // Should be checked if end pos actually changed (What if entity?)
 	}
-	else
-	{
-		
-
+	else {
 	}
 	//
 }
@@ -121,16 +104,15 @@ void BaseAIComponent::ResetPath()
 	m_navInfo.bPathUpdateRequired = true;
 	m_navInfo.bTargetReached = false;
 	m_navInfo.pathState = PathResult::Updating;
-	if(s_navThread != nullptr)
-	{
-		m_navInfo.queuedPath = std::make_shared<ai::navigation::PathQuery>(pTrComponent->GetPosition(),GetMoveTarget());
+	if(s_navThread != nullptr) {
+		m_navInfo.queuedPath = std::make_shared<ai::navigation::PathQuery>(pTrComponent->GetPosition(), GetMoveTarget());
 		s_navThread->pendingQueueMutex.lock();
-			s_navThread->pendingQueue.push(m_navInfo.queuedPath);
+		s_navThread->pendingQueue.push(m_navInfo.queuedPath);
 		s_navThread->pendingQueueMutex.unlock();
 	}
 }
 
-const Vector3 &BaseAIComponent::GetMoveTarget() const {return m_moveInfo.moveTarget;}
+const Vector3 &BaseAIComponent::GetMoveTarget() const { return m_moveInfo.moveTarget; }
 
 bool BaseAIComponent::IsMoving() const
 {
@@ -138,7 +120,7 @@ bool BaseAIComponent::IsMoving() const
 	return (animComponent.valid() && animComponent->GetActivity() == m_moveInfo.moveActivity) ? true : false;
 }
 
-BaseAIComponent::MoveResult BaseAIComponent::MoveTo(const Vector3 &pos,const MoveInfo &info)
+BaseAIComponent::MoveResult BaseAIComponent::MoveTo(const Vector3 &pos, const MoveInfo &info)
 {
 	auto charComponent = GetEntity().GetCharacterComponent();
 	if(charComponent.valid() && charComponent->CanMove() == false)
@@ -146,8 +128,7 @@ BaseAIComponent::MoveResult BaseAIComponent::MoveTo(const Vector3 &pos,const Mov
 	auto moveActivity = Activity::Invalid;
 	auto &ent = GetEntity();
 	auto animComponent = ent.GetAnimatedComponent();
-	if(animComponent.valid())
-	{
+	if(animComponent.valid()) {
 		moveActivity = animComponent->TranslateActivity(info.activity);
 		if(moveActivity != m_moveInfo.moveActivity && animComponent->SelectWeightedAnimation(moveActivity) == -1) // Activity doesn't exist
 		{
@@ -167,7 +148,7 @@ BaseAIComponent::MoveResult BaseAIComponent::MoveTo(const Vector3 &pos,const Mov
 	m_moveInfo.destinationTolerance = info.destinationTolerance;
 	//auto &start = m_entity->GetPosition();
 	auto &upDir = ent.IsCharacter() ? ent.GetCharacterComponent()->GetUpDirection() : uvec::UP;
-	auto d = uvec::planar_distance_sqr(m_moveInfo.moveTarget,m_navInfo.pathTarget,upDir);
+	auto d = uvec::planar_distance_sqr(m_moveInfo.moveTarget, m_navInfo.pathTarget, upDir);
 	if(d > umath::pow2(MAX_NODE_DISTANCE)) // If the new move target is too far away from our old one, we'll probably need a new path
 	{
 		if(info.moveOnPath == false) // TODO Check if obstructed
@@ -179,15 +160,14 @@ BaseAIComponent::MoveResult BaseAIComponent::MoveTo(const Vector3 &pos,const Mov
 		return MoveResult::TargetReached;
 	if(m_navInfo.bTargetReached == true)
 		return MoveResult::TargetReached;
-	if(m_navInfo.pathState == PathResult::Failed)
-	{
+	if(m_navInfo.pathState == PathResult::Failed) {
 		m_moveInfo.moving = false;
 		return MoveResult::TargetUnreachable;
 	}
 	if(m_navInfo.pathInfo != nullptr)
 		return MoveResult::MovingToTarget;
 	assert(m_navInfo.pathState == PathResult::Updating); // If we don't have a valid path and the path generation hasn't failed, then the path must still be generating. Otherwise what happened?
-	if(m_navInfo.pathState != PathResult::Updating) // This shouldn't happen, but if it does, try regenerating the path
+	if(m_navInfo.pathState != PathResult::Updating)      // This shouldn't happen, but if it does, try regenerating the path
 	{
 		m_navInfo.pathTarget = pos;
 		ResetPath();
@@ -203,28 +183,26 @@ float BaseAIComponent::GetMaxSpeed(bool bUseAnimSpeedIfAvailable) const
 	auto animComponent = ent.GetAnimatedComponent();
 	if(animComponent.expired())
 		return speed;
-	if(GetMoveSpeed(animComponent->GetAnimation(),speed) == true)
+	if(GetMoveSpeed(animComponent->GetAnimation(), speed) == true)
 		return speed;
-	if(bUseAnimSpeedIfAvailable == true)
-	{
+	if(bUseAnimSpeedIfAvailable == true) {
 		auto *anim = animComponent->GetAnimationObject();
-		if(anim != nullptr)
-		{
+		if(anim != nullptr) {
 			auto moveZ = 0.f;
-			if(animComponent->CalcAnimationMovementSpeed(nullptr,&moveZ,0) == true)
+			if(animComponent->CalcAnimationMovementSpeed(nullptr, &moveZ, 0) == true)
 				return moveZ;
 		}
 	}
 	return speed;
 }
 
-void BaseAIComponent::SetMoveSpeed(int32_t animId,float speed)
+void BaseAIComponent::SetMoveSpeed(int32_t animId, float speed)
 {
 	if(animId < 0)
 		return;
 	m_animIdMoveSpeed[animId] = speed;
 }
-void BaseAIComponent::SetMoveSpeed(const std::string &name,float speed)
+void BaseAIComponent::SetMoveSpeed(const std::string &name, float speed)
 {
 	m_animMoveSpeed[name] = speed;
 	auto &hMdl = GetEntity().GetModel();
@@ -238,23 +216,21 @@ void BaseAIComponent::SetMoveSpeed(const std::string &name,float speed)
 float BaseAIComponent::GetMoveSpeed(int32_t animId) const
 {
 	auto speed = 0.f;
-	GetMoveSpeed(animId,speed);
+	GetMoveSpeed(animId, speed);
 	return speed;
 }
-bool BaseAIComponent::GetMoveSpeed(int32_t animId,float &speed) const
+bool BaseAIComponent::GetMoveSpeed(int32_t animId, float &speed) const
 {
 	auto it = m_animIdMoveSpeed.find(animId);
-	if(it == m_animIdMoveSpeed.end())
-	{
+	if(it == m_animIdMoveSpeed.end()) {
 		speed = 0.f;
 		return false;
 	}
 	speed = it->second;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent)
-	{
+	if(pTrComponent) {
 		auto &scale = pTrComponent->GetScale();
-		speed *= umath::abs_max(scale.x,scale.y,scale.z);
+		speed *= umath::abs_max(scale.x, scale.y, scale.z);
 	}
 	return true;
 }
@@ -278,9 +254,9 @@ void BaseAIComponent::ClearMoveSpeed(const std::string &name)
 		return;
 	ClearMoveSpeed(animId);
 }
-Activity BaseAIComponent::GetMoveActivity() const {return m_moveInfo.moveActivity;}
+Activity BaseAIComponent::GetMoveActivity() const { return m_moveInfo.moveActivity; }
 
-void BaseAIComponent::BlendAnimationMovementMT(std::vector<umath::Transform> &bonePoses,std::vector<Vector3> *boneScales)
+void BaseAIComponent::BlendAnimationMovementMT(std::vector<umath::Transform> &bonePoses, std::vector<Vector3> *boneScales)
 {
 	if(m_seqIdle == -1)
 		return;
@@ -290,7 +266,7 @@ void BaseAIComponent::BlendAnimationMovementMT(std::vector<umath::Transform> &bo
 	auto &ent = GetEntity();
 	auto animComponent = ent.GetAnimatedComponent();
 	auto &hMdl = GetEntity().GetModel();
-	if(animComponent.expired() || hMdl == nullptr/* || animComponent->GetActivity() != m_moveInfo.moveActivity*/)
+	if(animComponent.expired() || hMdl == nullptr /* || animComponent->GetActivity() != m_moveInfo.moveActivity*/)
 		return;
 	auto *anim = animComponent->GetAnimationObject();
 	// Animation movement blending does not work well with special movement animations (e.g. leaping),
@@ -310,40 +286,34 @@ void BaseAIComponent::BlendAnimationMovementMT(std::vector<umath::Transform> &bo
 	if(frame == NULL)
 		return;
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
-	auto vel = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3{};
+	auto vel = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {};
 	float speed = uvec::length(vel);
 	if(m_lastMovementBlendScale == 0.f && speed < 0.5f) // Arbitrary limit; Don't blend animations if speed is below this value
 		return;
 	float scale = 0.f;
 	float speedMax = umath::abs(GetMaxSpeed());
-	if(speedMax > 0.f)
-	{
-		scale = 1.f -(speed /speedMax);
+	if(speedMax > 0.f) {
+		scale = 1.f - (speed / speedMax);
 		if(scale < 0.f)
 			scale = 0.f;
 	}
-	m_lastMovementBlendScale = scale = umath::approach(m_lastMovementBlendScale,scale,0.05f);
+	m_lastMovementBlendScale = scale = umath::approach(m_lastMovementBlendScale, scale, 0.05f);
 	auto &dstBonePoses = frame->GetBoneTransforms();
 	auto &dstBoneScales = frame->GetBoneScales();
-	animComponent->BlendBonePoses(
-		bonePoses,boneScales,
-		dstBonePoses,&dstBoneScales,
-		bonePoses,boneScales,
-		*anim,scale
-	);
+	animComponent->BlendBonePoses(bonePoses, boneScales, dstBonePoses, &dstBoneScales, bonePoses, boneScales, *anim, scale);
 }
 
 void BaseAIComponent::OnPathDestinationReached()
 {
 	m_moveInfo.moving = false; // TODO Do this properly
 }
-bool BaseAIComponent::HasReachedDestination() const {return m_navInfo.bTargetReached;}
+bool BaseAIComponent::HasReachedDestination() const { return m_navInfo.bTargetReached; }
 float BaseAIComponent::GetDistanceToMoveTarget() const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(!pTrComponent)
 		return 0.f;
-	return uvec::distance(pTrComponent->GetPosition(),GetMoveTarget());
+	return uvec::distance(pTrComponent->GetPosition(), GetMoveTarget());
 }
 
 void BaseAIComponent::StopMoving()
@@ -355,13 +325,13 @@ void BaseAIComponent::StopMoving()
 	m_moveInfo.moveSpeed = nullptr;
 	auto pAnimComponent = GetEntity().GetAnimatedComponent();
 	if(pAnimComponent.valid())
-		static_cast<BaseAnimatedComponent*>(pAnimComponent.get())->PlayActivity(Activity::Idle,pragma::FPlayAnim::Default);
+		static_cast<BaseAnimatedComponent *>(pAnimComponent.get())->PlayActivity(Activity::Idle, pragma::FPlayAnim::Default);
 }
 
-void BaseAIComponent::SetPathNodeIndex(uint32_t nodeIdx,const Vector3 &prevPos)
+void BaseAIComponent::SetPathNodeIndex(uint32_t nodeIdx, const Vector3 &prevPos)
 {
-	for(auto i=decltype(m_navInfo.pathInfo->splineNodes.size()){0};i<(m_navInfo.pathInfo->splineNodes.size() -1);++i)
-		m_navInfo.pathInfo->splineNodes[i] = (m_navInfo.pathInfo->splineNodes[i +1] != nullptr) ? std::make_unique<Vector3>(*m_navInfo.pathInfo->splineNodes[i +1]) : nullptr;
+	for(auto i = decltype(m_navInfo.pathInfo->splineNodes.size()) {0}; i < (m_navInfo.pathInfo->splineNodes.size() - 1); ++i)
+		m_navInfo.pathInfo->splineNodes[i] = (m_navInfo.pathInfo->splineNodes[i + 1] != nullptr) ? std::make_unique<Vector3>(*m_navInfo.pathInfo->splineNodes[i + 1]) : nullptr;
 	m_navInfo.pathInfo->splineNodes.back() = std::make_unique<Vector3>(prevPos);
 	m_navInfo.pathInfo->pathIdx = nodeIdx;
 	OnPathNodeChanged(m_navInfo.pathInfo->pathIdx);
@@ -381,20 +351,16 @@ void BaseAIComponent::PathStep(float)
 	auto upDir = ent.IsCharacter() ? ent.GetCharacterComponent()->GetUpDirection() : uvec::UP;
 	auto bMoveOnPath = m_moveInfo.moveOnPath == true && m_navInfo.pathInfo != nullptr && m_navInfo.pathInfo->path != nullptr;
 	Vector3 tgt;
-	if(bMoveOnPath == true)
-	{
+	if(bMoveOnPath == true) {
 		auto &path = *m_navInfo.pathInfo->path;
-		if(path.GetNode(m_navInfo.pathInfo->pathIdx,pos,tgt) == false)
+		if(path.GetNode(m_navInfo.pathInfo->pathIdx, pos, tgt) == false)
 			bMoveOnPath = false;
-		else
-		{
+		else {
 			tgt.y = 0.f;
 			const auto pathNodeReachedDist = umath::pow2(10.f);
-			while(uvec::planar_distance_sqr(pos,tgt,upDir) <= umath::pow2(pathNodeReachedDist))
-			{
-				SetPathNodeIndex(m_navInfo.pathInfo->pathIdx +1,tgt);
-				if(m_navInfo.pathInfo->pathIdx >= CUInt32(path.pathCount))
-				{
+			while(uvec::planar_distance_sqr(pos, tgt, upDir) <= umath::pow2(pathNodeReachedDist)) {
+				SetPathNodeIndex(m_navInfo.pathInfo->pathIdx + 1, tgt);
+				if(m_navInfo.pathInfo->pathIdx >= CUInt32(path.pathCount)) {
 					StopMoving();
 					m_navInfo.bTargetReached = true;
 					OnPathDestinationReached();
@@ -405,8 +371,7 @@ void BaseAIComponent::PathStep(float)
 					}*/ // Reached end of path?
 					return;
 				}
-				if(path.GetNode(m_navInfo.pathInfo->pathIdx,pos,tgt) == false)
-				{
+				if(path.GetNode(m_navInfo.pathInfo->pathIdx, pos, tgt) == false) {
 					bMoveOnPath = false;
 					break;
 				}
@@ -460,8 +425,7 @@ void BaseAIComponent::PathStep(float)
 	if(bMoveOnPath == false) // No navigation info available; Try to move to target in a straight line
 	{
 		tgt = m_moveInfo.moveTarget;
-		if(uvec::planar_distance_sqr(pos,tgt,upDir) <= umath::pow2(destReachDist))
-		{
+		if(uvec::planar_distance_sqr(pos, tgt, upDir) <= umath::pow2(destReachDist)) {
 			StopMoving();
 			m_navInfo.bTargetReached = true;
 			OnPathDestinationReached();
@@ -469,8 +433,8 @@ void BaseAIComponent::PathStep(float)
 		}
 	}
 
-	auto dir = tgt -pos;
-	dir = uvec::project_to_plane(dir,upDir,0.f);
+	auto dir = tgt - pos;
+	dir = uvec::project_to_plane(dir, upDir, 0.f);
 	auto l = uvec::length(dir);
 	if(l != 0.f)
 		dir /= l;
@@ -487,8 +451,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 		return;
 	auto *game = ent.GetNetworkState()->GetGameState();
 	auto &t = game->CurTime();
-	if(t < m_obstruction.nextObstructionCheck)
-	{
+	if(t < m_obstruction.nextObstructionCheck) {
 		if(m_obstruction.pathObstructed == true)
 			dir = m_obstruction.resolveDirection;
 		return;
@@ -496,21 +459,21 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 	auto pos = ent.GetCenter();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 
-	auto dstPos = pos +dir *(pPhysComponent ? (pPhysComponent->GetCollisionRadius() *1.1f) : 0.f);
+	auto dstPos = pos + dir * (pPhysComponent ? (pPhysComponent->GetCollisionRadius() * 1.1f) : 0.f);
 
-	const auto fCheckForObstruction = [this,&pTrComponent,&dir,t](TraceResult &r) -> bool {
+	const auto fCheckForObstruction = [this, &pTrComponent, &dir, t](TraceResult &r) -> bool {
 		if(r.hitType != RayCastHitType::None && (r.entity.valid() == false || IsObstruction(*r.entity.get()))) // Obstructed
 		{
 			m_obstruction.pathObstructed = true;
 			auto aimDir = pTrComponent->GetForward();
-			auto newDir = aimDir -glm::proj(aimDir,r.normal);
+			auto newDir = aimDir - glm::proj(aimDir, r.normal);
 			uvec::normalize(&newDir);
 			dir = newDir;
 			m_obstruction.resolveDirection = dir;
 		}
 		else
 			m_obstruction.pathObstructed = false;
-		m_obstruction.nextObstructionCheck = t +((m_obstruction.pathObstructed == false) ? 0.8 : 0.2);
+		m_obstruction.nextObstructionCheck = t + ((m_obstruction.pathObstructed == false) ? 0.8 : 0.2);
 		return m_obstruction.pathObstructed;
 	};
 
@@ -518,8 +481,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 	TraceData data {};
 	data.SetFilter(m_obstruction.sweepFilter);
 	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
-	if(pPhysComponent != nullptr)
-	{
+	if(pPhysComponent != nullptr) {
 		data.SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter());
 		data.SetCollisionFilterMask(pPhysComponent->GetCollisionFilterMask());
 	}
@@ -528,22 +490,20 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 	auto charComponent = ent.GetCharacterComponent();
 	auto upDir = charComponent.valid() ? charComponent->GetUpDirection() : uvec::UP;
 	auto height = 0.f;
-	if(pPhysComponent != nullptr)
-	{
-		Vector3 min,max;
-		pPhysComponent->GetCollisionBounds(&min,&max);
-		height = min.y +max.y;
+	if(pPhysComponent != nullptr) {
+		Vector3 min, max;
+		pPhysComponent->GetCollisionBounds(&min, &max);
+		height = min.y + max.y;
 	}
 	else
 		numRays = 0u;
-	auto offset = height /5.f; // 3 raycasts +margin at bottom and top
+	auto offset = height / 5.f; // 3 raycasts +margin at bottom and top
 
 	// Perform several raycasts near the center of the body of the NPC
-	for(auto i=0u;i<numRays;++i)
-	{
-		auto vOffset = upDir *(offset +i *offset);
-		data.SetSource(pos +vOffset);
-		data.SetTarget(dstPos +vOffset);
+	for(auto i = 0u; i < numRays; ++i) {
+		auto vOffset = upDir * (offset + i * offset);
+		data.SetSource(pos + vOffset);
+		data.SetTarget(dstPos + vOffset);
 		auto r = game->RayCast(data);
 		if(fCheckForObstruction(r) == true)
 			return;
@@ -552,19 +512,18 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 	auto *physObj = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(physObj == nullptr || physObj->IsController() == false)
 		return;
-	auto *physController = static_cast<ControllerPhysObj*>(physObj);
+	auto *physController = static_cast<ControllerPhysObj *>(physObj);
 	auto *shape = physController->GetController()->GetShape();
 	if(shape == nullptr)
 		return;
 	// If the NPC's physics object is a capsule shape (which is very likely), we'll have to offset the position
 	// so that the capsule sweep isn't inside the ground (since a capsule's origin is at its center, not near the feet, but the NPCs
 	// position is always at the feet).
-	if(physController->IsCapsule())
-	{
-		auto *capsuleController = static_cast<CapsuleControllerPhysObj*>(physObj);
+	if(physController->IsCapsule()) {
+		auto *capsuleController = static_cast<CapsuleControllerPhysObj *>(physObj);
 		auto rot = physObj->GetOrientation();
-		auto offset = Vector3(0,capsuleController->GetHeight() *0.5f,0);
-		uvec::rotate(&offset,rot);
+		auto offset = Vector3(0, capsuleController->GetHeight() * 0.5f, 0);
+		uvec::rotate(&offset, rot);
 		pos += offset;
 		dstPos += offset;
 	}
@@ -575,23 +534,19 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 	data.SetTarget(dstPos);
 	data.SetFilter(m_obstruction.sweepFilter);
 	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
-	if(pPhysComponent)
-	{
+	if(pPhysComponent) {
 		data.SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter());
 		data.SetCollisionFilterMask(pPhysComponent->GetCollisionFilterMask());
 	}
-	
+
 	auto result = game->Sweep(data);
 	fCheckForObstruction(result);
 #endif
 }
 
-bool BaseAIComponent::IsObstruction(const BaseEntity &ent) const {return true;}
+bool BaseAIComponent::IsObstruction(const BaseEntity &ent) const { return true; }
 
-void BaseAIComponent::OnEntityComponentAdded(BaseEntityComponent &component)
-{
-	BaseEntityComponent::OnEntityComponentAdded(component);
-}
+void BaseAIComponent::OnEntityComponentAdded(BaseEntityComponent &component) { BaseEntityComponent::OnEntityComponentAdded(component); }
 
 Vector2 BaseAIComponent::CalcMovementSpeed() const
 {
@@ -599,54 +554,48 @@ Vector2 BaseAIComponent::CalcMovementSpeed() const
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
 	if(pPhysComponent && (pPhysComponent->GetMoveType() != MOVETYPE::WALK || pPhysComponent->IsOnGround() == false))
-		return {pVelComponent.valid() ? uvec::length(pVelComponent->GetVelocity()) : 0.f,0.f};
+		return {pVelComponent.valid() ? uvec::length(pVelComponent->GetVelocity()) : 0.f, 0.f};
 	auto speed = 0.f;
 	auto animComponent = ent.GetAnimatedComponent();
 	if(animComponent.expired())
-		return {speed,0.f};
-	if(GetMoveSpeed(animComponent->GetAnimation(),speed))
-		return {speed,0.f};
-	if(m_animMoveInfo.moving == true)
-	{
+		return {speed, 0.f};
+	if(GetMoveSpeed(animComponent->GetAnimation(), speed))
+		return {speed, 0.f};
+	if(m_animMoveInfo.moving == true) {
 		Vector2 move {};
-		if(animComponent->CalcAnimationMovementSpeed(&move.y,&move.x) == true)
+		if(animComponent->CalcAnimationMovementSpeed(&move.y, &move.x) == true)
 			return move;
 	}
-	return {speed,0.f};
+	return {speed, 0.f};
 }
-float BaseAIComponent::CalcAirMovementModifier() const {return 0.f;}
-float BaseAIComponent::CalcMovementAcceleration() const {return 80.f;}
-Vector3 BaseAIComponent::CalcMovementDirection(const Vector3&,const Vector3&) const
+float BaseAIComponent::CalcAirMovementModifier() const { return 0.f; }
+float BaseAIComponent::CalcMovementAcceleration() const { return 80.f; }
+Vector3 BaseAIComponent::CalcMovementDirection(const Vector3 &, const Vector3 &) const
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
-	if(pPhysComponent && (pPhysComponent->GetMoveType() != MOVETYPE::WALK || pPhysComponent->IsOnGround() == false))
-	{
-		auto vel = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3{};
+	if(pPhysComponent && (pPhysComponent->GetMoveType() != MOVETYPE::WALK || pPhysComponent->IsOnGround() == false)) {
+		auto vel = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {};
 		uvec::normalize(&vel);
 		return vel;
 	}
-	if(m_animMoveInfo.moving == true)
-	{
+	if(m_animMoveInfo.moving == true) {
 		auto bMoveForward = true;
 		auto animComponent = ent.GetAnimatedComponent();
 		auto &hMdl = GetEntity().GetModel();
-		if(hMdl != nullptr && animComponent.valid())
-		{
+		if(hMdl != nullptr && animComponent.valid()) {
 			auto anim = hMdl->GetAnimation(animComponent->GetAnimation());
-			if(anim != nullptr)
-			{
+			if(anim != nullptr) {
 				auto *bc = anim->GetBlendController();
 				if(ent.IsCharacter() && bc && bc->controller == ent.GetCharacterComponent()->GetMoveController())
 					bMoveForward = false; // Animation has a move blend-controller, which means it probably allows sideways or backwards movement
 			}
 		}
-		if(bMoveForward == true)
-		{
+		if(bMoveForward == true) {
 			auto pTrComponent = ent.GetTransformComponent();
 			return pTrComponent ? pTrComponent->GetForward() : uvec::FORWARD;
 		}
 	}
-	return (m_moveInfo.moving == true) ? m_moveInfo.moveDir : Vector3{};
+	return (m_moveInfo.moving == true) ? m_moveInfo.moveDir : Vector3 {};
 }

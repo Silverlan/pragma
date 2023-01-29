@@ -15,10 +15,7 @@
 
 using namespace pragma;
 
-SAIComponent::ControlInfo::ControlInfo()
-	: hController{},hCbOnRemove{},hCbOnKilled{},
-	hCbOnActionInput{}
-{}
+SAIComponent::ControlInfo::ControlInfo() : hController {}, hCbOnRemove {}, hCbOnKilled {}, hCbOnActionInput {} {}
 
 void SAIComponent::ControlInfo::Clear()
 {
@@ -31,12 +28,9 @@ void SAIComponent::ControlInfo::Clear()
 		hCbOnActionInput.Remove();
 }
 
-void SAIComponent::SelectControllerSchedule()
-{
-	BroadcastEvent(EVENT_SELECT_CONTROLLER_SCHEDULE);
-}
+void SAIComponent::SelectControllerSchedule() { BroadcastEvent(EVENT_SELECT_CONTROLLER_SCHEDULE); }
 
-bool SAIComponent::IsControllable() const {return m_bControllable;}
+bool SAIComponent::IsControllable() const { return m_bControllable; }
 void SAIComponent::SetControllable(bool b)
 {
 	m_bControllable = b;
@@ -48,73 +42,64 @@ void SAIComponent::StartControl(pragma::SPlayerComponent &pl)
 	if(IsControllable() == false || IsControlled() == true)
 		return;
 	auto &plEnt = pl.GetEntity();
-	auto *charComponent = static_cast<pragma::SCharacterComponent*>(plEnt.GetCharacterComponent().get());
+	auto *charComponent = static_cast<pragma::SCharacterComponent *>(plEnt.GetCharacterComponent().get());
 	if(charComponent != nullptr)
 		charComponent->SetNoTarget(true);
 	CancelSchedule();
 	m_controlInfo.actions = Action::None; // We want to overwrite the player's controls, so we need to keep track of them ourselves
 	auto pGenericComponent = plEnt.GetComponent<SGenericComponent>();
-	if(pGenericComponent.valid())
-	{
-		m_controlInfo.hCbOnRemove = pGenericComponent->BindEventUnhandled(BaseEntity::EVENT_ON_REMOVE,std::bind(&SAIComponent::EndControl,this));
-		m_controlInfo.hCbOnKilled = pGenericComponent->BindEventUnhandled(SCharacterComponent::EVENT_ON_DEATH,std::bind(&SAIComponent::EndControl,this));
+	if(pGenericComponent.valid()) {
+		m_controlInfo.hCbOnRemove = pGenericComponent->BindEventUnhandled(BaseEntity::EVENT_ON_REMOVE, std::bind(&SAIComponent::EndControl, this));
+		m_controlInfo.hCbOnKilled = pGenericComponent->BindEventUnhandled(SCharacterComponent::EVENT_ON_DEATH, std::bind(&SAIComponent::EndControl, this));
 	}
-	m_controlInfo.hCbOnActionInput = pl.BindEvent(SPlayerComponent::EVENT_HANDLE_ACTION_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &actionInputData = static_cast<CEHandleActionInput&>(evData.get());
-		if(actionInputData.pressed == true)
-		{
-			if((m_controlInfo.actions &actionInputData.action) != Action::None)
+	m_controlInfo.hCbOnActionInput = pl.BindEvent(SPlayerComponent::EVENT_HANDLE_ACTION_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &actionInputData = static_cast<CEHandleActionInput &>(evData.get());
+		if(actionInputData.pressed == true) {
+			if((m_controlInfo.actions & actionInputData.action) != Action::None)
 				return util::EventReply::Handled;
 			m_controlInfo.actions |= actionInputData.action;
 		}
-		else
-		{
-			if((m_controlInfo.actions &actionInputData.action) == Action::None)
+		else {
+			if((m_controlInfo.actions & actionInputData.action) == Action::None)
 				return util::EventReply::Handled;
 			m_controlInfo.actions &= ~actionInputData.action;
 		}
-		OnControllerActionInput(actionInputData.action,actionInputData.pressed);
+		OnControllerActionInput(actionInputData.action, actionInputData.pressed);
 		return util::EventReply::Handled;
 	});
 	m_controlInfo.hController = util::WeakHandle<pragma::SPlayerComponent>(std::static_pointer_cast<pragma::SPlayerComponent>(pl.shared_from_this()));
-	
+
 	auto pObsComponent = GetEntity().GetComponent<pragma::SObservableComponent>();
-	if(pObsComponent.valid())
-	{
+	if(pObsComponent.valid()) {
 		pl.SetObserverMode(OBSERVERMODE::THIRDPERSON);
 		pl.SetObserverTarget(pObsComponent.get());
 	}
 	DisableAI();
 	OnStartControl(pl);
 }
-Action SAIComponent::GetControllerActionInput() const {return m_controlInfo.actions;}
-void SAIComponent::OnControllerActionInput(Action action,bool pressed)
+Action SAIComponent::GetControllerActionInput() const { return m_controlInfo.actions; }
+void SAIComponent::OnControllerActionInput(Action action, bool pressed)
 {
-	CEOnControllerActionInput evData{action,pressed};
+	CEOnControllerActionInput evData {action, pressed};
 	BroadcastEvent(EVENT_ON_CONTROLLER_ACTION_INPUT);
 }
 void SAIComponent::OnStartControl(pragma::SPlayerComponent &pl)
 {
-	CEOnStartControl evData{pl};
-	BroadcastEvent(EVENT_ON_START_CONTROL,evData);
+	CEOnStartControl evData {pl};
+	BroadcastEvent(EVENT_ON_START_CONTROL, evData);
 }
-void SAIComponent::OnEndControl()
-{
-	BroadcastEvent(EVENT_ON_END_CONTROL);
-}
+void SAIComponent::OnEndControl() { BroadcastEvent(EVENT_ON_END_CONTROL); }
 void SAIComponent::EndControl()
 {
 	if(IsControlled() == false)
 		return;
 	auto *pl = m_controlInfo.hController.get();
-	if(pl != nullptr)
-	{
-		auto *charComponent = static_cast<pragma::SCharacterComponent*>(pl->GetEntity().GetCharacterComponent().get());
+	if(pl != nullptr) {
+		auto *charComponent = static_cast<pragma::SCharacterComponent *>(pl->GetEntity().GetCharacterComponent().get());
 		if(charComponent != nullptr)
 			charComponent->SetNoTarget(false);
 		auto pObservableComponent = pl->GetEntity().GetComponent<SObservableComponent>();
-		if(pObservableComponent.valid())
-		{
+		if(pObservableComponent.valid()) {
 			pl->SetObserverMode(OBSERVERMODE::FIRSTPERSON);
 			pl->SetObserverTarget(pObservableComponent.get());
 		}
@@ -123,6 +108,5 @@ void SAIComponent::EndControl()
 	EnableAI();
 	m_controlInfo.Clear();
 }
-bool SAIComponent::IsControlled() const {return m_controlInfo.hController.expired() == false;}
-pragma::SPlayerComponent *SAIComponent::GetController() const {return m_controlInfo.hController.get();}
-
+bool SAIComponent::IsControlled() const { return m_controlInfo.hController.expired() == false; }
+pragma::SPlayerComponent *SAIComponent::GetController() const { return m_controlInfo.hController.get(); }

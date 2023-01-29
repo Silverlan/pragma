@@ -12,21 +12,17 @@
 #include "pragma/entities/components/c_raytracing_component.hpp"
 #include <shader/prosper_shader.hpp>
 
-namespace pragma
-{
-	class DLLCLIENT ShaderRayTracing
-		: public prosper::ShaderCompute
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT ShaderRayTracing : public prosper::ShaderCompute {
+	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_IMAGE_OUTPUT;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_GAME_SCENE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_IBL;
 
-		enum class GameSceneBinding : uint32_t
-		{
-			TextureArray=0,
+		enum class GameSceneBinding : uint32_t {
+			TextureArray = 0,
 			MaterialInfos,
 			SubMeshInfos,
 			EntityInstanceData,
@@ -38,19 +34,17 @@ namespace pragma
 			AlphaBuffer
 		};
 
-		enum class RenderFlags : uint32_t
-		{
+		enum class RenderFlags : uint32_t {
 			None = 0u,
 			RenderWorld = umath::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeWorld),
 			RenderView = umath::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeView),
 			RenderSkybox = umath::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeSkybox),
 			// RenderWater = umath::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeWater),
-			NoIBL = RenderSkybox<<1u
+			NoIBL = RenderSkybox << 1u
 		};
 
-#pragma pack(push,1)
-		struct PushConstants
-		{
+#pragma pack(push, 1)
+		struct PushConstants {
 			uint32_t numMeshes;
 			uint32_t lightCount;
 			uint32_t width;
@@ -61,17 +55,11 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderRayTracing(prosper::IPrContext &context,const std::string &identifier);
-		bool RecordCompute(
-			prosper::ShaderBindState &bindState,
-			const PushConstants &pushConstants,
-			prosper::IDescriptorSet &descSetOutputImage,prosper::IDescriptorSet &descSetGameScene,
-			prosper::IDescriptorSet &descSetCamera,prosper::IDescriptorSet &descSetLightSources,
-			prosper::IDescriptorSet *descSetIBL,
-			uint32_t workGroupsX,uint32_t workGroupsY
-		) const;
-	protected:
-		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		ShaderRayTracing(prosper::IPrContext &context, const std::string &identifier);
+		bool RecordCompute(prosper::ShaderBindState &bindState, const PushConstants &pushConstants, prosper::IDescriptorSet &descSetOutputImage, prosper::IDescriptorSet &descSetGameScene, prosper::IDescriptorSet &descSetCamera, prosper::IDescriptorSet &descSetLightSources,
+		  prosper::IDescriptorSet *descSetIBL, uint32_t workGroupsX, uint32_t workGroupsY) const;
+	  protected:
+		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderRayTracing::RenderFlags)

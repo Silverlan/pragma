@@ -12,30 +12,29 @@
 #include <sharedutils/util_shared_handle.hpp>
 #include <cinttypes>
 
-namespace util {class EnumRegister;};
+namespace util {
+	class EnumRegister;
+};
 
 class PhysObj;
 using PhysObjHandle = util::TWeakSharedHandle<PhysObj>;
 
-namespace udm
-{
+namespace udm {
 	struct Property;
 	using PProperty = std::shared_ptr<Property>;
 };
 
-namespace umath
-{
+namespace umath {
 	struct Vertex;
 	struct VertexWeight;
 };
 
 enum class Activity : uint16_t;
 using BoneId = uint16_t;
-namespace pragma
-{
+namespace pragma {
 	using RenderBufferIndex = uint32_t;
 	template<class T>
-		using ComponentHandle = util::TWeakSharedHandle<T>;
+	using ComponentHandle = util::TWeakSharedHandle<T>;
 
 	using ComponentId = uint32_t;
 	using ComponentMemberIndex = uint32_t;
@@ -44,14 +43,14 @@ namespace pragma
 	class EntityComponentManager;
 	struct ComponentMemberInfo;
 };
-namespace pragma::asset {enum class Type : uint8_t;};
-namespace pragma::animation
-{
+namespace pragma::asset {
+	enum class Type : uint8_t;
+};
+namespace pragma::animation {
 	using LayeredAnimationSlot = uint32_t;
 };
 
-namespace panima
-{
+namespace panima {
 	using AnimationId = uint32_t;
 	using AnimationChannelId = uint16_t;
 	class Animation;

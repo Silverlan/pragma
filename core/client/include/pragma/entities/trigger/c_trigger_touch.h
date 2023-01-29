@@ -12,12 +12,9 @@
 #include "pragma/entities/trigger/base_trigger_touch.hpp"
 #include <pragma/entities/trigger/base_trigger_touch.hpp>
 
-namespace pragma
-{
-	class DLLCLIENT CTouchComponent final
-		: public BaseTouchComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CTouchComponent final : public BaseTouchComponent {
+	  public:
 		CTouchComponent(BaseEntity &ent) : BaseTouchComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
@@ -25,10 +22,8 @@ namespace pragma
 	};
 };
 
-class DLLCLIENT CTriggerTouch
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CTriggerTouch : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

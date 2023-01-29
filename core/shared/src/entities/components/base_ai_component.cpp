@@ -34,15 +34,11 @@ using namespace pragma;
 decltype(BaseAIComponent::s_npcCount) BaseAIComponent::s_npcCount = {0};
 decltype(BaseAIComponent::s_navThread) BaseAIComponent::s_navThread = nullptr;
 
-ai::navigation::PathQuery::PathQuery(const Vector3 &_start,const Vector3 &_end)
-	: start(_start),end(_end),complete(false)
-{}
+ai::navigation::PathQuery::PathQuery(const Vector3 &_start, const Vector3 &_end) : start(_start), end(_end), complete(false) {}
 
 //////////////////
 
-BaseAIComponent::BaseAIComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent),m_seqIdle(-1),
-	m_navInfo(),m_obstruction()
+BaseAIComponent::BaseAIComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_seqIdle(-1), m_navInfo(), m_obstruction()
 {
 	m_obstruction.nextObstructionCheck = 0.0;
 	m_obstruction.pathObstructed = false;
@@ -55,11 +51,10 @@ BaseAIComponent::~BaseAIComponent() {}
 
 void BaseAIComponent::OnLookTargetChanged() {}
 
-bool BaseAIComponent::TurnStep(const Vector3 &target,float &turnAngle,const float *turnSpeed)
+bool BaseAIComponent::TurnStep(const Vector3 &target, float &turnAngle, const float *turnSpeed)
 {
 	auto charComponent = GetEntity().GetCharacterComponent();
-	if(charComponent.valid() && charComponent->CanMove() == false)
-	{
+	if(charComponent.valid() && charComponent->CanMove() == false) {
 		turnAngle = 0.f;
 		return true;
 	}
@@ -69,18 +64,17 @@ bool BaseAIComponent::TurnStep(const Vector3 &target,float &turnAngle,const floa
 		return true;
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
-	auto dir = target -pTrComponent->GetPosition();
+	auto dir = target - pTrComponent->GetPosition();
 	auto l = uvec::length(dir);
-	if(l == 0.f)
-	{
+	if(l == 0.f) {
 		turnAngle = 0.f;
 		return true;
 	}
 	dir /= l;
-	auto speedMax = static_cast<double>((turnSpeed != nullptr) ? *turnSpeed : (charComponent.valid() ? charComponent->GetTurnSpeed() : 100.f)) *game->DeltaTickTime();
+	auto speedMax = static_cast<double>((turnSpeed != nullptr) ? *turnSpeed : (charComponent.valid() ? charComponent->GetTurnSpeed() : 100.f)) * game->DeltaTickTime();
 	Vector2 rotAm = {};
-	const Vector2 pitchLimit {0.f,0.f};
-	auto newRot = uquat::approach_direction(pTrComponent->GetRotation(),charComponent.valid() ? charComponent->GetUpDirection() : uvec::UP,dir,Vector2(speedMax,speedMax),&rotAm,&pitchLimit);
+	const Vector2 pitchLimit {0.f, 0.f};
+	auto newRot = uquat::approach_direction(pTrComponent->GetRotation(), charComponent.valid() ? charComponent->GetUpDirection() : uvec::UP, dir, Vector2(speedMax, speedMax), &rotAm, &pitchLimit);
 	pTrComponent->SetRotation(newRot);
 	return (umath::abs(rotAm.y) <= speedMax) ? true : false;
 
@@ -113,10 +107,10 @@ bool BaseAIComponent::TurnStep(const Vector3 &target,float &turnAngle,const floa
 	return (fabs(diff) <= speedMax) ? true : false;*/
 }
 
-bool BaseAIComponent::TurnStep(const Vector3 &target,const float *turnSpeed)
+bool BaseAIComponent::TurnStep(const Vector3 &target, const float *turnSpeed)
 {
 	auto turnAngle = 0.f;
-	return TurnStep(target,turnAngle,turnSpeed);
+	return TurnStep(target, turnAngle, turnSpeed);
 }
 
 void BaseAIComponent::ReleaseNavThread()
@@ -144,28 +138,25 @@ void BaseAIComponent::ReloadNavThread(Game &game)
 		if(cb.IsValid())
 			cb.Remove();
 	});
-	game.AddCallback("EndGame",cb);
+	game.AddCallback("EndGame", cb);
 	s_navThread->releaseCallback = cb;
 
 	s_navThread->thread = std::thread([wpNavMesh]() {
-		while(s_navThread->running == true)
-		{
+		while(s_navThread->running == true) {
 			s_navThread->pendingQueueMutex.lock();
-				while(s_navThread->pendingQueue.empty() == false)
-				{
-					auto query = s_navThread->pendingQueue.front();
-					s_navThread->pendingQueue.pop();
-					s_navThread->queryQueue.push(query);
-				}
+			while(s_navThread->pendingQueue.empty() == false) {
+				auto query = s_navThread->pendingQueue.front();
+				s_navThread->pendingQueue.pop();
+				s_navThread->queryQueue.push(query);
+			}
 			s_navThread->pendingQueueMutex.unlock();
 
 			auto bEmpty = s_navThread->queryQueue.empty();
-			if(bEmpty == false)
-			{
+			if(bEmpty == false) {
 				auto item = s_navThread->queryQueue.front();
 				auto navMesh = wpNavMesh.lock();
 				std::shared_ptr<RcPathResult> path = nullptr;
-				if(navMesh != nullptr && (path = navMesh->FindPath(item->start,item->end)) != nullptr)
+				if(navMesh != nullptr && (path = navMesh->FindPath(item->start, item->end)) != nullptr)
 					item->pathInfo = std::make_shared<ai::navigation::PathInfo>(path);
 				s_navThread->queryQueue.pop();
 				item->complete = true;
@@ -183,37 +174,34 @@ void BaseAIComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	m_netEvSetLookTarget = SetupNetEvent("set_look_target");
 
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED,[this](std::reference_wrapper<pragma::ComponentEvent> eventData) {
-		PathStep(static_cast<float>(static_cast<pragma::CEPhysicsUpdateData&>(eventData.get()).deltaTime));
+	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> eventData) {
+		PathStep(static_cast<float>(static_cast<pragma::CEPhysicsUpdateData &>(eventData.get()).deltaTime));
 		return util::EventReply::Unhandled;
 	});
-	BindEvent(BaseCharacterComponent::EVENT_CALC_MOVEMENT_SPEED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		static_cast<pragma::CECalcMovementSpeed&>(evData.get()).speed = CalcMovementSpeed();
+	BindEvent(BaseCharacterComponent::EVENT_CALC_MOVEMENT_SPEED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		static_cast<pragma::CECalcMovementSpeed &>(evData.get()).speed = CalcMovementSpeed();
 		return util::EventReply::Handled;
 	});
-	BindEvent(BaseCharacterComponent::EVENT_CALC_AIR_MOVEMENT_MODIFIER,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		static_cast<pragma::CECalcAirMovementModifier&>(evData.get()).airMovementModifier = CalcAirMovementModifier();
+	BindEvent(BaseCharacterComponent::EVENT_CALC_AIR_MOVEMENT_MODIFIER, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		static_cast<pragma::CECalcAirMovementModifier &>(evData.get()).airMovementModifier = CalcAirMovementModifier();
 		return util::EventReply::Handled;
 	});
-	BindEvent(BaseCharacterComponent::EVENT_CALC_MOVEMENT_ACCELERATION,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		static_cast<pragma::CECalcMovementAcceleration&>(evData.get()).acceleration = CalcMovementAcceleration();
+	BindEvent(BaseCharacterComponent::EVENT_CALC_MOVEMENT_ACCELERATION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		static_cast<pragma::CECalcMovementAcceleration &>(evData.get()).acceleration = CalcMovementAcceleration();
 		return util::EventReply::Handled;
 	});
-	BindEvent(BaseCharacterComponent::EVENT_CALC_MOVEMENT_DIRECTION,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &movementDirData = static_cast<pragma::CECalcMovementDirection&>(evData.get());
-		movementDirData.direction = CalcMovementDirection(movementDirData.forward,movementDirData.right);
+	BindEvent(BaseCharacterComponent::EVENT_CALC_MOVEMENT_DIRECTION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &movementDirData = static_cast<pragma::CECalcMovementDirection &>(evData.get());
+		movementDirData.direction = CalcMovementDirection(movementDirData.forward, movementDirData.right);
 		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		OnModelChanged(static_cast<pragma::CEOnModelChanged&>(evData.get()).model);
-	});
-	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_ANIMATION_START,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnModelChanged(static_cast<pragma::CEOnModelChanged &>(evData.get()).model); });
+	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_ANIMATION_START, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto animComponent = GetEntity().GetAnimatedComponent();
 		if(animComponent.expired())
 			return;
 		auto *anim = animComponent->GetAnimationObject();
-		if(anim == nullptr)
-		{
+		if(anim == nullptr) {
 			m_animMoveInfo.moving = false;
 			m_animMoveInfo.blend = false;
 			return;
@@ -221,25 +209,23 @@ void BaseAIComponent::Initialize()
 		m_animMoveInfo.blend = !anim->HasFlag(FAnim::NoMoveBlend);
 		m_animMoveInfo.moving = (anim->HasFlag(FAnim::MoveX) || anim->HasFlag(FAnim::MoveZ)) ? true : false;
 	});
-	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_BLEND_ANIMATION_MT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_BLEND_ANIMATION_MT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto animComponent = GetEntity().GetAnimatedComponent();
 		if(animComponent.expired())
 			return;
-		auto &evDataBlend = static_cast<CEOnBlendAnimation&>(evData.get());
+		auto &evDataBlend = static_cast<CEOnBlendAnimation &>(evData.get());
 		auto &animInfo = evDataBlend.slotInfo;
 		if(&animInfo == &animComponent->GetBaseAnimationInfo()) // Only apply for base animation, not for gestures
-			BaseAIComponent::BlendAnimationMovementMT(evDataBlend.bonePoses,evDataBlend.boneScales);
+			BaseAIComponent::BlendAnimationMovementMT(evDataBlend.bonePoses, evDataBlend.boneScales);
 	});
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		OnPhysicsInitialized();
-	});
-	BindEvent(BaseCharacterComponent::EVENT_IS_MOVING,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		static_cast<CEIsMoving&>(evData.get()).moving = IsMoving();
+	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsInitialized(); });
+	BindEvent(BaseCharacterComponent::EVENT_IS_MOVING, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		static_cast<CEIsMoving &>(evData.get()).moving = IsMoving();
 		return util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
-	auto *pCharComponent = static_cast<BaseCharacterComponent*>(ent.AddComponent("character").get());
+	auto *pCharComponent = static_cast<BaseCharacterComponent *>(ent.AddComponent("character").get());
 	if(pCharComponent != nullptr)
 		pCharComponent->SetTurnSpeed(160.f);
 
@@ -261,22 +247,20 @@ void BaseAIComponent::OnEntitySpawn()
 void BaseAIComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 {
 	m_seqIdle = -1;
-	auto *pObservableComponent = static_cast<pragma::BaseObservableComponent*>(GetEntity().FindComponent("observable").get());
+	auto *pObservableComponent = static_cast<pragma::BaseObservableComponent *>(GetEntity().FindComponent("observable").get());
 	if(pObservableComponent != nullptr)
-		pObservableComponent->SetCameraEnabled(BaseObservableComponent::CameraType::ThirdPerson,false);
+		pObservableComponent->SetCameraEnabled(BaseObservableComponent::CameraType::ThirdPerson, false);
 	if(model == nullptr)
 		return;
-	if(pObservableComponent != nullptr)
-	{
-		Vector3 min,max;
-		model->GetRenderBounds(min,max);
-		pObservableComponent->SetCameraEnabled(BaseObservableComponent::CameraType::ThirdPerson,true);
-		pObservableComponent->SetLocalCameraOrigin(BaseObservableComponent::CameraType::ThirdPerson,Vector3{0.f,(max.y -min.y) *0.25f,-umath::max(umath::abs(min.x),umath::abs(min.y),umath::abs(min.z),umath::abs(max.x),umath::abs(max.y),umath::abs(max.z))});
+	if(pObservableComponent != nullptr) {
+		Vector3 min, max;
+		model->GetRenderBounds(min, max);
+		pObservableComponent->SetCameraEnabled(BaseObservableComponent::CameraType::ThirdPerson, true);
+		pObservableComponent->SetLocalCameraOrigin(BaseObservableComponent::CameraType::ThirdPerson, Vector3 {0.f, (max.y - min.y) * 0.25f, -umath::max(umath::abs(min.x), umath::abs(min.y), umath::abs(min.z), umath::abs(max.x), umath::abs(max.y), umath::abs(max.z))});
 	}
 
 	// Update animation move speed
-	for(auto &pair : m_animMoveSpeed)
-	{
+	for(auto &pair : m_animMoveSpeed) {
 		auto animId = model->LookupAnimation(pair.first);
 		if(animId == -1)
 			continue;
@@ -285,11 +269,11 @@ void BaseAIComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 
 	// Find idle animation
 	std::vector<unsigned int> animations;
-	model->GetAnimations(Activity::Idle,animations);
+	model->GetAnimations(Activity::Idle, animations);
 	if(animations.empty())
 		return;
 	m_seqIdle = animations.front();
-	auto it = std::find_if(animations.begin(),animations.end(),[&model](uint32_t animId) {
+	auto it = std::find_if(animations.begin(), animations.end(), [&model](uint32_t animId) {
 		auto anim = model->GetAnimation(animId);
 		return (anim != nullptr && !anim->HasFlag(FAnim::NoRepeat)) ? true : false; // Prefer an idle animation that can be repeated (More likely to be a generic idle animation)
 	});
@@ -305,8 +289,7 @@ void BaseAIComponent::OnPhysicsInitialized()
 		pPhysComponent->AddCollisionFilter(CollisionMask::NPC);
 }
 
-void BaseAIComponent::Spawn()
-{}
+void BaseAIComponent::Spawn() {}
 
 void BaseAIComponent::OnTick(double tDelta)
 {
@@ -316,17 +299,16 @@ void BaseAIComponent::OnTick(double tDelta)
 
 const char *BaseAIComponent::MoveResultToString(MoveResult result)
 {
-	switch(result)
-	{
-		case MoveResult::TargetUnreachable:
-			return "Target unreachable";
-		case MoveResult::TargetReached:
-			return "Target reached";
-		case MoveResult::WaitingForPath:
-			return "Waiting for path";
-		case MoveResult::MovingToTarget:
-			return "Moving to target";
-		default:
-			return "Unknown";
+	switch(result) {
+	case MoveResult::TargetUnreachable:
+		return "Target unreachable";
+	case MoveResult::TargetReached:
+		return "Target reached";
+	case MoveResult::WaitingForPath:
+		return "Waiting for path";
+	case MoveResult::MovingToTarget:
+		return "Moving to target";
+	default:
+		return "Unknown";
 	}
 }

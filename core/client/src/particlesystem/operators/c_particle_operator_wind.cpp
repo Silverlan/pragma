@@ -15,13 +15,12 @@
 #include <sharedutils/util.h>
 #include <algorithm>
 
-REGISTER_PARTICLE_OPERATOR(wind,CParticleOperatorWind);
+REGISTER_PARTICLE_OPERATOR(wind, CParticleOperatorWind);
 
-void CParticleOperatorWind::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleOperatorWind::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleOperator::Initialize(pSystem,values);
-	for(auto it=values.begin();it!=values.end();it++)
-	{
+	CParticleOperator::Initialize(pSystem, values);
+	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
 		ustring::to_lower(key);
 		if(key == "strength")
@@ -35,16 +34,15 @@ void CParticleOperatorWind::Initialize(pragma::CParticleSystemComponent &pSystem
 void CParticleOperatorWind::Simulate(double tDelta)
 {
 	CParticleOperator::Simulate(tDelta);
-	m_vDelta = m_vDirection *(m_fStrength *static_cast<float>(tDelta));
-	if(m_bRotateWithEmitter)
-	{
+	m_vDelta = m_vDirection * (m_fStrength * static_cast<float>(tDelta));
+	if(m_bRotateWithEmitter) {
 		auto pTrComponent = GetParticleSystem().GetEntity().GetTransformComponent();
 		if(pTrComponent != nullptr)
-			uvec::rotate(&m_vDelta,pTrComponent->GetRotation());
+			uvec::rotate(&m_vDelta, pTrComponent->GetRotation());
 	}
 }
-void CParticleOperatorWind::Simulate(CParticle &particle,double tDelta,float strength)
+void CParticleOperatorWind::Simulate(CParticle &particle, double tDelta, float strength)
 {
-	CParticleOperator::Simulate(particle,tDelta,strength);
-	particle.SetVelocity(particle.GetVelocity() +m_vDelta);
+	CParticleOperator::Simulate(particle, tDelta, strength);
+	particle.SetVelocity(particle.GetVelocity() + m_vDelta);
 }

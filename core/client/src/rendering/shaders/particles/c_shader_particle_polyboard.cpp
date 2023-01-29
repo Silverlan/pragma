@@ -19,30 +19,29 @@ extern DLLCLIENT CEngine *c_engine;
 using namespace pragma;
 
 decltype(ShaderParticlePolyboard::VERTEX_BINDING_VERTEX) ShaderParticlePolyboard::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex};
-decltype(ShaderParticlePolyboard::VERTEX_ATTRIBUTE_VERTEX) ShaderParticlePolyboard::VERTEX_ATTRIBUTE_VERTEX = {VERTEX_BINDING_VERTEX,prosper::Format::R32G32B32_SFloat};
-decltype(ShaderParticlePolyboard::VERTEX_ATTRIBUTE_COLOR) ShaderParticlePolyboard::VERTEX_ATTRIBUTE_COLOR = {VERTEX_BINDING_VERTEX,prosper::Format::R32G32B32A32_SFloat};
-ShaderParticlePolyboard::ShaderParticlePolyboard(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderParticle2DBase(context,identifier,"particles/beam/vs_particle_polyboard","particles/beam/fs_particle_polyboard","particles/beam/gs_particle_polyboard")
+decltype(ShaderParticlePolyboard::VERTEX_ATTRIBUTE_VERTEX) ShaderParticlePolyboard::VERTEX_ATTRIBUTE_VERTEX = {VERTEX_BINDING_VERTEX, prosper::Format::R32G32B32_SFloat};
+decltype(ShaderParticlePolyboard::VERTEX_ATTRIBUTE_COLOR) ShaderParticlePolyboard::VERTEX_ATTRIBUTE_COLOR = {VERTEX_BINDING_VERTEX, prosper::Format::R32G32B32A32_SFloat};
+ShaderParticlePolyboard::ShaderParticlePolyboard(prosper::IPrContext &context, const std::string &identifier) : ShaderParticle2DBase(context, identifier, "particles/beam/vs_particle_polyboard", "particles/beam/fs_particle_polyboard", "particles/beam/gs_particle_polyboard")
 {
 	SetBaseShader<ShaderParticle>();
 }
 
-void ShaderParticlePolyboard::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderParticlePolyboard::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	ShaderSceneLit::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	ShaderSceneLit::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 
 	SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_VERTEX);
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_COLOR);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_VERTEX);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_COLOR);
 
 	pipelineInfo.SetPrimitiveTopology(prosper::PrimitiveTopology::LineListWithAdjacency);
-	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(GeometryPushConstants),prosper::ShaderStageFlags::GeometryBit);
-	AttachPushConstantRange(pipelineInfo,pipelineIdx,sizeof(GeometryPushConstants),sizeof(FragmentPushConstants),prosper::ShaderStageFlags::FragmentBit);
+	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(GeometryPushConstants), prosper::ShaderStageFlags::GeometryBit);
+	AttachPushConstantRange(pipelineInfo, pipelineIdx, sizeof(GeometryPushConstants), sizeof(FragmentPushConstants), prosper::ShaderStageFlags::FragmentBit);
 
-	RegisterDefaultGfxPipelineDescriptorSetGroups(pipelineInfo,pipelineIdx);
+	RegisterDefaultGfxPipelineDescriptorSetGroups(pipelineInfo, pipelineIdx);
 }
 
-bool ShaderParticlePolyboard::Draw(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const pragma::CParticleSystemComponent &ps,prosper::IBuffer &vertexBuffer,prosper::IBuffer &indexBuffer,uint32_t numIndices,float radius,float curvature)
+bool ShaderParticlePolyboard::Draw(pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const pragma::CParticleSystemComponent &ps, prosper::IBuffer &vertexBuffer, prosper::IBuffer &indexBuffer, uint32_t numIndices, float radius, float curvature)
 {
 #if 0
 	if(BindParticleMaterial(renderer,ps) == false)

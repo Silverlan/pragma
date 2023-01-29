@@ -16,15 +16,13 @@ using namespace pragma;
 void SFieldAngleComponent::Initialize()
 {
 	BaseFieldAngleComponent::Initialize();
-	FlagCallbackForRemoval(m_fieldAngle->AddCallback([this](std::reference_wrapper<const float> oldVal,std::reference_wrapper<const float> val) {
+	FlagCallbackForRemoval(m_fieldAngle->AddCallback([this](std::reference_wrapper<const float> oldVal, std::reference_wrapper<const float> val) {
 		NetPacket p {};
 		p->Write<float>(val.get());
-		static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetFieldAngle,p,pragma::networking::Protocol::SlowReliable);
-	}),CallbackType::Component,this);
+		static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetFieldAngle, p, pragma::networking::Protocol::SlowReliable);
+	}),
+	  CallbackType::Component, this);
 }
-void SFieldAngleComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SFieldAngleComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void SFieldAngleComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
-{
-	packet->Write<float>(*m_fieldAngle);
-}
+void SFieldAngleComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { packet->Write<float>(*m_fieldAngle); }

@@ -11,24 +11,23 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/particlesystem/c_particlemodifier.h"
 
-namespace pragma {class CLightComponent;};
-class DLLCLIENT CParticleRendererBeam
-	: public CParticleRenderer
-{
-public:
-	CParticleRendererBeam()=default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
-	virtual void RecordRender(prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::ParticleRenderFlags renderFlags) override;
-	virtual void RecordRenderShadow(prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent &light,uint32_t layerId=0) override;
+namespace pragma {
+	class CLightComponent;
+};
+class DLLCLIENT CParticleRendererBeam : public CParticleRenderer {
+  public:
+	CParticleRendererBeam() = default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values);
+	virtual void RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ParticleRenderFlags renderFlags) override;
+	virtual void RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId = 0) override;
 	virtual void OnParticleSystemStopped() override;
 	virtual void PostSimulate(double tDelta) override;
-	virtual std::pair<Vector3,Vector3> GetRenderBounds() const override;
+	virtual std::pair<Vector3, Vector3> GetRenderBounds() const override;
 	virtual pragma::ShaderParticleBase *GetShader() const override;
-private:
-#pragma pack(push,1)
-	struct DLLCLIENT Node
-	{
-		Node(const Vector3 &o,const Color &c);
+  private:
+#pragma pack(push, 1)
+	struct DLLCLIENT Node {
+		Node(const Vector3 &o, const Color &c);
 		Vector3 origin = {};
 		Vector4 color = {};
 	};

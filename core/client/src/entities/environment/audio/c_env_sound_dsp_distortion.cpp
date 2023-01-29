@@ -22,7 +22,7 @@ using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
 
-LINK_ENTITY_TO_CLASS(env_sound_dsp_distortion,CEnvSoundDspDistortion);
+LINK_ENTITY_TO_CLASS(env_sound_dsp_distortion, CEnvSoundDspDistortion);
 
 void CSoundDspDistortionComponent::ReceiveData(NetPacket &packet)
 {
@@ -47,7 +47,7 @@ void CSoundDspDistortionComponent::OnEntitySpawn()
 	props.flEQBandwidth = m_kvEqBandwidth;
 	m_dsp = soundSys->CreateEffect(props);
 }
-void CSoundDspDistortionComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CSoundDspDistortionComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 //////////////////
 

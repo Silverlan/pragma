@@ -12,8 +12,7 @@
 #include <string>
 #include <vector>
 
-namespace pragma::rendering
-{
+namespace pragma::rendering {
 	constexpr std::string_view RENDERING_API_MODULE_LOCATION = "graphics";
 	DLLCLIENT std::vector<std::string> get_available_graphics_apis();
 	DLLCLIENT std::string get_graphics_api_module_location(const std::string &graphicsAPI);

@@ -11,12 +11,9 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_generic_component.hpp>
 
-namespace pragma
-{
-	class DLLSERVER SGenericComponent final
-		: public BaseGenericComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SGenericComponent final : public BaseGenericComponent {
+	  public:
 		SGenericComponent(BaseEntity &ent) : BaseGenericComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};

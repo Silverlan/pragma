@@ -12,13 +12,10 @@
 #include <unordered_set>
 
 class FunctionalParallelWorker;
-namespace pragma
-{
+namespace pragma {
 	class BaseStaticBvhUserComponent;
-	class DLLNETWORK BaseStaticBvhCacheComponent
-		: public BaseBvhComponent
-	{
-	public:
+	class DLLNETWORK BaseStaticBvhCacheComponent : public BaseBvhComponent {
+	  public:
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		virtual void OnTick(double tDelta) override;
@@ -28,29 +25,22 @@ namespace pragma
 
 		void SetEntityDirty(BaseEntity &ent);
 		void AddEntity(BaseEntity &ent);
-		void RemoveEntity(BaseEntity &ent,bool removeFinal=true);
+		void RemoveEntity(BaseEntity &ent, bool removeFinal = true);
 
-		virtual bool IntersectionTest(
-			const Vector3 &origin,const Vector3 &dir,float minDist,float maxDist,
-			BvhHitInfo &outHitInfo
-		) const override;
+		virtual bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, BvhHitInfo &outHitInfo) const override;
 		using BaseBvhComponent::IntersectionTest;
 
-		virtual bool IsStaticBvh() const override {return true;}
-	protected:
+		virtual bool IsStaticBvh() const override { return true; }
+	  protected:
 		BaseStaticBvhCacheComponent(BaseEntity &ent);
 		void UpdateBuild();
 
-		void Build(
-			std::vector<std::shared_ptr<ModelSubMesh>> &&meshes,
-			std::vector<BaseEntity*> &&meshToEntity,
-			std::vector<umath::ScaledTransform> &&meshPoses
-		);
+		void Build(std::vector<std::shared_ptr<ModelSubMesh>> &&meshes, std::vector<BaseEntity *> &&meshToEntity, std::vector<umath::ScaledTransform> &&meshPoses);
 
-		virtual void TestRebuildBvh()=0;
+		virtual void TestRebuildBvh() = 0;
 		bool m_staticBvhDirty = true;
 		std::shared_ptr<FunctionalParallelWorker> m_buildWorker = nullptr;
-		std::unordered_set<BaseStaticBvhUserComponent*> m_entities;
+		std::unordered_set<BaseStaticBvhUserComponent *> m_entities;
 	};
 };
 

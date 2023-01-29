@@ -11,8 +11,7 @@
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
 
-namespace Lua
-{
+namespace Lua {
 	DLLCLIENT double ServerTime(lua_State *l);
 	DLLCLIENT double FrameTime(lua_State *l);
 

@@ -15,22 +15,12 @@
 #include <cinttypes>
 #include <array>
 
-namespace pragma
-{
-#pragma pack(push,1)
-	struct LightBufferData
-	{
-		enum class BufferFlags : uint32_t
-		{
-			None = 0,
-			TurnedOn = 1,
-			TypeSpot = TurnedOn<<1,
-			TypePoint = TypeSpot<<1,
-			TypeDirectional = TypePoint<<1,
-			BakedLightSource = TypeDirectional<<1
-		};
+namespace pragma {
+#pragma pack(push, 1)
+	struct LightBufferData {
+		enum class BufferFlags : uint32_t { None = 0, TurnedOn = 1, TypeSpot = TurnedOn << 1, TypePoint = TypeSpot << 1, TypeDirectional = TypePoint << 1, BakedLightSource = TypeDirectional << 1 };
 		Vector4 position {}; // position.w = distance
-		Vector3 color {1.f,1.f,1.f};
+		Vector3 color {1.f, 1.f, 1.f};
 		Candela intensity = 0.f;
 		Vector4 direction {}; // direction.w is unused
 
@@ -45,10 +35,9 @@ namespace pragma
 		uint32_t shadowMapIndexDynamic = 0u;
 
 		float falloffExponent = 1.f;
-		std::array<float,3> padding = {}; // Padding to vec4
+		std::array<float, 3> padding = {}; // Padding to vec4
 	};
-	struct ShadowBufferData
-	{
+	struct ShadowBufferData {
 		Mat4 depthVP = umat::identity();
 		Mat4 view = umat::identity();
 		Mat4 projection = umat::identity();

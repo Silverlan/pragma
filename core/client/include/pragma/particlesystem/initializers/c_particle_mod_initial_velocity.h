@@ -12,15 +12,13 @@
 #include "pragma/particlesystem/c_particlemodifier.h"
 #include <optional>
 
-class DLLCLIENT CParticleInitializerInitialVelocity
-	: public CParticleInitializer
-{
-public:
-	CParticleInitializerInitialVelocity()=default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+class DLLCLIENT CParticleInitializerInitialVelocity : public CParticleInitializer {
+  public:
+	CParticleInitializerInitialVelocity() = default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void OnParticleCreated(CParticle &particle) override;
 	float GetSpeed() const;
-private:
+  private:
 	Vector3 m_direction = {};
 	float m_speed = 0.f;
 	Vector3 m_spreadMin = {};

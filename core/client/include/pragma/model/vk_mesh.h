@@ -12,20 +12,19 @@
 #include <memory>
 #include <mutex>
 
-namespace prosper
-{
+namespace prosper {
 	class Buffer;
 	class IRenderBuffer;
 };
 
 class CModelSubMesh;
-namespace pragma
-{
-	namespace model {enum class IndexType : uint8_t;};
+namespace pragma {
+	namespace model {
+		enum class IndexType : uint8_t;
+	};
 	class ShaderEntity;
-	class DLLCLIENT SceneMesh
-	{
-	public:
+	class DLLCLIENT SceneMesh {
+	  public:
 		SceneMesh();
 		SceneMesh(const SceneMesh &other);
 		~SceneMesh();
@@ -37,13 +36,13 @@ namespace pragma
 		void SetVertexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
 		void SetVertexWeightBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
 		void SetAlphaBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
-		void SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer,pragma::model::IndexType indexType);
+		void SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer, pragma::model::IndexType indexType);
 		void ClearBuffers();
 
-		const std::shared_ptr<prosper::IRenderBuffer> &GetRenderBuffer(CModelSubMesh &mesh,pragma::ShaderEntity &shader,uint32_t pipelineIdx=0u);
-	private:
+		const std::shared_ptr<prosper::IRenderBuffer> &GetRenderBuffer(CModelSubMesh &mesh, pragma::ShaderEntity &shader, uint32_t pipelineIdx = 0u);
+	  private:
 		void SetDirty();
-		std::vector<std::pair<prosper::PipelineID,std::shared_ptr<prosper::IRenderBuffer>>> m_renderBuffers;
+		std::vector<std::pair<prosper::PipelineID, std::shared_ptr<prosper::IRenderBuffer>>> m_renderBuffers;
 
 		std::shared_ptr<prosper::IBuffer> m_vertexBuffer = nullptr;
 		std::shared_ptr<prosper::IBuffer> m_vertexWeightBuffer = nullptr;

@@ -16,77 +16,51 @@
 
 using namespace pragma;
 
-void BaseEnvSoundComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
+void BaseEnvSoundComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseEnvSoundComponent;
 	{
 		using TSound = std::string;
-		auto memberInfo = create_component_member_info<
-			T,TSound,
-			[](const ComponentMemberInfo &info,T &component,const TSound &mdl) {
-				component.SetSoundSource(mdl);
-			},
-			static_cast<const TSound&(T::*)() const>(&T::GetSoundSource)
-		>("sound","",AttributeSpecializationType::File);
+		auto memberInfo = create_component_member_info<T, TSound, [](const ComponentMemberInfo &info, T &component, const TSound &mdl) { component.SetSoundSource(mdl); }, static_cast<const TSound &(T::*)() const>(&T::GetSoundSource)>("sound", "", AttributeSpecializationType::File);
 		auto &metaData = memberInfo.AddMetaData();
 		metaData["assetType"] = "sound";
 		metaData["rootPath"] = util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Sound)).GetString();
-		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::Sound,pragma::asset::FormatType::All);
+		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::Sound, pragma::asset::FormatType::All);
 		metaData["stripRootPath"] = true;
 		metaData["stripExtension"] = true;
 		registerMember(std::move(memberInfo));
 	}
 
 	{
-		auto memberInfo = create_component_member_info<
-			T,float,
-			static_cast<void(T::*)(float)>(&T::SetPitch),
-			static_cast<float(T::*)() const>(&T::GetPitch)
-		>("pitch",1.f);
+		auto memberInfo = create_component_member_info<T, float, static_cast<void (T::*)(float)>(&T::SetPitch), static_cast<float (T::*)() const>(&T::GetPitch)>("pitch", 1.f);
 		memberInfo.SetMin(0.f);
 		memberInfo.SetMax(1.f);
 		registerMember(std::move(memberInfo));
 	}
 
 	{
-		auto memberInfo = create_component_member_info<
-			T,float,
-			static_cast<void(T::*)(float)>(&T::SetGain),
-			static_cast<float(T::*)() const>(&T::GetGain)
-		>("volume",1.f);
+		auto memberInfo = create_component_member_info<T, float, static_cast<void (T::*)(float)>(&T::SetGain), static_cast<float (T::*)() const>(&T::GetGain)>("volume", 1.f);
 		memberInfo.SetMin(0.f);
 		memberInfo.SetMax(1.f);
 		registerMember(std::move(memberInfo));
 	}
 
 	{
-		auto memberInfo = create_component_member_info<
-			T,float,
-			static_cast<void(T::*)(float)>(&T::SetMaxDistance),
-			static_cast<float(T::*)() const>(&T::GetMaxDistance)
-		>("maxDist",1024.f,AttributeSpecializationType::Distance);
+		auto memberInfo = create_component_member_info<T, float, static_cast<void (T::*)(float)>(&T::SetMaxDistance), static_cast<float (T::*)() const>(&T::GetMaxDistance)>("maxDist", 1024.f, AttributeSpecializationType::Distance);
 		memberInfo.SetMin(0.f);
 		memberInfo.SetMax(8'192.f);
 		registerMember(std::move(memberInfo));
 	}
 
 	{
-		auto memberInfo = create_component_member_info<
-			T,float,
-			static_cast<void(T::*)(float)>(&T::SetReferenceDistance),
-			static_cast<float(T::*)() const>(&T::GetReferenceDistance)
-		>("refDist",1.f,AttributeSpecializationType::Distance);
+		auto memberInfo = create_component_member_info<T, float, static_cast<void (T::*)(float)>(&T::SetReferenceDistance), static_cast<float (T::*)() const>(&T::GetReferenceDistance)>("refDist", 1.f, AttributeSpecializationType::Distance);
 		memberInfo.SetMin(0.f);
 		memberInfo.SetMax(8'192.f);
 		registerMember(std::move(memberInfo));
 	}
 
 	{
-		auto memberInfo = create_component_member_info<
-			T,float,
-			static_cast<void(T::*)(float)>(&T::SetRolloffFactor),
-			static_cast<float(T::*)() const>(&T::GetRolloffFactor)
-		>("rolloffFactor",1.f);
+		auto memberInfo = create_component_member_info<T, float, static_cast<void (T::*)(float)>(&T::SetRolloffFactor), static_cast<float (T::*)() const>(&T::GetRolloffFactor)>("rolloffFactor", 1.f);
 		memberInfo.SetMin(0.f);
 		memberInfo.SetMax(1.f);
 		registerMember(std::move(memberInfo));
@@ -96,85 +70,101 @@ void BaseEnvSoundComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"sound",false))
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "sound", false))
 			m_kvSoundName = kvData.value;
-		else if(ustring::compare<std::string>(kvData.key,"pitch",false))
+		else if(ustring::compare<std::string>(kvData.key, "pitch", false))
 			m_kvPitch = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"gain",false))
+		else if(ustring::compare<std::string>(kvData.key, "gain", false))
 			m_kvGain = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"rolloff",false))
+		else if(ustring::compare<std::string>(kvData.key, "rolloff", false))
 			m_kvRolloff = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"min_gain",false))
+		else if(ustring::compare<std::string>(kvData.key, "min_gain", false))
 			m_kvMinGain = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"max_gain",false))
+		else if(ustring::compare<std::string>(kvData.key, "max_gain", false))
 			m_kvMaxGain = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"inner_cone",false))
+		else if(ustring::compare<std::string>(kvData.key, "inner_cone", false))
 			m_kvInnerCone = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"outer_cone",false))
+		else if(ustring::compare<std::string>(kvData.key, "outer_cone", false))
 			m_kvOuterCone = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"offset",false))
+		else if(ustring::compare<std::string>(kvData.key, "offset", false))
 			m_kvOffset = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"reference_dist",false))
+		else if(ustring::compare<std::string>(kvData.key, "reference_dist", false))
 			m_kvReferenceDist = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"max_dist",false))
+		else if(ustring::compare<std::string>(kvData.key, "max_dist", false))
 			m_kvMaxDist = util::to_float(kvData.value);
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &inputData = static_cast<CEInputData&>(evData.get());
+	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &inputData = static_cast<CEInputData &>(evData.get());
 		ALSound *snd = (m_sound != NULL) ? m_sound.get() : NULL;
-		if(ustring::compare<std::string>(inputData.input,"play",false))
-			if(snd != NULL) snd->Play();
-		else if(ustring::compare<std::string>(inputData.input,"stop",false))
-			if(snd != NULL) snd->Stop();
-		else if(ustring::compare<std::string>(inputData.input,"toggle",false))
-		{
+		if(ustring::compare<std::string>(inputData.input, "play", false))
 			if(snd != NULL)
-			{
-				if(snd->IsPlaying())
-					snd->Pause();
-				else
-					snd->Play();
-			}
-		}
-		else if(ustring::compare<std::string>(inputData.input,"fadein",false))
-			if(snd != NULL) snd->FadeIn(util::to_float(inputData.data));
-		else if(ustring::compare<std::string>(inputData.input,"fadeout",false))
-			if(snd != NULL) snd->FadeOut(util::to_float(inputData.data));
-		else if(ustring::compare<std::string>(inputData.input,"rewind",false))
-			if(snd != NULL) snd->Rewind();
-		else if(ustring::compare<std::string>(inputData.input,"pause",false))
-			if(snd != NULL) snd->Pause();
-		else if(ustring::compare<std::string>(inputData.input,"setpitch",false))
-			if(snd != NULL) snd->SetPitch(util::to_float(inputData.data));
-		else if(ustring::compare<std::string>(inputData.input,"setlooping",false))
-			if(snd != NULL) snd->SetLooping(util::to_boolean(inputData.data));
-		else if(ustring::compare<std::string>(inputData.input,"setgain",false))
-			if(snd != NULL) snd->SetGain(util::to_float(inputData.data));
-		else if(ustring::compare<std::string>(inputData.input,"setrelativetolistener",false))
-			if(snd != NULL) snd->SetRelative(util::to_boolean(inputData.data));
-		else if(ustring::compare<std::string>(inputData.input,"setoffset",false))
-			if(snd != NULL) snd->SetOffset(util::to_float(inputData.data));
-		else if(ustring::compare<std::string>(inputData.input,"setsecoffset",false))
-			if(snd != NULL) snd->SetTimeOffset(util::to_float(inputData.data));
-		else if(ustring::compare<std::string>(inputData.input,"setrollofffactor",false))
-			if(snd != NULL) snd->SetRolloffFactor(util::to_float(inputData.data));
-		else if(ustring::compare<std::string>(inputData.input,"setmaxdistance",false))
-			if(snd != NULL) snd->SetMaxDistance(util::to_float(inputData.data));
-		else if(ustring::compare<std::string>(inputData.input,"setmingain",false))
-			if(snd != NULL) snd->SetMinGain(util::to_float(inputData.data));
-		else if(ustring::compare<std::string>(inputData.input,"setmaxgain",false))
-			if(snd != NULL) snd->SetMaxGain(util::to_float(inputData.data));
-		else if(ustring::compare<std::string>(inputData.input,"setconeinnerangle",false))
-			if(snd != NULL) snd->SetInnerConeAngle(util::to_float(inputData.data));
-		else if(ustring::compare<std::string>(inputData.input,"setconeouterangle",false))
-			if(snd != NULL) snd->SetOuterConeAngle(util::to_float(inputData.data));
-		else
-			return util::EventReply::Unhandled;
+				snd->Play();
+			else if(ustring::compare<std::string>(inputData.input, "stop", false))
+				if(snd != NULL)
+					snd->Stop();
+				else if(ustring::compare<std::string>(inputData.input, "toggle", false)) {
+					if(snd != NULL) {
+						if(snd->IsPlaying())
+							snd->Pause();
+						else
+							snd->Play();
+					}
+				}
+				else if(ustring::compare<std::string>(inputData.input, "fadein", false))
+					if(snd != NULL)
+						snd->FadeIn(util::to_float(inputData.data));
+					else if(ustring::compare<std::string>(inputData.input, "fadeout", false))
+						if(snd != NULL)
+							snd->FadeOut(util::to_float(inputData.data));
+						else if(ustring::compare<std::string>(inputData.input, "rewind", false))
+							if(snd != NULL)
+								snd->Rewind();
+							else if(ustring::compare<std::string>(inputData.input, "pause", false))
+								if(snd != NULL)
+									snd->Pause();
+								else if(ustring::compare<std::string>(inputData.input, "setpitch", false))
+									if(snd != NULL)
+										snd->SetPitch(util::to_float(inputData.data));
+									else if(ustring::compare<std::string>(inputData.input, "setlooping", false))
+										if(snd != NULL)
+											snd->SetLooping(util::to_boolean(inputData.data));
+										else if(ustring::compare<std::string>(inputData.input, "setgain", false))
+											if(snd != NULL)
+												snd->SetGain(util::to_float(inputData.data));
+											else if(ustring::compare<std::string>(inputData.input, "setrelativetolistener", false))
+												if(snd != NULL)
+													snd->SetRelative(util::to_boolean(inputData.data));
+												else if(ustring::compare<std::string>(inputData.input, "setoffset", false))
+													if(snd != NULL)
+														snd->SetOffset(util::to_float(inputData.data));
+													else if(ustring::compare<std::string>(inputData.input, "setsecoffset", false))
+														if(snd != NULL)
+															snd->SetTimeOffset(util::to_float(inputData.data));
+														else if(ustring::compare<std::string>(inputData.input, "setrollofffactor", false))
+															if(snd != NULL)
+																snd->SetRolloffFactor(util::to_float(inputData.data));
+															else if(ustring::compare<std::string>(inputData.input, "setmaxdistance", false))
+																if(snd != NULL)
+																	snd->SetMaxDistance(util::to_float(inputData.data));
+																else if(ustring::compare<std::string>(inputData.input, "setmingain", false))
+																	if(snd != NULL)
+																		snd->SetMinGain(util::to_float(inputData.data));
+																	else if(ustring::compare<std::string>(inputData.input, "setmaxgain", false))
+																		if(snd != NULL)
+																			snd->SetMaxGain(util::to_float(inputData.data));
+																		else if(ustring::compare<std::string>(inputData.input, "setconeinnerangle", false))
+																			if(snd != NULL)
+																				snd->SetInnerConeAngle(util::to_float(inputData.data));
+																			else if(ustring::compare<std::string>(inputData.input, "setconeouterangle", false))
+																				if(snd != NULL)
+																					snd->SetOuterConeAngle(util::to_float(inputData.data));
+																				else
+																					return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
 	GetEntity().AddComponent("io");
@@ -241,8 +231,8 @@ float BaseEnvSoundComponent::GetMaxDistance() const
 	return m_kvMaxDist;
 }
 
-const std::string &BaseEnvSoundComponent::GetSoundSource() const {return m_kvSoundName;}
-void BaseEnvSoundComponent::SetSoundSource(const std::string &sndName) {m_kvSoundName = sndName;}
+const std::string &BaseEnvSoundComponent::GetSoundSource() const { return m_kvSoundName; }
+void BaseEnvSoundComponent::SetSoundSource(const std::string &sndName) { m_kvSoundName = sndName; }
 void BaseEnvSoundComponent::SetPitch(float pitch)
 {
 	m_kvPitch = pitch;
@@ -367,51 +357,35 @@ void BaseEnvSoundComponent::InitializeSound()
 	auto spawnFlags = static_cast<SpawnFlags>(ent.GetSpawnFlags());
 	auto mode = ALChannel::Auto;
 	auto createFlags = ALCreateFlags::None;
-	if((spawnFlags &SpawnFlags::PlayEverywhere) == SpawnFlags::None)
-	{
+	if((spawnFlags & SpawnFlags::PlayEverywhere) == SpawnFlags::None) {
 		mode = ALChannel::Mono;
 		createFlags = ALCreateFlags::Mono;
 	}
-	nw->PrecacheSound(m_kvSoundName,mode);
+	nw->PrecacheSound(m_kvSoundName, mode);
 
 	auto type = m_soundTypes;
-	const std::unordered_map<SpawnFlags,ALSoundType> types = {
-		{SpawnFlags::Effect,ALSoundType::Effect},
-		{SpawnFlags::Music,ALSoundType::Music},
-		{SpawnFlags::Voice,ALSoundType::Voice},
-		{SpawnFlags::Weapon,ALSoundType::Weapon},
-		{SpawnFlags::NPC,ALSoundType::NPC},
-		{SpawnFlags::Player,ALSoundType::Player},
-		{SpawnFlags::Vehicle,ALSoundType::Vehicle},
-		{SpawnFlags::Physics,ALSoundType::Physics},
-		{SpawnFlags::Environment,ALSoundType::Environment},
-		{SpawnFlags::GUI,ALSoundType::GUI}
-	};
-	for(auto &pair : types)
-	{
-		if((spawnFlags &pair.first) != SpawnFlags::None)
+	const std::unordered_map<SpawnFlags, ALSoundType> types = {{SpawnFlags::Effect, ALSoundType::Effect}, {SpawnFlags::Music, ALSoundType::Music}, {SpawnFlags::Voice, ALSoundType::Voice}, {SpawnFlags::Weapon, ALSoundType::Weapon}, {SpawnFlags::NPC, ALSoundType::NPC},
+	  {SpawnFlags::Player, ALSoundType::Player}, {SpawnFlags::Vehicle, ALSoundType::Vehicle}, {SpawnFlags::Physics, ALSoundType::Physics}, {SpawnFlags::Environment, ALSoundType::Environment}, {SpawnFlags::GUI, ALSoundType::GUI}};
+	for(auto &pair : types) {
+		if((spawnFlags & pair.first) != SpawnFlags::None)
 			type |= pair.second;
 	}
 
-	m_sound = nw->CreateSound(m_kvSoundName,type,createFlags);
+	m_sound = nw->CreateSound(m_kvSoundName, type, createFlags);
 
 	auto *snd = m_sound.get();
-	if(snd != NULL)
-	{
+	if(snd != NULL) {
 		snd->SetSource(&ent);
 
-		snd->AddCallback("OnStateChanged",FunctionCallback<void,ALState,ALState>::Create(
-			std::bind(&BaseEnvSoundComponent::InjectStateChange,this,std::placeholders::_1,std::placeholders::_2)
-		));
-		if((spawnFlags &SpawnFlags::IsLooped) != SpawnFlags::None)
+		snd->AddCallback("OnStateChanged", FunctionCallback<void, ALState, ALState>::Create(std::bind(&BaseEnvSoundComponent::InjectStateChange, this, std::placeholders::_1, std::placeholders::_2)));
+		if((spawnFlags & SpawnFlags::IsLooped) != SpawnFlags::None)
 			snd->SetLooping(true);
-		if((spawnFlags &SpawnFlags::PlayEverywhere) != SpawnFlags::None)
-		{
+		if((spawnFlags & SpawnFlags::PlayEverywhere) != SpawnFlags::None) {
 			m_kvMaxDist = std::numeric_limits<float>::max();
 			snd->SetRelative(true);
-			snd->SetPosition(Vector3(0,0,0));
-			snd->SetVelocity(Vector3(0,0,0));
-			snd->SetDirection(Vector3(0,0,1));
+			snd->SetPosition(Vector3(0, 0, 0));
+			snd->SetVelocity(Vector3(0, 0, 0));
+			snd->SetDirection(Vector3(0, 0, 1));
 		}
 
 		snd->SetPitch(m_kvPitch);
@@ -445,23 +419,17 @@ void BaseEnvSoundComponent::Pause()
 		return;
 	m_sound->Pause();
 }
-bool BaseEnvSoundComponent::IsPlaying() const
-{
-	return (m_sound != nullptr) ? m_sound->IsPlaying() : false;
-}
-bool BaseEnvSoundComponent::IsPaused() const
-{
-	return (m_sound != nullptr) ? m_sound->IsPaused() : true;
-}
-const std::shared_ptr<ALSound> &BaseEnvSoundComponent::GetSound() const {return m_sound;}
+bool BaseEnvSoundComponent::IsPlaying() const { return (m_sound != nullptr) ? m_sound->IsPlaying() : false; }
+bool BaseEnvSoundComponent::IsPaused() const { return (m_sound != nullptr) ? m_sound->IsPaused() : true; }
+const std::shared_ptr<ALSound> &BaseEnvSoundComponent::GetSound() const { return m_sound; }
 
 void BaseEnvSoundComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
 	InitializeSound();
-	if((static_cast<SpawnFlags>(GetEntity().GetSpawnFlags()) &SpawnFlags::PlayOnSpawn) != SpawnFlags::None)
+	if((static_cast<SpawnFlags>(GetEntity().GetSpawnFlags()) & SpawnFlags::PlayOnSpawn) != SpawnFlags::None)
 		Play();
 }
 
-void BaseEnvSoundComponent::InjectStateChange(ALState oldState,ALState newState) {}
+void BaseEnvSoundComponent::InjectStateChange(ALState oldState, ALState newState) {}
 void BaseEnvSoundComponent::OnSoundCreated(ALSound &snd) {}

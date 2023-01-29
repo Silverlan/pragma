@@ -19,10 +19,10 @@
 
 struct DLLNETWORK BoneList // Simplified Skeleton without an hierarchy
 {
-private:
+  private:
 	std::vector<std::string> m_bones;
-	std::unordered_map<std::string,uint32_t> m_boneIDs;
-public:
+	std::unordered_map<std::string, uint32_t> m_boneIDs;
+  public:
 	uint32_t AddBone(const std::string &name);
 	int32_t GetBoneID(const std::string &name) const;
 	uint32_t GetBoneCount() const;

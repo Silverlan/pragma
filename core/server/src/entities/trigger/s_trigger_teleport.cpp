@@ -15,11 +15,11 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(trigger_teleport,TriggerTeleport);
+LINK_ENTITY_TO_CLASS(trigger_teleport, TriggerTeleport);
 
 extern DLLSERVER SGame *s_game;
 
-void STriggerTeleportComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void STriggerTeleportComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void TriggerTeleport::Initialize()
 {

@@ -19,7 +19,7 @@ using namespace pragma;
 
 extern ServerState *server;
 
-void SLightComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SLightComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->Write<pragma::BaseEnvLightComponent::ShadowType>(GetShadowType());
 	packet->Write<float>(m_falloffExponent);
@@ -31,24 +31,23 @@ void SLightComponent::SendData(NetPacket &packet,networking::ClientRecipientFilt
 void SLightComponent::SetShadowType(ShadowType type)
 {
 	BaseEnvLightComponent::SetShadowType(type);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(!ent.IsShared())
 		return;
 	NetPacket p {};
 	p->Write(type);
-	ent.SendNetEvent(m_netEvSetShadowType,p,pragma::networking::Protocol::SlowReliable);
+	ent.SendNetEvent(m_netEvSetShadowType, p, pragma::networking::Protocol::SlowReliable);
 }
 
 void SLightComponent::SetFalloffExponent(float falloffExponent)
 {
 	BaseEnvLightComponent::SetFalloffExponent(falloffExponent);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(!ent.IsShared())
 		return;
 	NetPacket p {};
 	p->Write<float>(falloffExponent);
-	ent.SendNetEvent(m_netEvSetFalloffExponent,p,pragma::networking::Protocol::SlowReliable);
+	ent.SendNetEvent(m_netEvSetFalloffExponent, p, pragma::networking::Protocol::SlowReliable);
 }
 
-void SLightComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-
+void SLightComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

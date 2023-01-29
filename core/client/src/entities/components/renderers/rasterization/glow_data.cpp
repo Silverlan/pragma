@@ -21,21 +21,17 @@ extern DLLCLIENT CGame *c_game;
 
 using namespace pragma::rendering;
 
-GlowData::GlowData()
-	: bGlowScheduled(false)
-{
-	shader = c_engine->GetShader("glow");
-}
+GlowData::GlowData() : bGlowScheduled(false) { shader = c_engine->GetShader("glow"); }
 GlowData::~GlowData()
 {
 	if(m_cbReloadCommandBuffer.IsValid())
 		m_cbReloadCommandBuffer.Remove();
 }
-bool GlowData::Initialize(uint32_t width,uint32_t height,const HDRData &hdrInfo)
+bool GlowData::Initialize(uint32_t width, uint32_t height, const HDRData &hdrInfo)
 {
 	auto depthTex = hdrInfo.prepass.textureDepth;
 	if(depthTex->IsMSAATexture())
-		depthTex = static_cast<prosper::MSAATexture&>(*depthTex).GetResolvedTexture();
+		depthTex = static_cast<prosper::MSAATexture &>(*depthTex).GetResolvedTexture();
 
 	prosper::util::ImageCreateInfo imgCreateInfo {};
 	imgCreateInfo.width = width;
@@ -48,12 +44,12 @@ bool GlowData::Initialize(uint32_t width,uint32_t height,const HDRData &hdrInfo)
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	samplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToEdge;
 	samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
-	auto tex = c_engine->GetRenderContext().CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
-	renderTarget = c_engine->GetRenderContext().CreateRenderTarget({tex,depthTex},prosper::ShaderGraphics::GetRenderPass<pragma::ShaderGlow>(c_engine->GetRenderContext()));
+	auto tex = c_engine->GetRenderContext().CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
+	renderTarget = c_engine->GetRenderContext().CreateRenderTarget({tex, depthTex}, prosper::ShaderGraphics::GetRenderPass<pragma::ShaderGlow>(c_engine->GetRenderContext()));
 	renderTarget->SetDebugName("glow_rt");
 
-	auto rtBlur = c_engine->GetRenderContext().CreateRenderTarget({tex},prosper::ShaderGraphics::GetRenderPass<prosper::ShaderBlurBase>(c_engine->GetRenderContext(),umath::to_integral(prosper::ShaderBlurBase::Pipeline::R8G8B8A8Unorm)));
+	auto rtBlur = c_engine->GetRenderContext().CreateRenderTarget({tex}, prosper::ShaderGraphics::GetRenderPass<prosper::ShaderBlurBase>(c_engine->GetRenderContext(), umath::to_integral(prosper::ShaderBlurBase::Pipeline::R8G8B8A8Unorm)));
 	rtBlur->SetDebugName("glow_blur_rt");
-	blurSet = prosper::BlurSet::Create(c_engine->GetRenderContext(),rtBlur);
+	blurSet = prosper::BlurSet::Create(c_engine->GetRenderContext(), rtBlur);
 	return true;
 }

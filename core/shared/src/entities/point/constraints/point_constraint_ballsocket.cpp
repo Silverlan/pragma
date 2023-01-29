@@ -19,10 +19,7 @@
 
 using namespace pragma;
 
-void BasePointConstraintBallSocketComponent::Initialize()
-{
-	BasePointConstraintComponent::Initialize();
-}
+void BasePointConstraintBallSocketComponent::Initialize() { BasePointConstraintComponent::Initialize(); }
 
 void BasePointConstraintBallSocketComponent::OnEntitySpawn()
 {
@@ -30,14 +27,14 @@ void BasePointConstraintBallSocketComponent::OnEntitySpawn()
 	BasePointConstraintComponent::InitializeConstraint();
 }
 
-void BasePointConstraintBallSocketComponent::InitializeConstraint(BaseEntity *src,BaseEntity *tgt)
+void BasePointConstraintBallSocketComponent::InitializeConstraint(BaseEntity *src, BaseEntity *tgt)
 {
 	auto pPhysComponentTgt = tgt->GetPhysicsComponent();
-	auto *physTgt = pPhysComponentTgt ? dynamic_cast<RigidPhysObj*>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;
+	auto *physTgt = pPhysComponentTgt ? dynamic_cast<RigidPhysObj *>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;
 	if(physTgt == nullptr)
 		return;
 	auto pPhysComponentSrc = src->GetPhysicsComponent();
-	auto *physSrc = pPhysComponentSrc ? dynamic_cast<RigidPhysObj*>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
+	auto *physSrc = pPhysComponentSrc ? dynamic_cast<RigidPhysObj *>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
 	if(physSrc == nullptr)
 		return;
 	auto *bodySrc = physSrc->GetRigidBody();
@@ -48,17 +45,15 @@ void BasePointConstraintBallSocketComponent::InitializeConstraint(BaseEntity *sr
 	auto *game = state->GetGameState();
 	auto *physEnv = game->GetPhysicsEnvironment();
 	auto pTrComponent = entThis.GetTransformComponent();
-	auto posThis = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
+	auto posThis = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
 	auto dir = pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::FORWARD;
 
 	auto &bodies = physTgt->GetRigidBodies();
-	for(auto it=bodies.begin();it!=bodies.end();++it)
-	{
+	for(auto it = bodies.begin(); it != bodies.end(); ++it) {
 		auto &bodyTgt = *it;
-		if(bodyTgt.IsValid())
-		{
+		if(bodyTgt.IsValid()) {
 			auto posTgt = bodyTgt->GetPos();
-			auto ballSocket = physEnv->CreateBallSocketConstraint(*bodyTgt,posThis -posTgt,*bodySrc,posThis);
+			auto ballSocket = physEnv->CreateBallSocketConstraint(*bodyTgt, posThis - posTgt, *bodySrc, posThis);
 			if(ballSocket.IsValid())
 				ballSocket->SetEntity(GetEntity());
 			//if(ballSocket != nullptr)

@@ -31,101 +31,83 @@
 
 extern DLLSERVER ServerState *server;
 
-pragma::networking::NWMActiveServer::NWMActiveServer(const std::shared_ptr<SVNWMUDPConnection> &udp,const std::shared_ptr<SVNWMTCPConnection> &tcp)
-	: nwm::Server(udp,tcp),m_lastHeartBeat()
-{
-	m_dispatcher = UDPMessageDispatcher::Create();
-}
-nwm::ServerClient &pragma::networking::NWMActiveServer::GetNWMClient(StandardServerClient &cl) const
-{
-	return cl.GetNWMClient();
-}
-pragma::networking::StandardServerClient &pragma::networking::NWMActiveServer::GetPragmaClient(nwm::ServerClient &cl) const
-{
-	return *m_nwmToPragmaClient.find(&cl)->second;
-}
-void pragma::networking::NWMActiveServer::SetServer(StandardServer &server) {m_server = &server;}
+pragma::networking::NWMActiveServer::NWMActiveServer(const std::shared_ptr<SVNWMUDPConnection> &udp, const std::shared_ptr<SVNWMTCPConnection> &tcp) : nwm::Server(udp, tcp), m_lastHeartBeat() { m_dispatcher = UDPMessageDispatcher::Create(); }
+nwm::ServerClient &pragma::networking::NWMActiveServer::GetNWMClient(StandardServerClient &cl) const { return cl.GetNWMClient(); }
+pragma::networking::StandardServerClient &pragma::networking::NWMActiveServer::GetPragmaClient(nwm::ServerClient &cl) const { return *m_nwmToPragmaClient.find(&cl)->second; }
+void pragma::networking::NWMActiveServer::SetServer(StandardServer &server) { m_server = &server; }
 
-void pragma::networking::NWMActiveServer::OnPacketSent(const NWMEndpoint &ep,const NetPacket &packet)
+void pragma::networking::NWMActiveServer::OnPacketSent(const NWMEndpoint &ep, const NetPacket &packet)
 {
-	nwm::Server::OnPacketSent(ep,packet);
+	nwm::Server::OnPacketSent(ep, packet);
 #if DEBUG_SERVER_VERBOSE == 1
 	auto id = packet.GetMessageID();
 	auto *clMap = GetClientMessageMap();
-	std::unordered_map<std::string,uint32_t> *clMsgs;
+	std::unordered_map<std::string, uint32_t> *clMsgs;
 	clMap->GetNetMessages(&clMsgs);
-	auto it = std::find_if(clMsgs->begin(),clMsgs->end(),[id](const std::pair<std::string,uint32_t> &pair) {
-		return (pair.second == id) ? true : false;
-		});
+	auto it = std::find_if(clMsgs->begin(), clMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != clMsgs->end()) ? it->first : "Unknown";
-	Con::csv<<"OnPacketSent: "<<msgName<<" ("<<id<<")"<<Con::endl;
+	Con::csv << "OnPacketSent: " << msgName << " (" << id << ")" << Con::endl;
 #endif
-	m_server->MemorizeNetMessage(MessageTracker::MessageType::Outgoing,packet.GetMessageID(),ep,packet);
+	m_server->MemorizeNetMessage(MessageTracker::MessageType::Outgoing, packet.GetMessageID(), ep, packet);
 }
 
-void pragma::networking::NWMActiveServer::OnPacketReceived(const NWMEndpoint &ep,nwm::ServerClient *cl,unsigned int id,NetPacket &packet)
+void pragma::networking::NWMActiveServer::OnPacketReceived(const NWMEndpoint &ep, nwm::ServerClient *cl, unsigned int id, NetPacket &packet)
 {
-	nwm::Server::OnPacketReceived(ep,cl,id,packet);
+	nwm::Server::OnPacketReceived(ep, cl, id, packet);
 #if DEBUG_SERVER_VERBOSE == 1
 	auto *svMap = GetServerMessageMap();
-	std::unordered_map<std::string,uint32_t> *svMsgs;
+	std::unordered_map<std::string, uint32_t> *svMsgs;
 	svMap->GetNetMessages(&svMsgs);
-	auto it = std::find_if(svMsgs->begin(),svMsgs->end(),[id](const std::pair<std::string,uint32_t> &pair) {
-		return (pair.second == id) ? true : false;
-		});
+	auto it = std::find_if(svMsgs->begin(), svMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != svMsgs->end()) ? it->first : "Unknown";
-	Con::csv<<"OnPacketReceived: "<<msgName<<" ("<<id<<")"<<Con::endl;
+	Con::csv << "OnPacketReceived: " << msgName << " (" << id << ")" << Con::endl;
 #endif
-	m_server->MemorizeNetMessage(MessageTracker::MessageType::Incoming,id,ep,packet);
+	m_server->MemorizeNetMessage(MessageTracker::MessageType::Incoming, id, ep, packet);
 }
 
-bool pragma::networking::NWMActiveServer::HandleAsyncPacket(const NWMEndpoint &ep,NWMSession *session,uint32_t id,NetPacket &packet)
+bool pragma::networking::NWMActiveServer::HandleAsyncPacket(const NWMEndpoint &ep, NWMSession *session, uint32_t id, NetPacket &packet)
 {
-	switch(static_cast<WVQuery>(id))
-	{
+	switch(static_cast<WVQuery>(id)) {
 	case WVQuery::PING:
-	{
-		NetPacket pong{id};
-		auto *epPtr = ep.get();
-		// Send response
-		if(ep->IsUDP() == true)
 		{
-			NWMEndpoint ep = static_cast<NWMUDPEndpoint&>(*epPtr);
-			nwm::impl::ManagerBase::SendPacket(nwm::Protocol::UDP,pong,ep);
+			NetPacket pong {id};
+			auto *epPtr = ep.get();
+			// Send response
+			if(ep->IsUDP() == true) {
+				NWMEndpoint ep = static_cast<NWMUDPEndpoint &>(*epPtr);
+				nwm::impl::ManagerBase::SendPacket(nwm::Protocol::UDP, pong, ep);
+			}
+			else {
+				NWMEndpoint ep = static_cast<NWMTCPEndpoint &>(*epPtr);
+				nwm::impl::ManagerBase::SendPacket(nwm::Protocol::TCP, pong, ep);
+			}
+			return true;
 		}
-		else
-		{
-			NWMEndpoint ep = static_cast<NWMTCPEndpoint&>(*epPtr);
-			nwm::impl::ManagerBase::SendPacket(nwm::Protocol::TCP,pong,ep);
-		}
-		return true;
-	}
 	}
 	return false;
 }
 
-bool pragma::networking::NWMActiveServer::HandlePacket(const NWMEndpoint &ep,nwm::ServerClient *cl,unsigned int id,NetPacket &packet)
+bool pragma::networking::NWMActiveServer::HandlePacket(const NWMEndpoint &ep, nwm::ServerClient *cl, unsigned int id, NetPacket &packet)
 {
 #if DEBUG_SERVER_VERBOSE == 1
-	std::cout<<"HandlePacket: "<<id<<std::endl;
+	std::cout << "HandlePacket: " << id << std::endl;
 #endif
-	if(nwm::Server::HandlePacket(ep,cl,id,packet) == true || cl == nullptr || !cl->IsFullyConnected())
+	if(nwm::Server::HandlePacket(ep, cl, id, packet) == true || cl == nullptr || !cl->IsFullyConnected())
 		return true;
 	auto it = m_nwmToPragmaClient.find(cl);
 	if(it == m_nwmToPragmaClient.end())
 		return false;
 	auto *prCl = it->second;
-	m_server->HandlePacket(*prCl,packet);
+	m_server->HandlePacket(*prCl, packet);
 	return true;
 }
 void pragma::networking::NWMActiveServer::OnClientConnected(nwm::ServerClient *nwmCl)
 {
 #if DEBUG_SERVER_VERBOSE == 1
-	std::cout<<"Client connected: "<<nwmCl->GetIP()<<std::endl;
+	std::cout << "Client connected: " << nwmCl->GetIP() << std::endl;
 #endif
 	auto prCl = m_server->AddClient<StandardServerClient>();
-	if(prCl == nullptr)
-	{
+	if(prCl == nullptr) {
 		nwmCl->Drop(nwm::ClientDropped::Error);
 		return;
 	}
@@ -134,7 +116,7 @@ void pragma::networking::NWMActiveServer::OnClientConnected(nwm::ServerClient *n
 	m_server->OnClientConnected(*prCl);
 }
 
-void pragma::networking::NWMActiveServer::OnClientDropped(nwm::ServerClient *cl,nwm::ClientDropped reason)
+void pragma::networking::NWMActiveServer::OnClientDropped(nwm::ServerClient *cl, nwm::ClientDropped reason)
 {
 	auto it = m_nwmToPragmaClient.find(cl);
 	if(it == m_nwmToPragmaClient.end())
@@ -144,19 +126,19 @@ void pragma::networking::NWMActiveServer::OnClientDropped(nwm::ServerClient *cl,
 	if(pl)
 		pl->GetEntity().RemoveSafely();
 #if DEBUG_SERVER_VERBOSE == 1
-	std::cout<<"Client dropped: "<<cl->GetIP()<<" ("<<nwm::client_dropped_enum_to_string(reason)<<")"<<std::endl;
+	std::cout << "Client dropped: " << cl->GetIP() << " (" << nwm::client_dropped_enum_to_string(reason) << ")" << std::endl;
 #endif
 	m_nwmToPragmaClient.erase(it);
 
 	pragma::networking::Error err;
-	m_server->DropClient(*prCl,get_pragma_drop_reason(reason),err);
-	m_server->OnClientDropped(*prCl,get_pragma_drop_reason(reason));
+	m_server->DropClient(*prCl, get_pragma_drop_reason(reason), err);
+	m_server->OnClientDropped(*prCl, get_pragma_drop_reason(reason));
 }
 
 void pragma::networking::NWMActiveServer::OnClosed()
 {
 #if DEBUG_SERVER_VERBOSE == 1
-	std::cout<<"Connection closed..."<<std::endl;
+	std::cout << "Connection closed..." << std::endl;
 #endif
 }
 
@@ -166,9 +148,8 @@ void pragma::networking::NWMActiveServer::PollEvents()
 	if(m_dispatcher != nullptr)
 		m_dispatcher->Poll();
 	auto t = util::Clock::now();
-	auto tDelta = t -m_lastHeartBeat;
-	if(std::chrono::duration_cast<std::chrono::minutes>(tDelta).count() >= 5)
-	{
+	auto tDelta = t - m_lastHeartBeat;
+	if(std::chrono::duration_cast<std::chrono::minutes>(tDelta).count() >= 5) {
 		m_lastHeartBeat = t;
 		Heartbeat();
 	}
@@ -186,31 +167,30 @@ void pragma::networking::NWMActiveServer::Heartbeat()
 	DataStream header;
 	header->Write<WMSMessageHeader>(msgHeader);
 
-	m_dispatcher->Dispatch(header,GetMasterServerIP(),GetMasterServerPort(),[this,body](const nwm::ErrorCode err,UDPMessageDispatcher::Message*) mutable -> void {
-		if(!err)
-		{
-			m_dispatcher->Dispatch(body,GetMasterServerIP(),GetMasterServerPort(),[](const nwm::ErrorCode err,UDPMessageDispatcher::Message*) -> void {
+	m_dispatcher->Dispatch(header, GetMasterServerIP(), GetMasterServerPort(), [this, body](const nwm::ErrorCode err, UDPMessageDispatcher::Message *) mutable -> void {
+		if(!err) {
+			m_dispatcher->Dispatch(body, GetMasterServerIP(), GetMasterServerPort(), [](const nwm::ErrorCode err, UDPMessageDispatcher::Message *) -> void {
 				if(err)
-					Con::cwar<<"Unable to reach master server: "<<err.Message()<<". The server will not show up in the server browser."<<Con::endl;
-				});
+					Con::cwar << "Unable to reach master server: " << err.Message() << ". The server will not show up in the server browser." << Con::endl;
+			});
 		}
 		else
-			Con::cwar<<"Unable to reach master server: "<<err.Message()<<". The server will not show up in the server browser."<<Con::endl;
-		});
+			Con::cwar << "Unable to reach master server: " << err.Message() << ". The server will not show up in the server browser." << Con::endl;
+	});
 }
-std::shared_ptr<nwm::ServerClient> pragma::networking::NWMActiveServer::CreateClient() {return Server::CreateClient<pragma::networking::NWMActiveServerClient>();}
+std::shared_ptr<nwm::ServerClient> pragma::networking::NWMActiveServer::CreateClient() { return Server::CreateClient<pragma::networking::NWMActiveServerClient>(); }
 
-std::unique_ptr<pragma::networking::NWMActiveServer> pragma::networking::NWMActiveServer::Create(uint16_t tcpPort,uint16_t udpPort,nwm::ConnectionType conType)
+std::unique_ptr<pragma::networking::NWMActiveServer> pragma::networking::NWMActiveServer::Create(uint16_t tcpPort, uint16_t udpPort, nwm::ConnectionType conType)
 {
-	auto r = nwm::Server::Create<pragma::networking::NWMActiveServer>(tcpPort,udpPort,conType);
+	auto r = nwm::Server::Create<pragma::networking::NWMActiveServer>(tcpPort, udpPort, conType);
 	r->SetTimeoutDuration(GET_TIMEOUT_DURATION(server->GetConVarFloat("sv_timeout_duration")));
 	r->Start();
 	return r;
 }
 
-std::unique_ptr<pragma::networking::NWMActiveServer> pragma::networking::NWMActiveServer::Create(uint16_t port,nwm::ConnectionType conType)
+std::unique_ptr<pragma::networking::NWMActiveServer> pragma::networking::NWMActiveServer::Create(uint16_t port, nwm::ConnectionType conType)
 {
-	auto r = nwm::Server::Create<pragma::networking::NWMActiveServer>(port,conType);
+	auto r = nwm::Server::Create<pragma::networking::NWMActiveServer>(port, conType);
 	r->SetTimeoutDuration(GET_TIMEOUT_DURATION(server->GetConVarFloat("sv_timeout_duration")));
 	r->Start();
 	return r;
@@ -218,54 +198,38 @@ std::unique_ptr<pragma::networking::NWMActiveServer> pragma::networking::NWMActi
 
 /////////////////
 
-pragma::networking::NWMActiveServerClient::NWMActiveServerClient(nwm::Server *manager)
-	: nwm::ServerClient(manager)
-{}
+pragma::networking::NWMActiveServerClient::NWMActiveServerClient(nwm::Server *manager) : nwm::ServerClient(manager) {}
 
-pragma::networking::NWMActiveServerClient::~NWMActiveServerClient()
-{}
+pragma::networking::NWMActiveServerClient::~NWMActiveServerClient() {}
 
 void pragma::networking::NWMActiveServerClient::OnClosed() {}
 
 /////////////////
 
-pragma::networking::StandardServerClient::StandardServerClient()
-{}
+pragma::networking::StandardServerClient::StandardServerClient() {}
 
-uint16_t pragma::networking::StandardServerClient::GetLatency() const
-{
-	return m_nwmClient->GetLatency();
-}
-std::string pragma::networking::StandardServerClient::GetIdentifier() const
-{
-	return m_nwmClient->GetAddress().ToString();
-}
-std::optional<std::string> pragma::networking::StandardServerClient::GetIP() const
-{
-	return m_nwmClient->GetIP();
-}
-std::optional<pragma::networking::Port> pragma::networking::StandardServerClient::GetPort() const
-{
-	return m_nwmClient->GetPort();
-}
+uint16_t pragma::networking::StandardServerClient::GetLatency() const { return m_nwmClient->GetLatency(); }
+std::string pragma::networking::StandardServerClient::GetIdentifier() const { return m_nwmClient->GetAddress().ToString(); }
+std::optional<std::string> pragma::networking::StandardServerClient::GetIP() const { return m_nwmClient->GetIP(); }
+std::optional<pragma::networking::Port> pragma::networking::StandardServerClient::GetPort() const { return m_nwmClient->GetPort(); }
 bool pragma::networking::StandardServerClient::IsListenServerHost() const
 {
 	return true; // TODO
 }
-bool pragma::networking::StandardServerClient::Drop(DropReason reason,pragma::networking::Error &outErr)
+bool pragma::networking::StandardServerClient::Drop(DropReason reason, pragma::networking::Error &outErr)
 {
 	m_nwmClient->Drop(get_nwm_drop_reason(reason));
 	return true;
 }
-bool pragma::networking::StandardServerClient::SendPacket(pragma::networking::Protocol protocol,NetPacket &packet,pragma::networking::Error &outErr)
+bool pragma::networking::StandardServerClient::SendPacket(pragma::networking::Protocol protocol, NetPacket &packet, pragma::networking::Error &outErr)
 {
 	// TODO
 	return true;
 }
-void pragma::networking::StandardServerClient::SetNWMClient(nwm::ServerClient *cl) {m_nwmClient = cl;}
-nwm::ServerClient &pragma::networking::StandardServerClient::GetNWMClient() const {return *m_nwmClient;}
+void pragma::networking::StandardServerClient::SetNWMClient(nwm::ServerClient *cl) { m_nwmClient = cl; }
+nwm::ServerClient &pragma::networking::StandardServerClient::GetNWMClient() const { return *m_nwmClient; }
 
-static void sv_timeout_duration_callback(NetworkState*,ConVar*,float,float val)
+static void sv_timeout_duration_callback(NetworkState *, ConVar *, float, float val)
 {
 	if(server == nullptr)
 		return;
@@ -274,4 +238,4 @@ static void sv_timeout_duration_callback(NetworkState*,ConVar*,float,float val)
 		return;
 	sv->SetTimeoutDuration(GET_TIMEOUT_DURATION(val));
 }
-REGISTER_CONVAR_CALLBACK_SV(sv_timeout_duration,sv_timeout_duration_callback);
+REGISTER_CONVAR_CALLBACK_SV(sv_timeout_duration, sv_timeout_duration_callback);

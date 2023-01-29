@@ -41,26 +41,20 @@ extern DLLCLIENT CGame *c_game;
 
 using namespace pragma::rendering;
 
-void pragma::CRasterizationRendererComponent::RecordRenderParticleSystems(
-	prosper::ICommandBuffer &cmd,const util::DrawSceneInfo &drawSceneInfo,
-	std::vector<pragma::CParticleSystemComponent*> &particles,pragma::rendering::SceneRenderPass renderMode,
-	bool depthPass,Bool bloom,std::vector<pragma::CParticleSystemComponent*> *bloomParticles
-)
+void pragma::CRasterizationRendererComponent::RecordRenderParticleSystems(prosper::ICommandBuffer &cmd, const util::DrawSceneInfo &drawSceneInfo, std::vector<pragma::CParticleSystemComponent *> &particles, pragma::rendering::SceneRenderPass renderMode, bool depthPass, Bool bloom,
+  std::vector<pragma::CParticleSystemComponent *> *bloomParticles)
 {
-	auto depthOnly = umath::is_flag_set(drawSceneInfo.renderFlags,RenderFlags::ParticleDepth);
+	auto depthOnly = umath::is_flag_set(drawSceneInfo.renderFlags, RenderFlags::ParticleDepth);
 	if((depthOnly && bloom) || drawSceneInfo.scene.expired())
 		return;
 	auto &scene = *drawSceneInfo.scene;
 	auto renderFlags = ParticleRenderFlags::None;
-	umath::set_flag(renderFlags,ParticleRenderFlags::DepthOnly,depthOnly || depthPass);
-	umath::set_flag(renderFlags,ParticleRenderFlags::Bloom,bloom);
+	umath::set_flag(renderFlags, ParticleRenderFlags::DepthOnly, depthOnly || depthPass);
+	umath::set_flag(renderFlags, ParticleRenderFlags::Bloom, bloom);
 	auto bFirst = true;
-	for(auto *particle : particles)
-	{
-		if(particle != nullptr && particle->IsActive() == true && particle->GetSceneRenderPass() == renderMode && particle->GetParent() == nullptr)
-		{
-			if(bFirst == true)
-			{
+	for(auto *particle : particles) {
+		if(particle != nullptr && particle->IsActive() == true && particle->GetSceneRenderPass() == renderMode && particle->GetParent() == nullptr) {
+			if(bFirst == true) {
 				bFirst = false;
 
 				// We need to end the current render pass, because we need the depth buffer with everything
@@ -87,15 +81,13 @@ void pragma::CRasterizationRendererComponent::RecordRenderParticleSystems(
 #endif
 			}
 			//scene->ResolveDepthTexture(drawCmd); // Particles aren't multisampled, but requires scene depth buffer
-			particle->RecordRender(cmd,const_cast<pragma::CSceneComponent&>(scene),*this,renderFlags);
-			if(bloomParticles != nullptr)
-			{
+			particle->RecordRender(cmd, const_cast<pragma::CSceneComponent &>(scene), *this, renderFlags);
+			if(bloomParticles != nullptr) {
 				if(particle->IsBloomEnabled())
 					bloomParticles->push_back(particle);
 				auto &children = particle->GetChildren();
-				bloomParticles->reserve(bloomParticles->size() +children.size());
-				for(auto &hChild : children)
-				{
+				bloomParticles->reserve(bloomParticles->size() + children.size());
+				for(auto &hChild : children) {
 					if(hChild.child.expired())
 						continue;
 					bloomParticles->push_back(hChild.child.get());
@@ -110,10 +102,8 @@ void pragma::CRasterizationRendererComponent::RecordCommandBuffers(const util::D
 {
 	// Debug
 	static auto debugLockCmdBuffers = false;
-	if(cvLockCommandBuffers->GetBool())
-	{
-		if(debugLockCmdBuffers)
-		{
+	if(cvLockCommandBuffers->GetBool()) {
+		if(debugLockCmdBuffers) {
 			m_prepassCommandBufferGroup->Reuse();
 			m_lightingCommandBufferGroup->Reuse();
 			return;
@@ -122,8 +112,7 @@ void pragma::CRasterizationRendererComponent::RecordCommandBuffers(const util::D
 		m_prepassCommandBufferGroup->SetOneTimeSubmit(false);
 		m_lightingCommandBufferGroup->SetOneTimeSubmit(false);
 	}
-	else if(debugLockCmdBuffers)
-	{
+	else if(debugLockCmdBuffers) {
 		debugLockCmdBuffers = false;
 		m_prepassCommandBufferGroup->SetOneTimeSubmit(true);
 		m_lightingCommandBufferGroup->SetOneTimeSubmit(true);
@@ -142,15 +131,15 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 {
 	if(drawSceneInfo.scene.expired())
 		return;
-	auto &scene = const_cast<pragma::CSceneComponent&>(*drawSceneInfo.scene);
-	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("OnPreRender",drawSceneInfo);
+	auto &scene = const_cast<pragma::CSceneComponent &>(*drawSceneInfo.scene);
+	c_game->CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("OnPreRender", drawSceneInfo);
 	// c_game->CallLuaCallbacks<void,RasterizationRenderer*>("PrepareRendering",this);
 
 	// scene.GetSceneRenderDesc().BuildRenderQueue(drawSceneInfo);
 
 	// Prepass
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::Scene);
-	
+
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
 	auto prepassMode = GetPrepassMode();
@@ -159,17 +148,16 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 	// We still have to update entity buffers *before* we start the render pass (since buffer updates
 	// are not allowed during a render pass).
 	auto &worldRenderQueues = sceneRenderDesc.GetWorldRenderQueues();
-	if((drawSceneInfo.renderFlags &RenderFlags::World) != RenderFlags::None)
-	{
+	if((drawSceneInfo.renderFlags & RenderFlags::World) != RenderFlags::None) {
 		std::chrono::steady_clock::time_point t;
 		if(drawSceneInfo.renderStats)
 			t = std::chrono::steady_clock::now();
 		sceneRenderDesc.WaitForWorldRenderQueues();
 		if(drawSceneInfo.renderStats)
-			drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass)->SetTime(RenderPassStats::Timer::RenderThreadWait,std::chrono::steady_clock::now() -t);
+			drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass)->SetTime(RenderPassStats::Timer::RenderThreadWait, std::chrono::steady_clock::now() - t);
 
 		for(auto &renderQueue : worldRenderQueues)
-			CSceneComponent::UpdateRenderBuffers(drawCmd,*renderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
+			CSceneComponent::UpdateRenderBuffers(drawCmd, *renderQueue, drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
 	}
 
 	// If we're lucky, the render queues for everything else have already been built
@@ -196,107 +184,98 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 #endif
 
 	UpdatePrepassRenderBuffers(drawSceneInfo);
-	
+
 	std::chrono::steady_clock::time_point t;
 	// Start executing the prepass; This may require a waiting period of the recording
 	// of the prepass hasn't completed yet
-	if(runPrepass)
-	{
-		if(drawSceneInfo.renderStats)
-		{
-			drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass)->BeginGpuTimer(RenderPassStats::Timer::GpuExecution,*drawSceneInfo.commandBuffer);
+	if(runPrepass) {
+		if(drawSceneInfo.renderStats) {
+			drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass)->BeginGpuTimer(RenderPassStats::Timer::GpuExecution, *drawSceneInfo.commandBuffer);
 			t = std::chrono::steady_clock::now();
 		}
 
 		ExecutePrepass(drawSceneInfo);
-		if(drawSceneInfo.renderStats)
-		{
-			(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::PrepassExecutionCpu,std::chrono::steady_clock::now() -t);
-			drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass)->EndGpuTimer(RenderPassStats::Timer::GpuExecution,*drawSceneInfo.commandBuffer);
+		if(drawSceneInfo.renderStats) {
+			(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::PrepassExecutionCpu, std::chrono::steady_clock::now() - t);
+			drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass)->EndGpuTimer(RenderPassStats::Timer::GpuExecution, *drawSceneInfo.commandBuffer);
 		}
 	}
 
 	// SSAO (requires prepass)
-	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuSsao,*drawSceneInfo.commandBuffer);
+	if(drawSceneInfo.renderStats)
+		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuSsao, *drawSceneInfo.commandBuffer);
 	RenderSSAO(drawSceneInfo);
-	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuSsao,*drawSceneInfo.commandBuffer);
+	if(drawSceneInfo.renderStats)
+		(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuSsao, *drawSceneInfo.commandBuffer);
 
 	// Cull light sources (requires prepass)
-	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::LightCullingGpu,*drawSceneInfo.commandBuffer);
+	if(drawSceneInfo.renderStats)
+		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::LightCullingGpu, *drawSceneInfo.commandBuffer);
 	CullLightSources(drawSceneInfo);
-	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::LightCullingGpu,*drawSceneInfo.commandBuffer);
+	if(drawSceneInfo.renderStats)
+		(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::LightCullingGpu, *drawSceneInfo.commandBuffer);
 
 	RenderShadows(drawSceneInfo);
-	
+
 	// We still need to update the render buffers for some entities
 	// (All others have already been updated in the prepass)
 	if(drawSceneInfo.renderStats)
 		t = std::chrono::steady_clock::now();
 	// TODO: This would be a good spot to start recording the shadow command buffers
 	if(drawSceneInfo.renderStats)
-		(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::UpdateRenderBuffersCpu,std::chrono::steady_clock::now() -t);
+		(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::UpdateRenderBuffersCpu, std::chrono::steady_clock::now() - t);
 	// TODO: Execute shadow command buffers here
 
 	// Lighting pass
-	if(drawSceneInfo.renderStats)
-	{
-		drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass)->BeginGpuTimer(RenderPassStats::Timer::GpuExecution,*drawSceneInfo.commandBuffer);
+	if(drawSceneInfo.renderStats) {
+		drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass)->BeginGpuTimer(RenderPassStats::Timer::GpuExecution, *drawSceneInfo.commandBuffer);
 		t = std::chrono::steady_clock::now();
 	}
 	UpdateLightingPassRenderBuffers(drawSceneInfo);
 	ExecuteLightingPass(drawSceneInfo);
-	if(drawSceneInfo.renderStats)
-	{
-		(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::LightingPassExecutionCpu,std::chrono::steady_clock::now() -t);
-		drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass)->EndGpuTimer(RenderPassStats::Timer::GpuExecution,*drawSceneInfo.commandBuffer);
+	if(drawSceneInfo.renderStats) {
+		(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::LightingPassExecutionCpu, std::chrono::steady_clock::now() - t);
+		drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass)->EndGpuTimer(RenderPassStats::Timer::GpuExecution, *drawSceneInfo.commandBuffer);
 	}
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::Scene);
 
 	// Post processing
-	if(drawSceneInfo.renderStats)
-	{
-		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpu,*drawSceneInfo.commandBuffer);
+	if(drawSceneInfo.renderStats) {
+		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpu, *drawSceneInfo.commandBuffer);
 		t = std::chrono::steady_clock::now();
 	}
 	c_game->StartProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
 
 	// Particles
-	RenderParticles(*drawSceneInfo.commandBuffer,drawSceneInfo,false,drawSceneInfo.commandBuffer.get());
+	RenderParticles(*drawSceneInfo.commandBuffer, drawSceneInfo, false, drawSceneInfo.commandBuffer.get());
 
 	auto *renderer = scene.GetRenderer();
 	auto &postProcessing = renderer->GetPostProcessingEffects();
-	auto applyToneMapped = !umath::is_flag_set(drawSceneInfo.renderFlags,RenderFlags::HDR);
-	for(auto &pp : postProcessing)
-	{
-		if(pp.render.IsValid())
-		{
+	auto applyToneMapped = !umath::is_flag_set(drawSceneInfo.renderFlags, RenderFlags::HDR);
+	for(auto &pp : postProcessing) {
+		if(pp.render.IsValid()) {
 			auto flags = pp.getFlags ? pp.getFlags() : PostProcessingEffectData::Flags::None;
-			if(!applyToneMapped && umath::is_flag_set(flags,pragma::PostProcessingEffectData::Flags::ToneMapped))
+			if(!applyToneMapped && umath::is_flag_set(flags, pragma::PostProcessingEffectData::Flags::ToneMapped))
 				break;
-			pp.render.Call<void,const util::DrawSceneInfo&>(drawSceneInfo);
+			pp.render.Call<void, const util::DrawSceneInfo &>(drawSceneInfo);
 		}
 	}
 
-	if(!applyToneMapped)
-	{
+	if(!applyToneMapped) {
 		// Don't bother resolving HDR; Just apply the barrier
-		drawCmd->RecordImageBarrier(
-			GetHDRInfo().sceneRenderTarget->GetTexture().GetImage(),
-			prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal
-		);
+		drawCmd->RecordImageBarrier(GetHDRInfo().sceneRenderTarget->GetTexture().GetImage(), prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferSrcOptimal);
 	}
 
 	// Glow
 	// RenderGlowObjects(drawSceneInfo);
-	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing",drawSceneInfo);
-	c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*>("RenderPostProcessing",&drawSceneInfo);
+	c_game->CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing", drawSceneInfo);
+	c_game->CallLuaCallbacks<void, const util::DrawSceneInfo *>("RenderPostProcessing", &drawSceneInfo);
 
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
-	if(drawSceneInfo.renderStats)
-	{
-		(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::PostProcessingExecutionCpu,std::chrono::steady_clock::now() -t);
-		(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpu,*drawSceneInfo.commandBuffer);
+	if(drawSceneInfo.renderStats) {
+		(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::PostProcessingExecutionCpu, std::chrono::steady_clock::now() - t);
+		(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpu, *drawSceneInfo.commandBuffer);
 	}
 }

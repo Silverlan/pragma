@@ -11,17 +11,13 @@
 #include <pragma/lua/ldefinitions.h>
 #include "pragma/ai/ai_behavior.h"
 
-namespace Lua
-{
-	namespace ai
-	{
-		namespace server
-		{
-			DLLSERVER std::shared_ptr<pragma::ai::BehaviorNode> create_lua_task(lua_State *l,luabind::object oClass,pragma::ai::BehaviorNode::Type taskType,pragma::ai::SelectorType selectorType);
+namespace Lua {
+	namespace ai {
+		namespace server {
+			DLLSERVER std::shared_ptr<pragma::ai::BehaviorNode> create_lua_task(lua_State *l, luabind::object oClass, pragma::ai::BehaviorNode::Type taskType, pragma::ai::SelectorType selectorType);
 			DLLSERVER void register_library(Lua::Interface &lua);
 		};
 	};
 };
 
 #endif
-

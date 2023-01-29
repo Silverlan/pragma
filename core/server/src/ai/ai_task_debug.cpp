@@ -15,40 +15,37 @@
 
 using namespace pragma;
 
-ai::BehaviorNode::Result ai::TaskDebugPrint::Start(const Schedule *sched,pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::TaskDebugPrint::Start(const Schedule *sched, pragma::SAIComponent &ent)
 {
-	BehaviorNode::Start(sched,ent);
+	BehaviorNode::Start(sched, ent);
 	std::string msg;
-	if(GetDebugMessage(sched,msg) == false)
+	if(GetDebugMessage(sched, msg) == false)
 		return Result::Succeeded;
-	Con::csv<<"[AITask] "<<msg<<Con::endl;
+	Con::csv << "[AITask] " << msg << Con::endl;
 	return Result::Succeeded;
 }
-bool ai::TaskDebugPrint::GetDebugMessage(const Schedule *sched,std::string &msg) const
+bool ai::TaskDebugPrint::GetDebugMessage(const Schedule *sched, std::string &msg) const
 {
-	auto *param = GetParameter(sched,umath::to_integral(Parameter::Message));
+	auto *param = GetParameter(sched, umath::to_integral(Parameter::Message));
 	if(param == nullptr)
 		return false;
 	msg = param->ToString();
 	return true;
 }
-void ai::TaskDebugPrint::SetMessage(const std::string &msg)
-{
-	SetParameter(umath::to_integral(Parameter::Message),msg);
-}
-void ai::TaskDebugPrint::Print(const Schedule *sched,std::ostream &o) const
+void ai::TaskDebugPrint::SetMessage(const std::string &msg) { SetParameter(umath::to_integral(Parameter::Message), msg); }
+void ai::TaskDebugPrint::Print(const Schedule *sched, std::ostream &o) const
 {
 	std::string msg;
-	o<<"DebugPrint["<<((GetDebugMessage(sched,msg) == false) ? "null" : msg)<<"]";
+	o << "DebugPrint[" << ((GetDebugMessage(sched, msg) == false) ? "null" : msg) << "]";
 }
 
 ////////////////////
 
-ai::BehaviorNode::Result ai::TaskDebugDrawText::Start(const Schedule *sched,pragma::SAIComponent &aiComponent)
+ai::BehaviorNode::Result ai::TaskDebugDrawText::Start(const Schedule *sched, pragma::SAIComponent &aiComponent)
 {
-	BehaviorNode::Start(sched,aiComponent);
+	BehaviorNode::Start(sched, aiComponent);
 	std::string msg;
-	if(GetDebugMessage(sched,msg) == false)
+	if(GetDebugMessage(sched, msg) == false)
 		return Result::Succeeded;
 	auto &ent = aiComponent.GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
@@ -59,27 +56,23 @@ ai::BehaviorNode::Result ai::TaskDebugDrawText::Start(const Schedule *sched,prag
 	Vector3 max {};
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
-		pPhysComponent->GetCollisionBounds(&min,&max);
+		pPhysComponent->GetCollisionBounds(&min, &max);
 	pos.y += max.y;
-	SDebugRenderer::DrawText(msg,pos,0.5f,Color::White,1.f);
+	SDebugRenderer::DrawText(msg, pos, 0.5f, Color::White, 1.f);
 	return Result::Succeeded;
 }
-void ai::TaskDebugDrawText::SetMessage(const std::string &msg)
+void ai::TaskDebugDrawText::SetMessage(const std::string &msg) { SetParameter(umath::to_integral(Parameter::Message), msg); }
+bool ai::TaskDebugDrawText::GetDebugMessage(const Schedule *sched, std::string &msg) const
 {
-	SetParameter(umath::to_integral(Parameter::Message),msg);
-}
-bool ai::TaskDebugDrawText::GetDebugMessage(const Schedule *sched,std::string &msg) const
-{
-	auto *param = GetParameter(sched,umath::to_integral(Parameter::Message));
+	auto *param = GetParameter(sched, umath::to_integral(Parameter::Message));
 	if(param == nullptr)
 		return false;
 	msg = param->ToString();
 	return true;
-
 }
-void ai::TaskDebugDrawText::Print(const Schedule *sched,std::ostream &o) const
+void ai::TaskDebugDrawText::Print(const Schedule *sched, std::ostream &o) const
 {
-	BehaviorNode::Print(sched,o);
+	BehaviorNode::Print(sched, o);
 	std::string msg;
-	o<<"DebugDrawText["<<((GetDebugMessage(sched,msg) == false) ? "null" : msg)<<"]";
+	o << "DebugDrawText[" << ((GetDebugMessage(sched, msg) == false) ? "null" : msg) << "]";
 }

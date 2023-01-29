@@ -14,21 +14,15 @@
 #include <string>
 class BaseEntity;
 
-namespace pragma
-{
-	class DLLNETWORK BaseToggleComponent
-		: public BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLNETWORK BaseToggleComponent : public BaseEntityComponent {
+	  public:
 		static ComponentEventId EVENT_ON_TURN_ON;
 		static ComponentEventId EVENT_ON_TURN_OFF;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
-		enum class SpawnFlags : uint32_t
-		{
-			StartOn = SF_STARTON
-		};
-		
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		enum class SpawnFlags : uint32_t { StartOn = SF_STARTON };
+
 		BaseToggleComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		bool IsTurnedOn() const;
@@ -40,12 +34,12 @@ namespace pragma
 		virtual void OnEntitySpawn() override;
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
-		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
-	protected:
+		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
+	  protected:
 		::util::PBoolProperty m_bTurnedOn = nullptr;
 		bool m_bStartDisabled = false;
 		pragma::NetEventId m_netEvToggleState = pragma::INVALID_NET_EVENT;
-		bool ToggleInput(std::string input,BaseEntity *activator,BaseEntity *caller,std::string data);
+		bool ToggleInput(std::string input, BaseEntity *activator, BaseEntity *caller, std::string data);
 	};
 };
 

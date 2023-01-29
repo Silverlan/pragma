@@ -10,14 +10,11 @@
 #include "pragma/serverdefinitions.h"
 #include <pragma/model/modelmanager.h>
 
-namespace pragma::asset
-{
-	class DLLSERVER SModelManager
-		: public ModelManager
-	{
-	public:
+namespace pragma::asset {
+	class DLLSERVER SModelManager : public ModelManager {
+	  public:
 		using ModelManager::ModelManager;
-	private:
+	  private:
 		//virtual std::shared_ptr<Model> LoadModel(const std::string &mdlName,bool bReload=false,bool *outIsNewModel=nullptr) override;
 	};
 };

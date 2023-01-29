@@ -17,19 +17,24 @@
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
-namespace bsp {class File;};
-namespace prosper {class Buffer;};
-namespace util {class BSPTree;};
+namespace bsp {
+	class File;
+};
+namespace prosper {
+	class Buffer;
+};
+namespace util {
+	class BSPTree;
+};
 class CHC;
-namespace pragma
-{
+namespace pragma {
 	using RenderMeshIndex = uint32_t;
-	using RenderMeshGroup = std::pair<RenderMeshIndex,RenderMeshIndex>; // Start index +count
-	namespace rendering {class RenderQueue;};
-	class DLLCLIENT CWorldComponent final
-		: public BaseWorldComponent
-	{
-	public:
+	using RenderMeshGroup = std::pair<RenderMeshIndex, RenderMeshIndex>; // Start index +count
+	namespace rendering {
+		class RenderQueue;
+	};
+	class DLLCLIENT CWorldComponent final : public BaseWorldComponent {
+	  public:
 		CWorldComponent(BaseEntity &ent) : BaseWorldComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
@@ -38,18 +43,18 @@ namespace pragma
 		std::shared_ptr<CHC> GetCHCController() const;
 		virtual void InitializeLuaObject(lua_State *l) override;
 
-		const rendering::RenderQueue *GetClusterRenderQueue(util::BSPTree::ClusterIndex clusterIndex,bool translucent=false) const;
-		void SetBSPTree(const std::shared_ptr<util::BSPTree> &bspTree,const std::vector<std::vector<RenderMeshIndex>> &meshesPerCluster);
+		const rendering::RenderQueue *GetClusterRenderQueue(util::BSPTree::ClusterIndex clusterIndex, bool translucent = false) const;
+		void SetBSPTree(const std::shared_ptr<util::BSPTree> &bspTree, const std::vector<std::vector<RenderMeshIndex>> &meshesPerCluster);
 		const std::shared_ptr<util::BSPTree> &GetBSPTree() const;
 		void RebuildRenderQueues();
-	protected:
-		void BuildOfflineRenderQueues(bool rebuild=false);
+	  protected:
+		void BuildOfflineRenderQueues(bool rebuild = false);
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		void UpdateRenderMeshes();
 		void ReloadCHCController();
 		std::vector<std::shared_ptr<rendering::RenderQueue>> m_clusterRenderQueues;
 		std::vector<std::shared_ptr<rendering::RenderQueue>> m_clusterRenderTranslucentQueues;
-		std::unordered_map<uint32_t,bool> m_lodBaseMeshIds;
+		std::unordered_map<uint32_t, bool> m_lodBaseMeshIds;
 		std::shared_ptr<OcclusionOctree<std::shared_ptr<ModelMesh>>> m_meshTree;
 		std::shared_ptr<CHC> m_chcController;
 
@@ -63,14 +68,12 @@ class CPolyMesh;
 class ModelMesh;
 class CHC;
 template<class T>
-	class OcclusionOctree;
-class DLLCLIENT CWorld
-	: public CBaseEntity
-{
-public:
+class OcclusionOctree;
+class DLLCLIENT CWorld : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
-	Con::c_cout& print(Con::c_cout&);
-	std::ostream& print(std::ostream&);
+	Con::c_cout &print(Con::c_cout &);
+	std::ostream &print(std::ostream &);
 };
 
 #endif

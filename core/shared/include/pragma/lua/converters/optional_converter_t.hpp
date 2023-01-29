@@ -10,39 +10,39 @@
 #include "pragma/lua/converters/optional_converter.hpp"
 
 template<typename T>
-template <typename U>
-std::optional<T> luabind::default_converter<std::optional<T>>::to_cpp(lua_State* L, U u, int index)
+template<typename U>
+std::optional<T> luabind::default_converter<std::optional<T>>::to_cpp(lua_State *L, U u, int index)
 {
-	if(lua_isnil(L,index))
+	if(lua_isnil(L, index))
 		return {};
-	return m_converter.to_cpp(L,decorate_type_t<T>(),index);
+	return m_converter.to_cpp(L, decorate_type_t<T>(), index);
 }
 
 template<typename T>
-template <class U>
+template<class U>
 int luabind::default_converter<std::optional<T>>::match(lua_State *l, U u, int index)
 {
-	if(lua_isnil(l,index))
+	if(lua_isnil(l, index))
 		return 1;
-	return m_converter.match(l,decorate_type_t<T>(),index);
+	return m_converter.match(l, decorate_type_t<T>(), index);
 }
 
 template<typename T>
-void luabind::default_converter<std::optional<T>>::to_lua(lua_State* L, std::optional<T> const& x)
+void luabind::default_converter<std::optional<T>>::to_lua(lua_State *L, std::optional<T> const &x)
 {
 	if(!x.has_value())
 		lua_pushnil(L);
 	else
-		m_converter.to_lua(L,*x);
+		m_converter.to_lua(L, *x);
 }
 
 template<typename T>
-void luabind::default_converter<std::optional<T>>::to_lua(lua_State* L, std::optional<T>* x)
+void luabind::default_converter<std::optional<T>>::to_lua(lua_State *L, std::optional<T> *x)
 {
 	if(!x || !x->has_value())
 		lua_pushnil(L);
 	else
-		to_lua(L,*x);
+		to_lua(L, *x);
 }
 
 #endif

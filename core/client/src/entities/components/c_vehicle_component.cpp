@@ -23,26 +23,20 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
-std::vector<CVehicleComponent*> CVehicleComponent::s_vehicles;
-const std::vector<CVehicleComponent*> &CVehicleComponent::GetAll() {return s_vehicles;}
-unsigned int CVehicleComponent::GetVehicleCount() {return CUInt32(s_vehicles.size());}
+std::vector<CVehicleComponent *> CVehicleComponent::s_vehicles;
+const std::vector<CVehicleComponent *> &CVehicleComponent::GetAll() { return s_vehicles; }
+unsigned int CVehicleComponent::GetVehicleCount() { return CUInt32(s_vehicles.size()); }
 
-CVehicleComponent::CVehicleComponent(BaseEntity &ent)
-	: BaseVehicleComponent(ent),CBaseSnapshotComponent{}
-{
-	s_vehicles.push_back(this);
-}
+CVehicleComponent::CVehicleComponent(BaseEntity &ent) : BaseVehicleComponent(ent), CBaseSnapshotComponent {} { s_vehicles.push_back(this); }
 
 CVehicleComponent::~CVehicleComponent()
 {
 	if(m_hCbSteeringWheel.IsValid())
 		m_hCbSteeringWheel.Remove();
 	ClearDriver();
-	for(int i=0;i<s_vehicles.size();i++)
-	{
-		if(s_vehicles[i] == this)
-		{
-			s_vehicles.erase(s_vehicles.begin() +i);
+	for(int i = 0; i < s_vehicles.size(); i++) {
+		if(s_vehicles[i] == this) {
+			s_vehicles.erase(s_vehicles.begin() + i);
 			break;
 		}
 	}
@@ -57,8 +51,7 @@ void CVehicleComponent::ReceiveSnapshotData(NetPacket &packet)
 	auto handbrakeFactor = packet->Read<float>();
 	auto accFactor = packet->Read<float>();
 	auto engineRotSpeed = packet->Read<umath::Radian>();
-	if(physVehicle)
-	{
+	if(physVehicle) {
 		physVehicle->SetSteerFactor(steerFactor);
 		physVehicle->SetGear(gear);
 		physVehicle->SetBrakeFactor(brakeFactor);
@@ -66,12 +59,12 @@ void CVehicleComponent::ReceiveSnapshotData(NetPacket &packet)
 		physVehicle->SetAccelerationFactor(accFactor);
 		physVehicle->SetEngineRotationSpeed(engineRotSpeed);
 		auto numWheels = GetWheelCount();
-		for(auto i=decltype(numWheels){0u};i<numWheels;++i)
-			physVehicle->SetWheelRotationSpeed(i,packet->Read<float>());
+		for(auto i = decltype(numWheels) {0u}; i < numWheels; ++i)
+			physVehicle->SetWheelRotationSpeed(i, packet->Read<float>());
 	}
 }
 
-void CVehicleComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CVehicleComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CVehicleComponent::ReadWheelInfo(NetPacket &packet)
 {
@@ -90,7 +83,7 @@ void CVehicleComponent::ReadWheelInfo(NetPacket &packet)
 	auto *info = GetWheelInfo(wheelId);
 	if(info == nullptr)
 		return;
-	info->m_wheelDirectionCS = btVector3(wheelDir.x,wheelDir.y,wheelDir.z);
+	info->m_wheelDirectionCS = btVector3(wheelDir.x, wheelDir.y, wheelDir.z);
 	info->m_suspensionRestLength1 = suspensionRest;
 	info->m_wheelsRadius = radius;
 #endif
@@ -99,7 +92,7 @@ void CVehicleComponent::ReadWheelInfo(NetPacket &packet)
 void CVehicleComponent::ReceiveData(NetPacket &packet)
 {
 	auto *entSteeringWheel = nwm::read_entity(packet);
-	m_steeringWheel = entSteeringWheel ? entSteeringWheel->GetHandle() : EntityHandle{};
+	m_steeringWheel = entSteeringWheel ? entSteeringWheel->GetHandle() : EntityHandle {};
 
 	auto *driver = nwm::read_entity(packet);
 	if(driver)
@@ -117,16 +110,13 @@ void CVehicleComponent::OnEntitySpawn()
 void CVehicleComponent::ClearDriver()
 {
 	auto *entDriver = GetDriver();
-	if(entDriver != nullptr && entDriver->IsPlayer())
-	{
+	if(entDriver != nullptr && entDriver->IsPlayer()) {
 		auto plComponent = entDriver->GetPlayerComponent();
-		if(plComponent->IsLocalPlayer())
-		{
+		if(plComponent->IsLocalPlayer()) {
 			c_game->EnableRenderMode(pragma::rendering::SceneRenderPass::View);
 			auto *vb = c_game->GetViewBody();
-			if(vb != nullptr)
-			{
-				auto pRenderComponent = static_cast<CBaseEntity&>(vb->GetEntity()).GetRenderComponent();
+			if(vb != nullptr) {
+				auto pRenderComponent = static_cast<CBaseEntity &>(vb->GetEntity()).GetRenderComponent();
 				if(pRenderComponent)
 					pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::View);
 			}
@@ -147,9 +137,8 @@ void CVehicleComponent::SetDriver(BaseEntity *ent)
 		return;
 	c_game->DisableRenderMode(pragma::rendering::SceneRenderPass::View);
 	auto *vb = c_game->GetViewBody();
-	if(vb != nullptr)
-	{
-		auto pRenderComponent = static_cast<CBaseEntity&>(vb->GetEntity()).GetRenderComponent();
+	if(vb != nullptr) {
+		auto pRenderComponent = static_cast<CBaseEntity &>(vb->GetEntity()).GetRenderComponent();
 		if(pRenderComponent)
 			pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::None);
 	}
@@ -158,21 +147,16 @@ void CVehicleComponent::SetDriver(BaseEntity *ent)
 	auto pObsComponent = GetEntity().GetComponent<pragma::CObservableComponent>();
 	plComponent->SetObserverTarget(pObsComponent.get());
 }
-void CVehicleComponent::Initialize()
+void CVehicleComponent::Initialize() { BaseVehicleComponent::Initialize(); }
+Bool CVehicleComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
-	BaseVehicleComponent::Initialize();
-}
-Bool CVehicleComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
-{
-	if(eventId == m_netEvSteeringWheelModel)
-	{
+	if(eventId == m_netEvSteeringWheelModel) {
 		auto *ent = nwm::read_entity(packet);
-		m_steeringWheel = ent ? ent->GetHandle() : EntityHandle{};
+		m_steeringWheel = ent ? ent->GetHandle() : EntityHandle {};
 		m_maxSteeringWheelAngle = packet->Read<float>();
 		InitializeSteeringWheel();
 	}
-	else if(eventId == m_netEvSetDriver)
-	{
+	else if(eventId == m_netEvSetDriver) {
 		auto *ent = nwm::read_entity(packet);
 		if(ent)
 			SetDriver(ent);

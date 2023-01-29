@@ -11,14 +11,12 @@
 #include "pragma/clientdefinitions.h"
 #include <wgui/wibase.h>
 
-class DLLCLIENT WIFPS
-	: public WIBase
-{
-private:
+class DLLCLIENT WIFPS : public WIBase {
+  private:
 	WIHandle m_text;
 	uint32_t m_fpsLast;
 	double m_tLastUpdate;
-public:
+  public:
 	WIFPS();
 	virtual ~WIFPS() override;
 	virtual void Initialize() override;

@@ -11,10 +11,8 @@
 #include <pragma/model/brush/brushmesh.h>
 #include "pragma/model/c_side.h"
 
-class DLLCLIENT CBrushMesh
-	: public BrushMesh
-{
-public:
+class DLLCLIENT CBrushMesh : public BrushMesh {
+  public:
 };
 
 #endif

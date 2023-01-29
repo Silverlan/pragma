@@ -30,17 +30,16 @@
 
 extern DLLNETWORK Engine *engine;
 
-
-template<class TPropertyWrapper,class TClass,typename T>
-	void prop_set_basic_type_indexed(lua_State *l,TClass &p,int32_t idx,const T &v)
+template<class TPropertyWrapper, class TClass, typename T>
+void prop_set_basic_type_indexed(lua_State *l, TClass &p, int32_t idx, const T &v)
 {
 	if(idx < 0)
 		return;
 	static_cast<TPropertyWrapper>(p)[idx] = v;
 }
-	
-template<class TPropertyWrapper,class TClass,typename T>
-	void prop_set_basic_type(lua_State *l,TClass &p,const std::string &key,const T &v)
+
+template<class TPropertyWrapper, class TClass, typename T>
+void prop_set_basic_type(lua_State *l, TClass &p, const std::string &key, const T &v)
 {
 	static_cast<TPropertyWrapper>(p)[key] = v;
 }
@@ -51,20 +50,20 @@ static ::udm::Blob data_stream_to_blob(DataStream &ds)
 	ds->SetOffset(0);
 	std::vector<uint8_t> data {};
 	data.resize(ds->GetInternalSize());
-	memcpy(data.data(),ds->GetData(),data.size());
+	memcpy(data.data(), ds->GetData(), data.size());
 	ds->SetOffset(offset);
 	return ::udm::Blob {std::move(data)};
 }
 
-static ::udm::BlobLz4 data_stream_to_lz4_blob(DataStream &ds,uint64_t uncompressedSize)
+static ::udm::BlobLz4 data_stream_to_lz4_blob(DataStream &ds, uint64_t uncompressedSize)
 {
 	auto offset = ds->GetOffset();
 	ds->SetOffset(0);
 	std::vector<uint8_t> data {};
 	data.resize(ds->GetInternalSize());
-	memcpy(data.data(),ds->GetData(),data.size());
+	memcpy(data.data(), ds->GetData(), data.size());
 	ds->SetOffset(offset);
-	return ::udm::BlobLz4 {std::move(data),uncompressedSize};
+	return ::udm::BlobLz4 {std::move(data), uncompressedSize};
 }
 
 static ::udm::Utf8String data_stream_to_utf8(DataStream &ds)
@@ -73,85 +72,78 @@ static ::udm::Utf8String data_stream_to_utf8(DataStream &ds)
 	ds->SetOffset(0);
 	std::vector<uint8_t> data {};
 	data.resize(ds->GetInternalSize());
-	memcpy(data.data(),ds->GetData(),data.size());
+	memcpy(data.data(), ds->GetData(), data.size());
 	ds->SetOffset(offset);
 	return ::udm::Utf8String {std::move(data)};
 }
 
-static void set_property_value(lua_State *l,::udm::LinkedPropertyWrapper p,::udm::Type type,luabind::object o,int32_t idx,bool nil=false)
+static void set_property_value(lua_State *l, ::udm::LinkedPropertyWrapper p, ::udm::Type type, luabind::object o, int32_t idx, bool nil = false)
 {
-	if(nil)
-	{
-		p = ::udm::Nil{};
+	if(nil) {
+		p = ::udm::Nil {};
 		return;
 	}
-	if(::udm::is_numeric_type(type))
-	{
-		::udm::visit<true,false,false>(type,[l,idx,&p](auto tag){
-            using T = typename decltype(tag)::type;
-			if constexpr(std::is_same_v<T,::udm::Half>)
-				p = ::udm::Half{static_cast<float>(Lua::CheckNumber(l,idx))};
+	if(::udm::is_numeric_type(type)) {
+		::udm::visit<true, false, false>(type, [l, idx, &p](auto tag) {
+			using T = typename decltype(tag)::type;
+			if constexpr(std::is_same_v<T, ::udm::Half>)
+				p = ::udm::Half {static_cast<float>(Lua::CheckNumber(l, idx))};
 			else
-				p = Lua::udm::cast_object<T>(luabind::object{luabind::from_stack(l,idx)});
+				p = Lua::udm::cast_object<T>(luabind::object {luabind::from_stack(l, idx)});
 		});
 	}
-	if(::udm::is_generic_type(type))
-	{
-		::udm::visit<false,true,false>(type,[l,idx,&p](auto tag) {
-            if constexpr(std::is_same_v<typename decltype(tag)::type,udm::Nil>)
+	if(::udm::is_generic_type(type)) {
+		::udm::visit<false, true, false>(type, [l, idx, &p](auto tag) {
+			if constexpr(std::is_same_v<typename decltype(tag)::type, udm::Nil>)
 				return;
 			else
-                p = static_cast<typename decltype(tag)::type&>(Lua::Check<typename decltype(tag)::type>(l,idx));
+				p = static_cast<typename decltype(tag)::type &>(Lua::Check<typename decltype(tag)::type>(l, idx));
 		});
 	}
-	switch(type)
-	{
+	switch(type) {
 	case ::udm::Type::String:
-		p = static_cast<::udm::String>(Lua::CheckString(l,idx));
+		p = static_cast<::udm::String>(Lua::CheckString(l, idx));
 		break;
 	case ::udm::Type::Utf8String:
-		p = data_stream_to_utf8(Lua::Check<DataStream>(l,idx));
+		p = data_stream_to_utf8(Lua::Check<DataStream>(l, idx));
 		break;
 	case ::udm::Type::Reference:
-		p = Lua::Check<::udm::Reference>(l,idx);
+		p = Lua::Check<::udm::Reference>(l, idx);
 		break;
 	case ::udm::Type::Struct:
-		p = Lua::Check<::udm::Struct>(l,idx);
+		p = Lua::Check<::udm::Struct>(l, idx);
 		break;
 	case ::udm::Type::Blob:
-		p = data_stream_to_blob(Lua::Check<DataStream>(l,idx));
+		p = data_stream_to_blob(Lua::Check<DataStream>(l, idx));
 		break;
 	case ::udm::Type::BlobLz4:
-	{
-		Lua::CheckTable(l,idx);
-		luabind::table<> t {luabind::from_stack(l,idx)};
-		uint64_t uncompressedSize = luabind::object_cast_nothrow<uint64_t>(t[1],uint64_t{});
-		DataStream ds = luabind::object_cast_nothrow<DataStream>(t[2],DataStream{});
-		p = data_stream_to_lz4_blob(ds,uncompressedSize);
-		break;
+		{
+			Lua::CheckTable(l, idx);
+			luabind::table<> t {luabind::from_stack(l, idx)};
+			uint64_t uncompressedSize = luabind::object_cast_nothrow<uint64_t>(t[1], uint64_t {});
+			DataStream ds = luabind::object_cast_nothrow<DataStream>(t[2], DataStream {});
+			p = data_stream_to_lz4_blob(ds, uncompressedSize);
+			break;
+		}
 	}
-	}
-	static_assert(umath::to_integral(::udm::Type::Count) == 36,"Update this when types have been added or removed!");
+	static_assert(umath::to_integral(::udm::Type::Count) == 36, "Update this when types have been added or removed!");
 }
 template<typename T>
-	static bool is_type(luabind::object &o)
+static bool is_type(luabind::object &o)
 {
-	try
-	{
-		luabind::object_cast<T*>(o);
+	try {
+		luabind::object_cast<T *>(o);
 	}
-	catch(const std::exception &e)
-	{
+	catch(const std::exception &e) {
 		return false;
 	}
 	return true;
 }
-static void set_property_value(lua_State *l,::udm::LinkedPropertyWrapper p,luabind::object o)
+static void set_property_value(lua_State *l, ::udm::LinkedPropertyWrapper p, luabind::object o)
 {
 	auto type = luabind::type(o);
 	auto udmType = udm::Type::Nil;
-	switch(type)
-	{
+	switch(type) {
 	case LUA_TBOOLEAN:
 		udmType = udm::Type::Boolean;
 		break;
@@ -162,49 +154,47 @@ static void set_property_value(lua_State *l,::udm::LinkedPropertyWrapper p,luabi
 		udmType = udm::Type::Float;
 		break;
 	default:
-	{
-		if(is_type<udm::Vector2>(o))
-			udmType = udm::Type::Vector2;
-		else if(is_type<udm::Vector3>(o))
-			udmType = udm::Type::Vector3;
-		else if(is_type<udm::Vector4>(o))
-			udmType = udm::Type::Vector4;
-		else if(is_type<udm::Quaternion>(o))
-			udmType = udm::Type::Quaternion;
-		else if(is_type<udm::EulerAngles>(o))
-			udmType = udm::Type::EulerAngles;
-		else if(is_type<udm::Transform>(o))
-			udmType = udm::Type::Transform;
-		else if(is_type<udm::ScaledTransform>(o))
-			udmType = udm::Type::ScaledTransform;
-		else if(is_type<udm::Mat4>(o))
-			udmType = udm::Type::Mat4;
-		else if(is_type<udm::Mat3x4>(o))
-			udmType = udm::Type::Mat3x4;
-		else if(is_type<udm::Srgba>(o))
-			udmType = udm::Type::Srgba;
-		else if(is_type<udm::HdrColor>(o))
-			udmType = udm::Type::HdrColor;
-		else if(is_type<udm::Property>(o))
 		{
-			auto prop = luabind::object_cast<udm::PProperty>(o);
-			if(!prop)
-			{
-				p = udm::Nil{};
+			if(is_type<udm::Vector2>(o))
+				udmType = udm::Type::Vector2;
+			else if(is_type<udm::Vector3>(o))
+				udmType = udm::Type::Vector3;
+			else if(is_type<udm::Vector4>(o))
+				udmType = udm::Type::Vector4;
+			else if(is_type<udm::Quaternion>(o))
+				udmType = udm::Type::Quaternion;
+			else if(is_type<udm::EulerAngles>(o))
+				udmType = udm::Type::EulerAngles;
+			else if(is_type<udm::Transform>(o))
+				udmType = udm::Type::Transform;
+			else if(is_type<udm::ScaledTransform>(o))
+				udmType = udm::Type::ScaledTransform;
+			else if(is_type<udm::Mat4>(o))
+				udmType = udm::Type::Mat4;
+			else if(is_type<udm::Mat3x4>(o))
+				udmType = udm::Type::Mat3x4;
+			else if(is_type<udm::Srgba>(o))
+				udmType = udm::Type::Srgba;
+			else if(is_type<udm::HdrColor>(o))
+				udmType = udm::Type::HdrColor;
+			else if(is_type<udm::Property>(o)) {
+				auto prop = luabind::object_cast<udm::PProperty>(o);
+				if(!prop) {
+					p = udm::Nil {};
+					return;
+				}
+				p = prop;
 				return;
 			}
-			p = prop;
-			return;
+			break;
 		}
-		break;
-	}
 	}
 	if(udmType == udm::Type::Nil)
 		return;
-	set_property_value(l,p,udmType,o,3);
+	set_property_value(l, p, udmType, o, 3);
 }
 
-static luabind::object get_array_values(lua_State *l,::udm::LinkedPropertyWrapperArg p,std::optional<::udm::Type> type)
+static luabind::object get_array_values(lua_State *l, ::udm::LinkedPropertyWrapperArg p, std::optional<::udm::Type> type)
 {
 	auto t = luabind::newtable(l);
 	auto size = p.GetSize();
@@ -212,43 +202,39 @@ static luabind::object get_array_values(lua_State *l,::udm::LinkedPropertyWrappe
 	if(size == 0 || pArray == nullptr)
 		return t;
 
-	if(!type.has_value())
-	{
+	if(!type.has_value()) {
 		int32_t idx = 1;
 		for(auto prop : p)
 			t[idx++] = prop;
 		return t;
 	}
 
-	auto vs = [&t,pArray,size](auto tag) {
-        using T = typename decltype(tag)::type;
-		auto *p = static_cast<T*>(pArray->GetValues());
-		for(auto i=decltype(size){0u};i<size;++i)
-		{
-			t[i +1] = *p;
+	auto vs = [&t, pArray, size](auto tag) {
+		using T = typename decltype(tag)::type;
+		auto *p = static_cast<T *>(pArray->GetValues());
+		for(auto i = decltype(size) {0u}; i < size; ++i) {
+			t[i + 1] = *p;
 			++p;
 		}
 	};
 	if(::udm::is_numeric_type(*type) || ::udm::is_generic_type(*type))
-		udm::visit_ng(*type,vs);
-	else if(::udm::is_non_trivial_type(*type))
-	{
-		udm::visit<false,false,true>(*type,[&vs,size,pArray,&t](auto tag) {
-            using T = typename decltype(tag)::type;
+		udm::visit_ng(*type, vs);
+	else if(::udm::is_non_trivial_type(*type)) {
+		udm::visit<false, false, true>(*type, [&vs, size, pArray, &t](auto tag) {
+			using T = typename decltype(tag)::type;
 			// TODO: Add support for other non-trivial types
-			if constexpr(std::is_same_v<T,udm::String>)
+			if constexpr(std::is_same_v<T, udm::String>)
 				vs(tag);
-			else if constexpr(std::is_same_v<T,udm::Element>)
-			{
-				for(auto i=decltype(size){0u};i<size;++i)
-					t[i +1] = (*pArray)[i];
+			else if constexpr(std::is_same_v<T, udm::Element>) {
+				for(auto i = decltype(size) {0u}; i < size; ++i)
+					t[i + 1] = (*pArray)[i];
 			}
 		});
 	}
 	return t;
 }
 
-static luabind::object get_array_value(lua_State *l,::udm::LinkedPropertyWrapperArg p,int32_t idx,std::optional<::udm::Type> type)
+static luabind::object get_array_value(lua_State *l, ::udm::LinkedPropertyWrapperArg p, int32_t idx, std::optional<::udm::Type> type)
 {
 	if(idx < 0)
 		return Lua::nil;
@@ -260,138 +246,131 @@ static luabind::object get_array_value(lua_State *l,::udm::LinkedPropertyWrapper
 	if(!type.has_value())
 		type = pArray->GetValueType();
 
-	auto vs = [l,idx,pArray,size](auto tag) {
-        using T = typename decltype(tag)::type;
-		auto *p = static_cast<T*>(pArray->GetValues());
-		return luabind::object{l,p[idx]};
+	auto vs = [l, idx, pArray, size](auto tag) {
+		using T = typename decltype(tag)::type;
+		auto *p = static_cast<T *>(pArray->GetValues());
+		return luabind::object {l, p[idx]};
 	};
 	if(::udm::is_numeric_type(*type) || ::udm::is_generic_type(*type))
-		return udm::visit_ng(*type,vs);
-	else if(::udm::is_non_trivial_type(*type))
-	{
-		return udm::visit<false,false,true>(*type,[l,&vs,size,pArray,idx](auto tag) -> luabind::object {
-            using T = typename decltype(tag)::type;
+		return udm::visit_ng(*type, vs);
+	else if(::udm::is_non_trivial_type(*type)) {
+		return udm::visit<false, false, true>(*type, [l, &vs, size, pArray, idx](auto tag) -> luabind::object {
+			using T = typename decltype(tag)::type;
 			// TODO: Add support for other non-trivial types
-			if constexpr(std::is_same_v<T,udm::String>)
+			if constexpr(std::is_same_v<T, udm::String>)
 				return vs(tag);
-			else if constexpr(std::is_same_v<T,udm::Element>)
-				return luabind::object{l,(*pArray)[idx]};
+			else if constexpr(std::is_same_v<T, udm::Element>)
+				return luabind::object {l, (*pArray)[idx]};
 			return Lua::nil;
 		});
 	}
 	return Lua::nil;
 }
 
-static luabind::object get_blob_array_values(lua_State *l,const ::udm::PropertyWrapper &p,::udm::Type type)
+static luabind::object get_blob_array_values(lua_State *l, const ::udm::PropertyWrapper &p, ::udm::Type type)
 {
 	auto t = luabind::newtable(l);
-	auto vs = [l,&p,&type,&t](auto tag) {
-        using T = typename decltype(tag)::type;
+	auto vs = [l, &p, &type, &t](auto tag) {
+		using T = typename decltype(tag)::type;
 		auto blobData = p.GetBlobData(type);
-		auto *ptr = reinterpret_cast<T*>(blobData.data.data());
-		auto n = blobData.data.size() /sizeof(T);
-		for(auto i=decltype(n){0u};i<n;++i)
-			t[i +1] = ptr[i];
+		auto *ptr = reinterpret_cast<T *>(blobData.data.data());
+		auto n = blobData.data.size() / sizeof(T);
+		for(auto i = decltype(n) {0u}; i < n; ++i)
+			t[i + 1] = ptr[i];
 	};
 	if(::udm::is_ng_type(type))
-		::udm::visit_ng(type,vs);
+		::udm::visit_ng(type, vs);
 	return t;
 }
 
-static void set_blob_array_values(lua_State *l,const::udm::PropertyWrapper &p,const std::string &path,::udm::Type type,luabind::tableT<void> t,::udm::Type blobType=::udm::Type::BlobLz4)
+static void set_blob_array_values(lua_State *l, const ::udm::PropertyWrapper &p, const std::string &path, ::udm::Type type, luabind::tableT<void> t, ::udm::Type blobType = ::udm::Type::BlobLz4)
 {
 	if(blobType != ::udm::Type::Blob && blobType != ::udm::Type::BlobLz4)
 		return;
-	auto n = Lua::GetObjectLength(l,4);
-	auto vs = [l,&p,&type,&t,&path,blobType,n](auto tag) {
-        using T = typename decltype(tag)::type;
-		if(blobType == ::udm::Type::Blob)
-		{
-			auto &blob = p.Add(path,udm::Type::Blob).GetValue<::udm::Blob>();
-			blob.data.resize(sizeof(T) *n);
-			auto *p = reinterpret_cast<T*>(blob.data.data());
-			for(auto i=decltype(n){0u};i<n;++i)
-			{
-				*p = luabind::object_cast_nothrow<T>(t[i +1],T{});
+	auto n = Lua::GetObjectLength(l, 4);
+	auto vs = [l, &p, &type, &t, &path, blobType, n](auto tag) {
+		using T = typename decltype(tag)::type;
+		if(blobType == ::udm::Type::Blob) {
+			auto &blob = p.Add(path, udm::Type::Blob).GetValue<::udm::Blob>();
+			blob.data.resize(sizeof(T) * n);
+			auto *p = reinterpret_cast<T *>(blob.data.data());
+			for(auto i = decltype(n) {0u}; i < n; ++i) {
+				*p = luabind::object_cast_nothrow<T>(t[i + 1], T {});
 				++p;
 			}
 			return;
 		}
-		if constexpr(std::is_same_v<T,bool>)
-		{
+		if constexpr(std::is_same_v<T, bool>) {
 			// Boolean vectors in c++ are special, so we'll have to handle them separately...
 			std::vector<uint8_t> values {};
 			values.resize(n);
-			for(auto i=decltype(n){0u};i<n;++i)
-				values[i] = luabind::object_cast_nothrow<bool>(t[i +1],false);
-			p[path] = ::udm::compress_lz4_blob(reinterpret_cast<uint8_t*>(values.data()),values.size() *sizeof(values.front()));
+			for(auto i = decltype(n) {0u}; i < n; ++i)
+				values[i] = luabind::object_cast_nothrow<bool>(t[i + 1], false);
+			p[path] = ::udm::compress_lz4_blob(reinterpret_cast<uint8_t *>(values.data()), values.size() * sizeof(values.front()));
 		}
-		else
-		{
+		else {
 			std::vector<T> values {};
 			values.resize(n);
-			for(auto i=decltype(n){0u};i<n;++i)
-				values[i] = luabind::object_cast_nothrow<T>(t[i +1],T{});
-			p[path] = ::udm::compress_lz4_blob(reinterpret_cast<uint8_t*>(values.data()),values.size() *sizeof(values.front()));
+			for(auto i = decltype(n) {0u}; i < n; ++i)
+				values[i] = luabind::object_cast_nothrow<T>(t[i + 1], T {});
+			p[path] = ::udm::compress_lz4_blob(reinterpret_cast<uint8_t *>(values.data()), values.size() * sizeof(values.front()));
 		}
 	};
 	if(::udm::is_ng_type(type))
-		::udm::visit_ng(type,vs);
+		::udm::visit_ng(type, vs);
 }
 
-static luabind::object get_property_value(lua_State *l,::udm::Type type,void *ptr)
+static luabind::object get_property_value(lua_State *l, ::udm::Type type, void *ptr)
 {
-	auto vs = [l,ptr](auto tag) {
-        using T = typename decltype(tag)::type;
-		if constexpr(std::is_same_v<T,udm::Nil>)
-			return luabind::object{};
-		else
-		{
-			auto &v = *static_cast<T*>(ptr);
-			if constexpr(std::is_same_v<T,::udm::Half>)
-				return luabind::object{l,static_cast<float>(v)};
-			return luabind::object{l,v};
+	auto vs = [l, ptr](auto tag) {
+		using T = typename decltype(tag)::type;
+		if constexpr(std::is_same_v<T, udm::Nil>)
+			return luabind::object {};
+		else {
+			auto &v = *static_cast<T *>(ptr);
+			if constexpr(std::is_same_v<T, ::udm::Half>)
+				return luabind::object {l, static_cast<float>(v)};
+			return luabind::object {l, v};
 		}
 	};
 	if(::udm::is_ng_type(type))
-		return ::udm::visit_ng(type,vs);
-	switch(type)
-	{
+		return ::udm::visit_ng(type, vs);
+	switch(type) {
 	case ::udm::Type::String:
-		return luabind::object{l,*static_cast<udm::String*>(ptr)};
+		return luabind::object {l, *static_cast<udm::String *>(ptr)};
 	case ::udm::Type::Srgba:
-		return luabind::object{l,*static_cast<udm::Srgba*>(ptr)};
+		return luabind::object {l, *static_cast<udm::Srgba *>(ptr)};
 	case ::udm::Type::HdrColor:
-		return luabind::object{l,*static_cast<udm::HdrColor*>(ptr)};
+		return luabind::object {l, *static_cast<udm::HdrColor *>(ptr)};
 	case ::udm::Type::Reference:
-		return luabind::object{l,static_cast<udm::Reference*>(ptr)};
+		return luabind::object {l, static_cast<udm::Reference *>(ptr)};
 	case ::udm::Type::Struct:
-		return luabind::object{l,static_cast<udm::Struct*>(ptr)};
+		return luabind::object {l, static_cast<udm::Struct *>(ptr)};
 	case ::udm::Type::Utf8String:
-	{
-		auto &utf8String = *static_cast<udm::Utf8String*>(ptr);
-		DataStream ds {utf8String.data.data(),static_cast<uint32_t>(utf8String.data.size())};
-		return luabind::object{l,ds};
-	}
+		{
+			auto &utf8String = *static_cast<udm::Utf8String *>(ptr);
+			DataStream ds {utf8String.data.data(), static_cast<uint32_t>(utf8String.data.size())};
+			return luabind::object {l, ds};
+		}
 	case ::udm::Type::Blob:
-	{
-		auto &blob = *static_cast<udm::Blob*>(ptr);
-		DataStream ds {blob.data.data(),static_cast<uint32_t>(blob.data.size())};
-		return luabind::object{l,ds};
-	}
+		{
+			auto &blob = *static_cast<udm::Blob *>(ptr);
+			DataStream ds {blob.data.data(), static_cast<uint32_t>(blob.data.size())};
+			return luabind::object {l, ds};
+		}
 	case ::udm::Type::BlobLz4:
-	{
-		auto &blobLz4 = *static_cast<udm::BlobLz4*>(ptr);
-		auto t = luabind::newtable(l);
-		t[1] = blobLz4.uncompressedSize;
-		t[2] = DataStream{blobLz4.compressedData.data(),static_cast<uint32_t>(blobLz4.compressedData.size())};
-		return t;
+		{
+			auto &blobLz4 = *static_cast<udm::BlobLz4 *>(ptr);
+			auto t = luabind::newtable(l);
+			t[1] = blobLz4.uncompressedSize;
+			t[2] = DataStream {blobLz4.compressedData.data(), static_cast<uint32_t>(blobLz4.compressedData.size())};
+			return t;
+		}
 	}
-	}
-	static_assert(umath::to_integral(::udm::Type::Count) == 36,"Update this when types have been added or removed!");
+	static_assert(umath::to_integral(::udm::Type::Count) == 36, "Update this when types have been added or removed!");
 	return {};
 }
-static luabind::object get_property_value(lua_State *l,const ::udm::PropertyWrapper &val)
+static luabind::object get_property_value(lua_State *l, const ::udm::PropertyWrapper &val)
 {
 	if(!static_cast<bool>(val))
 		return {};
@@ -399,9 +378,9 @@ static luabind::object get_property_value(lua_State *l,const ::udm::PropertyWrap
 	auto *ptr = val.GetValuePtr(type);
 	if(ptr == nullptr)
 		return {};
-	return get_property_value(l,type,ptr);
+	return get_property_value(l, type, ptr);
 }
-static luabind::object get_property_value(lua_State *l,const ::udm::PropertyWrapper &val,::udm::Type type)
+static luabind::object get_property_value(lua_State *l, const ::udm::PropertyWrapper &val, ::udm::Type type)
 {
 	if(!static_cast<bool>(val))
 		return {};
@@ -410,53 +389,49 @@ static luabind::object get_property_value(lua_State *l,const ::udm::PropertyWrap
 	if(ptr == nullptr)
 		return {};
 	if(valType == type)
-		return get_property_value(l,val);
-	if(!::udm::is_convertible(valType,type))
+		return get_property_value(l, val);
+	if(!::udm::is_convertible(valType, type))
 		return {};
-	auto vs = [l,ptr,&val,type](auto tag) {
-        using T = typename decltype(tag)::type;
+	auto vs = [l, ptr, &val, type](auto tag) {
+		using T = typename decltype(tag)::type;
 		auto v = val.ToValue<T>();
 		if(!v.has_value())
-			return luabind::object{};
-		return get_property_value(l,type,&*v);
+			return luabind::object {};
+		return get_property_value(l, type, &*v);
 	};
-	return udm::visit(type,vs);
+	return udm::visit(type, vs);
 }
-static luabind::object get_property_value(lua_State *l,const ::udm::PropertyWrapper &val,int32_t idx)
+static luabind::object get_property_value(lua_State *l, const ::udm::PropertyWrapper &val, int32_t idx)
 {
 	if(!static_cast<bool>(val))
 		return {};
 	auto *a = val.GetValuePtr<udm::Array>();
 	if(!a || idx < 0 || idx >= a->GetSize())
 		return Lua::nil;
-	return get_property_value(l,a->GetValueType(),a->GetValuePtr(idx));
+	return get_property_value(l, a->GetValueType(), a->GetValuePtr(idx));
 }
 
-class LuaUdmArrayIterator
-{
-public:
+class LuaUdmArrayIterator {
+  public:
 	LuaUdmArrayIterator(::udm::PropertyWrapper &prop);
 
-	udm::ArrayIterator<udm::LinkedPropertyWrapper> begin() {return m_property->begin();}
-	udm::ArrayIterator<udm::LinkedPropertyWrapper> end() {return m_property->end();}
-private:
+	udm::ArrayIterator<udm::LinkedPropertyWrapper> begin() { return m_property->begin(); }
+	udm::ArrayIterator<udm::LinkedPropertyWrapper> end() { return m_property->end(); }
+  private:
 	::udm::PropertyWrapper *m_property = nullptr;
 };
 
-LuaUdmArrayIterator::LuaUdmArrayIterator(::udm::PropertyWrapper &prop)
-	: m_property{&prop}
-{}
+LuaUdmArrayIterator::LuaUdmArrayIterator(::udm::PropertyWrapper &prop) : m_property {&prop} {}
 
 template<typename T>
-	static bool is_udm_type(luabind::object &val)
+static bool is_udm_type(luabind::object &val)
 {
-	return luabind::object_cast_nothrow<T*>(val,static_cast<T*>(nullptr)) != nullptr;
+	return luabind::object_cast_nothrow<T *>(val, static_cast<T *>(nullptr)) != nullptr;
 }
 static udm::Type determine_udm_type(luabind::object &val)
 {
 	auto t = luabind::type(val);
-	switch(t)
-	{
+	switch(t) {
 	case LUA_TNIL:
 		return udm::Type::Nil;
 	case LUA_TBOOLEAN:
@@ -464,16 +439,15 @@ static udm::Type determine_udm_type(luabind::object &val)
 	case LUA_TSTRING:
 		return udm::Type::String;
 	case LUA_TNUMBER:
-	{
-		auto v = luabind::object_cast<double>(val);
-		if(static_cast<int64_t>(v) == v)
 		{
-			if(v < 0.0)
-				return udm::Type::UInt32;
-			return udm::Type::Int32;
+			auto v = luabind::object_cast<double>(val);
+			if(static_cast<int64_t>(v) == v) {
+				if(v < 0.0)
+					return udm::Type::UInt32;
+				return udm::Type::Int32;
+			}
+			return udm::Type::Float;
 		}
-		return udm::Type::Float;
-	}
 	case LUA_TUSERDATA:
 		break;
 	default:
@@ -529,86 +503,72 @@ static udm::Type determine_udm_type(luabind::object &val)
 	return udm::Type::Invalid;
 }
 
-void Lua::udm::table_to_udm(const Lua::tb<void> &t,::udm::LinkedPropertyWrapper &udm)
+void Lua::udm::table_to_udm(const Lua::tb<void> &t, ::udm::LinkedPropertyWrapper &udm)
 {
-	for(luabind::iterator it{t},end;it!=end;++it)
-	{
+	for(luabind::iterator it {t}, end; it != end; ++it) {
 		luabind::object val = *it;
-		std::string key = luabind::object_cast<std::string>(luabind::object{it.key()});
-		if(luabind::type(val) == LUA_TTABLE)
-		{
+		std::string key = luabind::object_cast<std::string>(luabind::object {it.key()});
+		if(luabind::type(val) == LUA_TTABLE) {
 			auto *l = val.interpreter();
-			auto len = Lua::GetObjectLength(l,val);
+			auto len = Lua::GetObjectLength(l, val);
 			uint32_t actualLen = 0;
 			auto isArrayType = true;
-			std::pair<int,luabind::detail::class_rep*> typeInfo {-1,nullptr};
-			for(luabind::iterator it{val},end;it!=end;++it)
-			{
+			std::pair<int, luabind::detail::class_rep *> typeInfo {-1, nullptr};
+			for(luabind::iterator it {val}, end; it != end; ++it) {
 				auto t = luabind::type(*it);
-				if(t != LUA_TUSERDATA)
-				{
-					if(typeInfo.second != nullptr)
-					{
+				if(t != LUA_TUSERDATA) {
+					if(typeInfo.second != nullptr) {
 						isArrayType = false;
 						break;
 					}
 					if(typeInfo.first == -1)
 						typeInfo.first = t;
-					else if(t != typeInfo.first)
-					{
+					else if(t != typeInfo.first) {
 						isArrayType = false;
 						break;
 					}
 					++actualLen;
 					continue;
 				}
-				else
-				{
+				else {
 					auto *crep = Lua::get_crep(val);
-					if(!crep || typeInfo.first != -1)
-					{
+					if(!crep || typeInfo.first != -1) {
 						isArrayType = false;
 						break;
 					}
 					if(typeInfo.second == nullptr)
 						typeInfo.second = crep;
-					else if(crep != typeInfo.second)
-					{
+					else if(crep != typeInfo.second) {
 						isArrayType = false;
 						break;
 					}
 				}
 				++actualLen;
 			}
-			if(actualLen > 0 && isArrayType)
-			{
+			if(actualLen > 0 && isArrayType) {
 				luabind::object first {val[1]};
 				auto type = determine_udm_type(first);
-				if(type != ::udm::Type::Invalid)
-				{
-					auto a = udm.AddArray(key,actualLen,type);
-					::udm::visit(type,[actualLen,&a,&val](auto tag) {
-                        using T = typename decltype(tag)::type;
+				if(type != ::udm::Type::Invalid) {
+					auto a = udm.AddArray(key, actualLen, type);
+					::udm::visit(type, [actualLen, &a, &val](auto tag) {
+						using T = typename decltype(tag)::type;
 						constexpr auto type = ::udm::type_to_enum<T>();
-						if constexpr(type != ::udm::Type::Element && !::udm::is_array_type(type))
-						{
-							for(auto i=decltype(actualLen){0u};i<actualLen;++i)
-								a[i] = Lua::udm::cast_object<T>(luabind::object{val[i +1]});
+						if constexpr(type != ::udm::Type::Element && !::udm::is_array_type(type)) {
+							for(auto i = decltype(actualLen) {0u}; i < actualLen; ++i)
+								a[i] = Lua::udm::cast_object<T>(luabind::object {val[i + 1]});
 						}
 					});
 				}
 				continue;
 			}
 			auto udmSub = udm[key];
-			table_to_udm(val,udmSub);
+			table_to_udm(val, udmSub);
 		}
-		else
-		{
+		else {
 			auto type = determine_udm_type(val);
-			if(type != ::udm::Type::Invalid)
-			{
-				::udm::visit(type,[&udm,&key,&val](auto tag) {
-                    using T = typename decltype(tag)::type;
+			if(type != ::udm::Type::Invalid) {
+				::udm::visit(type, [&udm, &key, &val](auto tag) {
+					using T = typename decltype(tag)::type;
 					constexpr auto type = ::udm::type_to_enum<T>();
 					if constexpr(type != ::udm::Type::Element && !::udm::is_array_type(type))
 						udm[key] = Lua::udm::cast_object<T>(val);
@@ -617,91 +577,81 @@ void Lua::udm::table_to_udm(const Lua::tb<void> &t,::udm::LinkedPropertyWrapper 
 		}
 	}
 }
-luabind::object Lua::udm::udm_to_value(lua_State *l,::udm::LinkedPropertyWrapperArg udm)
+luabind::object Lua::udm::udm_to_value(lua_State *l, ::udm::LinkedPropertyWrapperArg udm)
 {
 	auto type = udm.GetType();
-	if(::udm::is_array_type(type))
-	{
+	if(::udm::is_array_type(type)) {
 		auto t = luabind::newtable(l);
-		for(uint32_t idx = 1;auto &val : udm)
-			t[idx++] = udm_to_value(l,val);
+		for(uint32_t idx = 1; auto &val : udm)
+			t[idx++] = udm_to_value(l, val);
 		return t;
 	}
-	else if(type == ::udm::Type::Element)
-	{
+	else if(type == ::udm::Type::Element) {
 		auto t = luabind::newtable(l);
-		for(auto &pair : const_cast<::udm::LinkedPropertyWrapper&>(udm).ElIt())
-			t[pair.key] = udm_to_value(l,pair.property);
+		for(auto &pair : const_cast<::udm::LinkedPropertyWrapper &>(udm).ElIt())
+			t[pair.key] = udm_to_value(l, pair.property);
 		return t;
 	}
-	return ::udm::visit(type,[l,&udm](auto tag) {
-        using T = typename decltype(tag)::type;
+	return ::udm::visit(type, [l, &udm](auto tag) {
+		using T = typename decltype(tag)::type;
 		constexpr auto type = ::udm::type_to_enum<T>();
 		if constexpr(type != ::udm::Type::Element && !::udm::is_array_type(type))
-			return luabind::object{l,udm.GetValue<T>()};
+			return luabind::object {l, udm.GetValue<T>()};
 		else
-			return luabind::object{};
+			return luabind::object {};
 	});
 }
 
-static void data_block_to_udm(ds::Block &dataBlock,udm::LinkedPropertyWrapperArg udm)
+static void data_block_to_udm(ds::Block &dataBlock, udm::LinkedPropertyWrapperArg udm)
 {
-	std::function<void(udm::LinkedPropertyWrapperArg,ds::Block&)> dataBlockToUdm = nullptr;
-	dataBlockToUdm = [&dataBlockToUdm,&udm](udm::LinkedPropertyWrapperArg prop,ds::Block &block) {
-		const_cast<udm::LinkedPropertyWrapper&>(prop).InitializeProperty();
+	std::function<void(udm::LinkedPropertyWrapperArg, ds::Block &)> dataBlockToUdm = nullptr;
+	dataBlockToUdm = [&dataBlockToUdm, &udm](udm::LinkedPropertyWrapperArg prop, ds::Block &block) {
+		const_cast<udm::LinkedPropertyWrapper &>(prop).InitializeProperty();
 
-		for(auto &pair : *block.GetData())
-		{
+		for(auto &pair : *block.GetData()) {
 			auto &key = pair.first;
 			auto &val = pair.second;
-			if(val->IsBlock())
-			{
-				auto &block = static_cast<ds::Block&>(*pair.second);
+			if(val->IsBlock()) {
+				auto &block = static_cast<ds::Block &>(*pair.second);
 
 				auto &children = *block.GetData();
 				auto n = children.size();
 				uint32_t i = 0;
 				auto isArray = true;
-				while(i < n)
-				{
-					if(children.find(std::to_string(i)) == children.end())
-					{
+				while(i < n) {
+					if(children.find(std::to_string(i)) == children.end()) {
 						isArray = false;
 						break;
 					}
 					++i;
 				}
 
-				if(isArray)
-				{
-					auto a = prop.AddArray(key,n,udm::Type::String);
-					for(auto i=decltype(n){0u};i<n;++i)
-					{
+				if(isArray) {
+					auto a = prop.AddArray(key, n, udm::Type::String);
+					for(auto i = decltype(n) {0u}; i < n; ++i) {
 						auto it = children.find(std::to_string(i));
 						if(it == children.end())
-							throw std::runtime_error{"Unknown error"};
+							throw std::runtime_error {"Unknown error"};
 						auto &val = it->second;
 						if(val->IsBlock() || val->IsContainer())
-							throw std::runtime_error{"Unknown error"};
-						a[i] = static_cast<const ds::Value&>(*val).GetString();
+							throw std::runtime_error {"Unknown error"};
+						a[i] = static_cast<const ds::Value &>(*val).GetString();
 					}
 					continue;
 				}
 
-				dataBlockToUdm(prop[key],block);
+				dataBlockToUdm(prop[key], block);
 				continue;
 			}
-			if(val->IsContainer())
-			{
-				auto &container = static_cast<ds::Container&>(*pair.second);
+			if(val->IsContainer()) {
+				auto &container = static_cast<ds::Container &>(*pair.second);
 				auto &children = container.GetBlocks();
-				auto udmChildren = prop.AddArray(key,children.size());
+				auto udmChildren = prop.AddArray(key, children.size());
 				uint32_t idx = 0;
-				for(auto &child : children)
-				{
+				for(auto &child : children) {
 					if(child->IsContainer() || child->IsBlock())
 						continue;
-					auto *dsValue = dynamic_cast<ds::Value*>(pair.second.get());
+					auto *dsValue = dynamic_cast<ds::Value *>(pair.second.get());
 					if(dsValue == nullptr)
 						continue;
 					udmChildren[idx++] = dsValue->GetString();
@@ -709,120 +659,99 @@ static void data_block_to_udm(ds::Block &dataBlock,udm::LinkedPropertyWrapperArg
 				udmChildren.Resize(idx);
 				continue;
 			}
-			auto *dsValue = dynamic_cast<ds::Value*>(val.get());
+			auto *dsValue = dynamic_cast<ds::Value *>(val.get());
 			assert(dsValue);
-			if(dsValue)
-			{
-				auto *dsStr = dynamic_cast<ds::String*>(dsValue);
+			if(dsValue) {
+				auto *dsStr = dynamic_cast<ds::String *>(dsValue);
 				if(dsStr)
 					prop[key] = dsStr->GetString();
-				auto *dsInt = dynamic_cast<ds::Int*>(dsValue);
+				auto *dsInt = dynamic_cast<ds::Int *>(dsValue);
 				if(dsInt)
 					prop[key] = dsInt->GetInt();
-				auto *dsFloat = dynamic_cast<ds::Float*>(dsValue);
+				auto *dsFloat = dynamic_cast<ds::Float *>(dsValue);
 				if(dsFloat)
 					prop[key] = dsFloat->GetFloat();
-				auto *dsBool = dynamic_cast<ds::Bool*>(dsValue);
+				auto *dsBool = dynamic_cast<ds::Bool *>(dsValue);
 				if(dsBool)
 					prop[key] = dsBool->GetBool();
-				auto *dsVec = dynamic_cast<ds::Vector*>(dsValue);
+				auto *dsVec = dynamic_cast<ds::Vector *>(dsValue);
 				if(dsVec)
 					prop[key] = dsVec->GetVector();
-				auto *dsVec4 = dynamic_cast<ds::Vector4*>(dsValue);
+				auto *dsVec4 = dynamic_cast<ds::Vector4 *>(dsValue);
 				if(dsVec4)
 					prop[key] = dsVec4->GetVector4();
-				auto *dsVec2 = dynamic_cast<ds::Vector2*>(dsValue);
+				auto *dsVec2 = dynamic_cast<ds::Vector2 *>(dsValue);
 				if(dsVec2)
 					prop[key] = dsVec2->GetVector2();
-				auto *dsTex = dynamic_cast<ds::Texture*>(dsValue);
+				auto *dsTex = dynamic_cast<ds::Texture *>(dsValue);
 				if(dsTex)
 					udm["textures"][key] = dsTex->GetString();
-				auto *dsCol = dynamic_cast<ds::Color*>(dsValue);
-				if(dsCol)
-				{
+				auto *dsCol = dynamic_cast<ds::Color *>(dsValue);
+				if(dsCol) {
 					auto col = dsCol->GetColor();
 					auto max = std::numeric_limits<udm::Srgba::value_type>::max();
 					if(col.r <= max && col.g <= max && col.b <= max && col.a <= max)
-						prop[key] = udm::Srgba{static_cast<uint8_t>(col.r),static_cast<uint8_t>(col.g),static_cast<uint8_t>(col.b),static_cast<uint8_t>(col.a)};
+						prop[key] = udm::Srgba {static_cast<uint8_t>(col.r), static_cast<uint8_t>(col.g), static_cast<uint8_t>(col.b), static_cast<uint8_t>(col.a)};
 					else
 						prop[key] = col.ToVector4();
 				}
 			}
 		}
 	};
-	dataBlockToUdm(udm,dataBlock);
+	dataBlockToUdm(udm, dataBlock);
 }
 
-static std::ostream &operator<<(std::ostream& os,const ::udm::Element &el) {
-	return os<<"UDMElement["<<el.fromProperty<<"]";
-}
+static std::ostream &operator<<(std::ostream &os, const ::udm::Element &el) { return os << "UDMElement[" << el.fromProperty << "]"; }
 
-static std::ostream &operator<<(std::ostream& os,const ::udm::Reference &ref) {
-	return os<<"UDMReference["<<ref.path<<"]";
-}
+static std::ostream &operator<<(std::ostream &os, const ::udm::Reference &ref) { return os << "UDMReference[" << ref.path << "]"; }
 
-static std::ostream &operator<<(std::ostream& os,const ::udm::Data &data) {
-	return os<<"UDMData["<<data.GetAssetType()<<"]["<<data.GetAssetVersion()<<"]";
-}
+static std::ostream &operator<<(std::ostream &os, const ::udm::Data &data) { return os << "UDMData[" << data.GetAssetType() << "][" << data.GetAssetVersion() << "]"; }
 
-static std::ostream &operator<<(std::ostream& os,const ::udm::PropertyWrapper &prop) {
+static std::ostream &operator<<(std::ostream &os, const ::udm::PropertyWrapper &prop)
+{
 	auto valid = static_cast<bool>(prop);
-	return os<<"UDMPropertyWrapper["<<::udm::enum_type_to_ascii(prop.GetType())<<"]["<<(valid ? "valid" : "invalid")<<"]";
+	return os << "UDMPropertyWrapper[" << ::udm::enum_type_to_ascii(prop.GetType()) << "][" << (valid ? "valid" : "invalid") << "]";
 }
 
-static std::ostream &operator<<(std::ostream& os,const ::udm::LinkedPropertyWrapper &prop) {
+static std::ostream &operator<<(std::ostream &os, const ::udm::LinkedPropertyWrapper &prop)
+{
 	auto valid = static_cast<bool>(prop);
-	return os<<"UDMLinkedPropertyWrapper["<<::udm::enum_type_to_ascii(prop.GetType())<<"]["<<(valid ? "valid" : "invalid")<<"]";
+	return os << "UDMLinkedPropertyWrapper[" << ::udm::enum_type_to_ascii(prop.GetType()) << "][" << (valid ? "valid" : "invalid") << "]";
 }
 
-static std::ostream &operator<<(std::ostream& os,const ::udm::AssetData &assetData) {
-	return os<<"UDMAssetData["<<assetData.GetAssetType()<<"]["<<assetData.GetAssetVersion()<<"]";
-}
+static std::ostream &operator<<(std::ostream &os, const ::udm::AssetData &assetData) { return os << "UDMAssetData[" << assetData.GetAssetType() << "][" << assetData.GetAssetVersion() << "]"; }
 
-static std::ostream &operator<<(std::ostream& os,const ::udm::Array &a) {
-	return os<<"UDMArray["<<::udm::enum_type_to_ascii(a.GetValueType())<<"]["<<a.GetSize()<<"]";
-}
+static std::ostream &operator<<(std::ostream &os, const ::udm::Array &a) { return os << "UDMArray[" << ::udm::enum_type_to_ascii(a.GetValueType()) << "][" << a.GetSize() << "]"; }
 
-static std::ostream &operator<<(std::ostream& os,const ::udm::ArrayLz4 &a) {
-	return os<<"UDMArrayLz4["<<::udm::enum_type_to_ascii(a.GetValueType())<<"]["<<a.GetSize()<<"]";
-}
+static std::ostream &operator<<(std::ostream &os, const ::udm::ArrayLz4 &a) { return os << "UDMArrayLz4[" << ::udm::enum_type_to_ascii(a.GetValueType()) << "][" << a.GetSize() << "]"; }
 
-static std::ostream &operator<<(std::ostream& os,const ::udm::Property &prop) {
-	return os<<"UDMProperty["<<::udm::enum_type_to_ascii(prop.type)<<"]";
-}
+static std::ostream &operator<<(std::ostream &os, const ::udm::Property &prop) { return os << "UDMProperty[" << ::udm::enum_type_to_ascii(prop.type) << "]"; }
 
-static std::ostream &operator<<(std::ostream& os,const ::udm::Srgba &srgba) {
-	return os<<srgba[0]<<" "<<srgba[1]<<" "<<srgba[2]<<" "<<srgba[3];
-}
+static std::ostream &operator<<(std::ostream &os, const ::udm::Srgba &srgba) { return os << srgba[0] << " " << srgba[1] << " " << srgba[2] << " " << srgba[3]; }
 
-static std::ostream &operator<<(std::ostream& os,const ::udm::HdrColor &hdr) {
-	return os<<hdr[0]<<" "<<hdr[1]<<" "<<hdr[2]<<" "<<hdr[3];
-}
+static std::ostream &operator<<(std::ostream &os, const ::udm::HdrColor &hdr) { return os << hdr[0] << " " << hdr[1] << " " << hdr[2] << " " << hdr[3]; }
 
-static luabind::object get_children(lua_State *l,const ::udm::PropertyWrapper &p)
+static luabind::object get_children(lua_State *l, const ::udm::PropertyWrapper &p)
 {
 	auto t = luabind::newtable(l);
 	auto *el = p.GetValuePtr<::udm::Element>();
 	if(el == nullptr)
 		return t;
-	auto *linked = const_cast<::udm::PropertyWrapper&>(p).GetLinked();
-	if(linked)
-	{
+	auto *linked = const_cast<::udm::PropertyWrapper &>(p).GetLinked();
+	if(linked) {
 		for(auto pair : linked->ElIt())
-			t[std::string{pair.key}] = (*linked)[pair.key];
+			t[std::string {pair.key}] = (*linked)[pair.key];
 	}
-	else
-	{
-		for(auto it=p.begin_el();it!=p.end_el();++it)
-		{
+	else {
+		for(auto it = p.begin_el(); it != p.end_el(); ++it) {
 			auto &pair = *it;
-			t[std::string{pair.key}] = p[pair.key];
+			t[std::string {pair.key}] = p[pair.key];
 		}
 	}
 	return t;
 }
 
-static void remove_array(udm::PropertyWrapper &p,const std::string &name)
+static void remove_array(udm::PropertyWrapper &p, const std::string &name)
 {
 	auto *el = p.GetValuePtr<udm::Element>();
 	if(!el)
@@ -831,139 +760,119 @@ static void remove_array(udm::PropertyWrapper &p,const std::string &name)
 	if(it != el->children.end())
 		el->children.erase(it);
 }
-static void set_array_values(udm::PropertyWrapper &p,const std::string &name,::udm::StructDescription &strct,uint32_t count,DataStream &ds,::udm::ArrayType arrayType)
+static void set_array_values(udm::PropertyWrapper &p, const std::string &name, ::udm::StructDescription &strct, uint32_t count, DataStream &ds, ::udm::ArrayType arrayType)
 {
-	remove_array(p,name);
-	p.AddArray(name,strct,ds->GetData(),count,arrayType);
+	remove_array(p, name);
+	p.AddArray(name, strct, ds->GetData(), count, arrayType);
 }
 template<typename T>
-	static void set_array_values(udm::Array &a,::udm::Type type,luabind::tableT<void> t,size_t size,::udm::ArrayType arrayType)
+static void set_array_values(udm::Array &a, ::udm::Type type, luabind::tableT<void> t, size_t size, ::udm::ArrayType arrayType)
 {
 	a.Resize(size);
-	auto *pVal = static_cast<T*>(a.GetValues());
-	for(auto i=decltype(size){0u};i<size;++i)
-	{
-		*pVal = Lua::udm::cast_object_nothrow<T>(luabind::object{t[i +1]});
+	auto *pVal = static_cast<T *>(a.GetValues());
+	for(auto i = decltype(size) {0u}; i < size; ++i) {
+		*pVal = Lua::udm::cast_object_nothrow<T>(luabind::object {t[i + 1]});
 		++pVal;
 	}
 }
 template<typename T>
-	static void set_array_values(udm::PropertyWrapper &p,const std::string &name,::udm::Type type,luabind::tableT<void> t,size_t size,::udm::ArrayType arrayType)
+static void set_array_values(udm::PropertyWrapper &p, const std::string &name, ::udm::Type type, luabind::tableT<void> t, size_t size, ::udm::ArrayType arrayType)
 {
-	remove_array(p,name);
-	auto a = p.AddArray(name,size,type,arrayType);
-	set_array_values<T>(a.GetValue<udm::Array>(),type,t,size,arrayType);
+	remove_array(p, name);
+	auto a = p.AddArray(name, size, type, arrayType);
+	set_array_values<T>(a.GetValue<udm::Array>(), type, t, size, arrayType);
 }
 template<typename T>
-	concept is_assignable_type = !std::is_same_v<T,::udm::Element> && !std::is_same_v<T,::udm::Utf8String> && !std::is_same_v<T,::udm::Array> && !std::is_same_v<T,::udm::ArrayLz4>;
-static void insert_array_value(lua_State *l,udm::PropertyWrapper &p,uint32_t idx,const luabind::object &o)
+concept is_assignable_type = !
+std::is_same_v<T, ::udm::Element> && !std::is_same_v<T, ::udm::Utf8String> && !std::is_same_v<T, ::udm::Array> && !std::is_same_v<T, ::udm::ArrayLz4>;
+static void insert_array_value(lua_State *l, udm::PropertyWrapper &p, uint32_t idx, const luabind::object &o)
 {
 	auto *a = p.GetValuePtr<udm::Array>();
 	if(!a)
 		return;
 	auto arrayType = a->GetArrayType();
-	::udm::visit(a->GetValueType(),[&a,idx,&o,arrayType](auto tag) {
+	::udm::visit(a->GetValueType(), [&a, idx, &o, arrayType](auto tag) {
 		using T = typename decltype(tag)::type;
-		if constexpr(is_assignable_type<T>)
-		{
-			if(arrayType == ::udm::ArrayType::Raw)
-			{
+		if constexpr(is_assignable_type<T>) {
+			if(arrayType == ::udm::ArrayType::Raw) {
 				if constexpr(::udm::Array::IsValueTypeSupported(::udm::type_to_enum<T>()))
-					a->InsertValue<T>(idx,Lua::udm::cast_object<T>(o));
+					a->InsertValue<T>(idx, Lua::udm::cast_object<T>(o));
 			}
 			else if constexpr(::udm::ArrayLz4::IsValueTypeSupported(::udm::type_to_enum<T>()))
-				a->InsertValue<T>(idx,Lua::udm::cast_object<T>(o));
+				a->InsertValue<T>(idx, Lua::udm::cast_object<T>(o));
 		}
 	});
 }
-static void push_array_value(lua_State *l,udm::PropertyWrapper &p,const luabind::object &o)
+static void push_array_value(lua_State *l, udm::PropertyWrapper &p, const luabind::object &o)
 {
 	auto *a = p.GetValuePtr<udm::Array>();
 	if(!a)
 		return;
-	insert_array_value(l,p,a->GetSize(),o);
+	insert_array_value(l, p, a->GetSize(), o);
 }
-bool Lua::udm::set_array_value(lua_State *l,::udm::Array &a,int32_t idx,const luabind::object &o)
+bool Lua::udm::set_array_value(lua_State *l, ::udm::Array &a, int32_t idx, const luabind::object &o)
 {
 	if(idx < 0 || idx >= a.GetSize())
 		return false;
 	auto arrayType = a.GetArrayType();
-	::udm::visit(a.GetValueType(),[&a,idx,&o,arrayType](auto tag) {
-        using T = typename decltype(tag)::type;
-		if constexpr(is_assignable_type<T>)
-		{
-			if(arrayType == ::udm::ArrayType::Raw)
-			{
-				if constexpr(::udm::Array::IsValueTypeSupported(::udm::type_to_enum<T>()))
-				{
-					auto *pVal = static_cast<T*>(a.GetValues());
+	::udm::visit(a.GetValueType(), [&a, idx, &o, arrayType](auto tag) {
+		using T = typename decltype(tag)::type;
+		if constexpr(is_assignable_type<T>) {
+			if(arrayType == ::udm::ArrayType::Raw) {
+				if constexpr(::udm::Array::IsValueTypeSupported(::udm::type_to_enum<T>())) {
+					auto *pVal = static_cast<T *>(a.GetValues());
 					pVal[idx] = cast_object<T>(o);
 				}
 			}
-			else if constexpr(::udm::ArrayLz4::IsValueTypeSupported(::udm::type_to_enum<T>()))
-			{
-				auto *pVal = static_cast<T*>(a.GetValues());
+			else if constexpr(::udm::ArrayLz4::IsValueTypeSupported(::udm::type_to_enum<T>())) {
+				auto *pVal = static_cast<T *>(a.GetValues());
 				pVal[idx] = cast_object<T>(o);
 			}
 		}
 	});
 	return true;
 }
-static void set_array_values(lua_State *l,::udm::Array &a,::udm::Type type,luabind::tableT<void> t,uint32_t tIdx,::udm::ArrayType arrayType=::udm::ArrayType::Raw)
+static void set_array_values(lua_State *l, ::udm::Array &a, ::udm::Type type, luabind::tableT<void> t, uint32_t tIdx, ::udm::ArrayType arrayType = ::udm::ArrayType::Raw)
 {
-	auto size = Lua::GetObjectLength(l,tIdx);
-	auto vs = [&t,&a,type,tIdx,arrayType,size](auto tag) {
-        using T = typename decltype(tag)::type;
-		if constexpr(is_assignable_type<T>)
-		{
-			if(arrayType == ::udm::ArrayType::Raw)
-			{
+	auto size = Lua::GetObjectLength(l, tIdx);
+	auto vs = [&t, &a, type, tIdx, arrayType, size](auto tag) {
+		using T = typename decltype(tag)::type;
+		if constexpr(is_assignable_type<T>) {
+			if(arrayType == ::udm::ArrayType::Raw) {
 				if constexpr(::udm::Array::IsValueTypeSupported(::udm::type_to_enum<T>()))
-					set_array_values<T>(a,type,t,size,arrayType);
+					set_array_values<T>(a, type, t, size, arrayType);
 			}
 			else if constexpr(::udm::ArrayLz4::IsValueTypeSupported(::udm::type_to_enum<T>()))
-				set_array_values<T>(a,type,t,size,arrayType);
+				set_array_values<T>(a, type, t, size, arrayType);
 		}
 	};
-	udm::visit(type,vs);
+	udm::visit(type, vs);
 }
-void Lua::udm::set_array_values(lua_State *l,::udm::Array &a,luabind::tableT<void> t,uint32_t tIdx)
+void Lua::udm::set_array_values(lua_State *l, ::udm::Array &a, luabind::tableT<void> t, uint32_t tIdx) { ::set_array_values(l, a, a.GetValueType(), t, tIdx, a.GetArrayType()); }
+static void set_array_values(lua_State *l, udm::PropertyWrapper &p, const std::string &name, ::udm::Type type, luabind::tableT<void> t, ::udm::ArrayType arrayType = ::udm::ArrayType::Raw)
 {
-	::set_array_values(l,a,a.GetValueType(),t,tIdx,a.GetArrayType());
-}
-static void set_array_values(lua_State *l,udm::PropertyWrapper &p,const std::string &name,::udm::Type type,luabind::tableT<void> t,::udm::ArrayType arrayType=::udm::ArrayType::Raw)
-{
-	auto size = Lua::GetObjectLength(l,4);
-	auto a = p.AddArray(name,size,type,arrayType);
-	set_array_values(l,a.GetValue<udm::Array>(),type,t,4,arrayType);
+	auto size = Lua::GetObjectLength(l, 4);
+	auto a = p.AddArray(name, size, type, arrayType);
+	set_array_values(l, a.GetValue<udm::Array>(), type, t, 4, arrayType);
 }
 
-static ::udm::LinkedPropertyWrapper x_get(lua_State *l,::udm::Element &p,const std::string &key)
-{
-	return static_cast<::udm::PropertyWrapper&>(p)[key];
-}
-static ::udm::LinkedPropertyWrapper x_get(lua_State *l,::udm::PropertyWrapper &p,const std::string &key)
-{
-	return static_cast<::udm::PropertyWrapper&>(p)[key];
-}
-static ::udm::LinkedPropertyWrapper x_get(lua_State *l,::udm::Property &p,const std::string &key)
-{
-	return static_cast<::udm::PropertyWrapper>(p)[key];
-}
+static ::udm::LinkedPropertyWrapper x_get(lua_State *l, ::udm::Element &p, const std::string &key) { return static_cast<::udm::PropertyWrapper &>(p)[key]; }
+static ::udm::LinkedPropertyWrapper x_get(lua_State *l, ::udm::PropertyWrapper &p, const std::string &key) { return static_cast<::udm::PropertyWrapper &>(p)[key]; }
+static ::udm::LinkedPropertyWrapper x_get(lua_State *l, ::udm::Property &p, const std::string &key) { return static_cast<::udm::PropertyWrapper>(p)[key]; }
 
-static ::udm::LinkedPropertyWrapper i_get(lua_State *l,::udm::Element &p,int32_t idx)
+static ::udm::LinkedPropertyWrapper i_get(lua_State *l, ::udm::Element &p, int32_t idx)
 {
 	if(idx < 0)
 		return {};
-	return static_cast<::udm::PropertyWrapper&>(p)[idx];
+	return static_cast<::udm::PropertyWrapper &>(p)[idx];
 }
-static ::udm::LinkedPropertyWrapper i_get(lua_State *l,::udm::PropertyWrapper &p,int32_t idx)
+static ::udm::LinkedPropertyWrapper i_get(lua_State *l, ::udm::PropertyWrapper &p, int32_t idx)
 {
 	if(idx < 0)
 		return {};
-	return static_cast<::udm::PropertyWrapper&>(p)[idx];
+	return static_cast<::udm::PropertyWrapper &>(p)[idx];
 }
-static ::udm::LinkedPropertyWrapper i_get(lua_State *l,::udm::Property &p,int32_t idx)
+static ::udm::LinkedPropertyWrapper i_get(lua_State *l, ::udm::Property &p, int32_t idx)
 {
 	if(idx < 0)
 		return {};
@@ -973,37 +882,33 @@ static ::udm::LinkedPropertyWrapper i_get(lua_State *l,::udm::Property &p,int32_
 static std::string serialize(::udm::PropertyWrapper &p)
 {
 	auto data = udm::Data::Create();
-	data->GetAssetData().GetData().Merge(p,::udm::MergeFlags::DeepCopy);
+	data->GetAssetData().GetData().Merge(p, ::udm::MergeFlags::DeepCopy);
 	std::stringstream ss;
-	data->ToAscii(ss,::udm::AsciiSaveFlags::DontCompressLz4Arrays);
+	data->ToAscii(ss, ::udm::AsciiSaveFlags::DontCompressLz4Arrays);
 	return ss.str();
 }
 
-static Lua::var<::udm::PProperty,std::pair<bool,std::string>> deserialize(lua_State *l,const std::string &str)
+static Lua::var<::udm::PProperty, std::pair<bool, std::string>> deserialize(lua_State *l, const std::string &str)
 {
-	auto memFile = std::make_unique<::ufile::MemoryFile>(reinterpret_cast<uint8_t*>(const_cast<char*>(str.data())),str.size());
+	auto memFile = std::make_unique<::ufile::MemoryFile>(reinterpret_cast<uint8_t *>(const_cast<char *>(str.data())), str.size());
 	std::shared_ptr<::udm::Data> data = nullptr;
-	try
-	{
+	try {
 		data = ::udm::Data::Load(std::move(memFile));
 	}
-	catch(const udm::AsciiException &e)
-	{
-		return luabind::object{l,std::pair<bool,std::string>{false,e.what()}};
+	catch(const udm::AsciiException &e) {
+		return luabind::object {l, std::pair<bool, std::string> {false, e.what()}};
 	}
-	return luabind::object{l,data->GetAssetData().GetData().ClaimOwnership()};
+	return luabind::object {l, data->GetAssetData().GetData().ClaimOwnership()};
 }
 
 template<class TPropertyWrapper>
-	void clear(TPropertyWrapper &prop)
+void clear(TPropertyWrapper &prop)
 {
-	if constexpr(std::is_same_v<TPropertyWrapper,::udm::Element>)
+	if constexpr(std::is_same_v<TPropertyWrapper, ::udm::Element>)
 		prop.children.clear();
-	else
-	{
+	else {
 		auto *el = prop.template GetValuePtr<::udm::Element>();
-		if(el)
-		{
+		if(el) {
 			el->children.clear();
 			return;
 		}
@@ -1013,368 +918,389 @@ template<class TPropertyWrapper>
 	}
 }
 
-static void debug_print_wrapper(const udm::PropertyWrapper &lp,const std::string &t)
+static void debug_print_wrapper(const udm::PropertyWrapper &lp, const std::string &t)
 {
-	std::cout<<t<<"arrayIndex: "<<lp.arrayIndex<<std::endl;
-	std::cout<<t<<"prop: ";
+	std::cout << t << "arrayIndex: " << lp.arrayIndex << std::endl;
+	std::cout << t << "prop: ";
 	if(!lp.prop)
-		std::cout<<"NULL";
+		std::cout << "NULL";
 	else
-		std::cout<<udm::enum_to_string(lp.prop->type);
-	std::cout<<std::endl;
+		std::cout << udm::enum_to_string(lp.prop->type);
+	std::cout << std::endl;
 	auto *linked = lp.GetLinked();
-	if(linked)
-	{
-		std::cout<<t<<"propName: "<<linked->propName<<std::endl;
-		std::cout<<"prev: ";
+	if(linked) {
+		std::cout << t << "propName: " << linked->propName << std::endl;
+		std::cout << "prev: ";
 		if(!linked->prev)
-			std::cout<<"NULL"<<std::endl;
-		else
-		{
-			std::cout<<std::endl;
-			debug_print_wrapper(*linked->prev,t +"\t");
+			std::cout << "NULL" << std::endl;
+		else {
+			std::cout << std::endl;
+			debug_print_wrapper(*linked->prev, t + "\t");
 		}
 	}
 }
-static void debug_print_wrapper(const udm::PropertyWrapper &lp)
+static void debug_print_wrapper(const udm::PropertyWrapper &lp) { debug_print_wrapper(lp, ""); }
+
+template<class T, class TPropertyWrapper, class TClassDef>
+void register_property_methods(TClassDef &classDef)
 {
-	debug_print_wrapper(lp,"");
+	classDef
+	  .def(
+	    "Add", +[](lua_State *l, T &p, const std::string &path) -> ::udm::LinkedPropertyWrapper { return static_cast<TPropertyWrapper>(p).Add(path); })
+	  .def(
+	    "Add", +[](lua_State *l, T &p, const std::string &path, ::udm::Type type) -> ::udm::LinkedPropertyWrapper { return static_cast<TPropertyWrapper>(p).Add(path, type); })
+	  .def(
+	    "AddAssetData", +[](lua_State *l, T &p, const std::string &path) -> ::udm::AssetData { return ::udm::AssetData {static_cast<TPropertyWrapper>(p).Add(path)}; })
+	  .def(
+	    "ToAssetData", +[](lua_State *l, T &prop) -> ::udm::AssetData { return ::udm::AssetData {static_cast<TPropertyWrapper>(prop)}; })
+	  //.def("Get",+[](lua_State *l,T &p,const std::string &key) -> ::udm::LinkedPropertyWrapper {
+	  //	return static_cast<TPropertyWrapper>(p)[key];
+	  //})
+	  .def("Get", static_cast<::udm::LinkedPropertyWrapper (*)(lua_State *, T &, const std::string &)>(&x_get))
+	  .def("Get", static_cast<::udm::LinkedPropertyWrapper (*)(lua_State *, T &, int32_t)>(&i_get))
+	  //.def("Get",+[](lua_State *l,T &p,uint32_t idx) -> ::udm::LinkedPropertyWrapper {
+	  //	return static_cast<TPropertyWrapper>(p)[idx];
+	  //})
+	  .def(
+	    "GetArrayValuesFromBlob", +[](lua_State *l, T &p, ::udm::Type type) -> luabind::object { return get_blob_array_values(l, static_cast<TPropertyWrapper>(p), type); })
+	  .def(
+	    "AddBlobFromArrayValues", +[](lua_State *l, T &p, const std::string &path, ::udm::Type type, luabind::tableT<void> t, ::udm::Type blobType) { return set_blob_array_values(l, static_cast<TPropertyWrapper>(p), path, type, t, blobType); })
+	  .def(
+	    "AddBlobFromArrayValues", +[](lua_State *l, T &p, const std::string &path, ::udm::Type type, luabind::tableT<void> t) { return set_blob_array_values(l, static_cast<TPropertyWrapper>(p), path, type, t); })
+	  .def(
+	    "AddValueRange",
+	    +[](lua_State *l, T &p, uint32_t startIndex, uint32_t count) {
+		    auto *a = static_cast<TPropertyWrapper>(p).template GetValuePtr<::udm::Array>();
+		    if(!a)
+			    return;
+		    a->AddValueRange(startIndex, count);
+	    })
+	  .def(
+	    "RemoveValueRange",
+	    +[](lua_State *l, T &p, uint32_t startIndex, uint32_t count) {
+		    auto *a = static_cast<TPropertyWrapper>(p).template GetValuePtr<::udm::Array>();
+		    if(!a)
+			    return;
+		    a->RemoveValueRange(startIndex, count);
+	    })
+	  .def(
+	    "GetBlobData",
+	    +[](lua_State *l, T &p) {
+		    auto type = ::udm::Type::Nil;
+		    auto vs = [l, &p, &type](auto tag) {
+			    using T2 = typename decltype(tag)::type;
+			    return static_cast<TPropertyWrapper>(p).GetBlobData(type);
+		    };
+		    ::udm::Blob blob;
+		    if(::udm::is_ng_type(type))
+			    blob = ::udm::visit_ng(type, vs);
+		    else if(::udm::is_non_trivial_type(type))
+			    return; // TODO
+		    DataStream ds {static_cast<uint32_t>(blob.data.size())};
+		    ds->Write(blob.data.data(), blob.data.size());
+		    ds->SetOffset(0);
+		    Lua::Push(l, ds);
+		    Lua::Push(l, type);
+	    })
+	  .def(
+	    "GetSize", +[](lua_State *l, T &p) -> uint32_t { return static_cast<TPropertyWrapper>(p).GetSize(); })
+	  .def(
+	    "GetValueType",
+	    +[](lua_State *l, T &p) -> luabind::object {
+		    auto *a = static_cast<TPropertyWrapper>(p).template GetValuePtr<::udm::Array>();
+		    if(!a)
+			    return luabind::object {};
+		    return luabind::object {l, umath::to_integral(a->GetValueType())};
+	    })
+	  .def(
+	    "SetValueType",
+	    +[](lua_State *l, T &p, ::udm::Type valueType) {
+		    auto *a = static_cast<TPropertyWrapper>(p).template GetValuePtr<::udm::Array>();
+		    if(!a)
+			    return;
+		    a->SetValueType(valueType);
+	    })
+	  .def(
+	    "GetArrayValues",
+	    +[](lua_State *l, T &p, ::udm::Type type) -> luabind::object {
+		    TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
+		    auto *lp = tp.GetLinked();
+		    if(lp)
+			    return get_array_values(l, *lp, type);
+		    return get_array_values(l, ::udm::LinkedPropertyWrapper {tp}, type);
+	    })
+	  .def(
+	    "GetArrayValues",
+	    +[](lua_State *l, T &p) -> luabind::object {
+		    TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
+		    auto *lp = tp.GetLinked();
+		    if(lp)
+			    return get_array_values(l, (*lp), {});
+		    return get_array_values(l, tp, {});
+	    })
+	  .def(
+	    "GetArrayValues",
+	    +[](lua_State *l, T &p, const std::string &name, ::udm::Type type) -> luabind::object {
+		    TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
+		    auto *lp = tp.GetLinked();
+		    if(lp)
+			    return get_array_values(l, (*lp)[name], type);
+		    return get_array_values(l, tp[name], type);
+	    })
+	  .def(
+	    "GetArrayValues",
+	    +[](lua_State *l, T &p, const std::string &name) -> luabind::object {
+		    TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
+		    auto *lp = tp.GetLinked();
+		    if(lp)
+			    return get_array_values(l, (*lp)[name], {});
+		    return get_array_values(l, tp[name], {});
+	    })
+	  .def(
+	    "GetArrayValue",
+	    +[](lua_State *l, T &p, int32_t idx, ::udm::Type type) -> luabind::object {
+		    TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
+		    auto *lp = tp.GetLinked();
+		    if(lp)
+			    return get_array_value(l, *lp, idx, type);
+		    return get_array_value(l, ::udm::LinkedPropertyWrapper {tp}, idx, type);
+	    })
+	  .def(
+	    "GetArrayValue",
+	    +[](lua_State *l, T &p, int32_t idx) -> luabind::object {
+		    TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
+		    auto *lp = tp.GetLinked();
+		    if(lp)
+			    return get_array_value(l, (*lp), idx, {});
+		    return get_array_value(l, tp, idx, {});
+	    })
+	  .def(
+	    "SetArrayValues",
+	    +[](lua_State *l, T &p, ::udm::Type type, luabind::tableT<void> t) {
+		    TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
+		    set_array_values(l, tmp.template GetValue<::udm::Array>(), type, t, 3);
+	    })
+	  .def(
+	    "SetArrayValues",
+	    +[](lua_State *l, T &p, ::udm::Type type, luabind::tableT<void> t, ::udm::Type arrayType) {
+		    if(arrayType != ::udm::Type::Array && arrayType != ::udm::Type::ArrayLz4)
+			    Lua::Error(l, "Invalid array type '" + std::string {::udm::enum_type_to_ascii(arrayType)} + "'!");
+		    TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
+		    set_array_values(l, tmp.template GetValue<::udm::Array>(), type, t, 3, (arrayType == ::udm::Type::ArrayLz4) ? ::udm::ArrayType::Compressed : ::udm::ArrayType::Raw);
+	    })
+	  .def(
+	    "SetArrayValues",
+	    +[](lua_State *l, T &p, const std::string &name, ::udm::Type type, luabind::tableT<void> t) {
+		    TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
+		    set_array_values(l, tmp, name, type, t);
+	    })
+	  .def(
+	    "SetArrayValues",
+	    +[](lua_State *l, T &p, const std::string &name, ::udm::Type type, luabind::tableT<void> t, ::udm::Type arrayType) {
+		    if(arrayType != ::udm::Type::Array && arrayType != ::udm::Type::ArrayLz4)
+			    Lua::Error(l, "Invalid array type '" + std::string {::udm::enum_type_to_ascii(arrayType)} + "'!");
+		    TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
+		    set_array_values(l, tmp, name, type, t, (arrayType == ::udm::Type::ArrayLz4) ? ::udm::ArrayType::Compressed : ::udm::ArrayType::Raw);
+	    })
+	  .def(
+	    "SetArrayValues",
+	    +[](lua_State *l, T &p, const std::string &name, ::udm::StructDescription &strct, uint32_t count, DataStream &ds, ::udm::Type arrayType) {
+		    if(arrayType != ::udm::Type::Array && arrayType != ::udm::Type::ArrayLz4)
+			    Lua::Error(l, "Invalid array type '" + std::string {::udm::enum_type_to_ascii(arrayType)} + "'!");
+		    TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
+		    set_array_values(tmp, name, strct, count, ds, (arrayType == ::udm::Type::ArrayLz4) ? ::udm::ArrayType::Compressed : ::udm::ArrayType::Raw);
+	    })
+	  .def(
+	    "InsertValue",
+	    +[](lua_State *l, T &p, uint32_t idx, const luabind::object &o) {
+		    TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
+		    insert_array_value(l, tmp, idx, o);
+	    })
+	  .def(
+	    "InsertValue",
+	    +[](lua_State *l, T &p, const luabind::object &o) {
+		    TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
+		    push_array_value(l, tmp, o);
+	    })
+	  .def(
+	    "GetChildren", +[](lua_State *l, T &p) -> luabind::object { return get_children(l, static_cast<TPropertyWrapper>(p)); })
+	  .def(
+	    "GetChildren", +[](lua_State *l, T &p, const std::string &key) -> luabind::object { return get_children(l, static_cast<TPropertyWrapper>(p)[key]); })
+	  .def(
+	    "GetChildCount", +[](lua_State *l, T &p) -> uint32_t { return static_cast<TPropertyWrapper>(p).GetChildCount(); })
+	  .def(
+	    "GetChildCount", +[](lua_State *l, T &p, const std::string &key) -> uint32_t { return static_cast<TPropertyWrapper>(p)[key].GetChildCount(); })
+	  .def(
+	    "Resize", +[](lua_State *l, T &p, uint32_t size) { static_cast<TPropertyWrapper>(p).Resize(size); })
+	  .def(
+	    "RemoveValue",
+	    +[](lua_State *l, T &p, int32_t idx) {
+		    auto *a = static_cast<TPropertyWrapper>(p).template GetValuePtr<::udm::Array>();
+		    if(!a || idx < 0)
+			    return;
+		    a->RemoveValue(idx);
+	    })
+	  .def(
+	    "RemoveValue",
+	    +[](lua_State *l, T &p, const std::string &key) {
+		    TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
+		    auto *el = tmp.template GetValuePtr<::udm::Element>();
+		    if(!el)
+			    return;
+		    auto it = el->children.find(key);
+		    if(it != el->children.end())
+			    el->children.erase(it);
+	    })
+	  .def(
+	    "SetValue", +[](lua_State *l, T &el, const std::string &key, ::udm::Type type, luabind::object o) { set_property_value(l, static_cast<TPropertyWrapper>(el)[key], type, o, 4); })
+	  .def(
+	    "SetValue", +[](lua_State *l, T &el, int32_t idx, ::udm::Type type, luabind::object o) { set_property_value(l, static_cast<TPropertyWrapper>(el)[idx], type, o, 4); })
+	  .def(
+	    "SetValue",
+	    +[](lua_State *l, T &el, const std::string &key, ::udm::Type type) {
+		    if(type != ::udm::Type::Nil)
+			    Lua::Error(l, "Omitting value only allowed for nil type!");
+		    set_property_value(l, static_cast<TPropertyWrapper>(el)[key], type, luabind::object {}, 4, true);
+	    })
+	  .def(
+	    "SetValue", +[](lua_State *l, T &el, const std::string &key, luabind::object o) { set_property_value(l, static_cast<TPropertyWrapper>(el)[key], o); })
+	  .def(
+	    "HasValue", +[](lua_State *l, T &p, const std::string &key) -> bool { return static_cast<bool>(static_cast<TPropertyWrapper>(p)[key]); })
+	  .def(
+	    "GetValue", +[](lua_State *l, T &p, const std::string &key) -> luabind::object { return get_property_value(l, static_cast<TPropertyWrapper>(p)[key]); })
+	  .def(
+	    "GetValue", +[](lua_State *l, T &p, const std::string &key, ::udm::Type type) -> luabind::object { return get_property_value(l, static_cast<TPropertyWrapper>(p)[key], type); })
+	  .def(
+	    "GetValue", +[](lua_State *l, T &p) -> luabind::object { return get_property_value(l, static_cast<TPropertyWrapper>(p)); })
+	  .def(
+	    "GetValue", +[](lua_State *l, T &p, ::udm::Type type) -> luabind::object { return get_property_value(l, static_cast<TPropertyWrapper>(p), type); })
+	  .def(
+	    "GetArrayValueDirect", +[](lua_State *l, T &p, int32_t idx) -> luabind::object { return get_property_value(l, static_cast<TPropertyWrapper>(p), idx); })
+	  .def(
+	    "GetType",
+	    +[](lua_State *l, T &prop) -> ::udm::Type {
+		    if constexpr(std::is_same_v<T, ::udm::Element>)
+			    return ::udm::Type::Element;
+		    else
+			    return static_cast<TPropertyWrapper>(prop).GetType();
+	    })
+	  .def("Clear", &clear<T>)
+	  .def(
+	    "Merge", +[](lua_State *l, T &prop, ::udm::PropertyWrapper &propOther) { static_cast<TPropertyWrapper>(prop).Merge(propOther); })
+	  .def(
+	    "Merge", +[](lua_State *l, T &prop, ::udm::PropertyWrapper &propOther, ::udm::MergeFlags mergeFlags) { static_cast<TPropertyWrapper>(prop).Merge(propOther, mergeFlags); })
+	  .def(
+	    "Copy",
+	    +[](lua_State *l, T &prop) -> std::shared_ptr<::udm::Property> {
+		    auto p = static_cast<TPropertyWrapper>(prop).prop;
+		    if(!p)
+			    return nullptr;
+		    return std::make_shared<::udm::Property>(*p);
+	    })
+	  .def(
+	    "ToAscii",
+	    +[](lua_State *l, T &prop) -> luabind::object {
+		    auto *el = static_cast<TPropertyWrapper>(prop).template GetValuePtr<::udm::Element>();
+		    if(!el)
+			    return {};
+		    std::stringstream ss;
+		    el->ToAscii(::udm::AsciiSaveFlags::DontCompressLz4Arrays, ss);
+		    return luabind::object {l, ss.str()};
+	    })
+	  .def(
+	    "ToAscii",
+	    +[](lua_State *l, T &prop, ::udm::AsciiSaveFlags saveFlags) -> luabind::object {
+		    auto *el = static_cast<TPropertyWrapper>(prop).template GetValuePtr<::udm::Element>();
+		    if(!el)
+			    return {};
+		    std::stringstream ss;
+		    el->ToAscii(saveFlags, ss);
+		    return luabind::object {l, ss.str()};
+	    })
+	  .def(
+	    "ToTable",
+	    +[](lua_State *l, T &v) -> Lua::tb<void> {
+		    auto prop = static_cast<TPropertyWrapper>(v);
+		    auto o = Lua::udm::udm_to_value(l, prop);
+		    if(luabind::type(o) == LUA_TTABLE)
+			    return o;
+		    return luabind::newtable(l);
+	    })
+	  .def("Set", &prop_set_basic_type_indexed<TPropertyWrapper, T, bool>)
+	  .def("Set", &prop_set_basic_type_indexed<TPropertyWrapper, T, float>)
+	  .def("Set", &prop_set_basic_type_indexed<TPropertyWrapper, T, Vector2>)
+	  .def("Set", &prop_set_basic_type_indexed<TPropertyWrapper, T, Vector3>)
+	  .def("Set", &prop_set_basic_type_indexed<TPropertyWrapper, T, Vector4>)
+	  .def("Set", &prop_set_basic_type_indexed<TPropertyWrapper, T, Quat>)
+	  .def("Set", &prop_set_basic_type_indexed<TPropertyWrapper, T, EulerAngles>)
+	  .def("Set", &prop_set_basic_type_indexed<TPropertyWrapper, T, umath::Transform>)
+	  .def("Set", &prop_set_basic_type_indexed<TPropertyWrapper, T, umath::ScaledTransform>)
+	  .def("Set", &prop_set_basic_type_indexed<TPropertyWrapper, T, Mat4>)
+	  .def("Set", &prop_set_basic_type_indexed<TPropertyWrapper, T, Mat3x4>)
+	  .def("Set", &prop_set_basic_type_indexed<TPropertyWrapper, T, std::string>)
+	  .def("Set", &prop_set_basic_type_indexed<TPropertyWrapper, T, ::udm::Srgba>)
+	  .def("Set", &prop_set_basic_type_indexed<TPropertyWrapper, T, ::udm::HdrColor>)
+	  .def("Set", &prop_set_basic_type_indexed<TPropertyWrapper, T, ::udm::Reference>)
+
+	  .def("Set", &prop_set_basic_type<TPropertyWrapper, T, bool>)
+	  .def("Set", &prop_set_basic_type<TPropertyWrapper, T, float>)
+	  .def("Set", &prop_set_basic_type<TPropertyWrapper, T, Vector2>)
+	  .def("Set", &prop_set_basic_type<TPropertyWrapper, T, Vector3>)
+	  .def("Set", &prop_set_basic_type<TPropertyWrapper, T, Vector4>)
+	  .def("Set", &prop_set_basic_type<TPropertyWrapper, T, Quat>)
+	  .def("Set", &prop_set_basic_type<TPropertyWrapper, T, EulerAngles>)
+	  .def("Set", &prop_set_basic_type<TPropertyWrapper, T, umath::Transform>)
+	  .def("Set", &prop_set_basic_type<TPropertyWrapper, T, umath::ScaledTransform>)
+	  .def("Set", &prop_set_basic_type<TPropertyWrapper, T, Mat4>)
+	  .def("Set", &prop_set_basic_type<TPropertyWrapper, T, Mat3x4>)
+	  .def("Set", &prop_set_basic_type<TPropertyWrapper, T, std::string>)
+	  .def("Set", &prop_set_basic_type<TPropertyWrapper, T, ::udm::Srgba>)
+	  .def("Set", &prop_set_basic_type<TPropertyWrapper, T, ::udm::HdrColor>)
+	  .def("Set", &prop_set_basic_type<TPropertyWrapper, T, ::udm::Reference>)
+	  .def(
+	    "Set",
+	    +[](lua_State *l, T &p, int32_t idx, DataStream &ds) {
+		    auto offset = ds->GetOffset();
+		    ds->SetOffset(0);
+		    std::vector<uint8_t> data {};
+		    data.resize(ds->GetInternalSize());
+		    memcpy(data.data(), ds->GetData(), data.size());
+		    static_cast<TPropertyWrapper>(p)[idx] = ::udm::Blob {std::move(data)};
+		    ds->SetOffset(offset);
+	    })
+	  .def(
+	    "Set",
+	    +[](lua_State *l, T &p, const std::string &key, DataStream &ds) {
+		    auto offset = ds->GetOffset();
+		    ds->SetOffset(0);
+		    std::vector<uint8_t> data {};
+		    data.resize(ds->GetInternalSize());
+		    memcpy(data.data(), ds->GetData(), data.size());
+		    static_cast<TPropertyWrapper>(p)[key] = ::udm::Blob {std::move(data)};
+		    ds->SetOffset(offset);
+	    })
+	  .def(
+	    "AddArray", +[](lua_State *l, T &p, const std::string &name, uint32_t size) -> ::udm::LinkedPropertyWrapper { return static_cast<TPropertyWrapper>(p).AddArray(name, size, ::udm::Type::Element); })
+	  .def(
+	    "AddArray", +[](lua_State *l, T &p, const std::string &name, uint32_t size, ::udm::Type type) -> ::udm::LinkedPropertyWrapper { return static_cast<TPropertyWrapper>(p).AddArray(name, size, type); })
+	  .def(
+	    "AddArray", +[](lua_State *l, T &p, const std::string &name, uint32_t size, ::udm::Type type, ::udm::ArrayType arrayType) -> ::udm::LinkedPropertyWrapper { return static_cast<TPropertyWrapper>(p).AddArray(name, size, type, arrayType); })
+	  .def(
+	    "GetFromPath", +[](lua_State *l, T &p, const std::string &path) -> ::udm::LinkedPropertyWrapper { return static_cast<TPropertyWrapper>(p).GetFromPath(path); })
+	  .def(
+	    "IsValid", +[](lua_State *l, T &prop) -> bool { return static_cast<bool>(static_cast<TPropertyWrapper>(prop)); });
 }
 
-template<class T,class TPropertyWrapper,class TClassDef>
-	void register_property_methods(TClassDef &classDef)
+static Lua::var<Lua::mult<bool, std::string>, ::udm::Data> create(lua_State *l, ::udm::PProperty rootProp, std::optional<std::string> assetType, std::optional<uint32_t> assetVersion)
 {
-	classDef.def("Add",+[](lua_State *l,T &p,const std::string &path) -> ::udm::LinkedPropertyWrapper {
-		return static_cast<TPropertyWrapper>(p).Add(path);
-	})
-	.def("Add",+[](lua_State *l,T &p,const std::string &path,::udm::Type type) -> ::udm::LinkedPropertyWrapper {
-		return static_cast<TPropertyWrapper>(p).Add(path,type);
-	})
-	.def("AddAssetData",+[](lua_State *l,T &p,const std::string &path) -> ::udm::AssetData {
-		return ::udm::AssetData{static_cast<TPropertyWrapper>(p).Add(path)};
-	})
-	.def("ToAssetData",+[](lua_State *l,T &prop) -> ::udm::AssetData {
-		return ::udm::AssetData {static_cast<TPropertyWrapper>(prop)};
-	})
-	//.def("Get",+[](lua_State *l,T &p,const std::string &key) -> ::udm::LinkedPropertyWrapper {
-	//	return static_cast<TPropertyWrapper>(p)[key];
-	//})
-	.def("Get",static_cast<::udm::LinkedPropertyWrapper(*)(lua_State*,T&,const std::string&)>(&x_get))
-	.def("Get",static_cast<::udm::LinkedPropertyWrapper(*)(lua_State*,T&,int32_t)>(&i_get))
-	//.def("Get",+[](lua_State *l,T &p,uint32_t idx) -> ::udm::LinkedPropertyWrapper {
-	//	return static_cast<TPropertyWrapper>(p)[idx];
-	//})
-	.def("GetArrayValuesFromBlob",+[](lua_State *l,T &p,::udm::Type type) -> luabind::object {
-		return get_blob_array_values(l,static_cast<TPropertyWrapper>(p),type);
-	})
-	.def("AddBlobFromArrayValues",+[](lua_State *l,T &p,const std::string &path,::udm::Type type,luabind::tableT<void> t,::udm::Type blobType) {
-		return set_blob_array_values(l,static_cast<TPropertyWrapper>(p),path,type,t,blobType);
-	})
-	.def("AddBlobFromArrayValues",+[](lua_State *l,T &p,const std::string &path,::udm::Type type,luabind::tableT<void> t) {
-		return set_blob_array_values(l,static_cast<TPropertyWrapper>(p),path,type,t);
-	})
-	.def("AddValueRange",+[](lua_State *l,T &p,uint32_t startIndex,uint32_t count) {
-        auto *a = static_cast<TPropertyWrapper>(p).template GetValuePtr<::udm::Array>();
-		if(!a)
-			return;
-		a->AddValueRange(startIndex,count);
-	})
-	.def("RemoveValueRange",+[](lua_State *l,T &p,uint32_t startIndex,uint32_t count) {
-        auto *a = static_cast<TPropertyWrapper>(p).template GetValuePtr<::udm::Array>();
-		if(!a)
-			return;
-		a->RemoveValueRange(startIndex,count);
-	})
-	.def("GetBlobData",+[](lua_State *l,T &p) {
-		auto type = ::udm::Type::Nil;
-		auto vs = [l,&p,&type](auto tag) {
-            using T2 = typename decltype(tag)::type;
-			return static_cast<TPropertyWrapper>(p).GetBlobData(type);
-		};
-		::udm::Blob blob;
-		if(::udm::is_ng_type(type))
-			blob = ::udm::visit_ng(type,vs);
-		else if(::udm::is_non_trivial_type(type))
-			return; // TODO
-		DataStream ds {static_cast<uint32_t>(blob.data.size())};
-		ds->Write(blob.data.data(),blob.data.size());
-		ds->SetOffset(0);
-		Lua::Push(l,ds);
-		Lua::Push(l,type);
-	})
-	.def("GetSize",+[](lua_State *l,T &p) -> uint32_t {
-		return static_cast<TPropertyWrapper>(p).GetSize();
-	})
-	.def("GetValueType",+[](lua_State *l,T &p) -> luabind::object {
-        auto *a = static_cast<TPropertyWrapper>(p).template GetValuePtr<::udm::Array>();
-		if(!a)
-			return luabind::object{};
-		return luabind::object{l,umath::to_integral(a->GetValueType())};
-	})
-	.def("SetValueType",+[](lua_State *l,T &p,::udm::Type valueType) {
-        auto *a = static_cast<TPropertyWrapper>(p).template GetValuePtr<::udm::Array>();
-		if(!a)
-			return;
-		a->SetValueType(valueType);
-	})
-	.def("GetArrayValues",+[](lua_State *l,T &p,::udm::Type type) -> luabind::object {
-		TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
-		auto *lp = tp.GetLinked();
-		if(lp)
-			return get_array_values(l,*lp,type);
-		return get_array_values(l,::udm::LinkedPropertyWrapper{tp},type);
-	})
-	.def("GetArrayValues",+[](lua_State *l,T &p) -> luabind::object {
-		TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
-		auto *lp = tp.GetLinked();
-		if(lp)
-			return get_array_values(l,(*lp),{});
-		return get_array_values(l,tp,{});
-	})
-	.def("GetArrayValues",+[](lua_State *l,T &p,const std::string &name,::udm::Type type) -> luabind::object {
-		TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
-		auto *lp = tp.GetLinked();
-		if(lp)
-			return get_array_values(l,(*lp)[name],type);
-		return get_array_values(l,tp[name],type);
-	})
-	.def("GetArrayValues",+[](lua_State *l,T &p,const std::string &name) -> luabind::object {
-		TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
-		auto *lp = tp.GetLinked();
-		if(lp)
-			return get_array_values(l,(*lp)[name],{});
-		return get_array_values(l,tp[name],{});
-	})
-	.def("GetArrayValue",+[](lua_State *l,T &p,int32_t idx,::udm::Type type) -> luabind::object {
-		TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
-		auto *lp = tp.GetLinked();
-		if(lp)
-			return get_array_value(l,*lp,idx,type);
-		return get_array_value(l,::udm::LinkedPropertyWrapper{tp},idx,type);
-	})
-	.def("GetArrayValue",+[](lua_State *l,T &p,int32_t idx) -> luabind::object {
-		TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
-		auto *lp = tp.GetLinked();
-		if(lp)
-			return get_array_value(l,(*lp),idx,{});
-		return get_array_value(l,tp,idx,{});
-	})
-	.def("SetArrayValues",+[](lua_State *l,T &p,::udm::Type type,luabind::tableT<void> t) {
-		TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
-        set_array_values(l,tmp.template GetValue<::udm::Array>(),type,t,3);
-	})
-	.def("SetArrayValues",+[](lua_State *l,T &p,::udm::Type type,luabind::tableT<void> t,::udm::Type arrayType) {
-		if(arrayType != ::udm::Type::Array && arrayType != ::udm::Type::ArrayLz4)
-			Lua::Error(l,"Invalid array type '" +std::string{::udm::enum_type_to_ascii(arrayType)} +"'!");
-		TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
-        set_array_values(l,tmp.template GetValue<::udm::Array>(),type,t,3,(arrayType == ::udm::Type::ArrayLz4) ? ::udm::ArrayType::Compressed : ::udm::ArrayType::Raw);
-	})
-	.def("SetArrayValues",+[](lua_State *l,T &p,const std::string &name,::udm::Type type,luabind::tableT<void> t) {
-		TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
-		set_array_values(l,tmp,name,type,t);
-	})
-	.def("SetArrayValues",+[](lua_State *l,T &p,const std::string &name,::udm::Type type,luabind::tableT<void> t,::udm::Type arrayType) {
-		if(arrayType != ::udm::Type::Array && arrayType != ::udm::Type::ArrayLz4)
-			Lua::Error(l,"Invalid array type '" +std::string{::udm::enum_type_to_ascii(arrayType)} +"'!");
-		TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
-		set_array_values(l,tmp,name,type,t,(arrayType == ::udm::Type::ArrayLz4) ? ::udm::ArrayType::Compressed : ::udm::ArrayType::Raw);
-	})
-	.def("SetArrayValues",+[](lua_State *l,T &p,const std::string &name,::udm::StructDescription &strct,uint32_t count,DataStream &ds,::udm::Type arrayType) {
-		if(arrayType != ::udm::Type::Array && arrayType != ::udm::Type::ArrayLz4)
-			Lua::Error(l,"Invalid array type '" +std::string{::udm::enum_type_to_ascii(arrayType)} +"'!");
-		TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
-		set_array_values(tmp,name,strct,count,ds,(arrayType == ::udm::Type::ArrayLz4) ? ::udm::ArrayType::Compressed : ::udm::ArrayType::Raw);
-	})
-	.def("InsertValue",+[](lua_State *l,T &p,uint32_t idx,const luabind::object &o) {
-		TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
-		insert_array_value(l,tmp,idx,o);
-	})
-	.def("InsertValue",+[](lua_State *l,T &p,const luabind::object &o) {
-		TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
-		push_array_value(l,tmp,o);
-	})
-	.def("GetChildren",+[](lua_State *l,T &p) -> luabind::object {
-		return get_children(l,static_cast<TPropertyWrapper>(p));
-	})
-	.def("GetChildren",+[](lua_State *l,T &p,const std::string &key) -> luabind::object {
-		return get_children(l,static_cast<TPropertyWrapper>(p)[key]);
-	})
-	.def("GetChildCount",+[](lua_State *l,T &p) -> uint32_t {
-		return static_cast<TPropertyWrapper>(p).GetChildCount();
-	})
-	.def("GetChildCount",+[](lua_State *l,T &p,const std::string &key) -> uint32_t {
-		return static_cast<TPropertyWrapper>(p)[key].GetChildCount();
-	})
-	.def("Resize",+[](lua_State *l,T &p,uint32_t size) {
-		static_cast<TPropertyWrapper>(p).Resize(size);
-	})
-	.def("RemoveValue",+[](lua_State *l,T &p,int32_t idx) {
-        auto *a = static_cast<TPropertyWrapper>(p).template GetValuePtr<::udm::Array>();
-		if(!a || idx < 0)
-			return;
-		a->RemoveValue(idx);
-	})
-	.def("RemoveValue",+[](lua_State *l,T &p,const std::string &key) {
-		TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
-        auto *el = tmp.template GetValuePtr<::udm::Element>();
-		if(!el)
-			return;
-		auto it = el->children.find(key);
-		if(it != el->children.end())
-			el->children.erase(it);
-	})
-	.def("SetValue",+[](lua_State *l,T &el,const std::string &key,::udm::Type type,luabind::object o) {
-		set_property_value(l,static_cast<TPropertyWrapper>(el)[key],type,o,4);
-	})
-	.def("SetValue",+[](lua_State *l,T &el,int32_t idx,::udm::Type type,luabind::object o) {
-		set_property_value(l,static_cast<TPropertyWrapper>(el)[idx],type,o,4);
-	})
-	.def("SetValue",+[](lua_State *l,T &el,const std::string &key,::udm::Type type) {
-		if(type != ::udm::Type::Nil)
-			Lua::Error(l,"Omitting value only allowed for nil type!");
-		set_property_value(l,static_cast<TPropertyWrapper>(el)[key],type,luabind::object{},4,true);
-	})
-	.def("SetValue",+[](lua_State *l,T &el,const std::string &key,luabind::object o) {
-		set_property_value(l,static_cast<TPropertyWrapper>(el)[key],o);
-	})
-	.def("HasValue",+[](lua_State *l,T &p,const std::string &key) -> bool {
-		return static_cast<bool>(static_cast<TPropertyWrapper>(p)[key]);
-	})
-	.def("GetValue",+[](lua_State *l,T &p,const std::string &key) -> luabind::object {
-		return get_property_value(l,static_cast<TPropertyWrapper>(p)[key]);
-	})
-	.def("GetValue",+[](lua_State *l,T &p,const std::string &key,::udm::Type type) -> luabind::object {
-		return get_property_value(l,static_cast<TPropertyWrapper>(p)[key],type);
-	})
-	.def("GetValue",+[](lua_State *l,T &p) -> luabind::object {
-		return get_property_value(l,static_cast<TPropertyWrapper>(p));
-	})
-	.def("GetValue",+[](lua_State *l,T &p,::udm::Type type) -> luabind::object {
-		return get_property_value(l,static_cast<TPropertyWrapper>(p),type);
-	})
-	.def("GetArrayValueDirect",+[](lua_State *l,T &p,int32_t idx) -> luabind::object {
-		return get_property_value(l,static_cast<TPropertyWrapper>(p),idx);
-	})
-	.def("GetType",+[](lua_State *l,T &prop) -> ::udm::Type {
-		if constexpr(std::is_same_v<T,::udm::Element>)
-			return ::udm::Type::Element;
-		else
-			return static_cast<TPropertyWrapper>(prop).GetType();
-	})
-	.def("Clear",&clear<T>)
-	.def("Merge",+[](lua_State *l,T &prop,::udm::PropertyWrapper &propOther) {
-		static_cast<TPropertyWrapper>(prop).Merge(propOther);
-	})
-	.def("Merge",+[](lua_State *l,T &prop,::udm::PropertyWrapper &propOther,::udm::MergeFlags mergeFlags) {
-		static_cast<TPropertyWrapper>(prop).Merge(propOther,mergeFlags);
-	})
-	.def("Copy",+[](lua_State *l,T &prop) -> std::shared_ptr<::udm::Property> {
-		auto p = static_cast<TPropertyWrapper>(prop).prop;
-		if(!p)
-			return nullptr;
-		return std::make_shared<::udm::Property>(*p);
-	})
-	.def("ToAscii",+[](lua_State *l,T &prop) -> luabind::object {
-        auto *el = static_cast<TPropertyWrapper>(prop).template GetValuePtr<::udm::Element>();
-		if(!el)
-			return {};
-		std::stringstream ss;
-		el->ToAscii(::udm::AsciiSaveFlags::DontCompressLz4Arrays,ss);
-		return luabind::object{l,ss.str()};
-	})
-	.def("ToAscii",+[](lua_State *l,T &prop,::udm::AsciiSaveFlags saveFlags) -> luabind::object {
-        auto *el = static_cast<TPropertyWrapper>(prop).template GetValuePtr<::udm::Element>();
-		if(!el)
-			return {};
-		std::stringstream ss;
-		el->ToAscii(saveFlags,ss);
-		return luabind::object{l,ss.str()};
-	})
-	.def("ToTable",+[](lua_State *l,T &v) -> Lua::tb<void> {
-		auto prop = static_cast<TPropertyWrapper>(v);
-		auto o = Lua::udm::udm_to_value(l,prop);
-		if(luabind::type(o) == LUA_TTABLE)
-			return o;
-		return luabind::newtable(l);
-	})
-	.def("Set",&prop_set_basic_type_indexed<TPropertyWrapper,T,bool>)
-	.def("Set",&prop_set_basic_type_indexed<TPropertyWrapper,T,float>)
-	.def("Set",&prop_set_basic_type_indexed<TPropertyWrapper,T,Vector2>)
-	.def("Set",&prop_set_basic_type_indexed<TPropertyWrapper,T,Vector3>)
-	.def("Set",&prop_set_basic_type_indexed<TPropertyWrapper,T,Vector4>)
-	.def("Set",&prop_set_basic_type_indexed<TPropertyWrapper,T,Quat>)
-	.def("Set",&prop_set_basic_type_indexed<TPropertyWrapper,T,EulerAngles>)
-	.def("Set",&prop_set_basic_type_indexed<TPropertyWrapper,T,umath::Transform>)
-	.def("Set",&prop_set_basic_type_indexed<TPropertyWrapper,T,umath::ScaledTransform>)
-	.def("Set",&prop_set_basic_type_indexed<TPropertyWrapper,T,Mat4>)
-	.def("Set",&prop_set_basic_type_indexed<TPropertyWrapper,T,Mat3x4>)
-	.def("Set",&prop_set_basic_type_indexed<TPropertyWrapper,T,std::string>)
-	.def("Set",&prop_set_basic_type_indexed<TPropertyWrapper,T,::udm::Srgba>)
-	.def("Set",&prop_set_basic_type_indexed<TPropertyWrapper,T,::udm::HdrColor>)
-	.def("Set",&prop_set_basic_type_indexed<TPropertyWrapper,T,::udm::Reference>)
-
-	.def("Set",&prop_set_basic_type<TPropertyWrapper,T,bool>)
-	.def("Set",&prop_set_basic_type<TPropertyWrapper,T,float>)
-	.def("Set",&prop_set_basic_type<TPropertyWrapper,T,Vector2>)
-	.def("Set",&prop_set_basic_type<TPropertyWrapper,T,Vector3>)
-	.def("Set",&prop_set_basic_type<TPropertyWrapper,T,Vector4>)
-	.def("Set",&prop_set_basic_type<TPropertyWrapper,T,Quat>)
-	.def("Set",&prop_set_basic_type<TPropertyWrapper,T,EulerAngles>)
-	.def("Set",&prop_set_basic_type<TPropertyWrapper,T,umath::Transform>)
-	.def("Set",&prop_set_basic_type<TPropertyWrapper,T,umath::ScaledTransform>)
-	.def("Set",&prop_set_basic_type<TPropertyWrapper,T,Mat4>)
-	.def("Set",&prop_set_basic_type<TPropertyWrapper,T,Mat3x4>)
-	.def("Set",&prop_set_basic_type<TPropertyWrapper,T,std::string>)
-	.def("Set",&prop_set_basic_type<TPropertyWrapper,T,::udm::Srgba>)
-	.def("Set",&prop_set_basic_type<TPropertyWrapper,T,::udm::HdrColor>)
-	.def("Set",&prop_set_basic_type<TPropertyWrapper,T,::udm::Reference>)
-	.def("Set",+[](lua_State *l,T &p,int32_t idx,DataStream &ds) {
-		auto offset = ds->GetOffset();
-		ds->SetOffset(0);
-		std::vector<uint8_t> data {};
-		data.resize(ds->GetInternalSize());
-		memcpy(data.data(),ds->GetData(),data.size());
-		static_cast<TPropertyWrapper>(p)[idx] = ::udm::Blob {std::move(data)};
-		ds->SetOffset(offset);
-	})
-	.def("Set",+[](lua_State *l,T &p,const std::string &key,DataStream &ds) {
-		auto offset = ds->GetOffset();
-		ds->SetOffset(0);
-		std::vector<uint8_t> data {};
-		data.resize(ds->GetInternalSize());
-		memcpy(data.data(),ds->GetData(),data.size());
-		static_cast<TPropertyWrapper>(p)[key] = ::udm::Blob {std::move(data)};
-		ds->SetOffset(offset);
-	})
-	.def("AddArray",+[](lua_State *l,T &p,const std::string &name,uint32_t size) -> ::udm::LinkedPropertyWrapper {
-		return static_cast<TPropertyWrapper>(p).AddArray(name,size,::udm::Type::Element);
-	})
-	.def("AddArray",+[](lua_State *l,T &p,const std::string &name,uint32_t size,::udm::Type type) -> ::udm::LinkedPropertyWrapper {
-		return static_cast<TPropertyWrapper>(p).AddArray(name,size,type);
-	})
-	.def("AddArray",+[](lua_State *l,T &p,const std::string &name,uint32_t size,::udm::Type type,::udm::ArrayType arrayType) -> ::udm::LinkedPropertyWrapper {
-		return static_cast<TPropertyWrapper>(p).AddArray(name,size,type,arrayType);
-	})
-	.def("GetFromPath",+[](lua_State *l,T &p,const std::string &path) -> ::udm::LinkedPropertyWrapper {
-		return static_cast<TPropertyWrapper>(p).GetFromPath(path);
-	})
-	.def("IsValid",+[](lua_State *l,T &prop) -> bool {
-		return static_cast<bool>(static_cast<TPropertyWrapper>(prop));
-	});
-}
-
-static Lua::var<Lua::mult<bool,std::string>,::udm::Data> create(lua_State *l,::udm::PProperty rootProp,std::optional<std::string> assetType,std::optional<uint32_t> assetVersion)
-{
-	try
-	{
-		auto udmData = ::udm::Data::Create(assetType.has_value() ? *assetType : "",assetVersion.has_value() ? *assetVersion : 1);
+	try {
+		auto udmData = ::udm::Data::Create(assetType.has_value() ? *assetType : "", assetVersion.has_value() ? *assetVersion : 1);
 		if(rootProp)
 			udmData->GetAssetData().GetData() = rootProp;
-		return luabind::object{l,udmData};
+		return luabind::object {l, udmData};
 	}
-	catch(const ::udm::Exception &e)
-	{
-		return Lua::mult<bool,std::string>{l,false,e.what()};
+	catch(const ::udm::Exception &e) {
+		return Lua::mult<bool, std::string> {l, false, e.what()};
 	}
 }
 
@@ -1388,9 +1314,7 @@ static udm::Type determine_lua_object_udm_type(const luabind::object &o)
 	if(type == Lua::Type::String)
 		return udm::Type::String;
 
-	auto isType = [&o]<typename T>() -> bool {
-		return luabind::object_cast_nothrow<T*>(o,static_cast<T*>(nullptr)) != nullptr;
-	};
+	auto isType = [&o]<typename T>() -> bool { return luabind::object_cast_nothrow<T *>(o, static_cast<T *>(nullptr)) != nullptr; };
 	if(isType.template operator()<udm::Vector2>())
 		return udm::Type::Vector2;
 	if(isType.template operator()<udm::Vector3>())
@@ -1423,81 +1347,76 @@ static udm::Type determine_lua_object_udm_type(const luabind::object &o)
 }
 
 template<typename T>
-	static T &get_lua_object_udm_value(const luabind::object &o) requires(!std::is_arithmetic_v<T>)
+static T &get_lua_object_udm_value(const luabind::object &o)
+    requires(!std::is_arithmetic_v<T>)
 {
-	return *luabind::object_cast<T*>(o);
+	return *luabind::object_cast<T *>(o);
 }
 
 template<typename T>
-	static T get_lua_object_udm_value(const luabind::object &o) requires(std::is_arithmetic_v<T>)
+static T get_lua_object_udm_value(const luabind::object &o)
+    requires(std::is_arithmetic_v<T>)
 {
 	return Lua::udm::cast_object<T>(o);
 }
 
 template<typename T>
-	using lua_udm_underlying_numeric_type = 
-		std::conditional_t<std::is_same_v<T,bool>,uint8_t,
-		udm::underlying_numeric_type<T>
-	>;
+using lua_udm_underlying_numeric_type = std::conditional_t<std::is_same_v<T, bool>, uint8_t, udm::underlying_numeric_type<T>>;
 
 template<typename T>
-	static lua_udm_underlying_numeric_type<T> get_numeric_component(const T &value,int32_t idx)
+static lua_udm_underlying_numeric_type<T> get_numeric_component(const T &value, int32_t idx)
 {
 
 	if constexpr(udm::is_arithmetic<T>)
 		return value;
-	else if constexpr(udm::is_vector_type<T> || std::is_same_v<T,udm::EulerAngles> || std::is_same_v<T,udm::Srgba> || std::is_same_v<T,udm::HdrColor>)
+	else if constexpr(udm::is_vector_type<T> || std::is_same_v<T, udm::EulerAngles> || std::is_same_v<T, udm::Srgba> || std::is_same_v<T, udm::HdrColor>)
 		return value[idx];
-	else if constexpr(std::is_same_v<T,udm::Quaternion>)
-	{
+	else if constexpr(std::is_same_v<T, udm::Quaternion>) {
 		// Quaternion memory order is xyzw, but we want wxyz
 		if(idx == 0)
 			return value[3];
-		return value[idx -1];
+		return value[idx - 1];
 	}
-	else
-	{
-		static_assert(std::is_same_v<lua_udm_underlying_numeric_type<T>,float>);
-		return *(reinterpret_cast<const float*>(&value) +idx);
+	else {
+		static_assert(std::is_same_v<lua_udm_underlying_numeric_type<T>, float>);
+		return *(reinterpret_cast<const float *>(&value) + idx);
 	}
 }
 
-static Lua::type<uint32_t> get_numeric_component(lua_State *l,const luabind::object &value,int32_t idx,udm::Type type)
+static Lua::type<uint32_t> get_numeric_component(lua_State *l, const luabind::object &value, int32_t idx, udm::Type type)
 {
 	type = (type != udm::Type::Invalid) ? type : determine_lua_object_udm_type(value);
-	return ::udm::visit_ng(type,[l,&value,idx](auto tag){
-        using T = typename decltype(tag)::type;
+	return ::udm::visit_ng(type, [l, &value, idx](auto tag) {
+		using T = typename decltype(tag)::type;
 		using BaseType = lua_udm_underlying_numeric_type<T>;
-		if constexpr(std::is_same_v<lua_udm_underlying_numeric_type<T>,void>)
+		if constexpr(std::is_same_v<lua_udm_underlying_numeric_type<T>, void>)
 			return Lua::nil;
 		else
-			return luabind::object{l,get_numeric_component<T>(get_lua_object_udm_value<T>(value),idx)};
+			return luabind::object {l, get_numeric_component<T>(get_lua_object_udm_value<T>(value), idx)};
 	});
 }
 
-static Lua::udm_ng lerp_value(lua_State *l,const luabind::object &value0,const luabind::object &value1,float t,udm::Type type)
+static Lua::udm_ng lerp_value(lua_State *l, const luabind::object &value0, const luabind::object &value1, float t, udm::Type type)
 {
 	type = (type != udm::Type::Invalid) ? type : determine_lua_object_udm_type(value0);
-	return ::udm::visit_ng(type,[l,&value0,&value1,t,type](auto tag){
-        using T = typename decltype(tag)::type;
+	return ::udm::visit_ng(type, [l, &value0, &value1, t, type](auto tag) {
+		using T = typename decltype(tag)::type;
 		T valuer;
-		Lua::udm::lerp_value<T>(get_lua_object_udm_value<T>(value0),get_lua_object_udm_value<T>(value1),t,valuer,type);
-		return luabind::object{l,valuer};
+		Lua::udm::lerp_value<T>(get_lua_object_udm_value<T>(value0), get_lua_object_udm_value<T>(value1), t, valuer, type);
+		return luabind::object {l, valuer};
 	});
 }
 
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm, ::udm::Srgba);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm, ::udm::Element);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm, ::udm::Reference);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm, ::udm::HdrColor);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm, ::udm::Data);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm, ::udm::Array);
 
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm,::udm::Srgba);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm,::udm::Element);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm,::udm::Reference);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm,::udm::HdrColor);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm,::udm::Data);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(udm,::udm::Array);
-
-static bool is_supported_array_value_type(::udm::Type valueType,::udm::ArrayType arrayType)
+static bool is_supported_array_value_type(::udm::Type valueType, ::udm::ArrayType arrayType)
 {
-	switch(arrayType)
-	{
+	switch(arrayType) {
 	case ::udm::ArrayType::Compressed:
 		return ::udm::ArrayLz4::IsValueTypeSupported(valueType);
 	default:
@@ -1508,7 +1427,7 @@ static bool is_supported_array_value_type(::udm::Type valueType,::udm::ArrayType
 
 void Lua::udm::register_library(Lua::Interface &lua)
 {
-	auto modUdm = luabind::module(lua.GetState(),"udm");
+	auto modUdm = luabind::module(lua.GetState(), "udm");
 	modUdm[
 		luabind::def("load",+[](lua_State *l,const std::string &fileName) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
 			std::string err;
@@ -1791,398 +1710,326 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		luabind::def("lerp",static_cast<Lua::udm_ng(*)(lua_State*,const luabind::object&,const luabind::object&,float,::udm::Type)>(&::lerp_value))
 	];
 
-	Lua::RegisterLibraryEnums(lua.GetState(),"udm",{
-        {"TYPE_NIL",umath::to_integral(::udm::Type::Nil)},
-        {"TYPE_STRING",umath::to_integral(::udm::Type::String)},
-        {"TYPE_UTF8_STRING",umath::to_integral(::udm::Type::Utf8String)},
-        {"TYPE_INT8",umath::to_integral(::udm::Type::Int8)},
-        {"TYPE_UINT8",umath::to_integral(::udm::Type::UInt8)},
-        {"TYPE_INT16",umath::to_integral(::udm::Type::Int16)},
-        {"TYPE_UINT16",umath::to_integral(::udm::Type::UInt16)},
-        {"TYPE_INT32",umath::to_integral(::udm::Type::Int32)},
-        {"TYPE_UINT32",umath::to_integral(::udm::Type::UInt32)},
-        {"TYPE_INT64",umath::to_integral(::udm::Type::Int64)},
-        {"TYPE_UINT64",umath::to_integral(::udm::Type::UInt64)},
-        {"TYPE_FLOAT",umath::to_integral(::udm::Type::Float)},
-        {"TYPE_DOUBLE",umath::to_integral(::udm::Type::Double)},
-        {"TYPE_BOOLEAN",umath::to_integral(::udm::Type::Boolean)},
-        {"TYPE_VECTOR2",umath::to_integral(::udm::Type::Vector2)},
-        {"TYPE_VECTOR2I",umath::to_integral(::udm::Type::Vector2i)},
-        {"TYPE_VECTOR3",umath::to_integral(::udm::Type::Vector3)},
-        {"TYPE_VECTOR3I",umath::to_integral(::udm::Type::Vector3i)},
-        {"TYPE_VECTOR4",umath::to_integral(::udm::Type::Vector4)},
-        {"TYPE_VECTOR4I",umath::to_integral(::udm::Type::Vector4i)},
-        {"TYPE_QUATERNION",umath::to_integral(::udm::Type::Quaternion)},
-        {"TYPE_EULER_ANGLES",umath::to_integral(::udm::Type::EulerAngles)},
-        {"TYPE_SRGBA",umath::to_integral(::udm::Type::Srgba)},
-        {"TYPE_HDR_COLOR",umath::to_integral(::udm::Type::HdrColor)},
-        {"TYPE_TRANSFORM",umath::to_integral(::udm::Type::Transform)},
-        {"TYPE_SCALED_TRANSFORM",umath::to_integral(::udm::Type::ScaledTransform)},
-        {"TYPE_MAT4",umath::to_integral(::udm::Type::Mat4)},
-        {"TYPE_MAT3X4",umath::to_integral(::udm::Type::Mat3x4)},
-        {"TYPE_BLOB",umath::to_integral(::udm::Type::Blob)},
-        {"TYPE_BLOB_LZ4",umath::to_integral(::udm::Type::BlobLz4)},
-        {"TYPE_ELEMENT",umath::to_integral(::udm::Type::Element)},
-        {"TYPE_ARRAY",umath::to_integral(::udm::Type::Array)},
-        {"TYPE_ARRAY_LZ4",umath::to_integral(::udm::Type::ArrayLz4)},
-		{"TYPE_REFERENCE",umath::to_integral(::udm::Type::Reference)},
-		{"TYPE_STRUCT",umath::to_integral(::udm::Type::Struct)},
-		{"TYPE_HALF",umath::to_integral(::udm::Type::Half)},
-        {"TYPE_COUNT",umath::to_integral(::udm::Type::Count)},
-        {"TYPE_INVALID",umath::to_integral(::udm::Type::Invalid)},
+	Lua::RegisterLibraryEnums(lua.GetState(), "udm",
+	  {{"TYPE_NIL", umath::to_integral(::udm::Type::Nil)}, {"TYPE_STRING", umath::to_integral(::udm::Type::String)}, {"TYPE_UTF8_STRING", umath::to_integral(::udm::Type::Utf8String)}, {"TYPE_INT8", umath::to_integral(::udm::Type::Int8)},
+	    {"TYPE_UINT8", umath::to_integral(::udm::Type::UInt8)}, {"TYPE_INT16", umath::to_integral(::udm::Type::Int16)}, {"TYPE_UINT16", umath::to_integral(::udm::Type::UInt16)}, {"TYPE_INT32", umath::to_integral(::udm::Type::Int32)},
+	    {"TYPE_UINT32", umath::to_integral(::udm::Type::UInt32)}, {"TYPE_INT64", umath::to_integral(::udm::Type::Int64)}, {"TYPE_UINT64", umath::to_integral(::udm::Type::UInt64)}, {"TYPE_FLOAT", umath::to_integral(::udm::Type::Float)},
+	    {"TYPE_DOUBLE", umath::to_integral(::udm::Type::Double)}, {"TYPE_BOOLEAN", umath::to_integral(::udm::Type::Boolean)}, {"TYPE_VECTOR2", umath::to_integral(::udm::Type::Vector2)}, {"TYPE_VECTOR2I", umath::to_integral(::udm::Type::Vector2i)},
+	    {"TYPE_VECTOR3", umath::to_integral(::udm::Type::Vector3)}, {"TYPE_VECTOR3I", umath::to_integral(::udm::Type::Vector3i)}, {"TYPE_VECTOR4", umath::to_integral(::udm::Type::Vector4)}, {"TYPE_VECTOR4I", umath::to_integral(::udm::Type::Vector4i)},
+	    {"TYPE_QUATERNION", umath::to_integral(::udm::Type::Quaternion)}, {"TYPE_EULER_ANGLES", umath::to_integral(::udm::Type::EulerAngles)}, {"TYPE_SRGBA", umath::to_integral(::udm::Type::Srgba)}, {"TYPE_HDR_COLOR", umath::to_integral(::udm::Type::HdrColor)},
+	    {"TYPE_TRANSFORM", umath::to_integral(::udm::Type::Transform)}, {"TYPE_SCALED_TRANSFORM", umath::to_integral(::udm::Type::ScaledTransform)}, {"TYPE_MAT4", umath::to_integral(::udm::Type::Mat4)}, {"TYPE_MAT3X4", umath::to_integral(::udm::Type::Mat3x4)},
+	    {"TYPE_BLOB", umath::to_integral(::udm::Type::Blob)}, {"TYPE_BLOB_LZ4", umath::to_integral(::udm::Type::BlobLz4)}, {"TYPE_ELEMENT", umath::to_integral(::udm::Type::Element)}, {"TYPE_ARRAY", umath::to_integral(::udm::Type::Array)},
+	    {"TYPE_ARRAY_LZ4", umath::to_integral(::udm::Type::ArrayLz4)}, {"TYPE_REFERENCE", umath::to_integral(::udm::Type::Reference)}, {"TYPE_STRUCT", umath::to_integral(::udm::Type::Struct)}, {"TYPE_HALF", umath::to_integral(::udm::Type::Half)},
+	    {"TYPE_COUNT", umath::to_integral(::udm::Type::Count)}, {"TYPE_INVALID", umath::to_integral(::udm::Type::Invalid)},
 
-        {"ARRAY_TYPE_COMPRESSED",umath::to_integral(::udm::ArrayType::Compressed)},
-        {"ARRAY_TYPE_RAW",umath::to_integral(::udm::ArrayType::Raw)},
+	    {"ARRAY_TYPE_COMPRESSED", umath::to_integral(::udm::ArrayType::Compressed)}, {"ARRAY_TYPE_RAW", umath::to_integral(::udm::ArrayType::Raw)},
 
-		{"MERGE_FLAG_NONE",umath::to_integral(::udm::MergeFlags::None)},
-		{"MERGE_FLAG_BIT_OVERWRITE_EXISTING",umath::to_integral(::udm::MergeFlags::OverwriteExisting)},
-		{"MERGE_FLAG_BIT_DEEP_COPY",umath::to_integral(::udm::MergeFlags::DeepCopy)},
-		
-        {"ASCII_SAVE_FLAG_NONE",umath::to_integral(::udm::AsciiSaveFlags::None)},
-        {"ASCII_SAVE_FLAG_BIT_INCLUDE_HEADER",umath::to_integral(::udm::AsciiSaveFlags::IncludeHeader)},
-        {"ASCII_SAVE_FLAG_BIT_DONT_COMPRESS_LZ4_ARRAYS",umath::to_integral(::udm::AsciiSaveFlags::DontCompressLz4Arrays)}
-	});
-	static_assert(umath::to_integral(::udm::Type::Count) == 36,"Update this list when types have been added or removed!");
+	    {"MERGE_FLAG_NONE", umath::to_integral(::udm::MergeFlags::None)}, {"MERGE_FLAG_BIT_OVERWRITE_EXISTING", umath::to_integral(::udm::MergeFlags::OverwriteExisting)}, {"MERGE_FLAG_BIT_DEEP_COPY", umath::to_integral(::udm::MergeFlags::DeepCopy)},
+
+	    {"ASCII_SAVE_FLAG_NONE", umath::to_integral(::udm::AsciiSaveFlags::None)}, {"ASCII_SAVE_FLAG_BIT_INCLUDE_HEADER", umath::to_integral(::udm::AsciiSaveFlags::IncludeHeader)},
+	    {"ASCII_SAVE_FLAG_BIT_DONT_COMPRESS_LZ4_ARRAYS", umath::to_integral(::udm::AsciiSaveFlags::DontCompressLz4Arrays)}});
+	static_assert(umath::to_integral(::udm::Type::Count) == 36, "Update this list when types have been added or removed!");
 
 	auto cdEl = luabind::class_<::udm::Element>("Element");
 	cdEl.def(luabind::tostring(luabind::self));
-	register_property_methods<::udm::Element,::udm::PropertyWrapper&>(cdEl);
+	register_property_methods<::udm::Element, ::udm::PropertyWrapper &>(cdEl);
 	modUdm[cdEl];
-	
+
 	auto cdRef = luabind::class_<::udm::Reference>("Reference");
 	cdRef.def(luabind::constructor<>());
-	cdRef.def(luabind::constructor<const std::string&>());
+	cdRef.def(luabind::constructor<const std::string &>());
 	cdRef.def(luabind::tostring(luabind::self));
-	cdRef.def("GetProperty",+[](lua_State *l,::udm::Reference &ref) -> ::udm::PropertyWrapper {
-		return ref.property ? ::udm::PropertyWrapper{*ref.property} : ::udm::PropertyWrapper{};
-	});
+	cdRef.def(
+	  "GetProperty", +[](lua_State *l, ::udm::Reference &ref) -> ::udm::PropertyWrapper { return ref.property ? ::udm::PropertyWrapper {*ref.property} : ::udm::PropertyWrapper {}; });
 	modUdm[cdRef];
-	
+
 	auto cdStructDescription = luabind::class_<::udm::StructDescription>("StructDescription");
 	cdStructDescription.def(luabind::constructor<>());
-	cdStructDescription.def("GetTypes",+[](lua_State *l,::udm::StructDescription &udmData) -> luabind::object {
-		return Lua::vector_to_table<::udm::Type>(l,udmData.types);
-	});
-	cdStructDescription.def("GetNames",+[](lua_State *l,::udm::StructDescription &udmData) -> luabind::object {
-		return Lua::vector_to_table<std::string>(l,udmData.names);
-	});
-	cdStructDescription.def("GetMemberCount",+[](lua_State *l,::udm::StructDescription &udmData) -> uint32_t {
-		return udmData.GetMemberCount();
-	});
+	cdStructDescription.def(
+	  "GetTypes", +[](lua_State *l, ::udm::StructDescription &udmData) -> luabind::object { return Lua::vector_to_table<::udm::Type>(l, udmData.types); });
+	cdStructDescription.def(
+	  "GetNames", +[](lua_State *l, ::udm::StructDescription &udmData) -> luabind::object { return Lua::vector_to_table<std::string>(l, udmData.names); });
+	cdStructDescription.def(
+	  "GetMemberCount", +[](lua_State *l, ::udm::StructDescription &udmData) -> uint32_t { return udmData.GetMemberCount(); });
 	modUdm[cdStructDescription];
-	
+
 	auto cdStruct = luabind::class_<::udm::Struct>("Struct");
 	cdStruct.def(luabind::constructor<>());
-	cdStruct.def(luabind::constructor<const ::udm::StructDescription&>());
-	cdStruct.def("GetDescription",+[](lua_State *l,::udm::Struct &strct) -> ::udm::StructDescription* {
-		return &strct.description;
-	});
-	cdStruct.def("GetValue",+[](lua_State *l,::udm::Struct &strct) -> luabind::object {
-		auto t = luabind::newtable(l);
-		auto n = strct.description.types.size();
-		auto *ptr = strct.data.data();
-		auto vs = [l,&t,&ptr](auto tag) {
-            using T = typename decltype(tag)::type;
-			if constexpr(std::is_same_v<T,::udm::Nil>)
-				return luabind::object{};
-			else
-			{
+	cdStruct.def(luabind::constructor<const ::udm::StructDescription &>());
+	cdStruct.def(
+	  "GetDescription", +[](lua_State *l, ::udm::Struct &strct) -> ::udm::StructDescription * { return &strct.description; });
+	cdStruct.def(
+	  "GetValue", +[](lua_State *l, ::udm::Struct &strct) -> luabind::object {
+		  auto t = luabind::newtable(l);
+		  auto n = strct.description.types.size();
+		  auto *ptr = strct.data.data();
+		  auto vs = [l, &t, &ptr](auto tag) {
+			  using T = typename decltype(tag)::type;
+			  if constexpr(std::is_same_v<T, ::udm::Nil>)
+				  return luabind::object {};
+			  else {
 
-				auto &v = *reinterpret_cast<T*>(ptr);
-				if constexpr(std::is_same_v<T,::udm::Half>)
-					return luabind::object{l,static_cast<float>(v)};
-				return luabind::object{l,v};
-			}
-		};
-		for(auto i=decltype(n){0u};i<n;++i)
-		{
-			t[i +1] = ::udm::visit<false,true,false>(strct.description.types[i],vs);
-			ptr += ::udm::size_of(strct.description.types[i]);
-		}
-		return t;
-	});
+				  auto &v = *reinterpret_cast<T *>(ptr);
+				  if constexpr(std::is_same_v<T, ::udm::Half>)
+					  return luabind::object {l, static_cast<float>(v)};
+				  return luabind::object {l, v};
+			  }
+		  };
+		  for(auto i = decltype(n) {0u}; i < n; ++i) {
+			  t[i + 1] = ::udm::visit<false, true, false>(strct.description.types[i], vs);
+			  ptr += ::udm::size_of(strct.description.types[i]);
+		  }
+		  return t;
+	  });
 	modUdm[cdStruct];
 
 	auto cdSrgba = luabind::class_<::udm::Srgba>("Srgba");
 	cdSrgba.def(luabind::constructor<>());
 #ifdef _WIN32
-    cdSrgba.def(luabind::tostring(luabind::self));
+	cdSrgba.def(luabind::tostring(luabind::self));
 #else
-    cdSrgba.def("__tostring",+[](const ::udm::Srgba &value) -> std::string {
-        std::stringstream ss;
-        ss<<value;
-        return ss.str();
-    });
+	cdSrgba.def(
+	  "__tostring", +[](const ::udm::Srgba &value) -> std::string {
+		  std::stringstream ss;
+		  ss << value;
+		  return ss.str();
+	  });
 #endif
-	cdSrgba.property("r",+[](lua_State *l,::udm::Srgba &srgba) -> uint8_t {
-		return srgba[0];
-	},+[](lua_State *l,::udm::Srgba &srgba,uint8_t r) {
-		srgba[0] = r;
-	});
-	cdSrgba.property("g",+[](lua_State *l,::udm::Srgba &srgba) -> uint8_t {
-		return srgba[1];
-	},+[](lua_State *l,::udm::Srgba &srgba,uint8_t g) {
-		srgba[1] = g;
-	});
-	cdSrgba.property("b",+[](lua_State *l,::udm::Srgba &srgba) -> uint8_t {
-		return srgba[2];
-	},+[](lua_State *l,::udm::Srgba &srgba,uint8_t b) {
-		srgba[2] = b;
-	});
-	cdSrgba.property("a",+[](lua_State *l,::udm::Srgba &srgba) -> uint8_t {
-		return srgba[3];
-	},+[](lua_State *l,::udm::Srgba &srgba,uint8_t a) {
-		srgba[3] = a;
-	});
+	cdSrgba.property(
+	  "r", +[](lua_State *l, ::udm::Srgba &srgba) -> uint8_t { return srgba[0]; }, +[](lua_State *l, ::udm::Srgba &srgba, uint8_t r) { srgba[0] = r; });
+	cdSrgba.property(
+	  "g", +[](lua_State *l, ::udm::Srgba &srgba) -> uint8_t { return srgba[1]; }, +[](lua_State *l, ::udm::Srgba &srgba, uint8_t g) { srgba[1] = g; });
+	cdSrgba.property(
+	  "b", +[](lua_State *l, ::udm::Srgba &srgba) -> uint8_t { return srgba[2]; }, +[](lua_State *l, ::udm::Srgba &srgba, uint8_t b) { srgba[2] = b; });
+	cdSrgba.property(
+	  "a", +[](lua_State *l, ::udm::Srgba &srgba) -> uint8_t { return srgba[3]; }, +[](lua_State *l, ::udm::Srgba &srgba, uint8_t a) { srgba[3] = a; });
 	modUdm[cdSrgba];
 
 	auto cdHdr = luabind::class_<::udm::HdrColor>("HdrColor");
 	cdHdr.def(luabind::constructor<>());
 #ifdef _WIN32
-    cdHdr.def(luabind::tostring(luabind::self));
+	cdHdr.def(luabind::tostring(luabind::self));
 #else
-    cdHdr.def("__tostring",+[](const ::udm::HdrColor &value) -> std::string {
-        std::stringstream ss;
-        ss<<value;
-        return ss.str();
-    });
+	cdHdr.def(
+	  "__tostring", +[](const ::udm::HdrColor &value) -> std::string {
+		  std::stringstream ss;
+		  ss << value;
+		  return ss.str();
+	  });
 #endif
-	cdHdr.property("r",+[](lua_State *l,::udm::HdrColor &srgba) -> uint8_t {
-		return srgba[0];
-	},+[](lua_State *l,::udm::HdrColor &srgba,uint8_t r) {
-		srgba[0] = r;
-	});
-	cdHdr.property("g",+[](lua_State *l,::udm::HdrColor &srgba) -> uint8_t {
-		return srgba[1];
-	},+[](lua_State *l,::udm::HdrColor &srgba,uint8_t g) {
-		srgba[1] = g;
-	});
-	cdHdr.property("b",+[](lua_State *l,::udm::HdrColor &srgba) -> uint8_t {
-		return srgba[2];
-	},+[](lua_State *l,::udm::HdrColor &srgba,uint8_t b) {
-		srgba[2] = b;
-	});
-	cdHdr.property("a",+[](lua_State *l,::udm::HdrColor &srgba) -> uint8_t {
-		return srgba[3];
-	},+[](lua_State *l,::udm::HdrColor &srgba,uint8_t a) {
-		srgba[3] = a;
-	});
+	cdHdr.property(
+	  "r", +[](lua_State *l, ::udm::HdrColor &srgba) -> uint8_t { return srgba[0]; }, +[](lua_State *l, ::udm::HdrColor &srgba, uint8_t r) { srgba[0] = r; });
+	cdHdr.property(
+	  "g", +[](lua_State *l, ::udm::HdrColor &srgba) -> uint8_t { return srgba[1]; }, +[](lua_State *l, ::udm::HdrColor &srgba, uint8_t g) { srgba[1] = g; });
+	cdHdr.property(
+	  "b", +[](lua_State *l, ::udm::HdrColor &srgba) -> uint8_t { return srgba[2]; }, +[](lua_State *l, ::udm::HdrColor &srgba, uint8_t b) { srgba[2] = b; });
+	cdHdr.property(
+	  "a", +[](lua_State *l, ::udm::HdrColor &srgba) -> uint8_t { return srgba[3]; }, +[](lua_State *l, ::udm::HdrColor &srgba, uint8_t a) { srgba[3] = a; });
 	modUdm[cdHdr];
 
 	auto cdData = luabind::class_<::udm::Data>("Data");
 	cdData.def(luabind::tostring(luabind::self));
-	cdData.def("Save",+[](lua_State *l,::udm::Data &udmData,const std::string &fileName) {
-		auto fname = fileName;
-		if(Lua::file::validate_write_operation(l,fname) == false)
-		{
-			Lua::PushBool(l,false);
-			Lua::PushString(l,"Invalid write location!");
-			return;
-		}
-		try
-		{
-			udmData.Save(fname);
-			Lua::PushBool(l,true);
-		}
-		catch(const ::udm::Exception &e)
-		{
-			Lua::PushBool(l,false);
-			Lua::PushString(l,e.what());
-		}
-	});
-	cdData.def("SaveAscii",+[](lua_State *l,::udm::Data &udmData,const std::string &fileName) {
-		auto fname = fileName;
-		if(Lua::file::validate_write_operation(l,fname) == false)
-		{
-			Lua::PushBool(l,false);
-			Lua::PushString(l,"Invalid write location!");
-			return;
-		}
-		try
-		{
-			udmData.SaveAscii(fname);
-			Lua::PushBool(l,true);
-		}
-		catch(const ::udm::Exception &e)
-		{
-			Lua::PushBool(l,false);
-			Lua::PushString(l,e.what());
-		}
-	});
-	cdData.def("SaveAscii",+[](lua_State *l,::udm::Data &udmData,const std::string &fileName,::udm::AsciiSaveFlags flags) {
-		auto fname = fileName;
-		if(Lua::file::validate_write_operation(l,fname) == false)
-		{
-			Lua::PushBool(l,false);
-			Lua::PushString(l,"Invalid write location!");
-			return;
-		}
-		try
-		{
-			udmData.SaveAscii(fname,flags);
-			Lua::PushBool(l,true);
-		}
-		catch(const ::udm::Exception &e)
-		{
-			Lua::PushBool(l,false);
-			Lua::PushString(l,e.what());
-		}
-	});
-	cdData.def("Save",+[](lua_State *l,::udm::Data &udmData,LFile &f) {
-		auto fptr = f.GetHandle();
-		if(fptr == nullptr)
-			return;
-		try
-		{
-			udmData.Save(*fptr);
-			Lua::PushBool(l,true);
-		}
-		catch(const ::udm::Exception &e)
-		{
-			Lua::PushBool(l,false);
-			Lua::PushString(l,e.what());
-		}
-	});
-	cdData.def("SaveAscii",+[](lua_State *l,::udm::Data &udmData,LFile &f) {
-		auto fptr = f.GetHandle();
-		if(fptr == nullptr)
-			return;
-		try
-		{
-			udmData.SaveAscii(*fptr);
-			Lua::PushBool(l,true);
-		}
-		catch(const ::udm::Exception &e)
-		{
-			Lua::PushBool(l,false);
-			Lua::PushString(l,e.what());
-		}
-	});
-	cdData.def("SaveAscii",+[](lua_State *l,::udm::Data &udmData,LFile &f,::udm::AsciiSaveFlags flags) {
-		auto fptr = f.GetHandle();
-		if(fptr == nullptr)
-			return;
-		try
-		{
-			udmData.SaveAscii(*fptr,flags);
-			Lua::PushBool(l,true);
-		}
-		catch(const ::udm::Exception &e)
-		{
-			Lua::PushBool(l,false);
-			Lua::PushString(l,e.what());
-		}
-	});
-	cdData.def("ToAscii",+[](lua_State *l,::udm::Data &udmData) -> std::string {
-		std::stringstream ss;
-		udmData.ToAscii(ss);
-		return ss.str();
-	});
-	cdData.def("GetAssetData",+[](lua_State *l,::udm::Data &udmData) -> ::udm::AssetData {return udmData.GetAssetData();});
-	cdData.def("LoadProperty",+[](lua_State *l,::udm::Data &udmData,const std::string &path) {
-		try
-		{
-			auto prop = udmData.LoadProperty(path);
-			Lua::Push(l,prop);
-		}
-		catch(const ::udm::Exception &e)
-		{
-			Lua::PushBool(l,false);
-			Lua::PushString(l,e.what());
-		}
-	});
-	cdData.def("GetRootElement",+[](lua_State *l,::udm::Data &udmData) -> ::udm::Element* {
-		return &udmData.GetRootElement();
-	});
-	cdData.def("Get",+[](lua_State *l,::udm::Data &udmData,const std::string &key) -> ::udm::LinkedPropertyWrapper {
-		return udmData.GetRootElement()[key];
-	});
-	cdData.def("ResolveReferences",+[](lua_State *l,::udm::Data &udmData) {
-		udmData.ResolveReferences();
-	});
+	cdData.def(
+	  "Save", +[](lua_State *l, ::udm::Data &udmData, const std::string &fileName) {
+		  auto fname = fileName;
+		  if(Lua::file::validate_write_operation(l, fname) == false) {
+			  Lua::PushBool(l, false);
+			  Lua::PushString(l, "Invalid write location!");
+			  return;
+		  }
+		  try {
+			  udmData.Save(fname);
+			  Lua::PushBool(l, true);
+		  }
+		  catch(const ::udm::Exception &e) {
+			  Lua::PushBool(l, false);
+			  Lua::PushString(l, e.what());
+		  }
+	  });
+	cdData.def(
+	  "SaveAscii", +[](lua_State *l, ::udm::Data &udmData, const std::string &fileName) {
+		  auto fname = fileName;
+		  if(Lua::file::validate_write_operation(l, fname) == false) {
+			  Lua::PushBool(l, false);
+			  Lua::PushString(l, "Invalid write location!");
+			  return;
+		  }
+		  try {
+			  udmData.SaveAscii(fname);
+			  Lua::PushBool(l, true);
+		  }
+		  catch(const ::udm::Exception &e) {
+			  Lua::PushBool(l, false);
+			  Lua::PushString(l, e.what());
+		  }
+	  });
+	cdData.def(
+	  "SaveAscii", +[](lua_State *l, ::udm::Data &udmData, const std::string &fileName, ::udm::AsciiSaveFlags flags) {
+		  auto fname = fileName;
+		  if(Lua::file::validate_write_operation(l, fname) == false) {
+			  Lua::PushBool(l, false);
+			  Lua::PushString(l, "Invalid write location!");
+			  return;
+		  }
+		  try {
+			  udmData.SaveAscii(fname, flags);
+			  Lua::PushBool(l, true);
+		  }
+		  catch(const ::udm::Exception &e) {
+			  Lua::PushBool(l, false);
+			  Lua::PushString(l, e.what());
+		  }
+	  });
+	cdData.def(
+	  "Save", +[](lua_State *l, ::udm::Data &udmData, LFile &f) {
+		  auto fptr = f.GetHandle();
+		  if(fptr == nullptr)
+			  return;
+		  try {
+			  udmData.Save(*fptr);
+			  Lua::PushBool(l, true);
+		  }
+		  catch(const ::udm::Exception &e) {
+			  Lua::PushBool(l, false);
+			  Lua::PushString(l, e.what());
+		  }
+	  });
+	cdData.def(
+	  "SaveAscii", +[](lua_State *l, ::udm::Data &udmData, LFile &f) {
+		  auto fptr = f.GetHandle();
+		  if(fptr == nullptr)
+			  return;
+		  try {
+			  udmData.SaveAscii(*fptr);
+			  Lua::PushBool(l, true);
+		  }
+		  catch(const ::udm::Exception &e) {
+			  Lua::PushBool(l, false);
+			  Lua::PushString(l, e.what());
+		  }
+	  });
+	cdData.def(
+	  "SaveAscii", +[](lua_State *l, ::udm::Data &udmData, LFile &f, ::udm::AsciiSaveFlags flags) {
+		  auto fptr = f.GetHandle();
+		  if(fptr == nullptr)
+			  return;
+		  try {
+			  udmData.SaveAscii(*fptr, flags);
+			  Lua::PushBool(l, true);
+		  }
+		  catch(const ::udm::Exception &e) {
+			  Lua::PushBool(l, false);
+			  Lua::PushString(l, e.what());
+		  }
+	  });
+	cdData.def(
+	  "ToAscii", +[](lua_State *l, ::udm::Data &udmData) -> std::string {
+		  std::stringstream ss;
+		  udmData.ToAscii(ss);
+		  return ss.str();
+	  });
+	cdData.def(
+	  "GetAssetData", +[](lua_State *l, ::udm::Data &udmData) -> ::udm::AssetData { return udmData.GetAssetData(); });
+	cdData.def(
+	  "LoadProperty", +[](lua_State *l, ::udm::Data &udmData, const std::string &path) {
+		  try {
+			  auto prop = udmData.LoadProperty(path);
+			  Lua::Push(l, prop);
+		  }
+		  catch(const ::udm::Exception &e) {
+			  Lua::PushBool(l, false);
+			  Lua::PushString(l, e.what());
+		  }
+	  });
+	cdData.def(
+	  "GetRootElement", +[](lua_State *l, ::udm::Data &udmData) -> ::udm::Element * { return &udmData.GetRootElement(); });
+	cdData.def(
+	  "Get", +[](lua_State *l, ::udm::Data &udmData, const std::string &key) -> ::udm::LinkedPropertyWrapper { return udmData.GetRootElement()[key]; });
+	cdData.def(
+	  "ResolveReferences", +[](lua_State *l, ::udm::Data &udmData) { udmData.ResolveReferences(); });
 	modUdm[cdData];
 
 	auto cdPropWrap = luabind::class_<::udm::PropertyWrapper>("PropertyWrapper");
 	cdPropWrap.def(luabind::constructor<>());
 	cdPropWrap.def(luabind::tostring(luabind::self));
 	static std::optional<LuaUdmArrayIterator> g_it {}; // HACK: This is a workaround for a bug in luabind, which causes errors when compiled with gcc.
-	cdPropWrap.def("It",+[](lua_State *l,::udm::PropertyWrapper &p) -> LuaUdmArrayIterator& {
-		g_it = LuaUdmArrayIterator{p};
-		return *g_it;
-	},luabind::return_stl_iterator{});
-	cdPropWrap.def("DebugPrint",static_cast<void(*)(const ::udm::PropertyWrapper&)>(&debug_print_wrapper));
-	register_property_methods<::udm::PropertyWrapper,::udm::PropertyWrapper&>(cdPropWrap);
+	cdPropWrap.def(
+	  "It",
+	  +[](lua_State *l, ::udm::PropertyWrapper &p) -> LuaUdmArrayIterator & {
+		  g_it = LuaUdmArrayIterator {p};
+		  return *g_it;
+	  },
+	  luabind::return_stl_iterator {});
+	cdPropWrap.def("DebugPrint", static_cast<void (*)(const ::udm::PropertyWrapper &)>(&debug_print_wrapper));
+	register_property_methods<::udm::PropertyWrapper, ::udm::PropertyWrapper &>(cdPropWrap);
 	modUdm[cdPropWrap];
 
-	auto cdLinkedPropWrap = luabind::class_<::udm::LinkedPropertyWrapper,::udm::PropertyWrapper>("LinkedPropertyWrapper");
+	auto cdLinkedPropWrap = luabind::class_<::udm::LinkedPropertyWrapper, ::udm::PropertyWrapper>("LinkedPropertyWrapper");
 	cdLinkedPropWrap.def(luabind::tostring(luabind::self));
 	cdLinkedPropWrap.def(luabind::constructor<>());
-	cdLinkedPropWrap.def("GetAssetData",+[](lua_State *l,::udm::LinkedPropertyWrapper &prop) -> ::udm::AssetData {
-		return ::udm::AssetData{prop};
-	});
-	cdLinkedPropWrap.def("GetPath",+[](lua_State *l,::udm::LinkedPropertyWrapper &prop) -> std::string {
-		return prop.GetPath();
-	});
-	cdLinkedPropWrap.def("ClaimOwnership",+[](lua_State *l,::udm::LinkedPropertyWrapper &prop) -> ::udm::PProperty {
-		return prop.ClaimOwnership();
-	});
+	cdLinkedPropWrap.def(
+	  "GetAssetData", +[](lua_State *l, ::udm::LinkedPropertyWrapper &prop) -> ::udm::AssetData { return ::udm::AssetData {prop}; });
+	cdLinkedPropWrap.def(
+	  "GetPath", +[](lua_State *l, ::udm::LinkedPropertyWrapper &prop) -> std::string { return prop.GetPath(); });
+	cdLinkedPropWrap.def(
+	  "ClaimOwnership", +[](lua_State *l, ::udm::LinkedPropertyWrapper &prop) -> ::udm::PProperty { return prop.ClaimOwnership(); });
 	modUdm[cdLinkedPropWrap];
-	pragma::lua::define_custom_constructor<::udm::LinkedPropertyWrapper,
-		[](::udm::Property &prop) -> ::udm::LinkedPropertyWrapper {
-		return ::udm::LinkedPropertyWrapper{prop};
-	},::udm::Property&>(lua.GetState());
+	pragma::lua::define_custom_constructor<::udm::LinkedPropertyWrapper, [](::udm::Property &prop) -> ::udm::LinkedPropertyWrapper { return ::udm::LinkedPropertyWrapper {prop}; }, ::udm::Property &>(lua.GetState());
 
-	auto cdAssetData = luabind::class_<::udm::AssetData,::udm::LinkedPropertyWrapper,::udm::PropertyWrapper>("AssetData");
+	auto cdAssetData = luabind::class_<::udm::AssetData, ::udm::LinkedPropertyWrapper, ::udm::PropertyWrapper>("AssetData");
 	cdAssetData.def(luabind::tostring(luabind::self));
-	cdAssetData.def("GetAssetType",&::udm::AssetData::GetAssetType);
-	cdAssetData.def("GetAssetVersion",&::udm::AssetData::GetAssetVersion);
-	cdAssetData.def("SetAssetType",&::udm::AssetData::SetAssetType);
-	cdAssetData.def("SetAssetVersion",&::udm::AssetData::SetAssetVersion);
-	cdAssetData.def("GetData",+[](lua_State *l,::udm::AssetData &a) -> ::udm::LinkedPropertyWrapper {return a.GetData();});
-	cdAssetData.def("SetData",+[](lua_State *l,::udm::AssetData &a,::udm::PProperty &prop) {
-		a.GetData() = prop;
-	});
+	cdAssetData.def("GetAssetType", &::udm::AssetData::GetAssetType);
+	cdAssetData.def("GetAssetVersion", &::udm::AssetData::GetAssetVersion);
+	cdAssetData.def("SetAssetType", &::udm::AssetData::SetAssetType);
+	cdAssetData.def("SetAssetVersion", &::udm::AssetData::SetAssetVersion);
+	cdAssetData.def(
+	  "GetData", +[](lua_State *l, ::udm::AssetData &a) -> ::udm::LinkedPropertyWrapper { return a.GetData(); });
+	cdAssetData.def(
+	  "SetData", +[](lua_State *l, ::udm::AssetData &a, ::udm::PProperty &prop) { a.GetData() = prop; });
 	modUdm[cdAssetData];
 	pragma::lua::define_custom_constructor<::udm::AssetData,
-		[](::udm::LinkedPropertyWrapper &prop,const std::string &identifier,::udm::Version version) -> ::udm::AssetData {
-		::udm::AssetData assetData {prop};
-		assetData.SetAssetType(identifier);
-		assetData.SetAssetVersion(version);
-		return assetData;
-	},::udm::LinkedPropertyWrapper&,const std::string&,::udm::Version>(lua.GetState());
+	  [](::udm::LinkedPropertyWrapper &prop, const std::string &identifier, ::udm::Version version) -> ::udm::AssetData {
+		  ::udm::AssetData assetData {prop};
+		  assetData.SetAssetType(identifier);
+		  assetData.SetAssetVersion(version);
+		  return assetData;
+	  },
+	  ::udm::LinkedPropertyWrapper &, const std::string &, ::udm::Version>(lua.GetState());
 
 	auto cdArray = luabind::class_<::udm::Array>("Array");
 	cdArray.def(luabind::tostring(luabind::self));
-	cdArray.def("GetArrayType",&::udm::Array::GetArrayType);
-	cdArray.def("ToTable",+[](lua_State *l,::udm::Array &a) -> Lua::tb<void> {
-		auto t = luabind::newtable(l);
-		for(uint32_t idx = 1;auto &val : a)
-			t[idx++] = udm_to_value(l,val);
-		return t;
-	});
+	cdArray.def("GetArrayType", &::udm::Array::GetArrayType);
+	cdArray.def(
+	  "ToTable", +[](lua_State *l, ::udm::Array &a) -> Lua::tb<void> {
+		  auto t = luabind::newtable(l);
+		  for(uint32_t idx = 1; auto &val : a)
+			  t[idx++] = udm_to_value(l, val);
+		  return t;
+	  });
 	modUdm[cdArray];
 
 	auto cdProp = luabind::class_<::udm::Property>("Property");
 	cdProp.def(luabind::tostring(luabind::self));
-	register_property_methods<::udm::Property,::udm::PropertyWrapper>(cdProp);
+	register_property_methods<::udm::Property, ::udm::PropertyWrapper>(cdProp);
 	//cdProp.def("GetType",+[](lua_State *l,::udm::Property &prop) -> ::udm::Type {
 	//	return prop.type;
 	//});
-	cdProp.def("ToAscii",+[](lua_State *l,::udm::Property &prop,const std::string &propName,const std::string &prefix) -> std::string {
-		std::stringstream ss;
-		prop.ToAscii(::udm::AsciiSaveFlags::None,ss,propName,prefix);
-		return ss.str();
-	});
-	cdProp.def("ToAscii",+[](lua_State *l,::udm::Property &prop,const std::string &propName) -> std::string {
-		std::stringstream ss;
-		prop.ToAscii(::udm::AsciiSaveFlags::None,ss,propName);
-		return ss.str();
-	});
-	cdProp.def("Get",+[](lua_State *l,::udm::Property &prop) -> ::udm::LinkedPropertyWrapper {
-		return ::udm::LinkedPropertyWrapper{prop};
-	});
+	cdProp.def(
+	  "ToAscii", +[](lua_State *l, ::udm::Property &prop, const std::string &propName, const std::string &prefix) -> std::string {
+		  std::stringstream ss;
+		  prop.ToAscii(::udm::AsciiSaveFlags::None, ss, propName, prefix);
+		  return ss.str();
+	  });
+	cdProp.def(
+	  "ToAscii", +[](lua_State *l, ::udm::Property &prop, const std::string &propName) -> std::string {
+		  std::stringstream ss;
+		  prop.ToAscii(::udm::AsciiSaveFlags::None, ss, propName);
+		  return ss.str();
+	  });
+	cdProp.def(
+	  "Get", +[](lua_State *l, ::udm::Property &prop) -> ::udm::LinkedPropertyWrapper { return ::udm::LinkedPropertyWrapper {prop}; });
 	modUdm[cdProp];
-	
+
 	// TODO: Register "Get" method as subscript operator for the Lua classes
 	// Attempts below don't work
 	/*auto *reg = luabind::detail::class_registry::get_registry(lua.GetState());

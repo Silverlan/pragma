@@ -14,41 +14,31 @@
 #include <pragma/model/animation/play_animation_flags.hpp>
 #include <optional>
 
-namespace nwm
-{
+namespace nwm {
 	class RecipientFilter;
 };
 struct AnimationEvent;
-namespace pragma
-{
+namespace pragma {
 	class CViewModelComponent;
-	class DLLCLIENT CWeaponComponent final
-		: public BaseWeaponComponent,
-		public CBaseNetComponent
-	{
-	public:
+	class DLLCLIENT CWeaponComponent final : public BaseWeaponComponent, public CBaseNetComponent {
+	  public:
 		static ComponentEventId EVENT_ATTACH_TO_OWNER;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		static unsigned int GetWeaponCount();
-		static const std::vector<CWeaponComponent*> &GetAll();
+		static const std::vector<CWeaponComponent *> &GetAll();
 
-		enum class StateFlags : uint8_t
-		{
-			None = 0u,
-			HideWorldModelInFirstPerson = 1u,
-			UpdatingDeployState = HideWorldModelInFirstPerson<<1u
-		};
+		enum class StateFlags : uint8_t { None = 0u, HideWorldModelInFirstPerson = 1u, UpdatingDeployState = HideWorldModelInFirstPerson << 1u };
 
 		virtual ~CWeaponComponent() override;
-		
+
 		CWeaponComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual bool HandleViewModelAnimationEvent(CViewModelComponent *vm,const AnimationEvent &ev);
+		virtual bool HandleViewModelAnimationEvent(CViewModelComponent *vm, const AnimationEvent &ev);
 		virtual void Deploy() override;
 		virtual void Holster() override;
-		virtual bool PlayViewActivity(Activity activity,pragma::FPlayAnim flags=pragma::FPlayAnim::Default);
+		virtual bool PlayViewActivity(Activity activity, pragma::FPlayAnim flags = pragma::FPlayAnim::Default);
 		CViewModelComponent *GetViewModel();
 		virtual void PrimaryAttack() override;
 		virtual void SecondaryAttack() override;
@@ -65,12 +55,12 @@ namespace pragma
 		const Vector3 &GetViewModelOffset() const;
 		void SetViewFOV(umath::Degree fov);
 		umath::Degree GetViewFOV() const;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 
-		void SetViewModelComponent(pragma::ComponentId component) {m_viewModelComponent = component;}
-		pragma::ComponentId GetViewModelComponent() const {return m_viewModelComponent;}
+		void SetViewModelComponent(pragma::ComponentId component) { m_viewModelComponent = component; }
+		pragma::ComponentId GetViewModelComponent() const { return m_viewModelComponent; }
 		void UpdateDeployState();
-	protected:
+	  protected:
 		// Either the view-model or the character that owns the weapon
 		EntityHandle m_hTarget;
 		StateFlags m_stateFlags = StateFlags::None;
@@ -81,18 +71,16 @@ namespace pragma
 		std::optional<umath::Degree> m_viewFov {};
 		CallbackHandle m_cbOnOwnerObserverModeChanged = {};
 		virtual Activity TranslateViewActivity(Activity act);
-		virtual void OnFireBullets(const BulletInfo &bulletInfo,Vector3 &bulletOrigin,Vector3 &bulletDir,Vector3 *effectsOrigin=nullptr) override;
+		virtual void OnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin = nullptr) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		void UpdateViewModel();
 		void UpdateWorldModel();
 		void ClearOwnerCallbacks();
-	private:
-		static std::vector<CWeaponComponent*> s_weapons;
+	  private:
+		static std::vector<CWeaponComponent *> s_weapons;
 	};
-	struct DLLCLIENT CEAttachToOwner
-		: public ComponentEvent
-	{
-		CEAttachToOwner(BaseEntity &owner,CViewModelComponent *optViewmodel);
+	struct DLLCLIENT CEAttachToOwner : public ComponentEvent {
+		CEAttachToOwner(BaseEntity &owner, CViewModelComponent *optViewmodel);
 		virtual void PushArguments(lua_State *l) override;
 		BaseEntity &owner;
 		CViewModelComponent *viewModel = nullptr;

@@ -19,7 +19,7 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/game/c_game_createguielement.h"
 
-DEFINE_BASE_HANDLE(DLLCLIENT,CHCNode,CHCNode);
+DEFINE_BASE_HANDLE(DLLCLIENT, CHCNode, CHCNode);
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -29,13 +29,11 @@ static const uint32_t maxPrevInvisNodeBatchSize = 50;
 static CHC *chc_debug_draw = nullptr;
 #endif
 
-CHC::CHC(pragma::CCameraComponent &cam,const std::shared_ptr<BaseOcclusionOctree> &octree)
-	: m_cam(cam.GetHandle<pragma::CCameraComponent>()),m_frameID(0),m_octree(octree),
-	m_cbOnNodeCreated(),m_cbOnNodeDestroyed()
+CHC::CHC(pragma::CCameraComponent &cam, const std::shared_ptr<BaseOcclusionOctree> &octree)
+    : m_cam(cam.GetHandle<pragma::CCameraComponent>()), m_frameID(0), m_octree(octree), m_cbOnNodeCreated(), m_cbOnNodeDestroyed()
 #ifdef CHC_DEBUGGING_ENABLED
-	,m_bDrawDebugTexture(false),m_hGUIDebug(),m_debugMeshVertexBuffer(0),m_debugCallback(),
-	m_debugQueryDepthOverheadCamera(nullptr),
-	m_debugFrustumBuffer(0)
+      ,
+      m_bDrawDebugTexture(false), m_hGUIDebug(), m_debugMeshVertexBuffer(0), m_debugCallback(), m_debugQueryDepthOverheadCamera(nullptr), m_debugFrustumBuffer(0)
 #endif
 {
 	Reset(octree);
@@ -64,8 +62,8 @@ void CHC::Reset(const std::shared_ptr<BaseOcclusionOctree> &octree)
 	m_nodes.clear();
 	if(m_octree.expired() == true)
 		return;
-	m_cbOnNodeCreated = octree->AddNodeCreatedCallback(std::bind(&CHC::OnRenderNodeCreated,this,std::placeholders::_1));
-	m_cbOnNodeDestroyed = octree->AddNodeDestroyedCallback(std::bind(&CHC::OnRenderNodeDestroyed,this,std::placeholders::_1));
+	m_cbOnNodeCreated = octree->AddNodeCreatedCallback(std::bind(&CHC::OnRenderNodeCreated, this, std::placeholders::_1));
+	m_cbOnNodeDestroyed = octree->AddNodeDestroyedCallback(std::bind(&CHC::OnRenderNodeDestroyed, this, std::placeholders::_1));
 
 	InitializeNodes(octree->GetRootNode());
 }
@@ -73,22 +71,20 @@ void CHC::Reset(const std::shared_ptr<BaseOcclusionOctree> &octree)
 void CHC::InitializeNodes(const BaseOcclusionOctree::Node &node)
 {
 	auto idx = node.GetIndex();
-	if(idx >= m_nodes.size())
-	{
-		auto maxNodes = idx +1;
+	if(idx >= m_nodes.size()) {
+		auto maxNodes = idx + 1;
 		maxNodes += 10; // Add several nodes as buffer
 		auto numNodes = static_cast<uint32_t>(m_nodes.size());
 		m_nodes.resize(maxNodes);
-		memset(&m_nodes.at(numNodes),0,(maxNodes -numNodes) *sizeof(CHCNode*));
+		memset(&m_nodes.at(numNodes), 0, (maxNodes - numNodes) * sizeof(CHCNode *));
 	}
 	auto &dstNode = m_nodes.at(idx);
-	if(dstNode != nullptr)
-	{
+	if(dstNode != nullptr) {
 		if(dstNode->m_node.expired() == false && dstNode->m_node.lock().get() == &node)
 			return;
 		m_nodes.at(idx) = nullptr;
 	}
-	m_nodes.at(idx) = std::shared_ptr<CHCNode>(new CHCNode(this,node));
+	m_nodes.at(idx) = std::shared_ptr<CHCNode>(new CHCNode(this, node));
 }
 
 void CHC::OnRenderNodeCreated(std::reference_wrapper<const BaseOcclusionOctree::Node> node)
@@ -96,21 +92,19 @@ void CHC::OnRenderNodeCreated(std::reference_wrapper<const BaseOcclusionOctree::
 	auto *octree = node.get().GetTree();
 	auto numNodes = static_cast<uint32_t>(m_nodes.size());
 	auto maxNodes = octree->GetMaxNodeCount();
-	if(maxNodes > numNodes)
-	{
+	if(maxNodes > numNodes) {
 		maxNodes += 10; // Add several nodes as buffer
 		m_nodes.resize(maxNodes);
-		memset(&m_nodes[numNodes],0,(maxNodes -numNodes) *sizeof(CHCNode*));
+		memset(&m_nodes[numNodes], 0, (maxNodes - numNodes) * sizeof(CHCNode *));
 	}
 	auto idx = node.get().GetIndex();
 	auto &dstNode = m_nodes.at(idx);
-	if(dstNode != nullptr)
-	{
+	if(dstNode != nullptr) {
 		if(dstNode->m_node.expired() == false && dstNode->m_node.lock().get() == &node.get())
 			return;
 		m_nodes.at(idx) = nullptr;
 	}
-	m_nodes.at(idx) = std::shared_ptr<CHCNode>(new CHCNode(this,node));
+	m_nodes.at(idx) = std::shared_ptr<CHCNode>(new CHCNode(this, node));
 }
 void CHC::OnRenderNodeDestroyed(std::reference_wrapper<const BaseOcclusionOctree::Node> node)
 {
@@ -121,7 +115,7 @@ void CHC::OnRenderNodeDestroyed(std::reference_wrapper<const BaseOcclusionOctree
 }
 
 #ifdef CHC_DEBUGGING_ENABLED
-void CHC::DebugRender(CHCNode*,bool)
+void CHC::DebugRender(CHCNode *, bool)
 {
 	/*static ShaderOcclusion *shader = static_cast<ShaderOcclusion*>(c_game->GetShader("occlusion"));
 	auto *renderNode = node->GetRenderNode();
@@ -221,7 +215,7 @@ void CHC::DebugRender()
 	OpenGL::Disable(GL_BLEND);*/ // Vulkan TODO
 }
 
-bool CHC::GetDrawDebugTexture() {return m_bDrawDebugTexture;}
+bool CHC::GetDrawDebugTexture() { return m_bDrawDebugTexture; }
 void CHC::SetDrawDebugTexture(bool b)
 {
 	/*m_bDrawDebugTexture = b;
@@ -361,17 +355,16 @@ void CHC::UpdateFrustum()
 void CHC::TraverseNode(CHCNode *cNode)
 {
 	//if(cNode->IsLeaf()) // TODO We need to render all meshes in this node, even if it's not a leaf node!?
-		Render(cNode);
+	Render(cNode);
 	//else
 	//{
-		for(unsigned int i=0;i<cNode->GetChildCount();i++)
-		{
-			auto *child = cNode->GetChild(i);
-			if(child != NULL)
-				m_distanceQueue.push(child->GetHandle());
-		}
-		if(!cNode->IsLeaf()) // TODO (Originally no condition)
-			cNode->m_bVisible = false;
+	for(unsigned int i = 0; i < cNode->GetChildCount(); i++) {
+		auto *child = cNode->GetChild(i);
+		if(child != NULL)
+			m_distanceQueue.push(child->GetHandle());
+	}
+	if(!cNode->IsLeaf()) // TODO (Originally no condition)
+		cNode->m_bVisible = false;
 	//}
 }
 
@@ -387,8 +380,7 @@ void CHC::Render(CHCNode *cNode)
 
 void CHC::PullUpVisibility(CHCNode *cNode)
 {
-	while(cNode != nullptr && !cNode->m_bVisible)
-	{
+	while(cNode != nullptr && !cNode->m_bVisible) {
 		cNode->m_bVisible = true;
 		cNode = cNode->GetParent();
 	}
@@ -406,7 +398,7 @@ void CHC::QueryPreviouslyInvisibleNode(CHCNode *cNode)
 static std::size_t vertCount = 0;
 void CHC::IssueMultiQueries()
 {
-	 // prosper TODO
+	// prosper TODO
 #if 0
 	static auto hShader = c_engine->GetShader("occlusion");
 	if(hShader.IsValid() == false)
@@ -518,22 +510,17 @@ bool CHC::InsideViewFrustum(CHCNode *cNode)
 {
 	if(cvCulling->GetInt() == 0)
 		return true;
-	return umath::intersection::aabb_in_plane_mesh(cNode->GetMin(),cNode->GetMax(),m_frustumPlanes) != umath::intersection::Intersect::Outside;
+	return umath::intersection::aabb_in_plane_mesh(cNode->GetMin(), cNode->GetMax(), m_frustumPlanes) != umath::intersection::Intersect::Outside;
 }
 
-bool CHC::WasVisible(CHCNode *cNode)
-{
-	return (cNode->IsVisible() && (cNode->GetLastVisited() == (m_frameID -1))) ? true : false;
-}
+bool CHC::WasVisible(CHCNode *cNode) { return (cNode->IsVisible() && (cNode->GetLastVisited() == (m_frameID - 1))) ? true : false; }
 
 void CHC::HandleReturnedQuery(CHCQuery *query)
 {
 	long long r = query->GetResult();
-	if(r > 0)
-	{
+	if(r > 0) {
 		auto &hNode = query->m_hNode;
-		if(hNode.IsValid())
-		{
+		if(hNode.IsValid()) {
 			auto *node = hNode.get();
 			PullUpVisibility(node);
 			TraverseNode(node);
@@ -548,10 +535,7 @@ void CHC::IssueQuery(CHCNode *node)
 	m_queryQueue.push(query);
 }
 
-bool CHC::QueryReasonable(CHCNode*)
-{
-	return true;
-}
+bool CHC::QueryReasonable(CHCNode *) { return true; }
 
 CHCNode *CHC::GetNode(unsigned int idx)
 {
@@ -565,8 +549,7 @@ std::vector<pragma::OcclusionMeshInfo> &CHC::PerformCulling()
 	if(m_octree.expired() == true)
 		return m_renderMeshes;
 #ifdef CHC_DEBUGGING_ENABLED
-	if(m_bDrawDebugTexture == true)
-	{
+	if(m_bDrawDebugTexture == true) {
 		//auto bufFramePrev = OpenGL::GetInt(GL_FRAMEBUFFER_BINDING);
 		/*glClearDepth(1.f);
 
@@ -633,48 +616,40 @@ std::vector<pragma::OcclusionMeshInfo> &CHC::PerformCulling()
 	if(GetDrawDebugTexture())
 		chc_debug_draw = this;
 #endif
-	while(m_distanceQueue.empty() == false || m_queryQueue.empty() == false)
-	{
-		while(m_queryQueue.empty() == false)
-		{
+	while(m_distanceQueue.empty() == false || m_queryQueue.empty() == false) {
+		while(m_queryQueue.empty() == false) {
 			auto q = m_queryQueue.front();
-			if(q->IsValid() == false)
-			{
+			if(q->IsValid() == false) {
 				m_queryQueue.pop();
 				continue;
 			}
-			if(q->IsAvailable() == true || m_distanceQueue.empty())// || m_visQueue.empty())
+			if(q->IsAvailable() == true || m_distanceQueue.empty()) // || m_visQueue.empty())
 			{
 				m_queryQueue.pop();
 				HandleReturnedQuery(q.get());
 			}
 			else if(m_visQueue.empty()) // TODO Is this correct?
 				break;
-			else
-			{
+			else {
 				auto hNode = m_visQueue.front();
 				m_visQueue.pop();
 				if(hNode.IsValid())
 					IssueQuery(hNode.get());
 			}
 		}
-		if(!m_distanceQueue.empty())
-		{
+		if(!m_distanceQueue.empty()) {
 			auto hNode = m_distanceQueue.front();
 			m_distanceQueue.pop();
-			if(hNode.IsValid())
-			{
+			if(hNode.IsValid()) {
 				auto *n = hNode.get();
-				if(InsideViewFrustum(n))
-				{
+				if(InsideViewFrustum(n)) {
 					auto bWasVisible = WasVisible(n);
 					auto bLeafOrWasInvisible = (!bWasVisible || n->IsLeaf()) ? true : false;
 					n->m_bVisible = false;
 					n->m_lastVisited = m_frameID;
 					if(bLeafOrWasInvisible == true)
 						QueryPreviouslyInvisibleNode(n);
-					else
-					{
+					else {
 						if(n->IsLeaf() && QueryReasonable(n))
 							m_visQueue.push(n->GetHandle());
 						if(bWasVisible == true)
@@ -688,10 +663,9 @@ std::vector<pragma::OcclusionMeshInfo> &CHC::PerformCulling()
 	}
 #ifdef CHC_DEBUGGING_ENABLED
 	if(chc_debug_draw != nullptr)
-		DebugRender(root,WasVisible(root));
+		DebugRender(root, WasVisible(root));
 #endif
-	while(m_visQueue.empty() == false)
-	{
+	while(m_visQueue.empty() == false) {
 		auto hNode = m_visQueue.front();
 		m_visQueue.pop();
 		if(hNode.IsValid())
@@ -707,14 +681,9 @@ std::vector<pragma::OcclusionMeshInfo> &CHC::PerformCulling()
 
 ///////////////////////////////////////////
 
-CHCNode::CHCNode(CHC *chc,const BaseOcclusionOctree::Node &node)
-	: m_chc(chc),m_node(node.shared_from_this()),m_handle(new PtrCHCNode(this))
-{}
+CHCNode::CHCNode(CHC *chc, const BaseOcclusionOctree::Node &node) : m_chc(chc), m_node(node.shared_from_this()), m_handle(new PtrCHCNode(this)) {}
 
-CHCNode::~CHCNode()
-{
-	m_handle.Invalidate();
-}
+CHCNode::~CHCNode() { m_handle.Invalidate(); }
 
 uint32_t CHCNode::GetIndex() const
 {
@@ -722,7 +691,7 @@ uint32_t CHCNode::GetIndex() const
 		return 0;
 	return m_node.lock()->GetIndex();
 }
-bool CHCNode::IsVisible() const {return m_bVisible;}
+bool CHCNode::IsVisible() const { return m_bVisible; }
 bool CHCNode::IsLeaf() const
 {
 	if(m_node.expired() == true)
@@ -736,9 +705,9 @@ uint8_t CHCNode::GetChildCount() const
 		return 0;
 	return m_node.lock()->GetChildCount();
 }
-uint64_t CHCNode::GetLastVisited() const {return m_lastVisited;}
+uint64_t CHCNode::GetLastVisited() const { return m_lastVisited; }
 
-CHCNodeHandle CHCNode::GetHandle() const {return m_handle;}
+CHCNodeHandle CHCNode::GetHandle() const { return m_handle; }
 CHCNode *CHCNode::GetParent()
 {
 	if(m_node.expired() == true)
@@ -760,7 +729,7 @@ const CHCNode *CHCNode::GetChild(uint32_t idx) const
 		return nullptr;
 	return m_chc->GetNode(rNode->GetIndex());
 }
-void CHCNode::GetBounds(Vector3 &min,Vector3 &max) const
+void CHCNode::GetBounds(Vector3 &min, Vector3 &max) const
 {
 	if(m_node.expired() == true)
 		return;
@@ -795,8 +764,7 @@ const BaseOcclusionOctree::Node *CHCNode::GetRenderNode() const
 
 ///////////////////////////////////////////
 
-CHCQuery::CHCQuery(const CHCNode &node)
-	: m_hNode(node.GetHandle()),m_queryId(std::numeric_limits<decltype(m_queryId)>::max())
+CHCQuery::CHCQuery(const CHCNode &node) : m_hNode(node.GetHandle()), m_queryId(std::numeric_limits<decltype(m_queryId)>::max())
 {
 	/*pool->RequestFreeQuery(m_queryId);
 	auto &context = c_engine->GetRenderContext();
@@ -835,11 +803,11 @@ bool CHCQuery::IsAvailable() const
 	return GetResult(r);
 }
 
-bool CHCQuery::IsValid() const {return m_hNode.IsValid();}
+bool CHCQuery::IsValid() const { return m_hNode.IsValid(); }
 
 void CHCQuery::Run()
 {
-	 // prosper TODO
+	// prosper TODO
 #if 0
 	if(m_hNode.IsValid() == false)
 		return;

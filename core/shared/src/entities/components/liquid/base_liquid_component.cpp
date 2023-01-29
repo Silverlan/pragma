@@ -30,16 +30,15 @@
 
 using namespace pragma;
 
-void BaseFuncLiquidComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent) {}
+void BaseFuncLiquidComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) {}
 void BaseFuncLiquidComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BasePhysicsComponent::EVENT_HANDLE_RAYCAST,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &raycastData = static_cast<CEHandleRaycast&>(evData.get());
-		auto r = OnRayResultCallback(raycastData.rayCollisionGroup,raycastData.rayCollisionMask);
-		if(r == false)
-		{
+	BindEvent(BasePhysicsComponent::EVENT_HANDLE_RAYCAST, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &raycastData = static_cast<CEHandleRaycast &>(evData.get());
+		auto r = OnRayResultCallback(raycastData.rayCollisionGroup, raycastData.rayCollisionMask);
+		if(r == false) {
 			raycastData.hit = false;
 			return util::EventReply::Handled;
 		}
@@ -58,17 +57,14 @@ void BaseFuncLiquidComponent::Initialize()
 	ent.AddComponent("model");
 }
 
-void BaseFuncLiquidComponent::OnEntitySpawn()
-{
-	BaseEntityComponent::OnEntitySpawn();
-}
+void BaseFuncLiquidComponent::OnEntitySpawn() { BaseEntityComponent::OnEntitySpawn(); }
 
 void BaseFuncLiquidComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
-	auto *pRenderComponent = dynamic_cast<pragma::BaseRenderComponent*>(&component);
-	auto *pSurfC = dynamic_cast<pragma::BaseSurfaceComponent*>(&component);
-	auto *pSurfSim = dynamic_cast<pragma::BaseLiquidSurfaceSimulationComponent*>(&component);
+	auto *pRenderComponent = dynamic_cast<pragma::BaseRenderComponent *>(&component);
+	auto *pSurfC = dynamic_cast<pragma::BaseSurfaceComponent *>(&component);
+	auto *pSurfSim = dynamic_cast<pragma::BaseLiquidSurfaceSimulationComponent *>(&component);
 	if(pRenderComponent != nullptr)
 		pRenderComponent->SetCastShadows(false);
 	else if(pSurfC)
@@ -77,25 +73,25 @@ void BaseFuncLiquidComponent::OnEntityComponentAdded(BaseEntityComponent &compon
 		m_surfSim = pSurfSim->GetHandle<BaseLiquidSurfaceSimulationComponent>();
 }
 
-bool BaseFuncLiquidComponent::OnRayResultCallback(CollisionMask rayCollisionGroup,CollisionMask rayCollisionMask)
+bool BaseFuncLiquidComponent::OnRayResultCallback(CollisionMask rayCollisionGroup, CollisionMask rayCollisionMask)
 {
 #ifdef ENABLE_DEPRECATED_PHYSICS
-	if(m_physSurfaceSim == nullptr || (rayCollisionMask &CollisionMask::WaterSurface) == CollisionMask::None)
+	if(m_physSurfaceSim == nullptr || (rayCollisionMask & CollisionMask::WaterSurface) == CollisionMask::None)
 		return true;
-	auto rayFromWorldWs = uvec::create(rayFromWorld /PhysEnv::WORLD_SCALE);
-	auto rayToWorldWs = uvec::create(rayToWorld /PhysEnv::WORLD_SCALE);
-	auto dir = rayToWorldWs -rayFromWorldWs;
+	auto rayFromWorldWs = uvec::create(rayFromWorld / PhysEnv::WORLD_SCALE);
+	auto rayToWorldWs = uvec::create(rayToWorld / PhysEnv::WORLD_SCALE);
+	auto dir = rayToWorldWs - rayFromWorldWs;
 	auto dist = uvec::length(dir);
 	if(dist > 0.f)
 		dir /= dist;
 	auto t = 0.0;
-	auto bIntersect = CalcLineSurfaceIntersection(rayFromWorldWs,dir,&t);
+	auto bIntersect = CalcLineSurfaceIntersection(rayFromWorldWs, dir, &t);
 	if(bIntersect == false || t > dist || t < 0.0)
 		return false;
 	hitNormalWorld = uvec::create_bt(m_waterPlane.GetNormal());
-	rayResult.m_hitFraction = t /dist;
+	rayResult.m_hitFraction = t / dist;
 	rayResult.m_hitNormalLocal = hitNormalWorld;
-	hitPointWorld = uvec::create_bt(rayFromWorldWs +dir *static_cast<float>(t)) *PhysEnv::WORLD_SCALE;
+	hitPointWorld = uvec::create_bt(rayFromWorldWs + dir * static_cast<float>(t)) * PhysEnv::WORLD_SCALE;
 	return true;
 #else
 	return false;
@@ -111,9 +107,7 @@ void BaseFuncLiquidComponent::InitializeWaterSurface()
 		return;
 	if(m_surfaceC.expired())
 		return;
-	m_surfaceC->FindAndAssignMesh([](ModelMesh &mesh,ModelSubMesh &subMesh,Material &mat,const std::string &shader) -> uint32_t {
-		return (shader == "water") ? 1 : 0;
-	});
+	m_surfaceC->FindAndAssignMesh([](ModelMesh &mesh, ModelSubMesh &subMesh, Material &mat, const std::string &shader) -> uint32_t { return (shader == "water") ? 1 : 0; });
 }
 
 void BaseFuncLiquidComponent::ClearWaterSurface()
@@ -124,13 +118,13 @@ void BaseFuncLiquidComponent::ClearWaterSurface()
 		m_surfSim->ClearSurfaceSimulator();
 }
 
-bool BaseFuncLiquidComponent::CalcLineSurfaceIntersection(const Vector3 &lineOrigin,const Vector3 &lineDir,double *outT,double *outU,double *outV,bool bCull) const
+bool BaseFuncLiquidComponent::CalcLineSurfaceIntersection(const Vector3 &lineOrigin, const Vector3 &lineDir, double *outT, double *outU, double *outV, bool bCull) const
 {
-	double t,u,v;
+	double t, u, v;
 	auto *surfSim = m_surfSim.valid() ? m_surfSim->GetSurfaceSimulator() : nullptr;
 	if(surfSim != nullptr)
-		return m_surfSim->CalcLineSurfaceIntersection(lineOrigin,lineDir,outT,outU,outV,bCull);
+		return m_surfSim->CalcLineSurfaceIntersection(lineOrigin, lineDir, outT, outU, outV, bCull);
 	if(m_surfaceC.expired())
 		return false;
-	return m_surfaceC->CalcLineSurfaceIntersection(lineOrigin,lineDir,outT);
+	return m_surfaceC->CalcLineSurfaceIntersection(lineOrigin, lineDir, outT);
 }

@@ -18,14 +18,12 @@
 
 extern DLLCLIENT CGame *c_game;
 
-struct DebugHitboxes
-{
-	DebugHitboxes()=default;
+struct DebugHitboxes {
+	DebugHitboxes() = default;
 	~DebugHitboxes();
-	DebugHitboxes(const DebugHitboxes&)=delete;
-	DebugHitboxes &operator=(const DebugHitboxes&)=delete;
-	struct EntityObject
-	{
+	DebugHitboxes(const DebugHitboxes &) = delete;
+	DebugHitboxes &operator=(const DebugHitboxes &) = delete;
+	struct EntityObject {
 		EntityHandle hEntity;
 		std::vector<std::shared_ptr<DebugRenderer::BaseObject>> debugObjects;
 	};
@@ -40,17 +38,15 @@ DebugHitboxes::~DebugHitboxes()
 		cbGameEnd.Remove();
 	if(cbThink.IsValid())
 		cbThink.Remove();
-	for(auto &o : objects)
-	{
-		for(auto &dbObj : o.debugObjects)
-		{
+	for(auto &o : objects) {
+		for(auto &dbObj : o.debugObjects) {
 			if(dbObj->IsValid())
 				dbObj->Remove();
 		}
 	}
 }
 
-void Console::commands::debug_hitboxes(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+void Console::commands::debug_hitboxes(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	static std::unique_ptr<DebugHitboxes> debugHitboxes = nullptr;
 	auto bWasValid = (debugHitboxes != nullptr) ? true : false;
@@ -60,80 +56,72 @@ void Console::commands::debug_hitboxes(NetworkState *state,pragma::BasePlayerCom
 	auto charComponent = pl->GetEntity().GetCharacterComponent();
 	if(charComponent.expired())
 		return;
-	auto ents = command::find_target_entity(state,*charComponent,argv);
-	if(ents.empty())
-	{
+	auto ents = command::find_target_entity(state, *charComponent, argv);
+	if(ents.empty()) {
 		if(bWasValid == true)
 			return;
-		Con::cwar<<"No entity targets found!"<<Con::endl;
+		Con::cwar << "No entity targets found!" << Con::endl;
 		return;
 	}
 	debugHitboxes = std::make_unique<DebugHitboxes>();
-	for(auto *ent : ents)
-	{
+	for(auto *ent : ents) {
 		auto mdlComponent = ent->GetModelComponent();
 		auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 		if(mdl == nullptr)
 			return;
 		auto boneIds = mdl->GetHitboxBones();
-		if(!boneIds.empty())
-		{
-			debugHitboxes->objects.push_back(DebugHitboxes::EntityObject{});
+		if(!boneIds.empty()) {
+			debugHitboxes->objects.push_back(DebugHitboxes::EntityObject {});
 			auto &entObj = debugHitboxes->objects.back();
 			entObj.hEntity = ent->GetHandle();
-			for(auto boneId : boneIds)
-			{
+			for(auto boneId : boneIds) {
 				auto &hb = *mdl->GetHitbox(boneId);
-				Vector3 origin,min,max;
+				Vector3 origin, min, max;
 				Quat rot;
-				if(mdlComponent->GetHitboxBounds(boneId,min,max,origin,rot) == true)
-				{
-					Color col{255,255,255,255};
-					switch(hb.group)
-					{
-						case HitGroup::Head:
-							col = Color::Red;
-							break;
-						case HitGroup::Chest:
-							col = Color::Lime;
-							break;
-						case HitGroup::Stomach:
-							col = Color::Blue;
-							break;
-						case HitGroup::LeftArm:
-							col = Color::Yellow;
-							break;
-						case HitGroup::RightArm:
-							col = Color::Cyan;
-							break;
-						case HitGroup::LeftLeg:
-							col = Color::Magenta;
-							break;
-						case HitGroup::RightLeg:
-							col = Color::OrangeRed;
-							break;
-						case HitGroup::Gear:
-							col = Color::SpringGreen;
-							break;
-						case HitGroup::Tail:
-							col = Color::Violet;
-							break;
+				if(mdlComponent->GetHitboxBounds(boneId, min, max, origin, rot) == true) {
+					Color col {255, 255, 255, 255};
+					switch(hb.group) {
+					case HitGroup::Head:
+						col = Color::Red;
+						break;
+					case HitGroup::Chest:
+						col = Color::Lime;
+						break;
+					case HitGroup::Stomach:
+						col = Color::Blue;
+						break;
+					case HitGroup::LeftArm:
+						col = Color::Yellow;
+						break;
+					case HitGroup::RightArm:
+						col = Color::Cyan;
+						break;
+					case HitGroup::LeftLeg:
+						col = Color::Magenta;
+						break;
+					case HitGroup::RightLeg:
+						col = Color::OrangeRed;
+						break;
+					case HitGroup::Gear:
+						col = Color::SpringGreen;
+						break;
+					case HitGroup::Tail:
+						col = Color::Violet;
+						break;
 					}
-					entObj.debugObjects.push_back(::DebugRenderer::DrawBox(origin,min,max,rot,col));
+					entObj.debugObjects.push_back(::DebugRenderer::DrawBox(origin, min, max, rot, col));
 				}
 			}
 		}
 	}
-	if(debugHitboxes->objects.empty())
-	{
+	if(debugHitboxes->objects.empty()) {
 		debugHitboxes = nullptr;
 		return;
 	}
-	debugHitboxes->cbThink = c_game->AddCallback("Think",FunctionCallback<>::Create([]() {
+	debugHitboxes->cbThink = c_game->AddCallback("Think", FunctionCallback<>::Create([]() {
 		if(debugHitboxes == nullptr)
 			return;
-		for(auto &o : debugHitboxes->objects)
-		{
+		for(auto &o : debugHitboxes->objects) {
 			auto &hEnt = o.hEntity;
 			auto mdlComponent = hEnt.get()->GetModelComponent();
 			auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
@@ -142,15 +130,13 @@ void Console::commands::debug_hitboxes(NetworkState *state,pragma::BasePlayerCom
 			auto boneIds = mdl->GetHitboxBones();
 			uint32_t objId = 0;
 			auto numObjs = o.debugObjects.size();
-			for(auto boneId : boneIds)
-			{
+			for(auto boneId : boneIds) {
 				if(objId >= numObjs)
 					break;
 				auto &dbgObj = o.debugObjects[objId];
-				Vector3 origin,min,max;
+				Vector3 origin, min, max;
 				Quat rot;
-				if(mdlComponent->GetHitboxBounds(boneId,min,max,origin,rot) == true)
-				{
+				if(mdlComponent->GetHitboxBounds(boneId, min, max, origin, rot) == true) {
 					dbgObj->SetPos(origin);
 					dbgObj->SetRotation(rot);
 				}
@@ -158,7 +144,5 @@ void Console::commands::debug_hitboxes(NetworkState *state,pragma::BasePlayerCom
 			}
 		}
 	}));
-	debugHitboxes->cbGameEnd = c_game->AddCallback("OnGameEnd",FunctionCallback<void,CGame*>::Create([](CGame*) {
-		debugHitboxes = nullptr;
-	}));
+	debugHitboxes->cbGameEnd = c_game->AddCallback("OnGameEnd", FunctionCallback<void, CGame *>::Create([](CGame *) { debugHitboxes = nullptr; }));
 }

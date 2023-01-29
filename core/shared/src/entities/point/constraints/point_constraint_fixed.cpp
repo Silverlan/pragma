@@ -19,14 +19,14 @@
 
 using namespace pragma;
 
-void BasePointConstraintFixedComponent::InitializeConstraint(BaseEntity *src,BaseEntity *tgt)
+void BasePointConstraintFixedComponent::InitializeConstraint(BaseEntity *src, BaseEntity *tgt)
 {
 	auto pPhysComponentTgt = tgt->GetPhysicsComponent();
-	auto *physTgt = pPhysComponentTgt ? dynamic_cast<RigidPhysObj*>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;
+	auto *physTgt = pPhysComponentTgt ? dynamic_cast<RigidPhysObj *>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;
 	if(physTgt == nullptr)
 		return;
 	auto pPhysComponentSrc = src->GetPhysicsComponent();
-	auto *physSrc = pPhysComponentSrc ? dynamic_cast<RigidPhysObj*>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
+	auto *physSrc = pPhysComponentSrc ? dynamic_cast<RigidPhysObj *>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
 	if(physSrc == nullptr)
 		return;
 	auto *bodySrc = physSrc->GetRigidBody();
@@ -37,23 +37,20 @@ void BasePointConstraintFixedComponent::InitializeConstraint(BaseEntity *src,Bas
 	auto *game = state->GetGameState();
 	auto *physEnv = game->GetPhysicsEnvironment();
 	auto pTrComponent = entThis.GetTransformComponent();
-	auto posThis = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
+	auto posThis = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
 	auto dir = pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::FORWARD;
 
 	auto &bodies = physTgt->GetRigidBodies();
 	m_constraints.reserve(bodies.size());
-	for(auto it=bodies.begin();it!=bodies.end();++it)
-	{
+	for(auto it = bodies.begin(); it != bodies.end(); ++it) {
 		auto &bodyTgt = *it;
-		if(bodyTgt.IsValid())
-		{
-			auto posSrc = posThis -bodySrc->GetPos();
-			auto posTgt = posThis -bodyTgt->GetPos();
-			auto fixed = physEnv->CreateFixedConstraint(*bodyTgt,posTgt,uquat::identity(),*bodySrc,posSrc,uquat::identity());
-			if(fixed != nullptr)
-			{
+		if(bodyTgt.IsValid()) {
+			auto posSrc = posThis - bodySrc->GetPos();
+			auto posTgt = posThis - bodyTgt->GetPos();
+			auto fixed = physEnv->CreateFixedConstraint(*bodyTgt, posTgt, uquat::identity(), *bodySrc, posSrc, uquat::identity());
+			if(fixed != nullptr) {
 				fixed->SetEntity(GetEntity());
-				m_constraints.push_back(util::shared_handle_cast<pragma::physics::IFixedConstraint,pragma::physics::IConstraint>(fixed));
+				m_constraints.push_back(util::shared_handle_cast<pragma::physics::IFixedConstraint, pragma::physics::IConstraint>(fixed));
 			}
 		}
 	}

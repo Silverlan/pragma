@@ -15,15 +15,15 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(logic_relay,LogicRelay);
+LINK_ENTITY_TO_CLASS(logic_relay, LogicRelay);
 
 void SLogicRelayComponent::Initialize()
 {
 	BaseLogicRelayComponent::Initialize();
 
-	BindEvent(SIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &inputData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare<std::string>(inputData.input,"trigger",false))
+	BindEvent(SIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &inputData = static_cast<CEInputData &>(evData.get());
+		if(ustring::compare<std::string>(inputData.input, "trigger", false))
 			Trigger(inputData.activator);
 		else
 			return util::EventReply::Unhandled;
@@ -43,12 +43,12 @@ void SLogicRelayComponent::Trigger(BaseEntity *activator)
 		return;
 	auto pIoComponent = ent.GetComponent<SIOComponent>();
 	if(pIoComponent.valid())
-		pIoComponent->TriggerOutput("OnTrigger",activator);
+		pIoComponent->TriggerOutput("OnTrigger", activator);
 }
 
 //////////////
 
-void SLogicRelayComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SLogicRelayComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void LogicRelay::Initialize()
 {

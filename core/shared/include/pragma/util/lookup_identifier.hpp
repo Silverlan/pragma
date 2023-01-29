@@ -12,23 +12,15 @@
 #include <string>
 #include <optional>
 
-namespace pragma
-{
-	struct DLLNETWORK LookupIdentifier
-	{
-		LookupIdentifier(const std::string &name)
-			: name{name}
-		{}
-		LookupIdentifier(const char *name)
-			: name{name}
-		{}
-		LookupIdentifier(uint32_t id)
-			: id{id}
-		{}
+namespace pragma {
+	struct DLLNETWORK LookupIdentifier {
+		LookupIdentifier(const std::string &name) : name {name} {}
+		LookupIdentifier(const char *name) : name {name} {}
+		LookupIdentifier(uint32_t id) : id {id} {}
 
 		std::optional<std::string> name {};
 		mutable std::optional<uint32_t> id {};
-		bool resolved() const {return id.has_value();}
+		bool resolved() const { return id.has_value(); }
 	};
 };
 

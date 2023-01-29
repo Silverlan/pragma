@@ -11,12 +11,10 @@
 #include "pragma/networkdefinitions.h"
 #include <pragma/lua/luaapi.h>
 
-namespace Lua
-{
-	namespace net
-	{
+namespace Lua {
+	namespace net {
 		DLLNETWORK void RegisterLibraryEnums(lua_State *l);
-		DLLNETWORK pragma::NetEventId register_event(lua_State *l,const std::string &name);
+		DLLNETWORK pragma::NetEventId register_event(lua_State *l, const std::string &name);
 	};
 };
 

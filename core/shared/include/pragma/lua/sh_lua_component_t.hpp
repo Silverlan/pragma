@@ -13,8 +13,7 @@
 #include "pragma/lua/sh_lua_component_wrapper.hpp"
 #include "pragma/lua/policies/game_object_policy.hpp"
 
-namespace Lua
-{
+namespace Lua {
 	DLLNETWORK void register_base_entity_component(luabind::module_ &modEnts);
 };
 

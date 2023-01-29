@@ -10,13 +10,10 @@
 
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 
-namespace pragma
-{
-	class DLLCLIENT ShaderLoading
-		: public ShaderGameWorldLightingPass
-	{
-	public:
-		ShaderLoading(prosper::IPrContext &context,const std::string &identifier);
+namespace pragma {
+	class DLLCLIENT ShaderLoading : public ShaderGameWorldLightingPass {
+	  public:
+		ShaderLoading(prosper::IPrContext &context, const std::string &identifier);
 	};
 };
 

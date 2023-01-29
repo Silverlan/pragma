@@ -14,29 +14,23 @@
 #include <pragma/entities/func/basefunckinematic.hpp>
 #include <pragma/entities/entity_component_manager.hpp>
 
-namespace pragma
-{
-	class DLLCLIENT CKinematicComponent final
-		: public BaseFuncKinematicComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CKinematicComponent final : public BaseFuncKinematicComponent, public CBaseNetComponent {
+	  public:
 		CKinematicComponent(BaseEntity &ent) : BaseFuncKinematicComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
+		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		virtual void OnEntitySpawn() override;
-	protected:
+	  protected:
 		bool m_bInitiallyMoving = false;
 	};
 };
 
-class DLLCLIENT CFuncKinematic
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CFuncKinematic : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

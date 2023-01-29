@@ -26,69 +26,50 @@ using namespace pragma;
 
 ComponentEventId BaseTransformComponent::EVENT_ON_POSE_CHANGED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseTransformComponent::EVENT_ON_TELEPORT = pragma::INVALID_COMPONENT_ID;
-void BaseTransformComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
+void BaseTransformComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_POSE_CHANGED = registerEvent("ON_POSE_CHANGED",ComponentEventInfo::Type::Explicit);
-	EVENT_ON_TELEPORT = registerEvent("ON_TELEPORT",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_POSE_CHANGED = registerEvent("ON_POSE_CHANGED", ComponentEventInfo::Type::Explicit);
+	EVENT_ON_TELEPORT = registerEvent("ON_TELEPORT", ComponentEventInfo::Type::Broadcast);
 }
-void BaseTransformComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
+void BaseTransformComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseTransformComponent;
 
 	using TPosition = Vector3;
-	registerMember(create_component_member_info<
-		T,TPosition,
-		static_cast<void(T::*)(const TPosition&)>(&T::SetPosition),
-		static_cast<const TPosition&(T::*)() const>(&T::GetPosition)
-	>("position",TPosition{}));
+	registerMember(create_component_member_info<T, TPosition, static_cast<void (T::*)(const TPosition &)>(&T::SetPosition), static_cast<const TPosition &(T::*)() const>(&T::GetPosition)>("position", TPosition {}));
 
 	using TRotation = Quat;
-	registerMember(create_component_member_info<
-		T,TRotation,
-		static_cast<void(T::*)(const TRotation&)>(&T::SetRotation),
-		static_cast<const TRotation&(T::*)() const>(&T::GetRotation)
-	>("rotation",uquat::identity()));
+	registerMember(create_component_member_info<T, TRotation, static_cast<void (T::*)(const TRotation &)>(&T::SetRotation), static_cast<const TRotation &(T::*)() const>(&T::GetRotation)>("rotation", uquat::identity()));
 
 	using TAngles = EulerAngles;
-	registerMember(create_component_member_info<
-		T,TAngles,
-		static_cast<void(T::*)(const TAngles&)>(&T::SetAngles),
-		static_cast<TAngles(T::*)() const>(&T::GetAngles)
-	>("angles",TAngles{}));
+	registerMember(create_component_member_info<T, TAngles, static_cast<void (T::*)(const TAngles &)>(&T::SetAngles), static_cast<TAngles (T::*)() const>(&T::GetAngles)>("angles", TAngles {}));
 
 	using TScale = Vector3;
-	registerMember(create_component_member_info<
-		T,TScale,
-		static_cast<void(T::*)(const TScale&)>(&T::SetScale),
-		static_cast<const TScale&(T::*)() const>(&T::GetScale)
-	>("scale",TScale{1.f,1.f,1.f}));
+	registerMember(create_component_member_info<T, TScale, static_cast<void (T::*)(const TScale &)>(&T::SetScale), static_cast<const TScale &(T::*)() const>(&T::GetScale)>("scale", TScale {1.f, 1.f, 1.f}));
 }
-BaseTransformComponent::BaseTransformComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+BaseTransformComponent::BaseTransformComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BaseTransformComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	m_netEvSetScale = SetupNetEvent("set_scale");
 
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &mdl = static_cast<CEOnModelChanged&>(evData.get()).model;
-		if(mdl.get() == nullptr)
-		{
+	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &mdl = static_cast<CEOnModelChanged &>(evData.get()).model;
+		if(mdl.get() == nullptr) {
 			SetEyeOffset({});
 			return util::EventReply::Unhandled;
 		}
 		SetEyeOffset(mdl.get()->GetEyeOffset());
 		return util::EventReply::Unhandled;
 	});
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
 		/*if(ustring::compare(kvData.key,"origin",false))
 			SetPosition(uvec::create(kvData.value));
-		else */if(ustring::compare<std::string>(kvData.key,"angles",false))
-		{
+		else */
+		if(ustring::compare<std::string>(kvData.key, "angles", false)) {
 			EulerAngles ang;
-			ustring::string_to_array<float,double>(kvData.value,&ang.p,atof,3);
+			ustring::string_to_array<float, double>(kvData.value, &ang.p, atof, 3);
 			SetAngles(ang);
 		}
 		else
@@ -99,33 +80,31 @@ void BaseTransformComponent::Initialize()
 void BaseTransformComponent::Teleport(const umath::Transform &targetPose)
 {
 	umath::Transform curPose = GetPose();
-	auto deltaPose = targetPose *curPose.GetInverse();
-	CETeleport evData {curPose,targetPose,deltaPose};
-	if(BroadcastEvent(EVENT_ON_TELEPORT,evData) == util::EventReply::Handled)
+	auto deltaPose = targetPose * curPose.GetInverse();
+	CETeleport evData {curPose, targetPose, deltaPose};
+	if(BroadcastEvent(EVENT_ON_TELEPORT, evData) == util::EventReply::Handled)
 		return;
 	SetPose(targetPose);
 }
-void BaseTransformComponent::OnPoseChanged(TransformChangeFlags changeFlags,bool updatePhysics)
+void BaseTransformComponent::OnPoseChanged(TransformChangeFlags changeFlags, bool updatePhysics)
 {
 	auto &ent = GetEntity();
-	if(umath::is_flag_set(changeFlags,TransformChangeFlags::PositionChanged))
+	if(umath::is_flag_set(changeFlags, TransformChangeFlags::PositionChanged))
 		ent.SetStateFlag(BaseEntity::StateFlags::PositionChanged);
-	if(umath::is_flag_set(changeFlags,TransformChangeFlags::RotationChanged))
+	if(umath::is_flag_set(changeFlags, TransformChangeFlags::RotationChanged))
 		ent.SetStateFlag(BaseEntity::StateFlags::RotationChanged);
 	m_tLastMoved = ent.GetNetworkState()->GetGameState()->CurTime();
-	if(updatePhysics)
-	{
+	if(updatePhysics) {
 		auto pPhysComponent = ent.GetPhysicsComponent();
 		auto *pPhys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
-		if(pPhys)
-		{
-			if(umath::is_flag_set(changeFlags,TransformChangeFlags::PositionChanged) && umath::is_flag_set(pPhysComponent->GetStateFlags(),BasePhysicsComponent::StateFlags::ApplyingPhysicsPosition) == false)
+		if(pPhys) {
+			if(umath::is_flag_set(changeFlags, TransformChangeFlags::PositionChanged) && umath::is_flag_set(pPhysComponent->GetStateFlags(), BasePhysicsComponent::StateFlags::ApplyingPhysicsPosition) == false)
 				pPhys->SetPosition(GetPosition());
-			if(umath::is_flag_set(changeFlags,TransformChangeFlags::RotationChanged) && umath::is_flag_set(pPhysComponent->GetStateFlags(),BasePhysicsComponent::StateFlags::ApplyingPhysicsRotation) == false)
+			if(umath::is_flag_set(changeFlags, TransformChangeFlags::RotationChanged) && umath::is_flag_set(pPhysComponent->GetStateFlags(), BasePhysicsComponent::StateFlags::ApplyingPhysicsRotation) == false)
 				pPhys->SetOrientation(GetRotation());
 		}
 	}
-	InvokeEventCallbacks(EVENT_ON_POSE_CHANGED,CEOnPoseChanged{changeFlags});
+	InvokeEventCallbacks(EVENT_ON_POSE_CHANGED, CEOnPoseChanged {changeFlags});
 }
 void BaseTransformComponent::SetPose(const umath::ScaledTransform &pose)
 {
@@ -138,22 +117,19 @@ void BaseTransformComponent::SetPose(const umath::Transform &pose)
 	m_pose.SetRotation(pose.GetRotation());
 	OnPoseChanged(TransformChangeFlags::PositionChanged | TransformChangeFlags::RotationChanged);
 }
-const umath::ScaledTransform &BaseTransformComponent::GetPose() const {return m_pose;}
+const umath::ScaledTransform &BaseTransformComponent::GetPose() const { return m_pose; }
 
 Vector3 BaseTransformComponent::GetEyePosition() const
 {
 	auto eyeOffset = GetEyeOffset();
-	Vector3 forward,right,up;
-	GetOrientation(&forward,&right,&up);
+	Vector3 forward, right, up;
+	GetOrientation(&forward, &right, &up);
 	auto eyePos = GetPosition();
-	eyePos = eyePos +forward *eyeOffset.x +up *eyeOffset.y +right *eyeOffset.z;
+	eyePos = eyePos + forward * eyeOffset.x + up * eyeOffset.y + right * eyeOffset.z;
 	return eyePos;
 }
-Vector3 BaseTransformComponent::GetEyeOffset() const {return m_eyeOffset *GetScale();}
-void BaseTransformComponent::SetEyeOffset(const Vector3 &offset)
-{
-	m_eyeOffset = offset;
-}
+Vector3 BaseTransformComponent::GetEyeOffset() const { return m_eyeOffset * GetScale(); }
+void BaseTransformComponent::SetEyeOffset(const Vector3 &offset) { m_eyeOffset = offset; }
 
 float BaseTransformComponent::GetMaxAxisScale() const
 {
@@ -165,45 +141,38 @@ float BaseTransformComponent::GetMaxAxisScale() const
 		r = scale.z;
 	return r;
 }
-float BaseTransformComponent::GetAbsMaxAxisScale() const {return umath::abs(GetMaxAxisScale());}
-const Vector3 &BaseTransformComponent::GetScale() const {return m_pose.GetScale();}
-void BaseTransformComponent::SetScale(float scale) {SetScale({scale,scale,scale});}
+float BaseTransformComponent::GetAbsMaxAxisScale() const { return umath::abs(GetMaxAxisScale()); }
+const Vector3 &BaseTransformComponent::GetScale() const { return m_pose.GetScale(); }
+void BaseTransformComponent::SetScale(float scale) { SetScale({scale, scale, scale}); }
 void BaseTransformComponent::SetScale(const Vector3 &scale)
 {
 	m_pose.SetScale(scale);
 	OnPoseChanged(TransformChangeFlags::ScaleChanged);
 }
 
-float BaseTransformComponent::GetDistance(const Vector3 &p) const {return uvec::distance(GetPosition(),p);}
+float BaseTransformComponent::GetDistance(const Vector3 &p) const { return uvec::distance(GetPosition(), p); }
 float BaseTransformComponent::GetDistance(const BaseEntity &ent) const
 {
 	auto pTrComponent = ent.GetTransformComponent();
-	return uvec::distance(GetPosition(),pTrComponent ? pTrComponent->GetPosition() : Vector3{});
+	return uvec::distance(GetPosition(), pTrComponent ? pTrComponent->GetPosition() : Vector3 {});
 }
 
-void BaseTransformComponent::SetPosition(const Vector3 &pos,Bool bForceUpdate)
+void BaseTransformComponent::SetPosition(const Vector3 &pos, Bool bForceUpdate)
 {
 	auto &posCur = m_pose.GetOrigin();
-	if(
-		bForceUpdate == false &&
-		fabsf(pos.x -posCur.x) <= ENT_EPSILON &&
-		fabsf(pos.y -posCur.y) <= ENT_EPSILON &&
-		fabsf(pos.z -posCur.z) <= ENT_EPSILON
-	)
+	if(bForceUpdate == false && fabsf(pos.x - posCur.x) <= ENT_EPSILON && fabsf(pos.y - posCur.y) <= ENT_EPSILON && fabsf(pos.z - posCur.z) <= ENT_EPSILON)
 		return;
 	auto &ent = GetEntity();
-	if(std::isnan(pos.x) || std::isnan(pos.y) || std::isnan(pos.z))
-	{
-		Con::cwar<<"NaN position ("<<pos.x<<","<<pos.y<<","<<pos.z<<") for entity ";
+	if(std::isnan(pos.x) || std::isnan(pos.y) || std::isnan(pos.z)) {
+		Con::cwar << "NaN position (" << pos.x << "," << pos.y << "," << pos.z << ") for entity ";
 		ent.print(Con::cout);
-		Con::cwar<<"! Ignoring..."<<Con::endl;
+		Con::cwar << "! Ignoring..." << Con::endl;
 		return;
 	}
-	if(std::isinf(pos.x) || std::isinf(pos.y) || std::isinf(pos.z))
-	{
-		Con::cwar<<"inf position ("<<pos.x<<","<<pos.y<<","<<pos.z<<") for entity ";
+	if(std::isinf(pos.x) || std::isinf(pos.y) || std::isinf(pos.z)) {
+		Con::cwar << "inf position (" << pos.x << "," << pos.y << "," << pos.z << ") for entity ";
 		ent.print(Con::cout);
-		Con::cwar<<"! Ignoring..."<<Con::endl;
+		Con::cwar << "! Ignoring..." << Con::endl;
 		return;
 	}
 	m_pose.SetOrigin(pos);
@@ -211,26 +180,20 @@ void BaseTransformComponent::SetPosition(const Vector3 &pos,Bool bForceUpdate)
 	ent.MarkForSnapshot();
 }
 
-void BaseTransformComponent::SetPosition(const Vector3 &pos) {SetPosition(pos,false);}
+void BaseTransformComponent::SetPosition(const Vector3 &pos) { SetPosition(pos, false); }
 
-const Vector3 &BaseTransformComponent::GetPosition() const {return m_pose.GetOrigin();}
+const Vector3 &BaseTransformComponent::GetPosition() const { return m_pose.GetOrigin(); }
 
 void BaseTransformComponent::SetRotation(const Quat &q)
 {
 	auto &rotCur = GetRotation();
-	if(
-		fabsf(q.w -rotCur.w) <= ENT_EPSILON &&
-		fabsf(q.x -rotCur.x) <= ENT_EPSILON &&
-		fabsf(q.y -rotCur.y) <= ENT_EPSILON &&
-		fabsf(q.z -rotCur.z) <= ENT_EPSILON
-	)
+	if(fabsf(q.w - rotCur.w) <= ENT_EPSILON && fabsf(q.x - rotCur.x) <= ENT_EPSILON && fabsf(q.y - rotCur.y) <= ENT_EPSILON && fabsf(q.z - rotCur.z) <= ENT_EPSILON)
 		return;
 	auto &ent = GetEntity();
-	if(std::isnan(q.w) || std::isnan(q.x) || std::isnan(q.y) || std::isnan(q.z))
-	{
-		Con::cwar<<"NaN rotation ("<<q.w<<","<<q.x<<","<<q.y<<","<<q.z<<") for entity ";
+	if(std::isnan(q.w) || std::isnan(q.x) || std::isnan(q.y) || std::isnan(q.z)) {
+		Con::cwar << "NaN rotation (" << q.w << "," << q.x << "," << q.y << "," << q.z << ") for entity ";
 		ent.print(Con::cout);
-		Con::cwar<<"! Ignoring..."<<Con::endl;
+		Con::cwar << "! Ignoring..." << Con::endl;
 		return;
 	}
 	m_pose.SetRotation(q);
@@ -245,9 +208,9 @@ void BaseTransformComponent::Save(udm::LinkedPropertyWrapperArg udm)
 	udm["eyeOffset"] = m_eyeOffset;
 }
 
-void BaseTransformComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
+void BaseTransformComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version)
 {
-	BaseEntityComponent::Load(udm,version);
+	BaseEntityComponent::Load(udm, version);
 	auto pose = m_pose;
 	udm["pose"](pose);
 	SetPose(pose);
@@ -257,8 +220,8 @@ void BaseTransformComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t ver
 	SetEyeOffset(eyeOffset);
 }
 
-const Quat &BaseTransformComponent::GetRotation() const {return m_pose.GetRotation();}
-void BaseTransformComponent::SetAngles(const EulerAngles &ang) {SetRotation(uquat::create(ang));}
+const Quat &BaseTransformComponent::GetRotation() const { return m_pose.GetRotation(); }
+void BaseTransformComponent::SetAngles(const EulerAngles &ang) { SetRotation(uquat::create(ang)); }
 
 void BaseTransformComponent::SetPitch(float pitch)
 {
@@ -279,9 +242,9 @@ void BaseTransformComponent::SetRoll(float roll)
 	SetAngles(angles);
 }
 
-void BaseTransformComponent::LocalToWorld(Vector3 *origin) const {*origin = m_pose **origin;}
-void BaseTransformComponent::LocalToWorld(Quat *rot) const {*rot = m_pose **rot;}
-void BaseTransformComponent::LocalToWorld(Vector3 *origin,Quat *rot) const
+void BaseTransformComponent::LocalToWorld(Vector3 *origin) const { *origin = m_pose * *origin; }
+void BaseTransformComponent::LocalToWorld(Quat *rot) const { *rot = m_pose * *rot; }
+void BaseTransformComponent::LocalToWorld(Vector3 *origin, Quat *rot) const
 {
 	LocalToWorld(origin);
 	LocalToWorld(rot);
@@ -290,64 +253,61 @@ void BaseTransformComponent::LocalToWorld(Vector3 *origin,Quat *rot) const
 void BaseTransformComponent::WorldToLocal(Vector3 *origin) const
 {
 	auto inv = m_pose.GetInverse();
-	*origin = inv **origin;
+	*origin = inv * *origin;
 }
 void BaseTransformComponent::WorldToLocal(Quat *rot) const
 {
 	auto inv = m_pose.GetInverse();
-	*rot = inv **rot;
+	*rot = inv * *rot;
 }
-void BaseTransformComponent::WorldToLocal(Vector3 *origin,Quat *rot) const
+void BaseTransformComponent::WorldToLocal(Vector3 *origin, Quat *rot) const
 {
 	WorldToLocal(origin);
 	WorldToLocal(rot);
 }
 
-EulerAngles BaseTransformComponent::GetAngles() const {return EulerAngles(m_pose.GetRotation());}
-float BaseTransformComponent::GetPitch() const {return GetAngles().p;}
-float BaseTransformComponent::GetYaw() const {return GetAngles().y;}
-float BaseTransformComponent::GetRoll() const {return GetAngles().r;}
-Vector3 BaseTransformComponent::GetForward() const {return uquat::forward(m_pose.GetRotation());}
-Vector3 BaseTransformComponent::GetUp() const {return uquat::up(m_pose.GetRotation());}
-Vector3 BaseTransformComponent::GetRight() const {return uquat::right(m_pose.GetRotation());}
-void BaseTransformComponent::GetOrientation(Vector3 *forward,Vector3 *right,Vector3 *up) const {uquat::get_orientation(m_pose.GetRotation(),forward,right,up);}
-Mat4 BaseTransformComponent::GetRotationMatrix() const {return umat::create(m_pose.GetRotation());}
+EulerAngles BaseTransformComponent::GetAngles() const { return EulerAngles(m_pose.GetRotation()); }
+float BaseTransformComponent::GetPitch() const { return GetAngles().p; }
+float BaseTransformComponent::GetYaw() const { return GetAngles().y; }
+float BaseTransformComponent::GetRoll() const { return GetAngles().r; }
+Vector3 BaseTransformComponent::GetForward() const { return uquat::forward(m_pose.GetRotation()); }
+Vector3 BaseTransformComponent::GetUp() const { return uquat::up(m_pose.GetRotation()); }
+Vector3 BaseTransformComponent::GetRight() const { return uquat::right(m_pose.GetRotation()); }
+void BaseTransformComponent::GetOrientation(Vector3 *forward, Vector3 *right, Vector3 *up) const { uquat::get_orientation(m_pose.GetRotation(), forward, right, up); }
+Mat4 BaseTransformComponent::GetRotationMatrix() const { return umat::create(m_pose.GetRotation()); }
 
-void BaseTransformComponent::UpdateLastMovedTime()
-{
-	m_tLastMoved = GetEntity().GetNetworkState()->GetGameState()->CurTime();
-}
+void BaseTransformComponent::UpdateLastMovedTime() { m_tLastMoved = GetEntity().GetNetworkState()->GetGameState()->CurTime(); }
 
-void BaseTransformComponent::SetRawPosition(const Vector3 &pos) {m_pose.SetOrigin(pos);}
-void BaseTransformComponent::SetRawRotation(const Quat &rot) {m_pose.SetRotation(rot);}
-void BaseTransformComponent::SetRawScale(const Vector3 &scale) {m_pose.SetScale(scale);}
+void BaseTransformComponent::SetRawPosition(const Vector3 &pos) { m_pose.SetOrigin(pos); }
+void BaseTransformComponent::SetRawRotation(const Quat &rot) { m_pose.SetRotation(rot); }
+void BaseTransformComponent::SetRawScale(const Vector3 &scale) { m_pose.SetScale(scale); }
 
-Vector3 BaseTransformComponent::GetDirection(const BaseEntity &ent,bool bIgnoreYAxis) const
+Vector3 BaseTransformComponent::GetDirection(const BaseEntity &ent, bool bIgnoreYAxis) const
 {
 	auto pTrComponent = ent.GetTransformComponent();
-	return GetDirection(pTrComponent ? ent.GetCenter() : Vector3{},bIgnoreYAxis);
+	return GetDirection(pTrComponent ? ent.GetCenter() : Vector3 {}, bIgnoreYAxis);
 }
-EulerAngles BaseTransformComponent::GetAngles(const BaseEntity &ent,bool bIgnoreYAxis) const
+EulerAngles BaseTransformComponent::GetAngles(const BaseEntity &ent, bool bIgnoreYAxis) const
 {
 	auto pTrComponent = ent.GetTransformComponent();
-	return GetAngles(pTrComponent ? ent.GetCenter() : Vector3{},bIgnoreYAxis);
+	return GetAngles(pTrComponent ? ent.GetCenter() : Vector3 {}, bIgnoreYAxis);
 }
-float BaseTransformComponent::GetDotProduct(const BaseEntity &ent,bool bIgnoreYAxis) const
+float BaseTransformComponent::GetDotProduct(const BaseEntity &ent, bool bIgnoreYAxis) const
 {
 	auto pTrComponent = ent.GetTransformComponent();
-	return GetDotProduct(pTrComponent ? ent.GetCenter() : Vector3{},bIgnoreYAxis);
+	return GetDotProduct(pTrComponent ? ent.GetCenter() : Vector3 {}, bIgnoreYAxis);
 }
-Vector3 BaseTransformComponent::GetDirection(const Vector3 &pos,bool bIgnoreYAxis) const
+Vector3 BaseTransformComponent::GetDirection(const Vector3 &pos, bool bIgnoreYAxis) const
 {
 	auto &origin = GetPosition();
-	auto dir = pos -origin;
+	auto dir = pos - origin;
 	if(bIgnoreYAxis == true)
 		dir.y = 0.f;
 	uvec::normalize(&dir);
 	return dir;
 }
-EulerAngles BaseTransformComponent::GetAngles(const Vector3 &pos,bool bIgnoreYAxis) const {return uvec::to_angle(GetDirection(pos,bIgnoreYAxis),GetUp());}
-float BaseTransformComponent::GetDotProduct(const Vector3 &pos,bool bIgnoreYAxis) const {return uvec::dot(GetForward(),GetDirection(pos,bIgnoreYAxis));}
+EulerAngles BaseTransformComponent::GetAngles(const Vector3 &pos, bool bIgnoreYAxis) const { return uvec::to_angle(GetDirection(pos, bIgnoreYAxis), GetUp()); }
+float BaseTransformComponent::GetDotProduct(const Vector3 &pos, bool bIgnoreYAxis) const { return uvec::dot(GetForward(), GetDirection(pos, bIgnoreYAxis)); }
 
 Vector3 BaseTransformComponent::GetOrigin() const
 {
@@ -355,17 +315,12 @@ Vector3 BaseTransformComponent::GetOrigin() const
 	return pPhysComponent ? pPhysComponent->GetOrigin() : GetPosition();
 }
 
-double BaseTransformComponent::GetLastMoveTime() const {return m_tLastMoved;}
+double BaseTransformComponent::GetLastMoveTime() const { return m_tLastMoved; }
 
 /////////////////
 
-CEOnPoseChanged::CEOnPoseChanged(TransformChangeFlags changeFlags)
-	: changeFlags{changeFlags}
-{}
-void CEOnPoseChanged::PushArguments(lua_State *l)
-{
-	Lua::PushInt(l,umath::to_integral(changeFlags));
-}
+CEOnPoseChanged::CEOnPoseChanged(TransformChangeFlags changeFlags) : changeFlags {changeFlags} {}
+void CEOnPoseChanged::PushArguments(lua_State *l) { Lua::PushInt(l, umath::to_integral(changeFlags)); }
 
 /////////////////
 
@@ -375,24 +330,21 @@ TraceData util::get_entity_trace_data(BaseTransformComponent &component)
 	auto dir = component.GetForward();
 	TraceData trData;
 	trData.SetSource(origin);
-	trData.SetTarget(origin +dir *static_cast<float>(GameLimits::MaxRayCastRange));
+	trData.SetTarget(origin + dir * static_cast<float>(GameLimits::MaxRayCastRange));
 	trData.SetFilter(component.GetEntity());
 	trData.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
 	auto pPhysComponent = component.GetEntity().GetPhysicsComponent();
-	if(pPhysComponent)
-	{
+	if(pPhysComponent) {
 		trData.SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter());
-		trData.SetCollisionFilterMask(pPhysComponent->GetCollisionFilterMask() &~CollisionMask::Trigger &~CollisionMask::Water &~CollisionMask::WaterSurface);
+		trData.SetCollisionFilterMask(pPhysComponent->GetCollisionFilterMask() & ~CollisionMask::Trigger & ~CollisionMask::Water & ~CollisionMask::WaterSurface);
 	}
 	return trData;
 }
 
-CETeleport::CETeleport(const umath::Transform &originalPose,const umath::Transform &targetPose,const umath::Transform &deltaPose)
-	: originalPose{originalPose},targetPose{targetPose},deltaPose{deltaPose}
-{}
+CETeleport::CETeleport(const umath::Transform &originalPose, const umath::Transform &targetPose, const umath::Transform &deltaPose) : originalPose {originalPose}, targetPose {targetPose}, deltaPose {deltaPose} {}
 void CETeleport::PushArguments(lua_State *l)
 {
-	Lua::Push(l,originalPose);
-	Lua::Push(l,targetPose);
-	Lua::Push(l,deltaPose);
+	Lua::Push(l, originalPose);
+	Lua::Push(l, targetPose);
+	Lua::Push(l, deltaPose);
 }

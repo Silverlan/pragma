@@ -22,7 +22,7 @@ using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
 
-LINK_ENTITY_TO_CLASS(env_sound_dsp_eaxreverb,CEnvSoundDspEAXReverb);
+LINK_ENTITY_TO_CLASS(env_sound_dsp_eaxreverb, CEnvSoundDspEAXReverb);
 
 void CSoundDspEAXReverbComponent::ReceiveData(NetPacket &packet)
 {
@@ -69,10 +69,10 @@ void CSoundDspEAXReverbComponent::OnEntitySpawn()
 	props.iDecayHFLimit = m_kvDecayHFLimit;
 	props.flReflectionsGain = m_kvReflectionsGain;
 	props.flReflectionsDelay = m_kvReflectionsDelay;
-	props.flReflectionsPan = {m_kvReflectionsPan.x,m_kvReflectionsPan.y,m_kvReflectionsPan.z};
+	props.flReflectionsPan = {m_kvReflectionsPan.x, m_kvReflectionsPan.y, m_kvReflectionsPan.z};
 	props.flLateReverbGain = m_kvLateGain;
 	props.flLateReverbDelay = m_kvLateDelay;
-	props.flLateReverbPan = {m_kvLatePan.x,m_kvLatePan.y,m_kvLatePan.z};
+	props.flLateReverbPan = {m_kvLatePan.x, m_kvLatePan.y, m_kvLatePan.z};
 	props.flEchoTime = m_kvEchoTime;
 	props.flEchoDepth = m_kvEchoDepth;
 	props.flModulationTime = m_kvModTime;
@@ -83,7 +83,7 @@ void CSoundDspEAXReverbComponent::OnEntitySpawn()
 	props.flAirAbsorptionGainHF = m_kvAirAbsorpGainHF;
 	m_dsp = soundSys->CreateEffect(props);
 }
-void CSoundDspEAXReverbComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CSoundDspEAXReverbComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 //////////////////
 

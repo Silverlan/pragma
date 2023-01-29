@@ -12,24 +12,19 @@
 #include <pragma/entities/baseflashlight.h>
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 
-namespace pragma
-{
-	class DLLCLIENT CFlashlightComponent final
-		: public BaseFlashlightComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CFlashlightComponent final : public BaseFlashlightComponent {
+	  public:
 		CFlashlightComponent(BaseEntity &ent) : BaseFlashlightComponent(ent) {}
 		virtual void Initialize() override;
-		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
 class CEnvLightSpot;
-class DLLCLIENT CFlashlight
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CFlashlight : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

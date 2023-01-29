@@ -12,7 +12,7 @@
 
 using namespace pragma;
 
-PhysSoftBodyInfo *BaseFuncSoftPhysicsComponent::GetSoftBodyInfo() {return &m_softBodyInfo;}
+PhysSoftBodyInfo *BaseFuncSoftPhysicsComponent::GetSoftBodyInfo() { return &m_softBodyInfo; }
 
 // TODO
 /*PhysObj *BaseFuncSoftPhysicsComponent::InitializePhysics()
@@ -25,19 +25,19 @@ PhysSoftBodyInfo *BaseFuncSoftPhysicsComponent::GetSoftBodyInfo() {return &m_sof
 void BaseFuncSoftPhysicsComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		return SetKeyValue(kvData.key,kvData.value) ? util::EventReply::Handled : util::EventReply::Unhandled;
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		return SetKeyValue(kvData.key, kvData.value) ? util::EventReply::Handled : util::EventReply::Unhandled;
 	});
 	auto &ent = GetEntity();
 	ent.AddComponent("model");
 	ent.AddComponent("name");
 	auto whRenderComponent = ent.AddComponent("render");
 	if(whRenderComponent.valid())
-		static_cast<BaseRenderComponent*>(whRenderComponent.get())->SetCastShadows(true);
+		static_cast<BaseRenderComponent *>(whRenderComponent.get())->SetCastShadows(true);
 }
 
-bool BaseFuncSoftPhysicsComponent::SetKeyValue(std::string key,std::string val)
+bool BaseFuncSoftPhysicsComponent::SetKeyValue(std::string key, std::string val)
 {
 	if(key == "pose_matching_coefficient")
 		m_softBodyInfo.poseMatchingCoefficient = ustring::to_float(val);

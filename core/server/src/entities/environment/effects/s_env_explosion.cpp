@@ -17,23 +17,22 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_explosion,EnvExplosion);
+LINK_ENTITY_TO_CLASS(env_explosion, EnvExplosion);
 
 extern ServerState *server;
 
 void SExplosionComponent::Explode()
 {
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(ent.IsShared())
-	{
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
+	if(ent.IsShared()) {
 		NetPacket p;
-		nwm::write_entity(p,&ent);
-		server->SendPacket("envexplosion_explode",p,pragma::networking::Protocol::SlowReliable);
+		nwm::write_entity(p, &ent);
+		server->SendPacket("envexplosion_explode", p, pragma::networking::Protocol::SlowReliable);
 	}
 	BaseEnvExplosionComponent::Explode();
 }
 
-void SExplosionComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SExplosionComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void EnvExplosion::Initialize()
 {

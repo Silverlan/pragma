@@ -14,18 +14,15 @@
 
 extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
-WIMainMenuLoadGame::WIMainMenuLoadGame()
-	: WIMainMenuBase()
-{}
+WIMainMenuLoadGame::WIMainMenuLoadGame() : WIMainMenuBase() {}
 
-WIMainMenuLoadGame::~WIMainMenuLoadGame()
-{}
+WIMainMenuLoadGame::~WIMainMenuLoadGame() {}
 
 void WIMainMenuLoadGame::Initialize()
 {
 	WIMainMenuBase::Initialize();
-	AddMenuItem(Locale::GetText("back"),FunctionCallback<void,WIMainMenuElement*>::Create([this](WIMainMenuElement*) {
-		auto *mainMenu = dynamic_cast<WIMainMenu*>(GetParent());
+	AddMenuItem(Locale::GetText("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
+		auto *mainMenu = dynamic_cast<WIMainMenu *>(GetParent());
 		if(mainMenu == nullptr)
 			return;
 		mainMenu->OpenMainMenu();

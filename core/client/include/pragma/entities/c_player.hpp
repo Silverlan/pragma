@@ -12,11 +12,8 @@
 #include "pragma/entities/c_baseentity.h"
 #include <pragma/entities/baseplayer.hpp>
 
-class DLLCLIENT CPlayer
-	: public CBaseEntity,
-	public BasePlayer
-{
-public:
+class DLLCLIENT CPlayer : public CBaseEntity, public BasePlayer {
+  public:
 	virtual void Initialize() override;
 };
 

@@ -20,19 +20,19 @@ void BaseFuncPhysicsComponent::Initialize()
 {
 	BaseFuncSurfaceMaterialComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"mass",false))
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "mass", false))
 			m_kvMass = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"surface_material",false))
+		else if(ustring::compare<std::string>(kvData.key, "surface_material", false))
 			m_kvSurfaceMaterial = kvData.value;
-		else if(ustring::compare<std::string>(kvData.key,"clientside_physics",false))
+		else if(ustring::compare<std::string>(kvData.key, "clientside_physics", false))
 			m_bClientsidePhysics = util::to_boolean(kvData.value);
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &ent = GetEntity();
 		auto pPhysComponent = ent.GetPhysicsComponent();
 		auto *phys = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
@@ -45,7 +45,7 @@ void BaseFuncPhysicsComponent::Initialize()
 	ent.AddComponent("name");
 	auto whRenderComponent = ent.AddComponent("render");
 	if(whRenderComponent.valid())
-		static_cast<BaseRenderComponent*>(whRenderComponent.get())->SetCastShadows(true);
+		static_cast<BaseRenderComponent *>(whRenderComponent.get())->SetCastShadows(true);
 	ent.AddComponent("model");
 }
 
@@ -54,14 +54,12 @@ void BaseFuncPhysicsComponent::OnEntitySpawn()
 	BaseFuncSurfaceMaterialComponent::OnEntitySpawn();
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent != nullptr)
-	{
+	if(pPhysComponent != nullptr) {
 		pPhysComponent->DestroyPhysicsObject();
 		pPhysComponent->SetMoveType(MOVETYPE::PHYSICS);
 	}
 	auto *phys = InitializePhysics();
-	if(phys != nullptr)
-	{
+	if(phys != nullptr) {
 		UpdateSurfaceMaterial(ent.GetNetworkState()->GetGameState());
 		phys->WakeUp();
 	}

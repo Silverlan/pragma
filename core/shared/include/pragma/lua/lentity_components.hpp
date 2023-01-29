@@ -11,10 +11,11 @@
 #include "pragma/networkdefinitions.h"
 
 struct lua_State;
-namespace luabind {class module_;};
+namespace luabind {
+	class module_;
+};
 struct BaseSoundEmitterComponentHandleWrapper;
-namespace Lua
-{
+namespace Lua {
 	DLLNETWORK void register_gravity_component(luabind::module_ &module);
 };
 

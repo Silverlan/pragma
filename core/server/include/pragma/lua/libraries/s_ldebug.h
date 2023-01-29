@@ -16,12 +16,9 @@
 #include "pragma/ai/s_npcstate.h"
 #include "pragma/ai/ai_task.h"
 
-namespace Lua
-{
-	namespace debug
-	{
-		namespace Server
-		{
+namespace Lua {
+	namespace debug {
+		namespace Server {
 			DLLSERVER std::string behavior_selector_type_to_string(pragma::ai::SelectorType selectorType);
 			DLLSERVER std::string behavior_task_decorator_type_to_string(pragma::ai::TaskDecorator::DecoratorType decoratorType);
 			DLLSERVER std::string behavior_task_result_to_string(pragma::ai::BehaviorNode::Result result);

@@ -13,27 +13,28 @@
 // TODO: Remove this file
 bool Game::CollisionTest()
 {
-	if(!m_bCollisionsEnabled) return false;
+	if(!m_bCollisionsEnabled)
+		return false;
 	return false;
 	//Player *pl = GetLocalPlayer();
 	//if(pl == NULL) return false;
 	//return CollisionTest(pl->GetPosition());
 }
 
-void Game::EnableCollisions(bool b) {m_bCollisionsEnabled = b;}
+void Game::EnableCollisions(bool b) { m_bCollisionsEnabled = b; }
 
-void Game::CollisionTest(BaseEntity *a,BaseEntity *b)
+void Game::CollisionTest(BaseEntity *a, BaseEntity *b)
 {
 	// TODO: Remove me
 }
 
-bool Game::CollisionTest(pragma::BasePlayerComponent&,float*,Vector3*)
+bool Game::CollisionTest(pragma::BasePlayerComponent &, float *, Vector3 *)
 {
 	// TODO: Remove me
 	return false;
 }
 
-bool Game::CollisionTest(Vector3*)
+bool Game::CollisionTest(Vector3 *)
 {
 	// TODO: Remove me
 	return false;

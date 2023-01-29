@@ -14,17 +14,13 @@
 #include <pragma/entities/components/base_flex_component.hpp>
 
 struct Eyeball;
-namespace pragma
-{
-	class DLLCLIENT CFlexComponent final
-		: public BaseFlexComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CFlexComponent final : public BaseFlexComponent {
+	  public:
 		static ComponentEventId EVENT_ON_FLEX_CONTROLLERS_UPDATED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		struct FlexAnimationData
-		{
+		struct FlexAnimationData {
 			uint32_t flexAnimationId = std::numeric_limits<uint32_t>::max();
 			float t = 0.f;
 			bool loop = false;
@@ -34,47 +30,46 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual void OnTick(double dt) override;
 		// Vertex animations
-		virtual void SetFlexController(uint32_t flexId,float val,float duration=0.f,bool clampToLimits=true) override;
+		virtual void SetFlexController(uint32_t flexId, float val, float duration = 0.f, bool clampToLimits = true) override;
 		using BaseFlexComponent::SetFlexController;
-		virtual bool GetFlexController(uint32_t flexId,float &val) const override;
-		bool CalcFlexValue(uint32_t flexId,float &val) const;
+		virtual bool GetFlexController(uint32_t flexId, float &val) const override;
+		bool CalcFlexValue(uint32_t flexId, float &val) const;
 		const std::vector<float> &GetFlexWeights() const;
 		float GetFlexWeight(uint32_t flexId) const;
-		bool GetFlexWeight(uint32_t flexId,float &outWeight) const;
-		void SetFlexWeight(uint32_t flexId,float weight);
+		bool GetFlexWeight(uint32_t flexId, float &outWeight) const;
+		void SetFlexWeight(uint32_t flexId, float weight);
 		void UpdateSoundPhonemes(CALSound &snd);
 		void UpdateFlexWeightsMT();
 		virtual void InitializeLuaObject(lua_State *l) override;
 
-		void SetFlexWeightOverride(uint32_t flexId,float weight);
+		void SetFlexWeightOverride(uint32_t flexId, float weight);
 		void ClearFlexWeightOverride(uint32_t flexId);
 		bool HasFlexWeightOverride(uint32_t flexId) const;
 
-		void SetFlexAnimationCycle(const LookupIdentifier &id,float cycle);
+		void SetFlexAnimationCycle(const LookupIdentifier &id, float cycle);
 		float GetFlexAnimationCycle(const LookupIdentifier &id) const;
-		void PlayFlexAnimation(const LookupIdentifier &id,bool loop=true,bool reset=false);
+		void PlayFlexAnimation(const LookupIdentifier &id, bool loop = true, bool reset = false);
 		void StopFlexAnimation(const LookupIdentifier &id);
-		void SetFlexAnimationPlaybackRate(const LookupIdentifier &id,float playbackRate);
+		void SetFlexAnimationPlaybackRate(const LookupIdentifier &id, float playbackRate);
 		const std::vector<FlexAnimationData> &GetFlexAnimations() const;
-	protected:
+	  protected:
 		FlexAnimationData *FindFlexAnimationData(uint32_t flexAnimId);
-		const FlexAnimationData *FindFlexAnimationData(uint32_t flexAnimId) const {return const_cast<CFlexComponent*>(this)->FindFlexAnimationData(flexAnimId);}
+		const FlexAnimationData *FindFlexAnimationData(uint32_t flexAnimId) const { return const_cast<CFlexComponent *>(this)->FindFlexAnimationData(flexAnimId); }
 		void ResolveFlexAnimation(const LookupIdentifier &lookupId) const;
 		void MaintainFlexAnimations(float dt);
-		bool UpdateFlexWeight(uint32_t flexId,float &val,bool storeInCache=true);
+		bool UpdateFlexWeight(uint32_t flexId, float &val, bool storeInCache = true);
 		void UpdateEyeFlexes();
-		void UpdateEyeFlexes(Eyeball &eyeball,uint32_t eyeballIdx);
+		void UpdateEyeFlexes(Eyeball &eyeball, uint32_t eyeballIdx);
 		void UpdateFlexControllers(float dt);
 		void OnModelChanged(const std::shared_ptr<Model> &mdl);
 
 		// Flex controllers
-		struct FlexControllerInfo
-		{
+		struct FlexControllerInfo {
 			float value = 0.f;
 			float targetValue = 0.f;
 			float endTime = 0.f;
 		};
-		std::unordered_map<uint32_t,FlexControllerInfo> m_flexControllers = {};
+		std::unordered_map<uint32_t, FlexControllerInfo> m_flexControllers = {};
 		std::vector<float> m_flexWeights = {};
 		std::vector<bool> m_updatedFlexWeights = {};
 		bool m_flexDataUpdateRequired = false;

@@ -11,11 +11,10 @@
 
 using namespace pragma;
 
-void CTimeScaleComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-Bool CTimeScaleComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
+void CTimeScaleComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+Bool CTimeScaleComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
-	if(eventId == m_netEvSetTimeScale)
-	{
+	if(eventId == m_netEvSetTimeScale) {
 		SetTimeScale(packet->Read<float>());
 		return true;
 	}

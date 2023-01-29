@@ -11,14 +11,12 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/particlesystem/c_particlemodifier.h"
 
-class DLLCLIENT CParticleOperatorAngularAcceleration
-	: public CParticleOperator
-{
-public:
-	CParticleOperatorAngularAcceleration()=default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
-	virtual void Simulate(CParticle &particle,double tDelta,float strength) override;
-private:
+class DLLCLIENT CParticleOperatorAngularAcceleration : public CParticleOperator {
+  public:
+	CParticleOperatorAngularAcceleration() = default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
+  private:
 	Vector3 m_vAcceleration = {};
 };
 

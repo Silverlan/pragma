@@ -12,7 +12,7 @@
 #include "pragma/entities/point/c_point_rendertarget.h"
 #include "pragma/lua/classes/ldef_entity.h"
 
-DLLCLIENT void Lua_PointRenderTarget_GetTextureBuffer(lua_State *l,PointRenderTargetHandle &hEnt)
+DLLCLIENT void Lua_PointRenderTarget_GetTextureBuffer(lua_State *l, PointRenderTargetHandle &hEnt)
 {
 	// COMPONENT TODO
 	//LUA_CHECK_ENTITY(l,hEnt);
@@ -20,14 +20,14 @@ DLLCLIENT void Lua_PointRenderTarget_GetTextureBuffer(lua_State *l,PointRenderTa
 	//unsigned int bufTexture = rt->GetTextureBuffer();
 	//Lua::PushInt(l,bufTexture);
 }
-DLLCLIENT void Lua_PointRenderTarget_SetRenderSize(lua_State *l,PointRenderTargetHandle &hEnt,Vector2 &renderSize)
+DLLCLIENT void Lua_PointRenderTarget_SetRenderSize(lua_State *l, PointRenderTargetHandle &hEnt, Vector2 &renderSize)
 {
 	// COMPONENT TODO
 	//LUA_CHECK_ENTITY(l,hEnt);
 	//CPointRenderTarget *rt = hEnt.get<CPointRenderTarget>();
 	//rt->SetRenderSize(renderSize);
 }
-DLLCLIENT void Lua_PointRenderTarget_GetRenderSize(lua_State *l,PointRenderTargetHandle &hEnt)
+DLLCLIENT void Lua_PointRenderTarget_GetRenderSize(lua_State *l, PointRenderTargetHandle &hEnt)
 {
 	// COMPONENT TODO
 	//LUA_CHECK_ENTITY(l,hEnt);
@@ -35,28 +35,28 @@ DLLCLIENT void Lua_PointRenderTarget_GetRenderSize(lua_State *l,PointRenderTarge
 	//auto sz = rt->GetRenderSize();
 	//luabind::object(l,sz).push(l);
 }
-DLLCLIENT void Lua_PointRenderTarget_SetRenderMaterial(lua_State *l,PointRenderTargetHandle &hEnt,Material *mat)
+DLLCLIENT void Lua_PointRenderTarget_SetRenderMaterial(lua_State *l, PointRenderTargetHandle &hEnt, Material *mat)
 {
 	// COMPONENT TODO
 	//LUA_CHECK_ENTITY(l,hEnt);
 	//CPointRenderTarget *rt = hEnt.get<CPointRenderTarget>();
 	//rt->SetRenderMaterial(mat);
 }
-DLLCLIENT void Lua_PointRenderTarget_SetRenderMaterial(lua_State *l,PointRenderTargetHandle &hEnt,std::string mat)
+DLLCLIENT void Lua_PointRenderTarget_SetRenderMaterial(lua_State *l, PointRenderTargetHandle &hEnt, std::string mat)
 {
 	// COMPONENT TODO
 	//LUA_CHECK_ENTITY(l,hEnt);
 	//CPointRenderTarget *rt = hEnt.get<CPointRenderTarget>();
 	//rt->SetRenderMaterial(mat);
 }
-DLLCLIENT void Lua_PointRenderTarget_SetRenderMaterial(lua_State *l,PointRenderTargetHandle &hEnt)
+DLLCLIENT void Lua_PointRenderTarget_SetRenderMaterial(lua_State *l, PointRenderTargetHandle &hEnt)
 {
 	// COMPONENT TODO
 	//LUA_CHECK_ENTITY(l,hEnt);
 	//CPointRenderTarget *rt = hEnt.get<CPointRenderTarget>();
 	//rt->SetRenderMaterial(NULL);
 }
-DLLCLIENT void Lua_PointRenderTarget_GetRenderMaterial(lua_State *l,PointRenderTargetHandle &hEnt)
+DLLCLIENT void Lua_PointRenderTarget_GetRenderMaterial(lua_State *l, PointRenderTargetHandle &hEnt)
 {
 	// COMPONENT TODO
 	//LUA_CHECK_ENTITY(l,hEnt);
@@ -64,41 +64,41 @@ DLLCLIENT void Lua_PointRenderTarget_GetRenderMaterial(lua_State *l,PointRenderT
 	//Material *mat = rt->GetRenderMaterial();
 	//luabind::object(l,mat).push(l);
 }
-DLLCLIENT void Lua_PointRenderTarget_SetRefreshRate(lua_State *l,PointRenderTargetHandle &hEnt,float rate)
+DLLCLIENT void Lua_PointRenderTarget_SetRefreshRate(lua_State *l, PointRenderTargetHandle &hEnt, float rate)
 {
 	// COMPONENT TODO
 	//LUA_CHECK_ENTITY(l,hEnt);
 	//CPointRenderTarget *rt = hEnt.get<CPointRenderTarget>();
 	//rt->SetRefreshRate(rate);
 }
-DLLCLIENT void Lua_PointRenderTarget_GetRefreshRate(lua_State *l,PointRenderTargetHandle &hEnt)
+DLLCLIENT void Lua_PointRenderTarget_GetRefreshRate(lua_State *l, PointRenderTargetHandle &hEnt)
 {
 	// COMPONENT TODO
 	//LUA_CHECK_ENTITY(l,hEnt);
 	//CPointRenderTarget *rt = hEnt.get<CPointRenderTarget>();
 	//Lua::PushNumber(l,rt->GetRefreshRate());
 }
-DLLCLIENT void Lua_PointRenderTarget_SetRenderDepth(lua_State *l,PointRenderTargetHandle &hEnt,unsigned int depth)
+DLLCLIENT void Lua_PointRenderTarget_SetRenderDepth(lua_State *l, PointRenderTargetHandle &hEnt, unsigned int depth)
 {
 	// COMPONENT TODO
 	//LUA_CHECK_ENTITY(l,hEnt);
 	//CPointRenderTarget *rt = hEnt.get<CPointRenderTarget>();
 	//rt->SetRenderDepth(depth);
 }
-DLLCLIENT void Lua_PointRenderTarget_GetRenderDepth(lua_State *l,PointRenderTargetHandle &hEnt)
+DLLCLIENT void Lua_PointRenderTarget_GetRenderDepth(lua_State *l, PointRenderTargetHandle &hEnt)
 {
 	// COMPONENT TODO
 	//LUA_CHECK_ENTITY(l,hEnt);
 	//CPointRenderTarget *rt = hEnt.get<CPointRenderTarget>();
 	//Lua::PushInt(l,rt->GetRenderDepth());
 }
-DLLCLIENT void Lua_PointRenderTarget_SetRenderFOV(lua_State *l,PointRenderTargetHandle &hEnt,float fov)
+DLLCLIENT void Lua_PointRenderTarget_SetRenderFOV(lua_State *l, PointRenderTargetHandle &hEnt, float fov)
 {
 	// COMPONENT TODO
 	//LUA_CHECK_ENTITY(l,hEnt);
 	//hEnt.get<CPointRenderTarget>()->SetRenderFOV(fov);
 }
-DLLCLIENT void Lua_PointRenderTarget_GetRenderFOV(lua_State *l,PointRenderTargetHandle &hEnt)
+DLLCLIENT void Lua_PointRenderTarget_GetRenderFOV(lua_State *l, PointRenderTargetHandle &hEnt)
 {
 	// COMPONENT TODO
 	//LUA_CHECK_ENTITY(l,hEnt);

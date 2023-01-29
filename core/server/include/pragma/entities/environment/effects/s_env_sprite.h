@@ -12,24 +12,18 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/environment/effects/env_sprite.h>
 
-namespace pragma
-{
-	class DLLSERVER SSpriteComponent final
-		: public BaseEnvSpriteComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SSpriteComponent final : public BaseEnvSpriteComponent, public SBaseNetComponent {
+	  public:
 		SSpriteComponent(BaseEntity &ent) : BaseEnvSpriteComponent(ent) {}
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLSERVER EnvSprite
-	: public SBaseEntity
-{
-public:
+class DLLSERVER EnvSprite : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

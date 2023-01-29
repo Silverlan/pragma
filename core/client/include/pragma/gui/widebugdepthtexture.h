@@ -12,23 +12,21 @@
 #include <wgui/types/wirect.h>
 #include <prosper_util.hpp>
 
-class DLLCLIENT WIDebugDepthTexture
-	: public WIBase
-{
-public:
+class DLLCLIENT WIDebugDepthTexture : public WIBase {
+  public:
 	WIDebugDepthTexture();
 	virtual ~WIDebugDepthTexture() override;
 	virtual void Initialize() override;
 
-	void SetTexture(prosper::Texture &texture,bool stencil=false);
-	void SetTexture(prosper::Texture &texture,prosper::util::BarrierImageLayout srcLayout,prosper::util::BarrierImageLayout dstLayout,uint32_t layerId=0u,bool stencil=false);
+	void SetTexture(prosper::Texture &texture, bool stencil = false);
+	void SetTexture(prosper::Texture &texture, prosper::util::BarrierImageLayout srcLayout, prosper::util::BarrierImageLayout dstLayout, uint32_t layerId = 0u, bool stencil = false);
 
 	void SetContrastFactor(float contrastFactor);
 	float GetContrastFactor() const;
 
-	void Setup(float nearZ,float farZ);
+	void Setup(float nearZ, float farZ);
 	void SetShouldResolveImage(bool b);
-protected:
+  protected:
 	virtual void DoUpdate() override;
 	void UpdateResolvedTexture();
 	WIHandle m_hTextureRect;
@@ -44,7 +42,7 @@ protected:
 	std::shared_ptr<prosper::IDescriptorSetGroup> m_dsgSceneDepthTex = nullptr;
 	uint32_t m_imageLayer = 0u;
 	float m_contrastFactor = 1.f;
-	
+
 	bool m_bResolveImage = true;
 };
 

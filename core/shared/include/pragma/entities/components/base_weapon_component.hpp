@@ -11,21 +11,16 @@
 #include <sharedutils/property/util_property.hpp>
 
 struct BulletInfo;
-namespace pragma
-{
-	struct DLLNETWORK CEOnClipSizeChanged
-		: public ComponentEvent
-	{
-		CEOnClipSizeChanged(UInt16 oldClipSize,UInt16 newClipSize);
+namespace pragma {
+	struct DLLNETWORK CEOnClipSizeChanged : public ComponentEvent {
+		CEOnClipSizeChanged(UInt16 oldClipSize, UInt16 newClipSize);
 		virtual void PushArguments(lua_State *l) override;
 		UInt16 oldClipSize;
 		UInt16 newClipSize;
 	};
 	class BaseOwnableComponent;
-	class DLLNETWORK BaseWeaponComponent
-		: public BaseEntityComponent
-	{
-	public:
+	class DLLNETWORK BaseWeaponComponent : public BaseEntityComponent {
+	  public:
 		static ComponentEventId EVENT_ON_DEPLOY;
 		static ComponentEventId EVENT_ON_HOLSTER;
 		static ComponentEventId EVENT_ON_PRIMARY_ATTACK;
@@ -37,7 +32,7 @@ namespace pragma
 		static ComponentEventId EVENT_ON_RELOAD;
 		static ComponentEventId EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED;
 		static ComponentEventId EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;
 		virtual void Deploy();
@@ -87,12 +82,12 @@ namespace pragma
 
 		BaseOwnableComponent *GetOwnerComponent();
 		virtual void OnEntitySpawn() override;
-	protected:
+	  protected:
 		BaseWeaponComponent(BaseEntity &ent);
 		void UpdateTickPolicy();
 		bool CanPrimaryAttack() const;
 		bool CanSecondaryAttack() const;
-		virtual void OnFireBullets(const BulletInfo &bulletInfo,Vector3 &bulletOrigin,Vector3 &bulletDir,Vector3 *effectsOrigin=nullptr);
+		virtual void OnFireBullets(const BulletInfo &bulletInfo, Vector3 &bulletOrigin, Vector3 &bulletDir, Vector3 *effectsOrigin = nullptr);
 		virtual void OnPhysicsInitialized();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 

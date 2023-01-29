@@ -11,20 +11,16 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_transform_component.hpp>
 
-namespace pragma
-{
-	class DLLSERVER STransformComponent final
-		: public BaseTransformComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER STransformComponent final : public BaseTransformComponent, public SBaseNetComponent {
+	  public:
 		STransformComponent(BaseEntity &ent) : BaseTransformComponent(ent) {}
 		virtual void SetEyeOffset(const Vector3 &offset) override;
 		virtual void SetScale(const Vector3 &scale) override;
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
-	protected:
+	  protected:
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	};
 };

@@ -14,40 +14,40 @@
 
 enum class Activity : uint16_t;
 using BoneId = uint16_t;
-namespace util {class EnumRegister;};
-namespace pragma::animation::skeletal
-{
+namespace util {
+	class EnumRegister;
+};
+namespace pragma::animation::skeletal {
 	static constexpr std::string_view SK_ANIMATED_COMPONENT_NAME = "sk_animated";
-	struct DLLNETWORK AnimBoneChannelDesc
-	{
+	struct DLLNETWORK AnimBoneChannelDesc {
 		static constexpr auto INVALID_CHANNEL = std::numeric_limits<uint32_t>::max();
 		uint32_t positionChannel = INVALID_CHANNEL;
 		uint32_t rotationChannel = INVALID_CHANNEL;
 		uint32_t scaleChannel = INVALID_CHANNEL;
 	};
-	using BoneChannelMap = std::unordered_map<BoneId,AnimBoneChannelDesc>;
+	using BoneChannelMap = std::unordered_map<BoneId, AnimBoneChannelDesc>;
 
 	util::EnumRegister &get_activity_enum_register();
 	Activity get_activity(const panima::Animation &anim);
-	void set_activity(panima::Animation &anim,Activity act);
+	void set_activity(panima::Animation &anim, Activity act);
 	uint8_t get_activity_weight(const panima::Animation &anim);
-	void set_activity_weight(panima::Animation &anim,uint8_t weight);
+	void set_activity_weight(panima::Animation &anim, uint8_t weight);
 
-	std::pair<Vector3,Vector3> get_render_bounds(const panima::Animation &anim);
-	void set_render_bounds(panima::Animation &anim,const Vector3 &min,const Vector3 &max);
+	std::pair<Vector3, Vector3> get_render_bounds(const panima::Animation &anim);
+	void set_render_bounds(panima::Animation &anim, const Vector3 &min, const Vector3 &max);
 
-	BoneChannelMap get_bone_channel_map(const panima::Animation &animation,const panima::Skeleton &skeleton);
-	void animation_slice_to_animated_pose(const BoneChannelMap &boneChannelMap,const panima::Slice &slice,panima::Pose &pose);
+	BoneChannelMap get_bone_channel_map(const panima::Animation &animation, const panima::Skeleton &skeleton);
+	void animation_slice_to_animated_pose(const BoneChannelMap &boneChannelMap, const panima::Slice &slice, panima::Pose &pose);
 
-	void interpolate_animated_poses(const panima::Pose &pose0,const panima::Pose &pose1,panima::Pose &poseDst,float f);
+	void interpolate_animated_poses(const panima::Pose &pose0, const panima::Pose &pose1, panima::Pose &poseDst, float f);
 
 	bool is_bone_position_channel(const panima::Channel &channel);
 	bool is_bone_rotation_channel(const panima::Channel &channel);
 	bool is_bone_scale_channel(const panima::Channel &channel);
 
-	void translate(panima::Animation &anim,const Vector3 &translation);
-	void rotate(panima::Animation &anim,const Quat &rotation);
-	void scale(panima::Animation &anim,const Vector3 &scale);
+	void translate(panima::Animation &anim, const Vector3 &translation);
+	void rotate(panima::Animation &anim, const Quat &rotation);
+	void scale(panima::Animation &anim, const Vector3 &scale);
 };
 
 #endif

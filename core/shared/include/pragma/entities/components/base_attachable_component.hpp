@@ -14,32 +14,24 @@
 
 struct AttachmentData;
 struct AttachmentInfo;
-namespace pragma
-{
+namespace pragma {
 	class BaseParentComponent;
-	class DLLNETWORK BaseAttachableComponent
-		: public BaseEntityComponent
-	{
-	public:
+	class DLLNETWORK BaseAttachableComponent : public BaseEntityComponent {
+	  public:
 		static ComponentEventId EVENT_ON_ATTACHMENT_UPDATE;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		enum class StateFlags : uint32_t
-		{
-			None = 0u,
-			UpdatingPosition = 1u,
-			UpdatingRotation = UpdatingPosition<<1u
-		};
+		enum class StateFlags : uint32_t { None = 0u, UpdatingPosition = 1u, UpdatingRotation = UpdatingPosition << 1u };
 
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
-		void UpdateAttachmentOffset(bool invokeUpdateEvents=true);
+		void UpdateAttachmentOffset(bool invokeUpdateEvents = true);
 
-		AttachmentData *AttachToEntity(BaseEntity *ent,const AttachmentInfo &attInfo={});
-		AttachmentData *AttachToBone(BaseEntity *ent,uint32_t boneID,const AttachmentInfo &attInfo={});
-		AttachmentData *AttachToBone(BaseEntity *ent,std::string bone,const AttachmentInfo &attInfo={});
-		AttachmentData *AttachToAttachment(BaseEntity *ent,uint32_t attachmentID,const AttachmentInfo &attInfo={});
-		AttachmentData *AttachToAttachment(BaseEntity *ent,std::string attachment,const AttachmentInfo &attInfo={});
+		AttachmentData *AttachToEntity(BaseEntity *ent, const AttachmentInfo &attInfo = {});
+		AttachmentData *AttachToBone(BaseEntity *ent, uint32_t boneID, const AttachmentInfo &attInfo = {});
+		AttachmentData *AttachToBone(BaseEntity *ent, std::string bone, const AttachmentInfo &attInfo = {});
+		AttachmentData *AttachToAttachment(BaseEntity *ent, uint32_t attachmentID, const AttachmentInfo &attInfo = {});
+		AttachmentData *AttachToAttachment(BaseEntity *ent, std::string attachment, const AttachmentInfo &attInfo = {});
 		virtual void SetAttachmentFlags(FAttachmentMode flags);
 		void AddAttachmentFlags(FAttachmentMode flags);
 		void RemoveAttachmentFlags(FAttachmentMode flags);
@@ -47,7 +39,7 @@ namespace pragma
 		bool HasAttachmentFlag(FAttachmentMode flag) const;
 		BaseParentComponent *GetParent() const;
 		AttachmentData *GetAttachmentData() const;
-		void UpdateAttachmentData(bool bForceReload=false);
+		void UpdateAttachmentData(bool bForceReload = false);
 		void ClearAttachment();
 
 		std::optional<umath::Transform> GetLocalPose() const;
@@ -55,20 +47,20 @@ namespace pragma
 
 		virtual void OnTick(double dt) override;
 
-		void GetChildren(std::vector<BaseEntity*> &children) const;
-		const std::vector<BaseEntity*> &GetChildren() const;
-	protected:
+		void GetChildren(std::vector<BaseEntity *> &children) const;
+		const std::vector<BaseEntity *> &GetChildren() const;
+	  protected:
 		BaseAttachableComponent(BaseEntity &ent);
 		virtual void OnAttachmentChanged() {}
-		virtual AttachmentData *SetupAttachment(BaseEntity *ent,const AttachmentInfo &attInfo);
-		virtual void UpdateViewAttachmentOffset(BaseEntity *ent,pragma::BaseCharacterComponent &pl,Vector3 &pos,Quat &rot,Bool bYawOnly=false) const;
+		virtual AttachmentData *SetupAttachment(BaseEntity *ent, const AttachmentInfo &attInfo);
+		virtual void UpdateViewAttachmentOffset(BaseEntity *ent, pragma::BaseCharacterComponent &pl, Vector3 &pos, Quat &rot, Bool bYawOnly = false) const;
 		virtual void OnEntitySpawn() override;
 		void AddChild(BaseEntity *ent);
 		void RemoveChild(BaseEntity *ent);
 		std::optional<umath::Transform> GetParentPose() const;
 
 		StateFlags m_stateFlags = StateFlags::None;
-		std::vector<BaseEntity*> m_children = {};
+		std::vector<BaseEntity *> m_children = {};
 		float m_tLastAttachmentUpdate = 0.f;
 		std::unique_ptr<AttachmentData> m_attachment = nullptr;
 		std::string m_parentName = {};

@@ -10,10 +10,7 @@
 #include "sharedutils/datastream.h"
 #include <iostream>
 
-WMServerData::WMServerData()
-	: engineVersion{0,0,0},tcpPort(0),udpPort(0),players(0),maxPlayers(0),bots(0),
-	password(false)
-{}
+WMServerData::WMServerData() : engineVersion {0, 0, 0}, tcpPort(0), udpPort(0), players(0), maxPlayers(0), bots(0), password(false) {}
 
 void WMServerData::Write(DataStream &stream) const
 {
@@ -28,7 +25,7 @@ void WMServerData::Write(DataStream &stream) const
 	stream->WriteString(gameMode);
 	stream->Write<bool>(password);
 }
-void WMServerData::Read(DataStream &stream,WMServerData &data)
+void WMServerData::Read(DataStream &stream, WMServerData &data)
 {
 	data.engineVersion = stream->Read<util::Version>();
 	data.tcpPort = stream->Read<unsigned short>();
@@ -42,14 +39,14 @@ void WMServerData::Read(DataStream &stream,WMServerData &data)
 	data.password = stream->Read<bool>();
 }
 
-std::ostream &operator<<(std::ostream &out,const WMServerData &data)
+std::ostream &operator<<(std::ostream &out, const WMServerData &data)
 {
-	out<<"IP: "<<data.ip<<":[UDP:"<<data.udpPort<<"; TCP:"<<data.tcpPort<<"]"<<std::endl;
-	out<<"Name: "<<data.name<<std::endl;
-	out<<"Engine Version: "<<data.engineVersion.ToString()<<std::endl;
-	out<<"Map: "<<data.map<<std::endl;
-	out<<"Gamemode: "<<data.gameMode<<std::endl;
-	out<<"Players: "<<data.players<<"/"<<data.maxPlayers<<" ("<<data.bots<<" bots)"<<std::endl;
-	out<<"Password Protected: "<<data.password<<std::endl;
+	out << "IP: " << data.ip << ":[UDP:" << data.udpPort << "; TCP:" << data.tcpPort << "]" << std::endl;
+	out << "Name: " << data.name << std::endl;
+	out << "Engine Version: " << data.engineVersion.ToString() << std::endl;
+	out << "Map: " << data.map << std::endl;
+	out << "Gamemode: " << data.gameMode << std::endl;
+	out << "Players: " << data.players << "/" << data.maxPlayers << " (" << data.bots << " bots)" << std::endl;
+	out << "Password Protected: " << data.password << std::endl;
 	return out;
 }

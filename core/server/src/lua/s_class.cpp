@@ -234,53 +234,41 @@ void SGame::RegisterLuaClasses()
 
 	auto materialClassDef = luabind::class_<Material>("Material");
 	Lua::Material::register_class(materialClassDef);
-	materialClassDef.def("SetShader",static_cast<void(*)(lua_State*,::Material&,const std::string&)>([](lua_State *l,::Material &mat,const std::string &shader) {
+	materialClassDef.def("SetShader", static_cast<void (*)(lua_State *, ::Material &, const std::string &)>([](lua_State *l, ::Material &mat, const std::string &shader) {
 		auto db = mat.GetDataBlock();
 		if(db == nullptr)
 			return;
-		mat.Initialize(shader,db);
+		mat.Initialize(shader, db);
 		mat.SetLoaded(true);
 	}));
 	modGame[materialClassDef];
 
 	auto modelMeshClassDef = luabind::class_<ModelMesh>("Mesh");
 	Lua::ModelMesh::register_class(modelMeshClassDef);
-	modelMeshClassDef.scope[luabind::def("Create",&Lua::ModelMesh::Server::Create)];
+	modelMeshClassDef.scope[luabind::def("Create", &Lua::ModelMesh::Server::Create)];
 
 	auto subModelMeshClassDef = luabind::class_<ModelSubMesh>("Sub");
 	Lua::ModelSubMesh::register_class(subModelMeshClassDef);
-	subModelMeshClassDef.scope[luabind::def("Create",&Lua::ModelSubMesh::Server::Create)];
-	subModelMeshClassDef.scope[luabind::def("CreateQuad",&Lua::ModelSubMesh::Server::CreateQuad)];
-	subModelMeshClassDef.scope[luabind::def("CreateBox",&Lua::ModelSubMesh::Server::CreateBox)];
-	subModelMeshClassDef.scope[luabind::def("CreateSphere",static_cast<void(*)(lua_State*,const Vector3&,float,uint32_t)>(&Lua::ModelSubMesh::Server::CreateSphere))];
-	subModelMeshClassDef.scope[luabind::def("CreateSphere",static_cast<void(*)(lua_State*,const Vector3&,float)>(&Lua::ModelSubMesh::Server::CreateSphere))];
-	subModelMeshClassDef.scope[luabind::def("CreateCylinder",static_cast<void(*)(lua_State*,float,float,uint32_t)>(&Lua::ModelSubMesh::Server::CreateCylinder))];
-	subModelMeshClassDef.scope[luabind::def("CreateCylinder",static_cast<void(*)(lua_State*,float,float)>([](lua_State *l,float startRadius,float length) {
-		Lua::ModelSubMesh::Server::CreateCylinder(l,startRadius,length,12);
-	}))];
-	subModelMeshClassDef.scope[luabind::def("CreateCone",static_cast<void(*)(lua_State*,float,float,float,uint32_t)>(&Lua::ModelSubMesh::Server::CreateCone))];
-	subModelMeshClassDef.scope[luabind::def("CreateCone",static_cast<void(*)(lua_State*,float,float,float)>([](lua_State *l,float startRadius,float length,float endRadius) {
-		Lua::ModelSubMesh::Server::CreateCone(l,startRadius,length,endRadius,12);
-	}))];
-	subModelMeshClassDef.scope[luabind::def("CreateCircle",static_cast<void(*)(lua_State*,float,bool,uint32_t)>(&Lua::ModelSubMesh::Server::CreateCircle))];
-	subModelMeshClassDef.scope[luabind::def("CreateCircle",static_cast<void(*)(lua_State*,float,bool)>([](lua_State *l,float radius,bool doubleSided) {
-		Lua::ModelSubMesh::Server::CreateCircle(l,radius,doubleSided,36);
-	}))];
-	subModelMeshClassDef.scope[luabind::def("CreateCircle",static_cast<void(*)(lua_State*,float)>([](lua_State *l,float radius) {
-		Lua::ModelSubMesh::Server::CreateCircle(l,radius,true,36);
-	}))];
-	subModelMeshClassDef.scope[luabind::def("CreateRing",static_cast<void(*)(lua_State*,float,float,bool,uint32_t)>(&Lua::ModelSubMesh::Server::CreateRing))];
-	subModelMeshClassDef.scope[luabind::def("CreateRing",static_cast<void(*)(lua_State*,float,float,bool)>([](lua_State *l,float innerRadius,float outerRadius,bool doubleSided) {
-		Lua::ModelSubMesh::Server::CreateRing(l,innerRadius,outerRadius,doubleSided,36);
-	}))];
-	subModelMeshClassDef.scope[luabind::def("CreateRing",static_cast<void(*)(lua_State*,float,float)>([](lua_State *l,float innerRadius,float outerRadius) {
-		Lua::ModelSubMesh::Server::CreateRing(l,innerRadius,outerRadius,true,36);
-	}))];
+	subModelMeshClassDef.scope[luabind::def("Create", &Lua::ModelSubMesh::Server::Create)];
+	subModelMeshClassDef.scope[luabind::def("CreateQuad", &Lua::ModelSubMesh::Server::CreateQuad)];
+	subModelMeshClassDef.scope[luabind::def("CreateBox", &Lua::ModelSubMesh::Server::CreateBox)];
+	subModelMeshClassDef.scope[luabind::def("CreateSphere", static_cast<void (*)(lua_State *, const Vector3 &, float, uint32_t)>(&Lua::ModelSubMesh::Server::CreateSphere))];
+	subModelMeshClassDef.scope[luabind::def("CreateSphere", static_cast<void (*)(lua_State *, const Vector3 &, float)>(&Lua::ModelSubMesh::Server::CreateSphere))];
+	subModelMeshClassDef.scope[luabind::def("CreateCylinder", static_cast<void (*)(lua_State *, float, float, uint32_t)>(&Lua::ModelSubMesh::Server::CreateCylinder))];
+	subModelMeshClassDef.scope[luabind::def("CreateCylinder", static_cast<void (*)(lua_State *, float, float)>([](lua_State *l, float startRadius, float length) { Lua::ModelSubMesh::Server::CreateCylinder(l, startRadius, length, 12); }))];
+	subModelMeshClassDef.scope[luabind::def("CreateCone", static_cast<void (*)(lua_State *, float, float, float, uint32_t)>(&Lua::ModelSubMesh::Server::CreateCone))];
+	subModelMeshClassDef.scope[luabind::def("CreateCone", static_cast<void (*)(lua_State *, float, float, float)>([](lua_State *l, float startRadius, float length, float endRadius) { Lua::ModelSubMesh::Server::CreateCone(l, startRadius, length, endRadius, 12); }))];
+	subModelMeshClassDef.scope[luabind::def("CreateCircle", static_cast<void (*)(lua_State *, float, bool, uint32_t)>(&Lua::ModelSubMesh::Server::CreateCircle))];
+	subModelMeshClassDef.scope[luabind::def("CreateCircle", static_cast<void (*)(lua_State *, float, bool)>([](lua_State *l, float radius, bool doubleSided) { Lua::ModelSubMesh::Server::CreateCircle(l, radius, doubleSided, 36); }))];
+	subModelMeshClassDef.scope[luabind::def("CreateCircle", static_cast<void (*)(lua_State *, float)>([](lua_State *l, float radius) { Lua::ModelSubMesh::Server::CreateCircle(l, radius, true, 36); }))];
+	subModelMeshClassDef.scope[luabind::def("CreateRing", static_cast<void (*)(lua_State *, float, float, bool, uint32_t)>(&Lua::ModelSubMesh::Server::CreateRing))];
+	subModelMeshClassDef.scope[luabind::def("CreateRing", static_cast<void (*)(lua_State *, float, float, bool)>([](lua_State *l, float innerRadius, float outerRadius, bool doubleSided) { Lua::ModelSubMesh::Server::CreateRing(l, innerRadius, outerRadius, doubleSided, 36); }))];
+	subModelMeshClassDef.scope[luabind::def("CreateRing", static_cast<void (*)(lua_State *, float, float)>([](lua_State *l, float innerRadius, float outerRadius) { Lua::ModelSubMesh::Server::CreateRing(l, innerRadius, outerRadius, true, 36); }))];
 
 	auto modelClassDef = luabind::class_<Model>("Model");
-	Lua::Model::register_class(GetLuaState(),modelClassDef,modelMeshClassDef,subModelMeshClassDef);
-	modelClassDef.def("AddMaterial",&Lua::Model::Server::AddMaterial);
-	modelClassDef.def("SetMaterial",&Lua::Model::Server::SetMaterial);
+	Lua::Model::register_class(GetLuaState(), modelClassDef, modelMeshClassDef, subModelMeshClassDef);
+	modelClassDef.def("AddMaterial", &Lua::Model::Server::AddMaterial);
+	modelClassDef.def("SetMaterial", &Lua::Model::Server::SetMaterial);
 	modGame[modelClassDef];
 	auto _G = luabind::globals(GetLuaState());
 	_G["Model"] = _G["game"]["Model"];

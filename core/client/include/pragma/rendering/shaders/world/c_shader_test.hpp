@@ -11,17 +11,13 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 
-namespace pragma
-{
-	class DLLCLIENT ShaderTest
-		: public ShaderGameWorldLightingPass
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT ShaderTest : public ShaderGameWorldLightingPass {
+	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_PBR;
 
-		enum class MaterialBinding : uint32_t
-		{
+		enum class MaterialBinding : uint32_t {
 			MaterialSettings = umath::to_integral(ShaderGameWorldLightingPass::MaterialBinding::MaterialSettings),
 			AlbedoMap,
 			NormalMap,
@@ -35,8 +31,7 @@ namespace pragma
 			Count
 		};
 
-		enum class PBRBinding : uint32_t
-		{
+		enum class PBRBinding : uint32_t {
 			IrradianceMap = 0u,
 			PrefilterMap,
 			BRDFMap,
@@ -44,19 +39,19 @@ namespace pragma
 			Count
 		};
 
-		ShaderTest(prosper::IPrContext &context,const std::string &identifier);
-		ShaderTest(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
+		ShaderTest(prosper::IPrContext &context, const std::string &identifier);
+		ShaderTest(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader = "");
 
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
-		void DrawTest(prosper::IBuffer &buf,prosper::IBuffer &ibuf,uint32_t count);
+		void DrawTest(prosper::IBuffer &buf, prosper::IBuffer &ibuf, uint32_t count);
 		void SetForceNonIBLMode(bool b);
-	protected:
+	  protected:
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
-		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		virtual void UpdateRenderFlags(CModelSubMesh &mesh,SceneFlags &inOutFlags) override;
-		virtual void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo);
+		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void UpdateRenderFlags(CModelSubMesh &mesh, SceneFlags &inOutFlags) override;
+		virtual void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo);
 
 		SceneFlags m_extRenderFlags = SceneFlags::None;
 		bool m_bNonIBLMode = false;

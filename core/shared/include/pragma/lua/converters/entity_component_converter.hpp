@@ -11,8 +11,7 @@
 
 #include "pragma/lua/converters/game_type_converters.hpp"
 
-namespace luabind
-{
+namespace luabind {
 	/*template<typename T> requires(is_type_or_derived<base_type<T>,pragma::BaseEntityComponent>)
 	struct default_converter<T>
 		: type_converter<T>

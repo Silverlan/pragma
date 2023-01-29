@@ -11,9 +11,8 @@
 #include "pragma/networkdefinitions.h"
 #include <mathutil/uvec.h>
 
-namespace util
-{
-	DLLNETWORK Vector3 angular_velocity_to_linear(const Vector3 &refPos,const Vector3 &angVel,const Vector3 &tgtPos);
+namespace util {
+	DLLNETWORK Vector3 angular_velocity_to_linear(const Vector3 &refPos, const Vector3 &angVel, const Vector3 &tgtPos);
 };
 
 #endif

@@ -19,21 +19,18 @@
 
 extern DLLNETWORK Engine *engine;
 
-static std::unordered_map<pragma::asset::Type,std::string> g_assetTypeToIdentifier;
-static std::unordered_map<std::string,pragma::asset::Type> g_identifierToAssetType;
+static std::unordered_map<pragma::asset::Type, std::string> g_assetTypeToIdentifier;
+static std::unordered_map<std::string, pragma::asset::Type> g_identifierToAssetType;
 static void init_asset_type_maps()
 {
 	auto n = umath::to_integral(pragma::asset::Type::Count);
-	for(auto i=decltype(n){0u};i<n;++i)
-	{
+	for(auto i = decltype(n) {0u}; i < n; ++i) {
 		auto type = static_cast<pragma::asset::Type>(i);
 		std::string strType {magic_enum::enum_name(type)};
 		std::string normalizedTypeName;
-		normalizedTypeName.reserve(strType.size() *2);
-		for(auto c : strType)
-		{
-			if(std::isupper(c))
-			{
+		normalizedTypeName.reserve(strType.size() * 2);
+		for(auto c : strType) {
+			if(std::isupper(c)) {
 				if(!normalizedTypeName.empty())
 					normalizedTypeName += '_';
 				normalizedTypeName += std::tolower(c);
@@ -63,9 +60,9 @@ static std::optional<std::string> get_asset_identifier_from_type(pragma::asset::
 		return {};
 	return it->second;
 }
-void Lua::asset::register_library(Lua::Interface &lua,bool extended)
+void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 {
-	auto modAsset = luabind::module_(lua.GetState(),"asset");
+	auto modAsset = luabind::module_(lua.GetState(), "asset");
 	modAsset[
 		luabind::def("clear_unused",+[](NetworkState &nw,pragma::asset::Type type) -> std::optional<uint32_t> {
 			auto *assetManager = nw.GetAssetManager(type);
@@ -250,77 +247,64 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 		})
 	];
 
-	Lua::RegisterLibraryEnums(lua.GetState(),"asset",{
-		{"TYPE_MODEL",umath::to_integral(pragma::asset::Type::Model)},
-		{"TYPE_MAP",umath::to_integral(pragma::asset::Type::Map)},
-		{"TYPE_MATERIAL",umath::to_integral(pragma::asset::Type::Material)},
-		{"TYPE_TEXTURE",umath::to_integral(pragma::asset::Type::Texture)},
-		{"TYPE_AUDIO",umath::to_integral(pragma::asset::Type::Sound)},
-		{"TYPE_PARTICLE_SYSTEM",umath::to_integral(pragma::asset::Type::ParticleSystem)},
+	Lua::RegisterLibraryEnums(lua.GetState(), "asset",
+	  {{"TYPE_MODEL", umath::to_integral(pragma::asset::Type::Model)}, {"TYPE_MAP", umath::to_integral(pragma::asset::Type::Map)}, {"TYPE_MATERIAL", umath::to_integral(pragma::asset::Type::Material)}, {"TYPE_TEXTURE", umath::to_integral(pragma::asset::Type::Texture)},
+	    {"TYPE_AUDIO", umath::to_integral(pragma::asset::Type::Sound)}, {"TYPE_PARTICLE_SYSTEM", umath::to_integral(pragma::asset::Type::ParticleSystem)},
 
-		{"FORMAT_TYPE_NATIVE",umath::to_integral(pragma::asset::FormatType::Native)},
-		{"FORMAT_TYPE_IMPORT",umath::to_integral(pragma::asset::FormatType::Import)},
-		{"FORMAT_TYPE_ALL",umath::to_integral(pragma::asset::FormatType::All)},
-		
-		{"ASSET_LOAD_FLAG_NONE",umath::to_integral(util::AssetLoadFlags::None)},
-		{"ASSET_LOAD_FLAG_ABSOLUTE_PATH_BIT",umath::to_integral(util::AssetLoadFlags::AbsolutePath)},
-		{"ASSET_LOAD_FLAG_DONT_CACHE_BIT",umath::to_integral(util::AssetLoadFlags::DontCache)},
-		{"ASSET_LOAD_FLAG_IGNORE_CACHE_BIT",umath::to_integral(util::AssetLoadFlags::IgnoreCache)},
+	    {"FORMAT_TYPE_NATIVE", umath::to_integral(pragma::asset::FormatType::Native)}, {"FORMAT_TYPE_IMPORT", umath::to_integral(pragma::asset::FormatType::Import)}, {"FORMAT_TYPE_ALL", umath::to_integral(pragma::asset::FormatType::All)},
 
-		{"ASSET_STATE_NOT_LOADED",umath::to_integral(util::AssetState::NotLoaded)},
-		{"ASSET_STATE_LOADED",umath::to_integral(util::AssetState::Loaded)},
-		{"ASSET_STATE_FAILED_TO_LOAD",umath::to_integral(util::AssetState::FailedToLoad)},
-		{"ASSET_STATE_LOADING",umath::to_integral(util::AssetState::Loading)}
-	});
-	static_assert(umath::to_integral(pragma::asset::Type::Count) == 6,"Update this list!");
+	    {"ASSET_LOAD_FLAG_NONE", umath::to_integral(util::AssetLoadFlags::None)}, {"ASSET_LOAD_FLAG_ABSOLUTE_PATH_BIT", umath::to_integral(util::AssetLoadFlags::AbsolutePath)}, {"ASSET_LOAD_FLAG_DONT_CACHE_BIT", umath::to_integral(util::AssetLoadFlags::DontCache)},
+	    {"ASSET_LOAD_FLAG_IGNORE_CACHE_BIT", umath::to_integral(util::AssetLoadFlags::IgnoreCache)},
 
-	Lua::RegisterLibraryValue<std::string>(lua.GetState(),"asset","FORMAT_MAP_BINARY",pragma::asset::FORMAT_MAP_BINARY);
-	Lua::RegisterLibraryValue<std::string>(lua.GetState(),"asset","FORMAT_MAP_ASCII",pragma::asset::FORMAT_MAP_ASCII);
-	Lua::RegisterLibraryValue<std::string>(lua.GetState(),"asset","FORMAT_MAP_LEGACY",pragma::asset::FORMAT_MAP_LEGACY);
+	    {"ASSET_STATE_NOT_LOADED", umath::to_integral(util::AssetState::NotLoaded)}, {"ASSET_STATE_LOADED", umath::to_integral(util::AssetState::Loaded)}, {"ASSET_STATE_FAILED_TO_LOAD", umath::to_integral(util::AssetState::FailedToLoad)},
+	    {"ASSET_STATE_LOADING", umath::to_integral(util::AssetState::Loading)}});
+	static_assert(umath::to_integral(pragma::asset::Type::Count) == 6, "Update this list!");
 
-	Lua::RegisterLibraryValue<std::string>(lua.GetState(),"asset","FORMAT_MODEL_BINARY",pragma::asset::FORMAT_MODEL_BINARY);
-	Lua::RegisterLibraryValue<std::string>(lua.GetState(),"asset","FORMAT_MODEL_ASCII",pragma::asset::FORMAT_MODEL_ASCII);
-	Lua::RegisterLibraryValue<std::string>(lua.GetState(),"asset","FORMAT_MODEL_LEGACY",pragma::asset::FORMAT_MODEL_LEGACY);
+	Lua::RegisterLibraryValue<std::string>(lua.GetState(), "asset", "FORMAT_MAP_BINARY", pragma::asset::FORMAT_MAP_BINARY);
+	Lua::RegisterLibraryValue<std::string>(lua.GetState(), "asset", "FORMAT_MAP_ASCII", pragma::asset::FORMAT_MAP_ASCII);
+	Lua::RegisterLibraryValue<std::string>(lua.GetState(), "asset", "FORMAT_MAP_LEGACY", pragma::asset::FORMAT_MAP_LEGACY);
 
-	Lua::RegisterLibraryValue<std::string>(lua.GetState(),"asset","FORMAT_PARTICLE_SYSTEM_BINARY",pragma::asset::FORMAT_PARTICLE_SYSTEM_BINARY);
-	Lua::RegisterLibraryValue<std::string>(lua.GetState(),"asset","FORMAT_PARTICLE_SYSTEM_ASCII",pragma::asset::FORMAT_PARTICLE_SYSTEM_ASCII);
-	Lua::RegisterLibraryValue<std::string>(lua.GetState(),"asset","FORMAT_PARTICLE_SYSTEM_LEGACY",pragma::asset::FORMAT_PARTICLE_SYSTEM_LEGACY);
+	Lua::RegisterLibraryValue<std::string>(lua.GetState(), "asset", "FORMAT_MODEL_BINARY", pragma::asset::FORMAT_MODEL_BINARY);
+	Lua::RegisterLibraryValue<std::string>(lua.GetState(), "asset", "FORMAT_MODEL_ASCII", pragma::asset::FORMAT_MODEL_ASCII);
+	Lua::RegisterLibraryValue<std::string>(lua.GetState(), "asset", "FORMAT_MODEL_LEGACY", pragma::asset::FORMAT_MODEL_LEGACY);
 
-	Lua::RegisterLibraryValue<std::string>(lua.GetState(),"asset","FORMAT_MATERIAL_BINARY",pragma::asset::FORMAT_MATERIAL_BINARY);
-	Lua::RegisterLibraryValue<std::string>(lua.GetState(),"asset","FORMAT_MATERIAL_ASCII",pragma::asset::FORMAT_MATERIAL_ASCII);
-	Lua::RegisterLibraryValue<std::string>(lua.GetState(),"asset","FORMAT_MATERIAL_LEGACY",pragma::asset::FORMAT_MATERIAL_LEGACY);
+	Lua::RegisterLibraryValue<std::string>(lua.GetState(), "asset", "FORMAT_PARTICLE_SYSTEM_BINARY", pragma::asset::FORMAT_PARTICLE_SYSTEM_BINARY);
+	Lua::RegisterLibraryValue<std::string>(lua.GetState(), "asset", "FORMAT_PARTICLE_SYSTEM_ASCII", pragma::asset::FORMAT_PARTICLE_SYSTEM_ASCII);
+	Lua::RegisterLibraryValue<std::string>(lua.GetState(), "asset", "FORMAT_PARTICLE_SYSTEM_LEGACY", pragma::asset::FORMAT_PARTICLE_SYSTEM_LEGACY);
+
+	Lua::RegisterLibraryValue<std::string>(lua.GetState(), "asset", "FORMAT_MATERIAL_BINARY", pragma::asset::FORMAT_MATERIAL_BINARY);
+	Lua::RegisterLibraryValue<std::string>(lua.GetState(), "asset", "FORMAT_MATERIAL_ASCII", pragma::asset::FORMAT_MATERIAL_ASCII);
+	Lua::RegisterLibraryValue<std::string>(lua.GetState(), "asset", "FORMAT_MATERIAL_LEGACY", pragma::asset::FORMAT_MATERIAL_LEGACY);
 }
-bool Lua::asset::exists(lua_State *l,const std::string &name,pragma::asset::Type type)
+bool Lua::asset::exists(lua_State *l, const std::string &name, pragma::asset::Type type)
 {
 	auto *nw = engine->GetNetworkState(l);
-	return pragma::asset::exists(name,type);
+	return pragma::asset::exists(name, type);
 }
-Lua::opt<std::string> Lua::asset::find_file(lua_State *l,const std::string &name,pragma::asset::Type type)
+Lua::opt<std::string> Lua::asset::find_file(lua_State *l, const std::string &name, pragma::asset::Type type)
 {
 	auto *nw = engine->GetNetworkState(l);
-	auto path = pragma::asset::find_file(name,type);
+	auto path = pragma::asset::find_file(name, type);
 	if(path.has_value() == false)
 		return nil;
-	return {l,*path};
+	return {l, *path};
 }
-bool Lua::asset::is_loaded(lua_State *l,const std::string &name,pragma::asset::Type type)
+bool Lua::asset::is_loaded(lua_State *l, const std::string &name, pragma::asset::Type type)
 {
 	auto *nw = engine->GetNetworkState(l);
-	return pragma::asset::is_loaded(*nw,name,type);
+	return pragma::asset::is_loaded(*nw, name, type);
 }
-Lua::tb<std::string> Lua::asset::get_supported_import_file_extensions(lua_State *l,pragma::asset::Type type)
+Lua::tb<std::string> Lua::asset::get_supported_import_file_extensions(lua_State *l, pragma::asset::Type type)
 {
 	auto t = luabind::newtable(l);
 	auto &assetManager = engine->GetAssetManager();
 	auto n = assetManager.GetImporterCount(type);
 	int32_t idx = 1;
-	for(auto i=decltype(n){0u};i<n;++i)
-	{
-		for(auto &ext : assetManager.GetImporterInfo(type,i)->fileExtensions)
+	for(auto i = decltype(n) {0u}; i < n; ++i) {
+		for(auto &ext : assetManager.GetImporterInfo(type, i)->fileExtensions)
 			t[idx++] = ext.first;
 	}
-	if(type == pragma::asset::Type::Model)
-	{
+	if(type == pragma::asset::Type::Model) {
 		// These are implemented using the old importer system, so they're not included in the import information
 		// retrieved above. We'll add them to the list manually for now.
 		// TODO: Move these to the new importer system and remove these entries!
@@ -328,8 +312,7 @@ Lua::tb<std::string> Lua::asset::get_supported_import_file_extensions(lua_State 
 		t[idx++] = "vmdl_c";
 		t[idx++] = "nif";
 	}
-	else if(type == pragma::asset::Type::Material)
-	{
+	else if(type == pragma::asset::Type::Material) {
 		// These are implemented using the old importer system, so they're not included in the import information
 		// retrieved above. We'll add them to the list manually for now.
 		// TODO: Move these to the new importer system and remove these entries!
@@ -340,15 +323,14 @@ Lua::tb<std::string> Lua::asset::get_supported_import_file_extensions(lua_State 
 		t[idx++] = "pcf";
 	return t;
 }
-Lua::tb<std::string> Lua::asset::get_supported_export_file_extensions(lua_State *l,pragma::asset::Type type)
+Lua::tb<std::string> Lua::asset::get_supported_export_file_extensions(lua_State *l, pragma::asset::Type type)
 {
 	auto t = luabind::newtable(l);
 	auto &assetManager = engine->GetAssetManager();
 	auto n = assetManager.GetExporterCount(type);
 	int32_t idx = 1;
-	for(auto i=decltype(n){0u};i<n;++i)
-	{
-		for(auto &ext : assetManager.GetExporterInfo(type,i)->fileExtensions)
+	for(auto i = decltype(n) {0u}; i < n; ++i) {
+		for(auto &ext : assetManager.GetExporterInfo(type, i)->fileExtensions)
 			t[idx++] = ext.first;
 	}
 	return t;

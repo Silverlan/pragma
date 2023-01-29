@@ -17,15 +17,12 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_sprite,CEnvSprite);
+LINK_ENTITY_TO_CLASS(env_sprite, CEnvSprite);
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-void CSpriteComponent::Initialize()
-{
-	BaseEnvSpriteComponent::Initialize();
-}
+void CSpriteComponent::Initialize() { BaseEnvSpriteComponent::Initialize(); }
 
 CSpriteComponent::~CSpriteComponent()
 {
@@ -41,11 +38,11 @@ void CSpriteComponent::OnEntitySpawn()
 	StartParticle();
 }
 
-void CSpriteComponent::SetOrientationType(pragma::CParticleSystemComponent::OrientationType orientationType) {m_orientationType = orientationType;}
+void CSpriteComponent::SetOrientationType(pragma::CParticleSystemComponent::OrientationType orientationType) { m_orientationType = orientationType; }
 
-util::EventReply CSpriteComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
+util::EventReply CSpriteComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEnvSpriteComponent::HandleEvent(eventId,evData) == util::EventReply::Handled)
+	if(BaseEnvSpriteComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	if(eventId == BaseToggleComponent::EVENT_ON_TURN_ON)
 		StartParticle();
@@ -73,8 +70,7 @@ void CSpriteComponent::StopAndRemoveEntity()
 {
 	auto &ent = GetEntity();
 	StopParticle();
-	if(m_hParticle.expired())
-	{
+	if(m_hParticle.expired()) {
 		ent.RemoveSafely();
 		return;
 	}
@@ -86,62 +82,40 @@ void CSpriteComponent::StartParticle()
 	auto &ent = GetEntity();
 	StopParticle();
 	auto startAlpha = (m_tFadeIn == 0.f) ? m_color.a : 0;
-	std::unordered_map<std::string,std::string> values = {
-		{"maxparticles","1"},
-		{"emission_rate",std::to_string(std::numeric_limits<uint16_t>::max())},
-		{"material",m_spritePath},
-		{"sort_particles","0"},
-		{"orientation_type",std::to_string(umath::to_integral(m_orientationType))},
-		{"cast_shadows","0"},
-		{"static_scale",std::to_string(m_size)},
-		{"color",std::to_string(m_color.r) +" " +std::to_string(m_color.g) +" " +std::to_string(m_color.b) +" " +std::to_string(startAlpha)},
-		{"bloom_scale",std::to_string(m_bloomScale)},
-		{"move_with_emitter","1"}
-	};
+	std::unordered_map<std::string, std::string> values = {{"maxparticles", "1"}, {"emission_rate", std::to_string(std::numeric_limits<uint16_t>::max())}, {"material", m_spritePath}, {"sort_particles", "0"}, {"orientation_type", std::to_string(umath::to_integral(m_orientationType))},
+	  {"cast_shadows", "0"}, {"static_scale", std::to_string(m_size)}, {"color", std::to_string(m_color.r) + " " + std::to_string(m_color.g) + " " + std::to_string(m_color.b) + " " + std::to_string(startAlpha)}, {"bloom_scale", std::to_string(m_bloomScale)}, {"move_with_emitter", "1"}};
 	auto spawnFlags = ent.GetSpawnFlags();
-	if(spawnFlags &umath::to_integral(SpawnFlags::BlackToAlpha))
-		values.insert(std::make_pair("black_to_alpha","1"));
-	if(spawnFlags &umath::to_integral(SpawnFlags::NoSoftParticles))
-		values.insert(std::make_pair("soft_particles","0"));
+	if(spawnFlags & umath::to_integral(SpawnFlags::BlackToAlpha))
+		values.insert(std::make_pair("black_to_alpha", "1"));
+	if(spawnFlags & umath::to_integral(SpawnFlags::NoSoftParticles))
+		values.insert(std::make_pair("soft_particles", "0"));
 	auto *pt = pragma::CParticleSystemComponent::Create(values);
 	if(pt == nullptr)
 		return;
-	pt->AddInitializer("radius_random",std::unordered_map<std::string,std::string>{
-		{"radius_min",std::to_string(m_size)},
-		{"radius_max",std::to_string(m_size)}
-	});
-	pt->AddInitializer("lifetime_random",std::unordered_map<std::string,std::string>{
-		{"lifetime_min",std::to_string(std::numeric_limits<float>::max())},
-		{"lifetime_max",std::to_string(std::numeric_limits<float>::max())}
-	});
-	if(m_tFadeIn > 0.f)
-	{
-		pt->AddOperator("color_fade",std::unordered_map<std::string,std::string>{
-			{"alpha",std::to_string(m_color.a)},
-			{"fade_start","0"},
-			{"fade_end",std::to_string(m_tFadeIn)}
-		});
+	pt->AddInitializer("radius_random", std::unordered_map<std::string, std::string> {{"radius_min", std::to_string(m_size)}, {"radius_max", std::to_string(m_size)}});
+	pt->AddInitializer("lifetime_random", std::unordered_map<std::string, std::string> {{"lifetime_min", std::to_string(std::numeric_limits<float>::max())}, {"lifetime_max", std::to_string(std::numeric_limits<float>::max())}});
+	if(m_tFadeIn > 0.f) {
+		pt->AddOperator("color_fade", std::unordered_map<std::string, std::string> {{"alpha", std::to_string(m_color.a)}, {"fade_start", "0"}, {"fade_end", std::to_string(m_tFadeIn)}});
 	}
 	auto tFadeOut = (m_tFadeOut > 0.f) ? m_tFadeOut : 1.f;
-	if(tFadeOut > 0.f)
-	{
-		pt->AddOperator("color_fade",std::unordered_map<std::string,std::string>{
-			{"alpha","0"},
-			{"fade_start",std::to_string(-tFadeOut)},
-			{"fade_end","-0.0001"},
-		});
+	if(tFadeOut > 0.f) {
+		pt->AddOperator("color_fade",
+		  std::unordered_map<std::string, std::string> {
+		    {"alpha", "0"},
+		    {"fade_start", std::to_string(-tFadeOut)},
+		    {"fade_end", "-0.0001"},
+		  });
 	}
-	pt->AddRenderer("sprite",std::unordered_map<std::string,std::string>{});
+	pt->AddRenderer("sprite", std::unordered_map<std::string, std::string> {});
 
 	if(m_hCbRenderCallback.IsValid())
 		m_hCbRenderCallback.Remove();
 
 	auto whAttComponent = pt->GetEntity().AddComponent<CAttachableComponent>();
-	if(whAttComponent.valid())
-	{
+	if(whAttComponent.valid()) {
 		AttachmentInfo attInfo {};
 		attInfo.flags = FAttachmentMode::SnapToOrigin | FAttachmentMode::UpdateEachFrame;
-		whAttComponent->AttachToEntity(&ent,attInfo);
+		whAttComponent->AttachToEntity(&ent, attInfo);
 	}
 	// We need to update the particle system position every frame
 	m_hCbRenderCallback = pt->AddRenderCallback([this]() {
@@ -156,8 +130,7 @@ void CSpriteComponent::StartParticle()
 	pt->SetContinuous(true);
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pTrComponentPt = pt->GetEntity().GetTransformComponent();
-	if(pTrComponent != nullptr && pTrComponentPt)
-	{
+	if(pTrComponent != nullptr && pTrComponentPt) {
 		pTrComponentPt->SetPosition(pTrComponent->GetPosition());
 		pTrComponentPt->SetRotation(pTrComponent->GetRotation());
 	}
@@ -175,7 +148,7 @@ void CSpriteComponent::ReceiveData(NetPacket &packet)
 	m_tFadeIn = packet->Read<float>();
 	m_tFadeOut = packet->Read<float>();
 }
-void CSpriteComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CSpriteComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////////
 

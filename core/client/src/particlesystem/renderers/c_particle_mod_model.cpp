@@ -26,97 +26,80 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 
-REGISTER_PARTICLE_RENDERER(model,CParticleRendererModel);
+REGISTER_PARTICLE_RENDERER(model, CParticleRendererModel);
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-
 decltype(CParticleRendererModel::s_rendererCount) CParticleRendererModel::s_rendererCount = 0;
 static std::shared_ptr<prosper::IBuffer> s_instanceBuffer = nullptr;
 static std::shared_ptr<prosper::IBuffer> s_instanceBufferAnimated = nullptr;
 static std::shared_ptr<prosper::IDescriptorSetGroup> s_instanceDescSetGroup = nullptr;
-void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleRenderer::Initialize(pSystem,values);
+	CParticleRenderer::Initialize(pSystem, values);
 	m_rotationalBuffer.Initialize(pSystem);
 
 	auto skin = 0u;
 	m_shader = c_engine->GetShader("particlemodel");
-	std::unordered_map<uint32_t,uint32_t> bodyGroups;
+	std::unordered_map<uint32_t, uint32_t> bodyGroups;
 	std::string mdl;
-	for(auto &pair : values)
-	{
+	for(auto &pair : values) {
 		auto key = pair.first;
 		ustring::to_lower(key);
 		if(key == "model")
 			mdl = pair.second;
 		else if(key == "skin")
 			skin = util::to_int(pair.second);
-		else if(key == "animation")
-		{
+		else if(key == "animation") {
 			if(pair.second.empty() == false)
 				m_animation = pair.second;
 		}
-		else
-		{
-			auto sub = ustring::substr(key,0,9);
-			if(sub == "bodygroup")
-			{
-				auto id = util::to_int(ustring::substr(key,9));
+		else {
+			auto sub = ustring::substr(key, 0, 9);
+			if(sub == "bodygroup") {
+				auto id = util::to_int(ustring::substr(key, 9));
 				bodyGroups.at(id) = util::to_int(pair.second);
 			}
 		}
 	}
 
-	auto fCreateAnimatedComponent = [this,&pSystem]() {
-		return pSystem.GetEntity().AddComponent<pragma::CAnimatedComponent>(true);
-	};
+	auto fCreateAnimatedComponent = [this, &pSystem]() { return pSystem.GetEntity().AddComponent<pragma::CAnimatedComponent>(true); };
 
-	if(s_rendererCount++ == 0 && pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE.IsValid())
-	{
-		pragma::ShaderEntity::InstanceData instanceData {umat::identity(),Vector4(1.f,1.f,1.f,1.f),pragma::ShaderEntity::InstanceData::RenderFlags::None};
+	if(s_rendererCount++ == 0 && pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE.IsValid()) {
+		pragma::ShaderEntity::InstanceData instanceData {umat::identity(), Vector4(1.f, 1.f, 1.f, 1.f), pragma::ShaderEntity::InstanceData::RenderFlags::None};
 		prosper::util::BufferCreateInfo createInfo {};
 		createInfo.size = sizeof(instanceData);
 		createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 
 		s_instanceDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
-		s_instanceBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,&instanceData);
-		s_instanceDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(
-			*s_instanceBuffer,0u
-		);
+		s_instanceBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo, &instanceData);
+		s_instanceDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(*s_instanceBuffer, 0u);
 
 		instanceData.renderFlags = pragma::ShaderEntity::InstanceData::RenderFlags::Weighted;
-		s_instanceBufferAnimated = c_engine->GetRenderContext().CreateBuffer(createInfo,&instanceData);
+		s_instanceBufferAnimated = c_engine->GetRenderContext().CreateBuffer(createInfo, &instanceData);
 	}
 
 	auto bAnimated = !m_animation.empty();
 	if(bAnimated == false) // If not animated, we only need one model component
-		m_particleComponents.push_back(ParticleModelComponent{fCreateAnimatedComponent(),nullptr});
+		m_particleComponents.push_back(ParticleModelComponent {fCreateAnimatedComponent(), nullptr});
 	else // We need one model component per particle (expensive!!)
 	{
 		auto maxParticles = pSystem.GetMaxParticleCount();
 		m_particleComponents.reserve(maxParticles);
-		for(auto i=decltype(maxParticles){0u};i<maxParticles;++i)
-			m_particleComponents.push_back(ParticleModelComponent{fCreateAnimatedComponent(),nullptr});
+		for(auto i = decltype(maxParticles) {0u}; i < maxParticles; ++i)
+			m_particleComponents.push_back(ParticleModelComponent {fCreateAnimatedComponent(), nullptr});
 	}
-	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE.IsValid())
-	{
-		for(auto &ptComponent : m_particleComponents)
-		{
+	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE.IsValid()) {
+		for(auto &ptComponent : m_particleComponents) {
 			auto wpBoneBuffer = ptComponent.animatedComponent->GetBoneBuffer();
-			if(wpBoneBuffer)
-			{
+			if(wpBoneBuffer) {
 				// If we are animated, we have to create a unique descriptor set
 				ptComponent.instanceDescSetGroupAnimated = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
-				ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet()->SetBindingUniformBuffer(
-					*s_instanceBufferAnimated,0u
-				);
-				ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet()->SetBindingUniformBuffer(
-					const_cast<prosper::IBuffer&>(*wpBoneBuffer),umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices)
-				);
+				ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet()->SetBindingUniformBuffer(*s_instanceBufferAnimated, 0u);
+				ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IBuffer &>(*wpBoneBuffer), umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices));
 			}
 		}
 	}
@@ -124,18 +107,14 @@ void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSyste
 
 CParticleRendererModel::~CParticleRendererModel()
 {
-	if(--s_rendererCount == 0)
-	{
+	if(--s_rendererCount == 0) {
 		s_instanceDescSetGroup = nullptr;
 		s_instanceBuffer = nullptr;
 		s_instanceBufferAnimated = nullptr;
 	}
 }
 
-pragma::ShaderParticleBase *CParticleRendererModel::GetShader() const
-{
-	return static_cast<pragma::ShaderParticleModel*>(m_shader.get());
-}
+pragma::ShaderParticleBase *CParticleRendererModel::GetShader() const { return static_cast<pragma::ShaderParticleModel *>(m_shader.get()); }
 
 CParticleRendererModel::ParticleModelComponent &CParticleRendererModel::GetParticleComponent(uint32_t particleIdx)
 {
@@ -150,10 +129,10 @@ void CParticleRendererModel::OnParticleCreated(CParticle &particle)
 	if(m_animation.empty())
 		return;
 	auto &ptComponent = GetParticleComponent(particle.GetIndex());
-	ptComponent.animatedComponent->PlayAnimation(m_animation,pragma::FPlayAnim::Reset);
+	ptComponent.animatedComponent->PlayAnimation(m_animation, pragma::FPlayAnim::Reset);
 }
 
-bool CParticleRendererModel::IsAnimated() const {return m_animation.empty() == false;}
+bool CParticleRendererModel::IsAnimated() const { return m_animation.empty() == false; }
 
 void CParticleRendererModel::PostSimulate(double tDelta)
 {
@@ -167,8 +146,7 @@ void CParticleRendererModel::PostSimulate(double tDelta)
 		return;
 	auto &drawCmd = c_engine->GetDrawCommandBuffer();
 	auto numRenderParticles = GetParticleSystem().GetRenderParticleCount();
-	for(auto i=decltype(numRenderParticles){0u};i<numRenderParticles;++i)
-	{
+	for(auto i = decltype(numRenderParticles) {0u}; i < numRenderParticles; ++i) {
 		auto ptIdx = GetParticleSystem().TranslateBufferIndex(i);
 		auto &ptComponent = GetParticleComponent(ptIdx);
 		auto &animComponent = ptComponent.animatedComponent;
@@ -188,23 +166,22 @@ bool CParticleRendererModel::Update()
 	auto &posCam = cam->GetEntity().GetPosition();
 	auto &renderBounds = GetParticleSystem().GetRenderBounds();
 	Vector3 p;
-	umath::geometry::closest_point_on_aabb_to_point(renderBounds.first,renderBounds.second,posCam,&p);
-	auto dist = uvec::distance(posCam,p);
+	umath::geometry::closest_point_on_aabb_to_point(renderBounds.first, renderBounds.second, posCam, &p);
+	auto dist = uvec::distance(posCam, p);
 
 	auto bSuccessful = true;
 	auto mdlComponent = GetParticleSystem().GetEntity().GetModelComponent();
-	if(mdlComponent && mdlComponent->HasModel())
-	{
+	if(mdlComponent && mdlComponent->HasModel()) {
 		auto &mdl = mdlComponent->GetModel();
-		auto lod = c_game->GetLOD(dist,mdl->GetLODCount());
-		if(static_cast<pragma::CModelComponent&>(*mdlComponent).GetLOD() != lod)
+		auto lod = c_game->GetLOD(dist, mdl->GetLODCount());
+		if(static_cast<pragma::CModelComponent &>(*mdlComponent).GetLOD() != lod)
 			bSuccessful = false;
-		static_cast<pragma::CModelComponent&>(*mdlComponent).UpdateLOD(lod);
+		static_cast<pragma::CModelComponent &>(*mdlComponent).UpdateLOD(lod);
 	}
 	return bSuccessful;
 }
 
-void CParticleRendererModel::RecordRender(prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::ParticleRenderFlags renderFlags)
+void CParticleRendererModel::RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ParticleRenderFlags renderFlags)
 {
 #if 0
 	if(m_shader.expired())
@@ -268,7 +245,7 @@ void CParticleRendererModel::RecordRender(prosper::ICommandBuffer &drawCmd,pragm
 #endif
 }
 
-void CParticleRendererModel::RecordRenderShadow(prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererModel::RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId)
 {
 	/*if(s_instanceDescSet == nullptr)
 		return;

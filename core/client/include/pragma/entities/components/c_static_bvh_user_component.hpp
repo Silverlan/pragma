@@ -12,12 +12,9 @@
 #include <pragma/entities/components/base_static_bvh_user_component.hpp>
 #include <unordered_set>
 
-namespace pragma
-{
-	class DLLCLIENT CStaticBvhUserComponent final
-		: public BaseStaticBvhUserComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CStaticBvhUserComponent final : public BaseStaticBvhUserComponent {
+	  public:
 		CStaticBvhUserComponent(BaseEntity &ent) : BaseStaticBvhUserComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;

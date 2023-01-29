@@ -23,21 +23,20 @@
 
 extern DLLNETWORK Engine *engine;
 
-bool util::port_source2_map(NetworkState *nw,const std::string &path)
+bool util::port_source2_map(NetworkState *nw, const std::string &path)
 {
-	static auto *ptrConvertMap = reinterpret_cast<bool(*)(Game&,const std::string&)>(impl::get_module_func(nw,"convert_source2_map"));
+	static auto *ptrConvertMap = reinterpret_cast<bool (*)(Game &, const std::string &)>(impl::get_module_func(nw, "convert_source2_map"));
 	if(ptrConvertMap == nullptr)
 		return false;
 	auto lockWatcher = engine->ScopeLockResourceWatchers();
-	return ptrConvertMap(*nw->GetGameState(),path);
+	return ptrConvertMap(*nw->GetGameState(), path);
 }
 
-bool util::port_hl2_map(NetworkState *nw,const std::string &path)
+bool util::port_hl2_map(NetworkState *nw, const std::string &path)
 {
-	static auto *ptrConvertMap = reinterpret_cast<bool(*)(Game&,const std::string&)>(impl::get_module_func(nw,"convert_hl2_map"));
+	static auto *ptrConvertMap = reinterpret_cast<bool (*)(Game &, const std::string &)>(impl::get_module_func(nw, "convert_hl2_map"));
 	if(ptrConvertMap == nullptr)
 		return false;
 	auto lockWatcher = engine->ScopeLockResourceWatchers();
-	return ptrConvertMap(*nw->GetGameState(),path);
+	return ptrConvertMap(*nw->GetGameState(), path);
 }
-

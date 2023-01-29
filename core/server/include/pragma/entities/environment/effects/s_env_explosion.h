@@ -10,22 +10,17 @@
 #include "pragma/entities/s_baseentity.h"
 #include "pragma/entities/environment/effects/env_explosion.h"
 
-namespace pragma
-{
-	class DLLSERVER SExplosionComponent final
-		: public BaseEnvExplosionComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SExplosionComponent final : public BaseEnvExplosionComponent {
+	  public:
 		SExplosionComponent(BaseEntity &ent) : BaseEnvExplosionComponent(ent) {}
 		virtual void Explode() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
-class DLLSERVER EnvExplosion
-	: public SBaseEntity
-{
-protected:
-public:
+class DLLSERVER EnvExplosion : public SBaseEntity {
+  protected:
+  public:
 	virtual void Initialize() override;
 };
 

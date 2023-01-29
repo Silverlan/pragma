@@ -11,8 +11,7 @@
 #include "pragma/networkdefinitions.h"
 #include <mathutil/glmutil.h>
 
-struct DLLNETWORK ControllerHitData
-{
+struct DLLNETWORK ControllerHitData {
 	ControllerHitData();
 	~ControllerHitData();
 	PhysObjHandle *physObj = nullptr;

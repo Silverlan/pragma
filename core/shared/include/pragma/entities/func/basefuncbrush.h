@@ -11,15 +11,12 @@
 #include "pragma/entities/func/basefuncsurfacematerial.hpp"
 #include <pragma/console/conout.h>
 
-namespace pragma
-{
-	class DLLNETWORK BaseFuncBrushComponent
-		: public BaseFuncSurfaceMaterialComponent
-	{
-	public:
+namespace pragma {
+	class DLLNETWORK BaseFuncBrushComponent : public BaseFuncSurfaceMaterialComponent {
+	  public:
 		using BaseFuncSurfaceMaterialComponent::BaseFuncSurfaceMaterialComponent;
 		virtual void Initialize() override;
-	protected:
+	  protected:
 		bool m_kvSolid = true;
 	};
 };

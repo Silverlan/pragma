@@ -25,10 +25,16 @@
 
 class ModelSubMesh;
 class ModelMesh;
-namespace prosper {class IUniformResizableBuffer; class IDescriptorSet; class SwapDescriptorSet; class SwapBuffer;};
-namespace Intersection {struct LineMeshResult;};
-namespace pragma
-{
+namespace prosper {
+	class IUniformResizableBuffer;
+	class IDescriptorSet;
+	class SwapDescriptorSet;
+	class SwapBuffer;
+};
+namespace Intersection {
+	struct LineMeshResult;
+};
+namespace pragma {
 	class CModelComponent;
 	class CAnimatedComponent;
 	class CAttachableComponent;
@@ -36,23 +42,19 @@ namespace pragma
 	enum class GameShaderSpecialization : uint32_t;
 	using RenderMeshIndex = uint32_t;
 	using RenderBufferIndex = uint32_t;
-	class DLLCLIENT CRenderComponent final
-		: public BaseRenderComponent,
-		public CBaseNetComponent
-	{
-	public:
-		enum class StateFlags : uint16_t
-		{
+	class DLLCLIENT CRenderComponent final : public BaseRenderComponent, public CBaseNetComponent {
+	  public:
+		enum class StateFlags : uint16_t {
 			None = 0u,
 			RenderBufferDirty = 1u,
-			ExemptFromOcclusionCulling = RenderBufferDirty<<1u,
-			EnableDepthPass = ExemptFromOcclusionCulling<<1u,
-			DisableShadows = EnableDepthPass<<1u,
-			IsInstantiable = DisableShadows<<1u,
-			InstantiationDisabled = IsInstantiable<<1u,
-			RenderBoundsDirty = InstantiationDisabled<<1u,
-			ShouldDraw = RenderBoundsDirty<<1u,
-			ShouldDrawShadow = ShouldDraw<<1u
+			ExemptFromOcclusionCulling = RenderBufferDirty << 1u,
+			EnableDepthPass = ExemptFromOcclusionCulling << 1u,
+			DisableShadows = EnableDepthPass << 1u,
+			IsInstantiable = DisableShadows << 1u,
+			InstantiationDisabled = IsInstantiable << 1u,
+			RenderBoundsDirty = InstantiationDisabled << 1u,
+			ShouldDraw = RenderBoundsDirty << 1u,
+			ShouldDrawShadow = ShouldDraw << 1u
 		};
 		static constexpr auto USE_HOST_MEMORY_FOR_RENDER_DATA = true;
 
@@ -67,17 +69,17 @@ namespace pragma
 		static ComponentEventId EVENT_UPDATE_INSTANTIABILITY;
 		static ComponentEventId EVENT_ON_CLIP_PLANE_CHANGED;
 		static ComponentEventId EVENT_ON_DEPTH_BIAS_CHANGED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		CRenderComponent(BaseEntity &ent);
 		const std::shared_ptr<prosper::SwapBuffer> &GetSwapRenderBuffer() const;
 		const prosper::IBuffer &GetRenderBuffer() const;
-		bool IsRenderBufferValid() const {return m_renderBuffer != nullptr;}
+		bool IsRenderBufferValid() const { return m_renderBuffer != nullptr; }
 		std::optional<RenderBufferIndex> GetRenderBufferIndex() const;
 		prosper::IDescriptorSet *GetRenderDescriptorSet() const;
 		prosper::SwapDescriptorSet *GetSwapRenderDescriptorSet() const;
 
-		static const std::vector<CRenderComponent*> &GetEntitiesExemptFromOcclusionCulling();
+		static const std::vector<CRenderComponent *> &GetEntitiesExemptFromOcclusionCulling();
 		static const std::shared_ptr<prosper::IUniformResizableBuffer> &GetInstanceBuffer();
 		static void InitializeBuffers();
 		static void ClearBuffers();
@@ -88,7 +90,7 @@ namespace pragma
 		std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes();
 		const std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes() const;
 		std::vector<rendering::RenderBufferData> &GetRenderBufferData();
-		const std::vector<rendering::RenderBufferData> &GetRenderBufferData() const {return const_cast<CRenderComponent*>(this)->GetRenderBufferData();}
+		const std::vector<rendering::RenderBufferData> &GetRenderBufferData() const { return const_cast<CRenderComponent *>(this)->GetRenderBufferData(); }
 		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes();
 		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes() const;
 
@@ -100,11 +102,11 @@ namespace pragma
 		uint64_t GetLastRenderFrame() const;
 		void SetLastRenderFrame(unsigned long long &t);
 
-		void SetLocalRenderBounds(Vector3 min,Vector3 max);
+		void SetLocalRenderBounds(Vector3 min, Vector3 max);
 
 		const bounding_volume::AABB &GetLocalRenderBounds() const;
 		const Sphere &GetLocalRenderSphere() const;
-		
+
 		const bounding_volume::AABB &GetAbsoluteRenderBounds() const;
 		const Sphere &GetAbsoluteRenderSphere() const;
 
@@ -134,14 +136,14 @@ namespace pragma
 		virtual void ReceiveData(NetPacket &packet) override;
 
 		// Note: Called in render thread
-		void UpdateRenderDataMT(const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp);
+		void UpdateRenderDataMT(const CSceneComponent &scene, const CCameraComponent &cam, const Mat4 &vp);
 
-		void UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bForceBufferUpdate=false);
+		void UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, bool bForceBufferUpdate = false);
 
 		bool ShouldDraw() const;
 		bool ShouldDrawShadow() const;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void OnEntitySpawn() override;
 
 		CModelComponent *GetModelComponent() const;
@@ -161,7 +163,7 @@ namespace pragma
 		void ClearRenderClipPlane();
 		const Vector4 *GetRenderClipPlane() const;
 
-		void SetDepthBias(float d,float delta);
+		void SetDepthBias(float d, float delta);
 		void ClearDepthBias();
 		const Vector2 *GetDepthBias() const;
 
@@ -170,7 +172,7 @@ namespace pragma
 
 		void SetRenderBufferDirty();
 		void SetRenderBoundsDirty();
-		std::optional<Intersection::LineMeshResult> CalcRayIntersection(const Vector3 &start,const Vector3 &dir,bool precise=false) const;
+		std::optional<Intersection::LineMeshResult> CalcRayIntersection(const Vector3 &start, const Vector3 &dir, bool precise = false) const;
 
 		bool IsInstantiable() const;
 		void SetInstaniationEnabled(bool enabled);
@@ -182,20 +184,20 @@ namespace pragma
 		void ClearRenderOffsetTransform();
 		const umath::ScaledTransform *GetRenderOffsetTransform() const;
 
-		bool IsInPvs(const Vector3 &camPos,const CWorldComponent &world) const;
+		bool IsInPvs(const Vector3 &camPos, const CWorldComponent &world) const;
 		bool IsInPvs(const Vector3 &camPos) const;
 
 		GameShaderSpecialization GetShaderPipelineSpecialization() const;
 		void ClearRenderBuffers();
-	protected:
+	  protected:
 		void UpdateShouldDrawShadowState();
 		void UpdateRenderBuffer() const;
 		void UpdateMatrices();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 		void ClearRenderObjects();
-		static bool RenderCallback(RenderObject *o,CBaseEntity *ent,pragma::CCameraComponent *cam,pragma::ShaderGameWorldLightingPass *shader,Material *mat);
-		bool RenderCallback(RenderObject *o,pragma::CCameraComponent *cam,pragma::ShaderGameWorldLightingPass *shader,Material *mat);
+		static bool RenderCallback(RenderObject *o, CBaseEntity *ent, pragma::CCameraComponent *cam, pragma::ShaderGameWorldLightingPass *shader, Material *mat);
+		bool RenderCallback(RenderObject *o, pragma::CCameraComponent *cam, pragma::ShaderGameWorldLightingPass *shader, Material *mat);
 		void UpdateRenderMeshes();
 
 		void InitializeRenderBuffers();
@@ -221,14 +223,14 @@ namespace pragma
 		std::optional<Vector4> m_renderClipPlane {};
 		std::optional<Vector2> m_depthBias {};
 
-		StateFlags m_stateFlags = static_cast<StateFlags>(umath::to_integral(StateFlags::RenderBufferDirty) | umath::to_integral(StateFlags::EnableDepthPass) | umath::to_integral(StateFlags::RenderBoundsDirty) |
-			 umath::to_integral(StateFlags::ShouldDraw) | umath::to_integral(StateFlags::ShouldDrawShadow));
+		StateFlags m_stateFlags
+		  = static_cast<StateFlags>(umath::to_integral(StateFlags::RenderBufferDirty) | umath::to_integral(StateFlags::EnableDepthPass) | umath::to_integral(StateFlags::RenderBoundsDirty) | umath::to_integral(StateFlags::ShouldDraw) | umath::to_integral(StateFlags::ShouldDrawShadow));
 		std::atomic<uint64_t> m_lastRender = 0ull;
 		std::mutex m_renderDataMutex;
-		std::unordered_map<unsigned int,RenderInstance*> m_renderInstances;
+		std::unordered_map<unsigned int, RenderInstance *> m_renderInstances;
 		std::unique_ptr<SortedRenderMeshContainer> m_renderMeshContainer = nullptr;
-		static std::vector<CRenderComponent*> s_ocExemptEntities;
-	private:
+		static std::vector<CRenderComponent *> s_ocExemptEntities;
+	  private:
 		void UpdateAbsoluteRenderBounds();
 		void UpdateAbsoluteSphereRenderBounds();
 		void UpdateAbsoluteAABBRenderBounds();
@@ -238,10 +240,8 @@ namespace pragma
 	};
 
 	// Events
-	
-	struct DLLCLIENT CEUpdateInstantiability
-		: public ComponentEvent
-	{
+
+	struct DLLCLIENT CEUpdateInstantiability : public ComponentEvent {
 		CEUpdateInstantiability(bool &instantiable);
 		virtual void PushArguments(lua_State *l) override;
 		virtual uint32_t GetReturnCount() override;
@@ -249,9 +249,7 @@ namespace pragma
 		bool &instantiable;
 	};
 
-	struct DLLCLIENT CEShouldDraw
-		: public ComponentEvent
-	{
+	struct DLLCLIENT CEShouldDraw : public ComponentEvent {
 		CEShouldDraw(bool &shouldDraw);
 		virtual void PushArguments(lua_State *l) override;
 		virtual uint32_t GetReturnCount() override;
@@ -259,10 +257,8 @@ namespace pragma
 		bool &shouldDraw;
 	};
 
-	struct DLLCLIENT CEOnUpdateRenderMatrices
-		: public ComponentEvent
-	{
-		CEOnUpdateRenderMatrices(umath::ScaledTransform &pose,Mat4 &transformation);
+	struct DLLCLIENT CEOnUpdateRenderMatrices : public ComponentEvent {
+		CEOnUpdateRenderMatrices(umath::ScaledTransform &pose, Mat4 &transformation);
 		virtual void PushArguments(lua_State *l) override;
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua_State *l) override;
@@ -270,25 +266,19 @@ namespace pragma
 		Mat4 &transformation;
 	};
 
-	struct DLLCLIENT CEOnUpdateRenderData
-		: public ComponentEvent
-	{
+	struct DLLCLIENT CEOnUpdateRenderData : public ComponentEvent {
 		CEOnUpdateRenderData();
 		virtual void PushArguments(lua_State *l) override;
 	};
 
-	struct DLLCLIENT CEOnUpdateRenderBuffers
-		: public ComponentEvent
-	{
+	struct DLLCLIENT CEOnUpdateRenderBuffers : public ComponentEvent {
 		CEOnUpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer);
 		virtual void PushArguments(lua_State *l) override;
 		std::shared_ptr<prosper::IPrimaryCommandBuffer> commandBuffer;
 	};
 
-	struct DLLCLIENT CEOnRenderBoundsChanged
-		: public ComponentEvent
-	{
-		CEOnRenderBoundsChanged(const Vector3 &min,const Vector3 &max,const Sphere &sphere);
+	struct DLLCLIENT CEOnRenderBoundsChanged : public ComponentEvent {
+		CEOnRenderBoundsChanged(const Vector3 &min, const Vector3 &max, const Sphere &sphere);
 		virtual void PushArguments(lua_State *l) override;
 		const Vector3 &min;
 		const Vector3 &max;

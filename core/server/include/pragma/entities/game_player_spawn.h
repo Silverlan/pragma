@@ -10,21 +10,16 @@
 #include "pragma/entities/s_baseentity.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-namespace pragma
-{
-	class DLLSERVER SPlayerSpawnComponent final
-		: public BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SPlayerSpawnComponent final : public BaseEntityComponent {
+	  public:
 		SPlayerSpawnComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLSERVER GamePlayerSpawn
-	: public SBaseEntity
-{
-public:
+class DLLSERVER GamePlayerSpawn : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

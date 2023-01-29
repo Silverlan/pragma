@@ -11,12 +11,9 @@
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
 
-namespace Lua
-{
-	namespace ai
-	{
-		namespace client
-		{
+namespace Lua {
+	namespace ai {
+		namespace client {
 			DLLCLIENT void register_library(Lua::Interface &lua);
 		};
 	};

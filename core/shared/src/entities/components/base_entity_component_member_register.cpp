@@ -10,12 +10,11 @@
 
 using namespace pragma;
 
-pragma::DynamicMemberRegister::DynamicMemberRegister()
-{}
+pragma::DynamicMemberRegister::DynamicMemberRegister() {}
 void pragma::DynamicMemberRegister::ReserveMembers(uint32_t count)
 {
-	m_members.reserve(m_members.size() +count);
-	m_memberNameToIndex.reserve(m_memberNameToIndex.size() +count);
+	m_members.reserve(m_members.size() + count);
+	m_memberNameToIndex.reserve(m_memberNameToIndex.size() + count);
 }
 void pragma::DynamicMemberRegister::ClearMembers()
 {
@@ -30,7 +29,7 @@ void pragma::DynamicMemberRegister::RemoveMember(ComponentMemberIndex idx)
 	auto member = std::move(it->second);
 	m_members.erase(it);
 	UpdateMemberNameMap();
-	OnMemberRemoved(member,idx);
+	OnMemberRemoved(member, idx);
 }
 void pragma::DynamicMemberRegister::RemoveMember(const std::string &name)
 {
@@ -79,19 +78,18 @@ pragma::ComponentMemberIndex pragma::DynamicMemberRegister::RegisterMember(pragm
 	auto itName = m_memberNameToIndex.find(lmemberName);
 	if(itName != m_memberNameToIndex.end())
 		idx = itName->second;
-	else
-	{
+	else {
 		if(m_nextMemberIndex == std::numeric_limits<uint32_t>::max())
-			m_nextMemberIndex = dynamic_cast<BaseEntityComponent*>(this)->GetStaticMemberCount();
+			m_nextMemberIndex = dynamic_cast<BaseEntityComponent *>(this)->GetStaticMemberCount();
 		idx = m_nextMemberIndex++;
 	}
 	auto it = m_members.find(idx);
 	if(it != m_members.end())
 		it->second = std::move(memberInfo);
 	else
-		it = m_members.insert(std::make_pair(idx,std::move(memberInfo))).first;
+		it = m_members.insert(std::make_pair(idx, std::move(memberInfo))).first;
 	m_memberNameToIndex[lmemberName] = idx;
-	OnMemberRegistered(it->second,idx);
+	OnMemberRegistered(it->second, idx);
 	return idx;
 }
 pragma::ComponentMemberIndex pragma::DynamicMemberRegister::RegisterMember(const pragma::ComponentMemberInfo &memberInfo)

@@ -17,7 +17,7 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(vhc_wheel,SWheel);
+LINK_ENTITY_TO_CLASS(vhc_wheel, SWheel);
 
 extern DLLSERVER SGame *s_game;
 
@@ -34,31 +34,29 @@ SWheelComponent::~SWheelComponent()
 	//Detach();
 }
 
-void SWheelComponent::SendSnapshotData(NetPacket &packet,pragma::BasePlayerComponent &pl)
+void SWheelComponent::SendSnapshotData(NetPacket &packet, pragma::BasePlayerComponent &pl)
 {
 	//packet->Write<Float>(GetSteeringAngle());
 	//packet->Write<Float>(GetWheelRotation());
 #ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
-	if(info != nullptr)
-	{
+	if(info != nullptr) {
 		auto &t = info->m_worldTransform;
 		auto &origin = t.getOrigin();
 		auto rot = t.getRotation();
-		packet->Write<Vector3>(Vector3(origin.x(),origin.y(),origin.z()));
-		packet->Write<Quat>(Quat(CFloat(rot.w()),CFloat(rot.x()),CFloat(rot.y()),CFloat(rot.z())));
+		packet->Write<Vector3>(Vector3(origin.x(), origin.y(), origin.z()));
+		packet->Write<Quat>(Quat(CFloat(rot.w()), CFloat(rot.x()), CFloat(rot.y()), CFloat(rot.z())));
 	}
-	else
-	{
-		packet->Write<Vector3>(Vector3(0.f,0.f,0.f));
+	else {
+		packet->Write<Vector3>(Vector3(0.f, 0.f, 0.f));
 		packet->Write<Quat>(uquat::identity());
 	}
 #endif
 }
-void SWheelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-void SWheelComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SWheelComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SWheelComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
-	nwm::write_entity(packet,m_vehicle.valid() ? &m_vehicle->GetEntity() : nullptr);
+	nwm::write_entity(packet, m_vehicle.valid() ? &m_vehicle->GetEntity() : nullptr);
 	packet->Write<UChar>(m_wheelId);
 #if 0
 	packet->Write<Bool>(m_wheelInfo.bFrontWheel);
@@ -81,7 +79,7 @@ void SWheelComponent::SendData(NetPacket &packet,networking::ClientRecipientFilt
 void SWheelComponent::Initialize()
 {
 	BaseWheelComponent::Initialize();
-	static_cast<SBaseEntity&>(GetEntity()).SetShared(true);
+	static_cast<SBaseEntity &>(GetEntity()).SetShared(true);
 }
 /*
 void SWheelComponent::Attach(BaseEntity *ent,UChar wheelId)

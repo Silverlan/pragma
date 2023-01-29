@@ -19,17 +19,13 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
-LINK_ENTITY_TO_CLASS(env_fog_controller,CEnvFogController);
+LINK_ENTITY_TO_CLASS(env_fog_controller, CEnvFogController);
 
 void CFogControllerComponent::Initialize()
 {
 	BaseEnvFogControllerComponent::Initialize();
-	BindEventUnhandled(CToggleComponent::EVENT_ON_TURN_ON,[this](std::reference_wrapper<ComponentEvent> evData) {
-		GetFog().SetEnabled(true);
-	});
-	BindEventUnhandled(CToggleComponent::EVENT_ON_TURN_OFF,[this](std::reference_wrapper<ComponentEvent> evData) {
-		GetFog().SetEnabled(false);
-	});
+	BindEventUnhandled(CToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<ComponentEvent> evData) { GetFog().SetEnabled(true); });
+	BindEventUnhandled(CToggleComponent::EVENT_ON_TURN_OFF, [this](std::reference_wrapper<ComponentEvent> evData) { GetFog().SetEnabled(false); });
 }
 void CFogControllerComponent::OnRemove()
 {
@@ -41,11 +37,8 @@ void CFogControllerComponent::OnRemove()
 void CFogControllerComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEnvFogControllerComponent::OnEntityComponentAdded(component);
-	if(typeid(component) == typeid(CColorComponent))
-	{
-		static_cast<CColorComponent&>(component).GetColorProperty()->AddCallback([this](std::reference_wrapper<const Color> oldColor,std::reference_wrapper<const Color> color) {
-			GetFog().SetColor(color);
-		});
+	if(typeid(component) == typeid(CColorComponent)) {
+		static_cast<CColorComponent &>(component).GetColorProperty()->AddCallback([this](std::reference_wrapper<const Color> oldColor, std::reference_wrapper<const Color> color) { GetFog().SetColor(color); });
 	}
 }
 void CFogControllerComponent::OnEntitySpawn()
@@ -97,7 +90,7 @@ void CFogControllerComponent::SetFogType(util::FogType type)
 	BaseEnvFogControllerComponent::SetFogType(type);
 	GetFog().SetType(type);
 }
-void CFogControllerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CFogControllerComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////////
 

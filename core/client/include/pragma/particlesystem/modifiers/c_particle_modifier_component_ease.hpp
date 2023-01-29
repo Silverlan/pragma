@@ -12,25 +12,20 @@
 #include <string>
 #include <unordered_map>
 
-namespace umath {enum class EaseType : uint32_t;};
-class DLLCLIENT CParticleModifierComponentEase
-{
-protected:
+namespace umath {
+	enum class EaseType : uint32_t;
+};
+class DLLCLIENT CParticleModifierComponentEase {
+  protected:
 	CParticleModifierComponentEase();
-	void Initialize(const std::unordered_map<std::string,std::string> &values);
+	void Initialize(const std::unordered_map<std::string, std::string> &values);
 
 	float Ease(float t) const;
 	float EaseIn(float t) const;
 	float EaseOut(float t) const;
 	float EaseInOut(float t) const;
-private:
-	enum class EaseFunc : uint32_t
-	{
-		None = 0u,
-		In,
-		Out,
-		InOut
-	};
+  private:
+	enum class EaseFunc : uint32_t { None = 0u, In, Out, InOut };
 	umath::EaseType m_type;
 	EaseFunc m_easeFunc = EaseFunc::InOut;
 };

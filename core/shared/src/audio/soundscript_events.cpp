@@ -17,13 +17,8 @@
 
 extern DLLNETWORK Engine *engine;
 
-SoundScriptEventContainer::~SoundScriptEventContainer()
-{
-	m_events.clear();
-}
-SoundScriptEventContainer::SoundScriptEventContainer(SoundScriptManager *manager)
-	: m_manager(manager)
-{}
+SoundScriptEventContainer::~SoundScriptEventContainer() { m_events.clear(); }
+SoundScriptEventContainer::SoundScriptEventContainer(SoundScriptManager *manager) : m_manager(manager) {}
 SoundScriptEvent *SoundScriptEventContainer::CreateEvent(std::string name)
 {
 	auto *ev = m_manager->CreateEvent(name);
@@ -36,11 +31,10 @@ SoundScriptEvent *SoundScriptEventContainer::CreateEvent()
 	m_events.push_back(std::shared_ptr<SoundScriptEvent>(ev));
 	return ev;
 }
-std::vector<std::shared_ptr<SoundScriptEvent>> &SoundScriptEventContainer::GetEvents() {return m_events;}
+std::vector<std::shared_ptr<SoundScriptEvent>> &SoundScriptEventContainer::GetEvents() { return m_events; }
 void SoundScriptEventContainer::InitializeEvents(udm::LinkedPropertyWrapper &prop)
 {
-	for(auto udmEvent : prop["events"])
-	{
+	for(auto udmEvent : prop["events"]) {
 		std::string type;
 		udmEvent["type"](type);
 		auto *ev = CreateEvent(type);
@@ -48,7 +42,7 @@ void SoundScriptEventContainer::InitializeEvents(udm::LinkedPropertyWrapper &pro
 			continue;
 		udmEvent["repeat"](ev->repeat);
 		auto propTime = udmEvent["time"];
-		ev->eventOffset = SoundScriptValue{propTime};
+		ev->eventOffset = SoundScriptValue {propTime};
 		ev->Initialize(udmEvent);
 	}
 }
@@ -60,32 +54,23 @@ void SoundScriptEventContainer::PrecacheSounds()
 
 //////////////////////////////
 
-SSEBase::SSEBase(SoundScriptEvent *ev,double tStart,float evOffset)
-	: event(ev),timeCreated(tStart),eventOffset(evOffset)
-{}
+SSEBase::SSEBase(SoundScriptEvent *ev, double tStart, float evOffset) : event(ev), timeCreated(tStart), eventOffset(evOffset) {}
 
-SSESound::SSESound(std::shared_ptr<ALSound> snd,SSEPlaySound *ev,double tStart,float eventOffset)
-	: SSEBase(ev,tStart,eventOffset),sound(snd)
-{}
+SSESound::SSESound(std::shared_ptr<ALSound> snd, SSEPlaySound *ev, double tStart, float eventOffset) : SSEBase(ev, tStart, eventOffset), sound(snd) {}
 
-ALSound *SSESound::operator->() {return sound.get();}
+ALSound *SSESound::operator->() { return sound.get(); }
 
 //////////////////////////////
 
-SoundScriptEvent::SoundScriptEvent(SoundScriptManager *manager,float off,bool bRepeat)
-	: SoundScriptEventContainer(manager),eventOffset(off),repeat(bRepeat)
-{}
+SoundScriptEvent::SoundScriptEvent(SoundScriptManager *manager, float off, bool bRepeat) : SoundScriptEventContainer(manager), eventOffset(off), repeat(bRepeat) {}
 SoundScriptEvent::~SoundScriptEvent() {}
-void SoundScriptEvent::Initialize(udm::LinkedPropertyWrapper &prop)
-{
-	InitializeEvents(prop);
-}
+void SoundScriptEvent::Initialize(udm::LinkedPropertyWrapper &prop) { InitializeEvents(prop); }
 void SoundScriptEvent::Precache()
 {
 	for(auto &ev : m_events)
 		ev->Precache();
 }
-SSEBase *SoundScriptEvent::CreateEvent(double tStart) {return new SSEBase(this,tStart,eventOffset.GetValue());}
+SSEBase *SoundScriptEvent::CreateEvent(double tStart) { return new SSEBase(this, tStart, eventOffset.GetValue()); }
 
 //////////////////////////////
 
@@ -97,16 +82,16 @@ ALChannel SSEPlaySound::GetChannel()
 	return channel;
 }
 
-SSESound *SSEPlaySound::CreateSound(double tStart,const std::function<std::shared_ptr<ALSound>(const std::string&,ALChannel,ALCreateFlags)> &createSound)
+SSESound *SSEPlaySound::CreateSound(double tStart, const std::function<std::shared_ptr<ALSound>(const std::string &, ALChannel, ALCreateFlags)> &createSound)
 {
 	int numSounds = static_cast<int>(sources.size());
 	if(numSounds == 0)
 		return NULL;
-	unsigned int r = umath::random(0,numSounds -1);
+	unsigned int r = umath::random(0, numSounds - 1);
 	auto createFlags = ALCreateFlags::None;
 	if(stream == true)
 		createFlags |= ALCreateFlags::Stream;
-	std::shared_ptr<ALSound> snd = createSound(sources[r].c_str(),GetChannel(),createFlags);
+	std::shared_ptr<ALSound> snd = createSound(sources[r].c_str(), GetChannel(), createFlags);
 	if(snd.get() == NULL)
 		return NULL;
 	snd->SetMaxDistance(static_cast<float>(maxDistance));
@@ -121,41 +106,38 @@ SSESound *SSEPlaySound::CreateSound(double tStart,const std::function<std::share
 	snd->SetInnerConeAngle(coneInnerAngle.GetValue());
 	snd->SetOuterConeAngle(coneOuterAngle.GetValue());
 	snd->SetOuterConeGain(coneOuterGain.GetValue());
-	if(global)
-	{
+	if(global) {
 		snd->SetRelative(true);
 		snd->SetPosition({});
 	}
 	if(type.IsSet() == true)
 		snd->SetType(static_cast<ALSoundType>(umath::to_integral(snd->GetType()) | static_cast<uint32_t>(type.GetValue())));
 
-	if(startTime.IsSet() || endTime.IsSet())
-	{
+	if(startTime.IsSet() || endTime.IsSet()) {
 		auto start = (startTime.IsSet()) ? startTime.GetValue() : 0.f;
 		auto end = (endTime.IsSet()) ? endTime.GetValue() : snd->GetDuration();
-		snd->SetRange(start,end);
+		snd->SetRange(start, end);
 	}
 	if(fadeInTime.IsSet())
 		snd->SetFadeInDuration(fadeInTime.GetValue());
 	if(fadeOutTime.IsSet())
 		snd->SetFadeOutDuration(fadeOutTime.GetValue());
-	return new SSESound(snd,this,tStart,eventOffset.GetValue());
+	return new SSESound(snd, this, tStart, eventOffset.GetValue());
 }
 
 void SSEPlaySound::Precache()
 {
 	SoundScriptEvent::Precache();
-	for(unsigned int i=0;i<sources.size();i++)
+	for(unsigned int i = 0; i < sources.size(); i++)
 		PrecacheSound(sources[i].c_str());
 }
 
-void SSEPlaySound::PrecacheSound(const char *name) {engine->GetServerNetworkState()->PrecacheSound(name,GetChannel());}
+void SSEPlaySound::PrecacheSound(const char *name) { engine->GetServerNetworkState()->PrecacheSound(name, GetChannel()); }
 void SSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 {
 	SoundScriptEvent::Initialize(prop);
 	auto udmSources = prop["source"];
-	if(udmSources)
-	{
+	if(udmSources) {
 		udmSources.GetBlobData(sources);
 
 		std::string source;
@@ -178,22 +160,19 @@ void SSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 	position = -1;
 	std::string strPos;
 	prop["position"](strPos);
-	if(strPos == "random")
-	{
+	if(strPos == "random") {
 		position = -2;
 		if(mode == ALChannel::Auto)
 			mode = ALChannel::Mono;
 	}
-	if(position == -1 && prop["position"])
-	{
+	if(position == -1 && prop["position"]) {
 		if(mode == ALChannel::Auto)
 			mode = ALChannel::Mono;
 		prop["position"](position);
 		if(position < 0)
 			position = -1;
 	}
-	if(mode == ALChannel::Mono)
-	{
+	if(mode == ALChannel::Mono) {
 		maxDistance = 2'048.f;
 		referenceDistance = 64.f;
 	}
@@ -209,9 +188,8 @@ void SSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 	coneOuterAngle.Load(prop["cone_outer_angle"]);
 	coneOuterGain.Load(prop["cone_outer_gain"]);
 	auto udmType = prop["sound_type"];
-	if(udmType.IsType(udm::Type::String))
-	{
-		type = umath::to_integral(udm::string_to_flags<ALSoundType>(udmType,ALSoundType::Generic));
+	if(udmType.IsType(udm::Type::String)) {
+		type = umath::to_integral(udm::string_to_flags<ALSoundType>(udmType, ALSoundType::Generic));
 		type.SetSet(true);
 	}
 	else
@@ -225,8 +203,8 @@ void SSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 
 //////////////////////////////
 
-SoundScriptValue::SoundScriptValue(float f) {Initialize(f);}
-SoundScriptValue::SoundScriptValue(float min,float max) {Initialize(min,max);}
+SoundScriptValue::SoundScriptValue(float f) { Initialize(f); }
+SoundScriptValue::SoundScriptValue(float min, float max) { Initialize(min, max); }
 SoundScriptValue::SoundScriptValue(udm::LinkedPropertyWrapper &prop)
 {
 	Initialize(0.f);
@@ -235,27 +213,24 @@ SoundScriptValue::SoundScriptValue(udm::LinkedPropertyWrapper &prop)
 bool SoundScriptValue::Load(const udm::LinkedPropertyWrapper &prop)
 {
 	auto &udmVal = prop;
-	if(udmVal["min"] && udmVal["max"])
-	{
+	if(udmVal["min"] && udmVal["max"]) {
 		auto min = 0.f;
 		auto max = 0.f;
 		udmVal["min"](min);
 		udmVal["max"](max);
-		Initialize(min,max);
+		Initialize(min, max);
 		m_bIsSet = true;
 		return true;
 	}
 	auto val = udmVal.ToValue<udm::Float>();
-	if(val.has_value())
-	{
+	if(val.has_value()) {
 		Initialize(*val);
 		m_bIsSet = true;
 		return true;
 	}
 	auto valVec = udmVal.ToValue<udm::Vector2>();
-	if(valVec.has_value())
-	{
-		Initialize(valVec->x,valVec->y);
+	if(valVec.has_value()) {
+		Initialize(valVec->x, valVec->y);
 		m_bIsSet = true;
 		return true;
 	}
@@ -266,10 +241,10 @@ void SoundScriptValue::Initialize(float f)
 	m_min = f;
 	m_max = f;
 }
-void SoundScriptValue::Initialize(float min,float max)
+void SoundScriptValue::Initialize(float min, float max)
 {
 	m_min = min;
 	m_max = max;
 }
-float SoundScriptValue::GetValue() const {return umath::random(m_min,m_max);}
-bool SoundScriptValue::IsSet() const {return m_bIsSet;}
+float SoundScriptValue::GetValue() const { return umath::random(m_min, m_max); }
+bool SoundScriptValue::IsSet() const { return m_bIsSet; }

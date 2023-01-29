@@ -13,25 +13,20 @@
 #include "pragma/entities/basebot.h"
 #include <pragma/entities/components/base_character_component.hpp>
 
-namespace pragma
-{
-	class DLLCLIENT CBotComponent final
-		: public BaseBotComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CBotComponent final : public BaseBotComponent {
+	  public:
 		CBotComponent(BaseEntity &ent) : BaseBotComponent(ent) {}
 		virtual void Initialize() override;
-		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-	protected:
+	  protected:
 		void OnFootStep(BaseCharacterComponent::FootType foot);
 	};
 };
 
-class DLLCLIENT CBot
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CBot : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

@@ -22,7 +22,7 @@
 
 using namespace pragma;
 
-#pragma message ("FIXME: If point_rendertarget is out of view of the local player, but one of the texture targets isn't, they won't get updated! Find a solution!")
+#pragma message("FIXME: If point_rendertarget is out of view of the local player, but one of the texture targets isn't, they won't get updated! Find a solution!")
 
 // LINK_ENTITY_TO_CLASS(point_rendertarget,CPointRenderTarget);
 
@@ -38,36 +38,44 @@ void CRenderTargetComponent::ReceiveData(NetPacket &packet)
 	m_kvRenderDepth = packet->Read<int>();
 }
 
-void CRenderTargetComponent::SetRenderSize(Vector2 &size) {SetRenderSize(size.x,size.y);}
-void CRenderTargetComponent::SetRenderSize(float w,float h) {m_kvRenderWidth = w;m_kvRenderHeight = h;}
-Vector2 CRenderTargetComponent::GetRenderSize() {return Vector2(m_kvRenderWidth,m_kvRenderHeight);}
-void CRenderTargetComponent::GetRenderSize(float *w,float *h) {*w = m_kvRenderWidth;*h = m_kvRenderHeight;}
+void CRenderTargetComponent::SetRenderSize(Vector2 &size) { SetRenderSize(size.x, size.y); }
+void CRenderTargetComponent::SetRenderSize(float w, float h)
+{
+	m_kvRenderWidth = w;
+	m_kvRenderHeight = h;
+}
+Vector2 CRenderTargetComponent::GetRenderSize() { return Vector2(m_kvRenderWidth, m_kvRenderHeight); }
+void CRenderTargetComponent::GetRenderSize(float *w, float *h)
+{
+	*w = m_kvRenderWidth;
+	*h = m_kvRenderHeight;
+}
 
-void CRenderTargetComponent::SetRenderMaterial(Material *mat) {m_matRender = mat;}
-Material *CRenderTargetComponent::GetRenderMaterial() {return m_matRender;}
-void CRenderTargetComponent::SetRenderMaterial(std::string mat) {SetRenderMaterial(client->LoadMaterial(mat.c_str()));}
+void CRenderTargetComponent::SetRenderMaterial(Material *mat) { m_matRender = mat; }
+Material *CRenderTargetComponent::GetRenderMaterial() { return m_matRender; }
+void CRenderTargetComponent::SetRenderMaterial(std::string mat) { SetRenderMaterial(client->LoadMaterial(mat.c_str())); }
 
-void CRenderTargetComponent::SetRefreshRate(float f) {m_kvRefreshRate = f;}
-float CRenderTargetComponent::GetRefreshRate() {return m_kvRefreshRate;}
+void CRenderTargetComponent::SetRefreshRate(float f) { m_kvRefreshRate = f; }
+float CRenderTargetComponent::GetRefreshRate() { return m_kvRefreshRate; }
 
-void CRenderTargetComponent::SetRenderFOV(float fov) {m_kvFOV = fov;}
-float CRenderTargetComponent::GetRenderFOV() {return m_kvFOV;}
+void CRenderTargetComponent::SetRenderFOV(float fov) { m_kvFOV = fov; }
+float CRenderTargetComponent::GetRenderFOV() { return m_kvFOV; }
 
-void CRenderTargetComponent::SetRenderDepth(unsigned int depth) {m_kvRenderDepth = depth;}
-unsigned int CRenderTargetComponent::GetRenderDepth() {return m_kvRenderDepth;}
+void CRenderTargetComponent::SetRenderDepth(unsigned int depth) { m_kvRenderDepth = depth; }
+unsigned int CRenderTargetComponent::GetRenderDepth() { return m_kvRenderDepth; }
 
 void CRenderTargetComponent::Spawn()
 {
 	// TODO
 }
 
-unsigned int CRenderTargetComponent::GetTextureBuffer() {return 0;} // Obsolete
+unsigned int CRenderTargetComponent::GetTextureBuffer() { return 0; } // Obsolete
 
 void CRenderTargetComponent::Render(pragma::rendering::SceneRenderPass renderMode)
 {
 	// TODO
 }
-void CRenderTargetComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CRenderTargetComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CPointRenderTarget::Initialize()
 {

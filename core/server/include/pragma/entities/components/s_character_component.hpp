@@ -11,13 +11,10 @@
 #include "pragma/serverdefinitions.h"
 
 class Faction;
-namespace pragma
-{
-	class DLLSERVER SCharacterComponent final
-		: public BaseCharacterComponent
-	{
-	public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+namespace pragma {
+	class DLLSERVER SCharacterComponent final : public BaseCharacterComponent {
+	  public:
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		SCharacterComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void SetActiveWeapon(BaseEntity *ent) override;
@@ -27,7 +24,7 @@ namespace pragma
 		void SelectNextWeapon();
 		void SelectPreviousWeapon();
 		virtual void OnTick(double tDelta) override;
-		virtual void SetAmmoCount(UInt32 ammoType,UInt16 count) override;
+		virtual void SetAmmoCount(UInt32 ammoType, UInt16 count) override;
 		using BaseCharacterComponent::SetAmmoCount;
 
 		Faction *GetFaction();
@@ -36,7 +33,7 @@ namespace pragma
 		bool GetNoTarget() const;
 		void SetGodMode(bool b);
 		bool GetGodMode() const;
-	protected:
+	  protected:
 		void OnFrozen(bool bFrozen);
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 		virtual void InitializeLuaObject(lua_State *l) override;

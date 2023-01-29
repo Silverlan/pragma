@@ -15,9 +15,9 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_microphone,CEnvMicrophone);
+LINK_ENTITY_TO_CLASS(env_microphone, CEnvMicrophone);
 
-void CMicrophoneComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CMicrophoneComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CEnvMicrophone::Initialize()
 {

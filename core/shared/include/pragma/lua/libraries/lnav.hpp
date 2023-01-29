@@ -10,11 +10,9 @@
 
 #include "pragma/networkdefinitions.h"
 
-namespace Lua
-{
+namespace Lua {
 	class Interface;
-	namespace nav
-	{
+	namespace nav {
 		DLLNETWORK void register_library(Lua::Interface &lua);
 	};
 };

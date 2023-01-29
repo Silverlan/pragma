@@ -17,28 +17,24 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(trigger_touch,CTriggerTouch);
+LINK_ENTITY_TO_CLASS(trigger_touch, CTriggerTouch);
 
 extern CGame *c_game;
-void CTouchComponent::Initialize()
-{
-	BaseTouchComponent::Initialize();
-}
+void CTouchComponent::Initialize() { BaseTouchComponent::Initialize(); }
 void CTouchComponent::OnEntitySpawn()
 {
 	BaseTouchComponent::OnEntitySpawn();
-	auto &ent = static_cast<CBaseEntity&>(GetEntity());
-	if(ent.IsClientsideOnly() == true)
-	{
+	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	if(ent.IsClientsideOnly() == true) {
 		auto pPhysComponent = ent.GetPhysicsComponent();
 		if(pPhysComponent != nullptr)
 			pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
 	}
-	auto pRenderComponent = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
+	auto pRenderComponent = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
 	if(pRenderComponent)
 		pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::World);
 }
-void CTouchComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CTouchComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////////
 

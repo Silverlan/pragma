@@ -8,5 +8,5 @@
 #define __LDEF_BRUSHMESH_H__
 #include "pragma/lua/ldefinitions.h"
 #include "pragma/model/brush/brushmesh.h"
-lua_registercheck(BrushMesh,BrushMesh);
+lua_registercheck(BrushMesh, BrushMesh);
 #endif

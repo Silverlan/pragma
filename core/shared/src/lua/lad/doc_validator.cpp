@@ -13,19 +13,15 @@ using namespace pragma::lua;
 void DocValidator::ValidateCollection(const pragma::doc::Collection &collection)
 {
 	auto name = collection.GetName();
-	auto it = std::find_if(m_classes.begin(),m_classes.end(),[&name](const LuaClassInfo &luaClass) {
-		return luaClass.name == name;
-	});
+	auto it = std::find_if(m_classes.begin(), m_classes.end(), [&name](const LuaClassInfo &luaClass) { return luaClass.name == name; });
 	if(it == m_classes.end())
-		Con::cout<<"CLASS NOT FOUND!"<<Con::endl;
+		Con::cout << "CLASS NOT FOUND!" << Con::endl;
 	//find_item<pragma::doc::Function>(collection,name,&pragma::doc::Collection::GetFunctions);
-	for(auto &f : collection.GetFunctions())
-	{
-
+	for(auto &f : collection.GetFunctions()) {
 	}
 }
 
-void DocValidator::GetClassInfo(lua_State *L,luabind::detail::class_rep * crep)
+void DocValidator::GetClassInfo(lua_State *L, luabind::detail::class_rep *crep)
 {
 	crep->get_table(L);
 	luabind::object table(luabind::from_stack(L, -1));
@@ -33,29 +29,26 @@ void DocValidator::GetClassInfo(lua_State *L,luabind::detail::class_rep * crep)
 
 	std::size_t index = 1;
 
-	for(luabind::iterator i(table), e; i != e; ++i)
-	{
+	for(luabind::iterator i(table), e; i != e; ++i) {
 		std::string key;
 		auto lkey = i.key();
 		lkey.push(L);
-		if(Lua::IsString(L,-1))
-			key = Lua::CheckString(L,-1);
-		Lua::Pop(L,1);
+		if(Lua::IsString(L, -1))
+			key = Lua::CheckString(L, -1);
+		Lua::Pop(L, 1);
 
 		auto type = luabind::type(*i);
-		switch(type)
-		{
+		switch(type) {
 		case LUA_TFUNCTION:
-		{
-			auto *f = FindItem<pragma::doc::Function>(key,&pragma::doc::Collection::GetFunctions);
-			if(f == nullptr)
 			{
-				std::stringstream ss;
-				ss<<"Function '"<<key<<"' not found!";
-				WriteToLog(ss);
+				auto *f = FindItem<pragma::doc::Function>(key, &pragma::doc::Collection::GetFunctions);
+				if(f == nullptr) {
+					std::stringstream ss;
+					ss << "Function '" << key << "' not found!";
+					WriteToLog(ss);
+				}
+				break;
 			}
-			break;
-		}
 		case LUA_TBOOLEAN:
 			break;
 		case LUA_TNUMBER:
@@ -70,9 +63,8 @@ void DocValidator::GetClassInfo(lua_State *L,luabind::detail::class_rep * crep)
 			break;
 		}
 		if(type != LUA_TFUNCTION)
-			Con::cout<<"Type: "<<type<<Con::endl;
-		if(type == LUA_TNUMBER)
-		{
+			Con::cout << "Type: " << type << Con::endl;
+		if(type == LUA_TNUMBER) {
 		}
 		if(type != LUA_TFUNCTION)
 			continue;
@@ -84,11 +76,10 @@ void DocValidator::GetClassInfo(lua_State *L,luabind::detail::class_rep * crep)
 		member.push(L);
 		luabind::detail::stack_pop pop(L, 1);
 
-		if(lua_tocfunction(L, -1) == &luabind::detail::property_tag)
-		{
+		if(lua_tocfunction(L, -1) == &luabind::detail::property_tag) {
 			//result.attributes[index++] = i.key();
-		} else
-		{
+		}
+		else {
 			//result.methods[i.key()] = *i;
 		}
 	}

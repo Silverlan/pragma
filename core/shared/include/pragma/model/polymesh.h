@@ -19,18 +19,16 @@
 
 #include <pragma/math/intersection.h>
 
-class DLLNETWORK PolyMeshInfo
-{
-public:
+class DLLNETWORK PolyMeshInfo {
+  public:
 	std::vector<Vector3> vertexList;
 };
 
-class DLLNETWORK PolyMesh
-{
-	friend Con::c_cout& operator<<(Con::c_cout&,const PolyMesh&);
-public:
+class DLLNETWORK PolyMesh {
+	friend Con::c_cout &operator<<(Con::c_cout &, const PolyMesh &);
+  public:
 	PolyMesh();
-private:
+  private:
 	bool m_bHasDisplacements = false;
 	std::vector<std::shared_ptr<Poly>> m_polys;
 	PolyMeshInfo m_compiledData = {};
@@ -41,10 +39,10 @@ private:
 	Vector3 m_centerOfMass = {};
 	std::vector<Vector3> m_vertices;
 	bool m_bValid = true;
-	bool HasVertex(const PolyVertex &v,Vector3 *vThis=NULL);
+	bool HasVertex(const PolyVertex &v, Vector3 *vThis = NULL);
 	void Localize();
 	void Localize(const Vector3 &center);
-public:
+  public:
 	PolyMeshInfo &GetCompiledData();
 	bool HasDisplacements();
 	void SetHasDisplacements(bool b);
@@ -57,11 +55,11 @@ public:
 	std::vector<std::shared_ptr<Poly>> &GetPolys();
 	void debug_print();
 	std::shared_ptr<Model> GenerateModel();
-	template<class TPoly,class TPolyMesh>
-		static Model *GenerateModel(const std::vector<std::shared_ptr<TPolyMesh>> &meshes);
-	template<class TSide,class TPolyMesh,class TBrushMesh>
-		static void GenerateBrushMeshes(pragma::physics::IEnvironment &env,std::vector<std::shared_ptr<TBrushMesh>> &outBrushMeshes,const std::vector<std::shared_ptr<TPolyMesh>> &meshes);
-	void GetBounds(Vector3 *min,Vector3 *max);
+	template<class TPoly, class TPolyMesh>
+	static Model *GenerateModel(const std::vector<std::shared_ptr<TPolyMesh>> &meshes);
+	template<class TSide, class TPolyMesh, class TBrushMesh>
+	static void GenerateBrushMeshes(pragma::physics::IEnvironment &env, std::vector<std::shared_ptr<TBrushMesh>> &outBrushMeshes, const std::vector<std::shared_ptr<TPolyMesh>> &meshes);
+	void GetBounds(Vector3 *min, Vector3 *max);
 	Vector3 GetCenter();
 	Vector3 *GetLocalizedCenter();
 	Vector3 *GetWorldPosition();
@@ -70,14 +68,14 @@ public:
 	bool IsValid();
 };
 
-inline Con::c_cout &operator<<(Con::c_cout &os,const PolyMesh& mesh)
+inline Con::c_cout &operator<<(Con::c_cout &os, const PolyMesh &mesh)
 {
-	os<<"Mesh["<<&mesh<<"] ["<<mesh.m_polys.size()<<"] ["<<mesh.m_vertices.size()<<"]";
+	os << "Mesh[" << &mesh << "] [" << mesh.m_polys.size() << "] [" << mesh.m_vertices.size() << "]";
 	return os;
 }
 
-template<class TPoly,class TPolyMesh>
-	Model *PolyMesh::GenerateModel(const std::vector<std::shared_ptr<TPolyMesh>> &meshes) // Obsolete?
+template<class TPoly, class TPolyMesh>
+Model *PolyMesh::GenerateModel(const std::vector<std::shared_ptr<TPolyMesh>> &meshes) // Obsolete?
 {
 	return nullptr;
 	/*Model *mdl = new Model();
@@ -111,15 +109,13 @@ template<class TPoly,class TPolyMesh>
 	return mdl;*/
 }
 
-template<class TSide,class TPolyMesh,class TBrushMesh>
-	void PolyMesh::GenerateBrushMeshes(pragma::physics::IEnvironment &env,std::vector<std::shared_ptr<TBrushMesh>> &outBrushMeshes,const std::vector<std::shared_ptr<TPolyMesh>> &meshes) // Obsolete?
+template<class TSide, class TPolyMesh, class TBrushMesh>
+void PolyMesh::GenerateBrushMeshes(pragma::physics::IEnvironment &env, std::vector<std::shared_ptr<TBrushMesh>> &outBrushMeshes, const std::vector<std::shared_ptr<TPolyMesh>> &meshes) // Obsolete?
 {
-	for(int i=0;i<meshes.size();i++)
-	{
+	for(int i = 0; i < meshes.size(); i++) {
 		auto mesh = std::make_shared<TBrushMesh>();
 		auto &polys = meshes[i]->GetPolys();
-		for(int j=0;j<polys.size();j++)
-		{
+		for(int j = 0; j < polys.size(); j++) {
 			auto &poly = polys[j];
 			auto &polyVerts = poly->GetVertices();
 			/*std::vector<Vector3> *vertexList = new std::vector<Vector3>;

@@ -12,22 +12,19 @@
 #include <pragma/lua/luaobjectbase.h>
 #include <pragma/lua/handle_holder.hpp>
 
-class DLLCLIENT CLuaEntity
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CLuaEntity : public CBaseEntity {
+  public:
 	CLuaEntity();
 	virtual void Initialize() override;
-	void SetupLua(const luabind::object &o,const std::string &className);
+	void SetupLua(const luabind::object &o, const std::string &className);
 
 	void LuaInitialize() {}
 	static void default_Initialize(CBaseEntity *ent);
-protected:
+  protected:
 	virtual void InitializeLuaObject(lua_State *lua) override;
 };
 
-namespace pragma::lua
-{
+namespace pragma::lua {
 	using CLuaEntityHolder = HandleHolder<CLuaEntity>;
 };
 

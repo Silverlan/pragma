@@ -15,29 +15,26 @@
 #include "pragma/rendering/render_mesh_collection_handler.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-namespace pragma
-{
+namespace pragma {
 	class ShaderGameWorld;
-	namespace rendering {struct BaseRenderProcessor; class LightingStageRenderProcessor; class RenderQueue;};
-	class DLLCLIENT CSkyCameraComponent final
-		: public BaseEntityComponent
-	{
-	public:
+	namespace rendering {
+		struct BaseRenderProcessor;
+		class LightingStageRenderProcessor;
+		class RenderQueue;
+	};
+	class DLLCLIENT CSkyCameraComponent final : public BaseEntityComponent {
+	  public:
 		CSkyCameraComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		virtual void OnEntitySpawn() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		void BuildSkyMeshRenderQueues(
-			const pragma::CSceneComponent &scene,RenderFlags renderFlags,pragma::rendering::RenderMask renderMask,bool enableClipping,
-			rendering::RenderQueue &outRenderQueue,rendering::RenderQueue &outTranslucentRenderQueue,
-			pragma::CRasterizationRendererComponent *optRasterizationRenderer=nullptr,bool waitForRenderQueues=true
-		) const;
+		void BuildSkyMeshRenderQueues(const pragma::CSceneComponent &scene, RenderFlags renderFlags, pragma::rendering::RenderMask renderMask, bool enableClipping, rendering::RenderQueue &outRenderQueue, rendering::RenderQueue &outTranslucentRenderQueue,
+		  pragma::CRasterizationRendererComponent *optRasterizationRenderer = nullptr, bool waitForRenderQueues = true) const;
 
 		float GetSkyboxScale() const;
-	private:
-		struct SceneData
-		{
+	  private:
+		struct SceneData {
 			~SceneData();
 			CallbackHandle onBuildRenderQueue = {};
 			CallbackHandle onRendererChanged = {};
@@ -51,17 +48,15 @@ namespace pragma
 		void UpdateToggleState();
 		void BindToShader(pragma::rendering::BaseRenderProcessor &processor) const;
 		void UnbindFromShader(pragma::rendering::BaseRenderProcessor &processor) const;
-		void BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo,SceneData &sceneData);
+		void BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo, SceneData &sceneData);
 
 		float m_skyboxScale = 1.f;
-		std::unordered_map<pragma::CSceneComponent::SceneIndex,std::shared_ptr<SceneData>> m_sceneData;
+		std::unordered_map<pragma::CSceneComponent::SceneIndex, std::shared_ptr<SceneData>> m_sceneData;
 	};
 };
 
-class DLLCLIENT CSkyCamera
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CSkyCamera : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

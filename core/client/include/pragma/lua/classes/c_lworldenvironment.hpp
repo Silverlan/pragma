@@ -12,10 +12,8 @@
 #include "pragma/rendering/world_environment.hpp"
 #include <pragma/lua/ldefinitions.h>
 
-namespace Lua
-{
-	namespace WorldEnvironment
-	{
+namespace Lua {
+	namespace WorldEnvironment {
 		DLLCLIENT void register_class(luabind::class_<::WorldEnvironment> &classDef);
 	};
 };

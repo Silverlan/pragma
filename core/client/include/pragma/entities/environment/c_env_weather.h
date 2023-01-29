@@ -11,28 +11,22 @@
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/environment/env_weather.h"
 
-namespace pragma
-{
-	class DLLCLIENT CWeatherComponent final
-		: public BaseEnvWeatherComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CWeatherComponent final : public BaseEnvWeatherComponent {
+	  public:
 		CWeatherComponent(BaseEntity &ent) : BaseEnvWeatherComponent(ent) {}
 		virtual ~CWeatherComponent() override;
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnEntitySpawn() override;
-	protected:
+	  protected:
 		EntityHandle m_hParticle = {};
 	};
 };
 
-class DLLCLIENT CEnvWeather
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEnvWeather : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
-
 };
 
 #endif

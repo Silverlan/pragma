@@ -12,18 +12,20 @@
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-namespace bsp {class File;};
-namespace prosper {class IDynamicResizableBuffer;};
-namespace util::bsp {struct LightMapInfo;};
-namespace pragma
-{
+namespace bsp {
+	class File;
+};
+namespace prosper {
+	class IDynamicResizableBuffer;
+};
+namespace util::bsp {
+	struct LightMapInfo;
+};
+namespace pragma {
 	struct LightmapDataCache;
-	class DLLCLIENT CLightMapComponent final
-		: public BaseEntityComponent
-	{
-	public:
-		enum class Texture : uint32_t
-		{
+	class DLLCLIENT CLightMapComponent final : public BaseEntityComponent {
+	  public:
+		enum class Texture : uint32_t {
 			DiffuseDirectMap = 0,
 			DiffuseIndirectMap,
 			DiffuseMap,
@@ -31,8 +33,7 @@ namespace pragma
 
 			Count
 		};
-		struct DLLCLIENT LightmapBakeSettings
-		{
+		struct DLLCLIENT LightmapBakeSettings {
 			std::optional<uint32_t> width {};
 			std::optional<uint32_t> height {};
 			std::optional<pragma::rendering::cycles::SceneInfo::ColorTransform> colorTransform {};
@@ -45,7 +46,7 @@ namespace pragma
 			bool createAsRenderJob = false;
 			bool rebuildUvAtlas = false;
 		};
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		static std::shared_ptr<prosper::IDynamicResizableBuffer> GenerateLightmapUVBuffers(std::vector<std::shared_ptr<prosper::IBuffer>> &outMeshLightMapUvBuffers);
 		static std::shared_ptr<prosper::Texture> CreateLightmapTexture(uimg::ImageBuffer &imgBuf);
 		static bool BakeLightmaps(const LightmapBakeSettings &bakeSettings);
@@ -60,13 +61,8 @@ namespace pragma
 		const std::shared_ptr<prosper::Texture> &GetLightMap() const;
 		const std::shared_ptr<prosper::Texture> &GetDirectionalLightMap() const;
 
-		void InitializeLightMapData(
-			const std::shared_ptr<prosper::Texture> &lightMap,
-			const std::shared_ptr<prosper::IDynamicResizableBuffer> &lightMapUvBuffer,
-			const std::vector<std::shared_ptr<prosper::IBuffer>> &meshUvBuffers,
-			const std::shared_ptr<prosper::Texture> &directionalLightmap=nullptr,
-			bool keepCurrentTextures=false
-		);
+		void InitializeLightMapData(const std::shared_ptr<prosper::Texture> &lightMap, const std::shared_ptr<prosper::IDynamicResizableBuffer> &lightMapUvBuffer, const std::vector<std::shared_ptr<prosper::IBuffer>> &meshUvBuffers,
+		  const std::shared_ptr<prosper::Texture> &directionalLightmap = nullptr, bool keepCurrentTextures = false);
 		void SetLightMapAtlas(const std::shared_ptr<prosper::Texture> &lightMap);
 		const std::shared_ptr<prosper::Texture> &GetLightMapAtlas() const;
 		void SetDirectionalLightMapAtlas(const std::shared_ptr<prosper::Texture> &lightMap);
@@ -81,7 +77,7 @@ namespace pragma
 		void SetLightMapExposure(float exp);
 		float GetLightMapExposure() const;
 		float CalcLightMapPowExposurePow() const;
-		const util::PFloatProperty &GetLightMapExposureProperty() const {return m_lightMapExposure;}
+		const util::PFloatProperty &GetLightMapExposureProperty() const { return m_lightMapExposure; }
 
 		void ConvertLightmapToBSPLuxelData() const;
 
@@ -94,12 +90,12 @@ namespace pragma
 		const std::shared_ptr<prosper::Texture> &GetTexture(Texture tex) const;
 		void SetLightMapMaterial(const std::string &matName);
 		const std::string &GetLightMapMaterialName() const;
-	protected:
+	  protected:
 		void InitializeFromMaterial();
 
 		std::string m_lightMapMaterialName;
 		msys::MaterialHandle m_lightMapMaterial;
-		std::array<std::shared_ptr<prosper::Texture>,umath::to_integral(Texture::Count)> m_textures;
+		std::array<std::shared_ptr<prosper::Texture>, umath::to_integral(Texture::Count)> m_textures;
 
 		util::PFloatProperty m_lightMapExposure = nullptr;
 		std::shared_ptr<LightmapDataCache> m_lightmapDataCache;

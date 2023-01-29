@@ -22,12 +22,11 @@
 
 extern DLLNETWORK Engine *engine;
 extern DLLSERVER SGame *s_game;
-void ServerState::OnMasterServerRegistered(bool b,std::string reason)
+void ServerState::OnMasterServerRegistered(bool b, std::string reason)
 {
-	if(b == false)
-	{
-        m_tNextWMSConnect = std::chrono::steady_clock::now();
-		Con::cwar<<"Unable to connect to master server ("<<reason<<")"<<Con::endl;
+	if(b == false) {
+		m_tNextWMSConnect = std::chrono::steady_clock::now();
+		Con::cwar << "Unable to connect to master server (" << reason << ")" << Con::endl;
 	}
 }
 
@@ -53,8 +52,7 @@ void ServerState::RegisterServerInfo()
 	m_serverData.password = password.empty() == false;
 	//m_serverData.bots
 
-	if(m_serverReg)
-	{
+	if(m_serverReg) {
 		auto &serverInfo = m_serverReg->GetServerInfo();
 		serverInfo.name = m_serverData.name;
 		serverInfo.mapName = m_serverData.map;
@@ -89,10 +87,10 @@ void ServerState::CloseServer()
 	pragma::networking::Error err;
 	if(m_server->Shutdown(err) == true)
 		return;
-	spdlog::error("Unable to shut down server: ",err.GetMessage());
+	spdlog::error("Unable to shut down server: ", err.GetMessage());
 }
 
 /////////////////////////////////
 
-DLLSERVER void CMD_startserver(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv) {engine->StartServer(false);}
-DLLSERVER void CMD_closeserver(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&) {engine->CloseServer();}
+DLLSERVER void CMD_startserver(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv) { engine->StartServer(false); }
+DLLSERVER void CMD_closeserver(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &) { engine->CloseServer(); }

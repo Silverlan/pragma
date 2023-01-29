@@ -15,18 +15,16 @@
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <pragma/indexmap.h>
 
-namespace prosper {class Framebuffer; class RenderPass; class RenderTarget; class Texture;};
-namespace pragma
-{
-	class DLLCLIENT LightShadowRenderer
-	{
-	public:
-		enum class RenderState
-		{
-			NoRenderRequired = 0,
-			RenderRequiredOnChange,
-			RenderRequired
-		};
+namespace prosper {
+	class Framebuffer;
+	class RenderPass;
+	class RenderTarget;
+	class Texture;
+};
+namespace pragma {
+	class DLLCLIENT LightShadowRenderer {
+	  public:
+		enum class RenderState { NoRenderRequired = 0, RenderRequiredOnChange, RenderRequired };
 		LightShadowRenderer(CLightComponent &l);
 		~LightShadowRenderer();
 
@@ -35,9 +33,9 @@ namespace pragma
 		bool DoesRenderQueueRequireBuilding() const;
 		bool IsRenderQueueComplete() const;
 
-		RenderState GetRenderState() const {return m_renderState;}
-		void SetRenderState(RenderState renderState) {m_renderState = renderState;}
-	private:
+		RenderState GetRenderState() const { return m_renderState; }
+		void SetRenderState(RenderState renderState) { m_renderState = renderState; }
+	  private:
 		void UpdateSceneCallbacks();
 
 		std::vector<std::shared_ptr<pragma::rendering::RenderQueue>> m_renderQueues {};
@@ -50,15 +48,9 @@ namespace pragma
 		bool m_requiresRenderQueueUpdate = false;
 	};
 
-	class DLLCLIENT CShadowComponent final
-		: public BaseEntityComponent
-	{
-	public:
-		enum class Type : uint8_t
-		{
-			Generic = 1,
-			Cube
-		};
+	class DLLCLIENT CShadowComponent final : public BaseEntityComponent {
+	  public:
+		enum class Type : uint8_t { Generic = 1, Cube };
 		static prosper::IDescriptorSet *GetDescriptorSet();
 
 		CShadowComponent(BaseEntity &ent);
@@ -75,7 +67,7 @@ namespace pragma
 		prosper::RenderTarget *GetDepthRenderTarget() const;
 		prosper::Texture *GetDepthTexture() const;
 		prosper::IRenderPass *GetRenderPass() const;
-		prosper::IFramebuffer *GetFramebuffer(uint32_t layerId=0u);
+		prosper::IFramebuffer *GetFramebuffer(uint32_t layerId = 0u);
 
 		bool IsDirty() const;
 		void SetDirty(bool dirty);
@@ -89,7 +81,7 @@ namespace pragma
 		const LightShadowRenderer &GetRenderer() const;
 
 		void RenderShadows(const util::DrawSceneInfo &drawSceneInfo);
-	protected:
+	  protected:
 		void DestroyTextures();
 		bool m_bDirty = true;
 		Type m_type = CShadowComponent::Type::Generic;

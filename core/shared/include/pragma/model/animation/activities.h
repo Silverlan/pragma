@@ -11,8 +11,7 @@
 #include "pragma/networkdefinitions.h"
 #include <mathutil/umath.h>
 
-enum class DLLNETWORK Activity : uint16_t
-{
+enum class DLLNETWORK Activity : uint16_t {
 	Invalid,
 
 	Idle,
@@ -87,10 +86,9 @@ enum class DLLNETWORK Activity : uint16_t
 };
 REGISTER_BASIC_ARITHMETIC_OPERATORS(Activity)
 
-extern DLLNETWORK std::unordered_map<int32_t,std::string> ACTIVITY_NAMES;
+extern DLLNETWORK std::unordered_map<int32_t, std::string> ACTIVITY_NAMES;
 
-namespace pragma
-{
+namespace pragma {
 	DLLNETWORK void register_engine_activities();
 };
 

@@ -12,5 +12,5 @@
 
 using namespace pragma;
 
-void CLiquidVolumeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CLiquidVolumeComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CLiquidVolumeComponent::ReceiveData(NetPacket &packet) {}

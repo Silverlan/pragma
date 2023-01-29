@@ -11,15 +11,13 @@
 #include "pragma/physics/raycallback/physraycallbackfilter.hpp"
 #include "pragma/entities/baseentity_handle.h"
 
-class DLLNETWORK BasePhysRayCallbackFilterEntity
-	: public BasePhysRayCallbackFilter
-{
-protected:
+class DLLNETWORK BasePhysRayCallbackFilterEntity : public BasePhysRayCallbackFilter {
+  protected:
 	std::vector<EntityHandle> m_filter;
-public:
-	BasePhysRayCallbackFilterEntity(const std::vector<EntityHandle> &filter,FTRACE flags,CollisionMask group,CollisionMask mask);
-	BasePhysRayCallbackFilterEntity(const EntityHandle &filter,FTRACE flags,CollisionMask group,CollisionMask mask);
-	virtual bool ShouldPass(BaseEntity *ent,PhysObj *phys,pragma::physics::ICollisionObject *obj) override;
+  public:
+	BasePhysRayCallbackFilterEntity(const std::vector<EntityHandle> &filter, FTRACE flags, CollisionMask group, CollisionMask mask);
+	BasePhysRayCallbackFilterEntity(const EntityHandle &filter, FTRACE flags, CollisionMask group, CollisionMask mask);
+	virtual bool ShouldPass(BaseEntity *ent, PhysObj *phys, pragma::physics::ICollisionObject *obj) override;
 };
 
 #endif

@@ -30,12 +30,12 @@ extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(game_shadow_manager,CShadowManager);
+LINK_ENTITY_TO_CLASS(game_shadow_manager, CShadowManager);
 
 static CShadowManagerComponent *g_shadowManager = nullptr;
-CShadowManagerComponent *CShadowManagerComponent::GetShadowManager() {return g_shadowManager;}
+CShadowManagerComponent *CShadowManagerComponent::GetShadowManager() { return g_shadowManager; }
 
-void CShadowManagerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CShadowManagerComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CShadowManagerComponent::Initialize()
 {
@@ -62,12 +62,12 @@ void CShadowManagerComponent::Initialize()
 	auto arraySizeCubeShadows = pragma::ShaderPBR::DESCRIPTOR_SET_SHADOWS.bindings.at(umath::to_integral(pragma::ShaderPBR::ShadowBinding::ShadowCubeMaps)).descriptorArraySize;
 
 	auto &dummyTex = c_engine->GetRenderContext().GetDummyTexture();
-	for(auto i=decltype(arraySizeShadows){0u};i<arraySizeShadows;++i)
-		descSet->SetBindingArrayTexture(*dummyTex,umath::to_integral(pragma::ShaderSceneLit::ShadowBinding::ShadowMaps),i);
+	for(auto i = decltype(arraySizeShadows) {0u}; i < arraySizeShadows; ++i)
+		descSet->SetBindingArrayTexture(*dummyTex, umath::to_integral(pragma::ShaderSceneLit::ShadowBinding::ShadowMaps), i);
 
 	auto &dummyCubeTex = c_engine->GetRenderContext().GetDummyCubemapTexture();
-	for(auto i=decltype(arraySizeCubeShadows){0u};i<arraySizeCubeShadows;++i)
-		descSet->SetBindingArrayTexture(*dummyCubeTex,umath::to_integral(pragma::ShaderSceneLit::ShadowBinding::ShadowCubeMaps),i);
+	for(auto i = decltype(arraySizeCubeShadows) {0u}; i < arraySizeCubeShadows; ++i)
+		descSet->SetBindingArrayTexture(*dummyCubeTex, umath::to_integral(pragma::ShaderSceneLit::ShadowBinding::ShadowCubeMaps), i);
 	descSet->Update();
 }
 
@@ -82,10 +82,7 @@ void CShadowManagerComponent::OnRemove()
 	g_shadowManager = nullptr;
 }
 
-void CShadowManagerComponent::OnEntitySpawn()
-{
-	BaseEntityComponent::OnEntitySpawn();
-}
+void CShadowManagerComponent::OnEntitySpawn() { BaseEntityComponent::OnEntitySpawn(); }
 
 void CShadowManagerComponent::ClearRenderTargets()
 {
@@ -93,25 +90,22 @@ void CShadowManagerComponent::ClearRenderTargets()
 	m_cubeSet.buffers = {};
 }
 
-ShadowRenderer &CShadowManagerComponent::GetRenderer() {return m_renderer;}
+ShadowRenderer &CShadowManagerComponent::GetRenderer() { return m_renderer; }
 
-prosper::IDescriptorSet *CShadowManagerComponent::GetDescriptorSet() {return m_descSetGroup->GetDescriptorSet();}
+prosper::IDescriptorSet *CShadowManagerComponent::GetDescriptorSet() { return m_descSetGroup->GetDescriptorSet(); }
 
-CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(Type type,uint32_t size,Priority priority)
+CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(Type type, uint32_t size, Priority priority)
 {
 	if(m_whShadowShader.expired())
 		return {};
 	auto &set = (type == Type::Cube) ? m_cubeSet : m_genericSet;
-	auto itBuffer = std::find_if(set.buffers.begin(),set.buffers.end(),[priority](const BufferSet::BufferData &data) {
-		return priority > data.lastPriority;
-	});
-	if(itBuffer != set.buffers.end())
-	{
+	auto itBuffer = std::find_if(set.buffers.begin(), set.buffers.end(), [priority](const BufferSet::BufferData &data) { return priority > data.lastPriority; });
+	if(itBuffer != set.buffers.end()) {
 		// Found an existing target with a lower priority; We can claim this one
 		auto &data = *itBuffer;
 		data.renderTargetHandle = nullptr; // Invalidate previous handle (Reclaim ownership)
 
-										   // Create new handle
+		// Create new handle
 		data.renderTargetHandle = std::make_shared<std::weak_ptr<RenderTarget>>(data.renderTarget);
 		data.lastPriority = priority;
 		return data.renderTargetHandle;
@@ -142,12 +136,12 @@ CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(T
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	texCreateInfo.flags = prosper::util::TextureCreateInfo::Flags::CreateImageViewForEachLayer;
-	auto depthTexture = c_engine->GetRenderContext().CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
+	auto depthTexture = c_engine->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
 
 	auto rt = std::make_shared<RenderTarget>();
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	rtCreateInfo.useLayerFramebuffers = true;
-	rt->renderTarget = c_engine->GetRenderContext().CreateRenderTarget({depthTexture},static_cast<prosper::ShaderGraphics*>(m_whShadowShader.get())->GetRenderPass(),rtCreateInfo);
+	rt->renderTarget = c_engine->GetRenderContext().CreateRenderTarget({depthTexture}, static_cast<prosper::ShaderGraphics *>(m_whShadowShader.get())->GetRenderPass(), rtCreateInfo);
 	rt->renderTarget->SetDebugName("shadowmap_rt");
 	set.buffers.push_back({});
 	auto &data = set.buffers.back();
@@ -155,12 +149,8 @@ CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(T
 	data.renderTarget = rt;
 	data.renderTargetHandle = std::make_shared<std::weak_ptr<RenderTarget>>(data.renderTarget);
 
-	rt->index = set.buffers.size() -1;
-	m_descSetGroup->GetDescriptorSet()->SetBindingArrayTexture(
-		*depthTexture,
-		umath::to_integral((type != Type::Cube) ? pragma::ShaderSceneLit::ShadowBinding::ShadowMaps : pragma::ShaderSceneLit::ShadowBinding::ShadowCubeMaps),
-		rt->index
-	);
+	rt->index = set.buffers.size() - 1;
+	m_descSetGroup->GetDescriptorSet()->SetBindingArrayTexture(*depthTexture, umath::to_integral((type != Type::Cube) ? pragma::ShaderSceneLit::ShadowBinding::ShadowMaps : pragma::ShaderSceneLit::ShadowBinding::ShadowCubeMaps), rt->index);
 	m_descSetGroup->GetDescriptorSet()->Update();
 	return data.renderTargetHandle;
 }
@@ -175,7 +165,7 @@ void CShadowManagerComponent::FreeRenderTarget(const RenderTarget &rt)
 	data.renderTargetHandle = nullptr;
 }
 
-void CShadowManagerComponent::UpdatePriority(const RenderTarget &rt,Priority priority)
+void CShadowManagerComponent::UpdatePriority(const RenderTarget &rt, Priority priority)
 {
 	auto &depthTex = rt.renderTarget->GetTexture();
 	auto bCube = depthTex.GetImage().IsCubemap();

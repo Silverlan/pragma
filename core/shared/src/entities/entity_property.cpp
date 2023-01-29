@@ -10,9 +10,5 @@
 
 using namespace pragma;
 
-EntityProperty::EntityProperty()
-	: util::SimpleProperty<EntityProperty,EntityHandle>()
-{}
-EntityProperty::EntityProperty(const EntityHandle &hEnt)
-	: util::SimpleProperty<EntityProperty,EntityHandle>(hEnt)
-{}
+EntityProperty::EntityProperty() : util::SimpleProperty<EntityProperty, EntityHandle>() {}
+EntityProperty::EntityProperty(const EntityHandle &hEnt) : util::SimpleProperty<EntityProperty, EntityHandle>(hEnt) {}

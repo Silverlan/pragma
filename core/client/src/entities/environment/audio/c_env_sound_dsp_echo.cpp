@@ -22,7 +22,7 @@ using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
 
-LINK_ENTITY_TO_CLASS(env_sound_dsp_echo,CEnvSoundDspEcho);
+LINK_ENTITY_TO_CLASS(env_sound_dsp_echo, CEnvSoundDspEcho);
 
 void CSoundDspEchoComponent::ReceiveData(NetPacket &packet)
 {
@@ -47,7 +47,7 @@ void CSoundDspEchoComponent::OnEntitySpawn()
 	props.flSpread = m_kvSpread;
 	m_dsp = soundSys->CreateEffect(props);
 }
-void CSoundDspEchoComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CSoundDspEchoComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 //////////////////
 

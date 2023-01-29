@@ -20,114 +20,59 @@ using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
 
-decltype(ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT) ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT = {
-	{
-		prosper::DescriptorSetInfo::Binding { // Image
-			prosper::DescriptorType::StorageImage,
-			prosper::ShaderStageFlags::ComputeBit
-		}
-	}
-};
-decltype(ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE) ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE = {
-	{
-		prosper::DescriptorSetInfo::Binding { // Textures
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::ComputeBit,
-			umath::to_integral(GameLimits::MaxImageArrayLayers)
-		},
-		prosper::DescriptorSetInfo::Binding { // Materials
-			prosper::DescriptorType::StorageBuffer,
-			prosper::ShaderStageFlags::ComputeBit
-		},
-		prosper::DescriptorSetInfo::Binding { // SubMeshInfos
-			prosper::DescriptorType::StorageBuffer,
-			prosper::ShaderStageFlags::ComputeBit
-		},
-		prosper::DescriptorSetInfo::Binding { // EntityInstanceData
-			prosper::DescriptorType::StorageBuffer,
-			prosper::ShaderStageFlags::ComputeBit
-		},
-		prosper::DescriptorSetInfo::Binding { // BoneMatrices
-			prosper::DescriptorType::StorageBuffer,
-			prosper::ShaderStageFlags::ComputeBit
-		},
-		prosper::DescriptorSetInfo::Binding { // VertexBuffer
-			prosper::DescriptorType::StorageBuffer,
-			prosper::ShaderStageFlags::ComputeBit
-		},
-		prosper::DescriptorSetInfo::Binding { // IndexBuffer
-			prosper::DescriptorType::StorageBuffer,
-			prosper::ShaderStageFlags::ComputeBit
-		},
-		prosper::DescriptorSetInfo::Binding { // VertexWeightBuffer
-			prosper::DescriptorType::StorageBuffer,
-			prosper::ShaderStageFlags::ComputeBit
-		},
-		prosper::DescriptorSetInfo::Binding { // AlphaBuffer
-			prosper::DescriptorType::StorageBuffer,
-			prosper::ShaderStageFlags::ComputeBit
-		},
-	}
-};
+decltype(ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT) ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT = {{prosper::DescriptorSetInfo::Binding {// Image
+  prosper::DescriptorType::StorageImage, prosper::ShaderStageFlags::ComputeBit}}};
+decltype(ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE) ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE = {{
+  prosper::DescriptorSetInfo::Binding {// Textures
+    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::ComputeBit, umath::to_integral(GameLimits::MaxImageArrayLayers)},
+  prosper::DescriptorSetInfo::Binding {// Materials
+    prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit},
+  prosper::DescriptorSetInfo::Binding {// SubMeshInfos
+    prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit},
+  prosper::DescriptorSetInfo::Binding {// EntityInstanceData
+    prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit},
+  prosper::DescriptorSetInfo::Binding {// BoneMatrices
+    prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit},
+  prosper::DescriptorSetInfo::Binding {// VertexBuffer
+    prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit},
+  prosper::DescriptorSetInfo::Binding {// IndexBuffer
+    prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit},
+  prosper::DescriptorSetInfo::Binding {// VertexWeightBuffer
+    prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit},
+  prosper::DescriptorSetInfo::Binding {// AlphaBuffer
+    prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit},
+}};
 
 decltype(ShaderRayTracing::DESCRIPTOR_SET_SCENE) ShaderRayTracing::DESCRIPTOR_SET_SCENE = {&ShaderForwardPLightCulling::DESCRIPTOR_SET_SCENE};
-decltype(ShaderRayTracing::DESCRIPTOR_SET_LIGHTS) ShaderRayTracing::DESCRIPTOR_SET_LIGHTS = {
-	{
-		prosper::DescriptorSetInfo::Binding { // Light Buffers
-			prosper::DescriptorType::StorageBuffer,
-			prosper::ShaderStageFlags::ComputeBit
-		}
-	}
-};
-decltype(ShaderRayTracing::DESCRIPTOR_SET_IBL) ShaderRayTracing::DESCRIPTOR_SET_IBL = {
-	{
-		prosper::DescriptorSetInfo::Binding { // Irradiance Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::ComputeBit
-		},
-		prosper::DescriptorSetInfo::Binding { // Prefilter Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::ComputeBit
-		},
-		prosper::DescriptorSetInfo::Binding { // BRDF Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::ComputeBit
-		}
-	}
-};
-ShaderRayTracing::ShaderRayTracing(prosper::IPrContext &context,const std::string &identifier)
-	: prosper::ShaderCompute(context,identifier,"world/raytracing/raytracing.gls")
-{}
+decltype(ShaderRayTracing::DESCRIPTOR_SET_LIGHTS) ShaderRayTracing::DESCRIPTOR_SET_LIGHTS = {{prosper::DescriptorSetInfo::Binding {// Light Buffers
+  prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit}}};
+decltype(ShaderRayTracing::DESCRIPTOR_SET_IBL) ShaderRayTracing::DESCRIPTOR_SET_IBL = {{prosper::DescriptorSetInfo::Binding {// Irradiance Map
+                                                                                          prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::ComputeBit},
+  prosper::DescriptorSetInfo::Binding {// Prefilter Map
+    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::ComputeBit},
+  prosper::DescriptorSetInfo::Binding {// BRDF Map
+    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::ComputeBit}}};
+ShaderRayTracing::ShaderRayTracing(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderCompute(context, identifier, "world/raytracing/raytracing.gls") {}
 
-void ShaderRayTracing::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderRayTracing::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo,pipelineIdx);
+	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo, pipelineIdx);
 
 	// Currently not supported on some GPUs?
 	// AddSpecializationConstant(pipelineInfo,0u /* constant id */,sizeof(TILE_SIZE),&TILE_SIZE);
 
-	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::ComputeBit);
+	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::ComputeBit);
 
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_IMAGE_OUTPUT);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_GAME_SCENE);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SCENE);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_LIGHTS);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_IBL);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_IMAGE_OUTPUT);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_GAME_SCENE);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_LIGHTS);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_IBL);
 }
 
-bool ShaderRayTracing::RecordCompute(
-	prosper::ShaderBindState &bindState,
-	const PushConstants &pushConstants,
-	prosper::IDescriptorSet &descSetOutputImage,prosper::IDescriptorSet &descSetGameScene,
-	prosper::IDescriptorSet &descSetCamera,prosper::IDescriptorSet &descSetLightSources,
-	prosper::IDescriptorSet *descSetIBL,
-	uint32_t workGroupsX,uint32_t workGroupsY
-) const
+bool ShaderRayTracing::RecordCompute(prosper::ShaderBindState &bindState, const PushConstants &pushConstants, prosper::IDescriptorSet &descSetOutputImage, prosper::IDescriptorSet &descSetGameScene, prosper::IDescriptorSet &descSetCamera, prosper::IDescriptorSet &descSetLightSources,
+  prosper::IDescriptorSet *descSetIBL, uint32_t workGroupsX, uint32_t workGroupsY) const
 {
-	return RecordBindDescriptorSets(bindState,{
-		&descSetOutputImage,
-		&descSetGameScene,
-		&descSetCamera,
-		&descSetLightSources
-	}) && (descSetIBL == nullptr || RecordBindDescriptorSet(bindState,*descSetIBL,DESCRIPTOR_SET_IBL.setIndex)) && RecordPushConstants(bindState,pushConstants) && RecordDispatch(bindState,workGroupsX,workGroupsY);
+	return RecordBindDescriptorSets(bindState, {&descSetOutputImage, &descSetGameScene, &descSetCamera, &descSetLightSources}) && (descSetIBL == nullptr || RecordBindDescriptorSet(bindState, *descSetIBL, DESCRIPTOR_SET_IBL.setIndex)) && RecordPushConstants(bindState, pushConstants)
+	  && RecordDispatch(bindState, workGroupsX, workGroupsY);
 }

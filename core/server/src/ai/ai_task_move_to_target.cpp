@@ -13,68 +13,63 @@
 
 using namespace pragma;
 
-void ai::TaskMoveToTarget::Print(const Schedule *sched,std::ostream &o) const
+void ai::TaskMoveToTarget::Print(const Schedule *sched, std::ostream &o) const
 {
-	o<<"MoveToTarget[";
-	auto *target = GetParameter(sched,umath::to_integral(TaskTarget::Parameter::Target));
+	o << "MoveToTarget[";
+	auto *target = GetParameter(sched, umath::to_integral(TaskTarget::Parameter::Target));
 	auto type = (target != nullptr) ? target->GetType() : ai::Schedule::Parameter::Type::None;
-	switch(type)
-	{
-		case ai::Schedule::Parameter::Type::Entity:
+	switch(type) {
+	case ai::Schedule::Parameter::Type::Entity:
 		{
 			auto *ent = target->GetEntity();
-			if(ent != nullptr)
-			{
+			if(ent != nullptr) {
 				std::string name {};
 				auto pNameComponent = ent->GetComponent<pragma::SNameComponent>();
 				if(pNameComponent.valid())
 					name = pNameComponent->GetName();
 				if(name.empty())
 					name = ent->GetClass();
-				o<<name;
+				o << name;
 			}
 			else
-				o<<"NULL";
+				o << "NULL";
 			break;
 		}
-		case ai::Schedule::Parameter::Type::Vector:
+	case ai::Schedule::Parameter::Type::Vector:
 		{
 			auto &pos = *target->GetVector();
-			o<<pos.x<<","<<pos.y<<","<<pos.z;
+			o << pos.x << "," << pos.y << "," << pos.z;
 			break;
 		}
-		case ai::Schedule::Parameter::Type::Bool:
+	case ai::Schedule::Parameter::Type::Bool:
 		{
 			auto b = target->GetBool();
-			if(b)
-			{
-				o<<"Enemy";
+			if(b) {
+				o << "Enemy";
 				break;
 			}
 		}
-		default:
-			o<<"Nothing";
-			break;
+	default:
+		o << "Nothing";
+		break;
 	}
-	o<<"]";
+	o << "]";
 }
-ai::BehaviorNode::Result ai::TaskMoveToTarget::Think(const Schedule *sched,pragma::SAIComponent &ent)
+ai::BehaviorNode::Result ai::TaskMoveToTarget::Think(const Schedule *sched, pragma::SAIComponent &ent)
 {
-	auto r = TaskTarget::Think(sched,ent);
+	auto r = TaskTarget::Think(sched, ent);
 	if(r != Result::Succeeded)
 		return r;
 	Vector3 pos;
 	auto moveDistance = MAX_NODE_DISTANCE;
-	if(GetTargetPosition(sched,ent,pos) == false)
+	if(GetTargetPosition(sched, ent, pos) == false)
 		return r;
-	auto *param = GetParameter(sched,umath::to_integral(Parameter::Target));
-	if(param != nullptr)
-	{
+	auto *param = GetParameter(sched, umath::to_integral(Parameter::Target));
+	if(param != nullptr) {
 		if(param->GetType() == ai::Schedule::Parameter::Type::Float)
 			moveDistance = param->GetFloat();
-		else
-		{
-			param = GetParameter(sched,umath::to_integral(Parameter::Distance));
+		else {
+			param = GetParameter(sched, umath::to_integral(Parameter::Distance));
 			if(param->GetType() == ai::Schedule::Parameter::Type::Float)
 				moveDistance = param->GetFloat();
 		}
@@ -109,23 +104,16 @@ ai::BehaviorNode::Result ai::TaskMoveToTarget::Think(const Schedule *sched,pragm
 	}*/
 
 	auto moveAct = Activity::Run;
-	auto *paramAct = GetParameter(sched,umath::to_integral(Parameter::MoveActivity));
+	auto *paramAct = GetParameter(sched, umath::to_integral(Parameter::MoveActivity));
 	if(paramAct != nullptr && paramAct->GetType() == ai::Schedule::Parameter::Type::Int)
 		moveAct = static_cast<Activity>(paramAct->GetInt());
-	ent.MoveTo(pos,moveAct);
-	if(ent.GetDistanceToMoveTarget() <= moveDistance)
-	{
+	ent.MoveTo(pos, moveAct);
+	if(ent.GetDistanceToMoveTarget() <= moveDistance) {
 		ent.OnPathDestinationReached();
 		return r;
 	}
 	return Result::Pending;
 }
 
-void ai::TaskMoveToTarget::SetMoveDistance(float dist)
-{
-	SetParameter(umath::to_integral(Parameter::Distance),dist);
-}
-void ai::TaskMoveToTarget::SetMoveActivity(Activity act)
-{
-	SetParameter(umath::to_integral(Parameter::MoveActivity),umath::to_integral(act));
-}
+void ai::TaskMoveToTarget::SetMoveDistance(float dist) { SetParameter(umath::to_integral(Parameter::Distance), dist); }
+void ai::TaskMoveToTarget::SetMoveActivity(Activity act) { SetParameter(umath::to_integral(Parameter::MoveActivity), umath::to_integral(act)); }

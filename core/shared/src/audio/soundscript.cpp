@@ -18,24 +18,17 @@
 
 #undef CreateEvent
 
-SoundScript::SoundScript(SoundScriptManager *manager,const std::string &identifier)
-	: SoundScriptEventContainer(manager),m_identifier(identifier)
-{}
+SoundScript::SoundScript(SoundScriptManager *manager, const std::string &identifier) : SoundScriptEventContainer(manager), m_identifier(identifier) {}
 
-SoundScript::~SoundScript()
-{}
+SoundScript::~SoundScript() {}
 
-const std::string &SoundScript::GetIdentifier() const {return m_identifier;}
+const std::string &SoundScript::GetIdentifier() const { return m_identifier; }
 
 //////////////////////////////
 
-SoundScriptManager::SoundScriptManager()
-{}
+SoundScriptManager::SoundScriptManager() {}
 
-SoundScriptManager::~SoundScriptManager()
-{
-	Clear();
-}
+SoundScriptManager::~SoundScriptManager() { Clear(); }
 
 const std::string &SoundScriptManager::GetSoundScriptPath()
 {
@@ -43,18 +36,12 @@ const std::string &SoundScriptManager::GetSoundScriptPath()
 	return r;
 }
 
-const std::unordered_map<std::string,std::shared_ptr<SoundScript>> &SoundScriptManager::GetScripts() const {return m_soundScripts;}
-const std::vector<std::string> &SoundScriptManager::GetSoundScriptFiles() const {return m_soundScriptFiles;}
+const std::unordered_map<std::string, std::shared_ptr<SoundScript>> &SoundScriptManager::GetScripts() const { return m_soundScripts; }
+const std::vector<std::string> &SoundScriptManager::GetSoundScriptFiles() const { return m_soundScriptFiles; }
 
-void SoundScriptManager::Clear()
-{
-	m_soundScripts.clear();
-}
+void SoundScriptManager::Clear() { m_soundScripts.clear(); }
 
-bool SoundScriptManager::Load(const char *fname,std::vector<std::shared_ptr<SoundScript>> *scripts)
-{
-	return Load<SoundScript>(fname,scripts);
-}
+bool SoundScriptManager::Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts) { return Load<SoundScript>(fname, scripts); }
 
 SoundScript *SoundScriptManager::FindScript(const char *name)
 {
@@ -66,16 +53,15 @@ SoundScript *SoundScriptManager::FindScript(const char *name)
 	return NULL;
 }
 
-bool SoundScriptManager::Load(const char *fname,const std::function<std::shared_ptr<SoundScript>(const std::string&)> fCreateSoundScript,std::vector<std::shared_ptr<SoundScript>> *scripts)
+bool SoundScriptManager::Load(const char *fname, const std::function<std::shared_ptr<SoundScript>(const std::string &)> fCreateSoundScript, std::vector<std::shared_ptr<SoundScript>> *scripts)
 {
 	std::string err;
-	auto udmData = util::load_udm_asset(fname,&err);
+	auto udmData = util::load_udm_asset(fname, &err);
 	if(udmData == nullptr)
 		return false;
 	auto &data = *udmData;
 	auto udm = data.GetAssetData().GetData();
-	for(auto pair : udm.ElIt())
-	{
+	for(auto pair : udm.ElIt()) {
 		std::string name {pair.key};
 		StringToLower(name);
 		// Note: std::shared_ptr<TSoundScript>(new TSoundScript{this,it->first}); causes weird compiler errors for CSoundScript (clientside), but this works
@@ -84,14 +70,12 @@ bool SoundScriptManager::Load(const char *fname,const std::function<std::shared_
 
 		script->InitializeEvents(pair.property);
 		auto it = m_soundScripts.find(name);
-		if(it == m_soundScripts.end())
-		{
-			m_soundScripts.insert(std::make_pair(name,script));
+		if(it == m_soundScripts.end()) {
+			m_soundScripts.insert(std::make_pair(name, script));
 			if(scripts != NULL)
 				scripts->push_back(script);
 		}
-		else
-		{
+		else {
 			script = nullptr;
 			if(scripts != NULL)
 				scripts->push_back(it->second);
@@ -108,4 +92,4 @@ SoundScriptEvent *SoundScriptManager::CreateEvent(std::string name)
 		return new SSELua(this);
 	return new SoundScriptEvent(this);
 }
-SoundScriptEvent *SoundScriptManager::CreateEvent() {return CreateEvent("");}
+SoundScriptEvent *SoundScriptManager::CreateEvent() { return CreateEvent(""); }

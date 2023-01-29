@@ -9,8 +9,7 @@
 
 #include <cinttypes>
 
-namespace pragma
-{
+namespace pragma {
 	using ComponentId = uint32_t;
 	using ComponentEventId = uint32_t;
 	const auto INVALID_COMPONENT_ID = std::numeric_limits<ComponentId>::max();

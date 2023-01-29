@@ -13,10 +13,8 @@
 
 class WITreeList;
 class WIText;
-class DLLCLIENT WITreeListElement
-	: public WITableRow
-{
-public:
+class DLLCLIENT WITreeListElement : public WITableRow {
+  public:
 	WITreeListElement();
 	virtual void Initialize() override;
 	virtual void OnRemove() override;
@@ -26,17 +24,17 @@ public:
 	void SetList(WITreeList *pList);
 	uint32_t GetDepth() const;
 	bool IsCollapsed() const;
-	void Toggle(bool bAll=false);
-	void Collapse(bool bAll=false);
-	void Expand(bool bAll=false);
+	void Toggle(bool bAll = false);
+	void Collapse(bool bAll = false);
+	void Expand(bool bAll = false);
 	void Clear();
 	WIText *GetTextElement() const;
 	const std::vector<WIHandle> &GetItems() const;
-	WITreeListElement *AddItem(const std::string &text,const std::function<void(WITreeListElement&)> &fPopulate=nullptr);
-protected:
+	WITreeListElement *AddItem(const std::string &text, const std::function<void(WITreeListElement &)> &fPopulate = nullptr);
+  protected:
 	std::vector<WIHandle> m_items;
 	bool m_bCollapsed;
-	std::function<void(WITreeListElement&)> m_fPopulate = nullptr;
+	std::function<void(WITreeListElement &)> m_fPopulate = nullptr;
 	uint32_t m_xOffset;
 	uint32_t m_depth;
 	WIHandle m_pTreeParent;
@@ -47,19 +45,17 @@ protected:
 	void SetTextElement(WIText *pText);
 };
 
-class DLLCLIENT WITreeList
-	: public WITable
-{
-protected:
+class DLLCLIENT WITreeList : public WITable {
+  protected:
 	virtual void DoUpdate() override;
 	WIHandle m_pRoot;
-public:
+  public:
 	WITreeList();
 	virtual void Initialize() override;
-	virtual void SetSize(int x,int y) override;
-	virtual util::EventReply MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
+	virtual void SetSize(int x, int y) override;
+	virtual util::EventReply MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) override;
 	virtual WITableRow *AddRow() override;
-	WITreeListElement *AddItem(const std::string &text,const std::function<void(WITreeListElement&)> &fPopulate=nullptr);
+	WITreeListElement *AddItem(const std::string &text, const std::function<void(WITreeListElement &)> &fPopulate = nullptr);
 	WITreeListElement *GetRootItem() const;
 	void ExpandAll();
 	void CollapseAll();

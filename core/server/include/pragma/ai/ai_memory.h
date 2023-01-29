@@ -16,22 +16,18 @@
 #define AI_MEMORY_NEXT_CHECK_IF_VISIBLE 0.1f
 
 class BaseEntity;
-namespace pragma
-{
-	namespace ai
-	{
-		class DLLSERVER Memory
-		{
-		public:
-			class DLLSERVER Fragment
-			{
-			protected:
+namespace pragma {
+	namespace ai {
+		class DLLSERVER Memory {
+		  public:
+			class DLLSERVER Fragment {
+			  protected:
 				void Clear();
 				friend Memory;
-			public:
+			  public:
 				Fragment();
-				Fragment(const Fragment&)=delete;
-				Fragment &operator=(const Fragment&)=delete;
+				Fragment(const Fragment &) = delete;
+				Fragment &operator=(const Fragment &) = delete;
 				Fragment Copy() const;
 				bool occupied;
 				EntityHandle hEntity;
@@ -46,22 +42,21 @@ namespace pragma
 
 				void UpdateVisibility(float dist);
 			};
-			enum class DLLSERVER MemoryType : uint32_t
-			{
+			enum class DLLSERVER MemoryType : uint32_t {
 				Visual = 0,
 				Sound,
 				Smell // Unused
 			};
-		protected:
-			void Memorize(const BaseEntity &ent,MemoryType memType,const Vector3 &pos,float dist,const Vector3 &vel,int idx,Fragment **out=nullptr);
-		public:
+		  protected:
+			void Memorize(const BaseEntity &ent, MemoryType memType, const Vector3 &pos, float dist, const Vector3 &vel, int idx, Fragment **out = nullptr);
+		  public:
 			Memory();
-			Memory(const Memory&)=delete;
+			Memory(const Memory &) = delete;
 			Memory Copy() const;
-			Memory &operator=(const Memory&)=delete;
+			Memory &operator=(const Memory &) = delete;
 			uint32_t occupiedFragmentCount;
-			std::array<Fragment,MAX_AIMEMORY_FRAGMENTS> fragments;
-			bool Memorize(const BaseEntity &ent,MemoryType memType,const Vector3 &pos,float dist,const Vector3 &vel={},Fragment **out=nullptr);
+			std::array<Fragment, MAX_AIMEMORY_FRAGMENTS> fragments;
+			bool Memorize(const BaseEntity &ent, MemoryType memType, const Vector3 &pos, float dist, const Vector3 &vel = {}, Fragment **out = nullptr);
 			Fragment *FindFragment(const BaseEntity &ent);
 			void Forget(const BaseEntity &ent);
 			void Clear();

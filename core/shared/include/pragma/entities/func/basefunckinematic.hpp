@@ -10,17 +10,14 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 
 class BaseEntity;
-namespace pragma
-{
-	class DLLNETWORK BaseFuncKinematicComponent
-		: public BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLNETWORK BaseFuncKinematicComponent : public BaseEntityComponent {
+	  public:
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 		virtual void OnTick(double tDelta) override;
-	protected:
+	  protected:
 		bool m_bMoving = false;
 		float m_kvMoveSpeed = 0.f;
 		float m_speed = 0.f;
@@ -31,12 +28,12 @@ namespace pragma
 
 		pragma::NetEventId m_netEvStartForward = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvStartBackward = pragma::INVALID_NET_EVENT;
-	protected:
+	  protected:
 		void UpdateTickPolicy();
 		virtual void StartForward();
 		virtual void StartBackward();
-	private:
-		void MoveToTarget(BaseEntity *node,float speed);
+	  private:
+		void MoveToTarget(BaseEntity *node, float speed);
 	};
 };
 

@@ -10,33 +10,26 @@
 
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 
-namespace pragma
-{
+namespace pragma {
 	class CRasterizationRendererComponent;
-	class DLLCLIENT ShaderLightCone
-		: public ShaderGameWorldLightingPass
-	{
-	public:
+	class DLLCLIENT ShaderLightCone : public ShaderGameWorldLightingPass {
+	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_DEPTH_MAP;
 
-#pragma pack(push,1)
-		struct PushConstants
-		{
+#pragma pack(push, 1)
+		struct PushConstants {
 			float coneLength;
 			uint32_t boundLightIndex;
 			uint32_t resolution;
 		};
 #pragma pack(pop)
 
-		ShaderLightCone(prosper::IPrContext &context,const std::string &identifier);
+		ShaderLightCone(prosper::IPrContext &context, const std::string &identifier);
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
-		virtual bool RecordBindEntity(
-			rendering::ShaderProcessor &shaderProcessor,CRenderComponent &renderC,
-			prosper::IShaderPipelineLayout &layout,uint32_t entityInstanceDescriptorSetIndex
-		) const override;
-	protected:
-		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual bool RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const override;
+	  protected:
+		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		int32_t m_boundLightIndex = -1;
 	};
 };

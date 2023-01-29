@@ -17,12 +17,12 @@ void BasePropPhysicsComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &ent = GetEntity();
 		auto mdlComponent = ent.GetModelComponent();
 		if(!mdlComponent || mdlComponent->HasModel() == false || !ent.IsSpawned())
 			return util::EventReply::Unhandled;
-		auto *pPropComponent = static_cast<pragma::BasePropComponent*>(ent.FindComponent("prop").get());
+		auto *pPropComponent = static_cast<pragma::BasePropComponent *>(ent.FindComponent("prop").get());
 		if(pPropComponent != nullptr)
 			pPropComponent->UpdatePhysicsType(&ent);
 		return util::EventReply::Unhandled;
@@ -35,11 +35,10 @@ void BasePropPhysicsComponent::Initialize()
 void BasePropPhysicsComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
-	auto *pPropComponent = static_cast<pragma::BasePropComponent*>(GetEntity().FindComponent("prop").get());
+	auto *pPropComponent = static_cast<pragma::BasePropComponent *>(GetEntity().FindComponent("prop").get());
 	auto physType = PHYSICSTYPE::NONE;
 	if(pPropComponent == nullptr)
 		return;
 	physType = pPropComponent->UpdatePhysicsType(&GetEntity());
-	pPropComponent->Setup(physType,MOVETYPE::PHYSICS);
+	pPropComponent->Setup(physType, MOVETYPE::PHYSICS);
 }
-

@@ -13,16 +13,14 @@
 #include <memory>
 
 class BaseEntity;
-class DLLSERVER AISquad
-	: public std::enable_shared_from_this<AISquad>
-{
-private:
+class DLLSERVER AISquad : public std::enable_shared_from_this<AISquad> {
+  private:
 	static std::vector<std::shared_ptr<AISquad>> s_squads;
-protected:
+  protected:
 	AISquad(const std::string &name);
-public:
+  public:
 	static const std::vector<std::shared_ptr<AISquad>> &GetAll();
-public:
+  public:
 	static std::shared_ptr<AISquad> Create(const std::string &name);
 	~AISquad();
 	std::string name;

@@ -10,16 +10,9 @@
 
 #include "wms_shareddefinitions.h"
 
-enum class DLLWMSSHARED WMSMessage : unsigned int
-{
-	FIRST=1500,
-	HEARTBEAT,
-	REQUEST_SERVERS,
-	LAST
-};
+enum class DLLWMSSHARED WMSMessage : unsigned int { FIRST = 1500, HEARTBEAT, REQUEST_SERVERS, LAST };
 
-struct DLLWMSSHARED WMSMessageHeader
-{
+struct DLLWMSSHARED WMSMessageHeader {
 	WMSMessageHeader(unsigned int id);
 	WMSMessageHeader();
 	unsigned int version;

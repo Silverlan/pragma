@@ -10,6 +10,6 @@
 #include "pragma/lua/ldefinitions.h"
 #include <panima/skeleton.hpp>
 
-lua_registercheck(Skeleton,panima::Skeleton);
+lua_registercheck(Skeleton, panima::Skeleton);
 
 #endif

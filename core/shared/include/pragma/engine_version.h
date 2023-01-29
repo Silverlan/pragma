@@ -16,8 +16,7 @@
 #define ENGINE_VERSION_MINOR 0
 #define ENGINE_VERSION_REVISION 5
 
-namespace util
-{
+namespace util {
 	struct DLLSHUTIL Version;
 }
 

@@ -12,29 +12,27 @@
 #include <mathutil/color.h>
 #include <optional>
 
-namespace util
-{
-	enum class ConsoleColorFlags : uint32_t
-	{
+namespace util {
+	enum class ConsoleColorFlags : uint32_t {
 		None = 0u,
 		Red = 1u,
-		Green = Red<<1u,
-		Blue = Green<<1u,
-		Intensity = Blue<<1u,
-		
-		BackgroundRed = Intensity<<1u,
-		BackgroundGreen = BackgroundRed<<1u,
-		BackgroundBlue = BackgroundGreen<<1u,
-		BackgroundIntensity = BackgroundBlue<<1u,
+		Green = Red << 1u,
+		Blue = Green << 1u,
+		Intensity = Blue << 1u,
 
-		Reset = BackgroundIntensity<<1u,
+		BackgroundRed = Intensity << 1u,
+		BackgroundGreen = BackgroundRed << 1u,
+		BackgroundBlue = BackgroundGreen << 1u,
+		BackgroundIntensity = BackgroundBlue << 1u,
+
+		Reset = BackgroundIntensity << 1u,
 
 		Yellow = Red | Green,
 		Magenta = Red | Blue,
 		Cyan = Blue | Green,
 		White = Red | Green | Blue,
 		Black = None,
-		
+
 		BackgroundYellow = BackgroundRed | BackgroundGreen,
 		BackgroundMagenta = BackgroundRed | BackgroundBlue,
 		BackgroundCyan = BackgroundBlue | BackgroundGreen,

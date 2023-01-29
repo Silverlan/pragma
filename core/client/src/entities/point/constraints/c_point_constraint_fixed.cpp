@@ -15,7 +15,7 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(point_constraint_fixed,CPointConstraintFixed);
+LINK_ENTITY_TO_CLASS(point_constraint_fixed, CPointConstraintFixed);
 
 void CPointConstraintFixedComponent::ReceiveData(NetPacket &packet)
 {
@@ -23,7 +23,7 @@ void CPointConstraintFixedComponent::ReceiveData(NetPacket &packet)
 	m_kvTarget = packet->ReadString();
 	m_posTarget = nwm::read_vector(packet);
 }
-void CPointConstraintFixedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CPointConstraintFixedComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CPointConstraintFixed::Initialize()
 {

@@ -20,8 +20,7 @@ using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
 
-ShaderResizeImage::ShaderResizeImage(prosper::IPrContext &context,const std::string &identifier)
-	: prosper::ShaderBaseImageProcessing(context,identifier,"screen/fs_resize_image")
+ShaderResizeImage::ShaderResizeImage(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderBaseImageProcessing(context, identifier, "screen/fs_resize_image")
 {
 	SetBaseShader<prosper::ShaderCopyImage>();
 	SetPipelineCount(umath::to_integral(Filter::Count));
@@ -29,49 +28,41 @@ ShaderResizeImage::ShaderResizeImage(prosper::IPrContext &context,const std::str
 
 ShaderResizeImage::~ShaderResizeImage() {}
 
-void ShaderResizeImage::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderResizeImage::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	ShaderBaseImageProcessing::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	ShaderBaseImageProcessing::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 
-	AddSpecializationConstant(
-		pipelineInfo,prosper::ShaderStageFlags::FragmentBit,
-		0u /* constantId */,
-		static_cast<uint32_t>(pipelineIdx)
-	);
+	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, 0u /* constantId */, static_cast<uint32_t>(pipelineIdx));
 
-	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
+	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 }
 
-bool ShaderResizeImage::RecordDraw(prosper::ICommandBuffer &cmd,prosper::IDescriptorSet &descSetTexture,const BicubicFilter &bicubicFilter) const
+bool ShaderResizeImage::RecordDraw(prosper::ICommandBuffer &cmd, prosper::IDescriptorSet &descSetTexture, const BicubicFilter &bicubicFilter) const
 {
 	prosper::ShaderBindState bindState {cmd};
-	if(RecordBeginDraw(bindState,umath::to_integral(Filter::Bicubic)) == false)
+	if(RecordBeginDraw(bindState, umath::to_integral(Filter::Bicubic)) == false)
 		return false;
 	PushConstants pushConstants {};
-	auto res = RecordDraw(bindState,descSetTexture,pushConstants);
+	auto res = RecordDraw(bindState, descSetTexture, pushConstants);
 	RecordEndDraw(bindState);
 	return res;
 }
-bool ShaderResizeImage::RecordDraw(prosper::ICommandBuffer &cmd,prosper::IDescriptorSet &descSetTexture,const LanczosFilter &lanczosFilter) const
+bool ShaderResizeImage::RecordDraw(prosper::ICommandBuffer &cmd, prosper::IDescriptorSet &descSetTexture, const LanczosFilter &lanczosFilter) const
 {
 	prosper::ShaderBindState bindState {cmd};
-	if(RecordBeginDraw(bindState,umath::to_integral(Filter::Lanczos)) == false)
+	if(RecordBeginDraw(bindState, umath::to_integral(Filter::Lanczos)) == false)
 		return false;
 
-	constexpr std::array<Vector4,2> aaKernel {
-		Vector4{0.44031130485056913, 0.29880437751590694, 0.04535643028360444, -0.06431646022479595}, // x2
-		Vector4{0.2797564513818748, 0.2310717037833796, 0.11797652759318597, 0.01107354293249700} // x4
+	constexpr std::array<Vector4, 2> aaKernel {
+	  Vector4 {0.44031130485056913, 0.29880437751590694, 0.04535643028360444, -0.06431646022479595}, // x2
+	  Vector4 {0.2797564513818748, 0.2310717037833796, 0.11797652759318597, 0.01107354293249700}     // x4
 	};
-	auto idx = umath::get_least_significant_set_bit_index(umath::to_integral(lanczosFilter.scale)) -1;
+	auto idx = umath::get_least_significant_set_bit_index(umath::to_integral(lanczosFilter.scale)) - 1;
 	PushConstants pushConstants {};
 	pushConstants.fparam = aaKernel[idx];
-	auto res = RecordDraw(bindState,descSetTexture,pushConstants);
+	auto res = RecordDraw(bindState, descSetTexture, pushConstants);
 	RecordEndDraw(bindState);
 	return res;
 }
 
-bool ShaderResizeImage::RecordDraw(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetTexture,const PushConstants &pushConstants) const
-{
-	return RecordPushConstants(bindState,pushConstants) &&
-		prosper::ShaderBaseImageProcessing::RecordDraw(bindState,descSetTexture);
-}
+bool ShaderResizeImage::RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetTexture, const PushConstants &pushConstants) const { return RecordPushConstants(bindState, pushConstants) && prosper::ShaderBaseImageProcessing::RecordDraw(bindState, descSetTexture); }

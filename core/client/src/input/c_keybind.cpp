@@ -15,11 +15,7 @@
 
 extern CEngine *c_engine;
 
-KeyBind::KeyBind()
-	: m_type(Type::Invalid)
-{
-	Initialize();
-}
+KeyBind::KeyBind() : m_type(Type::Invalid) { Initialize(); }
 
 KeyBind::KeyBind(std::string bind)
 {
@@ -33,16 +29,17 @@ KeyBind::KeyBind(luabind::function<> function)
 	m_function = function;
 	Initialize();
 }
-KeyBind::KeyBind(const KeyBind &other) {operator=(other);}
+KeyBind::KeyBind(const KeyBind &other) { operator=(other); }
 KeyBind &KeyBind::operator=(const KeyBind &other)
 {
-	m_bind = other.m_bind ? std::make_unique<std::string>(*other.m_bind) : nullptr;;
+	m_bind = other.m_bind ? std::make_unique<std::string>(*other.m_bind) : nullptr;
+	;
 	m_type = other.m_type;
 	m_function = other.m_function;
 	m_cmds = other.m_cmds;
 	return *this;
 }
-KeyBind::Type KeyBind::GetType() const {return m_type;}
+KeyBind::Type KeyBind::GetType() const { return m_type; }
 const std::string &KeyBind::GetBind() const
 {
 	static std::string r;
@@ -51,7 +48,7 @@ const std::string &KeyBind::GetBind() const
 		return r;
 	return *m_bind;
 }
-std::optional<luabind::function<>> KeyBind::GetFunction() const {return m_function;}
+std::optional<luabind::function<>> KeyBind::GetFunction() const { return m_function; }
 // Deprecated (Replaced by "toggle" console command)
 /*DLLCLIENT void KeyBind_CmdToggle(std::string cmd,std::vector<std::string>&)
 {
@@ -79,7 +76,7 @@ void KeyBind::Initialize()
 	if(type != Type::Regular)
 		return;
 	auto &bind = GetBind();
-	ustring::get_sequence_commands(bind,[this](std::string cmd,std::vector<std::string> &argv) {
+	ustring::get_sequence_commands(bind, [this](std::string cmd, std::vector<std::string> &argv) {
 		m_cmds.push_back({});
 		auto &info = m_cmds.back();
 		info.cmd = cmd;
@@ -87,26 +84,23 @@ void KeyBind::Initialize()
 	});
 }
 
-bool KeyBind::Execute(GLFW::KeyState inputState,GLFW::KeyState pressState,GLFW::Modifier mods,float magnitude)
+bool KeyBind::Execute(GLFW::KeyState inputState, GLFW::KeyState pressState, GLFW::Modifier mods, float magnitude)
 {
 	auto type = GetType();
-	switch(type)
-	{
-		case Type::Regular: // Regular bind
+	switch(type) {
+	case Type::Regular: // Regular bind
 		{
-			auto bAxisInput = (mods &GLFW::Modifier::AxisInput) != GLFW::Modifier::None;
-			auto bNegativeAxis = (bAxisInput == true && (mods &GLFW::Modifier::AxisNegative) != GLFW::Modifier::None) ? true : false;
+			auto bAxisInput = (mods & GLFW::Modifier::AxisInput) != GLFW::Modifier::None;
+			auto bNegativeAxis = (bAxisInput == true && (mods & GLFW::Modifier::AxisNegative) != GLFW::Modifier::None) ? true : false;
 			auto bReleased = (pressState == GLFW::KeyState::Release) ? true : false;
 			auto bExecutedCmd = false;
-			for(auto &info : m_cmds)
-			{
+			for(auto &info : m_cmds) {
 				auto bActionCmd = (info.cmd.empty() == false && info.cmd.front() == '+') ? true : false;
-				c_engine->RunConsoleCommand(info.cmd,info.argv,static_cast<KeyState>(pressState),magnitude,[&info,&bExecutedCmd,pressState,bReleased,bAxisInput,bNegativeAxis,bActionCmd](ConConf *cf,float &magnitude) -> bool {
+				c_engine->RunConsoleCommand(info.cmd, info.argv, static_cast<KeyState>(pressState), magnitude, [&info, &bExecutedCmd, pressState, bReleased, bAxisInput, bNegativeAxis, bActionCmd](ConConf *cf, float &magnitude) -> bool {
 					auto cmdReleased = bReleased;
 					auto flags = cf->GetFlags();
-					auto bSingleAxis = ((flags &ConVarFlags::JoystickAxisSingle) != ConVarFlags::None) ? true : false;
-					if(bNegativeAxis == true)
-					{
+					auto bSingleAxis = ((flags & ConVarFlags::JoystickAxisSingle) != ConVarFlags::None) ? true : false;
+					if(bNegativeAxis == true) {
 						if(bAxisInput == false || bSingleAxis == false)
 							return false;
 						magnitude = c_engine->GetRawJoystickAxisMagnitude();
@@ -114,29 +108,24 @@ bool KeyBind::Execute(GLFW::KeyState inputState,GLFW::KeyState pressState,GLFW::
 
 					if(bSingleAxis == true)
 						bExecutedCmd = true; // Single axis commands have priority over everything else
-					if(bAxisInput == true)
-					{
+					if(bAxisInput == true) {
 						// invalidKeyState is true if the input is neither pressed, nor released
 						auto invalidKeyState = (pressState == GLFW::KeyState::Invalid) ? true : false;
 
-						if((flags &ConVarFlags::JoystickAxisContinuous) != ConVarFlags::None && (cmdReleased == true || invalidKeyState == true))
+						if((flags & ConVarFlags::JoystickAxisContinuous) != ConVarFlags::None && (cmdReleased == true || invalidKeyState == true))
 							cmdReleased = (c_engine->IsValidAxisInput(magnitude) == false) ? true : false; // Input won't count as 'released' unless joystick axis is at home position (near 0)
-						else if(invalidKeyState == true)
-						{
+						else if(invalidKeyState == true) {
 							bExecutedCmd = true; // Special case; Don't execute other commands
-							return false; // Axis is held down, but command doesn't react to below-threshold inputs, and previous state wasn't pressed; Skip the command
+							return false;        // Axis is held down, but command doesn't react to below-threshold inputs, and previous state wasn't pressed; Skip the command
 						}
 					}
-					if(bActionCmd == true)
-					{
-						if(cmdReleased == true)
-						{
-							c_engine->RunConsoleCommand('-' +info.cmd.substr(1),info.argv,static_cast<KeyState>(pressState));
+					if(bActionCmd == true) {
+						if(cmdReleased == true) {
+							c_engine->RunConsoleCommand('-' + info.cmd.substr(1), info.argv, static_cast<KeyState>(pressState));
 							return false; // Block this command, since we're calling "-" instead
 						}
 					}
-					if(cmdReleased == false)
-					{
+					if(cmdReleased == false) {
 						bExecutedCmd = true;
 						return true;
 					}
@@ -145,11 +134,11 @@ bool KeyBind::Execute(GLFW::KeyState inputState,GLFW::KeyState pressState,GLFW::
 			}
 			return bExecutedCmd;
 		}
-		case Type::Function: // Lua-function bind
+	case Type::Function: // Lua-function bind
 		{
 			if(pressState != GLFW::KeyState::Press && pressState != GLFW::KeyState::Release)
 				return false;
-			auto *clState = static_cast<ClientState*>(c_engine->GetClientState());
+			auto *clState = static_cast<ClientState *>(c_engine->GetClientState());
 			if(clState == NULL)
 				return false;
 			auto *game = clState->GetGameState();

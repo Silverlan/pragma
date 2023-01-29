@@ -10,9 +10,8 @@
 #include "pragma/networkdefinitions.h"
 #include <string>
 #include <mathutil/glmutil.h>
-class DLLNETWORK BaseEnvSoundDspReverb
-{
-protected:
+class DLLNETWORK BaseEnvSoundDspReverb {
+  protected:
 	float m_kvDensity;
 	float m_kvDiffusion;
 	float m_kvGain;

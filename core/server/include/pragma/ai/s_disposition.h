@@ -9,13 +9,6 @@
 
 #include "pragma/serverdefinitions.h"
 
-enum class DLLSERVER DISPOSITION : uint32_t
-{
-	HATE,
-	FEAR,
-	NEUTRAL,
-	LIKE,
-	COUNT
-};
+enum class DLLSERVER DISPOSITION : uint32_t { HATE, FEAR, NEUTRAL, LIKE, COUNT };
 
 #endif

@@ -15,9 +15,9 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(point_target,CPointTarget);
+LINK_ENTITY_TO_CLASS(point_target, CPointTarget);
 
-void CPointTargetComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CPointTargetComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CPointTarget::Initialize()
 {
 	CBaseEntity::Initialize();

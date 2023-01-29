@@ -16,14 +16,11 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(func_brush,FuncBrush);
+LINK_ENTITY_TO_CLASS(func_brush, FuncBrush);
 
 extern DLLSERVER SGame *s_game;
 
-void SBrushComponent::Initialize()
-{
-	BaseFuncBrushComponent::Initialize();
-}
+void SBrushComponent::Initialize() { BaseFuncBrushComponent::Initialize(); }
 void SBrushComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
@@ -35,13 +32,13 @@ void SBrushComponent::OnEntitySpawn()
 		pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
 	UpdateSurfaceMaterial(s_game);
 }
-void SBrushComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SBrushComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->Write<bool>(m_kvSolid);
 	packet->WriteString(m_kvSurfaceMaterial);
 }
 
-void SBrushComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SBrushComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void FuncBrush::Initialize()
 {

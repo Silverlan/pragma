@@ -11,8 +11,7 @@
 
 std::string pragma::networking::drop_reason_to_string(DropReason reason)
 {
-	switch(reason)
-	{
+	switch(reason) {
 	case DropReason::Disconnected:
 		return "User disconnected from server!";
 	case DropReason::Timeout:
@@ -31,8 +30,7 @@ std::string pragma::networking::drop_reason_to_string(DropReason reason)
 }
 nwm::Protocol pragma::networking::get_nwm_protocol(Protocol protocol)
 {
-	switch(protocol)
-	{
+	switch(protocol) {
 	case Protocol::SlowReliable:
 		return nwm::Protocol::TCP;
 	case Protocol::FastUnreliable:
@@ -43,8 +41,7 @@ nwm::Protocol pragma::networking::get_nwm_protocol(Protocol protocol)
 }
 nwm::ClientDropped pragma::networking::get_nwm_drop_reason(DropReason reason)
 {
-	switch(reason)
-	{
+	switch(reason) {
 	case DropReason::Disconnected:
 		return nwm::ClientDropped::Disconnected;
 	case DropReason::Timeout:
@@ -63,8 +60,7 @@ nwm::ClientDropped pragma::networking::get_nwm_drop_reason(DropReason reason)
 }
 pragma::networking::DropReason pragma::networking::get_pragma_drop_reason(nwm::ClientDropped reason)
 {
-	switch(reason)
-	{
+	switch(reason) {
 	case nwm::ClientDropped::Disconnected:
 		return DropReason::Disconnected;
 	case nwm::ClientDropped::Timeout:

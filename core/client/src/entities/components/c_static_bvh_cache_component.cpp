@@ -18,45 +18,35 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-void CStaticBvhCacheComponent::InitializeLuaObject(lua_State *l) {return BaseBvhComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CStaticBvhCacheComponent::InitializeLuaObject(lua_State *l) { return BaseBvhComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void CStaticBvhCacheComponent::Initialize()
-{
-	BaseBvhComponent::Initialize();
+void CStaticBvhCacheComponent::Initialize() { BaseBvhComponent::Initialize(); }
 
-}
-
-void CStaticBvhCacheComponent::DoRebuildBvh()
-{
-
-}
+void CStaticBvhCacheComponent::DoRebuildBvh() {}
 
 void CStaticBvhCacheComponent::TestRebuildBvh()
 {
 	std::vector<std::shared_ptr<ModelSubMesh>> meshes;
-	std::vector<BaseEntity*> meshToEntity;
+	std::vector<BaseEntity *> meshToEntity;
 	std::vector<umath::ScaledTransform> meshPoses;
-	for(auto *c : m_entities)
-	{
+	for(auto *c : m_entities) {
 		auto &ent = c->GetEntity();
-		auto *mdlC = static_cast<CModelComponent*>(ent.GetModelComponent());
+		auto *mdlC = static_cast<CModelComponent *>(ent.GetModelComponent());
 		if(!mdlC)
 			continue;
 		auto &renderMeshes = mdlC->GetRenderMeshes();
-		if(meshes.size() == meshes.capacity())
-		{
-			meshes.reserve(meshes.size() *1.5 +renderMeshes.size() +100);
+		if(meshes.size() == meshes.capacity()) {
+			meshes.reserve(meshes.size() * 1.5 + renderMeshes.size() + 100);
 			meshToEntity.reserve(meshes.size());
 			meshPoses.reserve(meshes.size());
 		}
 		auto &pose = ent.GetPose();
-		for(auto &mesh : renderMeshes)
-		{
+		for(auto &mesh : renderMeshes) {
 			meshes.push_back(mesh);
 			meshToEntity.push_back(&ent);
 			meshPoses.push_back(pose);
 		}
 	}
 
-	Build(std::move(meshes),std::move(meshToEntity),std::move(meshPoses));
+	Build(std::move(meshes), std::move(meshToEntity), std::move(meshPoses));
 }

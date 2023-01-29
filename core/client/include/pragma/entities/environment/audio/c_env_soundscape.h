@@ -11,13 +11,9 @@
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/environment/audio/env_soundscape.h"
 
-namespace pragma
-{
-	class DLLCLIENT CSoundScapeComponent final
-		: public BaseEnvSoundScapeComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CSoundScapeComponent final : public BaseEnvSoundScapeComponent, public CBaseNetComponent {
+	  public:
 		CSoundScapeComponent(BaseEntity &ent) : BaseEnvSoundScapeComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnTick(double dt) override;
@@ -27,20 +23,18 @@ namespace pragma
 		void StopSoundScape();
 		bool IsPlayerInRange();
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void OnEntitySpawn() override;
-	protected:
+	  protected:
 		std::shared_ptr<ALSound> m_sound;
 		static CSoundScapeComponent *s_active;
-		std::unordered_map<unsigned int,EntityHandle> m_targets;
+		std::unordered_map<unsigned int, EntityHandle> m_targets;
 		void UpdateTargetPositions();
 	};
 };
 
-class DLLCLIENT CEnvSoundScape
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEnvSoundScape : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

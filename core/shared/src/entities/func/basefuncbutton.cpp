@@ -23,11 +23,11 @@ void BaseFuncButtonComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"use_sound",false))
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "use_sound", false))
 			m_kvUseSound = kvData.value;
-		else if(ustring::compare<std::string>(kvData.key,"wait",false))
+		else if(ustring::compare<std::string>(kvData.key, "wait", false))
 			m_kvWaitTime = util::to_float(kvData.value);
 		else
 			return util::EventReply::Unhandled;
@@ -38,27 +38,26 @@ void BaseFuncButtonComponent::Initialize()
 	ent.AddComponent("physics");
 	auto whRenderComponent = ent.AddComponent("render");
 	if(whRenderComponent.valid())
-		static_cast<BaseRenderComponent*>(whRenderComponent.get())->SetCastShadows(true);
+		static_cast<BaseRenderComponent *>(whRenderComponent.get())->SetCastShadows(true);
 	ent.AddComponent("io");
 	ent.AddComponent("model");
 	ent.AddComponent("sound_emitter");
 	ent.AddComponent<pragma::UsableComponent>();
 }
 
-util::EventReply BaseFuncButtonComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
+util::EventReply BaseFuncButtonComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId,evData) == util::EventReply::Handled)
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == UsableComponent::EVENT_ON_USE)
-	{
+	if(eventId == UsableComponent::EVENT_ON_USE) {
 		if(m_useSound != nullptr)
 			m_useSound->Play();
 		auto &ent = GetEntity();
 		if(m_kvWaitTime > 0.f)
-			m_tNextUse = CFloat(ent.GetNetworkState()->GetGameState()->CurTime()) +m_kvWaitTime;
-		auto *ioComponent = static_cast<pragma::BaseIOComponent*>(GetEntity().FindComponent("io").get());
+			m_tNextUse = CFloat(ent.GetNetworkState()->GetGameState()->CurTime()) + m_kvWaitTime;
+		auto *ioComponent = static_cast<pragma::BaseIOComponent *>(GetEntity().FindComponent("io").get());
 		if(ioComponent != nullptr)
-			ioComponent->TriggerOutput("OnPressed",static_cast<const CEOnUseData&>(evData).entity);
+			ioComponent->TriggerOutput("OnPressed", static_cast<const CEOnUseData &>(evData).entity);
 	}
 	return util::EventReply::Unhandled;
 }
@@ -70,12 +69,11 @@ void BaseFuncButtonComponent::OnEntitySpawn()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
 		pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
-	if(!m_kvUseSound.empty())
-	{
+	if(!m_kvUseSound.empty()) {
 		ent.GetNetworkState()->PrecacheSound(m_kvUseSound);
 		m_useSound = nullptr;
-		auto pSoundEmitterComponent = static_cast<pragma::BaseSoundEmitterComponent*>(ent.FindComponent("sound_emitter").get());
+		auto pSoundEmitterComponent = static_cast<pragma::BaseSoundEmitterComponent *>(ent.FindComponent("sound_emitter").get());
 		if(pSoundEmitterComponent != nullptr)
-			m_useSound = pSoundEmitterComponent->CreateSound(m_kvUseSound,ALSoundType::Effect);
+			m_useSound = pSoundEmitterComponent->CreateSound(m_kvUseSound, ALSoundType::Effect);
 	}
 }

@@ -14,9 +14,9 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(game,CGameEntity);
+LINK_ENTITY_TO_CLASS(game, CGameEntity);
 
-void CGameComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CGameComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////////
 

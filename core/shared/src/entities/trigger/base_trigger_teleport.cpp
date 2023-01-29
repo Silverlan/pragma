@@ -19,9 +19,9 @@ void BaseTriggerTeleportComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"target",false))
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "target", false))
 			m_target = kvData.value;
 		else
 			return util::EventReply::Unhandled;
@@ -33,17 +33,16 @@ void BaseTriggerTeleportComponent::Initialize()
 	ent.AddComponent("touch");
 }
 
-util::EventReply BaseTriggerTeleportComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
+util::EventReply BaseTriggerTeleportComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId,evData) == util::EventReply::Handled)
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == BaseTouchComponent::EVENT_ON_START_TOUCH)
-	{
+	if(eventId == BaseTouchComponent::EVENT_ON_START_TOUCH) {
 		if(m_target.empty())
 			return util::EventReply::Unhandled;
 		auto &ent = GetEntity();
 		auto *game = ent.GetNetworkState()->GetGameState();
-		std::vector<BaseEntity*> targetCandidates;
+		std::vector<BaseEntity *> targetCandidates;
 
 		EntityIterator it {*game};
 		it.AttachFilter<EntityIteratorFilterEntity>(m_target);
@@ -52,13 +51,12 @@ util::EventReply BaseTriggerTeleportComponent::HandleEvent(ComponentEventId even
 
 		if(targetCandidates.empty())
 			return util::EventReply::Unhandled;
-		auto *entTarget = targetCandidates[umath::random(0,targetCandidates.size() -1)];
+		auto *entTarget = targetCandidates[umath::random(0, targetCandidates.size() - 1)];
 		auto ptrTrComponent = ent.GetTransformComponent();
 		auto ptrTrComponentTgt = entTarget->GetTransformComponent();
-		if(ptrTrComponent && ptrTrComponentTgt)
-		{
+		if(ptrTrComponent && ptrTrComponentTgt) {
 			ptrTrComponent->SetPosition(ptrTrComponentTgt->GetPosition());
-			if(ent.GetSpawnFlags() &umath::to_integral(SpawnFlags::FaceTargetDirectionOnTeleport))
+			if(ent.GetSpawnFlags() & umath::to_integral(SpawnFlags::FaceTargetDirectionOnTeleport))
 				ptrTrComponent->SetAngles(ptrTrComponentTgt->GetAngles());
 		}
 	}

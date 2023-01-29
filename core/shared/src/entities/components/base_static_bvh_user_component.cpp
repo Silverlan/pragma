@@ -15,27 +15,20 @@
 using namespace pragma;
 
 ComponentEventId BaseStaticBvhUserComponent::EVENT_ON_ACTIVATION_STATE_CHANGED = INVALID_COMPONENT_ID;
-void BaseStaticBvhUserComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
-{
-	EVENT_ON_ACTIVATION_STATE_CHANGED = registerEvent("ON_ACTIVATION_STATE_CHANGED",ComponentEventInfo::Type::Broadcast);
-}
+void BaseStaticBvhUserComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_ACTIVATION_STATE_CHANGED = registerEvent("ON_ACTIVATION_STATE_CHANGED", ComponentEventInfo::Type::Broadcast); }
 
-BaseStaticBvhUserComponent::BaseStaticBvhUserComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+BaseStaticBvhUserComponent::BaseStaticBvhUserComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 BaseStaticBvhUserComponent::~BaseStaticBvhUserComponent() {}
 void BaseStaticBvhUserComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent != nullptr)
-	{
+	if(pTrComponent != nullptr) {
 		auto &trC = *pTrComponent;
 		if(m_cbOnPoseChanged.IsValid())
 			m_cbOnPoseChanged.Remove();
-		m_cbOnPoseChanged = pTrComponent->AddEventCallback(BaseTransformComponent::EVENT_ON_POSE_CHANGED,
-			[this,&trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		m_cbOnPoseChanged = pTrComponent->AddEventCallback(BaseTransformComponent::EVENT_ON_POSE_CHANGED, [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			if(m_staticBvhComponent.valid())
 				m_staticBvhComponent->SetEntityDirty(GetEntity());
 			return util::EventReply::Unhandled;
@@ -56,29 +49,23 @@ void BaseStaticBvhUserComponent::UpdateBvhStatus()
 	if(GetEntity().FindComponent("panima").valid())
 		isStatic = false;
 
-	if(m_staticBvhComponent.expired())
-	{
-		if(m_isActive)
-		{
+	if(m_staticBvhComponent.expired()) {
+		if(m_isActive) {
 			m_isActive = false;
 			BroadcastEvent(EVENT_ON_ACTIVATION_STATE_CHANGED);
 		}
 		return;
 	}
-	if(isStatic)
-	{
+	if(isStatic) {
 		m_staticBvhComponent->AddEntity(GetEntity());
-		if(!m_isActive)
-		{
+		if(!m_isActive) {
 			m_isActive = true;
 			BroadcastEvent(EVENT_ON_ACTIVATION_STATE_CHANGED);
 		}
 	}
-	else
-	{
-		m_staticBvhComponent->RemoveEntity(GetEntity(),false);
-		if(m_isActive)
-		{
+	else {
+		m_staticBvhComponent->RemoveEntity(GetEntity(), false);
+		if(m_isActive) {
 			m_isActive = false;
 			BroadcastEvent(EVENT_ON_ACTIVATION_STATE_CHANGED);
 		}
@@ -96,12 +83,12 @@ void BaseStaticBvhUserComponent::OnEntityComponentRemoved(BaseEntityComponent &c
 	if(GetEntity().IsSpawned())
 		UpdateBvhStatus();
 }
-bool BaseStaticBvhUserComponent::IsActive() const {return m_isActive;}
-util::EventReply BaseStaticBvhUserComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
+bool BaseStaticBvhUserComponent::IsActive() const { return m_isActive; }
+util::EventReply BaseStaticBvhUserComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
 	if(eventId == BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED || eventId == BasePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED)
 		UpdateBvhStatus();
-	return BaseEntityComponent::HandleEvent(eventId,evData);
+	return BaseEntityComponent::HandleEvent(eventId, evData);
 }
 void BaseStaticBvhUserComponent::OnRemove()
 {
@@ -111,7 +98,4 @@ void BaseStaticBvhUserComponent::OnRemove()
 	if(m_staticBvhComponent.valid())
 		m_staticBvhComponent->RemoveEntity(GetEntity());
 }
-void BaseStaticBvhUserComponent::SetStaticBvhCacheComponent(BaseStaticBvhCacheComponent *component)
-{
-	m_staticBvhComponent = component ? component->GetHandle<BaseStaticBvhCacheComponent>() : pragma::ComponentHandle<BaseStaticBvhCacheComponent>{};
-}
+void BaseStaticBvhUserComponent::SetStaticBvhCacheComponent(BaseStaticBvhCacheComponent *component) { m_staticBvhComponent = component ? component->GetHandle<BaseStaticBvhCacheComponent>() : pragma::ComponentHandle<BaseStaticBvhCacheComponent> {}; }

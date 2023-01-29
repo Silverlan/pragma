@@ -19,23 +19,18 @@ extern ClientState *client;
 
 #undef CreateEvent
 
-CSoundScript::CSoundScript(SoundScriptManager *manager,std::string identifier)
-	: SoundScript(manager,identifier)
-{}
-CSoundScript::~CSoundScript()
-{}
+CSoundScript::CSoundScript(SoundScriptManager *manager, std::string identifier) : SoundScript(manager, identifier) {}
+CSoundScript::~CSoundScript() {}
 
 //////////////////////////////////////
 
-CSSEPlaySound::CSSEPlaySound(SoundScriptManager *manager)
-	: SSEPlaySound(manager),m_dspEffect(NULL)
-{}
-SSESound *CSSEPlaySound::CreateSound(double tStart,const std::function<std::shared_ptr<ALSound>(const std::string&,ALChannel,ALCreateFlags)> &createSound)
+CSSEPlaySound::CSSEPlaySound(SoundScriptManager *manager) : SSEPlaySound(manager), m_dspEffect(NULL) {}
+SSESound *CSSEPlaySound::CreateSound(double tStart, const std::function<std::shared_ptr<ALSound>(const std::string &, ALChannel, ALCreateFlags)> &createSound)
 {
-	auto *s = SSEPlaySound::CreateSound(tStart,createSound);
+	auto *s = SSEPlaySound::CreateSound(tStart, createSound);
 	if(s == nullptr)
 		return s;
-	auto *cs = dynamic_cast<CALSound*>(s->sound.get());
+	auto *cs = dynamic_cast<CALSound *>(s->sound.get());
 	if(cs == nullptr)
 		return s;
 	if(m_dspEffect != nullptr)
@@ -44,7 +39,7 @@ SSESound *CSSEPlaySound::CreateSound(double tStart,const std::function<std::shar
 		cs->AddEffect(*effect);
 	return s;
 }
-void CSSEPlaySound::PrecacheSound(const char *name) {client->PrecacheSound(name,GetChannel());}
+void CSSEPlaySound::PrecacheSound(const char *name) { client->PrecacheSound(name, GetChannel()); }
 void CSSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 {
 	SSEPlaySound::Initialize(prop);
@@ -55,12 +50,11 @@ void CSSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 	auto *soundSys = c_engine->GetSoundSystem();
 	if(soundSys == nullptr)
 		return;
-	for(auto &type : al::get_aux_types())
-	{
+	for(auto &type : al::get_aux_types()) {
 		auto dataBlock = prop[type];
 		if(!dataBlock)
 			continue;
-		auto effect = al::create_aux_effect(type,dataBlock);
+		auto effect = al::create_aux_effect(type, dataBlock);
 		if(effect != nullptr)
 			effects.push_back(effect);
 	}
@@ -68,15 +62,9 @@ void CSSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 
 //////////////////////////////////////
 
-CSoundScriptManager::CSoundScriptManager()
-	: SoundScriptManager()
-{}
-CSoundScriptManager::~CSoundScriptManager()
-{}
-bool CSoundScriptManager::Load(const char *fname,std::vector<std::shared_ptr<SoundScript>> *scripts)
-{
-	return SoundScriptManager::Load<CSoundScript>(fname,scripts);
-}
+CSoundScriptManager::CSoundScriptManager() : SoundScriptManager() {}
+CSoundScriptManager::~CSoundScriptManager() {}
+bool CSoundScriptManager::Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts) { return SoundScriptManager::Load<CSoundScript>(fname, scripts); }
 SoundScriptEvent *CSoundScriptManager::CreateEvent(std::string name)
 {
 	if(name == "playsound")

@@ -48,33 +48,26 @@ enum class GPUProfilingStage : uint32_t
 	Count
 };
 */
-namespace prosper
-{
+namespace prosper {
 	class IQueryPool;
 	class TimerQuery;
 };
-namespace pragma
-{
-	namespace debug
-	{
+namespace pragma {
+	namespace debug {
 		class GPUSwapchainTimer;
-		struct DLLCLIENT GPUProfilerResult
-			: public pragma::debug::ProfilerResult
-		{
+		struct DLLCLIENT GPUProfilerResult : public pragma::debug::ProfilerResult {
 			std::optional<prosper::PipelineStatistics> statistics;
 		};
 
 		class GPUProfiler;
-		class DLLCLIENT GPUProfilingStage
-			: public ProfilingStage
-		{
-		public:
-			static std::shared_ptr<GPUProfilingStage> Create(Profiler &profiler,const std::string &name,prosper::PipelineStageFlags stage,GPUProfilingStage *parent=nullptr);
+		class DLLCLIENT GPUProfilingStage : public ProfilingStage {
+		  public:
+			static std::shared_ptr<GPUProfilingStage> Create(Profiler &profiler, const std::string &name, prosper::PipelineStageFlags stage, GPUProfilingStage *parent = nullptr);
 			const GPUSwapchainTimer &GetTimer() const;
 			GPUSwapchainTimer &GetTimer();
 
 			prosper::PipelineStageFlags GetPipelineStage() const;
-		private:
+		  private:
 			using ProfilingStage::ProfilingStage;
 			virtual void InitializeTimer() override;
 			GPUProfiler &GetProfiler();
@@ -82,21 +75,19 @@ namespace pragma
 			prosper::PipelineStageFlags m_stage;
 		};
 
-		class DLLCLIENT GPUProfiler
-			: public Profiler
-		{
-		public:
+		class DLLCLIENT GPUProfiler : public Profiler {
+		  public:
 			virtual void Initialize() override;
 			void Reset();
 			std::shared_ptr<Timer> CreateTimer(prosper::PipelineStageFlags stage);
-		private:
+		  private:
 			GPUProfiler();
 			std::shared_ptr<prosper::IQueryPool> m_timerQueryPool = nullptr;
 			std::shared_ptr<prosper::IQueryPool> m_statsQueryPool = nullptr;
 
 			void InitializeQueries();
 			template<class TProfiler>
-				friend std::shared_ptr<TProfiler> Profiler::Create();
+			friend std::shared_ptr<TProfiler> Profiler::Create();
 		};
 	};
 };

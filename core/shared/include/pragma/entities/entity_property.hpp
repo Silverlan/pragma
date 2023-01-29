@@ -11,15 +11,12 @@
 #include "pragma/entities/baseentity_handle.h"
 #include <sharedutils/property/util_property.hpp>
 
-namespace pragma
-{
-	class DLLNETWORK EntityProperty
-		: public util::SimpleProperty<EntityProperty,EntityHandle>
-	{
-	public:
+namespace pragma {
+	class DLLNETWORK EntityProperty : public util::SimpleProperty<EntityProperty, EntityHandle> {
+	  public:
 		EntityProperty();
 		EntityProperty(const EntityHandle &hEnt);
-		using util::SimpleProperty<EntityProperty,EntityHandle>::operator=;
+		using util::SimpleProperty<EntityProperty, EntityHandle>::operator=;
 	};
 	using PEntityProperty = std::shared_ptr<EntityProperty>;
 };

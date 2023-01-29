@@ -43,70 +43,68 @@
 
 using namespace pragma;
 
-namespace pragma
-{
+namespace pragma {
 	using ::operator<<;
 };
-std::vector<CPlayerComponent*> CPlayerComponent::s_players;
-const std::vector<CPlayerComponent*> &CPlayerComponent::GetAll() {return s_players;}
-unsigned int CPlayerComponent::GetPlayerCount() {return CUInt32(s_players.size());}
+std::vector<CPlayerComponent *> CPlayerComponent::s_players;
+const std::vector<CPlayerComponent *> &CPlayerComponent::GetAll() { return s_players; }
+unsigned int CPlayerComponent::GetPlayerCount() { return CUInt32(s_players.size()); }
 
 extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
 extern CGame *c_game;
 
-Con::c_cout& CPlayerComponent::print(Con::c_cout &os)
+Con::c_cout &CPlayerComponent::print(Con::c_cout &os)
 {
 	auto &ent = GetEntity();
 	auto nameC = ent.GetNameComponent();
-	os<<"CPlayer["<<(nameC.valid() ? nameC->GetName() : "")<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
+	os << "CPlayer[" << (nameC.valid() ? nameC->GetName() : "") << "][" << ent.GetIndex() << "]"
+	   << "[" << ent.GetClass() << "]"
+	   << "[";
 	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
-		os<<"NULL";
+		os << "NULL";
 	else
-		os<<mdl->GetName();
-	os<<"]";
+		os << mdl->GetName();
+	os << "]";
 	return os;
 }
 
-std::ostream& CPlayerComponent::print(std::ostream &os)
+std::ostream &CPlayerComponent::print(std::ostream &os)
 {
 	auto &ent = GetEntity();
 	auto nameC = ent.GetNameComponent();
-	os<<"CPlayer["<<(nameC.valid() ? nameC->GetName() : "")<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
+	os << "CPlayer[" << (nameC.valid() ? nameC->GetName() : "") << "][" << ent.GetIndex() << "]"
+	   << "[" << ent.GetClass() << "]"
+	   << "[";
 	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
-		os<<"NULL";
+		os << "NULL";
 	else
-		os<<mdl->GetName();
-	os<<"]";
+		os << mdl->GetName();
+	os << "]";
 	return os;
 }
 
-CPlayerComponent::CPlayerComponent(BaseEntity &ent)
-	: BasePlayerComponent(ent),m_viewOffset(0,m_standEyeLevel,0),
-	m_crouchViewOffset(nullptr),m_upDirOffset(nullptr)
+CPlayerComponent::CPlayerComponent(BaseEntity &ent) : BasePlayerComponent(ent), m_viewOffset(0, m_standEyeLevel, 0), m_crouchViewOffset(nullptr), m_upDirOffset(nullptr)
 {
 	s_players.push_back(this);
 
-	BindEventUnhandled(SubmergibleComponent::EVENT_ON_WATER_SUBMERGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(SubmergibleComponent::EVENT_ON_WATER_SUBMERGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &ent = GetEntity();
 		auto pSoundEmitterComponent = ent.GetComponent<CSoundEmitterComponent>();
-		if(pSoundEmitterComponent.valid())
-		{
-			if(m_sndUnderwater == nullptr)
-			{
-				m_sndUnderwater = client->CreateSound("fx.underwater",ALSoundType::Effect,ALCreateFlags::Mono);
+		if(pSoundEmitterComponent.valid()) {
+			if(m_sndUnderwater == nullptr) {
+				m_sndUnderwater = client->CreateSound("fx.underwater", ALSoundType::Effect, ALCreateFlags::Mono);
 				m_sndUnderwater->SetRelative(true);
 			}
-			if(m_sndUnderwater != nullptr)
-			{
+			if(m_sndUnderwater != nullptr) {
 				m_sndUnderwater->SetGain(1.f);
 				m_sndUnderwater->FadeIn(0.1f);
 			}
 		}
 	});
-	BindEventUnhandled(SubmergibleComponent::EVENT_ON_WATER_EMERGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(SubmergibleComponent::EVENT_ON_WATER_EMERGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		if(m_sndUnderwater != nullptr)
 			m_sndUnderwater->FadeOut(0.1f);
 	});
@@ -114,7 +112,7 @@ CPlayerComponent::CPlayerComponent(BaseEntity &ent)
 
 CPlayerComponent::~CPlayerComponent()
 {
-	auto it = std::find(s_players.begin(),s_players.end(),this);
+	auto it = std::find(s_players.begin(), s_players.end(), this);
 	if(it != s_players.end())
 		s_players.erase(it);
 	if(m_cbCalcOrientationView.IsValid())
@@ -127,33 +125,30 @@ CPlayerComponent::~CPlayerComponent()
 		m_cbUnderwaterDsp->Remove();
 }
 
-void CPlayerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CPlayerComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CPlayerComponent::OnDeployWeapon(BaseEntity &ent) {}
 
 void CPlayerComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BasePlayerComponent::OnEntityComponentAdded(component);
-	if(typeid(component) == typeid(CCharacterComponent))
-	{
-		auto &pCharComponent = static_cast<CCharacterComponent&>(component);
+	if(typeid(component) == typeid(CCharacterComponent)) {
+		auto &pCharComponent = static_cast<CCharacterComponent &>(component);
 		auto &pUpDirProp = pCharComponent.GetUpDirectionProperty();
-		FlagCallbackForRemoval(pUpDirProp->AddCallback([this](std::reference_wrapper<const Vector3> oldVal,std::reference_wrapper<const Vector3> newVal) {
-			OnSetUpDirection(newVal);
-		}),CallbackType::Component,&pCharComponent);
+		FlagCallbackForRemoval(pUpDirProp->AddCallback([this](std::reference_wrapper<const Vector3> oldVal, std::reference_wrapper<const Vector3> newVal) { OnSetUpDirection(newVal); }), CallbackType::Component, &pCharComponent);
 	}
 }
 
-util::EventReply CPlayerComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
+util::EventReply CPlayerComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BasePlayerComponent::HandleEvent(eventId,evData) == util::EventReply::Handled)
+	if(BasePlayerComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	if(eventId == BaseCharacterComponent::EVENT_ON_DEPLOY_WEAPON)
-		OnDeployWeapon(static_cast<const CEOnDeployWeapon&>(evData).weapon);
+		OnDeployWeapon(static_cast<const CEOnDeployWeapon &>(evData).weapon);
 	else if(eventId == BaseCharacterComponent::EVENT_ON_SET_ACTIVE_WEAPON)
-		OnSetActiveWeapon(static_cast<const CEOnSetActiveWeapon&>(evData).weapon);
+		OnSetActiveWeapon(static_cast<const CEOnSetActiveWeapon &>(evData).weapon);
 	else if(eventId == BaseCharacterComponent::EVENT_ON_CHARACTER_ORIENTATION_CHANGED)
-		OnSetCharacterOrientation(static_cast<const CEOnSetCharacterOrientation&>(evData).up);
+		OnSetCharacterOrientation(static_cast<const CEOnSetCharacterOrientation &>(evData).up);
 	return util::EventReply::Unhandled;
 }
 
@@ -172,7 +167,7 @@ void CPlayerComponent::OnSetActiveWeapon(BaseEntity *ent)
 	auto charComponent = GetEntity().GetCharacterComponent();
 	auto *prevWeapon = charComponent.valid() ? charComponent->GetActiveWeapon() : nullptr;
 	if(prevWeapon != nullptr && prevWeapon->IsWeapon())
-		static_cast<pragma::CWeaponComponent&>(*prevWeapon->GetWeaponComponent()).UpdateOwnerAttachment();
+		static_cast<pragma::CWeaponComponent &>(*prevWeapon->GetWeaponComponent()).UpdateOwnerAttachment();
 }
 
 void CPlayerComponent::OnWaterSubmerged()
@@ -182,12 +177,12 @@ void CPlayerComponent::OnWaterSubmerged()
 	auto *entDsp = c_game->CreateEntity<CEnvSoundDsp>();
 	if(entDsp == nullptr)
 		return;
-	auto *pDspComponent = static_cast<pragma::BaseEnvSoundDspComponent*>(entDsp->FindComponent("sound_dsp").get());
-	entDsp->SetKeyValue("spawnflags",std::to_string(umath::to_integral(pragma::BaseEnvSoundDspComponent::SpawnFlags::All | pragma::BaseEnvSoundDspComponent::SpawnFlags::AffectRelative)));
+	auto *pDspComponent = static_cast<pragma::BaseEnvSoundDspComponent *>(entDsp->FindComponent("sound_dsp").get());
+	entDsp->SetKeyValue("spawnflags", std::to_string(umath::to_integral(pragma::BaseEnvSoundDspComponent::SpawnFlags::All | pragma::BaseEnvSoundDspComponent::SpawnFlags::AffectRelative)));
 	if(pDspComponent != nullptr)
 		pDspComponent->SetDSPEffect("underwater");
 	entDsp->Spawn();
-	auto *pToggleComponent = static_cast<pragma::BaseToggleComponent*>(entDsp->FindComponent("toggle").get());
+	auto *pToggleComponent = static_cast<pragma::BaseToggleComponent *>(entDsp->FindComponent("toggle").get());
 	if(pToggleComponent != nullptr)
 		pToggleComponent->TurnOn();
 	m_cbUnderwaterDsp = entDsp->GetHandle();
@@ -225,8 +220,7 @@ void CPlayerComponent::UpdateObserverCallback()
 	if(IsLocalPlayer() == false)
 		return;
 	auto obsMode = GetObserverMode();
-	if(obsMode == OBSERVERMODE::NONE)
-	{
+	if(obsMode == OBSERVERMODE::NONE) {
 		if(m_cbObserver.IsValid())
 			m_cbObserver.Remove();
 		return;
@@ -235,91 +229,83 @@ void CPlayerComponent::UpdateObserverCallback()
 		return;
 	// TODO
 	//m_lastObserveeRotation = GetEntity().GetRotation();
-	m_cbObserver = c_game->AddCallback("CalcView",FunctionCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>,std::reference_wrapper<Quat>>::Create(
-		[this](std::reference_wrapper<Vector3> refPos,std::reference_wrapper<Quat> refRot,
-			std::reference_wrapper<Quat> rotMod
-			) {
-		auto *obsC = GetObserverTarget();
-		if(obsC == nullptr)
-			return;
-		pragma::ObserverCameraData *obsCamData = nullptr;
-		switch(GetObserverMode())
-		{
-		case OBSERVERMODE::FIRSTPERSON:
-			obsCamData = &obsC->GetCameraData(BaseObservableComponent::CameraType::FirstPerson);
-			break;
-		case OBSERVERMODE::THIRDPERSON:
-			obsCamData = &obsC->GetCameraData(BaseObservableComponent::CameraType::ThirdPerson);
-			break;
-		}
-		auto &pos = refPos.get();
-		auto &rot = refRot.get();
-		//auto physType = ent->GetPhysicsType();
-		auto pTrComponentObs = obsC->GetEntity().GetTransformComponent();
-		auto camRot = (obsCamData == nullptr || obsCamData->angleLimits.has_value() == false) ? rot : pTrComponentObs ? pTrComponentObs->GetRotation() : uquat::identity();
+	m_cbObserver
+	  = c_game->AddCallback("CalcView", FunctionCallback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>, std::reference_wrapper<Quat>>::Create([this](std::reference_wrapper<Vector3> refPos, std::reference_wrapper<Quat> refRot, std::reference_wrapper<Quat> rotMod) {
+		    auto *obsC = GetObserverTarget();
+		    if(obsC == nullptr)
+			    return;
+		    pragma::ObserverCameraData *obsCamData = nullptr;
+		    switch(GetObserverMode()) {
+		    case OBSERVERMODE::FIRSTPERSON:
+			    obsCamData = &obsC->GetCameraData(BaseObservableComponent::CameraType::FirstPerson);
+			    break;
+		    case OBSERVERMODE::THIRDPERSON:
+			    obsCamData = &obsC->GetCameraData(BaseObservableComponent::CameraType::ThirdPerson);
+			    break;
+		    }
+		    auto &pos = refPos.get();
+		    auto &rot = refRot.get();
+		    //auto physType = ent->GetPhysicsType();
+		    auto pTrComponentObs = obsC->GetEntity().GetTransformComponent();
+		    auto camRot = (obsCamData == nullptr || obsCamData->angleLimits.has_value() == false) ? rot : pTrComponentObs ? pTrComponentObs->GetRotation() : uquat::identity();
 
-		auto pose = obsC->GetEntity().GetPose();
-		if(obsCamData && obsCamData->localOrigin.has_value())
-			pose.TranslateLocal(*obsCamData->localOrigin);
-		else
-		{
-			// Note: GetEyePosition is not always reliable, since it's derived from the Source Engine $eyeposition parameter,
-			// which is only valid for NPC models.
-			// Instead, we'll use the "eyes" attachment as reference if available.
-			auto &mdl = obsC->GetEntity().GetModel();
-			auto eyeAtt = mdl ? mdl->LookupAttachment("eyes") : -1; // TODO: Cache the lookup
-			auto eyePose = (eyeAtt != -1) ? obsC->GetEntity().GetAttachmentPose(eyeAtt) : std::optional<umath::Transform>{};
-			if(eyePose.has_value())
-			{
-				eyePose->GetOrigin().x = 0;
-				eyePose->GetOrigin().z = 0;
-				pose.TranslateLocal(eyePose->GetOrigin());
-			}
-			else if(pTrComponentObs)
-				pose.SetOrigin(pTrComponentObs->GetEyePosition());
-		}
+		    auto pose = obsC->GetEntity().GetPose();
+		    if(obsCamData && obsCamData->localOrigin.has_value())
+			    pose.TranslateLocal(*obsCamData->localOrigin);
+		    else {
+			    // Note: GetEyePosition is not always reliable, since it's derived from the Source Engine $eyeposition parameter,
+			    // which is only valid for NPC models.
+			    // Instead, we'll use the "eyes" attachment as reference if available.
+			    auto &mdl = obsC->GetEntity().GetModel();
+			    auto eyeAtt = mdl ? mdl->LookupAttachment("eyes") : -1; // TODO: Cache the lookup
+			    auto eyePose = (eyeAtt != -1) ? obsC->GetEntity().GetAttachmentPose(eyeAtt) : std::optional<umath::Transform> {};
+			    if(eyePose.has_value()) {
+				    eyePose->GetOrigin().x = 0;
+				    eyePose->GetOrigin().z = 0;
+				    pose.TranslateLocal(eyePose->GetOrigin());
+			    }
+			    else if(pTrComponentObs)
+				    pose.SetOrigin(pTrComponentObs->GetEyePosition());
+		    }
 
-		auto &entThis = GetEntity();
-		auto charComponent = entThis.GetCharacterComponent();
-		auto pTrComponent = entThis.GetTransformComponent();
-		if(obsCamData == nullptr || obsCamData->angleLimits.has_value() == false)
-		{
-			if(charComponent.valid())
-				rot = charComponent->GetViewOrientation();
-			else
-				rot = pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
-		}
-		else
-			rot = pTrComponentObs ? pTrComponentObs->GetRotation() : uquat::identity();
+		    auto &entThis = GetEntity();
+		    auto charComponent = entThis.GetCharacterComponent();
+		    auto pTrComponent = entThis.GetTransformComponent();
+		    if(obsCamData == nullptr || obsCamData->angleLimits.has_value() == false) {
+			    if(charComponent.valid())
+				    rot = charComponent->GetViewOrientation();
+			    else
+				    rot = pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
+		    }
+		    else
+			    rot = pTrComponentObs ? pTrComponentObs->GetRotation() : uquat::identity();
 
-		auto rotateWithObservee = (obsCamData && obsCamData->rotateWithObservee) ? true : false;
-		auto rotPos = camRot;
-		if(rotateWithObservee)
-		{
-			// Apply entity rotation for the current frame
-			auto entRot = obsC->GetEntity().GetRotation() *rotMod.get();
-			rotMod.get() = entRot;
-			rotPos = entRot *rotPos;
-		}
+		    auto rotateWithObservee = (obsCamData && obsCamData->rotateWithObservee) ? true : false;
+		    auto rotPos = camRot;
+		    if(rotateWithObservee) {
+			    // Apply entity rotation for the current frame
+			    auto entRot = obsC->GetEntity().GetRotation() * rotMod.get();
+			    rotMod.get() = entRot;
+			    rotPos = entRot * rotPos;
+		    }
 
-		auto camLookAtPos = pose.GetOrigin();
-		auto camPos = camLookAtPos;
-		if(obsCamData)
-			camPos += uquat::forward(rotPos) *(*obsCamData->offset)->z +uquat::up(rotPos) *(*obsCamData->offset)->y -uquat::right(rotPos) *(*obsCamData->offset)->x;
+		    auto camLookAtPos = pose.GetOrigin();
+		    auto camPos = camLookAtPos;
+		    if(obsCamData)
+			    camPos += uquat::forward(rotPos) * (*obsCamData->offset)->z + uquat::up(rotPos) * (*obsCamData->offset)->y - uquat::right(rotPos) * (*obsCamData->offset)->x;
 
-		if(obsCamData != nullptr && uvec::length_sqr(*obsCamData->offset) > 0.f)
-		{
-			TraceData data {};
-			data.SetSource(camLookAtPos);
-			data.SetTarget(camPos);
-			data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
-			data.SetFilter(obsC->GetEntity());
-			auto r = c_game->RayCast(data);
-			pos = (r.hitType == RayCastHitType::Block) ? r.position : camPos;
-		}
-		else
-			pos = camPos;
-	}));
+		    if(obsCamData != nullptr && uvec::length_sqr(*obsCamData->offset) > 0.f) {
+			    TraceData data {};
+			    data.SetSource(camLookAtPos);
+			    data.SetTarget(camPos);
+			    data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
+			    data.SetFilter(obsC->GetEntity());
+			    auto r = c_game->RayCast(data);
+			    pos = (r.hitType == RayCastHitType::Block) ? r.position : camPos;
+		    }
+		    else
+			    pos = camPos;
+	    }));
 }
 
 void CPlayerComponent::DoSetObserverMode(OBSERVERMODE mode)
@@ -329,22 +315,17 @@ void CPlayerComponent::DoSetObserverMode(OBSERVERMODE mode)
 	UpdateObserverCallback();
 }
 
-void CPlayerComponent::ApplyViewRotationOffset(const EulerAngles &ang,float dur)
+void CPlayerComponent::ApplyViewRotationOffset(const EulerAngles &ang, float dur)
 {
 	auto tStart = c_game->CurTime();
-	auto cb = FunctionCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>::Create(nullptr);
-	static_cast<Callback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>*>(cb.get())->SetFunction([cb,tStart,ang,dur](std::reference_wrapper<Vector3>,std::reference_wrapper<Quat> rot) mutable {
+	auto cb = FunctionCallback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>>::Create(nullptr);
+	static_cast<Callback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>> *>(cb.get())->SetFunction([cb, tStart, ang, dur](std::reference_wrapper<Vector3>, std::reference_wrapper<Quat> rot) mutable {
 		auto &t = c_game->CurTime();
-		auto tDelta = umath::min(static_cast<float>(t -tStart),dur);
-		auto sc = static_cast<float>(umath::sin(tDelta /(dur /2.f) *M_PI_2));
-		EulerAngles rotOffset {
-			static_cast<float>(umath::approach_angle(0.f,ang.p,umath::abs(ang.p) *sc)),
-			static_cast<float>(umath::approach_angle(0.f,ang.y,umath::abs(ang.y) *sc)),
-			static_cast<float>(umath::approach_angle(0.f,ang.r,umath::abs(ang.r) *sc))
-		};
-		rot.get() = rot.get() *uquat::create(rotOffset);
-		if(tDelta >= dur)
-		{
+		auto tDelta = umath::min(static_cast<float>(t - tStart), dur);
+		auto sc = static_cast<float>(umath::sin(tDelta / (dur / 2.f) * M_PI_2));
+		EulerAngles rotOffset {static_cast<float>(umath::approach_angle(0.f, ang.p, umath::abs(ang.p) * sc)), static_cast<float>(umath::approach_angle(0.f, ang.y, umath::abs(ang.y) * sc)), static_cast<float>(umath::approach_angle(0.f, ang.r, umath::abs(ang.r) * sc))};
+		rot.get() = rot.get() * uquat::create(rotOffset);
+		if(tDelta >= dur) {
 			cb.Remove();
 			/*auto cb = FunctionCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>::Create(nullptr);
 			static_cast<Callback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>*>(cb.get())->SetFunction([cb,ang](std::reference_wrapper<Vector3> pos,std::reference_wrapper<Quat> rot) mutable {
@@ -354,56 +335,49 @@ void CPlayerComponent::ApplyViewRotationOffset(const EulerAngles &ang,float dur)
 			c_game->AddCallback("CalcView",cb);*/ // Makes sure the camera rotation STAYS at the designated rotation (Works, but only reasonable for pitch-axis, and at half the duration -> Useless?)
 		}
 	});
-	c_game->AddCallback("CalcViewOffset",cb);
+	c_game->AddCallback("CalcViewOffset", cb);
 }
 
-bool CPlayerComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
+bool CPlayerComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
-	if(eventId == m_netEvSetObserverTarget)
-	{
+	if(eventId == m_netEvSetObserverTarget) {
 		auto *ent = nwm::read_entity(packet);
 		auto pObsComponent = ent->GetComponent<pragma::CObservableComponent>();
 		SetObserverTarget(pObsComponent.get());
 	}
-	else if(eventId == m_netEvApplyViewRotationOffset)
-	{
+	else if(eventId == m_netEvApplyViewRotationOffset) {
 		auto ang = nwm::read_angles(packet);
 		auto dur = packet->Read<float>();
-		ApplyViewRotationOffset(ang,dur);
+		ApplyViewRotationOffset(ang, dur);
 	}
-	else if(eventId == m_netEvPrintMessage)
-	{
+	else if(eventId == m_netEvPrintMessage) {
 		auto msg = packet->ReadString();
 		auto type = static_cast<MESSAGE>(packet->Read<std::underlying_type_t<MESSAGE>>());
-		PrintMessage(msg,type);
+		PrintMessage(msg, type);
 	}
-	else if(eventId == m_netEvRespawn)
-	{
+	else if(eventId == m_netEvRespawn) {
 		auto charComponent = GetEntity().GetCharacterComponent();
 		if(charComponent.valid())
 			charComponent->Respawn();
 	}
-	else if(eventId == m_netEvSetViewOrientation)
-	{
+	else if(eventId == m_netEvSetViewOrientation) {
 		auto charComponent = GetEntity().GetCharacterComponent();
-		if(charComponent.valid())
-		{
+		if(charComponent.valid()) {
 			auto rot = packet->Read<Quat>();
 			charComponent->SetViewOrientation(rot);
 		}
 	}
 	else
-		return CBaseNetComponent::ReceiveNetEvent(eventId,packet);
+		return CBaseNetComponent::ReceiveNetEvent(eventId, packet);
 	return true;
 }
 
 void CPlayerComponent::OnUpdateMatrices(Mat4 &transformMatrix)
 {
-	if(IsLocalPlayer() && IsInFirstPersonMode())
-	{
+	if(IsLocalPlayer() && IsInFirstPersonMode()) {
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		auto t = (pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::FORWARD) *VIEW_BODY_OFFSET;
-		transformMatrix = glm::translate(umat::identity(),t) *transformMatrix; // Translate to align shadow with view body
+		auto t = (pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::FORWARD) * VIEW_BODY_OFFSET;
+		transformMatrix = glm::translate(umat::identity(), t) * transformMatrix; // Translate to align shadow with view body
 	}
 }
 
@@ -411,26 +385,19 @@ void CPlayerComponent::Initialize()
 {
 	BasePlayerComponent::Initialize();
 
-	BindEventUnhandled(SubmergibleComponent::EVENT_ON_WATER_SUBMERGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		OnWaterSubmerged();
-	});
-	BindEventUnhandled(SubmergibleComponent::EVENT_ON_WATER_EMERGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		OnWaterEmerged();
-	});
-	BindEvent(CRenderComponent::EVENT_SHOULD_DRAW_SHADOW,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &shouldDrawData = static_cast<CEShouldDraw&>(evData.get());
-		if(ShouldDrawShadow() == false)
-		{
+	BindEventUnhandled(SubmergibleComponent::EVENT_ON_WATER_SUBMERGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnWaterSubmerged(); });
+	BindEventUnhandled(SubmergibleComponent::EVENT_ON_WATER_EMERGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnWaterEmerged(); });
+	BindEvent(CRenderComponent::EVENT_SHOULD_DRAW_SHADOW, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &shouldDrawData = static_cast<CEShouldDraw &>(evData.get());
+		if(ShouldDrawShadow() == false) {
 			shouldDrawData.shouldDraw = false;
 			return util::EventReply::Handled;
 		}
 		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		OnUpdateMatrices(static_cast<CEOnUpdateRenderMatrices&>(evData.get()).transformation);
-	});
+	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnUpdateMatrices(static_cast<CEOnUpdateRenderMatrices &>(evData.get()).transformation); });
 
-	auto &ent = static_cast<CBaseEntity&>(GetEntity());
+	auto &ent = static_cast<CBaseEntity &>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
@@ -440,7 +407,7 @@ void CPlayerComponent::Initialize()
 void CPlayerComponent::SetObserverMode(OBSERVERMODE mode)
 {
 	BasePlayerComponent::SetObserverMode(mode);
-	auto *renderC = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
+	auto *renderC = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
 	if(renderC)
 		renderC->UpdateShouldDrawState();
 }
@@ -455,21 +422,19 @@ void CPlayerComponent::UpdateViewModelTransform()
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pTrComponentVm = vmEnt.GetTransformComponent();
-	if(pTrComponentVm && (charComponent.valid() || pTrComponent != nullptr))
-	{
+	if(pTrComponentVm && (charComponent.valid() || pTrComponent != nullptr)) {
 		auto pos = charComponent.valid() ? charComponent->GetEyePosition() : pTrComponent->GetPosition();
 		auto &rot = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetRotation();
 		auto offset = vm->GetViewModelOffset();
-		uvec::local_to_world(pos,rot,offset);
+		uvec::local_to_world(pos, rot, offset);
 		pTrComponentVm->SetPosition(offset);
 		pTrComponentVm->SetRotation(rot);
 	}
 	auto pAttComponent = vmEnt.AddComponent<CAttachableComponent>();
-	if(pAttComponent.valid())
-	{
+	if(pAttComponent.valid()) {
 		AttachmentInfo attInfo {};
 		attInfo.flags |= FAttachmentMode::PlayerView | FAttachmentMode::UpdateEachFrame;
-		pAttComponent->AttachToEntity(&ent,attInfo);
+		pAttComponent->AttachToEntity(&ent, attInfo);
 	}
 }
 
@@ -486,8 +451,7 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 	BasePlayerComponent::SetLocalPlayer(b);
 
 	auto renderC = GetEntity().GetComponent<CRenderComponent>();
-	if(renderC.valid())
-	{
+	if(renderC.valid()) {
 		if(b)
 			renderC->AddToRenderGroup("thirdperson");
 		else
@@ -497,8 +461,7 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 	if(b == false)
 		return;
 	auto *vm = c_game->GetViewModel();
-	if(vm != nullptr)
-	{
+	if(vm != nullptr) {
 		auto &vmEnt = vm->GetEntity();
 		UpdateViewModelTransform();
 		UpdateViewFOV();
@@ -507,46 +470,40 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 	}
 	auto &ent = GetEntity();
 	auto *body = c_game->GetViewBody();
-	if(body != nullptr)
-	{
+	if(body != nullptr) {
 		auto &entBody = body->GetEntity();
 		auto pTrComponent = ent.GetTransformComponent();
 		auto pTrComponentBody = body->GetEntity().GetTransformComponent();
-		if(pTrComponent != nullptr && pTrComponentBody)
-		{
-			Vector3 pos = pTrComponent->GetPosition() +pTrComponent->GetForward() *VIEW_BODY_OFFSET;
+		if(pTrComponent != nullptr && pTrComponentBody) {
+			Vector3 pos = pTrComponent->GetPosition() + pTrComponent->GetForward() * VIEW_BODY_OFFSET;
 			auto &rot = pTrComponent->GetRotation();
 			pTrComponentBody->SetPosition(pos);
 			pTrComponentBody->SetRotation(Quat(rot));
 		}
 		auto pAttComponent = entBody.AddComponent<CAttachableComponent>();
-		if(pAttComponent.valid())
-		{
+		if(pAttComponent.valid()) {
 			AttachmentInfo attInfo {};
 			attInfo.flags |= FAttachmentMode::PlayerViewYaw | FAttachmentMode::BoneMerge | FAttachmentMode::UpdateEachFrame;
-			pAttComponent->AttachToEntity(&ent,attInfo);
+			pAttComponent->AttachToEntity(&ent, attInfo);
 		}
 		//body->SetRenderMode(RenderMode::None);
 		if(!entBody.IsSpawned())
 			entBody.Spawn();
 	}
 	auto *listener = c_game->GetListener();
-	if(listener != nullptr)
-	{
+	if(listener != nullptr) {
 		auto &entListener = listener->GetEntity();
 		auto pTrComponent = ent.GetTransformComponent();
 		auto pTrComponentListener = entListener.GetTransformComponent();
-		if(pTrComponent != nullptr && pTrComponentListener)
-		{
+		if(pTrComponent != nullptr && pTrComponentListener) {
 			pTrComponentListener->SetPosition(pTrComponent->GetPosition());
 			pTrComponentListener->SetRotation(pTrComponent->GetRotation());
 		}
 		auto pAttComponent = entListener.AddComponent<CAttachableComponent>();
-		if(pAttComponent.valid())
-		{
+		if(pAttComponent.valid()) {
 			AttachmentInfo attInfo {};
 			attInfo.flags |= FAttachmentMode::PlayerView;
-			pAttComponent->AttachToEntity(&ent,attInfo);
+			pAttComponent->AttachToEntity(&ent, attInfo);
 		}
 		if(!entListener.IsSpawned())
 			entListener.Spawn();
@@ -557,7 +514,7 @@ bool CPlayerComponent::ShouldDraw() const
 {
 	if(!IsLocalPlayer())
 		return true;
-#pragma message ("TODO: Find a better way to enable rendering, if being rendered through anything but the main camera (e.g. reflections)!")
+#pragma message("TODO: Find a better way to enable rendering, if being rendered through anything but the main camera (e.g. reflections)!")
 	auto *scene = c_game->GetScene();
 	if(c_game->GetRenderScene() != scene)
 		return true;
@@ -566,49 +523,46 @@ bool CPlayerComponent::ShouldDraw() const
 
 bool CPlayerComponent::ShouldDrawShadow() const
 {
-	auto pRenderComponent = static_cast<const CBaseEntity&>(GetEntity()).GetRenderComponent();
-	return pRenderComponent ? pRenderComponent->GetCastShadows() : false;;
+	auto pRenderComponent = static_cast<const CBaseEntity &>(GetEntity()).GetRenderComponent();
+	return pRenderComponent ? pRenderComponent->GetCastShadows() : false;
+	;
 }
 
-Vector3 &CPlayerComponent::GetViewOffset() {return m_viewOffset;}
-void CPlayerComponent::SetViewOffset(Vector3 offset) {m_viewOffset = offset;}
+Vector3 &CPlayerComponent::GetViewOffset() { return m_viewOffset; }
+void CPlayerComponent::SetViewOffset(Vector3 offset) { m_viewOffset = offset; }
 
 void CPlayerComponent::OnTick(double tDelta)
 {
 	BasePlayerComponent::OnTick(tDelta);
 
-	if(m_crouchViewOffset != NULL)
-	{
+	if(m_crouchViewOffset != NULL) {
 		DeltaOffset &doffset = *m_crouchViewOffset;
 		if(doffset.time <= 0)
 			m_crouchViewOffset = nullptr;
-		else
-		{
-			doffset.delta = umath::min(doffset.delta +tDelta /0.2,1.0); // 0.2 seconds to reach full speed
-			float scale = CFloat((doffset.delta *tDelta) /doffset.time);
-			scale = umath::min(scale,1.0f);
-			Vector3 mv = doffset.offset *scale;
+		else {
+			doffset.delta = umath::min(doffset.delta + tDelta / 0.2, 1.0); // 0.2 seconds to reach full speed
+			float scale = CFloat((doffset.delta * tDelta) / doffset.time);
+			scale = umath::min(scale, 1.0f);
+			Vector3 mv = doffset.offset * scale;
 			doffset.offset -= mv;
-			SetViewOffset(GetViewOffset() +mv);
+			SetViewOffset(GetViewOffset() + mv);
 			doffset.time -= tDelta;
 			if(doffset.time <= 0)
 				m_crouchViewOffset = nullptr;
 		}
 	}
-	if(m_upDirOffset != NULL)
-	{
+	if(m_upDirOffset != NULL) {
 		DeltaTransform &dtrans = *m_upDirOffset;
 		if(dtrans.time <= 0)
 			m_upDirOffset = nullptr;
-		else
-		{
-			dtrans.delta = umath::min(dtrans.delta +tDelta /0.2,1.0); // 0.2 seconds to reach full speed
-			float scale = CFloat((dtrans.delta *tDelta) /dtrans.time);
-			scale = umath::min(scale,1.0f);
+		else {
+			dtrans.delta = umath::min(dtrans.delta + tDelta / 0.2, 1.0); // 0.2 seconds to reach full speed
+			float scale = CFloat((dtrans.delta * tDelta) / dtrans.time);
+			scale = umath::min(scale, 1.0f);
 
-			Vector3 mv = dtrans.offset *scale;
+			Vector3 mv = dtrans.offset * scale;
 			dtrans.offset -= mv;
-			SetViewOffset(GetViewOffset() +mv);
+			SetViewOffset(GetViewOffset() + mv);
 
 			dtrans.time -= tDelta;
 			if(dtrans.time <= 0)
@@ -616,20 +570,14 @@ void CPlayerComponent::OnTick(double tDelta)
 		}
 	}
 }
-void CPlayerComponent::OnCrouch()
-{
-	m_crouchViewOffset = std::make_unique<DeltaOffset>(Vector3(0,m_crouchEyeLevel -GetViewOffset().y,0),0.2f);
-}
-void CPlayerComponent::OnUnCrouch()
-{
-	m_crouchViewOffset = std::make_unique<DeltaOffset>(Vector3(0,m_standEyeLevel -GetViewOffset().y,0),0.4f);
-}
-void CPlayerComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BasePlayerComponent));}
+void CPlayerComponent::OnCrouch() { m_crouchViewOffset = std::make_unique<DeltaOffset>(Vector3(0, m_crouchEyeLevel - GetViewOffset().y, 0), 0.2f); }
+void CPlayerComponent::OnUnCrouch() { m_crouchViewOffset = std::make_unique<DeltaOffset>(Vector3(0, m_standEyeLevel - GetViewOffset().y, 0), 0.4f); }
+void CPlayerComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BasePlayerComponent)); }
 void CPlayerComponent::ReceiveData(NetPacket &packet)
 {
 	m_timeConnected = packet->Read<double>();
 	auto hThis = GetHandle();
-	nwm::read_unique_entity(packet,[hThis,this](BaseEntity *ent) {
+	nwm::read_unique_entity(packet, [hThis, this](BaseEntity *ent) {
 		if(ent == nullptr || hThis.expired())
 			return;
 		m_entFlashlight = ent->GetHandle();
@@ -637,29 +585,26 @@ void CPlayerComponent::ReceiveData(NetPacket &packet)
 		auto charComponent = entThis.GetCharacterComponent();
 		auto pTrComponentEnt = ent->GetTransformComponent();
 		auto pTrComponent = entThis.GetTransformComponent();
-		if(pTrComponentEnt && (charComponent.valid() || pTrComponent != nullptr))
-		{
-			pTrComponentEnt->SetPosition(charComponent.valid() ? (charComponent->GetEyePosition() +charComponent->GetViewRight() *12.f +charComponent->GetViewForward() *5.f) : pTrComponent->GetPosition());
+		if(pTrComponentEnt && (charComponent.valid() || pTrComponent != nullptr)) {
+			pTrComponentEnt->SetPosition(charComponent.valid() ? (charComponent->GetEyePosition() + charComponent->GetViewRight() * 12.f + charComponent->GetViewForward() * 5.f) : pTrComponent->GetPosition());
 			pTrComponentEnt->SetRotation(charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetRotation());
 		}
 		auto pAttComponent = ent->AddComponent<CAttachableComponent>();
-		if(pAttComponent.valid())
-		{
+		if(pAttComponent.valid()) {
 			AttachmentInfo attInfo {};
 			attInfo.flags |= FAttachmentMode::PlayerView | FAttachmentMode::UpdateEachFrame;
-			pAttComponent->AttachToEntity(&entThis,attInfo);
+			pAttComponent->AttachToEntity(&entThis, attInfo);
 		}
 	});
 }
 
-void CPlayerComponent::PrintMessage(std::string message,MESSAGE type)
+void CPlayerComponent::PrintMessage(std::string message, MESSAGE type)
 {
-	switch(type)
-	{
-		case MESSAGE::PRINTCONSOLE:
-			Con::cout<<message<<Con::endl;
-			break;
-		case MESSAGE::PRINTCHAT:
+	switch(type) {
+	case MESSAGE::PRINTCONSOLE:
+		Con::cout << message << Con::endl;
+		break;
+	case MESSAGE::PRINTCHAT:
 		{
 			// TODO
 			//auto *l = client->GetLuaState();
@@ -681,12 +626,12 @@ void CPlayerComponent::OnSetCharacterOrientation(const Vector3 &up)
 	auto rotCur = charComponent->GetViewOrientation();
 	auto &rotRel = charComponent->GetOrientationAxesRotation();
 
-	auto rotDst = rotRel *rotCur;
+	auto rotDst = rotRel * rotCur;
 	//auto ang = EulerAngles{rotDst};
 	// to euler angles
 	auto m = glm::mat4_cast(rotDst);
 	EulerAngles ang;
-	glm::extractEulerAngleYXZ(m,ang.y,ang.p,ang.r);
+	glm::extractEulerAngleYXZ(m, ang.y, ang.p, ang.r);
 	ang.p = umath::rad_to_deg(ang.p);
 	ang.y = umath::rad_to_deg(ang.y);
 	ang.r = umath::rad_to_deg(ang.r);
@@ -694,7 +639,7 @@ void CPlayerComponent::OnSetCharacterOrientation(const Vector3 &up)
 
 	auto fToQuat = [](const EulerAngles &ang) {
 		auto m = umat::identity();
-		m = glm::eulerAngleYXZ(umath::deg_to_rad(ang.y),umath::deg_to_rad(ang.p),umath::deg_to_rad(ang.r));
+		m = glm::eulerAngleYXZ(umath::deg_to_rad(ang.y), umath::deg_to_rad(ang.p), umath::deg_to_rad(ang.r));
 		auto q = glm::quat_cast(m);
 		return q;
 	};
@@ -702,16 +647,15 @@ void CPlayerComponent::OnSetCharacterOrientation(const Vector3 &up)
 	ang.r = 0.f;
 	Quat rotCurNoRoll;
 	if(ang.p < -135.f || ang.p > 135.f)
-		rotCurNoRoll = fToQuat(ang) *fToQuat(EulerAngles{0.f,0.f,180.f});
-	else
-	{
+		rotCurNoRoll = fToQuat(ang) * fToQuat(EulerAngles {0.f, 0.f, 180.f});
+	else {
 		if(ang.p < -90.f)
 			ang.p = -90.f;
 		else if(ang.p > 90.f)
 			ang.p = 90.f;
 		rotCurNoRoll = fToQuat(ang);
 	}
-	rotDst = uquat::get_inverse(rotRel) *rotCurNoRoll;
+	rotDst = uquat::get_inverse(rotRel) * rotCurNoRoll;
 	charComponent->SetViewOrientation(rotDst);
 	//
 

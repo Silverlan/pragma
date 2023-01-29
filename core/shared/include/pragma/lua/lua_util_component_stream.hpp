@@ -9,9 +9,8 @@
 
 #include "pragma/networkdefinitions.h"
 
-namespace pragma
-{
-	DLLNETWORK std::ostream &operator<<(std::ostream &stream,const pragma::BaseEntityComponent &component);
+namespace pragma {
+	DLLNETWORK std::ostream &operator<<(std::ostream &stream, const pragma::BaseEntityComponent &component);
 };
 
 #endif

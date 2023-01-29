@@ -12,9 +12,9 @@
 
 extern DLLNETWORK Engine *engine;
 
-Con::c_cout &operator<<(Con::c_cout &os,const Mesh& mesh)
+Con::c_cout &operator<<(Con::c_cout &os, const Mesh &mesh)
 {
-	os<<"Mesh["<<&mesh<<"] ["<<mesh.m_numVerts<<"]";
+	os << "Mesh[" << &mesh << "] [" << mesh.m_numVerts << "]";
 	return os;
 }
 
@@ -26,21 +26,18 @@ Mesh::Mesh()
 	m_material = NULL;
 }
 
-Mesh::~Mesh()
-{
+Mesh::~Mesh() {}
 
-}
+unsigned int Mesh::GetUVBuffer() { return m_bufUV; }
+unsigned int Mesh::GetVertexBuffer() { return m_bufVertex; }
 
-unsigned int Mesh::GetUVBuffer() {return m_bufUV;}
-unsigned int Mesh::GetVertexBuffer() {return m_bufVertex;}
+Material *Mesh::GetMaterial() { return m_material; }
+void Mesh::SetMaterial(Material *material) { m_material = material; }
+void Mesh::SetMaterial(const char *texture) { m_material = engine->GetServerNetworkState()->LoadMaterial(texture); }
 
-Material *Mesh::GetMaterial() {return m_material;}
-void Mesh::SetMaterial(Material *material) {m_material = material;}
-void Mesh::SetMaterial(const char *texture) {m_material = engine->GetServerNetworkState()->LoadMaterial(texture);}
+unsigned int Mesh::GetVertexCount() { return m_numVerts; }
 
-unsigned int Mesh::GetVertexCount() {return m_numVerts;}
-
-void Mesh::AddTriangle(const Vector3 &a,const Vector3 &b,const Vector3 &c)
+void Mesh::AddTriangle(const Vector3 &a, const Vector3 &b, const Vector3 &c)
 {
 	m_points.push_back(a.x);
 	m_points.push_back(a.y);
@@ -57,7 +54,7 @@ void Mesh::AddTriangle(const Vector3 &a,const Vector3 &b,const Vector3 &c)
 	m_numVerts += 3;
 }
 
-void Mesh::AddTriangle(float aa,float ab,float ac,float ba,float bb,float bc,float ca,float cb,float cc)
+void Mesh::AddTriangle(float aa, float ab, float ac, float ba, float bb, float bc, float ca, float cb, float cc)
 {
 	m_points.push_back(aa);
 	m_points.push_back(ab);
@@ -73,32 +70,31 @@ void Mesh::AddTriangle(float aa,float ab,float ac,float ba,float bb,float bc,flo
 	m_numVerts += 3;
 }
 
-std::vector<float> *Mesh::GetPoints() {return &m_points;}
+std::vector<float> *Mesh::GetPoints() { return &m_points; }
 
 Mesh *Mesh::GenerateCubeMesh()
 {
 	Mesh *mesh = new Mesh();
-	mesh->AddTriangle(Vector3(-1.0f,-1.0f,-1.0f),Vector3(-1.0f,-1.0f, 1.0f),Vector3(-1.0f, 1.0f, 1.0f));
-	mesh->AddTriangle(Vector3(1.0f, 1.0f,-1.0f),Vector3(-1.0f,-1.0f,-1.0f),Vector3(-1.0f, 1.0f,-1.0f));
-	mesh->AddTriangle(Vector3(1.0f,-1.0f, 1.0f),Vector3(-1.0f,-1.0f,-1.0f),Vector3(1.0f,-1.0f,-1.0f));
-	mesh->AddTriangle(Vector3(1.0f, 1.0f,-1.0f),Vector3(1.0f,-1.0f,-1.0f),Vector3(-1.0f,-1.0f,-1.0f));
-	mesh->AddTriangle(Vector3(-1.0f,-1.0f,-1.0f),Vector3(-1.0f, 1.0f, 1.0f),Vector3(-1.0f, 1.0f,-1.0f));
-	mesh->AddTriangle(Vector3(1.0f,-1.0f, 1.0f),Vector3(-1.0f,-1.0f, 1.0f),Vector3(-1.0f,-1.0f,-1.0f));
-	mesh->AddTriangle(Vector3(-1.0f, 1.0f, 1.0f),Vector3(-1.0f,-1.0f, 1.0f),Vector3(1.0f,-1.0f, 1.0f));
-	mesh->AddTriangle(Vector3(1.0f, 1.0f, 1.0f),Vector3(1.0f,-1.0f,-1.0f),Vector3(1.0f, 1.0f,-1.0f));
-	mesh->AddTriangle(Vector3(1.0f,-1.0f,-1.0f),Vector3(1.0f, 1.0f, 1.0f),Vector3(1.0f,-1.0f, 1.0f));
-	mesh->AddTriangle(Vector3(1.0f, 1.0f, 1.0f),Vector3(1.0f, 1.0f,-1.0f),Vector3(-1.0f, 1.0f,-1.0f));
-	mesh->AddTriangle(Vector3(1.0f, 1.0f, 1.0f),Vector3(-1.0f, 1.0f,-1.0f),Vector3(-1.0f, 1.0f, 1.0f));
-	mesh->AddTriangle(Vector3(1.0f, 1.0f, 1.0f),Vector3(-1.0f, 1.0f, 1.0f),Vector3(1.0f,-1.0f, 1.0f));
+	mesh->AddTriangle(Vector3(-1.0f, -1.0f, -1.0f), Vector3(-1.0f, -1.0f, 1.0f), Vector3(-1.0f, 1.0f, 1.0f));
+	mesh->AddTriangle(Vector3(1.0f, 1.0f, -1.0f), Vector3(-1.0f, -1.0f, -1.0f), Vector3(-1.0f, 1.0f, -1.0f));
+	mesh->AddTriangle(Vector3(1.0f, -1.0f, 1.0f), Vector3(-1.0f, -1.0f, -1.0f), Vector3(1.0f, -1.0f, -1.0f));
+	mesh->AddTriangle(Vector3(1.0f, 1.0f, -1.0f), Vector3(1.0f, -1.0f, -1.0f), Vector3(-1.0f, -1.0f, -1.0f));
+	mesh->AddTriangle(Vector3(-1.0f, -1.0f, -1.0f), Vector3(-1.0f, 1.0f, 1.0f), Vector3(-1.0f, 1.0f, -1.0f));
+	mesh->AddTriangle(Vector3(1.0f, -1.0f, 1.0f), Vector3(-1.0f, -1.0f, 1.0f), Vector3(-1.0f, -1.0f, -1.0f));
+	mesh->AddTriangle(Vector3(-1.0f, 1.0f, 1.0f), Vector3(-1.0f, -1.0f, 1.0f), Vector3(1.0f, -1.0f, 1.0f));
+	mesh->AddTriangle(Vector3(1.0f, 1.0f, 1.0f), Vector3(1.0f, -1.0f, -1.0f), Vector3(1.0f, 1.0f, -1.0f));
+	mesh->AddTriangle(Vector3(1.0f, -1.0f, -1.0f), Vector3(1.0f, 1.0f, 1.0f), Vector3(1.0f, -1.0f, 1.0f));
+	mesh->AddTriangle(Vector3(1.0f, 1.0f, 1.0f), Vector3(1.0f, 1.0f, -1.0f), Vector3(-1.0f, 1.0f, -1.0f));
+	mesh->AddTriangle(Vector3(1.0f, 1.0f, 1.0f), Vector3(-1.0f, 1.0f, -1.0f), Vector3(-1.0f, 1.0f, 1.0f));
+	mesh->AddTriangle(Vector3(1.0f, 1.0f, 1.0f), Vector3(-1.0f, 1.0f, 1.0f), Vector3(1.0f, -1.0f, 1.0f));
 	return mesh;
 }
 
 void Mesh::debug_print()
 {
 	unsigned int numVerts = GetVertexCount();
-	Con::cout<<"Mesh ("<<*this<<"):"<<Con::endl;
-	for(unsigned int i=0;i<numVerts *3;i+=3)
-	{
-		Con::cout<<"\t("<<m_points[i]<<","<<m_points[i +1]<<","<<m_points[i +1]<<")"<<Con::endl;
+	Con::cout << "Mesh (" << *this << "):" << Con::endl;
+	for(unsigned int i = 0; i < numVerts * 3; i += 3) {
+		Con::cout << "\t(" << m_points[i] << "," << m_points[i + 1] << "," << m_points[i + 1] << ")" << Con::endl;
 	}
 }

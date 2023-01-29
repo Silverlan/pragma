@@ -12,18 +12,14 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/basetoggle.h>
 
-namespace pragma
-{
-	class DLLCLIENT CToggleComponent final
-		: public BaseToggleComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CToggleComponent final : public BaseToggleComponent, public CBaseNetComponent {
+	  public:
 		CToggleComponent(BaseEntity &ent) : BaseToggleComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual Bool ReceiveNetEvent(UInt32 eventId,NetPacket &packet) override;
+		virtual Bool ReceiveNetEvent(UInt32 eventId, NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 };
 

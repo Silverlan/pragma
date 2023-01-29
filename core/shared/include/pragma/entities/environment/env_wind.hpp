@@ -9,12 +9,9 @@
 
 #include "pragma/entities/components/base_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLNETWORK BaseEnvWindComponent
-		: public BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLNETWORK BaseEnvWindComponent : public BaseEntityComponent {
+	  public:
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
 		void SetWindForce(const Vector3 &force);
@@ -23,7 +20,7 @@ namespace pragma
 		const Vector3 &GetWindForce() const;
 		Vector3 GetWindDirection() const;
 		float GetWindSpeed() const;
-	protected:
+	  protected:
 		Vector3 m_windForce;
 	};
 };

@@ -11,6 +11,6 @@
 #include <mathutil/uquat.h>
 #include "pragma/console/conout.h"
 
-DLLNETWORK Con::c_cout& operator<<(Con::c_cout &os,const Quat &q);
+DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const Quat &q);
 
 #endif

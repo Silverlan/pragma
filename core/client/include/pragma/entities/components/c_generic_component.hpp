@@ -12,12 +12,9 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_generic_component.hpp>
 
-namespace pragma
-{
-	class DLLCLIENT CGenericComponent final
-		: public BaseGenericComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CGenericComponent final : public BaseGenericComponent {
+	  public:
 		CGenericComponent(BaseEntity &ent) : BaseGenericComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};

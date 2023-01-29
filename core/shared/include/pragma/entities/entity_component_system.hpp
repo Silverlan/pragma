@@ -16,31 +16,29 @@
 #include <typeindex>
 
 class BaseEntity;
-namespace pragma
-{
+namespace pragma {
 	using ComponentId = uint32_t;
 	using ComponentEventId = uint32_t;
 	class EntityComponentManager;
 	class BaseEntityComponent;
 	struct ComponentEvent;
-	class DLLNETWORK BaseEntityComponentSystem
-	{
-	public:
+	class DLLNETWORK BaseEntityComponentSystem {
+	  public:
 		virtual ~BaseEntityComponentSystem();
-		util::EventReply BroadcastEvent(ComponentEventId ev,ComponentEvent &evData,const BaseEntityComponent *src=nullptr) const;
+		util::EventReply BroadcastEvent(ComponentEventId ev, ComponentEvent &evData, const BaseEntityComponent *src = nullptr) const;
 		util::EventReply BroadcastEvent(ComponentEventId ev) const;
 
-		ComponentHandle<pragma::BaseEntityComponent> AddComponent(const std::string &name,bool bForceCreateNew=false);
-		ComponentHandle<pragma::BaseEntityComponent> AddComponent(ComponentId componentId,bool bForceCreateNew=false);
-		template<class TComponent,typename=std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<BaseEntityComponent,TComponent>::value>>
-			ComponentHandle<TComponent> AddComponent(bool bForceCreateNew=false);
+		ComponentHandle<pragma::BaseEntityComponent> AddComponent(const std::string &name, bool bForceCreateNew = false);
+		ComponentHandle<pragma::BaseEntityComponent> AddComponent(ComponentId componentId, bool bForceCreateNew = false);
+		template<class TComponent, typename = std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<BaseEntityComponent, TComponent>::value>>
+		ComponentHandle<TComponent> AddComponent(bool bForceCreateNew = false);
 		// This will remove ALL components of this type
 		void RemoveComponent(ComponentId componentId);
 		void RemoveComponent(const std::string &name);
 
 		void RemoveComponent(pragma::BaseEntityComponent &component);
-		template<class TComponent,typename=std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<BaseEntityComponent,TComponent>::value>>
-			void RemoveComponent();
+		template<class TComponent, typename = std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<BaseEntityComponent, TComponent>::value>>
+		void RemoveComponent();
 
 		// Removes ALL components
 		void ClearComponents();
@@ -49,12 +47,12 @@ namespace pragma
 		const std::vector<util::TSharedHandle<BaseEntityComponent>> &GetComponents() const;
 		std::vector<util::TSharedHandle<BaseEntityComponent>> &GetComponents();
 
-		template<class TComponent,typename=std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<BaseEntityComponent,TComponent>::value>>
-			ComponentHandle<TComponent> GetComponent() const;
+		template<class TComponent, typename = std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<BaseEntityComponent, TComponent>::value>>
+		ComponentHandle<TComponent> GetComponent() const;
 
 		bool HasComponent(ComponentId componentId) const;
-		template<class TComponent,typename=std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<BaseEntityComponent,TComponent>::value>>
-			bool HasComponent() const;
+		template<class TComponent, typename = std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<BaseEntityComponent, TComponent>::value>>
+		bool HasComponent() const;
 
 		ComponentHandle<BaseEntityComponent> FindComponent(ComponentId componentId) const;
 		ComponentHandle<BaseEntityComponent> FindComponent(const std::string &name) const;
@@ -62,14 +60,14 @@ namespace pragma
 		// For internal use only
 		EntityComponentManager *GetComponentManager();
 		const EntityComponentManager *GetComponentManager() const;
-	protected:
-		BaseEntityComponentSystem()=default;
+	  protected:
+		BaseEntityComponentSystem() = default;
 
-		void Initialize(BaseEntity &ent,EntityComponentManager &componentManager);
+		void Initialize(BaseEntity &ent, EntityComponentManager &componentManager);
 		virtual void OnComponentAdded(BaseEntityComponent &component);
 		virtual void OnComponentRemoved(BaseEntityComponent &component);
-	private:
-		std::unordered_map<ComponentId,ComponentHandle<BaseEntityComponent>> m_componentLookupTable; // Only contains one (the first) component per type; Used for fast lookups
+	  private:
+		std::unordered_map<ComponentId, ComponentHandle<BaseEntityComponent>> m_componentLookupTable; // Only contains one (the first) component per type; Used for fast lookups
 		std::vector<util::TSharedHandle<BaseEntityComponent>> m_components;
 		EntityComponentManager *m_componentManager;
 		BaseEntity *m_entity;

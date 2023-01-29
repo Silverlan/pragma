@@ -16,9 +16,9 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_light_environment,EnvLightDirectional);
+LINK_ENTITY_TO_CLASS(env_light_environment, EnvLightDirectional);
 
-void SLightDirectionalComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SLightDirectionalComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->Write<short>((*m_ambientColor)->r);
 	packet->Write<short>((*m_ambientColor)->g);
@@ -34,16 +34,16 @@ void SLightDirectionalComponent::SetAmbientColor(const Color &color)
 	p->Write<short>(color.g);
 	p->Write<short>(color.b);
 	p->Write<short>(color.a);
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetAmbientColor,p,pragma::networking::Protocol::SlowReliable);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetAmbientColor, p, pragma::networking::Protocol::SlowReliable);
 }
 
-void SLightDirectionalComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SLightDirectionalComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SLightDirectionalComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(SLightComponent))
-		static_cast<SLightComponent&>(component).SetLight(*this);
+		static_cast<SLightComponent &>(component).SetLight(*this);
 }
 
 //////////////

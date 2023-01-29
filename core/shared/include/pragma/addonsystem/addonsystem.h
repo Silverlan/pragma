@@ -16,16 +16,15 @@
 class AddonSystem;
 #pragma warning(push)
 #pragma warning(disable : 4251)
-class DLLNETWORK AddonInfo
-{
-public:
+class DLLNETWORK AddonInfo {
+  public:
 	friend AddonSystem;
-	AddonInfo(const std::string &absPath,const util::Version &version={},const std::string &uniqueId="");
-protected:
+	AddonInfo(const std::string &absPath, const util::Version &version = {}, const std::string &uniqueId = "");
+  protected:
 	std::string m_path;
 	std::string m_uniqueId;
 	util::Version m_version;
-public:
+  public:
 	// Note: The addon directory can be a shortcut, in which case it will have the
 	// .lnk-extension on Windows systems and the path will have to be resolved to
 	// get the actual addon path!
@@ -36,16 +35,17 @@ public:
 };
 
 class DirectoryWatcherCallback;
-namespace upad {class PADPackage;};
-class DLLNETWORK AddonSystem
-{
-public:
+namespace upad {
+	class PADPackage;
+};
+class DLLNETWORK AddonSystem {
+  public:
 	static void MountAddons();
 	static void UnmountAddons();
 	static const std::vector<AddonInfo> &GetMountedAddons();
 	static void Poll();
 	static DirectoryWatcherCallback *GetAddonWatcher();
-private:
+  private:
 	static std::vector<AddonInfo> m_addons;
 	static std::shared_ptr<DirectoryWatcherCallback> m_addonWatcher;
 	static upad::PADPackage *LoadPADPackage(const std::string &path);

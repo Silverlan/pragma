@@ -20,7 +20,7 @@ uint32_t BoneList::AddBone(const std::string &name)
 	return ID;
 }
 
-uint32_t BoneList::GetBoneCount() const {return static_cast<uint32_t>(m_bones.size());}
+uint32_t BoneList::GetBoneCount() const { return static_cast<uint32_t>(m_bones.size()); }
 
 int32_t BoneList::GetBoneID(const std::string &name) const
 {

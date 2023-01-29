@@ -11,16 +11,12 @@
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_bvh_component.hpp>
 
-namespace pragma
-{
-	struct DLLCLIENT AnimatedBvhData
-	{
-		struct DLLCLIENT AnimationBvhData
-		{
+namespace pragma {
+	struct DLLCLIENT AnimatedBvhData {
+		struct DLLCLIENT AnimationBvhData {
 			std::vector<Mat4> boneMatrices;
 		};
-		struct DLLCLIENT MeshData
-		{
+		struct DLLCLIENT MeshData {
 			std::vector<Vector3> transformedVerts;
 		};
 		AnimationBvhData animationBvhData;
@@ -31,18 +27,16 @@ namespace pragma
 		mutable std::mutex completeMutex;
 		uint32_t completeCount = 0;
 	};
-	class DLLCLIENT CAnimatedBvhComponent final
-		: public BaseEntityComponent
-	{
-	public:
+	class DLLCLIENT CAnimatedBvhComponent final : public BaseEntityComponent {
+	  public:
 		CAnimatedBvhComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnRemove() override;
 		void SetUpdateLazily(bool updateLazily);
 		bool ShouldUpdateLazily() const;
-		void RebuildAnimatedBvh(bool force=false);
-	private:
+		void RebuildAnimatedBvh(bool force = false);
+	  private:
 		void RebuildTemporaryBvhData();
 		void Clear();
 		void Cancel();

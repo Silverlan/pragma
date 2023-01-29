@@ -34,23 +34,21 @@
 #include <sharedutils/util_library.hpp>
 #include <pragma/logging.hpp>
 
-static std::unordered_map<std::string,std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
-std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &ServerState::GetConVarPtrs() {return *conVarPtrs;}
+static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
+std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ServerState::GetConVarPtrs() { return *conVarPtrs; }
 ConVarHandle ServerState::GetConVarHandle(std::string scvar)
 {
-	if(conVarPtrs == NULL)
-	{
-		static std::unordered_map<std::string,std::shared_ptr<PtrConVar>> ptrs;
+	if(conVarPtrs == NULL) {
+		static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> ptrs;
 		conVarPtrs = &ptrs;
 	}
-	return NetworkState::GetConVarHandle(*conVarPtrs,scvar);
+	return NetworkState::GetConVarHandle(*conVarPtrs, scvar);
 }
 
 extern DLLNETWORK Engine *engine;
 DLLSERVER ServerState *server = nullptr;
 DLLSERVER SGame *s_game = nullptr;
-ServerState::ServerState()
-	: NetworkState(),m_server(nullptr)
+ServerState::ServerState() : NetworkState(), m_server(nullptr)
 {
 	m_alsoundID = 1;
 	server = this;
@@ -60,12 +58,12 @@ ServerState::ServerState()
 	engine->InitializeAssetManager(*m_modelManager);
 	pragma::asset::update_extension_cache(pragma::asset::Type::Model);
 
-	FileManager::AddCustomMountDirectory("cache",static_cast<fsys::SearchFlags>(FSYS_SEARCH_CACHE));
+	FileManager::AddCustomMountDirectory("cache", static_cast<fsys::SearchFlags>(FSYS_SEARCH_CACHE));
 
-	RegisterCallback<void,SGame*>("EndGame");
-	RegisterCallback<void,SGame*>("OnGameStart");
-	RegisterCallback<void,std::reference_wrapper<NetPacket>,std::reference_wrapper<const nwm::RecipientFilter>>("OnSendPacketTCP");
-	RegisterCallback<void,std::reference_wrapper<NetPacket>,std::reference_wrapper<const nwm::RecipientFilter>>("OnSendPacketUDP");
+	RegisterCallback<void, SGame *>("EndGame");
+	RegisterCallback<void, SGame *>("OnGameStart");
+	RegisterCallback<void, std::reference_wrapper<NetPacket>, std::reference_wrapper<const nwm::RecipientFilter>>("OnSendPacketTCP");
+	RegisterCallback<void, std::reference_wrapper<NetPacket>, std::reference_wrapper<const nwm::RecipientFilter>>("OnSendPacketUDP");
 
 	ResetGameServer();
 }
@@ -75,7 +73,7 @@ ServerState::~ServerState()
 	CloseServer();
 	FileManager::RemoveCustomMountDirectory("cache");
 	auto &conVarPtrs = GetConVarPtrs();
-	for(auto itHandles=conVarPtrs.begin();itHandles!=conVarPtrs.end();itHandles++)
+	for(auto itHandles = conVarPtrs.begin(); itHandles != conVarPtrs.end(); itHandles++)
 		itHandles->second->set(NULL);
 	ResourceManager::ClearResources();
 	m_modelManager->Clear();
@@ -88,58 +86,49 @@ void ServerState::InitializeGameServer(bool singlePlayerLocalGame)
 	m_serverReg = nullptr;
 
 	pragma::networking::ServerEventInterface eventInterface {};
-	eventInterface.onClientDropped = [this](pragma::networking::IServerClient &client,pragma::networking::DropReason reason) {
+	eventInterface.onClientDropped = [this](pragma::networking::IServerClient &client, pragma::networking::DropReason reason) {
 		auto *game = GetGameState();
 		if(game == nullptr)
 			return;
-		game->OnClientDropped(client,reason);
+		game->OnClientDropped(client, reason);
 	};
 	eventInterface.onClientConnected = [](pragma::networking::IServerClient &client) {
 
 	};
-	eventInterface.handlePacket = [this](pragma::networking::IServerClient &client,NetPacket &packet) {
-		HandlePacket(client,packet);
-	};
+	eventInterface.handlePacket = [this](pragma::networking::IServerClient &client, NetPacket &packet) { HandlePacket(client, packet); };
 
-	if(singlePlayerLocalGame == false)
-	{
+	if(singlePlayerLocalGame == false) {
 		auto netLibName = GetConVarString("net_library");
-		auto netModPath = pragma::networking::GetNetworkingModuleLocation(netLibName,true);
+		auto netModPath = pragma::networking::GetNetworkingModuleLocation(netLibName, true);
 		auto port = GetConVarInt("sv_port_tcp");
 		auto usePeerToPeer = GetConVarBool("sv_use_p2p_if_available");
 		std::string err;
-		auto dllHandle = InitializeLibrary(netModPath,&err);
-		if(dllHandle)
-		{
-			auto *fInitNetLib = dllHandle->FindSymbolAddress<void(*)(NetworkState&,std::unique_ptr<pragma::networking::IServer>&)>("initialize_game_server");
-			if(fInitNetLib != nullptr)
-			{
-				fInitNetLib(*this,m_server);
-				if(m_server)
-				{
+		auto dllHandle = InitializeLibrary(netModPath, &err);
+		if(dllHandle) {
+			auto *fInitNetLib = dllHandle->FindSymbolAddress<void (*)(NetworkState &, std::unique_ptr<pragma::networking::IServer> &)>("initialize_game_server");
+			if(fInitNetLib != nullptr) {
+				fInitNetLib(*this, m_server);
+				if(m_server) {
 					m_server->SetEventInterface(eventInterface);
 					pragma::networking::Error err;
-					if(m_server->Start(err,port,usePeerToPeer) == false)
-					{
+					if(m_server->Start(err, port, usePeerToPeer) == false) {
 						m_server = nullptr;
 						m_serverReg = nullptr;
-						Con::cerr<<"Unable to start "<<netLibName<<" server: "<<err.GetMessage()<<Con::endl;
+						Con::cerr << "Unable to start " << netLibName << " server: " << err.GetMessage() << Con::endl;
 					}
 				}
 			}
 			else
-				Con::cerr<<"Unable to initialize networking system '"<<netLibName<<"': Function 'initialize_game_server' not found in module!"<<Con::endl;
+				Con::cerr << "Unable to initialize networking system '" << netLibName << "': Function 'initialize_game_server' not found in module!" << Con::endl;
 		}
 		else
-			Con::cerr<<"Unable to initialize networking system '"<<netLibName<<"': "<<err<<Con::endl;
+			Con::cerr << "Unable to initialize networking system '" << netLibName << "': " << err << Con::endl;
 
-		if(m_server)
-		{
+		if(m_server) {
 			std::string err;
-			auto hLib = InitializeLibrary("steamworks/pr_steamworks",&err);
-			if(hLib)
-			{
-				auto *game = static_cast<SGame*>(GetGameState());
+			auto hLib = InitializeLibrary("steamworks/pr_steamworks", &err);
+			if(hLib) {
+				auto *game = static_cast<SGame *>(GetGameState());
 				auto *gameMode = game ? game->GetGameMode() : nullptr;
 				GameModeInfo;
 				pragma::networking::GameServerInfo serverInfo {};
@@ -159,49 +148,44 @@ void ServerState::InitializeGameServer(bool singlePlayerLocalGame)
 				serverInfo.networkLayerIdentifier = m_server->GetNetworkLayerIdentifier();
 				serverInfo.peer2peer = m_server->IsPeerToPeer();
 				serverInfo.steamId = m_server->GetSteamId();
-				m_serverReg = pragma::networking::MasterServerRegistration::Register(*hLib,serverInfo);
-				if(m_serverReg)
-				{
+				m_serverReg = pragma::networking::MasterServerRegistration::Register(*hLib, serverInfo);
+				if(m_serverReg) {
 					pragma::networking::MasterServerRegistration::CallbackEvents cbEvents {};
-					cbEvents.onAuthCompleted = [this](pragma::networking::MasterServerRegistration::SteamId steamId,bool authSuccess) {
+					cbEvents.onAuthCompleted = [this](pragma::networking::MasterServerRegistration::SteamId steamId, bool authSuccess) {
 						if(m_server == nullptr)
 							return;
 						auto &clients = m_server->GetClients();
-						auto itCl = std::find_if(clients.begin(),clients.end(),[steamId](const std::shared_ptr<pragma::networking::IServerClient> &client) {
-							return client->GetSteamId() == steamId;
-							});
+						auto itCl = std::find_if(clients.begin(), clients.end(), [steamId](const std::shared_ptr<pragma::networking::IServerClient> &client) { return client->GetSteamId() == steamId; });
 						if(itCl == clients.end())
 							return;
-						OnClientAuthenticated(**itCl,authSuccess);
+						OnClientAuthenticated(**itCl, authSuccess);
 					};
 					m_serverReg->SetCallbackEvents(cbEvents);
 				}
 			}
 			else
-				Con::cerr<<"Steamworks module could not be loaded! Server will not show up in steam server browser!"<<Con::endl;
+				Con::cerr << "Steamworks module could not be loaded! Server will not show up in steam server browser!" << Con::endl;
 		}
 	}
-	else
-	{
+	else {
 		m_server = std::make_unique<pragma::networking::LocalServer>();
 		pragma::networking::Error err;
-		m_server->Start(err,0);
+		m_server->Start(err, 0);
 	}
 	if(m_server == nullptr)
 		ResetGameServer();
 }
-void ServerState::OnClientAuthenticated(pragma::networking::IServerClient &session,std::optional<bool> wasAuthenticationSuccessful)
+void ServerState::OnClientAuthenticated(pragma::networking::IServerClient &session, std::optional<bool> wasAuthenticationSuccessful)
 {
-	if(wasAuthenticationSuccessful.has_value() && wasAuthenticationSuccessful == false)
-	{
-		spdlog::info("Authentication for client with steam id '{}' has failed, dropping client...",session.GetSteamId());
-		DropClient(session,pragma::networking::DropReason::AuthenticationFailed);
+	if(wasAuthenticationSuccessful.has_value() && wasAuthenticationSuccessful == false) {
+		spdlog::info("Authentication for client with steam id '{}' has failed, dropping client...", session.GetSteamId());
+		DropClient(session, pragma::networking::DropReason::AuthenticationFailed);
 		return;
 	}
 	NetPacket p;
 	unsigned int numResources = ResourceManager::GetResourceCount();
 	p->Write<unsigned int>(numResources);
-	SendPacket("start_resource_transfer",p,pragma::networking::Protocol::SlowReliable,session);
+	SendPacket("start_resource_transfer", p, pragma::networking::Protocol::SlowReliable, session);
 }
 bool ServerState::ConnectLocalHostPlayerClient()
 {
@@ -239,15 +223,15 @@ void ServerState::Initialize()
 	NetworkState::Initialize();
 }
 
-bool ServerState::LoadSoundScripts(const char *file,bool bPrecache)
+bool ServerState::LoadSoundScripts(const char *file, bool bPrecache)
 {
-	auto r = NetworkState::LoadSoundScripts(file,bPrecache);
+	auto r = NetworkState::LoadSoundScripts(file, bPrecache);
 	if(s_game != nullptr && r != false)
-		s_game->RegisterGameResource(SoundScriptManager::GetSoundScriptPath() +std::string(file));
+		s_game->RegisterGameResource(SoundScriptManager::GetSoundScriptPath() + std::string(file));
 	return r;
 }
 
-void ServerState::InitializeResourceManager() {m_resourceWatcher = std::make_unique<SResourceWatcherManager>(this);}
+void ServerState::InitializeResourceManager() { m_resourceWatcher = std::make_unique<SResourceWatcherManager>(this); }
 
 void ServerState::Close()
 {
@@ -259,42 +243,36 @@ void ServerState::Close()
 void ServerState::Think()
 {
 	NetworkState::Think();
-	if(m_server)
-	{
-		if(m_server->IsRunning())
-		{
+	if(m_server) {
+		if(m_server->IsRunning()) {
 			pragma::networking::Error err;
 			if(m_server->PollEvents(err) == false)
-				Con::cwar<<"Server polling failed: "<<err.GetMessage()<<Con::endl;
+				Con::cwar << "Server polling failed: " << err.GetMessage() << Con::endl;
 		}
 		if(m_serverReg)
 			m_serverReg->UpdateServerData();
 	}
 }
 
-void ServerState::Tick()
-{
-	NetworkState::Tick();
+void ServerState::Tick() { NetworkState::Tick(); }
 
-}
-
-void ServerState::implFindSimilarConVars(const std::string &input,std::vector<SimilarCmdInfo> &similarCmds) const
+void ServerState::implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const
 {
-	NetworkState::implFindSimilarConVars(input,similarCmds);
+	NetworkState::implFindSimilarConVars(input, similarCmds);
 
 	auto *svMap = console_system::server::get_convar_map();
-	NetworkState::FindSimilarConVars(input,svMap->GetConVars(),similarCmds);
+	NetworkState::FindSimilarConVars(input, svMap->GetConVars(), similarCmds);
 }
 
-SGame *ServerState::GetGameState() {return static_cast<SGame*>(NetworkState::GetGameState());}
+SGame *ServerState::GetGameState() { return static_cast<SGame *>(NetworkState::GetGameState()); }
 
-bool ServerState::IsGameActive() {return m_game != nullptr;}
+bool ServerState::IsGameActive() { return m_game != nullptr; }
 
 void ServerState::EndGame()
 {
 	if(!IsGameActive())
 		return;
-	CallCallbacks<void,SGame*>("EndGame",GetGameState());
+	CallCallbacks<void, SGame *>("EndGame", GetGameState());
 	m_game->CallCallbacks<void>("EndGame");
 
 	// Game::OnRemove requires that NetworkState::GetGameState returns
@@ -303,7 +281,7 @@ void ServerState::EndGame()
 	// variable and destroy that instead.
 	// TODO: This is really ugly, do it another way!
 	auto game = std::move(m_game);
-	m_game = {game.get(),[](Game*) {}};
+	m_game = {game.get(), [](Game *) {}};
 	game = nullptr;
 	m_game = nullptr;
 
@@ -316,9 +294,7 @@ void ServerState::EndGame()
 std::shared_ptr<ALSound> ServerState::GetSoundByIndex(unsigned int idx)
 {
 	auto &snds = GetSounds();
-	auto it = std::find_if(snds.begin(),snds.end(),[idx](const ALSoundRef &rsound) {
-		return (rsound.get().GetIndex() == idx) ? true : false;
-	});
+	auto it = std::find_if(snds.begin(), snds.end(), [idx](const ALSoundRef &rsound) { return (rsound.get().GetIndex() == idx) ? true : false; });
 	if(it == snds.end())
 		return nullptr;
 	return it->get().shared_from_this();
@@ -328,24 +304,24 @@ void ServerState::StartGame(bool singlePlayer)
 {
 	NetworkState::StartGame(singlePlayer);
 	StartServer(singlePlayer);
-	m_game = {new SGame{this},[](Game *game) {game->OnRemove(); delete game;}};
-	s_game = static_cast<SGame*>(m_game.get());
+	m_game = {new SGame {this}, [](Game *game) {
+		          game->OnRemove();
+		          delete game;
+	          }};
+	s_game = static_cast<SGame *>(m_game.get());
 
 	// Register sound-scripts as game resources
 	for(auto &f : m_soundScriptManager->GetSoundScriptFiles())
 		GetGameState()->RegisterGameResource(f);
-	for(auto &pair : m_soundScriptManager->GetScripts())
-	{
+	for(auto &pair : m_soundScriptManager->GetScripts()) {
 		auto &script = pair.second;
-		std::function<void(SoundScriptEventContainer&)> fIterateScript = nullptr;
-		fIterateScript = [this,&fIterateScript](SoundScriptEventContainer &c) {
-			for(auto &ev : c.GetEvents())
-			{
-				auto *evPlaySound = dynamic_cast<SSEPlaySound*>(ev.get());
-				if(evPlaySound != nullptr)
-				{
+		std::function<void(SoundScriptEventContainer &)> fIterateScript = nullptr;
+		fIterateScript = [this, &fIterateScript](SoundScriptEventContainer &c) {
+			for(auto &ev : c.GetEvents()) {
+				auto *evPlaySound = dynamic_cast<SSEPlaySound *>(ev.get());
+				if(evPlaySound != nullptr) {
 					for(auto &src : evPlaySound->sources)
-						GetGameState()->RegisterGameResource("sounds\\" +src);
+						GetGameState()->RegisterGameResource("sounds\\" + src);
 				}
 				fIterateScript(*ev);
 			}
@@ -353,24 +329,20 @@ void ServerState::StartGame(bool singlePlayer)
 		fIterateScript(*script);
 	}
 
-	CallCallbacks<void,SGame*>("OnGameStart",GetGameState());
+	CallCallbacks<void, SGame *>("OnGameStart", GetGameState());
 	m_game->Initialize();
 	m_game->OnInitialized();
 	if(IsServerRunning())
 		RegisterServerInfo();
 }
 
-std::string ServerState::GetMessagePrefix() const
-{
-	return std::string{Con::PREFIX_SERVER};
-}
+std::string ServerState::GetMessagePrefix() const { return std::string {Con::PREFIX_SERVER}; }
 
 void ServerState::ChangeLevel(const std::string &map)
 {
 	NetworkState::ChangeLevel(map);
 	auto *game = GetGameState();
-	if(game != nullptr)
-	{
+	if(game != nullptr) {
 		auto &mapInfo = game->GetMapInfo();
 		ResourceManager::AddResource(mapInfo.fileName);
 	}
@@ -378,35 +350,33 @@ void ServerState::ChangeLevel(const std::string &map)
 	game->OnGameReady();
 }
 
-bool ServerState::IsMultiPlayer() const {return m_server && typeid(*m_server) != typeid(pragma::networking::LocalServer);}
-bool ServerState::IsSinglePlayer() const {return !IsMultiPlayer();}
+bool ServerState::IsMultiPlayer() const { return m_server && typeid(*m_server) != typeid(pragma::networking::LocalServer); }
+bool ServerState::IsSinglePlayer() const { return !IsMultiPlayer(); }
 
-ConVar *ServerState::SetConVar(std::string scmd,std::string value,bool bApplyIfEqual)
+ConVar *ServerState::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
 {
-	auto *cvar = NetworkState::SetConVar(scmd,value,bApplyIfEqual);
+	auto *cvar = NetworkState::SetConVar(scmd, value, bApplyIfEqual);
 	if(cvar == nullptr)
 		return nullptr;
 	auto flags = cvar->GetFlags();
-	if(((flags &ConVarFlags::Replicated) == ConVarFlags::Replicated || (flags &ConVarFlags::Notify) == ConVarFlags::Notify))
-	{
+	if(((flags & ConVarFlags::Replicated) == ConVarFlags::Replicated || (flags & ConVarFlags::Notify) == ConVarFlags::Notify)) {
 		auto *cl = engine->GetClientState();
-		if(cl != nullptr)
-		{
+		if(cl != nullptr) {
 			// This is a locally hosted game, just inform the client directly
-			engine->SetReplicatedConVar(scmd,cvar->GetString());
+			engine->SetReplicatedConVar(scmd, cvar->GetString());
 			return cvar;
 		}
 		NetPacket p;
 		p->WriteString(scmd);
 		p->WriteString(cvar->GetString());
-		SendPacket("cvar_set",p,pragma::networking::Protocol::SlowReliable);
+		SendPacket("cvar_set", p, pragma::networking::Protocol::SlowReliable);
 	}
 	return cvar;
 }
 
-pragma::SPlayerComponent *ServerState::GetPlayer(const pragma::networking::IServerClient &session) {return session.GetPlayer();}
-bool ServerState::IsServer() const {return true;}
-ConVarMap *ServerState::GetConVarMap() {return console_system::server::get_convar_map();}
+pragma::SPlayerComponent *ServerState::GetPlayer(const pragma::networking::IServerClient &session) { return session.GetPlayer(); }
+bool ServerState::IsServer() const { return true; }
+ConVarMap *ServerState::GetConVarMap() { return console_system::server::get_convar_map(); }
 
 void ServerState::ClearConCommands()
 {
@@ -416,77 +386,72 @@ void ServerState::ClearConCommands()
 	if(map == NULL)
 		m_conCommandID = 0;
 	else
-		m_conCommandID = map->GetConVarCount() +1;
+		m_conCommandID = map->GetConVarCount() + 1;
 }
 
-ConCommand *ServerState::CreateConCommand(const std::string &scmd,LuaFunction fc,ConVarFlags flags,const std::string &help)
+ConCommand *ServerState::CreateConCommand(const std::string &scmd, LuaFunction fc, ConVarFlags flags, const std::string &help)
 {
 	auto lscmd = scmd;
 	ustring::to_lower(lscmd);
-	auto *cmd = NetworkState::CreateConCommand(scmd,fc,flags,help);
+	auto *cmd = NetworkState::CreateConCommand(scmd, fc, flags, help);
 	if(cmd == nullptr)
 		return nullptr;
 	cmd->m_ID = m_conCommandID;
 	m_conCommandID++;
-	m_luaConCommands.insert(decltype(m_luaConCommands)::value_type(scmd,cmd));
-	m_conCommandIDs.insert(decltype(m_conCommandIDs)::value_type(scmd,cmd->GetID()));
+	m_luaConCommands.insert(decltype(m_luaConCommands)::value_type(scmd, cmd));
+	m_conCommandIDs.insert(decltype(m_conCommandIDs)::value_type(scmd, cmd->GetID()));
 
 	NetPacket packet;
 	packet->WriteString(scmd);
 	packet->Write<unsigned int>(cmd->GetID());
-	SendPacket("luacmd_reg",packet,pragma::networking::Protocol::SlowReliable);
+	SendPacket("luacmd_reg", packet, pragma::networking::Protocol::SlowReliable);
 	return cmd;
 }
-WMServerData &ServerState::GetServerData() {return m_serverData;}
+WMServerData &ServerState::GetServerData() { return m_serverData; }
 
-void ServerState::GetLuaConCommands(std::unordered_map<std::string,ConCommand*> **cmds) {*cmds = &m_luaConCommands;}
+void ServerState::GetLuaConCommands(std::unordered_map<std::string, ConCommand *> **cmds) { *cmds = &m_luaConCommands; }
 
-Material *ServerState::LoadMaterial(const std::string &path,bool precache,bool bReload)
+Material *ServerState::LoadMaterial(const std::string &path, bool precache, bool bReload)
 {
 	auto &matManager = GetMaterialManager();
 	auto success = true;
 	Material *mat = nullptr;
-	if(precache)
-	{
+	if(precache) {
 		success = matManager.PreloadAsset(path);
 		return nullptr;
 	}
-	else if(bReload)
-	{
+	else if(bReload) {
 		auto asset = matManager.ReloadAsset(path);
 		success = (asset != nullptr);
 		mat = asset.get();
 	}
-	else
-	{
+	else {
 		util::FileAssetManager::PreloadResult result {};
-		auto asset = matManager.LoadAsset(path,nullptr,&result);
+		auto asset = matManager.LoadAsset(path, nullptr, &result);
 		success = (asset != nullptr);
 		mat = asset.get();
 		if(!result && !result.firstTimeError)
 			return nullptr;
 	}
-	if(!success)
-	{
+	if(!success) {
 		static auto bSkipPort = false;
-		if(bSkipPort == false)
-		{
+		if(bSkipPort == false) {
 			bSkipPort = true;
 			auto b = PortMaterial(path);
 			bSkipPort = false;
 			if(b == true)
 				return mat;
 		}
-		Con::cwar<<"Unable to load material '"<<path<<"': File not found!"<<Con::endl;
+		Con::cwar << "Unable to load material '" << path << "': File not found!" << Con::endl;
 	}
 	return mat;
 }
 
-msys::MaterialManager &ServerState::GetMaterialManager() {return *engine->GetServerStateInstance().materialManager;}
-ModelSubMesh *ServerState::CreateSubMesh() const {return new ModelSubMesh;}
-ModelMesh *ServerState::CreateMesh() const {return new ModelMesh;}
+msys::MaterialManager &ServerState::GetMaterialManager() { return *engine->GetServerStateInstance().materialManager; }
+ModelSubMesh *ServerState::CreateSubMesh() const { return new ModelSubMesh; }
+ModelMesh *ServerState::CreateMesh() const { return new ModelMesh; }
 
-REGISTER_CONVAR_CALLBACK_SV(sv_tickrate,[](NetworkState*,ConVar*,int,int val) {
+REGISTER_CONVAR_CALLBACK_SV(sv_tickrate, [](NetworkState *, ConVar *, int, int val) {
 	if(val < 0)
 		val = 0;
 	engine->SetTickRate(val);
@@ -494,47 +459,46 @@ REGISTER_CONVAR_CALLBACK_SV(sv_tickrate,[](NetworkState*,ConVar*,int,int val) {
 
 ////////////////
 
-extern "C"
+extern "C" {
+DLLSERVER void pr_sv_create_server_state(std::unique_ptr<ServerState> &outState) { outState = std::make_unique<ServerState>(); }
+DLLSERVER void pr_sv_start_server(bool singlePlayer)
 {
-	DLLSERVER void pr_sv_create_server_state(std::unique_ptr<ServerState> &outState) {outState = std::make_unique<ServerState>();}
-	DLLSERVER void pr_sv_start_server(bool singlePlayer)
-	{
-		if(server == nullptr)
-			return;
-		server->StartServer(singlePlayer);
-	}
-	DLLSERVER void pr_sv_close_server()
-	{
-		if(server == nullptr)
-			return;
-		server->CloseServer();
-	}
-	DLLSERVER bool pr_sv_is_server_running()
-	{
-		if(server == nullptr)
-			return false;
-		return server->IsServerRunning();
-	}
-	DLLSERVER void pr_sv_get_server_steam_id(std::optional<uint64_t> &outSteamId)
-	{
-		outSteamId = {};
-		if(server == nullptr)
-			return;
-		auto *sv = server->GetServer();
-		outSteamId = sv ? sv->GetSteamId() : std::optional<uint64_t>{};
-	}
-	DLLSERVER ServerState *pr_sv_get_server_state() {return server;}
-	DLLSERVER void pr_sv_clear_server_state() {server = nullptr;}
-	DLLSERVER void pr_sv_handle_local_host_player_server_packet(NetPacket &packet)
-	{
-		if(server == nullptr)
-			return;
-		server->HandlePacket(*server->GetLocalClient(),packet);
-	}
-	DLLSERVER bool pr_sv_connect_local_host_player_client()
-	{
-		if(server == nullptr)
-			return false;
-		return server->ConnectLocalHostPlayerClient();
-	}
+	if(server == nullptr)
+		return;
+	server->StartServer(singlePlayer);
+}
+DLLSERVER void pr_sv_close_server()
+{
+	if(server == nullptr)
+		return;
+	server->CloseServer();
+}
+DLLSERVER bool pr_sv_is_server_running()
+{
+	if(server == nullptr)
+		return false;
+	return server->IsServerRunning();
+}
+DLLSERVER void pr_sv_get_server_steam_id(std::optional<uint64_t> &outSteamId)
+{
+	outSteamId = {};
+	if(server == nullptr)
+		return;
+	auto *sv = server->GetServer();
+	outSteamId = sv ? sv->GetSteamId() : std::optional<uint64_t> {};
+}
+DLLSERVER ServerState *pr_sv_get_server_state() { return server; }
+DLLSERVER void pr_sv_clear_server_state() { server = nullptr; }
+DLLSERVER void pr_sv_handle_local_host_player_server_packet(NetPacket &packet)
+{
+	if(server == nullptr)
+		return;
+	server->HandlePacket(*server->GetLocalClient(), packet);
+}
+DLLSERVER bool pr_sv_connect_local_host_player_client()
+{
+	if(server == nullptr)
+		return false;
+	return server->ConnectLocalHostPlayerClient();
+}
 }

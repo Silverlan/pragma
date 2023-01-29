@@ -12,35 +12,29 @@
 #include "pragma/entities/environment/audio/env_sound.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLCLIENT CSoundComponent final
-		: public BaseEnvSoundComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CSoundComponent final : public BaseEnvSoundComponent, public CBaseNetComponent {
+	  public:
 		CSoundComponent(BaseEntity &ent) : BaseEnvSoundComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		float GetMaxDistance() const;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void OnEntitySpawn() override;
 #if ALSYS_STEAM_AUDIO_SUPPORT_ENABLED == 1
-	public:
+	  public:
 		const std::string &GetSteamAudioIdentifier() const;
-	protected:
+	  protected:
 		std::string m_steamAudioIdentifier;
 #endif
-	protected:
+	  protected:
 		float m_kvMaxDistance = 0.f;
 		std::weak_ptr<ALSound> m_wpSound = {};
 	};
 };
 
-class DLLCLIENT CEnvSound
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEnvSound : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

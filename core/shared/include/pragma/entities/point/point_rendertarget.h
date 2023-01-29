@@ -11,15 +11,12 @@
 #include <string>
 #include "pragma/entities/components/basetoggle.h"
 
-namespace pragma
-{
-	class DLLNETWORK BasePointRenderTargetComponent
-		: public BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLNETWORK BasePointRenderTargetComponent : public BaseEntityComponent {
+	  public:
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
-	protected:
+	  protected:
 		std::string m_kvMaterial;
 		float m_kvFOV = 75.f;
 		float m_kvRefreshRate = 0.f;

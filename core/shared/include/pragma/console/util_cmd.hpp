@@ -12,12 +12,12 @@
 
 class Game;
 class BaseEntity;
-namespace pragma {class BasePlayerComponent;};
-namespace util
-{
-	namespace cmd
-	{
-		DLLNETWORK std::vector<std::pair<BaseEntity*,float>> get_sorted_entities(Game &game,::pragma::BasePlayerComponent *pl=nullptr);
+namespace pragma {
+	class BasePlayerComponent;
+};
+namespace util {
+	namespace cmd {
+		DLLNETWORK std::vector<std::pair<BaseEntity *, float>> get_sorted_entities(Game &game, ::pragma::BasePlayerComponent *pl = nullptr);
 	};
 };
 

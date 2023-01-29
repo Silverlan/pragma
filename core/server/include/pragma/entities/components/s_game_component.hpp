@@ -10,21 +10,16 @@
 #include "pragma/serverdefinitions.h"
 #include <pragma/entities/components/base_game_component.hpp>
 
-namespace pragma
-{
-	class DLLSERVER SGameComponent final
-		: public BaseGameComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SGameComponent final : public BaseGameComponent {
+	  public:
 		SGameComponent(BaseEntity &ent) : BaseGameComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLSERVER SGameEntity
-	: public SBaseEntity
-{
-public:
+class DLLSERVER SGameEntity : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

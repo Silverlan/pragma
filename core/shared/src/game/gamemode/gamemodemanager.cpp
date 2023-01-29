@@ -13,24 +13,22 @@
 #include <sharedutils/scope_guard.h>
 #include <udm.hpp>
 
-std::unordered_map<std::string,GameModeInfo> GameModeManager::m_gameModes;
+std::unordered_map<std::string, GameModeInfo> GameModeManager::m_gameModes;
 void GameModeManager::Initialize()
 {
 	std::vector<std::string> directories;
 	std::string dir = "lua/gamemodes/components/";
-	FileManager::FindFiles((dir +"*").c_str(),nullptr,&directories);
-	for(auto it=directories.begin();it!=directories.end();++it)
-	{
+	FileManager::FindFiles((dir + "*").c_str(), nullptr, &directories);
+	for(auto it = directories.begin(); it != directories.end(); ++it) {
 		auto path = dir;
 		path += *it;
 		path += "/info.udm";
 		std::string err;
-		auto udmData = ::util::load_udm_asset(path,&err);
+		auto udmData = ::util::load_udm_asset(path, &err);
 		if(udmData == nullptr)
 			continue;
 		auto udm = udmData->GetAssetData().GetData();
-		for(auto &pair : udm.ElIt())
-		{
+		for(auto &pair : udm.ElIt()) {
 			if(!pair.property.IsType(udm::Type::Element))
 				continue;
 			auto udmGm = pair.property;
@@ -48,8 +46,8 @@ void GameModeManager::Initialize()
 			udmGm["author"](gmInfo.author);
 			udmGm["initial_map"](gmInfo.initial_map);
 			for(auto &pair : udmGm["mount_priorities"].ElIt())
-				gmInfo.gameMountPriorities[std::string{pair.key}] = pair.property.ToValue<udm::Int32>(0);
-			
+				gmInfo.gameMountPriorities[std::string {pair.key}] = pair.property.ToValue<udm::Int32>(0);
+
 			std::string version {};
 			udmGm["version"](version);
 			gmInfo.version = util::string_to_version(version);
@@ -58,7 +56,7 @@ void GameModeManager::Initialize()
 	}
 }
 
-std::unordered_map<std::string,GameModeInfo> &GameModeManager::GetGameModes() {return m_gameModes;}
+std::unordered_map<std::string, GameModeInfo> &GameModeManager::GetGameModes() { return m_gameModes; }
 GameModeInfo *GameModeManager::GetGameModeInfo(const std::string &id)
 {
 	auto it = m_gameModes.find(id);

@@ -11,28 +11,24 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include <mathutil/uvec.h>
 
-namespace pragma
-{
-	class DLLCLIENT ShaderUnlit
-		: public ShaderGameWorldLightingPass
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT ShaderUnlit : public ShaderGameWorldLightingPass {
+	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
-		enum class MaterialBinding : uint32_t
-		{
+		enum class MaterialBinding : uint32_t {
 			MaterialSettings = umath::to_integral(ShaderGameWorldLightingPass::MaterialBinding::MaterialSettings),
 			AlbedoMap,
 
 			Count
 		};
 
-		ShaderUnlit(prosper::IPrContext &context,const std::string &identifier);
+		ShaderUnlit(prosper::IPrContext &context, const std::string &identifier);
 
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
-	protected:
+	  protected:
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
-		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo);
+		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo);
 	};
 };
 

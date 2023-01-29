@@ -11,14 +11,12 @@
 #include "pragma/util/util_thread_pool.hpp"
 
 class Game;
-namespace pragma
-{
-	struct AnimationUpdateManager
-	{
+namespace pragma {
+	struct AnimationUpdateManager {
 		AnimationUpdateManager(Game &game);
 
 		void UpdateAnimations(double dt);
-	private:
+	  private:
 		void UpdateEntityAnimationDrivers(double dt);
 		void UpdateConstraints(double dt);
 

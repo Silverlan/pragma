@@ -13,31 +13,42 @@
 #include <mathutil/color.h>
 #include <optional>
 
-struct DLLNETWORK DebugRenderInfo
-{
-	DebugRenderInfo()=default;
-	DebugRenderInfo(const umath::Transform &pose,const Color &color)
-		: pose{pose},color{color}
-	{}
-	DebugRenderInfo(const umath::Transform &pose,const Color &color,const Color &outlineColor)
-		: pose{pose},color{color},outlineColor{outlineColor}
-	{}
-	DebugRenderInfo(const umath::Transform &pose,const Color &color,float duration)
-		: pose{pose},color{color},duration{duration}
-	{}
-	DebugRenderInfo(const umath::Transform &pose,const Color &color,const Color &outlineColor,float duration)
-		: pose{pose},color{color},outlineColor{outlineColor},duration{duration}
-	{}
+struct DLLNETWORK DebugRenderInfo {
+	DebugRenderInfo() = default;
+	DebugRenderInfo(const umath::Transform &pose, const Color &color) : pose {pose}, color {color} {}
+	DebugRenderInfo(const umath::Transform &pose, const Color &color, const Color &outlineColor) : pose {pose}, color {color}, outlineColor {outlineColor} {}
+	DebugRenderInfo(const umath::Transform &pose, const Color &color, float duration) : pose {pose}, color {color}, duration {duration} {}
+	DebugRenderInfo(const umath::Transform &pose, const Color &color, const Color &outlineColor, float duration) : pose {pose}, color {color}, outlineColor {outlineColor}, duration {duration} {}
 	umath::Transform pose {};
 	Color color;
 	std::optional<Color> outlineColor {};
 	float duration = 0.f;
 
-	DebugRenderInfo &SetOrigin(const Vector3 &origin) {pose.SetOrigin(origin); return *this;}
-	DebugRenderInfo &SetRotation(const Quat &rot) {pose.SetRotation(rot); return *this;}
-	DebugRenderInfo &SetColor(const Color &color) {this->color = color; return *this;}
-	DebugRenderInfo &SetOutlineColor(const Color &color) {this->outlineColor = color; return *this;}
-	DebugRenderInfo &SetDuration(float duration) {this->duration = duration; return *this;}
+	DebugRenderInfo &SetOrigin(const Vector3 &origin)
+	{
+		pose.SetOrigin(origin);
+		return *this;
+	}
+	DebugRenderInfo &SetRotation(const Quat &rot)
+	{
+		pose.SetRotation(rot);
+		return *this;
+	}
+	DebugRenderInfo &SetColor(const Color &color)
+	{
+		this->color = color;
+		return *this;
+	}
+	DebugRenderInfo &SetOutlineColor(const Color &color)
+	{
+		this->outlineColor = color;
+		return *this;
+	}
+	DebugRenderInfo &SetDuration(float duration)
+	{
+		this->duration = duration;
+		return *this;
+	}
 };
 
 #endif

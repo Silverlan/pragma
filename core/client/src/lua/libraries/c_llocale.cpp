@@ -13,72 +13,59 @@
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-void Lua::Locale::change_language(const std::string &lan)
-{
-	::Locale::SetLanguage(lan);
-}
+void Lua::Locale::change_language(const std::string &lan) { ::Locale::SetLanguage(lan); }
 
-void Lua::Locale::set_localization(const std::string &id,const std::string &text)
-{
-	::Locale::SetLocalization(id,text);
-}
+void Lua::Locale::set_localization(const std::string &id, const std::string &text) { ::Locale::SetLocalization(id, text); }
 
 int Lua::Locale::get_text(lua_State *l)
 {
-	auto id = Lua::CheckString(l,1);
+	auto id = Lua::CheckString(l, 1);
 	std::vector<std::string> args {};
 	auto bReturnSuccess = false;
 	auto argIdx = 2;
-	if(Lua::IsSet(l,argIdx) && Lua::IsTable(l,argIdx))
-	{
-		auto numArgs = Lua::GetObjectLength(l,argIdx);
+	if(Lua::IsSet(l, argIdx) && Lua::IsTable(l, argIdx)) {
+		auto numArgs = Lua::GetObjectLength(l, argIdx);
 		args.reserve(numArgs);
-		for(auto i=decltype(numArgs){0u};i<numArgs;++i)
-		{
-			Lua::PushInt(l,i +1);
-			Lua::GetTableValue(l,argIdx);
-			args.push_back(Lua::CheckString(l,-1));
+		for(auto i = decltype(numArgs) {0u}; i < numArgs; ++i) {
+			Lua::PushInt(l, i + 1);
+			Lua::GetTableValue(l, argIdx);
+			args.push_back(Lua::CheckString(l, -1));
 
-			Lua::Pop(l,1);
+			Lua::Pop(l, 1);
 		}
 		++argIdx;
 	}
-	else if(Lua::IsNil(l,argIdx))
+	else if(Lua::IsNil(l, argIdx))
 		++argIdx;
-	if(Lua::IsSet(l,argIdx))
-		bReturnSuccess = Lua::CheckBool(l,argIdx);
+	if(Lua::IsSet(l, argIdx))
+		bReturnSuccess = Lua::CheckBool(l, argIdx);
 	uint32_t numResults = 1;
-	if(bReturnSuccess == true)
-	{
+	if(bReturnSuccess == true) {
 		std::string r;
-		auto b = ::Locale::GetText(id,args,r);
-		Lua::PushBool(l,b);
-		Lua::PushString(l,r);
+		auto b = ::Locale::GetText(id, args, r);
+		Lua::PushBool(l, b);
+		Lua::PushString(l, r);
 		++numResults;
 		return numResults;
 	}
-	Lua::PushString(l,::Locale::GetText(id,args));
+	Lua::PushString(l, ::Locale::GetText(id, args));
 	return numResults;
 }
 
-bool Lua::Locale::load(const std::string &fileName) {return ::Locale::Load(fileName) != ::Locale::LoadResult::Failed;}
+bool Lua::Locale::load(const std::string &fileName) { return ::Locale::Load(fileName) != ::Locale::LoadResult::Failed; }
 
-const std::string &Lua::Locale::get_language() {return ::Locale::GetLanguage();}
+const std::string &Lua::Locale::get_language() { return ::Locale::GetLanguage(); }
 
 int Lua::Locale::get_languages(lua_State *l)
 {
 	auto languages = ::Locale::GetLanguages();
 	auto t = Lua::CreateTable(l);
-	for(auto &pair : languages)
-	{
-		Lua::PushString(l,pair.first);
-		Lua::PushString(l,pair.second.displayName);
-		Lua::SetTableValue(l,t);
+	for(auto &pair : languages) {
+		Lua::PushString(l, pair.first);
+		Lua::PushString(l, pair.second.displayName);
+		Lua::SetTableValue(l, t);
 	}
 	return 1;
 }
 
-bool Lua::Locale::localize(const std::string &identifier,const std::string &lan,const std::string &category,const std::string &text)
-{
-	return ::Locale::Localize(identifier,lan,category,text);
-}
+bool Lua::Locale::localize(const std::string &identifier, const std::string &lan, const std::string &category, const std::string &text) { return ::Locale::Localize(identifier, lan, category, text); }

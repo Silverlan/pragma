@@ -12,26 +12,20 @@
 #include <vector>
 #include <string>
 
-namespace pragma::lua
-{
-	class RepositoryManager
-	{
-	public:
+namespace pragma::lua {
+	class RepositoryManager {
+	  public:
 		static constexpr auto REPOSITORY_CHECKOUT_URL = "https://github.com/Silverlan/pragma.git";
 		static constexpr auto REPOSITORY_URL = "https://github.com/Silverlan/pragma/blob/";
 		static constexpr auto REPOSITORY_BRANCH = "master";
-		static std::unique_ptr<RepositoryManager> Create(lua_State *l,std::string &outErr);
+		static std::unique_ptr<RepositoryManager> Create(lua_State *l, std::string &outErr);
 		bool LoadRepositoryReferences(std::string &outErr);
-	private:
-		RepositoryManager()=default;
+	  private:
+		RepositoryManager() = default;
 		void ClearLocalRepositoryDir();
-		static void CollectSourceCodeFiles(const std::string &sourceCodeLocation,std::vector<std::string> &outFiles);
+		static void CollectSourceCodeFiles(const std::string &sourceCodeLocation, std::vector<std::string> &outFiles);
 
-		using GitClone = bool(*)(
-			const std::string&,const std::string&,
-			const std::vector<std::string>&,const std::string&,std::string&,
-			std::string*
-		);
+		using GitClone = bool (*)(const std::string &, const std::string &, const std::vector<std::string> &, const std::string &, std::string &, std::string *);
 
 		GitClone m_gitClone = nullptr;
 		std::string m_repositoryRootDir = "core/";

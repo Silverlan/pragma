@@ -14,44 +14,40 @@ extern DLLCLIENT ClientState *client;
 
 #define DEBUG_CLIENT_VERBOSE 1
 
-void pragma::networking::NWMClientConnection::OnPacketSent(const NWMEndpoint &ep,const NetPacket &packet)
+void pragma::networking::NWMClientConnection::OnPacketSent(const NWMEndpoint &ep, const NetPacket &packet)
 {
-	nwm::Client::OnPacketSent(ep,packet);
+	nwm::Client::OnPacketSent(ep, packet);
 #if DEBUG_CLIENT_VERBOSE == 1
 	auto id = packet.GetMessageID();
 	auto *svMap = GetServerMessageMap();
-	std::unordered_map<std::string,uint32_t> *svMsgs;
+	std::unordered_map<std::string, uint32_t> *svMsgs;
 	svMap->GetNetMessages(&svMsgs);
-	auto it = std::find_if(svMsgs->begin(),svMsgs->end(),[id](const std::pair<std::string,uint32_t> &pair) {
-		return (pair.second == id) ? true : false;
-	});
+	auto it = std::find_if(svMsgs->begin(), svMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != svMsgs->end()) ? it->first : "Unknown";
-	Con::ccl<<"OnPacketSent: "<<msgName<<" ("<<id<<")"<<Con::endl;
+	Con::ccl << "OnPacketSent: " << msgName << " (" << id << ")" << Con::endl;
 #endif
-	MemorizeNetMessage(MessageTracker::MessageType::Outgoing,packet.GetMessageID(),ep,packet);
+	MemorizeNetMessage(MessageTracker::MessageType::Outgoing, packet.GetMessageID(), ep, packet);
 }
-void pragma::networking::NWMClientConnection::OnPacketReceived(const NWMEndpoint &ep,unsigned int id,NetPacket &packet)
+void pragma::networking::NWMClientConnection::OnPacketReceived(const NWMEndpoint &ep, unsigned int id, NetPacket &packet)
 {
-	nwm::Client::OnPacketReceived(ep,id,packet);
+	nwm::Client::OnPacketReceived(ep, id, packet);
 #if DEBUG_CLIENT_VERBOSE == 1
 	auto *clMap = GetClientMessageMap();
-	std::unordered_map<std::string,uint32_t> *clMsgs;
+	std::unordered_map<std::string, uint32_t> *clMsgs;
 	clMap->GetNetMessages(&clMsgs);
-	auto it = std::find_if(clMsgs->begin(),clMsgs->end(),[id](const std::pair<std::string,uint32_t> &pair) {
-		return (pair.second == id) ? true : false;
-	});
+	auto it = std::find_if(clMsgs->begin(), clMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != clMsgs->end()) ? it->first : "Unknown";
-	Con::ccl<<"OnPacketReceived: "<<msgName<<" ("<<id<<")"<<Con::endl;
+	Con::ccl << "OnPacketReceived: " << msgName << " (" << id << ")" << Con::endl;
 #endif
-	MemorizeNetMessage(MessageTracker::MessageType::Incoming,id,ep,packet);
+	MemorizeNetMessage(MessageTracker::MessageType::Incoming, id, ep, packet);
 }
 
-bool pragma::networking::NWMClientConnection::HandlePacket(const NWMEndpoint &ep,unsigned int id,NetPacket &packet)
+bool pragma::networking::NWMClientConnection::HandlePacket(const NWMEndpoint &ep, unsigned int id, NetPacket &packet)
 {
 #if DEBUG_CLIENT_VERBOSE == 1
-	Con::ccl<<"HandlePacket: "<<id<<Con::endl;
+	Con::ccl << "HandlePacket: " << id << Con::endl;
 #endif
-	if(nwm::Client::HandlePacket(ep,id,packet) == true)
+	if(nwm::Client::HandlePacket(ep, id, packet) == true)
 		return true;
 	m_client->HandlePacket(packet);
 	return true;
@@ -59,7 +55,7 @@ bool pragma::networking::NWMClientConnection::HandlePacket(const NWMEndpoint &ep
 void pragma::networking::NWMClientConnection::OnConnected()
 {
 #if DEBUG_CLIENT_VERBOSE == 1
-	Con::ccl<<"Connected to server..."<<Con::endl;
+	Con::ccl << "Connected to server..." << Con::endl;
 #endif
 	m_client->OnConnected();
 }
@@ -67,42 +63,36 @@ void pragma::networking::NWMClientConnection::OnClosed()
 {
 	auto err = GetLastError();
 #if DEBUG_CLIENT_VERBOSE == 1
-	Con::ccl<<"Connection to server has closed: "<<err.Message()<<Con::endl;
+	Con::ccl << "Connection to server has closed: " << err.Message() << Con::endl;
 #endif
 	m_client->OnConnectionClosed();
 }
 void pragma::networking::NWMClientConnection::OnDisconnected(nwm::ClientDropped reason)
 {
 #if DEBUG_CLIENT_VERBOSE == 1
-	Con::ccl<<"Disconnected from server ("<<nwm::client_dropped_enum_to_string(reason)<<")..."<<Con::endl;
+	Con::ccl << "Disconnected from server (" << nwm::client_dropped_enum_to_string(reason) << ")..." << Con::endl;
 #endif
 	m_bDisconnected = true;
 	m_client->OnDisconnected();
 }
 
-pragma::networking::NWMClientConnection::NWMClientConnection(const std::shared_ptr<CLNWMUDPConnection> &udp,std::shared_ptr<CLNWMTCPConnection> &tcp)
-	: nwm::Client(udp,tcp)
-{}
+pragma::networking::NWMClientConnection::NWMClientConnection(const std::shared_ptr<CLNWMUDPConnection> &udp, std::shared_ptr<CLNWMTCPConnection> &tcp) : nwm::Client(udp, tcp) {}
 
-std::unique_ptr<pragma::networking::NWMClientConnection> pragma::networking::NWMClientConnection::Create(const std::string &serverIp,unsigned short serverPort)
+std::unique_ptr<pragma::networking::NWMClientConnection> pragma::networking::NWMClientConnection::Create(const std::string &serverIp, unsigned short serverPort)
 {
 	std::unique_ptr<NWMClientConnection> cl = nullptr;
 	NWMException lastException("No error.");
-	for(unsigned short localPort=27018;localPort<27034;localPort++)
-	{
-		try
-		{
-			cl = nwm::Client::Create<NWMClientConnection>(serverIp,serverPort,localPort,nwm::ConnectionType::TCPUDP);
+	for(unsigned short localPort = 27018; localPort < 27034; localPort++) {
+		try {
+			cl = nwm::Client::Create<NWMClientConnection>(serverIp, serverPort, localPort, nwm::ConnectionType::TCPUDP);
 			break;
 		}
-		catch(NWMException &e)
-		{
+		catch(NWMException &e) {
 			lastException = e;
 		}
 	}
-	if(cl == nullptr)
-	{
-		Con::cwar<<"Unable to connect to server '"<<serverIp<<":"<<serverPort<<": "<<lastException.what()<<Con::endl;
+	if(cl == nullptr) {
+		Con::cwar << "Unable to connect to server '" << serverIp << ":" << serverPort << ": " << lastException.what() << Con::endl;
 		return nullptr;
 	}
 #ifdef _DEBUG
@@ -115,11 +105,11 @@ std::unique_ptr<pragma::networking::NWMClientConnection> pragma::networking::NWM
 	return cl;
 }
 
-void pragma::networking::NWMClientConnection::SetClient(StandardClient &client) {m_client = &client;}
+void pragma::networking::NWMClientConnection::SetClient(StandardClient &client) { m_client = &client; }
 
-bool pragma::networking::NWMClientConnection::IsDisconnected() const {return m_bDisconnected;}
+bool pragma::networking::NWMClientConnection::IsDisconnected() const { return m_bDisconnected; }
 
-REGISTER_CONVAR_CALLBACK_CL(sv_timeout_duration,[](NetworkState*,ConVar*,float,float val) {
+REGISTER_CONVAR_CALLBACK_CL(sv_timeout_duration, [](NetworkState *, ConVar *, float, float val) {
 	if(client == nullptr)
 		return;
 	auto *cl = client->GetClient();

@@ -11,16 +11,12 @@
 #include <pragma/lua/ldefinitions.h>
 #include <pragma/lua/libraries/lsound.h>
 
-namespace Lua
-{
-	namespace sound
-	{
-		namespace Server
-		{
+namespace Lua {
+	namespace sound {
+		namespace Server {
 			DLLSERVER int create(lua_State *l);
 		};
 	};
 };
 
 #endif
-

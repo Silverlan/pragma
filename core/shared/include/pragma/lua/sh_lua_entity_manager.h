@@ -13,26 +13,24 @@
 #include <pragma/lua/luaapi.h>
 #include <unordered_map>
 
-class DLLNETWORK LuaEntityManager
-{
-public:
-	struct DLLNETWORK EntityInfo
-	{
+class DLLNETWORK LuaEntityManager {
+  public:
+	struct DLLNETWORK EntityInfo {
 		luabind::object classObject;
 		std::vector<pragma::ComponentId> components;
 	};
-	void RegisterEntity(std::string className,luabind::object &o,const std::vector<pragma::ComponentId> &components);
+	void RegisterEntity(std::string className, luabind::object &o, const std::vector<pragma::ComponentId> &components);
 	luabind::object *GetClassObject(std::string className);
 	EntityInfo *GetEntityInfo(std::string className);
 
-	void RegisterComponent(std::string className,luabind::object &o);
+	void RegisterComponent(std::string className, luabind::object &o);
 	luabind::object *GetComponentClassObject(std::string className);
 
-	const std::unordered_map<std::string,EntityInfo> &GetRegisteredEntities() const {return m_ents;}
-	const std::unordered_map<std::string,luabind::object> &GetRegisteredComponents() const {return m_components;}
-private:
-	std::unordered_map<std::string,EntityInfo> m_ents;
-	std::unordered_map<std::string,luabind::object> m_components;
+	const std::unordered_map<std::string, EntityInfo> &GetRegisteredEntities() const { return m_ents; }
+	const std::unordered_map<std::string, luabind::object> &GetRegisteredComponents() const { return m_components; }
+  private:
+	std::unordered_map<std::string, EntityInfo> m_ents;
+	std::unordered_map<std::string, luabind::object> m_components;
 };
 
 #endif

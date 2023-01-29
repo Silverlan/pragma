@@ -12,22 +12,19 @@
 #include <optional>
 #include <unordered_map>
 
-namespace pragma::physics
-{
+namespace pragma::physics {
 	class SurfaceType;
-	class DLLNETWORK TireType
-		: public BaseNamedType
-	{
-	public:
-		void SetFrictionModifier(SurfaceType &surfType,float modifier);
+	class DLLNETWORK TireType : public BaseNamedType {
+	  public:
+		void SetFrictionModifier(SurfaceType &surfType, float modifier);
 		std::optional<float> GetFrictionModifier(SurfaceType &surfType);
-		const std::unordered_map<SurfaceType*,float> &GetFrictionModifiers() const;
-	protected:
+		const std::unordered_map<SurfaceType *, float> &GetFrictionModifiers() const;
+	  protected:
 		template<class TType>
-            friend class pragma::TTypeManager; //this must be explicit for some reason.
-		TireType(TypeId id,const std::string &name);
-	private:
-		std::unordered_map<SurfaceType*,float> m_frictionModifiers = {};
+		friend class pragma::TTypeManager; //this must be explicit for some reason.
+		TireType(TypeId id, const std::string &name);
+	  private:
+		std::unordered_map<SurfaceType *, float> m_frictionModifiers = {};
 	};
 
 	using TireTypeManager = TTypeManager<TireType>;

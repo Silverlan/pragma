@@ -9,15 +9,9 @@
 #include "pragma/lua/classes/lerrorcode.h"
 #include "luasystem.h"
 
-ErrorCode::ErrorCode()
-	: m_value(0)
-{}
-ErrorCode::ErrorCode(const std::string &msg,int32_t value)
-	: m_message(msg),m_value(value)
-{}
-ErrorCode::ErrorCode(const std::error_code &err)
-	: m_value(0),m_error(new std::error_code(err))
-{}
+ErrorCode::ErrorCode() : m_value(0) {}
+ErrorCode::ErrorCode(const std::string &msg, int32_t value) : m_message(msg), m_value(value) {}
+ErrorCode::ErrorCode(const std::error_code &err) : m_value(0), m_error(new std::error_code(err)) {}
 
 ErrorCode::ErrorCode(const ErrorCode &other)
 {
@@ -45,23 +39,14 @@ int32_t ErrorCode::GetValue() const
 	return m_value;
 }
 
-std::ostream &operator<<(std::ostream &out,const ErrorCode &err)
+std::ostream &operator<<(std::ostream &out, const ErrorCode &err)
 {
-	out<<err.GetMessage()<<" ("<<err.GetValue()<<")";
+	out << err.GetMessage() << " (" << err.GetValue() << ")";
 	return out;
 }
 
 //////////////////////////////
 
-std::string Lua_ErrorCode_GetMessage(lua_State *l,ErrorCode &err)
-{
-	return err.GetMessage();
-}
-int32_t Lua_ErrorCode_GetValue(lua_State *l,ErrorCode &err)
-{
-	return err.GetValue();
-}
-bool Lua_ErrorCode_IsError(lua_State *l,ErrorCode &err)
-{
-	return err.IsError();
-}
+std::string Lua_ErrorCode_GetMessage(lua_State *l, ErrorCode &err) { return err.GetMessage(); }
+int32_t Lua_ErrorCode_GetValue(lua_State *l, ErrorCode &err) { return err.GetValue(); }
+bool Lua_ErrorCode_IsError(lua_State *l, ErrorCode &err) { return err.IsError(); }

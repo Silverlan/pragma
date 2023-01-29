@@ -23,7 +23,7 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(flashlight,CFlashlight);
+LINK_ENTITY_TO_CLASS(flashlight, CFlashlight);
 
 extern DLLCLIENT ClientState *client;
 
@@ -34,38 +34,35 @@ void CFlashlightComponent::Initialize()
 	client->PrecacheSound("fx\\flashlight_off.wav");
 
 	auto &ent = GetEntity();
-	BindEvent(CLightComponent::EVENT_SHOULD_PASS_ENTITY,[this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+	BindEvent(CLightComponent::EVENT_SHOULD_PASS_ENTITY, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto pAttComponent = GetEntity().GetComponent<CAttachableComponent>();
 		auto *pParent = pAttComponent.valid() ? pAttComponent->GetParent() : nullptr;
-		if(pParent != nullptr && &static_cast<CEShouldPassEntity&>(evData.get()).entity == &pParent->GetEntity())
-		{
-			static_cast<CEShouldPassEntity&>(evData.get()).shouldPass = false;
+		if(pParent != nullptr && &static_cast<CEShouldPassEntity &>(evData.get()).entity == &pParent->GetEntity()) {
+			static_cast<CEShouldPassEntity &>(evData.get()).shouldPass = false;
 			return util::EventReply::Handled;
 		}
 		return util::EventReply::Unhandled;
 	});
 }
 
-util::EventReply CFlashlightComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
+util::EventReply CFlashlightComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseFlashlightComponent::HandleEvent(eventId,evData) == util::EventReply::Handled)
+	if(BaseFlashlightComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	auto &ent = GetEntity();
-	if(eventId == BaseToggleComponent::EVENT_ON_TURN_ON)
-	{
+	if(eventId == BaseToggleComponent::EVENT_ON_TURN_ON) {
 		auto pSoundEmitterCompnent = ent.GetComponent<pragma::CSoundEmitterComponent>();
 		if(pSoundEmitterCompnent.valid())
-			pSoundEmitterCompnent->EmitSound("fx\\flashlight_on.wav",ALSoundType::Effect,1.f);
+			pSoundEmitterCompnent->EmitSound("fx\\flashlight_on.wav", ALSoundType::Effect, 1.f);
 	}
-	else if(eventId == BaseToggleComponent::EVENT_ON_TURN_OFF)
-	{
+	else if(eventId == BaseToggleComponent::EVENT_ON_TURN_OFF) {
 		auto pSoundEmitterCompnent = ent.GetComponent<pragma::CSoundEmitterComponent>();
 		if(pSoundEmitterCompnent.valid())
-			pSoundEmitterCompnent->EmitSound("fx\\flashlight_off.wav",ALSoundType::Effect,1.f);
+			pSoundEmitterCompnent->EmitSound("fx\\flashlight_off.wav", ALSoundType::Effect, 1.f);
 	}
 	return util::EventReply::Unhandled;
 }
-void CFlashlightComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CFlashlightComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CFlashlight::Initialize()
 {

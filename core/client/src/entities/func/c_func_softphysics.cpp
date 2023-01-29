@@ -14,14 +14,14 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(func_physics_softbody,CFuncSoftPhysics);
+LINK_ENTITY_TO_CLASS(func_physics_softbody, CFuncSoftPhysics);
 
 void CFuncSoftPhysicsComponent::Initialize()
 {
 	BaseFuncSoftPhysicsComponent::Initialize();
 	GetEntity().AddComponent("func_physics");
 }
-void CFuncSoftPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CFuncSoftPhysicsComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ///////////
 

@@ -19,10 +19,9 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-LINK_WGUI_TO_CLASS(widebugdepthtexture,WIDebugDepthTexture);
+LINK_WGUI_TO_CLASS(widebugdepthtexture, WIDebugDepthTexture);
 
-WIDebugDepthTexture::WIDebugDepthTexture()
-	: WIBase(),m_imageLayer(0)
+WIDebugDepthTexture::WIDebugDepthTexture() : WIBase(), m_imageLayer(0)
 {
 	m_whDepthToRgbShader = c_engine->GetShader("debug_depth_to_rgb");
 	m_whCubeDepthToRgbShader = c_engine->GetShader("debug_cube_depth_to_rgb");
@@ -35,22 +34,19 @@ WIDebugDepthTexture::~WIDebugDepthTexture()
 		m_depthToRgbCallback.Remove();
 }
 
-void WIDebugDepthTexture::SetTexture(prosper::Texture &texture,bool stencil)
+void WIDebugDepthTexture::SetTexture(prosper::Texture &texture, bool stencil)
 {
-	SetTexture(texture,{
-		prosper::PipelineStageFlags::LateFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit
-	},{
-		prosper::PipelineStageFlags::EarlyFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit
-	},0u,stencil);
+	SetTexture(texture, {prosper::PipelineStageFlags::LateFragmentTestsBit, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AccessFlags::DepthStencilAttachmentWriteBit},
+	  {prosper::PipelineStageFlags::EarlyFragmentTestsBit, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AccessFlags::DepthStencilAttachmentWriteBit}, 0u, stencil);
 }
 
-void WIDebugDepthTexture::SetTexture(prosper::Texture &texture,prosper::util::BarrierImageLayout srcLayout,prosper::util::BarrierImageLayout dstLayout,uint32_t layerId,bool stencil)
+void WIDebugDepthTexture::SetTexture(prosper::Texture &texture, prosper::util::BarrierImageLayout srcLayout, prosper::util::BarrierImageLayout dstLayout, uint32_t layerId, bool stencil)
 {
 	m_srcDepthTex = nullptr;
 
 	if(m_whDepthToRgbShader.expired() || pragma::ShaderDepthToRGB::DESCRIPTOR_SET.IsValid() == false)
 		return;
-	auto &shader = static_cast<prosper::ShaderGraphics&>(*m_whDepthToRgbShader.get());
+	auto &shader = static_cast<prosper::ShaderGraphics &>(*m_whDepthToRgbShader.get());
 	auto &inputImg = texture.GetImage();
 	auto extents = inputImg.GetExtents();
 	auto &context = c_engine->GetRenderContext();
@@ -65,40 +61,34 @@ void WIDebugDepthTexture::SetTexture(prosper::Texture &texture,prosper::util::Ba
 	texCreateInfo.flags = prosper::util::TextureCreateInfo::Flags::Resolvable;
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	auto tex = context.CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
-	m_renderTarget = context.CreateRenderTarget({tex},shader.GetRenderPass());
+	auto tex = context.CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
+	m_renderTarget = context.CreateRenderTarget({tex}, shader.GetRenderPass());
 	m_renderTarget->SetDebugName("debug_depth_rt");
 
 	m_dsgSceneDepthTex = context.CreateDescriptorSetGroup(pragma::ShaderDepthToRGB::DESCRIPTOR_SET);
 
 	imgViewCreateInfo = {};
 	imgViewCreateInfo.baseLayer = layerId;
-	imgViewCreateInfo.levelCount = 1u;//inputImg.get_image_n_layers();
+	imgViewCreateInfo.levelCount = 1u; //inputImg.get_image_n_layers();
 	imgViewCreateInfo.aspectFlags = stencil ? prosper::ImageAspectFlags::StencilBit : prosper::ImageAspectFlags::DepthBit;
 	samplerCreateInfo = {};
-	m_srcDepthTex = context.CreateTexture({},texture.GetImage(),imgViewCreateInfo,samplerCreateInfo);
+	m_srcDepthTex = context.CreateTexture({}, texture.GetImage(), imgViewCreateInfo, samplerCreateInfo);
 	m_srcDepthTex->SetDebugName("debug_depth_src_rt");
 	if(inputImg.GetLayerCount() == 1u)
-		m_dsgSceneDepthTex->GetDescriptorSet()->SetBindingTexture(*m_srcDepthTex,0u);
+		m_dsgSceneDepthTex->GetDescriptorSet()->SetBindingTexture(*m_srcDepthTex, 0u);
 	else
-		m_dsgSceneDepthTex->GetDescriptorSet()->SetBindingArrayTexture(*m_srcDepthTex,0u,0u);
+		m_dsgSceneDepthTex->GetDescriptorSet()->SetBindingArrayTexture(*m_srcDepthTex, 0u, 0u);
 
 	if(m_hTextureRect.IsValid())
-		static_cast<WITexturedRect&>(*m_hTextureRect.get()).SetTexture(m_renderTarget->GetTexture());
+		static_cast<WITexturedRect &>(*m_hTextureRect.get()).SetTexture(m_renderTarget->GetTexture());
 	m_srcBarrierImageLayout = srcLayout;
 	m_dstBarrierImageLayout = dstLayout;
 	m_imageLayer = layerId;
 }
 
-void WIDebugDepthTexture::UpdateResolvedTexture()
-{
+void WIDebugDepthTexture::UpdateResolvedTexture() {}
 
-}
-
-void WIDebugDepthTexture::SetShouldResolveImage(bool b)
-{
-
-}
+void WIDebugDepthTexture::SetShouldResolveImage(bool b) {}
 
 void WIDebugDepthTexture::Initialize()
 {
@@ -106,84 +96,65 @@ void WIDebugDepthTexture::Initialize()
 	m_hTextureRect->SetAutoAlignToParent(true);
 }
 
-void WIDebugDepthTexture::Setup(float nearZ,float farZ)
+void WIDebugDepthTexture::Setup(float nearZ, float farZ)
 {
 	if(m_depthToRgbCallback.IsValid())
 		m_depthToRgbCallback.Remove();
-	m_depthToRgbCallback = c_engine->AddCallback("DrawFrame",FunctionCallback<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>::Create([this,nearZ,farZ](std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>> refDrawCmd) {
+	m_depthToRgbCallback = c_engine->AddCallback("DrawFrame", FunctionCallback<void, std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>::Create([this, nearZ, farZ](std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>> refDrawCmd) {
 		auto &drawCmd = refDrawCmd.get();
 		if(m_whDepthToRgbShader.expired() || m_srcDepthTex == nullptr || m_renderTarget == nullptr || m_dsgSceneDepthTex == nullptr)
 			return;
 		auto &img = m_renderTarget->GetTexture().GetImage();
-		drawCmd->RecordImageBarrier(img,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+		drawCmd->RecordImageBarrier(img, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 		auto &depthImg = m_srcDepthTex->GetImage();
 		auto &imgView = *m_srcDepthTex->GetImageView();
-		drawCmd->RecordImageBarrier(
-			depthImg,
-			m_srcBarrierImageLayout.stageMask,prosper::PipelineStageFlags::FragmentShaderBit,
-			m_srcBarrierImageLayout.layout,prosper::ImageLayout::ShaderReadOnlyOptimal,
-			m_srcBarrierImageLayout.accessMask,prosper::AccessFlags::ShaderReadBit,
-			std::numeric_limits<uint32_t>::max(),imgView.GetAspectMask()
-		);
-		if(drawCmd->RecordBeginRenderPass(*m_renderTarget) == true)
-		{
-			if(depthImg.IsCubemap())
-			{
-				auto &shader = static_cast<pragma::ShaderCubeDepthToRGB&>(*m_whCubeDepthToRgbShader.get());
+		drawCmd->RecordImageBarrier(depthImg, m_srcBarrierImageLayout.stageMask, prosper::PipelineStageFlags::FragmentShaderBit, m_srcBarrierImageLayout.layout, prosper::ImageLayout::ShaderReadOnlyOptimal, m_srcBarrierImageLayout.accessMask, prosper::AccessFlags::ShaderReadBit,
+		  std::numeric_limits<uint32_t>::max(), imgView.GetAspectMask());
+		if(drawCmd->RecordBeginRenderPass(*m_renderTarget) == true) {
+			if(depthImg.IsCubemap()) {
+				auto &shader = static_cast<pragma::ShaderCubeDepthToRGB &>(*m_whCubeDepthToRgbShader.get());
 				prosper::ShaderBindState bindState {*drawCmd};
-				if(shader.RecordBeginDraw(bindState) == true)
-				{
-					shader.RecordDraw(bindState,*m_dsgSceneDepthTex->GetDescriptorSet(),nearZ,farZ,m_imageLayer,GetContrastFactor());
+				if(shader.RecordBeginDraw(bindState) == true) {
+					shader.RecordDraw(bindState, *m_dsgSceneDepthTex->GetDescriptorSet(), nearZ, farZ, m_imageLayer, GetContrastFactor());
 					shader.RecordEndDraw(bindState);
 				}
 			}
-			else if(img.GetLayerCount() > 1u)
-			{
-				auto &shader = static_cast<pragma::ShaderCSMDepthToRGB&>(*m_whCsmDepthToRgbShader.get());
+			else if(img.GetLayerCount() > 1u) {
+				auto &shader = static_cast<pragma::ShaderCSMDepthToRGB &>(*m_whCsmDepthToRgbShader.get());
 				prosper::ShaderBindState bindState {*drawCmd};
-				if(shader.RecordBeginDraw(bindState) == true)
-				{
-					shader.RecordDraw(bindState,*m_dsgSceneDepthTex->GetDescriptorSet(),nearZ,farZ,m_imageLayer,GetContrastFactor());
+				if(shader.RecordBeginDraw(bindState) == true) {
+					shader.RecordDraw(bindState, *m_dsgSceneDepthTex->GetDescriptorSet(), nearZ, farZ, m_imageLayer, GetContrastFactor());
 					shader.RecordEndDraw(bindState);
 				}
 			}
-			else
-			{
-				auto &shader = static_cast<pragma::ShaderDepthToRGB&>(*m_whDepthToRgbShader.get());
+			else {
+				auto &shader = static_cast<pragma::ShaderDepthToRGB &>(*m_whDepthToRgbShader.get());
 				prosper::ShaderBindState bindState {*drawCmd};
-				if(shader.RecordBeginDraw(bindState) == true)
-				{
-					shader.RecordDraw(bindState,*m_dsgSceneDepthTex->GetDescriptorSet(),nearZ,farZ,GetContrastFactor());
+				if(shader.RecordBeginDraw(bindState) == true) {
+					shader.RecordDraw(bindState, *m_dsgSceneDepthTex->GetDescriptorSet(), nearZ, farZ, GetContrastFactor());
 					shader.RecordEndDraw(bindState);
 				}
 			}
 			drawCmd->RecordEndRenderPass();
 		}
-		drawCmd->RecordImageBarrier(
-			depthImg,
-			prosper::PipelineStageFlags::FragmentShaderBit,m_dstBarrierImageLayout.stageMask,
-			prosper::ImageLayout::ShaderReadOnlyOptimal,m_dstBarrierImageLayout.layout,
-			prosper::AccessFlags::ShaderReadBit,m_dstBarrierImageLayout.accessMask,
-			std::numeric_limits<uint32_t>::max(),imgView.GetAspectMask()
-		);
+		drawCmd->RecordImageBarrier(depthImg, prosper::PipelineStageFlags::FragmentShaderBit, m_dstBarrierImageLayout.stageMask, prosper::ImageLayout::ShaderReadOnlyOptimal, m_dstBarrierImageLayout.layout, prosper::AccessFlags::ShaderReadBit, m_dstBarrierImageLayout.accessMask,
+		  std::numeric_limits<uint32_t>::max(), imgView.GetAspectMask());
 	}));
 }
 
-void WIDebugDepthTexture::SetContrastFactor(float contrastFactor) {m_contrastFactor = contrastFactor;}
-float WIDebugDepthTexture::GetContrastFactor() const {return m_contrastFactor;}
+void WIDebugDepthTexture::SetContrastFactor(float contrastFactor) { m_contrastFactor = contrastFactor; }
+float WIDebugDepthTexture::GetContrastFactor() const { return m_contrastFactor; }
 
 void WIDebugDepthTexture::DoUpdate()
 {
 	auto nearZ = pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z;
 	auto farZ = pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z;
-	if(c_game)
-	{
+	if(c_game) {
 		auto *cam = c_game->GetPrimaryCamera();
-		if(cam)
-		{
+		if(cam) {
 			nearZ = cam->GetNearZ();
 			farZ = cam->GetFarZ();
 		}
 	}
-	Setup(nearZ,farZ);
+	Setup(nearZ, farZ);
 }

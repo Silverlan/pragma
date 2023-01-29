@@ -12,9 +12,7 @@
 
 using namespace pragma;
 
-MapComponent::MapComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+MapComponent::MapComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void MapComponent::Initialize()
 {
@@ -22,7 +20,7 @@ void MapComponent::Initialize()
 	GetEntity().AddComponent("name");
 }
 
-void MapComponent::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void MapComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void MapComponent::SetMapIndex(unsigned int idx) {m_mapIndex = idx;}
-unsigned int MapComponent::GetMapIndex() const {return m_mapIndex;}
+void MapComponent::SetMapIndex(unsigned int idx) { m_mapIndex = idx; }
+unsigned int MapComponent::GetMapIndex() const { return m_mapIndex; }

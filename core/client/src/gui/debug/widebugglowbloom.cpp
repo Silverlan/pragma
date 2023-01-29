@@ -18,11 +18,9 @@ extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-LINK_WGUI_TO_CLASS(WIDebugGlowBloom,WIDebugGlowBloom);
+LINK_WGUI_TO_CLASS(WIDebugGlowBloom, WIDebugGlowBloom);
 
-WIDebugGlowBloom::WIDebugGlowBloom()
-	: WITexturedRect()
-{}
+WIDebugGlowBloom::WIDebugGlowBloom() : WITexturedRect() {}
 
 WIDebugGlowBloom::~WIDebugGlowBloom()
 {
@@ -65,14 +63,12 @@ void WIDebugGlowBloom::DoUpdate()
 	auto img = c_engine->GetRenderContext().CreateImage(imgCreateInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	auto tex = c_engine->GetRenderContext().CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
+	auto tex = c_engine->GetRenderContext().CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
 	prosper::util::RenderPassCreateInfo rpInfo {};
-	rpInfo.attachments.push_back({img->GetFormat(),prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::Load,prosper::AttachmentStoreOp::Store,img->GetSampleCount(),prosper::ImageLayout::ColorAttachmentOptimal});
-	rpInfo.subPasses.push_back({prosper::util::RenderPassCreateInfo::SubPass{{0ull}}});
+	rpInfo.attachments.push_back({img->GetFormat(), prosper::ImageLayout::ColorAttachmentOptimal, prosper::AttachmentLoadOp::Load, prosper::AttachmentStoreOp::Store, img->GetSampleCount(), prosper::ImageLayout::ColorAttachmentOptimal});
+	rpInfo.subPasses.push_back({prosper::util::RenderPassCreateInfo::SubPass {{0ull}}});
 	auto rp = c_engine->GetRenderContext().CreateRenderPass(rpInfo);
-	m_renderTarget = c_engine->GetRenderContext().CreateRenderTarget({tex},rp,{});
-	m_cbRenderHDRMap = c_game->AddCallback("PostRenderScenes",FunctionCallback<>::Create(
-		std::bind(&WIDebugGlowBloom::UpdateBloomImage,this)
-	));
+	m_renderTarget = c_engine->GetRenderContext().CreateRenderTarget({tex}, rp, {});
+	m_cbRenderHDRMap = c_game->AddCallback("PostRenderScenes", FunctionCallback<>::Create(std::bind(&WIDebugGlowBloom::UpdateBloomImage, this)));
 	SetTexture(m_renderTarget->GetTexture());
 }

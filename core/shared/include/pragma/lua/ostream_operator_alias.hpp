@@ -11,18 +11,17 @@
 
 #ifdef _WIN32
 
-#define DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(ns,cl)
+#define DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(ns, cl)
 
 #else
 
-#define DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(ns,cl) \
-    namespace ns \
-    { \
-    static inline std::ostream &operator<<(std::ostream &out,const cl &o) \
-    { \
-        return ::operator<<(out,o); \
-    } \
-    };
+#define DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(ns, cl)                                                                                                                                                                                                                                          \
+	namespace ns {                                                                                                                                                                                                                                                                               \
+		static inline std::ostream &operator<<(std::ostream &out, const cl &o)                                                                                                                                                                                                                   \
+		{                                                                                                                                                                                                                                                                                        \
+			return ::operator<<(out, o);                                                                                                                                                                                                                                                         \
+		}                                                                                                                                                                                                                                                                                        \
+	};
 
 #endif
 

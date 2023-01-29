@@ -12,12 +12,9 @@
 #include <memory>
 
 class BaseEntity;
-namespace pragma
-{
-	class DLLNETWORK BasePropDynamicComponent
-		: public BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLNETWORK BasePropDynamicComponent : public BaseEntityComponent {
+	  public:
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;

@@ -16,16 +16,16 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(point_constraint_fixed,PointConstraintFixed);
+LINK_ENTITY_TO_CLASS(point_constraint_fixed, PointConstraintFixed);
 
-void SPointConstraintFixedComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SPointConstraintFixedComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_kvSource);
 	packet->WriteString(m_kvTarget);
-	nwm::write_vector(packet,m_posTarget);
+	nwm::write_vector(packet, m_posTarget);
 }
 
-void SPointConstraintFixedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SPointConstraintFixedComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void PointConstraintFixed::Initialize()
 {

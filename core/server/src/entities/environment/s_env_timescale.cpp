@@ -16,16 +16,16 @@
 
 using namespace pragma;
 
-void SEnvTimescaleComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SEnvTimescaleComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->Write<float>(m_kvTimescale);
 	packet->Write<float>(m_kvInnerRadius);
 	packet->Write<float>(m_kvOuterRadius);
 }
 
-LINK_ENTITY_TO_CLASS(env_timescale,EnvTimescale);
+LINK_ENTITY_TO_CLASS(env_timescale, EnvTimescale);
 
-void SEnvTimescaleComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SEnvTimescaleComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void EnvTimescale::Initialize()
 {

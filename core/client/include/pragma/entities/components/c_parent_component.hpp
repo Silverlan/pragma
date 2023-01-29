@@ -12,13 +12,10 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_parent_component.hpp>
 
-namespace pragma
-{
+namespace pragma {
 	class CParticleSystemComponent;
-	class DLLCLIENT CParentComponent final
-		: public BaseParentComponent
-	{
-	public:
+	class DLLCLIENT CParentComponent final : public BaseParentComponent {
+	  public:
 		CParentComponent(BaseEntity &ent) : BaseParentComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 

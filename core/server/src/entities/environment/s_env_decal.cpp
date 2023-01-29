@@ -15,18 +15,18 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_decal,EnvDecal);
+LINK_ENTITY_TO_CLASS(env_decal, EnvDecal);
 
-void SDecalComponent::InitializeLuaObject(lua_State *l) {return BaseEnvDecalComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SDecalComponent::InitializeLuaObject(lua_State *l) { return BaseEnvDecalComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SDecalComponent::Initialize()
 {
 	BaseEnvDecalComponent::Initialize();
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	ent.SetSynchronized(false);
 }
 
-void SDecalComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SDecalComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_material);
 	packet->Write<float>(m_size);

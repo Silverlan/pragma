@@ -13,43 +13,33 @@
 
 class Model;
 enum class Activity : uint16_t;
-namespace pragma
-{
-	struct DLLNETWORK CEOnBodyGroupChanged
-		: public ComponentEvent
-	{
-		CEOnBodyGroupChanged(uint32_t groupId,uint32_t typeId);
+namespace pragma {
+	struct DLLNETWORK CEOnBodyGroupChanged : public ComponentEvent {
+		CEOnBodyGroupChanged(uint32_t groupId, uint32_t typeId);
 		virtual void PushArguments(lua_State *l) override;
 		uint32_t groupId;
 		uint32_t typeId;
 	};
-	struct DLLNETWORK CEOnSkinChanged
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CEOnSkinChanged : public ComponentEvent {
 		CEOnSkinChanged(uint32_t skinId);
 		virtual void PushArguments(lua_State *l) override;
 		uint32_t skinId;
 	};
-	struct DLLNETWORK CEOnModelChanged
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CEOnModelChanged : public ComponentEvent {
 		CEOnModelChanged(const std::shared_ptr<Model> &model);
 		virtual void PushArguments(lua_State *l) override;
 		std::shared_ptr<Model> model;
 	};
 	class BaseBvhComponent;
 	class BaseStaticBvhCacheComponent;
-	class DLLNETWORK BaseModelComponent
-		: public BaseEntityComponent,
-		public DynamicMemberRegister
-	{
-	public:
+	class DLLNETWORK BaseModelComponent : public BaseEntityComponent, public DynamicMemberRegister {
+	  public:
 		static ComponentEventId EVENT_ON_MODEL_CHANGED;
 		static ComponentEventId EVENT_ON_MODEL_MATERIALS_LOADED;
 		static ComponentEventId EVENT_ON_SKIN_CHANGED;
 		static ComponentEventId EVENT_ON_BODY_GROUP_CHANGED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
@@ -58,7 +48,7 @@ namespace pragma
 		Int32 LookupBone(const std::string &name) const;
 		int LookupAnimation(const std::string &name) const;
 		int LookupAttachment(const std::string &name) const;
-		void GetAnimations(Activity activity,std::vector<unsigned int> &animations) const;
+		void GetAnimations(Activity activity, std::vector<unsigned int> &animations) const;
 		unsigned char GetAnimationActivityWeight(unsigned int animation) const;
 		Activity GetAnimationActivity(unsigned int animation) const;
 		float GetAnimationDuration(unsigned int animation) const;
@@ -75,35 +65,35 @@ namespace pragma
 		virtual void SetSkin(unsigned int skin);
 		const std::vector<uint32_t> &GetBodyGroups() const;
 		UInt32 GetBodyGroup(unsigned int groupId) const;
-		void SetBodyGroup(const std::string &name,UInt32 id);
-		virtual bool SetBodyGroup(UInt32 groupId,UInt32 id);
+		void SetBodyGroup(const std::string &name, UInt32 id);
+		virtual bool SetBodyGroup(UInt32 groupId, UInt32 id);
 
 		virtual void SetMaxDrawDistance(float maxDist);
 		float GetMaxDrawDistance() const;
 
-		bool GetAttachment(unsigned int attID,Vector3 *pos,EulerAngles *angles) const;
-		bool GetAttachment(const std::string &name,Vector3 *pos,EulerAngles *angles) const;
-		bool GetAttachment(unsigned int attID,Vector3 *pos,Quat *rot) const;
-		bool GetAttachment(const std::string &name,Vector3 *pos,Quat *rot) const;
+		bool GetAttachment(unsigned int attID, Vector3 *pos, EulerAngles *angles) const;
+		bool GetAttachment(const std::string &name, Vector3 *pos, EulerAngles *angles) const;
+		bool GetAttachment(unsigned int attID, Vector3 *pos, Quat *rot) const;
+		bool GetAttachment(const std::string &name, Vector3 *pos, Quat *rot) const;
 
 		uint32_t GetFlexControllerCount() const;
-		bool LookupFlexController(const std::string &name,uint32_t &flexId) const;
+		bool LookupFlexController(const std::string &name, uint32_t &flexId) const;
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		using BaseEntityComponent::Load;
 
 		uint32_t GetHitboxCount() const;
-		bool GetHitboxBounds(uint32_t boneId,Vector3 &min,Vector3 &max,Vector3 &origin,Quat &rot) const;
-		
+		bool GetHitboxBounds(uint32_t boneId, Vector3 &min, Vector3 &max, Vector3 &origin, Quat &rot) const;
+
 		const BaseBvhComponent *GetBvhComponent() const;
 		BaseBvhComponent *GetBvhComponent();
 
 		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
-	protected:
+	  protected:
 		BaseModelComponent(BaseEntity &ent);
 		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
 		virtual void OnModelChanged(const std::shared_ptr<Model> &model);
-		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
+		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 		std::shared_ptr<Model> m_model = nullptr;
 
 		BaseBvhComponent *m_bvhComponent = nullptr;

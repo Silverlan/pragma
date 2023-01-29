@@ -11,10 +11,8 @@
 #include "pragma/lua/ldefinitions.h"
 
 class Material;
-namespace Lua
-{
-	namespace Material
-	{
+namespace Lua {
+	namespace Material {
 		DLLNETWORK void register_class(luabind::class_<::Material> &classDef);
 	};
 };

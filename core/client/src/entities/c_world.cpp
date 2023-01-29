@@ -39,52 +39,48 @@ using namespace pragma;
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-
 void CWorldComponent::Initialize()
 {
 	BaseWorldComponent::Initialize();
 
-	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		c_game->UpdateEnvironmentLightSource();
 
 		m_lodBaseMeshIds.clear();
 		auto &ent = GetEntity();
 		auto &mdl = ent.GetModel();
-		if(mdl == nullptr)
-		{
+		if(mdl == nullptr) {
 			ReloadMeshCache();
 			return;
 		}
 		auto &lods = mdl->GetLODs();
-		for(auto &lod : lods)
-		{
+		for(auto &lod : lods) {
 			for(auto &pair : lod.meshReplacements)
 				m_lodBaseMeshIds[pair.first] = true;
 		}
 		ReloadMeshCache();
 		UpdateRenderMeshes();
 	});
-	BindEventUnhandled(CPhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(CPhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		Vector3 min {};
 		Vector3 max {};
 		auto &ent = GetEntity();
 		auto pPhysComponent = ent.GetPhysicsComponent();
 		if(pPhysComponent != nullptr)
-			pPhysComponent->GetCollisionBounds(&min,&max);
+			pPhysComponent->GetCollisionBounds(&min, &max);
 		auto pRenderComponent = ent.GetComponent<pragma::CRenderComponent>();
 		if(pRenderComponent.valid())
-			pRenderComponent->SetLocalRenderBounds(min,max);
+			pRenderComponent->SetLocalRenderBounds(min, max);
 	});
-	BindEvent(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		BuildOfflineRenderQueues(true);
 		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(CColorComponent::EVENT_ON_COLOR_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		auto &onColorChangedData = static_cast<pragma::CEOnColorChanged&>(evData.get());
+	BindEventUnhandled(CColorComponent::EVENT_ON_COLOR_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		auto &onColorChangedData = static_cast<pragma::CEOnColorChanged &>(evData.get());
 		EntityIterator entIt {*c_game};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<CLightDirectionalComponent>>();
-		for(auto *ent : entIt)
-		{
+		for(auto *ent : entIt) {
 			auto pToggleComponent = ent->GetComponent<CToggleComponent>();
 			if(pToggleComponent.valid() && pToggleComponent->IsTurnedOn())
 				return; // Ambient color already defined by environmental light entity
@@ -109,30 +105,29 @@ void CWorldComponent::ReloadCHCController()
 	m_chcController = std::make_shared<CHC>(*cam);
 	m_chcController->Reset(m_meshTree);*/ // prosper TODO
 }
-void CWorldComponent::SetBSPTree(const std::shared_ptr<util::BSPTree> &bspTree,const std::vector<std::vector<RenderMeshIndex>> &meshesPerCluster)
+void CWorldComponent::SetBSPTree(const std::shared_ptr<util::BSPTree> &bspTree, const std::vector<std::vector<RenderMeshIndex>> &meshesPerCluster)
 {
 	m_bspTree = bspTree;
 	m_meshesPerCluster = meshesPerCluster;
 	BuildOfflineRenderQueues(false);
 }
-const std::shared_ptr<util::BSPTree> &CWorldComponent::GetBSPTree() const {return m_bspTree;}
+const std::shared_ptr<util::BSPTree> &CWorldComponent::GetBSPTree() const { return m_bspTree; }
 void CWorldComponent::ReloadMeshCache()
 {
 	m_meshTree = nullptr;
 	m_chcController = nullptr;
-	auto &ent = static_cast<CBaseEntity&>(GetEntity());
+	auto &ent = static_cast<CBaseEntity &>(GetEntity());
 	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
 		return;
-	m_meshTree = std::make_shared<OcclusionOctree<std::shared_ptr<ModelMesh>>>(256.f,1'073'741'824.f,4096.f,[](const std::weak_ptr<ModelMesh> ptrSubMesh,Vector3 &min,Vector3 &max) {
-		if(ptrSubMesh.expired() == true)
-		{
+	m_meshTree = std::make_shared<OcclusionOctree<std::shared_ptr<ModelMesh>>>(256.f, 1'073'741'824.f, 4096.f, [](const std::weak_ptr<ModelMesh> ptrSubMesh, Vector3 &min, Vector3 &max) {
+		if(ptrSubMesh.expired() == true) {
 			min = {};
 			max = {};
 			return;
 		}
 		auto subMesh = ptrSubMesh.lock();
-		subMesh->GetBounds(min,max);
+		subMesh->GetBounds(min, max);
 	});
 	m_meshTree->Initialize();
 	m_meshTree->SetSingleReferenceMode(true);
@@ -141,32 +136,28 @@ void CWorldComponent::ReloadMeshCache()
 			return "Expired";
 		auto subMesh = ptrMesh.lock();
 		std::stringstream ss;
-		ss<<subMesh.get()<<" ("<<subMesh->GetTriangleCount()<<" Tris, "<<subMesh->GetVertexCount()<<" Vertices)";
+		ss << subMesh.get() << " (" << subMesh->GetTriangleCount() << " Tris, " << subMesh->GetVertexCount() << " Vertices)";
 		return ss.str();
 	});
 	// OnUpdateLOD(Vector3{});
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(pRenderComponent)
-	{
+	if(pRenderComponent) {
 		for(auto &mesh : pRenderComponent->GetLODMeshes())
 			m_meshTree->InsertObject(mesh);
 	}
 	ReloadCHCController();
 }
-void CWorldComponent::OnEntitySpawn()
-{
-	BaseWorldComponent::OnEntitySpawn();
-}
+void CWorldComponent::OnEntitySpawn() { BaseWorldComponent::OnEntitySpawn(); }
 void CWorldComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseWorldComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(CModelComponent))
-		static_cast<CModelComponent&>(component).SetAutoLodEnabled(false);
+		static_cast<CModelComponent &>(component).SetAutoLodEnabled(false);
 }
-std::shared_ptr<OcclusionOctree<std::shared_ptr<ModelMesh>>> CWorldComponent::GetMeshTree() const {return m_meshTree;};
-std::shared_ptr<CHC> CWorldComponent::GetCHCController() const {return m_chcController;}
+std::shared_ptr<OcclusionOctree<std::shared_ptr<ModelMesh>>> CWorldComponent::GetMeshTree() const { return m_meshTree; };
+std::shared_ptr<CHC> CWorldComponent::GetCHCController() const { return m_chcController; }
 
-const pragma::rendering::RenderQueue *CWorldComponent::GetClusterRenderQueue(util::BSPTree::ClusterIndex clusterIndex,bool translucent) const
+const pragma::rendering::RenderQueue *CWorldComponent::GetClusterRenderQueue(util::BSPTree::ClusterIndex clusterIndex, bool translucent) const
 {
 	auto &queue = translucent ? m_clusterRenderTranslucentQueues : m_clusterRenderQueues;
 	return (clusterIndex < queue.size()) ? queue.at(clusterIndex).get() : nullptr;
@@ -179,14 +170,12 @@ void CWorldComponent::RebuildRenderQueues()
 	m_lodBaseMeshIds.clear();
 	auto &ent = GetEntity();
 	auto &mdl = ent.GetModel();
-	if(mdl == nullptr)
-	{
+	if(mdl == nullptr) {
 		ReloadMeshCache();
 		return;
 	}
 	auto &lods = mdl->GetLODs();
-	for(auto &lod : lods)
-	{
+	for(auto &lod : lods) {
 		for(auto &pair : lod.meshReplacements)
 			m_lodBaseMeshIds[pair.first] = true;
 	}
@@ -202,14 +191,12 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 	auto &clusterRenderTranslucentQueues = m_clusterRenderTranslucentQueues;
 	if(rebuild == false && clusterRenderQueues.empty() == false)
 		return;
-	for(auto &queue : clusterRenderQueues)
-	{
+	for(auto &queue : clusterRenderQueues) {
 		if(!queue)
 			continue;
 		queue->WaitForCompletion();
 	}
-	for(auto &queue : clusterRenderTranslucentQueues)
-	{
+	for(auto &queue : clusterRenderTranslucentQueues) {
 		if(!queue)
 			continue;
 		queue->WaitForCompletion();
@@ -225,68 +212,60 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 	auto &renderMeshes = renderC->GetRenderMeshes();
 	auto numClusters = m_bspTree->GetClusterCount();
 
-	std::unordered_map<ModelSubMesh*,ModelMesh*> subMeshToMesh;
+	std::unordered_map<ModelSubMesh *, ModelMesh *> subMeshToMesh;
 	auto &mdl = mdlC->GetModel();
 	if(!mdl)
 		return;
-	for(auto &meshGroup : mdl->GetMeshGroups())
-	{
-		for(auto &mesh : meshGroup->GetMeshes())
-		{
+	for(auto &meshGroup : mdl->GetMeshGroups()) {
+		for(auto &mesh : meshGroup->GetMeshes()) {
 			for(auto &subMesh : mesh->GetSubMeshes())
 				subMeshToMesh[subMesh.get()] = mesh.get();
 		}
 	}
 
 	auto &meshesPerClusters = m_meshesPerCluster;
-	if(meshesPerClusters.empty())
-	{
+	if(meshesPerClusters.empty()) {
 		meshesPerClusters.resize(numClusters);
-		auto fAddClusterMesh = [&meshesPerClusters](util::BSPTree::ClusterIndex clusterIndex,RenderMeshIndex meshIdx) {
+		auto fAddClusterMesh = [&meshesPerClusters](util::BSPTree::ClusterIndex clusterIndex, RenderMeshIndex meshIdx) {
 			auto &clusterMeshes = meshesPerClusters.at(clusterIndex);
 			if(clusterMeshes.size() == clusterMeshes.capacity())
-				clusterMeshes.reserve(clusterMeshes.size() *1.1 +100);
+				clusterMeshes.reserve(clusterMeshes.size() * 1.1 + 100);
 			clusterMeshes.push_back(meshIdx);
 		};
-		for(auto meshIdx=decltype(renderMeshes.size()){0u};meshIdx<renderMeshes.size();++meshIdx)
-		{
+		for(auto meshIdx = decltype(renderMeshes.size()) {0u}; meshIdx < renderMeshes.size(); ++meshIdx) {
 			auto &subMesh = renderMeshes.at(meshIdx);
 			auto it = subMeshToMesh.find(subMesh.get());
 			if(it == subMeshToMesh.end())
 				continue;
 			auto *mesh = it->second;
 			auto meshClusterIdx = mesh->GetReferenceId();
-			if(meshClusterIdx == std::numeric_limits<uint32_t>::max())
-			{
+			if(meshClusterIdx == std::numeric_limits<uint32_t>::max()) {
 				// Probably a displacement, which don't have a single cluster associated with them.
 				// We'll have to determine which clusters they belong to manually.
-				Vector3 min,max;
-				mesh->GetBounds(min,max);
-				auto leafNodes = m_bspTree->FindLeafNodesInAabb(min,max);
+				Vector3 min, max;
+				mesh->GetBounds(min, max);
+				auto leafNodes = m_bspTree->FindLeafNodesInAabb(min, max);
 				std::unordered_set<util::BSPTree::ClusterIndex> clusters;
-				for(auto *node : leafNodes)
-				{
+				for(auto *node : leafNodes) {
 					auto meshClusterIdx = node->cluster;
 					if(meshClusterIdx == std::numeric_limits<util::BSPTree::ClusterIndex>::max())
 						continue;
-					for(auto clusterIdx=decltype(numClusters){0u};clusterIdx<numClusters;++clusterIdx)
-					{
-						if(m_bspTree->IsClusterVisible(clusterIdx,meshClusterIdx) == false)
+					for(auto clusterIdx = decltype(numClusters) {0u}; clusterIdx < numClusters; ++clusterIdx) {
+						if(m_bspTree->IsClusterVisible(clusterIdx, meshClusterIdx) == false)
 							continue;
 						auto it = clusters.find(clusterIdx);
 						if(it != clusters.end())
 							continue;
 						clusters.insert(clusterIdx);
-						fAddClusterMesh(clusterIdx,meshIdx);
+						fAddClusterMesh(clusterIdx, meshIdx);
 					}
 				}
 				continue;
 			}
-			for(auto clusterIdx=decltype(numClusters){0u};clusterIdx<numClusters;++clusterIdx)
-			{
-				if(m_bspTree->IsClusterVisible(clusterIdx,meshClusterIdx) == false)
+			for(auto clusterIdx = decltype(numClusters) {0u}; clusterIdx < numClusters; ++clusterIdx) {
+				if(m_bspTree->IsClusterVisible(clusterIdx, meshClusterIdx) == false)
 					continue;
-				fAddClusterMesh(clusterIdx,meshIdx);
+				fAddClusterMesh(clusterIdx, meshIdx);
 			}
 		}
 	}
@@ -294,16 +273,13 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 	clusterRenderQueues.reserve(numClusters);
 	clusterRenderTranslucentQueues.reserve(numClusters);
 	auto &context = c_engine->GetRenderContext();
-	for(auto clusterIdx=decltype(meshesPerClusters.size()){0u};clusterIdx<meshesPerClusters.size();++clusterIdx)
-	{
-		clusterRenderQueues.push_back(pragma::rendering::RenderQueue::Create("world_cluster_" +std::to_string(clusterIdx)));
+	for(auto clusterIdx = decltype(meshesPerClusters.size()) {0u}; clusterIdx < meshesPerClusters.size(); ++clusterIdx) {
+		clusterRenderQueues.push_back(pragma::rendering::RenderQueue::Create("world_cluster_" + std::to_string(clusterIdx)));
 		std::shared_ptr<pragma::rendering::RenderQueue> clusterRenderTranslucentQueue = nullptr;
 		auto &clusterRenderQueue = clusterRenderQueues.back();
 		auto &meshes = meshesPerClusters.at(clusterIdx);
-		for(auto subMeshIdx : meshes)
-		{
-			if(subMeshIdx >= renderMeshes.size())
-			{
+		for(auto subMeshIdx : meshes) {
+			if(subMeshIdx >= renderMeshes.size()) {
 				// Something went wrong (Maybe world model is missing?)
 				clusterRenderQueues.clear();
 				clusterRenderTranslucentQueues.clear();
@@ -316,23 +292,22 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 			auto hShader = mat->GetPrimaryShader();
 			if(!hShader)
 				continue;
-			auto *shader = dynamic_cast<pragma::ShaderGameWorldLightingPass*>(hShader);
+			auto *shader = dynamic_cast<pragma::ShaderGameWorldLightingPass *>(hShader);
 			if(shader == nullptr)
 				continue;
 			uint32_t pipelineIdx = 0;
-			auto t = shader->FindPipelineIndex(pragma::rendering::PassType::Generic,renderC->GetShaderPipelineSpecialization(),shader->GetMaterialPipelineSpecializationRequirements(*mat));// | pragma::GameShaderSpecializationConstantFlag::Enable3dOriginBit);
+			auto t = shader->FindPipelineIndex(pragma::rendering::PassType::Generic, renderC->GetShaderPipelineSpecialization(), shader->GetMaterialPipelineSpecializationRequirements(*mat)); // | pragma::GameShaderSpecializationConstantFlag::Enable3dOriginBit);
 			if(t.has_value())
 				pipelineIdx = *t;
 			prosper::PipelineID pipelineId;
-			if(shader->GetPipelineId(pipelineId,pipelineIdx) == false || pipelineId == std::numeric_limits<decltype(pipelineId)>::max())
+			if(shader->GetPipelineId(pipelineId, pipelineIdx) == false || pipelineId == std::numeric_limits<decltype(pipelineId)>::max())
 				continue;
-			if(mat->GetAlphaMode() == AlphaMode::Blend)
-			{
-				clusterRenderTranslucentQueue = clusterRenderTranslucentQueue ? clusterRenderTranslucentQueue : pragma::rendering::RenderQueue::Create("world_translucent_cluster_" +std::to_string(clusterIdx));
-				clusterRenderTranslucentQueue->Add(static_cast<CBaseEntity&>(GetEntity()),subMeshIdx,*mat,pipelineId);
+			if(mat->GetAlphaMode() == AlphaMode::Blend) {
+				clusterRenderTranslucentQueue = clusterRenderTranslucentQueue ? clusterRenderTranslucentQueue : pragma::rendering::RenderQueue::Create("world_translucent_cluster_" + std::to_string(clusterIdx));
+				clusterRenderTranslucentQueue->Add(static_cast<CBaseEntity &>(GetEntity()), subMeshIdx, *mat, pipelineId);
 				continue;
 			}
-			clusterRenderQueue->Add(static_cast<CBaseEntity&>(GetEntity()),subMeshIdx,*mat,pipelineId);
+			clusterRenderQueue->Add(static_cast<CBaseEntity &>(GetEntity()), subMeshIdx, *mat, pipelineId);
 		}
 		clusterRenderTranslucentQueues.push_back(clusterRenderTranslucentQueue);
 		clusterRenderQueue->Sort();
@@ -343,7 +318,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 
 void CWorldComponent::UpdateRenderMeshes()
 {
-	auto &ent = static_cast<CBaseEntity&>(GetEntity());
+	auto &ent = static_cast<CBaseEntity &>(GetEntity());
 	auto mdl = ent.GetModel();
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(mdl == nullptr || !pRenderComponent)
@@ -354,16 +329,12 @@ void CWorldComponent::UpdateRenderMeshes()
 	lodMeshes.clear();
 	renderMeshes.clear();
 	uint32_t numSubMeshes = 0;
-	for(auto id : baseMeshes)
-	{
+	for(auto id : baseMeshes) {
 		auto it = m_lodBaseMeshIds.find(id);
-		if(it == m_lodBaseMeshIds.end())
-		{
+		if(it == m_lodBaseMeshIds.end()) {
 			auto group = mdl->GetMeshGroup(id);
-			if(group != nullptr)
-			{
-				for(auto &mesh : group->GetMeshes())
-				{
+			if(group != nullptr) {
+				for(auto &mesh : group->GetMeshes()) {
 					lodMeshes.push_back(mesh);
 					numSubMeshes += mesh->GetSubMeshCount();
 				}
@@ -378,34 +349,30 @@ void CWorldComponent::UpdateRenderMeshes()
 			continue;
 		auto &mesh = meshes.front();
 		auto *lodInfo = mdl->GetLODInfo(0);
-		if(lodInfo != nullptr)
-		{
+		if(lodInfo != nullptr) {
 			auto it = lodInfo->meshReplacements.find(id);
-			if(it != lodInfo->meshReplacements.end())
-			{
+			if(it != lodInfo->meshReplacements.end()) {
 				auto lodGroup = mdl->GetMeshGroup(it->second);
 				if(lodGroup != nullptr)
 					group = lodGroup;
 			}
 		}
-		for(auto &mesh : group->GetMeshes())
-		{
+		for(auto &mesh : group->GetMeshes()) {
 			lodMeshes.push_back(mesh);
 			numSubMeshes += mesh->GetSubMeshCount();
 		}
 	}
 	renderMeshes.reserve(numSubMeshes);
-	for(auto &mesh : lodMeshes)
-	{
+	for(auto &mesh : lodMeshes) {
 		for(auto &subMesh : mesh->GetSubMeshes())
 			renderMeshes.push_back(subMesh);
 	}
 }
-void CWorldComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CWorldComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 //////////////
 
-LINK_ENTITY_TO_CLASS(world,CWorld);
+LINK_ENTITY_TO_CLASS(world, CWorld);
 
 void CWorld::Initialize()
 {
@@ -413,26 +380,30 @@ void CWorld::Initialize()
 	AddComponent<CWorldComponent>();
 }
 
-Con::c_cout& CWorld::print(Con::c_cout &os)
+Con::c_cout &CWorld::print(Con::c_cout &os)
 {
-	os<<"CWorld["<<m_index<<"]"<<"["<<GetClass()<<"]"<<"[";
+	os << "CWorld[" << m_index << "]"
+	   << "[" << GetClass() << "]"
+	   << "[";
 	auto &mdl = GetModel();
 	if(mdl == nullptr)
-		os<<"NULL";
+		os << "NULL";
 	else
-		os<<mdl->GetName();
-	os<<"]";
+		os << mdl->GetName();
+	os << "]";
 	return os;
 }
 
-std::ostream& CWorld::print(std::ostream &os)
+std::ostream &CWorld::print(std::ostream &os)
 {
-	os<<"CWorld["<<m_index<<"]"<<"["<<GetClass()<<"]"<<"[";
+	os << "CWorld[" << m_index << "]"
+	   << "[" << GetClass() << "]"
+	   << "[";
 	auto &mdl = GetModel();
 	if(mdl == nullptr)
-		os<<"NULL";
+		os << "NULL";
 	else
-		os<<mdl->GetName();
-	os<<"]";
+		os << mdl->GetName();
+	os << "]";
 	return os;
 }

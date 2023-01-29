@@ -11,13 +11,12 @@
 #include "pragma/definitions.h"
 #include <mathutil/glmutil.h>
 
-class DLLNETWORK OrientedPoint
-{
-public:
+class DLLNETWORK OrientedPoint {
+  public:
 	OrientedPoint();
 	OrientedPoint(Vector3 &position);
 	OrientedPoint(Quat &orientation);
-	OrientedPoint(Vector3 &position,Quat &orientation);
+	OrientedPoint(Vector3 &position, Quat &orientation);
 	Vector3 pos = {};
 	Quat rot = uquat::identity();
 };

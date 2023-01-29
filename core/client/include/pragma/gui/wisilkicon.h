@@ -11,10 +11,8 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/gui/wiicon.h"
 
-class DLLCLIENT WISilkIcon
-	: public WIIcon
-{
-public:
+class DLLCLIENT WISilkIcon : public WIIcon {
+  public:
 	WISilkIcon();
 	virtual ~WISilkIcon() override;
 	virtual void Initialize() override;

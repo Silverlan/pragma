@@ -15,16 +15,14 @@
 #include <optional>
 #include <functional>
 
-namespace util
-{
-	struct DLLNETWORK SplashDamageInfo
-	{
+namespace util {
+	struct DLLNETWORK SplashDamageInfo {
 		SplashDamageInfo();
 		DamageInfo damageInfo = {};
 		Vector3 origin = {};
 		float radius = 0.f;
-		std::optional<std::pair<Vector3,float>> cone = {};
-		std::function<bool(BaseEntity*,DamageInfo&)> callback = nullptr;
+		std::optional<std::pair<Vector3, float>> cone = {};
+		std::function<bool(BaseEntity *, DamageInfo &)> callback = nullptr;
 	};
 };
 

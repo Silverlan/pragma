@@ -66,15 +66,12 @@ extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-static void CVAR_CALLBACK_render_vsync_enabled(NetworkState*,ConVar*,int,int val)
-{
-	glfwSwapInterval((val == 0) ? 0 : 1);
-}
-REGISTER_CONVAR_CALLBACK_CL(render_vsync_enabled,CVAR_CALLBACK_render_vsync_enabled);
+static void CVAR_CALLBACK_render_vsync_enabled(NetworkState *, ConVar *, int, int val) { glfwSwapInterval((val == 0) ? 0 : 1); }
+REGISTER_CONVAR_CALLBACK_CL(render_vsync_enabled, CVAR_CALLBACK_render_vsync_enabled);
 
 static CallbackHandle cbDrawPhysics;
 static CallbackHandle cbDrawPhysicsEnd;
-static void CVAR_CALLBACK_debug_physics_draw(NetworkState*,ConVar*,int,int val,bool serverside)
+static void CVAR_CALLBACK_debug_physics_draw(NetworkState *, ConVar *, int, int val, bool serverside)
 {
 	if(cbDrawPhysics.IsValid())
 		cbDrawPhysics.Remove();
@@ -82,8 +79,7 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState*,ConVar*,int,int val,b
 		cbDrawPhysicsEnd.Remove();
 	//auto *physEnv = c_game->GetPhysicsEnvironment();
 	Game *game;
-	if(serverside)
-	{
+	if(serverside) {
 		auto *nw = c_engine->GetServerNetworkState();
 		game = nw ? nw->GetGameState() : nullptr;
 	}
@@ -94,8 +90,7 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState*,ConVar*,int,int val,b
 	auto *physEnv = game->GetPhysicsEnvironment();
 	if(physEnv == nullptr)
 		return;
-	if(val == 0)
-	{
+	if(val == 0) {
 		physEnv->SetVisualDebugger(nullptr);
 		return;
 	}
@@ -106,10 +101,9 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState*,ConVar*,int,int val,b
 		visDebugger->SetDebugMode(pragma::physics::IVisualDebugger::DebugMode::None);
 		return;
 	}*/
-	cbDrawPhysics = c_game->AddCallback("Think",FunctionCallback<>::Create([serverside]() {
+	cbDrawPhysics = c_game->AddCallback("Think", FunctionCallback<>::Create([serverside]() {
 		Game *game;
-		if(serverside)
-		{
+		if(serverside) {
 			auto *nw = c_engine->GetServerNetworkState();
 			game = nw ? nw->GetGameState() : nullptr;
 		}
@@ -122,19 +116,15 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState*,ConVar*,int,int val,b
 		if(debugDraw == nullptr)
 			return;
 		auto &vehicles = pragma::CVehicleComponent::GetAll();
-		for(auto it=vehicles.begin();it!=vehicles.end();++it)
-		{
+		for(auto it = vehicles.begin(); it != vehicles.end(); ++it) {
 			auto *vhc = *it;
 #ifdef ENABLE_DEPRECATED_PHYSICS
 			auto *btVhc = vhc->GetBtVehicle();
-			if(btVhc != nullptr)
-			{
-				for(UChar i=0;i<vhc->GetWheelCount();++i)
-				{
-					btVhc->updateWheelTransform(i,true);
+			if(btVhc != nullptr) {
+				for(UChar i = 0; i < vhc->GetWheelCount(); ++i) {
+					btVhc->updateWheelTransform(i, true);
 					auto *info = vhc->GetWheelInfo(i);
-					if(info != nullptr)
-					{
+					if(info != nullptr) {
 						auto &t = info->m_worldTransform;
 						//debugDraw->drawTransform(t,info->m_wheelsRadius);
 						//debugDraw->drawCylinder(info->m_wheelsRadius,info->m_wheelsRadius *0.5f,0,t,btVector3(1.f,0.f,0.f));
@@ -144,7 +134,7 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState*,ConVar*,int,int val,b
 #endif
 		}
 	}));
-	cbDrawPhysicsEnd = c_game->AddCallback("OnGameEnd",FunctionCallback<>::Create([]() {
+	cbDrawPhysicsEnd = c_game->AddCallback("OnGameEnd", FunctionCallback<>::Create([]() {
 		cbDrawPhysics.Remove();
 		cbDrawPhysicsEnd.Remove();
 	}));
@@ -157,28 +147,26 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState*,ConVar*,int,int val,b
 		mode = pragma::physics::IVisualDebugger::DebugMode::Normals;
 	visDebugger->SetDebugMode(mode);
 }
-REGISTER_CONVAR_CALLBACK_CL(debug_physics_draw,[](NetworkState *nw,ConVar *cv,int oldVal,int val) {CVAR_CALLBACK_debug_physics_draw(nw,cv,oldVal,val,false);});
-REGISTER_CONVAR_CALLBACK_CL(sv_debug_physics_draw,[](NetworkState *nw,ConVar *cv,int oldVal,int val) {CVAR_CALLBACK_debug_physics_draw(nw,cv,oldVal,val,true);});
+REGISTER_CONVAR_CALLBACK_CL(debug_physics_draw, [](NetworkState *nw, ConVar *cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, false); });
+REGISTER_CONVAR_CALLBACK_CL(sv_debug_physics_draw, [](NetworkState *nw, ConVar *cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, true); });
 
-void Console::commands::debug_render_validation_error_enabled(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+void Console::commands::debug_render_validation_error_enabled(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
-	if(argv.empty())
-	{
-		Con::cwar<<"No validation error id specified!"<<Con::endl;
+	if(argv.empty()) {
+		Con::cwar << "No validation error id specified!" << Con::endl;
 		return;
 	}
 	auto &id = argv.front();
 	auto enabled = true;
 	if(argv.size() > 1)
 		enabled = util::to_boolean(argv[1]);
-	c_engine->SetValidationErrorDisabled(id,!enabled);
+	c_engine->SetValidationErrorDisabled(id, !enabled);
 }
 
-void Console::commands::debug_render_depth_buffer(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+void Console::commands::debug_render_depth_buffer(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
-	if(dbg)
-	{
+	if(dbg) {
 		dbg = nullptr;
 		return;
 	}
@@ -186,47 +174,42 @@ void Console::commands::debug_render_depth_buffer(NetworkState *state,pragma::Ba
 	if(ent.IsCharacter() == false)
 		return;
 	auto charComponent = ent.GetCharacterComponent();
-	auto ents = command::find_target_entity(state,*charComponent,argv);
+	auto ents = command::find_target_entity(state, *charComponent, argv);
 	EntityHandle hEnt {};
 	if(ents.empty() == false)
 		hEnt = ents.front()->GetHandle();
 	dbg = std::make_unique<DebugGameGUI>([hEnt]() {
 		pragma::CSceneComponent *scene = nullptr;
-		if(hEnt.valid())
-		{
+		if(hEnt.valid()) {
 			auto sceneC = hEnt.get()->GetComponent<pragma::CSceneComponent>();
-			if(sceneC.expired())
-			{
-				Con::cwar<<"Scene not found!"<<Con::endl;
-				return WIHandle{};
+			if(sceneC.expired()) {
+				Con::cwar << "Scene not found!" << Con::endl;
+				return WIHandle {};
 			}
 			scene = sceneC.get();
 		}
 		else
 			scene = c_game->GetScene();
 		auto *renderer = scene ? scene->GetRenderer() : nullptr;
-		auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent>{};
+		auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 		if(raster.expired())
-			return WIHandle{};
+			return WIHandle {};
 		auto &wgui = WGUI::GetInstance();
-			
+
 		auto r = wgui.Create<WIDebugDepthTexture>();
-		r->SetTexture(*raster->GetPrepass().textureDepth,{
-			prosper::PipelineStageFlags::LateFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit
-		},{
-			prosper::PipelineStageFlags::EarlyFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit
-		});
+		r->SetTexture(*raster->GetPrepass().textureDepth, {prosper::PipelineStageFlags::LateFragmentTestsBit, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AccessFlags::DepthStencilAttachmentWriteBit},
+		  {prosper::PipelineStageFlags::EarlyFragmentTestsBit, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AccessFlags::DepthStencilAttachmentWriteBit});
 		r->SetShouldResolveImage(true);
-		r->SetSize(1024,1024);
+		r->SetSize(1024, 1024);
 		r->Update();
 		return r->GetHandle();
 	});
 	auto *d = dbg.get();
-	dbg->AddCallback("PostRenderScene",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([d](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
+	dbg->AddCallback("PostRenderScene", FunctionCallback<void, std::reference_wrapper<const util::DrawSceneInfo>>::Create([d](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
 		auto *el = d->GetGUIElement();
 		if(el == nullptr)
 			return;
-		static_cast<WIDebugDepthTexture*>(el)->Update();
+		static_cast<WIDebugDepthTexture *>(el)->Update();
 	}));
 }
 
@@ -246,83 +229,61 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 	auto &cmd = *drawSceneInfo.commandBuffer;
 	EntityIterator itParticles {*this};
 	itParticles.AttachFilter<TEntityIteratorFilterComponent<pragma::CParticleSystemComponent>>();
-	for(auto *ent : itParticles)
-	{
+	for(auto *ent : itParticles) {
 		auto &tDelta = DeltaTime();
 		auto pt = ent->GetComponent<pragma::CParticleSystemComponent>();
-		if(pt.valid() && pt->GetParent() == nullptr && pt->ShouldAutoSimulate())
-		{
+		if(pt.valid() && pt->GetParent() == nullptr && pt->ShouldAutoSimulate()) {
 			pt->Simulate(tDelta);
 
 			auto &renderers = pt->GetRenderers();
-			if(!renderers.empty())
-			{
+			if(!renderers.empty()) {
 				auto &renderer = renderers.front();
 				renderer->PreRender(cmd);
 			}
 
 			// Vertex buffer barrier
 			auto &ptBuffer = pt->GetParticleBuffer();
-			if (ptBuffer != nullptr)
-			{
+			if(ptBuffer != nullptr) {
 				// Particle buffer barrier
-				cmd.RecordBufferBarrier(
-					*ptBuffer,
-					prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexInputBit,
-					prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::VertexAttributeReadBit
-				);
+				cmd.RecordBufferBarrier(*ptBuffer, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::VertexInputBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::VertexAttributeReadBit);
 			}
 
 			auto &animBuffer = pt->GetParticleAnimationBuffer();
-			if (animBuffer != nullptr)
-			{
+			if(animBuffer != nullptr) {
 				// Animation start buffer barrier
-				cmd.RecordBufferBarrier(
-					*animBuffer,
-					prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexInputBit,
-					prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::VertexAttributeReadBit
-				);
+				cmd.RecordBufferBarrier(*animBuffer, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::VertexInputBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::VertexAttributeReadBit);
 			}
 
 			auto &spriteSheetBuffer = pt->GetSpriteSheetBuffer();
-			if (spriteSheetBuffer != nullptr)
-			{
+			if(spriteSheetBuffer != nullptr) {
 				// Animation buffer barrier
-				cmd.RecordBufferBarrier(
-					*spriteSheetBuffer,
-					prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit,
-					prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit
-				);
+				cmd.RecordBufferBarrier(*spriteSheetBuffer, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 			}
 		}
 	}
 
-	if(drawSceneInfo.scene.expired())
-	{
+	if(drawSceneInfo.scene.expired()) {
 		auto *sceneC = GetRenderScene();
-		drawSceneInfo.scene = sceneC ? sceneC->GetHandle<pragma::CSceneComponent>() : pragma::ComponentHandle<pragma::CSceneComponent>{};
+		drawSceneInfo.scene = sceneC ? sceneC->GetHandle<pragma::CSceneComponent>() : pragma::ComponentHandle<pragma::CSceneComponent> {};
 	}
 	auto &scene = drawSceneInfo.scene;
-	if(scene.expired())
-	{
-		Con::cwar<<"No active render scene!"<<Con::endl;
+	if(scene.expired()) {
+		Con::cwar << "No active render scene!" << Con::endl;
 		return;
 	}
-	if(scene->IsValid() == false)
-	{
-		Con::cwar<<"Attempted to render invalid scene!"<<Con::endl;
+	if(scene->IsValid() == false) {
+		Con::cwar << "Attempted to render invalid scene!" << Con::endl;
 		return;
 	}
-	CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes",std::ref(drawSceneInfo));
-	CallLuaCallbacks<void,util::DrawSceneInfo*>("PreRenderScenes",&drawSceneInfo);
-	CallLuaCallbacks<void,util::DrawSceneInfo*>("RenderScenes",&drawSceneInfo);
+	CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes", std::ref(drawSceneInfo));
+	CallLuaCallbacks<void, util::DrawSceneInfo *>("PreRenderScenes", &drawSceneInfo);
+	CallLuaCallbacks<void, util::DrawSceneInfo *>("RenderScenes", &drawSceneInfo);
 
-	if(IsDefaultGameRenderEnabled())
-	{
-		GetPrimaryCameraRenderMask(drawSceneInfo.inclusionMask,drawSceneInfo.exclusionMask);
+	if(IsDefaultGameRenderEnabled()) {
+		GetPrimaryCameraRenderMask(drawSceneInfo.inclusionMask, drawSceneInfo.exclusionMask);
 		QueueForRendering(drawSceneInfo);
 	}
-	
+
 	// This is the only callback that allows adding sub-passes
 	CallCallbacks("OnRenderScenes");
 	CallLuaCallbacks<void>("OnRenderScenes");
@@ -341,19 +302,17 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 	m_sceneRenderQueue.clear();
 }
 
-void CGame::GetPrimaryCameraRenderMask(::pragma::rendering::RenderMask &inclusionMask,::pragma::rendering::RenderMask &exclusionMask) const
+void CGame::GetPrimaryCameraRenderMask(::pragma::rendering::RenderMask &inclusionMask, ::pragma::rendering::RenderMask &exclusionMask) const
 {
 	auto *lp = m_plLocal.get();
-	if(lp && lp->IsInFirstPersonMode())
-	{
+	if(lp && lp->IsInFirstPersonMode()) {
 		exclusionMask |= m_thirdPersonRenderMask;
 		inclusionMask |= m_firstPersonRenderMask;
-		
+
 		exclusionMask &= ~m_firstPersonRenderMask;
 		inclusionMask &= ~m_thirdPersonRenderMask;
 	}
-	else
-	{
+	else {
 		exclusionMask |= m_firstPersonRenderMask;
 		inclusionMask |= m_thirdPersonRenderMask;
 
@@ -368,16 +327,14 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 		return;
 	auto drawWorld = cvDrawWorld->GetInt();
 
-	std::function<void(const std::vector<util::DrawSceneInfo>&)> buildRenderQueues = nullptr;
-	buildRenderQueues = [&buildRenderQueues,drawWorld](const std::vector<util::DrawSceneInfo> &drawSceneInfos) {
-		for(auto &cdrawSceneInfo : drawSceneInfos)
-		{
-			auto &drawSceneInfo = const_cast<util::DrawSceneInfo&>(cdrawSceneInfo);
+	std::function<void(const std::vector<util::DrawSceneInfo> &)> buildRenderQueues = nullptr;
+	buildRenderQueues = [&buildRenderQueues, drawWorld](const std::vector<util::DrawSceneInfo> &drawSceneInfos) {
+		for(auto &cdrawSceneInfo : drawSceneInfos) {
+			auto &drawSceneInfo = const_cast<util::DrawSceneInfo &>(cdrawSceneInfo);
 			if(drawSceneInfo.scene.expired())
 				continue;
 
-			if(drawSceneInfo.subPasses)
-			{
+			if(drawSceneInfo.subPasses) {
 				// This scene has sub-scenes we have to consider first!
 				buildRenderQueues(*drawSceneInfo.subPasses);
 			}
@@ -403,11 +360,11 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 			auto &renderFlags = drawSceneInfo.renderFlags;
 			auto drawWorld = cvDrawWorld->GetBool();
 			if(drawWorld == false)
-				umath::set_flag(renderFlags,RenderFlags::World,false);
+				umath::set_flag(renderFlags, RenderFlags::World, false);
 
 			auto *pl = c_game->GetLocalPlayer();
 			if(pl == nullptr || pl->IsInFirstPersonMode() == false)
-				umath::set_flag(renderFlags,RenderFlags::View,false);
+				umath::set_flag(renderFlags, RenderFlags::View, false);
 
 			drawSceneInfo.scene->BuildRenderQueues(drawSceneInfo);
 		}
@@ -425,15 +382,13 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 	// Initiate the command buffer build threads for all queued scenes.
 	// If we have multiple scenes to render (e.g. left eye and right eye for VR),
 	// the command buffers can all be built in parallel.
-	std::function<void(const std::vector<util::DrawSceneInfo>&)> buildCommandBuffers = nullptr;
-	buildCommandBuffers = [&buildCommandBuffers,drawWorld](const std::vector<util::DrawSceneInfo> &drawSceneInfos) {
-		for(auto &cdrawSceneInfo : drawSceneInfos)
-		{
-			auto &drawSceneInfo = const_cast<util::DrawSceneInfo&>(cdrawSceneInfo);
-			if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags,util::DrawSceneInfo::Flags::DisableRender))
+	std::function<void(const std::vector<util::DrawSceneInfo> &)> buildCommandBuffers = nullptr;
+	buildCommandBuffers = [&buildCommandBuffers, drawWorld](const std::vector<util::DrawSceneInfo> &drawSceneInfos) {
+		for(auto &cdrawSceneInfo : drawSceneInfos) {
+			auto &drawSceneInfo = const_cast<util::DrawSceneInfo &>(cdrawSceneInfo);
+			if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags, util::DrawSceneInfo::Flags::DisableRender))
 				continue;
-			if(drawSceneInfo.subPasses)
-			{
+			if(drawSceneInfo.subPasses) {
 				// This scene has sub-scenes we have to consider first!
 				buildCommandBuffers(*drawSceneInfo.subPasses);
 			}
@@ -443,16 +398,14 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 	buildCommandBuffers(drawSceneInfos);
 
 	// Render the scenes
-	std::function<void(const std::vector<util::DrawSceneInfo>&)> renderScenes = nullptr;
-	renderScenes = [this,&renderScenes,drawWorld](const std::vector<util::DrawSceneInfo> &drawSceneInfos) {
-		for(auto &cdrawSceneInfo : drawSceneInfos)
-		{
-			auto &drawSceneInfo = const_cast<util::DrawSceneInfo&>(cdrawSceneInfo);
-			if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags,util::DrawSceneInfo::Flags::DisableRender))
+	std::function<void(const std::vector<util::DrawSceneInfo> &)> renderScenes = nullptr;
+	renderScenes = [this, &renderScenes, drawWorld](const std::vector<util::DrawSceneInfo> &drawSceneInfos) {
+		for(auto &cdrawSceneInfo : drawSceneInfos) {
+			auto &drawSceneInfo = const_cast<util::DrawSceneInfo &>(cdrawSceneInfo);
+			if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags, util::DrawSceneInfo::Flags::DisableRender))
 				continue;
 
-			if(drawSceneInfo.subPasses)
-			{
+			if(drawSceneInfo.subPasses) {
 				// This scene has sub-scenes we have to consider first!
 				renderScenes(*drawSceneInfo.subPasses);
 			}
@@ -461,24 +414,22 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 			auto &drawCmd = drawSceneInfo.commandBuffer;
 			if(drawCmd == nullptr || drawCmd->IsPrimary() == false)
 				continue;
-			auto *primCmd = static_cast<prosper::IPrimaryCommandBuffer*>(drawCmd.get());
+			auto *primCmd = static_cast<prosper::IPrimaryCommandBuffer *>(drawCmd.get());
 			auto newRecording = !primCmd->IsRecording();
 			if(newRecording)
-				static_cast<prosper::IPrimaryCommandBuffer*>(drawCmd.get())->StartRecording();
-			if(cvClearScene->GetBool() == true || drawWorld == 2 || drawSceneInfo.clearColor.has_value())
-			{
+				static_cast<prosper::IPrimaryCommandBuffer *>(drawCmd.get())->StartRecording();
+			if(cvClearScene->GetBool() == true || drawWorld == 2 || drawSceneInfo.clearColor.has_value()) {
 				auto clearCol = drawSceneInfo.clearColor.has_value() ? drawSceneInfo.clearColor->ToVector4() : Color(cvClearSceneColor->GetString()).ToVector4();
 				auto &hdrImg = scene->GetRenderer()->GetSceneTexture()->GetImage();
-				drawCmd->RecordImageBarrier(hdrImg,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferDstOptimal);
-				drawCmd->RecordClearImage(hdrImg,prosper::ImageLayout::TransferDstOptimal,{{clearCol.r,clearCol.g,clearCol.b,clearCol.a}});
-				drawCmd->RecordImageBarrier(hdrImg,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+				drawCmd->RecordImageBarrier(hdrImg, prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferDstOptimal);
+				drawCmd->RecordClearImage(hdrImg, prosper::ImageLayout::TransferDstOptimal, {{clearCol.r, clearCol.g, clearCol.b, clearCol.a}});
+				drawCmd->RecordImageBarrier(hdrImg, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 			}
 
 			// Update Exposure
 			auto *renderer = scene->GetRenderer();
-			auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent>{};
-			if(raster.valid())
-			{
+			auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
+			if(raster.valid()) {
 				//c_engine->StartGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
 				auto frame = c_engine->GetRenderContext().GetLastFrameId();
 				if(frame > 0)
@@ -510,7 +461,7 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 #endif
 			RenderScene(drawSceneInfo);
 			if(newRecording)
-				static_cast<prosper::IPrimaryCommandBuffer*>(drawCmd.get())->StopRecording();
+				static_cast<prosper::IPrimaryCommandBuffer *>(drawCmd.get())->StopRecording();
 		}
 	};
 	renderScenes(drawSceneInfos);
@@ -520,4 +471,4 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 	// to have completed their work for this frame. The scene is now safe for writing again.
 }
 
-bool CGame::IsInMainRenderPass() const {return m_bMainRenderPass;}
+bool CGame::IsInMainRenderPass() const { return m_bMainRenderPass; }

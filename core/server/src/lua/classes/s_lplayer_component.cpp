@@ -17,46 +17,37 @@
 
 #include <pragma/lua/ostream_operator_alias.hpp>
 
-namespace Lua
-{
-	namespace Player
-	{
-		namespace Server
-		{
-			static void register_class(luabind::class_<pragma::SPlayerComponent,EntityHandle> &classDef);
-			static void Respawn(lua_State *l,pragma::SPlayerComponent &hEnt);
-			static void SetActionInput(lua_State *l,pragma::SPlayerComponent &hPl,UInt32 input,Bool pressed);
-			static bool SendResource(lua_State *l,pragma::SPlayerComponent &hPl,const std::string &name);
+namespace Lua {
+	namespace Player {
+		namespace Server {
+			static void register_class(luabind::class_<pragma::SPlayerComponent, EntityHandle> &classDef);
+			static void Respawn(lua_State *l, pragma::SPlayerComponent &hEnt);
+			static void SetActionInput(lua_State *l, pragma::SPlayerComponent &hPl, UInt32 input, Bool pressed);
+			static bool SendResource(lua_State *l, pragma::SPlayerComponent &hPl, const std::string &name);
 		};
 	};
 };
 
 extern DLLSERVER ServerState *server;
 
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma,BasePlayerComponent);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BasePlayerComponent);
 
-void Lua::register_sv_player_component(lua_State *l,luabind::module_ &module)
+void Lua::register_sv_player_component(lua_State *l, luabind::module_ &module)
 {
-	auto def = pragma::lua::create_entity_component_class<pragma::SPlayerComponent,pragma::BasePlayerComponent>("PlayerComponent");
-	def.def("Respawn",&Lua::Player::Server::Respawn);
-	def.def("SetActionInput",&Lua::Player::Server::SetActionInput);
-	def.def("Kick",&pragma::SPlayerComponent::Kick);
-	def.def("SendResource",&Lua::Player::Server::SendResource);
+	auto def = pragma::lua::create_entity_component_class<pragma::SPlayerComponent, pragma::BasePlayerComponent>("PlayerComponent");
+	def.def("Respawn", &Lua::Player::Server::Respawn);
+	def.def("SetActionInput", &Lua::Player::Server::SetActionInput);
+	def.def("Kick", &pragma::SPlayerComponent::Kick);
+	def.def("SendResource", &Lua::Player::Server::SendResource);
 	module[def];
 }
-void Lua::Player::Server::Respawn(lua_State *l,pragma::SPlayerComponent &hEnt)
+void Lua::Player::Server::Respawn(lua_State *l, pragma::SPlayerComponent &hEnt)
 {
 	auto charComponent = hEnt.GetEntity().GetCharacterComponent();
 	if(charComponent.valid())
 		charComponent->Respawn();
 }
 
-void Lua::Player::Server::SetActionInput(lua_State *l,pragma::SPlayerComponent &hPl,UInt32 input,Bool pressed)
-{
-	hPl.SetActionInput(static_cast<Action>(input),pressed);
-}
+void Lua::Player::Server::SetActionInput(lua_State *l, pragma::SPlayerComponent &hPl, UInt32 input, Bool pressed) { hPl.SetActionInput(static_cast<Action>(input), pressed); }
 
-bool Lua::Player::Server::SendResource(lua_State *l,pragma::SPlayerComponent &hPl,const std::string &name)
-{
-	return hPl.SendResource(name);
-}
+bool Lua::Player::Server::SendResource(lua_State *l, pragma::SPlayerComponent &hPl, const std::string &name) { return hPl.SendResource(name); }

@@ -11,17 +11,13 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_field_angle_component.hpp>
 
-namespace pragma
-{
-	class DLLSERVER SFieldAngleComponent final
-		: public BaseFieldAngleComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SFieldAngleComponent final : public BaseFieldAngleComponent, public SBaseNetComponent {
+	  public:
 		SFieldAngleComponent(BaseEntity &ent) : BaseFieldAngleComponent(ent) {}
 		virtual void Initialize() override;
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };

@@ -12,29 +12,26 @@
 #include "pragma/rendering/shaders/world/water/c_shader_water_splash.hpp"
 #include <pragma/physics/phys_water_surface_simulator.hpp>
 
-class DLLCLIENT CPhysWaterSurfaceSimulator
-	: public PhysWaterSurfaceSimulator
-{
-public:
-	CPhysWaterSurfaceSimulator(Vector2 aabbMin,Vector2 aabbMax,float originY,uint32_t spacing,float stiffness=0.1f,float propagation=100.f);
-	void Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,CModelSubMesh &mesh);
+class DLLCLIENT CPhysWaterSurfaceSimulator : public PhysWaterSurfaceSimulator {
+  public:
+	CPhysWaterSurfaceSimulator(Vector2 aabbMin, Vector2 aabbMax, float originY, uint32_t spacing, float stiffness = 0.1f, float propagation = 100.f);
+	void Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, CModelSubMesh &mesh);
 	const std::vector<uint16_t> &GetTriangleIndices() const;
 	virtual void Simulate(double dt) override;
 	const std::shared_ptr<prosper::IBuffer> &GetParticleBuffer() const;
 	const std::shared_ptr<prosper::IBuffer> &GetPositionBuffer() const;
 
-#pragma pack(push,1)
-	struct DLLCLIENT ParticleEdgeInfo
-	{
+#pragma pack(push, 1)
+	struct DLLCLIENT ParticleEdgeInfo {
 		Vector4 thisToNb = {};
 		Vector4 nbToThis = {};
 	};
 #pragma pack(pop)
-protected:
+  protected:
 	virtual uint8_t GetEdgeIterationCount() const override;
 	virtual void InitializeSurface() override;
 	std::vector<uint16_t> m_triangleIndices;
-	
+
 	std::shared_ptr<prosper::IPrimaryCommandBuffer> m_cmdBuffer = nullptr;
 	uint32_t m_universalQueueFamilyIndex = std::numeric_limits<uint32_t>::max();
 	::util::WeakHandle<prosper::Shader> m_whShaderSurface = {};
@@ -45,7 +42,7 @@ protected:
 
 	std::shared_ptr<prosper::IBuffer> m_particleBuffer = nullptr;
 	std::shared_ptr<prosper::IBuffer> m_positionBuffer = nullptr;
-	
+
 	std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupParticles = nullptr;
 	std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupSplash = nullptr;
 	std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupIntegrate = nullptr;

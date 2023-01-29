@@ -8,5 +8,5 @@
 #define __LDEF_PLANE_H__
 #include "pragma/lua/ldefinitions.h"
 #include <mathutil/plane.hpp>
-lua_registercheck(Plane,umath::Plane);
+lua_registercheck(Plane, umath::Plane);
 #endif

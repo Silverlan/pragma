@@ -19,21 +19,16 @@ using namespace pragma;
 
 extern DLLSERVER SGame *s_game;
 
-SFlammableComponent::IgniteInfo::IgniteInfo()
-	: damageTimer()
-{}
+SFlammableComponent::IgniteInfo::IgniteInfo() : damageTimer() {}
 
-SFlammableComponent::IgniteInfo::~IgniteInfo()
-{
-	Clear();
-}
+SFlammableComponent::IgniteInfo::~IgniteInfo() { Clear(); }
 
 void SFlammableComponent::IgniteInfo::Clear()
 {
 	if(damageTimer != nullptr && damageTimer->IsValid())
 		damageTimer->GetTimer()->Remove(s_game);
-	hAttacker = EntityHandle{};
-	hInflictor = EntityHandle{};
+	hAttacker = EntityHandle {};
+	hInflictor = EntityHandle {};
 }
 
 /////////////////////////
@@ -55,43 +50,40 @@ void SFlammableComponent::ApplyIgnitionDamage()
 	info.SetDamage(5);
 	pDamageableComponent->TakeDamage(info);
 }
-void SFlammableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-util::EventReply SFlammableComponent::Ignite(float duration,BaseEntity *attacker,BaseEntity *inflictor)
+void SFlammableComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+util::EventReply SFlammableComponent::Ignite(float duration, BaseEntity *attacker, BaseEntity *inflictor)
 {
 	if(!IsIgnitable())
 		return util::EventReply::Handled;
 	NetPacket p {};
 	p->Write<float>(duration);
-	nwm::write_entity(p,attacker);
-	nwm::write_entity(p,inflictor);
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvIgnite,p,pragma::networking::Protocol::SlowReliable);
+	nwm::write_entity(p, attacker);
+	nwm::write_entity(p, inflictor);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvIgnite, p, pragma::networking::Protocol::SlowReliable);
 
-	auto reps = static_cast<uint32_t>(umath::floor(duration /0.5f));
+	auto reps = static_cast<uint32_t>(umath::floor(duration / 0.5f));
 	Timer *t = nullptr;
 	if(IsOnFire() && m_igniteInfo.damageTimer != nullptr && m_igniteInfo.damageTimer->IsValid())
 		t = m_igniteInfo.damageTimer->GetTimer();
-	if(t == nullptr)
-	{
-		t = s_game->CreateTimer(0.5f,reps,FunctionCallback<void>::Create([this]() {
-			ApplyIgnitionDamage();
-		}));
+	if(t == nullptr) {
+		t = s_game->CreateTimer(0.5f, reps, FunctionCallback<void>::Create([this]() { ApplyIgnitionDamage(); }));
 		t->Start(s_game);
 	}
 	else if(reps > t->GetRepetitionsLeft())
 		t->SetRepetitions(reps);
 
 	m_igniteInfo.damageTimer = t->CreateHandle();
-	m_igniteInfo.hAttacker = (attacker != nullptr) ? attacker->GetHandle() : EntityHandle{};
-	m_igniteInfo.hInflictor = (inflictor != nullptr) ? inflictor->GetHandle() : EntityHandle{};
+	m_igniteInfo.hAttacker = (attacker != nullptr) ? attacker->GetHandle() : EntityHandle {};
+	m_igniteInfo.hInflictor = (inflictor != nullptr) ? inflictor->GetHandle() : EntityHandle {};
 
-	return BaseFlammableComponent::Ignite(duration,attacker,inflictor);
+	return BaseFlammableComponent::Ignite(duration, attacker, inflictor);
 }
 void SFlammableComponent::Extinguish()
 {
 	if(!IsOnFire())
 		return;
 	BaseFlammableComponent::Extinguish();
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvExtinguish,pragma::networking::Protocol::SlowReliable);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvExtinguish, pragma::networking::Protocol::SlowReliable);
 	m_igniteInfo.Clear();
 }
 void SFlammableComponent::SetIgnitable(bool b)
@@ -101,17 +93,16 @@ void SFlammableComponent::SetIgnitable(bool b)
 	BaseFlammableComponent::SetIgnitable(b);
 	NetPacket p {};
 	p->Write<bool>(b);
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetIgnitable,p,pragma::networking::Protocol::SlowReliable);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetIgnitable, p, pragma::networking::Protocol::SlowReliable);
 }
-void SFlammableComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SFlammableComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->Write<bool>(*m_bIgnitable);
 	packet->Write<bool>(*m_bIsOnFire);
-	if(*m_bIsOnFire == true)
-	{
+	if(*m_bIsOnFire == true) {
 		auto dur = (m_igniteInfo.damageTimer->IsValid()) ? m_igniteInfo.damageTimer->GetTimer()->GetTimeLeft() : 0.f;
 		packet->Write<float>(dur);
-		nwm::write_entity(packet,m_igniteInfo.hAttacker.get());
-		nwm::write_entity(packet,m_igniteInfo.hInflictor.get());
+		nwm::write_entity(packet, m_igniteInfo.hAttacker.get());
+		nwm::write_entity(packet, m_igniteInfo.hInflictor.get());
 	}
 }

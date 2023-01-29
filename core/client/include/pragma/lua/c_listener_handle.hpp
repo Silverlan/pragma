@@ -12,6 +12,6 @@
 #include <pragma/entities/baseentity_handle.h>
 
 class DLLCLIENT CListener;
-DECLARE_DERIVED_CHILD_HANDLE(DLLCLIENT,Entity,BaseEntity,Entity,CListener,Listener);
+DECLARE_DERIVED_CHILD_HANDLE(DLLCLIENT, Entity, BaseEntity, Entity, CListener, Listener);
 
 #endif

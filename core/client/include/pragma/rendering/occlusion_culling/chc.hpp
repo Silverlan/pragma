@@ -22,21 +22,20 @@
 
 class CHC;
 class CHCNode;
-DECLARE_BASE_HANDLE(DLLCLIENT,CHCNode,CHCNode);
+DECLARE_BASE_HANDLE(DLLCLIENT, CHCNode, CHCNode);
 #pragma warning(push)
 #pragma warning(disable : 4251)
-class DLLCLIENT CHCNode
-{
-public:
+class DLLCLIENT CHCNode {
+  public:
 	friend CHC;
-protected:
-	CHCNode(CHC *chc,const BaseOcclusionOctree::Node &node);
+  protected:
+	CHCNode(CHC *chc, const BaseOcclusionOctree::Node &node);
 	CHCNodeHandle m_handle;
 	std::weak_ptr<const BaseOcclusionOctree::Node> m_node;
 	CHC *m_chc;
 	bool m_bVisible = false;
 	uint64_t m_lastVisited = 0;
-public:
+  public:
 	~CHCNode();
 	CHCNodeHandle GetHandle() const;
 	void Render();
@@ -48,36 +47,36 @@ public:
 	const CHCNode *GetChild(uint32_t idx) const;
 	const BaseOcclusionOctree::Node *GetRenderNode() const;
 	uint32_t GetIndex() const;
-	void GetBounds(Vector3 &min,Vector3 &max) const;
+	void GetBounds(Vector3 &min, Vector3 &max) const;
 	const Vector3 &GetMin() const;
 	const Vector3 &GetMax() const;
 };
 
-class DLLCLIENT CHCQuery
-{
-public:
+class DLLCLIENT CHCQuery {
+  public:
 	friend CHC;
-protected:
+  protected:
 	uint32_t m_queryId = 0;
 	CHCNodeHandle m_hNode;
-public:
+  public:
 	CHCQuery(const CHCNode &node);
-    ~CHCQuery();
+	~CHCQuery();
 	bool IsValid() const;
-    bool IsAvailable() const;
-    void Run();
-    bool GetResult(uint32_t &r) const;
+	bool IsAvailable() const;
+	void Run();
+	bool GetResult(uint32_t &r) const;
 	uint32_t GetResult() const;
 };
 
 class ModelMesh;
 class CBaseEntity;
-namespace pragma {class CCameraComponent;};
-class DLLCLIENT CHC
-{
-public:
+namespace pragma {
+	class CCameraComponent;
+};
+class DLLCLIENT CHC {
+  public:
 	friend CHCNode;
-private:
+  private:
 #ifdef CHC_DEBUGGING_ENABLED
 	// Overhead
 	unsigned int m_debugFrustumBuffer;
@@ -88,7 +87,7 @@ private:
 	WIHandle m_hGUIDebug;
 	CallbackHandle m_debugCallback;
 	void DebugRender();
-	void DebugRender(CHCNode *node,bool bVisible=false);
+	void DebugRender(CHCNode *node, bool bVisible = false);
 /*
 	: m_cam(cam.shared_from_this()),m_frameID(0),m_octree(octree),
 	m_cbOnNodeCreated(),m_cbOnNodeDestroyed()
@@ -127,10 +126,10 @@ private:
 	void HandleReturnedQuery(CHCQuery *query);
 	void IssueQuery(CHCNode *node);
 	void UpdateFrustum();
-protected:
+  protected:
 	CHCNode *GetNode(uint32_t idx);
-public:
-	CHC(pragma::CCameraComponent &cam,const std::shared_ptr<BaseOcclusionOctree> &octree=nullptr);
+  public:
+	CHC(pragma::CCameraComponent &cam, const std::shared_ptr<BaseOcclusionOctree> &octree = nullptr);
 	~CHC();
 	void Reset(const std::shared_ptr<BaseOcclusionOctree> &octree);
 #ifdef CHC_DEBUGGING_ENABLED

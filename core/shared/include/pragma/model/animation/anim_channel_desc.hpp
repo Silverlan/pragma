@@ -11,11 +11,9 @@
 #include "pragma/networkdefinitions.h"
 #include <memory>
 
-namespace pragma
-{
+namespace pragma {
 	class AnimationChannel;
-	struct DLLNETWORK AnimChannelDesc
-	{
+	struct DLLNETWORK AnimChannelDesc {
 		std::shared_ptr<AnimationChannel> channel = nullptr;
 		uint32_t lastTimestampIndex = 0u;
 	};

@@ -12,21 +12,16 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/info/info_landmark.hpp>
 
-namespace pragma
-{
-	class DLLSERVER SInfoLandmarkComponent final
-		: public BaseInfoLandmarkComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SInfoLandmarkComponent final : public BaseInfoLandmarkComponent {
+	  public:
 		SInfoLandmarkComponent(BaseEntity &ent) : BaseInfoLandmarkComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLSERVER InfoLandmark
-	: public SBaseEntity
-{
-public:
+class DLLSERVER InfoLandmark : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

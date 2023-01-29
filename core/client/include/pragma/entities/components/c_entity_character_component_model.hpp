@@ -11,15 +11,12 @@
 #include <pragma/entities/components/base_entity_component.hpp>
 
 class CBaseEntity;
-namespace pragma
-{
-	class DLLCLIENT CEntityCharacterComponentModel
-		: public BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CEntityCharacterComponentModel : public BaseEntityComponent {
+	  public:
 		CEntityCharacterComponentModel(CBaseEntity &ent);
 		virtual void Initialize() override;
-	protected:
+	  protected:
 		// COMPONENT TODO
 		//virtual void ApplyAnimationBlending(AnimationSlotInfo &animInfo,double tDelta) override;
 	};

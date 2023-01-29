@@ -15,32 +15,31 @@
 
 using namespace pragma;
 
-static void get_local_bone_position(std::vector<umath::ScaledTransform> &transforms,std::shared_ptr<panima::Bone> &bone,const Vector3 &fscale={1.f,1.f,1.f},Vector3 *pos=nullptr,Quat *rot=nullptr,Vector3 *scale=nullptr)
+static void get_local_bone_position(std::vector<umath::ScaledTransform> &transforms, std::shared_ptr<panima::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr, Vector3 *scale = nullptr)
 {
-	std::function<void(std::shared_ptr<panima::Bone>&,Vector3*,Quat*,Vector3*)> apply;
-	apply = [&transforms,&apply,fscale](std::shared_ptr<panima::Bone> &bone,Vector3 *pos,Quat *rot,Vector3 *scale) {
+	std::function<void(std::shared_ptr<panima::Bone> &, Vector3 *, Quat *, Vector3 *)> apply;
+	apply = [&transforms, &apply, fscale](std::shared_ptr<panima::Bone> &bone, Vector3 *pos, Quat *rot, Vector3 *scale) {
 		auto parent = bone->parent.lock();
 		if(parent != nullptr)
-			apply(parent,pos,rot,scale);
+			apply(parent, pos, rot, scale);
 		auto &tParent = transforms[bone->ID];
 		auto &posParent = tParent.GetOrigin();
 		auto &rotParent = tParent.GetRotation();
 		auto inv = uquat::get_inverse(rotParent);
-		if(pos != nullptr)
-		{
-			*pos -= posParent *fscale;
-			uvec::rotate(pos,inv);
+		if(pos != nullptr) {
+			*pos -= posParent * fscale;
+			uvec::rotate(pos, inv);
 		}
 		if(rot != nullptr)
-			*rot = inv *(*rot);
+			*rot = inv * (*rot);
 	};
 	auto parent = bone->parent.lock();
 	if(parent != nullptr)
-		apply(parent,pos,rot,scale);
+		apply(parent, pos, rot, scale);
 }
-static void get_local_bone_position(const std::shared_ptr<Model> &mdl,std::vector<umath::ScaledTransform> &transforms,std::shared_ptr<panima::Bone> &bone,const Vector3 &fscale={1.f,1.f,1.f},Vector3 *pos=nullptr,Quat *rot=nullptr,Vector3 *scale=nullptr)
+static void get_local_bone_position(const std::shared_ptr<Model> &mdl, std::vector<umath::ScaledTransform> &transforms, std::shared_ptr<panima::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr, Vector3 *scale = nullptr)
 {
-	get_local_bone_position(transforms,bone,fscale,pos,rot,scale);
+	get_local_bone_position(transforms, bone, fscale, pos, rot, scale);
 
 	// Obsolete? Not sure what this was for
 	/*if(rot == nullptr)
@@ -57,13 +56,13 @@ static void get_local_bone_position(const std::shared_ptr<Model> &mdl,std::vecto
 		}
 	}*/
 }
-UInt32 BaseAnimatedComponent::GetBoneCount() const {return CInt32(m_bones.size());}
-const std::vector<umath::ScaledTransform> &BaseAnimatedComponent::GetBoneTransforms() const {return const_cast<BaseAnimatedComponent&>(*this).GetBoneTransforms();}
-std::vector<umath::ScaledTransform> &BaseAnimatedComponent::GetBoneTransforms() {return m_bones;}
-const std::vector<umath::ScaledTransform> &BaseAnimatedComponent::GetProcessedBoneTransforms() const {return const_cast<BaseAnimatedComponent&>(*this).GetProcessedBoneTransforms();}
-std::vector<umath::ScaledTransform> &BaseAnimatedComponent::GetProcessedBoneTransforms() {return m_processedBones;}
+UInt32 BaseAnimatedComponent::GetBoneCount() const { return CInt32(m_bones.size()); }
+const std::vector<umath::ScaledTransform> &BaseAnimatedComponent::GetBoneTransforms() const { return const_cast<BaseAnimatedComponent &>(*this).GetBoneTransforms(); }
+std::vector<umath::ScaledTransform> &BaseAnimatedComponent::GetBoneTransforms() { return m_bones; }
+const std::vector<umath::ScaledTransform> &BaseAnimatedComponent::GetProcessedBoneTransforms() const { return const_cast<BaseAnimatedComponent &>(*this).GetProcessedBoneTransforms(); }
+std::vector<umath::ScaledTransform> &BaseAnimatedComponent::GetProcessedBoneTransforms() { return m_processedBones; }
 
-Bool BaseAnimatedComponent::GetBonePosition(UInt32 boneId,Vector3 &pos,Quat &rot,Vector3 &scale) const
+Bool BaseAnimatedComponent::GetBonePosition(UInt32 boneId, Vector3 &pos, Quat &rot, Vector3 &scale) const
 {
 	if(boneId >= m_bones.size())
 		return false;
@@ -72,7 +71,7 @@ Bool BaseAnimatedComponent::GetBonePosition(UInt32 boneId,Vector3 &pos,Quat &rot
 	scale = m_bones[boneId].GetScale();
 	return true;
 }
-Bool BaseAnimatedComponent::GetBonePosition(UInt32 boneId,Vector3 &pos,Quat &rot) const
+Bool BaseAnimatedComponent::GetBonePosition(UInt32 boneId, Vector3 &pos, Quat &rot) const
 {
 	if(boneId >= m_bones.size())
 		return false;
@@ -80,21 +79,21 @@ Bool BaseAnimatedComponent::GetBonePosition(UInt32 boneId,Vector3 &pos,Quat &rot
 	rot = m_bones[boneId].GetRotation();
 	return true;
 }
-Bool BaseAnimatedComponent::GetBonePosition(UInt32 boneId,Vector3 &pos) const
+Bool BaseAnimatedComponent::GetBonePosition(UInt32 boneId, Vector3 &pos) const
 {
 	if(boneId >= m_bones.size())
 		return false;
 	pos = m_bones[boneId].GetOrigin();
 	return true;
 }
-Bool BaseAnimatedComponent::GetBoneRotation(UInt32 boneId,Quat &rot) const
+Bool BaseAnimatedComponent::GetBoneRotation(UInt32 boneId, Quat &rot) const
 {
 	if(boneId >= m_bones.size())
 		return false;
 	rot = m_bones[boneId].GetRotation();
 	return true;
 }
-Bool BaseAnimatedComponent::GetBonePosition(UInt32 boneId,Vector3 &pos,EulerAngles &ang) const
+Bool BaseAnimatedComponent::GetBonePosition(UInt32 boneId, Vector3 &pos, EulerAngles &ang) const
 {
 	if(boneId >= m_bones.size())
 		return false;
@@ -102,7 +101,7 @@ Bool BaseAnimatedComponent::GetBonePosition(UInt32 boneId,Vector3 &pos,EulerAngl
 	ang = EulerAngles(m_bones[boneId].GetRotation());
 	return true;
 }
-Bool BaseAnimatedComponent::GetBoneAngles(UInt32 boneId,EulerAngles &ang) const
+Bool BaseAnimatedComponent::GetBoneAngles(UInt32 boneId, EulerAngles &ang) const
 {
 	if(boneId >= m_bones.size())
 		return false;
@@ -122,7 +121,7 @@ const Quat *BaseAnimatedComponent::GetBoneRotation(UInt32 boneId) const
 	return &m_bones[boneId].GetRotation();
 }
 // See also lanimation.cpp
-Bool BaseAnimatedComponent::GetLocalBonePosition(UInt32 boneId,Vector3 &pos,Quat &rot,Vector3 *scale) const
+Bool BaseAnimatedComponent::GetLocalBonePosition(UInt32 boneId, Vector3 &pos, Quat &rot, Vector3 *scale) const
 {
 	if(boneId >= m_bones.size())
 		return false;
@@ -134,10 +133,9 @@ Bool BaseAnimatedComponent::GetLocalBonePosition(UInt32 boneId,Vector3 &pos,Quat
 	if(bone == nullptr)
 		return false;
 	umath::ScaledTransform t {};
-	while(bone)
-	{
+	while(bone) {
 		auto &boneTransform = m_bones.at(bone->ID);
-		t = boneTransform *t;
+		t = boneTransform * t;
 		bone = bone->parent.lock();
 	}
 	pos = t.GetOrigin();
@@ -146,58 +144,58 @@ Bool BaseAnimatedComponent::GetLocalBonePosition(UInt32 boneId,Vector3 &pos,Quat
 		*scale = t.GetScale();
 	return true;
 }
-Bool BaseAnimatedComponent::GetLocalBonePosition(UInt32 boneId,Vector3 &pos) const
+Bool BaseAnimatedComponent::GetLocalBonePosition(UInt32 boneId, Vector3 &pos) const
 {
 	Quat rot;
-	if(GetLocalBonePosition(boneId,pos,rot) == false)
+	if(GetLocalBonePosition(boneId, pos, rot) == false)
 		return false;
 	return true;
 }
-Bool BaseAnimatedComponent::GetLocalBoneRotation(UInt32 boneId,Quat &rot) const
+Bool BaseAnimatedComponent::GetLocalBoneRotation(UInt32 boneId, Quat &rot) const
 {
 	Vector3 pos;
-	if(GetLocalBonePosition(boneId,pos,rot) == false)
+	if(GetLocalBonePosition(boneId, pos, rot) == false)
 		return false;
 	return true;
 }
-Bool BaseAnimatedComponent::GetGlobalBonePosition(UInt32 boneId,Vector3 &pos,Quat &rot,Vector3 *scale) const
+Bool BaseAnimatedComponent::GetGlobalBonePosition(UInt32 boneId, Vector3 &pos, Quat &rot, Vector3 *scale) const
 {
-	if(GetLocalBonePosition(boneId,pos,rot,scale) == false)
+	if(GetLocalBonePosition(boneId, pos, rot, scale) == false)
 		return false;
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(!pTrComponent)
 		return true;
 	pos *= pTrComponent->GetScale();
-	uvec::local_to_world(pTrComponent->GetOrigin(),pTrComponent->GetRotation(),pos,rot);//uvec::local_to_world(GetOrigin(),GetOrientation(),pos,rot);
+	uvec::local_to_world(pTrComponent->GetOrigin(), pTrComponent->GetRotation(), pos, rot); //uvec::local_to_world(GetOrigin(),GetOrientation(),pos,rot);
 	return true;
 }
-Bool BaseAnimatedComponent::GetGlobalBonePosition(UInt32 boneId,Vector3 &pos) const
+Bool BaseAnimatedComponent::GetGlobalBonePosition(UInt32 boneId, Vector3 &pos) const
 {
-	if(GetLocalBonePosition(boneId,pos) == false)
+	if(GetLocalBonePosition(boneId, pos) == false)
 		return false;
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(!pTrComponent)
 		return true;
 	pos *= pTrComponent->GetScale();
-	uvec::local_to_world(pTrComponent->GetOrigin(),pTrComponent->GetRotation(),pos);//uvec::local_to_world(GetOrigin(),GetOrientation(),pos);
+	uvec::local_to_world(pTrComponent->GetOrigin(), pTrComponent->GetRotation(), pos); //uvec::local_to_world(GetOrigin(),GetOrientation(),pos);
 	return true;
 }
-Bool BaseAnimatedComponent::GetGlobalBoneRotation(UInt32 boneId,Quat &rot) const
+Bool BaseAnimatedComponent::GetGlobalBoneRotation(UInt32 boneId, Quat &rot) const
 {
-	if(GetLocalBoneRotation(boneId,rot) == false)
+	if(GetLocalBoneRotation(boneId, rot) == false)
 		return false;
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(!pTrComponent)
 		return true;
-	uvec::local_to_world(pTrComponent->GetRotation(),rot);
+	uvec::local_to_world(pTrComponent->GetRotation(), rot);
 	return true;
 }
-void BaseAnimatedComponent::SetBoneScale(uint32_t boneId,const Vector3 &scale)
+void BaseAnimatedComponent::SetBoneScale(uint32_t boneId, const Vector3 &scale)
 {
 	if(boneId >= m_bones.size())
 		return;
 	m_bones.at(boneId).SetScale(scale);
-	umath::set_flag(m_stateFlags,StateFlags::AbsolutePosesDirty);
+	umath::set_flag(m_stateFlags, StateFlags::AbsolutePosesDirty);
 }
 const Vector3 *BaseAnimatedComponent::GetBoneScale(uint32_t boneId) const
 {
@@ -205,7 +203,7 @@ const Vector3 *BaseAnimatedComponent::GetBoneScale(uint32_t boneId) const
 		return nullptr;
 	return &m_bones.at(boneId).GetScale();
 }
-void BaseAnimatedComponent::SetBonePosition(UInt32 boneId,const Vector3 &pos,const Quat &rot,const Vector3 *scale,Bool updatePhysics)
+void BaseAnimatedComponent::SetBonePosition(UInt32 boneId, const Vector3 &pos, const Quat &rot, const Vector3 *scale, Bool updatePhysics)
 {
 	if(boneId >= m_bones.size())
 		return;
@@ -213,37 +211,37 @@ void BaseAnimatedComponent::SetBonePosition(UInt32 boneId,const Vector3 &pos,con
 	m_bones[boneId].SetRotation(rot);
 	if(scale != nullptr)
 		m_bones[boneId].SetScale(*scale);
-	umath::set_flag(m_stateFlags,StateFlags::AbsolutePosesDirty);
+	umath::set_flag(m_stateFlags, StateFlags::AbsolutePosesDirty);
 	//if(updatePhysics == false)
 	//	return;
-	CEOnBoneTransformChanged evData {boneId,&pos,&rot,scale};
-	InvokeEventCallbacks(EVENT_ON_BONE_TRANSFORM_CHANGED,evData);
+	CEOnBoneTransformChanged evData {boneId, &pos, &rot, scale};
+	InvokeEventCallbacks(EVENT_ON_BONE_TRANSFORM_CHANGED, evData);
 }
-void BaseAnimatedComponent::SetBonePosition(UInt32 boneId,const Vector3 &pos,const Quat &rot,const Vector3 &scale) {SetBonePosition(boneId,pos,rot,&scale,true);}
-void BaseAnimatedComponent::SetBonePosition(UInt32 boneId,const Vector3 &pos,const Quat &rot) {SetBonePosition(boneId,pos,rot,nullptr,true);}
-void BaseAnimatedComponent::SetBonePosition(UInt32 boneId,const Vector3 &pos,const EulerAngles &ang) {SetBonePosition(boneId,pos,uquat::create(ang));}
-void BaseAnimatedComponent::SetBonePosition(UInt32 boneId,const Vector3 &pos)
+void BaseAnimatedComponent::SetBonePosition(UInt32 boneId, const Vector3 &pos, const Quat &rot, const Vector3 &scale) { SetBonePosition(boneId, pos, rot, &scale, true); }
+void BaseAnimatedComponent::SetBonePosition(UInt32 boneId, const Vector3 &pos, const Quat &rot) { SetBonePosition(boneId, pos, rot, nullptr, true); }
+void BaseAnimatedComponent::SetBonePosition(UInt32 boneId, const Vector3 &pos, const EulerAngles &ang) { SetBonePosition(boneId, pos, uquat::create(ang)); }
+void BaseAnimatedComponent::SetBonePosition(UInt32 boneId, const Vector3 &pos)
 {
 	if(boneId >= m_bones.size())
 		return;
 	m_bones[boneId].SetOrigin(pos);
-	umath::set_flag(m_stateFlags,StateFlags::AbsolutePosesDirty);
+	umath::set_flag(m_stateFlags, StateFlags::AbsolutePosesDirty);
 
-	CEOnBoneTransformChanged evData {boneId,&pos,nullptr,nullptr};
-	InvokeEventCallbacks(EVENT_ON_BONE_TRANSFORM_CHANGED,evData);
+	CEOnBoneTransformChanged evData {boneId, &pos, nullptr, nullptr};
+	InvokeEventCallbacks(EVENT_ON_BONE_TRANSFORM_CHANGED, evData);
 }
-void BaseAnimatedComponent::SetBoneRotation(UInt32 boneId,const Quat &rot)
+void BaseAnimatedComponent::SetBoneRotation(UInt32 boneId, const Quat &rot)
 {
 	if(boneId >= m_bones.size())
 		return;
 	m_bones[boneId].SetRotation(rot);
-	umath::set_flag(m_stateFlags,StateFlags::AbsolutePosesDirty);
+	umath::set_flag(m_stateFlags, StateFlags::AbsolutePosesDirty);
 
-	CEOnBoneTransformChanged evData {boneId,nullptr,&rot,nullptr};
-	InvokeEventCallbacks(EVENT_ON_BONE_TRANSFORM_CHANGED,evData);
+	CEOnBoneTransformChanged evData {boneId, nullptr, &rot, nullptr};
+	InvokeEventCallbacks(EVENT_ON_BONE_TRANSFORM_CHANGED, evData);
 }
 
-void BaseAnimatedComponent::SetLocalBonePosition(UInt32 boneId,const Vector3 &pos,const Quat &rot,const Vector3 &scale)
+void BaseAnimatedComponent::SetLocalBonePosition(UInt32 boneId, const Vector3 &pos, const Quat &rot, const Vector3 &scale)
 {
 	if(boneId >= m_bones.size())
 		return;
@@ -258,10 +256,10 @@ void BaseAnimatedComponent::SetLocalBonePosition(UInt32 boneId,const Vector3 &po
 	auto nrot = rot;
 	auto nscale = scale;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	get_local_bone_position(hModel,m_bones,bone,pTrComponent ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f},&npos,&nrot,&nscale);
-	SetBonePosition(boneId,npos,nrot,nscale);
+	get_local_bone_position(hModel, m_bones, bone, pTrComponent ? pTrComponent->GetScale() : Vector3 {1.f, 1.f, 1.f}, &npos, &nrot, &nscale);
+	SetBonePosition(boneId, npos, nrot, nscale);
 }
-void BaseAnimatedComponent::SetLocalBonePosition(UInt32 boneId,const Vector3 &pos,const Quat &rot)
+void BaseAnimatedComponent::SetLocalBonePosition(UInt32 boneId, const Vector3 &pos, const Quat &rot)
 {
 	if(boneId >= m_bones.size())
 		return;
@@ -275,10 +273,10 @@ void BaseAnimatedComponent::SetLocalBonePosition(UInt32 boneId,const Vector3 &po
 	auto npos = pos;
 	auto nrot = rot;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	get_local_bone_position(hModel,m_bones,bone,pTrComponent ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f},&npos,&nrot);
-	SetBonePosition(boneId,npos,nrot);
+	get_local_bone_position(hModel, m_bones, bone, pTrComponent ? pTrComponent->GetScale() : Vector3 {1.f, 1.f, 1.f}, &npos, &nrot);
+	SetBonePosition(boneId, npos, nrot);
 }
-void BaseAnimatedComponent::SetLocalBonePosition(UInt32 boneId,const Vector3 &pos)
+void BaseAnimatedComponent::SetLocalBonePosition(UInt32 boneId, const Vector3 &pos)
 {
 	if(boneId >= m_bones.size())
 		return;
@@ -291,10 +289,10 @@ void BaseAnimatedComponent::SetLocalBonePosition(UInt32 boneId,const Vector3 &po
 		return;
 	auto npos = pos;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	get_local_bone_position(hModel,m_bones,bone,pTrComponent ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f},&npos);
-	SetBonePosition(boneId,npos);
+	get_local_bone_position(hModel, m_bones, bone, pTrComponent ? pTrComponent->GetScale() : Vector3 {1.f, 1.f, 1.f}, &npos);
+	SetBonePosition(boneId, npos);
 }
-void BaseAnimatedComponent::SetLocalBoneRotation(UInt32 boneId,const Quat &rot)
+void BaseAnimatedComponent::SetLocalBoneRotation(UInt32 boneId, const Quat &rot)
 {
 	if(boneId >= m_bones.size())
 		return;
@@ -307,8 +305,8 @@ void BaseAnimatedComponent::SetLocalBoneRotation(UInt32 boneId,const Quat &rot)
 		return;
 	auto nrot = rot;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	get_local_bone_position(hModel,m_bones,bone,pTrComponent ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f},nullptr,&nrot);
-	SetBoneRotation(boneId,nrot);
+	get_local_bone_position(hModel, m_bones, bone, pTrComponent ? pTrComponent->GetScale() : Vector3 {1.f, 1.f, 1.f}, nullptr, &nrot);
+	SetBoneRotation(boneId, nrot);
 }
 
 std::optional<Mat4> BaseAnimatedComponent::GetBoneMatrix(unsigned int boneID) const
@@ -322,11 +320,11 @@ bool BaseAnimatedComponent::ShouldUpdateBones() const
 	if(IsPlayingAnimation())
 		return true;
 	CEShouldUpdateBones evData {};
-	return InvokeEventCallbacks(EVENT_SHOULD_UPDATE_BONES,evData) == util::EventReply::Handled && evData.shouldUpdate;
+	return InvokeEventCallbacks(EVENT_SHOULD_UPDATE_BONES, evData) == util::EventReply::Handled && evData.shouldUpdate;
 }
 
-FPlayAnim BaseAnimatedComponent::GetBaseAnimationFlags() const {return m_baseAnim.flags;}
-void BaseAnimatedComponent::SetBaseAnimationFlags(FPlayAnim flags) {m_baseAnim.flags = flags;}
+FPlayAnim BaseAnimatedComponent::GetBaseAnimationFlags() const { return m_baseAnim.flags; }
+void BaseAnimatedComponent::SetBaseAnimationFlags(FPlayAnim flags) { m_baseAnim.flags = flags; }
 
 std::optional<FPlayAnim> BaseAnimatedComponent::GetLayeredAnimationFlags(uint32_t layerIdx) const
 {
@@ -335,7 +333,7 @@ std::optional<FPlayAnim> BaseAnimatedComponent::GetLayeredAnimationFlags(uint32_
 		return {};
 	return it->second.flags;
 }
-void BaseAnimatedComponent::SetLayeredAnimationFlags(uint32_t layerIdx,FPlayAnim flags)
+void BaseAnimatedComponent::SetLayeredAnimationFlags(uint32_t layerIdx, FPlayAnim flags)
 {
 	auto it = m_animSlots.find(layerIdx);
 	if(it == m_animSlots.end())
@@ -343,47 +341,37 @@ void BaseAnimatedComponent::SetLayeredAnimationFlags(uint32_t layerIdx,FPlayAnim
 	it->second.flags = flags;
 }
 
-void BaseAnimatedComponent::TransformBoneFrames(std::vector<umath::Transform> &bonePoses,std::vector<Vector3> *boneScales,pragma::animation::Animation &anim,Frame *frameBlend,bool bAdd)
+void BaseAnimatedComponent::TransformBoneFrames(std::vector<umath::Transform> &bonePoses, std::vector<Vector3> *boneScales, pragma::animation::Animation &anim, Frame *frameBlend, bool bAdd)
 {
-	for(unsigned int i=0;i<bonePoses.size();i++)
-	{
+	for(unsigned int i = 0; i < bonePoses.size(); i++) {
 		auto &pose = bonePoses[i];
 		auto *poseFrame = frameBlend->GetBoneTransform(i);
 		auto weight = anim.GetBoneWeight(i);
-		if(poseFrame)
-		{
+		if(poseFrame) {
 			if(bAdd == true)
-				pose *= *poseFrame *weight;
+				pose *= *poseFrame * weight;
 			else
-				pose.Interpolate(*poseFrame,weight);
+				pose.Interpolate(*poseFrame, weight);
 		}
-		if(boneScales != nullptr)
-		{
+		if(boneScales != nullptr) {
 			auto *scale = frameBlend->GetBoneScale(i);
-			if(scale != nullptr)
-			{
-				if(bAdd == true)
-				{
+			if(scale != nullptr) {
+				if(bAdd == true) {
 					auto boneScale = *scale;
-					for(uint8_t i=0;i<3;++i)
-						boneScale[i] = umath::lerp(1.0,boneScale[i],weight);
+					for(uint8_t i = 0; i < 3; ++i)
+						boneScale[i] = umath::lerp(1.0, boneScale[i], weight);
 					boneScales->at(i) *= boneScale;
 				}
 				else
-					boneScales->at(i) = uvec::lerp(boneScales->at(i),*scale,weight);
+					boneScales->at(i) = uvec::lerp(boneScales->at(i), *scale, weight);
 			}
 		}
 	}
 }
-void BaseAnimatedComponent::TransformBoneFrames(
-	std::vector<umath::Transform> &tgt,std::vector<Vector3> *boneScales,
-	const std::shared_ptr<pragma::animation::Animation> &baseAnim,
-	const std::shared_ptr<pragma::animation::Animation> &anim,
-	std::vector<umath::Transform> &add,std::vector<Vector3> *addScales,bool bAdd
-)
+void BaseAnimatedComponent::TransformBoneFrames(std::vector<umath::Transform> &tgt, std::vector<Vector3> *boneScales, const std::shared_ptr<pragma::animation::Animation> &baseAnim, const std::shared_ptr<pragma::animation::Animation> &anim, std::vector<umath::Transform> &add,
+  std::vector<Vector3> *addScales, bool bAdd)
 {
-	for(auto i=decltype(tgt.size()){0};i<tgt.size();++i)
-	{
+	for(auto i = decltype(tgt.size()) {0}; i < tgt.size(); ++i) {
 		auto boneId = baseAnim->GetBoneList()[i];
 		auto animBoneIdx = anim->LookupBone(boneId);
 		if(animBoneIdx == -1 || animBoneIdx >= add.size())
@@ -391,84 +379,75 @@ void BaseAnimatedComponent::TransformBoneFrames(
 		auto &pose = tgt.at(i);
 		auto weight = anim->GetBoneWeight(animBoneIdx);
 		if(bAdd == true)
-			pose *= add.at(animBoneIdx) *weight;
+			pose *= add.at(animBoneIdx) * weight;
 		else
-			pose.Interpolate(add.at(animBoneIdx),weight);
-		if(boneScales != nullptr && addScales != nullptr)
-		{
-			if(bAdd == true)
-			{
+			pose.Interpolate(add.at(animBoneIdx), weight);
+		if(boneScales != nullptr && addScales != nullptr) {
+			if(bAdd == true) {
 				auto boneScale = addScales->at(animBoneIdx);
-				for(uint8_t i=0;i<3;++i)
-					boneScale[i] = umath::lerp(1.0,boneScale[i],weight);
+				for(uint8_t i = 0; i < 3; ++i)
+					boneScale[i] = umath::lerp(1.0, boneScale[i], weight);
 				boneScales->at(i) *= boneScale;
 			}
 			else
-				boneScales->at(i) = uvec::lerp(boneScales->at(i),addScales->at(animBoneIdx),weight);
+				boneScales->at(i) = uvec::lerp(boneScales->at(i), addScales->at(animBoneIdx), weight);
 		}
 	}
 }
-void BaseAnimatedComponent::BlendBonePoses(
-	const std::vector<umath::Transform> &srcBonePoses,const std::vector<Vector3> *optSrcBoneScales,
-	const std::vector<umath::Transform> &dstBonePoses,const std::vector<Vector3> *optDstBoneScales,
-	std::vector<umath::Transform> &outBonePoses,std::vector<Vector3> *optOutBoneScales,
-	pragma::animation::Animation &anim,float interpFactor
-) const
+void BaseAnimatedComponent::BlendBonePoses(const std::vector<umath::Transform> &srcBonePoses, const std::vector<Vector3> *optSrcBoneScales, const std::vector<umath::Transform> &dstBonePoses, const std::vector<Vector3> *optDstBoneScales, std::vector<umath::Transform> &outBonePoses,
+  std::vector<Vector3> *optOutBoneScales, pragma::animation::Animation &anim, float interpFactor) const
 {
-	auto numBones = umath::min(srcBonePoses.size(),dstBonePoses.size(),outBonePoses.size());
-	auto numScales = (optSrcBoneScales && optDstBoneScales && optOutBoneScales) ? umath::min(optSrcBoneScales->size(),optDstBoneScales->size(),optOutBoneScales->size(),numBones) : 0;
-	for(auto boneId=decltype(numBones){0u};boneId<numBones;++boneId)
-	{
+	auto numBones = umath::min(srcBonePoses.size(), dstBonePoses.size(), outBonePoses.size());
+	auto numScales = (optSrcBoneScales && optDstBoneScales && optOutBoneScales) ? umath::min(optSrcBoneScales->size(), optDstBoneScales->size(), optOutBoneScales->size(), numBones) : 0;
+	for(auto boneId = decltype(numBones) {0u}; boneId < numBones; ++boneId) {
 		auto &srcPose = srcBonePoses.at(boneId);
 		auto dstPose = dstBonePoses.at(boneId);
 		auto boneWeight = anim.GetBoneWeight(boneId);
-		auto boneInterpFactor = boneWeight *interpFactor;
+		auto boneInterpFactor = boneWeight * interpFactor;
 		auto &outPose = (outBonePoses.at(boneId) = srcPose);
-		outPose.Interpolate(dstPose,boneInterpFactor);
+		outPose.Interpolate(dstPose, boneInterpFactor);
 
 		// Scaling
 		if(boneId >= numScales)
 			continue;
-		optOutBoneScales->at(boneId) = uvec::lerp(optSrcBoneScales->at(boneId),optDstBoneScales->at(boneId) *boneWeight,interpFactor);
+		optOutBoneScales->at(boneId) = uvec::lerp(optSrcBoneScales->at(boneId), optDstBoneScales->at(boneId) * boneWeight, interpFactor);
 	}
 }
-void BaseAnimatedComponent::BlendBoneFrames(std::vector<umath::Transform> &tgt,std::vector<Vector3> *tgtScales,std::vector<umath::Transform> &add,std::vector<Vector3> *addScales,float blendScale) const
+void BaseAnimatedComponent::BlendBoneFrames(std::vector<umath::Transform> &tgt, std::vector<Vector3> *tgtScales, std::vector<umath::Transform> &add, std::vector<Vector3> *addScales, float blendScale) const
 {
 	if(blendScale == 0.f)
 		return;
-	for(unsigned int i=0;i<umath::min(tgt.size(),add.size());i++)
-	{
+	for(unsigned int i = 0; i < umath::min(tgt.size(), add.size()); i++) {
 		auto &pose = tgt.at(i);
-		pose.Interpolate(add.at(i),blendScale);
+		pose.Interpolate(add.at(i), blendScale);
 		if(tgtScales != nullptr && addScales != nullptr)
-			tgtScales->at(i) = uvec::lerp(tgtScales->at(i),addScales->at(i),blendScale);
+			tgtScales->at(i) = uvec::lerp(tgtScales->at(i), addScales->at(i), blendScale);
 	}
 }
 
-static void get_global_bone_transforms(std::vector<umath::ScaledTransform> &transforms,std::unordered_map<uint32_t,std::shared_ptr<panima::Bone>> &childBones,const umath::ScaledTransform &tParent={})
+static void get_global_bone_transforms(std::vector<umath::ScaledTransform> &transforms, std::unordered_map<uint32_t, std::shared_ptr<panima::Bone>> &childBones, const umath::ScaledTransform &tParent = {})
 {
-	for(auto &pair : childBones)
-	{
+	for(auto &pair : childBones) {
 		auto boneId = pair.first;
 		auto &bone = pair.second;
 		if(boneId >= transforms.size())
 			continue;
 		auto &t = transforms.at(boneId);
-		t.SetOrigin(t.GetOrigin() *tParent.GetScale());
-		t = tParent *t;
-		get_global_bone_transforms(transforms,bone->children,t);
+		t.SetOrigin(t.GetOrigin() * tParent.GetScale());
+		t = tParent * t;
+		get_global_bone_transforms(transforms, bone->children, t);
 	}
 }
 bool BaseAnimatedComponent::UpdateSkeleton()
 {
-	if(umath::is_flag_set(m_stateFlags,StateFlags::AbsolutePosesDirty) == false)
+	if(umath::is_flag_set(m_stateFlags, StateFlags::AbsolutePosesDirty) == false)
 		return false;
 	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return false;
-	umath::set_flag(m_stateFlags,StateFlags::AbsolutePosesDirty,false);
+	umath::set_flag(m_stateFlags, StateFlags::AbsolutePosesDirty, false);
 	auto &skeleton = hModel->GetSkeleton();
 	m_processedBones = m_bones;
-	get_global_bone_transforms(m_processedBones,skeleton.GetRootBones());
+	get_global_bone_transforms(m_processedBones, skeleton.GetRootBones());
 	return true;
 }

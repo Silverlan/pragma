@@ -14,12 +14,11 @@
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
-class DLLCLIENT LuaGUIManager
-{
-private:
-	std::unordered_map<std::string,luabind::object> m_guiElements;
-public:
-	void RegisterGUIElement(std::string className,luabind::object &o);
+class DLLCLIENT LuaGUIManager {
+  private:
+	std::unordered_map<std::string, luabind::object> m_guiElements;
+  public:
+	void RegisterGUIElement(std::string className, luabind::object &o);
 	luabind::object *GetClassObject(std::string className);
 };
 #pragma warning(pop)

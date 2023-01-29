@@ -15,37 +15,33 @@
 
 class CSoundScriptManager;
 
-namespace al {class IEffect;};
-class DLLCLIENT CSSEPlaySound
-	: public SSEPlaySound
-{
-protected:
+namespace al {
+	class IEffect;
+};
+class DLLCLIENT CSSEPlaySound : public SSEPlaySound {
+  protected:
 	std::shared_ptr<al::IEffect> m_dspEffect = nullptr;
 	void PrecacheSound(const char *name);
-public:
+  public:
 	CSSEPlaySound(SoundScriptManager *manager);
 	std::vector<std::shared_ptr<al::IEffect>> effects;
 	virtual void Initialize(udm::LinkedPropertyWrapper &prop) override;
-	virtual SSESound *CreateSound(double tStart,const std::function<std::shared_ptr<ALSound>(const std::string&,ALChannel,ALCreateFlags)> &createSound) override;
+	virtual SSESound *CreateSound(double tStart, const std::function<std::shared_ptr<ALSound>(const std::string &, ALChannel, ALCreateFlags)> &createSound) override;
 };
 
-class DLLCLIENT CSoundScript
-	: public SoundScript
-{
-public:
+class DLLCLIENT CSoundScript : public SoundScript {
+  public:
 	friend SoundScriptManager;
 	friend CSoundScriptManager;
-	CSoundScript(SoundScriptManager *manager,std::string identifier);
+	CSoundScript(SoundScriptManager *manager, std::string identifier);
 	virtual ~CSoundScript() override;
 };
 
-class DLLCLIENT CSoundScriptManager
-	: public SoundScriptManager
-{
-public:
+class DLLCLIENT CSoundScriptManager : public SoundScriptManager {
+  public:
 	CSoundScriptManager();
 	virtual ~CSoundScriptManager() override;
-	bool Load(const char *fname,std::vector<std::shared_ptr<SoundScript>> *scripts=NULL);
+	bool Load(const char *fname, std::vector<std::shared_ptr<SoundScript>> *scripts = NULL);
 	SoundScriptEvent *CreateEvent(std::string name);
 };
 

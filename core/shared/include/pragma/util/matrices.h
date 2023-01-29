@@ -12,9 +12,9 @@
 #include <mathutil/glmutil.h>
 #include "pragma/console/conout.h"
 
-#define MATRIX_OSTREAM_DEC(type) \
-	DLLNETWORK Con::c_cout& operator<<(Con::c_cout &os,const Mat##type &m); \
-	DLLNETWORK std::ostream& operator<<(std::ostream &os,const Mat##type &m);
+#define MATRIX_OSTREAM_DEC(type)                                                                                                                                                                                                                                                                 \
+	DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const Mat##type &m);                                                                                                                                                                                                                     \
+	DLLNETWORK std::ostream &operator<<(std::ostream &os, const Mat##type &m);
 
 MATRIX_OSTREAM_DEC(2x2);
 MATRIX_OSTREAM_DEC(2x3);

@@ -20,30 +20,34 @@ class Game;
 class NetworkState;
 class Engine;
 class BaseEntity;
-namespace pragma {class BaseEntityComponent;};
-namespace pragma::physics {class IEnvironment;};
+namespace pragma {
+	class BaseEntityComponent;
+};
+namespace pragma::physics {
+	class IEnvironment;
+};
 namespace luabind {
-	template <typename T,T(*FUNCTION)(lua_State*)>
-	struct parameter_emplacement_converter
-	{
+	template<typename T, T (*FUNCTION)(lua_State *)>
+	struct parameter_emplacement_converter {
 		enum { consumed_args = 0 };
 
-		template <class U>
-		T to_cpp(lua_State* L, U, int /*index*/);
+		template<class U>
+		T to_cpp(lua_State *L, U, int /*index*/);
 
-		template <class U>
-		static int match(lua_State*, U, int /*index*/);
+		template<class U>
+		static int match(lua_State *, U, int /*index*/);
 
-		template <class U>
-		void converter_postcall(lua_State*, U, int) {}
+		template<class U>
+		void converter_postcall(lua_State *, U, int)
+		{
+		}
 	};
 
 	// Game
-	namespace detail
-	{
+	namespace detail {
 		DLLNETWORK Game *get_game(lua_State *l);
 		template<typename T>
-			T get_game(lua_State *l)
+		T get_game(lua_State *l)
 		{
 			if constexpr(std::is_pointer_v<T>)
 				return static_cast<T>(get_game(l));
@@ -51,17 +55,15 @@ namespace luabind {
 				return static_cast<T>(*get_game(l));
 		}
 	};
-	template <typename T> requires(is_type_or_derived<T,Game>)
-	struct default_converter<T>
-		: parameter_emplacement_converter<T,&detail::get_game<T>>
-	{};
+	template<typename T>
+	    requires(is_type_or_derived<T, Game>)
+	struct default_converter<T> : parameter_emplacement_converter<T, &detail::get_game<T>> {};
 
 	// NetworkState
-	namespace detail
-	{
+	namespace detail {
 		DLLNETWORK NetworkState *get_network_state(lua_State *l);
 		template<typename T>
-			T get_network_state(lua_State *l)
+		T get_network_state(lua_State *l)
 		{
 			if constexpr(std::is_pointer_v<T>)
 				return static_cast<T>(get_network_state(l));
@@ -69,17 +71,15 @@ namespace luabind {
 				return static_cast<T>(*get_network_state(l));
 		}
 	};
-	template <typename T> requires(is_type_or_derived<T,NetworkState>)
-	struct default_converter<T>
-		: parameter_emplacement_converter<T,detail::get_network_state<T>>
-	{};
+	template<typename T>
+	    requires(is_type_or_derived<T, NetworkState>)
+	struct default_converter<T> : parameter_emplacement_converter<T, detail::get_network_state<T>> {};
 
 	// Engine
-	namespace detail
-	{
+	namespace detail {
 		DLLNETWORK Engine *get_engine(lua_State *l);
 		template<typename T>
-			T get_engine(lua_State *l)
+		T get_engine(lua_State *l)
 		{
 			if constexpr(std::is_pointer_v<T>)
 				return static_cast<T>(get_engine(l));
@@ -87,17 +87,15 @@ namespace luabind {
 				return static_cast<T>(*get_engine(l));
 		}
 	};
-	template <typename T> requires(is_type_or_derived<T,Engine>)
-	struct default_converter<T>
-		: parameter_emplacement_converter<T,detail::get_engine<T>>
-	{};
+	template<typename T>
+	    requires(is_type_or_derived<T, Engine>)
+	struct default_converter<T> : parameter_emplacement_converter<T, detail::get_engine<T>> {};
 
 	// Physics Environment
-	namespace detail
-	{
+	namespace detail {
 		DLLNETWORK pragma::physics::IEnvironment *get_physics_environment(lua_State *l);
 		template<typename T>
-			T get_physics_environment(lua_State *l)
+		T get_physics_environment(lua_State *l)
 		{
 			if constexpr(std::is_pointer_v<T>)
 				return static_cast<T>(get_physics_environment(l));
@@ -105,63 +103,63 @@ namespace luabind {
 				return static_cast<T>(*get_physics_environment(l));
 		}
 	};
-	template <typename T> requires(is_type_or_derived<T,pragma::physics::IEnvironment>)
-	struct default_converter<T>
-		: parameter_emplacement_converter<T,detail::get_physics_environment<T>>
-	{};
+	template<typename T>
+	    requires(is_type_or_derived<T, pragma::physics::IEnvironment>)
+	struct default_converter<T> : parameter_emplacement_converter<T, detail::get_physics_environment<T>> {};
 }
 
-namespace pragma {class BaseLuaHandle;};
-namespace pragma::physics {class IBase;};
-namespace luabind
-{
-	template <typename T,typename TConverter>
-	struct game_object_converter
-	{
+namespace pragma {
+	class BaseLuaHandle;
+};
+namespace pragma::physics {
+	class IBase;
+};
+namespace luabind {
+	template<typename T, typename TConverter>
+	struct game_object_converter {
 		enum { consumed_args = 1 };
 
-		template <class U>
-		T to_cpp(lua_State* L, U u, int index);
-		void to_lua(lua_State* L, T x);
+		template<class U>
+		T to_cpp(lua_State *L, U u, int index);
+		void to_lua(lua_State *L, T x);
 
-		template <class U>
-		int match(lua_State* L, U u, int index);
+		template<class U>
+		int match(lua_State *L, U u, int index);
 
-		template <class U>
-		void converter_postcall(lua_State*, U u, int) {}
-	private:
+		template<class U>
+		void converter_postcall(lua_State *, U u, int)
+		{
+		}
+	  private:
 		TConverter m_converter;
 	};
 
-	template <class T>
-		concept IsHandleType = std::derived_from<T,pragma::BaseLuaHandle>;
+	template<class T>
+	concept IsHandleType = std::derived_from<T, pragma::BaseLuaHandle>;
 
-	template <class T>
-		concept IsPhysicsType = std::derived_from<T,pragma::physics::IBase>;
+	template<class T>
+	concept IsPhysicsType = std::derived_from<T, pragma::physics::IBase>;
 
-	template <class T>
-		concept IsGameObjectType = IsHandleType<T> || IsPhysicsType<T>;
+	template<class T>
+	concept IsGameObjectType = IsHandleType<T> || IsPhysicsType<T>;
 
-	template <class T> // Note: BaseEntity and derived types are already handled by entity_converter.hpp, so we exclude them here
-		concept IsGenericGameObjectType = IsGameObjectType<T> && !is_type_or_derived<base_type<T>,BaseEntity>; // && !is_type_or_derived<base_type<T>,pragma::BaseEntityComponent>;
+	template<class T> // Note: BaseEntity and derived types are already handled by entity_converter.hpp, so we exclude them here
+	concept IsGenericGameObjectType = IsGameObjectType<T> && !
+	is_type_or_derived<base_type<T>, BaseEntity>; // && !is_type_or_derived<base_type<T>,pragma::BaseEntityComponent>;
 
-	template <typename T> requires(IsGenericGameObjectType<base_type<T>> && std::is_pointer_v<T> && !std::is_const_v<std::remove_pointer_t<T>>)
-	struct default_converter<T>
-		: game_object_converter<T,luabind::detail::pointer_converter>
-	{};
-	template <typename T> requires(IsGenericGameObjectType<base_type<T>> && std::is_pointer_v<T> && std::is_const_v<std::remove_pointer_t<T>>)
-	struct default_converter<T>
-		: game_object_converter<T,luabind::detail::const_pointer_converter>
-	{};
+	template<typename T>
+	    requires(IsGenericGameObjectType<base_type<T>> && std::is_pointer_v<T> && !std::is_const_v<std::remove_pointer_t<T>>)
+	struct default_converter<T> : game_object_converter<T, luabind::detail::pointer_converter> {};
+	template<typename T>
+	    requires(IsGenericGameObjectType<base_type<T>> && std::is_pointer_v<T> && std::is_const_v<std::remove_pointer_t<T>>)
+	struct default_converter<T> : game_object_converter<T, luabind::detail::const_pointer_converter> {};
 
-	template <typename T> requires(IsGenericGameObjectType<base_type<T>> && std::is_reference_v<T> && !std::is_const_v<std::remove_reference_t<T>>)
-	struct default_converter<T>
-		: game_object_converter<T,luabind::detail::ref_converter>
-	{};
-	template <typename T> requires(IsGenericGameObjectType<base_type<T>> && std::is_reference_v<T> && std::is_const_v<std::remove_reference_t<T>>)
-	struct default_converter<T>
-		: game_object_converter<T,luabind::detail::const_ref_converter>
-	{};
+	template<typename T>
+	    requires(IsGenericGameObjectType<base_type<T>> && std::is_reference_v<T> && !std::is_const_v<std::remove_reference_t<T>>)
+	struct default_converter<T> : game_object_converter<T, luabind::detail::ref_converter> {};
+	template<typename T>
+	    requires(IsGenericGameObjectType<base_type<T>> && std::is_reference_v<T> && std::is_const_v<std::remove_reference_t<T>>)
+	struct default_converter<T> : game_object_converter<T, luabind::detail::const_ref_converter> {};
 };
 
 #endif

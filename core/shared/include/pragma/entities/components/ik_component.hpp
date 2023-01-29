@@ -13,42 +13,34 @@
 class Jacobian;
 class Tree;
 class Node;
-namespace pragma
-{
-	class DLLNETWORK IKComponent final
-		: public BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLNETWORK IKComponent final : public BaseEntityComponent {
+	  public:
 		IKComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 
-		void SetIKControllerEnabled(uint32_t ikControllerId,bool b);
+		void SetIKControllerEnabled(uint32_t ikControllerId, bool b);
 		bool IsIKControllerEnabled(uint32_t ikControllerId) const;
-		void SetIKEffectorPos(uint32_t ikControllerId,uint32_t effectorIdx,const Vector3 &pos);
-		const Vector3 *GetIKEffectorPos(uint32_t ikControllerId,uint32_t effectorIdx) const;
+		void SetIKEffectorPos(uint32_t ikControllerId, uint32_t effectorIdx, const Vector3 &pos);
+		const Vector3 *GetIKEffectorPos(uint32_t ikControllerId, uint32_t effectorIdx) const;
 		virtual void InitializeLuaObject(lua_State *l) override;
-	protected:
-		struct DLLNETWORK IKTreeInfo
-		{
-			struct DLLNETWORK NodeInfo
-			{
-				std::array<std::shared_ptr<Node>,3u> ikNodes = {}; // One node for each axis
+	  protected:
+		struct DLLNETWORK IKTreeInfo {
+			struct DLLNETWORK NodeInfo {
+				std::array<std::shared_ptr<Node>, 3u> ikNodes = {}; // One node for each axis
 				uint32_t boneId = std::numeric_limits<uint32_t>::max();
 				Quat deltaRotation = uquat::identity(); // Rotation from model reference pose (for this bone) to IK node reference pose
 
 				std::vector<std::shared_ptr<NodeInfo>> children;
-				virtual bool IsEffector() const {return false;}
+				virtual bool IsEffector() const { return false; }
 			};
-			struct DLLNETWORK EffectorInfo
-				: public NodeInfo
-			{
+			struct DLLNETWORK EffectorInfo : public NodeInfo {
 				Vector3 position = {};
 				uint32_t effectorIndex = std::numeric_limits<uint32_t>::max();
 				uint32_t rootIndex = std::numeric_limits<uint32_t>::max();
-				virtual bool IsEffector() const override {return true;}
+				virtual bool IsEffector() const override { return true; }
 			};
-			struct DLLNETWORK FootInfo
-			{
+			struct DLLNETWORK FootInfo {
 				float yOffset = 0.f;
 				float yIkTreshold = 0.2f; // Default threshold
 				uint32_t effectorBoneId = std::numeric_limits<uint32_t>::max();
@@ -60,7 +52,7 @@ namespace pragma
 			std::vector<std::weak_ptr<EffectorInfo>> effectors = {};
 			bool enabled = false;
 		};
-		std::unordered_map<uint32_t,std::shared_ptr<IKTreeInfo>> m_ikTrees;
+		std::unordered_map<uint32_t, std::shared_ptr<IKTreeInfo>> m_ikTrees;
 
 		bool InitializeIKController(uint32_t ikControllerId);
 		void ClearIKControllers();

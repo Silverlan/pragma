@@ -13,30 +13,30 @@
 class Engine;
 class NetPacket;
 class TimerHandle;
-namespace pragma
-{
-	namespace networking {enum class Protocol : uint8_t; class ClientRecipientFilter;};
+namespace pragma {
+	namespace networking {
+		enum class Protocol : uint8_t;
+		class ClientRecipientFilter;
+	};
 };
-class DLLSERVER SBaseEntity
-	: public BaseEntity
-{
-public:
+class DLLSERVER SBaseEntity : public BaseEntity {
+  public:
 	SBaseEntity();
 	virtual pragma::ComponentHandle<pragma::BaseEntityComponent> AddNetworkedComponent(const std::string &name) override;
-protected:
+  protected:
 	bool m_bShared;
 	Bool m_bSynchronized;
 	void EraseFunction(int function);
 	virtual void OnComponentAdded(pragma::BaseEntityComponent &component) override;
 	virtual void OnComponentRemoved(pragma::BaseEntityComponent &component) override;
-public:
+  public:
 	virtual void DoSpawn() override;
 
 	virtual void Remove() override;
 	virtual void Initialize() override;
 	virtual void InitializeLuaObject(lua_State *lua) override;
-	virtual void SendSnapshotData(NetPacket &packet,pragma::BasePlayerComponent &pl);
-	virtual void SendData(NetPacket &packet,pragma::networking::ClientRecipientFilter &rp);
+	virtual void SendSnapshotData(NetPacket &packet, pragma::BasePlayerComponent &pl);
+	virtual void SendData(NetPacket &packet, pragma::networking::ClientRecipientFilter &rp);
 	bool IsShared() const;
 	void SetShared(bool b);
 	Bool IsNetworked();
@@ -67,27 +67,26 @@ public:
 	pragma::NetEventId RegisterNetEvent(const std::string &name) const;
 
 	// Net Events
-	void SendNetEvent(pragma::NetEventId eventId,NetPacket &packet,pragma::networking::Protocol protocol,const pragma::networking::ClientRecipientFilter &rf);
-	void SendNetEvent(pragma::NetEventId eventId,NetPacket &packet,pragma::networking::Protocol protocol);
-	void SendNetEvent(pragma::NetEventId eventId,NetPacket &packet);
-	void SendNetEvent(pragma::NetEventId eventId,pragma::networking::Protocol protocol);
+	void SendNetEvent(pragma::NetEventId eventId, NetPacket &packet, pragma::networking::Protocol protocol, const pragma::networking::ClientRecipientFilter &rf);
+	void SendNetEvent(pragma::NetEventId eventId, NetPacket &packet, pragma::networking::Protocol protocol);
+	void SendNetEvent(pragma::NetEventId eventId, NetPacket &packet);
+	void SendNetEvent(pragma::NetEventId eventId, pragma::networking::Protocol protocol);
 
-	virtual Bool ReceiveNetEvent(pragma::BasePlayerComponent &pl,pragma::NetEventId,NetPacket &packet);
+	virtual Bool ReceiveNetEvent(pragma::BasePlayerComponent &pl, pragma::NetEventId, NetPacket &packet);
 	//
 };
 
-inline DLLSERVER Con::c_cout& operator<<(Con::c_cout &os,SBaseEntity &ent) {return ent.print(os);}
+inline DLLSERVER Con::c_cout &operator<<(Con::c_cout &os, SBaseEntity &ent) { return ent.print(os); }
 
 #ifdef _WIN32
 template<>
-struct std::formatter<SBaseEntity> : std::formatter<std::string>
-{
-    auto format(SBaseEntity &ent, format_context &ctx) -> decltype(ctx.out())
-    {
+struct std::formatter<SBaseEntity> : std::formatter<std::string> {
+	auto format(SBaseEntity &ent, format_context &ctx) -> decltype(ctx.out())
+	{
 		std::stringstream ss;
 		ent.print(ss);
-        return std::format_to(ctx.out(), "{}",ss.str());
-    }
+		return std::format_to(ctx.out(), "{}", ss.str());
+	}
 };
 #endif
 

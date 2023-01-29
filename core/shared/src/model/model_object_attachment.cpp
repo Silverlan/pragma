@@ -8,9 +8,9 @@
 #include "stdafx_shared.h"
 #include "pragma/model/model.h"
 
-const std::vector<ObjectAttachment> &Model::GetObjectAttachments() const {return const_cast<Model*>(this)->GetObjectAttachments();}
-std::vector<ObjectAttachment> &Model::GetObjectAttachments() {return m_objectAttachments;}
-uint32_t Model::AddObjectAttachment(ObjectAttachment::Type type,const std::string &name,const std::string &attachment,const std::unordered_map<std::string,std::string> &keyValues)
+const std::vector<ObjectAttachment> &Model::GetObjectAttachments() const { return const_cast<Model *>(this)->GetObjectAttachments(); }
+std::vector<ObjectAttachment> &Model::GetObjectAttachments() { return m_objectAttachments; }
+uint32_t Model::AddObjectAttachment(ObjectAttachment::Type type, const std::string &name, const std::string &attachment, const std::unordered_map<std::string, std::string> &keyValues)
 {
 	m_objectAttachments.push_back({});
 	auto &objAtt = m_objectAttachments.back();
@@ -19,30 +19,28 @@ uint32_t Model::AddObjectAttachment(ObjectAttachment::Type type,const std::strin
 	objAtt.attachment = attachment;
 	objAtt.keyValues = keyValues;
 	ustring::to_lower(objAtt.name);
-	return m_objectAttachments.size() -1u;
+	return m_objectAttachments.size() - 1u;
 }
-uint32_t Model::GetObjectAttachmentCount() const {return m_objectAttachments.size();}
+uint32_t Model::GetObjectAttachmentCount() const { return m_objectAttachments.size(); }
 ObjectAttachment *Model::GetObjectAttachment(uint32_t idx)
 {
 	if(idx >= m_objectAttachments.size())
 		return nullptr;
 	return &m_objectAttachments.at(idx);
 }
-bool Model::LookupObjectAttachment(const std::string &name,uint32_t &attId) const
+bool Model::LookupObjectAttachment(const std::string &name, uint32_t &attId) const
 {
 	auto lname = name;
 	ustring::to_lower(lname);
-	auto it = std::find_if(m_objectAttachments.begin(),m_objectAttachments.end(),[&lname](const ObjectAttachment &att) {
-		return att.name == lname;
-	});
+	auto it = std::find_if(m_objectAttachments.begin(), m_objectAttachments.end(), [&lname](const ObjectAttachment &att) { return att.name == lname; });
 	if(it == m_objectAttachments.end())
 		return false;
-	return it -m_objectAttachments.begin();
+	return it - m_objectAttachments.begin();
 }
 bool Model::RemoveObjectAttachment(const std::string &name)
 {
 	auto attIdx = 0u;
-	if(LookupObjectAttachment(name,attIdx) == false)
+	if(LookupObjectAttachment(name, attIdx) == false)
 		return false;
 	return RemoveObjectAttachment(attIdx);
 }
@@ -50,6 +48,6 @@ bool Model::RemoveObjectAttachment(uint32_t idx)
 {
 	if(idx >= m_objectAttachments.size())
 		return false;
-	m_objectAttachments.erase(m_objectAttachments.begin() +idx);
+	m_objectAttachments.erase(m_objectAttachments.begin() + idx);
 	return true;
 }

@@ -11,12 +11,9 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_parent_component.hpp>
 
-namespace pragma
-{
-	class DLLSERVER SParentComponent final
-		: public BaseParentComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SParentComponent final : public BaseParentComponent {
+	  public:
 		SParentComponent(BaseEntity &ent) : BaseParentComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;

@@ -14,14 +14,13 @@
 #include <sharedutils/util.h>
 #include <algorithm>
 
-REGISTER_PARTICLE_OPERATOR(pause_emission,CParticleOperatorPauseEmission);
-REGISTER_PARTICLE_OPERATOR(pause_child_emission,CParticleOperatorPauseChildEmission);
+REGISTER_PARTICLE_OPERATOR(pause_emission, CParticleOperatorPauseEmission);
+REGISTER_PARTICLE_OPERATOR(pause_child_emission, CParticleOperatorPauseChildEmission);
 
-void CParticleOperatorPauseEmissionBase::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleOperatorPauseEmissionBase::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleOperator::Initialize(pSystem,values);
-	for(auto &pair : values)
-	{
+	CParticleOperator::Initialize(pSystem, values);
+	for(auto &pair : values) {
 		auto key = pair.first;
 		ustring::to_lower(key);
 		if(key == "pause_start")
@@ -45,54 +44,46 @@ void CParticleOperatorPauseEmissionBase::Simulate(double tDelta)
 	if(m_fEnd <= m_fStart)
 		return;
 	auto t = ps->GetLifeTime();
-	switch(m_state)
-	{
-		case State::Initial:
-			if(t < m_fStart)
-				return;
-			ps->PauseEmission();
-			m_state = State::Paused;
-			break;
-		case State::Paused:
-			if(t < m_fEnd)
-				return;
-			ps->ResumeEmission();
-			m_state = State::Unpaused;
-			break;
-		case State::Unpaused:
-			// Complete
-			break;
+	switch(m_state) {
+	case State::Initial:
+		if(t < m_fStart)
+			return;
+		ps->PauseEmission();
+		m_state = State::Paused;
+		break;
+	case State::Paused:
+		if(t < m_fEnd)
+			return;
+		ps->ResumeEmission();
+		m_state = State::Unpaused;
+		break;
+	case State::Unpaused:
+		// Complete
+		break;
 	}
 }
 
 /////////////////////
 
-void CParticleOperatorPauseEmission::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-{
-	CParticleOperatorPauseEmissionBase::Initialize(pSystem,values);
-}
-pragma::CParticleSystemComponent *CParticleOperatorPauseEmission::GetTargetParticleSystem() {return &GetParticleSystem();}
+void CParticleOperatorPauseEmission::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) { CParticleOperatorPauseEmissionBase::Initialize(pSystem, values); }
+pragma::CParticleSystemComponent *CParticleOperatorPauseEmission::GetTargetParticleSystem() { return &GetParticleSystem(); }
 
 /////////////////////
 
-void CParticleOperatorPauseChildEmission::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleOperatorPauseChildEmission::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleOperatorPauseEmissionBase::Initialize(pSystem,values);
+	CParticleOperatorPauseEmissionBase::Initialize(pSystem, values);
 	std::string childName;
-	for(auto &pair : values)
-	{
+	for(auto &pair : values) {
 		auto key = pair.first;
 		ustring::to_lower(key);
 		if(key == "name")
 			childName = pair.second;
 	}
 	auto &children = GetParticleSystem().GetChildren();
-	auto it = std::find_if(children.begin(),children.end(),[&childName](const pragma::CParticleSystemComponent::ChildData &hSystem) {
-		return hSystem.child.valid() && ustring::match(childName,hSystem.child.get()->GetParticleSystemName());
-	});
+	auto it = std::find_if(children.begin(), children.end(), [&childName](const pragma::CParticleSystemComponent::ChildData &hSystem) { return hSystem.child.valid() && ustring::match(childName, hSystem.child.get()->GetParticleSystemName()); });
 	if(it == children.end())
 		return;
 	m_hChildSystem = it->child;
 }
-pragma::CParticleSystemComponent *CParticleOperatorPauseChildEmission::GetTargetParticleSystem() {return m_hChildSystem.get();}
-
+pragma::CParticleSystemComponent *CParticleOperatorPauseChildEmission::GetTargetParticleSystem() { return m_hChildSystem.get(); }

@@ -11,21 +11,20 @@
 #include <pragma/math/vector/wvvector3.h>
 #include <algorithm>
 
-REGISTER_PARTICLE_OPERATOR(angular_acceleration,CParticleOperatorAngularAcceleration);
+REGISTER_PARTICLE_OPERATOR(angular_acceleration, CParticleOperatorAngularAcceleration);
 
-void CParticleOperatorAngularAcceleration::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleOperatorAngularAcceleration::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleOperator::Initialize(pSystem,values);
-	for(auto &pair : values)
-	{
+	CParticleOperator::Initialize(pSystem, values);
+	for(auto &pair : values) {
 		auto key = pair.first;
 		ustring::to_lower(key);
 		if(key == "acceleration")
 			m_vAcceleration = uvec::create(pair.second);
 	}
 }
-void CParticleOperatorAngularAcceleration::Simulate(CParticle &particle,double tDelta,float strength)
+void CParticleOperatorAngularAcceleration::Simulate(CParticle &particle, double tDelta, float strength)
 {
-	CParticleOperator::Simulate(particle,tDelta,strength);
-	particle.SetAngularVelocity(particle.GetAngularVelocity() +m_vAcceleration *static_cast<float>(tDelta));
+	CParticleOperator::Simulate(particle, tDelta, strength);
+	particle.SetAngularVelocity(particle.GetAngularVelocity() + m_vAcceleration * static_cast<float>(tDelta));
 }

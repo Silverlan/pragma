@@ -10,14 +10,11 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/entities/components/render_component_flags.hpp"
 
-namespace pragma
-{
-	class DLLNETWORK BaseRenderComponent
-		: public BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLNETWORK BaseRenderComponent : public BaseEntityComponent {
+	  public:
 		using BaseEntityComponent::BaseEntityComponent;
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 		virtual void SetUnlit(bool b);
 		virtual void SetCastShadows(bool b);
@@ -25,8 +22,8 @@ namespace pragma
 		bool GetCastShadows() const;
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
-		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
-	protected:
+		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
+	  protected:
 		FRenderFlags m_renderFlags = FRenderFlags::CastShadows;
 	};
 };

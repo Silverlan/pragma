@@ -13,10 +13,9 @@
 
 // Obsolete?
 // TODO: Remove this file
-struct DLLNETWORK PhysContactInfo
-{
-	static Vector3 GetContactNormal(const Vector3 &n,int8_t controllerIndex);
-	static double CalcXZDistance(const Vector3 &contactPointA,const Vector3 &contactPointB,int8_t controllerIndex);
+struct DLLNETWORK PhysContactInfo {
+	static Vector3 GetContactNormal(const Vector3 &n, int8_t controllerIndex);
+	static double CalcXZDistance(const Vector3 &contactPointA, const Vector3 &contactPointB, int8_t controllerIndex);
 
 	PhysContactInfo(int8_t controllerIndex);
 	Vector3 GetContactNormal() const;

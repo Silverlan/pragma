@@ -8,8 +8,8 @@
 #include "stdafx_shared.h"
 #include "pragma/math/angle/wvquaternion.h"
 
-DLLNETWORK Con::c_cout & operator<<(Con::c_cout &os,const Quat &q)
+DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const Quat &q)
 {
-	os<<q.w<<" "<<q.x<<" "<<q.y<<" "<<q.z;
+	os << q.w << " " << q.x << " " << q.y << " " << q.z;
 	return os;
 }

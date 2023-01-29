@@ -12,17 +12,16 @@
 
 using namespace pragma;
 
-std::shared_ptr<prosper::IDescriptorSetGroup> pragma::ShaderTexturedBase::InitializeMaterialDescriptorSet(CMaterial &mat,bool bReload)
+std::shared_ptr<prosper::IDescriptorSetGroup> pragma::ShaderTexturedBase::InitializeMaterialDescriptorSet(CMaterial &mat, bool bReload)
 {
-	auto &shader = *dynamic_cast<prosper::Shader*>(this);
+	auto &shader = *dynamic_cast<prosper::Shader *>(this);
 	auto descSetGroup = mat.GetDescriptorSetGroup(shader);
-	if(descSetGroup != nullptr)
-	{
+	if(descSetGroup != nullptr) {
 		if(bReload == false)
 			return descSetGroup;
-		mat.SetDescriptorSetGroup(shader,nullptr);
+		mat.SetDescriptorSetGroup(shader, nullptr);
 	}
 	return InitializeMaterialDescriptorSet(mat);
 }
 
-std::shared_ptr<prosper::IDescriptorSetGroup> pragma::ShaderTexturedBase::InitializeMaterialDescriptorSet(CMaterial &mat) {return nullptr;}
+std::shared_ptr<prosper::IDescriptorSetGroup> pragma::ShaderTexturedBase::InitializeMaterialDescriptorSet(CMaterial &mat) { return nullptr; }

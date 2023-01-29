@@ -12,22 +12,12 @@
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <unordered_set>
 
-namespace pragma
-{
-	class DLLCLIENT COpticalCameraComponent final
-		: public BaseEntityComponent
-	{
-	public:
-		enum class Flags : uint32_t
-		{
-			None = 0,
-			DebugShowFocus = 1,
-			EnableVignette = DebugShowFocus<<1u,
-			PentagonBokehShape = EnableVignette<<1u,
-			DebugShowDepth = PentagonBokehShape<<1u
-		};
+namespace pragma {
+	class DLLCLIENT COpticalCameraComponent final : public BaseEntityComponent {
+	  public:
+		enum class Flags : uint32_t { None = 0, DebugShowFocus = 1, EnableVignette = DebugShowFocus << 1u, PentagonBokehShape = EnableVignette << 1u, DebugShowDepth = PentagonBokehShape << 1u };
 
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
 		void SetDebugShowFocus(bool enabled);
 		bool GetDebugShowFocus() const;
@@ -73,7 +63,7 @@ namespace pragma
 		COpticalCameraComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-	private:
+	  private:
 		float m_focalDistance = 200.f;
 		float m_focalLength = 24.f;
 		float m_fstop = 0.5f;

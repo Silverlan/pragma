@@ -14,23 +14,12 @@
 
 using namespace pragma;
 
-static inline pragma::AnimationDriverComponent::ValueDriverHash get_value_driver_hash(ComponentId componentId,ComponentMemberIndex memberIdx)
-{
-	return util::hash_combine<uint64_t>(util::hash_combine<uint64_t>(0,componentId),memberIdx);
-}
-void pragma::AnimationDriverComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
-{
+static inline pragma::AnimationDriverComponent::ValueDriverHash get_value_driver_hash(ComponentId componentId, ComponentMemberIndex memberIdx) { return util::hash_combine<uint64_t>(util::hash_combine<uint64_t>(0, componentId), memberIdx); }
+void pragma::AnimationDriverComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) {}
 
-}
+pragma::AnimationDriverComponent::AnimationDriverComponent(BaseEntity &ent) : BaseEntityComponent {ent} {}
 
-pragma::AnimationDriverComponent::AnimationDriverComponent(BaseEntity &ent)
-	: BaseEntityComponent{ent}
-{}
-
-void pragma::AnimationDriverComponent::Initialize()
-{
-	BaseEntityComponent::Initialize();
-}
+void pragma::AnimationDriverComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void pragma::AnimationDriverComponent::OnRemove()
 {
 	BaseEntityComponent::OnRemove();
@@ -59,27 +48,23 @@ void AnimationDriverComponent::OnEntityComponentRemoved(BaseEntityComponent &com
 			m_cbOnAnimationsUpdated.Remove();
 	}*/
 }
-void pragma::AnimationDriverComponent::ClearDrivers()
+void pragma::AnimationDriverComponent::ClearDrivers() { m_drivers.clear(); }
+void pragma::AnimationDriverComponent::RemoveDriver(ComponentId componentId, ComponentMemberIndex memberIdx)
 {
-	m_drivers.clear();
-}
-void pragma::AnimationDriverComponent::RemoveDriver(ComponentId componentId,ComponentMemberIndex memberIdx)
-{
-	auto it = m_drivers.find(get_value_driver_hash(componentId,memberIdx));
+	auto it = m_drivers.find(get_value_driver_hash(componentId, memberIdx));
 	if(it != m_drivers.end())
 		m_drivers.erase(it);
 }
-void pragma::AnimationDriverComponent::RemoveDriver(ComponentId componentId,const std::string &memberName)
+void pragma::AnimationDriverComponent::RemoveDriver(ComponentId componentId, const std::string &memberName)
 {
-	auto memberIdx = FindComponentMember(componentId,memberName);
+	auto memberIdx = FindComponentMember(componentId, memberName);
 	if(!memberIdx.has_value())
 		return;
-	RemoveDriver(componentId,*memberIdx);
+	RemoveDriver(componentId, *memberIdx);
 }
 void pragma::AnimationDriverComponent::RemoveDrivers(ComponentId componentId)
 {
-	for(auto it=m_drivers.begin();it!=m_drivers.end();)
-	{
+	for(auto it = m_drivers.begin(); it != m_drivers.end();) {
 		auto &driver = it->second;
 		if(driver.GetComponentId() == componentId)
 			it = m_drivers.erase(it);
@@ -87,11 +72,10 @@ void pragma::AnimationDriverComponent::RemoveDrivers(ComponentId componentId)
 			++it;
 	}
 }
-std::optional<ComponentMemberIndex> pragma::AnimationDriverComponent::FindComponentMember(ComponentId componentId,const std::string &memberName)
+std::optional<ComponentMemberIndex> pragma::AnimationDriverComponent::FindComponentMember(ComponentId componentId, const std::string &memberName)
 {
 	auto *info = GetEntity().GetComponentManager()->GetComponentInfo(componentId);
-	if(info)
-	{
+	if(info) {
 		auto memberIdx = info->FindMember(memberName);
 		if(memberIdx.has_value())
 			return memberIdx;
@@ -101,15 +85,15 @@ std::optional<ComponentMemberIndex> pragma::AnimationDriverComponent::FindCompon
 		return {};
 	return hComponent->GetMemberIndex(memberName);
 }
-bool pragma::AnimationDriverComponent::AddDriver(ComponentId componentId,const std::string &memberName,ValueDriverDescriptor descriptor)
+bool pragma::AnimationDriverComponent::AddDriver(ComponentId componentId, const std::string &memberName, ValueDriverDescriptor descriptor)
 {
-	auto memberIdx = FindComponentMember(componentId,memberName);
+	auto memberIdx = FindComponentMember(componentId, memberName);
 	if(!memberIdx.has_value())
 		return false;
-	AddDriver(componentId,*memberIdx,std::move(descriptor));
+	AddDriver(componentId, *memberIdx, std::move(descriptor));
 	return true;
 }
-void pragma::AnimationDriverComponent::AddDriver(ComponentId componentId,ComponentMemberIndex memberIdx,ValueDriverDescriptor descriptor)
+void pragma::AnimationDriverComponent::AddDriver(ComponentId componentId, ComponentMemberIndex memberIdx, ValueDriverDescriptor descriptor)
 {
 	auto hComponent = GetEntity().FindComponent(componentId);
 	if(hComponent.expired())
@@ -117,19 +101,16 @@ void pragma::AnimationDriverComponent::AddDriver(ComponentId componentId,Compone
 	auto *memberInfo = hComponent->GetMemberInfo(memberIdx);
 	if(!memberInfo)
 		return;
-	auto ref = ComponentMemberReference::Create(*hComponent,memberIdx);
+	auto ref = ComponentMemberReference::Create(*hComponent, memberIdx);
 	if(!ref.has_value())
 		return;
-	RemoveDriver(componentId,memberIdx);
-	m_drivers[get_value_driver_hash(componentId,memberIdx)] = ValueDriver{componentId,std::move(*ref),std::move(descriptor),GetEntity().GetUuid()};
+	RemoveDriver(componentId, memberIdx);
+	m_drivers[get_value_driver_hash(componentId, memberIdx)] = ValueDriver {componentId, std::move(*ref), std::move(descriptor), GetEntity().GetUuid()};
 }
-bool pragma::AnimationDriverComponent::HasDriver(ComponentId componentId,ComponentMemberIndex memberIdx) const
+bool pragma::AnimationDriverComponent::HasDriver(ComponentId componentId, ComponentMemberIndex memberIdx) const { return FindDriver(componentId, memberIdx) != nullptr; }
+pragma::ValueDriver *pragma::AnimationDriverComponent::FindDriver(ComponentId componentId, ComponentMemberIndex memberIdx)
 {
-	return FindDriver(componentId,memberIdx) != nullptr;
-}
-pragma::ValueDriver *pragma::AnimationDriverComponent::FindDriver(ComponentId componentId,ComponentMemberIndex memberIdx)
-{
-	auto it = m_drivers.find(get_value_driver_hash(componentId,memberIdx));
+	auto it = m_drivers.find(get_value_driver_hash(componentId, memberIdx));
 	return (it != m_drivers.end()) ? &it->second : nullptr;
 }
 void pragma::AnimationDriverComponent::ApplyDrivers()
@@ -141,14 +122,7 @@ void pragma::AnimationDriverComponent::ApplyDrivers()
 		pair.second.Apply(ent);
 }
 
-void pragma::AnimationDriverComponent::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-void pragma::AnimationDriverComponent::Save(udm::LinkedPropertyWrapperArg udm)
-{
-	BaseEntityComponent::Save(udm);
-}
+void pragma::AnimationDriverComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void pragma::AnimationDriverComponent::Save(udm::LinkedPropertyWrapperArg udm) { BaseEntityComponent::Save(udm); }
 
-void pragma::AnimationDriverComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
-{
-	BaseEntityComponent::Load(udm,version);
-
-}
+void pragma::AnimationDriverComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) { BaseEntityComponent::Load(udm, version); }

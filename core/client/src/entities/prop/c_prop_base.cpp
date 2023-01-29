@@ -40,15 +40,12 @@ void CPropComponent::Initialize()
 		BasePropComponent::InitializePhysics(physType);
 	});*/
 }
-void CPropComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-void CPropComponent::ReceiveData(NetPacket &packet)
-{
-	m_kvMass = packet->Read<float>();
-}
+void CPropComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CPropComponent::ReceiveData(NetPacket &packet) { m_kvMass = packet->Read<float>(); }
 
 void CPropComponent::OnEntitySpawn()
 {
 	BasePropComponent::OnEntitySpawn();
 	auto physType = UpdatePhysicsType(&GetEntity());
-	BasePropComponent::Setup(physType,m_propMoveType);
+	BasePropComponent::Setup(physType, m_propMoveType);
 }

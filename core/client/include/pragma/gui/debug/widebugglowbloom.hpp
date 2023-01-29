@@ -11,13 +11,11 @@
 #include "pragma/clientdefinitions.h"
 #include <wgui/types/wirect.h>
 
-class DLLCLIENT WIDebugGlowBloom
-	: public WITexturedRect
-{
-public:
+class DLLCLIENT WIDebugGlowBloom : public WITexturedRect {
+  public:
 	WIDebugGlowBloom();
 	virtual ~WIDebugGlowBloom() override;
-private:
+  private:
 	virtual void DoUpdate() override;
 	void UpdateBloomImage();
 	CallbackHandle m_cbRenderHDRMap = {};

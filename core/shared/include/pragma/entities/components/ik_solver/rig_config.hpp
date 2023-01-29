@@ -14,33 +14,20 @@
 #include <mathutil/eulerangles.h>
 #include <udm_types.hpp>
 
-namespace pragma::ik
-{
-	struct RigConfigBone
-	{
+namespace pragma::ik {
+	struct RigConfigBone {
 		std::string name;
 		bool locked = false;
 	};
 
-	struct RigConfigControl
-	{
-		enum class Type : uint8_t
-		{
-			Drag = 0,
-			State
-		};
+	struct RigConfigControl {
+		enum class Type : uint8_t { Drag = 0, State };
 		std::string bone;
 		Type type = Type::Drag;
 	};
 
-	struct RigConfigConstraint
-	{
-		enum class Type : uint8_t
-		{
-			Fixed = 0,
-			Hinge,
-			BallSocket
-		};
+	struct RigConfigConstraint {
+		enum class Type : uint8_t { Fixed = 0, Hinge, BallSocket };
 		std::string bone0;
 		std::string bone1;
 		Type type = Type::Fixed;
@@ -51,9 +38,8 @@ namespace pragma::ik
 	using PRigConfigBone = std::shared_ptr<RigConfigBone>;
 	using PRigConfigControl = std::shared_ptr<RigConfigControl>;
 	using PRigConfigConstraint = std::shared_ptr<RigConfigConstraint>;
-	class RigConfig
-	{
-	public:
+	class RigConfig {
+	  public:
 		static std::optional<RigConfig> load(const std::string &fileName);
 		static std::optional<RigConfig> load_from_udm_data(udm::LinkedPropertyWrapper &prop);
 		static const std::vector<std::string> &get_supported_extensions();
@@ -66,27 +52,27 @@ namespace pragma::ik
 		void RemoveBone(const std::string &name);
 		bool HasBone(const std::string &name) const;
 		bool IsBoneLocked(const std::string &name) const;
-		void SetBoneLocked(const std::string &name,bool locked);
+		void SetBoneLocked(const std::string &name, bool locked);
 
 		void RemoveControl(const std::string &name);
 		bool HasControl(const std::string &name) const;
 
-		PRigConfigControl AddControl(const std::string &bone,RigConfigControl::Type type);
+		PRigConfigControl AddControl(const std::string &bone, RigConfigControl::Type type);
 
-		void RemoveConstraints(const std::string &bone0,const std::string &bone1);
+		void RemoveConstraints(const std::string &bone0, const std::string &bone1);
 		void RemoveConstraint(const RigConfigConstraint &constraint);
 		void RemoveControl(const RigConfigControl &control);
 		void RemoveBone(const RigConfigBone &bone);
-		PRigConfigConstraint AddFixedConstraint(const std::string &bone0,const std::string &bone1);
-		PRigConfigConstraint AddHingeConstraint(const std::string &bone0,const std::string &bone1,umath::Degree minAngle,umath::Degree maxAngle);
-		PRigConfigConstraint AddBallSocketConstraint(const std::string &bone0,const std::string &bone1,const EulerAngles &minAngles,const EulerAngles &maxAngles);
+		PRigConfigConstraint AddFixedConstraint(const std::string &bone0, const std::string &bone1);
+		PRigConfigConstraint AddHingeConstraint(const std::string &bone0, const std::string &bone1, umath::Degree minAngle, umath::Degree maxAngle);
+		PRigConfigConstraint AddBallSocketConstraint(const std::string &bone0, const std::string &bone1, const EulerAngles &minAngles, const EulerAngles &maxAngles);
 
-		const std::vector<PRigConfigBone> &GetBones() const {return m_bones;}
-		const std::vector<PRigConfigControl> &GetControls() const {return m_controls;}
-		const std::vector<PRigConfigConstraint> &GetConstraints() const {return m_constraints;}
+		const std::vector<PRigConfigBone> &GetBones() const { return m_bones; }
+		const std::vector<PRigConfigControl> &GetControls() const { return m_controls; }
+		const std::vector<PRigConfigConstraint> &GetConstraints() const { return m_constraints; }
 
 		bool Save(const std::string &fileName);
-	private:
+	  private:
 		std::vector<PRigConfigBone>::iterator FindBone(const std::string &name);
 		const std::vector<PRigConfigBone>::iterator FindBone(const std::string &name) const;
 
@@ -98,6 +84,6 @@ namespace pragma::ik
 		std::vector<PRigConfigConstraint> m_constraints;
 	};
 };
-std::ostream &operator<<(std::ostream &out,const pragma::ik::RigConfig &config);
+std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfig &config);
 
 #endif

@@ -8,16 +8,16 @@
 #ifndef __NETWORKDEFINITIONS_H__
 #define __NETWORKDEFINITIONS_H__
 #ifdef DLLNETWORK_EX
-	#ifdef __linux__
-		#define DLLNETWORK __attribute__((visibility("default")))
-	#else
-		#define DLLNETWORK  __declspec(dllexport)   // export DLL information
-	#endif
+#ifdef __linux__
+#define DLLNETWORK __attribute__((visibility("default")))
 #else
-	#ifdef __linux__
-		#define DLLNETWORK
-	#else
-		#define DLLNETWORK  __declspec(dllimport)   // import DLL information
-	#endif
+#define DLLNETWORK __declspec(dllexport) // export DLL information
+#endif
+#else
+#ifdef __linux__
+#define DLLNETWORK
+#else
+#define DLLNETWORK __declspec(dllimport) // import DLL information
+#endif
 #endif
 #endif

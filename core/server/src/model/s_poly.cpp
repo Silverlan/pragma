@@ -9,11 +9,9 @@
 #include "pragma/model/s_poly.h"
 
 extern ServerState *server;
-SPoly::SPoly(NetworkState *nw)
-	: Poly(nw)
-{}
-void SPoly::SetTextureData(std::string texture,Vector3 nu,Vector3 nv,float ou,float ov,float su,float sv,float rot)
+SPoly::SPoly(NetworkState *nw) : Poly(nw) {}
+void SPoly::SetTextureData(std::string texture, Vector3 nu, Vector3 nv, float ou, float ov, float su, float sv, float rot)
 {
-	Poly::SetTextureData(texture,nu,nv,ou,ov,su,sv,rot);
+	Poly::SetTextureData(texture, nu, nv, ou, ov, su, sv, rot);
 	SetMaterial(server->LoadMaterial(texture.c_str()));
 }

@@ -12,11 +12,10 @@
 #include <string_view>
 #include <vector>
 
-namespace pragma::networking
-{
+namespace pragma::networking {
 	static constexpr std::string_view NET_LIBRARY_MODULE_LOCATION = "networking";
 	DLLNETWORK std::vector<std::string> GetAvailableNetworkingModules();
-	DLLNETWORK std::string GetNetworkingModuleLocation(const std::string &netModule,bool server);
+	DLLNETWORK std::string GetNetworkingModuleLocation(const std::string &netModule, bool server);
 };
 
 #endif

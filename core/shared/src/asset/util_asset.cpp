@@ -17,24 +17,21 @@
 
 extern DLLNETWORK Engine *engine;
 
-bool pragma::asset::exists(const std::string &name,Type type)
-{
-	return find_file(name,type).has_value();
-}
-std::optional<std::string> pragma::asset::determine_format_from_data(ufile::IFile &f,Type type)
+bool pragma::asset::exists(const std::string &name, Type type) { return find_file(name, type).has_value(); }
+std::optional<std::string> pragma::asset::determine_format_from_data(ufile::IFile &f, Type type)
 {
 	auto offset = f.Tell();
-	std::array<char,4> header {};
-	f.Read(header.data(),header.size());
+	std::array<char, 4> header {};
+	f.Read(header.data(), header.size());
 	f.Seek(offset);
 
-	if(ustring::compare(header.data(),udm::HEADER_IDENTIFIER))
+	if(ustring::compare(header.data(), udm::HEADER_IDENTIFIER))
 		return get_binary_udm_extension(type);
-	else if(ustring::compare(header.data(),"WLD"))
+	else if(ustring::compare(header.data(), "WLD"))
 		return FORMAT_MAP_LEGACY;
-	else if(ustring::compare(header.data(),"WMD"))
+	else if(ustring::compare(header.data(), "WMD"))
 		return FORMAT_MODEL_LEGACY;
-	else if(ustring::compare(header.data(),"WPD"))
+	else if(ustring::compare(header.data(), "WPD"))
 		return FORMAT_PARTICLE_SYSTEM_LEGACY;
 	return get_ascii_udm_extension(type); // Assume it's the ASCII map format
 }
@@ -43,48 +40,43 @@ std::optional<pragma::asset::Type> pragma::asset::determine_type_from_extension(
 	std::string lext {ext};
 	ustring::to_lower(lext);
 	auto n = umath::to_integral(Type::Count);
-	for(auto i=decltype(n){0u};i<n;++i)
-	{
+	for(auto i = decltype(n) {0u}; i < n; ++i) {
 		auto type = static_cast<Type>(i);
 		auto supportedExtensions = get_supported_extensions(type);
-		auto it = std::find(supportedExtensions.begin(),supportedExtensions.end(),lext);
+		auto it = std::find(supportedExtensions.begin(), supportedExtensions.end(), lext);
 		if(it == supportedExtensions.end())
 			continue;
 		return type;
 	}
 	return {};
 }
-std::optional<std::string> pragma::asset::determine_format_from_filename(const std::string_view &fileName,Type type)
+std::optional<std::string> pragma::asset::determine_format_from_filename(const std::string_view &fileName, Type type)
 {
 	std::string ext;
-	if(ufile::get_extension(std::string{fileName},&ext) == false)
+	if(ufile::get_extension(std::string {fileName}, &ext) == false)
 		return {};
 	ustring::to_lower(ext);
 	auto supportedExtensions = get_supported_extensions(type);
-	auto it = std::find(supportedExtensions.begin(),supportedExtensions.end(),ext);
-	return (it != supportedExtensions.end()) ? *it : std::optional<std::string>{};
+	auto it = std::find(supportedExtensions.begin(), supportedExtensions.end(), ext);
+	return (it != supportedExtensions.end()) ? *it : std::optional<std::string> {};
 }
-bool pragma::asset::matches_format(const std::string_view &format0,const std::string_view &format1)
+bool pragma::asset::matches_format(const std::string_view &format0, const std::string_view &format1) { return ustring::compare(format0.data(), format1.data(), false, umath::min(format0.length(), format1.length())); }
+util::Path pragma::asset::relative_path_to_absolute_path(const util::Path &relPath, Type type, const std::optional<std::string> &rootPath)
 {
-	return ustring::compare(format0.data(),format1.data(),false,umath::min(format0.length(),format1.length()));
-}
-util::Path pragma::asset::relative_path_to_absolute_path(const util::Path &relPath,Type type,const std::optional<std::string> &rootPath)
-{
-	auto r = (get_asset_root_directory(type) +std::string{'/'}) +relPath;
+	auto r = (get_asset_root_directory(type) + std::string {'/'}) + relPath;
 	if(rootPath.has_value())
-		r = *rootPath +r;
+		r = *rootPath + r;
 	return r;
 }
-util::Path pragma::asset::absolute_path_to_relative_path(const util::Path &absPath,Type type)
+util::Path pragma::asset::absolute_path_to_relative_path(const util::Path &absPath, Type type)
 {
 	auto path = absPath;
 	path.PopFront();
 	return path;
 }
-std::optional<std::string> pragma::asset::get_udm_format_extension(Type type,bool binary)
+std::optional<std::string> pragma::asset::get_udm_format_extension(Type type, bool binary)
 {
-	switch(type)
-	{
+	switch(type) {
 	case Type::Model:
 		return binary ? FORMAT_MODEL_BINARY : FORMAT_MODEL_ASCII;
 	case Type::Map:
@@ -98,8 +90,7 @@ std::optional<std::string> pragma::asset::get_udm_format_extension(Type type,boo
 }
 std::optional<std::string> pragma::asset::get_legacy_extension(Type type)
 {
-	switch(type)
-	{
+	switch(type) {
 	case Type::Model:
 		return FORMAT_MODEL_LEGACY;
 	case Type::Map:
@@ -113,8 +104,7 @@ std::optional<std::string> pragma::asset::get_legacy_extension(Type type)
 }
 std::optional<std::string> pragma::asset::get_binary_udm_extension(Type type)
 {
-	switch(type)
-	{
+	switch(type) {
 	case Type::Model:
 		return FORMAT_MODEL_BINARY;
 	case Type::Map:
@@ -128,8 +118,7 @@ std::optional<std::string> pragma::asset::get_binary_udm_extension(Type type)
 }
 std::optional<std::string> pragma::asset::get_ascii_udm_extension(Type type)
 {
-	switch(type)
-	{
+	switch(type) {
 	case Type::Model:
 		return FORMAT_MODEL_ASCII;
 	case Type::Map:
@@ -141,20 +130,18 @@ std::optional<std::string> pragma::asset::get_ascii_udm_extension(Type type)
 	}
 	return {};
 }
-struct AssetFormatExtensionCache
-{
-public:
-	struct FormatCache
-	{
+struct AssetFormatExtensionCache {
+  public:
+	struct FormatCache {
 		std::vector<std::string> nativeFormats;
 		std::vector<std::string> importFormats;
 		std::vector<std::string> allFormats;
 	};
-	void Cache(pragma::asset::Type type,std::vector<std::string> nativeExts,std::vector<std::string> importExts)
+	void Cache(pragma::asset::Type type, std::vector<std::string> nativeExts, std::vector<std::string> importExts)
 	{
 		FormatCache formatCache {};
 		auto &allExts = formatCache.allFormats;
-		allExts.reserve(nativeExts.size() +importExts.size());
+		allExts.reserve(nativeExts.size() + importExts.size());
 		for(auto &ext : nativeExts)
 			allExts.push_back(ext);
 		for(auto &ext : importExts)
@@ -163,13 +150,12 @@ public:
 		formatCache.importFormats = std::move(importExts);
 		m_cache[umath::to_integral(type)] = std::move(formatCache);
 	}
-	const std::vector<std::string> *GetCache(pragma::asset::Type type,pragma::asset::FormatType formatType) const
+	const std::vector<std::string> *GetCache(pragma::asset::Type type, pragma::asset::FormatType formatType) const
 	{
 		if(umath::to_integral(type) >= m_cache.size() || m_cache[umath::to_integral(type)].has_value() == false)
 			return nullptr;
 		auto &cache = *m_cache[umath::to_integral(type)];
-		switch(formatType)
-		{
+		switch(formatType) {
 		case pragma::asset::FormatType::Native:
 			return &cache.nativeFormats;
 		case pragma::asset::FormatType::Import:
@@ -179,39 +165,38 @@ public:
 		}
 		return nullptr;
 	}
-private:
-	std::array<std::optional<FormatCache>,umath::to_integral(pragma::asset::Type::Count)> m_cache;
+  private:
+	std::array<std::optional<FormatCache>, umath::to_integral(pragma::asset::Type::Count)> m_cache;
 };
 static AssetFormatExtensionCache g_extCache;
 void pragma::asset::update_extension_cache(Type type)
 {
-	switch(type)
-	{
+	switch(type) {
 	case Type::Map:
-	{
-		g_extCache.Cache(type,{FORMAT_MAP_BINARY,FORMAT_MAP_ASCII,FORMAT_MAP_LEGACY},{"bsp"});
-		break;
-	}
+		{
+			g_extCache.Cache(type, {FORMAT_MAP_BINARY, FORMAT_MAP_ASCII, FORMAT_MAP_LEGACY}, {"bsp"});
+			break;
+		}
 	case Type::Sound:
-	{
-		g_extCache.Cache(type,engine_info::get_supported_audio_formats(),{});
-		break;
-	}
+		{
+			g_extCache.Cache(type, engine_info::get_supported_audio_formats(), {});
+			break;
+		}
 	case Type::ParticleSystem:
-	{
-		g_extCache.Cache(type,{FORMAT_PARTICLE_SYSTEM_BINARY,FORMAT_PARTICLE_SYSTEM_ASCII,FORMAT_PARTICLE_SYSTEM_LEGACY},{});
-		break;
-	}
+		{
+			g_extCache.Cache(type, {FORMAT_PARTICLE_SYSTEM_BINARY, FORMAT_PARTICLE_SYSTEM_ASCII, FORMAT_PARTICLE_SYSTEM_LEGACY}, {});
+			break;
+		}
 	case Type::Texture:
-	{
-		auto &supportedFormats = MaterialManager::get_supported_image_formats();
-		std::vector<std::string> extensions;
-		extensions.reserve(supportedFormats.size());
-		for(auto &format : supportedFormats)
-			extensions.push_back(format.extension);
-		g_extCache.Cache(type,std::move(extensions),{});
-		break;
-	}
+		{
+			auto &supportedFormats = MaterialManager::get_supported_image_formats();
+			std::vector<std::string> extensions;
+			extensions.reserve(supportedFormats.size());
+			for(auto &format : supportedFormats)
+				extensions.push_back(format.extension);
+			g_extCache.Cache(type, std::move(extensions), {});
+			break;
+		}
 	}
 
 	auto *nw = engine->GetClientState();
@@ -228,10 +213,8 @@ void pragma::asset::update_extension_cache(Type type)
 	std::vector<std::string> importExts;
 	nativeExts.reserve(exts.size());
 	importExts.reserve(exts.size());
-	for(auto &extInfo : exts)
-	{
-		switch(extInfo.type)
-		{
+	for(auto &extInfo : exts) {
+		switch(extInfo.type) {
 		case util::IAssetManager::FormatExtensionInfo::Type::Native:
 			nativeExts.push_back(extInfo.extension);
 			break;
@@ -242,29 +225,28 @@ void pragma::asset::update_extension_cache(Type type)
 	}
 	nativeExts.shrink_to_fit();
 	importExts.shrink_to_fit();
-	g_extCache.Cache(type,std::move(nativeExts),std::move(importExts));
+	g_extCache.Cache(type, std::move(nativeExts), std::move(importExts));
 }
 void pragma::asset::update_extension_cache()
 {
 	auto n = umath::to_integral(Type::Count);
-	for(auto i=decltype(n){0u};i<n;++i)
+	for(auto i = decltype(n) {0u}; i < n; ++i)
 		update_extension_cache(static_cast<Type>(i));
 }
-const std::vector<std::string> &pragma::asset::get_supported_extensions(Type type,FormatType formatType)
+const std::vector<std::string> &pragma::asset::get_supported_extensions(Type type, FormatType formatType)
 {
-	auto *cache = g_extCache.GetCache(type,formatType);
+	auto *cache = g_extCache.GetCache(type, formatType);
 	assert(cache);
 	if(cache)
 		return *cache;
 	static std::vector<std::string> empty {};
 	return empty;
 }
-std::string pragma::asset::get_normalized_path(const std::string &name,Type type)
+std::string pragma::asset::get_normalized_path(const std::string &name, Type type)
 {
 	auto path = util::Path::CreateFile(name);
 	path.Canonicalize();
-	switch(type)
-	{
+	switch(type) {
 	case Type::Model:
 		//return ModelManager::GetNormalizedModelName(path.GetString());
 	case Type::Map:
@@ -277,70 +259,62 @@ std::string pragma::asset::get_normalized_path(const std::string &name,Type type
 	}
 	return path.GetString();
 }
-bool pragma::asset::matches(const std::string &name0,const std::string &name1,Type type)
+bool pragma::asset::matches(const std::string &name0, const std::string &name1, Type type) { return ustring::compare(get_normalized_path(name0, type), get_normalized_path(name1, type), false); }
+bool pragma::asset::remove_asset(const std::string &name, Type type)
 {
-	return ustring::compare(get_normalized_path(name0,type),get_normalized_path(name1,type),false);
-}
-bool pragma::asset::remove_asset(const std::string &name,Type type)
-{
-	auto f = find_file(name,type);
+	auto f = find_file(name, type);
 	std::vector<std::string> deleted;
-	while(f.has_value())
-	{
-		auto it = std::find(deleted.begin(),deleted.end(),*f);
+	while(f.has_value()) {
+		auto it = std::find(deleted.begin(), deleted.end(), *f);
 		if(it != deleted.end())
 			return false;
-		auto fullPath = std::string{get_asset_root_directory(type)} +'/' +*f;
+		auto fullPath = std::string {get_asset_root_directory(type)} + '/' + *f;
 		if(FileManager::RemoveFile(fullPath.c_str()) == false)
 			return false;
 		deleted.push_back(*f);
-		f = find_file(name,type);
+		f = find_file(name, type);
 	}
 	return true;
 }
-std::optional<std::string> pragma::asset::find_file(const std::string &name,Type type,std::string *optOutFormat)
+std::optional<std::string> pragma::asset::find_file(const std::string &name, Type type, std::string *optOutFormat)
 {
-    auto normalizedName = get_normalized_path(name,type);
-	switch(type)
-	{
+	auto normalizedName = get_normalized_path(name, type);
+	switch(type) {
 	case Type::Model:
 	case Type::Map:
 	case Type::Texture:
 	case Type::ParticleSystem:
 	case Type::Sound:
-	{
-		for(auto &ext : get_supported_extensions(type))
 		{
-			auto nameWithExt = normalizedName +'.' +ext;
-			if(FileManager::Exists(std::string{get_asset_root_directory(type)} +"/" +nameWithExt))
-			{
-				if(optOutFormat)
-					*optOutFormat = ext;
-				return nameWithExt;
+			for(auto &ext : get_supported_extensions(type)) {
+				auto nameWithExt = normalizedName + '.' + ext;
+				if(FileManager::Exists(std::string {get_asset_root_directory(type)} + "/" + nameWithExt)) {
+					if(optOutFormat)
+						*optOutFormat = ext;
+					return nameWithExt;
+				}
 			}
+			return {};
 		}
-		return {};
-	}
 	case Type::Material:
-	{
-		auto *sv = engine->GetServerNetworkState();
-		auto *cl = engine->GetClientState();
-		auto *nw = sv ? sv : cl; // Doesn't matter which one
-		return nw ? nw->GetMaterialManager().FindAssetFilePath(name) : std::optional<std::string>{};
-	}
+		{
+			auto *sv = engine->GetServerNetworkState();
+			auto *cl = engine->GetClientState();
+			auto *nw = sv ? sv : cl; // Doesn't matter which one
+			return nw ? nw->GetMaterialManager().FindAssetFilePath(name) : std::optional<std::string> {};
+		}
 	}
 	return {};
 }
-bool pragma::asset::is_loaded(NetworkState &nw,const std::string &name,Type type)
+bool pragma::asset::is_loaded(NetworkState &nw, const std::string &name, Type type)
 {
-	switch(type)
-	{
+	switch(type) {
 	case Type::Model:
-	{
-		auto &mdlManager = nw.GetModelManager();
-		auto *asset = mdlManager.FindCachedAsset(name);
-		return asset != nullptr;
-	}
+		{
+			auto &mdlManager = nw.GetModelManager();
+			auto *asset = mdlManager.FindCachedAsset(name);
+			return asset != nullptr;
+		}
 	case Type::Map:
 		return false; // TODO
 	case Type::Material:
@@ -356,61 +330,55 @@ bool pragma::asset::is_loaded(NetworkState &nw,const std::string &name,Type type
 
 /////////////
 
-void pragma::asset::ModelAssetWrapper::SetModel(Model &model) {m_model = model.shared_from_this();}
-Model *pragma::asset::ModelAssetWrapper::GetModel() const {return m_model.get();}
+void pragma::asset::ModelAssetWrapper::SetModel(Model &model) { m_model = model.shared_from_this(); }
+Model *pragma::asset::ModelAssetWrapper::GetModel() const { return m_model.get(); }
 
-void pragma::asset::MaterialAssetWrapper::SetMaterial(Material &mat) {m_material = mat.GetHandle();}
-Material *pragma::asset::MaterialAssetWrapper::GetMaterial() const {return m_material.get();}
+void pragma::asset::MaterialAssetWrapper::SetMaterial(Material &mat) { m_material = mat.GetHandle(); }
+Material *pragma::asset::MaterialAssetWrapper::GetMaterial() const { return m_material.get(); }
 
-void pragma::asset::AssetManager::RegisterImporter(const ImporterInfo &importerInfo,Type type,const ImportHandler &importHandler)
+void pragma::asset::AssetManager::RegisterImporter(const ImporterInfo &importerInfo, Type type, const ImportHandler &importHandler)
 {
 	Importer importer {};
 	importer.info = importerInfo;
 	importer.handler = importHandler;
 	m_importers[umath::to_integral(type)].push_back(importer);
 }
-void pragma::asset::AssetManager::RegisterExporter(const ExporterInfo &importerInfo,Type type,const ExportHandler &exportHandler)
+void pragma::asset::AssetManager::RegisterExporter(const ExporterInfo &importerInfo, Type type, const ExportHandler &exportHandler)
 {
 	Exporter exporter {};
 	exporter.info = importerInfo;
 	exporter.handler = exportHandler;
 	m_exporters[umath::to_integral(type)].push_back(exporter);
 }
-std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::ImportAsset(Game &game,Type type,ufile::IFile *f,const std::optional<std::string> &filePath,std::string *optOutErr) const
+std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::ImportAsset(Game &game, Type type, ufile::IFile *f, const std::optional<std::string> &filePath, std::string *optOutErr) const
 {
 	auto fpath = filePath;
-	if(f == nullptr && filePath.has_value())
-	{
-		auto filePathNoExt = pragma::asset::get_normalized_path(*filePath,type);
+	if(f == nullptr && filePath.has_value()) {
+		auto filePathNoExt = pragma::asset::get_normalized_path(*filePath, type);
 		ufile::remove_extension_from_filename(filePathNoExt);
-		for(auto &importer : m_importers[umath::to_integral(type)])
-		{
-			for(auto &extInfo : importer.info.fileExtensions)
-			{
-				auto filePathWithExt = filePathNoExt +'.' +extInfo.first;
-				auto f = FileManager::OpenFile(filePathWithExt.c_str(),extInfo.second ? "rb" : "r");
+		for(auto &importer : m_importers[umath::to_integral(type)]) {
+			for(auto &extInfo : importer.info.fileExtensions) {
+				auto filePathWithExt = filePathNoExt + '.' + extInfo.first;
+				auto f = FileManager::OpenFile(filePathWithExt.c_str(), extInfo.second ? "rb" : "r");
 				if(f == nullptr)
 					continue;
 				fpath = filePathWithExt;
 
 				std::string err;
 				fsys::File fp {f};
-				auto aw = importer.handler(game,fp,fpath,err);
-				if(aw && aw->GetType() == type)
-				{
-					if(filePath.has_value())
-					{
-						switch(type)
-						{
+				auto aw = importer.handler(game, fp, fpath, err);
+				if(aw && aw->GetType() == type) {
+					if(filePath.has_value()) {
+						switch(type) {
 						case Type::Model:
-						{
-							auto path = util::Path::CreateFile(*filePath);
-							path.PopFront();
-							auto *mdl = static_cast<pragma::asset::ModelAssetWrapper&>(*aw).GetModel();
-							if(mdl && mdl->Save(game,::util::CONVERT_PATH +"models/" +path.GetString(),err) == false)
-								return nullptr;
-							break;
-						}
+							{
+								auto path = util::Path::CreateFile(*filePath);
+								path.PopFront();
+								auto *mdl = static_cast<pragma::asset::ModelAssetWrapper &>(*aw).GetModel();
+								if(mdl && mdl->Save(game, ::util::CONVERT_PATH + "models/" + path.GetString(), err) == false)
+									return nullptr;
+								break;
+							}
 						case Type::Map:
 							break; // TODO
 						case Type::Material:
@@ -432,20 +400,17 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 		return nullptr;
 	}
 
-	if(f)
-	{
+	if(f) {
 		auto pos = f->Tell();
-		for(auto &importer : m_importers[umath::to_integral(type)])
-		{
+		for(auto &importer : m_importers[umath::to_integral(type)]) {
 			std::string err;
 			f->Seek(pos);
-			auto aw = importer.handler(game,*f,fpath,err);
-			if(aw && aw->GetType() == type)
-			{
+			auto aw = importer.handler(game, *f, fpath, err);
+			if(aw && aw->GetType() == type) {
 				auto path = util::Path::CreateFile(*filePath);
 				// path.PopFront();
-				auto *mdl = static_cast<pragma::asset::ModelAssetWrapper&>(*aw).GetModel();
-				if(mdl && mdl->Save(game,::util::CONVERT_PATH +"models/" +path.GetString(),err) == false)
+				auto *mdl = static_cast<pragma::asset::ModelAssetWrapper &>(*aw).GetModel();
+				if(mdl && mdl->Save(game, ::util::CONVERT_PATH + "models/" + path.GetString(), err) == false)
 					return nullptr;
 				return aw;
 			}
@@ -455,12 +420,11 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 	}
 	return nullptr;
 }
-bool pragma::asset::AssetManager::ExportAsset(Game &game,Type type,ufile::IFile &f,const IAssetWrapper &assetWrapper,std::string *optOutErr) const
+bool pragma::asset::AssetManager::ExportAsset(Game &game, Type type, ufile::IFile &f, const IAssetWrapper &assetWrapper, std::string *optOutErr) const
 {
-	for(auto &exporter : m_exporters[umath::to_integral(type)])
-	{
+	for(auto &exporter : m_exporters[umath::to_integral(type)]) {
 		std::string err;
-		if(exporter.handler(game,f,assetWrapper,err))
+		if(exporter.handler(game, f, assetWrapper, err))
 			return true;
 		if(optOutErr)
 			*optOutErr = err;

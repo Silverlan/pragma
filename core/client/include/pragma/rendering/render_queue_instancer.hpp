@@ -12,16 +12,14 @@
 #include <sharedutils/util_hash.hpp>
 
 using EntityIndex = uint32_t;
-namespace pragma::rendering
-{
-	class DLLCLIENT RenderQueueInstancer
-	{
-	public:
+namespace pragma::rendering {
+	class DLLCLIENT RenderQueueInstancer {
+	  public:
 		RenderQueueInstancer(pragma::rendering::RenderQueue &renderQueue);
 		void Process();
-	private:
-		util::Hash CalcNextEntityHash(uint32_t &outNumMeshes,EntityIndex &entIndex);
-		void ProcessInstantiableList(uint32_t endIndex,uint32_t numMeshes,util::Hash hash);
+	  private:
+		util::Hash CalcNextEntityHash(uint32_t &outNumMeshes, EntityIndex &entIndex);
+		void ProcessInstantiableList(uint32_t endIndex, uint32_t numMeshes, util::Hash hash);
 
 		pragma::rendering::RenderQueue &m_renderQueue;
 		uint32_t m_curIndex = 0;

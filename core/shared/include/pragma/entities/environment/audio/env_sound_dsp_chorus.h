@@ -10,9 +10,8 @@
 #include "pragma/networkdefinitions.h"
 #include <string>
 #include <mathutil/glmutil.h>
-class DLLNETWORK BaseEnvSoundDspChorus
-{
-protected:
+class DLLNETWORK BaseEnvSoundDspChorus {
+  protected:
 	int32_t m_kvWaveform = 1;
 	int32_t m_kvPhase = 90;
 	float m_kvRate = 1.1f;

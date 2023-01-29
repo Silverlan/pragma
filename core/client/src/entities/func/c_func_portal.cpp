@@ -23,11 +23,11 @@ using namespace pragma;
 void CFuncPortalComponent::Initialize()
 {
 	BaseFuncPortalComponent::Initialize();
-	auto pRenderComponent = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
+	auto pRenderComponent = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
 	if(pRenderComponent)
 		pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::World);
 }
-void CFuncPortalComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CFuncPortalComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////////
 

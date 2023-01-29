@@ -13,35 +13,29 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/environment/lights/env_light_spot_vol.h>
 
-namespace pragma
-{
-	class DLLCLIENT CLightSpotVolComponent final
-		: public BaseEnvLightSpotVolComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CLightSpotVolComponent final : public BaseEnvLightSpotVolComponent, public CBaseNetComponent {
+	  public:
 		CLightSpotVolComponent(BaseEntity &ent) : BaseEnvLightSpotVolComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void OnEntitySpawn() override;
-	protected:
+	  protected:
 		float CalcEndRadius() const;
 		uint32_t CalcSegmentCount() const;
 		bool UpdateMeshData();
 		void InitializeVolumetricLight();
-		virtual bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
+		virtual bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		std::vector<std::shared_ptr<CModelSubMesh>> m_subMeshes;
 		std::shared_ptr<Model> m_model;
 		msys::MaterialHandle m_material;
 	};
 };
 
-class DLLCLIENT CEnvLightSpotVol
-	: public CBaseEntity
-{
+class DLLCLIENT CEnvLightSpotVol : public CBaseEntity {
 	virtual void Initialize() override;
 };
 

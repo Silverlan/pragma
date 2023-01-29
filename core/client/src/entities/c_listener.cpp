@@ -23,7 +23,7 @@ using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
 
-LINK_ENTITY_TO_CLASS(listener,CListener);
+LINK_ENTITY_TO_CLASS(listener, CListener);
 
 void CListenerComponent::Initialize()
 {
@@ -32,8 +32,7 @@ void CListenerComponent::Initialize()
 	auto &ent = GetEntity();
 	ent.AddComponent<pragma::CTransformComponent>();
 	auto *soundSys = c_engine->GetSoundSystem();
-	if(soundSys == nullptr)
-	{
+	if(soundSys == nullptr) {
 		ent.RemoveSafely();
 		return;
 	}
@@ -54,11 +53,10 @@ void CListenerComponent::OnTick(double dt)
 	if(pVelComponent.valid())
 		m_listener->SetVelocity(pVelComponent->GetVelocity());
 
-	if(pTrComponent != nullptr)
-	{
-		Vector3 forward,up;
-		pTrComponent->GetOrientation(&forward,nullptr,&up);
-		m_listener->SetOrientation(forward,up);
+	if(pTrComponent != nullptr) {
+		Vector3 forward, up;
+		pTrComponent->GetOrientation(&forward, nullptr, &up);
+		m_listener->SetOrientation(forward, up);
 	}
 }
 
@@ -75,7 +73,7 @@ void CListenerComponent::SetGain(float gain)
 		return;
 	m_listener->SetGain(gain);
 }
-void CListenerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CListenerComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////////////
 

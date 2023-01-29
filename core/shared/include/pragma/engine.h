@@ -41,94 +41,83 @@ class NetPacket;
 class ZIPFile;
 class ConVarMap;
 struct Color;
-namespace Con {enum class MessageFlags : uint8_t;};
-namespace upad {class PackageManager;};
-namespace util {class ParallelJobWrapper; class FileAssetManager;};
-namespace pragma::asset {class AssetManager;};
-class DLLNETWORK Engine
-	: public CVarHandler,public CallbackHandler
-{
-public:
+namespace Con {
+	enum class MessageFlags : uint8_t;
+};
+namespace upad {
+	class PackageManager;
+};
+namespace util {
+	class ParallelJobWrapper;
+	class FileAssetManager;
+};
+namespace pragma::asset {
+	class AssetManager;
+};
+class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
+  public:
 	static const uint32_t DEFAULT_TICK_RATE;
-// For internal use only! Not to be used directly!
-private:
+	// For internal use only! Not to be used directly!
+  private:
 	// Note: m_libServer needs to be the first member, to ensure it's destroyed last!
 	mutable std::shared_ptr<util::Library> m_libServer = nullptr;
 	mutable pragma::IServerState m_iServerState;
-public:
-	virtual std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &GetConVarPtrs();
+  public:
+	virtual std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &GetConVarPtrs();
 	static ConVarHandle GetConVarHandle(std::string scvar);
-//
-	class DLLNETWORK StateInstance
-	{
-	public:
+	//
+	class DLLNETWORK StateInstance {
+	  public:
 		~StateInstance();
-		StateInstance(const std::shared_ptr<msys::MaterialManager> &matManager,Material *matErr);
+		StateInstance(const std::shared_ptr<msys::MaterialManager> &matManager, Material *matErr);
 		std::shared_ptr<msys::MaterialManager> materialManager;
 		std::unique_ptr<NetworkState> state;
 	};
-	struct DLLNETWORK ConsoleOutput
-	{
+	struct DLLNETWORK ConsoleOutput {
 		std::string output;
 		Con::MessageFlags messageFlags;
 		std::shared_ptr<Color> color;
 	};
-	enum class ConsoleType : uint8_t
-	{
-		None = 0,
-		Terminal,
-		GUI,
-		GUIDetached
-	};
-protected:
-	bool ExecConfig(const std::string &cfg,const std::function<void(std::string&,std::vector<std::string>&)> &callback);
+	enum class ConsoleType : uint8_t { None = 0, Terminal, GUI, GUIDetached };
+  protected:
+	bool ExecConfig(const std::string &cfg, const std::function<void(std::string &, std::vector<std::string> &)> &callback);
 	std::unique_ptr<StateInstance> m_svInstance;
 	bool m_bMountExternalGameResources = true;
 
 	std::atomic<bool> m_bRecordConsoleOutput = false;
 	std::mutex m_consoleOutputMutex = {};
-public:
-	Engine(int argc,char* argv[]);
+  public:
+	Engine(int argc, char *argv[]);
 	virtual ~Engine();
 
-	enum class StateFlags : uint32_t
-	{
-		None = 0u,
-		Verbose = 1u,
-		Running = Verbose<<1u,
-		Initialized = Running<<1u,
-		DeveloperMode = Initialized<<1u,
-		Closed = DeveloperMode<<1u,
-		MultiThreadedAssetLoadingEnabled = Closed<<1u
-	};
+	enum class StateFlags : uint32_t { None = 0u, Verbose = 1u, Running = Verbose << 1u, Initialized = Running << 1u, DeveloperMode = Initialized << 1u, Closed = DeveloperMode << 1u, MultiThreadedAssetLoadingEnabled = Closed << 1u };
 
-	enum class CPUProfilingPhase : uint32_t
-	{
+	enum class CPUProfilingPhase : uint32_t {
 		Think = 0u,
 		Tick,
 		ServerTick,
 
 		Count
 	};
-public:
+  public:
 	DEBUGCONSOLE;
-	virtual bool Initialize(int argc,char *argv[]);
+	virtual bool Initialize(int argc, char *argv[]);
 	virtual void Start();
-	void AddLaunchConVar(std::string cvar,std::string val);
+	void AddLaunchConVar(std::string cvar, std::string val);
 	virtual void DumpDebugInformation(ZIPFile &zip) const;
 	virtual void Close();
 	virtual void Release();
 	virtual void ClearConsole();
 	void ClearCache();
 
-	uint32_t ClearUnusedAssets(pragma::asset::Type type,bool verbose=false) const;
-	uint32_t ClearUnusedAssets(const std::vector<pragma::asset::Type> &types,bool verbose=false) const;
+	uint32_t ClearUnusedAssets(pragma::asset::Type type, bool verbose = false) const;
+	uint32_t ClearUnusedAssets(const std::vector<pragma::asset::Type> &types, bool verbose = false) const;
 	virtual void SetAssetMultiThreadedLoadingEnabled(bool enabled);
 	void UpdateAssetMultiThreadedLoadingEnabled();
 
 	// Debug
 	pragma::debug::CPUProfiler &GetProfiler() const;
-	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase> *GetProfilingStageManager();
+	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase> *GetProfilingStageManager();
 	CallbackHandle AddProfilingHandler(const std::function<void(bool)> &handler);
 	void SetProfilingEnabled(bool bEnabled);
 	bool StartProfilingStage(CPUProfilingPhase stage);
@@ -144,7 +133,7 @@ public:
 
 	// Console
 	void ConsoleInput(const std::string_view &line);
-	void ProcessConsoleInput(const std::string_view &line,KeyState pressState=KeyState::Press,float magnitude=1.f);
+	void ProcessConsoleInput(const std::string_view &line, KeyState pressState = KeyState::Press, float magnitude = 1.f);
 	// Lua
 	virtual NetworkState *GetNetworkState(lua_State *l);
 	virtual Lua::Interface *GetLuaInterface(lua_State *l);
@@ -160,7 +149,7 @@ public:
 	void SaveEngineConfig();
 	// Util
 	bool IsRunning();
-	std::string GetDate(const std::string &format="%Y-%m-%d %X");
+	std::string GetDate(const std::string &format = "%Y-%m-%d %X");
 	uint64_t GetTickCount() const;
 	double GetTickTime() const;
 	const long long &GetLastTick() const;
@@ -179,8 +168,8 @@ public:
 	virtual bool GetConVarBool(const std::string &cv);
 	virtual ConConf *GetConVar(const std::string &cv);
 	template<class T>
-		T *GetConVar(const std::string &cv);
-	virtual bool RunConsoleCommand(std::string cmd,std::vector<std::string> &argv,KeyState pressState=KeyState::Press,float magnitude=1.f,const std::function<bool(ConConf*,float&)> &callback=nullptr);
+	T *GetConVar(const std::string &cv);
+	virtual bool RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(ConConf *, float &)> &callback = nullptr);
 	// NetState
 	virtual NetworkState *GetActiveState();
 
@@ -210,7 +199,7 @@ public:
 	std::thread::id GetMainThreadId() const;
 	void InitializeAssetManager(util::FileAssetManager &assetManager) const;
 
-	virtual void StartNewGame(const std::string &map,bool singlePlayer);
+	virtual void StartNewGame(const std::string &map, bool singlePlayer);
 
 	// When run in game-client: Starts a new single-player game, loads the specified map and connects the local client to the local server.
 	// When run in dedicated-server: Starts a new game, loads the specified map and automatically starts a listener server.
@@ -231,7 +220,7 @@ public:
 	int32_t GetRemoteDebugging() const;
 
 	void ShutDown();
-	void AddParallelJob(const util::ParallelJobWrapper &job,const std::string &jobName);
+	void AddParallelJob(const util::ParallelJobWrapper &job, const std::string &jobName);
 
 	void LockResourceWatchers();
 	void UnlockResourceWatchers();
@@ -242,10 +231,10 @@ public:
 	const pragma::asset::AssetManager &GetAssetManager() const;
 
 	// For internal use only
-	void SetReplicatedConVar(const std::string &cvar,const std::string &val);
-protected:
+	void SetReplicatedConVar(const std::string &cvar, const std::string &val);
+  protected:
 	void UpdateParallelJobs();
-	bool RunEngineConsoleCommand(std::string cmd,std::vector<std::string> &argv,KeyState pressState=KeyState::Press,float magnitude=1.f,const std::function<bool(ConConf*,float&)> &callback=nullptr);
+	bool RunEngineConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(ConConf *, float &)> &callback = nullptr);
 	void WriteServerConfig(VFilePtrReal f);
 	void WriteEngineConfig(VFilePtrReal f);
 	void RegisterSharedConsoleCommands(ConVarMap &map);
@@ -254,9 +243,8 @@ protected:
 	virtual uint32_t DoClearUnusedAssets(pragma::asset::Type type) const;
 	virtual void RegisterConsoleCommands();
 	virtual void UpdateTickCount();
-	struct DLLNETWORK LaunchCommand
-	{
-		LaunchCommand(const std::string &cmd,const std::vector<std::string> &args);
+	struct DLLNETWORK LaunchCommand {
+		LaunchCommand(const std::string &cmd, const std::vector<std::string> &args);
 		std::string command;
 		std::vector<std::string> args;
 	};
@@ -265,8 +253,7 @@ protected:
 	virtual void InitializeExternalArchiveManager();
 
 	// Console
-	struct ConsoleInstance
-	{
+	struct ConsoleInstance {
 		ConsoleInstance();
 		~ConsoleInstance();
 		std::unique_ptr<DebugConsole> console;
@@ -277,7 +264,7 @@ protected:
 	std::queue<std::string> m_consoleInput;
 
 	std::queue<ConsoleOutput> m_consoleOutput = {};
-	void ProcessConsoleInput(KeyState pressState=KeyState::Press);
+	void ProcessConsoleInput(KeyState pressState = KeyState::Press);
 
 	std::thread::id m_mainThreadId;
 	unsigned int m_tickRate;
@@ -285,17 +272,16 @@ protected:
 	long long m_lastTick;
 	uint64_t m_tickCount = 0;
 	std::shared_ptr<VFilePtrInternalReal> m_logFile;
-    std::unique_ptr<pragma::asset::AssetManager> m_assetManager;
+	std::unique_ptr<pragma::asset::AssetManager> m_assetManager;
 
-	struct JobInfo
-	{
+	struct JobInfo {
 		util::ParallelJobWrapper job = {};
 		std::string name = "";
 		float lastProgress = 0.f;
 		std::optional<float> timeRemaining = {};
 		std::chrono::steady_clock::time_point lastProgressUpdate = {};
 		std::chrono::steady_clock::time_point lastNotification = {};
-		std::chrono::seconds notificationFrequency = std::chrono::seconds{10};
+		std::chrono::seconds notificationFrequency = std::chrono::seconds {10};
 	};
 	// Background tasks that usually take a long time to complete and run on a separate thread
 	std::vector<JobInfo> m_parallelJobs {};
@@ -303,33 +289,32 @@ protected:
 
 	std::shared_ptr<pragma::debug::CPUProfiler> m_cpuProfiler;
 	std::vector<CallbackHandle> m_profileHandlers = {};
-	
+
 	std::queue<std::function<void()>> m_tickEventQueue;
 	StateFlags m_stateFlags;
 	mutable upad::PackageManager *m_padPackageManager = nullptr;
-	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_profilingStageManager = nullptr;
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase>> m_profilingStageManager = nullptr;
 
-	std::unordered_map<std::string,std::function<void(int,char*[])>> m_launchOptions;
+	std::unordered_map<std::string, std::function<void(int, char *[])>> m_launchOptions;
 
-	void InitLaunchOptions(int argc,char *argv[]);
+	void InitLaunchOptions(int argc, char *argv[]);
 	virtual void Think();
 	virtual void Tick();
 };
 REGISTER_BASIC_BITWISE_OPERATORS(Engine::StateFlags)
 
-namespace pragma
-{
+namespace pragma {
 	DLLNETWORK Engine *get_engine();
 	DLLNETWORK ServerState *get_server_state();
 };
 
 template<class T>
-	T *Engine::GetConVar(const std::string &scvar)
+T *Engine::GetConVar(const std::string &scvar)
 {
 	ConConf *cv = GetConVar(scvar);
 	if(cv == NULL)
 		return NULL;
-	return static_cast<T*>(cv);
+	return static_cast<T *>(cv);
 }
 
 #endif

@@ -10,37 +10,20 @@
 
 #include "pragma/networkdefinitions.h"
 
-enum class JointType : uint8_t
-{
-	None = 0,
-	Fixed,
-	BallSocket,
-	Hinge,
-	Slider,
-	ConeTwist,
-	DOF
-};
+enum class JointType : uint8_t { None = 0, Fixed, BallSocket, Hinge, Slider, ConeTwist, DOF };
 
 using BoneId = uint16_t;
-struct DLLNETWORK JointInfo
-{
-	JointInfo(JointType type,BoneId child,BoneId parent)
-		: type(type),parent(parent),child(child),collide(false)
-	{}
-	JointInfo()
-		: JointInfo(JointType::None,0,0)
-	{}
+struct DLLNETWORK JointInfo {
+	JointInfo(JointType type, BoneId child, BoneId parent) : type(type), parent(parent), child(child), collide(false) {}
+	JointInfo() : JointInfo(JointType::None, 0, 0) {}
 	JointType type;
 	BoneId parent;
 	BoneId child;
 	bool collide;
-	std::unordered_map<std::string,std::string> args;
+	std::unordered_map<std::string, std::string> args;
 
-	bool operator==(const JointInfo &other) const
-	{
-		return type == other.type && parent == other.parent && child == other.child && collide == other.collide && args == other.args;
-	}
-	bool operator!=(const JointInfo &other) const {return !operator==(other);}
+	bool operator==(const JointInfo &other) const { return type == other.type && parent == other.parent && child == other.child && collide == other.collide && args == other.args; }
+	bool operator!=(const JointInfo &other) const { return !operator==(other); }
 };
 
 #endif

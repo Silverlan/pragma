@@ -32,14 +32,14 @@
 
 extern DLLCLIENT CEngine *c_engine;
 
-void Lua::Scene::UpdateBuffers(lua_State *l,pragma::CSceneComponent &scene,prosper::ICommandBuffer &hCommandBuffer)
+void Lua::Scene::UpdateBuffers(lua_State *l, pragma::CSceneComponent &scene, prosper::ICommandBuffer &hCommandBuffer)
 {
 	if(hCommandBuffer.IsPrimary() == false)
 		return;
 	auto pCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
 	scene.UpdateBuffers(pCmdBuffer);
 }
-std::shared_ptr<WorldEnvironment> Lua::Scene::GetWorldEnvironment(lua_State *l,pragma::CSceneComponent &scene)
+std::shared_ptr<WorldEnvironment> Lua::Scene::GetWorldEnvironment(lua_State *l, pragma::CSceneComponent &scene)
 {
 	auto *worldEnv = scene.GetWorldEnvironment();
 	if(worldEnv == nullptr)
@@ -49,24 +49,9 @@ std::shared_ptr<WorldEnvironment> Lua::Scene::GetWorldEnvironment(lua_State *l,p
 
 ////////////////////////////////
 
-std::shared_ptr<prosper::Texture> Lua::RasterizationRenderer::GetPrepassDepthTexture(lua_State *l,pragma::CRasterizationRendererComponent &renderer)
-{
-	return renderer.GetPrepass().textureDepth;
-}
-std::shared_ptr<prosper::Texture> Lua::RasterizationRenderer::GetPrepassNormalTexture(lua_State *l,pragma::CRasterizationRendererComponent &renderer)
-{
-	return renderer.GetPrepass().textureNormals;
-}
-std::shared_ptr<prosper::RenderTarget> Lua::RasterizationRenderer::GetRenderTarget(lua_State *l,pragma::CRasterizationRendererComponent &renderer)
-{
-	return renderer.GetHDRInfo().sceneRenderTarget;
-}
+std::shared_ptr<prosper::Texture> Lua::RasterizationRenderer::GetPrepassDepthTexture(lua_State *l, pragma::CRasterizationRendererComponent &renderer) { return renderer.GetPrepass().textureDepth; }
+std::shared_ptr<prosper::Texture> Lua::RasterizationRenderer::GetPrepassNormalTexture(lua_State *l, pragma::CRasterizationRendererComponent &renderer) { return renderer.GetPrepass().textureNormals; }
+std::shared_ptr<prosper::RenderTarget> Lua::RasterizationRenderer::GetRenderTarget(lua_State *l, pragma::CRasterizationRendererComponent &renderer) { return renderer.GetHDRInfo().sceneRenderTarget; }
 
-bool Lua::RasterizationRenderer::BeginRenderPass(lua_State *l,pragma::CRasterizationRendererComponent &renderer,const ::util::DrawSceneInfo &drawSceneInfo)
-{
-	return renderer.BeginRenderPass(drawSceneInfo);
-}
-bool Lua::RasterizationRenderer::BeginRenderPass(lua_State *l,pragma::CRasterizationRendererComponent &renderer,const ::util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass &rp)
-{
-	return renderer.BeginRenderPass(drawSceneInfo,&rp);
-}
+bool Lua::RasterizationRenderer::BeginRenderPass(lua_State *l, pragma::CRasterizationRendererComponent &renderer, const ::util::DrawSceneInfo &drawSceneInfo) { return renderer.BeginRenderPass(drawSceneInfo); }
+bool Lua::RasterizationRenderer::BeginRenderPass(lua_State *l, pragma::CRasterizationRendererComponent &renderer, const ::util::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass &rp) { return renderer.BeginRenderPass(drawSceneInfo, &rp); }

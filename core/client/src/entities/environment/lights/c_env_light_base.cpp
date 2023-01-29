@@ -20,25 +20,17 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
-CBaseLightComponent::CBaseLightComponent(BaseEntity &ent)
-	: BaseEnvLightComponent(ent)
-{}
+CBaseLightComponent::CBaseLightComponent(BaseEntity &ent) : BaseEnvLightComponent(ent) {}
 
 CBaseLightComponent::~CBaseLightComponent() {}
 
-void CBaseLightComponent::Initialize()
-{
-	BaseEnvLightComponent::Initialize();
-}
+void CBaseLightComponent::Initialize() { BaseEnvLightComponent::Initialize(); }
 
-void CBaseLightComponent::OnEntityComponentAdded(BaseEntityComponent &component)
-{
-	BaseEnvLightComponent::OnEntityComponentAdded(component);
-}
+void CBaseLightComponent::OnEntityComponentAdded(BaseEntityComponent &component) { BaseEnvLightComponent::OnEntityComponentAdded(component); }
 
-util::EventReply CBaseLightComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
+util::EventReply CBaseLightComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEnvLightComponent::HandleEvent(eventId,evData) == util::EventReply::Handled)
+	if(BaseEnvLightComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	return util::EventReply::Unhandled;
 }
@@ -51,17 +43,17 @@ void CBaseLightComponent::ReceiveData(NetPacket &packet)
 
 	auto lightIntensity = packet->Read<float>();
 	auto lightIntensityType = packet->Read<LightIntensityType>();
-	SetLightIntensity(lightIntensity,lightIntensityType);
+	SetLightIntensity(lightIntensity, lightIntensityType);
 }
 
-Bool CBaseLightComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
+Bool CBaseLightComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetShadowType)
 		SetShadowType(packet->Read<BaseEnvLightComponent::ShadowType>());
 	else if(eventId == m_netEvSetFalloffExponent)
 		SetFalloffExponent(packet->Read<float>());
 	else
-		return CBaseNetComponent::ReceiveNetEvent(eventId,packet);
+		return CBaseNetComponent::ReceiveNetEvent(eventId, packet);
 	return true;
 }
 

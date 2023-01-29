@@ -11,9 +11,8 @@
 #include <pragma/lua/ldefinitions.h>
 
 class Material;
-namespace Lua::engine::server
-{
-	DLLSERVER Material *LoadMaterial(const std::string &mat,bool reload);
+namespace Lua::engine::server {
+	DLLSERVER Material *LoadMaterial(const std::string &mat, bool reload);
 	DLLSERVER Material *LoadMaterial(const std::string &mat);
 }
 

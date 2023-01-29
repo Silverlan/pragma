@@ -16,43 +16,34 @@
 using namespace pragma;
 
 ComponentEventId BaseFieldAngleComponent::EVENT_ON_FIELD_ANGLE_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseFieldAngleComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
-{
-	EVENT_ON_FIELD_ANGLE_CHANGED = registerEvent("ON_FIELD_ANGLE_CHANGED",ComponentEventInfo::Type::Broadcast);
-}
-void BaseFieldAngleComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
+void BaseFieldAngleComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_FIELD_ANGLE_CHANGED = registerEvent("ON_FIELD_ANGLE_CHANGED", ComponentEventInfo::Type::Broadcast); }
+void BaseFieldAngleComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseFieldAngleComponent;
 	using TRadius = float;
 	{
-		auto memberInfo = create_component_member_info<
-			T,TRadius,
-			static_cast<void(T::*)(TRadius)>(&T::SetFieldAngle),
-			static_cast<TRadius(T::*)() const>(&T::GetFieldAngle)
-		>("coneAngle",0.f,AttributeSpecializationType::Angle);
+		auto memberInfo = create_component_member_info<T, TRadius, static_cast<void (T::*)(TRadius)>(&T::SetFieldAngle), static_cast<TRadius (T::*)() const>(&T::GetFieldAngle)>("coneAngle", 0.f, AttributeSpecializationType::Angle);
 		memberInfo.SetMin(0.f);
 		memberInfo.SetMax(180.f);
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseFieldAngleComponent::BaseFieldAngleComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent),m_fieldAngle(util::FloatProperty::Create(0.f))
-{}
+BaseFieldAngleComponent::BaseFieldAngleComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_fieldAngle(util::FloatProperty::Create(0.f)) {}
 void BaseFieldAngleComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"coneAngle",false))
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "coneAngle", false))
 			SetFieldAngle(util::to_float(kvData.value));
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &inputData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare<std::string>(inputData.input,"setconeangle",false))
+	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &inputData = static_cast<CEInputData &>(evData.get());
+		if(ustring::compare<std::string>(inputData.input, "setconeangle", false))
 			SetFieldAngle(util::to_float(inputData.data));
 		else
 			return util::EventReply::Unhandled;
@@ -68,31 +59,29 @@ void BaseFieldAngleComponent::Save(udm::LinkedPropertyWrapperArg udm)
 	BaseEntityComponent::Save(udm);
 	udm["fieldAngle"] = **m_fieldAngle;
 }
-void BaseFieldAngleComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
+void BaseFieldAngleComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version)
 {
-	BaseEntityComponent::Load(udm,version);
+	BaseEntityComponent::Load(udm, version);
 	auto fieldAngle = GetFieldAngle();
 	udm["fieldAngle"](fieldAngle);
 	SetFieldAngle(fieldAngle);
 }
-umath::Degree BaseFieldAngleComponent::GetFieldAngle() const {return *m_fieldAngle;}
-const util::PFloatProperty &BaseFieldAngleComponent::GetFieldAngleProperty() const {return m_fieldAngle;}
+umath::Degree BaseFieldAngleComponent::GetFieldAngle() const { return *m_fieldAngle; }
+const util::PFloatProperty &BaseFieldAngleComponent::GetFieldAngleProperty() const { return m_fieldAngle; }
 void BaseFieldAngleComponent::SetFieldAngle(umath::Degree coneAngle)
 {
 	auto oldFieldAngle = GetFieldAngle();
 	*m_fieldAngle = coneAngle;
 
-	CEOnFieldAngleChanged evData {oldFieldAngle,*m_fieldAngle};
-	BroadcastEvent(EVENT_ON_FIELD_ANGLE_CHANGED,evData);
+	CEOnFieldAngleChanged evData {oldFieldAngle, *m_fieldAngle};
+	BroadcastEvent(EVENT_ON_FIELD_ANGLE_CHANGED, evData);
 }
 
 //////////////
 
-CEOnFieldAngleChanged::CEOnFieldAngleChanged(float oldFieldAngle,float newFieldAngle)
-	: oldFieldAngle{oldFieldAngle},newFieldAngle{newFieldAngle}
-{}
+CEOnFieldAngleChanged::CEOnFieldAngleChanged(float oldFieldAngle, float newFieldAngle) : oldFieldAngle {oldFieldAngle}, newFieldAngle {newFieldAngle} {}
 void CEOnFieldAngleChanged::PushArguments(lua_State *l)
 {
-	Lua::PushNumber(l,oldFieldAngle);
-	Lua::PushNumber(l,newFieldAngle);
+	Lua::PushNumber(l, oldFieldAngle);
+	Lua::PushNumber(l, newFieldAngle);
 }

@@ -13,11 +13,9 @@ extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-LINK_WGUI_TO_CLASS(WILineGraph,WILineGraph);
+LINK_WGUI_TO_CLASS(WILineGraph, WILineGraph);
 
-WILineGraph::WILineGraph()
-	: WIBase()
-{}
+WILineGraph::WILineGraph() : WIBase() {}
 
 void WILineGraph::Initialize()
 {
@@ -26,14 +24,14 @@ void WILineGraph::Initialize()
 	m_hOutline = pOutline->GetHandle();
 	pOutline->SetColor(Color::White);
 	pOutline->SetHeight(1);
-	pOutline->SetAutoAlignToParent(true,false);
+	pOutline->SetAutoAlignToParent(true, false);
 }
 
-void WILineGraph::SetSize(int x,int y)
+void WILineGraph::SetSize(int x, int y)
 {
-	WIBase::SetSize(x,y);
+	WIBase::SetSize(x, y);
 	if(m_hOutline.IsValid())
-		m_hOutline->SetY(y -1);
+		m_hOutline->SetY(y - 1);
 }
 
 void WILineGraph::DoUpdate()
@@ -47,18 +45,17 @@ void WILineGraph::UpdateLines()
 	auto numLines = m_lines.size();
 	auto numLinesNew = m_values.size();
 	m_lines.reserve(numLinesNew);
-	for(auto i=numLines;i<numLinesNew;++i)
-	{
+	for(auto i = numLines; i < numLinesNew; ++i) {
 		auto *pLine = WGUI::GetInstance().Create<WILine>(this);
 		pLine->SetLineWidth(2);
 		m_lines.push_back(pLine->GetHandle());
 	}
 }
 
-void WILineGraph::SetValue(uint32_t idx,float val)
+void WILineGraph::SetValue(uint32_t idx, float val)
 {
 	if(idx >= GetSegmentCount())
-		SetSegmentCount(idx +1);
+		SetSegmentCount(idx + 1);
 	m_values[idx] = val;
 }
 
@@ -67,14 +64,12 @@ void WILineGraph::SetSegmentCount(uint32_t count)
 	auto numValues = m_values.size();
 	if(count == numValues)
 		return;
-	if(count > numValues)
-	{
-		m_values.resize(count,0.f);
+	if(count > numValues) {
+		m_values.resize(count, 0.f);
 		UpdateLines();
 		return;
 	}
-	for(auto i=count;i<m_values.size();++i)
-	{
+	for(auto i = count; i < m_values.size(); ++i) {
 		auto &hLine = m_lines[i];
 		if(hLine.IsValid())
 			hLine->Remove();
@@ -83,7 +78,7 @@ void WILineGraph::SetSegmentCount(uint32_t count)
 	m_lines.resize(count);
 }
 
-uint32_t WILineGraph::GetSegmentCount() const {return static_cast<uint32_t>(m_values.size());}
+uint32_t WILineGraph::GetSegmentCount() const { return static_cast<uint32_t>(m_values.size()); }
 
 void WILineGraph::UpdateGraph()
 {
@@ -95,20 +90,18 @@ void WILineGraph::UpdateGraph()
 	auto h = GetHeight();
 	auto &colA = Color::Lime;
 	auto &colB = Color::Red;
-	auto inc = w /static_cast<float>(numValues);
-	Vector2i prevEndPos {0.f,h -h *values[0]};
-	auto colPrev = colA.Lerp(colB,values[0]);
-	for(auto i=decltype(numValues){1};i<numValues;++i)
-	{
+	auto inc = w / static_cast<float>(numValues);
+	Vector2i prevEndPos {0.f, h - h * values[0]};
+	auto colPrev = colA.Lerp(colB, values[0]);
+	for(auto i = decltype(numValues) {1}; i < numValues; ++i) {
 		auto v = values[i];
-		auto xOffset = inc *i;
-		auto endPos = Vector2(xOffset +inc,h -h *v);
-		auto endColor = colA.Lerp(colB,v);
+		auto xOffset = inc * i;
+		auto endPos = Vector2(xOffset + inc, h - h * v);
+		auto endColor = colA.Lerp(colB, v);
 
 		auto &hLine = m_lines[i];
-		if(hLine.IsValid())
-		{
-			auto *pLine = static_cast<WILine*>(hLine.get());
+		if(hLine.IsValid()) {
+			auto *pLine = static_cast<WILine *>(hLine.get());
 			pLine->SetStartColor(colPrev);
 			pLine->SetEndColor(endColor);
 			pLine->SetStartPos(prevEndPos);

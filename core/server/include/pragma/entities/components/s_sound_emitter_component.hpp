@@ -11,19 +11,15 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_sound_emitter_component.hpp>
 
-namespace pragma
-{
-	class DLLSERVER SSoundEmitterComponent final
-		: public BaseSoundEmitterComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SSoundEmitterComponent final : public BaseSoundEmitterComponent, public SBaseNetComponent {
+	  public:
 		SSoundEmitterComponent(BaseEntity &ent) : BaseSoundEmitterComponent(ent) {}
 		virtual void UpdateSoundTransform(ALSound &snd) const override;
-		virtual std::shared_ptr<ALSound> CreateSound(std::string sndname,ALSoundType type,const SoundInfo &sndInfo={}) override;
-		virtual std::shared_ptr<ALSound> EmitSound(std::string sndname,ALSoundType type,const SoundInfo &sndInfo={}) override;
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual std::shared_ptr<ALSound> CreateSound(std::string sndname, ALSoundType type, const SoundInfo &sndInfo = {}) override;
+		virtual std::shared_ptr<ALSound> EmitSound(std::string sndname, ALSoundType type, const SoundInfo &sndInfo = {}) override;
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };

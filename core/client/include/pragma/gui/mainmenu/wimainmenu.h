@@ -17,19 +17,17 @@
 #define WIMENU_ENABLE_FMOD_LOGO 0 // (ALSYS_LIBRARY_TYPE == ALSYS_LIBRARY_FMOD)
 #define WIMENU_ENABLE_CREDITS_MENU 0
 
-class DLLCLIENT WIMainMenu
-	: public WIBase
-{
-public:
+class DLLCLIENT WIMainMenu : public WIBase {
+  public:
 	WIMainMenu();
 	virtual ~WIMainMenu() override;
 	virtual void Initialize() override;
-	virtual void SetSize(int x,int y) override;
+	virtual void SetSize(int x, int y) override;
 	void SetContinueMenu();
 	void SetNewGameMenu();
 	virtual void OnFocusGained() override;
 	virtual void OnFocusKilled() override;
-	virtual util::EventReply KeyboardCallback(GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods) override;
+	virtual util::EventReply KeyboardCallback(GLFW::Key key, int scanCode, GLFW::KeyState state, GLFW::Modifier mods) override;
 
 	void OpenNewGameMenu();
 	void OpenLoadGameMenu();
@@ -40,7 +38,7 @@ public:
 #endif
 	void OpenLoadScreen();
 	void OpenMainMenu();
-protected:
+  protected:
 	WIHandle m_hMain;
 	WIHandle m_hNewGame;
 	WIHandle m_hLoad;
@@ -81,8 +79,8 @@ protected:
 	CallbackHandle m_cbBlur;
 	double m_tOpen;
 	//
-	void PlayNextMenuTrack(bool newRound=false);
-private:
+	void PlayNextMenuTrack(bool newRound = false);
+  private:
 	CallbackHandle m_cbOnSteamworksInit = {};
 	CallbackHandle m_cbOnSteamworksShutdown = {};
 };

@@ -38,8 +38,6 @@ void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentM
 	componentManager.RegisterComponentType<pragma::CompositeComponent>("composite");
 	componentManager.RegisterComponentType<pragma::AnimationDriverComponent>("animation_driver");
 
-	pragma::BaseEntityComponent::RegisterEvents(componentManager,[&componentManager](const std::string &evName,pragma::ComponentEventInfo::Type type) -> pragma::ComponentEventId {
-		return componentManager.RegisterEvent(evName,typeid(pragma::BaseEntityComponent),type);
-	});
+	pragma::BaseEntityComponent::RegisterEvents(componentManager, [&componentManager](const std::string &evName, pragma::ComponentEventInfo::Type type) -> pragma::ComponentEventId { return componentManager.RegisterEvent(evName, typeid(pragma::BaseEntityComponent), type); });
 	BaseEntity::RegisterEvents(componentManager);
 }

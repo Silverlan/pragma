@@ -10,7 +10,7 @@
 #include "luasystem.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 
-std::shared_ptr<prosper::Texture> Lua::Texture::GetVkTexture(lua_State *l,::Texture &tex)
+std::shared_ptr<prosper::Texture> Lua::Texture::GetVkTexture(lua_State *l, ::Texture &tex)
 {
 	if(tex.HasValidVkTexture() == false)
 		return nullptr;

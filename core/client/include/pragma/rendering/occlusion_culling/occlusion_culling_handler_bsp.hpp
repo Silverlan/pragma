@@ -13,31 +13,25 @@
 #include <pragma/util/util_bsp_tree.hpp>
 
 class CModelSubMesh;
-namespace pragma
-{
-	class DLLCLIENT OcclusionCullingHandlerBSP
-		: public OcclusionCullingHandlerOctTree
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT OcclusionCullingHandlerBSP : public OcclusionCullingHandlerOctTree {
+	  public:
 		OcclusionCullingHandlerBSP(const std::shared_ptr<util::BSPTree> &bspTree);
 		const util::BSPTree::Node *FindLeafNode(const Vector3 &point) const;
 		const util::BSPTree &GetBSPTree() const;
 
 		bool ShouldPass(CBaseEntity &ent) const;
-		bool ShouldPass(CModelMesh &modelMesh,const Vector3 &entityPos) const;
-		bool ShouldPass(CModelSubMesh &subMesh,const Vector3 &entityPos) const;
+		bool ShouldPass(CModelMesh &modelMesh, const Vector3 &entityPos) const;
+		bool ShouldPass(CModelSubMesh &subMesh, const Vector3 &entityPos) const;
 		const util::BSPTree::Node *GetCurrentNode() const;
 		virtual void Update(const Vector3 &camPos) override;
-		virtual void PerformCulling(
-			CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const Vector3 &camPos,
-			std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut,bool cullByViewFrustum=true
-		) override;
+		virtual void PerformCulling(CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const Vector3 &camPos, std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut, bool cullByViewFrustum = true) override;
 
 		void SetCurrentNodeLocked(bool bLocked);
 		bool IsCurrentNodeLocked() const;
-	protected:
-		virtual bool ShouldExamine(CModelMesh &mesh,const Vector3 &pos,bool bViewModel,std::size_t numMeshes,const std::vector<umath::Plane> *optPlanes=nullptr) const override;
-		virtual bool ShouldExamine(CSceneComponent &scene,const CRasterizationRendererComponent &renderer,CBaseEntity &cent,bool &outViewModel,std::vector<umath::Plane> **outPlanes) const override;
+	  protected:
+		virtual bool ShouldExamine(CModelMesh &mesh, const Vector3 &pos, bool bViewModel, std::size_t numMeshes, const std::vector<umath::Plane> *optPlanes = nullptr) const override;
+		virtual bool ShouldExamine(CSceneComponent &scene, const CRasterizationRendererComponent &renderer, CBaseEntity &cent, bool &outViewModel, std::vector<umath::Plane> **outPlanes) const override;
 		std::shared_ptr<util::BSPTree> m_bspTree = nullptr;
 		bool m_bLockCurrentNode = false;
 

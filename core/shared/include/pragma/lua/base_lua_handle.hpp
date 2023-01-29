@@ -15,50 +15,48 @@
 #include "pragma/lua/lua_handles.hpp"
 #include "pragma/lua/raw_object.hpp"
 
-namespace pragma
-{
-	class DLLNETWORK BaseLuaHandle
-	{
-	public:
+namespace pragma {
+	class DLLNETWORK BaseLuaHandle {
+	  public:
 		BaseLuaHandle();
 		virtual ~BaseLuaHandle();
-		util::TWeakSharedHandle<BaseLuaHandle> GetHandle() const {return util::TWeakSharedHandle<BaseLuaHandle>{m_handle};}
-		virtual void InitializeLuaObject(lua_State *lua)=0;
-		const luabind::object &GetLuaObject() const {return const_cast<BaseLuaHandle*>(this)->GetLuaObject();}
-		luabind::object &GetLuaObject() {return m_luaObj;}
+		util::TWeakSharedHandle<BaseLuaHandle> GetHandle() const { return util::TWeakSharedHandle<BaseLuaHandle> {m_handle}; }
+		virtual void InitializeLuaObject(lua_State *lua) = 0;
+		const luabind::object &GetLuaObject() const { return const_cast<BaseLuaHandle *>(this)->GetLuaObject(); }
+		luabind::object &GetLuaObject() { return m_luaObj; }
 		lua_State *GetLuaState() const;
 		void PushLuaObject();
 		void PushLuaObject(lua_State *l);
 
 		void CallLuaMethod(const std::string &name);
-		template<class T,typename... TARGS>
-			T CallLuaMethod(const std::string &name,TARGS ...args);
-		template<class T,typename... TARGS>
-			CallbackReturnType CallLuaMethod(const std::string &name,T *ret,TARGS ...args);
+		template<class T, typename... TARGS>
+		T CallLuaMethod(const std::string &name, TARGS... args);
+		template<class T, typename... TARGS>
+		CallbackReturnType CallLuaMethod(const std::string &name, T *ret, TARGS... args);
 
 		template<typename T>
-			util::TWeakSharedHandle<T> GetHandle() const;
-	protected:
+		util::TWeakSharedHandle<T> GetHandle() const;
+	  protected:
 		template<typename T>
-			void InitializeLuaObject(lua_State *l);
+		void InitializeLuaObject(lua_State *l);
 		void InvalidateHandle();
 		void SetLuaObject(const luabind::object &o);
-	private:
+	  private:
 		util::TSharedHandle<BaseLuaHandle> m_handle {};
 		luabind::object m_luaObj {};
 	};
 };
 
 template<typename T>
-	void pragma::BaseLuaHandle::InitializeLuaObject(lua_State *l)
+void pragma::BaseLuaHandle::InitializeLuaObject(lua_State *l)
 {
-	m_luaObj = {l,pragma::lua::raw_object_to_luabind_object(l,GetHandle<T>())};
+	m_luaObj = {l, pragma::lua::raw_object_to_luabind_object(l, GetHandle<T>())};
 }
 
 template<typename T>
-	util::TWeakSharedHandle<T> pragma::BaseLuaHandle::GetHandle() const
+util::TWeakSharedHandle<T> pragma::BaseLuaHandle::GetHandle() const
 {
-	return util::weak_shared_handle_cast<BaseLuaHandle,T>(GetHandle());
+	return util::weak_shared_handle_cast<BaseLuaHandle, T>(GetHandle());
 }
 
 #endif

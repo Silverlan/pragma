@@ -1,0 +1,25 @@
+# Format Style Options - Created with Clang Power Tools
+---
+BasedOnStyle: LLVM
+AlignAfterOpenBracket: DontAlign
+AlignOperands: DontAlign
+AllowAllArgumentsOnNextLine: false
+AlwaysBreakTemplateDeclarations: Yes
+BreakBeforeBinaryOperators: All
+BreakBeforeBraces: Stroustrup
+BreakStringLiterals: false
+ColumnLimit: 290
+ContinuationIndentWidth: 2
+EmptyLineBeforeAccessModifier: Never
+FixNamespaceComments: false
+IndentCaseBlocks: true
+IndentWidth: 4
+NamespaceIndentation: All
+ReflowComments: false
+SortIncludes: false
+SpaceAfterTemplateKeyword: false
+SpaceBeforeCpp11BracedList: true
+SpaceBeforeParens: Never
+TabWidth: 4
+UseTab: ForIndentation
+...

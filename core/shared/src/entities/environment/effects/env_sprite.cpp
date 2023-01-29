@@ -17,21 +17,21 @@ void BaseEnvSpriteComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"texture",false))
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "texture", false))
 			m_spritePath = kvData.value;
-		else if(ustring::compare<std::string>(kvData.key,"scale",false))
+		else if(ustring::compare<std::string>(kvData.key, "scale", false))
 			m_size = ustring::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"bloom_scale",false))
+		else if(ustring::compare<std::string>(kvData.key, "bloom_scale", false))
 			m_bloomScale = ustring::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"color",false))
+		else if(ustring::compare<std::string>(kvData.key, "color", false))
 			m_color = Color(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"render_mode",false))
+		else if(ustring::compare<std::string>(kvData.key, "render_mode", false))
 			m_particleRenderMode = ustring::to_int(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"fade_in_time",false))
+		else if(ustring::compare<std::string>(kvData.key, "fade_in_time", false))
 			m_tFadeIn = ustring::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"fade_out_time",false))
+		else if(ustring::compare<std::string>(kvData.key, "fade_out_time", false))
 			m_tFadeOut = ustring::to_float(kvData.value);
 		else
 			return util::EventReply::Unhandled;

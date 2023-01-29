@@ -12,13 +12,9 @@
 #include "pragma/entities/environment/audio/c_env_sound_dsp.h"
 #include "pragma/entities/environment/audio/env_sound_dsp_eaxreverb.h"
 
-namespace pragma
-{
-	class DLLCLIENT CSoundDspEAXReverbComponent final
-		: public CBaseSoundDspComponent,
-		public BaseEnvSoundDspEAXReverb
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CSoundDspEAXReverbComponent final : public CBaseSoundDspComponent, public BaseEnvSoundDspEAXReverb {
+	  public:
 		CSoundDspEAXReverbComponent(BaseEntity &ent) : CBaseSoundDspComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void OnEntitySpawn() override;
@@ -26,10 +22,8 @@ namespace pragma
 	};
 };
 
-class DLLCLIENT CEnvSoundDspEAXReverb
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEnvSoundDspEAXReverb : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

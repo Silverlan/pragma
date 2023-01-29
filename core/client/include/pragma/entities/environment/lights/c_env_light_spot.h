@@ -13,24 +13,19 @@
 #include <pragma/entities/environment/lights/env_light_spot.h>
 #include <pragma/util/mvpbase.h>
 
-namespace pragma
-{
-	class DLLCLIENT CLightSpotComponent final
-		: public BaseEnvLightSpotComponent,
-		public CBaseNetComponent,
-		public MVPBias<1>
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CLightSpotComponent final : public BaseEnvLightSpotComponent, public CBaseNetComponent, public MVPBias<1> {
+	  public:
 		CLightSpotComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void SetConeStartOffset(float offset) override;
 		virtual void OnEntitySpawn() override;
-	protected:
+	  protected:
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
+		virtual bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		virtual void SetFieldAngleComponent(BaseFieldAngleComponent &c) override;
 		void SetShadowDirty();
 
@@ -41,10 +36,8 @@ namespace pragma
 	};
 };
 
-class DLLCLIENT CEnvLightSpot
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEnvLightSpot : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

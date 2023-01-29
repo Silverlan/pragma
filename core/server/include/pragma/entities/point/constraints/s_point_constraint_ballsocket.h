@@ -12,24 +12,18 @@
 #include "pragma/entities/point/constraints/point_constraint_ballsocket.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLSERVER SPointConstraintBallSocketComponent final
-		: public BasePointConstraintBallSocketComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SPointConstraintBallSocketComponent final : public BasePointConstraintBallSocketComponent, public SBaseNetComponent {
+	  public:
 		using BasePointConstraintBallSocketComponent::BasePointConstraintBallSocketComponent;
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLSERVER PointConstraintBallSocket
-	: public SBaseEntity
-{
-public:
+class DLLSERVER PointConstraintBallSocket : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

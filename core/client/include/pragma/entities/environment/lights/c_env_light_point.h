@@ -15,23 +15,20 @@
 #include <mathutil/plane.hpp>
 #include <pragma/util/mvpbase.h>
 
-namespace pragma
-{
-	class DLLCLIENT CLightPointComponent final
-		: public BaseEnvLightPointComponent,public MVPBias<6>
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CLightPointComponent final : public BaseEnvLightPointComponent, public MVPBias<6> {
+	  public:
 		CLightPointComponent(BaseEntity &ent) : BaseEnvLightPointComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		const std::array<std::vector<umath::Plane>,6u> &GetFrustumPlanes() const;
+		const std::array<std::vector<umath::Plane>, 6u> &GetFrustumPlanes() const;
 		const std::vector<umath::Plane> &GetFrustumPlanes(CubeMapSide side) const;
-	protected:
+	  protected:
 		void UpdateProjectionMatrix();
 		void UpdateFrustumPlanes();
 		bool m_bSkipMatrixUpdate = false;
 		// Frustum planes for each side of the cubemap
-		std::array<std::vector<umath::Plane>,6u> m_frustumPlanes = {};
+		std::array<std::vector<umath::Plane>, 6u> m_frustumPlanes = {};
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void UpdateTransformationMatrix(unsigned int j) override;
 		void SetShadowDirty();
@@ -39,10 +36,8 @@ namespace pragma
 	};
 };
 
-class DLLCLIENT CEnvLightPoint
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEnvLightPoint : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

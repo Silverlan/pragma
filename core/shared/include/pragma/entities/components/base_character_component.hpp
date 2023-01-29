@@ -19,60 +19,45 @@
 #include <sharedutils/property/util_property_vector.h>
 
 struct AnimationEvent;
-namespace pragma
-{
-	struct DLLNETWORK CEOnDeployWeapon
-		: public ComponentEvent
-	{
+namespace pragma {
+	struct DLLNETWORK CEOnDeployWeapon : public ComponentEvent {
 		CEOnDeployWeapon(BaseEntity &entWeapon);
 		virtual void PushArguments(lua_State *l) override;
 		BaseEntity &weapon;
 	};
-	struct DLLNETWORK CEOnSetActiveWeapon
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CEOnSetActiveWeapon : public ComponentEvent {
 		CEOnSetActiveWeapon(BaseEntity *entWeapon);
 		virtual void PushArguments(lua_State *l) override;
 		BaseEntity *weapon;
 	};
-	struct DLLNETWORK CEOnSetCharacterOrientation
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CEOnSetCharacterOrientation : public ComponentEvent {
 		CEOnSetCharacterOrientation(const Vector3 &up);
 		virtual void PushArguments(lua_State *l) override;
 		const Vector3 &up;
 	};
-	struct DLLNETWORK CECalcMovementSpeed
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CECalcMovementSpeed : public ComponentEvent {
 		CECalcMovementSpeed();
 		virtual void PushArguments(lua_State *l) override;
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua_State *l) override;
 		Vector2 speed = {};
 	};
-	struct DLLNETWORK CECalcAirMovementModifier
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CECalcAirMovementModifier : public ComponentEvent {
 		CECalcAirMovementModifier();
 		virtual void PushArguments(lua_State *l) override;
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua_State *l) override;
 		float airMovementModifier = 0.f;
 	};
-	struct DLLNETWORK CECalcMovementAcceleration
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CECalcMovementAcceleration : public ComponentEvent {
 		CECalcMovementAcceleration();
 		virtual void PushArguments(lua_State *l) override;
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua_State *l) override;
 		float acceleration = 0.f;
 	};
-	struct DLLNETWORK CECalcMovementDirection
-		: public ComponentEvent
-	{
-		CECalcMovementDirection(const Vector3 &forward,const Vector3 &right);
+	struct DLLNETWORK CECalcMovementDirection : public ComponentEvent {
+		CECalcMovementDirection(const Vector3 &forward, const Vector3 &right);
 		virtual void PushArguments(lua_State *l) override;
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua_State *l) override;
@@ -80,26 +65,20 @@ namespace pragma
 		const Vector3 &right;
 		Vector3 direction = {};
 	};
-	struct DLLNETWORK CEIsMoving
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CEIsMoving : public ComponentEvent {
 		CEIsMoving();
 		virtual void PushArguments(lua_State *l) override;
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua_State *l) override;
 		bool moving = false;
 	};
-	struct DLLNETWORK CEViewRotation
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CEViewRotation : public ComponentEvent {
 		CEViewRotation(const Quat &rotation);
 		virtual void PushArguments(lua_State *l) override;
 		const Quat &rotation;
 	};
-	class DLLNETWORK BaseCharacterComponent
-		: public BaseActorComponent
-	{
-	public:
+	class DLLNETWORK BaseCharacterComponent : public BaseActorComponent {
+	  public:
 		static ComponentEventId EVENT_ON_FOOT_STEP;
 		static ComponentEventId EVENT_ON_CHARACTER_ORIENTATION_CHANGED;
 		static ComponentEventId EVENT_ON_DEPLOY_WEAPON;
@@ -112,17 +91,13 @@ namespace pragma
 		static ComponentEventId EVENT_IS_MOVING;
 		static ComponentEventId EVENT_HANDLE_VIEW_ROTATION;
 		static ComponentEventId EVENT_ON_JUMP;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		//
-		enum class FootType : uint8_t
-		{
-			Left = 0,
-			Right
-		};
-		
+		enum class FootType : uint8_t { Left = 0, Right };
+
 		BaseCharacterComponent(BaseEntity &ent);
-		virtual ~BaseCharacterComponent()=default;
+		virtual ~BaseCharacterComponent() = default;
 		virtual void FootStep(FootType foot);
 		virtual Vector3 GetEyePosition() const;
 		virtual Vector3 GetShootPosition() const;
@@ -132,14 +107,14 @@ namespace pragma
 		void NormalizeViewOrientation(Quat &inOutRot);
 		const Quat &NormalizeViewOrientation();
 		virtual void Initialize() override;
-		TraceData GetAimTraceData(std::optional<float> maxDist={}) const;
+		TraceData GetAimTraceData(std::optional<float> maxDist = {}) const;
 		EulerAngles GetViewAngles() const;
 		void SetViewAngles(const EulerAngles &ang);
 		Vector3 GetViewForward() const;
 		Vector3 GetViewRight() const;
 		Vector3 GetViewUp() const;
-		void GetViewOrientation(Vector3 *forward,Vector3 *right,Vector3 *up=nullptr) const;
-		void SetNeckControllers(const std::string &yawController,const std::string &pitchController);
+		void GetViewOrientation(Vector3 *forward, Vector3 *right, Vector3 *up = nullptr) const;
+		void SetNeckControllers(const std::string &yawController, const std::string &pitchController);
 		int32_t GetNeckYawBlendController() const;
 		int32_t GetNeckPitchBlendController() const;
 		const Vector3 &GetMoveVelocity() const;
@@ -164,7 +139,7 @@ namespace pragma
 		const Vector3 &GetUpDirection() const;
 		virtual void SetUpDirection(const Vector3 &direction);
 		// Returns the forward,right and up vectors, depending on the player's up direction
-		void GetOrientationAxes(Vector3 **forward,Vector3 **right,Vector3 **up);
+		void GetOrientationAxes(Vector3 **forward, Vector3 **right, Vector3 **up);
 		// Returns the rotation between the world's up vector and the player's up direction
 		const Quat &GetOrientationAxesRotation() const;
 
@@ -183,12 +158,12 @@ namespace pragma
 		// Ammo
 		UInt16 GetAmmoCount(const std::string &ammoType) const;
 		UInt16 GetAmmoCount(UInt32 ammoType) const;
-		void SetAmmoCount(const std::string &ammoType,UInt16 count);
-		virtual void SetAmmoCount(UInt32 ammoType,UInt16 count);
-		void AddAmmo(const std::string &ammoType,int16_t count);
-		void AddAmmo(UInt32 ammoType,int16_t count);
-		void RemoveAmmo(const std::string &ammoType,int16_t count);
-		void RemoveAmmo(UInt32 ammoType,int16_t count);
+		void SetAmmoCount(const std::string &ammoType, UInt16 count);
+		virtual void SetAmmoCount(UInt32 ammoType, UInt16 count);
+		void AddAmmo(const std::string &ammoType, int16_t count);
+		void AddAmmo(UInt32 ammoType, int16_t count);
+		void RemoveAmmo(const std::string &ammoType, int16_t count);
+		void RemoveAmmo(UInt32 ammoType, int16_t count);
 		//
 
 		// Weapons
@@ -197,8 +172,8 @@ namespace pragma
 		BaseEntity *GiveWeapon(std::string className);
 		BaseEntity *GetActiveWeapon();
 		BaseEntity *GetWeapon(std::string className);
-		std::vector<BaseEntity*> GetWeapons(std::string className);
-		void GetWeapons(std::string className,std::vector<BaseEntity*> &weapons);
+		std::vector<BaseEntity *> GetWeapons(std::string className);
+		void GetWeapons(std::string className, std::vector<BaseEntity *> &weapons);
 		void RemoveWeapon(std::string className);
 		virtual std::vector<EntityHandle>::iterator RemoveWeapon(BaseEntity &ent);
 		virtual void RemoveWeapons();
@@ -218,9 +193,9 @@ namespace pragma
 		float GetMovementBlendScale() const;
 
 		// Unsticks the character from ground (disabling friction and also making sure gravity is applied) for the specified duration.
-		void DetachFromGround(float duration=0.1f);
+		void DetachFromGround(float duration = 0.1f);
 
-		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
 		bool Jump();
 		bool Jump(const Vector3 &velocity);
@@ -228,13 +203,13 @@ namespace pragma
 		const util::PFloatProperty &GetJumpPowerProperty() const;
 		void SetJumpPower(float power);
 		bool CanJump() const;
-	protected:
+	  protected:
 		pragma::NetEventId m_netEvSetActiveWeapon = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvSetAmmoCount = pragma::INVALID_NET_EVENT;
 
 		util::PVector3Property m_upDirection = nullptr;
-		Vector3 m_axForward = {0.f,0.f,1.f};
-		Vector3 m_axRight = {-1.f,0.f,0.f};
+		Vector3 m_axForward = {0.f, 0.f, 1.f};
+		Vector3 m_axRight = {-1.f, 0.f, 0.f};
 		Quat m_axRot = uquat::identity();
 		float m_turnSpeed = 300.f;
 		float m_tDetachFromGround = 0.f;
@@ -246,7 +221,7 @@ namespace pragma
 		Vector3 m_moveVelocity = {};
 		std::vector<EntityHandle> m_weapons;
 		EntityHandle m_weaponActive;
-		std::unordered_map<UInt32,UInt16> m_ammoCount;
+		std::unordered_map<UInt32, UInt16> m_ammoCount;
 
 		int32_t m_yawController = -1;
 		int32_t m_pitchController = -1;
@@ -258,35 +233,29 @@ namespace pragma
 		virtual void InitializePhysObj(PhysObj *phys);
 
 		bool HandleAnimationEvent(const AnimationEvent &ev);
-		virtual void PlayFootStepSound(FootType foot,const SurfaceMaterial &surfMat,float scale);
+		virtual void PlayFootStepSound(FootType foot, const SurfaceMaterial &surfMat, float scale);
 		// Calculates the forward and sideways movement speed
 		virtual Vector2 CalcMovementSpeed() const;
 		virtual float CalcAirMovementModifier() const;
 		virtual float CalcMovementAcceleration() const;
-		virtual Vector3 CalcMovementDirection(const Vector3 &forward,const Vector3 &right) const;
+		virtual Vector3 CalcMovementDirection(const Vector3 &forward, const Vector3 &right) const;
 		void UpdateNeckControllers();
 
 		virtual void UpdateOrientation();
 	};
-	struct DLLNETWORK CEPlayFootstepSound
-		: public ComponentEvent
-	{
-		CEPlayFootstepSound(BaseCharacterComponent::FootType footType,const SurfaceMaterial &surfaceMaterial,float scale);
+	struct DLLNETWORK CEPlayFootstepSound : public ComponentEvent {
+		CEPlayFootstepSound(BaseCharacterComponent::FootType footType, const SurfaceMaterial &surfaceMaterial, float scale);
 		virtual void PushArguments(lua_State *l) override;
 		BaseCharacterComponent::FootType footType;
 		const SurfaceMaterial &surfaceMaterial;
 		float scale;
 	};
-	struct DLLNETWORK CEOnFootStep
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CEOnFootStep : public ComponentEvent {
 		CEOnFootStep(BaseCharacterComponent::FootType footType);
 		virtual void PushArguments(lua_State *l) override;
 		BaseCharacterComponent::FootType footType;
 	};
-	struct DLLNETWORK CEOnJump
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CEOnJump : public ComponentEvent {
 		CEOnJump(const Vector3 &velocity);
 		virtual void PushArguments(lua_State *l) override;
 		const Vector3 &velocity;

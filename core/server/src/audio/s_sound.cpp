@@ -25,7 +25,7 @@
 #include <pragma/logging.hpp>
 #include <util_sound.hpp>
 
-void ServerState::SendSoundSourceToClient(SALSound &sound,bool sendFullUpdate,const pragma::networking::ClientRecipientFilter *rf)
+void ServerState::SendSoundSourceToClient(SALSound &sound, bool sendFullUpdate, const pragma::networking::ClientRecipientFilter *rf)
 {
 	NetPacket p;
 	p->WriteString(sound.GetSoundName());
@@ -33,8 +33,7 @@ void ServerState::SendSoundSourceToClient(SALSound &sound,bool sendFullUpdate,co
 	p->Write<unsigned int>(sound.GetIndex());
 	p->Write<ALCreateFlags>(sound.GetCreateFlags());
 	p->Write<bool>(sendFullUpdate);
-	if(sendFullUpdate)
-	{
+	if(sendFullUpdate) {
 		p->Write<ALState>(sound.GetState());
 		p->Write<float>(sound.GetOffset());
 		p->Write<float>(sound.GetPitch());
@@ -55,11 +54,10 @@ void ServerState::SendSoundSourceToClient(SALSound &sound,bool sendFullUpdate,co
 		p->Write<float>(sound.GetOuterConeGain());
 		p->Write<float>(sound.GetOuterConeGainHF());
 		p->Write<uint32_t>(sound.GetFlags());
-		
+
 		auto hasRange = sound.HasRange();
 		p->Write<bool>(hasRange);
-		if(hasRange)
-		{
+		if(hasRange) {
 			auto range = sound.GetRange();
 			p->Write<float>(range.first);
 			p->Write<float>(range.second);
@@ -89,36 +87,32 @@ void ServerState::SendSoundSourceToClient(SALSound &sound,bool sendFullUpdate,co
 		p->Write<float>(directFilter.gainHF);
 		p->Write<float>(directFilter.gainLF);
 
-		nwm::write_unique_entity(p,sound.GetSource());
+		nwm::write_unique_entity(p, sound.GetSource());
 	}
 	if(rf != nullptr)
-		SendPacket("snd_create",p,pragma::networking::Protocol::FastUnreliable,*rf);
+		SendPacket("snd_create", p, pragma::networking::Protocol::FastUnreliable, *rf);
 	else
-		SendPacket("snd_create",p,pragma::networking::Protocol::FastUnreliable);
+		SendPacket("snd_create", p, pragma::networking::Protocol::FastUnreliable);
 }
-std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd,ALSoundType type,ALCreateFlags flags)
+std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd, ALSoundType type, ALCreateFlags flags)
 {
-	std::transform(snd.begin(),snd.end(),snd.begin(),::tolower);
+	std::transform(snd.begin(), snd.end(), snd.begin(), ::tolower);
 	snd = FileManager::GetNormalizedPath(snd);
 	if(m_missingSoundCache.find(snd) != m_missingSoundCache.end())
 		return nullptr;
 	SoundScript *script = m_soundScriptManager->FindScript(snd.c_str());
 	float duration = 0.f;
-	if(script == NULL)
-	{
-		sound::get_full_sound_path(snd,true);
+	if(script == NULL) {
+		sound::get_full_sound_path(snd, true);
 		auto it = m_soundsPrecached.find(snd);
-		if(it == m_soundsPrecached.end())
-		{
+		if(it == m_soundsPrecached.end()) {
 			static auto bSkipPrecache = false;
-			if(bSkipPrecache == false)
-			{
-				Con::cwar<<"Attempted to create unprecached sound '"<<snd<<"'! Precaching now..."<<Con::endl;
-				auto channel = ((flags &ALCreateFlags::Mono) != ALCreateFlags::None) ? ALChannel::Mono : ALChannel::Auto;
-				if(PrecacheSound(snd,channel) == true)
-				{
+			if(bSkipPrecache == false) {
+				Con::cwar << "Attempted to create unprecached sound '" << snd << "'! Precaching now..." << Con::endl;
+				auto channel = ((flags & ALCreateFlags::Mono) != ALCreateFlags::None) ? ALChannel::Mono : ALChannel::Auto;
+				if(PrecacheSound(snd, channel) == true) {
 					bSkipPrecache = true;
-					auto r = CreateSound(snd,type,flags);
+					auto r = CreateSound(snd, type, flags);
 					bSkipPrecache = false;
 					return r;
 				}
@@ -126,20 +120,16 @@ std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd,ALSoundType ty
 			m_missingSoundCache.insert(snd);
 			return std::shared_ptr<ALSound>();
 		}
-		else
-		{
+		else {
 			auto &inf = it->second;
-			if((flags &ALCreateFlags::Mono) != ALCreateFlags::None && inf->mono == false)
-			{
+			if((flags & ALCreateFlags::Mono) != ALCreateFlags::None && inf->mono == false) {
 				static auto bSkipPrecache = false;
-				if(bSkipPrecache == false)
-				{
-					Con::cwar<<"Attempted to create sound '"<<snd<<"' as unprecached mono! Precaching now..."<<Con::endl;
-					auto channel = ((flags &ALCreateFlags::Mono) != ALCreateFlags::None) ? ALChannel::Mono : ALChannel::Auto;
-					if(PrecacheSound(snd,channel) == true)
-					{
+				if(bSkipPrecache == false) {
+					Con::cwar << "Attempted to create sound '" << snd << "' as unprecached mono! Precaching now..." << Con::endl;
+					auto channel = ((flags & ALCreateFlags::Mono) != ALCreateFlags::None) ? ALChannel::Mono : ALChannel::Auto;
+					if(PrecacheSound(snd, channel) == true) {
 						bSkipPrecache = true;
-						auto r = CreateSound(snd,type,flags);
+						auto r = CreateSound(snd, type, flags);
 						bSkipPrecache = false;
 						return r;
 					}
@@ -151,45 +141,43 @@ std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd,ALSoundType ty
 		duration = it->second->duration;
 	}
 	unsigned int idx;
-	if(!m_alsoundIndex.empty())
-	{
+	if(!m_alsoundIndex.empty()) {
 		idx = m_alsoundIndex[0];
 		m_alsoundIndex.erase(m_alsoundIndex.begin());
 	}
-	else
-	{
+	else {
 		idx = m_alsoundID;
 		m_alsoundID++;
 	}
 	ALSound *as = NULL;
 	std::shared_ptr<ALSound> pAs;
 	if(script == NULL)
-		as = new SALSound(this,idx,duration,snd,flags);
+		as = new SALSound(this, idx, duration, snd, flags);
 	else
-		as = new SALSoundScript(this,idx,script,this,snd,flags);
-	pAs = std::shared_ptr<ALSound>(as,[](ALSound *snd) {snd->OnRelease(); delete snd;});
+		as = new SALSoundScript(this, idx, script, this, snd, flags);
+	pAs = std::shared_ptr<ALSound>(as, [](ALSound *snd) {
+		snd->OnRelease();
+		delete snd;
+	});
 	m_sounds.push_back(*as);
 	m_serverSounds.push_back(pAs);
 	as->SetType(type);
-	as->AddCallback("OnDestroyed",FunctionCallback<void>::Create([this,as]() {
-		auto it = std::find_if(m_sounds.begin(),m_sounds.end(),[as](const ALSoundRef &sndOther) {
-			return (&sndOther.get() == as) ? true : false;
-		});
+	as->AddCallback("OnDestroyed", FunctionCallback<void>::Create([this, as]() {
+		auto it = std::find_if(m_sounds.begin(), m_sounds.end(), [as](const ALSoundRef &sndOther) { return (&sndOther.get() == as) ? true : false; });
 		if(it == m_sounds.end())
 			return;
-		auto idx = it -m_sounds.begin();
+		auto idx = it - m_sounds.begin();
 		m_sounds.erase(it);
-		m_serverSounds.erase(m_serverSounds.begin() +idx);
+		m_serverSounds.erase(m_serverSounds.begin() + idx);
 	}));
 	as->Initialize();
 	Game *game = GetGameState();
-	if(game != NULL)
-	{
-		game->CallCallbacks<void,ALSound*>("OnSoundCreated",as);
-		game->CallLuaCallbacks<void,std::shared_ptr<ALSound>>("OnSoundCreated",pAs);
+	if(game != NULL) {
+		game->CallCallbacks<void, ALSound *>("OnSoundCreated", as);
+		game->CallLuaCallbacks<void, std::shared_ptr<ALSound>>("OnSoundCreated", pAs);
 	}
-	if(umath::is_flag_set(flags,ALCreateFlags::DontTransmit) == false)
-		SendSoundSourceToClient(dynamic_cast<SALSound&>(*pAs),false);
+	if(umath::is_flag_set(flags, ALCreateFlags::DontTransmit) == false)
+		SendSoundSourceToClient(dynamic_cast<SALSound &>(*pAs), false);
 	return pAs;
 }
 
@@ -203,58 +191,50 @@ void ServerState::StopSounds() {}
 
 void ServerState::StopSound(std::shared_ptr<ALSound> pSnd) {}
 
-bool ServerState::PrecacheSound(std::string snd,ALChannel mode)
+bool ServerState::PrecacheSound(std::string snd, ALChannel mode)
 {
-	std::transform(snd.begin(),snd.end(),snd.begin(),::tolower);
+	std::transform(snd.begin(), snd.end(), snd.begin(), ::tolower);
 	snd = FileManager::GetCanonicalizedPath(snd);
-	sound::get_full_sound_path(snd,true);
+	sound::get_full_sound_path(snd, true);
 
 	SoundCacheInfo *inf = NULL;
 	auto it = m_soundsPrecached.find(snd);
-	if(it != m_soundsPrecached.end())
-	{
+	if(it != m_soundsPrecached.end()) {
 		inf = it->second.get();
-		if(mode == ALChannel::Mono)
-		{
+		if(mode == ALChannel::Mono) {
 			if(inf->mono == true)
 				return true;
 		}
-		else if(mode == ALChannel::Both)
-		{
+		else if(mode == ALChannel::Both) {
 			if(inf->mono == true && inf->stereo == true)
 				return true;
 		}
 		else if(mode == ALChannel::Auto && inf->stereo == true)
 			return true;
 	}
-	auto subPath = FileManager::GetCanonicalizedPath("sounds\\" +snd);
-	if(!FileManager::IsFile(subPath))
-	{
+	auto subPath = FileManager::GetCanonicalizedPath("sounds\\" + snd);
+	if(!FileManager::IsFile(subPath)) {
 		auto bPort = false;
 		std::string ext;
-		if(ufile::get_extension(subPath,&ext) == true)
-			bPort = util::port_file(this,subPath);
-		else
-		{
+		if(ufile::get_extension(subPath, &ext) == true)
+			bPort = util::port_file(this, subPath);
+		else {
 			auto audioFormats = engine_info::get_supported_audio_formats();
-			for(auto &extFormat : audioFormats)
-			{
-				auto extPath = subPath +'.' +extFormat;
-				bPort = util::port_file(this,extPath);
+			for(auto &extFormat : audioFormats) {
+				auto extPath = subPath + '.' + extFormat;
+				bPort = util::port_file(this, extPath);
 				if(bPort == true)
 					break;
 			}
 		}
-		if(bPort == false)
-		{
-			spdlog::warn("Unable to precache sound '{}': File not found!",snd);
+		if(bPort == false) {
+			spdlog::warn("Unable to precache sound '{}': File not found!", snd);
 			return false;
 		}
 	}
 	auto duration = 0.f;
-	if(util::sound::get_duration(subPath,duration) == false || duration == 0.f)
-	{
-		spdlog::warn("Unable to precache sound '{}': Invalid format!",snd);
+	if(util::sound::get_duration(subPath, duration) == false || duration == 0.f) {
+		spdlog::warn("Unable to precache sound '{}': Invalid format!", snd);
 		return false;
 	}
 	if(inf == NULL)
@@ -264,12 +244,12 @@ bool ServerState::PrecacheSound(std::string snd,ALChannel mode)
 	if(mode == ALChannel::Auto || mode == ALChannel::Both)
 		inf->stereo = true;
 	inf->duration = duration;
-	m_soundsPrecached.insert(std::unordered_map<std::string,SoundCacheInfo*>::value_type(snd,inf));
+	m_soundsPrecached.insert(std::unordered_map<std::string, SoundCacheInfo *>::value_type(snd, inf));
 	if(m_game != nullptr)
 		GetGameState()->RegisterGameResource(subPath);
 	NetPacket p;
 	p->WriteString(snd);
 	p->Write<uint8_t>(umath::to_integral(mode));
-	SendPacket("snd_precache",p,pragma::networking::Protocol::SlowReliable);
+	SendPacket("snd_precache", p, pragma::networking::Protocol::SlowReliable);
 	return true;
 }

@@ -19,33 +19,30 @@
 
 extern DLLNETWORK Engine *engine;
 
-void nwm::write_vector(NetPacket &packet,const Vector3 &v)
+void nwm::write_vector(NetPacket &packet, const Vector3 &v)
 {
 	packet->Write<float>(v.x);
 	packet->Write<float>(v.y);
 	packet->Write<float>(v.z);
 }
-void nwm::write_angles(NetPacket &packet,const EulerAngles &ang)
+void nwm::write_angles(NetPacket &packet, const EulerAngles &ang)
 {
 	packet->Write<float>(ang.p);
 	packet->Write<float>(ang.y);
 	packet->Write<float>(ang.r);
 }
-void nwm::write_quat(NetPacket &packet,const Quat &rot)
+void nwm::write_quat(NetPacket &packet, const Quat &rot)
 {
 	packet->Write<float>(rot.w);
 	packet->Write<float>(rot.x);
 	packet->Write<float>(rot.y);
 	packet->Write<float>(rot.z);
 }
-void nwm::write_entity(NetPacket &packet,const BaseEntity *ent)
-{
-	packet->Write<unsigned int>((ent != nullptr) ? ent->GetIndex() : (unsigned int)(-1));
-}
-void nwm::write_entity(NetPacket &packet,const EntityHandle &hEnt) {write_entity(packet,hEnt.get());}
+void nwm::write_entity(NetPacket &packet, const BaseEntity *ent) { packet->Write<unsigned int>((ent != nullptr) ? ent->GetIndex() : (unsigned int)(-1)); }
+void nwm::write_entity(NetPacket &packet, const EntityHandle &hEnt) { write_entity(packet, hEnt.get()); }
 Vector3 nwm::read_vector(NetPacket &packet)
 {
-	Vector3 r(0.f,0.f,0.f);
+	Vector3 r(0.f, 0.f, 0.f);
 	r.x = packet->Read<float>();
 	r.y = packet->Read<float>();
 	r.z = packet->Read<float>();
@@ -53,7 +50,7 @@ Vector3 nwm::read_vector(NetPacket &packet)
 }
 EulerAngles nwm::read_angles(NetPacket &packet)
 {
-	EulerAngles ang(0.f,0.f,0.f);
+	EulerAngles ang(0.f, 0.f, 0.f);
 	ang.p = packet->Read<float>();
 	ang.y = packet->Read<float>();
 	ang.r = packet->Read<float>();
@@ -69,12 +66,13 @@ Quat nwm::read_quat(NetPacket &packet)
 	return rot;
 }
 
-static BaseEntity *read_entity(NetPacket &packet,const std::function<void(BaseEntity*)> &onCreated=nullptr,CallbackHandle *hCallback=nullptr)
+static BaseEntity *read_entity(NetPacket &packet, const std::function<void(BaseEntity *)> &onCreated = nullptr, CallbackHandle *hCallback = nullptr)
 {
 	NetworkState *state;
 	if(!packet.IsClient())
 		state = engine->GetServerNetworkState();
-	else state = engine->GetClientState();
+	else
+		state = engine->GetClientState();
 	if(state == nullptr || !state->IsGameActive())
 		return nullptr;
 	auto *game = state->GetGameState();
@@ -82,47 +80,39 @@ static BaseEntity *read_entity(NetPacket &packet,const std::function<void(BaseEn
 	if(idx == std::numeric_limits<uint32_t>::max())
 		return nullptr;
 	auto *ent = game->GetEntity(idx);
-	if(ent != nullptr)
-	{
+	if(ent != nullptr) {
 		if(onCreated != nullptr)
 			onCreated(ent);
 		return ent;
 	}
 	if(onCreated == nullptr)
 		return nullptr;
-	auto cb = FunctionCallback<void,BaseEntity*>::Create(nullptr);
-	cb.get<Callback<void,BaseEntity*>>()->SetFunction(std::bind([onCreated,idx](CallbackHandle hCb,BaseEntity *ent) {
-		if(ent->GetIndex() != idx)
-			return;
-		onCreated(ent);
-		if(hCb.IsValid())
-			hCb.Remove();
-	},cb,std::placeholders::_1));
-	*hCallback = game->AddCallback("OnEntityCreated",cb);
+	auto cb = FunctionCallback<void, BaseEntity *>::Create(nullptr);
+	cb.get<Callback<void, BaseEntity *>>()->SetFunction(std::bind(
+	  [onCreated, idx](CallbackHandle hCb, BaseEntity *ent) {
+		  if(ent->GetIndex() != idx)
+			  return;
+		  onCreated(ent);
+		  if(hCb.IsValid())
+			  hCb.Remove();
+	  },
+	  cb, std::placeholders::_1));
+	*hCallback = game->AddCallback("OnEntityCreated", cb);
 	return nullptr;
 }
-CallbackHandle nwm::read_entity(NetPacket &packet,const std::function<void(BaseEntity*)> &onCreated)
+CallbackHandle nwm::read_entity(NetPacket &packet, const std::function<void(BaseEntity *)> &onCreated)
 {
 	CallbackHandle r;
-	::read_entity(packet,onCreated,&r);
+	::read_entity(packet, onCreated, &r);
 	return r;
 }
-BaseEntity *nwm::read_entity(NetPacket &packet)
-{
-	return ::read_entity(packet);
-}
+BaseEntity *nwm::read_entity(NetPacket &packet) { return ::read_entity(packet); }
 
-void nwm::write_player(NetPacket &packet,const BaseEntity *pl)
-{
-	write_entity(packet,pl);
-}
-void nwm::write_player(NetPacket &packet,const pragma::BasePlayerComponent *plComponent)
-{
-	write_entity(packet,(plComponent != nullptr) ? dynamic_cast<BaseEntity*>(plComponent->GetBasePlayer()) : nullptr);
-}
+void nwm::write_player(NetPacket &packet, const BaseEntity *pl) { write_entity(packet, pl); }
+void nwm::write_player(NetPacket &packet, const pragma::BasePlayerComponent *plComponent) { write_entity(packet, (plComponent != nullptr) ? dynamic_cast<BaseEntity *>(plComponent->GetBasePlayer()) : nullptr); }
 pragma::BasePlayerComponent *nwm::read_player(NetPacket &packet)
 {
-	auto *ent = dynamic_cast<BasePlayer*>(::read_entity(packet));
+	auto *ent = dynamic_cast<BasePlayer *>(::read_entity(packet));
 	if(ent == nullptr)
 		return nullptr;
 	return ent->GetBasePlayerComponent().get();

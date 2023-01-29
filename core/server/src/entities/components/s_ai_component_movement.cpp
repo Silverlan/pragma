@@ -15,25 +15,23 @@ using namespace pragma;
 
 decltype(SAIComponent::s_plDebugAiNav) SAIComponent::s_plDebugAiNav {};
 
-bool SAIComponent::IsMoving() const {return m_moveInfo.moving;}
+bool SAIComponent::IsMoving() const { return m_moveInfo.moving; }
 
 void SAIComponent::OnPathNodeChanged(uint32_t nodeIdx)
 {
 	BaseAIComponent::OnPathNodeChanged(nodeIdx);
-	for(auto &hPl : s_plDebugAiNav)
-	{
+	for(auto &hPl : s_plDebugAiNav) {
 		if(hPl.expired() == false)
 			_debugSendNavInfo(*hPl.get());
 	}
-	CEOnPathNodeChanged evData{nodeIdx};
-	BroadcastEvent(EVENT_ON_PATH_NODE_CHANGED,evData);
+	CEOnPathNodeChanged evData {nodeIdx};
+	BroadcastEvent(EVENT_ON_PATH_NODE_CHANGED, evData);
 }
 
 void SAIComponent::OnPathChanged()
 {
 	BaseAIComponent::OnPathChanged();
-	for(auto &hPl : s_plDebugAiNav)
-	{
+	for(auto &hPl : s_plDebugAiNav) {
 		if(hPl.expired() == false)
 			_debugSendNavInfo(*hPl.get());
 	}
@@ -48,19 +46,16 @@ void SAIComponent::OnPrePhysicsSimulate()
 		return;
 	pragma::SAIComponent::AIAnimationInfo info {};
 	info.SetPlayAsSchedule(false);
-	PlayActivity(m_moveInfo.moveActivity,info);
+	PlayActivity(m_moveInfo.moveActivity, info);
 
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
-	if(pTrComponent != nullptr && pVelComponent.valid())
-	{
+	if(pTrComponent != nullptr && pVelComponent.valid()) {
 		auto &vel = pVelComponent->GetVelocity();
-		if(uvec::length_sqr(vel) > 1.f)
-		{
-			auto faceTarget = (m_moveInfo.faceTarget != nullptr) ? *m_moveInfo.faceTarget : (pTrComponent->GetPosition() +m_moveInfo.moveDir *1024.f);
-			if(uvec::cmp(faceTarget,uvec::ORIGIN) == false)
-				TurnStep(faceTarget,m_moveInfo.turnSpeed.get());
+		if(uvec::length_sqr(vel) > 1.f) {
+			auto faceTarget = (m_moveInfo.faceTarget != nullptr) ? *m_moveInfo.faceTarget : (pTrComponent->GetPosition() + m_moveInfo.moveDir * 1024.f);
+			if(uvec::cmp(faceTarget, uvec::ORIGIN) == false)
+				TurnStep(faceTarget, m_moveInfo.turnSpeed.get());
 		}
 	}
 }
-

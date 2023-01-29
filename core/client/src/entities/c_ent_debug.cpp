@@ -15,14 +15,14 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(debug_text,CEntDebugText);
-LINK_ENTITY_TO_CLASS(debug_point,CEntDebugPoint);
-LINK_ENTITY_TO_CLASS(debug_line,CEntDebugLine);
-LINK_ENTITY_TO_CLASS(debug_box,CEntDebugBox);
-LINK_ENTITY_TO_CLASS(debug_sphere,CEntDebugSphere);
-LINK_ENTITY_TO_CLASS(debug_cone,CEntDebugCone);
-LINK_ENTITY_TO_CLASS(debug_cylinder,CEntDebugCylinder);
-LINK_ENTITY_TO_CLASS(debug_plane,CEntDebugPlane);
+LINK_ENTITY_TO_CLASS(debug_text, CEntDebugText);
+LINK_ENTITY_TO_CLASS(debug_point, CEntDebugPoint);
+LINK_ENTITY_TO_CLASS(debug_line, CEntDebugLine);
+LINK_ENTITY_TO_CLASS(debug_box, CEntDebugBox);
+LINK_ENTITY_TO_CLASS(debug_sphere, CEntDebugSphere);
+LINK_ENTITY_TO_CLASS(debug_cone, CEntDebugCone);
+LINK_ENTITY_TO_CLASS(debug_cylinder, CEntDebugCylinder);
+LINK_ENTITY_TO_CLASS(debug_plane, CEntDebugPlane);
 
 void CEntDebugText::Initialize()
 {

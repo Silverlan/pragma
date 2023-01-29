@@ -11,26 +11,20 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/baseskybox.h>
 
-namespace pragma
-{
-	class DLLSERVER SSkyboxComponent final
-		: public BaseSkyboxComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SSkyboxComponent final : public BaseSkyboxComponent, public SBaseNetComponent {
+	  public:
 		SSkyboxComponent(BaseEntity &ent) : BaseSkyboxComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void SetSkyAngles(const EulerAngles &ang) override;
 
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 };
 
-class DLLSERVER Skybox
-	: public SBaseEntity
-{
-public:
+class DLLSERVER Skybox : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

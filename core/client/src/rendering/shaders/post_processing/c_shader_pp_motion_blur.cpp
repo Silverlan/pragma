@@ -15,31 +15,17 @@
 using namespace pragma;
 
 decltype(ShaderPPMotionBlur::DESCRIPTOR_SET_TEXTURE) ShaderPPMotionBlur::DESCRIPTOR_SET_TEXTURE = {ShaderPPBase::DESCRIPTOR_SET_TEXTURE};
-decltype(ShaderPPMotionBlur::DESCRIPTOR_SET_TEXTURE_VELOCITY) ShaderPPMotionBlur::DESCRIPTOR_SET_TEXTURE_VELOCITY = {
-	{
-		prosper::DescriptorSetInfo::Binding { // Velocity Texture
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		}
-	}
-};
+decltype(ShaderPPMotionBlur::DESCRIPTOR_SET_TEXTURE_VELOCITY) ShaderPPMotionBlur::DESCRIPTOR_SET_TEXTURE_VELOCITY = {{prosper::DescriptorSetInfo::Binding {// Velocity Texture
+  prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
 
-ShaderPPMotionBlur::ShaderPPMotionBlur(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderPPBase(context,identifier,"screen/fs_motion_blur")
+ShaderPPMotionBlur::ShaderPPMotionBlur(prosper::IPrContext &context, const std::string &identifier) : ShaderPPBase(context, identifier, "screen/fs_motion_blur") { SetBaseShader<prosper::ShaderCopyImage>(); }
+void ShaderPPMotionBlur::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	SetBaseShader<prosper::ShaderCopyImage>();
+	ShaderPPBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_TEXTURE_VELOCITY);
+	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 }
-void ShaderPPMotionBlur::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+bool ShaderPPMotionBlur::RecordDraw(prosper::ShaderBindState &bindState, const PushConstants &pushConstants, prosper::IDescriptorSet &descSetTexture, prosper::IDescriptorSet &descSetTextureVelocity) const
 {
-	ShaderPPBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_TEXTURE_VELOCITY);
-	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
-}
-bool ShaderPPMotionBlur::RecordDraw(
-	prosper::ShaderBindState &bindState,const PushConstants &pushConstants,
-	prosper::IDescriptorSet &descSetTexture,prosper::IDescriptorSet &descSetTextureVelocity
-) const
-{
-	return RecordBindDescriptorSets(bindState,{&descSetTextureVelocity},DESCRIPTOR_SET_TEXTURE_VELOCITY.setIndex) &&
-		RecordPushConstants(bindState,pushConstants) && ShaderPPBase::RecordDraw(bindState,descSetTexture);
+	return RecordBindDescriptorSets(bindState, {&descSetTextureVelocity}, DESCRIPTOR_SET_TEXTURE_VELOCITY.setIndex) && RecordPushConstants(bindState, pushConstants) && ShaderPPBase::RecordDraw(bindState, descSetTexture);
 }

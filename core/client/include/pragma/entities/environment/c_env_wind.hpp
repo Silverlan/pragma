@@ -13,24 +13,18 @@
 #include "pragma/entities/environment/env_wind.hpp"
 #include "pragma/entities/components/c_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLCLIENT CWindComponent final
-		: public BaseEnvWindComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CWindComponent final : public BaseEnvWindComponent, public CBaseNetComponent {
+	  public:
 		CWindComponent(BaseEntity &ent) : BaseEnvWindComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 };
 
-class DLLCLIENT CEnvWind
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEnvWind : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

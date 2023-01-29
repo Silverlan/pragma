@@ -11,14 +11,12 @@
 #include "pragma/physics/raycallback/physraycallbackfilter.hpp"
 #include "pragma/lua/luafunction.h"
 
-class DLLNETWORK BasePhysRayCallbackFilterLuaFunction
-	: public BasePhysRayCallbackFilter
-{
-protected:
+class DLLNETWORK BasePhysRayCallbackFilterLuaFunction : public BasePhysRayCallbackFilter {
+  protected:
 	LuaFunction m_filter;
-public:
-	BasePhysRayCallbackFilterLuaFunction(const LuaFunction &filter,FTRACE flags,CollisionMask group,CollisionMask mask);
-	virtual bool ShouldPass(BaseEntity *ent,PhysObj *phys,pragma::physics::ICollisionObject *obj) override;
+  public:
+	BasePhysRayCallbackFilterLuaFunction(const LuaFunction &filter, FTRACE flags, CollisionMask group, CollisionMask mask);
+	virtual bool ShouldPass(BaseEntity *ent, PhysObj *phys, pragma::physics::ICollisionObject *obj) override;
 };
 
 #endif

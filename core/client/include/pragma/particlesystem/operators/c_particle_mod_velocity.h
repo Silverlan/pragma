@@ -11,15 +11,13 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/particlesystem/c_particlemodifier.h"
 
-class DLLCLIENT CParticleOperatorVelocity
-	: public CParticleOperator
-{
-private:
+class DLLCLIENT CParticleOperatorVelocity : public CParticleOperator {
+  private:
 	Vector3 m_velocity = {};
-public:
-	CParticleOperatorVelocity()=default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
-	virtual void Simulate(CParticle &particle,double tDelta,float strength) override;
+  public:
+	CParticleOperatorVelocity() = default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
 	float GetSpeed() const;
 };
 

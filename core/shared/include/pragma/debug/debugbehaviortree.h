@@ -12,26 +12,10 @@
 #include <vector>
 #include <memory>
 
-struct DLLNETWORK DebugBehaviorTreeNode
-{
-	enum class DLLNETWORK State : uint32_t
-	{
-		Initial = std::numeric_limits<std::underlying_type_t<State>>::max(),
-		Invalid = Initial -1,
-		Pending = 0,
-		Failed,
-		Succeeded
-	};
-	enum class DLLNETWORK BehaviorNodeType : uint32_t
-	{
-		Selector = 0,
-		Sequence
-	};
-	enum class DLLNETWORK SelectorType : uint32_t
-	{
-		Sequential = 0,
-		RandomShuffle
-	};
+struct DLLNETWORK DebugBehaviorTreeNode {
+	enum class DLLNETWORK State : uint32_t { Initial = std::numeric_limits<std::underlying_type_t<State>>::max(), Invalid = Initial - 1, Pending = 0, Failed, Succeeded };
+	enum class DLLNETWORK BehaviorNodeType : uint32_t { Selector = 0, Sequence };
+	enum class DLLNETWORK SelectorType : uint32_t { Sequential = 0, RandomShuffle };
 	std::string name;
 	BehaviorNodeType nodeType = BehaviorNodeType::Selector;
 	SelectorType selectorType = SelectorType::Sequential;
@@ -44,7 +28,7 @@ struct DLLNETWORK DebugBehaviorTreeNode
 	std::vector<std::shared_ptr<DebugBehaviorTreeNode>> children;
 };
 
-DLLNETWORK bool operator==(const DebugBehaviorTreeNode &a,const DebugBehaviorTreeNode &b);
-DLLNETWORK bool operator!=(const DebugBehaviorTreeNode &a,const DebugBehaviorTreeNode &b);
+DLLNETWORK bool operator==(const DebugBehaviorTreeNode &a, const DebugBehaviorTreeNode &b);
+DLLNETWORK bool operator!=(const DebugBehaviorTreeNode &a, const DebugBehaviorTreeNode &b);
 
 #endif

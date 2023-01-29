@@ -12,73 +12,57 @@
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 
-class DLLCLIENT CEntDebugText
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEntDebugText : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-class DLLCLIENT CEntDebugPoint
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEntDebugPoint : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-class DLLCLIENT CEntDebugLine
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEntDebugLine : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-class DLLCLIENT CEntDebugBox
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEntDebugBox : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-class DLLCLIENT CEntDebugSphere
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEntDebugSphere : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-class DLLCLIENT CEntDebugCone
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEntDebugCone : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-class DLLCLIENT CEntDebugCylinder
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEntDebugCylinder : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 
 ////////////////
 
-class DLLCLIENT CEntDebugPlane
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEntDebugPlane : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

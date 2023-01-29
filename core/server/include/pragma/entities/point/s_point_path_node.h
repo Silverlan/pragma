@@ -12,21 +12,16 @@
 #include "pragma/entities/components/basepointpathnode.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLSERVER SPathNodeComponent final
-		: public BasePointPathNodeComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SPathNodeComponent final : public BasePointPathNodeComponent {
+	  public:
 		SPathNodeComponent(BaseEntity &ent) : BasePointPathNodeComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLSERVER PointPathNode
-	: public SBaseEntity
-{
-public:
+class DLLSERVER PointPathNode : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

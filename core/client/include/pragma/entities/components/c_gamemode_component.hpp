@@ -12,21 +12,16 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_gamemode_component.hpp>
 
-namespace pragma
-{
-	class DLLCLIENT CGamemodeComponent final
-		: public BaseGamemodeComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CGamemodeComponent final : public BaseGamemodeComponent {
+	  public:
 		CGamemodeComponent(BaseEntity &ent) : BaseGamemodeComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLCLIENT CGamemode
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CGamemode : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

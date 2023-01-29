@@ -12,26 +12,24 @@
 #include "pragma/gui/witransformable.h"
 #include <sharedutils/util_utf8.hpp>
 
-class DLLCLIENT WIFrame
-	: public WITransformable
-{
-public:
+class DLLCLIENT WIFrame : public WITransformable {
+  public:
 	WIFrame();
 	virtual ~WIFrame() override;
 	virtual void Initialize() override;
-	virtual void SetSize(int x,int y) override;
+	virtual void SetSize(int x, int y) override;
 	WIBase *GetContents();
 	using WITransformable::SetSize;
 	void SetTitle(std::string title);
 	util::Utf8String GetTitle() const;
 	void SetCloseButtonEnabled(bool b);
 	void SetDetachButtonEnabled(bool b);
-	virtual util::EventReply MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
+	virtual util::EventReply MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) override;
 
 	void Detach();
 	void Reattach();
 	bool IsDetached() const;
-protected:
+  protected:
 	WIHandle m_hBg;
 	WIHandle m_hTitle;
 	WIHandle m_hTitleBar;

@@ -29,9 +29,7 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 
-WIMainMenuNewGame::WIMainMenuNewGame()
-	: WIMainMenuBase()
-{}
+WIMainMenuNewGame::WIMainMenuNewGame() : WIMainMenuBase() {}
 
 WIMainMenuNewGame::~WIMainMenuNewGame()
 {
@@ -39,53 +37,48 @@ WIMainMenuNewGame::~WIMainMenuNewGame()
 		m_cbMapListReload.Remove();
 }
 
-void WIMainMenuNewGame::OnStartGame(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier)
+void WIMainMenuNewGame::OnStartGame(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier)
 {
 	if(button != GLFW::MouseButton::Left || state != GLFW::KeyState::Press)
 		return;
-	auto *pOptionsList = static_cast<WIOptionsList*>(m_hControlSettings.get());
+	auto *pOptionsList = static_cast<WIOptionsList *>(m_hControlSettings.get());
 	std::string map;
 	util::Utf8String serverName;
 	std::string gameMode;
 	util::Utf8String rconPassword;
 	UInt32 maxPlayers = 1;
-	if(m_hMapList.IsValid())
-	{
-		auto *pMap = static_cast<WIDropDownMenu*>(m_hMapList.get());
+	if(m_hMapList.IsValid()) {
+		auto *pMap = static_cast<WIDropDownMenu *>(m_hMapList.get());
 		map = pMap->GetValue();
 	}
-	if(m_hServerName.IsValid())
-	{
-		auto *pServerName = static_cast<WITextEntry*>(m_hServerName.get());
+	if(m_hServerName.IsValid()) {
+		auto *pServerName = static_cast<WITextEntry *>(m_hServerName.get());
 		serverName = pServerName->GetText().to_str();
 	}
-	if(m_hGameMode.IsValid())
-	{
-		auto *pGameMode = static_cast<WIDropDownMenu*>(m_hGameMode.get());
+	if(m_hGameMode.IsValid()) {
+		auto *pGameMode = static_cast<WIDropDownMenu *>(m_hGameMode.get());
 		gameMode = pGameMode->GetText().cpp_str();
 	}
-	if(m_hRconPassword.IsValid())
-	{
-		auto *pRconPassword = static_cast<WITextEntry*>(m_hRconPassword.get());
+	if(m_hRconPassword.IsValid()) {
+		auto *pRconPassword = static_cast<WITextEntry *>(m_hRconPassword.get());
 		rconPassword = pRconPassword->GetText().to_str();
 	}
-	if(m_hMaxPlayers.IsValid())
-	{
-		auto *pSlider = static_cast<WISlider*>(m_hMaxPlayers.get());
+	if(m_hMaxPlayers.IsValid()) {
+		auto *pSlider = static_cast<WISlider *>(m_hMaxPlayers.get());
 		maxPlayers = CUInt32(pSlider->GetValue());
 	}
 	if(map.empty())
 		return;
 	c_engine->EndGame();
 	pOptionsList->RunUpdateConVars(false);
-	c_engine->StartDefaultGame(map,maxPlayers <= 1);
+	c_engine->StartDefaultGame(map, maxPlayers <= 1);
 }
 
 void WIMainMenuNewGame::Initialize()
 {
 	WIMainMenuBase::Initialize();
-	AddMenuItem(Locale::GetText("back"),FunctionCallback<void,WIMainMenuElement*>::Create([this](WIMainMenuElement*) {
-		auto *mainMenu = dynamic_cast<WIMainMenu*>(GetParent());
+	AddMenuItem(Locale::GetText("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
+		auto *mainMenu = dynamic_cast<WIMainMenu *>(GetParent());
 		if(mainMenu == nullptr)
 			return;
 		mainMenu->OpenMainMenu();
@@ -109,19 +102,18 @@ void WIMainMenuNewGame::Think()
 void WIMainMenuNewGame::InitializeOptionsList(WIOptionsList *pList)
 {
 	auto *pRow = pList->AddRow();
-	pRow->SetValue(0,"");
-	
+	pRow->SetValue(0, "");
+
 	auto *buttonStart = WGUI::GetInstance().Create<WIButton>();
 	buttonStart->SetText(Locale::GetText("start_game"));
 	buttonStart->SizeToContents();
 	buttonStart->SetAutoCenterToParent(true);
-	buttonStart->AddCallback("OnMouseEvent",FunctionCallback<util::EventReply,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::CreateWithOptionalReturn(
-		[this](util::EventReply *reply,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) -> CallbackReturnType {
-		OnStartGame(button,state,mods);
+	buttonStart->AddCallback("OnMouseEvent", FunctionCallback<util::EventReply, GLFW::MouseButton, GLFW::KeyState, GLFW::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) -> CallbackReturnType {
+		OnStartGame(button, state, mods);
 		*reply = util::EventReply::Handled;
 		return CallbackReturnType::HasReturnValue;
 	}));
-	pRow->InsertElement(1,buttonStart);
+	pRow->InsertElement(1, buttonStart);
 	WIMainMenuBase::InitializeOptionsList(pList);
 }
 
@@ -129,39 +121,34 @@ void WIMainMenuNewGame::ReloadMapList()
 {
 	if(m_hMapList.IsValid() == false)
 		return;
-	auto *pMap = static_cast<WIDropDownMenu*>(m_hMapList.get());
+	auto *pMap = static_cast<WIDropDownMenu *>(m_hMapList.get());
 	pMap->ClearOptions();
-	auto exts = pragma::asset::get_supported_extensions(pragma::asset::Type::Map,pragma::asset::FormatType::All);
+	auto exts = pragma::asset::get_supported_extensions(pragma::asset::Type::Map, pragma::asset::FormatType::All);
 	std::vector<std::string> files;
 	for(auto &ext : exts)
-		filemanager::find_files("maps/*." +ext,&files,nullptr);
+		filemanager::find_files("maps/*." + ext, &files, nullptr);
 
 	std::unordered_set<std::string> uniqueFiles;
 	std::unordered_set<std::string> nativeFiles;
 	uniqueFiles.reserve(files.size());
-	for(auto &f : files)
-	{
-		ufile::remove_extension_from_filename(f,exts);
+	for(auto &f : files) {
+		ufile::remove_extension_from_filename(f, exts);
 		nativeFiles.insert(f);
 		uniqueFiles.insert(std::move(f));
 	}
 
-	if(c_engine->GetConVarBool("sh_mount_external_game_resources"))
-	{
+	if(c_engine->GetConVarBool("sh_mount_external_game_resources")) {
 		auto dllHandle = util::initialize_external_archive_manager(client);
-		if(dllHandle)
-		{
-			auto *fFindFiles = dllHandle->FindSymbolAddress<void(*)(const std::string&,std::vector<std::string>*,std::vector<std::string>*)>("find_files");
-			if(fFindFiles)
-			{
+		if(dllHandle) {
+			auto *fFindFiles = dllHandle->FindSymbolAddress<void (*)(const std::string &, std::vector<std::string> *, std::vector<std::string> *)>("find_files");
+			if(fFindFiles) {
 				std::vector<std::string> extFiles {};
 				std::vector<std::string> extDirs {};
-				fFindFiles("maps/*.bsp",&extFiles,&extDirs);
+				fFindFiles("maps/*.bsp", &extFiles, &extDirs);
 
-				uniqueFiles.reserve(uniqueFiles.size() +extFiles.size());
-				for(auto &extFile : extFiles)
-				{
-					ufile::remove_extension_from_filename(extFile,exts);
+				uniqueFiles.reserve(uniqueFiles.size() + extFiles.size());
+				for(auto &extFile : extFiles) {
+					ufile::remove_extension_from_filename(extFile, exts);
 					uniqueFiles.insert(std::move(extFile));
 				}
 			}
@@ -173,13 +160,10 @@ void WIMainMenuNewGame::ReloadMapList()
 		files.push_back(f);
 
 	// Remove duplicates
-	if(files.size() > 1)
-	{
-		for(auto it=files.begin();it!=files.end() -1;)
-		{
-			auto itNext = it +1;
-			if(ustring::compare(*it,*itNext,false) == false)
-			{
+	if(files.size() > 1) {
+		for(auto it = files.begin(); it != files.end() - 1;) {
+			auto itNext = it + 1;
+			if(ustring::compare(*it, *itNext, false) == false) {
 				++it;
 				continue;
 			}
@@ -189,50 +173,44 @@ void WIMainMenuNewGame::ReloadMapList()
 
 	std::vector<std::string> nativeMaps;
 	nativeMaps.reserve(files.size());
-	for(auto it=files.begin();it!=files.end();)
-	{
+	for(auto it = files.begin(); it != files.end();) {
 		auto &f = *it;
-		if(nativeFiles.find(f) != nativeFiles.end())
-		{
+		if(nativeFiles.find(f) != nativeFiles.end()) {
 			nativeMaps.push_back(std::move(f));
 			it = files.erase(it);
 			continue;
 		}
 		++it;
 	}
-	
-	std::sort(nativeMaps.begin(),nativeMaps.end());
-	std::sort(files.begin(),files.end());
 
-	auto fAddMaps = [pMap](const std::vector<std::string> &files,const std::optional<Color> &color={}) {
-		for(unsigned int i=0;i<files.size();i++)
-		{
+	std::sort(nativeMaps.begin(), nativeMaps.end());
+	std::sort(files.begin(), files.end());
+
+	auto fAddMaps = [pMap](const std::vector<std::string> &files, const std::optional<Color> &color = {}) {
+		for(unsigned int i = 0; i < files.size(); i++) {
 			auto &fName = files[i];
 			auto displayName = fName;
-			auto f = FileManager::OpenFile((std::string("maps/") +fName +".txt").c_str(),"r");
-			if(f != nullptr)
-			{
+			auto f = FileManager::OpenFile((std::string("maps/") + fName + ".txt").c_str(), "r");
+			if(f != nullptr) {
 				fsys::File fp {f};
 				auto root = ds::System::ReadData(fp);
-				if(root != nullptr)
-				{
-					auto block = root->GetBlock(fName.c_str(),0);
-					if(block != nullptr)
-					{
+				if(root != nullptr) {
+					auto block = root->GetBlock(fName.c_str(), 0);
+					if(block != nullptr) {
 						auto name = block->GetString("name");
 						auto author = block->GetString("author");
 						std::stringstream newName;
 						if(!name.empty())
-							newName<<name;
+							newName << name;
 						else
-							newName<<fName;
+							newName << fName;
 						if(!author.empty())
-							newName<<" ("<<author<<")";
+							newName << " (" << author << ")";
 						displayName = newName.str();
 					}
 				}
 			}
-			auto *opt = pMap->AddOption(displayName,fName);
+			auto *opt = pMap->AddOption(displayName, fName);
 			auto *el = opt ? opt->GetTextElement() : nullptr;
 			if(el && color.has_value())
 				el->SetColor(*color);
@@ -240,7 +218,7 @@ void WIMainMenuNewGame::ReloadMapList()
 	};
 	// Show native maps (i.e. maps that don't have to be imported) first
 	fAddMaps(nativeMaps);
-	fAddMaps(files,Color{200,0,0,255});
+	fAddMaps(files, Color {200, 0, 0, 255});
 }
 
 void WIMainMenuNewGame::InitializeGameSettings()
@@ -252,23 +230,21 @@ void WIMainMenuNewGame::InitializeGameSettings()
 
 	// Game Mode
 	auto &gameModes = GameModeManager::GetGameModes();
-	std::unordered_map<std::string,std::string> gameModeOptions;
-	for(auto it=gameModes.begin();it!=gameModes.end();++it)
-	{
+	std::unordered_map<std::string, std::string> gameModeOptions;
+	for(auto it = gameModes.begin(); it != gameModes.end(); ++it) {
 		auto &info = it->second;
 		gameModeOptions[info.name] = it->first;
 	}
-	auto *pGameMode = pList->AddDropDownMenu(Locale::GetText("gamemode"),gameModeOptions,"sv_gamemode");
-	pGameMode->AddCallback("OnValueChanged",FunctionCallback<void>::Create([pGameMode,this]() {
+	auto *pGameMode = pList->AddDropDownMenu(Locale::GetText("gamemode"), gameModeOptions, "sv_gamemode");
+	pGameMode->AddCallback("OnValueChanged", FunctionCallback<void>::Create([pGameMode, this]() {
 		auto val = pGameMode->GetOptionValue(pGameMode->GetSelectedOption());
 		auto &gameModes = GameModeManager::GetGameModes();
 		auto it = gameModes.find(val);
 		if(it == gameModes.end())
 			return;
 		auto &gmInfo = it->second;
-		if(!gmInfo.initial_map.empty())
-		{
-			auto *dropDownMenu = static_cast<WIDropDownMenu*>(m_hMapList.get());
+		if(!gmInfo.initial_map.empty()) {
+			auto *dropDownMenu = static_cast<WIDropDownMenu *>(m_hMapList.get());
 			if(dropDownMenu->GetSelectedOption() == -1)
 				dropDownMenu->SelectOption(gmInfo.initial_map);
 		}
@@ -281,27 +257,24 @@ void WIMainMenuNewGame::InitializeGameSettings()
 	// pMap->SetEditable(true);
 	pMap->SetName("map");
 	m_hMapList = pMap->GetHandle();
-	
+
 	auto &resourceWatcher = client->GetResourceWatcher();
 	if(m_cbMapListReload.IsValid())
 		m_cbMapListReload.Remove();
-	m_cbMapListReload = resourceWatcher.AddChangeCallback(EResourceWatcherCallbackType::Map,[this](std::reference_wrapper<const std::string> fileName,std::reference_wrapper<const std::string> ext) {
-		ReloadMapList();
-	});
+	m_cbMapListReload = resourceWatcher.AddChangeCallback(EResourceWatcherCallbackType::Map, [this](std::reference_wrapper<const std::string> fileName, std::reference_wrapper<const std::string> ext) { ReloadMapList(); });
 
 	// Server Name
-	auto *pServerName = pList->AddTextEntry(Locale::GetText("server_name"),"sv_servername");
+	auto *pServerName = pList->AddTextEntry(Locale::GetText("server_name"), "sv_servername");
 	m_hServerName = pServerName->GetHandle();
 	//
 	// RCON Password
-	auto *pPassword = pList->AddTextEntry(Locale::GetText("server_password"),"sv_password");
+	auto *pPassword = pList->AddTextEntry(Locale::GetText("server_password"), "sv_password");
 	pPassword->SetInputHidden(true);
 	m_hRconPassword = pPassword->GetHandle();
 	//
 	// Player Count
-	auto *pMaxPlayers = pList->AddSlider(Locale::GetText("max_players"),[](WISlider *pSlider) {
-		pSlider->SetRange(1.f,50.f,1.f);
-	},"sv_maxplayers");
+	auto *pMaxPlayers = pList->AddSlider(
+	  Locale::GetText("max_players"), [](WISlider *pSlider) { pSlider->SetRange(1.f, 50.f, 1.f); }, "sv_maxplayers");
 	m_hMaxPlayers = pMaxPlayers;
 	//
 	InitializeOptionsList(pList);

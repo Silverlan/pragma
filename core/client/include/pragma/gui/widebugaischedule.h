@@ -11,11 +11,9 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/gui/witreelist.h"
 
-class DLLCLIENT WIDebugAiSchedule
-	: public WITreeList
-{
-protected:
-public:
+class DLLCLIENT WIDebugAiSchedule : public WITreeList {
+  protected:
+  public:
 };
 
 #endif

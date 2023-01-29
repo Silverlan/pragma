@@ -12,26 +12,19 @@
 #include "pragma/entities/point/constraints/point_constraint_hinge.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLSERVER SPointConstraintHingeComponent final
-		: public BasePointConstraintHingeComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SPointConstraintHingeComponent final : public BasePointConstraintHingeComponent, public SBaseNetComponent {
+	  public:
 		using BasePointConstraintHingeComponent::BasePointConstraintHingeComponent;
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLSERVER PointConstraintHinge
-	: public SBaseEntity
-{
-protected:
-
-public:
+class DLLSERVER PointConstraintHinge : public SBaseEntity {
+  protected:
+  public:
 	virtual void Initialize() override;
 };
 

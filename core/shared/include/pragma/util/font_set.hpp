@@ -14,22 +14,12 @@
 #include <string_view>
 #include <vector>
 
-enum class FontSetFlag : uint8_t
-{
-	None = 0,
-	Bold = 1,
-	Italic = Bold<<1u,
-	Mono = Italic<<1u,
-	Serif = Mono<<1u,
-	Sans = Serif<<1u
-};
-struct DLLNETWORK FontSetFileData
-{
+enum class FontSetFlag : uint8_t { None = 0, Bold = 1, Italic = Bold << 1u, Mono = Italic << 1u, Serif = Mono << 1u, Sans = Serif << 1u };
+struct DLLNETWORK FontSetFileData {
 	FontSetFlag flags = FontSetFlag::None;
 	std::string fileName;
 };
-struct DLLNETWORK FontSet
-{
+struct DLLNETWORK FontSet {
 	std::vector<FontSetFileData> fileData;
 	std::vector<std::string> features;
 	FontSetFileData *FindFontFileCandidate(FontSetFlag flags);

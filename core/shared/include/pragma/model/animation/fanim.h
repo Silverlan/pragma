@@ -11,8 +11,7 @@
 #include "pragma/networkdefinitions.h"
 #include <mathutil/umath.h>
 
-enum class DLLNETWORK FAnim : uint32_t
-{
+enum class DLLNETWORK FAnim : uint32_t {
 	None = 0,
 	Loop = 1,
 	NoRepeat = 2,

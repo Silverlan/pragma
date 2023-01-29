@@ -12,16 +12,13 @@
 
 using namespace pragma;
 
-void CSurfaceComponent::ReceiveData(NetPacket &packet)
-{
-	m_plane = packet->Read<Vector4>();
-}
-void CSurfaceComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-Bool CSurfaceComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
+void CSurfaceComponent::ReceiveData(NetPacket &packet) { m_plane = packet->Read<Vector4>(); }
+void CSurfaceComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+Bool CSurfaceComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetPlane)
 		SetPlane(packet->Read<Vector4>());
 	else
-		return CBaseNetComponent::ReceiveNetEvent(eventId,packet);
+		return CBaseNetComponent::ReceiveNetEvent(eventId, packet);
 	return true;
 }

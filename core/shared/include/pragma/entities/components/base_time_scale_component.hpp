@@ -11,13 +11,10 @@
 #include "pragma/entities/baseentity_net_event_manager.hpp"
 #include <sharedutils/property/util_property.hpp>
 
-namespace pragma
-{
-	class DLLNETWORK BaseTimeScaleComponent
-		: public BaseEntityComponent
-	{
-	public:
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+namespace pragma {
+	class DLLNETWORK BaseTimeScaleComponent : public BaseEntityComponent {
+	  public:
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
 		virtual void Initialize() override;
 
@@ -27,10 +24,10 @@ namespace pragma
 		float GetEffectiveTimeScale() const;
 
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
-		
+
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
-		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
-	protected:
+		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
+	  protected:
 		BaseTimeScaleComponent(BaseEntity &ent);
 		pragma::NetEventId m_netEvSetTimeScale = pragma::INVALID_NET_EVENT;
 		util::PFloatProperty m_timeScale = nullptr;

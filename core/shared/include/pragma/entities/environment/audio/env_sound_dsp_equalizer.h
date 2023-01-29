@@ -9,9 +9,8 @@
 
 #include "pragma/networkdefinitions.h"
 #include <string>
-class DLLNETWORK BaseEnvSoundDspEqualizer
-{
-protected:
+class DLLNETWORK BaseEnvSoundDspEqualizer {
+  protected:
 	float m_lowGain = 1.f;
 	float m_lowCutoff = 200.f;
 	float m_mid1Gain = 1.f;

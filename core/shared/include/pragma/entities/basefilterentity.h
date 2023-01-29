@@ -12,32 +12,25 @@
 #include <vector>
 
 class BaseEntity;
-namespace pragma
-{
-	class DLLNETWORK BaseFilterComponent
-		: public BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLNETWORK BaseFilterComponent : public BaseEntityComponent {
+	  public:
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
-	protected:
+	  protected:
 		std::string m_kvFilter;
-	public:
-		virtual bool ShouldPass(BaseEntity &ent) const=0;
+	  public:
+		virtual bool ShouldPass(BaseEntity &ent) const = 0;
 	};
 
-	class DLLNETWORK BaseFilterNameComponent
-		: public BaseFilterComponent
-	{
-	public:
+	class DLLNETWORK BaseFilterNameComponent : public BaseFilterComponent {
+	  public:
 		using BaseFilterComponent::BaseFilterComponent;
 		virtual bool ShouldPass(BaseEntity &ent) const override;
 	};
 
-	class DLLNETWORK BaseFilterClassComponent
-		: public BaseFilterComponent
-	{
-	public:
+	class DLLNETWORK BaseFilterClassComponent : public BaseFilterComponent {
+	  public:
 		using BaseFilterComponent::BaseFilterComponent;
 		virtual bool ShouldPass(BaseEntity &ent) const override;
 	};

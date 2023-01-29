@@ -11,13 +11,11 @@
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/lua/libraries/limport.hpp"
 
-pragma::asset::AssimpFormatHandler::AssimpFormatHandler(util::IAssetManager &assetManager)
-	: util::IImportAssetFormatHandler{assetManager}
-{}
-bool pragma::asset::AssimpFormatHandler::Import(const std::string &outputPath,std::string &outFilePath)
+pragma::asset::AssimpFormatHandler::AssimpFormatHandler(util::IAssetManager &assetManager) : util::IImportAssetFormatHandler {assetManager} {}
+bool pragma::asset::AssimpFormatHandler::Import(const std::string &outputPath, std::string &outFilePath)
 {
 	std::string err;
-	auto result = Lua::import::import_model_asset(static_cast<ModelManager&>(GetAssetManager()).GetNetworkState(),outputPath,outFilePath,err);
+	auto result = Lua::import::import_model_asset(static_cast<ModelManager &>(GetAssetManager()).GetNetworkState(), outputPath, outFilePath, err);
 	if(!result)
 		m_error = std::move(err);
 	return result;

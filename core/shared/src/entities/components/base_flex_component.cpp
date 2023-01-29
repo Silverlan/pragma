@@ -15,15 +15,13 @@
 
 using namespace pragma;
 
-BaseFlexComponent::BaseFlexComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+BaseFlexComponent::BaseFlexComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BaseFlexComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		auto &changeData = static_cast<CEOnModelChanged&>(evData.get());
+	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		auto &changeData = static_cast<CEOnModelChanged &>(evData.get());
 		OnModelChanged(changeData.model);
 	});
 
@@ -33,31 +31,26 @@ void BaseFlexComponent::Initialize()
 }
 void BaseFlexComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 {
-	util::ScopeGuard sg {[this]() {OnMembersChanged();}};
+	util::ScopeGuard sg {[this]() { OnMembersChanged(); }};
 	ClearMembers();
 	if(!model)
 		return;
 	auto &flexControllers = model->GetFlexControllers();
 	ReserveMembers(flexControllers.size());
-	for(uint32_t idx = 0; auto &flexController : flexControllers)
-	{
+	for(uint32_t idx = 0; auto &flexController : flexControllers) {
 		const auto &name = flexController.name;
 		auto lname = name;
 		// ustring::to_lower(lname);
 		auto memberInfo = pragma::ComponentMemberInfo::CreateDummy();
-		memberInfo.SetName("flexController/" +lname);
+		memberInfo.SetName("flexController/" + lname);
 		memberInfo.type = ents::EntityMemberType::Float;
 		memberInfo.SetMin(flexController.min);
 		memberInfo.SetMax(flexController.max);
 		memberInfo.userIndex = idx++;
-		memberInfo.SetGetterFunction<BaseFlexComponent,float,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseFlexComponent&,float&)>(
-			[](const pragma::ComponentMemberInfo &memberInfo,BaseFlexComponent &component,float &outValue) {
-			outValue = component.GetFlexController(memberInfo.userIndex);
-		})>();
-		memberInfo.SetSetterFunction<BaseFlexComponent,float,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseFlexComponent&,const float&)>(
-			[](const pragma::ComponentMemberInfo &memberInfo,BaseFlexComponent &component,const float &value) {
-			component.SetFlexController(memberInfo.userIndex,value);
-		})>();
+		memberInfo.SetGetterFunction<BaseFlexComponent, float,
+		  static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseFlexComponent &, float &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseFlexComponent &component, float &outValue) { outValue = component.GetFlexController(memberInfo.userIndex); })>();
+		memberInfo.SetSetterFunction<BaseFlexComponent, float,
+		  static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseFlexComponent &, const float &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseFlexComponent &component, const float &value) { component.SetFlexController(memberInfo.userIndex, value); })>();
 		RegisterMember(std::move(memberInfo));
 	}
 }
@@ -66,7 +59,7 @@ const ComponentMemberInfo *BaseFlexComponent::GetMemberInfo(ComponentMemberIndex
 	auto numStatic = GetStaticMemberCount();
 	if(idx < numStatic)
 		return BaseEntityComponent::GetMemberInfo(idx);
-	return DynamicMemberRegister::GetMemberInfo(idx -numStatic);
+	return DynamicMemberRegister::GetMemberInfo(idx - numStatic);
 }
 std::optional<ComponentMemberIndex> BaseFlexComponent::DoGetMemberIndex(const std::string &name) const
 {
@@ -75,38 +68,38 @@ std::optional<ComponentMemberIndex> BaseFlexComponent::DoGetMemberIndex(const st
 		return idx;
 	idx = DynamicMemberRegister::GetMemberIndex(name);
 	if(idx.has_value())
-		return *idx +GetStaticMemberCount();
-	return std::optional<ComponentMemberIndex>{};
+		return *idx + GetStaticMemberCount();
+	return std::optional<ComponentMemberIndex> {};
 }
-void BaseFlexComponent::SetFlexController(const std::string &name,float val,float duration,bool clampToLimits)
+void BaseFlexComponent::SetFlexController(const std::string &name, float val, float duration, bool clampToLimits)
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
 	auto flexId = 0u;
-	if(!mdlComponent || mdlComponent->LookupFlexController(name,flexId) == false)
+	if(!mdlComponent || mdlComponent->LookupFlexController(name, flexId) == false)
 		return;
-	SetFlexController(flexId,val,duration,clampToLimits);
+	SetFlexController(flexId, val, duration, clampToLimits);
 }
 float BaseFlexComponent::GetFlexController(uint32_t flexId) const
 {
 	auto r = 0.f;
-	GetFlexController(flexId,r);
+	GetFlexController(flexId, r);
 	return r;
 }
-bool BaseFlexComponent::GetScaledFlexController(uint32_t flexId,float &val) const
+bool BaseFlexComponent::GetScaledFlexController(uint32_t flexId, float &val) const
 {
-	if(GetFlexController(flexId,val) == false)
+	if(GetFlexController(flexId, val) == false)
 		return false;
 	val *= GetFlexControllerScale();
 	return true;
 }
 
-void BaseFlexComponent::SetFlexControllerScale(float scale) {m_flexControllerScale = scale;}
-float BaseFlexComponent::GetFlexControllerScale() const {return m_flexControllerScale;}
+void BaseFlexComponent::SetFlexControllerScale(float scale) { m_flexControllerScale = scale; }
+float BaseFlexComponent::GetFlexControllerScale() const { return m_flexControllerScale; }
 float BaseFlexComponent::GetFlexController(const std::string &flexController) const
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
 	auto flexId = 0u;
-	if(!mdlComponent || mdlComponent->LookupFlexController(flexController,flexId) == false)
+	if(!mdlComponent || mdlComponent->LookupFlexController(flexController, flexId) == false)
 		return 0.f;
 	return GetFlexController(flexId);
 }

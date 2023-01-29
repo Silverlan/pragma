@@ -11,12 +11,9 @@
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
 
-namespace Lua
-{
-	namespace game
-	{
-		namespace Client
-		{
+namespace Lua {
+	namespace game {
+		namespace Client {
 			DLLCLIENT int open_dropped_file(lua_State *l);
 			DLLCLIENT int set_gravity(lua_State *l);
 			DLLCLIENT int get_gravity(lua_State *l);

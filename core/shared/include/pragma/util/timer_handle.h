@@ -11,16 +11,15 @@
 #include "pragma/networkdefinitions.h"
 
 class Timer;
-class DLLNETWORK TimerHandle
-{
-public:
+class DLLNETWORK TimerHandle {
+  public:
 	friend Timer;
-protected:
+  protected:
 	TimerHandle(Timer *timer);
-protected:
+  protected:
 	Timer *m_timer;
 	void Invalidate();
-public:
+  public:
 	TimerHandle();
 	~TimerHandle();
 	bool IsValid() const;

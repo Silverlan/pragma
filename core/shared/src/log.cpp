@@ -21,7 +21,4 @@ void Engine::EndLogging()
 	// TODO: This is obsolete, remove this function!
 }
 
-void Engine::WriteToLog(const std::string &str)
-{
-	pragma::log(str);
-}
+void Engine::WriteToLog(const std::string &str) { pragma::log(str); }

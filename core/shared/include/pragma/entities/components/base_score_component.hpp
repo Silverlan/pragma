@@ -10,15 +10,12 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 #include <sharedutils/property/util_property.hpp>
 
-namespace pragma
-{
-	class DLLNETWORK BaseScoreComponent
-		: public BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLNETWORK BaseScoreComponent : public BaseEntityComponent {
+	  public:
 		static pragma::ComponentEventId EVENT_ON_SCORE_CHANGED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		using Score = int32_t;
 		virtual void Initialize() override;
 		virtual ~BaseScoreComponent() override;
@@ -28,15 +25,13 @@ namespace pragma
 		void SetScore(Score score);
 		void AddScore(Score score);
 		void SubtractScore(Score score);
-	protected:
+	  protected:
 		BaseScoreComponent(BaseEntity &ent);
 		util::PInt32Property m_score;
 		pragma::NetEventId m_netEvSetScore = pragma::INVALID_NET_EVENT;
 		CallbackHandle m_cbOnScoreChanged = {};
 	};
-	struct DLLNETWORK CEOnScoreChanged
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CEOnScoreChanged : public ComponentEvent {
 		CEOnScoreChanged(BaseScoreComponent::Score score);
 		virtual void PushArguments(lua_State *l) override;
 		BaseScoreComponent::Score score;

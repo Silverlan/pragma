@@ -13,13 +13,11 @@
 #include <sharedutils/util_weak_handle.hpp>
 #include <sharedutils/util_shared_handle.hpp>
 
-namespace pragma::physics
-{
+namespace pragma::physics {
 	class IMaterial;
 	class ICollisionObject;
 	class IShape;
-	struct DLLNETWORK ContactPoint
-	{
+	struct DLLNETWORK ContactPoint {
 		Vector3 impulse;
 		Vector3 normal;
 		Vector3 position;
@@ -27,14 +25,8 @@ namespace pragma::physics
 		util::WeakHandle<IMaterial> material0;
 		util::WeakHandle<IMaterial> material1;
 	};
-	struct DLLNETWORK ContactInfo
-	{
-		enum class Flags : uint32_t
-		{
-			None = 0u,
-			StartTouch = 1u,
-			EndTouch = StartTouch<<1u
-		};
+	struct DLLNETWORK ContactInfo {
+		enum class Flags : uint32_t { None = 0u, StartTouch = 1u, EndTouch = StartTouch << 1u };
 		util::WeakHandle<IShape> shape0;
 		util::WeakHandle<IShape> shape1;
 		util::TWeakSharedHandle<ICollisionObject> collisionObj0;

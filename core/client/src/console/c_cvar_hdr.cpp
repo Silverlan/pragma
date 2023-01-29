@@ -10,7 +10,7 @@
 
 extern DLLCLIENT CGame *c_game;
 
-void CMD_debug_hdr_bloom(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
+void CMD_debug_hdr_bloom(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	auto &wgui = WGUI::GetInstance();
 	auto *pRoot = wgui.GetBaseElement();
@@ -19,8 +19,7 @@ void CMD_debug_hdr_bloom(NetworkState*,pragma::BasePlayerComponent*,std::vector<
 	const std::string name = "debug_hdr_bloom";
 	auto *pEl = pRoot->FindDescendantByName(name);
 	auto v = util::to_int(argv.front());
-	if(v == 0)
-	{
+	if(v == 0) {
 		if(pEl != nullptr)
 			pEl->Remove();
 		return;
@@ -31,6 +30,6 @@ void CMD_debug_hdr_bloom(NetworkState*,pragma::BasePlayerComponent*,std::vector<
 	if(pEl == nullptr)
 		return;
 	pEl->SetName(name);
-	pEl->SetSize(256,256);
+	pEl->SetSize(256, 256);
 	pEl->Update();
 }

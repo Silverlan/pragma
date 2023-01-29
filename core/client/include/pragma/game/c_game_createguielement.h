@@ -11,7 +11,7 @@
 #include "pragma/game/c_game.h"
 
 template<class TElement>
-	TElement *CGame::CreateGUIElement(WIBase *parent)
+TElement *CGame::CreateGUIElement(WIBase *parent)
 {
 	TElement *p = WGUI::GetInstance().Create<TElement>(parent);
 	if(p == nullptr)
@@ -20,7 +20,7 @@ template<class TElement>
 	return p;
 }
 template<class TElement>
-	TElement *CGame::CreateGUIElement(WIHandle *hParent)
+TElement *CGame::CreateGUIElement(WIHandle *hParent)
 {
 	WIBase *pParent = nullptr;
 	if(hParent != nullptr && hParent->IsValid())

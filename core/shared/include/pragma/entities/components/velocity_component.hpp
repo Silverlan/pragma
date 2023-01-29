@@ -10,13 +10,10 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 #include <sharedutils/property/util_property_vector.h>
 
-namespace pragma
-{
-	class DLLNETWORK VelocityComponent final
-		: public BaseEntityComponent
-	{
-	public:
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+namespace pragma {
+	class DLLNETWORK VelocityComponent final : public BaseEntityComponent {
+	  public:
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
 		VelocityComponent(BaseEntity &ent);
 		virtual void Initialize() override;
@@ -39,15 +36,15 @@ namespace pragma
 		const util::PVector3Property &GetAngularVelocityProperty() const;
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
-		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
+		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 
-		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual void InitializeLuaObject(lua_State *lua) override;
 
 		// Set member variables directly, without any other influences
 		void SetRawVelocity(const Vector3 &vel);
 		void SetRawAngularVelocity(const Vector3 &vel);
-	protected:
+	  protected:
 		util::PVector3Property m_velocity;
 		util::PVector3Property m_angVelocity;
 	};

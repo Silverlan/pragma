@@ -12,24 +12,22 @@
 #include "wgui/wibase.h"
 #include <sharedutils/util_shared_handle.hpp>
 
-class DLLCLIENT WIDebugShadowMap
-	: public WIBase
-{
-public:
+class DLLCLIENT WIDebugShadowMap : public WIBase {
+  public:
 	WIDebugShadowMap();
 
 	void SetLightSource(pragma::CLightComponent &lightSource);
-	void SetShadowMapSize(uint32_t w,uint32_t h);
+	void SetShadowMapSize(uint32_t w, uint32_t h);
 
 	void SetContrastFactor(float contrastFactor);
 	float GetContrastFactor() const;
 
 	void SetShadowMapType(pragma::CLightComponent::ShadowMapType type);
-private:
+  private:
 	virtual void DoUpdate() override;
 	std::vector<WIHandle> m_shadowMapImages = {};
 	util::TWeakSharedHandle<pragma::CLightComponent> m_lightHandle = {};
-	Vector2i m_shadowMapSize = {256,256};
+	Vector2i m_shadowMapSize = {256, 256};
 	float m_contrastFactor = 1.f;
 	pragma::CLightComponent::ShadowMapType m_shadowMapType = pragma::CLightComponent::ShadowMapType::Static;
 };

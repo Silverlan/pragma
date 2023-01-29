@@ -35,32 +35,30 @@
 extern ServerState *server;
 extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;
 extern ServerEntityNetworkMap *g_SvEntityNetworkMap;
-pragma::SPlayerComponent *SGame::GetPlayer(pragma::networking::IServerClient &session) {return server->GetPlayer(session);}
+pragma::SPlayerComponent *SGame::GetPlayer(pragma::networking::IServerClient &session) { return server->GetPlayer(session); }
 
 SBaseEntity *SGame::CreateEntity(std::string classname)
 {
-	if(umath::is_flag_set(m_flags,GameFlags::ClosingGame))
+	if(umath::is_flag_set(m_flags, GameFlags::ClosingGame))
 		return nullptr;
 	StringToLower(classname);
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("create_entity");
-	util::ScopeGuard sgVtune {[]() {debug::get_domain().EndTask();}};
+	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
 	auto *entlua = CreateLuaEntity(classname);
 	if(entlua != NULL)
 		return entlua;
-	SBaseEntity*(*factory)(void) = g_ServerEntityFactories->FindFactory(classname);
-	if(factory == NULL)
-	{
+	SBaseEntity *(*factory)(void) = g_ServerEntityFactories->FindFactory(classname);
+	if(factory == NULL) {
 		static auto skipSecondAttempt = false;
-		if(skipSecondAttempt == false && LoadLuaEntityByClass(classname) == true)
-		{
+		if(skipSecondAttempt == false && LoadLuaEntityByClass(classname) == true) {
 			skipSecondAttempt = true;
 			auto *r = CreateEntity(classname);
 			skipSecondAttempt = false;
 			return r;
 		}
-		Con::cwar<<"Unable to create entity '"<<classname<<"': Factory not found!"<<Con::endl;
+		Con::cwar << "Unable to create entity '" << classname << "': Factory not found!" << Con::endl;
 		return NULL;
 	}
 	return factory();
@@ -68,18 +66,16 @@ SBaseEntity *SGame::CreateEntity(std::string classname)
 
 void SGame::RemoveEntity(BaseEntity *ent)
 {
-	if(umath::is_flag_set(ent->GetStateFlags(),BaseEntity::StateFlags::Removed))
+	if(umath::is_flag_set(ent->GetStateFlags(), BaseEntity::StateFlags::Removed))
 		return;
 	ent->SetStateFlag(BaseEntity::StateFlags::Removed);
-	auto *s_ent = static_cast<SBaseEntity*>(ent);
-	if(s_ent->IsShared())
-	{
+	auto *s_ent = static_cast<SBaseEntity *>(ent);
+	if(s_ent->IsShared()) {
 		unsigned int ID = g_SvEntityNetworkMap->GetFactoryID(typeid(*ent));
-		if(ID != 0)
-		{
+		if(ID != 0) {
 			NetPacket p;
-			nwm::write_entity(p,ent);
-			server->SendPacket("ent_remove",p,pragma::networking::Protocol::SlowReliable);
+			nwm::write_entity(p, ent);
+			server->SendPacket("ent_remove", p, pragma::networking::Protocol::SlowReliable);
 		}
 	}
 	if(ent->IsPlayer())
@@ -95,10 +91,9 @@ void SGame::RemoveEntity(BaseEntity *ent)
 #endif
 	m_ents[idx] = NULL;
 	m_baseEnts[idx] = NULL;
-	if(idx == m_ents.size() -1)
-	{
-		m_ents.erase(m_ents.begin() +idx);
-		m_baseEnts.erase(m_baseEnts.begin() +idx);
+	if(idx == m_ents.size() - 1) {
+		m_ents.erase(m_ents.begin() + idx);
+		m_baseEnts.erase(m_baseEnts.begin() + idx);
 	}
 	else
 		m_entIndices.push_back(idx);
@@ -109,42 +104,38 @@ void SGame::SpawnEntity(BaseEntity *ent) // Don't call directly
 {
 	Game::SpawnEntity(ent);
 	unsigned int ID = g_SvEntityNetworkMap->GetFactoryID(typeid(*ent));
-	
+
 	auto pMapComponent = ent->GetComponent<pragma::MapComponent>();
-	if(ID != 0 && (pMapComponent.valid() == false || pMapComponent->GetMapIndex() == 0))
-	{
+	if(ID != 0 && (pMapComponent.valid() == false || pMapComponent->GetMapIndex() == 0)) {
 		pragma::networking::ClientRecipientFilter rp {[](const pragma::networking::IServerClient &client) -> bool {
 			auto *pl = client.GetPlayer();
 			return pl && pl->IsAuthed();
 		}};
-		SBaseEntity *sent = static_cast<SBaseEntity*>(ent);
+		SBaseEntity *sent = static_cast<SBaseEntity *>(ent);
 		NetPacket p;
 		p->Write<unsigned int>(ID);
 		p->Write<unsigned int>(ent->GetIndex());
 		p->Write<unsigned int>(pMapComponent.valid() ? pMapComponent->GetMapIndex() : 0u);
-		sent->SendData(p,rp);
-		server->SendPacket("ent_create",p,pragma::networking::Protocol::SlowReliable,rp);
+		sent->SendData(p, rp);
+		server->SendPacket("ent_create", p, pragma::networking::Protocol::SlowReliable, rp);
 	}
 	auto hEnt = ent->GetHandle();
-	CallCallbacks<void,BaseEntity*>("OnEntitySpawned",ent); // TODO: Call this after transmission for lua-entities has finished (Entity:OnPostSpawn)
-	
+	CallCallbacks<void, BaseEntity *>("OnEntitySpawned", ent); // TODO: Call this after transmission for lua-entities has finished (Entity:OnPostSpawn)
+
 	if(hEnt.valid() == false)
 		return;
 	auto globalNameComponent = ent->GetComponent<pragma::GlobalNameComponent>();
-	if(globalNameComponent.valid())
-	{
+	if(globalNameComponent.valid()) {
 		auto &globalName = globalNameComponent->GetGlobalName();
 		auto it = m_preTransitionWorldState.find(globalName);
-		if(it != m_preTransitionWorldState.end())
-		{
-			udm::LinkedPropertyWrapper udm{*it->second};
+		if(it != m_preTransitionWorldState.end()) {
+			udm::LinkedPropertyWrapper udm {*it->second};
 			ent->Load(udm);
-			if(hEnt.valid())
-			{
+			if(hEnt.valid()) {
 				// Move global entities by landmark offset between this level and the previous one.
 				// This will not affect map-entities, as the delta offset will be 0 at this point,
 				// however this will affect entities that are created after map-spawn, such as players.
-				ent->SetPosition(ent->GetPosition() +m_deltaTransitionLandmarkOffset);
+				ent->SetPosition(ent->GetPosition() + m_deltaTransitionLandmarkOffset);
 
 				it = m_preTransitionWorldState.find(globalName); // Iterator may have been become invalid by above function calls; Retrieve it again to be sure
 				if(it != m_preTransitionWorldState.end())
@@ -154,7 +145,7 @@ void SGame::SpawnEntity(BaseEntity *ent) // Don't call directly
 	}
 }
 
-void SGame::GetEntities(std::vector<SBaseEntity*> **ents) {*ents = &m_ents;}
+void SGame::GetEntities(std::vector<SBaseEntity *> **ents) { *ents = &m_ents; }
 
 SBaseEntity *SGame::GetEntity(unsigned int idx)
 {
@@ -163,20 +154,16 @@ SBaseEntity *SGame::GetEntity(unsigned int idx)
 	return m_ents[idx];
 }
 
-void SGame::SetupEntity(BaseEntity *ent,unsigned int idx)
+void SGame::SetupEntity(BaseEntity *ent, unsigned int idx)
 {
-	if(idx < m_ents.size())
-	{
-		if(m_ents[idx] != nullptr)
-		{
+	if(idx < m_ents.size()) {
+		if(m_ents[idx] != nullptr) {
 			m_ents[idx]->OnRemove();
 			delete m_ents[idx];
 		}
 	}
-	else
-	{
-		for(auto i=m_ents.size();i<idx;i++)
-		{
+	else {
+		for(auto i = m_ents.size(); i < idx; i++) {
 			m_ents.push_back(nullptr);
 			m_baseEnts.push_back(nullptr);
 			if(i > 0)
@@ -185,7 +172,7 @@ void SGame::SetupEntity(BaseEntity *ent,unsigned int idx)
 		m_ents.push_back(nullptr);
 		m_baseEnts.push_back(nullptr);
 	}
-	auto *sEnt = static_cast<SBaseEntity*>(ent);
+	auto *sEnt = static_cast<SBaseEntity *>(ent);
 	sEnt->Construct(idx);
 	sEnt->PrecacheModels();
 	auto pSoundEmitterComponent = sEnt->GetComponent<pragma::SSoundEmitterComponent>();
@@ -202,32 +189,31 @@ void SGame::SetupEntity(BaseEntity *ent,unsigned int idx)
 unsigned int SGame::GetFreeEntityIndex()
 {
 	unsigned int idx;
-	if(!m_entIndices.empty())
-	{
+	if(!m_entIndices.empty()) {
 		idx = m_entIndices[0];
 		m_entIndices.pop_front();
 	}
 	else
-		idx = CUInt32(m_ents.size()) +1;
+		idx = CUInt32(m_ents.size()) + 1;
 	return idx;
 }
 
-SBaseEntity *SGame::CreateLuaEntity(std::string classname,bool bLoadIfNotExists)
+SBaseEntity *SGame::CreateLuaEntity(std::string classname, bool bLoadIfNotExists)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("create_lua_entity");
-	util::ScopeGuard sgVtune {[]() {debug::get_domain().EndTask();}};
+	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
 	luabind::object oClass {};
-	auto *ent = static_cast<SBaseEntity*>(Game::CreateLuaEntity<SLuaEntity,pragma::lua::SLuaEntityHolder>(classname,oClass,bLoadIfNotExists));
+	auto *ent = static_cast<SBaseEntity *>(Game::CreateLuaEntity<SLuaEntity, pragma::lua::SLuaEntityHolder>(classname, oClass, bLoadIfNotExists));
 	if(ent == nullptr)
 		return nullptr;
 	auto oType = oClass["Type"];
-	if(oType && static_cast<LuaEntityType>(luabind::object_cast_nothrow<int>(oType,0)) == LuaEntityType::Shared)
+	if(oType && static_cast<LuaEntityType>(luabind::object_cast_nothrow<int>(oType, 0)) == LuaEntityType::Shared)
 		ent->SetShared(true);
 	else
 		ent->SetShared(false);
-	SetupEntity(ent,GetFreeEntityIndex());
+	SetupEntity(ent, GetFreeEntityIndex());
 
 	auto *info = m_luaEnts->GetEntityInfo(classname);
 	assert(info);
@@ -281,41 +267,41 @@ SBaseEntity *SGame::CreateLuaEntity(std::string classname,bool bLoadIfNotExists)
 	return ent;*/
 }
 
-void SGame::GetPlayers(std::vector<BaseEntity*> *ents) {GetPlayers<BaseEntity>(ents);}
-void SGame::GetNPCs(std::vector<BaseEntity*> *ents) {GetNPCs<BaseEntity>(ents);}
-void SGame::GetWeapons(std::vector<BaseEntity*> *ents) {GetWeapons<BaseEntity>(ents);}
-void SGame::GetVehicles(std::vector<BaseEntity*> *ents) {GetVehicles<BaseEntity>(ents);}
+void SGame::GetPlayers(std::vector<BaseEntity *> *ents) { GetPlayers<BaseEntity>(ents); }
+void SGame::GetNPCs(std::vector<BaseEntity *> *ents) { GetNPCs<BaseEntity>(ents); }
+void SGame::GetWeapons(std::vector<BaseEntity *> *ents) { GetWeapons<BaseEntity>(ents); }
+void SGame::GetVehicles(std::vector<BaseEntity *> *ents) { GetVehicles<BaseEntity>(ents); }
 
-void SGame::GetPlayers(std::vector<SBaseEntity*> *ents) {GetPlayers<SBaseEntity>(ents);}
-void SGame::GetNPCs(std::vector<SBaseEntity*> *ents) {GetNPCs<SBaseEntity>(ents);}
-void SGame::GetWeapons(std::vector<SBaseEntity*> *ents) {GetWeapons<SBaseEntity>(ents);}
-void SGame::GetVehicles(std::vector<SBaseEntity*> *ents) {GetVehicles<SBaseEntity>(ents);}
+void SGame::GetPlayers(std::vector<SBaseEntity *> *ents) { GetPlayers<SBaseEntity>(ents); }
+void SGame::GetNPCs(std::vector<SBaseEntity *> *ents) { GetNPCs<SBaseEntity>(ents); }
+void SGame::GetWeapons(std::vector<SBaseEntity *> *ents) { GetWeapons<SBaseEntity>(ents); }
+void SGame::GetVehicles(std::vector<SBaseEntity *> *ents) { GetVehicles<SBaseEntity>(ents); }
 
 void SGame::GetPlayers(std::vector<EntityHandle> *ents)
 {
 	auto &players = pragma::SPlayerComponent::GetAll();
-	ents->reserve(ents->size() +players.size());
+	ents->reserve(ents->size() + players.size());
 	for(auto *pl : players)
 		ents->push_back(pl->GetEntity().GetHandle());
 }
 void SGame::GetNPCs(std::vector<EntityHandle> *ents)
 {
 	auto &npcs = pragma::SAIComponent::GetAll();
-	ents->reserve(ents->size() +npcs.size());
+	ents->reserve(ents->size() + npcs.size());
 	for(auto *npc : npcs)
 		ents->push_back(npc->GetEntity().GetHandle());
 }
 void SGame::GetWeapons(std::vector<EntityHandle> *ents)
 {
 	auto &weapons = pragma::SWeaponComponent::GetAll();
-	ents->reserve(ents->size() +weapons.size());
+	ents->reserve(ents->size() + weapons.size());
 	for(auto *wep : weapons)
 		ents->push_back(wep->GetEntity().GetHandle());
 }
 void SGame::GetVehicles(std::vector<EntityHandle> *ents)
 {
 	auto &vehicles = pragma::SVehicleComponent::GetAll();
-	ents->reserve(ents->size() +vehicles.size());
+	ents->reserve(ents->size() + vehicles.size());
 	for(auto *vhc : vehicles)
 		ents->push_back(vhc->GetEntity().GetHandle());
 }

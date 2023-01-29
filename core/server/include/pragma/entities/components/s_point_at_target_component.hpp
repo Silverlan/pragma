@@ -12,21 +12,17 @@
 #include <pragma/entities/components/base_point_at_target_component.hpp>
 #include <pragma/lua/luaapi.h>
 
-namespace pragma
-{
-	class DLLSERVER SPointAtTargetComponent final
-		: public BasePointAtTargetComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SPointAtTargetComponent final : public BasePointAtTargetComponent, public SBaseNetComponent {
+	  public:
 		SPointAtTargetComponent(BaseEntity &ent) : BasePointAtTargetComponent(ent) {}
 		virtual void Initialize() override;
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
 
 		using BasePointAtTargetComponent::SetPointAtTarget;
-	protected:
+	  protected:
 		virtual void SetPointAtTarget(BaseEntity *ent) override;
 	};
 };

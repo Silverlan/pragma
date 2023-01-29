@@ -19,16 +19,11 @@
 
 extern DLLCLIENT CEngine *c_engine;
 
-LINK_WGUI_TO_CLASS(WIImageSlideShow,WIImageSlideShow);
+LINK_WGUI_TO_CLASS(WIImageSlideShow, WIImageSlideShow);
 
+WIImageSlideShow::PreloadImage::PreloadImage() : ready(false), loading(false), image(-1) {}
 
-WIImageSlideShow::PreloadImage::PreloadImage()
-	: ready(false),loading(false),image(-1)
-{}
-
-WIImageSlideShow::WIImageSlideShow()
-	: WIBase(),m_currentImg(-1)
-{}
+WIImageSlideShow::WIImageSlideShow() : WIBase(), m_currentImg(-1) {}
 
 void WIImageSlideShow::Initialize()
 {
@@ -42,13 +37,13 @@ void WIImageSlideShow::Initialize()
 	Update();
 }
 
-void WIImageSlideShow::SetColor(float r,float g,float b,float a)
+void WIImageSlideShow::SetColor(float r, float g, float b, float a)
 {
-	WIBase::SetColor(r,g,b,a);
+	WIBase::SetColor(r, g, b, a);
 	if(m_hImgNext.IsValid())
-		m_hImgNext->SetColor(r,g,b,a);
+		m_hImgNext->SetColor(r, g, b, a);
 	if(m_hImgPrev.IsValid())
-		m_hImgPrev->SetColor(r,g,b,a);
+		m_hImgPrev->SetColor(r, g, b, a);
 }
 
 void WIImageSlideShow::DoUpdate()
@@ -58,9 +53,9 @@ void WIImageSlideShow::DoUpdate()
 	//m_blurTexture.Initialize(*WGUI::GetContext(),m_texture,GetWidth(),GetHeight());
 }
 
-void WIImageSlideShow::SetSize(int x,int y)
+void WIImageSlideShow::SetSize(int x, int y)
 {
-	WIBase::SetSize(x,y);
+	WIBase::SetSize(x, y);
 	ScheduleUpdate();
 }
 
@@ -70,8 +65,7 @@ void WIImageSlideShow::Think()
 	if(!IsVisible())
 		return;
 	m_tLastFade.Update();
-	if((m_currentImg == -1 || m_tLastFade() > 18.f) && m_imgPreload.loading == false)
-	{
+	if((m_currentImg == -1 || m_tLastFade() > 18.f) && m_imgPreload.loading == false) {
 		DisplayPreloadedImage();
 		PreloadNextRandomShuffle();
 	}
@@ -107,40 +101,37 @@ void WIImageSlideShow::DisplayPreloadedImage()
 	auto img = context.CreateImage(createInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	auto tex = context.CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
+	auto tex = context.CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
 	prosper::util::RenderPassCreateInfo rpInfo {{img->GetFormat()}};
 	auto rp = context.CreateRenderPass(rpInfo);
-	auto rt = context.CreateRenderTarget({tex},rp);
+	auto rt = context.CreateRenderTarget({tex}, rp);
 	rt->SetDebugName("img_slideshow_rt");
 
-	m_blurSet = prosper::BlurSet::Create(context,rt,texPreload);
+	m_blurSet = prosper::BlurSet::Create(context, rt, texPreload);
 	if(m_blurSet == nullptr)
 		return;
 
 	m_lastTexture = lastTexture;
-	if(wiImgPreload.texture == nullptr)
-	{
+	if(wiImgPreload.texture == nullptr) {
 		wiImgPreload.texture = nullptr;
 		return;
 	}
 
 	auto &drawCmd = context.GetWindow().GetDrawCommandBuffer();
-	try
-	{
-		prosper::util::record_blur_image(context,drawCmd,*m_blurSet,{
-			Vector4(1.f,1.f,1.f,1.f),
-			1.75f, /* Blur size */
-			9 /* Kernel size */
-		});
+	try {
+		prosper::util::record_blur_image(context, drawCmd, *m_blurSet,
+		  {
+		    Vector4(1.f, 1.f, 1.f, 1.f), 1.75f, /* Blur size */
+		    9                                   /* Kernel size */
+		  });
 	}
-	catch(const std::logic_error &e)
-	{
-		Con::cwar<<"Unable to blur menu background image: '"<<e.what()<<"'!"<<Con::endl;
+	catch(const std::logic_error &e) {
+		Con::cwar << "Unable to blur menu background image: '" << e.what() << "'!" << Con::endl;
 	}
 	texPreload = m_blurSet->GetFinalRenderTarget()->GetTexture().shared_from_this();
 
-	auto *pImgPrev = static_cast<WITexturedRect*>(m_hImgPrev.get());
-	auto *pImgNext = static_cast<WITexturedRect*>(m_hImgNext.get());
+	auto *pImgPrev = static_cast<WITexturedRect *>(m_hImgPrev.get());
+	auto *pImgNext = static_cast<WITexturedRect *>(m_hImgNext.get());
 
 	if(m_lastTexture == nullptr)
 		pImgPrev->ClearTexture();
@@ -166,18 +157,16 @@ void WIImageSlideShow::SetImages(const std::vector<std::string> &images)
 	createInfo.height = 1u;
 	createInfo.format = prosper::Format::R8G8B8A8_UNorm;
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
-	std::array<uint8_t,4> px = {0u,0u,0u,std::numeric_limits<uint8_t>::max()};
-	auto img = c_engine->GetRenderContext().CreateImage(createInfo,px.data());
-	if(img != nullptr)
-	{
+	std::array<uint8_t, 4> px = {0u, 0u, 0u, std::numeric_limits<uint8_t>::max()};
+	auto img = c_engine->GetRenderContext().CreateImage(createInfo, px.data());
+	if(img != nullptr) {
 		prosper::util::TextureCreateInfo texCreateInfo {};
 		prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 		prosper::util::SamplerCreateInfo samplerCreateInfo {};
 		samplerCreateInfo.addressModeU = samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::Repeat;
-		auto tex = c_engine->GetRenderContext().CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
-		if(tex != nullptr)
-		{
-			auto *pImgNext = static_cast<WITexturedRect*>(m_hImgNext.get());
+		auto tex = c_engine->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
+		if(tex != nullptr) {
+			auto *pImgNext = static_cast<WITexturedRect *>(m_hImgNext.get());
 			pImgNext->SetTexture(*tex);
 		}
 	}
@@ -193,25 +182,25 @@ void WIImageSlideShow::PreloadNextImage(Int32 img)
 	imgPreload.image = img;
 
 	auto &wgui = WGUI::GetInstance();
-	auto &matManager = static_cast<msys::CMaterialManager&>(wgui.GetMaterialManager());
+	auto &matManager = static_cast<msys::CMaterialManager &>(wgui.GetMaterialManager());
 	auto &textureManager = matManager.GetTextureManager();
 	auto hSlideShow = GetHandle();
 
 	auto loadInfo = std::make_unique<msys::TextureLoadInfo>();
 	loadInfo->flags |= util::AssetLoadFlags::AbsolutePath;
-	loadInfo->onLoaded = [this,hSlideShow](util::Asset &asset) {
+	loadInfo->onLoaded = [this, hSlideShow](util::Asset &asset) {
 		if(!hSlideShow.IsValid())
 			return;
 		m_imgPreload.texture = msys::TextureManager::GetAssetObject(asset);
 		m_imgPreload.ready = true;
 		m_imgPreload.loading = false;
 	};
-	textureManager.PreloadAsset(f,std::move(loadInfo));
+	textureManager.PreloadAsset(f, std::move(loadInfo));
 }
 
 void WIImageSlideShow::DisplayNextImage()
 {
-	auto img = m_currentImg +1;
+	auto img = m_currentImg + 1;
 	if(img >= m_files.size())
 		img = 0;
 	PreloadNextImage(Int32(img));
@@ -219,19 +208,17 @@ void WIImageSlideShow::DisplayNextImage()
 
 void WIImageSlideShow::PreloadNextRandomShuffle()
 {
-	if(m_randomShuffle.empty())
-	{
+	if(m_randomShuffle.empty()) {
 		m_randomShuffle.resize(m_files.size());
-		for(size_t i=0;i<m_files.size();i++)
+		for(size_t i = 0; i < m_files.size(); i++)
 			m_randomShuffle.at(i) = i;
 	}
 	if(m_randomShuffle.empty())
 		return;
-	auto r = umath::random(0,CUInt32(m_randomShuffle.size() -1));
+	auto r = umath::random(0, CUInt32(m_randomShuffle.size() - 1));
 	auto img = m_randomShuffle[r];
-	m_randomShuffle.erase(m_randomShuffle.begin() +r);
-	if(!m_randomShuffle.empty() && img == m_currentImg)
-	{
+	m_randomShuffle.erase(m_randomShuffle.begin() + r);
+	if(!m_randomShuffle.empty() && img == m_currentImg) {
 		PreloadNextRandomShuffle();
 		return;
 	}

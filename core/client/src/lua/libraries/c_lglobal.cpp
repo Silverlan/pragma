@@ -18,7 +18,4 @@ double Lua::ServerTime(lua_State *l)
 	return game->ServerTime();
 }
 
-double Lua::FrameTime(lua_State *l)
-{
-	return c_engine->GetDeltaFrameTime();
-}
+double Lua::FrameTime(lua_State *l) { return c_engine->GetDeltaFrameTime(); }

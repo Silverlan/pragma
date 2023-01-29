@@ -13,15 +13,11 @@
 
 extern DLLCLIENT CEngine *c_engine;
 
-bool util::to_image_buffer(
-	prosper::IImage &image,uimg::Format targetFormat,std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers,
-	bool includeLayers,bool includeMipmaps,prosper::ImageLayout inputImageLayout
-)
+bool util::to_image_buffer(prosper::IImage &image, uimg::Format targetFormat, std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers, bool includeLayers, bool includeMipmaps, prosper::ImageLayout inputImageLayout)
 {
 	auto outputFormat = targetFormat;
 	prosper::Format dstFormat;
-	switch(targetFormat)
-	{
+	switch(targetFormat) {
 	case uimg::Format::RGB8:
 	case uimg::Format::RGBA8:
 		dstFormat = prosper::Format::R8G8B8A8_UNorm;
@@ -47,15 +43,14 @@ bool util::to_image_buffer(
 
 	auto copyCreateInfo = image.GetCreateInfo();
 	auto imgRead = image.shared_from_this();
-	if(copyCreateInfo.format != dstFormat)
-	{
+	if(copyCreateInfo.format != dstFormat) {
 		copyCreateInfo.format = dstFormat;
 		copyCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 		copyCreateInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
 		copyCreateInfo.tiling = prosper::ImageTiling::Optimal; // Needs to be in optimal tiling because some GPUs do not support linear tiling with mipmaps
-		setupCmd->RecordImageBarrier(image,inputImageLayout,prosper::ImageLayout::TransferSrcOptimal);
-		imgRead = image.Copy(*setupCmd,copyCreateInfo);
-		setupCmd->RecordImageBarrier(image,prosper::ImageLayout::TransferSrcOptimal,inputImageLayout);
+		setupCmd->RecordImageBarrier(image, inputImageLayout, prosper::ImageLayout::TransferSrcOptimal);
+		imgRead = image.Copy(*setupCmd, copyCreateInfo);
+		setupCmd->RecordImageBarrier(image, prosper::ImageLayout::TransferSrcOptimal, inputImageLayout);
 	}
 
 	// Copy the image data to a buffer
@@ -68,50 +63,43 @@ bool util::to_image_buffer(
 	std::vector<std::vector<size_t>> layerMipmapOffsets {};
 	layerMipmapOffsets.resize(numLayers);
 	outImageBuffers.resize(numLayers);
-	for(auto iLayer=decltype(numLayers){0u};iLayer<numLayers;++iLayer)
-	{
+	for(auto iLayer = decltype(numLayers) {0u}; iLayer < numLayers; ++iLayer) {
 		outImageBuffers.at(iLayer).resize(numMipmaps);
 		auto &mipmapOffsets = layerMipmapOffsets.at(iLayer);
 		mipmapOffsets.resize(numMipmaps);
-		for(auto iMipmap=decltype(numMipmaps){0u};iMipmap<numMipmaps;++iMipmap)
-		{
+		for(auto iMipmap = decltype(numMipmaps) {0u}; iMipmap < numMipmaps; ++iMipmap) {
 			mipmapOffsets.at(iMipmap) = size;
 
 			auto extents = image.GetExtents(iMipmap);
-			size += extents.width *extents.height *sizePerPixel;
+			size += extents.width * extents.height * sizePerPixel;
 		}
 	}
 	auto buf = context.AllocateTemporaryBuffer(size);
-	if(buf == nullptr)
-	{
+	if(buf == nullptr) {
 		context.FlushSetupCommandBuffer();
 		return false; // Buffer allocation failed; Requested size too large?
 	}
-	setupCmd->RecordImageBarrier(*imgRead,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::TransferSrcOptimal);
+	setupCmd->RecordImageBarrier(*imgRead, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::TransferSrcOptimal);
 
 	prosper::util::BufferImageCopyInfo copyInfo {};
 	copyInfo.dstImageLayout = prosper::ImageLayout::TransferSrcOptimal;
 
-	struct ImageMipmapData
-	{
+	struct ImageMipmapData {
 		uint32_t mipmapIndex = 0u;
 		uint64_t bufferOffset = 0ull;
 		uint64_t bufferSize = 0ull;
 		prosper::Extent2D extents = {};
 	};
-	struct ImageLayerData
-	{
+	struct ImageLayerData {
 		std::vector<ImageMipmapData> mipmaps = {};
 		uint32_t layerIndex = 0u;
 	};
 	std::vector<ImageLayerData> layers = {};
-	for(auto iLayer=decltype(numLayers){0u};iLayer<numLayers;++iLayer)
-	{
+	for(auto iLayer = decltype(numLayers) {0u}; iLayer < numLayers; ++iLayer) {
 		layers.push_back({});
 		auto &layerData = layers.back();
 		layerData.layerIndex = iLayer;
-		for(auto iMipmap=decltype(numMipmaps){0u};iMipmap<numMipmaps;++iMipmap)
-		{
+		for(auto iMipmap = decltype(numMipmaps) {0u}; iMipmap < numMipmaps; ++iMipmap) {
 			layerData.mipmaps.push_back({});
 			auto &mipmapData = layerData.mipmaps.back();
 			mipmapData.mipmapIndex = iMipmap;
@@ -119,33 +107,28 @@ bool util::to_image_buffer(
 
 			auto extents = image.GetExtents(iMipmap);
 			mipmapData.extents = extents;
-			mipmapData.bufferSize = extents.width *extents.height *sizePerPixel;
+			mipmapData.bufferSize = extents.width * extents.height * sizePerPixel;
 		}
 	}
-	for(auto &layerData : layers)
-	{
-		for(auto &mipmapData : layerData.mipmaps)
-		{
+	for(auto &layerData : layers) {
+		for(auto &mipmapData : layerData.mipmaps) {
 			copyInfo.mipLevel = mipmapData.mipmapIndex;
 			copyInfo.baseArrayLayer = layerData.layerIndex;
 			copyInfo.bufferOffset = mipmapData.bufferOffset;
-			setupCmd->RecordCopyImageToBuffer(copyInfo,*imgRead,prosper::ImageLayout::TransferSrcOptimal,*buf);
+			setupCmd->RecordCopyImageToBuffer(copyInfo, *imgRead, prosper::ImageLayout::TransferSrcOptimal, *buf);
 		}
 	}
 	context.FlushSetupCommandBuffer();
 
-	for(auto iLayer=decltype(layers.size()){0u};iLayer<layers.size();++iLayer)
-	{
+	for(auto iLayer = decltype(layers.size()) {0u}; iLayer < layers.size(); ++iLayer) {
 		auto &layerData = layers.at(iLayer);
 		auto &layerImages = outImageBuffers.at(iLayer);
-		for(auto iMipmap=decltype(layerData.mipmaps.size()){0u};iMipmap<layerData.mipmaps.size();++iMipmap)
-		{
+		for(auto iMipmap = decltype(layerData.mipmaps.size()) {0u}; iMipmap < layerData.mipmaps.size(); ++iMipmap) {
 			auto &mipmapData = layerData.mipmaps.at(iMipmap);
 			auto &mipmapImg = layerImages.at(iMipmap);
-			mipmapImg = uimg::ImageBuffer::Create(mipmapData.extents.width,mipmapData.extents.height,targetFormat);
-			if(buf->Map(mipmapData.bufferOffset,mipmapData.bufferSize,prosper::IBuffer::MapFlags::ReadBit))
-			{
-				buf->Read(0,mipmapData.bufferSize,mipmapImg->GetData());
+			mipmapImg = uimg::ImageBuffer::Create(mipmapData.extents.width, mipmapData.extents.height, targetFormat);
+			if(buf->Map(mipmapData.bufferOffset, mipmapData.bufferSize, prosper::IBuffer::MapFlags::ReadBit)) {
+				buf->Read(0, mipmapData.bufferSize, mipmapImg->GetData());
 				buf->Unmap();
 			}
 			mipmapImg->Convert(outputFormat);
@@ -153,15 +136,11 @@ bool util::to_image_buffer(
 	}
 	return true;
 }
-bool util::to_image_buffer(
-	prosper::IImage &image,std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers,
-	bool includeLayers,bool includeMipmaps,prosper::ImageLayout inputImageLayout
-)
+bool util::to_image_buffer(prosper::IImage &image, std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers, bool includeLayers, bool includeMipmaps, prosper::ImageLayout inputImageLayout)
 {
 	auto format = image.GetFormat();
 	auto targetFormat = uimg::Format::RGBA8;
-	switch(format)
-	{
+	switch(format) {
 	case prosper::Format::R8_UNorm:
 	case prosper::Format::R8_SNorm:
 	case prosper::Format::R8_UScaled_PoorCoverage:
@@ -307,5 +286,5 @@ bool util::to_image_buffer(
 		targetFormat = uimg::Format::RGBA32;
 		break;
 	}
-	return to_image_buffer(image,targetFormat,outImageBuffers,includeLayers,includeMipmaps,inputImageLayout);
+	return to_image_buffer(image, targetFormat, outImageBuffers, includeLayers, includeMipmaps, inputImageLayout);
 }

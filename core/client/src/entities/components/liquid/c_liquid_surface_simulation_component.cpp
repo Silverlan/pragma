@@ -18,25 +18,21 @@ extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
 
-static std::vector<CLiquidSurfaceSimulationComponent*> s_waterEntities = {};
-REGISTER_CONVAR_CALLBACK_CL(cl_water_surface_simulation_spacing,[](NetworkState*,ConVar*,int,int val) {
+static std::vector<CLiquidSurfaceSimulationComponent *> s_waterEntities = {};
+REGISTER_CONVAR_CALLBACK_CL(cl_water_surface_simulation_spacing, [](NetworkState *, ConVar *, int, int val) {
 	for(auto *entWater : s_waterEntities)
 		entWater->ReloadSurfaceSimulator();
 });
 
-REGISTER_CONVAR_CALLBACK_CL(cl_water_surface_simulation_enable_gpu_acceleration,[](NetworkState*,ConVar*,bool,bool val) {
+REGISTER_CONVAR_CALLBACK_CL(cl_water_surface_simulation_enable_gpu_acceleration, [](NetworkState *, ConVar *, bool, bool val) {
 	for(auto *entWater : s_waterEntities)
 		entWater->ReloadSurfaceSimulator();
 });
 
-CLiquidSurfaceSimulationComponent::CLiquidSurfaceSimulationComponent(BaseEntity &ent)
-	: BaseLiquidSurfaceSimulationComponent(ent)
-{
-	s_waterEntities.push_back(this);
-}
+CLiquidSurfaceSimulationComponent::CLiquidSurfaceSimulationComponent(BaseEntity &ent) : BaseLiquidSurfaceSimulationComponent(ent) { s_waterEntities.push_back(this); }
 CLiquidSurfaceSimulationComponent::~CLiquidSurfaceSimulationComponent()
 {
-	auto it = std::find(s_waterEntities.begin(),s_waterEntities.end(),this);
+	auto it = std::find(s_waterEntities.begin(), s_waterEntities.end(), this);
 	if(it == s_waterEntities.end())
 		return;
 	s_waterEntities.erase(it);
@@ -46,22 +42,21 @@ void CLiquidSurfaceSimulationComponent::Initialize()
 {
 	BaseLiquidSurfaceSimulationComponent::Initialize();
 
-	BindEventUnhandled(CLiquidControlComponent::EVENT_ON_SPLASH,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		auto &splashInfo = static_cast<CEOnSplash&>(evData.get()).splashInfo;
+	BindEventUnhandled(CLiquidControlComponent::EVENT_ON_SPLASH, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		auto &splashInfo = static_cast<CEOnSplash &>(evData.get()).splashInfo;
 		if(m_physSurfaceSim)
-			static_cast<CPhysWaterSurfaceSimulator&>(*m_physSurfaceSim).CreateSplash(splashInfo.origin,splashInfo.radius,splashInfo.force);
+			static_cast<CPhysWaterSurfaceSimulator &>(*m_physSurfaceSim).CreateSplash(splashInfo.origin, splashInfo.radius, splashInfo.force);
 	});
-	BindEventUnhandled(CLiquidControlComponent::EVENT_ON_PROPERTIES_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(CLiquidControlComponent::EVENT_ON_PROPERTIES_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &controlC = *GetEntity().GetComponent<CLiquidControlComponent>();
-		if(m_physSurfaceSim)
-		{
+		if(m_physSurfaceSim) {
 			m_physSurfaceSim->SetStiffness(controlC.GetStiffness());
 			m_physSurfaceSim->SetPropagation(controlC.GetPropagation());
 		}
 	});
 }
 
-void CLiquidSurfaceSimulationComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CLiquidSurfaceSimulationComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CLiquidSurfaceSimulationComponent::ReceiveData(NetPacket &packet)
 {
@@ -69,10 +64,10 @@ void CLiquidSurfaceSimulationComponent::ReceiveData(NetPacket &packet)
 	SetMaxWaveHeight(height);
 }
 
-std::shared_ptr<PhysWaterSurfaceSimulator> CLiquidSurfaceSimulationComponent::InitializeSurfaceSimulator(const Vector2 &min,const Vector2 &max,float originY)
+std::shared_ptr<PhysWaterSurfaceSimulator> CLiquidSurfaceSimulationComponent::InitializeSurfaceSimulator(const Vector2 &min, const Vector2 &max, float originY)
 {
 	auto controlC = GetEntity().GetComponent<CLiquidControlComponent>();
-	return controlC.valid() ? std::make_shared<CPhysWaterSurfaceSimulator>(min,max,originY,GetSpacing(),controlC->GetStiffness(),controlC->GetPropagation()) : nullptr;
+	return controlC.valid() ? std::make_shared<CPhysWaterSurfaceSimulator>(min, max, originY, GetSpacing(), controlC->GetStiffness(), controlC->GetPropagation()) : nullptr;
 }
 
 void CLiquidSurfaceSimulationComponent::OnEntitySpawn()
@@ -81,7 +76,7 @@ void CLiquidSurfaceSimulationComponent::OnEntitySpawn()
 	ReloadSurfaceSimulator();
 }
 
-CWaterSurface *CLiquidSurfaceSimulationComponent::GetSurfaceEntity() const {return static_cast<CWaterSurface*>(m_hWaterSurface.get());}
+CWaterSurface *CLiquidSurfaceSimulationComponent::GetSurfaceEntity() const { return static_cast<CWaterSurface *>(m_hWaterSurface.get()); }
 
 void CLiquidSurfaceSimulationComponent::ReloadSurfaceSimulator()
 {
@@ -98,8 +93,7 @@ void CLiquidSurfaceSimulationComponent::ReloadSurfaceSimulator()
 	ent.RemoveEntityOnRemoval(entSurface);
 	m_hWaterSurface = entSurface->GetHandle();
 	auto pWaterSurfComponent = entSurface->GetComponent<pragma::CWaterSurfaceComponent>();
-	if(pWaterSurfComponent.valid())
-	{
+	if(pWaterSurfComponent.valid()) {
 		pWaterSurfComponent->SetWaterObject(this);
 		pWaterSurfComponent->SetSurfaceSimulator(m_physSurfaceSim);
 	}

@@ -12,14 +12,11 @@
 #include <pragma/lua/ldefinitions.h>
 
 class Model;
-namespace Lua
-{
-	namespace Model
-	{
-		namespace Server
-		{
-			DLLSERVER void AddMaterial(lua_State *l,::Model &mdl,uint32_t textureGroup,const std::string &name);
-			DLLSERVER void SetMaterial(lua_State *l,::Model &mdl,uint32_t texIdx,const std::string &name);
+namespace Lua {
+	namespace Model {
+		namespace Server {
+			DLLSERVER void AddMaterial(lua_State *l, ::Model &mdl, uint32_t textureGroup, const std::string &name);
+			DLLSERVER void SetMaterial(lua_State *l, ::Model &mdl, uint32_t texIdx, const std::string &name);
 		};
 	};
 };

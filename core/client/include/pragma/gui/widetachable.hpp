@@ -11,19 +11,16 @@
 #include "pragma/clientdefinitions.h"
 #include <wgui/wibase.h>
 
-class DLLCLIENT WIDetachable
-	: public WIBase
-{
-public:
+class DLLCLIENT WIDetachable : public WIBase {
+  public:
 	WIDetachable();
 	virtual ~WIDetachable() override;
 	virtual void OnRemove() override;
 	void Detach();
 	void Reattach();
 	bool IsDetached() const;
-protected:
-	struct DetachedWindow
-	{
+  protected:
+	struct DetachedWindow {
 		~DetachedWindow();
 		void Clear();
 		WIHandle reattachElement {};
@@ -31,7 +28,7 @@ protected:
 		WIHandle detachedBg {};
 		Vector2i origPos;
 		Vector2i origSize;
-		std::optional<std::array<float,4>> origAnchor;
+		std::optional<std::array<float, 4>> origAnchor;
 	};
 	std::unique_ptr<DetachedWindow> m_detachedWindow = nullptr;
 };

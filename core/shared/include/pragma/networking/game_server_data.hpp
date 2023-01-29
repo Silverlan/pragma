@@ -15,11 +15,11 @@
 #include <optional>
 #include <sharedutils/util_version.h>
 
-namespace util {class Library;};
-namespace pragma::networking
-{
-	struct DLLNETWORK GameServerInfo
-	{
+namespace util {
+	class Library;
+};
+namespace pragma::networking {
+	struct DLLNETWORK GameServerInfo {
 		uint16_t port = 0u;
 		util::Version version = {};
 		std::string gameName = "";

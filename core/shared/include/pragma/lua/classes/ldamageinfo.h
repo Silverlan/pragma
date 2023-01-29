@@ -13,10 +13,8 @@
 #include <mathutil/glmutil.h>
 
 class DamageInfo;
-namespace Lua
-{
-	namespace DamageInfo
-	{
+namespace Lua {
+	namespace DamageInfo {
 
 	};
 };

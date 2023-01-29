@@ -21,35 +21,19 @@ extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
 
-decltype(ShaderParticleBlob::VERTEX_BINDING_BLOB_NEIGHBORS) ShaderParticleBlob::VERTEX_BINDING_BLOB_NEIGHBORS = {prosper::VertexInputRate::Instance,MAX_BLOB_NEIGHBORS *sizeof(uint16_t)};
-decltype(ShaderParticleBlob::VERTEX_ATTRIBUTE_BLOB_NEIGHBORS) ShaderParticleBlob::VERTEX_ATTRIBUTE_BLOB_NEIGHBORS = {VERTEX_BINDING_BLOB_NEIGHBORS,prosper::Format::R32G32B32A32_UInt};
-decltype(ShaderParticleBlob::DESCRIPTOR_SET_PARTICLE_DATA) ShaderParticleBlob::DESCRIPTOR_SET_PARTICLE_DATA = {
-	{
-		prosper::DescriptorSetInfo::Binding { // Particle data
-			prosper::DescriptorType::StorageBufferDynamic,
-			prosper::ShaderStageFlags::FragmentBit
-		}
-	}
-};
-decltype(ShaderParticleBlob::DESCRIPTOR_SET_MATERIAL) ShaderParticleBlob::DESCRIPTOR_SET_MATERIAL = {
-	{
-		prosper::DescriptorSetInfo::Binding { // Material settings
-			prosper::DescriptorType::UniformBuffer,
-			prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit
-		}
-	}
-};
+decltype(ShaderParticleBlob::VERTEX_BINDING_BLOB_NEIGHBORS) ShaderParticleBlob::VERTEX_BINDING_BLOB_NEIGHBORS = {prosper::VertexInputRate::Instance, MAX_BLOB_NEIGHBORS * sizeof(uint16_t)};
+decltype(ShaderParticleBlob::VERTEX_ATTRIBUTE_BLOB_NEIGHBORS) ShaderParticleBlob::VERTEX_ATTRIBUTE_BLOB_NEIGHBORS = {VERTEX_BINDING_BLOB_NEIGHBORS, prosper::Format::R32G32B32A32_UInt};
+decltype(ShaderParticleBlob::DESCRIPTOR_SET_PARTICLE_DATA) ShaderParticleBlob::DESCRIPTOR_SET_PARTICLE_DATA = {{prosper::DescriptorSetInfo::Binding {// Particle data
+  prosper::DescriptorType::StorageBufferDynamic, prosper::ShaderStageFlags::FragmentBit}}};
+decltype(ShaderParticleBlob::DESCRIPTOR_SET_MATERIAL) ShaderParticleBlob::DESCRIPTOR_SET_MATERIAL = {{prosper::DescriptorSetInfo::Binding {// Material settings
+  prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit}}};
 decltype(ShaderParticleBlob::DESCRIPTOR_SET_SCENE) ShaderParticleBlob::DESCRIPTOR_SET_SCENE = {&ShaderParticle2DBase::DESCRIPTOR_SET_SCENE};
 decltype(ShaderParticleBlob::DESCRIPTOR_SET_RENDERER) ShaderParticleBlob::DESCRIPTOR_SET_RENDERER = {&ShaderParticle2DBase::DESCRIPTOR_SET_RENDERER};
 decltype(ShaderParticleBlob::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderParticleBlob::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderParticle2DBase::DESCRIPTOR_SET_RENDER_SETTINGS};
 decltype(ShaderParticleBlob::DESCRIPTOR_SET_LIGHTS) ShaderParticleBlob::DESCRIPTOR_SET_LIGHTS = {&ShaderParticle2DBase::DESCRIPTOR_SET_LIGHTS};
 decltype(ShaderParticleBlob::DESCRIPTOR_SET_SHADOWS) ShaderParticleBlob::DESCRIPTOR_SET_SHADOWS = {&ShaderParticle2DBase::DESCRIPTOR_SET_SHADOWS};
 decltype(ShaderParticleBlob::DESCRIPTOR_SET_PBR) ShaderParticleBlob::DESCRIPTOR_SET_PBR = {&ShaderPBR::DESCRIPTOR_SET_PBR};
-ShaderParticleBlob::ShaderParticleBlob(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderParticle2DBase(context,identifier,"particles/blob/vs_particle_blob","particles/blob/fs_particle_blob")
-{
-	SetBaseShader<ShaderParticle>();
-}
+ShaderParticleBlob::ShaderParticleBlob(prosper::IPrContext &context, const std::string &identifier) : ShaderParticle2DBase(context, identifier, "particles/blob/vs_particle_blob", "particles/blob/fs_particle_blob") { SetBaseShader<ShaderParticle>(); }
 
 uint32_t ShaderParticleBlob::GetSceneDescriptorSetIndex() const
 {
@@ -61,17 +45,17 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticleBlob::InitializeMate
 	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
 	if(!descSetGroup)
 		return nullptr;
-	ShaderGameWorldLightingPass::InitializeMaterialBuffer(*descSetGroup->GetDescriptorSet(),mat,0);
-	mat.SetDescriptorSetGroup(*this,descSetGroup);
+	ShaderGameWorldLightingPass::InitializeMaterialBuffer(*descSetGroup->GetDescriptorSet(), mat, 0);
+	mat.SetDescriptorSetGroup(*this, descSetGroup);
 	return descSetGroup;
 }
 
-bool ShaderParticleBlob::RecordParticleMaterial(prosper::ShaderBindState &bindState,const CRasterizationRendererComponent &renderer,const pragma::CParticleSystemComponent &ps) const
+bool ShaderParticleBlob::RecordParticleMaterial(prosper::ShaderBindState &bindState, const CRasterizationRendererComponent &renderer, const pragma::CParticleSystemComponent &ps) const
 {
-	auto *mat = static_cast<CMaterial*>(ps.GetMaterial());
+	auto *mat = static_cast<CMaterial *>(ps.GetMaterial());
 	if(mat == nullptr)
 		return false;
-	auto descSetGroupMat = mat->GetDescriptorSetGroup(const_cast<ShaderParticleBlob&>(*this));
+	auto descSetGroupMat = mat->GetDescriptorSetGroup(const_cast<ShaderParticleBlob &>(*this));
 	// if(descSetGroupMat == nullptr)
 	// 	descSetGroupMat = const_cast<ShaderParticleBlob*>(this)->InitializeMaterialDescriptorSet(*mat); // Attempt to initialize on the fly
 	if(descSetGroupMat == nullptr)
@@ -80,132 +64,105 @@ bool ShaderParticleBlob::RecordParticleMaterial(prosper::ShaderBindState &bindSt
 	auto *descSetDepth = renderer.GetDepthDescriptorSet();
 	if(descSetDepth == nullptr)
 		return false;
-	auto &animDescSet = const_cast<ShaderParticleBlob*>(this)->GetAnimationDescriptorSet(const_cast<pragma::CParticleSystemComponent&>(ps));
-	return RecordBindDescriptorSets(bindState,{&descSetTexture},DESCRIPTOR_SET_MATERIAL.setIndex);
+	auto &animDescSet = const_cast<ShaderParticleBlob *>(this)->GetAnimationDescriptorSet(const_cast<pragma::CParticleSystemComponent &>(ps));
+	return RecordBindDescriptorSets(bindState, {&descSetTexture}, DESCRIPTOR_SET_MATERIAL.setIndex);
 }
 
-void ShaderParticleBlob::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderParticleBlob::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
 	auto basePipelineIdx = GetBasePipelineIndex(pipelineIdx);
-	ShaderSceneLit::InitializeGfxPipeline(pipelineInfo,basePipelineIdx);
+	ShaderSceneLit::InitializeGfxPipeline(pipelineInfo, basePipelineIdx);
 
 	pipelineInfo.ToggleDepthWrites(pipelineIdx == GetDepthPipelineIndex()); // Last pipeline is depth pipeline
 
-	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 	SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
 
 	RegisterDefaultGfxPipelineVertexAttributes(pipelineInfo);
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BLOB_NEIGHBORS);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_BLOB_NEIGHBORS);
 
-	RegisterDefaultGfxPipelinePushConstantRanges(pipelineInfo,pipelineIdx);
+	RegisterDefaultGfxPipelinePushConstantRanges(pipelineInfo, pipelineIdx);
 
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_PARTICLE_DATA);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_MATERIAL);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SCENE);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_RENDERER);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_RENDER_SETTINGS);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_LIGHTS);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SHADOWS);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_PBR);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_PARTICLE_DATA);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_MATERIAL);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_RENDERER);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_RENDER_SETTINGS);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_LIGHTS);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_SHADOWS);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_PBR);
 }
 
-bool ShaderParticleBlob::RecordBindScene(
-	prosper::ICommandBuffer &cmd,const prosper::IShaderPipelineLayout &layout,
-	const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
-	prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
-	prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
-	prosper::IDescriptorSet &dsShadows
-) const
+bool ShaderParticleBlob::RecordBindScene(prosper::ICommandBuffer &cmd, const prosper::IShaderPipelineLayout &layout, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
+  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows) const
 {
-	return ShaderParticle2DBase::RecordBindScene(
-		cmd,layout,scene,renderer,
-		dsScene,dsRenderer,dsRenderSettings,
-		dsLights,dsShadows
-	);
+	return ShaderParticle2DBase::RecordBindScene(cmd, layout, scene, renderer, dsScene, dsRenderer, dsRenderSettings, dsLights, dsShadows);
 }
 
-bool ShaderParticleBlob::RecordDraw(
-	prosper::ShaderBindState &bindState,pragma::CSceneComponent &scene,
-	const CRasterizationRendererComponent &renderer,const pragma::CParticleSystemComponent &ps,
-	pragma::CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags ptRenderFlags,
-	prosper::IBuffer &blobIndexBuffer,prosper::IDescriptorSet &dsParticles,uint32_t particleBufferOffset
-)
+bool ShaderParticleBlob::RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const pragma::CParticleSystemComponent &ps, pragma::CParticleSystemComponent::OrientationType orientationType,
+  ParticleRenderFlags ptRenderFlags, prosper::IBuffer &blobIndexBuffer, prosper::IDescriptorSet &dsParticles, uint32_t particleBufferOffset)
 {
-	if(RecordParticleMaterial(bindState,renderer,ps) == false)
+	if(RecordParticleMaterial(bindState, renderer, ps) == false)
 		return false;
 	auto &cam = scene.GetActiveCamera();
 
 	auto colorFactor = scene.GetParticleSystemColorFactor();
-	if(umath::is_flag_set(ptRenderFlags,ParticleRenderFlags::Bloom))
-	{
+	if(umath::is_flag_set(ptRenderFlags, ParticleRenderFlags::Bloom)) {
 		auto bloomColorFactor = ps.GetEffectiveBloomColorFactor();
 		if(bloomColorFactor.has_value())
 			colorFactor *= *bloomColorFactor;
 	}
-	else
-	{
+	else {
 		auto *mat = ps.GetMaterial();
 		auto &psColorFactor = ps.GetColorFactor();
 		colorFactor *= psColorFactor;
-		if(mat)
-		{
+		if(mat) {
 			auto &data = mat->GetDataBlock();
 			auto &dColorFactor = data->GetValue("color_factor");
-			if(dColorFactor != nullptr && typeid(*dColorFactor) == typeid(ds::Vector4))
-			{
-				auto &matColorFactor = static_cast<ds::Vector4*>(dColorFactor.get())->GetValue();
+			if(dColorFactor != nullptr && typeid(*dColorFactor) == typeid(ds::Vector4)) {
+				auto &matColorFactor = static_cast<ds::Vector4 *>(dColorFactor.get())->GetValue();
 				colorFactor *= matColorFactor;
 			}
 		}
 	}
 
-	auto renderFlags = GetRenderFlags(ps,ptRenderFlags);
+	auto renderFlags = GetRenderFlags(ps, ptRenderFlags);
 	auto width = c_engine->GetRenderContext().GetWindowWidth();
 	auto height = c_engine->GetRenderContext().GetWindowHeight();
 	assert(width <= std::numeric_limits<uint16_t>::max() && height <= std::numeric_limits<uint16_t>::max());
 
 	auto viewportSize = static_cast<uint32_t>(width);
-	viewportSize<<=16;
+	viewportSize <<= 16;
 	viewportSize |= height;
-	ShaderParticle2DBase::PushConstants pushConstants {
-		colorFactor,
-		Vector3 {}, /* camRightWs */
-		umath::to_integral(orientationType),
-		Vector3{}, /* camUpWs */
-		0.f, /* nearZ */
-		cam.valid() ? cam->GetEntity().GetPosition() : Vector3{},
-		0.f, /* farZ */
-		viewportSize,
-		umath::to_integral(renderFlags),
-		umath::to_integral(ps.GetAlphaMode()),
-		ps.GetSimulationTime()
-	};
+	ShaderParticle2DBase::PushConstants pushConstants {colorFactor, Vector3 {}, /* camRightWs */
+	  umath::to_integral(orientationType), Vector3 {},                          /* camUpWs */
+	  0.f,                                                                      /* nearZ */
+	  cam.valid() ? cam->GetEntity().GetPosition() : Vector3 {}, 0.f,           /* farZ */
+	  viewportSize, umath::to_integral(renderFlags), umath::to_integral(ps.GetAlphaMode()), ps.GetSimulationTime()};
 	Mat4 vp;
-	if(cam.valid())
-	{
+	if(cam.valid()) {
 		auto &v = cam->GetViewMatrix();
-		vp = cam->GetProjectionMatrix() *v;
+		vp = cam->GetProjectionMatrix() * v;
 	}
-	GetParticleSystemOrientationInfo(vp,ps,pushConstants.camUpWs,pushConstants.camRightWs,pushConstants.nearZ,pushConstants.farZ,ps.GetMaterial(),cam.get());
+	GetParticleSystemOrientationInfo(vp, ps, pushConstants.camUpWs, pushConstants.camRightWs, pushConstants.nearZ, pushConstants.farZ, ps.GetMaterial(), cam.get());
 
-	if(RecordPushConstants(bindState,pushConstants) == false)
+	if(RecordPushConstants(bindState, pushConstants) == false)
 		return false;
-	if(RecordBindDescriptorSet(bindState,dsParticles,DESCRIPTOR_SET_PARTICLE_DATA.setIndex,{particleBufferOffset}) == false)
+	if(RecordBindDescriptorSet(bindState, dsParticles, DESCRIPTOR_SET_PARTICLE_DATA.setIndex, {particleBufferOffset}) == false)
 		return false;
 	auto &shaderPbr = c_game->GetGameShader(CGame::GameShader::Pbr);
 	assert(shaderPbr.valid());
 
 	float iblStrength = 1.f;
 	auto sceneFlags = ShaderGameWorld::SceneFlags::None;
-	auto *dsPbr = static_cast<pragma::ShaderPBR*>(shaderPbr.get())->GetReflectionProbeDescriptorSet(scene,iblStrength,sceneFlags);
+	auto *dsPbr = static_cast<pragma::ShaderPBR *>(shaderPbr.get())->GetReflectionProbeDescriptorSet(scene, iblStrength, sceneFlags);
 	assert(dsPbr != nullptr);
-	if(RecordBindDescriptorSet(bindState,*dsPbr,DESCRIPTOR_SET_PBR.setIndex) == false)
+	if(RecordBindDescriptorSet(bindState, *dsPbr, DESCRIPTOR_SET_PBR.setIndex) == false)
 		return false;
-	auto bAnimated = ((renderFlags &RenderFlags::Animated) != RenderFlags::None) ? true : false;
+	auto bAnimated = ((renderFlags & RenderFlags::Animated) != RenderFlags::None) ? true : false;
 
 	auto ptAnimBuffer = ps.GetParticleAnimationBuffer();
 	if(ptAnimBuffer == nullptr)
 		ptAnimBuffer = c_engine->GetRenderContext().GetDummyBuffer();
-	return RecordBindVertexBuffers(bindState,{ps.GetParticleBuffer().get(),ptAnimBuffer.get(),&blobIndexBuffer}) == true &&
-		ShaderSceneLit::RecordDraw(bindState,pragma::CParticleSystemComponent::VERTEX_COUNT,ps.GetRenderParticleCount()) == true;
+	return RecordBindVertexBuffers(bindState, {ps.GetParticleBuffer().get(), ptAnimBuffer.get(), &blobIndexBuffer}) == true && ShaderSceneLit::RecordDraw(bindState, pragma::CParticleSystemComponent::VERTEX_COUNT, ps.GetRenderParticleCount()) == true;
 }

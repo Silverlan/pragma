@@ -18,85 +18,55 @@ extern DLLCLIENT CEngine *c_engine;
 using namespace pragma;
 
 decltype(ShaderDepthToRGB::VERTEX_BINDING_VERTEX) ShaderDepthToRGB::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex};
-decltype(ShaderDepthToRGB::VERTEX_ATTRIBUTE_POSITION) ShaderDepthToRGB::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX,prosper::CommonBufferCache::GetSquareVertexFormat()};
-decltype(ShaderDepthToRGB::VERTEX_ATTRIBUTE_UV) ShaderDepthToRGB::VERTEX_ATTRIBUTE_UV = {VERTEX_BINDING_VERTEX,prosper::CommonBufferCache::GetSquareUvFormat()};
+decltype(ShaderDepthToRGB::VERTEX_ATTRIBUTE_POSITION) ShaderDepthToRGB::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX, prosper::CommonBufferCache::GetSquareVertexFormat()};
+decltype(ShaderDepthToRGB::VERTEX_ATTRIBUTE_UV) ShaderDepthToRGB::VERTEX_ATTRIBUTE_UV = {VERTEX_BINDING_VERTEX, prosper::CommonBufferCache::GetSquareUvFormat()};
 
-decltype(ShaderDepthToRGB::DESCRIPTOR_SET) ShaderDepthToRGB::DESCRIPTOR_SET = {
-	{
-		prosper::DescriptorSetInfo::Binding {
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		}
-	}
-};
-ShaderDepthToRGB::ShaderDepthToRGB(prosper::IPrContext &context,const std::string &identifier,const std::string &fsShader)
-	: ShaderGraphics(context,identifier,"screen/vs_screen_uv",fsShader)
-{}
-ShaderDepthToRGB::ShaderDepthToRGB(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderDepthToRGB(context,identifier,"debug/fs_depth_to_rgb")
-{}
+decltype(ShaderDepthToRGB::DESCRIPTOR_SET) ShaderDepthToRGB::DESCRIPTOR_SET = {{prosper::DescriptorSetInfo::Binding {prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
+ShaderDepthToRGB::ShaderDepthToRGB(prosper::IPrContext &context, const std::string &identifier, const std::string &fsShader) : ShaderGraphics(context, identifier, "screen/vs_screen_uv", fsShader) {}
+ShaderDepthToRGB::ShaderDepthToRGB(prosper::IPrContext &context, const std::string &identifier) : ShaderDepthToRGB(context, identifier, "debug/fs_depth_to_rgb") {}
 
-void ShaderDepthToRGB::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderDepthToRGB::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 
-	ToggleDynamicScissorState(pipelineInfo,true);
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_UV);
+	ToggleDynamicScissorState(pipelineInfo, true);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_POSITION);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_UV);
 
-	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,GetPushConstantSize(),prosper::ShaderStageFlags::FragmentBit);
+	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, GetPushConstantSize(), prosper::ShaderStageFlags::FragmentBit);
 
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET);
 }
 
 template<class TPushConstants>
-	bool ShaderDepthToRGB::RecordDraw(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetDepthTex,const TPushConstants &pushConstants) const
+bool ShaderDepthToRGB::RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetDepthTex, const TPushConstants &pushConstants) const
 {
-	return RecordBindVertexBuffers(bindState,{c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexUvBuffer().get()}) == true &&
-		RecordBindDescriptorSet(bindState,descSetDepthTex) == true &&
-		RecordPushConstants(bindState,pushConstants) == true &&
-		prosper::ShaderGraphics::RecordDraw(bindState,prosper::CommonBufferCache::GetSquareVertexCount()) == true;
+	return RecordBindVertexBuffers(bindState, {c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexUvBuffer().get()}) == true && RecordBindDescriptorSet(bindState, descSetDepthTex) == true && RecordPushConstants(bindState, pushConstants) == true
+	  && prosper::ShaderGraphics::RecordDraw(bindState, prosper::CommonBufferCache::GetSquareVertexCount()) == true;
 }
 
-bool ShaderDepthToRGB::RecordDraw(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetDepthTex,float nearZ,float farZ,float contrastFactor) const
-{
-	return RecordDraw(bindState,descSetDepthTex,PushConstants{
-		nearZ,farZ,contrastFactor
-	});
-}
+bool ShaderDepthToRGB::RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetDepthTex, float nearZ, float farZ, float contrastFactor) const { return RecordDraw(bindState, descSetDepthTex, PushConstants {nearZ, farZ, contrastFactor}); }
 
-uint32_t ShaderDepthToRGB::GetPushConstantSize() const {return sizeof(PushConstants);}
+uint32_t ShaderDepthToRGB::GetPushConstantSize() const { return sizeof(PushConstants); }
 
 //////////////////////
 
-ShaderCubeDepthToRGB::ShaderCubeDepthToRGB(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderDepthToRGB(context,identifier,"debug/fs_cube_depth_to_rgb")
-{}
+ShaderCubeDepthToRGB::ShaderCubeDepthToRGB(prosper::IPrContext &context, const std::string &identifier) : ShaderDepthToRGB(context, identifier, "debug/fs_cube_depth_to_rgb") {}
 
-bool ShaderCubeDepthToRGB::RecordDraw(
-	prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetDepthTex,float nearZ,float farZ,uint32_t cubeSide,float contrastFactor
-) const
+bool ShaderCubeDepthToRGB::RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetDepthTex, float nearZ, float farZ, uint32_t cubeSide, float contrastFactor) const
 {
-	return ShaderDepthToRGB::RecordDraw(bindState,descSetDepthTex,PushConstants{
-		{nearZ,farZ,contrastFactor},static_cast<int32_t>(cubeSide)
-	});
+	return ShaderDepthToRGB::RecordDraw(bindState, descSetDepthTex, PushConstants {{nearZ, farZ, contrastFactor}, static_cast<int32_t>(cubeSide)});
 }
 
-uint32_t ShaderCubeDepthToRGB::GetPushConstantSize() const {return sizeof(PushConstants);}
+uint32_t ShaderCubeDepthToRGB::GetPushConstantSize() const { return sizeof(PushConstants); }
 
 //////////////////////
 
-ShaderCSMDepthToRGB::ShaderCSMDepthToRGB(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderDepthToRGB(context,identifier,"debug/fs_csm_depth_to_rgb")
-{}
+ShaderCSMDepthToRGB::ShaderCSMDepthToRGB(prosper::IPrContext &context, const std::string &identifier) : ShaderDepthToRGB(context, identifier, "debug/fs_csm_depth_to_rgb") {}
 
-bool ShaderCSMDepthToRGB::RecordDraw(
-	prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetDepthTex,float nearZ,float farZ,uint32_t layer,float contrastFactor
-) const
+bool ShaderCSMDepthToRGB::RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetDepthTex, float nearZ, float farZ, uint32_t layer, float contrastFactor) const
 {
-	return ShaderDepthToRGB::RecordDraw(bindState,descSetDepthTex,PushConstants{
-		{nearZ,farZ,contrastFactor},static_cast<int32_t>(layer)
-	});
+	return ShaderDepthToRGB::RecordDraw(bindState, descSetDepthTex, PushConstants {{nearZ, farZ, contrastFactor}, static_cast<int32_t>(layer)});
 }
 
-uint32_t ShaderCSMDepthToRGB::GetPushConstantSize() const {return sizeof(PushConstants);}
+uint32_t ShaderCSMDepthToRGB::GetPushConstantSize() const { return sizeof(PushConstants); }

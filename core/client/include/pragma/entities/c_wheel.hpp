@@ -13,27 +13,21 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_wheel_component.hpp>
 
-namespace pragma
-{
-	class DLLCLIENT CWheelComponent final
-		: public BaseWheelComponent,
-		public CBaseSnapshotComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CWheelComponent final : public BaseWheelComponent, public CBaseSnapshotComponent {
+	  public:
 		CWheelComponent(BaseEntity &ent) : BaseWheelComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void ReceiveSnapshotData(NetPacket &packet) override;
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
-		virtual bool ShouldTransmitSnapshotData() const override {return true;}
+		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
+		virtual bool ShouldTransmitSnapshotData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 };
 
-class DLLCLIENT CWheel
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CWheel : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

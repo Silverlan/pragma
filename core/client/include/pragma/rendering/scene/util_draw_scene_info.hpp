@@ -20,25 +20,22 @@
 
 class CBaseEntity;
 class CGame;
-namespace prosper {class IPrimaryCommandBuffer; class ICommandBuffer; class RenderTarget; class IImage;};
-namespace pragma {class CSceneComponent;};
-namespace util
-{
-	struct DLLCLIENT DrawSceneInfo
-	{
-		enum class Flags : uint8_t
-		{
-			None = 0u,
-			FlipVertically = 1u,
-			DisableRender = FlipVertically<<1u,
-			Reflection = DisableRender<<1u,
-			DisablePrepass = Reflection<<1u,
-			DisableLightingPass = DisablePrepass<<1u
-		};
+namespace prosper {
+	class IPrimaryCommandBuffer;
+	class ICommandBuffer;
+	class RenderTarget;
+	class IImage;
+};
+namespace pragma {
+	class CSceneComponent;
+};
+namespace util {
+	struct DLLCLIENT DrawSceneInfo {
+		enum class Flags : uint8_t { None = 0u, FlipVertically = 1u, DisableRender = FlipVertically << 1u, Reflection = DisableRender << 1u, DisablePrepass = Reflection << 1u, DisableLightingPass = DisablePrepass << 1u };
 		DrawSceneInfo();
 		DrawSceneInfo(const DrawSceneInfo &other);
 		DrawSceneInfo &operator=(const DrawSceneInfo &other);
-		util::TWeakSharedHandle<::pragma::CSceneComponent> scene = util::TWeakSharedHandle<::pragma::CSceneComponent>{};
+		util::TWeakSharedHandle<::pragma::CSceneComponent> scene = util::TWeakSharedHandle<::pragma::CSceneComponent> {};
 		mutable std::shared_ptr<prosper::IPrimaryCommandBuffer> commandBuffer = nullptr;
 		std::shared_ptr<prosper::RenderTarget> renderTarget = nullptr;
 		RenderFlags renderFlags = RenderFlags::All;
@@ -48,9 +45,9 @@ namespace util
 		std::optional<Vector3> pvsOrigin {};
 		::pragma::rendering::RenderMask exclusionMask = ::pragma::rendering::RenderMask::None;
 		::pragma::rendering::RenderMask inclusionMask = ::pragma::rendering::RenderMask::None;
-		
-		std::function<bool(CBaseEntity&)> prepassFilter = nullptr;
-		std::function<bool(CBaseEntity&)> renderFilter = nullptr;
+
+		std::function<bool(CBaseEntity &)> prepassFilter = nullptr;
+		std::function<bool(CBaseEntity &)> renderFilter = nullptr;
 
 		std::shared_ptr<prosper::IImage> outputImage = nullptr;
 		uint32_t outputLayerId = 0u;
@@ -59,14 +56,13 @@ namespace util
 		mutable std::unique_ptr<RenderStats> renderStats = nullptr;
 		std::unique_ptr<std::vector<DrawSceneInfo>> subPasses = nullptr;
 
-		::pragma::rendering::RenderMask GetRenderMask(CGame & game) const;
+		::pragma::rendering::RenderMask GetRenderMask(CGame &game) const;
 		Vector3 GetPvsOrigin() const;
 		void AddSubPass(const DrawSceneInfo &drawSceneInfo);
 		const std::vector<DrawSceneInfo> *GetSubPasses() const;
 	};
-	struct DLLCLIENT RenderPassDrawInfo
-	{
-		RenderPassDrawInfo(const DrawSceneInfo &drawSceneInfo,prosper::ICommandBuffer &cmdBuffer);
+	struct DLLCLIENT RenderPassDrawInfo {
+		RenderPassDrawInfo(const DrawSceneInfo &drawSceneInfo, prosper::ICommandBuffer &cmdBuffer);
 		const DrawSceneInfo &drawSceneInfo;
 		mutable std::shared_ptr<prosper::ICommandBuffer> commandBuffer = nullptr;
 	};

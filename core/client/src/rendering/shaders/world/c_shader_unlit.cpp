@@ -16,27 +16,18 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-decltype(ShaderUnlit::DESCRIPTOR_SET_MATERIAL) ShaderUnlit::DESCRIPTOR_SET_MATERIAL = {
-	{
-		prosper::DescriptorSetInfo::Binding { // Material settings
-			prosper::DescriptorType::UniformBuffer,
-			prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit
-		},
-		prosper::DescriptorSetInfo::Binding { // Albedo Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		}
-	}
-};
-ShaderUnlit::ShaderUnlit(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderGameWorldLightingPass{context,identifier,"world/vs_textured","world/fs_unlit"}
+decltype(ShaderUnlit::DESCRIPTOR_SET_MATERIAL) ShaderUnlit::DESCRIPTOR_SET_MATERIAL = {{prosper::DescriptorSetInfo::Binding {// Material settings
+                                                                                          prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit},
+  prosper::DescriptorSetInfo::Binding {// Albedo Map
+    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
+ShaderUnlit::ShaderUnlit(prosper::IPrContext &context, const std::string &identifier) : ShaderGameWorldLightingPass {context, identifier, "world/vs_textured", "world/fs_unlit"}
 {
 	// SetPipelineCount(umath::to_integral(Pipeline::Count));
 }
-prosper::DescriptorSetInfo &ShaderUnlit::GetMaterialDescriptorSetInfo() const {return ShaderGameWorldLightingPass::DESCRIPTOR_SET_MATERIAL;}//DESCRIPTOR_SET_MATERIAL;}
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderUnlit::InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo)
+prosper::DescriptorSetInfo &ShaderUnlit::GetMaterialDescriptorSetInfo() const { return ShaderGameWorldLightingPass::DESCRIPTOR_SET_MATERIAL; } //DESCRIPTOR_SET_MATERIAL;}
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderUnlit::InitializeMaterialDescriptorSet(CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo)
 {
-	return ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(mat,descSetInfo);
+	return ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(mat, descSetInfo);
 	/*auto *albedoMap = mat.GetDiffuseMap();
 	if(albedoMap == nullptr || albedoMap->texture == nullptr)
 		return nullptr;
@@ -57,6 +48,6 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderUnlit::InitializeMaterialDes
 }
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderUnlit::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
-	return InitializeMaterialDescriptorSet(mat,ShaderGameWorldLightingPass::DESCRIPTOR_SET_MATERIAL);
+	return InitializeMaterialDescriptorSet(mat, ShaderGameWorldLightingPass::DESCRIPTOR_SET_MATERIAL);
 	//return InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
 }

@@ -10,12 +10,9 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 #include <string>
 
-namespace pragma
-{
-	class DLLNETWORK BaseLogicRelayComponent
-		: public pragma::BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLNETWORK BaseLogicRelayComponent : public pragma::BaseEntityComponent {
+	  public:
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
 	};

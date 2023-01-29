@@ -6,10 +6,10 @@
  */
 
 #ifdef _WIN32
-	//#pragma message("Compiling precompiled headers.\n")
-	#define _WIN32_WINNT 0x0501
-	#define NOMINMAX
-	#include <Windows.h>
+//#pragma message("Compiling precompiled headers.\n")
+#define _WIN32_WINNT 0x0501
+#define NOMINMAX
+#include <Windows.h>
 #endif
 
 #include <deque>
@@ -58,8 +58,6 @@
 #include <memory>
 #include <unordered_map>
 
-
-
 #ifdef __linux__
 #include "pragma/lua/policies/core_policies.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
@@ -78,7 +76,6 @@
 #include "pragma/lua/policies/vector_policy.hpp"
 #include <pragma/entities/components/panima_component_channel_submitter_def.hpp>
 
-
 #include "pragma/lua/converters/alias_converter_t.hpp"
 #include "pragma/lua/converters/cast_converter_t.hpp"
 #include "pragma/lua/converters/file_converter_t.hpp"
@@ -92,4 +89,3 @@
 #include <pragma/entities/entity_component_manager_t.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #endif
-

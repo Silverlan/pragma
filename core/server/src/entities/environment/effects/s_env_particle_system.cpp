@@ -16,9 +16,9 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_particle_system,EnvParticleSystem);
+LINK_ENTITY_TO_CLASS(env_particle_system, EnvParticleSystem);
 
-void SParticleSystemComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SParticleSystemComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_particleFile);
 	packet->WriteString(m_particleName);
@@ -29,12 +29,12 @@ void SParticleSystemComponent::SetContinuous(bool b)
 	BaseEnvParticleSystemComponent::SetContinuous(b);
 
 	NetPacket p;
-	nwm::write_entity(p,&GetEntity());
+	nwm::write_entity(p, &GetEntity());
 	p->Write<bool>(b);
-	server->SendPacket("env_prtsys_setcontinuous",p,pragma::networking::Protocol::SlowReliable);
+	server->SendPacket("env_prtsys_setcontinuous", p, pragma::networking::Protocol::SlowReliable);
 }
 
-void SParticleSystemComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SParticleSystemComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ///////////////
 

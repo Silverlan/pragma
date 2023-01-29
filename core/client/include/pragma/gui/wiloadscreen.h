@@ -11,19 +11,16 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/gui/mainmenu/wimainmenu_base.h"
 
-class DLLCLIENT WILoadScreen
-	: public WIMainMenuBase
-{
-private:
+class DLLCLIENT WILoadScreen : public WIMainMenuBase {
+  private:
 	WIHandle m_hText;
 	WIHandle m_hProgress;
-public:
+  public:
 	WILoadScreen();
 	virtual ~WILoadScreen() override;
 	virtual void Initialize() override;
-	virtual void SetSize(int x,int y) override;
+	virtual void SetSize(int x, int y) override;
 	using WIMainMenuBase::SetSize;
 };
-
 
 #endif

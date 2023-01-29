@@ -11,23 +11,13 @@
 
 using namespace pragma;
 
-CEOnEntityComponentAdded::CEOnEntityComponentAdded(BaseEntityComponent &component)
-	: component(component)
-{}
-void CEOnEntityComponentAdded::PushArguments(lua_State *l)
-{
-	component.PushLuaObject(l);
-}
+CEOnEntityComponentAdded::CEOnEntityComponentAdded(BaseEntityComponent &component) : component(component) {}
+void CEOnEntityComponentAdded::PushArguments(lua_State *l) { component.PushLuaObject(l); }
 
 /////////////
 
-CEOnMembersChanged::CEOnMembersChanged(BaseEntityComponent &component)
-	: component(component)
-{}
-void CEOnMembersChanged::PushArguments(lua_State *l)
-{
-	component.PushLuaObject(l);
-}
+CEOnMembersChanged::CEOnMembersChanged(BaseEntityComponent &component) : component(component) {}
+void CEOnMembersChanged::PushArguments(lua_State *l) { component.PushLuaObject(l); }
 
 /////////////
 

@@ -11,37 +11,33 @@
 #include "pragma/audio/alsound_type.h"
 
 enum class DLLNETWORK ALState : uint32_t;
-namespace pragma
-{
-	class DLLNETWORK BaseEnvSoundComponent
-		: public BaseEntityComponent
-	{
-	public:
-		enum class DLLNETWORK SpawnFlags : uint32_t
-		{
+namespace pragma {
+	class DLLNETWORK BaseEnvSoundComponent : public BaseEntityComponent {
+	  public:
+		enum class DLLNETWORK SpawnFlags : uint32_t {
 			None = 0,
 			PlayEverywhere = 8,
-			PlayOnSpawn = PlayEverywhere<<1,
-			IsLooped = PlayOnSpawn<<1,
-			Effect = IsLooped<<1,
-			Music = Effect<<1,
-			Voice = Music<<1,
-			Weapon = Voice<<1,
-			NPC = Weapon<<1,
-			Player = NPC<<1,
-			Vehicle = Player<<1,
-			Physics = Vehicle<<1,
-			Environment = Physics<<1,
-			GUI = Environment<<1,
+			PlayOnSpawn = PlayEverywhere << 1,
+			IsLooped = PlayOnSpawn << 1,
+			Effect = IsLooped << 1,
+			Music = Effect << 1,
+			Voice = Music << 1,
+			Weapon = Voice << 1,
+			NPC = Weapon << 1,
+			Player = NPC << 1,
+			Vehicle = Player << 1,
+			Physics = Vehicle << 1,
+			Environment = Physics << 1,
+			GUI = Environment << 1,
 
 			AllTypes = Effect | Music | Voice | Weapon | NPC | Player | Vehicle | Physics | Environment | GUI
 		};
-		
+
 		using BaseEntityComponent::BaseEntityComponent;
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
-		virtual void InjectStateChange(ALState oldState,ALState newState);
+		virtual void InjectStateChange(ALState oldState, ALState newState);
 		virtual void OnEntitySpawn() override;
 
 		const std::string &GetSoundSource() const;
@@ -83,7 +79,7 @@ namespace pragma
 		bool IsPaused() const;
 		bool IsPlaying() const;
 		const std::shared_ptr<ALSound> &GetSound() const;
-	protected:
+	  protected:
 		void InitializeSound();
 		virtual void OnSoundCreated(ALSound &snd);
 		std::string m_kvSoundName;

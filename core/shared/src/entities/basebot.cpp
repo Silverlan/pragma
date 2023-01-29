@@ -16,7 +16,7 @@ void BaseBotComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	auto &ent = GetEntity();
-	auto *pMdlComponent = static_cast<BaseModelComponent*>(ent.AddComponent("model").get());
+	auto *pMdlComponent = static_cast<BaseModelComponent *>(ent.AddComponent("model").get());
 	if(pMdlComponent != nullptr)
 		pMdlComponent->SetModel("player/soldier.wmd");
 }

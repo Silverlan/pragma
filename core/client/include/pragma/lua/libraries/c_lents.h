@@ -11,12 +11,9 @@
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
 
-namespace Lua
-{
-	namespace ents
-	{
-		namespace Client
-		{
+namespace Lua {
+	namespace ents {
+		namespace Client {
 			DLLCLIENT int get_local_player(lua_State *l);
 			DLLCLIENT int get_listener(lua_State *l);
 			DLLCLIENT int get_view_model(lua_State *l);

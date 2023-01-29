@@ -16,9 +16,9 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(raytracing_renderer,CRaytracingRenderer);
+LINK_ENTITY_TO_CLASS(raytracing_renderer, CRaytracingRenderer);
 
-void CRaytracingRendererComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CRaytracingRendererComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////
 

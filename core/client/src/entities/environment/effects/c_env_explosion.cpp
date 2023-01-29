@@ -21,7 +21,7 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_explosion,CEnvExplosion);
+LINK_ENTITY_TO_CLASS(env_explosion, CEnvExplosion);
 
 extern ClientState *client;
 extern CGame *c_game;
@@ -40,8 +40,7 @@ void CExplosionComponent::Explode()
 #pragma message("TODO: Leave a scorch mark!")
 	auto &ent = GetEntity();
 	auto *particle = pragma::CParticleSystemComponent::Create("explosion");
-	if(particle != NULL)
-	{
+	if(particle != NULL) {
 		auto pTrComponent = ent.GetTransformComponent();
 		auto pTrComponentPt = particle->GetEntity().GetTransformComponent();
 		if(pTrComponent != nullptr && pTrComponentPt)
@@ -52,33 +51,30 @@ void CExplosionComponent::Explode()
 	}
 	auto pSoundEmitterComponent = ent.GetComponent<pragma::CSoundEmitterComponent>();
 	if(pSoundEmitterComponent.valid())
-		pSoundEmitterComponent->EmitSound("fx.explosion",ALSoundType::Effect,1.f);
+		pSoundEmitterComponent->EmitSound("fx.explosion", ALSoundType::Effect, 1.f);
 	auto radius = 500.f;
 	auto *entQuake = c_game->CreateEntity<CEnvQuake>();
-	if(entQuake != nullptr)
-	{
-		auto *pQuakeComponent = static_cast<pragma::CQuakeComponent*>(entQuake->FindComponent("quake").get());
-		if(pQuakeComponent != nullptr)
-		{
+	if(entQuake != nullptr) {
+		auto *pQuakeComponent = static_cast<pragma::CQuakeComponent *>(entQuake->FindComponent("quake").get());
+		if(pQuakeComponent != nullptr) {
 			pQuakeComponent->SetFrequency(50.f);
 			pQuakeComponent->SetAmplitude(50.f);
 			pQuakeComponent->SetRadius(radius);
 		}
 		auto pAttComponent = entQuake->AddComponent<CAttachableComponent>();
-		if(pAttComponent.valid())
-		{
+		if(pAttComponent.valid()) {
 			AttachmentInfo attInfo {};
 			attInfo.flags |= FAttachmentMode::SnapToOrigin | FAttachmentMode::PositionOnly;
-			pAttComponent->AttachToEntity(&ent,attInfo);
+			pAttComponent->AttachToEntity(&ent, attInfo);
 		}
-		entQuake->SetKeyValue("spawnflags",std::to_string(SF_QUAKE_IN_AIR | SF_QUAKE_REMOVE_ON_COMPLETE));
+		entQuake->SetKeyValue("spawnflags", std::to_string(SF_QUAKE_IN_AIR | SF_QUAKE_REMOVE_ON_COMPLETE));
 		entQuake->Spawn();
 		auto pIoComponent = entQuake->GetComponent<CIOComponent>();
 		if(pIoComponent.valid())
 			pIoComponent->Input("StartShake");
 	}
 }
-void CExplosionComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CExplosionComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////////////
 

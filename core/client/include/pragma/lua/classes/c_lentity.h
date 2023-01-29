@@ -11,17 +11,16 @@
 #include <pragma/lua/ldefinitions.h>
 #include <mathutil/glmutil.h>
 class NetPacket;
-namespace nwm {enum class Protocol : uint32_t;};
-namespace Lua
-{
-	namespace Entity
-	{
-		namespace Client
-		{
-			DLLCLIENT void register_class(luabind::class_<CBaseEntity,BaseEntity> &classDef);
-			DLLCLIENT void GetEffectiveBoneTransform(lua_State *l,CBaseEntity &ent,uint32_t boneIdx);
-			DLLCLIENT void SendNetEvent(lua_State *l,CBaseEntity &ent,nwm::Protocol protocol,unsigned int eventId,const ::NetPacket &packet);
-			DLLCLIENT void SendNetEvent(lua_State *l,CBaseEntity &ent,nwm::Protocol protocol,unsigned int eventId);
+namespace nwm {
+	enum class Protocol : uint32_t;
+};
+namespace Lua {
+	namespace Entity {
+		namespace Client {
+			DLLCLIENT void register_class(luabind::class_<CBaseEntity, BaseEntity> &classDef);
+			DLLCLIENT void GetEffectiveBoneTransform(lua_State *l, CBaseEntity &ent, uint32_t boneIdx);
+			DLLCLIENT void SendNetEvent(lua_State *l, CBaseEntity &ent, nwm::Protocol protocol, unsigned int eventId, const ::NetPacket &packet);
+			DLLCLIENT void SendNetEvent(lua_State *l, CBaseEntity &ent, nwm::Protocol protocol, unsigned int eventId);
 		};
 	};
 };

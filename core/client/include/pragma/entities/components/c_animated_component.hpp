@@ -13,29 +13,23 @@
 #include <pragma/entities/components/base_animated_component.hpp>
 
 struct Eyeball;
-namespace prosper {class SwapBuffer; class SwapDescriptorSet;};
-namespace pragma
-{
+namespace prosper {
+	class SwapBuffer;
+	class SwapDescriptorSet;
+};
+namespace pragma {
 	void initialize_articulated_buffers();
 	void clear_articulated_buffers();
 	const std::shared_ptr<prosper::IUniformResizableBuffer> &get_instance_bone_buffer();
 
-	class DLLCLIENT CAnimatedComponent final
-		: public BaseAnimatedComponent,
-		public CBaseNetComponent
-	{
-	public:
-		enum class StateFlags : uint8_t
-		{
-			None = 0u,
-			BoneBufferDirty = 1u,
-			EnableSkeletonUpdateCallbacks = BoneBufferDirty<<1u
-		};
+	class DLLCLIENT CAnimatedComponent final : public BaseAnimatedComponent, public CBaseNetComponent {
+	  public:
+		enum class StateFlags : uint8_t { None = 0u, BoneBufferDirty = 1u, EnableSkeletonUpdateCallbacks = BoneBufferDirty << 1u };
 
 		static ComponentEventId EVENT_ON_SKELETON_UPDATED;
 		static ComponentEventId EVENT_ON_BONE_MATRICES_UPDATED;
 		static ComponentEventId EVENT_ON_BONE_BUFFER_INITIALIZED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		CAnimatedComponent(BaseEntity &ent) : BaseAnimatedComponent(ent) {}
 
@@ -43,21 +37,21 @@ namespace pragma
 		virtual void OnRemove() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
-		virtual void PlayAnimation(int animation,FPlayAnim flags=FPlayAnim::Default) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
+		virtual void PlayAnimation(int animation, FPlayAnim flags = FPlayAnim::Default) override;
 		using BaseAnimatedComponent::PlayAnimation;
-		
+
 		prosper::SwapBuffer *GetSwapBoneBuffer();
-		const prosper::SwapBuffer *GetSwapBoneBuffer() const {return const_cast<CAnimatedComponent*>(this)->GetSwapBoneBuffer();}
+		const prosper::SwapBuffer *GetSwapBoneBuffer() const { return const_cast<CAnimatedComponent *>(this)->GetSwapBoneBuffer(); }
 		const prosper::IBuffer *GetBoneBuffer() const;
 		const std::vector<Mat4> &GetBoneMatrices() const;
 		std::vector<Mat4> &GetBoneMatrices();
 		void UpdateBoneMatricesMT();
-		void UpdateBoneBuffer(prosper::IPrimaryCommandBuffer &commandBuffer,bool flagAsDirty=false);
+		void UpdateBoneBuffer(prosper::IPrimaryCommandBuffer &commandBuffer, bool flagAsDirty = false);
 		void InitializeBoneBuffer();
-		std::optional<Mat4> GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 *optOutNormalOffset=nullptr,float *optOutDelta=nullptr) const;
-		virtual std::optional<Mat4> GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId) const override;
-		virtual bool GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId,umath::ScaledTransform &outPose) const override;
+		std::optional<Mat4> GetVertexTransformMatrix(const ModelSubMesh &subMesh, uint32_t vertexId, Vector3 *optOutNormalOffset = nullptr, float *optOutDelta = nullptr) const;
+		virtual std::optional<Mat4> GetVertexTransformMatrix(const ModelSubMesh &subMesh, uint32_t vertexId) const override;
+		virtual bool GetVertexTransformMatrix(const ModelSubMesh &subMesh, uint32_t vertexId, umath::ScaledTransform &outPose) const override;
 
 		uint32_t OnSkeletonUpdated();
 		bool MaintainAnimations(double dt) override;
@@ -65,10 +59,10 @@ namespace pragma
 		void SetSkeletonUpdateCallbacksEnabled(bool enabled);
 		bool AreSkeletonUpdateCallbacksEnabled() const;
 		void SetBoneBufferDirty();
-	protected:
+	  protected:
 		virtual void ResetAnimation(const std::shared_ptr<Model> &mdl) override;
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
-	private:
+	  private:
 		std::shared_ptr<prosper::SwapBuffer> m_boneBuffer = nullptr;
 		std::vector<Mat4> m_boneMatrices;
 		std::shared_ptr<prosper::SwapDescriptorSet> m_boneDescSetGroup = nullptr;
@@ -77,9 +71,7 @@ namespace pragma
 
 	// Events
 
-	struct DLLCLIENT CEOnSkeletonUpdated
-		: public ComponentEvent
-	{
+	struct DLLCLIENT CEOnSkeletonUpdated : public ComponentEvent {
 		CEOnSkeletonUpdated(uint32_t &physRootBoneId);
 		virtual void PushArguments(lua_State *l) override;
 		virtual uint32_t GetReturnCount() override;
@@ -87,9 +79,7 @@ namespace pragma
 		uint32_t &physRootBoneId;
 	};
 
-	struct DLLCLIENT CEOnBoneBufferInitialized
-		: public ComponentEvent
-	{
+	struct DLLCLIENT CEOnBoneBufferInitialized : public ComponentEvent {
 		CEOnBoneBufferInitialized(const std::shared_ptr<prosper::SwapBuffer> &buffer);
 		virtual void PushArguments(lua_State *l) override;
 		std::shared_ptr<prosper::SwapBuffer> buffer;

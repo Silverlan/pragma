@@ -15,53 +15,46 @@
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
-class DLLNETWORK LaunchParaMap
-{
-public:
-private:
-	std::unordered_map<std::string,std::function<void(const std::vector<std::string>&)>> m_parameters;
-public:
+class DLLNETWORK LaunchParaMap {
+  public:
+  private:
+	std::unordered_map<std::string, std::function<void(const std::vector<std::string> &)>> m_parameters;
+  public:
 	static std::stringstream LAUNCHPARAMETERS_HELP;
-	const std::unordered_map<std::string,std::function<void(const std::vector<std::string>&)>> &GetParameters() const;
-	void RegisterParameter(const std::string &name,const std::function<void(const std::vector<std::string>&)> &f);
+	const std::unordered_map<std::string, std::function<void(const std::vector<std::string> &)>> &GetParameters() const;
+	void RegisterParameter(const std::string &name, const std::function<void(const std::vector<std::string> &)> &f);
 };
 #pragma warning(pop)
 DLLNETWORK LaunchParaMap *GetLaunchParaMap();
-DLLNETWORK void RegisterLaunchParameter(std::string name,const std::function<void(const std::vector<std::string>&)> &function);
-DLLNETWORK void RegisterLaunchParameterHelp(std::string name,const std::function<void(const std::vector<std::string>&)> &function,std::string descCmd,std::string descHelp);
+DLLNETWORK void RegisterLaunchParameter(std::string name, const std::function<void(const std::vector<std::string> &)> &function);
+DLLNETWORK void RegisterLaunchParameterHelp(std::string name, const std::function<void(const std::vector<std::string> &)> &function, std::string descCmd, std::string descHelp);
 
-#define REGISTER_LAUNCH_PARAMETER__(lpName,function,identifier) \
-	class LPM##function##identifier \
-	{ \
-	public: \
-		LPM##function##identifier() \
-		{ \
-			RegisterLaunchParameter(#lpName,&function); \
-		} \
-	}; \
+#define REGISTER_LAUNCH_PARAMETER__(lpName, function, identifier)                                                                                                                                                                                                                                \
+	class LPM##function##identifier {                                                                                                                                                                                                                                                            \
+	  public:                                                                                                                                                                                                                                                                                    \
+		LPM##function##identifier()                                                                                                                                                                                                                                                              \
+		{                                                                                                                                                                                                                                                                                        \
+			RegisterLaunchParameter(#lpName, &function);                                                                                                                                                                                                                                         \
+		}                                                                                                                                                                                                                                                                                        \
+	};                                                                                                                                                                                                                                                                                           \
 	static LPM##function##identifier g_LPM##function##identifier;
 
-#define REGISTER_LAUNCH_PARAMETER_(lpName,function,identifier) \
-	REGISTER_LAUNCH_PARAMETER__(lpName,function,identifier)
+#define REGISTER_LAUNCH_PARAMETER_(lpName, function, identifier) REGISTER_LAUNCH_PARAMETER__(lpName, function, identifier)
 
-#define REGISTER_LAUNCH_PARAMETER(lpName,function) \
-	REGISTER_LAUNCH_PARAMETER_(lpName,function,__COUNTER__)
+#define REGISTER_LAUNCH_PARAMETER(lpName, function) REGISTER_LAUNCH_PARAMETER_(lpName, function, __COUNTER__)
 
-#define REGISTER_LAUNCH_PARAMETER_HELP__(lpName,function,identifier,descCmd,descHelp) \
-	class LPM##function##identifier \
-	{ \
-	public: \
-		LPM##function##identifier() \
-		{ \
-			RegisterLaunchParameterHelp(#lpName,&function,descCmd,descHelp); \
-		} \
-	}; \
+#define REGISTER_LAUNCH_PARAMETER_HELP__(lpName, function, identifier, descCmd, descHelp)                                                                                                                                                                                                        \
+	class LPM##function##identifier {                                                                                                                                                                                                                                                            \
+	  public:                                                                                                                                                                                                                                                                                    \
+		LPM##function##identifier()                                                                                                                                                                                                                                                              \
+		{                                                                                                                                                                                                                                                                                        \
+			RegisterLaunchParameterHelp(#lpName, &function, descCmd, descHelp);                                                                                                                                                                                                                  \
+		}                                                                                                                                                                                                                                                                                        \
+	};                                                                                                                                                                                                                                                                                           \
 	static LPM##function##identifier g_LPM##function##identifier;
 
-#define REGISTER_LAUNCH_PARAMETER_HELP_(lpName,function,identifier,descCmd,descHelp) \
-	REGISTER_LAUNCH_PARAMETER_HELP__(lpName,function,identifier,descCmd,descHelp)
+#define REGISTER_LAUNCH_PARAMETER_HELP_(lpName, function, identifier, descCmd, descHelp) REGISTER_LAUNCH_PARAMETER_HELP__(lpName, function, identifier, descCmd, descHelp)
 
-#define REGISTER_LAUNCH_PARAMETER_HELP(lpName,function,descCmd,descHelp) \
-	REGISTER_LAUNCH_PARAMETER_HELP_(lpName,function,__COUNTER__,descCmd,descHelp)
+#define REGISTER_LAUNCH_PARAMETER_HELP(lpName, function, descCmd, descHelp) REGISTER_LAUNCH_PARAMETER_HELP_(lpName, function, __COUNTER__, descCmd, descHelp)
 
 #endif

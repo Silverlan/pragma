@@ -10,10 +10,9 @@
 #include "pragma/networkdefinitions.h"
 #include <string>
 
-namespace sound
-{
+namespace sound {
 	// Returns the full path, including extension (if the file was found)
-	DLLNETWORK void get_full_sound_path(std::string &inOutPath,bool bPathRelativeToSounds=false);
+	DLLNETWORK void get_full_sound_path(std::string &inOutPath, bool bPathRelativeToSounds = false);
 };
 
 #endif

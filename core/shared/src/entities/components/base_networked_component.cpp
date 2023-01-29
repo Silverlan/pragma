@@ -11,16 +11,14 @@
 
 using namespace pragma;
 
-BaseNetworkedComponent::BaseNetworkedComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+BaseNetworkedComponent::BaseNetworkedComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BaseNetworkedComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"networkflags",false))
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "networkflags", false))
 			m_networkFlags = static_cast<NetworkFlags>(util::to_int(kvData.value));
 		else
 			return util::EventReply::Unhandled;
@@ -33,5 +31,5 @@ void BaseNetworkedComponent::Initialize()
 #endif
 }
 
-void BaseNetworkedComponent::SetNetworkFlags(NetworkFlags flags) {m_networkFlags = flags;}
-BaseNetworkedComponent::NetworkFlags BaseNetworkedComponent::GetNetworkFlags() const {return m_networkFlags;}
+void BaseNetworkedComponent::SetNetworkFlags(NetworkFlags flags) { m_networkFlags = flags; }
+BaseNetworkedComponent::NetworkFlags BaseNetworkedComponent::GetNetworkFlags() const { return m_networkFlags; }

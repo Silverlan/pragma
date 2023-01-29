@@ -17,61 +17,44 @@ using namespace pragma;
 
 ComponentEventId BaseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED = INVALID_COMPONENT_ID;
 ComponentEventId BaseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED = INVALID_COMPONENT_ID;
-void BaseSurfaceComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
+void BaseSurfaceComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_SURFACE_PLANE_CHANGED = registerEvent("ON_SURFACE_PLANE_CHANGED",ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_SURFACE_MESH_CHANGED = registerEvent("ON_SURFACE_MESH_CHANGED",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_SURFACE_PLANE_CHANGED = registerEvent("ON_SURFACE_PLANE_CHANGED", ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_SURFACE_MESH_CHANGED = registerEvent("ON_SURFACE_MESH_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
 
-void BaseSurfaceComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
+void BaseSurfaceComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseSurfaceComponent;
 	{
-		auto memberInfo = create_component_member_info<
-			T,Vector4,
-			[](const ComponentMemberInfo&,T &component,const Vector4 &value) {
-				component.SetPlane(value);
-			},
-			[](const ComponentMemberInfo&,T &component,Vector4 &value) {
-				value = component.GetPlane().ToVector4();
-			}
-		>("plane",Vector4{uvec::FORWARD,0.0},AttributeSpecializationType::Plane);
+		auto memberInfo = create_component_member_info<T, Vector4, [](const ComponentMemberInfo &, T &component, const Vector4 &value) { component.SetPlane(value); }, [](const ComponentMemberInfo &, T &component, Vector4 &value) { value = component.GetPlane().ToVector4(); }>("plane",
+		  Vector4 {uvec::FORWARD, 0.0}, AttributeSpecializationType::Plane);
 		registerMember(std::move(memberInfo));
 	}
 
 	{
-		auto memberInfo = create_component_member_info<
-			T,Vector3,
-			[](const ComponentMemberInfo&,T &component,const Vector3 &value) {
-				auto plane = component.GetPlane();
-				plane.SetNormal(value);
-				component.SetPlane(plane);
-			},
-			[](const ComponentMemberInfo&,T &component,Vector3 &value) {
-				value = component.GetPlane().GetNormal();
-			}
-		>("normal",uvec::FORWARD,AttributeSpecializationType::Normal);
+		auto memberInfo = create_component_member_info<T, Vector3,
+		  [](const ComponentMemberInfo &, T &component, const Vector3 &value) {
+			  auto plane = component.GetPlane();
+			  plane.SetNormal(value);
+			  component.SetPlane(plane);
+		  },
+		  [](const ComponentMemberInfo &, T &component, Vector3 &value) { value = component.GetPlane().GetNormal(); }>("normal", uvec::FORWARD, AttributeSpecializationType::Normal);
 		registerMember(std::move(memberInfo));
 	}
 
 	{
-		auto memberInfo = create_component_member_info<
-			T,float,
-			[](const ComponentMemberInfo&,T &component,const float &value) {
-				auto plane = component.GetPlane();
-				plane.SetDistance(value);
-				component.SetPlane(plane);
-			},
-			[](const ComponentMemberInfo&,T &component,float &value) {
-				value = component.GetPlane().GetDistance();
-			}
-		>("distance",0.0,AttributeSpecializationType::Distance);
+		auto memberInfo = create_component_member_info<T, float,
+		  [](const ComponentMemberInfo &, T &component, const float &value) {
+			  auto plane = component.GetPlane();
+			  plane.SetDistance(value);
+			  component.SetPlane(plane);
+		  },
+		  [](const ComponentMemberInfo &, T &component, float &value) { value = component.GetPlane().GetDistance(); }>("distance", 0.0, AttributeSpecializationType::Distance);
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseSurfaceComponent::BaseSurfaceComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+BaseSurfaceComponent::BaseSurfaceComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void BaseSurfaceComponent::Initialize()
 {
@@ -85,9 +68,9 @@ void BaseSurfaceComponent::Save(udm::LinkedPropertyWrapperArg udm)
 	BaseEntityComponent::Save(udm);
 	udm["plane"] = m_plane.ToVector4();
 }
-void BaseSurfaceComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
+void BaseSurfaceComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version)
 {
-	BaseEntityComponent::Load(udm,version);
+	BaseEntityComponent::Load(udm, version);
 	Vector4 plane;
 	udm["plane"](plane);
 	m_plane = {plane};
@@ -97,31 +80,31 @@ void BaseSurfaceComponent::SetPlane(const umath::Plane &plane)
 	m_plane = plane;
 	BroadcastEvent(EVENT_ON_SURFACE_PLANE_CHANGED);
 }
-const umath::Plane &BaseSurfaceComponent::GetPlane() const {return m_plane;}
+const umath::Plane &BaseSurfaceComponent::GetPlane() const { return m_plane; }
 umath::Plane BaseSurfaceComponent::GetPlaneWs() const
 {
 	auto &plane = GetPlane();
 	auto n = plane.GetNormal();
 	auto d = plane.GetDistance();
-	umath::geometry::local_plane_to_world_space(n,d,GetEntity().GetPosition(),GetEntity().GetRotation());
-	return umath::Plane{n,d};
+	umath::geometry::local_plane_to_world_space(n, d, GetEntity().GetPosition(), GetEntity().GetRotation());
+	return umath::Plane {n, d};
 }
 
-void BaseSurfaceComponent::SetPlane(const Vector3 &n,float d) {SetPlane({n,d});}
-void BaseSurfaceComponent::GetPlane(Vector3 &n,float &d) const
+void BaseSurfaceComponent::SetPlane(const Vector3 &n, float d) { SetPlane({n, d}); }
+void BaseSurfaceComponent::GetPlane(Vector3 &n, float &d) const
 {
 	n = m_plane.GetNormal();
 	d = m_plane.GetDistance();
 }
-void BaseSurfaceComponent::GetPlaneWs(Vector3 &n,float &d) const
+void BaseSurfaceComponent::GetPlaneWs(Vector3 &n, float &d) const
 {
 	auto plane = GetPlaneWs();
 	n = plane.GetNormal();
 	d = plane.GetDistance();
 }
 
-const Vector3 &BaseSurfaceComponent::GetPlaneNormal() const {return m_plane.GetNormal();}
-float BaseSurfaceComponent::GetPlaneDistance() const {return m_plane.GetDistance();}
+const Vector3 &BaseSurfaceComponent::GetPlaneNormal() const { return m_plane.GetNormal(); }
+float BaseSurfaceComponent::GetPlaneDistance() const { return m_plane.GetDistance(); }
 
 void BaseSurfaceComponent::SetPlaneNormal(const Vector3 &n)
 {
@@ -138,37 +121,35 @@ void BaseSurfaceComponent::SetPlaneDistance(float d)
 void BaseSurfaceComponent::Clear()
 {
 	m_mesh = {};
-	SetPlane({{0.f,1.f,0.f},0.f});
+	SetPlane({{0.f, 1.f, 0.f}, 0.f});
 }
-ModelSubMesh *BaseSurfaceComponent::GetMesh() {return m_mesh.lock().get();}
+ModelSubMesh *BaseSurfaceComponent::GetMesh() { return m_mesh.lock().get(); }
 Vector3 BaseSurfaceComponent::ProjectToSurface(const Vector3 &pos) const
 {
 	Vector3 n;
 	float d;
-	GetPlaneWs(n,d);
-	return uvec::project_to_plane(pos,n,d);
+	GetPlaneWs(n, d);
+	return uvec::project_to_plane(pos, n, d);
 }
-std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssignMesh(const std::function<int32_t(ModelMesh&,ModelSubMesh&,Material&,const std::string&)> &filter)
+std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssignMesh(const std::function<int32_t(ModelMesh &, ModelSubMesh &, Material &, const std::string &)> &filter)
 {
 	auto &ent = GetEntity();
 	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return {};
 	Material *mat = nullptr;
-	auto dir = Vector3(0.f,1.f,0.f); // TODO
+	auto dir = Vector3(0.f, 1.f, 0.f); // TODO
 	auto &mats = hMdl->GetMaterials();
 	std::vector<std::shared_ptr<ModelMesh>> meshes;
-	hMdl->GetBodyGroupMeshes({},0,meshes);
+	hMdl->GetBodyGroupMeshes({}, 0, meshes);
 	auto minDot = std::numeric_limits<float>::max();
 	uint32_t highestPriority = 0;
 
 	// Find best plane candidate
 	umath::Plane plane;
 	std::optional<MeshInfo> meshInfo {};
-	for(auto &mesh : meshes)
-	{
-		for(auto &subMesh : mesh->GetSubMeshes())
-		{
+	for(auto &mesh : meshes) {
+		for(auto &subMesh : mesh->GetSubMeshes()) {
 			auto matId = hMdl->GetMaterialIndex(*subMesh);
 			if(matId.has_value() == false || *matId >= mats.size())
 				continue;
@@ -177,9 +158,9 @@ std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssig
 				continue;
 			auto shaderName = hMat->GetShaderIdentifier();
 			ustring::to_lower(shaderName);
-			ustring::substr(shaderName,0,5);
+			ustring::substr(shaderName, 0, 5);
 
-			auto prio = filter ? filter(*mesh,*subMesh,*hMat.get(),shaderName) : 0;
+			auto prio = filter ? filter(*mesh, *subMesh, *hMat.get(), shaderName) : 0;
 			if(prio < 0)
 				continue;
 			if(prio > highestPriority)
@@ -193,55 +174,53 @@ std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssig
 			auto &v1 = verts.at(1);
 			auto &v2 = verts.at(2);
 
-			umath::Plane p {v0.position,v1.position,v2.position};
-			auto dot = umath::abs(uvec::dot(dir,p.GetNormal()) -1.f);
+			umath::Plane p {v0.position, v1.position, v2.position};
+			auto dot = umath::abs(uvec::dot(dir, p.GetNormal()) - 1.f);
 			if(dot >= minDot)
 				continue;
 			minDot = dot;
 			plane = p;
 			mat = hMat.get();
 
-			meshInfo = {mesh.get(),subMesh.get(),mat};
+			meshInfo = {mesh.get(), subMesh.get(), mat};
 		}
 	}
-	if(minDot == std::numeric_limits<float>::max())
-	{
+	if(minDot == std::numeric_limits<float>::max()) {
 		Clear();
-		spdlog::warn("No water plane found for func_water entity '{} ({})'!",ent.GetClass(),ent.GetIndex());
+		spdlog::warn("No water plane found for func_water entity '{} ({})'!", ent.GetClass(), ent.GetIndex());
 		return {};
 	}
-	else
-	{
+	else {
 		assert(meshInfo.has_value());
 		SetPlane(plane);
 		m_mesh = meshInfo->subMesh->shared_from_this();
-		BroadcastEvent(EVENT_ON_SURFACE_MESH_CHANGED,CEOnSurfaceMeshChanged{*meshInfo});
+		BroadcastEvent(EVENT_ON_SURFACE_MESH_CHANGED, CEOnSurfaceMeshChanged {*meshInfo});
 		return meshInfo;
 	}
 	return {};
 }
 
-bool BaseSurfaceComponent::IsPointBelowSurface(const Vector3 &p) const {return umath::geometry::get_side_of_point_to_plane(m_plane.GetNormal(),m_plane.GetDistance(),p) == umath::geometry::PlaneSide::Back;}
+bool BaseSurfaceComponent::IsPointBelowSurface(const Vector3 &p) const { return umath::geometry::get_side_of_point_to_plane(m_plane.GetNormal(), m_plane.GetDistance(), p) == umath::geometry::PlaneSide::Back; }
 
 Quat BaseSurfaceComponent::GetPlaneRotation() const
 {
 	auto plane = GetPlaneWs();
 	auto up = uvec::UP;
 	auto &n = plane.GetNormal();
-	if(umath::abs(uvec::dot(n,up)) > 0.99f)
+	if(umath::abs(uvec::dot(n, up)) > 0.99f)
 		up = uvec::FORWARD;
-	up = up -uvec::project(up,n);
+	up = up - uvec::project(up, n);
 	uvec::normalize(&up);
-	return uquat::create_look_rotation(n,up);
+	return uquat::create_look_rotation(n, up);
 }
 
-bool BaseSurfaceComponent::CalcLineSurfaceIntersection(const Vector3 &lineOrigin,const Vector3 &lineDir,double *outT) const
+bool BaseSurfaceComponent::CalcLineSurfaceIntersection(const Vector3 &lineOrigin, const Vector3 &lineDir, double *outT) const
 {
 	Vector3 n;
 	float d;
-	GetPlaneWs(n,d);
+	GetPlaneWs(n, d);
 	auto t = 0.f;
-	auto r = umath::intersection::line_plane(lineOrigin,lineDir,n,d,&t);
+	auto r = umath::intersection::line_plane(lineOrigin, lineDir, n, d, &t);
 	if(outT != nullptr)
 		*outT = t;
 	return r == umath::intersection::Result::Intersect;
@@ -249,12 +228,10 @@ bool BaseSurfaceComponent::CalcLineSurfaceIntersection(const Vector3 &lineOrigin
 
 /////////////////////////////////
 
-CEOnSurfaceMeshChanged::CEOnSurfaceMeshChanged(const BaseSurfaceComponent::MeshInfo &meshInfo)
-	: meshInfo{meshInfo}
-{}
+CEOnSurfaceMeshChanged::CEOnSurfaceMeshChanged(const BaseSurfaceComponent::MeshInfo &meshInfo) : meshInfo {meshInfo} {}
 void CEOnSurfaceMeshChanged::PushArguments(lua_State *l)
 {
-	Lua::Push(l,meshInfo.mesh->shared_from_this());
-	Lua::Push(l,meshInfo.subMesh->shared_from_this());
-	Lua::Push(l,meshInfo.material);
+	Lua::Push(l, meshInfo.mesh->shared_from_this());
+	Lua::Push(l, meshInfo.subMesh->shared_from_this());
+	Lua::Push(l, meshInfo.material);
 }

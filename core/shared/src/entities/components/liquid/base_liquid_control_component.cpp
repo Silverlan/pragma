@@ -15,30 +15,24 @@ using namespace pragma;
 
 ComponentEventId BaseLiquidControlComponent::EVENT_ON_SPLASH = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseLiquidControlComponent::EVENT_ON_PROPERTIES_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseLiquidControlComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
+void BaseLiquidControlComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_SPLASH = registerEvent("ON_SPLASH",ComponentEventInfo::Type::Broadcast);
-	EVENT_ON_PROPERTIES_CHANGED = registerEvent("ON_PROPERTIES_CHANGED",ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_SPLASH = registerEvent("ON_SPLASH", ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_PROPERTIES_CHANGED = registerEvent("ON_PROPERTIES_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
 
-void BaseLiquidControlComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
-{
-}
+void BaseLiquidControlComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
 
-BaseLiquidControlComponent::BaseLiquidControlComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+BaseLiquidControlComponent::BaseLiquidControlComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void BaseLiquidControlComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	m_netEvCreateSplash = SetupNetEvent("create_splash");
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"surface_material",false))
-		{
-			if(ustring::compare<std::string>(kvData.value,"default",false) == false)
-			{
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "surface_material", false)) {
+			if(ustring::compare<std::string>(kvData.value, "default", false) == false) {
 				m_kvSurfaceMaterial = kvData.value;
 				SetSurfaceMaterial(kvData.value);
 			}
@@ -47,25 +41,20 @@ void BaseLiquidControlComponent::Initialize()
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(BaseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		auto &data = static_cast<CEOnSurfaceMeshChanged&>(evData.get());
-		if(data.meshInfo.subMesh && m_kvSurfaceMaterial.empty() == true)
-		{
+	BindEventUnhandled(BaseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		auto &data = static_cast<CEOnSurfaceMeshChanged &>(evData.get());
+		if(data.meshInfo.subMesh && m_kvSurfaceMaterial.empty() == true) {
 			auto &dataBlock = data.meshInfo.material->GetDataBlock();
-			if(dataBlock != nullptr)
-			{
+			if(dataBlock != nullptr) {
 				std::string surfaceMatIdentifier;
-				if(dataBlock->GetString("surfacematerial",&surfaceMatIdentifier) == true)
+				if(dataBlock->GetString("surfacematerial", &surfaceMatIdentifier) == true)
 					SetSurfaceMaterial(surfaceMatIdentifier);
 			}
 		}
 	});
 }
 
-void BaseLiquidControlComponent::OnEntitySpawn()
-{
-	BaseEntityComponent::OnEntitySpawn();
-}
+void BaseLiquidControlComponent::OnEntitySpawn() { BaseEntityComponent::OnEntitySpawn(); }
 
 void BaseLiquidControlComponent::SetSurfaceMaterial(const std::string &mat)
 {
@@ -86,10 +75,10 @@ void BaseLiquidControlComponent::SetSurfaceMaterial(const SurfaceMaterial *mat)
 	SetPropagation(mat->GetWavePropagation());
 }
 
-const PhysLiquid &BaseLiquidControlComponent::GetLiquidDescription() const {return const_cast<BaseLiquidControlComponent*>(this)->GetLiquidDescription();}
-PhysLiquid &BaseLiquidControlComponent::GetLiquidDescription() {return m_liquid;}
+const PhysLiquid &BaseLiquidControlComponent::GetLiquidDescription() const { return const_cast<BaseLiquidControlComponent *>(this)->GetLiquidDescription(); }
+PhysLiquid &BaseLiquidControlComponent::GetLiquidDescription() { return m_liquid; }
 
-double BaseLiquidControlComponent::GetDensity() const {return m_liquid.density;}
+double BaseLiquidControlComponent::GetDensity() const { return m_liquid.density; }
 void BaseLiquidControlComponent::SetDensity(double density)
 {
 	m_liquid.density = density;
@@ -97,37 +86,37 @@ void BaseLiquidControlComponent::SetDensity(double density)
 	BroadcastEvent(EVENT_ON_PROPERTIES_CHANGED);
 }
 
-double BaseLiquidControlComponent::GetLinearDragCoefficient() const {return m_liquid.linearDragCoefficient;}
+double BaseLiquidControlComponent::GetLinearDragCoefficient() const { return m_liquid.linearDragCoefficient; }
 void BaseLiquidControlComponent::SetLinearDragCoefficient(double coefficient)
 {
 	m_liquid.linearDragCoefficient = coefficient;
 	BroadcastEvent(EVENT_ON_PROPERTIES_CHANGED);
 }
 
-double BaseLiquidControlComponent::GetTorqueDragCoefficient() const {return m_liquid.torqueDragCoefficient;}
+double BaseLiquidControlComponent::GetTorqueDragCoefficient() const { return m_liquid.torqueDragCoefficient; }
 void BaseLiquidControlComponent::SetTorqueDragCoefficient(double coefficient)
 {
 	m_liquid.torqueDragCoefficient = coefficient;
 	BroadcastEvent(EVENT_ON_PROPERTIES_CHANGED);
 }
 
-float BaseLiquidControlComponent::GetStiffness() const {return m_liquid.stiffness;}
+float BaseLiquidControlComponent::GetStiffness() const { return m_liquid.stiffness; }
 void BaseLiquidControlComponent::SetStiffness(float stiffness)
 {
 	m_liquid.stiffness = stiffness;
 	BroadcastEvent(EVENT_ON_PROPERTIES_CHANGED);
 }
-float BaseLiquidControlComponent::GetPropagation() const {return m_liquid.propagation;}
+float BaseLiquidControlComponent::GetPropagation() const { return m_liquid.propagation; }
 void BaseLiquidControlComponent::SetPropagation(float propagation)
 {
 	m_liquid.propagation = propagation;
 	BroadcastEvent(EVENT_ON_PROPERTIES_CHANGED);
 }
 
-const Vector3 &BaseLiquidControlComponent::GetLiquidVelocity() const {return m_liquidVelocity;}
-void BaseLiquidControlComponent::SetLiquidVelocity(const Vector3 &velocity) {m_liquidVelocity = velocity;}
+const Vector3 &BaseLiquidControlComponent::GetLiquidVelocity() const { return m_liquidVelocity; }
+void BaseLiquidControlComponent::SetLiquidVelocity(const Vector3 &velocity) { m_liquidVelocity = velocity; }
 
-void BaseLiquidControlComponent::CreateSplash(const Vector3 &origin,float radius,float force)
+void BaseLiquidControlComponent::CreateSplash(const Vector3 &origin, float radius, float force)
 {
 	m_splashes.push({});
 	auto &splashInfo = m_splashes.back();
@@ -135,12 +124,10 @@ void BaseLiquidControlComponent::CreateSplash(const Vector3 &origin,float radius
 	splashInfo.radius = radius;
 	splashInfo.force = force;
 
-	BroadcastEvent(EVENT_ON_SPLASH,CEOnSplash{splashInfo});
+	BroadcastEvent(EVENT_ON_SPLASH, CEOnSplash {splashInfo});
 }
 
-bool BaseLiquidControlComponent::OnBulletHit(
-	const BulletInfo &bulletInfo,const TraceData &data,PhysObj *phys,pragma::physics::ICollisionObject *col,const LocalRayResult &result
-)
+bool BaseLiquidControlComponent::OnBulletHit(const BulletInfo &bulletInfo, const TraceData &data, PhysObj *phys, pragma::physics::ICollisionObject *col, const LocalRayResult &result)
 {
 	/*if(m_physSurfaceSim != nullptr)
 	{
@@ -157,12 +144,10 @@ bool BaseLiquidControlComponent::OnBulletHit(
 
 /////////
 
-CEOnSplash::CEOnSplash(const BaseLiquidControlComponent::SplashInfo &splashInfo)
-	: splashInfo{splashInfo}
-{}
+CEOnSplash::CEOnSplash(const BaseLiquidControlComponent::SplashInfo &splashInfo) : splashInfo {splashInfo} {}
 void CEOnSplash::PushArguments(lua_State *l)
 {
-	Lua::Push<Vector3>(l,splashInfo.origin);
-	Lua::PushNumber(l,splashInfo.radius);
-	Lua::PushNumber(l,splashInfo.force);
+	Lua::Push<Vector3>(l, splashInfo.origin);
+	Lua::PushNumber(l, splashInfo.radius);
+	Lua::PushNumber(l, splashInfo.force);
 }

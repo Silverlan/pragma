@@ -15,29 +15,22 @@
 
 class BaseEntity;
 enum class MOVETYPE : int;
-namespace pragma
-{
-	class DLLNETWORK BasePropComponent
-		: public BaseEntityComponent
-	{
-	public:
-		enum class SpawnFlags : uint32_t
-		{
-			DisableCollisions = 2'048,
-			Static = DisableCollisions<<1
-		};
+namespace pragma {
+	class DLLNETWORK BasePropComponent : public BaseEntityComponent {
+	  public:
+		enum class SpawnFlags : uint32_t { DisableCollisions = 2'048, Static = DisableCollisions << 1 };
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
 		PHYSICSTYPE UpdatePhysicsType(BaseEntity *ent);
 		void InitializePhysics(PHYSICSTYPE physType);
-		void Setup(PHYSICSTYPE physType,MOVETYPE mvType);
+		void Setup(PHYSICSTYPE physType, MOVETYPE mvType);
 		virtual void OnEntitySpawn() override;
-	protected:
+	  protected:
 		void InitializePhysics();
 		float m_kvScale;
 		float m_kvMass = std::numeric_limits<float>::quiet_NaN();
 		BasePropComponent(BaseEntity &ent);
-		bool SetKeyValue(std::string key,std::string val);
+		bool SetKeyValue(std::string key, std::string val);
 
 		PHYSICSTYPE m_physicsType = PHYSICSTYPE::NONE;
 		MOVETYPE m_moveType = MOVETYPE::NONE;

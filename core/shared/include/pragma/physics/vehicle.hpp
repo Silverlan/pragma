@@ -14,13 +14,11 @@
 #include "pragma/util/util_typed_manager.hpp"
 #include <optional>
 
-namespace pragma::physics
-{
+namespace pragma::physics {
 	class IConvexHullShape;
 	class IShape;
 	class IRigidBody;
-	struct DLLNETWORK ChassisCreateInfo
-	{
+	struct DLLNETWORK ChassisCreateInfo {
 		std::optional<Vector3> momentOfInertia = {};
 		// Indices for all of the actor shapes that make up the chassis
 		std::vector<uint32_t> shapeIndices = {};
@@ -28,23 +26,16 @@ namespace pragma::physics
 		// If not specified, center of mass will be calculated automatically
 		std::optional<Vector3> centerOfMass = {};
 		float GetMass(const pragma::physics::IRigidBody &body) const;
-		void GetAABB(const pragma::physics::IRigidBody &body,Vector3 &min,Vector3 &max) const;
+		void GetAABB(const pragma::physics::IRigidBody &body, Vector3 &min, Vector3 &max) const;
 		Vector3 GetMomentOfInertia(const pragma::physics::IRigidBody &body) const;
 		Vector3 GetCenterOfMass(const pragma::physics::IRigidBody &body) const;
-		std::vector<const pragma::physics::IShape*> GetShapes(const pragma::physics::IRigidBody &body) const;
-		bool operator==(const ChassisCreateInfo &other) const
-		{
-			return momentOfInertia == other.momentOfInertia &&
-				shapeIndices == other.shapeIndices &&
-				centerOfMass == other.centerOfMass;
-		}
-		bool operator!=(const ChassisCreateInfo &other) const {return !operator==(other);}
+		std::vector<const pragma::physics::IShape *> GetShapes(const pragma::physics::IRigidBody &body) const;
+		bool operator==(const ChassisCreateInfo &other) const { return momentOfInertia == other.momentOfInertia && shapeIndices == other.shapeIndices && centerOfMass == other.centerOfMass; }
+		bool operator!=(const ChassisCreateInfo &other) const { return !operator==(other); }
 	};
 
-	struct DLLNETWORK WheelCreateInfo
-	{
-		struct DLLNETWORK SuspensionInfo
-		{
+	struct DLLNETWORK WheelCreateInfo {
+		struct DLLNETWORK SuspensionInfo {
 			float maxCompression = 0.3f;
 			float maxDroop = 0.1f;
 			float springStrength = 35'000.0f;
@@ -56,41 +47,21 @@ namespace pragma::physics
 
 			bool operator==(const SuspensionInfo &other) const
 			{
-				return maxCompression == other.maxCompression &&
-					maxDroop == other.maxDroop &&
-					springStrength == other.springStrength &&
-					springDamperRate == other.springDamperRate &&
-					camberAngleAtRest == other.camberAngleAtRest &&
-					camberAngleAtMaxDroop == other.camberAngleAtMaxDroop &&
-					camberAngleAtMaxCompression == other.camberAngleAtMaxCompression;
+				return maxCompression == other.maxCompression && maxDroop == other.maxDroop && springStrength == other.springStrength && springDamperRate == other.springDamperRate && camberAngleAtRest == other.camberAngleAtRest && camberAngleAtMaxDroop == other.camberAngleAtMaxDroop
+				  && camberAngleAtMaxCompression == other.camberAngleAtMaxCompression;
 			}
-			bool operator!=(const SuspensionInfo &other) const {return !operator==(other);}
+			bool operator!=(const SuspensionInfo &other) const { return !operator==(other); }
 		};
 
 		static WheelCreateInfo CreateStandardFrontWheel();
 		static WheelCreateInfo CreateStandardRearWheel();
 		bool operator==(const WheelCreateInfo &other) const
 		{
-			return flags == other.flags &&
-				width == other.width &&
-				radius == other.radius &&
-				maxHandbrakeTorque == other.maxHandbrakeTorque &&
-				shapeIndex == other.shapeIndex &&
-				maxSteeringAngle == other.maxSteeringAngle &&
-				chassisOffset == other.chassisOffset &&
-				suspension == other.suspension &&
-				tireType == other.tireType &&
-				momentOfInertia == other.momentOfInertia;
+			return flags == other.flags && width == other.width && radius == other.radius && maxHandbrakeTorque == other.maxHandbrakeTorque && shapeIndex == other.shapeIndex && maxSteeringAngle == other.maxSteeringAngle && chassisOffset == other.chassisOffset
+			  && suspension == other.suspension && tireType == other.tireType && momentOfInertia == other.momentOfInertia;
 		}
-		bool operator!=(const WheelCreateInfo &other) const {return !operator==(other);}
-		enum class Flags : uint32_t
-		{
-			None = 0u,
-			Front = 1u,
-			Rear = Front<<1u,
-			Left = Rear<<1u,
-			Right = Left<<1u
-		};
+		bool operator!=(const WheelCreateInfo &other) const { return !operator==(other); }
+		enum class Flags : uint32_t { None = 0u, Front = 1u, Rear = Front << 1u, Left = Rear << 1u, Right = Left << 1u };
 		Flags flags = Flags::None;
 		// If width or radius are not specified, they will be
 		// determined by the physics shape AABB!
@@ -113,23 +84,16 @@ namespace pragma::physics
 		// moi for a cylinder of the specified radius and mass.
 		float GetMomentOfInertia(const pragma::physics::IRigidBody &body) const;
 		const pragma::physics::IShape *GetShape(const pragma::physics::IRigidBody &body) const;
-		void GetAABB(const pragma::physics::IRigidBody &body,Vector3 &min,Vector3 &max) const;
+		void GetAABB(const pragma::physics::IRigidBody &body, Vector3 &min, Vector3 &max) const;
 		float GetRadius(const pragma::physics::IRigidBody &body) const;
 		float GetWidth(const pragma::physics::IRigidBody &body) const;
 	};
 
 	class IRigidBody;
-	struct DLLNETWORK VehicleCreateInfo
-	{
+	struct DLLNETWORK VehicleCreateInfo {
 		static constexpr uint32_t WHEEL_COUNT_4W_DRIVE = 4u;
-		enum class WheelDrive : uint8_t
-		{
-			Front = 0u,
-			Rear,
-			Four
-		};
-		enum class Wheel : uint8_t
-		{
+		enum class WheelDrive : uint8_t { Front = 0u, Rear, Four };
+		enum class Wheel : uint8_t {
 			// Note: Order is important!
 			FrontLeft = 0,
 			FrontRight,
@@ -138,42 +102,23 @@ namespace pragma::physics
 
 			Dummy
 		};
-		struct DLLNETWORK AntiRollBar
-		{
-			AntiRollBar(Wheel wheel0,Wheel wheel1,float stiffness=10'000.0f)
-				: wheel0{wheel0},wheel1{wheel1},stiffness{stiffness}
-			{}
-			AntiRollBar()=default;
-			bool operator==(const AntiRollBar &other) const
-			{
-				return wheel0 == other.wheel0 &&
-					wheel1 == other.wheel1 &&
-					stiffness == other.stiffness;
-			}
-			bool operator!=(const AntiRollBar &other) const {return !operator==(other);}
+		struct DLLNETWORK AntiRollBar {
+			AntiRollBar(Wheel wheel0, Wheel wheel1, float stiffness = 10'000.0f) : wheel0 {wheel0}, wheel1 {wheel1}, stiffness {stiffness} {}
+			AntiRollBar() = default;
+			bool operator==(const AntiRollBar &other) const { return wheel0 == other.wheel0 && wheel1 == other.wheel1 && stiffness == other.stiffness; }
+			bool operator!=(const AntiRollBar &other) const { return !operator==(other); }
 			Wheel wheel0 = Wheel::FrontLeft;
 			Wheel wheel1 = Wheel::FrontRight;
 			float stiffness = 10'000.0f;
 		};
 		static Wheel GetWheelType(const WheelCreateInfo &wheelDesc);
-		static VehicleCreateInfo CreateStandardFourWheelDrive(
-			const std::array<Vector3,WHEEL_COUNT_4W_DRIVE> &wheelCenterOffsets,
-			float handBrakeTorque=6'400'000.0,
-			float maxSteeringAngle=60.0
-		);
+		static VehicleCreateInfo CreateStandardFourWheelDrive(const std::array<Vector3, WHEEL_COUNT_4W_DRIVE> &wheelCenterOffsets, float handBrakeTorque = 6'400'000.0, float maxSteeringAngle = 60.0);
 		bool operator==(const VehicleCreateInfo &other) const
 		{
-			return chassis == other.chassis &&
-				wheels == other.wheels &&
-				wheelDrive == other.wheelDrive &&
-				antiRollBars == other.antiRollBars &&
-				maxEngineTorque == other.maxEngineTorque &&
-				gearSwitchTime == other.gearSwitchTime &&
-				clutchStrength == other.clutchStrength &&
-				gravityFactor == other.gravityFactor &&
-				actor.Get() == other.actor.Get();
+			return chassis == other.chassis && wheels == other.wheels && wheelDrive == other.wheelDrive && antiRollBars == other.antiRollBars && maxEngineTorque == other.maxEngineTorque && gearSwitchTime == other.gearSwitchTime && clutchStrength == other.clutchStrength
+			  && gravityFactor == other.gravityFactor && actor.Get() == other.actor.Get();
 		}
-		bool operator!=(const VehicleCreateInfo &other) const {return !operator==(other);}
+		bool operator!=(const VehicleCreateInfo &other) const { return !operator==(other); }
 
 		ChassisCreateInfo chassis = {};
 		std::vector<WheelCreateInfo> wheels = {};
@@ -188,12 +133,9 @@ namespace pragma::physics
 	};
 
 	class ICollisionObject;
-	class DLLNETWORK IVehicle
-		: public IBase,public IWorldObject
-	{
-	public:
-		enum class Gear : uint8_t
-		{
+	class DLLNETWORK IVehicle : public IBase, public IWorldObject {
+	  public:
+		enum class Gear : uint8_t {
 			Reverse = 0,
 			Neutral,
 			First,
@@ -238,57 +180,55 @@ namespace pragma::physics
 		const ICollisionObject *GetCollisionObject() const;
 		virtual void InitializeLuaObject(lua_State *lua) override;
 
-		virtual void SetUseDigitalInputs(bool bUseDigitalInputs)=0;
+		virtual void SetUseDigitalInputs(bool bUseDigitalInputs) = 0;
 
-		virtual void SetBrakeFactor(float f)=0;
-		virtual void SetHandbrakeFactor(float f)=0;
-		virtual void SetAccelerationFactor(float f)=0;
-		virtual void SetSteerFactor(float f)=0;
+		virtual void SetBrakeFactor(float f) = 0;
+		virtual void SetHandbrakeFactor(float f) = 0;
+		virtual void SetAccelerationFactor(float f) = 0;
+		virtual void SetSteerFactor(float f) = 0;
 
-		virtual void SetGear(Gear gear)=0;
-		virtual void SetGearDown()=0;
-		virtual void SetGearUp()=0;
-		virtual void SetGearSwitchTime(float time)=0;
-		virtual void ChangeToGear(Gear gear)=0;
-		virtual void SetUseAutoGears(bool useAutoGears)=0;
+		virtual void SetGear(Gear gear) = 0;
+		virtual void SetGearDown() = 0;
+		virtual void SetGearUp() = 0;
+		virtual void SetGearSwitchTime(float time) = 0;
+		virtual void ChangeToGear(Gear gear) = 0;
+		virtual void SetUseAutoGears(bool useAutoGears) = 0;
 
-		virtual bool ShouldUseAutoGears() const=0;
-		virtual Gear GetCurrentGear() const=0;
-		virtual umath::Radian GetEngineRotationSpeed() const=0;
-		virtual void SetEngineRotationSpeed(umath::Radian speed) const=0;
+		virtual bool ShouldUseAutoGears() const = 0;
+		virtual Gear GetCurrentGear() const = 0;
+		virtual umath::Radian GetEngineRotationSpeed() const = 0;
+		virtual void SetEngineRotationSpeed(umath::Radian speed) const = 0;
 
-		virtual void SetRestState()=0;
+		virtual void SetRestState() = 0;
 
-		virtual void ResetControls()=0;
+		virtual void ResetControls() = 0;
 
-		virtual void SetWheelRotationAngle(WheelIndex wheel,umath::Radian angle)=0;
-		virtual void SetWheelRotationSpeed(WheelIndex wheel,umath::Radian speed)=0;
+		virtual void SetWheelRotationAngle(WheelIndex wheel, umath::Radian angle) = 0;
+		virtual void SetWheelRotationSpeed(WheelIndex wheel, umath::Radian speed) = 0;
 
-		virtual bool IsInAir() const=0;
+		virtual bool IsInAir() const = 0;
 
-		virtual std::optional<umath::Transform> GetLocalWheelPose(WheelIndex wheelIndex) const=0;
-		virtual uint32_t GetWheelCount() const=0;
-		virtual float GetSteerFactor() const=0;
-		virtual umath::Radian GetWheelYawAngle(WheelIndex wheel) const=0;
-		virtual umath::Radian GetWheelRollAngle(WheelIndex wheel) const=0;
-		virtual float GetForwardSpeed() const=0;
-		virtual float GetSidewaysSpeed() const=0;
+		virtual std::optional<umath::Transform> GetLocalWheelPose(WheelIndex wheelIndex) const = 0;
+		virtual uint32_t GetWheelCount() const = 0;
+		virtual float GetSteerFactor() const = 0;
+		virtual umath::Radian GetWheelYawAngle(WheelIndex wheel) const = 0;
+		virtual umath::Radian GetWheelRollAngle(WheelIndex wheel) const = 0;
+		virtual float GetForwardSpeed() const = 0;
+		virtual float GetSidewaysSpeed() const = 0;
 
-		virtual float GetBrakeFactor() const=0;
-		virtual float GetHandbrakeFactor() const=0;
-		virtual float GetAccelerationFactor() const=0;
-		virtual umath::Radian GetWheelRotationSpeed(WheelIndex wheel) const=0;
-	protected:
-		IVehicle(IEnvironment &env,const util::TSharedHandle<ICollisionObject> &collisionObject);
-		virtual bool ShouldUseDigitalInputs() const=0;
+		virtual float GetBrakeFactor() const = 0;
+		virtual float GetHandbrakeFactor() const = 0;
+		virtual float GetAccelerationFactor() const = 0;
+		virtual umath::Radian GetWheelRotationSpeed(WheelIndex wheel) const = 0;
+	  protected:
+		IVehicle(IEnvironment &env, const util::TSharedHandle<ICollisionObject> &collisionObject);
+		virtual bool ShouldUseDigitalInputs() const = 0;
 		util::TSharedHandle<ICollisionObject> m_collisionObject = nullptr;
 	};
-	
-	class DLLNETWORK IWheel
-		: public IBase
-	{
-	public:
-	protected:
+
+	class DLLNETWORK IWheel : public IBase {
+	  public:
+	  protected:
 		IWheel(IEnvironment &env);
 	};
 };

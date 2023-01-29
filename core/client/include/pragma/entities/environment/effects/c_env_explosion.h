@@ -11,12 +11,9 @@
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/environment/effects/env_explosion.h"
 
-namespace pragma
-{
-	class DLLCLIENT CExplosionComponent final
-		: public BaseEnvExplosionComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CExplosionComponent final : public BaseEnvExplosionComponent {
+	  public:
 		CExplosionComponent(BaseEntity &ent) : BaseEnvExplosionComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void Explode() override;
@@ -24,10 +21,8 @@ namespace pragma
 	};
 };
 
-class DLLCLIENT CEnvExplosion
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEnvExplosion : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

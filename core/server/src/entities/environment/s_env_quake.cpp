@@ -15,14 +15,11 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_quake,EnvQuake);
+LINK_ENTITY_TO_CLASS(env_quake, EnvQuake);
 
-void SQuakeComponent::Initialize()
-{
-	BaseEnvQuakeComponent::Initialize();
-}
+void SQuakeComponent::Initialize() { BaseEnvQuakeComponent::Initialize(); }
 
-void SQuakeComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SQuakeComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->Write<UInt32>(m_quakeFlags);
 	packet->Write<Float>(GetFrequency());
@@ -33,7 +30,7 @@ void SQuakeComponent::SendData(NetPacket &packet,networking::ClientRecipientFilt
 	packet->Write<Float>(GetFadeOutDuration());
 }
 
-void SQuakeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SQuakeComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ///////////////
 

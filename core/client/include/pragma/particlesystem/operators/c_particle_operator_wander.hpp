@@ -10,16 +10,14 @@
 
 #include "pragma/particlesystem/operators/c_particle_operator_world_base.hpp"
 
-class DLLCLIENT CParticleOperatorWander
-	: public CParticleOperatorWorldBase
-{
-public:
-	CParticleOperatorWander()=default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
-	virtual void Simulate(CParticle &particle,double tDelta,float strength) override;
+class DLLCLIENT CParticleOperatorWander : public CParticleOperatorWorldBase {
+  public:
+	CParticleOperatorWander() = default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
 	virtual void Simulate(double tDelta) override;
 	virtual void OnParticleCreated(CParticle &particle) override;
-protected:
+  protected:
 	std::vector<int32_t> m_hashCodes;
 	float m_fFrequency = 2.f;
 	float m_fStrength = 0.05f;

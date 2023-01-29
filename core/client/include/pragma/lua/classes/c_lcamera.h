@@ -16,26 +16,32 @@
 
 class WorldEnvironment;
 class Material;
-namespace util {struct DrawSceneInfo;};
+namespace util {
+	struct DrawSceneInfo;
+};
 class Scene;
-namespace pragma {class CSceneComponent; class CRasterizationRendererComponent; class ShaderGameWorldLightingPass;};
-namespace prosper {class IRenderPass; class ICommandBuffer;};
+namespace pragma {
+	class CSceneComponent;
+	class CRasterizationRendererComponent;
+	class ShaderGameWorldLightingPass;
+};
+namespace prosper {
+	class IRenderPass;
+	class ICommandBuffer;
+};
 class ModelSubMesh;
-namespace Lua
-{
-	namespace Scene
-	{
-		DLLCLIENT void UpdateBuffers(lua_State *l,pragma::CSceneComponent &scene,prosper::ICommandBuffer &hCommandBuffer);
-		DLLCLIENT std::shared_ptr<WorldEnvironment> GetWorldEnvironment(lua_State *l,pragma::CSceneComponent &scene);
+namespace Lua {
+	namespace Scene {
+		DLLCLIENT void UpdateBuffers(lua_State *l, pragma::CSceneComponent &scene, prosper::ICommandBuffer &hCommandBuffer);
+		DLLCLIENT std::shared_ptr<WorldEnvironment> GetWorldEnvironment(lua_State *l, pragma::CSceneComponent &scene);
 	};
-	namespace RasterizationRenderer
-	{
-		DLLCLIENT std::shared_ptr<prosper::Texture> GetPrepassDepthTexture(lua_State *l,pragma::CRasterizationRendererComponent &renderer);
-		DLLCLIENT std::shared_ptr<prosper::Texture> GetPrepassNormalTexture(lua_State *l,pragma::CRasterizationRendererComponent &renderer);
+	namespace RasterizationRenderer {
+		DLLCLIENT std::shared_ptr<prosper::Texture> GetPrepassDepthTexture(lua_State *l, pragma::CRasterizationRendererComponent &renderer);
+		DLLCLIENT std::shared_ptr<prosper::Texture> GetPrepassNormalTexture(lua_State *l, pragma::CRasterizationRendererComponent &renderer);
 
-		DLLCLIENT std::shared_ptr<prosper::RenderTarget> GetRenderTarget(lua_State *l,pragma::CRasterizationRendererComponent &renderer);
-		DLLCLIENT bool BeginRenderPass(lua_State *l,pragma::CRasterizationRendererComponent &renderer,const ::util::DrawSceneInfo &drawSceneInfo);
-		DLLCLIENT bool BeginRenderPass(lua_State *l,pragma::CRasterizationRendererComponent &renderer,const ::util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass &rp);
+		DLLCLIENT std::shared_ptr<prosper::RenderTarget> GetRenderTarget(lua_State *l, pragma::CRasterizationRendererComponent &renderer);
+		DLLCLIENT bool BeginRenderPass(lua_State *l, pragma::CRasterizationRendererComponent &renderer, const ::util::DrawSceneInfo &drawSceneInfo);
+		DLLCLIENT bool BeginRenderPass(lua_State *l, pragma::CRasterizationRendererComponent &renderer, const ::util::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass &rp);
 	};
 };
 

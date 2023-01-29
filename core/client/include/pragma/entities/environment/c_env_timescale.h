@@ -13,24 +13,18 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <memory>
 
-namespace pragma
-{
-	class DLLCLIENT CEnvTimescaleComponent final
-		: public BaseEnvTimescaleComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CEnvTimescaleComponent final : public BaseEnvTimescaleComponent, public CBaseNetComponent {
+	  public:
 		CEnvTimescaleComponent(BaseEntity &ent) : BaseEnvTimescaleComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 };
 
-class DLLCLIENT CEnvTimescale
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEnvTimescale : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

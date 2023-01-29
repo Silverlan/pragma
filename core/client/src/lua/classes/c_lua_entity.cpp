@@ -8,14 +8,9 @@
 #include "stdafx_client.h"
 #include "pragma/lua/classes/c_lua_entity.h"
 
-CLuaEntity::CLuaEntity()
-	: CBaseEntity{}
-{}
-void CLuaEntity::Initialize()
-{
-	CBaseEntity::Initialize();
-}
-void CLuaEntity::SetupLua(const luabind::object &o,const std::string &className)
+CLuaEntity::CLuaEntity() : CBaseEntity {} {}
+void CLuaEntity::Initialize() { CBaseEntity::Initialize(); }
+void CLuaEntity::SetupLua(const luabind::object &o, const std::string &className)
 {
 	m_class = className;
 	SetLuaObject(o);

@@ -15,15 +15,14 @@ class CModelSubMesh;
 class CBaseEntity;
 #pragma warning(push)
 #pragma warning(disable : 4251)
-class DLLCLIENT EntityMeshInfo
-{
-public:
+class DLLCLIENT EntityMeshInfo {
+  public:
 	EntityMeshInfo(CBaseEntity *ent) : entity(ent) {};
-	EntityMeshInfo(const EntityMeshInfo&)=delete;
-	EntityMeshInfo(EntityMeshInfo&&)=default;
-	EntityMeshInfo &operator=(const EntityMeshInfo &other)=delete;
+	EntityMeshInfo(const EntityMeshInfo &) = delete;
+	EntityMeshInfo(EntityMeshInfo &&) = default;
+	EntityMeshInfo &operator=(const EntityMeshInfo &other) = delete;
 	CBaseEntity *entity;
-	std::vector<CModelSubMesh*> meshes;
+	std::vector<CModelSubMesh *> meshes;
 };
 #pragma warning(pop)
 

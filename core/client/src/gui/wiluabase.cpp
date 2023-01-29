@@ -16,13 +16,11 @@
 extern DLLCLIENT CGame *c_game;
 
 extern ClientState *client;
-WILuaBase::WILuaBase()
-{}
+WILuaBase::WILuaBase() {}
 
-WILuaBase::~WILuaBase()
-{}
+WILuaBase::~WILuaBase() {}
 
-void WILuaBase::SetupLua(const luabind::object &o,std::string &className)
+void WILuaBase::SetupLua(const luabind::object &o, std::string &className)
 {
 	m_class = className;
 	SetLuaObject(o);
@@ -40,7 +38,7 @@ void WILuaBase::Initialize()
 
 void WILuaBase::OnSkinApplied()
 {
-	if(umath::is_flag_set(m_stateFlags,StateFlags::SkinCallbacksEnabled))
+	if(umath::is_flag_set(m_stateFlags, StateFlags::SkinCallbacksEnabled))
 		CallLuaMember("OnSkinApplied");
 }
 
@@ -62,29 +60,29 @@ void WILuaBase::OnFirstThink()
 	CallLuaMember("OnFirstThink");
 }
 
-util::EventReply WILuaBase::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
+util::EventReply WILuaBase::MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods)
 {
 	auto hThis = GetHandle();
-	if(WIBase::MouseCallback(button,state,mods) == util::EventReply::Handled)
+	if(WIBase::MouseCallback(button, state, mods) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	if(!hThis.IsValid())
 		return util::EventReply::Unhandled;
 	uint32_t reply = umath::to_integral(util::EventReply::Unhandled);
-	CallLuaMember<uint32_t,int,int,int>("MouseCallback",&reply,static_cast<int>(button),static_cast<int>(state),static_cast<int>(mods));
+	CallLuaMember<uint32_t, int, int, int>("MouseCallback", &reply, static_cast<int>(button), static_cast<int>(state), static_cast<int>(mods));
 	return static_cast<util::EventReply>(reply);
 }
-util::EventReply WILuaBase::KeyboardCallback(GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods)
+util::EventReply WILuaBase::KeyboardCallback(GLFW::Key key, int scanCode, GLFW::KeyState state, GLFW::Modifier mods)
 {
 	auto hThis = GetHandle();
-	if(WIBase::KeyboardCallback(key,scanCode,state,mods) == util::EventReply::Handled)
+	if(WIBase::KeyboardCallback(key, scanCode, state, mods) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	if(!hThis.IsValid())
 		return util::EventReply::Unhandled;
 	uint32_t reply = umath::to_integral(util::EventReply::Unhandled);
-	CallLuaMember<uint32_t,int,int,int,int>("KeyboardCallback",&reply,static_cast<int>(key),scanCode,static_cast<int>(state),static_cast<int>(mods));
+	CallLuaMember<uint32_t, int, int, int, int>("KeyboardCallback", &reply, static_cast<int>(key), scanCode, static_cast<int>(state), static_cast<int>(mods));
 	return static_cast<util::EventReply>(reply);
 }
-util::EventReply WILuaBase::CharCallback(unsigned int c,GLFW::Modifier mods)
+util::EventReply WILuaBase::CharCallback(unsigned int c, GLFW::Modifier mods)
 {
 	auto hThis = GetHandle();
 	if(WIBase::CharCallback(c) == util::EventReply::Handled)
@@ -92,7 +90,7 @@ util::EventReply WILuaBase::CharCallback(unsigned int c,GLFW::Modifier mods)
 	if(!hThis.IsValid())
 		return util::EventReply::Unhandled;
 	uint32_t reply = umath::to_integral(util::EventReply::Unhandled);
-	CallLuaMember<uint32_t,unsigned int,uint32_t>("CharCallback",&reply,c,umath::to_integral(mods));
+	CallLuaMember<uint32_t, unsigned int, uint32_t>("CharCallback", &reply, c, umath::to_integral(mods));
 	return static_cast<util::EventReply>(reply);
 }
 util::EventReply WILuaBase::ScrollCallback(Vector2 offset)
@@ -103,46 +101,46 @@ util::EventReply WILuaBase::ScrollCallback(Vector2 offset)
 	if(!hThis.IsValid())
 		return util::EventReply::Unhandled;
 	uint32_t reply = umath::to_integral(util::EventReply::Unhandled);
-	CallLuaMember<uint32_t,double,double>("ScrollCallback",&reply,offset.x,offset.y);
+	CallLuaMember<uint32_t, double, double>("ScrollCallback", &reply, offset.x, offset.y);
 	return static_cast<util::EventReply>(reply);
 }
 
-void WILuaBase::SetSize(int x,int y)
+void WILuaBase::SetSize(int x, int y)
 {
 	if(x == GetWidth() && y == GetHeight())
 		return;
-	WIBase::SetSize(x,y);
-	CallLuaMember<void,int,int>("OnSizeChanged",x,y);
+	WIBase::SetSize(x, y);
+	CallLuaMember<void, int, int>("OnSizeChanged", x, y);
 }
 void WILuaBase::OnVisibilityChanged(bool bVisible)
 {
 	// if(bVisible == *GetVisibilityProperty())
 	// 	return;
 	WIBase::OnVisibilityChanged(bVisible);
-	CallLuaMember<void,bool>("OnVisibilityChanged",bVisible);
+	CallLuaMember<void, bool>("OnVisibilityChanged", bVisible);
 }
 void WILuaBase::DoUpdate()
 {
 	WIBase::DoUpdate();
 	CallLuaMember<void>("OnUpdate");
 }
-void WILuaBase::SetColor(float r,float g,float b,float a)
+void WILuaBase::SetColor(float r, float g, float b, float a)
 {
 	// TODO: Check against current values?
-	WIBase::SetColor(r,g,b,a);
-	CallLuaMember<void,float,float,float,float>("OnColorChanged",r,g,b,a);
+	WIBase::SetColor(r, g, b, a);
+	CallLuaMember<void, float, float, float, float>("OnColorChanged", r, g, b, a);
 }
 void WILuaBase::SetAlpha(float alpha)
 {
 	if(alpha == GetAlpha())
 		return;
 	WIBase::SetAlpha(alpha);
-	CallLuaMember<void,float>("OnAlphaChanged",alpha);
+	CallLuaMember<void, float>("OnAlphaChanged", alpha);
 }
 bool WILuaBase::DoPosInBounds(const Vector2i &pos) const
 {
 	bool res = false;
-	auto r = const_cast<WILuaBase*>(this)->CallLuaMember<bool,Vector2i>("CheckPosInBounds",&res,pos);
+	auto r = const_cast<WILuaBase *>(this)->CallLuaMember<bool, Vector2i>("CheckPosInBounds", &res, pos);
 	if(r == CallbackReturnType::HasReturnValue)
 		return res;
 	return WIBase::DoPosInBounds(pos);
@@ -150,25 +148,23 @@ bool WILuaBase::DoPosInBounds(const Vector2i &pos) const
 
 void WILuaBase::SetRenderCommandBuffer(const std::shared_ptr<prosper::util::PreparedCommandBuffer> &cmd)
 {
-	if(!cmd)
-	{
+	if(!cmd) {
 		m_renderData = nullptr;
 		return;
 	}
-	m_renderData = std::unique_ptr<RenderData>{new RenderData{}};
+	m_renderData = std::unique_ptr<RenderData> {new RenderData {}};
 	m_renderData->renderCommandBuffer = cmd;
 }
 
-void WILuaBase::Render(const DrawInfo &drawInfo,wgui::DrawState &drawState,const Mat4 &matDraw,const Vector2 &scale,uint32_t testStencilLevel,wgui::StencilPipeline stencilPipeline)
+void WILuaBase::Render(const DrawInfo &drawInfo, wgui::DrawState &drawState, const Mat4 &matDraw, const Vector2 &scale, uint32_t testStencilLevel, wgui::StencilPipeline stencilPipeline)
 {
-	WIBase::Render(drawInfo,drawState,matDraw,scale,testStencilLevel,stencilPipeline);
+	WIBase::Render(drawInfo, drawState, matDraw, scale, testStencilLevel, stencilPipeline);
 	if(!m_renderData)
 		return;
 	auto &drawArgs = m_renderData->drawArgs;
 	if(!m_renderData->renderCommandBuffer->enableDrawArgs)
-		m_renderData->renderCommandBuffer->RecordCommands(*drawInfo.commandBuffer,drawArgs,m_renderData->userData);
-	else
-	{
+		m_renderData->renderCommandBuffer->RecordCommands(*drawInfo.commandBuffer, drawArgs, m_renderData->userData);
+	else {
 		// Some arguments have to be updated at render time,
 		// however since the render-code is multi-threaded and we only have
 		// one container for the draw arguments, we have to secure it
@@ -176,18 +172,18 @@ void WILuaBase::Render(const DrawInfo &drawInfo,wgui::DrawState &drawState,const
 		// it's unlikely this will cause a significant negative performance impact.
 		using namespace ustring::string_switch;
 		std::scoped_lock lock {m_renderData->drawArgMutex};
-		drawArgs.SetArgumentValue(hash("x"),drawInfo.offset.x);
-		drawArgs.SetArgumentValue(hash("y"),drawInfo.offset.y);
-		drawArgs.SetArgumentValue(hash("w"),drawInfo.size.x);
-		drawArgs.SetArgumentValue(hash("h"),drawInfo.size.y);
-		drawArgs.SetArgumentValue(hash("stencilPipeline"),umath::to_integral(stencilPipeline));
-		drawArgs.SetArgumentValue(hash("testStencilLevel"),testStencilLevel);
-		drawArgs.SetArgumentValue(hash("msaa"),drawInfo.msaa);
-		drawArgs.SetArgumentValue(hash("matDraw"),matDraw);
-		drawArgs.SetArgumentValue(hash("scale"),scale);
-		drawArgs.SetArgumentValue(hash("viewportSize"),wgui::ElementData::ToViewportSize(drawInfo.size));
-		m_renderData->userData.Set(hash("guiDrawState"),drawState);
-		m_renderData->renderCommandBuffer->RecordCommands(*drawInfo.commandBuffer,drawArgs,m_renderData->userData);
+		drawArgs.SetArgumentValue(hash("x"), drawInfo.offset.x);
+		drawArgs.SetArgumentValue(hash("y"), drawInfo.offset.y);
+		drawArgs.SetArgumentValue(hash("w"), drawInfo.size.x);
+		drawArgs.SetArgumentValue(hash("h"), drawInfo.size.y);
+		drawArgs.SetArgumentValue(hash("stencilPipeline"), umath::to_integral(stencilPipeline));
+		drawArgs.SetArgumentValue(hash("testStencilLevel"), testStencilLevel);
+		drawArgs.SetArgumentValue(hash("msaa"), drawInfo.msaa);
+		drawArgs.SetArgumentValue(hash("matDraw"), matDraw);
+		drawArgs.SetArgumentValue(hash("scale"), scale);
+		drawArgs.SetArgumentValue(hash("viewportSize"), wgui::ElementData::ToViewportSize(drawInfo.size));
+		m_renderData->userData.Set(hash("guiDrawState"), drawState);
+		m_renderData->renderCommandBuffer->RecordCommands(*drawInfo.commandBuffer, drawArgs, m_renderData->userData);
 	}
 }
 void WILuaBase::OnCursorEntered()
@@ -219,58 +215,58 @@ void WILuaBase::OnRemove()
 ///////////////////////////////////////////
 
 void WILuaBase::Lua_OnInitialize() {}
-void WILuaBase::default_OnInitialize(lua_State*,WILuaBase&) {}
+void WILuaBase::default_OnInitialize(lua_State *, WILuaBase &) {}
 
 void WILuaBase::Lua_OnThink() {}
-void WILuaBase::default_OnThink(lua_State*,WILuaBase&) {}
+void WILuaBase::default_OnThink(lua_State *, WILuaBase &) {}
 
 void WILuaBase::Lua_OnFirstThink() {}
-void WILuaBase::default_OnFirstThink(lua_State*,WILuaBase&) {}
+void WILuaBase::default_OnFirstThink(lua_State *, WILuaBase &) {}
 
-void WILuaBase::Lua_MouseCallback(int,int,int) {}
-void WILuaBase::default_MouseCallback(lua_State*,WILuaBase&,int,int,int) {}
+void WILuaBase::Lua_MouseCallback(int, int, int) {}
+void WILuaBase::default_MouseCallback(lua_State *, WILuaBase &, int, int, int) {}
 
-void WILuaBase::Lua_KeyboardCallback(int,int,int,int) {}
-void WILuaBase::default_KeyboardCallback(lua_State*,WILuaBase&,int,int,int,int) {}
+void WILuaBase::Lua_KeyboardCallback(int, int, int, int) {}
+void WILuaBase::default_KeyboardCallback(lua_State *, WILuaBase &, int, int, int, int) {}
 
-void WILuaBase::Lua_CharCallback(unsigned int,uint32_t) {}
-void WILuaBase::default_CharCallback(lua_State*,WILuaBase&,unsigned int,uint32_t) {}
+void WILuaBase::Lua_CharCallback(unsigned int, uint32_t) {}
+void WILuaBase::default_CharCallback(lua_State *, WILuaBase &, unsigned int, uint32_t) {}
 
-void WILuaBase::Lua_ScrollCallback(double,double) {}
-void WILuaBase::default_ScrollCallback(lua_State*,WILuaBase&,double,double) {}
+void WILuaBase::Lua_ScrollCallback(double, double) {}
+void WILuaBase::default_ScrollCallback(lua_State *, WILuaBase &, double, double) {}
 
 void WILuaBase::Lua_OnUpdate() {}
-void WILuaBase::default_OnUpdate(lua_State *l,WILuaBase &hElement) {}
+void WILuaBase::default_OnUpdate(lua_State *l, WILuaBase &hElement) {}
 
-void WILuaBase::Lua_OnSetSize(int,int) {}
-void WILuaBase::default_OnSetSize(lua_State*,WILuaBase&,int,int) {}
+void WILuaBase::Lua_OnSetSize(int, int) {}
+void WILuaBase::default_OnSetSize(lua_State *, WILuaBase &, int, int) {}
 
 void WILuaBase::Lua_OnSetVisible(bool) {}
-void WILuaBase::default_OnSetVisible(lua_State*,WILuaBase&,bool) {}
+void WILuaBase::default_OnSetVisible(lua_State *, WILuaBase &, bool) {}
 
-void WILuaBase::Lua_OnSetColor(float,float,float,float) {}
-void WILuaBase::default_OnSetColor(lua_State*,WILuaBase&,float,float,float,float) {}
+void WILuaBase::Lua_OnSetColor(float, float, float, float) {}
+void WILuaBase::default_OnSetColor(lua_State *, WILuaBase &, float, float, float, float) {}
 
 void WILuaBase::Lua_OnSetAlpha(float) {}
-void WILuaBase::default_OnSetAlpha(lua_State*,WILuaBase&,float) {}
+void WILuaBase::default_OnSetAlpha(lua_State *, WILuaBase &, float) {}
 
-void WILuaBase::Lua_Render(const ::WIBase::DrawInfo &drawInfo,const Mat4 &matDraw,const Vector2 &scale) {}
-void WILuaBase::default_Render(lua_State*,WILuaBase&,const ::WIBase::DrawInfo &drawInfo,const Mat4 &matDraw,const Vector2 &scale) {}
+void WILuaBase::Lua_Render(const ::WIBase::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale) {}
+void WILuaBase::default_Render(lua_State *, WILuaBase &, const ::WIBase::DrawInfo &drawInfo, const Mat4 &matDraw, const Vector2 &scale) {}
 
 void WILuaBase::Lua_OnCursorEntered() {}
-void WILuaBase::default_OnCursorEntered(lua_State*,WILuaBase&) {}
+void WILuaBase::default_OnCursorEntered(lua_State *, WILuaBase &) {}
 
 void WILuaBase::Lua_OnCursorExited() {}
-void WILuaBase::default_OnCursorExited(lua_State*,WILuaBase&) {}
+void WILuaBase::default_OnCursorExited(lua_State *, WILuaBase &) {}
 
 void WILuaBase::Lua_OnFocusGained() {}
-void WILuaBase::default_OnFocusGained(lua_State*,WILuaBase&) {}
+void WILuaBase::default_OnFocusGained(lua_State *, WILuaBase &) {}
 
 void WILuaBase::Lua_OnFocusKilled() {}
-void WILuaBase::default_OnFocusKilled(lua_State*,WILuaBase&) {}
+void WILuaBase::default_OnFocusKilled(lua_State *, WILuaBase &) {}
 
 void WILuaBase::Lua_OnRemove() {}
-void WILuaBase::default_OnRemove(lua_State*,WILuaBase&) {}
+void WILuaBase::default_OnRemove(lua_State *, WILuaBase &) {}
 
-bool WILuaBase::Lua_CheckPosInBounds(const Vector2i &pos) {return WIBase::DoPosInBounds(pos);}
-bool WILuaBase::default_CheckPosInBounds(lua_State *l,WILuaBase &hElement,const Vector2i &pos) {return hElement.WIBase::DoPosInBounds(pos);}
+bool WILuaBase::Lua_CheckPosInBounds(const Vector2i &pos) { return WIBase::DoPosInBounds(pos); }
+bool WILuaBase::default_CheckPosInBounds(lua_State *l, WILuaBase &hElement, const Vector2i &pos) { return hElement.WIBase::DoPosInBounds(pos); }

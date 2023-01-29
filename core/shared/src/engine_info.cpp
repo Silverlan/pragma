@@ -27,7 +27,7 @@ std::string engine_info::get_identifier()
 	return name;
 }
 
-std::string engine_info::get_name() {return PRAGMA_ENGINE_NAME;}
+std::string engine_info::get_name() { return PRAGMA_ENGINE_NAME; }
 
 std::string engine_info::get_executable_name()
 {
@@ -41,20 +41,18 @@ std::string engine_info::get_server_executable_name()
 	exeName += "_server.exe";
 	return exeName;
 }
-std::string engine_info::get_author_mail_address() {return PRAGMA_AUTHOR_EMAIL;}
-std::string engine_info::get_website_url() {return PRAGMA_WEBSITE_URL;}
-std::string engine_info::get_modding_hub_url() {return PRAGMA_MODDING_HUB_URL;}
-std::string engine_info::get_wiki_url() {return PRAGMA_WIKI_URL;}
-std::string engine_info::get_forums_url() {return PRAGMA_FORUMS_URL;}
-std::string engine_info::get_discord_url() {return PRAGMA_DISCORD_URL;}
-std::string engine_info::get_twitter_url() {return PRAGMA_TWITTER_URL;}
-std::string engine_info::get_reddit_url() {return PRAGMA_REDDIT_URL;}
-uint32_t engine_info::get_steam_app_id() {return PRAGMA_STEAM_APP_ID;}
+std::string engine_info::get_author_mail_address() { return PRAGMA_AUTHOR_EMAIL; }
+std::string engine_info::get_website_url() { return PRAGMA_WEBSITE_URL; }
+std::string engine_info::get_modding_hub_url() { return PRAGMA_MODDING_HUB_URL; }
+std::string engine_info::get_wiki_url() { return PRAGMA_WIKI_URL; }
+std::string engine_info::get_forums_url() { return PRAGMA_FORUMS_URL; }
+std::string engine_info::get_discord_url() { return PRAGMA_DISCORD_URL; }
+std::string engine_info::get_twitter_url() { return PRAGMA_TWITTER_URL; }
+std::string engine_info::get_reddit_url() { return PRAGMA_REDDIT_URL; }
+uint32_t engine_info::get_steam_app_id() { return PRAGMA_STEAM_APP_ID; }
 
 const std::vector<std::string> engine_info::get_supported_audio_formats()
 {
 	// TODO: Merge this with asset library
-	return {
-		"ogg","wav","mp3"
-	};
+	return {"ogg", "wav", "mp3"};
 }

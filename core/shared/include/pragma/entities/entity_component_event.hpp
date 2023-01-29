@@ -10,30 +10,22 @@
 #include "pragma/networkdefinitions.h"
 
 struct lua_State;
-namespace pragma
-{
+namespace pragma {
 	class BaseEntityComponent;
-	struct DLLNETWORK ComponentEvent
-	{
-		virtual void PushArguments(lua_State *l)=0;
-		virtual uint32_t GetReturnCount() {return 0u;}
+	struct DLLNETWORK ComponentEvent {
+		virtual void PushArguments(lua_State *l) = 0;
+		virtual uint32_t GetReturnCount() { return 0u; }
 		virtual void HandleReturnValues(lua_State *l) {}
 	};
-	struct DLLNETWORK CEGenericComponentEvent
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CEGenericComponentEvent : public ComponentEvent {
 		virtual void PushArguments(lua_State *l) override;
 	};
-	struct DLLNETWORK CEOnEntityComponentAdded
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CEOnEntityComponentAdded : public ComponentEvent {
 		CEOnEntityComponentAdded(BaseEntityComponent &component);
 		BaseEntityComponent &component;
 		virtual void PushArguments(lua_State *l) override;
 	};
-	struct DLLNETWORK CEOnMembersChanged
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CEOnMembersChanged : public ComponentEvent {
 		CEOnMembersChanged(BaseEntityComponent &component);
 		BaseEntityComponent &component;
 		virtual void PushArguments(lua_State *l) override;

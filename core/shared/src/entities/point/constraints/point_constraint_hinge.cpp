@@ -26,17 +26,17 @@ void BasePointConstraintHingeComponent::Initialize()
 {
 	BasePointConstraintComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"limit_low",false))
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "limit_low", false))
 			m_kvLimitLow = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"limit_high",false))
+		else if(ustring::compare<std::string>(kvData.key, "limit_high", false))
 			m_kvLimitHigh = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"softness",false))
+		else if(ustring::compare<std::string>(kvData.key, "softness", false))
 			m_kvLimitSoftness = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"biasfactor",false))
+		else if(ustring::compare<std::string>(kvData.key, "biasfactor", false))
 			m_kvLimitBiasFactor = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"relaxationfactor",false))
+		else if(ustring::compare<std::string>(kvData.key, "relaxationfactor", false))
 			m_kvLimitRelaxationFactor = util::to_float(kvData.value);
 		else
 			return util::EventReply::Unhandled;
@@ -44,14 +44,14 @@ void BasePointConstraintHingeComponent::Initialize()
 	});
 }
 
-void BasePointConstraintHingeComponent::InitializeConstraint(BaseEntity *src,BaseEntity *tgt)
+void BasePointConstraintHingeComponent::InitializeConstraint(BaseEntity *src, BaseEntity *tgt)
 {
 	auto pPhysComponentTgt = tgt->GetPhysicsComponent();
-	auto *physTgt = pPhysComponentTgt ? dynamic_cast<RigidPhysObj*>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;
+	auto *physTgt = pPhysComponentTgt ? dynamic_cast<RigidPhysObj *>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;
 	if(physTgt == nullptr)
 		return;
 	auto pPhysComponentSrc = src->GetPhysicsComponent();
-	auto *physSrc = pPhysComponentSrc ? dynamic_cast<RigidPhysObj*>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
+	auto *physSrc = pPhysComponentSrc ? dynamic_cast<RigidPhysObj *>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
 	if(physSrc == nullptr)
 		return;
 	auto *bodySrc = physSrc->GetRigidBody();
@@ -62,22 +62,19 @@ void BasePointConstraintHingeComponent::InitializeConstraint(BaseEntity *src,Bas
 	auto *game = state->GetGameState();
 	auto *physEnv = game->GetPhysicsEnvironment();
 	auto pTrComponent = entThis.GetTransformComponent();
-	auto posThis = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
-	auto axis = m_posTarget -posThis;
+	auto posThis = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
+	auto axis = m_posTarget - posThis;
 	uvec::normalize(&axis);
 
 	auto &bodies = physTgt->GetRigidBodies();
-	for(auto it=bodies.begin();it!=bodies.end();++it)
-	{
+	for(auto it = bodies.begin(); it != bodies.end(); ++it) {
 		auto &bodyTgt = *it;
-		if(bodyTgt.IsValid())
-		{
+		if(bodyTgt.IsValid()) {
 			auto posTgt = bodyTgt->GetPos();
-			auto hinge = physEnv->CreateHingeConstraint(*bodyTgt,posThis -posTgt,*bodySrc,posThis,axis);
-			if(hinge != nullptr)
-			{
+			auto hinge = physEnv->CreateHingeConstraint(*bodyTgt, posThis - posTgt, *bodySrc, posThis, axis);
+			if(hinge != nullptr) {
 				hinge->SetEntity(GetEntity());
-				m_constraints.push_back(util::shared_handle_cast<pragma::physics::IHingeConstraint,pragma::physics::IConstraint>(hinge));
+				m_constraints.push_back(util::shared_handle_cast<pragma::physics::IHingeConstraint, pragma::physics::IConstraint>(hinge));
 			}
 		}
 	}

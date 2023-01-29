@@ -231,7 +231,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CSceneComponent>("scene");
 	componentManager.RegisterComponentType<pragma::CGamemodeComponent>("gamemode");
 	componentManager.RegisterComponentType<pragma::CGameComponent>("game");
-	
+
 	componentManager.RegisterComponentType<pragma::CLiquidComponent>("liquid");
 	componentManager.RegisterComponentType<pragma::CBuoyancyComponent>("buoyancy");
 	componentManager.RegisterComponentType<pragma::CLiquidSurfaceComponent>("liquid_surface");
@@ -275,7 +275,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CRendererPpFxaaComponent>("renderer_pp_fxaa");
 	componentManager.RegisterComponentType<pragma::CRendererPpMotionBlurComponent>("renderer_pp_motion_blur");
 	componentManager.RegisterComponentType<pragma::CRendererPpVolumetricComponent>("renderer_pp_volumetric");
-	
+
 	componentManager.RegisterComponentType<pragma::CMotionBlurDataComponent>("motion_blur_data");
 	componentManager.RegisterComponentType<pragma::CBSPComponent>("bsp");
 	componentManager.RegisterComponentType<pragma::CLightMapComponent>("light_map");
@@ -289,14 +289,8 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	// --template-component-register-location
 
 	auto *l = GetLuaState();
-	for(auto &evName : {
-		"ON_UPDATE_RENDER_DATA",
-		"ON_RENDER_BUFFERS_INITIALIZED"
-	})
-		componentManager.RegisterEvent(evName,typeid(BaseEntity),pragma::ComponentEventInfo::Type::Broadcast);
+	for(auto &evName : {"ON_UPDATE_RENDER_DATA", "ON_RENDER_BUFFERS_INITIALIZED"})
+		componentManager.RegisterEvent(evName, typeid(BaseEntity), pragma::ComponentEventInfo::Type::Broadcast);
 }
 
-pragma::BaseEntityComponent *CGame::CreateLuaEntityComponent(BaseEntity &ent,std::string classname)
-{
-	return Game::CreateLuaEntityComponent<pragma::CLuaBaseEntityComponent,pragma::lua::CLuaBaseEntityComponentHolder>(ent,classname);
-}
+pragma::BaseEntityComponent *CGame::CreateLuaEntityComponent(BaseEntity &ent, std::string classname) { return Game::CreateLuaEntityComponent<pragma::CLuaBaseEntityComponent, pragma::lua::CLuaBaseEntityComponentHolder>(ent, classname); }

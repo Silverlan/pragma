@@ -14,14 +14,13 @@
 #include <sharedutils/util_parallel_job.hpp>
 #include <mathutil/uvec.h>
 
-namespace pragma {struct LightmapDataCache;};
-namespace Lua
-{
-	namespace util
-	{
-		namespace Client
-		{
-			DLLCLIENT int calc_world_direction_from_2d_coordinates(lua_State *l,pragma::CCameraComponent &hCam,const ::Vector2 &uv);
+namespace pragma {
+	struct LightmapDataCache;
+};
+namespace Lua {
+	namespace util {
+		namespace Client {
+			DLLCLIENT int calc_world_direction_from_2d_coordinates(lua_State *l, pragma::CCameraComponent &hCam, const ::Vector2 &uv);
 			DLLCLIENT int create_particle_tracer(lua_State *l);
 			DLLCLIENT int create_muzzle_flash(lua_State *l);
 			DLLCLIENT luabind::object create_giblet(GibletCreateInfo &createInfo);
@@ -31,13 +30,8 @@ namespace Lua
 			DLLCLIENT int export_material(lua_State *l);
 			DLLCLIENT std::string get_clipboard_string();
 			DLLCLIENT void set_clipboard_string(const std::string &str);
-			DLLCLIENT ::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_directional_lightmap_atlas(
-				const std::vector<pragma::CLightComponent*> &lights,
-				const std::vector<::ModelSubMesh*> &meshes,
-				const std::vector<BaseEntity*> &entities,
-				uint32_t width,uint32_t height,
-				::pragma::LightmapDataCache *optLightmapDataCache=nullptr
-			);
+			DLLCLIENT ::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_directional_lightmap_atlas(const std::vector<pragma::CLightComponent *> &lights, const std::vector<::ModelSubMesh *> &meshes, const std::vector<BaseEntity *> &entities, uint32_t width, uint32_t height,
+			  ::pragma::LightmapDataCache *optLightmapDataCache = nullptr);
 		};
 	};
 };

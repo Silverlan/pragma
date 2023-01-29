@@ -12,9 +12,7 @@
 #include "pragma/physics/controller.hpp"
 #include "pragma/physics/base_t.hpp"
 
-pragma::physics::IController::IController(IEnvironment &env,const util::TSharedHandle<ICollisionObject> &collisionObject,const Vector3 &halfExtents,ShapeType shapeType)
-	: IBase{env},m_collisionObject{collisionObject},m_halfExtents{halfExtents},m_shapeType{shapeType}
-{}
+pragma::physics::IController::IController(IEnvironment &env, const util::TSharedHandle<ICollisionObject> &collisionObject, const Vector3 &halfExtents, ShapeType shapeType) : IBase {env}, m_collisionObject {collisionObject}, m_halfExtents {halfExtents}, m_shapeType {shapeType} {}
 
 void pragma::physics::IController::OnRemove()
 {
@@ -34,13 +32,13 @@ void pragma::physics::IController::SetMoveVelocity(const Vector3 &vel)
 	//std::cout<<"Move Velocity: "<<vel.x<<","<<vel.y<<","<<vel.z<<std::endl;
 	m_moveVelocity = vel;
 }
-void pragma::physics::IController::AddMoveVelocity(const Vector3 &vel) {SetMoveVelocity(GetMoveVelocity() +vel);}
-const Vector3 &pragma::physics::IController::GetMoveVelocity() const {return m_moveVelocity;}
+void pragma::physics::IController::AddMoveVelocity(const Vector3 &vel) { SetMoveVelocity(GetMoveVelocity() + vel); }
+const Vector3 &pragma::physics::IController::GetMoveVelocity() const { return m_moveVelocity; }
 
-pragma::physics::ICollisionObject *pragma::physics::IController::GetCollisionObject() {return m_collisionObject.Get();}
-const pragma::physics::ICollisionObject *pragma::physics::IController::GetCollisionObject() const {return const_cast<IController*>(this)->GetCollisionObject();}
+pragma::physics::ICollisionObject *pragma::physics::IController::GetCollisionObject() { return m_collisionObject.Get(); }
+const pragma::physics::ICollisionObject *pragma::physics::IController::GetCollisionObject() const { return const_cast<IController *>(this)->GetCollisionObject(); }
 
-const pragma::physics::IConvexShape *pragma::physics::IController::GetShape() const {return const_cast<IController*>(this)->GetShape();}
+const pragma::physics::IConvexShape *pragma::physics::IController::GetShape() const { return const_cast<IController *>(this)->GetShape(); }
 pragma::physics::IConvexShape *pragma::physics::IController::GetShape()
 {
 	if(m_collisionObject == nullptr)
@@ -48,8 +46,5 @@ pragma::physics::IConvexShape *pragma::physics::IController::GetShape()
 	auto *shape = m_collisionObject->GetCollisionShape();
 	return (shape && shape->IsConvex()) ? shape->GetConvexShape() : nullptr;
 }
-const Vector3 &pragma::physics::IController::GetLastMoveDisplacement() const {return uvec::ORIGIN;}//m_moveDisplacement;}
-void pragma::physics::IController::InitializeLuaObject(lua_State *lua)
-{
-	IBase::InitializeLuaObject<IController>(lua);
-}
+const Vector3 &pragma::physics::IController::GetLastMoveDisplacement() const { return uvec::ORIGIN; } //m_moveDisplacement;}
+void pragma::physics::IController::InitializeLuaObject(lua_State *lua) { IBase::InitializeLuaObject<IController>(lua); }

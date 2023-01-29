@@ -26,8 +26,7 @@
 
 #define DEBUG_RENDER_PERFORMANCE_TEST_ENABLED 0
 
-namespace prosper
-{
+namespace prosper {
 	class Texture;
 	class IDescriptorSetGroup;
 	class IPrimaryCommandBuffer;
@@ -35,19 +34,10 @@ namespace prosper
 	class ISwapCommandBufferGroup;
 };
 class SSAOInfo;
-namespace pragma
-{
-	struct DLLCLIENT RendererData
-	{
-		enum class Flags : uint32_t
-		{
-			None = 0u,
-			SSAOEnabled = 1u
-		};
-		void SetResolution(uint32_t w,uint32_t h)
-		{
-			vpResolution = w<<16 | (static_cast<uint16_t>(h));
-		}
+namespace pragma {
+	struct DLLCLIENT RendererData {
+		enum class Flags : uint32_t { None = 0u, SSAOEnabled = 1u };
+		void SetResolution(uint32_t w, uint32_t h) { vpResolution = w << 16 | (static_cast<uint16_t>(h)); }
 		Flags flags = Flags::None;
 		uint32_t vpResolution = 0;
 		uint32_t tileInfo; // First 16 bits = number of tiles (x-axis), second 16 bits = tile size
@@ -62,18 +52,15 @@ namespace pragma
 	class CSkyCameraComponent;
 	class CSceneComponent;
 	class CRendererComponent;
-	namespace rendering
-	{
+	namespace rendering {
 		class Prepass;
 		class ForwardPlusInstance;
 		class LightingStageRenderProcessor;
 		class DepthStageRenderProcessor;
 	};
 	class CLightMapComponent;
-	class DLLCLIENT CRasterizationRendererComponent final
-		: public BaseEntityComponent
-	{
-	public:
+	class DLLCLIENT CRasterizationRendererComponent final : public BaseEntityComponent {
+	  public:
 		static ComponentEventId EVENT_ON_RECORD_PREPASS;
 		static ComponentEventId EVENT_ON_RECORD_LIGHTING_PASS;
 		static ComponentEventId EVENT_PRE_EXECUTE_PREPASS;
@@ -99,30 +86,23 @@ namespace pragma
 		static ComponentEventId EVENT_MT_END_RECORD_VIEW;
 		static ComponentEventId EVENT_MT_BEGIN_RECORD_PREPASS;
 
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		static void UpdateLightmap(CLightMapComponent &lightMapC);
 		static void UpdateLightmap();
-		enum class PrepassMode : uint32_t
-		{
-			NoPrepass = 0,
-			DepthOnly,
-			Extended
-		};
+		enum class PrepassMode : uint32_t { NoPrepass = 0, DepthOnly, Extended };
 
-		enum class StateFlags : uint32_t
-		{
+		enum class StateFlags : uint32_t {
 			None = 0u,
 			DepthResolved = 1u,
-			BloomResolved = DepthResolved<<1u,
-			RenderResolved = BloomResolved<<1u,
+			BloomResolved = DepthResolved << 1u,
+			RenderResolved = BloomResolved << 1u,
 
-			SSAOEnabled = RenderResolved<<1u,
-			PrepassEnabled = SSAOEnabled<<1u
+			SSAOEnabled = RenderResolved << 1u,
+			PrepassEnabled = SSAOEnabled << 1u
 		};
 
-		enum class Stage : uint8_t
-		{
+		enum class Stage : uint8_t {
 			Initial = 0,
 			OcclusionCulling,
 			CollectRenderObjects,
@@ -141,8 +121,7 @@ namespace pragma
 			Final
 		};
 
-		struct DLLCLIENT LightMapInfo
-		{
+		struct DLLCLIENT LightMapInfo {
 			~LightMapInfo()
 			{
 				if(cbExposure.IsValid())
@@ -172,7 +151,7 @@ namespace pragma
 		bool HasIndirectLightmap() const;
 		bool HasDirectionalLightmap() const;
 
-		void SetShaderOverride(const std::string &srcShader,const std::string &shaderOverride);
+		void SetShaderOverride(const std::string &srcShader, const std::string &shaderOverride);
 		pragma::ShaderGameWorldLightingPass *GetShaderOverride(pragma::ShaderGameWorldLightingPass *srcShader) const;
 		void ClearShaderOverride(const std::string &srcShader);
 
@@ -202,21 +181,18 @@ namespace pragma
 		prosper::SampleCountFlags GetSampleCount() const;
 		bool IsMultiSampled() const;
 
-		prosper::RenderTarget *BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *customRenderPass=nullptr,bool secondaryCommandBuffers=false);
+		prosper::RenderTarget *BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *customRenderPass = nullptr, bool secondaryCommandBuffers = false);
 		bool EndRenderPass(const util::DrawSceneInfo &drawSceneInfo);
 		bool ResolveRenderPass(const util::DrawSceneInfo &drawSceneInfo);
 
 		pragma::ShaderPrepassBase &GetPrepassShader() const;
 
 		// Render
-		void RecordRenderParticleSystems(
-			prosper::ICommandBuffer &cmd,const util::DrawSceneInfo &drawSceneInfo,
-			std::vector<pragma::CParticleSystemComponent*> &particles,pragma::rendering::SceneRenderPass renderMode,
-			bool depthPass,Bool bloom=false,std::vector<pragma::CParticleSystemComponent*> *bloomParticles=nullptr
-		);
+		void RecordRenderParticleSystems(prosper::ICommandBuffer &cmd, const util::DrawSceneInfo &drawSceneInfo, std::vector<pragma::CParticleSystemComponent *> &particles, pragma::rendering::SceneRenderPass renderMode, bool depthPass, Bool bloom = false,
+		  std::vector<pragma::CParticleSystemComponent *> *bloomParticles = nullptr);
 
 		// Renders all meshes from m_glowInfo.tmpGlowMeshes, and clears the container when done
-		void RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const CSceneComponent &scene,pragma::rendering::SceneRenderPass renderMode);
+		void RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, const CSceneComponent &scene, pragma::rendering::SceneRenderPass renderMode);
 
 		// If this flag is set, the prepass depth buffer will be blitted into a sampleable buffer
 		// before rendering, which can then be used as shader sampler input. This flag will be reset once
@@ -232,8 +208,8 @@ namespace pragma
 		uint32_t GetWidth() const;
 		uint32_t GetHeight() const;
 
-		CRendererComponent *GetRendererComponent() {return m_rendererComponent;}
-		const CRendererComponent *GetRendererComponent() const {return const_cast<CRasterizationRendererComponent*>(this)->GetRendererComponent();}
+		CRendererComponent *GetRendererComponent() { return m_rendererComponent; }
+		const CRendererComponent *GetRendererComponent() const { return const_cast<CRasterizationRendererComponent *>(this)->GetRendererComponent(); }
 
 		void StartPrepassRecording(const util::DrawSceneInfo &drawSceneInfo);
 		void StartLightingPassRecording(const util::DrawSceneInfo &drawSceneInfo);
@@ -246,13 +222,13 @@ namespace pragma
 		void RecordPrepass(const util::DrawSceneInfo &drawSceneInfo);
 		void ExecutePrepass(const util::DrawSceneInfo &drawSceneInfo);
 
-		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetPrepassCommandBufferRecorder() const {return m_prepassCommandBufferGroup;}
-		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetShadowCommandBufferRecorder() const {return m_shadowCommandBufferGroup;}
-		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetLightingPassCommandBufferRecorder() const {return m_lightingCommandBufferGroup;}
-	private:
+		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetPrepassCommandBufferRecorder() const { return m_prepassCommandBufferGroup; }
+		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetShadowCommandBufferRecorder() const { return m_shadowCommandBufferGroup; }
+		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetLightingPassCommandBufferRecorder() const { return m_lightingCommandBufferGroup; }
+	  private:
 		void UpdateRendererBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
 		void UpdateRenderSettings();
-		bool ReloadRenderTarget(uint32_t width,uint32_t height);
+		bool ReloadRenderTarget(uint32_t width, uint32_t height);
 		void InitializeLightDescriptorSets();
 		void RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo);
 		void Render(const util::DrawSceneInfo &drawSceneInfo);
@@ -271,10 +247,7 @@ namespace pragma
 		void RenderShadows(const util::DrawSceneInfo &drawSceneInfo);
 		void RenderGlowObjects(const util::DrawSceneInfo &drawSceneInfo);
 
-		void RenderParticles(
-			prosper::ICommandBuffer &cmdBuffer,const util::DrawSceneInfo &drawSceneInfo,bool depthPass,
-			prosper::IPrimaryCommandBuffer *primCmdBuffer=nullptr
-		);
+		void RenderParticles(prosper::ICommandBuffer &cmdBuffer, const util::DrawSceneInfo &drawSceneInfo, bool depthPass, prosper::IPrimaryCommandBuffer *primCmdBuffer = nullptr);
 
 		void InitializeCommandBufferGroups();
 
@@ -293,7 +266,7 @@ namespace pragma
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_dsgLights;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_dsgLightsCompute;
 
-		std::vector<pragma::CLightComponent*> m_visLightSources;
+		std::vector<pragma::CLightComponent *> m_visLightSources;
 		std::vector<ComponentHandle<pragma::CLightComponent>> m_visShadowedLights;
 
 		// HDR
@@ -309,22 +282,18 @@ namespace pragma
 		std::shared_ptr<prosper::IBuffer> m_rendererBuffer = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupRenderer = nullptr;
 
-		std::unordered_map<size_t,::util::WeakHandle<prosper::Shader>> m_shaderOverrides;
+		std::unordered_map<size_t, ::util::WeakHandle<prosper::Shader>> m_shaderOverrides;
 		mutable ::util::WeakHandle<prosper::Shader> m_whShaderWireframe = {};
 	};
 
-	struct DLLCLIENT CELightingStageData
-		: public ComponentEvent
-	{
+	struct DLLCLIENT CELightingStageData : public ComponentEvent {
 		CELightingStageData(pragma::rendering::LightingStageRenderProcessor &renderProcessor);
 		virtual void PushArguments(lua_State *l) override;
 		pragma::rendering::LightingStageRenderProcessor &renderProcessor;
 	};
 
-	struct DLLCLIENT CEPrepassStageData
-		: public ComponentEvent
-	{
-		CEPrepassStageData(pragma::rendering::DepthStageRenderProcessor &renderProcessor,pragma::ShaderPrepassBase &shader);
+	struct DLLCLIENT CEPrepassStageData : public ComponentEvent {
+		CEPrepassStageData(pragma::rendering::DepthStageRenderProcessor &renderProcessor, pragma::ShaderPrepassBase &shader);
 		virtual void PushArguments(lua_State *l) override;
 		pragma::rendering::DepthStageRenderProcessor &renderProcessor;
 		pragma::ShaderPrepassBase &shader;
@@ -333,10 +302,8 @@ namespace pragma
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::CRasterizationRendererComponent::StateFlags)
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::RendererData::Flags)
 
-class DLLCLIENT CRasterizationRenderer
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CRasterizationRenderer : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

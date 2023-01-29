@@ -12,24 +12,18 @@
 #include "pragma/entities/point/constraints/point_constraint_slider.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLSERVER SPointConstraintSliderComponent final
-		: public BasePointConstraintSliderComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SPointConstraintSliderComponent final : public BasePointConstraintSliderComponent, public SBaseNetComponent {
+	  public:
 		SPointConstraintSliderComponent(BaseEntity &ent) : BasePointConstraintSliderComponent(ent) {}
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLSERVER PointConstraintSlider
-	: public SBaseEntity
-{
-public:
+class DLLSERVER PointConstraintSlider : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

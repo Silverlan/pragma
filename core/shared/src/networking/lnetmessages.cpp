@@ -10,7 +10,7 @@
 #include "pragma/lua/lnetmessages.h"
 #include <sharedutils/netpacket.hpp>
 
-bool NetIncludePacketID(NetworkState *state,std::string identifier,NetPacket &src,NetPacket &tgt)
+bool NetIncludePacketID(NetworkState *state, std::string identifier, NetPacket &src, NetPacket &tgt)
 {
 	if(!state->IsGameActive())
 		return false;
@@ -20,16 +20,15 @@ bool NetIncludePacketID(NetworkState *state,std::string identifier,NetPacket &sr
 		return false;
 	//size_t pos = 0;
 	tgt->Write<unsigned int>(ID);
-	tgt->Write(src->GetData(),src->GetSize()); // TODO Avoid having to copy the packet data
+	tgt->Write(src->GetData(), src->GetSize()); // TODO Avoid having to copy the packet data
 	return true;
 }
 
-void Game::RegisterLuaNetMessage(std::string name,int handler) {m_luaNetMessages.insert(std::unordered_map<std::string,int>::value_type(name,handler));}
+void Game::RegisterLuaNetMessage(std::string name, int handler) { m_luaNetMessages.insert(std::unordered_map<std::string, int>::value_type(name, handler)); }
 
 bool Game::RegisterNetMessage(std::string name)
 {
-	for(int i=1;i<m_luaNetMessageIndex.size();i++)
-	{
+	for(int i = 1; i < m_luaNetMessageIndex.size(); i++) {
 		if(m_luaNetMessageIndex[i] == name)
 			return false;
 	}
@@ -39,8 +38,7 @@ bool Game::RegisterNetMessage(std::string name)
 
 unsigned int Game::GetNetMessageID(std::string name)
 {
-	for(unsigned int i=1;i<m_luaNetMessageIndex.size();i++)
-	{
+	for(unsigned int i = 1; i < m_luaNetMessageIndex.size(); i++) {
 		if(m_luaNetMessageIndex[i] == name)
 			return i;
 	}

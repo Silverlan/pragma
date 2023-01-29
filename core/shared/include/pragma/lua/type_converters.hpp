@@ -10,8 +10,7 @@
 
 #include <luabind/detail/conversion_policies/conversion_policies.hpp>
 
-namespace luabind
-{
+namespace luabind {
 	/*template <>
 	struct default_converter<X>
 		: native_converter_base<X>

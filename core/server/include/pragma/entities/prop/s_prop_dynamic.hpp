@@ -10,21 +10,16 @@
 #include "pragma/serverdefinitions.h"
 #include <pragma/entities/prop/prop_dynamic.hpp>
 
-namespace pragma
-{
-	class DLLSERVER SPropDynamicComponent final
-		: public BasePropDynamicComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SPropDynamicComponent final : public BasePropDynamicComponent {
+	  public:
 		SPropDynamicComponent(BaseEntity &ent) : BasePropDynamicComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLSERVER PropDynamic
-	: public SBaseEntity
-{
-public:
+class DLLSERVER PropDynamic : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

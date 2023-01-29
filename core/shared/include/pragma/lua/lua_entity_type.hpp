@@ -10,10 +10,6 @@
 
 #include <cinttypes>
 
-enum class LuaEntityType : uint8_t
-{
-	NetworkLocal = 0u,
-	Shared
-};
+enum class LuaEntityType : uint8_t { NetworkLocal = 0u, Shared };
 
 #endif

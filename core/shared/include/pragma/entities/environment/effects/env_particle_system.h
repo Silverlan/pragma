@@ -15,13 +15,10 @@
 #define SF_PARTICLE_SYSTEM_CONTINUOUS 2048
 #define SF_PARTICLE_SYSTEM_REMOVE_ON_COMPLETE 4096
 
-namespace pragma
-{
-	class DLLNETWORK BaseEnvParticleSystemComponent
-		: public BaseEntityComponent
-	{
-	public:
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+namespace pragma {
+	class DLLNETWORK BaseEnvParticleSystemComponent : public BaseEntityComponent {
+	  public:
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
 		virtual void SetRemoveOnComplete(bool b);
@@ -33,7 +30,7 @@ namespace pragma
 		bool IsContinuous() const;
 		bool GetRemoveOnComplete() const;
 		virtual void OnEntitySpawn() override;
-	protected:
+	  protected:
 		void UpdateRemoveOnComplete();
 
 		std::string m_particleName;

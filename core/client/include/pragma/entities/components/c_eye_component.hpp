@@ -14,24 +14,14 @@
 #include <mathutil/uvec.h>
 
 struct Eyeball;
-namespace pragma
-{
+namespace pragma {
 	class CFlexComponent;
 	class CAnimatedComponent;
-	class DLLCLIENT CEyeComponent final
-		: public BaseEntityComponent
-	{
-	public:
-		enum class StateFlags : uint8_t
-		{
-			None = 0u,
-			BlinkingEnabled = 1u,
-			PrevBlinkToggle = BlinkingEnabled<<1u,
-			BlinkToggle = PrevBlinkToggle<<1u
-		};
+	class DLLCLIENT CEyeComponent final : public BaseEntityComponent {
+	  public:
+		enum class StateFlags : uint8_t { None = 0u, BlinkingEnabled = 1u, PrevBlinkToggle = BlinkingEnabled << 1u, BlinkToggle = PrevBlinkToggle << 1u };
 
-		struct EyeballState
-		{
+		struct EyeballState {
 			Vector3 origin = {};
 			Vector3 forward = {};
 			Vector3 right = {};
@@ -40,8 +30,7 @@ namespace pragma
 			Vector4 irisProjectionV = {};
 		};
 
-		struct EyeballConfig
-		{
+		struct EyeballConfig {
 			Vector3 eyeShift = {};
 			bool eyeMove = false;
 			Vector2 jitter = {};
@@ -50,16 +39,15 @@ namespace pragma
 			float irisScale = 1.f;
 		};
 
-		struct EyeballData
-		{
+		struct EyeballData {
 			EyeballState state = {};
 			EyeballConfig config = {};
 		};
 
 		// static ComponentEventId EVENT_ON_EYEBALLS_UPDATED;
 		// static ComponentEventId EVENT_ON_BLINK;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
 		CEyeComponent(BaseEntity &ent);
 
@@ -73,7 +61,7 @@ namespace pragma
 		void SetEyeballConfig(const EyeballConfig &eyeballConfig);
 		EyeballData *GetEyeballData(uint32_t eyeballIndex);
 		const EyeballData *GetEyeballData(uint32_t eyeballIndex) const;
-		bool GetEyeballProjectionVectors(uint32_t eyeballIndex,Vector4 &outProjU,Vector4 &outProjV) const;
+		bool GetEyeballProjectionVectors(uint32_t eyeballIndex, Vector4 &outProjU, Vector4 &outProjV) const;
 
 		void ClearViewTarget();
 		Vector3 GetViewTarget() const;
@@ -85,29 +73,29 @@ namespace pragma
 
 		void SetBlinkingEnabled(bool enabled);
 		bool IsBlinkingEnabled() const;
-		bool FindEyeballIndex(CModelSubMesh &subMesh,uint32_t &outEyeballIndex) const;
-		bool FindEyeballIndex(uint32_t skinMatIdx,uint32_t &outEyeballIndex) const;
+		bool FindEyeballIndex(CModelSubMesh &subMesh, uint32_t &outEyeballIndex) const;
+		bool FindEyeballIndex(uint32_t skinMatIdx, uint32_t &outEyeballIndex) const;
 
 		void SetLocalViewTargetFactor(float f);
 		float GetLocalViewTargetFactor() const;
 
-		umath::Transform CalcEyeballPose(uint32_t eyeballIndex,umath::Transform *optOutBonePose=nullptr) const;
-		
+		umath::Transform CalcEyeballPose(uint32_t eyeballIndex, umath::Transform *optOutBonePose = nullptr) const;
+
 		void UpdateEyeballsMT();
-	protected:
+	  protected:
 		void UpdateBlinkMT();
 		void OnModelChanged(const std::shared_ptr<Model> &mdl);
 		Vector3 ClampViewTarget(const Vector3 &viewTarget) const;
-		void UpdateEyeballMT(const Eyeball &eyeball,uint32_t eyeballIndex);
+		void UpdateEyeballMT(const Eyeball &eyeball, uint32_t eyeballIndex);
 		void UpdateEyeMaterialData();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
-	private:
+	  private:
 		EyeballConfig m_eyeballConfig = {};
 		std::vector<EyeballData> m_eyeballData = {};
 		Vector3 m_viewTarget {};
 		float m_localViewTargetFactor = 1.f;
 		StateFlags m_stateFlags;
-		std::unordered_map<uint32_t,uint32_t> m_skinMaterialIndexToEyeballIndex = {};
+		std::unordered_map<uint32_t, uint32_t> m_skinMaterialIndexToEyeballIndex = {};
 		ComponentHandle<CFlexComponent> m_flexC = {};
 		ComponentHandle<CAnimatedComponent> m_animC = {};
 		uint32_t m_eyeUpDownFlexController = std::numeric_limits<uint32_t>::max();

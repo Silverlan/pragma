@@ -12,20 +12,16 @@
 #include <pragma/entities/components/base_ownable_component.hpp>
 #include <pragma/lua/luaapi.h>
 
-namespace pragma
-{
-	class DLLSERVER SOwnableComponent final
-		: public BaseOwnableComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SOwnableComponent final : public BaseOwnableComponent, public SBaseNetComponent {
+	  public:
 		SOwnableComponent(BaseEntity &ent) : BaseOwnableComponent(ent) {}
 		virtual void Initialize() override;
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
 		using BaseOwnableComponent::SetOwner;
-	protected:
+	  protected:
 		virtual void SetOwner(BaseEntity *owner) override;
 	};
 };

@@ -15,56 +15,53 @@
 #endif
 extern DLLCLIENT ClientState *client;
 
-WIChromiumPage::WIChromiumPage(WIBase *parent)
-	: m_parent(parent)
-{}
+WIChromiumPage::WIChromiumPage(WIBase *parent) : m_parent(parent) {}
 
 void WIChromiumPage::OnVisibilityChanged(bool bVisible)
 {
-	if(bVisible == true && m_bEntered == false)
-	{
+	if(bVisible == true && m_bEntered == false) {
 		m_bEntered = true;
 		OnFirstEntered();
 	}
 }
 
-void WIChromiumPage::SetInitialURL(const std::string &url) {m_initialURL = url;}
+void WIChromiumPage::SetInitialURL(const std::string &url) { m_initialURL = url; }
 
-static void(*fLoadUrl)(WIBase*,const std::string&);
-static void(*fSetViewSize)(WIBase*,const Vector2i&);
-static void(*fSetTransparentBackground)(WIBase*,bool);
-static void(*fRegisterJavascriptFunction)(const std::string&,const std::function<std::unique_ptr<pragma::JSValue>(const std::vector<pragma::JSValue>&)>);
-static void(*fExecJavascript)(WIBase*,const std::string&);
+static void (*fLoadUrl)(WIBase *, const std::string &);
+static void (*fSetViewSize)(WIBase *, const Vector2i &);
+static void (*fSetTransparentBackground)(WIBase *, bool);
+static void (*fRegisterJavascriptFunction)(const std::string &, const std::function<std::unique_ptr<pragma::JSValue>(const std::vector<pragma::JSValue> &)>);
+static void (*fExecJavascript)(WIBase *, const std::string &);
 
 void WIChromiumPage::LoadURL(const std::string &url)
 {
 	if(fLoadUrl == nullptr || m_hWeb.IsValid() == false)
 		return;
-	fLoadUrl(m_hWeb.get(),url);
+	fLoadUrl(m_hWeb.get(), url);
 }
 void WIChromiumPage::SetViewSize(const Vector2i &size)
 {
 	if(fLoadUrl == nullptr || m_hWeb.IsValid() == false)
 		return;
-	fSetViewSize(m_hWeb.get(),size);
+	fSetViewSize(m_hWeb.get(), size);
 }
 void WIChromiumPage::SetTransparentBackground(bool b)
 {
 	if(fLoadUrl == nullptr || m_hWeb.IsValid() == false)
 		return;
-	fSetTransparentBackground(m_hWeb.get(),b);
+	fSetTransparentBackground(m_hWeb.get(), b);
 }
-void WIChromiumPage::RegisterJavascriptFunction(const std::string &name,const std::function<std::unique_ptr<pragma::JSValue>(const std::vector<pragma::JSValue>&)> &callback)
+void WIChromiumPage::RegisterJavascriptFunction(const std::string &name, const std::function<std::unique_ptr<pragma::JSValue>(const std::vector<pragma::JSValue> &)> &callback)
 {
 	if(fLoadUrl == nullptr)
 		return;
-	fRegisterJavascriptFunction(name,callback);
+	fRegisterJavascriptFunction(name, callback);
 }
 void WIChromiumPage::ExecJavascript(const std::string &js)
 {
 	if(fLoadUrl == nullptr || m_hWeb.IsValid() == false)
 		return;
-	fExecJavascript(m_hWeb.get(),js);
+	fExecJavascript(m_hWeb.get(), js);
 }
 
 void WIChromiumPage::OnFirstEntered()
@@ -72,12 +69,11 @@ void WIChromiumPage::OnFirstEntered()
 	InitializeChromium();
 	if(fLoadUrl == nullptr)
 		return;
-	m_hWeb = WGUI::GetInstance().Create("WIWeb",m_parent)->GetHandle();
-	if(m_hWeb.IsValid() == true)
-	{
+	m_hWeb = WGUI::GetInstance().Create("WIWeb", m_parent)->GetHandle();
+	if(m_hWeb.IsValid() == true) {
 		if(fSetViewSize != nullptr)
-			fSetViewSize(m_hWeb.get(),Vector2i(1024,768));
-		fSetTransparentBackground(m_hWeb.get(),true);
+			fSetViewSize(m_hWeb.get(), Vector2i(1024, 768));
+		fSetTransparentBackground(m_hWeb.get(), true);
 		m_hWeb->Update();
 
 		InitializeWebView(m_hWeb.get());
@@ -99,12 +95,10 @@ void WIChromiumPage::InitializeChromium()
 	// Initialize chromium
 	std::string err;
 	const std::string chromiumPath = "chromium/wv_chromium";
-	if(client->InitializeLibrary(chromiumPath,&err) != nullptr)
-	{
+	if(client->InitializeLibrary(chromiumPath, &err) != nullptr) {
 		auto dllHandle = client->GetLibraryModule(chromiumPath);
 		assert(dllHandle != nullptr);
-		if(dllHandle != nullptr)
-		{
+		if(dllHandle != nullptr) {
 			fLoadUrl = dllHandle->FindSymbolAddress<decltype(fLoadUrl)>("wv_chromium_load_url");
 			fSetViewSize = dllHandle->FindSymbolAddress<decltype(fSetViewSize)>("wv_chromium_set_browser_view_size");
 			fSetTransparentBackground = dllHandle->FindSymbolAddress<decltype(fSetTransparentBackground)>("wv_chromium_set_transparent_background");
@@ -114,5 +108,5 @@ void WIChromiumPage::InitializeChromium()
 		}
 	}
 	else
-		Con::cerr<<"Unable to load 'chromium' libary: "<<err<<Con::endl;
+		Con::cerr << "Unable to load 'chromium' libary: " << err << Con::endl;
 }

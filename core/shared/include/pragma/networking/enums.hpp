@@ -12,12 +12,13 @@
 #include <cinttypes>
 #include <string>
 
-namespace nwm {enum class Protocol : uint32_t; enum class ClientDropped : int8_t;};
-namespace pragma::networking
-{
+namespace nwm {
+	enum class Protocol : uint32_t;
+	enum class ClientDropped : int8_t;
+};
+namespace pragma::networking {
 	using Port = uint16_t;
-	enum class ErrorCode : uint32_t
-	{
+	enum class ErrorCode : uint32_t {
 		Success = 0,
 		UnableToStartServer,
 		UnableToConnect,
@@ -39,15 +40,13 @@ namespace pragma::networking
 
 		Count
 	};
-	enum class Protocol : uint8_t
-	{
+	enum class Protocol : uint8_t {
 		FastUnreliable = 0,
 		SlowReliable,
 
 		Count
 	};
-	enum class DropReason : int8_t
-	{
+	enum class DropReason : int8_t {
 		Disconnected = 0,
 		Timeout,
 		Kicked,

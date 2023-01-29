@@ -10,8 +10,7 @@
 
 #include <string>
 
-namespace sci
-{
+namespace sci {
 	const std::string DEFAULT_PORT_TCP = "29150";
 	const std::string DEFAULT_PORT_UDP = "29150";
 };

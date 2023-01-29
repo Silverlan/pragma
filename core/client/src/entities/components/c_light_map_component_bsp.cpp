@@ -26,7 +26,6 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-
 //#define TEST_SCALE_LIGHTMAP_ATLAS
 void CLightMapComponent::ConvertLightmapToBSPLuxelData() const
 {
@@ -40,11 +39,11 @@ void CLightMapComponent::ConvertLightmapToBSPLuxelData() const
 	extents.height *= 2;
 #endif
 #ifdef TEST_SCALE_LIGHTMAP_ATLAS
-	auto numPixels = extents.width /2 *extents.height /2;
+	auto numPixels = extents.width / 2 * extents.height / 2;
 #else
-	auto numPixels = extents.width *extents.height;
+	auto numPixels = extents.width * extents.height;
 #endif
-	auto imgBuf = uimg::ImageBuffer::Create(extents.width,extents.height,uimg::Format::RGBA16);
+	auto imgBuf = uimg::ImageBuffer::Create(extents.width, extents.height, uimg::Format::RGBA16);
 
 	// We can't read the image data directly, so we'll need a temporary buffer to copy it into
 	auto &context = c_engine->GetRenderContext();
@@ -55,36 +54,34 @@ void CLightMapComponent::ConvertLightmapToBSPLuxelData() const
 	auto buf = context.CreateBuffer(createInfo);
 
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
-	setupCmd->RecordImageBarrier(img,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferDstOptimal);
-	setupCmd->RecordCopyImageToBuffer({},img,prosper::ImageLayout::TransferDstOptimal,*buf);
-	setupCmd->RecordImageBarrier(img,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+	setupCmd->RecordImageBarrier(img, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::TransferDstOptimal);
+	setupCmd->RecordCopyImageToBuffer({}, img, prosper::ImageLayout::TransferDstOptimal, *buf);
+	setupCmd->RecordImageBarrier(img, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 	c_engine->FlushSetupCommandBuffer();
 
-	if(buf->Map(0,createInfo.size,prosper::IBuffer::MapFlags::ReadBit) == false)
+	if(buf->Map(0, createInfo.size, prosper::IBuffer::MapFlags::ReadBit) == false)
 		return;
-	buf->Read(0,createInfo.size,imgBuf->GetData());
+	buf->Read(0, createInfo.size, imgBuf->GetData());
 	buf->Unmap();
 #ifdef TEST_SCALE_LIGHTMAP_ATLAS
 	std::vector<uint16_t> scaledLightmapColors {};
-	scaledLightmapColors.resize(extents.width *extents.height *4);
-	for(auto i=0;i<scaledLightmapColors.size();++i)
-	{
-		auto iSrc = i /2 /2;
+	scaledLightmapColors.resize(extents.width * extents.height * 4);
+	for(auto i = 0; i < scaledLightmapColors.size(); ++i) {
+		auto iSrc = i / 2 / 2;
 		scaledLightmapColors.at(i) = lightmapColors.at(iSrc);
 	}
 	lightmapColors = std::move(scaledLightmapColors);
 #endif
 	// imgBuf->Clear(Color::Red);
-	
-	auto mapPath = "maps/" +c_game->GetMapName() +".bsp";
-	auto *convertLightmapDataToBspLuxelData = reinterpret_cast<bool(*)(NetworkState&,const std::string&,const uimg::ImageBuffer&,uint32_t,uint32_t,std::string&)>(util::impl::get_module_func(client,"convert_lightmap_data_to_bsp_luxel_data"));
+
+	auto mapPath = "maps/" + c_game->GetMapName() + ".bsp";
+	auto *convertLightmapDataToBspLuxelData = reinterpret_cast<bool (*)(NetworkState &, const std::string &, const uimg::ImageBuffer &, uint32_t, uint32_t, std::string &)>(util::impl::get_module_func(client, "convert_lightmap_data_to_bsp_luxel_data"));
 	if(convertLightmapDataToBspLuxelData == nullptr)
 		return;
 	std::string errMsg;
-	if(convertLightmapDataToBspLuxelData(*client,mapPath,*imgBuf,extents.width,extents.height,errMsg) == false)
-	{
-		Con::cwar<<"Unable to convert lightmap data to BSP luxel data: "<<errMsg<<Con::endl;
+	if(convertLightmapDataToBspLuxelData(*client, mapPath, *imgBuf, extents.width, extents.height, errMsg) == false) {
+		Con::cwar << "Unable to convert lightmap data to BSP luxel data: " << errMsg << Con::endl;
 		return;
 	}
-	Con::cout<<"Successfully written lightmap luxel data!"<<Con::endl;
+	Con::cout << "Successfully written lightmap luxel data!" << Con::endl;
 }

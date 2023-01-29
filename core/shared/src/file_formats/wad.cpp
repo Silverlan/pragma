@@ -13,17 +13,15 @@
 #include <sharedutils/util_ifile.hpp>
 #include <fsys/ifile.hpp>
 
-std::shared_ptr<pragma::animation::Animation> FWAD::ReadData(unsigned short mdlVersion,ufile::IFile &f)
+std::shared_ptr<pragma::animation::Animation> FWAD::ReadData(unsigned short mdlVersion, ufile::IFile &f)
 {
 	uint32_t animVersion = 0;
-	if(mdlVersion >= 33)
-	{
+	if(mdlVersion >= 33) {
 		animVersion = f.Read<uint32_t>();
 		auto offset = f.Tell();
 		auto len = f.Read<uint64_t>();
-		if(PRAGMA_ANIMATION_VERSION > animVersion || animVersion < 1)
-		{
-			f.Seek(offset +len);
+		if(PRAGMA_ANIMATION_VERSION > animVersion || animVersion < 1) {
+			f.Seek(offset + len);
 			return nullptr;
 		}
 	}
@@ -32,8 +30,7 @@ std::shared_ptr<pragma::animation::Animation> FWAD::ReadData(unsigned short mdlV
 	//Con::cout<<"Animation Version: "<<ver<<Con::endl;
 
 	auto activity = Activity::Invalid;
-	if(mdlVersion >= 0x0013)
-	{
+	if(mdlVersion >= 0x0013) {
 		auto activityName = f.ReadString();
 		auto id = pragma::animation::Animation::GetActivityEnumRegister().RegisterEnum(activityName);
 		activity = (id != util::EnumRegister::InvalidEnum) ? static_cast<Activity>(id) : Activity::Invalid;
@@ -47,90 +44,79 @@ std::shared_ptr<pragma::animation::Animation> FWAD::ReadData(unsigned short mdlV
 	auto flags = static_cast<FAnim>(f.Read<unsigned int>());
 	anim->SetFlags(flags);
 
-	bool bMoveX = ((flags &FAnim::MoveX) == FAnim::MoveX) ? true : false;
-	bool bMoveZ = ((flags &FAnim::MoveZ) == FAnim::MoveZ) ? true : false;
+	bool bMoveX = ((flags & FAnim::MoveX) == FAnim::MoveX) ? true : false;
+	bool bMoveZ = ((flags & FAnim::MoveZ) == FAnim::MoveZ) ? true : false;
 	bool bHasMovement = bMoveX || bMoveZ;
 
 	unsigned int fps = f.Read<unsigned int>();
 	anim->SetFPS(static_cast<unsigned char>(fps));
 
-	if(mdlVersion >= 0x0007)
-	{
+	if(mdlVersion >= 0x0007) {
 		auto min = f.Read<Vector3>();
 		auto max = f.Read<Vector3>();
-		anim->SetRenderBounds(min,max);
+		anim->SetRenderBounds(min, max);
 	}
 
 	bool bHasFadeIn = f.Read<bool>();
-	if(bHasFadeIn == true)
-	{
+	if(bHasFadeIn == true) {
 		float fadeIn = f.Read<float>();
 		anim->SetFadeInTime(fadeIn);
 	}
 
 	bool bHasFadeOut = f.Read<bool>();
-	if(bHasFadeOut == true)
-	{
+	if(bHasFadeOut == true) {
 		float fadeOut = f.Read<float>();
 		anim->SetFadeOutTime(fadeOut);
 	}
 
 	unsigned int numBones = f.Read<unsigned int>();
-	anim->ReserveBoneIds(anim->GetBoneCount() +numBones);
-	for(unsigned int i=0;i<numBones;i++)
-	{
+	anim->ReserveBoneIds(anim->GetBoneCount() + numBones);
+	for(unsigned int i = 0; i < numBones; i++) {
 		unsigned int boneID = f.Read<unsigned int>();
 		anim->AddBoneId(boneID);
 	}
 
-	if(mdlVersion >= 0x0012)
-	{
+	if(mdlVersion >= 0x0012) {
 		auto bHasWeights = f.Read<bool>();
-		if(bHasWeights == true)
-		{
+		if(bHasWeights == true) {
 			auto &weights = anim->GetBoneWeights();
 			weights.resize(numBones);
-			f.Read(weights.data(),weights.size() *sizeof(weights.front()));
+			f.Read(weights.data(), weights.size() * sizeof(weights.front()));
 		}
 	}
 
 	auto hasBlendController = f.Read<bool>();
-	if(hasBlendController)
-	{
+	if(hasBlendController) {
 		int controller = f.Read<int>();
 		auto &blend = anim->SetBlendController(controller);
 		char numTransitions = f.Read<char>();
-		for(char i=0;i<numTransitions;i++)
-		{
+		for(char i = 0; i < numTransitions; i++) {
 			unsigned int animation = f.Read<unsigned int>();
 			auto transition = (mdlVersion >= 29) ? f.Read<float>() : static_cast<float>(f.Read<int>());
 			blend.transitions.push_back(AnimationBlendControllerTransition());
 			AnimationBlendControllerTransition &t = blend.transitions.back();
-			t.animation = animation +1; // Account for reference pose
+			t.animation = animation + 1; // Account for reference pose
 			t.transition = transition;
 		}
 
-		if(mdlVersion >= 29)
-		{
+		if(mdlVersion >= 29) {
 			blend.animationPostBlendController = f.Read<int32_t>();
 			blend.animationPostBlendTarget = f.Read<int32_t>();
 		}
 	}
-	
+
 	unsigned int numFrames = f.Read<unsigned int>();
-	for(unsigned int i=0;i<numFrames;i++)
-	{
+	for(unsigned int i = 0; i < numFrames; i++) {
 		auto frame = Frame::Create(numBones);
-		for(unsigned int j=0;j<numBones;j++)
-		{
+		for(unsigned int j = 0; j < numBones; j++) {
 			auto orientation = uquat::identity(); // TODO: Can't use glm::quat here for some reason
-			for(unsigned char k=0;k<4;k++)
+			for(unsigned char k = 0; k < 4; k++)
 				orientation[k] = f.Read<float>();
 			Vector3 pos;
-			for(unsigned char k=0;k<3;k++)
+			for(unsigned char k = 0; k < 3; k++)
 				pos[k] = f.Read<float>();
-			frame->SetBonePosition(j,pos);
-			frame->SetBoneOrientation(j,orientation);
+			frame->SetBonePosition(j, pos);
+			frame->SetBoneOrientation(j, orientation);
 			/*Matx4x3 mat;
 			//Mat4x3 mat;
 			//Mat
@@ -142,20 +128,17 @@ std::shared_ptr<pragma::animation::Animation> FWAD::ReadData(unsigned short mdlV
 			frame->SetBoneMatrix(j,mat);*/
 		}
 
-		if(animVersion >= 2)
-		{
+		if(animVersion >= 2) {
 			auto numScales = f.Read<uint32_t>();
 			auto &boneScales = frame->GetBoneScales();
 			boneScales.resize(numScales);
-			f.Read(boneScales.data(),boneScales.size() *sizeof(boneScales.front()));
+			f.Read(boneScales.data(), boneScales.size() * sizeof(boneScales.front()));
 		}
 
 		unsigned short numEvents = f.Read<unsigned short>();
-		for(unsigned short j=0;j<numEvents;j++)
-		{
+		for(unsigned short j = 0; j < numEvents; j++) {
 			AnimationEvent *ev = new AnimationEvent;
-			if(mdlVersion >= 0x0013)
-			{
+			if(mdlVersion >= 0x0013) {
 				auto name = f.ReadString();
 				auto id = pragma::animation::Animation::GetEventEnumRegister().RegisterEnum(name);
 				ev->eventID = (id != util::EnumRegister::InvalidEnum) ? static_cast<AnimationEvent::Type>(id) : AnimationEvent::Type::Invalid;
@@ -163,16 +146,14 @@ std::shared_ptr<pragma::animation::Animation> FWAD::ReadData(unsigned short mdlV
 			else
 				ev->eventID = static_cast<AnimationEvent::Type>(f.Read<unsigned short>());
 			unsigned char numParams = f.Read<unsigned char>();
-			for(unsigned char k=0;k<numParams;k++)
-			{
+			for(unsigned char k = 0; k < numParams; k++) {
 				std::string param = f.ReadString();
 				ev->arguments.push_back(param);
 			}
-			anim->AddEvent(i,ev);
+			anim->AddEvent(i, ev);
 		}
-		if(bHasMovement == true)
-		{
-			Vector2 move(0,0);
+		if(bHasMovement == true) {
+			Vector2 move(0, 0);
 			if(bMoveX == true)
 				move.x = f.Read<float>();
 			if(bMoveZ == true)
@@ -187,21 +168,20 @@ std::shared_ptr<pragma::animation::Animation> FWAD::ReadData(unsigned short mdlV
 	return anim;
 }
 
-std::shared_ptr<pragma::animation::Animation> FWAD::Load(unsigned short version,const char *animation)
+std::shared_ptr<pragma::animation::Animation> FWAD::Load(unsigned short version, const char *animation)
 {
 	std::string pathCache(animation);
-	std::transform(pathCache.begin(),pathCache.end(),pathCache.begin(),::tolower);
+	std::transform(pathCache.begin(), pathCache.end(), pathCache.begin(), ::tolower);
 
 	std::string path = "models\\";
 	path += animation;
 	const char *cPath = path.c_str();
-	auto f = FileManager::OpenFile(cPath,"rb");
-	if(f == NULL)
-	{
-		Con::cout<<"WARNING: Unable to open animation '"<<animation<<"': File not found!"<<Con::endl;
+	auto f = FileManager::OpenFile(cPath, "rb");
+	if(f == NULL) {
+		Con::cout << "WARNING: Unable to open animation '" << animation << "': File not found!" << Con::endl;
 		return NULL;
 	}
 	fsys::File fp {f};
-	auto anim = ReadData(version,fp);
+	auto anim = ReadData(version, fp);
 	return anim;
 }

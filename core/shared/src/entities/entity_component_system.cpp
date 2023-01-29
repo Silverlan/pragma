@@ -14,47 +14,40 @@
 
 using namespace pragma;
 
-BaseEntityComponentSystem::~BaseEntityComponentSystem()
-{
-	ClearComponents();
-}
-void BaseEntityComponentSystem::Initialize(BaseEntity &ent,EntityComponentManager &componentManager)
+BaseEntityComponentSystem::~BaseEntityComponentSystem() { ClearComponents(); }
+void BaseEntityComponentSystem::Initialize(BaseEntity &ent, EntityComponentManager &componentManager)
 {
 	m_entity = &ent;
 	m_componentManager = &componentManager;
 }
-EntityComponentManager *BaseEntityComponentSystem::GetComponentManager() {return m_componentManager;}
-const EntityComponentManager *BaseEntityComponentSystem::GetComponentManager() const {return const_cast<BaseEntityComponentSystem*>(this)->GetComponentManager();}
+EntityComponentManager *BaseEntityComponentSystem::GetComponentManager() { return m_componentManager; }
+const EntityComponentManager *BaseEntityComponentSystem::GetComponentManager() const { return const_cast<BaseEntityComponentSystem *>(this)->GetComponentManager(); }
 void BaseEntityComponentSystem::ClearComponents()
 {
-	while(m_components.empty() == false)
-	{
+	while(m_components.empty() == false) {
 		auto numComponents = m_components.size();
 		auto componentId = m_components.back()->GetComponentId();
 		RemoveComponent(componentId);
-		
-		if(m_components.size() == numComponents)
-		{
+
+		if(m_components.size() == numComponents) {
 			std::stringstream entStr;
 			if(!m_entity)
-				entStr<<"NULL";
+				entStr << "NULL";
 			else
 				m_entity->print(entStr);
-			throw std::logic_error("An unknown error occured when trying to remove entity component "
-				+std::to_string(componentId) +" of entity " +entStr.str() +"!");
+			throw std::logic_error("An unknown error occured when trying to remove entity component " + std::to_string(componentId) + " of entity " + entStr.str() + "!");
 		}
 	}
 }
-util::EventReply BaseEntityComponentSystem::BroadcastEvent(ComponentEventId ev,ComponentEvent &evData,const BaseEntityComponent *src) const
+util::EventReply BaseEntityComponentSystem::BroadcastEvent(ComponentEventId ev, ComponentEvent &evData, const BaseEntityComponent *src) const
 {
 	// We need to copy the current list of components, in case one of the events
 	// changes the container by adding or removing a component
 	auto tmpComponents = m_components;
-	for(auto &component : tmpComponents)
-	{
+	for(auto &component : tmpComponents) {
 		if(component == nullptr || component.get() == src)
 			continue;
-		if(component->HandleEvent(ev,evData) == util::EventReply::Handled)
+		if(component->HandleEvent(ev, evData) == util::EventReply::Handled)
 			return util::EventReply::Handled;
 	}
 	return util::EventReply::Unhandled;
@@ -62,30 +55,26 @@ util::EventReply BaseEntityComponentSystem::BroadcastEvent(ComponentEventId ev,C
 util::EventReply BaseEntityComponentSystem::BroadcastEvent(ComponentEventId eventId) const
 {
 	CEGenericComponentEvent ev {};
-	return BroadcastEvent(eventId,ev);
+	return BroadcastEvent(eventId, ev);
 }
-pragma::ComponentHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::AddComponent(ComponentId componentId,bool bForceCreateNew)
+pragma::ComponentHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::AddComponent(ComponentId componentId, bool bForceCreateNew)
 {
-	if(bForceCreateNew == false)
-	{
-		auto it = std::find_if(m_components.begin(),m_components.end(),[componentId](const util::TSharedHandle<pragma::BaseEntityComponent> &ptrComponent) {
-			return ptrComponent->GetComponentId() == componentId;
-		});
+	if(bForceCreateNew == false) {
+		auto it = std::find_if(m_components.begin(), m_components.end(), [componentId](const util::TSharedHandle<pragma::BaseEntityComponent> &ptrComponent) { return ptrComponent->GetComponentId() == componentId; });
 		if(it != m_components.end())
 			return {*it};
 	}
-	auto ptrComponent = m_componentManager->CreateComponent(componentId,*m_entity);
-	if(ptrComponent == nullptr)
-	{
-		Con::cwar<<"Unable to create entity component of type "<<componentId<<"!"<<this<<Con::endl;
+	auto ptrComponent = m_componentManager->CreateComponent(componentId, *m_entity);
+	if(ptrComponent == nullptr) {
+		Con::cwar << "Unable to create entity component of type " << componentId << "!" << this << Con::endl;
 		return {};
 	}
 	if(m_components.size() == m_components.capacity())
-		m_components.reserve(m_components.size() +5u);
+		m_components.reserve(m_components.size() + 5u);
 	m_components.push_back(ptrComponent);
 	auto it = m_componentLookupTable.find(componentId);
 	if(it == m_componentLookupTable.end())
-		m_componentLookupTable.insert(std::make_pair(componentId,ptrComponent));
+		m_componentLookupTable.insert(std::make_pair(componentId, ptrComponent));
 
 	ptrComponent->Initialize();
 
@@ -95,50 +84,42 @@ pragma::ComponentHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::
 
 	OnComponentAdded(*ptrComponent);
 
-	pragma::CEOnEntityComponentAdded evData{*ptrComponent};
+	pragma::CEOnEntityComponentAdded evData {*ptrComponent};
 	auto *genericC = m_entity->GetGenericComponent();
-	if(BroadcastEvent(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED,evData,ptrComponent.get()) != util::EventReply::Handled && genericC)
-		genericC->InvokeEventCallbacks(BaseGenericComponent::EVENT_ON_ENTITY_COMPONENT_ADDED,evData);
+	if(BroadcastEvent(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED, evData, ptrComponent.get()) != util::EventReply::Handled && genericC)
+		genericC->InvokeEventCallbacks(BaseGenericComponent::EVENT_ON_ENTITY_COMPONENT_ADDED, evData);
 
-	for(auto &ptrComponentOther : components)
-	{
+	for(auto &ptrComponentOther : components) {
 		if(ptrComponentOther == nullptr || ptrComponentOther.get() == ptrComponent.get())
 			continue;
-		ptrComponentOther->OnEntityComponentAdded(*ptrComponent,false);
-		ptrComponent->OnEntityComponentAdded(*ptrComponentOther,true);
+		ptrComponentOther->OnEntityComponentAdded(*ptrComponent, false);
+		ptrComponent->OnEntityComponentAdded(*ptrComponentOther, true);
 	}
 	return {ptrComponent};
 }
-pragma::ComponentHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::AddComponent(const std::string &name,bool bForceCreateNew)
+pragma::ComponentHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::AddComponent(const std::string &name, bool bForceCreateNew)
 {
 	pragma::ComponentId componentId;
-	if(m_componentManager->GetComponentTypeId(name,componentId) == false)
-	{
+	if(m_componentManager->GetComponentTypeId(name, componentId) == false) {
 		if(
-			// Component isn't registered, try to load it dynamically
-			m_entity->GetNetworkState()->GetGameState()->LoadLuaComponentByName(name) == false ||
-			m_componentManager->GetComponentTypeId(name,componentId) == false
-		)
-		{
-			Con::cwar<<"Attempted to add unknown component '"<<name<<"' to game object "<<this<<Con::endl;
+		  // Component isn't registered, try to load it dynamically
+		  m_entity->GetNetworkState()->GetGameState()->LoadLuaComponentByName(name) == false || m_componentManager->GetComponentTypeId(name, componentId) == false) {
+			Con::cwar << "Attempted to add unknown component '" << name << "' to game object " << this << Con::endl;
 			return {};
 		}
 	}
-	return AddComponent(componentId,bForceCreateNew);
+	return AddComponent(componentId, bForceCreateNew);
 }
 void BaseEntityComponentSystem::RemoveComponent(pragma::BaseEntityComponent &component)
 {
-	if(umath::is_flag_set(component.m_stateFlags,BaseEntityComponent::StateFlags::Removed))
+	if(umath::is_flag_set(component.m_stateFlags, BaseEntityComponent::StateFlags::Removed))
 		return;
-	umath::set_flag(component.m_stateFlags,BaseEntityComponent::StateFlags::Removed);
-	auto it = std::find_if(m_components.begin(),m_components.end(),[&component](const util::TSharedHandle<BaseEntityComponent> &componentOther) {
-		return componentOther.get() == &component;
-	});
+	umath::set_flag(component.m_stateFlags, BaseEntityComponent::StateFlags::Removed);
+	auto it = std::find_if(m_components.begin(), m_components.end(), [&component](const util::TSharedHandle<BaseEntityComponent> &componentOther) { return componentOther.get() == &component; });
 	if(it == m_components.end())
 		return;
 	auto componentId = component.GetComponentId();
-	for(auto &ptrComponentOther : m_components)
-	{
+	for(auto &ptrComponentOther : m_components) {
 		if(ptrComponentOther.get() == &component)
 			continue;
 		ptrComponentOther->OnEntityComponentRemoved(component);
@@ -150,17 +131,13 @@ void BaseEntityComponentSystem::RemoveComponent(pragma::BaseEntityComponent &com
 	OnComponentRemoved(component);
 
 	// Safe to free now
-	tmpHandle = util::TSharedHandle<BaseEntityComponent>{};
+	tmpHandle = util::TSharedHandle<BaseEntityComponent> {};
 
 	auto itType = m_componentLookupTable.find(componentId);
-	if(itType != m_componentLookupTable.end())
-	{
+	if(itType != m_componentLookupTable.end()) {
 		// Find a different component of the same type
-		auto it = std::find_if(m_components.begin(),m_components.end(),[componentId](const util::TSharedHandle<BaseEntityComponent> &ptrComponent) {
-			return ptrComponent->GetComponentId() == componentId;
-		});
-		if(it == m_components.end())
-		{
+		auto it = std::find_if(m_components.begin(), m_components.end(), [componentId](const util::TSharedHandle<BaseEntityComponent> &ptrComponent) { return ptrComponent->GetComponentId() == componentId; });
+		if(it == m_components.end()) {
 			m_componentLookupTable.erase(itType);
 			return;
 		}
@@ -170,8 +147,7 @@ void BaseEntityComponentSystem::RemoveComponent(pragma::BaseEntityComponent &com
 void BaseEntityComponentSystem::RemoveComponent(ComponentId componentId)
 {
 	auto hComponent = FindComponent(componentId);
-	while(hComponent.valid())
-	{
+	while(hComponent.valid()) {
 		RemoveComponent(*hComponent);
 		hComponent = FindComponent(componentId);
 	}
@@ -179,7 +155,7 @@ void BaseEntityComponentSystem::RemoveComponent(ComponentId componentId)
 void BaseEntityComponentSystem::RemoveComponent(const std::string &name)
 {
 	ComponentId componentId;
-	if(m_componentManager->GetComponentTypeId(name,componentId) == false)
+	if(m_componentManager->GetComponentTypeId(name, componentId) == false)
 		return;
 	RemoveComponent(componentId);
 }
@@ -191,8 +167,8 @@ bool pragma::BaseEntityComponentSystem::HasComponent(ComponentId componentId) co
 	return it != m_componentLookupTable.end() && it->second.expired() == false;
 }
 
-const std::vector<util::TSharedHandle<BaseEntityComponent>> &BaseEntityComponentSystem::GetComponents() const {return const_cast<BaseEntityComponentSystem*>(this)->GetComponents();}
-std::vector<util::TSharedHandle<BaseEntityComponent>> &BaseEntityComponentSystem::GetComponents() {return m_components;}
+const std::vector<util::TSharedHandle<BaseEntityComponent>> &BaseEntityComponentSystem::GetComponents() const { return const_cast<BaseEntityComponentSystem *>(this)->GetComponents(); }
+std::vector<util::TSharedHandle<BaseEntityComponent>> &BaseEntityComponentSystem::GetComponents() { return m_components; }
 
 pragma::ComponentHandle<BaseEntityComponent> BaseEntityComponentSystem::FindComponent(ComponentId componentId) const
 {
@@ -205,7 +181,7 @@ pragma::ComponentHandle<BaseEntityComponent> BaseEntityComponentSystem::FindComp
 {
 	ComponentId componentId;
 	auto typeIndex = std::type_index(typeid(*this));
-	if(m_componentManager->GetComponentTypeId(name,componentId) == false)
+	if(m_componentManager->GetComponentTypeId(name, componentId) == false)
 		return {};
 	return FindComponent(componentId);
 }

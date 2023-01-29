@@ -14,13 +14,12 @@
 #include <sharedutils/util.h>
 #include <algorithm>
 
-REGISTER_PARTICLE_OPERATOR(cylindrical_vortex,CParticleOperatorCylindricalVortex);
+REGISTER_PARTICLE_OPERATOR(cylindrical_vortex, CParticleOperatorCylindricalVortex);
 
-void CParticleOperatorCylindricalVortex::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleOperatorCylindricalVortex::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleOperatorWorldBase::Initialize(pSystem,values);
-	for(auto it=values.begin();it!=values.end();it++)
-	{
+	CParticleOperatorWorldBase::Initialize(pSystem, values);
+	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
 		ustring::to_lower(key);
 		if(key == "axis")
@@ -34,27 +33,27 @@ void CParticleOperatorCylindricalVortex::Initialize(pragma::CParticleSystemCompo
 void CParticleOperatorCylindricalVortex::Simulate(double tDelta)
 {
 	CParticleOperatorWorldBase::Simulate(tDelta);
-	m_dtStrength = m_fStrength *tDelta;
+	m_dtStrength = m_fStrength * tDelta;
 
 	// transform the origin and axis into particle space
 	auto &ps = GetParticleSystem();
-	m_dtOrigin = ps.PointToParticleSpace(Vector3{},true);
-	m_dtAxis = ps.DirectionToParticleSpace(m_vAxis,ShouldRotateWithEmitter());
+	m_dtOrigin = ps.PointToParticleSpace(Vector3 {}, true);
+	m_dtAxis = ps.DirectionToParticleSpace(m_vAxis, ShouldRotateWithEmitter());
 
 	// find divergence rotation
-	m_dtRotation = uquat::create(m_dtAxis,-m_fDivergence);
+	m_dtRotation = uquat::create(m_dtAxis, -m_fDivergence);
 }
-void CParticleOperatorCylindricalVortex::Simulate(CParticle &particle,double tDelta,float strength)
+void CParticleOperatorCylindricalVortex::Simulate(CParticle &particle, double tDelta, float strength)
 {
-	CParticleOperatorWorldBase::Simulate(particle,tDelta,strength);
+	CParticleOperatorWorldBase::Simulate(particle, tDelta, strength);
 	// cross product of vortex axis and relative position is direction
-	auto v = uvec::cross(m_dtAxis,particle.GetPosition() -m_dtOrigin);
+	auto v = uvec::cross(m_dtAxis, particle.GetPosition() - m_dtOrigin);
 	auto l = uvec::length(v);
 	const auto EPSILON = 0.0001f;
 	if(l < EPSILON)
 		return; // particle is on the axis
 	// normalize direction, scale by delta, rotate, add to velocity
-	v *= m_dtStrength /l;
-	uvec::rotate(&v,m_dtRotation);
-	particle.SetVelocity(particle.GetVelocity() +v);
+	v *= m_dtStrength / l;
+	uvec::rotate(&v, m_dtRotation);
+	particle.SetVelocity(particle.GetVelocity() + v);
 }

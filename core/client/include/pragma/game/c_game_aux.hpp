@@ -14,9 +14,9 @@
 extern DLLCLIENT CEngine *c_engine;
 
 template<class TEfxProperties>
-	std::shared_ptr<al::Effect> CGame::CreateAuxEffect(const std::string &name,const TEfxProperties &props)
+std::shared_ptr<al::Effect> CGame::CreateAuxEffect(const std::string &name, const TEfxProperties &props)
 {
-	return c_engine->CreateAuxEffect(name,props);
+	return c_engine->CreateAuxEffect(name, props);
 }
 
 #endif

@@ -10,17 +10,8 @@
 
 #include <cinttypes>
 
-namespace util
-{
-	enum class DurationType : uint32_t
-	{
-		NanoSeconds = 0u,
-		MicroSeconds,
-		MilliSeconds,
-		Seconds,
-		Minutes,
-		Hours
-	};
+namespace util {
+	enum class DurationType : uint32_t { NanoSeconds = 0u, MicroSeconds, MilliSeconds, Seconds, Minutes, Hours };
 };
 
 #endif

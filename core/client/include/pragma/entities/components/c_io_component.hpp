@@ -12,12 +12,9 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_io_component.hpp>
 
-namespace pragma
-{
-	class DLLCLIENT CIOComponent final
-		: public BaseIOComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CIOComponent final : public BaseIOComponent {
+	  public:
 		CIOComponent(BaseEntity &ent) : BaseIOComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};

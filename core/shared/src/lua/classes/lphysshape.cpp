@@ -19,59 +19,60 @@
 
 extern DLLNETWORK Engine *engine;
 
-void Lua::PhysShape::register_class(lua_State *l,luabind::module_ &mod)
+void Lua::PhysShape::register_class(lua_State *l, luabind::module_ &mod)
 {
-	auto classDef = luabind::class_<pragma::physics::IShape,pragma::physics::IBase>("Shape");
-	classDef.def("GetBounds",+[](pragma::physics::IShape &shape) -> std::pair<Vector3,Vector3> {
-		Vector3 min,max;
-		shape.GetAABB(min,max);
-		return {min,max};
-	});
-	classDef.def("IsConvex",&pragma::physics::IShape::IsConvex);
-	classDef.def("IsConvexHull",&pragma::physics::IShape::IsConvexHull);
-	classDef.def("IsHeightfield",&pragma::physics::IShape::IsHeightfield);
-	classDef.def("IsTriangleShape",&pragma::physics::IShape::IsTriangleShape);
-	classDef.def("SetMass",&pragma::physics::IShape::SetMass);
-	classDef.def("GetMass",&pragma::physics::IShape::GetMass);
-	classDef.def("SetLocalPose",&pragma::physics::IShape::SetLocalPose);
-	classDef.def("GetLocalPose",&pragma::physics::IShape::GetLocalPose);
-	classDef.def("CalculateLocalInertia",&pragma::physics::IShape::CalculateLocalInertia,luabind::out_value<3>{});
+	auto classDef = luabind::class_<pragma::physics::IShape, pragma::physics::IBase>("Shape");
+	classDef.def(
+	  "GetBounds", +[](pragma::physics::IShape &shape) -> std::pair<Vector3, Vector3> {
+		  Vector3 min, max;
+		  shape.GetAABB(min, max);
+		  return {min, max};
+	  });
+	classDef.def("IsConvex", &pragma::physics::IShape::IsConvex);
+	classDef.def("IsConvexHull", &pragma::physics::IShape::IsConvexHull);
+	classDef.def("IsHeightfield", &pragma::physics::IShape::IsHeightfield);
+	classDef.def("IsTriangleShape", &pragma::physics::IShape::IsTriangleShape);
+	classDef.def("SetMass", &pragma::physics::IShape::SetMass);
+	classDef.def("GetMass", &pragma::physics::IShape::GetMass);
+	classDef.def("SetLocalPose", &pragma::physics::IShape::SetLocalPose);
+	classDef.def("GetLocalPose", &pragma::physics::IShape::GetLocalPose);
+	classDef.def("CalculateLocalInertia", &pragma::physics::IShape::CalculateLocalInertia, luabind::out_value<3> {});
 	mod[classDef];
 
-	auto convexClassDef = luabind::class_<pragma::physics::IConvexShape,luabind::bases<pragma::physics::IShape,pragma::physics::IBase>>("ConvexShape");
-	convexClassDef.def("GetCollisionMesh",static_cast<CollisionMesh*(pragma::physics::IConvexShape::*)()>(&pragma::physics::IConvexShape::GetCollisionMesh),luabind::shared_from_this_policy<0>{});
+	auto convexClassDef = luabind::class_<pragma::physics::IConvexShape, luabind::bases<pragma::physics::IShape, pragma::physics::IBase>>("ConvexShape");
+	convexClassDef.def("GetCollisionMesh", static_cast<CollisionMesh *(pragma::physics::IConvexShape::*)()>(&pragma::physics::IConvexShape::GetCollisionMesh), luabind::shared_from_this_policy<0> {});
 	mod[convexClassDef];
 
-	auto capsuleShapeDef = luabind::class_<pragma::physics::ICapsuleShape,luabind::bases<pragma::physics::IConvexShape,pragma::physics::IShape,pragma::physics::IBase>>("CapsuleShape");
-	capsuleShapeDef.def("GetRadius",&pragma::physics::ICapsuleShape::GetRadius);
-	capsuleShapeDef.def("GetHalfHeight",&pragma::physics::ICapsuleShape::GetHalfHeight);
+	auto capsuleShapeDef = luabind::class_<pragma::physics::ICapsuleShape, luabind::bases<pragma::physics::IConvexShape, pragma::physics::IShape, pragma::physics::IBase>>("CapsuleShape");
+	capsuleShapeDef.def("GetRadius", &pragma::physics::ICapsuleShape::GetRadius);
+	capsuleShapeDef.def("GetHalfHeight", &pragma::physics::ICapsuleShape::GetHalfHeight);
 	mod[capsuleShapeDef];
 
-	auto boxShapeDef = luabind::class_<pragma::physics::IBoxShape,luabind::bases<pragma::physics::IConvexShape,pragma::physics::IShape,pragma::physics::IBase>>("BoxShape");
-	boxShapeDef.def("GetHalfExtents",&pragma::physics::IBoxShape::GetHalfExtents);
+	auto boxShapeDef = luabind::class_<pragma::physics::IBoxShape, luabind::bases<pragma::physics::IConvexShape, pragma::physics::IShape, pragma::physics::IBase>>("BoxShape");
+	boxShapeDef.def("GetHalfExtents", &pragma::physics::IBoxShape::GetHalfExtents);
 	mod[boxShapeDef];
 
-	auto compoundShapeDef = luabind::class_<pragma::physics::ICompoundShape,luabind::bases<pragma::physics::IShape,pragma::physics::IBase>>("CompoundShape");
+	auto compoundShapeDef = luabind::class_<pragma::physics::ICompoundShape, luabind::bases<pragma::physics::IShape, pragma::physics::IBase>>("CompoundShape");
 	mod[compoundShapeDef];
 
-	auto hullClassDef = luabind::class_<pragma::physics::IConvexHullShape,luabind::bases<pragma::physics::IConvexShape,pragma::physics::IShape,pragma::physics::IBase>>("ConvexHullShape");
-	hullClassDef.def("AddPoint",&pragma::physics::IConvexHullShape::AddPoint);
-	hullClassDef.def("AddTriangle",&pragma::physics::IConvexHullShape::AddTriangle);
-	hullClassDef.def("ReservePoints",&pragma::physics::IConvexHullShape::ReservePoints);
-	hullClassDef.def("ReserveTriangles",&pragma::physics::IConvexHullShape::ReserveTriangles);
-	hullClassDef.def("Build",&pragma::physics::IConvexHullShape::Build);
+	auto hullClassDef = luabind::class_<pragma::physics::IConvexHullShape, luabind::bases<pragma::physics::IConvexShape, pragma::physics::IShape, pragma::physics::IBase>>("ConvexHullShape");
+	hullClassDef.def("AddPoint", &pragma::physics::IConvexHullShape::AddPoint);
+	hullClassDef.def("AddTriangle", &pragma::physics::IConvexHullShape::AddTriangle);
+	hullClassDef.def("ReservePoints", &pragma::physics::IConvexHullShape::ReservePoints);
+	hullClassDef.def("ReserveTriangles", &pragma::physics::IConvexHullShape::ReserveTriangles);
+	hullClassDef.def("Build", &pragma::physics::IConvexHullShape::Build);
 	mod[hullClassDef];
 
-	auto heightfieldClassDef = luabind::class_<pragma::physics::IHeightfield,luabind::bases<pragma::physics::IShape,pragma::physics::IBase>>("Heightfield");
-	heightfieldClassDef.def("GetHeight",&pragma::physics::IHeightfield::GetHeight);
-	heightfieldClassDef.def("SetHeight",&pragma::physics::IHeightfield::SetHeight);
-	heightfieldClassDef.def("GetWidth",&pragma::physics::IHeightfield::GetWidth);
-	heightfieldClassDef.def("GetLength",&pragma::physics::IHeightfield::GetLength);
-	heightfieldClassDef.def("GetMaxHeight",&pragma::physics::IHeightfield::GetMaxHeight);
-	heightfieldClassDef.def("GetUpAxis",&pragma::physics::IHeightfield::GetUpAxis);
+	auto heightfieldClassDef = luabind::class_<pragma::physics::IHeightfield, luabind::bases<pragma::physics::IShape, pragma::physics::IBase>>("Heightfield");
+	heightfieldClassDef.def("GetHeight", &pragma::physics::IHeightfield::GetHeight);
+	heightfieldClassDef.def("SetHeight", &pragma::physics::IHeightfield::SetHeight);
+	heightfieldClassDef.def("GetWidth", &pragma::physics::IHeightfield::GetWidth);
+	heightfieldClassDef.def("GetLength", &pragma::physics::IHeightfield::GetLength);
+	heightfieldClassDef.def("GetMaxHeight", &pragma::physics::IHeightfield::GetMaxHeight);
+	heightfieldClassDef.def("GetUpAxis", &pragma::physics::IHeightfield::GetUpAxis);
 	mod[heightfieldClassDef];
 
-	auto triangleShapeClassDef = luabind::class_<pragma::physics::ITriangleShape,luabind::bases<pragma::physics::IShape,pragma::physics::IBase>>("TriangleShape");
+	auto triangleShapeClassDef = luabind::class_<pragma::physics::ITriangleShape, luabind::bases<pragma::physics::IShape, pragma::physics::IBase>>("TriangleShape");
 #if 0
 	// Bullet triangle mesh deformation
 	// This is unstable and can cause the game to crash

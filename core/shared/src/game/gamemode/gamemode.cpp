@@ -24,21 +24,21 @@ std::string Game::GetGameModeScriptDirectoryPath() const
 	if(info == nullptr)
 		return "";
 	auto &id = info->id;
-	return "gamemodes\\" +id;
+	return "gamemodes\\" + id;
 }
 std::string Game::GetGameModeScriptDirectoryNetworkPath() const
 {
 	auto path = GetGameModeScriptDirectoryPath();
 	if(path.empty())
 		return "";
-	return path +'\\' +GetLuaNetworkDirectoryName();
+	return path + '\\' + GetLuaNetworkDirectoryName();
 }
 std::string Game::GetGameModeScriptFilePath() const
 {
 	auto path = GetGameModeScriptDirectoryNetworkPath();
 	if(path.empty())
 		return "";
-	return path +'\\' +GetLuaNetworkFileName();
+	return path + '\\' + GetLuaNetworkFileName();
 }
 
 void Game::ReloadGameModeScripts()

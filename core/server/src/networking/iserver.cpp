@@ -13,19 +13,18 @@
 bool pragma::networking::IServer::Shutdown(Error &outErr)
 {
 	for(auto &cl : m_clients)
-		cl->Drop(DropReason::Shutdown,outErr);
+		cl->Drop(DropReason::Shutdown, outErr);
 	auto result = DoShutdown(outErr);
 	m_bRunning = false;
 	return result;
 }
-bool pragma::networking::IServer::SendPacket(Protocol protocol,NetPacket &packet,const ClientRecipientFilter &rf,Error &outErr)
+bool pragma::networking::IServer::SendPacket(Protocol protocol, NetPacket &packet, const ClientRecipientFilter &rf, Error &outErr)
 {
 	auto success = true;
-	for(auto &cl : m_clients)
-	{
+	for(auto &cl : m_clients) {
 		if(rf(*cl) == false)
 			continue;
-		if(cl->SendPacket(protocol,packet,outErr) == false)
+		if(cl->SendPacket(protocol, packet, outErr) == false)
 			success = false;
 	}
 	return success;
@@ -36,44 +35,42 @@ void pragma::networking::IServer::AddClient(const std::shared_ptr<IServerClient>
 	if(m_eventInterface.onClientConnected)
 		m_eventInterface.onClientConnected(*client);
 }
-bool pragma::networking::IServer::Start(Error &outErr,uint16_t port,bool useP2PIfAvailable)
+bool pragma::networking::IServer::Start(Error &outErr, uint16_t port, bool useP2PIfAvailable)
 {
-	auto result = DoStart(outErr,port,useP2PIfAvailable);
+	auto result = DoStart(outErr, port, useP2PIfAvailable);
 	if(result)
 		m_bRunning = true;
 	return result;
 }
-bool pragma::networking::IServer::DropClient(const IServerClient &client,pragma::networking::DropReason reason,Error &outErr)
+bool pragma::networking::IServer::DropClient(const IServerClient &client, pragma::networking::DropReason reason, Error &outErr)
 {
-	auto it = std::find_if(m_clients.begin(),m_clients.end(),[&client](const std::shared_ptr<IServerClient> &clientOther) {
-		return clientOther.get() == &client;
-	});
+	auto it = std::find_if(m_clients.begin(), m_clients.end(), [&client](const std::shared_ptr<IServerClient> &clientOther) { return clientOther.get() == &client; });
 	if(it == m_clients.end())
 		return true;
 	if(m_eventInterface.onClientDropped)
-		m_eventInterface.onClientDropped(**it,reason);
+		m_eventInterface.onClientDropped(**it, reason);
 	auto cl = *it;
 	m_clients.erase(it);
-	return cl->Drop(reason,outErr);
+	return cl->Drop(reason, outErr);
 }
 
-void pragma::networking::IServer::SetEventInterface(const ServerEventInterface &eventHandler) {m_eventInterface = eventHandler;}
+void pragma::networking::IServer::SetEventInterface(const ServerEventInterface &eventHandler) { m_eventInterface = eventHandler; }
 
-bool pragma::networking::IServer::IsRunning() const {return m_bRunning;}
-const std::vector<std::shared_ptr<pragma::networking::IServerClient>> &pragma::networking::IServer::GetClients() const {return m_clients;}
-const pragma::networking::ServerEventInterface &pragma::networking::IServer::GetEventInterface() const {return m_eventInterface;}
-void pragma::networking::IServer::HandlePacket(IServerClient &client,NetPacket &packet)
+bool pragma::networking::IServer::IsRunning() const { return m_bRunning; }
+const std::vector<std::shared_ptr<pragma::networking::IServerClient>> &pragma::networking::IServer::GetClients() const { return m_clients; }
+const pragma::networking::ServerEventInterface &pragma::networking::IServer::GetEventInterface() const { return m_eventInterface; }
+void pragma::networking::IServer::HandlePacket(IServerClient &client, NetPacket &packet)
 {
 	if(m_eventInterface.handlePacket)
-		m_eventInterface.handlePacket(client,packet);
+		m_eventInterface.handlePacket(client, packet);
 }
 void pragma::networking::IServer::OnClientConnected(IServerClient &client)
 {
 	if(m_eventInterface.onClientConnected)
 		m_eventInterface.onClientConnected(client);
 }
-void pragma::networking::IServer::OnClientDropped(IServerClient &client,DropReason reason)
+void pragma::networking::IServer::OnClientDropped(IServerClient &client, DropReason reason)
 {
 	if(m_eventInterface.onClientDropped)
-		m_eventInterface.onClientDropped(client,reason);
+		m_eventInterface.onClientDropped(client, reason);
 }

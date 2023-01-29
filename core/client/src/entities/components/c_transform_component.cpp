@@ -16,8 +16,8 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
-void CTransformComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-void CTransformComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BaseTransformComponent));}
+void CTransformComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CTransformComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BaseTransformComponent)); }
 void CTransformComponent::ReceiveData(NetPacket &packet)
 {
 	Vector3 pos = nwm::read_vector(packet);
@@ -30,11 +30,11 @@ void CTransformComponent::ReceiveData(NetPacket &packet)
 	SetScale(scale);
 }
 
-Bool CTransformComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
+Bool CTransformComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetScale)
 		SetScale(packet->Read<Vector3>());
 	else
-		return CBaseNetComponent::ReceiveNetEvent(eventId,packet);
+		return CBaseNetComponent::ReceiveNetEvent(eventId, packet);
 	return true;
 }

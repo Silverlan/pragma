@@ -483,9 +483,9 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defRigConfig.scope[defRigBone];
 	
 	auto defRigConstraint = luabind::class_<pragma::ik::RigConfigConstraint>("Constraint");
-	defRigControl.add_static_constant("TYPE_FIXED",umath::to_integral(pragma::ik::RigConfigConstraint::Type::Fixed));
-	defRigControl.add_static_constant("TYPE_HINGE",umath::to_integral(pragma::ik::RigConfigConstraint::Type::Hinge));
-	defRigControl.add_static_constant("TYPE_BALL_SOCKET",umath::to_integral(pragma::ik::RigConfigConstraint::Type::BallSocket));
+	defRigConstraint.add_static_constant("TYPE_FIXED",umath::to_integral(pragma::ik::RigConfigConstraint::Type::Fixed));
+	defRigConstraint.add_static_constant("TYPE_HINGE",umath::to_integral(pragma::ik::RigConfigConstraint::Type::Hinge));
+	defRigConstraint.add_static_constant("TYPE_BALL_SOCKET",umath::to_integral(pragma::ik::RigConfigConstraint::Type::BallSocket));
 	defRigConstraint.def_readwrite("bone0",&pragma::ik::RigConfigConstraint::bone0);
 	defRigConstraint.def_readwrite("bone1",&pragma::ik::RigConfigConstraint::bone1);
 	defRigConstraint.def_readwrite("type",&pragma::ik::RigConfigConstraint::type);

@@ -377,6 +377,17 @@ pragma::ik::AngularPlaneControl &pragma::ik::Solver::AddAngularPlaneControl(Bone
 	m_bepuControls.push_back(**ctrl);
 	return *ctrl;
 }
+std::shared_ptr<pragma::ik::IControl> pragma::ik::Solver::FindControlPtr(Bone &bone)
+{
+	auto *bepuIkBone = *bone;
+	for(auto &ctrl : m_controls)
+	{
+		auto *bepuCtrl = **ctrl;
+		if(bepuCtrl->GetTargetBone() == bepuIkBone)
+			return ctrl;
+	}
+	return nullptr;
+}
 pragma::ik::IControl *pragma::ik::Solver::FindControl(Bone &bone)
 {
 	auto *bepuIkBone = *bone;

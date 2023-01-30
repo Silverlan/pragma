@@ -116,4 +116,5 @@ static void cmd_render_bloom_enabled(NetworkState *, ConVar *, bool, bool enable
 		return;
 	client->UpdateGameWorldShaderSettings();
 }
+
 REGISTER_CONVAR_CALLBACK_CL(render_bloom_enabled, cmd_render_bloom_enabled);

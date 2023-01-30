@@ -93,5 +93,6 @@ static void CVAR_CALLBACK_cl_render_texture_quality(NetworkState *, ConVar *, in
 	}*/
 	materialManager.ReloadMaterialShaders(); // Make sure to reload descriptor sets (So samplers are updated)
 }
+
 REGISTER_CONVAR_CALLBACK_CL(cl_render_texture_filtering, CVAR_CALLBACK_cl_render_texture_quality);
 REGISTER_CONVAR_CALLBACK_CL(cl_render_texture_quality, CVAR_CALLBACK_cl_render_texture_quality);

@@ -24,6 +24,7 @@
 #include "pragma/lua/converters/optional_converter_t.hpp"
 #include "pragma/lua/converters/pair_converter_t.hpp"
 #include "pragma/util/render_tile.hpp"
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include <pragma/game/game.h>
 #include "luasystem.h"
 #include "pragma/util/util_python.hpp"
@@ -401,6 +402,7 @@ static Lua::mult<bool, Lua::opt<std::string>> exec_python(lua_State *l, const st
 	return luabind::object {l, res};
 }
 static Lua::mult<bool, Lua::opt<std::string>> exec_python(lua_State *l, const std::string &fileName) { return exec_python(l, fileName, {}); }
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::rendering, pragma::rendering::Tile);
 void Lua::util::register_library(lua_State *l)
 {
 	auto pythonMod = luabind::module(l, "python");

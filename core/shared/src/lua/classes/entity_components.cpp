@@ -33,6 +33,7 @@
 #include "pragma/lua/types/udm.hpp"
 #include "pragma/entities/components/base_parent_component.hpp"
 #include "pragma/physics/shape.hpp"
+#include "pragma/util/render_tile.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include <udm.hpp>
 #include <luabind/out_value_policy.hpp>
@@ -2430,6 +2431,8 @@ void pragma::lua::base_env_camera_component::register_class(luabind::module_ &mo
 	def.add_static_constant("DEFAULT_FAR_Z", pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z);
 	def.add_static_constant("DEFAULT_FOV", pragma::BaseEnvCameraComponent::DEFAULT_FOV);
 	def.add_static_constant("DEFAULT_VIEWMODEL_FOV", pragma::BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV);
+	def.scope[luabind::def(
+	  "calc_projection_matrix", +[](umath::Radian fov, float aspectRatio, float nearZ, float farZ, const rendering::Tile *optTile) -> Mat4 { return pragma::BaseEnvCameraComponent::CalcProjectionMatrix(fov, aspectRatio, nearZ, farZ, optTile); })];
 	def.def("GetProjectionMatrix", &pragma::BaseEnvCameraComponent::GetProjectionMatrix, luabind::copy_policy<0> {});
 	def.def("GetViewMatrix", &pragma::BaseEnvCameraComponent::GetViewMatrix, luabind::copy_policy<0> {});
 	def.def("LookAt", static_cast<void (*)(lua_State *, pragma::BaseEnvCameraComponent &, const Vector3 &)>([](lua_State *l, pragma::BaseEnvCameraComponent &hComponent, const Vector3 &lookAtPos) {

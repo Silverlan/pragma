@@ -17,6 +17,9 @@
 enum class FrustumPlane : uint32_t;
 enum class FrustumPoint : uint32_t;
 namespace pragma {
+	namespace rendering {
+		struct Tile;
+	};
 	class BaseFieldAngleComponent;
 	class DLLNETWORK BaseEnvCameraComponent : public BaseEntityComponent {
 	  public:
@@ -96,7 +99,7 @@ namespace pragma {
 		static void GetFrustumNeighbors(FrustumPlane planeID, FrustumPlane *neighborIDs);
 		static void GetFrustumPlaneCornerPoints(FrustumPlane planeA, FrustumPlane planeB, FrustumPoint *cornerPoints);
 		static void CreateFrustumKDop(const std::vector<umath::Plane> &planes, const std::vector<Vector3> &points, const Vector3 &dir, std::vector<umath::Plane> *kDop);
-		static Mat4 CalcProjectionMatrix(float fovRad, float aspectRatio, float nearZ, float farZ);
+		static Mat4 CalcProjectionMatrix(umath::Radian fovRad, float aspectRatio, float nearZ, float farZ, const rendering::Tile *optTile = nullptr);
 		static void GetFrustumPlanes(const std::vector<Vector3> &points, std::vector<umath::Plane> &outPlanes);
 		static void GetFrustumPlanes(std::vector<umath::Plane> &outPlanes, float neard, float fard, float fov, float ratio, const Vector3 &center, const Vector3 &viewDir, const Vector3 &viewUp);
 	  protected:

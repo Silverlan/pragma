@@ -23,6 +23,7 @@
 #include "pragma/lua/policies/core_policies.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
 #include "pragma/lua/converters/pair_converter_t.hpp"
+#include "pragma/util/render_tile.hpp"
 #include <pragma/game/game.h>
 #include "luasystem.h"
 #include "pragma/util/util_python.hpp"
@@ -425,6 +426,16 @@ void Lua::util::register_library(lua_State *l)
 	auto nsRetarget = luabind::namespace_("retarget");
 	nsRetarget[defRetargetData];
 	nsRetarget[defRetargetFlexData];
+
+	auto defRenderTile = luabind::class_<pragma::rendering::Tile>("RenderTile");
+	defRenderTile.def(luabind::constructor<>());
+	defRenderTile.def(luabind::constructor<float, float, float, float>());
+	defRenderTile.def(luabind::tostring(luabind::self));
+	defRenderTile.def_readwrite("x", &pragma::rendering::Tile::x);
+	defRenderTile.def_readwrite("y", &pragma::rendering::Tile::y);
+	defRenderTile.def_readwrite("w", &pragma::rendering::Tile::w);
+	defRenderTile.def_readwrite("h", &pragma::rendering::Tile::h);
+	utilMod[defRenderTile];
 
 	utilMod[luabind::def("splash_damage", splash_damage), luabind::def("get_date_time", static_cast<std::string (*)(const std::string &)>(Lua::util::date_time)), luabind::def("get_date_time", static_cast<std::string (*)()>(Lua::util::date_time)),
 	  luabind::def("is_table", static_cast<bool (*)(luabind::argument)>(Lua::util::is_table)), luabind::def("is_table", static_cast<bool (*)()>(Lua::util::is_table)),

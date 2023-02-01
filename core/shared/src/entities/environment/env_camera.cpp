@@ -11,6 +11,7 @@
 #include "pragma/entities/components/base_field_angle_component.hpp"
 #include "pragma/entities/components/component_member_flags.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
+#include "pragma/util/render_tile.hpp"
 #include "pragma/math/e_frustum.h"
 #include <algorithm>
 #include <mathutil/umath_frustum.hpp>
@@ -633,9 +634,14 @@ void BaseEnvCameraComponent::CreateFrustumKDop(const std::vector<umath::Plane> &
 		}
 	}
 }
-Mat4 BaseEnvCameraComponent::CalcProjectionMatrix(float fovRad, float aspectRatio, float nearZ, float farZ)
+
+Mat4 BaseEnvCameraComponent::CalcProjectionMatrix(umath::Radian fovRad, float aspectRatio, float nearZ, float farZ, const rendering::Tile *optTile)
 {
 	auto mat = glm::perspectiveRH(fovRad, aspectRatio, normalize_plane_z(nearZ), normalize_plane_z(farZ));
+
+	if(optTile)
+		mat = pragma::rendering::calc_tile_offset_matrix(*optTile) * mat;
+
 	mat = glm::scale(mat, Vector3(1.f, -1.f, 1.f));
 	return mat;
 }

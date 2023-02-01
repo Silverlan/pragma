@@ -197,6 +197,12 @@ std::basic_ostream<char, std::char_traits<char>> &Con::endl(std::basic_ostream<c
 	Con::detail::currentLevel = util::LogSeverity::Disabled;
 	if(pragma::logging::detail::shouldLogOutput)
 		log_output();
+	switch(Con::detail::currentLevel) {
+	case util::LogSeverity::Error:
+	case util::LogSeverity::Critical:
+		pragma::flush_loggers(); // Flush loggers immediately in case this will lead to a crash
+		break;
+	}
 	if(bCrit == true) {
 		bCrit = false;
 		std::this_thread::sleep_for(std::chrono::seconds(5));

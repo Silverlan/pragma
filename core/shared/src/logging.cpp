@@ -37,6 +37,16 @@ void pragma::log(const std::string &msg, util::LogSeverity severity) { spdlog::l
 
 bool pragma::is_log_level_enabled(::util::LogSeverity severity) { return spdlog::should_log(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(severity))); }
 
+void pragma::flush_loggers()
+{
+	auto logger0 = spdlog::get("pragma_logger");
+	auto logger1 = spdlog::get("pragma_file_logger");
+	if(logger0)
+		logger0->flush();
+	if(logger1)
+		logger1->flush();
+}
+
 /////////////////////////////
 
 class SpdPragmaPrefixFormatter : public spdlog::custom_flag_formatter {

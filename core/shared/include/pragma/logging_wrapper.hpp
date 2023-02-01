@@ -21,6 +21,7 @@ namespace pragma {
 	};
 	DLLNETWORK void log(const std::string &msg, ::util::LogSeverity severity = ::util::LogSeverity::Info);
 	DLLNETWORK bool is_log_level_enabled(::util::LogSeverity severity);
+	DLLNETWORK void flush_loggers();
 
 	namespace detail {
 		DLLNETWORK void initialize_logger(::util::LogSeverity conLogLevel = DEFAULT_CONSOLE_LOG_LEVEL, ::util::LogSeverity fileLogLevel = DEFAULT_FILE_LOG_LEVEL, const std::optional<std::string> &logFile = DEFAULT_LOG_FILE);

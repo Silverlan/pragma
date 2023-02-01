@@ -452,6 +452,8 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defImageBuffer.def("IsLDRFormat", static_cast<void (*)(lua_State *, uimg::ImageBuffer &)>([](lua_State *l, uimg::ImageBuffer &imgBuffer) { Lua::PushBool(l, imgBuffer.IsLDRFormat()); }));
 	defImageBuffer.def("IsHDRFormat", static_cast<void (*)(lua_State *, uimg::ImageBuffer &)>([](lua_State *l, uimg::ImageBuffer &imgBuffer) { Lua::PushBool(l, imgBuffer.IsHDRFormat()); }));
 	defImageBuffer.def("IsFloatFormat", static_cast<void (*)(lua_State *, uimg::ImageBuffer &)>([](lua_State *l, uimg::ImageBuffer &imgBuffer) { Lua::PushBool(l, imgBuffer.IsFloatFormat()); }));
+	defImageBuffer.def("Insert", static_cast<void (uimg::ImageBuffer::*)(const uimg::ImageBuffer &, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t)>(&uimg::ImageBuffer::Insert));
+	defImageBuffer.def("Insert", static_cast<void (uimg::ImageBuffer::*)(const uimg::ImageBuffer &, uint32_t, uint32_t)>(&uimg::ImageBuffer::Insert));
 	defImageBuffer.def("Copy", static_cast<void (*)(lua_State *, uimg::ImageBuffer &)>([](lua_State *l, uimg::ImageBuffer &imgBuffer) { Lua::Push(l, imgBuffer.Copy()); }));
 	defImageBuffer.def("Copy", static_cast<void (*)(lua_State *, uimg::ImageBuffer &, uint32_t)>([](lua_State *l, uimg::ImageBuffer &imgBuffer, uint32_t format) { Lua::Push(l, imgBuffer.Copy(static_cast<uimg::Format>(format))); }));
 	defImageBuffer.def("Copy",

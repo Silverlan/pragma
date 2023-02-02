@@ -1469,6 +1469,16 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	prosperMod[defVkTexture];
 
 	auto defVkImage = luabind::class_<Lua::Vulkan::Image>("Image");
+
+	auto defToImageBufferInfo = luabind::class_<::util::ToImageBufferInfo>("ToImageBufferInfo");
+	defToImageBufferInfo.def(luabind::constructor<>());
+	defToImageBufferInfo.def_readwrite("includeLayers", &::util::ToImageBufferInfo::includeLayers);
+	defToImageBufferInfo.def_readwrite("includeMipmaps", &::util::ToImageBufferInfo::includeMipmaps);
+	defToImageBufferInfo.def_readwrite("inputImageLayout", &::util::ToImageBufferInfo::inputImageLayout);
+	defToImageBufferInfo.def_readwrite("stagingImage", &::util::ToImageBufferInfo::stagingImage);
+	defToImageBufferInfo.def_readwrite("targetFormat", &::util::ToImageBufferInfo::targetFormat);
+	defVkImage.scope[defToImageBufferInfo];
+
 	defVkImage.def(luabind::tostring(luabind::self));
 	defVkImage.def(luabind::const_self == luabind::const_self);
 	defVkImage.def("IsValid", &Lua::Vulkan::VKImage::IsValid);
@@ -1527,7 +1537,12 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImage.def(
 	  "ToImageBuffer", +[](lua_State *l, Lua::Vulkan::Image &img, bool includeLayers, bool includeMipmaps, uint32_t targetFormat, prosper::ImageLayout inputImageLayout) {
 		  std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> imgBuffers;
-		  auto result = util::to_image_buffer(img, static_cast<uimg::Format>(targetFormat), imgBuffers, includeLayers, includeMipmaps, inputImageLayout);
+		  util::ToImageBufferInfo info {};
+		  info.targetFormat = static_cast<uimg::Format>(targetFormat);
+		  info.includeLayers = includeLayers;
+		  info.includeMipmaps = includeMipmaps;
+		  info.inputImageLayout = inputImageLayout;
+		  auto result = util::to_image_buffer(img, info, imgBuffers);
 		  if(result == false || imgBuffers.empty())
 			  return;
 		  push_image_buffers(l, includeLayers, includeMipmaps, imgBuffers);
@@ -1535,7 +1550,11 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImage.def(
 	  "ToImageBuffer", +[](lua_State *l, Lua::Vulkan::Image &img, bool includeLayers, bool includeMipmaps, uint32_t targetFormat) {
 		  std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> imgBuffers;
-		  auto result = util::to_image_buffer(img, static_cast<uimg::Format>(targetFormat), imgBuffers, includeLayers, includeMipmaps);
+		  util::ToImageBufferInfo info {};
+		  info.targetFormat = static_cast<uimg::Format>(targetFormat);
+		  info.includeLayers = includeLayers;
+		  info.includeMipmaps = includeMipmaps;
+		  auto result = util::to_image_buffer(img, info, imgBuffers);
 		  if(result == false || imgBuffers.empty())
 			  return;
 		  push_image_buffers(l, includeLayers, includeMipmaps, imgBuffers);
@@ -1543,10 +1562,21 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImage.def(
 	  "ToImageBuffer", +[](lua_State *l, Lua::Vulkan::Image &img, bool includeLayers, bool includeMipmaps) {
 		  std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> imgBuffers;
-		  auto result = util::to_image_buffer(img, imgBuffers, includeLayers, includeMipmaps);
+		  util::ToImageBufferInfo info {};
+		  info.includeLayers = includeLayers;
+		  info.includeMipmaps = includeMipmaps;
+		  auto result = util::to_image_buffer(img, info, imgBuffers);
 		  if(result == false || imgBuffers.empty())
 			  return;
 		  push_image_buffers(l, includeLayers, includeMipmaps, imgBuffers);
+	  });
+	defVkImage.def(
+	  "ToImageBuffer", +[](lua_State *l, Lua::Vulkan::Image &img, const util::ToImageBufferInfo &info) {
+		  std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> imgBuffers;
+		  auto result = util::to_image_buffer(img, info, imgBuffers);
+		  if(result == false || imgBuffers.empty())
+			  return;
+		  push_image_buffers(l, info.includeLayers, info.includeMipmaps, imgBuffers);
 	  });
 	defVkImage.def("GetMemoryBuffer", static_cast<prosper::IBuffer *(*)(lua_State *, Lua::Vulkan::Image &)>([](lua_State *l, Lua::Vulkan::Image &img) -> prosper::IBuffer * {
 		auto *buf = img.GetMemoryBuffer();

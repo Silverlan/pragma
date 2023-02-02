@@ -1459,7 +1459,7 @@ bool pragma::asset::export_texture(const std::string &texturePath, ModelExportIn
 	}
 	else {
 		std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> imgBuffers;
-		if(::util::to_image_buffer(vkImg, imgBuffers) == false) {
+		if(::util::to_image_buffer(vkImg, {}, imgBuffers) == false) {
 			outErrMsg = "Unable to convert texture '" + texturePath + "' to image buffer!";
 			return false;
 		}

@@ -1207,37 +1207,38 @@ void CMD_debug_aim_info(NetworkState *state, pragma::BasePlayerComponent *pl, st
 	auto trData = util::get_entity_trace_data(*trC);
 	trData.SetFlags(RayCastFlags::InvertFilter);
 	trData.SetFilter(entPl);
-	auto res = c_game->RayCast(trData);
-	if(res.hitType == RayCastHitType::None) {
-		EntityIterator entIt {*c_game};
-		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
-		std::optional<Intersection::LineMeshResult> closestMesh {};
-		BaseEntity *entClosest = nullptr;
-		for(auto *ent : entIt) {
-			if(ent == &entPl)
-				continue;
-			auto renderC = ent->GetComponent<pragma::CRenderComponent>();
-			auto lineMeshResult = renderC->CalcRayIntersection(trData.GetSourceOrigin(), trData.GetTargetOrigin(), true);
-			if(lineMeshResult.has_value() == false || lineMeshResult->result != umath::intersection::Result::Intersect)
-				continue;
-			if(closestMesh.has_value() && lineMeshResult->hitValue > closestMesh->hitValue)
-				continue;
-			closestMesh = lineMeshResult;
-			entClosest = ent;
-		}
-		if(closestMesh.has_value()) {
-			res.hitType = RayCastHitType::Block;
-			res.entity = entClosest->GetHandle();
-			res.position = closestMesh->hitPos;
-			res.normal = {};
-			res.distance = uvec::distance(closestMesh->hitPos, trData.GetSourceOrigin());
-			if(closestMesh->precise) {
-				res.meshInfo = std::make_shared<TraceResult::MeshInfo>();
-				res.meshInfo->mesh = closestMesh->precise->mesh.get();
-				res.meshInfo->subMesh = closestMesh->precise->subMesh.get();
-			}
+
+	TraceResult res {};
+	EntityIterator entIt {*c_game};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
+	std::optional<Intersection::LineMeshResult> closestMesh {};
+	BaseEntity *entClosest = nullptr;
+	for(auto *ent : entIt) {
+		if(ent == &entPl)
+			continue;
+		auto renderC = ent->GetComponent<pragma::CRenderComponent>();
+		auto lineMeshResult = renderC->CalcRayIntersection(trData.GetSourceOrigin(), trData.GetTargetOrigin(), true);
+		if(lineMeshResult.has_value() == false || lineMeshResult->result != umath::intersection::Result::Intersect)
+			continue;
+		if(closestMesh.has_value() && lineMeshResult->hitValue > closestMesh->hitValue)
+			continue;
+		closestMesh = lineMeshResult;
+		entClosest = ent;
+	}
+	if(closestMesh.has_value()) {
+		res.hitType = RayCastHitType::Block;
+		res.entity = entClosest->GetHandle();
+		res.position = closestMesh->hitPos;
+		res.normal = {};
+		res.distance = uvec::distance(closestMesh->hitPos, trData.GetSourceOrigin());
+		if(closestMesh->precise) {
+			res.meshInfo = std::make_shared<TraceResult::MeshInfo>();
+			res.meshInfo->mesh = closestMesh->precise->mesh.get();
+			res.meshInfo->subMesh = closestMesh->precise->subMesh.get();
 		}
 	}
+	else
+		res = c_game->RayCast(trData);
 
 	if(res.hitType == RayCastHitType::None) {
 		Con::cout << "Nothing found in player aim direction!" << Con::endl;

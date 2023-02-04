@@ -59,6 +59,7 @@ namespace pragma::ents {
 		// Managed types
 		Entity = umath::to_integral(udm::Type::Count) + 1,
 		MultiEntity,
+		ComponentProperty,
 		Element,
 
 		Count,
@@ -75,13 +76,15 @@ namespace pragma::ents {
 	};
 	template<class T>
 	constexpr tag_t<T> tag = {};
-	constexpr std::variant<tag_t<EntityURef>, tag_t<MultiEntityURef>, tag_t<Element>> get_managed_member_type_tag(EntityMemberType e)
+	constexpr std::variant<tag_t<EntityURef>, tag_t<MultiEntityURef>, tag_t<EntityUComponentMemberRef>, tag_t<Element>> get_managed_member_type_tag(EntityMemberType e)
 	{
 		switch(e) {
 		case EntityMemberType::Entity:
 			return tag<EntityURef>;
 		case EntityMemberType::MultiEntity:
 			return tag<MultiEntityURef>;
+		case EntityMemberType::ComponentProperty:
+			return tag<EntityUComponentMemberRef>;
 		case EntityMemberType::Element:
 			return tag<Element>;
 		}
@@ -93,6 +96,7 @@ namespace pragma::ents {
 		switch(type) {
 		case EntityMemberType::Entity:
 		case EntityMemberType::MultiEntity:
+		case EntityMemberType::ComponentProperty:
 		case EntityMemberType::Element:
 			return true;
 		}
@@ -109,7 +113,7 @@ namespace pragma::ents {
 			return udm::visit<true, true, true, ENABLE_DEFAULT_RETURN>(member_type_to_udm_type(type), vs);
 	}
 	template<typename T>
-	concept is_managed_member_type = std::is_same_v<T, EntityURef> || std::is_same_v<T, MultiEntityURef> || std::is_same_v<T, Element>;
+	concept is_managed_member_type = std::is_same_v<T, EntityURef> || std::is_same_v<T, MultiEntityURef> || std::is_same_v<T, EntityUComponentMemberRef> || std::is_same_v<T, Element>;
 
 	template<typename T>
 	constexpr EntityMemberType member_type_to_enum()
@@ -119,6 +123,8 @@ namespace pragma::ents {
 				return EntityMemberType::Entity;
 			if constexpr(std::is_same_v<T, MultiEntityURef>)
 				return EntityMemberType::MultiEntity;
+			if constexpr(std::is_same_v<T, EntityUComponentMemberRef>)
+				return EntityMemberType::ComponentProperty;
 			if constexpr(std::is_same_v<T, Element>)
 				return EntityMemberType::Element;
 		}

@@ -475,6 +475,13 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 			          "	else value = ents.UniversalEntityReference(value) end\n"
 			          "end\n";
 		}
+		else if(memberType == ents::EntityMemberType::ComponentProperty) {
+			setter += "local t = util.get_type_name(value)\n"
+			          "if(t ~= \"UniversalMemberReference\") then\n"
+			          "	if(t == \"nil\") then value = ents.UniversalMemberReference()\n"
+			          "	else value = ents.UniversalMemberReference(value) end\n"
+			          "end\n";
+		}
 		else if(memberType == ents::EntityMemberType::MultiEntity)
 			throw std::runtime_error {"Not yet implemented!"};
 		setter += "self." + memberVarName;

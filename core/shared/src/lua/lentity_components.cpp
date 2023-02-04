@@ -233,7 +233,16 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	classDefMemRef.def(luabind::constructor<const std::string &, const std::string &, const std::string &>());
 	classDefMemRef.def(luabind::constructor<const BaseEntity &, pragma::ComponentId, const std::string &>());
 	classDefMemRef.def(luabind::constructor<const BaseEntity &, const std::string &, const std::string &>());
+	classDefMemRef.def(luabind::constructor<const std::string &>());
 	classDefMemRef.def("GetMemberInfo", &pragma::EntityUComponentMemberRef::GetMemberInfo);
+	classDefMemRef.def(
+	  "GetValue", +[](lua_State *l, Game &game, const pragma::EntityUComponentMemberRef &ref) {
+		  auto *c = ref.GetComponent(game);
+		  auto *memberInfo = ref.GetMemberInfo(game);
+		  if(!c || !memberInfo)
+			  return std::optional<Lua::udm_type> {};
+		  return pragma::lua::get_member_value(l, const_cast<pragma::BaseEntityComponent &>(*c), *memberInfo);
+	  });
 	classDefMemRef.def(
 	  "__tostring", +[](Game &game, const pragma::EntityUComponentMemberRef &ref) -> std::string {
 		  std::stringstream ss;

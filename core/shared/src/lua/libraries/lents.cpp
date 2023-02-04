@@ -188,7 +188,8 @@ void Lua::ents::register_library(lua_State *l)
 	    {"MEMBER_TYPE_MAT4", umath::to_integral(pragma::ents::EntityMemberType::Mat4)}, {"MEMBER_TYPE_MAT3X4", umath::to_integral(pragma::ents::EntityMemberType::Mat3x4)}, {"MEMBER_TYPE_HALF", umath::to_integral(pragma::ents::EntityMemberType::Half)},
 	    {"MEMBER_TYPE_VECTOR2I", umath::to_integral(pragma::ents::EntityMemberType::Vector2i)}, {"MEMBER_TYPE_VECTOR3I", umath::to_integral(pragma::ents::EntityMemberType::Vector3i)}, {"MEMBER_TYPE_VECTOR4I", umath::to_integral(pragma::ents::EntityMemberType::Vector4i)},
 	    {"MEMBER_TYPE_ELEMENT", umath::to_integral(pragma::ents::EntityMemberType::Element)}, {"MEMBER_TYPE_ENTITY", umath::to_integral(pragma::ents::EntityMemberType::Entity)}, {"MEMBER_TYPE_MULTI_ENTITY", umath::to_integral(pragma::ents::EntityMemberType::MultiEntity)},
-	    {"MEMBER_TYPE_COUNT", umath::to_integral(pragma::ents::EntityMemberType::Count)}, {"MEMBER_TYPE_LAST", umath::to_integral(pragma::ents::EntityMemberType::Last)}, {"MEMBER_TYPE_INVALID", umath::to_integral(pragma::ents::EntityMemberType::Invalid)},
+	    {"MEMBER_TYPE_COMPONENT_PROPERTY", umath::to_integral(pragma::ents::EntityMemberType::ComponentProperty)}, {"MEMBER_TYPE_COUNT", umath::to_integral(pragma::ents::EntityMemberType::Count)}, {"MEMBER_TYPE_LAST", umath::to_integral(pragma::ents::EntityMemberType::Last)},
+	    {"MEMBER_TYPE_INVALID", umath::to_integral(pragma::ents::EntityMemberType::Invalid)},
 
 	    {"INVALID_COMPONENT_ID", pragma::INVALID_COMPONENT_ID}, {"INVALID_COMPONENT_MEMBER_INDEX", pragma::INVALID_COMPONENT_MEMBER_INDEX}});
 

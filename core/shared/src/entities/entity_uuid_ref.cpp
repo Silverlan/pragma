@@ -144,6 +144,7 @@ EntityUComponentMemberRef::EntityUComponentMemberRef(EntityIdentifier identifier
 EntityUComponentMemberRef::EntityUComponentMemberRef(EntityIdentifier identifier, const std::string &componentName, const std::string &memberName) : EntityUComponentRef {std::move(identifier), componentName}, m_memberRef {memberName} {}
 EntityUComponentMemberRef::EntityUComponentMemberRef(const BaseEntity &ent, ComponentId componentId, const std::string &memberName) : EntityUComponentRef {ent, componentId}, m_memberRef {memberName} {}
 EntityUComponentMemberRef::EntityUComponentMemberRef(const BaseEntity &ent, const std::string &componentName, const std::string &memberName) : EntityUComponentRef {ent, componentName}, m_memberRef {memberName} {}
+EntityUComponentMemberRef::EntityUComponentMemberRef(const std::string &path) : EntityUComponentMemberRef {} { BaseEntity::ParseUri(path, *this); }
 const ComponentMemberInfo *EntityUComponentMemberRef::GetMemberInfo(Game &game) const
 {
 	auto *c = GetComponent(game);

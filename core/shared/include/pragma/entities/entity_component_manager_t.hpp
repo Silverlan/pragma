@@ -21,7 +21,8 @@ namespace pragma {
 	constexpr bool is_valid_component_property_type(pragma::ents::EntityMemberType type)
 	{
 		static_assert(umath::to_integral(pragma::ents::EntityMemberType::VersionIndex) == 0);
-		return is_valid_component_property_type(static_cast<udm::Type>(type)) || type == pragma::ents::EntityMemberType::Entity || type == pragma::ents::EntityMemberType::MultiEntity || type == pragma::ents::EntityMemberType::Element;
+		return is_valid_component_property_type(static_cast<udm::Type>(type)) || type == pragma::ents::EntityMemberType::Entity || type == pragma::ents::EntityMemberType::MultiEntity || type == pragma::ents::EntityMemberType::ComponentProperty
+		  || type == pragma::ents::EntityMemberType::Element;
 	}
 	template<typename T>
 	concept is_animatable_type_v = is_animatable_type(udm::type_to_enum<T>());

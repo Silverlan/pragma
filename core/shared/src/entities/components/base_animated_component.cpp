@@ -12,6 +12,7 @@
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_sound_emitter_component.hpp"
 #include "pragma/entities/components/panima_component.hpp"
+#include "pragma/entities/components/component_member_flags.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/audio/alsound_type.h"
@@ -213,15 +214,45 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 	auto &skeleton = mdl->GetSkeleton();
 	auto &bones = skeleton.GetBones();
 	ReserveMembers(bones.size() * 3);
-	for(auto &bone : skeleton.GetBones()) {
-		const auto &name = bone->name;
+	std::function<void(const panima::Bone &, const std::string &)> fAddBone = nullptr;
+	fAddBone = [&](const panima::Bone &bone, const std::string &parentPathName) {
+		const auto &name = bone.name;
 		auto lname = name;
 		// ustring::to_lower(lname);
+
+		std::string posePathName = "bone/" + lname + "/pose";
+		auto poseMetaData = std::make_shared<ents::PoseTypeMetaData>();
+		poseMetaData->poseProperty = posePathName;
+
+		auto coordMetaData = std::make_shared<ents::CoordinateTypeMetaData>();
+		coordMetaData->space = umath::CoordinateSpace::Local;
+		coordMetaData->parentProperty = parentPathName;
+
+		auto memberInfoPose = pragma::ComponentMemberInfo::CreateDummy();
+		memberInfoPose.SetName(posePathName);
+		memberInfoPose.type = ents::EntityMemberType::ScaledTransform;
+		memberInfoPose.userIndex = bone.ID;
+		memberInfoPose.SetFlag(pragma::ComponentMemberFlags::HideInInterface);
+		memberInfoPose.AddTypeMetaData(coordMetaData);
+		memberInfoPose.SetGetterFunction<BaseAnimatedComponent, umath::ScaledTransform,
+		  static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, umath::ScaledTransform &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, umath::ScaledTransform &outValue) {
+			  auto *pose = component.GetBonePose(memberInfo.userIndex);
+			  if(!pose) {
+				  outValue = {};
+				  return;
+			  }
+			  outValue = *pose;
+		  })>();
+		memberInfoPose.SetSetterFunction<BaseAnimatedComponent, umath::ScaledTransform,
+		  static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, const umath::ScaledTransform &)>(
+		    [](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, const umath::ScaledTransform &value) { component.SetBonePose(memberInfo.userIndex, value); })>();
 
 		auto memberInfoPos = pragma::ComponentMemberInfo::CreateDummy();
 		memberInfoPos.SetName("bone/" + lname + "/position");
 		memberInfoPos.type = ents::EntityMemberType::Vector3;
-		memberInfoPos.userIndex = bone->ID;
+		memberInfoPos.userIndex = bone.ID;
+		memberInfoPos.AddTypeMetaData(coordMetaData);
+		memberInfoPos.AddTypeMetaData(poseMetaData);
 		memberInfoPos.SetGetterFunction<BaseAnimatedComponent, Vector3, static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, Vector3 &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, Vector3 &outValue) {
 			auto *pos = component.GetBonePosition(memberInfo.userIndex);
 			if(!pos) {
@@ -236,6 +267,9 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		auto memberInfoRot = memberInfoPos;
 		memberInfoRot.SetName("bone/" + lname + "/rotation");
 		memberInfoRot.type = ents::EntityMemberType::Quaternion;
+		memberInfoRot.userIndex = bone.ID;
+		memberInfoRot.AddTypeMetaData(coordMetaData);
+		memberInfoRot.AddTypeMetaData(poseMetaData);
 		memberInfoRot.SetGetterFunction<BaseAnimatedComponent, Quat, static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, Quat &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, Quat &outValue) {
 			auto *rot = component.GetBoneRotation(memberInfo.userIndex);
 			if(!rot) {
@@ -249,6 +283,9 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 
 		auto memberInfoScale = memberInfoPos;
 		memberInfoScale.SetName("bone/" + lname + "/scale");
+		memberInfoScale.userIndex = bone.ID;
+		memberInfoScale.AddTypeMetaData(coordMetaData);
+		memberInfoScale.AddTypeMetaData(poseMetaData);
 		memberInfoScale.SetGetterFunction<BaseAnimatedComponent, Vector3, static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, Vector3 &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, Vector3 &outValue) {
 			auto *scale = component.GetBoneScale(memberInfo.userIndex);
 			if(!scale) {
@@ -263,7 +300,12 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		RegisterMember(std::move(memberInfoPos));
 		RegisterMember(std::move(memberInfoRot));
 		RegisterMember(std::move(memberInfoScale));
-	}
+
+		for(auto &pair : bone.children)
+			fAddBone(*pair.second, posePathName);
+	};
+	for(auto &pair : skeleton.GetRootBones())
+		fAddBone(*pair.second, "");
 }
 
 CallbackHandle BaseAnimatedComponent::BindAnimationEvent(AnimationEvent::Type eventId, const std::function<void(std::reference_wrapper<const AnimationEvent>)> &fCallback)

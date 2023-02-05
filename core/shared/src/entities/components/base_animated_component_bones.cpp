@@ -120,6 +120,12 @@ const Quat *BaseAnimatedComponent::GetBoneRotation(UInt32 boneId) const
 		return nullptr;
 	return &m_bones[boneId].GetRotation();
 }
+const umath::ScaledTransform *BaseAnimatedComponent::GetBonePose(UInt32 boneId) const
+{
+	if(boneId >= m_bones.size())
+		return nullptr;
+	return &m_bones[boneId];
+}
 // See also lanimation.cpp
 Bool BaseAnimatedComponent::GetLocalBonePosition(UInt32 boneId, Vector3 &pos, Quat &rot, Vector3 *scale) const
 {
@@ -238,6 +244,16 @@ void BaseAnimatedComponent::SetBoneRotation(UInt32 boneId, const Quat &rot)
 	umath::set_flag(m_stateFlags, StateFlags::AbsolutePosesDirty);
 
 	CEOnBoneTransformChanged evData {boneId, nullptr, &rot, nullptr};
+	InvokeEventCallbacks(EVENT_ON_BONE_TRANSFORM_CHANGED, evData);
+}
+void BaseAnimatedComponent::SetBonePose(UInt32 boneId, const umath::ScaledTransform &pose)
+{
+	if(boneId >= m_bones.size())
+		return;
+	m_bones[boneId] = pose;
+	umath::set_flag(m_stateFlags, StateFlags::AbsolutePosesDirty);
+
+	CEOnBoneTransformChanged evData {boneId, &pose.GetOrigin(), &pose.GetRotation(), nullptr};
 	InvokeEventCallbacks(EVENT_ON_BONE_TRANSFORM_CHANGED, evData);
 }
 

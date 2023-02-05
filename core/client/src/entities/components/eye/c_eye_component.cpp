@@ -36,27 +36,13 @@ void CEyeComponent::RegisterMembers(pragma::EntityComponentManager &componentMan
 	using T = CEyeComponent;
 
 	{
+		auto coordMetaData = std::make_shared<ents::CoordinateTypeMetaData>();
+		coordMetaData->space = umath::CoordinateSpace::Local;
+
 		using TViewTarget = Vector3;
 		auto memberInfo = create_component_member_info<T, TViewTarget, static_cast<void (T::*)(const Vector3 &)>(&T::SetViewTarget), [](const ComponentMemberInfo &, T &c, TViewTarget &value) { value = c.m_viewTarget; }>("viewTarget", Vector3 {});
 		memberInfo.SetFlag(pragma::ComponentMemberFlags::ObjectSpace);
-		registerMember(std::move(memberInfo));
-	}
-
-	{
-		using TViewTarget = Vector3;
-		auto memberInfo = create_component_member_info<T, TViewTarget,
-		  [](const ComponentMemberInfo &, T &c, TViewTarget value) {
-			  auto pose = c.GetEntity().GetPose();
-			  value = pose.GetInverse() * value;
-			  c.m_viewTarget = value;
-		  },
-		  [](const ComponentMemberInfo &, T &c, TViewTarget &value) {
-			  auto pose = c.GetEntity().GetPose();
-			  value = pose * c.m_viewTarget;
-		  }>("viewTargetWs", Vector3 {});
-		memberInfo.SetFlag(pragma::ComponentMemberFlags::HideInInterface | pragma::ComponentMemberFlags::Controller);
-		auto &meta = memberInfo.AddMetaData();
-		meta["controllerTarget"] = "ec/eye/viewTarget";
+		memberInfo.AddTypeMetaData(coordMetaData);
 		registerMember(std::move(memberInfo));
 	}
 

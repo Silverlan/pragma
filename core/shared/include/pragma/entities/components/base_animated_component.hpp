@@ -128,11 +128,13 @@ namespace pragma {
 		const Vector3 *GetBonePosition(UInt32 boneId) const;
 		// Returns the bone rotation in bone space, or null if the bone doesn't exist.
 		const Quat *GetBoneRotation(UInt32 boneId) const;
+		const umath::ScaledTransform *GetBonePose(UInt32 boneId) const;
 		void SetBonePosition(UInt32 boneId, const Vector3 &pos, const Quat &rot, const Vector3 &scale);
 		void SetBonePosition(UInt32 boneId, const Vector3 &pos, const Quat &rot);
 		void SetBonePosition(UInt32 boneId, const Vector3 &pos, const EulerAngles &ang);
 		void SetBonePosition(UInt32 boneId, const Vector3 &pos);
 		void SetBoneRotation(UInt32 boneId, const Quat &rot);
+		void SetBonePose(UInt32 boneId, const umath::ScaledTransform &pose);
 		void SetLocalBonePosition(UInt32 boneId, const Vector3 &pos, const Quat &rot, const Vector3 &scale);
 		void SetLocalBonePosition(UInt32 boneId, const Vector3 &pos, const Quat &rot);
 		void SetLocalBonePosition(UInt32 boneId, const Vector3 &pos);

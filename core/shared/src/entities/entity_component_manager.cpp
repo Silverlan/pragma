@@ -54,9 +54,7 @@ ComponentMemberInfo &ComponentMemberInfo::operator=(const ComponentMemberInfo &o
 	m_nameHash = other.m_nameHash;
 	m_specializationType = other.m_specializationType;
 	m_customSpecializationType = other.m_customSpecializationType ? std::make_unique<std::string>(*other.m_customSpecializationType) : nullptr;
-	m_min = other.m_min;
-	m_max = other.m_max;
-	m_stepSize = other.m_stepSize;
+	m_typeMetaData = other.m_typeMetaData;
 	m_metaData = other.m_metaData;
 	m_flags = other.m_flags;
 	m_enumConverter = other.m_enumConverter ? std::make_unique<EnumConverter>(*other.m_enumConverter) : nullptr;
@@ -84,9 +82,36 @@ void ComponentMemberInfo::SetSpecializationType(std::string customType)
 	m_specializationType = AttributeSpecializationType::Custom;
 	m_customSpecializationType = std::make_unique<std::string>(customType);
 }
-void ComponentMemberInfo::SetMin(float min) { m_min = min; }
-void ComponentMemberInfo::SetMax(float max) { m_max = max; }
-void ComponentMemberInfo::SetStepSize(float stepSize) { m_stepSize = stepSize; }
+void ComponentMemberInfo::SetMin(float min)
+{
+	auto &metaData = AddTypeMetaData<ents::RangeTypeMetaData>();
+	metaData.min = min;
+}
+void ComponentMemberInfo::SetMax(float max)
+{
+	auto &metaData = AddTypeMetaData<ents::RangeTypeMetaData>();
+	metaData.max = max;
+}
+void ComponentMemberInfo::SetStepSize(float stepSize)
+{
+	auto &metaData = AddTypeMetaData<ents::RangeTypeMetaData>();
+	metaData.stepSize = stepSize;
+}
+std::optional<float> ComponentMemberInfo::GetMin() const
+{
+	auto *metaData = FindTypeMetaData<ents::RangeTypeMetaData>();
+	return metaData ? metaData->min : std::optional<float> {};
+}
+std::optional<float> ComponentMemberInfo::GetMax() const
+{
+	auto *metaData = FindTypeMetaData<ents::RangeTypeMetaData>();
+	return metaData ? metaData->max : std::optional<float> {};
+}
+std::optional<float> ComponentMemberInfo::GetStepSize() const
+{
+	auto *metaData = FindTypeMetaData<ents::RangeTypeMetaData>();
+	return metaData ? metaData->stepSize : std::optional<float> {};
+}
 udm::Property &ComponentMemberInfo::AddMetaData()
 {
 	auto prop = udm::Property::Create(udm::Type::Element);
@@ -95,6 +120,12 @@ udm::Property &ComponentMemberInfo::AddMetaData()
 }
 void ComponentMemberInfo::AddMetaData(const udm::PProperty &prop) { m_metaData = prop; }
 const udm::PProperty &ComponentMemberInfo::GetMetaData() const { return m_metaData; }
+void ComponentMemberInfo::AddTypeMetaData(const std::shared_ptr<ents::TypeMetaData> &typeMetaData) { m_typeMetaData.push_back(typeMetaData); }
+const ents::TypeMetaData *ComponentMemberInfo::FindTypeMetaData(std::type_index typeId) const
+{
+	auto it = std::find_if(m_typeMetaData.begin(), m_typeMetaData.end(), [typeId](const std::shared_ptr<ents::TypeMetaData> &typeMetaData) { return typeId == typeid(*typeMetaData); });
+	return (it != m_typeMetaData.end()) ? it->get() : nullptr;
+}
 void ComponentMemberInfo::SetEnum(const EnumConverter::NameToEnumFunction &nameToEnum, const EnumConverter::EnumToNameFunction &enumToName, const EnumConverter::EnumValueGetFunction &getValues) { m_enumConverter = std::make_unique<EnumConverter>(nameToEnum, enumToName, getValues); }
 bool ComponentMemberInfo::IsEnum() const { return m_enumConverter != nullptr; }
 std::optional<int64_t> ComponentMemberInfo::EnumNameToValue(const std::string &name) const

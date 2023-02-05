@@ -38,6 +38,32 @@
 
 extern DLLNETWORK Engine *engine;
 
+enum class TypeMetaData : uint32_t { Range = 0, Coordinate, Pose };
+std::optional<std::type_index> type_meta_data_to_type_index(TypeMetaData eType)
+{
+	switch(eType) {
+	case TypeMetaData::Range:
+		return typeid(pragma::ents::RangeTypeMetaData);
+	case TypeMetaData::Coordinate:
+		return typeid(pragma::ents::CoordinateTypeMetaData);
+	case TypeMetaData::Pose:
+		return typeid(pragma::ents::PoseTypeMetaData);
+	}
+	return {};
+}
+luabind::object meta_data_type_to_lua_object(lua_State *l, const pragma::ents::TypeMetaData &metaData, TypeMetaData eType)
+{
+	switch(eType) {
+	case TypeMetaData::Range:
+		return luabind::object {l, static_cast<const pragma::ents::RangeTypeMetaData *>(&metaData)};
+	case TypeMetaData::Coordinate:
+		return luabind::object {l, static_cast<const pragma::ents::CoordinateTypeMetaData *>(&metaData)};
+	case TypeMetaData::Pose:
+		return luabind::object {l, static_cast<const pragma::ents::PoseTypeMetaData *>(&metaData)};
+	}
+	return Lua::nil;
+}
+
 //void test_lua_policies(lua_State *l);
 void Lua::ents::register_library(lua_State *l)
 {
@@ -239,6 +265,28 @@ void Lua::ents::register_library(lua_State *l)
 	  });
 
 	auto memberInfoDef = luabind::class_<pragma::ComponentMemberInfo>("MemberInfo");
+	memberInfoDef.add_static_constant("TYPE_META_DATA_RANGE", umath::to_integral(TypeMetaData::Range));
+	memberInfoDef.add_static_constant("TYPE_META_DATA_COORDINATE", umath::to_integral(TypeMetaData::Coordinate));
+	memberInfoDef.add_static_constant("TYPE_META_DATA_POSE", umath::to_integral(TypeMetaData::Pose));
+
+	auto typeMetaDataDef = luabind::class_<pragma::ents::TypeMetaData>("TypeMetaData");
+	memberInfoDef.scope[typeMetaDataDef];
+
+	auto rangeTypeMetaDataDef = luabind::class_<pragma::ents::RangeTypeMetaData, pragma::ents::TypeMetaData>("RangeTypeMetaData");
+	rangeTypeMetaDataDef.def_readonly("min", &pragma::ents::RangeTypeMetaData::min);
+	rangeTypeMetaDataDef.def_readonly("max", &pragma::ents::RangeTypeMetaData::max);
+	rangeTypeMetaDataDef.def_readonly("stepSize", &pragma::ents::RangeTypeMetaData::stepSize);
+	memberInfoDef.scope[rangeTypeMetaDataDef];
+
+	auto coordinateTypeMetaDataDef = luabind::class_<pragma::ents::CoordinateTypeMetaData, pragma::ents::TypeMetaData>("CoordinateTypeMetaData");
+	coordinateTypeMetaDataDef.def_readonly("space", &pragma::ents::CoordinateTypeMetaData::space);
+	coordinateTypeMetaDataDef.def_readonly("parentProperty", &pragma::ents::CoordinateTypeMetaData::parentProperty);
+	memberInfoDef.scope[coordinateTypeMetaDataDef];
+
+	auto poseTypeMetaDataDef = luabind::class_<pragma::ents::PoseTypeMetaData, pragma::ents::TypeMetaData>("PoseTypeMetaData");
+	poseTypeMetaDataDef.def_readonly("poseProperty", &pragma::ents::PoseTypeMetaData::poseProperty);
+	memberInfoDef.scope[poseTypeMetaDataDef];
+
 	memberInfoDef.add_static_constant("FLAG_NONE", umath::to_integral(pragma::ComponentMemberFlags::None));
 	memberInfoDef.add_static_constant("FLAG_HIDE_IN_INTERFACE_BIT", umath::to_integral(pragma::ComponentMemberFlags::HideInInterface));
 	memberInfoDef.add_static_constant("FLAG_CONTROLLER_BIT", umath::to_integral(pragma::ComponentMemberFlags::Controller));
@@ -276,7 +324,16 @@ void Lua::ents::register_library(lua_State *l)
 	memberInfoDef.def("HasFlag", &pragma::ComponentMemberInfo::HasFlag);
 	memberInfoDef.def("SetFlag", &pragma::ComponentMemberInfo::SetFlag);
 	memberInfoDef.def("SetFlag", &pragma::ComponentMemberInfo::SetFlag, luabind::default_parameter_policy<3, true> {});
-
+	memberInfoDef.def(
+	  "FindTypeMetaData", +[](lua_State *l, const pragma::ComponentMemberInfo &info, TypeMetaData eType) -> luabind::object {
+		  auto idx = type_meta_data_to_type_index(eType);
+		  if(!idx)
+			  return Lua::nil;
+		  auto *metaData = info.FindTypeMetaData(*idx);
+		  if(!metaData)
+			  return Lua::nil;
+		  return meta_data_type_to_lua_object(l, *metaData, eType);
+	  });
 	memberInfoDef.def("IsEnum", &pragma::ComponentMemberInfo::IsEnum);
 	memberInfoDef.def("ValueToEnumName", &pragma::ComponentMemberInfo::ValueToEnumName);
 	memberInfoDef.def("EnumNameToValue", &pragma::ComponentMemberInfo::EnumNameToValue);

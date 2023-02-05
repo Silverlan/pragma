@@ -12,6 +12,7 @@
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_observable_component.hpp"
 #include "pragma/entities/components/panima_component.hpp"
+#include "pragma/entities/components/component_member_flags.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/lua/luacallback.h"
@@ -35,17 +36,34 @@ void BaseTransformComponent::RegisterMembers(pragma::EntityComponentManager &com
 {
 	using T = BaseTransformComponent;
 
+	using TPose = umath::ScaledTransform;
+	constexpr auto *posePathName = "pose";
+	auto memberInfoPose = create_component_member_info<T, TPose, static_cast<void (T::*)(const TPose &)>(&T::SetPose), static_cast<const TPose &(T::*)() const>(&T::GetPose)>(posePathName, TPose {});
+	memberInfoPose.SetFlag(pragma::ComponentMemberFlags::HideInInterface);
+	registerMember(std::move(memberInfoPose));
+
+	auto poseMetaData = std::make_shared<ents::PoseTypeMetaData>();
+	poseMetaData->poseProperty = posePathName;
+
 	using TPosition = Vector3;
-	registerMember(create_component_member_info<T, TPosition, static_cast<void (T::*)(const TPosition &)>(&T::SetPosition), static_cast<const TPosition &(T::*)() const>(&T::GetPosition)>("position", TPosition {}));
+	auto memberInfoPos = create_component_member_info<T, TPosition, static_cast<void (T::*)(const TPosition &)>(&T::SetPosition), static_cast<const TPosition &(T::*)() const>(&T::GetPosition)>("position", TPosition {});
+	memberInfoPos.AddTypeMetaData(poseMetaData);
+	registerMember(std::move(memberInfoPos));
 
 	using TRotation = Quat;
-	registerMember(create_component_member_info<T, TRotation, static_cast<void (T::*)(const TRotation &)>(&T::SetRotation), static_cast<const TRotation &(T::*)() const>(&T::GetRotation)>("rotation", uquat::identity()));
+	auto memberInfoRot = create_component_member_info<T, TRotation, static_cast<void (T::*)(const TRotation &)>(&T::SetRotation), static_cast<const TRotation &(T::*)() const>(&T::GetRotation)>("rotation", uquat::identity());
+	memberInfoRot.AddTypeMetaData(poseMetaData);
+	registerMember(std::move(memberInfoRot));
 
 	using TAngles = EulerAngles;
-	registerMember(create_component_member_info<T, TAngles, static_cast<void (T::*)(const TAngles &)>(&T::SetAngles), static_cast<TAngles (T::*)() const>(&T::GetAngles)>("angles", TAngles {}));
+	auto memberInfoAng = create_component_member_info<T, TAngles, static_cast<void (T::*)(const TAngles &)>(&T::SetAngles), static_cast<TAngles (T::*)() const>(&T::GetAngles)>("angles", TAngles {});
+	memberInfoAng.AddTypeMetaData(poseMetaData);
+	registerMember(std::move(memberInfoAng));
 
 	using TScale = Vector3;
-	registerMember(create_component_member_info<T, TScale, static_cast<void (T::*)(const TScale &)>(&T::SetScale), static_cast<const TScale &(T::*)() const>(&T::GetScale)>("scale", TScale {1.f, 1.f, 1.f}));
+	auto memberInfoScale = create_component_member_info<T, TScale, static_cast<void (T::*)(const TScale &)>(&T::SetScale), static_cast<const TScale &(T::*)() const>(&T::GetScale)>("scale", TScale {1.f, 1.f, 1.f});
+	memberInfoScale.AddTypeMetaData(poseMetaData);
+	registerMember(std::move(memberInfoScale));
 }
 BaseTransformComponent::BaseTransformComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BaseTransformComponent::Initialize()

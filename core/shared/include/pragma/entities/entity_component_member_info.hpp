@@ -10,6 +10,7 @@
 #include "pragma/networkdefinitions.h"
 #include <functional>
 #include <optional>
+#include <typeindex>
 
 namespace udm {
 	enum class Type : uint8_t;
@@ -21,10 +22,29 @@ namespace udm {
 namespace pragma {
 	namespace ents {
 		enum class EntityMemberType : uint8_t;
+
+		struct TypeMetaData {
+			virtual ~TypeMetaData() = default;
+		};
+		struct RangeTypeMetaData : public TypeMetaData {
+			std::optional<float> min {};
+			std::optional<float> max {};
+			std::optional<float> stepSize {};
+		};
+
+		struct CoordinateTypeMetaData : public TypeMetaData {
+			umath::CoordinateSpace space = umath::CoordinateSpace::World;
+			std::string parentProperty;
+		};
+
+		struct PoseTypeMetaData : public TypeMetaData {
+			std::string poseProperty;
+		};
 	};
 	class BaseEntityComponent;
 	enum class AttributeSpecializationType : uint8_t;
 	enum class ComponentMemberFlags : uint32_t;
+
 	struct DLLNETWORK ComponentMemberInfo {
 		struct DLLNETWORK EnumConverter {
 			using NameToEnumFunction = std::function<std::optional<int64_t>(const std::string &)>;
@@ -115,12 +135,18 @@ namespace pragma {
 		void SetMin(float min);
 		void SetMax(float max);
 		void SetStepSize(float stepSize);
+		std::optional<float> GetMin() const;
+		std::optional<float> GetMax() const;
+		std::optional<float> GetStepSize() const;
 		udm::Property &AddMetaData();
 		void AddMetaData(const udm::PProperty &prop);
 		const udm::PProperty &GetMetaData() const;
-		std::optional<float> GetMin() const { return m_min; }
-		std::optional<float> GetMax() const { return m_max; }
-		std::optional<float> GetStepSize() const { return m_stepSize; }
+		void AddTypeMetaData(const std::shared_ptr<ents::TypeMetaData> &typeMetaData);
+		const ents::TypeMetaData *FindTypeMetaData(std::type_index typeId) const;
+		template<class T>
+		T &AddTypeMetaData();
+		template<class T>
+		const T *FindTypeMetaData() const;
 		template<typename T>
 		bool GetDefault(T &outValue) const;
 		template<typename T>
@@ -160,12 +186,30 @@ namespace pragma {
 		std::unique_ptr<std::string> m_customSpecializationType = nullptr;
 
 		udm::PProperty m_metaData = nullptr;
-		std::optional<float> m_min {};
-		std::optional<float> m_max {};
-		std::optional<float> m_stepSize {};
+		std::vector<std::shared_ptr<ents::TypeMetaData>> m_typeMetaData;
 		std::unique_ptr<void, void (*)(void *)> m_default = std::unique_ptr<void, void (*)(void *)> {nullptr, [](void *) {}};
 		std::unique_ptr<EnumConverter> m_enumConverter = nullptr;
 	};
 };
+
+template<class T>
+T &pragma::ComponentMemberInfo::AddTypeMetaData()
+{
+	auto *data = const_cast<ComponentMemberInfo *>(this)->FindTypeMetaData<T>();
+	if(data)
+		return *const_cast<T *>(data);
+	auto newData = std::shared_ptr<ents::TypeMetaData>(new T {});
+	AddTypeMetaData(newData);
+	return *static_cast<T *>(newData.get());
+}
+
+template<class T>
+const T *pragma::ComponentMemberInfo::FindTypeMetaData() const
+{
+	auto *data = FindTypeMetaData(typeid(T));
+	if(!data)
+		return nullptr;
+	return static_cast<const T *>(data);
+}
 
 #endif

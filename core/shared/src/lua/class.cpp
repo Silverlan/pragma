@@ -1382,8 +1382,8 @@ void Game::RegisterLuaClasses()
 	auto &modMath = m_lua->RegisterLibrary("math");
 
 	Lua::RegisterLibraryEnums(m_lua->GetState(), "math",
-	  {{"COORDINATE_SPACE_LOCAL", umath::to_integral(umath::CoordinateSpace::Local)}, {"COORDINATE_SPACE_WORLD", umath::to_integral(umath::CoordinateSpace::World)}, {"COORDINATE_SPACE_VIEW", umath::to_integral(umath::CoordinateSpace::View)},
-	    {"COORDINATE_SPACE_SCREEN", umath::to_integral(umath::CoordinateSpace::Screen)}});
+	  {{"COORDINATE_SPACE_LOCAL", umath::to_integral(umath::CoordinateSpace::Local)}, {"COORDINATE_SPACE_WORLD", umath::to_integral(umath::CoordinateSpace::World)}, {"COORDINATE_SPACE_OBJECT", umath::to_integral(umath::CoordinateSpace::Object)},
+	    {"COORDINATE_SPACE_VIEW", umath::to_integral(umath::CoordinateSpace::View)}, {"COORDINATE_SPACE_SCREEN", umath::to_integral(umath::CoordinateSpace::Screen)}});
 
 	auto defPlane = luabind::class_<umath::Plane>("Plane");
 	defPlane.def(luabind::constructor<Vector3, Vector3, Vector3>());

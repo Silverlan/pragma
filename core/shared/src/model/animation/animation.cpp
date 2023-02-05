@@ -310,7 +310,7 @@ bool pragma::animation::Animation::LoadFromAssetData(const udm::AssetData &data,
 			uint16_t nodeId = 0;
 			udmChannel["node"](nodeId);
 			if(nodeId >= nodeToLocalBoneId.size()) {
-				spdlog::warn("WARNING: Node {} of animation UDM channel exceeds number of bones ({})! Ignoring...", nodeId, nodeToLocalBoneId.size());
+				spdlog::debug("WARNING: Node {} of animation UDM channel exceeds number of bones ({})! Ignoring...", nodeId, nodeToLocalBoneId.size());
 				continue;
 			}
 			auto localBoneId = nodeToLocalBoneId[nodeId];

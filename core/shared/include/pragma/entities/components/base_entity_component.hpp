@@ -98,6 +98,10 @@ namespace pragma {
 
 		std::optional<ComponentMemberIndex> GetMemberIndex(const std::string &name) const;
 		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const;
+		bool GetTransformMemberPos(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &outPos) const;
+		bool GetTransformMemberRot(ComponentMemberIndex idx, umath::CoordinateSpace space, Quat &outRot) const;
+		bool GetTransformMemberScale(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &outScale) const;
+		bool GetTransformMemberPose(ComponentMemberIndex idx, umath::CoordinateSpace space, umath::ScaledTransform &outPose) const;
 		virtual uint32_t GetStaticMemberCount() const;
 
 		const ComponentInfo *GetComponentInfo() const;

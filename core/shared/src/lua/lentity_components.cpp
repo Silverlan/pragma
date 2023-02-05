@@ -210,6 +210,8 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	classDefCompRef.def(luabind::constructor<const std::string &, const std::string &>());
 	classDefCompRef.def(luabind::constructor<const BaseEntity &, pragma::ComponentId>());
 	classDefCompRef.def("GetComponent", static_cast<pragma::BaseEntityComponent *(pragma::EntityUComponentRef::*)(Game &)>(&pragma::EntityUComponentRef::GetComponent));
+	classDefCompRef.def("GetComponentId", &pragma::EntityUComponentMemberRef::GetComponentId);
+	classDefCompRef.def("GetComponentName", &pragma::EntityUComponentMemberRef::GetComponentName);
 	classDefCompRef.def(
 	  "__tostring", +[](Game &game, const pragma::EntityUComponentRef &ref) -> std::string {
 		  std::stringstream ss;
@@ -235,6 +237,32 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	classDefMemRef.def(luabind::constructor<const BaseEntity &, const std::string &, const std::string &>());
 	classDefMemRef.def(luabind::constructor<const std::string &>());
 	classDefMemRef.def("GetMemberInfo", &pragma::EntityUComponentMemberRef::GetMemberInfo);
+	classDefMemRef.def(
+	  "GetMemberIndex", +[](Game &game, const pragma::EntityUComponentMemberRef &ref) -> std::optional<pragma::ComponentMemberIndex> {
+		  if(ref.GetMemberIndex() == pragma::INVALID_COMPONENT_ID)
+			  ref.GetMemberInfo(game);
+		  auto idx = ref.GetMemberIndex();
+		  return (idx != pragma::INVALID_COMPONENT_ID) ? idx : std::optional<pragma::ComponentMemberIndex> {};
+	  });
+	classDefMemRef.def(
+	  "GetMemberName", +[](Game &game, const pragma::EntityUComponentMemberRef &ref) -> std::optional<std::string> {
+		  if(ref.GetMemberIndex() == pragma::INVALID_COMPONENT_ID)
+			  ref.GetMemberInfo(game);
+		  auto name = ref.GetMemberName();
+		  return !name.empty() ? name : std::optional<std::string> {};
+	  });
+	classDefMemRef.def(
+	  "GetPath", +[](Game &game, const pragma::EntityUComponentMemberRef &ref) -> std::optional<std::string> {
+		  auto *componentName = ref.GetComponentName();
+		  auto &memberName = ref.GetMemberName();
+		  if(!componentName || memberName.empty())
+			  return {};
+		  std::string name = "pragma:game/entity/ec/" + *componentName + "/" + memberName;
+		  auto uuid = ref.GetUuid();
+		  if(uuid.has_value())
+			  name += "?entity_uuid=" + util::uuid_to_string(*uuid);
+		  return name;
+	  });
 	classDefMemRef.def(
 	  "GetValue", +[](lua_State *l, Game &game, const pragma::EntityUComponentMemberRef &ref) {
 		  auto *c = ref.GetComponent(game);

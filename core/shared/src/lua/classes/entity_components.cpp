@@ -420,6 +420,13 @@ bool pragma::lua::set_member_value(lua_State *l, pragma::BaseEntityComponent &co
 	memberInfo.setterFunction(memberInfo, component, &eref);
 	return true;
 }
+bool pragma::lua::set_member_value(lua_State *l, pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo, const pragma::EntityUComponentMemberRef &eref)
+{
+	if(memberInfo.type != pragma::ents::EntityMemberType::ComponentProperty)
+		return false;
+	memberInfo.setterFunction(memberInfo, component, &eref);
+	return true;
+}
 static void get_dynamic_member_ids(pragma::BaseEntityComponent &c, std::vector<pragma::ComponentMemberIndex> &memberIndices)
 {
 	auto *reg = dynamic_cast<pragma::DynamicMemberRegister *>(&c);
@@ -569,6 +576,7 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	entityComponentDef.def("SetMemberValue", static_cast<bool (*)(lua_State *, pragma::BaseEntityComponent &, const pragma::ComponentMemberInfo &, Lua::udm_type)>(&set_member_value));
 	entityComponentDef.def("SetMemberValue", static_cast<bool (*)(lua_State *, pragma::BaseEntityComponent &, const pragma::ComponentMemberInfo &, const pragma::EntityURef &)>(&set_member_value));
 	entityComponentDef.def("SetMemberValue", static_cast<bool (*)(lua_State *, pragma::BaseEntityComponent &, const pragma::ComponentMemberInfo &, const pragma::MultiEntityURef &)>(&set_member_value));
+	entityComponentDef.def("SetMemberValue", static_cast<bool (*)(lua_State *, pragma::BaseEntityComponent &, const pragma::ComponentMemberInfo &, const pragma::EntityUComponentMemberRef &)>(&set_member_value));
 	entityComponentDef.def(
 	  "SetMemberValue", +[](lua_State *l, pragma::BaseEntityComponent &component, uint32_t memberIndex, Lua::udm_type value) -> bool {
 		  auto *info = component.GetMemberInfo(memberIndex);
@@ -592,6 +600,13 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	  });
 	entityComponentDef.def(
 	  "SetMemberValue", +[](lua_State *l, pragma::BaseEntityComponent &component, const std::string &memberName, const pragma::MultiEntityURef &eref) -> bool {
+		  auto *info = component.FindMemberInfo(memberName);
+		  if(!info)
+			  return false;
+		  return pragma::lua::set_member_value(l, component, *info, eref);
+	  });
+	entityComponentDef.def(
+	  "SetMemberValue", +[](lua_State *l, pragma::BaseEntityComponent &component, const std::string &memberName, const pragma::EntityUComponentMemberRef &eref) -> bool {
 		  auto *info = component.FindMemberInfo(memberName);
 		  if(!info)
 			  return false;

@@ -70,6 +70,8 @@ namespace pragma {
 		EntityUComponentMemberRef(const EntityUComponentMemberRef &) = default;
 		EntityUComponentMemberRef(const std::string &path);
 		const ComponentMemberInfo *GetMemberInfo(Game &game) const;
+		pragma::ComponentMemberIndex GetMemberIndex() const;
+		const std::string &GetMemberName() const;
 
 		EntityUComponentMemberRef &operator=(const EntityUComponentMemberRef &) = default;
 		ComponentMemberReference &operator*() { return m_memberRef; }

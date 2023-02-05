@@ -152,6 +152,8 @@ const ComponentMemberInfo *EntityUComponentMemberRef::GetMemberInfo(Game &game) 
 		return nullptr;
 	return m_memberRef.GetMemberInfo(*c);
 }
+pragma::ComponentMemberIndex EntityUComponentMemberRef::GetMemberIndex() const { return m_memberRef.GetMemberIndex(); }
+const std::string &EntityUComponentMemberRef::GetMemberName() const { return m_memberRef.GetMemberName(); }
 
 bool EntityUComponentMemberRef::HasMemberReference() const { return !m_memberRef.GetMemberName().empty(); }
 

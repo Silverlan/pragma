@@ -297,6 +297,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		memberInfoScale.SetSetterFunction<BaseAnimatedComponent, Vector3,
 		  static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, const Vector3 &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, const Vector3 &value) { component.SetBoneScale(memberInfo.userIndex, value); })>();
 
+		RegisterMember(std::move(memberInfoPose));
 		RegisterMember(std::move(memberInfoPos));
 		RegisterMember(std::move(memberInfoRot));
 		RegisterMember(std::move(memberInfoScale));

@@ -253,11 +253,12 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	  });
 	classDefMemRef.def(
 	  "GetPath", +[](Game &game, const pragma::EntityUComponentMemberRef &ref) -> std::optional<std::string> {
-		  auto *componentName = ref.GetComponentName();
+		  auto *c = ref.GetComponent(game);
+		  auto *cInfo = c ? c->GetComponentInfo() : nullptr;
 		  auto &memberName = ref.GetMemberName();
-		  if(!componentName || memberName.empty())
+		  if(!cInfo || memberName.empty())
 			  return {};
-		  std::string name = "pragma:game/entity/ec/" + *componentName + "/" + memberName;
+		  std::string name = "pragma:game/entity/ec/" + cInfo->name + "/" + memberName;
 		  auto uuid = ref.GetUuid();
 		  if(uuid.has_value())
 			  name += "?entity_uuid=" + util::uuid_to_string(*uuid);

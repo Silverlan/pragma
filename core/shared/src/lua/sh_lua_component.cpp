@@ -70,7 +70,7 @@ static std::string get_member_variable_name(const std::string &funcName)
 }
 static std::any string_to_any(Game &game, const std::string &value, util::VarType type)
 {
-	static_assert(umath::to_integral(util::VarType::Count) == 21);
+	static_assert(umath::to_integral(util::VarType::Count) == 23);
 	switch(type) {
 	case util::VarType::Bool:
 		return static_cast<bool>(util::to_boolean(value));
@@ -124,6 +124,9 @@ static std::any string_to_any(Game &game, const std::string &value, util::VarTyp
 			ustring::string_to_array<Float, Double>(value, reinterpret_cast<float *>(&r), atof, 4);
 			return r;
 		}
+	case util::VarType::Transform:
+	case util::VarType::ScaledTransform:
+		return {}; // Not yet supported
 	}
 	return {};
 }

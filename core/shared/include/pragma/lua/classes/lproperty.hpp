@@ -19,6 +19,7 @@
 #include <sharedutils/property/util_property_quat.hpp>
 #include <sharedutils/property/util_property_matrix.hpp>
 #include <sharedutils/property/util_property_euler_angles.hpp>
+#include <sharedutils/property/util_property_transform.hpp>
 
 #define DEFINE_LUA_NUMBER_PROPERTY(TYPE, UNDERLYING_TYPE)                                                                                                                                                                                                                                        \
 	using L##TYPE##Property = TLNumberPropertyWrapper<util::TYPE##Property, UNDERLYING_TYPE>;                                                                                                                                                                                                    \
@@ -171,6 +172,53 @@ class LEulerAnglesPropertyWrapper : public LSimplePropertyWrapper<util::EulerAng
 	}
 };
 using LEulerAnglesProperty = LEulerAnglesPropertyWrapper;
+
+// Transform
+class LTransformPropertyWrapper : public LSimplePropertyWrapper<util::TransformProperty, umath::Transform> {
+  public:
+	using LSimplePropertyWrapper<util::TransformProperty, umath::Transform>::LSimplePropertyWrapper;
+	using LSimplePropertyWrapper<util::TransformProperty, umath::Transform>::operator*;
+	using LSimplePropertyWrapper<util::TransformProperty, umath::Transform>::operator->;
+	virtual util::TransformProperty &GetProperty() const override { return *static_cast<util::TransformProperty *>(prop.get()); }
+
+	LTransformPropertyWrapper() : LSimplePropertyWrapper() {}
+	LTransformPropertyWrapper(const umath::Transform &col) : LSimplePropertyWrapper(col) {}
+	LTransformPropertyWrapper(const Vector3 &pos, const Quat &rot) : LSimplePropertyWrapper(umath::Transform {pos, rot}) {}
+	LTransformPropertyWrapper operator*(const umath::Transform &other)
+	{
+		GetProperty() *= other;
+		return *this;
+	}
+	LTransformPropertyWrapper operator*(const LTransformPropertyWrapper &propOther)
+	{
+		GetProperty() *= *propOther;
+		return *this;
+	}
+};
+using LTransformProperty = LTransformPropertyWrapper;
+
+class LScaledTransformPropertyWrapper : public LSimplePropertyWrapper<util::ScaledTransformProperty, umath::ScaledTransform> {
+  public:
+	using LSimplePropertyWrapper<util::ScaledTransformProperty, umath::ScaledTransform>::LSimplePropertyWrapper;
+	using LSimplePropertyWrapper<util::ScaledTransformProperty, umath::ScaledTransform>::operator*;
+	using LSimplePropertyWrapper<util::ScaledTransformProperty, umath::ScaledTransform>::operator->;
+	virtual util::ScaledTransformProperty &GetProperty() const override { return *static_cast<util::ScaledTransformProperty *>(prop.get()); }
+
+	LScaledTransformPropertyWrapper() : LSimplePropertyWrapper() {}
+	LScaledTransformPropertyWrapper(const umath::ScaledTransform &col) : LSimplePropertyWrapper(col) {}
+	LScaledTransformPropertyWrapper(const Vector3 &pos, const Quat &rot, const Vector3 &scale) : LSimplePropertyWrapper(umath::ScaledTransform {pos, rot, scale}) {}
+	LScaledTransformPropertyWrapper operator*(const umath::ScaledTransform &other)
+	{
+		GetProperty() *= other;
+		return *this;
+	}
+	LScaledTransformPropertyWrapper operator*(const LScaledTransformPropertyWrapper &propOther)
+	{
+		GetProperty() *= *propOther;
+		return *this;
+	}
+};
+using LScaledTransformProperty = LScaledTransformPropertyWrapper;
 
 template<class TProperty, typename T>
 class TLVectorPropertyWrapper : public LSimplePropertyWrapper<TProperty, T> {

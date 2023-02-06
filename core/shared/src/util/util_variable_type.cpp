@@ -59,10 +59,14 @@ std::string util::variable_type_to_string(VarType type)
 		return "Entity";
 	case VarType::Quaternion:
 		return "Quaternion";
+	case VarType::Transform:
+		return "Transform";
+	case VarType::ScaledTransform:
+		return "ScaledTransform";
 	case VarType::Count:
 		return "Count";
 	}
-	static_assert(umath::to_integral(VarType::Count) == 21);
+	static_assert(umath::to_integral(VarType::Count) == 23);
 	return "Unknown";
 }
 
@@ -197,6 +201,8 @@ static TGenericUserClassHandler<Vector3, util::Vector3Property, LVector3Property
 static TGenericUserClassHandler<Vector2, util::Vector2Property, LVector2Property> s_vector2Handler;
 static TGenericUserClassHandler<Vector4, util::Vector4Property, LVector4Property> s_vector4Handler;
 static TGenericUserClassHandler<Quat, util::QuatProperty, LQuatProperty> s_quatHandler;
+static TGenericUserClassHandler<umath::Transform, util::TransformProperty, LTransformProperty> s_transformHandler;
+static TGenericUserClassHandler<umath::ScaledTransform, util::ScaledTransformProperty, LScaledTransformProperty> s_scaledTransformHandler;
 
 struct EntityHandler : public IAnyHandler {
 	virtual std::any GetValue(lua_State *l, int32_t idx) const override
@@ -275,9 +281,6 @@ struct EntityHandler : public IAnyHandler {
 	}
 } static s_entityHandler;
 
-// If this assert fails, it means a new variable type as been added to the enum list which hasn't been included in this list yet
-static_assert(umath::to_integral(util::VarType::Count) == 21u);
-
 struct NilHandler : public IAnyHandler {
 	virtual std::any GetValue(lua_State *l, int32_t idx) const override { return {}; }
 	virtual void Push(lua_State *l, const std::any &value) const override { Lua::PushNil(l); }
@@ -290,6 +293,8 @@ struct NilHandler : public IAnyHandler {
 	virtual void Read(NetPacket &ds, std::any &outValue) const override { outValue = {}; }
 } static s_nilHandler;
 
+// If this assert fails, it means a new variable type as been added to the enum list which hasn't been included in this list yet
+static_assert(umath::to_integral(util::VarType::Count) == 23u);
 static constexpr const IAnyHandler &get_any_handler(util::VarType varType)
 {
 	switch(varType) {
@@ -333,6 +338,10 @@ static constexpr const IAnyHandler &get_any_handler(util::VarType varType)
 		return s_entityHandler;
 	case util::VarType::Quaternion:
 		return s_quatHandler;
+	case util::VarType::Transform:
+		return s_transformHandler;
+	case util::VarType::ScaledTransform:
+		return s_scaledTransformHandler;
 	}
 	return s_nilHandler;
 }

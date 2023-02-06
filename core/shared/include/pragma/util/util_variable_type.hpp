@@ -34,6 +34,8 @@ namespace util {
 		Vector4,
 		Entity,
 		Quaternion,
+		Transform,
+		ScaledTransform,
 
 		Count
 	};

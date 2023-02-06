@@ -55,6 +55,18 @@ static std::ostream &operator<<(std::ostream &str, const LEulerAnglesPropertyWra
 
 //////////
 
+static umath::Transform operator*(umath::Transform v, const LTransformPropertyWrapper &prop) { return v * prop->GetValue(); }
+static bool operator==(umath::Transform v, const LTransformPropertyWrapper &prop) { return **prop == v; }
+static std::ostream &operator<<(std::ostream &str, const LTransformPropertyWrapper &v) { return str << **v; }
+
+//////////
+
+static umath::ScaledTransform operator*(umath::ScaledTransform v, const LScaledTransformPropertyWrapper &prop) { return v * prop->GetValue(); }
+static bool operator==(umath::ScaledTransform v, const LScaledTransformPropertyWrapper &prop) { return **prop == v; }
+// static std::ostream &operator<<(std::ostream &str, const LScaledTransformPropertyWrapper &v) { return str << **v; }
+
+//////////
+
 static Quat operator*(const Quat &v, const LQuatProperty &prop) { return v * prop->GetValue(); }
 static Quat operator*(float v, const LQuatProperty &prop) { return v * prop->GetValue(); }
 static bool operator==(const Quat &v, const LQuatProperty &prop) { return **prop == v; }

@@ -65,6 +65,10 @@ namespace pragma {
 				return ents::EntityMemberType::Quaternion;
 			case util::VarType::Entity:
 				return ents::EntityMemberType::Entity;
+			case util::VarType::Transform:
+				return ents::EntityMemberType::Transform;
+			case util::VarType::ScaledTransform:
+				return ents::EntityMemberType::ScaledTransform;
 			}
 			return ents::EntityMemberType::Invalid;
 		}
@@ -107,6 +111,10 @@ namespace pragma {
 				return util::VarType::Quaternion;
 			case ents::EntityMemberType::Entity:
 				return util::VarType::Entity;
+			case ents::EntityMemberType::Transform:
+				return util::VarType::Transform;
+			case ents::EntityMemberType::ScaledTransform:
+				return util::VarType::ScaledTransform;
 			}
 			return util::VarType::Invalid;
 		}

@@ -42,6 +42,7 @@
 #include "pragma/entities/components/damageable_component.hpp"
 #include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/entities/components/ik_solver/rig_config.hpp"
+#include "pragma/entities/components/origin_component.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
@@ -556,6 +557,16 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defIkSolver.def("ResetIkRig", &pragma::IkSolverComponent::ResetIkRig);
 	defIkSolver.scope[defRigConfig];
 	entsMod[defIkSolver];
+
+	auto defOrigin = pragma::lua::create_entity_component_class<pragma::OriginComponent, pragma::BaseEntityComponent>("OriginComponent");
+	defOrigin.add_static_constant("EVENT_ON_ORIGIN_CHANGED", pragma::OriginComponent::EVENT_ON_ORIGIN_CHANGED);
+	defOrigin.def("GetOriginPose", &pragma::OriginComponent::GetOriginPose);
+	defOrigin.def("GetOriginPos", &pragma::OriginComponent::GetOriginPos);
+	defOrigin.def("GetOriginRot", &pragma::OriginComponent::GetOriginRot);
+	defOrigin.def("SetOriginPose", &pragma::OriginComponent::SetOriginPose);
+	defOrigin.def("SetOriginPos", &pragma::OriginComponent::SetOriginPos);
+	defOrigin.def("SetOriginRot", &pragma::OriginComponent::SetOriginRot);
+	entsMod[defOrigin];
 
 	auto defLogic = pragma::lua::create_entity_component_class<pragma::LogicComponent, pragma::BaseEntityComponent>("LogicComponent");
 	defLogic.add_static_constant("EVENT_ON_TICK", pragma::LogicComponent::EVENT_ON_TICK);

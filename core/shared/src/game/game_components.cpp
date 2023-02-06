@@ -20,6 +20,7 @@
 #include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/components/composite_component.hpp"
 #include "pragma/entities/components/animation_driver_component.hpp"
+#include "pragma/entities/components/origin_component.hpp"
 #include "pragma/entities/components/basegravity.h"
 
 void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
@@ -37,6 +38,7 @@ void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentM
 	componentManager.RegisterComponentType<pragma::PanimaComponent>("panima");
 	componentManager.RegisterComponentType<pragma::CompositeComponent>("composite");
 	componentManager.RegisterComponentType<pragma::AnimationDriverComponent>("animation_driver");
+	componentManager.RegisterComponentType<pragma::OriginComponent>("origin");
 
 	pragma::BaseEntityComponent::RegisterEvents(componentManager, [&componentManager](const std::string &evName, pragma::ComponentEventInfo::Type type) -> pragma::ComponentEventId { return componentManager.RegisterEvent(evName, typeid(pragma::BaseEntityComponent), type); });
 	BaseEntity::RegisterEvents(componentManager);

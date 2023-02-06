@@ -98,10 +98,17 @@ namespace pragma {
 
 		std::optional<ComponentMemberIndex> GetMemberIndex(const std::string &name) const;
 		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const;
-		bool GetTransformMemberPos(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &outPos) const;
-		bool GetTransformMemberRot(ComponentMemberIndex idx, umath::CoordinateSpace space, Quat &outRot) const;
-		bool GetTransformMemberScale(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &outScale) const;
-		bool GetTransformMemberPose(ComponentMemberIndex idx, umath::CoordinateSpace space, umath::ScaledTransform &outPose) const;
+
+		bool GetTransformMemberPos(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &outPos, bool useOriginObjectSpace = false) const;
+		bool GetTransformMemberRot(ComponentMemberIndex idx, umath::CoordinateSpace space, Quat &outRot, bool useOriginObjectSpace = false) const;
+		bool GetTransformMemberScale(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &outScale, bool useOriginObjectSpace = false) const;
+		bool GetTransformMemberPose(ComponentMemberIndex idx, umath::CoordinateSpace space, umath::ScaledTransform &outPose, bool useOriginObjectSpace = false) const;
+
+		bool SetTransformMemberPos(ComponentMemberIndex idx, umath::CoordinateSpace space, const Vector3 &pos, bool useOriginObjectSpace = false);
+		bool SetTransformMemberRot(ComponentMemberIndex idx, umath::CoordinateSpace space, const Quat &rot, bool useOriginObjectSpace = false);
+		bool SetTransformMemberScale(ComponentMemberIndex idx, umath::CoordinateSpace space, const Vector3 &scale, bool useOriginObjectSpace = false);
+		bool SetTransformMemberPose(ComponentMemberIndex idx, umath::CoordinateSpace space, const umath::ScaledTransform &pose, bool useOriginObjectSpace = false);
+
 		virtual uint32_t GetStaticMemberCount() const;
 
 		const ComponentInfo *GetComponentInfo() const;

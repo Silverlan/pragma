@@ -10,7 +10,7 @@
 #include <cinttypes>
 
 namespace pragma {
-	enum class Axis : uint8_t { X = 0u, Y, Z };
+	enum class Axis : uint8_t { X = 0u, Y, Z, Count };
 	enum class RotationOrder : uint16_t { XYZ = 0u, YXZ, XZX, XYX, YXY, YZY, ZYZ, ZXZ, XZY, YZX, ZYX, ZXY };
 };
 

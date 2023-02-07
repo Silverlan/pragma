@@ -154,6 +154,11 @@ const ComponentMemberInfo *EntityUComponentMemberRef::GetMemberInfo(Game &game) 
 }
 pragma::ComponentMemberIndex EntityUComponentMemberRef::GetMemberIndex() const { return m_memberRef.GetMemberIndex(); }
 const std::string &EntityUComponentMemberRef::GetMemberName() const { return m_memberRef.GetMemberName(); }
+void EntityUComponentMemberRef::UpdateMemberIndex(Game &game) const
+{
+	if(GetMemberIndex() == pragma::INVALID_COMPONENT_ID)
+		GetMemberInfo(game);
+}
 
 bool EntityUComponentMemberRef::HasMemberReference() const { return !m_memberRef.GetMemberName().empty(); }
 

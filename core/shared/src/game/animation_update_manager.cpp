@@ -10,7 +10,7 @@
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/entities/components/panima_component.hpp"
-#include "pragma/entities/components/constraint_manager_component.hpp"
+#include "pragma/entities/components/constraints/constraint_manager_component.hpp"
 #include "pragma/entities/components/ik_solver_component.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
@@ -51,20 +51,19 @@ void pragma::AnimationUpdateManager::UpdateAnimations(double dt)
 			auto panimaC = ent->GetComponent<pragma::PanimaComponent>();
 			if(panimaC.valid())
 				panimaC->UpdateAnimations(dt);
-
-			auto ikSolverC = ent->GetComponent<pragma::IkSolverComponent>();
-			if(ikSolverC.valid())
-				ikSolverC->Solve();
 			return nullptr;
 		});
 	}
 
 	m_threadPool.WaitForCompletion();
 
-	// Animation drivers are Lua-based and cannot be multi-threaded
+	// The remaining steps have to be executed on the main thread because
+	// they may affect arbitrary component properties or call listeners and events,
+	// which can't be guaranteed to be thread-safe in all cases.
+
 	UpdateEntityAnimationDrivers(dt);
 
-	// TODO: Move ik to constraint solver
+	// This will also update IK solvers
 	UpdateConstraints(dt);
 
 	{

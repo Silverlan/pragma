@@ -71,6 +71,7 @@ namespace pragma {
 		EntityUComponentMemberRef(const std::string &path);
 		const ComponentMemberInfo *GetMemberInfo(Game &game) const;
 		pragma::ComponentMemberIndex GetMemberIndex() const;
+		void UpdateMemberIndex(Game &game) const;
 		const std::string &GetMemberName() const;
 
 		EntityUComponentMemberRef &operator=(const EntityUComponentMemberRef &) = default;

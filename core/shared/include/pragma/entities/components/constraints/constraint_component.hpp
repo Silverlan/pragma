@@ -13,6 +13,13 @@ namespace pragma {
 	class ConstraintManagerComponent;
 	class DLLNETWORK ConstraintComponent final : public BaseEntityComponent {
 	  public:
+		struct DLLNETWORK ConstraintParticipants {
+			pragma::BaseEntityComponent *driverC;
+			pragma::BaseEntityComponent *drivenObjectC;
+			pragma::ComponentMemberIndex driverPropIdx;
+			pragma::ComponentMemberIndex drivenObjectPropIdx;
+		};
+
 		enum class CoordinateSpace : uint8_t { World = umath::to_integral(umath::CoordinateSpace::World), Local = umath::to_integral(umath::CoordinateSpace::Local), Object = umath::to_integral(umath::CoordinateSpace::Object) };
 		static ComponentEventId EVENT_APPLY_CONSTRAINT;
 		static ComponentEventId EVENT_ON_ORDER_INDEX_CHANGED;
@@ -45,6 +52,8 @@ namespace pragma {
 		int32_t GetOrderIndex() const;
 
 		void ApplyConstraint();
+
+		std::optional<ConstraintParticipants> GetConstraintParticipants() const;
 
 		virtual void InitializeLuaObject(lua_State *lua) override;
 	  protected:

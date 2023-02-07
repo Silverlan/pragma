@@ -6,8 +6,8 @@
  */
 
 #include "stdafx_shared.h"
-#include "pragma/entities/components/constraint_component.hpp"
-#include "pragma/entities/components/constraint_manager_component.hpp"
+#include "pragma/entities/components/constraints/constraint_component.hpp"
+#include "pragma/entities/components/constraints/constraint_manager_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/components/component_member_flags.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
@@ -62,6 +62,8 @@ void ConstraintComponent::RegisterMembers(pragma::EntityComponentManager &compon
 	{
 		using TOrderIndex = int32_t;
 		auto memberInfo = create_component_member_info<T, TOrderIndex, static_cast<void (T::*)(TOrderIndex)>(&T::SetOrderIndex), static_cast<TOrderIndex (T::*)() const>(&T::GetOrderIndex)>("orderIndex", TOrderIndex {0});
+		memberInfo.SetMin(-1'00);
+		memberInfo.SetMax(1'00);
 		registerMember(std::move(memberInfo));
 	}
 }
@@ -69,6 +71,27 @@ ConstraintComponent::ConstraintComponent(BaseEntity &ent) : BaseEntityComponent(
 void ConstraintComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void ConstraintComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ConstraintComponent::ApplyConstraint() { InvokeEventCallbacks(EVENT_APPLY_CONSTRAINT); }
+
+std::optional<ConstraintComponent::ConstraintParticipants> ConstraintComponent::GetConstraintParticipants() const
+{
+	auto &game = *GetEntity().GetNetworkState()->GetGameState();
+	auto &drivenObj = GetDrivenObject();
+	auto &driver = GetDriver();
+	auto *drivenObjC = drivenObj.GetComponent(game);
+	auto *driverC = driver.GetComponent(game);
+	drivenObj.UpdateMemberIndex(game);
+	driver.UpdateMemberIndex(game);
+	auto idxDrivenObject = drivenObj.GetMemberIndex();
+	auto idxDriver = driver.GetMemberIndex();
+	if(!drivenObjC || !driverC || idxDrivenObject == pragma::INVALID_COMPONENT_MEMBER_INDEX || idxDriver == pragma::INVALID_COMPONENT_MEMBER_INDEX)
+		return {};
+	ConstraintParticipants participants {};
+	participants.driverC = const_cast<pragma::BaseEntityComponent *>(driverC);
+	participants.drivenObjectC = const_cast<pragma::BaseEntityComponent *>(drivenObjC);
+	participants.driverPropIdx = idxDriver;
+	participants.drivenObjectPropIdx = idxDrivenObject;
+	return participants;
+}
 
 void ConstraintComponent::OnEntitySpawn() { BaseEntityComponent::OnEntitySpawn(); }
 void ConstraintComponent::OnRemove()

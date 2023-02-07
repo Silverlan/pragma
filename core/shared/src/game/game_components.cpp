@@ -19,8 +19,16 @@
 #include "pragma/entities/components/usable_component.hpp"
 #include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/components/composite_component.hpp"
-#include "pragma/entities/components/constraint_component.hpp"
-#include "pragma/entities/components/constraint_manager_component.hpp"
+#include "pragma/entities/components/constraints/constraint_component.hpp"
+#include "pragma/entities/components/constraints/constraint_manager_component.hpp"
+#include "pragma/entities/components/constraints/constraint_space_component.hpp"
+#include "pragma/entities/components/constraints/constraint_copy_location_component.hpp"
+#include "pragma/entities/components/constraints/constraint_copy_rotation_component.hpp"
+#include "pragma/entities/components/constraints/constraint_copy_scale_component.hpp"
+#include "pragma/entities/components/constraints/constraint_limit_distance_component.hpp"
+#include "pragma/entities/components/constraints/constraint_limit_location_component.hpp"
+#include "pragma/entities/components/constraints/constraint_limit_rotation_component.hpp"
+#include "pragma/entities/components/constraints/constraint_limit_scale_component.hpp"
 #include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/entities/components/origin_component.hpp"
 #include "pragma/entities/components/basegravity.h"
@@ -43,6 +51,14 @@ void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentM
 	componentManager.RegisterComponentType<pragma::OriginComponent>("origin");
 	componentManager.RegisterComponentType<pragma::ConstraintComponent>("constraint");
 	componentManager.RegisterComponentType<pragma::ConstraintManagerComponent>("constraint_manager");
+	componentManager.RegisterComponentType<pragma::ConstraintCopyLocationComponent>("constraint_copy_location");
+	componentManager.RegisterComponentType<pragma::ConstraintCopyRotationComponent>("constraint_copy_rotation");
+	componentManager.RegisterComponentType<pragma::ConstraintCopyScaleComponent>("constraint_copy_scale");
+	componentManager.RegisterComponentType<pragma::ConstraintLimitDistanceComponent>("constraint_limit_distance");
+	componentManager.RegisterComponentType<pragma::ConstraintLimitLocationComponent>("constraint_limit_location");
+	componentManager.RegisterComponentType<pragma::ConstraintLimitRotationComponent>("constraint_limit_rotation");
+	componentManager.RegisterComponentType<pragma::ConstraintLimitScaleComponent>("constraint_limit_scale");
+	componentManager.RegisterComponentType<pragma::ConstraintSpaceComponent>("constraint_space");
 
 	pragma::BaseEntityComponent::RegisterEvents(componentManager, [&componentManager](const std::string &evName, pragma::ComponentEventInfo::Type type) -> pragma::ComponentEventId { return componentManager.RegisterEvent(evName, typeid(pragma::BaseEntityComponent), type); });
 	BaseEntity::RegisterEvents(componentManager);

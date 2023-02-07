@@ -43,8 +43,16 @@
 #include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/entities/components/ik_solver/rig_config.hpp"
 #include "pragma/entities/components/origin_component.hpp"
-#include "pragma/entities/components/constraint_component.hpp"
-#include "pragma/entities/components/constraint_manager_component.hpp"
+#include "pragma/entities/components/constraints/constraint_component.hpp"
+#include "pragma/entities/components/constraints/constraint_space_component.hpp"
+#include "pragma/entities/components/constraints/constraint_manager_component.hpp"
+#include "pragma/entities/components/constraints/constraint_copy_location_component.hpp"
+#include "pragma/entities/components/constraints/constraint_copy_rotation_component.hpp"
+#include "pragma/entities/components/constraints/constraint_copy_scale_component.hpp"
+#include "pragma/entities/components/constraints/constraint_limit_distance_component.hpp"
+#include "pragma/entities/components/constraints/constraint_limit_location_component.hpp"
+#include "pragma/entities/components/constraints/constraint_limit_rotation_component.hpp"
+#include "pragma/entities/components/constraints/constraint_limit_scale_component.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
@@ -595,6 +603,53 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defConstraintManager.add_static_constant("COORDINATE_SPACE_OBJECT", umath::to_integral(pragma::ConstraintManagerComponent::CoordinateSpace::Object));
 	defConstraintManager.add_static_constant("EVENT_APPLY_CONSTRAINT", pragma::ConstraintManagerComponent::EVENT_APPLY_CONSTRAINT);
 	entsMod[defConstraintManager];
+
+	auto defConstraintSpace = pragma::lua::create_entity_component_class<pragma::ConstraintSpaceComponent, pragma::BaseEntityComponent>("ConstraintSpaceComponent");
+	defConstraintSpace.def("SetAxisEnabled", &pragma::ConstraintSpaceComponent::SetAxisEnabled);
+	defConstraintSpace.def("IsAxisEnabled", &pragma::ConstraintSpaceComponent::IsAxisEnabled);
+	defConstraintSpace.def("SetAxisInverted", &pragma::ConstraintSpaceComponent::SetAxisInverted);
+	defConstraintSpace.def("IsAxisInverted", &pragma::ConstraintSpaceComponent::IsAxisInverted);
+	defConstraintSpace.def(
+	  "ApplyFilter", +[](const pragma::ConstraintSpaceComponent &component, const Vector3 &posDriver, const Vector3 &posDriven) -> Vector3 {
+		  Vector3 result;
+		  component.ApplyFilter(posDriver, posDriven, result);
+		  return result;
+	  });
+	defConstraintSpace.def(
+	  "ApplyFilter", +[](const pragma::ConstraintSpaceComponent &component, const EulerAngles &angDriver, const EulerAngles &angDriven) -> EulerAngles {
+		  EulerAngles result;
+		  component.ApplyFilter(angDriver, angDriven, result);
+		  return result;
+	  });
+	entsMod[defConstraintSpace];
+
+	auto defConstraintCopyLocation = pragma::lua::create_entity_component_class<pragma::ConstraintCopyLocationComponent, pragma::BaseEntityComponent>("ConstraintCopyLocationComponent");
+	entsMod[defConstraintCopyLocation];
+
+	auto defConstraintCopyRotation = pragma::lua::create_entity_component_class<pragma::ConstraintCopyRotationComponent, pragma::BaseEntityComponent>("ConstraintCopyRotationComponent");
+	entsMod[defConstraintCopyRotation];
+
+	auto defConstraintCopyScale = pragma::lua::create_entity_component_class<pragma::ConstraintCopyScaleComponent, pragma::BaseEntityComponent>("ConstraintCopyScaleComponent");
+	entsMod[defConstraintCopyScale];
+
+	auto defConstraintLimitDistance = pragma::lua::create_entity_component_class<pragma::ConstraintLimitDistanceComponent, pragma::BaseEntityComponent>("ConstraintLimitDistanceComponent");
+	defConstraintLimitDistance.add_static_constant("CLAMP_REGION_INSIDE", umath::to_integral(pragma::ConstraintLimitDistanceComponent::ClampRegion::Inside));
+	defConstraintLimitDistance.add_static_constant("CLAMP_REGION_OUTSIDE", umath::to_integral(pragma::ConstraintLimitDistanceComponent::ClampRegion::Outside));
+	defConstraintLimitDistance.add_static_constant("CLAMP_REGION_ON_SURFACE", umath::to_integral(pragma::ConstraintLimitDistanceComponent::ClampRegion::OnSurface));
+	defConstraintLimitDistance.def("SetClampRegion", &pragma::ConstraintLimitDistanceComponent::SetClampRegion);
+	defConstraintLimitDistance.def("GetClampRegion", &pragma::ConstraintLimitDistanceComponent::GetClampRegion);
+	defConstraintLimitDistance.def("SetDistance", &pragma::ConstraintLimitDistanceComponent::SetDistance);
+	defConstraintLimitDistance.def("GetDistance", &pragma::ConstraintLimitDistanceComponent::GetDistance);
+	entsMod[defConstraintLimitDistance];
+
+	auto defConstraintLimitLocation = pragma::lua::create_entity_component_class<pragma::ConstraintLimitLocationComponent, pragma::BaseEntityComponent>("ConstraintLimitLocationComponent");
+	entsMod[defConstraintLimitLocation];
+
+	auto defConstraintLimitRotation = pragma::lua::create_entity_component_class<pragma::ConstraintLimitRotationComponent, pragma::BaseEntityComponent>("ConstraintLimitRotationComponent");
+	entsMod[defConstraintLimitRotation];
+
+	auto defConstraintLimitScale = pragma::lua::create_entity_component_class<pragma::ConstraintLimitScaleComponent, pragma::BaseEntityComponent>("ConstraintLimitScaleComponent");
+	entsMod[defConstraintLimitScale];
 
 	auto defLogic = pragma::lua::create_entity_component_class<pragma::LogicComponent, pragma::BaseEntityComponent>("LogicComponent");
 	defLogic.add_static_constant("EVENT_ON_TICK", pragma::LogicComponent::EVENT_ON_TICK);

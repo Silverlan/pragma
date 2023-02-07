@@ -11,6 +11,8 @@
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/components/ik_solver/rig_config.hpp"
 #include "pragma/entities/components/component_member_flags.hpp"
+#include "pragma/entities/components/constraints/constraint_component.hpp"
+#include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/logging.hpp"
 #include <panima/skeleton.hpp>
@@ -49,7 +51,16 @@ void IkSolverComponent::RegisterMembers(pragma::EntityComponentManager &componen
 	}
 }
 IkSolverComponent::IkSolverComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_ikRig {udm::Property::Create<udm::Element>()} {}
-void IkSolverComponent::Initialize() { BaseEntityComponent::Initialize(); }
+void IkSolverComponent::Initialize()
+{
+	BaseEntityComponent::Initialize();
+	GetEntity().AddComponent<ConstraintComponent>();
+
+	BindEvent(ConstraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		Solve();
+		return util::EventReply::Unhandled;
+	});
+}
 void IkSolverComponent::SetIkRigFile(const std::string &RigConfigFile)
 {
 	m_ikRigFile = RigConfigFile;

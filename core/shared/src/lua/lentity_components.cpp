@@ -43,6 +43,8 @@
 #include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/entities/components/ik_solver/rig_config.hpp"
 #include "pragma/entities/components/origin_component.hpp"
+#include "pragma/entities/components/constraint_component.hpp"
+#include "pragma/entities/components/constraint_manager_component.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
@@ -567,6 +569,32 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defOrigin.def("SetOriginPos", &pragma::OriginComponent::SetOriginPos);
 	defOrigin.def("SetOriginRot", &pragma::OriginComponent::SetOriginRot);
 	entsMod[defOrigin];
+
+	auto defConstraint = pragma::lua::create_entity_component_class<pragma::ConstraintComponent, pragma::BaseEntityComponent>("ConstraintComponent");
+	defConstraint.add_static_constant("EVENT_ON_ORDER_INDEX_CHANGED", pragma::ConstraintComponent::EVENT_ON_ORDER_INDEX_CHANGED);
+	defConstraint.add_static_constant("EVENT_APPLY_CONSTRAINT", pragma::ConstraintComponent::EVENT_APPLY_CONSTRAINT);
+	defConstraint.def("SetInfluence", &pragma::ConstraintComponent::SetInfluence);
+	defConstraint.def("GetInfluence", &pragma::ConstraintComponent::GetInfluence);
+	defConstraint.def("SetDriver", &pragma::ConstraintComponent::SetDriver);
+	defConstraint.def(
+	  "GetDriver", +[](pragma::ConstraintComponent &constraint) -> pragma::EntityUComponentMemberRef & { return const_cast<pragma::EntityUComponentMemberRef &>(constraint.GetDriver()); });
+	defConstraint.def("SetDrivenObject", &pragma::ConstraintComponent::SetDrivenObject);
+	defConstraint.def(
+	  "GetDrivenObject", +[](pragma::ConstraintComponent &constraint) -> pragma::EntityUComponentMemberRef & { return const_cast<pragma::EntityUComponentMemberRef &>(constraint.GetDrivenObject()); });
+	defConstraint.def("SetDriverSpace", &pragma::ConstraintComponent::SetDriverSpace);
+	defConstraint.def("GetDriverSpace", &pragma::ConstraintComponent::GetDriverSpace);
+	defConstraint.def("SetDrivenObjectSpace", &pragma::ConstraintComponent::SetDrivenObjectSpace);
+	defConstraint.def("GetDrivenObjectSpace", &pragma::ConstraintComponent::GetDrivenObjectSpace);
+	defConstraint.def("SetOrderIndex", &pragma::ConstraintComponent::SetOrderIndex);
+	defConstraint.def("GetOrderIndex", &pragma::ConstraintComponent::GetOrderIndex);
+	entsMod[defConstraint];
+
+	auto defConstraintManager = pragma::lua::create_entity_component_class<pragma::ConstraintManagerComponent, pragma::BaseEntityComponent>("ConstraintManagerComponent");
+	defConstraintManager.add_static_constant("COORDINATE_SPACE_WORLD", umath::to_integral(pragma::ConstraintManagerComponent::CoordinateSpace::World));
+	defConstraintManager.add_static_constant("COORDINATE_SPACE_LOCAL", umath::to_integral(pragma::ConstraintManagerComponent::CoordinateSpace::Local));
+	defConstraintManager.add_static_constant("COORDINATE_SPACE_OBJECT", umath::to_integral(pragma::ConstraintManagerComponent::CoordinateSpace::Object));
+	defConstraintManager.add_static_constant("EVENT_APPLY_CONSTRAINT", pragma::ConstraintManagerComponent::EVENT_APPLY_CONSTRAINT);
+	entsMod[defConstraintManager];
 
 	auto defLogic = pragma::lua::create_entity_component_class<pragma::LogicComponent, pragma::BaseEntityComponent>("LogicComponent");
 	defLogic.add_static_constant("EVENT_ON_TICK", pragma::LogicComponent::EVENT_ON_TICK);

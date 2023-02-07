@@ -10,6 +10,7 @@
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/entities/components/panima_component.hpp"
+#include "pragma/entities/components/constraint_manager_component.hpp"
 #include "pragma/entities/components/ik_solver_component.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
@@ -20,6 +21,7 @@ pragma::AnimationUpdateManager::AnimationUpdateManager(Game &game) : game {game}
 	auto r = componentManager.GetComponentTypeId("animated", m_animatedComponentId);
 	r = r && componentManager.GetComponentTypeId("panima", m_panimaComponentId);
 	r = r && componentManager.GetComponentTypeId("animation_driver", m_animationDriverComponentId);
+	r = r && componentManager.GetComponentTypeId("constraint_manager", m_constraintManagerComponentId);
 	assert(r);
 	if(!r) {
 		Con::crit << "Unable to determine animated component ids!" << Con::endl;
@@ -33,7 +35,8 @@ void pragma::AnimationUpdateManager::UpdateEntityAnimationDrivers(double dt)
 }
 void pragma::AnimationUpdateManager::UpdateConstraints(double dt)
 {
-	// Not yet implemented
+	for(auto *ent : EntityIterator {game, m_constraintManagerComponentId})
+		ent->GetComponent<pragma::ConstraintManagerComponent>()->ApplyConstraints();
 }
 void pragma::AnimationUpdateManager::UpdateAnimations(double dt)
 {
@@ -61,6 +64,7 @@ void pragma::AnimationUpdateManager::UpdateAnimations(double dt)
 	// Animation drivers are Lua-based and cannot be multi-threaded
 	UpdateEntityAnimationDrivers(dt);
 
+	// TODO: Move ik to constraint solver
 	UpdateConstraints(dt);
 
 	{

@@ -24,6 +24,7 @@ namespace pragma {
 		pragma::ComponentId m_animatedComponentId = std::numeric_limits<pragma::ComponentId>::max();
 		pragma::ComponentId m_panimaComponentId = std::numeric_limits<pragma::ComponentId>::max();
 		pragma::ComponentId m_animationDriverComponentId = std::numeric_limits<pragma::ComponentId>::max();
+		pragma::ComponentId m_constraintManagerComponentId = std::numeric_limits<pragma::ComponentId>::max();
 		pragma::ThreadPool m_threadPool;
 	};
 };

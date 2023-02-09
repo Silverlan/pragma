@@ -287,6 +287,14 @@ void Lua::ents::register_library(lua_State *l)
 	poseTypeMetaDataDef.def_readonly("poseProperty", &pragma::ents::PoseTypeMetaData::poseProperty);
 	memberInfoDef.scope[poseTypeMetaDataDef];
 
+	auto optionalTypeMetaDataDef = luabind::class_<pragma::ents::OptionalTypeMetaData, pragma::ents::TypeMetaData>("OptionalTypeMetaData");
+	optionalTypeMetaDataDef.def_readonly("enabledProperty", &pragma::ents::OptionalTypeMetaData::enabledProperty);
+	memberInfoDef.scope[optionalTypeMetaDataDef];
+
+	auto enablerTypeMetaDataDef = luabind::class_<pragma::ents::EnablerTypeMetaData, pragma::ents::TypeMetaData>("EnablerTypeMetaData");
+	enablerTypeMetaDataDef.def_readonly("targetProperty", &pragma::ents::EnablerTypeMetaData::targetProperty);
+	memberInfoDef.scope[enablerTypeMetaDataDef];
+
 	memberInfoDef.add_static_constant("FLAG_NONE", umath::to_integral(pragma::ComponentMemberFlags::None));
 	memberInfoDef.add_static_constant("FLAG_HIDE_IN_INTERFACE_BIT", umath::to_integral(pragma::ComponentMemberFlags::HideInInterface));
 	memberInfoDef.add_static_constant("FLAG_CONTROLLER_BIT", umath::to_integral(pragma::ComponentMemberFlags::Controller));

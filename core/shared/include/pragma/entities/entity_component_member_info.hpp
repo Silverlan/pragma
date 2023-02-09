@@ -23,22 +23,30 @@ namespace pragma {
 	namespace ents {
 		enum class EntityMemberType : uint8_t;
 
-		struct TypeMetaData {
+		struct DLLNETWORK TypeMetaData {
 			virtual ~TypeMetaData() = default;
 		};
-		struct RangeTypeMetaData : public TypeMetaData {
+		struct DLLNETWORK RangeTypeMetaData : public TypeMetaData {
 			std::optional<float> min {};
 			std::optional<float> max {};
 			std::optional<float> stepSize {};
 		};
 
-		struct CoordinateTypeMetaData : public TypeMetaData {
+		struct DLLNETWORK CoordinateTypeMetaData : public TypeMetaData {
 			umath::CoordinateSpace space = umath::CoordinateSpace::World;
 			std::string parentProperty;
 		};
 
-		struct PoseTypeMetaData : public TypeMetaData {
+		struct DLLNETWORK PoseTypeMetaData : public TypeMetaData {
 			std::string poseProperty;
+		};
+
+		struct DLLNETWORK OptionalTypeMetaData : public TypeMetaData {
+			std::string enabledProperty;
+		};
+
+		struct DLLNETWORK EnablerTypeMetaData : public TypeMetaData {
+			std::string targetProperty;
 		};
 	};
 	class BaseEntityComponent;

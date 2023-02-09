@@ -12,8 +12,7 @@
 #include "pragma/entities/entity_component_manager_t.hpp"
 
 using namespace pragma;
-
-static void set_x_axis_enabled(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, const bool &enabled) { component.SetAxisEnabled(pragma::Axis::X, enabled); }
+static void set_x_axis_enabled(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool enabled) { component.SetAxisEnabled(pragma::Axis::X, enabled); }
 static void set_y_axis_enabled(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool enabled) { component.SetAxisEnabled(pragma::Axis::Y, enabled); }
 static void set_z_axis_enabled(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool enabled) { component.SetAxisEnabled(pragma::Axis::Z, enabled); }
 static void is_x_axis_enabled(const ComponentMemberInfo &info, ConstraintSpaceComponent &component, bool &outValue) { outValue = component.IsAxisEnabled(pragma::Axis::X); }
@@ -58,7 +57,11 @@ void ConstraintSpaceComponent::RegisterMembers(pragma::EntityComponentManager &c
 		registerMember(std::move(memberInfo));
 	}
 }
-ConstraintSpaceComponent::ConstraintSpaceComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+ConstraintSpaceComponent::ConstraintSpaceComponent(BaseEntity &ent) : BaseEntityComponent(ent)
+{
+	m_axisEnabled.fill(true);
+	m_axisInverted.fill(false);
+}
 void ConstraintSpaceComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

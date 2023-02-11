@@ -45,15 +45,15 @@ void ConstraintSpaceComponent::RegisterMembers(pragma::EntityComponentManager &c
 
 	using TAxisInverted = bool;
 	{
-		auto memberInfo = create_component_member_info<T, TAxisInverted, &set_x_axis_inverted, &is_x_axis_inverted>("xAxisInverted", true);
+		auto memberInfo = create_component_member_info<T, TAxisInverted, &set_x_axis_inverted, &is_x_axis_inverted>("xAxisInverted", false);
 		registerMember(std::move(memberInfo));
 	}
 	{
-		auto memberInfo = create_component_member_info<T, TAxisInverted, &set_y_axis_inverted, &is_y_axis_inverted>("yAxisInverted", true);
+		auto memberInfo = create_component_member_info<T, TAxisInverted, &set_y_axis_inverted, &is_y_axis_inverted>("yAxisInverted", false);
 		registerMember(std::move(memberInfo));
 	}
 	{
-		auto memberInfo = create_component_member_info<T, TAxisInverted, &set_z_axis_inverted, &is_z_axis_inverted>("zAxisInverted", true);
+		auto memberInfo = create_component_member_info<T, TAxisInverted, &set_z_axis_inverted, &is_z_axis_inverted>("zAxisInverted", false);
 		registerMember(std::move(memberInfo));
 	}
 }

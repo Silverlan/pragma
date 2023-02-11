@@ -1561,6 +1561,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		}),
 		luabind::def("enum_type_to_ascii",&::udm::enum_type_to_ascii),
 		luabind::def("ascii_type_to_enum",&::udm::ascii_type_to_enum),
+		luabind::def("is_convertible",static_cast<bool(*)(::udm::Type,::udm::Type)>(&::udm::is_convertible)),
 		luabind::def("serialize",&::serialize),
 		luabind::def("deserialize",&::deserialize),
 		luabind::def("is_supported_array_value_type",&is_supported_array_value_type),

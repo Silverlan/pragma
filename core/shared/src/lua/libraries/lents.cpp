@@ -284,8 +284,14 @@ void Lua::ents::register_library(lua_State *l)
 	memberInfoDef.scope[coordinateTypeMetaDataDef];
 
 	auto poseTypeMetaDataDef = luabind::class_<pragma::ents::PoseTypeMetaData, pragma::ents::TypeMetaData>("PoseTypeMetaData");
-	poseTypeMetaDataDef.def_readonly("poseProperty", &pragma::ents::PoseTypeMetaData::poseProperty);
+	poseTypeMetaDataDef.def_readonly("posProperty", &pragma::ents::PoseTypeMetaData::posProperty);
+	poseTypeMetaDataDef.def_readonly("rotProperty", &pragma::ents::PoseTypeMetaData::rotProperty);
+	poseTypeMetaDataDef.def_readonly("scaleProperty", &pragma::ents::PoseTypeMetaData::scaleProperty);
 	memberInfoDef.scope[poseTypeMetaDataDef];
+
+	auto poseComponentTypeMetaDataDef = luabind::class_<pragma::ents::PoseComponentTypeMetaData, pragma::ents::TypeMetaData>("PoseComponentTypeMetaData");
+	poseComponentTypeMetaDataDef.def_readonly("poseProperty", &pragma::ents::PoseComponentTypeMetaData::poseProperty);
+	memberInfoDef.scope[poseComponentTypeMetaDataDef];
 
 	auto optionalTypeMetaDataDef = luabind::class_<pragma::ents::OptionalTypeMetaData, pragma::ents::TypeMetaData>("OptionalTypeMetaData");
 	optionalTypeMetaDataDef.def_readonly("enabledProperty", &pragma::ents::OptionalTypeMetaData::enabledProperty);

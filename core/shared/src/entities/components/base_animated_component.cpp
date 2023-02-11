@@ -220,9 +220,17 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		auto lname = name;
 		// ustring::to_lower(lname);
 
-		std::string posePathName = "bone/" + lname + "/pose";
+		auto posePathName = "bone/" + lname + "/pose";
+		auto posPathName = "bone/" + lname + "/position";
+		auto rotPathName = "bone/" + lname + "/rotation";
+		auto scalePathName = "bone/" + lname + "/scale";
 		auto poseMetaData = std::make_shared<ents::PoseTypeMetaData>();
-		poseMetaData->poseProperty = posePathName;
+		poseMetaData->posProperty = posPathName;
+		poseMetaData->rotProperty = rotPathName;
+		poseMetaData->scaleProperty = scalePathName;
+
+		auto poseComponentMetaData = std::make_shared<ents::PoseComponentTypeMetaData>();
+		poseComponentMetaData->poseProperty = posePathName;
 
 		auto coordMetaData = std::make_shared<ents::CoordinateTypeMetaData>();
 		coordMetaData->space = umath::CoordinateSpace::Local;
@@ -230,6 +238,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 
 		auto memberInfoPose = pragma::ComponentMemberInfo::CreateDummy();
 		memberInfoPose.SetName(posePathName);
+		memberInfoPose.AddTypeMetaData(poseMetaData);
 		memberInfoPose.type = ents::EntityMemberType::ScaledTransform;
 		memberInfoPose.userIndex = bone.ID;
 		memberInfoPose.SetFlag(pragma::ComponentMemberFlags::HideInInterface);
@@ -252,7 +261,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		memberInfoPos.type = ents::EntityMemberType::Vector3;
 		memberInfoPos.userIndex = bone.ID;
 		memberInfoPos.AddTypeMetaData(coordMetaData);
-		memberInfoPos.AddTypeMetaData(poseMetaData);
+		memberInfoPos.AddTypeMetaData(poseComponentMetaData);
 		memberInfoPos.SetGetterFunction<BaseAnimatedComponent, Vector3, static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, Vector3 &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, Vector3 &outValue) {
 			auto *pos = component.GetBonePosition(memberInfo.userIndex);
 			if(!pos) {
@@ -269,7 +278,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		memberInfoRot.type = ents::EntityMemberType::Quaternion;
 		memberInfoRot.userIndex = bone.ID;
 		memberInfoRot.AddTypeMetaData(coordMetaData);
-		memberInfoRot.AddTypeMetaData(poseMetaData);
+		memberInfoRot.AddTypeMetaData(poseComponentMetaData);
 		memberInfoRot.SetGetterFunction<BaseAnimatedComponent, Quat, static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, Quat &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, Quat &outValue) {
 			auto *rot = component.GetBoneRotation(memberInfo.userIndex);
 			if(!rot) {

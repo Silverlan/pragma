@@ -23,19 +23,24 @@ void OriginComponent::RegisterMembers(pragma::EntityComponentManager &componentM
 	using TRot = Quat;
 
 	constexpr auto *posePathName = "pose";
-	auto memberInfoPose = create_component_member_info<T, TPose, static_cast<void (T::*)(const TPose &)>(&T::SetOriginPose), static_cast<const TPose &(T::*)() const>(&T::GetOriginPose)>(posePathName, TPose {});
-	memberInfoPose.SetFlag(pragma::ComponentMemberFlags::HideInInterface);
-	registerMember(std::move(memberInfoPose));
+	auto poseComponentMetaData = std::make_shared<ents::PoseComponentTypeMetaData>();
+	poseComponentMetaData->poseProperty = posePathName;
 
 	auto poseMetaData = std::make_shared<ents::PoseTypeMetaData>();
-	poseMetaData->poseProperty = posePathName;
+	poseMetaData->posProperty = "pos";
+	poseMetaData->rotProperty = "rot";
+
+	auto memberInfoPose = create_component_member_info<T, TPose, static_cast<void (T::*)(const TPose &)>(&T::SetOriginPose), static_cast<const TPose &(T::*)() const>(&T::GetOriginPose)>(posePathName, TPose {});
+	memberInfoPose.SetFlag(pragma::ComponentMemberFlags::HideInInterface);
+	memberInfoPose.AddTypeMetaData(poseMetaData);
+	registerMember(std::move(memberInfoPose));
 
 	auto memberInfoPos = create_component_member_info<T, TPos, static_cast<void (T::*)(const TPos &)>(&T::SetOriginPos), static_cast<const TPos &(T::*)() const>(&T::GetOriginPos)>("pos", TPos {});
-	memberInfoPos.AddTypeMetaData(poseMetaData);
+	memberInfoPos.AddTypeMetaData(poseComponentMetaData);
 	registerMember(std::move(memberInfoPos));
 
 	auto memberInfoRot = create_component_member_info<T, TRot, static_cast<void (T::*)(const TRot &)>(&T::SetOriginRot), static_cast<const TRot &(T::*)() const>(&T::GetOriginRot)>("rot", TRot {});
-	memberInfoRot.AddTypeMetaData(poseMetaData);
+	memberInfoRot.AddTypeMetaData(poseComponentMetaData);
 	registerMember(std::move(memberInfoRot));
 }
 OriginComponent::OriginComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}

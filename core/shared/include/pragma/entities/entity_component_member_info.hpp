@@ -38,6 +38,12 @@ namespace pragma {
 		};
 
 		struct DLLNETWORK PoseTypeMetaData : public TypeMetaData {
+			std::string posProperty;
+			std::string rotProperty;
+			std::string scaleProperty;
+		};
+
+		struct DLLNETWORK PoseComponentTypeMetaData : public TypeMetaData {
 			std::string poseProperty;
 		};
 

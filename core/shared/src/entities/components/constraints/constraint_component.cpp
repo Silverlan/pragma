@@ -16,10 +16,14 @@
 using namespace pragma;
 
 ComponentEventId ConstraintComponent::EVENT_APPLY_CONSTRAINT = pragma::INVALID_COMPONENT_ID;
+ComponentEventId ConstraintComponent::EVENT_ON_DRIVER_CHANGED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId ConstraintComponent::EVENT_ON_DRIVEN_OBJECT_CHANGED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId ConstraintComponent::EVENT_ON_ORDER_INDEX_CHANGED = pragma::INVALID_COMPONENT_ID;
 void ConstraintComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	EVENT_APPLY_CONSTRAINT = registerEvent("APPLY_CONSTRAINT", ComponentEventInfo::Type::Explicit);
+	EVENT_ON_DRIVER_CHANGED = registerEvent("ON_DRIVER_CHANGED", ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_DRIVEN_OBJECT_CHANGED = registerEvent("ON_DRIVEN_OBJECT_CHANGED", ComponentEventInfo::Type::Broadcast);
 	EVENT_ON_ORDER_INDEX_CHANGED = registerEvent("ON_ORDER_INDEX_CHANGED", ComponentEventInfo::Type::Explicit);
 }
 void ConstraintComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
@@ -104,7 +108,11 @@ void ConstraintComponent::OnRemove()
 void ConstraintComponent::SetInfluence(float influence) { m_influence = influence; }
 float ConstraintComponent::GetInfluence() const { return m_influence; }
 
-void ConstraintComponent::SetDriver(const pragma::EntityUComponentMemberRef &driver) { m_driver = driver; }
+void ConstraintComponent::SetDriver(const pragma::EntityUComponentMemberRef &driver)
+{
+	m_driver = driver;
+	BroadcastEvent(EVENT_ON_DRIVER_CHANGED);
+}
 const pragma::EntityUComponentMemberRef &ConstraintComponent::GetDriver() const { return m_driver; }
 
 void ConstraintComponent::OnTick(double tDelta)
@@ -131,6 +139,7 @@ void ConstraintComponent::SetDrivenObject(const pragma::EntityUComponentMemberRe
 		m_curDrivenConstraintManager = pragma::ComponentHandle<pragma::ConstraintManagerComponent> {};
 		auto uuid = drivenObject.GetUuid();
 		spdlog::debug("Constraint driven object '{}' does not exist for constraint '{}'. Listening for future instancing...", uuid.has_value() ? util::uuid_to_string(*uuid) : "", GetEntity().ToString());
+		BroadcastEvent(EVENT_ON_DRIVEN_OBJECT_CHANGED);
 		return;
 	}
 	auto constraintManagerC = const_cast<BaseEntity *>(ent)->AddComponent<ConstraintManagerComponent>();
@@ -139,6 +148,7 @@ void ConstraintComponent::SetDrivenObject(const pragma::EntityUComponentMemberRe
 	m_curDrivenConstraintManager = constraintManagerC;
 	m_registeredWithConstraintManager = true;
 	SetTickPolicy(pragma::TickPolicy::Never);
+	BroadcastEvent(EVENT_ON_DRIVEN_OBJECT_CHANGED);
 }
 const pragma::EntityUComponentMemberRef &ConstraintComponent::GetDrivenObject() const { return m_drivenObject; }
 

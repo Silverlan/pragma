@@ -15,6 +15,7 @@
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/classes/ldef_angle.h"
 #include "pragma/lua/classes/lphysics.h"
+#include "pragma/lua/libraries/lutil.hpp"
 #include "pragma/physics/environment.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
@@ -200,6 +201,27 @@ void Lua::ents::register_library(lua_State *l)
 			return game.GetEntityComponentManager().AddCreationCallback(componentName,[callback](std::reference_wrapper<pragma::BaseEntityComponent> c) mutable {
 				callback(c.get().GetLuaObject());
 			});
+		}),
+		luabind::def("parse_uri",+[](const std::string &uriPath) -> std::optional<pragma::EntityUComponentMemberRef> {
+			pragma::EntityUComponentMemberRef ref;
+			if(!BaseEntity::ParseUri(uriPath,ref))
+				return {};
+			return ref;
+		}),
+		luabind::def("parse_uri",+[](const std::string &uriPath,const Lua::util::Uuid &uuid) -> std::optional<pragma::EntityUComponentMemberRef> {
+			pragma::EntityUComponentMemberRef ref;
+			if(!BaseEntity::ParseUri(uriPath,ref,&uuid.value))
+				return {};
+			return ref;
+		}),
+		luabind::def("create_uri",+[](const Lua::util::Uuid &uuid,const std::string &propName) -> std::string {
+			return "pragma:game/entity/" +propName +"?entity_uuid=" +::util::uuid_to_string(uuid.value);
+		}),
+		luabind::def("create_uri",+[](const std::string &uuid,const std::string &propName) -> std::string {
+			return "pragma:game/entity/" +propName +"?entity_uuid=" +uuid;
+		}),
+		luabind::def("create_uri",+[](const std::string &propName) -> std::string {
+			return "pragma:game/entity/" +propName;
 		})
 	];
 	static_assert(umath::to_integral(pragma::ents::EntityMemberType::VersionIndex) == 0);
@@ -781,10 +803,10 @@ Lua::opt<Lua::type<BaseEntity>> Lua::ents::get_by_local_index(lua_State *l, uint
 
 Lua::opt<Lua::type<BaseEntity>> Lua::ents::find_by_unique_index(lua_State *l, const std::string &uuid)
 {
-	auto uniqueIndex = util::uuid_string_to_bytes(uuid);
+	auto uniqueIndex = ::util::uuid_string_to_bytes(uuid);
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
-	auto *ent = game->FindEntityByUniqueId(util::uuid_string_to_bytes(uuid));
+	auto *ent = game->FindEntityByUniqueId(::util::uuid_string_to_bytes(uuid));
 	if(!ent)
 		return nil;
 	return ent->GetLuaObject();

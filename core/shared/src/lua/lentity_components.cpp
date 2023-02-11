@@ -649,12 +649,32 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defConstraintLimitDistance];
 
 	auto defConstraintLimitLocation = pragma::lua::create_entity_component_class<pragma::ConstraintLimitLocationComponent, pragma::BaseEntityComponent>("ConstraintLimitLocationComponent");
+	defConstraintLimitLocation.def("SetMinimum", &pragma::ConstraintLimitLocationComponent::SetMinimum);
+	defConstraintLimitLocation.def("SetMaximum", &pragma::ConstraintLimitLocationComponent::SetMaximum);
+	defConstraintLimitLocation.def("GetMinimum", &pragma::ConstraintLimitLocationComponent::GetMinimum);
+	defConstraintLimitLocation.def("GetMaximum", &pragma::ConstraintLimitLocationComponent::GetMaximum);
+	defConstraintLimitLocation.def("SetMinimumEnabled", &pragma::ConstraintLimitLocationComponent::SetMinimumEnabled);
+	defConstraintLimitLocation.def("IsMinimumEnabled", &pragma::ConstraintLimitLocationComponent::IsMinimumEnabled);
+	defConstraintLimitLocation.def("SetMaximumEnabled", &pragma::ConstraintLimitLocationComponent::SetMaximumEnabled);
+	defConstraintLimitLocation.def("IsMaximumEnabled", &pragma::ConstraintLimitLocationComponent::IsMaximumEnabled);
 	entsMod[defConstraintLimitLocation];
 
 	auto defConstraintLimitRotation = pragma::lua::create_entity_component_class<pragma::ConstraintLimitRotationComponent, pragma::BaseEntityComponent>("ConstraintLimitRotationComponent");
+	defConstraintLimitRotation.def("SetLimit", &pragma::ConstraintLimitRotationComponent::SetLimit);
+	defConstraintLimitRotation.def("GetLimit", &pragma::ConstraintLimitRotationComponent::GetLimit);
+	defConstraintLimitRotation.def("SetLimitEnabled", &pragma::ConstraintLimitRotationComponent::SetLimitEnabled);
+	defConstraintLimitRotation.def("IsLimitEnabled", &pragma::ConstraintLimitRotationComponent::IsLimitEnabled);
 	entsMod[defConstraintLimitRotation];
 
 	auto defConstraintLimitScale = pragma::lua::create_entity_component_class<pragma::ConstraintLimitScaleComponent, pragma::BaseEntityComponent>("ConstraintLimitScaleComponent");
+	defConstraintLimitScale.def("SetMinimum", &pragma::ConstraintLimitScaleComponent::SetMinimum);
+	defConstraintLimitScale.def("SetMaximum", &pragma::ConstraintLimitScaleComponent::SetMaximum);
+	defConstraintLimitScale.def("GetMinimum", &pragma::ConstraintLimitScaleComponent::GetMinimum);
+	defConstraintLimitScale.def("GetMaximum", &pragma::ConstraintLimitScaleComponent::GetMaximum);
+	defConstraintLimitScale.def("SetMinimumEnabled", &pragma::ConstraintLimitScaleComponent::SetMinimumEnabled);
+	defConstraintLimitScale.def("IsMinimumEnabled", &pragma::ConstraintLimitScaleComponent::IsMinimumEnabled);
+	defConstraintLimitScale.def("SetMaximumEnabled", &pragma::ConstraintLimitScaleComponent::SetMaximumEnabled);
+	defConstraintLimitScale.def("IsMaximumEnabled", &pragma::ConstraintLimitScaleComponent::IsMaximumEnabled);
 	entsMod[defConstraintLimitScale];
 
 	auto defLogic = pragma::lua::create_entity_component_class<pragma::LogicComponent, pragma::BaseEntityComponent>("LogicComponent");

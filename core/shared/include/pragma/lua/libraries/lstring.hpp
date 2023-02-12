@@ -12,6 +12,8 @@
 
 namespace Lua {
 	namespace string {
+		DLLNETWORK std::string snake_case_to_camel_case(const std::string &str);
+		DLLNETWORK std::string camel_case_to_snake_case(const std::string &str);
 		DLLNETWORK uint32_t calc_levenshtein_distance(const std::string &s0, const std::string &s1);
 		DLLNETWORK double calc_levenshtein_similarity(const std::string &s0, const std::string &s1);
 		DLLNETWORK void find_longest_common_substring(const std::string &s0, const std::string &s1, size_t &outStartIdx, size_t &outLen, size_t &outEndIdx);

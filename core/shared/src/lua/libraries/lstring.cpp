@@ -10,6 +10,35 @@
 #include "pragma/lua/libraries/lstring.hpp"
 #include <pragma/lua/luaapi.h>
 
+std::string Lua::string::snake_case_to_camel_case(const std::string &str)
+{
+	auto newStr = str;
+	bool nextCharIsUpper = false;
+	for(int i = 0; i < newStr.length(); i++) {
+		if(newStr[i] == '_') {
+			nextCharIsUpper = true;
+			continue;
+		}
+		if(nextCharIsUpper) {
+			newStr[i] = toupper(newStr[i]);
+			nextCharIsUpper = false;
+		}
+	}
+	// Remove '_' from the string
+	newStr.erase(remove(newStr.begin(), newStr.end(), '_'), newStr.end());
+	return newStr;
+}
+std::string Lua::string::camel_case_to_snake_case(const std::string &str)
+{
+	auto newStr = str;
+	for(int i = 0; i < newStr.length(); i++) {
+		if(isupper(newStr[i])) {
+			newStr.insert(i, "_");
+			newStr[i + 1] = tolower(newStr[i + 1]);
+		}
+	}
+	return newStr;
+}
 uint32_t Lua::string::calc_levenshtein_distance(const std::string &s0, const std::string &s1) { return ustring::calc_levenshtein_distance(s0, s1); }
 double Lua::string::calc_levenshtein_similarity(const std::string &s0, const std::string &s1) { return ustring::calc_levenshtein_similarity(s0, s1); }
 void Lua::string::find_longest_common_substring(const std::string &s0, const std::string &s1, size_t &outStartIdx, size_t &outLen, size_t &outEndIdx) { outLen = ustring::longest_common_substring(s0, s1, outStartIdx, outEndIdx); }

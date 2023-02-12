@@ -17,17 +17,17 @@ void ConstraintTrackToComponent::RegisterMembers(pragma::EntityComponentManager 
 {
 	using T = ConstraintTrackToComponent;
 	{
-		auto memberInfo = create_component_member_info<T, TrackAxis, &SetTrackAxis, &GetTrackAxis>("trackAxis", TrackAxis::X);
+		auto memberInfo = create_component_member_info<T, TrackAxis, &T::SetTrackAxis, &T::GetTrackAxis>("trackAxis", TrackAxis::X);
 		registerMember(std::move(memberInfo));
 	}
 
 	{
-		auto memberInfo = create_component_member_info<T, pragma::Axis, &SetUpAxis, &GetUpAxis>("upAxis", pragma::Axis::Y);
+		auto memberInfo = create_component_member_info<T, pragma::Axis, &T::SetUpAxis, &T::GetUpAxis>("upAxis", pragma::Axis::Y);
 		registerMember(std::move(memberInfo));
 	}
 
 	{
-		auto memberInfo = create_component_member_info<T, bool, &SetTargetY, &ShouldTargetY>("targetY", false);
+		auto memberInfo = create_component_member_info<T, bool, &T::SetTargetY, &T::ShouldTargetY>("targetY", false);
 		registerMember(std::move(memberInfo));
 	}
 }

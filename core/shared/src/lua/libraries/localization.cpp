@@ -71,8 +71,12 @@ Locale::LoadResult Locale::LoadFile(const std::string &file, const std::string &
 Locale::LoadResult Locale::LoadFile(const std::string &file, const std::string &lan)
 {
 	auto res = LoadFile(file, lan, m_localization);
-	if(res == LoadResult::Success)
+	if(res == LoadResult::Success) {
 		m_loadedFiles.push_back(file);
+		spdlog::debug("Loaded localization file '{}' for language '{}'.",file,lan);
+	}
+	else
+		spdlog::warn("Failed to load localization file '{}' for language '{}': {}",file,lan,magic_enum::enum_name(res));
 	return res;
 }
 
@@ -100,6 +104,7 @@ void Locale::ReloadFiles()
 
 void Locale::SetLanguage(std::string lan)
 {
+	spdlog::debug("Changing global language to '{}'...",lan);
 	ustring::to_lower(lan);
 	m_language = lan;
 

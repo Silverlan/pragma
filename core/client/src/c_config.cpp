@@ -118,6 +118,7 @@ void CEngine::PreloadClientConfig()
 	Locale::Load("inputs.txt");
 	Locale::Load("menu.txt");
 	Locale::Load("misc.txt");
+	Locale::Load("components.txt");
 }
 
 void CEngine::LoadClientConfig()

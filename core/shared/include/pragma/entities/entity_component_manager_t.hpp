@@ -17,6 +17,7 @@
 class BaseEntity;
 namespace pragma {
 	constexpr bool is_animatable_type(udm::Type type) { return panima::is_animatable_type(type); }
+	constexpr bool is_animatable_type(pragma::ents::EntityMemberType type) { return (umath::to_integral(type) < umath::to_integral(udm::Type::Count)) ? is_animatable_type(static_cast<udm::Type>(type)) : false; }
 	constexpr bool is_valid_component_property_type(udm::Type type) { return is_animatable_type(type) || type == udm::Type::String || type == udm::Type::Transform || type == udm::Type::ScaledTransform; }
 	constexpr bool is_valid_component_property_type(pragma::ents::EntityMemberType type)
 	{

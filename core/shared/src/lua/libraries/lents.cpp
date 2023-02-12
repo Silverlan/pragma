@@ -222,7 +222,8 @@ void Lua::ents::register_library(lua_State *l)
 		}),
 		luabind::def("create_uri",+[](const std::string &propName) -> std::string {
 			return "pragma:game/entity/" +propName;
-		})
+		}),
+		luabind::def("is_member_type_animatable",static_cast<bool(*)(pragma::ents::EntityMemberType)>(&pragma::is_animatable_type))
 	];
 	static_assert(umath::to_integral(pragma::ents::EntityMemberType::VersionIndex) == 0);
 	Lua::RegisterLibraryEnums(l, "ents",

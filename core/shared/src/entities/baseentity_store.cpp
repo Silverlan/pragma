@@ -107,8 +107,9 @@ bool BaseEntity::ParseUri(std::string uriPath, pragma::EntityUComponentMemberRef
 	size_t offset = 0;
 	if(path.GetComponent(offset, &offset) != "game" || path.GetComponent(offset, &offset) != "entity")
 		return false;
+	auto queryStr = uri.query();
 	std::unordered_map<std::string_view, std::string_view> query;
-	uriparser::parse_uri_query(uri.query(), query);
+	uriparser::parse_uri_query(queryStr, query);
 
 	auto &str = path.GetString();
 	auto memberName = (offset < str.size()) ? str.substr(offset) : std::string {};

@@ -692,14 +692,17 @@ void Engine::RunLaunchCommands()
 					auto *game = nw->GetGameState();
 					if(game) {
 						auto cbOnGameReady = FunctionCallback<void>::Create(nullptr);
-						cbOnGameReady.get<Callback<void>>()->SetFunction([this, cbOnGameReady, game, cmds0 = std::move(cmds0)]() mutable {
+						cbOnGameReady.get<Callback<void>>()->SetFunction([this, cbOnGameReady, cmds0 = std::move(cmds0)]() mutable {
 							auto cmds1 = std::move(cmds0);
+							auto *pThis = this;
+
+							// This will invalidate all captured variables!
 							if(cbOnGameReady.IsValid())
 								cbOnGameReady.Remove();
 
 							for(auto it = cmds1.rbegin(); it != cmds1.rend(); ++it) {
 								auto &cmd = *it;
-								RunConsoleCommand(cmd.command, cmd.args);
+								pThis->RunConsoleCommand(cmd.command, cmd.args);
 							}
 						});
 						game->AddCallback("OnGameReady", cbOnGameReady);

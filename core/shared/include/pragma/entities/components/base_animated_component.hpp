@@ -85,6 +85,8 @@ namespace pragma {
 		static bool GetBlendFramesFromCycle(pragma::animation::Animation &anim, float cycle, Frame **outFrameSrc, Frame **outFrameDst, float &outInterpFactor, int32_t frameOffset = 0);
 
 		virtual void Initialize() override;
+		virtual void OnEntitySpawn() override;
+		virtual void OnRemove() override;
 
 		virtual void MaintainAnimationMovement(const Vector3 &disp);
 

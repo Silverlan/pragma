@@ -218,6 +218,7 @@ class DLLNETWORK Game : public CallbackHandler, public LuaCallbackHandler {
 	BaseEntity *GetGameEntity();
 	LuaEntityManager &GetLuaEntityManager();
 	const LuaEntityManager &GetLuaEntityManager() const { return const_cast<Game *>(this)->GetLuaEntityManager(); }
+	pragma::AnimationUpdateManager &GetAnimationUpdateManager();
 
 	void SetWorld(pragma::BaseWorldComponent *entWorld);
 	void CloseMap();

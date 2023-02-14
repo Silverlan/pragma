@@ -12,8 +12,19 @@
 
 class Game;
 namespace pragma {
-	struct AnimationUpdateManager {
+	class PanimaComponent;
+	class BaseAnimatedComponent;
+	struct DLLNETWORK AnimationUpdateManager {
+		struct DLLNETWORK AnimatedEntity {
+			BaseEntity *entity = nullptr;
+			BaseAnimatedComponent *animatedC = nullptr;
+			PanimaComponent *panimaC = nullptr;
+		};
+
 		AnimationUpdateManager(Game &game);
+
+		void UpdateEntityState(BaseEntity &ent);
+		const std::vector<AnimatedEntity> &GetAnimatedEntities() const;
 
 		void UpdateAnimations(double dt);
 	  private:
@@ -26,6 +37,7 @@ namespace pragma {
 		pragma::ComponentId m_animationDriverComponentId = std::numeric_limits<pragma::ComponentId>::max();
 		pragma::ComponentId m_constraintManagerComponentId = std::numeric_limits<pragma::ComponentId>::max();
 		pragma::ThreadPool m_threadPool;
+		std::vector<AnimatedEntity> m_animatedEntities;
 	};
 };
 

@@ -14,6 +14,7 @@
 #include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/components/component_member_flags.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
+#include "pragma/game/animation_update_manager.hpp"
 #include "pragma/model/model.h"
 #include "pragma/audio/alsound_type.h"
 #include "pragma/lua/luafunction_call.h"
@@ -109,6 +110,18 @@ void BaseAnimatedComponent::Initialize()
 	}
 
 	// SetTickPolicy(TickPolicy::WhenVisible);
+}
+
+void BaseAnimatedComponent::OnEntitySpawn()
+{
+	BaseEntityComponent::OnEntitySpawn();
+	GetNetworkState().GetGameState()->GetAnimationUpdateManager().UpdateEntityState(GetEntity());
+}
+
+void BaseAnimatedComponent::OnRemove()
+{
+	BaseEntityComponent::OnRemove();
+	GetNetworkState().GetGameState()->GetAnimationUpdateManager().UpdateEntityState(GetEntity());
 }
 
 bool BaseAnimatedComponent::IsAnimated() const { return umath::is_flag_set(m_stateFlags, StateFlags::IsAnimated); }

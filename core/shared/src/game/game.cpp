@@ -322,6 +322,8 @@ unsigned char Game::GetPlayerCount() { return m_numPlayers; }
 
 LuaEntityManager &Game::GetLuaEntityManager() { return *m_luaEnts.get(); }
 
+pragma::AnimationUpdateManager &Game::GetAnimationUpdateManager() { return *m_animUpdateManager; }
+
 const GameModeInfo *Game::GetGameMode() const { return const_cast<Game *>(this)->GetGameMode(); }
 GameModeInfo *Game::GetGameMode() { return m_gameMode; }
 void Game::SetGameMode(const std::string &gameMode)

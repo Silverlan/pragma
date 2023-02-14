@@ -53,6 +53,8 @@ namespace pragma {
 		void DebugPrint();
 
 		virtual void Initialize() override;
+		virtual void OnEntitySpawn() override;
+		virtual void OnRemove() override;
 		void PlayAnimation(panima::AnimationManager &manager, panima::Animation &anim);
 		void ReloadAnimation(panima::AnimationManager &manager);
 		float GetCurrentTime(panima::AnimationManager &manager) const;

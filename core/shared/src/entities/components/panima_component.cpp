@@ -11,6 +11,7 @@
 #include "pragma/entities/components/base_time_scale_component.hpp"
 #include "pragma/entities/components/panima_component_channel_submitter.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
+#include "pragma/game/animation_update_manager.hpp"
 #include "pragma/model/model.h"
 #include "pragma/model/animation/animation.hpp"
 #include "pragma/lua/l_entity_handles.hpp"
@@ -504,6 +505,18 @@ void PanimaComponent::Initialize()
 	BaseEntityComponent::Initialize();
 
 	BindEventUnhandled(BaseEntityComponent::EVENT_ON_MEMBERS_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { InitializeAnimationChannelValueSubmitters(); });
+}
+
+void PanimaComponent::OnEntitySpawn()
+{
+	BaseEntityComponent::OnEntitySpawn();
+	GetNetworkState().GetGameState()->GetAnimationUpdateManager().UpdateEntityState(GetEntity());
+}
+
+void PanimaComponent::OnRemove()
+{
+	BaseEntityComponent::OnRemove();
+	GetNetworkState().GetGameState()->GetAnimationUpdateManager().UpdateEntityState(GetEntity());
 }
 
 void PanimaComponent::ReloadAnimation()

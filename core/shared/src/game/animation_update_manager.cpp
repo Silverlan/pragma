@@ -28,6 +28,25 @@ pragma::AnimationUpdateManager::AnimationUpdateManager(Game &game) : game {game}
 		exit(EXIT_FAILURE);
 	}
 }
+void pragma::AnimationUpdateManager::UpdateEntityState(BaseEntity &ent)
+{
+	auto animC = ent.GetAnimatedComponent();
+	auto panimaC = ent.GetComponent<PanimaComponent>();
+	auto it = std::find_if(m_animatedEntities.begin(), m_animatedEntities.end(), [&ent](const AnimatedEntity &animEnt) { return animEnt.entity == &ent; });
+	if(animC.expired() && panimaC.expired()) {
+		if(it != m_animatedEntities.end())
+			m_animatedEntities.erase(it);
+		return;
+	}
+	if(it == m_animatedEntities.end()) {
+		m_animatedEntities.push_back({});
+		it = m_animatedEntities.end() - 1;
+	}
+	it->entity = &ent;
+	it->animatedC = animC.get();
+	it->panimaC = panimaC.get();
+}
+const std::vector<pragma::AnimationUpdateManager::AnimatedEntity> &pragma::AnimationUpdateManager::GetAnimatedEntities() const { return m_animatedEntities; }
 void pragma::AnimationUpdateManager::UpdateEntityAnimationDrivers(double dt)
 {
 	for(auto *ent : EntityIterator {game, m_animationDriverComponentId})
@@ -40,17 +59,14 @@ void pragma::AnimationUpdateManager::UpdateConstraints(double dt)
 }
 void pragma::AnimationUpdateManager::UpdateAnimations(double dt)
 {
-	EntityIterator entIt {game, m_animatedComponentId};
-	for(auto *ent : entIt) {
-		auto animC = ent->GetAnimatedComponent();
-		auto maintainAnimations = animC->PreMaintainAnimations(dt);
-		m_threadPool.AddTask([this, ent, dt, maintainAnimations]() -> pragma::ThreadPool::ResultHandler {
+	for(auto &entInfo : m_animatedEntities) {
+		auto maintainAnimations = entInfo.animatedC ? entInfo.animatedC->PreMaintainAnimations(dt) : false;
+		m_threadPool.AddTask([this, &entInfo, dt, maintainAnimations]() -> pragma::ThreadPool::ResultHandler {
 			if(maintainAnimations)
-				ent->GetAnimatedComponent()->UpdateAnimations(dt);
+				entInfo.animatedC->UpdateAnimations(dt);
 
-			auto panimaC = ent->GetComponent<pragma::PanimaComponent>();
-			if(panimaC.valid())
-				panimaC->UpdateAnimations(dt);
+			if(entInfo.panimaC)
+				entInfo.panimaC->UpdateAnimations(dt);
 			return nullptr;
 		});
 	}

@@ -90,6 +90,30 @@ std::optional<std::string> EntityURef::GetClassOrName() const
 	  *m_identifier);
 }
 bool EntityURef::HasEntityReference() const { return m_identifier != nullptr; }
+void EntityURef::ToStringArgs(std::stringstream &outSs) const
+{
+	outSs << "[ID:";
+	if(!m_identifier)
+		outSs << "NULL]";
+	else {
+		std::visit(
+		  [&outSs](auto &val) {
+			  using T = decltype(val);
+			  if constexpr(std::is_same_v<T, util::Uuid &>)
+				  outSs << util::uuid_to_string(val) << "]";
+			  else
+				  outSs << val << "]";
+		  },
+		  *m_identifier);
+	}
+}
+std::string EntityURef::ToString() const
+{
+	std::stringstream ss;
+	ss << "EntityURef";
+	ToStringArgs(ss);
+	return ss.str();
+}
 
 //////////
 
@@ -136,6 +160,24 @@ BaseEntityComponent *EntityUComponentRef::GetComponent(Game &game)
 	}
 	return m_hComponent.get();
 }
+void EntityUComponentRef::ToStringArgs(std::stringstream &outSs) const
+{
+	EntityURef::ToStringArgs(outSs);
+	outSs << "[Cmp:";
+	if(!m_componentName && m_componentId == INVALID_COMPONENT_ID)
+		outSs << "NULL]";
+	else if(m_componentId != INVALID_COMPONENT_ID)
+		outSs << m_componentId << "]";
+	else
+		outSs << *m_componentName << "]";
+}
+std::string EntityUComponentRef::ToString() const
+{
+	std::stringstream ss;
+	ss << "EntityUComponentRef";
+	ToStringArgs(ss);
+	return ss.str();
+}
 
 //////////
 
@@ -161,6 +203,26 @@ void EntityUComponentMemberRef::UpdateMemberIndex(Game &game) const
 }
 
 bool EntityUComponentMemberRef::HasMemberReference() const { return !m_memberRef.GetMemberName().empty(); }
+void EntityUComponentMemberRef::ToStringArgs(std::stringstream &outSs) const
+{
+	EntityUComponentRef::ToStringArgs(outSs);
+	outSs << "[Mem:";
+	auto idx = m_memberRef.GetMemberIndex();
+	auto &name = m_memberRef.GetMemberName();
+	if(name.empty() && idx == INVALID_COMPONENT_MEMBER_INDEX)
+		outSs << "NULL]";
+	else if(idx != INVALID_COMPONENT_MEMBER_INDEX)
+		outSs << idx << "]";
+	else
+		outSs << name << "]";
+}
+std::string EntityUComponentMemberRef::ToString() const
+{
+	std::stringstream ss;
+	ss << "EntityUComponentMemberRef";
+	ToStringArgs(ss);
+	return ss.str();
+}
 
 ////////////////////
 
@@ -209,6 +271,30 @@ void MultiEntityURef::FindEntities(Game &game, std::vector<BaseEntity *> &outEnt
 	}
 }
 bool MultiEntityURef::HasEntityReference() const { return m_identifier != nullptr; }
+void MultiEntityURef::ToStringArgs(std::stringstream &outSs) const
+{
+	outSs << "[ID:";
+	if(!m_identifier)
+		outSs << "NULL]";
+	else {
+		std::visit(
+		  [&outSs](auto &val) {
+			  using T = decltype(val);
+			  if constexpr(std::is_same_v<T, util::Uuid &>)
+				  outSs << util::uuid_to_string(val) << "]";
+			  else
+				  outSs << val << "]";
+		  },
+		  *m_identifier);
+	}
+}
+std::string MultiEntityURef::ToString() const
+{
+	std::stringstream ss;
+	ss << "MultiEntityURef";
+	ToStringArgs(ss);
+	return ss.str();
+}
 
 //////////
 
@@ -262,4 +348,50 @@ void MultiEntityUComponentRef::FindComponents(Game &game, std::vector<BaseEntity
 			outComponents.reserve(outComponents.size() * 1.5 + 5);
 		outComponents.push_back(ent->FindComponent(m_componentId).get());
 	}
+}
+void MultiEntityUComponentRef::ToStringArgs(std::stringstream &outSs) const
+{
+	MultiEntityURef::ToStringArgs(outSs);
+	outSs << "[Cmp:";
+	if(!m_componentName && m_componentId == INVALID_COMPONENT_ID)
+		outSs << "NULL]";
+	else if(m_componentId != INVALID_COMPONENT_ID)
+		outSs << m_componentId << "]";
+	else
+		outSs << *m_componentName << "]";
+}
+std::string MultiEntityUComponentRef::ToString() const
+{
+	std::stringstream ss;
+	ss << "MultiEntityUComponentRef";
+	ToStringArgs(ss);
+	return ss.str();
+}
+
+//////////
+
+std::ostream &operator<<(std::ostream &out, const pragma::EntityURef &ref)
+{
+	out << ref.ToString();
+	return out;
+}
+std::ostream &operator<<(std::ostream &out, const pragma::EntityUComponentRef &ref)
+{
+	out << ref.ToString();
+	return out;
+}
+std::ostream &operator<<(std::ostream &out, const pragma::EntityUComponentMemberRef &ref)
+{
+	out << ref.ToString();
+	return out;
+}
+std::ostream &operator<<(std::ostream &out, const pragma::MultiEntityURef &ref)
+{
+	out << ref.ToString();
+	return out;
+}
+std::ostream &operator<<(std::ostream &out, const pragma::MultiEntityUComponentRef &ref)
+{
+	out << ref.ToString();
+	return out;
 }

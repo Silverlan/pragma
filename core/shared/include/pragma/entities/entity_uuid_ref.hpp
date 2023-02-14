@@ -34,7 +34,9 @@ namespace pragma {
 		const EntityIdentifier *GetIdentifier() const { return m_identifier.get(); }
 		std::optional<util::Uuid> GetUuid() const;
 		std::optional<std::string> GetClassOrName() const;
+		std::string ToString() const;
 	  protected:
+		void ToStringArgs(std::stringstream &outSs) const;
 		std::unique_ptr<EntityIdentifier> m_identifier = nullptr;
 		EntityHandle m_hEntity;
 	};
@@ -55,7 +57,9 @@ namespace pragma {
 		bool HasComponentReference() const;
 		ComponentId GetComponentId() const { return m_componentId; }
 		const std::string *GetComponentName() const { return m_componentName.get(); }
+		std::string ToString() const;
 	  protected:
+		void ToStringArgs(std::stringstream &outSs) const;
 		ComponentId m_componentId = INVALID_COMPONENT_ID;
 		std::unique_ptr<std::string> m_componentName = nullptr;
 		ComponentHandle<BaseEntityComponent> m_hComponent;
@@ -81,7 +85,9 @@ namespace pragma {
 		const ComponentMemberReference *operator->() const { return const_cast<EntityUComponentMemberRef *>(this)->operator->(); }
 
 		bool HasMemberReference() const;
+		std::string ToString() const;
 	  protected:
+		void ToStringArgs(std::stringstream &outSs) const;
 		ComponentMemberReference m_memberRef;
 	};
 
@@ -99,7 +105,9 @@ namespace pragma {
 
 		bool HasEntityReference() const;
 		const EntityIdentifier *GetIdentifier() const { return m_identifier.get(); }
+		std::string ToString() const;
 	  protected:
+		void ToStringArgs(std::stringstream &outSs) const;
 		std::unique_ptr<EntityIdentifier> m_identifier = nullptr;
 	};
 
@@ -118,11 +126,19 @@ namespace pragma {
 		bool HasComponentReference() const;
 		ComponentId GetComponentId() const { return m_componentId; }
 		const std::string *GetComponentName() const { return m_componentName.get(); }
+		std::string ToString() const;
 	  protected:
+		void ToStringArgs(std::stringstream &outSs) const;
 		ComponentId m_componentId = INVALID_COMPONENT_ID;
 		std::unique_ptr<std::string> m_componentName = nullptr;
 		ComponentHandle<BaseEntityComponent> m_hComponent;
 	};
 };
+
+std::ostream &operator<<(std::ostream &out, const pragma::EntityURef &ref);
+std::ostream &operator<<(std::ostream &out, const pragma::EntityUComponentRef &ref);
+std::ostream &operator<<(std::ostream &out, const pragma::EntityUComponentMemberRef &ref);
+std::ostream &operator<<(std::ostream &out, const pragma::MultiEntityURef &ref);
+std::ostream &operator<<(std::ostream &out, const pragma::MultiEntityUComponentRef &ref);
 
 #endif

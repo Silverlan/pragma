@@ -128,67 +128,11 @@ using ComponentMemberReferencePolicy = luabind::generic_policy<N, pragma::Compon
 	}>;
 */
 
-static std::string to_string(Game &game, const pragma::EntityURef &ref)
-{
-	std::stringstream ss;
-	ss << "[";
-	auto *ent = ref.GetEntity(game);
-	if(!ent)
-		ss << "NULL";
-	else
-		const_cast<BaseEntity *>(ent)->print(ss);
-	ss << "]";
-
-	auto *identifier = ref.GetIdentifier();
-	ss << "[";
-	if(!identifier)
-		ss << "NULL";
-	else {
-		std::visit(
-		  [&ss](auto &val) {
-			  using T = util::base_type<decltype(val)>;
-			  if constexpr(std::is_same_v<T, util::Uuid>)
-				  ss << "Uuid:" << util::uuid_to_string(val);
-			  else
-				  ss << "Name:" << val;
-		  },
-		  *identifier);
-	}
-	ss << "]";
-	return ss.str();
-}
-
-static std::string to_string(Game &game, const pragma::EntityUComponentRef &ref)
-{
-	std::stringstream ss;
-	ss << to_string(game, static_cast<const pragma::EntityURef &>(ref));
-	auto componentId = ref.GetComponentId();
-	if(componentId != pragma::INVALID_COMPONENT_ID)
-		ss << "[ComponentId:" << componentId << "]";
-	else {
-		auto *name = ref.GetComponentName();
-		if(name)
-			ss << "[ComponentName:" << *name << "]";
-		else
-			ss << "[Component:NULL]";
-	}
-	return ss.str();
-}
-
-static std::string to_string(Game &game, const pragma::EntityUComponentMemberRef &ref)
-{
-	std::stringstream ss;
-	ss << to_string(game, static_cast<const pragma::EntityURef &>(ref));
-	ss << "[";
-	auto *memberInfo = ref.GetMemberInfo(game);
-	if(memberInfo)
-		ss << "Member:" << memberInfo->GetName();
-	else
-		ss << "Member:NULL";
-	ss << "]";
-	return ss.str();
-}
-
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, pragma::EntityURef);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, pragma::EntityUComponentRef);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, pragma::EntityUComponentMemberRef);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, pragma::MultiEntityURef);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, pragma::MultiEntityUComponentRef);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, ValueDriver);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfig);
@@ -201,6 +145,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto classDefEntRef = luabind::class_<pragma::EntityURef>("UniversalEntityReference");
 	classDefEntRef.def(luabind::constructor<const BaseEntity &>());
 	classDefEntRef.def(luabind::constructor<const std::string &>());
+	classDefEntRef.def(luabind::tostring(luabind::self));
 	classDefEntRef.def("GetEntity", static_cast<BaseEntity *(pragma::EntityURef::*)(Game &)>(&pragma::EntityURef::GetEntity));
 	classDefEntRef.def(
 	  "GetUuid", +[](pragma::EntityURef &uref) -> std::optional<Lua::util::Uuid> {
@@ -208,12 +153,6 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  return uuid.has_value() ? Lua::util::Uuid {*uuid} : std::optional<Lua::util::Uuid> {};
 	  });
 	classDefEntRef.def("GetClassOrName", static_cast<std::optional<std::string> (pragma::EntityURef::*)() const>(&pragma::EntityURef::GetClassOrName));
-	classDefEntRef.def(
-	  "__tostring", +[](Game &game, const pragma::EntityURef &ref) -> std::string {
-		  std::stringstream ss;
-		  ss << "UniversalEntityReference" << to_string(game, ref);
-		  return ss.str();
-	  });
 	entsMod[classDefEntRef];
 	pragma::lua::define_custom_constructor<pragma::EntityURef, [](const Lua::util::Uuid &uuid) -> pragma::EntityURef { return pragma::EntityURef {uuid.value}; }, const Lua::util::Uuid &>(GetLuaState());
 
@@ -221,6 +160,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	classDefCompRef.def(luabind::constructor<const std::string &, pragma::ComponentId>());
 	classDefCompRef.def(luabind::constructor<const std::string &, const std::string &>());
 	classDefCompRef.def(luabind::constructor<const BaseEntity &, pragma::ComponentId>());
+	classDefCompRef.def(luabind::tostring(luabind::self));
 	classDefCompRef.def("GetComponent", static_cast<pragma::BaseEntityComponent *(pragma::EntityUComponentRef::*)(Game &)>(&pragma::EntityUComponentRef::GetComponent));
 	classDefCompRef.def("GetComponentId", &pragma::EntityUComponentMemberRef::GetComponentId);
 	classDefCompRef.def(
@@ -229,12 +169,6 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  if(!name)
 			  return {};
 		  return *name;
-	  });
-	classDefCompRef.def(
-	  "__tostring", +[](Game &game, const pragma::EntityUComponentRef &ref) -> std::string {
-		  std::stringstream ss;
-		  ss << "UniversalComponentReference" << to_string(game, ref);
-		  return ss.str();
 	  });
 	entsMod[classDefCompRef];
 	pragma::lua::define_custom_constructor<pragma::EntityUComponentRef,
@@ -254,6 +188,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	classDefMemRef.def(luabind::constructor<const BaseEntity &, pragma::ComponentId, const std::string &>());
 	classDefMemRef.def(luabind::constructor<const BaseEntity &, const std::string &, const std::string &>());
 	classDefMemRef.def(luabind::constructor<const std::string &>());
+	classDefMemRef.def(luabind::tostring(luabind::self));
 	classDefMemRef.def("GetMemberInfo", &pragma::EntityUComponentMemberRef::GetMemberInfo);
 	classDefMemRef.def(
 	  "GetMemberIndex", +[](Game &game, const pragma::EntityUComponentMemberRef &ref) -> std::optional<pragma::ComponentMemberIndex> {
@@ -289,12 +224,6 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  if(!c || !memberInfo)
 			  return std::optional<Lua::udm_type> {};
 		  return pragma::lua::get_member_value(l, const_cast<pragma::BaseEntityComponent &>(*c), *memberInfo);
-	  });
-	classDefMemRef.def(
-	  "__tostring", +[](Game &game, const pragma::EntityUComponentMemberRef &ref) -> std::string {
-		  std::stringstream ss;
-		  ss << "UniversalMemberReference" << to_string(game, ref);
-		  return ss.str();
 	  });
 	entsMod[classDefMemRef];
 	pragma::lua::define_custom_constructor<pragma::EntityUComponentMemberRef,

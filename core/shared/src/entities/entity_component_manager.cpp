@@ -31,13 +31,13 @@ static ComponentEventId get_component_event_id(const std::string &name)
 size_t pragma::get_component_member_name_hash(const std::string &name)
 {
 	auto lname = name;
-	ustring::to_lower(lname);
+	// ustring::to_lower(lname);
 	return std::hash<std::string> {}(lname);
 }
 std::string pragma::get_normalized_component_member_name(const std::string &name)
 {
 	auto lname = name;
-	ustring::to_lower(lname);
+	// ustring::to_lower(lname);
 	return lname;
 }
 ComponentMemberInfo::ComponentMemberInfo() : m_specializationType {AttributeSpecializationType::None} {}

@@ -7,6 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/game/value_driver.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/logging.hpp"
 #include <sharedutils/util_uri.hpp>
@@ -137,11 +138,15 @@ pragma::ValueDriver::Result pragma::ValueDriver::Apply(BaseEntity &ent)
 		auto *memInfo = var.memberRef.GetMemberInfo(game);
 		if(memInfo) {
 			auto *c = var.memberRef.GetComponent(game);
-			auto o = udm::visit_ng(udmType, [memInfo, c, l](auto tag) {
+			auto o = udm::visit(udmType, [memInfo, c, l](auto tag) {
 				using T = typename decltype(tag)::type;
-				T value;
-				memInfo->getterFunction(*memInfo, *c, &value);
-				return luabind::object {l, value};
+				if constexpr(pragma::is_valid_component_property_type_v<T>) {
+					T value;
+					memInfo->getterFunction(*memInfo, *c, &value);
+					return luabind::object {l, value};
+				}
+				else
+					return Lua::nil;
 			});
 			o.push(l);
 			++numPushed;

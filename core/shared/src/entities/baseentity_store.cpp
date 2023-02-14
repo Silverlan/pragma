@@ -91,6 +91,8 @@ bool BaseEntity::CreateMemberReference(pragma::EntityIdentifier identifier, std:
 		return true;
 	}
 	auto componentName = path.GetComponent(offset, &offset);
+	if(offset == std::string::npos)
+		return false;
 	auto memberName = path.GetString().substr(offset);
 	outRef = pragma::EntityUComponentMemberRef {std::move(identifier), std::string {componentName}, std::string {memberName}};
 	return true;

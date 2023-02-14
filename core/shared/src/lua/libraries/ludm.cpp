@@ -378,6 +378,12 @@ static luabind::object get_property_value(lua_State *l, const ::udm::PropertyWra
 	auto *ptr = val.GetValuePtr(type);
 	if(ptr == nullptr)
 		return {};
+	if(type == udm::Type::Element) {
+		auto *linked = val.GetLinked();
+		if(linked)
+			return luabind::object {l, *const_cast<::udm::LinkedPropertyWrapper *>(linked)};
+		return luabind::object {l, *const_cast<::udm::PropertyWrapper *>(&val)};
+	}
 	return get_property_value(l, type, ptr);
 }
 static luabind::object get_property_value(lua_State *l, const ::udm::PropertyWrapper &val, ::udm::Type type)

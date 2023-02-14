@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/game/value_driver.hpp"
 #include "pragma/lua/lua_call.hpp"
+#include "pragma/logging.hpp"
 #include <sharedutils/util_uri.hpp>
 
 using namespace pragma;
@@ -57,6 +58,16 @@ void pragma::ValueDriverDescriptor::AddReference(const std::string &name, std::s
 	m_variables[name] = std::move(path);
 	m_expressionDirty = true;
 }
+void pragma::ValueDriverDescriptor::ClearConstants()
+{
+	m_constants.clear();
+	m_expressionDirty = true;
+}
+void pragma::ValueDriverDescriptor::ClearReferences()
+{
+	m_variables.clear();
+	m_expressionDirty = true;
+}
 
 std::ostream &operator<<(std::ostream &out, const pragma::ValueDriverDescriptor &descriptor)
 {
@@ -84,22 +95,31 @@ ValueDriver::ValueDriver(pragma::ComponentId componentId, ComponentMemberReferen
 }
 void pragma::ValueDriver::ResetFailureState() { umath::set_flag(m_stateFlags, StateFlags::MemberRefFailed | StateFlags::ComponentRefFailed | StateFlags::EntityRefFailed, false); }
 bool pragma::ValueDriver::IsFailureFlagSet() const { return umath::is_flag_set(m_stateFlags, StateFlags::MemberRefFailed | StateFlags::ComponentRefFailed | StateFlags::EntityRefFailed); }
-bool pragma::ValueDriver::Apply(BaseEntity &ent)
+pragma::ValueDriver::Result pragma::ValueDriver::Apply(BaseEntity &ent)
 {
 	auto &luaExpression = m_descriptor.GetLuaExpression();
-	if(!luaExpression)
-		return false;
+	auto &expression = m_descriptor.GetExpression();
+	if(!luaExpression) {
+		spdlog::trace("Failed to execute value driver: No Lua expression has been specified!");
+		return Result::ErrorNoExpression;
+	}
 	auto *l = luaExpression.interpreter();
 	auto &game = *pragma::get_engine()->GetNetworkState(l)->GetGameState();
 	auto component = ent.FindComponent(m_componentId);
-	if(component.expired())
-		return false;
+	if(component.expired()) {
+		spdlog::trace("Failed to execute value driver (Expr: '{}'): Component {} could not be found in driver entity '{}'!", expression, m_componentId, ent.ToString());
+		return Result::ErrorComponentNotFound;
+	}
 	auto *member = m_memberReference.GetMemberInfo(*component);
-	if(!member)
-		return false;
+	if(!member) {
+		spdlog::trace("Failed to execute value driver (Expr: '{}'): Member '{}' could not be found in component {} of driver entity '{}'!", expression, m_memberReference.GetMemberName(), m_componentId, ent.ToString());
+		return Result::ErrorMemberNotFound;
+	}
 	auto udmType = ents::member_type_to_udm_type(member->type);
-	if(udmType == udm::Type::Invalid)
-		return false;
+	if(udmType == udm::Type::Invalid) {
+		spdlog::trace("Failed to execute value driver (Expr: '{}'): Member '{}' of component {} of driver entity '{}' has unsupported type {}!", expression, m_memberReference.GetMemberName(), m_componentId, ent.ToString(), magic_enum::enum_name(member->type));
+		return Result::ErrorInvalidMemberType;
+	}
 	luabind::object arg;
 	udm::visit_ng(udmType, [l, &arg, member, &component](auto tag) {
 		using T = typename decltype(tag)::type;
@@ -133,14 +153,15 @@ bool pragma::ValueDriver::Apply(BaseEntity &ent)
 
 			if(!umath::is_flag_set(m_stateFlags, StateFlags::MemberRefFailed)) {
 				ResetFailureState(); // Clear other failure flags
-				Con::cwar << "Unable to apply value driver with expression '" << m_descriptor.GetExpression() << "': Variable '" << pair.first << "' is member reference, but is pointing to invalid ";
+				std::string type;
 				if(!var.memberRef.GetEntity(game))
-					Con::cwar << "entity";
+					type = "entity";
 				else if(!var.memberRef.GetComponent(game))
-					Con::cwar << "component";
+					type = "component";
 				else
-					Con::cwar << "member";
-				Con::cwar << "!" << Con::endl;
+					type = "member";
+				spdlog::trace("Failed to execute value driver (Expr: '{}') for member '{}' of component {} of driver entity '{}': Variable '{}' is member reference, but is pointing to invalid {}!", expression, m_memberReference.GetMemberName(), m_componentId, ent.ToString(), pair.first,
+				  type);
 				umath::set_flag(m_stateFlags, StateFlags::MemberRefFailed);
 			}
 			break;
@@ -159,12 +180,13 @@ bool pragma::ValueDriver::Apply(BaseEntity &ent)
 
 			if(!umath::is_flag_set(m_stateFlags, StateFlags::ComponentRefFailed)) {
 				ResetFailureState(); // Clear other failure flags
-				Con::cwar << "Unable to apply value driver with expression '" << m_descriptor.GetExpression() << "': Variable '" << pair.first << "' is component reference, but is pointing to invalid ";
+				std::string type;
 				if(!var.memberRef.GetEntity(game))
-					Con::cwar << "entity";
+					type = "entity";
 				else
-					Con::cwar << "component";
-				Con::cwar << "!" << Con::endl;
+					type = "component";
+				spdlog::trace("Failed to execute value driver (Expr: '{}') for member '{}' of component {} of driver entity '{}': Variable '{}' is component reference, but is pointing to invalid {}!", expression, m_memberReference.GetMemberName(), m_componentId, ent.ToString(), pair.first,
+				  type);
 				umath::set_flag(m_stateFlags, StateFlags::ComponentRefFailed);
 			}
 			break;
@@ -180,9 +202,11 @@ bool pragma::ValueDriver::Apply(BaseEntity &ent)
 		// Is either an invalid reference altogether or an invalid entity reference
 		argsValid = false;
 
+		spdlog::trace("Failed to execute value driver (Expr: '{}') for member '{}' of component {} of driver entity '{}': Parameter '{}' is invalid!", expression, m_memberReference.GetMemberName(), m_componentId, ent.ToString(), var.memberRef.ToString());
+
 		if(!umath::is_flag_set(m_stateFlags, StateFlags::EntityRefFailed)) {
 			ResetFailureState(); // Clear other failure flags
-			Con::cwar << "Unable to apply value driver with expression '" << m_descriptor.GetExpression() << "': Variable '" << pair.first << "' is entity reference, but is pointing to invalid entity!" << Con::endl;
+			spdlog::trace("Failed to execute value driver (Expr: '{}') for member '{}' of component {} of driver entity '{}': Variable '{}' is entity reference, but is pointing to invalid entity!", expression, m_memberReference.GetMemberName(), m_componentId, ent.ToString(), pair.first);
 			umath::set_flag(m_stateFlags, StateFlags::EntityRefFailed);
 		}
 		break;
@@ -191,29 +215,34 @@ bool pragma::ValueDriver::Apply(BaseEntity &ent)
 		// Can't execute the driver if one or more of the arguments
 		// couldn't be determined
 		Lua::Pop(l, numPushed);
-		return false;
+		return Result::ErrorInvalidParameterReference;
 	}
 	auto c = Lua::ProtectedCall(l, numPushed - 1, 1);
 	if(c != Lua::StatusCode::Ok) {
 		Lua::HandleLuaError(l, c);
-		return false;
+		spdlog::trace("Failed to execute value driver (Expr: '{}') for member '{}' of component {} of driver entity '{}': Failed to execute expression!", expression, m_memberReference.GetMemberName(), m_componentId, ent.ToString());
+		return Result::ErrorExpressionExecutionFailed;
 	}
 	luabind::object result {luabind::from_stack(l, -1)};
 	Lua::Pop(l, 1);
 
-	if(!result)
-		return false;
-	udm::visit_ng(udmType, [l, this, &result, &member, &component](auto tag) {
+	if(!result) {
+		spdlog::trace("Failed to execute value driver (Expr: '{}') for member '{}' of component {} of driver entity '{}': Expression has no return value!", expression, m_memberReference.GetMemberName(), m_componentId, ent.ToString());
+		return Result::ErrorNoExpressionReturnValue;
+	}
+	return udm::visit_ng(udmType, [l, this, &result, &member, &component, &ent, &expression](auto tag) {
 		using T = typename decltype(tag)::type;
 		try {
 			auto ret = luabind::object_cast<T>(result);
 			member->setterFunction(*member, *component, &ret);
 		}
 		catch(const luabind::cast_failed &e) {
-			Con::cwar << "Driver expression '" << m_descriptor.GetExpression() << "' return value is incompatible with expected type '" << magic_enum::enum_name(member->type) << "'!" << Con::endl;
+			spdlog::trace("Failed to execute value driver (Expr: '{}') for member '{}' of component {} of driver entity '{}': Expression return value has type which is incompatible with expected type '{}'!", expression, m_memberReference.GetMemberName(), m_componentId, ent.ToString(),
+			  magic_enum::enum_name(member->type));
+			return Result::ErrorUnexpectedExpressionReturnValueType;
 		}
+		return Result::Success;
 	});
-	return true;
 }
 
 ////////////

@@ -31,7 +31,7 @@ pragma::AnimationUpdateManager::AnimationUpdateManager(Game &game) : game {game}
 void pragma::AnimationUpdateManager::UpdateEntityAnimationDrivers(double dt)
 {
 	for(auto *ent : EntityIterator {game, m_animationDriverComponentId})
-		ent->GetComponent<pragma::AnimationDriverComponent>()->ApplyDrivers();
+		ent->GetComponent<pragma::AnimationDriverComponent>()->ApplyDriver();
 }
 void pragma::AnimationUpdateManager::UpdateConstraints(double dt)
 {

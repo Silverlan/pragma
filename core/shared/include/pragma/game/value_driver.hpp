@@ -18,6 +18,7 @@ namespace pragma {
 		ValueDriverDescriptor(lua_State *l, std::string expression, std::unordered_map<std::string, std::string> variables, std::unordered_map<std::string, udm::PProperty> constants);
 		ValueDriverDescriptor(lua_State *l, std::string expression, std::unordered_map<std::string, std::string> variables) : ValueDriverDescriptor {l, expression, std::move(variables), {}} {}
 		ValueDriverDescriptor(lua_State *l, std::string expression) : ValueDriverDescriptor {l, expression, {}, {}} {}
+		ValueDriverDescriptor(lua_State *l) : ValueDriverDescriptor {l, {}, {}, {}} {}
 		void SetExpression(const std::string &expression);
 		const luabind::object &GetLuaExpression() const;
 		const std::string &GetExpression() const { return m_expression; }
@@ -30,6 +31,9 @@ namespace pragma {
 		}
 		void AddConstant(const std::string &name, const udm::PProperty &prop);
 		void AddReference(const std::string &name, std::string path);
+
+		void ClearConstants();
+		void ClearReferences();
 
 		const std::unordered_map<std::string, udm::PProperty> &GetConstants() const { return m_constants; }
 		const std::unordered_map<std::string, std::string> &GetReferences() const { return m_variables; }
@@ -53,13 +57,14 @@ namespace pragma {
 	};
 	struct DLLNETWORK ValueDriver {
 		enum class StateFlags : uint32_t { None = 0u, MemberRefFailed = 1u, ComponentRefFailed = MemberRefFailed << 1u, EntityRefFailed = ComponentRefFailed << 1u };
+		enum class Result : uint32_t { Success = 0, ErrorNoExpression, ErrorComponentNotFound, ErrorMemberNotFound, ErrorInvalidMemberType, ErrorInvalidParameterReference, ErrorExpressionExecutionFailed, ErrorNoExpressionReturnValue, ErrorUnexpectedExpressionReturnValueType };
 		ValueDriver() = default;
 		ValueDriver(pragma::ComponentId componentId, ComponentMemberReference memberRef, ValueDriverDescriptor descriptor, const util::Uuid &self);
 		const ComponentMemberReference &GetMemberReference() const { return m_memberReference; }
 		const ValueDriverDescriptor &GetDescriptor() const { return m_descriptor; }
 		pragma::ComponentId GetComponentId() const { return m_componentId; }
 
-		bool Apply(BaseEntity &ent);
+		Result Apply(BaseEntity &ent);
 		void ResetFailureState();
 		bool IsFailureFlagSet() const;
 	  private:

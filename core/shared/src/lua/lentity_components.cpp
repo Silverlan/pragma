@@ -107,13 +107,6 @@ AnimationEvent Lua::get_animation_event(lua_State *l, int32_t tArgs, uint32_t ev
 	return ev;
 }
 
-template<typename TMemberId>
-    requires(std::is_same_v<TMemberId, pragma::ComponentMemberIndex> || std::is_same_v<TMemberId, const std::string &>)
-static void add_driver(pragma::AnimationDriverComponent &hComponent, pragma::ComponentId componentId, TMemberId memberIdx, pragma::ValueDriverDescriptor descriptor)
-{
-	hComponent.AddDriver(componentId, memberIdx, std::move(descriptor));
-}
-
 static int lua_match_component_member_reference(lua_State *l, int index) { return lua_isstring(l, index) ? 0 : luabind::no_match; }
 static pragma::ComponentMemberReference lua_to_component_member_reference(lua_State *l, int index) { return pragma::ComponentMemberReference {Lua::CheckString(l, index)}; }
 
@@ -396,9 +389,14 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defAnimated2];
 
 	auto defDriverC = pragma::lua::create_entity_component_class<pragma::AnimationDriverComponent, pragma::BaseEntityComponent>("AnimationDriverComponent");
-	defDriverC.def("AddDriver", static_cast<void (*)(pragma::AnimationDriverComponent &, pragma::ComponentId, pragma::ComponentMemberIndex, pragma::ValueDriverDescriptor)>(&add_driver<pragma::ComponentMemberIndex>));
-	defDriverC.def("AddDriver", static_cast<void (*)(pragma::AnimationDriverComponent &, pragma::ComponentId, const std::string &, pragma::ValueDriverDescriptor)>(&add_driver<const std::string &>));
-	defDriverC.def("ClearDrivers", &pragma::AnimationDriverComponent::ClearDrivers);
+	defDriverC.def("SetExpression", &pragma::AnimationDriverComponent::SetExpression);
+	defDriverC.def("GetExpression", &pragma::AnimationDriverComponent::GetExpression);
+	defDriverC.def("AddReference", &pragma::AnimationDriverComponent::AddReference);
+	defDriverC.def("GetConstants", &pragma::AnimationDriverComponent::GetConstants);
+	defDriverC.def("GetReferences", &pragma::AnimationDriverComponent::GetReferences);
+	defDriverC.def("SetDrivenObject", &pragma::AnimationDriverComponent::SetDrivenObject);
+	defDriverC.def("GetDrivenObject", &pragma::AnimationDriverComponent::GetDrivenObject);
+	defDriverC.def("AddConstant", static_cast<void (pragma::AnimationDriverComponent::*)(const std::string &, const udm::PProperty &)>(&pragma::AnimationDriverComponent::AddConstant));
 
 	auto defDriver = luabind::class_<pragma::ValueDriver>("Driver");
 	defDriver.def(luabind::tostring(luabind::self));

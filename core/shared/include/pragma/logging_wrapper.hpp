@@ -18,10 +18,15 @@ namespace pragma {
 	constexpr auto DEFAULT_LOG_FILE = "log.txt";
 	namespace logging {
 		DLLNETWORK int32_t severity_to_spdlog_level(::util::LogSeverity severity);
+		DLLNETWORK ::util::LogSeverity spdlog_level_to_severity(int32_t spdlogLevel);
 	};
 	DLLNETWORK void log(const std::string &msg, ::util::LogSeverity severity = ::util::LogSeverity::Info);
 	DLLNETWORK bool is_log_level_enabled(::util::LogSeverity severity);
 	DLLNETWORK void flush_loggers();
+	DLLNETWORK void set_console_log_level(::util::LogSeverity level);
+	DLLNETWORK ::util::LogSeverity get_console_log_level();
+	DLLNETWORK void set_file_log_level(::util::LogSeverity level);
+	DLLNETWORK ::util::LogSeverity get_file_log_level();
 
 	namespace detail {
 		DLLNETWORK void initialize_logger(::util::LogSeverity conLogLevel = DEFAULT_CONSOLE_LOG_LEVEL, ::util::LogSeverity fileLogLevel = DEFAULT_FILE_LOG_LEVEL, const std::optional<std::string> &logFile = DEFAULT_LOG_FILE);

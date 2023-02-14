@@ -33,6 +33,26 @@ int32_t pragma::logging::severity_to_spdlog_level(util::LogSeverity severity)
 	return spdlog::level::info;
 }
 
+::util::LogSeverity pragma::logging::spdlog_level_to_severity(int32_t spdlogLevel)
+{
+	switch(spdlogLevel) {
+	case spdlog::level::info:
+		return util::LogSeverity::Info;
+	case spdlog::level::warn:
+		return util::LogSeverity::Warning;
+	case spdlog::level::err:
+		return util::LogSeverity::Error;
+	case spdlog::level::critical:
+		return util::LogSeverity::Critical;
+	case spdlog::level::debug:
+		return util::LogSeverity::Debug;
+	case spdlog::level::trace:
+		return util::LogSeverity::Trace;
+	}
+	static_assert(umath::to_integral(util::LogSeverity::Count) == 7, "Expand this list when more severity types are added!");
+	return ::util::LogSeverity::Info;
+}
+
 void pragma::log(const std::string &msg, util::LogSeverity severity) { spdlog::log(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(severity)), msg); }
 
 bool pragma::is_log_level_enabled(::util::LogSeverity severity) { return spdlog::should_log(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(severity))); }
@@ -45,6 +65,68 @@ void pragma::flush_loggers()
 		logger0->flush();
 	if(logger1)
 		logger1->flush();
+}
+
+static void update_pragma_log_level()
+{
+	auto logger = spdlog::get("pragma_logger");
+	if(!logger)
+		return;
+	auto &sinks = logger->sinks();
+	if(sinks.empty())
+		return;
+	auto &sink0 = sinks.front();
+	auto level = sink0->level();
+	for(auto it = sinks.begin() + 1; it != sinks.end(); ++it)
+		level = umath::min(level, (*it)->level());
+	logger->set_level(level);
+}
+void pragma::set_console_log_level(::util::LogSeverity level)
+{
+	auto logger = spdlog::get("pragma_logger");
+	if(!logger)
+		return;
+	auto &sinks = logger->sinks();
+	if(sinks.empty())
+		return;
+	auto &sink = sinks.front();
+	sink->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(level)));
+
+	update_pragma_log_level();
+}
+::util::LogSeverity pragma::get_console_log_level()
+{
+	auto logger = spdlog::get("pragma_logger");
+	if(!logger)
+		return ::util::LogSeverity::Disabled;
+	auto &sinks = logger->sinks();
+	if(sinks.empty())
+		return ::util::LogSeverity::Disabled;
+	return logging::spdlog_level_to_severity(sinks.front()->level());
+}
+void pragma::set_file_log_level(::util::LogSeverity level)
+{
+	auto logger = spdlog::get("pragma_logger");
+	if(logger) {
+		auto &sinks = logger->sinks();
+		if(sinks.size() >= 2) {
+			auto &sinkFile = sinks[1];
+			sinkFile->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(level)));
+		}
+	}
+
+	auto loggerFile = spdlog::get("pragma_file_logger");
+	if(loggerFile)
+		loggerFile->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(level)));
+
+	update_pragma_log_level();
+}
+::util::LogSeverity pragma::get_file_log_level()
+{
+	auto loggerFile = spdlog::get("pragma_file_logger");
+	if(!loggerFile)
+		return ::util::LogSeverity::Disabled;
+	return logging::spdlog_level_to_severity(loggerFile->level());
 }
 
 /////////////////////////////

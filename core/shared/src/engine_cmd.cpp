@@ -11,6 +11,7 @@
 #include "pragma/console/conout.h"
 #include "pragma/game/savegame.hpp"
 #include "pragma/asset/util_asset.hpp"
+#include "pragma/logging_wrapper.hpp"
 #include "pragma/localization.h"
 #include <pragma/console/convars.h>
 #include <pragma/lua/util.hpp>
@@ -442,6 +443,28 @@ void Engine::RegisterConsoleCommands()
 	conVarMap.RegisterConCommand(
 	  "debug_vtune_prof_end", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ::debug::get_domain().EndTask(); }, ConVarFlags::None, "End the VTune profiler.");
 #endif
+	conVarMap.RegisterConCommand(
+	  "log_level_console",
+	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  if(argv.empty()) {
+			  auto logLevel = pragma::get_console_log_level();
+			  Con::cout << "Current console log level: " << magic_enum::enum_name(logLevel) << Con::endl;
+			  return;
+		  }
+		  pragma::set_console_log_level(static_cast<util::LogSeverity>(util::to_int(argv[0])));
+	  },
+	  ConVarFlags::None, "Changes the console logging level. Usage: log_level_con <level>. Level can be: 0 = trace, 1 = debug, 2 = info, 3 = warning, 4 = error, 5 = critical, 6 = disabled.");
+	conVarMap.RegisterConCommand(
+	  "log_level_file",
+	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  if(argv.empty()) {
+			  auto logLevel = pragma::get_file_log_level();
+			  Con::cout << "Current file log level: " << magic_enum::enum_name(logLevel) << Con::endl;
+			  return;
+		  }
+		  pragma::set_file_log_level(static_cast<util::LogSeverity>(util::to_int(argv[0])));
+	  },
+	  ConVarFlags::None, "Changes the file logging level. Usage: log_level_file <level>. Level can be: 0 = trace, 1 = debug, 2 = info, 3 = warning, 4 = error, 5 = critical, 6 = disabled.");
 }
 
 #include "pragma/util/curl_query_handler.hpp"

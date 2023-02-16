@@ -51,11 +51,11 @@ SBaseEntity *SGame::CreateEntity(std::string classname)
 		return entlua;
 	SBaseEntity *(*factory)(void) = g_ServerEntityFactories->FindFactory(classname);
 	if(factory == NULL) {
-		static auto skipSecondAttempt = false;
-		if(skipSecondAttempt == false && LoadLuaEntityByClass(classname) == true) {
-			skipSecondAttempt = true;
+		static std::unordered_set<std::string> skipSet;
+		if(skipSet.find(classname) == skipSet.end() && LoadLuaEntityByClass(classname) == true) {
+			skipSet.insert(classname);
 			auto *r = CreateEntity(classname);
-			skipSecondAttempt = false;
+			skipSet.erase(classname);
 			return r;
 		}
 		Con::cwar << "Unable to create entity '" << classname << "': Factory not found!" << Con::endl;

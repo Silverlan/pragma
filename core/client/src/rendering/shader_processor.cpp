@@ -21,6 +21,7 @@
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/model/c_model.h"
+#include "pragma/logging.hpp"
 #include <prosper_command_buffer.hpp>
 #include <cmaterial.h>
 
@@ -31,7 +32,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 {
 	auto &hCam = scene.GetActiveCamera();
 	if(hCam.expired()) {
-		Con::cwar << "Attempted to bind scene with no active camera!" << Con::endl;
+		spdlog::trace( "Attempted to bind scene '{}' with no active camera!",scene.GetEntity().ToString() );
 		return false;
 	}
 	auto *dsScene = view ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();

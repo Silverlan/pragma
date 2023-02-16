@@ -77,7 +77,7 @@ class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseE
 	static constexpr auto PSAVE_IDENTIFIER = "PSAVE";
 	static constexpr uint32_t PSAVE_VERSION = 1;
 
-	enum class StateFlags : uint8_t {
+	enum class StateFlags : uint16_t {
 		None = 0u,
 		Spawned = 1u,
 		SnapshotUpdateRequired = Spawned << 1u,
@@ -88,7 +88,8 @@ class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseE
 		RenderBoundsChanged = CollisionBoundsChanged << 1u,
 
 		HasWorldComponent = RenderBoundsChanged << 1u,
-		Removed = HasWorldComponent << 1u
+		Removed = HasWorldComponent << 1u,
+		IsSpawning = Removed << 1u
 	};
 
 	static void RegisterEvents(pragma::EntityComponentManager &componentManager);

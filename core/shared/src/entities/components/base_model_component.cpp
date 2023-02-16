@@ -316,8 +316,13 @@ void BaseModelComponent::SetModel(const std::shared_ptr<Model> &mdl)
 {
 	ClearMembers();
 
+	// If bodygroups have been specified before the entity was spawned, keep them.
+	// Otherwise they will be discarded.
+	auto keepBodygroups = umath::is_flag_set(GetEntity().GetStateFlags(), BaseEntity::StateFlags::IsSpawning);
+
 	m_model = mdl;
-	m_bodyGroups.clear();
+	if(!keepBodygroups)
+		m_bodyGroups.clear();
 	m_bMaterialsLoaded = true;
 	if(m_onModelMaterialsLoaded.IsValid())
 		m_onModelMaterialsLoaded.Remove();
@@ -325,6 +330,8 @@ void BaseModelComponent::SetModel(const std::shared_ptr<Model> &mdl)
 		if(GetEntity().IsRemoved())
 			return;
 		m_modelName = nullptr;
+		if(!keepBodygroups)
+			m_bodyGroups.clear();
 		OnModelChanged(nullptr);
 		OnMembersChanged();
 		return;

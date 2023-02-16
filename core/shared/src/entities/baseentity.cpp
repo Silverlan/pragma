@@ -332,7 +332,9 @@ void BaseEntity::Spawn()
 {
 	if(IsSpawned())
 		return;
+	umath::set_flag(m_stateFlags, StateFlags::IsSpawning);
 	DoSpawn();
+	umath::set_flag(m_stateFlags, StateFlags::IsSpawning, false);
 	OnPostSpawn();
 }
 

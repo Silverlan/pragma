@@ -76,24 +76,32 @@ void ConstraintComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void ConstraintComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ConstraintComponent::ApplyConstraint() { InvokeEventCallbacks(EVENT_APPLY_CONSTRAINT); }
 
-std::optional<ConstraintComponent::ConstraintParticipants> ConstraintComponent::GetConstraintParticipants() const
+std::optional<ConstraintComponent::ConstraintParticipants> ConstraintComponent::GetConstraintParticipants(bool drivenObjectOnly) const
 {
 	auto &game = *GetEntity().GetNetworkState()->GetGameState();
+
 	auto &drivenObj = GetDrivenObject();
-	auto &driver = GetDriver();
 	auto *drivenObjC = drivenObj.GetComponent(game);
-	auto *driverC = driver.GetComponent(game);
 	drivenObj.UpdateMemberIndex(game);
-	driver.UpdateMemberIndex(game);
 	auto idxDrivenObject = drivenObj.GetMemberIndex();
-	auto idxDriver = driver.GetMemberIndex();
-	if(!drivenObjC || !driverC || idxDrivenObject == pragma::INVALID_COMPONENT_MEMBER_INDEX || idxDriver == pragma::INVALID_COMPONENT_MEMBER_INDEX)
+	if(!drivenObjC || idxDrivenObject == pragma::INVALID_COMPONENT_MEMBER_INDEX)
 		return {};
+
 	ConstraintParticipants participants {};
-	participants.driverC = const_cast<pragma::BaseEntityComponent *>(driverC);
 	participants.drivenObjectC = const_cast<pragma::BaseEntityComponent *>(drivenObjC);
-	participants.driverPropIdx = idxDriver;
 	participants.drivenObjectPropIdx = idxDrivenObject;
+	if(drivenObjectOnly)
+		return participants;
+
+	auto &driver = GetDriver();
+	auto *driverC = driver.GetComponent(game);
+	driver.UpdateMemberIndex(game);
+	auto idxDriver = driver.GetMemberIndex();
+	if(!driverC || idxDriver == pragma::INVALID_COMPONENT_MEMBER_INDEX)
+		return {};
+
+	participants.driverC = const_cast<pragma::BaseEntityComponent *>(driverC);
+	participants.driverPropIdx = idxDriver;
 	return participants;
 }
 

@@ -93,7 +93,7 @@ void ConstraintLimitRotationComponent::ApplyConstraint()
 	if(m_constraintC.expired())
 		return;
 	auto influence = m_constraintC->GetInfluence();
-	auto constraintInfo = m_constraintC->GetConstraintParticipants();
+	auto constraintInfo = m_constraintC->GetConstraintParticipants(true);
 	if(!constraintInfo || influence == 0.f)
 		return;
 	Quat rot;

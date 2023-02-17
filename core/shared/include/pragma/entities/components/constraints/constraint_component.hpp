@@ -55,7 +55,7 @@ namespace pragma {
 
 		void ApplyConstraint();
 
-		std::optional<ConstraintParticipants> GetConstraintParticipants() const;
+		std::optional<ConstraintParticipants> GetConstraintParticipants(bool drivenObjectOnly = false) const;
 
 		virtual void InitializeLuaObject(lua_State *lua) override;
 	  protected:

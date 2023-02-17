@@ -148,8 +148,9 @@ void ConstraintLimitLocationComponent::ApplyConstraint()
 {
 	if(m_constraintC.expired())
 		return;
+	auto influence = m_constraintC->GetInfluence();
 	auto constraintInfo = m_constraintC->GetConstraintParticipants();
-	if(!constraintInfo)
+	if(!constraintInfo || influence == 0.f)
 		return;
 	Vector3 pos;
 	auto res = constraintInfo->drivenObjectC->GetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), pos, true);
@@ -157,6 +158,7 @@ void ConstraintLimitLocationComponent::ApplyConstraint()
 		spdlog::trace("Failed to transform component property value for property {} for driven object of constraint '{}'.", constraintInfo->drivenObjectPropIdx, GetEntity().ToString());
 		return;
 	}
+	auto origPos = pos;
 	constexpr auto numAxes = umath::to_integral(pragma::Axis::Count);
 	for(auto i = decltype(numAxes) {0u}; i < numAxes; ++i) {
 		auto axis = static_cast<pragma::Axis>(i);
@@ -165,5 +167,7 @@ void ConstraintLimitLocationComponent::ApplyConstraint()
 		if(IsMaximumEnabled(axis))
 			pos[i] = umath::min(pos[i], GetMaximum(axis));
 	}
+
+	pos = uvec::lerp(origPos, pos, influence);
 	constraintInfo->drivenObjectC->SetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), pos, true);
 }

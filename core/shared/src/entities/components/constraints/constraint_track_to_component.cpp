@@ -63,8 +63,9 @@ void ConstraintTrackToComponent::ApplyConstraint()
 {
 	if(m_constraintC.expired())
 		return;
+	auto influence = m_constraintC->GetInfluence();
 	auto constraintInfo = m_constraintC->GetConstraintParticipants();
-	if(!constraintInfo)
+	if(!constraintInfo || influence == 0.f)
 		return;
 	if(!m_drivenObjectRotationInitialized) {
 		m_drivenObjectRotationInitialized = true;
@@ -124,6 +125,13 @@ void ConstraintTrackToComponent::ApplyConstraint()
 	}
 
 	auto rot = uquat::create_look_rotation(dir, up);
+	if(influence < 1.f) {
+		Quat curRot;
+		auto res = constraintInfo->drivenObjectC->GetTransformMemberRot(idxDrivenObjectRot, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot, true);
+		if(res) {
+			rot = uquat::slerp(curRot, rot, influence);
+		}
+	}
 	constraintInfo->drivenObjectC->SetTransformMemberRot(idxDrivenObjectRot, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot, true);
 }
 #pragma optimize("", on)

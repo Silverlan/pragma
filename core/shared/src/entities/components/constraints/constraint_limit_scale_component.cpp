@@ -154,8 +154,9 @@ void ConstraintLimitScaleComponent::ApplyConstraint()
 {
 	if(m_constraintC.expired())
 		return;
+	auto influence = m_constraintC->GetInfluence();
 	auto constraintInfo = m_constraintC->GetConstraintParticipants();
-	if(!constraintInfo)
+	if(!constraintInfo || influence == 0.f)
 		return;
 	Vector3 scale;
 	auto res = constraintInfo->drivenObjectC->GetTransformMemberScale(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), scale, true);
@@ -163,6 +164,7 @@ void ConstraintLimitScaleComponent::ApplyConstraint()
 		spdlog::trace("Failed to transform component property value for property {} for driven object of constraint '{}'.", constraintInfo->drivenObjectPropIdx, GetEntity().ToString());
 		return;
 	}
+	auto origScale = scale;
 	constexpr auto numAxes = umath::to_integral(pragma::Axis::Count);
 	for(auto i = decltype(numAxes) {0u}; i < numAxes; ++i) {
 		auto axis = static_cast<pragma::Axis>(i);
@@ -171,5 +173,7 @@ void ConstraintLimitScaleComponent::ApplyConstraint()
 		if(IsMaximumEnabled(axis))
 			scale[i] = umath::min(scale[i], GetMaximum(axis));
 	}
+
+	scale = uvec::lerp(origScale, scale, influence);
 	constraintInfo->drivenObjectC->SetTransformMemberScale(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), scale, true);
 }

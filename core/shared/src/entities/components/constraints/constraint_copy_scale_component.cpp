@@ -35,8 +35,9 @@ void ConstraintCopyScaleComponent::ApplyConstraint()
 {
 	if(m_constraintC.expired())
 		return;
+	auto influence = m_constraintC->GetInfluence();
 	auto constraintInfo = m_constraintC->GetConstraintParticipants();
-	if(!constraintInfo)
+	if(!constraintInfo || influence == 0.f)
 		return;
 	Vector3 scaleDriven;
 	auto res = constraintInfo->drivenObjectC->GetTransformMemberScale(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), scaleDriven, true);
@@ -55,5 +56,6 @@ void ConstraintCopyScaleComponent::ApplyConstraint()
 	if(m_constraintSpaceC.valid())
 		m_constraintSpaceC->ApplyFilter(scaleDriver, scaleDriven, scaleDriver);
 
+	scaleDriver = uvec::lerp(scaleDriven, scaleDriver, influence);
 	constraintInfo->drivenObjectC->SetTransformMemberScale(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), scaleDriver, true);
 }

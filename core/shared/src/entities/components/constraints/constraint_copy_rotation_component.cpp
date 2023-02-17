@@ -36,8 +36,9 @@ void ConstraintCopyRotationComponent::ApplyConstraint()
 {
 	if(m_constraintC.expired())
 		return;
+	auto influence = m_constraintC->GetInfluence();
 	auto constraintInfo = m_constraintC->GetConstraintParticipants();
-	if(!constraintInfo)
+	if(!constraintInfo || influence == 0.f)
 		return;
 	Quat rotDriven;
 	auto res = constraintInfo->drivenObjectC->GetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rotDriven, true);
@@ -60,5 +61,6 @@ void ConstraintCopyRotationComponent::ApplyConstraint()
 		rotDriver = uquat::create(angDriver);
 	}
 
+	rotDriver = uquat::slerp(rotDriven, rotDriver, influence);
 	constraintInfo->drivenObjectC->SetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rotDriver, true);
 }

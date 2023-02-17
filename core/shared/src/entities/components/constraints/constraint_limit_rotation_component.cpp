@@ -92,8 +92,9 @@ void ConstraintLimitRotationComponent::ApplyConstraint()
 {
 	if(m_constraintC.expired())
 		return;
+	auto influence = m_constraintC->GetInfluence();
 	auto constraintInfo = m_constraintC->GetConstraintParticipants();
-	if(!constraintInfo)
+	if(!constraintInfo || influence == 0.f)
 		return;
 	Quat rot;
 	auto res = constraintInfo->drivenObjectC->GetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot, true);
@@ -102,6 +103,7 @@ void ConstraintLimitRotationComponent::ApplyConstraint()
 		return;
 	}
 	auto ang = EulerAngles {rot};
+	auto origRot = rot;
 	constexpr auto numAxes = umath::to_integral(pragma::Axis::Count);
 	for(auto i = decltype(numAxes) {0u}; i < numAxes; ++i) {
 		auto axis = static_cast<pragma::Axis>(i);
@@ -111,5 +113,7 @@ void ConstraintLimitRotationComponent::ApplyConstraint()
 		ang[i] = umath::clamp(ang[i], limit.x, limit.y);
 	}
 	rot = uquat::create(ang);
+
+	rot = uquat::slerp(origRot, rot, influence);
 	constraintInfo->drivenObjectC->SetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot, true);
 }

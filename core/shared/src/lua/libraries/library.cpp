@@ -20,6 +20,7 @@
 #include "pragma/lua/libraries/lasset.hpp"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/libraries/lfile.h"
+#include "pragma/logging_wrapper.hpp"
 #include "pragma/debug/debug_render_info.hpp"
 #include "pragma/debug/intel_vtune.hpp"
 #include "pragma/game/game_resources.hpp"
@@ -1459,6 +1460,15 @@ void Game::RegisterLuaLibraries()
 		                                                                                                                                                                              Lua::PushString(l, prefix);
 		                                                                                                                                                                              return 1;
 	                                                                                                                                                                              }}});
+
+	auto modLog = luabind::module_(GetLuaState(), "log");
+	modLog[luabind::def("is_log_level_enabled", &pragma::is_log_level_enabled)];
+	modLog[luabind::def("flush_loggers", &pragma::flush_loggers)];
+	modLog[luabind::def("set_console_log_level", &pragma::set_console_log_level)];
+	modLog[luabind::def("get_console_log_level", &pragma::get_console_log_level)];
+	modLog[luabind::def("set_file_log_level", &pragma::set_file_log_level)];
+	modLog[luabind::def("get_file_log_level", &pragma::get_file_log_level)];
+
 	Lua::RegisterLibraryEnums(GetLuaState(), "log", {{"SEVERITY_INFO", 0}, {"SEVERITY_WARNING", 1}, {"SEVERITY_ERROR", 2}, {"SEVERITY_CRITICAL", 3}, {"SEVERITY_DEBUG", 4}});
 
 	Lua::RegisterLibrary(GetLuaState(), "regex", {{"match", Lua::regex::match}, {"search", Lua::regex::search}});

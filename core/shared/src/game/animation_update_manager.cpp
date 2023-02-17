@@ -67,14 +67,13 @@ void pragma::AnimationUpdateManager::UpdateAnimations(double dt)
 {
 	for(auto &entInfo : m_animatedEntities) {
 		auto maintainAnimations = entInfo.animatedC ? entInfo.animatedC->PreMaintainAnimations(dt) : false;
-		m_threadPool.AddTask([this, &entInfo, dt, maintainAnimations]() -> pragma::ThreadPool::ResultHandler {
-			if(maintainAnimations)
-				entInfo.animatedC->UpdateAnimations(dt);
+		if(maintainAnimations)
+			entInfo.animatedC->UpdateAnimations(dt);
 
-			if(entInfo.panimaC)
-				entInfo.panimaC->UpdateAnimations(dt);
-			return nullptr;
-		});
+		if(entInfo.panimaC)
+			entInfo.panimaC->UpdateAnimations(dt);
+		//return nullptr;
+		//});
 	}
 
 	m_threadPool.WaitForCompletion();

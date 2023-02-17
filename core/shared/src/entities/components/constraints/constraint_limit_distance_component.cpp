@@ -97,7 +97,7 @@ void ConstraintLimitDistanceComponent::ApplyConstraint()
 		dir = uvec::FORWARD;
 	else
 		dir /= l;
-	posDriven = origin + dir * GetDistance();
+	posDriver = origin + dir * GetDistance();
 
 	posDriver = uvec::lerp(posDriven, posDriver, influence);
 	constraintInfo->drivenObjectC->SetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriver, true);

@@ -492,7 +492,7 @@ void PanimaComponent::AdvanceAnimations(double dt)
 	dt *= GetPlaybackRate();
 	for(auto &pair : m_animationManagers) {
 		auto &manager = pair.second;
-		auto change = (*manager)->Advance(dt);
+		auto change = (*manager)->Advance(dt, true /* forceUpdate */);
 		if(!change)
 			continue;
 		InvokeValueSubmitters(*manager);

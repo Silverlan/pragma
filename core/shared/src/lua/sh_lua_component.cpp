@@ -294,6 +294,16 @@ std::optional<ComponentMemberInfo> pragma::lua::get_component_member_info(lua_St
 			componentMemberInfo->SetFlags(flags);
 		}
 
+		auto oTypeMetaData = attributes["typeMetaData"];
+		if(oTypeMetaData) {
+			for(luabind::iterator it {oTypeMetaData}, end; it != end; ++it) {
+				{
+					auto typeData = luabind::object_cast<std::shared_ptr<pragma::ents::TypeMetaData>>(*it);
+					componentMemberInfo->AddTypeMetaData(typeData);
+				}
+			}
+		}
+
 		auto oEnumValues = attributes["enumValues"];
 		if(oEnumValues) {
 			auto nameToValue = luabind::object_cast<std::unordered_map<std::string, int64_t>>(oEnumValues);
@@ -422,13 +432,21 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 	std::string getterName = "Get";
 	auto bProperty = (memberFlags & MemberFlags::PropertyBit) != MemberFlags::None;
 	if((memberFlags & MemberFlags::GetterBit) != MemberFlags::None) {
-		std::string getter = "function(self) return self." + memberVarName;
-		if(memberType == ents::EntityMemberType::Entity)
-			getter += ":GetEntity()";
-		else if(memberType == ents::EntityMemberType::MultiEntity)
-			throw std::runtime_error {"Not yet implemented!"};
-		else if(bProperty)
-			getter += ":Get()";
+		std::string getter;
+		auto oGetter = attributes["getter"];
+		if(oGetter) {
+			auto getterFuncName = luabind::object_cast<std::string>(oGetter);
+			getter = "function(self) return self:" + getterFuncName + "()";
+		}
+		else {
+			getter = "function(self) return self." + memberVarName;
+			if(memberType == ents::EntityMemberType::Entity)
+				getter += ":GetEntity()";
+			else if(memberType == ents::EntityMemberType::MultiEntity)
+				throw std::runtime_error {"Not yet implemented!"};
+			else if(bProperty)
+				getter += ":Get()";
+		}
 		getter += " end";
 
 		std::string err;
@@ -466,35 +484,43 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 		}
 	}
 	if((memberFlags & MemberFlags::SetterBit) != MemberFlags::None) {
-		auto bTransmit = (memberFlags & MemberFlags::TransmitOnChange) != MemberFlags::None;
-		auto bSetterValid = true;
-		std::string setter = "function(self,value) ";
-		if(bTransmit)
-			setter += "if(value == self:" + getterName + functionName + "()) then return end ";
-		if(memberType == ents::EntityMemberType::Entity) {
-			setter += "local t = util.get_type_name(value)\n"
-			          "if(t ~= \"UniversalEntityReference\") then\n"
-			          "	if(t == \"nil\") then value = ents.UniversalEntityReference()\n"
-			          "	else value = ents.UniversalEntityReference(value) end\n"
-			          "end\n";
+		std::string setter;
+		auto oSetter = attributes["setter"];
+		if(oSetter) {
+			auto setterFuncName = luabind::object_cast<std::string>(oSetter);
+			setter = "function(self,value) self:" + setterFuncName + "(value)";
 		}
-		else if(memberType == ents::EntityMemberType::ComponentProperty) {
-			setter += "local t = util.get_type_name(value)\n"
-			          "if(t ~= \"UniversalMemberReference\") then\n"
-			          "	if(t == \"nil\") then value = ents.UniversalMemberReference()\n"
-			          "	else value = ents.UniversalMemberReference(value) end\n"
-			          "end\n";
+		else {
+			auto bTransmit = (memberFlags & MemberFlags::TransmitOnChange) != MemberFlags::None;
+			setter = "function(self,value) ";
+			if(bTransmit)
+				setter += "if(value == self:" + getterName + functionName + "()) then return end ";
+			if(memberType == ents::EntityMemberType::Entity) {
+				setter += "local t = util.get_type_name(value)\n"
+				          "if(t ~= \"UniversalEntityReference\") then\n"
+				          "	if(t == \"nil\") then value = ents.UniversalEntityReference()\n"
+				          "	else value = ents.UniversalEntityReference(value) end\n"
+				          "end\n";
+			}
+			else if(memberType == ents::EntityMemberType::ComponentProperty) {
+				setter += "local t = util.get_type_name(value)\n"
+				          "if(t ~= \"UniversalMemberReference\") then\n"
+				          "	if(t == \"nil\") then value = ents.UniversalMemberReference()\n"
+				          "	else value = ents.UniversalMemberReference(value) end\n"
+				          "end\n";
+			}
+			else if(memberType == ents::EntityMemberType::MultiEntity)
+				throw std::runtime_error {"Not yet implemented!"};
+			setter += "self." + memberVarName;
+			if(bProperty)
+				setter += ":Set(value)";
+			else
+				setter += " = value";
 		}
-		else if(memberType == ents::EntityMemberType::MultiEntity)
-			throw std::runtime_error {"Not yet implemented!"};
-		setter += "self." + memberVarName;
-		if(bProperty)
-			setter += ":Set(value)";
-		else
-			setter += " = value";
 		if((memberFlags & MemberFlags::TransmitOnChange) == MemberFlags::TransmitOnChange || (memberFlags & MemberFlags::OutputBit) != MemberFlags::None || itMember->onChange)
 			setter += " self:OnMemberValueChanged(" + std::to_string(idx) + ")";
 		setter += " end";
+		auto bSetterValid = true;
 		std::string err;
 		if(Lua::PushLuaFunctionFromString(l, setter, "EntityComponentSetter", err) == false) {
 			bSetterValid = false;

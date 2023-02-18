@@ -233,7 +233,7 @@ static bool set_transform_member_value(pragma::BaseEntityComponent &component, C
 				umath::ScaledTransform parentPose;
 				if(!idxParent.has_value())
 					parentPose = get_entity_pose(component, useOriginObjectSpace);
-				else if(!get_transform_member_value(component, *idxParent, valueSpace, parentPose, useOriginObjectSpace))
+				else if(!get_transform_member_value(component, *idxParent, umath::CoordinateSpace::World, parentPose, useOriginObjectSpace))
 					return false;
 				auto valueInPropSpace = parentPose.GetInverse() * value;
 				return setValue(valueInPropSpace);

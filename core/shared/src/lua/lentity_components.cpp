@@ -53,7 +53,7 @@
 #include "pragma/entities/components/constraints/constraint_limit_location_component.hpp"
 #include "pragma/entities/components/constraints/constraint_limit_rotation_component.hpp"
 #include "pragma/entities/components/constraints/constraint_limit_scale_component.hpp"
-#include "pragma/entities/components/constraints/constraint_track_to_component.hpp"
+#include "pragma/entities/components/constraints/constraint_look_at_component.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
@@ -566,20 +566,16 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defConstraintCopyScale = pragma::lua::create_entity_component_class<pragma::ConstraintCopyScaleComponent, pragma::BaseEntityComponent>("ConstraintCopyScaleComponent");
 	entsMod[defConstraintCopyScale];
 
-	auto defConstraintTrackToComponent = pragma::lua::create_entity_component_class<pragma::ConstraintTrackToComponent, pragma::BaseEntityComponent>("ConstraintTrackToComponent");
-	defConstraintTrackToComponent.add_static_constant("TRACK_AXIS_X", umath::to_integral(pragma::ConstraintTrackToComponent::TrackAxis::X));
-	defConstraintTrackToComponent.add_static_constant("TRACK_AXIS_Y", umath::to_integral(pragma::ConstraintTrackToComponent::TrackAxis::Y));
-	defConstraintTrackToComponent.add_static_constant("TRACK_AXIS_Z", umath::to_integral(pragma::ConstraintTrackToComponent::TrackAxis::Z));
-	defConstraintTrackToComponent.add_static_constant("TRACK_AXIS_NEG_X", umath::to_integral(pragma::ConstraintTrackToComponent::TrackAxis::NegX));
-	defConstraintTrackToComponent.add_static_constant("TRACK_AXIS_NEG_Y", umath::to_integral(pragma::ConstraintTrackToComponent::TrackAxis::NegY));
-	defConstraintTrackToComponent.add_static_constant("TRACK_AXIS_NEG_Z", umath::to_integral(pragma::ConstraintTrackToComponent::TrackAxis::NegZ));
-	defConstraintTrackToComponent.def("SetTrackAxis", &pragma::ConstraintTrackToComponent::SetTrackAxis);
-	defConstraintTrackToComponent.def("GetTrackAxis", &pragma::ConstraintTrackToComponent::GetTrackAxis);
-	defConstraintTrackToComponent.def("SetUpAxis", &pragma::ConstraintTrackToComponent::SetUpAxis);
-	defConstraintTrackToComponent.def("GetUpAxis", &pragma::ConstraintTrackToComponent::GetUpAxis);
-	defConstraintTrackToComponent.def("SetTargetY", &pragma::ConstraintTrackToComponent::SetTargetY);
-	defConstraintTrackToComponent.def("ShouldTargetY", &pragma::ConstraintTrackToComponent::ShouldTargetY);
-	entsMod[defConstraintTrackToComponent];
+	auto defConstraintLookAtComponent = pragma::lua::create_entity_component_class<pragma::ConstraintLookAtComponent, pragma::BaseEntityComponent>("ConstraintLookAtComponent");
+	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_X", umath::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::X));
+	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_Y", umath::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::Y));
+	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_Z", umath::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::Z));
+	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_NEG_X", umath::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::NegX));
+	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_NEG_Y", umath::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::NegY));
+	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_NEG_Z", umath::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::NegZ));
+	defConstraintLookAtComponent.def("SetTrackAxis", &pragma::ConstraintLookAtComponent::SetTrackAxis);
+	defConstraintLookAtComponent.def("GetTrackAxis", &pragma::ConstraintLookAtComponent::GetTrackAxis);
+	entsMod[defConstraintLookAtComponent];
 
 	auto defConstraintLimitDistance = pragma::lua::create_entity_component_class<pragma::ConstraintLimitDistanceComponent, pragma::BaseEntityComponent>("ConstraintLimitDistanceComponent");
 	defConstraintLimitDistance.add_static_constant("CLAMP_REGION_INSIDE", umath::to_integral(pragma::ConstraintLimitDistanceComponent::ClampRegion::Inside));

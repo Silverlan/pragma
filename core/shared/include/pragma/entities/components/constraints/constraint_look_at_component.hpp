@@ -4,30 +4,24 @@
  *
  * Copyright (c) 2021 Silverlan */
 
-#ifndef __CONSTRAINT_TRACK_TO_COMPONENT_HPP__
-#define __CONSTRAINT_TRACK_TO_COMPONENT_HPP__
+#ifndef __CONSTRAINT_LOOK_AT_COMPONENT_HPP__
+#define __CONSTRAINT_LOOK_AT_COMPONENT_HPP__
 
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/game/game_coordinate_system.hpp"
 
 namespace pragma {
 	class ConstraintComponent;
-	class DLLNETWORK ConstraintTrackToComponent final : public BaseEntityComponent {
+	class DLLNETWORK ConstraintLookAtComponent final : public BaseEntityComponent {
 	  public:
-		enum class TrackAxis : uint8_t { X, Y, Z, NegX, NegY, NegZ };
+		enum class TrackAxis : uint8_t { X, Y, Z, NegX, NegY, NegZ, Count };
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
-		ConstraintTrackToComponent(BaseEntity &ent);
+		ConstraintLookAtComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 
 		void SetTrackAxis(TrackAxis axis);
 		TrackAxis GetTrackAxis() const;
-
-		void SetUpAxis(pragma::Axis upAxis);
-		pragma::Axis GetUpAxis() const;
-
-		void SetTargetY(bool targetY);
-		bool ShouldTargetY() const;
 
 		virtual void InitializeLuaObject(lua_State *lua) override;
 	  protected:
@@ -35,12 +29,10 @@ namespace pragma {
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		void ResetDrivenRotation();
 		pragma::ComponentHandle<ConstraintComponent> m_constraintC;
-		pragma::EntityUComponentMemberRef m_drivenObjectRotation;
+		pragma::EntityUComponentMemberRef m_drivenObjectPosition;
 		bool m_drivenObjectRotationInitialized = false;
 
 		TrackAxis m_trackAxis = TrackAxis::X;
-		pragma::Axis m_upAxis = pragma::Axis::Y;
-		bool m_targetY = false;
 	};
 };
 

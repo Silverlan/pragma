@@ -29,7 +29,7 @@
 #include "pragma/entities/components/constraints/constraint_limit_location_component.hpp"
 #include "pragma/entities/components/constraints/constraint_limit_rotation_component.hpp"
 #include "pragma/entities/components/constraints/constraint_limit_scale_component.hpp"
-#include "pragma/entities/components/constraints/constraint_track_to_component.hpp"
+#include "pragma/entities/components/constraints/constraint_look_at_component.hpp"
 #include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/entities/components/origin_component.hpp"
 #include "pragma/entities/components/basegravity.h"
@@ -60,7 +60,7 @@ void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentM
 	componentManager.RegisterComponentType<pragma::ConstraintLimitRotationComponent>("constraint_limit_rotation");
 	componentManager.RegisterComponentType<pragma::ConstraintLimitScaleComponent>("constraint_limit_scale");
 	componentManager.RegisterComponentType<pragma::ConstraintSpaceComponent>("constraint_space");
-	componentManager.RegisterComponentType<pragma::ConstraintTrackToComponent>("constraint_track_to");
+	componentManager.RegisterComponentType<pragma::ConstraintLookAtComponent>("constraint_look_at");
 
 	pragma::BaseEntityComponent::RegisterEvents(componentManager, [&componentManager](const std::string &evName, pragma::ComponentEventInfo::Type type) -> pragma::ComponentEventId { return componentManager.RegisterEvent(evName, typeid(pragma::BaseEntityComponent), type); });
 	BaseEntity::RegisterEvents(componentManager);

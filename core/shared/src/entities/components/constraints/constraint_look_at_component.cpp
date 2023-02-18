@@ -6,34 +6,24 @@
  */
 
 #include "stdafx_shared.h"
-#include "pragma/entities/components/constraints/constraint_track_to_component.hpp"
+#include "pragma/entities/components/constraints/constraint_look_at_component.hpp"
 #include "pragma/entities/components/constraints/constraint_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/logging.hpp"
 
 using namespace pragma;
 #pragma optimize("", off)
-void ConstraintTrackToComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+void ConstraintLookAtComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
-	using T = ConstraintTrackToComponent;
+	using T = ConstraintLookAtComponent;
 	{
 		auto memberInfo = create_component_member_info<T, TrackAxis, &T::SetTrackAxis, &T::GetTrackAxis>("trackAxis", TrackAxis::X);
 		registerMember(std::move(memberInfo));
 	}
-
-	{
-		auto memberInfo = create_component_member_info<T, pragma::Axis, &T::SetUpAxis, &T::GetUpAxis>("upAxis", pragma::Axis::Y);
-		registerMember(std::move(memberInfo));
-	}
-
-	{
-		auto memberInfo = create_component_member_info<T, bool, &T::SetTargetY, &T::ShouldTargetY>("targetY", false);
-		registerMember(std::move(memberInfo));
-	}
 }
 
-ConstraintTrackToComponent::ConstraintTrackToComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
-void ConstraintTrackToComponent::Initialize()
+ConstraintLookAtComponent::ConstraintLookAtComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+void ConstraintLookAtComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
@@ -41,25 +31,35 @@ void ConstraintTrackToComponent::Initialize()
 	BindEventUnhandled(ConstraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ApplyConstraint(); });
 	BindEventUnhandled(ConstraintComponent::EVENT_ON_DRIVEN_OBJECT_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ResetDrivenRotation(); });
 }
-void ConstraintTrackToComponent::ResetDrivenRotation() { m_drivenObjectRotationInitialized = false; }
-void ConstraintTrackToComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void ConstraintTrackToComponent::OnEntityComponentAdded(BaseEntityComponent &component)
+void ConstraintLookAtComponent::ResetDrivenRotation() { m_drivenObjectRotationInitialized = false; }
+void ConstraintLookAtComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void ConstraintLookAtComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(ConstraintComponent))
 		m_constraintC = component.GetHandle<ConstraintComponent>();
 }
 
-void ConstraintTrackToComponent::SetTrackAxis(TrackAxis axis) { m_trackAxis = axis; }
-ConstraintTrackToComponent::TrackAxis ConstraintTrackToComponent::GetTrackAxis() const { return m_trackAxis; }
+void ConstraintLookAtComponent::SetTrackAxis(TrackAxis axis) { m_trackAxis = axis; }
+ConstraintLookAtComponent::TrackAxis ConstraintLookAtComponent::GetTrackAxis() const { return m_trackAxis; }
 
-void ConstraintTrackToComponent::SetUpAxis(pragma::Axis upAxis) { m_upAxis = upAxis; }
-pragma::Axis ConstraintTrackToComponent::GetUpAxis() const { return m_upAxis; }
+static std::array<Quat, umath::to_integral(ConstraintLookAtComponent::TrackAxis::Count)> g_axisRotations {
+  uquat::create(EulerAngles {0.f, -90.f, 0.f}), // x+
+  uquat::create(EulerAngles {90.f, 0.f, 0.f}),  // y+
+  uquat::create(EulerAngles {0.f, 0.f, 0.f}),   // z+
+  uquat::create(EulerAngles {0.f, 90.f, 0.f}),  // x-
+  uquat::create(EulerAngles {-90.f, 0.f, 0.f}), // y-
+  uquat::create(EulerAngles {0.f, 180.f, 0.f})  // z-
+};
 
-void ConstraintTrackToComponent::SetTargetY(bool targetY) { m_targetY = targetY; }
-bool ConstraintTrackToComponent::ShouldTargetY() const { return m_targetY; }
+void rotate_towards_axis(Quat &rotation, const Vector3 &targetAxis, pragma::ConstraintLookAtComponent::TrackAxis eAxis)
+{
+	auto rotDriven = uquat::create_look_rotation(targetAxis, uvec::UP);
+	rotDriven = rotDriven * g_axisRotations[umath::to_integral(eAxis)];
+	rotation = rotDriven;
+}
 
-void ConstraintTrackToComponent::ApplyConstraint()
+void ConstraintLookAtComponent::ApplyConstraint()
 {
 	if(m_constraintC.expired())
 		return;
@@ -78,20 +78,20 @@ void ConstraintTrackToComponent::ApplyConstraint()
 				spdlog::trace("Unable to initialize track_to constraint '{}' with driven object property {} of driven object '{}': Property has no associated rotation.", GetEntity().ToString(), constraintInfo->drivenObjectPropIdx, constraintInfo->drivenObjectC->GetEntity().ToString());
 				return;
 			}
-			m_drivenObjectRotation = {constraintInfo->drivenObjectC->GetEntity(), constraintInfo->drivenObjectC->GetComponentId(), poseMetaData->rotProperty};
+			m_drivenObjectPosition = {constraintInfo->drivenObjectC->GetEntity(), constraintInfo->drivenObjectC->GetComponentId(), poseMetaData->posProperty};
 		}
 	}
 	auto &game = *GetEntity().GetNetworkState()->GetGameState();
-	m_drivenObjectRotation.UpdateMemberIndex(game);
-	auto *drivenObjectRotC = m_drivenObjectRotation.GetComponent(game);
-	if(!drivenObjectRotC || drivenObjectRotC != constraintInfo->drivenObjectC)
+	m_drivenObjectPosition.UpdateMemberIndex(game);
+	auto *drivenObjectPosC = m_drivenObjectPosition.GetComponent(game);
+	if(!drivenObjectPosC || drivenObjectPosC != constraintInfo->drivenObjectC)
 		return;
-	auto idxDrivenObjectRot = m_drivenObjectRotation.GetMemberIndex();
-	if(idxDrivenObjectRot == pragma::INVALID_COMPONENT_MEMBER_INDEX)
+	auto idxDrivenObjectPos = m_drivenObjectPosition.GetMemberIndex();
+	if(idxDrivenObjectPos == pragma::INVALID_COMPONENT_MEMBER_INDEX)
 		return;
 
 	Vector3 posDriven;
-	auto res = constraintInfo->drivenObjectC->GetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriven, true);
+	auto res = constraintInfo->drivenObjectC->GetTransformMemberPos(idxDrivenObjectPos, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriven, true);
 	if(!res) {
 		spdlog::trace("Failed to transform component property value for property {} for driven object of constraint '{}'.", constraintInfo->drivenObjectPropIdx, GetEntity().ToString());
 		return;
@@ -111,27 +111,15 @@ void ConstraintTrackToComponent::ApplyConstraint()
 	else
 		dir /= l;
 
-	Vector3 up;
-	switch(m_upAxis) {
-	case pragma::Axis::X:
-		break;
-	case pragma::Axis::Y:
-		break;
-	case pragma::Axis::Z:
-		break;
-	default:
-		up = uvec::FORWARD;
-		break;
-	}
+	Quat curRot;
+	res = constraintInfo->drivenObjectC->GetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), curRot, true);
 
-	auto rot = uquat::create_look_rotation(dir, up);
-	if(influence < 1.f) {
-		Quat curRot;
-		auto res = constraintInfo->drivenObjectC->GetTransformMemberRot(idxDrivenObjectRot, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot, true);
-		if(res) {
-			rot = uquat::slerp(curRot, rot, influence);
-		}
-	}
-	constraintInfo->drivenObjectC->SetTransformMemberRot(idxDrivenObjectRot, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot, true);
+	auto rot = curRot;
+	rotate_towards_axis(rot, dir, m_trackAxis);
+
+	if(res)
+		rot = uquat::slerp(curRot, rot, influence);
+
+	constraintInfo->drivenObjectC->SetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot, true);
 }
 #pragma optimize("", on)

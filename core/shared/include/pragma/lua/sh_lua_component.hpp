@@ -144,6 +144,20 @@ namespace pragma {
 			DefaultSnapshot = Default | SnapshotData
 		};
 		struct MemberInfo {
+			struct TransformCompositeInfo {
+				pragma::ComponentMemberIndex posIdx = pragma::INVALID_COMPONENT_MEMBER_INDEX;
+				pragma::ComponentMemberIndex rotIdx = pragma::INVALID_COMPONENT_MEMBER_INDEX;
+				pragma::ComponentMemberIndex scaleIdx = pragma::INVALID_COMPONENT_MEMBER_INDEX;
+			};
+
+			MemberInfo() = default;
+			MemberInfo(const MemberInfo &other);
+			MemberInfo(MemberInfo &&other);
+			MemberInfo(const std::string &functionName, const std::string &memberName, size_t memberNameHash, const std::string &memberVariableName, ents::EntityMemberType type, const std::any &initialValue, BaseLuaBaseEntityComponent::MemberFlags flags, const luabind::object &onChange,
+			  const std::optional<ComponentMemberInfo> &componentMemberInfo);
+			MemberInfo &operator=(const MemberInfo &other);
+			MemberInfo &operator=(MemberInfo &&other);
+
 			std::string functionName;
 			std::string memberName;
 			size_t memberNameHash;
@@ -152,6 +166,7 @@ namespace pragma {
 			std::any initialValue;
 			BaseLuaBaseEntityComponent::MemberFlags flags;
 			mutable luabind::object onChange;
+			std::unique_ptr<TransformCompositeInfo> transformCompositeInfo;
 
 			std::optional<ComponentMemberInfo> componentMemberInfo {};
 		};

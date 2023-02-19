@@ -24,13 +24,15 @@
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include "pragma/lua/lua_util_component.hpp"
 #include "pragma/lua/types/udm.hpp"
+#include "pragma/logging.hpp"
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/datastream.h>
 #include <sharedutils/netpacket.hpp>
 #include <udm.hpp>
 
-using namespace pragma;
+#define ENABLE_CUSTOM_SETTER_GETTER 0
 
+using namespace pragma;
 struct ClassMembers {
 	ClassMembers(const luabind::object &classObject) : classObject {classObject} {}
 	luabind::object classObject;
@@ -180,6 +182,22 @@ const pragma::BaseLuaBaseEntityComponent::MemberInfo *BaseLuaBaseEntityComponent
 	return &m_classMembers->memberDeclarations[memberInfo.userIndex];
 }
 
+template<typename T>
+static void init_pose_type_meta_data(const ComponentMemberInfo &memberInfo, BaseLuaBaseEntityComponent &component, BaseLuaBaseEntityComponent::MemberInfo &info)
+{
+	// Lazy initialization
+	auto *poseMetaData = memberInfo.FindTypeMetaData<pragma::ents::PoseTypeMetaData>();
+	assert(poseMetaData);
+	auto idxPos = static_cast<BaseEntityComponent &>(component).GetMemberIndex(poseMetaData->posProperty);
+	auto idxRot = static_cast<BaseEntityComponent &>(component).GetMemberIndex(poseMetaData->rotProperty);
+	auto idxScale = std::is_same_v<T, udm::Transform> ? pragma::INVALID_COMPONENT_MEMBER_INDEX : static_cast<BaseEntityComponent &>(component).GetMemberIndex(poseMetaData->scaleProperty);
+	auto &ncInfo = const_cast<BaseLuaBaseEntityComponent::MemberInfo &>(info);
+	ncInfo.transformCompositeInfo = std::make_unique<BaseLuaBaseEntityComponent::MemberInfo::TransformCompositeInfo>();
+	ncInfo.transformCompositeInfo->posIdx = idxPos ? *idxPos : pragma::INVALID_COMPONENT_MEMBER_INDEX;
+	ncInfo.transformCompositeInfo->rotIdx = idxRot ? *idxRot : pragma::INVALID_COMPONENT_MEMBER_INDEX;
+	ncInfo.transformCompositeInfo->scaleIdx = idxScale ? *idxScale : pragma::INVALID_COMPONENT_MEMBER_INDEX;
+}
+
 std::optional<ComponentMemberInfo> pragma::lua::get_component_member_info(lua_State *l, const std::string &functionName, ents::EntityMemberType memberType, const std::any &initialValue, BaseLuaBaseEntityComponent::MemberFlags memberFlags, const Lua::map<std::string, void> &attributes,
   luabind::object &outOnChange, bool dynamicMember)
 {
@@ -196,9 +214,86 @@ std::optional<ComponentMemberInfo> pragma::lua::get_component_member_info(lua_St
 			Lua::CheckFunction(l, -1);
 			Lua::Pop(l, 1);
 		}
-		auto vs = [&tmpMemberName, &functionName, &onChange, memberType, dynamicMember](auto tag) -> pragma::ComponentMemberInfo {
+		auto vs = [&tmpMemberName, &functionName, &onChange, &attributes, memberType, dynamicMember](auto tag) -> pragma::ComponentMemberInfo {
 			using T = typename decltype(tag)::type;
 			if constexpr(pragma::is_valid_component_property_type_v<T>) {
+				if constexpr(std::is_same_v<T, udm::Transform> || std::is_same_v<T, udm::ScaledTransform>) {
+					// If a transform type has a PoseTypeMetaData attached to it, it will be treated as a special case.
+					// In this case the property will act as a composite type, redirecting to a different position/rotation/scale property.
+					auto oTypeMetaData = attributes["typeMetaData"];
+					pragma::ents::PoseTypeMetaData *poseMetaData = nullptr;
+					for(luabind::iterator it {oTypeMetaData}, end; it != end; ++it) {
+						{
+							auto typeData = luabind::object_cast<std::shared_ptr<pragma::ents::TypeMetaData>>(*it);
+							if(typeid(*typeData) == typeid(pragma::ents::PoseTypeMetaData)) {
+								poseMetaData = static_cast<pragma::ents::PoseTypeMetaData *>(typeData.get());
+								break;
+							}
+						}
+					}
+					if(poseMetaData) {
+						constexpr auto getter = +[](const ComponentMemberInfo &memberInfo, BaseLuaBaseEntityComponent &component, T &value) {
+							auto *info = component.GetLuaMemberInfo(const_cast<ComponentMemberInfo &>(memberInfo));
+							assert(info);
+							if(!info->transformCompositeInfo)
+								init_pose_type_meta_data<T>(memberInfo, component, const_cast<BaseLuaBaseEntityComponent::MemberInfo &>(*info));
+
+							auto *posInfo = component.GetMemberInfo(info->transformCompositeInfo->posIdx);
+							auto *rotInfo = component.GetMemberInfo(info->transformCompositeInfo->rotIdx);
+							if(!posInfo || !rotInfo) {
+								spdlog::trace("Transform property '{}' points to invalid pos or rot property!", memberInfo.GetName());
+								return;
+							}
+
+							auto &pos = value.GetOrigin();
+							posInfo->getterFunction(*posInfo, component, &pos);
+
+							auto &rot = value.GetRotation();
+							rotInfo->getterFunction(*rotInfo, component, &rot);
+
+							if constexpr(std::is_same_v<T, udm::ScaledTransform>) {
+								auto *scaleInfo = component.GetMemberInfo(info->transformCompositeInfo->scaleIdx);
+								if(!scaleInfo) {
+									spdlog::trace("Transform property '{}' points to invalid scale property!", memberInfo.GetName());
+									return;
+								}
+								auto &scale = value.GetScale();
+								scaleInfo->getterFunction(*scaleInfo, component, &scale);
+							}
+						};
+						assert(!onChange);
+						if(onChange)
+							throw std::runtime_error {"onChange callback is not allowed for composite types!"};
+						return create_component_member_info<BaseLuaBaseEntityComponent, T,
+						  [](const ComponentMemberInfo &memberInfo, BaseLuaBaseEntityComponent &component, const T &value) {
+							  auto *info = component.GetLuaMemberInfo(const_cast<ComponentMemberInfo &>(memberInfo));
+							  assert(info);
+							  if(!info->transformCompositeInfo)
+								  init_pose_type_meta_data<T>(memberInfo, component, const_cast<BaseLuaBaseEntityComponent::MemberInfo &>(*info));
+
+							  auto *posInfo = component.GetMemberInfo(info->transformCompositeInfo->posIdx);
+							  auto *rotInfo = component.GetMemberInfo(info->transformCompositeInfo->rotIdx);
+							  if(!posInfo || !rotInfo) {
+								  spdlog::trace("Transform property '{}' points to invalid pos or rot property!", memberInfo.GetName());
+								  return;
+							  }
+
+							  posInfo->setterFunction(*posInfo, component, &value.GetOrigin());
+							  rotInfo->setterFunction(*rotInfo, component, &value.GetRotation());
+
+							  if constexpr(std::is_same_v<T, udm::ScaledTransform>) {
+								  auto *scaleInfo = component.GetMemberInfo(info->transformCompositeInfo->scaleIdx);
+								  if(!scaleInfo) {
+									  spdlog::trace("Transform property '{}' points to invalid scale property!", memberInfo.GetName());
+									  return;
+								  }
+								  scaleInfo->setterFunction(*scaleInfo, component, &value.GetScale());
+							  }
+						  },
+						  getter>(std::move(tmpMemberName));
+					}
+				}
+
 				if(dynamicMember) {
 					if constexpr(udm::is_udm_type<T>()) {
 						constexpr auto getter = +[](const ComponentMemberInfo &memberInfo, BaseLuaBaseEntityComponent &component, T &value) {
@@ -433,12 +528,15 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 	auto bProperty = (memberFlags & MemberFlags::PropertyBit) != MemberFlags::None;
 	if((memberFlags & MemberFlags::GetterBit) != MemberFlags::None) {
 		std::string getter;
+#if ENABLE_CUSTOM_SETTER_GETTER == 1
 		auto oGetter = attributes["getter"];
 		if(oGetter) {
 			auto getterFuncName = luabind::object_cast<std::string>(oGetter);
 			getter = "function(self) return self:" + getterFuncName + "()";
 		}
-		else {
+		else
+#endif
+		{
 			getter = "function(self) return self." + memberVarName;
 			if(memberType == ents::EntityMemberType::Entity)
 				getter += ":GetEntity()";
@@ -485,12 +583,15 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 	}
 	if((memberFlags & MemberFlags::SetterBit) != MemberFlags::None) {
 		std::string setter;
+#if ENABLE_CUSTOM_SETTER_GETTER == 1
 		auto oSetter = attributes["setter"];
 		if(oSetter) {
 			auto setterFuncName = luabind::object_cast<std::string>(oSetter);
 			setter = "function(self,value) self:" + setterFuncName + "(value)";
 		}
-		else {
+		else
+#endif
+		{
 			auto bTransmit = (memberFlags & MemberFlags::TransmitOnChange) != MemberFlags::None;
 			setter = "function(self,value) ";
 			if(bTransmit)
@@ -1575,4 +1676,54 @@ void Lua::register_base_entity_component(luabind::module_ &modEnts)
 	classDef.def("Save", &pragma::BaseLuaBaseEntityComponent::Lua_Save, &pragma::BaseLuaBaseEntityComponent::default_Lua_Save);
 	classDef.def("Load", &pragma::BaseLuaBaseEntityComponent::Lua_Load, &pragma::BaseLuaBaseEntityComponent::default_Lua_Load);
 	modEnts[classDef];
+}
+
+BaseLuaBaseEntityComponent::MemberInfo::MemberInfo(const std::string &functionName, const std::string &memberName, size_t memberNameHash, const std::string &memberVariableName, ents::EntityMemberType type, const std::any &initialValue, BaseLuaBaseEntityComponent::MemberFlags flags,
+  const luabind::object &onChange, const std::optional<ComponentMemberInfo> &componentMemberInfo)
+    : functionName(functionName), memberName(memberName), memberNameHash(memberNameHash), memberVariableName(memberVariableName), type(type), initialValue(initialValue), flags(flags), onChange(onChange), componentMemberInfo(componentMemberInfo)
+{
+}
+
+BaseLuaBaseEntityComponent::MemberInfo::MemberInfo(const MemberInfo &other)
+    : functionName(other.functionName), memberName(other.memberName), memberNameHash(other.memberNameHash), memberVariableName(other.memberVariableName), type(other.type), initialValue(other.initialValue), flags(other.flags), onChange(other.onChange),
+      transformCompositeInfo(other.transformCompositeInfo ? std::make_unique<TransformCompositeInfo>(*other.transformCompositeInfo) : nullptr), componentMemberInfo(other.componentMemberInfo)
+{
+}
+
+BaseLuaBaseEntityComponent::MemberInfo::MemberInfo(MemberInfo &&other)
+    : functionName(std::move(other.functionName)), memberName(std::move(other.memberName)), memberNameHash(std::move(other.memberNameHash)), memberVariableName(std::move(other.memberVariableName)), type(std::move(other.type)), initialValue(std::move(other.initialValue)),
+      flags(std::move(other.flags)), onChange(std::move(other.onChange)), transformCompositeInfo(std::move(other.transformCompositeInfo)), componentMemberInfo(std::move(other.componentMemberInfo))
+{
+	other.transformCompositeInfo = nullptr;
+}
+
+BaseLuaBaseEntityComponent::MemberInfo &BaseLuaBaseEntityComponent::MemberInfo::operator=(const MemberInfo &other)
+{
+	functionName = other.functionName;
+	memberName = other.memberName;
+	memberNameHash = other.memberNameHash;
+	memberVariableName = other.memberVariableName;
+	type = other.type;
+	initialValue = other.initialValue;
+	flags = other.flags;
+	onChange = other.onChange;
+	transformCompositeInfo = other.transformCompositeInfo ? std::make_unique<TransformCompositeInfo>(*other.transformCompositeInfo) : nullptr;
+	componentMemberInfo = other.componentMemberInfo;
+	return *this;
+}
+
+BaseLuaBaseEntityComponent::MemberInfo &BaseLuaBaseEntityComponent::MemberInfo::operator=(MemberInfo &&other)
+{
+	functionName = std::move(other.functionName);
+	memberName = std::move(other.memberName);
+	memberNameHash = std::move(other.memberNameHash);
+	memberVariableName = std::move(other.memberVariableName);
+	type = std::move(other.type);
+	initialValue = std::move(other.initialValue);
+	flags = std::move(other.flags);
+	onChange = std::move(other.onChange);
+	transformCompositeInfo = std::move(other.transformCompositeInfo);
+	componentMemberInfo = std::move(other.componentMemberInfo);
+	other.transformCompositeInfo = nullptr;
+	return *this;
 }

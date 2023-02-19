@@ -54,6 +54,7 @@
 #include "pragma/entities/components/constraints/constraint_limit_rotation_component.hpp"
 #include "pragma/entities/components/constraints/constraint_limit_scale_component.hpp"
 #include "pragma/entities/components/constraints/constraint_look_at_component.hpp"
+#include "pragma/entities/components/constraints/constraint_child_of_component.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
@@ -576,6 +577,15 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defConstraintLookAtComponent.def("SetTrackAxis", &pragma::ConstraintLookAtComponent::SetTrackAxis);
 	defConstraintLookAtComponent.def("GetTrackAxis", &pragma::ConstraintLookAtComponent::GetTrackAxis);
 	entsMod[defConstraintLookAtComponent];
+
+	auto defConstraintChildOfComponent = pragma::lua::create_entity_component_class<pragma::ConstraintChildOfComponent, pragma::BaseEntityComponent>("ConstraintChildOfComponent");
+	defConstraintChildOfComponent.def("SetLocationAxisEnabled", &pragma::ConstraintChildOfComponent::SetLocationAxisEnabled);
+	defConstraintChildOfComponent.def("IsLocationAxisEnabled", &pragma::ConstraintChildOfComponent::IsLocationAxisEnabled);
+	defConstraintChildOfComponent.def("SetRotationAxisEnabled", &pragma::ConstraintChildOfComponent::SetRotationAxisEnabled);
+	defConstraintChildOfComponent.def("IsRotationAxisEnabled", &pragma::ConstraintChildOfComponent::IsRotationAxisEnabled);
+	defConstraintChildOfComponent.def("SetScaleAxisEnabled", &pragma::ConstraintChildOfComponent::SetScaleAxisEnabled);
+	defConstraintChildOfComponent.def("IsScaleAxisEnabled", &pragma::ConstraintChildOfComponent::IsScaleAxisEnabled);
+	entsMod[defConstraintChildOfComponent];
 
 	auto defConstraintLimitDistance = pragma::lua::create_entity_component_class<pragma::ConstraintLimitDistanceComponent, pragma::BaseEntityComponent>("ConstraintLimitDistanceComponent");
 	defConstraintLimitDistance.add_static_constant("CLAMP_REGION_INSIDE", umath::to_integral(pragma::ConstraintLimitDistanceComponent::ClampRegion::Inside));

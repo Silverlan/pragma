@@ -14,8 +14,8 @@
 namespace pragma {
 #pragma pack(push, 1)
 	struct RenderSettings {
-		Vector4 ambientColor;
 		Vector3 posCam;
+		umath::Radian fov;
 		int32_t flags;
 		float shadowRatioX;
 		float shadowRatioY;

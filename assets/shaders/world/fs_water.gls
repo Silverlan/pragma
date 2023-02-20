@@ -166,7 +166,7 @@ void main()
 	Fog fog = u_waterFog.fog;
 	refractColor.rgb = mix(refractColor.rgb,u_waterFog.fog.color.rgb,get_fog_factor(fog,depthWater) *u_pushConstants.waterFogIntensity);
 
-	vec3 viewVector = normalize(u_renderSettings.posCam -fs_in.vert_pos_ws.xyz);
+	vec3 viewVector = normalize(u_renderSettings.posCam.xyz -fs_in.vert_pos_ws.xyz);
 	vec3 vertNormal = (get_model_matrix() *vec4(fs_in.vert_normal,0.0)).xyz;
 	float refractiveFactor = dot(viewVector,vertNormal);
 	refractiveFactor = pow(refractiveFactor,reflectiveIntensity);

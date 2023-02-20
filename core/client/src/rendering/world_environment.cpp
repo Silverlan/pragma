@@ -13,15 +13,10 @@ std::shared_ptr<WorldEnvironment> WorldEnvironment::Create() { return std::share
 
 WorldEnvironment::WorldEnvironment()
 {
-	m_ambientColor = std::make_shared<util::Vector4Property>(Vector4 {});
 	m_shaderQuality = std::make_shared<util::Int32Property>(int32_t {0});
 	m_bUnlit = std::make_shared<util::BoolProperty>(bool {false});
 	m_shadowResolution = std::make_shared<util::UInt32Property>(uint32_t {0});
 }
-const Vector4 &WorldEnvironment::GetAmbientColor() const { return *m_ambientColor; }
-void WorldEnvironment::SetAmbientColor(const Vector4 &col) { *m_ambientColor = col; }
-const std::shared_ptr<util::Vector4Property> &WorldEnvironment::GetAmbientColorProperty() const { return m_ambientColor; }
-
 int32_t WorldEnvironment::GetShaderQuality() const { return *m_shaderQuality; }
 void WorldEnvironment::SetShaderQuality(int32_t quality) { *m_shaderQuality = quality; }
 const std::shared_ptr<util::Int32Property> &WorldEnvironment::GetShaderQualityProperty() const { return m_shaderQuality; }

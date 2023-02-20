@@ -24,7 +24,7 @@ void main()
 	vec4 MVP_Pos = MVP *vec4(vtrans,1);
 	gl_Position = MVP_Pos.xyww;
 
-	vec3 camOffset = (inverse(get_instanced_model_matrix()) *vec4(u_renderSettings.posCam,1)).xyz;
+	vec3 camOffset = (inverse(get_instanced_model_matrix()) *vec4(u_renderSettings.posCam.xyz,1)).xyz;
 	vs_out.color = get_instanced_instance_color();
 	vs_out.cubemap_dir = in_vert_pos -camOffset;
 	vs_out.cubemap_dir = (get_rotation_matrix(u_pushConstants.skyAngles.xyz,u_pushConstants.skyAngles.w) *vec4(vs_out.cubemap_dir,1.0)).xyz;

@@ -252,8 +252,8 @@ void CSceneComponent::InitializeRenderSettingsBuffer()
 	auto w = GetWidth();
 	auto h = GetHeight();
 
-	m_renderSettings.ambientColor = Vector4(1.f, 1.f, 1.f, 1.f);
 	m_renderSettings.posCam = Vector3(0.f, 0.f, 0.f);
+	m_renderSettings.fov = 0.f;
 	m_renderSettings.flags = umath::to_integral(FRenderSetting::None);
 	m_renderSettings.shadowRatioX = 1.f / szShadowMap;
 	m_renderSettings.shadowRatioY = 1.f / szShadowMap;
@@ -337,8 +337,14 @@ void CSceneComponent::UpdateBuffers(std::shared_ptr<prosper::IPrimaryCommandBuff
 
 	// Update Render Buffer
 	auto &cam = GetActiveCamera();
-	auto camPos = cam.valid() ? cam->GetEntity().GetPosition() : Vector3 {};
-	m_renderSettings.posCam = camPos;
+	if(cam.valid()) {
+		m_renderSettings.posCam = cam->GetEntity().GetPosition();
+		m_renderSettings.fov = cam->GetFOVRad();
+	}
+	else {
+		m_renderSettings.posCam = {};
+		m_renderSettings.fov = 0.f;
+	}
 
 	drawCmd->RecordBufferBarrier(*m_renderSettingsBuffer, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::GeometryShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
 	  prosper::PipelineStageFlags::TransferBit, prosper::AccessFlags::ShaderReadBit, prosper::AccessFlags::TransferWriteBit);
@@ -444,7 +450,6 @@ void CSceneComponent::SetWorldEnvironment(WorldEnvironment &env)
 	ClearWorldEnvironment();
 
 	m_worldEnvironment = env.shared_from_this();
-	m_envCallbacks.push_back(m_worldEnvironment->GetAmbientColorProperty()->AddCallback([this](std::reference_wrapper<const Vector4> oldColor, std::reference_wrapper<const Vector4> newColor) { m_renderSettings.ambientColor = newColor.get(); }));
 	m_envCallbacks.push_back(m_worldEnvironment->GetShaderQualityProperty()->AddCallback([this](std::reference_wrapper<const int32_t> oldVal, std::reference_wrapper<const int32_t> newVal) { m_renderSettings.shaderQuality = newVal.get(); }));
 	m_envCallbacks.push_back(m_worldEnvironment->GetShadowResolutionProperty()->AddCallback([this](std::reference_wrapper<const uint32_t> oldVal, std::reference_wrapper<const uint32_t> newVal) {
 		Vector2 shadowRatio {1.f / static_cast<float>(newVal.get()), 1.f / static_cast<float>(newVal.get())};
@@ -546,7 +551,6 @@ void CSceneComponent::LinkWorldEnvironment(CSceneComponent &other)
 	// T
 	auto &worldEnv = *GetWorldEnvironment();
 	auto &worldEnvOther = *other.GetWorldEnvironment();
-	worldEnv.GetAmbientColorProperty()->Link(*worldEnvOther.GetAmbientColorProperty());
 	worldEnv.GetShaderQualityProperty()->Link(*worldEnvOther.GetShaderQualityProperty());
 	worldEnv.GetShadowResolutionProperty()->Link(*worldEnvOther.GetShadowResolutionProperty());
 	worldEnv.GetUnlitProperty()->Link(*worldEnvOther.GetUnlitProperty());

@@ -76,6 +76,7 @@ void CWorldComponent::Initialize()
 		BuildOfflineRenderQueues(true);
 		return util::EventReply::Handled;
 	});
+#if 0
 	BindEventUnhandled(CColorComponent::EVENT_ON_COLOR_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &onColorChangedData = static_cast<pragma::CEOnColorChanged &>(evData.get());
 		EntityIterator entIt {*c_game};
@@ -87,6 +88,7 @@ void CWorldComponent::Initialize()
 		}
 		c_game->GetWorldEnvironment().SetAmbientColor(onColorChangedData.color.ToVector4());
 	});
+#endif
 	//BindEventUnhandled(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 	//	BuildOfflineRenderQueues(true);
 	//});

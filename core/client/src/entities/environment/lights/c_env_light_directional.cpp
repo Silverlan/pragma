@@ -207,7 +207,7 @@ void CLightDirectionalComponent::UpdateAmbientColor()
 	auto pToggleComponent = GetEntity().GetComponent<CToggleComponent>();
 	if(pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false)
 		return;
-	c_game->GetWorldEnvironment().SetAmbientColor((*m_ambientColor)->ToVector4());
+	// c_game->GetWorldEnvironment().SetAmbientColor((*m_ambientColor)->ToVector4());
 	c_game->SetMaxHDRExposure(m_maxExposure);
 }
 void CLightDirectionalComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

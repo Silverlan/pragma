@@ -68,10 +68,6 @@ class DLLCLIENT WorldEnvironment : public std::enable_shared_from_this<WorldEnvi
 		std::shared_ptr<util::BoolProperty> m_bEnabled;
 	};
 
-	void SetAmbientColor(const Vector4 &col);
-	const Vector4 &GetAmbientColor() const;
-	const std::shared_ptr<util::Vector4Property> &GetAmbientColorProperty() const;
-
 	void SetShaderQuality(int32_t quality);
 	int32_t GetShaderQuality() const;
 	const std::shared_ptr<util::Int32Property> &GetShaderQualityProperty() const;
@@ -87,7 +83,6 @@ class DLLCLIENT WorldEnvironment : public std::enable_shared_from_this<WorldEnvi
 	Fog &GetFogSettings();
   protected:
 	WorldEnvironment();
-	std::shared_ptr<util::Vector4Property> m_ambientColor;
 	std::shared_ptr<util::Int32Property> m_shaderQuality;
 	std::shared_ptr<util::BoolProperty> m_bUnlit;
 	std::shared_ptr<util::UInt32Property> m_shadowResolution;

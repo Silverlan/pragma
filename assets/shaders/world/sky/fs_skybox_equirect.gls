@@ -16,7 +16,7 @@ layout(LAYOUT_PUSH_CONSTANTS()) uniform RenderSettings {
 
 void main()
 {
-	vec3 camOffset = (inverse(get_model_matrix()) *vec4(u_renderSettings.posCam,1)).xyz;
+	vec3 camOffset = (inverse(get_model_matrix()) *vec4(u_renderSettings.posCam.xyz,1)).xyz;
 	vec3 pos = fs_in.vert_pos_ws -camOffset;
 	fs_color = textureLod(u_skyboxTexture, pos, 0).rgba; 
 	fs_color *= get_instance_color();

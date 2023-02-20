@@ -53,7 +53,12 @@ namespace pragma {
 	struct EntityUComponentMemberRef;
 
 	using NetEventId = uint32_t;
+
+	namespace ents {
+		DLLNETWORK const char *register_class_name(const std::string &className);
+	};
 };
+
 namespace umath {
 	class Transform;
 	class ScaledTransform;
@@ -279,7 +284,7 @@ class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseE
   protected:
 	StateFlags m_stateFlags = StateFlags::None;
 
-	// Transform component is needed frequently, so we store a direct reference to it for faster access
+	// These components are needed frequently, so we store a direct reference to them for faster access
 	pragma::BaseTransformComponent *m_transformComponent = nullptr;
 	pragma::BasePhysicsComponent *m_physicsComponent = nullptr;
 	pragma::BaseModelComponent *m_modelComponent = nullptr;
@@ -292,11 +297,9 @@ class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseE
   protected:
 	uint32_t m_spawnFlags = 0u;
 
-	std::vector<EntityHandle> m_entsRemove; // List of entities that should be removed when this entity is removed
-	std::string m_class = "BaseEntity";
+	const char *m_className = "BaseEntity";
 	util::Uuid m_uuid {};
 	EntityIndex m_index = 0u;
-	virtual void EraseFunction(int function);
 	virtual void DoSpawn();
 	pragma::NetEventId SetupNetEvent(const std::string &name) const;
 };

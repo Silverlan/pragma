@@ -55,6 +55,7 @@
 #include "pragma/entities/components/constraints/constraint_limit_scale_component.hpp"
 #include "pragma/entities/components/constraints/constraint_look_at_component.hpp"
 #include "pragma/entities/components/constraints/constraint_child_of_component.hpp"
+#include "pragma/entities/components/lifeline_link_component.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
@@ -625,6 +626,9 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defConstraintLimitScale.def("SetMaximumEnabled", &pragma::ConstraintLimitScaleComponent::SetMaximumEnabled);
 	defConstraintLimitScale.def("IsMaximumEnabled", &pragma::ConstraintLimitScaleComponent::IsMaximumEnabled);
 	entsMod[defConstraintLimitScale];
+
+	auto defLifelineLink = pragma::lua::create_entity_component_class<pragma::LifelineLinkComponent, pragma::BaseEntityComponent>("LifelineLinkComponent");
+	entsMod[defLifelineLink];
 
 	auto defLogic = pragma::lua::create_entity_component_class<pragma::LogicComponent, pragma::BaseEntityComponent>("LogicComponent");
 	defLogic.add_static_constant("EVENT_ON_TICK", pragma::LogicComponent::EVENT_ON_TICK);

@@ -188,7 +188,9 @@ uint32_t CBaseEntity::GetLocalIndex() const { return const_cast<CBaseEntity *>(t
 void CBaseEntity::Initialize()
 {
 	BaseEntity::Initialize();
-	g_ClientEntityFactories->GetClassName(typeid(*this), &m_class);
+	std::string className;
+	g_ClientEntityFactories->GetClassName(typeid(*this), &className);
+	m_className = pragma::ents::register_class_name(className);
 }
 
 void CBaseEntity::DoSpawn()
@@ -255,12 +257,6 @@ void CBaseEntity::ReceiveData(NetPacket &packet)
 }
 
 void CBaseEntity::ReceiveSnapshotData(NetPacket &) {}
-
-void CBaseEntity::EraseFunction(int function)
-{
-	Game *game = client->GetGameState();
-	lua_removereference(game->GetLuaState(), function);
-}
 
 void CBaseEntity::OnRemove()
 {

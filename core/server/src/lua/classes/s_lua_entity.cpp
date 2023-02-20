@@ -23,7 +23,7 @@ SLuaEntity::SLuaEntity() : SBaseEntity {} {}
 void SLuaEntity::Initialize() { SBaseEntity::Initialize(); }
 void SLuaEntity::SetupLua(const luabind::object &o, const std::string &className)
 {
-	m_class = className;
+	m_className = pragma::ents::register_class_name(className);
 	SetLuaObject(o);
 }
 bool SLuaEntity::IsScripted() const { return true; }

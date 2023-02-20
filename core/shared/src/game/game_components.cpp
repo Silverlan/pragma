@@ -33,6 +33,7 @@
 #include "pragma/entities/components/constraints/constraint_child_of_component.hpp"
 #include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/entities/components/origin_component.hpp"
+#include "pragma/entities/components/lifeline_link_component.hpp"
 #include "pragma/entities/components/basegravity.h"
 
 void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
@@ -63,6 +64,7 @@ void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentM
 	componentManager.RegisterComponentType<pragma::ConstraintSpaceComponent>("constraint_space");
 	componentManager.RegisterComponentType<pragma::ConstraintLookAtComponent>("constraint_look_at");
 	componentManager.RegisterComponentType<pragma::ConstraintChildOfComponent>("constraint_child_of");
+	componentManager.RegisterComponentType<pragma::LifelineLinkComponent>("lifeline_link");
 
 	pragma::BaseEntityComponent::RegisterEvents(componentManager, [&componentManager](const std::string &evName, pragma::ComponentEventInfo::Type type) -> pragma::ComponentEventId { return componentManager.RegisterEvent(evName, typeid(pragma::BaseEntityComponent), type); });
 	BaseEntity::RegisterEvents(componentManager);

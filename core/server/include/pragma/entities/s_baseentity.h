@@ -26,7 +26,6 @@ class DLLSERVER SBaseEntity : public BaseEntity {
   protected:
 	bool m_bShared;
 	Bool m_bSynchronized;
-	void EraseFunction(int function);
 	virtual void OnComponentAdded(pragma::BaseEntityComponent &component) override;
 	virtual void OnComponentRemoved(pragma::BaseEntityComponent &component) override;
   public:

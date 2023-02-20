@@ -114,7 +114,10 @@ void SBaseEntity::Initialize()
 {
 	BaseEntity::Initialize();
 
-	g_ServerEntityFactories->GetClassName(typeid(*this), &m_class);
+	std::string className;
+	g_ServerEntityFactories->GetClassName(typeid(*this), &className);
+	m_className = pragma::ents::register_class_name(className);
+
 	unsigned int ID = g_SvEntityNetworkMap->GetFactoryID(typeid(*this));
 	if(ID == 0)
 		return;
@@ -176,12 +179,6 @@ void SBaseEntity::Remove()
 }
 
 NetworkState *SBaseEntity::GetNetworkState() const { return server; }
-
-void SBaseEntity::EraseFunction(int function)
-{
-	Game *game = server->GetGameState();
-	lua_removereference(game->GetLuaState(), function);
-}
 
 void SBaseEntity::SendNetEvent(pragma::NetEventId eventId, NetPacket &packet, pragma::networking::Protocol protocol, const pragma::networking::ClientRecipientFilter &rf)
 {

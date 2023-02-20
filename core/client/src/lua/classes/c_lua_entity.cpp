@@ -12,7 +12,7 @@ CLuaEntity::CLuaEntity() : CBaseEntity {} {}
 void CLuaEntity::Initialize() { CBaseEntity::Initialize(); }
 void CLuaEntity::SetupLua(const luabind::object &o, const std::string &className)
 {
-	m_class = className;
+	m_className = pragma::ents::register_class_name(className);
 	SetLuaObject(o);
 }
 void CLuaEntity::InitializeLuaObject(lua_State *lua) {}

@@ -82,13 +82,13 @@ void ConstraintChildOfComponent::Initialize()
 	GetEntity().AddComponent<ConstraintComponent>();
 	BindEventUnhandled(ConstraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ApplyConstraint(); });
 }
-void ConstraintChildOfComponent::SetLocationAxisEnabled(pragma::Axis axis, bool enabled) { m_locationEnabled[umath::to_integral(axis)] = enabled; }
+void ConstraintChildOfComponent::SetLocationAxisEnabled(pragma::Axis axis, bool enabled) { m_locationEnabled[umath::to_integral(axis)] = enabled; UpdateAxisState(); }
 bool ConstraintChildOfComponent::IsLocationAxisEnabled(pragma::Axis axis) const { return m_locationEnabled[umath::to_integral(axis)]; }
 
-void ConstraintChildOfComponent::SetRotationAxisEnabled(pragma::Axis axis, bool enabled) { m_rotationEnabled[umath::to_integral(axis)] = enabled; }
+void ConstraintChildOfComponent::SetRotationAxisEnabled(pragma::Axis axis, bool enabled) { m_rotationEnabled[umath::to_integral(axis)] = enabled; UpdateAxisState(); }
 bool ConstraintChildOfComponent::IsRotationAxisEnabled(pragma::Axis axis) const { return m_rotationEnabled[umath::to_integral(axis)]; }
 
-void ConstraintChildOfComponent::SetScaleAxisEnabled(pragma::Axis axis, bool enabled) { m_scaleEnabled[umath::to_integral(axis)] = enabled; }
+void ConstraintChildOfComponent::SetScaleAxisEnabled(pragma::Axis axis, bool enabled) { m_scaleEnabled[umath::to_integral(axis)] = enabled; UpdateAxisState(); }
 bool ConstraintChildOfComponent::IsScaleAxisEnabled(pragma::Axis axis) const { return m_scaleEnabled[umath::to_integral(axis)]; }
 
 void ConstraintChildOfComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
@@ -173,6 +173,6 @@ void ConstraintChildOfComponent::ApplyConstraint()
 	}
 
 	curPose.Interpolate(newPose, influence);
-	constraintInfo->drivenObjectC->SetTransformMemberPose(drivenObjPoseProp->GetMemberIndex(), static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), curPose, true);
+	constraintInfo->drivenObjectC->SetTransformMemberPose(drivenObjPoseProp->GetMemberIndex(), umath::CoordinateSpace::World, curPose, true);
 }
 #pragma optimize("", on)

@@ -555,14 +555,14 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	entityComponentDef.def("GetMemberInfo", &pragma::BaseEntityComponent::GetMemberInfo);
 	entityComponentDef.def("GetDynamicMemberIndices", static_cast<std::vector<pragma::ComponentMemberIndex> (*)(pragma::BaseEntityComponent &)>(&get_dynamic_member_ids));
 	entityComponentDef.def("GetStaticMemberCount", &pragma::BaseEntityComponent::GetStaticMemberCount);
-	entityComponentDef.def("GetTransformMemberPos",&get_transform_member_pos,luabind::default_parameter_policy<4, false> {});
-	entityComponentDef.def("GetTransformMemberRot",&get_transform_member_rot,luabind::default_parameter_policy<4, false> {});
-	entityComponentDef.def("GetTransformMemberScale",&get_transform_member_scale,luabind::default_parameter_policy<4, false> {});
-	entityComponentDef.def("GetTransformMemberPose",&get_transform_member_pose,luabind::default_parameter_policy<4, false> {});
-	entityComponentDef.def("GetTransformMemberPos",&get_transform_member_pos);
-	entityComponentDef.def("GetTransformMemberRot",&get_transform_member_rot);
-	entityComponentDef.def("GetTransformMemberScale",&get_transform_member_scale);
-	entityComponentDef.def("GetTransformMemberPose",&get_transform_member_pose);
+	entityComponentDef.def("GetTransformMemberPos", &get_transform_member_pos, luabind::default_parameter_policy<4, false> {});
+	entityComponentDef.def("GetTransformMemberRot", &get_transform_member_rot, luabind::default_parameter_policy<4, false> {});
+	entityComponentDef.def("GetTransformMemberScale", &get_transform_member_scale, luabind::default_parameter_policy<4, false> {});
+	entityComponentDef.def("GetTransformMemberPose", &get_transform_member_pose, luabind::default_parameter_policy<4, false> {});
+	entityComponentDef.def("GetTransformMemberPos", &get_transform_member_pos);
+	entityComponentDef.def("GetTransformMemberRot", &get_transform_member_rot);
+	entityComponentDef.def("GetTransformMemberScale", &get_transform_member_scale);
+	entityComponentDef.def("GetTransformMemberPose", &get_transform_member_pose);
 	entityComponentDef.def("SetTransformMemberPos", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Vector3 &, bool)>(&pragma::BaseEntityComponent::SetTransformMemberPos), luabind::default_parameter_policy<5, false> {});
 	entityComponentDef.def("SetTransformMemberRot", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Quat &, bool)>(&pragma::BaseEntityComponent::SetTransformMemberRot), luabind::default_parameter_policy<5, false> {});
 	entityComponentDef.def("SetTransformMemberScale", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Vector3 &, bool)>(&pragma::BaseEntityComponent::SetTransformMemberScale), luabind::default_parameter_policy<5, false> {});
@@ -1374,6 +1374,8 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	def.def("SetPlaybackRate", &pragma::BaseAnimatedComponent::SetPlaybackRate);
 	def.def("GetPlaybackRate", &pragma::BaseAnimatedComponent::GetPlaybackRate);
 	def.def("GetPlaybackRateProperty", &pragma::BaseAnimatedComponent::GetPlaybackRateProperty);
+	def.def(
+	  "GetEffectiveBoneTransforms", +[](pragma::BaseAnimatedComponent &animC) -> std::vector<umath::ScaledTransform> { return animC.GetProcessedBones(); });
 	register_base_animated_component_bone_methods<BoneId>(def);
 	register_base_animated_component_bone_methods<std::string>(def);
 	def.def("UpdateEffectiveBoneTransforms", &pragma::BaseAnimatedComponent::UpdateSkeleton);

@@ -417,8 +417,16 @@ namespace pragma {
 
 		virtual void SetIdentifier(const std::string &identifier) override { ShaderGameWorldLightingPass::SetIdentifier(identifier); }
 		virtual void SetPipelineCount(uint32_t count) override { ShaderGameWorldLightingPass::SetPipelineCount(count); }
+
+		virtual void RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
+		  prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, prosper::IDescriptorSet &dsMaterial, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const override;
+		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
+		virtual void InitializeMaterialData(CMaterial &mat, pragma::ShaderGameWorldLightingPass::MaterialData &matData) override;
+		void SetPushConstants(DataStream dsPushConstants);
 	  protected:
 		friend LuaShaderWrapperTextured3D;
+		std::shared_ptr<prosper::IDescriptorSetGroup> BaseInitializeMaterialDescriptorSet(CMaterial &mat);
+		void BaseInitializeMaterialData(CMaterial &mat, pragma::ShaderGameWorldLightingPass::MaterialData &matData);
 		void BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
 		void BaseInitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx);
 		void BaseInitializeGfxPipelineVertexAttributes(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
@@ -431,6 +439,8 @@ namespace pragma {
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 		void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx);
+
+		DataStream m_pushConstants;
 	};
 	class DLLCLIENT LuaShaderWrapperTextured3D : public LuaShaderWrapperGraphicsBase {
 	  public:
@@ -440,6 +450,12 @@ namespace pragma {
 
 		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		// virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override; // TODO: ShaderTexturedBase
+
+		std::shared_ptr<prosper::IDescriptorSetGroup> Lua_InitializeMaterialDescriptorSet(Material &mat);
+		static std::shared_ptr<prosper::IDescriptorSetGroup> Lua_default_InitializeMaterialDescriptorSet(lua_State *l, LuaShaderWrapperTextured3D &shader, Material &mat) { return shader.Lua_InitializeMaterialDescriptorSet(mat); }
+
+		void Lua_InitializeMaterialData(Material &mat, pragma::ShaderGameWorldLightingPass::MaterialData &matData);
+		static void Lua_default_InitializeMaterialData(lua_State *l, LuaShaderWrapperTextured3D &shader, Material &mat, pragma::ShaderGameWorldLightingPass::MaterialData &matData) { shader.Lua_InitializeMaterialData(mat, matData); }
 
 		void Lua_InitializeGfxPipelineVertexAttributes(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
 		static void Lua_default_InitializeGfxPipelineVertexAttributes(lua_State *l, LuaShaderWrapperTextured3D &shader, prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { shader.Lua_InitializeGfxPipelineVertexAttributes(pipelineInfo, pipelineIdx); }
@@ -468,9 +484,14 @@ namespace pragma {
 		void Lua_OnEndDraw();
 		static void Lua_default_OnEndDraw(lua_State *l, LuaShaderWrapperTextured3D &shader) { shader.Lua_OnEndDraw(); }
 
+		void SetPushConstants(DataStream dsPushConstants);
+		void InitializeMaterialBuffer(prosper::IDescriptorSetGroup &descSet, CMaterial &mat);
+
 		virtual LShaderBase *CreateShader() const override { return new TShader {}; }
 	  protected:
 		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
+		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat);
+		void InitializeMaterialData(CMaterial &mat, pragma::ShaderGameWorldLightingPass::MaterialData &matData);
 		void InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
 		void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
 		void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);

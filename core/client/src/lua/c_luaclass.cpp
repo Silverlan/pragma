@@ -360,20 +360,42 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defShaderScene.add_static_constant("RENDER_PASS_COLOR_FORMAT", umath::to_integral(pragma::ShaderScene::RENDER_PASS_FORMAT));
 	defShaderScene.add_static_constant("RENDER_PASS_BLOOM_FORMAT", umath::to_integral(pragma::ShaderScene::RENDER_PASS_FORMAT));
 	defShaderScene.add_static_constant("RENDER_PASS_DEPTH_FORMAT", umath::to_integral(pragma::ShaderScene::RENDER_PASS_DEPTH_FORMAT));
+	defShaderScene.def("GetCameraDescriptorSetIndex", &pragma::ShaderScene::GetCameraDescriptorSetIndex);
+	defShaderScene.def("GetRendererDescriptorSetIndex", &pragma::ShaderScene::GetRendererDescriptorSetIndex);
 	modShader[defShaderScene];
 
 	auto defShaderSceneLit = luabind::class_<pragma::ShaderSceneLit, luabind::bases<pragma::ShaderScene, prosper::ShaderGraphics, prosper::Shader>>("SceneLit3D");
+	defShaderSceneLit.def("GetLightDescriptorSetIndex", &pragma::ShaderSceneLit::GetLightDescriptorSetIndex);
 	modShader[defShaderSceneLit];
 
 	auto defShaderEntity = luabind::class_<pragma::ShaderEntity, luabind::bases<pragma::ShaderSceneLit, pragma::ShaderScene, prosper::ShaderGraphics, prosper::Shader>>("ShaderEntity");
 	modShader[defShaderEntity];
 
 	auto defShaderGameWorld = luabind::class_<pragma::ShaderGameWorld, luabind::bases<pragma::ShaderEntity, pragma::ShaderSceneLit, pragma::ShaderScene, prosper::ShaderGraphics, prosper::Shader>>("GameWorld");
+	defShaderGameWorld.def("GetMaterialDescriptorSetIndex", &pragma::ShaderGameWorld::GetMaterialDescriptorSetIndex);
+	defShaderGameWorld.def("GetInstanceDescriptorSetIndex", &pragma::ShaderGameWorld::GetInstanceDescriptorSetIndex);
+	defShaderGameWorld.def("GetRenderSettingsDescriptorSetIndex", &pragma::ShaderGameWorld::GetRenderSettingsDescriptorSetIndex);
 	modShader[defShaderGameWorld];
 
 	auto defShaderTextured3D = luabind::class_<pragma::ShaderGameWorldLightingPass, luabind::bases<pragma::ShaderGameWorld, pragma::ShaderEntity, pragma::ShaderSceneLit, pragma::ShaderScene, prosper::ShaderGraphics, prosper::Shader>>("TexturedLit3D");
 	defShaderTextured3D.add_static_constant("PUSH_CONSTANTS_SIZE", sizeof(pragma::ShaderGameWorldLightingPass::PushConstants));
 	defShaderTextured3D.add_static_constant("PUSH_CONSTANTS_USER_DATA_OFFSET", sizeof(pragma::ShaderGameWorldLightingPass::PushConstants));
+
+	auto defMatData = luabind::class_<pragma::ShaderGameWorldLightingPass::MaterialData>("MaterialData");
+	defMatData.def_readwrite("color", &pragma::ShaderGameWorldLightingPass::MaterialData::color);
+	defMatData.def_readwrite("emissionFactor", &pragma::ShaderGameWorldLightingPass::MaterialData::emissionFactor);
+	defMatData.def_readwrite("flags", &pragma::ShaderGameWorldLightingPass::MaterialData::flags);
+	defMatData.def_readwrite("glowScale", &pragma::ShaderGameWorldLightingPass::MaterialData::glowScale);
+	defMatData.def_readwrite("parallaxHeightScale", &pragma::ShaderGameWorldLightingPass::MaterialData::parallaxHeightScale);
+	defMatData.def_readwrite("alphaDiscardThreshold", &pragma::ShaderGameWorldLightingPass::MaterialData::alphaDiscardThreshold);
+	defMatData.def_readwrite("phongIntensity", &pragma::ShaderGameWorldLightingPass::MaterialData::phongIntensity);
+	defMatData.def_readwrite("metalnessFactor", &pragma::ShaderGameWorldLightingPass::MaterialData::metalnessFactor);
+	defMatData.def_readwrite("roughnessFactor", &pragma::ShaderGameWorldLightingPass::MaterialData::roughnessFactor);
+	defMatData.def_readwrite("aoFactor", &pragma::ShaderGameWorldLightingPass::MaterialData::aoFactor);
+	defMatData.def_readwrite("alphaMode", &pragma::ShaderGameWorldLightingPass::MaterialData::alphaMode);
+	defMatData.def_readwrite("alphaCutoff", &pragma::ShaderGameWorldLightingPass::MaterialData::alphaCutoff);
+	defShaderTextured3D.scope[defMatData];
+
 	modShader[defShaderTextured3D];
 
 	auto defShaderGlow = luabind::class_<pragma::ShaderGlow, luabind::bases<pragma::ShaderGameWorldLightingPass, pragma::ShaderEntity, pragma::ShaderSceneLit, pragma::ShaderScene, prosper::ShaderGraphics, prosper::Shader>>("Glow");
@@ -633,6 +655,10 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	defShaderTextured3DBase.def("InitializeGfxPipelineVertexAttributes", &pragma::LuaShaderWrapperTextured3D::Lua_InitializeGfxPipelineVertexAttributes, &pragma::LuaShaderWrapperTextured3D::Lua_default_InitializeGfxPipelineVertexAttributes);
 	defShaderTextured3DBase.def("InitializeGfxPipelinePushConstantRanges", &pragma::LuaShaderWrapperTextured3D::Lua_InitializeGfxPipelinePushConstantRanges, &pragma::LuaShaderWrapperTextured3D::Lua_default_InitializeGfxPipelinePushConstantRanges);
 	defShaderTextured3DBase.def("InitializeGfxPipelineDescriptorSets", &pragma::LuaShaderWrapperTextured3D::Lua_InitializeGfxPipelineDescriptorSets, &pragma::LuaShaderWrapperTextured3D::Lua_default_InitializeGfxPipelineDescriptorSets);
+	defShaderTextured3DBase.def("InitializeMaterialDescriptorSet", &pragma::LuaShaderWrapperTextured3D::Lua_InitializeMaterialDescriptorSet, &pragma::LuaShaderWrapperTextured3D::Lua_default_InitializeMaterialDescriptorSet);
+	defShaderTextured3DBase.def("InitializeMaterialData", &pragma::LuaShaderWrapperTextured3D::Lua_InitializeMaterialData, &pragma::LuaShaderWrapperTextured3D::Lua_default_InitializeMaterialData);
+	defShaderTextured3DBase.def("SetPushConstants", &pragma::LuaShaderWrapperTextured3D::SetPushConstants);
+	defShaderTextured3DBase.def("InitializeMaterialBuffer", &pragma::LuaShaderWrapperTextured3D::InitializeMaterialBuffer);
 
 	defShaderTextured3DBase.def("OnBindMaterial", &pragma::LuaShaderWrapperTextured3D::Lua_OnBindMaterial, &pragma::LuaShaderWrapperTextured3D::Lua_default_OnBindMaterial);
 	defShaderTextured3DBase.def("OnDraw", &pragma::LuaShaderWrapperTextured3D::Lua_OnDraw, &pragma::LuaShaderWrapperTextured3D::Lua_default_OnDraw);

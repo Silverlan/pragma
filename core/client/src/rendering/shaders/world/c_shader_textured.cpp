@@ -16,6 +16,7 @@
 #include "pragma/model/vk_mesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <pragma/game/game_limits.h>
+#include <pragma/logging.hpp>
 #include <datasystem_color.h>
 #include <datasystem_vector.h>
 #include <prosper_util.hpp>
@@ -415,7 +416,7 @@ ShaderGameWorldLightingPass::MaterialData ShaderGameWorldLightingPass::GenerateM
 	//	matFlags |= MaterialFlags::Translucent;
 	return matData;
 }
-std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLightingPass::UpdateMaterialBuffer(CMaterial &mat) const
+std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLightingPass::UpdateMaterialBuffer(CMaterial &mat)
 {
 	auto *buf = mat.GetSettingsBuffer();
 	if(buf == nullptr)
@@ -423,7 +424,7 @@ std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLighting
 
 	auto matData = GenerateMaterialData(mat);
 	ApplyMaterialFlags(mat, matData.flags);
-
+	InitializeMaterialData(mat, matData);
 	buf->Write(0, matData);
 	return matData;
 }
@@ -435,6 +436,7 @@ uint32_t ShaderGameWorldLightingPass::GetInstanceDescriptorSetIndex() const { re
 uint32_t ShaderGameWorldLightingPass::GetRenderSettingsDescriptorSetIndex() const { return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex; }
 uint32_t ShaderGameWorldLightingPass::GetLightDescriptorSetIndex() const { return DESCRIPTOR_SET_LIGHTS.setIndex; }
 uint32_t ShaderGameWorldLightingPass::GetMaterialDescriptorSetIndex() const { return GetMaterialDescriptorSetInfo().setIndex; }
+void ShaderGameWorldLightingPass::InitializeMaterialData(CMaterial &mat, MaterialData &matData) {}
 void ShaderGameWorldLightingPass::GetVertexAnimationPushConstantInfo(uint32_t &offset) const { offset = offsetof(PushConstants, vertexAnimInfo); }
 bool ShaderGameWorldLightingPass::GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const
 {
@@ -448,11 +450,15 @@ bool ShaderGameWorldLightingPass::GetRenderBufferTargets(CModelSubMesh &mesh, ui
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo)
 {
 	auto *diffuseMap = mat.GetDiffuseMap();
-	if(diffuseMap == nullptr || diffuseMap->texture == nullptr)
+	if(diffuseMap == nullptr || diffuseMap->texture == nullptr) {
+		spdlog::debug("Failed to initialize material descriptor set for material '{}': Material has no albedo map!", mat.GetName());
 		return nullptr;
+	}
 	auto diffuseTexture = std::static_pointer_cast<Texture>(diffuseMap->texture);
-	if(diffuseTexture->HasValidVkTexture() == false)
+	if(diffuseTexture->HasValidVkTexture() == false) {
+		spdlog::debug("Failed to initialize material descriptor set for material '{}': Albedo map of material is not valid!", mat.GetName());
 		return nullptr;
+	}
 	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(descSetInfo);
 	mat.SetDescriptorSetGroup(*this, descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();

@@ -10,6 +10,7 @@
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/render_processor.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -286,6 +287,26 @@ pragma::LShaderGameWorldLightingPass::LShaderGameWorldLightingPass() : TLShaderB
 {
 	// SetBaseShader<ShaderTextured3DBase>();
 }
+void pragma::LShaderGameWorldLightingPass::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
+  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, prosper::IDescriptorSet &dsMaterial, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
+{
+	RecordPushSceneConstants(shaderProcessor, scene, drawOrigin);
+
+	if(m_pushConstants->GetSize() > 0)
+		shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, sizeof(ShaderPBR::PushConstants), m_pushConstants->GetSize(),
+		  const_cast<LShaderGameWorldLightingPass *>(this)->m_pushConstants->GetData());
+}
+std::shared_ptr<prosper::IDescriptorSetGroup> pragma::LShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(CMaterial &mat)
+{
+	auto descSet = static_cast<LuaShaderWrapperTextured3D *>(m_wrapper)->InitializeMaterialDescriptorSet(mat);
+	if(descSet)
+		mat.SetDescriptorSetGroup(*this, descSet);
+	return descSet;
+}
+void pragma::LShaderGameWorldLightingPass::InitializeMaterialData(CMaterial &mat, pragma::ShaderGameWorldLightingPass::MaterialData &matData) { static_cast<LuaShaderWrapperTextured3D *>(m_wrapper)->InitializeMaterialData(mat, matData); }
+void pragma::LShaderGameWorldLightingPass::SetPushConstants(DataStream dsPushConstants) { m_pushConstants = dsPushConstants; }
+std::shared_ptr<prosper::IDescriptorSetGroup> pragma::LShaderGameWorldLightingPass::BaseInitializeMaterialDescriptorSet(CMaterial &mat) { return ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(mat); }
+void pragma::LShaderGameWorldLightingPass::BaseInitializeMaterialData(CMaterial &mat, pragma::ShaderGameWorldLightingPass::MaterialData &matData) { return ShaderGameWorldLightingPass::InitializeMaterialData(mat, matData); }
 void pragma::LShaderGameWorldLightingPass::BaseInitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
 void pragma::LShaderGameWorldLightingPass::BaseInitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { ShaderGameWorldLightingPass::InitializeRenderPass(outRenderPass, pipelineIdx); }
 void pragma::LShaderGameWorldLightingPass::BaseInitializeGfxPipelineVertexAttributes(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
@@ -311,6 +332,8 @@ void pragma::LuaShaderWrapperTextured3D::Lua_InitializePipeline(prosper::BasePip
 {
 	static_cast<LShaderGameWorldLightingPass *>(m_shader)->BaseInitializeGfxPipeline(static_cast<prosper::GraphicsPipelineCreateInfo &>(pipelineInfo), pipelineIdx);
 }
+std::shared_ptr<prosper::IDescriptorSetGroup> pragma::LuaShaderWrapperTextured3D::Lua_InitializeMaterialDescriptorSet(Material &mat) { return static_cast<LShaderGameWorldLightingPass *>(m_shader)->BaseInitializeMaterialDescriptorSet(static_cast<CMaterial &>(mat)); }
+void pragma::LuaShaderWrapperTextured3D::Lua_InitializeMaterialData(Material &mat, pragma::ShaderGameWorldLightingPass::MaterialData &matData) { return static_cast<LShaderGameWorldLightingPass *>(m_shader)->BaseInitializeMaterialData(static_cast<CMaterial &>(mat), matData); }
 void pragma::LuaShaderWrapperTextured3D::Lua_InitializeGfxPipelineVertexAttributes(prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
 	static_cast<LShaderGameWorldLightingPass *>(m_shader)->BaseInitializeGfxPipelineVertexAttributes(static_cast<prosper::GraphicsPipelineCreateInfo &>(pipelineInfo), pipelineIdx);
@@ -329,6 +352,10 @@ void pragma::LuaShaderWrapperTextured3D::Lua_OnBindEntity(EntityHandle &hEnt) {}
 void pragma::LuaShaderWrapperTextured3D::Lua_OnBindScene(CRasterizationRendererComponent &renderer, bool bView) {}
 void pragma::LuaShaderWrapperTextured3D::Lua_OnBeginDraw(prosper::ICommandBuffer &drawCmd, const Vector4 &clipPlane, uint32_t pipelineIdx, uint32_t recordFlags) {}
 void pragma::LuaShaderWrapperTextured3D::Lua_OnEndDraw() {}
+void pragma::LuaShaderWrapperTextured3D::SetPushConstants(DataStream dsPushConstants) { static_cast<LShaderGameWorldLightingPass *>(m_shader)->SetPushConstants(dsPushConstants); }
+void pragma::LuaShaderWrapperTextured3D::InitializeMaterialBuffer(prosper::IDescriptorSetGroup &descSet, CMaterial &mat) { static_cast<LShaderGameWorldLightingPass *>(m_shader)->InitializeMaterialBuffer(*descSet.GetDescriptorSet(), mat); }
+std::shared_ptr<prosper::IDescriptorSetGroup> pragma::LuaShaderWrapperTextured3D::InitializeMaterialDescriptorSet(CMaterial &mat) { return CallLuaMember<std::shared_ptr<prosper::IDescriptorSetGroup>, CMaterial *>("InitializeMaterialDescriptorSet", &mat); }
+void pragma::LuaShaderWrapperTextured3D::InitializeMaterialData(CMaterial &mat, pragma::ShaderGameWorldLightingPass::MaterialData &matData) { CallLuaMember<void, CMaterial *, pragma::ShaderGameWorldLightingPass::MaterialData *>("InitializeMaterialData", &mat, &matData); }
 void pragma::LuaShaderWrapperTextured3D::InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
 	CallLuaMember<void, std::reference_wrapper<prosper::BasePipelineCreateInfo>, uint32_t>("InitializeGfxPipelineVertexAttributes", std::ref(static_cast<prosper::BasePipelineCreateInfo &>(pipelineInfo)), pipelineIdx);

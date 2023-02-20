@@ -66,14 +66,14 @@ namespace pragma {
 			uint32_t flags;
 		};
 #pragma pack(pop)
+		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const = 0;
+		virtual uint32_t GetCameraDescriptorSetIndex() const = 0;
+		virtual uint32_t GetRendererDescriptorSetIndex() const { return std::numeric_limits<uint32_t>::max(); }
 	  protected:
 		ShaderScene(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader = "");
 		prosper::SampleCountFlags GetSampleCount(uint32_t pipelineIdx) const;
 		virtual bool ShouldInitializePipeline(uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
-		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const = 0;
-		virtual uint32_t GetCameraDescriptorSetIndex() const = 0;
-		virtual uint32_t GetRendererDescriptorSetIndex() const { return std::numeric_limits<uint32_t>::max(); }
 	};
 
 	/////////////////////
@@ -97,9 +97,9 @@ namespace pragma {
 			int32_t count;
 		};
 #pragma pack(pop)
+		virtual uint32_t GetLightDescriptorSetIndex() const = 0;
 	  protected:
 		ShaderSceneLit(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader = "");
-		virtual uint32_t GetLightDescriptorSetIndex() const = 0;
 	};
 
 	/////////////////////

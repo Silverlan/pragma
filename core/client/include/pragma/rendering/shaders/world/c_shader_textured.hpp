@@ -205,9 +205,10 @@ namespace pragma {
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual bool GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const override;
 		static MaterialData GenerateMaterialData(CMaterial &mat);
-		std::optional<MaterialData> UpdateMaterialBuffer(CMaterial &mat) const;
+		std::optional<MaterialData> UpdateMaterialBuffer(CMaterial &mat);
 		bool RecordPushSceneConstants(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const Vector4 &drawOrigin) const;
 
+		virtual void InitializeMaterialData(CMaterial &mat, MaterialData &matData);
 		virtual uint32_t GetMaterialDescriptorSetIndex() const override;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
 		virtual uint32_t GetRendererDescriptorSetIndex() const override;

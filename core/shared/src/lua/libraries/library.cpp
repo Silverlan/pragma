@@ -650,6 +650,14 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	    {"print_color", Lua::console::msgc}, {"print_warning", Lua::console::msgw}, {"print_error", Lua::console::msge},
 
 	    {"run", Lua::console::Run}, {"add_change_callback", Lua::console::AddChangeCallback},
+	    {"invoke_change_callbacks",
+	      +[](lua_State *l) -> int {
+		      std::string cvarName = Lua::CheckString(l, 1);
+		      auto *nw = engine->GetNetworkState(l);
+		      if(nw)
+			      nw->InvokeConVarChangeCallbacks(cvarName);
+		      return 0;
+	      }},
 
 	    {"parse_command_arguments", Lua::console::parse_command_arguments}});
 

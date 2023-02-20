@@ -34,5 +34,8 @@ If applicable, add screenshots to help explain your problem.
 **Crashdump**
 If Pragma has crashed and has generated a crashdump, please attach it to this issue.
 
+**Log**
+If a `log.txt` file exists in the root directory of Pragma, please attach it to this issue.
+
 **Additional context**
 Add any other context about the problem here.

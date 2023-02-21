@@ -40,7 +40,7 @@
 
 extern DLLNETWORK Engine *engine;
 
-enum class TypeMetaData : uint32_t { Range = 0, Coordinate, Pose };
+enum class TypeMetaData : uint32_t { Range = 0, Coordinate, Pose, PoseComponent, Optional, Enabler };
 std::optional<std::type_index> type_meta_data_to_type_index(TypeMetaData eType)
 {
 	switch(eType) {
@@ -50,6 +50,12 @@ std::optional<std::type_index> type_meta_data_to_type_index(TypeMetaData eType)
 		return typeid(pragma::ents::CoordinateTypeMetaData);
 	case TypeMetaData::Pose:
 		return typeid(pragma::ents::PoseTypeMetaData);
+	case TypeMetaData::PoseComponent:
+		return typeid(pragma::ents::PoseComponentTypeMetaData);
+	case TypeMetaData::Optional:
+		return typeid(pragma::ents::OptionalTypeMetaData);
+	case TypeMetaData::Enabler:
+		return typeid(pragma::ents::EnablerTypeMetaData);
 	}
 	return {};
 }
@@ -62,6 +68,12 @@ luabind::object meta_data_type_to_lua_object(lua_State *l, const pragma::ents::T
 		return luabind::object {l, static_cast<const pragma::ents::CoordinateTypeMetaData *>(&metaData)};
 	case TypeMetaData::Pose:
 		return luabind::object {l, static_cast<const pragma::ents::PoseTypeMetaData *>(&metaData)};
+	case TypeMetaData::PoseComponent:
+		return luabind::object {l, static_cast<const pragma::ents::PoseComponentTypeMetaData *>(&metaData)};
+	case TypeMetaData::Optional:
+		return luabind::object {l, static_cast<const pragma::ents::OptionalTypeMetaData *>(&metaData)};
+	case TypeMetaData::Enabler:
+		return luabind::object {l, static_cast<const pragma::ents::EnablerTypeMetaData *>(&metaData)};
 	}
 	return Lua::nil;
 }
@@ -298,6 +310,9 @@ void Lua::ents::register_library(lua_State *l)
 	memberInfoDef.add_static_constant("TYPE_META_DATA_RANGE", umath::to_integral(TypeMetaData::Range));
 	memberInfoDef.add_static_constant("TYPE_META_DATA_COORDINATE", umath::to_integral(TypeMetaData::Coordinate));
 	memberInfoDef.add_static_constant("TYPE_META_DATA_POSE", umath::to_integral(TypeMetaData::Pose));
+	memberInfoDef.add_static_constant("TYPE_META_DATA_POSE_COMPONENT", umath::to_integral(TypeMetaData::PoseComponent));
+	memberInfoDef.add_static_constant("TYPE_META_DATA_OPTIONAL", umath::to_integral(TypeMetaData::Optional));
+	memberInfoDef.add_static_constant("TYPE_META_DATA_ENABLER", umath::to_integral(TypeMetaData::Enabler));
 
 	auto typeMetaDataDef = luabind::class_<pragma::ents::TypeMetaData>("TypeMetaData");
 	memberInfoDef.scope[typeMetaDataDef];

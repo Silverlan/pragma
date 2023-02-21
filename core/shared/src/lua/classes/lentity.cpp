@@ -202,15 +202,15 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	classDef.def("GetModelComponent", &BaseEntity::GetModelComponent);
 	classDef.def("GetAnimatedComponent", &BaseEntity::GetAnimatedComponent);
 	classDef.def(
-	  "FindMemberInfo", +[](lua_State *l, BaseEntity &ent, const std::string &uri) -> const pragma::ComponentMemberInfo * {
+	  "FindMemberInfo", +[](lua_State *l, BaseEntity &ent, const std::string &uri) -> Lua::opt<Lua::mult<const pragma::ComponentMemberInfo *, Lua::type<pragma::BaseEntityComponent>>> {
 		  auto path = pragma::PanimaComponent::ParseComponentChannelPath(panima::ChannelPath {uri});
 		  if(!path.has_value())
-			  return nullptr;
+			  return Lua::nil;
 		  auto c = ent.FindComponent(path->first);
 		  if(c.expired())
-			  return nullptr;
+			  return Lua::nil;
 		  auto &memberPath = path->second;
-		  return c->FindMemberInfo(memberPath.GetString());
+		  return Lua::mult<const pragma::ComponentMemberInfo *, Lua::type<pragma::BaseEntityComponent>> {l, c->FindMemberInfo(memberPath.GetString()), c->GetLuaObject()};
 	  });
 	classDef.def(
 	  "GetMemberValue", +[](lua_State *l, BaseEntity &ent, const std::string &uri) -> std::optional<Lua::udm_type> {

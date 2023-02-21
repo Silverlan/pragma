@@ -54,7 +54,7 @@ static std::array<Quat, umath::to_integral(ConstraintLookAtComponent::TrackAxis:
 
 void rotate_towards_axis(Quat &rotation, const Vector3 &targetAxis, pragma::ConstraintLookAtComponent::TrackAxis eAxis)
 {
-	auto rotDriven = uquat::create_look_rotation(targetAxis, uvec::UP);
+	auto rotDriven = uquat::create_look_rotation(targetAxis, uquat::up(rotation));
 	rotDriven = rotDriven * g_axisRotations[umath::to_integral(eAxis)];
 	rotation = rotDriven;
 }
@@ -91,7 +91,7 @@ void ConstraintLookAtComponent::ApplyConstraint()
 		return;
 
 	Vector3 posDriven;
-	auto res = constraintInfo->drivenObjectC->GetTransformMemberPos(idxDrivenObjectPos, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriven, true);
+	auto res = constraintInfo->drivenObjectC->GetTransformMemberPos(idxDrivenObjectPos, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriven);
 	if(!res) {
 		spdlog::trace("Failed to transform component property value for property {} for driven object of constraint '{}'.", constraintInfo->drivenObjectPropIdx, GetEntity().ToString());
 		return;
@@ -112,7 +112,7 @@ void ConstraintLookAtComponent::ApplyConstraint()
 		dir /= l;
 
 	Quat curRot;
-	res = constraintInfo->drivenObjectC->GetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), curRot, true);
+	res = constraintInfo->drivenObjectC->GetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), curRot);
 
 	auto rot = curRot;
 	rotate_towards_axis(rot, dir, m_trackAxis);
@@ -120,6 +120,6 @@ void ConstraintLookAtComponent::ApplyConstraint()
 	if(res)
 		rot = uquat::slerp(curRot, rot, influence);
 
-	constraintInfo->drivenObjectC->SetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot, true);
+	constraintInfo->drivenObjectC->SetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot);
 }
 #pragma optimize("", on)

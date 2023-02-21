@@ -79,97 +79,129 @@ void BaseEntityComponent::OnMembersChanged()
 	}
 }
 void BaseEntityComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) {}
-static umath::ScaledTransform get_entity_pose(const pragma::BaseEntityComponent &component, bool useOriginObjectSpace)
-{
-	umath::ScaledTransform pose;
-	if(!useOriginObjectSpace)
-		pose = component.GetEntity().GetPose();
-	else {
-		auto originC = component.GetEntity().GetComponent<OriginComponent>();
-		if(originC.valid())
-			pose = originC->GetOriginPose();
-		else
-			pose = component.GetEntity().GetPose();
-	}
-	return pose;
-}
+static umath::ScaledTransform get_entity_pose(const pragma::BaseEntityComponent &component) { return component.GetEntity().GetPose(); }
 template<typename TValue>
-static bool get_transform_member_value(const pragma::BaseEntityComponent &component, ComponentMemberIndex idx, umath::CoordinateSpace space, TValue &outValue, bool useOriginObjectSpace)
+TValue get_identity_value()
+{
+	if constexpr(std::is_same_v<TValue, Quat>)
+		return uquat::identity();
+	return TValue {};
+}
+template<typename TValue, bool parentSpaceOnly = false>
+static bool get_transform_member_value(const pragma::BaseEntityComponent &component, ComponentMemberIndex idx, umath::CoordinateSpace space, TValue &outValue)
 {
 	auto *memberInfo = component.GetMemberInfo(idx);
 	if(!memberInfo || !memberInfo->getterFunction || (space != umath::CoordinateSpace::Local && space != umath::CoordinateSpace::World && space != umath::CoordinateSpace::Object))
 		return false;
-	auto *cMetaData = memberInfo->FindTypeMetaData<pragma::ents::CoordinateTypeMetaData>();
-	auto result = pragma::ents::visit_member(memberInfo->type, [&component, memberInfo, &outValue](auto tag) -> bool {
-		using T = typename decltype(tag)::type;
-		if constexpr(!udm::is_convertible<T, TValue>())
-			return false;
-		else {
-			T value;
-			memberInfo->getterFunction(*memberInfo, const_cast<pragma::BaseEntityComponent &>(component), &value);
-			outValue = udm::convert<T, TValue>(value);
-			return true;
-		}
-	});
-	if(!result)
-		return false;
-	auto valueSpace = cMetaData ? cMetaData->space : umath::CoordinateSpace::World;
-	if(valueSpace == space)
-		return true;
-	auto idxParent = cMetaData ? component.GetMemberIndex(cMetaData->parentProperty) : std::optional<ComponentMemberIndex> {};
-	switch(valueSpace) {
-	case umath::CoordinateSpace::Local:
-		{
-			umath::ScaledTransform parentPose {};
-			if(!idxParent.has_value()) {
-				if(space == umath::CoordinateSpace::Object)
-					return true;
-				parentPose = get_entity_pose(component, useOriginObjectSpace);
-			}
-			else if(!get_transform_member_value(component, *idxParent, space, parentPose, useOriginObjectSpace))
-				return false;
-			outValue = parentPose * outValue;
-			return true;
-		}
-	case umath::CoordinateSpace::Object:
-		{
-			if(space == umath::CoordinateSpace::World) {
-				// Effectively the same as the else branch below, but faster
-				outValue = get_entity_pose(component, useOriginObjectSpace) * outValue;
-				return true;
-			}
-			else {
-				if(!idxParent.has_value())
-					return true; // Object space is equivalent to local space
-				umath::ScaledTransform parentPose {};
-				if(!get_transform_member_value(component, *idxParent, space, parentPose, useOriginObjectSpace))
-					return false;
-				outValue = parentPose.GetInverse() * outValue;
-				return true;
-			}
-			return false;
-		}
-	case umath::CoordinateSpace::World:
-		{
-			if(space == umath::CoordinateSpace::Object || !idxParent.has_value()) {
-				// Effectively the same as the else branch below, but faster
-				outValue = get_entity_pose(component, useOriginObjectSpace).GetInverse() * outValue;
-				return true;
-			}
-			else {
-				umath::ScaledTransform parentPose {};
-				if(!get_transform_member_value(component, *idxParent, space, parentPose, useOriginObjectSpace))
-					return false;
-				outValue = parentPose.GetInverse() * outValue;
-				return true;
+	if constexpr(std::is_same_v<TValue, umath::Transform> || std::is_same_v<TValue, umath::ScaledTransform>) {
+		if(memberInfo->type != pragma::ents::EntityMemberType::Transform && memberInfo->type != pragma::ents::EntityMemberType::ScaledTransform) {
+			auto *cPoseType = memberInfo->FindTypeMetaData<pragma::ents::PoseComponentTypeMetaData>();
+			if(cPoseType) {
+				// The requested type is Transform/ScaledTransform, but the property type is
+				// position or rotation. In this case we want to take our pos/rot siblings into account, so
+				// we return the pose for our associated pose instead.
+				auto idxPose = cPoseType ? component.GetMemberIndex(cPoseType->poseProperty) : std::optional<ComponentMemberIndex> {};
+				return idxPose.has_value() ? get_transform_member_value(component, *idxPose, space, outValue) : false;
 			}
 			return false;
 		}
 	}
-	return false;
+	auto *cMetaData = memberInfo->FindTypeMetaData<pragma::ents::CoordinateTypeMetaData>();
+	if constexpr(!parentSpaceOnly) {
+		auto result = pragma::ents::visit_member(memberInfo->type, [&component, memberInfo, &outValue](auto tag) -> bool {
+			using T = typename decltype(tag)::type;
+			if constexpr(!udm::is_convertible<T, TValue>())
+				return false;
+			else {
+				T value;
+				memberInfo->getterFunction(*memberInfo, const_cast<pragma::BaseEntityComponent &>(component), &value);
+				outValue = udm::convert<T, TValue>(value);
+				return true;
+			}
+		});
+		if(!result)
+			return false;
+	}
+	auto idxParent = cMetaData ? component.GetMemberIndex(cMetaData->parentProperty) : std::optional<ComponentMemberIndex> {};
+	if constexpr(parentSpaceOnly) {
+		if(!idxParent.has_value()) {
+			// If parentProperty is empty, then it's okay if no parent has been found, otherwise it's an error
+			if(cMetaData->parentProperty.empty()) {
+				outValue = get_identity_value<TValue>();
+				return true;
+			}
+			return false;
+		}
+		switch(space) {
+		case umath::CoordinateSpace::Local:
+			{
+				outValue = get_identity_value<TValue>();
+				return true; // Nothing to do
+			}
+		default:
+			return get_transform_member_value(component, *idxParent, space, outValue);
+		}
+		return false; // Unreachable
+	}
+	else {
+		auto valueSpace = cMetaData ? cMetaData->space : umath::CoordinateSpace::World;
+		if(valueSpace == space)
+			return true;
+		switch(valueSpace) {
+		case umath::CoordinateSpace::Local:
+			{
+				umath::ScaledTransform parentPose {};
+				if(!idxParent.has_value()) {
+					if(space == umath::CoordinateSpace::Object)
+						return true;
+					parentPose = get_entity_pose(component);
+				}
+				else if(!get_transform_member_value<umath::ScaledTransform, false>(component, *idxParent, space, parentPose))
+					return false;
+				outValue = parentPose * outValue;
+				return true;
+			}
+		case umath::CoordinateSpace::Object:
+			{
+				if(space == umath::CoordinateSpace::World) {
+					// Effectively the same as the else branch below, but faster
+					outValue = get_entity_pose(component) * outValue;
+					return true;
+				}
+				else {
+					if(!idxParent.has_value())
+						return true; // Object space is equivalent to local space
+					umath::ScaledTransform parentPose {};
+					if(!get_transform_member_value<umath::ScaledTransform, false>(component, *idxParent, space, parentPose))
+						return false;
+					outValue = parentPose.GetInverse() * outValue;
+					return true;
+				}
+				return false;
+			}
+		case umath::CoordinateSpace::World:
+			{
+				if(space == umath::CoordinateSpace::Object || !idxParent.has_value()) {
+					// Effectively the same as the else branch below, but faster
+					outValue = get_entity_pose(component).GetInverse() * outValue;
+					return true;
+				}
+				else {
+					umath::ScaledTransform parentPose {};
+					if(!get_transform_member_value<umath::ScaledTransform, false>(component, *idxParent, space, parentPose))
+						return false;
+					outValue = parentPose.GetInverse() * outValue;
+					return true;
+				}
+				return false;
+			}
+		}
+		return false;
+	}
+	return false; // Unreachable
 }
 template<typename TValue>
-static bool set_transform_member_value(pragma::BaseEntityComponent &component, ComponentMemberIndex idx, umath::CoordinateSpace space, const TValue &value, bool useOriginObjectSpace)
+static bool set_transform_member_value(pragma::BaseEntityComponent &component, ComponentMemberIndex idx, umath::CoordinateSpace space, const TValue &value)
 {
 	auto *memberInfo = component.GetMemberInfo(idx);
 	if(!memberInfo || !memberInfo->setterFunction || (space != umath::CoordinateSpace::Local && space != umath::CoordinateSpace::World && space != umath::CoordinateSpace::Object))
@@ -197,9 +229,9 @@ static bool set_transform_member_value(pragma::BaseEntityComponent &component, C
 			umath::ScaledTransform parentPose {};
 			if(!idxParent.has_value()) {
 				if(valueSpace == umath::CoordinateSpace::World)
-					parentPose = get_entity_pose(component, useOriginObjectSpace);
+					parentPose = get_entity_pose(component);
 			}
-			else if(!get_transform_member_value(component, *idxParent, valueSpace, parentPose, useOriginObjectSpace))
+			else if(!get_transform_member_value(component, *idxParent, valueSpace, parentPose))
 				return false;
 			auto valueInPropSpace = parentPose * value;
 			return setValue(valueInPropSpace);
@@ -208,14 +240,14 @@ static bool set_transform_member_value(pragma::BaseEntityComponent &component, C
 		{
 			if(valueSpace == umath::CoordinateSpace::World) {
 				// Effectively the same as the else branch below, but faster
-				auto valueInPropSpace = get_entity_pose(component, useOriginObjectSpace) * value;
+				auto valueInPropSpace = get_entity_pose(component) * value;
 				return setValue(valueInPropSpace);
 			}
 			else {
 				if(!idxParent.has_value())
 					return setValue(value); // Object space is equivalent to local space
 				umath::ScaledTransform parentPose {};
-				if(!get_transform_member_value(component, *idxParent, valueSpace, parentPose, useOriginObjectSpace))
+				if(!get_transform_member_value(component, *idxParent, valueSpace, parentPose))
 					return false;
 				auto valueInPropSpace = parentPose.GetInverse() * value;
 				return setValue(valueInPropSpace);
@@ -226,14 +258,14 @@ static bool set_transform_member_value(pragma::BaseEntityComponent &component, C
 		{
 			if(valueSpace == umath::CoordinateSpace::Object || !idxParent.has_value()) {
 				// Effectively the same as the else branch below, but faster
-				auto valueInPropSpace = get_entity_pose(component, useOriginObjectSpace).GetInverse() * value;
+				auto valueInPropSpace = get_entity_pose(component).GetInverse() * value;
 				return setValue(valueInPropSpace);
 			}
 			else {
 				umath::ScaledTransform parentPose;
 				if(!idxParent.has_value())
-					parentPose = get_entity_pose(component, useOriginObjectSpace);
-				else if(!get_transform_member_value(component, *idxParent, umath::CoordinateSpace::World, parentPose, useOriginObjectSpace))
+					parentPose = get_entity_pose(component);
+				else if(!get_transform_member_value(component, *idxParent, umath::CoordinateSpace::World, parentPose))
 					return false;
 				auto valueInPropSpace = parentPose.GetInverse() * value;
 				return setValue(valueInPropSpace);
@@ -243,15 +275,20 @@ static bool set_transform_member_value(pragma::BaseEntityComponent &component, C
 	}
 	return false;
 }
-bool BaseEntityComponent::GetTransformMemberPos(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &outPos, bool useOriginObjectSpace) const { return get_transform_member_value(*this, idx, space, outPos, useOriginObjectSpace); }
-bool BaseEntityComponent::GetTransformMemberRot(ComponentMemberIndex idx, umath::CoordinateSpace space, Quat &outRot, bool useOriginObjectSpace) const { return get_transform_member_value(*this, idx, space, outRot, useOriginObjectSpace); }
-bool BaseEntityComponent::GetTransformMemberScale(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &outScale, bool useOriginObjectSpace) const { return get_transform_member_value(*this, idx, space, outScale, useOriginObjectSpace); }
-bool BaseEntityComponent::GetTransformMemberPose(ComponentMemberIndex idx, umath::CoordinateSpace space, umath::ScaledTransform &outPose, bool useOriginObjectSpace) const { return get_transform_member_value(*this, idx, space, outPose, useOriginObjectSpace); }
+bool BaseEntityComponent::GetTransformMemberPos(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &outPos) const { return get_transform_member_value(*this, idx, space, outPos); }
+bool BaseEntityComponent::GetTransformMemberRot(ComponentMemberIndex idx, umath::CoordinateSpace space, Quat &outRot) const { return get_transform_member_value(*this, idx, space, outRot); }
+bool BaseEntityComponent::GetTransformMemberScale(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &outScale) const { return get_transform_member_value(*this, idx, space, outScale); }
+bool BaseEntityComponent::GetTransformMemberPose(ComponentMemberIndex idx, umath::CoordinateSpace space, umath::ScaledTransform &outPose) const { return get_transform_member_value(*this, idx, space, outPose); }
 
-bool BaseEntityComponent::SetTransformMemberPos(ComponentMemberIndex idx, umath::CoordinateSpace space, const Vector3 &pos, bool useOriginObjectSpace) { return set_transform_member_value(*this, idx, space, pos, useOriginObjectSpace); }
-bool BaseEntityComponent::SetTransformMemberRot(ComponentMemberIndex idx, umath::CoordinateSpace space, const Quat &rot, bool useOriginObjectSpace) { return set_transform_member_value(*this, idx, space, rot, useOriginObjectSpace); }
-bool BaseEntityComponent::SetTransformMemberScale(ComponentMemberIndex idx, umath::CoordinateSpace space, const Vector3 &scale, bool useOriginObjectSpace) { return set_transform_member_value(*this, idx, space, scale, useOriginObjectSpace); }
-bool BaseEntityComponent::SetTransformMemberPose(ComponentMemberIndex idx, umath::CoordinateSpace space, const umath::ScaledTransform &pose, bool useOriginObjectSpace) { return set_transform_member_value(*this, idx, space, pose, useOriginObjectSpace); }
+bool BaseEntityComponent::SetTransformMemberPos(ComponentMemberIndex idx, umath::CoordinateSpace space, const Vector3 &pos) { return set_transform_member_value(*this, idx, space, pos); }
+bool BaseEntityComponent::SetTransformMemberRot(ComponentMemberIndex idx, umath::CoordinateSpace space, const Quat &rot) { return set_transform_member_value(*this, idx, space, rot); }
+bool BaseEntityComponent::SetTransformMemberScale(ComponentMemberIndex idx, umath::CoordinateSpace space, const Vector3 &scale) { return set_transform_member_value(*this, idx, space, scale); }
+bool BaseEntityComponent::SetTransformMemberPose(ComponentMemberIndex idx, umath::CoordinateSpace space, const umath::ScaledTransform &pose) { return set_transform_member_value(*this, idx, space, pose); }
+
+bool BaseEntityComponent::GetTransformMemberParentPos(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &outPos) const { return get_transform_member_value<std::remove_reference_t<decltype(outPos)>, true>(*this, idx, space, outPos); }
+bool BaseEntityComponent::GetTransformMemberParentRot(ComponentMemberIndex idx, umath::CoordinateSpace space, Quat &outRot) const { return get_transform_member_value<std::remove_reference_t<decltype(outRot)>, true>(*this, idx, space, outRot); }
+bool BaseEntityComponent::GetTransformMemberParentScale(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &outScale) const { return get_transform_member_value<std::remove_reference_t<decltype(outScale)>, true>(*this, idx, space, outScale); }
+bool BaseEntityComponent::GetTransformMemberParentPose(ComponentMemberIndex idx, umath::CoordinateSpace space, umath::ScaledTransform &outPose) const { return get_transform_member_value<std::remove_reference_t<decltype(outPose)>, true>(*this, idx, space, outPose); }
 
 const ComponentMemberInfo *BaseEntityComponent::FindMemberInfo(const std::string &name) const
 {

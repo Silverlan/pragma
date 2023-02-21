@@ -476,32 +476,60 @@ std::ostream &operator<<(std::ostream &out,const panima::Bone &o)
 }
 }; */
 
-static std::optional<Vector3> get_transform_member_pos(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, bool useOriginObjectSpace)
+template<bool parentSpaceOnly = false>
+static std::optional<Vector3> get_transform_member_pos(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space)
 {
 	Vector3 pos;
-	if(component.GetTransformMemberPos(idx, space, pos, useOriginObjectSpace))
-		return pos;
+	if constexpr(parentSpaceOnly) {
+		if(component.GetTransformMemberParentPos(idx, space, pos))
+			return pos;
+	}
+	else {
+		if(component.GetTransformMemberPos(idx, space, pos))
+			return pos;
+	}
 	return {};
 }
-static std::optional<Quat> get_transform_member_rot(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, bool useOriginObjectSpace)
+template<bool parentSpaceOnly = false>
+static std::optional<Quat> get_transform_member_rot(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space)
 {
 	Quat rot;
-	if(component.GetTransformMemberRot(idx, space, rot, useOriginObjectSpace))
-		return rot;
+	if constexpr(parentSpaceOnly) {
+		if(component.GetTransformMemberParentRot(idx, space, rot))
+			return rot;
+	}
+	else {
+		if(component.GetTransformMemberRot(idx, space, rot))
+			return rot;
+	}
 	return {};
 }
-static std::optional<Vector3> get_transform_member_scale(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, bool useOriginObjectSpace)
+template<bool parentSpaceOnly = false>
+static std::optional<Vector3> get_transform_member_scale(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space)
 {
 	Vector3 scale;
-	if(component.GetTransformMemberScale(idx, space, scale, useOriginObjectSpace))
-		return scale;
+	if constexpr(parentSpaceOnly) {
+		if(component.GetTransformMemberParentScale(idx, space, scale))
+			return scale;
+	}
+	else {
+		if(component.GetTransformMemberScale(idx, space, scale))
+			return scale;
+	}
 	return {};
 }
-static std::optional<umath::ScaledTransform> get_transform_member_pose(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, bool useOriginObjectSpace)
+template<bool parentSpaceOnly = false>
+static std::optional<umath::ScaledTransform> get_transform_member_pose(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space)
 {
 	umath::ScaledTransform pose;
-	if(component.GetTransformMemberPose(idx, space, pose, useOriginObjectSpace))
-		return pose;
+	if constexpr(parentSpaceOnly) {
+		if(component.GetTransformMemberParentPose(idx, space, pose))
+			return pose;
+	}
+	else {
+		if(component.GetTransformMemberPose(idx, space, pose))
+			return pose;
+	}
 	return {};
 }
 
@@ -555,23 +583,18 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	entityComponentDef.def("GetMemberInfo", &pragma::BaseEntityComponent::GetMemberInfo);
 	entityComponentDef.def("GetDynamicMemberIndices", static_cast<std::vector<pragma::ComponentMemberIndex> (*)(pragma::BaseEntityComponent &)>(&get_dynamic_member_ids));
 	entityComponentDef.def("GetStaticMemberCount", &pragma::BaseEntityComponent::GetStaticMemberCount);
-	entityComponentDef.def("GetTransformMemberPos", &get_transform_member_pos, luabind::default_parameter_policy<4, false> {});
-	entityComponentDef.def("GetTransformMemberRot", &get_transform_member_rot, luabind::default_parameter_policy<4, false> {});
-	entityComponentDef.def("GetTransformMemberScale", &get_transform_member_scale, luabind::default_parameter_policy<4, false> {});
-	entityComponentDef.def("GetTransformMemberPose", &get_transform_member_pose, luabind::default_parameter_policy<4, false> {});
-	entityComponentDef.def("GetTransformMemberPos", &get_transform_member_pos);
-	entityComponentDef.def("GetTransformMemberRot", &get_transform_member_rot);
-	entityComponentDef.def("GetTransformMemberScale", &get_transform_member_scale);
-	entityComponentDef.def("GetTransformMemberPose", &get_transform_member_pose);
-	entityComponentDef.def("SetTransformMemberPos", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Vector3 &, bool)>(&pragma::BaseEntityComponent::SetTransformMemberPos), luabind::default_parameter_policy<5, false> {});
-	entityComponentDef.def("SetTransformMemberRot", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Quat &, bool)>(&pragma::BaseEntityComponent::SetTransformMemberRot), luabind::default_parameter_policy<5, false> {});
-	entityComponentDef.def("SetTransformMemberScale", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Vector3 &, bool)>(&pragma::BaseEntityComponent::SetTransformMemberScale), luabind::default_parameter_policy<5, false> {});
-	entityComponentDef.def("SetTransformMemberPose", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const umath::ScaledTransform &, bool)>(&pragma::BaseEntityComponent::SetTransformMemberPose),
-	  luabind::default_parameter_policy<5, false> {});
-	entityComponentDef.def("SetTransformMemberPos", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Vector3 &, bool)>(&pragma::BaseEntityComponent::SetTransformMemberPos));
-	entityComponentDef.def("SetTransformMemberRot", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Quat &, bool)>(&pragma::BaseEntityComponent::SetTransformMemberRot));
-	entityComponentDef.def("SetTransformMemberScale", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Vector3 &, bool)>(&pragma::BaseEntityComponent::SetTransformMemberScale));
-	entityComponentDef.def("SetTransformMemberPose", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const umath::ScaledTransform &, bool)>(&pragma::BaseEntityComponent::SetTransformMemberPose));
+	entityComponentDef.def("GetTransformMemberPos", &get_transform_member_pos<false>);
+	entityComponentDef.def("GetTransformMemberRot", &get_transform_member_rot<false>);
+	entityComponentDef.def("GetTransformMemberScale", &get_transform_member_scale<false>);
+	entityComponentDef.def("GetTransformMemberPose", &get_transform_member_pose<false>);
+	entityComponentDef.def("GetTransformMemberParentPos", &get_transform_member_pos<true>);
+	entityComponentDef.def("GetTransformMemberParentRot", &get_transform_member_rot<true>);
+	entityComponentDef.def("GetTransformMemberParentScale", &get_transform_member_scale<true>);
+	entityComponentDef.def("GetTransformMemberParentPose", &get_transform_member_pose<true>);
+	entityComponentDef.def("SetTransformMemberPos", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Vector3 &)>(&pragma::BaseEntityComponent::SetTransformMemberPos));
+	entityComponentDef.def("SetTransformMemberRot", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Quat &)>(&pragma::BaseEntityComponent::SetTransformMemberRot));
+	entityComponentDef.def("SetTransformMemberScale", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Vector3 &)>(&pragma::BaseEntityComponent::SetTransformMemberScale));
+	entityComponentDef.def("SetTransformMemberPose", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const umath::ScaledTransform &)>(&pragma::BaseEntityComponent::SetTransformMemberPose));
 	entityComponentDef.def(
 	  "GetMemberIndices", +[](lua_State *l, pragma::BaseEntityComponent &component) -> std::vector<pragma::ComponentMemberIndex> {
 		  std::vector<pragma::ComponentMemberIndex> memberIndices;

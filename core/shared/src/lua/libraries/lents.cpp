@@ -336,36 +336,36 @@ void Lua::ents::register_library(lua_State *l)
 	auto coordinateTypeMetaDataDef = luabind::class_<pragma::ents::CoordinateTypeMetaData, pragma::ents::TypeMetaData>("CoordinateTypeMetaData");
 	coordinateTypeMetaDataDef.def_readwrite("space", &pragma::ents::CoordinateTypeMetaData::space);
 	coordinateTypeMetaDataDef.property(
-	  "parentProperty", +[](lua_State *l, pragma::ents::CoordinateTypeMetaData &metaData) { Lua::PushString(l, metaData.parentProperty.c_str()); }, +[](lua_State *l, pragma::ents::CoordinateTypeMetaData &metaData, const std::string &prop) { metaData.parentProperty = prop; });
+	  "parentProperty", +[](lua_State *l, const pragma::ents::CoordinateTypeMetaData &metaData) { Lua::PushString(l, metaData.parentProperty.c_str()); }, +[](lua_State *l, pragma::ents::CoordinateTypeMetaData &metaData, const std::string &prop) { metaData.parentProperty = prop; });
 	memberInfoDef.scope[coordinateTypeMetaDataDef];
 
 	auto poseTypeMetaDataDef = luabind::class_<pragma::ents::PoseTypeMetaData, pragma::ents::TypeMetaData>("PoseTypeMetaData");
 	poseTypeMetaDataDef.property(
-	  "posProperty", +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.posProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.posProperty = prop; });
+	  "posProperty", +[](lua_State *l, const pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.posProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.posProperty = prop; });
 	poseTypeMetaDataDef.property(
-	  "rotProperty", +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.rotProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.rotProperty = prop; });
+	  "rotProperty", +[](lua_State *l, const pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.rotProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.rotProperty = prop; });
 	poseTypeMetaDataDef.property(
-	  "scaleProperty", +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.scaleProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.scaleProperty = prop; });
+	  "scaleProperty", +[](lua_State *l, const pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.scaleProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.scaleProperty = prop; });
 	memberInfoDef.scope[poseTypeMetaDataDef];
 
 	auto poseComponentTypeMetaDataDef = luabind::class_<pragma::ents::PoseComponentTypeMetaData, pragma::ents::TypeMetaData>("PoseComponentTypeMetaData");
 	poseComponentTypeMetaDataDef.property(
-	  "poseProperty", +[](lua_State *l, pragma::ents::PoseComponentTypeMetaData &metaData) { Lua::PushString(l, metaData.poseProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseComponentTypeMetaData &metaData, const std::string &prop) { metaData.poseProperty = prop; });
+	  "poseProperty", +[](lua_State *l, const pragma::ents::PoseComponentTypeMetaData &metaData) { Lua::PushString(l, metaData.poseProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseComponentTypeMetaData &metaData, const std::string &prop) { metaData.poseProperty = prop; });
 	memberInfoDef.scope[poseComponentTypeMetaDataDef];
 
 	auto optionalTypeMetaDataDef = luabind::class_<pragma::ents::OptionalTypeMetaData, pragma::ents::TypeMetaData>("OptionalTypeMetaData");
 	optionalTypeMetaDataDef.property(
-	  "enabledProperty", +[](lua_State *l, pragma::ents::OptionalTypeMetaData &metaData) { Lua::PushString(l, metaData.enabledProperty.c_str()); }, +[](lua_State *l, pragma::ents::OptionalTypeMetaData &metaData, const std::string &prop) { metaData.enabledProperty = prop; });
+	  "enabledProperty", +[](lua_State *l, const pragma::ents::OptionalTypeMetaData &metaData) { Lua::PushString(l, metaData.enabledProperty.c_str()); }, +[](lua_State *l, pragma::ents::OptionalTypeMetaData &metaData, const std::string &prop) { metaData.enabledProperty = prop; });
 	memberInfoDef.scope[optionalTypeMetaDataDef];
 
 	auto parentTypeMetaDataDef = luabind::class_<pragma::ents::ParentTypeMetaData, pragma::ents::TypeMetaData>("ParentTypeMetaData");
 	parentTypeMetaDataDef.property(
-	  "parentProperty", +[](lua_State *l, pragma::ents::ParentTypeMetaData &metaData) { Lua::PushString(l, metaData.parentProperty.c_str()); }, +[](lua_State *l, pragma::ents::ParentTypeMetaData &metaData, const std::string &prop) { metaData.parentProperty = prop; });
+	  "parentProperty", +[](lua_State *l, const pragma::ents::ParentTypeMetaData &metaData) { Lua::PushString(l, metaData.parentProperty.c_str()); }, +[](lua_State *l, pragma::ents::ParentTypeMetaData &metaData, const std::string &prop) { metaData.parentProperty = prop; });
 	memberInfoDef.scope[parentTypeMetaDataDef];
 
 	auto enablerTypeMetaDataDef = luabind::class_<pragma::ents::EnablerTypeMetaData, pragma::ents::TypeMetaData>("EnablerTypeMetaData");
 	enablerTypeMetaDataDef.property(
-	  "targetProperty", +[](lua_State *l, pragma::ents::EnablerTypeMetaData &metaData) { Lua::PushString(l, metaData.targetProperty.c_str()); }, +[](lua_State *l, pragma::ents::EnablerTypeMetaData &metaData, const std::string &prop) { metaData.targetProperty = prop; });
+	  "targetProperty", +[](lua_State *l, const pragma::ents::EnablerTypeMetaData &metaData) { Lua::PushString(l, metaData.targetProperty.c_str()); }, +[](lua_State *l, pragma::ents::EnablerTypeMetaData &metaData, const std::string &prop) { metaData.targetProperty = prop; });
 	memberInfoDef.scope[enablerTypeMetaDataDef];
 
 	static_assert(umath::to_integral(TypeMetaData::Count) == 7, "Update these bindings when adding news types!");

@@ -55,6 +55,9 @@ namespace pragma {
 		struct DLLNETWORK EnablerTypeMetaData : public TypeMetaData {
 			pragma::GString targetProperty = nullptr;
 		};
+
+		struct DLLNETWORK ParentTypeMetaData : public TypeMetaData {
+			pragma::GString parentProperty = nullptr;
 		};
 	};
 	class BaseEntityComponent;

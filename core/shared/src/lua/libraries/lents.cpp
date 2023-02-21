@@ -41,7 +41,7 @@
 
 extern DLLNETWORK Engine *engine;
 
-enum class TypeMetaData : uint32_t { Range = 0, Coordinate, Pose, PoseComponent, Optional, Enabler };
+enum class TypeMetaData : uint32_t { Range = 0, Coordinate, Pose, PoseComponent, Optional, Enabler, Parent, Count };
 std::optional<std::type_index> type_meta_data_to_type_index(TypeMetaData eType)
 {
 	switch(eType) {
@@ -57,7 +57,10 @@ std::optional<std::type_index> type_meta_data_to_type_index(TypeMetaData eType)
 		return typeid(pragma::ents::OptionalTypeMetaData);
 	case TypeMetaData::Enabler:
 		return typeid(pragma::ents::EnablerTypeMetaData);
+	case TypeMetaData::Parent:
+		return typeid(pragma::ents::ParentTypeMetaData);
 	}
+	static_assert(umath::to_integral(TypeMetaData::Count) == 7, "Update this implementation when adding news types!");
 	return {};
 }
 luabind::object meta_data_type_to_lua_object(lua_State *l, const pragma::ents::TypeMetaData &metaData, TypeMetaData eType)
@@ -75,7 +78,10 @@ luabind::object meta_data_type_to_lua_object(lua_State *l, const pragma::ents::T
 		return luabind::object {l, static_cast<const pragma::ents::OptionalTypeMetaData *>(&metaData)};
 	case TypeMetaData::Enabler:
 		return luabind::object {l, static_cast<const pragma::ents::EnablerTypeMetaData *>(&metaData)};
+	case TypeMetaData::Parent:
+		return luabind::object {l, static_cast<const pragma::ents::ParentTypeMetaData *>(&metaData)};
 	}
+	static_assert(umath::to_integral(TypeMetaData::Count) == 7, "Update this implementation when adding news types!");
 	return Lua::nil;
 }
 
@@ -315,6 +321,8 @@ void Lua::ents::register_library(lua_State *l)
 	memberInfoDef.add_static_constant("TYPE_META_DATA_POSE_COMPONENT", umath::to_integral(TypeMetaData::PoseComponent));
 	memberInfoDef.add_static_constant("TYPE_META_DATA_OPTIONAL", umath::to_integral(TypeMetaData::Optional));
 	memberInfoDef.add_static_constant("TYPE_META_DATA_ENABLER", umath::to_integral(TypeMetaData::Enabler));
+	memberInfoDef.add_static_constant("TYPE_META_DATA_PARENT", umath::to_integral(TypeMetaData::Parent));
+	static_assert(umath::to_integral(TypeMetaData::Count) == 7, "Update this implementation when adding news types!");
 
 	auto typeMetaDataDef = luabind::class_<pragma::ents::TypeMetaData>("TypeMetaData");
 	memberInfoDef.scope[typeMetaDataDef];
@@ -349,6 +357,11 @@ void Lua::ents::register_library(lua_State *l)
 	optionalTypeMetaDataDef.property(
 	  "enabledProperty", +[](lua_State *l, pragma::ents::OptionalTypeMetaData &metaData) { Lua::PushString(l, metaData.enabledProperty.c_str()); }, +[](lua_State *l, pragma::ents::OptionalTypeMetaData &metaData, const std::string &prop) { metaData.enabledProperty = prop; });
 	memberInfoDef.scope[optionalTypeMetaDataDef];
+
+	auto parentTypeMetaDataDef = luabind::class_<pragma::ents::ParentTypeMetaData, pragma::ents::TypeMetaData>("ParentTypeMetaData");
+	parentTypeMetaDataDef.property(
+	  "parentProperty", +[](lua_State *l, pragma::ents::ParentTypeMetaData &metaData) { Lua::PushString(l, metaData.parentProperty.c_str()); }, +[](lua_State *l, pragma::ents::ParentTypeMetaData &metaData, const std::string &prop) { metaData.parentProperty = prop; });
+	memberInfoDef.scope[parentTypeMetaDataDef];
 
 	auto enablerTypeMetaDataDef = luabind::class_<pragma::ents::EnablerTypeMetaData, pragma::ents::TypeMetaData>("EnablerTypeMetaData");
 	enablerTypeMetaDataDef.property(
@@ -527,6 +540,16 @@ void Lua::ents::register_library(lua_State *l)
 		  return metaData;
 	  },
 	  const std::string &>(l);
+	pragma::lua::define_custom_constructor<pragma::ents::ParentTypeMetaData, []() -> std::shared_ptr<pragma::ents::ParentTypeMetaData> { return std::make_shared<pragma::ents::ParentTypeMetaData>(); }>(l);
+	pragma::lua::define_custom_constructor<pragma::ents::ParentTypeMetaData,
+	  [](const std::string &parentProperty) -> std::shared_ptr<pragma::ents::ParentTypeMetaData> {
+		  auto metaData = std::shared_ptr<pragma::ents::ParentTypeMetaData> {new pragma::ents::ParentTypeMetaData {}};
+		  metaData->parentProperty = parentProperty;
+		  return metaData;
+	  },
+	  const std::string &>(l);
+
+	static_assert(umath::to_integral(TypeMetaData::Count) == 7, "Update this implementation when adding news types!");
 }
 
 Lua::type<BaseEntity> Lua::ents::create(lua_State *l, const std::string &classname)

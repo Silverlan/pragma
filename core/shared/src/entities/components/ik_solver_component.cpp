@@ -504,10 +504,26 @@ void IkSolverComponent::AddControl(BoneId boneId, bool translation, bool rotatio
 	auto defGetSet = [this, &bone, rigConfigBone, &name, boneId](auto &ctrl) {
 		using TControl = std::remove_reference_t<decltype(ctrl)>;
 
+		auto posePropName = "control/" + name + "/pose";
+		auto posPropName = "control/" + name + "/position";
+		auto rotPropName = "control/" + name + "/rotation";
+
+		auto coordMetaData = std::make_shared<ents::CoordinateTypeMetaData>();
+		coordMetaData->space = umath::CoordinateSpace::Object;
+
+		std::shared_ptr<ents::PoseComponentTypeMetaData> compMetaData = nullptr;
+		if constexpr(std::is_same_v<TControl, pragma::ik::StateControl>) {
+			compMetaData = std::make_shared<ents::PoseComponentTypeMetaData>();
+			compMetaData->poseProperty = posePropName;
+		}
+
 		auto memberInfoPos = pragma::ComponentMemberInfo::CreateDummy();
-		memberInfoPos.SetName("control/" + name + "/position");
+		memberInfoPos.SetName(posPropName);
 		memberInfoPos.type = ents::EntityMemberType::Vector3;
 		memberInfoPos.userIndex = boneId;
+		memberInfoPos.AddTypeMetaData(coordMetaData);
+		if(compMetaData)
+			memberInfoPos.AddTypeMetaData(compMetaData);
 		memberInfoPos.SetFlag(pragma::ComponentMemberFlags::ObjectSpace);
 		using TValue = Vector3;
 		memberInfoPos.SetGetterFunction<TComponent, TValue, static_cast<void (*)(const pragma::ComponentMemberInfo &, TComponent &, TValue &)>([](const pragma::ComponentMemberInfo &memberInfo, TComponent &component, TValue &outValue) {
@@ -530,9 +546,11 @@ void IkSolverComponent::AddControl(BoneId boneId, bool translation, bool rotatio
 
 		if constexpr(std::is_same_v<TControl, pragma::ik::StateControl>) {
 			auto memberInfoRot = pragma::ComponentMemberInfo::CreateDummy();
-			memberInfoRot.SetName("control/" + name + "/rotation");
+			memberInfoRot.SetName(rotPropName);
 			memberInfoRot.type = ents::EntityMemberType::Quaternion;
 			memberInfoRot.userIndex = boneId;
+			memberInfoRot.AddTypeMetaData(coordMetaData);
+			memberInfoRot.AddTypeMetaData(compMetaData);
 			memberInfoRot.SetFlag(pragma::ComponentMemberFlags::ObjectSpace);
 			using TValue = Quat;
 			memberInfoRot.SetGetterFunction<TComponent, TValue, static_cast<void (*)(const pragma::ComponentMemberInfo &, TComponent &, TValue &)>([](const pragma::ComponentMemberInfo &memberInfo, TComponent &component, TValue &outValue) {
@@ -552,6 +570,38 @@ void IkSolverComponent::AddControl(BoneId boneId, bool translation, bool rotatio
 			})>();
 			RegisterMember(std::move(memberInfoRot));
 			ctrl.SetTargetOrientation(rigConfigBone->GetRot());
+
+			auto poseMetaData = std::make_shared<ents::PoseTypeMetaData>();
+			poseMetaData->posProperty = posPropName;
+			poseMetaData->rotProperty = rotPropName;
+
+			auto memberInfoPose = pragma::ComponentMemberInfo::CreateDummy();
+			memberInfoPose.SetName(posePropName);
+			memberInfoPose.type = ents::EntityMemberType::Transform;
+			memberInfoPose.userIndex = boneId;
+			memberInfoPose.AddTypeMetaData(coordMetaData);
+			memberInfoPose.AddTypeMetaData(poseMetaData);
+			memberInfoPose.SetFlag(pragma::ComponentMemberFlags::ObjectSpace);
+			using TValuePose = umath::Transform;
+			memberInfoPose.SetGetterFunction<TComponent, TValuePose, static_cast<void (*)(const pragma::ComponentMemberInfo &, TComponent &, TValuePose &)>([](const pragma::ComponentMemberInfo &memberInfo, TComponent &component, TValuePose &outValue) {
+				auto it = component.m_ikControls.find(memberInfo.userIndex);
+				if(it == component.m_ikControls.end()) {
+					outValue = {};
+					return;
+				}
+				auto *ctrl = static_cast<TControl *>(it->second.get());
+				outValue = {ctrl->GetTargetPosition(), ctrl->GetTargetOrientation()};
+			})>();
+			memberInfoPose.SetSetterFunction<TComponent, TValuePose, static_cast<void (*)(const pragma::ComponentMemberInfo &, TComponent &, const TValuePose &)>([](const pragma::ComponentMemberInfo &memberInfo, TComponent &component, const TValuePose &value) {
+				auto it = component.m_ikControls.find(memberInfo.userIndex);
+				if(it == component.m_ikControls.end())
+					return;
+				auto *ctrl = static_cast<TControl *>(it->second.get());
+				ctrl->SetTargetPosition(value.GetOrigin());
+				ctrl->SetTargetOrientation(value.GetRotation());
+				component.m_updateRequired = true;
+			})>();
+			RegisterMember(std::move(memberInfoPose));
 		}
 	};
 	switch(type) {

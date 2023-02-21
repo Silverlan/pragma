@@ -699,7 +699,7 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 		auto *game = nw->GetGameState();
 		auto &componentManager = game->GetEntityComponentManager();
 		auto &info = *componentManager.GetComponentInfo(component.GetComponentId());
-		return info.name;
+		return std::string {*info.name};
 	}));
 	entityComponentDef.def("AddEventCallback", static_cast<CallbackHandle (*)(lua_State *, pragma::BaseEntityComponent &, uint32_t, const Lua::func<void> &)>([](lua_State *l, pragma::BaseEntityComponent &hComponent, uint32_t eventId, const Lua::func<void> &function) {
 		auto hCb = hComponent.AddEventCallback(eventId, [l, function](std::reference_wrapper<pragma::ComponentEvent> ev) -> util::EventReply {

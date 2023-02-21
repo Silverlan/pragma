@@ -8,6 +8,7 @@
 #define __ENTITY_COMPONENT_MEMBER_INFO_HPP__
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/util/global_string_table.hpp"
 #include <functional>
 #include <optional>
 #include <typeindex>
@@ -34,25 +35,26 @@ namespace pragma {
 
 		struct DLLNETWORK CoordinateTypeMetaData : public TypeMetaData {
 			umath::CoordinateSpace space = umath::CoordinateSpace::World;
-			std::string parentProperty;
+			pragma::GString parentProperty = nullptr;
 		};
 
 		struct DLLNETWORK PoseTypeMetaData : public TypeMetaData {
-			std::string posProperty;
-			std::string rotProperty;
-			std::string scaleProperty;
+			pragma::GString posProperty = nullptr;
+			pragma::GString rotProperty = nullptr;
+			pragma::GString scaleProperty = nullptr;
 		};
 
 		struct DLLNETWORK PoseComponentTypeMetaData : public TypeMetaData {
-			std::string poseProperty;
+			pragma::GString poseProperty = nullptr;
 		};
 
 		struct DLLNETWORK OptionalTypeMetaData : public TypeMetaData {
-			std::string enabledProperty;
+			pragma::GString enabledProperty = nullptr;
 		};
 
 		struct DLLNETWORK EnablerTypeMetaData : public TypeMetaData {
-			std::string targetProperty;
+			pragma::GString targetProperty = nullptr;
+		};
 		};
 	};
 	class BaseEntityComponent;
@@ -75,7 +77,8 @@ namespace pragma {
 		using InterpolationFunction = void (*)(const void *, const void *, double, void *);
 		using UpdateDependenciesFunction = void (*)(BaseEntityComponent &, std::vector<std::string> &);
 		static ComponentMemberInfo CreateDummy();
-		ComponentMemberInfo(std::string &&name, ents::EntityMemberType type, const ApplyFunction &applyFunc, const GetFunction &getFunc);
+		ComponentMemberInfo(const char *name, ents::EntityMemberType type, const ApplyFunction &applyFunc, const GetFunction &getFunc);
+		ComponentMemberInfo(const std::string &name, ents::EntityMemberType type, const ApplyFunction &applyFunc, const GetFunction &getFunc);
 
 		template<typename TComponent, typename T, void (*TApply)(const ComponentMemberInfo &, TComponent &, const T &)>
 		void SetSetterFunction()
@@ -133,9 +136,8 @@ namespace pragma {
 			interpolationFunction = [](const void *v0, const void *v1, double t, void *out) { TInterp(*static_cast<const T *>(v0), *static_cast<const T *>(v1), t, *static_cast<T *>(out)); };
 		}
 
-		void SetName(const std::string &name);
-		void SetName(std::string &&name);
-		const std::string &GetName() const { return m_name; }
+		void SetName(const pragma::GString &name);
+		const pragma::GString &GetName() const { return m_name; }
 		size_t GetNameHash() const { return m_nameHash; }
 
 		AttributeSpecializationType GetSpecializationType() const { return m_specializationType; }
@@ -192,7 +194,7 @@ namespace pragma {
 		};
 	  private:
 		ComponentMemberInfo();
-		std::string m_name;
+		pragma::GString m_name = "";
 		size_t m_nameHash = 0;
 		ComponentMemberFlags m_flags = static_cast<ComponentMemberFlags>(0);
 

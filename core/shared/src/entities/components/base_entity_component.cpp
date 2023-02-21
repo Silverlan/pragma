@@ -704,7 +704,7 @@ bool BaseEntityComponent::Tick(double tDelta)
 
 std::string BaseEntityComponent::GetUri() const
 {
-	auto uri = GetUri(nullptr, GetEntity().GetUuid(), GetComponentInfo()->name);
+	auto uri = GetUri(nullptr, GetEntity().GetUuid(), std::string {*GetComponentInfo()->name});
 	assert(uri.has_value());
 	return *uri;
 }
@@ -719,7 +719,7 @@ std::optional<std::string> BaseEntityComponent::GetMemberUri(ComponentMemberInde
 	auto *info = GetMemberInfo(memberIdx);
 	if(!info)
 		return {};
-	return GetMemberUri(GetEntity().GetNetworkState()->GetGameState(), GetEntity().GetUuid(), GetComponentId(), info->GetName());
+	return GetMemberUri(GetEntity().GetNetworkState()->GetGameState(), GetEntity().GetUuid(), GetComponentId(), *info->GetName());
 }
 std::optional<std::string> BaseEntityComponent::GetUri(Game *game, std::variant<util::Uuid, std::string> entityIdentifier, std::variant<ComponentId, std::string> componentIdentifier)
 {
@@ -736,7 +736,7 @@ std::optional<std::string> BaseEntityComponent::GetUri(Game *game, std::variant<
 				    auto *info = game->GetEntityComponentManager().GetComponentInfo(value);
 				    if(!info)
 					    return {};
-				    return info->name;
+				    return std::string {*info->name};
 			    }
 			    else
 				    return value;
@@ -774,7 +774,7 @@ std::optional<std::string> BaseEntityComponent::GetMemberUri(Game *game, std::va
 				    if(!info || memberId >= info->members.size())
 					    return {};
 				    auto &memberInfo = info->members[memberId];
-				    return memberInfo.GetName();
+				    return std::string {*memberInfo.GetName()};
 			    },
 			    componentIdentifier);
 		  }

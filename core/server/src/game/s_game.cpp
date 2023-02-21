@@ -516,7 +516,7 @@ void SGame::WriteEntityData(NetPacket &packet, SBaseEntity **ents, uint32_t entC
 				packet->Write<Bool>(true);
 				auto offset = packet->GetSize();
 				packet->Write<UInt32>(UInt32(0));
-				packet->WriteString(ent->GetClass());
+				packet->WriteString(*ent->GetClass());
 				packet->Write<unsigned int>(ent->GetIndex());
 				packet->Write<unsigned int>(pMapComponent.valid() ? pMapComponent->GetMapIndex() : 0u);
 				ent->SendData(packet, rp);
@@ -650,7 +650,7 @@ void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session, NetPacke
 			--numTypes;
 			continue;
 		}
-		packetInf->WriteString(info.name);
+		packetInf->WriteString(*info.name);
 		packetInf->Write<pragma::ComponentId>(info.id);
 	}
 	packetInf->Write<uint32_t>(numTypes, &offsetTypes);

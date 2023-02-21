@@ -19,6 +19,6 @@ void SEntityComponentManager::OnComponentTypeRegistered(const ComponentInfo &com
 		return;
 	NetPacket p {};
 	p->Write<ComponentId>(componentInfo.id);
-	p->WriteString(componentInfo.name);
+	p->WriteString(*componentInfo.name);
 	server->SendPacket("register_entity_component", p, pragma::networking::Protocol::SlowReliable);
 }

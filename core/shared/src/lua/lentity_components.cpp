@@ -206,7 +206,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  auto &memberName = ref.GetMemberName();
 		  if(!cInfo || memberName.empty())
 			  return {};
-		  std::string name = "pragma:game/entity/ec/" + cInfo->name + "/" + memberName;
+		  std::string name = "pragma:game/entity/ec/" + std::string {*cInfo->name} + "/" + memberName;
 		  auto uuid = ref.GetUuid();
 		  if(uuid.has_value())
 			  name += "?entity_uuid=" + util::uuid_to_string(*uuid);

@@ -44,14 +44,14 @@ bool EntityIteratorFilterUuid::ShouldPass(BaseEntity &ent, std::size_t index) { 
 /////////////////
 
 EntityIteratorFilterClass::EntityIteratorFilterClass(Game &game, const std::string &name, bool caseSensitive, bool exactMatch) : m_name(name), m_bCaseSensitive(caseSensitive), m_bExactMatch(exactMatch) {}
-bool EntityIteratorFilterClass::ShouldPass(BaseEntity &ent, std::size_t index) { return m_bExactMatch ? ustring::match(ent.GetClass(), m_name, m_bCaseSensitive) : ustring::compare(ent.GetClass(), m_name, m_bCaseSensitive); }
+bool EntityIteratorFilterClass::ShouldPass(BaseEntity &ent, std::size_t index) { return m_bExactMatch ? ustring::match(*ent.GetClass(), m_name.c_str(), m_bCaseSensitive) : ustring::compare(ent.GetClass().c_str(), m_name.c_str(), m_bCaseSensitive); }
 
 /////////////////
 
 EntityIteratorFilterNameOrClass::EntityIteratorFilterNameOrClass(Game &game, const std::string &name, bool caseSensitive, bool exactMatch) : m_name(name), m_bCaseSensitive(caseSensitive), m_bExactMatch(exactMatch) {}
 bool EntityIteratorFilterNameOrClass::ShouldPass(BaseEntity &ent, std::size_t index)
 {
-	if(m_bExactMatch ? ustring::match(ent.GetClass(), m_name, m_bCaseSensitive) : ustring::compare(ent.GetClass(), m_name, m_bCaseSensitive))
+	if(m_bExactMatch ? ustring::match(*ent.GetClass(), m_name, m_bCaseSensitive) : ustring::compare(*ent.GetClass(), m_name.c_str(), m_bCaseSensitive))
 		return true;
 	auto pNameComponent = static_cast<pragma::BaseNameComponent *>(ent.FindComponent("name").get());
 	return pNameComponent != nullptr && (m_bExactMatch ? ustring::match(pNameComponent->GetName(), m_name, m_bCaseSensitive) : ustring::compare(pNameComponent->GetName(), m_name, m_bCaseSensitive));
@@ -84,7 +84,7 @@ bool EntityIteratorFilterEntity::ShouldPass(BaseEntity &ent, std::size_t index)
 		if(hFilter->ShouldPass(ent))
 			return true;
 	}
-	if(ustring::compare(ent.GetClass(), m_name, false))
+	if(ustring::compare(ent.GetClass().c_str(), m_name.c_str(), false))
 		return true;
 	auto pNameComponent = static_cast<pragma::BaseNameComponent *>(ent.FindComponent("name").get());
 	return pNameComponent != nullptr && ustring::compare(pNameComponent->GetName(), m_name, false);

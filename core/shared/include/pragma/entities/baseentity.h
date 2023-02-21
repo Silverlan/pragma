@@ -10,6 +10,7 @@
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/base_lua_handle.hpp"
 #include "pragma/entities/entity_component_system.hpp"
+#include "pragma/util/global_string_table.hpp"
 #include "pragma/model/animation/play_animation_flags.hpp"
 #include "pragma/types.hpp"
 #include <pragma/console/conout.h>
@@ -99,7 +100,7 @@ class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseE
 
 	static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
-	virtual std::string GetClass() const;
+	virtual pragma::GString GetClass() const;
 	BaseEntity();
 	void Construct(unsigned int idx);
 	EntityHandle GetHandle() const;
@@ -297,7 +298,7 @@ class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseE
   protected:
 	uint32_t m_spawnFlags = 0u;
 
-	const char *m_className = "BaseEntity";
+	pragma::GString m_className = "BaseEntity";
 	util::Uuid m_uuid {};
 	EntityIndex m_index = 0u;
 	virtual void DoSpawn();

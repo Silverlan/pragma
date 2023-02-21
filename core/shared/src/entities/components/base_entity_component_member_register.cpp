@@ -70,7 +70,7 @@ const pragma::ComponentMemberInfo *pragma::DynamicMemberRegister::GetMemberInfo(
 
 pragma::ComponentMemberIndex pragma::DynamicMemberRegister::RegisterMember(pragma::ComponentMemberInfo &&memberInfo)
 {
-	auto lmemberName = memberInfo.GetName();
+	std::string lmemberName = memberInfo.GetName();
 	ustring::to_lower(lmemberName);
 	if(m_memberNameToIndex.find(lmemberName) != m_memberNameToIndex.end())
 		RemoveMember(lmemberName);

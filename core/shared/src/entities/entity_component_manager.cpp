@@ -11,6 +11,7 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/entities/components/component_member_flags.hpp"
 #include "pragma/entities/attribute_specialization_type.hpp"
+#include "pragma/util/global_string_table.hpp"
 #include <udm.hpp>
 
 using namespace pragma;
@@ -28,6 +29,7 @@ static ComponentEventId get_component_event_id(const std::string &name)
 	return id;
 }
 
+size_t pragma::get_component_member_name_hash(const char *name) { return get_component_member_name_hash(std::string {name}); }
 size_t pragma::get_component_member_name_hash(const std::string &name)
 {
 	auto lname = name;
@@ -69,7 +71,7 @@ ComponentMemberInfo &ComponentMemberInfo::operator=(const ComponentMemberInfo &o
 			});
 		}
 	}
-	static_assert(sizeof(*this) == 168);
+	static_assert(sizeof(*this) == 144);
 	return *this;
 }
 void ComponentMemberInfo::SetSpecializationType(AttributeSpecializationType type)
@@ -166,15 +168,10 @@ void ComponentMemberInfo::SetFlags(ComponentMemberFlags flags) { m_flags = flags
 ComponentMemberFlags ComponentMemberInfo::GetFlags() const { return m_flags; }
 bool ComponentMemberInfo::HasFlag(ComponentMemberFlags flag) const { return umath::is_flag_set(m_flags, flag); }
 void ComponentMemberInfo::SetFlag(ComponentMemberFlags flag, bool set) { umath::set_flag(m_flags, flag, set); }
-void ComponentMemberInfo::SetName(const std::string &name)
+void ComponentMemberInfo::SetName(const pragma::GString &name)
 {
 	m_name = name;
-	m_nameHash = get_component_member_name_hash(name);
-}
-void ComponentMemberInfo::SetName(std::string &&name)
-{
-	m_name = std::move(name);
-	m_nameHash = get_component_member_name_hash(m_name);
+	m_nameHash = get_component_member_name_hash(*name);
 }
 
 //////////////
@@ -282,10 +279,11 @@ ComponentId EntityComponentManager::PreRegisterComponentType(const std::string &
 	if(GetComponentTypeId(name, componentId))
 		return componentId;
 	m_preRegistered.push_back({});
+	std::string lname = name;
+	ustring::to_lower(lname);
 	auto &componentInfo = m_preRegistered.back();
-	componentInfo.name = name;
+	componentInfo.name = lname;
 	componentInfo.id = m_nextComponentId++;
-	ustring::to_lower(componentInfo.name);
 	if(componentInfo.id != m_components.size())
 		throw std::logic_error("Newly registered component id does not match expected component type count!");
 	if(m_components.size() == m_components.capacity())
@@ -334,7 +332,7 @@ ComponentId EntityComponentManager::RegisterComponentType(const std::string &nam
 		return componentId;
 	}
 	auto idx = PreRegisterComponentType(name);
-	auto itPre = std::find_if(m_preRegistered.begin(), m_preRegistered.end(), [&name](const ComponentInfo &componentInfo) { return ustring::compare(name, componentInfo.name, false); });
+	auto itPre = std::find_if(m_preRegistered.begin(), m_preRegistered.end(), [&name](const ComponentInfo &componentInfo) { return ustring::compare(name.c_str(), componentInfo.name.c_str(), false); });
 	if(itPre == m_preRegistered.end())
 		throw std::logic_error("Error when attempting to pre-register component " + name + "!");
 	componentId = itPre->id;
@@ -375,13 +373,13 @@ bool EntityComponentManager::GetComponentId(std::type_index typeIndex, Component
 bool EntityComponentManager::GetComponentTypeId(const std::string &name, ComponentId &outId, bool bIncludePreregistered) const
 {
 	if(bIncludePreregistered == true) {
-		auto itPre = std::find_if(m_preRegistered.begin(), m_preRegistered.end(), [&name](const ComponentInfo &componentInfo) { return ustring::compare(name, componentInfo.name); });
+		auto itPre = std::find_if(m_preRegistered.begin(), m_preRegistered.end(), [&name](const ComponentInfo &componentInfo) { return ustring::compare(name.c_str(), componentInfo.name.c_str()); });
 		if(itPre != m_preRegistered.end()) {
 			outId = itPre->id;
 			return true;
 		}
 	}
-	auto it = std::find_if(m_componentInfos.begin(), m_componentInfos.end(), [&name](const ComponentInfo &componentInfo) { return ustring::compare(name, componentInfo.name, false); });
+	auto it = std::find_if(m_componentInfos.begin(), m_componentInfos.end(), [&name](const ComponentInfo &componentInfo) { return ustring::compare(name.c_str(), componentInfo.name.c_str(), false); });
 	if(it == m_componentInfos.end())
 		return false;
 	outId = it->id;
@@ -396,7 +394,7 @@ ComponentInfo *EntityComponentManager::GetComponentInfo(ComponentId id)
 }
 ComponentMemberIndex EntityComponentManager::RegisterMember(ComponentInfo &componentInfo, ComponentMemberInfo &&memberInfo)
 {
-	auto lname = memberInfo.GetName();
+	std::string lname = memberInfo.GetName();
 	ustring::to_lower(lname);
 	componentInfo.members.push_back(std::move(memberInfo));
 	auto idx = componentInfo.members.size() - 1;
@@ -544,7 +542,8 @@ std::size_t EntityComponentManager::ComponentContainerInfo::GetCount() const { r
 ////////////////////
 
 ComponentMemberInfo pragma::ComponentMemberInfo::CreateDummy() { return ComponentMemberInfo {}; }
-pragma::ComponentMemberInfo::ComponentMemberInfo(std::string &&name, ents::EntityMemberType type, const ApplyFunction &applyFunc, const GetFunction &getFunc)
-    : m_name {std::move(name)}, m_nameHash {get_component_member_name_hash(m_name)}, type {type}, setterFunction {applyFunc}, getterFunction {getFunc}
+pragma::ComponentMemberInfo::ComponentMemberInfo(const char *name, ents::EntityMemberType type, const ApplyFunction &applyFunc, const GetFunction &getFunc)
+    : m_name {name}, m_nameHash {get_component_member_name_hash(*m_name)}, type {type}, setterFunction {applyFunc}, getterFunction {getFunc}
 {
 }
+pragma::ComponentMemberInfo::ComponentMemberInfo(const std::string &name, ents::EntityMemberType type, const ApplyFunction &applyFunc, const GetFunction &getFunc) : ComponentMemberInfo {pragma::register_global_string(name), type, applyFunc, getFunc} {}

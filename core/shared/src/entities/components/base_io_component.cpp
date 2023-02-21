@@ -120,7 +120,7 @@ bool BaseIOComponent::FireSingleOutput(Output &output, BaseEntity *activator, Io
 		ustring::to_lower(className);
 		EntityIterator entIt {*game};
 		entIt.AttachFilter<EntityIteratorFilterUser>([&className, &output](BaseEntity &ent, std::size_t index) -> bool {
-			if(ustring::compare(ent.GetClass(), className, false))
+			if(ustring::compare(ent.GetClass(), className.c_str(), false))
 				return true;
 			auto pNameComponent = static_cast<pragma::BaseNameComponent *>(ent.FindComponent("name").get());
 			return pNameComponent != nullptr && ustring::compare(pNameComponent->GetName(), output.entities, false);

@@ -28,7 +28,7 @@ void ai::TaskMoveToTarget::Print(const Schedule *sched, std::ostream &o) const
 				if(pNameComponent.valid())
 					name = pNameComponent->GetName();
 				if(name.empty())
-					name = ent->GetClass();
+					name = *ent->GetClass();
 				o << name;
 			}
 			else

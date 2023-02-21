@@ -119,7 +119,7 @@ void BaseCharacterComponent::RemoveWeapon(std::string className)
 			it = m_weapons.erase(it);
 			continue;
 		}
-		if(ustring::compare(className, hEnt->GetClass(), false)) {
+		if(ustring::compare(className.c_str(), hEnt->GetClass().c_str(), false)) {
 			it = RemoveWeapon(*it->get());
 			continue;
 		}

@@ -14,6 +14,7 @@
 #include "pragma/entities/entity_component_info.hpp"
 #include "pragma/entities/entity_component_member_info.hpp"
 #include "pragma/entities/entity_component_event_info.hpp"
+#include "pragma/util/global_string_table.hpp"
 #include "pragma/types.hpp"
 #include <cinttypes>
 #include <string>
@@ -41,6 +42,7 @@ namespace pragma {
 	class BaseEntityComponent;
 	DLLNETWORK std::string get_normalized_component_member_name(const std::string &name);
 	DLLNETWORK size_t get_component_member_name_hash(const std::string &name);
+	DLLNETWORK size_t get_component_member_name_hash(const char *name);
 
 	enum class AttributeSpecializationType : uint8_t;
 	enum class ComponentMemberFlags : uint32_t;
@@ -72,7 +74,7 @@ namespace pragma {
 		ComponentInfo(ComponentInfo &&other);
 		ComponentInfo &operator=(const ComponentInfo &other);
 		ComponentInfo &operator=(ComponentInfo &&other);
-		std::string name;
+		pragma::GString name = "";
 		std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity &)> factory = nullptr;
 		mutable std::unique_ptr<std::vector<CallbackHandle>> onCreateCallbacks = nullptr;
 		ComponentId id = std::numeric_limits<uint32_t>::max();

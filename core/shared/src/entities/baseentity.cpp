@@ -21,6 +21,7 @@
 #include "pragma/model/model.h"
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
+#include "pragma/util/global_string_table.hpp"
 
 void BaseEntity::SetEnabled(bool enabled)
 {
@@ -233,7 +234,7 @@ void BaseEntity::Initialize()
 	AddComponent("entity");
 }
 
-std::string BaseEntity::GetClass() const { return m_className; }
+pragma::GString BaseEntity::GetClass() const { return m_className; }
 
 void BaseEntity::SetPose(const umath::Transform &outTransform)
 {
@@ -385,34 +386,4 @@ DLLNETWORK std::ostream &operator<<(std::ostream &os, const EntityHandle ent)
 	return os;
 }
 
-// Class map
-namespace pragma::ents {
-	struct ClassMap {
-		const char *RegisterClassName(const std::string &className);
-		std::unordered_map<std::string, const char *> classNames;
-		~ClassMap();
-	};
-};
-static pragma::ents::ClassMap g_classMap;
-pragma::ents::ClassMap::~ClassMap()
-{
-	for(auto &pair : classNames)
-		delete[] pair.second;
-}
-
-const char *pragma::ents::ClassMap::RegisterClassName(const std::string &className)
-{
-	auto it = classNames.find(className);
-	if(it != classNames.end())
-		return it->second;
-	else {
-		char *registrationId = new char[className.size() + 1];
-		std::copy(className.begin(), className.end(), registrationId);
-		registrationId[className.size()] = '\0';
-		classNames.emplace(className, registrationId);
-		return registrationId;
-	}
-}
-
-const char *pragma::ents::register_class_name(const std::string &className) { return g_classMap.RegisterClassName(className); }
-//
+const char *pragma::ents::register_class_name(const std::string &className) { return pragma::register_global_string(className); }

@@ -174,7 +174,7 @@ const pragma::BaseLuaBaseEntityComponent::MemberInfo *BaseLuaBaseEntityComponent
 		auto it = std::find_if(m_classMembers->memberDeclarations.begin(), m_classMembers->memberDeclarations.end(), [&memberInfo](const BaseLuaBaseEntityComponent::MemberInfo &luaMemberInfo) { return luaMemberInfo.memberNameHash == memberInfo.GetNameHash(); });
 		assert(it != m_classMembers->memberDeclarations.end());
 		if(it == m_classMembers->memberDeclarations.end()) {
-			throw std::runtime_error {"Member '" + memberInfo.GetName() + "' is missing Lua meta data!"};
+			throw std::runtime_error {"Member '" + std::string {*memberInfo.GetName()} + "' is missing Lua meta data!"};
 			return nullptr;
 		}
 		memberInfo.userIndex = it - m_classMembers->memberDeclarations.begin();
@@ -241,7 +241,7 @@ std::optional<ComponentMemberInfo> pragma::lua::get_component_member_info(lua_St
 							auto *posInfo = component.GetMemberInfo(info->transformCompositeInfo->posIdx);
 							auto *rotInfo = component.GetMemberInfo(info->transformCompositeInfo->rotIdx);
 							if(!posInfo || !rotInfo) {
-								spdlog::trace("Transform property '{}' points to invalid pos or rot property!", memberInfo.GetName());
+								spdlog::trace("Transform property '{}' points to invalid pos or rot property!", std::string {*memberInfo.GetName()});
 								return;
 							}
 
@@ -254,7 +254,7 @@ std::optional<ComponentMemberInfo> pragma::lua::get_component_member_info(lua_St
 							if constexpr(std::is_same_v<T, udm::ScaledTransform>) {
 								auto *scaleInfo = component.GetMemberInfo(info->transformCompositeInfo->scaleIdx);
 								if(!scaleInfo) {
-									spdlog::trace("Transform property '{}' points to invalid scale property!", memberInfo.GetName());
+									spdlog::trace("Transform property '{}' points to invalid scale property!", std::string {*memberInfo.GetName()});
 									return;
 								}
 								auto &scale = value.GetScale();
@@ -274,7 +274,7 @@ std::optional<ComponentMemberInfo> pragma::lua::get_component_member_info(lua_St
 							  auto *posInfo = component.GetMemberInfo(info->transformCompositeInfo->posIdx);
 							  auto *rotInfo = component.GetMemberInfo(info->transformCompositeInfo->rotIdx);
 							  if(!posInfo || !rotInfo) {
-								  spdlog::trace("Transform property '{}' points to invalid pos or rot property!", memberInfo.GetName());
+								  spdlog::trace("Transform property '{}' points to invalid pos or rot property!", std::string {*memberInfo.GetName()});
 								  return;
 							  }
 
@@ -284,7 +284,7 @@ std::optional<ComponentMemberInfo> pragma::lua::get_component_member_info(lua_St
 							  if constexpr(std::is_same_v<T, udm::ScaledTransform>) {
 								  auto *scaleInfo = component.GetMemberInfo(info->transformCompositeInfo->scaleIdx);
 								  if(!scaleInfo) {
-									  spdlog::trace("Transform property '{}' points to invalid scale property!", memberInfo.GetName());
+									  spdlog::trace("Transform property '{}' points to invalid scale property!", std::string {*memberInfo.GetName()});
 									  return;
 								  }
 								  scaleInfo->setterFunction(*scaleInfo, component, &value.GetScale());

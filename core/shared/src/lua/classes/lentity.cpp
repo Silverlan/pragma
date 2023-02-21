@@ -84,7 +84,8 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	classDef.def("IsPlayer", &BaseEntity::IsPlayer);
 	classDef.def("IsWorld", &BaseEntity::IsWorld);
 	classDef.def("IsInert", &BaseEntity::IsInert);
-	classDef.def("GetClass", &BaseEntity::GetClass);
+	classDef.def(
+	  "GetClass", +[](const BaseEntity &ent) { return std::string {*ent.GetClass()}; });
 	//classDef.def("AddCallback",&AddCallback); // Obsolete
 	classDef.def("IsScripted", &BaseEntity::IsScripted);
 	classDef.def("IsSpawned", &BaseEntity::IsSpawned);

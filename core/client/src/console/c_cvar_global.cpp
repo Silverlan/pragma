@@ -74,9 +74,9 @@ DLLCLIENT void CMD_entities_cl(NetworkState *state, pragma::BasePlayerComponent 
 	if(argv.size() > 1)
 		modelName = '*' + argv[1] + '*';
 	for(auto &pair : sortedEnts) {
-		if(className.has_value() && ustring::match(pair.first->GetClass(), *className) == false)
+		if(className.has_value() && ustring::match(pair.first->GetClass().c_str(), className->c_str()) == false)
 			continue;
-		if(modelName.has_value() && ustring::match(pair.first->GetModelName(), *modelName) == false)
+		if(modelName.has_value() && ustring::match(pair.first->GetModelName().c_str(), modelName->c_str()) == false)
 			continue;
 		Con::cout << *pair.first << Con::endl;
 	}

@@ -34,4 +34,4 @@ bool BaseFilterNameComponent::ShouldPass(BaseEntity &ent) const
 	return pNameComponent != nullptr && ustring::match(pNameComponent->GetName(), m_kvFilter);
 }
 
-bool BaseFilterClassComponent::ShouldPass(BaseEntity &ent) const { return ustring::match(ent.GetClass(), m_kvFilter); }
+bool BaseFilterClassComponent::ShouldPass(BaseEntity &ent) const { return ustring::match(ent.GetClass().c_str(), m_kvFilter.c_str()); }

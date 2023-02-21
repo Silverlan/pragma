@@ -175,7 +175,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 		auto linVel = phys->GetLinearVelocity();
 		// Sanity check
 		if(std::isnan(linVel.x) || std::isnan(linVel.y) || std::isnan(linVel.z)) {
-			spdlog::warn("UpdatePhysicsData: NaN linear velocity ({},{},{}) for entity {}! Forcing to 0.", linVel.x, linVel.y, linVel.z, ent.GetClass());
+			spdlog::warn("UpdatePhysicsData: NaN linear velocity ({},{},{}) for entity {}! Forcing to 0.", linVel.x, linVel.y, linVel.z, ent.ToString());
 			phys->SetLinearVelocity({});
 			linVel = {};
 		}

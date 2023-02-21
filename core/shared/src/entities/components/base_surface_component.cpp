@@ -187,7 +187,7 @@ std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssig
 	}
 	if(minDot == std::numeric_limits<float>::max()) {
 		Clear();
-		spdlog::warn("No water plane found for func_water entity '{} ({})'!", ent.GetClass(), ent.GetIndex());
+		spdlog::warn("No water plane found for func_water entity '{}'!", ent.ToString());
 		return {};
 	}
 	else {

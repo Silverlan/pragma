@@ -28,6 +28,7 @@
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/component_member_flags.hpp"
 #include "pragma/entities/attribute_specialization_type.hpp"
+#include "pragma/util/global_string_table.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
 #include "pragma/lua/lentity_type.hpp"
@@ -262,7 +263,8 @@ void Lua::ents::register_library(lua_State *l)
 	    {"INVALID_COMPONENT_ID", pragma::INVALID_COMPONENT_ID}, {"INVALID_COMPONENT_MEMBER_INDEX", pragma::INVALID_COMPONENT_MEMBER_INDEX}});
 
 	auto componentInfoDef = luabind::class_<pragma::ComponentInfo>("ComponentInfo");
-	componentInfoDef.def_readonly("name", &pragma::ComponentInfo::name);
+	componentInfoDef.property(
+	  "name", +[](lua_State *l, const pragma::ComponentInfo &componentInfo) { return std::string {*componentInfo.name}; });
 	componentInfoDef.def_readonly("id", &pragma::ComponentInfo::id);
 	componentInfoDef.def_readonly("flags", &pragma::ComponentInfo::flags);
 	componentInfoDef.def(
@@ -325,26 +327,36 @@ void Lua::ents::register_library(lua_State *l)
 
 	auto coordinateTypeMetaDataDef = luabind::class_<pragma::ents::CoordinateTypeMetaData, pragma::ents::TypeMetaData>("CoordinateTypeMetaData");
 	coordinateTypeMetaDataDef.def_readwrite("space", &pragma::ents::CoordinateTypeMetaData::space);
-	coordinateTypeMetaDataDef.def_readwrite("parentProperty", &pragma::ents::CoordinateTypeMetaData::parentProperty);
+	coordinateTypeMetaDataDef.property(
+	  "parentProperty", +[](lua_State *l, pragma::ents::CoordinateTypeMetaData &metaData) { Lua::PushString(l, metaData.parentProperty.c_str()); }, +[](lua_State *l, pragma::ents::CoordinateTypeMetaData &metaData, const std::string &prop) { metaData.parentProperty = prop; });
 	memberInfoDef.scope[coordinateTypeMetaDataDef];
 
 	auto poseTypeMetaDataDef = luabind::class_<pragma::ents::PoseTypeMetaData, pragma::ents::TypeMetaData>("PoseTypeMetaData");
-	poseTypeMetaDataDef.def_readwrite("posProperty", &pragma::ents::PoseTypeMetaData::posProperty);
-	poseTypeMetaDataDef.def_readwrite("rotProperty", &pragma::ents::PoseTypeMetaData::rotProperty);
-	poseTypeMetaDataDef.def_readwrite("scaleProperty", &pragma::ents::PoseTypeMetaData::scaleProperty);
+	poseTypeMetaDataDef.property(
+	  "posProperty", +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.posProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.posProperty = prop; });
+	poseTypeMetaDataDef.property(
+	  "rotProperty", +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.rotProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.rotProperty = prop; });
+	poseTypeMetaDataDef.property(
+	  "scaleProperty", +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData) { Lua::PushString(l, metaData.scaleProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseTypeMetaData &metaData, const std::string &prop) { metaData.scaleProperty = prop; });
 	memberInfoDef.scope[poseTypeMetaDataDef];
 
 	auto poseComponentTypeMetaDataDef = luabind::class_<pragma::ents::PoseComponentTypeMetaData, pragma::ents::TypeMetaData>("PoseComponentTypeMetaData");
-	poseComponentTypeMetaDataDef.def_readwrite("poseProperty", &pragma::ents::PoseComponentTypeMetaData::poseProperty);
+	poseComponentTypeMetaDataDef.property(
+	  "poseProperty", +[](lua_State *l, pragma::ents::PoseComponentTypeMetaData &metaData) { Lua::PushString(l, metaData.poseProperty.c_str()); }, +[](lua_State *l, pragma::ents::PoseComponentTypeMetaData &metaData, const std::string &prop) { metaData.poseProperty = prop; });
 	memberInfoDef.scope[poseComponentTypeMetaDataDef];
 
 	auto optionalTypeMetaDataDef = luabind::class_<pragma::ents::OptionalTypeMetaData, pragma::ents::TypeMetaData>("OptionalTypeMetaData");
-	optionalTypeMetaDataDef.def_readwrite("enabledProperty", &pragma::ents::OptionalTypeMetaData::enabledProperty);
+	optionalTypeMetaDataDef.property(
+	  "enabledProperty", +[](lua_State *l, pragma::ents::OptionalTypeMetaData &metaData) { Lua::PushString(l, metaData.enabledProperty.c_str()); }, +[](lua_State *l, pragma::ents::OptionalTypeMetaData &metaData, const std::string &prop) { metaData.enabledProperty = prop; });
 	memberInfoDef.scope[optionalTypeMetaDataDef];
 
 	auto enablerTypeMetaDataDef = luabind::class_<pragma::ents::EnablerTypeMetaData, pragma::ents::TypeMetaData>("EnablerTypeMetaData");
-	enablerTypeMetaDataDef.def_readwrite("targetProperty", &pragma::ents::EnablerTypeMetaData::targetProperty);
+	enablerTypeMetaDataDef.property(
+	  "targetProperty", +[](lua_State *l, pragma::ents::EnablerTypeMetaData &metaData) { Lua::PushString(l, metaData.targetProperty.c_str()); }, +[](lua_State *l, pragma::ents::EnablerTypeMetaData &metaData, const std::string &prop) { metaData.targetProperty = prop; });
 	memberInfoDef.scope[enablerTypeMetaDataDef];
+
+	static_assert(umath::to_integral(TypeMetaData::Count) == 7, "Update these bindings when adding news types!");
+
 	memberInfoDef.add_static_constant("FLAG_NONE", umath::to_integral(pragma::ComponentMemberFlags::None));
 	memberInfoDef.add_static_constant("FLAG_HIDE_IN_INTERFACE_BIT", umath::to_integral(pragma::ComponentMemberFlags::HideInInterface));
 	memberInfoDef.add_static_constant("FLAG_CONTROLLER_BIT", umath::to_integral(pragma::ComponentMemberFlags::Controller));
@@ -404,7 +416,7 @@ void Lua::ents::register_library(lua_State *l)
 	  });
 	memberInfoDef.def_readonly("type", &pragma::ComponentMemberInfo::type);
 	memberInfoDef.property(
-	  "name", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetName(); });
+	  "name", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return std::string {*memInfo.GetName()}; });
 	memberInfoDef.property(
 	  "nameHash", +[](lua_State *l, const pragma::ComponentMemberInfo &memInfo) { return memInfo.GetNameHash(); });
 	memberInfoDef.property(

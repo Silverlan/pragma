@@ -35,7 +35,7 @@ void SLuaEntity::DoSpawn()
 	if(IsShared()) {
 		pragma::networking::ClientRecipientFilter rf {[](const pragma::networking::IServerClient &cl) -> bool { return cl.GetPlayer(); }};
 		NetPacket p;
-		p->WriteString(GetClass());
+		p->WriteString(*GetClass());
 		p->Write<unsigned int>(GetIndex());
 		auto pMapComponent = GetComponent<pragma::MapComponent>();
 		p->Write<unsigned int>(pMapComponent.valid() ? pMapComponent->GetMapIndex() : 0u);

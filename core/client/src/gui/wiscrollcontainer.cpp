@@ -63,6 +63,33 @@ Vector2i WIScrollContainer::GetContentSize()
 	return Vector2i(GetContentWidth(), GetContentHeight());
 }
 
+WIBase *WIScrollContainer::GetWrapperElement() { return m_hWrapper.get(); }
+void WIScrollContainer::ScrollToElement(::WIBase &el)
+{
+	ScrollToElementX(el);
+	ScrollToElementY(el);
+}
+void WIScrollContainer::ScrollToElementX(::WIBase &el)
+{
+	auto *elWrapper = GetWrapperElement();
+	auto *scrlBar = GetHorizontalScrollBar();
+	if(!elWrapper || !scrlBar)
+		return;
+	auto offset = el.GetAbsolutePos().x - elWrapper->GetAbsolutePos().x;
+	offset -= (GetWidth() + el.GetWidth()) / 2;
+	scrlBar->SetScrollOffset(offset);
+}
+void WIScrollContainer::ScrollToElementY(::WIBase &el)
+{
+	auto *elWrapper = GetWrapperElement();
+	auto *scrlBar = GetVerticalScrollBar();
+	if(!elWrapper || !scrlBar)
+		return;
+	auto offset = el.GetAbsolutePos().y - elWrapper->GetAbsolutePos().y;
+	offset -= (GetHeight() + el.GetHeight()) / 2;
+	scrlBar->SetScrollOffset(offset);
+}
+
 void WIScrollContainer::SetAutoStickToBottom(bool autoStick) { umath::set_flag(m_scFlags, StateFlags::AutoStickToBottom, autoStick); }
 bool WIScrollContainer::ShouldAutoStickToBottom() const { return umath::is_flag_set(m_scFlags, StateFlags::AutoStickToBottom); }
 

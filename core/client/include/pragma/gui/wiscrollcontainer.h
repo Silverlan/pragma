@@ -31,6 +31,10 @@ class DLLCLIENT WIScrollContainer : public WIBase {
 	void SetScrollAmount(int32_t amX, int32_t amY);
 	void SetScrollAmountX(int32_t amX);
 	void SetScrollAmountY(int32_t amY);
+	WIBase *GetWrapperElement();
+	void ScrollToElement(::WIBase &el);
+	void ScrollToElementX(::WIBase &el);
+	void ScrollToElementY(::WIBase &el);
 
 	void ScrollToBottom();
 

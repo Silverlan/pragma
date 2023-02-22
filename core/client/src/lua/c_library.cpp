@@ -327,6 +327,10 @@ static void register_gui(Lua::Interface &lua)
 	wiScrollContainerClassDef.def("SetScrollAmount", &WIScrollContainer::SetScrollAmount);
 	wiScrollContainerClassDef.def("SetScrollAmountX", &WIScrollContainer::SetScrollAmountX);
 	wiScrollContainerClassDef.def("SetScrollAmountY", &WIScrollContainer::SetScrollAmountY);
+	wiScrollContainerClassDef.def("GetWrapperElement", &WIScrollContainer::GetWrapperElement);
+	wiScrollContainerClassDef.def("ScrollToElement", &WIScrollContainer::ScrollToElement);
+	wiScrollContainerClassDef.def("ScrollToElementX", &WIScrollContainer::ScrollToElementX);
+	wiScrollContainerClassDef.def("ScrollToElementY", &WIScrollContainer::ScrollToElementY);
 	guiMod[wiScrollContainerClassDef];
 
 	auto wiContainerClassDef = luabind::class_<WIContainer, ::WIBase>("Container");

@@ -10,6 +10,7 @@
 #include "pragma/lua/libraries/lengine.h"
 #include "pragma/input/inputhelper.h"
 #include <pragma/engine.h>
+#include "pragma/engine_version.h"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/file_formats/wmd_load.h"
 #include "pragma/util/util_module.hpp"
@@ -32,6 +33,8 @@ std::string Lua::engine::get_working_directory()
 Lua::tb<void> Lua::engine::get_info(lua_State *l)
 {
 	auto t = luabind::newtable(l);
+	t["version"] = get_engine_version();
+	t["prettyVersion"] = get_pretty_engine_version();
 	t["identifier"] = engine_info::get_identifier();
 	t["twitterURL"] = engine_info::get_twitter_url();
 	t["redditURL"] = engine_info::get_reddit_url();
@@ -40,6 +43,18 @@ Lua::tb<void> Lua::engine::get_info(lua_State *l)
 	t["websiteURL"] = engine_info::get_website_url();
 	t["wikiURL"] = engine_info::get_wiki_url();
 	t["name"] = engine_info::get_name();
+	return t;
+}
+
+Lua::opt<Lua::tb<void>> Lua::engine::get_git_info(lua_State *l)
+{
+	auto gitInfo = engine_info::get_git_info();
+	if(!gitInfo.has_value())
+		return Lua::nil;
+	auto t = luabind::newtable(l);
+	t["ref"] = gitInfo->ref;
+	t["commitSha"] = gitInfo->commitSha;
+	t["dateTime"] = gitInfo->dateTime;
 	return t;
 }
 

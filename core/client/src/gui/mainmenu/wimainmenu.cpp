@@ -254,10 +254,15 @@ void WIMainMenu::Initialize()
 	pLoadScreen->SetKeyboardInputEnabled(true);
 
 	m_hVersion = CreateChild<WIText>();
+
+	auto version = get_pretty_engine_version();
+	auto gitInfo = engine_info::get_git_info();
+	if(gitInfo.has_value())
+		version += " [" + ustring::substr(gitInfo->commitSha, 0, 7) + "]";
 	auto *pVersion = static_cast<WIText *>(m_hVersion.get());
 	pVersion->AddStyleClass("game_version");
 	pVersion->SetColor(1.f, 1.f, 1.f, 1.f);
-	pVersion->SetText(get_pretty_engine_version());
+	pVersion->SetText(version);
 	pVersion->SizeToContents();
 	pVersion->SetName("engine_version");
 	pVersion->SetPos(GetWidth() - pVersion->GetWidth() - 40, GetHeight() - pVersion->GetHeight() - 20);

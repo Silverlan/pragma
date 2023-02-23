@@ -58,7 +58,8 @@ void Lua::engine::register_library(lua_State *l)
 	  luabind::def("set_fixed_frame_delta_time_interpretation", Lua::engine::set_fixed_frame_delta_time_interpretation), luabind::def("clear_fixed_frame_delta_time_interpretation", Lua::engine::clear_fixed_frame_delta_time_interpretation),
 	  luabind::def("set_tick_delta_time_tied_to_frame_rate", Lua::engine::set_tick_delta_time_tied_to_frame_rate), luabind::def("get_window_resolution", Lua::engine::get_window_resolution), luabind::def("get_render_resolution", Lua::engine::get_render_resolution),
 	  luabind::def("get_staging_render_target", Lua::engine::get_staging_render_target), luabind::def("set_record_console_output", Lua::engine::set_record_console_output), luabind::def("get_tick_count", &Lua::engine::GetTickCount), luabind::def("shutdown", &Lua::engine::exit),
-	  luabind::def("get_working_directory", Lua::engine::get_working_directory), luabind::def("get_current_frame_index", &Lua::engine::get_current_frame_index), luabind::def("get_default_font_set_name", &CEngine::GetDefaultFontSetName)];
+	  luabind::def("get_working_directory", Lua::engine::get_working_directory), luabind::def("get_current_frame_index", &Lua::engine::get_current_frame_index), luabind::def("get_default_font_set_name", &CEngine::GetDefaultFontSetName),
+	  luabind::def("get_git_info", Lua::engine::get_git_info)];
 
 	Lua::RegisterLibraryEnums(l, "engine",
 	  {{"FONT_FEATURE_FLAG_NONE", umath::to_integral(FontSetFlag::None)}, {"FONT_FEATURE_FLAG_BOLD_BIT", umath::to_integral(FontSetFlag::Bold)}, {"FONT_FEATURE_FLAG_ITALIC_BIT", umath::to_integral(FontSetFlag::Italic)}, {"FONT_FEATURE_FLAG_MONO_BIT", umath::to_integral(FontSetFlag::Mono)},

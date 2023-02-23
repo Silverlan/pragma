@@ -21,6 +21,7 @@ namespace Lua {
 		DLLNETWORK bool LibraryExists(lua_State *l, const std::string &library);
 		DLLNETWORK uint64_t GetTickCount();
 		DLLNETWORK tb<void> get_info(lua_State *l);
+		DLLNETWORK opt<tb<void>> get_git_info(lua_State *l);
 		DLLNETWORK void exit();
 		DLLNETWORK std::string get_working_directory();
 

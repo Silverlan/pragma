@@ -56,3 +56,32 @@ const std::vector<std::string> engine_info::get_supported_audio_formats()
 	// TODO: Merge this with asset library
 	return {"ogg", "wav", "mp3"};
 }
+
+DLLNETWORK std::optional<engine_info::GitInfo> engine_info::get_git_info()
+{
+	auto f = filemanager::open_file("git_info.txt", filemanager::FileMode::Read, fsys::SearchFlags::Local | fsys::SearchFlags::NoMounts);
+	if(f == nullptr)
+		return {};
+	GitInfo gitInfo {};
+	std::vector<std::string> lines;
+	ustring::explode(f->ReadString(), "\n", lines);
+	for(auto &l : lines) {
+		auto sep = l.find(':');
+		if(sep == std::string::npos)
+			continue;
+		auto id = l.substr(0, sep);
+		auto val = l.substr(sep + 1);
+		ustring::remove_whitespace(val);
+		if(id.empty() || val.empty())
+			continue;
+		if(id == "ref")
+			gitInfo.ref = val;
+		else if(id == "commit")
+			gitInfo.commitSha = val;
+		else if(id == "build")
+			gitInfo.dateTime = val;
+	}
+	if(gitInfo.commitSha.empty())
+		return {};
+	return gitInfo;
+}

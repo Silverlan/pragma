@@ -545,6 +545,12 @@ bool Engine::Initialize(int argc, char *argv[])
 	InitLaunchOptions(argc, argv);
 
 	pragma::detail::initialize_logger(g_lpLogLevelCon, g_lpLogLevelFile, g_lpLogFile);
+	spdlog::info("Engine Version: {}", get_pretty_engine_version());
+	auto f = filemanager::open_file("git_info.txt", filemanager::FileMode::Read, fsys::SearchFlags::Local | fsys::SearchFlags::NoMounts);
+	if(f) {
+		spdlog::info("Git Info:");
+		spdlog::info(f->ReadString());
+	}
 
 #if 0
 	Con::cout<<"----- Logger test -----"<<Con::endl;

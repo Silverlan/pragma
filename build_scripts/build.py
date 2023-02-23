@@ -14,14 +14,14 @@ import zipfile
 import sys
 
 def str2bool(v):
-    if isinstance(v, bool):
-        return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
+	if isinstance(v, bool):
+		return v
+	if v.lower() in ('yes', 'true', 't', 'y', '1'):
+		return True
+	elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+		return False
+	else:
+		raise argparse.ArgumentTypeError('Boolean value expected.')
 
 parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev=False, formatter_class=argparse.ArgumentDefaultsHelpFormatter, epilog="")
 
@@ -64,10 +64,10 @@ input_args = args
 #		log_file = os.getcwd() +"/" +log_file
 #
 #		logging.basicConfig(filename=log_file,
-#	        filemode='a',
-#	        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-#	        datefmt='%H:%M:%S',
-#	        level=logging.DEBUG)
+#			filemode='a',
+#			format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+#			datefmt='%H:%M:%S',
+#			level=logging.DEBUG)
 #
 #		logging.info("Running Pragma Build Script")
 
@@ -81,10 +81,12 @@ if args["update"]:
 	if not os.path.isabs(build_dir):
 		build_dir = os.getcwd() +"/" +build_dir
 
-	import json
-	cfg = json.load(open(build_dir +"/build_config.json"))
-	for key,value in cfg["args"].items():
-		args[key] = value
+	buildConfigLocation = build_dir +"/build_config.json"
+	if Path(buildConfigLocation).is_file():
+		import json
+		cfg = json.load(open(build_dir +"/build_config.json"))
+		for key,value in cfg["args"].items():
+			args[key] = value
 	args["update"] = True
 
 if platform == "linux":
@@ -146,15 +148,15 @@ def mkpath(path):
 	pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
 class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+	HEADER = '\033[95m'
+	OKBLUE = '\033[94m'
+	OKCYAN = '\033[96m'
+	OKGREEN = '\033[92m'
+	WARNING = '\033[93m'
+	FAIL = '\033[91m'
+	ENDC = '\033[0m'
+	BOLD = '\033[1m'
+	UNDERLINE = '\033[4m'
 
 def print_msg(msg):
 	print(bcolors.OKGREEN +msg +bcolors.ENDC)
@@ -224,16 +226,16 @@ def http_download(url,fileName=None):
 # See https://stackoverflow.com/a/54748564
 from zipfile import ZipFile, ZipInfo
 class ZipFileWithPermissions(ZipFile):
-    def _extract_member(self, member, targetpath, pwd):
-        if not isinstance(member, ZipInfo):
-            member = self.getinfo(member)
+	def _extract_member(self, member, targetpath, pwd):
+		if not isinstance(member, ZipInfo):
+			member = self.getinfo(member)
 
-        targetpath = super()._extract_member(member, targetpath, pwd)
+		targetpath = super()._extract_member(member, targetpath, pwd)
 
-        attr = member.external_attr >> 16
-        if attr != 0:
-            os.chmod(targetpath, attr)
-        return targetpath
+		attr = member.external_attr >> 16
+		if attr != 0:
+			os.chmod(targetpath, attr)
+		return targetpath
 
 def extract(zipName,removeZip=True,format="zip"):
 	if format == "zip":
@@ -341,6 +343,10 @@ if platform == "linux":
 		for cmd in commands:
 			print_msg("Running " +cmd +"...")
 			subprocess.run(["sudo"] +cmd.split() +["-y"],check=True)
+
+module_list = []
+cmake_args = []
+additional_build_targets = []
 
 ########## zlib ##########
 # Download
@@ -486,10 +492,6 @@ if platform == "win32":
 print_msg("Downloading modules...")
 os.chdir(root +"/modules")
 
-module_list = []
-cmake_args = []
-additional_build_targets = []
-
 if with_essential_client_modules:
 	modules.append( "pr_prosper_vulkan:\"https://github.com/Silverlan/pr_prosper_vulkan.git\"" )
 
@@ -513,16 +515,16 @@ if with_vr:
 	modules.append( "pr_openvr:https://github.com/Silverlan/pr_openvr.git" )
 
 def execfile(filepath, globals=None, locals=None, args=None):
-    if globals is None:
-        globals = {}
-    globals.update({
-        "__file__": filepath,
-        "__name__": "__main__",
-    })
-    if args is not None:
-        sys.argv = [filepath] + args
-    with open(filepath, 'rb') as file:
-        exec(compile(file.read(), filepath, 'exec'), globals, locals)
+	if globals is None:
+		globals = {}
+	globals.update({
+		"__file__": filepath,
+		"__name__": "__main__",
+	})
+	if args is not None:
+		sys.argv = [filepath] + args
+	with open(filepath, 'rb') as file:
+		exec(compile(file.read(), filepath, 'exec'), globals, locals)
 
 def execbuildscript(filepath):
 	global module_list
@@ -674,10 +676,10 @@ os.chdir(build_dir)
 
 print_msg("Running CMake configure...")
 cmake_args += [
-    "-DDEPENDENCY_GEOMETRIC_TOOLS_INCLUDE=" +deps_dir +"/GeometricTools/GTE",
-    "-DDEPENDENCY_SPIRV_TOOLS_DIR=" +deps_dir +"/SPIRV-Tools",
-    "-DBUILD_TESTING=OFF",
-    "-DCMAKE_INSTALL_PREFIX:PATH=" +install_dir +""
+	"-DDEPENDENCY_GEOMETRIC_TOOLS_INCLUDE=" +deps_dir +"/GeometricTools/GTE",
+	"-DDEPENDENCY_SPIRV_TOOLS_DIR=" +deps_dir +"/SPIRV-Tools",
+	"-DBUILD_TESTING=OFF",
+	"-DCMAKE_INSTALL_PREFIX:PATH=" +install_dir +""
 ]
 
 if platform == "linux":
@@ -694,17 +696,17 @@ if platform == "linux":
 else:
 	cmake_args += [
 		"-DDEPENDENCY_BOOST_INCLUDE=" +boost_root +"/build/_deps/boost-src",
-	    "-DDEPENDENCY_BOOST_LIBRARY_LOCATION=" +boost_root +"/build/lib/Release",
-	    "-DDEPENDENCY_BOOST_CHRONO_LIBRARY=" +boost_root +"/build/lib/Release/boost_chrono.lib",
-	    "-DDEPENDENCY_BOOST_DATE_TIME_LIBRARY=" +boost_root +"/build/lib/Release/boost_date_time.lib",
-	    "-DDEPENDENCY_BOOST_REGEX_LIBRARY=" +boost_root +"/build/lib/Release/boost_regex.lib",
-	    "-DDEPENDENCY_BOOST_SYSTEM_LIBRARY=" +boost_root +"/build/lib/Release/boost_system.lib",
-	    "-DDEPENDENCY_BOOST_THREAD_LIBRARY=" +boost_root +"/build/lib/Release/boost_thread.lib",
-	    "-DBOOST_ROOT=" +boost_root +"",
-	    "-DBOOST_LIBRARYDIR=" +boost_root +"/build/lib/Release/",
-	    "-DZLIB_INCLUDE_DIRS=" +build_dir +"/third_party_libs/zlib " +zlib_conf_root +"",
-	    "-DDEPENDENCY_LUAJIT_LIBRARY=" +lua_jit_lib +"",
-	    "-DDEPENDENCY_LUA_LIBRARY=" +lua_jit_lib +""
+		"-DDEPENDENCY_BOOST_LIBRARY_LOCATION=" +boost_root +"/build/lib/Release",
+		"-DDEPENDENCY_BOOST_CHRONO_LIBRARY=" +boost_root +"/build/lib/Release/boost_chrono.lib",
+		"-DDEPENDENCY_BOOST_DATE_TIME_LIBRARY=" +boost_root +"/build/lib/Release/boost_date_time.lib",
+		"-DDEPENDENCY_BOOST_REGEX_LIBRARY=" +boost_root +"/build/lib/Release/boost_regex.lib",
+		"-DDEPENDENCY_BOOST_SYSTEM_LIBRARY=" +boost_root +"/build/lib/Release/boost_system.lib",
+		"-DDEPENDENCY_BOOST_THREAD_LIBRARY=" +boost_root +"/build/lib/Release/boost_thread.lib",
+		"-DBOOST_ROOT=" +boost_root +"",
+		"-DBOOST_LIBRARYDIR=" +boost_root +"/build/lib/Release/",
+		"-DZLIB_INCLUDE_DIRS=" +build_dir +"/third_party_libs/zlib " +zlib_conf_root +"",
+		"-DDEPENDENCY_LUAJIT_LIBRARY=" +lua_jit_lib +"",
+		"-DDEPENDENCY_LUA_LIBRARY=" +lua_jit_lib +""
 	]
 
 cmake_configure(root,generator,cmake_args)
@@ -756,7 +758,7 @@ luasocket_args = ["-DLUA_INCLUDE_DIR=" +root +"/third_party_libs/luajit/src"]
 if platform == "win32":
 	luasocket_args.append("-DLUA_LIBRARY=" +deps_dir +"/luajit_build/src/Release/luajit.lib")
 else:
-    luasocket_args.append("-DLUA_LIBRARY=" +root +"/third_party_libs/luajit/src/libluajit-p.so")
+	luasocket_args.append("-DLUA_LIBRARY=" +root +"/third_party_libs/luajit/src/libluajit-p.so")
 cmake_configure("..",generator,luasocket_args)
 cmake_build(build_config)
 cp(luasocket_root +"/src/socket.lua",install_dir +"/lua/modules/")
@@ -764,20 +766,32 @@ mkdir(install_dir +"/modules/socket/")
 if platform == "win32":
 	cp(luasocket_root +"/build/socket/" +build_config +"/core.dll",install_dir +"/modules/socket/")
 else:
-    cp(luasocket_root +"/build/socket/core.so",install_dir +"/modules/socket/")
+	cp(luasocket_root +"/build/socket/core.so",install_dir +"/modules/socket/")
 os.chdir(curDir)
 
 ########## Addons ##########
 def download_addon(name,addonName,url):
-    print_msg("Downloading " +name +" addon...")
-    mkdir(install_dir +"/addons",cd=True)
-    if not Path(install_dir +"/addons/" +addonName).is_dir():
-    	git_clone(url,addonName)
-    else:
-        os.chdir(install_dir +"/addons/" +addonName)
-        print_msg("Updating " +name +"...")
-        subprocess.run(["git","pull"],check=True)
-        os.chdir("..")
+	print_msg("Downloading " +name +" addon...")
+	mkdir(install_dir +"/addons",cd=True)
+	if not Path(install_dir +"/addons/" +addonName).is_dir():
+		git_clone(url,addonName)
+	else:
+		os.chdir(install_dir +"/addons/" +addonName)
+		print_msg("Updating " +name +"...")
+		subprocess.run(["git","pull"],check=True)
+		os.chdir("..")
+
+	# Write commit SHA info for debugging purposes
+	os.chdir(install_dir +"/addons/" +addonName)
+	try:
+		commit_id = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
+	except subprocess.CalledProcessError:
+		if os.path.exists("git_info.txt"):
+			os.remove("git_info.txt")
+	else:
+		with open("git_info.txt", "w") as f:
+			f.write(f"commit: {commit_id}\n")
+	os.chdir("..")
 
 curDir = os.getcwd()
 if with_pfm:
@@ -789,33 +803,32 @@ if with_vr:
 os.chdir(curDir)
 
 ########## Write Build Configuration ##########
-if not update:
-	cfg = {}
-	cfg["args"] = {}
-	for key, value in input_args.items():
-		cfg["args"][key] = value
+cfg = {}
+cfg["args"] = {}
+for key, value in input_args.items():
+	cfg["args"][key] = value
 
-	import json
-	json.dump(cfg,open(build_dir +"/build_config.json",'w'))
+import json
+json.dump(cfg,open(build_dir +"/build_config.json",'w'))
 
 ########## Build Pragma ##########
 if build:
-    print_msg("Building Pragma...")
+	print_msg("Building Pragma...")
 
-    os.chdir(build_dir)
-    targets = ["pragma-install-full"] +module_list
-    if with_pfm:
-    	targets.append("pfm")
-    targets += additional_build_targets
-    targets.append("pragma-install")
+	os.chdir(build_dir)
+	targets = ["pragma-install-full"] +module_list
+	if with_pfm:
+		targets.append("pfm")
+	targets += additional_build_targets
+	targets.append("pragma-install")
 
-    print_msg("Running build command...")
-    cmake_build(build_config,targets)
+	print_msg("Running build command...")
+	cmake_build(build_config,targets)
 
-    print_msg("Build Successful! Pragma has been installed to \"" +normalize_path(install_dir) +"\".")
-    print_msg("If you make any changes to the core source code, you can build the \"pragma-install\" target to compile the changes and re-install the binaries automatically.")
-    print_msg("If you make any changes to a module, you will have to build the module target first, and then build \"pragma-install\".")
-    print_msg("")
+	print_msg("Build Successful! Pragma has been installed to \"" +normalize_path(install_dir) +"\".")
+	print_msg("If you make any changes to the core source code, you can build the \"pragma-install\" target to compile the changes and re-install the binaries automatically.")
+	print_msg("If you make any changes to a module, you will have to build the module target first, and then build \"pragma-install\".")
+	print_msg("")
 
 print_msg("All actions have been completed! Please make sure to re-run this script every time you pull any changes from the repository, and after adding any new modules.")
 

@@ -44,7 +44,7 @@ jobs:
           # Add info file
           cd "${{ steps.build-pragma.outputs.install-dir }}"
           echo -e "ref: $GITHUB_REF \ncommit: $GITHUB_SHA\nbuild: $(date +"%Y-%m-%dT%H:%M:%SZ")" \
-          > ./info.txt
+          > ./git_info.txt
           cd "$curDir"
 
           7z a pragma.zip "${{ steps.build-pragma.outputs.install-dir }}/**"

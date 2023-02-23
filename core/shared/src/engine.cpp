@@ -887,10 +887,10 @@ void Engine::DumpDebugInformation(ZIPFile &zip) const
 			zip.AddFile("log.txt", *logContents);
 	}
 
-	if(filemanager::exists("info.txt")) {
-		auto infoContents = filemanager::read_file("info.txt");
+	if(filemanager::exists("git_info.txt")) {
+		auto infoContents = filemanager::read_file("git_info.txt");
 		if(infoContents.has_value())
-			zip.AddFile("info.txt", *infoContents);
+			zip.AddFile("git_info.txt", *infoContents);
 	}
 
 	auto fWriteConvars = [&zip](const std::map<std::string, std::shared_ptr<ConConf>> &cvarMap, const std::string &fileName) {

@@ -691,6 +691,9 @@ void Game::Tick()
 
 	StartProfilingStage(CPUProfilingPhase::GameObjectLogic);
 
+	// Perform some cleanup
+	pragma::BaseEntityComponentSystem::Cleanup();
+
 	auto &logicComponents = GetEntityTickComponents();
 	// Note: During the loop, new items may be appended to the end of logicComponents, but no elements
 	// may be erased from outside sources. If an element is removed, it's set to nullptr.

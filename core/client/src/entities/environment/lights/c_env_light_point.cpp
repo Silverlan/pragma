@@ -104,7 +104,7 @@ void CLightPointComponent::Initialize()
 void CLightPointComponent::SetShadowDirty()
 {
 	for(auto &pComponent : GetEntity().GetComponents()) {
-		if(typeid(*pComponent) != typeid(CShadowComponent))
+		if(pComponent.expired() || typeid(*pComponent) != typeid(CShadowComponent))
 			continue;
 		static_cast<CShadowComponent &>(*pComponent).SetDirty(true);
 	}

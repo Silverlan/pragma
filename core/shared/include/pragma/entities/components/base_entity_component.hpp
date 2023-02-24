@@ -228,11 +228,11 @@ namespace pragma {
 			CallbackHandle hCallback;
 			BaseEntityComponent *pComponent = nullptr;
 		};
-		std::vector<CallbackInfo> m_callbackInfos;
 		ComponentId m_componentId = std::numeric_limits<ComponentId>::max();
 
-		mutable std::unordered_map<ComponentEventId, std::vector<CallbackHandle>> m_eventCallbacks;
-		mutable std::unordered_map<ComponentEventId, std::vector<CallbackHandle>> m_boundEvents;
+		std::vector<CallbackInfo> &GetCallbackInfos() const;
+		std::unordered_map<ComponentEventId, std::vector<CallbackHandle>> &GetEventCallbacks() const;
+		std::unordered_map<ComponentEventId, std::vector<CallbackHandle>> &GetBoundEvents() const;
 	  protected:
 		void OnEntityComponentAdded(BaseEntityComponent &component, bool bSkipEventBinding);
 		BaseEntity &m_entity;
@@ -241,6 +241,10 @@ namespace pragma {
 		TickData m_tickData {};
 	  private:
 		friend BaseEntityComponentSystem;
+
+		mutable std::unique_ptr<std::vector<CallbackInfo>> m_callbackInfos;
+		mutable std::unique_ptr<std::unordered_map<ComponentEventId, std::vector<CallbackHandle>>> m_eventCallbacks;
+		mutable std::unique_ptr<std::unordered_map<ComponentEventId, std::vector<CallbackHandle>>> m_boundEvents;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseEntityComponent::StateFlags)

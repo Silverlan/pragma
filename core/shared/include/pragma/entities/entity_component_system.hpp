@@ -24,6 +24,12 @@ namespace pragma {
 	struct ComponentEvent;
 	class DLLNETWORK BaseEntityComponentSystem {
 	  public:
+		enum class StateFlags : uint32_t {
+			None = 0,
+			// A component was removed and it's entry set to NULL
+			ComponentCleanupRequired = 1u,
+			IsBeingRemoved = ComponentCleanupRequired << 1u
+		};
 		virtual ~BaseEntityComponentSystem();
 		util::EventReply BroadcastEvent(ComponentEventId ev, ComponentEvent &evData, const BaseEntityComponent *src = nullptr) const;
 		util::EventReply BroadcastEvent(ComponentEventId ev) const;
@@ -57,9 +63,12 @@ namespace pragma {
 		ComponentHandle<BaseEntityComponent> FindComponent(ComponentId componentId) const;
 		ComponentHandle<BaseEntityComponent> FindComponent(const std::string &name) const;
 
+		virtual void OnRemove() = 0;
+
 		// For internal use only
 		EntityComponentManager *GetComponentManager();
 		const EntityComponentManager *GetComponentManager() const;
+		static void Cleanup();
 	  protected:
 		BaseEntityComponentSystem() = default;
 
@@ -71,7 +80,9 @@ namespace pragma {
 		std::vector<util::TSharedHandle<BaseEntityComponent>> m_components;
 		EntityComponentManager *m_componentManager;
 		BaseEntity *m_entity;
+		mutable StateFlags m_stateFlags = StateFlags::None;
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseEntityComponentSystem::StateFlags)
 
 #endif

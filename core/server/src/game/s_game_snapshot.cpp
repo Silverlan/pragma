@@ -106,7 +106,7 @@ void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 			auto numComponents = 0u;
 			auto bFirst = true;
 			for(auto &pComponent : ent->GetComponents()) {
-				if(pComponent->ShouldTransmitSnapshotData() == false)
+				if(pComponent.expired() || pComponent->ShouldTransmitSnapshotData() == false)
 					continue;
 				auto *pSnapshotComponent = dynamic_cast<pragma::SBaseSnapshotComponent *>(pComponent.get());
 				if(pSnapshotComponent == nullptr)

@@ -36,10 +36,13 @@ decltype(BaseEntityComponent::EVENT_ON_MEMBERS_CHANGED) BaseEntityComponent::EVE
 BaseEntityComponent::BaseEntityComponent(BaseEntity &ent) : m_entity {ent} {}
 BaseEntityComponent::~BaseEntityComponent()
 {
-	for(auto &cbInfo : m_callbackInfos) {
-		if(cbInfo.hCallback.IsValid() == false)
-			continue;
-		cbInfo.hCallback.Remove();
+	if(m_callbackInfos) {
+		for(auto &cbInfo : *m_callbackInfos) {
+			if(cbInfo.hCallback.IsValid() == false)
+				continue;
+			cbInfo.hCallback.Remove();
+		}
+		m_callbackInfos = nullptr;
 	}
 	GetEntity().GetNetworkState()->GetGameState()->GetEntityComponentManager().DeregisterComponent(*this);
 }
@@ -344,19 +347,25 @@ void BaseEntityComponent::Initialize()
 void BaseEntityComponent::OnRemove()
 {
 	OnDetached(GetEntity());
-	for(auto &pair : m_eventCallbacks) {
-		for(auto &hCb : pair.second) {
-			if(hCb.IsValid() == false)
-				continue;
-			hCb.Remove();
+	if(m_eventCallbacks) {
+		for(auto &pair : *m_eventCallbacks) {
+			for(auto &hCb : pair.second) {
+				if(hCb.IsValid() == false)
+					continue;
+				hCb.Remove();
+			}
 		}
+		m_eventCallbacks = nullptr;
 	}
-	for(auto &pair : m_boundEvents) {
-		for(auto &hCb : pair.second) {
-			if(hCb.IsValid() == false)
-				continue;
-			hCb.Remove();
+	if(m_boundEvents) {
+		for(auto &pair : *m_boundEvents) {
+			for(auto &hCb : pair.second) {
+				if(hCb.IsValid() == false)
+					continue;
+				hCb.Remove();
+			}
 		}
+		m_boundEvents = nullptr;
 	}
 	if(umath::is_flag_set(m_stateFlags, StateFlags::IsLogicEnabled)) {
 		auto &logicComponents = GetEntity().GetNetworkState()->GetGameState()->GetEntityTickComponents();
@@ -377,8 +386,9 @@ void BaseEntityComponent::FlagCallbackForRemoval(const CallbackHandle &hCallback
 			component = this;
 		break;
 	}
-	m_callbackInfos.push_back({});
-	auto &cbInfo = m_callbackInfos.back();
+	auto &callbackInfos = GetCallbackInfos();
+	callbackInfos.push_back({});
+	auto &cbInfo = callbackInfos.back();
 	cbInfo.hCallback = hCallback;
 	cbInfo.pComponent = component;
 }
@@ -387,6 +397,24 @@ BaseEntity &BaseEntityComponent::GetEntity() { return m_entity; }
 const BaseEntity &BaseEntityComponent::operator->() const { return GetEntity(); }
 BaseEntity &BaseEntityComponent::operator->() { return GetEntity(); }
 ComponentId BaseEntityComponent::GetComponentId() const { return m_componentId; }
+std::vector<BaseEntityComponent::CallbackInfo> &BaseEntityComponent::GetCallbackInfos() const
+{
+	if(!m_callbackInfos)
+		m_callbackInfos = std::make_unique<std::vector<CallbackInfo>>();
+	return *m_callbackInfos;
+}
+std::unordered_map<ComponentEventId, std::vector<CallbackHandle>> &BaseEntityComponent::GetEventCallbacks() const
+{
+	if(!m_eventCallbacks)
+		m_eventCallbacks = std::make_unique<std::unordered_map<ComponentEventId, std::vector<CallbackHandle>>>();
+	return *m_eventCallbacks;
+}
+std::unordered_map<ComponentEventId, std::vector<CallbackHandle>> &BaseEntityComponent::GetBoundEvents() const
+{
+	if(!m_boundEvents)
+		m_boundEvents = std::make_unique<std::unordered_map<ComponentEventId, std::vector<CallbackHandle>>>();
+	return *m_boundEvents;
+}
 CallbackHandle BaseEntityComponent::AddEventCallback(ComponentEventId eventId, const std::function<util::EventReply(std::reference_wrapper<ComponentEvent>)> &fCallback)
 {
 	return AddEventCallback(eventId, FunctionCallback<util::EventReply, std::reference_wrapper<ComponentEvent>>::Create(fCallback));
@@ -402,23 +430,27 @@ CallbackHandle BaseEntityComponent::AddEventCallback(ComponentEventId eventId, c
 	if(it != events.end() && it->second.typeIndex.has_value() && componentTypeIndex != *it->second.typeIndex && baseTypeIndex != *it->second.typeIndex)
 		throw std::logic_error("Attempted to add callback for component event " + std::to_string(eventId) + " (" + it->second.name + ") to component " + std::string(typeid(*this).name()) + ", which this event does not belong to!");
 
-	auto itEv = m_eventCallbacks.find(eventId);
-	if(itEv == m_eventCallbacks.end())
-		itEv = m_eventCallbacks.insert(std::make_pair(eventId, std::vector<CallbackHandle> {})).first;
+	auto &eventCallbacks = GetEventCallbacks();
+	auto itEv = eventCallbacks.find(eventId);
+	if(itEv == eventCallbacks.end())
+		itEv = eventCallbacks.insert(std::make_pair(eventId, std::vector<CallbackHandle> {})).first;
 	itEv->second.push_back(hCallback);
 	return itEv->second.back();
 }
 void BaseEntityComponent::RemoveEventCallback(ComponentEventId eventId, const CallbackHandle &hCallback)
 {
-	auto itEv = m_eventCallbacks.find(eventId);
-	if(itEv == m_eventCallbacks.end())
+	if(!m_eventCallbacks)
+		return;
+	auto &eventCallbacks = GetEventCallbacks();
+	auto itEv = eventCallbacks.find(eventId);
+	if(itEv == eventCallbacks.end())
 		return;
 	auto itCb = std::find(itEv->second.begin(), itEv->second.end(), hCallback);
 	if(itCb == itEv->second.end())
 		return;
 	itEv->second.erase(itCb);
 	if(itEv->second.empty())
-		m_eventCallbacks.erase(itEv);
+		eventCallbacks.erase(itEv);
 }
 util::EventReply BaseEntityComponent::InvokeEventCallbacks(ComponentEventId eventId, const ComponentEvent &evData) const
 {
@@ -426,8 +458,11 @@ util::EventReply BaseEntityComponent::InvokeEventCallbacks(ComponentEventId even
 }
 util::EventReply BaseEntityComponent::InvokeEventCallbacks(ComponentEventId eventId, ComponentEvent &evData) const
 {
-	auto itEv = m_eventCallbacks.find(eventId);
-	if(itEv == m_eventCallbacks.end())
+	if(!m_eventCallbacks)
+		return util::EventReply::Unhandled;
+	auto &eventCallbacks = GetEventCallbacks();
+	auto itEv = eventCallbacks.find(eventId);
+	if(itEv == eventCallbacks.end())
 		return util::EventReply::Unhandled;
 	auto hThis = GetHandle();
 	auto &evs = itEv->second;
@@ -490,6 +525,8 @@ CallbackHandle BaseEntityComponent::BindEvent(ComponentEventId eventId, const st
 		auto &info = itInfo->second;
 		if(info.typeIndex.has_value()) {
 			for(auto &pComponent : ent.GetComponents()) {
+				if(pComponent.expired())
+					continue;
 				auto componentTypeIndex = std::type_index(typeid(*pComponent));
 				auto baseTypeIndex = componentTypeIndex;
 				pComponent->GetBaseTypeIndex(baseTypeIndex);
@@ -501,9 +538,10 @@ CallbackHandle BaseEntityComponent::BindEvent(ComponentEventId eventId, const st
 			}
 		}
 	}
-	auto itEv = m_boundEvents.find(eventId);
-	if(itEv == m_boundEvents.end())
-		itEv = m_boundEvents.insert(std::make_pair(eventId, std::vector<CallbackHandle> {})).first;
+	auto &boundEvents = GetBoundEvents();
+	auto itEv = boundEvents.find(eventId);
+	if(itEv == boundEvents.end())
+		itEv = boundEvents.insert(std::make_pair(eventId, std::vector<CallbackHandle> {})).first;
 	itEv->second.push_back(hCallback);
 	return itEv->second.back();
 }
@@ -514,8 +552,11 @@ util::EventReply BaseEntityComponent::HandleEvent(ComponentEventId eventId, Comp
 	else if(eventId == BaseEntity::EVENT_ON_POST_SPAWN)
 		OnEntityPostSpawn();
 
-	auto itEv = m_boundEvents.find(eventId);
-	if(itEv == m_boundEvents.end())
+	if(!m_boundEvents)
+		return util::EventReply::Unhandled;
+	auto &boundEvents = GetBoundEvents();
+	auto itEv = boundEvents.find(eventId);
+	if(itEv == boundEvents.end())
 		return util::EventReply::Unhandled;
 	for(auto it = itEv->second.begin(); it != itEv->second.end();) {
 		auto &hCb = *it;
@@ -534,8 +575,30 @@ void BaseEntityComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 void BaseEntityComponent::OnEntityComponentAdded(BaseEntityComponent &component, bool bSkipEventBinding)
 {
 	if(bSkipEventBinding == false) {
+		if(m_boundEvents) {
+			auto &events = GetEntity().GetNetworkState()->GetGameState()->GetEntityComponentManager().GetEvents();
+			for(auto &pair : *m_boundEvents) {
+				auto evId = pair.first;
+				auto &info = events.at(evId);
+				if(!info.typeIndex.has_value())
+					continue;
+				auto componentTypeIndex = std::type_index(typeid(component));
+				auto baseTypeIndex = componentTypeIndex;
+				component.GetBaseTypeIndex(baseTypeIndex);
+				if(componentTypeIndex != *info.typeIndex && baseTypeIndex != *info.typeIndex)
+					continue;
+				for(auto &hCb : pair.second)
+					component.AddEventCallback(evId, hCb);
+			}
+		}
+	}
+	OnEntityComponentAdded(component);
+}
+void BaseEntityComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
+{
+	if(m_boundEvents) {
 		auto &events = GetEntity().GetNetworkState()->GetGameState()->GetEntityComponentManager().GetEvents();
-		for(auto &pair : m_boundEvents) {
+		for(auto &pair : *m_boundEvents) {
 			auto evId = pair.first;
 			auto &info = events.at(evId);
 			if(!info.typeIndex.has_value())
@@ -546,36 +609,22 @@ void BaseEntityComponent::OnEntityComponentAdded(BaseEntityComponent &component,
 			if(componentTypeIndex != *info.typeIndex && baseTypeIndex != *info.typeIndex)
 				continue;
 			for(auto &hCb : pair.second)
-				component.AddEventCallback(evId, hCb);
+				component.RemoveEventCallback(evId, hCb);
 		}
 	}
-	OnEntityComponentAdded(component);
-}
-void BaseEntityComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
-{
-	auto &events = GetEntity().GetNetworkState()->GetGameState()->GetEntityComponentManager().GetEvents();
-	for(auto &pair : m_boundEvents) {
-		auto evId = pair.first;
-		auto &info = events.at(evId);
-		if(!info.typeIndex.has_value())
-			continue;
-		auto componentTypeIndex = std::type_index(typeid(component));
-		auto baseTypeIndex = componentTypeIndex;
-		component.GetBaseTypeIndex(baseTypeIndex);
-		if(componentTypeIndex != *info.typeIndex && baseTypeIndex != *info.typeIndex)
-			continue;
-		for(auto &hCb : pair.second)
-			component.RemoveEventCallback(evId, hCb);
-	}
-	for(auto it = m_callbackInfos.begin(); it != m_callbackInfos.end();) {
-		auto &cbInfo = *it;
-		if(cbInfo.pComponent != &component && cbInfo.hCallback.IsValid()) {
-			++it;
-			continue;
+	if(m_callbackInfos) {
+		for(auto it = m_callbackInfos->begin(); it != m_callbackInfos->end();) {
+			auto &cbInfo = *it;
+			if(cbInfo.pComponent != &component && cbInfo.hCallback.IsValid()) {
+				++it;
+				continue;
+			}
+			if(cbInfo.hCallback.IsValid())
+				it->hCallback.Remove();
+			it = m_callbackInfos->erase(it);
 		}
-		if(cbInfo.hCallback.IsValid())
-			it->hCallback.Remove();
-		it = m_callbackInfos.erase(it);
+		if(m_callbackInfos->empty())
+			m_callbackInfos = nullptr;
 	}
 	pragma::CEOnEntityComponentRemoved evData {*this};
 	auto *genericC = GetEntity().GetGenericComponent();
@@ -614,15 +663,19 @@ void BaseEntityComponent::OnEntityPostSpawn() { UpdateTickPolicy(); }
 void BaseEntityComponent::OnAttached(BaseEntity &ent) {}
 void BaseEntityComponent::OnDetached(BaseEntity &ent)
 {
-	for(auto it = m_callbackInfos.begin(); it != m_callbackInfos.end();) {
-		auto &cbInfo = *it;
-		if(cbInfo.pComponent != nullptr && cbInfo.hCallback.IsValid()) {
-			++it;
-			continue;
+	if(m_callbackInfos) {
+		for(auto it = m_callbackInfos->begin(); it != m_callbackInfos->end();) {
+			auto &cbInfo = *it;
+			if(cbInfo.pComponent != nullptr && cbInfo.hCallback.IsValid()) {
+				++it;
+				continue;
+			}
+			if(cbInfo.hCallback.IsValid())
+				it->hCallback.Remove();
+			it = m_callbackInfos->erase(it);
 		}
-		if(cbInfo.hCallback.IsValid())
-			it->hCallback.Remove();
-		it = m_callbackInfos.erase(it);
+		if(m_callbackInfos->empty())
+			m_callbackInfos = nullptr;
 	}
 }
 pragma::NetEventId BaseEntityComponent::SetupNetEvent(const std::string &name) const { return GetEntity().GetNetworkState()->GetGameState()->SetupNetEvent(name); }

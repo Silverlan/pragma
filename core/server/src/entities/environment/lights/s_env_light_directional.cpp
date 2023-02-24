@@ -51,6 +51,6 @@ void SLightDirectionalComponent::OnEntityComponentAdded(BaseEntityComponent &com
 void EnvLightDirectional::Initialize()
 {
 	SBaseEntity::Initialize();
-	AddComponent<SLightComponent>("light");
-	AddComponent<SLightDirectionalComponent>("light_directional");
+	AddComponent<SLightComponent>();
+	AddComponent<SLightDirectionalComponent>();
 }

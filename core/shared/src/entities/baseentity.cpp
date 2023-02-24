@@ -138,6 +138,7 @@ pragma::BaseEntityComponent *BaseEntity::FindComponentMemberIndex(const util::Pa
 }
 void BaseEntity::OnRemove()
 {
+	BaseEntityComponentSystem::OnRemove();
 	BroadcastEvent(EVENT_ON_REMOVE);
 	ClearComponents();
 	pragma::BaseLuaHandle::InvalidateHandle();

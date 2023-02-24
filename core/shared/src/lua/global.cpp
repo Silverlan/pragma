@@ -282,6 +282,8 @@ void Game::RegisterLuaGlobals()
 			std::vector<std::string> componentNames;
 			componentNames.reserve(components.size());
 			for(auto &c : components) {
+				if(c.expired())
+					continue;
 				auto *info = game->GetEntityComponentManager().GetComponentInfo(c->GetComponentId());
 				if(!info)
 					continue;

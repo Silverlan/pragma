@@ -53,8 +53,10 @@ void BaseEntity::Save(udm::LinkedPropertyWrapper &udm)
 	auto &components = GetComponents();
 	auto udmComponents = udm.AddArray("components", components.size());
 	uint32_t idx = 0;
-	// Note: Also one component per type supported!
+	// Note: Only one component per type supported!
 	for(auto &ptrComponent : components) {
+		if(ptrComponent.expired())
+			continue;
 		auto udmComponent = udmComponents[idx++];
 		auto *pComponentInfo = componentManager.GetComponentInfo(ptrComponent->GetComponentId());
 		udmComponent["type"] = pComponentInfo->name;

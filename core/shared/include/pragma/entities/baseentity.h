@@ -237,7 +237,7 @@ class DLLNETWORK BaseEntity : public pragma::BaseLuaHandle, public pragma::BaseE
 
 	bool IsMapEntity() const;
 
-	virtual void OnRemove();
+	virtual void OnRemove() override;
 	// Returns true if the entity is static, or asleep (and not animated)
 	bool IsInert() const;
 

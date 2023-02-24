@@ -298,9 +298,13 @@ void pragma::LShaderGameWorldLightingPass::RecordBindScene(rendering::ShaderProc
 }
 std::shared_ptr<prosper::IDescriptorSetGroup> pragma::LShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
+	auto &shader = *dynamic_cast<prosper::Shader *>(this);
+	auto descSetGroup = mat.GetDescriptorSetGroup(shader);
+	if(descSetGroup != nullptr)
+		return descSetGroup;
 	auto descSet = static_cast<LuaShaderWrapperTextured3D *>(m_wrapper)->InitializeMaterialDescriptorSet(mat);
 	if(descSet)
-		mat.SetDescriptorSetGroup(*this, descSet);
+		mat.SetDescriptorSetGroup(shader, descSet);
 	return descSet;
 }
 void pragma::LShaderGameWorldLightingPass::InitializeMaterialData(CMaterial &mat, pragma::ShaderGameWorldLightingPass::MaterialData &matData) { static_cast<LuaShaderWrapperTextured3D *>(m_wrapper)->InitializeMaterialData(mat, matData); }

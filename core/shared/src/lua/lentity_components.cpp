@@ -281,10 +281,10 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  auto &ents = hComponent.GetRootCompositeGroup().GetEntities();
 		  auto tEnts = luabind::newtable(l);
 		  int32_t idx = 1;
-		  for(auto &hEnt : ents) {
-			  if(!hEnt.valid())
+		  for(auto &pair : ents) {
+			  if(!pair.second.valid())
 				  continue;
-			  tEnts[idx++] = hEnt.get()->GetLuaObject();
+			  tEnts[idx++] = pair.second.get()->GetLuaObject();
 		  }
 		  return tEnts;
 	  });
@@ -296,10 +296,10 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 			  return tEnts;
 		  auto &ents = group->GetEntities();
 		  int32_t idx = 1;
-		  for(auto &hEnt : ents) {
-			  if(!hEnt.valid())
+		  for(auto &pair : ents) {
+			  if(!pair.second.valid())
 				  continue;
-			  tEnts[idx++] = hEnt.get()->GetLuaObject();
+			  tEnts[idx++] = pair.second.get()->GetLuaObject();
 		  }
 		  return tEnts;
 	  });
@@ -332,10 +332,10 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  auto &ents = hComponent.GetEntities();
 		  auto tEnts = luabind::newtable(l);
 		  int32_t idx = 1;
-		  for(auto &hEnt : ents) {
-			  if(!hEnt.valid())
+		  for(auto &pair : ents) {
+			  if(!pair.second.valid())
 				  continue;
-			  tEnts[idx++] = hEnt.get()->GetLuaObject();
+			  tEnts[idx++] = pair.second.get()->GetLuaObject();
 		  }
 		  return tEnts;
 	  });

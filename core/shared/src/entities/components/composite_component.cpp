@@ -20,15 +20,16 @@ using namespace pragma;
 
 CompositeGroup::CompositeGroup(CompositeComponent &compositeC, const std::string &name) : m_compositeComponent {&compositeC}, m_groupName {name} {}
 CompositeGroup::~CompositeGroup() { ClearEntities(false); }
-std::vector<EntityHandle>::const_iterator CompositeGroup::FindEntity(BaseEntity &ent) const
+std::unordered_map<CompositeGroup::UuidHash, EntityHandle>::const_iterator CompositeGroup::FindEntity(BaseEntity &ent) const
 {
-	return std::find_if(m_ents.begin(), m_ents.end(), [&ent](const EntityHandle &hEnt) { return hEnt.get() == &ent; });
+	auto hash = util::get_uuid_hash(ent.GetUuid());
+	return m_ents.find(hash);
 }
 void CompositeGroup::AddEntity(BaseEntity &ent)
 {
 	if(FindEntity(ent) != m_ents.end())
 		return;
-	m_ents.push_back(ent.GetHandle());
+	m_ents[util::get_uuid_hash(ent.GetUuid())] = ent.GetHandle();
 	m_compositeComponent->BroadcastEvent(CompositeComponent::EVENT_ON_ENTITY_ADDED, CECompositeEntityChanged {*this, ent});
 }
 void CompositeGroup::RemoveEntity(BaseEntity &ent)
@@ -56,17 +57,17 @@ CompositeGroup &CompositeGroup::AddChildGroup(const std::string &groupName)
 void CompositeGroup::ClearEntities(bool safely)
 {
 	auto ents = std::move(m_ents);
-	for(auto &hEnt : ents) {
-		if(!hEnt.valid())
+	for(auto &pair : ents) {
+		if(!pair.second.valid())
 			continue;
 		if(safely) {
-			auto compositeC = hEnt->GetComponent<CompositeComponent>();
+			auto compositeC = pair.second->GetComponent<CompositeComponent>();
 			if(compositeC.valid())
 				compositeC->ClearEntities(safely);
-			hEnt->RemoveSafely();
+			pair.second->RemoveSafely();
 		}
 		else
-			hEnt->Remove();
+			pair.second->Remove();
 	}
 	m_ents.clear();
 
@@ -102,8 +103,11 @@ static void write_group(udm::LinkedPropertyWrapperArg udmGroup, const CompositeG
 	std::vector<std::string> ents;
 	auto &groupEnts = group.GetEntities();
 	ents.reserve(groupEnts.size());
-	for(auto &hEnt : groupEnts)
-		ents.push_back(util::uuid_to_string(hEnt.get()->GetUuid()));
+	for(auto &pair : groupEnts) {
+		if(!pair.second.valid())
+			continue;
+		ents.push_back(util::uuid_to_string(pair.second.get()->GetUuid()));
+	}
 	udmGroup["entities"] = ents;
 
 	auto udmChildren = udmGroup["children"];
@@ -131,7 +135,7 @@ static void read_group(BaseEntity &ent, udm::LinkedPropertyWrapperArg udmGroup, 
 		auto it = set.find(toHash(ent->GetUuid()));
 		if(it == set.end())
 			continue;
-		groupEnts.push_back(ent->GetHandle());
+		groupEnts[util::get_uuid_hash(ent->GetUuid())] = ent->GetHandle();
 	}
 
 	auto udmChildren = udmGroup["children"];

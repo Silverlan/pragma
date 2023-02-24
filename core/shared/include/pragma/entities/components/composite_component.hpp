@@ -14,6 +14,7 @@ namespace pragma {
 	class CompositeComponent;
 	class DLLNETWORK CompositeGroup {
 	  public:
+		using UuidHash = size_t;
 		CompositeGroup(CompositeComponent &compositeC, const std::string &name);
 		~CompositeGroup();
 		CompositeGroup(const CompositeGroup &) = delete;
@@ -24,17 +25,17 @@ namespace pragma {
 		void RemoveEntity(BaseEntity &ent);
 		const std::string &GetGroupName() const { return m_groupName; }
 		void SetGroupName(const std::string &name) { m_groupName = name; }
-		std::vector<EntityHandle> &GetEntities() { return m_ents; }
-		const std::vector<EntityHandle> &GetEntities() const { return const_cast<CompositeGroup *>(this)->GetEntities(); }
+		std::unordered_map<UuidHash, EntityHandle> &GetEntities() { return m_ents; }
+		const std::unordered_map<UuidHash, EntityHandle> &GetEntities() const { return const_cast<CompositeGroup *>(this)->GetEntities(); }
 		std::vector<std::unique_ptr<CompositeGroup>> &GetChildGroups() { return m_childGroups; }
 		const std::vector<std::unique_ptr<CompositeGroup>> &GetChildGroups() const { return const_cast<CompositeGroup *>(this)->GetChildGroups(); }
 		CompositeGroup &AddChildGroup(const std::string &groupName);
 		CompositeGroup *FindChildGroup(const std::string &name);
 		void ClearEntities(bool safely = true);
 	  private:
-		std::vector<EntityHandle>::const_iterator FindEntity(BaseEntity &ent) const;
+		std::unordered_map<UuidHash, EntityHandle>::const_iterator FindEntity(BaseEntity &ent) const;
 		std::string m_groupName;
-		std::vector<EntityHandle> m_ents;
+		std::unordered_map<UuidHash, EntityHandle> m_ents;
 		std::vector<std::unique_ptr<CompositeGroup>> m_childGroups;
 		CompositeGroup *m_parent = nullptr;
 		CompositeComponent *m_compositeComponent = nullptr;

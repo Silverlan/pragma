@@ -298,6 +298,8 @@ void pragma::LShaderGameWorldLightingPass::RecordBindScene(rendering::ShaderProc
 }
 std::shared_ptr<prosper::IDescriptorSetGroup> pragma::LShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
+	if(!m_wrapper)
+		return nullptr;
 	auto &shader = *dynamic_cast<prosper::Shader *>(this);
 	auto descSetGroup = mat.GetDescriptorSetGroup(shader);
 	if(descSetGroup != nullptr)

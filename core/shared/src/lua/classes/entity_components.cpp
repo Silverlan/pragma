@@ -782,6 +782,15 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	auto defBvhHitInfo = luabind::class_<pragma::BvhHitInfo>("HitInfo");
 	defBvhHitInfo.def_readonly("mesh", &pragma::BvhHitInfo::mesh);
 	defBvhHitInfo.def_readonly("entity", &pragma::BvhHitInfo::entity);
+	defBvhHitInfo.property(
+	  "entity",
+	  +[](lua_State *l, pragma::BvhHitInfo &info) {
+		  if(info.entity.expired())
+			  Lua::PushNil(l);
+		  else
+			  info.entity->PushLuaObject(l);
+	  },
+	  +[](pragma::BvhHitInfo &info, BaseEntity *ent) { info.entity = ent ? ent->GetHandle() : EntityHandle {}; });
 	defBvhHitInfo.def_readonly("primitiveIndex", &pragma::BvhHitInfo::primitiveIndex);
 	defBvhHitInfo.def_readonly("distance", &pragma::BvhHitInfo::distance);
 	defBvhHitInfo.def_readonly("t", &pragma::BvhHitInfo::t);

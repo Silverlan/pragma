@@ -16,9 +16,20 @@ function ents.ClickComponent:Initialize()
 	end
 	numClickComponents = numClickComponents +1
 end
-local function get_viewport_data()
-	local cursorPos = input.get_cursor_pos()
+local function get_viewport_data(vp)
 	local vpData = {}
+	if(vp ~= nil) then
+		local absPos = vp:GetAbsolutePos()
+		vpData.width = vp:GetWidth()
+		vpData.height = vp:GetHeight()
+		vpData.x = absPos.x
+		vpData.y = absPos.y
+		vpData.cursorPos = vp:GetCursorPos()
+		vpData.camera = vp:GetCamera()
+		vpData.vp = vp
+		return vpData
+	end
+	local cursorPos = input.get_cursor_pos()
 	-- Check if element under cursor is a viewport
 	local elFocus = gui.get_element_under_cursor(function(el) return el:GetClass() == "wiviewport" end)
 	if(util.is_valid(elFocus)) then
@@ -86,8 +97,8 @@ function ents.ClickComponent.inject_click_input(action,pressed,filter)
 	end
 	return util.EVENT_REPLY_UNHANDLED,clickActor,hitPos,startPos,hitData
 end
-function ents.ClickComponent.world_space_point_to_screen_space_uv(point,callback)
-	local vpData = get_viewport_data()
+function ents.ClickComponent.world_space_point_to_screen_space_uv(point,callback,vpData)
+	vpData = vpData or get_viewport_data()
 
 	local cam = vpData.camera
 	if(util.is_valid(cam) == false) then return end
@@ -108,7 +119,7 @@ function ents.ClickComponent.get_camera()
 	local vpData = get_viewport_data()
 	return vpData.camera
 end
-function ents.ClickComponent.get_viewport_data() return get_viewport_data() end
+function ents.ClickComponent.get_viewport_data(vp) return get_viewport_data(vp) end
 local function get_local_planes(planes,ent)
 	local pose = ent:GetPose():GetInverse()
 	local localPlanes = {}

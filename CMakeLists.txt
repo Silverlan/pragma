@@ -1297,6 +1297,7 @@ if(UNIX)
            -DINSTALL_LOCATION=${CMAKE_INSTALL_PREFIX}
            -P ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/patch_libraries.cmake
        COMMENT "Patching libraries...")
+       # HACK: This should be in the pr_chromium module!
        add_custom_command(TARGET pragma-install
        POST_BUILD
        COMMAND patchelf --set-rpath '$ORIGIN' "${CMAKE_INSTALL_PREFIX}/modules/chromium/pr_chromium_subprocess"

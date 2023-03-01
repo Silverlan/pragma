@@ -16,30 +16,24 @@
 
 #define MOTION_BLUR_DEBUG_ELEMENT_ENABLED 0
 
-namespace prosper {class SwapBuffer;};
-namespace pragma
-{
-	enum class MotionBlurQuality : uint32_t
-	{
-		Low = 0,
-		Medium,
-		High
-	};
-	
+namespace prosper {
+	class SwapBuffer;
+};
+namespace pragma {
+	enum class MotionBlurQuality : uint32_t { Low = 0, Medium, High };
+
 	class CMotionBlurDataComponent;
 	struct MotionBlurTemporalData;
-	class DLLCLIENT CRendererPpMotionBlurComponent final
-		: public CRendererPpBaseComponent
-	{
-	public:
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+	class DLLCLIENT CRendererPpMotionBlurComponent final : public CRendererPpBaseComponent {
+	  public:
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
 		CRendererPpMotionBlurComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnRemove() override;
-		virtual std::string GetIdentifier() const override {return "motion_blur";}
-		virtual uint32_t GetPostProcessingWeight() const override {return umath::to_integral(CRendererComponent::StandardPostProcessingWeight::MotionBlur);}
+		virtual std::string GetIdentifier() const override { return "motion_blur"; }
+		virtual uint32_t GetPostProcessingWeight() const override { return umath::to_integral(CRendererComponent::StandardPostProcessingWeight::MotionBlur); }
 
 		void SetAutoUpdateMotionData(bool updateMotionPerFrame);
 		void UpdateMotionBlurData();
@@ -52,9 +46,9 @@ namespace pragma
 
 		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetSwapCommandBuffer() const;
 		const std::shared_ptr<prosper::RenderTarget> &GetRenderTarget() const;
-	private:
+	  private:
 		virtual void DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo) override;
-		void DoUpdatePoses(const CMotionBlurDataComponent &motionBlurDataC,const MotionBlurTemporalData &motionBlurData,prosper::IPrimaryCommandBuffer &cmd);
+		void DoUpdatePoses(const CMotionBlurDataComponent &motionBlurDataC, const MotionBlurTemporalData &motionBlurData, prosper::IPrimaryCommandBuffer &cmd);
 		void RecordVelocityPass(const util::DrawSceneInfo &drawSceneInfo);
 		void ExecuteVelocityPass(const util::DrawSceneInfo &drawSceneInfo);
 		void RenderPostProcessing(const util::DrawSceneInfo &drawSceneInfo);

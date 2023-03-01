@@ -11,14 +11,9 @@
 #include <pragma/lua/luaapi.h>
 
 struct PhysSoftBodyInfo;
-namespace Lua
-{
-	namespace PhysSoftBodyInfo
-	{
-		DLLNETWORK void register_class(
-			lua_State *l,
-			luabind::class_<::PhysSoftBodyInfo> &classDef
-		);
+namespace Lua {
+	namespace PhysSoftBodyInfo {
+		DLLNETWORK void register_class(lua_State *l, luabind::class_<::PhysSoftBodyInfo> &classDef);
 	};
 };
 

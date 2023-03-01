@@ -51,22 +51,14 @@ extern DLLCLIENT CGame *c_game;
 #include "pragma/debug/c_debugoverlay.h"
 #include <pragma/physics/environment.hpp>
 #ifdef ENABLE_DEPRECATED_PHYSICS
-static btSoftBody *createSoftBody(btSoftRigidDynamicsWorld *world,btSoftBodyWorldInfo *info,const btScalar s,
-					const int numX,
-					const int numY, 
-					const int fixed) {
-   btSoftBody* cloth=btSoftBodyHelpers::CreatePatch(*info,
-                                                    btVector3(-s/2,s+1,0),
-                                                    btVector3(+s/2,s+1,0),
-		                                    btVector3(-s/2,s+1,+s),
-		                                    btVector3(+s/2,s+1,+s),
-		                                    numX,numY, 
-		                                    fixed,true); 
-   cloth->getCollisionShape()->setMargin(0.001f);
-   cloth->generateBendingConstraints(2,cloth->appendMaterial());
-   cloth->setTotalMass(10);  
-   cloth->m_cfg.piterations = 5;
-   cloth->m_cfg.kDP = 0.005f;
+static btSoftBody *createSoftBody(btSoftRigidDynamicsWorld *world, btSoftBodyWorldInfo *info, const btScalar s, const int numX, const int numY, const int fixed)
+{
+	btSoftBody *cloth = btSoftBodyHelpers::CreatePatch(*info, btVector3(-s / 2, s + 1, 0), btVector3(+s / 2, s + 1, 0), btVector3(-s / 2, s + 1, +s), btVector3(+s / 2, s + 1, +s), numX, numY, fixed, true);
+	cloth->getCollisionShape()->setMargin(0.001f);
+	cloth->generateBendingConstraints(2, cloth->appendMaterial());
+	cloth->setTotalMass(10);
+	cloth->m_cfg.piterations = 5;
+	cloth->m_cfg.kDP = 0.005f;
 	world->addSoftBody(cloth);
 	return cloth;
 }
@@ -88,50 +80,47 @@ static void update_vehicle(Vehicle_Car *vhc)
 	vhc->ControlInput(-1);
 	auto &t = vhc->Chassis->getWorldTransform();
 	auto &linVel = vhc->Chassis->getLinearVelocity();
-	auto origin = uvec::create(t.getOrigin() /PhysEnv::WORLD_SCALE);
+	auto origin = uvec::create(t.getOrigin() / PhysEnv::WORLD_SCALE);
 	auto axis = uvec::create(t.getRotation().getAxis());
 	uvec::normalize(&axis);
-	c_game->DrawLine(origin,origin +axis *400.f,Color::Red,0.5f);
+	c_game->DrawLine(origin, origin + axis * 400.f, Color::Red, 0.5f);
 }
 #endif
 
-enum Method {IK_JACOB_TRANS=0, IK_PURE_PSEUDO, IK_DLS, IK_SDLS , IK_DLS_SVD};
+enum Method { IK_JACOB_TRANS = 0, IK_PURE_PSEUDO, IK_DLS, IK_SDLS, IK_DLS_SVD };
 #include <pragma/model/model.h>
 #include <pragma/lua/classes/ldef_quaternion.h>
-static void get_local_bone_position(const std::function<Transform(uint32_t)> &fGetTransform,std::shared_ptr<panima::Bone> &bone,const Vector3 &fscale={1.f,1.f,1.f},Vector3 *pos=nullptr,Quat *rot=nullptr,Vector3 *scale=nullptr)
+static void get_local_bone_position(const std::function<Transform(uint32_t)> &fGetTransform, std::shared_ptr<panima::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr, Vector3 *scale = nullptr)
 {
-	std::function<void(std::shared_ptr<panima::Bone>&,Vector3*,Quat*,Vector3*)> apply;
-	apply = [fGetTransform,&apply,fscale](std::shared_ptr<panima::Bone> &bone,Vector3 *pos,Quat *rot,Vector3 *scale) {
+	std::function<void(std::shared_ptr<panima::Bone> &, Vector3 *, Quat *, Vector3 *)> apply;
+	apply = [fGetTransform, &apply, fscale](std::shared_ptr<panima::Bone> &bone, Vector3 *pos, Quat *rot, Vector3 *scale) {
 		auto parent = bone->parent.lock();
 		if(parent != nullptr)
-			apply(parent,pos,rot,scale);
+			apply(parent, pos, rot, scale);
 		auto tParent = fGetTransform(bone->ID);
 		auto &posParent = tParent.GetPosition();
 		auto &rotParent = tParent.GetOrientation();
 		auto inv = uquat::get_inverse(rotParent);
-		if(pos != nullptr)
-		{
-			*pos -= posParent *fscale;
-			uvec::rotate(pos,inv);
+		if(pos != nullptr) {
+			*pos -= posParent * fscale;
+			uvec::rotate(pos, inv);
 		}
 		if(rot != nullptr)
-			*rot = inv *(*rot);
+			*rot = inv * (*rot);
 	};
 	auto parent = bone->parent.lock();
 	if(parent != nullptr)
-		apply(parent,pos,rot,scale);
+		apply(parent, pos, rot, scale);
 }
-static void get_local_bone_position(const std::shared_ptr<Model> &mdl,const std::function<Transform(uint32_t)> &fGetTransform,std::shared_ptr<panima::Bone> &bone,const Vector3 &fscale={1.f,1.f,1.f},Vector3 *pos=nullptr,Quat *rot=nullptr,Vector3 *scale=nullptr)
+static void get_local_bone_position(const std::shared_ptr<Model> &mdl, const std::function<Transform(uint32_t)> &fGetTransform, std::shared_ptr<panima::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr, Vector3 *scale = nullptr)
 {
-	get_local_bone_position(fGetTransform,bone,fscale,pos,rot,scale);
+	get_local_bone_position(fGetTransform, bone, fscale, pos, rot, scale);
 	if(rot == nullptr)
 		return;
 	auto anim = mdl->GetAnimation(0);
-	if(anim != nullptr)
-	{
+	if(anim != nullptr) {
 		auto frame = anim->GetFrame(0);
-		if(frame != nullptr)
-		{
+		if(frame != nullptr) {
 			auto *frameRot = frame->GetBoneOrientation(0);
 			if(frameRot != nullptr)
 				*rot *= *frameRot;
@@ -142,11 +131,9 @@ static void get_local_bone_position(const std::shared_ptr<Model> &mdl,const std:
 #ifdef ENABLE_DEPRECATED_PHYSICS
 #include <pragma/physics/shape.hpp>
 // Source: BenchmarkDemo.cpp from Bullet source code
-class RagDoll
-{
-public:
-	enum
-	{
+class RagDoll {
+  public:
+	enum {
 		BODYPART_PELVIS = 0,
 		BODYPART_SPINE,
 		BODYPART_HEAD,
@@ -166,8 +153,7 @@ public:
 		BODYPART_COUNT
 	};
 
-	enum
-	{
+	enum {
 		JOINT_PELVIS_SPINE = 0,
 		JOINT_SPINE_HEAD,
 
@@ -186,208 +172,228 @@ public:
 		JOINT_COUNT
 	};
 
-	btDynamicsWorld* m_ownerWorld;
+	btDynamicsWorld *m_ownerWorld;
 	std::shared_ptr<PhysConvexShape> m_shapes[BODYPART_COUNT];
 	PhysCollisionObjectHandle m_bodies[BODYPART_COUNT];
-	PhysConstraint* m_joints[JOINT_COUNT];
+	PhysConstraint *m_joints[JOINT_COUNT];
 
-	PhysCollisionObjectHandle createRigidBody (btScalar mass, const btTransform& startTransform, std::shared_ptr<PhysConvexShape>& shape)
+	PhysCollisionObjectHandle createRigidBody(btScalar mass, const btTransform &startTransform, std::shared_ptr<PhysConvexShape> &shape)
 	{
 		bool isDynamic = (mass != 0.f);
 
-		Vector3 localInertia(0,0,0);
-		if (isDynamic)
-			shape->CalculateLocalInertia(mass,&localInertia);
+		Vector3 localInertia(0, 0, 0);
+		if(isDynamic)
+			shape->CalculateLocalInertia(mass, &localInertia);
 
-		auto *body = c_game->GetPhysicsEnvironment()->CreateRigidBody(mass,shape,localInertia);
+		auto *body = c_game->GetPhysicsEnvironment()->CreateRigidBody(mass, shape, localInertia);
 
 		body->Spawn();
 		body->SetCollisionFilterGroup(CollisionMask::Dynamic | CollisionMask::Generic);
 		body->SetCollisionFilterMask(CollisionMask::All);
 		return body->GetHandle();
 	}
-
-public:
-	RagDoll (btDynamicsWorld* ownerWorld, const btVector3& positionOffset,btScalar scale)
-		: m_ownerWorld (ownerWorld)
+  public:
+	RagDoll(btDynamicsWorld *ownerWorld, const btVector3 &positionOffset, btScalar scale) : m_ownerWorld(ownerWorld)
 	{
 		// Setup the geometry
-		m_shapes[BODYPART_PELVIS] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.15)*scale, btScalar(0.20)*scale));
-		m_shapes[BODYPART_SPINE] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.15)*scale, btScalar(0.28)*scale));
-		m_shapes[BODYPART_HEAD] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.10)*scale, btScalar(0.05)*scale));
-		m_shapes[BODYPART_LEFT_UPPER_LEG] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.07)*scale, btScalar(0.45)*scale));
-		m_shapes[BODYPART_LEFT_LOWER_LEG] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.05)*scale, btScalar(0.37)*scale));
-		m_shapes[BODYPART_RIGHT_UPPER_LEG] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.07)*scale, btScalar(0.45)*scale));
-		m_shapes[BODYPART_RIGHT_LOWER_LEG] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.05)*scale, btScalar(0.37)*scale));
-		m_shapes[BODYPART_LEFT_UPPER_ARM] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.05)*scale, btScalar(0.33)*scale));
-		m_shapes[BODYPART_LEFT_LOWER_ARM] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.04)*scale, btScalar(0.25)*scale));
-		m_shapes[BODYPART_RIGHT_UPPER_ARM] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.05)*scale, btScalar(0.33)*scale));
-		m_shapes[BODYPART_RIGHT_LOWER_ARM] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.04)*scale, btScalar(0.25)*scale));
+		m_shapes[BODYPART_PELVIS] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.15) * scale, btScalar(0.20) * scale));
+		m_shapes[BODYPART_SPINE] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.15) * scale, btScalar(0.28) * scale));
+		m_shapes[BODYPART_HEAD] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.10) * scale, btScalar(0.05) * scale));
+		m_shapes[BODYPART_LEFT_UPPER_LEG] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.07) * scale, btScalar(0.45) * scale));
+		m_shapes[BODYPART_LEFT_LOWER_LEG] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.05) * scale, btScalar(0.37) * scale));
+		m_shapes[BODYPART_RIGHT_UPPER_LEG] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.07) * scale, btScalar(0.45) * scale));
+		m_shapes[BODYPART_RIGHT_LOWER_LEG] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.05) * scale, btScalar(0.37) * scale));
+		m_shapes[BODYPART_LEFT_UPPER_ARM] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.05) * scale, btScalar(0.33) * scale));
+		m_shapes[BODYPART_LEFT_LOWER_ARM] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.04) * scale, btScalar(0.25) * scale));
+		m_shapes[BODYPART_RIGHT_UPPER_ARM] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.05) * scale, btScalar(0.33) * scale));
+		m_shapes[BODYPART_RIGHT_LOWER_ARM] = c_game->GetPhysicsEnvironment()->CreateConvexShape(new btCapsuleShape(btScalar(0.04) * scale, btScalar(0.25) * scale));
 
 		// Setup all the rigid bodies
-		btTransform offset; offset.setIdentity();
+		btTransform offset;
+		offset.setIdentity();
 		offset.setOrigin(positionOffset);
 
 		btTransform transform;
 		transform.setIdentity();
-		transform.setOrigin(scale*btVector3(btScalar(0.), btScalar(1.), btScalar(0.)));
-		m_bodies[BODYPART_PELVIS] = createRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_PELVIS]);
+		transform.setOrigin(scale * btVector3(btScalar(0.), btScalar(1.), btScalar(0.)));
+		m_bodies[BODYPART_PELVIS] = createRigidBody(btScalar(1.), offset * transform, m_shapes[BODYPART_PELVIS]);
 
 		transform.setIdentity();
-		transform.setOrigin(scale*btVector3(btScalar(0.), btScalar(1.2), btScalar(0.)));
-		m_bodies[BODYPART_SPINE] = createRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_SPINE]);
+		transform.setOrigin(scale * btVector3(btScalar(0.), btScalar(1.2), btScalar(0.)));
+		m_bodies[BODYPART_SPINE] = createRigidBody(btScalar(1.), offset * transform, m_shapes[BODYPART_SPINE]);
 
 		transform.setIdentity();
-		transform.setOrigin(scale*btVector3(btScalar(0.), btScalar(1.6), btScalar(0.)));
-		m_bodies[BODYPART_HEAD] = createRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_HEAD]);
+		transform.setOrigin(scale * btVector3(btScalar(0.), btScalar(1.6), btScalar(0.)));
+		m_bodies[BODYPART_HEAD] = createRigidBody(btScalar(1.), offset * transform, m_shapes[BODYPART_HEAD]);
 
 		transform.setIdentity();
-		transform.setOrigin(scale*btVector3(btScalar(-0.18), btScalar(0.65), btScalar(0.)));
-		m_bodies[BODYPART_LEFT_UPPER_LEG] = createRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_LEFT_UPPER_LEG]);
+		transform.setOrigin(scale * btVector3(btScalar(-0.18), btScalar(0.65), btScalar(0.)));
+		m_bodies[BODYPART_LEFT_UPPER_LEG] = createRigidBody(btScalar(1.), offset * transform, m_shapes[BODYPART_LEFT_UPPER_LEG]);
 
 		transform.setIdentity();
-		transform.setOrigin(scale*btVector3(btScalar(-0.18), btScalar(0.2), btScalar(0.)));
-		m_bodies[BODYPART_LEFT_LOWER_LEG] = createRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_LEFT_LOWER_LEG]);
+		transform.setOrigin(scale * btVector3(btScalar(-0.18), btScalar(0.2), btScalar(0.)));
+		m_bodies[BODYPART_LEFT_LOWER_LEG] = createRigidBody(btScalar(1.), offset * transform, m_shapes[BODYPART_LEFT_LOWER_LEG]);
 
 		transform.setIdentity();
-		transform.setOrigin(scale*btVector3(btScalar(0.18), btScalar(0.65), btScalar(0.)));
-		m_bodies[BODYPART_RIGHT_UPPER_LEG] = createRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_RIGHT_UPPER_LEG]);
+		transform.setOrigin(scale * btVector3(btScalar(0.18), btScalar(0.65), btScalar(0.)));
+		m_bodies[BODYPART_RIGHT_UPPER_LEG] = createRigidBody(btScalar(1.), offset * transform, m_shapes[BODYPART_RIGHT_UPPER_LEG]);
 
 		transform.setIdentity();
-		transform.setOrigin(scale*btVector3(btScalar(0.18), btScalar(0.2), btScalar(0.)));
-		m_bodies[BODYPART_RIGHT_LOWER_LEG] = createRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_RIGHT_LOWER_LEG]);
+		transform.setOrigin(scale * btVector3(btScalar(0.18), btScalar(0.2), btScalar(0.)));
+		m_bodies[BODYPART_RIGHT_LOWER_LEG] = createRigidBody(btScalar(1.), offset * transform, m_shapes[BODYPART_RIGHT_LOWER_LEG]);
 
 		transform.setIdentity();
-		transform.setOrigin(scale*btVector3(btScalar(-0.35), btScalar(1.45), btScalar(0.)));
-		transform.getBasis().setEulerZYX(0,0,M_PI_2);
-		m_bodies[BODYPART_LEFT_UPPER_ARM] = createRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_LEFT_UPPER_ARM]);
+		transform.setOrigin(scale * btVector3(btScalar(-0.35), btScalar(1.45), btScalar(0.)));
+		transform.getBasis().setEulerZYX(0, 0, M_PI_2);
+		m_bodies[BODYPART_LEFT_UPPER_ARM] = createRigidBody(btScalar(1.), offset * transform, m_shapes[BODYPART_LEFT_UPPER_ARM]);
 
 		transform.setIdentity();
-		transform.setOrigin(scale*btVector3(btScalar(-0.7), btScalar(1.45), btScalar(0.)));
-		transform.getBasis().setEulerZYX(0,0,M_PI_2);
-		m_bodies[BODYPART_LEFT_LOWER_ARM] = createRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_LEFT_LOWER_ARM]);
+		transform.setOrigin(scale * btVector3(btScalar(-0.7), btScalar(1.45), btScalar(0.)));
+		transform.getBasis().setEulerZYX(0, 0, M_PI_2);
+		m_bodies[BODYPART_LEFT_LOWER_ARM] = createRigidBody(btScalar(1.), offset * transform, m_shapes[BODYPART_LEFT_LOWER_ARM]);
 
 		transform.setIdentity();
-		transform.setOrigin(scale*btVector3(btScalar(0.35), btScalar(1.45), btScalar(0.)));
-		transform.getBasis().setEulerZYX(0,0,-M_PI_2);
-		m_bodies[BODYPART_RIGHT_UPPER_ARM] = createRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_RIGHT_UPPER_ARM]);
+		transform.setOrigin(scale * btVector3(btScalar(0.35), btScalar(1.45), btScalar(0.)));
+		transform.getBasis().setEulerZYX(0, 0, -M_PI_2);
+		m_bodies[BODYPART_RIGHT_UPPER_ARM] = createRigidBody(btScalar(1.), offset * transform, m_shapes[BODYPART_RIGHT_UPPER_ARM]);
 
 		transform.setIdentity();
-		transform.setOrigin(scale*btVector3(btScalar(0.7), btScalar(1.45), btScalar(0.)));
-		transform.getBasis().setEulerZYX(0,0,-M_PI_2);
-		m_bodies[BODYPART_RIGHT_LOWER_ARM] = createRigidBody(btScalar(1.), offset*transform, m_shapes[BODYPART_RIGHT_LOWER_ARM]);
+		transform.setOrigin(scale * btVector3(btScalar(0.7), btScalar(1.45), btScalar(0.)));
+		transform.getBasis().setEulerZYX(0, 0, -M_PI_2);
+		m_bodies[BODYPART_RIGHT_LOWER_ARM] = createRigidBody(btScalar(1.), offset * transform, m_shapes[BODYPART_RIGHT_LOWER_ARM]);
 
 		// Setup some damping on the m_bodies
-		for (int i = 0; i < BODYPART_COUNT; ++i)
-		{
-			auto *pRigidBody = static_cast<PhysRigidBody*>(m_bodies[i].get());
+		for(int i = 0; i < BODYPART_COUNT; ++i) {
+			auto *pRigidBody = static_cast<PhysRigidBody *>(m_bodies[i].get());
 			pRigidBody->SetDamping(btScalar(0.05), btScalar(0.85));
 			pRigidBody->GetRigidBody()->setDeactivationTime(btScalar(0.8));
 			pRigidBody->SetSleepingThresholds(btScalar(1.6), btScalar(2.5));
 		}
 
 		// Now setup the constraints
-		PhysHinge* hingeC;
-		PhysConeTwist* coneC;
+		PhysHinge *hingeC;
+		PhysConeTwist *coneC;
 		auto *physEnv = c_game->GetPhysicsEnvironment();
 
 		btTransform localA, localB;
 
-		localA.setIdentity(); localB.setIdentity();
-		localA.getBasis().setEulerZYX(0,M_PI_2,0); localA.setOrigin(scale*btVector3(btScalar(0.), btScalar(0.15), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0,M_PI_2,0); localB.setOrigin(scale*btVector3(btScalar(0.), btScalar(-0.15), btScalar(0.)));
+		localA.setIdentity();
+		localB.setIdentity();
+		localA.getBasis().setEulerZYX(0, M_PI_2, 0);
+		localA.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.15), btScalar(0.)));
+		localB.getBasis().setEulerZYX(0, M_PI_2, 0);
+		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.15), btScalar(0.)));
 
-		std::vector<btRigidBody*> rigidBodies;
+		std::vector<btRigidBody *> rigidBodies;
 		for(auto &hBody : m_bodies)
-			rigidBodies.push_back(static_cast<PhysRigidBody*>(hBody.get())->GetRigidBody());
+			rigidBodies.push_back(static_cast<PhysRigidBody *>(hBody.get())->GetRigidBody());
 
 		hingeC = physEnv->AddHingeConstraint(new btHingeConstraint(*rigidBodies[BODYPART_PELVIS], *rigidBodies[BODYPART_SPINE], localA, localB));
 		hingeC->SetLimit(btScalar(-M_PI_4), btScalar(M_PI_2));
 		m_joints[JOINT_PELVIS_SPINE] = hingeC;
 		hingeC->DisableCollisions();
 
-
-		localA.setIdentity(); localB.setIdentity();
-		localA.getBasis().setEulerZYX(0,0,M_PI_2); localA.setOrigin(scale*btVector3(btScalar(0.), btScalar(0.30), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0,0,M_PI_2); localB.setOrigin(scale*btVector3(btScalar(0.), btScalar(-0.14), btScalar(0.)));
+		localA.setIdentity();
+		localB.setIdentity();
+		localA.getBasis().setEulerZYX(0, 0, M_PI_2);
+		localA.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.30), btScalar(0.)));
+		localB.getBasis().setEulerZYX(0, 0, M_PI_2);
+		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.14), btScalar(0.)));
 		coneC = physEnv->AddConeTwistConstraint(new btConeTwistConstraint(*rigidBodies[BODYPART_SPINE], *rigidBodies[BODYPART_HEAD], localA, localB));
 		coneC->SetLimit(M_PI_4, M_PI_4, M_PI_2);
 		m_joints[JOINT_SPINE_HEAD] = coneC;
 		coneC->DisableCollisions();
 
-
-		localA.setIdentity(); localB.setIdentity();
-		localA.getBasis().setEulerZYX(0,0,-M_PI_4*5); localA.setOrigin(scale*btVector3(btScalar(-0.18), btScalar(-0.10), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0,0,-M_PI_4*5); localB.setOrigin(scale*btVector3(btScalar(0.), btScalar(0.225), btScalar(0.)));
+		localA.setIdentity();
+		localB.setIdentity();
+		localA.getBasis().setEulerZYX(0, 0, -M_PI_4 * 5);
+		localA.setOrigin(scale * btVector3(btScalar(-0.18), btScalar(-0.10), btScalar(0.)));
+		localB.getBasis().setEulerZYX(0, 0, -M_PI_4 * 5);
+		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.225), btScalar(0.)));
 		coneC = physEnv->AddConeTwistConstraint(new btConeTwistConstraint(*rigidBodies[BODYPART_PELVIS], *rigidBodies[BODYPART_LEFT_UPPER_LEG], localA, localB));
 		coneC->SetLimit(M_PI_4, M_PI_4, 0);
 		m_joints[JOINT_LEFT_HIP] = coneC;
 		coneC->DisableCollisions();
 
-		localA.setIdentity(); localB.setIdentity();
-		localA.getBasis().setEulerZYX(0,M_PI_2,0); localA.setOrigin(scale*btVector3(btScalar(0.), btScalar(-0.225), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0,M_PI_2,0); localB.setOrigin(scale*btVector3(btScalar(0.), btScalar(0.185), btScalar(0.)));
+		localA.setIdentity();
+		localB.setIdentity();
+		localA.getBasis().setEulerZYX(0, M_PI_2, 0);
+		localA.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.225), btScalar(0.)));
+		localB.getBasis().setEulerZYX(0, M_PI_2, 0);
+		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.185), btScalar(0.)));
 		hingeC = physEnv->AddHingeConstraint(new btHingeConstraint(*rigidBodies[BODYPART_LEFT_UPPER_LEG], *rigidBodies[BODYPART_LEFT_LOWER_LEG], localA, localB));
 		hingeC->SetLimit(btScalar(0), btScalar(M_PI_2));
 		m_joints[JOINT_LEFT_KNEE] = hingeC;
 		hingeC->DisableCollisions();
 
-
-		localA.setIdentity(); localB.setIdentity();
-		localA.getBasis().setEulerZYX(0,0,M_PI_4); localA.setOrigin(scale*btVector3(btScalar(0.18), btScalar(-0.10), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0,0,M_PI_4); localB.setOrigin(scale*btVector3(btScalar(0.), btScalar(0.225), btScalar(0.)));
+		localA.setIdentity();
+		localB.setIdentity();
+		localA.getBasis().setEulerZYX(0, 0, M_PI_4);
+		localA.setOrigin(scale * btVector3(btScalar(0.18), btScalar(-0.10), btScalar(0.)));
+		localB.getBasis().setEulerZYX(0, 0, M_PI_4);
+		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.225), btScalar(0.)));
 		coneC = physEnv->AddConeTwistConstraint(new btConeTwistConstraint(*rigidBodies[BODYPART_PELVIS], *rigidBodies[BODYPART_RIGHT_UPPER_LEG], localA, localB));
 		coneC->SetLimit(M_PI_4, M_PI_4, 0);
 		m_joints[JOINT_RIGHT_HIP] = coneC;
 		coneC->DisableCollisions();
 
-		localA.setIdentity(); localB.setIdentity();
-		localA.getBasis().setEulerZYX(0,M_PI_2,0); localA.setOrigin(scale*btVector3(btScalar(0.), btScalar(-0.225), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0,M_PI_2,0); localB.setOrigin(scale*btVector3(btScalar(0.), btScalar(0.185), btScalar(0.)));
+		localA.setIdentity();
+		localB.setIdentity();
+		localA.getBasis().setEulerZYX(0, M_PI_2, 0);
+		localA.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.225), btScalar(0.)));
+		localB.getBasis().setEulerZYX(0, M_PI_2, 0);
+		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.185), btScalar(0.)));
 		hingeC = physEnv->AddHingeConstraint(new btHingeConstraint(*rigidBodies[BODYPART_RIGHT_UPPER_LEG], *rigidBodies[BODYPART_RIGHT_LOWER_LEG], localA, localB));
 		hingeC->SetLimit(btScalar(0), btScalar(M_PI_2));
 		m_joints[JOINT_RIGHT_KNEE] = hingeC;
 		hingeC->DisableCollisions();
 
-
-		localA.setIdentity(); localB.setIdentity();
-		localA.getBasis().setEulerZYX(0,0,M_PI); localA.setOrigin(scale*btVector3(btScalar(-0.2), btScalar(0.15), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0,0,M_PI_2); localB.setOrigin(scale*btVector3(btScalar(0.), btScalar(-0.18), btScalar(0.)));
+		localA.setIdentity();
+		localB.setIdentity();
+		localA.getBasis().setEulerZYX(0, 0, M_PI);
+		localA.setOrigin(scale * btVector3(btScalar(-0.2), btScalar(0.15), btScalar(0.)));
+		localB.getBasis().setEulerZYX(0, 0, M_PI_2);
+		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.18), btScalar(0.)));
 		coneC = physEnv->AddConeTwistConstraint(new btConeTwistConstraint(*rigidBodies[BODYPART_SPINE], *rigidBodies[BODYPART_LEFT_UPPER_ARM], localA, localB));
 		coneC->SetLimit(M_PI_2, M_PI_2, 0);
 		m_joints[JOINT_LEFT_SHOULDER] = coneC;
 		coneC->DisableCollisions();
 
-		localA.setIdentity(); localB.setIdentity();
-		localA.getBasis().setEulerZYX(0,M_PI_2,0); localA.setOrigin(scale*btVector3(btScalar(0.), btScalar(0.18), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0,M_PI_2,0); localB.setOrigin(scale*btVector3(btScalar(0.), btScalar(-0.14), btScalar(0.)));
+		localA.setIdentity();
+		localB.setIdentity();
+		localA.getBasis().setEulerZYX(0, M_PI_2, 0);
+		localA.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.18), btScalar(0.)));
+		localB.getBasis().setEulerZYX(0, M_PI_2, 0);
+		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.14), btScalar(0.)));
 		hingeC = physEnv->AddHingeConstraint(new btHingeConstraint(*rigidBodies[BODYPART_LEFT_UPPER_ARM], *rigidBodies[BODYPART_LEFT_LOWER_ARM], localA, localB));
 		hingeC->SetLimit(btScalar(-M_PI_2), btScalar(0));
 		m_joints[JOINT_LEFT_ELBOW] = hingeC;
 		hingeC->DisableCollisions();
 
-
-
-		localA.setIdentity(); localB.setIdentity();
-		localA.getBasis().setEulerZYX(0,0,0); localA.setOrigin(scale*btVector3(btScalar(0.2), btScalar(0.15), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0,0,M_PI_2); localB.setOrigin(scale*btVector3(btScalar(0.), btScalar(-0.18), btScalar(0.)));
+		localA.setIdentity();
+		localB.setIdentity();
+		localA.getBasis().setEulerZYX(0, 0, 0);
+		localA.setOrigin(scale * btVector3(btScalar(0.2), btScalar(0.15), btScalar(0.)));
+		localB.getBasis().setEulerZYX(0, 0, M_PI_2);
+		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.18), btScalar(0.)));
 		coneC = physEnv->AddConeTwistConstraint(new btConeTwistConstraint(*rigidBodies[BODYPART_SPINE], *rigidBodies[BODYPART_RIGHT_UPPER_ARM], localA, localB));
 		coneC->SetLimit(M_PI_2, M_PI_2, 0);
 		m_joints[JOINT_RIGHT_SHOULDER] = coneC;
 		coneC->DisableCollisions();
 
-		localA.setIdentity(); localB.setIdentity();
-		localA.getBasis().setEulerZYX(0,M_PI_2,0); localA.setOrigin(scale*btVector3(btScalar(0.), btScalar(0.18), btScalar(0.)));
-		localB.getBasis().setEulerZYX(0,M_PI_2,0); localB.setOrigin(scale*btVector3(btScalar(0.), btScalar(-0.14), btScalar(0.)));
+		localA.setIdentity();
+		localB.setIdentity();
+		localA.getBasis().setEulerZYX(0, M_PI_2, 0);
+		localA.setOrigin(scale * btVector3(btScalar(0.), btScalar(0.18), btScalar(0.)));
+		localB.getBasis().setEulerZYX(0, M_PI_2, 0);
+		localB.setOrigin(scale * btVector3(btScalar(0.), btScalar(-0.14), btScalar(0.)));
 		hingeC = physEnv->AddHingeConstraint(new btHingeConstraint(*rigidBodies[BODYPART_RIGHT_UPPER_ARM], *rigidBodies[BODYPART_RIGHT_LOWER_ARM], localA, localB));
 		hingeC->SetLimit(btScalar(-M_PI_2), btScalar(0));
 		m_joints[JOINT_RIGHT_ELBOW] = hingeC;
 		hingeC->DisableCollisions();
 	}
 
-	virtual	~RagDoll ()
-	{
-	}
+	virtual ~RagDoll() {}
 };
 
 #include <pragma/physics/collisionmesh.h>
@@ -416,16 +422,15 @@ int Lua::game::Client::test(lua_State *l)
 	}*/
 	//if(pNode != nullptr)
 	//{
-		//Lua::Push<Vector3>(l,pNode->min);
+	//Lua::Push<Vector3>(l,pNode->min);
 	//	//Lua::Push<Vector3>(l,pNode->max);
 	//	return 2;
 	//}
 	if(true)
 		return 0;
 
-
 	auto *world = c_game->GetPhysicsEnvironment()->GetWorld();
-	auto offset = btVector3{0.f,0.f,0.f};
+	auto offset = btVector3 {0.f, 0.f, 0.f};
 	auto scale = 3.5;
 	/*auto *ragdoll = new RagDoll(world,offset,scale);
 
@@ -439,24 +444,21 @@ int Lua::game::Client::test(lua_State *l)
 			static_cast<PhysRigidBody*>(hBody.get())->ApplyForce(localForce);
 		}
 	}));*/
-	
+
 	auto mdl = c_game->LoadModel("breen.wmd");
-	static std::vector<PhysRigidBody*> rigidBodies {};
-	if(rigidBodies.empty() == true)
-	{
-		if(mdl != nullptr)
-		{
+	static std::vector<PhysRigidBody *> rigidBodies {};
+	if(rigidBodies.empty() == true) {
+		if(mdl != nullptr) {
 			std::vector<uint32_t> boneIds {};
 			auto meshId = 0u;
-			for(auto &colMesh : mdl->GetCollisionMeshes())
-			{
+			for(auto &colMesh : mdl->GetCollisionMeshes()) {
 				auto shape = colMesh->GetShape();
 				auto mass = mdl->GetMass();
-				Vector3 localInertia(0,0,0);
-				shape->CalculateLocalInertia(mass,&localInertia);
+				Vector3 localInertia(0, 0, 0);
+				shape->CalculateLocalInertia(mass, &localInertia);
 
-				auto *body = c_game->GetPhysicsEnvironment()->CreateRigidBody(mass,shape,localInertia);
-			
+				auto *body = c_game->GetPhysicsEnvironment()->CreateRigidBody(mass, shape, localInertia);
+
 				body->Spawn();
 				body->SetPos(colMesh->GetOrigin());
 				body->SetCollisionFilterGroup(CollisionMask::Dynamic | CollisionMask::Generic);
@@ -468,8 +470,7 @@ int Lua::game::Client::test(lua_State *l)
 			}
 
 			auto &joints = mdl->GetJoints();
-			for(auto it=joints.begin();it!=joints.end();++it)
-			{
+			for(auto it = joints.begin(); it != joints.end(); ++it) {
 				auto &joint = *it;
 				if(joint.src >= rigidBodies.size() || joint.dest >= rigidBodies.size())
 					continue;
@@ -481,29 +482,26 @@ int Lua::game::Client::test(lua_State *l)
 				auto posConstraint = *pose.GetBonePosition(boneId);
 				auto rotConstraint = *pose.GetBoneOrientation(boneId);
 
-				auto posTgt = posConstraint +dstBody->GetOrigin();
-				posConstraint = posConstraint +srcBody->GetOrigin();
-				auto *c = c_game->GetPhysicsEnvironment()->CreateFixedConstraint(srcBody,posConstraint,uquat::identity(),dstBody,posTgt,uquat::identity());
+				auto posTgt = posConstraint + dstBody->GetOrigin();
+				posConstraint = posConstraint + srcBody->GetOrigin();
+				auto *c = c_game->GetPhysicsEnvironment()->CreateFixedConstraint(srcBody, posConstraint, uquat::identity(), dstBody, posTgt, uquat::identity());
 				if(c != nullptr)
 					c->SetCollisionsEnabled(joint.collide);
 			}
 		}
 	}
-	else
-	{
+	else {
 		for(auto *pRigidBody : rigidBodies)
 			pRigidBody->SetMass(mdl->GetMass());
-		auto cbThink = c_game->AddCallback("Think",FunctionCallback<>::Create([]() {
-			static auto f = Vector3{0.f,-600.f,0.f};
-			for(auto *body : rigidBodies)
-			{
-				auto localForce = f *body->GetMass();
+		auto cbThink = c_game->AddCallback("Think", FunctionCallback<>::Create([]() {
+			static auto f = Vector3 {0.f, -600.f, 0.f};
+			for(auto *body : rigidBodies) {
+				auto localForce = f * body->GetMass();
 				body->Activate();
 				body->ApplyForce(localForce);
 			}
 		}));
 	}
-
 
 #if 0
 	if(true)
@@ -819,114 +817,106 @@ int Lua::game::Client::open_dropped_file(lua_State *l)
 {
 	auto &droppedFiles = c_game->GetDroppedFiles();
 	const CGame::DroppedFile *pf = nullptr;
-	if(Lua::IsString(l,1))
-	{
-		auto *fileName = Lua::CheckString(l,1);
-		auto it = std::find_if(droppedFiles.begin(),droppedFiles.end(),[&fileName](const CGame::DroppedFile &f) {
-			return (f.fileName == fileName) ? true : false;
-		});
+	if(Lua::IsString(l, 1)) {
+		auto *fileName = Lua::CheckString(l, 1);
+		auto it = std::find_if(droppedFiles.begin(), droppedFiles.end(), [&fileName](const CGame::DroppedFile &f) { return (f.fileName == fileName) ? true : false; });
 		if(it == droppedFiles.end())
 			return 0;
 		pf = &(*it);
 	}
-	else
-	{
-		auto id = Lua::CheckInt(l,1);
+	else {
+		auto id = Lua::CheckInt(l, 1);
 		--id;
 		if(id < 0 || id >= droppedFiles.size())
 			return 0;
 		pf = &droppedFiles[id];
 	}
 	auto bBinary = false;
-	if(Lua::IsSet(l,2) == true)
-		bBinary = Lua::CheckBool(l,2);
-	auto f = FileManager::OpenSystemFile(pf->fullPath.c_str(),(bBinary == true) ? "rb" : "r");
+	if(Lua::IsSet(l, 2) == true)
+		bBinary = Lua::CheckBool(l, 2);
+	auto f = FileManager::OpenSystemFile(pf->fullPath.c_str(), (bBinary == true) ? "rb" : "r");
 	if(f == nullptr)
 		return 0;
 	auto r = std::make_shared<LFile>();
 	r->Construct(f);
-	Lua::Push<std::shared_ptr<LFile>>(l,r);
+	Lua::Push<std::shared_ptr<LFile>>(l, r);
 	return 1;
 }
 int Lua::game::Client::set_gravity(lua_State *l)
 {
-	Vector3 *gravity = Lua::CheckVector(l,1);
+	Vector3 *gravity = Lua::CheckVector(l, 1);
 	c_game->SetGravity(*gravity);
 	return 0;
 }
 int Lua::game::Client::get_gravity(lua_State *l)
 {
-	Lua::Push<Vector3>(l,c_game->GetGravity());
+	Lua::Push<Vector3>(l, c_game->GetGravity());
 	return 1;
 }
 int Lua::game::Client::load_model(lua_State *l)
 {
-	auto *name = Lua::CheckString(l,1);
+	auto *name = Lua::CheckString(l, 1);
 	auto reload = false;
-	if(Lua::IsSet(l,2))
-		reload = Lua::CheckBool(l,2);
-	auto mdl = c_game->LoadModel(name,reload);
+	if(Lua::IsSet(l, 2))
+		reload = Lua::CheckBool(l, 2);
+	auto mdl = c_game->LoadModel(name, reload);
 	if(mdl == nullptr)
 		return 0;
-	Lua::Push<decltype(mdl)>(l,mdl);
+	Lua::Push<decltype(mdl)>(l, mdl);
 	return 1;
 }
 int Lua::game::Client::create_model(lua_State *l)
 {
 	std::shared_ptr<Model> mdl = nullptr;
-	if(!Lua::IsSet(l,1))
+	if(!Lua::IsSet(l, 1))
 		mdl = c_game->CreateModel();
-	else
-	{
-		if(Lua::IsBool(l,1))
-		{
+	else {
+		if(Lua::IsBool(l, 1)) {
 			auto bAddReference = true;
-			if(Lua::IsSet(l,1))
-				bAddReference = Lua::CheckBool(l,1);
+			if(Lua::IsSet(l, 1))
+				bAddReference = Lua::CheckBool(l, 1);
 			mdl = c_game->CreateModel(bAddReference);
 		}
-		else
-		{
-			std::string name = Lua::CheckString(l,1);
+		else {
+			std::string name = Lua::CheckString(l, 1);
 			mdl = c_game->CreateModel(name);
 		}
 	}
 	if(mdl == nullptr)
 		return 0;
-	Lua::Push<decltype(mdl)>(l,mdl);
+	Lua::Push<decltype(mdl)>(l, mdl);
 	return 1;
 }
 int Lua::game::Client::get_action_input(lua_State *l)
 {
-	auto input = Lua::CheckInt(l,1);
-	Lua::PushBool(l,c_game->GetActionInput(static_cast<Action>(input)));
+	auto input = Lua::CheckInt(l, 1);
+	Lua::PushBool(l, c_game->GetActionInput(static_cast<Action>(input)));
 	return 1;
 }
 int Lua::game::Client::set_action_input(lua_State *l)
 {
-	auto input = Lua::CheckInt(l,1);
-	auto pressed = Lua::CheckBool(l,2);
-	c_game->SetActionInput(static_cast<Action>(input),pressed);
+	auto input = Lua::CheckInt(l, 1);
+	auto pressed = Lua::CheckBool(l, 2);
+	c_game->SetActionInput(static_cast<Action>(input), pressed);
 	return 0;
 }
 int Lua::game::Client::update_render_buffers(lua_State *l)
 {
-	auto &drawSceneInfo = Lua::Check<const ::util::DrawSceneInfo>(l,1);
-	auto &renderQueue = Lua::Check<const pragma::rendering::RenderQueue>(l,2);
-	pragma::CSceneComponent::UpdateRenderBuffers(drawSceneInfo.commandBuffer,renderQueue);
+	auto &drawSceneInfo = Lua::Check<const ::util::DrawSceneInfo>(l, 1);
+	auto &renderQueue = Lua::Check<const pragma::rendering::RenderQueue>(l, 2);
+	pragma::CSceneComponent::UpdateRenderBuffers(drawSceneInfo.commandBuffer, renderQueue);
 	return 0;
 }
 int Lua::game::Client::render_scenes(lua_State *l)
 {
 	std::vector<::util::DrawSceneInfo> scenes {};
-	auto n = Lua::GetObjectLength(l,1);
+	auto n = Lua::GetObjectLength(l, 1);
 	scenes.reserve(n);
 
-	auto t = luabind::object{luabind::from_stack(l,1)};
-	for(luabind::iterator i{t},end;i!=end;++i)
-	{
+	auto t = luabind::object {luabind::from_stack(l, 1)};
+	for(luabind::iterator i {t}, end; i != end; ++i) {
 		auto val = *i;
-		auto *drawSceneInfo = luabind::object_cast<::util::DrawSceneInfo*>(val);
+		auto *drawSceneInfo = luabind::object_cast<::util::DrawSceneInfo *>(val);
 		scenes.push_back(*drawSceneInfo);
 	}
 	c_game->RenderScenes(scenes);
@@ -935,45 +925,40 @@ int Lua::game::Client::render_scenes(lua_State *l)
 extern void set_debug_render_filter(std::unique_ptr<DebugRenderFilter> filter);
 int Lua::game::Client::set_debug_render_filter(lua_State *l)
 {
-	if(Lua::IsSet(l,1) == false)
-	{
+	if(Lua::IsSet(l, 1) == false) {
 		::set_debug_render_filter(nullptr);
 		return 0;
 	}
-	Lua::CheckTable(l,1);
-	auto t = luabind::object{luabind::from_stack{l,1}};
+	Lua::CheckTable(l, 1);
+	auto t = luabind::object {luabind::from_stack {l, 1}};
 	auto filter = std::make_unique<DebugRenderFilter>();
-	if(t["shaderFilter"])
-	{
-		auto shaderFilter = luabind::object{t["shaderFilter"]};
+	if(t["shaderFilter"]) {
+		auto shaderFilter = luabind::object {t["shaderFilter"]};
 		filter->shaderFilter = [shaderFilter](pragma::ShaderGameWorld &shader) mutable -> bool {
 			auto r = shaderFilter(&shader);
 			return luabind::object_cast<bool>(r);
 		};
 	}
-	if(t["materialFilter"])
-	{
-		auto materialFilter = luabind::object{t["materialFilter"]};
+	if(t["materialFilter"]) {
+		auto materialFilter = luabind::object {t["materialFilter"]};
 		filter->materialFilter = [materialFilter](CMaterial &mat) mutable -> bool {
-			auto r = materialFilter(static_cast<Material*>(&mat));
+			auto r = materialFilter(static_cast<Material *>(&mat));
 			return luabind::object_cast<bool>(r);
 		};
 	}
-	if(t["entityFilter"])
-	{
-		auto entityFilter = luabind::object{t["entityFilter"]};
-		filter->entityFilter = [entityFilter](CBaseEntity &ent,CMaterial &mat) mutable -> bool {
+	if(t["entityFilter"]) {
+		auto entityFilter = luabind::object {t["entityFilter"]};
+		filter->entityFilter = [entityFilter](CBaseEntity &ent, CMaterial &mat) mutable -> bool {
 			auto &oEnt = ent.GetLuaObject();
-			auto r = entityFilter(oEnt,static_cast<Material*>(&mat));
+			auto r = entityFilter(oEnt, static_cast<Material *>(&mat));
 			return luabind::object_cast<bool>(r);
 		};
 	}
-	if(t["meshFilter"])
-	{
-		auto meshFilter = luabind::object{t["meshFilter"]};
-		filter->meshFilter = [meshFilter](CBaseEntity &ent,CMaterial *mat,CModelSubMesh &mesh,pragma::RenderMeshIndex meshIdx) mutable -> bool {
+	if(t["meshFilter"]) {
+		auto meshFilter = luabind::object {t["meshFilter"]};
+		filter->meshFilter = [meshFilter](CBaseEntity &ent, CMaterial *mat, CModelSubMesh &mesh, pragma::RenderMeshIndex meshIdx) mutable -> bool {
 			auto &oEnt = ent.GetLuaObject();
-			auto r = meshFilter(oEnt,mat ? static_cast<Material*>(mat) : nullptr,mesh.shared_from_this(),meshIdx);
+			auto r = meshFilter(oEnt, mat ? static_cast<Material *>(mat) : nullptr, mesh.shared_from_this(), meshIdx);
 			return luabind::object_cast<bool>(r);
 		};
 	}
@@ -982,7 +967,7 @@ int Lua::game::Client::set_debug_render_filter(lua_State *l)
 }
 int Lua::game::Client::queue_scene_for_rendering(lua_State *l)
 {
-	auto &drawSceneInfo = Lua::Check<::util::DrawSceneInfo>(l,1);
+	auto &drawSceneInfo = Lua::Check<::util::DrawSceneInfo>(l, 1);
 	c_game->QueueForRendering(drawSceneInfo);
 #if 0
 	auto scene = drawSceneInfo.scene.valid() ? drawSceneInfo.scene.get() : c_game->GetRenderScene();
@@ -1011,12 +996,12 @@ int Lua::game::Client::queue_scene_for_rendering(lua_State *l)
 #endif
 	return 0;
 }
-DLLCLIENT void debug_render_stats(bool enabled,bool full,bool print,bool continuous);
+DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool continuous);
 int Lua::game::Client::set_render_stats_enabled(lua_State *l)
 {
-	auto enabled = Lua::CheckBool(l,1);
+	auto enabled = Lua::CheckBool(l, 1);
 	c_engine->SetGpuPerformanceTimersEnabled(enabled);
-	debug_render_stats(enabled,false,false,true);
+	debug_render_stats(enabled, false, false, true);
 	return 0;
 }
 int Lua::game::Client::get_queued_render_scenes(lua_State *l)
@@ -1025,7 +1010,7 @@ int Lua::game::Client::get_queued_render_scenes(lua_State *l)
 	auto t = luabind::newtable(l);
 	int32_t i = 1;
 	for(auto &renderScene : renderScenes)
-		t[i++] = const_cast<::util::DrawSceneInfo&>(renderScene);
+		t[i++] = const_cast<::util::DrawSceneInfo &>(renderScene);
 	t.push(l);
 	return 1;
 }
@@ -1033,12 +1018,12 @@ int Lua::game::Client::create_scene(lua_State *l)
 {
 	auto argIdx = 1;
 	pragma::CSceneComponent::CreateInfo createInfo {};
-	if(Lua::IsSet(l,argIdx))
-		createInfo = Lua::Check<pragma::CSceneComponent::CreateInfo>(l,argIdx++);
+	if(Lua::IsSet(l, argIdx))
+		createInfo = Lua::Check<pragma::CSceneComponent::CreateInfo>(l, argIdx++);
 	::pragma::CSceneComponent *parent = nullptr;
-	if(Lua::IsSet(l,argIdx))
-		parent = &Lua::Check<::pragma::CSceneComponent>(l,argIdx++);
-	auto *scene = pragma::CSceneComponent::Create(createInfo,parent);
+	if(Lua::IsSet(l, argIdx))
+		parent = &Lua::Check<::pragma::CSceneComponent>(l, argIdx++);
+	auto *scene = pragma::CSceneComponent::Create(createInfo, parent);
 	if(scene == nullptr)
 		return 0;
 	scene->GetLuaObject().push(l);
@@ -1073,7 +1058,7 @@ int Lua::game::Client::get_scene(lua_State *l)
 }
 int Lua::game::Client::get_scene_by_index(lua_State *l)
 {
-	auto *scene = ::pragma::CSceneComponent::GetByIndex(Lua::CheckInt(l,1));
+	auto *scene = ::pragma::CSceneComponent::GetByIndex(Lua::CheckInt(l, 1));
 	if(scene == nullptr)
 		return 0;
 	scene->GetLuaObject().push(l);
@@ -1091,13 +1076,13 @@ int Lua::game::Client::get_scene_camera(lua_State *l)
 int Lua::game::Client::get_draw_command_buffer(lua_State *l)
 {
 	auto &drawCmd = c_engine->GetDrawCommandBuffer();
-	Lua::Push(l,std::static_pointer_cast<prosper::ICommandBuffer>(drawCmd));
+	Lua::Push(l, std::static_pointer_cast<prosper::ICommandBuffer>(drawCmd));
 	return 1;
 }
 int Lua::game::Client::get_setup_command_buffer(lua_State *l)
 {
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
-	Lua::Push<std::shared_ptr<prosper::ICommandBuffer>>(l,setupCmd);
+	Lua::Push<std::shared_ptr<prosper::ICommandBuffer>>(l, setupCmd);
 	return 1;
 }
 int Lua::game::Client::flush_setup_command_buffer(lua_State *l)
@@ -1108,62 +1093,61 @@ int Lua::game::Client::flush_setup_command_buffer(lua_State *l)
 int Lua::game::Client::get_camera_position(lua_State *l)
 {
 	auto *cam = c_game->GetPrimaryCamera();
-	if(cam == nullptr)
-	{
-		Lua::Push<Vector3>(l,Vector3{});
-		Lua::Push<Quat>(l,Quat{});
+	if(cam == nullptr) {
+		Lua::Push<Vector3>(l, Vector3 {});
+		Lua::Push<Quat>(l, Quat {});
 		return 2;
 	}
-	Lua::Push<Vector3>(l,cam->GetEntity().GetPosition());
-	Lua::Push<Quat>(l,cam->GetEntity().GetRotation());
+	Lua::Push<Vector3>(l, cam->GetEntity().GetPosition());
+	Lua::Push<Quat>(l, cam->GetEntity().GetRotation());
 	return 2;
 }
 int Lua::game::Client::get_render_clip_plane(lua_State *l)
 {
-	Lua::Push<Vector4>(l,c_game->GetRenderClipPlane());
+	Lua::Push<Vector4>(l, c_game->GetRenderClipPlane());
 	return 1;
 }
 int Lua::game::Client::set_render_clip_plane(lua_State *l)
 {
-	auto *clipPlane = Lua::CheckVector4(l,1);
+	auto *clipPlane = Lua::CheckVector4(l, 1);
 	c_game->SetRenderClipPlane(*clipPlane);
 	return 0;
 }
 int Lua::game::Client::get_debug_buffer(lua_State *l)
 {
 	auto &renderSettings = c_game->GetGlobalRenderSettingsBufferData();
-	Lua::Push(l,renderSettings.debugBuffer);
+	Lua::Push(l, renderSettings.debugBuffer);
 	return 1;
 }
 int Lua::game::Client::get_time_buffer(lua_State *l)
 {
 	auto &renderSettings = c_game->GetGlobalRenderSettingsBufferData();
-	Lua::Push(l,renderSettings.timeBuffer);
+	Lua::Push(l, renderSettings.timeBuffer);
 	return 1;
 }
 int Lua::game::Client::get_csm_buffer(lua_State *l)
 {
 	auto &renderSettings = c_game->GetGlobalRenderSettingsBufferData();
-	Lua::Push(l,renderSettings.csmBuffer);
+	Lua::Push(l, renderSettings.csmBuffer);
 	return 1;
 }
 int Lua::game::Client::get_render_settings_descriptor_set(lua_State *l)
 {
 	auto &renderSettings = c_game->GetGlobalRenderSettingsBufferData();
-	Lua::Push(l,renderSettings.descSetGroup);
+	Lua::Push(l, renderSettings.descSetGroup);
 	return 1;
 }
 int Lua::game::Client::load_map(lua_State *l)
 {
 	std::string mapName;
 	Vector3 origin {};
-	return Lua::game::load_map(l,mapName,nullptr,origin).second;
+	return Lua::game::load_map(l, mapName, nullptr, origin).second;
 }
 int Lua::game::Client::build_reflection_probes(lua_State *l)
 {
 	auto rebuild = false;
-	if(Lua::IsSet(l,1))
-		rebuild = Lua::CheckBool(l,1);
-	pragma::CReflectionProbeComponent::BuildAllReflectionProbes(*c_game,rebuild);
+	if(Lua::IsSet(l, 1))
+		rebuild = Lua::CheckBool(l, 1);
+	pragma::CReflectionProbeComponent::BuildAllReflectionProbes(*c_game, rebuild);
 	return 0;
 }

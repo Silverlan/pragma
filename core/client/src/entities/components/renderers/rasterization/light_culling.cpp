@@ -38,21 +38,14 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawS
 		c_game->StartProfilingStage(CGame::GPUProfilingPhase::CullLightSources);
 		auto depthTex = prepass.textureDepth;
 		auto bMultisampled = depthTex->IsMSAATexture();
-		if(depthTex->IsMSAATexture())
-		{
-			depthTex = static_cast<prosper::MSAATexture&>(*depthTex).Resolve(
-				*drawCmd,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal,
-				prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal
-			);
+		if(depthTex->IsMSAATexture()) {
+			depthTex = static_cast<prosper::MSAATexture &>(*depthTex).Resolve(*drawCmd, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 		}
 		else
-			drawCmd->RecordImageBarrier(depthTex->GetImage(),prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+			drawCmd->RecordImageBarrier(depthTex->GetImage(), prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 
-		drawCmd->RecordImageBarrier(
-			depthTex->GetImage(),
-			{prosper::PipelineStageFlags::LateFragmentTestsBit,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit},
-			{prosper::PipelineStageFlags::ComputeShaderBit,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::AccessFlags::ShaderReadBit}
-		);
+		drawCmd->RecordImageBarrier(depthTex->GetImage(), {prosper::PipelineStageFlags::LateFragmentTestsBit, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::AccessFlags::DepthStencilAttachmentWriteBit},
+		  {prosper::PipelineStageFlags::ComputeShaderBit, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::AccessFlags::ShaderReadBit});
 
 		m_visLightSources.clear();
 		m_visShadowedLights.clear();
@@ -60,67 +53,44 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawS
 		auto &fp = GetForwardPlusInstance();
 
 		// Camera buffer
-		drawCmd->RecordBufferBarrier(
-			*scene.GetCameraBuffer(),
-			prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::ComputeShaderBit,
-			prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-		);
+		drawCmd->RecordBufferBarrier(*scene.GetCameraBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 		// Render settings buffer
-		drawCmd->RecordBufferBarrier(
-			*scene.GetRenderSettingsBuffer(),
-			prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::ComputeShaderBit,
-			prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-		);
+		drawCmd->RecordBufferBarrier(*scene.GetRenderSettingsBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 		auto *worldEnv = scene.GetWorldEnvironment();
-		if(worldEnv && worldEnv->IsUnlit() == false)
-		{
+		if(worldEnv && worldEnv->IsUnlit() == false) {
 			std::chrono::steady_clock::time_point t;
 			if(drawSceneInfo.renderStats)
 				t = std::chrono::steady_clock::now();
 
-			fp.Compute(*drawCmd,const_cast<pragma::CSceneComponent&>(scene),depthTex->GetImage(),*scene.GetCameraDescriptorSetCompute());
+			fp.Compute(*drawCmd, const_cast<pragma::CSceneComponent &>(scene), depthTex->GetImage(), *scene.GetCameraDescriptorSetCompute());
 			auto &lightBits = fp.GetShadowLightBits();
-			for(auto i=decltype(lightBits.size()){0};i<lightBits.size();++i)
-			{
+			for(auto i = decltype(lightBits.size()) {0}; i < lightBits.size(); ++i) {
 				auto &intVal = lightBits.at(i);
 				const auto numBits = 32u;
-				for(auto j=0u;j<numBits;++j)
-				{
-					if(!(intVal &(1<<j))) // If bit is set, this light is visible on screen
+				for(auto j = 0u; j < numBits; ++j) {
+					if(!(intVal & (1 << j))) // If bit is set, this light is visible on screen
 						continue;
-					auto shadowIdx = i *numBits +j;
+					auto shadowIdx = i * numBits + j;
 					auto *l = pragma::CLightComponent::GetLightByShadowBufferIndex(shadowIdx);
-					if(l == nullptr || static_cast<CBaseEntity&>(l->GetEntity()).IsInScene(scene) == false)
+					if(l == nullptr || static_cast<CBaseEntity &>(l->GetEntity()).IsInScene(scene) == false)
 						continue;
 					m_visLightSources.push_back(l);
 
 					auto &renderBuffer = l->GetRenderBuffer();
-					if(renderBuffer)
-					{
-						drawCmd->RecordBufferBarrier(
-							*renderBuffer,
-							prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
-							prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-						);
+					if(renderBuffer) {
+						drawCmd->RecordBufferBarrier(*renderBuffer, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 					}
 					auto &shadowBuffer = l->GetShadowBuffer();
-					if(shadowBuffer)
-					{
-						drawCmd->RecordBufferBarrier(
-							*shadowBuffer,
-							prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
-							prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-						);
+					if(shadowBuffer) {
+						drawCmd->RecordBufferBarrier(*shadowBuffer, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 						// Determine light sources that should actually cast shadows
-						if(l->ShouldCastShadows())
-						{
+						if(l->ShouldCastShadows()) {
 							auto *shadowC = l->GetShadowComponent();
 							auto hSm = l->GetShadowMap(pragma::CLightComponent::ShadowMapType::Dynamic);
-							if(hSm.valid() && hSm->HasRenderTarget())
-							{
+							if(hSm.valid() && hSm->HasRenderTarget()) {
 								// Request render target for light sources that already had one before.
 								// This will make sure the shadow map is the same as before, which increases the likelihood
 								// we don't actually have to re-render the shadows for this light.
@@ -134,7 +104,7 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawS
 			}
 
 			if(drawSceneInfo.renderStats)
-				(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::LightCullingCpu,std::chrono::steady_clock::now() -t);
+				(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::LightCullingCpu, std::chrono::steady_clock::now() - t);
 		}
 	}
 }
@@ -150,13 +120,10 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const util::DrawScen
 	auto bMultisampled = depthTex->IsMSAATexture();
 	// Don't write to depth image until compute shader has completed reading from it
 	if(!bMultisampled)
-		drawCmd->RecordImageBarrier(depthTex->GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal);
+		drawCmd->RecordImageBarrier(depthTex->GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::DepthStencilAttachmentOptimal);
 
-	drawCmd->RecordImageBarrier(
-		depthTex->GetImage(),
-		{prosper::PipelineStageFlags::ComputeShaderBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::ShaderReadBit},
-		{prosper::PipelineStageFlags::EarlyFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit}
-	);
+	drawCmd->RecordImageBarrier(depthTex->GetImage(), {prosper::PipelineStageFlags::ComputeShaderBit, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AccessFlags::ShaderReadBit},
+	  {prosper::PipelineStageFlags::EarlyFragmentTestsBit, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AccessFlags::DepthStencilAttachmentWriteBit});
 
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::CullLightSources);
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::CullLightSources);
@@ -167,26 +134,18 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const util::DrawScen
 	//c_engine->StartGPUTimer(GPUTimerEvent::Shadow); // TODO: Only for main scene // prosper TODO
 
 	// Entity instance buffer barrier
-	drawCmd->RecordBufferBarrier(
-		*pragma::CRenderComponent::GetInstanceBuffer(),
-		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
-		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-	);
+	drawCmd->RecordBufferBarrier(*pragma::CRenderComponent::GetInstanceBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
+	  prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 	// Entity bone buffer barrier
-	drawCmd->RecordBufferBarrier(
-		*pragma::get_instance_bone_buffer(),
-		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
-		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-	);
-	
+	drawCmd->RecordBufferBarrier(*pragma::get_instance_bone_buffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
+	  prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
+
 	auto *worldEnv = scene.GetWorldEnvironment();
-	if(worldEnv && worldEnv->IsUnlit() == false && shaderSettings.dynamicShadowsEnabled)
-	{			
+	if(worldEnv && worldEnv->IsUnlit() == false && shaderSettings.dynamicShadowsEnabled) {
 		std::queue<uint32_t> lightSourcesReadyForShadowRendering;
 		std::queue<uint32_t> lightSourcesWaitingForRenderQueues;
-		for(auto i=decltype(m_visShadowedLights.size()){0u};i<m_visShadowedLights.size();++i)
-		{
+		for(auto i = decltype(m_visShadowedLights.size()) {0u}; i < m_visShadowedLights.size(); ++i) {
 			auto *l = m_visShadowedLights[i].get();
 			auto hSm = l->GetShadowMap(pragma::CLightComponent::ShadowMapType::Dynamic);
 			if(hSm.valid() && hSm->HasRenderTarget() == false)
@@ -206,8 +165,7 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const util::DrawScen
 			auto &renderer = shadowC->GetRenderer();
 			if(renderer.IsRenderQueueComplete())
 				lightSourcesReadyForShadowRendering.push(i);
-			else
-			{
+			else {
 				// Render queue creation has either not been initiated yet, or is still processing
 				lightSourcesWaitingForRenderQueues.push(i);
 				if(renderer.DoesRenderQueueRequireBuilding())
@@ -216,8 +174,7 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const util::DrawScen
 		}
 		c_game->GetRenderQueueBuilder().SetReadyForCompletion();
 
-		while(lightSourcesReadyForShadowRendering.empty() == false)
-		{
+		while(lightSourcesReadyForShadowRendering.empty() == false) {
 			auto idx = lightSourcesReadyForShadowRendering.front();
 			lightSourcesReadyForShadowRendering.pop();
 
@@ -229,11 +186,10 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const util::DrawScen
 			renderer.Render(drawSceneInfo);
 		}
 
-		while(lightSourcesWaitingForRenderQueues.empty() == false)
-		{
+		while(lightSourcesWaitingForRenderQueues.empty() == false) {
 			auto idx = lightSourcesWaitingForRenderQueues.front();
 			lightSourcesWaitingForRenderQueues.pop();
-				
+
 			// Render remaining light sources. If their render queues are still not
 			// completed, we'll have no choice but to wait.
 			auto &lightC = m_visShadowedLights.at(idx);
@@ -241,7 +197,7 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const util::DrawScen
 			renderer.Render(drawSceneInfo);
 		}
 
-		const_cast<CSceneComponent&>(*drawSceneInfo.scene).SwapPreviouslyVisibleLights(std::move(m_visShadowedLights));
+		const_cast<CSceneComponent &>(*drawSceneInfo.scene).SwapPreviouslyVisibleLights(std::move(m_visShadowedLights));
 	}
 	//c_engine->StopGPUTimer(GPUTimerEvent::Shadow); // prosper TODO
 	//drawCmd->SetViewport(w,h); // Reset the viewport

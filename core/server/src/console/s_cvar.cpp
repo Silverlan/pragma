@@ -10,7 +10,4 @@
 #include <pragma/serverstate/serverstate.h>
 
 extern ServerState *server;
-ConVarHandle GetServerConVar(std::string scmd)
-{
-	return server->GetConVarHandle(scmd);
-}
+ConVarHandle GetServerConVar(std::string scmd) { return server->GetConVarHandle(scmd); }

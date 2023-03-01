@@ -13,23 +13,18 @@
 #include <vector>
 #include <pragma/entities/components/base_weapon_component.hpp>
 
-namespace nwm
-{
+namespace nwm {
 	class RecipientFilter;
 };
-namespace pragma
-{
-	class DLLSERVER SWeaponComponent final
-		: public BaseWeaponComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SWeaponComponent final : public BaseWeaponComponent, public SBaseNetComponent {
+	  public:
 		static uint32_t GetWeaponCount();
-		static const std::vector<SWeaponComponent*> &GetAll();
-		
+		static const std::vector<SWeaponComponent *> &GetAll();
+
 		SWeaponComponent(BaseEntity &ent);
 		virtual ~SWeaponComponent() override;
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual void Initialize() override;
 		virtual void Deploy() override;
 		virtual void Holster() override;
@@ -55,21 +50,21 @@ namespace pragma
 		void RefillSecondaryClip(UInt16 num);
 		void RefillPrimaryClip();
 		void RefillSecondaryClip();
-		void RemovePrimaryClip(UInt16 num=1);
-		void RemoveSecondaryClip(UInt16 num=1);
+		void RemovePrimaryClip(UInt16 num = 1);
+		void RemoveSecondaryClip(UInt16 num = 1);
 		void SetPrimaryAmmoType(const std::string &type);
 		void SetSecondaryAmmoType(const std::string &type);
 		//
 
-		virtual bool ShouldTransmitNetData() const override {return true;};
-	protected:
+		virtual bool ShouldTransmitNetData() const override { return true; };
+	  protected:
 		void GetTargetRecipients(networking::ClientRecipientFilter &rf);
 		virtual void OnUse(BaseEntity *pl);
 		virtual void OnPhysicsInitialized() override;
 		virtual void OnEntitySpawn() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-	private:
-		static std::vector<SWeaponComponent*> s_weapons;
+	  private:
+		static std::vector<SWeaponComponent *> s_weapons;
 	};
 };
 

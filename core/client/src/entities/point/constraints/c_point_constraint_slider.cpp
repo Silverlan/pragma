@@ -15,7 +15,7 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(point_constraint_slider,CPointConstraintSlider);
+LINK_ENTITY_TO_CLASS(point_constraint_slider, CPointConstraintSlider);
 
 void CPointConstraintSliderComponent::ReceiveData(NetPacket &packet)
 {
@@ -26,7 +26,7 @@ void CPointConstraintSliderComponent::ReceiveData(NetPacket &packet)
 	m_kvLimitLinLow = packet->Read<float>();
 	m_kvLimitLinHigh = packet->Read<float>();
 }
-void CPointConstraintSliderComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CPointConstraintSliderComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////////
 

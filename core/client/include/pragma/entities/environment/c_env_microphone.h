@@ -11,21 +11,16 @@
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/environment/env_microphone_base.h"
 
-namespace pragma
-{
-	class DLLCLIENT CMicrophoneComponent final
-		: public BaseEnvMicrophoneComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CMicrophoneComponent final : public BaseEnvMicrophoneComponent {
+	  public:
 		CMicrophoneComponent(BaseEntity &ent) : BaseEnvMicrophoneComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLCLIENT CEnvMicrophone
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEnvMicrophone : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

@@ -13,11 +13,10 @@
 #include <string>
 
 //namespace luabind{class object;}
-class DLLNETWORK LuaFunction
-{
-protected:
+class DLLNETWORK LuaFunction {
+  protected:
 	std::shared_ptr<luabind::object> m_luaFunction;
-public:
+  public:
 	LuaFunction(const luabind::object &o);
 	LuaFunction(const LuaFunction &other);
 	LuaFunction(std::nullptr_t);
@@ -25,10 +24,10 @@ public:
 	virtual ~LuaFunction();
 	luabind::object &GetLuaObject();
 	void operator()();
-	template<class T,typename... TARGS>
-		T Call(TARGS ...args);
-	template<class T,typename... TARGS>
-		bool Call(T *ret,TARGS ...args);
+	template<class T, typename... TARGS>
+	T Call(TARGS... args);
+	template<class T, typename... TARGS>
+	bool Call(T *ret, TARGS... args);
 };
 
 #endif

@@ -11,17 +11,16 @@
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-namespace bsp {class File;};
-namespace pragma
-{
-	class DLLCLIENT CBSPComponent final
-		: public BaseEntityComponent
-	{
-	public:
+namespace bsp {
+	class File;
+};
+namespace pragma {
+	class DLLCLIENT CBSPComponent final : public BaseEntityComponent {
+	  public:
 		CBSPComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-	protected:
+	  protected:
 		void InitializeBSPTree(bsp::File &bsp);
 	};
 };

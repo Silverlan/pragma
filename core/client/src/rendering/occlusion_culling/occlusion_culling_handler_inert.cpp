@@ -19,10 +19,7 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
-void OcclusionCullingHandlerInert::PerformCulling(
-	pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const Vector3 &camPos,
-	std::vector<pragma::CParticleSystemComponent*> &particlesOut
-)
+void OcclusionCullingHandlerInert::PerformCulling(pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const Vector3 &camPos, std::vector<pragma::CParticleSystemComponent *> &particlesOut)
 {
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CParticleSystemComponent>>();
@@ -31,10 +28,7 @@ void OcclusionCullingHandlerInert::PerformCulling(
 	for(auto *ent : entIt)
 		particlesOut.push_back(ent->GetComponent<pragma::CParticleSystemComponent>().get());
 }
-void OcclusionCullingHandlerInert::PerformCulling(
-	pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const Vector3 &camPos,
-	std::vector<OcclusionMeshInfo> &culledMeshesOut,bool cullByViewFrustum
-)
+void OcclusionCullingHandlerInert::PerformCulling(pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const Vector3 &camPos, std::vector<OcclusionMeshInfo> &culledMeshesOut, bool cullByViewFrustum)
 {
 	//auto d = uvec::distance(m_lastLodCamPos,posCam);
 	//auto bUpdateLod = (d >= LOD_SWAP_DISTANCE) ? true : false;
@@ -42,31 +36,27 @@ void OcclusionCullingHandlerInert::PerformCulling(
 
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
-	for(auto *e : entIt)
-	{
+	for(auto *e : entIt) {
 		if(e == nullptr)
 			continue;
-		auto *ent = static_cast<CBaseEntity*>(e);
+		auto *ent = static_cast<CBaseEntity *>(e);
 		if(ent->IsInScene(scene) == false)
 			continue;
 		auto *pRenderComponent = ent->GetRenderComponent();
 		bool bViewModel = false;
-		if((ent->IsSpawned() == true && pRenderComponent->GetModelComponent() && pRenderComponent->GetModelComponent()->GetModel() != nullptr && pRenderComponent->ShouldDraw() != false))
-		{
+		if((ent->IsSpawned() == true && pRenderComponent->GetModelComponent() && pRenderComponent->GetModelComponent()->GetModel() != nullptr && pRenderComponent->ShouldDraw() != false)) {
 			//if(bUpdateLod == true) // Needs to be updated every frame (in case the entity is moving towards or away from us)
 			//pRenderComponent->GetModelComponent()->UpdateLOD(camPos);
-			if(pRenderComponent)
-			{
+			if(pRenderComponent) {
 				auto pTrComponent = ent->GetTransformComponent();
 				auto &meshes = pRenderComponent->GetLODMeshes();
 				auto numMeshes = meshes.size();
-				auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
-				for(auto itMesh=meshes.begin();itMesh!=meshes.end();++itMesh)
-				{
-					auto *mesh = static_cast<CModelMesh*>(itMesh->get());
-					if(culledMeshesOut.capacity() -culledMeshesOut.size() == 0)
-						culledMeshesOut.reserve(culledMeshesOut.capacity() +100);
-					culledMeshesOut.push_back(OcclusionMeshInfo{*ent,*mesh});
+				auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
+				for(auto itMesh = meshes.begin(); itMesh != meshes.end(); ++itMesh) {
+					auto *mesh = static_cast<CModelMesh *>(itMesh->get());
+					if(culledMeshesOut.capacity() - culledMeshesOut.size() == 0)
+						culledMeshesOut.reserve(culledMeshesOut.capacity() + 100);
+					culledMeshesOut.push_back(OcclusionMeshInfo {*ent, *mesh});
 				}
 			}
 		}

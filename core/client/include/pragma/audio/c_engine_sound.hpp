@@ -11,7 +11,7 @@
 #include "pragma/c_engine.h"
 
 template<class TEfxProperties>
-	std::shared_ptr<al::IEffect> CEngine::CreateAuxEffect(const std::string &name,const TEfxProperties &props)
+std::shared_ptr<al::IEffect> CEngine::CreateAuxEffect(const std::string &name, const TEfxProperties &props)
 {
 	auto lname = name;
 	ustring::to_lower(lname);
@@ -21,16 +21,14 @@ template<class TEfxProperties>
 	auto *soundSys = GetSoundSystem();
 	if(soundSys == nullptr)
 		return nullptr;
-	try
-	{
+	try {
 		effect = soundSys->CreateEffect(props);
 	}
-	catch(const std::runtime_error &e)
-	{
-		Con::cwar<<"WARNING: Unable to create auxiliary effect '"<<name<<"': "<<e.what()<<Con::endl;
+	catch(const std::runtime_error &e) {
+		Con::cwar << "Unable to create auxiliary effect '" << name << "': " << e.what() << Con::endl;
 		return nullptr;
 	}
-	m_auxEffects.insert(decltype(m_auxEffects)::value_type(name,effect));
+	m_auxEffects.insert(decltype(m_auxEffects)::value_type(name, effect));
 	return effect;
 }
 

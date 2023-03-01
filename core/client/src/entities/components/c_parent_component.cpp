@@ -11,8 +11,5 @@
 
 using namespace pragma;
 
-void CParentComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-void CParentComponent::OnRemove()
-{
-	BaseParentComponent::OnRemove();
-}
+void CParentComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CParentComponent::OnRemove() { BaseParentComponent::OnRemove(); }

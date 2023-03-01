@@ -16,6 +16,7 @@
 #include "pragma/model/vk_mesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <pragma/game/game_limits.h>
+#include <pragma/logging.hpp>
 #include <datasystem_color.h>
 #include <datasystem_vector.h>
 #include <prosper_util.hpp>
@@ -35,7 +36,6 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-
 /*ShaderGameWorldPipeline ShaderGameWorldLightingPass::GetPipelineIndex(prosper::SampleCountFlags sampleCount,bool bReflection)
 {
 	if(sampleCount == prosper::SampleCountFlags::e1Bit)
@@ -46,55 +46,39 @@ using namespace pragma;
 }*/
 
 decltype(ShaderGameWorldLightingPass::VERTEX_BINDING_RENDER_BUFFER_INDEX) ShaderGameWorldLightingPass::VERTEX_BINDING_RENDER_BUFFER_INDEX = {prosper::VertexInputRate::Instance};
-decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX = {ShaderEntity::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX,VERTEX_BINDING_RENDER_BUFFER_INDEX};
+decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX = {ShaderEntity::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX, VERTEX_BINDING_RENDER_BUFFER_INDEX};
 
 decltype(ShaderGameWorldLightingPass::VERTEX_BINDING_BONE_WEIGHT) ShaderGameWorldLightingPass::VERTEX_BINDING_BONE_WEIGHT = {prosper::VertexInputRate::Vertex};
-decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID,VERTEX_BINDING_BONE_WEIGHT};
-decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BONE_WEIGHT) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BONE_WEIGHT = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT,VERTEX_BINDING_BONE_WEIGHT};
+decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID, VERTEX_BINDING_BONE_WEIGHT};
+decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BONE_WEIGHT) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BONE_WEIGHT = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT, VERTEX_BINDING_BONE_WEIGHT};
 
 decltype(ShaderGameWorldLightingPass::VERTEX_BINDING_BONE_WEIGHT_EXT) ShaderGameWorldLightingPass::VERTEX_BINDING_BONE_WEIGHT_EXT = {prosper::VertexInputRate::Vertex};
-decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID,VERTEX_BINDING_BONE_WEIGHT_EXT};
-decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT,VERTEX_BINDING_BONE_WEIGHT_EXT};
+decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID, VERTEX_BINDING_BONE_WEIGHT_EXT};
+decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT, VERTEX_BINDING_BONE_WEIGHT_EXT};
 
-decltype(ShaderGameWorldLightingPass::VERTEX_BINDING_VERTEX) ShaderGameWorldLightingPass::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex,sizeof(VertexBufferData)};
-decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_POSITION) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_POSITION = {ShaderEntity::VERTEX_ATTRIBUTE_POSITION,VERTEX_BINDING_VERTEX};
-decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_UV) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_UV = {ShaderEntity::VERTEX_ATTRIBUTE_UV,VERTEX_BINDING_VERTEX};
-decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_NORMAL) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_NORMAL = {ShaderEntity::VERTEX_ATTRIBUTE_NORMAL,VERTEX_BINDING_VERTEX};
-decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_TANGENT) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_TANGENT = {ShaderEntity::VERTEX_ATTRIBUTE_TANGENT,VERTEX_BINDING_VERTEX};
-decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BI_TANGENT) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BI_TANGENT = {ShaderEntity::VERTEX_ATTRIBUTE_BI_TANGENT,VERTEX_BINDING_VERTEX};
+decltype(ShaderGameWorldLightingPass::VERTEX_BINDING_VERTEX) ShaderGameWorldLightingPass::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex, sizeof(VertexBufferData)};
+decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_POSITION) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_POSITION = {ShaderEntity::VERTEX_ATTRIBUTE_POSITION, VERTEX_BINDING_VERTEX};
+decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_UV) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_UV = {ShaderEntity::VERTEX_ATTRIBUTE_UV, VERTEX_BINDING_VERTEX};
+decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_NORMAL) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_NORMAL = {ShaderEntity::VERTEX_ATTRIBUTE_NORMAL, VERTEX_BINDING_VERTEX};
+decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_TANGENT) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_TANGENT = {ShaderEntity::VERTEX_ATTRIBUTE_TANGENT, VERTEX_BINDING_VERTEX};
+decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BI_TANGENT) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BI_TANGENT = {ShaderEntity::VERTEX_ATTRIBUTE_BI_TANGENT, VERTEX_BINDING_VERTEX};
 
 decltype(ShaderGameWorldLightingPass::VERTEX_BINDING_LIGHTMAP) ShaderGameWorldLightingPass::VERTEX_BINDING_LIGHTMAP = {prosper::VertexInputRate::Vertex};
-decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_LIGHTMAP_UV) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_LIGHTMAP_UV = {ShaderEntity::VERTEX_ATTRIBUTE_LIGHTMAP_UV,VERTEX_BINDING_LIGHTMAP};
+decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_LIGHTMAP_UV) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_LIGHTMAP_UV = {ShaderEntity::VERTEX_ATTRIBUTE_LIGHTMAP_UV, VERTEX_BINDING_LIGHTMAP};
 
 decltype(ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE) ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE = {&ShaderEntity::DESCRIPTOR_SET_INSTANCE};
-decltype(ShaderGameWorldLightingPass::DESCRIPTOR_SET_MATERIAL) ShaderGameWorldLightingPass::DESCRIPTOR_SET_MATERIAL = {
-	{
-		prosper::DescriptorSetInfo::Binding { // Material settings
-			prosper::DescriptorType::UniformBuffer,
-			prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit
-		},
-		prosper::DescriptorSetInfo::Binding { // Diffuse Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		},
-		prosper::DescriptorSetInfo::Binding { // Normal Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		},
-		prosper::DescriptorSetInfo::Binding { // Specular Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		},
-		prosper::DescriptorSetInfo::Binding { // Parallax Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		},
-		prosper::DescriptorSetInfo::Binding { // Glow Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		}
-	}
-};
+decltype(ShaderGameWorldLightingPass::DESCRIPTOR_SET_MATERIAL) ShaderGameWorldLightingPass::DESCRIPTOR_SET_MATERIAL = {{prosper::DescriptorSetInfo::Binding {// Material settings
+                                                                                                                          prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit},
+  prosper::DescriptorSetInfo::Binding {// Diffuse Map
+    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
+  prosper::DescriptorSetInfo::Binding {// Normal Map
+    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
+  prosper::DescriptorSetInfo::Binding {// Specular Map
+    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
+  prosper::DescriptorSetInfo::Binding {// Parallax Map
+    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
+  prosper::DescriptorSetInfo::Binding {// Glow Map
+    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
 decltype(ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE) ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE = {&ShaderEntity::DESCRIPTOR_SET_SCENE};
 decltype(ShaderGameWorldLightingPass::DESCRIPTOR_SET_RENDERER) ShaderGameWorldLightingPass::DESCRIPTOR_SET_RENDERER = {&ShaderEntity::DESCRIPTOR_SET_RENDERER};
 decltype(ShaderGameWorldLightingPass::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderGameWorldLightingPass::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderEntity::DESCRIPTOR_SET_RENDER_SETTINGS};
@@ -114,46 +98,39 @@ static void initialize_material_settings_buffer()
 	prosper::util::BufferCreateInfo bufCreateInfo {};
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	//bufCreateInfo.size = sizeof(ShaderGameWorldLightingPass::MaterialData) *2'048;
-	bufCreateInfo.size = sizeof(ShaderGameWorldLightingPass::MaterialData) *524'288; // ~22 MiB
+	bufCreateInfo.size = sizeof(ShaderGameWorldLightingPass::MaterialData) * 524'288; // ~22 MiB
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::UniformBufferBit;
 	bufCreateInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
-	g_materialSettingsBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(bufCreateInfo,sizeof(ShaderGameWorldLightingPass::MaterialData),sizeof(ShaderGameWorldLightingPass::MaterialData) *524'288,0.05f);
-	g_materialSettingsBuffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit);
+	g_materialSettingsBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(bufCreateInfo, sizeof(ShaderGameWorldLightingPass::MaterialData), sizeof(ShaderGameWorldLightingPass::MaterialData) * 524'288, 0.05f);
+	g_materialSettingsBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 }
-ShaderGameWorldLightingPass::ShaderGameWorldLightingPass(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
-	: ShaderGameWorld(context,identifier,vsShader,fsShader,gsShader)
+ShaderGameWorldLightingPass::ShaderGameWorldLightingPass(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderGameWorld(context, identifier, vsShader, fsShader, gsShader)
 {
 	if(g_instanceCount++ == 0u)
 		initialize_material_settings_buffer();
 
 	auto n = umath::to_integral(GameShaderSpecialization::Count);
 	auto nPassTypes = umath::to_integral(rendering::PassType::Count);
-	for(auto j=decltype(nPassTypes){0u};j<nPassTypes;++j)
-	{
+	for(auto j = decltype(nPassTypes) {0u}; j < nPassTypes; ++j) {
 		// Note: Every pass type has to have the exact same number of pipelines in the exact same order!
 		auto startIdx = ShaderSpecializationManager::GetPipelineCount();
-		for(auto i=decltype(n){0u};i<n;++i)
-		{
-			auto dynamicFlags = GameShaderSpecializationConstantFlag::EmissionEnabledBit | GameShaderSpecializationConstantFlag::EnableRmaMapBit |
-				GameShaderSpecializationConstantFlag::EnableNormalMapBit | GameShaderSpecializationConstantFlag::ParallaxEnabledBit |
-				GameShaderSpecializationConstantFlag::EnableDepthBias | GameShaderSpecializationConstantFlag::EnableTranslucencyBit |
-				GameShaderSpecializationConstantFlag::EnableClippingBit;
-			switch(static_cast<GameShaderSpecialization>(i))
-			{
+		for(auto i = decltype(n) {0u}; i < n; ++i) {
+			auto dynamicFlags = GameShaderSpecializationConstantFlag::EmissionEnabledBit | GameShaderSpecializationConstantFlag::EnableRmaMapBit | GameShaderSpecializationConstantFlag::EnableNormalMapBit | GameShaderSpecializationConstantFlag::ParallaxEnabledBit
+			  | GameShaderSpecializationConstantFlag::EnableDepthBias | GameShaderSpecializationConstantFlag::EnableTranslucencyBit | GameShaderSpecializationConstantFlag::EnableClippingBit;
+			switch(static_cast<GameShaderSpecialization>(i)) {
 			case GameShaderSpecialization::Generic:
 				break;
 			case GameShaderSpecialization::Lightmapped:
 				break;
 			case GameShaderSpecialization::Animated:
-				dynamicFlags |= GameShaderSpecializationConstantFlag::WrinklesEnabledBit |
-					GameShaderSpecializationConstantFlag::EnableExtendedVertexWeights;
+				dynamicFlags |= GameShaderSpecializationConstantFlag::WrinklesEnabledBit | GameShaderSpecializationConstantFlag::EnableExtendedVertexWeights;
 				break;
 			}
 			auto staticFlags = GetStaticSpecializationConstantFlags(static_cast<GameShaderSpecialization>(i));
-			RegisterSpecializations(static_cast<rendering::PassType>(j),staticFlags,dynamicFlags);
+			RegisterSpecializations(static_cast<rendering::PassType>(j), staticFlags, dynamicFlags);
 		}
 		auto endIdx = ShaderSpecializationManager::GetPipelineCount();
-		SetPipelineIndexRange(j,startIdx,endIdx);
+		SetPipelineIndexRange(j, startIdx, endIdx);
 	}
 
 	auto numPipelines = ShaderSpecializationManager::GetPipelineCount();
@@ -164,7 +141,7 @@ ShaderGameWorldLightingPass::~ShaderGameWorldLightingPass()
 	if(--g_instanceCount == 0)
 		g_materialSettingsBuffer = nullptr;
 }
-uint32_t ShaderGameWorldLightingPass::GetPassPipelineIndexStartOffset(rendering::PassType passType) const {return GetPipelineIndexStartOffset(umath::to_integral(passType));}
+uint32_t ShaderGameWorldLightingPass::GetPassPipelineIndexStartOffset(rendering::PassType passType) const { return GetPipelineIndexStartOffset(umath::to_integral(passType)); }
 void ShaderGameWorldLightingPass::OnPipelinesInitialized()
 {
 	ShaderGameWorld::OnPipelinesInitialized();
@@ -173,8 +150,7 @@ void ShaderGameWorldLightingPass::OnPipelinesInitialized()
 GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetStaticSpecializationConstantFlags(GameShaderSpecialization specialization) const
 {
 	auto staticFlags = GameShaderSpecializationConstantFlag::None;
-	switch(specialization)
-	{
+	switch(specialization) {
 	case GameShaderSpecialization::Generic:
 		break;
 	case GameShaderSpecialization::Lightmapped:
@@ -186,9 +162,9 @@ GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetStaticSpeci
 	}
 	return staticFlags;
 }
-std::optional<uint32_t> ShaderGameWorldLightingPass::FindPipelineIndex(rendering::PassType passType,GameShaderSpecialization specialization,GameShaderSpecializationConstantFlag specializationFlags) const
+std::optional<uint32_t> ShaderGameWorldLightingPass::FindPipelineIndex(rendering::PassType passType, GameShaderSpecialization specialization, GameShaderSpecializationConstantFlag specializationFlags) const
 {
-	return ShaderSpecializationManager::FindSpecializationPipelineIndex(passType,GetStaticSpecializationConstantFlags(specialization) | specializationFlags);
+	return ShaderSpecializationManager::FindSpecializationPipelineIndex(passType, GetStaticSpecializationConstantFlags(specialization) | specializationFlags);
 }
 GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetMaterialPipelineSpecializationRequirements(CMaterial &mat) const
 {
@@ -200,18 +176,15 @@ GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetMaterialPip
 	if(mat.GetAlphaMode() != AlphaMode::Opaque)
 		flags |= GameShaderSpecializationConstantFlag::EnableTranslucencyBit;
 	auto *rmaMap = mat.GetRMAMap();
-	if(rmaMap)
-	{
+	if(rmaMap) {
 		flags |= GameShaderSpecializationConstantFlag::EnableRmaMapBit;
 		auto texture = std::static_pointer_cast<Texture>(rmaMap->texture);
-		if(texture)
-		{
+		if(texture) {
 			auto texName = texture->GetName();
 			ustring::to_lower(texName);
 			auto path = util::Path::CreateFile(texName);
 			path.RemoveFileExtension();
-			if(path == "pbr/rma_neutral")
-			{
+			if(path == "pbr/rma_neutral") {
 				// If the material uses the neutral rma texture, we can completely ignore
 				// it for the shader and use the default values instead, which saves
 				// a lot of texture lookups.
@@ -225,28 +198,28 @@ GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetMaterialPip
 		flags |= GameShaderSpecializationConstantFlag::ParallaxEnabledBit;
 	return flags;
 }
-prosper::DescriptorSetInfo &ShaderGameWorldLightingPass::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
-void ShaderGameWorldLightingPass::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+prosper::DescriptorSetInfo &ShaderGameWorldLightingPass::GetMaterialDescriptorSetInfo() const { return DESCRIPTOR_SET_MATERIAL; }
+void ShaderGameWorldLightingPass::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
-void ShaderGameWorldLightingPass::InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderGameWorldLightingPass::InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX);
 
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT_ID);
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_BONE_WEIGHT_ID);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_BONE_WEIGHT);
 
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID);
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT);
 
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_UV);
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_NORMAL);
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_TANGENT);
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BI_TANGENT);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_POSITION);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_UV);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_NORMAL);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_TANGENT);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_BI_TANGENT);
 
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_LIGHTMAP_UV);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_LIGHTMAP_UV);
 
 	/*if(static_cast<Pipeline>(pipelineIdx) == Pipeline::LightMap)
 	{
@@ -256,80 +229,75 @@ void ShaderGameWorldLightingPass::InitializeGfxPipelineVertexAttributes(prosper:
 		//pipelineInfo.add_specialization_constant(prosper::ShaderStage::VERTEX,0u,sizeof(lightMapEnabled),&lightMapEnabled);
 	}*/
 }
-void ShaderGameWorldLightingPass::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderGameWorldLightingPass::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,GetMaterialDescriptorSetInfo());
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SCENE);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_RENDERER);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_RENDER_SETTINGS);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_LIGHTS);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SHADOWS);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_INSTANCE);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, GetMaterialDescriptorSetInfo());
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_RENDERER);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_RENDER_SETTINGS);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_LIGHTS);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_SHADOWS);
 }
-void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	ShaderEntity::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
-	
+	ShaderEntity::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
+
 	auto isReflection = (static_cast<rendering::PassType>(GetBasePassType(pipelineIdx)) == rendering::PassType::Reflection);
-	if(isReflection)
-	{
-		prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::FrontBit);
+	if(isReflection) {
+		prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo, prosper::CullModeFlags::FrontBit);
 		//pipelineInfo.SetRasterizationProperties(prosper::PolygonMode::Line,prosper::CullModeFlags::FrontBit,prosper::FrontFace::Clockwise,1.f);
 	}
-	
+
 	//uint32_t isSet = static_cast<uint32_t>(IsSpecializationConstantSet(pipelineIdx,flag));
-	auto isTranslucentPipeline = IsSpecializationConstantSet(pipelineIdx,GameShaderSpecializationConstantFlag::EnableTranslucencyBit);
+	auto isTranslucentPipeline = IsSpecializationConstantSet(pipelineIdx, GameShaderSpecializationConstantFlag::EnableTranslucencyBit);
 	if(isTranslucentPipeline)
 		SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
 	pipelineInfo.ToggleDepthWrites(false); // Already written in depth pre-pass
-	pipelineInfo.ToggleDepthTest(true,prosper::CompareOp::LessOrEqual);
+	pipelineInfo.ToggleDepthTest(true, prosper::CompareOp::LessOrEqual);
 
 	//pipelineInfo.ToggleDepthBias(true,0.f,0.f,0.f);
 	//pipelineInfo.ToggleDynamicState(true,prosper::DynamicState::DepthBias); // Required for decals
 
-	InitializeGfxPipelineVertexAttributes(pipelineInfo,pipelineIdx);
-	InitializeGfxPipelinePushConstantRanges(pipelineInfo,pipelineIdx);
-	InitializeGfxPipelineDescriptorSets(pipelineInfo,pipelineIdx);
+	InitializeGfxPipelineVertexAttributes(pipelineInfo, pipelineIdx);
+	InitializeGfxPipelinePushConstantRanges(pipelineInfo, pipelineIdx);
+	InitializeGfxPipelineDescriptorSets(pipelineInfo, pipelineIdx);
 
-	ToggleDynamicScissorState(pipelineInfo,true);
+	ToggleDynamicScissorState(pipelineInfo, true);
 
 	// Fragment
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EmissionEnabledBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::WrinklesEnabledBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableTranslucencyBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableRmaMapBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::FragmentBit, GameShaderSpecializationConstantFlag::EmissionEnabledBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::FragmentBit, GameShaderSpecializationConstantFlag::WrinklesEnabledBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::FragmentBit, GameShaderSpecializationConstantFlag::EnableTranslucencyBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::FragmentBit, GameShaderSpecializationConstantFlag::EnableRmaMapBit);
 
 	// Shared
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableNormalMapBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::ParallaxEnabledBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableLightMapsBit);
-	
+	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit, GameShaderSpecializationConstantFlag::EnableNormalMapBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit, GameShaderSpecializationConstantFlag::ParallaxEnabledBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit, GameShaderSpecializationConstantFlag::EnableLightMapsBit);
+
 	// Vertex
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableAnimationBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableMorphTargetAnimationBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableClippingBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::Enable3dOriginBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableExtendedVertexWeights);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableDepthBias);
+	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::VertexBit, GameShaderSpecializationConstantFlag::EnableAnimationBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::VertexBit, GameShaderSpecializationConstantFlag::EnableMorphTargetAnimationBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::VertexBit, GameShaderSpecializationConstantFlag::EnableClippingBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::VertexBit, GameShaderSpecializationConstantFlag::Enable3dOriginBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::VertexBit, GameShaderSpecializationConstantFlag::EnableExtendedVertexWeights);
+	ShaderSpecializationManager::AddSpecializationConstant(*this, pipelineInfo, pipelineIdx, prosper::ShaderStageFlags::VertexBit, GameShaderSpecializationConstantFlag::EnableDepthBias);
 
 	// Properties
 	auto &shaderSettings = client->GetGameWorldShaderSettings();
-	auto fSetPropertyValue = [this,&pipelineInfo](GameShaderSpecializationPropertyIndex prop,auto value) {
-		ShaderGameWorld::AddSpecializationConstant(
-			pipelineInfo,prosper::ShaderStageFlags::FragmentBit,umath::to_integral(prop),sizeof(value),&value
-		);
-	};
-	fSetPropertyValue(GameShaderSpecializationPropertyIndex::ShadowQuality,shaderSettings.shadowQuality);
-	fSetPropertyValue(GameShaderSpecializationPropertyIndex::DebugModeEnabled,static_cast<uint32_t>(shaderSettings.debugModeEnabled));
-	fSetPropertyValue(GameShaderSpecializationPropertyIndex::BloomOutputEnabled,static_cast<uint32_t>(shaderSettings.bloomEnabled));
-	fSetPropertyValue(GameShaderSpecializationPropertyIndex::EnableSsao,static_cast<uint32_t>(shaderSettings.ssaoEnabled));
-	fSetPropertyValue(GameShaderSpecializationPropertyIndex::EnableIbl,static_cast<uint32_t>(shaderSettings.iblEnabled));
-	fSetPropertyValue(GameShaderSpecializationPropertyIndex::EnableDynamicLighting,static_cast<uint32_t>(shaderSettings.dynamicLightingEnabled));
-	fSetPropertyValue(GameShaderSpecializationPropertyIndex::EnableDynamicShadows,static_cast<uint32_t>(shaderSettings.dynamicShadowsEnabled));
+	auto fSetPropertyValue = [this, &pipelineInfo](GameShaderSpecializationPropertyIndex prop, auto value) { ShaderGameWorld::AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::FragmentBit, umath::to_integral(prop), sizeof(value), &value); };
+	fSetPropertyValue(GameShaderSpecializationPropertyIndex::ShadowQuality, shaderSettings.shadowQuality);
+	fSetPropertyValue(GameShaderSpecializationPropertyIndex::DebugModeEnabled, static_cast<uint32_t>(shaderSettings.debugModeEnabled));
+	fSetPropertyValue(GameShaderSpecializationPropertyIndex::BloomOutputEnabled, static_cast<uint32_t>(shaderSettings.bloomEnabled));
+	fSetPropertyValue(GameShaderSpecializationPropertyIndex::EnableSsao, static_cast<uint32_t>(shaderSettings.ssaoEnabled));
+	fSetPropertyValue(GameShaderSpecializationPropertyIndex::EnableIbl, static_cast<uint32_t>(shaderSettings.iblEnabled));
+	fSetPropertyValue(GameShaderSpecializationPropertyIndex::EnableDynamicLighting, static_cast<uint32_t>(shaderSettings.dynamicLightingEnabled));
+	fSetPropertyValue(GameShaderSpecializationPropertyIndex::EnableDynamicShadows, static_cast<uint32_t>(shaderSettings.dynamicShadowsEnabled));
 }
 
 static auto cvNormalMappingEnabled = GetClientConVar("render_normalmapping_enabled");
-void ShaderGameWorldLightingPass::ApplyMaterialFlags(CMaterial &mat,MaterialFlags &outFlags) const {}
+void ShaderGameWorldLightingPass::ApplyMaterialFlags(CMaterial &mat, MaterialFlags &outFlags) const {}
 ShaderGameWorldLightingPass::MaterialData ShaderGameWorldLightingPass::GenerateMaterialData(CMaterial &mat)
 {
 	MaterialData matData {};
@@ -344,15 +312,13 @@ ShaderGameWorldLightingPass::MaterialData ShaderGameWorldLightingPass::GenerateM
 	if(data == nullptr)
 		return {};
 	auto *parallaxMap = mat.GetParallaxMap();
-	if(parallaxMap != nullptr && parallaxMap->texture != nullptr)
-	{
+	if(parallaxMap != nullptr && parallaxMap->texture != nullptr) {
 		matFlags |= MaterialFlags::Parallax;
 
-		data->GetFloat("parallax_height_scale",&matData.parallaxHeightScale);
+		data->GetFloat("parallax_height_scale", &matData.parallaxHeightScale);
 	}
 
-	if(cvNormalMappingEnabled->GetBool() == true)
-	{
+	if(cvNormalMappingEnabled->GetBool() == true) {
 		auto *normalMap = mat.GetNormalMap();
 		if(normalMap != nullptr && normalMap->texture != nullptr)
 			matFlags |= MaterialFlags::Normal;
@@ -361,45 +327,39 @@ ShaderGameWorldLightingPass::MaterialData ShaderGameWorldLightingPass::GenerateM
 	if(data->GetBool("black_to_alpha") == true)
 		matFlags |= MaterialFlags::BlackToAlpha;
 
-	matData.color = {1.f,1.f,1.f,1.f};
-	data->GetVector3("color_factor",reinterpret_cast<Vector3*>(&matData.color));
-	data->GetFloat("alpha_factor",&matData.color.a);
+	matData.color = {1.f, 1.f, 1.f, 1.f};
+	data->GetVector3("color_factor", reinterpret_cast<Vector3 *>(&matData.color));
+	data->GetFloat("alpha_factor", &matData.color.a);
 
-	if(data->GetBool("debug_mode",false))
+	if(data->GetBool("debug_mode", false))
 		matFlags |= MaterialFlags::Debug;
 
 	auto *glowMap = mat.GetGlowMap();
-	if(glowMap != nullptr && glowMap->texture != nullptr)
-	{
+	if(glowMap != nullptr && glowMap->texture != nullptr) {
 		auto texture = std::static_pointer_cast<Texture>(glowMap->texture);
 
 		auto &emissionFactor = data->GetValue("emission_factor");
-		if(emissionFactor != nullptr && typeid(*emissionFactor) == typeid(ds::Vector))
-		{
-			auto f = static_cast<ds::Vector*>(emissionFactor.get())->GetValue();
-			f *= data->GetFloat("emission_strength",1.f);
-			matData.emissionFactor = {f.r,f.g,f.b,1.f};
+		if(emissionFactor != nullptr && typeid(*emissionFactor) == typeid(ds::Vector)) {
+			auto f = static_cast<ds::Vector *>(emissionFactor.get())->GetValue();
+			f *= data->GetFloat("emission_strength", 1.f);
+			matData.emissionFactor = {f.r, f.g, f.b, 1.f};
 		}
 
 		if(texture->HasFlag(Texture::Flags::SRGB))
 			matFlags |= MaterialFlags::GlowSRGB;
 		auto bUseGlow = true;
-		if(data->GetBool("glow_alpha_only") == true)
-		{
+		if(data->GetBool("glow_alpha_only") == true) {
 			if(prosper::util::has_alpha(texture->GetVkTexture()->GetImage().GetFormat()) == false)
 				bUseGlow = false;
 		}
-		if(bUseGlow == true)
-		{
+		if(bUseGlow == true) {
 			int32_t glowMode = 1;
-			data->GetInt("glow_blend_diffuse_mode",&glowMode);
-			if(glowMode != 0)
-			{
+			data->GetInt("glow_blend_diffuse_mode", &glowMode);
+			if(glowMode != 0) {
 				matFlags |= MaterialFlags::Glow;
-				data->GetFloat("glow_blend_diffuse_scale",&matData.glowScale);
+				data->GetFloat("glow_blend_diffuse_scale", &matData.glowScale);
 			}
-			switch(glowMode)
-			{
+			switch(glowMode) {
 			case 1:
 				matFlags |= MaterialFlags::FMAT_GLOW_MODE_1;
 				break;
@@ -416,7 +376,7 @@ ShaderGameWorldLightingPass::MaterialData ShaderGameWorldLightingPass::GenerateM
 		}
 	}
 
-	data->GetFloat("alpha_discard_threshold",&matData.alphaDiscardThreshold);
+	data->GetFloat("alpha_discard_threshold", &matData.alphaDiscardThreshold);
 
 	auto hasRmaMap = (data->GetValue(Material::RMA_MAP_IDENTIFIER) != nullptr);
 	auto defaultMetalness = hasRmaMap ? 1.f : 0.f;
@@ -424,184 +384,153 @@ ShaderGameWorldLightingPass::MaterialData ShaderGameWorldLightingPass::GenerateM
 	auto defaultAo = hasRmaMap ? 1.f : 0.f;
 
 	matData.metalnessFactor = defaultMetalness;
-	data->GetFloat("metalness_factor",&matData.metalnessFactor);
+	data->GetFloat("metalness_factor", &matData.metalnessFactor);
 
 	matData.roughnessFactor = defaultRoughness;
-	auto hasRoughnessFactor = data->GetFloat("roughness_factor",&matData.roughnessFactor);
+	auto hasRoughnessFactor = data->GetFloat("roughness_factor", &matData.roughnessFactor);
 
 	matData.aoFactor = defaultAo;
-	data->GetFloat("ao_factor",&matData.aoFactor);
+	data->GetFloat("ao_factor", &matData.aoFactor);
 
 	float specularFactor;
-	if(data->GetFloat("specular_factor",&specularFactor))
-	{
+	if(data->GetFloat("specular_factor", &specularFactor)) {
 		if(hasRoughnessFactor == false)
 			matData.roughnessFactor = 1.f;
-		matData.roughnessFactor *= (1.f -specularFactor);
+		matData.roughnessFactor *= (1.f - specularFactor);
 	}
 
 	auto alphaMode = AlphaMode::Opaque;
-	if(data->IsString("alpha_mode"))
-	{
+	if(data->IsString("alpha_mode")) {
 		auto e = magic_enum::enum_cast<AlphaMode>(data->GetString("alpha_mode"));
 		alphaMode = e.has_value() ? *e : AlphaMode::Opaque;
 	}
 	else
-		alphaMode = static_cast<AlphaMode>(data->GetInt("alpha_mode",umath::to_integral(AlphaMode::Opaque)));
+		alphaMode = static_cast<AlphaMode>(data->GetInt("alpha_mode", umath::to_integral(AlphaMode::Opaque)));
 	matData.alphaMode = alphaMode;
 
 	auto alphaCutoff = 0.5f;
-	data->GetFloat("alpha_cutoff",&alphaCutoff);
+	data->GetFloat("alpha_cutoff", &alphaCutoff);
 	matData.alphaCutoff = alphaCutoff;
 	// Obsolete
 	//if(mat.IsTranslucent() == true)
 	//	matFlags |= MaterialFlags::Translucent;
 	return matData;
 }
-std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLightingPass::UpdateMaterialBuffer(
-	CMaterial &mat
-) const
+std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLightingPass::UpdateMaterialBuffer(CMaterial &mat)
 {
 	auto *buf = mat.GetSettingsBuffer();
 	if(buf == nullptr)
 		return {};
 
 	auto matData = GenerateMaterialData(mat);
-	ApplyMaterialFlags(mat,matData.flags);
-
-	buf->Write(0,matData);
+	ApplyMaterialFlags(mat, matData.flags);
+	InitializeMaterialData(mat, matData);
+	buf->Write(0, matData);
 	return matData;
 }
-void ShaderGameWorldLightingPass::UpdateRenderFlags(CModelSubMesh &mesh,SceneFlags &inOutFlags) {}
-bool ShaderGameWorldLightingPass::IsDepthPrepassEnabled() const {return m_depthPrepassEnabled;}
-uint32_t ShaderGameWorldLightingPass::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_SCENE.setIndex;}
-uint32_t ShaderGameWorldLightingPass::GetRendererDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDERER.setIndex;}
-uint32_t ShaderGameWorldLightingPass::GetInstanceDescriptorSetIndex() const {return DESCRIPTOR_SET_INSTANCE.setIndex;}
-uint32_t ShaderGameWorldLightingPass::GetRenderSettingsDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex;}
-uint32_t ShaderGameWorldLightingPass::GetLightDescriptorSetIndex() const {return DESCRIPTOR_SET_LIGHTS.setIndex;}
-uint32_t ShaderGameWorldLightingPass::GetMaterialDescriptorSetIndex() const {return GetMaterialDescriptorSetInfo().setIndex;}
-void ShaderGameWorldLightingPass::GetVertexAnimationPushConstantInfo(uint32_t &offset) const
+void ShaderGameWorldLightingPass::UpdateRenderFlags(CModelSubMesh &mesh, SceneFlags &inOutFlags) {}
+bool ShaderGameWorldLightingPass::IsDepthPrepassEnabled() const { return m_depthPrepassEnabled; }
+uint32_t ShaderGameWorldLightingPass::GetCameraDescriptorSetIndex() const { return DESCRIPTOR_SET_SCENE.setIndex; }
+uint32_t ShaderGameWorldLightingPass::GetRendererDescriptorSetIndex() const { return DESCRIPTOR_SET_RENDERER.setIndex; }
+uint32_t ShaderGameWorldLightingPass::GetInstanceDescriptorSetIndex() const { return DESCRIPTOR_SET_INSTANCE.setIndex; }
+uint32_t ShaderGameWorldLightingPass::GetRenderSettingsDescriptorSetIndex() const { return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex; }
+uint32_t ShaderGameWorldLightingPass::GetLightDescriptorSetIndex() const { return DESCRIPTOR_SET_LIGHTS.setIndex; }
+uint32_t ShaderGameWorldLightingPass::GetMaterialDescriptorSetIndex() const { return GetMaterialDescriptorSetInfo().setIndex; }
+void ShaderGameWorldLightingPass::InitializeMaterialData(CMaterial &mat, MaterialData &matData) {}
+void ShaderGameWorldLightingPass::GetVertexAnimationPushConstantInfo(uint32_t &offset) const { offset = offsetof(PushConstants, vertexAnimInfo); }
+bool ShaderGameWorldLightingPass::GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const
 {
-	offset = offsetof(PushConstants,vertexAnimInfo);
-}
-bool ShaderGameWorldLightingPass::GetRenderBufferTargets(
-	CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
-	std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
-) const
-{
-	if(ShaderEntity::GetRenderBufferTargets(mesh,pipelineIdx,outBuffers,outOffsets,outIndexBufferInfo) == false)
+	if(ShaderEntity::GetRenderBufferTargets(mesh, pipelineIdx, outBuffers, outOffsets, outIndexBufferInfo) == false)
 		return false;
 	auto &sceneMesh = mesh.GetSceneMesh();
 	outBuffers.push_back(nullptr); // Lightmap uv buffer is instance-based and handled by the model entity component
 	outOffsets.push_back(0ull);
 	return true;
 }
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo)
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo)
 {
 	auto *diffuseMap = mat.GetDiffuseMap();
-	if(diffuseMap == nullptr || diffuseMap->texture == nullptr)
+	if(diffuseMap == nullptr || diffuseMap->texture == nullptr) {
+		spdlog::debug("Failed to initialize material descriptor set for material '{}': Material has no albedo map!", mat.GetName());
 		return nullptr;
+	}
 	auto diffuseTexture = std::static_pointer_cast<Texture>(diffuseMap->texture);
-	if(diffuseTexture->HasValidVkTexture() == false)
+	if(diffuseTexture->HasValidVkTexture() == false) {
+		spdlog::debug("Failed to initialize material descriptor set for material '{}': Albedo map of material is not valid!", mat.GetName());
 		return nullptr;
+	}
 	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(descSetInfo);
-	mat.SetDescriptorSetGroup(*this,descSetGroup);
+	mat.SetDescriptorSetGroup(*this, descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
-	descSet.SetBindingTexture(*diffuseTexture->GetVkTexture(),umath::to_integral(MaterialBinding::DiffuseMap));
+	descSet.SetBindingTexture(*diffuseTexture->GetVkTexture(), umath::to_integral(MaterialBinding::DiffuseMap));
 
 	auto *normalMap = mat.GetNormalMap();
-	if(normalMap != nullptr && normalMap->texture != nullptr)
-	{
+	if(normalMap != nullptr && normalMap->texture != nullptr) {
 		auto texture = std::static_pointer_cast<Texture>(normalMap->texture);
 		if(texture->HasValidVkTexture())
-			descSet.SetBindingTexture(*texture->GetVkTexture(),umath::to_integral(MaterialBinding::NormalMap));
+			descSet.SetBindingTexture(*texture->GetVkTexture(), umath::to_integral(MaterialBinding::NormalMap));
 	}
 
 	auto *parallaxMap = mat.GetParallaxMap();
-	if(parallaxMap != nullptr && parallaxMap->texture != nullptr)
-	{
+	if(parallaxMap != nullptr && parallaxMap->texture != nullptr) {
 		auto texture = std::static_pointer_cast<Texture>(parallaxMap->texture);
 		if(texture->HasValidVkTexture())
-			descSet.SetBindingTexture(*texture->GetVkTexture(),umath::to_integral(MaterialBinding::ParallaxMap));
+			descSet.SetBindingTexture(*texture->GetVkTexture(), umath::to_integral(MaterialBinding::ParallaxMap));
 	}
 
 	auto *glowMap = mat.GetGlowMap();
-	if(glowMap != nullptr && glowMap->texture != nullptr)
-	{
+	if(glowMap != nullptr && glowMap->texture != nullptr) {
 		auto texture = std::static_pointer_cast<Texture>(glowMap->texture);
 		if(texture->HasValidVkTexture())
-			descSet.SetBindingTexture(*texture->GetVkTexture(),umath::to_integral(MaterialBinding::GlowMap));
+			descSet.SetBindingTexture(*texture->GetVkTexture(), umath::to_integral(MaterialBinding::GlowMap));
 	}
-	InitializeMaterialBuffer(descSet,mat);
+	InitializeMaterialBuffer(descSet, mat);
 
 	return descSetGroup;
 }
-std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLightingPass::InitializeMaterialBuffer(
-	prosper::IDescriptorSet &descSet,CMaterial &mat,uint32_t bindingIdx
-)
+std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLightingPass::InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, CMaterial &mat, uint32_t bindingIdx)
 {
 	auto settingsBuffer = mat.GetSettingsBuffer() ? mat.GetSettingsBuffer()->shared_from_this() : nullptr;
 	if(settingsBuffer == nullptr && g_materialSettingsBuffer)
 		settingsBuffer = g_materialSettingsBuffer->AllocateBuffer();
 	if(settingsBuffer == nullptr)
 		return {};
-	descSet.SetBindingUniformBuffer(*settingsBuffer,bindingIdx);
+	descSet.SetBindingUniformBuffer(*settingsBuffer, bindingIdx);
 	mat.SetSettingsBuffer(*settingsBuffer);
 
 	auto matData = GenerateMaterialData(mat);
 
-	settingsBuffer->Write(0,matData);
+	settingsBuffer->Write(0, matData);
 	return matData;
 }
-std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLightingPass::InitializeMaterialBuffer(
-	prosper::IDescriptorSet &descSet,CMaterial &mat
-)
+std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLightingPass::InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, CMaterial &mat)
 {
 	auto settingsBuffer = mat.GetSettingsBuffer() ? mat.GetSettingsBuffer()->shared_from_this() : nullptr;
 	if(settingsBuffer == nullptr && g_materialSettingsBuffer)
 		settingsBuffer = g_materialSettingsBuffer->AllocateBuffer();
 	if(settingsBuffer == nullptr)
 		return {};
-	descSet.SetBindingUniformBuffer(*settingsBuffer,umath::to_integral(MaterialBinding::MaterialSettings));
+	descSet.SetBindingUniformBuffer(*settingsBuffer, umath::to_integral(MaterialBinding::MaterialSettings));
 	mat.SetSettingsBuffer(*settingsBuffer);
 	return UpdateMaterialBuffer(mat);
 }
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(CMaterial &mat)
-{
-	return InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
-}
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(CMaterial &mat) { return InitializeMaterialDescriptorSet(mat, DESCRIPTOR_SET_MATERIAL); }
 
 ////////
 
-GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetBaseSpecializationFlags() const
-{
-	return GameShaderSpecializationConstantFlag::None;
-}
+GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetBaseSpecializationFlags() const { return GameShaderSpecializationConstantFlag::None; }
 
-void ShaderGameWorldLightingPass::RecordBindScene(
-	rendering::ShaderProcessor &shaderProcessor,
-	const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
-	prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
-	prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
-	prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
-	const Vector4 &drawOrigin,ShaderGameWorld::SceneFlags &inOutSceneFlags
-) const
+void ShaderGameWorldLightingPass::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
+  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, prosper::IDescriptorSet &dsMaterial, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
 {
-	std::array<prosper::IDescriptorSet*,6> descSets {
-		descSets[0] = &dsMaterial,
-		descSets[1] = &dsScene,
-		descSets[2] = &dsRenderer,
-		descSets[3] = &dsRenderSettings,
-		descSets[4] = &dsLights,
-		descSets[5] = &dsShadows
-	};
+	std::array<prosper::IDescriptorSet *, 6> descSets {descSets[0] = &dsMaterial, descSets[1] = &dsScene, descSets[2] = &dsRenderer, descSets[3] = &dsRenderSettings, descSets[4] = &dsLights, descSets[5] = &dsShadows};
 
-	RecordPushSceneConstants(shaderProcessor,scene,drawOrigin);
+	RecordPushSceneConstants(shaderProcessor, scene, drawOrigin);
 	static const std::vector<uint32_t> dynamicOffsets {};
-	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,shaderProcessor.GetCurrentPipelineLayout(),pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX,descSets,dynamicOffsets);
+	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, shaderProcessor.GetCurrentPipelineLayout(), pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX, descSets, dynamicOffsets);
 }
 
-bool ShaderGameWorldLightingPass::RecordPushSceneConstants(rendering::ShaderProcessor &shaderProcessor,const pragma::CSceneComponent &scene,const Vector4 &drawOrigin) const
+bool ShaderGameWorldLightingPass::RecordPushSceneConstants(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const Vector4 &drawOrigin) const
 {
 	ShaderGameWorldLightingPass::PushConstants pushConstants {};
 	pushConstants.Initialize();
@@ -610,7 +539,7 @@ bool ShaderGameWorldLightingPass::RecordPushSceneConstants(rendering::ShaderProc
 	assert(hCam.valid());
 	pushConstants.debugMode = scene.GetDebugMode();
 	pushConstants.flags = m_sceneFlags;
-	return shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
+	return shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, 0u, sizeof(pushConstants), &pushConstants);
 }
 
 ////////
@@ -621,64 +550,61 @@ uint32_t ShaderSpecializationManager::GetPipelineIndexStartOffset(PassTypeIndex 
 		return 0;
 	return m_passTypeSpecializationToPipelineIdx[passType].pipelineIndexRange.first;
 }
-void ShaderSpecializationManager::SetPipelineIndexRange(PassTypeIndex passType,uint32_t startIndex,uint32_t endIndex)
+void ShaderSpecializationManager::SetPipelineIndexRange(PassTypeIndex passType, uint32_t startIndex, uint32_t endIndex)
 {
 	auto &info = InitializePassTypeSpecializations(passType);
-	info.pipelineIndexRange = {startIndex,endIndex};
+	info.pipelineIndexRange = {startIndex, endIndex};
 }
 ShaderSpecializationManager::PassTypeIndex ShaderSpecializationManager::GetBasePassType(uint32_t pipelineIdx) const
 {
-	for(auto it=m_passTypeSpecializationToPipelineIdx.begin();it!=m_passTypeSpecializationToPipelineIdx.end();++it)
-	{
+	for(auto it = m_passTypeSpecializationToPipelineIdx.begin(); it != m_passTypeSpecializationToPipelineIdx.end(); ++it) {
 		auto &info = *it;
 		if(pipelineIdx >= info.pipelineIndexRange.first && pipelineIdx < info.pipelineIndexRange.second)
-			return it -m_passTypeSpecializationToPipelineIdx.begin();
+			return it - m_passTypeSpecializationToPipelineIdx.begin();
 	}
-	throw std::logic_error{"Invalid pipeline index " +std::to_string(pipelineIdx) +"!"};
+	throw std::logic_error {"Invalid pipeline index " + std::to_string(pipelineIdx) + "!"};
 }
-bool ShaderSpecializationManager::IsSpecializationConstantSet(uint32_t pipelineIdx,SpecializationFlags flag) const
+bool ShaderSpecializationManager::IsSpecializationConstantSet(uint32_t pipelineIdx, SpecializationFlags flag) const
 {
 	if(pipelineIdx >= m_pipelineSpecializations.size())
 		return false;
 	auto flags = m_pipelineSpecializations[pipelineIdx];
-	return (flags &flag) != 0;
+	return (flags & flag) != 0;
 }
 ShaderSpecializationManager::PassTypeInfo &ShaderSpecializationManager::InitializePassTypeSpecializations(PassTypeIndex passType)
 {
-	if(passType >= m_passTypeSpecializationToPipelineIdx.size())
-	{
+	if(passType >= m_passTypeSpecializationToPipelineIdx.size()) {
 		auto n = m_passTypeSpecializationToPipelineIdx.size();
-		m_passTypeSpecializationToPipelineIdx.resize(passType +1);
-		for(auto i=n;i<m_passTypeSpecializationToPipelineIdx.size();++i)
-			std::fill(m_passTypeSpecializationToPipelineIdx[i].specializationToPipelineIdx.begin(),m_passTypeSpecializationToPipelineIdx[i].specializationToPipelineIdx.end(),std::numeric_limits<uint32_t>::max());
+		m_passTypeSpecializationToPipelineIdx.resize(passType + 1);
+		for(auto i = n; i < m_passTypeSpecializationToPipelineIdx.size(); ++i)
+			std::fill(m_passTypeSpecializationToPipelineIdx[i].specializationToPipelineIdx.begin(), m_passTypeSpecializationToPipelineIdx[i].specializationToPipelineIdx.end(), std::numeric_limits<uint32_t>::max());
 	}
 	return m_passTypeSpecializationToPipelineIdx[passType];
 }
-void ShaderSpecializationManager::RegisterSpecializations(PassTypeIndex passType,SpecializationFlags staticFlags,SpecializationFlags dynamicFlags)
+void ShaderSpecializationManager::RegisterSpecializations(PassTypeIndex passType, SpecializationFlags staticFlags, SpecializationFlags dynamicFlags)
 {
 	auto &specializationMap = InitializePassTypeSpecializations(passType).specializationToPipelineIdx;
 	auto dynamicFlagValues = umath::get_power_of_2_values(dynamicFlags);
 	auto &permutations = m_pipelineSpecializations;
-	std::function<void(uint32_t,SpecializationFlags)> registerSpecialization = nullptr;
-	permutations.reserve(permutations.size() +umath::pow(static_cast<size_t>(2),dynamicFlagValues.size()));
-	registerSpecialization = [&specializationMap,&registerSpecialization,&dynamicFlagValues,&permutations](uint32_t idx,SpecializationFlags perm) {
-		if(idx >= dynamicFlagValues.size())
-		{
+	std::function<void(uint32_t, SpecializationFlags)> registerSpecialization = nullptr;
+	permutations.reserve(permutations.size() + umath::pow(static_cast<size_t>(2), dynamicFlagValues.size()));
+	registerSpecialization = [&specializationMap, &registerSpecialization, &dynamicFlagValues, &permutations](uint32_t idx, SpecializationFlags perm) {
+		if(idx >= dynamicFlagValues.size()) {
 			permutations.push_back(perm);
-			specializationMap[perm] = permutations.size() -1;
+			specializationMap[perm] = permutations.size() - 1;
 			return;
 		}
 		auto curFlag = dynamicFlagValues[idx];
-		registerSpecialization(idx +1,perm);
-		registerSpecialization(idx +1,perm |= curFlag);
+		registerSpecialization(idx + 1, perm);
+		registerSpecialization(idx + 1, perm |= curFlag);
 	};
-	registerSpecialization(0,staticFlags);
+	registerSpecialization(0, staticFlags);
 }
-std::optional<uint32_t> ShaderSpecializationManager::FindSpecializationPipelineIndex(PassTypeIndex passType,uint64_t specializationFlags) const
+std::optional<uint32_t> ShaderSpecializationManager::FindSpecializationPipelineIndex(PassTypeIndex passType, uint64_t specializationFlags) const
 {
 	if(passType >= m_passTypeSpecializationToPipelineIdx.size())
 		return {};
 	auto &specToPipelineIdx = m_passTypeSpecializationToPipelineIdx[passType].specializationToPipelineIdx;
 	auto pipelineIdx = specToPipelineIdx[specializationFlags];
-	return (pipelineIdx != std::numeric_limits<uint32_t>::max()) ? pipelineIdx : std::optional<uint32_t>{};
+	return (pipelineIdx != std::numeric_limits<uint32_t>::max()) ? pipelineIdx : std::optional<uint32_t> {};
 }

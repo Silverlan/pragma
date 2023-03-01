@@ -16,30 +16,22 @@
 using namespace pragma;
 
 decltype(ShaderClearColor::VERTEX_BINDING_VERTEX) ShaderClearColor::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex};
-decltype(ShaderClearColor::VERTEX_ATTRIBUTE_POSITION) ShaderClearColor::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX,prosper::Format::R32G32_SFloat};
-ShaderClearColor::ShaderClearColor(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderGraphics(context,identifier,"screen/vs_screen","screen/fs_clear_color")
-{}
+decltype(ShaderClearColor::VERTEX_ATTRIBUTE_POSITION) ShaderClearColor::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX, prosper::Format::R32G32_SFloat};
+ShaderClearColor::ShaderClearColor(prosper::IPrContext &context, const std::string &identifier) : ShaderGraphics(context, identifier, "screen/vs_screen", "screen/fs_clear_color") {}
 
-ShaderClearColor::ShaderClearColor(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
-	: ShaderGraphics(context,identifier,vsShader,fsShader,gsShader)
-{}
+ShaderClearColor::ShaderClearColor(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderGraphics(context, identifier, vsShader, fsShader, gsShader) {}
 
-void ShaderClearColor::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderClearColor::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
-	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_POSITION);
+	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 }
 
-bool ShaderClearColor::RecordDraw(prosper::ShaderBindState &bindState,const PushConstants &pushConstants) const
+bool ShaderClearColor::RecordDraw(prosper::ShaderBindState &bindState, const PushConstants &pushConstants) const
 {
-	if(
-		RecordBindVertexBuffer(bindState,*GetContext().GetCommonBufferCache().GetSquareVertexBuffer()) == false ||
-		RecordPushConstants(bindState,pushConstants) == false ||
-		prosper::ShaderGraphics::RecordDraw(bindState,prosper::CommonBufferCache::GetSquareVertexCount()) == false
-	)
+	if(RecordBindVertexBuffer(bindState, *GetContext().GetCommonBufferCache().GetSquareVertexBuffer()) == false || RecordPushConstants(bindState, pushConstants) == false || prosper::ShaderGraphics::RecordDraw(bindState, prosper::CommonBufferCache::GetSquareVertexCount()) == false)
 		return false;
 	return true;
 }

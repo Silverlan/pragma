@@ -12,12 +12,9 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(npc_dragonworm,NPCDragonWorm);
+LINK_ENTITY_TO_CLASS(npc_dragonworm, NPCDragonWorm);
 
-void SDragonWormComponent::Initialize()
-{
-	BaseEntityComponent::Initialize();
-}
+void SDragonWormComponent::Initialize() { BaseEntityComponent::Initialize(); }
 
 void SDragonWormComponent::OnEntitySpawn()
 {

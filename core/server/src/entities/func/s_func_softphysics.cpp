@@ -14,14 +14,11 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(func_physics_softbody,FuncSoftPhysics);
+LINK_ENTITY_TO_CLASS(func_physics_softbody, FuncSoftPhysics);
 
-void SFuncSoftPhysicsComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
-{
-	packet->Write<PhysSoftBodyInfo>(m_softBodyInfo);
-}
+void SFuncSoftPhysicsComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { packet->Write<PhysSoftBodyInfo>(m_softBodyInfo); }
 
-void SFuncSoftPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SFuncSoftPhysicsComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////
 

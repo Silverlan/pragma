@@ -13,19 +13,13 @@
 #include <pragma/game/game.h>
 #include "pragma/entities/components/base_physics_component.hpp"
 
-PhysObjKinematic::PhysObjKinematic()
-	: m_bKinematic(false)
-{}
-void PhysObjKinematic::SetKinematic(bool b)
-{
-	m_bKinematic = b;
-}
+PhysObjKinematic::PhysObjKinematic() : m_bKinematic(false) {}
+void PhysObjKinematic::SetKinematic(bool b) { m_bKinematic = b; }
 
 void PhysObjDynamic::PreSimulate()
 {
-	auto *phys = dynamic_cast<PhysObj*>(this);
-	for(auto &hObj : phys->GetCollisionObjects())
-	{
+	auto *phys = dynamic_cast<PhysObj *>(this);
+	for(auto &hObj : phys->GetCollisionObjects()) {
 		if(hObj.IsValid() == false || hObj->IsRigid() == false)
 			continue;
 		hObj->GetRigidBody()->PreSimulate();
@@ -33,28 +27,26 @@ void PhysObjDynamic::PreSimulate()
 }
 void PhysObjDynamic::PostSimulate()
 {
-	auto *phys = dynamic_cast<PhysObj*>(this);
-	for(auto &hObj : phys->GetCollisionObjects())
-	{
+	auto *phys = dynamic_cast<PhysObj *>(this);
+	for(auto &hObj : phys->GetCollisionObjects()) {
 		if(hObj.IsValid() == false || hObj->IsRigid() == false)
 			continue;
 		hObj->GetRigidBody()->PostSimulate();
 	}
 }
 
-bool PhysObjKinematic::IsKinematic() const {return false;}
+bool PhysObjKinematic::IsKinematic() const { return false; }
 
 ////////////////////////////////////
 
 #if PHYS_KEEP_SIMULATION_TRANSFORM != 0
 void PhysObjDynamic::PreSimulate()
 {
-	PhysObj *phys = dynamic_cast<PhysObj*>(this);
-	std::vector<PhysCollisionObject*> &objs = phys->GetCollisionObjects();
+	PhysObj *phys = dynamic_cast<PhysObj *>(this);
+	std::vector<PhysCollisionObject *> &objs = phys->GetCollisionObjects();
 	if(m_offsets.size() != objs.size())
 		m_offsets.resize(objs.size());
-	for(unsigned int i=0;i<objs.size();i++)
-	{
+	for(unsigned int i = 0; i < objs.size(); i++) {
 		PhysCollisionObject *o = objs[i];
 		m_offsets[i] = o->GetWorldTransform();
 	}
@@ -78,7 +70,7 @@ void PhysObjDynamic::PostSimulate()
 Vector3 PhysObjDynamic::GetSimulationOffset(unsigned int idx)
 {
 	if(idx >= m_offsets.size())
-		return Vector3(0,0,0);
+		return Vector3(0, 0, 0);
 	PhysTransform &t = m_offsets[idx];
 	return t.GetOrigin();
 }

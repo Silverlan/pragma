@@ -25,19 +25,13 @@
 #include <cinttypes>
 #include <mathutil/glmutil.h>
 
-namespace Geometry
-{
-  DLLNETWORK bool triangulate(const std::vector<Vector2> &contour,std::vector<uint16_t> &result);
-  DLLNETWORK float calc_area(const std::vector<Vector2> &contour);
+namespace Geometry {
+	DLLNETWORK bool triangulate(const std::vector<Vector2> &contour, std::vector<uint16_t> &result);
+	DLLNETWORK float calc_area(const std::vector<Vector2> &contour);
 
-  // decide if point Px/Py is inside triangle defined by
-  // (Ax,Ay) (Bx,By) (Cx,Cy)
-  DLLNETWORK bool inside_triangle(
-	  float Ax,float Ay,
-	  float Bx, float By,
-	  float Cx, float Cy,
-	  float Px, float Py
-  );
+	// decide if point Px/Py is inside triangle defined by
+	// (Ax,Ay) (Bx,By) (Cx,Cy)
+	DLLNETWORK bool inside_triangle(float Ax, float Ay, float Bx, float By, float Cx, float Cy, float Px, float Py);
 };
 
 #endif

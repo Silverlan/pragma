@@ -11,7 +11,4 @@
 #include "pragma/clientstate/clientstate.h"
 
 extern ClientState *client;
-ConVarHandle GetClientConVar(std::string scmd)
-{
-	return client->GetConVarHandle(scmd);
-}
+ConVarHandle GetClientConVar(std::string scmd) { return client->GetConVarHandle(scmd); }

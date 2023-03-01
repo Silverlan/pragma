@@ -62,15 +62,15 @@ int Lua::ents::Client::get_view_body(lua_State *l)
 int Lua::ents::Client::get_instance_buffer(lua_State *l)
 {
 	auto &instanceBuffer = pragma::CRenderComponent::GetInstanceBuffer();
-	Lua::Push<std::shared_ptr<prosper::IBuffer>>(l,instanceBuffer);
-	Lua::PushInt(l,instanceBuffer->GetInstanceSize());
+	Lua::Push<std::shared_ptr<prosper::IBuffer>>(l, instanceBuffer);
+	Lua::PushInt(l, instanceBuffer->GetInstanceSize());
 	return 2;
 }
 
 int Lua::ents::Client::get_instance_bone_buffer(lua_State *l)
 {
 	auto &instanceBuffer = pragma::get_instance_bone_buffer();
-	Lua::Push<std::shared_ptr<prosper::IBuffer>>(l,instanceBuffer);
-	Lua::PushInt(l,instanceBuffer->GetInstanceSize());
+	Lua::Push<std::shared_ptr<prosper::IBuffer>>(l, instanceBuffer);
+	Lua::PushInt(l, instanceBuffer->GetInstanceSize());
 	return 2;
 }

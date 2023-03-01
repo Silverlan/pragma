@@ -15,41 +15,24 @@
 using namespace pragma;
 
 decltype(ShaderPPDoF::DESCRIPTOR_SET_TEXTURE) ShaderPPDoF::DESCRIPTOR_SET_TEXTURE = {ShaderPPBase::DESCRIPTOR_SET_TEXTURE};
-decltype(ShaderPPDoF::DESCRIPTOR_SET_DEPTH_BUFFER) ShaderPPDoF::DESCRIPTOR_SET_DEPTH_BUFFER = {
-	{
-		prosper::DescriptorSetInfo::Binding { // Depth Buffer
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		}
-	}
-};
-ShaderPPDoF::ShaderPPDoF(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderPPBase(context,identifier,"pfm/post_processing/fs_depth_of_field")
-{
-	SetBaseShader<prosper::ShaderCopyImage>();
-}
+decltype(ShaderPPDoF::DESCRIPTOR_SET_DEPTH_BUFFER) ShaderPPDoF::DESCRIPTOR_SET_DEPTH_BUFFER = {{prosper::DescriptorSetInfo::Binding {// Depth Buffer
+  prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
+ShaderPPDoF::ShaderPPDoF(prosper::IPrContext &context, const std::string &identifier) : ShaderPPBase(context, identifier, "pfm/post_processing/fs_depth_of_field") { SetBaseShader<prosper::ShaderCopyImage>(); }
 
-void ShaderPPDoF::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderPPDoF::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 	AddDefaultVertexAttributes(pipelineInfo);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_TEXTURE);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_DEPTH_BUFFER);
-	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_TEXTURE);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_DEPTH_BUFFER);
+	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit);
 }
-bool ShaderPPDoF::RecordDraw(
-	prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetTexture,
-	prosper::IDescriptorSet &descSetDepth,const PushConstants &pushConstants
-) const
+bool ShaderPPDoF::RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetTexture, prosper::IDescriptorSet &descSetDepth, const PushConstants &pushConstants) const
 {
-	return RecordPushConstants(bindState,pushConstants) &&
-		RecordBindDescriptorSets(bindState,{&descSetDepth},DESCRIPTOR_SET_DEPTH_BUFFER.setIndex) &&
-		ShaderPPBase::RecordDraw(bindState,descSetTexture);
+	return RecordPushConstants(bindState, pushConstants) && RecordBindDescriptorSets(bindState, {&descSetDepth}, DESCRIPTOR_SET_DEPTH_BUFFER.setIndex) && ShaderPPBase::RecordDraw(bindState, descSetTexture);
 }
-void ShaderPPDoF::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
+void ShaderPPDoF::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)
 {
-	CreateCachedRenderPass<ShaderPPDoF>({{{
-		prosper::Format::R16G16B16A16_UNorm,prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::DontCare,
-		prosper::AttachmentStoreOp::Store,prosper::SampleCountFlags::e1Bit,prosper::ImageLayout::ColorAttachmentOptimal
-	}}},outRenderPass,pipelineIdx);
+	CreateCachedRenderPass<ShaderPPDoF>({{{prosper::Format::R16G16B16A16_UNorm, prosper::ImageLayout::ColorAttachmentOptimal, prosper::AttachmentLoadOp::DontCare, prosper::AttachmentStoreOp::Store, prosper::SampleCountFlags::e1Bit, prosper::ImageLayout::ColorAttachmentOptimal}}},
+	  outRenderPass, pipelineIdx);
 }

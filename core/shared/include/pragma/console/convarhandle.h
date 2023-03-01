@@ -10,11 +10,10 @@
 #include "pragma/networkdefinitions.h"
 #include <memory>
 class DLLNETWORK ConVar;
-class DLLNETWORK PtrConVar
-{
-private:
+class DLLNETWORK PtrConVar {
+  private:
 	ConVar *m_cvar;
-public:
+  public:
 	PtrConVar();
 	ConVar *get();
 	void set(ConVar *cvar);
@@ -24,11 +23,10 @@ public:
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
-class DLLNETWORK ConVarHandle
-{
-private:
+class DLLNETWORK ConVarHandle {
+  private:
 	std::shared_ptr<PtrConVar> m_cvar;
-public:
+  public:
 	ConVarHandle(std::shared_ptr<PtrConVar> &sptr);
 	ConVar *operator->();
 };

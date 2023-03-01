@@ -1,0 +1,5 @@
+"skybox"
+{
+	$texture skybox "skybox/nebula_dark"
+	$int mipmap_load_mode -1
+}

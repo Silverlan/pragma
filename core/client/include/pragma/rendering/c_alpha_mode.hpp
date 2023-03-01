@@ -13,10 +13,8 @@
 #include <cinttypes>
 #include <mathutil/uvec.h>
 
-namespace pragma
-{
-	enum class ParticleAlphaMode : uint32_t
-	{
+namespace pragma {
+	enum class ParticleAlphaMode : uint32_t {
 		Additive = 0u,
 		AdditiveByColor,
 		Opaque,
@@ -27,7 +25,7 @@ namespace pragma
 
 		Count
 	};
-	DLLCLIENT bool premultiply_alpha(Vector4 &color,pragma::ParticleAlphaMode alphaMode);
+	DLLCLIENT bool premultiply_alpha(Vector4 &color, pragma::ParticleAlphaMode alphaMode);
 };
 
 #endif

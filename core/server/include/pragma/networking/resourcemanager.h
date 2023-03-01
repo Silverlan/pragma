@@ -13,19 +13,17 @@
 
 #undef FindResource
 
-class DLLSERVER ResourceManager
-{
-private:
-	struct ResourceInfo
-	{
-		ResourceInfo(const std::string &fileName,bool stream);
+class DLLSERVER ResourceManager {
+  private:
+	struct ResourceInfo {
+		ResourceInfo(const std::string &fileName, bool stream);
 		std::string fileName;
 		bool stream;
 	};
 	static std::vector<ResourceInfo> m_resources;
-public:
+  public:
 	static const std::vector<ResourceInfo> &GetResources();
-	static bool AddResource(std::string res,bool stream=false);
+	static bool AddResource(std::string res, bool stream = false);
 	static unsigned int GetResourceCount();
 	static bool IsValidResource(std::string res);
 	static void ClearResources();

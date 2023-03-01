@@ -10,15 +10,12 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 #include <string>
 
-namespace pragma
-{
-	class DLLNETWORK BaseEnvFireComponent
-		: public BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLNETWORK BaseEnvFireComponent : public BaseEntityComponent {
+	  public:
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
-	protected:
+	  protected:
 		std::string m_fireType = "fire";
 	};
 };

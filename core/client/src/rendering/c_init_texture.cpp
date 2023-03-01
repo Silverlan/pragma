@@ -18,34 +18,30 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 
-static void get_filter_mode(UInt32 filter,prosper::Filter &minFilter,prosper::Filter &magFilter,prosper::SamplerMipmapMode &mipmapMode,UInt32 &anisotropy)
+static void get_filter_mode(UInt32 filter, prosper::Filter &minFilter, prosper::Filter &magFilter, prosper::SamplerMipmapMode &mipmapMode, UInt32 &anisotropy)
 {
 	anisotropy = 1; // 1 = off
 	if(filter < 0)
 		filter = 0;
 	else if(filter > 6)
 		filter = 6;
-	if(filter == 0)
-	{
+	if(filter == 0) {
 		minFilter = prosper::Filter::Nearest;
 		magFilter = prosper::Filter::Nearest;
 		mipmapMode = prosper::SamplerMipmapMode::Nearest;
 	}
-	else if(filter == 1)
-	{
+	else if(filter == 1) {
 		minFilter = prosper::Filter::Nearest;
 		magFilter = prosper::Filter::Linear;
 		mipmapMode = prosper::SamplerMipmapMode::Nearest;
 	}
-	else
-	{
+	else {
 		minFilter = prosper::Filter::Linear;
 		magFilter = prosper::Filter::Linear;
 		mipmapMode = prosper::SamplerMipmapMode::Linear;
-		if(filter >= 3)
-		{
+		if(filter >= 3) {
 			filter -= 2;
-			anisotropy = umath::pow(static_cast<uint32_t>(2),filter);
+			anisotropy = umath::pow(static_cast<uint32_t>(2), filter);
 		}
 	}
 }
@@ -66,21 +62,21 @@ static uint32_t get_quality_lod_offset()
 }
 
 static CVar cvTextureFiltering = GetClientConVar("cl_render_texture_filtering");
-static void CVAR_CALLBACK_cl_render_texture_quality(NetworkState*,ConVar*,int,int)
+static void CVAR_CALLBACK_cl_render_texture_quality(NetworkState *, ConVar *, int, int)
 {
 	if(client == nullptr)
 		return;
 	c_engine->GetRenderContext().WaitIdle();
-	prosper::Filter minFilter,magFilter;
+	prosper::Filter minFilter, magFilter;
 	prosper::SamplerMipmapMode mipmapMode;
 	UInt32 anisotropy;
-	get_filter_mode(cvTextureFiltering->GetInt(),minFilter,magFilter,mipmapMode,anisotropy);
+	get_filter_mode(cvTextureFiltering->GetInt(), minFilter, magFilter, mipmapMode, anisotropy);
 	auto lodOffset = get_quality_lod_offset();
-	auto &materialManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager());
+	auto &materialManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager());
 	auto &textureManager = materialManager.GetTextureManager();
-	auto &sampler = static_cast<msys::TextureLoader&>(textureManager.GetLoader()).GetTextureSampler();
+	auto &sampler = static_cast<msys::TextureLoader &>(textureManager.GetLoader()).GetTextureSampler();
 	//auto &customSamplers = textureManager.GetCustomSamplers();
-	auto fUpdateSampler = [anisotropy,mipmapMode,minFilter,magFilter,lodOffset](prosper::ISampler &sampler) {
+	auto fUpdateSampler = [anisotropy, mipmapMode, minFilter, magFilter, lodOffset](prosper::ISampler &sampler) {
 		sampler.SetMaxAnisotropy(static_cast<float>(anisotropy));
 		sampler.SetMipmapMode(mipmapMode);
 		sampler.SetMinFilter(minFilter);
@@ -97,5 +93,6 @@ static void CVAR_CALLBACK_cl_render_texture_quality(NetworkState*,ConVar*,int,in
 	}*/
 	materialManager.ReloadMaterialShaders(); // Make sure to reload descriptor sets (So samplers are updated)
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_render_texture_filtering,CVAR_CALLBACK_cl_render_texture_quality);
-REGISTER_CONVAR_CALLBACK_CL(cl_render_texture_quality,CVAR_CALLBACK_cl_render_texture_quality);
+
+REGISTER_CONVAR_CALLBACK_CL(cl_render_texture_filtering, CVAR_CALLBACK_cl_render_texture_quality);
+REGISTER_CONVAR_CALLBACK_CL(cl_render_texture_quality, CVAR_CALLBACK_cl_render_texture_quality);

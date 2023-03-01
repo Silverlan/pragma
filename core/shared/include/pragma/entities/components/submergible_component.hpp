@@ -11,18 +11,15 @@
 #include <sharedutils/property/util_property.hpp>
 
 class DamageInfo;
-namespace pragma
-{
+namespace pragma {
 	class BaseFuncWaterComponent;
-	class DLLNETWORK SubmergibleComponent final
-		: public BaseEntityComponent
-	{
-	public:
+	class DLLNETWORK SubmergibleComponent final : public BaseEntityComponent {
+	  public:
 		static ComponentEventId EVENT_ON_WATER_SUBMERGED;
 		static ComponentEventId EVENT_ON_WATER_EMERGED;
 		static ComponentEventId EVENT_ON_WATER_ENTERED;
 		static ComponentEventId EVENT_ON_WATER_EXITED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		SubmergibleComponent(BaseEntity &ent);
 		virtual void Initialize() override;
@@ -31,13 +28,13 @@ namespace pragma
 		bool IsFullySubmerged() const;
 		bool IsInWater() const;
 		float GetSubmergedFraction() const;
-		void SetSubmergedFraction(BaseEntity &waterEntity,float fraction);
+		void SetSubmergedFraction(BaseEntity &waterEntity, float fraction);
 
 		BaseEntity *GetWaterEntity();
 		const BaseEntity *GetWaterEntity() const;
 		const util::PFloatProperty &GetSubmergedFractionProperty() const;
 		virtual void InitializeLuaObject(lua_State *l) override;
-	protected:
+	  protected:
 		util::PFloatProperty m_submergedFraction;
 		EntityHandle m_waterEntity = {};
 		virtual void OnWaterEntered();

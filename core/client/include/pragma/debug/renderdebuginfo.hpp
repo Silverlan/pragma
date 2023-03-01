@@ -13,9 +13,8 @@
 #include <chrono>
 #include <memory>
 
-class DLLCLIENT RenderDebugInfo
-{
-public:
+class DLLCLIENT RenderDebugInfo {
+  public:
 	uint32_t triangleCount = 0;
 	uint32_t vertexCount = 0;
 	uint32_t shadowMeshCount = 0;

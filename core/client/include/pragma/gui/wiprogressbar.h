@@ -13,20 +13,18 @@
 #include <mathutil/umath.h>
 #include <sharedutils/property/util_property.hpp>
 
-class DLLCLIENT WIProgressBar
-	: public WIBase
-{
-public:
+class DLLCLIENT WIProgressBar : public WIBase {
+  public:
 	WIProgressBar();
 	virtual ~WIProgressBar() override;
 	virtual void Initialize() override;
-	virtual void SetSize(int x,int y) override;
+	virtual void SetSize(int x, int y) override;
 	void SetProgress(float progress);
 	float GetProgress() const;
 	const util::PFloatProperty &GetProgressProperty() const;
 	void SetValue(float v);
-	void SetRange(float min,float max,float stepSize=1.f);
-	std::array<float,3> GetRange() const;
+	void SetRange(float min, float max, float stepSize = 1.f);
+	std::array<float, 3> GetRange() const;
 	void SetOptions(const std::vector<std::string> &options);
 	void AddOption(const std::string &option);
 	float GetValue() const;
@@ -34,7 +32,7 @@ public:
 	void SetPostFix(const std::string &postfix);
 	void SetValueTranslator(const std::function<std::string(float)> &translator);
 	void SetLabelVisible(bool visible);
-private:
+  private:
 	WIHandle m_hProgress;
 	WIHandle m_hLabel;
 	WIHandle m_hLabel2;
@@ -50,8 +48,8 @@ private:
 	void UpdateText();
 	void UpdateTextPosition();
 	void UpdateOptions();
-	void OnProgressChanged(float oldValue,float value);
-	void SetRange(float min,float max,float stepSize,bool bEraseOptions);
+	void OnProgressChanged(float oldValue, float value);
+	void SetRange(float min, float max, float stepSize, bool bEraseOptions);
 };
 
 #endif

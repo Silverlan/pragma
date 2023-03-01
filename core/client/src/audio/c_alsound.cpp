@@ -10,6 +10,7 @@
 #include "pragma/audio/c_alsound.h"
 #include "pragma/c_engine.h"
 #include <pragma/networking/nwm_util.h>
+#include <pragma/logging.hpp>
 #include "pragma/console/c_cvar.h"
 #include "pragma/networking/c_nwm_util.h"
 #include "luasystem.h"
@@ -22,7 +23,7 @@ DLLCLIENT void NET_cl_snd_precache(NetPacket packet)
 {
 	std::string snd = packet->ReadString();
 	auto mode = packet->Read<uint8_t>();
-	client->PrecacheSound(snd,static_cast<ALChannel>(mode));
+	client->PrecacheSound(snd, static_cast<ALChannel>(mode));
 }
 
 DLLCLIENT void NET_cl_snd_create(NetPacket packet)
@@ -31,10 +32,10 @@ DLLCLIENT void NET_cl_snd_create(NetPacket packet)
 	auto type = packet->Read<ALSoundType>();
 	unsigned int idx = packet->Read<unsigned int>();
 	auto createFlags = packet->Read<ALCreateFlags>();
-	auto as = client->CreateSound(snd,ALSoundType::Generic,createFlags);
+	auto as = client->CreateSound(snd, ALSoundType::Generic, createFlags);
 	if(as == nullptr)
 		return;
-	client->IndexSound(as,idx);
+	client->IndexSound(as, idx);
 
 	auto fullUpdate = packet->Read<bool>();
 	if(fullUpdate == false)
@@ -62,11 +63,10 @@ DLLCLIENT void NET_cl_snd_create(NetPacket packet)
 	as->SetFlags(packet->Read<uint32_t>());
 
 	auto hasRange = packet->Read<bool>();
-	if(hasRange)
-	{
+	if(hasRange) {
 		auto start = packet->Read<float>();
 		auto end = packet->Read<float>();
-		as->SetRange(start,end);
+		as->SetRange(start, end);
 	}
 
 	as->SetFadeInDuration(packet->Read<float>());
@@ -75,7 +75,7 @@ DLLCLIENT void NET_cl_snd_create(NetPacket packet)
 
 	auto at = packet->Read<Vector3>();
 	auto up = packet->Read<Vector3>();
-	as->SetOrientation(at,up);
+	as->SetOrientation(at, up);
 
 	as->SetDopplerFactor(packet->Read<float>());
 	as->SetLeftStereoAngle(packet->Read<float>());
@@ -86,22 +86,21 @@ DLLCLIENT void NET_cl_snd_create(NetPacket packet)
 	auto directHF = packet->Read<bool>();
 	auto send = packet->Read<bool>();
 	auto sendHF = packet->Read<bool>();
-	as->SetGainAuto(directHF,send,sendHF);
+	as->SetGainAuto(directHF, send, sendHF);
 
 	auto gain = packet->Read<float>();
 	auto gainHF = packet->Read<float>();
 	auto gainLF = packet->Read<float>();
-	as->SetDirectFilter({gain,gainHF,gainLF});
+	as->SetDirectFilter({gain, gainHF, gainLF});
 
 	std::weak_ptr<ALSound> wpSnd = as;
-	nwm::read_unique_entity(packet,[wpSnd](BaseEntity *ent) {
+	nwm::read_unique_entity(packet, [wpSnd](BaseEntity *ent) {
 		if(ent == nullptr || wpSnd.expired())
 			return;
 		wpSnd.lock()->SetSource(ent);
 	});
 
-	switch(state)
-	{
+	switch(state) {
 	case ALState::Paused:
 		as->Pause();
 		break;
@@ -123,9 +122,8 @@ DLLCLIENT void NET_cl_snd_ev(NetPacket packet)
 	std::shared_ptr<ALSound> as = client->GetSoundByIndex(idx);
 	if(as == NULL)
 		return;
-	CALSound *cas = static_cast<CALSound*>(as.get());
-	switch(static_cast<ALSound::NetEvent>(ev))
-	{
+	CALSound *cas = static_cast<CALSound *>(as.get());
+	switch(static_cast<ALSound::NetEvent>(ev)) {
 	case ALSound::NetEvent::Play:
 		cas->Play();
 		break;
@@ -268,7 +266,7 @@ DLLCLIENT void NET_cl_snd_ev(NetPacket packet)
 		{
 			auto start = packet->Read<float>();
 			auto end = packet->Read<float>();
-			cas->SetRange(start,end);
+			cas->SetRange(start, end);
 			break;
 		}
 	case ALSound::NetEvent::ClearRange:
@@ -303,7 +301,7 @@ DLLCLIENT void NET_cl_snd_ev(NetPacket packet)
 	case ALSound::NetEvent::SetIndex:
 		{
 			auto idx = packet->Read<uint32_t>();
-			CALSound::SetIndex(cas,idx);
+			CALSound::SetIndex(cas, idx);
 			break;
 		}
 	case ALSound::NetEvent::SetPriority:
@@ -316,7 +314,7 @@ DLLCLIENT void NET_cl_snd_ev(NetPacket packet)
 		{
 			auto at = packet->Read<Vector3>();
 			auto up = packet->Read<Vector3>();
-			cas->SetOrientation(at,up);
+			cas->SetOrientation(at, up);
 			break;
 		}
 	case ALSound::NetEvent::SetDopplerFactor:
@@ -348,7 +346,7 @@ DLLCLIENT void NET_cl_snd_ev(NetPacket packet)
 			auto directHF = packet->Read<float>();
 			auto send = packet->Read<float>();
 			auto sendHF = packet->Read<float>();
-			cas->SetGainAuto(directHF,send,sendHF);
+			cas->SetGainAuto(directHF, send, sendHF);
 			break;
 		}
 	case ALSound::NetEvent::SetDirectFilter:
@@ -356,7 +354,7 @@ DLLCLIENT void NET_cl_snd_ev(NetPacket packet)
 			auto gain = packet->Read<float>();
 			auto gainHF = packet->Read<float>();
 			auto gainLF = packet->Read<float>();
-			cas->SetDirectFilter({gain,gainHF,gainLF});
+			cas->SetDirectFilter({gain, gainHF, gainLF});
 			break;
 		}
 	case ALSound::NetEvent::AddEffect:
@@ -365,7 +363,7 @@ DLLCLIENT void NET_cl_snd_ev(NetPacket packet)
 			auto gain = packet->Read<float>();
 			auto gainHF = packet->Read<float>();
 			auto gainLF = packet->Read<float>();
-			cas->AddEffect(effectName,{gain,gainHF,gainLF});
+			cas->AddEffect(effectName, {gain, gainHF, gainLF});
 			break;
 		}
 	case ALSound::NetEvent::RemoveEffect:
@@ -380,7 +378,7 @@ DLLCLIENT void NET_cl_snd_ev(NetPacket packet)
 			auto gain = packet->Read<float>();
 			auto gainHF = packet->Read<float>();
 			auto gainLF = packet->Read<float>();
-			cas->SetEffectParameters(effectName,{gain,gainHF,gainLF});
+			cas->SetEffectParameters(effectName, {gain, gainHF, gainLF});
 			break;
 		}
 	case ALSound::NetEvent::SetEntityMapIndex:
@@ -391,7 +389,7 @@ DLLCLIENT void NET_cl_snd_ev(NetPacket packet)
 		}
 	default:
 		{
-			Con::cwar<<"WARNING: Unhandled sound net event "<<ev<<"!"<<Con::endl;
+			spdlog::warn("Unhandled sound net event {}!", ev);
 			break;
 		}
 	}
@@ -406,11 +404,10 @@ ALSound *CALSound::FindByServerIndex(uint32_t idx)
 	return it->second.lock().get();
 }
 
-CALSound::CALSound(NetworkState *nw,const al::PSoundChannel &channel)
-	: ALSound(nw),al::SoundSource{channel}
+CALSound::CALSound(NetworkState *nw, const al::PSoundChannel &channel) : ALSound(nw), al::SoundSource {channel}
 {
 	UpdateVolume();
-	RegisterCallback<void,std::reference_wrapper<float>>("UpdateGain");
+	RegisterCallback<void, std::reference_wrapper<float>>("UpdateGain");
 }
 
 CALSound::~CALSound() {}
@@ -422,8 +419,7 @@ void CALSound::OnRelease()
 	auto it = s_svIndexedSounds.find(GetIndex());
 	if(it != s_svIndexedSounds.end())
 		s_svIndexedSounds.erase(it);
-	for(auto it=s_svIndexedSounds.begin();it!=s_svIndexedSounds.end();)
-	{
+	for(auto it = s_svIndexedSounds.begin(); it != s_svIndexedSounds.end();) {
 		if(it->second.expired() == true)
 			it = s_svIndexedSounds.erase(it);
 		else
@@ -440,25 +436,25 @@ void CALSound::Terminate()
 }
 
 static_assert(sizeof(al::EffectParams) == sizeof(ALSound::EffectParams));
-bool CALSound::AddEffect(al::IEffect &effect,const EffectParams &params) {return (*this)->AddEffect(effect,reinterpret_cast<const al::EffectParams&>(params));}
-bool CALSound::AddEffect(al::IEffect &effect,uint32_t &slotId,const EffectParams &params) {return (*this)->AddEffect(effect,slotId,reinterpret_cast<const al::EffectParams&>(params));}
-bool CALSound::AddEffect(al::IEffect &effect,float gain) {return (*this)->AddEffect(effect,gain);}
-bool CALSound::AddEffect(al::IEffect &effect,uint32_t &slotId,float gain) {return (*this)->AddEffect(effect,slotId,gain);}
-void CALSound::RemoveEffect(al::IEffect &effect) {(*this)->RemoveEffect(effect);}
-void CALSound::RemoveEffect(uint32_t slotId) {(*this)->RemoveEffect(slotId);}
+bool CALSound::AddEffect(al::IEffect &effect, const EffectParams &params) { return (*this)->AddEffect(effect, reinterpret_cast<const al::EffectParams &>(params)); }
+bool CALSound::AddEffect(al::IEffect &effect, uint32_t &slotId, const EffectParams &params) { return (*this)->AddEffect(effect, slotId, reinterpret_cast<const al::EffectParams &>(params)); }
+bool CALSound::AddEffect(al::IEffect &effect, float gain) { return (*this)->AddEffect(effect, gain); }
+bool CALSound::AddEffect(al::IEffect &effect, uint32_t &slotId, float gain) { return (*this)->AddEffect(effect, slotId, gain); }
+void CALSound::RemoveEffect(al::IEffect &effect) { (*this)->RemoveEffect(effect); }
+void CALSound::RemoveEffect(uint32_t slotId) { (*this)->RemoveEffect(slotId); }
 
 void CALSound::SetPitchModifier(float mod)
 {
 	m_modPitch = mod;
 	UpdatePitch();
 }
-float CALSound::GetPitchModifier() const {return m_modPitch;}
+float CALSound::GetPitchModifier() const { return m_modPitch; }
 void CALSound::SetVolumeModifier(float mod)
 {
 	m_modVol = mod;
 	UpdateVolume();
 }
-float CALSound::GetVolumeModifier() const {return m_modVol;}
+float CALSound::GetVolumeModifier() const { return m_modVol; }
 
 static auto cvAlwaysPlay = GetClientConVar("cl_audio_always_play");
 void CALSound::UpdateVolume()
@@ -469,15 +465,12 @@ void CALSound::UpdateVolume()
 	auto gain = m_gain;
 	if(c_engine->IsWindowFocused() == false && cvAlwaysPlay->GetBool() == false)
 		gain = 0.f;
-	else
-	{
+	else {
 		gain *= GetVolumeModifier();
 		auto &volumes = client->GetSoundVolumes();
 		auto minGain = 1.f;
-		for(auto it=volumes.begin();it!=volumes.end();++it)
-		{
-			if((umath::to_integral(m_type) &umath::to_integral(it->first)) != 0)
-			{
+		for(auto it = volumes.begin(); it != volumes.end(); ++it) {
+			if((umath::to_integral(m_type) & umath::to_integral(it->first)) != 0) {
 				if(it->second < minGain)
 					minGain = it->second;
 			}
@@ -485,11 +478,11 @@ void CALSound::UpdateVolume()
 		gain *= minGain;
 		gain *= client->GetMasterSoundVolume();
 	}
-	CallCallbacks<void,std::reference_wrapper<float>>("UpdateGain",std::ref<float>(gain));
+	CallCallbacks<void, std::reference_wrapper<float>>("UpdateGain", std::ref<float>(gain));
 	(*this)->SetGain(gain);
 }
 
-float CALSound::GetMaxAudibleDistance() const {return (*this)->GetMaxAudibleDistance();}
+float CALSound::GetMaxAudibleDistance() const { return (*this)->GetMaxAudibleDistance(); }
 
 void CALSound::UpdatePitch()
 {
@@ -500,9 +493,9 @@ void CALSound::UpdatePitch()
 	(*this)->SetPitch(pitch);
 }
 
-unsigned int CALSound::GetIndex() const {return m_index;}
+unsigned int CALSound::GetIndex() const { return m_index; }
 
-void CALSound::SetIndex(ALSound *snd,uint32_t idx)
+void CALSound::SetIndex(ALSound *snd, uint32_t idx)
 {
 	auto it = s_svIndexedSounds.find(idx);
 	if(it != s_svIndexedSounds.end())
@@ -511,7 +504,7 @@ void CALSound::SetIndex(ALSound *snd,uint32_t idx)
 	snd->SetIndex(idx);
 	if(idx == 0)
 		return;
-	s_svIndexedSounds.insert(decltype(s_svIndexedSounds)::value_type(idx,snd->shared_from_this()));
+	s_svIndexedSounds.insert(decltype(s_svIndexedSounds)::value_type(idx, snd->shared_from_this()));
 }
 
 void CALSound::Update()
@@ -521,23 +514,20 @@ void CALSound::Update()
 	al::SoundSource::Update();
 	auto old = GetState();
 	UpdateState();
-	if(IsStopped() == true)
-	{
+	if(IsStopped() == true) {
 		CancelFade();
 		CheckStateChange(old);
 	}
-	else if(m_fade != nullptr)
-	{
-		auto t = client->RealTime() -m_fade->start;
+	else if(m_fade != nullptr) {
+		auto t = client->RealTime() - m_fade->start;
 		if(t >= m_fade->duration)
 			CancelFade();
-		else
-		{
-			auto gain = (t /m_fade->duration) *m_fade->gain;
+		else {
+			auto gain = (t / m_fade->duration) * m_fade->gain;
 			if(m_fade->fadein)
 				SetGain(gain);
 			else
-				SetGain(m_fade->gain -gain);
+				SetGain(m_fade->gain - gain);
 		}
 	}
 }
@@ -558,7 +548,7 @@ ALState CALSound::GetState() const
 	if(IsPaused())
 		return ALState::Paused;
 	// TODO
-	return ALState::Initial;//static_cast<ALState>(m_state);
+	return ALState::Initial; //static_cast<ALState>(m_state);
 }
 
 void CALSound::FadeIn(float time)
@@ -568,7 +558,7 @@ void CALSound::FadeIn(float time)
 	CancelFade();
 	if(!IsPlaying())
 		Play();
-	m_fade = std::unique_ptr<SoundFade>(new SoundFade(true,client->RealTime(),time,gain));
+	m_fade = std::unique_ptr<SoundFade>(new SoundFade(true, client->RealTime(), time, gain));
 }
 
 void CALSound::FadeOut(float time)
@@ -577,7 +567,7 @@ void CALSound::FadeOut(float time)
 		return;
 	float gain = GetGain();
 	CancelFade();
-	m_fade = std::unique_ptr<SoundFade>(new SoundFade(false,client->RealTime(),time,gain));
+	m_fade = std::unique_ptr<SoundFade>(new SoundFade(false, client->RealTime(), time, gain));
 }
 
 void CALSound::UpdateState()
@@ -596,15 +586,12 @@ void CALSound::Play()
 	auto bPaused = (GetState() == ALState::Paused) ? true : false;
 	if(bPaused == false)
 		InitRange();
-	if(bPaused == false)
-	{
-		try
-		{
+	if(bPaused == false) {
+		try {
 			(*this)->Play();
 		}
-		catch(const std::runtime_error &err)
-		{
-			Con::cwar<<"WARNING: Unable to play sound "<<GetIndex()<<": "<<err.what()<<Con::endl;
+		catch(const std::runtime_error &err) {
+			spdlog::warn("Unable to play sound {}: {}", GetIndex(), err.what());
 			return;
 		}
 	}
@@ -663,9 +650,13 @@ float CALSound::GetOffset() const
 	return (*this)->GetOffset();
 }
 
-void CALSound::SetPitch(float pitch) {m_pitch = pitch; UpdatePitch();}
+void CALSound::SetPitch(float pitch)
+{
+	m_pitch = pitch;
+	UpdatePitch();
+}
 
-float CALSound::GetPitch() const {return m_pitch;}
+float CALSound::GetPitch() const { return m_pitch; }
 
 void CALSound::SetLooping(bool loop)
 {
@@ -704,12 +695,16 @@ bool CALSound::IsStopped() const
 		return false;
 	return (*this)->IsStopped();
 }
-void CALSound::SetGain(float gain) {m_gain = gain; UpdateVolume();}
+void CALSound::SetGain(float gain)
+{
+	m_gain = gain;
+	UpdateVolume();
+}
 float CALSound::GetGain() const
 {
 	if(m_bTerminated == true)
 		return 0.f;
-	return glm::clamp((*this)->GetGain(),GetMinGain(),GetMaxGain());
+	return glm::clamp((*this)->GetGain(), GetMinGain(), GetMaxGain());
 }
 void CALSound::SetPosition(const Vector3 &pos)
 {
@@ -720,9 +715,8 @@ void CALSound::SetPosition(const Vector3 &pos)
 Vector3 CALSound::GetPosition() const
 {
 	if(m_bTerminated == true)
-		return Vector3(0.f,0.f,0.f);
-	if(m_hSourceEntity.valid())
-	{
+		return Vector3(0.f, 0.f, 0.f);
+	if(m_hSourceEntity.valid()) {
 		auto pTrComponent = m_hSourceEntity.get()->GetTransformComponent();
 		if(pTrComponent != nullptr)
 			return pTrComponent->GetPosition();
@@ -738,7 +732,7 @@ void CALSound::SetVelocity(const Vector3 &vel)
 Vector3 CALSound::GetVelocity() const
 {
 	if(m_bTerminated == true)
-		return Vector3(0.f,0.f,0.f);
+		return Vector3(0.f, 0.f, 0.f);
 	return (*this)->GetVelocity();
 }
 void CALSound::SetDirection(const Vector3 &dir)
@@ -750,7 +744,7 @@ void CALSound::SetDirection(const Vector3 &dir)
 Vector3 CALSound::GetDirection() const
 {
 	if(m_bTerminated == true)
-		return Vector3(0.f,0.f,0.f);
+		return Vector3(0.f, 0.f, 0.f);
 	return (*this)->GetDirection();
 }
 void CALSound::SetRelative(bool b)
@@ -916,13 +910,13 @@ void CALSound::SetPriority(uint32_t priority)
 		return;
 	(*this)->SetPriority(priority);
 }
-void CALSound::SetOrientation(const Vector3 &at,const Vector3 &up)
+void CALSound::SetOrientation(const Vector3 &at, const Vector3 &up)
 {
 	if(m_bTerminated == true)
 		return;
-	(*this)->SetOrientation(at,up);
+	(*this)->SetOrientation(at, up);
 }
-std::pair<Vector3,Vector3> CALSound::GetOrientation() const
+std::pair<Vector3, Vector3> CALSound::GetOrientation() const
 {
 	if(m_bTerminated == true)
 		return {};
@@ -976,39 +970,38 @@ float CALSound::GetAirAbsorptionFactor() const
 		return 0.f;
 	return (*this)->GetAirAbsorptionFactor();
 }
-void CALSound::SetGainAuto(bool directHF,bool send,bool sendHF)
+void CALSound::SetGainAuto(bool directHF, bool send, bool sendHF)
 {
 	if(m_bTerminated == true)
 		return;
-	(*this)->SetGainAuto(directHF,send,sendHF);
+	(*this)->SetGainAuto(directHF, send, sendHF);
 }
-std::tuple<bool,bool,bool> CALSound::GetGainAuto() const
+std::tuple<bool, bool, bool> CALSound::GetGainAuto() const
 {
 	if(m_bTerminated == true)
-		return {false,false,false};
+		return {false, false, false};
 	return (*this)->GetGainAuto();
 }
 void CALSound::SetDirectFilter(const EffectParams &params)
 {
 	if(m_bTerminated == true)
 		return;
-	(*this)->SetDirectFilter(reinterpret_cast<const al::EffectParams&>(params));
+	(*this)->SetDirectFilter(reinterpret_cast<const al::EffectParams &>(params));
 }
 const ALSound::EffectParams &CALSound::GetDirectFilter() const
 {
-	if(m_bTerminated == true)
-	{
+	if(m_bTerminated == true) {
 		static ALSound::EffectParams params {};
 		return params;
 	}
-	return reinterpret_cast<const ALSound::EffectParams&>((*this)->GetDirectFilter());
+	return reinterpret_cast<const ALSound::EffectParams &>((*this)->GetDirectFilter());
 }
-bool CALSound::AddEffect(const std::string &effectName,const EffectParams &params)
+bool CALSound::AddEffect(const std::string &effectName, const EffectParams &params)
 {
 	auto effect = c_engine->GetAuxEffect(effectName);
 	if(effect == nullptr)
 		return false;
-	return (*this)->AddEffect(*effect,reinterpret_cast<const al::EffectParams&>(params));
+	return (*this)->AddEffect(*effect, reinterpret_cast<const al::EffectParams &>(params));
 }
 void CALSound::RemoveEffect(const std::string &effectName)
 {
@@ -1017,14 +1010,13 @@ void CALSound::RemoveEffect(const std::string &effectName)
 		return;
 	(*this)->RemoveEffect(*effect);
 }
-void CALSound::SetEffectParameters(const std::string &effectName,const EffectParams &params)
+void CALSound::SetEffectParameters(const std::string &effectName, const EffectParams &params)
 {
 	auto effect = c_engine->GetAuxEffect(effectName);
 	if(effect == nullptr)
 		return;
-	(*this)->SetEffectParameters(*effect,reinterpret_cast<const al::EffectParams&>(params));
+	(*this)->SetEffectParameters(*effect, reinterpret_cast<const al::EffectParams &>(params));
 }
-
 
 void CALSound::SetType(ALSoundType type)
 {
@@ -1034,6 +1026,4 @@ void CALSound::SetType(ALSoundType type)
 	UpdateVolume();
 }
 
-REGISTER_CONVAR_CALLBACK_CL(cl_audio_always_play,[](NetworkState*,ConVar*,bool,bool) {
-	client->UpdateSoundVolume();
-})
+REGISTER_CONVAR_CALLBACK_CL(cl_audio_always_play, [](NetworkState *, ConVar *, bool, bool) { client->UpdateSoundVolume(); })

@@ -14,22 +14,19 @@
 #include <pragma/networking/nwm_util.h>
 
 extern DLLNETWORK Engine *engine;
-void ClientState::SendPacket(const std::string &name,NetPacket &packet,pragma::networking::Protocol protocol)
+void ClientState::SendPacket(const std::string &name, NetPacket &packet, pragma::networking::Protocol protocol)
 {
 	auto ID = GetServerMessageID(name);
 	if(ID == 0 || m_client == nullptr)
 		return;
 	packet.SetMessageID(ID);
 	pragma::networking::Error err;
-	if(m_client->SendPacket(protocol,packet,err) == false)
-		Con::cwar<<"WARNING: Unable to send packet '"<<name<<"': "<<err.GetMessage()<<Con::endl;
+	if(m_client->SendPacket(protocol, packet, err) == false)
+		Con::cwar << "Unable to send packet '" << name << "': " << err.GetMessage() << Con::endl;
 }
-void ClientState::SendPacket(const std::string &name,NetPacket &packet)
+void ClientState::SendPacket(const std::string &name, NetPacket &packet) { SendPacket(name, packet, pragma::networking::Protocol::FastUnreliable); }
+void ClientState::SendPacket(const std::string &name, pragma::networking::Protocol protocol)
 {
-	SendPacket(name,packet,pragma::networking::Protocol::FastUnreliable);
-}
-void ClientState::SendPacket(const std::string &name,pragma::networking::Protocol protocol)
-{
-	NetPacket packet{};
-	SendPacket(name,packet,protocol);
+	NetPacket packet {};
+	SendPacket(name, packet, protocol);
 }

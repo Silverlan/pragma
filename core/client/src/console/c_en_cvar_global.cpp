@@ -17,60 +17,58 @@ extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 
 #if LUA_ENABLE_RUN_GUI == 1
-	void CMD_lua_run_gui(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
-	{
-		if(argv.empty()) return;
-		std::string lua = argv[0];
-		for(auto i=1;i<argv.size();i++)
-		{
-			lua += " ";
-			lua += argv[i];
-		}
-		auto *l = static_cast<ClientState*>(state)->GetGUILuaState();
-		Lua::Execute(l,[l,&lua](int(*traceback)(lua_State*)) {
-			return Lua::RunString(l,lua,"lua_run_gui",traceback);
-		},Lua::ErrorColorMode::White);
+void CMD_lua_run_gui(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
+{
+	if(argv.empty())
+		return;
+	std::string lua = argv[0];
+	for(auto i = 1; i < argv.size(); i++) {
+		lua += " ";
+		lua += argv[i];
 	}
+	auto *l = static_cast<ClientState *>(state)->GetGUILuaState();
+	Lua::Execute(l, [l, &lua](int (*traceback)(lua_State *)) { return Lua::RunString(l, lua, "lua_run_gui", traceback); });
+}
 #endif
 
-DLLCLIENT void CMD_lua_run_cl(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
+DLLCLIENT void CMD_lua_run_cl(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
-	if(argv.empty() || !state->IsGameActive()) return;
+	if(argv.empty() || !state->IsGameActive())
+		return;
 	Game *game = state->GetGameState();
 	if(game == NULL)
 		return;
 	std::string lua = argv[0];
-	for(auto i=1;i<argv.size();i++)
-	{
+	for(auto i = 1; i < argv.size(); i++) {
 		lua += " ";
 		lua += argv[i];
 	}
 	game->RunLua(lua);
 }
 
-DLLCLIENT void CMD_lua_reload_entity(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
+DLLCLIENT void CMD_lua_reload_entity(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	ClientState *cstate = static_cast<ClientState*>(state);
+	ClientState *cstate = static_cast<ClientState *>(state);
 	CGame *game = cstate->GetGameState();
 	if(game == NULL)
 		return;
-	game->LoadLuaEntity("entities",argv[0]);
+	game->LoadLuaEntity("entities", argv[0]);
 }
 
-DLLCLIENT void CMD_lua_reload_weapon(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
+DLLCLIENT void CMD_lua_reload_weapon(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	ClientState *cstate = static_cast<ClientState*>(state);
+	ClientState *cstate = static_cast<ClientState *>(state);
 	CGame *game = cstate->GetGameState();
 	if(game == NULL)
 		return;
-	game->LoadLuaEntity("weapons",argv[0]);
+	game->LoadLuaEntity("weapons", argv[0]);
 }
 
-DLLCLIENT void CMD_lua_reload_entities(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
+DLLCLIENT void CMD_lua_reload_entities(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	NetworkState *server = c_engine->GetServerNetworkState();
 	Game *sgame = server->GetGameState();
@@ -82,7 +80,7 @@ DLLCLIENT void CMD_lua_reload_entities(NetworkState*,pragma::BasePlayerComponent
 		cgame->LoadLuaEntities("entities");
 }
 
-DLLCLIENT void CMD_lua_reload_weapons(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
+DLLCLIENT void CMD_lua_reload_weapons(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &)
 {
 	NetworkState *server = c_engine->GetServerNetworkState();
 	Game *sgame = server->GetGameState();

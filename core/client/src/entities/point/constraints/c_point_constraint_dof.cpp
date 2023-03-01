@@ -15,7 +15,7 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(point_constraint_dof,CPointConstraintDoF);
+LINK_ENTITY_TO_CLASS(point_constraint_dof, CPointConstraintDoF);
 
 void CPointConstraintDoFComponent::ReceiveData(NetPacket &packet)
 {
@@ -28,7 +28,7 @@ void CPointConstraintDoFComponent::ReceiveData(NetPacket &packet)
 	m_kvLimAngLower = nwm::read_vector(packet);
 	m_kvLimAngUpper = nwm::read_vector(packet);
 }
-void CPointConstraintDoFComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CPointConstraintDoFComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////////////
 

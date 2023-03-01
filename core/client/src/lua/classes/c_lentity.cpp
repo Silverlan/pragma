@@ -19,33 +19,32 @@
 
 extern DLLCLIENT CEngine *c_engine;
 
-void Lua::Entity::Client::register_class(luabind::class_<CBaseEntity,BaseEntity> &classDef)
+void Lua::Entity::Client::register_class(luabind::class_<CBaseEntity, BaseEntity> &classDef)
 {
-	classDef.add_static_constant("EVENT_ON_SCENE_FLAGS_CHANGED",CBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED);
-	classDef.def("IsClientsideOnly",&CBaseEntity::IsClientsideOnly);
-	classDef.def("GetClientIndex",&CBaseEntity::GetClientIndex);
-	classDef.def("SendNetEvent",static_cast<void(*)(lua_State*,CBaseEntity&,nwm::Protocol,unsigned int,const NetPacket&)>(&SendNetEvent));
-	classDef.def("SendNetEvent",static_cast<void(*)(lua_State*,CBaseEntity&,nwm::Protocol,unsigned int)>(&SendNetEvent));
+	classDef.add_static_constant("EVENT_ON_SCENE_FLAGS_CHANGED", CBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED);
+	classDef.def("IsClientsideOnly", &CBaseEntity::IsClientsideOnly);
+	classDef.def("GetClientIndex", &CBaseEntity::GetClientIndex);
+	classDef.def("SendNetEvent", static_cast<void (*)(lua_State *, CBaseEntity &, nwm::Protocol, unsigned int, const NetPacket &)>(&SendNetEvent));
+	classDef.def("SendNetEvent", static_cast<void (*)(lua_State *, CBaseEntity &, nwm::Protocol, unsigned int)>(&SendNetEvent));
 
-	classDef.def("GetSceneFlags",&CBaseEntity::GetSceneFlags);
-	classDef.def("AddToScene",&CBaseEntity::AddToScene);
-	classDef.def("RemoveFromScene",&CBaseEntity::RemoveFromScene);
-	classDef.def("RemoveFromAllScenes",&CBaseEntity::RemoveFromAllScenes);
-	classDef.def("IsInScene",&CBaseEntity::IsInScene);
+	classDef.def("GetSceneFlags", &CBaseEntity::GetSceneFlags);
+	classDef.def("AddToScene", &CBaseEntity::AddToScene);
+	classDef.def("RemoveFromScene", &CBaseEntity::RemoveFromScene);
+	classDef.def("RemoveFromAllScenes", &CBaseEntity::RemoveFromAllScenes);
+	classDef.def("IsInScene", &CBaseEntity::IsInScene);
 
-	classDef.def("AddChild",&CBaseEntity::AddChild);
+	classDef.def("AddChild", &CBaseEntity::AddChild);
 }
 
-void Lua::Entity::Client::SendNetEvent(lua_State *l,CBaseEntity &ent,nwm::Protocol protocol,unsigned int eventId,const NetPacket &packet)
+void Lua::Entity::Client::SendNetEvent(lua_State *l, CBaseEntity &ent, nwm::Protocol protocol, unsigned int eventId, const NetPacket &packet)
 {
-	switch(protocol)
-	{
-		case nwm::Protocol::TCP:
-			ent.SendNetEventTCP(eventId,const_cast<NetPacket&>(packet));
-			break;
-		case nwm::Protocol::UDP:
-			ent.SendNetEventUDP(eventId,const_cast<NetPacket&>(packet));
-			break;
+	switch(protocol) {
+	case nwm::Protocol::TCP:
+		ent.SendNetEventTCP(eventId, const_cast<NetPacket &>(packet));
+		break;
+	case nwm::Protocol::UDP:
+		ent.SendNetEventUDP(eventId, const_cast<NetPacket &>(packet));
+		break;
 	}
 }
-void Lua::Entity::Client::SendNetEvent(lua_State *l,CBaseEntity &ent,nwm::Protocol protocol,unsigned int eventId) {SendNetEvent(l,ent,protocol,eventId,{});}
+void Lua::Entity::Client::SendNetEvent(lua_State *l, CBaseEntity &ent, nwm::Protocol protocol, unsigned int eventId) { SendNetEvent(l, ent, protocol, eventId, {}); }

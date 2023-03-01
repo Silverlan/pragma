@@ -13,24 +13,18 @@
 
 using namespace pragma;
 
-void SOwnableComponent::Initialize()
-{
-	BaseOwnableComponent::Initialize();
-}
-void SOwnableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SOwnableComponent::Initialize() { BaseOwnableComponent::Initialize(); }
+void SOwnableComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void SOwnableComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
-{
-	nwm::write_entity(packet,*m_owner);
-}
+void SOwnableComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { nwm::write_entity(packet, *m_owner); }
 
 void SOwnableComponent::SetOwner(BaseEntity *owner)
 {
 	BaseOwnableComponent::SetOwner(owner);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared() == false)
 		return;
 	NetPacket p {};
-	nwm::write_entity(p,*m_owner);
-	ent.SendNetEvent(m_netEvSetOwner,p,pragma::networking::Protocol::SlowReliable);
+	nwm::write_entity(p, *m_owner);
+	ent.SendNetEvent(m_netEvSetOwner, p, pragma::networking::Protocol::SlowReliable);
 }

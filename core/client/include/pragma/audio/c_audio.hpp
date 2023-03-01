@@ -12,8 +12,7 @@
 #include <vector>
 #include <string>
 
-namespace pragma::audio
-{
+namespace pragma::audio {
 	DLLCLIENT std::vector<std::string> get_available_audio_apis();
 	DLLCLIENT std::string get_audio_api_module_location(const std::string &audioAPI);
 };

@@ -17,13 +17,12 @@
 
 extern DLLCLIENT CEngine *c_engine;
 
-REGISTER_PARTICLE_OPERATOR(wander,CParticleOperatorWander);
+REGISTER_PARTICLE_OPERATOR(wander, CParticleOperatorWander);
 
-void CParticleOperatorWander::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleOperatorWander::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleOperatorWorldBase::Initialize(pSystem,values);
-	for(auto it=values.begin();it!=values.end();it++)
-	{
+	CParticleOperatorWorldBase::Initialize(pSystem, values);
+	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
 		ustring::to_lower(key);
 		if(key == "strength")
@@ -33,31 +32,23 @@ void CParticleOperatorWander::Initialize(pragma::CParticleSystemComponent &pSyst
 	}
 
 	m_hashCodes.resize(pSystem.GetMaxParticleCount());
-
 }
-void CParticleOperatorWander::OnParticleCreated(CParticle &particle)
-{
-	m_hashCodes.at(particle.GetIndex()) = umath::random(1,std::numeric_limits<int32_t>::max());
-}
+void CParticleOperatorWander::OnParticleCreated(CParticle &particle) { m_hashCodes.at(particle.GetIndex()) = umath::random(1, std::numeric_limits<int32_t>::max()); }
 void CParticleOperatorWander::Simulate(double tDelta)
 {
 	CParticleOperatorWorldBase::Simulate(tDelta);
 
-	m_dtTime += tDelta *m_fFrequency;
-	m_dtStrength = m_fStrength *tDelta *60.f;
+	m_dtTime += tDelta * m_fFrequency;
+	m_dtStrength = m_fStrength * tDelta * 60.f;
 }
-void CParticleOperatorWander::Simulate(CParticle &particle,double tDelta,float strength)
+void CParticleOperatorWander::Simulate(CParticle &particle, double tDelta, float strength)
 {
-	CParticleOperatorWorldBase::Simulate(particle,tDelta,strength);
+	CParticleOperatorWorldBase::Simulate(particle, tDelta, strength);
 
 	// using the system hash gives each particle a consistent unique identity;
 	// adding an offset to the time prevents synchronization of the zero points
 	// (the noise function is always zero at integers)
 	auto pid = m_hashCodes.at(particle.GetIndex());
-	auto time = m_dtTime +(pid &255) /256.f;
-	particle.SetVelocity(particle.GetVelocity() +Vector3(
-		util::noise::get_noise(time,pid) *m_dtStrength,
-		util::noise::get_noise(time,pid +1) *m_dtStrength,
-		util::noise::get_noise(time,pid +2) *m_dtStrength
-	));
+	auto time = m_dtTime + (pid & 255) / 256.f;
+	particle.SetVelocity(particle.GetVelocity() + Vector3(util::noise::get_noise(time, pid) * m_dtStrength, util::noise::get_noise(time, pid + 1) * m_dtStrength, util::noise::get_noise(time, pid + 2) * m_dtStrength));
 }

@@ -13,24 +13,18 @@
 #include "pragma/entities/point/constraints/point_constraint_fixed.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLCLIENT CPointConstraintFixedComponent final
-		: public BasePointConstraintFixedComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CPointConstraintFixedComponent final : public BasePointConstraintFixedComponent, public CBaseNetComponent {
+	  public:
 		CPointConstraintFixedComponent(BaseEntity &ent) : BasePointConstraintFixedComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 };
 
-class DLLCLIENT CPointConstraintFixed
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CPointConstraintFixed : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

@@ -12,35 +12,30 @@
 #include <luabind/detail/type_info.hpp>
 #include <util_pragma_doc.hpp>
 
-namespace pragma::lua
-{
-	struct LuaOverloadInfo
-	{
+namespace pragma::lua {
+	struct LuaOverloadInfo {
 		std::vector<luabind::detail::TypeInfo> parameters {};
 		std::vector<luabind::detail::TypeInfo> returnValues {};
 		std::optional<pragma::doc::Source> source {};
 		std::optional<std::vector<std::string>> namedParameters {};
 	};
 
-	struct LuaMethodInfo
-	{
+	struct LuaMethodInfo {
 		std::string name;
 		std::vector<LuaOverloadInfo> overloads;
 	};
 
-	struct LuaClassInfo
-	{
-		using EnumSet = std::unordered_map<std::string,int32_t>;
+	struct LuaClassInfo {
+		using EnumSet = std::unordered_map<std::string, int32_t>;
 		luabind::detail::class_rep *classRep = nullptr;
 		std::string name;
 		std::vector<LuaMethodInfo> methods;
 		std::vector<std::string> attributes;
-		std::vector<luabind::detail::class_rep*> bases;
-		std::unordered_map<std::string,EnumSet> enumSets;
+		std::vector<luabind::detail::class_rep *> bases;
+		std::unordered_map<std::string, EnumSet> enumSets;
 	};
 
-	struct ClassRegInfo
-	{
+	struct ClassRegInfo {
 		std::string path;
 		LuaClassInfo classInfo;
 		bool cppDefined = true;

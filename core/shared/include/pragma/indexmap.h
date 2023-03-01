@@ -12,25 +12,23 @@
 #include <queue>
 
 template<class T>
-	class IndexMap
-{
-public:
+class IndexMap {
+  public:
 	size_t Insert(const T &val);
 	void Remove(size_t idx);
 	size_t Size() const;
 	T *operator[](const size_t idx);
-private:
+  private:
 	std::vector<T> m_values;
 	std::queue<size_t> m_freeIndices;
 };
 
 template<class T>
-	size_t IndexMap<T>::Insert(const T &val)
+size_t IndexMap<T>::Insert(const T &val)
 {
-	if(m_freeIndices.empty())
-	{
+	if(m_freeIndices.empty()) {
 		m_values.push_back(val);
-		return m_values.size() -1;
+		return m_values.size() - 1;
 	}
 	auto idx = m_freeIndices.front();
 	m_values.at(idx) = val;
@@ -39,15 +37,17 @@ template<class T>
 }
 
 template<class T>
-	size_t IndexMap<T>::Size() const {return m_values.size();}
+size_t IndexMap<T>::Size() const
+{
+	return m_values.size();
+}
 
 template<class T>
-	void IndexMap<T>::Remove(size_t idx)
+void IndexMap<T>::Remove(size_t idx)
 {
 	if(idx >= m_values.size() || idx < 0)
 		return;
-	if(idx == m_values.size() -1)
-	{
+	if(idx == m_values.size() - 1) {
 		m_values.pop_back();
 		return;
 	}
@@ -56,7 +56,7 @@ template<class T>
 }
 
 template<class T>
-	T *IndexMap<T>::operator[](const size_t idx)
+T *IndexMap<T>::operator[](const size_t idx)
 {
 	if(idx >= m_values.size() || idx < 0)
 		return nullptr;

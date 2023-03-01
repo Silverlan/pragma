@@ -11,15 +11,13 @@
 #include <cinttypes>
 #include <mathutil/umath.h>
 
-namespace pragma
-{
-	enum class FPlayAnim : uint32_t
-	{
+namespace pragma {
+	enum class FPlayAnim : uint32_t {
 		None = 0u,
 		Reset = 1u,
-		Transmit = Reset<<1u, // Only used for entities
-		SnapTo = Transmit<<1u, // Unused
-		Loop = SnapTo<<1u,
+		Transmit = Reset << 1u,  // Only used for entities
+		SnapTo = Transmit << 1u, // Unused
+		Loop = SnapTo << 1u,
 
 		Default = Transmit
 	};

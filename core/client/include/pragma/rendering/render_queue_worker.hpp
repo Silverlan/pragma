@@ -16,12 +16,10 @@
 #include <thread>
 
 struct RenderQueueWorkerStats;
-namespace pragma::rendering
-{
+namespace pragma::rendering {
 	class RenderQueueWorker;
-	class RenderQueueWorkerManager
-	{
-	public:
+	class RenderQueueWorkerManager {
+	  public:
 		using Job = std::function<void(void)>;
 		RenderQueueWorkerManager(uint32_t numWorkers);
 		~RenderQueueWorkerManager();
@@ -31,12 +29,12 @@ namespace pragma::rendering
 		uint32_t GetWorkerCount() const;
 		void SetWorkerCount(uint32_t numWorkers);
 
-		void SetJobsPerBatchCount(uint32_t numJobsPerBatch) {m_numJobsPerBatch = numJobsPerBatch;}
-		uint32_t GetJobsPerBatchCount() const {return m_numJobsPerBatch;}
+		void SetJobsPerBatchCount(uint32_t numJobsPerBatch) { m_numJobsPerBatch = numJobsPerBatch; }
+		uint32_t GetJobsPerBatchCount() const { return m_numJobsPerBatch; }
 
 		RenderQueueWorker &GetWorker(uint32_t i);
 		const RenderQueueWorker &GetWorker(uint32_t i) const;
-	private:
+	  private:
 		friend RenderQueueWorker;
 		std::vector<std::shared_ptr<RenderQueueWorker>> m_workers;
 		std::queue<Job> m_pendingJobs;
@@ -52,21 +50,19 @@ namespace pragma::rendering
 		uint32_t m_numJobsPerBatch = 2;
 	};
 
-	class RenderQueueWorker
-	{
-	public:
+	class RenderQueueWorker {
+	  public:
 		RenderQueueWorker(RenderQueueWorkerManager &manager);
 		~RenderQueueWorker();
 
 		void SetStats(RenderQueueWorkerStats *stats);
 		void Stop();
-	private:
+	  private:
 		void StartThread();
 		std::thread m_thread;
 		RenderQueueWorkerManager &m_manager;
 		std::atomic<bool> m_running = true;
 		RenderQueueWorkerStats *m_stats = nullptr;
-
 	};
 };
 

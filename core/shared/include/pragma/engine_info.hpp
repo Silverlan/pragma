@@ -12,8 +12,7 @@
 #include <string>
 #include <vector>
 
-namespace engine_info
-{
+namespace engine_info {
 	DLLNETWORK std::string get_identifier();
 	DLLNETWORK std::string get_name();
 	DLLNETWORK std::string get_executable_name();
@@ -34,6 +33,13 @@ namespace engine_info
 
 	// Returns the extensions for the supported audio formats
 	DLLNETWORK const std::vector<std::string> get_supported_audio_formats();
+
+	struct DLLNETWORK GitInfo {
+		std::string ref;
+		std::string commitSha;
+		std::string dateTime;
+	};
+	DLLNETWORK std::optional<GitInfo> get_git_info();
 };
 
 #endif

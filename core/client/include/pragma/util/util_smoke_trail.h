@@ -11,10 +11,11 @@
 #include "pragma/clientdefinitions.h"
 #include <string>
 
-namespace pragma {class CParticleSystemComponent;};
-namespace util
-{
-	DLLCLIENT ::pragma::CParticleSystemComponent *create_smoke_trail_particle(float distance,float speed,float minSpriteSize,float maxSpriteSize,const std::string &material="particles/smoke_sprites_dense");
+namespace pragma {
+	class CParticleSystemComponent;
+};
+namespace util {
+	DLLCLIENT ::pragma::CParticleSystemComponent *create_smoke_trail_particle(float distance, float speed, float minSpriteSize, float maxSpriteSize, const std::string &material = "particles/smoke_sprites_dense");
 };
 
 #endif

@@ -13,13 +13,8 @@
 using namespace pragma;
 
 ComponentEventId DamageableComponent::EVENT_ON_TAKE_DAMAGE = pragma::INVALID_COMPONENT_ID;
-void DamageableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
-{
-	EVENT_ON_TAKE_DAMAGE = registerEvent("ON_TAKE_DAMAGE",ComponentEventInfo::Type::Broadcast);
-}
-DamageableComponent::DamageableComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+void DamageableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_TAKE_DAMAGE = registerEvent("ON_TAKE_DAMAGE", ComponentEventInfo::Type::Broadcast); }
+DamageableComponent::DamageableComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 void DamageableComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -27,7 +22,7 @@ void DamageableComponent::Initialize()
 	ent.AddComponent("health");
 }
 
-void DamageableComponent::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void DamageableComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void DamageableComponent::OnTakeDamage(DamageInfo &info) {}
 
@@ -36,19 +31,14 @@ void DamageableComponent::TakeDamage(DamageInfo &info)
 	auto &ent = GetEntity();
 	auto *state = ent.GetNetworkState();
 	auto *game = state->GetGameState();
-	game->CallCallbacks<void,BaseEntity*,std::reference_wrapper<DamageInfo>>("OnEntityTakeDamage",&ent,std::ref<DamageInfo>(info));
+	game->CallCallbacks<void, BaseEntity *, std::reference_wrapper<DamageInfo>>("OnEntityTakeDamage", &ent, std::ref<DamageInfo>(info));
 	OnTakeDamage(info);
 
 	CEOnTakeDamage takeDmgInfo {info};
-	BroadcastEvent(EVENT_ON_TAKE_DAMAGE,takeDmgInfo);
+	BroadcastEvent(EVENT_ON_TAKE_DAMAGE, takeDmgInfo);
 }
 
 //////////////
 
-CEOnTakeDamage::CEOnTakeDamage(DamageInfo &damageInfo)
-	: damageInfo{damageInfo}
-{}
-void CEOnTakeDamage::PushArguments(lua_State *l)
-{
-	Lua::Push<DamageInfo*>(l,&damageInfo);
-}
+CEOnTakeDamage::CEOnTakeDamage(DamageInfo &damageInfo) : damageInfo {damageInfo} {}
+void CEOnTakeDamage::PushArguments(lua_State *l) { Lua::Push<DamageInfo *>(l, &damageInfo); }

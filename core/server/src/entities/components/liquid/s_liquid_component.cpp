@@ -24,11 +24,9 @@ using namespace pragma;
 
 extern DLLSERVER SGame *s_game;
 
-LINK_ENTITY_TO_CLASS(func_water,FuncWater);
+LINK_ENTITY_TO_CLASS(func_water, FuncWater);
 
-SLiquidComponent::SLiquidComponent(BaseEntity &ent)
-	: BaseFuncLiquidComponent(ent)
-{}
+SLiquidComponent::SLiquidComponent(BaseEntity &ent) : BaseFuncLiquidComponent(ent) {}
 SLiquidComponent::~SLiquidComponent()
 {
 	if(m_cbGameInitialized.IsValid())
@@ -39,7 +37,7 @@ void SLiquidComponent::Initialize()
 {
 	BaseFuncLiquidComponent::Initialize();
 
-	BindEventUnhandled(SModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(SModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		// TODO: Move this to shared
 		auto &ent = GetEntity();
 		if(ent.IsSpawned() == false || m_cbGameInitialized.IsValid() == true)
@@ -62,12 +60,9 @@ void SLiquidComponent::OnEntitySpawn()
 	// TODO: Move this to shared
 	auto &ent = GetEntity();
 	auto *game = ent.GetNetworkState()->GetGameState();
-	if(game->IsMapLoaded() == false)
-	{
+	if(game->IsMapLoaded() == false) {
 		// Need to wait until the game is initialized, to be sure the entity exists clientside
-		m_cbGameInitialized = game->AddCallback("OnMapLoaded",FunctionCallback<void>::Create([this]() {
-			InitializeWaterSurface();
-		}));
+		m_cbGameInitialized = game->AddCallback("OnMapLoaded", FunctionCallback<void>::Create([this]() { InitializeWaterSurface(); }));
 		return;
 	}
 	auto &mdl = ent.GetModel();
@@ -76,11 +71,11 @@ void SLiquidComponent::OnEntitySpawn()
 	InitializeWaterSurface();
 }
 
-void SLiquidComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) {}
+void SLiquidComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) {}
 
 ///////////////
 
-void SLiquidComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SLiquidComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void FuncWater::Initialize()
 {

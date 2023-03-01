@@ -175,3 +175,6 @@
 [submodule "third_party_libs/cppbepuik"]
 	path = third_party_libs/cppbepuik
 	url = https://github.com/Silverlan/cppbepuik.git
+[submodule "third_party_libs/spdlog"]
+	path = third_party_libs/spdlog
+	url = https://github.com/Silverlan/spdlog.git

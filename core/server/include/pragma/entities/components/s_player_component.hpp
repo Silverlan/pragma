@@ -14,19 +14,17 @@
 #include <networkmanager/wrappers/nwm_ip_address.hpp>
 
 class Player;
-namespace pragma
-{
-	namespace networking {class IServerClient;};
-	class DLLSERVER SPlayerComponent final
-		: public BasePlayerComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	namespace networking {
+		class IServerClient;
+	};
+	class DLLSERVER SPlayerComponent final : public BasePlayerComponent, public SBaseNetComponent {
+	  public:
 		// Same as PlayActivity, but doesn't automatically transmit to clients if called serverside
 		virtual bool PlaySharedActivity(Activity activity) override;
 		static unsigned int GetPlayerCount();
-		static const std::vector<SPlayerComponent*> &GetAll();
-		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
+		static const std::vector<SPlayerComponent *> &GetAll();
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		// Same as SetViewOrientation, but doesn't transmit anything to the client
 		void UpdateViewOrientation(const Quat &rot);
 		void Kick(const std::string &reason);
@@ -37,10 +35,10 @@ namespace pragma
 		void SetSprintSpeed(float speed);
 		void SetCrouchedWalkSpeed(float speed);
 		void SetClientSession(networking::IServerClient &session);
-		Con::c_cout& print(Con::c_cout&);
-		std::ostream& print(std::ostream&);
+		Con::c_cout &print(Con::c_cout &);
+		std::ostream &print(std::ostream &);
 		networking::IServerClient *GetClientSession();
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual std::string GetClientIP() override;
 		virtual unsigned short GetClientPort() override;
 		networking::IPAddress GetClientIPAddress() const;
@@ -55,16 +53,16 @@ namespace pragma
 		bool IsGameReady() const;
 		void SetGameReady(bool b);
 		bool SendResource(const std::string &fileName) const;
-		virtual void PrintMessage(std::string message,MESSAGE type) override;
+		virtual void PrintMessage(std::string message, MESSAGE type) override;
 
 		virtual void SetViewRotation(const Quat &rot) override;
 
 		virtual void SetObserverTarget(BaseObservableComponent *ent) override;
-		virtual void ApplyViewRotationOffset(const EulerAngles &ang,float dur=0.5f) override;
+		virtual void ApplyViewRotationOffset(const EulerAngles &ang, float dur = 0.5f) override;
 
-		virtual bool ShouldTransmitNetData() const override {return true;};
+		virtual bool ShouldTransmitNetData() const override { return true; };
 		virtual void InitializeLuaObject(lua_State *l) override;
-	protected:
+	  protected:
 		mutable util::WeakHandle<networking::IServerClient> m_session = {};
 		bool m_bGameReady;
 		bool m_bAuthed;
@@ -79,9 +77,9 @@ namespace pragma
 		void OnSetViewOrientation(const Quat &orientation);
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
-	private:
-		static std::vector<SPlayerComponent*> s_players;
-	public:
+	  private:
+		static std::vector<SPlayerComponent *> s_players;
+	  public:
 		SPlayerComponent(BaseEntity &ent);
 		virtual ~SPlayerComponent() override;
 	};

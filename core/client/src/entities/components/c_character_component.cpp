@@ -37,25 +37,20 @@ extern DLLCLIENT ClientState *client;
 
 using namespace pragma;
 
-void CCharacterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
-{
-	BaseCharacterComponent::RegisterEvents(componentManager,registerEvent);
-}
-CCharacterComponent::CCharacterComponent(BaseEntity &ent)
-	: BaseCharacterComponent(ent)
-{}
+void CCharacterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { BaseCharacterComponent::RegisterEvents(componentManager, registerEvent); }
+CCharacterComponent::CCharacterComponent(BaseEntity &ent) : BaseCharacterComponent(ent) {}
 
 void CCharacterComponent::Initialize()
 {
 	BaseCharacterComponent::Initialize();
-	BindEventUnhandled(CAnimatedComponent::EVENT_ON_BLEND_ANIMATION,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(CAnimatedComponent::EVENT_ON_BLEND_ANIMATION_MT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &ent = GetEntity();
 		auto animComponent = ent.GetAnimatedComponent();
 		auto &hMdl = ent.GetModel();
 		if(hMdl == nullptr || animComponent.expired())
 			return;
 		// Apply movement blending
-		auto &blendAnimInfo = static_cast<CEOnBlendAnimation&>(evData.get());
+		auto &blendAnimInfo = static_cast<CEOnBlendAnimation &>(evData.get());
 		if(&blendAnimInfo.slotInfo == &animComponent->GetBaseAnimationInfo()) // Only apply to main animation, not to gestures!
 		{
 			auto anim = hMdl->GetAnimation(animComponent->GetAnimation());
@@ -64,31 +59,22 @@ void CCharacterComponent::Initialize()
 			// so we exclude all non-looping movement animations here. (Also see BaseAIComponent::BlendAnimationMovement).
 			// If the result isn't satisfactory, alternatively enable the check for the moveActivity above instead.
 			// However, this requires sending the moveActivity from the server to the clients (snapshots?)
-			if(anim != nullptr && anim->HasFlag(FAnim::Loop) && (moveSpeed.x > 0.f || moveSpeed.y > 0.f))//IsMoving())
+			if(anim != nullptr && anim->HasFlag(FAnim::Loop) && (moveSpeed.x > 0.f || moveSpeed.y > 0.f)) //IsMoving())
 			{
 				auto anim = hMdl->GetAnimation(hMdl->SelectFirstAnimation(animComponent->TranslateActivity(Activity::Idle)));
 				auto frame = anim ? anim->GetFrame(0) : nullptr;
-				if(frame != nullptr)
-				{
+				if(frame != nullptr) {
 					auto blendScale = GetMovementBlendScale();
 					auto &dstPoses = frame->GetBoneTransforms();
 					auto &dstScales = frame->GetBoneScales();
-					animComponent->BlendBonePoses(
-						blendAnimInfo.slotInfo.bonePoses,!blendAnimInfo.slotInfo.boneScales.empty() ? &blendAnimInfo.slotInfo.boneScales : nullptr,
-						dstPoses,&dstScales,
-						blendAnimInfo.slotInfo.bonePoses,!blendAnimInfo.slotInfo.boneScales.empty() ? &blendAnimInfo.slotInfo.boneScales : nullptr,
-						*anim,blendScale
-					);
+					animComponent->BlendBonePoses(blendAnimInfo.slotInfo.bonePoses, !blendAnimInfo.slotInfo.boneScales.empty() ? &blendAnimInfo.slotInfo.boneScales : nullptr, dstPoses, &dstScales, blendAnimInfo.slotInfo.bonePoses,
+					  !blendAnimInfo.slotInfo.boneScales.empty() ? &blendAnimInfo.slotInfo.boneScales : nullptr, *anim, blendScale);
 				}
 			}
 		}
 	});
-	BindEventUnhandled(SubmergibleComponent::EVENT_ON_WATER_ENTERED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		CreateWaterSplash();
-	});
-	BindEventUnhandled(SubmergibleComponent::EVENT_ON_WATER_EXITED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		CreateWaterSplash();
-	});
+	BindEventUnhandled(SubmergibleComponent::EVENT_ON_WATER_ENTERED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { CreateWaterSplash(); });
+	BindEventUnhandled(SubmergibleComponent::EVENT_ON_WATER_EXITED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { CreateWaterSplash(); });
 	GetEntity().AddComponent<CEyeComponent>();
 }
 
@@ -99,26 +85,23 @@ void CCharacterComponent::CreateWaterSplash()
 	auto pSubmergibleComponent = ent.GetComponent<SubmergibleComponent>();
 	auto pSoundEmitterComponent = ent.GetComponent<CSoundEmitterComponent>();
 	auto *pWater = pSubmergibleComponent.valid() ? pSubmergibleComponent->GetWaterEntity() : nullptr;
-	auto pSurfC = (pWater != nullptr) ? pWater->GetComponent<CSurfaceComponent>() : pragma::ComponentHandle<CSurfaceComponent>{};
-	if(pSoundEmitterComponent.valid() && pTrComponent != nullptr && pSurfC.valid())
-	{
+	auto pSurfC = (pWater != nullptr) ? pWater->GetComponent<CSurfaceComponent>() : pragma::ComponentHandle<CSurfaceComponent> {};
+	if(pSoundEmitterComponent.valid() && pTrComponent != nullptr && pSurfC.valid()) {
 		auto pos = pTrComponent->GetPosition();
 		pos = pSurfC->ProjectToSurface(pos);
-		client->PlayWorldSound("fx.water_slosh",ALSoundType::Effect,pos);
+		client->PlayWorldSound("fx.water_slosh", ALSoundType::Effect, pos);
 		auto *pt = pragma::CParticleSystemComponent::Create("watersplash");
-		if(pt != nullptr)
-		{
+		if(pt != nullptr) {
 			auto pTrComponent = pt->GetEntity().GetTransformComponent();
-			if(pTrComponent != nullptr)
-			{
+			if(pTrComponent != nullptr) {
 				pTrComponent->SetPosition(pos);
 				Vector3 n;
 				float d;
-				pSurfC->GetPlaneWs(n,d);
+				pSurfC->GetPlaneWs(n, d);
 				auto up = uvec::create(n);
 				uvec::normalize(&up);
-				const auto rot = Quat{0.5f,-0.5f,-0.5f,-0.5f};
-				pTrComponent->SetRotation(uquat::create_look_rotation(uvec::get_perpendicular(up),up) *rot);
+				const auto rot = Quat {0.5f, -0.5f, -0.5f, -0.5f};
+				pTrComponent->SetRotation(uquat::create_look_rotation(uvec::get_perpendicular(up), up) * rot);
 			}
 			pt->SetRemoveOnComplete(true);
 			pt->Start();
@@ -126,32 +109,28 @@ void CCharacterComponent::CreateWaterSplash()
 	}
 }
 
-void CCharacterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-void CCharacterComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BaseCharacterComponent));}
+void CCharacterComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CCharacterComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BaseCharacterComponent)); }
 void CCharacterComponent::ReceiveData(NetPacket &packet)
 {
 	// Note: Change return value of ShouldTransmitNetData if data should be received
 }
-Bool CCharacterComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
+Bool CCharacterComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
-	if(eventId == m_netEvSetFrozen)
-	{
+	if(eventId == m_netEvSetFrozen) {
 		auto b = packet->Read<bool>();
 		SetFrozen(b);
 	}
-	else if(eventId == m_netEvSetActiveWeapon)
-	{
+	else if(eventId == m_netEvSetActiveWeapon) {
 		auto *ent = nwm::read_entity(packet);
 		SetActiveWeapon(ent);
 	}
-	else if(eventId == m_netEvSetAmmoCount)
-	{
+	else if(eventId == m_netEvSetAmmoCount) {
 		auto ammoType = packet->Read<uint32_t>();
 		auto count = packet->Read<uint16_t>();
-		SetAmmoCount(ammoType,count);
+		SetAmmoCount(ammoType, count);
 	}
 	else
-		return CBaseNetComponent::ReceiveNetEvent(eventId,packet);
+		return CBaseNetComponent::ReceiveNetEvent(eventId, packet);
 	return true;
 }
-

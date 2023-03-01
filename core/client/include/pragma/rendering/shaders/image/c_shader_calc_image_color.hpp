@@ -11,15 +11,11 @@
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader.hpp>
 
-namespace pragma
-{
-	class DLLCLIENT ShaderCalcImageColor
-		: public prosper::ShaderCompute
-	{
-	public:
-#pragma pack(push,1)
-		struct PushConstants
-		{
+namespace pragma {
+	class DLLCLIENT ShaderCalcImageColor : public prosper::ShaderCompute {
+	  public:
+#pragma pack(push, 1)
+		struct PushConstants {
 			int32_t sampleCount;
 		};
 #pragma pack(pop)
@@ -27,10 +23,10 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_COLOR;
 
-		ShaderCalcImageColor(prosper::IPrContext &context,const std::string &identifier);
-		bool RecordCompute(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetTexture,prosper::IDescriptorSet &descSetColor,uint32_t sampleCount) const;
-	protected:
-		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		ShaderCalcImageColor(prosper::IPrContext &context, const std::string &identifier);
+		bool RecordCompute(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetTexture, prosper::IDescriptorSet &descSetColor, uint32_t sampleCount) const;
+	  protected:
+		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 	};
 };
 

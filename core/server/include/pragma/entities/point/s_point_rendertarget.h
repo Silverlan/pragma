@@ -11,24 +11,18 @@
 #include "pragma/entities/point/point_rendertarget.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLSERVER SRenderTargetComponent final
-		: public BasePointRenderTargetComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SRenderTargetComponent final : public BasePointRenderTargetComponent, public SBaseNetComponent {
+	  public:
 		SRenderTargetComponent(BaseEntity &ent) : BasePointRenderTargetComponent(ent) {}
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLSERVER PointRenderTarget
-	: public SBaseEntity
-{
-public:
+class DLLSERVER PointRenderTarget : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

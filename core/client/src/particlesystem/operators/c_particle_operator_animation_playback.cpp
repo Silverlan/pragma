@@ -10,21 +10,20 @@
 #include <mathutil/umath.h>
 #include <algorithm>
 
-REGISTER_PARTICLE_OPERATOR(animation_playback,CParticleOperatorAnimationPlayback);
+REGISTER_PARTICLE_OPERATOR(animation_playback, CParticleOperatorAnimationPlayback);
 
-void CParticleOperatorAnimationPlayback::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleOperatorAnimationPlayback::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleOperator::Initialize(pSystem,values);
-	for(auto &pair : values)
-	{
+	CParticleOperator::Initialize(pSystem, values);
+	for(auto &pair : values) {
 		auto key = pair.first;
 		ustring::to_lower(key);
 		if(key == "playbackspeed")
 			m_playbackSpeed = util::to_float(pair.second);
 	}
 }
-void CParticleOperatorAnimationPlayback::Simulate(CParticle &particle,double tDelta,float strength)
+void CParticleOperatorAnimationPlayback::Simulate(CParticle &particle, double tDelta, float strength)
 {
-	CParticleOperator::Simulate(particle,tDelta,strength);
-	particle.SetFrameOffset(fmodf(particle.GetFrameOffset() +tDelta *m_playbackSpeed,1.f));
+	CParticleOperator::Simulate(particle, tDelta, strength);
+	particle.SetFrameOffset(fmodf(particle.GetFrameOffset() + tDelta * m_playbackSpeed, 1.f));
 }

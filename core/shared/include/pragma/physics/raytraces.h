@@ -15,36 +15,32 @@
 #include <sharedutils/util_weak_handle.hpp>
 #include <memory>
 
-enum class RayCastFlags : uint32_t
-{
+enum class RayCastFlags : uint32_t {
 	None = 0u,
 	ReportHitPosition = 1u,
-	ReportHitNormal = ReportHitPosition<<1u,
-	ReportHitUV = ReportHitNormal<<1u,
-	ReportAllResults = ReportHitUV<<1u,
-	ReportAnyResult = ReportAllResults<<1u,
-	ReportBackFaceHits = ReportAnyResult<<1u,
-	Precise = ReportBackFaceHits<<1u,
+	ReportHitNormal = ReportHitPosition << 1u,
+	ReportHitUV = ReportHitNormal << 1u,
+	ReportAllResults = ReportHitUV << 1u,
+	ReportAnyResult = ReportAllResults << 1u,
+	ReportBackFaceHits = ReportAnyResult << 1u,
+	Precise = ReportBackFaceHits << 1u,
 
-	IgnoreDynamic = Precise<<1u,
-	IgnoreStatic = IgnoreDynamic<<1u,
-	InvertFilter = IgnoreStatic<<1u,
+	IgnoreDynamic = Precise << 1u,
+	IgnoreStatic = IgnoreDynamic << 1u,
+	InvertFilter = IgnoreStatic << 1u,
 
 	Default = ReportHitPosition | ReportHitNormal | ReportHitUV
 };
 REGISTER_BASIC_BITWISE_OPERATORS(RayCastFlags);
 
-enum class RayCastHitType : uint8_t
-{
-	None = 0,
-	Touch,
-	Block
-};
+enum class RayCastHitType : uint8_t { None = 0, Touch, Block };
 
-namespace pragma::physics {class IConvexShape; class IRayCastFilterCallback;};
-class DLLNETWORK TraceData
-{
-public:
+namespace pragma::physics {
+	class IConvexShape;
+	class IRayCastFilterCallback;
+};
+class DLLNETWORK TraceData {
+  public:
 	TraceData();
 	TraceData(const TraceData &other);
 	RayCastFlags GetFlags() const;
@@ -75,15 +71,12 @@ public:
 	void SetFilter(std::vector<EntityHandle> &&ents);
 	void SetFilter(PhysObj &phys);
 	void SetFilter(pragma::physics::ICollisionObject &colObj);
-	void SetFilter(
-		const std::function<RayCastHitType(pragma::physics::IShape&,pragma::physics::IRigidBody&)> &preFilter,
-		const std::function<RayCastHitType(pragma::physics::IShape&,pragma::physics::IRigidBody&)> &postFilter=nullptr
-	);
+	void SetFilter(const std::function<RayCastHitType(pragma::physics::IShape &, pragma::physics::IRigidBody &)> &preFilter, const std::function<RayCastHitType(pragma::physics::IShape &, pragma::physics::IRigidBody &)> &postFilter = nullptr);
 	const std::shared_ptr<pragma::physics::IRayCastFilterCallback> &GetFilter() const;
 	bool HasFlag(RayCastFlags flag) const;
-protected:
+  protected:
 	bool HasTarget() const;
-private:
+  private:
 	umath::Transform m_tStart;
 	umath::Transform m_tEnd;
 
@@ -99,16 +92,13 @@ class ModelMesh;
 class ModelSubMesh;
 class Material;
 class PhysObj;
-struct DLLNETWORK TraceResult
-{
-	struct DLLNETWORK MeshInfo
-	{
+struct DLLNETWORK TraceResult {
+	struct DLLNETWORK MeshInfo {
 		std::vector<std::shared_ptr<ModelMesh>> meshes;
 		ModelMesh *mesh = nullptr;
 		ModelSubMesh *subMesh = nullptr;
 	};
-	TraceResult()
-	{}
+	TraceResult() {}
 	TraceResult(const TraceData &data);
 	RayCastHitType hitType = RayCastHitType::None;
 	EntityHandle entity = {};
@@ -120,14 +110,14 @@ struct DLLNETWORK TraceResult
 	float distance = 0.f;
 	Vector3 normal = {};
 	Vector3 position = {};
-	Vector3 startPosition = Vector3{};
+	Vector3 startPosition = Vector3 {};
 
 	std::shared_ptr<MeshInfo> meshInfo = nullptr;
 
-	void GetMeshes(ModelMesh **mesh,ModelSubMesh **subMesh);
+	void GetMeshes(ModelMesh **mesh, ModelSubMesh **subMesh);
 	Material *GetMaterial();
 	bool GetMaterial(std::string &mat);
-private:
+  private:
 	void InitializeMeshes();
 };
 

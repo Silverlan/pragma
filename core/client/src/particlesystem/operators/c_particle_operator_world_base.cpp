@@ -13,11 +13,10 @@
 #include <sharedutils/util.h>
 #include <algorithm>
 
-void CParticleOperatorWorldBase::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleOperatorWorldBase::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleOperator::Initialize(pSystem,values);
-	for(auto it=values.begin();it!=values.end();it++)
-	{
+	CParticleOperator::Initialize(pSystem, values);
+	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
 		ustring::to_lower(key);
 		if(key == "rotate_with_emitter")
@@ -25,4 +24,4 @@ void CParticleOperatorWorldBase::Initialize(pragma::CParticleSystemComponent &pS
 	}
 }
 
-bool CParticleOperatorWorldBase::ShouldRotateWithEmitter() const {return m_bRotateWithEmitter;}
+bool CParticleOperatorWorldBase::ShouldRotateWithEmitter() const { return m_bRotateWithEmitter; }

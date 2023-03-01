@@ -10,40 +10,36 @@
 #include <luasystem.h>
 #include <sharedutils/util_string_literal.hpp>
 
-namespace pragma
-{
-	namespace lua
-	{
-		template<typename ...Types>
-			luabind::class_<Types...> register_class(const char *name)
+namespace pragma {
+	namespace lua {
+		template<typename... Types>
+		luabind::class_<Types...> register_class(const char *name)
 		{
 			auto def = luabind::class_<Types...>(name);
 			def.def(luabind::tostring(luabind::self));
 			return def;
 		}
-		template<typename TBase,typename ...Types>
-			luabind::class_<TBase,Types...> register_class(const char *name,void(*tostring)(const TBase&))
+		template<typename TBase, typename... Types>
+		luabind::class_<TBase, Types...> register_class(const char *name, void (*tostring)(const TBase &))
 		{
 			auto def = luabind::class_<Types...>(name);
-			def.def("__tostring",tostring);
+			def.def("__tostring", tostring);
 			return def;
 		}
-		template<util::StringLiteral TStr,typename ...Types>
-			luabind::class_<Types...> register_class(const char *name)
+		template<util::StringLiteral TStr, typename... Types>
+		luabind::class_<Types...> register_class(const char *name)
 		{
 			auto def = luabind::class_<Types...>(name);
-			def.def("__tostring",+[]() -> const char* {
-				return TStr;
-			});
+			def.def(
+			  "__tostring", +[]() -> const char * { return TStr; });
 			return def;
 		}
-		template<util::StringLiteral TStr,typename ...Types>
-			luabind::class_<Types...> register_class()
+		template<util::StringLiteral TStr, typename... Types>
+		luabind::class_<Types...> register_class()
 		{
 			auto def = luabind::class_<Types...>(TStr.value);
-			def.def("__tostring",+[]() -> const char* {
-				return TStr.value;
-			});
+			def.def(
+			  "__tostring", +[]() -> const char * { return TStr.value; });
 			return def;
 		}
 	};

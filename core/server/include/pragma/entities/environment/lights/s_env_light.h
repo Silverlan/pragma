@@ -11,16 +11,12 @@
 #include "pragma/entities/environment/lights/env_light.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLSERVER SLightComponent final
-		: public BaseEnvLightComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SLightComponent final : public BaseEnvLightComponent, public SBaseNetComponent {
+	  public:
 		SLightComponent(BaseEntity &ent) : BaseEnvLightComponent(ent) {}
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void SetShadowType(ShadowType type) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 

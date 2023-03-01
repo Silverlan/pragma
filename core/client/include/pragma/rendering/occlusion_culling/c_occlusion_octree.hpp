@@ -17,40 +17,34 @@
 #include <queue>
 #include <functional>
 
-namespace DebugRenderer {class BaseObject;};
+namespace DebugRenderer {
+	class BaseObject;
+};
 
 #define ENABLE_OCCLUSION_DEBUG_MODE 0
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
-enum class OcclusionOctreeUpdateMode : uint8_t
-{
-	Default = 0,
-	ForceUpdateParents,
-	DontUpdateParents
-};
-class BaseOcclusionOctree
-{
-public:
-	class DLLCLIENT Node
-		: public std::enable_shared_from_this<Node>
-	{
-	public:
+enum class OcclusionOctreeUpdateMode : uint8_t { Default = 0, ForceUpdateParents, DontUpdateParents };
+class BaseOcclusionOctree {
+  public:
+	class DLLCLIENT Node : public std::enable_shared_from_this<Node> {
+	  public:
 		virtual ~Node();
 		// Object count of child-branches, as well as own objects
 		uint32_t GetTotalObjectCount() const;
 		// Object count of child-branches, not counting own objects
 		uint32_t GetChildObjectCount() const;
-		virtual uint32_t GetObjectCount() const=0;
+		virtual uint32_t GetObjectCount() const = 0;
 		uint32_t GetChildCount() const;
 		bool IsEmpty() const;
-		const std::pair<Vector3,Vector3> &GetWorldBounds() const;
+		const std::pair<Vector3, Vector3> &GetWorldBounds() const;
 		const Vector3 &GetDimensions() const;
 		Vector3 GetChildDimensions() const;
-		bool IsContained(const Vector3 &min,const Vector3 &max) const;
-		bool UpdateState(OcclusionOctreeUpdateMode updateMode=OcclusionOctreeUpdateMode::Default);
-		void InitializeChildren(bool bPopulateChildren=false);
-		const std::array<std::shared_ptr<Node>,8> *GetChildren() const;
+		bool IsContained(const Vector3 &min, const Vector3 &max) const;
+		bool UpdateState(OcclusionOctreeUpdateMode updateMode = OcclusionOctreeUpdateMode::Default);
+		void InitializeChildren(bool bPopulateChildren = false);
+		const std::array<std::shared_ptr<Node>, 8> *GetChildren() const;
 		bool HasObjects() const;
 		Node *GetParent();
 		const Node *GetParent() const;
@@ -59,27 +53,27 @@ public:
 		uint32_t GetIndex() const;
 		bool IsLeaf() const;
 
-		void DebugPrint(const std::string &t="") const;
-	protected:
+		void DebugPrint(const std::string &t = "") const;
+	  protected:
 		friend BaseOcclusionOctree;
-		Node(BaseOcclusionOctree *tree,Node *parent=nullptr);
-		void SetWorldBounds(const Vector3 &min,const Vector3 &max);
+		Node(BaseOcclusionOctree *tree, Node *parent = nullptr);
+		void SetWorldBounds(const Vector3 &min, const Vector3 &max);
 		void SetIndex(uint32_t idx);
 		// Debug
-		virtual void DebugPrintObjects(const std::string &t) const=0;
-		void DebugDraw(bool b,bool applyToChildren=true,uint32_t depth=0) const;
+		virtual void DebugPrintObjects(const std::string &t) const = 0;
+		void DebugDraw(bool b, bool applyToChildren = true, uint32_t depth = 0) const;
 		void UpdateDebugObject() const;
 
-		std::shared_ptr<std::array<std::shared_ptr<Node>,8>> m_children;
+		std::shared_ptr<std::array<std::shared_ptr<Node>, 8>> m_children;
 		bool m_bIsFinal = false;
 		uint32_t m_index = 0;
 		std::weak_ptr<Node> m_parent = {};
-		BaseOcclusionOctree * const m_tree = nullptr;
+		BaseOcclusionOctree *const m_tree = nullptr;
 		// Total object count in children (Not counting own objects)
 		uint32_t m_branchObjectCount = 0;
-		std::pair<Vector3,Vector3> m_worldBounds;
+		std::pair<Vector3, Vector3> m_worldBounds;
 		Vector3 m_dimensions;
-	private:
+	  private:
 		// Debug
 		mutable std::shared_ptr<DebugRenderer::BaseObject> m_debugObject;
 	};
@@ -98,14 +92,14 @@ public:
 	const Node &GetRootNode() const;
 	CallbackHandle AddNodeCreatedCallback(const std::function<void(std::reference_wrapper<const Node>)> &callback);
 	CallbackHandle AddNodeDestroyedCallback(const std::function<void(std::reference_wrapper<const Node>)> &callback);
-	void IterateTree(const std::function<bool(const Node&)> fNodeCallback) const;
+	void IterateTree(const std::function<bool(const Node &)> fNodeCallback) const;
 
 	// Debug
 	void SetDebugModeEnabled(bool b) const;
 	virtual void DebugPrint() const;
-protected:
-	BaseOcclusionOctree(float minNodeSize,float maxNodeSize,float initialBounds);
-	virtual std::shared_ptr<Node> CreateNode(Node *parent=nullptr)=0;
+  protected:
+	BaseOcclusionOctree(float minNodeSize, float maxNodeSize, float initialBounds);
+	virtual std::shared_ptr<Node> CreateNode(Node *parent = nullptr) = 0;
 	void InitializeNode(Node &node);
 	void FreeNodeIndex(const Node &node);
 
@@ -117,44 +111,33 @@ protected:
 	std::shared_ptr<Node> m_root = nullptr;
 	std::vector<CallbackHandle> m_nodeCreatedCallbacks;
 	std::vector<CallbackHandle> m_nodeDestroyedCallback;
-private:
+  private:
 	std::queue<uint32_t> m_freeIndices;
 	// Debug
 	mutable bool m_bDebugModeEnabled = false;
 };
 
-
-enum class OcclusionOctreeInsertResult : uint8_t
-{
-	ObjectOutOfBounds = 0,
-	ObjectAlreadyIncluded,
-	ObjectInsertedInChildNode,
-	ObjectInserted
-};
+enum class OcclusionOctreeInsertResult : uint8_t { ObjectOutOfBounds = 0, ObjectAlreadyIncluded, ObjectInsertedInChildNode, ObjectInserted };
 template<class T>
-	class DLLCLIENT OcclusionOctree
-		: public BaseOcclusionOctree
-{
-public:
-	class DLLCLIENT Node
-		: public BaseOcclusionOctree::Node
-	{
-	public:
+class DLLCLIENT OcclusionOctree : public BaseOcclusionOctree {
+  public:
+	class DLLCLIENT Node : public BaseOcclusionOctree::Node {
+	  public:
 		virtual uint32_t GetObjectCount() const override;
 		bool HasObject(const T &o) const;
-		void RemoveObject(const T &o,bool bSkipCheck=false);
-		OcclusionOctreeInsertResult InsertObject(const T &o,const Vector3 &min,const Vector3 &max,std::vector<std::weak_ptr<BaseOcclusionOctree::Node>> &nodesInserted,bool bForceInsert=false);
-		bool InsertObjectReverse(const T &o,const Vector3 &min,const Vector3 &max,std::vector<std::weak_ptr<BaseOcclusionOctree::Node>> &nodesInserted);
+		void RemoveObject(const T &o, bool bSkipCheck = false);
+		OcclusionOctreeInsertResult InsertObject(const T &o, const Vector3 &min, const Vector3 &max, std::vector<std::weak_ptr<BaseOcclusionOctree::Node>> &nodesInserted, bool bForceInsert = false);
+		bool InsertObjectReverse(const T &o, const Vector3 &min, const Vector3 &max, std::vector<std::weak_ptr<BaseOcclusionOctree::Node>> &nodesInserted);
 		const std::vector<T> &GetObjects() const;
 		OcclusionOctree<T> *GetTree();
 		const OcclusionOctree<T> *GetTree() const;
-	protected:
-		static std::shared_ptr<Node> Create(OcclusionOctree<T> *tree,Node *parent=nullptr);
+	  protected:
+		static std::shared_ptr<Node> Create(OcclusionOctree<T> *tree, Node *parent = nullptr);
 		friend OcclusionOctree;
 		// Debug
 		virtual void DebugPrintObjects(const std::string &t) const override;
-	private:
-		Node(BaseOcclusionOctree *tree,Node *parent=nullptr) : BaseOcclusionOctree::Node(tree,parent) {};
+	  private:
+		Node(BaseOcclusionOctree *tree, Node *parent = nullptr) : BaseOcclusionOctree::Node(tree, parent) {};
 		std::vector<T> m_objects;
 	};
 	Node &GetRootNode();
@@ -164,33 +147,26 @@ public:
 	void UpdateObject(const T &o);
 	void RemoveObject(const T &o);
 	bool ContainsObject(const T &o);
-	void InsertObjectAndExtendRoot(const T &o,const Vector3 &min,const Vector3 &max,std::vector<std::weak_ptr<BaseOcclusionOctree::Node>> &nodesInserted);
-	void SetToStringCallback(const std::function<std::string(const T&)> &callback);
-	void IterateObjects(const std::function<bool(const Node&)> fNodeCallback,const std::function<void(const T&)> &fObjCallback) const;
-	OcclusionOctree(float minNodeSize,float maxNodeSize,float initialBounds,const std::function<void(const T&,Vector3&,Vector3&)> &factory);
+	void InsertObjectAndExtendRoot(const T &o, const Vector3 &min, const Vector3 &max, std::vector<std::weak_ptr<BaseOcclusionOctree::Node>> &nodesInserted);
+	void SetToStringCallback(const std::function<std::string(const T &)> &callback);
+	void IterateObjects(const std::function<bool(const Node &)> fNodeCallback, const std::function<void(const T &)> &fObjCallback) const;
+	OcclusionOctree(float minNodeSize, float maxNodeSize, float initialBounds, const std::function<void(const T &, Vector3 &, Vector3 &)> &factory);
 
 	virtual void DebugPrint() const override;
 #if ENABLE_OCCLUSION_DEBUG_MODE == 1
-	enum class DLLCLIENT ValidationError : uint32_t
-	{
-		Success = 0,
-		InvalidObjectReferenceCount,
-		InvalidObjectReferenceToNode,
-		MissingObject,
-		DuplicateObject
-	};
-	ValidationError Validate(const T **r=nullptr) const;
+	enum class DLLCLIENT ValidationError : uint32_t { Success = 0, InvalidObjectReferenceCount, InvalidObjectReferenceToNode, MissingObject, DuplicateObject };
+	ValidationError Validate(const T **r = nullptr) const;
 #endif
-protected:
-	void InsertObject(const T &o,Node *optNode);
-	void GetObjectBounds(const T &o,Vector3 &min,Vector3 &max) const;
-	void RemoveNodeReference(const Node &node,const T &o);
-private:
-	virtual std::shared_ptr<BaseOcclusionOctree::Node> CreateNode(BaseOcclusionOctree::Node *parent=nullptr) override;
+  protected:
+	void InsertObject(const T &o, Node *optNode);
+	void GetObjectBounds(const T &o, Vector3 &min, Vector3 &max) const;
+	void RemoveNodeReference(const Node &node, const T &o);
+  private:
+	virtual std::shared_ptr<BaseOcclusionOctree::Node> CreateNode(BaseOcclusionOctree::Node *parent = nullptr) override;
 
-	std::function<void(const T&,Vector3&,Vector3&)> m_objectBoundsCallback = nullptr;
-	std::function<std::string(const T&)> m_objectToStringCallback = nullptr;
-	std::unordered_map<T,std::vector<std::weak_ptr<BaseOcclusionOctree::Node>>> m_objectNodes;
+	std::function<void(const T &, Vector3 &, Vector3 &)> m_objectBoundsCallback = nullptr;
+	std::function<std::string(const T &)> m_objectToStringCallback = nullptr;
+	std::unordered_map<T, std::vector<std::weak_ptr<BaseOcclusionOctree::Node>>> m_objectNodes;
 #if ENABLE_OCCLUSION_DEBUG_MODE == 1
 	std::vector<T> m_dbgObjects;
 #endif

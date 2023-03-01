@@ -86,7 +86,7 @@ vec3 calculate_lighting(vec3 diffuseColor,vec2 texCoords,mat4 mdlMatrix,vec3 fra
 #endif
 	{
 		ambientColor = diffuseColor;
-		ambientColor *= u_renderSettings.ambientColor.rgb *u_renderSettings.ambientColor.a;
+		// ambientColor *= u_renderSettings.ambientColor.rgb *u_renderSettings.ambientColor.a;
 		if(is_ssao_enabled() == true)
 			ssaoFactor = get_ssao_occlusion(get_viewport_width(),get_viewport_height());
 	}

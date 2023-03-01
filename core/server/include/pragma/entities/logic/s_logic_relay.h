@@ -10,24 +10,19 @@
 #include "pragma/entities/s_baseentity.h"
 #include "pragma/entities/logic/logic_relay.h"
 
-namespace pragma
-{
-	class DLLSERVER SLogicRelayComponent final
-		: public BaseLogicRelayComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SLogicRelayComponent final : public BaseLogicRelayComponent {
+	  public:
 		SLogicRelayComponent(BaseEntity &ent) : BaseLogicRelayComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-	protected:
+	  protected:
 		void Trigger(BaseEntity *activator);
 	};
 };
 
-class DLLSERVER LogicRelay
-	: public SBaseEntity
-{
-public:
+class DLLSERVER LogicRelay : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

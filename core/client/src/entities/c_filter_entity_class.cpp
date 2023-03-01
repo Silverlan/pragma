@@ -14,11 +14,11 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(filter_entity_class,CFilterEntityClass);
+LINK_ENTITY_TO_CLASS(filter_entity_class, CFilterEntityClass);
 
 extern CGame *s_game;
 
-void CFilterClassComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CFilterClassComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CFilterEntityClass::Initialize()
 {

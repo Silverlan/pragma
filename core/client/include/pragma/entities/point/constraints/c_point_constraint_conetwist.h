@@ -13,24 +13,18 @@
 #include "pragma/entities/point/constraints/point_constraint_conetwist.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLCLIENT CPointConstraintConeTwistComponent final
-		: public BasePointConstraintConeTwistComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CPointConstraintConeTwistComponent final : public BasePointConstraintConeTwistComponent, public CBaseNetComponent {
+	  public:
 		CPointConstraintConeTwistComponent(BaseEntity &ent) : BasePointConstraintConeTwistComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 };
 
-class DLLCLIENT CPointConstraintConeTwist
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CPointConstraintConeTwist : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

@@ -10,17 +10,15 @@
 
 #include "pragma/clientdefinitions.h"
 
-class DLLCLIENT WILuaHandleWrapper
-{
-private:
-	WILuaHandleWrapper()
-	{}
-public:
+class DLLCLIENT WILuaHandleWrapper {
+  private:
+	WILuaHandleWrapper() {}
+  public:
 	template<class THandle>
-		static WILuaHandleWrapper *Create(lua_State *l,THandle handle)
+	static WILuaHandleWrapper *Create(lua_State *l, THandle handle)
 	{
 		WILuaHandleWrapper *wrapper = new WILuaHandleWrapper;
-		wrapper->object = new luabind::object(l,handle);
+		wrapper->object = new luabind::object(l, handle);
 		wrapper->handle = handle;
 		wrapper->lua = false;
 		return wrapper;

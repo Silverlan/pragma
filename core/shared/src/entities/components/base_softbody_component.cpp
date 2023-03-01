@@ -21,9 +21,7 @@ void BaseSoftBodyComponent::Initialize()
 	auto &ent = GetEntity();
 	ent.AddComponent("physics");
 	ent.AddComponent("model");
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		m_softBodyData = nullptr;
-	});
+	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { m_softBodyData = nullptr; });
 }
 bool BaseSoftBodyComponent::InitializeSoftBodyData()
 {
@@ -35,33 +33,26 @@ bool BaseSoftBodyComponent::InitializeSoftBodyData()
 		return false;
 	m_softBodyData = std::unique_ptr<SoftBodyData>(new SoftBodyData);
 	auto &meshes = m_softBodyData->meshes;
-	hMdl->GetBodyGroupMeshes(mdlComponent->GetBodyGroups(),0u,meshes);
-	if(meshes.empty() == true)
-	{
+	hMdl->GetBodyGroupMeshes(mdlComponent->GetBodyGroups(), 0u, meshes);
+	if(meshes.empty() == true) {
 		m_softBodyData = nullptr;
 		return false;
 	}
 	auto &materials = hMdl->GetMaterials();
 	auto &colMeshes = hMdl->GetCollisionMeshes();
-	for(auto it=meshes.begin();it!=meshes.end();)
-	{
+	for(auto it = meshes.begin(); it != meshes.end();) {
 		auto &mesh = *it;
 		mesh = mesh->Copy();
 		auto &subMeshes = mesh->GetSubMeshes();
-		for(auto it=subMeshes.begin();it!=subMeshes.end();)
-		{
+		for(auto it = subMeshes.begin(); it != subMeshes.end();) {
 			auto &subMesh = *it;
 			auto matId = hMdl->GetMaterialIndex(*subMesh);
-			if(matId.has_value() == false || *matId >= materials.size() || ustring::compare<std::string>(materials.at(*matId)->GetShaderIdentifier(),"nodraw"))
-			{
+			if(matId.has_value() == false || *matId >= materials.size() || ustring::compare<std::string>(materials.at(*matId)->GetShaderIdentifier(), "nodraw")) {
 				it = subMeshes.erase(it);
 				continue;
 			}
-			auto itTest = std::find_if(colMeshes.begin(),colMeshes.end(),[&subMesh](const std::shared_ptr<CollisionMesh> &colMesh) {
-				return (colMesh->GetSoftBodyMesh() == subMesh.get());
-			});
-			if(itTest == colMeshes.end())
-			{
+			auto itTest = std::find_if(colMeshes.begin(), colMeshes.end(), [&subMesh](const std::shared_ptr<CollisionMesh> &colMesh) { return (colMesh->GetSoftBodyMesh() == subMesh.get()); });
+			if(itTest == colMeshes.end()) {
 				it = subMeshes.erase(it);
 				continue;
 			}
@@ -72,19 +63,18 @@ bool BaseSoftBodyComponent::InitializeSoftBodyData()
 		else
 			++it;
 	}
-	if(meshes.empty() == true)
-	{
+	if(meshes.empty() == true) {
 		m_softBodyData = nullptr;
 		return false;
 	}
 	return true;
 }
-const BaseSoftBodyComponent::SoftBodyData *BaseSoftBodyComponent::GetSoftBodyData() const {return const_cast<BaseSoftBodyComponent*>(this)->GetSoftBodyData();}
-BaseSoftBodyComponent::SoftBodyData *BaseSoftBodyComponent::GetSoftBodyData() {return m_softBodyData.get();}
-void BaseSoftBodyComponent::ReleaseSoftBodyData() {m_softBodyData = nullptr;}
-util::EventReply BaseSoftBodyComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
+const BaseSoftBodyComponent::SoftBodyData *BaseSoftBodyComponent::GetSoftBodyData() const { return const_cast<BaseSoftBodyComponent *>(this)->GetSoftBodyData(); }
+BaseSoftBodyComponent::SoftBodyData *BaseSoftBodyComponent::GetSoftBodyData() { return m_softBodyData.get(); }
+void BaseSoftBodyComponent::ReleaseSoftBodyData() { m_softBodyData = nullptr; }
+util::EventReply BaseSoftBodyComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId,evData) == util::EventReply::Handled)
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	if(eventId == pragma::BasePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED)
 		ReleaseSoftBodyData();

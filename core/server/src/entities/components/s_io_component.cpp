@@ -11,8 +11,5 @@
 
 using namespace pragma;
 
-void SIOComponent::Initialize()
-{
-	BaseIOComponent::Initialize();
-}
-void SIOComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SIOComponent::Initialize() { BaseIOComponent::Initialize(); }
+void SIOComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

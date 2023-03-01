@@ -23,10 +23,7 @@ using namespace pragma;
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 
-void CPhysicsComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
-{
-	BasePhysicsComponent::RegisterEvents(componentManager,registerEvent);
-}
+void CPhysicsComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { BasePhysicsComponent::RegisterEvents(componentManager, registerEvent); }
 void CPhysicsComponent::Initialize()
 {
 	BasePhysicsComponent::Initialize();
@@ -64,33 +61,31 @@ void CPhysicsComponent::Initialize()
 	});
 #endif
 }
-void CPhysicsComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BasePhysicsComponent));}
+void CPhysicsComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BasePhysicsComponent)); }
 void CPhysicsComponent::OnEntitySpawn()
 {
 	BasePhysicsComponent::OnEntitySpawn();
 	if(m_physicsType != PHYSICSTYPE::NONE)
 		InitializePhysics(m_physicsType);
 }
-void CPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CPhysicsComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CPhysicsComponent::PrePhysicsSimulate()
 {
 	auto dt = c_game->DeltaTime();
-	if(dt > 0.0 && GetPhysicsType() != PHYSICSTYPE::SOFTBODY)
-	{
+	if(dt > 0.0 && GetPhysicsType() != PHYSICSTYPE::SOFTBODY) {
 		auto pVelComponent = GetEntity().GetComponent<pragma::VelocityComponent>();
 		if(pVelComponent.valid())
-			pVelComponent->SetVelocity(pVelComponent->GetVelocity() +GetLinearCorrectionVelocity() /static_cast<float>(dt));
+			pVelComponent->SetVelocity(pVelComponent->GetVelocity() + GetLinearCorrectionVelocity() / static_cast<float>(dt));
 	}
 	BasePhysicsComponent::PrePhysicsSimulate();
 }
 bool CPhysicsComponent::PostPhysicsSimulate()
 {
 	auto dt = c_game->DeltaTime();
-	if(dt > 0.0 && GetPhysicsType() != PHYSICSTYPE::SOFTBODY)
-	{
+	if(dt > 0.0 && GetPhysicsType() != PHYSICSTYPE::SOFTBODY) {
 		auto pVelComponent = GetEntity().GetComponent<pragma::VelocityComponent>();
 		if(pVelComponent.valid())
-			pVelComponent->SetVelocity(pVelComponent->GetVelocity() -GetLinearCorrectionVelocity() /static_cast<float>(dt));
+			pVelComponent->SetVelocity(pVelComponent->GetVelocity() - GetLinearCorrectionVelocity() / static_cast<float>(dt));
 	}
 	ResetLinearCorrectionVelocity();
 	return BasePhysicsComponent::PostPhysicsSimulate();
@@ -104,22 +99,16 @@ void CPhysicsComponent::ReceiveData(NetPacket &packet)
 	SetMoveType(moveType);
 }
 
-Bool CPhysicsComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
+Bool CPhysicsComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetCollisionsEnabled)
 		SetCollisionsEnabled(packet->Read<bool>());
 	else if(eventId == m_netEvSetSimEnabled)
 		SetSimulationEnabled(packet->Read<bool>());
 	else
-		return CBaseNetComponent::ReceiveNetEvent(eventId,packet);
+		return CBaseNetComponent::ReceiveNetEvent(eventId, packet);
 	return true;
 }
 
-void CPhysicsComponent::OnWake()
-{
-	BasePhysicsComponent::OnWake();
-}
-void CPhysicsComponent::OnSleep()
-{
-	BasePhysicsComponent::OnSleep();
-}
+void CPhysicsComponent::OnWake() { BasePhysicsComponent::OnWake(); }
+void CPhysicsComponent::OnSleep() { BasePhysicsComponent::OnSleep(); }

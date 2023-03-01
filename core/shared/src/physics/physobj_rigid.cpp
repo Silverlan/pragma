@@ -13,10 +13,7 @@
 #include <pragma/game/game.h>
 #include "pragma/physics/environment.hpp"
 
-
-RigidPhysObj::RigidPhysObj(pragma::BaseEntityComponent *owner)
-	: PhysObj(owner),PhysObjKinematic(),PhysObjDynamic()
-{}
+RigidPhysObj::RigidPhysObj(pragma::BaseEntityComponent *owner) : PhysObj(owner), PhysObjKinematic(), PhysObjDynamic() {}
 bool RigidPhysObj::Initialize(pragma::physics::IRigidBody &body)
 {
 	if(PhysObj::Initialize() == false)
@@ -25,35 +22,31 @@ bool RigidPhysObj::Initialize(pragma::physics::IRigidBody &body)
 	m_mass = body.GetMass();
 	return true;
 }
-bool RigidPhysObj::Initialize(const std::vector<pragma::physics::IRigidBody*> &bodies)
+bool RigidPhysObj::Initialize(const std::vector<pragma::physics::IRigidBody *> &bodies)
 {
 	if(PhysObj::Initialize() == false)
 		return false;
 	m_mass = 0.f;
 	auto first = true;
 	m_rigidBodies.reserve(bodies.size());
-	for(auto *body : bodies)
-	{
+	for(auto *body : bodies) {
 		AddCollisionObject(*body);
-		if(first)
-		{
+		if(first) {
 			m_mass = body->GetMass();
 			first = false;
 		}
 	}
 	return true;
 }
-RigidPhysObj::~RigidPhysObj()
-{}
-void RigidPhysObj::SetDamping(float linDamping,float angDamping)
+RigidPhysObj::~RigidPhysObj() {}
+void RigidPhysObj::SetDamping(float linDamping, float angDamping)
 {
 	SetLinearDamping(linDamping);
 	SetAngularDamping(angDamping);
 }
 void RigidPhysObj::SetLinearDamping(float damping)
 {
-	for(auto it=m_rigidBodies.begin();it!=m_rigidBodies.end();++it)
-	{
+	for(auto it = m_rigidBodies.begin(); it != m_rigidBodies.end(); ++it) {
 		auto &body = *it;
 		if(body.IsValid())
 			body->SetLinearDamping(damping);
@@ -61,8 +54,7 @@ void RigidPhysObj::SetLinearDamping(float damping)
 }
 void RigidPhysObj::SetAngularDamping(float damping)
 {
-	for(auto it=m_rigidBodies.begin();it!=m_rigidBodies.end();++it)
-	{
+	for(auto it = m_rigidBodies.begin(); it != m_rigidBodies.end(); ++it) {
 		auto &body = *it;
 		if(body.IsValid())
 			body->SetAngularDamping(damping);
@@ -82,7 +74,7 @@ float RigidPhysObj::GetAngularDamping() const
 		return PhysObj::GetAngularDamping();
 	return body->GetAngularDamping();
 }
-std::vector<util::TSharedHandle<pragma::physics::IRigidBody>> &RigidPhysObj::GetRigidBodies() {return m_rigidBodies;}
+std::vector<util::TSharedHandle<pragma::physics::IRigidBody>> &RigidPhysObj::GetRigidBodies() { return m_rigidBodies; }
 void RigidPhysObj::UpdateVelocity()
 {
 	auto *body = GetRigidBody();
@@ -93,7 +85,7 @@ void RigidPhysObj::UpdateVelocity()
 	if(body == NULL)
 		return Vector3(0.f,0.f,0.f);
 	return body->GetLinearVelocity();*/
-	// m_velocity = 
+	// m_velocity =
 	/*if(m_owner == NULL || !m_owner->IsValid())
 		return;
 	NetworkState *state = (*m_owner)->GetNetworkState();
@@ -110,17 +102,16 @@ void RigidPhysObj::UpdateVelocity()
 	m_originLast = pos;
 	m_posLast = Vector3(0.f,0.f,0.f);*/
 }
-void RigidPhysObj::Simulate(double tDelta,bool bIgnoreGravity) {}
+void RigidPhysObj::Simulate(double tDelta, bool bIgnoreGravity) {}
 void RigidPhysObj::SetKinematic(bool bKinematic)
 {
-	for(auto &hRigidBody : m_rigidBodies)
-	{
+	for(auto &hRigidBody : m_rigidBodies) {
 		if(hRigidBody.IsValid() == false)
 			continue;
 		hRigidBody->SetKinematic(bKinematic);
 	}
 }
-pragma::BaseEntityComponent *RigidPhysObj::GetOwner() {return PhysObj::GetOwner();}
+pragma::BaseEntityComponent *RigidPhysObj::GetOwner() { return PhysObj::GetOwner(); }
 pragma::physics::IRigidBody *RigidPhysObj::GetRigidBody()
 {
 	if(m_rigidBodies.empty())
@@ -130,17 +121,16 @@ pragma::physics::IRigidBody *RigidPhysObj::GetRigidBody()
 		return nullptr;
 	return hBody.Get();
 }
-const pragma::physics::IRigidBody *RigidPhysObj::GetRigidBody() const {return const_cast<RigidPhysObj*>(this)->GetRigidBody();}
+const pragma::physics::IRigidBody *RigidPhysObj::GetRigidBody() const { return const_cast<RigidPhysObj *>(this)->GetRigidBody(); }
 void RigidPhysObj::ApplyMass(float mass)
 {
-	for(unsigned int i=0;i<m_rigidBodies.size();i++)
-	{
+	for(unsigned int i = 0; i < m_rigidBodies.size(); i++) {
 		auto &body = m_rigidBodies[i];
 		if(body.IsValid())
 			body->GetRigidBody()->SetMassAndUpdateInertia(mass);
 	}
 }
-float RigidPhysObj::GetMass() const {return m_mass;}
+float RigidPhysObj::GetMass() const { return m_mass; }
 void RigidPhysObj::SetMass(float mass)
 {
 	m_mass = mass;
@@ -150,8 +140,7 @@ void RigidPhysObj::SetMass(float mass)
 }
 void RigidPhysObj::SetLinearFactor(const Vector3 &factor)
 {
-	for(auto it=m_rigidBodies.begin();it!=m_rigidBodies.end();++it)
-	{
+	for(auto it = m_rigidBodies.begin(); it != m_rigidBodies.end(); ++it) {
 		auto &hBody = *it;
 		if(hBody.IsValid())
 			hBody->GetRigidBody()->SetLinearFactor(factor);
@@ -159,8 +148,7 @@ void RigidPhysObj::SetLinearFactor(const Vector3 &factor)
 }
 void RigidPhysObj::SetAngularFactor(const Vector3 &factor)
 {
-	for(auto it=m_rigidBodies.begin();it!=m_rigidBodies.end();++it)
-	{
+	for(auto it = m_rigidBodies.begin(); it != m_rigidBodies.end(); ++it) {
 		auto &hBody = *it;
 		if(hBody.IsValid())
 			hBody->GetRigidBody()->SetAngularFactor(factor);
@@ -170,14 +158,14 @@ Vector3 RigidPhysObj::GetLinearFactor() const
 {
 	auto *body = GetRigidBody();
 	if(body == nullptr)
-		return Vector3(0.f,0.f,0.f);
+		return Vector3(0.f, 0.f, 0.f);
 	return body->GetLinearFactor();
 }
 Vector3 RigidPhysObj::GetAngularFactor() const
 {
 	auto *body = GetRigidBody();
 	if(body == nullptr)
-		return Vector3(0.f,0.f,0.f);
+		return Vector3(0.f, 0.f, 0.f);
 	return body->GetAngularFactor();
 }
 
@@ -188,12 +176,12 @@ void RigidPhysObj::ApplyForce(const Vector3 &force)
 		return;
 	body->ApplyForce(force);
 }
-void RigidPhysObj::ApplyForce(const Vector3 &force,const Vector3 &relPos)
+void RigidPhysObj::ApplyForce(const Vector3 &force, const Vector3 &relPos)
 {
 	auto *body = GetRigidBody();
 	if(body == nullptr)
 		return;
-	body->ApplyForce(force,relPos);
+	body->ApplyForce(force, relPos);
 }
 void RigidPhysObj::ApplyImpulse(const Vector3 &impulse)
 {
@@ -202,12 +190,12 @@ void RigidPhysObj::ApplyImpulse(const Vector3 &impulse)
 		return;
 	body->ApplyImpulse(impulse);
 }
-void RigidPhysObj::ApplyImpulse(const Vector3 &impulse,const Vector3 &relPos)
+void RigidPhysObj::ApplyImpulse(const Vector3 &impulse, const Vector3 &relPos)
 {
 	auto *body = GetRigidBody();
 	if(body == nullptr)
 		return;
-	body->ApplyImpulse(impulse,relPos);
+	body->ApplyImpulse(impulse, relPos);
 }
 void RigidPhysObj::ApplyTorque(const Vector3 &torque)
 {
@@ -234,23 +222,22 @@ Vector3 RigidPhysObj::GetTotalForce() const
 {
 	auto *body = GetRigidBody();
 	if(body == nullptr)
-		return Vector3(0.f,0.f,0.f);
+		return Vector3(0.f, 0.f, 0.f);
 	return body->GetTotalForce();
 }
 Vector3 RigidPhysObj::GetTotalTorque() const
 {
 	auto *body = GetRigidBody();
 	if(body == nullptr)
-		return Vector3(0.f,0.f,0.f);
+		return Vector3(0.f, 0.f, 0.f);
 	return body->GetTotalTorque();
 }
-void RigidPhysObj::SetSleepingThresholds(float linear,float angular)
+void RigidPhysObj::SetSleepingThresholds(float linear, float angular)
 {
-	for(auto &hBody : m_rigidBodies)
-	{
+	for(auto &hBody : m_rigidBodies) {
 		if(hBody.IsValid() == false)
 			continue;
-		hBody->SetSleepingThresholds(linear,angular);
+		hBody->SetSleepingThresholds(linear, angular);
 	}
 }
 float RigidPhysObj::GetLinearSleepingThreshold() const
@@ -268,12 +255,11 @@ float RigidPhysObj::GetAngularSleepingThreshold() const
 	return body->GetAngularSleepingThreshold();
 }
 
-bool RigidPhysObj::IsStatic() const {return m_bStatic;}
+bool RigidPhysObj::IsStatic() const { return m_bStatic; }
 void RigidPhysObj::SetStatic(bool b)
 {
 	m_bStatic = b;
-	for(unsigned int i=0;i<m_rigidBodies.size();i++)
-	{
+	for(unsigned int i = 0; i < m_rigidBodies.size(); i++) {
 		auto &body = m_rigidBodies[i];
 		if(body.IsValid())
 			body->SetStatic(b);
@@ -284,25 +270,20 @@ void RigidPhysObj::SetStatic(bool b)
 	else
 		ApplyMass(m_mass);*/
 }
-bool RigidPhysObj::IsRigid() const {return true;}
+bool RigidPhysObj::IsRigid() const { return true; }
 void RigidPhysObj::AddCollisionObject(pragma::physics::ICollisionObject &o)
 {
 	if(o.IsRigid() == false)
 		return;
 	PhysObj::AddCollisionObject(o);
-	m_rigidBodies.push_back(util::shared_handle_cast<pragma::physics::IBase,pragma::physics::IRigidBody>(o.ClaimOwnership()));
+	m_rigidBodies.push_back(util::shared_handle_cast<pragma::physics::IBase, pragma::physics::IRigidBody>(o.ClaimOwnership()));
 }
-Vector3 RigidPhysObj::GetLinearVelocity() const
-{
-	return m_velocity;
-}
+Vector3 RigidPhysObj::GetLinearVelocity() const { return m_velocity; }
 void RigidPhysObj::SetLinearVelocity(const Vector3 &vel)
 {
-	for(unsigned int i=0;i<m_rigidBodies.size();i++)
-	{
+	for(unsigned int i = 0; i < m_rigidBodies.size(); i++) {
 		auto &body = m_rigidBodies[i];
-		if(body.IsValid())
-		{
+		if(body.IsValid()) {
 			body->SetLinearVelocity(vel);
 			body->WakeUp();
 		}
@@ -312,16 +293,14 @@ Vector3 RigidPhysObj::GetAngularVelocity() const
 {
 	auto *body = GetRigidBody();
 	if(body == NULL)
-		return Vector3(0.f,0.f,0.f);
+		return Vector3(0.f, 0.f, 0.f);
 	return body->GetAngularVelocity();
 }
 void RigidPhysObj::SetAngularVelocity(const Vector3 &vel)
 {
-	for(unsigned int i=0;i<m_rigidBodies.size();i++)
-	{
+	for(unsigned int i = 0; i < m_rigidBodies.size(); i++) {
 		auto &body = m_rigidBodies[i];
-		if(body.IsValid())
-		{
+		if(body.IsValid()) {
 			body->SetAngularVelocity(vel);
 			body->WakeUp();
 		}
@@ -329,8 +308,7 @@ void RigidPhysObj::SetAngularVelocity(const Vector3 &vel)
 }
 void RigidPhysObj::PutToSleep()
 {
-	for(unsigned int i=0;i<m_rigidBodies.size();i++)
-	{
+	for(unsigned int i = 0; i < m_rigidBodies.size(); i++) {
 		auto &body = m_rigidBodies[i];
 		if(body.IsValid())
 			body->PutToSleep();
@@ -338,8 +316,7 @@ void RigidPhysObj::PutToSleep()
 }
 void RigidPhysObj::WakeUp()
 {
-	for(unsigned int i=0;i<m_rigidBodies.size();i++)
-	{
+	for(unsigned int i = 0; i < m_rigidBodies.size(); i++) {
 		auto &body = m_rigidBodies[i];
 		if(body.IsValid())
 			body->WakeUp();
@@ -352,12 +329,5 @@ bool RigidPhysObj::IsSleeping() const
 		return true;
 	return body->IsAsleep();
 }
-void RigidPhysObj::OnSleep()
-{
-	PhysObj::OnSleep();
-}
-void RigidPhysObj::OnWake()
-{
-	PhysObj::OnWake();
-}
-
+void RigidPhysObj::OnSleep() { PhysObj::OnSleep(); }
+void RigidPhysObj::OnWake() { PhysObj::OnWake(); }

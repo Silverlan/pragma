@@ -19,24 +19,20 @@
 
 class ClientState;
 class BaseEntity;
-namespace uimg {class ImageBuffer; struct ImageLayerSet;};
-namespace pragma::rendering::cycles
-{
-	struct DLLCLIENT SceneInfo
-	{
-		enum class DeviceType : uint8_t
-		{
-			CPU = 0,
-			GPU
-		};
+namespace uimg {
+	class ImageBuffer;
+	struct ImageLayerSet;
+};
+namespace pragma::rendering::cycles {
+	struct DLLCLIENT SceneInfo {
+		enum class DeviceType : uint8_t { CPU = 0, GPU };
 		enum class SceneFlags : uint8_t // Has to match struct defined in Cycles module!
 		{
 			None = 0u,
 			CullObjectsOutsidePvs = 1u,
-			CullObjectsOutsideCameraFrustum = CullObjectsOutsidePvs<<1u
+			CullObjectsOutsideCameraFrustum = CullObjectsOutsidePvs << 1u
 		};
-		struct DLLCLIENT ColorTransform
-		{
+		struct DLLCLIENT ColorTransform {
 			std::string config;
 			std::string look;
 		};
@@ -57,8 +53,7 @@ namespace pragma::rendering::cycles
 		float exposure = 1.f;
 		std::optional<ColorTransform> colorTransform {};
 	};
-	struct DLLCLIENT RenderImageInfo
-	{
+	struct DLLCLIENT RenderImageInfo {
 		umath::Transform camPose {};
 		bool equirectPanorama = false;
 		Mat4 viewProjectionMatrix = {};
@@ -66,13 +61,13 @@ namespace pragma::rendering::cycles
 		float farZ = pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z;
 		umath::Degree fov = BaseEnvCameraComponent::DEFAULT_FOV;
 
-		std::function<bool(BaseEntity&)> entityFilter = nullptr;
-		const std::vector<BaseEntity*> *entityList = nullptr;
+		std::function<bool(BaseEntity &)> entityFilter = nullptr;
+		const std::vector<BaseEntity *> *entityList = nullptr;
 	};
-	util::ParallelJob<uimg::ImageLayerSet> render_image(ClientState &client,const SceneInfo &sceneInfo,const RenderImageInfo &renderImageInfo);
-	util::ParallelJob<uimg::ImageLayerSet> bake_ambient_occlusion(ClientState &client,const SceneInfo &sceneInfo,Model &mdl,uint32_t materialIndex);
-	util::ParallelJob<uimg::ImageLayerSet> bake_ambient_occlusion(ClientState &client,const SceneInfo &sceneInfo,BaseEntity &ent,uint32_t materialIndex);
-	util::ParallelJob<uimg::ImageLayerSet> bake_lightmaps(ClientState &client,const SceneInfo &sceneInfo);
+	util::ParallelJob<uimg::ImageLayerSet> render_image(ClientState &client, const SceneInfo &sceneInfo, const RenderImageInfo &renderImageInfo);
+	util::ParallelJob<uimg::ImageLayerSet> bake_ambient_occlusion(ClientState &client, const SceneInfo &sceneInfo, Model &mdl, uint32_t materialIndex);
+	util::ParallelJob<uimg::ImageLayerSet> bake_ambient_occlusion(ClientState &client, const SceneInfo &sceneInfo, BaseEntity &ent, uint32_t materialIndex);
+	util::ParallelJob<uimg::ImageLayerSet> bake_lightmaps(ClientState &client, const SceneInfo &sceneInfo);
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::rendering::cycles::SceneInfo::SceneFlags)
 

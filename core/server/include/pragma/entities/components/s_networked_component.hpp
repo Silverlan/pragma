@@ -11,24 +11,20 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_networked_component.hpp>
 
-namespace pragma
-{
-	class DLLSERVER SNetworkedComponent final
-		: public BaseNetworkedComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SNetworkedComponent final : public BaseNetworkedComponent, public SBaseNetComponent {
+	  public:
 		SNetworkedComponent(BaseEntity &ent) : BaseNetworkedComponent(ent) {}
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual void SetNetworkFlags(NetworkFlags flags) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
-	protected:
+	  protected:
 #if NETWORKED_VARS_ENABLED != 0
 		template<class TProperty>
-			void add_networked_variable_callback(NetworkedVariable::Id id,util::BaseProperty &prop);
+		void add_networked_variable_callback(NetworkedVariable::Id id, util::BaseProperty &prop);
 		template<typename T>
-			static NetworkedVariable::Type get_networked_variable_type();
+		static NetworkedVariable::Type get_networked_variable_type();
 		virtual void OnNetworkedVariableCreated(NetworkedVariable &nwVar) override;
 #endif
 	};

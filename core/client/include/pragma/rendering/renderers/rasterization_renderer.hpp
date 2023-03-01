@@ -17,11 +17,8 @@
 #include <string>
 #include <vector>
 
-
-
 class SceneRenderDesc;
-namespace pragma::rendering
-{
+namespace pragma::rendering {
 
 };
 

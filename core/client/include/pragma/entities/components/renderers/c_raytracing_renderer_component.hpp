@@ -13,22 +13,17 @@
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <unordered_set>
 
-namespace pragma
-{
-	class DLLCLIENT CRaytracingRendererComponent final
-		: public BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CRaytracingRendererComponent final : public BaseEntityComponent {
+	  public:
 		CRaytracingRendererComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
-	private:
+	  private:
 	};
 };
 
-class DLLCLIENT CRaytracingRenderer
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CRaytracingRenderer : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

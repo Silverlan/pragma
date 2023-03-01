@@ -21,11 +21,9 @@ extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-LINK_WGUI_TO_CLASS(WIDebugHDRBloom,WIDebugHDRBloom);
+LINK_WGUI_TO_CLASS(WIDebugHDRBloom, WIDebugHDRBloom);
 
-WIDebugHDRBloom::WIDebugHDRBloom()
-	: WITexturedRect()
-{}
+WIDebugHDRBloom::WIDebugHDRBloom() : WITexturedRect() {}
 
 WIDebugHDRBloom::~WIDebugHDRBloom()
 {
@@ -38,18 +36,18 @@ void WIDebugHDRBloom::UpdateBloomImage()
 {
 	auto &drawCmd = c_engine->GetDrawCommandBuffer();
 	auto *scene = c_game->GetScene();
-	auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent*>(scene->GetRenderer()) : nullptr;
+	auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent *>(scene->GetRenderer()) : nullptr;
 	if(renderer == nullptr)
 		return;
 	auto &bloomTexture = renderer->GetHDRInfo().bloomBlurRenderTarget->GetTexture();
 	auto &imgSrc = bloomTexture.GetImage();
 	auto &imgDst = m_renderTarget->GetTexture().GetImage();
-		
-	drawCmd->RecordImageBarrier(imgSrc,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal);
-	drawCmd->RecordImageBarrier(imgDst,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferDstOptimal);
-	drawCmd->RecordBlitImage({},imgSrc,imgDst);
-	drawCmd->RecordImageBarrier(imgSrc,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
-	drawCmd->RecordImageBarrier(imgDst,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+
+	drawCmd->RecordImageBarrier(imgSrc, prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferSrcOptimal);
+	drawCmd->RecordImageBarrier(imgDst, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::TransferDstOptimal);
+	drawCmd->RecordBlitImage({}, imgSrc, imgDst);
+	drawCmd->RecordImageBarrier(imgSrc, prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
+	drawCmd->RecordImageBarrier(imgDst, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 }
 
 void WIDebugHDRBloom::DoUpdate()
@@ -66,14 +64,12 @@ void WIDebugHDRBloom::DoUpdate()
 	auto img = c_engine->GetRenderContext().CreateImage(imgCreateInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	auto tex = c_engine->GetRenderContext().CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
+	auto tex = c_engine->GetRenderContext().CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
 	prosper::util::RenderPassCreateInfo rpInfo {};
-	rpInfo.attachments.push_back({img->GetFormat(),prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::Load,prosper::AttachmentStoreOp::Store,img->GetSampleCount(),prosper::ImageLayout::ColorAttachmentOptimal});
-	rpInfo.subPasses.push_back({prosper::util::RenderPassCreateInfo::SubPass{{0ull}}});
+	rpInfo.attachments.push_back({img->GetFormat(), prosper::ImageLayout::ColorAttachmentOptimal, prosper::AttachmentLoadOp::Load, prosper::AttachmentStoreOp::Store, img->GetSampleCount(), prosper::ImageLayout::ColorAttachmentOptimal});
+	rpInfo.subPasses.push_back({prosper::util::RenderPassCreateInfo::SubPass {{0ull}}});
 	auto rp = c_engine->GetRenderContext().CreateRenderPass(rpInfo);
-	m_renderTarget = c_engine->GetRenderContext().CreateRenderTarget({tex},rp,{});
-	m_cbRenderHDRMap = c_game->AddCallback("PostRenderScenes",FunctionCallback<>::Create(
-		std::bind(&WIDebugHDRBloom::UpdateBloomImage,this)
-	));
+	m_renderTarget = c_engine->GetRenderContext().CreateRenderTarget({tex}, rp, {});
+	m_cbRenderHDRMap = c_game->AddCallback("PostRenderScenes", FunctionCallback<>::Create(std::bind(&WIDebugHDRBloom::UpdateBloomImage, this)));
 	SetTexture(m_renderTarget->GetTexture());
 }

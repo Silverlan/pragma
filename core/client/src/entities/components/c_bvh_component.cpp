@@ -17,26 +17,21 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-void CBvhComponent::InitializeLuaObject(lua_State *l) {return BaseBvhComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CBvhComponent::InitializeLuaObject(lua_State *l) { return BaseBvhComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CBvhComponent::Initialize()
 {
 	BaseBvhComponent::Initialize();
 
-	BindEventUnhandled(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		RebuildBvh();
-	});
+	BindEventUnhandled(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { RebuildBvh(); });
 	if(GetEntity().IsSpawned())
 		RebuildBvh();
 }
 
-bool CBvhComponent::IntersectionTest(
-	const Vector3 &origin,const Vector3 &dir,float minDist,float maxDist,
-	BvhHitInfo &outHitInfo
-) const
+bool CBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, BvhHitInfo &outHitInfo) const
 {
 	// TODO: If dirty?
-	return BaseBvhComponent::IntersectionTest(origin,dir,minDist,maxDist,outHitInfo);
+	return BaseBvhComponent::IntersectionTest(origin, dir, minDist, maxDist, outHitInfo);
 }
 
 void CBvhComponent::OnEntityComponentAdded(BaseEntityComponent &component)
@@ -60,8 +55,7 @@ void CBvhComponent::OnRemove()
 void CBvhComponent::UpdateBvhStatus()
 {
 	auto useAnimatedBvh = GetEntity().HasComponent<CAnimatedComponent>();
-	if(useAnimatedBvh)
-	{
+	if(useAnimatedBvh) {
 		auto animBvh = GetEntity().AddComponent<CAnimatedBvhComponent>();
 		if(animBvh.valid())
 			animBvh->SetUpdateLazily(true);
@@ -73,7 +67,7 @@ void CBvhComponent::UpdateBvhStatus()
 void CBvhComponent::DoRebuildBvh()
 {
 	ClearBvh();
-	auto *mdlC = static_cast<CModelComponent*>(GetEntity().GetModelComponent());
+	auto *mdlC = static_cast<CModelComponent *>(GetEntity().GetModelComponent());
 	if(!mdlC)
 		return;
 	auto &renderMeshes = mdlC->GetRenderMeshes();

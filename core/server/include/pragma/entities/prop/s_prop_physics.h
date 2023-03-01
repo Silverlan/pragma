@@ -10,21 +10,16 @@
 #include "pragma/serverdefinitions.h"
 #include <pragma/entities/prop/prop_physics.hpp>
 
-namespace pragma
-{
-	class DLLSERVER SPropPhysicsComponent final
-		: public BasePropPhysicsComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SPropPhysicsComponent final : public BasePropPhysicsComponent {
+	  public:
 		SPropPhysicsComponent(BaseEntity &ent) : BasePropPhysicsComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLSERVER PropPhysics
-	: public SBaseEntity
-{
-public:
+class DLLSERVER PropPhysics : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

@@ -19,9 +19,9 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(func_kinematic,FuncKinematic);
+LINK_ENTITY_TO_CLASS(func_kinematic, FuncKinematic);
 
-void SKinematicComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SKinematicComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_kvFirstNode);
 	packet->Write<float>(m_kvMoveSpeed);
@@ -31,16 +31,16 @@ void SKinematicComponent::SendData(NetPacket &packet,networking::ClientRecipient
 void SKinematicComponent::StartForward()
 {
 	BaseFuncKinematicComponent::StartForward();
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvStartForward,pragma::networking::Protocol::SlowReliable);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvStartForward, pragma::networking::Protocol::SlowReliable);
 }
 
 void SKinematicComponent::StartBackward()
 {
 	BaseFuncKinematicComponent::StartBackward();
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvStartBackward,pragma::networking::Protocol::SlowReliable);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvStartBackward, pragma::networking::Protocol::SlowReliable);
 }
 
-void SKinematicComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SKinematicComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void FuncKinematic::Initialize()
 {

@@ -13,49 +13,38 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-namespace prosper {class Texture; class DescriptorSetGroup;};
-namespace uimg {struct ImageLayerSet;};
-namespace pragma
-{
+namespace prosper {
+	class Texture;
+	class DescriptorSetGroup;
+};
+namespace uimg {
+	struct ImageLayerSet;
+};
+namespace pragma {
 	class CSceneComponent;
-	namespace rendering
-	{
-		struct DLLCLIENT IBLData
-		{
-			IBLData(const std::shared_ptr<prosper::Texture> &irradianceMap,const std::shared_ptr<prosper::Texture> &prefilterMap,const std::shared_ptr<prosper::Texture> &brdfMap);
+	namespace rendering {
+		struct DLLCLIENT IBLData {
+			IBLData(const std::shared_ptr<prosper::Texture> &irradianceMap, const std::shared_ptr<prosper::Texture> &prefilterMap, const std::shared_ptr<prosper::Texture> &brdfMap);
 			std::shared_ptr<prosper::Texture> irradianceMap;
 			std::shared_ptr<prosper::Texture> prefilterMap;
 			std::shared_ptr<prosper::Texture> brdfMap;
 			float strength = 1.f;
 		};
 	};
-	class DLLCLIENT CReflectionProbeComponent final
-		: public BaseEntityComponent
-	{
-	public:
-		enum class UpdateStatus : uint8_t
-		{
-			Initial = 0,
-			Pending,
-			Complete,
-			Failed
-		};
-		enum class StateFlags : uint8_t
-		{
-			None = 0u,
-			BakingFailed = 1u,
-			RequiresRebuild = BakingFailed<<1u
-		};
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
-		static void BuildAllReflectionProbes(Game &game,bool rebuild=false);
-		static void BuildReflectionProbes(Game &game,std::vector<CReflectionProbeComponent*> &probes,bool rebuild=false);
-		static prosper::IDescriptorSet *FindDescriptorSetForClosestProbe(const CSceneComponent &scene,const Vector3 &origin,float &outIntensity);
+	class DLLCLIENT CReflectionProbeComponent final : public BaseEntityComponent {
+	  public:
+		enum class UpdateStatus : uint8_t { Initial = 0, Pending, Complete, Failed };
+		enum class StateFlags : uint8_t { None = 0u, BakingFailed = 1u, RequiresRebuild = BakingFailed << 1u };
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static void BuildAllReflectionProbes(Game &game, bool rebuild = false);
+		static void BuildReflectionProbes(Game &game, std::vector<CReflectionProbeComponent *> &probes, bool rebuild = false);
+		static prosper::IDescriptorSet *FindDescriptorSetForClosestProbe(const CSceneComponent &scene, const Vector3 &origin, float &outIntensity);
 
 		CReflectionProbeComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		bool CaptureIBLReflectionsFromScene(const std::vector<BaseEntity*> *optEntityList=nullptr,bool renderJob=false);
+		bool CaptureIBLReflectionsFromScene(const std::vector<BaseEntity *> *optEntityList = nullptr, bool renderJob = false);
 		bool GenerateIBLReflectionsFromEnvMap(const std::string &envMapFileName);
 		bool GenerateIBLReflectionsFromCubemap(prosper::Texture &cubemap);
 		bool LoadIBLReflectionsFromFile();
@@ -67,29 +56,26 @@ namespace pragma
 		float GetIBLStrength() const;
 		void SetIBLStrength(float iblStrength);
 
-		UpdateStatus UpdateIBLData(bool rebuild=false);
+		UpdateStatus UpdateIBLData(bool rebuild = false);
 		bool RequiresRebuild() const;
 		std::string GetLocationIdentifier() const;
 
 		std::string GetCubemapIBLMaterialFilePath() const;
 		void SetCubemapIBLMaterialFilePath(const std::string &path);
-	private:
+	  private:
 		static std::shared_ptr<prosper::IImage> CreateCubemapImage();
 		Material *LoadMaterial(bool &outIsDefault);
 
 		void InitializeDescriptorSet();
-		util::ParallelJob<uimg::ImageLayerSet> CaptureRaytracedIBLReflectionsFromScene(
-			uint32_t width,uint32_t height,const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov,
-			float exposure,const std::vector<BaseEntity*> *optEntityList=nullptr,bool renderJob=false
-		);
+		util::ParallelJob<uimg::ImageLayerSet> CaptureRaytracedIBLReflectionsFromScene(uint32_t width, uint32_t height, const Vector3 &camPos, const Quat &camRot, float nearZ, float farZ, umath::Degree fov, float exposure, const std::vector<BaseEntity *> *optEntityList = nullptr,
+		  bool renderJob = false);
 		bool FinalizeCubemap(prosper::IImage &imgCubemap);
 		std::string GetCubemapIBLMaterialPath() const;
 		std::string GetCubemapIdentifier() const;
 		std::unique_ptr<rendering::IBLData> m_iblData = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_iblDsg = nullptr;
 
-		struct RaytracingJobManager
-		{
+		struct RaytracingJobManager {
 			RaytracingJobManager(CReflectionProbeComponent &probe);
 			~RaytracingJobManager();
 			util::ParallelJob<uimg::ImageLayerSet> job = {};
@@ -108,10 +94,8 @@ namespace pragma
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::CReflectionProbeComponent::StateFlags)
 
-class DLLCLIENT CEnvReflectionProbe
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEnvReflectionProbe : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

@@ -12,8 +12,7 @@
 
 #undef NEAR
 #undef FAR
-enum class FrustumPlane : uint32_t
-{
+enum class FrustumPlane : uint32_t {
 	Left,
 	Right,
 	Top,
@@ -24,16 +23,6 @@ enum class FrustumPlane : uint32_t
 	Count
 };
 
-enum class FrustumPoint : uint32_t
-{
-	FarBottomLeft = 0,
-	FarTopLeft,
-	FarTopRight,
-	FarBottomRight,
-	NearBottomLeft,
-	NearTopLeft,
-	NearTopRight,
-	NearBottomRight
-};
+enum class FrustumPoint : uint32_t { FarBottomLeft = 0, FarTopLeft, FarTopRight, FarBottomRight, NearBottomLeft, NearTopLeft, NearTopRight, NearBottomRight };
 
 #endif

@@ -14,11 +14,9 @@
 #include "textureinfo.h"
 #include <texturemanager/texture.h>
 
-namespace Lua
-{
-	namespace Texture
-	{
-		DLLCLIENT std::shared_ptr<prosper::Texture> GetVkTexture(lua_State *l,::Texture &tex);
+namespace Lua {
+	namespace Texture {
+		DLLCLIENT std::shared_ptr<prosper::Texture> GetVkTexture(lua_State *l, ::Texture &tex);
 	};
 };
 

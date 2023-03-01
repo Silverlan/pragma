@@ -11,31 +11,27 @@
 
 extern DLLSERVER SGame *s_game;
 
-decltype(ESResourceWatcherCallbackType::NavMesh) ESResourceWatcherCallbackType::NavMesh = ESResourceWatcherCallbackType{umath::to_integral(E::NavMesh)};
-decltype(ESResourceWatcherCallbackType::Count) ESResourceWatcherCallbackType::Count = ESResourceWatcherCallbackType{umath::to_integral(E::Count)};
-void SResourceWatcherManager::OnResourceChanged(const util::Path &rootPath,const util::Path &path,const std::string &ext)
+decltype(ESResourceWatcherCallbackType::NavMesh) ESResourceWatcherCallbackType::NavMesh = ESResourceWatcherCallbackType {umath::to_integral(E::NavMesh)};
+decltype(ESResourceWatcherCallbackType::Count) ESResourceWatcherCallbackType::Count = ESResourceWatcherCallbackType {umath::to_integral(E::Count)};
+void SResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const util::Path &path, const std::string &ext)
 {
-	ResourceWatcherManager::OnResourceChanged(rootPath,path,ext);
+	ResourceWatcherManager::OnResourceChanged(rootPath, path, ext);
 	auto &strPath = path.GetString();
-	if((ext == pragma::nav::PNAV_EXTENSION_BINARY || ext == pragma::nav::PNAV_EXTENSION_ASCII) && s_game != nullptr)
-	{
+	if((ext == pragma::nav::PNAV_EXTENSION_BINARY || ext == pragma::nav::PNAV_EXTENSION_ASCII) && s_game != nullptr) {
 		auto fname = ufile::get_file_from_filename(strPath);
 		ufile::remove_extension_from_filename(fname);
 		auto mapName = s_game->GetMapName();
-		if(ustring::compare(mapName,fname,false) == true)
-		{
+		if(ustring::compare(mapName, fname, false) == true) {
 #if RESOURCE_WATCHER_VERBOSE > 0
-			auto navPath = "maps\\" +strPath;
-			Con::cout<<"[ResourceWatcher] Navigation mesh has changed: "<<navPath<<". Attempting to reload..."<<Con::endl;
+			auto navPath = "maps\\" + strPath;
+			Con::cout << "[ResourceWatcher] Navigation mesh has changed: " << navPath << ". Attempting to reload..." << Con::endl;
 #endif
-			if(s_game->LoadNavMesh(true) == false)
-			{
+			if(s_game->LoadNavMesh(true) == false) {
 #if RESOURCE_WATCHER_VERBOSE > 0
-			Con::cwar<<"WARNING: [ResourceWatcher] Unable to reload navigation mesh!"<<Con::endl;
+				Con::cwar << "[ResourceWatcher] Unable to reload navigation mesh!" << Con::endl;
 #endif
 			}
 		}
-		CallChangeCallbacks(ESResourceWatcherCallbackType::NavMesh,strPath,ext);
+		CallChangeCallbacks(ESResourceWatcherCallbackType::NavMesh, strPath, ext);
 	}
 }
-

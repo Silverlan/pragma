@@ -19,7 +19,7 @@ ClientState *CEngine::OpenClientState()
 	auto *cl = GetClientState();
 	cl->Initialize();
 	UpdateAssetMultiThreadedLoadingEnabled();
-	return static_cast<ClientState*>(cl);
+	return static_cast<ClientState *>(cl);
 }
 
 void CEngine::CloseClientState()
@@ -39,5 +39,5 @@ NetworkState *CEngine::GetClientState() const
 {
 	if(m_clInstance == nullptr)
 		return nullptr;
-	return static_cast<ClientState*>(m_clInstance->state.get());
+	return static_cast<ClientState *>(m_clInstance->state.get());
 }

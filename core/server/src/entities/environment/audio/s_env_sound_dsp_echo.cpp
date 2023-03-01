@@ -15,28 +15,28 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_sound_dsp_echo,EnvSoundDspEcho);
+LINK_ENTITY_TO_CLASS(env_sound_dsp_echo, EnvSoundDspEcho);
 
-bool SSoundDspEchoComponent::OnSetKeyValue(const std::string &key,const std::string &val)
+bool SSoundDspEchoComponent::OnSetKeyValue(const std::string &key, const std::string &val)
 {
-	if(SBaseSoundDspComponent::OnSetKeyValue(key,val))
+	if(SBaseSoundDspComponent::OnSetKeyValue(key, val))
 		return true;
-	if(ustring::compare<std::string>(key,"delay",false))
+	if(ustring::compare<std::string>(key, "delay", false))
 		m_kvDelay = util::to_float(val);
-	else if(ustring::compare<std::string>(key,"lrdelay",false))
+	else if(ustring::compare<std::string>(key, "lrdelay", false))
 		m_kvLRDelay = util::to_float(val);
-	else if(ustring::compare<std::string>(key,"damping",false))
+	else if(ustring::compare<std::string>(key, "damping", false))
 		m_kvDamping = util::to_float(val);
-	else if(ustring::compare<std::string>(key,"feedback",false))
+	else if(ustring::compare<std::string>(key, "feedback", false))
 		m_kvFeedback = util::to_float(val);
-	else if(ustring::compare<std::string>(key,"spread",false))
+	else if(ustring::compare<std::string>(key, "spread", false))
 		m_kvSpread = util::to_float(val);
 	else
 		return false;
 	return true;
 }
 
-void SSoundDspEchoComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SSoundDspEchoComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->Write<float>(m_kvDelay);
 	packet->Write<float>(m_kvLRDelay);
@@ -44,7 +44,7 @@ void SSoundDspEchoComponent::SendData(NetPacket &packet,networking::ClientRecipi
 	packet->Write<float>(m_kvFeedback);
 	packet->Write<float>(m_kvSpread);
 }
-void SSoundDspEchoComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SSoundDspEchoComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////////////
 

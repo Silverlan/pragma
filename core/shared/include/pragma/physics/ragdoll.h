@@ -11,10 +11,8 @@
 #include "pragma/networkdefinitions.h"
 #include "pragma/physics/physobj.h"
 
-class DLLNETWORK Ragdoll
-	: public PhysObj
-{
-public:
+class DLLNETWORK Ragdoll : public PhysObj {
+  public:
 	Ragdoll();
 };
 #endif

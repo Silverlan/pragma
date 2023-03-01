@@ -15,18 +15,15 @@
 class PolyMesh;
 #pragma warning(push)
 #pragma warning(disable : 4251)
-namespace pragma
-{
-	class DLLNETWORK BaseWorldComponent
-		: public BaseEntityComponent
-	{
-	public:
-		virtual Con::c_cout &print(Con::c_cout&);
-	public:
+namespace pragma {
+	class DLLNETWORK BaseWorldComponent : public BaseEntityComponent {
+	  public:
+		virtual Con::c_cout &print(Con::c_cout &);
+	  public:
 		BaseWorldComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
-	protected:
+	  protected:
 		void InitializePhysics();
 	};
 };

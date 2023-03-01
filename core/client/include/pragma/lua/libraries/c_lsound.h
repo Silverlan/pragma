@@ -12,10 +12,8 @@
 #include "pragma/lua/c_ldefinitions.h"
 #include "pragma/lua/libraries/lsound.h"
 
-namespace Lua
-{
-	namespace sound
-	{
+namespace Lua {
+	namespace sound {
 		DLLCLIENT int register_aux_effect(lua_State *l);
 		DLLCLIENT int get_aux_effect(lua_State *l);
 		DLLCLIENT int set_distance_model(lua_State *l);

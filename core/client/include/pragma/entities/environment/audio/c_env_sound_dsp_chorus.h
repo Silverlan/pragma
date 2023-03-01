@@ -12,13 +12,9 @@
 #include "pragma/entities/environment/audio/c_env_sound_dsp.h"
 #include "pragma/entities/environment/audio/env_sound_dsp_chorus.h"
 
-namespace pragma
-{
-	class DLLCLIENT CSoundDspChorusComponent final
-		: public CBaseSoundDspComponent,
-		public BaseEnvSoundDspChorus
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CSoundDspChorusComponent final : public CBaseSoundDspComponent, public BaseEnvSoundDspChorus {
+	  public:
 		CSoundDspChorusComponent(BaseEntity &ent) : CBaseSoundDspComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void OnEntitySpawn() override;
@@ -26,10 +22,8 @@ namespace pragma
 	};
 };
 
-class DLLCLIENT CEnvSoundDspChorus
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEnvSoundDspChorus : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

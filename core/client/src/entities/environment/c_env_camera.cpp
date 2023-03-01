@@ -23,7 +23,7 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_camera,CEnvCamera);
+LINK_ENTITY_TO_CLASS(env_camera, CEnvCamera);
 
 extern DLLCLIENT CGame *c_game;
 
@@ -32,27 +32,22 @@ CCameraComponent::~CCameraComponent()
 	if(m_cbCameraUpdate.IsValid())
 		m_cbCameraUpdate.Remove();
 }
-void CCameraComponent::Save(udm::LinkedPropertyWrapperArg udm)
-{
-	BaseEnvCameraComponent::Save(udm);
-}
-void CCameraComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
-{
-	BaseEnvCameraComponent::Load(udm,version);
-}
+void CCameraComponent::Save(udm::LinkedPropertyWrapperArg udm) { BaseEnvCameraComponent::Save(udm); }
+void CCameraComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) { BaseEnvCameraComponent::Load(udm, version); }
 void CCameraComponent::Initialize()
 {
 	BaseEnvCameraComponent::Initialize();
 
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent != nullptr)
-	{
+	if(pTrComponent != nullptr) {
 		auto &trC = *pTrComponent;
-		FlagCallbackForRemoval(pTrComponent->AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-			FlagViewMatrixAsDirty();
-			return util::EventReply::Unhandled;
-		}),CallbackType::Entity);
+		FlagCallbackForRemoval(pTrComponent->AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,
+		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			                         FlagViewMatrixAsDirty();
+			                         return util::EventReply::Unhandled;
+		                         }),
+		  CallbackType::Entity);
 	}
 }
 void CCameraComponent::OnEntitySpawn()
@@ -66,48 +61,40 @@ void CCameraComponent::UpdateState()
 	if(GetEntity().IsSpawned() == false)
 		return;
 	auto toggleC = GetEntity().GetComponent<CToggleComponent>();
-	if(toggleC.expired() || toggleC->IsTurnedOn())
-	{
+	if(toggleC.expired() || toggleC->IsTurnedOn()) {
 		if(m_cbCameraUpdate.IsValid())
 			m_cbCameraUpdate.Remove();
 		auto *renderScene = c_game->GetRenderScene();
-		if(renderScene && static_cast<CBaseEntity&>(GetEntity()).IsInScene(*renderScene))
-		{
+		if(renderScene && static_cast<CBaseEntity &>(GetEntity()).IsInScene(*renderScene)) {
 			auto *pl = c_game->GetLocalPlayer();
 			if(pl != nullptr)
 				pl->SetObserverMode(OBSERVERMODE::THIRDPERSON);
-			m_cbCameraUpdate = c_game->AddCallback("CalcView",FunctionCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>,std::reference_wrapper<Quat>>::Create(
-				[this](std::reference_wrapper<Vector3> refPos,std::reference_wrapper<Quat> refRot,
-					std::reference_wrapper<Quat> rotMod
-				) {
-				auto &ent = GetEntity();
-				auto *pToggleComponent = static_cast<pragma::BaseToggleComponent*>(ent.FindComponent("toggle").get());
-				if(pToggleComponent != nullptr && pToggleComponent->IsTurnedOn() == false)
-					return;
-				auto pTrComponent = ent.GetTransformComponent();
-				auto &pos = refPos.get();
-				auto &rot = refRot.get();
-				if(pTrComponent == nullptr)
-				{
-					pos = {};
-					rot = uquat::identity();
-				}
-				else
-				{
-					pos = pTrComponent->GetPosition();
-					rot = pTrComponent->GetRotation();
-				}
-			}));
+			m_cbCameraUpdate = c_game->AddCallback("CalcView",
+			  FunctionCallback<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>, std::reference_wrapper<Quat>>::Create([this](std::reference_wrapper<Vector3> refPos, std::reference_wrapper<Quat> refRot, std::reference_wrapper<Quat> rotMod) {
+				  auto &ent = GetEntity();
+				  auto *pToggleComponent = static_cast<pragma::BaseToggleComponent *>(ent.FindComponent("toggle").get());
+				  if(pToggleComponent != nullptr && pToggleComponent->IsTurnedOn() == false)
+					  return;
+				  auto pTrComponent = ent.GetTransformComponent();
+				  auto &pos = refPos.get();
+				  auto &rot = refRot.get();
+				  if(pTrComponent == nullptr) {
+					  pos = {};
+					  rot = uquat::identity();
+				  }
+				  else {
+					  pos = pTrComponent->GetPosition();
+					  rot = pTrComponent->GetRotation();
+				  }
+			  }));
 			renderScene->SetActiveCamera(*this);
 		}
 		return;
 	}
 
 	auto *renderScene = c_game->GetRenderScene();
-	if(renderScene)
-	{
-		if(static_cast<CBaseEntity&>(GetEntity()).IsInScene(*renderScene))
-		{
+	if(renderScene) {
+		if(static_cast<CBaseEntity &>(GetEntity()).IsInScene(*renderScene)) {
 			auto *pl = c_game->GetLocalPlayer();
 			if(pl != nullptr)
 				pl->SetObserverMode(OBSERVERMODE::FIRSTPERSON);
@@ -115,14 +102,12 @@ void CCameraComponent::UpdateState()
 				m_cbCameraUpdate.Remove();
 		}
 
-		if(renderScene->GetActiveCamera().get() == this)
-		{
+		if(renderScene->GetActiveCamera().get() == this) {
 			EntityIterator entIt {*c_game};
 			entIt.AttachFilter<TEntityIteratorFilterComponent<CCameraComponent>>();
-			for(auto *ent : entIt)
-			{
+			for(auto *ent : entIt) {
 				auto toggleC = ent->GetComponent<CToggleComponent>();
-				if((toggleC.valid() && toggleC->IsTurnedOn() == false) || static_cast<CBaseEntity*>(ent)->IsInScene(*renderScene) == false)
+				if((toggleC.valid() && toggleC->IsTurnedOn() == false) || static_cast<CBaseEntity *>(ent)->IsInScene(*renderScene) == false)
 					continue;
 				auto camC = ent->GetComponent<CCameraComponent>();
 				renderScene->SetActiveCamera(*camC);
@@ -135,17 +120,17 @@ void CCameraComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEnvCameraComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(CFieldAngleComponent))
-		SetFieldAngleComponent(static_cast<CFieldAngleComponent&>(component));
+		SetFieldAngleComponent(static_cast<CFieldAngleComponent &>(component));
 }
-util::EventReply CCameraComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
+util::EventReply CCameraComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEnvCameraComponent::HandleEvent(eventId,evData) == util::EventReply::Handled)
+	if(BaseEnvCameraComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	if(eventId == BaseToggleComponent::EVENT_ON_TURN_ON || eventId == BaseToggleComponent::EVENT_ON_TURN_OFF)
 		UpdateState();
 	return util::EventReply::Unhandled;
 }
-void CCameraComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CCameraComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////
 

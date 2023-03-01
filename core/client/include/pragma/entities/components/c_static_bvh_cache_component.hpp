@@ -12,17 +12,14 @@
 #include <pragma/entities/components/base_static_bvh_cache_component.hpp>
 #include <unordered_set>
 
-namespace pragma
-{
-	class DLLCLIENT CStaticBvhCacheComponent final
-		: public BaseStaticBvhCacheComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CStaticBvhCacheComponent final : public BaseStaticBvhCacheComponent {
+	  public:
 		CStaticBvhCacheComponent(BaseEntity &ent) : BaseStaticBvhCacheComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void TestRebuildBvh() override;
-	private:
+	  private:
 		virtual void DoRebuildBvh() override;
 	};
 };

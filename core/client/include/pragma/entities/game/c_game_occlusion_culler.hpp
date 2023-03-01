@@ -14,32 +14,27 @@
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-namespace pragma
-{
-	class DLLCLIENT COcclusionCullerComponent final
-		: public BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT COcclusionCullerComponent final : public BaseEntityComponent {
+	  public:
 		COcclusionCullerComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		virtual void OnEntitySpawn() override;
 
-		OcclusionOctree<CBaseEntity*> &GetOcclusionOctree();
-		const OcclusionOctree<CBaseEntity*> &GetOcclusionOctree() const;
+		OcclusionOctree<CBaseEntity *> &GetOcclusionOctree();
+		const OcclusionOctree<CBaseEntity *> &GetOcclusionOctree() const;
 
 		void AddEntity(CBaseEntity &ent);
-	private:
-		std::shared_ptr<OcclusionOctree<CBaseEntity*>> m_occlusionOctree = nullptr;
-		std::unordered_map<CBaseEntity*,std::vector<CallbackHandle>> m_callbacks {};
+	  private:
+		std::shared_ptr<OcclusionOctree<CBaseEntity *>> m_occlusionOctree = nullptr;
+		std::unordered_map<CBaseEntity *, std::vector<CallbackHandle>> m_callbacks {};
 	};
 };
 
-class DLLCLIENT COcclusionCuller
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT COcclusionCuller : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

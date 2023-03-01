@@ -16,22 +16,15 @@
 
 extern DLLCLIENT CEngine *c_engine;
 
-REGISTER_PARTICLE_OPERATOR(jitter,CParticleOperatorJitter);
+REGISTER_PARTICLE_OPERATOR(jitter, CParticleOperatorJitter);
 
-void CParticleOperatorJitter::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleOperatorJitter::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) { CParticleOperatorWander::Initialize(pSystem, values); }
+void CParticleOperatorJitter::Simulate(CParticle &particle, double tDelta, float strength)
 {
-	CParticleOperatorWander::Initialize(pSystem,values);
-}
-void CParticleOperatorJitter::Simulate(CParticle &particle,double tDelta,float strength)
-{
-	CParticleOperatorWorldBase::Simulate(particle,tDelta,strength);
+	CParticleOperatorWorldBase::Simulate(particle, tDelta, strength);
 
 	// jitter is just like wander, except it directly influences the position
 	auto pid = m_hashCodes.at(particle.GetIndex());
-	auto time = m_dtTime +(pid &255) /256.f;
-	particle.SetPosition(particle.GetPosition() +Vector3(
-		util::noise::get_noise(time,pid) *m_dtStrength,
-		util::noise::get_noise(time,pid +1) *m_dtStrength,
-		util::noise::get_noise(time,pid +2) *m_dtStrength
-	));
+	auto time = m_dtTime + (pid & 255) / 256.f;
+	particle.SetPosition(particle.GetPosition() + Vector3(util::noise::get_noise(time, pid) * m_dtStrength, util::noise::get_noise(time, pid + 1) * m_dtStrength, util::noise::get_noise(time, pid + 2) * m_dtStrength));
 }

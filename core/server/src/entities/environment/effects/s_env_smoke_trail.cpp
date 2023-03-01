@@ -16,12 +16,12 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_smoke_trail,EnvSmokeTrail);
+LINK_ENTITY_TO_CLASS(env_smoke_trail, EnvSmokeTrail);
 
 extern ServerState *server;
 extern SGame *s_game;
 
-void SSmokeTrailComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SSmokeTrailComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->Write<float>(m_speed);
 	packet->Write<float>(m_distance);
@@ -30,7 +30,7 @@ void SSmokeTrailComponent::SendData(NetPacket &packet,networking::ClientRecipien
 	packet->WriteString(m_material);
 }
 
-void SSmokeTrailComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SSmokeTrailComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ///////////////
 

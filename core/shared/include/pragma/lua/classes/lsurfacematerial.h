@@ -10,10 +10,8 @@
 #include "pragma/networkdefinitions.h"
 #include <pragma/lua/luaapi.h>
 
-namespace Lua
-{
-	namespace SurfaceMaterial
-	{
+namespace Lua {
+	namespace SurfaceMaterial {
 	};
 };
 

@@ -11,10 +11,8 @@
 #include "pragma/clientdefinitions.h"
 #include <wgui/wibase.h>
 
-class DLLCLIENT WIChatBox
-	: public WIBase
-{
-public:
+class DLLCLIENT WIChatBox : public WIBase {
+  public:
 	WIChatBox();
 	virtual ~WIChatBox() override;
 	virtual void Initialize() override;

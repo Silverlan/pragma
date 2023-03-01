@@ -14,32 +14,28 @@
 #include <pragma/util/util_handled.hpp>
 
 class CBaseEntity;
-namespace pragma
-{
-	class DLLCLIENT CVehicleComponent final
-		: public BaseVehicleComponent,
-		public CBaseSnapshotComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CVehicleComponent final : public BaseVehicleComponent, public CBaseSnapshotComponent {
+	  public:
 		CVehicleComponent(BaseEntity &ent);
 		virtual ~CVehicleComponent() override;
 		static unsigned int GetVehicleCount();
-		static const std::vector<CVehicleComponent*> &GetAll();
+		static const std::vector<CVehicleComponent *> &GetAll();
 		virtual void ClearDriver() override;
 		virtual void SetDriver(BaseEntity *ent) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 
 		virtual void ReceiveSnapshotData(NetPacket &packet) override;
-	protected:
+	  protected:
 		void ReadWheelInfo(NetPacket &packet);
 		CallbackHandle m_hCbSteeringWheel;
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
+		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-	private:
-		static std::vector<CVehicleComponent*> s_vehicles;
+	  private:
+		static std::vector<CVehicleComponent *> s_vehicles;
 	};
 };
 

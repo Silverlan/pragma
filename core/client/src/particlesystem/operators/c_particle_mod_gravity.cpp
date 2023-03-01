@@ -16,19 +16,17 @@
 
 extern DLLCLIENT CGame *c_game;
 
-REGISTER_PARTICLE_OPERATOR(gravity,CParticleOperatorGravity);
+REGISTER_PARTICLE_OPERATOR(gravity, CParticleOperatorGravity);
 
-void CParticleOperatorGravity::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleOperatorGravity::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleOperatorWorldBase::Initialize(pSystem,values);
-	for(auto it=values.begin();it!=values.end();it++)
-	{
+	CParticleOperatorWorldBase::Initialize(pSystem, values);
+	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
 		StringToLower(key);
 		if(key == "effective_scale")
 			m_gravityScale = util::to_float(it->second);
-		else if(key == "acceleration")
-		{
+		else if(key == "acceleration") {
 			m_bUseCustomGravityForce = true;
 			m_gravityForce = uvec::create(it->second);
 		}
@@ -39,17 +37,16 @@ void CParticleOperatorGravity::Simulate(double tDelta)
 	CParticleOperatorWorldBase::Simulate(tDelta);
 	if(m_bUseCustomGravityForce == false)
 		return;
-	m_dtGravity = GetParticleSystem().DirectionToParticleSpace(m_gravityForce *static_cast<float>(tDelta),ShouldRotateWithEmitter());
+	m_dtGravity = GetParticleSystem().DirectionToParticleSpace(m_gravityForce * static_cast<float>(tDelta), ShouldRotateWithEmitter());
 }
-void CParticleOperatorGravity::Simulate(CParticle &particle,double tDelta,float strength)
+void CParticleOperatorGravity::Simulate(CParticle &particle, double tDelta, float strength)
 {
-	CParticleOperatorWorldBase::Simulate(particle,tDelta,strength);
-	if(m_bUseCustomGravityForce)
-	{
-		particle.SetVelocity(particle.GetVelocity() +m_dtGravity);
+	CParticleOperatorWorldBase::Simulate(particle, tDelta, strength);
+	if(m_bUseCustomGravityForce) {
+		particle.SetVelocity(particle.GetVelocity() + m_dtGravity);
 		return;
 	}
 	auto &gravity = c_game->GetGravity();
 	auto &oldVel = particle.GetVelocity();
-	particle.SetVelocity(oldVel +(m_bUseCustomGravityForce ? m_gravityForce : gravity) *m_gravityScale *static_cast<float>(tDelta));
+	particle.SetVelocity(oldVel + (m_bUseCustomGravityForce ? m_gravityForce : gravity) * m_gravityScale * static_cast<float>(tDelta));
 }

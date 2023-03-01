@@ -11,35 +11,31 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_physics_component.hpp>
 
-namespace pragma
-{
-	class DLLSERVER SPhysicsComponent final
-		: public BasePhysicsComponent,
-		public SBaseNetComponent
-	{
-	public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+namespace pragma {
+	class DLLSERVER SPhysicsComponent final : public BasePhysicsComponent, public SBaseNetComponent {
+	  public:
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		SPhysicsComponent(BaseEntity &ent) : BasePhysicsComponent(ent) {}
 
 		virtual void OnPhysicsInitialized() override;
 		virtual void OnPhysicsDestroyed() override;
 		virtual bool PostPhysicsSimulate() override;
-		
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
+
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 
 		virtual void SetCollisionsEnabled(bool b) override;
 		virtual void SetSimulationEnabled(bool b) override;
 		using BasePhysicsComponent::SetCollisionsEnabled;
 		virtual void SetKinematic(bool b) override;
 
-		virtual void SetCollisionFilter(CollisionMask filterGroup,CollisionMask filterMask) override;
+		virtual void SetCollisionFilter(CollisionMask filterGroup, CollisionMask filterMask) override;
 
 		virtual void SetMoveType(MOVETYPE movetype) override;
 		void SetCollisionType(COLLISIONTYPE collisiontype) override;
 
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
-	protected:
+	  protected:
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	};
 };

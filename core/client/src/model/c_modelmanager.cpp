@@ -14,7 +14,4 @@
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/debug/intel_vtune.hpp>
 
-std::shared_ptr<Model> pragma::asset::CModelManager::CreateModel(uint32_t numBones,const std::string &mdlName)
-{
-	return Model::Create<CModel>(&m_nw,numBones,mdlName);
-}
+std::shared_ptr<Model> pragma::asset::CModelManager::CreateModel(uint32_t numBones, const std::string &mdlName) { return Model::Create<CModel>(&m_nw, numBones, mdlName); }

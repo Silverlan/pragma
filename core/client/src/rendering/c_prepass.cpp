@@ -27,7 +27,7 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-bool pragma::rendering::Prepass::Initialize(prosper::IPrContext &context,uint32_t width,uint32_t height,prosper::SampleCountFlags samples,bool bExtended)
+bool pragma::rendering::Prepass::Initialize(prosper::IPrContext &context, uint32_t width, uint32_t height, prosper::SampleCountFlags samples, bool bExtended)
 {
 	m_shaderPrepass = context.GetShader("prepass");
 
@@ -47,7 +47,7 @@ bool pragma::rendering::Prepass::Initialize(prosper::IPrContext &context,uint32_
 	samplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToEdge;
 	samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
 	samplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToEdge;
-	textureDepth = context.CreateTexture(texCreateInfo,*imgDepth,imgViewCreateInfo,samplerCreateInfo);
+	textureDepth = context.CreateTexture(texCreateInfo, *imgDepth, imgViewCreateInfo, samplerCreateInfo);
 
 	imgCreateInfo.usage = prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::SampledBit;
 	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
@@ -55,19 +55,16 @@ bool pragma::rendering::Prepass::Initialize(prosper::IPrContext &context,uint32_
 	auto imgDepthSampled = context.CreateImage(imgCreateInfo);
 
 	texCreateInfo.flags = {};
-	textureDepthSampled = context.CreateTexture(texCreateInfo,*imgDepthSampled,imgViewCreateInfo,samplerCreateInfo);
+	textureDepthSampled = context.CreateTexture(texCreateInfo, *imgDepthSampled, imgViewCreateInfo, samplerCreateInfo);
 
-	SetUseExtendedPrepass(bExtended,true);
+	SetUseExtendedPrepass(bExtended, true);
 	return true;
 }
 
-pragma::ShaderPrepassBase &pragma::rendering::Prepass::GetShader() const
-{
-	return static_cast<pragma::ShaderPrepassBase&>(*m_shaderPrepass.get());
-}
+pragma::ShaderPrepassBase &pragma::rendering::Prepass::GetShader() const { return static_cast<pragma::ShaderPrepassBase &>(*m_shaderPrepass.get()); }
 
-bool pragma::rendering::Prepass::IsExtended() const {return m_bExtended;}
-void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b,bool bForceReload)
+bool pragma::rendering::Prepass::IsExtended() const { return m_bExtended; }
+void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b, bool bForceReload)
 {
 	if(m_bExtended == b && bForceReload == false)
 		return;
@@ -85,7 +82,7 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b,bool bForceReload)
 	if(whShaderPrepass.expired())
 		return;
 
-	auto *shaderPrepass = static_cast<pragma::ShaderPrepass*>(whShaderPrepass.get());
+	auto *shaderPrepass = static_cast<pragma::ShaderPrepass *>(whShaderPrepass.get());
 	auto sampleCount = imgDepth.GetSampleCount();
 	//auto pipelineType = pragma::ShaderPrepassBase::GetPipelineIndex(sampleCount);
 	//if(b == true)
@@ -105,14 +102,14 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b,bool bForceReload)
 		samplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToEdge;
 		samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
 		samplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToEdge;
-		textureNormals = context.CreateTexture(texCreateInfo,*imgNormals,imgViewCreateInfo,samplerCreateInfo);
+		textureNormals = context.CreateTexture(texCreateInfo, *imgNormals, imgViewCreateInfo, samplerCreateInfo);
 
 		auto &imgDepth = textureDepth->GetImage();
-		renderTarget = context.CreateRenderTarget({textureNormals,textureDepth},shaderPrepass->GetRenderPass());//umath::to_integral(pipelineType)));
+		renderTarget = context.CreateRenderTarget({textureNormals, textureDepth}, shaderPrepass->GetRenderPass()); //umath::to_integral(pipelineType)));
 		renderTarget->SetDebugName("prepass_depth_normal_rt");
 		m_clearValues = {
-			prosper::ClearValue{prosper::ClearColorValue{}}, // Unused, but required
-			prosper::ClearValue{prosper::ClearDepthStencilValue{1.f,0}} // Clear depth
+		  prosper::ClearValue {prosper::ClearColorValue {}},             // Unused, but required
+		  prosper::ClearValue {prosper::ClearDepthStencilValue {1.f, 0}} // Clear depth
 		};
 	}
 	/*else
@@ -125,27 +122,21 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b,bool bForceReload)
 			prosper::ClearValue{prosper::ClearDepthStencilValue{1.f,0}} // Clear depth
 		};
 	}*/
-	prosper::util::RenderPassCreateInfo rpInfo {{
-		pragma::ShaderPrepass::get_normal_render_pass_attachment_info(sampleCount),
-		pragma::ShaderPrepass::get_depth_render_pass_attachment_info(sampleCount)
-	}};
+	prosper::util::RenderPassCreateInfo rpInfo {{pragma::ShaderPrepass::get_normal_render_pass_attachment_info(sampleCount), pragma::ShaderPrepass::get_depth_render_pass_attachment_info(sampleCount)}};
 	for(auto &att : rpInfo.attachments)
 		att.loadOp = prosper::AttachmentLoadOp::Load;
 	subsequentRenderPass = c_engine->GetRenderContext().CreateRenderPass(rpInfo);
 }
 
-prosper::RenderTarget &pragma::rendering::Prepass::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *optRenderPass,bool secondaryCommandBuffers)
+prosper::RenderTarget &pragma::rendering::Prepass::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *optRenderPass, bool secondaryCommandBuffers)
 {
 	// prosper TODO: Barriers for imgDepth and imgNormals
-	drawSceneInfo.commandBuffer->RecordBeginRenderPass(*renderTarget,m_clearValues,secondaryCommandBuffers ? prosper::IPrimaryCommandBuffer::RenderPassFlags::SecondaryCommandBuffers : prosper::IPrimaryCommandBuffer::RenderPassFlags::None,optRenderPass);
+	drawSceneInfo.commandBuffer->RecordBeginRenderPass(*renderTarget, m_clearValues, secondaryCommandBuffers ? prosper::IPrimaryCommandBuffer::RenderPassFlags::SecondaryCommandBuffers : prosper::IPrimaryCommandBuffer::RenderPassFlags::None, optRenderPass);
 	return *renderTarget;
 }
-void pragma::rendering::Prepass::EndRenderPass(const util::DrawSceneInfo &drawSceneInfo)
-{
-	drawSceneInfo.commandBuffer->RecordEndRenderPass();
-}
+void pragma::rendering::Prepass::EndRenderPass(const util::DrawSceneInfo &drawSceneInfo) { drawSceneInfo.commandBuffer->RecordEndRenderPass(); }
 
-void Console::commands::debug_prepass(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+void Console::commands::debug_prepass(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto &wgui = WGUI::GetInstance();
 	auto *pRoot = wgui.GetBaseElement();
@@ -154,8 +145,7 @@ void Console::commands::debug_prepass(NetworkState *state,pragma::BasePlayerComp
 	const std::string name = "debug_ssao";
 	auto *pEl = pRoot->FindDescendantByName(name);
 	auto v = util::to_int(argv.front());
-	if(v == 0)
-	{
+	if(v == 0) {
 		if(pEl != nullptr)
 			pEl->Remove();
 		return;
@@ -169,7 +159,7 @@ void Console::commands::debug_prepass(NetworkState *state,pragma::BasePlayerComp
 
 	auto *scene = c_game->GetScene();
 	auto *renderer = scene ? scene->GetRenderer() : nullptr;
-	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent>{};
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent> {};
 	if(raster.expired())
 		return;
 	auto &ssaoInfo = raster->GetSSAOInfo();
@@ -177,23 +167,20 @@ void Console::commands::debug_prepass(NetworkState *state,pragma::BasePlayerComp
 
 	auto bExtended = prepass.IsExtended();
 	auto xOffset = 0u;
-	if(prepass.textureNormals != nullptr)
-	{
+	if(prepass.textureNormals != nullptr) {
 		auto *pNormals = wgui.Create<WITexturedRect>(pEl);
-		if(pNormals != nullptr)
-		{
+		if(pNormals != nullptr) {
 			pNormals->SetX(xOffset);
-			pNormals->SetSize(256,256);
+			pNormals->SetSize(256, 256);
 			pNormals->SetTexture(*prepass.textureNormals);
 			pNormals->Update();
 			xOffset += 256;
 		}
 	}
 	auto *pPrepassDepth = wgui.Create<WIDebugDepthTexture>(pEl);
-	if(pPrepassDepth != nullptr)
-	{
+	if(pPrepassDepth != nullptr) {
 		pPrepassDepth->SetX(xOffset);
-		pPrepassDepth->SetSize(256,256);
+		pPrepassDepth->SetSize(256, 256);
 		pPrepassDepth->SetTexture(*prepass.textureDepth);
 		pPrepassDepth->Update();
 		xOffset += 256;

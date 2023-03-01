@@ -10,14 +10,11 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
 
-namespace pragma
-{
+namespace pragma {
 	class CPlayerComponent;
 	class CWeaponComponent;
-	class DLLCLIENT CViewModelComponent final
-		: public BaseEntityComponent
-	{
-	public:
+	class DLLCLIENT CViewModelComponent final : public BaseEntityComponent {
+	  public:
 		CViewModelComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		void SetViewModelOffset(const Vector3 &offset);
@@ -28,16 +25,14 @@ namespace pragma
 
 		CPlayerComponent *GetPlayer();
 		CWeaponComponent *GetWeapon();
-	protected:
+	  protected:
 		Vector3 m_viewModelOffset;
 		float m_viewFov = std::numeric_limits<float>::quiet_NaN();
 	};
 };
 
-class DLLCLIENT CViewModel
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CViewModel : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

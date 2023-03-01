@@ -10,15 +10,12 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 #include <unordered_set>
 
-namespace pragma
-{
+namespace pragma {
 	class BaseStaticBvhCacheComponent;
-	class DLLNETWORK BaseStaticBvhUserComponent
-		: public BaseEntityComponent
-	{
-	public:
+	class DLLNETWORK BaseStaticBvhUserComponent : public BaseEntityComponent {
+	  public:
 		static ComponentEventId EVENT_ON_ACTIVATION_STATE_CHANGED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
@@ -29,11 +26,11 @@ namespace pragma
 
 		void SetStaticBvhCacheComponent(BaseStaticBvhCacheComponent *component);
 		bool IsActive() const;
-	protected:
+	  protected:
 		BaseStaticBvhUserComponent(BaseEntity &ent);
 		friend BaseStaticBvhCacheComponent;
 		void UpdateBvhStatus();
-		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		CallbackHandle m_cbOnPoseChanged;
 		pragma::ComponentHandle<BaseStaticBvhCacheComponent> m_staticBvhComponent {};
 		bool m_isActive = false;

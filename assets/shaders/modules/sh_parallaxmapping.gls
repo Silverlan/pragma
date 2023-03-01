@@ -28,7 +28,7 @@
 		//vec3 viewDir = fs_in.tangentData.cam_dir_to_vert_ts;
 
 		mat3 TBN = fs_in.TBN *inverse(transpose(mat3(get_view_matrix()))); // TODO: This basically undoes what the vertex shader is doing (performance waste), but the TBN needs to be in view-space for lighting. Is there a better way?
-		vec3 camPosTs = TBN *u_renderSettings.posCam;
+		vec3 camPosTs = TBN *u_renderSettings.posCam.xyz;
 		vec3 vertPosTs = TBN *fs_in.vert_pos_ws.xyz;
 		vec3 viewDir = camPosTs -vertPosTs;
 

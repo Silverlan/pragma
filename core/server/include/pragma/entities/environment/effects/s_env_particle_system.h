@@ -11,25 +11,19 @@
 #include "pragma/entities/environment/effects/env_particle_system.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLSERVER SParticleSystemComponent final
-		: public BaseEnvParticleSystemComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SParticleSystemComponent final : public BaseEnvParticleSystemComponent, public SBaseNetComponent {
+	  public:
 		SParticleSystemComponent(BaseEntity &ent) : BaseEnvParticleSystemComponent(ent) {}
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual void SetContinuous(bool b) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLSERVER EnvParticleSystem
-	: public SBaseEntity
-{
-public:
+class DLLSERVER EnvParticleSystem : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

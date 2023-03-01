@@ -10,26 +10,16 @@
 
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 
-namespace pragma
-{
-	class DLLCLIENT ShaderParticleBlob
-		: public ShaderParticle2DBase
-	{
-	public:
-
-		enum class DebugMode : uint8_t
-		{
-			None = 0,
-			EyeDir,
-			SurfaceNormal,
-			FlatColor
-		};
+namespace pragma {
+	class DLLCLIENT ShaderParticleBlob : public ShaderParticle2DBase {
+	  public:
+		enum class DebugMode : uint8_t { None = 0, EyeDir, SurfaceNormal, FlatColor };
 
 		static const uint32_t MAX_BLOB_NEIGHBORS = 8;
 
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BLOB_NEIGHBORS;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BLOB_NEIGHBORS;
-		
+
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDERER;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
@@ -40,25 +30,16 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_PARTICLE_DATA;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
-		ShaderParticleBlob(prosper::IPrContext &context,const std::string &identifier);
+		ShaderParticleBlob(prosper::IPrContext &context, const std::string &identifier);
 		virtual uint32_t GetSceneDescriptorSetIndex() const override;
-		bool RecordDraw(
-			prosper::ShaderBindState &bindState,pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,
-			const CParticleSystemComponent &ps,CParticleSystemComponent::OrientationType orientationType,
-			ParticleRenderFlags renderFlags,
-			prosper::IBuffer &blobIndexBuffer,prosper::IDescriptorSet &dsParticles,uint32_t particleBufferOffset
-		);
-		virtual bool RecordBindScene(
-			prosper::ICommandBuffer &cmd,const prosper::IShaderPipelineLayout &layout,
-			const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
-			prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
-			prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
-			prosper::IDescriptorSet &dsShadows
-		) const override;
+		bool RecordDraw(prosper::ShaderBindState &bindState, pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const CParticleSystemComponent &ps, CParticleSystemComponent::OrientationType orientationType, ParticleRenderFlags renderFlags,
+		  prosper::IBuffer &blobIndexBuffer, prosper::IDescriptorSet &dsParticles, uint32_t particleBufferOffset);
+		virtual bool RecordBindScene(prosper::ICommandBuffer &cmd, const prosper::IShaderPipelineLayout &layout, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
+		  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows) const override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
-	protected:
-		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		virtual bool RecordParticleMaterial(prosper::ShaderBindState &bindState,const CRasterizationRendererComponent &renderer,const CParticleSystemComponent &ps) const override;
+	  protected:
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual bool RecordParticleMaterial(prosper::ShaderBindState &bindState, const CRasterizationRendererComponent &renderer, const CParticleSystemComponent &ps) const override;
 	};
 };
 

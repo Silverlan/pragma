@@ -10,15 +10,12 @@
 
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 
-namespace pragma
-{
-	class DLLCLIENT ShaderWireframe
-		: public ShaderPBR
-	{
-	public:
-		ShaderWireframe(prosper::IPrContext &context,const std::string &identifier);
-	protected:
-		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+namespace pragma {
+	class DLLCLIENT ShaderWireframe : public ShaderPBR {
+	  public:
+		ShaderWireframe(prosper::IPrContext &context, const std::string &identifier);
+	  protected:
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 	};
 };
 

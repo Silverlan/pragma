@@ -9,12 +9,9 @@
 
 #include "pragma/entities/components/base_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLNETWORK BaseEnvMicrophoneComponent
-		: public BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLNETWORK BaseEnvMicrophoneComponent : public BaseEntityComponent {
+	  public:
 		using BaseEntityComponent::BaseEntityComponent;
 	};
 };

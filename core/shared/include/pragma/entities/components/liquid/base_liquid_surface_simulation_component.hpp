@@ -11,20 +11,14 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 
 class PhysWaterSurfaceSimulator;
-namespace pragma
-{
+namespace pragma {
 	class BaseSurfaceComponent;
-	class DLLNETWORK BaseLiquidSurfaceSimulationComponent
-		: public BaseEntityComponent
-	{
-	public:
+	class DLLNETWORK BaseLiquidSurfaceSimulationComponent : public BaseEntityComponent {
+	  public:
 		static ComponentEventId EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
-		enum class DLLNETWORK SpawnFlags : uint32_t
-		{
-			SurfaceSimulation = 2048
-		};
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		enum class DLLNETWORK SpawnFlags : uint32_t { SurfaceSimulation = 2048 };
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 
@@ -36,13 +30,13 @@ namespace pragma
 
 		virtual void ReloadSurfaceSimulator();
 		void ClearSurfaceSimulator();
-		
-		bool CalcLineSurfaceIntersection(const Vector3 &lineOrigin,const Vector3 &lineDir,double *outT=nullptr,double *outU=nullptr,double *outV=nullptr,bool bCull=false) const;
-	protected:
+
+		bool CalcLineSurfaceIntersection(const Vector3 &lineOrigin, const Vector3 &lineDir, double *outT = nullptr, double *outU = nullptr, double *outV = nullptr, bool bCull = false) const;
+	  protected:
 		BaseLiquidSurfaceSimulationComponent(BaseEntity &ent);
 		BaseSurfaceComponent *GetSurfaceComponent() const;
 
-		virtual std::shared_ptr<PhysWaterSurfaceSimulator> InitializeSurfaceSimulator(const Vector2 &min,const Vector2 &max,float originY);
+		virtual std::shared_ptr<PhysWaterSurfaceSimulator> InitializeSurfaceSimulator(const Vector2 &min, const Vector2 &max, float originY);
 		virtual bool ShouldSimulateSurface() const;
 		void SetMaxWaveHeight(float height);
 		float m_kvMaxWaveHeight = 100.f;

@@ -11,24 +11,19 @@
 #include "pragma/ai/ai_behavior.h"
 #include <vector>
 
-namespace pragma
-{
+namespace pragma {
 	class SAIComponent;
-	namespace ai
-	{
-		class DLLSERVER Schedule
-			: public std::enable_shared_from_this<Schedule>,
-			public ParameterBase
-		{
-		public:
+	namespace ai {
+		class DLLSERVER Schedule : public std::enable_shared_from_this<Schedule>, public ParameterBase {
+		  public:
 			using Parameter = BehaviorParameter;
-		protected:
+		  protected:
 			Schedule();
 			mutable std::shared_ptr<BehaviorNode> m_rootTask;
 			uint32_t m_interruptFlags = 0;
-		public:
-			Schedule(const Schedule&)=delete;
-			Schedule &operator=(const Schedule&)=delete;
+		  public:
+			Schedule(const Schedule &) = delete;
+			Schedule &operator=(const Schedule &) = delete;
 			static std::shared_ptr<Schedule> Create();
 			std::shared_ptr<Schedule> Copy() const;
 			BehaviorNode &GetRootNode() const;

@@ -15,9 +15,8 @@
 #include "pragma/entities/baseentity_handle.h"
 
 class BaseEntity;
-class DLLNETWORK DamageInfo
-{
-protected:
+class DLLNETWORK DamageInfo {
+  protected:
 	unsigned short m_damage = 0u;
 	unsigned int m_types = 0u;
 	Vector3 m_source = {};
@@ -26,9 +25,9 @@ protected:
 	EntityHandle m_attacker = {};
 	EntityHandle m_inflictor = {};
 	HitGroup m_hitGroup = HitGroup::Generic;
-public:
-	DamageInfo()=default;
-	~DamageInfo()=default;
+  public:
+	DamageInfo() = default;
+	~DamageInfo() = default;
 	void SetDamage(unsigned short dmg);
 	void AddDamage(unsigned short dmg);
 	void ScaleDamage(float scale);
@@ -54,6 +53,6 @@ public:
 	void SetHitGroup(HitGroup hitGroup);
 };
 
-DLLNETWORK std::ostream &operator<<(std::ostream &out,const DamageInfo &o);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const DamageInfo &o);
 
 #endif

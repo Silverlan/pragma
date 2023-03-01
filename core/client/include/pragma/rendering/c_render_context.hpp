@@ -19,18 +19,17 @@
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
-namespace util {class Library;};
-namespace prosper {class Window; struct WindowSettings;};
-namespace pragma
-{
-	class DLLCLIENT RenderContext
-	{
-	public:
-		enum class StateFlags : uint8_t
-		{
-			None = 0u,
-			GfxAPIValidationEnabled = 1u
-		};
+namespace util {
+	class Library;
+};
+namespace prosper {
+	class Window;
+	struct WindowSettings;
+};
+namespace pragma {
+	class DLLCLIENT RenderContext {
+	  public:
+		enum class StateFlags : uint8_t { None = 0u, GfxAPIValidationEnabled = 1u };
 		RenderContext();
 		virtual ~RenderContext();
 
@@ -39,7 +38,7 @@ namespace pragma
 		const prosper::IPrContext &GetRenderContext() const;
 		prosper::IPrContext &GetRenderContext();
 		prosper::ShaderManager &GetShaderManager() const;
-		void RegisterShader(const std::string &identifier,const std::function<prosper::Shader*(prosper::IPrContext&,const std::string&)> &fFactory);
+		void RegisterShader(const std::string &identifier, const std::function<prosper::Shader *(prosper::IPrContext &, const std::string &)> &fFactory);
 		::util::WeakHandle<prosper::Shader> GetShader(const std::string &identifier) const;
 
 		prosper::Window &GetWindow();
@@ -50,26 +49,23 @@ namespace pragma
 		void FlushSetupCommandBuffer();
 
 		prosper::WindowSettings &GetInitialWindowSettings();
-		const prosper::WindowSettings &GetInitialWindowSettings() const {return const_cast<RenderContext*>(this)->GetInitialWindowSettings();}
-		
+		const prosper::WindowSettings &GetInitialWindowSettings() const { return const_cast<RenderContext *>(this)->GetInitialWindowSettings(); }
+
 		void InitializeRenderAPI();
 		void SetGfxAPIValidationEnabled(bool b);
 		void SetRenderAPI(const std::string &renderAPI);
 		const std::string &GetRenderAPI() const;
 
-		void SetValidationErrorDisabled(const std::string &id,bool disabled);
+		void SetValidationErrorDisabled(const std::string &id, bool disabled);
 		bool IsValidationErrorDisabled(const std::string &id) const;
-	protected:
+	  protected:
 		virtual void OnClose();
 		virtual void DrawFrameCore();
 		virtual void OnWindowInitialized();
-		virtual void OnResolutionChanged(uint32_t w,uint32_t h);
+		virtual void OnResolutionChanged(uint32_t w, uint32_t h);
 		virtual void DrawFrame();
-		void ValidationCallback(
-			prosper::DebugMessageSeverityFlags severityFlags,
-			const std::string &message
-		);
-	private:
+		void ValidationCallback(prosper::DebugMessageSeverityFlags severityFlags, const std::string &message);
+	  private:
 		std::shared_ptr<prosper::IPrContext> m_renderContext = nullptr;
 		std::unordered_set<std::string> m_disabledValidationErrors;
 		StateFlags m_stateFlags = StateFlags::None;

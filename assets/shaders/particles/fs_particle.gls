@@ -41,9 +41,9 @@ vec3 calc_particle_lighting(vec3 normal,vec3 baseColor)
     vec3 color = vec3(0.0, 0.0, 0.0);
 
     color = baseColor.rgb;
-    vec3 view = normalize(u_renderSettings.posCam - fs_in.vert_pos_ws.xyz);
+    vec3 view = normalize(u_renderSettings.posCam.xyz - fs_in.vert_pos_ws.xyz);
 #if 0
-    vec3 view = normalize(u_renderSettings.posCam - fs_in.vert_pos_ws.xyz);
+    vec3 view = normalize(u_renderSettings.posCam.xyz - fs_in.vert_pos_ws.xyz);
 
     bool useLightmaps = is_light_map_enabled();
     if(useLightmaps)

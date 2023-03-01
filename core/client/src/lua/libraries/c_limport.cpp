@@ -231,4 +231,3 @@ int Lua::lib_export::export_scene(lua_State *l)
 #endif
 	return 0;
 }
-

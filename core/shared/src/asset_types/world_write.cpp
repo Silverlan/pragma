@@ -31,7 +31,7 @@ void pragma::asset::Output::Write(VFilePtrReal &f)
 
 /////////
 
-void pragma::asset::WorldData::WriteDataOffset(VFilePtrReal &f,uint64_t offsetToOffset)
+void pragma::asset::WorldData::WriteDataOffset(VFilePtrReal &f, uint64_t offsetToOffset)
 {
 	auto offset = f->Tell();
 	f->Seek(offsetToOffset);
@@ -39,31 +39,29 @@ void pragma::asset::WorldData::WriteDataOffset(VFilePtrReal &f,uint64_t offsetTo
 	f->Seek(offset);
 }
 
-bool pragma::asset::WorldData::Write(const std::string &fileName,std::string *optOutErrMsg)
+bool pragma::asset::WorldData::Write(const std::string &fileName, std::string *optOutErrMsg)
 {
 	auto nFileName = fileName;
 	ufile::remove_extension_from_filename(nFileName);
 	nFileName += ".wld";
-	auto fullPath = util::CONVERT_PATH +nFileName;
+	auto fullPath = util::CONVERT_PATH + nFileName;
 	auto pathNoFile = ufile::get_path_from_filename(fullPath);
-	if(FileManager::CreatePath(pathNoFile.c_str()) == false)
-	{
+	if(FileManager::CreatePath(pathNoFile.c_str()) == false) {
 		if(optOutErrMsg)
-			*optOutErrMsg = "Unable to create path '" +pathNoFile +"'!";
+			*optOutErrMsg = "Unable to create path '" + pathNoFile + "'!";
 		return false;
 	}
-	auto fOut = FileManager::OpenFile<VFilePtrReal>(fullPath.c_str(),"wb");
-	if(fOut == nullptr)
-	{
+	auto fOut = FileManager::OpenFile<VFilePtrReal>(fullPath.c_str(), "wb");
+	if(fOut == nullptr) {
 		if(optOutErrMsg)
-			*optOutErrMsg = "Unable to write file '" +nFileName +"'!";
+			*optOutErrMsg = "Unable to write file '" + nFileName + "'!";
 		return false;
 	}
 	Write(fOut);
 	return true;
 }
 
-static void preprocess_bsp_data(util::BSPTree &bspTree,std::vector<std::vector<size_t>> &outClusterNodes,std::vector<std::vector<uint16_t>> &outClusterToClusterVisibility)
+static void preprocess_bsp_data(util::BSPTree &bspTree, std::vector<std::vector<size_t>> &outClusterNodes, std::vector<std::vector<uint16_t>> &outClusterToClusterVisibility)
 {
 	auto numClusters = bspTree.GetClusterCount();
 	auto &bspNodes = bspTree.GetNodes();
@@ -72,28 +70,25 @@ static void preprocess_bsp_data(util::BSPTree &bspTree,std::vector<std::vector<s
 	{
 		// Nodes per cluster
 		outClusterNodes.resize(numClusters);
-		for(auto i=decltype(bspNodes.size()){0u};i<bspNodes.size();++i)
-		{
+		for(auto i = decltype(bspNodes.size()) {0u}; i < bspNodes.size(); ++i) {
 			auto &bspNode = bspNodes.at(i);
 			if(bspNode.cluster >= outClusterNodes.size())
 				continue;
 			auto &nodeList = outClusterNodes.at(bspNode.cluster);
 			if(nodeList.size() == nodeList.capacity())
-				nodeList.reserve(nodeList.size() *1.5f +100);
+				nodeList.reserve(nodeList.size() * 1.5f + 100);
 			nodeList.push_back(i);
 		}
 
 		// List of clusters visible from every other cluster
 		outClusterToClusterVisibility.resize(numClusters);
-		for(auto cluster0=decltype(numClusters){0u};cluster0<numClusters;++cluster0)
-		{
+		for(auto cluster0 = decltype(numClusters) {0u}; cluster0 < numClusters; ++cluster0) {
 			auto &visibleClusters = outClusterToClusterVisibility.at(cluster0);
-			for(auto cluster1=decltype(numClusters){0u};cluster1<numClusters;++cluster1)
-			{
-				if(bspTree.IsClusterVisible(cluster0,cluster1) == false)
+			for(auto cluster1 = decltype(numClusters) {0u}; cluster1 < numClusters; ++cluster1) {
+				if(bspTree.IsClusterVisible(cluster0, cluster1) == false)
 					continue;
 				if(visibleClusters.size() == visibleClusters.capacity())
-					visibleClusters.reserve(visibleClusters.size() *1.5f +50);
+					visibleClusters.reserve(visibleClusters.size() * 1.5f + 50);
 				visibleClusters.push_back(cluster1);
 			}
 		}
@@ -101,18 +96,16 @@ static void preprocess_bsp_data(util::BSPTree &bspTree,std::vector<std::vector<s
 	//
 }
 
-bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,EntityData::Flags entMask,std::string &outErr)
+bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data, EntityData::Flags entMask, std::string &outErr)
 {
-	if(data.GetAssetType() != PMAP_IDENTIFIER)
-	{
+	if(data.GetAssetType() != PMAP_IDENTIFIER) {
 		outErr = "Incorrect format!";
 		return false;
 	}
 
 	auto udm = *data;
 	auto version = data.GetAssetVersion();
-	if(version < 1)
-	{
+	if(version < 1) {
 		outErr = "Invalid version!";
 		return false;
 	}
@@ -122,33 +115,30 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,Enti
 		m_nw.PrecacheMaterial(str);
 
 	auto udmLightmap = udm["lightmap"];
-	if(udmLightmap)
-	{
+	if(udmLightmap) {
 		udm["lightmap"]["intensity"](m_lightMapIntensity);
 		udm["lightmap"]["exposure"](m_lightMapExposure);
 	}
 
 	uint32_t nextEntIdx = 0;
-	for(auto udmEnt : udm["entities"])
-	{
+	for(auto udmEnt : udm["entities"]) {
 		auto entIdx = nextEntIdx++;
 		auto entData = EntityData::Create();
 
-		if(udmEnt["flags"])
-		{
+		if(udmEnt["flags"]) {
 			auto udmClientsideOnly = udmEnt["flags"]["clientsideOnly"];
 			if(udmClientsideOnly.ToValue<bool>(false))
 				entData->SetFlags(EntityData::Flags::ClientsideOnly);
 		}
 
-		if(entMask != EntityData::Flags::None && (entData->GetFlags() &entMask) == EntityData::Flags::None)
+		if(entMask != EntityData::Flags::None && (entData->GetFlags() & entMask) == EntityData::Flags::None)
 			continue;
 
 		m_entities.push_back(entData);
-		entData->m_mapIndex = entIdx +1; // Map indices always start at 1!
+		entData->m_mapIndex = entIdx + 1; // Map indices always start at 1!
 		entData->SetClassName(udmEnt["className"].ToValue<std::string>(""));
 
-		auto pose = udmEnt["pose"].ToValue<umath::Transform>(umath::Transform{});
+		auto pose = udmEnt["pose"].ToValue<umath::Transform>(umath::Transform {});
 		entData->SetOrigin(pose.GetOrigin());
 
 		auto &keyValues = entData->GetKeyValues();
@@ -157,12 +147,11 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,Enti
 		auto itMdl = keyValues.find("model");
 		if(itMdl != keyValues.end())
 			m_nw.GetModelManager().PreloadAsset(itMdl->second);
-		
+
 		auto &outputs = entData->GetOutputs();
 		auto udmOutputs = udmEnt["outputs"];
 		outputs.reserve(udmOutputs.GetSize());
-		for(auto udmOutput : udmOutputs)
-		{
+		for(auto udmOutput : udmOutputs) {
 			outputs.push_back({});
 			auto &output = outputs.back();
 			udmOutput["name"](output.name);
@@ -172,18 +161,17 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,Enti
 			udmOutput["delay"](output.delay);
 			udmOutput["times"](output.times);
 		}
-		
+
 		auto &components = entData->GetComponents();
 		udmEnt["components"](components);
-		
+
 		auto &leaves = entData->GetLeaves();
 		udmEnt["bspLeaves"].GetBlobData(leaves);
 	}
 
 	auto udmBsp = udm["bsp"];
-	if(udmBsp)
-	{
-		m_bspTree = util::BSPTree::Load(udm::AssetData{udmBsp["tree"]},outErr);
+	if(udmBsp) {
+		m_bspTree = util::BSPTree::Load(udm::AssetData {udmBsp["tree"]}, outErr);
 		if(m_bspTree == nullptr)
 			return false;
 
@@ -192,38 +180,34 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,Enti
 		udmBsp["clusterMeshIndexData"].GetBlobData(clusterMeshIndexData);
 		auto &clusterMeshIndices = GetClusterMeshIndices();
 		clusterMeshIndices.resize(numClusters);
-		if(!clusterMeshIndexData.empty())
-		{
+		if(!clusterMeshIndexData.empty()) {
 			auto *ptr = clusterMeshIndexData.data();
 			uint32_t idx = 0;
-			do
-			{
-				auto &numIndices = *reinterpret_cast<uint32_t*>(ptr);
+			do {
+				auto &numIndices = *reinterpret_cast<uint32_t *>(ptr);
 				ptr += sizeof(numIndices);
 				auto &meshIndices = clusterMeshIndices[idx++];
 				meshIndices.resize(numIndices);
-				memcpy(meshIndices.data(),ptr,numIndices *sizeof(meshIndices.front()));
-				ptr += numIndices *sizeof(meshIndices.front());
-			}
-			while(ptr < &clusterMeshIndexData.back());
+				memcpy(meshIndices.data(), ptr, numIndices * sizeof(meshIndices.front()));
+				ptr += numIndices * sizeof(meshIndices.front());
+			} while(ptr < &clusterMeshIndexData.back());
 		}
 	}
 	return true;
 }
 
-bool pragma::asset::WorldData::Save(udm::AssetDataArg outData,const std::string &mapName,std::string &outErr)
+bool pragma::asset::WorldData::Save(udm::AssetDataArg outData, const std::string &mapName, std::string &outErr)
 {
 	outData.SetAssetType(PMAP_IDENTIFIER);
 	outData.SetAssetVersion(PMAP_VERSION);
 	auto udm = *outData;
-	
+
 	// Materials
 	std::vector<std::string> normalizedMaterials;
 	normalizedMaterials.reserve(m_materialTable.size());
-	for(auto &str : m_materialTable)
-	{
-		util::Path path{str};
-		if(ustring::compare<std::string_view>(path.GetFront(),"materials",false))
+	for(auto &str : m_materialTable) {
+		util::Path path {str};
+		if(ustring::compare<std::string_view>(path.GetFront(), "materials", false))
 			path.PopFront();
 
 		auto strPath = path.GetString();
@@ -233,14 +217,13 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData,const std::string 
 	udm["materials"] = normalizedMaterials;
 
 	// Entities
-	auto udmEntities = udm.AddArray("entities",m_entities.size());
+	auto udmEntities = udm.AddArray("entities", m_entities.size());
 	uint32_t entIdx = 0;
-	for(auto &entData : m_entities)
-	{
+	for(auto &entData : m_entities) {
 		auto udmEnt = udmEntities[entIdx++];
 		udmEnt["className"] = entData->GetClassName();
 
-		if(umath::is_flag_set(entData->GetFlags(),EntityData::Flags::ClientsideOnly))
+		if(umath::is_flag_set(entData->GetFlags(), EntityData::Flags::ClientsideOnly))
 			udmEnt["flags"]["clientsideOnly"] = true;
 
 		umath::ScaledTransform pose {};
@@ -250,10 +233,9 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData,const std::string 
 		udmEnt["keyValues"] = entData->GetKeyValues();
 
 		auto &outputs = entData->GetOutputs();
-		auto udmOutputs = udmEnt.AddArray("outputs",outputs.size());
+		auto udmOutputs = udmEnt.AddArray("outputs", outputs.size());
 		uint32_t outputIdx = 0;
-		for(auto &output : outputs)
-		{
+		for(auto &output : outputs) {
 			auto udmOutput = udmOutputs[outputIdx++];
 			udmOutput["name"] = output.name;
 			udmOutput["target"] = output.target;
@@ -265,20 +247,18 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData,const std::string 
 
 		udmEnt["components"] = entData->GetComponents();
 
-		uint32_t firstLeaf,numLeaves;
-		entData->GetLeafData(firstLeaf,numLeaves);
-		if(numLeaves > 0)
-		{
+		uint32_t firstLeaf, numLeaves;
+		entData->GetLeafData(firstLeaf, numLeaves);
+		if(numLeaves > 0) {
 			std::vector<uint16_t> leaves {};
 			leaves.resize(numLeaves);
 			if(numLeaves > 0u)
-				memcpy(leaves.data(),GetStaticPropLeaves().data() +firstLeaf,leaves.size() *sizeof(leaves.front()));
+				memcpy(leaves.data(), GetStaticPropLeaves().data() + firstLeaf, leaves.size() * sizeof(leaves.front()));
 			udmEnt["bspLeaves"] = leaves;
 		}
 	}
 
-	if(m_lightMapAtlasEnabled)
-	{
+	if(m_lightMapAtlasEnabled) {
 		auto strMapName = mapName;
 		ufile::remove_extension_from_filename(strMapName); // TODO: Specify extensions
 		ustring::to_lower(strMapName);
@@ -287,24 +267,21 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData,const std::string 
 		udm["lightmap"]["exposure"] = m_lightMapExposure;
 	}
 
-	if(m_bspTree && m_bspTree->GetNodes().empty() == false && m_bspTree->GetClusterCount() > 0)
-	{
+	if(m_bspTree && m_bspTree->GetNodes().empty() == false && m_bspTree->GetClusterCount() > 0) {
 		auto udmBsp = udm["bsp"];
 		auto &bspTree = *m_bspTree;
 
-		if(bspTree.Save(udm::AssetData{udmBsp["tree"]},outErr) == false)
+		if(bspTree.Save(udm::AssetData {udmBsp["tree"]}, outErr) == false)
 			return false;
 
 		std::vector<std::vector<size_t>> clusterNodes;
 		std::vector<std::vector<uint16_t>> clusterToClusterVisibility;
-		preprocess_bsp_data(bspTree,clusterNodes,clusterToClusterVisibility);
+		preprocess_bsp_data(bspTree, clusterNodes, clusterToClusterVisibility);
 
 		auto &clusterMeshIndices = GetClusterMeshIndices();
-		if(clusterMeshIndices.empty() == false)
-		{
+		if(clusterMeshIndices.empty() == false) {
 			assert(clusterMeshIndices.size() == m_bspTree->GetClusterCount());
-			if(clusterMeshIndices.size() != m_bspTree->GetClusterCount())
-			{
+			if(clusterMeshIndices.size() != m_bspTree->GetClusterCount()) {
 				m_messageLogger("Error: Number of items in cluster mesh list mismatches number of BSP tree clusters!");
 				return false;
 			}
@@ -314,15 +291,14 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData,const std::string 
 			for(auto &meshIndices : clusterMeshIndices)
 				numIndices += meshIndices.size();
 			std::vector<uint8_t> clusterData {};
-			clusterData.resize(numClusters *sizeof(uint32_t) +numIndices *sizeof(WorldModelMeshIndex));
+			clusterData.resize(numClusters * sizeof(uint32_t) + numIndices * sizeof(WorldModelMeshIndex));
 			auto *ptr = clusterData.data();
-			for(auto &meshIndices : clusterMeshIndices)
-			{
+			for(auto &meshIndices : clusterMeshIndices) {
 				uint32_t numIndices = meshIndices.size();
-				memcpy(ptr,&numIndices,sizeof(numIndices));
+				memcpy(ptr, &numIndices, sizeof(numIndices));
 				ptr += sizeof(numIndices);
-				memcpy(ptr,meshIndices.data(),meshIndices.size() *sizeof(meshIndices.front()));
-				ptr += meshIndices.size() *sizeof(meshIndices.front());
+				memcpy(ptr, meshIndices.data(), meshIndices.size() * sizeof(meshIndices.front()));
+				ptr += meshIndices.size() * sizeof(meshIndices.front());
 			}
 			udmBsp["clusterMeshIndexData"] = udm::compress_lz4_blob(clusterData);
 		}
@@ -333,15 +309,15 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData,const std::string 
 void pragma::asset::WorldData::Write(VFilePtrReal &f)
 {
 	auto mapName = util::Path::CreateFile(f->GetPath());
-	while(ustring::compare<std::string_view>(mapName.GetFront(),"maps",false) == false)
+	while(ustring::compare<std::string_view>(mapName.GetFront(), "maps", false) == false)
 		mapName.PopFront();
 	mapName.PopFront(); // Pop "maps"
 	auto strMapName = mapName.GetString();
 	ufile::remove_extension_from_filename(strMapName);
 	ustring::to_lower(strMapName);
 
-	const std::array<char,3> header = {'W','L','D'};
-	f->Write(header.data(),header.size());
+	const std::array<char, 3> header = {'W', 'L', 'D'};
+	f->Write(header.data(), header.size());
 
 	f->Write<uint32_t>(WLD_VERSION);
 	static_assert(WLD_VERSION == 12);
@@ -358,33 +334,29 @@ void pragma::asset::WorldData::Write(VFilePtrReal &f)
 
 	auto flags = DataFlags::None;
 	m_messageLogger("Writing materials...");
-	WriteDataOffset(f,offsetMaterials);
+	WriteDataOffset(f, offsetMaterials);
 	WriteMaterials(f);
 
 	m_messageLogger("Writing BSP Tree...");
-	if(m_bspTree && m_bspTree->GetNodes().empty() == false && m_bspTree->GetClusterCount() > 0)
-	{
-		WriteDataOffset(f,offsetBSPTree);
+	if(m_bspTree && m_bspTree->GetNodes().empty() == false && m_bspTree->GetClusterCount() > 0) {
+		WriteDataOffset(f, offsetBSPTree);
 		flags |= DataFlags::HasBSPTree;
 		WriteBSPTree(f);
 
 		auto &clusterMeshIndices = GetClusterMeshIndices();
 		f->Write<bool>(!clusterMeshIndices.empty());
-		if(clusterMeshIndices.empty() == false)
-		{
+		if(clusterMeshIndices.empty() == false) {
 			assert(clusterMeshIndices.size() == m_bspTree->GetClusterCount());
-			if(clusterMeshIndices.size() != m_bspTree->GetClusterCount())
-			{
+			if(clusterMeshIndices.size() != m_bspTree->GetClusterCount()) {
 				m_messageLogger("Error: Number of items in cluster mesh list mismatches number of BSP tree clusters!");
 				return;
 			}
 
 			auto numClusters = m_bspTree->GetClusterCount();
-			for(auto i=decltype(numClusters){0u};i<numClusters;++i)
-			{
+			for(auto i = decltype(numClusters) {0u}; i < numClusters; ++i) {
 				auto &meshIndices = clusterMeshIndices.at(i);
 				f->Write<uint32_t>(meshIndices.size());
-				f->Write(meshIndices.data(),meshIndices.size() *sizeof(meshIndices.front()));
+				f->Write(meshIndices.data(), meshIndices.size() * sizeof(meshIndices.front()));
 			}
 		}
 	}
@@ -393,15 +365,14 @@ void pragma::asset::WorldData::Write(VFilePtrReal &f)
 	SaveLightmapAtlas(strMapName);
 	if(m_lightMapAtlasEnabled)
 		flags |= DataFlags::HasLightmapAtlas;
-	if(m_lightMapAtlasEnabled)
-	{
-		WriteDataOffset(f,offsetLightMapData);
+	if(m_lightMapAtlasEnabled) {
+		WriteDataOffset(f, offsetLightMapData);
 		f->Write<float>(m_lightMapIntensity);
 		f->Write<float>(m_lightMapExposure);
 	}
 
 	m_messageLogger("Writing entity data...");
-	WriteDataOffset(f,offsetEntities);
+	WriteDataOffset(f, offsetEntities);
 	WriteEntities(f);
 
 	// Update flags
@@ -417,10 +388,9 @@ void pragma::asset::WorldData::Write(VFilePtrReal &f)
 void pragma::asset::WorldData::WriteMaterials(VFilePtrReal &f)
 {
 	f->Write<uint32_t>(m_materialTable.size());
-	for(auto &str : m_materialTable)
-	{
-		util::Path path{str};
-		if(ustring::compare<std::string_view>(path.GetFront(),"materials",false))
+	for(auto &str : m_materialTable) {
+		util::Path path {str};
+		if(ustring::compare<std::string_view>(path.GetFront(), "materials", false))
 			path.PopFront();
 
 		auto strPath = path.GetString();
@@ -434,40 +404,34 @@ void pragma::asset::WorldData::WriteBSPTree(VFilePtrReal &f)
 	auto &bspTree = *m_bspTree;
 	std::vector<std::vector<size_t>> clusterNodes;
 	std::vector<std::vector<uint16_t>> clusterToClusterVisibility;
-	preprocess_bsp_data(bspTree,clusterNodes,clusterToClusterVisibility);
-	
+	preprocess_bsp_data(bspTree, clusterNodes, clusterToClusterVisibility);
+
 	auto &bspNodes = bspTree.GetNodes();
 	auto numClusters = bspTree.GetClusterCount();
 	auto &clusterVisibility = bspTree.GetClusterVisibility();
-	std::function<void(const util::BSPTree::Node&)> fWriteNode = nullptr;
-	fWriteNode = [&f,&fWriteNode,&clusterVisibility,&clusterToClusterVisibility,&bspNodes,&clusterNodes,&bspTree,numClusters](const util::BSPTree::Node &node) {
+	std::function<void(const util::BSPTree::Node &)> fWriteNode = nullptr;
+	fWriteNode = [&f, &fWriteNode, &clusterVisibility, &clusterToClusterVisibility, &bspNodes, &clusterNodes, &bspTree, numClusters](const util::BSPTree::Node &node) {
 		f->Write<bool>(node.leaf);
 		f->Write<Vector3>(node.min);
 		f->Write<Vector3>(node.max);
 		f->Write<int32_t>(node.firstFace);
 		f->Write<int32_t>(node.numFaces);
 		f->Write<int32_t>(node.originalNodeIndex);
-		if(node.leaf)
-		{
+		if(node.leaf) {
 			f->Write<uint16_t>(node.cluster);
-			auto itNode = std::find_if(bspNodes.begin(),bspNodes.end(),[&node](const util::BSPTree::Node &nodeOther) {
-				return &nodeOther == &node;
-				});
+			auto itNode = std::find_if(bspNodes.begin(), bspNodes.end(), [&node](const util::BSPTree::Node &nodeOther) { return &nodeOther == &node; });
 			// Calculate AABB encompassing all nodes visible by this node
 			auto min = node.min;
 			auto max = node.max;
-			if(itNode != bspNodes.end() && node.cluster != std::numeric_limits<uint16_t>::max())
-			{
-				for(auto clusterDst : clusterToClusterVisibility.at(node.cluster))
-				{
-					for(auto nodeOtherIdx : clusterNodes.at(clusterDst))
-					{
+			if(itNode != bspNodes.end() && node.cluster != std::numeric_limits<uint16_t>::max()) {
+				for(auto clusterDst : clusterToClusterVisibility.at(node.cluster)) {
+					for(auto nodeOtherIdx : clusterNodes.at(clusterDst)) {
 						auto &nodeOther = bspNodes.at(nodeOtherIdx);
-						uvec::to_min_max(min,max,nodeOther.min,nodeOther.max);
+						uvec::to_min_max(min, max, nodeOther.min, nodeOther.max);
 					}
 				}
 			}
-			uvec::to_min_max(min,max); // Vertex conversion rotates the vectors, which will change the signs, so we have to re-order the vector components
+			uvec::to_min_max(min, max); // Vertex conversion rotates the vectors, which will change the signs, so we have to re-order the vector components
 			f->Write<Vector3>(min);
 			f->Write<Vector3>(max);
 			return;
@@ -481,15 +445,14 @@ void pragma::asset::WorldData::WriteBSPTree(VFilePtrReal &f)
 	fWriteNode(bspTree.GetRootNode());
 
 	f->Write<uint64_t>(bspTree.GetClusterCount());
-	f->Write(clusterVisibility.data(),clusterVisibility.size() *sizeof(clusterVisibility.front()));
+	f->Write(clusterVisibility.data(), clusterVisibility.size() * sizeof(clusterVisibility.front()));
 }
 
 void pragma::asset::WorldData::WriteEntities(VFilePtrReal &f)
 {
 	f->Write<uint32_t>(m_entities.size());
 
-	for(auto &entData : m_entities)
-	{
+	for(auto &entData : m_entities) {
 		auto offsetEndOfEntity = f->Tell();
 		f->Write<uint64_t>(0u); // Offset to end of entity
 		auto offsetEntityMeshes = f->Tell();
@@ -505,8 +468,7 @@ void pragma::asset::WorldData::WriteEntities(VFilePtrReal &f)
 		// Keyvalues
 		auto &keyValues = entData->GetKeyValues();
 		f->Write<uint32_t>(keyValues.size());
-		for(auto &pair : keyValues)
-		{
+		for(auto &pair : keyValues) {
 			f->WriteString(pair.first);
 			f->WriteString(pair.second);
 		}
@@ -526,29 +488,28 @@ void pragma::asset::WorldData::WriteEntities(VFilePtrReal &f)
 		// Leaves
 		auto cur = f->Tell();
 		f->Seek(offsetEntityLeaves);
-		f->Write<uint64_t>(cur -offsetEntityLeaves);
+		f->Write<uint64_t>(cur - offsetEntityLeaves);
 		f->Seek(cur);
 
-		uint32_t firstLeaf,numLeaves;
-		entData->GetLeafData(firstLeaf,numLeaves);
+		uint32_t firstLeaf, numLeaves;
+		entData->GetLeafData(firstLeaf, numLeaves);
 		f->Write<uint32_t>(numLeaves);
 		std::vector<uint16_t> leaves {};
 		leaves.resize(numLeaves);
 		if(numLeaves > 0u)
-			memcpy(leaves.data(),GetStaticPropLeaves().data() +firstLeaf,leaves.size() *sizeof(leaves.front()));
-		f->Write(leaves.data(),leaves.size() *sizeof(leaves.front()));
+			memcpy(leaves.data(), GetStaticPropLeaves().data() + firstLeaf, leaves.size() * sizeof(leaves.front()));
+		f->Write(leaves.data(), leaves.size() * sizeof(leaves.front()));
 
 		cur = f->Tell();
 		f->Seek(offsetEndOfEntity);
-		f->Write<uint64_t>(cur -offsetEndOfEntity);
+		f->Write<uint64_t>(cur - offsetEndOfEntity);
 		f->Seek(cur);
 	}
 }
 
 bool pragma::asset::WorldData::SaveLightmapAtlas(const std::string &mapName)
 {
-	if(m_lightMapAtlas == nullptr)
-	{
+	if(m_lightMapAtlas == nullptr) {
 		m_messageLogger("No lightmap atlas has been specified! Lightmaps will not be available.");
 		return false;
 	}
@@ -559,15 +520,13 @@ bool pragma::asset::WorldData::SaveLightmapAtlas(const std::string &mapName)
 	// texInfo.flags = uimg::TextureInfo::Flags::SRGB;
 	texInfo.inputFormat = uimg::TextureInfo::InputFormat::R16G16B16A16_Float;
 	texInfo.outputFormat = uimg::TextureInfo::OutputFormat::HDRColorMap;
-	auto matPath = "materials/maps/" +mapName;
+	auto matPath = "materials/maps/" + mapName;
 	FileManager::CreatePath(matPath.c_str());
-	auto filePath = matPath +"/lightmap_atlas.dds";
-	auto result = uimg::save_texture(filePath,*m_lightMapAtlas,saveInfo,[](const std::string &msg) {
-		Con::cwar<<"WARNING: Unable to save lightmap atlas: "<<msg<<Con::endl;
-	});
+	auto filePath = matPath + "/lightmap_atlas.dds";
+	auto result = uimg::save_texture(filePath, *m_lightMapAtlas, saveInfo, [](const std::string &msg) { Con::cwar << "Unable to save lightmap atlas: " << msg << Con::endl; });
 	if(result)
-		m_messageLogger("Lightmap atlas has been saved as '" +filePath +"'!");
+		m_messageLogger("Lightmap atlas has been saved as '" + filePath + "'!");
 	else
-		m_messageLogger("Lightmap atlas could not be saved as '" +filePath +"'! Lightmaps will not be available.");
+		m_messageLogger("Lightmap atlas could not be saved as '" + filePath + "'! Lightmaps will not be available.");
 	return result;
 }

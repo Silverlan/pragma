@@ -13,34 +13,33 @@
 
 using namespace pragma;
 
-void SObservableComponent::SetLocalCameraOrigin(CameraType type,const Vector3 &origin)
+void SObservableComponent::SetLocalCameraOrigin(CameraType type, const Vector3 &origin)
 {
-	BaseObservableComponent::SetLocalCameraOrigin(type,origin);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
+	BaseObservableComponent::SetLocalCameraOrigin(type, origin);
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared() == false)
 		return;
 	NetPacket p;
 	p->Write<CameraType>(type);
 	p->Write<Vector3>(origin);
-	ent.SendNetEvent(m_netSetObserverOrigin,p,pragma::networking::Protocol::SlowReliable);
+	ent.SendNetEvent(m_netSetObserverOrigin, p, pragma::networking::Protocol::SlowReliable);
 }
-void SObservableComponent::SetLocalCameraOffset(CameraType type,const Vector3 &offset)
+void SObservableComponent::SetLocalCameraOffset(CameraType type, const Vector3 &offset)
 {
-	BaseObservableComponent::SetLocalCameraOffset(type,offset);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
+	BaseObservableComponent::SetLocalCameraOffset(type, offset);
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsShared() == false)
 		return;
 	NetPacket p;
 	p->Write<CameraType>(type);
 	p->Write<Vector3>(offset);
-	ent.SendNetEvent(m_netSetObserverOffset,p,pragma::networking::Protocol::SlowReliable);
+	ent.SendNetEvent(m_netSetObserverOffset, p, pragma::networking::Protocol::SlowReliable);
 }
-void SObservableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-void SObservableComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SObservableComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void SObservableComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	constexpr auto numTypes = umath::to_integral(CameraType::Count);
-	for(auto i=0u;i<numTypes;++i)
-	{
+	for(auto i = 0u; i < numTypes; ++i) {
 		auto &data = GetCameraData(static_cast<CameraType>(i));
 		packet->Write<bool>(*data.enabled);
 		packet->Write<Vector3>(*data.localOrigin);
@@ -48,8 +47,7 @@ void SObservableComponent::SendData(NetPacket &packet,networking::ClientRecipien
 		packet->Write<bool>(data.rotateWithObservee);
 		auto hasLimits = data.angleLimits.has_value();
 		packet->Write<bool>(hasLimits);
-		if(hasLimits)
-		{
+		if(hasLimits) {
 			packet->Write<EulerAngles>(data.angleLimits->first);
 			packet->Write<EulerAngles>(data.angleLimits->second);
 		}

@@ -11,29 +11,23 @@
 #include "pragma/entities/environment/lights/s_env_light.h"
 #include <pragma/entities/environment/lights/env_light_spot.h>
 
-namespace pragma
-{
-	class DLLSERVER SLightSpotComponent final
-		: public BaseEnvLightSpotComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SLightSpotComponent final : public BaseEnvLightSpotComponent, public SBaseNetComponent {
+	  public:
 		SLightSpotComponent(BaseEntity &ent) : BaseEnvLightSpotComponent(ent) {}
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual void SetOuterConeAngle(float ang) override;
 		virtual void SetBlendFraction(float fraction) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void SetConeStartOffset(float offset) override;
-	protected:
+	  protected:
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 	};
 };
 
-class DLLSERVER EnvLightSpot
-	: public SBaseEntity
-{
-public:
+class DLLSERVER EnvLightSpot : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

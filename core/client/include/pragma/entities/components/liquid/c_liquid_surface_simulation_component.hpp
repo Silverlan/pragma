@@ -14,24 +14,20 @@
 
 class PhysWaterSurfaceSimulator;
 class CWaterSurface;
-namespace pragma
-{
-	class DLLCLIENT CLiquidSurfaceSimulationComponent final
-		: public BaseLiquidSurfaceSimulationComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CLiquidSurfaceSimulationComponent final : public BaseLiquidSurfaceSimulationComponent, public CBaseNetComponent {
+	  public:
 		CLiquidSurfaceSimulationComponent(BaseEntity &ent);
 		virtual ~CLiquidSurfaceSimulationComponent() override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void ReloadSurfaceSimulator() override;
 		CWaterSurface *GetSurfaceEntity() const;
-	protected:
+	  protected:
 		virtual void OnEntitySpawn() override;
-		virtual std::shared_ptr<PhysWaterSurfaceSimulator> InitializeSurfaceSimulator(const Vector2 &min,const Vector2 &max,float originY) override;
+		virtual std::shared_ptr<PhysWaterSurfaceSimulator> InitializeSurfaceSimulator(const Vector2 &min, const Vector2 &max, float originY) override;
 		mutable EntityHandle m_hWaterSurface = {};
 	};
 };

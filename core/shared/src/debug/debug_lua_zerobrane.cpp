@@ -12,14 +12,12 @@
 // #include <windows.h>
 // #include <tlhelp32.h>
 
-void debug::open_file_in_zerobrane(const std::string &fileName,uint32_t lineIdx)
+void debug::open_file_in_zerobrane(const std::string &fileName, uint32_t lineIdx)
 {
 	std::string zeroBranePath = "C:/Program Files (x86)/ZeroBraneStudio/zbstudio.exe"; // TODO: Find program path from registry?
-	util::start_process(zeroBranePath.c_str(),std::vector<std::string>{
-		fileName +':' +std::to_string(lineIdx)
-	},true);
+	util::start_process(zeroBranePath.c_str(), std::vector<std::string> {fileName + ':' + std::to_string(lineIdx)}, true);
 
-    /*
+	/*
 	// Check if process is already running
 	PROCESSENTRY32 entry;
     entry.dwSize = sizeof(PROCESSENTRY32);

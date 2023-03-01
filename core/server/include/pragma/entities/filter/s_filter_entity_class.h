@@ -10,21 +10,16 @@
 #include "pragma/entities/s_baseentity.h"
 #include <pragma/entities/basefilterentity.h>
 
-namespace pragma
-{
-	class DLLSERVER SFilterClassComponent final
-		: public BaseFilterClassComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SFilterClassComponent final : public BaseFilterClassComponent {
+	  public:
 		SFilterClassComponent(BaseEntity &ent) : BaseFilterClassComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLSERVER FilterEntityClass
-	: public SBaseEntity
-{
-public:
+class DLLSERVER FilterEntityClass : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

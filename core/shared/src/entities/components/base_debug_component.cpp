@@ -13,9 +13,7 @@
 
 using namespace pragma;
 
-BaseDebugTextComponent::BaseDebugTextComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+BaseDebugTextComponent::BaseDebugTextComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BaseDebugTextComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -25,21 +23,21 @@ void BaseDebugTextComponent::Initialize()
 	ent.AddComponent("transform");
 	ent.AddComponent("attachable");
 	ent.AddComponent("color");
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"text",false))
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "text", false))
 			m_debugText = kvData.value;
-		else if(ustring::compare<std::string>(kvData.key,"size",false))
+		else if(ustring::compare<std::string>(kvData.key, "size", false))
 			m_size = util::to_float(kvData.value);
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &ioData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare<std::string>(ioData.input,"settext",false))
+	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &ioData = static_cast<CEInputData &>(evData.get());
+		if(ustring::compare<std::string>(ioData.input, "settext", false))
 			SetText(ioData.data);
-		else if(ustring::compare<std::string>(ioData.input,"setsize",false))
+		else if(ustring::compare<std::string>(ioData.input, "setsize", false))
 			SetSize(util::to_float(ioData.data));
 		else
 			return util::EventReply::Unhandled;
@@ -48,33 +46,33 @@ void BaseDebugTextComponent::Initialize()
 
 	m_netEvSetText = SetupNetEvent("set_text");
 }
-void BaseDebugTextComponent::SetText(const std::string &text) {m_debugText = text;}
-void BaseDebugTextComponent::SetSize(float size) {m_size = size;}
+void BaseDebugTextComponent::SetText(const std::string &text) { m_debugText = text; }
+void BaseDebugTextComponent::SetSize(float size) { m_size = size; }
 
 ////////////////
 
 void BaseDebugOutlineComponent::Initialize(BaseEntityComponent &component)
 {
 	m_netEvSetOutlineColor = component.SetupNetEvent("set_outline_color");
-	component.BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"outline_color",false))
-			m_outlineColor = Color{kvData.value};
+	component.BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "outline_color", false))
+			m_outlineColor = Color {kvData.value};
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	component.BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &ioData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare<std::string>(ioData.input,"SetOutlineColor",false))
-			m_outlineColor = Color{ioData.data};
+	component.BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &ioData = static_cast<CEInputData &>(evData.get());
+		if(ustring::compare<std::string>(ioData.input, "SetOutlineColor", false))
+			m_outlineColor = Color {ioData.data};
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
 }
-void BaseDebugOutlineComponent::SetOutlineColor(const Color &color) {m_outlineColor = color;}
-const Color &BaseDebugOutlineComponent::GetOutlineColor() const {return m_outlineColor;}
+void BaseDebugOutlineComponent::SetOutlineColor(const Color &color) { m_outlineColor = color; }
+const Color &BaseDebugOutlineComponent::GetOutlineColor() const { return m_outlineColor; }
 
 ////////////////
 
@@ -86,9 +84,7 @@ void BaseDebugPointComponent::Initialize()
 	ent.AddComponent("attachable");
 	ent.AddComponent("color");
 }
-BaseDebugPointComponent::BaseDebugPointComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+BaseDebugPointComponent::BaseDebugPointComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 ////////////////
 
@@ -99,21 +95,19 @@ void BaseDebugLineComponent::Initialize()
 	ent.AddComponent("transform");
 	ent.AddComponent("attachable");
 	ent.AddComponent("color");
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"end_target",false))
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "end_target", false))
 			m_targetEntity = kvData.value;
-		else if(ustring::compare<std::string>(kvData.key,"target_origin",false))
+		else if(ustring::compare<std::string>(kvData.key, "target_origin", false))
 			m_targetOrigin = uvec::create(kvData.value);
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
 }
-BaseDebugLineComponent::BaseDebugLineComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
-	
+BaseDebugLineComponent::BaseDebugLineComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+
 ////////////////
 
 void BaseDebugBoxComponent::Initialize()
@@ -124,26 +118,24 @@ void BaseDebugBoxComponent::Initialize()
 	ent.AddComponent("transform");
 	ent.AddComponent("attachable");
 	ent.AddComponent("color");
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"min_bounds",false))
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "min_bounds", false))
 			m_bounds.first = uvec::create(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"max_bounds",false))
+		else if(ustring::compare<std::string>(kvData.key, "max_bounds", false))
 			m_bounds.second = uvec::create(kvData.value);
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
 }
-void BaseDebugBoxComponent::SetBounds(const Vector3 &min,const Vector3 &max) {m_bounds = {min,max};}
-const std::pair<Vector3,Vector3> &BaseDebugBoxComponent::GetBounds() const {return m_bounds;}
+void BaseDebugBoxComponent::SetBounds(const Vector3 &min, const Vector3 &max) { m_bounds = {min, max}; }
+const std::pair<Vector3, Vector3> &BaseDebugBoxComponent::GetBounds() const { return m_bounds; }
 
-BaseDebugBoxComponent::BaseDebugBoxComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+BaseDebugBoxComponent::BaseDebugBoxComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 ////////////////
-	
+
 void BaseDebugSphereComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -153,22 +145,19 @@ void BaseDebugSphereComponent::Initialize()
 	ent.AddComponent("attachable");
 	ent.AddComponent("radius");
 	ent.AddComponent("color");
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"recursion_level",false))
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "recursion_level", false))
 			m_recursionLevel = util::to_int(kvData.value);
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-
 }
-BaseDebugSphereComponent::BaseDebugSphereComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+BaseDebugSphereComponent::BaseDebugSphereComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 ////////////////
-	
+
 void BaseDebugConeComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -178,13 +167,13 @@ void BaseDebugConeComponent::Initialize()
 	ent.AddComponent("attachable");
 	ent.AddComponent("radius");
 	ent.AddComponent("color");
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"start_radius",false))
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "start_radius", false))
 			m_startRadius = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"cone_angle",false))
+		else if(ustring::compare<std::string>(kvData.key, "cone_angle", false))
 			m_coneAngle = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"segment_count",false))
+		else if(ustring::compare<std::string>(kvData.key, "segment_count", false))
 			m_segmentCount = util::to_int(kvData.value);
 		else
 			return util::EventReply::Unhandled;
@@ -192,18 +181,16 @@ void BaseDebugConeComponent::Initialize()
 	});
 }
 
-void BaseDebugConeComponent::SetConeAngle(float angle) {m_coneAngle = angle;}
-float BaseDebugConeComponent::GetConeAngle() const {return m_coneAngle;}
-		
-void BaseDebugConeComponent::SetStartRadius(float radius) {m_startRadius = radius;}
-float BaseDebugConeComponent::GetStartRadius() const {return m_startRadius;}
+void BaseDebugConeComponent::SetConeAngle(float angle) { m_coneAngle = angle; }
+float BaseDebugConeComponent::GetConeAngle() const { return m_coneAngle; }
 
-BaseDebugConeComponent::BaseDebugConeComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+void BaseDebugConeComponent::SetStartRadius(float radius) { m_startRadius = radius; }
+float BaseDebugConeComponent::GetStartRadius() const { return m_startRadius; }
+
+BaseDebugConeComponent::BaseDebugConeComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 ////////////////
-	
+
 void BaseDebugCylinderComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -213,11 +200,11 @@ void BaseDebugCylinderComponent::Initialize()
 	ent.AddComponent("attachable");
 	ent.AddComponent("color");
 	ent.AddComponent("radius");
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"length",false))
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "length", false))
 			m_length = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"segment_count",false))
+		else if(ustring::compare<std::string>(kvData.key, "segment_count", false))
 			m_segmentCount = util::to_int(kvData.value);
 		else
 			return util::EventReply::Unhandled;
@@ -225,15 +212,13 @@ void BaseDebugCylinderComponent::Initialize()
 	});
 }
 
-void BaseDebugCylinderComponent::SetLength(float length) {m_length = length;}
-float BaseDebugCylinderComponent::GetLength() const {return m_length;}
+void BaseDebugCylinderComponent::SetLength(float length) { m_length = length; }
+float BaseDebugCylinderComponent::GetLength() const { return m_length; }
 
-BaseDebugCylinderComponent::BaseDebugCylinderComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+BaseDebugCylinderComponent::BaseDebugCylinderComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 ////////////////
-	
+
 void BaseDebugPlaneComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -242,6 +227,4 @@ void BaseDebugPlaneComponent::Initialize()
 	ent.AddComponent("attachable");
 	ent.AddComponent("color");
 }
-BaseDebugPlaneComponent::BaseDebugPlaneComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+BaseDebugPlaneComponent::BaseDebugPlaneComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}

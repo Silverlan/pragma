@@ -12,15 +12,11 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/liquid/base_buoyancy_component.hpp>
 
-namespace pragma
-{
-	class DLLCLIENT CBuoyancyComponent final
-		: public BaseBuoyancyComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CBuoyancyComponent final : public BaseBuoyancyComponent, public CBaseNetComponent {
+	  public:
 		CBuoyancyComponent(BaseEntity &ent) : BaseBuoyancyComponent(ent) {}
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};

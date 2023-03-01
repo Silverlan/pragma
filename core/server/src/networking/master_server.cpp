@@ -7,16 +7,16 @@
 #include "pragma/networking/master_server.hpp"
 #include <sharedutils/util_library.hpp>
 
-std::unique_ptr<pragma::networking::MasterServerRegistration> pragma::networking::MasterServerRegistration::Register(const util::Library &steamworksLibrary,const GameServerInfo &serverInfo)
+std::unique_ptr<pragma::networking::MasterServerRegistration> pragma::networking::MasterServerRegistration::Register(const util::Library &steamworksLibrary, const GameServerInfo &serverInfo)
 {
 	std::unique_ptr<MasterServerRegistration> reg {new MasterServerRegistration {}};
 	if(reg->Initialize(steamworksLibrary) == false || reg->m_register_server(serverInfo) == false)
 		return nullptr;
 	CallbackEvents events {};
 	auto *pReg = reg.get();
-	events.onAuthCompleted = [pReg](uint64_t steamId,bool authSuccess) {
+	events.onAuthCompleted = [pReg](uint64_t steamId, bool authSuccess) {
 		if(pReg->m_callbackEvents.onAuthCompleted)
-			pReg->m_callbackEvents.onAuthCompleted(steamId,authSuccess);
+			pReg->m_callbackEvents.onAuthCompleted(steamId, authSuccess);
 	};
 	reg->m_steamworks_set_master_server_callback_events(events);
 	return reg;
@@ -39,28 +39,18 @@ bool pragma::networking::MasterServerRegistration::Initialize(const util::Librar
 	m_steamworks_set_client_score = library.FindSymbolAddress<decltype(m_steamworks_set_client_score)>("pr_steamworks_set_client_score");
 	m_steamworks_set_master_server_callback_events = library.FindSymbolAddress<decltype(m_steamworks_set_master_server_callback_events)>("pr_steamworks_set_master_server_callback_events");
 
-	return m_register_server && m_unregister_server && m_update_server_data && m_steamworks_get_server_data &&
-		m_steamworks_authenticate_and_add_client && m_steamworks_drop_client && m_steamworks_set_client_name && m_steamworks_set_client_score &&
-		m_steamworks_set_master_server_callback_events;
+	return m_register_server && m_unregister_server && m_update_server_data && m_steamworks_get_server_data && m_steamworks_authenticate_and_add_client && m_steamworks_drop_client && m_steamworks_set_client_name && m_steamworks_set_client_score
+	  && m_steamworks_set_master_server_callback_events;
 }
-void pragma::networking::MasterServerRegistration::UpdateServerData() const
-{
-	m_update_server_data();
-}
+void pragma::networking::MasterServerRegistration::UpdateServerData() const { m_update_server_data(); }
 pragma::networking::GameServerInfo &pragma::networking::MasterServerRegistration::GetServerInfo()
 {
 	pragma::networking::GameServerInfo *serverInfo;
 	m_steamworks_get_server_data(&serverInfo);
 	return *serverInfo;
 }
-void pragma::networking::MasterServerRegistration::SetCallbackEvents(const CallbackEvents &callbackEvents)
-{
-	m_callbackEvents = callbackEvents;
-}
-void pragma::networking::MasterServerRegistration::AuthenticateAndAddClient(uint64_t steamId,std::vector<char> &token,const std::string &clientName)
-{
-	m_steamworks_authenticate_and_add_client(steamId,token,clientName);
-}
-void pragma::networking::MasterServerRegistration::DropClient(SteamId steamId) {m_steamworks_drop_client(steamId);}
-void pragma::networking::MasterServerRegistration::SetClientName(SteamId steamId,const std::string &name) {m_steamworks_set_client_name(steamId,name);}
-void pragma::networking::MasterServerRegistration::SetClientScore(SteamId steamId,int32_t score) {m_steamworks_set_client_score(steamId,score);}
+void pragma::networking::MasterServerRegistration::SetCallbackEvents(const CallbackEvents &callbackEvents) { m_callbackEvents = callbackEvents; }
+void pragma::networking::MasterServerRegistration::AuthenticateAndAddClient(uint64_t steamId, std::vector<char> &token, const std::string &clientName) { m_steamworks_authenticate_and_add_client(steamId, token, clientName); }
+void pragma::networking::MasterServerRegistration::DropClient(SteamId steamId) { m_steamworks_drop_client(steamId); }
+void pragma::networking::MasterServerRegistration::SetClientName(SteamId steamId, const std::string &name) { m_steamworks_set_client_name(steamId, name); }
+void pragma::networking::MasterServerRegistration::SetClientScore(SteamId steamId, int32_t score) { m_steamworks_set_client_score(steamId, score); }

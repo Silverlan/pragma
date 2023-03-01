@@ -13,9 +13,9 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(point_path_node,PointPathNode);
+LINK_ENTITY_TO_CLASS(point_path_node, PointPathNode);
 
-void SPathNodeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SPathNodeComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void PointPathNode::Initialize()
 {

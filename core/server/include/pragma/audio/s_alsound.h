@@ -11,31 +11,27 @@
 #include <pragma/audio/alsound.h>
 #include <pragma/audio/alsound_base.hpp>
 
-class DLLSERVER SALSoundBase
-{
-protected:
+class DLLSERVER SALSoundBase {
+  protected:
 	bool m_bShared;
-public:
-	SALSoundBase(bool bShared=true);
+  public:
+	SALSoundBase(bool bShared = true);
 	void SetShared(bool b);
 	bool IsShared() const;
-	virtual void SetPosition(const Vector3 &pos,bool bDontTransmit)=0;
-	virtual void SetVelocity(const Vector3 &vel,bool bDontTransmit)=0;
-	virtual void SetDirection(const Vector3 &dir,bool bDontTransmit)=0;
+	virtual void SetPosition(const Vector3 &pos, bool bDontTransmit) = 0;
+	virtual void SetVelocity(const Vector3 &vel, bool bDontTransmit) = 0;
+	virtual void SetDirection(const Vector3 &dir, bool bDontTransmit) = 0;
 };
 
-class DLLSERVER SALSound
-	: virtual public ALSound,public SALSoundBase,
-	virtual public ALSoundBase
-{
-public:
+class DLLSERVER SALSound : virtual public ALSound, public SALSoundBase, virtual public ALSoundBase {
+  public:
 	static SALSoundBase *GetBase(ALSound *snd);
-protected:
+  protected:
 	virtual void SetState(ALState state) override;
-	void SendEvent(NetEvent evId,const std::function<void(NetPacket&)> &write=nullptr,bool bUDP=true) const;
+	void SendEvent(NetEvent evId, const std::function<void(NetPacket &)> &write = nullptr, bool bUDP = true) const;
 	uint32_t m_entityIndex = std::numeric_limits<uint32_t>::max();
-public:
-	SALSound(NetworkState *nw,unsigned int idx,float duration,const std::string &soundName,ALCreateFlags createFlags);
+  public:
+	SALSound(NetworkState *nw, unsigned int idx, float duration, const std::string &soundName, ALCreateFlags createFlags);
 	virtual ~SALSound() override;
 	const std::string &GetSoundName() const;
 	ALCreateFlags GetCreateFlags() const;
@@ -58,13 +54,13 @@ public:
 	virtual bool IsStopped() const override;
 	virtual void SetGain(float gain) override;
 	virtual float GetGain() const override;
-	void SetPosition(const Vector3 &pos,bool bDontTransmit);
+	void SetPosition(const Vector3 &pos, bool bDontTransmit);
 	virtual void SetPosition(const Vector3 &pos) override;
 	virtual Vector3 GetPosition() const override;
-	void SetVelocity(const Vector3 &vel,bool bDontTransmit);
+	void SetVelocity(const Vector3 &vel, bool bDontTransmit);
 	virtual void SetVelocity(const Vector3 &vel) override;
 	virtual Vector3 GetVelocity() const override;
-	void SetDirection(const Vector3 &dir,bool bDontTransmit);
+	void SetDirection(const Vector3 &dir, bool bDontTransmit);
 	virtual void SetDirection(const Vector3 &dir);
 	virtual Vector3 GetDirection() const override;
 	virtual void SetRelative(bool b) override;
@@ -92,8 +88,8 @@ public:
 	virtual void SetOuterConeGainHF(float gain) override;
 	virtual uint32_t GetPriority() override;
 	virtual void SetPriority(uint32_t priority) override;
-	virtual void SetOrientation(const Vector3 &at,const Vector3 &up) override;
-	virtual std::pair<Vector3,Vector3> GetOrientation() const override;
+	virtual void SetOrientation(const Vector3 &at, const Vector3 &up) override;
+	virtual std::pair<Vector3, Vector3> GetOrientation() const override;
 	virtual void SetDopplerFactor(float factor) override;
 	virtual float GetDopplerFactor() const override;
 	virtual void SetLeftStereoAngle(float ang) override;
@@ -102,27 +98,27 @@ public:
 	virtual float GetRightStereoAngle() const override;
 	virtual void SetAirAbsorptionFactor(float factor) override;
 	virtual float GetAirAbsorptionFactor() const override;
-	virtual void SetGainAuto(bool directHF,bool send,bool sendHF) override;
-	virtual std::tuple<bool,bool,bool> GetGainAuto() const override;
+	virtual void SetGainAuto(bool directHF, bool send, bool sendHF) override;
+	virtual std::tuple<bool, bool, bool> GetGainAuto() const override;
 	virtual void SetDirectFilter(const EffectParams &params) override;
 	virtual const EffectParams &GetDirectFilter() const override;
-	virtual bool AddEffect(const std::string &effectName,const EffectParams &params={}) override;
+	virtual bool AddEffect(const std::string &effectName, const EffectParams &params = {}) override;
 	virtual void RemoveEffect(const std::string &effectName) override;
-	virtual void SetEffectParameters(const std::string &effectName,const EffectParams &params={}) override;
+	virtual void SetEffectParameters(const std::string &effectName, const EffectParams &params = {}) override;
 
 	virtual void SetType(ALSoundType type) override;
 	virtual void SetFlags(unsigned int flags) override;
 	virtual void SetSource(BaseEntity *ent) override;
 	virtual void Update() override;
 	virtual void PostUpdate() override;
-	virtual void SetRange(float start,float end) override;
+	virtual void SetRange(float start, float end) override;
 	virtual void ClearRange() override;
 	virtual void SetFadeInDuration(float t) override;
 	virtual void SetFadeOutDuration(float t) override;
 
 	// Special index required for steam audio
 	void SetEntityMapIndex(uint32_t idx);
-private:
+  private:
 	std::string m_soundName = "";
 	ALCreateFlags m_createFlags = ALCreateFlags::None;
 };

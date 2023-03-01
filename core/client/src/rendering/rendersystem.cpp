@@ -41,10 +41,6 @@ extern DLLCLIENT CGame *c_game;
 // Disables rendering of meshes and shadows; For debug purposes only!
 #define DEBUG_RENDER_DISABLED 0
 
-
 #include "pragma/rendering/render_processor.hpp"
 
-uint32_t pragma::rendering::LightingStageRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue,RenderPassStats *optStats,std::optional<uint32_t> worldRenderQueueIndex)
-{
-	return BaseRenderProcessor::Render(renderQueue,false,optStats,worldRenderQueueIndex);
-}
+uint32_t pragma::rendering::LightingStageRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue, RenderPassStats *optStats, std::optional<uint32_t> worldRenderQueueIndex) { return BaseRenderProcessor::Render(renderQueue, false, optStats, worldRenderQueueIndex); }

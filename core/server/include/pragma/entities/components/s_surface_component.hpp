@@ -11,17 +11,13 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_surface_component.hpp>
 
-namespace pragma
-{
-	class DLLSERVER SSurfaceComponent final
-		: public BaseSurfaceComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SSurfaceComponent final : public BaseSurfaceComponent, public SBaseNetComponent {
+	  public:
 		SSurfaceComponent(BaseEntity &ent) : BaseSurfaceComponent(ent) {}
 		virtual void SetPlane(const umath::Plane &plane) override;
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };

@@ -24,8 +24,7 @@ void BaseFuncSurfaceMaterialComponent::UpdateSurfaceMaterial(Game *game)
 		return;
 	auto idx = mat->GetIndex();
 	auto &objs = phys->GetCollisionObjects();
-	for(auto it=objs.begin();it!=objs.end();++it)
-	{
+	for(auto it = objs.begin(); it != objs.end(); ++it) {
 		auto &hObj = *it;
 		if(hObj.IsValid())
 			hObj->SetSurfaceMaterial(CUInt32(idx));

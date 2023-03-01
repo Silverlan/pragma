@@ -12,12 +12,9 @@
 #include <pragma/lua/classes/lalsound.h>
 #include <alsound_buffer.hpp>
 
-namespace Lua
-{
-	namespace ALSound
-	{
-		namespace Client
-		{
+namespace Lua {
+	namespace ALSound {
+		namespace Client {
 			DLLCLIENT void register_class(luabind::class_<::ALSound> &classDef);
 			DLLCLIENT void register_buffer(luabind::class_<al::ISoundBuffer> &classDef);
 		};

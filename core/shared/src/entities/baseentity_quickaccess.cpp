@@ -30,19 +30,19 @@ pragma::ComponentHandle<pragma::BaseEntityComponent> BaseEntity::AddNetworkedCom
 		return c;
 	return AddComponent(name);
 }
-std::shared_ptr<ALSound> BaseEntity::CreateSound(const std::string &snd,ALSoundType type)
+std::shared_ptr<ALSound> BaseEntity::CreateSound(const std::string &snd, ALSoundType type)
 {
-	auto *sndC = static_cast<pragma::BaseSoundEmitterComponent*>(AddNetworkedComponent("sound_emitter").get());
+	auto *sndC = static_cast<pragma::BaseSoundEmitterComponent *>(AddNetworkedComponent("sound_emitter").get());
 	if(sndC == nullptr)
 		return nullptr;
-	return sndC->CreateSound(snd,type);
+	return sndC->CreateSound(snd, type);
 }
-std::shared_ptr<ALSound> BaseEntity::EmitSound(const std::string &snd,ALSoundType type,float gain,float pitch)
+std::shared_ptr<ALSound> BaseEntity::EmitSound(const std::string &snd, ALSoundType type, float gain, float pitch)
 {
-	auto *sndC = static_cast<pragma::BaseSoundEmitterComponent*>(AddNetworkedComponent("sound_emitter").get());
+	auto *sndC = static_cast<pragma::BaseSoundEmitterComponent *>(AddNetworkedComponent("sound_emitter").get());
 	if(sndC == nullptr)
 		return nullptr;
-	return sndC->EmitSound(snd,type,{gain,pitch});
+	return sndC->EmitSound(snd, type, {gain, pitch});
 }
 
 std::string BaseEntity::GetName() const
@@ -52,7 +52,7 @@ std::string BaseEntity::GetName() const
 }
 void BaseEntity::SetName(const std::string &name)
 {
-	auto *nameC = static_cast<pragma::BaseNameComponent*>(AddNetworkedComponent("name").get());
+	auto *nameC = static_cast<pragma::BaseNameComponent *>(AddNetworkedComponent("name").get());
 	if(nameC == nullptr)
 		return;
 	nameC->SetName(name);
@@ -60,14 +60,14 @@ void BaseEntity::SetName(const std::string &name)
 
 void BaseEntity::SetModel(const std::string &mdl)
 {
-	auto *mdlC = static_cast<pragma::BaseModelComponent*>(AddNetworkedComponent("model").get());
+	auto *mdlC = static_cast<pragma::BaseModelComponent *>(AddNetworkedComponent("model").get());
 	if(mdlC == nullptr)
 		return;
 	mdlC->SetModel(mdl);
 }
 void BaseEntity::SetModel(const std::shared_ptr<Model> &mdl)
 {
-	auto *mdlC = static_cast<pragma::BaseModelComponent*>(AddNetworkedComponent("model").get());
+	auto *mdlC = static_cast<pragma::BaseModelComponent *>(AddNetworkedComponent("model").get());
 	if(mdlC == nullptr)
 		return;
 	mdlC->SetModel(mdl);
@@ -87,12 +87,11 @@ std::optional<umath::Transform> BaseEntity::GetAttachmentPose(uint32_t attId) co
 {
 	auto mdlC = GetModelComponent();
 	umath::Transform t {};
-	if(mdlC)
-	{
+	if(mdlC) {
 		Vector3 pos;
 		Quat rot;
-		if(mdlC->GetAttachment(attId,&pos,&rot))
-			t = {pos,rot};
+		if(mdlC->GetAttachment(attId, &pos, &rot))
+			t = {pos, rot};
 	}
 	return t;
 }
@@ -117,30 +116,30 @@ uint32_t BaseEntity::GetBodyGroup(const std::string &name) const
 	auto id = mdl ? mdl->GetBodyGroupId(name) : -1;
 	return (id != -1) ? mdlC->GetBodyGroup(id) : 0;
 }
-void BaseEntity::SetBodyGroup(const std::string &name,uint32_t id)
+void BaseEntity::SetBodyGroup(const std::string &name, uint32_t id)
 {
 	auto mdlC = GetModelComponent();
 	if(!mdlC)
 		return;
-	mdlC->SetBodyGroup(name,id);
+	mdlC->SetBodyGroup(name, id);
 }
 
 void BaseEntity::SetParent(BaseEntity *parent)
 {
-	auto *attC = static_cast<pragma::BaseAttachableComponent*>(AddNetworkedComponent("attachable").get());
+	auto *attC = static_cast<pragma::BaseAttachableComponent *>(AddNetworkedComponent("attachable").get());
 	if(attC == nullptr)
 		return;
 	attC->AttachToEntity(parent);
 }
 
-void BaseEntity::ClearParent() {SetParent(nullptr);}
+void BaseEntity::ClearParent() { SetParent(nullptr); }
 
 pragma::BaseParentComponent *BaseEntity::GetParent() const
 {
 	auto attC = FindComponent("attachable");
 	if(attC.expired())
 		return nullptr;
-	return static_cast<pragma::BaseAttachableComponent*>(attC.get())->GetParent();
+	return static_cast<pragma::BaseAttachableComponent *>(attC.get())->GetParent();
 }
 
 PhysObj *BaseEntity::GetPhysicsObject() const
@@ -150,7 +149,7 @@ PhysObj *BaseEntity::GetPhysicsObject() const
 }
 PhysObj *BaseEntity::InitializePhysics(PHYSICSTYPE type)
 {
-	auto *physC = static_cast<pragma::BasePhysicsComponent*>(AddNetworkedComponent("physics").get());
+	auto *physC = static_cast<pragma::BasePhysicsComponent *>(AddNetworkedComponent("physics").get());
 	if(physC == nullptr)
 		return nullptr;
 	return physC->InitializePhysics(type);
@@ -169,14 +168,14 @@ void BaseEntity::DropToFloor()
 		return;
 	physC->DropToFloor();
 }
-std::pair<Vector3,Vector3> BaseEntity::GetCollisionBounds() const
+std::pair<Vector3, Vector3> BaseEntity::GetCollisionBounds() const
 {
 	auto physC = GetPhysicsComponent();
 	if(!physC)
-		return {Vector3{},Vector3{}};
-	Vector3 min,max;
-	physC->GetCollisionBounds(&min,&max);
-	return {min,max};
+		return {Vector3 {}, Vector3 {}};
+	Vector3 min, max;
+	physC->GetCollisionBounds(&min, &max);
+	return {min, max};
 }
 void BaseEntity::SetCollisionFilterMask(CollisionMask filterMask)
 {
@@ -223,34 +222,34 @@ Vector3 BaseEntity::GetRight() const
 	return trC ? trC->GetRight() : uvec::RIGHT;
 }
 
-void BaseEntity::Input(const std::string &input,BaseEntity *activator,BaseEntity *caller,const std::string &data)
+void BaseEntity::Input(const std::string &input, BaseEntity *activator, BaseEntity *caller, const std::string &data)
 {
-	auto *ioC = static_cast<pragma::BaseIOComponent*>(AddNetworkedComponent("io").get());
+	auto *ioC = static_cast<pragma::BaseIOComponent *>(AddNetworkedComponent("io").get());
 	if(ioC == nullptr)
 		return;
-	ioC->Input(input,activator,caller,data);
+	ioC->Input(input, activator, caller, data);
 }
 
 uint16_t BaseEntity::GetHealth() const
 {
 	auto healthC = FindComponent("health");
-	return healthC.valid() ? static_cast<pragma::BaseHealthComponent&>(*healthC).GetHealth() : 0;
+	return healthC.valid() ? static_cast<pragma::BaseHealthComponent &>(*healthC).GetHealth() : 0;
 }
 uint16_t BaseEntity::GetMaxHealth() const
 {
 	auto healthC = FindComponent("health");
-	return healthC.valid() ? static_cast<pragma::BaseHealthComponent&>(*healthC).GetMaxHealth() : 0;
+	return healthC.valid() ? static_cast<pragma::BaseHealthComponent &>(*healthC).GetMaxHealth() : 0;
 }
 void BaseEntity::SetHealth(uint16_t health)
 {
-	auto *healthC = static_cast<pragma::BaseHealthComponent*>(AddNetworkedComponent("health").get());
+	auto *healthC = static_cast<pragma::BaseHealthComponent *>(AddNetworkedComponent("health").get());
 	if(healthC == nullptr)
 		return;
 	healthC->SetHealth(health);
 }
 void BaseEntity::SetMaxHealth(uint16_t maxHealth)
 {
-	auto *healthC = static_cast<pragma::BaseHealthComponent*>(AddNetworkedComponent("health").get());
+	auto *healthC = static_cast<pragma::BaseHealthComponent *>(AddNetworkedComponent("health").get());
 	if(healthC == nullptr)
 		return;
 	healthC->SetMaxHealth(maxHealth);
@@ -258,14 +257,14 @@ void BaseEntity::SetMaxHealth(uint16_t maxHealth)
 
 void BaseEntity::SetVelocity(const Vector3 &vel)
 {
-	auto *velC = static_cast<pragma::VelocityComponent*>(AddNetworkedComponent("velocity").get());
+	auto *velC = static_cast<pragma::VelocityComponent *>(AddNetworkedComponent("velocity").get());
 	if(velC == nullptr)
 		return;
 	velC->SetVelocity(vel);
 }
 void BaseEntity::AddVelocity(const Vector3 &vel)
 {
-	auto *velC = static_cast<pragma::VelocityComponent*>(AddNetworkedComponent("velocity").get());
+	auto *velC = static_cast<pragma::VelocityComponent *>(AddNetworkedComponent("velocity").get());
 	if(velC == nullptr)
 		return;
 	velC->AddVelocity(vel);
@@ -273,18 +272,18 @@ void BaseEntity::AddVelocity(const Vector3 &vel)
 Vector3 BaseEntity::GetVelocity() const
 {
 	auto velC = GetComponent<pragma::VelocityComponent>();
-	return velC.valid() ? velC->GetVelocity() : Vector3{};
+	return velC.valid() ? velC->GetVelocity() : Vector3 {};
 }
 void BaseEntity::SetAngularVelocity(const Vector3 &vel)
 {
-	auto *velC = static_cast<pragma::VelocityComponent*>(AddNetworkedComponent("velocity").get());
+	auto *velC = static_cast<pragma::VelocityComponent *>(AddNetworkedComponent("velocity").get());
 	if(velC == nullptr)
 		return;
 	velC->SetAngularVelocity(vel);
 }
 void BaseEntity::AddAngularVelocity(const Vector3 &vel)
 {
-	auto *velC = static_cast<pragma::VelocityComponent*>(AddNetworkedComponent("velocity").get());
+	auto *velC = static_cast<pragma::VelocityComponent *>(AddNetworkedComponent("velocity").get());
 	if(velC == nullptr)
 		return;
 	velC->AddAngularVelocity(vel);
@@ -292,43 +291,43 @@ void BaseEntity::AddAngularVelocity(const Vector3 &vel)
 Vector3 BaseEntity::GetAngularVelocity() const
 {
 	auto velC = GetComponent<pragma::VelocityComponent>();
-	return velC.valid() ? velC->GetAngularVelocity() : Vector3{};
+	return velC.valid() ? velC->GetAngularVelocity() : Vector3 {};
 }
 
-void BaseEntity::PlayAnimation(int32_t animation,pragma::FPlayAnim flags)
+void BaseEntity::PlayAnimation(int32_t animation, pragma::FPlayAnim flags)
 {
-	auto *animC = static_cast<pragma::BaseAnimatedComponent*>(AddNetworkedComponent("animated").get());
+	auto *animC = static_cast<pragma::BaseAnimatedComponent *>(AddNetworkedComponent("animated").get());
 	if(animC == nullptr)
 		return;
-	animC->PlayAnimation(animation,flags);
+	animC->PlayAnimation(animation, flags);
 }
-void BaseEntity::PlayLayeredAnimation(int32_t slot,int32_t animation,pragma::FPlayAnim flags)
+void BaseEntity::PlayLayeredAnimation(int32_t slot, int32_t animation, pragma::FPlayAnim flags)
 {
-	auto *animC = static_cast<pragma::BaseAnimatedComponent*>(AddNetworkedComponent("animated").get());
+	auto *animC = static_cast<pragma::BaseAnimatedComponent *>(AddNetworkedComponent("animated").get());
 	if(animC == nullptr)
 		return;
-	animC->PlayLayeredAnimation(slot,animation,flags);
+	animC->PlayLayeredAnimation(slot, animation, flags);
 }
-bool BaseEntity::PlayActivity(Activity activity,pragma::FPlayAnim flags)
+bool BaseEntity::PlayActivity(Activity activity, pragma::FPlayAnim flags)
 {
-	auto *animC = static_cast<pragma::BaseAnimatedComponent*>(AddNetworkedComponent("animated").get());
+	auto *animC = static_cast<pragma::BaseAnimatedComponent *>(AddNetworkedComponent("animated").get());
 	if(animC == nullptr)
 		return false;
-	return animC->PlayActivity(activity,flags);
+	return animC->PlayActivity(activity, flags);
 }
-bool BaseEntity::PlayLayeredActivity(int32_t slot,Activity activity,pragma::FPlayAnim flags)
+bool BaseEntity::PlayLayeredActivity(int32_t slot, Activity activity, pragma::FPlayAnim flags)
 {
-	auto *animC = static_cast<pragma::BaseAnimatedComponent*>(AddNetworkedComponent("animated").get());
+	auto *animC = static_cast<pragma::BaseAnimatedComponent *>(AddNetworkedComponent("animated").get());
 	if(animC == nullptr)
 		return false;
-	return animC->PlayLayeredActivity(slot,activity,flags);
+	return animC->PlayLayeredActivity(slot, activity, flags);
 }
-bool BaseEntity::PlayLayeredAnimation(int32_t slot,std::string animation,pragma::FPlayAnim flags)
+bool BaseEntity::PlayLayeredAnimation(int32_t slot, std::string animation, pragma::FPlayAnim flags)
 {
-	auto *animC = static_cast<pragma::BaseAnimatedComponent*>(AddNetworkedComponent("animated").get());
+	auto *animC = static_cast<pragma::BaseAnimatedComponent *>(AddNetworkedComponent("animated").get());
 	if(animC == nullptr)
 		return false;
-	return animC->PlayLayeredAnimation(slot,animation,flags);
+	return animC->PlayLayeredAnimation(slot, animation, flags);
 }
 void BaseEntity::StopLayeredAnimation(int slot)
 {
@@ -337,12 +336,12 @@ void BaseEntity::StopLayeredAnimation(int slot)
 		return;
 	animC->StopLayeredAnimation(slot);
 }
-bool BaseEntity::PlayAnimation(const std::string &animation,pragma::FPlayAnim flags)
+bool BaseEntity::PlayAnimation(const std::string &animation, pragma::FPlayAnim flags)
 {
-	auto *animC = static_cast<pragma::BaseAnimatedComponent*>(AddNetworkedComponent("animated").get());
+	auto *animC = static_cast<pragma::BaseAnimatedComponent *>(AddNetworkedComponent("animated").get());
 	if(animC == nullptr)
 		return false;
-	return animC->PlayAnimation(animation,flags);
+	return animC->PlayAnimation(animation, flags);
 }
 int32_t BaseEntity::GetAnimation() const
 {
@@ -357,7 +356,7 @@ Activity BaseEntity::GetActivity() const
 
 void BaseEntity::TakeDamage(DamageInfo &info)
 {
-	auto *dmgC = static_cast<pragma::DamageableComponent*>(AddNetworkedComponent("damageable").get());
+	auto *dmgC = static_cast<pragma::DamageableComponent *>(AddNetworkedComponent("damageable").get());
 	if(dmgC == nullptr)
 		return;
 	dmgC->TakeDamage(info);

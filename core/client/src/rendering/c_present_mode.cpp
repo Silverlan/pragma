@@ -11,6 +11,4 @@
 
 extern DLLCLIENT CEngine *c_engine;
 
-REGISTER_CONVAR_CALLBACK_CL(cl_render_present_mode,[](NetworkState *state,ConVar*,int32_t,int32_t val) {
-	c_engine->GetWindow().SetPresentMode(static_cast<prosper::PresentModeKHR>(val));
-});
+REGISTER_CONVAR_CALLBACK_CL(cl_render_present_mode, [](NetworkState *state, ConVar *, int32_t, int32_t val) { c_engine->GetWindow().SetPresentMode(static_cast<prosper::PresentModeKHR>(val)); });

@@ -9,13 +9,6 @@
 
 #include "pragma/serverdefinitions.h"
 
-enum class NPCSTATE : int
-{
-	NONE,
-	IDLE,
-	ALERT,
-	COMBAT,
-	SCRIPT
-};
+enum class NPCSTATE : int { NONE, IDLE, ALERT, COMBAT, SCRIPT };
 
 #endif

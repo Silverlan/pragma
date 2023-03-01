@@ -13,10 +13,8 @@
 #include "pragma/lua/ldefinitions.h"
 #include "pragma/lua/luafunction.h"
 
-class DLLNETWORK LuaCallback
-	: public TCallback,public LuaFunction
-{
-public:
+class DLLNETWORK LuaCallback : public TCallback, public LuaFunction {
+  public:
 	LuaCallback(const luabind::object &o);
 	virtual ~LuaCallback() override;
 };

@@ -17,44 +17,28 @@
 #include <sharedutils/util_pragma.hpp>
 #include <string>
 
-namespace pragma
-{
+namespace pragma {
 	class BaseEnvLightSpotComponent;
 	class BaseEnvLightPointComponent;
 	class BaseEnvLightDirectionalComponent;
-	class DLLNETWORK BaseEnvLightComponent
-		: public BaseEntityComponent
-	{
-	public:
+	class DLLNETWORK BaseEnvLightComponent : public BaseEntityComponent {
+	  public:
 		static ComponentEventId EVENT_CALC_LIGHT_DIRECTION_TO_POINT;
 		static ComponentEventId EVENT_CALC_LIGHT_INTENSITY_AT_POINT;
-		enum class SpawnFlag : uint32_t
-		{
-			DontCastShadows = 512
-		};
-		enum class LightFlags : uint32_t
-		{
-			None = 0u,
-			BakedLightSource = 1u
-		};
-		enum class ShadowType : uint8_t
-		{
-			None = 0,
-			StaticOnly = 1,
-			Full = StaticOnly | 2
-		};
-		enum class LightIntensityType : uint8_t
-		{
+		enum class SpawnFlag : uint32_t { DontCastShadows = 512 };
+		enum class LightFlags : uint32_t { None = 0u, BakedLightSource = 1u };
+		enum class ShadowType : uint8_t { None = 0, StaticOnly = 1, Full = StaticOnly | 2 };
+		enum class LightIntensityType : uint8_t {
 			Candela = 0,
 			Lumen,
 			Lux // Lumen per square-meter; Directional lights only
 		};
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		static std::string LightIntensityTypeToString(LightIntensityType type);
-		static Candela GetLightIntensityCandela(float intensity,LightIntensityType type,std::optional<float> outerConeAngle={});
-		static Lumen GetLightIntensityLumen(float intensity,LightIntensityType type,std::optional<float> outerConeAngle={});
-		static float CalcDistanceFalloff(const Vector3 &lightPos,const Vector3 &point,std::optional<float> radius={});
+		static Candela GetLightIntensityCandela(float intensity, LightIntensityType type, std::optional<float> outerConeAngle = {});
+		static Lumen GetLightIntensityLumen(float intensity, LightIntensityType type, std::optional<float> outerConeAngle = {});
+		static float CalcDistanceFalloff(const Vector3 &lightPos, const Vector3 &point, std::optional<float> radius = {});
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
@@ -75,7 +59,7 @@ namespace pragma
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 
 		virtual void SetLightIntensityType(LightIntensityType type);
-		virtual void SetLightIntensity(float intensity,LightIntensityType type);
+		virtual void SetLightIntensity(float intensity, LightIntensityType type);
 		LightIntensityType GetLightIntensityType() const;
 		void SetLightIntensity(float intensity);
 		float GetLightIntensity() const;
@@ -84,8 +68,8 @@ namespace pragma
 
 		float CalcLightIntensityAtPoint(const Vector3 &pos) const;
 		Vector3 CalcLightDirectionToPoint(const Vector3 &pos) const;
-	protected:
-		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
+	  protected:
+		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 		virtual void InitializeLight(BaseEntityComponent &component);
 		ComponentHandle<BaseEntityComponent> m_hLight = {};
 
@@ -97,21 +81,17 @@ namespace pragma
 		float m_lightIntensity = 0.f;
 		pragma::NetEventId m_netEvSetShadowType = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvSetFalloffExponent = pragma::INVALID_NET_EVENT;
-	public:
+	  public:
 		ShadowType GetShadowType() const;
 		virtual void SetShadowType(ShadowType type);
 	};
-	struct DLLNETWORK CECalcLightDirectionToPoint
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CECalcLightDirectionToPoint : public ComponentEvent {
 		CECalcLightDirectionToPoint(const Vector3 &pos);
 		virtual void PushArguments(lua_State *l) override;
 		const Vector3 &pos;
 		Vector3 direction = uvec::FORWARD;
 	};
-	struct DLLNETWORK CECalcLightIntensityAtPoint
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CECalcLightIntensityAtPoint : public ComponentEvent {
 		CECalcLightIntensityAtPoint(const Vector3 &pos);
 		virtual void PushArguments(lua_State *l) override;
 		const Vector3 &pos;

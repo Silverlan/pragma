@@ -9,11 +9,9 @@
 
 #include "pragma/networkdefinitions.h"
 
-namespace Lua
-{
+namespace Lua {
 	class Interface;
-	namespace ai
-	{
+	namespace ai {
 		DLLNETWORK void register_library(Lua::Interface &lua);
 	};
 };

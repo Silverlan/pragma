@@ -5,7 +5,6 @@
  * Copyright (c) 2021 Silverlan
  */
 
-
 #ifdef _MSC_VER
 #ifndef __LUA_AUTO_DOC_VALIDATOR_HPP__
 #define __LUA_AUTO_DOC_VALIDATOR_HPP__
@@ -13,20 +12,18 @@
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/lad/lad.hpp"
 
-namespace pragma::lua
-{
-	class DocValidator
-	{
-	public:
-	private:
+namespace pragma::lua {
+	class DocValidator {
+	  public:
+	  private:
 		template<class TItem>
-			static const TItem *FindItem(const std::string &name,const std::vector<TItem>&(pragma::doc::Collection::*fPt)() const)
+		static const TItem *FindItem(const std::string &name, const std::vector<TItem> &(pragma::doc::Collection::*fPt)() const)
 		{
 			return nullptr;
 		}
 		template<class TItem>
-			static const TItem *FindItem(const pragma::doc::Collection &collection,const std::string &name,const std::vector<TItem>&(pragma::doc::Collection::*fPt)() const);
-		void GetClassInfo(lua_State *L,luabind::detail::class_rep *crep);
+		static const TItem *FindItem(const pragma::doc::Collection &collection, const std::string &name, const std::vector<TItem> &(pragma::doc::Collection::*fPt)() const);
+		void GetClassInfo(lua_State *L, luabind::detail::class_rep *crep);
 		void FindFunction(const std::string &name) {}
 		void WriteToLog(const std::stringstream &log) {}
 		void ValidateCollection(const pragma::doc::Collection &collection);
@@ -35,17 +32,14 @@ namespace pragma::lua
 };
 
 template<class TItem>
-    const TItem *pragma::lua::DocValidator::FindItem(const pragma::doc::Collection &collection,const std::string &name,const std::vector<TItem>&(pragma::doc::Collection::*fPt)() const)
+const TItem *pragma::lua::DocValidator::FindItem(const pragma::doc::Collection &collection, const std::string &name, const std::vector<TItem> &(pragma::doc::Collection::*fPt)() const)
 {
 	auto &items = (collection.*fPt)();
-	auto it = std::find_if(items.begin(),items.end(),[&name](const TItem &el) {
-		return el.GetName() == name;
-	});
+	auto it = std::find_if(items.begin(), items.end(), [&name](const TItem &el) { return el.GetName() == name; });
 	if(it != items.end())
 		return &*it;
-	for(auto &child : collection.GetChildren())
-	{
-		auto *pItem = find_item(*child,name,fPt);
+	for(auto &child : collection.GetChildren()) {
+		auto *pItem = find_item(*child, name, fPt);
 		if(pItem)
 			return pItem;
 	}

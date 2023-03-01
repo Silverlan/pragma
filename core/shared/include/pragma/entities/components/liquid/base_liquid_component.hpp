@@ -14,18 +14,14 @@
 #include "pragma/basewaterobject.hpp"
 
 struct BulletInfo;
-namespace pragma
-{
+namespace pragma {
 	class BaseSurfaceComponent;
 	class BaseLiquidSurfaceSimulationComponent;
-	class DLLNETWORK BaseFuncLiquidComponent
-		: public BaseEntityComponent
-	{
-	public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+	class DLLNETWORK BaseFuncLiquidComponent : public BaseEntityComponent {
+	  public:
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		using BaseEntityComponent::BaseEntityComponent;
-		struct LocalRayResult
-		{
+		struct LocalRayResult {
 			float fraction;
 			float friction;
 			Vector3 hitNormalLocal;
@@ -33,10 +29,10 @@ namespace pragma
 
 		virtual void Initialize() override;
 
-		bool CalcLineSurfaceIntersection(const Vector3 &lineOrigin,const Vector3 &lineDir,double *outT=nullptr,double *outU=nullptr,double *outV=nullptr,bool bCull=false) const;
-		virtual bool OnRayResultCallback(CollisionMask rayCollisionGroup,CollisionMask rayCollisionMask);
+		bool CalcLineSurfaceIntersection(const Vector3 &lineOrigin, const Vector3 &lineDir, double *outT = nullptr, double *outU = nullptr, double *outV = nullptr, bool bCull = false) const;
+		virtual bool OnRayResultCallback(CollisionMask rayCollisionGroup, CollisionMask rayCollisionMask);
 		virtual void OnEntitySpawn() override;
-	protected:
+	  protected:
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void ClearWaterSurface();
 		void InitializeWaterSurface();

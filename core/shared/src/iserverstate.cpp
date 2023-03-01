@@ -21,6 +21,5 @@ void pragma::IServerState::Initialize(util::Library &lib)
 	clear_server_state = lib.FindSymbolAddress<decltype(clear_server_state)>("pr_sv_clear_server_state");
 	handle_local_host_player_server_packet = lib.FindSymbolAddress<decltype(handle_local_host_player_server_packet)>("pr_sv_handle_local_host_player_server_packet");
 	connect_local_host_player_client = lib.FindSymbolAddress<decltype(connect_local_host_player_client)>("pr_sv_connect_local_host_player_client");
-	m_bValid = start_server && close_server && is_server_running && get_server_steam_id && get_server_state &&
-		clear_server_state && handle_local_host_player_server_packet && connect_local_host_player_client;
+	m_bValid = start_server && close_server && is_server_running && get_server_steam_id && get_server_state && clear_server_state && handle_local_host_player_server_packet && connect_local_host_player_client;
 }

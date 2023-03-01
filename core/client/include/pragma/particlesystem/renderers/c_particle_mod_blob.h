@@ -15,27 +15,27 @@
 
 #define ENABLE_BLOB_DEPTH_TEST 0
 
-namespace Shader {class ParticleBlobShadow;};
-namespace pragma {class CLightComponent;};
-class DLLCLIENT CParticleRendererBlob
-	: public CParticleRenderer
-{
-private:
+namespace Shader {
+	class ParticleBlobShadow;
+};
+namespace pragma {
+	class CLightComponent;
+};
+class DLLCLIENT CParticleRendererBlob : public CParticleRenderer {
+  private:
 	static bool s_bShowNeighborLinks;
 	static std::shared_ptr<prosper::IDescriptorSetGroup> s_dsParticles;
 	static std::size_t s_activeBlobRendererCount;
 	static pragma::ShaderParticleBlob *s_shader;
 	static Shader::ParticleBlobShadow *s_shadowShader;
-protected:
+  protected:
 	static const auto INVALID_BLOB_INDEX = std::numeric_limits<uint16_t>::max();
-	struct Link
-	{
+	struct Link {
 		uint32_t targetParticleIdx = INVALID_BLOB_INDEX;
 		float distSqr = std::numeric_limits<float>::max();
 	};
-	struct LinkContainer
-	{
-		std::array<Link,pragma::ShaderParticleBlob::MAX_BLOB_NEIGHBORS> links; // First slot is reserved for own particle index
+	struct LinkContainer {
+		std::array<Link, pragma::ShaderParticleBlob::MAX_BLOB_NEIGHBORS> links; // First slot is reserved for own particle index
 		uint32_t nextLinkId = 1;
 	};
 	std::vector<LinkContainer> m_particleLinks;
@@ -44,34 +44,33 @@ protected:
 	float m_refractionIndexRatio = 1.f;
 	pragma::ShaderParticleBlob::DebugMode m_debugMode = pragma::ShaderParticleBlob::DebugMode::None;
 	uint64_t m_lastFrame = std::numeric_limits<uint64_t>::max();
-	std::vector<std::array<uint16_t,pragma::ShaderParticleBlob::MAX_BLOB_NEIGHBORS>> m_adjacentParticleIds;
+	std::vector<std::array<uint16_t, pragma::ShaderParticleBlob::MAX_BLOB_NEIGHBORS>> m_adjacentParticleIds;
 	std::shared_ptr<prosper::IBuffer> m_adjacentBlobBuffer = nullptr;
 	//Vulkan::RenderTarget m_rtTransparent = nullptr; // prosper TODO
 	void SortParticleLinks();
-	void UpdateAdjacentParticles(prosper::ICommandBuffer &cmd,prosper::IBuffer &blobIndexBuffer);
+	void UpdateAdjacentParticles(prosper::ICommandBuffer &cmd, prosper::IBuffer &blobIndexBuffer);
 
 	// Debug
-	struct DebugInfo
-	{
-		std::array<std::shared_ptr<DebugRenderer::BaseObject>,pragma::ShaderParticleBlob::MAX_BLOB_NEIGHBORS -1> renderObjects;
+	struct DebugInfo {
+		std::array<std::shared_ptr<DebugRenderer::BaseObject>, pragma::ShaderParticleBlob::MAX_BLOB_NEIGHBORS - 1> renderObjects;
 		bool hide = false;
 	};
 	std::vector<DebugInfo> m_dbgNeighborLinks;
 	void ShowDebugNeighborLinks(bool b);
 	void UpdateDebugNeighborLinks();
-public:
+  public:
 	static void SetShowNeighborLinks(bool b);
 
-	CParticleRendererBlob()=default;
+	CParticleRendererBlob() = default;
 	virtual ~CParticleRendererBlob() override;
-	virtual void RecordRender(prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::ParticleRenderFlags renderFlags) override;
-	virtual void RecordRenderShadow(prosper::ICommandBuffer &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent &light,uint32_t layerId=0) override;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	virtual void RecordRender(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::ParticleRenderFlags renderFlags) override;
+	virtual void RecordRenderShadow(prosper::ICommandBuffer &drawCmd, pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, pragma::CLightComponent &light, uint32_t layerId = 0) override;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values);
 	virtual void OnParticleSystemStarted() override;
 	virtual void OnParticleDestroyed(CParticle &particle) override;
 	virtual void OnParticleSystemStopped() override;
 	virtual void PreRender(prosper::ICommandBuffer &cmd) override;
-	virtual bool RequiresDepthPass() const override {return true;}
+	virtual bool RequiresDepthPass() const override { return true; }
 	virtual pragma::ShaderParticleBase *GetShader() const override;
 };
 

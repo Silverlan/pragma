@@ -10,22 +10,17 @@
 #include "pragma/entities/s_baseentity.h"
 #include "pragma/basenpcdragonworm.h"
 
-namespace pragma
-{
-	class DLLSERVER SDragonWormComponent
-		: public BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SDragonWormComponent : public BaseEntityComponent {
+	  public:
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 	};
 };
 
-class DLLSERVER NPCDragonWorm
-	: public SBaseEntity
-{
-public:
+class DLLSERVER NPCDragonWorm : public SBaseEntity {
+  public:
 };
 
 #endif

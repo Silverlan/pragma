@@ -11,12 +11,10 @@
 #include "pragma/physics/raytraces.h"
 
 class BaseEntity;
-namespace pragma
-{
+namespace pragma {
 	class BaseTransformComponent;
 };
-namespace util
-{
+namespace util {
 	DLLNETWORK TraceData get_entity_trace_data(BaseEntity &ent);
 	DLLNETWORK TraceData get_entity_trace_data(::pragma::BaseTransformComponent &component);
 };

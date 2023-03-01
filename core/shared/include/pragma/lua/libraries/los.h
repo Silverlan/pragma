@@ -11,10 +11,8 @@
 #include "pragma/networkdefinitions.h"
 #include <pragma/lua/luaapi.h>
 
-namespace Lua
-{
-	namespace os
-	{
+namespace Lua {
+	namespace os {
 		DLLNETWORK int64_t time_since_epoch(lua_State *l);
 	};
 };

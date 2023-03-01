@@ -12,26 +12,20 @@
 #include "pragma/entities/environment/env_quake.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLSERVER SQuakeComponent final
-		: public BaseEnvQuakeComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SQuakeComponent final : public BaseEnvQuakeComponent, public SBaseNetComponent {
+	  public:
 		SQuakeComponent(BaseEntity &ent) : BaseEnvQuakeComponent(ent) {}
 		virtual void Initialize() override;
 
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLSERVER EnvQuake
-	: public SBaseEntity
-{
-public:
+class DLLSERVER EnvQuake : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

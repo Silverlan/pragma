@@ -18,12 +18,9 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(prop_physics,CPropPhysics);
+LINK_ENTITY_TO_CLASS(prop_physics, CPropPhysics);
 
-void CPropPhysicsComponent::Initialize()
-{
-	BasePropPhysicsComponent::Initialize();
-}
+void CPropPhysicsComponent::Initialize() { BasePropPhysicsComponent::Initialize(); }
 
 void CPropPhysicsComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
@@ -41,7 +38,7 @@ void CPropPhysicsComponent::OnEntityComponentAdded(BaseEntityComponent &componen
 	}*/
 }
 
-void CPropPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CPropPhysicsComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 //////////////////
 
@@ -50,4 +47,3 @@ void CPropPhysics::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CPropPhysicsComponent>();
 }
-

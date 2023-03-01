@@ -58,6 +58,7 @@ macro(link_generic_module_libraries)
 	link_external_library(datasystem)
 	link_external_library(ishared)
 	link_external_library(util_udm)
+	link_external_library(spdlog)
 
 	add_include_dir(boost)
 endmacro(link_generic_module_libraries)

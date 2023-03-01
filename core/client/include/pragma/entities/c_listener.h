@@ -11,13 +11,12 @@
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/lua/c_listener_handle.hpp"
 
-namespace al {class IListener;};
-namespace pragma
-{
-	class DLLCLIENT CListenerComponent final
-		: public BaseEntityComponent
-	{
-	public:
+namespace al {
+	class IListener;
+};
+namespace pragma {
+	class DLLCLIENT CListenerComponent final : public BaseEntityComponent {
+	  public:
 		CListenerComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		CListenerComponent();
 		virtual void Initialize() override;
@@ -25,15 +24,13 @@ namespace pragma
 		float GetGain();
 		void SetGain(float gain);
 		virtual void InitializeLuaObject(lua_State *l) override;
-	private:
+	  private:
 		al::IListener *m_listener = nullptr;
 	};
 };
 
-class DLLCLIENT CListener
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CListener : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

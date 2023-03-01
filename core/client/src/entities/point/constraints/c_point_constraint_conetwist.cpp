@@ -15,7 +15,7 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(point_constraint_conetwist,CPointConstraintConeTwist);
+LINK_ENTITY_TO_CLASS(point_constraint_conetwist, CPointConstraintConeTwist);
 
 void CPointConstraintConeTwistComponent::ReceiveData(NetPacket &packet)
 {
@@ -30,7 +30,7 @@ void CPointConstraintConeTwistComponent::ReceiveData(NetPacket &packet)
 	// m_kvBiasFactor = packet->Read<float>();
 	m_kvRelaxationFactor = packet->Read<float>();
 }
-void CPointConstraintConeTwistComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CPointConstraintConeTwistComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CPointConstraintConeTwist::Initialize()
 {

@@ -23,9 +23,9 @@ void BaseEnvSoundDspComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(OnSetKeyValue(kvData.key,kvData.value) == true)
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(OnSetKeyValue(kvData.key, kvData.value) == true)
 			return util::EventReply::Handled;
 		return util::EventReply::Unhandled;
 	});
@@ -35,15 +35,15 @@ void BaseEnvSoundDspComponent::Initialize()
 	ent.AddComponent("toggle");
 }
 
-bool BaseEnvSoundDspComponent::OnSetKeyValue(const std::string &key,const std::string &val)
+bool BaseEnvSoundDspComponent::OnSetKeyValue(const std::string &key, const std::string &val)
 {
-	if(ustring::compare<std::string>(key,"dsp",false))
+	if(ustring::compare<std::string>(key, "dsp", false))
 		m_kvDsp = val;
-	else if(ustring::compare<std::string>(key,"inner_radius",false))
+	else if(ustring::compare<std::string>(key, "inner_radius", false))
 		m_kvInnerRadius = util::to_float(val);
-	else if(ustring::compare<std::string>(key,"outer_radius",false))
+	else if(ustring::compare<std::string>(key, "outer_radius", false))
 		m_kvOuterRadius = util::to_float(val);
-	else if(ustring::compare<std::string>(key,"intensity",false))
+	else if(ustring::compare<std::string>(key, "intensity", false))
 		m_kvDspGain = util::to_float(val);
 	else
 		return false;
@@ -57,14 +57,14 @@ BaseEnvSoundDspEcho::BaseEnvSoundDspEcho() {}
 BaseEnvSoundDspEqualizer::BaseEnvSoundDspEqualizer() {}
 BaseEnvSoundDspFlanger::BaseEnvSoundDspFlanger() {}
 
-void BaseEnvSoundDspComponent::SetDSPEffect(const std::string &identifier) {m_kvDsp = identifier;}
-void BaseEnvSoundDspComponent::SetInnerRadius(float radius) {m_kvInnerRadius = radius;}
-void BaseEnvSoundDspComponent::SetOuterRadius(float radius) {m_kvOuterRadius = radius;}
+void BaseEnvSoundDspComponent::SetDSPEffect(const std::string &identifier) { m_kvDsp = identifier; }
+void BaseEnvSoundDspComponent::SetInnerRadius(float radius) { m_kvInnerRadius = radius; }
+void BaseEnvSoundDspComponent::SetOuterRadius(float radius) { m_kvOuterRadius = radius; }
 
-float BaseEnvSoundDspComponent::GetGain() const {return m_kvDspGain;}
-void BaseEnvSoundDspComponent::SetGain(float gain) {m_kvDspGain = gain;}
+float BaseEnvSoundDspComponent::GetGain() const { return m_kvDspGain; }
+void BaseEnvSoundDspComponent::SetGain(float gain) { m_kvDspGain = gain; }
 
-bool BaseEnvSoundDspComponent::Input(const std::string &input,BaseEntity *activator,BaseEntity *caller,std::string data)
+bool BaseEnvSoundDspComponent::Input(const std::string &input, BaseEntity *activator, BaseEntity *caller, std::string data)
 {
 	if(input == "setgain")
 		SetGain(ustring::to_int(data));

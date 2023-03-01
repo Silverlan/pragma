@@ -13,9 +13,7 @@
 #include <pragma/lua/luaapi.h>
 #include <vector>
 
-struct DLLNETWORK LuaComponentEvent
-	: public pragma::ComponentEvent
-{
+struct DLLNETWORK LuaComponentEvent : public pragma::ComponentEvent {
 	std::vector<luabind::object> arguments;
 	virtual void PushArguments(lua_State *l) override;
 };

@@ -12,33 +12,26 @@
 #include <string>
 #include <vector>
 
-#pragma pack(push,1)
-struct DLLNETWORK FlexController
-{
+#pragma pack(push, 1)
+struct DLLNETWORK FlexController {
 	std::string name = {};
 	float min = 0.f;
 	float max = 0.f;
 
-	bool operator==(const FlexController &other) const
-	{
-		return name == other.name && umath::abs(min -other.min) < 0.001f && umath::abs(max -other.max) < 0.001f;
-	}
-	bool operator!=(const FlexController &other) const {return !operator==(other);}
+	bool operator==(const FlexController &other) const { return name == other.name && umath::abs(min - other.min) < 0.001f && umath::abs(max - other.max) < 0.001f; }
+	bool operator!=(const FlexController &other) const { return !operator==(other); }
 };
 #pragma pack(pop)
 
 class VertexAnimation;
 class MeshVertexAnimation;
 class MeshVertexFrame;
-class DLLNETWORK Flex
-{
-public:
-	Flex(const std::string &name="");
-	Flex(const Flex &other)=default;
-	struct DLLNETWORK Operation
-	{
-		enum class Type : uint32_t
-		{
+class DLLNETWORK Flex {
+  public:
+	Flex(const std::string &name = "");
+	Flex(const Flex &other) = default;
+	struct DLLNETWORK Operation {
+		enum class Type : uint32_t {
 			None = 0u,
 			Const,
 			Fetch,
@@ -64,20 +57,14 @@ public:
 
 			Count
 		};
-		enum class ValueType : uint8_t
-		{
-			None = 0,
-			Value,
-			Index
-		};
+		enum class ValueType : uint8_t { None = 0, Value, Index };
 		static ValueType GetOperationValueType(Type type);
 
-		Operation()=default;
-		Operation(Type type,float value);
-		Operation(Type type,int32_t index);
+		Operation() = default;
+		Operation(Type type, float value);
+		Operation(Type type, int32_t index);
 		Type type = Type::None;
-		union 
-		{
+		union {
 			int32_t index;
 			float value;
 		} d;
@@ -87,8 +74,7 @@ public:
 			if(type != other.type)
 				return false;
 			auto valueType = GetOperationValueType(type);
-			switch(valueType)
-			{
+			switch(valueType) {
 			case ValueType::Index:
 				return d.index == other.d.index;
 			case ValueType::Value:
@@ -96,9 +82,9 @@ public:
 			}
 			return true;
 		}
-		bool operator!=(const Operation &other) const {return !operator==(other);}
+		bool operator!=(const Operation &other) const { return !operator==(other); }
 	};
-	const std::string &GetName() const {return const_cast<Flex*>(this)->GetName();}
+	const std::string &GetName() const { return const_cast<Flex *>(this)->GetName(); }
 	std::string &GetName();
 	void SetName(const std::string &name);
 	const std::vector<Operation> &GetOperations() const;
@@ -106,14 +92,11 @@ public:
 
 	VertexAnimation *GetVertexAnimation() const;
 	uint32_t GetFrameIndex() const;
-	void SetVertexAnimation(VertexAnimation &anim,uint32_t frameIndex=0);
+	void SetVertexAnimation(VertexAnimation &anim, uint32_t frameIndex = 0);
 
-	bool operator==(const Flex &other) const
-	{
-		return m_operations == other.m_operations && m_name == other.m_name && m_frameIndex == other.m_frameIndex;
-	}
-	bool operator!=(const Flex &other) const {return !operator==(other);}
-private:
+	bool operator==(const Flex &other) const { return m_operations == other.m_operations && m_name == other.m_name && m_frameIndex == other.m_frameIndex; }
+	bool operator!=(const Flex &other) const { return !operator==(other); }
+  private:
 	std::vector<Operation> m_operations;
 	std::string m_name;
 	mutable std::weak_ptr<VertexAnimation> m_vertexAnim = {};

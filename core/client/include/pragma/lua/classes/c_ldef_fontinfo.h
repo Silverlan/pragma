@@ -9,5 +9,5 @@
 #define __C_LDEF_FONTINFO_H__
 #include <pragma/lua/ldefinitions.h>
 
-lua_registercheck(Font,FontInfo);
+lua_registercheck(Font, FontInfo);
 #endif

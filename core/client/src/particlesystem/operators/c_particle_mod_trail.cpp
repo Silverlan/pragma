@@ -14,29 +14,28 @@
 #include <sharedutils/util.h>
 #include <algorithm>
 
-REGISTER_PARTICLE_OPERATOR(trail,CParticleOperatorTrail);
+REGISTER_PARTICLE_OPERATOR(trail, CParticleOperatorTrail);
 
-void CParticleOperatorTrail::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleOperatorTrail::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleOperator::Initialize(pSystem,values);
-	for(auto &it : values)
-	{
+	CParticleOperator::Initialize(pSystem, values);
+	for(auto &it : values) {
 		auto key = it.first;
 		ustring::to_lower(key);
 		if(key == "travel_time")
 			m_travelTime = util::to_float(it.second);
 	}
-	m_particleNodes.resize(pSystem.GetMaxParticleCount(),0);
+	m_particleNodes.resize(pSystem.GetMaxParticleCount(), 0);
 }
-void CParticleOperatorTrail::Simulate(CParticle &particle,double,float strength)
+void CParticleOperatorTrail::Simulate(CParticle &particle, double, float strength)
 {
 	auto vel = particle.GetVelocity();
 	auto nodeIdx = particle.GetIndex();
 	auto curNode = m_particleNodes[nodeIdx];
-	auto nextNode = curNode +1;
+	auto nextNode = curNode + 1;
 	auto posSrc = GetParticleSystem().GetNodePosition(curNode);
 	auto posDst = GetParticleSystem().GetNodePosition(nextNode);
-	auto dir = posDst -posSrc;
+	auto dir = posDst - posSrc;
 	uvec::normalize(&dir);
 
 	//vel += dir *m_travelTime *static_cast<float>(tDelta);
@@ -44,25 +43,17 @@ void CParticleOperatorTrail::Simulate(CParticle &particle,double,float strength)
 	{
 		auto &p0 = posSrc;
 		auto &p1 = posDst;
-		auto p2 = GetParticleSystem().GetNodePosition(nextNode +1);
-		auto p3 = GetParticleSystem().GetNodePosition(nextNode +2);
+		auto p2 = GetParticleSystem().GetNodePosition(nextNode + 1);
+		auto p3 = GetParticleSystem().GetNodePosition(nextNode + 2);
 
 		auto curveTightness = 1.f;
-		auto s = particle.GetTimeAlive() /m_travelTime;
-		auto t1 = curveTightness *(p2 -p0);
-		auto t2 = curveTightness *(p3 -p1);
+		auto s = particle.GetTimeAlive() / m_travelTime;
+		auto t1 = curveTightness * (p2 - p0);
+		auto t2 = curveTightness * (p3 - p1);
 
-		auto hTransform = Vector4(
-			2.f *powf(s,3.f) -3.f *powf(s,2.f) +1.f,
-			-2.f *powf(s,3.f) +3.f *powf(s,2.f),
-			powf(s,3.f) -2.f *powf(s,2.f) +s,
-			powf(s,3.f) -powf(s,2.f)
-		);
-		auto p = Vector3(
-			hTransform[0] *p1.x +hTransform[1] *p2.x +hTransform[2] *t1.x +hTransform[3] *t2.x,
-			hTransform[0] *p1.y +hTransform[1] *p2.y +hTransform[2] *t1.y +hTransform[3] *t2.y,
-			hTransform[0] *p1.z +hTransform[1] *p2.z +hTransform[2] *t1.z +hTransform[3] *t2.z
-		);
+		auto hTransform = Vector4(2.f * powf(s, 3.f) - 3.f * powf(s, 2.f) + 1.f, -2.f * powf(s, 3.f) + 3.f * powf(s, 2.f), powf(s, 3.f) - 2.f * powf(s, 2.f) + s, powf(s, 3.f) - powf(s, 2.f));
+		auto p = Vector3(hTransform[0] * p1.x + hTransform[1] * p2.x + hTransform[2] * t1.x + hTransform[3] * t2.x, hTransform[0] * p1.y + hTransform[1] * p2.y + hTransform[2] * t1.y + hTransform[3] * t2.y,
+		  hTransform[0] * p1.z + hTransform[1] * p2.z + hTransform[2] * t1.z + hTransform[3] * t2.z);
 		/*local P1 = points[i]
 		local P0 = (i > 1) and points[i -1] or P1
 		local P2 = points[i +1]

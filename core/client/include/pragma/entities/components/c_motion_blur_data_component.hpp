@@ -14,45 +14,39 @@
 #include <mathutil/transform.hpp>
 #include <unordered_set>
 
-namespace pragma
-{
+namespace pragma {
 	class ShaderVelocityBuffer;
-#pragma pack(push,1)
-	struct DLLCLIENT MotionBlurCameraData
-	{
+#pragma pack(push, 1)
+	struct DLLCLIENT MotionBlurCameraData {
 		Vector4 linearCameraVelocity;
 		Vector4 angularCameraVelocity;
 	};
 #pragma pack(pop)
 
-	struct DLLCLIENT MotionBlurTemporalData
-	{
-		struct PoseData
-		{
+	struct DLLCLIENT MotionBlurTemporalData {
+		struct PoseData {
 			Mat4 matrix;
 			umath::Transform pose;
 			std::shared_ptr<prosper::IBuffer> boneBuffer;
 			std::shared_ptr<prosper::IDescriptorSetGroup> boneDsg;
 		};
-		std::unordered_map<const BaseEntity*,PoseData> prevModelMatrices;
-		std::unordered_map<const BaseEntity*,PoseData> curModelMatrices;
+		std::unordered_map<const BaseEntity *, PoseData> prevModelMatrices;
+		std::unordered_map<const BaseEntity *, PoseData> curModelMatrices;
 		MotionBlurCameraData cameraData;
 		double lastTick = 0.0;
 	};
 
 	DLLCLIENT pragma::ShaderVelocityBuffer *get_velocity_buffer_shader();
-	class DLLCLIENT CMotionBlurDataComponent final
-		: public BaseEntityComponent
-	{
-	public:
+	class DLLCLIENT CMotionBlurDataComponent final : public BaseEntityComponent {
+	  public:
 		CMotionBlurDataComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 
 		void UpdateEntityPoses();
-		const MotionBlurTemporalData &GetMotionBlurData() const {return m_motionBlurData;}
-		size_t GetLastUpdateIndex() const {return m_lastUpdateIndex;}
-	private:
+		const MotionBlurTemporalData &GetMotionBlurData() const { return m_motionBlurData; }
+		size_t GetLastUpdateIndex() const { return m_lastUpdateIndex; }
+	  private:
 		MotionBlurTemporalData m_motionBlurData {};
 		size_t m_lastUpdateIndex = 0;
 	};

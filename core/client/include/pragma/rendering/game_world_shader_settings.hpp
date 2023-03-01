@@ -12,36 +12,20 @@
 #include "pragma/clientdefinitions.h"
 #include <cinttypes>
 
-namespace pragma
-{
-	namespace rendering
-	{
-		struct DLLCLIENT GameWorldShaderSettings
-		{
-			enum class ShadowQuality : uint32_t
-			{
-				VeryLow = 0,
-				Low,
-				Medium,
-				High,
-				VeryHigh
-			};
+namespace pragma {
+	namespace rendering {
+		struct DLLCLIENT GameWorldShaderSettings {
+			enum class ShadowQuality : uint32_t { VeryLow = 0, Low, Medium, High, VeryHigh };
 			// TODO: Enable these once C++20 is available
 			//bool operator==(const GameWorldShaderSettings&) const=default;
 			//bool operator!=(const GameWorldShaderSettings&) const=default;
 			bool operator==(const GameWorldShaderSettings &other) const
 			{
-				return other.shadowQuality == shadowQuality &&
-					other.ssaoEnabled == ssaoEnabled &&
-					other.bloomEnabled == bloomEnabled &&
-					other.fxaaEnabled == fxaaEnabled &&
-					other.debugModeEnabled == debugModeEnabled &&
-					other.iblEnabled == iblEnabled &&
-					other.dynamicLightingEnabled == dynamicLightingEnabled &&
-					other.dynamicShadowsEnabled == dynamicShadowsEnabled;
+				return other.shadowQuality == shadowQuality && other.ssaoEnabled == ssaoEnabled && other.bloomEnabled == bloomEnabled && other.fxaaEnabled == fxaaEnabled && other.debugModeEnabled == debugModeEnabled && other.iblEnabled == iblEnabled
+				  && other.dynamicLightingEnabled == dynamicLightingEnabled && other.dynamicShadowsEnabled == dynamicShadowsEnabled;
 				static_assert(sizeof(GameWorldShaderSettings) == 12);
 			}
-			bool operator!=(const GameWorldShaderSettings &other) const {return !operator==(other);}
+			bool operator!=(const GameWorldShaderSettings &other) const { return !operator==(other); }
 			ShadowQuality shadowQuality = ShadowQuality::Medium;
 			bool ssaoEnabled = true;
 			bool bloomEnabled = true;

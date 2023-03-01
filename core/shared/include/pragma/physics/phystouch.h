@@ -11,9 +11,8 @@
 #include <sharedutils/functioncallback.h>
 #include "pragma/entities/baseentity_handle.h"
 class BaseEntity;
-struct DLLNETWORK PhysTouch
-{
-	PhysTouch(BaseEntity *ent,CallbackHandle onRemove);
+struct DLLNETWORK PhysTouch {
+	PhysTouch(BaseEntity *ent, CallbackHandle onRemove);
 	~PhysTouch();
 	EntityHandle entity;
 	CallbackHandle onRemoveCallback;

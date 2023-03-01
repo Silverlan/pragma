@@ -11,17 +11,13 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_name_component.hpp>
 
-namespace pragma
-{
-	class DLLSERVER SNameComponent final
-		: public BaseNameComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SNameComponent final : public BaseNameComponent, public SBaseNetComponent {
+	  public:
 		SNameComponent(BaseEntity &ent) : BaseNameComponent(ent) {}
 		virtual void SetName(std::string name) override;
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };

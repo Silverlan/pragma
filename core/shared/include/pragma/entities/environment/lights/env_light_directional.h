@@ -15,13 +15,10 @@
 #include <sharedutils/property/util_property_color.hpp>
 #include <string>
 
-namespace pragma
-{
-	class DLLNETWORK BaseEnvLightDirectionalComponent
-		: public BaseEntityComponent
-	{
-	public:
-		static Candela CalcIntensityAtPoint(Candela intensity,const Vector3 &point);
+namespace pragma {
+	class DLLNETWORK BaseEnvLightDirectionalComponent : public BaseEntityComponent {
+	  public:
+		static Candela CalcIntensityAtPoint(Candela intensity, const Vector3 &point);
 
 		BaseEnvLightDirectionalComponent(BaseEntity &ent);
 		virtual void Initialize() override;
@@ -30,9 +27,9 @@ namespace pragma
 		const util::PColorProperty &GetAmbientColorProperty() const;
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
-	protected:
-		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
-		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
+	  protected:
+		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		util::PColorProperty m_ambientColor = nullptr;
 		Float m_maxExposure = 8.f;
 		pragma::NetEventId m_netEvSetAmbientColor = pragma::INVALID_NET_EVENT;

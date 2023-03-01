@@ -14,9 +14,9 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(skybox,Skybox);
+LINK_ENTITY_TO_CLASS(skybox, Skybox);
 
-void SSkyboxComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SSkyboxComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SSkyboxComponent::SetSkyAngles(const EulerAngles &ang)
 {
@@ -24,13 +24,10 @@ void SSkyboxComponent::SetSkyAngles(const EulerAngles &ang)
 
 	NetPacket p {};
 	p->Write<EulerAngles>(ang);
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetSkyAngles,p,pragma::networking::Protocol::SlowReliable);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetSkyAngles, p, pragma::networking::Protocol::SlowReliable);
 }
 
-void SSkyboxComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
-{
-	packet->Write<EulerAngles>(m_skyAngles);
-}
+void SSkyboxComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { packet->Write<EulerAngles>(m_skyAngles); }
 
 void Skybox::Initialize()
 {

@@ -11,17 +11,14 @@
 #include <pragma/localization.h>
 #include <wgui/types/witext.h>
 
-WIMainMenuCredits::WIMainMenuCredits()
-	: WIMainMenuBase()
-{}
+WIMainMenuCredits::WIMainMenuCredits() : WIMainMenuBase() {}
 
-WIMainMenuCredits::~WIMainMenuCredits()
-{}
+WIMainMenuCredits::~WIMainMenuCredits() {}
 
 void WIMainMenuCredits::AddCreditsElement(WIBase &el)
 {
 	auto hThis = GetHandle();
-	el.AddCallback("SetSize",FunctionCallback<void>::Create([hThis]() mutable {
+	el.AddCallback("SetSize", FunctionCallback<void>::Create([hThis]() mutable {
 		if(hThis.IsValid() == false)
 			return;
 		hThis.get()->ScheduleUpdate();
@@ -35,25 +32,25 @@ WITexturedRect &WIMainMenuCredits::AddLogo(const std::string &material)
 	el->AddStyleClass("credits_logo");
 	el->SetMaterial(material);
 	el->SizeToTexture();
-	el->SetWidth(180,true);
+	el->SetWidth(180, true);
 	AddGap(10);
 	AddCreditsElement(*el);
 	return *el;
 }
 
-WIText &WIMainMenuCredits::AddHeader(const std::string &header,const std::string &headerStyle)
+WIText &WIMainMenuCredits::AddHeader(const std::string &header, const std::string &headerStyle)
 {
 	if(headerStyle != "header")
 		AddGap(30);
-	auto &pText = AddText(header,headerStyle);
+	auto &pText = AddText(header, headerStyle);
 	if(headerStyle == "header")
 		AddGap(10);
 	return pText;
 }
 
-WIText &WIMainMenuCredits::AddText(const std::string &header,const std::string &styleClass)
+WIText &WIMainMenuCredits::AddText(const std::string &header, const std::string &styleClass)
 {
-	auto *pText = static_cast<WIText*>(WGUI::GetInstance().Create<WIText>(m_creditsContainer.get()));
+	auto *pText = static_cast<WIText *>(WGUI::GetInstance().Create<WIText>(m_creditsContainer.get()));
 	pText->SetText(header);
 	pText->AddStyleClass(styleClass);
 	pText->SetColor(Color::White);
@@ -65,7 +62,7 @@ WIText &WIMainMenuCredits::AddText(const std::string &header,const std::string &
 WIBase &WIMainMenuCredits::AddGap(uint32_t size)
 {
 	auto *p = WGUI::GetInstance().Create<WIBase>(m_creditsContainer.get());
-	p->SetSize(1,size);
+	p->SetSize(1, size);
 	AddCreditsElement(*p);
 	return *p;
 }
@@ -73,17 +70,17 @@ WIBase &WIMainMenuCredits::AddGap(uint32_t size)
 void WIMainMenuCredits::Initialize()
 {
 	WIMainMenuBase::Initialize();
-	AddMenuItem(Locale::GetText("back"),FunctionCallback<void,WIMainMenuElement*>::Create([this](WIMainMenuElement*) {
-		auto *mainMenu = dynamic_cast<WIMainMenu*>(GetParent());
+	AddMenuItem(Locale::GetText("back"), FunctionCallback<void, WIMainMenuElement *>::Create([this](WIMainMenuElement *) {
+		auto *mainMenu = dynamic_cast<WIMainMenu *>(GetParent());
 		if(mainMenu == nullptr)
 			return;
 		mainMenu->OpenMainMenu();
 	}));
 }
 
-void WIMainMenuCredits::SetSize(int x,int y)
+void WIMainMenuCredits::SetSize(int x, int y)
 {
-	WIMainMenuBase::SetSize(x,y);
+	WIMainMenuBase::SetSize(x, y);
 	ScheduleUpdate();
 }
 
@@ -91,13 +88,12 @@ void WIMainMenuCredits::DoUpdate()
 {
 	WIMainMenuBase::DoUpdate();
 	uint32_t y = 0u;
-	for(auto &hChild : *m_creditsContainer->GetChildren())
-	{
+	for(auto &hChild : *m_creditsContainer->GetChildren()) {
 		if(hChild.IsValid() == false)
 			continue;
-		auto x = GetWidth() /2 -hChild->GetWidth() /2;
-		hChild->SetPos(x,y);
-		y += hChild->GetHeight() +5;
+		auto x = GetWidth() / 2 - hChild->GetWidth() / 2;
+		hChild->SetPos(x, y);
+		y += hChild->GetHeight() + 5;
 	}
 }
 
@@ -106,8 +102,7 @@ void WIMainMenuCredits::OnVisibilityChanged(bool bVisible)
 	WIMainMenuBase::OnVisibilityChanged(bVisible);
 
 	// Create or destroy contents based on visibility, so we don't keep it around in cache
-	if(bVisible == false)
-	{
+	if(bVisible == false) {
 		if(m_creditsContainer.IsValid())
 			m_creditsContainer->Remove();
 		return;
@@ -118,22 +113,22 @@ void WIMainMenuCredits::OnVisibilityChanged(bool bVisible)
 	m_creditsContainer->SetAutoAlignToParent(true);
 
 	AddGap(120);
-	AddHeader(Locale::GetText("menu_credits"),"header");
+	AddHeader(Locale::GetText("menu_credits"), "header");
 	/*AddHeader(Locale::GetText("patrons"));
 
 	for(auto &patron : engine_info::get_patrons())
 		AddText(patron,"credits_text");*/
 
 	AddHeader(Locale::GetText("localization"));
-	AddText("Shmeerz (" +Locale::GetText("lan_portuguese") +")","credits_text");
+	AddText("Shmeerz (" + Locale::GetText("lan_portuguese") + ")", "credits_text");
 
 	AddHeader(Locale::GetText("tools_and_plugins"));
-	AddText("Ilya Getsman aka \"RED_EYE\" (Blender plugins)","credits_text");
+	AddText("Ilya Getsman aka \"RED_EYE\" (Blender plugins)", "credits_text");
 
-	AddHeader(Locale::GetText("powered_by"),"header2");
+	AddHeader(Locale::GetText("powered_by"), "header2");
 	AddLogo("third_party/vulkan_logo");
 	AddLogo("third_party/fmod_logo");
 	AddLogo("third_party/physx_logo");
-	AddLogo("third_party/lua_logo").SetWidth(160,true);
+	AddLogo("third_party/lua_logo").SetWidth(160, true);
 	ScheduleUpdate();
 }

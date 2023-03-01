@@ -14,15 +14,15 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_light_point,EnvLightPoint);
+LINK_ENTITY_TO_CLASS(env_light_point, EnvLightPoint);
 
-void SLightPointComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SLightPointComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SLightPointComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(SLightComponent))
-		static_cast<SLightComponent&>(component).SetLight(*this);
+		static_cast<SLightComponent &>(component).SetLight(*this);
 }
 
 void EnvLightPoint::Initialize()

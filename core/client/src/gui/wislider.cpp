@@ -11,16 +11,11 @@
 #include <wgui/types/wibutton.h>
 #include "pragma/gui/wiprogressbar.h"
 
-LINK_WGUI_TO_CLASS(WISlider,WISlider);
+LINK_WGUI_TO_CLASS(WISlider, WISlider);
 
-WISlider::WISlider()
-	: WIProgressBar(),m_bMoveSlider(false)
-{
-	SetMouseInputEnabled(true);
-}
+WISlider::WISlider() : WIProgressBar(), m_bMoveSlider(false) { SetMouseInputEnabled(true); }
 
-WISlider::~WISlider()
-{}
+WISlider::~WISlider() {}
 
 void WISlider::Initialize()
 {
@@ -28,10 +23,7 @@ void WISlider::Initialize()
 	EnableThinking();
 }
 
-void WISlider::SetSize(int x,int y)
-{
-	WIProgressBar::SetSize(x,y);
-}
+void WISlider::SetSize(int x, int y) { WIProgressBar::SetSize(x, y); }
 
 void WISlider::Think()
 {
@@ -39,20 +31,19 @@ void WISlider::Think()
 	if(m_bMoveSlider == false)
 		return;
 	int x;
-	GetMousePos(&x,nullptr);
+	GetMousePos(&x, nullptr);
 	auto width = GetWidth();
-	float v = CFloat(x) /CFloat(width);
+	float v = CFloat(x) / CFloat(width);
 	SetProgress(v);
 }
 
-bool WISlider::IsBeingDragged() const {return m_bMoveSlider;}
+bool WISlider::IsBeingDragged() const { return m_bMoveSlider; }
 
-util::EventReply WISlider::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
+util::EventReply WISlider::MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods)
 {
-	if(WIProgressBar::MouseCallback(button,state,mods) == util::EventReply::Handled)
+	if(WIProgressBar::MouseCallback(button, state, mods) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(button == GLFW::MouseButton::Left)
-	{
+	if(button == GLFW::MouseButton::Left) {
 		if(state == GLFW::KeyState::Press)
 			m_bMoveSlider = true;
 		else

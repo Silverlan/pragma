@@ -18,4 +18,4 @@ void BasePropDynamicComponent::Initialize()
 	ent.RemoveComponent("physics");
 }
 
-void BasePropDynamicComponent::OnEntitySpawn() {BaseEntityComponent::OnEntitySpawn();}
+void BasePropDynamicComponent::OnEntitySpawn() { BaseEntityComponent::OnEntitySpawn(); }

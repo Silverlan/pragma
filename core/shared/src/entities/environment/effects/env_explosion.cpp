@@ -22,9 +22,9 @@ void BaseEnvExplosionComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &inputData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare<std::string>(inputData.input,"explode",false))
+	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &inputData = static_cast<CEInputData &>(evData.get());
+		if(ustring::compare<std::string>(inputData.input, "explode", false))
 			Explode();
 		else
 			return util::EventReply::Unhandled;
@@ -37,15 +37,14 @@ void BaseEnvExplosionComponent::Explode()
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	auto &origin = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
+	auto &origin = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
 	float radius = 512.f;
 	unsigned short damage = 12;
-	Vector3 force(0.f,0.f,0.f);
-	EntityIterator entIt{*ent.GetNetworkState()->GetGameState()};
+	Vector3 force(0.f, 0.f, 0.f);
+	EntityIterator entIt {*ent.GetNetworkState()->GetGameState()};
 	entIt.AttachFilter<EntityIteratorFilterComponent>("transform");
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::DamageableComponent>>();
-	for(auto *entOther : entIt)
-	{
+	for(auto *entOther : entIt) {
 		auto pTrComponentOther = entOther->GetTransformComponent();
 		auto pDamageableComponentOther = entOther->GetComponent<pragma::DamageableComponent>();
 		auto pPhysComponentOther = entOther->GetPhysicsComponent();
@@ -53,12 +52,11 @@ void BaseEnvExplosionComponent::Explode()
 		Vector3 min {};
 		Vector3 max {};
 		if(pPhysComponentOther)
-			pPhysComponentOther->GetCollisionBounds(&min,&max);
+			pPhysComponentOther->GetCollisionBounds(&min, &max);
 		Vector3 r;
-		umath::geometry::closest_point_on_aabb_to_point((min +pos),(max +pos),origin,&r);
-		float d = glm::distance(origin,r);
-		if(d <= radius)
-		{
+		umath::geometry::closest_point_on_aabb_to_point((min + pos), (max + pos), origin, &r);
+		float d = glm::distance(origin, r);
+		if(d <= radius) {
 			// TODO: Raytrace
 			DamageInfo dmg;
 			dmg.SetAttacker(&ent);

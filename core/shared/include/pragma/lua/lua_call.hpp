@@ -10,12 +10,8 @@
 
 #include <pragma/lua/lua_error_handling.hpp>
 
-namespace Lua
-{
-	inline Lua::StatusCode CallFunction(lua_State *l,const std::function<Lua::StatusCode(lua_State*)> &pushArgs,int32_t numReturnValues=0)
-	{
-		return Lua::ProtectedCall(l,pushArgs,numReturnValues,Lua::HandleTracebackError);
-	}
+namespace Lua {
+	inline Lua::StatusCode CallFunction(lua_State *l, const std::function<Lua::StatusCode(lua_State *)> &pushArgs, int32_t numReturnValues = 0) { return Lua::ProtectedCall(l, pushArgs, numReturnValues, Lua::HandleTracebackError); }
 };
 
 #endif

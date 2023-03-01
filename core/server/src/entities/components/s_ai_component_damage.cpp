@@ -11,20 +11,18 @@
 
 using namespace pragma;
 
-void SAIComponent::OnTakenDamage(DamageInfo &info,unsigned short oldHealth,unsigned short newHealth)
+void SAIComponent::OnTakenDamage(DamageInfo &info, unsigned short oldHealth, unsigned short newHealth)
 {
 	auto charComponent = GetEntity().GetCharacterComponent();
 	if(charComponent.valid() && charComponent->IsAlive() == false)
 		return;
-	std::array<BaseEntity*,2> ents = {info.GetAttacker(),info.GetInflictor()};
+	std::array<BaseEntity *, 2> ents = {info.GetAttacker(), info.GetInflictor()};
 	//auto &t = s_game->CurTime();
-	for(auto *ent : ents)
-	{
+	for(auto *ent : ents) {
 		if(ent == nullptr || (!ent->IsPlayer() && !ent->IsNPC()) || HasCharacterNoTargetEnabled(*ent) == true)
 			continue;
 		auto *mem = GetMemory(ent);
-		if(mem != nullptr)
-		{
+		if(mem != nullptr) {
 			if(mem->visible == true)
 				continue;
 			//auto tLast = mem->GetLastTimeSensed();
@@ -32,7 +30,6 @@ void SAIComponent::OnTakenDamage(DamageInfo &info,unsigned short oldHealth,unsig
 
 			// TODO
 		}
-
 	}
 	if(oldHealth == 0 || newHealth != 0)
 		return;
@@ -45,7 +42,7 @@ void SAIComponent::OnKilled(DamageInfo *damageInfo)
 {
 	auto *nw = GetEntity().GetNetworkState();
 	auto *game = nw->GetGameState();
-	game->CallCallbacks<void,pragma::BaseAIComponent*,DamageInfo*>("OnNPCDeath",this,damageInfo);
+	game->CallCallbacks<void, pragma::BaseAIComponent *, DamageInfo *>("OnNPCDeath", this, damageInfo);
 	auto charComponent = GetEntity().GetCharacterComponent();
 	if(charComponent.valid())
 		charComponent->RemoveWeapons();
@@ -53,8 +50,7 @@ void SAIComponent::OnKilled(DamageInfo *damageInfo)
 
 void SAIComponent::OnTakeDamage(DamageInfo &info)
 {
-	auto *charComponent = static_cast<pragma::SCharacterComponent*>(GetEntity().GetCharacterComponent().get());
+	auto *charComponent = static_cast<pragma::SCharacterComponent *>(GetEntity().GetCharacterComponent().get());
 	if(charComponent != nullptr && charComponent->GetGodMode() == true)
 		info.SetDamage(0);
 }
-

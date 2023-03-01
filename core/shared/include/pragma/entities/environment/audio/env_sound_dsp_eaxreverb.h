@@ -10,9 +10,8 @@
 #include "pragma/networkdefinitions.h"
 #include <string>
 #include <mathutil/glmutil.h>
-class DLLNETWORK BaseEnvSoundDspEAXReverb
-{
-protected:
+class DLLNETWORK BaseEnvSoundDspEAXReverb {
+  protected:
 	float m_kvDensity = 1.f;
 	float m_kvDiffusion = 1.f;
 	float m_kvGain = 0.32f;
@@ -24,10 +23,10 @@ protected:
 	int32_t m_kvDecayHFLimit = 1;
 	float m_kvReflectionsGain = 0.05f;
 	float m_kvReflectionsDelay = 0.007f;
-	Vector3 m_kvReflectionsPan = {0.f,0.f,0.f};
+	Vector3 m_kvReflectionsPan = {0.f, 0.f, 0.f};
 	float m_kvLateGain = 1.26f;
 	float m_kvLateDelay = 0.011f;
-	Vector3 m_kvLatePan = {0.f,0.f,0.f};
+	Vector3 m_kvLatePan = {0.f, 0.f, 0.f};
 	float m_kvEchoTime = 0.25f;
 	float m_kvEchoDepth = 0.f;
 	float m_kvModTime = 0.25f;

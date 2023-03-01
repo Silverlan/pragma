@@ -13,14 +13,11 @@
 #include <mathutil/umath.h>
 #include <string>
 
-namespace pragma
-{
-	class DLLNETWORK BaseEnvLightSpotVolComponent
-		: public BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLNETWORK BaseEnvLightSpotVolComponent : public BaseEntityComponent {
+	  public:
 		using BaseEntityComponent::BaseEntityComponent;
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 
@@ -30,8 +27,8 @@ namespace pragma
 		float GetIntensityFactor() const;
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
-	protected:
-		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
+	  protected:
+		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 		virtual void SetSpotlightTarget(BaseEntity &ent);
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		float m_coneStartOffset = 0.f;

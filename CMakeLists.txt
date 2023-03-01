@@ -309,6 +309,9 @@ search_lib_recursive(DEPENDENCY_LUABIND_LIBRARY lib/${BINARY_PRAGMA_DIR} luabind
 set(DEPENDENCY_CPPBEPUIK_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/cppbepuik/include CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_CPPBEPUIK_LIBRARY third_party_libs/cppbepuik/${BINARY_PRAGMA_DIR} cppbepuik STATIC)
 
+set(DEPENDENCY_SPDLOG_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/spdlog/include CACHE PATH "Path to include directory.")
+search_lib_recursive(DEPENDENCY_SPDLOG_LIBRARY third_party_libs/spdlog/${BINARY_PRAGMA_DIR} spdlog)
+
 if(WIN32)
     set(DEPENDENCY_7ZPP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/7zpp/include CACHE STRING "" FORCE)
     search_lib_recursive(DEPENDENCY_7ZPP_LIBRARY third_party_libs/7zpp/${BINARY_PRAGMA_DIR} 7zpp)
@@ -555,10 +558,26 @@ function(register_third_party_library_custom LIB_NAME CUSTOM_PATH)
 	add_subdirectory(${CUSTOM_PATH}/${LIB_NAME})
 endfunction(register_third_party_library_custom)
 
+if(WIN32)
+    set(OS_LIB_BIN_EXT ".dll")
+    set(OS_LIB_BIN_PRE "")
+    set(OS_LIB_SHARED_EXT ".lib")
+    set(OS_EXE_EXT ".exe")
+else()
+    set(OS_LIB_BIN_EXT ".so")
+    set(OS_LIB_BIN_PRE "lib")
+    set(OS_LIB_SHARED_EXT ".so")
+    set(OS_EXE_EXT "")
+endif()
+
+if(is_multi_config)
+    set(PR_MODULE_INSTALL_SUBDIR "${CONFIG_BUILD_TYPE}")
+else()
+    set(PR_MODULE_INSTALL_SUBDIR ".")
+endif()
+
 message("Processing core libraries...")
 add_subdirectory(core)
-
-set_target_folder(build_core core)
 
 message("Processing external libraries...")
 add_subdirectory(external_libs)
@@ -704,6 +723,21 @@ target_include_directories(luabind PUBLIC ${LUA_INCLUDE_DIR})
 # cppbepuik
 register_third_party_library(cppbepuik)
 set_target_folder(cppbepuik third_party_libs)
+#
+
+# spdlog
+set(SPDLOG_BUILD_SHARED ON CACHE BOOL ON FORCE)
+set(SPDLOG_BUILD_PIC ON CACHE BOOL ON FORCE)
+if(WIN32)
+	set(SPDLOG_USE_STD_FORMAT ON CACHE BOOL ON FORCE)
+else()
+	set(SPDLOG_USE_STD_FORMAT OFF CACHE BOOL OFF FORCE)
+endif()
+set(SPDLOG_CLOCK_COARSE ON CACHE BOOL ON FORCE)
+set(CMAKE_CXX_STANDARD 20)
+register_third_party_library(spdlog)
+set_target_folder(spdlog third_party_libs)
+unset(CMAKE_CXX_STANDARD)
 #
 
 # 7zip cpp
@@ -985,7 +1019,7 @@ if(WIN32)
 add_dependencies(util_zip 7zpp)
 endif()
 
-add_dependencies(shared materialsystem util_zip wms_shared util_pragma_doc luasystem networkmanager muparserx libz2 bzip2 clip2tri-static clipper-static poly2tri-static util_udm panima util_bsp util_smdmodel util_source_script rectangle_bin_pack Recast Detour util_pad noise-static noiseutils-static ogg vorbis vorbisfile cppbepuik)
+add_dependencies(shared materialsystem util_zip wms_shared util_pragma_doc luasystem networkmanager muparserx libz2 bzip2 clip2tri-static clipper-static poly2tri-static util_udm panima util_bsp util_smdmodel util_source_script rectangle_bin_pack Recast Detour util_pad noise-static noiseutils-static ogg vorbis vorbisfile cppbepuik spdlog)
 add_dependencies(ishared util_udm shared)
 add_dependencies(iclient ishared client)
 add_dependencies(iserver ishared server)
@@ -994,6 +1028,7 @@ add_dependencies(client shared clientmanager wgui alsoundsystem util_timeline_sc
 
 add_dependencies(pragma_server server)
 add_dependencies(pragma client server)
+add_dependencies(pragma pragma_server)
 
 set_property(TARGET pragma PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
 set_property(TARGET pragma_server PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
@@ -1182,29 +1217,12 @@ pragma_install_lib("${DEPENDENCY_LIBVORBISFILE_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_VTFLIB_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_LIBZIP_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_LPNG_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+pragma_install_lib("${DEPENDENCY_SPDLOG_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 if(WIN32)
 pragma_install_lib_c("${DEPENDENCY_ZLIB_LIBRARY}" zlib1 "${BINARY_OUTPUT_DIR}")
 else()
     pragma_install_lib("${DEPENDENCY_ZLIB_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 endif()
-
-if(WIN32)
-    set(OS_LIB_BIN_EXT ".dll")
-    set(OS_LIB_BIN_PRE "")
-    set(OS_LIB_SHARED_EXT ".lib")
-    set(OS_EXE_EXT ".exe")
-else()
-    set(OS_LIB_BIN_EXT ".so")
-    set(OS_LIB_BIN_PRE "lib")
-    set(OS_LIB_SHARED_EXT ".so")
-    set(OS_EXE_EXT "")
-endif()
-if(is_multi_config)
-    set(PR_MODULE_INSTALL_SUBDIR "${CONFIG_BUILD_TYPE}")
-else()
-    set(PR_MODULE_INSTALL_SUBDIR ".")
-endif()
-
 
 function(pragma_install_file FILE_PATH INSTALL_PATH)
     if("${FILE_PATH}" STREQUAL "")

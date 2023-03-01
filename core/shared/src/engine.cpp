@@ -11,6 +11,7 @@
 #include "pragma/engine_init.hpp"
 #include "pragma/lua/libraries/ldebug.h"
 #include "pragma/lua/lua_error_handling.hpp"
+#include "pragma/logging.hpp"
 #include <pragma/serverstate/serverstate.h>
 #include <pragma/console/convarhandle.h>
 #include "luasystem.h"
@@ -42,64 +43,59 @@
 
 const pragma::IServerState &Engine::GetServerStateInterface() const
 {
-    if(m_libServer == nullptr)
-    {
-        auto path = util::Path::CreatePath(util::get_program_path());
+	if(m_libServer == nullptr) {
+		auto path = util::Path::CreatePath(util::get_program_path());
 #ifdef _WIN32
-        path += "bin/";
-        path += "server";
+		path += "bin/";
+		path += "server";
 #else
-        path += "lib/";
-        path += "libserver";
+		path += "lib/";
+		path += "libserver";
 #endif
-        auto modPath = path.GetString();
-        std::string err;
-        m_libServer = util::Library::Load(modPath,{},&err);
-        if(m_libServer == nullptr)
-        {
-            throw std::logic_error{"Unable to load module '" +modPath +"': " +err};
-            exit(EXIT_FAILURE);
-        }
+		auto modPath = path.GetString();
+		std::string err;
+		m_libServer = util::Library::Load(modPath, {}, &err);
+		if(m_libServer == nullptr) {
+			throw std::logic_error {"Unable to load module '" + modPath + "': " + err};
+			exit(EXIT_FAILURE);
+		}
 
-        m_iServerState.Initialize(*m_libServer);
-        if(m_iServerState.valid() == false)
-        {
-            throw std::logic_error{"Unresolved server state functions!"};
-            exit(EXIT_FAILURE);
-        }
-    }
-    return m_iServerState;
+		m_iServerState.Initialize(*m_libServer);
+		if(m_iServerState.valid() == false) {
+			throw std::logic_error {"Unresolved server state functions!"};
+			exit(EXIT_FAILURE);
+		}
+	}
+	return m_iServerState;
 }
 
 decltype(Engine::DEFAULT_TICK_RATE) Engine::DEFAULT_TICK_RATE = ENGINE_DEFAULT_TICK_RATE;
 
-extern "C"
+extern "C" {
+void DLLNETWORK RunEngine(int argc, char *argv[])
 {
-	void DLLNETWORK RunEngine(int argc,char *argv[])
-	{
-		auto en = InitializeServer(argc,argv);
-		en = nullptr;
-	}
+	auto en = InitializeServer(argc, argv);
+	en = nullptr;
+}
 }
 
-static std::unordered_map<std::string,std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
-std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &Engine::GetConVarPtrs() {return *conVarPtrs;}
+static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
+std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &Engine::GetConVarPtrs() { return *conVarPtrs; }
 ConVarHandle Engine::GetConVarHandle(std::string scvar)
 {
-	if(conVarPtrs == NULL)
-	{
-		static std::unordered_map<std::string,std::shared_ptr<PtrConVar>> ptrs;
+	if(conVarPtrs == NULL) {
+		static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> ptrs;
 		conVarPtrs = &ptrs;
 	}
-	return CVarHandler::GetConVarHandle(*conVarPtrs,scvar);
+	return CVarHandler::GetConVarHandle(*conVarPtrs, scvar);
 }
 
 DLLNETWORK Engine *engine = NULL;
-Engine::Engine(int,char*[])
-	: CVarHandler(),
-	m_logFile(nullptr),
-	m_tickRate(Engine::DEFAULT_TICK_RATE),
-	m_stateFlags{StateFlags::Running | StateFlags::MultiThreadedAssetLoadingEnabled}
+
+extern std::optional<std::string> g_lpLogFile;
+extern util::LogSeverity g_lpLogLevelCon;
+extern util::LogSeverity g_lpLogLevelFile;
+Engine::Engine(int, char *[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(Engine::DEFAULT_TICK_RATE), m_stateFlags {StateFlags::Running | StateFlags::MultiThreadedAssetLoadingEnabled}
 {
 	// TODO: File cache doesn't work with absolute paths at the moment
 	// (e.g. addons/imported/models/some_model.pmdl would return false even if the file exists)
@@ -109,98 +105,67 @@ Engine::Engine(int,char*[])
 	debug::open_domain();
 #endif
 	Locale::Init();
-    OpenConsole();
-#ifdef _WIN32
-            freopen("CON","w",stdout); // Redirect fprint, etc.
-        #endif
+	OpenConsole();
 
 	m_mainThreadId = std::this_thread::get_id();
-	
+
 	m_lastTick = static_cast<long long>(m_ctTick());
 	engine = this;
-
-	// These need to exist, so they can be automatically mounted
-	if(FileManager::Exists("addons/imported") == false)
-		FileManager::CreatePath("addons/imported");
-	if(FileManager::Exists("addons/converted") == false)
-		FileManager::CreatePath("addons/converted");
 
 	// Link package system to file system
 	m_padPackageManager = upad::link_to_file_system();
 	m_assetManager = std::make_unique<pragma::asset::AssetManager>();
 
-	pragma::register_engine_animation_events();
-	pragma::register_engine_activities();
-
 	RegisterCallback<void>("Think");
 
-	Con::set_output_callback([this](const std::string_view &output,Con::MessageFlags flags,const Color *color) {
-		if(m_bRecordConsoleOutput == false)
-			return;
-		m_consoleOutputMutex.lock();
-			m_consoleOutput.push({std::string{output},flags,color ? std::make_shared<Color>(*color) : nullptr});
-		m_consoleOutputMutex.unlock();
-	});
-	
 	m_cpuProfiler = pragma::debug::CPUProfiler::Create<pragma::debug::CPUProfiler>();
 	AddProfilingHandler([this](bool profilingEnabled) {
-		if(profilingEnabled == false)
-		{
+		if(profilingEnabled == false) {
 			m_profilingStageManager = nullptr;
 			return;
 		}
-		auto stageFrame = pragma::debug::ProfilingStage::Create(*m_cpuProfiler,"Frame");
-		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>>();
-		m_profilingStageManager->InitializeProfilingStageManager(*m_cpuProfiler,{
-			stageFrame,
-			pragma::debug::ProfilingStage::Create(*m_cpuProfiler,"Think",stageFrame.get()),
-			pragma::debug::ProfilingStage::Create(*m_cpuProfiler,"Tick",stageFrame.get())
-		});
-		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 3u,"Added new profiling phase, but did not create associated profiling stage!");
+		auto stageFrame = pragma::debug::ProfilingStage::Create(*m_cpuProfiler, "Frame");
+		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase>>();
+		m_profilingStageManager->InitializeProfilingStageManager(*m_cpuProfiler, {stageFrame, pragma::debug::ProfilingStage::Create(*m_cpuProfiler, "Think", stageFrame.get()), pragma::debug::ProfilingStage::Create(*m_cpuProfiler, "Tick", stageFrame.get())});
+		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 3u, "Added new profiling phase, but did not create associated profiling stage!");
 	});
 }
 
-pragma::asset::AssetManager &Engine::GetAssetManager() {return *m_assetManager;}
-const pragma::asset::AssetManager &Engine::GetAssetManager() const {return const_cast<Engine*>(this)->GetAssetManager();}
+pragma::asset::AssetManager &Engine::GetAssetManager() { return *m_assetManager; }
+const pragma::asset::AssetManager &Engine::GetAssetManager() const { return const_cast<Engine *>(this)->GetAssetManager(); }
 
-void Engine::ClearConsole()
-{
-	std::system("cls");
-}
+void Engine::ClearConsole() { std::system("cls"); }
 
-void Engine::SetConsoleType(ConsoleType type) {m_consoleType = type;}
+void Engine::SetConsoleType(ConsoleType type) { m_consoleType = type; }
 
-Engine::ConsoleType Engine::GetConsoleType() const
-{
-	return (m_consoleInfo && m_consoleInfo->console) ? ConsoleType::Terminal : ConsoleType::None;
-}
+Engine::ConsoleType Engine::GetConsoleType() const { return (m_consoleInfo && m_consoleInfo->console) ? ConsoleType::Terminal : ConsoleType::None; }
 
-void Engine::SetReplicatedConVar(const std::string &cvar,const std::string &val)
+void Engine::SetReplicatedConVar(const std::string &cvar, const std::string &val)
 {
 	auto *client = GetClientState();
 	if(client == nullptr)
 		return;
 	auto flags = client->GetConVarFlags(cvar);
-	if((flags &ConVarFlags::Notify) == ConVarFlags::Notify)
-		Con::cout<<"ConVar '"<<cvar<<"' has been changed to '"<<val<<"'"<<Con::endl;
-	if((flags &ConVarFlags::Replicated) == ConVarFlags::None)
+	if((flags & ConVarFlags::Notify) == ConVarFlags::Notify)
+		spdlog::info("ConVar '{}' has been changed to '{}'", cvar, val);
+	//Con::cout<<"ConVar '"<<cvar<<"' has been changed to '"<<val<<"'"<<Con::endl;
+	if((flags & ConVarFlags::Replicated) == ConVarFlags::None)
 		return;
-	client->SetConVar(cvar,val);
+	client->SetConVar(cvar, val);
 }
 
-std::thread::id Engine::GetMainThreadId() const {return m_mainThreadId;}
+std::thread::id Engine::GetMainThreadId() const { return m_mainThreadId; }
 std::optional<Engine::ConsoleOutput> Engine::PollConsoleOutput()
 {
 	if(m_bRecordConsoleOutput == false)
 		return {};
 	m_consoleOutputMutex.lock();
-		if(m_consoleOutput.empty())
-		{
-			m_consoleOutputMutex.unlock();
-			return {};
-		}
-		auto r = m_consoleOutput.front();
-		m_consoleOutput.pop();
+	if(m_consoleOutput.empty()) {
+		m_consoleOutputMutex.unlock();
+		return {};
+	}
+	auto r = m_consoleOutput.front();
+	m_consoleOutput.pop();
 	m_consoleOutputMutex.unlock();
 	return r;
 }
@@ -209,25 +174,23 @@ void Engine::SetRecordConsoleOutput(bool record)
 	if(record == m_bRecordConsoleOutput)
 		return;
 	m_consoleOutputMutex.lock();
-		m_bRecordConsoleOutput = record;
-		m_consoleOutput = {};
+	m_bRecordConsoleOutput = record;
+	m_consoleOutput = {};
 	m_consoleOutputMutex.unlock();
 }
 
 CallbackHandle Engine::AddProfilingHandler(const std::function<void(bool)> &handler)
 {
-	auto hCb = FunctionCallback<void,bool>::Create(handler);
+	auto hCb = FunctionCallback<void, bool>::Create(handler);
 	m_profileHandlers.push_back(hCb);
 	return hCb;
 }
 
 void Engine::SetProfilingEnabled(bool bEnabled)
 {
-	for(auto it=m_profileHandlers.begin();it!=m_profileHandlers.end();)
-	{
+	for(auto it = m_profileHandlers.begin(); it != m_profileHandlers.end();) {
 		auto &hCb = *it;
-		if(hCb.IsValid() == false)
-		{
+		if(hCb.IsValid() == false) {
 			it = m_profileHandlers.erase(it);
 			continue;
 		}
@@ -236,7 +199,7 @@ void Engine::SetProfilingEnabled(bool bEnabled)
 	}
 }
 
-upad::PackageManager *Engine::GetPADPackageManager() const {return m_padPackageManager;}
+upad::PackageManager *Engine::GetPADPackageManager() const { return m_padPackageManager; }
 
 void Engine::LockResourceWatchers()
 {
@@ -273,7 +236,7 @@ util::ScopeGuard Engine::ScopeLockResourceWatchers()
 		sv->GetResourceWatcher().Lock();
 	if(cl)
 		cl->GetResourceWatcher().Lock();
-	return util::ScopeGuard{[this,sv,cl]() {
+	return util::ScopeGuard {[this, sv, cl]() {
 		if(sv && GetServerNetworkState() == sv)
 			sv->GetResourceWatcher().Unlock();
 		if(cl && GetClientState() == cl)
@@ -281,7 +244,7 @@ util::ScopeGuard Engine::ScopeLockResourceWatchers()
 	}};
 }
 
-void Engine::AddParallelJob(const util::ParallelJobWrapper &job,const std::string &jobName)
+void Engine::AddParallelJob(const util::ParallelJobWrapper &job, const std::string &jobName)
 {
 	m_parallelJobMutex.lock();
 	m_parallelJobs.push_back({});
@@ -294,9 +257,9 @@ void Engine::AddParallelJob(const util::ParallelJobWrapper &job,const std::strin
 
 void Engine::Close()
 {
-	if(umath::is_flag_set(m_stateFlags,StateFlags::Closed))
+	if(umath::is_flag_set(m_stateFlags, StateFlags::Closed))
 		return;
-	umath::set_flag(m_stateFlags,StateFlags::Closed);
+	umath::set_flag(m_stateFlags, StateFlags::Closed);
 	// Cancel all running jobs, then wait until
 	// they have completed
 	for(auto &jobInfo : m_parallelJobs)
@@ -305,7 +268,7 @@ void Engine::Close()
 		jobInfo.job->Wait();
 	m_parallelJobs.clear();
 
-	umath::set_flag(m_stateFlags,StateFlags::Running,false);
+	umath::set_flag(m_stateFlags, StateFlags::Running, false);
 	util::close_external_archive_manager();
 	CloseServerState();
 
@@ -316,7 +279,7 @@ void Engine::Close()
 	Locale::Clear();
 }
 
-static uint32_t clear_assets(NetworkState *state,pragma::asset::Type type,bool verbose)
+static uint32_t clear_assets(NetworkState *state, pragma::asset::Type type, bool verbose)
 {
 	if(!state)
 		return 0;
@@ -324,178 +287,165 @@ static uint32_t clear_assets(NetworkState *state,pragma::asset::Type type,bool v
 	if(l)
 		Lua::debug::collectgarbage(l); // Make sure any potential Lua references to asset files that can be cleared are cleared
 	uint32_t n = 0;
-	switch(type)
-	{
+	switch(type) {
 	case pragma::asset::Type::Model:
-	{
-		auto &mdlManager = state->GetModelManager();
-		if(!verbose)
-			n = mdlManager.ClearUnused();
-		else
 		{
-			auto &cache = mdlManager.GetCache();
+			auto &mdlManager = state->GetModelManager();
+			if(!verbose)
+				n = mdlManager.ClearUnused();
+			else {
+				auto &cache = mdlManager.GetCache();
 
-			std::unordered_map<Model*,std::string> oldCache;
-			for(auto &pair : cache)
-			{
-				auto asset = mdlManager.GetAsset(pair.second);
-				if(!asset)
-					continue;
-				oldCache[pragma::asset::ModelManager::GetAssetObject(*asset).get()] = pair.first;
+				std::unordered_map<Model *, std::string> oldCache;
+				for(auto &pair : cache) {
+					auto asset = mdlManager.GetAsset(pair.second);
+					if(!asset)
+						continue;
+					oldCache[pragma::asset::ModelManager::GetAssetObject(*asset).get()] = pair.first;
+				}
+
+				n = mdlManager.ClearUnused();
+
+				std::unordered_map<Model *, std::string> newCache;
+				for(auto &pair : cache) {
+					auto asset = mdlManager.GetAsset(pair.second);
+					if(!asset)
+						continue;
+					newCache[pragma::asset::ModelManager::GetAssetObject(*asset).get()] = pair.first;
+				}
+
+				for(auto &pair : oldCache) {
+					auto it = newCache.find(pair.first);
+					if(it != newCache.end())
+						continue;
+					spdlog::info("Model {} was cleared from cache!", pair.second);
+				}
 			}
-
-			n = mdlManager.ClearUnused();
-
-			std::unordered_map<Model*,std::string> newCache;
-			for(auto &pair : cache)
-			{
-				auto asset = mdlManager.GetAsset(pair.second);
-				if(!asset)
-					continue;
-				newCache[pragma::asset::ModelManager::GetAssetObject(*asset).get()] = pair.first;
-			}
-
-			for(auto &pair : oldCache)
-			{
-				auto it = newCache.find(pair.first);
-				if(it != newCache.end())
-					continue;
-				Con::cout<<"Model "<<pair.second<<" was cleared from cache!"<<Con::endl;
-			}
+			break;
 		}
-		break;
-	}
 	case pragma::asset::Type::Material:
-	{
-		auto &matManager = state->GetMaterialManager();
-		if(!verbose)
-			n = matManager.ClearUnused();
-		else
 		{
-			auto &cache = matManager.GetCache();
+			auto &matManager = state->GetMaterialManager();
+			if(!verbose)
+				n = matManager.ClearUnused();
+			else {
+				auto &cache = matManager.GetCache();
 
-			std::unordered_map<Material*,std::string> oldCache;
-			for(auto &pair : cache)
-			{
-				auto asset = matManager.GetAsset(pair.second);
-				if(!asset)
-					continue;
-				oldCache[msys::MaterialManager::GetAssetObject(*asset).get()] = pair.first;
+				std::unordered_map<Material *, std::string> oldCache;
+				for(auto &pair : cache) {
+					auto asset = matManager.GetAsset(pair.second);
+					if(!asset)
+						continue;
+					oldCache[msys::MaterialManager::GetAssetObject(*asset).get()] = pair.first;
+				}
+
+				n = matManager.ClearUnused();
+
+				std::unordered_map<Material *, std::string> newCache;
+				for(auto &pair : cache) {
+					auto asset = matManager.GetAsset(pair.second);
+					if(!asset)
+						continue;
+					newCache[msys::MaterialManager::GetAssetObject(*asset).get()] = pair.first;
+				}
+
+				for(auto &pair : oldCache) {
+					auto it = newCache.find(pair.first);
+					if(it != newCache.end())
+						continue;
+					spdlog::info("Material {} was cleared from cache!", pair.second);
+				}
 			}
-
-			n = matManager.ClearUnused();
-
-			std::unordered_map<Material*,std::string> newCache;
-			for(auto &pair : cache)
-			{
-				auto asset = matManager.GetAsset(pair.second);
-				if(!asset)
-					continue;
-				newCache[msys::MaterialManager::GetAssetObject(*asset).get()] = pair.first;
-			}
-
-			for(auto &pair : oldCache)
-			{
-				auto it = newCache.find(pair.first);
-				if(it != newCache.end())
-					continue;
-				Con::cout<<"Material "<<pair.second<<" was cleared from cache!"<<Con::endl;
-			}
+			break;
 		}
-		break;
-	}
 	}
 	return n;
 }
 uint32_t Engine::DoClearUnusedAssets(pragma::asset::Type type) const
 {
 	uint32_t n = 0;
-	n += clear_assets(GetServerNetworkState(),type,IsVerbose());
-	n += clear_assets(GetClientState(),type,IsVerbose());
+	n += clear_assets(GetServerNetworkState(), type, IsVerbose());
+	n += clear_assets(GetClientState(), type, IsVerbose());
 	return n;
 }
-uint32_t Engine::ClearUnusedAssets(pragma::asset::Type type,bool verbose) const
+uint32_t Engine::ClearUnusedAssets(pragma::asset::Type type, bool verbose) const
 {
 	auto n = DoClearUnusedAssets(type);
 	if(verbose)
-		Con::cout<<n<<" assets have been cleared!"<<Con::endl;
+		spdlog::info("{} assets have been cleared!", n);
 	return n;
 }
 void Engine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
 {
 	auto *sv = GetServerNetworkState();
-	if(sv)
-	{
+	if(sv) {
 		sv->GetModelManager().GetLoader().SetMultiThreadingEnabled(enabled);
 		auto &matManager = sv->GetMaterialManager();
 		matManager.GetLoader().SetMultiThreadingEnabled(enabled);
 	}
 }
-void Engine::UpdateAssetMultiThreadedLoadingEnabled() {SetAssetMultiThreadedLoadingEnabled(umath::is_flag_set(m_stateFlags,StateFlags::MultiThreadedAssetLoadingEnabled));}
-uint32_t Engine::ClearUnusedAssets(const std::vector<pragma::asset::Type> &types,bool verbose) const
+void Engine::UpdateAssetMultiThreadedLoadingEnabled() { SetAssetMultiThreadedLoadingEnabled(umath::is_flag_set(m_stateFlags, StateFlags::MultiThreadedAssetLoadingEnabled)); }
+uint32_t Engine::ClearUnusedAssets(const std::vector<pragma::asset::Type> &types, bool verbose) const
 {
 	uint32_t n = 0;
 	for(auto type : types)
-		n += ClearUnusedAssets(type,false);
+		n += ClearUnusedAssets(type, false);
 	if(verbose)
-		Con::cout<<n<<" assets have been cleared!"<<Con::endl;
+		spdlog::info("{} assets have been cleared!", n);
 	return n;
 }
 
 void Engine::ClearCache()
 {
 	constexpr auto clearAssetFiles = false;
-	Con::cout<<"Clearing cached files..."<<Con::endl;
+	spdlog::info("Clearing cached files...");
 	auto fRemoveDir = [](const std::string &name) {
-		Con::cout<<"Removing '"<<name<<"'..."<<Con::endl;
+		spdlog::info("Removing '{}'", name);
 		auto result = FileManager::RemoveDirectory(name.c_str());
 		if(result == false)
-			Con::cwar<<"WARNING: Unable to remove directory! Please remove it manually!"<<Con::endl;
+			spdlog::warn("Failed to remove cache directory '{}'! Please remove it manually.", name);
 		return result;
 	};
 	fRemoveDir("cache");
-	if(clearAssetFiles)
-	{
+	if(clearAssetFiles) {
 		fRemoveDir("addons/imported");
 		fRemoveDir("addons/converted");
 	}
 
-	Con::cout<<"Removing addon cache directories..."<<Con::endl;
-	for(auto &addonInfo : AddonSystem::GetMountedAddons())
-	{
-		auto path = addonInfo.GetAbsolutePath() +"\\cache";
+	spdlog::info("Removing addon cache directories...");
+	for(auto &addonInfo : AddonSystem::GetMountedAddons()) {
+		auto path = addonInfo.GetAbsolutePath() + "\\cache";
 		if(FileManager::ExistsSystem(path) == false)
 			continue;
 		if(FileManager::RemoveSystemDirectory(path.c_str()) == false)
-			Con::cwar<<"WARNING: Unable to remove '"<<path<<"'! Please remove it manually!"<<Con::endl;
+			spdlog::warn("Failed to remove cache directory '{}'! Please remove it manually.", path);
 	}
 
 	// Give it a bit of time to complete
-	std::this_thread::sleep_for(std::chrono::milliseconds{500});
+	std::this_thread::sleep_for(std::chrono::milliseconds {500});
 
 	// Re-create the directories
 	FileManager::CreatePath("cache");
-	if(clearAssetFiles)
-	{
+	if(clearAssetFiles) {
 		FileManager::CreatePath("addons/imported");
 		FileManager::CreatePath("addons/converted");
 	}
 
 	// Give it a bit of time to complete
-	std::this_thread::sleep_for(std::chrono::milliseconds{500});
+	std::this_thread::sleep_for(std::chrono::milliseconds {500});
 	// The addon system needs to be informed right away, to make sure the new directories are re-mounted
 	AddonSystem::Poll();
-	Con::cout<<"Cache cleared successfully! Please restart the Engine."<<Con::endl;
+	Con::cout << "Cache cleared successfully! Please restart the Engine." << Con::endl;
 }
 
 ServerState *Engine::GetServerState() const
 {
 	if(m_svInstance == nullptr)
 		return nullptr;
-	return static_cast<ServerState*>(m_svInstance->state.get());
+	return static_cast<ServerState *>(m_svInstance->state.get());
 }
 
-NetworkState *Engine::GetServerNetworkState() const {return static_cast<NetworkState*>(GetServerState());}
+NetworkState *Engine::GetServerNetworkState() const { return static_cast<NetworkState *>(GetServerState()); }
 
 void Engine::EndGame()
 {
@@ -511,28 +461,21 @@ void Engine::SetMountExternalGameResources(bool b)
 	if(b == true)
 		InitializeExternalArchiveManager();
 }
-bool Engine::ShouldMountExternalGameResources() const {return m_bMountExternalGameResources;}
+bool Engine::ShouldMountExternalGameResources() const { return m_bMountExternalGameResources; }
 
-pragma::debug::CPUProfiler &Engine::GetProfiler() const {return *m_cpuProfiler;}
-pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,Engine::CPUProfilingPhase> *Engine::GetProfilingStageManager() {return m_profilingStageManager.get();}
-bool Engine::StartProfilingStage(CPUProfilingPhase stage)
-{
-	return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage);
-}
-bool Engine::StopProfilingStage(CPUProfilingPhase stage)
-{
-	return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(stage);
-}
+pragma::debug::CPUProfiler &Engine::GetProfiler() const { return *m_cpuProfiler; }
+pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, Engine::CPUProfilingPhase> *Engine::GetProfilingStageManager() { return m_profilingStageManager.get(); }
+bool Engine::StartProfilingStage(CPUProfilingPhase stage) { return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage); }
+bool Engine::StopProfilingStage(CPUProfilingPhase stage) { return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(stage); }
 
 void Engine::RunTickEvents()
 {
-	while(!m_tickEventQueue.empty())
-	{
+	while(!m_tickEventQueue.empty()) {
 		m_tickEventQueue.front()();
 		m_tickEventQueue.pop();
 	}
 }
-void Engine::AddTickEvent(const std::function<void()> &ev) {m_tickEventQueue.push(ev);}
+void Engine::AddTickEvent(const std::function<void()> &ev) { m_tickEventQueue.push(ev); }
 
 void Engine::Tick()
 {
@@ -556,57 +499,95 @@ void Engine::UpdateParallelJobs()
 {
 	// Update background tasks
 	// Note: We can't use iterators here, since 'Poll' can potentially add new jobs which can invalidate the iterator
-	for(auto i=decltype(m_parallelJobs.size()){0u};i<m_parallelJobs.size();)
-	{
+	for(auto i = decltype(m_parallelJobs.size()) {0u}; i < m_parallelJobs.size();) {
 		auto &jobInfo = m_parallelJobs.at(i);
 		auto progress = jobInfo.job->GetProgress();
 		auto t = std::chrono::steady_clock::now();
-		auto tDelta = t -jobInfo.lastProgressUpdate;
-		if(progress != jobInfo.lastProgress)
-		{
-			jobInfo.timeRemaining = util::clock::to_seconds(tDelta) /(progress -jobInfo.lastProgress) *(1.f -progress);
+		auto tDelta = t - jobInfo.lastProgressUpdate;
+		if(progress != jobInfo.lastProgress) {
+			jobInfo.timeRemaining = util::clock::to_seconds(tDelta) / (progress - jobInfo.lastProgress) * (1.f - progress);
 			jobInfo.lastProgress = progress;
 			jobInfo.lastProgressUpdate = t;
 		}
-		if((t -jobInfo.lastNotification) >= jobInfo.notificationFrequency)
-		{
-			auto percent = progress *100.f;
-			Con::cout<<"Progress of worker '"<<jobInfo.name<<"' at "<<umath::floor(percent)<<"%.";
-			if(jobInfo.timeRemaining.has_value())
-			{
-				auto msgDur = util::get_pretty_duration(*jobInfo.timeRemaining *std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds{1}).count());
-				Con::cout<<" Approximately "<<msgDur<<" remaining!";
+		if((t - jobInfo.lastNotification) >= jobInfo.notificationFrequency) {
+			auto percent = progress * 100.f;
+			Con::cout << "Progress of worker '" << jobInfo.name << "' at " << umath::floor(percent) << "%.";
+			if(jobInfo.timeRemaining.has_value()) {
+				auto msgDur = util::get_pretty_duration(*jobInfo.timeRemaining * std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds {1}).count());
+				Con::cout << " Approximately " << msgDur << " remaining!";
 			}
-			Con::cout<<Con::endl;
+			Con::cout << Con::endl;
 			jobInfo.lastNotification = t;
 		}
 
-		if(jobInfo.job->Poll() == false)
-		{
+		if(jobInfo.job->Poll() == false) {
 			++i;
 			continue;
 		}
-		m_parallelJobs.erase(m_parallelJobs.begin() +i);
+		m_parallelJobs.erase(m_parallelJobs.begin() + i);
 	}
 }
 
-ConVarMap *Engine::GetConVarMap() {return console_system::engine::get_convar_map();}
+ConVarMap *Engine::GetConVarMap() { return console_system::engine::get_convar_map(); }
 
-Engine::StateInstance &Engine::GetServerStateInstance() {return *m_svInstance;}
+Engine::StateInstance &Engine::GetServerStateInstance() { return *m_svInstance; }
 
-void Engine::SetVerbose(bool bVerbose) {umath::set_flag(m_stateFlags,StateFlags::Verbose,bVerbose);}
-bool Engine::IsVerbose() const {return umath::is_flag_set(m_stateFlags,StateFlags::Verbose);}
+void Engine::SetVerbose(bool bVerbose) { umath::set_flag(m_stateFlags, StateFlags::Verbose, bVerbose); }
+bool Engine::IsVerbose() const { return umath::is_flag_set(m_stateFlags, StateFlags::Verbose); }
 
-void Engine::SetDeveloperMode(bool devMode) {umath::set_flag(m_stateFlags,StateFlags::DeveloperMode,devMode);}
-bool Engine::IsDeveloperModeEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::DeveloperMode);}
+void Engine::SetDeveloperMode(bool devMode) { umath::set_flag(m_stateFlags, StateFlags::DeveloperMode, devMode); }
+bool Engine::IsDeveloperModeEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::DeveloperMode); }
 
-void Engine::Release()
+void Engine::Release() { Close(); }
+
+bool Engine::Initialize(int argc, char *argv[])
 {
-	Close();
-}
+	InitLaunchOptions(argc, argv);
 
-bool Engine::Initialize(int argc,char *argv[])
-{
+	pragma::detail::initialize_logger(g_lpLogLevelCon, g_lpLogLevelFile, g_lpLogFile);
+	spdlog::info("Engine Version: {}", get_pretty_engine_version());
+	auto f = filemanager::open_file("git_info.txt", filemanager::FileMode::Read, fsys::SearchFlags::Local | fsys::SearchFlags::NoMounts);
+	if(f) {
+		spdlog::info("Git Info:");
+		spdlog::info(f->ReadString());
+	}
+
+#if 0
+	Con::cout<<"----- Logger test -----"<<Con::endl;
+	Con::cout<<"cout output"<<Con::endl;
+	Con::cwar<<"cwar output"<<Con::endl;
+	Con::cerr<<"cerr output"<<Con::endl;
+	Con::crit<<"crit output"<<Con::endl;
+	Con::csv<<"csv output"<<Con::endl;
+	Con::ccl<<"ccl output"<<Con::endl;
+	
+	spdlog::trace("trace log");
+	spdlog::debug("debug log");
+	spdlog::info("info log");
+	spdlog::warn("warn log");
+	spdlog::error("error log");
+	spdlog::critical("critical log");
+	Con::cout<<"----- Logger test -----"<<Con::endl;
+	spdlog::default_logger()->flush();
+#endif
+
+	// These need to exist, so they can be automatically mounted
+	if(FileManager::Exists("addons/imported") == false)
+		FileManager::CreatePath("addons/imported");
+	if(FileManager::Exists("addons/converted") == false)
+		FileManager::CreatePath("addons/converted");
+
+	pragma::register_engine_animation_events();
+	pragma::register_engine_activities();
+
+	Con::set_output_callback([this](const std::string_view &output, Con::MessageFlags flags, const Color *color) {
+		if(m_bRecordConsoleOutput == false)
+			return;
+		m_consoleOutputMutex.lock();
+		m_consoleOutput.push({std::string {output}, flags, color ? std::make_shared<Color>(*color) : nullptr});
+		m_consoleOutputMutex.unlock();
+	});
+
 	CVarHandler::Initialize();
 	RegisterConsoleCommands();
 
@@ -622,27 +603,23 @@ bool Engine::Initialize(int argc,char *argv[])
 	pragma::asset::update_extension_cache(pragma::asset::Type::Material);
 
 	auto matErr = matManager->LoadAsset("error");
-	m_svInstance = std::unique_ptr<StateInstance>(new StateInstance{matManager,matErr.get()});
+	m_svInstance = std::unique_ptr<StateInstance>(new StateInstance {matManager, matErr.get()});
 	//
-	InitLaunchOptions(argc,argv);
-	if(Lua::get_extended_lua_modules_enabled())
-	{
-		RegisterConCommand("l",[this](NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
-			RunConsoleCommand("lua_run",argv);
-		});
+
+	if(Lua::get_extended_lua_modules_enabled()) {
+		RegisterConCommand("l", [this](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { RunConsoleCommand("lua_run", argv); });
 	}
 	if(!IsServerOnly())
 		LoadConfig();
 
 	auto cacheVersion = GetConVarInt("cache_version");
 	auto cacheVersionTarget = GetConVarInt("cache_version_target");
-	if(cacheVersion != cacheVersionTarget)
-	{
-		SetConVar("cache_version",std::to_string(cacheVersionTarget));
+	if(cacheVersion != cacheVersionTarget) {
+		SetConVar("cache_version", std::to_string(cacheVersionTarget));
 		ClearCache();
 	}
-	
-    ServerState *server = OpenServerState();
+
+	ServerState *server = OpenServerState();
 	if(server != nullptr && IsServerOnly())
 		LoadConfig();
 
@@ -656,16 +633,14 @@ bool Engine::Initialize(int argc,char *argv[])
 
 void Engine::InitializeAssetManager(util::FileAssetManager &assetManager) const
 {
-	assetManager.SetExternalSourceFileImportHandler([this,&assetManager](const std::string &path,const std::string &outputPath) -> std::optional<std::string> {
+	assetManager.SetLogHandler(&pragma::log);
+	assetManager.SetExternalSourceFileImportHandler([this, &assetManager](const std::string &path, const std::string &outputPath) -> std::optional<std::string> {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("import_asset_file");
-	util::ScopeGuard sg {[]() {
-		::debug::get_domain().EndTask();
-	}};
+		::debug::get_domain().BeginTask("import_asset_file");
+		util::ScopeGuard sg {[]() { ::debug::get_domain().EndTask(); }};
 #endif
 		auto *nw = GetClientState();
-		if(!nw || !nw->IsGameActive())
-		{
+		if(!nw || !nw->IsGameActive()) {
 			auto *nwSv = GetServerNetworkState();
 			if(nwSv && nwSv->IsGameActive())
 				nw = nwSv;
@@ -674,22 +649,21 @@ void Engine::InitializeAssetManager(util::FileAssetManager &assetManager) const
 			return {};
 		auto &rootDir = assetManager.GetRootDirectory();
 		auto &extensions = assetManager.GetSupportedFormatExtensions();
-		for(auto &extInfo : extensions)
-		{
-			auto relPath = util::Path::CreateFile(path +'.' +extInfo.extension);
+		for(auto &extInfo : extensions) {
+			auto relPath = util::Path::CreateFile(path + '.' + extInfo.extension);
 			auto formatPath = rootDir;
 			formatPath += relPath;
 
 			auto p = rootDir;
-			p += util::Path::CreateFile(outputPath +'.' +extInfo.extension);
+			p += util::Path::CreateFile(outputPath + '.' + extInfo.extension);
 
 			auto portSuccess = false;
 			if(extInfo.extension == "bsp")
-				portSuccess = util::port_hl2_map(nw,relPath.GetString());
+				portSuccess = util::port_hl2_map(nw, relPath.GetString());
 			else if(extInfo.extension == "mdl")
-				portSuccess = util::port_hl2_model(nw,ufile::get_path_from_filename(formatPath.GetString()),ufile::get_file_from_filename(p.GetString()));
+				portSuccess = util::port_hl2_model(nw, ufile::get_path_from_filename(formatPath.GetString()), ufile::get_file_from_filename(p.GetString()));
 			else
-				portSuccess = util::port_file(nw,formatPath.GetString(),p.GetString());
+				portSuccess = util::port_file(nw, formatPath.GetString(), p.GetString());
 			if(portSuccess)
 				return extInfo.extension;
 		}
@@ -697,22 +671,19 @@ void Engine::InitializeAssetManager(util::FileAssetManager &assetManager) const
 	});
 }
 
-void Engine::InitializeExternalArchiveManager() {util::initialize_external_archive_manager(GetServerNetworkState());}
+void Engine::InitializeExternalArchiveManager() { util::initialize_external_archive_manager(GetServerNetworkState()); }
 
 void Engine::RunLaunchCommands()
 {
-	for(auto it=m_launchCommands.rbegin();it!=m_launchCommands.rend();++it)
-	{
+	for(auto it = m_launchCommands.rbegin(); it != m_launchCommands.rend(); ++it) {
 		auto &cmd = *it;
-		RunConsoleCommand(cmd.command,cmd.args);
-		if(ustring::compare(cmd.command.c_str(),"map",false))
-		{
+		RunConsoleCommand(cmd.command, cmd.args);
+		if(ustring::compare(cmd.command.c_str(), "map", false)) {
 			// We'll delay all remaining commands until after the map has been loaded
 			std::vector<LaunchCommand> remainingCommands;
 			++it;
-			for(auto it2=it;it2!=m_launchCommands.rend();++it2)
-			{
-				if(ustring::compare(it2->command.c_str(),"map",false))
+			for(auto it2 = it; it2 != m_launchCommands.rend(); ++it2) {
+				if(ustring::compare(it2->command.c_str(), "map", false))
 					continue;
 				remainingCommands.push_back(*it2);
 			}
@@ -720,33 +691,33 @@ void Engine::RunLaunchCommands()
 			auto *nw = GetClientState();
 			if(!nw)
 				nw = GetServerState();
-			if(nw)
-			{
+			if(nw) {
 				auto cbOnGameStart = FunctionCallback<void>::Create(nullptr);
-				cbOnGameStart.get<Callback<void>>()->SetFunction([this,cbOnGameStart,nw,remainingCommands=std::move(remainingCommands)]() mutable {
+				cbOnGameStart.get<Callback<void>>()->SetFunction([this, cbOnGameStart, nw, remainingCommands = std::move(remainingCommands)]() mutable {
 					auto cmds0 = std::move(remainingCommands);
 					auto *game = nw->GetGameState();
-					if(game)
-					{
+					if(game) {
 						auto cbOnGameReady = FunctionCallback<void>::Create(nullptr);
-						cbOnGameReady.get<Callback<void>>()->SetFunction([this,cbOnGameReady,game,cmds0=std::move(cmds0)]() mutable {
+						cbOnGameReady.get<Callback<void>>()->SetFunction([this, cbOnGameReady, cmds0 = std::move(cmds0)]() mutable {
 							auto cmds1 = std::move(cmds0);
+							auto *pThis = this;
+
+							// This will invalidate all captured variables!
 							if(cbOnGameReady.IsValid())
 								cbOnGameReady.Remove();
 
-							for(auto it=cmds1.rbegin();it!=cmds1.rend();++it)
-							{
+							for(auto it = cmds1.rbegin(); it != cmds1.rend(); ++it) {
 								auto &cmd = *it;
-								RunConsoleCommand(cmd.command,cmd.args);
+								pThis->RunConsoleCommand(cmd.command, cmd.args);
 							}
 						});
-						game->AddCallback("OnGameReady",cbOnGameReady);
+						game->AddCallback("OnGameReady", cbOnGameReady);
 					}
 
 					if(cbOnGameStart.IsValid())
 						cbOnGameStart.Remove();
 				});
-				nw->AddCallback("OnGameStart",cbOnGameStart);
+				nw->AddCallback("OnGameStart", cbOnGameStart);
 			}
 			break;
 		}
@@ -784,7 +755,7 @@ bool Engine::IsMultiPlayer() const
 		return false;
 	return sv->IsMultiPlayer();
 }
-bool Engine::IsSinglePlayer() const {return !IsMultiPlayer();}
+bool Engine::IsSinglePlayer() const { return !IsMultiPlayer(); }
 
 void Engine::StartServer(bool singlePlayer)
 {
@@ -802,7 +773,7 @@ void Engine::CloseServer()
 	GetServerStateInterface().close_server();
 }
 
-bool Engine::IsClientConnected() {return false;}
+bool Engine::IsClientConnected() { return false; }
 
 bool Engine::IsServerRunning()
 {
@@ -812,19 +783,19 @@ bool Engine::IsServerRunning()
 	return GetServerStateInterface().is_server_running();
 }
 
-void Engine::StartNewGame(const std::string &map,bool singlePlayer)
+void Engine::StartNewGame(const std::string &map, bool singlePlayer)
 {
 	EndGame();
 	auto *sv = GetServerNetworkState();
 	if(sv == nullptr)
 		return;
-	sv->StartNewGame(map,singlePlayer);
+	sv->StartNewGame(map, singlePlayer);
 }
 
 void Engine::StartDefaultGame(const std::string &map)
 {
 	EndGame();
-	StartNewGame(map.c_str(),false);
+	StartNewGame(map.c_str(), false);
 }
 
 std::optional<uint64_t> Engine::GetServerSteamId() const
@@ -838,7 +809,7 @@ std::optional<uint64_t> Engine::GetServerSteamId() const
 }
 
 static auto cvRemoteDebugging = GetConVar("sh_lua_remote_debugging");
-int32_t Engine::GetRemoteDebugging() const {return cvRemoteDebugging->GetInt();}
+int32_t Engine::GetRemoteDebugging() const { return cvRemoteDebugging->GetInt(); }
 
 extern std::string __lp_map;
 extern std::string __lp_gamemode;
@@ -847,10 +818,9 @@ void Engine::Start()
 {
 	if(cvMountExternalResources->GetBool() == true)
 		SetMountExternalGameResources(true);
-	if(!__lp_gamemode.empty())
-	{
+	if(!__lp_gamemode.empty()) {
 		std::vector<std::string> argv = {__lp_gamemode};
-		RunConsoleCommand("sv_gamemode",argv);
+		RunConsoleCommand("sv_gamemode", argv);
 	}
 	if(!__lp_map.empty())
 		StartDefaultGame(__lp_map);
@@ -871,98 +841,102 @@ void Engine::Start()
 
 		loops = 0;
 		auto tickRate = GetTickRate();
-		auto skipTicks = static_cast<long long>(1'000 /tickRate);
+		auto skipTicks = static_cast<long long>(1'000 / tickRate);
 
 		auto t = GetTickCount();
-		while(t > nextTick && loops < MAX_FRAMESKIP)
-		{
+		while(t > nextTick && loops < MAX_FRAMESKIP) {
 			Tick();
 
 			m_lastTick = static_cast<long long>(m_ctTick());
-			nextTick += skipTicks;//SKIP_TICKS);
+			nextTick += skipTicks; //SKIP_TICKS);
 			loops++;
 		}
 		if(t > nextTick)
 			nextTick = t; // This should only happen after loading times
-	}
-	while(IsRunning());
+	} while(IsRunning());
 	Close();
 }
 
-void Engine::UpdateTickCount()
-{
-	m_ctTick.Update();
-}
+void Engine::UpdateTickCount() { m_ctTick.Update(); }
 
 void Engine::DumpDebugInformation(ZIPFile &zip) const
 {
 	std::stringstream engineInfo;
-	engineInfo<<"System: ";
+	engineInfo << "System: ";
 	if(util::is_windows_system())
-		engineInfo<<"Windows";
+		engineInfo << "Windows";
 	else
-		engineInfo<<"Linux";
+		engineInfo << "Linux";
 	if(util::is_x64_system())
-		engineInfo<<" x64";
+		engineInfo << " x64";
 	else
-		engineInfo<<" x86";
+		engineInfo << " x86";
 	if(engine != nullptr)
-		engineInfo<<"\nEngine Version: "<<get_pretty_engine_version();
-	auto *nw = static_cast<NetworkState*>(GetServerNetworkState());
+		engineInfo << "\nEngine Version: " << get_pretty_engine_version();
+	auto *nw = static_cast<NetworkState *>(GetServerNetworkState());
 	if(nw == nullptr)
 		nw = GetClientState();
-	if(nw != nullptr)
-	{
+	if(nw != nullptr) {
 		auto *game = nw->GetGameState();
-		if(game != nullptr)
-		{
+		if(game != nullptr) {
 			auto &mapInfo = game->GetMapInfo();
-			engineInfo<<"\nMap: "<<mapInfo.name<<" ("<<mapInfo.fileName<<")";
+			engineInfo << "\nMap: " << mapInfo.name << " (" << mapInfo.fileName << ")";
 		}
 	}
-	zip.AddFile("engine.txt",engineInfo.str());
+	zip.AddFile("engine.txt", engineInfo.str());
 
-	auto fWriteConvars = [&zip](const std::map<std::string,std::shared_ptr<ConConf>> &cvarMap,const std::string &fileName) {
+	auto logFileName = pragma::detail::get_log_file_name();
+	if(logFileName.has_value()) {
+		pragma::detail::close_logger();
+		auto logContents = filemanager::read_file(*logFileName);
+		if(logContents.has_value())
+			zip.AddFile("log.txt", *logContents);
+	}
+
+	if(filemanager::exists("git_info.txt")) {
+		auto infoContents = filemanager::read_file("git_info.txt");
+		if(infoContents.has_value())
+			zip.AddFile("git_info.txt", *infoContents);
+	}
+
+	auto fWriteConvars = [&zip](const std::map<std::string, std::shared_ptr<ConConf>> &cvarMap, const std::string &fileName) {
 		std::stringstream convars;
-		for(auto &pair : cvarMap)
-		{
+		for(auto &pair : cvarMap) {
 			if(pair.second->GetType() != ConType::Variable)
 				continue;
-			auto *cv = static_cast<ConVar*>(pair.second.get());
-			if(umath::is_flag_set(cv->GetFlags(),ConVarFlags::Password))
+			auto *cv = static_cast<ConVar *>(pair.second.get());
+			if(umath::is_flag_set(cv->GetFlags(), ConVarFlags::Password))
 				continue; // Don't store potentially personal passwords in the crashdump
-			convars<<pair.first<<" \""<<cv->GetString()<<"\"\n";
+			convars << pair.first << " \"" << cv->GetString() << "\"\n";
 		}
-		zip.AddFile(fileName,convars.str());
+		zip.AddFile(fileName, convars.str());
 	};
-	fWriteConvars(GetConVars(),"cvars_en.txt");
+	fWriteConvars(GetConVars(), "cvars_en.txt");
 
-	auto fWriteLuaTraceback = [&zip](lua_State *l,const std::string &identifier) {
+	auto fWriteLuaTraceback = [&zip](lua_State *l, const std::string &identifier) {
 		if(!l)
 			return;
 		std::stringstream ss;
-		if(!Lua::PrintTraceback(l,ss))
+		if(!Lua::PrintTraceback(l, ss))
 			return;
 		auto strStack = Lua::StackToString(l);
 		if(strStack.has_value())
-			ss<<"\n\n"<<*strStack;
-		zip.AddFile("lua_traceback_" +identifier +".txt",ss.str());
+			ss << "\n\n" << *strStack;
+		zip.AddFile("lua_traceback_" + identifier + ".txt", ss.str());
 	};
-	if(GetClientState())
-	{
-		fWriteConvars(GetClientState()->GetConVars(),"cvars_cl.txt");
-		fWriteLuaTraceback(GetClientState()->GetLuaState(),"cl");
+	if(GetClientState()) {
+		fWriteConvars(GetClientState()->GetConVars(), "cvars_cl.txt");
+		fWriteLuaTraceback(GetClientState()->GetLuaState(), "cl");
 	}
-	if(GetServerNetworkState())
-	{
-		fWriteConvars(GetServerNetworkState()->GetConVars(),"cvars_sv.txt");
-		fWriteLuaTraceback(GetServerNetworkState()->GetLuaState(),"sv");
+	if(GetServerNetworkState()) {
+		fWriteConvars(GetServerNetworkState()->GetConVars(), "cvars_sv.txt");
+		fWriteLuaTraceback(GetServerNetworkState()->GetLuaState(), "sv");
 	}
 }
 
-const long long &Engine::GetLastTick() const {return m_lastTick;}
+const long long &Engine::GetLastTick() const { return m_lastTick; }
 
-long long Engine::GetDeltaTick() const {return GetTickCount() -m_lastTick;}
+long long Engine::GetDeltaTick() const { return GetTickCount() - m_lastTick; }
 
 void Engine::Think()
 {
@@ -983,7 +957,7 @@ ServerState *Engine::OpenServerState()
 	auto *sv = GetServerNetworkState();
 	sv->Initialize();
 	UpdateAssetMultiThreadedLoadingEnabled();
-	return static_cast<ServerState*>(sv);
+	return static_cast<ServerState *>(sv);
 }
 
 void Engine::CloseServerState()
@@ -996,41 +970,38 @@ void Engine::CloseServerState()
 	GetServerStateInterface().clear_server_state();
 }
 
-NetworkState *Engine::GetClientState() const {return NULL;}
+NetworkState *Engine::GetClientState() const { return NULL; }
 
-NetworkState *Engine::GetActiveState() {return GetServerNetworkState();}
+NetworkState *Engine::GetActiveState() { return GetServerNetworkState(); }
 
-bool Engine::IsActiveState(NetworkState *state) {return state == GetActiveState();}
+bool Engine::IsActiveState(NetworkState *state) { return state == GetActiveState(); }
 
-void Engine::AddLaunchConVar(std::string cvar,std::string val) {m_launchCommands.push_back({cvar,{val}});}
+void Engine::AddLaunchConVar(std::string cvar, std::string val) { m_launchCommands.push_back({cvar, {val}}); }
 
-void Engine::ShutDown() {umath::set_flag(m_stateFlags,StateFlags::Running,false);}
+void Engine::ShutDown() { umath::set_flag(m_stateFlags, StateFlags::Running, false); }
 
 void Engine::HandleLocalHostPlayerClientPacket(NetPacket &p) {}
-void Engine::HandleLocalHostPlayerServerPacket(NetPacket &p)
-{
-	return GetServerStateInterface().handle_local_host_player_server_packet(p);
-}
+void Engine::HandleLocalHostPlayerServerPacket(NetPacket &p) { return GetServerStateInterface().handle_local_host_player_server_packet(p); }
 
-bool Engine::ConnectLocalHostPlayerClient()
-{
-	return GetServerStateInterface().connect_local_host_player_client();
-}
+bool Engine::ConnectLocalHostPlayerClient() { return GetServerStateInterface().connect_local_host_player_client(); }
 
 Engine::~Engine()
 {
 	engine = nullptr;
-	if(umath::is_flag_set(m_stateFlags,StateFlags::Running))
+	if(umath::is_flag_set(m_stateFlags, StateFlags::Running))
 		throw std::runtime_error("Engine has to be closed before it can be destroyed!");
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::close_domain();
 #endif
+
+	spdlog::info("Closing logger...");
+	pragma::detail::close_logger();
 }
 
-Engine *pragma::get_engine() {return engine;}
-ServerState *pragma::get_server_state() {return engine->GetServerStateInterface().get_server_state();}
+Engine *pragma::get_engine() { return engine; }
+ServerState *pragma::get_server_state() { return engine->GetServerStateInterface().get_server_state(); }
 
-REGISTER_ENGINE_CONVAR_CALLBACK(debug_profiling_enabled,[](NetworkState*,ConVar*,bool,bool enabled) {
+REGISTER_ENGINE_CONVAR_CALLBACK(debug_profiling_enabled, [](NetworkState *, ConVar *, bool, bool enabled) {
 	if(engine == nullptr)
 		return;
 	engine->SetProfilingEnabled(enabled);

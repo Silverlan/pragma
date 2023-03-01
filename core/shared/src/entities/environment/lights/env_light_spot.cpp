@@ -19,76 +19,56 @@
 
 using namespace pragma;
 
-umath::Degree BaseEnvLightSpotComponent::CalcInnerConeAngle(umath::Degree outerConeAngle,float blendFraction)
+umath::Degree BaseEnvLightSpotComponent::CalcInnerConeAngle(umath::Degree outerConeAngle, float blendFraction) { return outerConeAngle * umath::clamp(1.f - blendFraction, 0.f, 1.f); }
+float BaseEnvLightSpotComponent::CalcBlendFraction(float outerConeAngle, float innerConeAngle)
 {
-	return outerConeAngle *umath::clamp(1.f -blendFraction,0.f,1.f);
+	innerConeAngle = umath::clamp(innerConeAngle, 0.f, outerConeAngle);
+	return 1.f - (innerConeAngle / outerConeAngle);
 }
-float BaseEnvLightSpotComponent::CalcBlendFraction(float outerConeAngle,float innerConeAngle)
-{
-	innerConeAngle = umath::clamp(innerConeAngle,0.f,outerConeAngle);
-	return 1.f -(innerConeAngle /outerConeAngle);
-}
-void BaseEnvLightSpotComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
+void BaseEnvLightSpotComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseEnvLightSpotComponent;
 
 	{
 		using TBlend = float;
-		auto memberInfo = create_component_member_info<
-			T,TBlend,
-			static_cast<void(T::*)(TBlend)>(&T::SetBlendFraction),
-			static_cast<TBlend(T::*)() const>(&T::GetBlendFraction)
-		>("blendFraction",0.1f,AttributeSpecializationType::Fraction);
+		auto memberInfo = create_component_member_info<T, TBlend, static_cast<void (T::*)(TBlend)>(&T::SetBlendFraction), static_cast<TBlend (T::*)() const>(&T::GetBlendFraction)>("blendFraction", 0.1f, AttributeSpecializationType::Fraction);
 		memberInfo.SetMin(0.f);
 		memberInfo.SetMax(1.f);
 		registerMember(std::move(memberInfo));
 	}
-	
+
 	using TConeAngle = float;
 	{
-		auto memberInfo = create_component_member_info<
-			T,TConeAngle,
-			static_cast<void(T::*)(TConeAngle)>(&T::SetOuterConeAngle),
-			static_cast<TConeAngle(T::*)() const>(&T::GetOuterConeAngle)
-		>("outerConeAngle",0.f,AttributeSpecializationType::Angle);
+		auto memberInfo = create_component_member_info<T, TConeAngle, static_cast<void (T::*)(TConeAngle)>(&T::SetOuterConeAngle), static_cast<TConeAngle (T::*)() const>(&T::GetOuterConeAngle)>("outerConeAngle", 0.f, AttributeSpecializationType::Angle);
 		memberInfo.SetMin(0.f);
 		memberInfo.SetMax(179.99f);
 		registerMember(std::move(memberInfo));
 	}
 
 	{
-		auto memberInfo = create_component_member_info<
-			T,TConeAngle,
-			static_cast<void(T::*)(TConeAngle)>(&T::SetConeStartOffset),
-			static_cast<TConeAngle(T::*)() const>(&T::GetConeStartOffset)
-		>("coneStartOffset",0.f,AttributeSpecializationType::Distance);
+		auto memberInfo = create_component_member_info<T, TConeAngle, static_cast<void (T::*)(TConeAngle)>(&T::SetConeStartOffset), static_cast<TConeAngle (T::*)() const>(&T::GetConeStartOffset)>("coneStartOffset", 0.f, AttributeSpecializationType::Distance);
 		memberInfo.SetMin(0.f);
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseEnvLightSpotComponent::BaseEnvLightSpotComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent),m_blendFraction(util::FloatProperty::Create(0.1f)),
-	m_coneStartOffset(util::FloatProperty::Create(0.f))
-{}
+BaseEnvLightSpotComponent::BaseEnvLightSpotComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_blendFraction(util::FloatProperty::Create(0.1f)), m_coneStartOffset(util::FloatProperty::Create(0.f)) {}
 void BaseEnvLightSpotComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"outerconeangle",false))
-		{
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "outerconeangle", false)) {
 			if(m_fieldAngleComponent.valid())
 				m_fieldAngleComponent->SetFieldAngle(util::to_float(kvData.value));
 		}
-		else if(ustring::compare<std::string>(kvData.key,"outercutoff",false))
-		{
+		else if(ustring::compare<std::string>(kvData.key, "outercutoff", false)) {
 			if(m_fieldAngleComponent.valid())
-				m_fieldAngleComponent->SetFieldAngle(util::to_float(kvData.value) *2.f);
+				m_fieldAngleComponent->SetFieldAngle(util::to_float(kvData.value) * 2.f);
 		}
-		else if(ustring::compare<std::string>(kvData.key,"blendfraction",false))
+		else if(ustring::compare<std::string>(kvData.key, "blendfraction", false))
 			*m_blendFraction = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"cone_start_offset",false))
+		else if(ustring::compare<std::string>(kvData.key, "cone_start_offset", false))
 			SetConeStartOffset(util::to_float(kvData.value));
 		else
 			return util::EventReply::Unhandled;
@@ -103,61 +83,45 @@ void BaseEnvLightSpotComponent::Initialize()
 	m_netEvSetConeStartOffset = SetupNetEvent("set_cone_start_offset");
 }
 
-void BaseEnvLightSpotComponent::SetFieldAngleComponent(BaseFieldAngleComponent &c) {m_fieldAngleComponent = c.GetHandle<BaseFieldAngleComponent>();}
+void BaseEnvLightSpotComponent::SetFieldAngleComponent(BaseFieldAngleComponent &c) { m_fieldAngleComponent = c.GetHandle<BaseFieldAngleComponent>(); }
 
-float BaseEnvLightSpotComponent::CalcConeFalloff(
-	const Vector3 &lightPos,const Vector3 &lightDir,umath::Degree outerConeAngle,umath::Degree innerConeAngle,const Vector3 &point
-)
+float BaseEnvLightSpotComponent::CalcConeFalloff(const Vector3 &lightPos, const Vector3 &lightDir, umath::Degree outerConeAngle, umath::Degree innerConeAngle, const Vector3 &point)
 {
-	auto posFromWorldSpace = lightPos -point;
+	auto posFromWorldSpace = lightPos - point;
 	auto dirToLight = posFromWorldSpace;
 	uvec::normalize(&dirToLight);
-	return ulighting::calc_cone_falloff(lightDir,dirToLight,outerConeAngle,innerConeAngle);
+	return ulighting::calc_cone_falloff(lightDir, dirToLight, outerConeAngle, innerConeAngle);
 }
 
-Candela BaseEnvLightSpotComponent::CalcIntensityFalloff(
-	const Vector3 &lightPos,const Vector3 &lightDir,
-	umath::Degree outerConeAngle,umath::Degree innerConeAngle,const Vector3 &point,
-	std::optional<float> radius
-)
+Candela BaseEnvLightSpotComponent::CalcIntensityFalloff(const Vector3 &lightPos, const Vector3 &lightDir, umath::Degree outerConeAngle, umath::Degree innerConeAngle, const Vector3 &point, std::optional<float> radius)
 {
-	return BaseEnvLightComponent::CalcDistanceFalloff(lightPos,point,radius) *CalcConeFalloff(lightPos,lightDir,outerConeAngle,innerConeAngle,point);
+	return BaseEnvLightComponent::CalcDistanceFalloff(lightPos, point, radius) * CalcConeFalloff(lightPos, lightDir, outerConeAngle, innerConeAngle, point);
 }
-Candela BaseEnvLightSpotComponent::CalcIntensityAtPoint(
-	const Vector3 &lightPos,Candela intensity,const Vector3 &lightDir,
-	umath::Degree outerConeAngle,umath::Degree innerConeAngle,const Vector3 &point,
-	std::optional<float> radius
-)
+Candela BaseEnvLightSpotComponent::CalcIntensityAtPoint(const Vector3 &lightPos, Candela intensity, const Vector3 &lightDir, umath::Degree outerConeAngle, umath::Degree innerConeAngle, const Vector3 &point, std::optional<float> radius)
 {
-	intensity *= CalcIntensityFalloff(lightPos,lightDir,outerConeAngle,innerConeAngle,point,radius);
+	intensity *= CalcIntensityFalloff(lightPos, lightDir, outerConeAngle, innerConeAngle, point, radius);
 	return intensity;
 }
-util::EventReply BaseEnvLightSpotComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
+util::EventReply BaseEnvLightSpotComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(eventId == BaseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT)
-	{
-		auto &levData = static_cast<CECalcLightDirectionToPoint&>(evData);
-		auto dir = levData.pos -GetEntity().GetPosition();
+	if(eventId == BaseEnvLightComponent::EVENT_CALC_LIGHT_DIRECTION_TO_POINT) {
+		auto &levData = static_cast<CECalcLightDirectionToPoint &>(evData);
+		auto dir = levData.pos - GetEntity().GetPosition();
 		uvec::normalize(&dir);
 		levData.direction = dir;
 		return util::EventReply::Handled;
 	}
-	else if(eventId == BaseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT)
-	{
-		auto &levData = static_cast<CECalcLightIntensityAtPoint&>(evData);
-		auto *cLight = dynamic_cast<pragma::BaseEnvLightComponent*>(GetEntity().FindComponent("light").get());
-		if(cLight)
-		{
-			auto *radiusC = dynamic_cast<pragma::BaseRadiusComponent*>(GetEntity().FindComponent("radius").get());
+	else if(eventId == BaseEnvLightComponent::EVENT_CALC_LIGHT_INTENSITY_AT_POINT) {
+		auto &levData = static_cast<CECalcLightIntensityAtPoint &>(evData);
+		auto *cLight = dynamic_cast<pragma::BaseEnvLightComponent *>(GetEntity().FindComponent("light").get());
+		if(cLight) {
+			auto *radiusC = dynamic_cast<pragma::BaseRadiusComponent *>(GetEntity().FindComponent("radius").get());
 			auto radius = radiusC ? radiusC->GetRadius() : 0.f;
-			static_cast<CECalcLightIntensityAtPoint&>(evData).intensity = CalcIntensityAtPoint(
-				GetEntity().GetPosition(),cLight->GetLightIntensityCandela(),GetEntity().GetForward(),
-				GetOuterConeAngle(),GetInnerConeAngle(),levData.pos,radius
-			);
+			static_cast<CECalcLightIntensityAtPoint &>(evData).intensity = CalcIntensityAtPoint(GetEntity().GetPosition(), cLight->GetLightIntensityCandela(), GetEntity().GetForward(), GetOuterConeAngle(), GetInnerConeAngle(), levData.pos, radius);
 		}
 		return util::EventReply::Handled;
 	}
-	return BaseEntityComponent::HandleEvent(eventId,evData);
+	return BaseEntityComponent::HandleEvent(eventId, evData);
 }
 
 void BaseEnvLightSpotComponent::Save(udm::LinkedPropertyWrapperArg udm)
@@ -166,9 +130,9 @@ void BaseEnvLightSpotComponent::Save(udm::LinkedPropertyWrapperArg udm)
 	udm["blendFraction"] = **m_blendFraction;
 	udm["coneStartOffset"] = **m_coneStartOffset;
 }
-void BaseEnvLightSpotComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
+void BaseEnvLightSpotComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version)
 {
-	BaseEntityComponent::Load(udm,version);
+	BaseEntityComponent::Load(udm, version);
 	udm["blendFraction"](**m_blendFraction);
 	udm["coneStartOffset"](**m_coneStartOffset);
 }
@@ -186,43 +150,30 @@ umath::Degree BaseEnvLightSpotComponent::GetOuterConeAngle() const
 	return m_fieldAngleComponent->GetFieldAngle();
 }
 
-void BaseEnvLightSpotComponent::SetInnerConeAngle(umath::Degree ang)
-{
-	SetBlendFraction(CalcBlendFraction(GetOuterConeAngle(),ang));
-}
-umath::Degree BaseEnvLightSpotComponent::GetInnerConeAngle() const
-{
-	return CalcInnerConeAngle(GetOuterConeAngle(),GetBlendFraction());
-}
-umath::Fraction BaseEnvLightSpotComponent::GetBlendFraction() const {return *m_blendFraction;}
-void BaseEnvLightSpotComponent::SetBlendFraction(umath::Fraction fraction) {*m_blendFraction = fraction;}
+void BaseEnvLightSpotComponent::SetInnerConeAngle(umath::Degree ang) { SetBlendFraction(CalcBlendFraction(GetOuterConeAngle(), ang)); }
+umath::Degree BaseEnvLightSpotComponent::GetInnerConeAngle() const { return CalcInnerConeAngle(GetOuterConeAngle(), GetBlendFraction()); }
+umath::Fraction BaseEnvLightSpotComponent::GetBlendFraction() const { return *m_blendFraction; }
+void BaseEnvLightSpotComponent::SetBlendFraction(umath::Fraction fraction) { *m_blendFraction = fraction; }
 
-const util::PFloatProperty &BaseEnvLightSpotComponent::GetBlendFractionProperty() const {return m_blendFraction;}
+const util::PFloatProperty &BaseEnvLightSpotComponent::GetBlendFractionProperty() const { return m_blendFraction; }
 const util::PFloatProperty &BaseEnvLightSpotComponent::GetOuterConeAngleProperty() const
 {
-	if(m_fieldAngleComponent.expired())
-	{
+	if(m_fieldAngleComponent.expired()) {
 		static util::PFloatProperty nptr = nullptr;
 		return nptr;
 	}
 	return m_fieldAngleComponent->GetFieldAngleProperty();
 }
-const util::PFloatProperty &BaseEnvLightSpotComponent::GetConeStartOffsetProperty() const {return m_coneStartOffset;}
+const util::PFloatProperty &BaseEnvLightSpotComponent::GetConeStartOffsetProperty() const { return m_coneStartOffset; }
 
-void BaseEnvLightSpotComponent::SetConeStartOffset(float offset) {*m_coneStartOffset = offset;}
-float BaseEnvLightSpotComponent::GetConeStartOffset() const {return *m_coneStartOffset;}
+void BaseEnvLightSpotComponent::SetConeStartOffset(float offset) { *m_coneStartOffset = offset; }
+float BaseEnvLightSpotComponent::GetConeStartOffset() const { return *m_coneStartOffset; }
 
-float BaseEnvLightSpotComponent::CalcConeFalloff(const Vector3 &point) const
-{
-	return CalcConeFalloff(
-		GetEntity().GetPosition(),GetEntity().GetForward(),
-		GetOuterConeAngle(),GetInnerConeAngle(),point
-	);
-}
+float BaseEnvLightSpotComponent::CalcConeFalloff(const Vector3 &point) const { return CalcConeFalloff(GetEntity().GetPosition(), GetEntity().GetForward(), GetOuterConeAngle(), GetInnerConeAngle(), point); }
 float BaseEnvLightSpotComponent::CalcDistanceFalloff(const Vector3 &point) const
 {
-	auto *radiusC = dynamic_cast<pragma::BaseRadiusComponent*>(GetEntity().FindComponent("radius").get());
+	auto *radiusC = dynamic_cast<pragma::BaseRadiusComponent *>(GetEntity().FindComponent("radius").get());
 	if(!radiusC)
 		return 0.f;
-	return BaseEnvLightComponent::CalcDistanceFalloff(GetEntity().GetPosition(),point,radiusC->GetRadius());
+	return BaseEnvLightComponent::CalcDistanceFalloff(GetEntity().GetPosition(), point, radiusC->GetRadius());
 }

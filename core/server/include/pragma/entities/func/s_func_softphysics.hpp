@@ -12,24 +12,18 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/func/basefuncsoftphysics.hpp>
 
-namespace pragma
-{
-	class DLLSERVER SFuncSoftPhysicsComponent final
-		: public BaseFuncSoftPhysicsComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SFuncSoftPhysicsComponent final : public BaseFuncSoftPhysicsComponent, public SBaseNetComponent {
+	  public:
 		SFuncSoftPhysicsComponent(BaseEntity &ent) : BaseFuncSoftPhysicsComponent(ent) {}
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLSERVER FuncSoftPhysics
-	: public SBaseEntity
-{
-public:
+class DLLSERVER FuncSoftPhysics : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

@@ -11,21 +11,16 @@
 #include "pragma/entities/c_baseentity.h"
 #include <pragma/entities/basefilterentity.h>
 
-namespace pragma
-{
-	class DLLCLIENT CFilterNameComponent final
-		: public BaseFilterNameComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CFilterNameComponent final : public BaseFilterNameComponent {
+	  public:
 		CFilterNameComponent(BaseEntity &ent) : BaseFilterNameComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLCLIENT CFilterEntityName
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CFilterEntityName : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

@@ -10,13 +10,13 @@
 #include <panima/channel.hpp>
 #include <panima/channel_t.hpp>
 
-#pragma optimize("",off)
+#pragma optimize("", off)
 void __panima_cvs_5()
 {
-	udm::visit_ng({},[](auto tag) {
-        using TChannel = typename decltype(tag)::type;
-		if constexpr(std::is_same_v<TChannel,udm::Vector2> || std::is_same_v<TChannel,udm::Vector3> || std::is_same_v<TChannel,udm::Vector4>)
+	udm::visit_ng({}, [](auto tag) {
+		using TChannel = typename decltype(tag)::type;
+		if constexpr(std::is_same_v<TChannel, udm::Vector2> || std::is_same_v<TChannel, udm::Vector3> || std::is_same_v<TChannel, udm::Vector4>)
 			instantiate_get_member_channel_submitter<TChannel>();
 	});
 }
-#pragma optimize("",on)
+#pragma optimize("", on)

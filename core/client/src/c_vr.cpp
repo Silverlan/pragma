@@ -33,16 +33,15 @@ static void update_text()
 	if(hHmdViewText.IsValid() == false || hHmdViewMessage.IsValid() == false)
 		return;
 	auto *pBg = hHmdViewMessage.get();
-	auto *pText = static_cast<WIText*>(hHmdViewText.get());
+	auto *pText = static_cast<WIText *>(hHmdViewText.get());
 	pText->SetText(lastMessage);
 	pText->SetColor(lastColor);
 	pText->SizeToContents();
-	pText->SetPos(pBg->GetWidth() *0.5f -pText->GetWidth() *0.5f,pBg->GetHeight() *0.5f -pText->GetHeight() *0.5f);
+	pText->SetPos(pBg->GetWidth() * 0.5f - pText->GetWidth() * 0.5f, pBg->GetHeight() * 0.5f - pText->GetHeight() * 0.5f);
 }
-static void show_hmd_message(bool bInit=false)
+static void show_hmd_message(bool bInit = false)
 {
-	if(hHmdViewText.IsValid() == true)
-	{
+	if(hHmdViewText.IsValid() == true) {
 		update_text();
 		return;
 	}
@@ -57,7 +56,7 @@ static void show_hmd_message(bool bInit=false)
 
 	auto *pText = wgui.Create<WIText>(bg);
 	hHmdViewText = pText->GetHandle();
-	
+
 	update_text();
 }
 
@@ -67,10 +66,9 @@ static void cl_render_vr_enabled(bool b)
 		return;
 	Locale::Load("vr.txt");
 	std::string err;
-	if(client->InitializeLibrary(OPENVR_MODULE_PATH,&err) == nullptr)
-	{
-		lastMessage = Locale::GetText("vr_msg_error_load",std::vector<std::string>{err});
-		Con::cerr<<lastMessage<<Con::endl;
+	if(client->InitializeLibrary(OPENVR_MODULE_PATH, &err) == nullptr) {
+		lastMessage = Locale::GetText("vr_msg_error_load", std::vector<std::string> {err});
+		Con::cerr << lastMessage << Con::endl;
 		lastColor = Color::Red;
 		show_hmd_message();
 		return;
@@ -81,16 +79,14 @@ static void cl_render_vr_enabled(bool b)
 		return;
 	std::vector<std::string> reqInstanceExtensions;
 	std::vector<std::string> reqDeviceExtensions;
-	auto *fInitialize = dllHandle->FindSymbolAddress<bool(*)(std::string&,std::vector<std::string>&,std::vector<std::string>&)>("openvr_initialize");
-	if(fInitialize(err,reqInstanceExtensions,reqDeviceExtensions) == false)
-	{
-		lastMessage = Locale::GetText("vr_msg_error_init",std::vector<std::string>{err});
-		Con::cerr<<lastMessage<<Con::endl;
+	auto *fInitialize = dllHandle->FindSymbolAddress<bool (*)(std::string &, std::vector<std::string> &, std::vector<std::string> &)>("openvr_initialize");
+	if(fInitialize(err, reqInstanceExtensions, reqDeviceExtensions) == false) {
+		lastMessage = Locale::GetText("vr_msg_error_init", std::vector<std::string> {err});
+		Con::cerr << lastMessage << Con::endl;
 		lastColor = Color::Red;
 		show_hmd_message();
 	}
-	else
-	{
+	else {
 		/* // Obsolete: All extensions are enabled by default by Anvil
 		auto &dev = c_engine->GetDevice();
 		auto fCheckExtension = [&dev](const std::string &ext,bool instanceExtension=false) -> bool {
@@ -119,9 +115,7 @@ static void cl_render_vr_enabled(bool b)
 		lastColor = Color::White;
 	}
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_render_vr_enabled,[](NetworkState*,ConVar*,bool,bool b) {
-	cl_render_vr_enabled(b);
-})
+REGISTER_CONVAR_CALLBACK_CL(cl_render_vr_enabled, [](NetworkState *, ConVar *, bool, bool b) { cl_render_vr_enabled(b); })
 
 /*REGISTER_CONVAR_CALLBACK_CL(cl_render_vr_resolution,[](NetworkState*,ConVar*,std::string,std::string val) {
 	
@@ -221,11 +215,9 @@ static void cl_vr_mirror_window_enabled(bool val)
 	auto dllHandle = client->GetLibraryModule(OPENVR_MODULE_PATH);
 	if(dllHandle == nullptr)
 		return;
-	auto *fSetMirrorWindowEnabled = dllHandle->FindSymbolAddress<void(*)(bool)>("openvr_set_mirror_window_enabled");
+	auto *fSetMirrorWindowEnabled = dllHandle->FindSymbolAddress<void (*)(bool)>("openvr_set_mirror_window_enabled");
 	if(fSetMirrorWindowEnabled == nullptr)
 		return;
 	fSetMirrorWindowEnabled(val);
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_vr_mirror_window_enabled,[](NetworkState*,ConVar*,bool,bool val) {
-	cl_vr_mirror_window_enabled(val);
-})
+REGISTER_CONVAR_CALLBACK_CL(cl_vr_mirror_window_enabled, [](NetworkState *, ConVar *, bool, bool val) { cl_vr_mirror_window_enabled(val); })

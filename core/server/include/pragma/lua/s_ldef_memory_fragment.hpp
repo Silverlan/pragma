@@ -10,6 +10,6 @@
 #include <pragma/lua/ldefinitions.h>
 #include "pragma/ai/ai_memory.h"
 
-lua_registercheck(AIMemoryFragment,pragma::ai::Memory::Fragment);
+lua_registercheck(AIMemoryFragment, pragma::ai::Memory::Fragment);
 
 #endif

@@ -21,16 +21,15 @@ void BaseTriggerPushComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"push_dir",false))
-		{
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "push_dir", false)) {
 			EulerAngles ang(kvData.value);
 			m_kvPushDir = ang.Forward();
 		}
-		else if(ustring::compare<std::string>(kvData.key,"push_speed",false))
+		else if(ustring::compare<std::string>(kvData.key, "push_speed", false))
 			m_kvPushSpeed = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"change_duration",false))
+		else if(ustring::compare<std::string>(kvData.key, "change_duration", false))
 			m_kvChangeDuration = util::to_float(kvData.value);
 		else
 			return util::EventReply::Unhandled;
@@ -46,7 +45,7 @@ void BaseTriggerPushComponent::Initialize()
 void BaseTriggerPushComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
-	auto *pToggleComponent = dynamic_cast<BaseToggleComponent*>(&component);
+	auto *pToggleComponent = dynamic_cast<BaseToggleComponent *>(&component);
 	if(pToggleComponent != nullptr)
 		m_toggleComponent = pToggleComponent->GetHandle<BaseToggleComponent>();
 }
@@ -55,24 +54,21 @@ void BaseTriggerPushComponent::OnTick(double dt)
 {
 	if(m_toggleComponent.valid() && m_toggleComponent->IsTurnedOn() == false)
 		return;
-	for(auto it=m_entityPushQueue.begin();it!=m_entityPushQueue.end();)
-	{
+	for(auto it = m_entityPushQueue.begin(); it != m_entityPushQueue.end();) {
 		auto &info = *it;
-		if(info.hEntity.valid() == false)
-		{
+		if(info.hEntity.valid() == false) {
 			it = m_entityPushQueue.erase(it);
 			continue;
 		}
 		auto *ent = info.hEntity.get();
-		auto t = umath::min(info.t,static_cast<float>(dt) /m_kvChangeDuration);
+		auto t = umath::min(info.t, static_cast<float>(dt) / m_kvChangeDuration);
 		auto pVelComponentEnt = ent->GetComponent<pragma::VelocityComponent>();
-		auto vel = pVelComponentEnt.valid() ? pVelComponentEnt->GetVelocity() : Vector3{};
-		vel = glm::slerp(uvec::get_normal(vel),m_kvPushDir,t) *uvec::length(vel);
+		auto vel = pVelComponentEnt.valid() ? pVelComponentEnt->GetVelocity() : Vector3 {};
+		vel = glm::slerp(uvec::get_normal(vel), m_kvPushDir, t) * uvec::length(vel);
 		//uvec::rotate(&vel,info.rotation *t);
 		if(pVelComponentEnt.valid())
 			pVelComponentEnt->SetVelocity(vel);
-		if((info.t -= t) <= 0.f)
-		{
+		if((info.t -= t) <= 0.f) {
 			it = m_entityPushQueue.erase(it);
 			continue;
 		}
@@ -94,11 +90,10 @@ void BaseTriggerPushComponent::OnTick(double dt)
 	}
 	if(m_kvPushSpeed == 0.f)
 		return;
-	Vector3 vel = m_kvPushDir *m_kvPushSpeed;
+	Vector3 vel = m_kvPushDir * m_kvPushSpeed;
 	vel *= dt;
-	auto *pTouchComponent = static_cast<pragma::BaseTouchComponent*>(GetEntity().FindComponent("touch").get());
-	for(auto &touch : pTouchComponent->GetTouchingInfo())
-	{
+	auto *pTouchComponent = static_cast<pragma::BaseTouchComponent *>(GetEntity().FindComponent("touch").get());
+	for(auto &touch : pTouchComponent->GetTouchingInfo()) {
 		auto &hEnt = touch.touch.entity;
 		if(hEnt.valid() == false || touch.triggered == false)
 			continue;
@@ -108,23 +103,20 @@ void BaseTriggerPushComponent::OnTick(double dt)
 	}
 }
 
-util::EventReply BaseTriggerPushComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
+util::EventReply BaseTriggerPushComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEntityComponent::HandleEvent(eventId,evData) == util::EventReply::Handled)
+	if(BaseEntityComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(eventId == BaseTouchComponent::EVENT_ON_START_TOUCH)
-	{
+	if(eventId == BaseTouchComponent::EVENT_ON_START_TOUCH) {
 		auto &entThis = GetEntity();
-		if(entThis.GetSpawnFlags() &umath::to_integral(SpawnFlags::ChangeVelocityDirection))
-		{
-			auto &touchData = static_cast<const pragma::CETouchData&>(evData);
+		if(entThis.GetSpawnFlags() & umath::to_integral(SpawnFlags::ChangeVelocityDirection)) {
+			auto &touchData = static_cast<const pragma::CETouchData &>(evData);
 			m_entityPushQueue.push_back({});
 			auto &info = m_entityPushQueue.back();
 			info.hEntity = touchData.entity->GetHandle();
 			auto pVelComponentEnt = touchData.entity->GetComponent<pragma::VelocityComponent>();
-			info.rotation = uvec::get_rotation(pVelComponentEnt.valid() ? uvec::get_normal(pVelComponentEnt->GetVelocity()) : uvec::UP,m_kvPushDir);
+			info.rotation = uvec::get_rotation(pVelComponentEnt.valid() ? uvec::get_normal(pVelComponentEnt->GetVelocity()) : uvec::UP, m_kvPushDir);
 		}
 	}
 	return util::EventReply::Unhandled;
 }
-

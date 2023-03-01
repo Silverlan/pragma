@@ -20,8 +20,7 @@
 #include <mathutil/uvec.h>
 
 class Scene;
-namespace prosper
-{
+namespace prosper {
 	class Texture;
 	class ICommandBuffer;
 	class IPrimaryCommandBuffer;
@@ -33,31 +32,33 @@ namespace prosper
 	class IBuffer;
 	class IFence;
 };
-namespace util {struct DrawSceneInfo;};
-namespace pragma {class CRasterizationRendererComponent;};
-namespace pragma::rendering
-{
-	class DLLCLIENT HDRData
-	{
-	public:
+namespace util {
+	struct DrawSceneInfo;
+};
+namespace pragma {
+	class CRasterizationRendererComponent;
+};
+namespace pragma::rendering {
+	class DLLCLIENT HDRData {
+	  public:
 		HDRData(CRasterizationRendererComponent &rasterizer);
 		~HDRData();
 		void UpdateExposure();
-		bool Initialize(uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bEnableSSAO);
+		bool Initialize(uint32_t width, uint32_t height, prosper::SampleCountFlags sampleCount, bool bEnableSSAO);
 		bool InitializeDescriptorSets();
 		prosper::RenderTarget &GetRenderTarget(const util::DrawSceneInfo &drawSceneInfo);
 
 		void SwapIOTextures();
 
-		bool BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *customRenderPass=nullptr,bool secondaryCommandBuffers=false);
+		bool BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo, prosper::IRenderPass *customRenderPass = nullptr, bool secondaryCommandBuffers = false);
 		bool EndRenderPass(const util::DrawSceneInfo &drawSceneInfo);
 		bool ResolveRenderPass(const util::DrawSceneInfo &drawSceneInfo);
-		void ReloadPresentationRenderTarget(uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount);
+		void ReloadPresentationRenderTarget(uint32_t width, uint32_t height, prosper::SampleCountFlags sampleCount);
 		bool ReloadBloomRenderTarget(uint32_t width);
 
 		void ResetIOTextureIndex();
 		bool BlitStagingRenderTargetToMainRenderTarget(const util::DrawSceneInfo &drawSceneInfo);
-		bool BlitMainDepthBufferToSamplableDepthBuffer(const util::DrawSceneInfo &drawSceneInfo,std::function<void(prosper::ICommandBuffer&)> &fTransitionSampleImgToTransferDst);
+		bool BlitMainDepthBufferToSamplableDepthBuffer(const util::DrawSceneInfo &drawSceneInfo, std::function<void(prosper::ICommandBuffer &)> &fTransitionSampleImgToTransferDst);
 
 		SSAOInfo ssaoInfo;
 		pragma::rendering::Prepass prepass;
@@ -107,14 +108,13 @@ namespace pragma::rendering
 		std::shared_ptr<prosper::RenderTarget> rtParticle = nullptr;
 
 		float exposure = 1.f;
-		float max_exposure = 1,f;
-		std::array<float,3> luminescence = {0.f,0.f,0.f};
-	private:
+		float max_exposure = 1, f;
+		std::array<float, 3> luminescence = {0.f, 0.f, 0.f};
+	  private:
 		static prosper::util::SamplerCreateInfo GetSamplerCreateInfo();
 		uint32_t m_curTex = 0;
 		CallbackHandle m_cbReloadCommandBuffer;
-		struct Exposure
-		{
+		struct Exposure {
 			Exposure();
 			std::shared_ptr<prosper::IDescriptorSetGroup> descSetGroupAverageColorTexture = nullptr;
 			std::shared_ptr<prosper::IDescriptorSetGroup> descSetGroupAverageColorBuffer = nullptr;
@@ -123,7 +123,7 @@ namespace pragma::rendering
 			double lastExposureUpdate;
 			bool Initialize(prosper::Texture &texture);
 			const Vector3 &UpdateColor();
-		private:
+		  private:
 			util::WeakHandle<prosper::Shader> m_shaderCalcColor = {};
 			std::weak_ptr<prosper::Texture> m_exposureColorSource = {};
 			std::shared_ptr<prosper::IPrimaryCommandBuffer> m_calcImgColorCmdBuffer = nullptr;

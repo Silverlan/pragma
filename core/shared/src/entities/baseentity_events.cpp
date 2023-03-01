@@ -13,11 +13,9 @@
 
 using namespace pragma;
 
-CEKeyValueData::CEKeyValueData(const std::string &key,const std::string &value)
-	: key(key),value(value)
-{}
+CEKeyValueData::CEKeyValueData(const std::string &key, const std::string &value) : key(key), value(value) {}
 void CEKeyValueData::PushArguments(lua_State *l)
 {
-	Lua::PushString(l,key);
-	Lua::PushString(l,value);
+	Lua::PushString(l, key);
+	Lua::PushString(l, value);
 }

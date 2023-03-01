@@ -24,8 +24,7 @@ decltype(pragma::CurlQueryHandler::s_fIsErrorCode) pragma::CurlQueryHandler::s_f
 pragma::CurlQueryHandler::CurlQueryHandler()
 {
 	Initialize();
-	if(s_fCreate == nullptr)
-	{
+	if(s_fCreate == nullptr) {
 		throw std::runtime_error("Unable to load 'curl' libary!");
 		return;
 	}
@@ -34,8 +33,7 @@ pragma::CurlQueryHandler::CurlQueryHandler()
 
 pragma::CurlQueryHandler::~CurlQueryHandler()
 {
-	if(IsComplete() == false)
-	{
+	if(IsComplete() == false) {
 		CancelDownload();
 		s_fRelease(m_curl);
 		for(auto &f : m_files) // TODO: Only remove files which haven't been fully downloaded yet
@@ -48,43 +46,45 @@ pragma::CurlQueryHandler::~CurlQueryHandler()
 	else
 		s_fRelease(m_curl);
 }
-void pragma::CurlQueryHandler::AddResource(const std::string &url,const std::string &fname,const std::function<void(int64_t,int64_t,int64_t,int64_t)> &progressCallback,const std::function<void(int32_t)> &onComplete)
+void pragma::CurlQueryHandler::AddResource(const std::string &url, const std::string &fname, const std::function<void(int64_t, int64_t, int64_t, int64_t)> &progressCallback, const std::function<void(int32_t)> &onComplete)
 {
-	auto f = FileManager::OpenFile<VFilePtrReal>(fname.c_str(),"wb");
+	auto f = FileManager::OpenFile<VFilePtrReal>(fname.c_str(), "wb");
 	if(f == nullptr)
 		return;
 	m_files.push_back(f);
-	struct FileData
-	{
-		FileData(const VFilePtrReal &f)
-			: file{f}
-		{}
+	struct FileData {
+		FileData(const VFilePtrReal &f) : file {f} {}
 		VFilePtrReal file;
 	};
 	auto fd = std::make_shared<FileData>(f);
 	auto *fptr = f.get();
-	s_fAddResource(m_curl,url,[fptr](void *data,size_t size,size_t nmemb) -> size_t {
-		fptr->Write(data,size *nmemb);
-		return size *nmemb;
-	},nullptr,progressCallback,[this,onComplete,fd](int32_t code) {
-		auto fptr = fd->file.get();
-		auto it = std::find_if(m_files.begin(),m_files.end(),[fptr](const std::shared_ptr<VFilePtrInternalReal> &fOther) {
-			return (fOther.get() == fptr) ? true : false;
-		});
-		if(it != m_files.end())
-			m_files.erase(it);
-		fd->file = nullptr;
-		if(onComplete != nullptr)
-			onComplete(code);
-	});
+	s_fAddResource(
+	  m_curl, url,
+	  [fptr](void *data, size_t size, size_t nmemb) -> size_t {
+		  fptr->Write(data, size * nmemb);
+		  return size * nmemb;
+	  },
+	  nullptr, progressCallback,
+	  [this, onComplete, fd](int32_t code) {
+		  auto fptr = fd->file.get();
+		  auto it = std::find_if(m_files.begin(), m_files.end(), [fptr](const std::shared_ptr<VFilePtrInternalReal> &fOther) { return (fOther.get() == fptr) ? true : false; });
+		  if(it != m_files.end())
+			  m_files.erase(it);
+		  fd->file = nullptr;
+		  if(onComplete != nullptr)
+			  onComplete(code);
+	  });
 }
-void pragma::CurlQueryHandler::AddRequest(const std::string &url,const std::unordered_map<std::string,std::string> &post,const std::function<void(int32_t,const std::string&)> &onComplete,const std::function<void(int64_t,int64_t,int64_t,int64_t)> &progressCallback) {s_fSendRequest(m_curl,url,post,onComplete,progressCallback);}
-void pragma::CurlQueryHandler::StartDownload() {s_fStartDownload(m_curl);}
-void pragma::CurlQueryHandler::CancelDownload() {s_fCancelDownload(m_curl);}
-bool pragma::CurlQueryHandler::IsComplete() const {return s_fIsComplete(m_curl);}
-void pragma::CurlQueryHandler::SetErrorHandler(const std::function<void(uint32_t)> &f) {s_fSetErrorHandler(m_curl,f);}
-std::string pragma::CurlQueryHandler::CodeToString(int32_t code) const {return s_fCodeToString(code);}
-bool pragma::CurlQueryHandler::IsErrorCode(int32_t code) const {return s_fIsErrorCode(code);}
+void pragma::CurlQueryHandler::AddRequest(const std::string &url, const std::unordered_map<std::string, std::string> &post, const std::function<void(int32_t, const std::string &)> &onComplete, const std::function<void(int64_t, int64_t, int64_t, int64_t)> &progressCallback)
+{
+	s_fSendRequest(m_curl, url, post, onComplete, progressCallback);
+}
+void pragma::CurlQueryHandler::StartDownload() { s_fStartDownload(m_curl); }
+void pragma::CurlQueryHandler::CancelDownload() { s_fCancelDownload(m_curl); }
+bool pragma::CurlQueryHandler::IsComplete() const { return s_fIsComplete(m_curl); }
+void pragma::CurlQueryHandler::SetErrorHandler(const std::function<void(uint32_t)> &f) { s_fSetErrorHandler(m_curl, f); }
+std::string pragma::CurlQueryHandler::CodeToString(int32_t code) const { return s_fCodeToString(code); }
+bool pragma::CurlQueryHandler::IsErrorCode(int32_t code) const { return s_fIsErrorCode(code); }
 
 void pragma::CurlQueryHandler::Initialize()
 {
@@ -97,13 +97,12 @@ void pragma::CurlQueryHandler::Initialize()
 #else
 	const std::string curlPath = "curl/libpr_curl.so";
 #endif
-	auto *nw = static_cast<NetworkState*>(pragma::get_engine()->GetServerNetworkState());
+	auto *nw = static_cast<NetworkState *>(pragma::get_engine()->GetServerNetworkState());
 	if(!nw)
 		nw = pragma::get_engine()->GetClientState();
-	
-	if(!nw || nw->InitializeLibrary(curlPath,&err) == nullptr)
-	{
-		Con::cerr<<"ERROR: Unable to load 'curl' library: "<<err<<Con::endl;
+
+	if(!nw || nw->InitializeLibrary(curlPath, &err) == nullptr) {
+		Con::cerr << "Unable to load 'curl' library: " << err << Con::endl;
 		return;
 	}
 	auto dllHandle = nw->GetLibraryModule(curlPath);

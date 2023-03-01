@@ -10,7 +10,4 @@
 
 using namespace util;
 
-SplashDamageInfo::SplashDamageInfo()
-{
-	damageInfo.SetDamageType(DAMAGETYPE::EXPLOSION);
-}
+SplashDamageInfo::SplashDamageInfo() { damageInfo.SetDamageType(DAMAGETYPE::EXPLOSION); }

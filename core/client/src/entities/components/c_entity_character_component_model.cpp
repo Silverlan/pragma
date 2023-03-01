@@ -10,11 +10,6 @@
 
 using namespace pragma;
 
-CEntityCharacterComponentModel::CEntityCharacterComponentModel(CBaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+CEntityCharacterComponentModel::CEntityCharacterComponentModel(CBaseEntity &ent) : BaseEntityComponent(ent) {}
 
-void CEntityCharacterComponentModel::Initialize()
-{
-	BaseEntityComponent::Initialize();
-}
+void CEntityCharacterComponentModel::Initialize() { BaseEntityComponent::Initialize(); }

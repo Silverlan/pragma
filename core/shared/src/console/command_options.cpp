@@ -8,22 +8,19 @@
 #include "pragma/console/command_options.hpp"
 #include <sharedutils/util_string.h>
 
-void pragma::console::parse_command_options(const std::vector<std::string> args,std::unordered_map<std::string,CommandOption> &outOptions)
+void pragma::console::parse_command_options(const std::vector<std::string> args, std::unordered_map<std::string, CommandOption> &outOptions)
 {
 	auto itCurOption = outOptions.end();
-	for(auto &arg : args)
-	{
+	for(auto &arg : args) {
 		if(arg.empty())
 			continue;
-		if(arg.front() == '-')
-		{
+		if(arg.front() == '-') {
 			auto larg = arg.substr(1);
 			ustring::to_lower(larg);
-			auto it = outOptions.insert(std::make_pair(larg,CommandOption{})).first;
+			auto it = outOptions.insert(std::make_pair(larg, CommandOption {})).first;
 			itCurOption = it;
 		}
-		else
-		{
+		else {
 			if(itCurOption == outOptions.end())
 				continue;
 			itCurOption->second.parameters.push_back(arg);
@@ -31,7 +28,7 @@ void pragma::console::parse_command_options(const std::vector<std::string> args,
 	}
 }
 
-std::string pragma::console::get_command_option_parameter_value(std::unordered_map<std::string,CommandOption> &options,const std::string &key,const std::string &defaultValue)
+std::string pragma::console::get_command_option_parameter_value(std::unordered_map<std::string, CommandOption> &options, const std::string &key, const std::string &defaultValue)
 {
 	auto it = options.find(key);
 	if(it == options.end() || it->second.parameters.empty())

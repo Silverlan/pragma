@@ -14,9 +14,9 @@
 // this is currently not possible
 
 template<typename T>
-	void luabind::push_property(lua_State *l,T& prop)
+void luabind::push_property(lua_State *l, T &prop)
 {
-	Lua::Property::push(l,prop);
+	Lua::Property::push(l, prop);
 }
 
 #endif

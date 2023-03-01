@@ -42,26 +42,24 @@ void CGame::CalcLocalPlayerOrientation()
 	//Vector3 pos = pl->GetPosition();
 	auto orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetRotation();
 	uquat::inverse(m_curFrameRotationModifier);
-	orientation = m_curFrameRotationModifier *orientation;
+	orientation = m_curFrameRotationModifier * orientation;
 	m_curFrameRotationModifier = uquat::identity();
 	//Con::cerr<<"Actual ("<<pl->GetIndex()<<"): "<<&(*pl->GetViewOrientation())<<Con::endl;
 
-	float wDelta,hDelta;
+	float wDelta, hDelta;
 	auto *window = WGUI::GetInstance().FindFocusedWindow();
-	if(window && window->IsValid() && WGUI::GetInstance().GetFocusedElement(window) == nullptr)
-	{
+	if(window && window->IsValid() && WGUI::GetInstance().GetFocusedElement(window) == nullptr) {
 		auto size = (*window)->GetSize();
 		auto w = size.x;
 		auto h = size.y;
 		auto pos = (*window)->GetCursorPos();
-		(*window)->SetCursorPos(Vector2i(umath::round(w /2.f),umath::round(h /2.f)));
-		wDelta = pos.x -w /2.f;
-		hDelta = pos.y -h /2.f;
-		if((h %2) != 0)
+		(*window)->SetCursorPos(Vector2i(umath::round(w / 2.f), umath::round(h / 2.f)));
+		wDelta = pos.x - w / 2.f;
+		hDelta = pos.y - h / 2.f;
+		if((h % 2) != 0)
 			hDelta -= 0.5f;
 	}
-	else
-	{
+	else {
 		wDelta = 0.f;
 		hDelta = 0.f;
 	}
@@ -72,9 +70,8 @@ void CGame::CalcLocalPlayerOrientation()
 	//Vector3 up = pl->GetUpDirection();
 	auto rot = uquat::identity();
 	auto *pObserverTarget = pl->GetObserverTarget();
-	if(pObserverTarget != nullptr)
-	{
-		auto *pObserverCharComponent = static_cast<pragma::CCharacterComponent*>(pObserverTarget->GetEntity().GetCharacterComponent().get());
+	if(pObserverTarget != nullptr) {
+		auto *pObserverCharComponent = static_cast<pragma::CCharacterComponent *>(pObserverTarget->GetEntity().GetCharacterComponent().get());
 		if(pObserverCharComponent != nullptr)
 			rot = pObserverCharComponent->GetOrientationAxesRotation();
 		else
@@ -83,56 +80,53 @@ void CGame::CalcLocalPlayerOrientation()
 	if(pObserverTarget == nullptr && charComponent.valid())
 		rot = charComponent->GetOrientationAxesRotation();
 
-	const Vector3 forward(0,0,1);
-	const Vector3 right(-1,0,0);
-	const Vector3 up(0,1,0);
-	
-	auto acc = cvAcceleration->GetFloat() +1.f;
+	const Vector3 forward(0, 0, 1);
+	const Vector3 right(-1, 0, 0);
+	const Vector3 up(0, 1, 0);
+
+	auto acc = cvAcceleration->GetFloat() + 1.f;
 	if(hDelta != 0.f)
-		hDelta = umath::pow(CFloat(abs(hDelta)),acc) *((hDelta > 0.f) ? 1 : -1);
+		hDelta = umath::pow(CFloat(abs(hDelta)), acc) * ((hDelta > 0.f) ? 1 : -1);
 	if(wDelta != 0.f)
-		wDelta = umath::pow(CFloat(abs(wDelta)),acc) *((wDelta > 0.f) ? 1 : -1);
+		wDelta = umath::pow(CFloat(abs(wDelta)), acc) * ((wDelta > 0.f) ? 1 : -1);
 
 	const auto tDelta = 0.016f; // 60 FPS as reference
-	auto rotPitch = uquat::create(-right,speed *speedPitch *CFloat(tDelta) *hDelta);
-	auto rotYaw = uquat::create(up,speed *speedYaw *CFloat(tDelta) *wDelta);
-	orientation = rot *orientation;
+	auto rotPitch = uquat::create(-right, speed * speedPitch * CFloat(tDelta) * hDelta);
+	auto rotYaw = uquat::create(up, speed * speedYaw * CFloat(tDelta) * wDelta);
+	orientation = rot * orientation;
 	auto oldAng = EulerAngles(orientation);
-	orientation = rotYaw *orientation *rotPitch;
+	orientation = rotYaw * orientation * rotPitch;
 	// TODO: Does this work with custom player up directions? Is there a direct way, without converting to euler angles?
 
 	EulerAngles ang(orientation);
-	if(ang.p < -90.f || ang.p > 90.f)
-	{
+	if(ang.p < -90.f || ang.p > 90.f) {
 		//ang.r = 0.f;
-		if(ang.p < -90.f)
-		{
+		if(ang.p < -90.f) {
 			if(oldAng.p >= -90.f)
 				ang.p = -90.f;
 			else
-				ang.p = umath::max(ang.p,oldAng.p);
+				ang.p = umath::max(ang.p, oldAng.p);
 			//ang.p = -90.f;
 		}
-		else if(ang.p > 90.f)
-		{
+		else if(ang.p > 90.f) {
 			if(oldAng.p <= 90.f)
 				ang.p = 90.f;
 			else
-				ang.p = umath::min(ang.p,oldAng.p);
+				ang.p = umath::min(ang.p, oldAng.p);
 			//ang.p = 90.f;
 		}
 		orientation = uquat::create(ang);
 	}
 	//
-	orientation = uquat::get_inverse(rot) *orientation;
+	orientation = uquat::get_inverse(rot) * orientation;
 
 	//if(true)
 	//{
-		if(charComponent.valid())
-			charComponent->SetViewOrientation(orientation);
-		else
-			pTrComponent->SetRotation(orientation);
-		return;
+	if(charComponent.valid())
+		charComponent->SetViewOrientation(orientation);
+	else
+		pTrComponent->SetRotation(orientation);
+	return;
 	//}
 }
 
@@ -148,19 +142,19 @@ void CGame::CalcView()
 		return;
 	Vector3 pos;
 	Quat orientation = uquat::identity();
-	pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
+	pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
 	Vector3 offset = pl->GetViewOffset();
 	Vector3 upDir = charComponent.valid() ? charComponent->GetUpDirection() : uvec::UP;
-	offset = Vector3(offset.x,0,offset.z) +upDir *offset.y;
+	offset = Vector3(offset.x, 0, offset.z) + upDir * offset.y;
 	pos += offset;
 
 	orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetRotation();
 
 	auto rotModifier = uquat::identity();
-	CallCallbacks<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>,std::reference_wrapper<Quat>>("CalcView",std::ref(pos),std::ref(orientation),std::ref(rotModifier));
-	CallLuaCallbacks<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>,std::reference_wrapper<Quat>>("CalcView",std::ref(pos),std::ref(orientation),std::ref(rotModifier));
+	CallCallbacks<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>, std::reference_wrapper<Quat>>("CalcView", std::ref(pos), std::ref(orientation), std::ref(rotModifier));
+	CallLuaCallbacks<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>, std::reference_wrapper<Quat>>("CalcView", std::ref(pos), std::ref(orientation), std::ref(rotModifier));
 
-	orientation = rotModifier *orientation;
+	orientation = rotModifier * orientation;
 	m_curFrameRotationModifier = rotModifier;
 
 	if(charComponent.valid())
@@ -180,8 +174,8 @@ void CGame::CalcView()
 			pAttComponent->UpdateAttachmentOffset();
 	}*/
 
-	CallCallbacks<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>("CalcViewOffset",std::ref(pos),std::ref(orientation));
-	CallLuaCallbacks<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>("CalcViewOffset",std::ref(pos),std::ref(orientation));
+	CallCallbacks<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>>("CalcViewOffset", std::ref(pos), std::ref(orientation));
+	CallLuaCallbacks<void, std::reference_wrapper<Vector3>, std::reference_wrapper<Quat>>("CalcViewOffset", std::ref(pos), std::ref(orientation));
 
 	auto *cam = c_game->GetGameplayControlCamera();
 	if(cam == nullptr)

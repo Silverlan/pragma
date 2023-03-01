@@ -20,26 +20,23 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_sound,EnvSound);
+LINK_ENTITY_TO_CLASS(env_sound, EnvSound);
 
-void SSoundComponent::Initialize()
-{
-	BaseEnvSoundComponent::Initialize();
-}
+void SSoundComponent::Initialize() { BaseEnvSoundComponent::Initialize(); }
 void SSoundComponent::OnSoundCreated(ALSound &snd)
 {
 	BaseEnvSoundComponent::OnSoundCreated(snd);
 	auto pMapComponent = GetEntity().GetComponent<pragma::MapComponent>();
-	dynamic_cast<SALSound&>(snd).SetEntityMapIndex(pMapComponent.valid() ? pMapComponent->GetMapIndex() : 0u);
+	dynamic_cast<SALSound &>(snd).SetEntityMapIndex(pMapComponent.valid() ? pMapComponent->GetMapIndex() : 0u);
 }
-void SSoundComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SSoundComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->Write<float>(m_kvMaxDist);
 	auto idx = (m_sound != nullptr) ? m_sound->GetIndex() : std::numeric_limits<uint32_t>::max();
 	packet->Write<uint32_t>(idx);
 }
 
-void SSoundComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SSoundComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////////
 

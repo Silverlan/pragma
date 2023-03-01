@@ -18,20 +18,20 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_sound_dsp,EnvSoundDsp);
+LINK_ENTITY_TO_CLASS(env_sound_dsp, EnvSoundDsp);
 
 void SBaseSoundDspComponent::Initialize()
 {
 	BaseEnvSoundDspComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(OnSetKeyValue(kvData.key,kvData.value) == false)
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(OnSetKeyValue(kvData.key, kvData.value) == false)
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
 }
-void SBaseSoundDspComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SBaseSoundDspComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_kvDsp);
 	packet->Write<float>(m_kvInnerRadius);
@@ -42,15 +42,15 @@ void SBaseSoundDspComponent::SendData(NetPacket &packet,networking::ClientRecipi
 void SBaseSoundDspComponent::SetGain(float gain)
 {
 	BaseEnvSoundDspComponent::SetGain(gain);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(ent.IsSpawned() == false)
 		return;
 	NetPacket p {};
 	p->Write<float>(gain);
-	ent.SendNetEvent(m_netEvSetGain,p,pragma::networking::Protocol::SlowReliable);
+	ent.SendNetEvent(m_netEvSetGain, p, pragma::networking::Protocol::SlowReliable);
 }
 
-void SSoundDspComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SSoundDspComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////////////
 

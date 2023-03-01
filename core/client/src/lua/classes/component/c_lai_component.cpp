@@ -20,8 +20,8 @@
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/lentity_components_base_types.hpp>
 
-void Lua::register_cl_ai_component(lua_State *l,luabind::module_ &module)
+void Lua::register_cl_ai_component(lua_State *l, luabind::module_ &module)
 {
-	auto def = pragma::lua::create_entity_component_class<pragma::CAIComponent,pragma::BaseAIComponent>("AIComponent");
+	auto def = pragma::lua::create_entity_component_class<pragma::CAIComponent, pragma::BaseAIComponent>("AIComponent");
 	module[def];
 }

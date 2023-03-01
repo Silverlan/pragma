@@ -28,72 +28,64 @@
 #include <pragma/lua/lua_util_component_stream.hpp>
 // --template-include-location
 
-void RegisterLuaEntityComponents2_cl(lua_State *l,luabind::module_ &entsMod)
+void RegisterLuaEntityComponents2_cl(lua_State *l, luabind::module_ &entsMod)
 {
-	auto defLiquidControl = pragma::lua::create_entity_component_class<pragma::CLiquidControlComponent,pragma::BaseLiquidControlComponent>("LiquidControlComponent");
+	auto defLiquidControl = pragma::lua::create_entity_component_class<pragma::CLiquidControlComponent, pragma::BaseLiquidControlComponent>("LiquidControlComponent");
 	entsMod[defLiquidControl];
 
-	auto defLiquidSurfaceSimulation = pragma::lua::create_entity_component_class<pragma::CLiquidSurfaceSimulationComponent,pragma::BaseLiquidSurfaceSimulationComponent>("LiquidSurfaceSimulationComponent");
+	auto defLiquidSurfaceSimulation = pragma::lua::create_entity_component_class<pragma::CLiquidSurfaceSimulationComponent, pragma::BaseLiquidSurfaceSimulationComponent>("LiquidSurfaceSimulationComponent");
 	entsMod[defLiquidSurfaceSimulation];
 
-	auto defBvh = pragma::lua::create_entity_component_class<pragma::CBvhComponent,pragma::BaseBvhComponent>("BvhComponent");
+	auto defBvh = pragma::lua::create_entity_component_class<pragma::CBvhComponent, pragma::BaseBvhComponent>("BvhComponent");
 	entsMod[defBvh];
 
-	auto defAnimatedBvh = pragma::lua::create_entity_component_class<pragma::CAnimatedBvhComponent,pragma::BaseEntityComponent>("AnimatedBvhComponent");
-	defAnimatedBvh.def("SetUpdateLazily",&pragma::CAnimatedBvhComponent::SetUpdateLazily);
+	auto defAnimatedBvh = pragma::lua::create_entity_component_class<pragma::CAnimatedBvhComponent, pragma::BaseEntityComponent>("AnimatedBvhComponent");
+	defAnimatedBvh.def("SetUpdateLazily", &pragma::CAnimatedBvhComponent::SetUpdateLazily);
+	defAnimatedBvh.def("RebuildAnimatedBvh", &pragma::CAnimatedBvhComponent::RebuildAnimatedBvh);
 	entsMod[defAnimatedBvh];
 
-	auto defStaticBvh = pragma::lua::create_entity_component_class<pragma::CStaticBvhCacheComponent,pragma::BaseStaticBvhCacheComponent>("StaticBvhCacheComponent");
+	auto defStaticBvh = pragma::lua::create_entity_component_class<pragma::CStaticBvhCacheComponent, pragma::BaseStaticBvhCacheComponent>("StaticBvhCacheComponent");
 	entsMod[defStaticBvh];
 
-	auto defStaticBvhUser = pragma::lua::create_entity_component_class<pragma::CStaticBvhUserComponent,pragma::BaseStaticBvhUserComponent>("StaticBvhUserComponent");
+	auto defStaticBvhUser = pragma::lua::create_entity_component_class<pragma::CStaticBvhUserComponent, pragma::BaseStaticBvhUserComponent>("StaticBvhUserComponent");
 	entsMod[defStaticBvhUser];
 
-	auto defOpticalCamera = pragma::lua::create_entity_component_class<pragma::COpticalCameraComponent,pragma::BaseEntityComponent>("OpticalCameraComponent");
+	auto defOpticalCamera = pragma::lua::create_entity_component_class<pragma::COpticalCameraComponent, pragma::BaseEntityComponent>("OpticalCameraComponent");
 	entsMod[defOpticalCamera];
 
-    Con::cout<<"RendererPpFogComponent registration"<<Con::endl;
-	auto defPpFog =
-		pragma::lua::create_entity_component_class<pragma::CRendererPpFogComponent,pragma::BaseEntityComponent>("RendererPpFogComponent");
+	auto defPpFog = pragma::lua::create_entity_component_class<pragma::CRendererPpFogComponent, pragma::BaseEntityComponent>("RendererPpFogComponent");
 	entsMod[defPpFog];
 
-	auto defPpDof =
-		pragma::lua::create_entity_component_class<pragma::CRendererPpDoFComponent,pragma::BaseEntityComponent>("RendererPpDoFComponent");
+	auto defPpDof = pragma::lua::create_entity_component_class<pragma::CRendererPpDoFComponent, pragma::BaseEntityComponent>("RendererPpDoFComponent");
 	entsMod[defPpDof];
 
-	auto defPpBloom =
-		pragma::lua::create_entity_component_class<pragma::CRendererPpBloomComponent,pragma::BaseEntityComponent>("RendererPpBloomComponent");
+	auto defPpBloom = pragma::lua::create_entity_component_class<pragma::CRendererPpBloomComponent, pragma::BaseEntityComponent>("RendererPpBloomComponent");
 	entsMod[defPpBloom];
 
-	auto defPpToneMapping =
-		pragma::lua::create_entity_component_class<pragma::CRendererPpToneMappingComponent,pragma::BaseEntityComponent>("RendererPpToneMappingComponent");
-	defPpToneMapping.def("SetApplyToHdrImage",&pragma::CRendererPpToneMappingComponent::SetApplyToHdrImage);
+	auto defPpToneMapping = pragma::lua::create_entity_component_class<pragma::CRendererPpToneMappingComponent, pragma::BaseEntityComponent>("RendererPpToneMappingComponent");
+	defPpToneMapping.def("SetApplyToHdrImage", &pragma::CRendererPpToneMappingComponent::SetApplyToHdrImage);
 	entsMod[defPpToneMapping];
 
-	auto defPpFxaa =
-		pragma::lua::create_entity_component_class<pragma::CRendererPpFxaaComponent,pragma::BaseEntityComponent>("RendererPpFxaaComponent");
+	auto defPpFxaa = pragma::lua::create_entity_component_class<pragma::CRendererPpFxaaComponent, pragma::BaseEntityComponent>("RendererPpFxaaComponent");
 	entsMod[defPpFxaa];
 
-	auto defPpMotionBlur =
-		pragma::lua::create_entity_component_class<pragma::CRendererPpMotionBlurComponent,pragma::BaseEntityComponent>("RendererPpMotionBlurComponent");
-	defPpMotionBlur.add_static_constant("MOTION_BLUR_QUALITY_LOW",umath::to_integral(pragma::MotionBlurQuality::Low));
-	defPpMotionBlur.add_static_constant("MOTION_BLUR_QUALITY_MEDIUM",umath::to_integral(pragma::MotionBlurQuality::Medium));
-	defPpMotionBlur.add_static_constant("MOTION_BLUR_QUALITY_HIGH",umath::to_integral(pragma::MotionBlurQuality::High));
-	defPpMotionBlur.def("SetAutoUpdateMotionData",&pragma::CRendererPpMotionBlurComponent::SetAutoUpdateMotionData);
-	defPpMotionBlur.def("SetMotionBlurIntensity",&pragma::CRendererPpMotionBlurComponent::SetMotionBlurIntensity);
-	defPpMotionBlur.def("GetMotionBlurIntensity",&pragma::CRendererPpMotionBlurComponent::GetMotionBlurIntensity);
-	defPpMotionBlur.def("SetMotionBlurQuality",&pragma::CRendererPpMotionBlurComponent::SetMotionBlurQuality);
-	defPpMotionBlur.def("GetMotionBlurQuality",&pragma::CRendererPpMotionBlurComponent::GetMotionBlurQuality);
-	defPpMotionBlur.def("UpdateMotionBlurData",&pragma::CRendererPpMotionBlurComponent::UpdateMotionBlurData);
+	auto defPpMotionBlur = pragma::lua::create_entity_component_class<pragma::CRendererPpMotionBlurComponent, pragma::BaseEntityComponent>("RendererPpMotionBlurComponent");
+	defPpMotionBlur.add_static_constant("MOTION_BLUR_QUALITY_LOW", umath::to_integral(pragma::MotionBlurQuality::Low));
+	defPpMotionBlur.add_static_constant("MOTION_BLUR_QUALITY_MEDIUM", umath::to_integral(pragma::MotionBlurQuality::Medium));
+	defPpMotionBlur.add_static_constant("MOTION_BLUR_QUALITY_HIGH", umath::to_integral(pragma::MotionBlurQuality::High));
+	defPpMotionBlur.def("SetAutoUpdateMotionData", &pragma::CRendererPpMotionBlurComponent::SetAutoUpdateMotionData);
+	defPpMotionBlur.def("SetMotionBlurIntensity", &pragma::CRendererPpMotionBlurComponent::SetMotionBlurIntensity);
+	defPpMotionBlur.def("GetMotionBlurIntensity", &pragma::CRendererPpMotionBlurComponent::GetMotionBlurIntensity);
+	defPpMotionBlur.def("SetMotionBlurQuality", &pragma::CRendererPpMotionBlurComponent::SetMotionBlurQuality);
+	defPpMotionBlur.def("GetMotionBlurQuality", &pragma::CRendererPpMotionBlurComponent::GetMotionBlurQuality);
+	defPpMotionBlur.def("UpdateMotionBlurData", &pragma::CRendererPpMotionBlurComponent::UpdateMotionBlurData);
 	entsMod[defPpMotionBlur];
 
-	auto defPpVol =
-		pragma::lua::create_entity_component_class<pragma::CRendererPpVolumetricComponent,pragma::BaseEntityComponent>("RendererPpVolumetricComponent");
+	auto defPpVol = pragma::lua::create_entity_component_class<pragma::CRendererPpVolumetricComponent, pragma::BaseEntityComponent>("RendererPpVolumetricComponent");
 	entsMod[defPpVol];
 
-	auto defMotionBlurData =
-		pragma::lua::create_entity_component_class<pragma::CMotionBlurDataComponent,pragma::BaseEntityComponent>("MotionBlurDataComponent");
-	defMotionBlurData.def("UpdatePoses",&pragma::CMotionBlurDataComponent::UpdateEntityPoses);
+	auto defMotionBlurData = pragma::lua::create_entity_component_class<pragma::CMotionBlurDataComponent, pragma::BaseEntityComponent>("MotionBlurDataComponent");
+	defMotionBlurData.def("UpdatePoses", &pragma::CMotionBlurDataComponent::UpdateEntityPoses);
 	entsMod[defMotionBlurData];
 
 	// --template-component-register-location

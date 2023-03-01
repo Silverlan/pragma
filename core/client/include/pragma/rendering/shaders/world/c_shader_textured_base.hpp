@@ -11,13 +11,11 @@
 #include "pragma/clientdefinitions.h"
 
 class CMaterial;
-namespace pragma
-{
-	class DLLCLIENT ShaderTexturedBase
-	{
-	public:
-		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat,bool bReload);
-	protected:
+namespace pragma {
+	class DLLCLIENT ShaderTexturedBase {
+	  public:
+		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat, bool bReload);
+	  protected:
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat);
 	};
 };

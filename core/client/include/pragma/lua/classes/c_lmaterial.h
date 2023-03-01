@@ -16,28 +16,24 @@
 
 class Material;
 struct TextureInfo;
-namespace Lua
-{
-	namespace Material
-	{
-		namespace Client
-		{
-			DLLCLIENT void SetTexture(lua_State *l,::Material *mat,const std::string &textureID,const std::string &tex);
-			DLLCLIENT void SetTexture(lua_State *l,::Material *mat,const std::string &textureID,::Texture &tex);
-			DLLCLIENT void SetTexture(lua_State *l,::Material *mat,const std::string &textureID,Lua::Vulkan::Texture &hTex);
-			DLLCLIENT void SetTexture(lua_State *l,::Material *mat,const std::string &textureID,Lua::Vulkan::Texture &hTex,const std::string &name);
-			DLLCLIENT void GetTexture(lua_State *l,::Material *mat,const std::string &textureID);
-			DLLCLIENT void GetData(lua_State *l,::Material *mat);
-			DLLCLIENT void InitializeShaderData(lua_State *l,::Material *mat,bool reload);
-			DLLCLIENT void InitializeShaderData(lua_State *l,::Material *mat);
+namespace Lua {
+	namespace Material {
+		namespace Client {
+			DLLCLIENT void SetTexture(lua_State *l, ::Material *mat, const std::string &textureID, const std::string &tex);
+			DLLCLIENT void SetTexture(lua_State *l, ::Material *mat, const std::string &textureID, ::Texture &tex);
+			DLLCLIENT void SetTexture(lua_State *l, ::Material *mat, const std::string &textureID, Lua::Vulkan::Texture &hTex);
+			DLLCLIENT void SetTexture(lua_State *l, ::Material *mat, const std::string &textureID, Lua::Vulkan::Texture &hTex, const std::string &name);
+			DLLCLIENT void GetTexture(lua_State *l, ::Material *mat, const std::string &textureID);
+			DLLCLIENT void GetData(lua_State *l, ::Material *mat);
+			DLLCLIENT void InitializeShaderData(lua_State *l, ::Material *mat, bool reload);
+			DLLCLIENT void InitializeShaderData(lua_State *l, ::Material *mat);
 		};
 	};
-	namespace TextureInfo
-	{
-		DLLCLIENT std::shared_ptr<Texture> GetTexture(lua_State *l,::TextureInfo *tex);
-		DLLCLIENT std::pair<uint32_t,uint32_t> GetSize(lua_State *l,::TextureInfo *tex);
-		DLLCLIENT uint32_t GetWidth(lua_State *l,::TextureInfo *tex);
-		DLLCLIENT uint32_t GetHeight(lua_State *l,::TextureInfo *tex);
+	namespace TextureInfo {
+		DLLCLIENT std::shared_ptr<Texture> GetTexture(lua_State *l, ::TextureInfo *tex);
+		DLLCLIENT std::pair<uint32_t, uint32_t> GetSize(lua_State *l, ::TextureInfo *tex);
+		DLLCLIENT uint32_t GetWidth(lua_State *l, ::TextureInfo *tex);
+		DLLCLIENT uint32_t GetHeight(lua_State *l, ::TextureInfo *tex);
 	};
 };
 

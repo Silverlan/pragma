@@ -11,12 +11,9 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_time_scale_component.hpp>
 
-namespace pragma
-{
-	class DLLSERVER STimeScaleComponent final
-		: public BaseTimeScaleComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER STimeScaleComponent final : public BaseTimeScaleComponent {
+	  public:
 		STimeScaleComponent(BaseEntity &ent) : BaseTimeScaleComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void SetTimeScale(float timeScale) override;

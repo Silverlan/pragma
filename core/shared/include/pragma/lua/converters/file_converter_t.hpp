@@ -10,16 +10,16 @@
 #include "pragma/lua/converters/file_converter.hpp"
 #include "pragma/lua/libraries/lfile.h"
 
-template <class U>
-int luabind::default_converter<std::shared_ptr<ufile::IFile>,void >::match(lua_State* L, U, int index)
+template<class U>
+int luabind::default_converter<std::shared_ptr<ufile::IFile>, void>::match(lua_State *L, U, int index)
 {
-	return Lua::IsFile(L,index) ? 0 : no_match;
+	return Lua::IsFile(L, index) ? 0 : no_match;
 }
 
-template <class U>
-std::shared_ptr<ufile::IFile> luabind::default_converter<std::shared_ptr<ufile::IFile> >::to_cpp(lua_State* L, U u, int index)
+template<class U>
+std::shared_ptr<ufile::IFile> luabind::default_converter<std::shared_ptr<ufile::IFile>>::to_cpp(lua_State *L, U u, int index)
 {
-	auto *f = luabind::object_cast<LFile*>(luabind::object{luabind::from_stack(L,index)});
+	auto *f = luabind::object_cast<LFile *>(luabind::object {luabind::from_stack(L, index)});
 	return f->GetHandle();
 }
 

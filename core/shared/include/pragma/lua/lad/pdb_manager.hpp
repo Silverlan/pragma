@@ -22,31 +22,27 @@ struct IDiaSymbol;
 struct IDiaEnumTables;
 struct IDiaEnumSymbolsByAddr;
 
-namespace pragma::lua
-{
-	struct ParameterInfo
-	{
-		enum class Flags : uint16_t
-		{
+namespace pragma::lua {
+	struct ParameterInfo {
+		enum class Flags : uint16_t {
 			None = 0u,
 			Const = 1u,
-			Reference = Const<<1u,
-			Pointer = Reference<<1u,
-			Volatile = Pointer<<1u,
-			Unaligned = Volatile<<1u,
+			Reference = Const << 1u,
+			Pointer = Reference << 1u,
+			Volatile = Pointer << 1u,
+			Unaligned = Volatile << 1u,
 
-			Struct = Unaligned<<1u,
-			Class = Struct<<1u,
-			Union = Class<<1u,
-			Interface = Union<<1u,
-			Enum = Interface<<1u
+			Struct = Unaligned << 1u,
+			Class = Struct << 1u,
+			Union = Class << 1u,
+			Interface = Union << 1u,
+			Enum = Interface << 1u
 		};
 		std::string typeName;
 		Flags flags = Flags::None;
 	};
 
-	enum SymTag
-	{
+	enum SymTag {
 		Null,
 		Exe,
 		Compiland,
@@ -93,25 +89,22 @@ namespace pragma::lua
 	};
 
 	struct SymbolIterator;
-	class Symbol
-	{
-	public:
-		Symbol(IDiaSymbol *symbol=nullptr)
-			: m_symbol{symbol}
-		{}
+	class Symbol {
+	  public:
+		Symbol(IDiaSymbol *symbol = nullptr) : m_symbol {symbol} {}
 		~Symbol();
-		Symbol(const Symbol&)=delete;
-		Symbol &operator=(const Symbol&)=delete;
-		IDiaSymbol &GetSymbol() {return *m_symbol;}
+		Symbol(const Symbol &) = delete;
+		Symbol &operator=(const Symbol &) = delete;
+		IDiaSymbol &GetSymbol() { return *m_symbol; }
 		uint64_t GetAddress() const;
 		SymTag GetTag() const;
 
 		std::optional<std::string> GetSourceFile(uint32_t &outOptLine) const;
 		std::optional<std::string> GetName() const;
-		operator bool() const {return m_symbol != nullptr;}
+		operator bool() const { return m_symbol != nullptr; }
 		bool operator==(const Symbol &other) const;
-		bool operator!=(const Symbol &other) const {return !operator==(other);}
-	private:
+		bool operator!=(const Symbol &other) const { return !operator==(other); }
+	  private:
 		void Release();
 		friend SymbolIterator;
 		IDiaSymbol *m_symbol = nullptr;
@@ -119,36 +112,39 @@ namespace pragma::lua
 
 	class PdbManager;
 	struct PdbSession;
-	struct SymbolIterator
-	{
-		SymbolIterator(PdbManager &manager,PdbSession *session,IDiaSymbol *symbol=nullptr);
-		SymbolIterator(const SymbolIterator&)=default;
-		SymbolIterator &operator=(const SymbolIterator&)=default;
+	struct SymbolIterator {
+		SymbolIterator(PdbManager &manager, PdbSession *session, IDiaSymbol *symbol = nullptr);
+		SymbolIterator(const SymbolIterator &) = default;
+		SymbolIterator &operator=(const SymbolIterator &) = default;
 		using difference_type = long;
-		using pointer = Symbol*;
-		using reference = Symbol&;
+		using pointer = Symbol *;
+		using reference = Symbol &;
 		using iterator_category = std::forward_iterator_tag;
 
-		reference operator*() {return *m_symbol;}
-		pointer operator->() {return m_symbol.get();}
+		reference operator*() { return *m_symbol; }
+		pointer operator->() { return m_symbol.get(); }
 
 		// Prefix increment
-		SymbolIterator& operator++();
+		SymbolIterator &operator++();
 
 		// Postfix increment
-		SymbolIterator operator++(int) {SymbolIterator tmp = *this; ++(*this); return tmp;}
+		SymbolIterator operator++(int)
+		{
+			SymbolIterator tmp = *this;
+			++(*this);
+			return tmp;
+		}
 
 		bool operator==(const SymbolIterator &other) const;
-		bool operator!=(const SymbolIterator &other) const {return !operator==(other);};
-	private:
+		bool operator!=(const SymbolIterator &other) const { return !operator==(other); };
+	  private:
 		PdbManager *m_manager = nullptr;
 		PdbSession *m_session = nullptr;
 		std::shared_ptr<Symbol> m_symbol = nullptr;
 		ULONG m_celt = 0;
 	};
 
-	struct PdbSession
-	{
+	struct PdbSession {
 		~PdbSession();
 		std::string pdbPath;
 		IDiaDataSource *source = nullptr;
@@ -156,19 +152,16 @@ namespace pragma::lua
 		IDiaSymbol *globalSymbol = nullptr;
 		IDiaEnumTables *enumTables = nullptr;
 		IDiaEnumSymbolsByAddr *enumSymbolsByAddr = nullptr;
-		operator bool() const {return m_valid;}
-		void SetValid() {m_valid = true;}
-	private:
+		operator bool() const { return m_valid; }
+		void SetValid() { m_valid = true; }
+	  private:
 		bool m_valid = false;
 	};
 
-	class PdbManager
-	{
-	public:
-		struct SymbolInfo
-		{
-			struct Source
-			{
+	class PdbManager {
+	  public:
+		struct SymbolInfo {
+			struct Source {
 				std::string fileName;
 				uint32_t line;
 			};
@@ -181,18 +174,18 @@ namespace pragma::lua
 
 		~PdbManager();
 		bool Initialize();
-		bool LoadPdb(const std::string &moduleName,const std::string &pdbPath);
-		const std::vector<std::string> &GetModuleNames() const {return m_moduleNames;}
+		bool LoadPdb(const std::string &moduleName, const std::string &pdbPath);
+		const std::vector<std::string> &GetModuleNames() const { return m_moduleNames; }
 
-        SymbolIterator begin(const std::string &moduleName) const;
-        SymbolIterator end() const;
+		SymbolIterator begin(const std::string &moduleName) const;
+		SymbolIterator end() const;
 
-		std::optional<SymbolInfo> FindSymbolByRva(const std::string &moduleName,DWORD64 rva);
-	private:
+		std::optional<SymbolInfo> FindSymbolByRva(const std::string &moduleName, DWORD64 rva);
+	  private:
 		static std::optional<ParameterInfo> SymbolToParameterInfo(IDiaSymbol *pSymbol);
-		static std::optional<std::vector<ParameterInfo>> GetFunctionParameters(IDiaSymbol *pSymbol,std::optional<ParameterInfo> &outReturnValue);
+		static std::optional<std::vector<ParameterInfo>> GetFunctionParameters(IDiaSymbol *pSymbol, std::optional<ParameterInfo> &outReturnValue);
 
-		std::unordered_map<std::string,std::unique_ptr<PdbSession>> m_pdbSessions {};
+		std::unordered_map<std::string, std::unique_ptr<PdbSession>> m_pdbSessions {};
 		std::vector<std::string> m_moduleNames;
 	};
 };

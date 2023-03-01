@@ -12,24 +12,18 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/prop/prop_base.h>
 
-namespace pragma
-{
-	class DLLSERVER PropComponent final
-		: public BasePropComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER PropComponent final : public BasePropComponent, public SBaseNetComponent {
+	  public:
 		PropComponent(BaseEntity &ent) : BasePropComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 };
 
-class DLLSERVER SBaseProp
-	: public SBaseEntity
-{
-protected:
+class DLLSERVER SBaseProp : public SBaseEntity {
+  protected:
 };
 
 #endif

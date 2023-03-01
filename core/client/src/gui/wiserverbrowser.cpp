@@ -19,11 +19,9 @@
 #include "pragma/networking/wv_message.h"
 #include <sharedutils/util_library.hpp>
 
-LINK_WGUI_TO_CLASS(WIServerBrowser,WIServerBrowser);
+LINK_WGUI_TO_CLASS(WIServerBrowser, WIServerBrowser);
 
-
-pragma::networking::DefaultMasterServerQueryDispatcher::DefaultMasterServerQueryDispatcher()
-	: IMasterServerQueryDispatcher{}
+pragma::networking::DefaultMasterServerQueryDispatcher::DefaultMasterServerQueryDispatcher() : IMasterServerQueryDispatcher {}
 {
 	m_dispatcher = UDPMessageDispatcher::Create();
 	if(m_dispatcher != nullptr)
@@ -45,23 +43,21 @@ void pragma::networking::DefaultMasterServerQueryDispatcher::DoPingServer(uint32
 	header->Write<uint16_t>(static_cast<uint16_t>(WVQuery::PING));
 	header->Write<uint16_t>(static_cast<uint16_t>(0)); // Body Size
 
-	m_dispatcher->Dispatch(header,queryResult->ip,queryResult->serverInfo.port,[this,serverIdx](nwm::ErrorCode err,UDPMessageDispatcher::Message *msg) mutable {
-		if(!err)
-		{
-			msg->Receive(sizeof(WMSMessageHeader),[this,serverIdx](nwm::ErrorCode err,DataStream data) {
+	m_dispatcher->Dispatch(header, queryResult->ip, queryResult->serverInfo.port, [this, serverIdx](nwm::ErrorCode err, UDPMessageDispatcher::Message *msg) mutable {
+		if(!err) {
+			msg->Receive(sizeof(WMSMessageHeader), [this, serverIdx](nwm::ErrorCode err, DataStream data) {
 				if(!err)
-					OnServerPingResponse(serverIdx,true);
-				else
-				{
+					OnServerPingResponse(serverIdx, true);
+				else {
 #ifdef _DEBUG
-					Con::cwar<<"WARNING: Unable to add server '"<<sv->ip<<":"<<sv->tcpPort<<"' to list: "<<err.message()<<" ("<<err.value()<<")"<<Con::endl;
+					Con::cwar << "Unable to add server '" << sv->ip << ":" << sv->tcpPort << "' to list: " << err.message() << " (" << err.value() << ")" << Con::endl;
 #endif
-					OnServerPingResponse(serverIdx,false);
+					OnServerPingResponse(serverIdx, false);
 				}
 			});
 		}
 		else
-			OnServerPingResponse(serverIdx,false);
+			OnServerPingResponse(serverIdx, false);
 	});
 }
 
@@ -79,21 +75,20 @@ void pragma::networking::DefaultMasterServerQueryDispatcher::DoQueryServers(cons
 	//	m_hRefresh.get<WIButton>()->Set
 	DataStream body;
 	auto filterEnums = RequestFilter::AND;
-	if(umath::is_flag_set(filter.flags,IMasterServerQueryDispatcher::Filter::Flags::NotEmpty))
+	if(umath::is_flag_set(filter.flags, IMasterServerQueryDispatcher::Filter::Flags::NotEmpty))
 		filterEnums |= RequestFilter::NOT_EMPTY;
-	if(umath::is_flag_set(filter.flags,IMasterServerQueryDispatcher::Filter::Flags::NotFull))
+	if(umath::is_flag_set(filter.flags, IMasterServerQueryDispatcher::Filter::Flags::NotFull))
 		filterEnums |= RequestFilter::NOT_FULL;
-	if(umath::is_flag_set(filter.flags,IMasterServerQueryDispatcher::Filter::Flags::Empty))
+	if(umath::is_flag_set(filter.flags, IMasterServerQueryDispatcher::Filter::Flags::Empty))
 		filterEnums |= RequestFilter::EMPTY;
-	if(umath::is_flag_set(filter.flags,IMasterServerQueryDispatcher::Filter::Flags::PasswordProtected) == false)
+	if(umath::is_flag_set(filter.flags, IMasterServerQueryDispatcher::Filter::Flags::PasswordProtected) == false)
 		filterEnums |= RequestFilter::NO_PASSWORD;
 	body->Write<RequestFilter>(filterEnums);
-	std::unordered_map<std::string,std::string> filters;
+	std::unordered_map<std::string, std::string> filters;
 
-	auto numFilters = std::min(static_cast<int>(filters.size()),50);
+	auto numFilters = std::min(static_cast<int>(filters.size()), 50);
 	body->Write<unsigned char>(CUChar(numFilters));
-	for(auto it=filters.begin();it!=filters.end();++it)
-	{
+	for(auto it = filters.begin(); it != filters.end(); ++it) {
 		body->WriteString(it->first);
 		body->WriteString(it->second);
 		numFilters--;
@@ -106,25 +101,20 @@ void pragma::networking::DefaultMasterServerQueryDispatcher::DoQueryServers(cons
 	DataStream header;
 	header->Write<WMSMessageHeader>(msgHeader);
 
-	m_dispatcher->Dispatch(header,GetMasterServerIP(),GetMasterServerPort(),[this,body](nwm::ErrorCode err,UDPMessageDispatcher::Message*) mutable {
-		if(!err)
-		{
-			m_dispatcher->Dispatch(body,GetMasterServerIP(),GetMasterServerPort(),[this](nwm::ErrorCode err,UDPMessageDispatcher::Message *msg) {
-				if(!err)
-				{
-					msg->Receive(sizeof(WMSMessageHeader),[this,msg](nwm::ErrorCode err,DataStream data) {
-						if(!err)
-						{
+	m_dispatcher->Dispatch(header, GetMasterServerIP(), GetMasterServerPort(), [this, body](nwm::ErrorCode err, UDPMessageDispatcher::Message *) mutable {
+		if(!err) {
+			m_dispatcher->Dispatch(body, GetMasterServerIP(), GetMasterServerPort(), [this](nwm::ErrorCode err, UDPMessageDispatcher::Message *msg) {
+				if(!err) {
+					msg->Receive(sizeof(WMSMessageHeader), [this, msg](nwm::ErrorCode err, DataStream data) {
+						if(!err) {
 							auto header = data->Read<WMSMessageHeader>();
-							msg->Receive(header.size,[this](nwm::ErrorCode err,DataStream data) {
-								if(!err)
-								{
+							msg->Receive(header.size, [this](nwm::ErrorCode err, DataStream data) {
+								if(!err) {
 									auto numServers = data->Read<unsigned int>();
-									for(unsigned int i=0;i<numServers;i++)
-									{
+									for(unsigned int i = 0; i < numServers; i++) {
 										WMServerData serverData {};
 										serverData.ip = data->ReadString();
-										WMServerData::Read(data,serverData);
+										WMServerData::Read(data, serverData);
 
 										MasterServerQueryResult queryResult {};
 										queryResult.ip = serverData.ip;
@@ -162,8 +152,7 @@ void pragma::networking::DefaultMasterServerQueryDispatcher::DoQueryServers(cons
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
-WIServerBrowser::WIServerBrowser()
-	: WIFrame(),m_bRefreshScheduled(false)
+WIServerBrowser::WIServerBrowser() : WIFrame(), m_bRefreshScheduled(false)
 {
 	AddStyleClass("wiframe");
 	Refresh();
@@ -171,14 +160,14 @@ WIServerBrowser::WIServerBrowser()
 	auto libSteamworks = client->InitializeLibrary("steamworks/pr_steamworks");
 	if(libSteamworks == nullptr)
 		return;
-	auto *fInitMasterServerQueryDispatcher = libSteamworks->FindSymbolAddress<void(*)(std::unique_ptr<pragma::networking::IMasterServerQueryDispatcher,void(*)(pragma::networking::IMasterServerQueryDispatcher*)>&)>("initialize_master_server_query_dispatcher");
+	auto *fInitMasterServerQueryDispatcher = libSteamworks->FindSymbolAddress<void (*)(std::unique_ptr<pragma::networking::IMasterServerQueryDispatcher, void (*)(pragma::networking::IMasterServerQueryDispatcher *)> &)>("initialize_master_server_query_dispatcher");
 	if(fInitMasterServerQueryDispatcher == nullptr)
 		return;
 	fInitMasterServerQueryDispatcher(m_msQueryDispatcher);
 	if(fInitMasterServerQueryDispatcher == nullptr)
 		return;
 	pragma::networking::IMasterServerQueryDispatcher::EventCallbacks eventCallbacks {};
-	eventCallbacks.onServerPingResponse = [this](const pragma::networking::MasterServerQueryResult &queryResult,bool pingSuccessful) {
+	eventCallbacks.onServerPingResponse = [this](const pragma::networking::MasterServerQueryResult &queryResult, bool pingSuccessful) {
 		if(pingSuccessful)
 			AddServer(queryResult);
 	};
@@ -186,14 +175,12 @@ WIServerBrowser::WIServerBrowser()
 		if(numServers == 0u)
 			DisplayMessage(Locale::GetText("server_browser_no_servers"));
 	};
-	eventCallbacks.onQueryResponse = [this](bool querySuccessful,uint32_t numServersFound) {
-		if(querySuccessful == false)
-		{
+	eventCallbacks.onQueryResponse = [this](bool querySuccessful, uint32_t numServersFound) {
+		if(querySuccessful == false) {
 			DisplayMessage(Locale::GetText("server_browser_connect_error"));
 			return;
 		}
-		if(numServersFound == 0u)
-		{
+		if(numServersFound == 0u) {
 			DisplayMessage(Locale::GetText("server_browser_no_servers"));
 			return;
 		}
@@ -205,10 +192,7 @@ WIServerBrowser::WIServerBrowser()
 	m_msQueryDispatcher->SetEventCallbacks(eventCallbacks);
 }
 
-WIServerBrowser::~WIServerBrowser()
-{
-	m_msQueryDispatcher = nullptr;
-}
+WIServerBrowser::~WIServerBrowser() { m_msQueryDispatcher = nullptr; }
 
 void WIServerBrowser::Think()
 {
@@ -224,14 +208,13 @@ void WIServerBrowser::OnServerDoubleClick(unsigned int idx)
 	if(idx >= m_servers.size())
 		return;
 	auto &svInfo = m_servers.at(idx);
-	client->SetConVar("net_library",svInfo.queryResult.serverInfo.networkLayerIdentifier);
-	if(svInfo.queryResult.serverInfo.peer2peer && svInfo.queryResult.serverInfo.steamId.has_value())
-	{
+	client->SetConVar("net_library", svInfo.queryResult.serverInfo.networkLayerIdentifier);
+	if(svInfo.queryResult.serverInfo.peer2peer && svInfo.queryResult.serverInfo.steamId.has_value()) {
 		auto steamId = *svInfo.queryResult.serverInfo.steamId;
 		c_engine->Connect(steamId);
 		return;
 	}
-	c_engine->Connect(svInfo.queryResult.ip,std::to_string(svInfo.queryResult.serverInfo.port));
+	c_engine->Connect(svInfo.queryResult.ip, std::to_string(svInfo.queryResult.serverInfo.port));
 }
 
 void WIServerBrowser::DisplayMessage(std::string msg)
@@ -244,7 +227,7 @@ void WIServerBrowser::DisplayMessage(std::string msg)
 	WITableRow *row = t->AddRow();
 	if(row == nullptr)
 		return;
-	row->SetValue(1,msg);
+	row->SetValue(1, msg);
 }
 
 void WIServerBrowser::Initialize()
@@ -260,35 +243,32 @@ void WIServerBrowser::Initialize()
 	auto &wgui = WGUI::GetInstance();
 	m_hServerList = wgui.Create<WITable>(contents)->GetHandle();
 	WITable *t = m_hServerList.get<WITable>();
-	if(t != nullptr)
-	{
+	if(t != nullptr) {
 		t->SetSortable(true);
 		t->SetScrollable(true);
 		t->SetSelectable(WITable::SelectableMode::Single);
 		WITableRow *row = t->AddHeaderRow();
-		if(row != nullptr)
-		{
-			row->SetValue(0,Locale::GetText("password_protected"));
-			row->SetValue(1,Locale::GetText("server_name"));
-			row->SetValue(2,Locale::GetText("gamemode"));
-			row->SetValue(3,Locale::GetText("map"));
-			row->SetValue(4,Locale::GetText("players"));
-			row->SetValue(5,Locale::GetText("latency"));
+		if(row != nullptr) {
+			row->SetValue(0, Locale::GetText("password_protected"));
+			row->SetValue(1, Locale::GetText("server_name"));
+			row->SetValue(2, Locale::GetText("gamemode"));
+			row->SetValue(3, Locale::GetText("map"));
+			row->SetValue(4, Locale::GetText("players"));
+			row->SetValue(5, Locale::GetText("latency"));
 		}
-		t->SetColumnWidth(0,30);
+		t->SetColumnWidth(0, 30);
 		t->SizeToContents();
 
-		t->SetSize(contents->GetWidth() -20,contents->GetHeight() -100);
+		t->SetSize(contents->GetWidth() - 20, contents->GetHeight() - 100);
 		t->SetX(10);
-		t->SetAnchor(0.f,0.f,1.f,1.f);
+		t->SetAnchor(0.f, 0.f, 1.f, 1.f);
 	}
 	m_hRefresh = wgui.Create<WIButton>(contents)->GetHandle();
 	WIButton *buttonRefresh = m_hRefresh.get<WIButton>();
-	if(buttonRefresh != nullptr)
-	{
+	if(buttonRefresh != nullptr) {
 		buttonRefresh->SetText(Locale::GetText("refresh"));
 		auto hServerBrowser = GetHandle();
-		buttonRefresh->AddCallback("OnPressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hServerBrowser](util::EventReply *reply) mutable -> CallbackReturnType {
+		buttonRefresh->AddCallback("OnPressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hServerBrowser](util::EventReply *reply) mutable -> CallbackReturnType {
 			*reply = util::EventReply::Handled;
 			if(!hServerBrowser.IsValid())
 				return CallbackReturnType::HasReturnValue;
@@ -296,18 +276,17 @@ void WIServerBrowser::Initialize()
 			sb->Refresh();
 			return CallbackReturnType::HasReturnValue;
 		}));
-		
+
 		buttonRefresh->SetWidth(100);
-		buttonRefresh->SetPos(contents->GetWidth() -buttonRefresh->GetWidth() -10,contents->GetHeight() -buttonRefresh->GetHeight() -20);
-		buttonRefresh->SetAnchor(1.f,1.f,1.f,1.f);
+		buttonRefresh->SetPos(contents->GetWidth() - buttonRefresh->GetWidth() - 10, contents->GetHeight() - buttonRefresh->GetHeight() - 20);
+		buttonRefresh->SetAnchor(1.f, 1.f, 1.f, 1.f);
 	}
 	m_hConnect = wgui.Create<WIButton>(contents)->GetHandle();
 	WIButton *buttonConnect = m_hConnect.get<WIButton>();
-	if(buttonConnect != nullptr)
-	{
+	if(buttonConnect != nullptr) {
 		buttonConnect->SetText(Locale::GetText("connect"));
 		auto hServerBrowser = GetHandle();
-		buttonConnect->AddCallback("OnPressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this,hServerBrowser](util::EventReply *reply) mutable -> CallbackReturnType {
+		buttonConnect->AddCallback("OnPressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this, hServerBrowser](util::EventReply *reply) mutable -> CallbackReturnType {
 			*reply = util::EventReply::Handled;
 			if(!hServerBrowser.IsValid())
 				return CallbackReturnType::HasReturnValue;
@@ -326,29 +305,25 @@ void WIServerBrowser::Initialize()
 		}));
 
 		buttonConnect->SetWidth(100);
-		buttonConnect->SetPos(contents->GetWidth() -buttonConnect->GetWidth() -120,contents->GetHeight() -buttonConnect->GetHeight() -20);
-		buttonConnect->SetAnchor(1.f,1.f,1.f,1.f);
+		buttonConnect->SetPos(contents->GetWidth() - buttonConnect->GetWidth() - 120, contents->GetHeight() - buttonConnect->GetHeight() - 20);
+		buttonConnect->SetAnchor(1.f, 1.f, 1.f, 1.f);
 	}
-	SetSize(800,400);
-	SetMinSize(400,300);
+	SetSize(800, 400);
+	SetMinSize(400, 300);
 }
 
 void WIServerBrowser::DoRefresh()
 {
 	m_bRefreshScheduled = false;
-	if(m_msQueryDispatcher)
-	{
+	if(m_msQueryDispatcher) {
 		pragma::networking::IMasterServerQueryDispatcher::Filter filter {client->GetConVarString("networking_library")};
 		m_msQueryDispatcher->QueryServers(filter);
 	}
 }
 
-void WIServerBrowser::Refresh() {m_bRefreshScheduled = true;}
+void WIServerBrowser::Refresh() { m_bRefreshScheduled = true; }
 
-void WIServerBrowser::SetSize(int x,int y)
-{
-	WIFrame::SetSize(x,y);
-}
+void WIServerBrowser::SetSize(int x, int y) { WIFrame::SetSize(x, y); }
 
 void WIServerBrowser::AddServer(const pragma::networking::MasterServerQueryResult &queryResult)
 {
@@ -358,36 +333,32 @@ void WIServerBrowser::AddServer(const pragma::networking::MasterServerQueryResul
 	if(t == nullptr)
 		return;
 	WITableRow *row = t->AddRow();
-	if(row != nullptr)
-	{
+	if(row != nullptr) {
 		m_servers.push_back({});
 		auto &data = m_servers.back();
 		data.queryResult = queryResult;
 		data.row = row->GetHandle();
-		int idx = CInt32(m_servers.size() -1);
+		int idx = CInt32(m_servers.size() - 1);
 		row->SetUserData3(std::make_shared<int32_t>(idx));
 		auto hTableRow = row->GetHandle();
-		row->AddCallback("OnDoubleClick",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this,hTableRow,idx](util::EventReply *reply) -> CallbackReturnType {
+		row->AddCallback("OnDoubleClick", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this, hTableRow, idx](util::EventReply *reply) -> CallbackReturnType {
 			*reply = util::EventReply::Handled;
 			if(!hTableRow.IsValid())
 				return CallbackReturnType::HasReturnValue;
 			OnServerDoubleClick(idx);
 			return CallbackReturnType::HasReturnValue;
 		}));
-		if(queryResult.serverInfo.passwordProtected == true)
-		{
+		if(queryResult.serverInfo.passwordProtected == true) {
 			WISilkIcon *icon = WGUI::GetInstance().Create<WISilkIcon>();
-			if(icon != nullptr)
-			{
+			if(icon != nullptr) {
 				icon->SetIcon("lock");
-				row->InsertElement(0,icon);
+				row->InsertElement(0, icon);
 			}
 		}
-		row->SetValue(1,queryResult.serverInfo.name);
-		row->SetValue(2,queryResult.serverInfo.gameMode);
-		row->SetValue(3,queryResult.serverInfo.mapName);
-		row->SetValue(4,std::to_string(queryResult.numPlayers) +"/" +std::to_string(queryResult.serverInfo.maxPlayers));
-		row->SetValue(5,std::to_string(0));
+		row->SetValue(1, queryResult.serverInfo.name);
+		row->SetValue(2, queryResult.serverInfo.gameMode);
+		row->SetValue(3, queryResult.serverInfo.mapName);
+		row->SetValue(4, std::to_string(queryResult.numPlayers) + "/" + std::to_string(queryResult.serverInfo.maxPlayers));
+		row->SetValue(5, std::to_string(0));
 	}
 }
-

@@ -17,13 +17,11 @@ extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-LINK_WGUI_TO_CLASS(WIDebugSSAO,WIDebugSSAO);
+LINK_WGUI_TO_CLASS(WIDebugSSAO, WIDebugSSAO);
 
-WIDebugSSAO::WIDebugSSAO()
-	: WITexturedRect()
-{}
+WIDebugSSAO::WIDebugSSAO() : WITexturedRect() {}
 
-void WIDebugSSAO::SetUseBlurredSSAOImage(bool b) {m_bUseBlurVariant = b;}
+void WIDebugSSAO::SetUseBlurredSSAOImage(bool b) { m_bUseBlurVariant = b; }
 
 void WIDebugSSAO::DoUpdate()
 {
@@ -31,17 +29,15 @@ void WIDebugSSAO::DoUpdate()
 	if(c_game == nullptr)
 		return;
 	auto *scene = c_game->GetScene();
-	auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent*>(scene->GetRenderer()) : nullptr;
+	auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent *>(scene->GetRenderer()) : nullptr;
 	if(renderer == nullptr)
 		return;
 	auto &ssaoInfo = renderer->GetSSAOInfo();
-	if(m_bUseBlurVariant == false)
-	{
+	if(m_bUseBlurVariant == false) {
 		if(ssaoInfo.renderTarget)
 			SetTexture(ssaoInfo.renderTarget->GetTexture());
 	}
-	else
-	{
+	else {
 		if(ssaoInfo.renderTargetBlur)
 			SetTexture(ssaoInfo.renderTargetBlur->GetTexture());
 	}

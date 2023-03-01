@@ -17,9 +17,9 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(bot,Bot);
+LINK_ENTITY_TO_CLASS(bot, Bot);
 
-void SBotComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SBotComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void Bot::Initialize()
 {

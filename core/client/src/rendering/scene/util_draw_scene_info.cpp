@@ -12,16 +12,13 @@
 
 using namespace pragma::rendering;
 
-util::DrawSceneInfo::DrawSceneInfo()
-{}
+util::DrawSceneInfo::DrawSceneInfo() {}
 util::DrawSceneInfo::DrawSceneInfo(const DrawSceneInfo &other)
-	: scene{other.scene},commandBuffer{other.commandBuffer},renderTarget{other.renderTarget},
-	renderFlags{other.renderFlags},clearColor{other.clearColor},toneMapping{other.toneMapping},
-	prepassFilter{other.prepassFilter},renderFilter{other.renderFilter},outputImage{other.outputImage},
-	clipPlane{other.clipPlane},pvsOrigin{other.pvsOrigin},
-	outputLayerId{other.outputLayerId},flags{other.flags},renderStats{other.renderStats ? std::make_unique<RenderStats>(*other.renderStats) : nullptr},
-	exclusionMask{other.exclusionMask},inclusionMask{other.inclusionMask},subPasses{other.subPasses ? std::make_unique<std::vector<DrawSceneInfo>>(*other.subPasses) : nullptr}
-{}
+    : scene {other.scene}, commandBuffer {other.commandBuffer}, renderTarget {other.renderTarget}, renderFlags {other.renderFlags}, clearColor {other.clearColor}, toneMapping {other.toneMapping}, prepassFilter {other.prepassFilter}, renderFilter {other.renderFilter},
+      outputImage {other.outputImage}, clipPlane {other.clipPlane}, pvsOrigin {other.pvsOrigin}, outputLayerId {other.outputLayerId}, flags {other.flags}, renderStats {other.renderStats ? std::make_unique<RenderStats>(*other.renderStats) : nullptr}, exclusionMask {other.exclusionMask},
+      inclusionMask {other.inclusionMask}, subPasses {other.subPasses ? std::make_unique<std::vector<DrawSceneInfo>>(*other.subPasses) : nullptr}
+{
+}
 util::DrawSceneInfo &util::DrawSceneInfo::operator=(const DrawSceneInfo &other)
 {
 	scene = other.scene;
@@ -54,7 +51,7 @@ void util::DrawSceneInfo::AddSubPass(const DrawSceneInfo &drawSceneInfo)
 		subPasses = std::make_unique<std::vector<DrawSceneInfo>>();
 	subPasses->push_back(drawSceneInfo);
 }
-const std::vector<util::DrawSceneInfo> *util::DrawSceneInfo::GetSubPasses() const {return subPasses.get();}
+const std::vector<util::DrawSceneInfo> *util::DrawSceneInfo::GetSubPasses() const { return subPasses.get(); }
 
 Vector3 util::DrawSceneInfo::GetPvsOrigin() const
 {
@@ -74,6 +71,4 @@ Vector3 util::DrawSceneInfo::GetPvsOrigin() const
 	return mask;
 }
 
-util::RenderPassDrawInfo::RenderPassDrawInfo(const DrawSceneInfo &drawSceneInfo,prosper::ICommandBuffer &cmdBuffer)
-	: drawSceneInfo{drawSceneInfo},commandBuffer{cmdBuffer.shared_from_this()}
-{}
+util::RenderPassDrawInfo::RenderPassDrawInfo(const DrawSceneInfo &drawSceneInfo, prosper::ICommandBuffer &cmdBuffer) : drawSceneInfo {drawSceneInfo}, commandBuffer {cmdBuffer.shared_from_this()} {}

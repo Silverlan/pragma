@@ -12,13 +12,9 @@
 #include "pragma/entities/environment/audio/c_env_sound_dsp.h"
 #include "pragma/entities/environment/audio/env_sound_dsp_distortion.h"
 
-namespace pragma
-{
-	class DLLCLIENT CSoundDspDistortionComponent final
-		: public CBaseSoundDspComponent,
-		public BaseEnvSoundDspDistortion
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CSoundDspDistortionComponent final : public CBaseSoundDspComponent, public BaseEnvSoundDspDistortion {
+	  public:
 		CSoundDspDistortionComponent(BaseEntity &ent) : CBaseSoundDspComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void OnEntitySpawn() override;
@@ -26,10 +22,8 @@ namespace pragma
 	};
 };
 
-class DLLCLIENT CEnvSoundDspDistortion
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEnvSoundDspDistortion : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

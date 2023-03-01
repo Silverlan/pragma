@@ -14,36 +14,36 @@
 class FontInfo;
 class LFile;
 enum class TextureLoadFlags : uint32_t;
-namespace util {enum class AssetLoadFlags : uint32_t;};
-namespace Lua
-{
-	namespace engine
-	{
-		DLLCLIENT void precache_material(lua_State *l,const std::string &mat);
-		DLLCLIENT void precache_model(lua_State *l,const std::string &mdl);
-		DLLCLIENT Material *load_material(lua_State *l,const std::string &mat,bool reload,bool loadInstantly);
-		DLLCLIENT Material *load_material(lua_State *l,const std::string &mat,bool reload);
-		DLLCLIENT Material *load_material(lua_State *l,const std::string &mat);
-		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l,const std::string &name,util::AssetLoadFlags loadFlags);
-		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l,const std::string &name);
-		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l,const LFile &file,const std::string &cacheName,util::AssetLoadFlags loadFlags);
-		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l,const LFile &file,const std::string &cacheName);
-		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l,const LFile &file,util::AssetLoadFlags loadFlags);
-		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l,const LFile &file);
+namespace util {
+	enum class AssetLoadFlags : uint32_t;
+};
+namespace Lua {
+	namespace engine {
+		DLLCLIENT void precache_material(lua_State *l, const std::string &mat);
+		DLLCLIENT void precache_model(lua_State *l, const std::string &mdl);
+		DLLCLIENT Material *load_material(lua_State *l, const std::string &mat, bool reload, bool loadInstantly);
+		DLLCLIENT Material *load_material(lua_State *l, const std::string &mat, bool reload);
+		DLLCLIENT Material *load_material(lua_State *l, const std::string &mat);
+		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l, const std::string &name, util::AssetLoadFlags loadFlags);
+		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l, const std::string &name);
+		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l, const LFile &file, const std::string &cacheName, util::AssetLoadFlags loadFlags);
+		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l, const LFile &file, const std::string &cacheName);
+		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l, const LFile &file, util::AssetLoadFlags loadFlags);
+		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l, const LFile &file);
 		DLLCLIENT Material *get_error_material();
 		DLLCLIENT void clear_unused_materials();
-		DLLCLIENT std::shared_ptr<Material> create_material(const std::string &identifier,const std::string &shader);
+		DLLCLIENT std::shared_ptr<Material> create_material(const std::string &identifier, const std::string &shader);
 		DLLCLIENT std::shared_ptr<Material> create_material(const std::string &shader);
 		DLLCLIENT Material *get_material(const std::string &identifier);
 		DLLCLIENT int create_particle_system(lua_State *l);
-		DLLCLIENT bool precache_particle_system(lua_State *l,const std::string &particle,bool reload);
-		DLLCLIENT bool precache_particle_system(lua_State *l,const std::string &particle);
+		DLLCLIENT bool precache_particle_system(lua_State *l, const std::string &particle, bool reload);
+		DLLCLIENT bool precache_particle_system(lua_State *l, const std::string &particle);
 		DLLCLIENT int save_particle_system(lua_State *l);
-		DLLCLIENT std::shared_ptr<const FontInfo> create_font(lua_State *l,const std::string &identifier,const std::string &font,FontSetFlag features,uint32_t size,bool reload);
-		DLLCLIENT std::shared_ptr<const FontInfo> create_font(lua_State *l,const std::string &identifier,const std::string &font,FontSetFlag features,uint32_t size);
-		DLLCLIENT std::shared_ptr<const FontInfo> get_font(lua_State *l,const std::string &identifier);
-		DLLCLIENT Vector2i get_text_size(lua_State *l,const std::string &text,const std::string &font);
-		DLLCLIENT Vector2i get_text_size(lua_State *l,const std::string &text,const FontInfo &font);
+		DLLCLIENT std::shared_ptr<const FontInfo> create_font(lua_State *l, const std::string &identifier, const std::string &font, FontSetFlag features, uint32_t size, bool reload);
+		DLLCLIENT std::shared_ptr<const FontInfo> create_font(lua_State *l, const std::string &identifier, const std::string &font, FontSetFlag features, uint32_t size);
+		DLLCLIENT std::shared_ptr<const FontInfo> get_font(lua_State *l, const std::string &identifier);
+		DLLCLIENT Vector2i get_text_size(lua_State *l, const std::string &text, const std::string &font);
+		DLLCLIENT Vector2i get_text_size(lua_State *l, const std::string &text, const FontInfo &font);
 		DLLCLIENT std::shared_ptr<prosper::RenderTarget> get_staging_render_target();
 		DLLCLIENT void set_fixed_frame_delta_time_interpretation(uint16_t fps);
 		DLLCLIENT void clear_fixed_frame_delta_time_interpretation();

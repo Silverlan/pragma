@@ -30,36 +30,33 @@ static int shadowmapHeight;
 static CallbackHandle cbRenderShadowMap;
 static CallbackHandle cbReleaseShadowMap;
 static CVar cvShadowmapSize = GetClientConVar("cl_render_shadow_resolution");
-static bool get_shadow_map(NetworkState *nw,std::vector<std::string> &argv,pragma::CLightComponent **light,pragma::CLightComponent::ShadowMapType smType)
+static bool get_shadow_map(NetworkState *nw, std::vector<std::string> &argv, pragma::CLightComponent **light, pragma::CLightComponent::ShadowMapType smType)
 {
 	if(argv.empty())
 		return false;
-	auto ents = command::find_named_targets(nw,argv.front());
+	auto ents = command::find_named_targets(nw, argv.front());
 	if(ents.empty())
 		return false;
-	auto *ent = static_cast<CBaseEntity*>(ents.front());
-	auto *pLightComponent = static_cast<pragma::CLightComponent*>(ent->FindComponent("light").get());
-	if(pLightComponent == nullptr)
-	{
-		Con::cwar<<"Entity '"<<ent->GetClass()<<"'("<<argv.front()<<") is not a light!"<<Con::endl;
+	auto *ent = static_cast<CBaseEntity *>(ents.front());
+	auto *pLightComponent = static_cast<pragma::CLightComponent *>(ent->FindComponent("light").get());
+	if(pLightComponent == nullptr) {
+		Con::cwar << "Entity '" << ent->GetClass() << "'(" << argv.front() << ") is not a light!" << Con::endl;
 		return false;
 	}
 	*light = pLightComponent;
-	if(pLightComponent->GetLight() == nullptr)
-	{
-		Con::cwar<<"Entity '"<<ent->GetClass()<<"'("<<argv.front()<<") has no light attached!"<<Con::endl;
+	if(pLightComponent->GetLight() == nullptr) {
+		Con::cwar << "Entity '" << ent->GetClass() << "'(" << argv.front() << ") has no light attached!" << Con::endl;
 		return false;
 	}
 	auto hShadowmap = (*light)->GetShadowMap(smType);
-	if(hShadowmap.expired() && (*light)->GetEntity().HasComponent<pragma::CShadowCSMComponent>() == false)
-	{
-		Con::cwar<<"Invalid shadowmap for this entity!"<<Con::endl;
+	if(hShadowmap.expired() && (*light)->GetEntity().HasComponent<pragma::CShadowCSMComponent>() == false) {
+		Con::cwar << "Invalid shadowmap for this entity!" << Con::endl;
 		return false;
 	}
 	return true;
 }
 
-void CMD_debug_light_shadowmap(NetworkState *nw,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
+void CMD_debug_light_shadowmap(NetworkState *nw, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
 	auto &wgui = WGUI::GetInstance();
 	auto *pRoot = wgui.GetBaseElement();
@@ -74,7 +71,7 @@ void CMD_debug_light_shadowmap(NetworkState *nw,pragma::BasePlayerComponent*,std
 	auto smType = pragma::CLightComponent::ShadowMapType::Dynamic;
 
 	pragma::CLightComponent *light;
-	if(get_shadow_map(nw,argv,&light,smType) == false)
+	if(get_shadow_map(nw, argv, &light, smType) == false)
 		return;
 	if(c_game == nullptr || argv.empty() || pRoot == nullptr)
 		return;
@@ -83,21 +80,17 @@ void CMD_debug_light_shadowmap(NetworkState *nw,pragma::BasePlayerComponent*,std
 		return;
 	auto size = 256u;
 	pElSm->SetLightSource(*light);
-	pElSm->SetShadowMapSize(size,size);
+	pElSm->SetShadowMapSize(size, size);
 	pElSm->SetShadowMapType(smType);
 	pElSm->SetName(name);
 	pElSm->Update();
 }
 
-static void CVAR_CALLBACK_cl_render_shadow_pssm_split_count(NetworkState *state,ConVar*,int,int)
+static void CVAR_CALLBACK_cl_render_shadow_pssm_split_count(NetworkState *state, ConVar *, int, int)
 {
 	if(shadowmapTargetIdx == -1)
 		return;
-	std::vector<std::string> argv = {
-		std::to_string(shadowmapTargetIdx),
-		std::to_string(shadowmapWidth),
-		std::to_string(shadowmapHeight)
-	};
-	CMD_debug_light_shadowmap(state,nullptr,argv);
+	std::vector<std::string> argv = {std::to_string(shadowmapTargetIdx), std::to_string(shadowmapWidth), std::to_string(shadowmapHeight)};
+	CMD_debug_light_shadowmap(state, nullptr, argv);
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_render_shadow_pssm_split_count,CVAR_CALLBACK_cl_render_shadow_pssm_split_count);
+REGISTER_CONVAR_CALLBACK_CL(cl_render_shadow_pssm_split_count, CVAR_CALLBACK_cl_render_shadow_pssm_split_count);

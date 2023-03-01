@@ -78,7 +78,7 @@ void pragma::CRasterizationRendererComponent::RenderGlowObjects(const util::Draw
 #endif
 }
 
-void pragma::CRasterizationRendererComponent::RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::CSceneComponent &scene,pragma::rendering::SceneRenderPass renderMode)
+void pragma::CRasterizationRendererComponent::RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, const pragma::CSceneComponent &scene, pragma::rendering::SceneRenderPass renderMode)
 {
 	// TODO
 #if 0
@@ -110,10 +110,11 @@ void pragma::CRasterizationRendererComponent::RenderGlowMeshes(std::shared_ptr<p
 #endif
 }
 
-static void cmd_render_bloom_enabled(NetworkState*,ConVar*,bool,bool enabled)
+static void cmd_render_bloom_enabled(NetworkState *, ConVar *, bool, bool enabled)
 {
 	if(client == nullptr)
 		return;
 	client->UpdateGameWorldShaderSettings();
 }
-REGISTER_CONVAR_CALLBACK_CL(render_bloom_enabled,cmd_render_bloom_enabled);
+
+REGISTER_CONVAR_CALLBACK_CL(render_bloom_enabled, cmd_render_bloom_enabled);

@@ -12,19 +12,15 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/liquid/base_liquid_control_component.hpp>
 
-namespace pragma
-{
-	class DLLCLIENT CLiquidControlComponent final
-		: public BaseLiquidControlComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CLiquidControlComponent final : public BaseLiquidControlComponent, public CBaseNetComponent {
+	  public:
 		CLiquidControlComponent(BaseEntity &ent) : BaseLiquidControlComponent(ent) {}
-		virtual bool ShouldTransmitNetData() const override {return true;}
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
+		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool OnBulletHit(const BulletInfo &bulletInfo,const TraceData &data,PhysObj *phys,pragma::physics::ICollisionObject *col,const LocalRayResult &result) override;
+		virtual bool OnBulletHit(const BulletInfo &bulletInfo, const TraceData &data, PhysObj *phys, pragma::physics::ICollisionObject *col, const LocalRayResult &result) override;
 	};
 };
 

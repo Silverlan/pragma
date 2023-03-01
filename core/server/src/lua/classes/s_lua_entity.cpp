@@ -19,49 +19,37 @@
 extern DLLSERVER SGame *s_game;
 extern DLLSERVER ServerState *server;
 
-SLuaEntity::SLuaEntity()
-	: SBaseEntity{}
-{}
-void SLuaEntity::Initialize()
+SLuaEntity::SLuaEntity() : SBaseEntity {} {}
+void SLuaEntity::Initialize() { SBaseEntity::Initialize(); }
+void SLuaEntity::SetupLua(const luabind::object &o, const std::string &className)
 {
-	SBaseEntity::Initialize();
-}
-void SLuaEntity::SetupLua(const luabind::object &o,const std::string &className)
-{
-	m_class = className;
+	m_className = pragma::ents::register_class_name(className);
 	SetLuaObject(o);
 }
-bool SLuaEntity::IsScripted() const {return true;}
-void SLuaEntity::InitializeLuaObject(lua_State *lua)
-{
-	pragma::BaseLuaHandle::InitializeLuaObject<SLuaEntity>(lua);
-}
+bool SLuaEntity::IsScripted() const { return true; }
+void SLuaEntity::InitializeLuaObject(lua_State *lua) { pragma::BaseLuaHandle::InitializeLuaObject<SLuaEntity>(lua); }
 
 void SLuaEntity::DoSpawn()
 {
 	SBaseEntity::DoSpawn();
-	if(IsShared())
-	{
-		pragma::networking::ClientRecipientFilter rf {[](const pragma::networking::IServerClient &cl) -> bool {
-			return cl.GetPlayer();
-		}};
+	if(IsShared()) {
+		pragma::networking::ClientRecipientFilter rf {[](const pragma::networking::IServerClient &cl) -> bool { return cl.GetPlayer(); }};
 		NetPacket p;
-		p->WriteString(GetClass());
+		p->WriteString(*GetClass());
 		p->Write<unsigned int>(GetIndex());
 		auto pMapComponent = GetComponent<pragma::MapComponent>();
 		p->Write<unsigned int>(pMapComponent.valid() ? pMapComponent->GetMapIndex() : 0u);
-		SendData(p,rf);
-		server->SendPacket("ent_create_lua",p,pragma::networking::Protocol::SlowReliable,rf);
+		SendData(p, rf);
+		server->SendPacket("ent_create_lua", p, pragma::networking::Protocol::SlowReliable, rf);
 	}
 }
 void SLuaEntity::Remove()
 {
-	if(IsSpawned())
-	{
+	if(IsSpawned()) {
 		// TODO: Do we need this? (If so, why?)
 		NetPacket p;
-		nwm::write_entity(p,this);
-		server->SendPacket("ent_remove",p,pragma::networking::Protocol::SlowReliable);
+		nwm::write_entity(p, this);
+		server->SendPacket("ent_remove", p, pragma::networking::Protocol::SlowReliable);
 	}
 	SBaseEntity::Remove();
 }

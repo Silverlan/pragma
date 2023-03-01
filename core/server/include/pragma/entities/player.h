@@ -12,11 +12,8 @@
 #include <pragma/entities/baseplayer.hpp>
 
 class WVServerClient;
-class DLLSERVER Player
-	: public SBaseEntity,
-	public BasePlayer
-{
-public:
+class DLLSERVER Player : public SBaseEntity, public BasePlayer {
+  public:
 	virtual void Initialize() override;
 };
 

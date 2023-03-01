@@ -15,30 +15,32 @@
 class CALSound;
 class Engine;
 class NetPacket;
-namespace pragma::rendering {enum class RenderMask : uint64_t; using RenderGroup = RenderMask;};
+namespace pragma::rendering {
+	enum class RenderMask : uint64_t;
+	using RenderGroup = RenderMask;
+};
 class RenderInstance;
 class RenderObject;
 class Material;
-namespace pragma
-{
+namespace pragma {
 	class BaseEntityComponent;
 	class ShaderGameWorldLightingPass;
 	class CRenderComponent;
 	class CPhysicsComponent;
 	class CSceneComponent;
 };
-namespace bounding_volume {class AABB;};
+namespace bounding_volume {
+	class AABB;
+};
 #pragma warning(push)
 #pragma warning(disable : 4251)
-class DLLCLIENT CBaseEntity
-	: public BaseEntity
-{
-public:
+class DLLCLIENT CBaseEntity : public BaseEntity {
+  public:
 	static pragma::ComponentEventId EVENT_ON_SCENE_FLAGS_CHANGED;
 	static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
 	CBaseEntity();
-	void Construct(unsigned int idx,unsigned int clientIdx);
+	void Construct(unsigned int idx, unsigned int clientIdx);
 	virtual void InitializeLuaObject(lua_State *lua) override;
 
 	virtual pragma::ComponentHandle<pragma::BaseAnimatedComponent> GetAnimatedComponent() const override;
@@ -64,11 +66,11 @@ public:
 	virtual void Initialize() override;
 	virtual void ReceiveData(NetPacket &packet);
 	virtual void ReceiveSnapshotData(NetPacket &packet);
-	virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet);
+	virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet);
 
 	virtual void Remove() override;
 	virtual void OnRemove() override;
-	
+
 	bool IsClientsideOnly() const;
 	virtual bool IsNetworkLocal() const override;
 
@@ -81,27 +83,25 @@ public:
 	void RemoveFromScene(pragma::CSceneComponent &scene);
 	void RemoveFromAllScenes();
 	bool IsInScene(const pragma::CSceneComponent &scene) const;
-	std::vector<pragma::CSceneComponent*> GetScenes() const;
+	std::vector<pragma::CSceneComponent *> GetScenes() const;
 
 	void AddChild(CBaseEntity &ent);
 
 	// Quick-access
 	const bounding_volume::AABB &GetLocalRenderBounds() const;
-	const bounding_volume::AABB &GetAbsoluteRenderBounds(bool updateBounds=true) const;
+	const bounding_volume::AABB &GetAbsoluteRenderBounds(bool updateBounds = true) const;
 	//
 
-	void SendNetEventTCP(UInt32 eventId,NetPacket &data) const;
+	void SendNetEventTCP(UInt32 eventId, NetPacket &data) const;
 	void SendNetEventTCP(UInt32 eventId) const;
-	void SendNetEventUDP(UInt32 eventId,NetPacket &data) const;
+	void SendNetEventUDP(UInt32 eventId, NetPacket &data) const;
 	void SendNetEventUDP(UInt32 eventId) const;
 
 	virtual NetworkState *GetNetworkState() const override final;
-protected:
+  protected:
 	virtual void DoSpawn() override;
 	virtual void OnComponentAdded(pragma::BaseEntityComponent &component) override;
 	virtual void OnComponentRemoved(pragma::BaseEntityComponent &component) override;
-	// TODO: Obsolete? (Also remove from BaseEntity and SBaseEntity)
-	void EraseFunction(int function);
 
 	friend pragma::BaseEntityComponent;
 	uint32_t m_clientIdx = 0u;
@@ -110,6 +110,18 @@ protected:
 };
 #pragma warning(pop)
 
-inline DLLCLIENT Con::c_cout& operator<<(Con::c_cout &os,CBaseEntity &ent) {return ent.print(os);}
+inline DLLCLIENT Con::c_cout &operator<<(Con::c_cout &os, CBaseEntity &ent) { return ent.print(os); }
+
+#ifdef _WIN32
+template<>
+struct std::formatter<CBaseEntity> : std::formatter<std::string> {
+	auto format(CBaseEntity &ent, format_context &ctx) -> decltype(ctx.out())
+	{
+		std::stringstream ss;
+		ent.print(ss);
+		return std::format_to(ctx.out(), "{}", ss.str());
+	}
+};
+#endif
 
 #endif

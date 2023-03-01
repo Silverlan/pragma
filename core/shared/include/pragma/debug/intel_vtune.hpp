@@ -14,26 +14,21 @@
 
 struct ___itt_domain;
 struct ___itt_string_handle;
-namespace debug
-{
-	struct DLLNETWORK VTuneTask
-	{
+namespace debug {
+	struct DLLNETWORK VTuneTask {
 		void Begin();
 		void End();
-		VTuneTask(___itt_domain *domain,___itt_string_handle *handle)
-			: domain{domain},handle{handle}
-		{}
+		VTuneTask(___itt_domain *domain, ___itt_string_handle *handle) : domain {domain}, handle {handle} {}
 		___itt_domain *domain;
 		___itt_string_handle *handle;
 	};
-	class DLLNETWORK VTuneDomain
-	{
-	public:
+	class DLLNETWORK VTuneDomain {
+	  public:
 		VTuneDomain();
 		~VTuneDomain();
 		VTuneTask BeginTask(const std::string &name);
 		void EndTask();
-	private:
+	  private:
 		___itt_domain *m_domain = nullptr;
 	};
 

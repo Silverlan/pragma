@@ -17,25 +17,21 @@
 
 class CBaseEntity;
 struct DeltaTransform;
-namespace pragma
-{
-	class DLLCLIENT CPlayerComponent final
-		: public BasePlayerComponent,
-		public CBaseNetComponent
-	{
-	private:
-		static std::vector<CPlayerComponent*> s_players;
+namespace pragma {
+	class DLLCLIENT CPlayerComponent final : public BasePlayerComponent, public CBaseNetComponent {
+	  private:
+		static std::vector<CPlayerComponent *> s_players;
 		const float VIEW_BODY_OFFSET = -20.f;
-	public:
+	  public:
 		CPlayerComponent(BaseEntity &ent);
 		virtual ~CPlayerComponent() override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
-	public:
+	  public:
 		static unsigned int GetPlayerCount();
-		static const std::vector<CPlayerComponent*> &GetAll();
-		Con::c_cout& print(Con::c_cout&);
-		std::ostream& print(std::ostream&);
+		static const std::vector<CPlayerComponent *> &GetAll();
+		Con::c_cout &print(Con::c_cout &);
+		std::ostream &print(std::ostream &);
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void OnTick(double tDelta) override;
@@ -44,21 +40,21 @@ namespace pragma
 		virtual void OnCrouch() override;
 		virtual void OnUnCrouch() override;
 		virtual void SetLocalPlayer(bool b) override;
-		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
 		void UpdateObserverOffset();
 		virtual void SetObserverMode(OBSERVERMODE mode) override;
 		virtual void SetObserverTarget(BaseObservableComponent *ent) override;
 		virtual void DoSetObserverMode(OBSERVERMODE mode) override;
-		virtual void ApplyViewRotationOffset(const EulerAngles &ang,float dur=0.5f) override;
-		virtual void PrintMessage(std::string message,MESSAGE type) override;
+		virtual void ApplyViewRotationOffset(const EulerAngles &ang, float dur = 0.5f) override;
+		virtual void PrintMessage(std::string message, MESSAGE type) override;
 
 		// Returns true if observer mode is first-person and observer target is this player (Only works for the local player)
 		bool IsInFirstPersonMode() const;
 
 		void UpdateViewModelTransform();
 		void UpdateViewFOV();
-	protected:
+	  protected:
 		CallbackHandle m_cbCalcOrientationView = {};
 		Vector3 m_viewOffset = {};
 		std::unique_ptr<DeltaOffset> m_crouchViewOffset = nullptr;
@@ -72,7 +68,7 @@ namespace pragma
 		void OnDeployWeapon(BaseEntity &ent);
 		void OnSetActiveWeapon(BaseEntity *ent);
 		void OnSetUpDirection(const Vector3 &direction);
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
+		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		void UpdateObserverCallback();
 		void OnSetCharacterOrientation(const Vector3 &up);
 		bool ShouldDraw() const;

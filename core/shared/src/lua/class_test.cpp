@@ -15,22 +15,20 @@
 template<typename T>
 	using TClass = util::WeakHandle<T>;
 
-#define LUA_DEFINE_PTR_TYPE(TPTR,BASENAME) \
-	namespace luabind \
-	{ \
-		template<typename T> \
-		T* get_pointer(const TPTR& pointer) \
-		{ \
-			return const_cast<T*>(pointer.Get()); \
-		} \
-	}; \
-	namespace luabind::detail::has_get_pointer_ \
-	{ \
-		template<typename T> \
-			T* get_pointer(const TPTR &pointer) \
-		{ \
-			return const_cast<T*>(pointer.Get()); \
-		} \
+#define LUA_DEFINE_PTR_TYPE(TPTR, BASENAME)                                                                                                                                                                                                                                                      \
+	namespace luabind {                                                                                                                                                                                                                                                                          \
+		template<typename T>                                                                                                                                                                                                                                                                     \
+		T *get_pointer(const TPTR &pointer)                                                                                                                                                                                                                                                      \
+		{                                                                                                                                                                                                                                                                                        \
+			return const_cast<T *>(pointer.Get());                                                                                                                                                                                                                                               \
+		}                                                                                                                                                                                                                                                                                        \
+	};                                                                                                                                                                                                                                                                                           \
+	namespace luabind::detail::has_get_pointer_ {                                                                                                                                                                                                                                                \
+		template<typename T>                                                                                                                                                                                                                                                                     \
+		T *get_pointer(const TPTR &pointer)                                                                                                                                                                                                                                                      \
+		{                                                                                                                                                                                                                                                                                        \
+			return const_cast<T *>(pointer.Get());                                                                                                                                                                                                                                               \
+		}                                                                                                                                                                                                                                                                                        \
 	};
 
 //LUA_DEFINE_PTR_TYPE(util::WeakHandle<T>,weak_handle);
@@ -125,32 +123,31 @@ static void test()
 #include "pragma/util/bulletinfo.h"
 #include "pragma/lua/policies/handle_policy.hpp"
 #include <sharedutils/util_shared_handle.hpp>
-namespace Lua
-{
+namespace Lua {
 	// These don't like to be in core/shared/src/lua/class.cpp for some reason (Something to do with EntityHandle hAttacker/hInflictor)
 	void register_bullet_info(luabind::module_ &gameMod)
 	{
 		auto bulletInfo = luabind::class_<BulletInfo>("BulletInfo");
 		bulletInfo.def(luabind::constructor<>());
 		bulletInfo.def(luabind::tostring(luabind::self));
-		bulletInfo.def_readwrite("spread",&BulletInfo::spread);
-		bulletInfo.def_readwrite("force",&BulletInfo::force);
-		bulletInfo.def_readwrite("distance",&BulletInfo::distance);
-		bulletInfo.def_readwrite("damageType",reinterpret_cast<std::underlying_type_t<decltype(BulletInfo::damageType)> BulletInfo::*>(&BulletInfo::damageType));
-		bulletInfo.def_readwrite("bulletCount",&BulletInfo::bulletCount);
-		bulletInfo.def_readwrite("attacker",&BulletInfo::hAttacker);
-		bulletInfo.def_readwrite("inflictor",&BulletInfo::hInflictor);
-		bulletInfo.def_readwrite("tracerCount",&BulletInfo::tracerCount);
-		bulletInfo.def_readwrite("tracerRadius",&BulletInfo::tracerRadius);
-		bulletInfo.def_readwrite("tracerColor",&BulletInfo::tracerColor);
-		bulletInfo.def_readwrite("tracerLength",&BulletInfo::tracerLength);
-		bulletInfo.def_readwrite("tracerSpeed",&BulletInfo::tracerSpeed);
-		bulletInfo.def_readwrite("tracerMaterial",&BulletInfo::tracerMaterial);
-		bulletInfo.def_readwrite("tracerBloom",&BulletInfo::tracerBloom);
-		bulletInfo.def_readwrite("ammoType",&BulletInfo::ammoType);
-		bulletInfo.def_readwrite("direction",&BulletInfo::direction);
-		bulletInfo.def_readwrite("effectOrigin",&BulletInfo::effectOrigin);
-		bulletInfo.def_readwrite("damage",&BulletInfo::damage);
+		bulletInfo.def_readwrite("spread", &BulletInfo::spread);
+		bulletInfo.def_readwrite("force", &BulletInfo::force);
+		bulletInfo.def_readwrite("distance", &BulletInfo::distance);
+		bulletInfo.def_readwrite("damageType", reinterpret_cast<std::underlying_type_t<decltype(BulletInfo::damageType)> BulletInfo::*>(&BulletInfo::damageType));
+		bulletInfo.def_readwrite("bulletCount", &BulletInfo::bulletCount);
+		bulletInfo.def_readwrite("attacker", &BulletInfo::hAttacker);
+		bulletInfo.def_readwrite("inflictor", &BulletInfo::hInflictor);
+		bulletInfo.def_readwrite("tracerCount", &BulletInfo::tracerCount);
+		bulletInfo.def_readwrite("tracerRadius", &BulletInfo::tracerRadius);
+		bulletInfo.def_readwrite("tracerColor", &BulletInfo::tracerColor);
+		bulletInfo.def_readwrite("tracerLength", &BulletInfo::tracerLength);
+		bulletInfo.def_readwrite("tracerSpeed", &BulletInfo::tracerSpeed);
+		bulletInfo.def_readwrite("tracerMaterial", &BulletInfo::tracerMaterial);
+		bulletInfo.def_readwrite("tracerBloom", &BulletInfo::tracerBloom);
+		bulletInfo.def_readwrite("ammoType", &BulletInfo::ammoType);
+		bulletInfo.def_readwrite("direction", &BulletInfo::direction);
+		bulletInfo.def_readwrite("effectOrigin", &BulletInfo::effectOrigin);
+		bulletInfo.def_readwrite("damage", &BulletInfo::damage);
 		gameMod[bulletInfo];
 	}
 };

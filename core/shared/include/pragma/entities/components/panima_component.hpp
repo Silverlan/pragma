@@ -15,13 +15,12 @@
 #undef GetCurrentTime
 
 struct AnimationEvent;
-namespace util {class Path;};
-namespace pragma
-{
-	class DLLNETWORK PanimaComponent final
-		: public BaseEntityComponent
-	{
-	public:
+namespace util {
+	class Path;
+};
+namespace pragma {
+	class DLLNETWORK PanimaComponent final : public BaseEntityComponent {
+	  public:
 		static ComponentEventId EVENT_HANDLE_ANIMATION_EVENT;
 		static ComponentEventId EVENT_ON_PLAY_ANIMATION;
 		static ComponentEventId EVENT_ON_ANIMATION_COMPLETE;
@@ -31,16 +30,16 @@ namespace pragma
 		static ComponentEventId EVENT_PLAY_ANIMATION;
 		static ComponentEventId EVENT_TRANSLATE_ANIMATION;
 		static ComponentEventId EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
-		static std::optional<std::pair<std::string,util::Path>> ParseComponentChannelPath(const panima::ChannelPath &path);
-		
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static std::optional<std::pair<std::string, util::Path>> ParseComponentChannelPath(const panima::ChannelPath &path);
+
 		PanimaComponent(BaseEntity &ent);
 		void SetPlaybackRate(float rate);
 		float GetPlaybackRate() const;
 		const util::PFloatProperty &GetPlaybackRateProperty() const;
-		
-		std::vector<std::pair<std::string,panima::PAnimationManager>> &GetAnimationManagers() {return m_animationManagers;}
-		const std::vector<std::pair<std::string,panima::PAnimationManager>> &GetAnimationManagers() const {return const_cast<PanimaComponent*>(this)->GetAnimationManagers();}
+
+		std::vector<std::pair<std::string, panima::PAnimationManager>> &GetAnimationManagers() { return m_animationManagers; }
+		const std::vector<std::pair<std::string, panima::PAnimationManager>> &GetAnimationManagers() const { return const_cast<PanimaComponent *>(this)->GetAnimationManagers(); }
 		panima::PAnimationManager AddAnimationManager(std::string name);
 		panima::PAnimationManager GetAnimationManager(std::string name);
 		void RemoveAnimationManager(const panima::AnimationManager &player);
@@ -54,68 +53,60 @@ namespace pragma
 		void DebugPrint();
 
 		virtual void Initialize() override;
-		void PlayAnimation(panima::AnimationManager &manager,panima::Animation &anim);
+		virtual void OnEntitySpawn() override;
+		virtual void OnRemove() override;
+		void PlayAnimation(panima::AnimationManager &manager, panima::Animation &anim);
 		void ReloadAnimation(panima::AnimationManager &manager);
 		float GetCurrentTime(panima::AnimationManager &manager) const;
-		void SetCurrentTime(panima::AnimationManager &manager,float time);
+		void SetCurrentTime(panima::AnimationManager &manager, float time);
 		float GetCurrentTimeFraction(panima::AnimationManager &manager) const;
-		void SetCurrentTimeFraction(panima::AnimationManager &manager,float t);
+		void SetCurrentTimeFraction(panima::AnimationManager &manager, float t);
 		void ReloadAnimation();
 
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		using BaseEntityComponent::Load;
-	protected:
-		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
+	  protected:
+		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 		void InvokeValueSubmitters(panima::AnimationManager &manager);
-		std::vector<std::pair<std::string,panima::PAnimationManager>>::iterator FindAnimationManager(const std::string_view &name);
+		std::vector<std::pair<std::string, panima::PAnimationManager>>::iterator FindAnimationManager(const std::string_view &name);
 		void InitializeAnimationChannelValueSubmitters();
 		void InitializeAnimationChannelValueSubmitters(panima::AnimationManager &manager);
 		void ResetAnimation(const std::shared_ptr<Model> &mdl);
 		util::PFloatProperty m_playbackRate = nullptr;
-		std::vector<std::pair<std::string,panima::PAnimationManager>> m_animationManagers;
+		std::vector<std::pair<std::string, panima::PAnimationManager>> m_animationManagers;
 	};
 
-	struct DLLNETWORK CEAnim2OnAnimationComplete
-		: public ComponentEvent
-	{
-		CEAnim2OnAnimationComplete(const panima::AnimationSet &set,int32_t animation,Activity activity);
+	struct DLLNETWORK CEAnim2OnAnimationComplete : public ComponentEvent {
+		CEAnim2OnAnimationComplete(const panima::AnimationSet &set, int32_t animation, Activity activity);
 		virtual void PushArguments(lua_State *l) override;
 		const panima::AnimationSet &set;
 		int32_t animation;
 		Activity activity;
 	};
-	struct DLLNETWORK CEAnim2HandleAnimationEvent
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CEAnim2HandleAnimationEvent : public ComponentEvent {
 		CEAnim2HandleAnimationEvent(const AnimationEvent &animationEvent);
 		virtual void PushArguments(lua_State *l) override;
 		void PushArgumentVariadic(lua_State *l);
 		const AnimationEvent &animationEvent;
 	};
-	struct DLLNETWORK CEAnim2OnPlayAnimation
-		: public ComponentEvent
-	{
-		CEAnim2OnPlayAnimation(const panima::AnimationSet &set,panima::AnimationId animation,panima::PlaybackFlags flags);
+	struct DLLNETWORK CEAnim2OnPlayAnimation : public ComponentEvent {
+		CEAnim2OnPlayAnimation(const panima::AnimationSet &set, panima::AnimationId animation, panima::PlaybackFlags flags);
 		virtual void PushArguments(lua_State *l) override;
 		const panima::AnimationSet &set;
 		panima::AnimationId animation;
 		panima::PlaybackFlags flags;
 	};
-	struct DLLNETWORK CEAnim2OnAnimationStart
-		: public ComponentEvent
-	{
-		CEAnim2OnAnimationStart(const panima::AnimationSet &set,int32_t animation,Activity activity,panima::PlaybackFlags flags);
+	struct DLLNETWORK CEAnim2OnAnimationStart : public ComponentEvent {
+		CEAnim2OnAnimationStart(const panima::AnimationSet &set, int32_t animation, Activity activity, panima::PlaybackFlags flags);
 		virtual void PushArguments(lua_State *l) override;
 		const panima::AnimationSet &set;
 		int32_t animation;
 		Activity activity;
 		panima::PlaybackFlags flags;
 	};
-	struct DLLNETWORK CEAnim2TranslateAnimation
-		: public ComponentEvent
-	{
-		CEAnim2TranslateAnimation(const panima::AnimationSet &set,panima::AnimationId &animation,panima::PlaybackFlags &flags);
+	struct DLLNETWORK CEAnim2TranslateAnimation : public ComponentEvent {
+		CEAnim2TranslateAnimation(const panima::AnimationSet &set, panima::AnimationId &animation, panima::PlaybackFlags &flags);
 		virtual void PushArguments(lua_State *l) override;
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua_State *l) override;
@@ -123,16 +114,12 @@ namespace pragma
 		panima::AnimationId &animation;
 		panima::PlaybackFlags &flags;
 	};
-	struct DLLNETWORK CEAnim2MaintainAnimations
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CEAnim2MaintainAnimations : public ComponentEvent {
 		CEAnim2MaintainAnimations(double deltaTime);
 		virtual void PushArguments(lua_State *l) override;
 		double deltaTime;
 	};
-	struct DLLNETWORK CEAnim2InitializeChannelValueSubmitter
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CEAnim2InitializeChannelValueSubmitter : public ComponentEvent {
 		CEAnim2InitializeChannelValueSubmitter(util::Path &path);
 		virtual void PushArguments(lua_State *l) override;
 		virtual uint32_t GetReturnCount() override;

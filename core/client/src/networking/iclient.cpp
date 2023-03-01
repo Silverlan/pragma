@@ -14,21 +14,21 @@ std::optional<pragma::networking::IPAddress> pragma::networking::IClient::GetIPA
 	auto port = GetLocalTCPPort();
 	if(ip.has_value() == false || port.has_value() == false)
 		return {};
-	return pragma::networking::IPAddress{*ip,*port};
+	return pragma::networking::IPAddress {*ip, *port};
 }
 
-void pragma::networking::IClient::SetEventInterface(const ClientEventInterface &eventHandler) {m_eventInterface = eventHandler;}
-const pragma::networking::ClientEventInterface &pragma::networking::IClient::GetEventInterface() const {return m_eventInterface;}
+void pragma::networking::IClient::SetEventInterface(const ClientEventInterface &eventHandler) { m_eventInterface = eventHandler; }
+const pragma::networking::ClientEventInterface &pragma::networking::IClient::GetEventInterface() const { return m_eventInterface; }
 
 void pragma::networking::IClient::HandlePacket(NetPacket &packet)
 {
 	if(m_eventInterface.handlePacket)
 		m_eventInterface.handlePacket(packet);
 }
-void pragma::networking::IClient::OnPacketSent(Protocol protocol,NetPacket &packet)
+void pragma::networking::IClient::OnPacketSent(Protocol protocol, NetPacket &packet)
 {
 	if(m_eventInterface.onPacketSent)
-		m_eventInterface.onPacketSent(protocol,packet);
+		m_eventInterface.onPacketSent(protocol, packet);
 }
 void pragma::networking::IClient::OnConnected()
 {

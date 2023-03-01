@@ -24,56 +24,50 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_particle_system,CEnvParticleSystem);
+LINK_ENTITY_TO_CLASS(env_particle_system, CEnvParticleSystem);
 
 void CParticleSystemComponent::Initialize()
 {
 	BaseEnvParticleSystemComponent::Initialize();
 
-	BindEventUnhandled(BaseToggleComponent::EVENT_ON_TURN_ON,[this](std::reference_wrapper<ComponentEvent> evData) {
-		Start();
-	});
-	BindEventUnhandled(BaseToggleComponent::EVENT_ON_TURN_OFF,[this](std::reference_wrapper<ComponentEvent> evData) {
-		Stop();
-	});
-	BindEvent(CIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
-		auto &inputData = static_cast<pragma::CEInputData&>(evData.get());
-		if(ustring::compare<std::string>(inputData.input,"setcontinuous",false))
-		{
+	BindEventUnhandled(BaseToggleComponent::EVENT_ON_TURN_ON, [this](std::reference_wrapper<ComponentEvent> evData) { Start(); });
+	BindEventUnhandled(BaseToggleComponent::EVENT_ON_TURN_OFF, [this](std::reference_wrapper<ComponentEvent> evData) { Stop(); });
+	BindEvent(CIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+		auto &inputData = static_cast<pragma::CEInputData &>(evData.get());
+		if(ustring::compare<std::string>(inputData.input, "setcontinuous", false)) {
 			SetContinuous(util::to_boolean(inputData.data));
 			return util::EventReply::Handled;
 		}
 		return util::EventReply::Unhandled;
 	});
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		return HandleKeyValue(kvData.key,kvData.value);
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		return HandleKeyValue(kvData.key, kvData.value);
 	});
-	BindEvent(CAnimatedComponent::EVENT_SHOULD_UPDATE_BONES,[this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
-		static_cast<CEShouldUpdateBones&>(evData.get()).shouldUpdate = IsActive();
+	BindEvent(CAnimatedComponent::EVENT_SHOULD_UPDATE_BONES, [this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+		static_cast<CEShouldUpdateBones &>(evData.get()).shouldUpdate = IsActive();
 		return util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent != nullptr)
-	{
+	if(pTrComponent != nullptr) {
 		auto &trC = *pTrComponent;
-		FlagCallbackForRemoval(pTrComponent->AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-			if(IsActive() == false || umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::PositionChanged) == false)
-				return util::EventReply::Unhandled;
-			for(auto it=m_childSystems.begin();it!=m_childSystems.end();++it)
-			{
-				auto &hChild = *it;
-				if(hChild.child.valid())
-				{
-					auto pTrComponent = hChild.child->GetEntity().GetTransformComponent();
-					if(pTrComponent != nullptr)
-						pTrComponent->SetPosition(trC.GetPosition());
-				}
-			}
-			return util::EventReply::Unhandled;
-		}),CallbackType::Entity);
+		FlagCallbackForRemoval(pTrComponent->AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,
+		                         [this, &trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			                         if(IsActive() == false || umath::is_flag_set(static_cast<pragma::CEOnPoseChanged &>(evData.get()).changeFlags, pragma::TransformChangeFlags::PositionChanged) == false)
+				                         return util::EventReply::Unhandled;
+			                         for(auto it = m_childSystems.begin(); it != m_childSystems.end(); ++it) {
+				                         auto &hChild = *it;
+				                         if(hChild.child.valid()) {
+					                         auto pTrComponent = hChild.child->GetEntity().GetTransformComponent();
+					                         if(pTrComponent != nullptr)
+						                         pTrComponent->SetPosition(trC.GetPosition());
+				                         }
+			                         }
+			                         return util::EventReply::Unhandled;
+		                         }),
+		  CallbackType::Entity);
 	}
 }
 void CParticleSystemComponent::OnEntitySpawn()
@@ -81,9 +75,9 @@ void CParticleSystemComponent::OnEntitySpawn()
 	CreateParticle();
 	BaseEnvParticleSystemComponent::OnEntitySpawn();
 }
-util::EventReply CParticleSystemComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
+util::EventReply CParticleSystemComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEnvParticleSystemComponent::HandleEvent(eventId,evData) == util::EventReply::Handled)
+	if(BaseEnvParticleSystemComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 
 	return util::EventReply::Unhandled;
@@ -98,8 +92,8 @@ void CParticleSystemComponent::SetParticleFile(const std::string &fileName)
 	BaseEnvParticleSystemComponent::SetParticleFile(fileName);
 	CParticleSystemComponent::Precache(fileName);
 }
-pragma::rendering::SceneRenderPass CParticleSystemComponent::GetSceneRenderPass() const {return m_renderPass;}
-void CParticleSystemComponent::SetSceneRenderPass(pragma::rendering::SceneRenderPass pass) {m_renderPass = pass;}
+pragma::rendering::SceneRenderPass CParticleSystemComponent::GetSceneRenderPass() const { return m_renderPass; }
+void CParticleSystemComponent::SetSceneRenderPass(pragma::rendering::SceneRenderPass pass) { m_renderPass = pass; }
 
 void CParticleSystemComponent::CreateParticle()
 {
@@ -114,7 +108,7 @@ void CParticleSystemComponent::CreateParticle()
 			pAttComponent->UpdateAttachmentOffset();
 	});*/
 }
-void CParticleSystemComponent::SetRemoveOnComplete(bool b) {BaseEnvParticleSystemComponent::SetRemoveOnComplete(b);}
+void CParticleSystemComponent::SetRemoveOnComplete(bool b) { BaseEnvParticleSystemComponent::SetRemoveOnComplete(b); }
 
 void CParticleSystemComponent::Clear()
 {
@@ -123,8 +117,7 @@ void CParticleSystemComponent::Clear()
 	m_initializers.clear();
 	m_operators.clear();
 	m_renderers.clear();
-	for(auto &hChild : m_childSystems)
-	{
+	for(auto &hChild : m_childSystems) {
 		if(hChild.child.expired())
 			continue;
 		hChild.child->GetEntity().Remove();
@@ -132,23 +125,21 @@ void CParticleSystemComponent::Clear()
 	m_childSystems.clear();
 	m_state = State::Initial;
 
-	umath::set_flag(m_flags,Flags::Setup,false);
+	umath::set_flag(m_flags, Flags::Setup, false);
 }
 
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>
-std::shared_ptr<Model> CParticleSystemComponent::GenerateModel(CGame &game,const std::vector<const CParticleSystemComponent*> &particleSystems)
+std::shared_ptr<Model> CParticleSystemComponent::GenerateModel(CGame &game, const std::vector<const CParticleSystemComponent *> &particleSystems)
 {
 	auto *cam = game.GetRenderCamera();
 	if(cam == nullptr)
 		return nullptr;
-	std::unordered_set<const CParticleSystemComponent*> particleSystemList {};
-	for(auto *pts : particleSystems)
-	{
+	std::unordered_set<const CParticleSystemComponent *> particleSystemList {};
+	for(auto *pts : particleSystems) {
 		particleSystemList.insert(pts);
-		for(auto &childData : pts->GetChildren())
-		{
+		for(auto &childData : pts->GetChildren()) {
 			if(childData.child.expired())
 				continue;
 			particleSystemList.insert(childData.child.get());
@@ -156,34 +147,30 @@ std::shared_ptr<Model> CParticleSystemComponent::GenerateModel(CGame &game,const
 	}
 	Vector3 camUpWs;
 	Vector3 camRightWs;
-	float ptNearZ,ptFarZ;
+	float ptNearZ, ptFarZ;
 	auto nearZ = cam->GetNearZ();
 	auto farZ = cam->GetFarZ();
 	auto &posCam = cam->GetEntity().GetPosition();
 	auto mdl = game.CreateModel();
 	constexpr uint32_t numVerts = pragma::ShaderParticle2DBase::VERTEX_COUNT;
-	uint32_t numTris = pragma::ShaderParticle2DBase::TRIANGLE_COUNT *2;
-	for(auto *pts : particleSystemList)
-	{
+	uint32_t numTris = pragma::ShaderParticle2DBase::TRIANGLE_COUNT * 2;
+	for(auto *pts : particleSystemList) {
 		auto &renderers = pts->GetRenderers();
 		if(renderers.empty())
 			return nullptr;
 		auto &renderer = *renderers.front();
-		auto *pShader = dynamic_cast<pragma::ShaderParticle2DBase*>(renderer.GetShader());
+		auto *pShader = dynamic_cast<pragma::ShaderParticle2DBase *>(renderer.GetShader());
 		if(pShader == nullptr)
 			return nullptr;
 		auto *mat = pts->GetMaterial();
 		if(mat == nullptr)
 			continue;
 		std::optional<uint32_t> skinTexIdx {};
-		mdl->AddMaterial(0,mat,{},&skinTexIdx);
+		mdl->AddMaterial(0, mat, {}, &skinTexIdx);
 		if(skinTexIdx.has_value() == false)
 			continue;
 		auto orientationType = pts->GetOrientationType();
-		pShader->GetParticleSystemOrientationInfo(
-			cam->GetProjectionMatrix() *cam->GetViewMatrix(),*pts,orientationType,camUpWs,camRightWs,
-			ptNearZ,ptFarZ,mat,nearZ,farZ
-		);
+		pShader->GetParticleSystemOrientationInfo(cam->GetProjectionMatrix() * cam->GetViewMatrix(), *pts, orientationType, camUpWs, camRightWs, ptNearZ, ptFarZ, mat, nearZ, farZ);
 
 		auto *spriteSheetAnim = pts->GetSpriteSheetAnimation();
 		auto &particles = pts->GetRenderParticleData();
@@ -193,22 +180,20 @@ std::shared_ptr<Model> CParticleSystemComponent::GenerateModel(CGame &game,const
 		auto subMesh = game.CreateModelSubMesh();
 		subMesh->SetSkinTextureIndex(*skinTexIdx);
 		auto &verts = subMesh->GetVertices();
-		auto numTrisSys = numParticles *numTris;
-		auto numVertsSys = numParticles *numVerts;
-		subMesh->ReserveIndices(numTrisSys *3);
+		auto numTrisSys = numParticles * numTris;
+		auto numVertsSys = numParticles * numVerts;
+		subMesh->ReserveIndices(numTrisSys * 3);
 		verts.resize(numVertsSys);
 		uint32_t vertOffset = 0;
-		for(auto i=decltype(numParticles){0u};i<numParticles;++i)
-		{
+		for(auto i = decltype(numParticles) {0u}; i < numParticles; ++i) {
 			auto &pt = particles.at(i);
 			auto ptIdx = pts->TranslateBufferIndex(i);
 			auto pos = pts->GetParticlePosition(ptIdx);
-			Vector2 uvStart {0.f,0.f};
-			Vector2 uvEnd {1.f,1.f};
-			if(pts->IsAnimated() && spriteSheetAnim && spriteSheetAnim->sequences.empty() == false)
-			{
+			Vector2 uvStart {0.f, 0.f};
+			Vector2 uvEnd {1.f, 1.f};
+			if(pts->IsAnimated() && spriteSheetAnim && spriteSheetAnim->sequences.empty() == false) {
 				auto &animData = pts->GetParticleAnimationData().at(i);
-				auto &ptData = *const_cast<CParticleSystemComponent*>(pts)->GetParticle(ptIdx);
+				auto &ptData = *const_cast<CParticleSystemComponent *>(pts)->GetParticle(ptIdx);
 				auto seqIdx = ptData.GetSequence();
 				assert(seqIdx < spriteSheetAnim->sequences.size());
 				auto &seq = (seqIdx < spriteSheetAnim->sequences.size()) ? spriteSheetAnim->sequences.at(seqIdx) : spriteSheetAnim->sequences.back();
@@ -217,27 +202,22 @@ std::shared_ptr<Model> CParticleSystemComponent::GenerateModel(CGame &game,const
 				uvStart = frame.uvStart;
 				uvEnd = frame.uvEnd;
 			}
-			for(auto vertIdx=decltype(numVerts){0u};vertIdx<numVerts;++vertIdx)
-			{
-				auto vertPos = pShader->CalcVertexPosition(*pts,pts->TranslateBufferIndex(i),vertIdx,posCam,camUpWs,camRightWs,nearZ,farZ);
+			for(auto vertIdx = decltype(numVerts) {0u}; vertIdx < numVerts; ++vertIdx) {
+				auto vertPos = pShader->CalcVertexPosition(*pts, pts->TranslateBufferIndex(i), vertIdx, posCam, camUpWs, camRightWs, nearZ, farZ);
 				auto uv = pragma::ShaderParticle2DBase::GetVertexUV(vertIdx);
-				auto &v = verts.at(vertOffset +vertIdx);
+				auto &v = verts.at(vertOffset + vertIdx);
 				v.position = vertPos;
-				v.normal = Vector4{-uvec::RIGHT,1.f};
+				v.normal = Vector4 {-uvec::RIGHT, 1.f};
 				// v.tangent = uvec::FORWARD;
-				v.uv = uvStart +uv *(uvEnd -uvStart);
+				v.uv = uvStart + uv * (uvEnd - uvStart);
 			}
 			static_assert(pragma::ShaderParticle2DBase::TRIANGLE_COUNT == 2 && pragma::ShaderParticle2DBase::VERTEX_COUNT == 6);
-			std::array<uint32_t,12> indices = {
-				0,1,2,
-				3,4,5,
+			std::array<uint32_t, 12> indices = {0, 1, 2, 3, 4, 5,
 
-				// Back facing
-				0,2,1,
-				3,5,4
-			};
+			  // Back facing
+			  0, 2, 1, 3, 5, 4};
 			for(auto idx : indices)
-				subMesh->AddIndex(vertOffset +idx);
+				subMesh->AddIndex(vertOffset + idx);
 
 			vertOffset += numVerts;
 		}
@@ -250,27 +230,25 @@ std::shared_ptr<Model> CParticleSystemComponent::GenerateModel(CGame &game,const
 }
 std::shared_ptr<Model> CParticleSystemComponent::GenerateModel() const
 {
-	auto &game = static_cast<CGame&>(*GetEntity().GetNetworkState()->GetGameState());
-	std::vector<const CParticleSystemComponent*> particleSystems {};
+	auto &game = static_cast<CGame &>(*GetEntity().GetNetworkState()->GetGameState());
+	std::vector<const CParticleSystemComponent *> particleSystems {};
 	particleSystems.push_back(this);
-	return GenerateModel(game,particleSystems);
+	return GenerateModel(game, particleSystems);
 }
 
-void CParticleSystemComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CParticleSystemComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-bool CParticleSystemComponent::InitializeFromAssetData(
-	const std::string &ptName,const ::udm::LinkedPropertyWrapper &udm,std::string &outErr
-)
+bool CParticleSystemComponent::InitializeFromAssetData(const std::string &ptName, const ::udm::LinkedPropertyWrapper &udm, std::string &outErr)
 {
 	auto ptData = std::make_unique<CParticleSystemData>();
-	auto res = LoadFromAssetData(*ptData,udm,outErr);
+	auto res = LoadFromAssetData(*ptData, udm, outErr);
 	if(res == false)
 		return false;
 	s_particleData[ptName] = std::move(ptData);
 	return true;
 }
 
-bool CParticleSystemComponent::LoadFromAssetData(CParticleSystemData &ptData,const ::udm::LinkedPropertyWrapper &udm,std::string &outErr)
+bool CParticleSystemComponent::LoadFromAssetData(CParticleSystemData &ptData, const ::udm::LinkedPropertyWrapper &udm, std::string &outErr)
 {
 	udm["keyValues"](ptData.settings);
 
@@ -278,30 +256,28 @@ bool CParticleSystemComponent::LoadFromAssetData(CParticleSystemData &ptData,con
 	if(itMat != ptData.settings.end())
 		client->LoadMaterial(itMat->second);
 
-	auto readModifier = [&udm](const std::string &name,std::vector<CParticleModifierData> &modifiers) {
+	auto readModifier = [&udm](const std::string &name, std::vector<CParticleModifierData> &modifiers) {
 		auto udmModifiers = udm[name];
 		auto numModifiers = udmModifiers.GetSize();
 		modifiers.reserve(numModifiers);
-		for(auto &udmModifier : udmModifiers)
-		{
+		for(auto &udmModifier : udmModifiers) {
 			std::string name;
 			udmModifier["name"](name);
 			if(name.empty())
 				continue;
-			modifiers.push_back(CParticleModifierData{name});
+			modifiers.push_back(CParticleModifierData {name});
 			udmModifier["keyValues"](modifiers.back().settings);
 		}
 	};
-	readModifier("initializers",ptData.initializers);
-	readModifier("operators",ptData.operators);
-	readModifier("renderers",ptData.renderers);
+	readModifier("initializers", ptData.initializers);
+	readModifier("operators", ptData.operators);
+	readModifier("renderers", ptData.renderers);
 
 	auto udmChildren = udm["children"];
 	auto &children = ptData.children;
 	auto numChildren = udmChildren.GetSize();
 	children.reserve(numChildren);
-	for(auto i=decltype(numChildren){0u};i<numChildren;++i)
-	{
+	for(auto i = decltype(numChildren) {0u}; i < numChildren; ++i) {
 		auto udmChild = udmChildren[i];
 		std::string type;
 		udmChild["type"](type);
@@ -314,25 +290,23 @@ bool CParticleSystemComponent::LoadFromAssetData(CParticleSystemData &ptData,con
 	}
 	return true;
 }
-bool CParticleSystemComponent::LoadFromAssetData(CParticleSystemData &ptData,const udm::AssetData &data,std::string &outErr)
+bool CParticleSystemComponent::LoadFromAssetData(CParticleSystemData &ptData, const udm::AssetData &data, std::string &outErr)
 {
-	if(data.GetAssetType() != pragma::asset::PPTSYS_IDENTIFIER)
-	{
+	if(data.GetAssetType() != pragma::asset::PPTSYS_IDENTIFIER) {
 		outErr = "Incorrect format!";
 		return false;
 	}
 
 	auto version = data.GetAssetVersion();
-	if(version < 1)
-	{
+	if(version < 1) {
 		outErr = "Invalid version!";
 		return false;
 	}
 	// if(version > FORMAT_VERSION)
 	// 	return false;
-	
+
 	auto udm = *data;
-	return LoadFromAssetData(ptData,udm,outErr);
+	return LoadFromAssetData(ptData, udm, outErr);
 }
 
 ///////////////

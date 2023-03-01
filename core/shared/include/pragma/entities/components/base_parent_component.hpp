@@ -10,20 +10,17 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 
 struct AttachmentData;
-namespace pragma
-{
+namespace pragma {
 	class BaseAttachableComponent;
-	class DLLNETWORK BaseParentComponent
-		: public BaseEntityComponent
-	{
-	public:
+	class DLLNETWORK BaseParentComponent : public BaseEntityComponent {
+	  public:
 		virtual void Initialize() override;
 
 		void UpdateChildAttachmentData();
 
 		const std::vector<pragma::ComponentHandle<BaseAttachableComponent>> &GetChildren() const;
 		std::vector<pragma::ComponentHandle<BaseAttachableComponent>> &GetChildren();
-	protected:
+	  protected:
 		friend BaseAttachableComponent;
 		BaseParentComponent(BaseEntity &ent);
 		void AddChild(BaseAttachableComponent &ent);

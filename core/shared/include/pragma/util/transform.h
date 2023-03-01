@@ -13,18 +13,17 @@
 
 // Deprecated, replaced by umath::Transform
 // TODO: Remove all instances of this, then remove this file!
-class DLLNETWORK Transform
-{
-protected:
+class DLLNETWORK Transform {
+  protected:
 	Vector3 m_pos = {};
-	Vector3 m_scale = {1.f,1.f,1.f};
+	Vector3 m_scale = {1.f, 1.f, 1.f};
 	Quat m_orientation = uquat::identity();
 	Mat4 m_transform = umat::identity();
-public:
+  public:
 	Transform();
 	Transform(const Vector3 &position);
 	Transform(const Quat &orientation);
-	Transform(const Vector3 &position,const Quat &orientation);
+	Transform(const Vector3 &position, const Quat &orientation);
 	const Vector3 &GetScale() const;
 	const Vector3 &GetPosition() const;
 	const Quat &GetOrientation() const;
@@ -35,6 +34,6 @@ public:
 	void UpdateMatrix();
 };
 
-DLLNETWORK std::ostream &operator<<(std::ostream &out,const Transform &o);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const Transform &o);
 
 #endif

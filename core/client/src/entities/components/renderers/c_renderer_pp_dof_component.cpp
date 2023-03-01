@@ -25,17 +25,17 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-CRendererPpDoFComponent::CRendererPpDoFComponent(BaseEntity &ent)
-	: CRendererPpBaseComponent(ent)
-{}
+CRendererPpDoFComponent::CRendererPpDoFComponent(BaseEntity &ent) : CRendererPpBaseComponent(ent) {}
 void CRendererPpDoFComponent::DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo)
 {
-	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuDoF,*drawSceneInfo.commandBuffer);
+	if(drawSceneInfo.renderStats)
+		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuDoF, *drawSceneInfo.commandBuffer);
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingDoF);
-		
+
 	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
 		c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingDoF);
-		if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuDoF,*drawSceneInfo.commandBuffer);
+		if(drawSceneInfo.renderStats)
+			(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuDoF, *drawSceneInfo.commandBuffer);
 	}};
 
 	if(drawSceneInfo.scene.expired() || m_renderer.expired())
@@ -50,44 +50,26 @@ void CRendererPpDoFComponent::DoRenderEffect(const util::DrawSceneInfo &drawScen
 	auto opticalC = cam->GetEntity().GetComponent<pragma::COpticalCameraComponent>();
 	if(opticalC.expired())
 		return;
-	auto &shaderDoF = static_cast<pragma::ShaderPPDoF&>(*hShaderDof.get());
+	auto &shaderDoF = static_cast<pragma::ShaderPPDoF &>(*hShaderDof.get());
 	auto &prepass = hdrInfo.prepass;
 	auto texDepth = prepass.textureDepth;
-	if(texDepth->IsMSAATexture())
-	{
-		texDepth = static_cast<prosper::MSAATexture&>(*texDepth).Resolve(
-			*drawCmd,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal,
-			prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal
-		);
+	if(texDepth->IsMSAATexture()) {
+		texDepth = static_cast<prosper::MSAATexture &>(*texDepth).Resolve(*drawCmd, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 	}
 	else
-		drawCmd->RecordImageBarrier(texDepth->GetImage(),prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+		drawCmd->RecordImageBarrier(texDepth->GetImage(), prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 	//texDepth->GetImage()->SetDrawLayout(prosper::ImageLayout::ShaderReadOnlyOptimal);
 
 	auto &hdrTex = hdrInfo.sceneRenderTarget->GetTexture();
-	drawCmd->RecordImageBarrier(hdrTex.GetImage(),prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
-	drawCmd->RecordBufferBarrier(
-		*scene.GetCameraBuffer(),
-		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
-		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-	);
-	drawCmd->RecordBufferBarrier(
-		*scene.GetRenderSettingsBuffer(),
-		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
-		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-	);
-	drawCmd->RecordBufferBarrier(
-		*scene.GetFogBuffer(),
-		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
-		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-	);
-	if(drawCmd->RecordBeginRenderPass(*hdrInfo.hdrPostProcessingRenderTarget) == true)
-	{
+	drawCmd->RecordImageBarrier(hdrTex.GetImage(), prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
+	drawCmd->RecordBufferBarrier(*scene.GetCameraBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
+	drawCmd->RecordBufferBarrier(*scene.GetRenderSettingsBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
+	drawCmd->RecordBufferBarrier(*scene.GetFogBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
+	if(drawCmd->RecordBeginRenderPass(*hdrInfo.hdrPostProcessingRenderTarget) == true) {
 		prosper::ShaderBindState bindState {*drawCmd};
-		if(shaderDoF.RecordBeginDraw(bindState) == true)
-		{
+		if(shaderDoF.RecordBeginDraw(bindState) == true) {
 			pragma::ShaderPPDoF::PushConstants pushConstants {};
-			pushConstants.mvp = cam->GetViewMatrix() *cam->GetProjectionMatrix();
+			pushConstants.mvp = cam->GetViewMatrix() * cam->GetProjectionMatrix();
 			pushConstants.width = scene.GetWidth();
 			pushConstants.height = scene.GetHeight();
 
@@ -99,10 +81,10 @@ void CRendererPpDoFComponent::DoRenderEffect(const util::DrawSceneInfo &drawScen
 			pushConstants.zFar = cam->GetFarZ();
 
 			pushConstants.flags = pragma::COpticalCameraComponent::Flags::None;
-			umath::set_flag(pushConstants.flags,pragma::COpticalCameraComponent::Flags::EnableVignette,opticalC->IsVignetteEnabled());
-			umath::set_flag(pushConstants.flags,pragma::COpticalCameraComponent::Flags::PentagonBokehShape,opticalC->GetPentagonBokehShape());
-			umath::set_flag(pushConstants.flags,pragma::COpticalCameraComponent::Flags::DebugShowDepth,opticalC->GetDebugShowDepth());
-			umath::set_flag(pushConstants.flags,pragma::COpticalCameraComponent::Flags::DebugShowFocus,opticalC->GetDebugShowFocus());
+			umath::set_flag(pushConstants.flags, pragma::COpticalCameraComponent::Flags::EnableVignette, opticalC->IsVignetteEnabled());
+			umath::set_flag(pushConstants.flags, pragma::COpticalCameraComponent::Flags::PentagonBokehShape, opticalC->GetPentagonBokehShape());
+			umath::set_flag(pushConstants.flags, pragma::COpticalCameraComponent::Flags::DebugShowDepth, opticalC->GetDebugShowDepth());
+			umath::set_flag(pushConstants.flags, pragma::COpticalCameraComponent::Flags::DebugShowFocus, opticalC->GetDebugShowFocus());
 			pushConstants.rings = opticalC->GetRingCount();
 			pushConstants.ringSamples = opticalC->GetRingSamples();
 			pushConstants.CoC = opticalC->GetCircleOfConfusionSize();
@@ -112,18 +94,13 @@ void CRendererPpDoFComponent::DoRenderEffect(const util::DrawSceneInfo &drawScen
 			pushConstants.vignOut = opticalC->GetVignettingOuterBorder();
 			pushConstants.pentagonShapeFeather = opticalC->GetPentagonShapeFeather();
 
-			shaderDoF.RecordDraw(
-				bindState,
-				*hdrInfo.dsgHDRPostProcessing->GetDescriptorSet(),
-				*hdrInfo.dsgDepthPostProcessing->GetDescriptorSet(),
-				pushConstants
-			);
+			shaderDoF.RecordDraw(bindState, *hdrInfo.dsgHDRPostProcessing->GetDescriptorSet(), *hdrInfo.dsgDepthPostProcessing->GetDescriptorSet(), pushConstants);
 			shaderDoF.RecordEndDraw(bindState);
 		}
 		drawCmd->RecordEndRenderPass();
 	}
-	drawCmd->RecordImageBarrier(texDepth->GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal);
+	drawCmd->RecordImageBarrier(texDepth->GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::DepthStencilAttachmentOptimal);
 
 	hdrInfo.BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo);
 }
-void CRendererPpDoFComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CRendererPpDoFComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

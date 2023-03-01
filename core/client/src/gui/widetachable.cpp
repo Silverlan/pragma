@@ -16,9 +16,9 @@
 
 extern DLLCLIENT CEngine *c_engine;
 
-LINK_WGUI_TO_CLASS(WIDetachable,WIDetachable);
+LINK_WGUI_TO_CLASS(WIDetachable, WIDetachable);
 
-WIDetachable::DetachedWindow::~DetachedWindow() {Clear();}
+WIDetachable::DetachedWindow::~DetachedWindow() { Clear(); }
 void WIDetachable::DetachedWindow::Clear()
 {
 	if(detachedBg.IsValid())
@@ -29,11 +29,8 @@ void WIDetachable::DetachedWindow::Clear()
 		w->Close();
 }
 
-WIDetachable::WIDetachable()
-	: WIBase{}
-{}
-WIDetachable::~WIDetachable()
-{}
+WIDetachable::WIDetachable() : WIBase {} {}
+WIDetachable::~WIDetachable() {}
 
 void WIDetachable::OnRemove()
 {
@@ -41,7 +38,7 @@ void WIDetachable::OnRemove()
 	WIBase::OnRemove();
 }
 
-bool WIDetachable::IsDetached() const {return m_detachedWindow != nullptr;}
+bool WIDetachable::IsDetached() const { return m_detachedWindow != nullptr; }
 
 void WIDetachable::Detach()
 {
@@ -59,7 +56,7 @@ void WIDetachable::Detach()
 	settings.width = w;
 	settings.height = h;
 	settings.title = Locale::GetText("console");
-	m_detachedWindow = std::unique_ptr<DetachedWindow>{new DetachedWindow{}};
+	m_detachedWindow = std::unique_ptr<DetachedWindow> {new DetachedWindow {}};
 	m_detachedWindow->window = c_engine->CreateWindow(settings);
 	if(!m_detachedWindow->window)
 		return;
@@ -67,32 +64,30 @@ void WIDetachable::Detach()
 	m_detachedWindow->reattachElement = frame->GetHandle();
 	m_detachedWindow->origPos = GetPos();
 	m_detachedWindow->origSize = GetSize();
-	if(HasAnchor())
-	{
-		m_detachedWindow->origAnchor = std::array<float,4>{};
+	if(HasAnchor()) {
+		m_detachedWindow->origAnchor = std::array<float, 4> {};
 		auto &anchor = *m_detachedWindow->origAnchor;
-		GetAnchor(anchor[0],anchor[1],anchor[2],anchor[3]);
+		GetAnchor(anchor[0], anchor[1], anchor[2], anchor[3]);
 	}
-	m_detachedWindow->window->AddCloseListener([this]() {Reattach();});
+	m_detachedWindow->window->AddCloseListener([this]() { Reattach(); });
 	auto *elBase = WGUI::GetInstance().GetBaseElement(m_detachedWindow->window.get());
 	assert(elBase);
 	TrapFocus(false);
 	KillFocus();
-	if(elBase)
-	{
+	if(elBase) {
 		auto *elBg = WGUI::GetInstance().Create<WIRect>(elBase);
 		assert(elBg);
 		elBg->GetColorProperty()->Link(*frame->GetColorProperty());
-		elBg->SetSize(w,h);
-		elBg->SetAnchor(0,0,1,1);
+		elBg->SetSize(w, h);
+		elBg->SetAnchor(0, 0, 1, 1);
 
 		ClearAnchor();
 		SetParentAndUpdateWindow(elBg);
 	}
 
-	SetPos(0,0);
-	SetSize(w,h);
-	SetAnchor(0,0,1,1);
+	SetPos(0, 0);
+	SetSize(w, h);
+	SetAnchor(0, 0, 1, 1);
 	TrapFocus(true);
 	RequestFocus();
 
@@ -109,17 +104,15 @@ void WIDetachable::Reattach()
 	auto info = std::move(m_detachedWindow);
 	m_detachedWindow = nullptr;
 	auto *frame = info->reattachElement.get();
-	if(frame)
-	{
+	if(frame) {
 		TrapFocus(false);
 		SetParentAndUpdateWindow(frame);
 		ClearAnchor();
 		SetPos(info->origPos);
 		SetSize(info->origSize);
-		if(info->origAnchor.has_value())
-		{
+		if(info->origAnchor.has_value()) {
 			auto &anchor = *info->origAnchor;
-			SetAnchor(anchor[0],anchor[1],anchor[2],anchor[3]);
+			SetAnchor(anchor[0], anchor[1], anchor[2], anchor[3]);
 		}
 		frame->SetVisible(true);
 		RequestFocus();

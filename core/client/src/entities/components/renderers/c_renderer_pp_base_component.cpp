@@ -21,9 +21,7 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-CRendererPpBaseComponent::CRendererPpBaseComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+CRendererPpBaseComponent::CRendererPpBaseComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 void CRendererPpBaseComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -32,9 +30,8 @@ void CRendererPpBaseComponent::Initialize()
 	auto rendererC = GetEntity().GetComponent<CRendererComponent>();
 	if(rendererC.expired())
 		return;
-	m_cbEffect = rendererC->AddPostProcessingEffect(GetIdentifier(),[this](const util::DrawSceneInfo &drawSceneInfo) {
-		RenderEffect(drawSceneInfo);
-	},GetPostProcessingWeight(),[this]() {return GetFlags();});
+	m_cbEffect = rendererC->AddPostProcessingEffect(
+	  GetIdentifier(), [this](const util::DrawSceneInfo &drawSceneInfo) { RenderEffect(drawSceneInfo); }, GetPostProcessingWeight(), [this]() { return GetFlags(); });
 }
 void CRendererPpBaseComponent::OnRemove()
 {
@@ -43,7 +40,7 @@ void CRendererPpBaseComponent::OnRemove()
 	if(m_cbEffect.IsValid())
 		m_cbEffect.Remove();
 }
-void CRendererPpBaseComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CRendererPpBaseComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CRendererPpBaseComponent::RenderEffect(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene.expired() || m_renderer.expired())

@@ -12,17 +12,18 @@
 #include "pragma/particlesystem/c_particlemodifier.h"
 #include <pragma/types.hpp>
 
-namespace prosper {class Buffer;};
-class DLLCLIENT CParticleRendererRotationalBuffer
-{
-public:
-	CParticleRendererRotationalBuffer()=default;
+namespace prosper {
+	class Buffer;
+};
+class DLLCLIENT CParticleRendererRotationalBuffer {
+  public:
+	CParticleRendererRotationalBuffer() = default;
 	void Initialize(pragma::CParticleSystemComponent &pSystem);
 	virtual bool Update();
 	const std::shared_ptr<prosper::IBuffer> &GetBuffer() const;
 	void SetRotationAlignVelocity(bool b);
 	bool ShouldRotationAlignVelocity() const;
-protected:
+  protected:
 	uint64_t m_lastFrameUpdate = std::numeric_limits<uint64_t>::max();
 	std::shared_ptr<prosper::IBuffer> m_rotBuffer = nullptr;
 	std::vector<Quat> m_rotations;

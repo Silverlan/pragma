@@ -17,15 +17,9 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-prosper::ShaderBindState *LuaShaderRecordTarget::GetBindState() const
-{
-	return luabind::object_cast_nothrow<prosper::ShaderBindState*>(target,static_cast<prosper::ShaderBindState*>(nullptr));
-}
-prosper::util::PreparedCommandBuffer *LuaShaderRecordTarget::GetPcb() const
-{
-	return luabind::object_cast_nothrow<prosper::util::PreparedCommandBuffer*>(target,static_cast<prosper::util::PreparedCommandBuffer*>(nullptr));
-}
-void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,pragma::LuaDescriptorSetInfo &descSetInfo)
+prosper::ShaderBindState *LuaShaderRecordTarget::GetBindState() const { return luabind::object_cast_nothrow<prosper::ShaderBindState *>(target, static_cast<prosper::ShaderBindState *>(nullptr)); }
+prosper::util::PreparedCommandBuffer *LuaShaderRecordTarget::GetPcb() const { return luabind::object_cast_nothrow<prosper::util::PreparedCommandBuffer *>(target, static_cast<prosper::util::PreparedCommandBuffer *>(nullptr)); }
+void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l, prosper::BasePipelineCreateInfo &pipelineInfo, pragma::LuaDescriptorSetInfo &descSetInfo)
 {
 	auto *shader = pragma::LuaShaderWrapperBase::GetShader(pipelineInfo);
 	if(shader == nullptr)
@@ -33,8 +27,7 @@ void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l,prosper::
 	prosper::DescriptorSetInfo shaderDescSetInfo {};
 	shaderDescSetInfo.bindings.reserve(descSetInfo.bindings.size());
 	auto bindingIdx = 0u;
-	for(auto &lBinding : descSetInfo.bindings)
-	{
+	for(auto &lBinding : descSetInfo.bindings) {
 		shaderDescSetInfo.bindings.push_back({});
 		auto &binding = shaderDescSetInfo.bindings.back();
 		binding.type = lBinding.type;
@@ -42,205 +35,173 @@ void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l,prosper::
 		binding.descriptorArraySize = lBinding.descriptorArraySize;
 		binding.bindingIndex = (lBinding.bindingIndex != std::numeric_limits<uint32_t>::max()) ? lBinding.bindingIndex : bindingIdx;
 
-		bindingIdx = binding.bindingIndex +1u;
+		bindingIdx = binding.bindingIndex + 1u;
 	}
 	shaderDescSetInfo.setIndex = descSetInfo.setIndex;
-	shader->GetShader().AddDescriptorSetGroup(pipelineInfo,shader->GetCurrentPipelineIndex(),shaderDescSetInfo);
+	shader->GetShader().AddDescriptorSetGroup(pipelineInfo, shader->GetCurrentPipelineIndex(), shaderDescSetInfo);
 }
-void Lua::BasePipelineCreateInfo::AttachPushConstantRange(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t offset,uint32_t size,uint32_t shaderStages)
+void Lua::BasePipelineCreateInfo::AttachPushConstantRange(lua_State *l, prosper::BasePipelineCreateInfo &pipelineInfo, uint32_t offset, uint32_t size, uint32_t shaderStages)
 {
 	auto *shader = pragma::LuaShaderWrapperBase::GetShader(pipelineInfo);
 	if(shader == nullptr)
 		return;
-	shader->GetShader().AttachPushConstantRange(pipelineInfo,shader->GetCurrentPipelineIndex(),offset,size,static_cast<prosper::ShaderStageFlags>(shaderStages));
+	shader->GetShader().AttachPushConstantRange(pipelineInfo, shader->GetCurrentPipelineIndex(), offset, size, static_cast<prosper::ShaderStageFlags>(shaderStages));
 }
 
-void Lua::shader::push_shader(lua_State *l,prosper::Shader &shader)
+void Lua::shader::push_shader(lua_State *l, prosper::Shader &shader)
 {
-	auto *luaShader = dynamic_cast<pragma::LuaShaderWrapperBase*>(&shader);
+	auto *luaShader = dynamic_cast<pragma::LuaShaderWrapperBase *>(&shader);
 	if(luaShader != nullptr)
 		luaShader->GetLuaObject().push(l);
-	else
-	{
-		if(shader.IsGraphicsShader())
-		{
-			if(dynamic_cast<pragma::ShaderScene*>(&shader) != nullptr)
-			{
-				if(dynamic_cast<pragma::ShaderSceneLit*>(&shader) != nullptr)
-				{
-					if(dynamic_cast<pragma::ShaderEntity*>(&shader) != nullptr)
-					{
-						if(dynamic_cast<pragma::ShaderGameWorldLightingPass*>(&shader) != nullptr)
-							Lua::PushRaw<pragma::ShaderGameWorldLightingPass*>(l,static_cast<pragma::ShaderGameWorldLightingPass*>(&shader));
+	else {
+		if(shader.IsGraphicsShader()) {
+			if(dynamic_cast<pragma::ShaderScene *>(&shader) != nullptr) {
+				if(dynamic_cast<pragma::ShaderSceneLit *>(&shader) != nullptr) {
+					if(dynamic_cast<pragma::ShaderEntity *>(&shader) != nullptr) {
+						if(dynamic_cast<pragma::ShaderGameWorldLightingPass *>(&shader) != nullptr)
+							Lua::PushRaw<pragma::ShaderGameWorldLightingPass *>(l, static_cast<pragma::ShaderGameWorldLightingPass *>(&shader));
 						else
-							Lua::PushRaw<pragma::ShaderEntity*>(l,static_cast<pragma::ShaderEntity*>(&shader));
+							Lua::PushRaw<pragma::ShaderEntity *>(l, static_cast<pragma::ShaderEntity *>(&shader));
 					}
 					else
-						Lua::PushRaw<pragma::ShaderSceneLit*>(l,static_cast<pragma::ShaderSceneLit*>(&shader));
+						Lua::PushRaw<pragma::ShaderSceneLit *>(l, static_cast<pragma::ShaderSceneLit *>(&shader));
 				}
 				else
-					Lua::PushRaw<pragma::ShaderScene*>(l,static_cast<pragma::ShaderScene*>(&shader));
+					Lua::PushRaw<pragma::ShaderScene *>(l, static_cast<pragma::ShaderScene *>(&shader));
 			}
-			else if(dynamic_cast<pragma::ShaderComposeRMA*>(&shader))
-				Lua::PushRaw<pragma::ShaderComposeRMA*>(l,static_cast<pragma::ShaderComposeRMA*>(&shader));
+			else if(dynamic_cast<pragma::ShaderComposeRMA *>(&shader))
+				Lua::PushRaw<pragma::ShaderComposeRMA *>(l, static_cast<pragma::ShaderComposeRMA *>(&shader));
 			else
-				Lua::PushRaw<prosper::ShaderGraphics*>(l,static_cast<prosper::ShaderGraphics*>(&shader));
+				Lua::PushRaw<prosper::ShaderGraphics *>(l, static_cast<prosper::ShaderGraphics *>(&shader));
 		}
 		else if(shader.IsComputeShader())
-			Lua::PushRaw<prosper::ShaderCompute*>(l,static_cast<prosper::ShaderCompute*>(&shader));
+			Lua::PushRaw<prosper::ShaderCompute *>(l, static_cast<prosper::ShaderCompute *>(&shader));
 		else
-			Lua::PushRaw<prosper::Shader*>(l,&shader);
+			Lua::PushRaw<prosper::Shader *>(l, &shader);
 	}
 }
-void Lua::Shader::CreateDescriptorSetGroup(lua_State *l,prosper::Shader &shader,uint32_t setIdx,uint32_t pipelineIdx)
+void Lua::Shader::CreateDescriptorSetGroup(lua_State *l, prosper::Shader &shader, uint32_t setIdx, uint32_t pipelineIdx)
 {
-	auto dsg = shader.CreateDescriptorSetGroup(setIdx,pipelineIdx);
+	auto dsg = shader.CreateDescriptorSetGroup(setIdx, pipelineIdx);
 	if(dsg == nullptr)
 		return;
-	Lua::Push(l,dsg);
+	Lua::Push(l, dsg);
 }
-void Lua::Shader::GetPipelineInfo(lua_State *l,prosper::Shader &shader,uint32_t shaderStage,uint32_t pipelineIdx)
+void Lua::Shader::GetPipelineInfo(lua_State *l, prosper::Shader &shader, uint32_t shaderStage, uint32_t pipelineIdx)
 {
 	auto *info = shader.GetPipelineInfo(pipelineIdx);
 	if(info == nullptr)
 		return;
-	Lua::Push(l,std::ref(*info));
+	Lua::Push(l, std::ref(*info));
 }
-void Lua::Shader::GetEntrypointName(lua_State *l,prosper::Shader &shader,uint32_t shaderStage,uint32_t pipelineIdx)
+void Lua::Shader::GetEntrypointName(lua_State *l, prosper::Shader &shader, uint32_t shaderStage, uint32_t pipelineIdx)
 {
-	auto *ep = shader.GetModuleStageEntryPoint(static_cast<prosper::ShaderStage>(shaderStage),pipelineIdx);
+	auto *ep = shader.GetModuleStageEntryPoint(static_cast<prosper::ShaderStage>(shaderStage), pipelineIdx);
 	if(ep == nullptr || ep->shader_module_ptr == nullptr)
 		return;
-	switch(shaderStage)
-	{
-		case umath::to_integral(prosper::ShaderStageFlags::FragmentBit):
-			Lua::PushString(l,ep->shader_module_ptr->GetFSEntrypointName());
-			break;
-		case umath::to_integral(prosper::ShaderStageFlags::VertexBit):
-			Lua::PushString(l,ep->shader_module_ptr->GetVSEntrypointName());
-			break;
-		case umath::to_integral(prosper::ShaderStageFlags::GeometryBit):
-			Lua::PushString(l,ep->shader_module_ptr->GetGSEntrypointName());
-			break;
-		case umath::to_integral(prosper::ShaderStageFlags::TessellationControlBit):
-			Lua::PushString(l,ep->shader_module_ptr->GetTCEntrypointName());
-			break;
-		case umath::to_integral(prosper::ShaderStageFlags::TessellationEvaluationBit):
-			Lua::PushString(l,ep->shader_module_ptr->GetTEEntrypointName());
-			break;
-		case umath::to_integral(prosper::ShaderStageFlags::ComputeBit):
-			Lua::PushString(l,ep->shader_module_ptr->GetCSEntrypointName());
-			break;
+	switch(shaderStage) {
+	case umath::to_integral(prosper::ShaderStageFlags::FragmentBit):
+		Lua::PushString(l, ep->shader_module_ptr->GetFSEntrypointName());
+		break;
+	case umath::to_integral(prosper::ShaderStageFlags::VertexBit):
+		Lua::PushString(l, ep->shader_module_ptr->GetVSEntrypointName());
+		break;
+	case umath::to_integral(prosper::ShaderStageFlags::GeometryBit):
+		Lua::PushString(l, ep->shader_module_ptr->GetGSEntrypointName());
+		break;
+	case umath::to_integral(prosper::ShaderStageFlags::TessellationControlBit):
+		Lua::PushString(l, ep->shader_module_ptr->GetTCEntrypointName());
+		break;
+	case umath::to_integral(prosper::ShaderStageFlags::TessellationEvaluationBit):
+		Lua::PushString(l, ep->shader_module_ptr->GetTEEntrypointName());
+		break;
+	case umath::to_integral(prosper::ShaderStageFlags::ComputeBit):
+		Lua::PushString(l, ep->shader_module_ptr->GetCSEntrypointName());
+		break;
 	}
 }
-void Lua::Shader::GetGlslSourceCode(lua_State *l,prosper::Shader &shader,uint32_t shaderStage,uint32_t pipelineIdx)
+void Lua::Shader::GetGlslSourceCode(lua_State *l, prosper::Shader &shader, uint32_t shaderStage, uint32_t pipelineIdx)
 {
-	auto *ep = shader.GetModuleStageEntryPoint(static_cast<prosper::ShaderStage>(shaderStage),pipelineIdx);
+	auto *ep = shader.GetModuleStageEntryPoint(static_cast<prosper::ShaderStage>(shaderStage), pipelineIdx);
 	if(ep == nullptr || ep->shader_module_ptr == nullptr)
 		return;
-	Lua::PushString(l,ep->shader_module_ptr->GetGLSLSourceCode());
+	Lua::PushString(l, ep->shader_module_ptr->GetGLSLSourceCode());
 }
-void Lua::Shader::IsGraphicsShader(lua_State *l,prosper::Shader &shader) {Lua::PushBool(l,shader.IsGraphicsShader());}
-void Lua::Shader::IsComputeShader(lua_State *l,prosper::Shader &shader) {Lua::PushBool(l,shader.IsComputeShader());}
-void Lua::Shader::GetPipelineBindPoint(lua_State *l,prosper::Shader &shader) {Lua::PushInt(l,static_cast<int32_t>(shader.GetPipelineBindPoint()));}
-void Lua::Shader::IsValid(lua_State *l,prosper::Shader &shader) {Lua::PushBool(l,shader.IsValid());}
-void Lua::Shader::GetIdentifier(lua_State *l,prosper::Shader &shader) {Lua::PushString(l,shader.GetIdentifier());}
-void Lua::Shader::GetSourceFilePath(lua_State *l,prosper::Shader &shader,uint32_t shaderStage)
+void Lua::Shader::IsGraphicsShader(lua_State *l, prosper::Shader &shader) { Lua::PushBool(l, shader.IsGraphicsShader()); }
+void Lua::Shader::IsComputeShader(lua_State *l, prosper::Shader &shader) { Lua::PushBool(l, shader.IsComputeShader()); }
+void Lua::Shader::GetPipelineBindPoint(lua_State *l, prosper::Shader &shader) { Lua::PushInt(l, static_cast<int32_t>(shader.GetPipelineBindPoint())); }
+void Lua::Shader::IsValid(lua_State *l, prosper::Shader &shader) { Lua::PushBool(l, shader.IsValid()); }
+void Lua::Shader::GetIdentifier(lua_State *l, prosper::Shader &shader) { Lua::PushString(l, shader.GetIdentifier()); }
+void Lua::Shader::GetSourceFilePath(lua_State *l, prosper::Shader &shader, uint32_t shaderStage)
 {
 	std::string sourceFilePath;
-	auto r = shader.GetSourceFilePath(static_cast<prosper::ShaderStage>(shaderStage),sourceFilePath);
+	auto r = shader.GetSourceFilePath(static_cast<prosper::ShaderStage>(shaderStage), sourceFilePath);
 	if(r == false)
 		return;
-	Lua::PushString(l,sourceFilePath);
+	Lua::PushString(l, sourceFilePath);
 }
-void Lua::Shader::GetSourceFilePaths(lua_State *l,prosper::Shader &shader)
+void Lua::Shader::GetSourceFilePaths(lua_State *l, prosper::Shader &shader)
 {
 	auto filePaths = shader.GetSourceFilePaths();
 	auto t = Lua::CreateTable(l);
 	auto idx = 1u;
-	for(auto &fPath : filePaths)
-	{
-		Lua::PushInt(l,idx++);
-		Lua::PushString(l,fPath);
-		Lua::SetTableValue(l,t);
+	for(auto &fPath : filePaths) {
+		Lua::PushInt(l, idx++);
+		Lua::PushString(l, fPath);
+		Lua::SetTableValue(l, t);
 	}
 }
-void Lua::Shader::RecordPushConstants(lua_State *l,prosper::Shader &shader,prosper::util::PreparedCommandBuffer &pcb,udm::Type type,const Lua::Vulkan::PreparedCommandLuaArg &value,uint32_t offset)
+void Lua::Shader::RecordPushConstants(lua_State *l, prosper::Shader &shader, prosper::util::PreparedCommandBuffer &pcb, udm::Type type, const Lua::Vulkan::PreparedCommandLuaArg &value, uint32_t offset)
 {
 	pcb.PushCommand(
-		[&shader,offset,type](const prosper::util::PreparedCommandBufferRecordState &recordState) mutable -> bool {
-			return udm::visit_ng(type,[&recordState,&shader,offset](auto tag) {
-                using T = typename decltype(tag)::type;
-				auto value = recordState.GetArgument<T>(0);
-				return shader.RecordPushConstants(*recordState.shaderBindState,sizeof(value),&value,offset);
-			});
-	},util::make_vector<prosper::util::PreparedCommand::Argument>(Lua::Vulkan::make_pcb_arg(value,type)));
+	  [&shader, offset, type](const prosper::util::PreparedCommandBufferRecordState &recordState) mutable -> bool {
+		  return udm::visit_ng(type, [&recordState, &shader, offset](auto tag) {
+			  using T = typename decltype(tag)::type;
+			  auto value = recordState.GetArgument<T>(0);
+			  return shader.RecordPushConstants(*recordState.shaderBindState, sizeof(value), &value, offset);
+		  });
+	  },
+	  util::make_vector<prosper::util::PreparedCommand::Argument>(Lua::Vulkan::make_pcb_arg(value, type)));
 }
-void Lua::Shader::RecordPushConstants(lua_State *l,prosper::Shader &shader,const LuaShaderRecordTarget &recordTarget,::DataStream &ds,uint32_t offset)
+void Lua::Shader::RecordPushConstants(lua_State *l, prosper::Shader &shader, const LuaShaderRecordTarget &recordTarget, ::DataStream &ds, uint32_t offset)
 {
 	auto *bindState = recordTarget.GetBindState();
-	if(bindState)
-	{
-		auto r = shader.RecordPushConstants(*bindState,ds->GetSize(),ds->GetData(),offset);
-		Lua::PushBool(l,r);
+	if(bindState) {
+		auto r = shader.RecordPushConstants(*bindState, ds->GetSize(), ds->GetData(), offset);
+		Lua::PushBool(l, r);
 		return;
 	}
-	recordTarget.GetPcb()->PushCommand(
-		[&shader,ds,offset](const prosper::util::PreparedCommandBufferRecordState &recordState) mutable -> bool {
-		return shader.RecordPushConstants(*recordState.shaderBindState,ds->GetSize(),ds->GetData(),offset);
-	});
+	recordTarget.GetPcb()->PushCommand([&shader, ds, offset](const prosper::util::PreparedCommandBufferRecordState &recordState) mutable -> bool { return shader.RecordPushConstants(*recordState.shaderBindState, ds->GetSize(), ds->GetData(), offset); });
 }
-static bool record_bind_descriptor_sets(prosper::Shader &shader,prosper::ShaderBindState &bindState,const std::vector<prosper::IDescriptorSet*> &descSets,uint32_t firstSet,const std::vector<uint32_t> &dynamicOffsets)
+static bool record_bind_descriptor_sets(prosper::Shader &shader, prosper::ShaderBindState &bindState, const std::vector<prosper::IDescriptorSet *> &descSets, uint32_t firstSet, const std::vector<uint32_t> &dynamicOffsets)
 {
-	return shader.RecordBindDescriptorSets(bindState,descSets,firstSet,dynamicOffsets);
+	return shader.RecordBindDescriptorSets(bindState, descSets, firstSet, dynamicOffsets);
 }
-void Lua::Shader::RecordBindDescriptorSet(
-	lua_State *l,prosper::Shader &shader,prosper::util::PreparedCommandBuffer &pcb,
-	Lua::Vulkan::DescriptorSet &ds,uint32_t firstSet,luabind::object oDynamicOffsets,std::optional<uint32_t> dynamicOffsetIndex
-)
+void Lua::Shader::RecordBindDescriptorSet(lua_State *l, prosper::Shader &shader, prosper::util::PreparedCommandBuffer &pcb, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object oDynamicOffsets, std::optional<uint32_t> dynamicOffsetIndex)
 {
-	auto dynamicOffsets = dynamicOffsetIndex.has_value() ? Lua::table_to_vector<uint32_t>(l,oDynamicOffsets,*dynamicOffsetIndex) : std::vector<uint32_t>{};
+	auto dynamicOffsets = dynamicOffsetIndex.has_value() ? Lua::table_to_vector<uint32_t>(l, oDynamicOffsets, *dynamicOffsetIndex) : std::vector<uint32_t> {};
 	pcb.PushCommand(
-		[&shader,&ds,firstSet,dynamicOffsets=std::move(dynamicOffsets)](const prosper::util::PreparedCommandBufferRecordState &recordState) mutable -> bool {
-			return shader.RecordBindDescriptorSet(
-				*recordState.shaderBindState,
-				*ds.GetDescriptorSet(),firstSet,dynamicOffsets
-			);
-	});
+	  [&shader, &ds, firstSet, dynamicOffsets = std::move(dynamicOffsets)](const prosper::util::PreparedCommandBufferRecordState &recordState) mutable -> bool { return shader.RecordBindDescriptorSet(*recordState.shaderBindState, *ds.GetDescriptorSet(), firstSet, dynamicOffsets); });
 }
-void Lua::Shader::RecordBindDescriptorSet(lua_State *l,prosper::Shader &shader,prosper::ShaderBindState &bindState,Lua::Vulkan::DescriptorSet &ds,uint32_t firstSet,luabind::object dynamicOffsets,std::optional<uint32_t> dynamicOffsetIndex)
+void Lua::Shader::RecordBindDescriptorSet(lua_State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, Lua::Vulkan::DescriptorSet &ds, uint32_t firstSet, luabind::object dynamicOffsets, std::optional<uint32_t> dynamicOffsetIndex)
 {
 	std::vector<uint32_t> vDynamicOffsets;
-	if(dynamicOffsetIndex.has_value() && Lua::IsSet(l,*dynamicOffsetIndex))
-	{
-		vDynamicOffsets = get_table_values<uint32_t>(l,*dynamicOffsetIndex,[](lua_State *l,int32_t idx) {
-			return static_cast<uint32_t>(Lua::CheckInt(l,idx));
-		});
+	if(dynamicOffsetIndex.has_value() && Lua::IsSet(l, *dynamicOffsetIndex)) {
+		vDynamicOffsets = get_table_values<uint32_t>(l, *dynamicOffsetIndex, [](lua_State *l, int32_t idx) { return static_cast<uint32_t>(Lua::CheckInt(l, idx)); });
 	}
-	auto r = record_bind_descriptor_sets(shader,bindState,{ds.GetDescriptorSet()},firstSet,vDynamicOffsets);
-	Lua::PushBool(l,r);
+	auto r = record_bind_descriptor_sets(shader, bindState, {ds.GetDescriptorSet()}, firstSet, vDynamicOffsets);
+	Lua::PushBool(l, r);
 }
-void Lua::Shader::RecordBindDescriptorSets(lua_State *l,prosper::Shader &shader,prosper::ShaderBindState &bindState,luabind::object descSets,uint32_t firstSet,luabind::object dynamicOffsets)
+void Lua::Shader::RecordBindDescriptorSets(lua_State *l, prosper::Shader &shader, prosper::ShaderBindState &bindState, luabind::object descSets, uint32_t firstSet, luabind::object dynamicOffsets)
 {
-	auto vDescSets = get_table_values<prosper::IDescriptorSet*>(l,2u,[](lua_State *l,int32_t idx) {
-		return Lua::Check<Lua::Vulkan::DescriptorSet>(l,idx).GetDescriptorSet();
-	});
+	auto vDescSets = get_table_values<prosper::IDescriptorSet *>(l, 2u, [](lua_State *l, int32_t idx) { return Lua::Check<Lua::Vulkan::DescriptorSet>(l, idx).GetDescriptorSet(); });
 	std::vector<uint32_t> vDynamicOffsets;
-	if(Lua::IsSet(l,4u))
-	{
-		vDynamicOffsets = get_table_values<uint32_t>(l,4u,[](lua_State *l,int32_t idx) {
-			return static_cast<uint32_t>(Lua::CheckInt(l,idx));
-		});
+	if(Lua::IsSet(l, 4u)) {
+		vDynamicOffsets = get_table_values<uint32_t>(l, 4u, [](lua_State *l, int32_t idx) { return static_cast<uint32_t>(Lua::CheckInt(l, idx)); });
 	}
-	auto r = record_bind_descriptor_sets(shader,bindState,vDescSets,firstSet,vDynamicOffsets);
-	Lua::PushBool(l,r);
+	auto r = record_bind_descriptor_sets(shader, bindState, vDescSets, firstSet, vDynamicOffsets);
+	Lua::PushBool(l, r);
 }
 
-void Lua::Shader::SetStageSourceFilePath(lua_State *l,pragma::LuaShaderWrapperBase &shader,uint32_t shaderStage,const std::string &fpath)
-{
-	shader.SetStageSourceFilePath(static_cast<prosper::ShaderStage>(shaderStage),fpath);
-}
-void Lua::Shader::SetPipelineCount(lua_State *l,pragma::LuaShaderWrapperBase &shader,uint32_t pipelineCount)
-{
-	shader.SetPipelineCount(pipelineCount);
-}
+void Lua::Shader::SetStageSourceFilePath(lua_State *l, pragma::LuaShaderWrapperBase &shader, uint32_t shaderStage, const std::string &fpath) { shader.SetStageSourceFilePath(static_cast<prosper::ShaderStage>(shaderStage), fpath); }
+void Lua::Shader::SetPipelineCount(lua_State *l, pragma::LuaShaderWrapperBase &shader, uint32_t pipelineCount) { shader.SetPipelineCount(pipelineCount); }

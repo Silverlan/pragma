@@ -12,11 +12,13 @@
 #define ENABLE_LAD 1
 #endif
 
-namespace pragma {namespace doc {class BaseCollectionObject;};};
-namespace Lua
-{
-	namespace doc
-	{
+namespace pragma {
+	namespace doc {
+		class BaseCollectionObject;
+	};
+};
+namespace Lua {
+	namespace doc {
 		static auto constexpr FILE_LOCATION = "doc/lua/";
 		static auto constexpr FILE_EXTENSION_ASCII = "ldoc";
 		static auto constexpr FILE_EXTENSION_BINARY = "ldoc_b";
@@ -25,7 +27,7 @@ namespace Lua
 		DLLNETWORK void reset();
 		DLLNETWORK void print_documentation(const std::string &name);
 		DLLNETWORK void generate_autocomplete_script();
-		DLLNETWORK void find_candidates(const std::string &name,std::vector<const pragma::doc::BaseCollectionObject*> &outCandidates,uint32_t candidateLimit);
+		DLLNETWORK void find_candidates(const std::string &name, std::vector<const pragma::doc::BaseCollectionObject *> &outCandidates, uint32_t candidateLimit);
 	};
 };
 

@@ -9,8 +9,8 @@
 #include "pragma/math/angle/wvangle.h"
 #include "pragma/console/conout.h"
 
-DLLNETWORK Con::c_cout& operator<<(Con::c_cout &os,const EulerAngles &ang)
+DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const EulerAngles &ang)
 {
-	os<<ang.p<<" "<<ang.y<<" "<<ang.r;
+	os << ang.p << " " << ang.y << " " << ang.r;
 	return os;
 }

@@ -40,6 +40,6 @@ runs:
       shell: bash
       id: set-output-vars
       run: |
-        echo "::set-output name=build-dir::$(echo \"${{ steps.build-pragma.outputs.build-dir }}\")"
-        echo "::set-output name=deps-dir::$(echo \"${{ steps.build-pragma.outputs.deps-dir }}\")"
-        echo "::set-output name=install-dir::$(echo \"${{ steps.build-pragma.outputs.install-dir }}\")"
+        echo "build-dir=${{ steps.build-pragma.outputs.build-dir }}" >> $GITHUB_OUTPUT
+        echo "deps-dir=${{ steps.build-pragma.outputs.deps-dir }}" >> $GITHUB_OUTPUT
+        echo "install-dir=${{ steps.build-pragma.outputs.install-dir }}" >> $GITHUB_OUTPUT

@@ -13,24 +13,18 @@
 #include "pragma/entities/point/constraints/point_constraint_ballsocket.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLCLIENT CPointConstraintBallSocketComponent final
-		: public BasePointConstraintBallSocketComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CPointConstraintBallSocketComponent final : public BasePointConstraintBallSocketComponent, public CBaseNetComponent {
+	  public:
 		CPointConstraintBallSocketComponent(BaseEntity &ent) : BasePointConstraintBallSocketComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 };
 
-class DLLCLIENT CPointConstraintBallSocket
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CPointConstraintBallSocket : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

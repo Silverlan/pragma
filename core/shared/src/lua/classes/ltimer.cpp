@@ -13,12 +13,9 @@
 #include "pragma/lua/ldefinitions.h"
 #include "luasystem.h"
 
-Timer::Timer()
-	: m_bRemove(false),m_next(0),m_bRunning(false),m_bIsValid(true),m_callback()
-{}
+Timer::Timer() : m_bRemove(false), m_next(0), m_bRunning(false), m_bIsValid(true), m_callback() {}
 
-Timer::Timer(float delay,unsigned int reps,LuaFunctionObject luaFunction,TimerType timetype)
-	: Timer()
+Timer::Timer(float delay, unsigned int reps, LuaFunctionObject luaFunction, TimerType timetype) : Timer()
 {
 	m_delay = delay;
 	m_reps = reps;
@@ -26,8 +23,7 @@ Timer::Timer(float delay,unsigned int reps,LuaFunctionObject luaFunction,TimerTy
 	m_timeType = timetype;
 }
 
-Timer::Timer(float delay,unsigned int reps,const CallbackHandle &hCallback,TimerType timetype)
-	: Timer()
+Timer::Timer(float delay, unsigned int reps, const CallbackHandle &hCallback, TimerType timetype) : Timer()
 {
 	m_delay = delay;
 	m_reps = reps;
@@ -37,8 +33,7 @@ Timer::Timer(float delay,unsigned int reps,const CallbackHandle &hCallback,Timer
 
 Timer::~Timer()
 {
-	for(auto i=m_handles.size() -1;i!=size_t(-1);i--)
-	{
+	for(auto i = m_handles.size() - 1; i != size_t(-1); i--) {
 		std::shared_ptr<TimerHandle> pTimer = m_handles[i];
 		TimerHandle *hTimer = pTimer.get();
 		if(hTimer != NULL)
@@ -48,8 +43,7 @@ Timer::~Timer()
 
 double Timer::GetCurTime(Game *game)
 {
-	switch(m_timeType)
-	{
+	switch(m_timeType) {
 	case TimerType::CurTime:
 		return game->CurTime();
 	case TimerType::RealTime:
@@ -60,8 +54,7 @@ double Timer::GetCurTime(Game *game)
 
 double Timer::GetDeltaTime(Game *game)
 {
-	switch(m_timeType)
-	{
+	switch(m_timeType) {
 	case TimerType::CurTime:
 		return game->DeltaTickTime();
 	case TimerType::RealTime:
@@ -75,11 +68,9 @@ void Timer::Update(Game *game)
 	if(!m_bRunning)
 		return;
 	m_next -= static_cast<float>(GetDeltaTime(game));
-	if(m_next <= 0)
-	{
+	if(m_next <= 0) {
 		Call(game);
-		if(m_reps > 0)
-		{
+		if(m_reps > 0) {
 			m_reps--;
 			if(m_reps == 0)
 				Remove(game);
@@ -93,35 +84,33 @@ void Timer::Update(Game *game)
 
 void Timer::Call(Game *game)
 {
-	if(m_luaFunction.is_valid())
-	{
-		game->ProtectedLuaCall([this](lua_State *l) {
-			m_luaFunction.push(l);
-			Lua::Push(l,CreateHandle());
-			return Lua::StatusCode::Ok;
-		},0);
+	if(m_luaFunction.is_valid()) {
+		game->ProtectedLuaCall(
+		  [this](lua_State *l) {
+			  m_luaFunction.push(l);
+			  Lua::Push(l, CreateHandle());
+			  return Lua::StatusCode::Ok;
+		  },
+		  0);
 	}
 	m_callback();
 }
 
-void Timer::SetCall(Game *game,LuaFunctionObject luaFunction)
+void Timer::SetCall(Game *game, LuaFunctionObject luaFunction)
 {
 	m_luaFunction = luaFunction;
 	m_callback = CallbackHandle();
 }
 
-void Timer::SetCall(Game *game,const CallbackHandle &hCallback)
+void Timer::SetCall(Game *game, const CallbackHandle &hCallback)
 {
 	m_luaFunction = {};
 	m_callback = hCallback;
 }
 
-void Timer::Reset()
-{
-	m_next = m_delay +m_next;
-}
+void Timer::Reset() { m_next = m_delay + m_next; }
 
-void Timer::Start(Game*)
+void Timer::Start(Game *)
 {
 	if(m_bRunning)
 		return;
@@ -130,10 +119,7 @@ void Timer::Start(Game*)
 	m_bRunning = true;
 }
 
-void Timer::Pause()
-{
-	m_bRunning = false;
-}
+void Timer::Pause() { m_bRunning = false; }
 
 void Timer::Stop()
 {
@@ -147,10 +133,10 @@ void Timer::Remove(Game *game)
 	m_luaFunction = {};
 }
 
-bool Timer::IsValid() {return m_bIsValid;}
-bool Timer::IsRunning() {return m_bRunning;}
+bool Timer::IsValid() { return m_bIsValid; }
+bool Timer::IsRunning() { return m_bRunning; }
 
-bool Timer::IsPaused() {return (!m_bRunning && m_next != 0.f) ? true : false;}
+bool Timer::IsPaused() { return (!m_bRunning && m_next != 0.f) ? true : false; }
 
 std::shared_ptr<TimerHandle> Timer::CreateHandle()
 {
@@ -161,12 +147,10 @@ std::shared_ptr<TimerHandle> Timer::CreateHandle()
 
 void Timer::InvalidateHandle(TimerHandle *hTimer)
 {
-	for(auto i=m_handles.size() -1;i!=size_t(-1);i--)
-	{
-		if(m_handles[i].get() == hTimer)
-		{
+	for(auto i = m_handles.size() - 1; i != size_t(-1); i--) {
+		if(m_handles[i].get() == hTimer) {
 			hTimer->m_timer = NULL;
-			m_handles.erase(m_handles.begin() +i);
+			m_handles.erase(m_handles.begin() + i);
 			break;
 		}
 	}
@@ -176,7 +160,7 @@ float Timer::GetTimeLeft()
 {
 	if(m_reps == 0)
 		return 0;
-	return std::max(m_next,0.f) +(m_reps -1) *m_delay;
+	return std::max(m_next, 0.f) + (m_reps - 1) * m_delay;
 }
 void Timer::SetTimeInterval(float time)
 {
@@ -184,12 +168,12 @@ void Timer::SetTimeInterval(float time)
 	m_delay = time;
 	if(!IsRunning())
 		return;
-	float tDelta = time -delayOld;
+	float tDelta = time - delayOld;
 	m_next += tDelta;
 }
-float Timer::GetTimeInterval() {return m_delay;}
-unsigned int Timer::GetRepetitionsLeft() {return m_reps;}
-void Timer::SetRepetitions(unsigned int rep) {m_reps = rep;}
+float Timer::GetTimeInterval() { return m_delay; }
+unsigned int Timer::GetRepetitionsLeft() { return m_reps; }
+void Timer::SetRepetitions(unsigned int rep) { m_reps = rep; }
 /*
 TimerRandom::TimerRandom(float minInterval,float maxInterval,unsigned int reps,int function,unsigned char timetype)
 	: Timer(minInterval,reps,function,timetype)
@@ -206,31 +190,26 @@ void TimerRandom::Reset()
 /////////////////////////////
 
 extern DLLNETWORK Engine *engine;
-Timer *Game::CreateTimer(float delay,int reps,LuaFunctionObject luaFunction,TimerType timeType)
+Timer *Game::CreateTimer(float delay, int reps, LuaFunctionObject luaFunction, TimerType timeType)
 {
-	m_timers.push_back(std::make_unique<Timer>(delay,reps,luaFunction,timeType));
+	m_timers.push_back(std::make_unique<Timer>(delay, reps, luaFunction, timeType));
 	return m_timers.back().get();
 }
 
-Timer *Game::CreateTimer(float delay,int reps,const CallbackHandle &hCallback,TimerType timeType)
+Timer *Game::CreateTimer(float delay, int reps, const CallbackHandle &hCallback, TimerType timeType)
 {
-	m_timers.push_back(std::make_unique<Timer>(delay,reps,hCallback,timeType));
+	m_timers.push_back(std::make_unique<Timer>(delay, reps, hCallback, timeType));
 	return m_timers.back().get();
 }
 
-void Game::ClearTimers()
-{
-	m_timers.clear();
-}
+void Game::ClearTimers() { m_timers.clear(); }
 
 void Game::UpdateTimers()
 {
-	for(auto i=decltype(m_timers.size()){0u};i<m_timers.size();++i)
-	{
+	for(auto i = decltype(m_timers.size()) {0u}; i < m_timers.size(); ++i) {
 		auto &timer = *m_timers.at(i);
-		if(timer.IsValid() == false)
-		{
-			m_timers.erase(m_timers.begin() +i);
+		if(timer.IsValid() == false) {
+			m_timers.erase(m_timers.begin() + i);
 			continue;
 		}
 		timer.Update(this);
@@ -239,112 +218,109 @@ void Game::UpdateTimers()
 
 /////////////////////////////
 
-DLLNETWORK void Lua_Timer_Start(lua_State *l,TimerHandle &timer)
+DLLNETWORK void Lua_Timer_Start(lua_State *l, TimerHandle &timer)
 {
 	NetworkState *state = engine->GetNetworkState(l);
-	lua_checktimer(l,timer);
+	lua_checktimer(l, timer);
 	timer.GetTimer()->Start(state->GetGameState());
 }
 
-DLLNETWORK void Lua_Timer_Stop(lua_State *l,TimerHandle &timer)
+DLLNETWORK void Lua_Timer_Stop(lua_State *l, TimerHandle &timer)
 {
-	lua_checktimer(l,timer);
+	lua_checktimer(l, timer);
 	timer.GetTimer()->Stop();
 }
 
-DLLNETWORK void Lua_Timer_Pause(lua_State *l,TimerHandle &timer)
+DLLNETWORK void Lua_Timer_Pause(lua_State *l, TimerHandle &timer)
 {
-	lua_checktimer(l,timer);
+	lua_checktimer(l, timer);
 	timer.GetTimer()->Pause();
 }
 
-DLLNETWORK void Lua_Timer_Remove(lua_State *l,TimerHandle &timer)
+DLLNETWORK void Lua_Timer_Remove(lua_State *l, TimerHandle &timer)
 {
 	NetworkState *state = engine->GetNetworkState(l);
-	lua_checktimer(l,timer);
+	lua_checktimer(l, timer);
 	timer.GetTimer()->Remove(state->GetGameState());
 }
 
-DLLNETWORK void Lua_Timer_IsValid(lua_State *l,TimerHandle &timer)
+DLLNETWORK void Lua_Timer_IsValid(lua_State *l, TimerHandle &timer) { lua_pushboolean(l, timer.IsValid()); }
+
+DLLNETWORK void Lua_Timer_GetTimeLeft(lua_State *l, TimerHandle &timer)
 {
-	lua_pushboolean(l,timer.IsValid());
+	lua_checktimer(l, timer);
+	Lua::PushNumber(l, timer.GetTimer()->GetTimeLeft());
 }
 
-DLLNETWORK void Lua_Timer_GetTimeLeft(lua_State *l,TimerHandle &timer)
+DLLNETWORK void Lua_Timer_GetTimeInterval(lua_State *l, TimerHandle &timer)
 {
-	lua_checktimer(l,timer);
-	Lua::PushNumber(l,timer.GetTimer()->GetTimeLeft());
+	lua_checktimer(l, timer);
+	Lua::PushNumber(l, timer.GetTimer()->GetTimeInterval());
 }
 
-DLLNETWORK void Lua_Timer_GetTimeInterval(lua_State *l,TimerHandle &timer)
+DLLNETWORK void Lua_Timer_SetTimeInterval(lua_State *l, TimerHandle &timer, float time)
 {
-	lua_checktimer(l,timer);
-	Lua::PushNumber(l,timer.GetTimer()->GetTimeInterval());
-}
-
-DLLNETWORK void Lua_Timer_SetTimeInterval(lua_State *l,TimerHandle &timer,float time)
-{
-	lua_checktimer(l,timer);
+	lua_checktimer(l, timer);
 	timer.GetTimer()->SetTimeInterval(time);
 }
 
-DLLNETWORK void Lua_Timer_GetRepetitionsLeft(lua_State *l,TimerHandle &timer)
+DLLNETWORK void Lua_Timer_GetRepetitionsLeft(lua_State *l, TimerHandle &timer)
 {
-	lua_checktimer(l,timer);
-	Lua::PushInt(l,timer.GetTimer()->GetRepetitionsLeft());
+	lua_checktimer(l, timer);
+	Lua::PushInt(l, timer.GetTimer()->GetRepetitionsLeft());
 }
 
-DLLNETWORK void Lua_Timer_SetRepetitions(lua_State *l,TimerHandle &timer,unsigned int reps)
+DLLNETWORK void Lua_Timer_SetRepetitions(lua_State *l, TimerHandle &timer, unsigned int reps)
 {
-	lua_checktimer(l,timer);
+	lua_checktimer(l, timer);
 	timer.GetTimer()->SetRepetitions(reps);
 }
 
-DLLNETWORK void Lua_Timer_IsRunning(lua_State *l,TimerHandle &timer)
+DLLNETWORK void Lua_Timer_IsRunning(lua_State *l, TimerHandle &timer)
 {
-	lua_checktimer(l,timer);
-	lua_pushboolean(l,timer.GetTimer()->IsRunning());
+	lua_checktimer(l, timer);
+	lua_pushboolean(l, timer.GetTimer()->IsRunning());
 }
 
-DLLNETWORK void Lua_Timer_IsPaused(lua_State *l,TimerHandle &timer)
+DLLNETWORK void Lua_Timer_IsPaused(lua_State *l, TimerHandle &timer)
 {
-	lua_checktimer(l,timer);
-	lua_pushboolean(l,timer.GetTimer()->IsPaused());
+	lua_checktimer(l, timer);
+	lua_pushboolean(l, timer.GetTimer()->IsPaused());
 }
 
-DLLNETWORK void Lua_Timer_Call(lua_State *l,TimerHandle &timer)
+DLLNETWORK void Lua_Timer_Call(lua_State *l, TimerHandle &timer)
 {
 	NetworkState *state = engine->GetNetworkState(l);
-	lua_checktimer(l,timer);
+	lua_checktimer(l, timer);
 	timer.GetTimer()->Call(state->GetGameState());
 }
 
-DLLNETWORK void Lua_Timer_SetCall(lua_State *l,TimerHandle &timer,LuaFunctionObject o)
+DLLNETWORK void Lua_Timer_SetCall(lua_State *l, TimerHandle &timer, LuaFunctionObject o)
 {
-	lua_checktimer(l,timer);
+	lua_checktimer(l, timer);
 	NetworkState *state = engine->GetNetworkState(l);
-	timer.GetTimer()->SetCall(state->GetGameState(),o);
+	timer.GetTimer()->SetCall(state->GetGameState(), o);
 }
 
 /////////////////////////////
 
-std::shared_ptr<TimerHandle> Lua::time::create_timer(lua_State *l,float delay,int32_t repetitions,LuaFunctionObject fc,TimerType timerType)
+std::shared_ptr<TimerHandle> Lua::time::create_timer(lua_State *l, float delay, int32_t repetitions, LuaFunctionObject fc, TimerType timerType)
 {
-	Lua::CheckType(fc,Lua::Type::Function);
+	Lua::CheckType(fc, Lua::Type::Function);
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
-	auto *timer = game->CreateTimer(delay,repetitions,fc,timerType);
+	auto *timer = game->CreateTimer(delay, repetitions, fc, timerType);
 	return timer->CreateHandle();
 }
-std::shared_ptr<TimerHandle> Lua::time::create_timer(lua_State *l,float delay,int32_t repetitions,LuaFunctionObject fc) {return create_timer(l,delay,repetitions,fc,TimerType::CurTime);}
+std::shared_ptr<TimerHandle> Lua::time::create_timer(lua_State *l, float delay, int32_t repetitions, LuaFunctionObject fc) { return create_timer(l, delay, repetitions, fc, TimerType::CurTime); }
 
-std::shared_ptr<TimerHandle> Lua::time::create_simple_timer(lua_State *l,float delay,LuaFunctionObject fc,TimerType timerType)
+std::shared_ptr<TimerHandle> Lua::time::create_simple_timer(lua_State *l, float delay, LuaFunctionObject fc, TimerType timerType)
 {
-	Lua::CheckType(fc,Lua::Type::Function);
+	Lua::CheckType(fc, Lua::Type::Function);
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
-	auto *timer = game->CreateTimer(delay,1,fc,timerType);
+	auto *timer = game->CreateTimer(delay, 1, fc, timerType);
 	timer->Start(game);
 	return timer->CreateHandle();
 }
-std::shared_ptr<TimerHandle> Lua::time::create_simple_timer(lua_State *l,float delay,LuaFunctionObject fc) {return create_simple_timer(l,delay,fc,TimerType::CurTime);}
+std::shared_ptr<TimerHandle> Lua::time::create_simple_timer(lua_State *l, float delay, LuaFunctionObject fc) { return create_simple_timer(l, delay, fc, TimerType::CurTime); }

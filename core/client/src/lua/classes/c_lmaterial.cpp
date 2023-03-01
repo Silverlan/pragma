@@ -17,71 +17,70 @@
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-void Lua::Material::Client::SetTexture(lua_State*,::Material *mat,const std::string &textureID,const std::string &tex)
+void Lua::Material::Client::SetTexture(lua_State *, ::Material *mat, const std::string &textureID, const std::string &tex)
 {
-	auto *cmat = static_cast<CMaterial*>(mat);
-	cmat->SetTexture(textureID,tex);
+	auto *cmat = static_cast<CMaterial *>(mat);
+	cmat->SetTexture(textureID, tex);
 	cmat->UpdateTextures();
-	c_game->ReloadMaterialShader(static_cast<CMaterial*>(mat));
+	c_game->ReloadMaterialShader(static_cast<CMaterial *>(mat));
 }
-void Lua::Material::Client::SetTexture(lua_State *l,::Material *mat,const std::string &textureID,::Texture &tex)
+void Lua::Material::Client::SetTexture(lua_State *l, ::Material *mat, const std::string &textureID, ::Texture &tex)
 {
-	auto *cmat = static_cast<CMaterial*>(mat);
-	cmat->SetTexture(textureID,&tex);
+	auto *cmat = static_cast<CMaterial *>(mat);
+	cmat->SetTexture(textureID, &tex);
 	cmat->UpdateTextures();
-	c_game->ReloadMaterialShader(static_cast<CMaterial*>(mat));
+	c_game->ReloadMaterialShader(static_cast<CMaterial *>(mat));
 }
-void Lua::Material::Client::SetTexture(lua_State *l,::Material *mat,const std::string &textureID,Lua::Vulkan::Texture &hTex,const std::string &name)
+void Lua::Material::Client::SetTexture(lua_State *l, ::Material *mat, const std::string &textureID, Lua::Vulkan::Texture &hTex, const std::string &name)
 {
-	auto *cmat = static_cast<CMaterial*>(mat);
-	cmat->SetTexture(textureID,hTex);
+	auto *cmat = static_cast<CMaterial *>(mat);
+	cmat->SetTexture(textureID, hTex);
 	auto *texInfo = cmat->GetTextureInfo(textureID);
-	if(texInfo)
-	{
+	if(texInfo) {
 		texInfo->name = name;
 		if(texInfo->texture)
-			static_cast<Texture*>(texInfo->texture.get())->SetName(name);
+			static_cast<Texture *>(texInfo->texture.get())->SetName(name);
 	}
 	cmat->UpdateTextures();
-	c_game->ReloadMaterialShader(static_cast<CMaterial*>(mat));
+	c_game->ReloadMaterialShader(static_cast<CMaterial *>(mat));
 }
-void Lua::Material::Client::SetTexture(lua_State *l,::Material *mat,const std::string &textureID,Lua::Vulkan::Texture &hTex) {SetTexture(l,mat,textureID,hTex,"");}
+void Lua::Material::Client::SetTexture(lua_State *l, ::Material *mat, const std::string &textureID, Lua::Vulkan::Texture &hTex) { SetTexture(l, mat, textureID, hTex, ""); }
 
-void Lua::Material::Client::GetTexture(lua_State *l,::Material *mat,const std::string &textureID)
+void Lua::Material::Client::GetTexture(lua_State *l, ::Material *mat, const std::string &textureID)
 {
 	auto *tex = mat->GetTextureInfo(textureID);
 	if(tex == nullptr)
 		return;
-	Lua::Push<::TextureInfo*>(l,tex);
+	Lua::Push<::TextureInfo *>(l, tex);
 }
 
-void Lua::Material::Client::GetData(lua_State *l,::Material *mat)
+void Lua::Material::Client::GetData(lua_State *l, ::Material *mat)
 {
 	auto &data = mat->GetDataBlock();
-	Lua::Push<std::shared_ptr<ds::Block>>(l,data);
+	Lua::Push<std::shared_ptr<ds::Block>>(l, data);
 }
 
-void Lua::Material::Client::InitializeShaderData(lua_State *l,::Material *mat,bool reload)
+void Lua::Material::Client::InitializeShaderData(lua_State *l, ::Material *mat, bool reload)
 {
-	auto shaderHandler = static_cast<msys::CMaterialManager&>(client->GetMaterialManager()).GetShaderHandler();
+	auto shaderHandler = static_cast<msys::CMaterialManager &>(client->GetMaterialManager()).GetShaderHandler();
 	if(shaderHandler)
 		shaderHandler(mat);
-	auto *shader = static_cast<::pragma::ShaderTexturedBase*>(mat->GetUserData());
+	auto *shader = static_cast<::pragma::ShaderTexturedBase *>(mat->GetUserData());
 	if(shader == nullptr)
 		return;
-	shader->InitializeMaterialDescriptorSet(static_cast<CMaterial&>(*mat),reload);
+	shader->InitializeMaterialDescriptorSet(static_cast<CMaterial &>(*mat), reload);
 }
 
-void Lua::Material::Client::InitializeShaderData(lua_State *l,::Material *mat) {InitializeShaderData(l,mat,false);}
+void Lua::Material::Client::InitializeShaderData(lua_State *l, ::Material *mat) { InitializeShaderData(l, mat, false); }
 
 ///////////////////
 
-std::shared_ptr<Texture> Lua::TextureInfo::GetTexture(lua_State *l,::TextureInfo *tex)
+std::shared_ptr<Texture> Lua::TextureInfo::GetTexture(lua_State *l, ::TextureInfo *tex)
 {
 	if(tex->texture == nullptr)
 		return nullptr;
 	return std::static_pointer_cast<Texture>(tex->texture);
 }
-std::pair<uint32_t,uint32_t> Lua::TextureInfo::GetSize(lua_State *l,::TextureInfo *tex) {return {tex->width,tex->height};}
-uint32_t Lua::TextureInfo::GetWidth(lua_State *l,::TextureInfo *tex) {return tex->width;}
-uint32_t Lua::TextureInfo::GetHeight(lua_State *l,::TextureInfo *tex) {return tex->height;}
+std::pair<uint32_t, uint32_t> Lua::TextureInfo::GetSize(lua_State *l, ::TextureInfo *tex) { return {tex->width, tex->height}; }
+uint32_t Lua::TextureInfo::GetWidth(lua_State *l, ::TextureInfo *tex) { return tex->width; }
+uint32_t Lua::TextureInfo::GetHeight(lua_State *l, ::TextureInfo *tex) { return tex->height; }

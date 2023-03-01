@@ -11,24 +11,18 @@
 #include "pragma/entities/environment/audio/env_soundscape.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLSERVER SSoundScapeComponent final
-		: public BaseEnvSoundScapeComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SSoundScapeComponent final : public BaseEnvSoundScapeComponent, public SBaseNetComponent {
+	  public:
 		SSoundScapeComponent(BaseEntity &ent) : BaseEnvSoundScapeComponent(ent) {}
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLSERVER EnvSoundScape
-	: public SBaseEntity
-{
-public:
+class DLLSERVER EnvSoundScape : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

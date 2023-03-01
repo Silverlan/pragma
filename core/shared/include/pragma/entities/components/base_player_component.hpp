@@ -16,13 +16,12 @@
 
 class BasePlayer;
 enum class Activity : uint16_t;
-namespace pragma
-{
-	namespace physics {class IConvexShape;};
-	struct DLLNETWORK CEHandleActionInput
-		: public ComponentEvent
-	{
-		CEHandleActionInput(Action action,bool pressed,float magnitude);
+namespace pragma {
+	namespace physics {
+		class IConvexShape;
+	};
+	struct DLLNETWORK CEHandleActionInput : public ComponentEvent {
+		CEHandleActionInput(Action action, bool pressed, float magnitude);
 		virtual void PushArguments(lua_State *l) override;
 		Action action;
 		bool pressed;
@@ -30,19 +29,17 @@ namespace pragma
 	};
 
 	class BaseObservableComponent;
-	class DLLNETWORK BasePlayerComponent
-		: public BaseEntityComponent
-	{
-	public:
+	class DLLNETWORK BasePlayerComponent : public BaseEntityComponent {
+	  public:
 		static ComponentEventId EVENT_HANDLE_ACTION_INPUT;
 		static ComponentEventId EVENT_ON_OBSERVATION_MODE_CHANGED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		friend Engine;
 		virtual ~BasePlayerComponent() override;
-		virtual Con::c_cout& print(Con::c_cout&);
-		virtual std::ostream& print(std::ostream&);
+		virtual Con::c_cout &print(Con::c_cout &);
+		virtual std::ostream &print(std::ostream &);
 
-		virtual void OnTakenDamage(DamageInfo &info,unsigned short oldHealth,unsigned short newHealth);
+		virtual void OnTakenDamage(DamageInfo &info, unsigned short oldHealth, unsigned short newHealth);
 		// Same as PlayActivity, but doesn't automatically transmit to clients if called serverside
 		virtual bool PlaySharedActivity(Activity activity);
 
@@ -76,18 +73,18 @@ namespace pragma
 		virtual void SetCrouchEyeLevel(float eyelevel);
 
 		// Inputs
-		void SetActionInput(Action action,bool b,bool bKeepMagnitude);
-		void SetActionInput(Action action,bool b,float magnitude=1.f);
+		void SetActionInput(Action action, bool b, bool bKeepMagnitude);
+		void SetActionInput(Action action, bool b, float magnitude = 1.f);
 		bool GetActionInput(Action action) const;
 		bool GetRawActionInput(Action action) const;
 		float GetActionInputAxisMagnitude(Action action) const;
-		const std::unordered_map<Action,float> &GetActionInputAxisMagnitudes() const;
+		const std::unordered_map<Action, float> &GetActionInputAxisMagnitudes() const;
 		Action GetActionInputs() const;
 		Action GetRawActionInputs() const;
-		void SetActionInputs(Action action,bool bKeepMagnitudes=false);
-		void SetActionInputAxisMagnitude(Action action,float magnitude);
+		void SetActionInputs(Action action, bool bKeepMagnitudes = false);
+		void SetActionInputAxisMagnitude(Action action, float magnitude);
 		void Crouch();
-		void UnCrouch(bool bForce=false);
+		void UnCrouch(bool bForce = false);
 		virtual void OnCrouch();
 		virtual void OnUnCrouch();
 		virtual void OnFullyCrouched();
@@ -104,9 +101,9 @@ namespace pragma
 		virtual unsigned short GetClientPort();
 		double ConnectionTime() const;
 		double TimeConnected() const;
-		virtual void PrintMessage(std::string message,MESSAGE type)=0;
-		void GetConVars(std::unordered_map<std::string,std::string> **convars);
-		bool GetConVar(std::string cvar,std::string *val);
+		virtual void PrintMessage(std::string message, MESSAGE type) = 0;
+		void GetConVars(std::unordered_map<std::string, std::string> **convars);
+		bool GetConVar(std::string cvar, std::string *val);
 		std::string GetConVarString(std::string cvar) const;
 		int GetConVarInt(std::string cvar) const;
 		float GetConVarFloat(std::string cvar) const;
@@ -125,18 +122,13 @@ namespace pragma
 
 		virtual void SetObserverTarget(BaseObservableComponent *ent);
 		BaseObservableComponent *GetObserverTarget() const;
-		virtual void ApplyViewRotationOffset(const EulerAngles &ang,float dur=0.5f)=0;
-		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
+		virtual void ApplyViewRotationOffset(const EulerAngles &ang, float dur = 0.5f) = 0;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
 		BasePlayer *GetBasePlayer() const;
 		virtual void OnEntitySpawn() override;
-	protected:
-		enum class DLLNETWORK CrouchTransition : int32_t
-		{
-			None = -1,
-			Crouching = 0,
-			Uncrouching = 1
-		};
+	  protected:
+		enum class DLLNETWORK CrouchTransition : int32_t { None = -1, Crouching = 0, Uncrouching = 1 };
 		BasePlayerComponent(BaseEntity &ent);
 		virtual void DoSetObserverMode(OBSERVERMODE mode) {};
 		virtual void OnPhysicsInitialized();
@@ -171,21 +163,21 @@ namespace pragma
 		Vector2 CalcMovementSpeed() const;
 		float CalcAirMovementModifier() const;
 		float CalcMovementAcceleration() const;
-		Vector3 CalcMovementDirection(const Vector3 &forward,const Vector3 &right) const;
-		virtual void OnActionInputChanged(Action action,bool b);
-		void OnKilled(DamageInfo *dmgInfo=nullptr);
+		Vector3 CalcMovementDirection(const Vector3 &forward, const Vector3 &right) const;
+		virtual void OnActionInputChanged(Action action, bool b);
+		void OnKilled(DamageInfo *dmgInfo = nullptr);
 
 		virtual void OnTick(double tDelta) override;
 		std::shared_ptr<pragma::physics::IConvexShape> m_shapeStand = nullptr;
-	private:
+	  private:
 		unsigned short m_portUDP;
-		std::unordered_map<int,bool> m_keysPressed;
+		std::unordered_map<int, bool> m_keysPressed;
 		bool m_bLocalPlayer;
-		std::unordered_map<std::string,std::string> m_conVars;
+		std::unordered_map<std::string, std::string> m_conVars;
 		// Inputs
 		Action m_actionInputs = Action::None;
 		Action m_rawInputs = Action::None;
-		std::unordered_map<Action,float> m_inputAxes;
+		std::unordered_map<Action, float> m_inputAxes;
 		// Movement
 		float m_speedWalk;
 		float m_speedRun;

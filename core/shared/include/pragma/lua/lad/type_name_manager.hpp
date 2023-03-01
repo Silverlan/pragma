@@ -12,13 +12,10 @@
 #include "pragma/networkdefinitions.h"
 #include <luasystem.h>
 
-namespace pragma::lua
-{
-	class TypeNameManager
-	{
-	public:
-		struct TypeInfo
-		{
+namespace pragma::lua {
+	class TypeNameManager {
+	  public:
+		struct TypeInfo {
 			size_t hash = 0;
 			std::string name;
 			std::string simplifiedName;
@@ -29,15 +26,15 @@ namespace pragma::lua
 			std::optional<std::string> bestMatch {};
 			double bestMatchScore = std::numeric_limits<double>::lowest();
 		};
-		void RegisterType(const std::type_info &typeInfo,const luabind::detail::class_rep &luaClassDef);
+		void RegisterType(const std::type_info &typeInfo, const luabind::detail::class_rep &luaClassDef);
 		void AssignType(const std::string &name);
 		const TypeInfo *GetTypeInfo(const std::type_info *ti) const;
-		const std::unordered_map<const std::type_info*,TypeInfo*> &GetTypes() const {return m_types;}
-		const std::unordered_map<std::string,const std::type_info*> &GetAssignedTypes() const {return m_assignedTypes;}
+		const std::unordered_map<const std::type_info *, TypeInfo *> &GetTypes() const { return m_types; }
+		const std::unordered_map<std::string, const std::type_info *> &GetAssignedTypes() const { return m_assignedTypes; }
 		std::optional<const std::string_view> TranslateType(const std::string &type) const;
-	private:
-		std::unordered_map<const std::type_info*,TypeInfo*> m_types;
-		std::unordered_map<std::string,const std::type_info*> m_assignedTypes;
+	  private:
+		std::unordered_map<const std::type_info *, TypeInfo *> m_types;
+		std::unordered_map<std::string, const std::type_info *> m_assignedTypes;
 	};
 };
 

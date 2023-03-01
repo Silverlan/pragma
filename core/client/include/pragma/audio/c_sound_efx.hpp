@@ -13,12 +13,13 @@
 #include <string>
 #include <memory>
 
-namespace udm {struct LinkedPropertyWrapper;};
-namespace al
-{
+namespace udm {
+	struct LinkedPropertyWrapper;
+};
+namespace al {
 	class IEffect;
-	DLLCLIENT std::shared_ptr<al::IEffect> create_aux_effect(const std::string &type,udm::LinkedPropertyWrapper &prop);
-	DLLCLIENT std::shared_ptr<al::IEffect> create_aux_effect(const std::string &name,const std::string &type,udm::LinkedPropertyWrapper &prop);
+	DLLCLIENT std::shared_ptr<al::IEffect> create_aux_effect(const std::string &type, udm::LinkedPropertyWrapper &prop);
+	DLLCLIENT std::shared_ptr<al::IEffect> create_aux_effect(const std::string &name, const std::string &type, udm::LinkedPropertyWrapper &prop);
 	DLLCLIENT const std::vector<std::string> &get_aux_types();
 };
 

@@ -14,29 +14,26 @@
 #include <queries/prosper_pipeline_statistics_query.hpp>
 #include <chrono>
 
-namespace prosper {class IQueryPool;};
-namespace pragma
-{
-	namespace debug
-	{
-		class DLLCLIENT GPUSwapchainTimer
-			: public Timer
-		{
-		public:
-			static std::shared_ptr<GPUSwapchainTimer> Create(prosper::IQueryPool &timerQueryPool,prosper::IQueryPool &statsQueryPool,prosper::PipelineStageFlags stage);
+namespace prosper {
+	class IQueryPool;
+};
+namespace pragma {
+	namespace debug {
+		class DLLCLIENT GPUSwapchainTimer : public Timer {
+		  public:
+			static std::shared_ptr<GPUSwapchainTimer> Create(prosper::IQueryPool &timerQueryPool, prosper::IQueryPool &statsQueryPool, prosper::PipelineStageFlags stage);
 
 			virtual bool Start() override;
 			virtual bool Stop() override;
 			bool Reset();
 			virtual std::unique_ptr<ProfilerResult> GetResult() const override;
-		private:
-			GPUSwapchainTimer(prosper::IQueryPool &timerQueryPool,prosper::IQueryPool &statsQueryPool,prosper::PipelineStageFlags stage);
+		  private:
+			GPUSwapchainTimer(prosper::IQueryPool &timerQueryPool, prosper::IQueryPool &statsQueryPool, prosper::PipelineStageFlags stage);
 			void UpdateResult();
 			prosper::TimerQuery *GetTimerQuery();
 			prosper::PipelineStatisticsQuery *GetStatisticsQuery();
 			void InitializeQueries();
-			struct SwapchainQuery
-			{
+			struct SwapchainQuery {
 				std::shared_ptr<prosper::TimerQuery> timerQuery;
 				std::shared_ptr<prosper::PipelineStatisticsQuery> statsQuery;
 			};

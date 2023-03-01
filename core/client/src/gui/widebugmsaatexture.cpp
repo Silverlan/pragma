@@ -14,11 +14,9 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-LINK_WGUI_TO_CLASS(widebugmsaatexture,WIDebugMSAATexture);
+LINK_WGUI_TO_CLASS(widebugmsaatexture, WIDebugMSAATexture);
 
-WIDebugMSAATexture::WIDebugMSAATexture()
-	: WIBase()
-{}
+WIDebugMSAATexture::WIDebugMSAATexture() : WIBase() {}
 
 void WIDebugMSAATexture::Initialize()
 {
@@ -31,7 +29,7 @@ void WIDebugMSAATexture::SetTexture(prosper::Texture &texture)
 	m_msaaTexture = texture.shared_from_this();
 	UpdateResolvedTexture();
 	if(m_hTextureRect.IsValid() && m_resolvedTexture != nullptr)
-		static_cast<WITexturedRect*>(m_hTextureRect.get())->SetTexture(*m_resolvedTexture);
+		static_cast<WITexturedRect *>(m_hTextureRect.get())->SetTexture(*m_resolvedTexture);
 }
 
 void WIDebugMSAATexture::UpdateResolvedTexture()
@@ -39,15 +37,13 @@ void WIDebugMSAATexture::UpdateResolvedTexture()
 	m_resolvedTexture = nullptr;
 	if(m_msaaTexture == nullptr)
 		return;
-	if(m_msaaTexture->GetImage().GetSampleCount() == prosper::SampleCountFlags::e1Bit)
-	{
+	if(m_msaaTexture->GetImage().GetSampleCount() == prosper::SampleCountFlags::e1Bit) {
 		m_resolvedTexture = m_msaaTexture;
-		static_cast<WITexturedRect&>(*m_hTextureRect.get()).SetTexture(*m_resolvedTexture);
+		static_cast<WITexturedRect &>(*m_hTextureRect.get()).SetTexture(*m_resolvedTexture);
 		return;
 	}
-	if(m_msaaTexture->IsMSAATexture())
-	{
-		m_resolvedTexture = static_cast<prosper::MSAATexture&>(*m_msaaTexture).GetResolvedTexture();
+	if(m_msaaTexture->IsMSAATexture()) {
+		m_resolvedTexture = static_cast<prosper::MSAATexture &>(*m_msaaTexture).GetResolvedTexture();
 		// prosper TODO: Use custom shader
 		return;
 	}
@@ -63,7 +59,7 @@ void WIDebugMSAATexture::UpdateResolvedTexture()
 	resolvedImgCreateInfo.usage = prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::SampledBit;
 	auto resolvedImg = context.CreateImage(resolvedImgCreateInfo);
 	prosper::util::SamplerCreateInfo resolvedSamplerCreateInfo {};
-	m_resolvedTexture = context.CreateTexture({},*resolvedImg,{},resolvedSamplerCreateInfo);
+	m_resolvedTexture = context.CreateTexture({}, *resolvedImg, {}, resolvedSamplerCreateInfo);
 }
 
 void WIDebugMSAATexture::SetShouldResolveImage(bool b)

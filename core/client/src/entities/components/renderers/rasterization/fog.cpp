@@ -34,19 +34,15 @@ extern DLLCLIENT CGame *c_game;
 static auto cvDrawParticles = GetClientConVar("render_draw_particles");
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include <prosper_descriptor_set_group.hpp>
-void pragma::CRasterizationRendererComponent::RenderParticles(
-	prosper::ICommandBuffer &cmd,const util::DrawSceneInfo &drawSceneInfo,bool depthPass,
-	prosper::IPrimaryCommandBuffer *primCmdBuffer
-)
+void pragma::CRasterizationRendererComponent::RenderParticles(prosper::ICommandBuffer &cmd, const util::DrawSceneInfo &drawSceneInfo, bool depthPass, prosper::IPrimaryCommandBuffer *primCmdBuffer)
 {
 	assert(!depthPass || primCmdBuffer != nullptr);
 	// TODO: Only render particles if they're visible
-	std::vector<pragma::CParticleSystemComponent*> culledParticles;
+	std::vector<pragma::CParticleSystemComponent *> culledParticles;
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CParticleSystemComponent>>();
 	culledParticles.reserve(entIt.GetCount());
-	for(auto *ent : entIt)
-	{
+	for(auto *ent : entIt) {
 		auto *ptrC = ent->GetComponent<pragma::CParticleSystemComponent>().get();
 		auto &renderers = ptrC->GetRenderers();
 		auto *renderer = !renderers.empty() ? renderers.front().get() : nullptr;
@@ -56,7 +52,7 @@ void pragma::CRasterizationRendererComponent::RenderParticles(
 			continue;
 		culledParticles.push_back(ent->GetComponent<pragma::CParticleSystemComponent>().get());
 	}
-	auto bShouldDrawParticles = (drawSceneInfo.renderFlags &RenderFlags::Particles) == RenderFlags::Particles && cvDrawParticles->GetBool() == true && culledParticles.empty() == false;
+	auto bShouldDrawParticles = (drawSceneInfo.renderFlags & RenderFlags::Particles) == RenderFlags::Particles && cvDrawParticles->GetBool() == true && culledParticles.empty() == false;
 	if(!bShouldDrawParticles)
 		return;
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::Particles);
@@ -69,57 +65,46 @@ void pragma::CRasterizationRendererComponent::RenderParticles(
 	auto &rt = hdrInfo.GetRenderTarget(drawSceneInfo);
 	auto &hdrTex = rt.GetTexture();
 
-	if(!depthPass)
-	{
-		if(drawSceneInfo.renderTarget)
-		{
+	if(!depthPass) {
+		if(drawSceneInfo.renderTarget) {
 			// Custom render target; Blit to staging target
 			auto &imgColorRender = drawSceneInfo.renderTarget->GetTexture().GetImage();
 			auto &imgColorSampled = prepass.textureDepthSampled->GetImage();
-			cmd.RecordImageBarrier(imgColorSampled,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferDstOptimal);
-			cmd.RecordImageBarrier(imgColorRender,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal);
-			cmd.RecordBlitImage({},imgColorRender,imgColorSampled);
-			cmd.RecordImageBarrier(imgColorSampled,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+			cmd.RecordImageBarrier(imgColorSampled, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::TransferDstOptimal);
+			cmd.RecordImageBarrier(imgColorRender, prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferSrcOptimal);
+			cmd.RecordBlitImage({}, imgColorRender, imgColorSampled);
+			cmd.RecordImageBarrier(imgColorSampled, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 		}
-	
+
 		// We need to sample depth buffer, so we need to blit
 		auto &imgDepthRender = prepass.textureDepth->GetImage();
 		auto &imgDepthSampled = prepass.textureDepthSampled->GetImage();
-		cmd.RecordImageBarrier(imgDepthSampled,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferDstOptimal);
-		cmd.RecordImageBarrier(imgDepthRender,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal);
-		cmd.RecordBlitImage({},imgDepthRender,imgDepthSampled);
-		cmd.RecordImageBarrier(imgDepthSampled,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
-		cmd.RecordImageBarrier(imgDepthRender,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal);
+		cmd.RecordImageBarrier(imgDepthSampled, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::TransferDstOptimal);
+		cmd.RecordImageBarrier(imgDepthRender, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::ImageLayout::TransferSrcOptimal);
+		cmd.RecordBlitImage({}, imgDepthRender, imgDepthSampled);
+		cmd.RecordImageBarrier(imgDepthSampled, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
+		cmd.RecordImageBarrier(imgDepthRender, prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::DepthStencilAttachmentOptimal);
 
 		// cmd.RecordImageBarrier(texDepth->GetImage(),prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
-		if(primCmdBuffer->RecordBeginRenderPass(*hdrInfo.rtParticle) == true)
-		{
-			RecordRenderParticleSystems(
-				cmd,drawSceneInfo,culledParticles,pragma::rendering::SceneRenderPass::World,depthPass,
-				false,nullptr
-			);
+		if(primCmdBuffer->RecordBeginRenderPass(*hdrInfo.rtParticle) == true) {
+			RecordRenderParticleSystems(cmd, drawSceneInfo, culledParticles, pragma::rendering::SceneRenderPass::World, depthPass, false, nullptr);
 			primCmdBuffer->RecordEndRenderPass();
 		}
 		// cmd.RecordImageBarrier(texDepth->GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal);
 
-		if(drawSceneInfo.renderTarget)
-		{
+		if(drawSceneInfo.renderTarget) {
 			// Custom render target; Blit from staging target
 			auto &imgColorRender = drawSceneInfo.renderTarget->GetTexture().GetImage();
 			auto &imgColorSampled = prepass.textureDepthSampled->GetImage();
-			cmd.RecordImageBarrier(imgColorSampled,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferSrcOptimal);
-			cmd.RecordImageBarrier(imgColorRender,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::TransferDstOptimal);
-			cmd.RecordBlitImage({},imgColorRender,imgColorSampled);
-			cmd.RecordImageBarrier(imgColorSampled,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
-			cmd.RecordImageBarrier(imgColorRender,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+			cmd.RecordImageBarrier(imgColorSampled, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::TransferSrcOptimal);
+			cmd.RecordImageBarrier(imgColorRender, prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::TransferDstOptimal);
+			cmd.RecordBlitImage({}, imgColorRender, imgColorSampled);
+			cmd.RecordImageBarrier(imgColorSampled, prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
+			cmd.RecordImageBarrier(imgColorRender, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 		}
 	}
-	else
-	{
-		RecordRenderParticleSystems(
-			cmd,drawSceneInfo,culledParticles,pragma::rendering::SceneRenderPass::World,depthPass,
-			false,nullptr
-		);
+	else {
+		RecordRenderParticleSystems(cmd, drawSceneInfo, culledParticles, pragma::rendering::SceneRenderPass::World, depthPass, false, nullptr);
 	}
 
 	//InvokeEventCallbacks(EVENT_MT_END_RECORD_PARTICLES,evDataLightingStage);

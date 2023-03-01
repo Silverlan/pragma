@@ -11,26 +11,23 @@
 #include "pragma/lua/base_lua_handle.hpp"
 #include "pragma/lua/ldefinitions.h"
 
-template<class T,typename... TARGS>
-	T pragma::BaseLuaHandle::CallLuaMethod(const std::string &name,TARGS ...args)
+template<class T, typename... TARGS>
+T pragma::BaseLuaHandle::CallLuaMethod(const std::string &name, TARGS... args)
 {
 	auto &o = GetLuaObject();
-	
+
 	auto r = o[name];
-	if(r)
-	{
+	if(r) {
 #ifndef LUABIND_NO_EXCEPTIONS
-		try
-		{
+		try {
 #endif
-			return static_cast<T>(luabind::call_member<T>(o,name.c_str(),std::forward<TARGS>(args)...));
+			return static_cast<T>(luabind::call_member<T>(o, name.c_str(), std::forward<TARGS>(args)...));
 #ifndef LUABIND_NO_EXCEPTIONS
 		}
-		catch(luabind::error &err)
-		{
+		catch(luabind::error &err) {
 			Lua::HandleLuaError(o.interpreter());
 		}
-		catch(const luabind::cast_failed&) // No return value was specified, or return value couldn't be cast
+		catch(const luabind::cast_failed &) // No return value was specified, or return value couldn't be cast
 		{
 			return T();
 		}
@@ -38,39 +35,35 @@ template<class T,typename... TARGS>
 	}
 	return T();
 }
-template<class T,typename... TARGS>
-	CallbackReturnType pragma::BaseLuaHandle::CallLuaMethod(const std::string &name,T *ret,TARGS ...args)
+template<class T, typename... TARGS>
+CallbackReturnType pragma::BaseLuaHandle::CallLuaMethod(const std::string &name, T *ret, TARGS... args)
 {
 	auto &o = GetLuaObject();
-	
+
 	auto r = o[name];
-	if(r)
-	{
+	if(r) {
 #ifndef LUABIND_NO_EXCEPTIONS
-		try
-		{
+		try {
 #endif
-			*ret = static_cast<T>(luabind::call_member<T>(o,name.c_str(),std::forward<TARGS>(args)...));
+			*ret = static_cast<T>(luabind::call_member<T>(o, name.c_str(), std::forward<TARGS>(args)...));
 #ifndef LUABIND_NO_EXCEPTIONS
 		}
-		catch(luabind::error&)
-		{
+		catch(luabind::error &) {
 			Lua::HandleLuaError(o.interpreter());
 			return CallbackReturnType::NoReturnValue;
 		}
-		catch(const luabind::cast_failed&) // No return value was specified, or return value couldn't be cast
+		catch(const luabind::cast_failed &) // No return value was specified, or return value couldn't be cast
 		{
 			return CallbackReturnType::NoReturnValue;
 		}
-		catch(std::exception&)
-		{
+		catch(std::exception &) {
 			return CallbackReturnType::NoReturnValue;
 		}
 #endif
 		auto *state = r.interpreter();
 		r.push(state);
-		auto r = (lua_iscfunction(state,-1) == 0) ? CallbackReturnType::HasReturnValue : CallbackReturnType::NoReturnValue;
-		Lua::Pop(state,1);
+		auto r = (lua_iscfunction(state, -1) == 0) ? CallbackReturnType::HasReturnValue : CallbackReturnType::NoReturnValue;
+		Lua::Pop(state, 1);
 		return r;
 	}
 	return CallbackReturnType::NoReturnValue;

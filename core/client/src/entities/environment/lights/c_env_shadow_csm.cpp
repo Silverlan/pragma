@@ -35,26 +35,22 @@ static const uint8_t LAYER_UPDATE_FREQUENCY = 3; // Frames
 #define CSM_MAX_SHADOW_DISTANCE 10'000
 #define CSM_SHADOW_SPLIT_FACTOR 0.9f
 
-FrustumSplit::FrustumSplit()
-	: neard(0.f),fard(0.f)
-{}
+FrustumSplit::FrustumSplit() : neard(0.f), fard(0.f) {}
 
-Frustum::Frustum()
-	: radius(0.f)
+Frustum::Frustum() : radius(0.f)
 {
-	bounds[0] = Vector3(0.f,0.f,0.f);
-	bounds[1] = Vector3(0.f,0.f,0.f);
+	bounds[0] = Vector3(0.f, 0.f, 0.f);
+	bounds[1] = Vector3(0.f, 0.f, 0.f);
 	projection = umat::identity();
 }
 
-static void cmd_cl_render_shadow_pssm_split_count(NetworkState*,ConVar*,int,int val)
+static void cmd_cl_render_shadow_pssm_split_count(NetworkState *, ConVar *, int, int val)
 {
 	if(c_game == NULL)
 		return;
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CShadowCSMComponent>>();
-	for(auto *ent : entIt)
-	{
+	for(auto *ent : entIt) {
 		auto hCsmC = ent->GetComponent<pragma::CShadowCSMComponent>();
 		if(hCsmC.expired())
 			continue;
@@ -62,62 +58,53 @@ static void cmd_cl_render_shadow_pssm_split_count(NetworkState*,ConVar*,int,int 
 		hCsmC->ReloadDepthTextures();
 	}
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_render_shadow_pssm_split_count,cmd_cl_render_shadow_pssm_split_count);
+REGISTER_CONVAR_CALLBACK_CL(cl_render_shadow_pssm_split_count, cmd_cl_render_shadow_pssm_split_count);
 
-static void cmd_render_csm_max_distance(NetworkState*,ConVar*,float,float val)
+static void cmd_render_csm_max_distance(NetworkState *, ConVar *, float, float val)
 {
 	if(c_game == NULL)
 		return;
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CShadowCSMComponent>>();
-	for(auto *ent : entIt)
-	{
+	for(auto *ent : entIt) {
 		auto hCsmC = ent->GetComponent<pragma::CShadowCSMComponent>();
 		if(hCsmC.expired())
 			continue;
 		hCsmC->SetMaxDistance(val);
 	}
 }
-REGISTER_CONVAR_CALLBACK_CL(render_csm_max_distance,cmd_render_csm_max_distance);
+REGISTER_CONVAR_CALLBACK_CL(render_csm_max_distance, cmd_render_csm_max_distance);
 
 static CVar cvCascadeCount = GetClientConVar("cl_render_shadow_pssm_split_count");
 static CVar cvRange = GetClientConVar("render_csm_max_distance");
-CShadowCSMComponent::CShadowCSMComponent(BaseEntity &ent)
-	: BaseEntityComponent{ent},m_maxDistance{cvRange->GetFloat()},
-	m_layerUpdate{false}
+CShadowCSMComponent::CShadowCSMComponent(BaseEntity &ent) : BaseEntityComponent {ent}, m_maxDistance {cvRange->GetFloat()}, m_layerUpdate {false}
 {
 	SetSplitCount(cvCascadeCount->GetInt());
-	UpdateSplitDistances(2.f,GetMaxDistance());
+	UpdateSplitDistances(2.f, GetMaxDistance());
 
 	m_whShaderCsm = c_engine->GetShader("shadowcsm");
 	m_whShaderCsmTransparent = c_engine->GetShader("shadowcsmtransparent");
 }
 
-void CShadowCSMComponent::Initialize()
-{
-	BaseEntityComponent::Initialize();
-}
+void CShadowCSMComponent::Initialize() { BaseEntityComponent::Initialize(); }
 
-void CShadowCSMComponent::OnRemove()
-{
-	BaseEntityComponent::OnRemove();
-}
+void CShadowCSMComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
 
-uint64_t CShadowCSMComponent::GetLastUpdateFrameId() const {return m_lastFrameUpdate;}
-void CShadowCSMComponent::SetLastUpdateFrameId(uint64_t id) {m_lastFrameUpdate = id;}
+uint64_t CShadowCSMComponent::GetLastUpdateFrameId() const { return m_lastFrameUpdate; }
+void CShadowCSMComponent::SetLastUpdateFrameId(uint64_t id) { m_lastFrameUpdate = id; }
 
 //const Vulkan::DescriptorSet &CShadowCSMComponent::GetDescriptorSet() const {return m_descSet;} // prosper TODO
 
-float CShadowCSMComponent::GetMaxDistance() {return m_maxDistance;}
+float CShadowCSMComponent::GetMaxDistance() { return m_maxDistance; }
 void CShadowCSMComponent::SetMaxDistance(float dist)
 {
 	m_maxDistance = dist;
-	UpdateSplitDistances(2.f,dist);
+	UpdateSplitDistances(2.f, dist);
 }
 
-float *CShadowCSMComponent::GetSplitFarDistances() {return &m_fard.front();}
+float *CShadowCSMComponent::GetSplitFarDistances() { return &m_fard.front(); }
 
-unsigned int CShadowCSMComponent::GetSplitCount() {return m_numSplits;}
+unsigned int CShadowCSMComponent::GetSplitCount() { return m_numSplits; }
 void CShadowCSMComponent::SetSplitCount(unsigned int numSplits)
 {
 	if(numSplits == 0)
@@ -129,31 +116,29 @@ void CShadowCSMComponent::SetSplitCount(unsigned int numSplits)
 
 	auto &csmBuffer = c_game->GetGlobalRenderSettingsBufferData().csmBuffer;
 	auto splitCount = static_cast<decltype(pragma::ShaderGameWorldLightingPass::CSMData::count)>(numSplits);
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderGameWorldLightingPass::CSMData,count),splitCount);
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer, offsetof(pragma::ShaderGameWorldLightingPass::CSMData, count), splitCount);
 
 	m_frustums.resize(m_numSplits);
 	m_fard.resize(m_numSplits);
-	UpdateSplitDistances(2.f,GetMaxDistance());
+	UpdateSplitDistances(2.f, GetMaxDistance());
 }
 
-Mat4 &CShadowCSMComponent::GetProjectionMatrix(unsigned int layer) {return m_frustums[layer].projection;}
-Mat4 &CShadowCSMComponent::GetViewProjectionMatrix(unsigned int layer) {return m_frustums[layer].viewProjection;}
+Mat4 &CShadowCSMComponent::GetProjectionMatrix(unsigned int layer) { return m_frustums[layer].projection; }
+Mat4 &CShadowCSMComponent::GetViewProjectionMatrix(unsigned int layer) { return m_frustums[layer].viewProjection; }
 
-void CShadowCSMComponent::UpdateSplitDistances(float nd,float fd)
+void CShadowCSMComponent::UpdateSplitDistances(float nd, float fd)
 {
 	const float splitWeight = 0.75f;
 	float lambda = splitWeight;
-	float ratio = fd /nd;
+	float ratio = fd / nd;
 	m_frustums[0].split.neard = nd;
 	unsigned int numCascades = GetSplitCount();
-	for(unsigned int i=1;i<numCascades;i++)
-	{
-		float si = i /float(numCascades);
-		m_frustums[i].split.neard = lambda *(nd *powf(ratio,si))
-			+(1.f -lambda) *(nd +(fd -nd) *si);
-		m_frustums[i -1].split.fard = m_frustums[i].split.neard *1.005f;
+	for(unsigned int i = 1; i < numCascades; i++) {
+		float si = i / float(numCascades);
+		m_frustums[i].split.neard = lambda * (nd * powf(ratio, si)) + (1.f - lambda) * (nd + (fd - nd) * si);
+		m_frustums[i - 1].split.fard = m_frustums[i].split.neard * 1.005f;
 	}
-	m_frustums[numCascades -1].split.fard = fd;
+	m_frustums[numCascades - 1].split.fard = fd;
 }
 
 Frustum *CShadowCSMComponent::GetFrustumSplit(unsigned int splitId)
@@ -163,19 +148,16 @@ Frustum *CShadowCSMComponent::GetFrustumSplit(unsigned int splitId)
 	return &m_frustums[splitId];
 }
 
-bool CShadowCSMComponent::ShouldUpdateLayer(uint32_t layerId) const
-{
-	return (layerId < m_layerUpdate.size() && m_layerUpdate[layerId] == true) ? true : false;
-}
+bool CShadowCSMComponent::ShouldUpdateLayer(uint32_t layerId) const { return (layerId < m_layerUpdate.size() && m_layerUpdate[layerId] == true) ? true : false; }
 
-uint32_t CShadowCSMComponent::GetLayerCount() const {return m_layerCount;}
+uint32_t CShadowCSMComponent::GetLayerCount() const { return m_layerCount; }
 
-void CShadowCSMComponent::SetFrustumUpdateCallback(const std::function<void(void)> &f) {m_onFrustumUpdated = f;}
+void CShadowCSMComponent::SetFrustumUpdateCallback(const std::function<void(void)> &f) { m_onFrustumUpdated = f; }
 
 static CVar cvUpdateFrequency = GetClientConVar("cl_render_shadow_update_frequency");
 static CVar cvUpdateFrequencyOffset = GetClientConVar("cl_render_shadow_pssm_update_frequency_offset");
 static CVar cvShadowmapSize = GetClientConVar("cl_render_shadow_resolution");
-void CShadowCSMComponent::UpdateFrustum(uint32_t splitId,pragma::CCameraComponent &cam,const Mat4 &matView,const Vector3 &dir)
+void CShadowCSMComponent::UpdateFrustum(uint32_t splitId, pragma::CCameraComponent &cam, const Mat4 &matView, const Vector3 &dir)
 {
 	auto &frustumSplit = m_frustums.at(splitId);
 	m_pendingInfo.prevVpMatrices.at(splitId) = m_vpMatrices.at(splitId);
@@ -193,14 +175,7 @@ void CShadowCSMComponent::UpdateFrustum(uint32_t splitId,pragma::CCameraComponen
 	cam.SetNearZ(split.neard);
 	cam.SetFarZ(split.fard);
 	cam.GetFrustumPlanes(frustumSplit.planes);
-	cam.GetFrustumPoints(
-		frustumSplit.points,
-		split.neard,split.fard,
-		cam.GetFOVRad(),cam.GetAspectRatio(),
-		entCam.GetPosition(),
-		trCam ? trCam->GetForward() : uvec::FORWARD,
-		trCam ? trCam->GetUp() : uvec::UP
-	);
+	cam.GetFrustumPoints(frustumSplit.points, split.neard, split.fard, cam.GetFOVRad(), cam.GetAspectRatio(), entCam.GetPosition(), trCam ? trCam->GetForward() : uvec::FORWARD, trCam ? trCam->GetUp() : uvec::UP);
 
 	cam.SetNearZ(zNear);
 	cam.SetFarZ(zFar);
@@ -210,38 +185,38 @@ void CShadowCSMComponent::UpdateFrustum(uint32_t splitId,pragma::CCameraComponen
 	auto &nbl = frustumSplit.points[static_cast<int>(FrustumPoint::NearBottomLeft)];
 	auto &ntr = frustumSplit.points[static_cast<int>(FrustumPoint::NearTopRight)];
 
-	std::vector<Vector3> trapezoid = {ftr,fbl,nbl,ntr};
+	std::vector<Vector3> trapezoid = {ftr, fbl, nbl, ntr};
 	auto &center = frustumSplit.center;
 	auto &radius = frustumSplit.radius;
-	Seb::Calculate(trapezoid,center,radius);
+	Seb::Calculate(trapezoid, center, radius);
 
-	auto diameter = radius *2.f;
-	auto frustumTop = center -dir *diameter;
+	auto diameter = radius * 2.f;
+	auto frustumTop = center - dir * diameter;
 	auto perp = uvec::get_perpendicular(dir);
-	auto matViewSplit = glm::lookAtRH(frustumTop,frustumTop +dir,uvec::get_perpendicular(perp));
+	auto matViewSplit = glm::lookAtRH(frustumTop, frustumTop + dir, uvec::get_perpendicular(perp));
 
-	std::array<Vector3,2> bounds = {-Vector3(diameter,diameter,diameter),Vector3(diameter,diameter,diameter)};
-	frustumSplit.projection = glm::ortho(bounds.at(0).z,bounds.at(1).z,bounds.at(0).x,bounds.at(1).x,-bounds.at(1).y *2.f,bounds.at(1).y *2.f);
-	auto scale = Vector3(1.f,-1.f,1.f);
-	frustumSplit.projection = glm::scale(frustumSplit.projection,scale);
+	std::array<Vector3, 2> bounds = {-Vector3(diameter, diameter, diameter), Vector3(diameter, diameter, diameter)};
+	frustumSplit.projection = glm::ortho(bounds.at(0).z, bounds.at(1).z, bounds.at(0).x, bounds.at(1).x, -bounds.at(1).y * 2.f, bounds.at(1).y * 2.f);
+	auto scale = Vector3(1.f, -1.f, 1.f);
+	frustumSplit.projection = glm::scale(frustumSplit.projection, scale);
 
-	frustumSplit.viewProjection = frustumSplit.projection *matViewSplit;
+	frustumSplit.viewProjection = frustumSplit.projection * matViewSplit;
 
 	// Update Frustum OBB and AABB (Required for culling)
-	uvec::to_min_max(bounds.at(0),bounds.at(1));
+	uvec::to_min_max(bounds.at(0), bounds.at(1));
 	auto &obbCenter = frustumSplit.obbCenter;
-	obbCenter = (bounds.at(0) +bounds.at(1)) /2.f;
+	obbCenter = (bounds.at(0) + bounds.at(1)) / 2.f;
 	bounds.at(0) -= obbCenter;
 	bounds.at(1) -= obbCenter;
-	obbCenter += center;//frustumTop; // TODO: Is this correct?
+	obbCenter += center; //frustumTop; // TODO: Is this correct?
 
 	auto &obb = frustumSplit.obb;
 	obb.min = bounds.at(0);
 	obb.max = bounds.at(1);
-	obb.rotation = uquat::create_look_rotation(dir,perp);
+	obb.rotation = uquat::create_look_rotation(dir, perp);
 
 	auto &aabb = frustumSplit.aabb;
-	bounding_volume::AABB::GetRotatedBounds(obb.min,obb.max,umat::create(obb.rotation),&aabb.min,&aabb.max);
+	bounding_volume::AABB::GetRotatedBounds(obb.min, obb.max, umat::create(obb.rotation), &aabb.min, &aabb.max);
 	//
 
 	m_vpMatrices.at(splitId) = m_frustums.at(splitId).viewProjection;
@@ -254,14 +229,14 @@ void CShadowCSMComponent::UpdateFrustum(uint32_t splitId,pragma::CCameraComponen
 	auto &splitDistance = m_pendingInfo.prevSplitDistances;
 
 	auto &csmBuffer = c_game->GetGlobalRenderSettingsBufferData().csmBuffer;
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderGameWorldLightingPass::CSMData,VP),m_pendingInfo.prevVpMatrices.size() *sizeof(Mat4),m_pendingInfo.prevVpMatrices.data());
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderGameWorldLightingPass::CSMData,fard),splitDistance);
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer, offsetof(pragma::ShaderGameWorldLightingPass::CSMData, VP), m_pendingInfo.prevVpMatrices.size() * sizeof(Mat4), m_pendingInfo.prevVpMatrices.data());
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer, offsetof(pragma::ShaderGameWorldLightingPass::CSMData, fard), splitDistance);
 
 	// Calculate new split distances
-	splitDistance[splitId] = 0.5f *(-frustumSplit.split.fard *camProj[2][2] +camProj[3][2]) /frustumSplit.split.fard +0.5f;
+	splitDistance[splitId] = 0.5f * (-frustumSplit.split.fard * camProj[2][2] + camProj[3][2]) / frustumSplit.split.fard + 0.5f;
 }
-void CShadowCSMComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-void CShadowCSMComponent::InitializeTextureSet(TextureSet &set,pragma::CLightComponent::ShadowMapType smType)
+void CShadowCSMComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CShadowCSMComponent::InitializeTextureSet(TextureSet &set, pragma::CLightComponent::ShadowMapType smType)
 {
 	auto wpShaderShadow = c_engine->GetShader("shadowcsm");
 	if(wpShaderShadow.expired())
@@ -293,21 +268,21 @@ void CShadowCSMComponent::InitializeTextureSet(TextureSet &set,pragma::CLightCom
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	texCreateInfo.flags |= prosper::util::TextureCreateInfo::Flags::CreateImageViewForEachLayer;
-	auto tex = c_engine->GetRenderContext().CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
+	auto tex = c_engine->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	rtCreateInfo.useLayerFramebuffers = true;
 
-	set.renderTarget = c_engine->GetRenderContext().CreateRenderTarget({tex},static_cast<prosper::ShaderGraphics*>(wpShaderShadow.get())->GetRenderPass(),rtCreateInfo);
+	set.renderTarget = c_engine->GetRenderContext().CreateRenderTarget({tex}, static_cast<prosper::ShaderGraphics *>(wpShaderShadow.get())->GetRenderPass(), rtCreateInfo);
 	set.renderTarget->SetDebugName("csm_rt");
 }
-void CShadowCSMComponent::UpdateFrustum(pragma::CCameraComponent &cam,const Mat4 &matView,const Vector3 &dir)
+void CShadowCSMComponent::UpdateFrustum(pragma::CCameraComponent &cam, const Mat4 &matView, const Vector3 &dir)
 {
 	auto numCascades = GetSplitCount();
-	for(auto i=decltype(numCascades){0};i<numCascades;++i)
-		UpdateFrustum(i,cam,matView,dir);
+	for(auto i = decltype(numCascades) {0}; i < numCascades; ++i)
+		UpdateFrustum(i, cam, matView, dir);
 }
 
-void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightDirectionalComponent &light)
+void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightDirectionalComponent &light)
 {
 	// TODO
 #if 0

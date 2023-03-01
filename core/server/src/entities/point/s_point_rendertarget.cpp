@@ -18,7 +18,7 @@ using namespace pragma;
 
 // LINK_ENTITY_TO_CLASS(point_rendertarget,PointRenderTarget);
 
-void SRenderTargetComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SRenderTargetComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_kvMaterial);
 	packet->Write<float>(m_kvFOV);
@@ -30,7 +30,7 @@ void SRenderTargetComponent::SendData(NetPacket &packet,networking::ClientRecipi
 	packet->Write<int>(m_kvRenderDepth);
 }
 
-void SRenderTargetComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SRenderTargetComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void PointRenderTarget::Initialize()
 {

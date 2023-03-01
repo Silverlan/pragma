@@ -14,13 +14,12 @@
 #include <sharedutils/util.h>
 #include <algorithm>
 
-REGISTER_PARTICLE_OPERATOR(emission_rate_random,CParticleOperatorRandomEmissionRate);
+REGISTER_PARTICLE_OPERATOR(emission_rate_random, CParticleOperatorRandomEmissionRate);
 
-void CParticleOperatorRandomEmissionRate::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleOperatorRandomEmissionRate::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleOperator::Initialize(pSystem,values);
-	for(auto &pair : values)
-	{
+	CParticleOperator::Initialize(pSystem, values);
+	for(auto &pair : values) {
 		auto key = pair.first;
 		ustring::to_lower(key);
 		if(key == "minimum")
@@ -35,22 +34,20 @@ void CParticleOperatorRandomEmissionRate::OnParticleSystemStarted()
 	Reset();
 	Simulate(0.f);
 }
-void CParticleOperatorRandomEmissionRate::Reset() {m_fRemaining = GetInterval();}
-float CParticleOperatorRandomEmissionRate::GetInterval() const {return umath::max(0.f,umath::random(m_fMinimum,m_fMaximum));}
+void CParticleOperatorRandomEmissionRate::Reset() { m_fRemaining = GetInterval(); }
+float CParticleOperatorRandomEmissionRate::GetInterval() const { return umath::max(0.f, umath::random(m_fMinimum, m_fMaximum)); }
 void CParticleOperatorRandomEmissionRate::Simulate(double tDelta)
 {
 	CParticleOperator::Simulate(tDelta);
 
 	auto &ps = GetParticleSystem();
-	if((m_fRemaining -= tDelta) > 0.f)
-	{
+	if((m_fRemaining -= tDelta) > 0.f) {
 		ps.SetNextParticleEmissionCount(0u);
 		return;
 	}
 	auto maximum = ps.GetMaxParticleCount();
-	auto count = umath::min(1u,maximum);
+	auto count = umath::min(1u, maximum);
 	while(count < maximum && (m_fRemaining += GetInterval()) < 0.f)
 		++count;
 	ps.SetNextParticleEmissionCount(count);
 }
-

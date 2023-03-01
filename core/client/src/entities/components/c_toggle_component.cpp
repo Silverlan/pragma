@@ -12,15 +12,11 @@
 
 using namespace pragma;
 
-void CToggleComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-void CToggleComponent::ReceiveData(NetPacket &packet)
+void CToggleComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CToggleComponent::ReceiveData(NetPacket &packet) { SetTurnedOn(packet->Read<bool>()); }
+Bool CToggleComponent::ReceiveNetEvent(UInt32 eventId, NetPacket &packet)
 {
-	SetTurnedOn(packet->Read<bool>());
-}
-Bool CToggleComponent::ReceiveNetEvent(UInt32 eventId,NetPacket &packet)
-{
-	if(eventId == m_netEvToggleState)
-	{
+	if(eventId == m_netEvToggleState) {
 		auto bState = packet->Read<bool>();
 		if(bState)
 			TurnOn();
@@ -28,6 +24,5 @@ Bool CToggleComponent::ReceiveNetEvent(UInt32 eventId,NetPacket &packet)
 			TurnOff();
 		return true;
 	}
-	return CBaseNetComponent::ReceiveNetEvent(eventId,packet);
+	return CBaseNetComponent::ReceiveNetEvent(eventId, packet);
 }
-

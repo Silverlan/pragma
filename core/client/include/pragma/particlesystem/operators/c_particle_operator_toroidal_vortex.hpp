@@ -10,16 +10,14 @@
 
 #include "pragma/particlesystem/operators/c_particle_operator_world_base.hpp"
 
-class DLLCLIENT CParticleOperatorToroidalVortex
-	: public CParticleOperatorWorldBase
-{
-public:
-	CParticleOperatorToroidalVortex()=default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
-	virtual void Simulate(CParticle &particle,double tDelta,float strength) override;
+class DLLCLIENT CParticleOperatorToroidalVortex : public CParticleOperatorWorldBase {
+  public:
+	CParticleOperatorToroidalVortex() = default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
+	virtual void Simulate(CParticle &particle, double tDelta, float strength) override;
 	virtual void Simulate(double tDelta) override;
-private:
-	Vector3 m_vAxis = {0.f,1.f,0.f};
+  private:
+	Vector3 m_vAxis = {0.f, 1.f, 0.f};
 	float m_fHeight = 1.f;
 	float m_fRadius = 1.f;
 	float m_fStrength = 2.f;

@@ -14,18 +14,17 @@
 #include "pragma/lua/l_entity_handles.hpp"
 #include <sharedutils/util_weak_handle.hpp>
 
-inline std::ostream &operator<<(std::ostream &out,const pragma::BaseEntityComponent *hComponent)
+inline std::ostream &operator<<(std::ostream &out, const pragma::BaseEntityComponent *hComponent)
 {
-	out<<"EntityComponent[";
+	out << "EntityComponent[";
 	if(!hComponent)
-		out<<"NULL]";
-	else
-	{
+		out << "NULL]";
+	else {
 		auto &ent = hComponent->GetEntity();
 		auto &componentInfo = *ent.GetNetworkState()->GetGameState()->GetEntityComponentManager().GetComponentInfo(hComponent->GetComponentId());
-		out<<componentInfo.name<<"][";
-		const_cast<BaseEntity&>(ent).print(out);
-		out<<"]";
+		out << componentInfo.name << "][";
+		const_cast<BaseEntity &>(ent).print(out);
+		out << "]";
 	}
 	return out;
 }

@@ -11,13 +11,10 @@
 #include "pragma/util/util_game.hpp"
 #include <mathutil/color.h>
 
-namespace pragma
-{
-	class DLLNETWORK BaseEnvFogControllerComponent
-		: public BaseEntityComponent
-	{
-	public:
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+namespace pragma {
+	class DLLNETWORK BaseEnvFogControllerComponent : public BaseEntityComponent {
+	  public:
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
 
@@ -26,11 +23,11 @@ namespace pragma
 		virtual void SetMaxDensity(float density);
 		virtual void SetFogType(util::FogType type);
 
-		float GetFogStart() const {return m_kvFogStart;}
-		float GetFogEnd() const {return m_kvFogEnd;}
-		float GetMaxDensity() const {return m_kvMaxDensity;}
-		util::FogType GetFogType() const {return m_kvFogType;}
-	protected:
+		float GetFogStart() const { return m_kvFogStart; }
+		float GetFogEnd() const { return m_kvFogEnd; }
+		float GetMaxDensity() const { return m_kvMaxDensity; }
+		util::FogType GetFogType() const { return m_kvFogType; }
+	  protected:
 		float m_kvFogStart = 500.f;
 		float m_kvFogEnd = 2'000.f;
 		float m_kvMaxDensity = 1.f;

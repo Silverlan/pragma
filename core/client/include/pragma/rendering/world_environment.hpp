@@ -14,8 +14,7 @@
 #include <mathutil/glmutil.h>
 #include <memory>
 
-namespace util
-{
+namespace util {
 	class ColorProperty;
 	class FloatProperty;
 	class UInt8Property;
@@ -24,15 +23,12 @@ namespace util
 	class BoolProperty;
 	class Vector4Property;
 };
-class DLLCLIENT WorldEnvironment
-	: public std::enable_shared_from_this<WorldEnvironment>
-{
-public:
+class DLLCLIENT WorldEnvironment : public std::enable_shared_from_this<WorldEnvironment> {
+  public:
 	static std::shared_ptr<WorldEnvironment> Create();
 
-	class DLLCLIENT Fog
-	{
-	public:
+	class DLLCLIENT Fog {
+	  public:
 		Fog();
 
 		void SetColor(const Color &col);
@@ -61,10 +57,9 @@ public:
 
 		Vector2 GetRange() const;
 		void SetRange(const Vector2 &range);
-		void SetRange(float start,float end);
+		void SetRange(float start, float end);
 		float GetFarDistance() const;
-
-	private:
+	  private:
 		std::shared_ptr<util::ColorProperty> m_color;
 		std::shared_ptr<util::FloatProperty> m_start;
 		std::shared_ptr<util::FloatProperty> m_end;
@@ -72,10 +67,6 @@ public:
 		std::shared_ptr<util::UInt8Property> m_type;
 		std::shared_ptr<util::BoolProperty> m_bEnabled;
 	};
-
-	void SetAmbientColor(const Vector4 &col);
-	const Vector4 &GetAmbientColor() const;
-	const std::shared_ptr<util::Vector4Property> &GetAmbientColorProperty() const;
 
 	void SetShaderQuality(int32_t quality);
 	int32_t GetShaderQuality() const;
@@ -90,9 +81,8 @@ public:
 	const std::shared_ptr<util::UInt32Property> &GetShadowResolutionProperty() const;
 
 	Fog &GetFogSettings();
-protected:
+  protected:
 	WorldEnvironment();
-	std::shared_ptr<util::Vector4Property> m_ambientColor;
 	std::shared_ptr<util::Int32Property> m_shaderQuality;
 	std::shared_ptr<util::BoolProperty> m_bUnlit;
 	std::shared_ptr<util::UInt32Property> m_shadowResolution;

@@ -19,12 +19,12 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(func_physics,CFuncPhysics);
+LINK_ENTITY_TO_CLASS(func_physics, CFuncPhysics);
 
 void CFuncPhysicsComponent::Initialize()
 {
 	BaseFuncPhysicsComponent::Initialize();
-	auto pRenderComponent = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
+	auto pRenderComponent = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
 	if(pRenderComponent)
 		pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::World);
 }
@@ -35,11 +35,8 @@ void CFuncPhysicsComponent::ReceiveData(NetPacket &packet)
 	m_kvSurfaceMaterial = packet->ReadString();
 }
 
-void CFuncPhysicsComponent::OnEntitySpawn()
-{
-	BaseFuncPhysicsComponent::OnEntitySpawn();
-}
-void CFuncPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CFuncPhysicsComponent::OnEntitySpawn() { BaseFuncPhysicsComponent::OnEntitySpawn(); }
+void CFuncPhysicsComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////////
 

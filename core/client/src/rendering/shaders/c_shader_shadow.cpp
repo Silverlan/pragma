@@ -33,119 +33,96 @@ static auto SHADOW_DEPTH_BIAS_SLOPE = 1.75f;
 decltype(ShaderShadow::RENDER_PASS_DEPTH_FORMAT) ShaderShadow::RENDER_PASS_DEPTH_FORMAT = prosper::Format::D32_SFloat;
 
 decltype(ShaderShadow::VERTEX_BINDING_RENDER_BUFFER_INDEX) ShaderShadow::VERTEX_BINDING_RENDER_BUFFER_INDEX = {prosper::VertexInputRate::Instance};
-decltype(ShaderShadow::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX) ShaderShadow::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX = {ShaderGameWorld::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX,VERTEX_BINDING_RENDER_BUFFER_INDEX};
+decltype(ShaderShadow::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX) ShaderShadow::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX = {ShaderGameWorld::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX, VERTEX_BINDING_RENDER_BUFFER_INDEX};
 
 decltype(ShaderShadow::VERTEX_BINDING_BONE_WEIGHT) ShaderShadow::VERTEX_BINDING_BONE_WEIGHT = {prosper::VertexInputRate::Vertex};
-decltype(ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID) ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID = {ShaderGameWorld::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID,VERTEX_BINDING_BONE_WEIGHT};
-decltype(ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT) ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT = {ShaderGameWorld::VERTEX_ATTRIBUTE_BONE_WEIGHT,VERTEX_BINDING_BONE_WEIGHT};
+decltype(ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID) ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID = {ShaderGameWorld::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID, VERTEX_BINDING_BONE_WEIGHT};
+decltype(ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT) ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT = {ShaderGameWorld::VERTEX_ATTRIBUTE_BONE_WEIGHT, VERTEX_BINDING_BONE_WEIGHT};
 
 decltype(ShaderShadow::VERTEX_BINDING_BONE_WEIGHT_EXT) ShaderShadow::VERTEX_BINDING_BONE_WEIGHT_EXT = {prosper::VertexInputRate::Vertex};
-decltype(ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID) ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID = {ShaderGameWorld::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID,VERTEX_BINDING_BONE_WEIGHT_EXT};
-decltype(ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT) ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT = {ShaderGameWorld::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT,VERTEX_BINDING_BONE_WEIGHT_EXT};
+decltype(ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID) ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID = {ShaderGameWorld::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID, VERTEX_BINDING_BONE_WEIGHT_EXT};
+decltype(ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT) ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT = {ShaderGameWorld::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT, VERTEX_BINDING_BONE_WEIGHT_EXT};
 
-decltype(ShaderShadow::VERTEX_BINDING_VERTEX) ShaderShadow::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex,sizeof(VertexBufferData)};
-decltype(ShaderShadow::VERTEX_ATTRIBUTE_POSITION) ShaderShadow::VERTEX_ATTRIBUTE_POSITION = {ShaderGameWorld::VERTEX_ATTRIBUTE_POSITION,VERTEX_BINDING_VERTEX};
+decltype(ShaderShadow::VERTEX_BINDING_VERTEX) ShaderShadow::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex, sizeof(VertexBufferData)};
+decltype(ShaderShadow::VERTEX_ATTRIBUTE_POSITION) ShaderShadow::VERTEX_ATTRIBUTE_POSITION = {ShaderGameWorld::VERTEX_ATTRIBUTE_POSITION, VERTEX_BINDING_VERTEX};
 
 decltype(ShaderShadow::DESCRIPTOR_SET_INSTANCE) ShaderShadow::DESCRIPTOR_SET_INSTANCE = {&ShaderGameWorld::DESCRIPTOR_SET_INSTANCE};
 decltype(ShaderShadow::DESCRIPTOR_SET_SCENE) ShaderShadow::DESCRIPTOR_SET_SCENE = {&ShaderScene::DESCRIPTOR_SET_SCENE};
 decltype(ShaderShadow::DESCRIPTOR_SET_MATERIAL) ShaderShadow::DESCRIPTOR_SET_MATERIAL = {&ShaderGameWorldLightingPass::DESCRIPTOR_SET_MATERIAL};
 decltype(ShaderShadow::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderShadow::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderGameWorld::DESCRIPTOR_SET_RENDER_SETTINGS};
-ShaderShadow::ShaderShadow(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader)
-	: ShaderGameWorld(context,identifier,vsShader,fsShader)
-{
-	SetPipelineCount(umath::to_integral(Pipeline::Count));
-}
+ShaderShadow::ShaderShadow(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader) : ShaderGameWorld(context, identifier, vsShader, fsShader) { SetPipelineCount(umath::to_integral(Pipeline::Count)); }
 
-ShaderShadow::ShaderShadow(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderShadow(context,identifier,"shadow/vs_shadow","shadow/fs_shadow")
-{}
+ShaderShadow::ShaderShadow(prosper::IPrContext &context, const std::string &identifier) : ShaderShadow(context, identifier, "shadow/vs_shadow", "shadow/fs_shadow") {}
 void ShaderShadow::OnPipelinesInitialized()
 {
 	ShaderGameWorld::OnPipelinesInitialized();
 	m_defaultMatDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
 }
 
-void ShaderShadow::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
+void ShaderShadow::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)
 {
-	CreateCachedRenderPass<ShaderShadow>({{{
-		{
-			RENDER_PASS_DEPTH_FORMAT,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AttachmentLoadOp::Clear,
-			prosper::AttachmentStoreOp::Store,prosper::SampleCountFlags::e1Bit,prosper::ImageLayout::ShaderReadOnlyOptimal
-		}
-	}}},outRenderPass,pipelineIdx);
+	CreateCachedRenderPass<ShaderShadow>({{{{RENDER_PASS_DEPTH_FORMAT, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AttachmentLoadOp::Clear, prosper::AttachmentStoreOp::Store, prosper::SampleCountFlags::e1Bit, prosper::ImageLayout::ShaderReadOnlyOptimal}}}}, outRenderPass,
+	  pipelineIdx);
 }
-uint32_t ShaderShadow::GetRenderSettingsDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex;}
-uint32_t ShaderShadow::GetCameraDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
-uint32_t ShaderShadow::GetLightDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
-uint32_t ShaderShadow::GetInstanceDescriptorSetIndex() const{return DESCRIPTOR_SET_INSTANCE.setIndex;}
-uint32_t ShaderShadow::GetMaterialDescriptorSetIndex() const {return DESCRIPTOR_SET_MATERIAL.setIndex;}
-void ShaderShadow::GetVertexAnimationPushConstantInfo(uint32_t &offset) const {offset = offsetof(PushConstants,vertexAnimInfo);}
-void ShaderShadow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+uint32_t ShaderShadow::GetRenderSettingsDescriptorSetIndex() const { return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex; }
+uint32_t ShaderShadow::GetCameraDescriptorSetIndex() const { return std::numeric_limits<uint32_t>::max(); }
+uint32_t ShaderShadow::GetLightDescriptorSetIndex() const { return std::numeric_limits<uint32_t>::max(); }
+uint32_t ShaderShadow::GetInstanceDescriptorSetIndex() const { return DESCRIPTOR_SET_INSTANCE.setIndex; }
+uint32_t ShaderShadow::GetMaterialDescriptorSetIndex() const { return DESCRIPTOR_SET_MATERIAL.setIndex; }
+void ShaderShadow::GetVertexAnimationPushConstantInfo(uint32_t &offset) const { offset = offsetof(PushConstants, vertexAnimInfo); }
+void ShaderShadow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	prosper::ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	prosper::ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 
-	ToggleDynamicScissorState(pipelineInfo,true);
+	ToggleDynamicScissorState(pipelineInfo, true);
 	pipelineInfo.ToggleDepthWrites(true);
-	pipelineInfo.ToggleDepthTest(true,prosper::CompareOp::LessOrEqual);
-	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::None);
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX);
+	pipelineInfo.ToggleDepthTest(true, prosper::CompareOp::LessOrEqual);
+	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo, prosper::CullModeFlags::None);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX);
 
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT_ID);
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_BONE_WEIGHT_ID);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_BONE_WEIGHT);
 
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID);
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT);
 
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_POSITION);
 
-	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit);
+	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit);
 
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_MATERIAL);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_SCENE);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_RENDER_SETTINGS);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_INSTANCE);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_MATERIAL);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_SCENE);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_RENDER_SETTINGS);
 
-	pipelineInfo.ToggleDepthBias(true,SHADOW_DEPTH_BIAS_CONSTANT,0.f,SHADOW_DEPTH_BIAS_SLOPE);
+	pipelineInfo.ToggleDepthBias(true, SHADOW_DEPTH_BIAS_CONSTANT, 0.f, SHADOW_DEPTH_BIAS_SLOPE);
 	uint32_t enableMorphTagetAnimations = (pipelineIdx == umath::to_integral(Pipeline::WithMorphTargetAnimations));
-	AddSpecializationConstant(
-		pipelineInfo,prosper::ShaderStageFlags::VertexBit,umath::get_least_significant_set_bit_index(umath::to_integral(GameShaderSpecializationConstantFlag::EnableMorphTargetAnimationBit)),
-		sizeof(enableMorphTagetAnimations),&enableMorphTagetAnimations
-	);
+	AddSpecializationConstant(pipelineInfo, prosper::ShaderStageFlags::VertexBit, umath::get_least_significant_set_bit_index(umath::to_integral(GameShaderSpecializationConstantFlag::EnableMorphTargetAnimationBit)), sizeof(enableMorphTagetAnimations), &enableMorphTagetAnimations);
 }
 
 //
 
-void ShaderShadow::RecordBindScene(
-	rendering::ShaderProcessor &shaderProcessor,
-	const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
-	prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
-	prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
-	prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
-	const Vector4 &drawOrigin,ShaderGameWorld::SceneFlags &inOutSceneFlags
-) const
+void ShaderShadow::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
+  prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, prosper::IDescriptorSet &dsMaterial, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
 {
-	std::array<prosper::IDescriptorSet*,3> descSets {
-		&dsMaterial,
-		&dsScene,
-		&dsRenderSettings
-	};
-		
+	std::array<prosper::IDescriptorSet *, 3> descSets {&dsMaterial, &dsScene, &dsRenderSettings};
+
 	ShaderShadow::PushConstants pushConstants {};
 	pushConstants.Initialize();
-	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, 0u, sizeof(pushConstants), &pushConstants);
 
 	static const std::vector<uint32_t> dynamicOffsets {};
-	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,shaderProcessor.GetCurrentPipelineLayout(),pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX,descSets,dynamicOffsets);
+	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, shaderProcessor.GetCurrentPipelineLayout(), pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX, descSets, dynamicOffsets);
 }
 
-void pragma::ShaderShadow::RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor,SceneFlags sceneFlags) const
+void pragma::ShaderShadow::RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor, SceneFlags sceneFlags) const
 {
-	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(PushConstants,flags),sizeof(sceneFlags),&sceneFlags);
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, offsetof(PushConstants, flags), sizeof(sceneFlags), &sceneFlags);
 }
 
-void pragma::ShaderShadow::RecordBindLight(rendering::ShaderProcessor &shaderProcessor,CLightComponent &light,uint32_t layerId) const
+void pragma::ShaderShadow::RecordBindLight(rendering::ShaderProcessor &shaderProcessor, CLightComponent &light, uint32_t layerId) const
 {
-#pragma pack(push,1)
+#pragma pack(push, 1)
 	struct {
 		Mat4 depthMVP;
 		Vector4 lightPos;
@@ -155,54 +132,38 @@ void pragma::ShaderShadow::RecordBindLight(rendering::ShaderProcessor &shaderPro
 	auto pRadiusComponent = light.GetEntity().GetComponent<CRadiusComponent>();
 	auto &pos = light.GetEntity().GetPosition();
 	pushData.depthMVP = light.GetTransformationMatrix(layerId);
-	pushData.lightPos = Vector4{pos.x,pos.y,pos.z,static_cast<float>(pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f)};
+	pushData.lightPos = Vector4 {pos.x, pos.y, pos.z, static_cast<float>(pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f)};
 
-	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(PushConstants,depthMVP),sizeof(pushData),&pushData);
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, offsetof(PushConstants, depthMVP), sizeof(pushData), &pushData);
 }
 
-void ShaderShadow::RecordAlphaCutoff(rendering::ShaderProcessor &shaderProcessor,float alphaCutoff) const
+void ShaderShadow::RecordAlphaCutoff(rendering::ShaderProcessor &shaderProcessor, float alphaCutoff) const
 {
-	shaderProcessor.GetCommandBuffer().RecordPushConstants(
-		shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(PushConstants,alphaCutoff),sizeof(alphaCutoff),&alphaCutoff
-	);
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, offsetof(PushConstants, alphaCutoff), sizeof(alphaCutoff), &alphaCutoff);
 }
 
-bool ShaderShadow::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor,CMaterial &mat) const
+bool ShaderShadow::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, CMaterial &mat) const
 {
 	if(mat.GetAlphaMode() == AlphaMode::Opaque)
 		return false;
-	return ShaderGameWorld::RecordBindMaterial(shaderProcessor,mat);
+	return ShaderGameWorld::RecordBindMaterial(shaderProcessor, mat);
 }
 
-void ShaderShadow::RecordVertexAnimationOffset(rendering::ShaderProcessor &shaderProcessor,uint32_t vertexAnimationOffset) const
+void ShaderShadow::RecordVertexAnimationOffset(rendering::ShaderProcessor &shaderProcessor, uint32_t vertexAnimationOffset) const
 {
 	// TODO: Only if pipeline 1
-	shaderProcessor.GetCommandBuffer().RecordPushConstants(
-		shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(PushConstants,vertexAnimInfo),sizeof(vertexAnimationOffset),&vertexAnimationOffset
-	);
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, offsetof(PushConstants, vertexAnimInfo), sizeof(vertexAnimationOffset), &vertexAnimationOffset);
 }
 
 //////////////////
 
-ShaderShadowSpot::ShaderShadowSpot(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderShadow(context,identifier,"shadow/vs_shadow","shadow/fs_shadow_spot")
-{
-	SetBaseShader<ShaderShadow>();
-}
+ShaderShadowSpot::ShaderShadowSpot(prosper::IPrContext &context, const std::string &identifier) : ShaderShadow(context, identifier, "shadow/vs_shadow", "shadow/fs_shadow_spot") { SetBaseShader<ShaderShadow>(); }
 
 //////////////////
 
-ShaderShadowCSM::ShaderShadowCSM(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderShadow(context,identifier,"shadow/vs_shadow_csm","")
+ShaderShadowCSM::ShaderShadowCSM(prosper::IPrContext &context, const std::string &identifier) : ShaderShadow(context, identifier, "shadow/vs_shadow_csm", "") { SetBaseShader<ShaderShadow>(); }
+void ShaderShadowCSM::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)
 {
-	SetBaseShader<ShaderShadow>();
-}
-void ShaderShadowCSM::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
-{
-	CreateCachedRenderPass<ShaderShadowCSM>({{{
-		{
-			RENDER_PASS_DEPTH_FORMAT,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AttachmentLoadOp::Load,
-			prosper::AttachmentStoreOp::Store,prosper::SampleCountFlags::e1Bit,prosper::ImageLayout::ShaderReadOnlyOptimal
-		}
-	}}},outRenderPass,pipelineIdx);
+	CreateCachedRenderPass<ShaderShadowCSM>({{{{RENDER_PASS_DEPTH_FORMAT, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AttachmentLoadOp::Load, prosper::AttachmentStoreOp::Store, prosper::SampleCountFlags::e1Bit, prosper::ImageLayout::ShaderReadOnlyOptimal}}}},
+	  outRenderPass, pipelineIdx);
 }

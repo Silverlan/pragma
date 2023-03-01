@@ -11,23 +11,18 @@
 #include "pragma/entities/environment/lights/s_env_light.h"
 #include "pragma/entities/environment/lights/env_light_point.h"
 
-namespace pragma
-{
-	class DLLSERVER SLightPointComponent final
-		: public BaseEnvLightPointComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SLightPointComponent final : public BaseEnvLightPointComponent {
+	  public:
 		SLightPointComponent(BaseEntity &ent) : BaseEnvLightPointComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
-	protected:
+	  protected:
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 	};
 };
 
-class DLLSERVER EnvLightPoint
-	: public SBaseEntity
-{
-public:
+class DLLSERVER EnvLightPoint : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

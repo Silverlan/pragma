@@ -9,7 +9,7 @@
 #include "pragma/lua/c_lua_gui_manager.h"
 #include "pragma/lua/libraries/c_lgui.h"
 
-void LuaGUIManager::RegisterGUIElement(std::string className,luabind::object &o)
+void LuaGUIManager::RegisterGUIElement(std::string className, luabind::object &o)
 {
 	ustring::to_lower(className);
 	m_guiElements[className] = o;

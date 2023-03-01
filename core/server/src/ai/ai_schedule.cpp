@@ -12,15 +12,8 @@
 
 using namespace pragma;
 
-std::shared_ptr<ai::Schedule> ai::Schedule::Create()
-{
-	return std::shared_ptr<Schedule>(new Schedule());
-}
-ai::Schedule::Schedule()
-	: std::enable_shared_from_this<Schedule>(),m_rootTask(std::make_shared<ai::BehaviorNode>(ai::BehaviorNode::Type::Sequence))
-{
-	m_rootTask->SetDebugName("Root");
-}
+std::shared_ptr<ai::Schedule> ai::Schedule::Create() { return std::shared_ptr<Schedule>(new Schedule()); }
+ai::Schedule::Schedule() : std::enable_shared_from_this<Schedule>(), m_rootTask(std::make_shared<ai::BehaviorNode>(ai::BehaviorNode::Type::Sequence)) { m_rootTask->SetDebugName("Root"); }
 void ai::Schedule::Cancel() const
 {
 	if(m_rootTask->IsActive() == false)
@@ -29,7 +22,7 @@ void ai::Schedule::Cancel() const
 }
 ai::BehaviorNode::Result ai::Schedule::Start(pragma::SAIComponent &ent)
 {
-	std::function<void(const ai::BehaviorNode&)> fResetNode = nullptr;
+	std::function<void(const ai::BehaviorNode &)> fResetNode = nullptr;
 	fResetNode = [&fResetNode](const ai::BehaviorNode &node) {
 		auto &debugInfo = node.GetDebugInfo();
 		debugInfo.lastResult = BehaviorNode::Result::Initial;
@@ -37,10 +30,10 @@ ai::BehaviorNode::Result ai::Schedule::Start(pragma::SAIComponent &ent)
 			fResetNode(*child);
 	};
 	fResetNode(*m_rootTask);
-	return m_rootTask->Start(this,ent);
+	return m_rootTask->Start(this, ent);
 }
-ai::BehaviorNode::Result ai::Schedule::Think(pragma::SAIComponent &ent) const {return m_rootTask->Think(this,ent);}
-ai::BehaviorNode &ai::Schedule::GetRootNode() const {return *m_rootTask;}
+ai::BehaviorNode::Result ai::Schedule::Think(pragma::SAIComponent &ent) const { return m_rootTask->Think(this, ent); }
+ai::BehaviorNode &ai::Schedule::GetRootNode() const { return *m_rootTask; }
 std::shared_ptr<ai::Schedule> ai::Schedule::Copy() const
 {
 	auto *cpy = new ai::Schedule();
@@ -50,11 +43,8 @@ std::shared_ptr<ai::Schedule> ai::Schedule::Copy() const
 		cpy->m_params.push_back(std::unique_ptr<ParameterInfo>(new ParameterInfo(*p)));
 	return std::shared_ptr<ai::Schedule>(cpy);
 }
-void ai::Schedule::SetInterruptFlags(uint32_t f) {m_interruptFlags = f;}
-void ai::Schedule::AddInterruptFlags(uint32_t f) {m_interruptFlags |= f;}
-uint32_t ai::Schedule::GetInterruptFlags() const {return m_interruptFlags;}
+void ai::Schedule::SetInterruptFlags(uint32_t f) { m_interruptFlags = f; }
+void ai::Schedule::AddInterruptFlags(uint32_t f) { m_interruptFlags |= f; }
+uint32_t ai::Schedule::GetInterruptFlags() const { return m_interruptFlags; }
 
-void ai::Schedule::DebugPrint(std::stringstream &ss) const
-{
-	m_rootTask->DebugPrint(this,ss);
-}
+void ai::Schedule::DebugPrint(std::stringstream &ss) const { m_rootTask->DebugPrint(this, ss); }

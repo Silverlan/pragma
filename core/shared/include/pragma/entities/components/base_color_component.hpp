@@ -10,23 +10,18 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 #include <sharedutils/property/util_property_color.hpp>
 
-namespace pragma
-{
-	struct DLLNETWORK CEOnColorChanged
-		: public ComponentEvent
-	{
-		CEOnColorChanged(const Color &oldColor,const Color &color);
+namespace pragma {
+	struct DLLNETWORK CEOnColorChanged : public ComponentEvent {
+		CEOnColorChanged(const Color &oldColor, const Color &color);
 		virtual void PushArguments(lua_State *l) override;
 		const Color &oldColor;
 		const Color &color;
 	};
-	class DLLNETWORK BaseColorComponent
-		: public BaseEntityComponent
-	{
-	public:
+	class DLLNETWORK BaseColorComponent : public BaseEntityComponent {
+	  public:
 		static pragma::ComponentEventId EVENT_ON_COLOR_CHANGED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 		const Color &GetColor() const;
 		const util::PColorProperty &GetColorProperty() const;
@@ -37,8 +32,8 @@ namespace pragma
 		void SetColor(const Vector3 &color);
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
-	protected:
-		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
+	  protected:
+		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 		BaseColorComponent(BaseEntity &ent);
 		util::PColorProperty m_color;
 		CallbackHandle m_cbOnColorChanged = {};

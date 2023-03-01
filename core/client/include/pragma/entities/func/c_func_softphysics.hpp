@@ -12,22 +12,17 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/func/basefuncsoftphysics.hpp>
 
-namespace pragma
-{
-	class DLLCLIENT CFuncSoftPhysicsComponent final
-		: public BaseFuncSoftPhysicsComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CFuncSoftPhysicsComponent final : public BaseFuncSoftPhysicsComponent {
+	  public:
 		CFuncSoftPhysicsComponent(BaseEntity &ent) : BaseFuncSoftPhysicsComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLCLIENT CFuncSoftPhysics
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CFuncSoftPhysics : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

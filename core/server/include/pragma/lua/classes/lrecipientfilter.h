@@ -11,15 +11,15 @@
 #include <pragma/lua/ldefinitions.h>
 #include "pragma/lua/s_lentity_handles.hpp"
 
-namespace pragma::networking {class TargetRecipientFilter;};
-namespace Lua
-{
-	namespace RecipientFilter
-	{
-		DLLSERVER luabind::tableT<pragma::SPlayerComponent> GetRecipients(lua_State *l,pragma::networking::TargetRecipientFilter &rp);
-		DLLSERVER void AddRecipient(lua_State *l,pragma::networking::TargetRecipientFilter &rp,pragma::SPlayerComponent &hPl);
-		DLLSERVER void RemoveRecipient(lua_State *l,pragma::networking::TargetRecipientFilter &rp,pragma::SPlayerComponent &hPl);
-		DLLSERVER bool HasRecipient(lua_State *l,pragma::networking::TargetRecipientFilter &rp,pragma::SPlayerComponent &hPl);
+namespace pragma::networking {
+	class TargetRecipientFilter;
+};
+namespace Lua {
+	namespace RecipientFilter {
+		DLLSERVER luabind::tableT<pragma::SPlayerComponent> GetRecipients(lua_State *l, pragma::networking::TargetRecipientFilter &rp);
+		DLLSERVER void AddRecipient(lua_State *l, pragma::networking::TargetRecipientFilter &rp, pragma::SPlayerComponent &hPl);
+		DLLSERVER void RemoveRecipient(lua_State *l, pragma::networking::TargetRecipientFilter &rp, pragma::SPlayerComponent &hPl);
+		DLLSERVER bool HasRecipient(lua_State *l, pragma::networking::TargetRecipientFilter &rp, pragma::SPlayerComponent &hPl);
 	};
 };
 

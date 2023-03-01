@@ -18,19 +18,10 @@
 
 #undef DrawText
 
-namespace pragma::physics
-{
-	class DLLNETWORK IVisualDebugger
-	{
-	public:
-		enum class DebugMode : uint32_t
-		{
-			None = 0,
-			Wireframe,
-			Constraints,
-			Normals,
-			All
-		};
+namespace pragma::physics {
+	class DLLNETWORK IVisualDebugger {
+	  public:
+		enum class DebugMode : uint32_t { None = 0, Wireframe, Constraints, Normals, All };
 		/* // Bullet: 
 		auto mode = btIDebugDraw::DBG_DrawAabb |
 			btIDebugDraw::DBG_DrawConstraintLimits |
@@ -49,22 +40,22 @@ namespace pragma::physics
 		else if(val == 4)
 			mode = btIDebugDraw::DBG_DrawNormals;
 			*/
-		IVisualDebugger()=default;
-		virtual ~IVisualDebugger()=default;
-		IVisualDebugger(IVisualDebugger&)=delete;
-		IVisualDebugger &operator=(const IVisualDebugger&)=delete;
+		IVisualDebugger() = default;
+		virtual ~IVisualDebugger() = default;
+		IVisualDebugger(IVisualDebugger &) = delete;
+		IVisualDebugger &operator=(const IVisualDebugger &) = delete;
 
-		void DrawLine(const Vector3 &from,const Vector3 &to,const Color &color);
-		virtual void DrawLine(const Vector3 &from,const Vector3 &to,const Color &fromColor,const Color &toColor)=0;
-		virtual void DrawPoint(const Vector3 &pos,const Color &color)=0;
-		virtual void DrawTriangle(const Vector3 &v0,const Vector3 &v1,const Vector3 &v2,const Color &c0,const Color &c1,const Color &c2)=0;
-		virtual void ReportErrorWarning(const std::string &str)=0;
-		virtual void DrawText(const std::string &str,const Vector3 &location,const Color &color,float size)=0;
-		virtual void Reset()=0;
-		virtual void Flush()=0;
+		void DrawLine(const Vector3 &from, const Vector3 &to, const Color &color);
+		virtual void DrawLine(const Vector3 &from, const Vector3 &to, const Color &fromColor, const Color &toColor) = 0;
+		virtual void DrawPoint(const Vector3 &pos, const Color &color) = 0;
+		virtual void DrawTriangle(const Vector3 &v0, const Vector3 &v1, const Vector3 &v2, const Color &c0, const Color &c1, const Color &c2) = 0;
+		virtual void ReportErrorWarning(const std::string &str) = 0;
+		virtual void DrawText(const std::string &str, const Vector3 &location, const Color &color, float size) = 0;
+		virtual void Reset() = 0;
+		virtual void Flush() = 0;
 
 		void SetDebugMode(DebugMode debugMode);
-	private:
+	  private:
 		DebugMode m_debugMode = DebugMode::None;
 	};
 };

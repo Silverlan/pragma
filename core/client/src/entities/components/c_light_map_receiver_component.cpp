@@ -25,30 +25,22 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-void CLightMapReceiverComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
-{
-	using T = CLightMapReceiverComponent;
-
-}
-void CLightMapReceiverComponent::SetupLightMapUvData(CBaseEntity &ent,LightmapDataCache *cache)
+void CLightMapReceiverComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember) { using T = CLightMapReceiverComponent; }
+void CLightMapReceiverComponent::SetupLightMapUvData(CBaseEntity &ent, LightmapDataCache *cache)
 {
 	auto mdl = ent.GetModel();
 	if(!mdl)
 		return;
 	auto hasLightmapUvs = false;
-	for(auto &mg : mdl->GetMeshGroups())
-	{
-		for(auto &mesh : mg->GetMeshes())
-		{
-			for(auto &subMesh : mesh->GetSubMeshes())
-			{
+	for(auto &mg : mdl->GetMeshGroups()) {
+		for(auto &mesh : mg->GetMeshes()) {
+			for(auto &subMesh : mesh->GetSubMeshes()) {
 				const std::vector<Vector2> *uvSet = nullptr;
 				if(cache)
-					uvSet = cache->FindLightmapUvs(ent.GetUuid(),subMesh->GetUuid());
+					uvSet = cache->FindLightmapUvs(ent.GetUuid(), subMesh->GetUuid());
 				else
 					uvSet = subMesh->GetUVSet("lightmap");
-				if(uvSet)
-				{
+				if(uvSet) {
 					hasLightmapUvs = true;
 					goto endLoop;
 				}
@@ -56,8 +48,7 @@ void CLightMapReceiverComponent::SetupLightMapUvData(CBaseEntity &ent,LightmapDa
 		}
 	}
 endLoop:
-	if(hasLightmapUvs)
-	{
+	if(hasLightmapUvs) {
 		auto lightMapReceiverC = ent.AddComponent<CLightMapReceiverComponent>();
 		if(lightMapReceiverC.valid())
 			lightMapReceiverC->UpdateLightMapUvData();
@@ -71,58 +62,53 @@ void CLightMapReceiverComponent::UpdateLightMapUvData()
 	if(mdlC.expired() || renderC.expired() || mdl == nullptr)
 		return;
 	m_modelName = mdl->GetName();
-	umath::set_flag(m_stateFlags,StateFlags::IsModelBakedWithLightMaps,true);
+	umath::set_flag(m_stateFlags, StateFlags::IsModelBakedWithLightMaps, true);
 	m_uvDataPerMesh.clear();
 	m_meshes.clear();
 	m_meshToMeshIdx.clear();
 	m_meshToBufIdx.clear();
-	umath::set_flag(m_stateFlags,StateFlags::RenderMeshBufferIndexTableDirty);
+	umath::set_flag(m_stateFlags, StateFlags::RenderMeshBufferIndexTableDirty);
 	uint32_t subMeshIdx = 0u;
 	auto wasInitialized = false;
-	for(auto &subMesh : renderC->GetRenderMeshes())
-	{
+	for(auto &subMesh : renderC->GetRenderMeshes()) {
 		auto *uvSet = FindLightmapUvSet(*subMesh);
-		if(uvSet == nullptr)
-		{
+		if(uvSet == nullptr) {
 			++subMeshIdx;
 			continue;
 		}
-		m_uvDataPerMesh.insert(std::make_pair(subMeshIdx,*uvSet));
-		m_meshes.insert(std::make_pair(subMeshIdx,subMesh));
-		m_meshToMeshIdx.insert(std::make_pair(static_cast<CModelSubMesh*>(subMesh.get()),subMeshIdx));
+		m_uvDataPerMesh.insert(std::make_pair(subMeshIdx, *uvSet));
+		m_meshes.insert(std::make_pair(subMeshIdx, subMesh));
+		m_meshToMeshIdx.insert(std::make_pair(static_cast<CModelSubMesh *>(subMesh.get()), subMeshIdx));
 		++subMeshIdx;
 	}
 	UpdateRenderMeshBufferList();
 }
-const LightmapDataCache *CLightMapReceiverComponent::GetLightmapDataCache() const {return m_lightmapDataCache.get();}
-void CLightMapReceiverComponent::SetLightmapDataCache(LightmapDataCache *cache) {m_lightmapDataCache = cache ? cache->shared_from_this() : nullptr;}
+const LightmapDataCache *CLightMapReceiverComponent::GetLightmapDataCache() const { return m_lightmapDataCache.get(); }
+void CLightMapReceiverComponent::SetLightmapDataCache(LightmapDataCache *cache) { m_lightmapDataCache = cache ? cache->shared_from_this() : nullptr; }
 const std::vector<Vector2> *CLightMapReceiverComponent::FindLightmapUvSet(ModelSubMesh &mesh) const
 {
 	auto *cache = GetLightmapDataCache();
 	if(cache)
-		return cache->FindLightmapUvs(GetEntity().GetUuid(),mesh.GetUuid());
+		return cache->FindLightmapUvs(GetEntity().GetUuid(), mesh.GetUuid());
 	return mesh.GetUVSet("lightmap");
 }
-void CLightMapReceiverComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CLightMapReceiverComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CLightMapReceiverComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<ComponentEvent> evData) {
+	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		//m_isModelBakedWithLightMaps = (GetEntity().GetModelName() == m_modelName); // TODO
 		//if(m_isModelBakedWithLightMaps)
 		m_meshBufferIndices.clear();
 		UpdateModelMeshes();
 	});
-	BindEventUnhandled(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED,[this](std::reference_wrapper<ComponentEvent> evData) {
-		UpdateRenderMeshBufferList();
-	});
-	BindEventUnhandled(CBaseEntity::EVENT_ON_SPAWN,[this](std::reference_wrapper<ComponentEvent> evData) {
+	BindEventUnhandled(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateRenderMeshBufferList(); });
+	BindEventUnhandled(CBaseEntity::EVENT_ON_SPAWN, [this](std::reference_wrapper<ComponentEvent> evData) {
 		//m_isModelBakedWithLightMaps = (GetEntity().GetModelName() == m_modelName); // TODO
 		//if(m_isModelBakedWithLightMaps)
-			UpdateModelMeshes();
+		UpdateModelMeshes();
 	});
-	if(GetEntity().IsSpawned())
-	{
+	if(GetEntity().IsSpawned()) {
 		UpdateModelMeshes();
 		UpdateRenderMeshBufferList();
 	}
@@ -133,12 +119,11 @@ void CLightMapReceiverComponent::UpdateRenderMeshBufferList()
 	auto mdlC = GetEntity().GetModelComponent();
 	if(!mdlC)
 		return;
-	umath::set_flag(m_stateFlags,StateFlags::RenderMeshBufferIndexTableDirty,false);
-	auto &renderMeshes = static_cast<CModelComponent*>(mdlC)->GetRenderMeshes();
+	umath::set_flag(m_stateFlags, StateFlags::RenderMeshBufferIndexTableDirty, false);
+	auto &renderMeshes = static_cast<CModelComponent *>(mdlC)->GetRenderMeshes();
 	m_meshBufferIndices.resize(renderMeshes.size());
-	for(auto i=decltype(renderMeshes.size()){0u};i<renderMeshes.size();++i)
-	{
-		auto bufIdx = FindBufferIndex(static_cast<CModelSubMesh&>(*renderMeshes[i]));
+	for(auto i = decltype(renderMeshes.size()) {0u}; i < renderMeshes.size(); ++i) {
+		auto bufIdx = FindBufferIndex(static_cast<CModelSubMesh &>(*renderMeshes[i]));
 		m_meshBufferIndices[i] = bufIdx.has_value() ? *bufIdx : std::numeric_limits<BufferIdx>::max();
 	}
 }
@@ -152,60 +137,55 @@ void CLightMapReceiverComponent::UpdateModelMeshes()
 	auto renderC = GetEntity().GetComponent<CRenderComponent>();
 	if(renderC.expired())
 		return;
-	std::unordered_map<MeshIdx,BufferIdx> meshIdxToBufIdx {};
-	for(auto &pair : m_meshToMeshIdx)
-	{
+	std::unordered_map<MeshIdx, BufferIdx> meshIdxToBufIdx {};
+	for(auto &pair : m_meshToMeshIdx) {
 		auto *mesh = pair.first;
 		auto it = m_meshToBufIdx.find(mesh);
 		if(it == m_meshToBufIdx.end())
 			continue;
-		meshIdxToBufIdx.insert(std::make_pair(pair.second,it->second));
+		meshIdxToBufIdx.insert(std::make_pair(pair.second, it->second));
 	}
-	umath::set_flag(m_stateFlags,StateFlags::RenderMeshBufferIndexTableDirty);
+	umath::set_flag(m_stateFlags, StateFlags::RenderMeshBufferIndexTableDirty);
 	m_meshToBufIdx.clear();
 	m_meshToMeshIdx.clear();
 	uint32_t subMeshIdx = 0u;
 	std::vector<std::shared_ptr<ModelMesh>> meshes;
 	mdlC->GetBaseModelMeshes(meshes);
-	for(auto &mesh : meshes)
-	{
-		for(auto &subMesh : mesh->GetSubMeshes())
-		{
+	for(auto &mesh : meshes) {
+		for(auto &subMesh : mesh->GetSubMeshes()) {
 			auto *uvSet = FindLightmapUvSet(*subMesh);
-			if(uvSet == nullptr)
-			{
+			if(uvSet == nullptr) {
 				++subMeshIdx;
 				continue;
 			}
-			m_meshes.insert(std::make_pair(subMeshIdx,subMesh));
+			m_meshes.insert(std::make_pair(subMeshIdx, subMesh));
 			auto itBufIdx = meshIdxToBufIdx.find(subMeshIdx);
-			if(itBufIdx != meshIdxToBufIdx.end())
-			{
-				m_meshToBufIdx.insert(std::make_pair(static_cast<CModelSubMesh*>(subMesh.get()),itBufIdx->second));
-				m_meshToMeshIdx.insert(std::make_pair(static_cast<CModelSubMesh*>(subMesh.get()),subMeshIdx));
+			if(itBufIdx != meshIdxToBufIdx.end()) {
+				m_meshToBufIdx.insert(std::make_pair(static_cast<CModelSubMesh *>(subMesh.get()), itBufIdx->second));
+				m_meshToMeshIdx.insert(std::make_pair(static_cast<CModelSubMesh *>(subMesh.get()), subMeshIdx));
 			}
 			++subMeshIdx;
 		}
 	}
 }
-const std::unordered_map<CLightMapReceiverComponent::MeshIdx,std::vector<Vector2>> &CLightMapReceiverComponent::GetMeshLightMapUvData() const {return m_uvDataPerMesh;}
-void CLightMapReceiverComponent::AssignBufferIndex(MeshIdx meshIdx,BufferIdx bufIdx)
+const std::unordered_map<CLightMapReceiverComponent::MeshIdx, std::vector<Vector2>> &CLightMapReceiverComponent::GetMeshLightMapUvData() const { return m_uvDataPerMesh; }
+void CLightMapReceiverComponent::AssignBufferIndex(MeshIdx meshIdx, BufferIdx bufIdx)
 {
 	auto itMesh = m_meshes.find(meshIdx);
 	if(itMesh == m_meshes.end())
 		return;
-	m_meshToBufIdx.insert(std::make_pair(static_cast<CModelSubMesh*>(itMesh->second.get()),bufIdx));
-	umath::set_flag(m_stateFlags,StateFlags::RenderMeshBufferIndexTableDirty);
+	m_meshToBufIdx.insert(std::make_pair(static_cast<CModelSubMesh *>(itMesh->second.get()), bufIdx));
+	umath::set_flag(m_stateFlags, StateFlags::RenderMeshBufferIndexTableDirty);
 }
 std::optional<pragma::CLightMapReceiverComponent::BufferIdx> CLightMapReceiverComponent::GetBufferIndex(RenderMeshIndex meshIdx) const
 {
-	if(umath::is_flag_set(m_stateFlags,StateFlags::RenderMeshBufferIndexTableDirty))
-		const_cast<CLightMapReceiverComponent*>(this)->UpdateRenderMeshBufferList();
-	return (meshIdx < m_meshBufferIndices.size() && m_meshBufferIndices[meshIdx] != std::numeric_limits<BufferIdx>::max()) ? m_meshBufferIndices[meshIdx] : std::optional<pragma::CLightMapReceiverComponent::BufferIdx>{};
+	if(umath::is_flag_set(m_stateFlags, StateFlags::RenderMeshBufferIndexTableDirty))
+		const_cast<CLightMapReceiverComponent *>(this)->UpdateRenderMeshBufferList();
+	return (meshIdx < m_meshBufferIndices.size() && m_meshBufferIndices[meshIdx] != std::numeric_limits<BufferIdx>::max()) ? m_meshBufferIndices[meshIdx] : std::optional<pragma::CLightMapReceiverComponent::BufferIdx> {};
 }
 std::optional<CLightMapReceiverComponent::BufferIdx> CLightMapReceiverComponent::FindBufferIndex(CModelSubMesh &mesh) const
 {
-	if(umath::is_flag_set(m_stateFlags,StateFlags::IsModelBakedWithLightMaps) == false)
+	if(umath::is_flag_set(m_stateFlags, StateFlags::IsModelBakedWithLightMaps) == false)
 		return {};
 	auto it = m_meshToBufIdx.find(&mesh);
 	if(it == m_meshToBufIdx.end())
@@ -221,11 +201,9 @@ void CLightMapReceiverComponent::UpdateMeshLightmapUvBuffers(CLightMapComponent 
 	uint32_t subMeshIdx = 0u;
 	std::vector<std::shared_ptr<ModelMesh>> meshes;
 	mdlC->GetBaseModelMeshes(meshes);
-	for(auto &mesh : meshes)
-	{
-		for(auto &subMesh : mesh->GetSubMeshes())
-		{
-			auto bufIdx = FindBufferIndex(*static_cast<CModelSubMesh*>(subMesh.get()));
+	for(auto &mesh : meshes) {
+		for(auto &subMesh : mesh->GetSubMeshes()) {
+			auto bufIdx = FindBufferIndex(*static_cast<CModelSubMesh *>(subMesh.get()));
 			if(bufIdx.has_value() == false)
 				continue;
 			auto *pUvBuffer = lightMapC.GetMeshLightMapUvBuffer(*bufIdx);
@@ -234,7 +212,7 @@ void CLightMapReceiverComponent::UpdateMeshLightmapUvBuffers(CLightMapComponent 
 				pLightMapUvBuffer = pUvBuffer;
 			else
 				pLightMapUvBuffer = c_engine->GetRenderContext().GetDummyBuffer().get();
-			mdlC->SetLightmapUvBuffer(*static_cast<CModelSubMesh*>(subMesh.get()),pLightMapUvBuffer->shared_from_this());
+			mdlC->SetLightmapUvBuffer(*static_cast<CModelSubMesh *>(subMesh.get()), pLightMapUvBuffer->shared_from_this());
 		}
 	}
 }

@@ -9,10 +9,8 @@
 
 #include <cinttypes>
 
-namespace pragma
-{
-	enum class AttributeSpecializationType : uint8_t
-	{
+namespace pragma {
+	enum class AttributeSpecializationType : uint8_t {
 		None = 0,
 		Color = 1,
 		Distance,

@@ -11,18 +11,15 @@
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_softbody_component.hpp>
 
-namespace pragma
-{
-	class DLLCLIENT CSoftBodyComponent final
-		: public BaseSoftBodyComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CSoftBodyComponent final : public BaseSoftBodyComponent {
+	  public:
 		CSoftBodyComponent(BaseEntity &ent) : BaseSoftBodyComponent(ent) {}
-		
+
 		virtual void Initialize() override;
 		void UpdateSoftBodyGeometry();
 		virtual void InitializeLuaObject(lua_State *l) override;
-	protected:
+	  protected:
 		virtual bool InitializeSoftBodyData() override;
 		virtual void ReleaseSoftBodyData() override;
 	};

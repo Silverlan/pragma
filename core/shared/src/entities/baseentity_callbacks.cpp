@@ -13,8 +13,8 @@
 
 CallbackHandle BaseEntity::CallOnRemove(const CallbackHandle &hCallback)
 {
-	auto *pComponent = static_cast<pragma::BaseGenericComponent*>(FindComponent("entity").get());
+	auto *pComponent = static_cast<pragma::BaseGenericComponent *>(FindComponent("entity").get());
 	if(pComponent != nullptr)
-		pComponent->BindEventUnhandled(BaseEntity::EVENT_ON_REMOVE,hCallback);
+		pComponent->BindEventUnhandled(BaseEntity::EVENT_ON_REMOVE, hCallback);
 	return hCallback;
 }

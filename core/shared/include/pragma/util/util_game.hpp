@@ -21,42 +21,41 @@
 
 class NetworkState;
 class Game;
-namespace udm {class Data; struct AssetData; struct LinkedPropertyWrapper;};
-namespace pragma {class BaseEntityComponent;};
+namespace udm {
+	class Data;
+	struct AssetData;
+	struct LinkedPropertyWrapper;
+};
+namespace pragma {
+	class BaseEntityComponent;
+};
 class VFilePtrInternal;
 #include <sharedutils/util_hair.hpp>
-namespace util
-{
-	DLLNETWORK util::ParallelJob<std::vector<Vector2>&> generate_lightmap_uvs(NetworkState &nwState,uint32_t atlastWidth,uint32_t atlasHeight,const std::vector<umath::Vertex> &verts,const std::vector<uint32_t> &tris);
-	DLLNETWORK std::shared_ptr<udm::Data> load_udm_asset(const std::string &fileName,std::string *optOutErr=nullptr);
-	DLLNETWORK std::shared_ptr<udm::Data> load_udm_asset(std::unique_ptr<ufile::IFile> &&f,std::string *optOutErr=nullptr);
+namespace util {
+	DLLNETWORK util::ParallelJob<std::vector<Vector2> &> generate_lightmap_uvs(NetworkState &nwState, uint32_t atlastWidth, uint32_t atlasHeight, const std::vector<umath::Vertex> &verts, const std::vector<uint32_t> &tris);
+	DLLNETWORK std::shared_ptr<udm::Data> load_udm_asset(const std::string &fileName, std::string *optOutErr = nullptr);
+	DLLNETWORK std::shared_ptr<udm::Data> load_udm_asset(std::unique_ptr<ufile::IFile> &&f, std::string *optOutErr = nullptr);
 
-	DLLNETWORK void write_udm_entity(udm::LinkedPropertyWrapperArg udm,EntityHandle &hEnt);
-	DLLNETWORK EntityHandle read_udm_entity(Game &game,udm::LinkedPropertyWrapperArg udm);
-	DLLNETWORK EntityHandle read_udm_entity(::pragma::BaseEntityComponent &c,udm::LinkedPropertyWrapperArg udm);
-	
+	DLLNETWORK void write_udm_entity(udm::LinkedPropertyWrapperArg udm, EntityHandle &hEnt);
+	DLLNETWORK EntityHandle read_udm_entity(Game &game, udm::LinkedPropertyWrapperArg udm);
+	DLLNETWORK EntityHandle read_udm_entity(::pragma::BaseEntityComponent &c, udm::LinkedPropertyWrapperArg udm);
+
 	struct HairConfig;
 	struct HairData;
-	class HairFile
-	{
-	public:
+	class HairFile {
+	  public:
 		static constexpr uint32_t PHAIR_VERSION = 1;
 		static constexpr auto PHAIR_IDENTIFIER = "PHAIR";
-		static std::shared_ptr<HairFile> Load(const udm::AssetData &data,std::string &outErr);
+		static std::shared_ptr<HairFile> Load(const udm::AssetData &data, std::string &outErr);
 		static std::shared_ptr<HairFile> Create();
-		bool Save(udm::AssetData &outData,std::string &outErr) const;
-	private:
-		bool LoadFromAssetData(const udm::AssetData &data,std::string &outErr);
+		bool Save(udm::AssetData &outData, std::string &outErr) const;
+	  private:
+		bool LoadFromAssetData(const udm::AssetData &data, std::string &outErr);
 		util::HairConfig m_hairConfig;
 		HairData m_hairData;
 	};
 
-	enum class FogType : uint8_t
-	{
-		Linear = 0,
-		Exponential = 1,
-		Exponential2 = 2
-	};
+	enum class FogType : uint8_t { Linear = 0, Exponential = 1, Exponential2 = 2 };
 };
 
 #endif

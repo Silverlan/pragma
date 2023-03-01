@@ -10,15 +10,12 @@
 
 #include "pragma/util/util_typed_manager.hpp"
 
-namespace pragma::physics
-{
-	class DLLNETWORK SurfaceType
-		: public BaseNamedType
-	{
-	protected:
+namespace pragma::physics {
+	class DLLNETWORK SurfaceType : public BaseNamedType {
+	  protected:
 		template<class TType>
-            friend class pragma::TTypeManager;
-		SurfaceType(TypeId id,const std::string &name);
+		friend class pragma::TTypeManager;
+		SurfaceType(TypeId id, const std::string &name);
 	};
 
 	using SurfaceTypeManager = TTypeManager<SurfaceType>;

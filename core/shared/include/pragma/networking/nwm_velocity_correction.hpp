@@ -11,11 +11,9 @@
 #include "pragma/networkdefinitions.h"
 #include <mathutil/uvec.h>
 
-namespace nwm
-{
-	class DLLNETWORK VelocityCorrection
-	{
-	public:
+namespace nwm {
+	class DLLNETWORK VelocityCorrection {
+	  public:
 		void SetLinearCorrectionVelocity(const Vector3 &v);
 		const Vector3 &GetLinearCorrectionVelocity() const;
 		void CorrectLinearVelocity(Vector3 &vel);
@@ -25,7 +23,7 @@ namespace nwm
 		const Vector3 &GetAngularCorrectionVelocity() const;
 		void CorrectAngularVelocity(Vector3 &vel);
 		void ResetAngularCorrectionVelocity();
-	private:
+	  private:
 		Vector3 m_linearCorrectionVel = {};
 		Vector3 m_angularCorrectionVel = {};
 	};

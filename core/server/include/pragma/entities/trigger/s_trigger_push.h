@@ -10,22 +10,17 @@
 #include "pragma/entities/s_baseentity.h"
 #include <pragma/entities/trigger/base_trigger_push.hpp>
 
-namespace pragma
-{
-	class DLLSERVER STriggerPushComponent final
-		: public BaseTriggerPushComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER STriggerPushComponent final : public BaseTriggerPushComponent {
+	  public:
 		STriggerPushComponent(BaseEntity &ent) : BaseTriggerPushComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLSERVER TriggerPush
-	: public SBaseEntity
-{
-public:
+class DLLSERVER TriggerPush : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

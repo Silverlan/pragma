@@ -64,10 +64,10 @@ input_args = args
 #		log_file = os.getcwd() +"/" +log_file
 #
 #		logging.basicConfig(filename=log_file,
-#	        filemode='a',
-#	        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-#	        datefmt='%H:%M:%S',
-#	        level=logging.DEBUG)
+#			filemode='a',
+#			format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+#			datefmt='%H:%M:%S',
+#			level=logging.DEBUG)
 #
 #		logging.info("Running Pragma Build Script")
 
@@ -81,10 +81,12 @@ if args["update"]:
 	if not os.path.isabs(build_dir):
 		build_dir = os.getcwd() +"/" +build_dir
 
-	import json
-	cfg = json.load(open(build_dir +"/build_config.json"))
-	for key,value in cfg["args"].items():
-		args[key] = value
+	buildConfigLocation = build_dir +"/build_config.json"
+	if Path(buildConfigLocation).is_file():
+		import json
+		cfg = json.load(open(build_dir +"/build_config.json"))
+		for key,value in cfg["args"].items():
+			args[key] = value
 	args["update"] = True
 
 if platform == "linux":
@@ -345,6 +347,10 @@ if platform == "linux":
 			print_msg("Running " +cmd +"...")
 			subprocess.run(["sudo"] +cmd.split() +["-y"],check=True)
 
+module_list = []
+cmake_args = []
+additional_build_targets = []
+
 ########## zlib ##########
 # Download
 os.chdir(deps_dir)
@@ -592,10 +598,6 @@ if platform == "linux":
 ########## Modules ##########
 print_msg("Downloading modules...")
 os.chdir(root +"/modules")
-
-module_list = []
-cmake_args = []
-additional_build_targets = []
 
 if with_essential_client_modules:
 	modules.append( "pr_prosper_vulkan:\"https://github.com/Silverlan/pr_prosper_vulkan.git\"" )
@@ -900,6 +902,18 @@ def download_addon(name,addonName,url):
 		subprocess.run(["git","pull"],check=True)
 		os.chdir("..")
 
+	# Write commit SHA info for debugging purposes
+	os.chdir(install_dir +"/addons/" +addonName)
+	try:
+		commit_id = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
+	except subprocess.CalledProcessError:
+		if os.path.exists("git_info.txt"):
+			os.remove("git_info.txt")
+	else:
+		with open("git_info.txt", "w") as f:
+			f.write(f"commit: {commit_id}\n")
+	os.chdir("..")
+
 curDir = os.getcwd()
 if with_pfm:
 	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git")
@@ -910,14 +924,13 @@ if with_vr:
 os.chdir(curDir)
 
 ########## Write Build Configuration ##########
-if not update:
-	cfg = {}
-	cfg["args"] = {}
-	for key, value in input_args.items():
-		cfg["args"][key] = value
+cfg = {}
+cfg["args"] = {}
+for key, value in input_args.items():
+	cfg["args"][key] = value
 
-	import json
-	json.dump(cfg,open(build_dir +"/build_config.json",'w'))
+import json
+json.dump(cfg,open(build_dir +"/build_config.json",'w'))
 
 ########## Build Pragma ##########
 if build:

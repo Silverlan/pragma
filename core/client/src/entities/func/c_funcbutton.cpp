@@ -17,16 +17,16 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(func_button,CFuncButton);
+LINK_ENTITY_TO_CLASS(func_button, CFuncButton);
 
 void CButtonComponent::Initialize()
 {
 	BaseFuncButtonComponent::Initialize();
-	auto pRenderComponent = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
+	auto pRenderComponent = static_cast<CBaseEntity &>(GetEntity()).GetRenderComponent();
 	if(pRenderComponent)
 		pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::World);
 }
-void CButtonComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CButtonComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 //////////
 

@@ -11,12 +11,11 @@
 #include <mathutil/uvec.h>
 #include "pragma/console/conout.h"
 
-DLLNETWORK Con::c_cout& operator<<(Con::c_cout &os,const Vector4 &vec);
-DLLNETWORK Con::c_cout& operator<<(Con::c_cout &os,const Vector3 &vec);
-DLLNETWORK Con::c_cout& operator<<(Con::c_cout &os,const Vector2 &vec);
+DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const Vector4 &vec);
+DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const Vector3 &vec);
+DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const Vector2 &vec);
 
-namespace uvec
-{
+namespace uvec {
 	DLLNETWORK void print(Vector3 *vec);
 };
 

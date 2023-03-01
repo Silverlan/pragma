@@ -12,18 +12,14 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_networked_component.hpp>
 
-namespace pragma
-{
-	class DLLCLIENT CNetworkedComponent final
-		: public BaseNetworkedComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CNetworkedComponent final : public BaseNetworkedComponent, public CBaseNetComponent {
+	  public:
 		CNetworkedComponent(BaseEntity &ent) : BaseNetworkedComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
+		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 };
 

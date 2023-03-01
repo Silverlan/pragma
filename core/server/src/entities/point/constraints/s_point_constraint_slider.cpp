@@ -16,19 +16,19 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(point_constraint_slider,PointConstraintSlider);
+LINK_ENTITY_TO_CLASS(point_constraint_slider, PointConstraintSlider);
 
-void SPointConstraintSliderComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SPointConstraintSliderComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_kvSource);
 	packet->WriteString(m_kvTarget);
-	nwm::write_vector(packet,m_posTarget);
+	nwm::write_vector(packet, m_posTarget);
 
 	packet->Write<float>(m_kvLimitLinLow);
 	packet->Write<float>(m_kvLimitLinHigh);
 }
 
-void SPointConstraintSliderComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SPointConstraintSliderComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void PointConstraintSlider::Initialize()
 {

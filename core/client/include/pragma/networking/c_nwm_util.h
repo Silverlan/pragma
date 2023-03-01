@@ -11,10 +11,9 @@
 #include "pragma/clientdefinitions.h"
 #include <pragma/networking/nwm_util.h>
 
-namespace nwm
-{
+namespace nwm {
 	DLLCLIENT CBaseEntity *read_unique_entity(NetPacket &packet);
-	DLLCLIENT CallbackHandle read_unique_entity(NetPacket &packet,const std::function<void(BaseEntity*)> &onCreated);
+	DLLCLIENT CallbackHandle read_unique_entity(NetPacket &packet, const std::function<void(BaseEntity *)> &onCreated);
 };
 
 #endif

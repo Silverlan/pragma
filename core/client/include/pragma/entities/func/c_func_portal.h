@@ -11,22 +11,17 @@
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/func/basefuncportal.h"
 
-namespace pragma
-{
-	class DLLCLIENT CFuncPortalComponent final
-		: public BaseFuncPortalComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CFuncPortalComponent final : public BaseFuncPortalComponent {
+	  public:
 		CFuncPortalComponent(BaseEntity &ent) : BaseFuncPortalComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLCLIENT CFuncPortal
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CFuncPortal : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

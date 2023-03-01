@@ -18,22 +18,22 @@
 #include "pragma/debug/intel_vtune.hpp"
 #include "pragma/asset_types/world.hpp"
 
-pragma::BaseWorldComponent *Game::GetWorld() {return !m_worldComponents.empty() ? m_worldComponents[0].get() : nullptr;}
-const std::vector<util::TWeakSharedHandle<pragma::BaseWorldComponent>> &Game::GetWorldComponents() const {return m_worldComponents;}
-unsigned int Game::GetEntityCount() {return 0;}
-void Game::RemoveEntity(BaseEntity*) {}
-BaseEntity *Game::CreateEntity() {return NULL;}
-BaseEntity *Game::CreateEntity(std::string classname) {return NULL;}
+pragma::BaseWorldComponent *Game::GetWorld() { return !m_worldComponents.empty() ? m_worldComponents[0].get() : nullptr; }
+const std::vector<util::TWeakSharedHandle<pragma::BaseWorldComponent>> &Game::GetWorldComponents() const { return m_worldComponents; }
+unsigned int Game::GetEntityCount() { return 0; }
+void Game::RemoveEntity(BaseEntity *) {}
+BaseEntity *Game::CreateEntity() { return NULL; }
+BaseEntity *Game::CreateEntity(std::string classname) { return NULL; }
 void Game::SpawnEntity(BaseEntity *ent)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("spawn_entity");
-	util::ScopeGuard sgVtune {[]() {debug::get_domain().EndTask();}};
+	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
 	ent->OnSpawn();
 }
-BaseEntity *Game::GetEntity(unsigned int) {return NULL;}
-BaseEntity *Game::GetEntityByLocalIndex(uint32_t idx) {return GetEntity(idx);}
+BaseEntity *Game::GetEntity(unsigned int) { return NULL; }
+BaseEntity *Game::GetEntityByLocalIndex(uint32_t idx) { return GetEntity(idx); }
 BaseEntity *Game::FindEntityByUniqueId(const util::Uuid &uuid)
 {
 	auto it = m_uuidToEnt.find(util::get_uuid_hash(uuid));
@@ -57,15 +57,13 @@ BaseEntity *Game::CreateMapEntity(pragma::asset::EntityData &entData)
 		pMapComponent->SetMapIndex(entData.GetMapIndex());
 
 	for(auto &pair : entData.GetKeyValues())
-		ent->SetKeyValue(pair.first,pair.second);
+		ent->SetKeyValue(pair.first, pair.second);
 
-	auto *pIoComponent = static_cast<pragma::BaseIOComponent*>(ent->FindComponent("io").get());
-	if(pIoComponent != nullptr)
-	{
+	auto *pIoComponent = static_cast<pragma::BaseIOComponent *>(ent->FindComponent("io").get());
+	if(pIoComponent != nullptr) {
 		for(auto &output : entData.GetOutputs())
-			pIoComponent->StoreOutput(output.name,output.target,output.input,output.param,output.delay,output.times);
+			pIoComponent->StoreOutput(output.name, output.target, output.input, output.param, output.delay, output.times);
 	}
 
 	return ent;
 }
-

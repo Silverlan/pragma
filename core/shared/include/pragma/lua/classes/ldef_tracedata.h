@@ -9,6 +9,6 @@
 #include "pragma/lua/ldefinitions.h"
 #include "pragma/physics/raytraces.h"
 
-lua_registercheck(TraceData,::TraceData);
+lua_registercheck(TraceData, ::TraceData);
 
 #endif

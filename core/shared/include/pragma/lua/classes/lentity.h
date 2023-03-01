@@ -14,15 +14,13 @@
 class EulerAngles;
 class DamageInfo;
 class ModelHandle;
-namespace Lua
-{
-	namespace Entity
-	{
+namespace Lua {
+	namespace Entity {
 		DLLNETWORK void register_class(luabind::class_<BaseEntity> &classDef);
 		DLLNETWORK bool IsValid(BaseEntity *ent);
 
-		DLLNETWORK void RemoveEntityOnRemoval(BaseEntity &ent,BaseEntity &entOther);
-		DLLNETWORK void RemoveEntityOnRemoval(BaseEntity &ent,BaseEntity &entOther,Bool bRemove);
+		DLLNETWORK void RemoveEntityOnRemoval(BaseEntity &ent, BaseEntity &entOther);
+		DLLNETWORK void RemoveEntityOnRemoval(BaseEntity &ent, BaseEntity &entOther, Bool bRemove);
 
 		DLLNETWORK float GetAirDensity(BaseEntity &ent);
 	};

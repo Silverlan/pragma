@@ -15,13 +15,9 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <memory>
 
-namespace pragma
-{
-	class DLLCLIENT CFogControllerComponent final
-		: public BaseEnvFogControllerComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CFogControllerComponent final : public BaseEnvFogControllerComponent, public CBaseNetComponent {
+	  public:
 		CFogControllerComponent(BaseEntity &ent) : BaseEnvFogControllerComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
@@ -32,18 +28,16 @@ namespace pragma
 		virtual void SetMaxDensity(float density) override;
 		virtual void SetFogType(util::FogType type) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void OnEntitySpawn() override;
-	protected:
+	  protected:
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		WorldEnvironment::Fog &GetFog();
 	};
 };
 
-class DLLCLIENT CEnvFogController
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEnvFogController : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

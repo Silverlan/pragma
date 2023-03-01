@@ -11,15 +11,13 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/particlesystem/c_particlemodifier.h"
 
-class DLLCLIENT CParticleOperatorRandomEmissionRate
-	: public CParticleOperator
-{
-public:
-	CParticleOperatorRandomEmissionRate()=default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+class DLLCLIENT CParticleOperatorRandomEmissionRate : public CParticleOperator {
+  public:
+	CParticleOperatorRandomEmissionRate() = default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void Simulate(double tDelta) override;
 	virtual void OnParticleSystemStarted() override;
-private:
+  private:
 	float GetInterval() const;
 	void Reset();
 	float m_fMinimum = 0.07f;

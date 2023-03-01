@@ -21,42 +21,32 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
+decltype(ShaderEquirectangularToCubemap::DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE) ShaderEquirectangularToCubemap::DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE = {{prosper::DescriptorSetInfo::Binding {prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
+ShaderEquirectangularToCubemap::ShaderEquirectangularToCubemap(prosper::IPrContext &context, const std::string &identifier) : ShaderCubemap {context, identifier, "screen/fs_equirectangular_to_cubemap"} {}
 
-decltype(ShaderEquirectangularToCubemap::DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE) ShaderEquirectangularToCubemap::DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE = {
-	{
-		prosper::DescriptorSetInfo::Binding {
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		}
-	}
-};
-ShaderEquirectangularToCubemap::ShaderEquirectangularToCubemap(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderCubemap{context,identifier,"screen/fs_equirectangular_to_cubemap"}
-{}
-
-void ShaderEquirectangularToCubemap::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderEquirectangularToCubemap::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	ShaderCubemap::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	ShaderCubemap::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE);
 }
 
-void ShaderEquirectangularToCubemap::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
+void ShaderEquirectangularToCubemap::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)
 {
-	CreateCachedRenderPass<ShaderEquirectangularToCubemap>({{prosper::util::RenderPassCreateInfo::AttachmentInfo{prosper::Format::R16G16B16A16_SFloat}}},outRenderPass,pipelineIdx);
+	CreateCachedRenderPass<ShaderEquirectangularToCubemap>({{prosper::util::RenderPassCreateInfo::AttachmentInfo {prosper::Format::R16G16B16A16_SFloat}}}, outRenderPass, pipelineIdx);
 }
 
-std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectangularImage(const std::string &fileName,uint32_t resolution)
+std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectangularImage(const std::string &fileName, uint32_t resolution)
 {
-	auto f = FileManager::OpenFile(fileName.c_str(),"rb");
+	auto f = FileManager::OpenFile(fileName.c_str(), "rb");
 	if(f == nullptr)
 		return nullptr;
-	return LoadEquirectangularImage(f,resolution);
+	return LoadEquirectangularImage(f, resolution);
 }
-std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectangularImage(VFilePtr fp,uint32_t resolution)
+std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectangularImage(VFilePtr fp, uint32_t resolution)
 {
 	fsys::File f {fp};
-	auto imgBuffer = uimg::load_image(f,uimg::PixelFormat::Float);
+	auto imgBuffer = uimg::load_image(f, uimg::PixelFormat::Float);
 	if(imgBuffer == nullptr)
 		return nullptr;
 	prosper::util::ImageCreateInfo createInfo {};
@@ -68,7 +58,7 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectan
 	createInfo.usage = prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::SampledBit;
 
 	auto &context = c_engine->GetRenderContext();
-	auto img = context.CreateImage(createInfo,reinterpret_cast<uint8_t*>(imgBuffer->GetData()));
+	auto img = context.CreateImage(createInfo, reinterpret_cast<uint8_t *>(imgBuffer->GetData()));
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
@@ -77,20 +67,20 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectan
 	samplerCreateInfo.magFilter = prosper::Filter::Linear;
 	samplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToEdge;
 	samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
-	auto equirectRadianceTex = context.CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
-	return EquirectangularTextureToCubemap(*equirectRadianceTex,resolution);
+	auto equirectRadianceTex = context.CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
+	return EquirectangularTextureToCubemap(*equirectRadianceTex, resolution);
 }
 
-std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::EquirectangularTextureToCubemap(prosper::Texture &equirectangularTexture,uint32_t resolution)
+std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::EquirectangularTextureToCubemap(prosper::Texture &equirectangularTexture, uint32_t resolution)
 {
-	auto rt = CreateCubeMapRenderTarget(resolution,resolution,prosper::util::ImageCreateInfo::Flags::FullMipmapChain);
+	auto rt = CreateCubeMapRenderTarget(resolution, resolution, prosper::util::ImageCreateInfo::Flags::FullMipmapChain);
 
 	// Shader input
 	auto dsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE);
-	dsg->GetDescriptorSet()->SetBindingTexture(equirectangularTexture,0u);
+	dsg->GetDescriptorSet()->SetBindingTexture(equirectangularTexture, 0u);
 
 	PushConstants pushConstants {};
-	pushConstants.projection = GetProjectionMatrix(resolution /static_cast<float>(resolution));
+	pushConstants.projection = GetProjectionMatrix(resolution / static_cast<float>(resolution));
 
 	// Generate cube
 	uint32_t numVerts;
@@ -98,21 +88,17 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::Equirectangula
 
 	// Shader execution
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
-	setupCmd->RecordPostRenderPassImageBarrier(rt->GetTexture().GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+	setupCmd->RecordPostRenderPassImageBarrier(rt->GetTexture().GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 	auto success = true;
-	for(uint8_t layerId=0u;layerId<6u;++layerId)
-	{
-		if(setupCmd->RecordBeginRenderPass(*rt,layerId) == false)
-		{
+	for(uint8_t layerId = 0u; layerId < 6u; ++layerId) {
+		if(setupCmd->RecordBeginRenderPass(*rt, layerId) == false) {
 			success = false;
 			break;
 		}
 		prosper::ShaderBindState bindState {*setupCmd};
-		if(RecordBeginDraw(bindState) == true)
-		{
+		if(RecordBeginDraw(bindState) == true) {
 			pushConstants.view = GetViewMatrix(layerId);
-			success = RecordPushConstants(bindState,pushConstants) && RecordBindDescriptorSet(bindState,*dsg->GetDescriptorSet()) &&
-				RecordBindVertexBuffer(bindState,*vertexBuffer) && RecordDraw(bindState,numVerts);
+			success = RecordPushConstants(bindState, pushConstants) && RecordBindDescriptorSet(bindState, *dsg->GetDescriptorSet()) && RecordBindVertexBuffer(bindState, *vertexBuffer) && RecordDraw(bindState, numVerts);
 			RecordEndDraw(bindState);
 		}
 		success = success && setupCmd->RecordEndRenderPass();
@@ -120,14 +106,8 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::Equirectangula
 			break;
 	}
 	auto &img = rt->GetTexture().GetImage();
-	setupCmd->RecordPostRenderPassImageBarrier(img,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
-	setupCmd->RecordGenerateMipmaps(
-		img,
-		prosper::ImageLayout::ShaderReadOnlyOptimal,
-		prosper::AccessFlags::ShaderReadBit,
-		prosper::PipelineStageFlags::FragmentShaderBit
-	);
+	setupCmd->RecordPostRenderPassImageBarrier(img, prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
+	setupCmd->RecordGenerateMipmaps(img, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::AccessFlags::ShaderReadBit, prosper::PipelineStageFlags::FragmentShaderBit);
 	GetContext().FlushSetupCommandBuffer();
 	return success ? rt->GetTexture().shared_from_this() : nullptr;
 }
-

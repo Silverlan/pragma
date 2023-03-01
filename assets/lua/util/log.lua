@@ -12,6 +12,7 @@ pfm.LOG_SEVERITY_NORMAL = log.SEVERITY_INFO
 pfm.LOG_SEVERITY_WARNING = log.SEVERITY_WARNING
 pfm.LOG_SEVERITY_ERROR = log.SEVERITY_ERROR
 pfm.LOG_SEVERITY_CRITICAL = log.SEVERITY_CRITICAL
+pfm.LOG_SEVERITY_DEBUG = log.SEVERITY_DEBUG
 
 pfm.MAX_LOG_CATEGORIES = 30
 local g_enabledCategories = bit.lshift(1,pfm.MAX_LOG_CATEGORIES) -1 -- Enable all call categories by default
@@ -31,11 +32,12 @@ pfm.log = function(msg,categories,severity)
 	severity = severity or pfm.LOG_SEVERITY_NORMAL
 	categories = categories or pfm.LOG_CATEGORY_PFM
 	if(pfm.is_log_category_enabled(categories) == false) then return false end
-	msg = "[PFM] " .. msg
-	if(severity == pfm.LOG_SEVERITY_NORMAL) then console.print_messageln(msg)
-	elseif(severity == pfm.LOG_SEVERITY_WARNING) then console.print_warning(msg)
-	elseif(severity == pfm.LOG_SEVERITY_ERROR) then console.print_error(msg)
-	elseif(severity == pfm.LOG_SEVERITY_CRITICAL) then console.print_error(msg)
+	local prefix = {log.prefix("pfm",bit.bor(console.COLOR_FLAG_GREEN_BIT,console.COLOR_FLAG_INTENSITY_BIT))}
+	if(severity == pfm.LOG_SEVERITY_NORMAL) then log.info(prefix,msg)
+	elseif(severity == pfm.LOG_SEVERITY_WARNING) then log.warn(prefix,msg)
+	elseif(severity == pfm.LOG_SEVERITY_ERROR) then log.error(prefix,msg)
+	elseif(severity == pfm.LOG_SEVERITY_CRITICAL) then log.critical(prefix,msg)
+	elseif(severity == pfm.LOG_SEVERITY_DEBUG) then log.debug(prefix,msg)
 	else return false end
 	return true
 end

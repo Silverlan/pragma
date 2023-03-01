@@ -18,40 +18,34 @@
 #include <array>
 #include <set>
 
-namespace pragma
-{
-	namespace debug
-	{
-		struct DLLNETWORK ProfilerResult
-		{
+namespace pragma {
+	namespace debug {
+		struct DLLNETWORK ProfilerResult {
 			std::optional<std::chrono::nanoseconds> duration;
 		};
 
-		class DLLNETWORK Timer
-		{
-		public:
-			Timer(const Timer&)=delete;
-			Timer &operator=(const Timer&)=delete;
-			virtual ~Timer()=default;
-			virtual bool Start()=0;
-			virtual bool Stop()=0;
-			virtual std::unique_ptr<ProfilerResult> GetResult() const=0;
-		protected:
-			Timer()=default;
+		class DLLNETWORK Timer {
+		  public:
+			Timer(const Timer &) = delete;
+			Timer &operator=(const Timer &) = delete;
+			virtual ~Timer() = default;
+			virtual bool Start() = 0;
+			virtual bool Stop() = 0;
+			virtual std::unique_ptr<ProfilerResult> GetResult() const = 0;
+		  protected:
+			Timer() = default;
 		};
 
 		class Profiler;
-		class DLLNETWORK ProfilingStage
-			: public std::enable_shared_from_this<ProfilingStage>
-		{
-		public:
+		class DLLNETWORK ProfilingStage : public std::enable_shared_from_this<ProfilingStage> {
+		  public:
 			using StageId = uint32_t;
 			template<class TProfilingStage>
-				static std::shared_ptr<TProfilingStage> Create(Profiler &profiler,const std::string &name,TProfilingStage *parent=nullptr);
-			static std::shared_ptr<ProfilingStage> Create(Profiler &profiler,const std::string &name,ProfilingStage *parent=nullptr);
-			virtual ~ProfilingStage()=default;
-			ProfilingStage(const ProfilingStage&)=delete;
-			ProfilingStage &operator=(const ProfilingStage&)=delete;
+			static std::shared_ptr<TProfilingStage> Create(Profiler &profiler, const std::string &name, TProfilingStage *parent = nullptr);
+			static std::shared_ptr<ProfilingStage> Create(Profiler &profiler, const std::string &name, ProfilingStage *parent = nullptr);
+			virtual ~ProfilingStage() = default;
+			ProfilingStage(const ProfilingStage &) = delete;
+			ProfilingStage &operator=(const ProfilingStage &) = delete;
 			virtual void Initialize(ProfilingStage *parent);
 
 			bool Start();
@@ -65,11 +59,11 @@ namespace pragma
 			const std::vector<std::weak_ptr<ProfilingStage>> &GetChildren() const;
 			const Timer &GetTimer() const;
 			Timer &GetTimer();
-		protected:
-			ProfilingStage(Profiler &profiler,const std::string &name);
+		  protected:
+			ProfilingStage(Profiler &profiler, const std::string &name);
 			virtual void InitializeTimer();
 			std::shared_ptr<Timer> m_timer;
-		private:
+		  private:
 			Profiler &m_profiler;
 			std::weak_ptr<ProfilingStage> m_parent = {};
 			std::vector<std::weak_ptr<ProfilingStage>> m_children = {};
@@ -78,12 +72,11 @@ namespace pragma
 		};
 
 		class CPUProfiler;
-		class DLLNETWORK Profiler
-		{
-		public:
+		class DLLNETWORK Profiler {
+		  public:
 			template<class TProfiler>
-				static std::shared_ptr<TProfiler> Create();
-			virtual std::shared_ptr<Timer> CreateTimer() {return nullptr;};
+			static std::shared_ptr<TProfiler> Create();
+			virtual std::shared_ptr<Timer> CreateTimer() { return nullptr; };
 			virtual void Initialize();
 
 			bool StartStage(ProfilingStage::StageId stage);
@@ -94,96 +87,91 @@ namespace pragma
 			ProfilingStage *GetStage(ProfilingStage::StageId stage);
 			const std::vector<std::weak_ptr<ProfilingStage>> &GetStages() const;
 			void AddStage(ProfilingStage &stage);
-		protected:
-			Profiler()=default;
+		  protected:
+			Profiler() = default;
 			std::shared_ptr<ProfilingStage> m_rootStage = nullptr;
-		private:
+		  private:
 			ProfilingStage::StageId m_nextStageId = 0u;
 			std::vector<std::weak_ptr<ProfilingStage>> m_stages = {};
-			friend std::shared_ptr<ProfilingStage> ProfilingStage::Create(Profiler &profiler,const std::string &name,ProfilingStage *parent);
+			friend std::shared_ptr<ProfilingStage> ProfilingStage::Create(Profiler &profiler, const std::string &name, ProfilingStage *parent);
 		};
 
-		template<class TProfilingStage,typename TPhaseEnum>
-			class ProfilingStageManager
-		{
-		public:
+		template<class TProfilingStage, typename TPhaseEnum>
+		class ProfilingStageManager {
+		  public:
 			TProfilingStage &GetProfilerStage(TPhaseEnum phase);
 			bool StartProfilerStage(TPhaseEnum phase);
 			bool StopProfilerStage(TPhaseEnum phase);
-			void InitializeProfilingStageManager(Profiler &profiler,const std::array<std::shared_ptr<TProfilingStage>,umath::to_integral(TPhaseEnum::Count)> &stages);
-		protected:
-			std::array<std::shared_ptr<TProfilingStage>,umath::to_integral(TPhaseEnum::Count)> m_profilingStages = {};
-		private:
+			void InitializeProfilingStageManager(Profiler &profiler, const std::array<std::shared_ptr<TProfilingStage>, umath::to_integral(TPhaseEnum::Count)> &stages);
+		  protected:
+			std::array<std::shared_ptr<TProfilingStage>, umath::to_integral(TPhaseEnum::Count)> m_profilingStages = {};
+		  private:
 			Profiler *m_profiler = nullptr;
 		};
 
 		////////
 
-		class DLLNETWORK CPUTimer
-			: public Timer
-		{
-		public:
+		class DLLNETWORK CPUTimer : public Timer {
+		  public:
 			static std::shared_ptr<CPUTimer> Create();
 			virtual bool Start() override;
 			virtual bool Stop() override;
 			virtual std::unique_ptr<ProfilerResult> GetResult() const override;
-		private:
-			CPUTimer()=default;
+		  private:
+			CPUTimer() = default;
 			util::Clock::time_point m_startTime = {};
 			util::Clock::time_point m_stopTime = {};
 		};
 
-		class DLLNETWORK CPUProfiler
-			: public Profiler
-		{
-		public:
-			CPUProfiler()=default;
+		class DLLNETWORK CPUProfiler : public Profiler {
+		  public:
+			CPUProfiler() = default;
 			virtual std::shared_ptr<Timer> CreateTimer() override;
 		};
 	};
 };
 
-template<class TProfilingStage,typename TPhaseEnum>
-	TProfilingStage &pragma::debug::ProfilingStageManager<TProfilingStage,TPhaseEnum>::GetProfilerStage(TPhaseEnum phase)
+template<class TProfilingStage, typename TPhaseEnum>
+TProfilingStage &pragma::debug::ProfilingStageManager<TProfilingStage, TPhaseEnum>::GetProfilerStage(TPhaseEnum phase)
 {
 	return *m_profilingStages.at(umath::to_integral(phase));
 }
 
-template<class TProfilingStage,typename TPhaseEnum>
-	bool pragma::debug::ProfilingStageManager<TProfilingStage,TPhaseEnum>::StartProfilerStage(TPhaseEnum phase)
+template<class TProfilingStage, typename TPhaseEnum>
+bool pragma::debug::ProfilingStageManager<TProfilingStage, TPhaseEnum>::StartProfilerStage(TPhaseEnum phase)
 {
 	auto &stage = GetProfilerStage(phase);
 	return stage.Start();
 }
 
-template<class TProfilingStage,typename TPhaseEnum>
-	bool pragma::debug::ProfilingStageManager<TProfilingStage,TPhaseEnum>::StopProfilerStage(TPhaseEnum phase)
+template<class TProfilingStage, typename TPhaseEnum>
+bool pragma::debug::ProfilingStageManager<TProfilingStage, TPhaseEnum>::StopProfilerStage(TPhaseEnum phase)
 {
 	auto &stage = GetProfilerStage(phase);
 	return stage.Stop();
 }
 
-template<class TProfilingStage,typename TPhaseEnum>
-	void pragma::debug::ProfilingStageManager<TProfilingStage,TPhaseEnum>::InitializeProfilingStageManager(Profiler &profiler,const std::array<std::shared_ptr<TProfilingStage>,umath::to_integral(TPhaseEnum::Count)> &stages)
+template<class TProfilingStage, typename TPhaseEnum>
+void pragma::debug::ProfilingStageManager<TProfilingStage, TPhaseEnum>::InitializeProfilingStageManager(Profiler &profiler, const std::array<std::shared_ptr<TProfilingStage>, umath::to_integral(TPhaseEnum::Count)> &stages)
 {
 	m_profiler = &profiler;
 	m_profilingStages = stages;
 }
 
 template<class TProfiler>
-	std::shared_ptr<TProfiler> pragma::debug::Profiler::Create()
+std::shared_ptr<TProfiler> pragma::debug::Profiler::Create()
 {
-	auto profiler = std::shared_ptr<TProfiler>{new TProfiler{}};
+	auto profiler = std::shared_ptr<TProfiler> {new TProfiler {}};
 	profiler->Initialize();
 	return profiler;
 }
 
 template<class TProfilingStage>
-	std::shared_ptr<TProfilingStage> pragma::debug::ProfilingStage::Create(Profiler &profiler,const std::string &name,TProfilingStage *parent)
+std::shared_ptr<TProfilingStage> pragma::debug::ProfilingStage::Create(Profiler &profiler, const std::string &name, TProfilingStage *parent)
 {
 	if(parent == nullptr)
-		parent = static_cast<TProfilingStage*>(&profiler.GetRootStage());
-	auto result = std::shared_ptr<TProfilingStage>{new TProfilingStage{profiler,name}};
+		parent = static_cast<TProfilingStage *>(&profiler.GetRootStage());
+	auto result = std::shared_ptr<TProfilingStage> {new TProfilingStage {profiler, name}};
 	result->Initialize(parent);
 	profiler.AddStage(*result);
 	return result;

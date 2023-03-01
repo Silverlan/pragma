@@ -12,11 +12,11 @@
 #include "pragma/localization.h"
 #include <fsys/filesystem.h>
 #include "pragma/input/inputhelper.h"
+#include <pragma/logging.hpp>
 
 CEngine::ConVarInfo *CEngine::ConVarInfoList::find(const std::string &cmd)
 {
-	for(auto it=cvars.begin();it!=cvars.end();++it)
-	{
+	for(auto it = cvars.begin(); it != cvars.end(); ++it) {
 		auto &info = *it;
 		if(info.cvar == cmd)
 			return &info;
@@ -24,9 +24,9 @@ CEngine::ConVarInfo *CEngine::ConVarInfoList::find(const std::string &cmd)
 	return nullptr;
 }
 
-bool CEngine::ExecConfig(const std::string &cfg,std::vector<ConVarInfo> &cmds)
+bool CEngine::ExecConfig(const std::string &cfg, std::vector<ConVarInfo> &cmds)
 {
-	return Engine::ExecConfig(cfg,[&cmds](std::string &cmd,std::vector<std::string> &argv) {
+	return Engine::ExecConfig(cfg, [&cmds](std::string &cmd, std::vector<std::string> &argv) {
 		cmds.push_back(ConVarInfo());
 		auto &info = cmds.back();
 		info.cvar = cmd;
@@ -36,10 +36,9 @@ bool CEngine::ExecConfig(const std::string &cfg,std::vector<ConVarInfo> &cmds)
 
 void CEngine::ExecCommands(ConVarInfoList &cmds)
 {
-	for(auto it=cmds.cvars.begin();it!=cmds.cvars.end();++it)
-	{
+	for(auto it = cmds.cvars.begin(); it != cmds.cvars.end(); ++it) {
 		auto &info = *it;
-		RunConsoleCommand(info.cvar,info.argv);
+		RunConsoleCommand(info.cvar, info.argv);
 	}
 }
 
@@ -47,10 +46,9 @@ void CEngine::SaveClientConfig()
 {
 	FileManager::CreatePath("cfg");
 	std::string path = "cfg\\client.cfg";
-	auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"w");
-	if(f == NULL)
-	{
-		Con::cwar<<"WARNING: Unable to save client.cfg"<<Con::endl;
+	auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(), "w");
+	if(f == NULL) {
+		spdlog::warn("Unable to save client.cfg");
 		return;
 	}
 	WriteClientConfig(f);
@@ -60,17 +58,13 @@ void CEngine::WriteClientConfig(VFilePtrReal f)
 {
 	f->WriteString("unbindall\n");
 	auto inputLayer = GetCoreInputBindingLayer();
-	if(inputLayer)
-	{
-		for(auto &pair : inputLayer->GetKeyMappings())
-		{
+	if(inputLayer) {
+		for(auto &pair : inputLayer->GetKeyMappings()) {
 			auto &kb = pair.second;
-			if(kb.GetType() == KeyBind::Type::Regular)
-			{
+			if(kb.GetType() == KeyBind::Type::Regular) {
 				std::string key;
-				if(KeyToString(pair.first,&key))
-				{
-					std::string l = "bind \"" +key +"\" \"" +kb.GetBind() +"\"\n";
+				if(KeyToString(pair.first, &key)) {
+					std::string l = "bind \"" + key + "\" \"" + kb.GetBind() + "\"\n";
 					f->WriteString(l.c_str());
 				}
 			}
@@ -88,20 +82,15 @@ void CEngine::WriteClientConfig(VFilePtrReal f)
 	}
 	auto *stateSv = GetServerNetworkState();
 	auto *stateCl = GetClientState();
-	if(stateCl != NULL)
-	{
+	if(stateCl != NULL) {
 		auto &cvars = stateCl->GetConVars();
-		for(auto &pair : cvars)
-		{
-			if(stateSv == NULL || stateSv->GetConVar(pair.first) == NULL)
-			{
+		for(auto &pair : cvars) {
+			if(stateSv == NULL || stateSv->GetConVar(pair.first) == NULL) {
 				auto &cf = pair.second;
-				if(cf->GetType() == ConType::Var)
-				{
-					auto *cv = static_cast<ConVar*>(cf.get());
-					if((cv->GetFlags() &ConVarFlags::Archive) == ConVarFlags::Archive && cv->GetString() != cv->GetDefault())
-					{
-						std::string l = pair.first +" \"" +cv->GetString() +"\"\n";
+				if(cf->GetType() == ConType::Var) {
+					auto *cv = static_cast<ConVar *>(cf.get());
+					if((cv->GetFlags() & ConVarFlags::Archive) == ConVarFlags::Archive && cv->GetString() != cv->GetDefault()) {
+						std::string l = pair.first + " \"" + cv->GetString() + "\"\n";
 						f->WriteString(l.c_str());
 					}
 				}
@@ -120,7 +109,7 @@ void CEngine::PreloadClientConfig()
 {
 	m_preloadedConfig = std::make_unique<ConVarInfoList>();
 	auto &cmds = *m_preloadedConfig.get();
-	ExecConfig("client.cfg",cmds.cvars);
+	ExecConfig("client.cfg", cmds.cvars);
 	std::string lan = Locale::DetermineSystemLanguage();
 	auto res = cmds.find("cl_language");
 	if(res != nullptr && !res->argv.empty())
@@ -129,12 +118,12 @@ void CEngine::PreloadClientConfig()
 	Locale::Load("inputs.txt");
 	Locale::Load("menu.txt");
 	Locale::Load("misc.txt");
+	Locale::Load("components.txt");
 }
 
 void CEngine::LoadClientConfig()
 {
-	if(m_preloadedConfig != nullptr)
-	{
+	if(m_preloadedConfig != nullptr) {
 		ExecCommands(*m_preloadedConfig.get());
 		m_preloadedConfig = nullptr;
 	}

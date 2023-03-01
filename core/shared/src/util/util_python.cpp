@@ -11,39 +11,27 @@
 
 extern DLLNETWORK Engine *engine;
 
-struct IPythonWrapper final
-{
+struct IPythonWrapper final {
 	IPythonWrapper(util::Library &lib);
-	IPythonWrapper()=default;
-		
-	bool(*run)(const char *code) = nullptr;
-	bool(*exec)(const char *fileName,uint32_t argc,const char **argv) = nullptr;
-	bool(*get_last_error)(std::string&) = nullptr;
-	void(*reload)() = nullptr;
+	IPythonWrapper() = default;
 
-	bool valid() const {return m_bValid;}
-private:
+	bool (*run)(const char *code) = nullptr;
+	bool (*exec)(const char *fileName, uint32_t argc, const char **argv) = nullptr;
+	bool (*get_last_error)(std::string &) = nullptr;
+	void (*reload)() = nullptr;
+
+	bool valid() const { return m_bValid; }
+  private:
 	bool m_bValid = false;
 };
 
-#define PR_PYTHON_FIND_SYMBOL(lib,sym) \
-	(sym = lib.FindSymbolAddress<decltype(sym)>("pr_py_" #sym)) != nullptr
-IPythonWrapper::IPythonWrapper(util::Library &lib)
-{
-	m_bValid = 
-		PR_PYTHON_FIND_SYMBOL(lib,run) &&
-		PR_PYTHON_FIND_SYMBOL(lib,exec) &&
-		PR_PYTHON_FIND_SYMBOL(lib,get_last_error) &&
-		PR_PYTHON_FIND_SYMBOL(lib,reload);
-}
+#define PR_PYTHON_FIND_SYMBOL(lib, sym) (sym = lib.FindSymbolAddress<decltype(sym)>("pr_py_" #sym)) != nullptr
+IPythonWrapper::IPythonWrapper(util::Library &lib) { m_bValid = PR_PYTHON_FIND_SYMBOL(lib, run) && PR_PYTHON_FIND_SYMBOL(lib, exec) && PR_PYTHON_FIND_SYMBOL(lib, get_last_error) && PR_PYTHON_FIND_SYMBOL(lib, reload); }
 
 ////////////////
 
 static std::unique_ptr<IPythonWrapper> g_pyWrapper = nullptr;
-static void clear_py_wrapper()
-{
-	g_pyWrapper = nullptr;
-}
+static void clear_py_wrapper() { g_pyWrapper = nullptr; }
 static IPythonWrapper *get_py_wrapper()
 {
 	static auto initialized = false;
@@ -58,17 +46,16 @@ static IPythonWrapper *get_py_wrapper()
 	if(!nw)
 		return nullptr;
 	std::string err;
-	auto lib = nw->InitializeLibrary("python/pr_python",&err);
-	if(!lib)
-	{
-		Con::cwar<<"WARNING: Failed to load python module: "<<err<<Con::endl;
+	auto lib = nw->InitializeLibrary("python/pr_python", &err);
+	if(!lib) {
+		Con::cwar << "Failed to load python module: " << err << Con::endl;
 		return nullptr;
 	}
 	auto wrapper = std::make_unique<IPythonWrapper>(*lib);
 	if(!wrapper->valid())
 		return nullptr;
 	g_pyWrapper = std::move(wrapper);
-	nw->AddCallback("OnClose",FunctionCallback<void>::Create([]() {clear_py_wrapper();}));
+	nw->AddCallback("OnClose", FunctionCallback<void>::Create([]() { clear_py_wrapper(); }));
 	return g_pyWrapper.get();
 }
 
@@ -81,15 +68,15 @@ bool pragma::python::run(const char *code)
 		return false;
 	return wrapper->run(code);
 }
-bool pragma::python::exec(std::string fileName,uint32_t argc,const char **argv)
+bool pragma::python::exec(std::string fileName, uint32_t argc, const char **argv)
 {
 	auto *wrapper = get_py_wrapper();
 	if(!wrapper)
 		return false;
 	auto path = util::Path::CreateFile(fileName);
 	path.Canonicalize();
-	path = util::Path::CreatePath(util::get_program_path()) +path;
-	return wrapper->exec(path.GetString().c_str(),argc,argv);
+	path = util::Path::CreatePath(util::get_program_path()) + path;
+	return wrapper->exec(path.GetString().c_str(), argc, argv);
 }
 
 std::optional<std::string> pragma::python::get_last_error()
@@ -98,7 +85,7 @@ std::optional<std::string> pragma::python::get_last_error()
 	if(!wrapper)
 		return {};
 	std::string err;
-	return wrapper->get_last_error(err) ? err : std::optional<std::string>{};
+	return wrapper->get_last_error(err) ? err : std::optional<std::string> {};
 }
 
 static auto g_blenderInitialized = false;
@@ -109,13 +96,13 @@ bool pragma::python::init_blender()
 		return g_blenderInitSuccess;
 	g_blenderInitialized = true;
 	auto programPath = util::Path::CreatePath(util::get_program_path());
-	auto scriptsPath = programPath +util::Path::CreatePath("modules/blender/3.2/scripts");
-	if(!util::set_env_variable("BLENDER_SYSTEM_SCRIPTS",scriptsPath.GetString().c_str()))
+	auto scriptsPath = programPath + util::Path::CreatePath("modules/blender/3.2/scripts");
+	if(!util::set_env_variable("BLENDER_SYSTEM_SCRIPTS", scriptsPath.GetString().c_str()))
 		return false;
 	if(!run("import sys"))
 		return false;
-	auto sitePackagesPath = programPath +util::Path::CreatePath("modules/blender/site-packages");
-	g_blenderInitSuccess = run(("sys.path.append(\"" +sitePackagesPath.GetString() +"\")").c_str());
+	auto sitePackagesPath = programPath + util::Path::CreatePath("modules/blender/site-packages");
+	g_blenderInitSuccess = run(("sys.path.append(\"" + sitePackagesPath.GetString() + "\")").c_str());
 	return g_blenderInitSuccess;
 }
 

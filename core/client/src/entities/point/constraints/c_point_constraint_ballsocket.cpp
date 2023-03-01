@@ -15,7 +15,7 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(point_constraint_ballsocket,CPointConstraintBallSocket);
+LINK_ENTITY_TO_CLASS(point_constraint_ballsocket, CPointConstraintBallSocket);
 
 void CPointConstraintBallSocketComponent::ReceiveData(NetPacket &packet)
 {
@@ -23,7 +23,7 @@ void CPointConstraintBallSocketComponent::ReceiveData(NetPacket &packet)
 	m_kvTarget = packet->ReadString();
 	m_posTarget = nwm::read_vector(packet);
 }
-void CPointConstraintBallSocketComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CPointConstraintBallSocketComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CPointConstraintBallSocket::Initialize()
 {

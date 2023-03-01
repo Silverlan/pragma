@@ -12,15 +12,13 @@
 #include "pragma/particlesystem/c_particlemodifier.h"
 #include "pragma/particlesystem/modifiers/c_particle_modifier_component_random_variable.hpp"
 
-class DLLCLIENT CParticleInitializerSpeed
-	: public CParticleInitializer
-{
-public:
-	CParticleInitializerSpeed()=default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+class DLLCLIENT CParticleInitializerSpeed : public CParticleInitializer {
+  public:
+	CParticleInitializerSpeed() = default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void OnParticleCreated(CParticle &particle) override;
-private:
-	CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>,float> m_fSpeed;
+  private:
+	CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>, float> m_fSpeed;
 };
 
 #endif

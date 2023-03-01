@@ -14,29 +14,23 @@
 #include <pragma/entities/prop/prop_base.h>
 #include <pragma/physics/movetypes.h>
 
-namespace pragma
-{
-	class DLLCLIENT CPropComponent final
-		: public BasePropComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CPropComponent final : public BasePropComponent, public CBaseNetComponent {
+	  public:
 		CPropComponent(BaseEntity &ent) : BasePropComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void OnEntitySpawn() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
-	protected:
+		virtual bool ShouldTransmitNetData() const override { return true; }
+	  protected:
 		PHYSICSTYPE m_propPhysType = PHYSICSTYPE::NONE;
 		MOVETYPE m_propMoveType = MOVETYPE::NONE;
 	};
 };
 
-class DLLCLIENT CBaseProp
-	: public CBaseEntity
-{
-protected:
+class DLLCLIENT CBaseProp : public CBaseEntity {
+  protected:
 };
 
 #endif

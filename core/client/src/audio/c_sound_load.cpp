@@ -15,12 +15,12 @@
 #include "pragma/audio/sound_ogg.h"
 #include "pragma/audio/c_sound_load.h"
 
-static bool al_check_error(const std::string &path,uint32_t alBuffer,ALResource &res)
+static bool al_check_error(const std::string &path, uint32_t alBuffer, ALResource &res)
 {
 	/*auto err = alGetError();
 	if(err != AL_NO_ERROR)
 	{
-		Con::cwar<<"WARNING: OpenAL Error for '"<<path<<"': "<<alGetString(err)<<"!"<<Con::endl;
+		Con::cwar<<"OpenAL Error for '"<<path<<"': "<<alGetString(err)<<"!"<<Con::endl;
 		if(alIsBuffer(alBuffer))
 			alDeleteBuffers(1,&alBuffer);
 		res.buffer = 0;
@@ -29,25 +29,24 @@ static bool al_check_error(const std::string &path,uint32_t alBuffer,ALResource 
 	return true;*/
 }
 
-template<class T,class S>
-	static unsigned int stereo_to_mono(char *src,char **ptgt,unsigned int datalen,unsigned int fragmentSize=2)
+template<class T, class S>
+static unsigned int stereo_to_mono(char *src, char **ptgt, unsigned int datalen, unsigned int fragmentSize = 2)
 {
 	*ptgt = new char[datalen];
 	char *monoData = *ptgt;
-	for(unsigned int i=0;i<datalen;i+=(fragmentSize *2))
-	{
-		T left = *(T*)&src[i];
-		T right = *(T*)&src[i +fragmentSize];
+	for(unsigned int i = 0; i < datalen; i += (fragmentSize * 2)) {
+		T left = *(T *)&src[i];
+		T right = *(T *)&src[i + fragmentSize];
 #pragma message("TODO: This leads to information loss / Worse quality. Dividing by two leads to lower volume however. Find a better way to convert from stereo to mono!")
-		S monoSample = (S(left) +S(right)); // /2;
+		S monoSample = (S(left) + S(right)); // /2;
 		if(monoSample > std::numeric_limits<T>::max())
 			monoSample = std::numeric_limits<T>::max();
 		else if(monoSample < std::numeric_limits<T>::lowest())
 			monoSample = std::numeric_limits<T>::lowest();
 		T rsMonoSample = static_cast<T>(monoSample);
-		memcpy(&monoData[i /2],&rsMonoSample,sizeof(T));
+		memcpy(&monoData[i / 2], &rsMonoSample, sizeof(T));
 	}
-	return datalen /2;
+	return datalen / 2;
 }
 
 /*
@@ -115,7 +114,7 @@ static bool initialize_albuffer(std::string &path,ALenum format,ALuint rate,int 
 	return al_check_error(path,alBuffer,*audio.mono);
 }*/
 
-bool openal::load_alure(std::string &path,VFilePtr f,ALChannel mode,ALAudio &audio)
+bool openal::load_alure(std::string &path, VFilePtr f, ALChannel mode, ALAudio &audio)
 {
 	/*alGetError(); // Clear Last Error
 	ALenum format;
@@ -130,7 +129,7 @@ bool openal::load_alure(std::string &path,VFilePtr f,ALChannel mode,ALAudio &aud
 	return false;
 }
 
-bool openal::load_ogg(std::string &path,VFilePtr f,ALChannel mode,ALAudio &audio)
+bool openal::load_ogg(std::string &path, VFilePtr f, ALChannel mode, ALAudio &audio)
 {
 	/*alGetError(); // Clear Last Error
 	vorbis_info *pInfo;
@@ -177,7 +176,7 @@ static int64_t ffmpeg_seek(void *userData,int64_t offset,int whence)
 #ifdef WEAVE_MP3_SUPPORT_ENABLED
 extern DLLCLIENT LPALBUFFERSAMPLESSOFT alBufferSamplesSOFT;
 extern DLLCLIENT LPALISBUFFERFORMATSUPPORTEDSOFT alIsBufferFormatSupportedSOFT;
-bool openal::load_ffmpeg(std::string &path,VFilePtr f,ALChannel mode,ALAudio *audio)
+bool openal::load_ffmpeg(std::string &path, VFilePtr f, ALChannel mode, ALAudio *audio)
 {
 	int err = alGetError();
 	size_t datalen;
@@ -185,88 +184,72 @@ bool openal::load_ffmpeg(std::string &path,VFilePtr f,ALChannel mode,ALAudio *au
 	FilePtr audiofile;
 	StreamPtr sound;
 
-	audiofile = openAVCustom(path.c_str(),&f,&ffmpeg_read_packet,NULL,&ffmpeg_seek);
-	sound = getAVAudioStream(audiofile,0);
-	if(!sound)
-	{
-		Con::cwar<<"WARNING: Unable to load sound file '"<<path<<"'!"<<Con::endl;
+	audiofile = openAVCustom(path.c_str(), &f, &ffmpeg_read_packet, NULL, &ffmpeg_seek);
+	sound = getAVAudioStream(audiofile, 0);
+	if(!sound) {
+		Con::cwar << "Unable to load sound file '" << path << "'!" << Con::endl;
 		return false;
 	}
 	ALuint rate;
 	ALenum channels;
 	ALenum type;
-	if(getAVAudioInfo(sound,&rate,&channels,&type) != 0)
-	{
-		Con::cwar<<"WARNING: Unable to get audio info for '"<<path<<"'!"<<Con::endl;
+	if(getAVAudioInfo(sound, &rate, &channels, &type) != 0) {
+		Con::cwar << "Unable to get audio info for '" << path << "'!" << Con::endl;
 		closeAVFile(audiofile);
 		return false;
 	}
 
-	ALenum format = GetFormat(channels,type,alIsBufferFormatSupportedSOFT);
-	if(format == AL_NONE)
-	{
-		Con::cwar<<"WARNING: Unsupported format ("<<ChannelsName(channels)<<","<<TypeName(type)<<") for '"<<path<<"'!"<<Con::endl;
+	ALenum format = GetFormat(channels, type, alIsBufferFormatSupportedSOFT);
+	if(format == AL_NONE) {
+		Con::cwar << "Unsupported format (" << ChannelsName(channels) << "," << TypeName(type) << ") for '" << path << "'!" << Con::endl;
 		closeAVFile(audiofile);
 		return false;
 	}
 
-	data = decodeAVAudioStream(sound,&datalen);
-	if(!data)
-	{
-		Con::cwar<<"WARNING: Failed to read audio from '"<<path<<"'!"<<Con::endl;
+	data = decodeAVAudioStream(sound, &datalen);
+	if(!data) {
+		Con::cwar << "Failed to read audio from '" << path << "'!" << Con::endl;
 		closeAVFile(audiofile);
 		return false;
 	}
 
 	bool bIsMonoFormat = (format == AL_MONO8_SOFT || format == AL_MONO16_SOFT || format == AL_MONO32F_SOFT) ? true : false;
-	if(bIsMonoFormat)
-	{
+	if(bIsMonoFormat) {
 		if(audio->mono == NULL)
 			audio->mono = new ALResource;
-		if(mode == AL_CHANNEL_BOTH)
-		{
+		if(mode == AL_CHANNEL_BOTH) {
 			if(audio->stereo == NULL)
 				audio->stereo = new ALResource;
-			FillResource(audio->stereo,rate,channels,type,format);
+			FillResource(audio->stereo, rate, channels, type, format);
 			audio->stereo->buffer = 0;
 		}
-		if(audio->mono->buffer != -1)
-		{
+		if(audio->mono->buffer != -1) {
 			free(data);
 			closeAVFile(audiofile);
 			return true;
 		}
-		FillResource(audio->mono,rate,channels,type,format);
+		FillResource(audio->mono, rate, channels, type, format);
 		unsigned int alBuffer;
-		alGenBuffers(1,&alBuffer);
+		alGenBuffers(1, &alBuffer);
 		audio->mono->buffer = alBuffer;
-		alBufferSamplesSOFT(
-			audio->mono->buffer,audio->mono->rate,audio->mono->format,BytesToFrames(static_cast<ALsizei>(datalen),audio->mono->channels,audio->mono->type),
-			audio->mono->channels,audio->mono->type,data
-		);
+		alBufferSamplesSOFT(audio->mono->buffer, audio->mono->rate, audio->mono->format, BytesToFrames(static_cast<ALsizei>(datalen), audio->mono->channels, audio->mono->type), audio->mono->channels, audio->mono->type, data);
 		free(data);
 		closeAVFile(audiofile);
 		AL_CHECK_ERROR(audio->mono);
 		return true;
 	}
-	if(mode != AL_CHANNEL_MONO)
-	{
+	if(mode != AL_CHANNEL_MONO) {
 		if(audio->stereo == NULL)
 			audio->stereo = new ALResource;
-		if(audio->stereo->buffer == -1)
-		{
-			FillResource(audio->stereo,rate,channels,type,format);
+		if(audio->stereo->buffer == -1) {
+			FillResource(audio->stereo, rate, channels, type, format);
 			unsigned int alBuffer;
-			alGenBuffers(1,&alBuffer);
+			alGenBuffers(1, &alBuffer);
 			audio->stereo->buffer = alBuffer;
-			alBufferSamplesSOFT(
-				audio->stereo->buffer,audio->stereo->rate,audio->stereo->format,BytesToFrames(static_cast<ALsizei>(datalen),audio->stereo->channels,audio->stereo->type),
-				audio->stereo->channels,audio->stereo->type,data
-			);
+			alBufferSamplesSOFT(audio->stereo->buffer, audio->stereo->rate, audio->stereo->format, BytesToFrames(static_cast<ALsizei>(datalen), audio->stereo->channels, audio->stereo->type), audio->stereo->channels, audio->stereo->type, data);
 			AL_CHECK_ERROR(audio->stereo);
 		}
-		if(mode == AL_CHANNEL_AUTO || (audio->mono != NULL && audio->mono->buffer > 0))
-		{
+		if(mode == AL_CHANNEL_AUTO || (audio->mono != NULL && audio->mono->buffer > 0)) {
 			free(data);
 			closeAVFile(audiofile);
 			return true;
@@ -277,41 +260,35 @@ bool openal::load_ffmpeg(std::string &path,VFilePtr f,ALChannel mode,ALAudio *au
 	if(audio->mono == NULL)
 		audio->mono = new ALResource;
 	char *monoData;
-	if(format == AL_STEREO8_SOFT)
-	{
+	if(format == AL_STEREO8_SOFT) {
 		fragmentSize = 1;
 		newFormat = AL_MONO8_SOFT;
-		datalen = StereoToMono<char,short>(&((char*)data)[0],&monoData,CUInt32(datalen),fragmentSize);
+		datalen = StereoToMono<char, short>(&((char *)data)[0], &monoData, CUInt32(datalen), fragmentSize);
 	}
-	else if(format == AL_STEREO16_SOFT)
-	{
+	else if(format == AL_STEREO16_SOFT) {
 		fragmentSize = 2;
 		newFormat = AL_MONO16_SOFT;
-		datalen = StereoToMono<short,int>(&((char*)data)[0],&monoData,CUInt32(datalen),fragmentSize);
+		datalen = StereoToMono<short, int>(&((char *)data)[0], &monoData, CUInt32(datalen), fragmentSize);
 	}
-	else if(format == AL_STEREO32F_SOFT)
-	{
+	else if(format == AL_STEREO32F_SOFT) {
 		fragmentSize = 4;
 		newFormat = AL_MONO32F_SOFT;
-		datalen = StereoToMono<int,long long>(&((char*)data)[0],&monoData,CUInt32(datalen),fragmentSize);
+		datalen = StereoToMono<int, long long>(&((char *)data)[0], &monoData, CUInt32(datalen), fragmentSize);
 	}
 	else // Attempt to convert it anyway
 	{
 		fragmentSize = 2;
 		newFormat = AL_MONO16_SOFT;
-		datalen = StereoToMono<short,int>(&((char*)data)[0],&monoData,CUInt32(datalen),fragmentSize);
+		datalen = StereoToMono<short, int>(&((char *)data)[0], &monoData, CUInt32(datalen), fragmentSize);
 	}
 
-	FillResource(audio->mono,rate,channels,type,format);
+	FillResource(audio->mono, rate, channels, type, format);
 	audio->mono->format = newFormat;
 	audio->mono->channels = AL_MONO_SOFT;
 	unsigned int alBuffer;
-	alGenBuffers(1,&alBuffer);
+	alGenBuffers(1, &alBuffer);
 	audio->mono->buffer = alBuffer;
-	alBufferSamplesSOFT(
-		audio->mono->buffer,audio->mono->rate,audio->mono->format,BytesToFrames(static_cast<ALsizei>(datalen),audio->mono->channels,audio->mono->type),
-		audio->mono->channels,audio->mono->type,monoData
-	);
+	alBufferSamplesSOFT(audio->mono->buffer, audio->mono->rate, audio->mono->format, BytesToFrames(static_cast<ALsizei>(datalen), audio->mono->channels, audio->mono->type), audio->mono->channels, audio->mono->type, monoData);
 	delete[] monoData;
 	free(data);
 	closeAVFile(audiofile);

@@ -28,34 +28,24 @@ using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
 
-decltype(ShaderLightCone::DESCRIPTOR_SET_DEPTH_MAP) ShaderLightCone::DESCRIPTOR_SET_DEPTH_MAP = {
-	{
-		prosper::DescriptorSetInfo::Binding { // Depth Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		}
-	}
-};
-ShaderLightCone::ShaderLightCone(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderGameWorldLightingPass(context,identifier,"effects/vs_light_cone","effects/fs_light_cone")
+decltype(ShaderLightCone::DESCRIPTOR_SET_DEPTH_MAP) ShaderLightCone::DESCRIPTOR_SET_DEPTH_MAP = {{prosper::DescriptorSetInfo::Binding {// Depth Map
+  prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
+ShaderLightCone::ShaderLightCone(prosper::IPrContext &context, const std::string &identifier) : ShaderGameWorldLightingPass(context, identifier, "effects/vs_light_cone", "effects/fs_light_cone")
 {
 	// SetBaseShader<ShaderTextured3DBase>();
-	umath::set_flag(m_sceneFlags,SceneFlags::LightmapsEnabled,false);
+	umath::set_flag(m_sceneFlags, SceneFlags::LightmapsEnabled, false);
 }
 
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderLightCone::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
 	auto descSetGroup = GetContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
-	mat.SetDescriptorSetGroup(*this,descSetGroup);
+	mat.SetDescriptorSetGroup(*this, descSetGroup);
 	return descSetGroup;
 }
 
-bool ShaderLightCone::RecordBindEntity(
-	rendering::ShaderProcessor &shaderProcessor,CRenderComponent &renderC,
-	prosper::IShaderPipelineLayout &layout,uint32_t entityInstanceDescriptorSetIndex
-) const
+bool ShaderLightCone::RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const
 {
-	if(ShaderGameWorldLightingPass::RecordBindEntity(shaderProcessor,renderC,layout,entityInstanceDescriptorSetIndex) == false)
+	if(ShaderGameWorldLightingPass::RecordBindEntity(shaderProcessor, renderC, layout, entityInstanceDescriptorSetIndex) == false)
 		return false;
 	auto lightSpotVol = renderC.GetEntity().GetComponent<CLightSpotVolComponent>();
 	if(lightSpotVol.expired())
@@ -78,15 +68,15 @@ bool ShaderLightCone::Draw(CModelSubMesh &mesh,const std::optional<pragma::Rende
 }
 #endif
 
-void ShaderLightCone::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderLightCone::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(ShaderGameWorldLightingPass::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(ShaderGameWorldLightingPass::PushConstants) + sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
-void ShaderLightCone::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderLightCone::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_DEPTH_MAP);
-	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::None);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_DEPTH_MAP);
+	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo, prosper::CullModeFlags::None);
 	pipelineInfo.ToggleDepthWrites(false);
 }

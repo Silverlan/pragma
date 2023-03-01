@@ -13,24 +13,18 @@
 #include "pragma/entities/point/constraints/point_constraint_hinge.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLCLIENT CPointConstraintHingeComponent final
-		: public BasePointConstraintHingeComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CPointConstraintHingeComponent final : public BasePointConstraintHingeComponent, public CBaseNetComponent {
+	  public:
 		CPointConstraintHingeComponent(BaseEntity &ent) : BasePointConstraintHingeComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 	};
 };
 
-class DLLCLIENT CPointConstraintHinge
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CPointConstraintHinge : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

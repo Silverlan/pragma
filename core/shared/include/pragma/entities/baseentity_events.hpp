@@ -11,12 +11,9 @@
 #include "pragma/entities/entity_component_event.hpp"
 #include <string>
 
-namespace pragma
-{
-	struct DLLNETWORK CEKeyValueData
-		: public ComponentEvent
-	{
-		CEKeyValueData(const std::string &key,const std::string &value);
+namespace pragma {
+	struct DLLNETWORK CEKeyValueData : public ComponentEvent {
+		CEKeyValueData(const std::string &key, const std::string &value);
 		virtual void PushArguments(lua_State *l) override;
 		const std::string &key;
 		const std::string &value;

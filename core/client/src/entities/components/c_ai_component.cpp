@@ -19,23 +19,17 @@
 
 using namespace pragma;
 
-std::vector<CAIComponent*> CAIComponent::s_npcs;
-const std::vector<CAIComponent*> &CAIComponent::GetAll() {return s_npcs;}
-unsigned int CAIComponent::GetNPCCount() {return CUInt32(s_npcs.size());}
+std::vector<CAIComponent *> CAIComponent::s_npcs;
+const std::vector<CAIComponent *> &CAIComponent::GetAll() { return s_npcs; }
+unsigned int CAIComponent::GetNPCCount() { return CUInt32(s_npcs.size()); }
 
-CAIComponent::CAIComponent(BaseEntity &ent)
-	: BaseAIComponent(ent)
-{
-	s_npcs.push_back(this);
-}
+CAIComponent::CAIComponent(BaseEntity &ent) : BaseAIComponent(ent) { s_npcs.push_back(this); }
 
 CAIComponent::~CAIComponent()
 {
-	for(int i=0;i<s_npcs.size();i++)
-	{
-		if(s_npcs[i] == this)
-		{
-			s_npcs.erase(s_npcs.begin() +i);
+	for(int i = 0; i < s_npcs.size(); i++) {
+		if(s_npcs[i] == this) {
+			s_npcs.erase(s_npcs.begin() + i);
 			break;
 		}
 	}
@@ -43,25 +37,21 @@ CAIComponent::~CAIComponent()
 void CAIComponent::ReceiveSnapshotData(NetPacket &packet)
 {
 	auto snapshotFlags = packet->Read<SnapshotFlags>();
-	if((snapshotFlags &SnapshotFlags::Moving) == SnapshotFlags::None)
-	{
-		if(m_moveInfo.moving == true)
-		{
+	if((snapshotFlags & SnapshotFlags::Moving) == SnapshotFlags::None) {
+		if(m_moveInfo.moving == true) {
 			m_moveInfo.moving = false;
 			m_moveInfo.moveSpeed = nullptr;
 			m_moveInfo.turnSpeed = nullptr;
 			m_moveInfo.faceTarget = nullptr;
 		}
 	}
-	else
-	{
+	else {
 		m_moveInfo.moving = true;
 		m_moveInfo.moveActivity = packet->Read<Activity>();
 		m_moveInfo.moveDir = packet->Read<Vector3>();
 		m_moveInfo.moveTarget = packet->Read<Vector3>();
 
-		if((snapshotFlags &SnapshotFlags::MoveSpeed) != SnapshotFlags::None)
-		{
+		if((snapshotFlags & SnapshotFlags::MoveSpeed) != SnapshotFlags::None) {
 			auto moveSpeed = packet->Read<float>();
 			if(m_moveInfo.moveSpeed == nullptr)
 				m_moveInfo.moveSpeed = std::make_unique<float>(moveSpeed);
@@ -70,8 +60,7 @@ void CAIComponent::ReceiveSnapshotData(NetPacket &packet)
 		}
 		else
 			m_moveInfo.moveSpeed = nullptr;
-		if((snapshotFlags &SnapshotFlags::TurnSpeed) != SnapshotFlags::None)
-		{
+		if((snapshotFlags & SnapshotFlags::TurnSpeed) != SnapshotFlags::None) {
 			auto turnSpeed = packet->Read<float>();
 			if(m_moveInfo.turnSpeed == nullptr)
 				m_moveInfo.turnSpeed = std::make_unique<float>(turnSpeed);
@@ -80,8 +69,7 @@ void CAIComponent::ReceiveSnapshotData(NetPacket &packet)
 		}
 		else
 			m_moveInfo.moveSpeed = nullptr;
-		if((snapshotFlags &SnapshotFlags::FaceTarget) != SnapshotFlags::None)
-		{
+		if((snapshotFlags & SnapshotFlags::FaceTarget) != SnapshotFlags::None) {
 			auto faceTarget = packet->Read<Vector3>();
 			if(m_moveInfo.faceTarget == nullptr)
 				m_moveInfo.faceTarget = std::make_unique<Vector3>(faceTarget);
@@ -92,27 +80,25 @@ void CAIComponent::ReceiveSnapshotData(NetPacket &packet)
 			m_moveInfo.faceTarget = nullptr;
 	}
 }
-void CAIComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CAIComponent>(l);}
+void CAIComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<CAIComponent>(l); }
 
 void CAIComponent::ReceiveData(NetPacket &packet)
 {
 	// Note: Change return value of ShouldTransmitNetData if data should be received
 }
 
-bool CAIComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
+bool CAIComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
-	if(eventId == m_netEvSetLookTarget)
-	{
+	if(eventId == m_netEvSetLookTarget) {
 		auto type = packet->Read<BaseAIComponent::LookTargetType>();
-		switch(type)
-		{
-			case BaseAIComponent::LookTargetType::Position:
+		switch(type) {
+		case BaseAIComponent::LookTargetType::Position:
 			{
 				auto v = packet->Read<Vector3>();
 				SetLookTarget(v);
 				break;
 			}
-			case BaseAIComponent::LookTargetType::Entity:
+		case BaseAIComponent::LookTargetType::Entity:
 			{
 				auto *ent = nwm::read_entity(packet);
 				if(ent == nullptr)
@@ -121,16 +107,16 @@ bool CAIComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
 					SetLookTarget(*ent);
 				break;
 			}
-			default:
-				ClearLookTarget();
+		default:
+			ClearLookTarget();
 		}
 	}
 	else
-		return CBaseNetComponent::ReceiveNetEvent(eventId,packet);
+		return CBaseNetComponent::ReceiveNetEvent(eventId, packet);
 	return true;
 }
 
-Vector3 CAIComponent::OnCalcMovementDirection(const Vector3&,const Vector3&) const
+Vector3 CAIComponent::OnCalcMovementDirection(const Vector3 &, const Vector3 &) const
 {
 	auto pVelComponent = GetEntity().GetComponent<pragma::VelocityComponent>();
 	if(pVelComponent.expired())
@@ -139,30 +125,29 @@ Vector3 CAIComponent::OnCalcMovementDirection(const Vector3&,const Vector3&) con
 	auto l = uvec::length(vel);
 	if(l < 1.f)
 		return {};
-	return vel /l;
+	return vel / l;
 }
 
-void CAIComponent::Initialize()
-{
-	BaseAIComponent::Initialize();
-}
+void CAIComponent::Initialize() { BaseAIComponent::Initialize(); }
 
 void CAIComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseAIComponent::OnEntityComponentAdded(component);
-	if(typeid(component) == typeid(pragma::CCharacterComponent))
-	{
-		FlagCallbackForRemoval(static_cast<pragma::CCharacterComponent*>(&component)->BindEvent(CCharacterComponent::EVENT_CALC_MOVEMENT_DIRECTION,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-			auto &dirData = static_cast<CECalcMovementDirection&>(evData.get());
-			dirData.direction = OnCalcMovementDirection(dirData.forward,dirData.right);
-			return util::EventReply::Handled;
-		}),CallbackType::Component,&component);
+	if(typeid(component) == typeid(pragma::CCharacterComponent)) {
+		FlagCallbackForRemoval(static_cast<pragma::CCharacterComponent *>(&component)
+		                         ->BindEvent(CCharacterComponent::EVENT_CALC_MOVEMENT_DIRECTION,
+		                           [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			                           auto &dirData = static_cast<CECalcMovementDirection &>(evData.get());
+			                           dirData.direction = OnCalcMovementDirection(dirData.forward, dirData.right);
+			                           return util::EventReply::Handled;
+		                           }),
+		  CallbackType::Component, &component);
 	}
 }
 
-util::EventReply CAIComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
+util::EventReply CAIComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseAIComponent::HandleEvent(eventId,evData) == util::EventReply::Handled)
+	if(BaseAIComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	return util::EventReply::Unhandled;
 }

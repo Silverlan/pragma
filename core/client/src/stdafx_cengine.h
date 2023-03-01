@@ -6,11 +6,11 @@
  */
 
 #ifdef _WIN32
-	#pragma message("Compiling precompiled headers.\n")
+#pragma message("Compiling precompiled headers.\n")
 #endif
 #ifdef _WIN32
-	#define _WIN32_WINNT 0x0501
-	#include <Windows.h>
+#define _WIN32_WINNT 0x0501
+#include <Windows.h>
 #endif
 #include <mathutil/glmutil.h>
 #include <mathutil/eulerangles.h>

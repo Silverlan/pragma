@@ -11,5 +11,5 @@
 
 extern ServerState *server;
 
-Material *Lua::engine::server::LoadMaterial(const std::string &mat,bool reload) {return ::server->LoadMaterial(mat,reload);}
-Material *Lua::engine::server::LoadMaterial(const std::string &mat) {return LoadMaterial(mat,false);}
+Material *Lua::engine::server::LoadMaterial(const std::string &mat, bool reload) { return ::server->LoadMaterial(mat, reload); }
+Material *Lua::engine::server::LoadMaterial(const std::string &mat) { return LoadMaterial(mat, false); }

@@ -9,47 +9,76 @@
 #include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/entity_iterator.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
+#include "pragma/logging.hpp"
 #include <sharedutils/util_hash.hpp>
 #include <udm.hpp>
 
 using namespace pragma;
+void pragma::AnimationDriverComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) {}
+static void set_parameters(const ComponentMemberInfo &memberInfo, AnimationDriverComponent &component, const pragma::ents::Element &value) { component.UpdateParameters(); }
+static void get_parameters(const ComponentMemberInfo &memberInfo, AnimationDriverComponent &component, pragma::ents::Element &value) { value = component.GetParameters(); }
+void AnimationDriverComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+{
+	using T = AnimationDriverComponent;
 
-static inline pragma::AnimationDriverComponent::ValueDriverHash get_value_driver_hash(ComponentId componentId,ComponentMemberIndex memberIdx)
-{
-	return util::hash_combine<uint64_t>(util::hash_combine<uint64_t>(0,componentId),memberIdx);
-}
-void pragma::AnimationDriverComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
-{
-
-}
-
-pragma::AnimationDriverComponent::AnimationDriverComponent(BaseEntity &ent)
-	: BaseEntityComponent{ent}
-{}
-
-void pragma::AnimationDriverComponent::Initialize()
-{
-	BaseEntityComponent::Initialize();
-}
-void pragma::AnimationDriverComponent::OnRemove()
-{
-	BaseEntityComponent::OnRemove();
-	//if(m_cbOnAnimationsUpdated.IsValid())
-	//	m_cbOnAnimationsUpdated.Remove();
-}
-void AnimationDriverComponent::OnEntityComponentAdded(BaseEntityComponent &component)
-{
-	BaseEntityComponent::OnEntityComponentAdded(component);
-	/*if(typeid(component) == typeid(PanimaComponent))
 	{
-		if(m_cbOnAnimationsUpdated.IsValid())
-			m_cbOnAnimationsUpdated.Remove();
-		m_cbOnAnimationsUpdated = component.AddEventCallback(PanimaComponent::EVENT_ON_ANIMATIONS_UPDATED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-			ApplyDrivers();
-			return util::EventReply::Unhandled;
-		});
-	}*/
+		using TDrivenObject = pragma::EntityUComponentMemberRef;
+		auto memberInfo = create_component_member_info<T, TDrivenObject, static_cast<void (T::*)(const TDrivenObject &)>(&T::SetDrivenObject), static_cast<const TDrivenObject &(T::*)() const>(&T::GetDrivenObject)>("drivenObject", TDrivenObject {});
+		registerMember(std::move(memberInfo));
+	}
+	{
+		using TParameters = pragma::ents::Element;
+		auto memberInfo = create_component_member_info<T, TParameters,
+		  // For some reasons these don't work as lambdas (VS compiler bug?)
+		  &set_parameters, &get_parameters>("parameters");
+		registerMember(std::move(memberInfo));
+	}
+	{
+		using TExpr = std::string;
+		auto memberInfo = create_component_member_info<T, TExpr, &T::SetExpression, &T::GetExpression>("expression");
+		registerMember(std::move(memberInfo));
+	}
 }
+
+pragma::AnimationDriverComponent::AnimationDriverComponent(BaseEntity &ent) : BaseEntityComponent {ent}, m_parameters {udm::Property::Create<udm::Element>()}, m_descriptor {ent.GetLuaState()} {}
+
+udm::PProperty &AnimationDriverComponent::GetParameters() { return m_parameters; }
+void AnimationDriverComponent::UpdateParameters()
+{
+	m_driverDirty = true;
+
+	m_descriptor.ClearConstants();
+	auto udmConstants = (*m_parameters)["constants"];
+	for(auto pair : udmConstants.ElIt()) {
+		auto *prop = pair.property.GetProperty();
+		if(!prop) {
+			spdlog::trace("Animation driver '{}' has invalid constant parameter '{}'!", GetEntity().ToString(), pair.key);
+			continue;
+		}
+		auto cpy = pair.property.GetProperty()->Copy();
+		assert(cpy != nullptr);
+		m_descriptor.AddConstant(std::string {pair.key}, cpy);
+	}
+
+	m_descriptor.ClearReferences();
+	auto udmReferences = (*m_parameters)["references"];
+	for(auto pair : udmReferences.ElIt()) {
+		auto val = pair.property.ToValue<udm::String>();
+		if(!val) {
+			spdlog::trace("Animation driver '{}' has invalid reference parameter '{}'!", GetEntity().ToString(), pair.key);
+			continue;
+		}
+		m_descriptor.AddReference(std::string {pair.key}, *val);
+	}
+}
+
+void AnimationDriverComponent::SetDrivenObject(const pragma::EntityUComponentMemberRef &drivenObject) { m_drivenObject = drivenObject; }
+const pragma::EntityUComponentMemberRef &AnimationDriverComponent::GetDrivenObject() const { return m_drivenObject; }
+
+void pragma::AnimationDriverComponent::Initialize() { BaseEntityComponent::Initialize(); }
+void pragma::AnimationDriverComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
+void AnimationDriverComponent::OnEntityComponentAdded(BaseEntityComponent &component) { BaseEntityComponent::OnEntityComponentAdded(component); }
 void AnimationDriverComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentRemoved(component);
@@ -59,39 +88,10 @@ void AnimationDriverComponent::OnEntityComponentRemoved(BaseEntityComponent &com
 			m_cbOnAnimationsUpdated.Remove();
 	}*/
 }
-void pragma::AnimationDriverComponent::ClearDrivers()
-{
-	m_drivers.clear();
-}
-void pragma::AnimationDriverComponent::RemoveDriver(ComponentId componentId,ComponentMemberIndex memberIdx)
-{
-	auto it = m_drivers.find(get_value_driver_hash(componentId,memberIdx));
-	if(it != m_drivers.end())
-		m_drivers.erase(it);
-}
-void pragma::AnimationDriverComponent::RemoveDriver(ComponentId componentId,const std::string &memberName)
-{
-	auto memberIdx = FindComponentMember(componentId,memberName);
-	if(!memberIdx.has_value())
-		return;
-	RemoveDriver(componentId,*memberIdx);
-}
-void pragma::AnimationDriverComponent::RemoveDrivers(ComponentId componentId)
-{
-	for(auto it=m_drivers.begin();it!=m_drivers.end();)
-	{
-		auto &driver = it->second;
-		if(driver.GetComponentId() == componentId)
-			it = m_drivers.erase(it);
-		else
-			++it;
-	}
-}
-std::optional<ComponentMemberIndex> pragma::AnimationDriverComponent::FindComponentMember(ComponentId componentId,const std::string &memberName)
+std::optional<ComponentMemberIndex> pragma::AnimationDriverComponent::FindComponentMember(ComponentId componentId, const std::string &memberName)
 {
 	auto *info = GetEntity().GetComponentManager()->GetComponentInfo(componentId);
-	if(info)
-	{
+	if(info) {
 		auto memberIdx = info->FindMember(memberName);
 		if(memberIdx.has_value())
 			return memberIdx;
@@ -101,54 +101,52 @@ std::optional<ComponentMemberIndex> pragma::AnimationDriverComponent::FindCompon
 		return {};
 	return hComponent->GetMemberIndex(memberName);
 }
-bool pragma::AnimationDriverComponent::AddDriver(ComponentId componentId,const std::string &memberName,ValueDriverDescriptor descriptor)
+void pragma::AnimationDriverComponent::SetExpression(const std::string &expression)
 {
-	auto memberIdx = FindComponentMember(componentId,memberName);
-	if(!memberIdx.has_value())
+	m_descriptor.SetExpression(expression);
+	m_driverDirty = true;
+}
+const std::string &pragma::AnimationDriverComponent::GetExpression() const { return m_descriptor.GetExpression(); }
+
+void pragma::AnimationDriverComponent::AddConstant(const std::string &name, const udm::PProperty &prop)
+{
+	m_descriptor.AddConstant(name, prop);
+	m_driverDirty = true;
+}
+void pragma::AnimationDriverComponent::AddReference(const std::string &name, std::string path)
+{
+	m_descriptor.AddReference(name, path);
+	m_driverDirty = true;
+}
+
+const std::unordered_map<std::string, udm::PProperty> &pragma::AnimationDriverComponent::GetConstants() const { return m_descriptor.GetConstants(); }
+const std::unordered_map<std::string, std::string> &pragma::AnimationDriverComponent::GetReferences() const { return m_descriptor.GetReferences(); }
+bool pragma::AnimationDriverComponent::ApplyDriver()
+{
+	if(m_driverDirty) {
+		m_driverDirty = false;
+		m_driver = nullptr;
+		auto componentId = m_drivenObject.GetComponentId();
+		auto uuid = m_drivenObject.GetUuid();
+		if(componentId != INVALID_COMPONENT_ID && uuid.has_value())
+			m_driver = std::make_unique<ValueDriver>(componentId, *m_drivenObject, m_descriptor, *uuid);
+	}
+	if(!m_driver)
 		return false;
-	AddDriver(componentId,*memberIdx,std::move(descriptor));
-	return true;
-}
-void pragma::AnimationDriverComponent::AddDriver(ComponentId componentId,ComponentMemberIndex memberIdx,ValueDriverDescriptor descriptor)
-{
-	auto hComponent = GetEntity().FindComponent(componentId);
-	if(hComponent.expired())
-		return;
-	auto *memberInfo = hComponent->GetMemberInfo(memberIdx);
-	if(!memberInfo)
-		return;
-	auto ref = ComponentMemberReference::Create(*hComponent,memberIdx);
-	if(!ref.has_value())
-		return;
-	RemoveDriver(componentId,memberIdx);
-	m_drivers[get_value_driver_hash(componentId,memberIdx)] = ValueDriver{componentId,std::move(*ref),std::move(descriptor),GetEntity().GetUuid()};
-}
-bool pragma::AnimationDriverComponent::HasDriver(ComponentId componentId,ComponentMemberIndex memberIdx) const
-{
-	return FindDriver(componentId,memberIdx) != nullptr;
-}
-pragma::ValueDriver *pragma::AnimationDriverComponent::FindDriver(ComponentId componentId,ComponentMemberIndex memberIdx)
-{
-	auto it = m_drivers.find(get_value_driver_hash(componentId,memberIdx));
-	return (it != m_drivers.end()) ? &it->second : nullptr;
-}
-void pragma::AnimationDriverComponent::ApplyDrivers()
-{
+	auto &game = *GetEntity().GetNetworkState()->GetGameState();
+	auto *ent = m_drivenObject.GetEntity(game);
+	if(!ent) {
+		spdlog::trace("Execution of animation driver '{}' failed: Driven entity does not exist!", GetEntity().ToString());
+		return false;
+	}
 	auto *l = GetLuaState();
-	auto &ent = GetEntity();
-	auto &game = *ent.GetNetworkState()->GetGameState();
-	for(auto &pair : m_drivers)
-		pair.second.Apply(ent);
+	auto res = m_driver->Apply(*ent);
+	if(res != pragma::ValueDriver::Result::Success)
+		spdlog::trace("Execution of animation driver '{}' failed with result code {}!", GetEntity().ToString(), magic_enum::enum_name(res));
+	return res == pragma::ValueDriver::Result::Success;
 }
 
-void pragma::AnimationDriverComponent::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-void pragma::AnimationDriverComponent::Save(udm::LinkedPropertyWrapperArg udm)
-{
-	BaseEntityComponent::Save(udm);
-}
+void pragma::AnimationDriverComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void pragma::AnimationDriverComponent::Save(udm::LinkedPropertyWrapperArg udm) { BaseEntityComponent::Save(udm); }
 
-void pragma::AnimationDriverComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
-{
-	BaseEntityComponent::Load(udm,version);
-
-}
+void pragma::AnimationDriverComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) { BaseEntityComponent::Load(udm, version); }

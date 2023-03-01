@@ -10,22 +10,17 @@
 #include "pragma/entities/s_baseentity.h"
 #include <pragma/entities/baseworld.h>
 
-namespace pragma
-{
-	class DLLSERVER SWorldComponent final
-		: public BaseWorldComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SWorldComponent final : public BaseWorldComponent {
+	  public:
 		SWorldComponent(BaseEntity &ent) : BaseWorldComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
 class SPolyMesh;
-class DLLSERVER World
-	: public SBaseEntity
-{
-public:
+class DLLSERVER World : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

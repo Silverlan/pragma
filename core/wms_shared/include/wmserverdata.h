@@ -15,8 +15,7 @@
 class DataStream;
 #pragma warning(push)
 #pragma warning(disable : 4251)
-struct DLLWMSSHARED WMServerData
-{
+struct DLLWMSSHARED WMServerData {
 	WMServerData();
 	util::Version engineVersion;
 	std::string ip;
@@ -30,9 +29,9 @@ struct DLLWMSSHARED WMServerData
 	std::string gameMode;
 	bool password;
 	void Write(DataStream &stream) const;
-	static void Read(DataStream &stream,WMServerData &data);
+	static void Read(DataStream &stream, WMServerData &data);
 };
-DLLWMSSHARED std::ostream &operator<<(std::ostream &out,const WMServerData &data);
+DLLWMSSHARED std::ostream &operator<<(std::ostream &out, const WMServerData &data);
 #pragma warning(pop)
 
 #endif

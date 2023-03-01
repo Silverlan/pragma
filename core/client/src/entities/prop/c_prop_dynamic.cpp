@@ -18,29 +18,24 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(prop_dynamic,CPropDynamic);
+LINK_ENTITY_TO_CLASS(prop_dynamic, CPropDynamic);
 
-void CPropDynamicComponent::Initialize()
-{
-	BasePropDynamicComponent::Initialize();
-}
+void CPropDynamicComponent::Initialize() { BasePropDynamicComponent::Initialize(); }
 
 void CPropDynamicComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BasePropDynamicComponent::OnEntityComponentAdded(component);
-	if(typeid(component) == typeid(pragma::CPhysicsComponent))
-	{
-		auto *pPhysComponent = static_cast<pragma::CPhysicsComponent*>(&component);
+	if(typeid(component) == typeid(pragma::CPhysicsComponent)) {
+		auto *pPhysComponent = static_cast<pragma::CPhysicsComponent *>(&component);
 		pPhysComponent->SetMoveType(MOVETYPE::NONE);
 		// m_propPhysType = PHYSICSTYPE::DYNAMIC;
 	}
-	else if(typeid(component) == typeid(pragma::CRenderComponent))
-	{
-		auto *pRenderComponent = static_cast<pragma::CRenderComponent*>(&component);
+	else if(typeid(component) == typeid(pragma::CRenderComponent)) {
+		auto *pRenderComponent = static_cast<pragma::CRenderComponent *>(&component);
 		pRenderComponent->SetCastShadows(true);
 	}
 }
-void CPropDynamicComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CPropDynamicComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 //////////////////
 

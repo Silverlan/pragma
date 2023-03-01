@@ -10,49 +10,44 @@
 #include "pragma/lua/converters/gui_element_converter.hpp"
 #include "pragma/gui/wgui_luainterface.h"
 
-template <typename T,typename TConverter>
-template <class U>
-T luabind::gui_element_converter<T,TConverter>::to_cpp(lua_State* L, U u, int index)
+template<typename T, typename TConverter>
+template<class U>
+T luabind::gui_element_converter<T, TConverter>::to_cpp(lua_State *L, U u, int index)
 {
-	return m_converter.to_cpp(L,u,index);
+	return m_converter.to_cpp(L, u, index);
 }
 
-template <typename T,typename TConverter>
-void luabind::gui_element_converter<T,TConverter>::to_lua(lua_State* L, T x)
+template<typename T, typename TConverter>
+void luabind::gui_element_converter<T, TConverter>::to_lua(lua_State *L, T x)
 {
-	if constexpr(std::is_same_v<T,WIHandle>)
-	{
+	if constexpr(std::is_same_v<T, WIHandle>) {
 		if(x.expired())
 			lua_pushnil(L);
-		else
-		{
+		else {
 			auto &el = *x;
-			auto o = WGUILuaInterface::GetLuaObject(L,const_cast<std::remove_cvref_t<decltype(el)>&>(el));
+			auto o = WGUILuaInterface::GetLuaObject(L, const_cast<std::remove_cvref_t<decltype(el)> &>(el));
 			o.push(L);
 		}
 	}
-	else if constexpr(std::is_pointer_v<T>)
-	{
+	else if constexpr(std::is_pointer_v<T>) {
 		if(!x)
 			lua_pushnil(L);
-		else
-		{
-			auto o = WGUILuaInterface::GetLuaObject(L,*const_cast<T>(x));
+		else {
+			auto o = WGUILuaInterface::GetLuaObject(L, *const_cast<T>(x));
 			o.push(L);
 		}
 	}
-	else
-	{
-		auto o = WGUILuaInterface::GetLuaObject(L,const_cast<T&>(x));
+	else {
+		auto o = WGUILuaInterface::GetLuaObject(L, const_cast<T &>(x));
 		o.push(L);
 	}
 }
 
-template <typename T,typename TConverter>
-template <class U>
-int luabind::gui_element_converter<T,TConverter>::match(lua_State* L, U u, int index)
+template<typename T, typename TConverter>
+template<class U>
+int luabind::gui_element_converter<T, TConverter>::match(lua_State *L, U u, int index)
 {
-	return m_converter.match(L,u,index);
+	return m_converter.match(L, u, index);
 }
 
 #endif

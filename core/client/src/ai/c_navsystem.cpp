@@ -25,25 +25,24 @@
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-std::shared_ptr<pragma::nav::CMesh> pragma::nav::CMesh::Create(const std::shared_ptr<RcNavMesh> &rcMesh,const Config &config) {return Mesh::Create<CMesh>(rcMesh,config);}
-std::shared_ptr<pragma::nav::CMesh> pragma::nav::CMesh::Load(Game &game,const std::string &fname) {return Mesh::Load<CMesh>(game,fname);}
-void pragma::nav::CMesh::UpdateDebugPath(Vector3 &start,Vector3 &end)
+std::shared_ptr<pragma::nav::CMesh> pragma::nav::CMesh::Create(const std::shared_ptr<RcNavMesh> &rcMesh, const Config &config) { return Mesh::Create<CMesh>(rcMesh, config); }
+std::shared_ptr<pragma::nav::CMesh> pragma::nav::CMesh::Load(Game &game, const std::string &fname) { return Mesh::Load<CMesh>(game, fname); }
+void pragma::nav::CMesh::UpdateDebugPath(Vector3 &start, Vector3 &end)
 {
-	auto res = FindPath(start,end);
+	auto res = FindPath(start, end);
 	if(res == nullptr)
 		return;
 	std::vector<Vector3> lineVerts;
-	lineVerts.reserve(res->pathCount +2);
+	lineVerts.reserve(res->pathCount + 2);
 
-	const auto lineOffset = Vector3(0.f,10.f,0.f);
+	const auto lineOffset = Vector3(0.f, 10.f, 0.f);
 	auto nextPoint = res->start;
-	for(auto i=decltype(res->pathCount){0};i<res->pathCount;i++)
-	{
+	for(auto i = decltype(res->pathCount) {0}; i < res->pathCount; i++) {
 		auto &pathPoint = nextPoint;
-		res->GetNode(i,pathPoint,nextPoint);
-		lineVerts.push_back(pathPoint +lineOffset);
+		res->GetNode(i, pathPoint, nextPoint);
+		lineVerts.push_back(pathPoint + lineOffset);
 	}
-	m_dbgNavPath = DebugRenderer::DrawLines(lineVerts,Color::Yellow);
+	m_dbgNavPath = DebugRenderer::DrawLines(lineVerts, Color::Yellow);
 
 	m_numPath = static_cast<uint32_t>(lineVerts.size());
 }
@@ -51,9 +50,9 @@ void pragma::nav::CMesh::UpdateDebugPath(Vector3 &start,Vector3 &end)
 void pragma::nav::CMesh::UpdateDepthPathTargets()
 {
 	if(m_dbgPathStart != nullptr)
-		m_dbgPointLines[0] = DebugRenderer::DrawLine(*m_dbgPathStart,*m_dbgPathStart +Vector3(0.f,32.f,0.f),Color::Magenta);
+		m_dbgPointLines[0] = DebugRenderer::DrawLine(*m_dbgPathStart, *m_dbgPathStart + Vector3(0.f, 32.f, 0.f), Color::Magenta);
 	if(m_dbgPathEnd != nullptr)
-		m_dbgPointLines[0] = DebugRenderer::DrawLine(*m_dbgPathEnd,*m_dbgPathEnd +Vector3(0.f,32.f,0.f),Color::Magenta);
+		m_dbgPointLines[0] = DebugRenderer::DrawLine(*m_dbgPathEnd, *m_dbgPathEnd + Vector3(0.f, 32.f, 0.f), Color::Magenta);
 }
 
 void pragma::nav::CMesh::SetDebugPathStart(Vector3 &start)
@@ -63,7 +62,7 @@ void pragma::nav::CMesh::SetDebugPathStart(Vector3 &start)
 	else
 		m_dbgPathStart = std::make_unique<Vector3>(start);
 	if(m_dbgPathEnd != nullptr)
-		UpdateDebugPath(*m_dbgPathStart,*m_dbgPathEnd);
+		UpdateDebugPath(*m_dbgPathStart, *m_dbgPathEnd);
 	UpdateDepthPathTargets();
 }
 void pragma::nav::CMesh::SetDebugPathEnd(Vector3 &end)
@@ -73,7 +72,7 @@ void pragma::nav::CMesh::SetDebugPathEnd(Vector3 &end)
 	else
 		m_dbgPathEnd = std::make_unique<Vector3>(end);
 	if(m_dbgPathStart != nullptr)
-		UpdateDebugPath(*m_dbgPathStart,*m_dbgPathEnd);
+		UpdateDebugPath(*m_dbgPathStart, *m_dbgPathEnd);
 	UpdateDepthPathTargets();
 }
 
@@ -81,8 +80,7 @@ void pragma::nav::CMesh::ShowNavMeshes(bool b)
 {
 	if(b == m_bShowNavMeshes)
 		return;
-	if(b == false)
-	{
+	if(b == false) {
 		m_bShowNavMeshes = b;
 		m_dbgNavMesh = nullptr;
 		return;
@@ -97,17 +95,16 @@ void pragma::nav::CMesh::ShowNavMeshes(bool b)
 	auto &polyMesh = navMesh->GetPolyMesh();
 	std::vector<Vector3> triangleVerts;
 	{
-		const auto fDrawMeshTile = [&triangleVerts](const dtNavMesh &mesh,const dtMeshTile &tile) {
+		const auto fDrawMeshTile = [&triangleVerts](const dtNavMesh &mesh, const dtMeshTile &tile) {
 			auto base = mesh.getPolyRefBase(&tile);
 
 			auto tileNum = mesh.decodePolyIdTile(base);
-	
-			for(auto i=0;i<tile.header->polyCount;++i)
-			{
+
+			for(auto i = 0; i < tile.header->polyCount; ++i) {
 				const auto *p = &tile.polys[i];
-				if(p->getType() == DT_POLYTYPE_OFFMESH_CONNECTION)	// Skip off-mesh links.
+				if(p->getType() == DT_POLYTYPE_OFFMESH_CONNECTION) // Skip off-mesh links.
 					continue;
-			
+
 				const auto *pd = &tile.detailMeshes[i];
 
 				/*unsigned int col;
@@ -127,30 +124,28 @@ void pragma::nav::CMesh::ShowNavMeshes(bool b)
 							col = duIntToCol(p->getArea(), 64);
 					}
 				}*/
-		
-				triangleVerts.reserve(triangleVerts.size() +pd->triCount *3u);
-				for(auto j=0; j<pd->triCount;++j)
-				{
-					const auto *t = &tile.detailTris[(pd->triBase +j) *4];
-					for(auto k=0;k<3;++k)
-					{
+
+				triangleVerts.reserve(triangleVerts.size() + pd->triCount * 3u);
+				for(auto j = 0; j < pd->triCount; ++j) {
+					const auto *t = &tile.detailTris[(pd->triBase + j) * 4];
+					for(auto k = 0; k < 3; ++k) {
 						triangleVerts.push_back({});
 						auto &v = triangleVerts.back();
 						float *dtVert = nullptr;
 						if(t[k] < p->vertCount)
-							dtVert = &tile.verts[p->verts[t[k]] *3];
+							dtVert = &tile.verts[p->verts[t[k]] * 3];
 						else
-							dtVert = &tile.detailVerts[(pd->vertBase +t[k] -p->vertCount) *3];
+							dtVert = &tile.detailVerts[(pd->vertBase + t[k] - p->vertCount) * 3];
 						v[0] = dtVert[0];
 						v[1] = dtVert[1];
 						v[2] = dtVert[2];
 					}
 				}
 			}
-	
+
 			// Draw inter poly boundaries
 			//drawPolyBoundaries(dd, tile, duRGBA(0,48,64,32), 1.5f, true);
-	
+
 			// Draw outer poly boundaries
 			//drawPolyBoundaries(dd, tile, duRGBA(0,48,64,220), 2.5f, false);
 			/*
@@ -168,12 +163,11 @@ void pragma::nav::CMesh::ShowNavMeshes(bool b)
 
 		const auto &dtNavMesh = navMesh->GetNavMesh();
 		auto numTiles = dtNavMesh.getMaxTiles();
-		for(auto i=decltype(numTiles){0};i<numTiles;++i)
-		{
+		for(auto i = decltype(numTiles) {0}; i < numTiles; ++i) {
 			auto *tile = dtNavMesh.getTile(i);
 			if(tile == nullptr || tile->header == nullptr)
 				continue;
-			fDrawMeshTile(dtNavMesh,*tile);
+			fDrawMeshTile(dtNavMesh, *tile);
 		}
 	}
 
@@ -205,7 +199,7 @@ void pragma::nav::CMesh::ShowNavMeshes(bool b)
 	}*/
 	auto col = Color::Aqua;
 	col.a = 32;
-	m_dbgNavMesh = DebugRenderer::DrawMesh(triangleVerts,col,Color::Maroon);
+	m_dbgNavMesh = DebugRenderer::DrawMesh(triangleVerts, col, Color::Maroon);
 }
 
 void pragma::nav::CMesh::Clear()
@@ -220,20 +214,20 @@ void pragma::nav::CMesh::Clear()
 }
 
 static auto cvShowNavMeshes = GetClientConVar("debug_nav_show_meshes");
-REGISTER_CONVAR_CALLBACK_CL(debug_nav_show_meshes,[](NetworkState*,ConVar*,bool,bool val) {
+REGISTER_CONVAR_CALLBACK_CL(debug_nav_show_meshes, [](NetworkState *, ConVar *, bool, bool val) {
 	if(c_game == NULL || c_game->LoadNavMesh() == false)
 		return;
 	auto &navMesh = c_game->GetNavMesh();
 	if(navMesh == nullptr)
 		return;
-	static_cast<pragma::nav::CMesh&>(*navMesh).ShowNavMeshes(val);
+	static_cast<pragma::nav::CMesh &>(*navMesh).ShowNavMeshes(val);
 });
 
 ////////////////////////////////////
 
-void CMD_debug_nav_path_start(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string>&)
+void CMD_debug_nav_path_start(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
-	CHECK_CHEATS("debug_nav_path_start",state,);
+	CHECK_CHEATS("debug_nav_path_start", state, );
 	if(c_game == nullptr || c_game->LoadNavMesh() == false || pl == nullptr)
 		return;
 	auto &navMesh = c_game->GetNavMesh();
@@ -251,16 +245,16 @@ void CMD_debug_nav_path_start(NetworkState *state,pragma::BasePlayerComponent *p
 	data.SetFilter(ent);
 	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
 	data.SetSource(origin);
-	data.SetTarget(origin +dir *65'536.f);
+	data.SetTarget(origin + dir * 65'536.f);
 	auto r = c_game->RayCast(data);
 	if(r.hitType == RayCastHitType::None)
 		return;
-	static_cast<pragma::nav::CMesh&>(*navMesh).SetDebugPathStart(r.position);
+	static_cast<pragma::nav::CMesh &>(*navMesh).SetDebugPathStart(r.position);
 }
 
-void CMD_debug_nav_path_end(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string>&)
+void CMD_debug_nav_path_end(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &)
 {
-	CHECK_CHEATS("debug_nav_path_end",state,);
+	CHECK_CHEATS("debug_nav_path_end", state, );
 	if(c_game == nullptr || c_game->LoadNavMesh() == false || pl == nullptr)
 		return;
 	auto &navMesh = c_game->GetNavMesh();
@@ -278,10 +272,9 @@ void CMD_debug_nav_path_end(NetworkState *state,pragma::BasePlayerComponent *pl,
 	data.SetFilter(ent);
 	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
 	data.SetSource(origin);
-	data.SetTarget(origin +dir *65'536.f);
+	data.SetTarget(origin + dir * 65'536.f);
 	auto r = c_game->RayCast(data);
 	if(r.hitType == RayCastHitType::None)
 		return;
-	static_cast<pragma::nav::CMesh&>(*navMesh).SetDebugPathEnd(r.position);
+	static_cast<pragma::nav::CMesh &>(*navMesh).SetDebugPathEnd(r.position);
 }
-

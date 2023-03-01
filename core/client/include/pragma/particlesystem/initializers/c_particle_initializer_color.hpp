@@ -12,13 +12,10 @@
 #include "pragma/particlesystem/c_particlemodifier.h"
 #include "pragma/particlesystem/modifiers/c_particle_modifier_component_random_color.hpp"
 
-class DLLCLIENT CParticleInitializerColor
-	: public CParticleInitializer,
-	public CParticleModifierComponentRandomColor
-{
-public:
-	CParticleInitializerColor()=default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+class DLLCLIENT CParticleInitializerColor : public CParticleInitializer, public CParticleModifierComponentRandomColor {
+  public:
+	CParticleInitializerColor() = default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void OnParticleCreated(CParticle &particle) override;
 };
 

@@ -8,8 +8,7 @@
 #include "pragma/networking/resource.h"
 #include <fsys/filesystem.h>
 
-Resource::Resource(std::string name,bool bStream)
-	: offset(0),stream(bStream)
+Resource::Resource(std::string name, bool bStream) : offset(0), stream(bStream)
 {
 	this->name = FileManager::GetCanonicalizedPath(name);
 	file = nullptr;
@@ -22,7 +21,7 @@ Resource::~Resource()
 }
 bool Resource::Construct()
 {
-	file = FileManager::OpenFile(name.c_str(),"rb");
+	file = FileManager::OpenFile(name.c_str(), "rb");
 	if(file == nullptr)
 		return false;
 	return true;

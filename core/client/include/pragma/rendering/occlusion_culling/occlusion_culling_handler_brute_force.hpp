@@ -11,18 +11,12 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler.hpp"
 
-namespace pragma
-{
-	class DLLCLIENT OcclusionCullingHandlerBruteForce
-		: public OcclusionCullingHandler
-	{
-	public:
-		OcclusionCullingHandlerBruteForce()=default;
-		virtual void PerformCulling(
-			CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const Vector3 &camPos,
-			std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut,bool cullByViewFrustum=true
-		) override;
-	private:
+namespace pragma {
+	class DLLCLIENT OcclusionCullingHandlerBruteForce : public OcclusionCullingHandler {
+	  public:
+		OcclusionCullingHandlerBruteForce() = default;
+		virtual void PerformCulling(CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const Vector3 &camPos, std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut, bool cullByViewFrustum = true) override;
+	  private:
 	};
 };
 

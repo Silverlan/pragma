@@ -11,20 +11,16 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/liquid/base_liquid_control_component.hpp>
 
-namespace pragma
-{
-	class DLLSERVER SLiquidControlComponent final
-		: public BaseLiquidControlComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SLiquidControlComponent final : public BaseLiquidControlComponent, public SBaseNetComponent {
+	  public:
 		SLiquidControlComponent(BaseEntity &ent) : BaseLiquidControlComponent(ent) {}
 		virtual void Initialize() override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 
-		virtual void CreateSplash(const Vector3 &origin,float radius,float force) override;
+		virtual void CreateSplash(const Vector3 &origin, float radius, float force) override;
 	};
 };
 

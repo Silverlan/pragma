@@ -14,34 +14,20 @@
 using namespace pragma;
 
 ComponentEventId LogicComponent::EVENT_ON_TICK = INVALID_COMPONENT_ID;
-void LogicComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
-{
-	EVENT_ON_TICK = registerEvent("ON_TICK",ComponentEventInfo::Type::Explicit);
-}
+void LogicComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_TICK = registerEvent("ON_TICK", ComponentEventInfo::Type::Explicit); }
 
-LogicComponent::LogicComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+LogicComponent::LogicComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 
-void LogicComponent::Initialize()
-{
-	BaseEntityComponent::Initialize();
-}
-void LogicComponent::OnRemove()
-{
-	BaseEntityComponent::OnRemove();
-}
-void LogicComponent::OnEntitySpawn()
-{
-	BaseEntityComponent::OnEntitySpawn();
-}
-void LogicComponent::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void LogicComponent::Initialize() { BaseEntityComponent::Initialize(); }
+void LogicComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
+void LogicComponent::OnEntitySpawn() { BaseEntityComponent::OnEntitySpawn(); }
+void LogicComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void LogicComponent::OnTick(double dt)
 {
 	//if(contact != NULL)
 	//{
-		/*if(contact->actor->isRigidDynamic())
+	/*if(contact->actor->isRigidDynamic())
 		{
 			physx::PxRigidDynamic *rigid = static_cast<physx::PxRigidDynamic*>(contact->actor);
 			Vector3 pos = *GetPosition();
@@ -64,15 +50,10 @@ void LogicComponent::OnTick(double dt)
 	auto hThis = GetHandle();
 	auto &ent = GetEntity();
 	CEOnTick evData {dt};
-	InvokeEventCallbacks(EVENT_ON_TICK,evData);
+	InvokeEventCallbacks(EVENT_ON_TICK, evData);
 }
 
 //////////
 
-CEOnTick::CEOnTick(double dt)
-	: deltaTime(dt)
-{}
-void CEOnTick::PushArguments(lua_State *l)
-{
-	Lua::PushNumber(l,deltaTime);
-}
+CEOnTick::CEOnTick(double dt) : deltaTime(dt) {}
+void CEOnTick::PushArguments(lua_State *l) { Lua::PushNumber(l, deltaTime); }

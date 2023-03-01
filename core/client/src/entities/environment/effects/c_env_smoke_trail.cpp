@@ -18,15 +18,12 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_smoke_trail,CEnvSmokeTrail);
+LINK_ENTITY_TO_CLASS(env_smoke_trail, CEnvSmokeTrail);
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-CSmokeTrailComponent::~CSmokeTrailComponent()
-{
-	DestroyParticle();
-}
+CSmokeTrailComponent::~CSmokeTrailComponent() { DestroyParticle(); }
 void CSmokeTrailComponent::Initialize()
 {
 	BaseEnvSmokeTrailComponent::Initialize();
@@ -45,9 +42,9 @@ void CSmokeTrailComponent::ReceiveData(NetPacket &packet)
 	m_maxSpriteSize = packet->Read<float>();
 	m_material = packet->ReadString();
 }
-util::EventReply CSmokeTrailComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
+util::EventReply CSmokeTrailComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
-	if(BaseEnvSmokeTrailComponent::HandleEvent(eventId,evData) == util::EventReply::Handled)
+	if(BaseEnvSmokeTrailComponent::HandleEvent(eventId, evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	if(eventId == BaseToggleComponent::EVENT_ON_TURN_ON)
 		InitializeParticle();
@@ -59,10 +56,10 @@ util::EventReply CSmokeTrailComponent::HandleEvent(ComponentEventId eventId,Comp
 void CSmokeTrailComponent::InitializeParticle()
 {
 	auto &ent = GetEntity();
-	auto *pToggleComponent = static_cast<pragma::BaseToggleComponent*>(ent.FindComponent("toggle").get());
+	auto *pToggleComponent = static_cast<pragma::BaseToggleComponent *>(ent.FindComponent("toggle").get());
 	if((pToggleComponent != nullptr && pToggleComponent->IsTurnedOn() == false) || m_hParticle.valid() == true)
 		return;
-	auto *pt = util::create_smoke_trail_particle(m_distance,m_speed,m_minSpriteSize,m_maxSpriteSize,m_material);
+	auto *pt = util::create_smoke_trail_particle(m_distance, m_speed, m_minSpriteSize, m_maxSpriteSize, m_material);
 	if(pt == nullptr)
 		return;
 	pt->Start();
@@ -71,13 +68,12 @@ void CSmokeTrailComponent::InitializeParticle()
 
 void CSmokeTrailComponent::DestroyParticle()
 {
-	if(m_hParticle.valid())
-	{
+	if(m_hParticle.valid()) {
 		m_hParticle->Die();
 		m_hParticle->SetRemoveOnComplete(true);
 	}
 }
-void CSmokeTrailComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CSmokeTrailComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////////
 

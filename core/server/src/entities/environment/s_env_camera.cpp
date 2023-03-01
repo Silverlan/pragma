@@ -16,16 +16,15 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_camera,EnvCamera);
+LINK_ENTITY_TO_CLASS(env_camera, EnvCamera);
 
-void SCameraComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SCameraComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void SCameraComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEnvCameraComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(SFieldAngleComponent))
-		SetFieldAngleComponent(static_cast<SFieldAngleComponent&>(component));
+		SetFieldAngleComponent(static_cast<SFieldAngleComponent &>(component));
 }
-
 
 void EnvCamera::Initialize()
 {

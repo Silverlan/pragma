@@ -15,22 +15,19 @@
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
-class DLLCLIENT CParticleSystemBaseKeyValues
-{
-public:
-	CParticleSystemBaseKeyValues()=default;
-	void RecordKeyValues(const std::unordered_map<std::string,std::string> &values);
-	const std::unordered_map<std::string,std::string> *GetKeyValues() const;
+class DLLCLIENT CParticleSystemBaseKeyValues {
+  public:
+	CParticleSystemBaseKeyValues() = default;
+	void RecordKeyValues(const std::unordered_map<std::string, std::string> &values);
+	const std::unordered_map<std::string, std::string> *GetKeyValues() const;
 	bool IsRecordingKeyValues() const;
-private:
-	std::unique_ptr<std::unordered_map<std::string,std::string>> m_keyValues;
+  private:
+	std::unique_ptr<std::unordered_map<std::string, std::string>> m_keyValues;
 };
 
-class DLLCLIENT CParticle
-{
-public:
-	enum class FieldId : uint8_t
-	{
+class DLLCLIENT CParticle {
+  public:
+	enum class FieldId : uint8_t {
 		Pos = 0,
 		Rot,
 		RotYaw,
@@ -116,30 +113,30 @@ public:
 	const Vector3 &GetOrigin() const;
 	void SetOrigin(const Vector3 &origin);
 
-	void SetField(FieldId fieldId,float value);
-	void SetField(FieldId fieldId,const Vector4 &value);
-	bool GetField(FieldId fieldId,float &outValue) const;
-	bool GetField(FieldId fieldId,Vector4 &outValue) const;
+	void SetField(FieldId fieldId, float value);
+	void SetField(FieldId fieldId, const Vector4 &value);
+	bool GetField(FieldId fieldId, float &outValue) const;
+	bool GetField(FieldId fieldId, Vector4 &outValue) const;
 
 	uint32_t GetSeed() const;
 	// Generates a random int, but gurantees to always return the same int for a specific particle and a specific seed
-	template<typename T,typename = std::enable_if_t<std::is_integral<T>::value>>
-		T PseudoRandomInt(T min,T max,uint32_t seed=0u) const;
-    template<typename T>
-		T PseudoRandomInt(const std::uniform_int_distribution<T> &dis,uint32_t seed=0u) const;
+	template<typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+	T PseudoRandomInt(T min, T max, uint32_t seed = 0u) const;
+	template<typename T>
+	T PseudoRandomInt(const std::uniform_int_distribution<T> &dis, uint32_t seed = 0u) const;
 	// Generates a random real, but gurantees to always return the same real for a specific particle and a specific seed
-	template<typename T,typename = std::enable_if_t<std::is_floating_point<T>::value>>
-		T PseudoRandomReal(T min,T max,uint32_t seed=0u) const;
-    template<typename T>
-		T PseudoRandomReal(const std::uniform_real_distribution<T> &dis,uint32_t seed=0u) const;
+	template<typename T, typename = std::enable_if_t<std::is_floating_point<T>::value>>
+	T PseudoRandomReal(T min, T max, uint32_t seed = 0u) const;
+	template<typename T>
+	T PseudoRandomReal(const std::uniform_real_distribution<T> &dis, uint32_t seed = 0u) const;
 
-	template<typename T,typename = std::enable_if_t<std::is_floating_point<T>::value>>
-		T PseudoRandomRealExp(T min,T max,float exp,uint32_t seed=0u) const;
-private:
+	template<typename T, typename = std::enable_if_t<std::is_floating_point<T>::value>>
+	T PseudoRandomRealExp(T min, T max, float exp, uint32_t seed = 0u) const;
+  private:
 	Vector3 m_pos = {};
 	Quat m_rot = uquat::identity(); // Only used by model renderer and physics
-									// Optional relative origin, which is rotated by the particle's rotation, and added to its position before
-									// being written to the render buffer (= Position modifier)
+	                                // Optional relative origin, which is rotated by the particle's rotation, and added to its position before
+	                                // being written to the render buffer (= Position modifier)
 	Vector3 m_origin = {};
 	Vector3 m_velocity = {};
 	Vector3 m_angularVelocity = {};
@@ -177,41 +174,40 @@ private:
 #pragma warning(pop)
 
 template<typename T>
-    T CParticle::PseudoRandomInt(const std::uniform_int_distribution<T> &dis,uint32_t seed) const
+T CParticle::PseudoRandomInt(const std::uniform_int_distribution<T> &dis, uint32_t seed) const
 {
-	m_mt.seed(m_seed +seed);
-	return const_cast<std::uniform_int_distribution<T>&>(dis)(m_mt);
+	m_mt.seed(m_seed + seed);
+	return const_cast<std::uniform_int_distribution<T> &>(dis)(m_mt);
 }
 
-template<typename T,typename>
-	T CParticle::PseudoRandomInt(T min,T max,uint32_t seed) const
+template<typename T, typename>
+T CParticle::PseudoRandomInt(T min, T max, uint32_t seed) const
 {
-	return PseudoRandomInt(std::uniform_int_distribution<T>(min,max),seed);
+	return PseudoRandomInt(std::uniform_int_distribution<T>(min, max), seed);
 }
 
 template<typename T>
-	T CParticle::PseudoRandomReal(const std::uniform_real_distribution<T> &dis,uint32_t seed) const
+T CParticle::PseudoRandomReal(const std::uniform_real_distribution<T> &dis, uint32_t seed) const
 {
-	m_mt.seed(m_seed +seed);
-	return const_cast<std::uniform_real_distribution<T>&>(dis)(m_mt);
+	m_mt.seed(m_seed + seed);
+	return const_cast<std::uniform_real_distribution<T> &>(dis)(m_mt);
 }
 
-template<typename T,typename>
-	T CParticle::PseudoRandomReal(T min,T max,uint32_t seed) const
+template<typename T, typename>
+T CParticle::PseudoRandomReal(T min, T max, uint32_t seed) const
 {
-	return PseudoRandomReal(std::uniform_real_distribution<T>(min,max),seed);
+	return PseudoRandomReal(std::uniform_real_distribution<T>(min, max), seed);
 }
 
-template<typename T,typename>
-	T CParticle::PseudoRandomRealExp(T min,T max,float exp,uint32_t seed) const
+template<typename T, typename>
+T CParticle::PseudoRandomRealExp(T min, T max, float exp, uint32_t seed) const
 {
-	auto v = PseudoRandomReal(std::uniform_real_distribution<T>(min,max),seed) -min;
+	auto v = PseudoRandomReal(std::uniform_real_distribution<T>(min, max), seed) - min;
 	if(exp != 1.f)
-		v = powf(v,exp);
-	return v +min;
+		v = powf(v, exp);
+	return v + min;
 }
 
-inline bool operator<(const CParticle &a,const CParticle &b)
-{return a.GetCameraDistance() > b.GetCameraDistance();}
+inline bool operator<(const CParticle &a, const CParticle &b) { return a.GetCameraDistance() > b.GetCameraDistance(); }
 
 #endif

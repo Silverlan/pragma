@@ -18,9 +18,9 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_light_spot,EnvLightSpot);
+LINK_ENTITY_TO_CLASS(env_light_spot, EnvLightSpot);
 
-void SLightSpotComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SLightSpotComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->Write<float>(*m_blendFraction);
 	packet->Write<float>(*m_coneStartOffset);
@@ -31,7 +31,7 @@ void SLightSpotComponent::SetConeStartOffset(float offset)
 	BaseEnvLightSpotComponent::SetConeStartOffset(offset);
 	NetPacket p {};
 	p->Write<float>(offset);
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetConeStartOffset,p,pragma::networking::Protocol::SlowReliable);
+	static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetConeStartOffset, p, pragma::networking::Protocol::SlowReliable);
 }
 
 void SLightSpotComponent::SetOuterConeAngle(float ang)
@@ -41,9 +41,9 @@ void SLightSpotComponent::SetOuterConeAngle(float ang)
 	if(!ent.IsSpawned())
 		return;
 	NetPacket p;
-	nwm::write_entity(p,&ent);
+	nwm::write_entity(p, &ent);
 	p->Write<float>(ang);
-	server->SendPacket("env_light_spot_outercutoff_angle",p,pragma::networking::Protocol::SlowReliable);
+	server->SendPacket("env_light_spot_outercutoff_angle", p, pragma::networking::Protocol::SlowReliable);
 }
 
 void SLightSpotComponent::SetBlendFraction(float ang)
@@ -53,20 +53,20 @@ void SLightSpotComponent::SetBlendFraction(float ang)
 	if(!ent.IsSpawned())
 		return;
 	NetPacket p;
-	nwm::write_entity(p,&ent);
+	nwm::write_entity(p, &ent);
 	p->Write<float>(ang);
-	server->SendPacket("env_light_spot_innercutoff_angle",p,pragma::networking::Protocol::SlowReliable);
+	server->SendPacket("env_light_spot_innercutoff_angle", p, pragma::networking::Protocol::SlowReliable);
 }
 
-void SLightSpotComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SLightSpotComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void SLightSpotComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(SLightComponent))
-		static_cast<SLightComponent&>(component).SetLight(*this);
+		static_cast<SLightComponent &>(component).SetLight(*this);
 	else if(typeid(component) == typeid(SFieldAngleComponent))
-		SetFieldAngleComponent(static_cast<SFieldAngleComponent&>(component));
+		SetFieldAngleComponent(static_cast<SFieldAngleComponent &>(component));
 }
 
 ///////////

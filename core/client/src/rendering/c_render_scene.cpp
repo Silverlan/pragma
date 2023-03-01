@@ -32,51 +32,46 @@
 
 extern DLLCLIENT CEngine *c_engine;
 
-void CGame::RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::Texture &texPostHdr,prosper::IImage *optOutImage,uint32_t layerId)
+void CGame::RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, prosper::Texture &texPostHdr, prosper::IImage *optOutImage, uint32_t layerId)
 {
-	if(optOutImage)
-	{
-		drawCmd->RecordImageBarrier(*optOutImage,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferDstOptimal);
+	if(optOutImage) {
+		drawCmd->RecordImageBarrier(*optOutImage, prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferDstOptimal);
 		prosper::util::BlitInfo blitInfo {};
 		blitInfo.dstSubresourceLayer.baseArrayLayer = layerId;
-		drawCmd->RecordBlitImage(blitInfo,texPostHdr.GetImage(),*optOutImage);
-		drawCmd->RecordImageBarrier(*optOutImage,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+		drawCmd->RecordBlitImage(blitInfo, texPostHdr.GetImage(), *optOutImage);
+		drawCmd->RecordImageBarrier(*optOutImage, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 	}
-	drawCmd->RecordImageBarrier(texPostHdr.GetImage(),prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+	drawCmd->RecordImageBarrier(texPostHdr.GetImage(), prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 }
 
-std::shared_ptr<prosper::IPrimaryCommandBuffer> CGame::GetCurrentDrawCommandBuffer() const {return m_currentDrawCmd.lock();}
+std::shared_ptr<prosper::IPrimaryCommandBuffer> CGame::GetCurrentDrawCommandBuffer() const { return m_currentDrawCmd.lock(); }
 
 void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 {
 	m_currentDrawCmd = drawSceneInfo.commandBuffer;
-	util::ScopeGuard sgCurrentDrawCmd {[this]() {
-		m_currentDrawCmd = {};
-	}};
+	util::ScopeGuard sgCurrentDrawCmd {[this]() { m_currentDrawCmd = {}; }};
 
-	CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScene",drawSceneInfo);
-	CallLuaCallbacks<void,const util::DrawSceneInfo*>("PreRenderScene",&drawSceneInfo);
+	CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScene", drawSceneInfo);
+	CallLuaCallbacks<void, const util::DrawSceneInfo *>("PreRenderScene", &drawSceneInfo);
 
 	auto &scene = drawSceneInfo.scene;
-	auto *renderer = const_cast<pragma::CSceneComponent*>(scene.get())->GetRenderer();
-	if(renderer)
-	{
-
+	auto *renderer = const_cast<pragma::CSceneComponent *>(scene.get())->GetRenderer();
+	if(renderer) {
 		prosper::Texture *presentationTexture = nullptr;
-		if(umath::is_flag_set(drawSceneInfo.renderFlags,RenderFlags::HDR))
+		if(umath::is_flag_set(drawSceneInfo.renderFlags, RenderFlags::HDR))
 			presentationTexture = drawSceneInfo.renderTarget ? &drawSceneInfo.renderTarget->GetTexture() : renderer->GetHDRPresentationTexture();
 		else
 			presentationTexture = renderer->GetPresentationTexture();
-		drawSceneInfo.commandBuffer->RecordImageBarrier(presentationTexture->GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+		drawSceneInfo.commandBuffer->RecordImageBarrier(presentationTexture->GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 
 		renderer->Render(drawSceneInfo);
 		StartProfilingStage(CGame::GPUProfilingPhase::Present);
 		StartProfilingStage(CGame::CPUProfilingPhase::Present);
 
-		RenderScenePresent(drawSceneInfo.commandBuffer,*presentationTexture,drawSceneInfo.outputImage.get(),drawSceneInfo.outputLayerId);
+		RenderScenePresent(drawSceneInfo.commandBuffer, *presentationTexture, drawSceneInfo.outputImage.get(), drawSceneInfo.outputLayerId);
 		StopProfilingStage(CGame::CPUProfilingPhase::Present);
 		StopProfilingStage(CGame::GPUProfilingPhase::Present);
 	}
-	CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PostRenderScene",drawSceneInfo);
-	CallLuaCallbacks<void,const util::DrawSceneInfo*>("PostRenderScene",&drawSceneInfo);
+	CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("PostRenderScene", drawSceneInfo);
+	CallLuaCallbacks<void, const util::DrawSceneInfo *>("PostRenderScene", &drawSceneInfo);
 }

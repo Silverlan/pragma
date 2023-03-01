@@ -36,30 +36,29 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CEngine *c_engine;
 
-
-int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l,pragma::CCameraComponent &hCam,const Vector2 &uv)
+int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l, pragma::CCameraComponent &hCam, const Vector2 &uv)
 {
 	auto trComponent = hCam.GetEntity().GetTransformComponent();
 	auto forward = trComponent ? trComponent->GetForward() : uvec::FORWARD;
 	auto right = trComponent ? trComponent->GetRight() : uvec::RIGHT;
 	auto up = trComponent ? trComponent->GetUp() : uvec::UP;
-	auto dir = uvec::calc_world_direction_from_2d_coordinates(forward,right,up,hCam.GetFOVRad(),hCam.GetNearZ(),hCam.GetFarZ(),hCam.GetAspectRatio(),0.f,0.f,uv);
-	Lua::Push<Vector3>(l,dir);
+	auto dir = uvec::calc_world_direction_from_2d_coordinates(forward, right, up, hCam.GetFOVRad(), hCam.GetNearZ(), hCam.GetFarZ(), hCam.GetAspectRatio(), 0.f, 0.f, uv);
+	Lua::Push<Vector3>(l, dir);
 	return 1;
 }
 
 int Lua::util::Client::create_particle_tracer(lua_State *l)
 {
-	auto &start = *Lua::CheckVector(l,1);
-	auto &end = *Lua::CheckVector(l,2);
-	auto radius = Lua::IsSet(l,3) ? Lua::CheckNumber(l,3) : BulletInfo::DEFAULT_TRACER_RADIUS;
-	const auto *col = Lua::IsSet(l,4) ? Lua::CheckColor(l,4) : &BulletInfo::DEFAULT_TRACER_COLOR;
-	auto length = Lua::IsSet(l,5) ? Lua::CheckNumber(l,5) : BulletInfo::DEFAULT_TRACER_LENGTH;
-	auto speed = Lua::IsSet(l,6) ? Lua::CheckNumber(l,6) : BulletInfo::DEFAULT_TRACER_SPEED;
-	auto *mat = Lua::IsSet(l,7) ? Lua::CheckString(l,7) : BulletInfo::DEFAULT_TRACER_MATERIAL.c_str();
-	auto bloomScale = Lua::IsSet(l,8) ? Lua::CheckNumber(l,8) : BulletInfo::DEFAULT_TRACER_BLOOM;
+	auto &start = *Lua::CheckVector(l, 1);
+	auto &end = *Lua::CheckVector(l, 2);
+	auto radius = Lua::IsSet(l, 3) ? Lua::CheckNumber(l, 3) : BulletInfo::DEFAULT_TRACER_RADIUS;
+	const auto *col = Lua::IsSet(l, 4) ? Lua::CheckColor(l, 4) : &BulletInfo::DEFAULT_TRACER_COLOR;
+	auto length = Lua::IsSet(l, 5) ? Lua::CheckNumber(l, 5) : BulletInfo::DEFAULT_TRACER_LENGTH;
+	auto speed = Lua::IsSet(l, 6) ? Lua::CheckNumber(l, 6) : BulletInfo::DEFAULT_TRACER_SPEED;
+	auto *mat = Lua::IsSet(l, 7) ? Lua::CheckString(l, 7) : BulletInfo::DEFAULT_TRACER_MATERIAL.c_str();
+	auto bloomScale = Lua::IsSet(l, 8) ? Lua::CheckNumber(l, 8) : BulletInfo::DEFAULT_TRACER_BLOOM;
 
-	auto *particle = c_game->CreateParticleTracer(start,end,static_cast<float>(radius),*col,static_cast<float>(length),static_cast<float>(speed),mat,static_cast<float>(bloomScale));
+	auto *particle = c_game->CreateParticleTracer(start, end, static_cast<float>(radius), *col, static_cast<float>(length), static_cast<float>(speed), mat, static_cast<float>(bloomScale));
 	if(particle == nullptr)
 		return 0;
 	particle->PushLuaObject(l);
@@ -68,58 +67,54 @@ int Lua::util::Client::create_particle_tracer(lua_State *l)
 
 int Lua::util::Client::create_muzzle_flash(lua_State *l)
 {
-	if(Lua::IsType<BaseEntity>(l,1) == true)
-	{
-		auto &ent = Lua::Check<BaseEntity>(l,1);
+	if(Lua::IsType<BaseEntity>(l, 1) == true) {
+		auto &ent = Lua::Check<BaseEntity>(l, 1);
 		int32_t attId = -1;
 		std::string att {};
-		if(Lua::IsNumber(l,2))
-			attId = Lua::CheckInt(l,2);
+		if(Lua::IsNumber(l, 2))
+			attId = Lua::CheckInt(l, 2);
 		else
-			att = Lua::CheckString(l,2);
+			att = Lua::CheckString(l, 2);
 		Vector3 relOffset {};
 		auto relRot = uquat::identity();
-		if(Lua::IsSet(l,3))
-		{
-			relOffset = *Lua::CheckVector(l,3);
-			if(Lua::IsSet(l,4))
-				relRot = *Lua::CheckQuaternion(l,4);
+		if(Lua::IsSet(l, 3)) {
+			relOffset = *Lua::CheckVector(l, 3);
+			if(Lua::IsSet(l, 4))
+				relRot = *Lua::CheckQuaternion(l, 4);
 		}
-		std::string particleName = "muzzleflash0" +std::to_string(umath::random(1,6));
+		std::string particleName = "muzzleflash0" + std::to_string(umath::random(1, 6));
 		auto *pt = pragma::CParticleSystemComponent::Create(particleName);
 		if(pt == nullptr)
 			return 0;
-		auto pRenderComponent = static_cast<CBaseEntity*>(&ent)->GetRenderComponent();
+		auto pRenderComponent = static_cast<CBaseEntity *>(&ent)->GetRenderComponent();
 		if(pRenderComponent)
 			pt->SetSceneRenderPass(pRenderComponent->GetSceneRenderPass());
-		pt->GetEntity().SetKeyValue("transform_with_emitter","1");
+		pt->GetEntity().SetKeyValue("transform_with_emitter", "1");
 		pt->SetRemoveOnComplete(true);
 		auto &entPt = pt->GetEntity();
 		pt->Start();
 		auto pAttachableComponent = entPt.AddComponent<pragma::CAttachableComponent>();
-		if(pAttachableComponent.valid())
-		{
+		if(pAttachableComponent.valid()) {
 			AttachmentInfo attInfo {};
 			attInfo.offset = relOffset;
 			attInfo.rotation = relRot;
 			attInfo.flags |= FAttachmentMode::UpdateEachFrame;
 			if(att.empty() == false)
-				pAttachableComponent->AttachToAttachment(&ent,att,attInfo);
+				pAttachableComponent->AttachToAttachment(&ent, att, attInfo);
 			else
-				pAttachableComponent->AttachToAttachment(&ent,attId,attInfo);
+				pAttachableComponent->AttachToAttachment(&ent, attId, attInfo);
 		}
 		pt->PushLuaObject(l);
 		return 1;
 	}
-	auto &pos = *Lua::CheckVector(l,1);
-	auto &rot = *Lua::CheckQuaternion(l,2);
-	std::string particleName = "muzzleflash0" +std::to_string(umath::random(1,6));
+	auto &pos = *Lua::CheckVector(l, 1);
+	auto &rot = *Lua::CheckQuaternion(l, 2);
+	std::string particleName = "muzzleflash0" + std::to_string(umath::random(1, 6));
 	auto *pt = pragma::CParticleSystemComponent::Create(particleName);
 	if(pt == nullptr)
 		return 0;
 	auto pTrComponent = pt->GetEntity().GetTransformComponent();
-	if(pTrComponent != nullptr)
-	{
+	if(pTrComponent != nullptr) {
 		pTrComponent->SetPosition(pos);
 		pTrComponent->SetRotation(rot);
 	}
@@ -132,7 +127,7 @@ int Lua::util::Client::create_muzzle_flash(lua_State *l)
 luabind::object Lua::util::Client::create_giblet(GibletCreateInfo &createInfo)
 {
 	pragma::CParticleSystemComponent *particle = nullptr;
-	c_game->CreateGiblet(createInfo,&particle);
+	c_game->CreateGiblet(createInfo, &particle);
 	if(particle == nullptr)
 		return {};
 	return particle->GetLuaObject();
@@ -142,159 +137,143 @@ int Lua::util::Client::import_model(lua_State *l)
 {
 	std::shared_ptr<ufile::IFile> f = nullptr;
 	std::string fileName;
-	if(Lua::IsString(l,1))
-		fileName = Lua::CheckString(l,1);
-	else
-	{
-		auto *lf = Lua::CheckFile(l,1);
+	if(Lua::IsString(l, 1))
+		fileName = Lua::CheckString(l, 1);
+	else {
+		auto *lf = Lua::CheckFile(l, 1);
 		if(lf == nullptr)
 			return 0;
 		f = lf->GetHandle();
 	}
 	::util::Path outputPath {};
-	if(Lua::IsSet(l,2))
-		outputPath = ::util::Path::CreatePath(Lua::CheckString(l,2));
+	if(Lua::IsSet(l, 2))
+		outputPath = ::util::Path::CreatePath(Lua::CheckString(l, 2));
 	std::string errMsg;
 	std::shared_ptr<Model> mdl = nullptr;
-	if(f)
-	{
-		mdl = pragma::asset::import_model(*f,errMsg,outputPath);
+	if(f) {
+		mdl = pragma::asset::import_model(*f, errMsg, outputPath);
 	}
 	else
-		mdl = pragma::asset::import_model(fileName,errMsg,outputPath);
-	if(mdl == nullptr)
-	{
-		Lua::PushBool(l,false);
-		Lua::PushString(l,errMsg);
+		mdl = pragma::asset::import_model(fileName, errMsg, outputPath);
+	if(mdl == nullptr) {
+		Lua::PushBool(l, false);
+		Lua::PushString(l, errMsg);
 		return 2;
 	}
-	Lua::Push(l,mdl);
+	Lua::Push(l, mdl);
 	return 1;
 }
 
 int Lua::util::Client::export_map(lua_State *l)
 {
-	std::string mapName = Lua::CheckString(l,1);
-	auto &exportInfo = Lua::Check<pragma::asset::ModelExportInfo>(l,2);
+	std::string mapName = Lua::CheckString(l, 1);
+	auto &exportInfo = Lua::Check<pragma::asset::ModelExportInfo>(l, 2);
 
 	pragma::asset::MapExportInfo mapExportInfo {};
-	if(Lua::IsSet(l,3))
-		mapExportInfo = Lua::Check<pragma::asset::MapExportInfo>(l,3);
+	if(Lua::IsSet(l, 3))
+		mapExportInfo = Lua::Check<pragma::asset::MapExportInfo>(l, 3);
 
 	std::string errMsg;
-	auto result = pragma::asset::export_map(mapName,exportInfo,errMsg,mapExportInfo);
-	Lua::PushBool(l,result);
+	auto result = pragma::asset::export_map(mapName, exportInfo, errMsg, mapExportInfo);
+	Lua::PushBool(l, result);
 	if(result)
 		return 1;
-	Lua::PushString(l,errMsg);
+	Lua::PushString(l, errMsg);
 	return 2;
 }
 
 int Lua::util::Client::export_texture(lua_State *l)
 {
-	if(Lua::IsString(l,1))
-	{
-		std::string texturePath = Lua::CheckString(l,1);
-		auto imgFormat = static_cast<pragma::asset::ModelExportInfo::ImageFormat>(Lua::CheckInt(l,2));
+	if(Lua::IsString(l, 1)) {
+		std::string texturePath = Lua::CheckString(l, 1);
+		auto imgFormat = static_cast<pragma::asset::ModelExportInfo::ImageFormat>(Lua::CheckInt(l, 2));
 		auto alphaMode = uimg::TextureInfo::AlphaMode::Auto;
-		if(Lua::IsSet(l,3))
-			alphaMode = static_cast<uimg::TextureInfo::AlphaMode>(Lua::CheckInt(l,3));
+		if(Lua::IsSet(l, 3))
+			alphaMode = static_cast<uimg::TextureInfo::AlphaMode>(Lua::CheckInt(l, 3));
 		auto enabledExtendedDDs = false;
-		if(Lua::IsSet(l,4))
-			enabledExtendedDDs = Lua::CheckBool(l,4);
+		if(Lua::IsSet(l, 4))
+			enabledExtendedDDs = Lua::CheckBool(l, 4);
 
 		std::string errMsg;
 		std::string outputPath;
-		auto result = pragma::asset::export_texture(texturePath,imgFormat,errMsg,alphaMode,enabledExtendedDDs,nullptr,&outputPath);
-		Lua::PushBool(l,result);
+		auto result = pragma::asset::export_texture(texturePath, imgFormat, errMsg, alphaMode, enabledExtendedDDs, nullptr, &outputPath);
+		Lua::PushBool(l, result);
 		if(result == false)
-			Lua::PushString(l,errMsg);
+			Lua::PushString(l, errMsg);
 		else
-			Lua::PushString(l,outputPath);
+			Lua::PushString(l, outputPath);
 		return 2;
 	}
-	auto &imgBuf = Lua::Check<uimg::ImageBuffer>(l,1);
-	auto imgFormat = static_cast<pragma::asset::ModelExportInfo::ImageFormat>(Lua::CheckInt(l,2));
-	std::string outputPath = Lua::CheckString(l,3);
-	if(Lua::file::validate_write_operation(l,outputPath) == false)
-	{
-		Lua::PushBool(l,false);
+	auto &imgBuf = Lua::Check<uimg::ImageBuffer>(l, 1);
+	auto imgFormat = static_cast<pragma::asset::ModelExportInfo::ImageFormat>(Lua::CheckInt(l, 2));
+	std::string outputPath = Lua::CheckString(l, 3);
+	if(Lua::file::validate_write_operation(l, outputPath) == false) {
+		Lua::PushBool(l, false);
 		return 1;
 	}
 	auto normalMap = false;
-	if(Lua::IsSet(l,4))
-		normalMap = Lua::CheckBool(l,4);
+	if(Lua::IsSet(l, 4))
+		normalMap = Lua::CheckBool(l, 4);
 	auto srgb = false;
-	if(Lua::IsSet(l,5))
-		srgb = Lua::CheckBool(l,5);
+	if(Lua::IsSet(l, 5))
+		srgb = Lua::CheckBool(l, 5);
 	auto alphaMode = uimg::TextureInfo::AlphaMode::Auto;
-	if(Lua::IsSet(l,6))
-		alphaMode = static_cast<uimg::TextureInfo::AlphaMode>(Lua::CheckInt(l,6));
-	
+	if(Lua::IsSet(l, 6))
+		alphaMode = static_cast<uimg::TextureInfo::AlphaMode>(Lua::CheckInt(l, 6));
+
 	std::string errMsg;
 	std::string finalOutputPath;
-	auto result = pragma::asset::export_texture(imgBuf,imgFormat,outputPath,errMsg,normalMap,srgb,alphaMode,&finalOutputPath);
-	Lua::PushBool(l,result);
+	auto result = pragma::asset::export_texture(imgBuf, imgFormat, outputPath, errMsg, normalMap, srgb, alphaMode, &finalOutputPath);
+	Lua::PushBool(l, result);
 	if(result == false)
-		Lua::PushString(l,errMsg);
+		Lua::PushString(l, errMsg);
 	else
-		Lua::PushString(l,finalOutputPath);
+		Lua::PushString(l, finalOutputPath);
 	return 2;
 }
 
 int Lua::util::Client::export_material(lua_State *l)
 {
 	Material *mat = nullptr;
-	if(Lua::IsString(l,1))
-	{
-		std::string matPath = Lua::CheckString(l,1);
-		mat = client->LoadMaterial(matPath,nullptr,true,false);
+	if(Lua::IsString(l, 1)) {
+		std::string matPath = Lua::CheckString(l, 1);
+		mat = client->LoadMaterial(matPath, nullptr, true, false);
 	}
 	else
-		mat = Lua::CheckMaterial(l,1);
+		mat = Lua::CheckMaterial(l, 1);
 
-	if(mat == nullptr)
-	{
-		Lua::PushBool(l,false);
-		Lua::PushString(l,"Invalid material");
+	if(mat == nullptr) {
+		Lua::PushBool(l, false);
+		Lua::PushString(l, "Invalid material");
 		return 2;
 	}
-	auto imgFormat = static_cast<pragma::asset::ModelExportInfo::ImageFormat>(Lua::CheckInt(l,2));
+	auto imgFormat = static_cast<pragma::asset::ModelExportInfo::ImageFormat>(Lua::CheckInt(l, 2));
 	auto normalizeTextureNames = false;
-	if(Lua::IsSet(l,3))
-		normalizeTextureNames = Lua::CheckBool(l,3);
+	if(Lua::IsSet(l, 3))
+		normalizeTextureNames = Lua::CheckBool(l, 3);
 
 	std::string errMsg;
 	std::string finalOutputPath;
-	auto textures = pragma::asset::export_material(*mat,imgFormat,errMsg,nullptr,normalizeTextureNames);
-	Lua::PushBool(l,textures.has_value());
+	auto textures = pragma::asset::export_material(*mat, imgFormat, errMsg, nullptr, normalizeTextureNames);
+	Lua::PushBool(l, textures.has_value());
 	if(textures.has_value() == false)
-		Lua::PushString(l,errMsg);
-	else
-	{
+		Lua::PushString(l, errMsg);
+	else {
 		auto t = Lua::CreateTable(l);
-		for(auto &pair : *textures)
-		{
-			Lua::PushString(l,pair.first);
-			Lua::PushString(l,pair.second);
-			Lua::SetTableValue(l,t);
+		for(auto &pair : *textures) {
+			Lua::PushString(l, pair.first);
+			Lua::PushString(l, pair.second);
+			Lua::SetTableValue(l, t);
 		}
 	}
 	return 2;
 }
 
-std::string Lua::util::Client::get_clipboard_string() {return c_engine->GetWindow()->GetClipboardString();}
-void Lua::util::Client::set_clipboard_string(const std::string &str) {c_engine->GetWindow()->SetClipboardString(str);}
+std::string Lua::util::Client::get_clipboard_string() { return c_engine->GetWindow()->GetClipboardString(); }
+void Lua::util::Client::set_clipboard_string(const std::string &str) { c_engine->GetWindow()->SetClipboardString(str); }
 
-::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> Lua::util::Client::bake_directional_lightmap_atlas(
-	const std::vector<pragma::CLightComponent*> &lights,
-	const std::vector<::ModelSubMesh*> &meshes,
-	const std::vector<BaseEntity*> &entities,
-	uint32_t width,uint32_t height,
-	::pragma::LightmapDataCache *optLightmapDataCache
-)
+::util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> Lua::util::Client::bake_directional_lightmap_atlas(const std::vector<pragma::CLightComponent *> &lights, const std::vector<::ModelSubMesh *> &meshes, const std::vector<BaseEntity *> &entities, uint32_t width, uint32_t height,
+  ::pragma::LightmapDataCache *optLightmapDataCache)
 {
-	return ::util::baking::bake_directional_lightmap_atlas(
-		lights,meshes,entities,width,height,optLightmapDataCache
-	);
+	return ::util::baking::bake_directional_lightmap_atlas(lights, meshes, entities, width, height, optLightmapDataCache);
 }

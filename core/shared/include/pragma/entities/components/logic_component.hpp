@@ -9,14 +9,11 @@
 
 #include "pragma/entities/components/base_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLNETWORK LogicComponent final
-		: public BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLNETWORK LogicComponent final : public BaseEntityComponent {
+	  public:
 		static ComponentEventId EVENT_ON_TICK;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		LogicComponent(BaseEntity &ent);
 		virtual void Initialize() override;
@@ -27,9 +24,7 @@ namespace pragma
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnEntitySpawn() override;
 	};
-	struct DLLNETWORK CEOnTick
-		: public ComponentEvent
-	{
+	struct DLLNETWORK CEOnTick : public ComponentEvent {
 		CEOnTick(double dt);
 		virtual void PushArguments(lua_State *l) override;
 		double deltaTime;

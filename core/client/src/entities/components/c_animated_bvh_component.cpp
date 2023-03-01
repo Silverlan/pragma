@@ -23,26 +23,24 @@ using namespace pragma;
 static std::unique_ptr<pragma::ThreadPool> g_threadPool = nullptr;
 static uint32_t g_instanceCount = 0;
 
-static pragma::ThreadPool &get_thread_pool() {return *g_threadPool;}
-static void init_thread_pool() {g_threadPool = std::make_unique<pragma::ThreadPool>(8,"bvh_animated");}
-static void free_thread_pool() {g_threadPool = nullptr;}
+static pragma::ThreadPool &get_thread_pool() { return *g_threadPool; }
+static void init_thread_pool() { g_threadPool = std::make_unique<pragma::ThreadPool>(8, "bvh_animated"); }
+static void free_thread_pool() { g_threadPool = nullptr; }
 
-CAnimatedBvhComponent::CAnimatedBvhComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
+CAnimatedBvhComponent::CAnimatedBvhComponent(BaseEntity &ent) : BaseEntityComponent(ent)
 {
 	if(g_instanceCount++ == 0)
 		init_thread_pool();
 }
-void CAnimatedBvhComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CAnimatedBvhComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CAnimatedBvhComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	
+
 	auto animC = GetEntity().GetComponent<CAnimatedComponent>();
-	if(animC.valid())
-	{
-		m_cbOnMatricesUpdated = animC->AddEventCallback(CAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	if(animC.valid()) {
+		m_cbOnMatricesUpdated = animC->AddEventCallback(CAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			RebuildAnimatedBvh();
 			return util::EventReply::Unhandled;
 		});
@@ -50,16 +48,13 @@ void CAnimatedBvhComponent::Initialize()
 	}
 
 	auto bvhC = GetEntity().GetComponent<CBvhComponent>();
-	if(bvhC.valid())
-	{
-		m_cbOnBvhCleared = bvhC->AddEventCallback(CBvhComponent::EVENT_ON_CLEAR_BVH,
-			[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	if(bvhC.valid()) {
+		m_cbOnBvhCleared = bvhC->AddEventCallback(CBvhComponent::EVENT_ON_CLEAR_BVH, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			Clear();
 			m_tmpBvhData = nullptr;
 			return util::EventReply::Unhandled;
 		});
-		m_cbOnBvhUpdateRequested = bvhC->AddEventCallback(CBvhComponent::EVENT_ON_BVH_UPDATE_REQUESTED,
-			[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		m_cbOnBvhUpdateRequested = bvhC->AddEventCallback(CBvhComponent::EVENT_ON_BVH_UPDATE_REQUESTED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			/*if(m_updateLazily && m_rebuildScheduled)
 			{
 				RebuildAnimatedBvh(true);
@@ -67,8 +62,7 @@ void CAnimatedBvhComponent::Initialize()
 			}*/
 			return util::EventReply::Unhandled;
 		});
-		m_cbOnBvhRebuilt = bvhC->AddEventCallback(CBvhComponent::EVENT_ON_BVH_REBUILT,
-			[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		m_cbOnBvhRebuilt = bvhC->AddEventCallback(CBvhComponent::EVENT_ON_BVH_REBUILT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			RebuildTemporaryBvhData();
 			return util::EventReply::Unhandled;
 		});
@@ -80,7 +74,7 @@ void CAnimatedBvhComponent::Initialize()
 
 void CAnimatedBvhComponent::RebuildTemporaryBvhData()
 {
-	auto *mdlC = static_cast<CModelComponent*>(GetEntity().GetModelComponent());
+	auto *mdlC = static_cast<CModelComponent *>(GetEntity().GetModelComponent());
 	if(!mdlC)
 		return;
 	auto &renderMeshes = mdlC->GetRenderMeshes();
@@ -88,8 +82,8 @@ void CAnimatedBvhComponent::RebuildTemporaryBvhData()
 	m_tmpBvhData = BaseBvhComponent::RebuildBvh(renderMeshes);
 }
 
-void CAnimatedBvhComponent::SetUpdateLazily(bool updateLazily) {m_updateLazily = updateLazily;}
-bool CAnimatedBvhComponent::ShouldUpdateLazily() const {return m_updateLazily;}
+void CAnimatedBvhComponent::SetUpdateLazily(bool updateLazily) { m_updateLazily = updateLazily; }
+bool CAnimatedBvhComponent::ShouldUpdateLazily() const { return m_updateLazily; }
 
 void CAnimatedBvhComponent::Clear()
 {
@@ -101,7 +95,7 @@ void CAnimatedBvhComponent::OnRemove()
 {
 	Clear();
 	m_tmpBvhData = nullptr;
-	
+
 	if(m_cbOnMatricesUpdated.IsValid())
 		m_cbOnMatricesUpdated.Remove();
 	if(m_cbOnBvhCleared.IsValid())
@@ -120,10 +114,7 @@ void CAnimatedBvhComponent::OnRemove()
 		free_thread_pool();
 }
 
-void CAnimatedBvhComponent::Cancel()
-{
-	m_cancelled = true;
-}
+void CAnimatedBvhComponent::Cancel() { m_cancelled = true; }
 bool CAnimatedBvhComponent::IsBusy() const
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
@@ -144,16 +135,14 @@ void CAnimatedBvhComponent::WaitForCompletion()
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().EndTask();
 #endif
-	m_animatedBvhData.completeCondition.wait(lock,[this]() {
-		return m_animatedBvhData.completeCount == m_numJobs;
-	});
+	m_animatedBvhData.completeCondition.wait(lock, [this]() { return m_animatedBvhData.completeCount == m_numJobs; });
 }
 
 void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force)
 {
 	if(IsBusy())
 		return;
-	/*if(!force && m_updateLazily)
+		/*if(!force && m_updateLazily)
 	{
 		m_rebuildScheduled = true;
 		if(m_cbRebuildScheduled.IsValid())
@@ -168,20 +157,15 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force)
 	::debug::get_domain().BeginTask("bvh_animated_prepare");
 #endif
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	util::ScopeGuard sg {[]() {
-		::debug::get_domain().EndTask();
-	}};
+	util::ScopeGuard sg {[]() { ::debug::get_domain().EndTask(); }};
 #endif
-	if(!force && IsBusy())
-	{
+	if(!force && IsBusy()) {
 		if(m_rebuildScheduled)
 			return;
 		m_rebuildScheduled = true;
 		if(m_cbRebuildScheduled.IsValid())
 			m_cbRebuildScheduled.Remove();
-		m_cbRebuildScheduled = c_engine->AddCallback("Think",FunctionCallback<void>::Create([this]() {
-			RebuildAnimatedBvh();
-		}));
+		m_cbRebuildScheduled = c_engine->AddCallback("Think", FunctionCallback<void>::Create([this]() { RebuildAnimatedBvh(); }));
 		return;
 	}
 	if(m_cbRebuildScheduled.IsValid())
@@ -193,16 +177,16 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force)
 	m_cancelled = false;
 	m_rebuildScheduled = false;
 
-	auto *animC = static_cast<CAnimatedComponent*>(GetEntity().GetAnimatedComponent().get());
-	auto *mdlC = static_cast<CModelComponent*>(GetEntity().GetModelComponent());
+	auto *animC = static_cast<CAnimatedComponent *>(GetEntity().GetAnimatedComponent().get());
+	auto *mdlC = static_cast<CModelComponent *>(GetEntity().GetModelComponent());
 	if(!animC || !mdlC)
 		return;
-	
+
 	// Need to copy the current bone matrices
 	auto &animBvhData = m_animatedBvhData.animationBvhData;
 	animBvhData.boneMatrices = animC->GetBoneMatrices();
 	m_animatedBvhData.renderMeshes = mdlC->GetRenderMeshes();
-	
+
 	auto &renderMeshes = m_animatedBvhData.renderMeshes;
 	auto &pool = get_thread_pool();
 
@@ -213,51 +197,47 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force)
 	uint32_t &numJobs = m_numJobs;
 	numJobs = 0;
 	size_t numIndices = 0;
-	for(auto &renderMesh : renderMeshes)
-	{
+	for(auto &renderMesh : renderMeshes) {
 		auto numVerts = renderMesh->GetVertexCount();
-		numJobs += numVerts /numVerticesPerBatch;
-		if((numVerts %numVerticesPerBatch) > 0)
+		numJobs += numVerts / numVerticesPerBatch;
+		if((numVerts % numVerticesPerBatch) > 0)
 			++numJobs;
 		numIndices += renderMesh->GetIndexCount();
 	}
 	if(numIndices == 0)
 		return;
 	m_busy = true;
-	m_animatedBvhData.transformedTris.resize(numIndices /3);
+	m_animatedBvhData.transformedTris.resize(numIndices / 3);
 
 	auto bvhC = GetEntity().GetComponent<CBvhComponent>();
-	auto finalize = [this,bvhC,&animBvhData,&renderMeshes]() mutable -> pragma::ThreadPool::ResultHandler {
+	auto finalize = [this, bvhC, &animBvhData, &renderMeshes]() mutable -> pragma::ThreadPool::ResultHandler {
 		size_t indexOffset = 0;
 		uint32_t meshIdx = 0;
-		for(auto &renderMesh : renderMeshes)
-		{
-			renderMesh->VisitIndices([this,meshIdx,&indexOffset](auto *indexDataSrc,uint32_t numIndicesSrc) {
+		for(auto &renderMesh : renderMeshes) {
+			renderMesh->VisitIndices([this, meshIdx, &indexOffset](auto *indexDataSrc, uint32_t numIndicesSrc) {
 				auto &verts = m_animatedBvhData.meshData.at(meshIdx).transformedVerts;
-				for(auto i=decltype(numIndicesSrc){0};i<numIndicesSrc;i+=3)
-					m_animatedBvhData.transformedTris[(indexOffset +i) /3] = {verts[indexDataSrc[i]],verts[indexDataSrc[i +1]],verts[indexDataSrc[i +2]]};
+				for(auto i = decltype(numIndicesSrc) {0}; i < numIndicesSrc; i += 3)
+					m_animatedBvhData.transformedTris[(indexOffset + i) / 3] = {verts[indexDataSrc[i]], verts[indexDataSrc[i + 1]], verts[indexDataSrc[i + 2]]};
 				indexOffset += numIndicesSrc;
 			});
 			++meshIdx;
 		}
 
 		// Swap Bvh
-		CBvhComponent::SetVertexData(*m_tmpBvhData,m_animatedBvhData.transformedTris);
+		CBvhComponent::SetVertexData(*m_tmpBvhData, m_animatedBvhData.transformedTris);
 		auto oldBvh = bvhC->SetBvhData(m_tmpBvhData);
 		m_tmpBvhData = oldBvh;
 
 		m_busy = false;
 		return {};
 	};
-	for(auto i=decltype(renderMeshes.size()){0u};i<renderMeshes.size();++i)
-	{
+	for(auto i = decltype(renderMeshes.size()) {0u}; i < renderMeshes.size(); ++i) {
 		auto &mesh = *renderMeshes[i];
 		auto numVerts = mesh.GetVertexCount();
 		auto &meshData = meshDatas[i];
 		meshData.transformedVerts.resize(numVerts);
 
-		pool.BatchProcess(numVerts,numVerticesPerBatch,
-			[this,numJobs,&mesh,&meshData,&animBvhData,finalize](uint32_t start,uint32_t end) mutable -> pragma::ThreadPool::ResultHandler {
+		pool.BatchProcess(numVerts, numVerticesPerBatch, [this, numJobs, &mesh, &meshData, &animBvhData, finalize](uint32_t start, uint32_t end) mutable -> pragma::ThreadPool::ResultHandler {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 			::debug::get_domain().BeginTask("bvh_animated_compute");
 #endif
@@ -265,32 +245,28 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force)
 			auto &vertexWeights = mesh.GetVertexWeights();
 			auto &transformedVerts = meshData.transformedVerts;
 			assert(transformedVerts.size() == vertexWeights.size());
-			if(transformedVerts.size() != vertexWeights.size())
-			{
-				for(auto i=start;i<end;++i)
+			if(transformedVerts.size() != vertexWeights.size()) {
+				for(auto i = start; i < end; ++i)
 					transformedVerts[i] = verts[i].position;
 			}
-			else
-			{
-				for(auto i=start;i<end;++i)
-				{
+			else {
+				for(auto i = start; i < end; ++i) {
 					if(m_cancelled)
 						break;
 					auto &v = verts[i];
 					auto &vw = vertexWeights[i];
 					Mat4 mat {0.f};
-					for(auto i=0u;i<4u;++i)
-					{
+					for(auto i = 0u; i < 4u; ++i) {
 						auto boneId = vw.boneIds[i];
 						if(boneId == -1)
 							continue;
 						auto weight = vw.weights[i];
-						mat += weight *animBvhData.boneMatrices[boneId];
+						mat += weight * animBvhData.boneMatrices[boneId];
 					}
 
-					Vector4 vpos {v.position.x,v.position.y,v.position.z,1.f};
-					vpos = mat *vpos;
-					transformedVerts[i] = Vector3{vpos.x,vpos.y,vpos.z} /vpos.w;
+					Vector4 vpos {v.position.x, v.position.y, v.position.z, 1.f};
+					vpos = mat * vpos;
+					transformedVerts[i] = Vector3 {vpos.x, vpos.y, vpos.z} / vpos.w;
 				}
 			}
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
@@ -301,17 +277,16 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force)
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 			::debug::get_domain().EndTask();
 #endif
-				if(++m_animatedBvhData.completeCount == numJobs)
-				{
+			if(++m_animatedBvhData.completeCount == numJobs) {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-					::debug::get_domain().BeginTask("bvh_animated_finalize");
+				::debug::get_domain().BeginTask("bvh_animated_finalize");
 #endif
-					finalize();
+				finalize();
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-					::debug::get_domain().EndTask();
+				::debug::get_domain().EndTask();
 #endif
-					m_animatedBvhData.completeCondition.notify_one();
-				}
+				m_animatedBvhData.completeCondition.notify_one();
+			}
 			m_animatedBvhData.completeMutex.unlock();
 			return {};
 		});

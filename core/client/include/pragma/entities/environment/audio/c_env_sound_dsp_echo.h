@@ -12,13 +12,9 @@
 #include "pragma/entities/environment/audio/c_env_sound_dsp.h"
 #include "pragma/entities/environment/audio/env_sound_dsp_echo.h"
 
-namespace pragma
-{
-	class DLLCLIENT CSoundDspEchoComponent final
-		: public CBaseSoundDspComponent,
-		public BaseEnvSoundDspEcho
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CSoundDspEchoComponent final : public CBaseSoundDspComponent, public BaseEnvSoundDspEcho {
+	  public:
 		CSoundDspEchoComponent(BaseEntity &ent) : CBaseSoundDspComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void OnEntitySpawn() override;
@@ -26,10 +22,8 @@ namespace pragma
 	};
 };
 
-class DLLCLIENT CEnvSoundDspEcho
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEnvSoundDspEcho : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

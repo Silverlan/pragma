@@ -30,87 +30,50 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-decltype(ShaderPBR::DESCRIPTOR_SET_MATERIAL) ShaderPBR::DESCRIPTOR_SET_MATERIAL = {
-	{
-		prosper::DescriptorSetInfo::Binding { // Material settings
-			prosper::DescriptorType::UniformBuffer,
-			prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit
-		},
-		prosper::DescriptorSetInfo::Binding { // Albedo Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		},
-		prosper::DescriptorSetInfo::Binding { // Normal Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		},
-		prosper::DescriptorSetInfo::Binding { // RMA Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		},
-		prosper::DescriptorSetInfo::Binding { // Emission Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		},
-		prosper::DescriptorSetInfo::Binding { // Parallax Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		},
-		prosper::DescriptorSetInfo::Binding { // Wrinkle Stretch Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		},
-		prosper::DescriptorSetInfo::Binding { // Wrinkle Compress Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		},
-		prosper::DescriptorSetInfo::Binding { // Exponent Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		}
-	}
-};
-static_assert(umath::to_integral(ShaderPBR::MaterialBinding::Count) == 9,"Number of bindings in material descriptor set does not match MaterialBinding enum count!");
+decltype(ShaderPBR::DESCRIPTOR_SET_MATERIAL) ShaderPBR::DESCRIPTOR_SET_MATERIAL = {{prosper::DescriptorSetInfo::Binding {// Material settings
+                                                                                      prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit},
+  prosper::DescriptorSetInfo::Binding {// Albedo Map
+    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
+  prosper::DescriptorSetInfo::Binding {// Normal Map
+    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
+  prosper::DescriptorSetInfo::Binding {// RMA Map
+    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
+  prosper::DescriptorSetInfo::Binding {// Emission Map
+    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
+  prosper::DescriptorSetInfo::Binding {// Parallax Map
+    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
+  prosper::DescriptorSetInfo::Binding {// Wrinkle Stretch Map
+    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
+  prosper::DescriptorSetInfo::Binding {// Wrinkle Compress Map
+    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
+  prosper::DescriptorSetInfo::Binding {// Exponent Map
+    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
+static_assert(umath::to_integral(ShaderPBR::MaterialBinding::Count) == 9, "Number of bindings in material descriptor set does not match MaterialBinding enum count!");
 
-decltype(ShaderPBR::DESCRIPTOR_SET_PBR) ShaderPBR::DESCRIPTOR_SET_PBR = {
-	{
-		prosper::DescriptorSetInfo::Binding { // Irradiance Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		},
-		prosper::DescriptorSetInfo::Binding { // Prefilter Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		},
-		prosper::DescriptorSetInfo::Binding { // BRDF Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		}
-	}
-};
-ShaderPBR::ShaderPBR(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
-	: ShaderGameWorldLightingPass{context,identifier,vsShader,fsShader,gsShader}
-{}
-ShaderPBR::ShaderPBR(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderPBR{context,identifier,"world/vs_textured","world/pbr/fs_pbr"}
-{
-}
+decltype(ShaderPBR::DESCRIPTOR_SET_PBR) ShaderPBR::DESCRIPTOR_SET_PBR = {{prosper::DescriptorSetInfo::Binding {// Irradiance Map
+                                                                            prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
+  prosper::DescriptorSetInfo::Binding {// Prefilter Map
+    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
+  prosper::DescriptorSetInfo::Binding {// BRDF Map
+    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
+ShaderPBR::ShaderPBR(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderGameWorldLightingPass {context, identifier, vsShader, fsShader, gsShader} {}
+ShaderPBR::ShaderPBR(prosper::IPrContext &context, const std::string &identifier) : ShaderPBR {context, identifier, "world/vs_textured", "world/pbr/fs_pbr"} {}
 
-prosper::DescriptorSetInfo &ShaderPBR::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
-void ShaderPBR::UpdateRenderFlags(CModelSubMesh &mesh,SceneFlags &inOutFlags)
+prosper::DescriptorSetInfo &ShaderPBR::GetMaterialDescriptorSetInfo() const { return DESCRIPTOR_SET_MATERIAL; }
+void ShaderPBR::UpdateRenderFlags(CModelSubMesh &mesh, SceneFlags &inOutFlags)
 {
-	ShaderGameWorldLightingPass::UpdateRenderFlags(mesh,inOutFlags);
+	ShaderGameWorldLightingPass::UpdateRenderFlags(mesh, inOutFlags);
 	inOutFlags |= m_extRenderFlags;
 }
-void ShaderPBR::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderPBR::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	ShaderGameWorldLightingPass::InitializeGfxPipelineDescriptorSets(pipelineInfo,pipelineIdx);
-	AddDescriptorSetGroup(pipelineInfo,pipelineIdx,DESCRIPTOR_SET_PBR);
+	ShaderGameWorldLightingPass::InitializeGfxPipelineDescriptorSets(pipelineInfo, pipelineIdx);
+	AddDescriptorSetGroup(pipelineInfo, pipelineIdx, DESCRIPTOR_SET_PBR);
 }
 
-bool ShaderPBR::BindDescriptorSetTexture(Material &mat,prosper::IDescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,Texture *optDefaultTex)
+bool ShaderPBR::BindDescriptorSetTexture(Material &mat, prosper::IDescriptorSet &ds, TextureInfo *texInfo, uint32_t bindingIndex, Texture *optDefaultTex)
 {
-	auto &matManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager());
+	auto &matManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 
 	std::shared_ptr<Texture> tex = nullptr;
@@ -121,18 +84,17 @@ bool ShaderPBR::BindDescriptorSetTexture(Material &mat,prosper::IDescriptorSet &
 	else
 		tex = optDefaultTex->shared_from_this();
 	if(tex && tex->HasValidVkTexture())
-		ds.SetBindingTexture(*tex->GetVkTexture(),bindingIndex);
+		ds.SetBindingTexture(*tex->GetVkTexture(), bindingIndex);
 	return true;
 }
 
-static bool bind_default_texture(prosper::IDescriptorSet &ds,const std::string &defaultTexName,uint32_t bindingIndex,Texture **optOutTex)
+static bool bind_default_texture(prosper::IDescriptorSet &ds, const std::string &defaultTexName, uint32_t bindingIndex, Texture **optOutTex)
 {
-	auto &matManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager());
+	auto &matManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 	auto *asset = texManager.FindCachedAsset(defaultTexName);
-	if(!asset)
-	{
-		Con::cwar<<"WARNING: Attempted to bind texture '"<<defaultTexName<<"' to material descriptor set, but texture has not been loaded!"<<Con::endl;
+	if(!asset) {
+		Con::cwar << "Attempted to bind texture '" << defaultTexName << "' to material descriptor set, but texture has not been loaded!" << Con::endl;
 		return false;
 	}
 	auto ptrTex = msys::TextureManager::GetAssetObject(*asset);
@@ -141,26 +103,22 @@ static bool bind_default_texture(prosper::IDescriptorSet &ds,const std::string &
 	auto tex = std::static_pointer_cast<Texture>(ptrTex);
 
 	if(tex && tex->HasValidVkTexture())
-		ds.SetBindingTexture(*tex->GetVkTexture(),bindingIndex);
+		ds.SetBindingTexture(*tex->GetVkTexture(), bindingIndex);
 	if(optOutTex)
 		*optOutTex = tex.get();
 	return true;
 }
 
-bool ShaderPBR::BindDescriptorSetTexture(
-	Material &mat,prosper::IDescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,const std::string &defaultTexName,Texture **optOutTex
-)
+bool ShaderPBR::BindDescriptorSetTexture(Material &mat, prosper::IDescriptorSet &ds, TextureInfo *texInfo, uint32_t bindingIndex, const std::string &defaultTexName, Texture **optOutTex)
 {
-	auto &matManager = static_cast<msys::CMaterialManager&>(client->GetMaterialManager());
+	auto &matManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 
 	std::shared_ptr<Texture> tex = nullptr;
-	if(texInfo && texInfo->texture)
-	{
+	if(texInfo && texInfo->texture) {
 		tex = std::static_pointer_cast<Texture>(texInfo->texture);
-		if(tex->HasValidVkTexture())
-		{
-			ds.SetBindingTexture(*tex->GetVkTexture(),bindingIndex);
+		if(tex->HasValidVkTexture()) {
+			ds.SetBindingTexture(*tex->GetVkTexture(), bindingIndex);
 			if(optOutTex)
 				*optOutTex = tex.get();
 			return true;
@@ -168,43 +126,43 @@ bool ShaderPBR::BindDescriptorSetTexture(
 	}
 	else if(defaultTexName.empty())
 		return false;
-	return bind_default_texture(ds,defaultTexName,bindingIndex,optOutTex);
+	return bind_default_texture(ds, defaultTexName, bindingIndex, optOutTex);
 }
 
-bool ShaderPBR::BindDescriptorSetBaseTextures(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo,prosper::IDescriptorSet &ds)
+bool ShaderPBR::BindDescriptorSetBaseTextures(CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo, prosper::IDescriptorSet &ds)
 {
-	auto matData = InitializeMaterialBuffer(ds,mat);
+	auto matData = InitializeMaterialBuffer(ds, mat);
 	if(matData.has_value() == false)
 		return false;
 
 	Texture *texAlbedo = nullptr;
-	if(BindDescriptorSetTexture(mat,ds,mat.GetAlbedoMap(),umath::to_integral(MaterialBinding::AlbedoMap),"white",&texAlbedo) == false)
+	if(BindDescriptorSetTexture(mat, ds, mat.GetAlbedoMap(), umath::to_integral(MaterialBinding::AlbedoMap), "white", &texAlbedo) == false)
 		return false;
 
-	if(BindDescriptorSetTexture(mat,ds,mat.GetNormalMap(),umath::to_integral(MaterialBinding::NormalMap),"black") == false)
+	if(BindDescriptorSetTexture(mat, ds, mat.GetNormalMap(), umath::to_integral(MaterialBinding::NormalMap), "black") == false)
 		return false;
 
-	if(BindDescriptorSetTexture(mat,ds,mat.GetRMAMap(),umath::to_integral(MaterialBinding::RMAMap),"pbr/rma_neutral") == false)
+	if(BindDescriptorSetTexture(mat, ds, mat.GetRMAMap(), umath::to_integral(MaterialBinding::RMAMap), "pbr/rma_neutral") == false)
 		return false;
 
-	BindDescriptorSetTexture(mat,ds,mat.GetGlowMap(),umath::to_integral(MaterialBinding::EmissionMap));
+	BindDescriptorSetTexture(mat, ds, mat.GetGlowMap(), umath::to_integral(MaterialBinding::EmissionMap));
 
-	if(BindDescriptorSetTexture(mat,ds,mat.GetParallaxMap(),umath::to_integral(MaterialBinding::ParallaxMap),"black") == false)
+	if(BindDescriptorSetTexture(mat, ds, mat.GetParallaxMap(), umath::to_integral(MaterialBinding::ParallaxMap), "black") == false)
 		return false;
 
-	if(BindDescriptorSetTexture(mat,ds,mat.GetTextureInfo("wrinkle_stretch_map"),umath::to_integral(MaterialBinding::WrinkleStretchMap),texAlbedo) == false)
+	if(BindDescriptorSetTexture(mat, ds, mat.GetTextureInfo("wrinkle_stretch_map"), umath::to_integral(MaterialBinding::WrinkleStretchMap), texAlbedo) == false)
 		return false;
 
-	if(BindDescriptorSetTexture(mat,ds,mat.GetTextureInfo("wrinkle_compress_map"),umath::to_integral(MaterialBinding::WrinkleCompressMap),texAlbedo) == false)
+	if(BindDescriptorSetTexture(mat, ds, mat.GetTextureInfo("wrinkle_compress_map"), umath::to_integral(MaterialBinding::WrinkleCompressMap), texAlbedo) == false)
 		return false;
 
-	if(BindDescriptorSetTexture(mat,ds,mat.GetTextureInfo("exponent_map"),umath::to_integral(MaterialBinding::ExponentMap),"white") == false)
+	if(BindDescriptorSetTexture(mat, ds, mat.GetTextureInfo("exponent_map"), umath::to_integral(MaterialBinding::ExponentMap), "white") == false)
 		return false;
 
 	return true;
 }
 
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo)
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(CMaterial &mat, const prosper::DescriptorSetInfo &descSetInfo)
 {
 	auto *albedoMap = mat.GetDiffuseMap();
 	if(albedoMap == nullptr || albedoMap->texture == nullptr)
@@ -215,10 +173,10 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescr
 		return nullptr;
 
 	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(descSetInfo);
-	mat.SetDescriptorSetGroup(*this,descSetGroup);
+	mat.SetDescriptorSetGroup(*this, descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
-	
-	if(BindDescriptorSetBaseTextures(mat,descSetInfo,descSet) == false)
+
+	if(BindDescriptorSetBaseTextures(mat, descSetInfo, descSet) == false)
 		return nullptr;
 
 	// TODO: FIXME: It would probably be a good idea to update the descriptor set lazily (i.e. not update it here), but
@@ -233,52 +191,32 @@ void ShaderPBR::OnPipelinesInitialized()
 	auto &context = c_engine->GetRenderContext();
 	m_defaultPbrDsg = context.CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_PBR);
 	auto &dummyTex = context.GetDummyCubemapTexture();
-	auto &ds =* m_defaultPbrDsg->GetDescriptorSet(0);
-	ds.SetBindingTexture(*dummyTex,umath::to_integral(PBRBinding::IrradianceMap));
-	ds.SetBindingTexture(*dummyTex,umath::to_integral(PBRBinding::PrefilterMap));
-	ds.SetBindingTexture(*dummyTex,umath::to_integral(PBRBinding::BRDFMap));
+	auto &ds = *m_defaultPbrDsg->GetDescriptorSet(0);
+	ds.SetBindingTexture(*dummyTex, umath::to_integral(PBRBinding::IrradianceMap));
+	ds.SetBindingTexture(*dummyTex, umath::to_integral(PBRBinding::PrefilterMap));
+	ds.SetBindingTexture(*dummyTex, umath::to_integral(PBRBinding::BRDFMap));
 }
-prosper::IDescriptorSet &ShaderPBR::GetDefaultPbrDescriptorSet() const {return *m_defaultPbrDsg->GetDescriptorSet();}
-std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(CMaterial &mat)
-{
-	return InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
-}
-void ShaderPBR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
-{
-	ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
-}
+prosper::IDescriptorSet &ShaderPBR::GetDefaultPbrDescriptorSet() const { return *m_defaultPbrDsg->GetDescriptorSet(); }
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(CMaterial &mat) { return InitializeMaterialDescriptorSet(mat, DESCRIPTOR_SET_MATERIAL); }
+void ShaderPBR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo, pipelineIdx); }
 
 //
 
-void ShaderPBR::RecordBindSceneDescriptorSets(
-	rendering::ShaderProcessor &shaderProcessor,
-	const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
-	prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
-	prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
-	prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
-	ShaderGameWorld::SceneFlags &inOutSceneFlags,float &outIblStrength
-) const
+void ShaderPBR::RecordBindSceneDescriptorSets(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
+  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, prosper::IDescriptorSet &dsMaterial, ShaderGameWorld::SceneFlags &inOutSceneFlags, float &outIblStrength) const
 {
 	outIblStrength = 1.f;
-	std::array<prosper::IDescriptorSet*,7> descSets {
-		&dsMaterial,
-		&dsScene,
-		&dsRenderer,
-		&dsRenderSettings,
-		&dsLights,
-		&dsShadows,
-		GetReflectionProbeDescriptorSet(scene,outIblStrength,inOutSceneFlags)
-	};
+	std::array<prosper::IDescriptorSet *, 7> descSets {&dsMaterial, &dsScene, &dsRenderer, &dsRenderSettings, &dsLights, &dsShadows, GetReflectionProbeDescriptorSet(scene, outIblStrength, inOutSceneFlags)};
 
 	static const std::vector<uint32_t> dynamicOffsets {};
-	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,shaderProcessor.GetCurrentPipelineLayout(),pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX,descSets,dynamicOffsets);
+	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, shaderProcessor.GetCurrentPipelineLayout(), pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX, descSets, dynamicOffsets);
 }
 
-prosper::IDescriptorSet *ShaderPBR::GetReflectionProbeDescriptorSet(const pragma::CSceneComponent &scene,float &outIblStrength,ShaderGameWorld::SceneFlags &inOutSceneFlags) const
+prosper::IDescriptorSet *ShaderPBR::GetReflectionProbeDescriptorSet(const pragma::CSceneComponent &scene, float &outIblStrength, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
 {
 	auto &hCam = scene.GetActiveCamera();
 	assert(hCam.valid());
-	auto *dsPbr = CReflectionProbeComponent::FindDescriptorSetForClosestProbe(scene,hCam->GetEntity().GetPosition(),outIblStrength);
+	auto *dsPbr = CReflectionProbeComponent::FindDescriptorSetForClosestProbe(scene, hCam->GetEntity().GetPosition(), outIblStrength);
 	if(dsPbr == nullptr) // No reflection probe and therefore no IBL available. Fallback to non-IBL rendering.
 	{
 		dsPbr = &GetDefaultPbrDescriptorSet();
@@ -287,21 +225,11 @@ prosper::IDescriptorSet *ShaderPBR::GetReflectionProbeDescriptorSet(const pragma
 	return dsPbr;
 }
 
-void ShaderPBR::RecordBindScene(
-	rendering::ShaderProcessor &shaderProcessor,
-	const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
-	prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
-	prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
-	prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
-	const Vector4 &drawOrigin,ShaderGameWorld::SceneFlags &inOutSceneFlags
-) const
+void ShaderPBR::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const pragma::CSceneComponent &scene, const pragma::CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
+  prosper::IDescriptorSet &dsLights, prosper::IDescriptorSet &dsShadows, prosper::IDescriptorSet &dsMaterial, const Vector4 &drawOrigin, ShaderGameWorld::SceneFlags &inOutSceneFlags) const
 {
 	auto iblStrength = 1.f;
-	RecordBindSceneDescriptorSets(
-		shaderProcessor,scene,renderer,
-		dsScene,dsRenderer,dsRenderSettings,
-		dsLights,dsShadows,dsMaterial,inOutSceneFlags,iblStrength
-	);
+	RecordBindSceneDescriptorSets(shaderProcessor, scene, renderer, dsScene, dsRenderer, dsRenderSettings, dsLights, dsShadows, dsMaterial, inOutSceneFlags, iblStrength);
 
 	ShaderGameWorldLightingPass::PushConstants pushConstants {};
 	pushConstants.Initialize();
@@ -309,69 +237,54 @@ void ShaderPBR::RecordBindScene(
 	pushConstants.reflectionProbeIntensity = iblStrength;
 	pushConstants.flags = inOutSceneFlags;
 	pushConstants.drawOrigin = drawOrigin;
-	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, 0u, sizeof(pushConstants), &pushConstants);
 }
 
 /////////////////
 
 decltype(ShaderPBRBlend::VERTEX_BINDING_ALPHA) ShaderPBRBlend::VERTEX_BINDING_ALPHA = {prosper::VertexInputRate::Vertex};
-decltype(ShaderPBRBlend::VERTEX_ATTRIBUTE_ALPHA) ShaderPBRBlend::VERTEX_ATTRIBUTE_ALPHA = {VERTEX_BINDING_ALPHA,prosper::Format::R32G32_SFloat};
-decltype(ShaderPBRBlend::DESCRIPTOR_SET_MATERIAL) ShaderPBRBlend::DESCRIPTOR_SET_MATERIAL = {
-	&ShaderPBR::DESCRIPTOR_SET_MATERIAL,
-	{
-		prosper::DescriptorSetInfo::Binding { // Albedo Map 2
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		},
-		prosper::DescriptorSetInfo::Binding { // Albedo Map 3
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		}
-	}
-};
-ShaderPBRBlend::ShaderPBRBlend(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderPBR{context,identifier,"world/vs_textured_blend","world/pbr/fs_pbr_blend"}
-{}
-void ShaderPBRBlend::InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+decltype(ShaderPBRBlend::VERTEX_ATTRIBUTE_ALPHA) ShaderPBRBlend::VERTEX_ATTRIBUTE_ALPHA = {VERTEX_BINDING_ALPHA, prosper::Format::R32G32_SFloat};
+decltype(ShaderPBRBlend::DESCRIPTOR_SET_MATERIAL) ShaderPBRBlend::DESCRIPTOR_SET_MATERIAL = {&ShaderPBR::DESCRIPTOR_SET_MATERIAL,
+  {prosper::DescriptorSetInfo::Binding {// Albedo Map 2
+     prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
+    prosper::DescriptorSetInfo::Binding {// Albedo Map 3
+      prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
+ShaderPBRBlend::ShaderPBRBlend(prosper::IPrContext &context, const std::string &identifier) : ShaderPBR {context, identifier, "world/vs_textured_blend", "world/pbr/fs_pbr_blend"} {}
+void ShaderPBRBlend::InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	ShaderPBR::InitializeGfxPipelineVertexAttributes(pipelineInfo,pipelineIdx);
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_ALPHA);
+	ShaderPBR::InitializeGfxPipelineVertexAttributes(pipelineInfo, pipelineIdx);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_ALPHA);
 }
-prosper::DescriptorSetInfo &ShaderPBRBlend::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
-void ShaderPBRBlend::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+prosper::DescriptorSetInfo &ShaderPBRBlend::GetMaterialDescriptorSetInfo() const { return DESCRIPTOR_SET_MATERIAL; }
+void ShaderPBRBlend::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(ShaderGameWorldLightingPass::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(ShaderGameWorldLightingPass::PushConstants) + sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBRBlend::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
-	auto descSetGroup = ShaderPBR::InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
+	auto descSetGroup = ShaderPBR::InitializeMaterialDescriptorSet(mat, DESCRIPTOR_SET_MATERIAL);
 	if(descSetGroup == nullptr)
 		return nullptr;
 	auto &descSet = *descSetGroup->GetDescriptorSet();
 
 	auto *diffuseMap2 = mat.GetTextureInfo(Material::ALBEDO_MAP2_IDENTIFIER);
-	if(diffuseMap2 != nullptr && diffuseMap2->texture != nullptr)
-	{
+	if(diffuseMap2 != nullptr && diffuseMap2->texture != nullptr) {
 		auto texture = std::static_pointer_cast<Texture>(diffuseMap2->texture);
 		if(texture->HasValidVkTexture())
-			descSet.SetBindingTexture(*texture->GetVkTexture(),umath::to_integral(MaterialBinding::AlbedoMap2));
+			descSet.SetBindingTexture(*texture->GetVkTexture(), umath::to_integral(MaterialBinding::AlbedoMap2));
 	}
 
 	auto *diffuseMap3 = mat.GetTextureInfo(Material::ALBEDO_MAP3_IDENTIFIER);
-	if(diffuseMap3 != nullptr && diffuseMap3->texture != nullptr)
-	{
+	if(diffuseMap3 != nullptr && diffuseMap3->texture != nullptr) {
 		auto texture = std::static_pointer_cast<Texture>(diffuseMap3->texture);
 		if(texture->HasValidVkTexture())
-			descSet.SetBindingTexture(*texture->GetVkTexture(),umath::to_integral(MaterialBinding::AlbedoMap3));
+			descSet.SetBindingTexture(*texture->GetVkTexture(), umath::to_integral(MaterialBinding::AlbedoMap3));
 	}
 	return descSetGroup;
 }
-bool ShaderPBRBlend::GetRenderBufferTargets(
-	CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
-	std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
-) const
+bool ShaderPBRBlend::GetRenderBufferTargets(CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const
 {
-	if(ShaderPBR::GetRenderBufferTargets(mesh,pipelineIdx,outBuffers,outOffsets,outIndexBufferInfo) == false)
+	if(ShaderPBR::GetRenderBufferTargets(mesh, pipelineIdx, outBuffers, outOffsets, outIndexBufferInfo) == false)
 		return false;
 	auto &sceneMesh = mesh.GetSceneMesh();
 	auto *alphaBuf = sceneMesh->GetAlphaBuffer().get();

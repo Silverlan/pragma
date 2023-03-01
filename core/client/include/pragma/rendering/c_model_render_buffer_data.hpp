@@ -12,12 +12,14 @@
 #include <prosper_context.hpp>
 #include <material.h>
 
-namespace prosper {class IRenderBuffer;};
-namespace pragma {enum class GameShaderSpecializationConstantFlag : uint32_t;};
-namespace pragma::rendering
-{
-	struct DLLCLIENT RenderBufferData
-	{
+namespace prosper {
+	class IRenderBuffer;
+};
+namespace pragma {
+	enum class GameShaderSpecializationConstantFlag : uint32_t;
+};
+namespace pragma::rendering {
+	struct DLLCLIENT RenderBufferData {
 		std::shared_ptr<prosper::IRenderBuffer> renderBuffer;
 		pragma::GameShaderSpecializationConstantFlag pipelineSpecializationFlags;
 		msys::MaterialHandle material;

@@ -14,16 +14,14 @@
 
 using namespace pragma;
 
-BasePointAtTargetComponent::BasePointAtTargetComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent),m_pointAtTarget{pragma::EntityProperty::Create()}
-{}
+BasePointAtTargetComponent::BasePointAtTargetComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_pointAtTarget {pragma::EntityProperty::Create()} {}
 void BasePointAtTargetComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"point_at_target",false))
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "point_at_target", false))
 			m_kvPointAtTargetName = kvData.value;
 		else
 			return util::EventReply::Unhandled;
@@ -42,48 +40,45 @@ void BasePointAtTargetComponent::OnRemove()
 void BasePointAtTargetComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
-	if(m_kvPointAtTargetName.empty() == false)
-	{
-		EntityIterator entIt {*GetEntity().GetNetworkState()->GetGameState(),EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	if(m_kvPointAtTargetName.empty() == false) {
+		EntityIterator entIt {*GetEntity().GetNetworkState()->GetGameState(), EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
 		entIt.AttachFilter<EntityIteratorFilterEntity>(m_kvPointAtTargetName);
 		auto it = entIt.begin();
 		if(it != entIt.end())
 			SetPointAtTarget(**it);
 	}
-	auto *transformC = dynamic_cast<pragma::BaseTransformComponent*>(GetEntity().AddComponent("transform").get());
-	if(transformC)
-	{
-		m_cbOnPoseChangedThis = transformC->AddEventCallback(BaseTransformComponent::EVENT_ON_POSE_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	auto *transformC = dynamic_cast<pragma::BaseTransformComponent *>(GetEntity().AddComponent("transform").get());
+	if(transformC) {
+		m_cbOnPoseChangedThis = transformC->AddEventCallback(BaseTransformComponent::EVENT_ON_POSE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			UpdatePose();
 			return util::EventReply::Unhandled;
 		});
 	}
 }
-const pragma::PEntityProperty &BasePointAtTargetComponent::GetPointAtTargetProperty() const {return m_pointAtTarget;}
-void BasePointAtTargetComponent::ClearPointAtTarget() {SetPointAtTarget(nullptr);}
-void BasePointAtTargetComponent::SetPointAtTarget(BaseEntity &ent) {SetPointAtTarget(&ent);}
+const pragma::PEntityProperty &BasePointAtTargetComponent::GetPointAtTargetProperty() const { return m_pointAtTarget; }
+void BasePointAtTargetComponent::ClearPointAtTarget() { SetPointAtTarget(nullptr); }
+void BasePointAtTargetComponent::SetPointAtTarget(BaseEntity &ent) { SetPointAtTarget(&ent); }
 void BasePointAtTargetComponent::SetPointAtTarget(BaseEntity *ent)
 {
-	*m_pointAtTarget = (ent != nullptr) ? ent->GetHandle() : EntityHandle{};
+	*m_pointAtTarget = (ent != nullptr) ? ent->GetHandle() : EntityHandle {};
 	if(m_cbOnPoseChanged.IsValid())
 		m_cbOnPoseChanged.Remove();
 	if(ent == nullptr)
 		return;
 
-	auto transformC = static_cast<pragma::BaseTransformComponent*>(ent->AddComponent("transform").get());
+	auto transformC = static_cast<pragma::BaseTransformComponent *>(ent->AddComponent("transform").get());
 	if(transformC == nullptr)
 		return;
-	m_cbOnPoseChanged = transformC->AddEventCallback(BaseTransformComponent::EVENT_ON_POSE_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	m_cbOnPoseChanged = transformC->AddEventCallback(BaseTransformComponent::EVENT_ON_POSE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		UpdatePose();
 		return util::EventReply::Unhandled;
 	});
 }
-BaseEntity *BasePointAtTargetComponent::GetPointAtTarget() const {return m_pointAtTarget->GetValue().get();}
+BaseEntity *BasePointAtTargetComponent::GetPointAtTarget() const { return m_pointAtTarget->GetValue().get(); }
 void BasePointAtTargetComponent::UpdatePose()
 {
 	auto *entPointAtTarget = GetPointAtTarget();
-	if(entPointAtTarget == nullptr)
-	{
+	if(entPointAtTarget == nullptr) {
 		if(m_cbOnPoseChanged.IsValid())
 			m_cbOnPoseChanged.Remove();
 		return;
@@ -93,5 +88,5 @@ void BasePointAtTargetComponent::UpdatePose()
 		return;
 	auto posTgt = entPointAtTarget->GetPosition();
 	auto pos = pTransformComponent->GetPosition();
-	pTransformComponent->SetAngles(uvec::to_angle(posTgt -pos));
+	pTransformComponent->SetAngles(uvec::to_angle(posTgt - pos));
 }

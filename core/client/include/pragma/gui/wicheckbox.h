@@ -11,22 +11,20 @@
 #include "pragma/clientdefinitions.h"
 #include <wgui/types/wirect.h>
 
-class DLLCLIENT WICheckbox
-	: public WIRect
-{
-protected:
+class DLLCLIENT WICheckbox : public WIRect {
+  protected:
 	WIHandle m_hOutline;
 	WIHandle m_hTick;
 	bool m_bChecked;
-public:
+  public:
 	WICheckbox();
 	virtual ~WICheckbox() override;
 	virtual void Initialize() override;
 	void SetChecked(bool bChecked);
 	bool IsChecked();
 	void Toggle();
-	virtual util::EventReply MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
-	virtual void SetSize(int x,int y) override;
+	virtual util::EventReply MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) override;
+	virtual void SetSize(int x, int y) override;
 };
 
 #endif

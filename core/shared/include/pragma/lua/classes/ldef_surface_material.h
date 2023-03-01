@@ -10,6 +10,6 @@
 #include "pragma/lua/ldefinitions.h"
 #include "pragma/math/surfacematerial.h"
 
-lua_registercheck(SurfaceMaterial,SurfaceMaterial);
+lua_registercheck(SurfaceMaterial, SurfaceMaterial);
 
 #endif

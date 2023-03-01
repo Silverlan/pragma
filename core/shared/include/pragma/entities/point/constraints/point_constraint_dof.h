@@ -10,20 +10,17 @@
 #include "pragma/networkdefinitions.h"
 #include "pragma/entities/point/constraints/point_constraint_base.h"
 
-namespace pragma
-{
-	class DLLNETWORK BasePointConstraintDoFComponent
-		: public BasePointConstraintComponent
-	{
-	public:
+namespace pragma {
+	class DLLNETWORK BasePointConstraintDoFComponent : public BasePointConstraintComponent {
+	  public:
 		using BasePointConstraintComponent::BasePointConstraintComponent;
 		virtual void Initialize() override;
-	protected:
+	  protected:
 		Vector3 m_kvLimLinLower;
 		Vector3 m_kvLimLinUpper;
 		Vector3 m_kvLimAngLower;
 		Vector3 m_kvLimAngUpper;
-		virtual void InitializeConstraint(BaseEntity *src,BaseEntity *tgt) override;
+		virtual void InitializeConstraint(BaseEntity *src, BaseEntity *tgt) override;
 	};
 };
 

@@ -22,8 +22,8 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_actor_component.hpp>
 
-void Lua::register_cl_character_component(lua_State *l,luabind::module_ &module)
+void Lua::register_cl_character_component(lua_State *l, luabind::module_ &module)
 {
-	auto def = pragma::lua::create_entity_component_class<pragma::CCharacterComponent,pragma::BaseCharacterComponent>("CharacterComponent");
+	auto def = pragma::lua::create_entity_component_class<pragma::CCharacterComponent, pragma::BaseCharacterComponent>("CharacterComponent");
 	module[def];
 }

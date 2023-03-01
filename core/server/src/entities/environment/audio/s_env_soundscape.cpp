@@ -16,22 +16,21 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_soundscape,EnvSoundScape);
+LINK_ENTITY_TO_CLASS(env_soundscape, EnvSoundScape);
 
-void SSoundScapeComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SSoundScapeComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_kvSoundScape);
 	packet->Write<float>(m_kvRadius);
 	packet->Write<unsigned int>(CUInt32(m_positions.size()));
-	std::unordered_map<unsigned int,std::string>::iterator it;
-	for(it=m_positions.begin();it!=m_positions.end();it++)
-	{
+	std::unordered_map<unsigned int, std::string>::iterator it;
+	for(it = m_positions.begin(); it != m_positions.end(); it++) {
 		packet->Write<unsigned int>(it->first);
 		packet->WriteString(it->second);
 	}
 }
 
-void SSoundScapeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SSoundScapeComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ///////
 

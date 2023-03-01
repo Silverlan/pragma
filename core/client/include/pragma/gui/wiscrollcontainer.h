@@ -12,23 +12,15 @@
 #include <wgui/wibase.h>
 
 class WIScrollBar;
-class DLLCLIENT WIScrollContainer
-	: public WIBase
-{
-public:
-	enum class StateFlags : uint8_t
-	{
-		None = 0u,
-		AutoStickToBottom = 1u,
-		ContentsWidthFixed = AutoStickToBottom<<1u,
-		ContentsHeightFixed = ContentsWidthFixed<<1u
-	};
+class DLLCLIENT WIScrollContainer : public WIBase {
+  public:
+	enum class StateFlags : uint8_t { None = 0u, AutoStickToBottom = 1u, ContentsWidthFixed = AutoStickToBottom << 1u, ContentsHeightFixed = ContentsWidthFixed << 1u };
 	WIScrollContainer();
 	virtual ~WIScrollContainer() override;
 	virtual void Initialize() override;
-	virtual void SetSize(int x,int y) override;
+	virtual void SetSize(int x, int y) override;
 	virtual util::EventReply ScrollCallback(Vector2 offset) override;
-	virtual void SizeToContents(bool x=true,bool y=true) override;
+	virtual void SizeToContents(bool x = true, bool y = true) override;
 	WIScrollBar *GetHorizontalScrollBar();
 	WIScrollBar *GetVerticalScrollBar();
 	int GetScrollBarWidthV();
@@ -36,9 +28,13 @@ public:
 	int GetContentWidth();
 	int GetContentHeight();
 	Vector2i GetContentSize();
-	void SetScrollAmount(int32_t amX,int32_t amY);
+	void SetScrollAmount(int32_t amX, int32_t amY);
 	void SetScrollAmountX(int32_t amX);
 	void SetScrollAmountY(int32_t amY);
+	WIBase *GetWrapperElement();
+	void ScrollToElement(::WIBase &el);
+	void ScrollToElementX(::WIBase &el);
+	void ScrollToElementY(::WIBase &el);
 
 	void ScrollToBottom();
 
@@ -49,7 +45,7 @@ public:
 	void SetContentsHeightFixed(bool fixed);
 	bool IsContentsWidthFixed() const;
 	bool IsContentsHeightFixed() const;
-protected:
+  protected:
 	virtual void DoUpdate() override;
 	StateFlags m_scFlags = StateFlags::None;
 	WIHandle m_hScrollBarH = {};
@@ -60,7 +56,7 @@ protected:
 	Vector2i m_lastOffset = {};
 	int32_t m_scrollAmountX = 64;
 	int32_t m_scrollAmountY = 64;
-	std::unordered_map<WIBase*,std::vector<CallbackHandle>> m_childCallbackHandles;
+	std::unordered_map<WIBase *, std::vector<CallbackHandle>> m_childCallbackHandles;
 	virtual void OnChildAdded(WIBase *child) override;
 	virtual void OnChildRemoved(WIBase *child) override;
 	void OnHScrollOffsetChanged(unsigned int offset);

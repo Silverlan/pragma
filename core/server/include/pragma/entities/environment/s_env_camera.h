@@ -12,23 +12,18 @@
 #include "pragma/entities/environment/env_camera.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLSERVER SCameraComponent final
-		: public BaseEnvCameraComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SCameraComponent final : public BaseEnvCameraComponent {
+	  public:
 		SCameraComponent(BaseEntity &ent) : BaseEnvCameraComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
-	protected:
+	  protected:
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 	};
 };
 
-class DLLSERVER EnvCamera
-	: public SBaseEntity
-{
-public:
+class DLLSERVER EnvCamera : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

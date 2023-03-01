@@ -15,7 +15,7 @@ std::string Engine::GetConVarString(const std::string &cv)
 	auto *cvar = GetConVar(cv);
 	if(cvar == nullptr)
 		return "";
-	return static_cast<ConVar*>(cvar)->GetString();
+	return static_cast<ConVar *>(cvar)->GetString();
 }
 
 int Engine::GetConVarInt(const std::string &cv)
@@ -23,7 +23,7 @@ int Engine::GetConVarInt(const std::string &cv)
 	auto *cvar = GetConVar(cv);
 	if(cvar == nullptr)
 		return 0;
-	return static_cast<ConVar*>(cvar)->GetInt();
+	return static_cast<ConVar *>(cvar)->GetInt();
 }
 
 float Engine::GetConVarFloat(const std::string &cv)
@@ -31,7 +31,7 @@ float Engine::GetConVarFloat(const std::string &cv)
 	auto *cvar = GetConVar(cv);
 	if(cvar == nullptr)
 		return 0.f;
-	return static_cast<ConVar*>(cvar)->GetFloat();
+	return static_cast<ConVar *>(cvar)->GetFloat();
 }
 
 bool Engine::GetConVarBool(const std::string &cv)
@@ -39,7 +39,7 @@ bool Engine::GetConVarBool(const std::string &cv)
 	auto *cvar = GetConVar(cv);
 	if(cvar == nullptr)
 		return false;
-	return static_cast<ConVar*>(cvar)->GetBool();
+	return static_cast<ConVar *>(cvar)->GetBool();
 }
 
 ConConf *Engine::GetConVar(const std::string &cv)

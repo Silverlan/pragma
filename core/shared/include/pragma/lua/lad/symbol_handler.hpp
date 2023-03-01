@@ -14,25 +14,22 @@
 #include <optional>
 #include <luasystem.h>
 
-namespace pragma::os::windows
-{
+namespace pragma::os::windows {
 	using RVA = uint64_t; // TODO: RVAs should be uint32_t
 	std::string get_last_error_as_string();
 };
-namespace pragma::lua
-{
-	class SymbolHandler
-	{
-	public:
+namespace pragma::lua {
+	class SymbolHandler {
+	  public:
 		~SymbolHandler();
 		bool Initialize();
 		std::optional<std::string> FindModule(DWORD64 rva) const;
 		std::optional<std::string> FindAddress(DWORD64 rva) const;
 		std::optional<pragma::os::windows::RVA> FindSymbol(const std::string &symbol) const;
-		std::optional<std::string> FindSource(DWORD64 rva,uint32_t &outLine) const;
+		std::optional<std::string> FindSource(DWORD64 rva, uint32_t &outLine) const;
 
-		operator bool() const {return m_valid;}
-	private:
+		operator bool() const { return m_valid; }
+	  private:
 		HANDLE m_hProcess = nullptr;
 		bool m_valid = false;
 	};

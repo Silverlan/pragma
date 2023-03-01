@@ -13,22 +13,17 @@
 #include "pragma/entities/components/c_color_component.hpp"
 #include <pragma/entities/environment/lights/env_light.h>
 
-const std::array<Mat4,6> &pragma::math::get_cubemap_view_matrices()
+const std::array<Mat4, 6> &pragma::math::get_cubemap_view_matrices()
 {
-	static const std::array<Mat4,6> viewMatrices = {
-		glm::lookAtRH(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f)),
-		glm::lookAtRH(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(-1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f)),
-		glm::lookAtRH(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f),glm::vec3(0.0f,0.0f,1.0f)),
-		glm::lookAtRH(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f),glm::vec3(0.0f,0.0f,-1.0f)),
-		glm::lookAtRH(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,0.0f,1.0f),glm::vec3(0.0f,-1.0f,0.0f)),
-		glm::lookAtRH(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,-1.0f,0.0f))
-	};
+	static const std::array<Mat4, 6> viewMatrices = {glm::lookAtRH(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)), glm::lookAtRH(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+	  glm::lookAtRH(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)), glm::lookAtRH(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)),
+	  glm::lookAtRH(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)), glm::lookAtRH(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f))};
 	return viewMatrices;
 }
 
-const Mat4 &pragma::math::get_cubemap_projection_matrix(float aspectRatio,float nearZ,float farZ)
+const Mat4 &pragma::math::get_cubemap_projection_matrix(float aspectRatio, float nearZ, float farZ)
 {
-	static const auto projMatrix = glm::perspectiveRH<float>(glm::radians(90.0f),aspectRatio,nearZ,farZ);
+	static const auto projMatrix = glm::perspectiveRH<float>(glm::radians(90.0f), aspectRatio, nearZ, farZ);
 	return projMatrix;
 }
 
@@ -40,12 +35,12 @@ Watt pragma::math::cycles::get_light_power(const CLightComponent &light)
 	auto col = colC.valid() ? colC->GetColor() : Color::White;
 	auto pointC = ent.GetComponent<CLightPointComponent>();
 	if(pointC.valid())
-		return ulighting::cycles::lumen_to_watt_point(lumen,col.ToVector3());
+		return ulighting::cycles::lumen_to_watt_point(lumen, col.ToVector3());
 	auto spotC = ent.GetComponent<CLightSpotComponent>();
 	if(spotC.valid())
-		return ulighting::cycles::lumen_to_watt_spot(lumen,col.ToVector3(),spotC->GetOuterConeAngle() /2.f);
+		return ulighting::cycles::lumen_to_watt_spot(lumen, col.ToVector3(), spotC->GetOuterConeAngle() / 2.f);
 	auto envC = ent.GetComponent<CLightDirectionalComponent>();
 	if(envC.expired())
 		return 0.f;
-	return ulighting::cycles::lumen_to_watt_area(lumen,col.ToVector3());
+	return ulighting::cycles::lumen_to_watt_area(lumen, col.ToVector3());
 }

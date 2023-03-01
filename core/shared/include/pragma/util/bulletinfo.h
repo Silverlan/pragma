@@ -14,8 +14,7 @@
 #include <mathutil/color.h>
 #include <limits>
 
-struct DLLNETWORK BulletInfo
-{
+struct DLLNETWORK BulletInfo {
 	static const float DEFAULT_TRACER_RADIUS;
 	static const Color DEFAULT_TRACER_COLOR;
 	static const float DEFAULT_TRACER_LENGTH;
@@ -23,11 +22,11 @@ struct DLLNETWORK BulletInfo
 	static const std::string DEFAULT_TRACER_MATERIAL;
 	static const float DEFAULT_TRACER_BLOOM;
 
-	EulerAngles spread = EulerAngles(0,0,0);
+	EulerAngles spread = EulerAngles(0, 0, 0);
 	float force = std::numeric_limits<float>::signaling_NaN(); // Overwrite for ammo type?
 	float distance = static_cast<float>(umath::to_integral(GameLimits::MaxWorldDistance));
 	Vector3 direction = {}; // Not used for Entity::FireBullets
-	Vector3 effectOrigin = {std::numeric_limits<float>::signaling_NaN(),std::numeric_limits<float>::signaling_NaN(),std::numeric_limits<float>::signaling_NaN()};
+	Vector3 effectOrigin = {std::numeric_limits<float>::signaling_NaN(), std::numeric_limits<float>::signaling_NaN(), std::numeric_limits<float>::signaling_NaN()};
 	uint32_t damage = std::numeric_limits<uint32_t>::max();
 	DAMAGETYPE damageType = static_cast<DAMAGETYPE>(std::numeric_limits<std::underlying_type_t<DAMAGETYPE>>::max());
 	uint32_t bulletCount = 1;
@@ -43,7 +42,7 @@ struct DLLNETWORK BulletInfo
 	std::string ammoType = "";
 	// TODO Additional Filter
 };
-lua_registercheck(BulletInfo,BulletInfo);
-DLLNETWORK std::ostream &operator<<(std::ostream &out,const BulletInfo &o);
+lua_registercheck(BulletInfo, BulletInfo);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const BulletInfo &o);
 
 #endif

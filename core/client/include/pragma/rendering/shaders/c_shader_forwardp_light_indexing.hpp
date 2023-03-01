@@ -11,25 +11,21 @@
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader.hpp>
 
-namespace pragma
-{
-	class DLLCLIENT ShaderForwardPLightIndexing
-		: public prosper::ShaderCompute
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT ShaderForwardPLightIndexing : public prosper::ShaderCompute {
+	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_VISIBLE_LIGHT;
 
-#pragma pack(push,1)
-		struct PushConstants
-		{
+#pragma pack(push, 1)
+		struct PushConstants {
 			uint32_t tileCount;
 		};
 #pragma pack(pop)
 
-		ShaderForwardPLightIndexing(prosper::IPrContext &context,const std::string &identifier);
-		bool RecordCompute(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetLights,uint32_t tileCount) const;
-	protected:
-		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		ShaderForwardPLightIndexing(prosper::IPrContext &context, const std::string &identifier);
+		bool RecordCompute(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetLights, uint32_t tileCount) const;
+	  protected:
+		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 	};
 };
 

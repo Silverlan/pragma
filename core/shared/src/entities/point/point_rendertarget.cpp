@@ -16,23 +16,23 @@ void BasePointRenderTargetComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"material",false))
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "material", false))
 			m_kvMaterial = kvData.value;
-		else if(ustring::compare<std::string>(kvData.key,"fov",false))
+		else if(ustring::compare<std::string>(kvData.key, "fov", false))
 			m_kvFOV = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"refreshrate",false))
+		else if(ustring::compare<std::string>(kvData.key, "refreshrate", false))
 			m_kvRefreshRate = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"renderwidth",false))
+		else if(ustring::compare<std::string>(kvData.key, "renderwidth", false))
 			m_kvRenderWidth = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"renderheight",false))
+		else if(ustring::compare<std::string>(kvData.key, "renderheight", false))
 			m_kvRenderHeight = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"nearz",false))
+		else if(ustring::compare<std::string>(kvData.key, "nearz", false))
 			m_kvNearZ = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"farz",false))
+		else if(ustring::compare<std::string>(kvData.key, "farz", false))
 			m_kvFarZ = util::to_float(kvData.value);
-		else if(ustring::compare<std::string>(kvData.key,"depth",false))
+		else if(ustring::compare<std::string>(kvData.key, "depth", false))
 			m_kvRenderDepth = util::to_int(kvData.value);
 		else
 			return util::EventReply::Unhandled;

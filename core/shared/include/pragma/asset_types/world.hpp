@@ -18,12 +18,14 @@
 
 #undef GetClassName
 
-namespace uimg {class ImageBuffer;};
-namespace udm {struct AssetData;};
-namespace pragma::asset
-{
-	struct DLLNETWORK Output
-	{
+namespace uimg {
+	class ImageBuffer;
+};
+namespace udm {
+	struct AssetData;
+};
+namespace pragma::asset {
+	struct DLLNETWORK Output {
 		std::string name;
 		std::string target;
 		std::string input;
@@ -36,15 +38,9 @@ namespace pragma::asset
 	};
 
 	class WorldData;
-	class DLLNETWORK EntityData
-		: public std::enable_shared_from_this<EntityData>
-	{
-	public:
-		enum class Flags : uint64_t
-		{
-			None = 0u,
-			ClientsideOnly = 1u
-		};
+	class DLLNETWORK EntityData : public std::enable_shared_from_this<EntityData> {
+	  public:
+		enum class Flags : uint64_t { None = 0u, ClientsideOnly = 1u };
 
 		static std::shared_ptr<EntityData> Create();
 
@@ -54,8 +50,8 @@ namespace pragma::asset
 		void SetClassName(const std::string &className);
 		void SetOrigin(const Vector3 &origin);
 		void SetRotation(const Quat &rot);
-		void SetLeafData(uint32_t firstLeaf,uint32_t numLeaves);
-		void SetKeyValue(const std::string &key,const std::string &value);
+		void SetLeafData(uint32_t firstLeaf, uint32_t numLeaves);
+		void SetKeyValue(const std::string &key, const std::string &value);
 		void AddOutput(const Output &output);
 
 		uint32_t GetMapIndex() const;
@@ -64,23 +60,23 @@ namespace pragma::asset
 		void SetFlags(Flags flags);
 		const std::vector<std::string> &GetComponents() const;
 		std::vector<std::string> &GetComponents();
-		const std::unordered_map<std::string,std::string> &GetKeyValues() const;
-		std::unordered_map<std::string,std::string> &GetKeyValues();
+		const std::unordered_map<std::string, std::string> &GetKeyValues() const;
+		std::unordered_map<std::string, std::string> &GetKeyValues();
 		std::optional<std::string> GetKeyValue(const std::string &key) const;
-		std::string GetKeyValue(const std::string &key,const std::string &def) const;
+		std::string GetKeyValue(const std::string &key, const std::string &def) const;
 		const std::vector<Output> &GetOutputs() const;
 		std::vector<Output> &GetOutputs();
 		const std::vector<uint16_t> &GetLeaves() const;
 		std::vector<uint16_t> &GetLeaves();
 		const Vector3 &GetOrigin() const;
 		umath::Transform GetPose() const;
-		void GetLeafData(uint32_t &outFirstLeaf,uint32_t &outNumLeaves) const;
-	private:
+		void GetLeafData(uint32_t &outFirstLeaf, uint32_t &outNumLeaves) const;
+	  private:
 		friend WorldData;
-		EntityData()=default;
+		EntityData() = default;
 		std::string m_className;
 		std::vector<std::string> m_components;
-		std::unordered_map<std::string,std::string> m_keyValues;
+		std::unordered_map<std::string, std::string> m_keyValues;
 		std::vector<Output> m_outputs;
 		uint32_t m_mapIndex = 0u;
 		Vector3 m_origin = {};
@@ -91,33 +87,27 @@ namespace pragma::asset
 		uint32_t m_firstLeaf = 0u;
 		uint32_t m_numLeaves = 0u;
 	};
-	
+
 	using WorldModelMeshIndex = uint32_t;
-	class DLLNETWORK WorldData
-	{
-	public:
+	class DLLNETWORK WorldData {
+	  public:
 		static constexpr uint32_t PMAP_VERSION = 1;
 		static constexpr auto PMAP_IDENTIFIER = "PMAP";
-		enum class DataFlags : uint64_t
-		{
-			None = 0u,
-			HasLightmapAtlas = 1u,
-			HasBSPTree = HasLightmapAtlas<<1u
-		};
+		enum class DataFlags : uint64_t { None = 0u, HasLightmapAtlas = 1u, HasBSPTree = HasLightmapAtlas << 1u };
 
-		using Edge = std::array<uint16_t,2>; // Vertex indices
+		using Edge = std::array<uint16_t, 2>; // Vertex indices
 
 		static std::shared_ptr<WorldData> Create(NetworkState &nw);
 		static std::string GetLightmapAtlasTexturePath(const std::string &mapName);
 
-		bool Write(const std::string &fileName,std::string *optOutErrMsg=nullptr);
+		bool Write(const std::string &fileName, std::string *optOutErrMsg = nullptr);
 		void Write(VFilePtrReal &f);
-		bool Read(VFilePtr &f,EntityData::Flags entMask=EntityData::Flags::None,std::string *optOutErrMsg=nullptr);
-		void AddEntity(EntityData &ent,bool isWorld=false);
+		bool Read(VFilePtr &f, EntityData::Flags entMask = EntityData::Flags::None, std::string *optOutErrMsg = nullptr);
+		void AddEntity(EntityData &ent, bool isWorld = false);
 		EntityData *FindWorld();
 		void SetBSPTree(util::BSPTree &bspTree);
 		util::BSPTree *GetBSPTree();
-		std::vector<std::vector<WorldModelMeshIndex>> &GetClusterMeshIndices() {return m_meshesPerCluster;}
+		std::vector<std::vector<WorldModelMeshIndex>> &GetClusterMeshIndices() { return m_meshesPerCluster; }
 		std::vector<uint16_t> &GetStaticPropLeaves();
 		NetworkState &GetNetworkState() const;
 
@@ -133,21 +123,21 @@ namespace pragma::asset
 		const std::vector<std::shared_ptr<EntityData>> &GetEntities() const;
 		const std::vector<std::string> &GetMaterialTable() const;
 		std::vector<std::string> &GetMaterialTable();
-		void SetMessageLogger(const std::function<void(const std::string&)> &msgLogger);
+		void SetMessageLogger(const std::function<void(const std::string &)> &msgLogger);
 
-		bool Save(udm::AssetDataArg outData,const std::string &mapName,std::string &outErr);
-		bool LoadFromAssetData(udm::AssetDataArg data,EntityData::Flags entMask,std::string &outErr);
-	private:
+		bool Save(udm::AssetDataArg outData, const std::string &mapName, std::string &outErr);
+		bool LoadFromAssetData(udm::AssetDataArg data, EntityData::Flags entMask, std::string &outErr);
+	  private:
 		WorldData(NetworkState &nw);
-		void WriteDataOffset(VFilePtrReal &f,uint64_t offsetToOffset);
+		void WriteDataOffset(VFilePtrReal &f, uint64_t offsetToOffset);
 		void WriteMaterials(VFilePtrReal &f);
 		void WriteBSPTree(VFilePtrReal &f);
 		bool SaveLightmapAtlas(const std::string &mapName);
 		void WriteEntities(VFilePtrReal &f);
 
 		std::vector<msys::MaterialHandle> ReadMaterials(VFilePtr &f);
-		void ReadBSPTree(VFilePtr &f,uint32_t version);
-		void ReadEntities(VFilePtr &f,const std::vector<msys::MaterialHandle> &materials,EntityData::Flags entMask);
+		void ReadBSPTree(VFilePtr &f, uint32_t version);
+		void ReadEntities(VFilePtr &f, const std::vector<msys::MaterialHandle> &materials, EntityData::Flags entMask);
 
 		NetworkState &m_nw;
 		std::vector<std::vector<WorldModelMeshIndex>> m_meshesPerCluster;
@@ -158,7 +148,7 @@ namespace pragma::asset
 		std::vector<uint16_t> m_staticPropLeaves {};
 		std::vector<std::shared_ptr<EntityData>> m_entities {};
 		std::vector<std::string> m_materialTable {};
-		std::function<void(const std::string&)> m_messageLogger = nullptr;
+		std::function<void(const std::string &)> m_messageLogger = nullptr;
 		std::shared_ptr<util::BSPTree> m_bspTree = nullptr;
 	};
 };

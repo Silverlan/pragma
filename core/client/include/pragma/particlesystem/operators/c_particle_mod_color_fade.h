@@ -13,16 +13,13 @@
 #include "pragma/particlesystem/modifiers/c_particle_modifier_component_gradual_fade.hpp"
 #include "pragma/particlesystem/modifiers/c_particle_modifier_component_random_color.hpp"
 
-class DLLCLIENT CParticleOperatorColorFade
-	: public CParticleOperator,
-	public CParticleModifierComponentGradualFade
-{
-public:
-	CParticleOperatorColorFade()=default;
-	virtual void Simulate(CParticle &particle,double,float strength) override;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+class DLLCLIENT CParticleOperatorColorFade : public CParticleOperator, public CParticleModifierComponentGradualFade {
+  public:
+	CParticleOperatorColorFade() = default;
+	virtual void Simulate(CParticle &particle, double, float strength) override;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void OnParticleCreated(CParticle &particle) override;
-private:
+  private:
 	CParticleModifierComponentRandomColor m_colorStart;
 	CParticleModifierComponentRandomColor m_colorEnd;
 	std::unique_ptr<std::vector<Color>> m_particleStartColors = nullptr;

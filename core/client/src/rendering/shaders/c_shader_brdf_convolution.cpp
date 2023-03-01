@@ -17,17 +17,14 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-
-ShaderBRDFConvolution::ShaderBRDFConvolution(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderBaseImageProcessing{context,identifier,"screen/fs_brdf_convolution.gls"}
-{}
-void ShaderBRDFConvolution::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
+ShaderBRDFConvolution::ShaderBRDFConvolution(prosper::IPrContext &context, const std::string &identifier) : ShaderBaseImageProcessing {context, identifier, "screen/fs_brdf_convolution.gls"} {}
+void ShaderBRDFConvolution::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)
 {
-	CreateCachedRenderPass<ShaderBRDFConvolution>({{prosper::util::RenderPassCreateInfo::AttachmentInfo{prosper::Format::R16G16_SFloat}}},outRenderPass,pipelineIdx);
+	CreateCachedRenderPass<ShaderBRDFConvolution>({{prosper::util::RenderPassCreateInfo::AttachmentInfo {prosper::Format::R16G16_SFloat}}}, outRenderPass, pipelineIdx);
 }
-void ShaderBRDFConvolution::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderBRDFConvolution::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 
 	AddDefaultVertexAttributes(pipelineInfo);
 }
@@ -48,22 +45,17 @@ std::shared_ptr<prosper::Texture> ShaderBRDFConvolution::CreateBRDFConvolutionMa
 	samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
 	samplerCreateInfo.minFilter = prosper::Filter::Linear;
 	samplerCreateInfo.magFilter = prosper::Filter::Linear;
-	auto tex = c_engine->GetRenderContext().CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
-	auto rt = c_engine->GetRenderContext().CreateRenderTarget({tex},GetRenderPass());
+	auto tex = c_engine->GetRenderContext().CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
+	auto rt = c_engine->GetRenderContext().CreateRenderTarget({tex}, GetRenderPass());
 
 	auto vertBuffer = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
 	auto uvBuffer = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareUvBuffer();
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
 	auto success = false;
-	if(setupCmd->RecordBeginRenderPass(*rt))
-	{
+	if(setupCmd->RecordBeginRenderPass(*rt)) {
 		prosper::ShaderBindState bindState {*setupCmd};
-		if(RecordBeginDraw(bindState))
-		{
-			if(
-				RecordBindVertexBuffers(bindState,{vertBuffer.get(),uvBuffer.get()}) &&
-				prosper::ShaderGraphics::RecordDraw(bindState,prosper::CommonBufferCache::GetSquareVertexCount())
-			)
+		if(RecordBeginDraw(bindState)) {
+			if(RecordBindVertexBuffers(bindState, {vertBuffer.get(), uvBuffer.get()}) && prosper::ShaderGraphics::RecordDraw(bindState, prosper::CommonBufferCache::GetSquareVertexCount()))
 				success = true;
 		}
 		setupCmd->RecordEndRenderPass();
@@ -71,4 +63,3 @@ std::shared_ptr<prosper::Texture> ShaderBRDFConvolution::CreateBRDFConvolutionMa
 	c_engine->FlushSetupCommandBuffer();
 	return success ? tex : nullptr;
 }
-

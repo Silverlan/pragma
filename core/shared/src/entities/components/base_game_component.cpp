@@ -10,29 +10,13 @@
 
 using namespace pragma;
 
-void BaseGameComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
-{
-}
-BaseGameComponent::BaseGameComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+void BaseGameComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) {}
+BaseGameComponent::BaseGameComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 
-void BaseGameComponent::Initialize()
-{
-	BaseEntityComponent::Initialize();
-}
+void BaseGameComponent::Initialize() { BaseEntityComponent::Initialize(); }
 
-void BaseGameComponent::OnRemove()
-{
-	BaseEntityComponent::OnRemove();
-}
+void BaseGameComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
 
-void BaseGameComponent::Save(udm::LinkedPropertyWrapperArg udm)
-{
-	BaseEntityComponent::Save(udm);
-}
+void BaseGameComponent::Save(udm::LinkedPropertyWrapperArg udm) { BaseEntityComponent::Save(udm); }
 
-void BaseGameComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
-{
-	BaseEntityComponent::Load(udm,version);
-}
+void BaseGameComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) { BaseEntityComponent::Load(udm, version); }

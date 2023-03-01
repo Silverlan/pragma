@@ -14,15 +14,13 @@
 
 class WIDropDownMenu;
 class WICheckbox;
-class DLLCLIENT WIMainMenuOptions
-	: public WIMainMenuBase
-{
-public:
+class DLLCLIENT WIMainMenuOptions : public WIMainMenuBase {
+  public:
 	WIMainMenuOptions();
 	virtual ~WIMainMenuOptions() override;
 	virtual void Initialize() override;
 	virtual void Think() override;
-protected:
+  protected:
 	std::vector<WIHandle> m_labels;
 	WIHandle m_hResolutionList;
 	WIHandle m_hVSync;
@@ -69,8 +67,8 @@ protected:
 
 	CallbackHandle m_joystickStateChanged = {};
 	int m_yOffset;
-	void Apply(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods);
-	void ResetDefaults(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods);
+	void Apply(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods);
+	void ResetDefaults(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods);
 	void ApplyOptions();
 	void ApplyWindowSize();
 	void CloseMessageBox();
@@ -93,6 +91,5 @@ protected:
 
 	void UpdateMemoryUsage();
 };
-
 
 #endif

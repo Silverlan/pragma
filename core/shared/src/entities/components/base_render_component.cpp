@@ -15,17 +15,13 @@
 
 using namespace pragma;
 
-void BaseRenderComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
+void BaseRenderComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseRenderComponent;
 
 	{
 		using TCastShadows = bool;
-		auto memberInfo = create_component_member_info<
-			T,TCastShadows,
-			static_cast<void(T::*)(TCastShadows)>(&T::SetCastShadows),
-			static_cast<TCastShadows(T::*)() const>(&T::GetCastShadows)
-		>("castShadows",true);
+		auto memberInfo = create_component_member_info<T, TCastShadows, static_cast<void (T::*)(TCastShadows)>(&T::SetCastShadows), static_cast<TCastShadows (T::*)() const>(&T::GetCastShadows)>("castShadows", true);
 		registerMember(std::move(memberInfo));
 	}
 }
@@ -33,9 +29,9 @@ void BaseRenderComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"disableshadows",false))
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "disableshadows", false))
 			SetCastShadows(!util::to_boolean(kvData.value));
 		else
 			return util::EventReply::Unhandled;
@@ -56,20 +52,20 @@ void BaseRenderComponent::SetCastShadows(bool b)
 	else
 		m_renderFlags &= ~FRenderFlags::CastShadows;
 }
-bool BaseRenderComponent::IsUnlit() const {return (m_renderFlags &FRenderFlags::Unlit) != FRenderFlags::None;}
-bool BaseRenderComponent::GetCastShadows() const {return (m_renderFlags &FRenderFlags::CastShadows) != FRenderFlags::None;}
+bool BaseRenderComponent::IsUnlit() const { return (m_renderFlags & FRenderFlags::Unlit) != FRenderFlags::None; }
+bool BaseRenderComponent::GetCastShadows() const { return (m_renderFlags & FRenderFlags::CastShadows) != FRenderFlags::None; }
 
 void BaseRenderComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
-	udm::write_flag(udm["renderFlags"],m_renderFlags,FRenderFlags::CastShadows,"castShadows");
-	udm::write_flag(udm["renderFlags"],m_renderFlags,FRenderFlags::Unlit,"unlit");
+	udm::write_flag(udm["renderFlags"], m_renderFlags, FRenderFlags::CastShadows, "castShadows");
+	udm::write_flag(udm["renderFlags"], m_renderFlags, FRenderFlags::Unlit, "unlit");
 	static_assert(magic_enum::flags::enum_count<FRenderFlags>() == 2);
 }
-void BaseRenderComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
+void BaseRenderComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version)
 {
-	BaseEntityComponent::Load(udm,version);
-	udm::read_flag(udm["renderFlags"],m_renderFlags,FRenderFlags::CastShadows,"castShadows");
-	udm::read_flag(udm["renderFlags"],m_renderFlags,FRenderFlags::Unlit,"unlit");
+	BaseEntityComponent::Load(udm, version);
+	udm::read_flag(udm["renderFlags"], m_renderFlags, FRenderFlags::CastShadows, "castShadows");
+	udm::read_flag(udm["renderFlags"], m_renderFlags, FRenderFlags::Unlit, "unlit");
 	static_assert(magic_enum::flags::enum_count<FRenderFlags>() == 2);
 }

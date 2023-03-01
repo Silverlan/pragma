@@ -11,26 +11,20 @@
 #include "pragma/entities/func/basefuncbrush.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 
-namespace pragma
-{
-	class DLLSERVER SBrushComponent final
-		: public BaseFuncBrushComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SBrushComponent final : public BaseFuncBrushComponent, public SBaseNetComponent {
+	  public:
 		SBrushComponent(BaseEntity &ent) : BaseFuncBrushComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLSERVER FuncBrush
-	: public SBaseEntity
-{
-public:
+class DLLSERVER FuncBrush : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

@@ -12,16 +12,13 @@
 
 using namespace pragma;
 
-void CFieldAngleComponent::ReceiveData(NetPacket &packet)
-{
-	SetFieldAngle(packet->Read<float>());
-}
-void CFieldAngleComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-Bool CFieldAngleComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
+void CFieldAngleComponent::ReceiveData(NetPacket &packet) { SetFieldAngle(packet->Read<float>()); }
+void CFieldAngleComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+Bool CFieldAngleComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvSetFieldAngle)
 		SetFieldAngle(packet->Read<float>());
 	else
-		return CBaseNetComponent::ReceiveNetEvent(eventId,packet);
+		return CBaseNetComponent::ReceiveNetEvent(eventId, packet);
 	return true;
 }

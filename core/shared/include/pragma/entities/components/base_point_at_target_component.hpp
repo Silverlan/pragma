@@ -11,20 +11,17 @@
 #include "pragma/entities/baseentity_net_event_manager.hpp"
 #include "pragma/entities/entity_property.hpp"
 
-namespace pragma
-{
-	class DLLNETWORK BasePointAtTargetComponent
-		: public BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLNETWORK BasePointAtTargetComponent : public BaseEntityComponent {
+	  public:
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
-		
+
 		const pragma::PEntityProperty &GetPointAtTargetProperty() const;
 		void SetPointAtTarget(BaseEntity &ent);
 		void ClearPointAtTarget();
 		BaseEntity *GetPointAtTarget() const;
-	protected:
+	  protected:
 		BasePointAtTargetComponent(BaseEntity &ent);
 		void UpdatePose();
 		virtual void OnEntitySpawn() override;

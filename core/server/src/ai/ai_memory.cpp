@@ -18,16 +18,11 @@ using namespace pragma;
 
 extern SGame *s_game;
 
-ai::Memory::Fragment::Fragment()
-	: hEntity(),lastSeen(0.f),visible(false),lastCheck(0.f),occupied(false),
-	lastHeared(0.f)
-{
-	lastDistance = std::numeric_limits<float>::max();
-}
+ai::Memory::Fragment::Fragment() : hEntity(), lastSeen(0.f), visible(false), lastCheck(0.f), occupied(false), lastHeared(0.f) { lastDistance = std::numeric_limits<float>::max(); }
 
 void ai::Memory::Fragment::Clear()
 {
-	hEntity = EntityHandle{};
+	hEntity = EntityHandle {};
 	occupied = false;
 	lastDistance = std::numeric_limits<float>::max();
 	lastSeen = 0.f;
@@ -36,7 +31,7 @@ void ai::Memory::Fragment::Clear()
 	lastHeared = 0.f;
 }
 
-float ai::Memory::Fragment::GetLastTimeSensed() const {return umath::max(lastSeen,lastHeared);}
+float ai::Memory::Fragment::GetLastTimeSensed() const { return umath::max(lastSeen, lastHeared); }
 
 void ai::Memory::Fragment::UpdateVisibility(float dist)
 {
@@ -45,10 +40,10 @@ void ai::Memory::Fragment::UpdateVisibility(float dist)
 	auto *ent = hEntity.get();
 
 	auto pTrComponent = ent->GetTransformComponent();
-	lastPosition = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
+	lastPosition = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
 
 	auto pVelComponent = ent->GetComponent<pragma::VelocityComponent>();
-	lastVelocity = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3{};
+	lastVelocity = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3 {};
 
 	lastDistance = dist;
 	lastSeen = CFloat(s_game->CurTime());
@@ -58,47 +53,42 @@ void ai::Memory::Fragment::UpdateVisibility(float dist)
 
 ///////////////////////
 
-ai::Memory::Memory()
-	: occupiedFragmentCount(0)
-{}
+ai::Memory::Memory() : occupiedFragmentCount(0) {}
 
 void ai::Memory::Update()
 {
-	for(auto &fragment : fragments)
-	{
-		if(fragment.occupied == true && fragment.hEntity.valid())
-		{
+	for(auto &fragment : fragments) {
+		if(fragment.occupied == true && fragment.hEntity.valid()) {
 			fragment.Clear();
 			--occupiedFragmentCount;
 		}
 	}
 }
 
-void ai::Memory::Memorize(const BaseEntity &ent,MemoryType memType,const Vector3 &pos,float dist,const Vector3 &vel,int idx,ai::Memory::Fragment **out)
+void ai::Memory::Memorize(const BaseEntity &ent, MemoryType memType, const Vector3 &pos, float dist, const Vector3 &vel, int idx, ai::Memory::Fragment **out)
 {
 	auto &fragment = fragments[idx];
 	fragment.lastPosition = pos;
 	fragment.lastVelocity = vel;
 	fragment.lastDistance = dist;
 	fragment.lastCheck = CFloat(s_game->CurTime());
-	switch(memType)
-	{
-		case MemoryType::Visual:
+	switch(memType) {
+	case MemoryType::Visual:
 		{
 			fragment.lastSeen = fragment.lastCheck;
 			fragment.visible = true;
 			break;
 		}
-		case MemoryType::Sound:
+	case MemoryType::Sound:
 		{
 			fragment.lastHeared = fragment.lastSeen;
 			fragment.visible = false;
 			break;
 		}
-		case MemoryType::Smell:
-			break; // Not yet implemented
+	case MemoryType::Smell:
+		break; // Not yet implemented
 	}
-	
+
 	if(out != nullptr)
 		*out = &fragment;
 }
@@ -112,8 +102,7 @@ void ai::Memory::Clear(Fragment &fragment)
 
 void ai::Memory::Clear()
 {
-	for(auto &fragment : fragments)
-	{
+	for(auto &fragment : fragments) {
 		if(fragment.occupied == true)
 			fragment.Clear();
 	}
@@ -122,9 +111,7 @@ void ai::Memory::Clear()
 
 ai::Memory::Fragment *ai::Memory::FindFragment(const BaseEntity &ent)
 {
-	auto it = std::find_if(fragments.begin(),fragments.end(),[&ent](const ai::Memory::Fragment &fragment) {
-		return (fragment.occupied == true && fragment.hEntity.get() == &ent) ? true : false;
-	});
+	auto it = std::find_if(fragments.begin(), fragments.end(), [&ent](const ai::Memory::Fragment &fragment) { return (fragment.occupied == true && fragment.hEntity.get() == &ent) ? true : false; });
 	if(it == fragments.end())
 		return nullptr;
 	return &(*it);
@@ -139,20 +126,17 @@ void ai::Memory::Forget(const BaseEntity &ent)
 	--occupiedFragmentCount;
 }
 
-bool ai::Memory::Memorize(const BaseEntity &ent,MemoryType memType,const Vector3 &pos,float dist,const Vector3 &vel,ai::Memory::Fragment **out)
+bool ai::Memory::Memorize(const BaseEntity &ent, MemoryType memType, const Vector3 &pos, float dist, const Vector3 &vel, ai::Memory::Fragment **out)
 {
 	int32_t freeIndex = -1;
-	for(auto i=decltype(fragments.size()){0};i<fragments.size();++i)
-	{
+	for(auto i = decltype(fragments.size()) {0}; i < fragments.size(); ++i) {
 		auto &fragment = fragments[i];
-		if(fragment.occupied == false)
-		{
+		if(fragment.occupied == false) {
 			if(freeIndex == -1)
 				freeIndex = static_cast<int32_t>(i);
 		}
-		else if(fragment.hEntity.get() == &ent)
-		{
-			Memorize(ent,memType,pos,dist,vel,static_cast<int32_t>(i),out);
+		else if(fragment.hEntity.get() == &ent) {
+			Memorize(ent, memType, pos, dist, vel, static_cast<int32_t>(i), out);
 			return false;
 		}
 	}
@@ -163,6 +147,6 @@ bool ai::Memory::Memorize(const BaseEntity &ent,MemoryType memType,const Vector3
 	fragments[freeIndex].occupied = true;
 	if(out != nullptr)
 		*out = &fragments[freeIndex];
-	Memorize(ent,memType,pos,dist,vel,freeIndex);
+	Memorize(ent, memType, pos, dist, vel, freeIndex);
 	return true;
 }

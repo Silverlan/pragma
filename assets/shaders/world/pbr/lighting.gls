@@ -29,7 +29,7 @@ vec3 calc_pbr_lighting(vec2 uv,MaterialInfo materialInfo,vec4 baseColor)
 	vec3 normal = get_normal_from_map(uv);
 	normal = normalize((get_model_matrix() *vec4(normal.xyz,0.0)).xyz);
 
-	vec3 view = normalize(u_renderSettings.posCam - fs_in.vert_pos_ws.xyz);
+	vec3 view = normalize(u_renderSettings.posCam.xyz - fs_in.vert_pos_ws.xyz);
 
 	bool useLightmaps = false;
 	if(CSPEC_ENABLE_LIGHT_MAPS == 1)

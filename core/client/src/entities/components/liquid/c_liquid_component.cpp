@@ -31,15 +31,11 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(func_water,CFuncWater);
+LINK_ENTITY_TO_CLASS(func_water, CFuncWater);
 
 extern DLLCLIENT CGame *c_game;
 
-CLiquidComponent::CLiquidComponent(BaseEntity &ent)
-	: BaseFuncLiquidComponent(ent)
-{
-	pragma::CParticleSystemComponent::Precache("water");
-}
+CLiquidComponent::CLiquidComponent(BaseEntity &ent) : BaseFuncLiquidComponent(ent) { pragma::CParticleSystemComponent::Precache("water"); }
 CLiquidComponent::~CLiquidComponent() {}
 void CLiquidComponent::Initialize()
 {
@@ -62,7 +58,7 @@ void CLiquidComponent::Initialize()
 		SetupWater();
 		ReloadSurfaceSimulator();
 	});*/
-	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		BaseFuncLiquidComponent::InitializeWaterSurface();
 		SetupWater();
 	});
@@ -70,13 +66,12 @@ void CLiquidComponent::Initialize()
 void CLiquidComponent::OnEntitySpawn()
 {
 	BaseFuncLiquidComponent::OnEntitySpawn();
-	auto &ent = static_cast<CBaseEntity&>(GetEntity());
+	auto &ent = static_cast<CBaseEntity &>(GetEntity());
 	//auto pPhysComponent = ent.GetPhysicsComponent();
 	//if(pPhysComponent != nullptr)
 	//	pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(pRenderComponent)
-	{
+	if(pRenderComponent) {
 		// pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::Water);
 		// pRenderComponent->GetRenderModeProperty()->SetLocked(true);
 	}
@@ -138,15 +133,15 @@ void CLiquidComponent::SetupWater()
 	auto &mats = mdl->GetMaterials();
 	if(!mesh)
 		return;
-	auto *meshSurface = static_cast<CModelSubMesh*>(mesh);
+	auto *meshSurface = static_cast<CModelSubMesh *>(mesh);
 	auto matIdx = mdl->GetMaterialIndex(*meshSurface);
-	auto *mat = matIdx.has_value() ? static_cast<CMaterial*>(mats.at(*matIdx).get()) : nullptr;
-	Vector3 min,max;
-	mdl->GetCollisionBounds(min,max);
-	renderC->InitializeWaterScene(meshSurface->GetVertexPosition(0),meshSurface->GetVertexNormal(0),min,max);
+	auto *mat = matIdx.has_value() ? static_cast<CMaterial *>(mats.at(*matIdx).get()) : nullptr;
+	Vector3 min, max;
+	mdl->GetCollisionBounds(min, max);
+	renderC->InitializeWaterScene(meshSurface->GetVertexPosition(0), meshSurface->GetVertexNormal(0), min, max);
 }
 
-void CLiquidComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CLiquidComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ///////////////
 

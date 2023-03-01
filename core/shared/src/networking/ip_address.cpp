@@ -7,13 +7,9 @@
 
 #include "pragma/networking/ip_address.hpp"
 
-pragma::networking::IPAddress::IPAddress()
-	: IPAddress{"",0}
-{}
-pragma::networking::IPAddress::IPAddress(const std::string &ip,uint16_t port)
-	: m_ip{ip},m_port{port}
-{}
+pragma::networking::IPAddress::IPAddress() : IPAddress {"", 0} {}
+pragma::networking::IPAddress::IPAddress(const std::string &ip, uint16_t port) : m_ip {ip}, m_port {port} {}
 
-std::string pragma::networking::IPAddress::ToString() const {return m_ip;}
-const std::string &pragma::networking::IPAddress::GetIP() const {return m_ip;}
-uint16_t pragma::networking::IPAddress::GetPort() const {return m_port;}
+std::string pragma::networking::IPAddress::ToString() const { return m_ip; }
+const std::string &pragma::networking::IPAddress::GetIP() const { return m_ip; }
+uint16_t pragma::networking::IPAddress::GetPort() const { return m_port; }

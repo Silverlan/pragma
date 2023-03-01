@@ -11,21 +11,16 @@
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader_base_image_processing.hpp>
 
-namespace prosper
-{
+namespace prosper {
 	class Image;
 	class Texture;
 };
-namespace pragma
-{
-	class DLLCLIENT ShaderSpecularGlossinessToMetalnessRoughness
-		: public prosper::ShaderBaseImageProcessing
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT ShaderSpecularGlossinessToMetalnessRoughness : public prosper::ShaderBaseImageProcessing {
+	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
 
-		enum class TextureBinding : uint32_t
-		{
+		enum class TextureBinding : uint32_t {
 			DiffuseMap = 0,
 			SpecularGlossinessMap,
 			AmbientOcclusionMap,
@@ -33,37 +28,28 @@ namespace pragma
 			Count
 		};
 
-		struct DLLCLIENT MetalnessRoughnessImageSet
-		{
+		struct DLLCLIENT MetalnessRoughnessImageSet {
 			std::shared_ptr<prosper::IImage> albedoMap = nullptr;
 			std::shared_ptr<prosper::IImage> rmaMap = nullptr;
 		};
 
-		enum class Pass : uint32_t
-		{
-			Albedo = 0,
-			RMA
-		};
+		enum class Pass : uint32_t { Albedo = 0, RMA };
 
-#pragma pack(push,1)
-		struct PushConstants
-		{
+#pragma pack(push, 1)
+		struct PushConstants {
 
-            PushConstants(){};
-			Vector4 diffuseFactor = {1.f,1.f,1.f,1.f};
-			Vector4 specularFactor = {1.f,1.f,1.f,1.f}; // Alpha is glossiness factor
-            Pass pass = Pass::Albedo;
+			PushConstants() {};
+			Vector4 diffuseFactor = {1.f, 1.f, 1.f, 1.f};
+			Vector4 specularFactor = {1.f, 1.f, 1.f, 1.f}; // Alpha is glossiness factor
+			Pass pass = Pass::Albedo;
 		};
 #pragma pack(pop)
 
-		ShaderSpecularGlossinessToMetalnessRoughness(prosper::IPrContext &context,const std::string &identifier);
-		std::optional<MetalnessRoughnessImageSet> ConvertToMetalnessRoughness(
-			prosper::IPrContext &context,prosper::Texture *optDiffuseMap,prosper::Texture *optSpecularGlossinessMap,const PushConstants &pushConstants={},
-			prosper::Texture *optAoMap=nullptr
-		);
-	protected:
-		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		ShaderSpecularGlossinessToMetalnessRoughness(prosper::IPrContext &context, const std::string &identifier);
+		std::optional<MetalnessRoughnessImageSet> ConvertToMetalnessRoughness(prosper::IPrContext &context, prosper::Texture *optDiffuseMap, prosper::Texture *optSpecularGlossinessMap, const PushConstants &pushConstants = {}, prosper::Texture *optAoMap = nullptr);
+	  protected:
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 	};
 };
 

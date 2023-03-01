@@ -18,9 +18,9 @@ void BaseEnvFireComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	GetEntity().AddComponent("toggle");
 
-	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare<std::string>(kvData.key,"fire_type",false))
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
+		if(ustring::compare<std::string>(kvData.key, "fire_type", false))
 			m_fireType = kvData.value;
 		else
 			return util::EventReply::Unhandled;

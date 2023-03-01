@@ -16,19 +16,22 @@
 void Lua::NetPacket::Client::register_class(luabind::class_<::NetPacket> &classDef)
 {
 	Lua::NetPacket::register_class(classDef);
-	classDef.def("ReadUniqueEntity",&ReadUniqueEntity);
+	classDef.def("ReadUniqueEntity", &ReadUniqueEntity);
 }
 
-void Lua::NetPacket::Client::ReadUniqueEntity(lua_State *l,::NetPacket &packet,luabind::object o)
+void Lua::NetPacket::Client::ReadUniqueEntity(lua_State *l, ::NetPacket &packet, luabind::object o)
 {
-	Lua::CheckFunction(l,2);
-	auto cb = FunctionCallback<void,BaseEntity*>::Create([l,o](BaseEntity *ent) {
-		Lua::CallFunction(l,[&o,ent](lua_State *l) {
-			o.push(l);
-			ent->GetLuaObject().push(l);
-			return Lua::StatusCode::Ok;
-		},0);
+	Lua::CheckFunction(l, 2);
+	auto cb = FunctionCallback<void, BaseEntity *>::Create([l, o](BaseEntity *ent) {
+		Lua::CallFunction(
+		  l,
+		  [&o, ent](lua_State *l) {
+			  o.push(l);
+			  ent->GetLuaObject().push(l);
+			  return Lua::StatusCode::Ok;
+		  },
+		  0);
 	});
-	nwm::read_unique_entity(packet,cb);
-	Lua::Push<CallbackHandle>(l,cb);
+	nwm::read_unique_entity(packet, cb);
+	Lua::Push<CallbackHandle>(l, cb);
 }

@@ -13,11 +13,9 @@
 #include <string>
 #include <memory>
 
-class DLLNETWORK IKController
-	: public std::enable_shared_from_this<IKController>
-{
-public:
-	IKController(const std::string &effectorName,uint32_t chainLength,const std::string &type,util::ik::Method method=util::ik::Method::Default);
+class DLLNETWORK IKController : public std::enable_shared_from_this<IKController> {
+  public:
+	IKController(const std::string &effectorName, uint32_t chainLength, const std::string &type, util::ik::Method method = util::ik::Method::Default);
 	IKController(const IKController &other);
 
 	const std::string &GetEffectorName() const;
@@ -31,18 +29,18 @@ public:
 	void SetMethod(util::ik::Method method);
 	util::ik::Method GetMethod() const;
 
-	const std::unordered_map<std::string,std::string> &GetKeyValues() const;
-	std::unordered_map<std::string,std::string> &GetKeyValues();
+	const std::unordered_map<std::string, std::string> &GetKeyValues() const;
+	std::unordered_map<std::string, std::string> &GetKeyValues();
 
 	bool operator==(const IKController &other) const;
-	bool operator!=(const IKController &other) const {return !operator==(other);}
-protected:
+	bool operator!=(const IKController &other) const { return !operator==(other); }
+  protected:
 	std::string m_effectorName;
 	std::string m_type;
 	uint32_t m_chainLength = 0u;
 	util::ik::Method m_method = util::ik::Method::Default;
 
-	std::unordered_map<std::string,std::string> m_keyValues;
+	std::unordered_map<std::string, std::string> m_keyValues;
 };
 
 #endif

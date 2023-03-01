@@ -5,27 +5,21 @@
  * Copyright (c) 2021 Silverlan
  */
 
-#include "stdafx_weave.h"
 #include "pragma/pragma_executable.hpp"
 
-int main(int argc,char* argv[]) try
-{
-	std::vector<std::string> extraArgs {
-		"-icon","materials/logo/pragma_window_icon.png"
-	};
-	auto cargs = pragma::merge_arguments(argc,argv,extraArgs);
-	auto hModule = pragma::launch_pragma(cargs.size(),cargs.data());
+int main(int argc, char *argv[])
+try {
+	std::vector<std::string> extraArgs {"-icon", "materials/logo/pragma_window_icon.png"};
+	auto cargs = pragma::merge_arguments(argc, argv, extraArgs);
+	auto hModule = pragma::launch_pragma(cargs.size(), cargs.data());
 	return hModule ? EXIT_SUCCESS : EXIT_FAILURE;
 }
-catch (...) {
+catch(...) {
 	// Note: Calling std::current_exception in a std::set_terminate handler will return NULL due to a bug in the VS libraries.
 	// Catching all unhandled exceptions here and then calling the handler works around that issue.
 	std::get_terminate()();
 }
 
 #ifdef _WIN32
-	int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int)
-	{
-		return main(__argc,__argv);
-	}
+int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) { return main(__argc, __argv); }
 #endif

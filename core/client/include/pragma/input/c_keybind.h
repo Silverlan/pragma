@@ -14,29 +14,22 @@
 #include <iglfw/glfw_keys.h>
 #pragma warning(push)
 #pragma warning(disable : 4251)
-struct DLLCLIENT KeyBind
-{
-public:
-	enum class DLLCLIENT Type : uint8_t
-	{
-		Invalid = std::numeric_limits<uint8_t>::max(),
-		Regular = 0,
-		Function = 1
-	};
-private:
+struct DLLCLIENT KeyBind {
+  public:
+	enum class DLLCLIENT Type : uint8_t { Invalid = std::numeric_limits<uint8_t>::max(), Regular = 0, Function = 1 };
+  private:
 	std::unique_ptr<std::string> m_bind = nullptr;
 	Type m_type = Type::Invalid;
 	std::optional<luabind::function<>> m_function {};
 
-	struct Command
-	{
+	struct Command {
 		std::string cmd;
 		std::vector<std::string> argv;
 	};
 	std::vector<Command> m_cmds;
 
 	void Initialize();
-public:
+  public:
 	KeyBind();
 	KeyBind(std::string bind);
 	KeyBind(luabind::function<> function);
@@ -45,7 +38,7 @@ public:
 	Type GetType() const;
 	const std::string &GetBind() const;
 	std::optional<luabind::function<>> GetFunction() const;
-	bool Execute(GLFW::KeyState inputState,GLFW::KeyState pressState,GLFW::Modifier mods,float magnitude=1.f);
+	bool Execute(GLFW::KeyState inputState, GLFW::KeyState pressState, GLFW::Modifier mods, float magnitude = 1.f);
 };
 #pragma warning(pop)
 #endif

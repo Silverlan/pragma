@@ -21,12 +21,9 @@ class ModelMesh;
 class ModelSubMesh;
 class Model;
 struct Hitbox;
-namespace Intersection
-{
-	struct DLLNETWORK LineMeshResult
-	{
-		struct DLLNETWORK Precise
-		{
+namespace Intersection {
+	struct DLLNETWORK LineMeshResult {
+		struct DLLNETWORK Precise {
 			std::shared_ptr<ModelMeshGroup> meshGroup;
 			std::shared_ptr<ModelMesh> mesh;
 			std::shared_ptr<ModelSubMesh> subMesh;
@@ -51,12 +48,12 @@ namespace Intersection
 		// Only for precise results
 		std::shared_ptr<Precise> precise = nullptr;
 	};
-	DLLNETWORK bool LineMesh(const Vector3 &start,const Vector3 &dir,ModelMesh &mesh,LineMeshResult &outResult,bool precise=false,const Vector3 *origin=nullptr,const Quat *rot=nullptr);
-	DLLNETWORK bool LineMesh(const Vector3 &start,const Vector3 &dir,ModelSubMesh &subMesh,LineMeshResult &outResult,bool precise=false,const Vector3 *origin=nullptr,const Quat *rot=nullptr);
-	DLLNETWORK bool LineMesh(const Vector3 &start,const Vector3 &dir,Model &mdl,LineMeshResult &outResult,bool precise,const std::vector<uint32_t> *bodyGroups,uint32_t lod,const Vector3 &origin,const Quat &rot);
-	DLLNETWORK bool LineMesh(const Vector3 &start,const Vector3 &dir,Model &mdl,LineMeshResult &outResult,bool precise,uint32_t lod,const Vector3 &origin,const Quat &rot);
-	DLLNETWORK bool LineMesh(const Vector3 &start,const Vector3 &dir,Model &mdl,LineMeshResult &outResult,bool precise,const std::vector<uint32_t> &bodyGroups,const Vector3 &origin,const Quat &rot);
-	DLLNETWORK bool LineMesh(const Vector3 &start,const Vector3 &dir,Model &mdl,LineMeshResult &outResult,bool precise,const Vector3 &origin,const Quat &rot);
+	DLLNETWORK bool LineMesh(const Vector3 &start, const Vector3 &dir, ModelMesh &mesh, LineMeshResult &outResult, bool precise = false, const Vector3 *origin = nullptr, const Quat *rot = nullptr);
+	DLLNETWORK bool LineMesh(const Vector3 &start, const Vector3 &dir, ModelSubMesh &subMesh, LineMeshResult &outResult, bool precise = false, const Vector3 *origin = nullptr, const Quat *rot = nullptr);
+	DLLNETWORK bool LineMesh(const Vector3 &start, const Vector3 &dir, Model &mdl, LineMeshResult &outResult, bool precise, const std::vector<uint32_t> *bodyGroups, uint32_t lod, const Vector3 &origin, const Quat &rot);
+	DLLNETWORK bool LineMesh(const Vector3 &start, const Vector3 &dir, Model &mdl, LineMeshResult &outResult, bool precise, uint32_t lod, const Vector3 &origin, const Quat &rot);
+	DLLNETWORK bool LineMesh(const Vector3 &start, const Vector3 &dir, Model &mdl, LineMeshResult &outResult, bool precise, const std::vector<uint32_t> &bodyGroups, const Vector3 &origin, const Quat &rot);
+	DLLNETWORK bool LineMesh(const Vector3 &start, const Vector3 &dir, Model &mdl, LineMeshResult &outResult, bool precise, const Vector3 &origin, const Quat &rot);
 };
 
 #endif // __COLLISIONS_H__

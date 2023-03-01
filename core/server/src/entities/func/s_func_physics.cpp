@@ -18,16 +18,16 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(func_physics,FuncPhysics);
+LINK_ENTITY_TO_CLASS(func_physics, FuncPhysics);
 
 void SFuncPhysicsComponent::Initialize()
 {
 	BaseFuncPhysicsComponent::Initialize();
 	if(m_bClientsidePhysics == true)
-		static_cast<SBaseEntity&>(GetEntity()).SetSynchronized(false);
+		static_cast<SBaseEntity &>(GetEntity()).SetSynchronized(false);
 }
 
-void SFuncPhysicsComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SFuncPhysicsComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->Write<float>(m_kvMass);
 	packet->WriteString(m_kvSurfaceMaterial);
@@ -42,7 +42,7 @@ PhysObj *SFuncPhysicsComponent::InitializePhysics()
 
 /////////////
 
-void SFuncPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SFuncPhysicsComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void FuncPhysics::Initialize()
 {

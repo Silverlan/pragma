@@ -53,9 +53,9 @@ vec4 apply_debug_mode(uint debugMode,vec4 outputColor,vec2 texCoords,vec3 diffus
 	else if(debugMode == DEBUG_MODE_REFLECTANCE)
 		finalColor = vec4(reflectance,reflectance,reflectance,1.0);
 	else if(debugMode == DEBUG_MODE_IBL_PREFILTER_MAP)
-		finalColor = texture(u_prefilterMap,normalize(fs_in.vert_pos_ws.xyz -u_renderSettings.posCam));
+		finalColor = texture(u_prefilterMap,normalize(fs_in.vert_pos_ws.xyz -u_renderSettings.posCam.xyz));
 	else if(debugMode == DEBUG_MODE_IBL_IRRADIANCE_MAP)
-		finalColor = texture(u_irradianceMap,normalize(fs_in.vert_pos_ws.xyz -u_renderSettings.posCam));
+		finalColor = texture(u_irradianceMap,normalize(fs_in.vert_pos_ws.xyz -u_renderSettings.posCam.xyz));
 	else if(debugMode == DEBUG_MODE_EMISSION_MAP)
 		finalColor = texture(u_glowMap,texCoords);
 	else if(debugMode == DEBUG_MODE_LIGHTMAP)

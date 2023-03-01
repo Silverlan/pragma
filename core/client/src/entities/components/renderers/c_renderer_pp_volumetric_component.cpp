@@ -36,17 +36,13 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
-CRendererPpVolumetricComponent::CRendererPpVolumetricComponent(BaseEntity &ent)
-	: CRendererPpBaseComponent(ent)
+#pragma optimize("", off)
+CRendererPpVolumetricComponent::CRendererPpVolumetricComponent(BaseEntity &ent) : CRendererPpBaseComponent(ent)
 {
 	static auto g_shadersRegistered = false;
-	if(!g_shadersRegistered)
-	{
+	if(!g_shadersRegistered) {
 		g_shadersRegistered = true;
-		c_engine->GetShaderManager().RegisterShader(
-			"pp_light_cone",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPPLightCone(context,identifier);}
-		);
+		c_engine->GetShaderManager().RegisterShader("pp_light_cone", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPLightCone(context, identifier); });
 	}
 }
 static util::WeakHandle<prosper::Shader> g_shader {};
@@ -71,16 +67,13 @@ void CRendererPpVolumetricComponent::ReloadRenderTarget()
 	auto cRenderer = GetEntity().GetComponent<CRasterizationRendererComponent>();
 	if(rendererC.expired() || cRenderer.expired() || g_shader.expired())
 		return;
-	auto &shaderLightCone = *static_cast<pragma::ShaderPPLightCone*>(g_shader.get());
-	m_renderTarget = c_engine->GetRenderContext().CreateRenderTarget(
-		{hdrInfo.sceneRenderTarget->GetTexture(0)->shared_from_this(),hdrInfo.bloomTexture,hdrInfo.prepass.textureDepth},
-		shaderLightCone.GetRenderPass()
-	);
+	auto &shaderLightCone = *static_cast<pragma::ShaderPPLightCone *>(g_shader.get());
+	m_renderTarget = c_engine->GetRenderContext().CreateRenderTarget({hdrInfo.sceneRenderTarget->GetTexture(0)->shared_from_this(), hdrInfo.bloomTexture, hdrInfo.prepass.textureDepth}, shaderLightCone.GetRenderPass());
 }
 void CRendererPpVolumetricComponent::Initialize()
 {
 	CRendererPpBaseComponent::Initialize();
-	BindEventUnhandled(pragma::CRendererComponent::EVENT_ON_RENDER_TARGET_RELOADED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(pragma::CRendererComponent::EVENT_ON_RENDER_TARGET_RELOADED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		if(!GetEntity().IsSpawned())
 			return;
 		ReloadRenderTarget();
@@ -92,7 +85,7 @@ void CRendererPpVolumetricComponent::DoRenderEffect(const util::DrawSceneInfo &d
 {
 	if(drawSceneInfo.scene.expired() || m_renderer.expired() || g_shader.expired() || !m_renderTarget)
 		return;
-	auto &shaderLightCone = *static_cast<pragma::ShaderPPLightCone*>(g_shader.get());
+	auto &shaderLightCone = *static_cast<pragma::ShaderPPLightCone *>(g_shader.get());
 	auto &scene = *drawSceneInfo.scene;
 	auto &hdrInfo = m_renderer->GetHDRInfo();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
@@ -105,18 +98,15 @@ void CRendererPpVolumetricComponent::DoRenderEffect(const util::DrawSceneInfo &d
 	pragma::ShaderPPLightCone::PushConstants pushConstants {};
 	pushConstants.nearZ = cam->GetNearZ();
 	pushConstants.farZ = cam->GetFarZ();
-	pushConstants.SetResolution(m_renderTarget->GetTexture().GetImage().GetWidth(),m_renderTarget->GetTexture().GetImage().GetHeight());
+	pushConstants.SetResolution(m_renderTarget->GetTexture().GetImage().GetWidth(), m_renderTarget->GetTexture().GetImage().GetHeight());
 	auto &frustumPlanes = cam->GetFrustumPlanes();
 	constexpr float lightIntensityFactor = 0.01f;
-	if(drawCmd->RecordBeginRenderPass(*m_renderTarget) == true)
-	{
+	if(drawCmd->RecordBeginRenderPass(*m_renderTarget) == true) {
 		prosper::ShaderBindState bindState {*drawCmd};
-		if(shaderLightCone.RecordBeginDraw(bindState) == true)
-		{
-			EntityIterator entIt {*c_game,EntityIterator::FilterFlags::Default};
+		if(shaderLightCone.RecordBeginDraw(bindState) == true) {
+			EntityIterator entIt {*c_game, EntityIterator::FilterFlags::Default};
 			entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightSpotVolComponent>>();
-			for(auto *ent : entIt)
-			{
+			for(auto *ent : entIt) {
 				auto volC = ent->GetComponent<pragma::CLightSpotVolComponent>();
 				auto mdlC = ent->GetComponent<CModelComponent>();
 				auto renderC = ent->GetComponent<CRenderComponent>();
@@ -129,24 +119,18 @@ void CRendererPpVolumetricComponent::DoRenderEffect(const util::DrawSceneInfo &d
 				if(!dsInstance)
 					continue;
 				pushConstants.color = colorC.valid() ? colorC->GetColor().ToVector4() : Color::White.ToVector4();
-				pushConstants.color.w = lightC.valid() ? (lightC->GetLightIntensityCandela() *lightIntensityFactor) : 1.f;
+				pushConstants.color.w = lightC.valid() ? (lightC->GetLightIntensityCandela() * lightIntensityFactor) : 1.f;
 				pushConstants.color.w *= volC->GetIntensityFactor();
 				pushConstants.coneOrigin = ent->GetPosition();
 				pushConstants.coneLength = radiusC->GetRadius();
-				shaderLightCone.RecordPushConstants(bindState,pushConstants);
+				shaderLightCone.RecordPushConstants(bindState, pushConstants);
 
 				auto &renderMeshes = mdlC->GetRenderMeshes();
-				for(auto &mesh : renderMeshes)
-				{
-					auto &cmesh = static_cast<CModelSubMesh&>(*mesh);
+				for(auto &mesh : renderMeshes) {
+					auto &cmesh = static_cast<CModelSubMesh &>(*mesh);
 
 					// TODO: We only have to bind the instance and camera descriptor sets once per entity and not for every mesh
-					shaderLightCone.RecordDraw(
-						bindState,cmesh,
-						*hdrInfo.dsgHDRPostProcessing->GetDescriptorSet(),
-						*hdrInfo.dsgDepthPostProcessing->GetDescriptorSet(),
-						*dsInstance,*dsCam
-					);
+					shaderLightCone.RecordDraw(bindState, cmesh, *hdrInfo.dsgHDRPostProcessing->GetDescriptorSet(), *hdrInfo.dsgDepthPostProcessing->GetDescriptorSet(), *dsInstance, *dsCam);
 				}
 			}
 			shaderLightCone.RecordEndDraw(bindState);
@@ -154,5 +138,5 @@ void CRendererPpVolumetricComponent::DoRenderEffect(const util::DrawSceneInfo &d
 		drawCmd->RecordEndRenderPass();
 	}
 }
-void CRendererPpVolumetricComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-#pragma optimize("",on)
+void CRendererPpVolumetricComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+#pragma optimize("", on)

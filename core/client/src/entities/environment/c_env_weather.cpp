@@ -18,7 +18,7 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_weather,CEnvWeather);
+LINK_ENTITY_TO_CLASS(env_weather, CEnvWeather);
 
 extern DLLCLIENT CGame *c_game;
 
@@ -36,11 +36,9 @@ void CWeatherComponent::OnEntitySpawn()
 {
 	BaseEnvWeatherComponent::OnEntitySpawn();
 	auto *pl = c_game->GetLocalPlayer();
-	if(pl != NULL)
-	{
-		auto *pt = CParticleSystemComponent::Create({{"particle","snow"}});
-		if(pt != nullptr)
-		{
+	if(pl != NULL) {
+		auto *pt = CParticleSystemComponent::Create({{"particle", "snow"}});
+		if(pt != nullptr) {
 			auto &plEnt = pl->GetEntity();
 			auto &ent = pt->GetEntity();
 			auto pTrComponent = ent.GetTransformComponent();
@@ -48,18 +46,17 @@ void CWeatherComponent::OnEntitySpawn()
 			if(pTrComponent != nullptr && pTrComponentPl)
 				pTrComponent->SetPosition(pTrComponentPl->GetPosition());
 			auto pAttComponent = ent.AddComponent<CAttachableComponent>();
-			if(pAttComponent.valid())
-			{
+			if(pAttComponent.valid()) {
 				AttachmentInfo attInfo {};
 				attInfo.flags |= FAttachmentMode::PositionOnly;
-				pAttComponent->AttachToEntity(&plEnt,attInfo);
+				pAttComponent->AttachToEntity(&plEnt, attInfo);
 			}
 			ent.Spawn();
 			m_hParticle = ent.GetHandle();
 		}
 	}
 }
-void CWeatherComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CWeatherComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////////
 

@@ -18,22 +18,21 @@
 #include "material.h"
 #include <pragma/console/conout.h>
 
-struct DLLNETWORK PolyVertex
-{
+struct DLLNETWORK PolyVertex {
 	Vector3 pos = {};
 	Vector3 normal = {};
 	double u = 0.0;
 	double v = 0.0;
-	PolyVertex()=default;
-	PolyVertex(Vector3 _pos,Vector3 _normal) {
+	PolyVertex() = default;
+	PolyVertex(Vector3 _pos, Vector3 _normal)
+	{
 		PolyVertex();
 		pos = _pos;
 		normal = _normal;
 	}
 };
 
-struct DLLNETWORK TextureData
-{
+struct DLLNETWORK TextureData {
 	std::string texture;
 	Vector3 nu = {};
 	Vector3 nv = {};
@@ -44,8 +43,7 @@ struct DLLNETWORK TextureData
 	float rot = 0.f;
 };
 
-struct DLLNETWORK DispInfo
-{
+struct DLLNETWORK DispInfo {
 	uint32_t power;
 	uint32_t flags;
 	uint32_t elevation;
@@ -58,9 +56,8 @@ struct DLLNETWORK DispInfo
 	std::vector<std::vector<Vector2>> alphas;
 };
 
-class DLLNETWORK PolyDispInfo
-{
-public:
+class DLLNETWORK PolyDispInfo {
+  public:
 	PolyDispInfo();
 	std::vector<Vector3> vertices;
 	std::vector<Vector3> normals;
@@ -74,9 +71,8 @@ public:
 	std::vector<uint32_t> powersMerged;
 };
 
-class DLLNETWORK PolyInfo
-{
-public:
+class DLLNETWORK PolyInfo {
+  public:
 	PolyInfo();
 	Vector3 nu;
 	Vector3 nv;
@@ -90,12 +86,11 @@ const short CLASSIFY_BACK = 1;
 const short CLASSIFY_ONPLANE = 2;
 const short CLASSIFY_SPANNING = 3;
 
-class DLLNETWORK Poly
-{
-	friend Con::c_cout& operator<<(Con::c_cout&,const Poly&);
-public:
+class DLLNETWORK Poly {
+	friend Con::c_cout &operator<<(Con::c_cout &, const Poly &);
+  public:
 	Poly(NetworkState *nw);
-protected:
+  protected:
 	NetworkState *m_nwState = nullptr;
 	std::vector<PolyVertex> m_vertices;
 	Vector3 m_normal = {};
@@ -115,25 +110,25 @@ protected:
 	void ReverseVertexOrder();
 	void Calculate();
 	void CalculateNormal();
-public:
+  public:
 	PolyInfo &GetCompiledData();
 	void SetDistance(double d);
 	void SetNormal(Vector3 n);
 	double GetDistance();
 	Vector3 GetNormal();
-	bool AddUniqueVertex(Vector3 vert,Vector3 n);
-	void AddVertex(Vector3 vert,Vector3 n);
+	bool AddUniqueVertex(Vector3 vert, Vector3 n);
+	void AddVertex(Vector3 vert, Vector3 n);
 	bool HasVertex(Vector3 *vert);
 	unsigned int GetVertexCount();
 	bool IsValid();
 	virtual void SortVertices();
 	Vector3 GetCenter();
 	std::vector<PolyVertex> &GetVertices();
-	void GetBounds(Vector3 *min,Vector3 *max);
+	void GetBounds(Vector3 *min, Vector3 *max);
 	void Localize(const Vector3 &center);
 	void debug_print();
-	bool GenerateTriangleMesh(std::vector<uint16_t> *triangles,std::vector<glm::vec2> *uvs,std::vector<Vector3> *normals);
-	virtual void SetTextureData(std::string texture,Vector3 nu,Vector3 nv,float ou,float ov,float su,float sv,float rot=0);
+	bool GenerateTriangleMesh(std::vector<uint16_t> *triangles, std::vector<glm::vec2> *uvs, std::vector<Vector3> *normals);
+	virtual void SetTextureData(std::string texture, Vector3 nu, Vector3 nv, float ou, float ov, float su, float sv, float rot = 0);
 	TextureData *GetTextureData();
 	virtual Material *GetMaterial();
 	virtual void SetMaterial(Material *material);
@@ -146,10 +141,8 @@ public:
 	std::shared_ptr<DispInfo> GetDisplacement();
 	bool IsDisplacement();
 	void RemoveDisplacement();
-	void BuildDisplacement(
-		std::vector<Vector3> &verts,Vector3 &nu,Vector3 &nv,unsigned int w,unsigned int h,
-		std::vector<Vector3> &outVertices,std::vector<glm::vec2> &outUvs,std::vector<unsigned int> &outTriangles,std::vector<Vector3> &faceNormals,unsigned char &numAlpha,std::vector<glm::vec2> *outAlphas
-	);
+	void BuildDisplacement(std::vector<Vector3> &verts, Vector3 &nu, Vector3 &nv, unsigned int w, unsigned int h, std::vector<Vector3> &outVertices, std::vector<glm::vec2> &outUvs, std::vector<unsigned int> &outTriangles, std::vector<Vector3> &faceNormals, unsigned char &numAlpha,
+	  std::vector<glm::vec2> *outAlphas);
 };
 
 #endif

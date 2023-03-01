@@ -15,42 +15,43 @@
 #include <sharedutils/util_shared_handle.hpp>
 #include <mathutil/color.h>
 
-namespace pragma::physics {class IEnvironment;};
+namespace pragma::physics {
+	class IEnvironment;
+};
 class SurfaceMaterial;
-class DLLNETWORK SurfaceMaterialManager
-{
-public:
+class DLLNETWORK SurfaceMaterialManager {
+  public:
 	SurfaceMaterialManager(pragma::physics::IEnvironment &env);
 	bool Load(const std::string &path);
-	SurfaceMaterial &Create(const std::string &identifier,Float staticFriction,Float dynamicFriction,Float restitution);
-	SurfaceMaterial &Create(const std::string &identifier,Float friction=0.5f,Float restitution=0.5f);
+	SurfaceMaterial &Create(const std::string &identifier, Float staticFriction, Float dynamicFriction, Float restitution);
+	SurfaceMaterial &Create(const std::string &identifier, Float friction = 0.5f, Float restitution = 0.5f);
 	// The returned pointer is NOT guaranteed to stay alive; Don't store it.
 	SurfaceMaterial *GetMaterial(const std::string &id);
 	std::vector<SurfaceMaterial> &GetMaterials();
-protected:
+  protected:
 	std::vector<SurfaceMaterial> m_materials; // These have to be objects (Not pointers) to uphold the requirements for the btTriangleIndexVertexMaterialArray constructor.
 	pragma::physics::IEnvironment &m_physEnv;
 };
 
-
-namespace pragma
-{
-	namespace physics {class IMaterial; class SurfaceType;};
-	namespace nav
-	{
+namespace pragma {
+	namespace physics {
+		class IMaterial;
+		class SurfaceType;
+	};
+	namespace nav {
 		enum class PolyFlags : uint16_t;
 	};
 };
 
-namespace udm {struct LinkedPropertyWrapper;};
+namespace udm {
+	struct LinkedPropertyWrapper;
+};
 
 struct PhysLiquid;
-class DLLNETWORK SurfaceMaterial
-{
-public:
-	struct AudioInfo
-	{
-		 // These should correspond to the values specified in "c_game_audio.cpp"
+class DLLNETWORK SurfaceMaterial {
+  public:
+	struct AudioInfo {
+		// These should correspond to the values specified in "c_game_audio.cpp"
 		float lowFreqAbsorption = 0.10f;
 		float midFreqAbsorption = 0.20f;
 		float highFreqAbsorption = 0.30f;
@@ -59,19 +60,18 @@ public:
 		float midFreqTransmission = 0.050f;
 		float highFreqTransmission = 0.030f;
 	};
-	struct PBRInfo
-	{
+	struct PBRInfo {
 		float metalness = 0.f;
 		float roughness = 0.5f;
 		struct {
 			Color color = Color::White;
-			Vector3 scatterColor = {0.f,0.f,0.f};
+			Vector3 scatterColor = {0.f, 0.f, 0.f};
 			Vector3 radiusMM {};
 			float factor = 0.f;
 		} subsurface;
 	};
-public:
-	SurfaceMaterial(pragma::physics::IEnvironment &env,const std::string &identifier,UInt idx,pragma::physics::IMaterial &physMat);
+  public:
+	SurfaceMaterial(pragma::physics::IEnvironment &env, const std::string &identifier, UInt idx, pragma::physics::IMaterial &physMat);
 	SurfaceMaterial(const SurfaceMaterial &other);
 	void Reset();
 	void Load(udm::LinkedPropertyWrapper &prop);
@@ -138,7 +138,7 @@ public:
 	float GetAudioMidFrequencyTransmission() const;
 	void SetAudioHighFrequencyTransmission(float transmission);
 	float GetAudioHighFrequencyTransmission() const;
-protected:
+  protected:
 	pragma::physics::IEnvironment &m_physEnv;
 	UInt m_index;
 	std::string m_identifier;
@@ -157,6 +157,6 @@ protected:
 	PhysLiquid &InitializeLiquid();
 };
 
-DLLNETWORK std::ostream &operator<<(std::ostream &out,const SurfaceMaterial &surfaceMaterial);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const SurfaceMaterial &surfaceMaterial);
 
 #endif

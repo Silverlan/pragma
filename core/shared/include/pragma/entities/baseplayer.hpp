@@ -10,14 +10,15 @@
 #include "pragma/networkdefinitions.h"
 #include <sharedutils/util_weak_handle.hpp>
 
-namespace pragma {class BasePlayerComponent;};
-class DLLNETWORK BasePlayer
-{
-public:
-	BasePlayer()=default;
-	virtual ~BasePlayer()=default;
+namespace pragma {
+	class BasePlayerComponent;
+};
+class DLLNETWORK BasePlayer {
+  public:
+	BasePlayer() = default;
+	virtual ~BasePlayer() = default;
 	util::WeakHandle<pragma::BasePlayerComponent> GetBasePlayerComponent();
-protected:
+  protected:
 	util::WeakHandle<pragma::BasePlayerComponent> m_basePlayerComponent = {};
 };
 

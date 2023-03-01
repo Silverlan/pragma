@@ -16,16 +16,14 @@ using namespace pragma;
 void SScoreComponent::Initialize()
 {
 	BaseScoreComponent::Initialize();
-	FlagCallbackForRemoval(m_score->AddCallback([this](std::reference_wrapper<const Score> oldVal,std::reference_wrapper<const Score> val) {
+	FlagCallbackForRemoval(m_score->AddCallback([this](std::reference_wrapper<const Score> oldVal, std::reference_wrapper<const Score> val) {
 		NetPacket p {};
 		p->Write<Score>(val);
-		static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetScore,p,pragma::networking::Protocol::SlowReliable);
-	}),CallbackType::Component,this);
+		static_cast<SBaseEntity &>(GetEntity()).SendNetEvent(m_netEvSetScore, p, pragma::networking::Protocol::SlowReliable);
+	}),
+	  CallbackType::Component, this);
 }
 
-void SScoreComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SScoreComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void SScoreComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
-{
-	packet->Write<Score>(*m_score);
-}
+void SScoreComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { packet->Write<Score>(*m_score); }

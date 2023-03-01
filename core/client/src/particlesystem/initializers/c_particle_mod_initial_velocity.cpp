@@ -15,17 +15,15 @@
 #include <sharedutils/util.h>
 #include <algorithm>
 
-REGISTER_PARTICLE_INITIALIZER(initial_velocity,CParticleInitializerInitialVelocity);
+REGISTER_PARTICLE_INITIALIZER(initial_velocity, CParticleInitializerInitialVelocity);
 
-void CParticleInitializerInitialVelocity::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleInitializerInitialVelocity::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleInitializer::Initialize(pSystem,values);
-	for(auto it=values.begin();it!=values.end();it++)
-	{
+	CParticleInitializer::Initialize(pSystem, values);
+	for(auto it = values.begin(); it != values.end(); it++) {
 		std::string key = it->first;
-		std::transform(key.begin(),key.end(),key.begin(),::tolower);
-		if(key == "velocity")
-		{
+		std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+		if(key == "velocity") {
 			Vector3 velocity;
 			velocity = uvec::create(it->second);
 			m_speed = uvec::length(velocity);
@@ -47,13 +45,12 @@ void CParticleInitializerInitialVelocity::Initialize(pragma::CParticleSystemComp
 void CParticleInitializerInitialVelocity::OnParticleCreated(CParticle &particle)
 {
 	auto dir = m_direction;
-	if(uvec::length_sqr(m_spreadMax -m_spreadMin) > 0.001f)
-	{
-		dir += uvec::get_random_spread(m_spreadMin,m_spreadMax);
+	if(uvec::length_sqr(m_spreadMax - m_spreadMin) > 0.001f) {
+		dir += uvec::get_random_spread(m_spreadMin, m_spreadMax);
 		uvec::normalize(&dir);
 	}
-	auto vel = dir *m_speed;
-	vel += uvec::get_random_spread(m_velocityMin,m_velocityMax);
+	auto vel = dir * m_speed;
+	vel += uvec::get_random_spread(m_velocityMin, m_velocityMax);
 	particle.SetVelocity(vel);
 }
-float CParticleInitializerInitialVelocity::GetSpeed() const {return m_speed;}
+float CParticleInitializerInitialVelocity::GetSpeed() const { return m_speed; }

@@ -14,20 +14,17 @@
 
 using namespace pragma;
 
-
 void BaseWorldComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	auto &ent = GetEntity();
 	auto whRenderComponent = ent.AddComponent("render");
 	if(whRenderComponent.valid())
-		static_cast<BaseRenderComponent*>(whRenderComponent.get())->SetCastShadows(true);
+		static_cast<BaseRenderComponent *>(whRenderComponent.get())->SetCastShadows(true);
 	ent.AddComponent("model");
 	ent.AddComponent("physics");
 
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		InitializePhysics();
-	});
+	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { InitializePhysics(); });
 }
 
 void BaseWorldComponent::InitializePhysics()
@@ -54,7 +51,6 @@ void BaseWorldComponent::OnEntitySpawn()
 
 Con::c_cout &BaseWorldComponent::print(Con::c_cout &os)
 {
-	os<<"World";
+	os << "World";
 	return os;
 }
-

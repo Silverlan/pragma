@@ -12,27 +12,27 @@
 #include <mathutil/color.h>
 #include <optional>
 
-namespace util
-{
-	enum class ConsoleColorFlags : uint32_t
-	{
+namespace util {
+	enum class ConsoleColorFlags : uint32_t {
 		None = 0u,
 		Red = 1u,
-		Green = Red<<1u,
-		Blue = Green<<1u,
-		Intensity = Blue<<1u,
-		
-		BackgroundRed = Intensity<<1u,
-		BackgroundGreen = BackgroundRed<<1u,
-		BackgroundBlue = BackgroundGreen<<1u,
-		BackgroundIntensity = BackgroundBlue<<1u,
+		Green = Red << 1u,
+		Blue = Green << 1u,
+		Intensity = Blue << 1u,
+
+		BackgroundRed = Intensity << 1u,
+		BackgroundGreen = BackgroundRed << 1u,
+		BackgroundBlue = BackgroundGreen << 1u,
+		BackgroundIntensity = BackgroundBlue << 1u,
+
+		Reset = BackgroundIntensity << 1u,
 
 		Yellow = Red | Green,
 		Magenta = Red | Blue,
 		Cyan = Blue | Green,
 		White = Red | Green | Blue,
 		Black = None,
-		
+
 		BackgroundYellow = BackgroundRed | BackgroundGreen,
 		BackgroundMagenta = BackgroundRed | BackgroundBlue,
 		BackgroundCyan = BackgroundBlue | BackgroundGreen,
@@ -44,6 +44,7 @@ namespace util
 	DLLNETWORK ConsoleColorFlags get_active_console_color_flags();
 	DLLNETWORK std::optional<Color> console_color_flags_to_color(ConsoleColorFlags flags);
 	DLLNETWORK ConsoleColorFlags color_to_console_color_flags(const Color &color);
+	DLLNETWORK std::string get_ansi_color_code(ConsoleColorFlags flags);
 };
 REGISTER_BASIC_BITWISE_OPERATORS(util::ConsoleColorFlags);
 

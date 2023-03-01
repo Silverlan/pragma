@@ -22,7 +22,7 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(viewbody,CViewBody);
+LINK_ENTITY_TO_CLASS(viewbody, CViewBody);
 
 extern ClientState *client;
 extern CGame *c_game;
@@ -36,15 +36,14 @@ void CViewBodyComponent::Initialize()
 	ent.AddComponent<CModelComponent>();
 	ent.AddComponent<LogicComponent>(); // Logic component is needed for animations
 	auto pRenderComponent = ent.AddComponent<CRenderComponent>();
-	if(pRenderComponent.valid())
-	{
+	if(pRenderComponent.valid()) {
 		pRenderComponent->AddToRenderGroup("firstperson");
 		pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::View);
 		pRenderComponent->SetCastShadows(false);
 	}
 	ent.AddComponent<CAnimatedComponent>();
 }
-void CViewBodyComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CViewBodyComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 //////////////
 

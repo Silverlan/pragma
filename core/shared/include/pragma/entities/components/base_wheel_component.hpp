@@ -10,19 +10,16 @@
 #include "pragma/networkdefinitions.h"
 #include "pragma/physics/vehicle.hpp"
 
-namespace pragma
-{
+namespace pragma {
 	class BaseVehicleComponent;
-	class DLLNETWORK BaseWheelComponent
-		: public BaseEntityComponent
-	{
-	public:
+	class DLLNETWORK BaseWheelComponent : public BaseEntityComponent {
+	  public:
 		virtual ~BaseWheelComponent() override;
 		virtual void Initialize() override;
 		util::WeakHandle<pragma::BaseVehicleComponent> GetVehicle();
 
-		void SetupWheel(BaseVehicleComponent &vhc,const pragma::physics::WheelCreateInfo &createInfo,uint8_t wheelId);
-	protected:
+		void SetupWheel(BaseVehicleComponent &vhc, const pragma::physics::WheelCreateInfo &createInfo, uint8_t wheelId);
+	  protected:
 		BaseWheelComponent(BaseEntity &ent);
 		void UpdatePose();
 		ComponentHandle<pragma::BaseVehicleComponent> m_vehicle = {};
@@ -32,7 +29,7 @@ namespace pragma
 
 		virtual void OnTick(double dt) override;
 		void UpdateWheel();
-	private:
+	  private:
 		CallbackHandle m_cbOnSpawn = {};
 	};
 };

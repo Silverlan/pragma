@@ -17,11 +17,10 @@
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT pragma::physics::IEnvironment *c_physEnv;
 
-void CParticleOperatorPhysics::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleOperatorPhysics::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleOperator::Initialize(pSystem,values);
-	for(auto it=values.begin();it!=values.end();it++)
-	{
+	CParticleOperator::Initialize(pSystem, values);
+	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
 		ustring::to_lower(key);
 		if(key == "mass")
@@ -34,8 +33,7 @@ void CParticleOperatorPhysics::Initialize(pragma::CParticleSystemComponent &pSys
 			m_angularDamping = util::to_float(it->second);
 		else if(key == "angular_factor")
 			m_angularFactor = uvec::create(it->second);
-		else if(key == "rotation_offset")
-		{
+		else if(key == "rotation_offset") {
 			auto ang = EulerAngles(it->second);
 			m_rotOffset = uquat::create(ang);
 		}
@@ -57,14 +55,12 @@ void CParticleOperatorPhysics::OnParticleSystemStarted()
 	shape->SetMass(mass);
 
 	m_physicsObjects.resize(maxParticles);
-	for(auto i=decltype(maxParticles){0};i<maxParticles;++i)
-	{
+	for(auto i = decltype(maxParticles) {0}; i < maxParticles; ++i) {
 		auto rigidBody = c_physEnv->CreateRigidBody(*shape);
-		if(rigidBody != nullptr)
-		{
+		if(rigidBody != nullptr) {
 			m_physicsObjects[i] = rigidBody;
 			rigidBody->SetCollisionFilterGroup(CollisionMask::Particle);
-			rigidBody->SetCollisionFilterMask(CollisionMask::All &~CollisionMask::Particle);
+			rigidBody->SetCollisionFilterMask(CollisionMask::All & ~CollisionMask::Particle);
 			rigidBody->DisableSimulation();
 			rigidBody->SetCCDEnabled(true);
 			rigidBody->SetLinearDamping(m_linearDamping);
@@ -75,10 +71,7 @@ void CParticleOperatorPhysics::OnParticleSystemStarted()
 		}
 	}
 }
-void CParticleOperatorPhysics::OnParticleSystemStopped()
-{
-	m_physicsObjects.clear();
-}
+void CParticleOperatorPhysics::OnParticleSystemStopped() { m_physicsObjects.clear(); }
 void CParticleOperatorPhysics::OnParticleCreated(CParticle &particle)
 {
 	auto idx = particle.GetIndex();
@@ -87,7 +80,7 @@ void CParticleOperatorPhysics::OnParticleCreated(CParticle &particle)
 	auto &hPhys = m_physicsObjects[idx];
 	auto pos = m_posOffset;
 	auto rot = m_rotOffset;
-	uvec::local_to_world(particle.GetPosition(),particle.GetWorldRotation(),pos,rot);
+	uvec::local_to_world(particle.GetPosition(), particle.GetWorldRotation(), pos, rot);
 	auto *rigidBody = hPhys.Get();
 	rigidBody->EnableSimulation();
 	rigidBody->SetPos(pos);
@@ -105,7 +98,7 @@ void CParticleOperatorPhysics::OnParticleDestroyed(CParticle &particle)
 	hPhys->DisableSimulation();
 }
 
-void CParticleOperatorPhysics::PreSimulate(CParticle &particle,double)
+void CParticleOperatorPhysics::PreSimulate(CParticle &particle, double)
 {
 	auto idx = particle.GetIndex();
 	if(idx >= m_physicsObjects.size())
@@ -115,8 +108,8 @@ void CParticleOperatorPhysics::PreSimulate(CParticle &particle,double)
 	auto rot = hPhys->GetRotation();
 
 	auto translationOffset = m_posOffset;
-	rot = rot *uquat::get_inverse(m_rotOffset);
-	uvec::rotate(&translationOffset,rot);
+	rot = rot * uquat::get_inverse(m_rotOffset);
+	uvec::rotate(&translationOffset, rot);
 	pos -= translationOffset;
 
 	particle.SetPosition(pos);
@@ -125,14 +118,14 @@ void CParticleOperatorPhysics::PreSimulate(CParticle &particle,double)
 	particle.SetAngularVelocity(hPhys->GetAngularVelocity());
 }
 
-void CParticleOperatorPhysics::PostSimulate(CParticle &particle,double)
+void CParticleOperatorPhysics::PostSimulate(CParticle &particle, double)
 {
 	auto idx = particle.GetIndex();
 	if(idx >= m_physicsObjects.size())
 		return;
 	auto pos = m_posOffset;
 	auto rot = m_rotOffset;
-	uvec::local_to_world(particle.GetPosition(),particle.GetWorldRotation(),pos,rot);
+	uvec::local_to_world(particle.GetPosition(), particle.GetWorldRotation(), pos, rot);
 	auto &hPhys = m_physicsObjects[idx];
 	hPhys->SetPos(pos);
 	hPhys->SetRotation(rot);
@@ -142,11 +135,10 @@ void CParticleOperatorPhysics::PostSimulate(CParticle &particle,double)
 
 //////////////////////////////
 
-void CParticleOperatorPhysicsSphere::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleOperatorPhysicsSphere::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleOperatorPhysics::Initialize(pSystem,values);
-	for(auto it=values.begin();it!=values.end();it++)
-	{
+	CParticleOperatorPhysics::Initialize(pSystem, values);
+	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
 		ustring::to_lower(key);
 		if(key == "radius")
@@ -154,18 +146,14 @@ void CParticleOperatorPhysicsSphere::Initialize(pragma::CParticleSystemComponent
 	}
 }
 
-std::shared_ptr<pragma::physics::IShape> CParticleOperatorPhysicsSphere::CreateShape()
-{
-	return c_physEnv->CreateSphereShape(m_radius,c_physEnv->GetGenericMaterial());
-}
+std::shared_ptr<pragma::physics::IShape> CParticleOperatorPhysicsSphere::CreateShape() { return c_physEnv->CreateSphereShape(m_radius, c_physEnv->GetGenericMaterial()); }
 
 //////////////////////////////
 
-void CParticleOperatorPhysicsBox::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleOperatorPhysicsBox::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleOperatorPhysics::Initialize(pSystem,values);
-	for(auto it=values.begin();it!=values.end();it++)
-	{
+	CParticleOperatorPhysics::Initialize(pSystem, values);
+	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
 		ustring::to_lower(key);
 		if(key == "extent")
@@ -173,18 +161,14 @@ void CParticleOperatorPhysicsBox::Initialize(pragma::CParticleSystemComponent &p
 	}
 }
 
-std::shared_ptr<pragma::physics::IShape> CParticleOperatorPhysicsBox::CreateShape()
-{
-	return c_physEnv->CreateBoxShape({m_extent,m_extent,m_extent},c_physEnv->GetGenericMaterial());
-}
+std::shared_ptr<pragma::physics::IShape> CParticleOperatorPhysicsBox::CreateShape() { return c_physEnv->CreateBoxShape({m_extent, m_extent, m_extent}, c_physEnv->GetGenericMaterial()); }
 
 //////////////////////////////
 
-void CParticleOperatorPhysicsCylinder::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleOperatorPhysicsCylinder::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleOperatorPhysics::Initialize(pSystem,values);
-	for(auto it=values.begin();it!=values.end();it++)
-	{
+	CParticleOperatorPhysics::Initialize(pSystem, values);
+	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
 		ustring::to_lower(key);
 		if(key == "radius")
@@ -194,22 +178,17 @@ void CParticleOperatorPhysicsCylinder::Initialize(pragma::CParticleSystemCompone
 	}
 }
 
-std::shared_ptr<pragma::physics::IShape> CParticleOperatorPhysicsCylinder::CreateShape()
-{
-	return c_physEnv->CreateCylinderShape(m_radius,m_height,c_physEnv->GetGenericMaterial());
-}
+std::shared_ptr<pragma::physics::IShape> CParticleOperatorPhysicsCylinder::CreateShape() { return c_physEnv->CreateCylinderShape(m_radius, m_height, c_physEnv->GetGenericMaterial()); }
 
 //////////////////////////////
 
-void CParticleOperatorPhysicsModel::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleOperatorPhysicsModel::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleOperatorPhysics::Initialize(pSystem,values);
-	for(auto &pair : values)
-	{
+	CParticleOperatorPhysics::Initialize(pSystem, values);
+	for(auto &pair : values) {
 		auto key = pair.first;
 		ustring::to_lower(key);
-		if(key == "model")
-		{
+		if(key == "model") {
 			m_model = c_game->LoadModel(pair.second);
 			break;
 		}
@@ -229,10 +208,9 @@ std::shared_ptr<pragma::physics::IShape> CParticleOperatorPhysicsModel::CreateSh
 	if(m_model == nullptr)
 		return nullptr;
 	auto &colMeshes = m_model->GetCollisionMeshes();
-	std::vector<pragma::physics::IShape*> shapes;
+	std::vector<pragma::physics::IShape *> shapes;
 	shapes.reserve(colMeshes.size());
-	for(auto &colMesh : colMeshes)
-	{
+	for(auto &colMesh : colMeshes) {
 		auto shape = colMesh->GetShape();
 		if(shape == nullptr)
 			continue;

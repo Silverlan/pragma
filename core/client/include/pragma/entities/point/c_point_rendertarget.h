@@ -15,22 +15,18 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <texturemanager/texture.h>
 
-namespace pragma
-{
-	class DLLCLIENT CRenderTargetComponent final
-		: public BasePointRenderTargetComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CRenderTargetComponent final : public BasePointRenderTargetComponent, public CBaseNetComponent {
+	  public:
 		CRenderTargetComponent(BaseEntity &ent) : BasePointRenderTargetComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
-	protected:
+		virtual bool ShouldTransmitNetData() const override { return true; }
+	  protected:
 		void SetRenderSize(Vector2 &size);
-		void SetRenderSize(float w,float h);
+		void SetRenderSize(float w, float h);
 		Vector2 GetRenderSize();
-		void GetRenderSize(float *w,float *h);
+		void GetRenderSize(float *w, float *h);
 
 		void SetRenderMaterial(Material *mat);
 		Material *GetRenderMaterial();
@@ -58,10 +54,8 @@ namespace pragma
 	};
 };
 
-class DLLCLIENT CPointRenderTarget
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CPointRenderTarget : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

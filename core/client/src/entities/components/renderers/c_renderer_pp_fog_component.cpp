@@ -24,17 +24,17 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-CRendererPpFogComponent::CRendererPpFogComponent(BaseEntity &ent)
-	: CRendererPpBaseComponent(ent)
-{}
+CRendererPpFogComponent::CRendererPpFogComponent(BaseEntity &ent) : CRendererPpBaseComponent(ent) {}
 void CRendererPpFogComponent::DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo)
 {
-	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuFog,*drawSceneInfo.commandBuffer);
+	if(drawSceneInfo.renderStats)
+		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuFog, *drawSceneInfo.commandBuffer);
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
-	
+
 	util::ScopeGuard scopeGuard {[&drawSceneInfo]() {
 		c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
-		if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuFog,*drawSceneInfo.commandBuffer);
+		if(drawSceneInfo.renderStats)
+			(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuFog, *drawSceneInfo.commandBuffer);
 	}};
 
 	if(drawSceneInfo.scene.expired() || m_renderer.expired())
@@ -42,11 +42,9 @@ void CRendererPpFogComponent::DoRenderEffect(const util::DrawSceneInfo &drawScen
 	auto &scene = *drawSceneInfo.scene;
 	auto &hdrInfo = m_renderer->GetHDRInfo();
 	auto descSetGroupFog = m_renderer->GetFogOverride();
-	if(descSetGroupFog == nullptr)
-	{
+	if(descSetGroupFog == nullptr) {
 		auto *worldEnv = scene.GetWorldEnvironment();
-		if(worldEnv != nullptr)
-		{
+		if(worldEnv != nullptr) {
 			auto &fog = worldEnv->GetFogSettings();
 			if(fog.IsEnabled() == true)
 				descSetGroupFog = scene.GetFogDescriptorSetGroup();
@@ -56,55 +54,31 @@ void CRendererPpFogComponent::DoRenderEffect(const util::DrawSceneInfo &drawScen
 	auto hShaderFog = c_game->GetGameShader(CGame::GameShader::PPFog);
 	if(descSetGroupFog == nullptr || hShaderFog.expired())
 		return;
-	auto &shaderFog = static_cast<pragma::ShaderPPFog&>(*hShaderFog.get());
+	auto &shaderFog = static_cast<pragma::ShaderPPFog &>(*hShaderFog.get());
 	auto &prepass = hdrInfo.prepass;
 	auto texDepth = prepass.textureDepth;
-	if(texDepth->IsMSAATexture())
-	{
-		texDepth = static_cast<prosper::MSAATexture&>(*texDepth).Resolve(
-			*drawCmd,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal,
-			prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal
-		);
+	if(texDepth->IsMSAATexture()) {
+		texDepth = static_cast<prosper::MSAATexture &>(*texDepth).Resolve(*drawCmd, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 	}
 	else
-		drawCmd->RecordImageBarrier(texDepth->GetImage(),prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+		drawCmd->RecordImageBarrier(texDepth->GetImage(), prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 	//texDepth->GetImage()->SetDrawLayout(prosper::ImageLayout::ShaderReadOnlyOptimal);
 
 	auto &hdrTex = hdrInfo.sceneRenderTarget->GetTexture();
-	drawCmd->RecordImageBarrier(hdrTex.GetImage(),prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
-	drawCmd->RecordBufferBarrier(
-		*scene.GetCameraBuffer(),
-		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
-		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-	);
-	drawCmd->RecordBufferBarrier(
-		*scene.GetRenderSettingsBuffer(),
-		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
-		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-	);
-	drawCmd->RecordBufferBarrier(
-		*scene.GetFogBuffer(),
-		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
-		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-	);
-	if(drawCmd->RecordBeginRenderPass(*hdrInfo.hdrPostProcessingRenderTarget) == true)
-	{
+	drawCmd->RecordImageBarrier(hdrTex.GetImage(), prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
+	drawCmd->RecordBufferBarrier(*scene.GetCameraBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
+	drawCmd->RecordBufferBarrier(*scene.GetRenderSettingsBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
+	drawCmd->RecordBufferBarrier(*scene.GetFogBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
+	if(drawCmd->RecordBeginRenderPass(*hdrInfo.hdrPostProcessingRenderTarget) == true) {
 		prosper::ShaderBindState bindState {*drawCmd};
-		if(shaderFog.RecordBeginDraw(bindState) == true)
-		{
-			shaderFog.RecordDraw(
-				bindState,
-				*hdrInfo.dsgHDRPostProcessing->GetDescriptorSet(),
-				*hdrInfo.dsgDepthPostProcessing->GetDescriptorSet(),
-				*scene.GetCameraDescriptorSetGraphics(),
-				*scene.GetFogDescriptorSetGroup()->GetDescriptorSet()
-			);
+		if(shaderFog.RecordBeginDraw(bindState) == true) {
+			shaderFog.RecordDraw(bindState, *hdrInfo.dsgHDRPostProcessing->GetDescriptorSet(), *hdrInfo.dsgDepthPostProcessing->GetDescriptorSet(), *scene.GetCameraDescriptorSetGraphics(), *scene.GetFogDescriptorSetGroup()->GetDescriptorSet());
 			shaderFog.RecordEndDraw(bindState);
 		}
 		drawCmd->RecordEndRenderPass();
 	}
-	drawCmd->RecordImageBarrier(texDepth->GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal);
+	drawCmd->RecordImageBarrier(texDepth->GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::DepthStencilAttachmentOptimal);
 
 	hdrInfo.BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo);
 }
-void CRendererPpFogComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CRendererPpFogComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

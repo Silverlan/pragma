@@ -12,12 +12,10 @@
 
 extern DLLNETWORK Engine *engine;
 
-Engine::StateInstance::StateInstance(const std::shared_ptr<msys::MaterialManager> &matManager,Material *matErr)
-	: materialManager{matManager},state(nullptr)
+Engine::StateInstance::StateInstance(const std::shared_ptr<msys::MaterialManager> &matManager, Material *matErr) : materialManager {matManager}, state(nullptr)
 {
-	if(matErr == nullptr)
-	{
-		Con::cout<<"Unable to load error material! Validate or reinstall the game files!"<<Con::endl;
+	if(matErr == nullptr) {
+		Con::cout << "Unable to load error material! Validate or reinstall the game files!" << Con::endl;
 		exit(EXIT_FAILURE);
 	}
 	materialManager->SetErrorMaterial(matErr);

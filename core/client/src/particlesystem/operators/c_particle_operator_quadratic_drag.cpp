@@ -13,13 +13,12 @@
 #include <sharedutils/util.h>
 #include <algorithm>
 
-REGISTER_PARTICLE_OPERATOR(quadratic_drag,CParticleOperatorQuadraticDrag);
+REGISTER_PARTICLE_OPERATOR(quadratic_drag, CParticleOperatorQuadraticDrag);
 
-void CParticleOperatorQuadraticDrag::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleOperatorQuadraticDrag::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleOperator::Initialize(pSystem,values);
-	for(auto it=values.begin();it!=values.end();it++)
-	{
+	CParticleOperator::Initialize(pSystem, values);
+	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
 		ustring::to_lower(key);
 		if(key == "drag")
@@ -29,11 +28,11 @@ void CParticleOperatorQuadraticDrag::Initialize(pragma::CParticleSystemComponent
 void CParticleOperatorQuadraticDrag::Simulate(double tDelta)
 {
 	CParticleOperator::Simulate(tDelta);
-	m_fTickDrag = m_fAmount *static_cast<float>(tDelta);
+	m_fTickDrag = m_fAmount * static_cast<float>(tDelta);
 }
-void CParticleOperatorQuadraticDrag::Simulate(CParticle &particle,double tDelta,float strength)
+void CParticleOperatorQuadraticDrag::Simulate(CParticle &particle, double tDelta, float strength)
 {
-	CParticleOperator::Simulate(particle,tDelta,strength);
+	CParticleOperator::Simulate(particle, tDelta, strength);
 	auto &velocity = particle.GetVelocity();
-	particle.SetVelocity(velocity *umath::max(0.f,1.f -m_fTickDrag *uvec::length(velocity)));
+	particle.SetVelocity(velocity * umath::max(0.f, 1.f - m_fTickDrag * uvec::length(velocity)));
 }

@@ -13,13 +13,11 @@
 
 struct lua_State;
 class ALSound;
-namespace Lua
-{
-	namespace ALSound
-	{
+namespace Lua {
+	namespace ALSound {
 		DLLNETWORK void register_class(luabind::class_<::ALSound> &classDef);
 	};
 };
-std::ostream &operator<<(std::ostream &out,const ::ALSound &snd);
+std::ostream &operator<<(std::ostream &out, const ::ALSound &snd);
 
 #endif

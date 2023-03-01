@@ -1,7 +1,7 @@
 util.register_class("ents.LuaScriptComponent",BaseEntityComponent)
 
-ents.LuaScriptComponent:RegisterMember("ScriptFile",util.VAR_TYPE_STRING,"",ents.BaseEntityComponent.MEMBER_FLAG_DEFAULT,1)
-ents.LuaScriptComponent:RegisterMember("Code",util.VAR_TYPE_STRING,"",ents.BaseEntityComponent.MEMBER_FLAG_DEFAULT,1)
+ents.LuaScriptComponent:RegisterMember("ScriptFile",util.VAR_TYPE_STRING,"",ents.BaseEntityComponent.MEMBER_FLAG_DEFAULT)
+ents.LuaScriptComponent:RegisterMember("Code",util.VAR_TYPE_STRING,"",ents.BaseEntityComponent.MEMBER_FLAG_DEFAULT)
 function ents.LuaScriptComponent:__init()
 	BaseEntityComponent.__init(self)
 end

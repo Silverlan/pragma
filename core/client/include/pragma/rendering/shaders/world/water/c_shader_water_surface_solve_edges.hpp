@@ -10,13 +10,10 @@
 
 #include "pragma/rendering/shaders/world/water/c_shader_water_surface_sum_edges.hpp"
 
-namespace pragma
-{
-	class DLLCLIENT ShaderWaterSurfaceSolveEdges
-		: public ShaderWaterSurfaceSumEdges
-	{
-	public:
-		ShaderWaterSurfaceSolveEdges(prosper::IPrContext &context,const std::string &identifier);
+namespace pragma {
+	class DLLCLIENT ShaderWaterSurfaceSolveEdges : public ShaderWaterSurfaceSumEdges {
+	  public:
+		ShaderWaterSurfaceSolveEdges(prosper::IPrContext &context, const std::string &identifier);
 	};
 };
 

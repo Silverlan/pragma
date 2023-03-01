@@ -16,19 +16,15 @@
 #include <atomic>
 #include <mathutil/umath.h>
 
-namespace prosper
-{
+namespace prosper {
 	class Texture;
 	class BlurSet;
 };
 
 class GLFrameBuffer;
-class DLLCLIENT WIImageSlideShow
-	: public WIBase
-{
-private:
-	struct PreloadImage
-	{
+class DLLCLIENT WIImageSlideShow : public WIBase {
+  private:
+	struct PreloadImage {
 		PreloadImage();
 		Int32 image;
 		std::shared_ptr<Texture> texture;
@@ -50,12 +46,12 @@ private:
 	void PreloadNextRandomShuffle();
 	void DisplayPreloadedImage();
 	void DisplayNextImage();
-public:
+  public:
 	WIImageSlideShow();
 	virtual void Initialize() override;
-	virtual void SetSize(int x,int y) override;
+	virtual void SetSize(int x, int y) override;
 	virtual void Think() override;
-	virtual void SetColor(float r,float g,float b,float a=1.f) override;
+	virtual void SetColor(float r, float g, float b, float a = 1.f) override;
 	void SetImages(const std::vector<std::string> &images);
 };
 

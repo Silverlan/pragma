@@ -13,17 +13,11 @@
 
 using namespace pragma;
 
-
-pragma::ObserverCameraData::ObserverCameraData()
-	: enabled{util::BoolProperty::Create(false)},
-	offset{util::Vector3Property::Create()}
-{}
+pragma::ObserverCameraData::ObserverCameraData() : enabled {util::BoolProperty::Create(false)}, offset {util::Vector3Property::Create()} {}
 
 /////////
 
-BaseObservableComponent::BaseObservableComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+BaseObservableComponent::BaseObservableComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 void BaseObservableComponent::Initialize()
 {
@@ -31,62 +25,52 @@ void BaseObservableComponent::Initialize()
 	m_netSetObserverOffset = SetupNetEvent("set_observer_offset");
 }
 
-void BaseObservableComponent::SetLocalCameraOrigin(CameraType type,const Vector3 &origin)
-{
-	GetCameraData(type).localOrigin = origin;
-}
-void BaseObservableComponent::ClearLocalCameraOrigin(CameraType type)
-{
-	GetCameraData(type).localOrigin = {};
-}
+void BaseObservableComponent::SetLocalCameraOrigin(CameraType type, const Vector3 &origin) { GetCameraData(type).localOrigin = origin; }
+void BaseObservableComponent::ClearLocalCameraOrigin(CameraType type) { GetCameraData(type).localOrigin = {}; }
 Vector3 BaseObservableComponent::GetLocalCameraOrigin(CameraType type) const
 {
 	auto &localOrigin = GetCameraData(type).localOrigin;
-	return localOrigin.has_value() ? *localOrigin : Vector3{};
+	return localOrigin.has_value() ? *localOrigin : Vector3 {};
 }
-void BaseObservableComponent::SetLocalCameraOffset(CameraType type,const Vector3 &offset)
-{
-	*GetCameraData(type).offset = offset;
-}
-const Vector3 &BaseObservableComponent::GetLocalCameraOffset(CameraType type) const {return *GetCameraData(type).offset;}
+void BaseObservableComponent::SetLocalCameraOffset(CameraType type, const Vector3 &offset) { *GetCameraData(type).offset = offset; }
+const Vector3 &BaseObservableComponent::GetLocalCameraOffset(CameraType type) const { return *GetCameraData(type).offset; }
 
-const ObserverCameraData &BaseObservableComponent::GetCameraData(CameraType type) const {return const_cast<BaseObservableComponent*>(this)->GetCameraData(type);}
-ObserverCameraData &BaseObservableComponent::GetCameraData(CameraType type) {return m_cameraData.at(umath::to_integral(type));}
+const ObserverCameraData &BaseObservableComponent::GetCameraData(CameraType type) const { return const_cast<BaseObservableComponent *>(this)->GetCameraData(type); }
+ObserverCameraData &BaseObservableComponent::GetCameraData(CameraType type) { return m_cameraData.at(umath::to_integral(type)); }
 
-void BaseObservableComponent::SetCameraEnabled(CameraType type,bool enabled) {*GetCameraData(type).enabled = enabled;}
-bool BaseObservableComponent::IsCameraEnabled(CameraType type) const {return *GetCameraData(type).enabled;}
+void BaseObservableComponent::SetCameraEnabled(CameraType type, bool enabled) { *GetCameraData(type).enabled = enabled; }
+bool BaseObservableComponent::IsCameraEnabled(CameraType type) const { return *GetCameraData(type).enabled; }
 
-const util::PBoolProperty &BaseObservableComponent::GetCameraEnabledProperty(CameraType type) const {return GetCameraData(type).enabled;}
-const util::PVector3Property &BaseObservableComponent::GetCameraOffsetProperty(CameraType type) const {return GetCameraData(type).offset;}
+const util::PBoolProperty &BaseObservableComponent::GetCameraEnabledProperty(CameraType type) const { return GetCameraData(type).enabled; }
+const util::PVector3Property &BaseObservableComponent::GetCameraOffsetProperty(CameraType type) const { return GetCameraData(type).offset; }
 
 void BaseObservableComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	constexpr auto numTypes = umath::to_integral(CameraType::Count);
-	auto fWriteCameraData = [](udm::LinkedPropertyWrapperArg udm,ObserverCameraData &camData) {
+	auto fWriteCameraData = [](udm::LinkedPropertyWrapperArg udm, ObserverCameraData &camData) {
 		udm["enabled"] = **camData.enabled;
 		if(camData.localOrigin.has_value())
 			udm["localOrigin"] = *camData.localOrigin;
 		udm["offset"] = **camData.offset;
 		udm["rotateWithObservee"] = camData.rotateWithObservee;
-		if(camData.angleLimits.has_value())
-		{
+		if(camData.angleLimits.has_value()) {
 			udm["limits"]["min"] = camData.angleLimits->first;
 			udm["limits"]["max"] = camData.angleLimits->second;
 		}
 	};
 	auto &dataFp = GetCameraData(CameraType::FirstPerson);
 	auto &dataTp = GetCameraData(CameraType::ThirdPerson);
-	fWriteCameraData(udm["firstPerson"],dataFp);
-	fWriteCameraData(udm["thirdPerson"],dataTp);
+	fWriteCameraData(udm["firstPerson"], dataFp);
+	fWriteCameraData(udm["thirdPerson"], dataTp);
 }
 
-void BaseObservableComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
+void BaseObservableComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version)
 {
-	BaseEntityComponent::Load(udm,version);
-	
+	BaseEntityComponent::Load(udm, version);
+
 	constexpr auto numTypes = umath::to_integral(CameraType::Count);
-	auto fReadCameraData = [](udm::LinkedPropertyWrapperArg udm,ObserverCameraData &camData) {
+	auto fReadCameraData = [](udm::LinkedPropertyWrapperArg udm, ObserverCameraData &camData) {
 		udm["enabled"](**camData.enabled);
 		camData.localOrigin = udm["localOrigin"].ToValue<Vector3>();
 		udm["offset"](**camData.offset);
@@ -96,6 +80,6 @@ void BaseObservableComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t ve
 	};
 	auto &dataFp = GetCameraData(CameraType::FirstPerson);
 	auto &dataTp = GetCameraData(CameraType::ThirdPerson);
-	fReadCameraData(udm["firstPerson"],dataFp);
-	fReadCameraData(udm["thirdPerson"],dataTp);
+	fReadCameraData(udm["firstPerson"], dataFp);
+	fReadCameraData(udm["thirdPerson"], dataTp);
 }

@@ -16,13 +16,8 @@ using namespace pragma::debug;
 
 extern DLLCLIENT CEngine *c_engine;
 
-std::shared_ptr<GPUSwapchainTimer> GPUSwapchainTimer::Create(prosper::IQueryPool &timerQueryPool,prosper::IQueryPool &statsQueryPool,prosper::PipelineStageFlags stage)
-{
-	return std::shared_ptr<GPUSwapchainTimer>(new GPUSwapchainTimer{timerQueryPool,statsQueryPool,stage});
-}
-GPUSwapchainTimer::GPUSwapchainTimer(prosper::IQueryPool &timerQueryPool,prosper::IQueryPool &statsQueryPool,prosper::PipelineStageFlags stage)
-	: m_stage{stage},m_wpTimerQueryPool{timerQueryPool.shared_from_this()},m_wpStatsQueryPool{statsQueryPool.shared_from_this()}
-{}
+std::shared_ptr<GPUSwapchainTimer> GPUSwapchainTimer::Create(prosper::IQueryPool &timerQueryPool, prosper::IQueryPool &statsQueryPool, prosper::PipelineStageFlags stage) { return std::shared_ptr<GPUSwapchainTimer>(new GPUSwapchainTimer {timerQueryPool, statsQueryPool, stage}); }
+GPUSwapchainTimer::GPUSwapchainTimer(prosper::IQueryPool &timerQueryPool, prosper::IQueryPool &statsQueryPool, prosper::PipelineStageFlags stage) : m_stage {stage}, m_wpTimerQueryPool {timerQueryPool.shared_from_this()}, m_wpStatsQueryPool {statsQueryPool.shared_from_this()} {}
 void GPUSwapchainTimer::UpdateResult()
 {
 	auto *pTimerQuery = GetTimerQuery();
@@ -69,8 +64,8 @@ bool GPUSwapchainTimer::Reset()
 std::unique_ptr<ProfilerResult> GPUSwapchainTimer::GetResult() const
 {
 	auto result = std::make_unique<pragma::debug::GPUProfilerResult>();
-	result->duration = m_lastTimeResult.has_value() ? *m_lastTimeResult : std::optional<std::chrono::nanoseconds>{};
-	result->statistics = m_lastStatsResult.has_value() ? *m_lastStatsResult : std::optional<prosper::PipelineStatistics>{};
+	result->duration = m_lastTimeResult.has_value() ? *m_lastTimeResult : std::optional<std::chrono::nanoseconds> {};
+	result->statistics = m_lastStatsResult.has_value() ? *m_lastStatsResult : std::optional<prosper::PipelineStatistics> {};
 	return result;
 }
 
@@ -99,12 +94,11 @@ void GPUSwapchainTimer::InitializeQueries()
 		return;
 	auto timerPool = m_wpTimerQueryPool.lock();
 	auto statsPool = m_wpStatsQueryPool.lock();
-	m_swapchainTimers.reserve(index +1);
-	for(auto i=decltype(m_swapchainTimers.size()){0u};i<=index;++i)
-	{
+	m_swapchainTimers.reserve(index + 1);
+	for(auto i = decltype(m_swapchainTimers.size()) {0u}; i <= index; ++i) {
 		// TODO: Using the same stage for both time queries makes no sense
-		auto timerQuery = timerPool->CreateTimerQuery(static_cast<prosper::PipelineStageFlags>(m_stage),static_cast<prosper::PipelineStageFlags>(m_stage));
+		auto timerQuery = timerPool->CreateTimerQuery(static_cast<prosper::PipelineStageFlags>(m_stage), static_cast<prosper::PipelineStageFlags>(m_stage));
 		auto statsQuery = statsPool->CreatePipelineStatisticsQuery();
-		m_swapchainTimers.push_back({timerQuery,statsQuery});
+		m_swapchainTimers.push_back({timerQuery, statsQuery});
 	}
 }

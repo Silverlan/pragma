@@ -9,6 +9,8 @@
 #include "pragma/networkdefinitions.h"
 #include <pragma/lua/luaapi.h>
 
-namespace umath {class Plane;};
+namespace umath {
+	class Plane;
+};
 
 #endif

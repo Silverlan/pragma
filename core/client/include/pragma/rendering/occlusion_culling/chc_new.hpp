@@ -17,53 +17,48 @@
 
 #define CHC_DEBUGGING_ENABLED 0
 
-namespace pragma
-{
-	#pragma warning(push)
-	#pragma warning(disable : 4251)
+namespace pragma {
+#pragma warning(push)
+#pragma warning(disable : 4251)
 	class CHC;
 	class CHCNode;
 	using WPCHCNode = util::WeakHandle<CHCNode>;
 	using PCHCNode = std::shared_ptr<CHCNode>;
-	class DLLCLIENT CHCNode
-		: public std::enable_shared_from_this<CHCNode>
-	{
-	public:
+	class DLLCLIENT CHCNode : public std::enable_shared_from_this<CHCNode> {
+	  public:
 		friend CHC;
 		bool IsVisible() const;
 		bool IsLeaf() const;
 		const std::vector<PCHCNode> &GetChildren() const;
-	protected:
+	  protected:
 		void SetVisible(bool bVisible);
 		CHCNode *GetParent() const;
-	private:
+	  private:
 		bool m_bVisible = false;
 		mutable WPCHCNode m_parent = {};
 	};
 
-	class DLLCLIENT CHCQuery
-	{
-	public:
+	class DLLCLIENT CHCQuery {
+	  public:
 		uint32_t GetVisiblePixels() const;
 		CHCNode *GetNode() const;
 		uint32_t GetQueryCount() const;
 	};
 	using PCHCQuery = std::shared_ptr<CHCQuery>;
 
-	class DLLCLIENT CHC
-	{
-	public:
-		CHC(CCameraComponent &cam,const std::shared_ptr<BaseOcclusionOctree> &octree=nullptr);
+	class DLLCLIENT CHC {
+	  public:
+		CHC(CCameraComponent &cam, const std::shared_ptr<BaseOcclusionOctree> &octree = nullptr);
 		~CHC();
 		void Reset(const std::shared_ptr<BaseOcclusionOctree> &octree);
-	#ifdef CHC_DEBUGGING_ENABLED
+#ifdef CHC_DEBUGGING_ENABLED
 		void SetDrawDebugTexture(bool b);
 		bool GetDrawDebugTexture();
-	#endif
+#endif
 		std::vector<pragma::OcclusionMeshInfo> &PerformCulling();
-	protected:
+	  protected:
 		CHCNode *GetNode(uint32_t idx);
-	private:
+	  private:
 		PCHCNode m_rootNode = nullptr;
 		std::queue<WPCHCNode> m_distanceQueue;
 		std::queue<PCHCQuery> m_queryQueue;
@@ -88,7 +83,7 @@ namespace pragma
 		void IssueQuery(CHCNode &node);
 		void UpdateFrustum();
 	};
-	#pragma warning(pop)
+#pragma warning(pop)
 };
 
 #endif

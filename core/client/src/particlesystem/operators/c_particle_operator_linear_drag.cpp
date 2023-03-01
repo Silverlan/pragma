@@ -13,13 +13,12 @@
 #include <sharedutils/util.h>
 #include <algorithm>
 
-REGISTER_PARTICLE_OPERATOR(linear_drag,CParticleOperatorLinearDrag);
+REGISTER_PARTICLE_OPERATOR(linear_drag, CParticleOperatorLinearDrag);
 
-void CParticleOperatorLinearDrag::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleOperatorLinearDrag::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleOperator::Initialize(pSystem,values);
-	for(auto it=values.begin();it!=values.end();it++)
-	{
+	CParticleOperator::Initialize(pSystem, values);
+	for(auto it = values.begin(); it != values.end(); it++) {
 		auto key = it->first;
 		ustring::to_lower(key);
 		if(key == "drag")
@@ -29,10 +28,10 @@ void CParticleOperatorLinearDrag::Initialize(pragma::CParticleSystemComponent &p
 void CParticleOperatorLinearDrag::Simulate(double tDelta)
 {
 	CParticleOperator::Simulate(tDelta);
-	m_fTickDrag = umath::max(0.f,1.f -m_fAmount *static_cast<float>(tDelta));
+	m_fTickDrag = umath::max(0.f, 1.f - m_fAmount * static_cast<float>(tDelta));
 }
-void CParticleOperatorLinearDrag::Simulate(CParticle &particle,double tDelta,float strength)
+void CParticleOperatorLinearDrag::Simulate(CParticle &particle, double tDelta, float strength)
 {
-	CParticleOperator::Simulate(particle,tDelta,strength);
-	particle.SetVelocity(particle.GetVelocity() *m_fTickDrag);
+	CParticleOperator::Simulate(particle, tDelta, strength);
+	particle.SetVelocity(particle.GetVelocity() * m_fTickDrag);
 }

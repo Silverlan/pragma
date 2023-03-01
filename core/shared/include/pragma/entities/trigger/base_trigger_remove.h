@@ -11,12 +11,9 @@
 #include "pragma/entities/baseentity_handle.h"
 #include <vector>
 
-namespace pragma
-{
-	class DLLNETWORK BaseTriggerRemoveComponent
-		: public BaseEntityComponent
-	{
-	public:
+namespace pragma {
+	class DLLNETWORK BaseTriggerRemoveComponent : public BaseEntityComponent {
+	  public:
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
 	};

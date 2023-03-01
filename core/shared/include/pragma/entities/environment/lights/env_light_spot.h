@@ -15,30 +15,17 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 #include <string>
 
-namespace pragma
-{
+namespace pragma {
 	class BaseFieldAngleComponent;
-	class DLLNETWORK BaseEnvLightSpotComponent
-		: public BaseEntityComponent
-	{
-	public:
-		static float CalcInnerConeAngle(float outerConeAngle,float blendFraction);
-		static float CalcBlendFraction(float outerConeAngle,float innerConeAngle);
-		static float CalcConeFalloff(
-			const Vector3 &lightPos,const Vector3 &lightDir,umath::Degree outerConeAngle,umath::Degree innerConeAngle,const Vector3 &point
-		);
-		static Candela CalcIntensityFalloff(
-			const Vector3 &lightPos,const Vector3 &lightDir,
-			umath::Degree outerConeAngle,umath::Degree innerConeAngle,const Vector3 &point,
-			std::optional<float> radius={}
-		);
-		static Candela CalcIntensityAtPoint(
-			const Vector3 &lightPos,Candela intensity,const Vector3 &lightDir,
-			umath::Degree outerConeAngle,umath::Degree innerConeAngle,const Vector3 &point,
-			std::optional<float> radius={}
-		);
+	class DLLNETWORK BaseEnvLightSpotComponent : public BaseEntityComponent {
+	  public:
+		static float CalcInnerConeAngle(float outerConeAngle, float blendFraction);
+		static float CalcBlendFraction(float outerConeAngle, float innerConeAngle);
+		static float CalcConeFalloff(const Vector3 &lightPos, const Vector3 &lightDir, umath::Degree outerConeAngle, umath::Degree innerConeAngle, const Vector3 &point);
+		static Candela CalcIntensityFalloff(const Vector3 &lightPos, const Vector3 &lightDir, umath::Degree outerConeAngle, umath::Degree innerConeAngle, const Vector3 &point, std::optional<float> radius = {});
+		static Candela CalcIntensityAtPoint(const Vector3 &lightPos, Candela intensity, const Vector3 &lightDir, umath::Degree outerConeAngle, umath::Degree innerConeAngle, const Vector3 &point, std::optional<float> radius = {});
 
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		BaseEnvLightSpotComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 
@@ -56,14 +43,14 @@ namespace pragma
 		const util::PFloatProperty &GetBlendFractionProperty() const;
 		const util::PFloatProperty &GetOuterConeAngleProperty() const;
 		const util::PFloatProperty &GetConeStartOffsetProperty() const;
-		
+
 		float CalcConeFalloff(const Vector3 &point) const;
 		float CalcDistanceFalloff(const Vector3 &point) const;
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
-	protected:
-		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
-		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
+	  protected:
+		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual void SetFieldAngleComponent(BaseFieldAngleComponent &c);
 		util::PFloatProperty m_blendFraction = nullptr;
 		util::PFloatProperty m_coneStartOffset = nullptr;

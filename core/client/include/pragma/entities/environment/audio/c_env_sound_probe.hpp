@@ -12,24 +12,13 @@
 #include "pragma/entities/c_baseentity.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 
-namespace pragma
-{
-	class DLLCLIENT CEnvSoundProbeComponent final
-		: public BaseEntityComponent
-	{
-	public:
-		enum class Placement : uint32_t
-		{
-			Centroid = 0u,
-			Octree,
-			UniformFloor
-		};
-		struct DLLCLIENT ProbeInfo
-		{
-			ProbeInfo()=default;
-			ProbeInfo(const Vector3 &min,const Vector3 &max,Placement placement,float spacing,float heightAboveFloor)
-				: min(min),max(max),placement(placement),spacing(spacing),heightAboveFloor(heightAboveFloor)
-			{}
+namespace pragma {
+	class DLLCLIENT CEnvSoundProbeComponent final : public BaseEntityComponent {
+	  public:
+		enum class Placement : uint32_t { Centroid = 0u, Octree, UniformFloor };
+		struct DLLCLIENT ProbeInfo {
+			ProbeInfo() = default;
+			ProbeInfo(const Vector3 &min, const Vector3 &max, Placement placement, float spacing, float heightAboveFloor) : min(min), max(max), placement(placement), spacing(spacing), heightAboveFloor(heightAboveFloor) {}
 			Vector3 min = {};
 			Vector3 max = {};
 			Placement placement = Placement::Centroid;
@@ -41,21 +30,19 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
-	protected:
+	  protected:
 		static std::vector<ProbeInfo> s_probes;
 		static CallbackHandle s_probeCallback;
 		static void ClearProbes();
-	private:
+	  private:
 		float m_spacing = 512.f;
 		float m_heightAboveFloor = 50.f;
 		float m_radius = 512.f;
 	};
 };
 
-class DLLCLIENT CEnvSoundProbe
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEnvSoundProbe : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

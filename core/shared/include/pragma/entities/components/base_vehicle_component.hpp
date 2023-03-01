@@ -11,23 +11,18 @@
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/physics/vehicle.hpp"
 
-namespace pragma
-{
+namespace pragma {
 	class BaseWheelComponent;
-	namespace physics {class IConvexShape; struct VehicleCreateInfo;};
-	class DLLNETWORK BaseVehicleComponent
-		: public BaseEntityComponent
-	{
-	public:
+	namespace physics {
+		class IConvexShape;
+		struct VehicleCreateInfo;
+	};
+	class DLLNETWORK BaseVehicleComponent : public BaseEntityComponent {
+	  public:
 		static ComponentEventId EVENT_ON_DRIVER_ENTERED;
 		static ComponentEventId EVENT_ON_DRIVER_EXITED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
-		enum class StateFlags : uint32_t
-		{
-			None = 0u,
-			HasDriver = 1u,
-			SteeringWheelInitialized = HasDriver<<1u
-		};
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
+		enum class StateFlags : uint32_t { None = 0u, HasDriver = 1u, SteeringWheelInitialized = HasDriver << 1u };
 
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
@@ -39,21 +34,20 @@ namespace pragma
 
 		virtual void OnTick(double tDelta) override;
 
-		void SetupVehicle(const pragma::physics::VehicleCreateInfo &createInfo,const std::vector<std::string> &wheelModels);
+		void SetupVehicle(const pragma::physics::VehicleCreateInfo &createInfo, const std::vector<std::string> &wheelModels);
 
 		BaseEntity *GetSteeringWheel();
 		float GetSpeedKmh() const;
 		float GetSteeringFactor() const;
 
-		virtual void SetupSteeringWheel(const std::string &mdl,umath::Degree maxSteeringAngle);
+		virtual void SetupSteeringWheel(const std::string &mdl, umath::Degree maxSteeringAngle);
 
 		physics::IVehicle *GetPhysicsVehicle();
 		const physics::IVehicle *GetPhysicsVehicle() const;
-	protected:
+	  protected:
 		BaseVehicleComponent(BaseEntity &ent);
-		struct DLLNETWORK WheelData
-		{
-			WheelData()=default;
+		struct DLLNETWORK WheelData {
+			WheelData() = default;
 			ComponentHandle<pragma::BaseWheelComponent> hWheel = {};
 			std::string model = "";
 		};
@@ -68,7 +62,7 @@ namespace pragma
 		EntityHandle m_driver = {};
 		StateFlags m_stateFlags = StateFlags::None;
 		float m_maxSteeringWheelAngle = 0.f;
-		void InitializeVehiclePhysics(PHYSICSTYPE type,BasePhysicsComponent::PhysFlags flags);
+		void InitializeVehiclePhysics(PHYSICSTYPE type, BasePhysicsComponent::PhysFlags flags);
 		void DestroyVehiclePhysics();
 		virtual BaseWheelComponent *CreateWheelEntity(uint8_t wheelIndex);
 		void InitializeWheelEntities();

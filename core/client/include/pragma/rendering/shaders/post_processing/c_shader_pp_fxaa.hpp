@@ -10,23 +10,15 @@
 
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_base.hpp"
 
-namespace pragma
-{
-	class DLLCLIENT ShaderPPFXAA
-		: public ShaderPPBase
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT ShaderPPFXAA : public ShaderPPBase {
+	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
 
-		enum class TextureBinding : uint32_t
-		{
-			SceneTexturePostToneMapping = 0,
-			SceneTextureHdr
-		};
+		enum class TextureBinding : uint32_t { SceneTexturePostToneMapping = 0, SceneTextureHdr };
 
-#pragma pack(push,1)
-		struct DLLCLIENT PushConstants
-		{
+#pragma pack(push, 1)
+		struct DLLCLIENT PushConstants {
 			// Required due to gcc bug (see https://stackoverflow.com/q/46866686)
 			PushConstants() {};
 			~PushConstants() {};
@@ -37,11 +29,11 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderPPFXAA(prosper::IPrContext &context,const std::string &identifier);
-		bool RecordDraw(prosper::ShaderBindState &bindState,prosper::IDescriptorSet &descSetTexture,const PushConstants &pushConstants=PushConstants{}) const;
-	protected:
-		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		ShaderPPFXAA(prosper::IPrContext &context, const std::string &identifier);
+		bool RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetTexture, const PushConstants &pushConstants = PushConstants {}) const;
+	  protected:
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;
 	};
 };
 

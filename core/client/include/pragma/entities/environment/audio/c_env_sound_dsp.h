@@ -14,22 +14,18 @@
 #include <pragma/entities/environment/audio/env_sound_dsp.h>
 #include <alsound_source.hpp>
 
-namespace pragma
-{
-	class DLLCLIENT CBaseSoundDspComponent
-		: public BaseEnvSoundDspComponent,
-		public CBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLCLIENT CBaseSoundDspComponent : public BaseEnvSoundDspComponent, public CBaseNetComponent {
+	  public:
 		virtual ~CBaseSoundDspComponent() override;
 		virtual void Initialize() override;
 		virtual void OnTick(double dt) override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
-		virtual Bool ReceiveNetEvent(UInt32 eventId,NetPacket &p) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		virtual Bool ReceiveNetEvent(UInt32 eventId, NetPacket &p) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void OnEntitySpawn() override;
-	protected:
+	  protected:
 		CBaseSoundDspComponent(BaseEntity &ent) : BaseEnvSoundDspComponent(ent) {}
 
 		bool m_bAffectRelative = false;
@@ -37,29 +33,25 @@ namespace pragma
 		bool m_bAllWorldSounds = false;
 		bool m_bAllSounds = false;
 		std::shared_ptr<al::IEffect> m_dsp = nullptr;
-		std::vector<std::pair<al::SoundSourceHandle,uint32_t>> m_affectedSounds;
-		ALSoundType m_types = ALSoundType::All &~ALSoundType::GUI;
+		std::vector<std::pair<al::SoundSourceHandle, uint32_t>> m_affectedSounds;
+		ALSoundType m_types = ALSoundType::All & ~ALSoundType::GUI;
 
 		ALSoundType GetTargetSoundTypes() const;
-		std::vector<std::pair<al::SoundSourceHandle,uint32_t>>::iterator FindSoundSource(al::SoundSource &src);
-		void UpdateSoundSource(al::SoundSource &src,float gain);
+		std::vector<std::pair<al::SoundSourceHandle, uint32_t>>::iterator FindSoundSource(al::SoundSource &src);
+		void UpdateSoundSource(al::SoundSource &src, float gain);
 		void DetachSoundSource(al::SoundSource &src);
 		void DetachAllSoundSources();
 	};
 
-	class DLLCLIENT CSoundDspComponent final
-		: public CBaseSoundDspComponent
-	{
-	public:
+	class DLLCLIENT CSoundDspComponent final : public CBaseSoundDspComponent {
+	  public:
 		CSoundDspComponent(BaseEntity &ent) : CBaseSoundDspComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLCLIENT CEnvSoundDsp
-	: public CBaseEntity
-{
-public:
+class DLLCLIENT CEnvSoundDsp : public CBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

@@ -11,9 +11,8 @@
 #include <string>
 #include <cinttypes>
 
-namespace debug
-{
-	DLLNETWORK void open_file_in_zerobrane(const std::string &fileName,uint32_t lineIdx);
+namespace debug {
+	DLLNETWORK void open_file_in_zerobrane(const std::string &fileName, uint32_t lineIdx);
 };
 
 #endif

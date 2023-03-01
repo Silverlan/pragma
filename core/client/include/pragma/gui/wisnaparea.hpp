@@ -11,14 +11,12 @@
 #include "pragma/clientdefinitions.h"
 #include <wgui/wibase.h>
 
-class DLLCLIENT WISnapArea
-	: public WIBase
-{
-public:
+class DLLCLIENT WISnapArea : public WIBase {
+  public:
 	WISnapArea();
 	virtual void Initialize() override;
 	WIBase *GetTriggerArea();
-private:
+  private:
 	WIHandle m_hTriggerArea = {};
 };
 

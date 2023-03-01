@@ -614,7 +614,7 @@ void BasePhysicsComponent::OnPhysicsWake(PhysObj*)
 	});
 	if(it != awakePhysC.end())
 	{
-		// Con::cwar<<"WARNING: Physics component has woken up, but was already marked as awake previously!"<<Con::endl;
+		// Con::cwar<<"Physics component has woken up, but was already marked as awake previously!"<<Con::endl;
 		return;
 	}
 	awakePhysC.push_back(GetHandle<BasePhysicsComponent>());
@@ -629,7 +629,7 @@ void BasePhysicsComponent::OnPhysicsSleep(PhysObj*)
 		return this == hPhysC.get();
 	});
 	if(it == awakePhysC.end())
-		Con::cwar<<"WARNING: Physics component has fallen asleep, but was already marked as asleep previously!"<<Con::endl;
+		Con::cwar<<"Physics component has fallen asleep, but was already marked as asleep previously!"<<Con::endl;
 	ClearAwakeStatus();
 }
 

@@ -27,23 +27,19 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
+OcclusionMeshInfo::OcclusionMeshInfo(CBaseEntity &ent, CModelMesh &mesh) : mesh {&mesh}, hEntity {ent.GetHandle()} {}
 
-
-OcclusionMeshInfo::OcclusionMeshInfo(CBaseEntity &ent,CModelMesh &mesh)
-	: mesh{&mesh},hEntity{ent.GetHandle()}
-{}
-
-bool OcclusionCullingHandler::ShouldExamine(CModelMesh &mesh,const Vector3 &pos,bool bViewModel,std::size_t numMeshes,const std::vector<umath::Plane> *planes) const
+bool OcclusionCullingHandler::ShouldExamine(CModelMesh &mesh, const Vector3 &pos, bool bViewModel, std::size_t numMeshes, const std::vector<umath::Plane> *planes) const
 {
 	if((planes == nullptr) || bViewModel == true || numMeshes == 1)
 		return true;
-	Vector3 min,max;
-	mesh.GetBounds(min,max);
+	Vector3 min, max;
+	mesh.GetBounds(min, max);
 	min += pos;
 	max += pos;
-	return (umath::intersection::aabb_in_plane_mesh(min,max,*planes) != umath::intersection::Intersect::Outside) ? true : false;
+	return (umath::intersection::aabb_in_plane_mesh(min, max, *planes) != umath::intersection::Intersect::Outside) ? true : false;
 }
-bool OcclusionCullingHandler::ShouldExamine(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,CBaseEntity &ent,bool &outViewModel,std::vector<umath::Plane> **outPlanes) const
+bool OcclusionCullingHandler::ShouldExamine(pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, CBaseEntity &ent, bool &outViewModel, std::vector<umath::Plane> **outPlanes) const
 {
 	if(ent.IsInScene(scene) == false)
 		return false;
@@ -57,49 +53,45 @@ bool OcclusionCullingHandler::ShouldExamine(pragma::CSceneComponent &scene,const
 	if(mdl == nullptr)
 		return false;
 	outViewModel = (pRenderComponent->GetSceneRenderPass() == pragma::rendering::SceneRenderPass::View) ? true : false; // TODO: Remove me once the render bounds accurately encompass animation bounds
-	*outPlanes = (pRenderComponent->GetSceneRenderPass() == pragma::rendering::SceneRenderPass::Sky) ? const_cast<std::vector<umath::Plane>*>(&renderer.GetFrustumPlanes()) : const_cast<std::vector<umath::Plane>*>(&renderer.GetClippedFrustumPlanes());
+	*outPlanes = (pRenderComponent->GetSceneRenderPass() == pragma::rendering::SceneRenderPass::Sky) ? const_cast<std::vector<umath::Plane> *>(&renderer.GetFrustumPlanes()) : const_cast<std::vector<umath::Plane> *>(&renderer.GetClippedFrustumPlanes());
 	if(pRenderComponent->IsExemptFromOcclusionCulling() || outViewModel)
 		return true; // Always draw
 	auto &sphere = pRenderComponent->GetUpdatedAbsoluteRenderSphere();
-	if(umath::intersection::sphere_in_plane_mesh(sphere.pos,sphere.radius,*(*outPlanes),true) == umath::intersection::Intersect::Outside)
+	if(umath::intersection::sphere_in_plane_mesh(sphere.pos, sphere.radius, *(*outPlanes), true) == umath::intersection::Intersect::Outside)
 		return false;
 	auto &aabb = pRenderComponent->GetAbsoluteRenderBounds();
-	return umath::intersection::aabb_in_plane_mesh(aabb.min,aabb.max,*(*outPlanes)) != umath::intersection::Intersect::Outside;
+	return umath::intersection::aabb_in_plane_mesh(aabb.min, aabb.max, *(*outPlanes)) != umath::intersection::Intersect::Outside;
 }
-void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,std::vector<pragma::CParticleSystemComponent*> &particlesOut)
+void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, std::vector<pragma::CParticleSystemComponent *> &particlesOut)
 {
 	auto &cam = scene.GetActiveCamera();
 	auto &posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
-	PerformCulling(scene,renderer,posCam,particlesOut);
+	PerformCulling(scene, renderer, posCam, particlesOut);
 }
-void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut)
+void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, std::vector<OcclusionMeshInfo> &culledMeshesOut)
 {
 	auto &cam = scene.GetActiveCamera();
 	auto &posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
-	PerformCulling(scene,renderer,posCam,culledMeshesOut);
+	PerformCulling(scene, renderer, posCam, culledMeshesOut);
 }
-void OcclusionCullingHandler::PerformCulling(
-	pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const Vector3 &camPos,
-	std::vector<pragma::CParticleSystemComponent*> &particlesOut
-)
+void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const Vector3 &camPos, std::vector<pragma::CParticleSystemComponent *> &particlesOut)
 {
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CParticleSystemComponent>>();
 	particlesOut.reserve(entIt.GetCount());
 	particlesOut.clear();
 	auto &frustumPlanes = renderer.GetFrustumPlanes();
-	for(auto *ent : entIt)
-	{
-		if(static_cast<CBaseEntity*>(ent)->IsInScene(scene) == false)
+	for(auto *ent : entIt) {
+		if(static_cast<CBaseEntity *>(ent)->IsInScene(scene) == false)
 			continue;
 		auto hPt = ent->GetComponent<pragma::CParticleSystemComponent>();
 		auto &bounds = hPt->GetRenderBounds();
 		static auto bAlwaysPass = false;
-		if(bAlwaysPass || umath::intersection::aabb_in_plane_mesh(bounds.first,bounds.second,frustumPlanes) != umath::intersection::Intersect::Outside)
+		if(bAlwaysPass || umath::intersection::aabb_in_plane_mesh(bounds.first, bounds.second, frustumPlanes) != umath::intersection::Intersect::Outside)
 			particlesOut.push_back(hPt.get());
 	}
 }
-void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const std::vector<pragma::CLightComponent*> &lightsIn,std::vector<pragma::CLightComponent*> &lightsOut)
+void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const std::vector<pragma::CLightComponent *> &lightsIn, std::vector<pragma::CLightComponent *> &lightsOut)
 {
 	auto &cam = scene.GetActiveCamera();
 	auto &pos = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
@@ -109,47 +101,38 @@ void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,cons
 	lightsOut.reserve(sz);
 	distances.reserve(sz);
 	auto &frustumPlanes = renderer.GetFrustumPlanes();
-	for(auto it=lightsIn.begin();it!=lightsIn.end();++it)
-	{
+	for(auto it = lightsIn.begin(); it != lightsIn.end(); ++it) {
 		auto *light = *it;
 		if(light == nullptr)
 			continue;
 		auto &ent = light->GetEntity();
 		auto pToggleComponent = ent.GetComponent<pragma::CToggleComponent>();
-		if(pToggleComponent.expired() || pToggleComponent->IsTurnedOn())
-		{
+		if(pToggleComponent.expired() || pToggleComponent->IsTurnedOn()) {
 			auto type = util::pragma::LightType::Undefined;
 			auto *pLight = light->GetLight(type);
-			if(type == util::pragma::LightType::Directional)
-			{
-				lightsOut.insert(lightsOut.begin(),light);
+			if(type == util::pragma::LightType::Directional) {
+				lightsOut.insert(lightsOut.begin(), light);
 				distances.push_back(0.f);
 			}
-			else
-			{
+			else {
 				auto pTrComponent = ent.GetTransformComponent();
 				auto pRadiusComponent = ent.GetComponent<pragma::CRadiusComponent>();
-				if(pTrComponent != nullptr && pRadiusComponent.valid())
-				{
+				if(pTrComponent != nullptr && pRadiusComponent.valid()) {
 					auto &posLight = pTrComponent->GetPosition();
-					if(umath::intersection::sphere_in_plane_mesh(posLight,pRadiusComponent->GetRadius(),frustumPlanes) != umath::intersection::Intersect::Outside)
-					{
-						auto dist = uvec::length_sqr(posLight -pos);
+					if(umath::intersection::sphere_in_plane_mesh(posLight, pRadiusComponent->GetRadius(), frustumPlanes) != umath::intersection::Intersect::Outside) {
+						auto dist = uvec::length_sqr(posLight - pos);
 						auto bInserted = false;
-						for(UInt i=0;i<lightsOut.size();i++)
-						{
+						for(UInt i = 0; i < lightsOut.size(); i++) {
 							//auto *lightOther = lightsOut[i];
 							auto distOther = distances[i];
-							if(dist < distOther)
-							{
-								lightsOut.insert(lightsOut.begin() +i,light);
-								distances.insert(distances.begin() +i,dist);
+							if(dist < distOther) {
+								lightsOut.insert(lightsOut.begin() + i, light);
+								distances.insert(distances.begin() + i, dist);
 								bInserted = true;
 								break;
 							}
 						}
-						if(bInserted == false)
-						{
+						if(bInserted == false) {
 							lightsOut.push_back(light);
 							distances.push_back(dist);
 						}
@@ -161,20 +144,17 @@ void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,cons
 
 	uint32_t numSpotLights = 0;
 	uint32_t numPointLights = 0;
-	for(auto it=lightsOut.begin();it!=lightsOut.end();)
-	{
+	for(auto it = lightsOut.begin(); it != lightsOut.end();) {
 		auto *light = *it;
 		auto type = util::pragma::LightType::Undefined;
 		auto *pLight = light->GetLight(type);
-		if(type == util::pragma::LightType::Spot)
-		{
+		if(type == util::pragma::LightType::Spot) {
 			if(++numSpotLights > static_cast<uint32_t>(GameLimits::MaxActiveShadowMaps))
 				it = lightsOut.erase(it);
 			else
 				++it;
 		}
-		else if(type == util::pragma::LightType::Point)
-		{
+		else if(type == util::pragma::LightType::Point) {
 			if(++numPointLights > static_cast<uint32_t>(GameLimits::MaxActiveShadowCubeMaps))
 				it = lightsOut.erase(it);
 			else
@@ -186,19 +166,18 @@ void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,cons
 	if(lightsOut.size() > static_cast<uint32_t>(GameLimits::MaxAbsoluteLights))
 		lightsOut.resize(static_cast<uint32_t>(GameLimits::MaxAbsoluteLights));
 }
-void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const Vector3 &origin,float radius,std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut)
+void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene, const CRasterizationRendererComponent &renderer, const Vector3 &origin, float radius, std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut)
 {
-	auto radiusSqr = umath::pow(radius,2.f);
+	auto radiusSqr = umath::pow(radius, 2.f);
 	culledMeshesOut.clear();
 	culledMeshesOut.reserve(10);
 
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
-	for(auto *e : entIt)
-	{
+	for(auto *e : entIt) {
 		if(e == nullptr)
 			continue;
-		auto *ent = static_cast<CBaseEntity*>(e);
+		auto *ent = static_cast<CBaseEntity *>(e);
 		if(ent->IsInScene(scene) == false)
 			continue;
 		auto pRenderComponent = ent->GetRenderComponent();
@@ -207,30 +186,27 @@ void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,cons
 		auto exemptFromCulling = pRenderComponent->IsExemptFromOcclusionCulling();
 		auto pTrComponent = ent->GetTransformComponent();
 		auto &sphere = pRenderComponent->GetAbsoluteRenderSphere();
-		auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
-		if(exemptFromCulling || uvec::length_sqr(sphere.pos -origin) <= radiusSqr +umath::pow(sphere.radius,2.f))
-		{
+		auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3 {};
+		if(exemptFromCulling || uvec::length_sqr(sphere.pos - origin) <= radiusSqr + umath::pow(sphere.radius, 2.f)) {
 			auto &meshes = pRenderComponent->GetLODMeshes();
-			for(auto itMesh=meshes.begin();itMesh!=meshes.end();++itMesh)
-			{
-				auto *mesh = static_cast<CModelMesh*>(itMesh->get());
+			for(auto itMesh = meshes.begin(); itMesh != meshes.end(); ++itMesh) {
+				auto *mesh = static_cast<CModelMesh *>(itMesh->get());
 				Vector3 min;
 				Vector3 max;
-				mesh->GetBounds(min,max);
+				mesh->GetBounds(min, max);
 				min += pos;
 				max += pos;
-				if(exemptFromCulling || umath::intersection::aabb_sphere(min,max,origin,radius) == true)
-				{
-					if(culledMeshesOut.capacity() -culledMeshesOut.size() == 0)
-						culledMeshesOut.reserve(culledMeshesOut.capacity() +10);
-					culledMeshesOut.push_back(OcclusionMeshInfo{*ent,*mesh});
+				if(exemptFromCulling || umath::intersection::aabb_sphere(min, max, origin, radius) == true) {
+					if(culledMeshesOut.capacity() - culledMeshesOut.size() == 0)
+						culledMeshesOut.reserve(culledMeshesOut.capacity() + 10);
+					culledMeshesOut.push_back(OcclusionMeshInfo {*ent, *mesh});
 				}
 			}
 		}
 	}
 }
 
-static void cl_render_occlusion_culling_callback(NetworkState*,ConVar*,int,int val)
+static void cl_render_occlusion_culling_callback(NetworkState *, ConVar *, int, int val)
 {
 	/*if(c_game == nullptr)
 		return;
@@ -238,4 +214,4 @@ static void cl_render_occlusion_culling_callback(NetworkState*,ConVar*,int,int v
 	if(scene != nullptr)
 		scene->GetSceneRenderDesc().ReloadOcclusionCullingHandler();*/
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_render_occlusion_culling,cl_render_occlusion_culling_callback);
+REGISTER_CONVAR_CALLBACK_CL(cl_render_occlusion_culling, cl_render_occlusion_culling_callback);

@@ -16,19 +16,16 @@ using namespace pragma;
 
 extern DLLSERVER ServerState *server;
 
-void SNameComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
-{
-	packet->WriteString(GetName());
-}
+void SNameComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) { packet->WriteString(GetName()); }
 void SNameComponent::SetName(std::string name)
 {
 	BaseNameComponent::SetName(name);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
+	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	if(!ent.IsShared())
 		return;
 	NetPacket p;
-	nwm::write_entity(p,&ent);
+	nwm::write_entity(p, &ent);
 	p->WriteString(name);
-	server->SendPacket("ent_setname",p,pragma::networking::Protocol::SlowReliable);
+	server->SendPacket("ent_setname", p, pragma::networking::Protocol::SlowReliable);
 }
-void SNameComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SNameComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }

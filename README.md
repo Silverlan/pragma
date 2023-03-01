@@ -131,7 +131,7 @@ To build a module, simply run the build-script with the following parameter:
 --module <moduleName>:<gitUrl>
 ```
 
-The build script will clone, build and install the module automatically.
+The build script will clone, build and install the module automatically. Alternatively you can also download the module manually to `pragma/modules` and omit the `:<gitUrl>` portion of the parameter.
 
 If you only want to install a module without building it, you can also run the following console command from within Pragma to download and install the module automatically:
 ```console

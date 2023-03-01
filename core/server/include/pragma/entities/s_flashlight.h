@@ -11,21 +11,16 @@
 #include "pragma/entities/s_baseentity.h"
 #include <pragma/entities/baseflashlight.h>
 
-namespace pragma
-{
-	class DLLSERVER SFlashlightComponent final
-		: public BaseFlashlightComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SFlashlightComponent final : public BaseFlashlightComponent {
+	  public:
 		SFlashlightComponent(BaseEntity &ent) : BaseFlashlightComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 
-class DLLSERVER Flashlight
-	: public SBaseEntity
-{
-public:
+class DLLSERVER Flashlight : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

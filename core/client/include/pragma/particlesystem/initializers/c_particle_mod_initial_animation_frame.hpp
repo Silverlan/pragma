@@ -11,15 +11,13 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/particlesystem/c_particlemodifier.h"
 
-class DLLCLIENT CParticleInitializerInitialAnimationFrame
-	: public CParticleInitializer
-{
-private:
+class DLLCLIENT CParticleInitializerInitialAnimationFrame : public CParticleInitializer {
+  private:
 	float m_minFrame = 0.f;
 	float m_maxFrame = 1.f;
-public:
-	CParticleInitializerInitialAnimationFrame()=default;
-	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+  public:
+	CParticleInitializerInitialAnimationFrame() = default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values) override;
 	virtual void OnParticleCreated(CParticle &particle) override;
 };
 

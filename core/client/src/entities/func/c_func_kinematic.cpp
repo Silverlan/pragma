@@ -17,18 +17,18 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(func_kinematic,CFuncKinematic);
+LINK_ENTITY_TO_CLASS(func_kinematic, CFuncKinematic);
 
 void CKinematicComponent::Initialize()
 {
 	BaseFuncKinematicComponent::Initialize();
-	auto &ent = static_cast<CBaseEntity&>(GetEntity());
+	auto &ent = static_cast<CBaseEntity &>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(pRenderComponent)
 		pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::World);
 }
 
-Bool CKinematicComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
+Bool CKinematicComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
 	if(eventId == m_netEvStartForward)
 		StartForward();
@@ -52,7 +52,7 @@ void CKinematicComponent::ReceiveData(NetPacket &packet)
 	m_kvMoveSpeed = packet->Read<float>();
 	m_bInitiallyMoving = packet->Read<bool>();
 }
-void CKinematicComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CKinematicComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 ////////////
 

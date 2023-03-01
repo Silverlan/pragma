@@ -23,14 +23,13 @@
 
 using namespace pragma;
 
-namespace pragma
-{
+namespace pragma {
 	using ::operator<<;
 };
 
 CSoundScapeComponent *CSoundScapeComponent::s_active = NULL;
 
-LINK_ENTITY_TO_CLASS(env_soundscape,CEnvSoundScape);
+LINK_ENTITY_TO_CLASS(env_soundscape, CEnvSoundScape);
 
 extern DLLCLIENT CGame *c_game;
 
@@ -53,17 +52,14 @@ void CSoundScapeComponent::OnTick(double dt)
 		return;
 	auto &entThis = GetEntity();
 	auto pTrComponent = entThis.GetTransformComponent();
-	SetNextTick(c_game->CurTime() +0.25f);
-	if(pTrComponent != nullptr && IsPlayerInRange())
-	{
-		if(s_active != this)
-		{
+	SetNextTick(c_game->CurTime() + 0.25f);
+	if(pTrComponent != nullptr && IsPlayerInRange()) {
+		if(s_active != this) {
 			auto *pl = c_game->GetLocalPlayer();
 			auto &ent = pl->GetEntity();
 			auto charComponentEnt = ent.GetCharacterComponent();
 			auto pTrComponentEnt = ent.GetTransformComponent();
-			if(charComponentEnt.valid() || pTrComponentEnt)
-			{
+			if(charComponentEnt.valid() || pTrComponentEnt) {
 				TraceData tr;
 				tr.SetSource(charComponentEnt.valid() ? charComponentEnt->GetEyePosition() : pTrComponentEnt->GetPosition());
 				tr.SetTarget(pTrComponent->GetPosition());
@@ -81,35 +77,31 @@ void CSoundScapeComponent::OnTick(double dt)
 void CSoundScapeComponent::OnEntitySpawn()
 {
 	BaseEnvSoundScapeComponent::OnEntitySpawn();
-	for(auto &pair : m_positions)
-	{
-		EntityIterator itEnt{*c_game};
+	for(auto &pair : m_positions) {
+		EntityIterator itEnt {*c_game};
 		itEnt.AttachFilter<EntityIteratorFilterEntity>(pair.second);
 		auto it = itEnt.begin();
 		if(it != itEnt.end())
-			m_targets.insert(std::unordered_map<unsigned int,EntityHandle>::value_type(pair.first,(*it)->GetHandle()));
+			m_targets.insert(std::unordered_map<unsigned int, EntityHandle>::value_type(pair.first, (*it)->GetHandle()));
 	}
 	m_sound = nullptr;
 	auto &ent = GetEntity();
 	auto pSoundEmitterComponent = ent.GetComponent<pragma::CSoundEmitterComponent>();
-	if(pSoundEmitterComponent.valid())
-	{
-		std::shared_ptr<ALSound> snd = pSoundEmitterComponent->CreateSound(m_kvSoundScape,ALSoundType::Environment);
-		if(snd.get() == NULL)
-		{
-			Con::cwar<<"WARNING: Invalid soundscape '"<<m_kvSoundScape<<"' for entity "<<this<<Con::endl;
+	if(pSoundEmitterComponent.valid()) {
+		std::shared_ptr<ALSound> snd = pSoundEmitterComponent->CreateSound(m_kvSoundScape, ALSoundType::Environment);
+		if(snd.get() == NULL) {
+			Con::cwar << "Invalid soundscape '" << m_kvSoundScape << "' for entity " << this << Con::endl;
 			return;
 		}
-		ALSoundScript *al = dynamic_cast<ALSoundScript*>(snd.get());
-		if(al == NULL)
-		{
-			Con::cwar<<"WARNING: Invalid soundscape '"<<m_kvSoundScape<<"' for entity "<<this<<Con::endl;
+		ALSoundScript *al = dynamic_cast<ALSoundScript *>(snd.get());
+		if(al == NULL) {
+			Con::cwar << "Invalid soundscape '" << m_kvSoundScape << "' for entity " << this << Con::endl;
 			return;
 		}
 		snd->SetRelative(true);
 		m_sound = snd;
 	}
-	SetNextTick(c_game->CurTime() +umath::random(0.f,0.25f)); // Spread out think time between entities
+	SetNextTick(c_game->CurTime() + umath::random(0.f, 0.25f)); // Spread out think time between entities
 }
 
 void CSoundScapeComponent::ReceiveData(NetPacket &packet)
@@ -117,11 +109,10 @@ void CSoundScapeComponent::ReceiveData(NetPacket &packet)
 	m_kvSoundScape = packet->ReadString();
 	m_kvRadius = packet->Read<float>();
 	unsigned int numPositions = packet->Read<unsigned int>();
-	for(unsigned int i=0;i<numPositions;i++)
-	{
+	for(unsigned int i = 0; i < numPositions; i++) {
 		unsigned int id = packet->Read<unsigned int>();
 		std::string name = packet->ReadString();
-		m_positions.insert(std::unordered_map<unsigned int,std::string>::value_type(id,name));
+		m_positions.insert(std::unordered_map<unsigned int, std::string>::value_type(id, name));
 	}
 }
 
@@ -129,16 +120,14 @@ void CSoundScapeComponent::UpdateTargetPositions()
 {
 	if(m_sound.get() == NULL)
 		return;
-	ALSoundScript *al = dynamic_cast<ALSoundScript*>(m_sound.get());
-	std::unordered_map<unsigned int,EntityHandle>::iterator it;
-	for(it=m_targets.begin();it!=m_targets.end();it++)
-	{
+	ALSoundScript *al = dynamic_cast<ALSoundScript *>(m_sound.get());
+	std::unordered_map<unsigned int, EntityHandle>::iterator it;
+	for(it = m_targets.begin(); it != m_targets.end(); it++) {
 		EntityHandle &hEnt = it->second;
-		if(hEnt.valid())
-		{
+		if(hEnt.valid()) {
 			auto pTrComponent = hEnt->GetTransformComponent();
 			if(pTrComponent != nullptr)
-				al->SetTargetPosition(it->first,pTrComponent->GetPosition());
+				al->SetTargetPosition(it->first, pTrComponent->GetPosition());
 		}
 	}
 }
@@ -147,8 +136,7 @@ void CSoundScapeComponent::StartSoundScape()
 {
 	if(s_active == this)
 		return;
-	if(s_active != NULL)
-	{
+	if(s_active != NULL) {
 		if(s_active->IsPlayerInRange())
 			return;
 		s_active->StopSoundScape();
@@ -178,9 +166,9 @@ bool CSoundScapeComponent::IsPlayerInRange()
 		return false;
 	auto &origin = pTrComponent->GetPosition();
 	auto &pos = pTrComponentPl->GetPosition();
-	return (glm::distance(origin,pos) <= m_kvRadius) ? true : false;
+	return (glm::distance(origin, pos) <= m_kvRadius) ? true : false;
 }
-void CSoundScapeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void CSoundScapeComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////////
 

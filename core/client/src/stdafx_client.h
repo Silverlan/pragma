@@ -6,10 +6,10 @@
  */
 
 #ifdef _WIN32
-	// #pragma message("Compiling precompiled headers.\n")
-	#define _WIN32_WINNT 0x0501
-	#define NOMINMAX
-	#include <Windows.h>
+// #pragma message("Compiling precompiled headers.\n")
+#define _WIN32_WINNT 0x0501
+#define NOMINMAX
+#include <Windows.h>
 #endif
 #include <mathutil/glmutil.h>
 #include <mathutil/eulerangles.h>
@@ -44,8 +44,6 @@
 #include <memory>
 #include <unordered_map>
 
-
-
 #ifdef __linux__
 #include <wgui/wihandle.h>
 #include "pragma/lua/policies/gui_element_policy.hpp"
@@ -57,4 +55,3 @@
 #include "pragma/lua/converters/shader_converter.hpp"
 #include "pragma/lua/converters/shader_converter_t.hpp"
 #endif
-

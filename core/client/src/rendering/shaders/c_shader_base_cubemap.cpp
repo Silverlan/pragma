@@ -21,67 +21,62 @@ extern DLLCLIENT CEngine *c_engine;
 using namespace pragma;
 
 decltype(ShaderCubemap::VERTEX_BINDING_VERTEX) ShaderCubemap::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex};
-decltype(ShaderCubemap::VERTEX_ATTRIBUTE_POSITION) ShaderCubemap::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX,prosper::Format::R32G32B32_SFloat};
+decltype(ShaderCubemap::VERTEX_ATTRIBUTE_POSITION) ShaderCubemap::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX, prosper::Format::R32G32B32_SFloat};
 
+ShaderCubemap::ShaderCubemap(prosper::IPrContext &context, const std::string &identifier, const std::string &vertexShader, const std::string &fragmentShader) : ShaderGraphics {context, identifier, vertexShader, fragmentShader} {}
+ShaderCubemap::ShaderCubemap(prosper::IPrContext &context, const std::string &identifier, const std::string &fragmentShader) : ShaderCubemap {context, identifier, "screen/vs_cubemap", fragmentShader} {}
 
-ShaderCubemap::ShaderCubemap(prosper::IPrContext &context,const std::string &identifier,const std::string &vertexShader,const std::string &fragmentShader)
-	: ShaderGraphics{context,identifier,vertexShader,fragmentShader}
-{}
-ShaderCubemap::ShaderCubemap(prosper::IPrContext &context,const std::string &identifier,const std::string &fragmentShader)
-	: ShaderCubemap{context,identifier,"screen/vs_cubemap",fragmentShader}
-{}
-
-void ShaderCubemap::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderCubemap::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
-	AttachPushConstantRange(pipelineInfo,pipelineIdx,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	AddVertexAttribute(pipelineInfo, VERTEX_ATTRIBUTE_POSITION);
+	AttachPushConstantRange(pipelineInfo, pipelineIdx, 0u, sizeof(PushConstants), prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
 
-void ShaderCubemap::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
+void ShaderCubemap::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx)
 {
-	CreateCachedRenderPass<ShaderCubemap>({{prosper::util::RenderPassCreateInfo::AttachmentInfo{prosper::Format::R8G8B8A8_UNorm}}},outRenderPass,pipelineIdx);
+	CreateCachedRenderPass<ShaderCubemap>({{prosper::util::RenderPassCreateInfo::AttachmentInfo {prosper::Format::R8G8B8A8_UNorm}}}, outRenderPass, pipelineIdx);
 	//R32G32B32A32_SFLOAT
 }
 
 std::shared_ptr<prosper::IBuffer> ShaderCubemap::CreateCubeMesh(uint32_t &outNumVerts) const
 {
 	// Generate cube
-	constexpr Vector3 min {-1.f,-1.f,-1.f};
-	constexpr Vector3 max {1.f,1.f,1.f};
-	constexpr std::array<Vector3,8> uniqueVertices {
-		min, // 0
-		Vector3(max.x,min.y,min.z), // 1
-		Vector3(max.x,min.y,max.z), // 2
-		Vector3(max.x,max.y,min.z), // 3
-		max, // 4
-		Vector3(min.x,max.y,min.z), // 5
-		Vector3(min.x,min.y,max.z), // 6
-		Vector3(min.x,max.y,max.z) // 7
+	constexpr Vector3 min {-1.f, -1.f, -1.f};
+	constexpr Vector3 max {1.f, 1.f, 1.f};
+	constexpr std::array<Vector3, 8> uniqueVertices {
+	  min,                          // 0
+	  Vector3(max.x, min.y, min.z), // 1
+	  Vector3(max.x, min.y, max.z), // 2
+	  Vector3(max.x, max.y, min.z), // 3
+	  max,                          // 4
+	  Vector3(min.x, max.y, min.z), // 5
+	  Vector3(min.x, min.y, max.z), // 6
+	  Vector3(min.x, max.y, max.z)  // 7
 	};
-	constexpr std::array<Vector3,36> verts {
-		uniqueVertices[0],uniqueVertices[6],uniqueVertices[7], // 1
-		uniqueVertices[0],uniqueVertices[7],uniqueVertices[5], // 1
-		uniqueVertices[3],uniqueVertices[0],uniqueVertices[5], // 2
-		uniqueVertices[3],uniqueVertices[1],uniqueVertices[0], // 2
-		uniqueVertices[2],uniqueVertices[0],uniqueVertices[1], // 3
-		uniqueVertices[2],uniqueVertices[6],uniqueVertices[0], // 3
-		uniqueVertices[7],uniqueVertices[6],uniqueVertices[2], // 4
-		uniqueVertices[4],uniqueVertices[7],uniqueVertices[2], // 4
-		uniqueVertices[4],uniqueVertices[1],uniqueVertices[3], // 5
-		uniqueVertices[1],uniqueVertices[4],uniqueVertices[2], // 5
-		uniqueVertices[4],uniqueVertices[3],uniqueVertices[5], // 6
-		uniqueVertices[4],uniqueVertices[5],uniqueVertices[7] // 6
+	constexpr std::array<Vector3, 36> verts {
+	  uniqueVertices[0], uniqueVertices[6], uniqueVertices[7], // 1
+	  uniqueVertices[0], uniqueVertices[7], uniqueVertices[5], // 1
+	  uniqueVertices[3], uniqueVertices[0], uniqueVertices[5], // 2
+	  uniqueVertices[3], uniqueVertices[1], uniqueVertices[0], // 2
+	  uniqueVertices[2], uniqueVertices[0], uniqueVertices[1], // 3
+	  uniqueVertices[2], uniqueVertices[6], uniqueVertices[0], // 3
+	  uniqueVertices[7], uniqueVertices[6], uniqueVertices[2], // 4
+	  uniqueVertices[4], uniqueVertices[7], uniqueVertices[2], // 4
+	  uniqueVertices[4], uniqueVertices[1], uniqueVertices[3], // 5
+	  uniqueVertices[1], uniqueVertices[4], uniqueVertices[2], // 5
+	  uniqueVertices[4], uniqueVertices[3], uniqueVertices[5], // 6
+	  uniqueVertices[4], uniqueVertices[5], uniqueVertices[7]  // 6
 	};
 	prosper::util::BufferCreateInfo bufCreateInfo {};
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
-	bufCreateInfo.size = verts.size() *sizeof(verts.front());
+	bufCreateInfo.size = verts.size() * sizeof(verts.front());
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
 	outNumVerts = verts.size();
-	return c_engine->GetRenderContext().CreateBuffer(bufCreateInfo,verts.data());
+	return c_engine->GetRenderContext().CreateBuffer(bufCreateInfo, verts.data());
 }
-std::shared_ptr<prosper::IImage> ShaderCubemap::CreateCubeMap(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags) const
+std::shared_ptr<prosper::IImage> ShaderCubemap::CreateCubeMap(uint32_t width, uint32_t height, prosper::util::ImageCreateInfo::Flags flags) const
 {
 	prosper::util::ImageCreateInfo createInfo {};
 	createInfo.format = prosper::Format::R16G16B16A16_SFloat;
@@ -95,42 +90,32 @@ std::shared_ptr<prosper::IImage> ShaderCubemap::CreateCubeMap(uint32_t width,uin
 
 	return c_engine->GetRenderContext().CreateImage(createInfo);
 }
-void ShaderCubemap::InitializeSamplerCreateInfo(prosper::util::ImageCreateInfo::Flags flags,prosper::util::SamplerCreateInfo &inOutSamplerCreateInfo)
+void ShaderCubemap::InitializeSamplerCreateInfo(prosper::util::ImageCreateInfo::Flags flags, prosper::util::SamplerCreateInfo &inOutSamplerCreateInfo)
 {
 	inOutSamplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToEdge;
 	inOutSamplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
 	inOutSamplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToEdge;
 	inOutSamplerCreateInfo.minFilter = prosper::Filter::Linear;
 	inOutSamplerCreateInfo.magFilter = prosper::Filter::Linear;
-	if(umath::is_flag_set(flags,prosper::util::ImageCreateInfo::Flags::FullMipmapChain))
+	if(umath::is_flag_set(flags, prosper::util::ImageCreateInfo::Flags::FullMipmapChain))
 		inOutSamplerCreateInfo.mipmapMode = prosper::SamplerMipmapMode::Linear;
 }
-void ShaderCubemap::InitializeTextureCreateInfo(prosper::util::TextureCreateInfo &inOutTextureCreateInfo)
+void ShaderCubemap::InitializeTextureCreateInfo(prosper::util::TextureCreateInfo &inOutTextureCreateInfo) { inOutTextureCreateInfo.flags |= prosper::util::TextureCreateInfo::Flags::CreateImageViewForEachLayer; }
+std::shared_ptr<prosper::RenderTarget> ShaderCubemap::CreateCubeMapRenderTarget(uint32_t width, uint32_t height, prosper::util::ImageCreateInfo::Flags flags) const
 {
-	inOutTextureCreateInfo.flags |= prosper::util::TextureCreateInfo::Flags::CreateImageViewForEachLayer;
-}
-std::shared_ptr<prosper::RenderTarget> ShaderCubemap::CreateCubeMapRenderTarget(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags) const
-{
-	auto img = CreateCubeMap(width,height,flags);
+	auto img = CreateCubeMap(width, height, flags);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	InitializeSamplerCreateInfo(flags,samplerCreateInfo);
+	InitializeSamplerCreateInfo(flags, samplerCreateInfo);
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	InitializeTextureCreateInfo(texCreateInfo);
-	auto tex = c_engine->GetRenderContext().CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
+	auto tex = c_engine->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
 
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	rtCreateInfo.useLayerFramebuffers = true;
-	return c_engine->GetRenderContext().CreateRenderTarget({tex},GetRenderPass(),rtCreateInfo);
+	return c_engine->GetRenderContext().CreateRenderTarget({tex}, GetRenderPass(), rtCreateInfo);
 }
 
-const Mat4 &ShaderCubemap::GetProjectionMatrix(float aspectRatio) const
-{
-	return pragma::math::get_cubemap_projection_matrix(aspectRatio);
-}
-const Mat4 &ShaderCubemap::GetViewMatrix(uint8_t layerId) const
-{
-	return pragma::math::get_cubemap_view_matrices().at(layerId);
-}
-
+const Mat4 &ShaderCubemap::GetProjectionMatrix(float aspectRatio) const { return pragma::math::get_cubemap_projection_matrix(aspectRatio); }
+const Mat4 &ShaderCubemap::GetViewMatrix(uint8_t layerId) const { return pragma::math::get_cubemap_view_matrices().at(layerId); }

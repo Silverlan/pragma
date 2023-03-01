@@ -11,27 +11,21 @@
 #include "pragma/entities/environment/lights/s_env_light.h"
 #include "pragma/entities/environment/lights/env_light_directional.h"
 
-namespace pragma
-{
-	class DLLSERVER SLightDirectionalComponent final
-		: public BaseEnvLightDirectionalComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SLightDirectionalComponent final : public BaseEnvLightDirectionalComponent, public SBaseNetComponent {
+	  public:
 		SLightDirectionalComponent(BaseEntity &ent) : BaseEnvLightDirectionalComponent(ent) {};
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
 		virtual void SetAmbientColor(const Color &color) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
-	protected:
+	  protected:
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 	};
 };
 
-class DLLSERVER EnvLightDirectional
-	: public SBaseEntity
-{
-public:
+class DLLSERVER EnvLightDirectional : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

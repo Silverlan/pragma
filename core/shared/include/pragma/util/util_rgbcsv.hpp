@@ -11,23 +11,17 @@
 #include "pragma/networkdefinitions.h"
 #include <mathutil/color.h>
 
-namespace util
-{
-	struct DLLNETWORK HSV
-	{
-		HSV(double h,double s,double v)
-			: h{h},s{s},v{v}
-		{}
-		HSV()=default;
+namespace util {
+	struct DLLNETWORK HSV {
+		HSV(double h, double s, double v) : h {h}, s {s}, v {v} {}
+		HSV() = default;
 
 		bool operator==(const util::HSV &b) const
 		{
 			constexpr auto EPSILON = 0.01f;
-			return umath::abs(h -b.h) <= EPSILON &&
-				umath::abs(s -b.s) <= EPSILON &&
-				umath::abs(v -b.v) <= EPSILON;
+			return umath::abs(h - b.h) <= EPSILON && umath::abs(s - b.s) <= EPSILON && umath::abs(v - b.v) <= EPSILON;
 		}
-		bool operator!=(const util::HSV &b) const {return operator==(b);}
+		bool operator!=(const util::HSV &b) const { return operator==(b); }
 
 		double h = 0.0;
 		double s = 0.0;
@@ -35,7 +29,7 @@ namespace util
 	};
 	DLLNETWORK HSV rgb_to_hsv(const Color &rgb);
 	DLLNETWORK Color hsv_to_rgb(const HSV &hsv);
-	DLLNETWORK HSV lerp_hsv(const HSV &src,const HSV &dst,float t);
+	DLLNETWORK HSV lerp_hsv(const HSV &src, const HSV &dst, float t);
 };
 
 #endif

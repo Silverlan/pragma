@@ -10,9 +10,8 @@
 
 #include <tiny_gltf.h>
 
-namespace pragma::asset
-{
-	
+namespace pragma::asset {
+
 };
 
 #endif

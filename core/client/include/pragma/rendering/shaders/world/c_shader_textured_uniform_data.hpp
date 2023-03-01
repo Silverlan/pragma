@@ -11,13 +11,11 @@
 #include "pragma/clientdefinitions.h"
 #include <mathutil/uvec.h>
 
-namespace pragma
-{
-#pragma pack(push,1)
-	struct RenderSettings
-	{
-		Vector4 ambientColor;
+namespace pragma {
+#pragma pack(push, 1)
+	struct RenderSettings {
 		Vector3 posCam;
+		umath::Radian fov;
 		int32_t flags;
 		float shadowRatioX;
 		float shadowRatioY;
@@ -25,14 +23,12 @@ namespace pragma
 		float farZ;
 		int32_t shaderQuality;
 	};
-	struct CameraData
-	{
+	struct CameraData {
 		Mat4 V;
 		Mat4 P;
 		Mat4 VP;
 	};
-	struct FogData
-	{
+	struct FogData {
 		Vector4 color;
 		float start;
 		float end;

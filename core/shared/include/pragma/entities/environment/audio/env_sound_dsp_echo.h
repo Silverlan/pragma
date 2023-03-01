@@ -9,9 +9,8 @@
 
 #include "pragma/networkdefinitions.h"
 #include <string>
-class DLLNETWORK BaseEnvSoundDspEcho
-{
-protected:
+class DLLNETWORK BaseEnvSoundDspEcho {
+  protected:
 	float m_kvDelay = 0.1f;
 	float m_kvLRDelay = 0.1f;
 	float m_kvDamping = 0.5f;

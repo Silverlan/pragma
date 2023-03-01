@@ -16,11 +16,9 @@
 #include <buffers/prosper_buffer.hpp>
 #include <mathutil/umath_geometry.hpp>
 
-namespace pragma
-{
+namespace pragma {
 	class CSceneComponent;
-	struct DLLCLIENT WaterScene
-	{
+	struct DLLCLIENT WaterScene {
 		~WaterScene();
 		util::TWeakSharedHandle<pragma::CSceneComponent> sceneReflection = {};
 		std::shared_ptr<prosper::IBuffer> settingsBuffer = nullptr;
@@ -44,26 +42,23 @@ namespace pragma
 	};
 
 	class CSurfaceComponent;
-	class DLLCLIENT CLiquidSurfaceComponent final
-		: public BaseLiquidSurfaceComponent,
-		public CBaseNetComponent
-	{
-	public:
+	class DLLCLIENT CLiquidSurfaceComponent final : public BaseLiquidSurfaceComponent, public CBaseNetComponent {
+	  public:
 		CLiquidSurfaceComponent(BaseEntity &ent) : BaseLiquidSurfaceComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnRemove() override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void ReceiveData(NetPacket &packet) override;
-		
+
 		void ClearWaterScene();
 		const WaterScene &GetWaterScene() const;
 		prosper::IDescriptorSet *GetEffectDescriptorSet() const;
 		CMaterial *GetWaterMaterial() const;
-		void InitializeWaterScene(const Vector3 &refPos,const Vector3 &planeNormal,const Vector3 &waterAabbMin,const Vector3 &waterAabbMax);
+		void InitializeWaterScene(const Vector3 &refPos, const Vector3 &planeNormal, const Vector3 &waterAabbMin, const Vector3 &waterAabbMax);
 		void InitializeWaterScene(const WaterScene &scene);
 		bool IsWaterSceneValid() const;
-	private:
+	  private:
 		virtual void OnEntitySpawn() override;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		void RenderPostProcessingOverlay(const util::DrawSceneInfo &drawSceneInfo);
@@ -75,7 +70,7 @@ namespace pragma
 		std::unique_ptr<WaterScene> m_waterScene = nullptr;
 		util::WeakHandle<prosper::Shader> m_shaderPpWater {};
 		umath::geometry::PlaneSide m_curCameraSurfaceSide = umath::geometry::PlaneSide::OnPlane;
-		std::pair<Vector3,Vector3> m_waterAabbBounds = {};
+		std::pair<Vector3, Vector3> m_waterAabbBounds = {};
 		bool m_renderDataInitialized = false;
 	};
 };

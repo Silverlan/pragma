@@ -13,17 +13,12 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-Shader3DBase::Shader3DBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
-	: ShaderGraphics(context,identifier,vsShader,fsShader,gsShader)
-{}
-void Shader3DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+Shader3DBase::Shader3DBase(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderGraphics(context, identifier, vsShader, fsShader, gsShader) {}
+void Shader3DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
-	pipelineInfo.ToggleDepthTest(true,prosper::CompareOp::LessOrEqual);
+	ShaderGraphics::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
+	pipelineInfo.ToggleDepthTest(true, prosper::CompareOp::LessOrEqual);
 	pipelineInfo.ToggleDepthWrites(true);
 }
 
-void Shader3DBase::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
-{
-	ShaderGraphics::InitializeRenderPass(outRenderPass,pipelineIdx);
-}
+void Shader3DBase::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { ShaderGraphics::InitializeRenderPass(outRenderPass, pipelineIdx); }

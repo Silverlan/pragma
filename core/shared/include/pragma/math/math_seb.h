@@ -12,9 +12,8 @@
 #include <mathutil/glmutil.h>
 #include <vector>
 
-namespace Seb
-{
-	void DLLNETWORK Calculate(std::vector<Vector3> &verts,Vector3 &center,float &radius);
+namespace Seb {
+	void DLLNETWORK Calculate(std::vector<Vector3> &verts, Vector3 &center, float &radius);
 };
 
 #endif

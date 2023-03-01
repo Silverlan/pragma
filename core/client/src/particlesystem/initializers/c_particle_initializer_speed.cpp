@@ -8,14 +8,13 @@
 #include "stdafx_client.h"
 #include "pragma/particlesystem/initializers/c_particle_initializer_speed.hpp"
 
-REGISTER_PARTICLE_INITIALIZER(speed,CParticleInitializerSpeed);
+REGISTER_PARTICLE_INITIALIZER(speed, CParticleInitializerSpeed);
 
-void CParticleInitializerSpeed::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+void CParticleInitializerSpeed::Initialize(pragma::CParticleSystemComponent &pSystem, const std::unordered_map<std::string, std::string> &values)
 {
-	CParticleInitializer::Initialize(pSystem,values);
-	m_fSpeed.Initialize("speed",values);
-	for(auto &pair : values)
-	{
+	CParticleInitializer::Initialize(pSystem, values);
+	m_fSpeed.Initialize("speed", values);
+	for(auto &pair : values) {
 		auto key = pair.first;
 		ustring::to_lower(key);
 		if(key == "speed_min")
@@ -31,5 +30,5 @@ void CParticleInitializerSpeed::OnParticleCreated(CParticle &particle)
 	if(l <= 0.0001f)
 		return;
 	vel /= l;
-	particle.SetVelocity(vel *m_fSpeed.GetValue(particle));
+	particle.SetVelocity(vel * m_fSpeed.GetValue(particle));
 }

@@ -20,8 +20,7 @@
 
 using namespace pragma;
 
-
-void BaseGravity::SetGravityScale(float scale) {m_gravityScale = scale;}
+void BaseGravity::SetGravityScale(float scale) { m_gravityScale = scale; }
 void BaseGravity::SetGravityOverride(const Vector3 &dir)
 {
 	if(m_gravityDir == nullptr)
@@ -30,7 +29,7 @@ void BaseGravity::SetGravityOverride(const Vector3 &dir)
 	m_gravityDir->y = dir.y;
 	m_gravityDir->z = dir.z;
 }
-void BaseGravity::SetGravityOverride(const Vector3 &dir,float gravity)
+void BaseGravity::SetGravityOverride(const Vector3 &dir, float gravity)
 {
 	SetGravityOverride(dir);
 	SetGravityOverride(gravity);
@@ -46,11 +45,11 @@ void BaseGravity::SetGravityOverride()
 	m_gravity = nullptr;
 	m_gravityDir = nullptr;
 }
-bool BaseGravity::HasGravityForceOverride() const {return (m_gravity != nullptr) ? true : false;}
-bool BaseGravity::HasGravityDirectionOverride() const {return (m_gravityDir != nullptr) ? true : false;}
+bool BaseGravity::HasGravityForceOverride() const { return (m_gravity != nullptr) ? true : false; }
+bool BaseGravity::HasGravityDirectionOverride() const { return (m_gravityDir != nullptr) ? true : false; }
 
 //~#PDOC f-ents-gravitycomponent-getgravityscale
-float BaseGravity::GetGravityScale() const {return m_gravityScale;}
+float BaseGravity::GetGravityScale() const { return m_gravityScale; }
 
 Vector3 BaseGravity::GetGravityDirection(NetworkState *state) const
 {
@@ -73,11 +72,10 @@ float BaseGravity::GetGravity(NetworkState *state) const
 Vector3 BaseGravity::GetGravityForce(NetworkState *state) const
 {
 	if(state == nullptr)
-		return Vector3(0,0,0);
+		return Vector3(0, 0, 0);
 	Game *game = state->GetGameState();
-	Vector3 force(0,0,0);
-	if(m_gravityDir != nullptr)
-	{
+	Vector3 force(0, 0, 0);
+	if(m_gravityDir != nullptr) {
 		force.x = m_gravityDir->x;
 		force.y = m_gravityDir->y;
 		force.z = m_gravityDir->z;
@@ -93,7 +91,7 @@ Vector3 BaseGravity::GetGravityForce(NetworkState *state) const
 	else if(m_gravity != nullptr) // Keep world gravity direction
 	{
 		Vector3 gravity = game->GetGravity();
-		gravity = glm::normalize(gravity) *(*m_gravity);
+		gravity = glm::normalize(gravity) * (*m_gravity);
 		force.x = gravity.x;
 		force.y = gravity.y;
 		force.z = gravity.z;
@@ -111,18 +109,12 @@ Vector3 BaseGravity::GetGravityForce(NetworkState *state) const
 
 /////////////////////
 
-GravityComponent::GravityComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent)
-{}
+GravityComponent::GravityComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 void GravityComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		OnPhysicsInitialized();
-	});
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		ApplyGravity(static_cast<CEPhysicsUpdateData&>(evData.get()).deltaTime);
-	});
+	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnPhysicsInitialized(); });
+	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ApplyGravity(static_cast<CEPhysicsUpdateData &>(evData.get()).deltaTime); });
 }
 
 void GravityComponent::ApplyGravity(double dt)
@@ -134,37 +126,33 @@ void GravityComponent::ApplyGravity(double dt)
 	auto moveType = pPhysComponent->GetMoveType();
 	if(moveType != MOVETYPE::WALK && moveType != MOVETYPE::PHYSICS)
 		return;
-	if(pPhys->IsRigid())
-	{
-		auto *pPhysRigid = static_cast<RigidPhysObj*>(pPhys);
+	if(pPhys->IsRigid()) {
+		auto *pPhysRigid = static_cast<RigidPhysObj *>(pPhys);
 		if(pPhysRigid->IsKinematic() || pPhysRigid->IsStatic())
 			return;
 		auto f = GetGravityForce();
 		f *= pPhysRigid->GetMass();
 
-		for(auto hObj : pPhysRigid->GetCollisionObjects())
-		{
+		for(auto hObj : pPhysRigid->GetCollisionObjects()) {
 			if(hObj.IsValid() == false || hObj->IsAsleep())
 				continue;
-			hObj->GetRigidBody()->ApplyForce(f,false);
+			hObj->GetRigidBody()->ApplyForce(f, false);
 		}
 	}
-	else if(pPhys->IsController())
-	{
-		auto *pPhysObjController = static_cast<ControllerPhysObj*>(pPhys);
+	else if(pPhys->IsController()) {
+		auto *pPhysObjController = static_cast<ControllerPhysObj *>(pPhys);
 		auto *pCollisionObject = pPhysObjController->GetCollisionObject();
 		if(pCollisionObject == nullptr)
 			return;
 		auto t = pCollisionObject->GetWorldTransform();
 		//m_originLast = t.GetOrigin();
 		Vector3 disp {};
-		if(pPhysObjController->IsGroundWalkable() == false)//!m_controller->onGround())
+		if(pPhysObjController->IsGroundWalkable() == false) //!m_controller->onGround())
 		{
-			Vector3 f = GetGravityForce() *CFloat(dt);
-			disp += Vector3(f.x,f.y,f.z);
+			Vector3 f = GetGravityForce() * CFloat(dt);
+			disp += Vector3(f.x, f.y, f.z);
 		}
-		else
-		{
+		else {
 			//static Vector3 oldVelocity = {};
 
 			// TODO: Code below doesn't work with moving kinematic platforms. What was this for?
@@ -199,7 +187,7 @@ void GravityComponent::ApplyGravity(double dt)
 			//else
 			//	oldVelocity = {};
 		}
-#pragma message ("TODO: Use Verlet Gravity")
+#pragma message("TODO: Use Verlet Gravity")
 		//
 
 		disp *= dt;
@@ -210,12 +198,10 @@ void GravityComponent::ApplyGravity(double dt)
 		pPhysController->AddMoveVelocity(disp);
 #endif
 	}
-	else if(pPhys->IsSoftBody())
-	{
-		auto *pPhysObjSoftBody = static_cast<SoftBodyPhysObj*>(pPhys);
-		auto f = GetGravityForce() *CFloat(dt);
-		for(auto &hSoftBody : pPhysObjSoftBody->GetSoftBodies())
-		{
+	else if(pPhys->IsSoftBody()) {
+		auto *pPhysObjSoftBody = static_cast<SoftBodyPhysObj *>(pPhys);
+		auto f = GetGravityForce() * CFloat(dt);
+		for(auto &hSoftBody : pPhysObjSoftBody->GetSoftBodies()) {
 			if(hSoftBody.IsValid() == false)
 				continue;
 			hSoftBody->AddVelocity(f);
@@ -224,37 +210,25 @@ void GravityComponent::ApplyGravity(double dt)
 }
 
 void GravityComponent::OnPhysicsInitialized() {}
-void GravityComponent::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-Vector3 GravityComponent::GetGravityDirection() const {return BaseGravity::GetGravityDirection(GetEntity().GetNetworkState());}
-float GravityComponent::GetGravity() const {return BaseGravity::GetGravity(GetEntity().GetNetworkState());}
-Vector3 GravityComponent::GetGravityForce() const {return BaseGravity::GetGravityForce(GetEntity().GetNetworkState());}
+void GravityComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+Vector3 GravityComponent::GetGravityDirection() const { return BaseGravity::GetGravityDirection(GetEntity().GetNetworkState()); }
+float GravityComponent::GetGravity() const { return BaseGravity::GetGravity(GetEntity().GetNetworkState()); }
+Vector3 GravityComponent::GetGravityForce() const { return BaseGravity::GetGravityForce(GetEntity().GetNetworkState()); }
 
-void GravityComponent::SetGravityOverride(const Vector3 &dir)
-{
-	BaseGravity::SetGravityOverride(dir);
-}
-void GravityComponent::SetGravityOverride(float gravity)
-{
-	BaseGravity::SetGravityOverride(gravity);
-}
-void GravityComponent::SetGravityOverride()
-{
-	BaseGravity::SetGravityOverride();
-}
-void GravityComponent::SetGravityScale(float scale)
-{
-	BaseGravity::SetGravityScale(scale);
-}
-bool GravityComponent::CalcBallisticVelocity(const Vector3 &origin,const Vector3 &destPos,float fireAngle,float maxSpeed,float spread,float maxPitch,float maxYaw,Vector3 &vel) const
+void GravityComponent::SetGravityOverride(const Vector3 &dir) { BaseGravity::SetGravityOverride(dir); }
+void GravityComponent::SetGravityOverride(float gravity) { BaseGravity::SetGravityOverride(gravity); }
+void GravityComponent::SetGravityOverride() { BaseGravity::SetGravityOverride(); }
+void GravityComponent::SetGravityScale(float scale) { BaseGravity::SetGravityScale(scale); }
+bool GravityComponent::CalcBallisticVelocity(const Vector3 &origin, const Vector3 &destPos, float fireAngle, float maxSpeed, float spread, float maxPitch, float maxYaw, Vector3 &vel) const
 {
 	auto gravity = -GetGravityForce().y;
-	auto b = umath::calc_ballistic_velocity(origin,destPos,fireAngle,gravity,vel);
+	auto b = umath::calc_ballistic_velocity(origin, destPos, fireAngle, gravity, vel);
 	if(b == false)
 		return false;
 
 	// Apply random spread
-	auto spreadAngles = EulerAngles(umath::random(-spread,spread),umath::random(-spread,spread),0.f);
-	uvec::rotate(&vel,spreadAngles);
+	auto spreadAngles = EulerAngles(umath::random(-spread, spread), umath::random(-spread, spread), 0.f);
+	uvec::rotate(&vel, spreadAngles);
 	//
 
 	// Clamp to max speed
@@ -265,21 +239,18 @@ bool GravityComponent::CalcBallisticVelocity(const Vector3 &origin,const Vector3
 
 	// Clamp to maximum angles
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent)
-	{
+	if(pTrComponent) {
 		auto velAng = uvec::to_angle(vel);
 		auto ang = pTrComponent->GetAngles();
-		ang.p = umath::clamp_angle(velAng.p,ang.p -maxPitch,ang.p +maxPitch);
-		ang.y = umath::clamp_angle(velAng.y,ang.y -maxYaw,ang.y +maxYaw);
-		vel = ang.Forward() *l;
+		ang.p = umath::clamp_angle(velAng.p, ang.p - maxPitch, ang.p + maxPitch);
+		ang.y = umath::clamp_angle(velAng.y, ang.y - maxYaw, ang.y + maxYaw);
+		vel = ang.Forward() * l;
 	}
-	else
-	{
+	else {
 		uvec::normalize(&vel);
-		vel = vel *l;
+		vel = vel * l;
 	}
 	//
 
 	return true;
 }
-

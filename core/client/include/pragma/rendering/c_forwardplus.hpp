@@ -12,8 +12,7 @@
 #include <cinttypes>
 #include <memory>
 
-namespace prosper
-{
+namespace prosper {
 	class IPrContext;
 	class IBuffer;
 	class Texture;
@@ -25,31 +24,28 @@ namespace prosper
 #pragma warning(push)
 #pragma warning(disable : 4251)
 class Scene;
-namespace pragma
-{
+namespace pragma {
 	class CCameraComponent;
 	class CSceneComponent;
 	class CRasterizationRendererComponent;
-	namespace rendering
-	{
-		class DLLCLIENT ForwardPlusInstance
-		{
-		public:
+	namespace rendering {
+		class DLLCLIENT ForwardPlusInstance {
+		  public:
 			ForwardPlusInstance(CRasterizationRendererComponent &rasterizer);
-			bool Initialize(prosper::IPrContext &context,uint32_t width,uint32_t height,prosper::Texture &depthTexture);
+			bool Initialize(prosper::IPrContext &context, uint32_t width, uint32_t height, prosper::Texture &depthTexture);
 
-			std::pair<uint32_t,uint32_t> GetWorkGroupCount() const;
+			std::pair<uint32_t, uint32_t> GetWorkGroupCount() const;
 			uint32_t GetTileCount() const;
 			const std::vector<uint32_t> &GetShadowLightBits() const;
 			prosper::IDescriptorSet *GetDepthDescriptorSetGraphics() const;
 			const std::shared_ptr<prosper::IBuffer> &GetTileVisLightIndexBuffer() const;
 			const std::shared_ptr<prosper::IBuffer> &GetVisLightIndexBuffer() const;
 
-			void Compute(prosper::IPrimaryCommandBuffer &cmdBuffer,pragma::CSceneComponent &scene,prosper::IImage &imgDepth,prosper::IDescriptorSet &descSetCam);
+			void Compute(prosper::IPrimaryCommandBuffer &cmdBuffer, pragma::CSceneComponent &scene, prosper::IImage &imgDepth, prosper::IDescriptorSet &descSetCam);
 
-			static std::pair<uint32_t,uint32_t> CalcWorkGroupCount(uint32_t w,uint32_t h);
-			static uint32_t CalcTileCount(uint32_t w,uint32_t h);
-		private:
+			static std::pair<uint32_t, uint32_t> CalcWorkGroupCount(uint32_t w, uint32_t h);
+			static uint32_t CalcTileCount(uint32_t w, uint32_t h);
+		  private:
 			CRasterizationRendererComponent &m_rasterizer;
 			uint32_t m_workGroupCountX = 0u;
 			uint32_t m_workGroupCountY = 0u;

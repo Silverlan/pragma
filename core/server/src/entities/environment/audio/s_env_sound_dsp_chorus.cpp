@@ -15,30 +15,30 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(env_sound_dsp_chorus,EnvSoundDspChorus);
+LINK_ENTITY_TO_CLASS(env_sound_dsp_chorus, EnvSoundDspChorus);
 
-bool SSoundDspChorusComponent::OnSetKeyValue(const std::string &key,const std::string &val)
+bool SSoundDspChorusComponent::OnSetKeyValue(const std::string &key, const std::string &val)
 {
-	if(SBaseSoundDspComponent::OnSetKeyValue(key,val))
+	if(SBaseSoundDspComponent::OnSetKeyValue(key, val))
 		return true;
-	if(ustring::compare<std::string>(key,"waveform",false))
+	if(ustring::compare<std::string>(key, "waveform", false))
 		m_kvWaveform = util::to_int(val);
-	else if(ustring::compare<std::string>(key,"phase",false))
+	else if(ustring::compare<std::string>(key, "phase", false))
 		m_kvPhase = util::to_int(val);
-	else if(ustring::compare<std::string>(key,"rate",false))
+	else if(ustring::compare<std::string>(key, "rate", false))
 		m_kvRate = util::to_float(val);
-	else if(ustring::compare<std::string>(key,"depth",false))
+	else if(ustring::compare<std::string>(key, "depth", false))
 		m_kvDepth = util::to_float(val);
-	else if(ustring::compare<std::string>(key,"feedback",false))
+	else if(ustring::compare<std::string>(key, "feedback", false))
 		m_kvFeedback = util::to_float(val);
-	else if(ustring::compare<std::string>(key,"delay",false))
+	else if(ustring::compare<std::string>(key, "delay", false))
 		m_kvDelay = util::to_float(val);
 	else
 		return false;
 	return true;
 }
 
-void SSoundDspChorusComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SSoundDspChorusComponent::SendData(NetPacket &packet, networking::ClientRecipientFilter &rp)
 {
 	packet->Write<int>(m_kvWaveform);
 	packet->Write<int>(m_kvPhase);
@@ -47,7 +47,7 @@ void SSoundDspChorusComponent::SendData(NetPacket &packet,networking::ClientReci
 	packet->Write<float>(m_kvFeedback);
 	packet->Write<float>(m_kvDelay);
 }
-void SSoundDspChorusComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SSoundDspChorusComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 /////////////////
 

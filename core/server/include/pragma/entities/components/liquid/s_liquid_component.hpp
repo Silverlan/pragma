@@ -12,29 +12,23 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/liquid/base_liquid_component.hpp>
 
-namespace pragma
-{
-	class DLLSERVER SLiquidComponent final
-		: public BaseFuncLiquidComponent,
-		public SBaseNetComponent
-	{
-	public:
+namespace pragma {
+	class DLLSERVER SLiquidComponent final : public BaseFuncLiquidComponent, public SBaseNetComponent {
+	  public:
 		SLiquidComponent(BaseEntity &ent);
 		virtual ~SLiquidComponent() override;
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
-		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SendData(NetPacket &packet, networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void InitializeLuaObject(lua_State *l) override;
-	protected:
+	  protected:
 		CallbackHandle m_cbGameInitialized = {};
 	};
 };
 
-class DLLSERVER FuncWater
-	: public SBaseEntity
-{
-public:
+class DLLSERVER FuncWater : public SBaseEntity {
+  public:
 	virtual void Initialize() override;
 };
 

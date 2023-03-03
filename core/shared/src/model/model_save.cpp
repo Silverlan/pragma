@@ -821,7 +821,8 @@ bool Model::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
 				}
 				auto udmAnim = udmAnimations[animName];
 				udmAnim["index"] = static_cast<uint32_t>(i);
-				if(anim->Save(udm::AssetData {udmAnim}, outErr, &ref) == false)
+				auto enableOptimizations = (animName != "reference"); // Never enable optimization for reference pose
+				if(anim->Save(udm::AssetData {udmAnim}, outErr, &ref, enableOptimizations) == false)
 					return false;
 			}
 		}

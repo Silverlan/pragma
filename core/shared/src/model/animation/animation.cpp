@@ -486,7 +486,7 @@ static void write_channel_value(std::shared_ptr<Channel> &channel, uint32_t numF
 	channel->AddValue(curVal);
 };
 
-bool pragma::animation::Animation::Save(udm::AssetDataArg outData, std::string &outErr, const Frame *optReference)
+bool pragma::animation::Animation::Save(udm::AssetDataArg outData, std::string &outErr, const Frame *optReference, bool enableOptimizations)
 {
 	outData.SetAssetType(PANIM_IDENTIFIER);
 	outData.SetAssetVersion(PANIM_VERSION);
@@ -593,56 +593,58 @@ bool pragma::animation::Animation::Save(udm::AssetDataArg outData, std::string &
 	auto isGesture = HasFlag(FAnim::Gesture);
 	if(!isGesture) {
 		if constexpr(ENABLE_ANIMATION_SAVE_OPTIMIZATION) {
-			// We may be able to remove some channels altogether if they're empty,
-			// or are equivalent to the reference pose (or identity value if the animation
-			// is a gesture)
-			for(auto it = nodeChannels.begin(); it != nodeChannels.begin() + numBones;) {
-				auto boneId = bones[it - nodeChannels.begin()];
-				auto &channels = *it;
-				for(auto &pair : channels) {
-					// If channel only has two values and they're both the same, we can get rid of the second one
-					auto &channel = pair.second;
-					auto n = channel->GetValueCount();
-					if(n == 2) {
-						auto *v0 = channel->GetValue(0);
-						auto *v1 = channel->GetValue(1);
-						if(channel->CompareValues(v0, v1) == false)
+			if(enableOptimizations) {
+				// We may be able to remove some channels altogether if they're empty,
+				// or are equivalent to the reference pose (or identity value if the animation
+				// is a gesture)
+				for(auto it = nodeChannels.begin(); it != nodeChannels.begin() + numBones;) {
+					auto boneId = bones[it - nodeChannels.begin()];
+					auto &channels = *it;
+					for(auto &pair : channels) {
+						// If channel only has two values and they're both the same, we can get rid of the second one
+						auto &channel = pair.second;
+						auto n = channel->GetValueCount();
+						if(n == 2) {
+							auto *v0 = channel->GetValue(0);
+							auto *v1 = channel->GetValue(1);
+							if(channel->CompareValues(v0, v1) == false)
+								continue;
+							channel->PopBack();
+						}
+
+						n = channel->GetValueCount();
+						if(n != 1)
+							continue;
+						if(isGesture) {
+							if(channel->CompareWithDefault(channel->GetValue(0)))
+								channel->PopBack();
+							continue;
+						}
+						if(!optReference)
+							continue;
+						auto *ref = channel->GetReferenceValue(*optReference, boneId);
+						if(!ref || !channel->CompareValues(channel->GetValue(0), ref))
 							continue;
 						channel->PopBack();
 					}
-
-					n = channel->GetValueCount();
-					if(n != 1)
-						continue;
-					if(isGesture) {
-						if(channel->CompareWithDefault(channel->GetValue(0)))
-							channel->PopBack();
-						continue;
+					for(auto itChannel = channels.begin(); itChannel != channels.end();) {
+						auto &channel = itChannel->second;
+						if(channel->times.empty())
+							itChannel = channels.erase(itChannel);
+						else
+							++itChannel;
 					}
-					if(!optReference)
-						continue;
-					auto *ref = channel->GetReferenceValue(*optReference, boneId);
-					if(!ref || !channel->CompareValues(channel->GetValue(0), ref))
-						continue;
-					channel->PopBack();
-				}
-				for(auto itChannel = channels.begin(); itChannel != channels.end();) {
-					auto &channel = itChannel->second;
-					if(channel->times.empty())
-						itChannel = channels.erase(itChannel);
+					if(channels.empty()) {
+						auto i = (it - nodeChannels.begin());
+						bones.erase(bones.begin() + i);
+						if(!weights.empty())
+							weights.erase(weights.begin() + i);
+						--numBones;
+						it = nodeChannels.erase(it);
+					}
 					else
-						++itChannel;
+						++it;
 				}
-				if(channels.empty()) {
-					auto i = (it - nodeChannels.begin());
-					bones.erase(bones.begin() + i);
-					if(!weights.empty())
-						weights.erase(weights.begin() + i);
-					--numBones;
-					it = nodeChannels.erase(it);
-				}
-				else
-					++it;
 			}
 		}
 	}

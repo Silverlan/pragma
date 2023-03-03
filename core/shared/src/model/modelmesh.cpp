@@ -723,7 +723,7 @@ const std::vector<umath::VertexWeight> &ModelSubMesh::GetVertexWeightSet(uint32_
 std::vector<umath::VertexWeight> &ModelSubMesh::GetVertexWeightSet(uint32_t idx) { return (idx >= 4) ? *m_extendedVertexWeights : *m_vertexWeights; }
 void ModelSubMesh::SetVertexWeight(uint32_t idx, const umath::VertexWeight &weight)
 {
-	auto &vertexWeights = GetVertexWeightSet(idx);
+	auto &vertexWeights = GetVertexWeightSet(0);
 	if(idx >= vertexWeights.size()) {
 		vertexWeights.resize(idx + 1);
 		if(vertexWeights.size() == vertexWeights.capacity())

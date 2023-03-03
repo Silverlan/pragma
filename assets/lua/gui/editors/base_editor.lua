@@ -78,6 +78,8 @@ function gui.WIBaseEditor:InitializeGenericLayout()
 	self.m_contents:SetAutoFillContents(true)
 end
 
+function gui.WIBaseEditor:GetContentsElement() return self.m_contents end
+
 function gui.WIBaseEditor:GoToWindow(identifier)
 	for _,window in ipairs(self.m_frames) do
 		window:SetActiveTab(identifier)

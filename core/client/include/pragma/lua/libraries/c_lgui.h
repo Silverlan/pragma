@@ -52,9 +52,11 @@ namespace Lua {
 		DLLCLIENT ::WIBase *get_element_at_position(lua_State *l, prosper::Window *window, ::WIBase *baseElement, int32_t x, int32_t y);
 		DLLCLIENT ::WIBase *get_element_at_position(lua_State *l, prosper::Window *window, ::WIBase *baseElement, int32_t x, int32_t y, const Lua::func<bool, ::WIBase> &condition);
 
+		DLLCLIENT ::WIBase *get_element_under_cursor(lua_State *l, ::WIBase &elRoot, const Lua::func<bool, ::WIBase> &condition);
 		DLLCLIENT ::WIBase *get_element_under_cursor(lua_State *l, const prosper::Window *window, const Lua::func<bool, ::WIBase> &condition);
 		DLLCLIENT ::WIBase *get_element_under_cursor(lua_State *l, const Lua::func<bool, ::WIBase> &condition);
 		DLLCLIENT ::WIBase *get_element_under_cursor(lua_State *l, const prosper::Window *window = nullptr);
+		DLLCLIENT ::WIBase *get_element_under_cursor(lua_State *l, ::WIBase &elRoot);
 		DLLCLIENT ::WIBase *get_focused_element(lua_State *l);
 		DLLCLIENT ::WIBase *get_focused_element(lua_State *l, prosper::Window &window);
 		DLLCLIENT bool register_skin(lua_State *l, const std::string &skin, const luabind::tableT<void> &vars, const luabind::tableT<void> &skinData);

@@ -114,7 +114,7 @@ namespace pragma::animation {
 		std::vector<float> &GetBoneWeights();
 
 		// If reference frame is specified, it will be used to optimize frame data and reduce the file size
-		bool Save(udm::AssetDataArg outData, std::string &outErr, const Frame *optReference = nullptr);
+		bool Save(udm::AssetDataArg outData, std::string &outErr, const Frame *optReference = nullptr, bool enableOptimizations = true);
 		bool SaveLegacy(std::shared_ptr<VFilePtrInternalReal> &f);
 
 		bool operator==(const Animation &other) const;

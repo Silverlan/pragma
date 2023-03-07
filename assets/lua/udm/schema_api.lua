@@ -47,6 +47,27 @@ function udm.BaseSchemaType:Initialize(schema,udmData,parent)
 	end
 	self:OnInitialize()
 end
+function udm.BaseSchemaType:ReloadUdmData(udmData)
+	self.m_udmData = udmData
+	local typeData = self.m_schema:FindTypeData(self.TypeName)
+	for name,child in pairs(typeData:Get("children"):GetChildren()) do
+		local childType = child:GetValue("type",udm.TYPE_STRING)
+		if(childType ~= nil) then
+			local schemaType = self.m_schema:FindTypeData(childType)
+			if(schemaType ~= nil and udm.Schema.is_enum_type(schemaType:GetValue("type",udm.TYPE_STRING)) == false) then
+				self.m_typedChildren[name]:ReloadUdmData(self:GetUdmData():Get(name))
+			elseif(udm.is_array_type(udm.ascii_type_to_enum(childType))) then
+				local childValueType = child:GetValue("valueType",udm.TYPE_STRING)
+				local schemaValueType = self.m_schema:FindTypeData(childValueType)
+				if(schemaValueType ~= nil and udm.Schema.is_enum_type(schemaValueType:GetValue("type",udm.TYPE_STRING)) == false) then
+					for i,aChild in ipairs(self:GetUdmData():Get(name):GetArrayValues()) do
+						self:GetTypedChildren()[name][i]:ReloadUdmData(aChild)
+					end
+				end
+			end
+		end
+	end
+end
 function udm.BaseSchemaType:Reinitialize(data)
 	self:CleanUp(false)
 	

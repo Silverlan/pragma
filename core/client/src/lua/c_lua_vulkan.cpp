@@ -1765,6 +1765,8 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 
 	auto defWindow = luabind::class_<prosper::Window>("Window");
 	defWindow.def(
+	  "__eq", +[](prosper::Window &a, prosper::Window &b) -> bool { return &a == &b; });
+	defWindow.def(
 	  "GetMonitorBounds", +[](prosper::Window &window) -> std::optional<std::tuple<Vector2, Vector2, Vector2, Vector2>> {
 		  auto bounds = window->GetMonitorBounds();
 		  if(!bounds.has_value())

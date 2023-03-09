@@ -184,12 +184,9 @@ void Lua::gui::register_element(const std::string &className, const Lua::classOb
 ::WIBase *Lua::gui::get_base_element(const prosper::Window &window) { return WGUI::GetInstance().GetBaseElement(&window); }
 ::WIBase *Lua::gui::get_base_element() { return WGUI::GetInstance().GetBaseElement(); }
 
-::WIBase *Lua::gui::get_element_under_cursor(lua_State *l, const prosper::Window *window, const Lua::func<bool, ::WIBase> &condition)
+::WIBase *Lua::gui::get_element_under_cursor(lua_State *l, ::WIBase &elRoot, const Lua::func<bool, ::WIBase> &condition)
 {
-	auto *el = WGUI::GetInstance().GetBaseElement(window);
-	if(!el)
-		return nullptr;
-	return ::WGUI::GetInstance().GetCursorGUIElement(el, [l, condition](::WIBase *el) -> bool {
+	return ::WGUI::GetInstance().GetCursorGUIElement(&elRoot, [l, condition](::WIBase *el) -> bool {
 		auto &oFunc = condition;
 		auto result = Lua::CallFunction(
 		  l,
@@ -210,6 +207,13 @@ void Lua::gui::register_element(const std::string &className, const Lua::classOb
 		return r;
 	});
 }
+::WIBase *Lua::gui::get_element_under_cursor(lua_State *l, const prosper::Window *window, const Lua::func<bool, ::WIBase> &condition)
+{
+	auto *el = WGUI::GetInstance().GetBaseElement(window);
+	if(!el)
+		return nullptr;
+	return get_element_under_cursor(l, *el, condition);
+}
 ::WIBase *Lua::gui::get_element_under_cursor(lua_State *l, const Lua::func<bool, ::WIBase> &condition) { return get_element_under_cursor(l, nullptr, condition); }
 ::WIBase *Lua::gui::get_element_under_cursor(lua_State *l, const prosper::Window *window)
 {
@@ -218,6 +222,10 @@ void Lua::gui::register_element(const std::string &className, const Lua::classOb
 		return nullptr;
 	return ::WGUI::GetInstance().GetCursorGUIElement(
 	  el, [l](::WIBase *el) -> bool { return true; }, window);
+}
+::WIBase *Lua::gui::get_element_under_cursor(lua_State *l, ::WIBase &elRoot)
+{
+	return ::WGUI::GetInstance().GetCursorGUIElement(&elRoot, [l](::WIBase *el) -> bool { return true; });
 }
 
 ::WIBase *Lua::gui::get_element_at_position(lua_State *l, prosper::Window *window, ::WIBase *baseElement, int32_t x, int32_t y, const Lua::func<bool, ::WIBase> &condition)

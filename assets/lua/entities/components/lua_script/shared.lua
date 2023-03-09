@@ -1,7 +1,8 @@
 util.register_class("ents.LuaScriptComponent",BaseEntityComponent)
 
-ents.LuaScriptComponent:RegisterMember("ScriptFile",util.VAR_TYPE_STRING,"",ents.BaseEntityComponent.MEMBER_FLAG_DEFAULT)
-ents.LuaScriptComponent:RegisterMember("Code",util.VAR_TYPE_STRING,"",ents.BaseEntityComponent.MEMBER_FLAG_DEFAULT)
+ents.LuaScriptComponent:RegisterMember("ScriptFile",udm.TYPE_STRING,"",{},"def")
+ents.LuaScriptComponent:RegisterMember("Code",udm.TYPE_STRING,"",{},"def")
+ents.LuaScriptComponent:RegisterMember("ExecuteOnSpawn",udm.TYPE_BOOLEAN,false,{},"def")
 function ents.LuaScriptComponent:__init()
 	BaseEntityComponent.__init(self)
 end
@@ -16,7 +17,7 @@ end
 function ents.LuaScriptComponent:Execute()
 	local scriptFile = self:GetScriptFile()
 	if(#scriptFile > 0) then
-		assert(loadstring("include(\"" .. scriptFile .. "\")"))()
+		assert(loadstring("include(\"" .. scriptFile .. "\",true)"))()
 	end
 	
 	local code = self:GetCode()
@@ -34,7 +35,7 @@ function ents.LuaScriptComponent:HandleInput(input,activator,caller,data)
 end
 
 function ents.LuaScriptComponent:OnEntitySpawn()
-	if(bit.band(self:GetEntity():GetSpawnFlags(),1) ~= 0) then
+	if(bit.band(self:GetEntity():GetSpawnFlags(),1) ~= 0 or self:GetExecuteOnSpawn()) then
 		self:Execute()
 		local ioComponent = self:GetEntity():GetComponent(ents.COMPONENT_IO)
 		if(ioComponent ~= nil) then ioComponent:FireOutput("OnExecuted",self:GetEntity()) end

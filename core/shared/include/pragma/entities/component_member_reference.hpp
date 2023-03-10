@@ -9,6 +9,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/types.hpp"
+#include <string>
 #include <optional>
 
 namespace pragma {

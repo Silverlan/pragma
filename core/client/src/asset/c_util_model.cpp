@@ -714,6 +714,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 
 			if(pose != umath::ScaledTransform {}) {
 				for(auto &v : verts) {
+					v.position *= pose.GetScale();
 					v.position = pose * v.position;
 					uvec::rotate(&v.normal, pose.GetRotation());
 				}

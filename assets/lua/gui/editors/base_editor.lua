@@ -26,6 +26,7 @@ function gui.WIBaseEditor:OnInitialize()
 	self.m_windowFactories = {}
 
 	self.m_menuBar = gui.create("WIMenuBar",self)
+	self.m_menuBar:SetName("menu_bar")
 	self.m_menuBar:AddCallback("OnClose",function(pMenuBar)
 		if(util.is_valid(self)) then return end
 		self:Close()
@@ -70,11 +71,12 @@ function gui.WIBaseEditor:AddWindowsMenuBarItem()
 			end)
 		end
 		pContext:ScheduleUpdate()
-	end)
+	end):SetName("windows")
 end
 
 function gui.WIBaseEditor:InitializeGenericLayout()
 	self.m_contents = gui.create("WIHBox",self,0,self.m_menuBar:GetHeight(),self:GetWidth(),self:GetHeight() -self.m_menuBar:GetHeight() -self.m_infoBar:GetHeight(),0,0,1,1)
+	self.m_contents:SetName("contents")
 	self.m_contents:SetAutoFillContents(true)
 end
 

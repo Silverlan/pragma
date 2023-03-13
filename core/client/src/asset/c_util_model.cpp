@@ -1153,13 +1153,18 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		auto &meshGroups = mdl->GetMeshGroups();
 		props.reserve(meshGroups.size());
 		outputData.models.reserve(meshGroups.size());
-		for(auto &meshGroup : meshGroups) {
+		for(auto it = meshGroups.begin(); it != meshGroups.end(); ++it) {
+			auto &meshGroup = *it;
 			auto cpy = mdl->Copy(c_game);
 			auto &cpyMeshGroups = cpy->GetMeshGroups();
-			auto it = std::find(cpyMeshGroups.begin(), cpyMeshGroups.end(), meshGroup);
-			if(it == cpyMeshGroups.end())
-				continue;
-			cpyMeshGroups = {*it};
+			auto idx = it - meshGroups.begin();
+			assert(idx >= 0 && idx < meshGroups.size());
+			cpyMeshGroups = {meshGroups[idx]};
+
+			auto &bodyGroups = cpy->GetBodyGroups();
+			bodyGroups.clear();
+			cpy->AddBodyGroup(meshGroups[idx]->GetName());
+
 			cpy->Update();
 
 			auto subMdlName = meshGroup->GetName();

@@ -233,6 +233,7 @@ local function import_assets(handler,logCb,basePath,clearFiles,callback)
 			for i,path in ipairs(filePaths) do
 				if(path:MakeRelative(rootPath)) then
 					local outPath = "addons/imported/models/" .. basePath .. path:GetString()
+					file.create_path(file.get_file_path(outPath))
 					logCb("Extracing file '" .. files[i] .. "' to '" .. outPath .. "'...",log.SEVERITY_INFO)
 					local result,msg = handler:ExtractFile(files[i],outPath)
 					if(result == false) then

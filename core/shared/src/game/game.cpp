@@ -869,10 +869,16 @@ std::shared_ptr<Model> Game::LoadModel(const std::string &mdl, bool bReload)
 	if(asset)
 		return pragma::asset::ModelManager::GetAssetObject(*asset);
 	auto &mdlMananger = GetNetworkState()->GetModelManager();
-	auto r = bReload ? mdlMananger.ReloadAsset(mdl) : mdlMananger.LoadAsset(mdl);
+	util::FileAssetManager::PreloadResult result;
+	auto r = bReload ? mdlMananger.ReloadAsset(mdl, nullptr, &result) : mdlMananger.LoadAsset(mdl, nullptr, &result);
 	if(r != nullptr) {
 		CallCallbacks<void, std::reference_wrapper<std::shared_ptr<Model>>>("OnModelLoaded", r);
 		CallLuaCallbacks<void, std::shared_ptr<Model>>("OnModelLoaded", r);
+	}
+	else {
+		Con::cwar << "Failed to load model '" << mdl << "': " << magic_enum::enum_name(result.result) << Con::endl;
+		if(result.errorMessage)
+			Con::cwar << "Error Message:\n" << *result.errorMessage << Con::endl;
 	}
 	return r;
 }

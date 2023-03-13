@@ -30,12 +30,22 @@ bool pragma::asset::BlenderFormatHandler::Import(const std::string &outputPath, 
 	auto absGlbPath = util::Path::CreatePath(util::get_program_path()) + util::Path::CreateFile(glbPath);
 	std::vector<const char *> argv {absPath.c_str()};
 	if(!pragma::python::exec("modules/blender/scripts/format_importers/" + m_ext + ".py", argv.size(), argv.data())) {
-		m_error = "Failed to import asset to Blender instance!";
+		auto errMsg = pragma::python::get_last_error();
+		m_error = "Failed to import asset into Blender instance: ";
+		if(errMsg)
+			*m_error += *errMsg;
+		else
+			*m_error += "Unknown error";
 		return false;
 	}
 	argv = {absGlbPath.GetString().c_str()};
 	if(!pragma::python::exec("modules/blender/scripts/export_scene_as_glb.py", argv.size(), argv.data())) {
-		m_error = "Failed to export scene as glTF/glb!";
+		auto errMsg = pragma::python::get_last_error();
+		m_error = "Failed to export scene as glTF/glb: ";
+		if(errMsg)
+			*m_error += *errMsg;
+		else
+			*m_error += "Unknown error";
 		return false;
 	}
 	filemanager::update_file_index_cache(absGlbPath.GetString(), true);

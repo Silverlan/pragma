@@ -142,7 +142,7 @@ void SBaseEntity::SendData(NetPacket &packet, pragma::networking::ClientRecipien
 	auto numComponents = umath::min(components.size(), static_cast<size_t>(std::numeric_limits<uint8_t>::max()));
 	packet->Write<uint8_t>(numComponents);
 	for(auto &pComponent : components) {
-		if(pComponent->ShouldTransmitNetData() == false) {
+		if(pComponent.expired() || pComponent->ShouldTransmitNetData() == false) {
 			--numComponents;
 			continue;
 		}

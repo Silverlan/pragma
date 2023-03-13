@@ -1067,7 +1067,7 @@ void CGame::RegisterLuaLibraries()
 	ClientState::RegisterSharedLuaLibraries(GetLuaInterface());
 
 	GetLuaInterface().RegisterLibrary("asset",
-	  {{"export_map", Lua::util::Client::export_map}, {"import_model", Lua::util::Client::import_model}, {"export_texture", Lua::util::Client::export_texture}, {"export_material", Lua::util::Client::export_material},
+	  {{"export_map", Lua::util::Client::export_map}, {"import_model", Lua::util::Client::import_model}, {"import_gltf", Lua::util::Client::import_gltf}, {"export_texture", Lua::util::Client::export_texture}, {"export_material", Lua::util::Client::export_material},
 	    {"export_texture_as_vtf", static_cast<int32_t (*)(lua_State *)>([](lua_State *l) -> int32_t {
 		     std::string fileName = Lua::CheckString(l, 1);
 		     if(Lua::file::validate_write_operation(l, fileName) == false || FileManager::CreatePath(ufile::get_path_from_filename(fileName).c_str()) == false) {

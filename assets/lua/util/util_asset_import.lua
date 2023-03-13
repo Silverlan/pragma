@@ -271,9 +271,31 @@ local function import_assets(handler,logCb,basePath,clearFiles,callback)
 		time.create_simple_timer(0.25,function()
 			logCb("Importing model '" .. mdl .. "'...",log.SEVERITY_INFO)
 			if(callback ~= nil) then callback(asset.TYPE_MODEL,mdl) end
-			local mdl = game.load_model(mdl)
-			if(mdl ~= nil) then logCb("Model has been imported successfully!",log.SEVERITY_INFO)
-			else logCb("Failed to import model!",log.SEVERITY_ERROR) end
+
+			local ext = file.get_file_extension(mdl)
+			local handled = false
+			if(ext ~= nil) then
+				ext = ext:lower()
+				if(ext == "gltf" or ext == "glb") then
+					handled = true
+					local absPath = file.find_absolute_path(asset.get_asset_root_directory(asset.TYPE_MODEL) .. "/" .. mdl)
+					if(absPath ~= nil) then
+						local res,errMsg = asset.import_gltf(absPath,file.get_file_path(mdl))
+						if(res ~= false) then
+							if(#res.mapName == 0) then logCb(#res.models .. " models have been imported!",log.SEVERITY_INFO)
+							else
+								logCb(#res.models .. " models and new map '" .. res.mapName .. "' have been imported!",log.SEVERITY_INFO)
+							end
+						else logCb("Unable to import model '" .. fileName .. "': " .. errMsg,log.SEVERITY_ERROR) end
+					else logCb("Unable to import model '" .. fileName .. "': Could not determine absolute file path!",log.SEVERITY_ERROR) end
+				end
+			end
+
+			if(handled == false) then
+				local mdl = game.load_model(mdl)
+				if(mdl ~= nil) then logCb("Model has been imported successfully!",log.SEVERITY_INFO)
+				else logCb("Failed to import model!",log.SEVERITY_ERROR) end
+			end
 			asset.clear_unused(asset.TYPE_MODEL)
 			asset.clear_unused(asset.TYPE_MATERIAL)
 			asset.clear_unused(asset.TYPE_TEXTURE)

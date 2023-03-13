@@ -26,6 +26,7 @@ namespace Lua {
 			DLLCLIENT luabind::object create_giblet(GibletCreateInfo &createInfo);
 			DLLCLIENT int export_map(lua_State *l);
 			DLLCLIENT int import_model(lua_State *l);
+			DLLCLIENT int import_gltf(lua_State *l);
 			DLLCLIENT int export_texture(lua_State *l);
 			DLLCLIENT int export_material(lua_State *l);
 			DLLCLIENT std::string get_clipboard_string();

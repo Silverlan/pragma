@@ -62,7 +62,7 @@ function util.ListAssetImportFileHandler:ExtractFile(fileName,outPath)
 end
 function util.ListAssetImportFileHandler:GetFileList() return self.m_files end
 
-local function import_assets(handler,logCb,basePath,clearFiles,callback)
+local function import_assets(handler,logCb,basePath,clearFiles,callback,onComplete)
 	basePath = basePath or ""
 	logCb = logCb or function(msg,severity)
 		if(severity ~= log.SEVERITY_INFO) then console.print_warning(msg)
@@ -264,6 +264,7 @@ local function import_assets(handler,logCb,basePath,clearFiles,callback)
 					file.delete(f)
 				end
 			end
+			if(onComplete ~= nil) then onComplete() end
 			return
 		end
 		local mdl = basePath .. mdlAssets[1]
@@ -305,7 +306,7 @@ local function import_assets(handler,logCb,basePath,clearFiles,callback)
 	import_next_model()
 end
 
-function util.import_assets(files,logCb,basePath,dropped,callback)
+function util.import_assets(files,logCb,basePath,dropped,callback,onComplete)
 	logCb = logCb or function(msg,severity)
 		if(severity ~= log.SEVERITY_INFO) then console.print_warning(msg)
 		else print(msg) end
@@ -330,7 +331,7 @@ function util.import_assets(files,logCb,basePath,dropped,callback)
 				hasZipAssets = true
 				local handler = util.ZipAssetImportFileHandler(zipFile)
 				zipFile = nil
-				import_assets(handler,logCb,basePath,nil,callback)
+				import_assets(handler,logCb,basePath,nil,callback,onComplete)
 			end
 		else table.insert(nonZipFiles,f) end
 	end
@@ -339,5 +340,5 @@ function util.import_assets(files,logCb,basePath,dropped,callback)
 		return
 	end
 	local handler = dropped and util.DropAssetImportFileHandler(nonZipFiles) or util.ListAssetImportFileHandler(nonZipFiles)
-	import_assets(handler,logCb,basePath,nil,callback)
+	import_assets(handler,logCb,basePath,nil,callback,onComplete)
 end

@@ -1714,7 +1714,28 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		luabind::def("lerp",+[](lua_State *l,const luabind::object &value0,const luabind::object &value1,float t) -> Lua::udm_ng {
 			return lerp_value(l,value0,value1,t,::udm::Type::Invalid);
 		}),
-		luabind::def("lerp",static_cast<Lua::udm_ng(*)(lua_State*,const luabind::object&,const luabind::object&,float,::udm::Type)>(&::lerp_value))
+		luabind::def("lerp",static_cast<Lua::udm_ng(*)(lua_State*,const luabind::object&,const luabind::object&,float,::udm::Type)>(&::lerp_value)),
+		luabind::def("get_format_type",+[](lua_State *l,const std::string &fileName) -> Lua::var<::udm::FormatType,Lua::mult<bool,std::string>> {
+			std::string err;
+			auto formatType = ::udm::Data::GetFormatType(fileName, err);
+			if(!formatType)
+				return luabind::object{l,std::pair<bool,std::string>{false,err}};
+			return luabind::object{l,*formatType};
+		}),
+		luabind::def("convert_udm_file_to_ascii",+[](lua_State *l,const std::string &fileName) -> Lua::var<std::string,Lua::mult<bool,std::string>> {
+			std::string err;
+			auto newFileName = ::util::convert_udm_file_to_ascii(fileName, err);
+		    if(!newFileName)
+				return luabind::object{l,std::pair<bool,std::string>{false,err}};
+			return luabind::object{l,*newFileName};
+		}),
+		luabind::def("convert_udm_file_to_binary",+[](lua_State *l,const std::string &fileName) -> Lua::var<std::string,Lua::mult<bool,std::string>> {
+			std::string err;
+			auto newFileName = ::util::convert_udm_file_to_binary(fileName, err);
+		    if(!newFileName)
+				return luabind::object{l,std::pair<bool,std::string>{false,err}};
+			return luabind::object{l,*newFileName};
+		})
 	];
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "udm",
@@ -1734,7 +1755,9 @@ void Lua::udm::register_library(Lua::Interface &lua)
 	    {"MERGE_FLAG_NONE", umath::to_integral(::udm::MergeFlags::None)}, {"MERGE_FLAG_BIT_OVERWRITE_EXISTING", umath::to_integral(::udm::MergeFlags::OverwriteExisting)}, {"MERGE_FLAG_BIT_DEEP_COPY", umath::to_integral(::udm::MergeFlags::DeepCopy)},
 
 	    {"ASCII_SAVE_FLAG_NONE", umath::to_integral(::udm::AsciiSaveFlags::None)}, {"ASCII_SAVE_FLAG_BIT_INCLUDE_HEADER", umath::to_integral(::udm::AsciiSaveFlags::IncludeHeader)},
-	    {"ASCII_SAVE_FLAG_BIT_DONT_COMPRESS_LZ4_ARRAYS", umath::to_integral(::udm::AsciiSaveFlags::DontCompressLz4Arrays)}});
+	    {"ASCII_SAVE_FLAG_BIT_DONT_COMPRESS_LZ4_ARRAYS", umath::to_integral(::udm::AsciiSaveFlags::DontCompressLz4Arrays)},
+
+	    {"FORMAT_TYPE_BINARY", umath::to_integral(::udm::FormatType::Binary)}, {"FORMAT_TYPE_ASCII", umath::to_integral(::udm::FormatType::Ascii)}});
 	static_assert(umath::to_integral(::udm::Type::Count) == 36, "Update this list when types have been added or removed!");
 
 	auto cdEl = luabind::class_<::udm::Element>("Element");

@@ -9,6 +9,7 @@
 #include "pragma/networkstate/networkstate.h"
 #include "pragma/util/lookup_identifier.hpp"
 #include "pragma/entities/entity_iterator.hpp"
+#include "pragma/lua/libraries/lfile.h"
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_path.hpp>
 #include <fsys/ifile.hpp>
@@ -219,4 +220,91 @@ bool util::HairFile::LoadFromAssetData(const udm::AssetData &data, std::string &
 	udmData["triangles"].GetBlobData(m_hairData.hairPointTriangles);
 	udmData["barycentricCoords"].GetBlobData(m_hairData.hairPointBarycentric);
 	return true;
+}
+
+std::optional<std::string> util::convert_udm_file_to_ascii(const std::string &fileName, std::string &outErr)
+{
+	auto formatType = udm::Data::GetFormatType(fileName, outErr);
+	if(formatType.has_value() == false) {
+		outErr = "Unable to load UDM data: " + outErr;
+		return {};
+	}
+	if(*formatType == udm::FormatType::Ascii)
+		return fileName; // Already in ascii format
+	auto udmData = util::load_udm_asset(fileName, &outErr);
+	if(udmData == nullptr) {
+		outErr = "Unable to load UDM data: " + outErr;
+		return {};
+	}
+	std::string rpath;
+	if(FileManager::FindAbsolutePath(fileName, rpath) == false) {
+		outErr = "Unable to locate UDM file on disk!";
+		return {};
+	}
+	auto path = util::Path::CreateFile(rpath);
+	path.MakeRelative(util::get_program_path());
+	auto outFileName = path.GetString();
+	std::string ext;
+	ufile::get_extension(outFileName, &ext);
+	ufile::remove_extension_from_filename(outFileName);
+	if(ext.empty())
+		ext = "udm";
+	else if(ext.length() > 2) {
+		if(ext.at(ext.length() - 1) == 'b' && ext.at(ext.length() - 2) == '_')
+			ext = ext.substr(0, ext.length() - 2);
+	}
+	outFileName += '.' + ext;
+	auto res = true;
+	try {
+		res = udmData->SaveAscii(outFileName, udm::AsciiSaveFlags::IncludeHeader | udm::AsciiSaveFlags::DontCompressLz4Arrays);
+	}
+	catch(const udm::Exception &e) {
+		outErr = "Unable to save UDM data: " + std::string {e.what()};
+	}
+	if(!res)
+		return {};
+	filemanager::remove_file(fileName);
+	return Lua::file::to_relative_path(outFileName);
+}
+std::optional<std::string> util::convert_udm_file_to_binary(const std::string &fileName, std::string &outErr)
+{
+	auto formatType = udm::Data::GetFormatType(fileName, outErr);
+	if(formatType.has_value() == false) {
+		outErr = "Unable to load UDM data: " + outErr;
+		return {};
+	}
+	if(*formatType == udm::FormatType::Binary)
+		return fileName; // Already in binary format
+	auto udmData = util::load_udm_asset(fileName, &outErr);
+	if(udmData == nullptr) {
+		outErr = "Unable to load UDM data: " + outErr;
+		return {};
+	}
+	std::string rpath;
+	if(FileManager::FindAbsolutePath(fileName, rpath) == false) {
+		outErr = "Unable to locate UDM file on disk!";
+		return {};
+	}
+	auto path = util::Path::CreateFile(rpath);
+	path.MakeRelative(util::get_program_path());
+	auto outFileName = path.GetString();
+	std::string ext;
+	ufile::get_extension(outFileName, &ext);
+	ufile::remove_extension_from_filename(outFileName);
+	if(ext.empty())
+		ext = "udm_b";
+	else
+		ext += "_b";
+	outFileName += '.' + ext;
+	auto res = true;
+	try {
+		res = udmData->Save(outFileName);
+	}
+	catch(const udm::Exception &e) {
+		outErr = "Unable to save UDM data: " + std::string {e.what()};
+	}
+	if(!res)
+		return {};
+	filemanager::remove_file(fileName);
+	return Lua::file::to_relative_path(outFileName);
 }

@@ -13,6 +13,7 @@
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/logging_wrapper.hpp"
 #include "pragma/localization.h"
+#include "pragma/util/util_game.hpp"
 #include <pragma/console/convars.h>
 #include <pragma/lua/util.hpp>
 #include <pragma/lua/libraries/lutil.hpp>
@@ -62,51 +63,29 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 			  Con::cwar << "Unable to load UDM data: " << err << Con::endl;
 			  return;
 		  }
-		  auto udmData = util::load_udm_asset(fileName, &err);
-		  if(udmData == nullptr) {
-			  Con::cwar << "Unable to load UDM data: " << err << Con::endl;
+
+		  std::optional<std::string> newFileName {};
+		  switch(*formatType) {
+		  case ::udm::FormatType::Ascii:
+			  newFileName = util::convert_udm_file_to_binary(fileName, err);
+			  break;
+		  case ::udm::FormatType::Binary:
+			  newFileName = util::convert_udm_file_to_ascii(fileName, err);
+			  break;
+		  }
+
+		  if(!newFileName.has_value()) {
+			  Con::cwar << "Failed to convert UDM file: " << err << Con::endl;
 			  return;
 		  }
+
 		  std::string rpath;
-		  if(FileManager::FindAbsolutePath(fileName, rpath) == false) {
-			  Con::cwar << "Unable to locate UDM file on disk!" << Con::endl;
+		  if(FileManager::FindAbsolutePath(*newFileName, rpath) == false) {
+			  Con::cwar << "Unable to locate converted UDM file on disk!" << Con::endl;
 			  return;
 		  }
-		  auto path = util::Path::CreateFile(rpath);
-		  path.MakeRelative(util::get_program_path());
-		  auto outFileName = path.GetString();
-		  std::string ext;
-		  ufile::get_extension(outFileName, &ext);
-		  ufile::remove_extension_from_filename(outFileName);
-		  if(*formatType == udm::FormatType::Binary) {
-			  if(ext.empty())
-				  ext = "udm_b";
-			  else if(ext.length() > 2) {
-				  if(ext.at(ext.length() - 1) == 'b' && ext.at(ext.length() - 2) == '_')
-					  ext = ext.substr(0, ext.length() - 2);
-			  }
-			  outFileName += '.' + ext;
-			  try {
-				  udmData->SaveAscii(outFileName, udm::AsciiSaveFlags::IncludeHeader | udm::AsciiSaveFlags::DontCompressLz4Arrays);
-			  }
-			  catch(const udm::Exception &e) {
-				  Con::cwar << "Unable to save UDM data: " << e.what() << Con::endl;
-			  }
-		  }
-		  else {
-			  if(ext.empty())
-				  ext = "udm_a";
-			  else
-				  ext += "_b";
-			  outFileName += '.' + ext;
-			  try {
-				  udmData->Save(outFileName);
-			  }
-			  catch(const udm::Exception &e) {
-				  Con::cwar << "Unable to save UDM data: " << e.what() << Con::endl;
-			  }
-		  }
-		  auto absPath = util::get_program_path() + '/' + outFileName;
+
+		  auto absPath = util::get_program_path() + '/' + rpath;
 		  util::open_path_in_explorer(ufile::get_path_from_filename(absPath), ufile::get_file_from_filename(absPath));
 	  },
 	  ConVarFlags::None, "Converts a UDM file from binary to ASCII or the other way around.");

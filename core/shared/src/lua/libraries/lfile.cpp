@@ -275,7 +275,7 @@ void Lua_LFile_GetPath(lua_State *l, LFile &f)
 
 ////////////////////////////////////
 
-std::string Lua::file::to_relative_path(lua_State *l, const std::string &path)
+std::string Lua::file::to_relative_path(const std::string &path)
 {
 	auto opath = util::Path::CreateFile(path);
 	opath.Canonicalize();

@@ -56,6 +56,9 @@ namespace util {
 	};
 
 	enum class FogType : uint8_t { Linear = 0, Exponential = 1, Exponential2 = 2 };
+
+	DLLNETWORK std::optional<std::string> convert_udm_file_to_ascii(const std::string &fileName, std::string &outErr);
+	DLLNETWORK std::optional<std::string> convert_udm_file_to_binary(const std::string &fileName, std::string &outErr);
 };
 
 #endif

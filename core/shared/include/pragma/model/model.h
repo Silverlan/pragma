@@ -171,6 +171,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 		Unused4 = Unused3 << 1u,
 		Unused5 = Unused4 << 1u,
 		DontPrecacheTextureGroups = Unused5 << 1u,
+		WorldGeometry = DontPrecacheTextureGroups << 1u,
 
 		Count = 8
 	};

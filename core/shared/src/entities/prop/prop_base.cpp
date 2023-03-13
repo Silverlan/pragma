@@ -19,7 +19,7 @@
 
 using namespace pragma;
 
-BasePropComponent::BasePropComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_kvScale(1.f) {}
+BasePropComponent::BasePropComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 
 PHYSICSTYPE BasePropComponent::UpdatePhysicsType(BaseEntity *ent)
 {
@@ -40,8 +40,15 @@ PHYSICSTYPE BasePropComponent::UpdatePhysicsType(BaseEntity *ent)
 
 bool BasePropComponent::SetKeyValue(std::string key, std::string val)
 {
-	if(key == "scale")
-		m_kvScale = ustring::to_float(val);
+	if(key == "scale") {
+		Vector3 scale {1.f, 1.f, 1.f};
+		auto n = ustring::string_to_array<float, double>(val, &scale.x, atof, 3);
+		if(n == 1) {
+			scale.y = scale.x;
+			scale.z = scale.x;
+		}
+		m_kvScale = scale;
+	}
 	else if(key == "mass") {
 		ustring::remove_whitespace(val);
 		if(val.empty() == false)
@@ -125,7 +132,7 @@ void BasePropComponent::OnEntitySpawn()
 	BaseEntityComponent::OnEntitySpawn();
 	auto &ent = GetEntity();
 	auto mdlComponent = ent.GetModelComponent();
-	if(m_kvScale != 1.f) {
+	if(m_kvScale != Vector3 {1.f, 1.f, 1.f}) {
 		auto pTrComponent = ent.GetTransformComponent();
 		if(pTrComponent != nullptr)
 			pTrComponent->SetScale(m_kvScale);

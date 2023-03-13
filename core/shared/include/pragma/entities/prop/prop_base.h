@@ -27,7 +27,7 @@ namespace pragma {
 		virtual void OnEntitySpawn() override;
 	  protected:
 		void InitializePhysics();
-		float m_kvScale;
+		Vector3 m_kvScale {1.f, 1.f, 1.f};
 		float m_kvMass = std::numeric_limits<float>::quiet_NaN();
 		BasePropComponent(BaseEntity &ent);
 		bool SetKeyValue(std::string key, std::string val);

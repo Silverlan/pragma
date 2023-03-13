@@ -96,6 +96,15 @@ void BaseTransformComponent::Initialize()
 			ustring::string_to_array<float, double>(kvData.value, &ang.p, atof, 3);
 			SetAngles(ang);
 		}
+		else if(ustring::compare<std::string>(kvData.key, "scale", false)) {
+			Vector3 scale {1.f, 1.f, 1.f};
+			auto n = ustring::string_to_array<float, double>(kvData.value, &scale.x, atof, 3);
+			if(n == 1) {
+				scale.y = scale.x;
+				scale.z = scale.x;
+			}
+			SetScale(scale);
+		}
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;

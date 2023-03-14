@@ -1191,25 +1191,32 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 				propInfo.pose = itPose->second;
 		}
 
-		auto baseHash = std::hash<std::string> {}(relFileName.GetString());
-
 		auto worldData = pragma::asset::WorldData::Create(*client);
 		auto &materials = worldData->GetMaterialTable();
 		materials.reserve(materialMap.size());
 		for(auto &mat : materialMap)
 			materials.push_back(mat);
+
+		uint32_t hashIdx = 0;
+		auto createEntity = [&relFileName, &hashIdx](const umath::ScaledTransform &pose, bool includeScale = true) -> std::shared_ptr<pragma::asset::EntityData> {
+			auto baseHash = std::hash<std::string> {}(relFileName.GetString() + "_" + std::to_string(hashIdx++));
+			auto ang = pose.GetAngles();
+			auto &scale = pose.GetScale();
+			auto ent = pragma::asset::EntityData::Create();
+			ent->SetKeyValue("uuid", util::uuid_to_string(util::generate_uuid_v4(baseHash)));
+			ent->SetKeyValue("angles", std::to_string(ang.p) + " " + std::to_string(ang.y) + " " + std::to_string(ang.r));
+			if(includeScale)
+				ent->SetKeyValue("scale", std::to_string(scale.x) + " " + std::to_string(scale.y) + " " + std::to_string(scale.z));
+			ent->SetOrigin(pose.GetOrigin());
+			return ent;
+		};
+
 		for(auto i = decltype(props.size()) {0u}; i < props.size(); ++i) {
 			auto &propInfo = props[i];
 
-			auto ang = propInfo.pose.GetAngles();
-			auto &scale = propInfo.pose.GetScale();
-			auto ent = pragma::asset::EntityData::Create();
+			auto ent = createEntity(propInfo.pose);
 			ent->SetClassName("prop_dynamic");
-			ent->SetKeyValue("uuid", util::uuid_to_string(util::generate_uuid_v4(baseHash)));
 			ent->SetKeyValue("model", propInfo.modelName);
-			ent->SetKeyValue("angles", std::to_string(ang.p) + " " + std::to_string(ang.y) + " " + std::to_string(ang.r));
-			ent->SetKeyValue("scale", std::to_string(scale.x) + " " + std::to_string(scale.y) + " " + std::to_string(scale.z));
-			ent->SetOrigin(propInfo.pose.GetOrigin());
 			worldData->AddEntity(*ent);
 		}
 
@@ -1225,13 +1232,9 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 				continue;
 			auto &light = gltfMdl.lights[lightSourceIndex];
 			auto pose = getNodePose(node);
-			auto ang = pose.GetAngles();
 			auto color = light.color;
 			color.resize(3);
-			auto ent = pragma::asset::EntityData::Create();
-			ent->SetKeyValue("uuid", util::uuid_to_string(util::generate_uuid_v4(baseHash)));
-			ent->SetKeyValue("angles", std::to_string(ang.p) + " " + std::to_string(ang.y) + " " + std::to_string(ang.r));
-			ent->SetOrigin(pose.GetOrigin());
+			auto ent = createEntity(pose, false);
 			// TODO: Some of these probably have to be converted
 			ent->SetKeyValue("color", std::to_string(color[0]) + " " + std::to_string(color[1]) + " " + std::to_string(color[2]));
 			ent->SetKeyValue("intensity", std::to_string(light.intensity));
@@ -1264,12 +1267,8 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 			if(cam.type != "perspective")
 				continue; // orthographic currently not supported
 			auto pose = getNodePose(node);
-			auto ang = pose.GetAngles();
-			auto ent = pragma::asset::EntityData::Create();
+			auto ent = createEntity(pose, false);
 			ent->SetClassName("env_camera");
-			ent->SetKeyValue("uuid", util::uuid_to_string(util::generate_uuid_v4(baseHash)));
-			ent->SetKeyValue("angles", std::to_string(ang.p) + " " + std::to_string(ang.y) + " " + std::to_string(ang.r));
-			ent->SetOrigin(pose.GetOrigin());
 
 			ent->SetKeyValue("fov", std::to_string(umath::rad_to_deg(cam.perspective.yfov)));
 			ent->SetKeyValue("farz", std::to_string(util::pragma::metres_to_units(cam.perspective.znear)));

@@ -15,6 +15,7 @@
 #include "pragma/model/animation/flex_animation.hpp"
 #include "pragma/file_formats/wmd.h"
 #include "pragma/asset/util_asset.hpp"
+#include "pragma/logging.hpp"
 #include <fsys/filesystem.h>
 #include <sharedutils/util_file.h>
 #include <udm.hpp>
@@ -426,6 +427,10 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 		auto meshGroup = ModelMeshGroup::Create(std::string {udmMeshGroup.key});
 		uint32_t groupIdx = 0;
 		udmMeshGroup.property["index"](groupIdx);
+		if(groupIdx >= meshGroups.size()) {
+			spdlog::warn("Invalid mesh group index: " + std::to_string(groupIdx));
+			continue;
+		}
 		meshGroups[groupIdx] = meshGroup;
 		auto udmMeshes = udmMeshGroup.property["meshes"];
 		auto numMeshes = udmMeshes.GetSize();

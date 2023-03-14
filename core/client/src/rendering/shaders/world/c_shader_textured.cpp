@@ -28,6 +28,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <sharedutils/magic_enum.hpp>
 #include <sharedutils/util_path.hpp>
+#include <util_image.hpp>
 #include <cmaterial.h>
 
 extern DLLCLIENT CGame *c_game;
@@ -296,6 +297,8 @@ void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelin
 	fSetPropertyValue(GameShaderSpecializationPropertyIndex::EnableDynamicShadows, static_cast<uint32_t>(shaderSettings.dynamicShadowsEnabled));
 }
 
+static void to_srgb_color(Vector4 &col) { col = Vector4 {uimg::linear_to_srgb(reinterpret_cast<Vector3 &>(col)), col.w}; }
+
 static auto cvNormalMappingEnabled = GetClientConVar("render_normalmapping_enabled");
 void ShaderGameWorldLightingPass::ApplyMaterialFlags(CMaterial &mat, MaterialFlags &outFlags) const {}
 ShaderGameWorldLightingPass::MaterialData ShaderGameWorldLightingPass::GenerateMaterialData(CMaterial &mat)
@@ -330,6 +333,7 @@ ShaderGameWorldLightingPass::MaterialData ShaderGameWorldLightingPass::GenerateM
 	matData.color = {1.f, 1.f, 1.f, 1.f};
 	data->GetVector3("color_factor", reinterpret_cast<Vector3 *>(&matData.color));
 	data->GetFloat("alpha_factor", &matData.color.a);
+	to_srgb_color(matData.color);
 
 	if(data->GetBool("debug_mode", false))
 		matFlags |= MaterialFlags::Debug;
@@ -343,6 +347,7 @@ ShaderGameWorldLightingPass::MaterialData ShaderGameWorldLightingPass::GenerateM
 			auto f = static_cast<ds::Vector *>(emissionFactor.get())->GetValue();
 			f *= data->GetFloat("emission_strength", 1.f);
 			matData.emissionFactor = {f.r, f.g, f.b, 1.f};
+			to_srgb_color(matData.emissionFactor);
 		}
 
 		if(texture->HasFlag(Texture::Flags::SRGB))

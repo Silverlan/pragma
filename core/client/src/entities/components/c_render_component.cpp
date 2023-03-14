@@ -39,6 +39,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <util_image.hpp>
 
 using namespace pragma;
 
@@ -625,7 +626,8 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 		Vector4 color(1.f, 1.f, 1.f, 1.f);
 		auto pColorComponent = GetEntity().GetComponent<CColorComponent>();
 		if(pColorComponent.valid())
-			color = pColorComponent->GetColor().ToVector4();
+			color = pColorComponent->GetColor();
+		color = Vector4 {uimg::linear_to_srgb(reinterpret_cast<Vector3 &>(color)), color.w};
 
 		auto renderFlags = pragma::ShaderEntity::InstanceData::RenderFlags::None;
 		auto *pMdlComponent = GetModelComponent();

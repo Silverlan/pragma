@@ -525,9 +525,8 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 				cmat->SetTexture(Material::ALBEDO_MAP_IDENTIFIER, "white");
 
 			auto &baseColorFactor = gltfMat.pbrMetallicRoughness.baseColorFactor;
-			if(baseColorFactor != std::vector<double> {1.0, 1.0, 1.0, 1.0}) {
-				dataBlock->AddValue("color", "color_factor", std::to_string(baseColorFactor.at(0) * 255.f) + ' ' + std::to_string(baseColorFactor.at(1) * 255.f) + ' ' + std::to_string(baseColorFactor.at(2) * 255.f) + ' ' + std::to_string(baseColorFactor.at(3) * 255.f));
-			}
+			if(baseColorFactor != std::vector<double> {1.0, 1.0, 1.0, 1.0})
+				dataBlock->AddValue("vector", "color_factor", std::to_string(baseColorFactor.at(0)) + ' ' + std::to_string(baseColorFactor.at(1)) + ' ' + std::to_string(baseColorFactor.at(2)) + ' ' + std::to_string(baseColorFactor.at(3)));
 
 			auto metallicRoughnessImg = fGetImage(gltfMat.pbrMetallicRoughness.metallicRoughnessTexture.index);
 			if(metallicRoughnessImg) {

@@ -21,13 +21,8 @@ void BaseColorComponent::RegisterMembers(pragma::EntityComponentManager &compone
 {
 	using T = BaseColorComponent;
 	{
-		auto memberInfo = create_component_member_info<T, Vector3,
-		  [](const ComponentMemberInfo &, T &component, const Vector3 &value) {
-			  auto &curColor = component.GetColor();
-			  Vector4 newColor {value, curColor.a / 255.f};
-			  component.SetColor(Color {newColor});
-		  },
-		  [](const ComponentMemberInfo &, T &component, Vector3 &value) { value = component.GetColor().ToVector4(); }>("color", Color::White.ToVector3(), AttributeSpecializationType::Color);
+		auto memberInfo = create_component_member_info<T, Vector3, [](const ComponentMemberInfo &, T &component, const Vector3 &value) { component.SetColor(value); }, [](const ComponentMemberInfo &, T &component, Vector3 &value) { value = component.GetColor(); }>("color",
+		  Color::White.ToVector3(), AttributeSpecializationType::Color);
 		memberInfo.SetInterpolationFunction<T, Vector3, [](const Vector3 &col0, const Vector3 &col1, double t, Vector3 &vOut) {
 			double h0, s0, v0;
 			util::rgb_to_hsv(col0, h0, s0, v0);
@@ -55,7 +50,7 @@ void BaseColorComponent::RegisterMembers(pragma::EntityComponentManager &compone
 		registerMember(std::move(memberInfo));
 	}
 }
-BaseColorComponent::BaseColorComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_color(util::SimpleProperty<util::ColorProperty, Color>::Create(Color(255, 255, 255, 255))) {}
+BaseColorComponent::BaseColorComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_color(util::SimpleProperty<util::Vector4Property, Vector4>::Create(Color::White.ToVector4())) {}
 BaseColorComponent::~BaseColorComponent()
 {
 	if(m_cbOnColorChanged.IsValid())
@@ -67,21 +62,31 @@ void BaseColorComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData &>(evData.get());
-		if(ustring::compare<std::string>(kvData.key, "color", false))
-			*m_color = Color {kvData.value};
+		if(ustring::compare<std::string>(kvData.key, "color", false)) {
+			Vector4 r;
+			auto n = ustring::string_to_array<glm::vec4::value_type, Double>(kvData.value, &r[0], atof, 4);
+			if(n < 4)
+				r.a = 1.f;
+			*m_color = r;
+		}
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
 	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData &>(evData.get());
-		if(ustring::compare<std::string>(inputData.input, "setcolor", false))
-			*m_color = Color {inputData.data};
+		if(ustring::compare<std::string>(inputData.input, "setcolor", false)) {
+			Vector4 r;
+			auto n = ustring::string_to_array<glm::vec4::value_type, Double>(inputData.data, &r[0], atof, 4);
+			if(n < 4)
+				r.a = 1.f;
+			*m_color = r;
+		}
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	m_cbOnColorChanged = m_color->AddCallback([this](std::reference_wrapper<const Color> oldColor, std::reference_wrapper<const Color> newColor) {
+	m_cbOnColorChanged = m_color->AddCallback([this](std::reference_wrapper<const Vector4> oldColor, std::reference_wrapper<const Vector4> newColor) {
 		pragma::CEOnColorChanged onColorChanged {oldColor.get(), newColor.get()};
 		BroadcastEvent(EVENT_ON_COLOR_CHANGED, onColorChanged);
 	});
@@ -93,27 +98,27 @@ void BaseColorComponent::Initialize()
 void BaseColorComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
-	udm["color"] = (*m_color)->ToVector4();
+	udm["color"] = *m_color;
 }
 void BaseColorComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_t version)
 {
 	BaseEntityComponent::Load(udm, version);
 	Vector4 color;
 	udm["color"](color);
-	(*m_color) = Color {color};
+	(*m_color) = color;
 }
-const Color &BaseColorComponent::GetColor() const { return *m_color; }
-const util::PColorProperty &BaseColorComponent::GetColorProperty() const { return m_color; }
+const Vector4 &BaseColorComponent::GetColor() const { return *m_color; }
+const util::PVector4Property &BaseColorComponent::GetColorProperty() const { return m_color; }
 
-void BaseColorComponent::SetColor(const Color &color) { *m_color = color; }
-void BaseColorComponent::SetColor(const Vector4 &color) { SetColor(Color(color)); }
-void BaseColorComponent::SetColor(const Vector3 &color) { SetColor(Vector4 {color.x, color.y, color.z, GetColor().ToVector4().w}); }
+void BaseColorComponent::SetColor(const Color &color) { *m_color = color.ToVector4(); }
+void BaseColorComponent::SetColor(const Vector4 &color) { *m_color = color; }
+void BaseColorComponent::SetColor(const Vector3 &color) { *m_color = Vector4 {color, (*m_color)->a}; }
 
 /////////////////
 
-CEOnColorChanged::CEOnColorChanged(const Color &oldColor, const Color &color) : oldColor {oldColor}, color {color} {}
+CEOnColorChanged::CEOnColorChanged(const Vector4 &oldColor, const Vector4 &color) : oldColor {oldColor}, color {color} {}
 void CEOnColorChanged::PushArguments(lua_State *l)
 {
-	Lua::Push<Color>(l, oldColor);
-	Lua::Push<Color>(l, color);
+	Lua::Push<Vector4>(l, oldColor);
+	Lua::Push<Vector4>(l, color);
 }

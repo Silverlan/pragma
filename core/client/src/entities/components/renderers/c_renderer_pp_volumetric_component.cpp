@@ -31,6 +31,7 @@
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
 #include <pragma/entities/entity_iterator.hpp>
+#include <util_image.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
@@ -118,7 +119,8 @@ void CRendererPpVolumetricComponent::DoRenderEffect(const util::DrawSceneInfo &d
 				auto *dsInstance = renderC->GetRenderDescriptorSet();
 				if(!dsInstance)
 					continue;
-				pushConstants.color = colorC.valid() ? colorC->GetColor().ToVector4() : Color::White.ToVector4();
+				pushConstants.color = colorC.valid() ? colorC->GetColor() : Color::White.ToVector4();
+				pushConstants.color = Vector4 {uimg::linear_to_srgb(reinterpret_cast<Vector3 &>(pushConstants.color)), pushConstants.color.w};
 				pushConstants.color.w = lightC.valid() ? (lightC->GetLightIntensityCandela() * lightIntensityFactor) : 1.f;
 				pushConstants.color.w *= volC->GetIntensityFactor();
 				pushConstants.coneOrigin = ent->GetPosition();

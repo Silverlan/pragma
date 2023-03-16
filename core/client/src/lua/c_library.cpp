@@ -952,7 +952,7 @@ void CGame::RegisterLuaLibraries()
 {
 	Lua::util::register_library(GetLuaState());
 	auto utilMod = luabind::module(GetLuaState(), "util");
-	Lua::util::register_shared(utilMod);
+	Lua::util::register_shared(GetLuaState(), utilMod);
 	utilMod[luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::calc_world_direction_from_2d_coordinates), luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::Client::calc_world_direction_from_2d_coordinates),
 	  luabind::def("create_particle_tracer", Lua::util::Client::create_particle_tracer), luabind::def("create_muzzle_flash", Lua::util::Client::create_muzzle_flash), luabind::def("fire_bullets", static_cast<luabind::object (*)(lua_State *, BulletInfo &)>(Lua::util::fire_bullets)),
 	  luabind::def("save_image", static_cast<bool (*)(lua_State *, uimg::ImageBuffer &, std::string, uimg::TextureInfo &, bool)>(save_image)),

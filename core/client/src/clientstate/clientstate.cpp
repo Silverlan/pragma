@@ -241,7 +241,7 @@ void ClientState::InitializeGUILua()
 	Lua::initialize_lua_state(GetGUILuaInterface());
 
 	auto utilMod = luabind::module(m_luaGUI->GetState(), "util");
-	Lua::util::register_shared_generic(utilMod);
+	Lua::util::register_shared_generic(m_luaGUI->GetState(), utilMod);
 	NetworkState::RegisterSharedLuaClasses(GetGUILuaInterface());
 	NetworkState::RegisterSharedLuaLibraries(GetGUILuaInterface());
 	ClientState::RegisterSharedLuaClasses(*m_luaGUI, true);

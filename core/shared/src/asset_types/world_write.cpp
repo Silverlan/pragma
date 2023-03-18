@@ -163,7 +163,33 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data, Ent
 		}
 
 		auto &components = entData->GetComponents();
-		udmEnt["components"](components);
+		auto udmComponents = udmEnt["components"];
+		components.reserve(udmComponents.GetSize());
+		if(udm::is_array_type(udmComponents.GetType())) {
+			for(auto udmComponent : udmComponents) {
+				auto *typeName = udmComponent.GetValuePtr<udm::String>();
+				if(typeName)
+					entData->AddComponent(std::string {*typeName});
+			}
+		}
+		else {
+			for(auto pair : udmComponents.ElIt()) {
+				auto name = pair.key;
+				auto &udmComponent = pair.property;
+				auto component = entData->AddComponent(std::string {name});
+
+				auto flags = component->GetFlags();
+				udmComponent["flags"](flags);
+				component->SetFlags(flags);
+
+				auto udmProperties = udmComponent["properties"];
+				auto *elProperties = udmProperties->GetValuePtr<udm::Element>();
+				if(elProperties) {
+					auto udmData = component->GetData();
+					udmData->GetValue<udm::Element>().Merge(*elProperties);
+				}
+			}
+		}
 
 		auto &leaves = entData->GetLeaves();
 		udmEnt["bspLeaves"].GetBlobData(leaves);
@@ -245,7 +271,18 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData, const std::string
 			udmOutput["times"] = output.times;
 		}
 
-		udmEnt["components"] = entData->GetComponents();
+		auto udmComponents = udmEnt["components"];
+		for(auto &pair : entData->GetComponents()) {
+			if(pair.first.empty()) {
+				outErr = "Encountered empty component name!";
+				return false;
+			}
+			auto &componentData = *pair.second;
+			auto udmComponent = udmComponents[pair.first];
+			udmComponent["flags"] = componentData.GetFlags();
+			auto udmProperties = udmComponent["properties"];
+			udmProperties.Merge(udm::LinkedPropertyWrapper {*componentData.GetData()});
+		}
 
 		uint32_t firstLeaf, numLeaves;
 		entData->GetLeafData(firstLeaf, numLeaves);
@@ -482,8 +519,8 @@ void pragma::asset::WorldData::WriteEntities(VFilePtrReal &f)
 		// Custom Components
 		auto &components = entData->GetComponents();
 		f->Write<uint32_t>(components.size());
-		for(auto &name : components)
-			f->WriteString(name);
+		for(auto &pair : components)
+			f->WriteString(pair.first);
 
 		// Leaves
 		auto cur = f->Tell();

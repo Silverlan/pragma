@@ -49,8 +49,36 @@ BaseEntity *Game::CreateMapEntity(pragma::asset::EntityData &entData)
 	if(pTrComponent != nullptr)
 		pTrComponent->SetPosition(entData.GetOrigin());
 
-	for(auto &componentName : entData.GetComponents())
-		ent->AddComponent(componentName);
+	for(auto &pair : entData.GetComponents()) {
+		auto flags = pair.second->GetFlags();
+		if(umath::is_flag_set(flags, pragma::asset::ComponentData::Flags::ClientsideOnly) && !IsClient())
+			continue;
+		auto c = ent->AddComponent(pair.first);
+		if(c.expired())
+			continue;
+		auto udmData = pair.second->GetData();
+		for(auto &pair : udm::LinkedPropertyWrapper {*udmData}.ElIt()) {
+			auto *memberInfo = c->FindMemberInfo(std::string {pair.key});
+			if(!memberInfo || !memberInfo->setterFunction || !pragma::ents::is_udm_member_type(memberInfo->type))
+				continue;
+			auto udmType = pragma::ents::member_type_to_udm_type(memberInfo->type);
+			auto &udmProp = pair.property;
+			auto propType = udmProp.GetType();
+			if(!udm::is_convertible(propType, udmType))
+				continue;
+			udm::visit(propType, [udmType, &udmProp, memberInfo, &c](auto tag) {
+				using T0 = typename decltype(tag)::type;
+				udm::visit(udmType, [&udmProp, memberInfo, &c](auto tag) {
+					using T1 = typename decltype(tag)::type;
+					if constexpr(udm::is_convertible<T0, T1>()) {
+						auto val = udmProp.ToValue<T1>();
+						if(val)
+							memberInfo->setterFunction(*memberInfo, *c, &*val);
+					}
+				});
+			});
+		}
+	}
 
 	auto pMapComponent = ent->AddComponent<pragma::MapComponent>();
 	if(pMapComponent.valid())

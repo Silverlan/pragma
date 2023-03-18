@@ -63,6 +63,14 @@ std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::Create(Netwo
 
 ////////////
 
+std::shared_ptr<pragma::asset::ComponentData> pragma::asset::ComponentData::Create() { return std::shared_ptr<ComponentData> {new ComponentData {}}; }
+
+pragma::asset::ComponentData::ComponentData() : m_data {udm::Property::Create<udm::Element>()} {}
+pragma::asset::ComponentData::Flags pragma::asset::ComponentData::GetFlags() const { return m_flags; }
+void pragma::asset::ComponentData::SetFlags(Flags flags) { m_flags = flags; }
+
+////////////
+
 std::shared_ptr<pragma::asset::EntityData> pragma::asset::EntityData::Create() { return std::shared_ptr<EntityData> {new EntityData {}}; }
 bool pragma::asset::EntityData::IsWorld() const { return m_className == "world"; }
 bool pragma::asset::EntityData::IsSkybox() const { return m_className == "skybox"; }
@@ -91,8 +99,17 @@ uint32_t pragma::asset::EntityData::GetMapIndex() const { return m_mapIndex; }
 const std::string &pragma::asset::EntityData::GetClassName() const { return m_className; }
 pragma::asset::EntityData::Flags pragma::asset::EntityData::GetFlags() const { return m_flags; }
 void pragma::asset::EntityData::SetFlags(Flags flags) { m_flags = flags; }
-const std::vector<std::string> &pragma::asset::EntityData::GetComponents() const { return const_cast<EntityData *>(this)->GetComponents(); }
-std::vector<std::string> &pragma::asset::EntityData::GetComponents() { return m_components; }
+std::shared_ptr<pragma::asset::ComponentData> pragma::asset::EntityData::AddComponent(const std::string &name)
+{
+	auto it = m_components.find(name);
+	if(it != m_components.end())
+		return it->second;
+	auto component = ComponentData::Create();
+	m_components[name] = component;
+	return component;
+}
+const std::unordered_map<std::string, std::shared_ptr<pragma::asset::ComponentData>> &pragma::asset::EntityData::GetComponents() const { return const_cast<EntityData *>(this)->GetComponents(); }
+std::unordered_map<std::string, std::shared_ptr<pragma::asset::ComponentData>> &pragma::asset::EntityData::GetComponents() { return m_components; }
 const std::unordered_map<std::string, std::string> &pragma::asset::EntityData::GetKeyValues() const { return const_cast<EntityData *>(this)->GetKeyValues(); }
 std::unordered_map<std::string, std::string> &pragma::asset::EntityData::GetKeyValues() { return m_keyValues; }
 const std::vector<pragma::asset::Output> &pragma::asset::EntityData::GetOutputs() const { return const_cast<EntityData *>(this)->GetOutputs(); }

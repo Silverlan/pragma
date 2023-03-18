@@ -175,9 +175,11 @@ void pragma::asset::WorldData::ReadEntities(VFilePtr &f, const std::vector<msys:
 
 		auto &components = entData->GetComponents();
 		auto numComponents = f->Read<uint32_t>();
-		components.resize(numComponents);
-		for(auto &c : components)
-			c = f->ReadString();
+		components.reserve(numComponents);
+		for(auto &c : components) {
+			auto componentType = f->ReadString();
+			entData->AddComponent(componentType);
+		}
 
 		auto numLeaves = f->Read<uint32_t>();
 		auto &leaves = entData->GetLeaves();

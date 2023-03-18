@@ -219,6 +219,15 @@ void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
 	defOutput.def_readwrite("name", &pragma::asset::Output::times);
 	defWorldData.scope[defOutput];
 
+	auto defComponentData = luabind::class_<pragma::asset::ComponentData>("ComponentData");
+	defComponentData.add_static_constant("FLAG_NONE", umath::to_integral(pragma::asset::ComponentData::Flags::None));
+	defComponentData.add_static_constant("FLAG_CLIENTSIDE_ONLY_BIT", umath::to_integral(pragma::asset::ComponentData::Flags::ClientsideOnly));
+	defComponentData.def("GetFlags", &pragma::asset::ComponentData::GetFlags);
+	defComponentData.def("SetFlags", &pragma::asset::ComponentData::SetFlags);
+	defComponentData.def(
+	  "GetData", +[](pragma::asset::ComponentData &componentData) -> udm::LinkedPropertyWrapper { return udm::LinkedPropertyWrapper {*componentData.GetData()}; });
+	mod[defComponentData];
+
 	auto defEntityData = luabind::class_<pragma::asset::EntityData>("EntityData");
 	defEntityData.add_static_constant("FLAG_NONE", umath::to_integral(pragma::asset::EntityData::Flags::None));
 	defEntityData.add_static_constant("FLAG_CLIENTSIDE_ONLY_BIT", umath::to_integral(pragma::asset::EntityData::Flags::ClientsideOnly));
@@ -235,7 +244,8 @@ void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
 	defEntityData.def("GetClassName", &pragma::asset::EntityData::GetClassName);
 	defEntityData.def("GetFlags", &pragma::asset::EntityData::GetFlags);
 	defEntityData.def("SetFlags", &pragma::asset::EntityData::SetFlags);
-	defEntityData.def("GetComponents", static_cast<const std::vector<std::string> &(pragma::asset::EntityData ::*)() const>(&pragma::asset::EntityData::GetComponents));
+	defEntityData.def("AddComponent", &pragma::asset::EntityData::AddComponent);
+	defEntityData.def("GetComponents", static_cast<const std::unordered_map<std::string, std::shared_ptr<pragma::asset::ComponentData>> &(pragma::asset::EntityData ::*)() const>(&pragma::asset::EntityData::GetComponents));
 	defEntityData.def("GetKeyValues", static_cast<const std::unordered_map<std::string, std::string> &(pragma::asset::EntityData ::*)() const>(&pragma::asset::EntityData::GetKeyValues));
 	defEntityData.def("GetKeyValue", static_cast<std::optional<std::string> (pragma::asset::EntityData ::*)(const std::string &) const>(&pragma::asset::EntityData::GetKeyValue));
 	defEntityData.def("GetKeyValue", static_cast<std::string (pragma::asset::EntityData ::*)(const std::string &, const std::string &) const>(&pragma::asset::EntityData::GetKeyValue));
@@ -277,6 +287,7 @@ void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
 		  return luabind::object {l, std::pair<bool, std::string> {false, err}};
 	  });
 	mod[defWorldData];
+	pragma::lua::define_custom_constructor<pragma::asset::ComponentData, []() -> std::shared_ptr<pragma::asset::ComponentData> { return pragma::asset::ComponentData::Create(); }>(l);
 	pragma::lua::define_custom_constructor<pragma::asset::EntityData, []() -> std::shared_ptr<pragma::asset::EntityData> { return pragma::asset::EntityData::Create(); }>(l);
 	pragma::lua::define_custom_constructor<pragma::asset::WorldData, [](NetworkState &nw) -> std::shared_ptr<pragma::asset::WorldData> { return pragma::asset::WorldData::Create(nw); }, NetworkState &>(l);
 }

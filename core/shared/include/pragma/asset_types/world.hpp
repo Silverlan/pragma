@@ -15,6 +15,7 @@
 #include <fsys/filesystem.h>
 #include <mathutil/uvec.h>
 #include <unordered_set>
+#include <udm.hpp>
 
 #undef GetClassName
 
@@ -35,6 +36,21 @@ namespace pragma::asset {
 
 		void Write(VFilePtrReal &f);
 		void Read(VFilePtr &f);
+	};
+
+	class DLLNETWORK ComponentData : public std::enable_shared_from_this<ComponentData> {
+	  public:
+		enum class Flags : uint64_t { None = 0u, ClientsideOnly = 1u };
+
+		static std::shared_ptr<ComponentData> Create();
+
+		Flags GetFlags() const;
+		void SetFlags(Flags flags);
+		udm::PProperty GetData() const { return m_data; }
+	  private:
+		ComponentData();
+		udm::PProperty m_data;
+		Flags m_flags = Flags::None;
 	};
 
 	class WorldData;
@@ -58,8 +74,9 @@ namespace pragma::asset {
 		const std::string &GetClassName() const;
 		Flags GetFlags() const;
 		void SetFlags(Flags flags);
-		const std::vector<std::string> &GetComponents() const;
-		std::vector<std::string> &GetComponents();
+		std::shared_ptr<ComponentData> AddComponent(const std::string &name);
+		const std::unordered_map<std::string, std::shared_ptr<ComponentData>> &GetComponents() const;
+		std::unordered_map<std::string, std::shared_ptr<ComponentData>> &GetComponents();
 		const std::unordered_map<std::string, std::string> &GetKeyValues() const;
 		std::unordered_map<std::string, std::string> &GetKeyValues();
 		std::optional<std::string> GetKeyValue(const std::string &key) const;
@@ -74,8 +91,8 @@ namespace pragma::asset {
 	  private:
 		friend WorldData;
 		EntityData() = default;
-		std::string m_className;
-		std::vector<std::string> m_components;
+		std::string m_className = "entity";
+		std::unordered_map<std::string, std::shared_ptr<ComponentData>> m_components;
 		std::unordered_map<std::string, std::string> m_keyValues;
 		std::vector<Output> m_outputs;
 		uint32_t m_mapIndex = 0u;

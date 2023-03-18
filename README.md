@@ -77,6 +77,9 @@ Running the build-script with the arguments above will build and install Pragma 
 | `--with-core-pfm-modules <1/0>`         | Include essential PFM modules.                                                               | `1`              |
 | `--with-all-pfm-modules <1/0>`          | Include non-essential PFM modules (e.g. chromium and cycles).                                | `0`              |
 | `--with-vr <1/0>`                       | Include Virtual Reality support.                                                             | `0`              |
+| `--with-lua-debugger <1/0>`             | Include Lua-debugger support.                                                                | `1`              |
+| `--with-lua-doc-generator <1/0>`        | Include Lua documentation generator.                                                         | `0`              |
+| `--build-cycles <1/0>`                  | Build the Cycles library (otherwise uses pre-built binaries). Requires --with-all-pfm-modules| `0`              |
 | `--build <1/0>`                         | Build Pragma after configurating and generating build files.                                 | `1`              |
 | `--build-all <1/0>`                     | Build all dependencies instead of downloading prebuilt binaries where available.             | `0`              |
 | `--build-config <config>`               | The build configuration to use.                                                              | `RelWithDebInfo` |
@@ -91,6 +94,8 @@ Example for using the `--module` parameter:
 ```console
 --module pr_physx:"https://github.com/Silverlan/pr_physx.git"
 ```
+
+If you want to build Cycles with NVIDIA OptiX support, you will have to install the [OptiX SDK](https://developer.nvidia.com/designworks/optix/download), and then build Pragma with the `--with-pfm --with-all-pfm-modules --build-cycles` parameters.
 
 Modules
 ------

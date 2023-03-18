@@ -132,6 +132,8 @@ namespace Lua {
 		DLLNETWORK void register_shared(lua_State *l, luabind::module_ &mod);
 		DLLNETWORK void register_world_data(lua_State *l, luabind::module_ &mod);
 
+		DLLNETWORK bool start_debugger_server(lua_State *l);
+
 		struct DLLNETWORK Uuid {
 			::util::Uuid value;
 		};

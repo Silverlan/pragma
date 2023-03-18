@@ -856,7 +856,7 @@ namespace dbg {
 	class Help {
 	  public:
 		bool Initialize();
-		void LoadSymbolModule();
+		void LoadSymbolModule(const std::string &installDir);
 	  private:
 		void EnumerateSymbols();
 		static BOOL CALLBACK EnumSymProc(PSYMBOL_INFO pSymInfo, ULONG SymbolSize, PVOID UserContext);
@@ -902,11 +902,15 @@ BOOL CALLBACK dbg::Help::EnumSymProc(PSYMBOL_INFO pSymInfo, ULONG SymbolSize, PV
 }
 
 #include <Winbase.h>
-void dbg::Help::LoadSymbolModule()
+void dbg::Help::LoadSymbolModule(const std::string &installDir)
 {
-	std::string szImageName = "E:/projects/pragma/build_winx64/install/bin/shared.dll";
+	std::string szImageName = installDir + "/bin/shared.dll";
 	DWORD64 dwBaseAddr = 0;
-	AddDllDirectory(L"E:/projects/pragma/build_winx64/install/bin/");
+
+	auto binDir = installDir + "/bin/";
+	auto binDirW = ustring::string_to_wstring(binDir);
+	AddDllDirectory(binDirW.c_str());
+
 	auto dllBase = SymLoadModuleEx(m_hProcess, // target process
 	  NULL,                                    // handle to image - not used
 	  szImageName.c_str(),                     // name of image file
@@ -954,7 +958,7 @@ ThisIsATestClass test_test_test() { return ThisIsATestClass {}; }
 #include <luabind/make_function.hpp>
 #include "pragma/lua/libraries/lasset.hpp"
 
-static void autogenerate()
+static void autogenerate(const std::string &buildDir)
 {
 	{
 		auto *cl = pragma::get_engine()->GetClientState();
@@ -997,18 +1001,15 @@ static void autogenerate()
 	if(luaStates.empty())
 		return;
 
-	const std::unordered_map<std::string, std::string> pdbModules
-	  = {{"server", "E:/projects/pragma/build_winx64/core/server/RelWithDebInfo/server.pdb"}, {"client", "E:/projects/pragma/build_winx64/core/client/RelWithDebInfo/client.pdb"}, {"shared", "E:/projects/pragma/build_winx64/core/shared/RelWithDebInfo/shared.pdb"},
-	    {"mathutil", "E:/projects/pragma/build_winx64/external_libs/mathutil/RelWithDebInfo/mathutil.pdb"}, {"sharedutils", "E:/projects/pragma/build_winx64/external_libs/sharedutils/RelWithDebInfo/sharedutils.pdb"},
-	    {"prosper", "E:/projects/pragma/build_winx64/external_libs/prosper/RelWithDebInfo/prosper.pdb"}, {"vfilesystem", "E:/projects/pragma/build_winx64/external_libs/vfilesystem/RelWithDebInfo/vfilesystem.pdb"},
-	    {"alsoundsystem", "E:/projects/pragma/build_winx64/external_libs/alsoundsystem/RelWithDebInfo/alsoundsystem.pdb"}, {"datasystem", "E:/projects/pragma/build_winx64/external_libs/datasystem/RelWithDebInfo/datasystem.pdb"},
-	    {"iglfw", "E:/projects/pragma/build_winx64/external_libs/iglfw/RelWithDebInfo/iglfw.pdb"}, {"materialsystem", "E:/projects/pragma/build_winx64/external_libs/materialsystem/RelWithDebInfo/materialsystem.pdb"},
-	    {"cmaterialsystem", "E:/projects/pragma/build_winx64/external_libs/materialsystem/RelWithDebInfo/cmaterialsystem.pdb"}, {"util_image", "E:/projects/pragma/build_winx64/external_libs/util_image/RelWithDebInfo/util_image.pdb"},
-	    {"util_pragma_doc", "E:/projects/pragma/build_winx64/external_libs/util_pragma_doc/RelWithDebInfo/util_pragma_doc.pdb"}, {"util_sound", "E:/projects/pragma/build_winx64/external_libs/util_sound/RelWithDebInfo/util_sound.pdb"},
-	    {"util_udm", "E:/projects/pragma/build_winx64/external_libs/util_udm/RelWithDebInfo/util_udm.pdb"}, {"wgui", "E:/projects/pragma/build_winx64/external_libs/wgui/RelWithDebInfo/wgui.pdb"}, {"pr_dmx", "E:/projects/pragma/build_winx64/modules/pr_dmx/RelWithDebInfo/pr_dmx.pdb"},
-	    {"pr_cycles", "E:/projects/pragma/build_winx64/modules/pr_cycles/RelWithDebInfo/pr_unirender.pdb"}, {"pr_openvr", "E:/projects/pragma/build_winx64/modules/pr_openvr/RelWithDebInfo/pr_openvr.pdb"},
-	    {"pr_chromium", "E:/projects/pragma/build_winx64/modules/pr_chromium/RelWithDebInfo/pr_chromium.pdb"}, {"pr_chromium_wrapper", "E:/projects/pragma/build_winx64/modules/pr_chromium/external_libs/pr_chromium_wrapper/RelWithDebInfo/pr_chromium_wrapper.pdb"},
-	    {"pr_steamworks", "E:/projects/pragma/build_winx64/modules/pr_steamworks/RelWithDebInfo/pr_steamworks.pdb"}, {"panima", "E:/projects/pragma/build_winx64/external_libs/panima/RelWithDebInfo/panima.pdb"}};
+	const std::unordered_map<std::string, std::string> pdbModules = {{"server", buildDir + "/core/server/RelWithDebInfo/server.pdb"}, {"client", buildDir + "/core/client/RelWithDebInfo/client.pdb"}, {"shared", buildDir + "/core/shared/RelWithDebInfo/shared.pdb"},
+	  {"mathutil", buildDir + "/external_libs/mathutil/RelWithDebInfo/mathutil.pdb"}, {"sharedutils", buildDir + "/external_libs/sharedutils/RelWithDebInfo/sharedutils.pdb"}, {"prosper", buildDir + "/external_libs/prosper/RelWithDebInfo/prosper.pdb"},
+	  {"vfilesystem", buildDir + "/external_libs/vfilesystem/RelWithDebInfo/vfilesystem.pdb"}, {"alsoundsystem", buildDir + "/external_libs/alsoundsystem/RelWithDebInfo/alsoundsystem.pdb"}, {"datasystem", buildDir + "/external_libs/datasystem/RelWithDebInfo/datasystem.pdb"},
+	  {"iglfw", buildDir + "/external_libs/iglfw/RelWithDebInfo/iglfw.pdb"}, {"materialsystem", buildDir + "/external_libs/materialsystem/RelWithDebInfo/materialsystem.pdb"}, {"cmaterialsystem", buildDir + "/external_libs/materialsystem/RelWithDebInfo/cmaterialsystem.pdb"},
+	  {"util_image", buildDir + "/external_libs/util_image/RelWithDebInfo/util_image.pdb"}, {"util_pragma_doc", buildDir + "/external_libs/util_pragma_doc/RelWithDebInfo/util_pragma_doc.pdb"}, {"util_sound", buildDir + "/external_libs/util_sound/RelWithDebInfo/util_sound.pdb"},
+	  {"util_udm", buildDir + "/external_libs/util_udm/RelWithDebInfo/util_udm.pdb"}, {"wgui", buildDir + "/external_libs/wgui/RelWithDebInfo/wgui.pdb"}, {"pr_dmx", buildDir + "/modules/pr_dmx/RelWithDebInfo/pr_dmx.pdb"},
+	  {"pr_cycles", buildDir + "/modules/pr_cycles/RelWithDebInfo/pr_unirender.pdb"}, {"pr_openvr", buildDir + "/modules/pr_openvr/RelWithDebInfo/pr_openvr.pdb"}, {"pr_chromium", buildDir + "/modules/pr_chromium/RelWithDebInfo/pr_chromium.pdb"},
+	  {"pr_chromium_wrapper", buildDir + "/modules/pr_chromium/external_libs/pr_chromium_wrapper/RelWithDebInfo/pr_chromium_wrapper.pdb"}, {"pr_steamworks", buildDir + "/modules/pr_steamworks/RelWithDebInfo/pr_steamworks.pdb"},
+	  {"panima", buildDir + "/external_libs/panima/RelWithDebInfo/panima.pdb"}};
 
 #ifdef ENABLE_PDB_MANAGER
 	pragma::lua::PdbManager pdbManager {};
@@ -1555,7 +1556,7 @@ void Lua::doc::register_library(Lua::Interface &lua)
 	  luabind::def("autogenerate", &autogenerate), luabind::def("generate_lad_assets", static_cast<void (*)(lua_State *)>([](lua_State *l) {
 		  Lua::RunString(l, "doc.autogenerate() local el = udm.load('doc/lua/pragma.ldoc'):GetAssetData():GetData() local js = udm.to_json(el) file.write('doc/lua/web_api.json',js) doc.generate_zerobrane_autocomplete_script()", "internal");
 	  })),
-	  luabind::def("generate_zerobrane_autocomplete_script", static_cast<void (*)(lua_State *)>([](lua_State *l) { Lua::doc::generate_autocomplete_script(); })), luabind::def("generate_convar_documentation", generate_convar_doc)];
+	  luabind::def("generate_documentation", static_cast<void (*)(lua_State *)>([](lua_State *l) { Lua::doc::generate_autocomplete_script(); })), luabind::def("generate_convar_documentation", generate_convar_doc)];
 	Lua::RegisterLibraryEnums(l, libName,
 	  {{"GAME_STATE_FLAG_NONE", umath::to_integral(pragma::doc::GameStateFlags::None)}, {"GAME_STATE_FLAG_BIT_SERVER", umath::to_integral(pragma::doc::GameStateFlags::Server)}, {"GAME_STATE_FLAG_BIT_CLIENT", umath::to_integral(pragma::doc::GameStateFlags::Client)},
 	    {"GAME_STATE_FLAG_BIT_GUI", umath::to_integral(pragma::doc::GameStateFlags::GUI)}, {"GAME_STATE_FLAG_SHARED", umath::to_integral(pragma::doc::GameStateFlags::Shared)}, {"GAME_STATE_FLAG_ANY", umath::to_integral(pragma::doc::GameStateFlags::Any)}});

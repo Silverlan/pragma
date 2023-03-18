@@ -229,6 +229,12 @@ namespace umath {
 	float calc_bezier_point(float f1, float f2, float f3, float f4, float t);
 };
 
+bool Lua::util::start_debugger_server(lua_State *l)
+{
+	std::string fileName = "start_debugger_server.lua";
+	return engine->GetNetworkState(l)->GetGameState()->ExecuteLuaFile(fileName);
+}
+
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, HSV);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(std, match_results<const char *>); //I HAD TO DO THIS!!! I wanted to avoid this shit, but no.
 
@@ -241,7 +247,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	lua_pushnil(lua.GetState());
 	lua_setglobal(lua.GetState(), "loadfile");
 
-	std::array<std::string, 7> fRemoveOs = {"execute", "rename", "setlocale", "getenv", "remove", "exit", "tmpname"};
+	std::array<std::string, 7> fRemoveOs = {"execute", "rename", "setlocale" /*, "getenv"*/, "remove", "exit", "tmpname"};
 	Lua::GetGlobal(lua.GetState(), "os"); /* 1 */
 	auto tOs = Lua::GetStackTop(lua.GetState());
 	for(auto &name : fRemoveOs) {
@@ -579,6 +585,11 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	auto modDebug = luabind::module_(lua.GetState(), "debug");
 	modDebug[luabind::def("move_state_to_string", Lua::debug::move_state_to_string), luabind::def("beep", Lua::debug::beep)];
 	lua_pushtablecfunction(lua.GetState(), "debug", "print", Lua::debug::print);
+	lua_pushtablecfunction(
+	  lua.GetState(), "debug", "start_debugger_server", +[](lua_State *l) -> int {
+		  auto res = Lua::util::start_debugger_server(l);
+		  return 1;
+	  });
 	auto classDefDrawInfo = luabind::class_<DebugRenderInfo>("DrawInfo");
 	classDefDrawInfo.def(luabind::constructor<>());
 	classDefDrawInfo.def(luabind::constructor<const umath::Transform &, const Color &>());

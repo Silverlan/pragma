@@ -11,6 +11,7 @@
 #include "pragma/rendering/render_processor.hpp"
 #include <pragma/asset/util_asset.hpp>
 #include <pragma/lua/libraries/ldebug.h>
+#include <pragma/lua/libraries/lutil.hpp>
 #include <pragma/lua/util.hpp>
 #include <pragma/lua/libraries/lutil.hpp>
 #include <pragma/rendering/render_apis.hpp>
@@ -526,4 +527,15 @@ void CEngine::RegisterConsoleCommands()
 			  Con::cwar << "Localization failed!" << Con::endl;
 	  },
 	  ConVarFlags::None, "Adds the specified text to the localization files. Usage: locale_localize <group> <language> <textIdentifier> <localizedText>");
+	conVarMap.RegisterConCommand(
+	  "debug_start_lua_debugger_server_cl",
+	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  auto *l = state->GetLuaState();
+		  if(!l) {
+			  Con::cwar << "Unable to start debugger server: No active Lua state!" << Con::endl;
+			  return;
+		  }
+		  Lua::util::start_debugger_server(l);
+	  },
+	  ConVarFlags::None, "Starts the Lua debugger server for the clientside lua state.");
 }

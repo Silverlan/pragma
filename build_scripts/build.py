@@ -41,6 +41,8 @@ parser.add_argument("--with-pfm", type=str2bool, nargs='?', const=True, default=
 parser.add_argument("--with-core-pfm-modules", type=str2bool, nargs='?', const=True, default=True, help="Include essential PFM modules.")
 parser.add_argument("--with-all-pfm-modules", type=str2bool, nargs='?', const=True, default=False, help="Include non-essential PFM modules (e.g. chromium and cycles).")
 parser.add_argument("--with-vr", type=str2bool, nargs='?', const=True, default=False, help="Include Virtual Reality support.")
+parser.add_argument("--with-lua-debugger", type=str2bool, nargs='?', const=True, default=True, help="Include Lua-debugger support.")
+parser.add_argument("--with-lua-doc-generator", type=str2bool, nargs='?', const=True, default=False, help="Include Lua documentation generator.")
 parser.add_argument("--build", type=str2bool, nargs='?', const=True, default=True, help="Build Pragma after configurating and generating build files.")
 parser.add_argument("--build-all", type=str2bool, nargs='?', const=True, default=False, help="Build all dependencies instead of downloading prebuilt binaries where available. Enabling this may significantly increase the disk space requirement and build time.")
 parser.add_argument('--build-config', help='The build configuration to use.', default='RelWithDebInfo')
@@ -76,6 +78,25 @@ def normalize_path(path):
 	normalizedPath = normalizedPath.replace('\\','/')
 	return normalizedPath
 
+class bcolors:
+	HEADER = '\033[95m'
+	OKBLUE = '\033[94m'
+	OKCYAN = '\033[96m'
+	OKGREEN = '\033[92m'
+	WARNING = '\033[93m'
+	FAIL = '\033[91m'
+	ENDC = '\033[0m'
+	BOLD = '\033[1m'
+	UNDERLINE = '\033[4m'
+
+def print_msg(msg):
+	print(bcolors.OKGREEN +msg +bcolors.ENDC)
+	sys.stdout.flush()
+
+def print_warning(msg):
+	print(bcolors.FAIL +msg +bcolors.ENDC)
+	sys.stdout.flush()
+
 if args["update"]:
 	build_dir = normalize_path(args["build_directory"])
 	if not os.path.isabs(build_dir):
@@ -103,6 +124,8 @@ with_pfm = args["with_pfm"]
 with_core_pfm_modules = args["with_core_pfm_modules"]
 with_all_pfm_modules = args["with_all_pfm_modules"]
 with_vr = args["with_vr"]
+with_lua_debugger = args["with_lua_debugger"]
+with_lua_doc_generator = args["with_lua_doc_generator"]
 build = args["build"]
 build_all = args["build_all"]
 build_config = args["build_config"]
@@ -119,6 +142,11 @@ print("Inputs:")
 if platform == "linux":
 	print("cxx_compiler: " +cxx_compiler)
 	print("c_compiler: " +c_compiler)
+
+	if with_lua_doc_generator:
+		with_lua_doc_generator = 0
+		print_warning("Lua documentation generator is only supported on Windows! --with-lua-doc-generator flag will be ignored.")
+
 print("generator: " +generator)
 #if platform == "win32":
 #	print("vcvars: " +vcvars)
@@ -128,6 +156,7 @@ print("with_pfm: " +str(with_pfm))
 print("with_core_pfm_modules: " +str(with_core_pfm_modules))
 print("with_all_pfm_modules: " +str(with_all_pfm_modules))
 print("with_vr: " +str(with_vr))
+print("with_lua_debugger: " +str(with_lua_debugger))
 print("update: " +str(update))
 print("build: " +str(build))
 print("build_all: " +str(build_all))
@@ -146,25 +175,6 @@ if platform == "linux":
 
 def mkpath(path):
 	pathlib.Path(path).mkdir(parents=True, exist_ok=True)
-
-class bcolors:
-	HEADER = '\033[95m'
-	OKBLUE = '\033[94m'
-	OKCYAN = '\033[96m'
-	OKGREEN = '\033[92m'
-	WARNING = '\033[93m'
-	FAIL = '\033[91m'
-	ENDC = '\033[0m'
-	BOLD = '\033[1m'
-	UNDERLINE = '\033[4m'
-
-def print_msg(msg):
-	print(bcolors.OKGREEN +msg +bcolors.ENDC)
-	sys.stdout.flush()
-
-def print_warning(msg):
-	print(bcolors.FAIL +msg +bcolors.ENDC)
-	sys.stdout.flush()
 
 root = normalize_path(os.getcwd())
 build_dir = normalize_path(build_directory)
@@ -268,6 +278,33 @@ def cp(src,dst):
 
 def cp_dir(src,dst):
 	shutil.copytree(src,dst,dirs_exist_ok=True)
+
+# https://stackoverflow.com/a/22331852/1879228
+def copytree(src, dst, symlinks = False, ignore = None):
+	if not os.path.exists(dst):
+		os.makedirs(dst)
+		shutil.copystat(src, dst)
+	lst = os.listdir(src)
+	if ignore:
+		excl = ignore(src, lst)
+		lst = [x for x in lst if x not in excl]
+	for item in lst:
+		s = os.path.join(src, item)
+		d = os.path.join(dst, item)
+		if symlinks and os.path.islink(s):
+			if os.path.lexists(d):
+				os.remove(d)
+			os.symlink(os.readlink(s), d)
+			try:
+				st = os.lstat(s)
+				mode = stat.S_IMODE(st.st_mode)
+				os.lchmod(d, mode)
+			except:
+				pass # lchmod not available
+		elif os.path.isdir(s):
+			copytree(s, d, symlinks, ignore)
+		else:
+			shutil.copy2(s, d)
 
 def replace_text_in_file(filepath,srcStr,dstStr):
 	filedata = None
@@ -424,7 +461,7 @@ else:
 	os.chdir(deps_dir)
 	mkdir("luajit_build")
 	os.chdir("luajit_build")
-	cmake_configure(root +"/third_party_libs/luajit",generator)
+	cmake_configure(root +"/third_party_libs/luajit",generator,["-DBUILD_SHARED_LIBS=1"])
 	cmake_build("Release")
 
 	lua_jit_lib = normalize_path(deps_dir +"/luajit_build/src/Release/luajit.lib")
@@ -511,6 +548,9 @@ if with_pfm:
 		modules.append( "pr_dmx:https://github.com/Silverlan/pr_dmx.git" )
 		modules.append( "pr_xatlas:https://github.com/Silverlan/pr_xatlas.git" )
 	
+if with_lua_doc_generator:
+	modules.append( "pr_git:https://github.com/Silverlan/pr_git.git\"" )
+
 if with_vr:
 	modules.append( "pr_openvr:https://github.com/Silverlan/pr_openvr.git" )
 
@@ -709,6 +749,9 @@ else:
 		"-DDEPENDENCY_LUA_LIBRARY=" +lua_jit_lib +""
 	]
 
+if with_lua_doc_generator:
+	cmake_args += ["-DCONFIG_BUILD_WITH_LAD=1"]
+
 cmake_configure(root,generator,cmake_args)
 
 print_msg("Build files have been written to \"" +build_dir +"\".")
@@ -730,44 +773,92 @@ if platform == "win32":
 lua_ext_dir = deps_dir +"/lua_extensions"
 mkdir(lua_ext_dir,cd=True)
 
-# MoDebug
-mob_debug_root = lua_ext_dir +"/MobDebug-0.80"
-if not Path(mob_debug_root).is_dir():
-	print_msg("MobDebug not found. Downloading...")
+if with_lua_debugger:
+	# MoDebug
+	mob_debug_root = lua_ext_dir +"/MobDebug-0.80"
+	if not Path(mob_debug_root).is_dir():
+		print_msg("MobDebug not found. Downloading...")
+		if platform == "win32":
+			zipName = "0.80.zip"
+			http_extract("https://github.com/pkulchenko/MobDebug/archive/refs/tags/" +zipName)
+		else:
+			zipName = "0.80.tar.gz"
+			http_extract("https://github.com/pkulchenko/MobDebug/archive/refs/tags/" +zipName,format="tar.gz")
+	mkdir(install_dir +"/lua/modules/")
+	cp(lua_ext_dir +"/MobDebug-0.80/src/mobdebug.lua",install_dir +"/lua/modules/")
+
+	# Socket
+	curDir = os.getcwd()
+	os.chdir(lua_ext_dir)
+	luasocket_root = lua_ext_dir +"/luasocket"
+	if not Path(luasocket_root).is_dir():
+		print_msg("luasocket not found. Downloading...")
+		git_clone("https://github.com/LuaDist/luasocket.git")
+
+	print_msg("Building luasocket...")
+	os.chdir(luasocket_root)
+	mkdir("build",cd=True)
+	luasocket_args = ["-DLUA_INCLUDE_DIR=" +root +"/third_party_libs/luajit/src"]
 	if platform == "win32":
-		zipName = "0.80.zip"
-		http_extract("https://github.com/pkulchenko/MobDebug/archive/refs/tags/" +zipName)
+		luasocket_args.append("-DLUA_LIBRARY=" +deps_dir +"/luajit_build/src/Release/luajit.lib")
 	else:
-		zipName = "0.80.tar.gz"
-		http_extract("https://github.com/pkulchenko/MobDebug/archive/refs/tags/" +zipName,format="tar.gz")
-mkdir(install_dir +"/lua/modules/")
-cp(lua_ext_dir +"/MobDebug-0.80/src/mobdebug.lua",install_dir +"/lua/modules/")
+		luasocket_args.append("-DLUA_LIBRARY=" +root +"/third_party_libs/luajit/src/libluajit-p.so")
+	cmake_configure("..",generator,luasocket_args)
+	cmake_build(build_config)
+	cp(luasocket_root +"/src/socket.lua",install_dir +"/lua/modules/")
+	mkdir(install_dir +"/modules/socket/")
+	if platform == "win32":
+		cp(luasocket_root +"/build/socket/" +build_config +"/core.dll",install_dir +"/modules/socket/")
+	else:
+		cp(luasocket_root +"/build/socket/core.so",install_dir +"/modules/socket/")
+	os.chdir(curDir)
 
-# Socket
-curDir = os.getcwd()
-os.chdir(lua_ext_dir)
-luasocket_root = lua_ext_dir +"/luasocket"
-if not Path(luasocket_root).is_dir():
-	print_msg("luasocket not found. Downloading...")
-	git_clone("https://github.com/LuaDist/luasocket.git")
+########## lua-debug ##########
+if with_lua_debugger:
+	# These are required for Lua debugging with Visual Studio Code
+	curDir = os.getcwd()
+	os.chdir(deps_dir)
+	luamake_root = deps_dir +"/luamake"
+	if not Path(luamake_root).is_dir():
+		git_clone("https://github.com/actboy168/luamake")
+	os.chdir(luamake_root)
+	subprocess.run(["git","reset","--hard","ca3e3fe"],check=True)
+	if platform == "linux":
+		subprocess.run([luamake_root +"/compile/install.sh"],check=True,shell=True)
+	else:
+		subprocess.run([luamake_root +"/compile/install.bat"],check=True,shell=True)
 
-print_msg("Building luasocket...")
-os.chdir(luasocket_root)
-mkdir("build",cd=True)
-luasocket_args = ["-DLUA_INCLUDE_DIR=" +root +"/third_party_libs/luajit/src"]
-if platform == "win32":
-	luasocket_args.append("-DLUA_LIBRARY=" +deps_dir +"/luajit_build/src/Release/luajit.lib")
-else:
-	luasocket_args.append("-DLUA_LIBRARY=" +root +"/third_party_libs/luajit/src/libluajit-p.so")
-cmake_configure("..",generator,luasocket_args)
-cmake_build(build_config)
-cp(luasocket_root +"/src/socket.lua",install_dir +"/lua/modules/")
-mkdir(install_dir +"/modules/socket/")
-if platform == "win32":
-	cp(luasocket_root +"/build/socket/" +build_config +"/core.dll",install_dir +"/modules/socket/")
-else:
-	cp(luasocket_root +"/build/socket/core.so",install_dir +"/modules/socket/")
-os.chdir(curDir)
+	tmp_env = os.environ.copy()
+	if platform == "linux":
+		tmp_env["PATH"] = luamake_root +":" + tmp_env["PATH"]
+	else:
+		tmp_env["PATH"] = luamake_root +";" + tmp_env["PATH"]
+
+	os.chdir(deps_dir)
+	luadebug_root = deps_dir +"/lua-debug"
+	if not Path(luadebug_root).is_dir():
+		git_clone("https://github.com/actboy168/lua-debug")
+	os.chdir(luadebug_root)
+	subprocess.run(["git","fetch"],check=True)
+	subprocess.run(["git","reset","--hard","aab2ef5"],check=True) # TODO: Once a stable version has been released with commit aab2ef5, change to that version
+
+	subprocess.run(["luamake","lua","compile/download_deps.lua"],shell=True,check=True,env=tmp_env)
+	subprocess.run(["luamake"],shell=True,check=True,env=tmp_env)
+
+	if platform == "linux":
+		luadebug_bin_path = "runtime/linux-x64/luajit"
+		luadebug_bin_name = "luadebug.so"
+	else:
+		luadebug_bin_path = "runtime/win32-x64/luajit"
+		luadebug_bin_name = "luadebug.dll"
+
+	mkpath(install_dir +"/lua/modules/lua-debug/" +luadebug_bin_path)
+
+	# Copy required files
+	cp_dir(luadebug_root +"/publish/script",install_dir +"/lua/modules/lua-debug/script/")
+	cp(luadebug_root +"/publish/" +luadebug_bin_path +"/" +luadebug_bin_name,install_dir +"/lua/modules/lua-debug/" +luadebug_bin_path +"/")
+
+	os.chdir(curDir)
 
 ########## Addons ##########
 def download_addon(name,addonName,url):
@@ -807,6 +898,7 @@ cfg = {}
 cfg["args"] = {}
 for key, value in input_args.items():
 	cfg["args"][key] = value
+cfg["original_args"] = ' '.join(sys.argv[1:])
 
 import json
 json.dump(cfg,open(build_dir +"/build_config.json",'w'))

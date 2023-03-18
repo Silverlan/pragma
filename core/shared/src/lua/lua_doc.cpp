@@ -167,10 +167,19 @@ void Lua::doc::find_candidates(const std::string &name, std::vector<const pragma
 void Lua::doc::generate_autocomplete_script()
 {
 	initialize_pragma_documentation();
-	auto autocompleteScript = pragma::doc::zerobrane::generate_autocomplete_script(s_docInfo.collections);
 
 	filemanager::create_path("doc/ZeroBrane/api/lua");
-	filemanager::write_file("doc/ZeroBrane/api/lua/pragma.lua", autocompleteScript);
+	auto autocompleteScriptZb = pragma::doc::zerobrane::generate_autocomplete_script(s_docInfo.collections);
+	filemanager::write_file("doc/ZeroBrane/api/lua/pragma.lua", autocompleteScriptZb);
+
+	auto lsDoc = pragma::doc::luals::generate_doc(s_docInfo.collections);
+	for(auto &pair : lsDoc.streams) {
+		std::string path = "doc/LuaLS/meta/";
+		filemanager::create_path(path);
+		path += pair.first + ".lua";
+
+		filemanager::write_file(path, pair.second.str());
+	}
 
 	filemanager::create_path("doc/ZeroBrane/cfg");
 	filemanager::write_file("doc/ZeroBrane/cfg/pragma.lua",

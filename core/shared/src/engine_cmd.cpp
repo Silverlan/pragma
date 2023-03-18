@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/engine.h"
 #include "pragma/lua/lua_doc.hpp"
+#include "pragma/lua/libraries/lutil.hpp"
 #include "pragma/console/conout.h"
 #include "pragma/game/savegame.hpp"
 #include "pragma/asset/util_asset.hpp"
@@ -444,6 +445,17 @@ void Engine::RegisterConsoleCommands()
 		  pragma::set_file_log_level(static_cast<util::LogSeverity>(util::to_int(argv[0])));
 	  },
 	  ConVarFlags::None, "Changes the file logging level. Usage: log_level_file <level>. Level can be: 0 = trace, 1 = debug, 2 = info, 3 = warning, 4 = error, 5 = critical, 6 = disabled.");
+	conVarMap.RegisterConCommand(
+	  "debug_start_lua_debugger_server_sv",
+	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  auto *l = state->GetLuaState();
+		  if(!l) {
+			  Con::cwar << "Unable to start debugger server: No active Lua state!" << Con::endl;
+			  return;
+		  }
+		  Lua::util::start_debugger_server(l);
+	  },
+	  ConVarFlags::None, "Starts the Lua debugger server for the serverside lua state.");
 }
 
 #include "pragma/util/curl_query_handler.hpp"

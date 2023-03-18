@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "pragma",
+            "type": "lua",
+            "request": "attach",
+            "stopOnEntry": false,
+            "address": "127.0.0.1:12306",
+            "sourceMaps": [
+                [
+                    "*",
+                    "${workspaceFolder}/*"
+                ]
+            ]
+        }
+    ]
+}

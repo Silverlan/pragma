@@ -1,27 +1,11 @@
 import os
 from pathlib import Path
-import subprocess
 from sys import platform
 from distutils.dir_util import copy_tree
-import pathlib
 import argparse
-import shutil
-import logging
-import tarfile
-import urllib.request
-from urllib.parse import urlparse
-import zipfile
-import sys
+# import logging
 
-def str2bool(v):
-	if isinstance(v, bool):
-		return v
-	if v.lower() in ('yes', 'true', 't', 'y', '1'):
-		return True
-	elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-		return False
-	else:
-		raise argparse.ArgumentTypeError('Boolean value expected.')
+from scripts.shared import *
 
 parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev=False, formatter_class=argparse.ArgumentDefaultsHelpFormatter, epilog="")
 
@@ -73,30 +57,6 @@ input_args = args
 #
 #		logging.info("Running Pragma Build Script")
 
-def normalize_path(path):
-	normalizedPath = path
-	normalizedPath = normalizedPath.replace('\\','/')
-	return normalizedPath
-
-class bcolors:
-	HEADER = '\033[95m'
-	OKBLUE = '\033[94m'
-	OKCYAN = '\033[96m'
-	OKGREEN = '\033[92m'
-	WARNING = '\033[93m'
-	FAIL = '\033[91m'
-	ENDC = '\033[0m'
-	BOLD = '\033[1m'
-	UNDERLINE = '\033[4m'
-
-def print_msg(msg):
-	print(bcolors.OKGREEN +msg +bcolors.ENDC)
-	sys.stdout.flush()
-
-def print_warning(msg):
-	print(bcolors.FAIL +msg +bcolors.ENDC)
-	sys.stdout.flush()
-
 if args["update"]:
 	build_dir = normalize_path(args["build_directory"])
 	if not os.path.isabs(build_dir):
@@ -132,6 +92,7 @@ build_config = args["build_config"]
 build_directory = args["build_directory"]
 deps_directory = args["deps_directory"]
 install_directory = args["install_directory"]
+scripts_dir = os.getcwd() +"/build_scripts"
 #log_file = args["log_file"]
 verbose = args["verbose"]
 modules = args["module"]
@@ -173,9 +134,6 @@ if platform == "linux":
 	os.environ["CC"] = c_compiler
 	os.environ["CXX"] = cxx_compiler
 
-def mkpath(path):
-	pathlib.Path(path).mkdir(parents=True, exist_ok=True)
-
 root = normalize_path(os.getcwd())
 build_dir = normalize_path(build_directory)
 deps_dir = normalize_path(deps_directory)
@@ -202,122 +160,65 @@ mkpath(deps_dir)
 mkpath(install_dir)
 mkpath(tools)
 
-def git_clone(url,directory=None):
-	args = ["git","clone",url,"--recurse-submodules"]
-	if directory:
-		args.append(directory)
-	subprocess.run(args,check=True)
+def execscript(filepath):
+	global generator
+	global build_config
+	global build_directory
+	global deps_directory
+	global install_directory
+	global verbose
+	global root
+	global build_dir
+	global deps_dir
+	global install_dir
+	global tools
 
-def cmake_configure(scriptPath,generator,additionalArgs=[]):
-	args = ["cmake",scriptPath,"-G",generator]
-	args += additionalArgs
-	subprocess.run(args,check=True)
+	curDir = os.getcwd()
 
-def cmake_build(buildConfig,targets=None):
-	args = ["cmake","--build",".","--config",buildConfig]
-	if targets:
-		args.append("--target")
-		args += targets
-	subprocess.run(args,check=True)
+	g = {}
+	l = {
+		"generator": generator,
+		"build_config": build_config,
+		"build_directory": build_directory,
+		"deps_directory": deps_directory,
+		"install_directory": install_directory,
+		"verbose": verbose,
 
-def mkdir(dirName,cd=False):
-	if not Path(dirName).is_dir():
-		os.makedirs(dirName)
-	if cd:
-		os.chdir(dirName)
+		"root": root,
+		"build_dir": build_dir,
+		"deps_dir": deps_dir,
+		"install_dir": install_dir,
+		"tools": tools,
 
-def http_download(url,fileName=None):
-	if not fileName:
-		a = urlparse(url)
-		fileName = os.path.basename(a.path)
-	urllib.request.urlretrieve(url,fileName)
-	return fileName
+		"build_all": build_all,
 
-# See https://stackoverflow.com/a/54748564
-from zipfile import ZipFile, ZipInfo
-class ZipFileWithPermissions(ZipFile):
-	def _extract_member(self, member, targetpath, pwd):
-		if not isinstance(member, ZipInfo):
-			member = self.getinfo(member)
-
-		targetpath = super()._extract_member(member, targetpath, pwd)
-
-		attr = member.external_attr >> 16
-		if attr != 0:
-			os.chmod(targetpath, attr)
-		return targetpath
-
-def extract(zipName,removeZip=True,format="zip"):
-	if format == "zip":
-		with ZipFileWithPermissions(zipName, 'r') as zip_ref:
-			zip_ref.extractall(".")
-	elif format == "tar.bz2":
-		tar = tarfile.open(zipName, "r:bz2")  
-		tar.extractall()
-		tar.close()
-	elif format == "tar.gz":
-		tar = tarfile.open(zipName, "r:gz")  
-		tar.extractall()
-		tar.close()
-	if removeZip:
-		os.remove(zipName)
-
-def http_extract(url,removeZip=True,format="zip"):
-	fileName = http_download(url)
-	extract(fileName,removeZip,format)
-
-def install_prebuilt_binaries(baseUrl):
+		"normalize_path": normalize_path,
+		"mkpath": mkpath,
+		"print_msg": print_msg,
+		"git_clone": git_clone,
+		"cmake_configure": cmake_configure,
+		"cmake_build": cmake_build,
+		"mkdir": mkdir,
+		"http_download": http_download,
+		"http_extract": http_extract,
+		"cp": cp,
+		"cp_dir": cp_dir,
+		"replace_text_in_file": replace_text_in_file,
+		"extract": extract,
+		"execfile": execfile,
+		"execscript": execscript,
+		"str2bool": str2bool,
+		"install_prebuilt_binaries": install_prebuilt_binaries
+	}
 	if platform == "linux":
-		http_extract(baseUrl +"binaries_linux64.tar.gz",format="tar.gz")
-	else:
-		http_extract(baseUrl +"binaries_windows64.zip")
+		l["c_compiler"] = c_compiler
+		l["cxx_compiler"] = cxx_compiler
+		l["no_confirm"] = no_confirm
+		l["no_sudo"] = no_sudo
 
+	execfile(filepath,g,l)
 
-def cp(src,dst):
-	shutil.copy2(src,dst)
-
-def cp_dir(src,dst):
-	shutil.copytree(src,dst,dirs_exist_ok=True)
-
-# https://stackoverflow.com/a/22331852/1879228
-def copytree(src, dst, symlinks = False, ignore = None):
-	if not os.path.exists(dst):
-		os.makedirs(dst)
-		shutil.copystat(src, dst)
-	lst = os.listdir(src)
-	if ignore:
-		excl = ignore(src, lst)
-		lst = [x for x in lst if x not in excl]
-	for item in lst:
-		s = os.path.join(src, item)
-		d = os.path.join(dst, item)
-		if symlinks and os.path.islink(s):
-			if os.path.lexists(d):
-				os.remove(d)
-			os.symlink(os.readlink(s), d)
-			try:
-				st = os.lstat(s)
-				mode = stat.S_IMODE(st.st_mode)
-				os.lchmod(d, mode)
-			except:
-				pass # lchmod not available
-		elif os.path.isdir(s):
-			copytree(s, d, symlinks, ignore)
-		else:
-			shutil.copy2(s, d)
-
-def replace_text_in_file(filepath,srcStr,dstStr):
-	filedata = None
-	with open(filepath, 'r') as file :
-		filedata = file.read()
-
-	if filedata:
-		# Replace the target string
-		filedata = filedata.replace(srcStr, dstStr)
-
-		# Write the file out again
-		with open(filepath, 'w') as file:
-			file.write(filedata)
+	os.chdir(curDir)
 
 ########## System packages ##########
 if platform == "linux":
@@ -815,50 +716,7 @@ if with_lua_debugger:
 
 ########## lua-debug ##########
 if with_lua_debugger:
-	# These are required for Lua debugging with Visual Studio Code
-	curDir = os.getcwd()
-	os.chdir(deps_dir)
-	luamake_root = deps_dir +"/luamake"
-	if not Path(luamake_root).is_dir():
-		git_clone("https://github.com/actboy168/luamake")
-	os.chdir(luamake_root)
-	subprocess.run(["git","reset","--hard","ca3e3fe"],check=True)
-	if platform == "linux":
-		subprocess.run([luamake_root +"/compile/install.sh"],check=True,shell=True)
-	else:
-		subprocess.run([luamake_root +"/compile/install.bat"],check=True,shell=True)
-
-	tmp_env = os.environ.copy()
-	if platform == "linux":
-		tmp_env["PATH"] = luamake_root +":" + tmp_env["PATH"]
-	else:
-		tmp_env["PATH"] = luamake_root +";" + tmp_env["PATH"]
-
-	os.chdir(deps_dir)
-	luadebug_root = deps_dir +"/lua-debug"
-	if not Path(luadebug_root).is_dir():
-		git_clone("https://github.com/actboy168/lua-debug")
-	os.chdir(luadebug_root)
-	subprocess.run(["git","fetch"],check=True)
-	subprocess.run(["git","reset","--hard","aab2ef5"],check=True) # TODO: Once a stable version has been released with commit aab2ef5, change to that version
-
-	subprocess.run(["luamake","lua","compile/download_deps.lua"],shell=True,check=True,env=tmp_env)
-	subprocess.run(["luamake"],shell=True,check=True,env=tmp_env)
-
-	if platform == "linux":
-		luadebug_bin_path = "runtime/linux-x64/luajit"
-		luadebug_bin_name = "luadebug.so"
-	else:
-		luadebug_bin_path = "runtime/win32-x64/luajit"
-		luadebug_bin_name = "luadebug.dll"
-
-	mkpath(install_dir +"/lua/modules/lua-debug/" +luadebug_bin_path)
-
-	# Copy required files
-	cp_dir(luadebug_root +"/publish/script",install_dir +"/lua/modules/lua-debug/script/")
-	cp(luadebug_root +"/publish/" +luadebug_bin_path +"/" +luadebug_bin_name,install_dir +"/lua/modules/lua-debug/" +luadebug_bin_path +"/")
-
-	os.chdir(curDir)
+	execscript(scripts_dir +"/scripts/build_lua_debug.py")
 
 ########## Addons ##########
 def download_addon(name,addonName,url):

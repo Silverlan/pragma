@@ -449,7 +449,7 @@ if with_pfm:
 		modules.append( "pr_dmx:https://github.com/Silverlan/pr_dmx.git" )
 		modules.append( "pr_xatlas:https://github.com/Silverlan/pr_xatlas.git" )
 	
-if with_lua_doc_generator:
+if with_lua_doc_generator or with_pfm:
 	modules.append( "pr_git:https://github.com/Silverlan/pr_git.git\"" )
 
 if with_vr:

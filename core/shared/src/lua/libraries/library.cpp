@@ -236,7 +236,7 @@ bool Lua::util::start_debugger_server(lua_State *l)
 }
 
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, HSV);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(std, match_results<const char *>); //I HAD TO DO THIS!!! I wanted to avoid this shit, but no.
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(std, match_results<const char *>);
 
 void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 {

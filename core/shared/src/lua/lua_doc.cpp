@@ -177,8 +177,17 @@ void Lua::doc::generate_autocomplete_script()
 		std::string path = "doc/LuaLS/meta/";
 		filemanager::create_path(path);
 		path += pair.first + ".lua";
-
-		filemanager::write_file(path, pair.second.str());
+		auto &ss = pair.second;
+		if(pair.first == "math") {
+			ss << "\n";
+			ss << "Vector2i = math.Vector2i\n";
+			ss << "Vector = math.Vector\n";
+			ss << "Vector2 = math.Vector2\n";
+			ss << "Vector4 = math.Vector4\n";
+			ss << "EulerAngles = math.EulerAngles\n";
+			ss << "Quaternion = math.Quaternion\n";
+		}
+		filemanager::write_file(path, ss.str());
 	}
 
 	filemanager::create_path("doc/ZeroBrane/cfg");

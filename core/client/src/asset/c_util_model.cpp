@@ -590,7 +590,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 			pose.SetOrigin(TransformPos(Vector3 {static_cast<float>(node.translation[0]), static_cast<float>(node.translation[1]), static_cast<float>(node.translation[2])}));
 		}
 		if(node.rotation.size() == 4) {
-			pose.SetRotation(Quat {static_cast<float>(node.rotation[0]), static_cast<float>(node.rotation[1]), static_cast<float>(node.rotation[2]), static_cast<float>(node.rotation[3])});
+			pose.SetRotation(Quat {static_cast<float>(node.rotation[3]), static_cast<float>(node.rotation[0]), static_cast<float>(node.rotation[1]), static_cast<float>(node.rotation[2])});
 		}
 		if(node.scale.size() == 3) {
 			pose.SetScale(Vector3 {static_cast<float>(node.scale[0]), static_cast<float>(node.scale[1]), static_cast<float>(node.scale[2])});

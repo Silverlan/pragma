@@ -362,7 +362,7 @@ bool Lua::game::raycast(lua_State *l, const ::TraceData &data)
 }
 
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, ValueDriverDescriptor);
-void Lua::game::register_shared_functions(luabind::module_ &modGame)
+void Lua::game::register_shared_functions(lua_State *l, luabind::module_ &modGame)
 {
 	modGame[luabind::def("add_callback", Lua::game::add_callback),
 	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua_State *, Game &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
@@ -388,15 +388,15 @@ void Lua::game::register_shared_functions(luabind::module_ &modGame)
 	  luabind::def(
 	    "update_animations", +[](Game &game, float dt) { game.UpdateAnimations(dt); })];
 
-	auto classDefDescriptor = pragma::lua::register_class<pragma::ValueDriverDescriptor>("ValueDriverDescriptor");
-	classDefDescriptor.def(luabind::constructor<lua_State *, std::string, std::unordered_map<std::string, std::string>, std::unordered_map<std::string, udm::PProperty>>());
-	classDefDescriptor.def(luabind::constructor<lua_State *, std::string, std::unordered_map<std::string, std::string>>());
-	classDefDescriptor.def(luabind::constructor<lua_State *, std::string>());
-	classDefDescriptor.property("expression", static_cast<std::string (*)(lua_State *, pragma::ValueDriverDescriptor &)>([](lua_State *l, pragma::ValueDriverDescriptor &descriptor) -> std::string { return descriptor.GetExpression(); }),
+	auto classDefDescriptor = pragma::lua::register_class<pragma::ValueDriverDescriptor>(l, "ValueDriverDescriptor");
+	classDefDescriptor->def(luabind::constructor<lua_State *, std::string, std::unordered_map<std::string, std::string>, std::unordered_map<std::string, udm::PProperty>>());
+	classDefDescriptor->def(luabind::constructor<lua_State *, std::string, std::unordered_map<std::string, std::string>>());
+	classDefDescriptor->def(luabind::constructor<lua_State *, std::string>());
+	classDefDescriptor->property("expression", static_cast<std::string (*)(lua_State *, pragma::ValueDriverDescriptor &)>([](lua_State *l, pragma::ValueDriverDescriptor &descriptor) -> std::string { return descriptor.GetExpression(); }),
 	  static_cast<void (*)(lua_State *, pragma::ValueDriverDescriptor &, const std::string &)>([](lua_State *l, pragma::ValueDriverDescriptor &descriptor, const std::string &expr) { descriptor.SetExpression(expr); }));
-	classDefDescriptor.def("AddReference", &pragma::ValueDriverDescriptor::AddReference);
-	classDefDescriptor.def("AddConstant", static_cast<void (*)(pragma::ValueDriverDescriptor &, const std::string &, udm::PProperty)>([](pragma::ValueDriverDescriptor &descriptor, const std::string &name, udm::PProperty prop) { descriptor.AddConstant(name, prop); }));
-	classDefDescriptor.def("AddConstant", static_cast<void (*)(pragma::ValueDriverDescriptor &, const std::string &, const Lua::classObject &)>([](pragma::ValueDriverDescriptor &descriptor, const std::string &name, const Lua::classObject &udmType) {
+	classDefDescriptor->def("AddReference", &pragma::ValueDriverDescriptor::AddReference);
+	classDefDescriptor->def("AddConstant", static_cast<void (*)(pragma::ValueDriverDescriptor &, const std::string &, udm::PProperty)>([](pragma::ValueDriverDescriptor &descriptor, const std::string &name, udm::PProperty prop) { descriptor.AddConstant(name, prop); }));
+	classDefDescriptor->def("AddConstant", static_cast<void (*)(pragma::ValueDriverDescriptor &, const std::string &, const Lua::classObject &)>([](pragma::ValueDriverDescriptor &descriptor, const std::string &name, const Lua::classObject &udmType) {
 		for(auto type : udm::GENERIC_TYPES) {
 			auto r = udm::visit<false, true, false>(type, [&udmType, &descriptor, &name](auto tag) mutable -> bool {
 				using T = typename decltype(tag)::type;
@@ -412,8 +412,8 @@ void Lua::game::register_shared_functions(luabind::module_ &modGame)
 				break;
 		}
 	}));
-	classDefDescriptor.def("GetConstants", &pragma::ValueDriverDescriptor::GetConstants);
-	classDefDescriptor.def("GetReferences", &pragma::ValueDriverDescriptor::GetReferences);
-	modGame[classDefDescriptor];
+	classDefDescriptor->def("GetConstants", &pragma::ValueDriverDescriptor::GetConstants);
+	classDefDescriptor->def("GetReferences", &pragma::ValueDriverDescriptor::GetReferences);
+	modGame[*classDefDescriptor];
 }
 #pragma optimize("", on)

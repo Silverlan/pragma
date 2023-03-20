@@ -71,7 +71,7 @@ void SGame::RegisterLua()
 	    //{"create_sprite",Lua::engine::CreateSprite},
 	    {"create_model", Lua::game::Server::create_model}, {"load_map", Lua::game::Server::load_map}});
 	auto gameMod = luabind::module(GetLuaState(), "game");
-	Lua::game::register_shared_functions(gameMod);
+	Lua::game::register_shared_functions(GetLuaState(), gameMod);
 	gameMod[luabind::def("change_map", static_cast<void (*)(const std::string &, const std::string &)>(Lua::game::Server::change_level)), luabind::def("change_map", static_cast<void (*)(const std::string &)>(Lua::game::Server::change_level)),
 	  luabind::def("set_gravity", Lua::game::Server::set_gravity), luabind::def("get_gravity", Lua::game::Server::get_gravity), luabind::def("load_model", Lua::game::Server::load_model),
 	  luabind::def("load_sound_scripts", static_cast<void (*)(lua_State *, const std::string &, bool)>(Lua::engine::LoadSoundScripts)), luabind::def("load_sound_scripts", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::LoadSoundScripts)),

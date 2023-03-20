@@ -164,7 +164,7 @@ void CGame::RegisterLua()
 		})}*/
 	  });
 	auto modGame = luabind::module_(GetLuaState(), "game");
-	Lua::game::register_shared_functions(modGame);
+	Lua::game::register_shared_functions(GetLuaState(), modGame);
 	modGame[luabind::def("load_material", static_cast<Material *(*)(lua_State *, const std::string &, bool, bool)>(Lua::engine::load_material)), luabind::def("load_material", static_cast<Material *(*)(lua_State *, const std::string &, bool)>(Lua::engine::load_material)),
 	  luabind::def("load_material", static_cast<Material *(*)(lua_State *, const std::string &)>(Lua::engine::load_material)),
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua_State *, const std::string &, util::AssetLoadFlags)>(Lua::engine::load_texture)),

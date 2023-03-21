@@ -178,14 +178,20 @@ void Lua::doc::generate_autocomplete_script()
 		filemanager::create_path(path);
 		path += pair.first + ".lua";
 		auto &ss = pair.second;
-		if(pair.first == "math") {
+		if(pair.first == "_G") {
+			// Some types have global aliases which can't be detected automatically, so we define them here.
+			const std::unordered_map<std::string, std::string> globalAliases {
+			  {"Vector2i", "math.Vector2i"},
+			  {"Vector", "math.Vector"},
+			  {"Vector2", "math.Vector2"},
+			  {"Vector4", "math.Vector4"},
+			  {"EulerAngles", "math.EulerAngles"},
+			  {"Quaternion", "math.Quaternion"},
+			  {"Color", "util.Color"},
+			};
 			ss << "\n";
-			ss << "Vector2i = math.Vector2i\n";
-			ss << "Vector = math.Vector\n";
-			ss << "Vector2 = math.Vector2\n";
-			ss << "Vector4 = math.Vector4\n";
-			ss << "EulerAngles = math.EulerAngles\n";
-			ss << "Quaternion = math.Quaternion\n";
+			for(auto &pair : globalAliases)
+				ss << pair.first << " = " << pair.second << "\n";
 		}
 		filemanager::write_file(path, ss.str());
 	}

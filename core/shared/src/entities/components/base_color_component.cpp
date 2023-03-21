@@ -41,10 +41,10 @@ void BaseColorComponent::RegisterMembers(pragma::EntityComponentManager &compone
 		auto memberInfo = create_component_member_info<T, float,
 		  [](const ComponentMemberInfo &, T &component, const float &value) {
 			  auto col = component.GetColor();
-			  col.a = value * 255.f;
+			  col.a = value;
 			  component.SetColor(col);
 		  },
-		  [](const ComponentMemberInfo &, T &component, float &value) { value = component.GetColor().a / 255.f; }>("alpha", 1.f);
+		  [](const ComponentMemberInfo &, T &component, float &value) { value = component.GetColor().a; }>("alpha", 1.f);
 		memberInfo.SetMin(0.f);
 		memberInfo.SetMax(1.f);
 		registerMember(std::move(memberInfo));
@@ -65,6 +65,8 @@ void BaseColorComponent::Initialize()
 		if(ustring::compare<std::string>(kvData.key, "color", false)) {
 			Vector4 r;
 			auto n = ustring::string_to_array<glm::vec4::value_type, Double>(kvData.value, &r[0], atof, 4);
+			for(auto i = decltype(n) {0u}; i < n; ++i)
+				r[i] /= static_cast<float>(std::numeric_limits<uint8_t>::max());
 			if(n < 4)
 				r.a = 1.f;
 			*m_color = r;
@@ -78,6 +80,8 @@ void BaseColorComponent::Initialize()
 		if(ustring::compare<std::string>(inputData.input, "setcolor", false)) {
 			Vector4 r;
 			auto n = ustring::string_to_array<glm::vec4::value_type, Double>(inputData.data, &r[0], atof, 4);
+			for(auto i = decltype(n) {0u}; i < n; ++i)
+				r[i] /= static_cast<float>(std::numeric_limits<uint8_t>::max());
 			if(n < 4)
 				r.a = 1.f;
 			*m_color = r;

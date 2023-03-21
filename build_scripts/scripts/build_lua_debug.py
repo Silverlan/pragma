@@ -1,8 +1,8 @@
-import shared
+import scripts.shared
 from sys import platform
 
-shared.init_global_vars()
-from shared import *
+scripts.shared.init_global_vars()
+from scripts.shared import *
 
 # These are required for Lua debugging with Visual Studio Code
 print_msg("Building luamake...")

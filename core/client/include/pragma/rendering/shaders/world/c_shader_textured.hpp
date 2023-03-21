@@ -14,6 +14,7 @@
 namespace prosper {
 	class IDescriptorSet;
 };
+class Texture;
 namespace pragma {
 	const float DefaultParallaxHeightScale = 0.025f;
 	const float DefaultAlphaDiscardThreshold = 0.99f;
@@ -227,6 +228,7 @@ namespace pragma {
 		bool IsDepthPrepassEnabled() const;
 		void SetDepthPrepassEnabled(bool enabled) { m_depthPrepassEnabled = enabled; }
 		static std::optional<MaterialData> InitializeMaterialBuffer(prosper::IDescriptorSet &descSet, CMaterial &mat, uint32_t bindingIdx);
+		static std::shared_ptr<Texture> GetTexture(const std::string &texName);
 	  protected:
 		using ShaderEntity::RecordDraw;
 		GameShaderSpecializationConstantFlag GetStaticSpecializationConstantFlags(GameShaderSpecialization specialization) const;

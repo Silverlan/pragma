@@ -30,6 +30,7 @@
 #include <sharedutils/util_path.hpp>
 #include <util_image.hpp>
 #include <cmaterial.h>
+#include <cmaterial_manager2.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
@@ -167,10 +168,28 @@ std::optional<uint32_t> ShaderGameWorldLightingPass::FindPipelineIndex(rendering
 {
 	return ShaderSpecializationManager::FindSpecializationPipelineIndex(passType, GetStaticSpecializationConstantFlags(specialization) | specializationFlags);
 }
+static std::optional<Vector3> get_emission_factor(CMaterial &mat)
+{
+	auto &data = mat.GetDataBlock();
+	auto &dbEmissionFactor = data->GetValue("emission_factor");
+	if(dbEmissionFactor == nullptr || typeid(*dbEmissionFactor) != typeid(ds::Vector))
+		return {};
+	auto emissionFactor = static_cast<ds::Vector *>(dbEmissionFactor.get())->GetValue();
+	emissionFactor *= data->GetFloat("emission_strength", 1.f);
+	if(emissionFactor.r == 0.f && emissionFactor.g == 0.f && emissionFactor.b == 0.f)
+		return {};
+	return emissionFactor;
+}
 GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetMaterialPipelineSpecializationRequirements(CMaterial &mat) const
 {
 	auto flags = GameShaderSpecializationConstantFlag::None;
-	if(mat.GetTextureInfo(Material::EMISSION_MAP_IDENTIFIER))
+	auto hasEmission = (mat.GetTextureInfo(Material::EMISSION_MAP_IDENTIFIER) != nullptr);
+	if(!hasEmission) {
+		auto &data = mat.GetDataBlock();
+		if(data->HasValue("emission_factor"))
+			hasEmission = get_emission_factor(mat).has_value();
+	}
+	if(hasEmission)
 		flags |= GameShaderSpecializationConstantFlag::EmissionEnabledBit;
 	if(mat.GetTextureInfo(Material::WRINKLE_STRETCH_MAP_IDENTIFIER) || mat.GetTextureInfo(Material::WRINKLE_COMPRESS_MAP_IDENTIFIER))
 		flags |= GameShaderSpecializationConstantFlag::WrinklesEnabledBit;
@@ -297,6 +316,19 @@ void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelin
 	fSetPropertyValue(GameShaderSpecializationPropertyIndex::EnableDynamicShadows, static_cast<uint32_t>(shaderSettings.dynamicShadowsEnabled));
 }
 
+std::shared_ptr<Texture> ShaderGameWorldLightingPass::GetTexture(const std::string &texName)
+{
+	auto &matManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager());
+	auto &texManager = matManager.GetTextureManager();
+	auto *asset = texManager.FindCachedAsset(texName);
+	if(!asset)
+		return nullptr;
+	auto ptrTex = msys::TextureManager::GetAssetObject(*asset);
+	if(ptrTex == nullptr)
+		return nullptr;
+	return std::static_pointer_cast<Texture>(ptrTex);
+}
+
 static void to_srgb_color(Vector4 &col) { col = Vector4 {uimg::linear_to_srgb(reinterpret_cast<Vector3 &>(col)), col.w}; }
 
 static auto cvNormalMappingEnabled = GetClientConVar("render_normalmapping_enabled");
@@ -339,44 +371,55 @@ ShaderGameWorldLightingPass::MaterialData ShaderGameWorldLightingPass::GenerateM
 		matFlags |= MaterialFlags::Debug;
 
 	auto *glowMap = mat.GetGlowMap();
-	if(glowMap != nullptr && glowMap->texture != nullptr) {
-		auto texture = std::static_pointer_cast<Texture>(glowMap->texture);
-
-		auto &emissionFactor = data->GetValue("emission_factor");
-		if(emissionFactor != nullptr && typeid(*emissionFactor) == typeid(ds::Vector)) {
-			auto f = static_cast<ds::Vector *>(emissionFactor.get())->GetValue();
-			f *= data->GetFloat("emission_strength", 1.f);
-			matData.emissionFactor = {f.r, f.g, f.b, 1.f};
+	auto hasGlowmap = (glowMap != nullptr && glowMap->texture != nullptr);
+	if(hasGlowmap || data->HasValue("emission_factor")) {
+		auto emissionFactor = get_emission_factor(mat);
+		if(emissionFactor) {
+			matData.emissionFactor = {emissionFactor->r, emissionFactor->g, emissionFactor->b, 1.f};
 			to_srgb_color(matData.emissionFactor);
 		}
 
-		if(texture->HasFlag(Texture::Flags::SRGB))
-			matFlags |= MaterialFlags::GlowSRGB;
-		auto bUseGlow = true;
-		if(data->GetBool("glow_alpha_only") == true) {
-			if(prosper::util::has_alpha(texture->GetVkTexture()->GetImage().GetFormat()) == false)
-				bUseGlow = false;
-		}
-		if(bUseGlow == true) {
-			int32_t glowMode = 1;
-			data->GetInt("glow_blend_diffuse_mode", &glowMode);
-			if(glowMode != 0) {
-				matFlags |= MaterialFlags::Glow;
-				data->GetFloat("glow_blend_diffuse_scale", &matData.glowScale);
+		if(hasGlowmap || emissionFactor) {
+			std::shared_ptr<Texture> texture;
+			if(hasGlowmap)
+				texture = std::static_pointer_cast<Texture>(glowMap->texture);
+			if(emissionFactor) {
+				matFlags |= MaterialFlags::GlowSRGB;
+				if(!texture) {
+					texture = GetTexture("white");
+					hasGlowmap = true;
+				}
 			}
-			switch(glowMode) {
-			case 1:
-				matFlags |= MaterialFlags::FMAT_GLOW_MODE_1;
-				break;
-			case 2:
-				matFlags |= MaterialFlags::FMAT_GLOW_MODE_2;
-				break;
-			case 3:
-				matFlags |= MaterialFlags::FMAT_GLOW_MODE_3;
-				break;
-			case 4:
-				matFlags |= MaterialFlags::FMAT_GLOW_MODE_4;
-				break;
+			auto bUseGlow = true;
+			if(hasGlowmap) {
+				if(texture->HasFlag(Texture::Flags::SRGB))
+					matFlags |= MaterialFlags::GlowSRGB;
+				if(data->GetBool("glow_alpha_only") == true) {
+					if(prosper::util::has_alpha(texture->GetVkTexture()->GetImage().GetFormat()) == false)
+						bUseGlow = false;
+				}
+			}
+			if(bUseGlow == true) {
+				int32_t glowMode = 1;
+				data->GetInt("glow_blend_diffuse_mode", &glowMode);
+				if(glowMode != 0) {
+					matFlags |= MaterialFlags::Glow;
+					data->GetFloat("glow_blend_diffuse_scale", &matData.glowScale);
+				}
+				switch(glowMode) {
+				case 1:
+					matFlags |= MaterialFlags::FMAT_GLOW_MODE_1;
+					break;
+				case 2:
+					matFlags |= MaterialFlags::FMAT_GLOW_MODE_2;
+					break;
+				case 3:
+					matFlags |= MaterialFlags::FMAT_GLOW_MODE_3;
+					break;
+				case 4:
+					matFlags |= MaterialFlags::FMAT_GLOW_MODE_4;
+					break;
+				}
 			}
 		}
 	}

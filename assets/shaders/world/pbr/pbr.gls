@@ -69,9 +69,9 @@ vec4 calc_pbr(vec4 albedoColor,vec2 texCoords,uint debugMode)
 #endif
 
 	// f0 = specular
-	specularColor = f0;
-	float oneMinusSpecularStrength = 1.0 - max(max(f0.r, f0.g), f0.b);
-	diffuseColor = baseColor.rgb * oneMinusSpecularStrength;
+	//specularColor = f0;
+	//float oneMinusSpecularStrength = 1.0 - max(max(f0.r, f0.g), f0.b);
+	//diffuseColor = baseColor.rgb * oneMinusSpecularStrength;
 
 	vec4 rma;
 	if(CSPEC_ENABLE_RMA_MAP == 1)

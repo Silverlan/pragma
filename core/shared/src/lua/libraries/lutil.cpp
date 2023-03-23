@@ -226,7 +226,7 @@ void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
 	defComponentData.def("SetFlags", &pragma::asset::ComponentData::SetFlags);
 	defComponentData.def(
 	  "GetData", +[](pragma::asset::ComponentData &componentData) -> udm::LinkedPropertyWrapper { return udm::LinkedPropertyWrapper {*componentData.GetData()}; });
-	mod[defComponentData];
+	defWorldData.scope[defComponentData];
 
 	auto defEntityData = luabind::class_<pragma::asset::EntityData>("EntityData");
 	defEntityData.add_static_constant("FLAG_NONE", umath::to_integral(pragma::asset::EntityData::Flags::None));
@@ -357,18 +357,18 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 			    std::function<uint32_t()> getTriangleCount = nullptr;
 			    std::function<uint32_t()> getVertexCount = nullptr;
 			    std::function<std::array<uint32_t, 3>(uint32_t)> getTriangle = nullptr;
-			    std::function<const Vector3 &(uint32_t)> getVertexPosition = nullptr;
-			    std::function<const Vector3 &(uint32_t)> getVertexNormal = nullptr;
-			    std::function<const Vector2 &(uint32_t)> getVertexUv = nullptr;
+			    std::function<Vector3(uint32_t)> getVertexPosition = nullptr;
+			    std::function<Vector3(uint32_t)> getVertexNormal = nullptr;
+			    std::function<Vector2(uint32_t)> getVertexUv = nullptr;
 		    };
 
 		    auto meshInterface = std::make_unique<MeshInterface>();
 		    meshInterface->getTriangleCount = [&mesh]() -> uint32_t { return mesh.GetTriangleCount(); };
 		    meshInterface->getVertexCount = [&mesh]() -> uint32_t { return mesh.GetVertexCount(); };
 		    meshInterface->getTriangle = [&mesh](uint32_t triIdx) -> std::array<uint32_t, 3> { return std::array<uint32_t, 3> {*mesh.GetIndex(triIdx * 3), *mesh.GetIndex(triIdx * 3 + 1), *mesh.GetIndex(triIdx * 3 + 2)}; };
-		    meshInterface->getVertexPosition = [&mesh](uint32_t vertIdx) -> const Vector3 & { return mesh.GetVertexPosition(vertIdx) * static_cast<float>(util::units_to_metres(1.f)); };
-		    meshInterface->getVertexNormal = [&mesh](uint32_t vertIdx) -> const Vector3 & { return mesh.GetVertexNormal(vertIdx); };
-		    meshInterface->getVertexUv = [&mesh](uint32_t vertIdx) -> const Vector2 & { return mesh.GetVertexUV(vertIdx); };
+		    meshInterface->getVertexPosition = [&mesh](uint32_t vertIdx) -> Vector3 { return mesh.GetVertexPosition(vertIdx) * static_cast<float>(util::units_to_metres(1.f)); };
+		    meshInterface->getVertexNormal = [&mesh](uint32_t vertIdx) -> Vector3 { return mesh.GetVertexNormal(vertIdx); };
+		    meshInterface->getVertexUv = [&mesh](uint32_t vertIdx) -> Vector2 { return mesh.GetVertexUV(vertIdx); };
 
 		    ::util::HairGenerator gen {};
 		    gen.SetMeshDataInterface(std::move(meshInterface));

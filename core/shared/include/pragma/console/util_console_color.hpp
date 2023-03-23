@@ -45,7 +45,22 @@ namespace util {
 	DLLNETWORK std::optional<Color> console_color_flags_to_color(ConsoleColorFlags flags);
 	DLLNETWORK ConsoleColorFlags color_to_console_color_flags(const Color &color);
 	DLLNETWORK std::string get_ansi_color_code(ConsoleColorFlags flags);
+
+	enum class ConsoleDecoratorFlags : uint32_t {
+		None = 0,
+		Bold = 1,
+		Underline = Bold << 1,
+		SlowBlink = Underline << 1,
+		Framed = SlowBlink << 1,
+		Encircled = Framed << 1,
+		Overlined = Encircled << 1,
+		Reset = Overlined << 1,
+	};
+
+	DLLNETWORK std::string get_true_color_code(std::optional<Color> foregroundColor, std::optional<Color> backgroundColor = {}, ConsoleDecoratorFlags flags = ConsoleDecoratorFlags::None);
+	DLLNETWORK std::string get_reset_color_code();
 };
 REGISTER_BASIC_BITWISE_OPERATORS(util::ConsoleColorFlags);
+REGISTER_BASIC_BITWISE_OPERATORS(util::ConsoleDecoratorFlags);
 
 #endif

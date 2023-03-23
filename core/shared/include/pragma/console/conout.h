@@ -37,15 +37,6 @@ namespace Con {
 template<class T>
 Con::c_crit &operator<<(Con::c_crit &con, const T &t);
 
-#define PRAGMA_CON_COLOR_WARNING "\u001b[33;1m"
-#define PRAGMA_CON_COLOR_ERROR "\u001b[31;1m"
-#define PRAGMA_CON_COLOR_CRITICAL "\u001b[41m\u001b[37;1m"
-#define PRAGMA_CON_COLOR_SERVER "\u001b[36;1m"
-#define PRAGMA_CON_COLOR_CLIENT "\u001b[35;1m"
-#define PRAGMA_CON_COLOR_LUA "\u001b[34;1m"
-#define PRAGMA_CON_COLOR_GUI "\u001b[37;1m"
-#define PRAGMA_CON_COLOR_RESET "\u001b[0m"
-
 namespace Con {
 	enum class MessageFlags : uint8_t {
 		None = 0u,
@@ -105,13 +96,22 @@ namespace Con {
 		outputCallback(ss.str(), flags, color.has_value() ? &(*color) : nullptr);
 	}
 
-	constexpr const char *PREFIX_WARNING = PRAGMA_CON_COLOR_RESET "[" PRAGMA_CON_COLOR_WARNING "warning" PRAGMA_CON_COLOR_RESET "] ";
-	constexpr const char *PREFIX_ERROR = PRAGMA_CON_COLOR_RESET "[" PRAGMA_CON_COLOR_ERROR "error" PRAGMA_CON_COLOR_RESET "] ";
-	constexpr const char *PREFIX_CRITICAL = PRAGMA_CON_COLOR_RESET "[" PRAGMA_CON_COLOR_CRITICAL "critical" PRAGMA_CON_COLOR_RESET "] ";
-	constexpr const char *PREFIX_SERVER = PRAGMA_CON_COLOR_RESET "[" PRAGMA_CON_COLOR_SERVER "server" PRAGMA_CON_COLOR_RESET "] ";
-	constexpr const char *PREFIX_CLIENT = PRAGMA_CON_COLOR_RESET "[" PRAGMA_CON_COLOR_CLIENT "client" PRAGMA_CON_COLOR_RESET "] ";
-	constexpr const char *PREFIX_LUA = PRAGMA_CON_COLOR_RESET "[" PRAGMA_CON_COLOR_LUA "lua" PRAGMA_CON_COLOR_RESET "] ";
-	constexpr const char *PREFIX_GUI = PRAGMA_CON_COLOR_RESET "[" PRAGMA_CON_COLOR_GUI "gui" PRAGMA_CON_COLOR_RESET "] ";
+	DLLNETWORK extern const std::string COLOR_WARNING;
+	DLLNETWORK extern const std::string COLOR_ERROR;
+	DLLNETWORK extern const std::string COLOR_CRITICAL;
+	DLLNETWORK extern const std::string COLOR_SERVER;
+	DLLNETWORK extern const std::string COLOR_CLIENT;
+	DLLNETWORK extern const std::string COLOR_LUA;
+	DLLNETWORK extern const std::string COLOR_GUI;
+	DLLNETWORK extern const std::string COLOR_RESET;
+
+	DLLNETWORK extern const std::string PREFIX_WARNING;
+	DLLNETWORK extern const std::string PREFIX_ERROR;
+	DLLNETWORK extern const std::string PREFIX_CRITICAL;
+	DLLNETWORK extern const std::string PREFIX_SERVER;
+	DLLNETWORK extern const std::string PREFIX_CLIENT;
+	DLLNETWORK extern const std::string PREFIX_LUA;
+	DLLNETWORK extern const std::string PREFIX_GUI;
 };
 REGISTER_BASIC_BITWISE_OPERATORS(Con::MessageFlags)
 

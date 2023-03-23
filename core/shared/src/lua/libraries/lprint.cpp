@@ -227,13 +227,13 @@ static int log(lua_State *l, spdlog::level::level_enum lv)
 			ss << luabind::object_cast<std::string>(*i);
 		switch(lv) {
 		case spdlog::level::level_enum::warn:
-			ss << PRAGMA_CON_COLOR_WARNING;
+			ss << Con::COLOR_WARNING;
 			break;
 		case spdlog::level::level_enum::err:
-			ss << PRAGMA_CON_COLOR_ERROR;
+			ss << Con::COLOR_ERROR;
 			break;
 		case spdlog::level::level_enum::critical:
-			ss << PRAGMA_CON_COLOR_CRITICAL;
+			ss << Con::COLOR_CRITICAL;
 			break;
 		}
 	}
@@ -251,7 +251,7 @@ static int log(lua_State *l, spdlog::level::level_enum lv)
 	case spdlog::level::level_enum::warn:
 	case spdlog::level::level_enum::err:
 	case spdlog::level::level_enum::critical:
-		ss << PRAGMA_CON_COLOR_RESET;
+		ss << Con::COLOR_RESET;
 		break;
 	}
 	spdlog::log(lv, ss.str());
@@ -269,13 +269,13 @@ int Lua::log::color(lua_State *l)
 	std::string c {};
 	switch(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(level))) {
 	case spdlog::level::level_enum::warn:
-		c = PRAGMA_CON_COLOR_WARNING;
+		c = Con::COLOR_WARNING;
 		break;
 	case spdlog::level::level_enum::err:
-		c = PRAGMA_CON_COLOR_ERROR;
+		c = Con::COLOR_ERROR;
 		break;
 	case spdlog::level::level_enum::critical:
-		c = PRAGMA_CON_COLOR_CRITICAL;
+		c = Con::COLOR_CRITICAL;
 		break;
 	}
 	Lua::PushString(l, c);

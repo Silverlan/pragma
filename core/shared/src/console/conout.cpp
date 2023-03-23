@@ -21,6 +21,23 @@ DLLNETWORK Con::c_crit Con::crit;
 DLLNETWORK Con::c_csv Con::csv;
 DLLNETWORK Con::c_ccl Con::ccl;
 
+const std::string Con::COLOR_WARNING = util::get_true_color_code(Color {254, 228, 64}, {}, util::ConsoleDecoratorFlags::Bold);
+const std::string Con::COLOR_ERROR = util::get_true_color_code(Color {233, 25, 15}, {}, util::ConsoleDecoratorFlags::Bold);
+const std::string Con::COLOR_CRITICAL = util::get_true_color_code(Color {233, 25, 15}, Color {254, 250, 224}, util::ConsoleDecoratorFlags::Bold);
+const std::string Con::COLOR_SERVER = util::get_true_color_code(Color {0, 245, 212});
+const std::string Con::COLOR_CLIENT = util::get_true_color_code(Color {255, 73, 158});
+const std::string Con::COLOR_LUA = util::get_true_color_code(Color {73, 182, 255});
+const std::string Con::COLOR_GUI = util::get_true_color_code(Color {181, 23, 158});
+const std::string Con::COLOR_RESET = util::get_reset_color_code();
+
+const std::string Con::PREFIX_WARNING = Con::COLOR_RESET + "[" + Con::COLOR_WARNING + "warning" + Con::COLOR_RESET + "] ";
+const std::string Con::PREFIX_ERROR = Con::COLOR_RESET + "[" + Con::COLOR_ERROR + "error" + Con::COLOR_RESET + "] ";
+const std::string Con::PREFIX_CRITICAL = Con::COLOR_RESET + "[" + Con::COLOR_CRITICAL + "critical" + Con::COLOR_RESET + "] ";
+const std::string Con::PREFIX_SERVER = Con::COLOR_RESET + "[" + Con::COLOR_SERVER + "server" + Con::COLOR_RESET + "] ";
+const std::string Con::PREFIX_CLIENT = Con::COLOR_RESET + "[" + Con::COLOR_CLIENT + "client" + Con::COLOR_RESET + "] ";
+const std::string Con::PREFIX_LUA = Con::COLOR_RESET + "[" + Con::COLOR_LUA + "lua" + Con::COLOR_RESET + "] ";
+const std::string Con::PREFIX_GUI = Con::COLOR_RESET + "[" + Con::COLOR_GUI + "gui" + Con::COLOR_RESET + "] ";
+
 extern DLLNETWORK Engine *engine;
 static CVar cvLog = GetConVar("log_enabled");
 int Con::GetLogLevel()
@@ -185,10 +202,10 @@ std::basic_ostream<char, std::char_traits<char>> &Con::endl(std::basic_ostream<c
 	case util::LogSeverity::Warning:
 	case util::LogSeverity::Error:
 	case util::LogSeverity::Critical:
-		os << PRAGMA_CON_COLOR_RESET;
+		os << Con::COLOR_RESET;
 		if(pragma::logging::detail::shouldLogOutput) {
 			pragma::logging::detail::logOutputMutex.lock();
-			pragma::logging::detail::logOutput << PRAGMA_CON_COLOR_RESET;
+			pragma::logging::detail::logOutput << Con::COLOR_RESET;
 			pragma::logging::detail::logOutputMutex.unlock();
 		}
 		break;
@@ -216,26 +233,26 @@ std::basic_ostream<char, std::char_traits<char>> &Con::prefix(std::basic_ostream
 	// have to reset the color here.
 	switch(Con::detail::currentLevel) {
 	case util::LogSeverity::Warning:
-		os << PRAGMA_CON_COLOR_WARNING;
+		os << Con::COLOR_WARNING;
 		if(pragma::logging::detail::shouldLogOutput) {
 			pragma::logging::detail::logOutputMutex.lock();
-			pragma::logging::detail::logOutput << PRAGMA_CON_COLOR_WARNING;
+			pragma::logging::detail::logOutput << Con::COLOR_WARNING;
 			pragma::logging::detail::logOutputMutex.unlock();
 		}
 		break;
 	case util::LogSeverity::Error:
-		os << PRAGMA_CON_COLOR_ERROR;
+		os << Con::COLOR_ERROR;
 		if(pragma::logging::detail::shouldLogOutput) {
 			pragma::logging::detail::logOutputMutex.lock();
-			pragma::logging::detail::logOutput << PRAGMA_CON_COLOR_ERROR;
+			pragma::logging::detail::logOutput << Con::COLOR_ERROR;
 			pragma::logging::detail::logOutputMutex.unlock();
 		}
 		break;
 	case util::LogSeverity::Critical:
-		os << PRAGMA_CON_COLOR_CRITICAL;
+		os << Con::COLOR_CRITICAL;
 		if(pragma::logging::detail::shouldLogOutput) {
 			pragma::logging::detail::logOutputMutex.lock();
-			pragma::logging::detail::logOutput << PRAGMA_CON_COLOR_CRITICAL;
+			pragma::logging::detail::logOutput << Con::COLOR_CRITICAL;
 			pragma::logging::detail::logOutputMutex.unlock();
 		}
 		break;

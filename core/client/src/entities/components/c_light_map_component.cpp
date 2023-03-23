@@ -21,6 +21,7 @@
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/gui/wiframe.h"
 #include <pragma/util/util_tga.hpp>
+#include <pragma/logging.hpp>
 #include <pragma/level/mapgeometry.h>
 #include <pragma/entities/entity_iterator.hpp>
 #include <GuillotineBinPack.h>
@@ -44,6 +45,8 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
+
+auto &LOGGER = pragma::register_logger(CLightMapComponent::LOGGER_NAME);
 
 void CLightMapComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
@@ -105,14 +108,19 @@ const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetTexture(Texture 
 
 void CLightMapComponent::InitializeFromMaterial()
 {
+	LOGGER.info("Initializing lightmap from material '{}'...", m_lightMapMaterialName);
 	for(auto &tex : m_textures)
 		tex = nullptr;
 	m_lightMapMaterial = {};
-	if(m_lightMapMaterialName.empty())
+	if(m_lightMapMaterialName.empty()) {
+		LOGGER.warn("No lightmap material specified!");
 		return;
+	}
 	auto *mat = client->LoadMaterial(m_lightMapMaterialName);
-	if(!mat)
+	if(!mat) {
+		LOGGER.warn("Unable to load lightmap material '{}'!", m_lightMapMaterialName);
 		return;
+	}
 	m_lightMapMaterial = mat->GetHandle();
 	auto getTexture = [this](const std::string &identifier) -> std::shared_ptr<prosper::Texture> {
 		if(!m_lightMapMaterial)
@@ -127,6 +135,12 @@ void CLightMapComponent::InitializeFromMaterial()
 	m_textures[umath::to_integral(Texture::DiffuseDirectMap)] = getTexture("diffuse_direct_map");
 	m_textures[umath::to_integral(Texture::DiffuseIndirectMap)] = getTexture("diffuse_indirect_map");
 	m_textures[umath::to_integral(Texture::DominantDirectionMap)] = getTexture("dominant_direction_map");
+
+	for(auto i = decltype(m_textures.size()) {0u}; i < m_textures.size(); ++i) {
+		auto e = static_cast<Texture>(i);
+		auto &tex = m_textures[i];
+		LOGGER.info("Texture state for '{}': {}", magic_enum::enum_name(e), tex ? "loaded" : "not loaded");
+	}
 
 	pragma::CRasterizationRendererComponent::UpdateLightmap(*this);
 }

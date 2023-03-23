@@ -20,6 +20,7 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <image/prosper_msaa_texture.hpp>
+#include <pragma/logging.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <prosper_command_buffer.hpp>
@@ -91,16 +92,20 @@ void CRasterizationRendererComponent::InitializeLuaObject(lua_State *l) { return
 static pragma::ComponentHandle<pragma::CLightMapComponent> g_lightmapC = {};
 void CRasterizationRendererComponent::UpdateLightmap(CLightMapComponent &lightMapC)
 {
-	if(!lightMapC.HasValidLightMap())
+	if(!lightMapC.HasValidLightMap()) {
+		pragma::get_logger(CLightMapComponent::LOGGER_NAME).warn("Lightmap has no valid lightmap texture!");
 		return;
+	}
 	for(auto &renderer : EntityCIterator<CRasterizationRendererComponent> {*c_game})
 		renderer.SetLightMap(lightMapC);
 	g_lightmapC = lightMapC.GetHandle<CLightMapComponent>();
 }
 void CRasterizationRendererComponent::UpdateLightmap()
 {
-	if(g_lightmapC.expired())
+	if(g_lightmapC.expired()) {
+		pragma::get_logger(CLightMapComponent::LOGGER_NAME).warn("No lightmap component found!");
 		return;
+	}
 	UpdateLightmap(*g_lightmapC);
 }
 
@@ -462,8 +467,10 @@ void CRasterizationRendererComponent::SetLightMap(pragma::CLightMapComponent &li
 	if(m_lightMapInfo.cbExposure.IsValid())
 		m_lightMapInfo.cbExposure.Remove();
 	m_lightMapInfo.cbExposure = lightMapC.GetLightMapExposureProperty()->AddCallback([this, &lightMapC](std::reference_wrapper<const float> oldValue, std::reference_wrapper<const float> newValue) { m_rendererData.lightmapExposurePow = lightMapC.CalcLightMapPowExposurePow(); });
-	if(m_lightMapInfo.lightMapTexture == nullptr)
+	if(m_lightMapInfo.lightMapTexture == nullptr) {
+		pragma::get_logger(CLightMapComponent::LOGGER_NAME).warn("Lightmap component has no light map texture!");
 		return;
+	}
 	auto &ds = *m_descSetGroupRenderer->GetDescriptorSet();
 
 	auto &dummyTex = c_engine->GetRenderContext().GetDummyTexture();

@@ -280,6 +280,7 @@ void pragma::lua::detail::register_lua_debug_tostring(lua_State *l, const std::t
 	auto o = luabind::object {luabind::from_stack(l, -1)};
 	o["__debugger_tostring"] = luabind::make_function(
 	  l, +[](const luabind::object &o) -> std::string { return tostring(o); });
+	o["__name"] = crep->name();
 	lua_pop(l, 1);
 }
 
@@ -1677,18 +1678,33 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	modEnts[defItFilterFunction];
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "ents",
-	  {{"ITERATOR_FILTER_BIT_NONE", umath::to_integral(EntityIterator::FilterFlags::None)}, {"ITERATOR_FILTER_BIT_SPAWNED", umath::to_integral(EntityIterator::FilterFlags::Spawned)}, {"ITERATOR_FILTER_BIT_PENDING", umath::to_integral(EntityIterator::FilterFlags::Pending)},
-	    {"ITERATOR_FILTER_BIT_INCLUDE_SHARED", umath::to_integral(EntityIterator::FilterFlags::IncludeShared)}, {"ITERATOR_FILTER_BIT_INCLUDE_NETWORK_LOCAL", umath::to_integral(EntityIterator::FilterFlags::IncludeNetworkLocal)},
+	  {
+	    {"ITERATOR_FILTER_BIT_NONE", umath::to_integral(EntityIterator::FilterFlags::None)},
+	    {"ITERATOR_FILTER_BIT_SPAWNED", umath::to_integral(EntityIterator::FilterFlags::Spawned)},
+	    {"ITERATOR_FILTER_BIT_PENDING", umath::to_integral(EntityIterator::FilterFlags::Pending)},
+	    {"ITERATOR_FILTER_BIT_INCLUDE_SHARED", umath::to_integral(EntityIterator::FilterFlags::IncludeShared)},
+	    {"ITERATOR_FILTER_BIT_INCLUDE_NETWORK_LOCAL", umath::to_integral(EntityIterator::FilterFlags::IncludeNetworkLocal)},
 
-	    {"ITERATOR_FILTER_BIT_CHARACTER", umath::to_integral(EntityIterator::FilterFlags::Character)}, {"ITERATOR_FILTER_BIT_PLAYER", umath::to_integral(EntityIterator::FilterFlags::Player)}, {"ITERATOR_FILTER_BIT_WEAPON", umath::to_integral(EntityIterator::FilterFlags::Weapon)},
-	    {"ITERATOR_FILTER_BIT_VEHICLE", umath::to_integral(EntityIterator::FilterFlags::Vehicle)}, {"ITERATOR_FILTER_BIT_NPC", umath::to_integral(EntityIterator::FilterFlags::NPC)}, {"ITERATOR_FILTER_BIT_PHYSICAL", umath::to_integral(EntityIterator::FilterFlags::Physical)},
-	    {"ITERATOR_FILTER_BIT_SCRIPTED", umath::to_integral(EntityIterator::FilterFlags::Scripted)}, {"ITERATOR_FILTER_BIT_MAP_ENTITY", umath::to_integral(EntityIterator::FilterFlags::MapEntity)},
+	    {"ITERATOR_FILTER_BIT_CHARACTER", umath::to_integral(EntityIterator::FilterFlags::Character)},
+	    {"ITERATOR_FILTER_BIT_PLAYER", umath::to_integral(EntityIterator::FilterFlags::Player)},
+	    {"ITERATOR_FILTER_BIT_WEAPON", umath::to_integral(EntityIterator::FilterFlags::Weapon)},
+	    {"ITERATOR_FILTER_BIT_VEHICLE", umath::to_integral(EntityIterator::FilterFlags::Vehicle)},
+	    {"ITERATOR_FILTER_BIT_NPC", umath::to_integral(EntityIterator::FilterFlags::NPC)},
+	    {"ITERATOR_FILTER_BIT_PHYSICAL", umath::to_integral(EntityIterator::FilterFlags::Physical)},
+	    {"ITERATOR_FILTER_BIT_SCRIPTED", umath::to_integral(EntityIterator::FilterFlags::Scripted)},
+	    {"ITERATOR_FILTER_BIT_MAP_ENTITY", umath::to_integral(EntityIterator::FilterFlags::MapEntity)},
 
-	    {"ITERATOR_FILTER_BIT_HAS_TRANSFORM", umath::to_integral(EntityIterator::FilterFlags::HasTransform)}, {"ITERATOR_FILTER_BIT_HAS_MODEL", umath::to_integral(EntityIterator::FilterFlags::HasModel)},
+	    {"ITERATOR_FILTER_BIT_HAS_TRANSFORM", umath::to_integral(EntityIterator::FilterFlags::HasTransform)},
+	    {"ITERATOR_FILTER_BIT_HAS_MODEL", umath::to_integral(EntityIterator::FilterFlags::HasModel)},
 
-	    {"ITERATOR_FILTER_ANY_TYPE", umath::to_integral(EntityIterator::FilterFlags::AnyType)}, {"ITERATOR_FILTER_ANY", umath::to_integral(EntityIterator::FilterFlags::Any)}, {"ITERATOR_FILTER_DEFAULT", umath::to_integral(EntityIterator::FilterFlags::Default)},
+	    {"ITERATOR_FILTER_ANY_TYPE", umath::to_integral(EntityIterator::FilterFlags::AnyType)},
+	    {"ITERATOR_FILTER_ANY", umath::to_integral(EntityIterator::FilterFlags::Any)},
+	    {"ITERATOR_FILTER_DEFAULT", umath::to_integral(EntityIterator::FilterFlags::Default)},
 
-	    {"TICK_POLICY_ALWAYS", umath::to_integral(pragma::TickPolicy::Always)}, {"TICK_POLICY_NEVER", umath::to_integral(pragma::TickPolicy::Never)}, {"TICK_POLICY_WHEN_VISIBLE", umath::to_integral(pragma::TickPolicy::WhenVisible)}});
+	    {"TICK_POLICY_ALWAYS", umath::to_integral(pragma::TickPolicy::Always)},
+	    {"TICK_POLICY_NEVER", umath::to_integral(pragma::TickPolicy::Never)},
+	    {"TICK_POLICY_WHEN_VISIBLE", umath::to_integral(pragma::TickPolicy::WhenVisible)},
+	  });
 
 	auto surfaceMatDef = pragma::lua::register_class<SurfaceMaterial>(GetLuaState(), "SurfaceMaterial");
 	surfaceMatDef->def("GetName", &::SurfaceMaterial::GetIdentifier);

@@ -4,19 +4,6 @@
 util.retarget = {}
 
 --- 
---- @param retargetData util.retarget.RetargetData
---- @param mdl game.Model
---- @param animSrc ents.BaseAnimatedComponent
---- @param animDst ents.BaseAnimatedComponent
---- @param skeleton game.Model.Skeleton
-function util.retarget.apply_retarget_rig(retargetData, mdl, animSrc, animDst, skeleton) end
-
---- 
---- @param remapData any
---- @return util.retarget.RetargetFlexData ret0
-function util.retarget.initialize_retarget_flex_data(remapData) end
-
---- 
 --- @param retargetFlexData util.retarget.RetargetFlexData
 --- @param flexCSrc ents.BaseFlexComponent
 --- @param flexCDst ents.BaseFlexComponent
@@ -37,6 +24,19 @@ function util.retarget.apply_retarget_flex(retargetFlexData, flexCSrc, flexCDst)
 --- @param tTranslationTable any
 --- @return util.retarget.RetargetData ret0
 function util.retarget.initialize_retarget_data(absBonePoses, origBindPoseToRetargetBindPose, origBindPoseBoneDistances, bindPosesOther, origBindPoses, tmpPoses, retargetPoses, invRootPose, bindPoseTransforms, relBindPoses, tUntranslatedBones, tTranslationTable) end
+
+--- 
+--- @param retargetData util.retarget.RetargetData
+--- @param mdl game.Model
+--- @param animSrc ents.BaseAnimatedComponent
+--- @param animDst ents.BaseAnimatedComponent
+--- @param skeleton Model.Skeleton
+function util.retarget.apply_retarget_rig(retargetData, mdl, animSrc, animDst, skeleton) end
+
+--- 
+--- @param remapData any
+--- @return util.retarget.RetargetFlexData ret0
+function util.retarget.initialize_retarget_flex_data(remapData) end
 
 
 --- 

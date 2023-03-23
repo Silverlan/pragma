@@ -4,6 +4,9 @@
 engine = {}
 
 --- 
+function engine.shutdown() end
+
+--- 
 --- @return string ret0
 function engine.get_working_directory() end
 
@@ -21,13 +24,13 @@ function engine.get_tick_count() end
 function engine.load_library(path) end
 
 --- 
+--- @return table ret0
+function engine.get_git_info() end
+
+--- 
 --- @param library string
 --- @return bool ret0
 function engine.library_exists(library) end
-
---- 
---- @return table ret0
-function engine.get_git_info() end
 
 --- 
 --- @return table ret0
@@ -40,7 +43,11 @@ function engine.get_info() end
 function engine.poll_console_output() end
 
 --- 
-function engine.shutdown() end
+--- @param text string
+--- @param font engine.FontInfo
+--- @return math.Vector2i ret0
+--- @overload fun(text: string, font: string): math.Vector2i
+function engine.get_text_size(text, font) end
 
 --- 
 --- @param identifier string
@@ -87,13 +94,6 @@ function engine.get_current_frame_index() end
 --- @param arg0 class CEngine
 --- @return string ret0
 function engine.get_default_font_set_name(arg0) end
-
---- 
---- @param text string
---- @param font engine.FontInfo
---- @return math.Vector2i ret0
---- @overload fun(text: string, font: string): math.Vector2i
-function engine.get_text_size(text, font) end
 
 
 --- 

@@ -4,13 +4,9 @@
 locale = {}
 
 --- 
---- @param fileName string
---- @return bool ret0
-function locale.load(fileName) end
-
---- 
---- @return string ret0
-function locale.get_language() end
+--- @param id string
+--- @param text string
+function locale.set_text(id, text) end
 
 --- 
 --- @param identifier string
@@ -21,12 +17,16 @@ function locale.get_language() end
 function locale.localize(identifier, lan, category, text) end
 
 --- 
+--- @return string ret0
+function locale.get_language() end
+
+--- 
 --- @param lan string
 function locale.change_language(lan) end
 
 --- 
---- @param id string
---- @param text string
-function locale.set_text(id, text) end
+--- @param fileName string
+--- @return bool ret0
+function locale.load(fileName) end
 
 

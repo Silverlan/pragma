@@ -5,35 +5,11 @@ dmx = {}
 
 
 --- 
---- @class dmx.Data
-dmx.Data = {}
-
---- 
-function dmx.Data:GetElements() end
-
---- 
-function dmx.Data:GetRootAttribute() end
-
---- 
-function dmx.Data:__tostring() end
-
-
---- 
 --- @class dmx.Attribute
 dmx.Attribute = {}
 
 --- 
 function dmx.Attribute:GetValue() end
-
---- 
-function dmx.Attribute:GetType() end
-
---- 
-function dmx.Attribute:__tostring() end
-
---- 
---- @param val dmx.Attribute
-function dmx.Attribute:RemoveArrayValue(val) end
 
 --- 
 --- @param attrOther dmx.Attribute
@@ -47,11 +23,21 @@ function dmx.Attribute:IsValid() end
 function dmx.Attribute:AddArrayValue(val) end
 
 --- 
-function dmx.Attribute:GetValueAsString() end
+function dmx.Attribute:__tostring() end
+
+--- 
+--- @param val dmx.Attribute
+function dmx.Attribute:RemoveArrayValue(val) end
+
+--- 
+function dmx.Attribute:GetType() end
 
 --- 
 --- @param name string
 function dmx.Attribute:Get(name) end
+
+--- 
+function dmx.Attribute:GetValueAsString() end
 
 
 --- @enum Type
@@ -97,6 +83,9 @@ dmx.Attribute = {
 dmx.Element = {}
 
 --- 
+function dmx.Element:GetAttributes() end
+
+--- 
 function dmx.Element:GetGUID() end
 
 --- 
@@ -112,27 +101,38 @@ function dmx.Element:GetAttributeValue(id) end
 function dmx.Element:GetAttr(name) end
 
 --- 
-function dmx.Element:GetType() end
-
---- 
 --- @param elOther dmx.Element
 function dmx.Element:__eq(elOther) end
 
 --- 
-function dmx.Element:GetName() end
-
---- 
---- @param id string
-function dmx.Element:GetAttribute(id) end
-
---- 
-function dmx.Element:GetAttributes() end
+function dmx.Element:GetType() end
 
 --- 
 --- @param name string
 function dmx.Element:Get(name) end
 
 --- 
+--- @param id string
+function dmx.Element:GetAttribute(id) end
+
+--- 
+function dmx.Element:GetName() end
+
+--- 
 function dmx.Element:__tostring() end
+
+
+--- 
+--- @class dmx.Data
+dmx.Data = {}
+
+--- 
+function dmx.Data:GetRootAttribute() end
+
+--- 
+function dmx.Data:__tostring() end
+
+--- 
+function dmx.Data:GetElements() end
 
 

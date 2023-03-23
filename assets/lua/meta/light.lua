@@ -17,11 +17,13 @@ function light.get_average_color_temperature(type) end
 --- 
 --- @param temperature int
 --- @return math.Vector ret0
+--- @overload fun(temperature: int): math.Vector
 function light.color_temperature_to_color(temperature) end
 
 --- 
 --- @param wavelength int
 --- @return math.Vector ret0
+--- @overload fun(wavelength: int): math.Vector
 function light.wavelength_to_color(wavelength) end
 
 --- 

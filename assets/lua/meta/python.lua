@@ -4,10 +4,11 @@
 python = {}
 
 --- 
---- @param code string
---- @return bool ret0_1
---- @return string ret0_2
-function python.run(code) end
+--- @return bool ret0
+function python.init_blender() end
+
+--- 
+function python.reload() end
 
 --- 
 --- @param fileName string
@@ -18,10 +19,9 @@ function python.run(code) end
 function python.exec(fileName, args) end
 
 --- 
---- @return bool ret0
-function python.init_blender() end
-
---- 
-function python.reload() end
+--- @param code string
+--- @return bool ret0_1
+--- @return string ret0_2
+function python.run(code) end
 
 

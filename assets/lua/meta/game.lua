@@ -4,24 +4,16 @@
 game = {}
 
 --- 
---- @param typeId int
---- @return string ret0
-function game.get_ammo_type_name(typeId) end
-
---- 
---- @return bool ret0
-function game.is_game_mode_initialized() end
-
---- 
---- @return nav.Mesh ret0
-function game.get_nav_mesh() end
-
---- 
 function game.clear_unused_materials() end
 
 --- 
 --- @return ents.BaseGamemodeComponent ret0
 function game.get_game_mode() end
+
+--- 
+--- @param mapName string
+--- @overload fun(mapName: string, landmarkName: string): 
+function game.change_map(mapName) end
 
 --- 
 --- @param name string
@@ -32,18 +24,42 @@ function game.get_game_mode() end
 function game.register_ammo_type(name) end
 
 --- 
---- @param mapName string
---- @overload fun(mapName: string, landmarkName: string): 
-function game.change_map(mapName) end
-
---- 
 --- @return number ret0
 function game.get_time_scale() end
 
 --- 
+--- @param arg0 class CGame
+function game.clear_gameplay_control_camera(arg0) end
+
+--- 
+--- @param name string
+--- @return int ret0
+function game.get_ammo_type_id(name) end
+
+--- 
+--- @param pos math.Vector
+--- @return number ret0
+--- @overload fun(pos: vector.Vector): number
+function game.get_sound_intensity(pos) end
+
+--- 
+--- @return bool ret0
+function game.is_game_mode_initialized() end
+
+--- 
+--- @param typeId int
+--- @return string ret0
+function game.get_ammo_type_name(typeId) end
+
+--- 
 --- @param pos math.Vector
 --- @return math.Vector ret0
+--- @overload fun(pos: vector.Vector): math.Vector
 function game.get_light_color(pos) end
+
+--- 
+--- @return nav.Mesh ret0
+function game.get_nav_mesh() end
 
 --- 
 --- @return bool ret0
@@ -54,11 +70,6 @@ function game.load_nav_mesh() end
 --- @param identifier string
 --- @return game.Material ret0
 function game.get_material(identifier) end
-
---- 
---- @param pos math.Vector
---- @return number ret0
-function game.get_sound_intensity(pos) end
 
 --- 
 --- @return bool ret0
@@ -78,6 +89,10 @@ function game.get_game_state_flags() end
 function game.update_animations(game, dt) end
 
 --- 
+--- @return math.Vector ret0
+function game.get_gravity() end
+
+--- 
 --- @param gravity math.Vector
 function game.set_gravity(gravity) end
 
@@ -91,10 +106,6 @@ function game.add_callback(identifier, function_) end
 --- @return enum pragma::rendering::RenderMask ret0_1
 --- @return enum pragma::rendering::RenderMask ret0_2
 function game.get_primary_camera_render_mask() end
-
---- 
---- @return math.Vector ret0
-function game.get_gravity() end
 
 --- 
 --- @param name string
@@ -112,6 +123,11 @@ function game.load_sound_scripts(fileName) end
 function game.precache_model(mdlName) end
 
 --- 
+--- @param mdlName string
+--- @return game.Model ret0
+function game.get_model(mdlName) end
+
+--- 
 --- @param mat string
 --- @return game.Material ret0
 --- @overload fun(mat: string, reload: bool): game.Material
@@ -123,11 +139,6 @@ function game.load_material(mat) end
 --- 
 --- @param timeScale number
 function game.set_time_scale(timeScale) end
-
---- 
---- @param mdlName string
---- @return game.Model ret0
-function game.get_model(mdlName) end
 
 --- 
 --- @param game class Game
@@ -144,31 +155,6 @@ function game.call_callbacks(game, identifier) end
 --- 
 --- @param identifier string
 function game.clear_callbacks(identifier) end
-
---- 
---- @param name string
---- @return int ret0
-function game.get_ammo_type_id(name) end
-
---- 
---- @param arg0 class CGame
-function game.clear_gameplay_control_camera(arg0) end
-
---- 
---- @param file file.File
---- @return prosper.Texture ret0
---- @overload fun(file: file.File, loadFlags: enum util::AssetLoadFlags): prosper.Texture
---- @overload fun(file: file.File, cacheName: string): prosper.Texture
---- @overload fun(file: file.File, cacheName: string, loadFlags: enum util::AssetLoadFlags): prosper.Texture
---- @overload fun(name: string): prosper.Texture
---- @overload fun(name: string, loadFlags: enum util::AssetLoadFlags): prosper.Texture
-function game.load_texture(file) end
-
---- 
---- @param shader string
---- @return game.Material ret0
---- @overload fun(identifier: string, shader: string): game.Material
-function game.create_material(shader) end
 
 --- 
 --- @param mat string
@@ -209,6 +195,22 @@ function game.get_gameplay_control_camera(arg0) end
 --- @param arg0 class CGame
 function game.reset_gameplay_control_camera(arg0) end
 
+--- 
+--- @param file file.File
+--- @return prosper.Texture ret0
+--- @overload fun(file: file.File, loadFlags: enum util::AssetLoadFlags): prosper.Texture
+--- @overload fun(file: file.File, cacheName: string): prosper.Texture
+--- @overload fun(file: file.File, cacheName: string, loadFlags: enum util::AssetLoadFlags): prosper.Texture
+--- @overload fun(name: string): prosper.Texture
+--- @overload fun(name: string, loadFlags: enum util::AssetLoadFlags): prosper.Texture
+function game.load_texture(file) end
+
+--- 
+--- @param shader string
+--- @return game.Material ret0
+--- @overload fun(identifier: string, shader: string): game.Material
+function game.create_material(shader) end
+
 
 --- 
 --- @class game.ValueDriverDescriptor
@@ -217,6 +219,11 @@ function game.reset_gameplay_control_camera(arg0) end
 --- @overload fun(arg2: string, arg3: map):game.ValueDriverDescriptor
 --- @overload fun(arg2: string, arg3: map, arg4: map):game.ValueDriverDescriptor
 game.ValueDriverDescriptor = {}
+
+--- 
+--- @param arg1 string
+--- @param arg2 string
+function game.ValueDriverDescriptor:AddReference(arg1, arg2) end
 
 --- 
 --- @param name string
@@ -229,33 +236,16 @@ function game.ValueDriverDescriptor:AddConstant(name, udmType) end
 function game.ValueDriverDescriptor:GetConstants() end
 
 --- 
---- @return map ret0
-function game.ValueDriverDescriptor:GetReferences() end
-
---- 
 function game.ValueDriverDescriptor:__tostring() end
 
 --- 
---- @param arg1 string
---- @param arg2 string
-function game.ValueDriverDescriptor:AddReference(arg1, arg2) end
+--- @return map ret0
+function game.ValueDriverDescriptor:GetReferences() end
 
 
 --- 
 --- @class game.SurfaceMaterial
 game.SurfaceMaterial = {}
-
---- 
---- @param arg1 string
-function game.SurfaceMaterial:SetBulletImpactSound(arg1) end
-
---- 
---- @param arg1 string
-function game.SurfaceMaterial:SetFootstepSound(arg1) end
-
---- 
---- @param arg1 number
-function game.SurfaceMaterial:SetWavePropagation(arg1) end
 
 --- 
 --- @return string ret0
@@ -264,6 +254,14 @@ function game.SurfaceMaterial:GetFootstepSound() end
 --- 
 --- @return number ret0
 function game.SurfaceMaterial:GetWavePropagation() end
+
+--- 
+--- @param arg1 number
+function game.SurfaceMaterial:SetAudioHighFrequencyTransmission(arg1) end
+
+--- 
+--- @return number ret0
+function game.SurfaceMaterial:GetPBRMetalness() end
 
 --- 
 --- @return number ret0
@@ -275,15 +273,8 @@ function game.SurfaceMaterial:GetHardImpactSound() end
 
 --- 
 --- @param radiusRGB math.Vector
+--- @overload fun(radiusRGB: vector.Vector): 
 function game.SurfaceMaterial:SetSubsurfaceScatterColor(radiusRGB) end
-
---- 
---- @return number ret0
-function game.SurfaceMaterial:GetPBRMetalness() end
-
---- 
---- @param arg1 number
-function game.SurfaceMaterial:SetAudioHighFrequencyTransmission(arg1) end
 
 --- 
 --- @param factor number
@@ -307,10 +298,12 @@ function game.SurfaceMaterial:GetSubsurfaceFactor() end
 
 --- 
 --- @return math.Vector ret0
+--- @overload fun(): math.Vector
 function game.SurfaceMaterial:GetSubsurfaceScatterColor() end
 
 --- 
 --- @return math.Vector ret0
+--- @overload fun(): math.Vector
 function game.SurfaceMaterial:GetSubsurfaceRadiusMM() end
 
 --- 
@@ -319,6 +312,7 @@ function game.SurfaceMaterial:GetAudioMidFrequencyAbsorption() end
 
 --- 
 --- @param radiusMM math.Vector
+--- @overload fun(radiusMM: vector.Vector): 
 function game.SurfaceMaterial:SetSubsurfaceRadiusMM(radiusMM) end
 
 --- 
@@ -339,15 +333,15 @@ function game.SurfaceMaterial:SetFriction(arg1) end
 
 --- 
 --- @return number ret0
-function game.SurfaceMaterial:GetAudioScattering() end
+function game.SurfaceMaterial:GetDensity() end
 
 --- 
 --- @param arg1 number
-function game.SurfaceMaterial:SetRestitution(arg1) end
+function game.SurfaceMaterial:SetLinearDragCoefficient(arg1) end
 
 --- 
 --- @param arg1 number
-function game.SurfaceMaterial:SetAudioMidFrequencyTransmission(arg1) end
+function game.SurfaceMaterial:SetDensity(arg1) end
 
 --- 
 --- @return number ret0
@@ -361,20 +355,20 @@ function game.SurfaceMaterial:SetTorqueDragCoefficient(arg1) end
 function game.SurfaceMaterial:ClearIOR() end
 
 --- 
+--- @param arg1 string
+function game.SurfaceMaterial:SetFootstepSound(arg1) end
+
+--- 
+--- @param arg1 string
+function game.SurfaceMaterial:SetBulletImpactSound(arg1) end
+
+--- 
 --- @param arg1 number
-function game.SurfaceMaterial:SetLinearDragCoefficient(arg1) end
+function game.SurfaceMaterial:SetWavePropagation(arg1) end
 
 --- 
 --- @return number ret0
-function game.SurfaceMaterial:GetDensity() end
-
---- 
---- @param arg1 number
-function game.SurfaceMaterial:SetDensity(arg1) end
-
---- 
---- @return number ret0
-function game.SurfaceMaterial:GetAudioHighFrequencyTransmission() end
+function game.SurfaceMaterial:GetRestitution() end
 
 --- 
 --- @param arg1 number
@@ -405,8 +399,24 @@ function game.SurfaceMaterial:GetDynamicFriction() end
 function game.SurfaceMaterial:GetAudioLowFrequencyAbsorption() end
 
 --- 
+--- @return string ret0
+function game.SurfaceMaterial:GetName() end
+
+--- 
+--- @param arg1 string
+function game.SurfaceMaterial:SetSoftImpactSound(arg1) end
+
+--- 
+--- @param arg1 number
+function game.SurfaceMaterial:SetRestitution(arg1) end
+
+--- 
 --- @return number ret0
-function game.SurfaceMaterial:GetRestitution() end
+function game.SurfaceMaterial:GetAudioScattering() end
+
+--- 
+--- @return int ret0
+function game.SurfaceMaterial:GetIndex() end
 
 --- 
 --- @return string ret0
@@ -415,14 +425,6 @@ function game.SurfaceMaterial:GetImpactParticleEffect() end
 --- 
 --- @return string ret0
 function game.SurfaceMaterial:GetBulletImpactSound() end
-
---- 
---- @param arg1 string
-function game.SurfaceMaterial:SetSoftImpactSound(arg1) end
-
---- 
---- @return string ret0
-function game.SurfaceMaterial:GetName() end
 
 --- 
 --- @return string ret0
@@ -464,12 +466,16 @@ function game.SurfaceMaterial:SetAudioLowFrequencyTransmission(arg1) end
 function game.SurfaceMaterial:SetWaveStiffness(arg1) end
 
 --- 
+--- @param arg1 number
+function game.SurfaceMaterial:SetAudioMidFrequencyTransmission(arg1) end
+
+--- 
 --- @return number ret0
 function game.SurfaceMaterial:GetAudioMidFrequencyTransmission() end
 
 --- 
---- @return int ret0
-function game.SurfaceMaterial:GetIndex() end
+--- @return number ret0
+function game.SurfaceMaterial:GetAudioHighFrequencyTransmission() end
 
 --- 
 --- @return enum pragma::nav::PolyFlags ret0
@@ -481,74 +487,274 @@ function game.SurfaceMaterial:SetNavigationFlags(arg1) end
 
 
 --- 
+--- @class game.DamageInfo
+--- @overload fun():game.DamageInfo
+game.DamageInfo = {}
+
+--- 
+--- @param arg1 enum DAMAGETYPE
+function game.DamageInfo:RemoveDamageType(arg1) end
+
+--- 
+--- @param arg1 enum DAMAGETYPE
+--- @return bool ret0
+function game.DamageInfo:IsDamageType(arg1) end
+
+--- 
+--- @return int ret0
+function game.DamageInfo:GetDamage() end
+
+--- 
+--- @param arg1 math.Vector
+--- @overload fun(arg1: vector.Vector): 
+function game.DamageInfo:SetSource(arg1) end
+
+--- 
+--- @param arg1 math.Vector
+--- @overload fun(arg1: vector.Vector): 
+function game.DamageInfo:SetForce(arg1) end
+
+--- 
+--- @return math.Vector ret0
+--- @overload fun(): math.Vector
+function game.DamageInfo:GetSource() end
+
+--- 
+--- @return math.Vector ret0
+--- @overload fun(): math.Vector
+function game.DamageInfo:GetForce() end
+
+--- 
+--- @param arg1 math.Vector
+--- @overload fun(arg1: vector.Vector): 
+function game.DamageInfo:SetHitPosition(arg1) end
+
+--- 
+--- @return math.Vector ret0
+--- @overload fun(): math.Vector
+function game.DamageInfo:GetHitPosition() end
+
+--- 
+--- @return enum HitGroup ret0
+function game.DamageInfo:GetHitGroup() end
+
+--- 
+--- @param arg1 enum HitGroup
+function game.DamageInfo:SetHitGroup(arg1) end
+
+--- 
+function game.DamageInfo:__tostring() end
+
+--- 
+--- @param arg1 int
+function game.DamageInfo:SetDamage(arg1) end
+
+--- 
+--- @param arg1 int
+function game.DamageInfo:AddDamage(arg1) end
+
+--- 
+--- @param arg1 number
+function game.DamageInfo:ScaleDamage(arg1) end
+
+--- 
+--- @return ents.BaseEntityBase ret0
+function game.DamageInfo:GetAttacker() end
+
+--- 
+--- @param arg1 ents.BaseEntityBase
+function game.DamageInfo:SetAttacker(arg1) end
+
+--- 
+--- @return ents.BaseEntityBase ret0
+function game.DamageInfo:GetInflictor() end
+
+--- 
+--- @param arg1 ents.BaseEntityBase
+function game.DamageInfo:SetInflictor(arg1) end
+
+--- 
+--- @return int ret0
+function game.DamageInfo:GetDamageTypes() end
+
+--- 
+--- @param arg1 enum DAMAGETYPE
+function game.DamageInfo:SetDamageType(arg1) end
+
+--- 
+--- @param arg1 enum DAMAGETYPE
+function game.DamageInfo:AddDamageType(arg1) end
+
+
+--- 
+--- @class game.BulletInfo
+--- @field distance number 
+--- @field spread  
+--- @field attacker class util::TWeakSharedHandle<class BaseEntity> 
+--- @field force number 
+--- @field damageType int 
+--- @field damage int 
+--- @field bulletCount int 
+--- @field inflictor class util::TWeakSharedHandle<class BaseEntity> 
+--- @field tracerCount int 
+--- @field tracerRadius number 
+--- @field tracerColor  
+--- @field tracerLength number 
+--- @field tracerSpeed number 
+--- @field tracerMaterial string 
+--- @field tracerBloom number 
+--- @field ammoType string 
+--- @field direction  
+--- @field effectOrigin  
+--- @overload fun():game.BulletInfo
+game.BulletInfo = {}
+
+--- 
+function game.BulletInfo:__tostring() end
+
+
+--- 
+--- @class game.GibletCreateInfo
+--- @field physHeight number 
+--- @field model string 
+--- @field physShape int 
+--- @field lifetime number 
+--- @field physRadius number 
+--- @field skin int 
+--- @field scale number 
+--- @field mass number 
+--- @field position  
+--- @field rotation  
+--- @field velocity  
+--- @field angularVelocity  
+--- @field physTranslationOffset  
+--- @field physRotationOffset  
+--- @overload fun():game.GibletCreateInfo
+game.GibletCreateInfo = {}
+
+
+--- @enum PhysShape
+game.GibletCreateInfo = {
+	PHYS_SHAPE_BOX = 3,
+	PHYS_SHAPE_CYLINDER = 4,
+	PHYS_SHAPE_SPHERE = 2,
+	PHYS_SHAPE_MODEL = 0,
+	PHYS_SHAPE_NONE = 1,
+}
+
+--- 
 --- @class game.Model
 game.Model = {}
 
 --- 
+--- @param idx int
+function game.Model:GetObjectAttachment(idx) end
+
+--- 
+--- @param lod int
+--- @overload fun(lod: int, o: any): 
+function game.Model:TranslateLODMeshes(lod) end
+
+--- 
+--- @param activity int
+function game.Model:SelectFirstAnimation(activity) end
+
+--- 
+function game.Model:GetLODCount() end
+
+--- 
+--- @param idx int
+--- @return any ret0
+function game.Model:GetFlexAnimation(idx) end
+
+--- 
+--- @param anim int
+function game.Model:GetAnimationActivity(anim) end
+
+--- 
+--- @param attId int
+--- @param data any
+--- @overload fun(name: string, data: any): 
+function game.Model:SetAttachmentData(attId, data) end
+
+--- 
+function game.Model:GetFlags() end
+
+--- 
+--- @param anim int
+function game.Model:GetAnimationActivityWeight(anim) end
+
+--- 
+function game.Model:GetAnimationCount() end
+
+--- 
+--- @param group int
+function game.Model:PrecacheTextureGroup(group) end
+
+--- 
 --- @param name string
---- @param boneId int
---- @param offset math.Vector
---- @param ang math.EulerAngles
---- @overload fun(name: string, boneName: string, offset: math.Vector, ang: math.EulerAngles): 
-function game.Model:AddAttachment(name, boneId, offset, ang) end
-
---- 
-function game.Model:GetMeshCount() end
+--- @param flexAnim Model.FlexAnimation
+--- @overload fun(name: string): 
+function game.Model:AddFlexAnimation(name, flexAnim) end
 
 --- 
 --- @param name string
-function game.Model:GetVertexAnimation(name) end
+function game.Model:LookupAnimation(name) end
 
 --- 
---- @param mass number
-function game.Model:SetMass(mass) end
+--- @param anim int
+function game.Model:GetAnimationDuration(anim) end
 
 --- 
-function game.Model:GetFlexControllerCount() end
+function game.Model:GetEyeOffset() end
 
 --- 
---- @param name string
-function game.Model:SaveLegacy(name) end
-
---- 
---- @param o any
-function game.Model:SetMaterialPaths(o) end
-
---- 
-function game.Model:HasVertexWeights() end
-
---- 
---- @param type int
---- @param name string
---- @param attachment string
---- @param oKeyValues any
-function game.Model:AddObjectAttachment(type, name, attachment, oKeyValues) end
-
---- 
-function game.Model:GetCollisionBounds() end
-
---- 
---- @param name string
-function game.Model:LookupFlexController(name) end
-
---- 
-function game.Model:GetBaseMeshGroupIds() end
+--- @overload fun(lod: int): 
+function game.Model:GetLODData() end
 
 --- 
 --- @param flags int
---- @overload fun(): 
-function game.Model:Update(flags) end
+function game.Model:SetFlags(flags) end
 
 --- 
-function game.Model:GetVertexCount() end
+function game.Model:GetMaterialNames() end
 
 --- 
-function game.Model:GetSkeleton() end
+--- @param name string
+--- @return any ret0
+function game.Model:LookupFlexAnimation(name) end
 
 --- 
---- @param animID int
---- @overload fun(name: int): 
-function game.Model:GetAnimation(animID) end
+--- @param flag int
+function game.Model:HasFlag(flag) end
+
+--- 
+--- @return int ret0
+function game.Model:GetFlexAnimationCount() end
+
+--- 
+--- @param idx int
+--- @return any ret0
+function game.Model:GetFlexAnimationName(idx) end
+
+--- 
+function game.Model:UpdateCollisionBounds() end
+
+--- 
+--- @param name string
+function game.Model:LookupObjectAttachment(name) end
+
+--- 
+--- @param mgId int
+--- @overload fun(meshGroupName: string): 
+function game.Model:GetMeshGroup(mgId) end
+
+--- 
+function game.Model:ClearFlexAnimations() end
+
+--- 
+--- @param idx int
+function game.Model:RemoveFlexAnimation(idx) end
 
 --- 
 function game.Model:GetSubMeshCount() end
@@ -560,17 +766,20 @@ function game.Model:GetBlendControllerCount() end
 function game.Model:GetAnimationNames() end
 
 --- 
---- @param textureGroup int
---- @param name string
---- @overload fun(textureGroup: int, mat: game.Material): 
-function game.Model:AddMaterial(textureGroup, name) end
-
---- 
 --- @param mgId int
 --- @param mId int
 --- @param smId int
---- @return game.Model.Mesh.Sub ret0
+--- @return Model.Mesh.Sub ret0
 function game.Model:GetSubMesh(mgId, mId, smId) end
+
+--- 
+--- @param path string
+function game.Model:AddMaterialPath(path) end
+
+--- 
+--- @param blendControllerId int
+--- @overload fun(name: string): 
+function game.Model:GetBlendController(blendControllerId) end
 
 --- 
 function game.Model:GetCollisionMeshes() end
@@ -579,12 +788,15 @@ function game.Model:GetCollisionMeshes() end
 function game.Model:GetAnimations() end
 
 --- 
---- @param boneId int
---- @param hitGroup int
-function game.Model:SetHitboxGroup(boneId, hitGroup) end
+--- @param copyFlags int
+--- @overload fun(): 
+function game.Model:Copy(copyFlags) end
 
 --- 
 function game.Model:ClearCollisionMeshes() end
+
+--- 
+function game.Model:GetSkeleton() end
 
 --- 
 function game.Model:GetAttachmentCount() end
@@ -601,20 +813,17 @@ function game.Model:GetAttachments() end
 function game.Model:GetAttachment(attId) end
 
 --- 
-function game.Model:GetFlags() end
+--- @param name string
+--- @param boneId int
+--- @param offset math.Vector
+--- @param ang math.EulerAngles
+--- @overload fun(name: string, boneName: string, offset: math.Vector, ang: math.EulerAngles): 
+--- @overload fun(name: string, boneId: int, offset: vector.Vector, ang: math.EulerAngles): 
+--- @overload fun(name: string, boneName: string, offset: vector.Vector, ang: math.EulerAngles): 
+function game.Model:AddAttachment(name, boneId, offset, ang) end
 
 --- 
---- @param attId int
---- @param data any
---- @overload fun(name: string, data: any): 
-function game.Model:SetAttachmentData(attId, data) end
-
---- 
---- @param idx int
-function game.Model:GetMaterial(idx) end
-
---- 
---- @param eyeball game.Model.Eyeball
+--- @param eyeball Model.Eyeball
 function game.Model:AddEyeball(eyeball) end
 
 --- 
@@ -627,15 +836,15 @@ function game.Model:RemoveAttachment(attId) end
 function game.Model:SetBaseMeshGroupIds(o) end
 
 --- 
---- @param meshGroup game.Model.MeshGroup
+--- @param meshGroup Model.MeshGroup
 --- @overload fun(name: string): 
 function game.Model:AddMeshGroup(meshGroup) end
 
 --- 
-function game.Model:GetObjectAttachments() end
+function game.Model:GetRenderBounds() end
 
 --- 
-function game.Model:GetRenderBounds() end
+function game.Model:GetObjectAttachments() end
 
 --- 
 --- @param activity int
@@ -647,32 +856,14 @@ function game.Model:SelectWeightedAnimation(activity, animIgnore) end
 function game.Model:AddBaseMeshGroupId() end
 
 --- 
-function game.Model:GetObjectAttachmentCount() end
-
---- 
---- @param boneId int
-function game.Model:GetHitboxGroup(boneId) end
-
---- 
---- @param lod int
---- @overload fun(lod: int, o: any): 
-function game.Model:TranslateLODMeshes(lod) end
-
---- 
---- @param idx int
-function game.Model:GetObjectAttachment(idx) end
-
---- 
+--- @param type int
 --- @param name string
-function game.Model:LookupObjectAttachment(name) end
+--- @param attachment string
+--- @param oKeyValues any
+function game.Model:AddObjectAttachment(type, name, attachment, oKeyValues) end
 
 --- 
---- @param mgId int
---- @overload fun(meshGroupName: string): 
-function game.Model:GetMeshGroup(mgId) end
-
---- 
-function game.Model:UpdateCollisionBounds() end
+function game.Model:GetObjectAttachmentCount() end
 
 --- 
 --- @param idx int
@@ -683,51 +874,17 @@ function game.Model:RemoveObjectAttachment(idx) end
 function game.Model:PrecacheTextureGroups() end
 
 --- 
-function game.Model:GetCollisionMeshCount() end
-
---- 
---- @param boneId int
-function game.Model:RemoveHitbox(boneId) end
-
---- 
 function game.Model:GetBlendControllers() end
-
---- 
-function game.Model:GetAnimationCount() end
-
---- 
---- @param group int
-function game.Model:PrecacheTextureGroup(group) end
-
---- 
---- @param name string
-function game.Model:LookupAttachment(name) end
-
---- 
---- @param boneId int
---- @param hitGroup int
---- @param min math.Vector
---- @param max math.Vector
-function game.Model:AddHitbox(boneId, hitGroup, min, max) end
 
 --- 
 --- @param animID int
 function game.Model:GetAnimationName(animID) end
 
 --- 
+function game.Model:GetBoneCount() end
+
+--- 
 function game.Model:GetReferencePose() end
-
---- 
---- @param bodyGroupId int
---- @param groupId int
-function game.Model:GetMeshGroupId(bodyGroupId, groupId) end
-
---- 
---- @param smTgt game.Model.Mesh.Sub
---- @return int ret0_1
---- @return int ret0_2
---- @return int ret0_3
-function game.Model:FindSubMeshId(smTgt) end
 
 --- 
 --- @param o any
@@ -742,19 +899,160 @@ function game.Model:LookupBodyGroup(name) end
 function game.Model:GetMeshGroups() end
 
 --- 
-function game.Model:GetBodyGroupCount() end
+function game.Model:GetBaseMeshGroupIds() end
+
+--- 
+--- @param name string
+function game.Model:LookupFlexController(name) end
+
+--- 
+function game.Model:GetCollisionBounds() end
+
+--- 
+--- @param mdl game.Model
+--- @param fname string
+--- @overload fun(): 
+--- @overload fun(assetData: udm.AssetData): 
+function game.Model:Save(mdl, fname) end
+
+--- 
+--- @param bodyGroupId int
+--- @param groupId int
+function game.Model:GetMeshGroupId(bodyGroupId, groupId) end
+
+--- 
+--- @param offset math.Vector
+--- @overload fun(offset: vector.Vector): 
+function game.Model:SetEyeOffset(offset) end
+
+--- 
+--- @param min math.Vector
+--- @param max math.Vector
+--- @overload fun(min: vector.Vector, max: vector.Vector): 
+function game.Model:SetRenderBounds(min, max) end
+
+--- 
+--- @param t math.Vector
+--- @overload fun(t: vector.Vector): 
+function game.Model:Translate(t) end
+
+--- 
+--- @param eyeballIndex int
+--- @overload fun(): 
+function game.Model:IsStatic(eyeballIndex) end
+
+--- 
+--- @param animId int
+--- @param frameId int
+--- @param boneId int
+function game.Model:GetLocalBoneTransform(animId, frameId, boneId) end
+
+--- 
+function game.Model:GetEyeballCount() end
+
+--- 
+function game.Model:GetName() end
+
+--- 
+--- @param 1 game.Model
+function game.Model:__eq(arg1) end
+
+--- 
+--- @param bgId int
+function game.Model:GetBodyGroup(bgId) end
+
+--- 
+function game.Model:__tostring() end
+
+--- 
+function game.Model:GetBodyGroups() end
+
+--- 
+--- @param boneId int
+function game.Model:IsRootBone(boneId) end
+
+--- 
+--- @param name string
+function game.Model:LookupBlendController(name) end
+
+--- 
+--- @param name string
+function game.Model:LookupAttachment(name) end
+
+--- 
+--- @param boneId int
+--- @param hitGroup int
+--- @param min math.Vector
+--- @param max math.Vector
+--- @overload fun(boneId: int, hitGroup: int, min: vector.Vector, max: vector.Vector): 
+function game.Model:AddHitbox(boneId, hitGroup, min, max) end
+
+--- 
+function game.Model:GetHitboxCount() end
+
+--- 
+--- @param boneId int
+function game.Model:GetHitboxBounds(boneId) end
+
+--- 
+--- @param name string
+function game.Model:GetVertexAnimation(name) end
+
+--- 
+--- @param scale math.Vector
+--- @overload fun(scale: vector.Vector): 
+function game.Model:Scale(scale) end
+
+--- 
+--- @return any ret0
+function game.Model:GetFlexAnimationNames() end
+
+--- 
+--- @return any ret0
+function game.Model:GetFlexAnimations() end
+
+--- 
+function game.Model:HasVertexWeights() end
+
+--- 
+--- @param o any
+function game.Model:SetMaterialPaths(o) end
+
+--- 
+--- @param name string
+function game.Model:LookupBone(name) end
+
+--- 
+--- @param mdlOther game.Model
+--- @overload fun(mdlOther: game.Model, mergeFlags: int): 
+function game.Model:Merge(mdlOther) end
 
 --- 
 function game.Model:UpdateRenderBounds() end
 
 --- 
---- @param min math.Vector
---- @param max math.Vector
-function game.Model:SetRenderBounds(min, max) end
+function game.Model:GetMeshCount() end
 
 --- 
---- @param colMesh game.Model.CollisionMesh
+--- @param mass number
+function game.Model:SetMass(mass) end
+
+--- 
+--- @param colMesh Model.CollisionMesh
 function game.Model:AddCollisionMesh(colMesh) end
+
+--- 
+function game.Model:GetFlexControllerCount() end
+
+--- 
+--- @param name string
+function game.Model:SaveLegacy(name) end
+
+--- 
+--- @param textureGroup int
+--- @param name string
+--- @overload fun(textureGroup: int, mat: game.Material): 
+function game.Model:AddMaterial(textureGroup, name) end
 
 --- 
 --- @param texIdx int
@@ -766,9 +1064,57 @@ function game.Model:SetMaterial(texIdx, name) end
 function game.Model:GetMaterials() end
 
 --- 
---- @param mesh game.Model.Mesh.Sub
+--- @param idx int
+function game.Model:GetMaterial(idx) end
+
+--- 
+--- @param mesh Model.Mesh.Sub
 --- @param skinId int
 function game.Model:GetMaterialIndex(mesh, skinId) end
+
+--- 
+function game.Model:GetMass() end
+
+--- 
+--- @param flags int
+--- @overload fun(): 
+function game.Model:Update(flags) end
+
+--- 
+--- @param min math.Vector
+--- @param max math.Vector
+--- @overload fun(min: vector.Vector, max: vector.Vector): 
+function game.Model:SetCollisionBounds(min, max) end
+
+--- 
+function game.Model:GetTriangleCount() end
+
+--- 
+--- @param rot math.Quaternion
+function game.Model:Rotate(rot) end
+
+--- 
+--- @param idx int
+function game.Model:GetLOD(idx) end
+
+--- 
+function game.Model:GetVertexCount() end
+
+--- 
+--- @param boneId int
+function game.Model:RemoveHitbox(boneId) end
+
+--- 
+--- @param animID int
+--- @overload fun(name: int): 
+function game.Model:GetAnimation(animID) end
+
+--- 
+--- @param smTgt Model.Mesh.Sub
+--- @return int ret0_1
+--- @return int ret0_2
+--- @return int ret0_3
+function game.Model:FindSubMeshId(smTgt) end
 
 --- 
 function game.Model:GetMaterialCount() end
@@ -777,8 +1123,18 @@ function game.Model:GetMaterialCount() end
 function game.Model:GetMeshGroupCount() end
 
 --- 
+function game.Model:GetCollisionMeshCount() end
+
+--- 
 --- @param bodyGroupName string
 function game.Model:GetBodyGroupId(bodyGroupName) end
+
+--- 
+function game.Model:GetBodyGroupCount() end
+
+--- 
+--- @param boneId int
+function game.Model:GetHitboxGroup(boneId) end
 
 --- 
 --- @overload fun(hitGroup: int): 
@@ -786,8 +1142,14 @@ function game.Model:GetHitboxBones() end
 
 --- 
 --- @param boneId int
+--- @param hitGroup int
+function game.Model:SetHitboxGroup(boneId, hitGroup) end
+
+--- 
+--- @param boneId int
 --- @param min math.Vector
 --- @param max math.Vector
+--- @overload fun(boneId: int, min: vector.Vector, max: vector.Vector): 
 function game.Model:SetHitboxBounds(boneId, min, max) end
 
 --- 
@@ -805,24 +1167,12 @@ function game.Model:GetTextureGroups() end
 function game.Model:GetTextureGroup(id) end
 
 --- 
-function game.Model:GetTriangleCount() end
-
---- 
 function game.Model:GetMaterialPaths() end
 
 --- 
 --- @param bReload bool
 --- @overload fun(): 
 function game.Model:LoadMaterials(bReload) end
-
---- 
---- @param path string
-function game.Model:AddMaterialPath(path) end
-
---- 
---- @param blendControllerId int
---- @overload fun(name: string): 
-function game.Model:GetBlendController(blendControllerId) end
 
 --- 
 --- @param idx int
@@ -837,7 +1187,7 @@ function game.Model:ClearMaterials() end
 
 --- 
 --- @param name string
---- @param anim game.Model.Animation
+--- @param anim Model.Animation
 function game.Model:AddAnimation(name, anim) end
 
 --- 
@@ -861,43 +1211,21 @@ function game.Model:ClearBaseMeshGroupIds() end
 function game.Model:AddTextureGroup() end
 
 --- 
-function game.Model:GetLODCount() end
+function game.Model:GetJoints() end
 
 --- 
---- @param activity int
-function game.Model:SelectFirstAnimation(activity) end
+--- @param type enum JointType
+--- @param child int
+--- @param parent int
+--- @return Model.Joint ret0
+function game.Model:AddJoint(type, child, parent) end
 
 --- 
---- @overload fun(lod: int): 
-function game.Model:GetLODData() end
-
---- 
---- @param flags int
-function game.Model:SetFlags(flags) end
-
---- 
---- @param name string
-function game.Model:LookupAnimation(name) end
-
---- 
---- @param animId int
---- @param frameId int
---- @param boneId int
-function game.Model:GetLocalBoneTransform(animId, frameId, boneId) end
-
---- 
-function game.Model:GetEyeballCount() end
-
---- 
-function game.Model:GetHitboxCount() end
-
---- 
---- @param boneId int
-function game.Model:GetHitboxBounds(boneId) end
+function game.Model:GetVertexAnimations() end
 
 --- 
 --- @param name string
-function game.Model:LookupBone(name) end
+function game.Model:AddVertexAnimation(name) end
 
 --- 
 --- @param name string
@@ -951,119 +1279,34 @@ function game.Model:CalcFlexWeight(flexId, oFc) end
 function game.Model:CalcReferenceAttachmentPose(attIdx) end
 
 --- 
-function game.Model:GetBoneCount() end
+--- @param boneIdx int
+function game.Model:CalcReferenceBonePose(boneIdx) end
 
 --- 
---- @param mdlOther game.Model
---- @overload fun(mdlOther: game.Model, mergeFlags: int): 
-function game.Model:Merge(mdlOther) end
+--- @param eyeIdx int
+function game.Model:GetEyeball(eyeIdx) end
 
 --- 
---- @param flag int
-function game.Model:HasFlag(flag) end
+function game.Model:GetEyeballs() end
 
 --- 
---- @param min math.Vector
---- @param max math.Vector
-function game.Model:SetCollisionBounds(min, max) end
+function game.Model:GetIKControllers() end
 
 --- 
---- @param t math.Vector
-function game.Model:Translate(t) end
-
---- 
-function game.Model:GetMass() end
-
---- 
---- @param idx int
-function game.Model:RemoveFlexAnimation(idx) end
-
---- 
-function game.Model:ClearFlexAnimations() end
-
---- 
---- @param idx int
---- @return any ret0
-function game.Model:GetFlexAnimationName(idx) end
-
---- 
---- @return int ret0
-function game.Model:GetFlexAnimationCount() end
-
---- 
-function game.Model:GetEyeOffset() end
-
---- 
---- @param offset math.Vector
-function game.Model:SetEyeOffset(offset) end
-
---- 
---- @param idx int
---- @return any ret0
-function game.Model:GetFlexAnimation(idx) end
-
---- 
---- @param name string
---- @return any ret0
-function game.Model:LookupFlexAnimation(name) end
-
---- 
-function game.Model:GetMaterialNames() end
-
---- 
---- @param name string
---- @param flexAnim game.Model.FlexAnimation
---- @overload fun(name: string): 
-function game.Model:AddFlexAnimation(name, flexAnim) end
-
---- 
---- @return any ret0
-function game.Model:GetFlexAnimationNames() end
-
---- 
---- @return any ret0
-function game.Model:GetFlexAnimations() end
-
---- 
---- @param anim int
-function game.Model:GetAnimationDuration(anim) end
-
---- 
---- @param anim int
-function game.Model:GetAnimationActivity(anim) end
-
---- 
---- @param anim int
-function game.Model:GetAnimationActivityWeight(anim) end
-
---- 
---- @param group game.Model.MeshGroup
---- @param mesh game.Model.Mesh
---- @param subMesh game.Model.Mesh.Sub
-function game.Model:AssignDistinctMaterial(group, mesh, subMesh) end
-
---- 
---- @param o any
-function game.Model:SetPhonemeMap(o) end
-
---- 
-function game.Model:GetPhonemeMap() end
-
---- 
-function game.Model:GetIncludeModels() end
+--- @param id int
+function game.Model:GetIKController(id) end
 
 --- 
 --- @param name string
 function game.Model:LookupIKController(name) end
 
 --- 
---- @param animName string
---- @param exportInfo game.Model.ExportInfo
-function game.Model:ExportAnimation(animName, exportInfo) end
+function game.Model:GetIncludeModels() end
 
 --- 
---- @param modelName string
-function game.Model:AddIncludeModel(modelName) end
+--- @param animName string
+--- @param exportInfo Model.ExportInfo
+function game.Model:ExportAnimation(animName, exportInfo) end
 
 --- 
 --- @param name string
@@ -1073,99 +1316,27 @@ function game.Model:AddIncludeModel(modelName) end
 function game.Model:AddIKController(name, chainLength, type) end
 
 --- 
---- @param id int
-function game.Model:GetIKController(id) end
+--- @param modelName string
+function game.Model:AddIncludeModel(modelName) end
 
 --- 
-function game.Model:GetIKControllers() end
+function game.Model:GetPhonemeMap() end
 
 --- 
-function game.Model:GetEyeballs() end
+--- @param o any
+function game.Model:SetPhonemeMap(o) end
 
 --- 
---- @param eyeIdx int
-function game.Model:GetEyeball(eyeIdx) end
-
---- 
-function game.Model:GetJoints() end
-
---- 
---- @param boneIdx int
-function game.Model:CalcReferenceBonePose(boneIdx) end
-
---- 
---- @param rot math.Quaternion
-function game.Model:Rotate(rot) end
-
---- 
---- @param idx int
-function game.Model:GetLOD(idx) end
-
---- 
-function game.Model:__tostring() end
-
---- 
---- @param mdl game.Model
---- @param fname string
---- @overload fun(): 
---- @overload fun(assetData: udm.AssetData): 
-function game.Model:Save(mdl, fname) end
-
---- 
---- @param 1 game.Model
-function game.Model:__eq(arg1) end
-
---- 
---- @param copyFlags int
---- @overload fun(): 
-function game.Model:Copy(copyFlags) end
-
---- 
---- @param eyeballIndex int
---- @overload fun(): 
-function game.Model:IsStatic(eyeballIndex) end
-
---- 
---- @param bgId int
-function game.Model:GetBodyGroup(bgId) end
-
---- 
-function game.Model:GetBodyGroups() end
-
---- 
---- @param boneId int
-function game.Model:IsRootBone(boneId) end
-
---- 
---- @param scale math.Vector
-function game.Model:Scale(scale) end
-
---- 
-function game.Model:GetName() end
-
---- 
---- @param name string
-function game.Model:LookupBlendController(name) end
-
---- 
---- @param type enum JointType
---- @param child int
---- @param parent int
---- @return game.Model.Joint ret0
-function game.Model:AddJoint(type, child, parent) end
-
---- 
-function game.Model:GetVertexAnimations() end
-
---- 
---- @param name string
-function game.Model:AddVertexAnimation(name) end
+--- @param group Model.MeshGroup
+--- @param mesh Model.Mesh
+--- @param subMesh Model.Mesh.Sub
+function game.Model:AssignDistinctMaterial(group, mesh, subMesh) end
 
 --- 
 function game.Model:GetVertexAnimationBuffer() end
 
 --- 
---- @param exportInfo game.Model.ExportInfo
+--- @param exportInfo Model.ExportInfo
 function game.Model:Export(exportInfo) end
 
 
@@ -1351,6 +1522,10 @@ function game.Model.CollisionMesh:GetMass() end
 function game.Model.CollisionMesh:GetSurfaceMaterialIds() end
 
 --- 
+--- @return int ret0
+function game.Model.CollisionMesh:GetVertexCount() end
+
+--- 
 --- @return table ret0
 function game.Model.CollisionMesh:GetVertices() end
 
@@ -1361,8 +1536,8 @@ function game.Model.CollisionMesh:GetVertices() end
 function game.Model.CollisionMesh:AddTriangle(idx0, idx1, idx2) end
 
 --- 
---- @return int ret0
-function game.Model.CollisionMesh:GetVertexCount() end
+--- @return phys.Shape ret0
+function game.Model.CollisionMesh:GetShape() end
 
 --- 
 --- @param arg1 bool
@@ -1371,10 +1546,6 @@ function game.Model.CollisionMesh:SetConvex(arg1) end
 --- 
 --- @return int ret0
 function game.Model.CollisionMesh:GetBoneParentId() end
-
---- 
---- @return phys.Shape ret0
-function game.Model.CollisionMesh:GetShape() end
 
 --- 
 --- @return math.Vector ret0_1
@@ -1916,11 +2087,11 @@ function game.Model.Mesh.Sub:GetVertices() end
 function game.Model.Mesh.Sub:HasUvSet(name) end
 
 --- 
---- @overload fun(flags: int): 
-function game.Model.Mesh.Sub:Update() end
+function game.Model.Mesh.Sub:GetIndices() end
 
 --- 
-function game.Model.Mesh.Sub:GetIndices() end
+--- @overload fun(flags: int): 
+function game.Model.Mesh.Sub:Update() end
 
 --- 
 --- @return bool ret0
@@ -2831,7 +3002,34 @@ game.Model.ExportInfo = {
 game.Material = {}
 
 --- 
-function game.Material:Reset() end
+--- @return bool ret0
+function game.Material:IsTranslucent() end
+
+--- 
+--- @return number ret0
+function game.Material:GetAlphaCutoff() end
+
+--- 
+--- @return string ret0
+function game.Material:GetName() end
+
+--- 
+--- @param textureID string
+function game.Material:GetTextureInfo(textureID) end
+
+--- 
+--- @return enum AlphaMode ret0
+function game.Material:GetAlphaMode() end
+
+--- 
+--- @param shader string
+function game.Material:SetShader(shader) end
+
+--- 
+function game.Material:GetData() end
+
+--- 
+function game.Material:__tostring() end
 
 --- 
 --- @param mat game.Material
@@ -2842,64 +3040,7 @@ function game.Material:Reset() end
 function game.Material:Save(mat, fname) end
 
 --- 
---- @return bool ret0
-function game.Material:IsLoaded() end
-
---- 
---- @return util.DataBlock ret0
-function game.Material:GetDataBlock() end
-
---- 
-function game.Material:GetData() end
-
---- 
-function game.Material:__tostring() end
-
---- 
---- @param data udm.LinkedPropertyWrapper
---- @return bool ret0
-function game.Material:MergeData(data) end
-
---- 
-function game.Material:Copy() end
-
---- 
---- @return string ret0
-function game.Material:GetShaderName() end
-
---- 
---- @param arg1 bool
-function game.Material:SetLoaded(arg1) end
-
---- 
-function game.Material:UpdateTextures() end
-
---- 
-function game.Material:ClearSpriteSheetAnimation() end
-
---- 
---- @return string ret0
-function game.Material:GetName() end
-
---- 
---- @return bool ret0
-function game.Material:IsTranslucent() end
-
---- 
---- @return enum AlphaMode ret0
-function game.Material:GetAlphaMode() end
-
---- 
---- @param textureID string
-function game.Material:GetTextureInfo(textureID) end
-
---- 
---- @return number ret0
-function game.Material:GetAlphaCutoff() end
-
---- 
---- @param shader string
-function game.Material:SetShader(shader) end
+function game.Material:Reset() end
 
 --- 
 --- @return bool ret0
@@ -2913,6 +3054,40 @@ function game.Material:IsValid() end
 function game.Material:GetSpriteSheetAnimation() end
 
 --- 
+function game.Material:Copy() end
+
+--- 
+--- @return string ret0
+function game.Material:GetShaderName() end
+
+--- 
+--- @return util.DataBlock ret0
+function game.Material:GetDataBlock() end
+
+--- 
+--- @return bool ret0
+function game.Material:IsLoaded() end
+
+--- 
+--- @param arg1 bool
+function game.Material:SetLoaded(arg1) end
+
+--- 
+--- @param data udm.LinkedPropertyWrapper
+--- @return bool ret0
+function game.Material:MergeData(data) end
+
+--- 
+function game.Material:UpdateTextures() end
+
+--- 
+function game.Material:ClearSpriteSheetAnimation() end
+
+--- 
+--- @overload fun(reload: bool): 
+function game.Material:InitializeShaderDescriptorSet() end
+
+--- 
 --- @param textureID string
 --- @param hTex prosper.Texture
 --- @param name string
@@ -2920,10 +3095,6 @@ function game.Material:GetSpriteSheetAnimation() end
 --- @overload fun(textureID: string, tex: util.Texture): 
 --- @overload fun(textureID: string, tex: string): 
 function game.Material:SetTexture(textureID, hTex, name) end
-
---- 
---- @overload fun(reload: bool): 
-function game.Material:InitializeShaderDescriptorSet() end
 
 
 --- @enum DetailBlendModeTranslucent
@@ -2964,6 +3135,11 @@ game.Material = {
 game.Material.SpriteSheetAnimation = {}
 
 --- 
+--- @param seqIdx int
+--- @return game.Material.SpriteSheetAnimation.Sequence ret0
+function game.Material.SpriteSheetAnimation:GetSequence(seqIdx) end
+
+--- 
 --- @return table ret0
 function game.Material.SpriteSheetAnimation:GetSequences() end
 
@@ -2971,19 +3147,14 @@ function game.Material.SpriteSheetAnimation:GetSequences() end
 --- @return int ret0
 function game.Material.SpriteSheetAnimation:GetSequenceCount() end
 
---- 
---- @param seqIdx int
---- @return game.Material.SpriteSheetAnimation.Sequence ret0
-function game.Material.SpriteSheetAnimation:GetSequence(seqIdx) end
-
 
 --- 
 --- @class game.Material.SpriteSheetAnimation.Sequence
 game.Material.SpriteSheetAnimation.Sequence = {}
 
 --- 
---- @return int ret0
-function game.Material.SpriteSheetAnimation.Sequence:GetFrameOffset() end
+--- @return number ret0
+function game.Material.SpriteSheetAnimation.Sequence:GetDuration() end
 
 --- 
 --- @return int ret0
@@ -2997,8 +3168,8 @@ function game.Material.SpriteSheetAnimation.Sequence:GetFrameCount() end
 function game.Material.SpriteSheetAnimation.Sequence:GetInterpolatedFrameData(ptTime) end
 
 --- 
---- @return number ret0
-function game.Material.SpriteSheetAnimation.Sequence:GetDuration() end
+--- @return int ret0
+function game.Material.SpriteSheetAnimation.Sequence:GetFrameOffset() end
 
 --- 
 --- @param frameIdx int
@@ -3019,251 +3190,71 @@ function game.Material.SpriteSheetAnimation.Sequence:IsLooping() end
 game.Material.SpriteSheetAnimation.Sequence.Frame = {}
 
 --- 
+--- @return number ret0
+function game.Material.SpriteSheetAnimation.Sequence.Frame:GetDuration() end
+
+--- 
 --- @return math.Vector2 ret0_1
 --- @return math.Vector2 ret0_2
 function game.Material.SpriteSheetAnimation.Sequence.Frame:GetUVBounds() end
 
---- 
---- @return number ret0
-function game.Material.SpriteSheetAnimation.Sequence.Frame:GetDuration() end
-
 
 --- 
---- @class game.GibletCreateInfo
---- @field mass number 
---- @field lifetime number 
---- @field angularVelocity math.Vector 
---- @field position math.Vector 
---- @field velocity math.Vector 
---- @field rotation  
---- @field physTranslationOffset math.Vector 
---- @field physRotationOffset  
---- @field physRadius number 
---- @field physHeight number 
---- @field physShape int 
---- @field model string 
---- @field skin int 
---- @field scale number 
---- @overload fun():game.GibletCreateInfo
-game.GibletCreateInfo = {}
-
-
---- @enum PhysShape
-game.GibletCreateInfo = {
-	PHYS_SHAPE_BOX = 3,
-	PHYS_SHAPE_CYLINDER = 4,
-	PHYS_SHAPE_SPHERE = 2,
-	PHYS_SHAPE_MODEL = 0,
-	PHYS_SHAPE_NONE = 1,
-}
+--- @class game.BaseRenderProcessor
+game.BaseRenderProcessor = {}
 
 --- 
---- @class game.BulletInfo
---- @field attacker class util::TWeakSharedHandle<class BaseEntity> 
---- @field inflictor class util::TWeakSharedHandle<class BaseEntity> 
---- @field tracerMaterial string 
---- @field tracerCount int 
---- @field tracerColor  
---- @field tracerRadius number 
---- @field tracerLength number 
---- @field tracerSpeed number 
---- @field tracerBloom number 
---- @field ammoType string 
---- @field direction math.Vector 
---- @field effectOrigin math.Vector 
---- @field damage int 
---- @field bulletCount int 
---- @field distance number 
---- @field spread  
---- @field force number 
---- @field damageType int 
---- @overload fun():game.BulletInfo
-game.BulletInfo = {}
+--- @param d number
+--- @param delta number
+function game.BaseRenderProcessor:SetDepthBias(d, delta) end
 
---- 
-function game.BulletInfo:__tostring() end
-
-
---- 
---- @class game.DamageInfo
---- @overload fun():game.DamageInfo
-game.DamageInfo = {}
-
---- 
---- @param arg1 enum DAMAGETYPE
---- @return bool ret0
-function game.DamageInfo:IsDamageType(arg1) end
-
---- 
---- @return int ret0
-function game.DamageInfo:GetDamage() end
-
---- 
---- @param arg1 math.Vector
-function game.DamageInfo:SetSource(arg1) end
-
---- 
---- @param arg1 math.Vector
-function game.DamageInfo:SetForce(arg1) end
-
---- 
---- @return math.Vector ret0
-function game.DamageInfo:GetSource() end
-
---- 
---- @return math.Vector ret0
-function game.DamageInfo:GetForce() end
-
---- 
---- @param arg1 math.Vector
-function game.DamageInfo:SetHitPosition(arg1) end
-
---- 
---- @return enum HitGroup ret0
-function game.DamageInfo:GetHitGroup() end
-
---- 
---- @return math.Vector ret0
-function game.DamageInfo:GetHitPosition() end
-
---- 
---- @param arg1 enum HitGroup
-function game.DamageInfo:SetHitGroup(arg1) end
-
---- 
---- @param arg1 int
-function game.DamageInfo:AddDamage(arg1) end
-
---- 
---- @param arg1 int
-function game.DamageInfo:SetDamage(arg1) end
-
---- 
-function game.DamageInfo:__tostring() end
-
---- 
---- @param arg1 number
-function game.DamageInfo:ScaleDamage(arg1) end
-
---- 
---- @return ents.BaseEntityBase ret0
-function game.DamageInfo:GetAttacker() end
-
---- 
---- @param arg1 ents.BaseEntityBase
-function game.DamageInfo:SetAttacker(arg1) end
-
---- 
---- @return ents.BaseEntityBase ret0
-function game.DamageInfo:GetInflictor() end
-
---- 
---- @param arg1 ents.BaseEntityBase
-function game.DamageInfo:SetInflictor(arg1) end
-
---- 
---- @return int ret0
-function game.DamageInfo:GetDamageTypes() end
-
---- 
---- @param arg1 enum DAMAGETYPE
-function game.DamageInfo:SetDamageType(arg1) end
-
---- 
---- @param arg1 enum DAMAGETYPE
-function game.DamageInfo:AddDamageType(arg1) end
-
---- 
---- @param arg1 enum DAMAGETYPE
-function game.DamageInfo:RemoveDamageType(arg1) end
-
-
---- 
---- @class game.DepthStageRenderProcessor: game.BaseRenderProcessor
-game.DepthStageRenderProcessor = {}
-
---- 
---- @param renderQueue game.RenderQueue
-function game.DepthStageRenderProcessor:Render(renderQueue) end
-
-
---- 
---- @class game.RenderQueue
-game.RenderQueue = {}
-
---- 
---- @return bool ret0
-function game.RenderQueue:IsComplete() end
-
---- 
-function game.RenderQueue:WaitForCompletion() end
-
-
---- 
---- @class game.RenderStats
---- @overload fun():game.RenderStats
-game.RenderStats = {}
-
---- 
---- @param 1 game.RenderStats
-function game.RenderStats:__add(arg1) end
-
---- 
---- @param timer enum RenderStats::RenderStage
---- @return number ret0
-function game.RenderStats:GetTime(timer) end
-
---- 
---- @return game.RenderStats ret0
-function game.RenderStats:Copy() end
-
---- 
---- @param pass enum RenderStats::RenderPass
---- @return game.RenderPassStats ret0
-function game.RenderStats:GetPassStats(pass) end
-
-
---- @enum TimerPostProcessingGpu
-game.RenderStats = {
-	TIMER_POST_PROCESSING_GPU = 1,
-	TIMER_POST_PROCESSING_GPU_TONE_MAPPING = 4,
-	TIMER_POST_PROCESSING_GPU_BLOOM = 3,
-	TIMER_POST_PROCESSING_GPU_FOG = 2,
-	TIMER_POST_PROCESSING_GPU_FXAA = 5,
-	TIMER_POST_PROCESSING_GPU_SSAO = 6,
-}
-
---- @enum RenderPassLighting
-game.RenderStats = {
-	RENDER_PASS_LIGHTING_PASS = 0,
-	RENDER_PASS_LIGHTING_PASS_TRANSLUCENT = 1,
-}
-
---- @enum Timer
-game.RenderStats = {
-	TIMER_UPDATE_RENDER_BUFFERS_CPU = 11,
-	TIMER_COUNT = 12,
-	TIMER_PREPASS_EXECUTION_CPU = 8,
-	TIMER_POST_PROCESSING_EXECUTION_CPU = 10,
-	TIMER_LIGHTING_PASS_EXECUTION_CPU = 9,
-}
-
---- @enum TimerLightCulling
-game.RenderStats = {
-	TIMER_LIGHT_CULLING_CPU = 7,
-	TIMER_LIGHT_CULLING_GPU = 0,
-}
-
---- @enum RenderPass
-game.RenderStats = {
-	RENDER_PASS_COUNT = 4,
-	RENDER_PASS_SHADOW_PASS = 3,
-	RENDER_PASS_PREPASS = 2,
-}
 
 --- 
 --- @class game.WorldEnvironment
 game.WorldEnvironment = {}
+
+--- 
+--- @return bool ret0
+function game.WorldEnvironment:IsUnlit() end
+
+--- 
+--- @return int ret0
+function game.WorldEnvironment:GetShaderQuality() end
+
+--- 
+--- @param start number
+function game.WorldEnvironment:SetFogStart(start) end
+
+--- 
+--- @param end number
+function game.WorldEnvironment:SetFogEnd(end_) end
+
+--- 
+function game.WorldEnvironment:GetFogStart() end
+
+--- 
+function game.WorldEnvironment:GetShaderQualityProperty() end
+
+--- 
+function game.WorldEnvironment:GetFogEnd() end
+
+--- 
+--- @param bEnabled bool
+function game.WorldEnvironment:SetFogEnabled(bEnabled) end
+
+--- 
+--- @param color util.Color
+function game.WorldEnvironment:SetFogColor(color) end
+
+--- 
+function game.WorldEnvironment:IsFogEnabled() end
+
+--- 
+function game.WorldEnvironment:GetFogColor() end
+
+--- 
+--- @param density number
+function game.WorldEnvironment:SetFogDensity(density) end
 
 --- 
 function game.WorldEnvironment:GetFogDensity() end
@@ -3273,29 +3264,23 @@ function game.WorldEnvironment:GetFogDensity() end
 function game.WorldEnvironment:SetFogType(type) end
 
 --- 
---- @return int ret0
-function game.WorldEnvironment:GetShadowResolution() end
-
---- 
-function game.WorldEnvironment:GetFogColorProperty() end
-
---- 
 function game.WorldEnvironment:GetFogType() end
 
 --- 
 function game.WorldEnvironment:GetFogFarDistance() end
 
 --- 
-function game.WorldEnvironment:GetFogEnd() end
-
---- 
-function game.WorldEnvironment:GetShaderQualityProperty() end
-
---- 
 function game.WorldEnvironment:GetUnlitProperty() end
 
 --- 
 function game.WorldEnvironment:GetShadowResolutionProperty() end
+
+--- 
+function game.WorldEnvironment:GetFogColorProperty() end
+
+--- 
+--- @return int ret0
+function game.WorldEnvironment:GetShadowResolution() end
 
 --- 
 function game.WorldEnvironment:GetFogStartProperty() end
@@ -3317,49 +3302,12 @@ function game.WorldEnvironment:GetFogTypeProperty() end
 function game.WorldEnvironment:GetFogEnabledProperty() end
 
 --- 
---- @return int ret0
-function game.WorldEnvironment:GetShaderQuality() end
-
---- 
---- @return bool ret0
-function game.WorldEnvironment:IsUnlit() end
-
---- 
---- @param start number
-function game.WorldEnvironment:SetFogStart(start) end
-
---- 
 --- @param arg1 bool
 function game.WorldEnvironment:SetUnlit(arg1) end
 
 --- 
 --- @param arg1 int
 function game.WorldEnvironment:SetShadowResolution(arg1) end
-
---- 
---- @param end number
-function game.WorldEnvironment:SetFogEnd(end_) end
-
---- 
-function game.WorldEnvironment:GetFogStart() end
-
---- 
---- @param color util.Color
-function game.WorldEnvironment:SetFogColor(color) end
-
---- 
-function game.WorldEnvironment:GetFogColor() end
-
---- 
---- @param bEnabled bool
-function game.WorldEnvironment:SetFogEnabled(bEnabled) end
-
---- 
-function game.WorldEnvironment:IsFogEnabled() end
-
---- 
---- @param density number
-function game.WorldEnvironment:SetFogDensity(density) end
 
 
 --- @enum FogType
@@ -3375,8 +3323,8 @@ game.WorldEnvironment = {
 game.RenderPassStats = {}
 
 --- 
---- @param 1 game.RenderPassStats
-function game.RenderPassStats:__add(arg1) end
+--- @return game.RenderPassStats ret0
+function game.RenderPassStats:Copy() end
 
 --- 
 --- @param timer enum RenderPassStats::Timer
@@ -3384,13 +3332,13 @@ function game.RenderPassStats:__add(arg1) end
 function game.RenderPassStats:GetTime(timer) end
 
 --- 
+--- @param 1 game.RenderPassStats
+function game.RenderPassStats:__add(arg1) end
+
+--- 
 --- @param counter enum RenderPassStats::Counter
 --- @return int ret0
 function game.RenderPassStats:GetCount(counter) end
-
---- 
---- @return game.RenderPassStats ret0
-function game.RenderPassStats:Copy() end
 
 
 --- @enum TimerCpu
@@ -3454,27 +3402,85 @@ game.RenderPassStats = {
 }
 
 --- 
+--- @class game.RenderStats
+--- @overload fun():game.RenderStats
+game.RenderStats = {}
+
+--- 
+--- @return game.RenderStats ret0
+function game.RenderStats:Copy() end
+
+--- 
+--- @param pass enum RenderStats::RenderPass
+--- @return game.RenderPassStats ret0
+function game.RenderStats:GetPassStats(pass) end
+
+--- 
+--- @param timer enum RenderStats::RenderStage
+--- @return number ret0
+function game.RenderStats:GetTime(timer) end
+
+--- 
+--- @param 1 game.RenderStats
+function game.RenderStats:__add(arg1) end
+
+
+--- @enum TimerPostProcessingGpu
+game.RenderStats = {
+	TIMER_POST_PROCESSING_GPU = 1,
+	TIMER_POST_PROCESSING_GPU_TONE_MAPPING = 4,
+	TIMER_POST_PROCESSING_GPU_BLOOM = 3,
+	TIMER_POST_PROCESSING_GPU_FOG = 2,
+	TIMER_POST_PROCESSING_GPU_FXAA = 5,
+	TIMER_POST_PROCESSING_GPU_SSAO = 6,
+}
+
+--- @enum RenderPassLighting
+game.RenderStats = {
+	RENDER_PASS_LIGHTING_PASS = 0,
+	RENDER_PASS_LIGHTING_PASS_TRANSLUCENT = 1,
+}
+
+--- @enum Timer
+game.RenderStats = {
+	TIMER_UPDATE_RENDER_BUFFERS_CPU = 11,
+	TIMER_COUNT = 12,
+	TIMER_PREPASS_EXECUTION_CPU = 8,
+	TIMER_POST_PROCESSING_EXECUTION_CPU = 10,
+	TIMER_LIGHTING_PASS_EXECUTION_CPU = 9,
+}
+
+--- @enum TimerLightCulling
+game.RenderStats = {
+	TIMER_LIGHT_CULLING_CPU = 7,
+	TIMER_LIGHT_CULLING_GPU = 0,
+}
+
+--- @enum RenderPass
+game.RenderStats = {
+	RENDER_PASS_COUNT = 4,
+	RENDER_PASS_SHADOW_PASS = 3,
+	RENDER_PASS_PREPASS = 2,
+}
+
+--- 
 --- @class game.DrawSceneInfo
+--- @field renderStats any 
+--- @field renderFlags int 
 --- @field commandBuffer prosper.CommandBuffer 
 --- @field flags int 
---- @field renderFlags int 
 --- @field scene any 
 --- @field toneMapping any 
---- @field inclusionMask pragma::rendering::RenderMask 
 --- @field renderTarget prosper.RenderTarget 
 --- @field exclusionMask pragma::rendering::RenderMask 
+--- @field inclusionMask pragma::rendering::RenderMask 
 --- @field outputImage prosper.Image 
 --- @field outputLayerId int 
 --- @field clearColor util.Color 
 --- @field clipPlane math.Vector4 
 --- @field pvsOrigin math.Vector 
---- @field renderStats any 
 --- @overload fun():game.DrawSceneInfo
 game.DrawSceneInfo = {}
-
---- 
---- @param f any
-function game.DrawSceneInfo:SetEntityPrepassFilter(f) end
 
 --- 
 --- @param arg1 game.DrawSceneInfo
@@ -3483,6 +3489,10 @@ function game.DrawSceneInfo:AddSubPass(arg1) end
 --- 
 --- @param f any
 function game.DrawSceneInfo:SetEntityRenderFilter(f) end
+
+--- 
+--- @param f any
+function game.DrawSceneInfo:SetEntityPrepassFilter(f) end
 
 
 --- @enum FlagDisable
@@ -3499,13 +3509,24 @@ game.DrawSceneInfo = {
 }
 
 --- 
---- @class game.BaseRenderProcessor
-game.BaseRenderProcessor = {}
+--- @class game.RenderQueue
+game.RenderQueue = {}
 
 --- 
---- @param d number
---- @param delta number
-function game.BaseRenderProcessor:SetDepthBias(d, delta) end
+function game.RenderQueue:WaitForCompletion() end
+
+--- 
+--- @return bool ret0
+function game.RenderQueue:IsComplete() end
+
+
+--- 
+--- @class game.DepthStageRenderProcessor: game.BaseRenderProcessor
+game.DepthStageRenderProcessor = {}
+
+--- 
+--- @param renderQueue game.RenderQueue
+function game.DepthStageRenderProcessor:Render(renderQueue) end
 
 
 --- 

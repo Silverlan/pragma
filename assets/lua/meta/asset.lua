@@ -4,10 +4,23 @@
 asset = {}
 
 --- 
---- @param path string
+--- @param name string
 --- @param type enum pragma::asset::Type
+--- @return variant ret0
+function asset.reload(name, type) end
+
+--- 
+--- @param name string
+--- @param type enum pragma::asset::Type
+--- @return bool ret0
+function asset.exists(name, type) end
+
+--- 
+--- @param type enum pragma::asset::Type
+--- @param formatType enum pragma::asset::FormatType
 --- @return table ret0
-function asset.find(path, type) end
+--- @overload fun(type: enum pragma::asset::Type): table
+function asset.get_supported_extensions(type, formatType) end
 
 --- 
 --- @param nw class NetworkState
@@ -18,8 +31,29 @@ function asset.clear_unused(nw, type) end
 --- 
 --- @param name string
 --- @param type enum pragma::asset::Type
+--- @return bool ret0
+function asset.delete(name, type) end
+
+--- 
+--- @param path string
+--- @param type enum pragma::asset::Type
+--- @return table ret0
+function asset.find(path, type) end
+
+--- 
+--- @param name string
+--- @param type enum pragma::asset::Type
 --- @return variant ret0
-function asset.reload(name, type) end
+--- @overload fun(f: file.File, type: enum pragma::asset::Type): variant
+function asset.load(name, type) end
+
+--- 
+--- @return int ret0
+function asset.clear_unused_models() end
+
+--- 
+--- @return int ret0
+function asset.clear_flagged_models() end
 
 --- 
 --- @param name0 string
@@ -29,8 +63,12 @@ function asset.reload(name, type) end
 function asset.matches(name0, name1, type) end
 
 --- 
+--- @param mdl game.Model
+function asset.flag_model_for_cache_removal(mdl) end
+
+--- 
 --- @return int ret0
-function asset.clear_flagged_models() end
+function asset.clear_unused_materials() end
 
 --- 
 --- @param type enum pragma::asset::Type
@@ -38,17 +76,9 @@ function asset.clear_flagged_models() end
 function asset.get_type_identifier(type) end
 
 --- 
---- @param mdl game.Model
-function asset.flag_model_for_cache_removal(mdl) end
-
---- 
 --- @param identifier string
 --- @return enum pragma::asset::Type ret0
 function asset.get_type_enum(identifier) end
-
---- 
---- @return int ret0
-function asset.clear_unused_materials() end
 
 --- 
 --- @param arg0 class Engine
@@ -195,45 +225,23 @@ function asset.poll(type) end
 function asset.poll_all() end
 
 --- 
---- @param type enum pragma::asset::Type
---- @param formatType enum pragma::asset::FormatType
---- @return table ret0
---- @overload fun(type: enum pragma::asset::Type): table
-function asset.get_supported_extensions(type, formatType) end
-
---- 
---- @return int ret0
-function asset.clear_unused_models() end
-
---- 
---- @param name string
---- @param type enum pragma::asset::Type
---- @return variant ret0
---- @overload fun(f: file.File, type: enum pragma::asset::Type): variant
-function asset.load(name, type) end
-
---- 
---- @param name string
---- @param type enum pragma::asset::Type
---- @return bool ret0
-function asset.delete(name, type) end
-
---- 
---- @param name string
---- @param type enum pragma::asset::Type
---- @return bool ret0
-function asset.exists(name, type) end
-
---- 
---- @return int ret0
-function asset.clear_unused_textures() end
-
---- 
 --- @param nw class NetworkState
 --- @param name string
 --- @param type enum pragma::asset::Type
 --- @return bool ret0
 function asset.import(nw, name, type) end
+
+--- 
+--- @return int ret0
+function asset.clear_unused_textures() end
+
+
+--- 
+--- @class asset.TextureImportInfo
+--- @field normalMap bool 
+--- @field srgb bool 
+--- @overload fun():asset.TextureImportInfo
+asset.TextureImportInfo = {}
 
 
 --- 
@@ -249,13 +257,5 @@ function asset.MapExportInfo:AddLightSource(arg1) end
 --- 
 --- @param arg1 ents.CameraComponent
 function asset.MapExportInfo:AddCamera(arg1) end
-
-
---- 
---- @class asset.TextureImportInfo
---- @field srgb bool 
---- @field normalMap bool 
---- @overload fun():asset.TextureImportInfo
-asset.TextureImportInfo = {}
 
 

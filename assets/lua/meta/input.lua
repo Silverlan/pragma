@@ -4,12 +4,6 @@
 input = {}
 
 --- 
---- @param identifier string
---- @param f unknown
---- @return util.Callback ret0
-function input.add_callback(identifier, f) end
-
---- 
 --- @param arg0 class CEngine
 --- @param arg1 string
 --- @return bool ret0
@@ -39,15 +33,15 @@ function input.get_key_state(key) end
 function input.get_cursor_pos() end
 
 --- 
---- @return bool ret0
-function input.is_shift_key_down() end
-
---- 
 --- @param pos math.Vector2
 function input.set_cursor_pos(pos) end
 
 --- 
 function input.center_cursor() end
+
+--- 
+--- @return bool ret0
+function input.is_shift_key_down() end
 
 --- 
 --- @return bool ret0
@@ -131,6 +125,12 @@ function input.get_effective_input_binding_layer(arg0) end
 --- @return bool ret0
 function input.is_binding_layer_enabled(en, layerName) end
 
+--- 
+--- @param identifier string
+--- @param f unknown
+--- @return util.Callback ret0
+function input.add_callback(identifier, f) end
+
 
 --- 
 --- @class input.InputBindingLayer
@@ -139,6 +139,14 @@ function input.is_binding_layer_enabled(en, layerName) end
 --- @field priority int 
 --- @overload fun(args: string):input.InputBindingLayer
 input.InputBindingLayer = {}
+
+--- 
+function input.InputBindingLayer:ClearKeyMappings() end
+
+--- 
+--- @param cmd string
+--- @return table ret0
+function input.InputBindingLayer:FindBoundKeys(cmd) end
 
 --- 
 function input.InputBindingLayer:ClearLuaKeyMappings() end
@@ -152,13 +160,5 @@ function input.InputBindingLayer:BindKey(key, function_) end
 --- 
 --- @param key string
 function input.InputBindingLayer:UnbindKey(key) end
-
---- 
---- @param cmd string
---- @return table ret0
-function input.InputBindingLayer:FindBoundKeys(cmd) end
-
---- 
-function input.InputBindingLayer:ClearKeyMappings() end
 
 

@@ -20,19 +20,19 @@ pfm.Version = {}
 function pfm.Version:ToString() end
 
 --- 
---- @param 1 pfm.Version
-function pfm.Version:__eq(arg1) end
-
---- 
---- @param 1 pfm.Version
-function pfm.Version:__lt(arg1) end
+function pfm.Version:Reset() end
 
 --- 
 --- @param 1 pfm.Version
 function pfm.Version:__le(arg1) end
 
 --- 
-function pfm.Version:Reset() end
+--- @param 1 pfm.Version
+function pfm.Version:__eq(arg1) end
+
+--- 
+--- @param 1 pfm.Version
+function pfm.Version:__lt(arg1) end
 
 --- 
 function pfm.Version:__tostring() end

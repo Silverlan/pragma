@@ -70,12 +70,9 @@ function string.is_integer(str) end
 function string.find_similar_elements(baseElement, inElements, limit, outSimilarElements, outSimilarities) end
 
 --- 
---- @param s0 string
---- @param s1 string
---- @param outStartIdx int
---- @param outLen int
---- @param outEndIdx int
-function string.find_longest_common_substring(s0, s1, outStartIdx, outLen, outEndIdx) end
+--- @param str string
+--- @return string ret0
+function string.snake_case_to_camel_case(str) end
 
 --- 
 --- @param s0 string
@@ -86,7 +83,7 @@ function string.calc_levenshtein_similarity(s0, s1) end
 --- 
 --- @param str string
 --- @return string ret0
-function string.snake_case_to_camel_case(str) end
+function string.camel_case_to_snake_case(str) end
 
 --- 
 --- @param s0 string
@@ -95,8 +92,11 @@ function string.snake_case_to_camel_case(str) end
 function string.calc_levenshtein_distance(s0, s1) end
 
 --- 
---- @param str string
---- @return string ret0
-function string.camel_case_to_snake_case(str) end
+--- @param s0 string
+--- @param s1 string
+--- @param outStartIdx int
+--- @param outLen int
+--- @param outEndIdx int
+function string.find_longest_common_substring(s0, s1, outStartIdx, outLen, outEndIdx) end
 
 

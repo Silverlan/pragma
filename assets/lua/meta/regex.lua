@@ -18,6 +18,18 @@ function regex.replace(input, e, format) end
 regex.Result = {}
 
 --- 
+function regex.Result:GetMatchCount() end
+
+--- 
+function regex.Result:GetLength() end
+
+--- 
+function regex.Result:__tostring() end
+
+--- 
+function regex.Result:GetPosition() end
+
+--- 
 --- @param format string
 --- @param flags int
 function regex.Result:SetFormat(format, flags) end
@@ -26,18 +38,6 @@ function regex.Result:SetFormat(format, flags) end
 function regex.Result:HasMatch() end
 
 --- 
-function regex.Result:GetPosition() end
-
---- 
 function regex.Result:GetString() end
-
---- 
-function regex.Result:GetMatchCount() end
-
---- 
-function regex.Result:__tostring() end
-
---- 
-function regex.Result:GetLength() end
 
 

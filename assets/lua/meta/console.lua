@@ -65,6 +65,10 @@ function console.clear_override(src) end
 console.Var = {}
 
 --- 
+--- @return enum ConVarFlags ret0
+function console.Var:GetFlags() end
+
+--- 
 --- @return int ret0
 function console.Var:GetInt() end
 
@@ -89,15 +93,11 @@ function console.Var:GetHelpText() end
 function console.Var:GetString() end
 
 --- 
---- @return string ret0
-function console.Var:GetName() end
-
---- 
 --- @param arg2 unknown
 function console.Var:AddChangeCallback(arg2) end
 
 --- 
---- @return enum ConVarFlags ret0
-function console.Var:GetFlags() end
+--- @return string ret0
+function console.Var:GetName() end
 
 

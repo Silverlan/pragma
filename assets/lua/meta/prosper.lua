@@ -4,6 +4,25 @@
 prosper = {}
 
 --- 
+--- @param format enum prosper::Format
+--- @return string ret0
+function prosper.format_to_string(format) end
+
+--- 
+--- @param arg0 class prosper::IPrContext
+--- @return prosper.Event ret0
+function prosper.create_event(arg0) end
+
+--- 
+--- @param rtCreateInfo prosper.RenderTargetCreateInfo
+--- @param textures table
+--- @return prosper.RenderTarget ret0
+--- @overload fun(rtCreateInfo: prosper.RenderTargetCreateInfo, textures: table, renderPass: prosper.RenderPass): prosper.RenderTarget
+--- @overload fun(rtCreateInfo: prosper.RenderTargetCreateInfo, texture: prosper.Texture, renderPass: prosper.RenderPass): prosper.RenderTarget
+--- @overload fun(rtCreateInfo: prosper.RenderTargetCreateInfo, texture: prosper.Texture): prosper.RenderTarget
+function prosper.create_render_target(rtCreateInfo, textures) end
+
+--- 
 --- @param context class prosper::IPrContext
 --- @param bufCreateInfo prosper.BufferCreateInfo
 --- @return prosper.Buffer ret0
@@ -27,23 +46,6 @@ function prosper.create_descriptor_set(ldescSetInfo) end
 function prosper.create_image(imgBuffer, imgCreateInfo) end
 
 --- 
---- @param context class prosper::IPrContext
---- @param imgViewCreateInfo prosper.ImageViewCreateInfo
---- @param img prosper.Image
---- @return prosper.ImageView ret0
-function prosper.create_image_view(context, imgViewCreateInfo, img) end
-
---- 
---- @return variant ret0
-function prosper.wait_for_current_swapchain_command_buffer_completion() end
-
---- 
---- @param imgBuf util.ImageBuffer
---- @return prosper.ImageCreateInfo ret0
---- @overload fun(imgBuf: util.ImageBuffer, cubemap: bool): prosper.ImageCreateInfo
-function prosper.create_image_create_info(imgBuf) end
-
---- 
 --- @param stage enum prosper::ShaderStage
 --- @return string ret0
 function prosper.shader_stage_to_string(stage) end
@@ -55,6 +57,23 @@ function prosper.shader_stage_to_string(stage) end
 --- @return prosper.Framebuffer ret0
 --- @overload fun(width: int, height: int, attachments: table, layers: int): prosper.Framebuffer
 function prosper.create_framebuffer(width, height, attachments) end
+
+--- 
+--- @param imgBuf util.ImageBuffer
+--- @return prosper.ImageCreateInfo ret0
+--- @overload fun(imgBuf: util.ImageBuffer, cubemap: bool): prosper.ImageCreateInfo
+function prosper.create_image_create_info(imgBuf) end
+
+--- 
+--- @return variant ret0
+function prosper.wait_for_current_swapchain_command_buffer_completion() end
+
+--- 
+--- @param context class prosper::IPrContext
+--- @param imgViewCreateInfo prosper.ImageViewCreateInfo
+--- @param img prosper.Image
+--- @return prosper.ImageView ret0
+function prosper.create_image_view(context, imgViewCreateInfo, img) end
 
 --- 
 --- @param img prosper.Image
@@ -86,25 +105,6 @@ function prosper.create_gradient_texture(width, height, format, dir, tNodes) end
 function prosper.blur_texture(srcTex, blurStrength) end
 
 --- 
---- @param arg0 class prosper::IPrContext
---- @return prosper.Event ret0
-function prosper.create_event(arg0) end
-
---- 
---- @param format enum prosper::Format
---- @return string ret0
-function prosper.format_to_string(format) end
-
---- 
---- @param rtCreateInfo prosper.RenderTargetCreateInfo
---- @param textures table
---- @return prosper.RenderTarget ret0
---- @overload fun(rtCreateInfo: prosper.RenderTargetCreateInfo, textures: table, renderPass: prosper.RenderPass): prosper.RenderTarget
---- @overload fun(rtCreateInfo: prosper.RenderTargetCreateInfo, texture: prosper.Texture, renderPass: prosper.RenderPass): prosper.RenderTarget
---- @overload fun(rtCreateInfo: prosper.RenderTargetCreateInfo, texture: prosper.Texture): prosper.RenderTarget
-function prosper.create_render_target(rtCreateInfo, textures) end
-
---- 
 --- @return prosper.Fence ret0
 --- @overload fun(createSignalled: bool): prosper.Fence
 function prosper.create_fence() end
@@ -121,6 +121,11 @@ function prosper.calculate_mipmap_count(w, h) end
 --- @return int ret0
 --- @overload fun(w: int, h: int, level: int): int
 function prosper.calculate_mipmap_size(v, level) end
+
+--- 
+--- @param r enum prosper::Result
+--- @return string ret0
+function prosper.result_to_string(r) end
 
 --- 
 --- @param format enum prosper::Format
@@ -180,218 +185,6 @@ function prosper.flush(arg0) end
 --- @return prosper.Window ret0
 function prosper.create_window(arg0, arg1) end
 
---- 
---- @param r enum prosper::Result
---- @return string ret0
-function prosper.result_to_string(r) end
-
-
---- 
---- @class prosper.Window
-prosper.Window = {}
-
---- 
---- @param enabled bool
-function prosper.Window:SetStickyMouseButtonsEnabled(enabled) end
-
---- 
---- @return math.Vector2 ret0
-function prosper.Window:GetCursorPos() end
-
---- 
---- @return bool ret0
-function prosper.Window:GetStickyMouseButtonsEnabled() end
-
---- 
---- @return bool ret0
-function prosper.Window:IsVisible() end
-
---- 
-function prosper.Window:SwapBuffers() end
-
---- 
---- @param enabled bool
-function prosper.Window:SetStickyKeysEnabled(enabled) end
-
---- 
---- @param b prosper.Window
---- @return bool ret0
-function prosper.Window:__eq(b) end
-
---- 
-function prosper.Window:Restore() end
-
---- 
-function prosper.Window:Maximize() end
-
---- 
-function prosper.Window:MakeContextCurrent() end
-
---- 
---- @return math.Vector2i ret0
-function prosper.Window:GetFramebufferSize() end
-
---- 
---- @return math.Vector2i ret0
-function prosper.Window:GetPos() end
-
---- 
---- @return math.Vector2i ret0
-function prosper.Window:GetSize() end
-
---- 
-function prosper.Window:Show() end
-
---- 
-function prosper.Window:Hide() end
-
---- 
-function prosper.Window:ClearCursorPosOverride() end
-
---- 
---- @param pos math.Vector2
-function prosper.Window:SetCursorPosOverride(pos) end
-
---- 
---- @return bool ret0
-function prosper.Window:IsFocused() end
-
---- 
---- @return bool ret0
-function prosper.Window:IsResizable() end
-
---- 
---- @param size math.Vector2i
-function prosper.Window:SetSize(size) end
-
---- 
---- @return math.Vector2 ret0_1
---- @return math.Vector2 ret0_2
---- @return math.Vector2 ret0_3
---- @return math.Vector2 ret0_4
-function prosper.Window:GetMonitorBounds() end
-
---- 
---- @return bool ret0
-function prosper.Window:IsIconified() end
-
---- 
---- @return bool ret0
-function prosper.Window:IsFloating() end
-
---- 
---- @return bool ret0
-function prosper.Window:IsDecorated() end
-
---- 
---- @return bool ret0
-function prosper.Window:ShouldClose() end
-
---- 
-function prosper.Window:ClearCursor() end
-
---- 
---- @param key enum GLFW::Key
---- @return enum GLFW::KeyState ret0
-function prosper.Window:GetKeyState(key) end
-
---- 
---- @param pos math.Vector2i
-function prosper.Window:SetPos(pos) end
-
---- 
---- @param mouseButton enum GLFW::MouseButton
---- @return enum GLFW::KeyState ret0
-function prosper.Window:GetMouseButtonState(mouseButton) end
-
---- 
---- @param cursorMode enum GLFW::CursorMode
-function prosper.Window:SetCursorInputMode(cursorMode) end
-
---- 
---- @return enum GLFW::CursorMode ret0
-function prosper.Window:GetCursorInputMode() end
-
---- 
---- @return int ret0
-function prosper.Window:GetSwapchainImageCount() end
-
---- 
---- @return bool ret0
-function prosper.Window:GetStickyKeysEnabled() end
-
---- 
---- @param function unknown
-function prosper.Window:AddCloseListener(function_) end
-
---- 
---- @return bool ret0
-function prosper.Window:IsValid() end
-
---- 
---- @param cursor class GLFW::Cursor
-function prosper.Window:SetCursor(cursor) end
-
---- 
---- @return bool ret0
-function prosper.Window:IsMaximized() end
-
---- 
-function prosper.Window:Close() end
-
---- 
-function prosper.Window:Iconify() end
-
---- 
---- @return math.Vector4i ret0
-function prosper.Window:GetFrameSize() end
-
---- 
---- @param title string
-function prosper.Window:SetWindowTitle(title) end
-
---- 
---- @param shouldClose bool
-function prosper.Window:SetShouldClose(shouldClose) end
-
---- 
---- @return string ret0
-function prosper.Window:GetClipboardString() end
-
---- 
---- @param str string
-function prosper.Window:SetClipboardString(str) end
-
---- 
---- @param pos math.Vector2
-function prosper.Window:SetCursorPos(pos) end
-
-
---- 
---- @class prosper.WindowCreateInfo
---- @field greenBits int 
---- @field samples int 
---- @field visible bool 
---- @field decorated bool 
---- @field depthBits int 
---- @field focused bool 
---- @field autoIconify bool 
---- @field floating bool 
---- @field stereo bool 
---- @field srgbCapable bool 
---- @field doublebuffer bool 
---- @field height int 
---- @field alphaBits int 
---- @field redBits int 
---- @field blueBits int 
---- @field refreshRate int 
---- @field width int 
---- @field title string 
---- @field stencilBits int 
---- @field resizable bool 
---- @overload fun():prosper.WindowCreateInfo
-prosper.WindowCreateInfo = {}
-
 
 --- 
 --- @class prosper.PreparedCommandBuffer
@@ -400,13 +193,13 @@ prosper.WindowCreateInfo = {}
 prosper.PreparedCommandBuffer = {}
 
 --- 
---- @param lineWidth struct Lua::Vulkan::PreparedCommandLuaArg
-function prosper.PreparedCommandBuffer:RecordSetLineWidth(lineWidth) end
-
---- 
 --- @param cmd prosper.CommandBuffer
 --- @return bool ret0
 function prosper.PreparedCommandBuffer:RecordCommands(cmd) end
+
+--- 
+--- @param lineWidth struct Lua::Vulkan::PreparedCommandLuaArg
+function prosper.PreparedCommandBuffer:RecordSetLineWidth(lineWidth) end
 
 --- 
 --- @param faceMask struct Lua::Vulkan::PreparedCommandLuaArg
@@ -443,166 +236,723 @@ prosper.PreparedCommandBuffer.DynArg = {}
 
 
 --- 
+--- @class prosper.PipelineBarrierInfo
+--- @field srcStageMask int 
+--- @field dstStageMask int 
+--- @overload fun():prosper.PipelineBarrierInfo
+prosper.PipelineBarrierInfo = {}
+
+
+--- 
+--- @class prosper.BufferCopyInfo
+--- @field size int 
+--- @field srcOffset int 
+--- @field dstOffset int 
+--- @overload fun():prosper.BufferCopyInfo
+prosper.BufferCopyInfo = {}
+
+
+--- 
+--- @class prosper.Image
+prosper.Image = {}
+
+--- 
+--- @param cmd prosper.CommandBuffer
+--- @return prosper.Image ret0
+--- @overload fun(cmd: prosper.CommandBuffer, imgCreateInfo: prosper.ImageCreateInfo): prosper.Image
+function prosper.Image:Copy(cmd) end
+
+--- 
+--- @return bool ret0
+function prosper.Image:IsNormalMap() end
+
+--- 
+--- @return enum prosper::SampleCountFlags ret0
+function prosper.Image:GetSampleCount() end
+
+--- 
+--- @param 1 prosper.Image
+function prosper.Image:__eq(arg1) end
+
+--- 
+--- @return prosper.SubresourceLayout ret0
+--- @overload fun(layer: int): prosper.SubresourceLayout
+--- @overload fun(arg1: int, arg2: int): prosper.SubresourceLayout
+function prosper.Image:GetAspectSubresourceLayout() end
+
+--- 
+--- @return bool ret0
+function prosper.Image:IsSrgb() end
+
+--- 
+--- @param arg1 bool
+function prosper.Image:SetSrgb(arg1) end
+
+--- 
+function prosper.Image:__tostring() end
+
+--- 
+--- @param x int
+--- @param y int
+--- @param imgBuf util.ImageBuffer
+--- @overload fun(x: int, y: int, imgBuf: util.ImageBuffer, layerIndex: int): 
+--- @overload fun(x: int, y: int, imgBuf: util.ImageBuffer, layerIndex: int, mipLevel: int): 
+function prosper.Image:WriteMemory(x, y, imgBuf) end
+
+--- 
+--- @param mipmap int
+--- @return int ret0_1
+--- @return int ret0_2
+function prosper.Image:GetMipmapSize(mipmap) end
+
+--- 
+--- @return int ret0
+function prosper.Image:GetLayerCount() end
+
+--- 
+--- @return int ret0
+function prosper.Image:GetMipmapCount() end
+
+--- 
+--- @return enum prosper::ImageUsageFlags ret0
+function prosper.Image:GetUsage() end
+
+--- 
+--- @return enum prosper::SharingMode ret0
+function prosper.Image:GetSharingMode() end
+
+--- 
+--- @return enum prosper::ImageTiling ret0
+function prosper.Image:GetTiling() end
+
+--- 
+--- @return prosper.ImageCreateInfo ret0
+function prosper.Image:GetCreateInfo() end
+
+--- 
+--- @param info prosper.Image.ToImageBufferInfo
+--- @overload fun(includeLayers: bool, includeMipmaps: bool): 
+--- @overload fun(includeLayers: bool, includeMipmaps: bool, targetFormat: int): 
+--- @overload fun(includeLayers: bool, includeMipmaps: bool, targetFormat: int, inputImageLayout: enum prosper::ImageLayout): 
+function prosper.Image:ToImageBuffer(info) end
+
+--- 
+--- @return prosper.Buffer ret0
+function prosper.Image:GetMemoryBuffer() end
+
+--- 
+--- @param cmd prosper.CommandBuffer
+--- @param format enum prosper::Format
+--- @return prosper.Image ret0
+function prosper.Image:Convert(cmd, format) end
+
+--- 
+--- @param arg1 int
+--- @return int ret0
+--- @overload fun(arg1: int): int
+function prosper.Image:GetWidth(arg1) end
+
+--- 
+--- @return enum prosper::ImageType ret0
+function prosper.Image:GetType() end
+
+--- 
+--- @param name string
+function prosper.Image:SetDebugName(name) end
+
+--- 
+--- @param arg1 int
+--- @return int ret0
+--- @overload fun(arg1: int): int
+function prosper.Image:GetHeight(arg1) end
+
+--- 
+--- @return string ret0
+function prosper.Image:GetDebugName() end
+
+--- 
+--- @return bool ret0
+function prosper.Image:IsValid() end
+
+--- 
+--- @return int ret0
+function prosper.Image:GetAlignment() end
+
+--- 
+--- @return enum prosper::Format ret0
+function prosper.Image:GetFormat() end
+
+--- 
+--- @param arg1 bool
+function prosper.Image:SetNormalMap(arg1) end
+
+--- 
+--- @param mipmap int
+--- @return int ret0_1
+--- @return int ret0_2
+function prosper.Image:GetExtent2D(mipmap) end
+
+
+--- 
+--- @class prosper.Image.ToImageBufferInfo
+--- @field inputImageLayout prosper::ImageLayout 
+--- @field stagingImage prosper.Image 
+--- @field targetFormat uimg::Format 
+--- @field includeLayers bool 
+--- @field includeMipmaps bool 
+--- @overload fun():prosper.Image.ToImageBufferInfo
+prosper.Image.ToImageBufferInfo = {}
+
+
+--- 
+--- @class prosper.ImageCopyInfo
+--- @field srcSubresource  
+--- @field height int 
+--- @field srcOffset math.Vectori 
+--- @field dstSubresource  
+--- @field dstOffset math.Vectori 
+--- @field width int 
+--- @field srcImageLayout int 
+--- @field dstImageLayout int 
+--- @overload fun():prosper.ImageCopyInfo
+prosper.ImageCopyInfo = {}
+
+
+--- 
+--- @class prosper.RenderBuffer
+prosper.RenderBuffer = {}
+
+
+--- 
+--- @class prosper.ClearImageInfo
+--- @field subresourceRange prosper.ImageSubresourceRange 
+--- @overload fun():prosper.ClearImageInfo
+prosper.ClearImageInfo = {}
+
+
+--- 
+--- @class prosper.RenderPassCreateInfo
+--- @overload fun():prosper.RenderPassCreateInfo
+prosper.RenderPassCreateInfo = {}
+
+--- 
+--- @return int ret0
+function prosper.RenderPassCreateInfo:AddSubPass() end
+
+--- 
+--- @param subPassId int
+--- @param bEnabled bool
+function prosper.RenderPassCreateInfo:SetSubPassDepthStencilAttachmentEnabled(subPassId, bEnabled) end
+
+--- 
+--- @param format int
+--- @param initialLayout int
+--- @param finalLayout int
+--- @param loadOp int
+--- @param storeOp int
+--- @return int ret0
+--- @overload fun(format: int, initialLayout: int, finalLayout: int, loadOp: int, storeOp: int, sampleCount: int): int
+function prosper.RenderPassCreateInfo:AddAttachment(format, initialLayout, finalLayout, loadOp, storeOp) end
+
+--- 
+--- @param subPassId int
+--- @param colorAttId int
+function prosper.RenderPassCreateInfo:AddSubPassColorAttachment(subPassId, colorAttId) end
+
+--- 
+--- @param subPassId int
+--- @param sourceSubPassId int
+--- @param destinationSubPassId int
+--- @param sourceStageMask int
+--- @param destinationStageMask int
+--- @param sourceAccessMask int
+--- @param destinationAccessMask int
+function prosper.RenderPassCreateInfo:AddSubPassDependency(subPassId, sourceSubPassId, destinationSubPassId, sourceStageMask, destinationStageMask, sourceAccessMask, destinationAccessMask) end
+
+
+--- 
+--- @class prosper.RenderPass
+prosper.RenderPass = {}
+
+--- 
+--- @param 1 prosper.RenderPass
+function prosper.RenderPass:__eq(arg1) end
+
+--- 
+--- @return bool ret0
+function prosper.RenderPass:IsValid() end
+
+--- 
+function prosper.RenderPass:__tostring() end
+
+
+--- 
+--- @class prosper.Texture
+prosper.Texture = {}
+
+--- 
+--- @return enum prosper::Format ret0
+function prosper.Texture:GetFormat() end
+
+--- 
+--- @return int ret0
+function prosper.Texture:GetHeight() end
+
+--- 
+--- @param arg1 prosper.ImageView
+function prosper.Texture:SetImageView(arg1) end
+
+--- 
+--- @return int ret0
+function prosper.Texture:GetWidth() end
+
+--- 
+--- @return bool ret0
+function prosper.Texture:IsValid() end
+
+--- 
+--- @param 1 prosper.Texture
+function prosper.Texture:__eq(arg1) end
+
+--- 
+function prosper.Texture:__tostring() end
+
+--- 
+--- @return string ret0
+function prosper.Texture:GetDebugName() end
+
+--- 
+--- @return prosper.Sampler ret0
+function prosper.Texture:GetSampler() end
+
+--- 
+--- @param arg1 int
+--- @return prosper.ImageView ret0
+--- @overload fun(): prosper.ImageView
+function prosper.Texture:GetImageView(arg1) end
+
+--- 
+--- @param name string
+function prosper.Texture:SetDebugName(name) end
+
+--- 
+--- @return prosper.Image ret0
+function prosper.Texture:GetImage() end
+
+
+--- 
 --- @class prosper.ImageViewCreateInfo
---- @field mipmapLevels int 
---- @field format int 
+--- @field swizzleRed int 
+--- @field swizzleGreen int 
+--- @field baseMipmap int 
 --- @field swizzleBlue int 
 --- @field swizzleAlpha int 
---- @field baseMipmap int 
---- @field swizzleGreen int 
---- @field swizzleRed int 
 --- @field baseLayer int 
+--- @field format int 
+--- @field mipmapLevels int 
 --- @field levelCount int 
 --- @overload fun():prosper.ImageViewCreateInfo
 prosper.ImageViewCreateInfo = {}
 
 
 --- 
---- @class prosper.Buffer
-prosper.Buffer = {}
+--- @class prosper.TimestampQuery
+prosper.TimestampQuery = {}
 
 --- 
---- @param offset int
---- @param ds util.DataStream
---- @return bool ret0
---- @overload fun(offset: int, type: enum udm::Type, value: struct luabind::adl::udm_type<class luabind::adl::object,1,1,0>): bool
---- @overload fun(offset: int, ds: util.DataStream, dsOffset: int, dsSize: int): bool
-function prosper.Buffer:WriteMemory(offset, ds) end
-
---- 
-function prosper.Buffer:__tostring() end
+--- @param 1 prosper.TimestampQuery
+function prosper.TimestampQuery:__eq(arg1) end
 
 --- 
 --- @return bool ret0
-function prosper.Buffer:UnmapMemory() end
+function prosper.TimestampQuery:IsValid() end
 
 --- 
---- @return int ret0
-function prosper.Buffer:GetStartOffset() end
+function prosper.TimestampQuery:__tostring() end
+
 
 --- 
---- @param mapFlags enum prosper::IBuffer::MapFlags
---- @return bool ret0
---- @overload fun(offset: int, size: int, mapFlags: enum prosper::IBuffer::MapFlags): bool
-function prosper.Buffer:MapMemory(mapFlags) end
+--- @class prosper.Window
+prosper.Window = {}
 
 --- 
 --- @return bool ret0
-function prosper.Buffer:IsValid() end
+function prosper.Window:GetStickyMouseButtonsEnabled() end
 
 --- 
---- @param 1 prosper.Buffer
-function prosper.Buffer:__eq(arg1) end
+--- @return math.Vector2 ret0
+function prosper.Window:GetCursorPos() end
 
 --- 
---- @return int ret0
-function prosper.Buffer:GetSize() end
+function prosper.Window:SwapBuffers() end
 
 --- 
---- @return util.DataStream ret0
---- @overload fun(offset: int, size: int): util.DataStream
---- @overload fun(offset: int, type: enum udm::Type, value: struct luabind::adl::udm_type<class luabind::adl::object,1,1,0>): util.DataStream
---- @overload fun(offset: int, size: int, ds: util.DataStream): util.DataStream
---- @overload fun(offset: int, size: int, ds: util.DataStream, dsOffset: int): util.DataStream
-function prosper.Buffer:ReadMemory() end
+--- @return bool ret0
+function prosper.Window:IsVisible() end
 
 --- 
---- @return int ret0
-function prosper.Buffer:GetBaseIndex() end
+--- @param size math.Vector2i
+function prosper.Window:SetSize(size) end
 
 --- 
---- @return prosper.BufferCreateInfo ret0
-function prosper.Buffer:GetCreateInfo() end
+--- @return bool ret0
+function prosper.Window:IsFocused() end
 
 --- 
---- @param name string
-function prosper.Buffer:SetDebugName(name) end
+--- @return bool ret0
+function prosper.Window:IsResizable() end
 
 --- 
---- @return enum prosper::BufferUsageFlags ret0
-function prosper.Buffer:GetUsageFlags() end
+--- @return math.Vector2 ret0_1
+--- @return math.Vector2 ret0_2
+--- @return math.Vector2 ret0_3
+--- @return math.Vector2 ret0_4
+function prosper.Window:GetMonitorBounds() end
+
+--- 
+--- @return bool ret0
+function prosper.Window:ShouldClose() end
+
+--- 
+--- @return bool ret0
+function prosper.Window:IsDecorated() end
+
+--- 
+--- @return math.Vector2i ret0
+function prosper.Window:GetSize() end
+
+--- 
+--- @param title string
+function prosper.Window:SetWindowTitle(title) end
+
+--- 
+--- @param shouldClose bool
+function prosper.Window:SetShouldClose(shouldClose) end
 
 --- 
 --- @return string ret0
-function prosper.Buffer:GetDebugName() end
+function prosper.Window:GetClipboardString() end
 
 --- 
---- @param arg1 bool
---- @param arg2 enum prosper::IBuffer::MapFlags
-function prosper.Buffer:SetPermanentlyMapped(arg1, arg2) end
+--- @param str string
+function prosper.Window:SetClipboardString(str) end
 
 --- 
---- @return prosper.Buffer ret0
-function prosper.Buffer:GetParent() end
+--- @param pos math.Vector2
+function prosper.Window:SetCursorPos(pos) end
 
+--- 
+--- @param enabled bool
+function prosper.Window:SetStickyKeysEnabled(enabled) end
+
+--- 
+--- @param b prosper.Window
+--- @return bool ret0
+function prosper.Window:__eq(b) end
+
+--- 
+--- @param function unknown
+function prosper.Window:AddCloseListener(function_) end
+
+--- 
+--- @return bool ret0
+function prosper.Window:GetStickyKeysEnabled() end
+
+--- 
+--- @return int ret0
+function prosper.Window:GetSwapchainImageCount() end
+
+--- 
+--- @param enabled bool
+function prosper.Window:SetStickyMouseButtonsEnabled(enabled) end
+
+--- 
+--- @return math.Vector2i ret0
+function prosper.Window:GetFramebufferSize() end
+
+--- 
+--- @return math.Vector2i ret0
+function prosper.Window:GetPos() end
+
+--- 
+--- @return math.Vector4i ret0
+function prosper.Window:GetFrameSize() end
+
+--- 
+function prosper.Window:Iconify() end
+
+--- 
+function prosper.Window:Restore() end
+
+--- 
+function prosper.Window:Maximize() end
+
+--- 
+function prosper.Window:MakeContextCurrent() end
+
+--- 
+function prosper.Window:Show() end
+
+--- 
+function prosper.Window:Hide() end
+
+--- 
+function prosper.Window:ClearCursorPosOverride() end
+
+--- 
+--- @param pos math.Vector2
+function prosper.Window:SetCursorPosOverride(pos) end
+
+--- 
+--- @return bool ret0
+function prosper.Window:IsMaximized() end
+
+--- 
+--- @param cursor class GLFW::Cursor
+function prosper.Window:SetCursor(cursor) end
+
+--- 
+--- @return bool ret0
+function prosper.Window:IsIconified() end
+
+--- 
+--- @return bool ret0
+function prosper.Window:IsFloating() end
+
+--- 
+function prosper.Window:ClearCursor() end
+
+--- 
+--- @param key enum GLFW::Key
+--- @return enum GLFW::KeyState ret0
+function prosper.Window:GetKeyState(key) end
+
+--- 
+--- @param pos math.Vector2i
+function prosper.Window:SetPos(pos) end
+
+--- 
+--- @param mouseButton enum GLFW::MouseButton
+--- @return enum GLFW::KeyState ret0
+function prosper.Window:GetMouseButtonState(mouseButton) end
+
+--- 
+--- @param cursorMode enum GLFW::CursorMode
+function prosper.Window:SetCursorInputMode(cursorMode) end
+
+--- 
+--- @return enum GLFW::CursorMode ret0
+function prosper.Window:GetCursorInputMode() end
+
+--- 
+--- @return bool ret0
+function prosper.Window:IsValid() end
+
+--- 
+function prosper.Window:Close() end
+
+
+--- 
+--- @class prosper.BlitInfo
+--- @field offsetDst math.Vector2i 
+--- @field extentsSrc math.Vector2i 
+--- @field extentsDst math.Vector2i 
+--- @field srcSubresourceLayer  
+--- @field dstSubresourceLayer  
+--- @field offsetSrc math.Vector2i 
+--- @overload fun():prosper.BlitInfo
+prosper.BlitInfo = {}
+
+
+--- 
+--- @class prosper.ClearValue
+--- @overload fun(arg1: number):prosper.ClearValue
+--- @overload fun(arg1: number, arg2: int):prosper.ClearValue
+--- @overload fun(arg1: util.Color):prosper.ClearValue
+--- @overload fun():prosper.ClearValue
+prosper.ClearValue = {}
+
+--- 
+--- @param clearColor util.Color
+function prosper.ClearValue:SetColor(clearColor) end
+
+--- 
+--- @param depth number
+--- @param stencil int
+--- @overload fun(depth: number): 
+function prosper.ClearValue:SetDepthStencil(depth, stencil) end
+
+
+--- 
+--- @class prosper.SamplerCreateInfo
+--- @field maxLod number 
+--- @field borderColor int 
+--- @field magFilter int 
+--- @field addressModeV int 
+--- @field maxAnisotropy number 
+--- @field mipLodBias number 
+--- @field addressModeW int 
+--- @field minFilter int 
+--- @field mipmapMode int 
+--- @field addressModeU int 
+--- @field compareEnable bool 
+--- @field compareOp int 
+--- @field minLod number 
+--- @overload fun():prosper.SamplerCreateInfo
+prosper.SamplerCreateInfo = {}
+
+
+--- 
+--- @class prosper.ImageView
+prosper.ImageView = {}
+
+--- 
+--- @return string ret0
+function prosper.ImageView:GetDebugName() end
+
+--- 
+--- @param name string
+function prosper.ImageView:SetDebugName(name) end
+
+--- 
+--- @return bool ret0
+function prosper.ImageView:IsValid() end
+
+--- 
+--- @param 1 prosper.ImageView
+function prosper.ImageView:__eq(arg1) end
+
+--- 
+--- @return enum prosper::Format ret0
+function prosper.ImageView:GetImageFormat() end
+
+--- 
+function prosper.ImageView:__tostring() end
+
+--- 
+--- @return int ret0
+function prosper.ImageView:GetLayerCount() end
+
+--- 
+--- @return enum prosper::ImageAspectFlags ret0
+function prosper.ImageView:GetAspectMask() end
+
+--- 
+--- @return enum prosper::ImageViewType ret0
+function prosper.ImageView:GetType() end
+
+--- 
+--- @return int ret0
+function prosper.ImageView:GetBaseMipmapLevel() end
+
+--- 
+--- @return class std::array<enum prosper::ComponentSwizzle,4> ret0
+function prosper.ImageView:GetSwizzleArray() end
+
+--- 
+--- @return int ret0
+function prosper.ImageView:GetMipmapCount() end
+
+--- 
+--- @return int ret0
+function prosper.ImageView:GetBaseLayer() end
+
+
+--- 
+--- @class prosper.BufferCreateInfo
+--- @field usageFlags int 
+--- @field memoryFeatures int 
+--- @field size int 
+--- @field flags int 
+--- @field queueFamilyMask int 
+--- @overload fun():prosper.BufferCreateInfo
+prosper.BufferCreateInfo = {}
+
+
+--- @enum FlagSparse
+prosper.BufferCreateInfo = {
+	FLAG_SPARSE_ALIASED_RESIDENCY_BIT = 8,
+	FLAG_SPARSE_BIT = 4,
+}
+
+--- @enum Flag
+prosper.BufferCreateInfo = {
+	FLAG_NONE = 0,
+	FLAG_CONCURRENT_SHARING_BIT = 1,
+	FLAG_DONT_ALLOCATE_MEMORY_BIT = 2,
+}
+
+--- 
+--- @class prosper.ImageSubresourceLayers
+--- @field aspectMask int 
+--- @field layerCount int 
+--- @field mipLevel int 
+--- @field baseArrayLayer int 
+--- @overload fun():prosper.ImageSubresourceLayers
+prosper.ImageSubresourceLayers = {}
+
+
+--- 
+--- @class prosper.TimerQuery
+prosper.TimerQuery = {}
+
+--- 
+--- @param 1 prosper.TimerQuery
+function prosper.TimerQuery:__eq(arg1) end
+
+--- 
+--- @return bool ret0
+function prosper.TimerQuery:IsValid() end
+
+--- 
+function prosper.TimerQuery:__tostring() end
+
+
+--- 
+--- @class prosper.ImageCreateInfo
+--- @field usageFlags int 
+--- @field memoryFeatures int 
+--- @field height int 
+--- @field tiling int 
+--- @field format int 
+--- @field layers int 
+--- @field samples int 
+--- @field postCreateLayout int 
+--- @field type int 
+--- @field width int 
+--- @field flags int 
+--- @field queueFamilyMask int 
+--- @overload fun():prosper.ImageCreateInfo
+prosper.ImageCreateInfo = {}
+
+
+--- @enum FlagSparse
+prosper.ImageCreateInfo = {
+	FLAG_SPARSE_ALIASED_RESIDENCY_BIT = 16,
+	FLAG_SPARSE_BIT = 8,
+}
+
+--- @enum Flag
+prosper.ImageCreateInfo = {
+	FLAG_DONT_ALLOCATE_MEMORY_BIT = 64,
+	FLAG_ALLOCATE_DISCRETE_MEMORY_BIT = 32,
+	FLAG_NORMAL_MAP_BIT = 256,
+	FLAG_NONE = 0,
+	FLAG_CONCURRENT_SHARING_BIT = 2,
+	FLAG_CUBEMAP_BIT = 1,
+	FLAG_SRGB_BIT = 128,
+	FLAG_FULL_MIPMAP_CHAIN_BIT = 4,
+}
 
 --- 
 --- @class prosper.CommandBuffer
 prosper.CommandBuffer = {}
 
 --- 
---- @param 1 prosper.CommandBuffer
-function prosper.CommandBuffer:__eq(arg1) end
-
---- 
---- @param name string
-function prosper.CommandBuffer:SetDebugName(name) end
-
---- 
---- @param graphics shader.Graphics
---- @param vertexBuffer prosper.Buffer
+--- @param minDepthBounds number
+--- @param maxDepthBounds number
 --- @return bool ret0
---- @overload fun(graphics: shader.Graphics, vertexBuffer: prosper.Buffer, startBinding: int): bool
---- @overload fun(graphics: shader.Graphics, vertexBuffer: prosper.Buffer, startBinding: int, offset: int): bool
-function prosper.CommandBuffer:RecordBindVertexBuffer(graphics, vertexBuffer) end
-
---- 
---- @param indexCount int
---- @return bool ret0
---- @overload fun(indexCount: int, instanceCount: int): bool
---- @overload fun(indexCount: int, instanceCount: int, firstIndex: int): bool
---- @overload fun(indexCount: int, instanceCount: int, firstIndex: int, firstInstance: int): bool
-function prosper.CommandBuffer:RecordDrawIndexed(indexCount) end
-
---- 
---- @param graphics shader.Graphics
---- @param buffers table
---- @return bool ret0
---- @overload fun(graphics: shader.Graphics, buffers: table, startBinding: int): bool
---- @overload fun(graphics: shader.Graphics, buffers: table, startBinding: int, voffsets: table): bool
-function prosper.CommandBuffer:RecordBindVertexBuffers(graphics, buffers) end
-
---- 
-function prosper.CommandBuffer:__tostring() end
-
---- 
---- @param texSrc prosper.Texture
---- @param imgDst prosper.Image
---- @return bool ret0
-function prosper.CommandBuffer:RecordBlitTexture(texSrc, imgDst) end
-
---- 
---- @param vertexCount int
---- @return bool ret0
---- @overload fun(vertexCount: int, instanceCount: int): bool
---- @overload fun(vertexCount: int, instanceCount: int, firstVertex: int): bool
---- @overload fun(vertexCount: int, instanceCount: int, firstVertex: int, firstInstance: int): bool
-function prosper.CommandBuffer:RecordDraw(vertexCount) end
-
---- 
---- @return string ret0
-function prosper.CommandBuffer:GetDebugName() end
-
---- 
---- @param indexBuffer prosper.Buffer
---- @param indexType int
---- @return bool ret0
---- @overload fun(indexBuffer: prosper.Buffer, indexType: int, offset: int): bool
-function prosper.CommandBuffer:RecordBindIndexBuffer(indexBuffer, indexType) end
-
---- 
---- @return bool ret0
-function prosper.CommandBuffer:IsRecording() end
+function prosper.CommandBuffer:RecordSetDepthBounds(minDepthBounds, maxDepthBounds) end
 
 --- 
 --- @param rpInfo prosper.RenderPassInfo
@@ -610,10 +960,23 @@ function prosper.CommandBuffer:IsRecording() end
 function prosper.CommandBuffer:RecordBeginRenderPass(rpInfo) end
 
 --- 
---- @param minDepthBounds number
---- @param maxDepthBounds number
 --- @return bool ret0
-function prosper.CommandBuffer:RecordSetDepthBounds(minDepthBounds, maxDepthBounds) end
+function prosper.CommandBuffer:IsRecording() end
+
+--- 
+--- @param imgSrc prosper.Image
+--- @param imgDst prosper.Image
+--- @param blitInfo prosper.BlitInfo
+--- @return bool ret0
+function prosper.CommandBuffer:RecordBlitImage(imgSrc, imgDst, blitInfo) end
+
+--- 
+--- @param img prosper.Image
+--- @param clearDepth number
+--- @return bool ret0
+--- @overload fun(img: prosper.Image, clearDepth: number, clearStencil: int): bool
+--- @overload fun(img: prosper.Image, col: util.Color, attId: int): bool
+function prosper.CommandBuffer:RecordClearAttachment(img, clearDepth) end
 
 --- 
 --- @param img prosper.Image
@@ -626,21 +989,6 @@ function prosper.CommandBuffer:RecordSetDepthBounds(minDepthBounds, maxDepthBoun
 function prosper.CommandBuffer:RecordClearImage(img, clearDepth, clearStencil) end
 
 --- 
---- @param img prosper.Image
---- @param clearDepth number
---- @return bool ret0
---- @overload fun(img: prosper.Image, clearDepth: number, clearStencil: int): bool
---- @overload fun(img: prosper.Image, col: util.Color, attId: int): bool
-function prosper.CommandBuffer:RecordClearAttachment(img, clearDepth) end
-
---- 
---- @param imgSrc prosper.Image
---- @param imgDst prosper.Image
---- @param blitInfo prosper.BlitInfo
---- @return bool ret0
-function prosper.CommandBuffer:RecordBlitImage(imgSrc, imgDst, blitInfo) end
-
---- 
 --- @param imgSrc prosper.Image
 --- @param imgDst prosper.Image
 --- @param copyInfo prosper.ImageCopyInfo
@@ -649,17 +997,17 @@ function prosper.CommandBuffer:RecordCopyImage(imgSrc, imgDst, copyInfo) end
 
 --- 
 --- @param bufSrc prosper.Buffer
---- @param imgDst prosper.Image
---- @return bool ret0
---- @overload fun(bufSrc: prosper.Buffer, imgDst: prosper.Image, copyInfo: prosper.BufferImageCopyInfo): bool
-function prosper.CommandBuffer:RecordCopyBufferToImage(bufSrc, imgDst) end
-
---- 
---- @param bufSrc prosper.Buffer
 --- @param bufDst prosper.Buffer
 --- @param copyInfo prosper.BufferCopyInfo
 --- @return bool ret0
 function prosper.CommandBuffer:RecordCopyBuffer(bufSrc, bufDst, copyInfo) end
+
+--- 
+--- @param bufSrc prosper.Buffer
+--- @param imgDst prosper.Image
+--- @return bool ret0
+--- @overload fun(bufSrc: prosper.Buffer, imgDst: prosper.Image, copyInfo: prosper.BufferImageCopyInfo): bool
+function prosper.CommandBuffer:RecordCopyBufferToImage(bufSrc, imgDst) end
 
 --- 
 --- @param buf prosper.Buffer
@@ -677,10 +1025,31 @@ function prosper.CommandBuffer:RecordUpdateBuffer(buf, offset, type, value) end
 function prosper.CommandBuffer:RecordSetStencilWriteMask(faceMask, stencilWriteMask) end
 
 --- 
+--- @param depthBiasConstantFactor number
+--- @param depthBiasClamp number
+--- @param slopeScaledDepthBias number
+--- @return bool ret0
+function prosper.CommandBuffer:RecordSetDepthBias(depthBiasConstantFactor, depthBiasClamp, slopeScaledDepthBias) end
+
+--- 
 --- @param imgSrc prosper.Image
 --- @param imgDst prosper.Image
 --- @return bool ret0
 function prosper.CommandBuffer:RecordResolveImage(imgSrc, imgDst) end
+
+--- 
+--- @param texSrc prosper.Texture
+--- @param imgDst prosper.Image
+--- @return bool ret0
+function prosper.CommandBuffer:RecordBlitTexture(texSrc, imgDst) end
+
+--- 
+--- @param vertexCount int
+--- @return bool ret0
+--- @overload fun(vertexCount: int, instanceCount: int): bool
+--- @overload fun(vertexCount: int, instanceCount: int, firstVertex: int): bool
+--- @overload fun(vertexCount: int, instanceCount: int, firstVertex: int, firstInstance: int): bool
+function prosper.CommandBuffer:RecordDraw(vertexCount) end
 
 --- 
 --- @param img prosper.Image
@@ -782,28 +1151,27 @@ function prosper.CommandBuffer:RecordFillBuffer(buffer, offset, size, data) end
 function prosper.CommandBuffer:RecordSetBlendConstants(blendConstants) end
 
 --- 
---- @param depthBiasConstantFactor number
---- @param depthBiasClamp number
---- @param slopeScaledDepthBias number
---- @return bool ret0
-function prosper.CommandBuffer:RecordSetDepthBias(depthBiasConstantFactor, depthBiasClamp, slopeScaledDepthBias) end
+--- @param 1 prosper.CommandBuffer
+function prosper.CommandBuffer:__eq(arg1) end
 
 --- 
---- @param lineWidth number
---- @return bool ret0
-function prosper.CommandBuffer:RecordSetLineWidth(lineWidth) end
+function prosper.CommandBuffer:__tostring() end
 
 --- 
---- @param faceMask int
---- @param stencilCompareMask int
---- @return bool ret0
-function prosper.CommandBuffer:RecordSetStencilCompareMask(faceMask, stencilCompareMask) end
+function prosper.CommandBuffer:Flush() end
 
 --- 
---- @param faceMask int
---- @param stencilReference int
+--- @param indexBuffer prosper.Buffer
+--- @param indexType int
 --- @return bool ret0
-function prosper.CommandBuffer:RecordSetStencilReference(faceMask, stencilReference) end
+--- @overload fun(indexBuffer: prosper.Buffer, indexType: int, offset: int): bool
+function prosper.CommandBuffer:RecordBindIndexBuffer(indexBuffer, indexType) end
+
+--- 
+--- @param oneTimeSubmit bool
+--- @param simultaneousUseAllowed bool
+--- @return bool ret0
+function prosper.CommandBuffer:StartRecording(oneTimeSubmit, simultaneousUseAllowed) end
 
 --- 
 --- @param rt prosper.RenderTarget
@@ -813,342 +1181,106 @@ function prosper.CommandBuffer:RecordSetStencilReference(faceMask, stencilRefere
 function prosper.CommandBuffer:RecordDrawGradient(rt, dir, lnodes) end
 
 --- 
---- @param oneTimeSubmit bool
---- @param simultaneousUseAllowed bool
+--- @param faceMask int
+--- @param stencilReference int
 --- @return bool ret0
-function prosper.CommandBuffer:StartRecording(oneTimeSubmit, simultaneousUseAllowed) end
+function prosper.CommandBuffer:RecordSetStencilReference(faceMask, stencilReference) end
 
 --- 
-function prosper.CommandBuffer:Flush() end
-
-
---- 
---- @class prosper.DescriptorSet
-prosper.DescriptorSet = {}
-
---- 
-function prosper.DescriptorSet:__tostring() end
-
---- 
---- @return int ret0
-function prosper.DescriptorSet:GetBindingCount() end
-
---- 
---- @param bindingIdx int
---- @param texture prosper.Texture
+--- @param faceMask int
+--- @param stencilCompareMask int
 --- @return bool ret0
---- @overload fun(bindingIdx: int, texture: prosper.Texture, layerId: int): bool
-function prosper.DescriptorSet:SetBindingTexture(bindingIdx, texture) end
+function prosper.CommandBuffer:RecordSetStencilCompareMask(faceMask, stencilCompareMask) end
 
 --- 
---- @param 1 prosper.DescriptorSet
-function prosper.DescriptorSet:__eq(arg1) end
+--- @param lineWidth number
+--- @return bool ret0
+function prosper.CommandBuffer:RecordSetLineWidth(lineWidth) end
 
 --- 
 --- @param name string
-function prosper.DescriptorSet:SetDebugName(name) end
-
---- 
---- @return bool ret0
-function prosper.DescriptorSet:Update() end
+function prosper.CommandBuffer:SetDebugName(name) end
 
 --- 
 --- @return string ret0
-function prosper.DescriptorSet:GetDebugName() end
+function prosper.CommandBuffer:GetDebugName() end
 
 --- 
---- @param bindingIdx int
---- @param texture prosper.Texture
---- @param arrayIdx int
+--- @param graphics shader.Graphics
+--- @param vertexBuffer prosper.Buffer
 --- @return bool ret0
---- @overload fun(bindingIdx: int, texture: prosper.Texture, arrayIdx: int, layerId: int): bool
-function prosper.DescriptorSet:SetBindingArrayTexture(bindingIdx, texture, arrayIdx) end
+--- @overload fun(graphics: shader.Graphics, vertexBuffer: prosper.Buffer, startBinding: int): bool
+--- @overload fun(graphics: shader.Graphics, vertexBuffer: prosper.Buffer, startBinding: int, offset: int): bool
+function prosper.CommandBuffer:RecordBindVertexBuffer(graphics, vertexBuffer) end
 
 --- 
---- @param bindingIdx int
---- @param buffer prosper.Buffer
+--- @param graphics shader.Graphics
+--- @param buffers table
 --- @return bool ret0
---- @overload fun(bindingIdx: int, buffer: prosper.Buffer, startOffset: int): bool
---- @overload fun(bindingIdx: int, buffer: prosper.Buffer, startOffset: int, size: int): bool
-function prosper.DescriptorSet:SetBindingUniformBuffer(bindingIdx, buffer) end
+--- @overload fun(graphics: shader.Graphics, buffers: table, startBinding: int): bool
+--- @overload fun(graphics: shader.Graphics, buffers: table, startBinding: int, voffsets: table): bool
+function prosper.CommandBuffer:RecordBindVertexBuffers(graphics, buffers) end
 
 --- 
---- @param bindingIdx int
---- @param buffer prosper.Buffer
+--- @param indexCount int
 --- @return bool ret0
---- @overload fun(bindingIdx: int, buffer: prosper.Buffer, startOffset: int): bool
---- @overload fun(bindingIdx: int, buffer: prosper.Buffer, startOffset: int, size: int): bool
-function prosper.DescriptorSet:SetBindingUniformBufferDynamic(bindingIdx, buffer) end
-
---- 
---- @param bindingIdx int
---- @param buffer prosper.Buffer
---- @return bool ret0
---- @overload fun(bindingIdx: int, buffer: prosper.Buffer, startOffset: int): bool
---- @overload fun(bindingIdx: int, buffer: prosper.Buffer, startOffset: int, size: int): bool
-function prosper.DescriptorSet:SetBindingStorageBuffer(bindingIdx, buffer) end
+--- @overload fun(indexCount: int, instanceCount: int): bool
+--- @overload fun(indexCount: int, instanceCount: int, firstIndex: int): bool
+--- @overload fun(indexCount: int, instanceCount: int, firstIndex: int, firstInstance: int): bool
+function prosper.CommandBuffer:RecordDrawIndexed(indexCount) end
 
 
 --- 
---- @class prosper.BufferImageCopyInfo
---- @field imageSize math.Vector2i 
---- @field dstImageLayout int 
---- @field aspectMask int 
---- @field layerCount int 
---- @field mipLevel int 
---- @field baseArrayLayer int 
---- @field bufferOffset int 
---- @overload fun():prosper.BufferImageCopyInfo
-prosper.BufferImageCopyInfo = {}
-
---- 
---- @return math.Vector2i ret0
-function prosper.BufferImageCopyInfo:GetImageSize() end
-
---- 
---- @param width int
---- @param height int
-function prosper.BufferImageCopyInfo:SetImageSize(width, height) end
+--- @class prosper.SwapBuffer
+prosper.SwapBuffer = {}
 
 
 --- 
---- @class prosper.RenderBuffer
-prosper.RenderBuffer = {}
-
-
---- 
---- @class prosper.ImageCopyInfo
---- @field height int 
---- @field width int 
---- @field dstOffset math.Vectori 
---- @field srcSubresource  
---- @field dstSubresource  
---- @field srcOffset math.Vectori 
---- @field srcImageLayout int 
---- @field dstImageLayout int 
---- @overload fun():prosper.ImageCopyInfo
-prosper.ImageCopyInfo = {}
-
+--- @class prosper.Mesh
+prosper.Mesh = {}
 
 --- 
---- @class prosper.Sampler
-prosper.Sampler = {}
+--- @param arg1 prosper.Buffer
+function prosper.Mesh:SetVertexBuffer(arg1) end
 
 --- 
---- @return enum prosper::Filter ret0
-function prosper.Sampler:GetMinFilter() end
+--- @param arg1 prosper.Buffer
+function prosper.Mesh:SetAlphaBuffer(arg1) end
 
 --- 
---- @return bool ret0
-function prosper.Sampler:GetCompareEnabled() end
+--- @param arg1 prosper.Buffer
+--- @param arg2 enum pragma::model::IndexType
+function prosper.Mesh:SetIndexBuffer(arg1, arg2) end
 
 --- 
---- @return number ret0
-function prosper.Sampler:GetMaxAnisotropy() end
+--- @return prosper.Buffer ret0
+function prosper.Mesh:GetAlphaBuffer() end
 
 --- 
---- @return enum prosper::Filter ret0
-function prosper.Sampler:GetMagFilter() end
+--- @param arg1 prosper.Buffer
+function prosper.Mesh:SetVertexWeightBuffer(arg1) end
 
 --- 
---- @param arg1 number
-function prosper.Sampler:SetMinLod(arg1) end
+function prosper.Mesh:__tostring() end
 
 --- 
---- @param arg1 enum prosper::SamplerAddressMode
-function prosper.Sampler:SetAddressModeV(arg1) end
+--- @return prosper.Buffer ret0
+function prosper.Mesh:GetVertexBuffer() end
 
 --- 
---- @return enum prosper::SamplerMipmapMode ret0
-function prosper.Sampler:GetMipmapMode() end
+function prosper.Mesh:ClearBuffers() end
 
 --- 
---- @return bool ret0
-function prosper.Sampler:GetAnisotropyEnabled() end
+--- @param 1 prosper.Mesh
+function prosper.Mesh:__eq(arg1) end
 
 --- 
---- @param 1 prosper.Sampler
-function prosper.Sampler:__eq(arg1) end
+--- @return prosper.Buffer ret0
+function prosper.Mesh:GetIndexBuffer() end
 
 --- 
---- @return bool ret0
-function prosper.Sampler:IsValid() end
-
---- 
---- @param arg1 enum prosper::SamplerAddressMode
-function prosper.Sampler:SetAddressModeU(arg1) end
-
---- 
---- @return enum prosper::SamplerAddressMode ret0
-function prosper.Sampler:GetAddressModeV() end
-
---- 
---- @return enum prosper::SamplerAddressMode ret0
-function prosper.Sampler:GetAddressModeW() end
-
---- 
---- @return enum prosper::CompareOp ret0
-function prosper.Sampler:GetCompareOperation() end
-
---- 
---- @return number ret0
-function prosper.Sampler:GetMinLod() end
-
---- 
---- @return bool ret0
-function prosper.Sampler:Update() end
-
---- 
---- @return number ret0
-function prosper.Sampler:GetMaxLod() end
-
---- 
---- @return enum prosper::BorderColor ret0
-function prosper.Sampler:GetBorderColor() end
-
---- 
---- @param arg1 enum prosper::Filter
-function prosper.Sampler:SetMagFilter(arg1) end
-
---- 
---- @param arg1 enum prosper::Filter
-function prosper.Sampler:SetMinFilter(arg1) end
-
---- 
---- @param arg1 enum prosper::SamplerMipmapMode
-function prosper.Sampler:SetMipmapMode(arg1) end
-
---- 
---- @param arg1 enum prosper::SamplerAddressMode
-function prosper.Sampler:SetAddressModeW(arg1) end
-
---- 
-function prosper.Sampler:__tostring() end
-
---- 
---- @param arg1 bool
-function prosper.Sampler:SetCompareEnabled(arg1) end
-
---- 
---- @param arg1 enum prosper::CompareOp
-function prosper.Sampler:SetCompareOperation(arg1) end
-
---- 
---- @return number ret0
-function prosper.Sampler:GetMipLodBias() end
-
---- 
---- @param arg1 enum prosper::BorderColor
-function prosper.Sampler:SetBorderColor(arg1) end
-
---- 
---- @param arg1 number
-function prosper.Sampler:SetMaxLod(arg1) end
-
---- 
---- @param name string
-function prosper.Sampler:SetDebugName(name) end
-
---- 
---- @return string ret0
-function prosper.Sampler:GetDebugName() end
-
---- 
---- @return enum prosper::SamplerAddressMode ret0
-function prosper.Sampler:GetAddressModeU() end
-
---- 
---- @param arg1 number
-function prosper.Sampler:SetMaxAnisotropy(arg1) end
-
-
---- 
---- @class prosper.TimerQuery
-prosper.TimerQuery = {}
-
---- 
---- @param 1 prosper.TimerQuery
-function prosper.TimerQuery:__eq(arg1) end
-
---- 
---- @return bool ret0
-function prosper.TimerQuery:IsValid() end
-
---- 
-function prosper.TimerQuery:__tostring() end
-
-
---- 
---- @class prosper.ImageSubresourceLayers
---- @field aspectMask int 
---- @field layerCount int 
---- @field mipLevel int 
---- @field baseArrayLayer int 
---- @overload fun():prosper.ImageSubresourceLayers
-prosper.ImageSubresourceLayers = {}
-
-
---- 
---- @class prosper.ImageCreateInfo
---- @field height int 
---- @field tiling int 
---- @field width int 
---- @field layers int 
---- @field memoryFeatures int 
---- @field queueFamilyMask int 
---- @field samples int 
---- @field postCreateLayout int 
---- @field flags int 
---- @field type int 
---- @field format int 
---- @field usageFlags int 
---- @overload fun():prosper.ImageCreateInfo
-prosper.ImageCreateInfo = {}
-
-
---- @enum FlagSparse
-prosper.ImageCreateInfo = {
-	FLAG_SPARSE_ALIASED_RESIDENCY_BIT = 16,
-	FLAG_SPARSE_BIT = 8,
-}
-
---- @enum Flag
-prosper.ImageCreateInfo = {
-	FLAG_DONT_ALLOCATE_MEMORY_BIT = 64,
-	FLAG_ALLOCATE_DISCRETE_MEMORY_BIT = 32,
-	FLAG_NORMAL_MAP_BIT = 256,
-	FLAG_NONE = 0,
-	FLAG_CONCURRENT_SHARING_BIT = 2,
-	FLAG_CUBEMAP_BIT = 1,
-	FLAG_SRGB_BIT = 128,
-	FLAG_FULL_MIPMAP_CHAIN_BIT = 4,
-}
-
---- 
---- @class prosper.SubresourceLayout
---- @field size int 
---- @field arrayPitch int 
---- @field offset int 
---- @field rowPitch int 
---- @field depthPitch int 
---- @overload fun():prosper.SubresourceLayout
-prosper.SubresourceLayout = {}
-
-
---- 
---- @class prosper.Event
-prosper.Event = {}
-
---- 
---- @param 1 prosper.Event
-function prosper.Event:__eq(arg1) end
-
---- 
---- @return bool ret0
-function prosper.Event:IsValid() end
-
---- 
-function prosper.Event:__tostring() end
+--- @return prosper.Buffer ret0
+function prosper.Mesh:GetVertexWeightBuffer() end
 
 
 --- 
@@ -1176,57 +1308,9 @@ function prosper.RenderPassInfo:AddClearValue(clearValue) end
 
 
 --- 
---- @class prosper.Mesh
-prosper.Mesh = {}
-
---- 
---- @param arg1 prosper.Buffer
-function prosper.Mesh:SetVertexBuffer(arg1) end
-
---- 
---- @param arg1 prosper.Buffer
-function prosper.Mesh:SetAlphaBuffer(arg1) end
-
---- 
---- @return prosper.Buffer ret0
-function prosper.Mesh:GetVertexWeightBuffer() end
-
---- 
---- @return prosper.Buffer ret0
-function prosper.Mesh:GetIndexBuffer() end
-
---- 
---- @return prosper.Buffer ret0
-function prosper.Mesh:GetVertexBuffer() end
-
---- 
-function prosper.Mesh:__tostring() end
-
---- 
---- @param arg1 prosper.Buffer
-function prosper.Mesh:SetVertexWeightBuffer(arg1) end
-
---- 
---- @return prosper.Buffer ret0
-function prosper.Mesh:GetAlphaBuffer() end
-
---- 
-function prosper.Mesh:ClearBuffers() end
-
---- 
---- @param arg1 prosper.Buffer
---- @param arg2 enum pragma::model::IndexType
-function prosper.Mesh:SetIndexBuffer(arg1, arg2) end
-
---- 
---- @param 1 prosper.Mesh
-function prosper.Mesh:__eq(arg1) end
-
-
---- 
 --- @class prosper.TextureCreateInfo
---- @field sampler prosper.Sampler 
 --- @field imageView prosper.ImageView 
+--- @field sampler prosper.Sampler 
 --- @field flags int 
 --- @overload fun():prosper.TextureCreateInfo
 prosper.TextureCreateInfo = {}
@@ -1240,436 +1324,149 @@ prosper.TextureCreateInfo = {
 }
 
 --- 
---- @class prosper.SamplerCreateInfo
---- @field compareOp int 
---- @field addressModeU int 
---- @field maxLod number 
---- @field borderColor int 
---- @field magFilter int 
---- @field minLod number 
---- @field mipmapMode int 
---- @field minFilter int 
---- @field addressModeV int 
---- @field addressModeW int 
---- @field mipLodBias number 
---- @field maxAnisotropy number 
---- @field compareEnable bool 
---- @overload fun():prosper.SamplerCreateInfo
-prosper.SamplerCreateInfo = {}
-
+--- @class prosper.Buffer
+prosper.Buffer = {}
 
 --- 
---- @class prosper.ImageView
-prosper.ImageView = {}
+--- @return prosper.BufferCreateInfo ret0
+function prosper.Buffer:GetCreateInfo() end
 
 --- 
+--- @param mapFlags enum prosper::IBuffer::MapFlags
 --- @return bool ret0
-function prosper.ImageView:IsValid() end
+--- @overload fun(offset: int, size: int, mapFlags: enum prosper::IBuffer::MapFlags): bool
+function prosper.Buffer:MapMemory(mapFlags) end
 
 --- 
---- @param 1 prosper.ImageView
-function prosper.ImageView:__eq(arg1) end
+--- @return int ret0
+function prosper.Buffer:GetStartOffset() end
+
+--- 
+--- @return int ret0
+function prosper.Buffer:GetSize() end
+
+--- 
+--- @return util.DataStream ret0
+--- @overload fun(offset: int, size: int): util.DataStream
+--- @overload fun(offset: int, type: enum udm::Type, value: struct luabind::adl::udm_type<class luabind::adl::object,1,1,0>): util.DataStream
+--- @overload fun(offset: int, size: int, ds: util.DataStream): util.DataStream
+--- @overload fun(offset: int, size: int, ds: util.DataStream, dsOffset: int): util.DataStream
+function prosper.Buffer:ReadMemory() end
+
+--- 
+--- @return int ret0
+function prosper.Buffer:GetBaseIndex() end
+
+--- 
+--- @return enum prosper::BufferUsageFlags ret0
+function prosper.Buffer:GetUsageFlags() end
 
 --- 
 --- @param name string
-function prosper.ImageView:SetDebugName(name) end
-
---- 
-function prosper.ImageView:__tostring() end
-
---- 
---- @return enum prosper::Format ret0
-function prosper.ImageView:GetImageFormat() end
-
---- 
---- @return enum prosper::ImageViewType ret0
-function prosper.ImageView:GetType() end
-
---- 
---- @return int ret0
-function prosper.ImageView:GetLayerCount() end
-
---- 
---- @return enum prosper::ImageAspectFlags ret0
-function prosper.ImageView:GetAspectMask() end
-
---- 
---- @return int ret0
-function prosper.ImageView:GetBaseLayer() end
-
---- 
---- @return string ret0
-function prosper.ImageView:GetDebugName() end
-
---- 
---- @return class std::array<enum prosper::ComponentSwizzle,4> ret0
-function prosper.ImageView:GetSwizzleArray() end
-
---- 
---- @return int ret0
-function prosper.ImageView:GetMipmapCount() end
-
---- 
---- @return int ret0
-function prosper.ImageView:GetBaseMipmapLevel() end
-
-
---- 
---- @class prosper.RenderTarget
-prosper.RenderTarget = {}
-
---- 
---- @return prosper.RenderPass ret0
-function prosper.RenderTarget:GetRenderPass() end
-
---- 
---- @param arg1 int
---- @return prosper.Texture ret0
---- @overload fun(): prosper.Texture
-function prosper.RenderTarget:GetTexture(arg1) end
-
---- 
---- @return prosper.Framebuffer ret0
-function prosper.RenderTarget:GetFramebuffer() end
-
---- 
-function prosper.RenderTarget:__tostring() end
-
---- 
---- @return int ret0
-function prosper.RenderTarget:GetWidth() end
-
---- 
---- @param 1 prosper.RenderTarget
-function prosper.RenderTarget:__eq(arg1) end
-
---- 
---- @return string ret0
-function prosper.RenderTarget:GetDebugName() end
-
---- 
---- @param idx int
---- @return prosper.Texture ret0
---- @overload fun(idx: int): prosper.Texture
-function prosper.RenderTarget:GetColorAttachmentTexture(idx) end
-
---- 
---- @return prosper.Texture ret0
-function prosper.RenderTarget:GetDepthStencilAttachmentTexture() end
-
---- 
---- @param name string
-function prosper.RenderTarget:SetDebugName(name) end
-
---- 
---- @return int ret0
-function prosper.RenderTarget:GetHeight() end
-
---- 
---- @return enum prosper::Format ret0
-function prosper.RenderTarget:GetFormat() end
-
-
---- 
---- @class prosper.Framebuffer
-prosper.Framebuffer = {}
+function prosper.Buffer:SetDebugName(name) end
 
 --- 
 --- @return bool ret0
-function prosper.Framebuffer:IsValid() end
+function prosper.Buffer:IsValid() end
 
 --- 
---- @return int ret0
-function prosper.Framebuffer:GetWidth() end
+function prosper.Buffer:__tostring() end
 
 --- 
---- @param 1 prosper.Framebuffer
-function prosper.Framebuffer:__eq(arg1) end
-
---- 
-function prosper.Framebuffer:__tostring() end
-
---- 
---- @return int ret0
-function prosper.Framebuffer:GetHeight() end
-
-
---- 
---- @class prosper.BufferCopyInfo
---- @field dstOffset int 
---- @field size int 
---- @field srcOffset int 
---- @overload fun():prosper.BufferCopyInfo
-prosper.BufferCopyInfo = {}
-
-
---- 
---- @class prosper.Image
-prosper.Image = {}
+--- @param offset int
+--- @param ds util.DataStream
+--- @return bool ret0
+--- @overload fun(offset: int, type: enum udm::Type, value: struct luabind::adl::udm_type<class luabind::adl::object,1,1,0>): bool
+--- @overload fun(offset: int, ds: util.DataStream, dsOffset: int, dsSize: int): bool
+function prosper.Buffer:WriteMemory(offset, ds) end
 
 --- 
 --- @param arg1 bool
-function prosper.Image:SetNormalMap(arg1) end
+--- @param arg2 enum prosper::IBuffer::MapFlags
+function prosper.Buffer:SetPermanentlyMapped(arg1, arg2) end
 
 --- 
 --- @return bool ret0
-function prosper.Image:IsValid() end
+function prosper.Buffer:UnmapMemory() end
 
 --- 
---- @param 1 prosper.Image
-function prosper.Image:__eq(arg1) end
+--- @return string ret0
+function prosper.Buffer:GetDebugName() end
 
 --- 
---- @return prosper.SubresourceLayout ret0
---- @overload fun(layer: int): prosper.SubresourceLayout
---- @overload fun(arg1: int, arg2: int): prosper.SubresourceLayout
-function prosper.Image:GetAspectSubresourceLayout() end
-
---- 
---- @return enum prosper::Format ret0
-function prosper.Image:GetFormat() end
-
---- 
---- @return int ret0
-function prosper.Image:GetAlignment() end
-
---- 
---- @return bool ret0
-function prosper.Image:IsSrgb() end
-
---- 
---- @return bool ret0
-function prosper.Image:IsNormalMap() end
-
---- 
---- @param arg1 bool
-function prosper.Image:SetSrgb(arg1) end
-
---- 
---- @param mipmap int
---- @return int ret0_1
---- @return int ret0_2
-function prosper.Image:GetExtent2D(mipmap) end
-
---- 
---- @param mipmap int
---- @return int ret0_1
---- @return int ret0_2
-function prosper.Image:GetMipmapSize(mipmap) end
-
---- 
---- @return int ret0
-function prosper.Image:GetLayerCount() end
-
---- 
---- @return int ret0
-function prosper.Image:GetMipmapCount() end
-
---- 
---- @return enum prosper::ImageUsageFlags ret0
-function prosper.Image:GetUsage() end
-
---- 
---- @return enum prosper::SharingMode ret0
-function prosper.Image:GetSharingMode() end
-
---- 
---- @return enum prosper::ImageTiling ret0
-function prosper.Image:GetTiling() end
-
---- 
---- @param x int
---- @param y int
---- @param imgBuf util.ImageBuffer
---- @overload fun(x: int, y: int, imgBuf: util.ImageBuffer, layerIndex: int): 
---- @overload fun(x: int, y: int, imgBuf: util.ImageBuffer, layerIndex: int, mipLevel: int): 
-function prosper.Image:WriteMemory(x, y, imgBuf) end
-
---- 
-function prosper.Image:__tostring() end
-
---- 
---- @return prosper.ImageCreateInfo ret0
-function prosper.Image:GetCreateInfo() end
-
---- 
---- @param info prosper.Image.ToImageBufferInfo
---- @overload fun(includeLayers: bool, includeMipmaps: bool): 
---- @overload fun(includeLayers: bool, includeMipmaps: bool, targetFormat: int): 
---- @overload fun(includeLayers: bool, includeMipmaps: bool, targetFormat: int, inputImageLayout: enum prosper::ImageLayout): 
-function prosper.Image:ToImageBuffer(info) end
-
---- 
---- @return enum prosper::SampleCountFlags ret0
-function prosper.Image:GetSampleCount() end
+--- @param 1 prosper.Buffer
+function prosper.Buffer:__eq(arg1) end
 
 --- 
 --- @return prosper.Buffer ret0
-function prosper.Image:GetMemoryBuffer() end
+function prosper.Buffer:GetParent() end
+
 
 --- 
---- @param arg1 int
+--- @class prosper.DescriptorSet
+prosper.DescriptorSet = {}
+
+--- 
+--- @param bindingIdx int
+--- @param buffer prosper.Buffer
+--- @return bool ret0
+--- @overload fun(bindingIdx: int, buffer: prosper.Buffer, startOffset: int): bool
+--- @overload fun(bindingIdx: int, buffer: prosper.Buffer, startOffset: int, size: int): bool
+function prosper.DescriptorSet:SetBindingUniformBufferDynamic(bindingIdx, buffer) end
+
+--- 
+--- @param bindingIdx int
+--- @param buffer prosper.Buffer
+--- @return bool ret0
+--- @overload fun(bindingIdx: int, buffer: prosper.Buffer, startOffset: int): bool
+--- @overload fun(bindingIdx: int, buffer: prosper.Buffer, startOffset: int, size: int): bool
+function prosper.DescriptorSet:SetBindingStorageBuffer(bindingIdx, buffer) end
+
+--- 
+--- @return bool ret0
+function prosper.DescriptorSet:Update() end
+
+--- 
+function prosper.DescriptorSet:__tostring() end
+
+--- 
 --- @return int ret0
---- @overload fun(arg1: int): int
-function prosper.Image:GetHeight(arg1) end
+function prosper.DescriptorSet:GetBindingCount() end
 
 --- 
---- @param cmd prosper.CommandBuffer
---- @param format enum prosper::Format
---- @return prosper.Image ret0
-function prosper.Image:Convert(cmd, format) end
+--- @param bindingIdx int
+--- @param texture prosper.Texture
+--- @return bool ret0
+--- @overload fun(bindingIdx: int, texture: prosper.Texture, layerId: int): bool
+function prosper.DescriptorSet:SetBindingTexture(bindingIdx, texture) end
 
 --- 
 --- @param name string
-function prosper.Image:SetDebugName(name) end
+function prosper.DescriptorSet:SetDebugName(name) end
+
+--- 
+--- @param 1 prosper.DescriptorSet
+function prosper.DescriptorSet:__eq(arg1) end
 
 --- 
 --- @return string ret0
-function prosper.Image:GetDebugName() end
+function prosper.DescriptorSet:GetDebugName() end
 
 --- 
---- @param cmd prosper.CommandBuffer
---- @return prosper.Image ret0
---- @overload fun(cmd: prosper.CommandBuffer, imgCreateInfo: prosper.ImageCreateInfo): prosper.Image
-function prosper.Image:Copy(cmd) end
-
---- 
---- @param arg1 int
---- @return int ret0
---- @overload fun(arg1: int): int
-function prosper.Image:GetWidth(arg1) end
-
---- 
---- @return enum prosper::ImageType ret0
-function prosper.Image:GetType() end
-
-
---- 
---- @class prosper.Image.ToImageBufferInfo
---- @field includeMipmaps bool 
---- @field stagingImage prosper.Image 
---- @field targetFormat uimg::Format 
---- @field inputImageLayout prosper::ImageLayout 
---- @field includeLayers bool 
---- @overload fun():prosper.Image.ToImageBufferInfo
-prosper.Image.ToImageBufferInfo = {}
-
-
---- 
---- @class prosper.PipelineBarrierInfo
---- @field srcStageMask int 
---- @field dstStageMask int 
---- @overload fun():prosper.PipelineBarrierInfo
-prosper.PipelineBarrierInfo = {}
-
-
---- 
---- @class prosper.BlitInfo
---- @field dstSubresourceLayer  
---- @field offsetDst math.Vector2i 
---- @field extentsSrc math.Vector2i 
---- @field extentsDst math.Vector2i 
---- @field offsetSrc math.Vector2i 
---- @field srcSubresourceLayer  
---- @overload fun():prosper.BlitInfo
-prosper.BlitInfo = {}
-
-
---- 
---- @class prosper.ImageSubresourceRange
---- @field baseArrayLayer int 
---- @field baseMipLevel int 
---- @field levelCount int 
---- @field layerCount int 
---- @overload fun(arg1: int, arg2: int, arg3: int, arg4: int):prosper.ImageSubresourceRange
---- @overload fun(arg1: int, arg2: int, arg3: int):prosper.ImageSubresourceRange
---- @overload fun(arg1: int, arg2: int):prosper.ImageSubresourceRange
---- @overload fun(arg1: int):prosper.ImageSubresourceRange
---- @overload fun():prosper.ImageSubresourceRange
-prosper.ImageSubresourceRange = {}
-
-
---- 
---- @class prosper.ClearImageInfo
---- @field subresourceRange prosper.ImageSubresourceRange 
---- @overload fun():prosper.ClearImageInfo
-prosper.ClearImageInfo = {}
-
-
---- 
---- @class prosper.TimestampQuery
-prosper.TimestampQuery = {}
-
---- 
---- @param 1 prosper.TimestampQuery
-function prosper.TimestampQuery:__eq(arg1) end
-
---- 
+--- @param bindingIdx int
+--- @param texture prosper.Texture
+--- @param arrayIdx int
 --- @return bool ret0
-function prosper.TimestampQuery:IsValid() end
+--- @overload fun(bindingIdx: int, texture: prosper.Texture, arrayIdx: int, layerId: int): bool
+function prosper.DescriptorSet:SetBindingArrayTexture(bindingIdx, texture, arrayIdx) end
 
 --- 
-function prosper.TimestampQuery:__tostring() end
-
-
---- 
---- @class prosper.CommandBufferRecorder
-prosper.CommandBufferRecorder = {}
-
---- 
---- @param drawCmd prosper.CommandBuffer
+--- @param bindingIdx int
+--- @param buffer prosper.Buffer
 --- @return bool ret0
-function prosper.CommandBufferRecorder:ExecuteCommands(drawCmd) end
-
---- 
---- @return bool ret0
-function prosper.CommandBufferRecorder:IsValid() end
-
---- 
---- @param 1 prosper.CommandBufferRecorder
-function prosper.CommandBufferRecorder:__eq(arg1) end
-
---- 
-function prosper.CommandBufferRecorder:__tostring() end
-
---- 
---- @return bool ret0
-function prosper.CommandBufferRecorder:IsPending() end
-
-
---- 
---- @class prosper.ClearValue
---- @overload fun(arg1: number):prosper.ClearValue
---- @overload fun(arg1: number, arg2: int):prosper.ClearValue
---- @overload fun(arg1: util.Color):prosper.ClearValue
---- @overload fun():prosper.ClearValue
-prosper.ClearValue = {}
-
---- 
---- @param clearColor util.Color
-function prosper.ClearValue:SetColor(clearColor) end
-
---- 
---- @param depth number
---- @param stencil int
---- @overload fun(depth: number): 
-function prosper.ClearValue:SetDepthStencil(depth, stencil) end
-
-
---- 
---- @class prosper.RenderPass
-prosper.RenderPass = {}
-
---- 
---- @param 1 prosper.RenderPass
-function prosper.RenderPass:__eq(arg1) end
-
---- 
---- @return bool ret0
-function prosper.RenderPass:IsValid() end
-
---- 
-function prosper.RenderPass:__tostring() end
+--- @overload fun(bindingIdx: int, buffer: prosper.Buffer, startOffset: int): bool
+--- @overload fun(bindingIdx: int, buffer: prosper.Buffer, startOffset: int, size: int): bool
+function prosper.DescriptorSet:SetBindingUniformBuffer(bindingIdx, buffer) end
 
 
 --- 
@@ -1689,102 +1486,329 @@ function prosper.Fence:__tostring() end
 
 
 --- 
---- @class prosper.SwapBuffer
-prosper.SwapBuffer = {}
-
+--- @class prosper.Event
+prosper.Event = {}
 
 --- 
---- @class prosper.Texture
-prosper.Texture = {}
+--- @param 1 prosper.Event
+function prosper.Event:__eq(arg1) end
 
 --- 
 --- @return bool ret0
-function prosper.Texture:IsValid() end
+function prosper.Event:IsValid() end
 
 --- 
---- @param 1 prosper.Texture
-function prosper.Texture:__eq(arg1) end
+function prosper.Event:__tostring() end
+
 
 --- 
---- @param name string
-function prosper.Texture:SetDebugName(name) end
+--- @class prosper.SubresourceLayout
+--- @field offset int 
+--- @field size int 
+--- @field arrayPitch int 
+--- @field rowPitch int 
+--- @field depthPitch int 
+--- @overload fun():prosper.SubresourceLayout
+prosper.SubresourceLayout = {}
+
+
+--- 
+--- @class prosper.Framebuffer
+prosper.Framebuffer = {}
+
+--- 
+--- @param 1 prosper.Framebuffer
+function prosper.Framebuffer:__eq(arg1) end
+
+--- 
+--- @return int ret0
+function prosper.Framebuffer:GetWidth() end
+
+--- 
+--- @return bool ret0
+function prosper.Framebuffer:IsValid() end
+
+--- 
+--- @return int ret0
+function prosper.Framebuffer:GetHeight() end
+
+--- 
+function prosper.Framebuffer:__tostring() end
+
+
+--- 
+--- @class prosper.RenderTarget
+prosper.RenderTarget = {}
 
 --- 
 --- @return enum prosper::Format ret0
-function prosper.Texture:GetFormat() end
+function prosper.RenderTarget:GetFormat() end
 
 --- 
---- @return prosper.Image ret0
-function prosper.Texture:GetImage() end
+--- @return int ret0
+function prosper.RenderTarget:GetHeight() end
 
 --- 
---- @param arg1 int
---- @return prosper.ImageView ret0
---- @overload fun(): prosper.ImageView
-function prosper.Texture:GetImageView(arg1) end
+--- @return prosper.Texture ret0
+function prosper.RenderTarget:GetDepthStencilAttachmentTexture() end
 
 --- 
---- @return prosper.Sampler ret0
-function prosper.Texture:GetSampler() end
+--- @return int ret0
+function prosper.RenderTarget:GetWidth() end
+
+--- 
+--- @param 1 prosper.RenderTarget
+function prosper.RenderTarget:__eq(arg1) end
+
+--- 
+function prosper.RenderTarget:__tostring() end
 
 --- 
 --- @return string ret0
-function prosper.Texture:GetDebugName() end
+function prosper.RenderTarget:GetDebugName() end
 
 --- 
---- @param arg1 prosper.ImageView
-function prosper.Texture:SetImageView(arg1) end
+--- @param arg1 int
+--- @return prosper.Texture ret0
+--- @overload fun(): prosper.Texture
+function prosper.RenderTarget:GetTexture(arg1) end
 
 --- 
---- @return int ret0
-function prosper.Texture:GetWidth() end
+--- @return prosper.Framebuffer ret0
+function prosper.RenderTarget:GetFramebuffer() end
 
 --- 
---- @return int ret0
-function prosper.Texture:GetHeight() end
+--- @param name string
+function prosper.RenderTarget:SetDebugName(name) end
 
 --- 
-function prosper.Texture:__tostring() end
+--- @param idx int
+--- @return prosper.Texture ret0
+--- @overload fun(idx: int): prosper.Texture
+function prosper.RenderTarget:GetColorAttachmentTexture(idx) end
+
+--- 
+--- @return prosper.RenderPass ret0
+function prosper.RenderTarget:GetRenderPass() end
 
 
 --- 
---- @class prosper.RenderPassCreateInfo
---- @overload fun():prosper.RenderPassCreateInfo
-prosper.RenderPassCreateInfo = {}
+--- @class prosper.WindowCreateInfo
+--- @field greenBits int 
+--- @field samples int 
+--- @field resizable bool 
+--- @field depthBits int 
+--- @field focused bool 
+--- @field visible bool 
+--- @field decorated bool 
+--- @field floating bool 
+--- @field autoIconify bool 
+--- @field stereo bool 
+--- @field srgbCapable bool 
+--- @field doublebuffer bool 
+--- @field height int 
+--- @field alphaBits int 
+--- @field stencilBits int 
+--- @field title string 
+--- @field width int 
+--- @field redBits int 
+--- @field blueBits int 
+--- @field refreshRate int 
+--- @overload fun():prosper.WindowCreateInfo
+prosper.WindowCreateInfo = {}
+
 
 --- 
---- @param subPassId int
---- @param sourceSubPassId int
---- @param destinationSubPassId int
---- @param sourceStageMask int
---- @param destinationStageMask int
---- @param sourceAccessMask int
---- @param destinationAccessMask int
-function prosper.RenderPassCreateInfo:AddSubPassDependency(subPassId, sourceSubPassId, destinationSubPassId, sourceStageMask, destinationStageMask, sourceAccessMask, destinationAccessMask) end
+--- @class prosper.CommandBufferRecorder
+prosper.CommandBufferRecorder = {}
 
 --- 
---- @param format int
---- @param initialLayout int
---- @param finalLayout int
---- @param loadOp int
---- @param storeOp int
---- @return int ret0
---- @overload fun(format: int, initialLayout: int, finalLayout: int, loadOp: int, storeOp: int, sampleCount: int): int
-function prosper.RenderPassCreateInfo:AddAttachment(format, initialLayout, finalLayout, loadOp, storeOp) end
+--- @param 1 prosper.CommandBufferRecorder
+function prosper.CommandBufferRecorder:__eq(arg1) end
 
 --- 
---- @return int ret0
-function prosper.RenderPassCreateInfo:AddSubPass() end
+--- @return bool ret0
+function prosper.CommandBufferRecorder:IsValid() end
 
 --- 
---- @param subPassId int
---- @param bEnabled bool
-function prosper.RenderPassCreateInfo:SetSubPassDepthStencilAttachmentEnabled(subPassId, bEnabled) end
+--- @param drawCmd prosper.CommandBuffer
+--- @return bool ret0
+function prosper.CommandBufferRecorder:ExecuteCommands(drawCmd) end
 
 --- 
---- @param subPassId int
---- @param colorAttId int
-function prosper.RenderPassCreateInfo:AddSubPassColorAttachment(subPassId, colorAttId) end
+function prosper.CommandBufferRecorder:__tostring() end
+
+--- 
+--- @return bool ret0
+function prosper.CommandBufferRecorder:IsPending() end
+
+
+--- 
+--- @class prosper.Sampler
+prosper.Sampler = {}
+
+--- 
+--- @return enum prosper::Filter ret0
+function prosper.Sampler:GetMagFilter() end
+
+--- 
+--- @param arg1 number
+function prosper.Sampler:SetMinLod(arg1) end
+
+--- 
+--- @param arg1 enum prosper::SamplerAddressMode
+function prosper.Sampler:SetAddressModeV(arg1) end
+
+--- 
+--- @return enum prosper::SamplerMipmapMode ret0
+function prosper.Sampler:GetMipmapMode() end
+
+--- 
+--- @return bool ret0
+function prosper.Sampler:GetAnisotropyEnabled() end
+
+--- 
+--- @return string ret0
+function prosper.Sampler:GetDebugName() end
+
+--- 
+--- @return enum prosper::SamplerAddressMode ret0
+function prosper.Sampler:GetAddressModeU() end
+
+--- 
+--- @return enum prosper::SamplerAddressMode ret0
+function prosper.Sampler:GetAddressModeV() end
+
+--- 
+function prosper.Sampler:__tostring() end
+
+--- 
+--- @return number ret0
+function prosper.Sampler:GetMipLodBias() end
+
+--- 
+--- @param arg1 enum prosper::CompareOp
+function prosper.Sampler:SetCompareOperation(arg1) end
+
+--- 
+--- @return enum prosper::SamplerAddressMode ret0
+function prosper.Sampler:GetAddressModeW() end
+
+--- 
+--- @return bool ret0
+function prosper.Sampler:IsValid() end
+
+--- 
+--- @param arg1 enum prosper::SamplerAddressMode
+function prosper.Sampler:SetAddressModeU(arg1) end
+
+--- 
+--- @return enum prosper::CompareOp ret0
+function prosper.Sampler:GetCompareOperation() end
+
+--- 
+--- @return number ret0
+function prosper.Sampler:GetMinLod() end
+
+--- 
+--- @return bool ret0
+function prosper.Sampler:Update() end
+
+--- 
+--- @return enum prosper::BorderColor ret0
+function prosper.Sampler:GetBorderColor() end
+
+--- 
+--- @param arg1 enum prosper::Filter
+function prosper.Sampler:SetMagFilter(arg1) end
+
+--- 
+--- @param arg1 enum prosper::Filter
+function prosper.Sampler:SetMinFilter(arg1) end
+
+--- 
+--- @param arg1 enum prosper::SamplerMipmapMode
+function prosper.Sampler:SetMipmapMode(arg1) end
+
+--- 
+--- @param arg1 enum prosper::SamplerAddressMode
+function prosper.Sampler:SetAddressModeW(arg1) end
+
+--- 
+--- @param arg1 number
+function prosper.Sampler:SetMaxAnisotropy(arg1) end
+
+--- 
+--- @param arg1 bool
+function prosper.Sampler:SetCompareEnabled(arg1) end
+
+--- 
+--- @param arg1 number
+function prosper.Sampler:SetMaxLod(arg1) end
+
+--- 
+--- @param arg1 enum prosper::BorderColor
+function prosper.Sampler:SetBorderColor(arg1) end
+
+--- 
+--- @param name string
+function prosper.Sampler:SetDebugName(name) end
+
+--- 
+--- @param 1 prosper.Sampler
+function prosper.Sampler:__eq(arg1) end
+
+--- 
+--- @return number ret0
+function prosper.Sampler:GetMaxLod() end
+
+--- 
+--- @return bool ret0
+function prosper.Sampler:GetCompareEnabled() end
+
+--- 
+--- @return number ret0
+function prosper.Sampler:GetMaxAnisotropy() end
+
+--- 
+--- @return enum prosper::Filter ret0
+function prosper.Sampler:GetMinFilter() end
+
+
+--- 
+--- @class prosper.ImageSubresourceRange
+--- @field baseArrayLayer int 
+--- @field layerCount int 
+--- @field baseMipLevel int 
+--- @field levelCount int 
+--- @overload fun(arg1: int, arg2: int, arg3: int, arg4: int):prosper.ImageSubresourceRange
+--- @overload fun(arg1: int, arg2: int, arg3: int):prosper.ImageSubresourceRange
+--- @overload fun(arg1: int, arg2: int):prosper.ImageSubresourceRange
+--- @overload fun(arg1: int):prosper.ImageSubresourceRange
+--- @overload fun():prosper.ImageSubresourceRange
+prosper.ImageSubresourceRange = {}
+
+
+--- 
+--- @class prosper.BufferImageCopyInfo
+--- @field dstImageLayout int 
+--- @field imageSize math.Vector2i 
+--- @field aspectMask int 
+--- @field layerCount int 
+--- @field mipLevel int 
+--- @field baseArrayLayer int 
+--- @field bufferOffset int 
+--- @overload fun():prosper.BufferImageCopyInfo
+prosper.BufferImageCopyInfo = {}
+
+--- 
+--- @return math.Vector2i ret0
+function prosper.BufferImageCopyInfo:GetImageSize() end
+
+--- 
+--- @param width int
+--- @param height int
+function prosper.BufferImageCopyInfo:SetImageSize(width, height) end
 
 
 --- 
@@ -1793,28 +1817,4 @@ function prosper.RenderPassCreateInfo:AddSubPassColorAttachment(subPassId, color
 --- @overload fun():prosper.RenderTargetCreateInfo
 prosper.RenderTargetCreateInfo = {}
 
-
---- 
---- @class prosper.BufferCreateInfo
---- @field size int 
---- @field flags int 
---- @field usageFlags int 
---- @field memoryFeatures int 
---- @field queueFamilyMask int 
---- @overload fun():prosper.BufferCreateInfo
-prosper.BufferCreateInfo = {}
-
-
---- @enum FlagSparse
-prosper.BufferCreateInfo = {
-	FLAG_SPARSE_ALIASED_RESIDENCY_BIT = 8,
-	FLAG_SPARSE_BIT = 4,
-}
-
---- @enum Flag
-prosper.BufferCreateInfo = {
-	FLAG_NONE = 0,
-	FLAG_CONCURRENT_SHARING_BIT = 1,
-	FLAG_DONT_ALLOCATE_MEMORY_BIT = 2,
-}
 

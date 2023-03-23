@@ -280,7 +280,7 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData, const std::string
 			auto &componentData = *pair.second;
 			auto udmComponent = udmComponents[pair.first];
 			udmComponent["flags"] = componentData.GetFlags();
-			auto udmProperties = udmComponent["properties"];
+			auto udmProperties = udmComponent.Add("properties");
 			udmProperties.Merge(udm::LinkedPropertyWrapper {*componentData.GetData()});
 		}
 

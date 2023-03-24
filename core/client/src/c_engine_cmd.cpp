@@ -14,6 +14,7 @@
 #include <pragma/lua/libraries/lutil.hpp>
 #include <pragma/lua/util.hpp>
 #include <pragma/lua/libraries/lutil.hpp>
+#include <pragma/logging.hpp>
 #include <pragma/rendering/render_apis.hpp>
 #include <pragma/console/convars.h>
 #include <sharedutils/util_file.h>
@@ -125,6 +126,7 @@ void CEngine::RegisterConsoleCommands()
 	conVarMap.RegisterConCommand(
 	  "crash",
 	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  Con::cwar << "Crash command has been invoked. Crashing intentionally..." << Con::endl;
 		  if(!argv.empty() && argv.front() == "exception") {
 			  throw std::runtime_error {"Crash!"};
 			  return;

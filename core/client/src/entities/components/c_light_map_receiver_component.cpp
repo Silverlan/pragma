@@ -31,7 +31,7 @@ void CLightMapReceiverComponent::SetupLightMapUvData(CBaseEntity &ent, LightmapD
 {
 	auto mdl = ent.GetModel();
 	if(!mdl) {
-		pragma::get_logger(CLightMapComponent::LOGGER_NAME).warn("Unable to find lightmap uv data for entity '{}': Entity has no model!", ent.ToString());
+		CLightMapComponent::LOGGER.warn("Unable to find lightmap uv data for entity '{}': Entity has no model!", ent.ToString());
 		return;
 	}
 	auto hasLightmapUvs = false;
@@ -63,7 +63,7 @@ void CLightMapReceiverComponent::UpdateLightMapUvData()
 	auto mdl = GetEntity().GetModel();
 	auto renderC = GetEntity().GetComponent<CRenderComponent>();
 	if(mdlC.expired() || renderC.expired() || mdl == nullptr) {
-		pragma::get_logger(CLightMapComponent::LOGGER_NAME).warn("Unable to initialize lightmap uv data for entity '{}': Entity has no model!", GetEntity().ToString());
+		CLightMapComponent::LOGGER.warn("Unable to initialize lightmap uv data for entity '{}': Entity has no model!", GetEntity().ToString());
 		return;
 	}
 	m_modelName = mdl->GetName();
@@ -123,7 +123,7 @@ void CLightMapReceiverComponent::UpdateRenderMeshBufferList()
 	m_meshBufferIndices.clear();
 	auto mdlC = GetEntity().GetModelComponent();
 	if(!mdlC) {
-		pragma::get_logger(CLightMapComponent::LOGGER_NAME).warn("Unable to update render mesh buffer list: No model component found for entity '{}'!", GetEntity().ToString());
+		CLightMapComponent::LOGGER.warn("Unable to update render mesh buffer list: No model component found for entity '{}'!", GetEntity().ToString());
 		return;
 	}
 	umath::set_flag(m_stateFlags, StateFlags::RenderMeshBufferIndexTableDirty, false);
@@ -140,12 +140,12 @@ void CLightMapReceiverComponent::UpdateModelMeshes()
 	auto mdlC = GetEntity().GetComponent<CModelComponent>();
 	auto mdl = GetEntity().GetModel();
 	if(mdlC.expired() || mdl == nullptr) {
-		pragma::get_logger(CLightMapComponent::LOGGER_NAME).warn("Unable to update model meshes: No model component found for entity '{}'!", GetEntity().ToString());
+		CLightMapComponent::LOGGER.warn("Unable to update model meshes: No model component found for entity '{}'!", GetEntity().ToString());
 		return;
 	}
 	auto renderC = GetEntity().GetComponent<CRenderComponent>();
 	if(renderC.expired()) {
-		pragma::get_logger(CLightMapComponent::LOGGER_NAME).warn("Unable to update model meshes: No render component found for entity '{}'!", GetEntity().ToString());
+		CLightMapComponent::LOGGER.warn("Unable to update model meshes: No render component found for entity '{}'!", GetEntity().ToString());
 		return;
 	}
 	std::unordered_map<MeshIdx, BufferIdx> meshIdxToBufIdx {};
@@ -184,7 +184,7 @@ void CLightMapReceiverComponent::AssignBufferIndex(MeshIdx meshIdx, BufferIdx bu
 {
 	auto itMesh = m_meshes.find(meshIdx);
 	if(itMesh == m_meshes.end()) {
-		pragma::get_logger(CLightMapComponent::LOGGER_NAME).warn("Unable to assign buffer index for buffer {} of mesh {} to lightmap receiver component of entity {}: Mesh not found!", bufIdx, meshIdx, GetEntity().ToString());
+		CLightMapComponent::LOGGER.warn("Unable to assign buffer index for buffer {} of mesh {} to lightmap receiver component of entity {}: Mesh not found!", bufIdx, meshIdx, GetEntity().ToString());
 		return;
 	}
 	m_meshToBufIdx.insert(std::make_pair(static_cast<CModelSubMesh *>(itMesh->second.get()), bufIdx));
@@ -210,7 +210,7 @@ void CLightMapReceiverComponent::UpdateMeshLightmapUvBuffers(CLightMapComponent 
 	auto mdlC = GetEntity().GetComponent<CModelComponent>();
 	auto mdl = GetEntity().GetModel();
 	if(mdlC.expired() || mdl == nullptr) {
-		pragma::get_logger(CLightMapComponent::LOGGER_NAME).warn("Unable to update mesh lightmap uv buffers: No model component found for entity '{}'!", GetEntity().ToString());
+		CLightMapComponent::LOGGER.warn("Unable to update mesh lightmap uv buffers: No model component found for entity '{}'!", GetEntity().ToString());
 		return;
 	}
 	uint32_t subMeshIdx = 0u;

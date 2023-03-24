@@ -21,6 +21,9 @@ namespace prosper {
 namespace util::bsp {
 	struct LightMapInfo;
 };
+namespace spdlog {
+	class logger;
+};
 namespace pragma {
 	struct LightmapDataCache;
 	class DLLCLIENT CLightMapComponent final : public BaseEntityComponent {
@@ -46,7 +49,7 @@ namespace pragma {
 			bool createAsRenderJob = false;
 			bool rebuildUvAtlas = false;
 		};
-		static constexpr const char *LOGGER_NAME = "lightmap";
+		static spdlog::logger &LOGGER;
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		static std::shared_ptr<prosper::IDynamicResizableBuffer> GenerateLightmapUVBuffers(std::vector<std::shared_ptr<prosper::IBuffer>> &outMeshLightMapUvBuffers);
 		static std::shared_ptr<prosper::Texture> CreateLightmapTexture(uimg::ImageBuffer &imgBuf);

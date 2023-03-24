@@ -45,8 +45,7 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-
-auto &LOGGER = pragma::register_logger(CLightMapComponent::LOGGER_NAME);
+spdlog::logger &CLightMapComponent::LOGGER = pragma::register_logger("lightmap");
 
 void CLightMapComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
@@ -118,7 +117,7 @@ void CLightMapComponent::InitializeFromMaterial()
 	}
 	auto *mat = client->LoadMaterial(m_lightMapMaterialName);
 	if(!mat) {
-		LOGGER.warn("Unable to load lightmap material '{}'!", m_lightMapMaterialName);
+		LOGGER.error("Unable to load lightmap material '{}'!", m_lightMapMaterialName);
 		return;
 	}
 	m_lightMapMaterial = mat->GetHandle();
@@ -242,6 +241,7 @@ void CLightMapComponent::SetLightmapDataCache(LightmapDataCache *cache) { m_ligh
 
 std::shared_ptr<prosper::IDynamicResizableBuffer> CLightMapComponent::GenerateLightmapUVBuffers(std::vector<std::shared_ptr<prosper::IBuffer>> &outMeshLightMapUvBuffers)
 {
+	LOGGER.info("Generating lightmap uv buffers...");
 	prosper::util::BufferCreateInfo bufCreateInfo {};
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit; // Transfer flags are required for mapping GPUBulk buffers
@@ -264,11 +264,22 @@ std::shared_ptr<prosper::IDynamicResizableBuffer> CLightMapComponent::GenerateLi
 		}
 	}
 
+	if(numMeshes == 0) {
+		LOGGER.warn("No meshes with lightmap uv coordinates found!");
+		return nullptr;
+	}
+
 	// Generate the lightmap uv buffer
 	bufCreateInfo.size = requiredBufferSize;
 	auto lightMapUvBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(bufCreateInfo, bufCreateInfo.size, 0.2f);
-	if(lightMapUvBuffer == nullptr || lightMapUvBuffer->Map(0ull, lightMapUvBuffer->GetSize(), prosper::IBuffer::MapFlags::WriteBit) == false)
+	if(!lightMapUvBuffer) {
+		LOGGER.error("Unable to create lightmap uv buffer!");
 		return nullptr;
+	}
+	if(lightMapUvBuffer->Map(0ull, lightMapUvBuffer->GetSize(), prosper::IBuffer::MapFlags::WriteBit) == false) {
+		LOGGER.error("Unable to map lightmap uv buffer!");
+		return nullptr;
+	}
 
 	outMeshLightMapUvBuffers.reserve(numMeshes);
 	uint32_t bufIdx = 0;

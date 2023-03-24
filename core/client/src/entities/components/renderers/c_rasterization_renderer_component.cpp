@@ -93,7 +93,7 @@ static pragma::ComponentHandle<pragma::CLightMapComponent> g_lightmapC = {};
 void CRasterizationRendererComponent::UpdateLightmap(CLightMapComponent &lightMapC)
 {
 	if(!lightMapC.HasValidLightMap()) {
-		pragma::get_logger(CLightMapComponent::LOGGER_NAME).warn("Lightmap has no valid lightmap texture!");
+		CLightMapComponent::LOGGER.warn("Lightmap has no valid lightmap texture!");
 		return;
 	}
 	for(auto &renderer : EntityCIterator<CRasterizationRendererComponent> {*c_game})
@@ -103,7 +103,7 @@ void CRasterizationRendererComponent::UpdateLightmap(CLightMapComponent &lightMa
 void CRasterizationRendererComponent::UpdateLightmap()
 {
 	if(g_lightmapC.expired()) {
-		pragma::get_logger(CLightMapComponent::LOGGER_NAME).warn("No lightmap component found!");
+		CLightMapComponent::LOGGER.warn("No lightmap component found!");
 		return;
 	}
 	UpdateLightmap(*g_lightmapC);
@@ -468,7 +468,7 @@ void CRasterizationRendererComponent::SetLightMap(pragma::CLightMapComponent &li
 		m_lightMapInfo.cbExposure.Remove();
 	m_lightMapInfo.cbExposure = lightMapC.GetLightMapExposureProperty()->AddCallback([this, &lightMapC](std::reference_wrapper<const float> oldValue, std::reference_wrapper<const float> newValue) { m_rendererData.lightmapExposurePow = lightMapC.CalcLightMapPowExposurePow(); });
 	if(m_lightMapInfo.lightMapTexture == nullptr) {
-		pragma::get_logger(CLightMapComponent::LOGGER_NAME).warn("Lightmap component has no light map texture!");
+		CLightMapComponent::LOGGER.warn("Lightmap component has no light map texture!");
 		return;
 	}
 	auto &ds = *m_descSetGroupRenderer->GetDescriptorSet();

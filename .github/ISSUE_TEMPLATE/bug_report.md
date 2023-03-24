@@ -36,6 +36,7 @@ If Pragma has crashed and has generated a crashdump, please attach it to this is
 
 **Log**
 If a `log.txt` file exists in the root directory of Pragma, please attach it to this issue.
+If the problem is reproducible, **please** launch Pragma with the launch parameter `-log 1` and re-create the problem before uploading the log. This will add significantly more information to the log-file, which will help the developers find the cause much more easily.
 
 **Additional context**
 Add any other context about the problem here.

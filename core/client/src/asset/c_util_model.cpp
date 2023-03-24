@@ -1191,6 +1191,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 			bodyGroups.clear();
 			cpy->AddBodyGroup(meshGroups[idx]->GetName());
 
+			cpy->RemoveUnusedMaterialReferences();
 			cpy->Update();
 
 			auto subMdlName = meshGroup->GetName();

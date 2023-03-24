@@ -499,6 +499,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	util::WeakHandle<const Model> GetHandle() const;
 	util::WeakHandle<Model> GetHandle();
 
+	void RemoveUnusedMaterialReferences();
 	void ClipAgainstPlane(const Vector3 &n, double d, Model &mdlA, Model &mdlB, const std::vector<Mat4> *boneMatrices = nullptr);
 
 	std::vector<std::shared_ptr<FlexAnimation>> &GetFlexAnimations() { return m_flexAnimations; }

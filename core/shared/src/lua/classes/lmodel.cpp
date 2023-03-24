@@ -162,6 +162,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 {
 	classDef.def(luabind::tostring(luabind::self));
 	classDef.def(luabind::const_self == luabind::const_self);
+	classDef.def("RemoveUnusedMaterialReferences", &::Model::RemoveUnusedMaterialReferences);
 	classDef.def("GetCollisionMeshes", &GetCollisionMeshes);
 	classDef.def("ClearCollisionMeshes", &ClearCollisionMeshes);
 	classDef.def("GetSkeleton", &GetSkeleton);

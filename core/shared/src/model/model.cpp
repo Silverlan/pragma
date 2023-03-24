@@ -717,6 +717,63 @@ void Model::Optimize()
 
 void Model::PrecacheMaterials() { LoadMaterials(true, false); }
 
+void Model::RemoveUnusedMaterialReferences()
+{
+	if(m_metaInfo.textures.size() != m_materials.size())
+		return;
+	std::vector<bool> inUse;
+	inUse.resize(m_metaInfo.textures.size(), false);
+	for(auto &meshGroup : GetMeshGroups()) {
+		for(auto &mesh : meshGroup->GetMeshes()) {
+			for(auto &subMesh : mesh->GetSubMeshes()) {
+				auto idx = subMesh->GetSkinTextureIndex();
+				if(idx >= inUse.size())
+					continue;
+				inUse[idx] = true;
+			}
+		}
+	}
+
+	std::vector<uint32_t> oldIndexToNewIndex {};
+	oldIndexToNewIndex.resize(m_metaInfo.textures.size(), std::numeric_limits<uint32_t>::max());
+	uint32_t oldIdx = 0;
+	for(auto it = m_metaInfo.textures.begin(); it != m_metaInfo.textures.end();) {
+		util::ScopeGuard sg {[&oldIdx]() { ++oldIdx; }};
+		auto idx = it - m_metaInfo.textures.begin();
+		if(inUse[oldIdx] == false) {
+			it = m_metaInfo.textures.erase(it);
+			m_materials.erase(m_materials.begin() + idx);
+			continue;
+		}
+		oldIndexToNewIndex[oldIdx] = idx;
+		++it;
+	}
+
+	auto &texGroups = GetTextureGroups();
+	for(auto &texGroup : texGroups) {
+		for(auto it = texGroup.textures.begin(); it != texGroup.textures.end();) {
+			auto idx = *it;
+			if(oldIndexToNewIndex[idx] == std::numeric_limits<uint32_t>::max()) {
+				it = texGroup.textures.erase(it);
+				continue;
+			}
+			*it = oldIndexToNewIndex[idx];
+			++it;
+		}
+	}
+
+	for(auto &meshGroup : GetMeshGroups()) {
+		for(auto &mesh : meshGroup->GetMeshes()) {
+			for(auto &subMesh : mesh->GetSubMeshes()) {
+				auto idx = subMesh->GetSkinTextureIndex();
+				if(idx >= oldIndexToNewIndex.size())
+					continue;
+				subMesh->SetSkinTextureIndex(oldIndexToNewIndex[idx]);
+			}
+		}
+	}
+}
+
 void Model::LoadMaterials(const std::vector<uint32_t> &textureGroupIds, bool precache, bool bReload)
 {
 	util::ScopeGuard resWatcherLock {};

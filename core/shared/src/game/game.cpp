@@ -800,15 +800,18 @@ bool Game::LoadMap(const std::string &map, const Vector3 &origin, std::vector<En
 	// Load entities
 	Con::cout << "Loading entities..." << Con::endl;
 
-	auto *entBvh = CreateEntity("entity");
-	assert(entBvh);
-	auto *bvhC = static_cast<pragma::BaseStaticBvhCacheComponent *>(entBvh->AddComponent("static_bvh_cache").get());
-	if(!bvhC) {
-		entBvh->Remove();
-		entBvh = nullptr;
+	pragma::BaseStaticBvhCacheComponent *bvhC = nullptr;
+	if(IsClient()) {
+		auto *entBvh = CreateEntity("entity");
+		assert(entBvh);
+		bvhC = static_cast<pragma::BaseStaticBvhCacheComponent *>(entBvh->AddComponent("static_bvh_cache").get());
+		if(!bvhC) {
+			entBvh->Remove();
+			entBvh = nullptr;
+		}
+		else
+			entBvh->Spawn();
 	}
-	else
-		entBvh->Spawn();
 
 	std::vector<EntityHandle> ents {};
 	InitializeMapEntities(*worldData, ents);

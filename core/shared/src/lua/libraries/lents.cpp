@@ -1131,7 +1131,8 @@ Lua::opt<pragma::NetEventId> Lua::ents::register_component_net_event(lua_State *
 		return nil;
 	}
 
-	auto netName = componentInfo->name + '_' + std::string {name};
+	std::string componentName = componentInfo->name;
+	auto netName = componentName + '_' + std::string {name};
 	return {l, game->SetupNetEvent(netName)};
 }
 
@@ -1147,7 +1148,8 @@ Lua::opt<pragma::ComponentEventId> Lua::ents::register_component_event(lua_State
 		return nil;
 	}
 
-	auto netName = componentInfo->name + '_' + std::string {name};
+	std::string componentName = componentInfo->name;
+	auto netName = componentName + '_' + std::string {name};
 	auto eventId = componentManager.RegisterEventById(netName, componentId, pragma::ComponentEventInfo::Type::Broadcast);
 	return {l, eventId};
 }

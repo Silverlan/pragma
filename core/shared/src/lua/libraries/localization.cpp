@@ -23,6 +23,8 @@ Localization::Localization() {}
 
 //////////////////////////
 
+static spdlog::logger &LOGGER = pragma::register_logger("locale");
+
 static constexpr auto LOCALIZATION_ROOT_PATH = "scripts/localization/";
 
 static std::unique_ptr<DirectoryWatcherCallback> g_locFileWatcher = nullptr;
@@ -73,10 +75,10 @@ Locale::LoadResult Locale::LoadFile(const std::string &file, const std::string &
 	auto res = LoadFile(file, lan, m_localization);
 	if(res == LoadResult::Success) {
 		m_loadedFiles.push_back(file);
-		spdlog::debug("Loaded localization file '{}' for language '{}'.",file,lan);
+		LOGGER.debug("Loaded localization file '{}' for language '{}'.", file, lan);
 	}
 	else
-		spdlog::warn("Failed to load localization file '{}' for language '{}': {}",file,lan,magic_enum::enum_name(res));
+		LOGGER.warn("Failed to load localization file '{}' for language '{}': {}", file, lan, magic_enum::enum_name(res));
 	return res;
 }
 
@@ -104,7 +106,7 @@ void Locale::ReloadFiles()
 
 void Locale::SetLanguage(std::string lan)
 {
-	spdlog::debug("Changing global language to '{}'...",lan);
+	LOGGER.debug("Changing global language to '{}'...", lan);
 	ustring::to_lower(lan);
 	m_language = lan;
 
@@ -206,7 +208,7 @@ std::string Locale::GetText(const std::string &id, const std::vector<std::string
 {
 	auto it = m_localization.texts.find(id);
 	if(it == m_localization.texts.end()) {
-		spdlog::warn("Missing localization for '{}'!", id);
+		LOGGER.warn("Missing localization for '{}'!", id);
 		return std::string("<MISSING LOCALIZATION: ") + id + std::string(">");
 	}
 	auto r = it->second.cpp_str();
@@ -217,7 +219,7 @@ util::Utf8String Locale::GetTextUtf8(const std::string &id, const std::vector<ut
 {
 	auto it = m_localization.texts.find(id);
 	if(it == m_localization.texts.end()) {
-		spdlog::warn("Missing localization for '{}'!", id);
+		LOGGER.warn("Missing localization for '{}'!", id);
 		return std::string("<MISSING LOCALIZATION: ") + id + std::string(">");
 	}
 	auto r = it->second;

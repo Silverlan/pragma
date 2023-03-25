@@ -470,12 +470,26 @@ bool Engine::StopProfilingStage(CPUProfilingPhase stage) { return m_profilingSta
 
 void Engine::RunTickEvents()
 {
-	while(!m_tickEventQueue.empty()) {
-		m_tickEventQueue.front()();
-		m_tickEventQueue.pop();
+	m_tickEventQueueMutex.lock();
+	if(m_tickEventQueue.empty()) {
+		m_tickEventQueueMutex.unlock();
+		return;
+	}
+	auto queue = std::move(m_tickEventQueue);
+	m_tickEventQueue = {};
+	m_tickEventQueueMutex.unlock();
+
+	while(!queue.empty()) {
+		queue.front()();
+		queue.pop();
 	}
 }
-void Engine::AddTickEvent(const std::function<void()> &ev) { m_tickEventQueue.push(ev); }
+void Engine::AddTickEvent(const std::function<void()> &ev)
+{
+	m_tickEventQueueMutex.lock();
+	m_tickEventQueue.push(ev);
+	m_tickEventQueueMutex.unlock();
+}
 
 void Engine::Tick()
 {

@@ -230,6 +230,8 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	pragma::asset::AssetManager &GetAssetManager();
 	const pragma::asset::AssetManager &GetAssetManager() const;
 
+	void AddTickEvent(const std::function<void()> &ev);
+
 	// For internal use only
 	void SetReplicatedConVar(const std::string &cvar, const std::string &val);
   protected:
@@ -239,7 +241,6 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	void WriteEngineConfig(VFilePtrReal f);
 	void RegisterSharedConsoleCommands(ConVarMap &map);
 	void RunTickEvents();
-	void AddTickEvent(const std::function<void()> &ev);
 	virtual uint32_t DoClearUnusedAssets(pragma::asset::Type type) const;
 	virtual void RegisterConsoleCommands();
 	virtual void UpdateTickCount();
@@ -291,6 +292,7 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	std::vector<CallbackHandle> m_profileHandlers = {};
 
 	std::queue<std::function<void()>> m_tickEventQueue;
+	std::mutex m_tickEventQueueMutex;
 	StateFlags m_stateFlags;
 	mutable upad::PackageManager *m_padPackageManager = nullptr;
 	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase>> m_profilingStageManager = nullptr;

@@ -142,7 +142,7 @@ static void transform_path(const lua_Debug &d, std::string &errPath, int32_t cur
 	auto qt0 = errPath.find_first_of('\"', start);
 	auto qt1 = errPath.find_first_of('\"', qt0 + 1);
 	if(qt0 < end && qt1 < end) {
-		auto path = FileManager::GetCanonicalizedPath(d.source);
+		auto path = FileManager::GetCanonicalizedPath(Lua::get_source(d));
 
 		// Remove program path from absolute path
 		auto programPath = FileManager::GetCanonicalizedPath(util::get_program_path());
@@ -176,7 +176,7 @@ bool Lua::get_callstack(lua_State *l, std::stringstream &ss)
 				break;
 			}
 			else
-				ss << "\n" << t << level << ": " << (d.name != nullptr ? d.name : "?") << "[" << d.linedefined << ":" << d.lastlinedefined << "] [" << d.what << ":" << d.namewhat << "] : " << d.source << ":" << d.currentline;
+				ss << "\n" << t << level << ": " << (d.name != nullptr ? d.name : "?") << "[" << d.linedefined << ":" << d.lastlinedefined << "] [" << d.what << ":" << d.namewhat << "] : " << get_source(d) << ":" << d.currentline;
 		}
 		++level;
 		r = lua_getstack(l, level, &d);
@@ -202,7 +202,7 @@ bool Lua::PrintTraceback(lua_State *l, std::stringstream &ssOut, std::string *pO
 	auto hasMsg = true;
 	if(bFoundSrc == true) {
 		if(!errMsg.empty() && errMsg.front() != '[') {
-			std::string shortSrc = d.source;
+			std::string shortSrc = get_source(d);
 			auto c = FileManager::GetDirectorySeparator();
 			auto br = shortSrc.find(c);
 			uint32_t offset = 0;
@@ -225,7 +225,7 @@ bool Lua::PrintTraceback(lua_State *l, std::stringstream &ssOut, std::string *pO
 		}
 		transform_path(d, errMsg, d.currentline);
 		ssOut << errMsg;
-		bNl = print_code_snippet(ssOut, d.source, d.currentline, ":");
+		bNl = print_code_snippet(ssOut, get_source(d), d.currentline, ":");
 	}
 	else {
 		ssOut << errMsg;
@@ -349,7 +349,7 @@ void Lua::initialize_error_handler()
 
 			if(bFoundSrc == true) {
 				if(!luaMsg.empty() && luaMsg.front() != '[') {
-					std::string shortSrc = d.source;
+					std::string shortSrc = get_source(d);
 					strip_path_until_lua_dir(shortSrc);
 					shortSrc = "[string \"" + shortSrc + "\"]";
 
@@ -360,7 +360,7 @@ void Lua::initialize_error_handler()
 			}
 			transform_path(d, luaMsg, d.currentline);
 			ssMsg << luaMsg;
-			auto bNl = print_code_snippet(ssMsg, (d.source != nullptr) ? d.source : "", d.currentline, ":");
+			auto bNl = print_code_snippet(ssMsg, (d.source != nullptr) ? get_source(d) : "", d.currentline, ":");
 			// if(level != 1)
 			{
 				level = 1;
@@ -377,7 +377,7 @@ void Lua::initialize_error_handler()
 							break;
 						}
 						else {
-							std::string src = d.source;
+							std::string src = get_source(d);
 							strip_path_until_lua_dir(src);
 							transform_path(d, src, d.currentline);
 							src = "[string \"" + src + "\"]";

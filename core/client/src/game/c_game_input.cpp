@@ -68,12 +68,22 @@ Bool CGame::ScrollInput(Vector2 offset)
 }
 
 CGame::DroppedFile::DroppedFile(const std::string &_fullPath) : fullPath(_fullPath), fileName(ufile::get_file_from_filename(_fullPath)) {}
+
+// Usually we don't allow opening external files, but we make an exception for files that have been dropped into Pragma.
+static std::unordered_map<std::string, std::string> g_droppedFiles;
+namespace pragma {
+	DLLCLIENT const std::unordered_map<std::string, std::string> &get_dropped_files() { return g_droppedFiles; }
+};
 void CGame::OnFilesDropped(std::vector<std::string> &files)
 {
 	m_droppedFiles.reserve(files.size());
 	for(auto &f : files) {
-		if(FileManager::IsSystemFile(f) == true)
+		if(FileManager::IsSystemFile(f) == true) {
 			m_droppedFiles.push_back(DroppedFile {f});
+			auto path = util::Path::CreateFile(f).GetString();
+			ustring::to_lower(path);
+			g_droppedFiles.insert(std::make_pair(ufile::get_file_from_filename(path), path));
+		}
 	}
 	util::ScopeGuard g {[this]() {
 		m_droppedFiles.clear();

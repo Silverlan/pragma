@@ -79,15 +79,15 @@ namespace pragma::asset {
 		bool greyScaleMap = false;
 	};
 
-	DLLCLIENT std::shared_ptr<Model> import_model(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath = {});
-	DLLCLIENT std::shared_ptr<Model> import_model(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath = {});
+	DLLCLIENT std::shared_ptr<Model> import_model(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = true);
+	DLLCLIENT std::shared_ptr<Model> import_model(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = true);
 
 	struct DLLCLIENT GltfImportInfo {
 		std::vector<std::string> models;
 		std::string mapName;
 	};
-	DLLCLIENT std::optional<GltfImportInfo> import_gltf(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath = {});
-	DLLCLIENT std::optional<GltfImportInfo> import_gltf(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath = {});
+	DLLCLIENT std::optional<GltfImportInfo> import_gltf(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = false);
+	DLLCLIENT std::optional<GltfImportInfo> import_gltf(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath = {}, bool importAsSingleModel = false);
 
 	DLLCLIENT bool import_texture(const std::string &fileName, const TextureImportInfo &texInfo, const std::string &outputPath, std::string &outErrMsg);
 	DLLCLIENT bool import_texture(std::unique_ptr<ufile::IFile> &&f, const TextureImportInfo &texInfo, const std::string &outputPath, std::string &outErrMsg);

@@ -148,13 +148,16 @@ int Lua::util::Client::import_gltf(lua_State *l)
 	::util::Path outputPath {};
 	if(Lua::IsSet(l, 2))
 		outputPath = ::util::Path::CreatePath(Lua::CheckString(l, 2));
+	auto importAsSingleModel = false;
+	if(Lua::IsSet(l, 3))
+		importAsSingleModel = Lua::CheckBool(l, 3);
 	std::string errMsg;
 	std::optional<pragma::asset::GltfImportInfo> importInfo {};
 	if(f) {
-		importInfo = pragma::asset::import_gltf(*f, errMsg, outputPath);
+		importInfo = pragma::asset::import_gltf(*f, errMsg, outputPath, importAsSingleModel);
 	}
 	else
-		importInfo = pragma::asset::import_gltf(fileName, errMsg, outputPath);
+		importInfo = pragma::asset::import_gltf(fileName, errMsg, outputPath, importAsSingleModel);
 	if(!importInfo) {
 		Lua::PushBool(l, false);
 		Lua::PushString(l, errMsg);
@@ -182,13 +185,16 @@ int Lua::util::Client::import_model(lua_State *l)
 	::util::Path outputPath {};
 	if(Lua::IsSet(l, 2))
 		outputPath = ::util::Path::CreatePath(Lua::CheckString(l, 2));
+	auto importAsSingleModel = true;
+	if(Lua::IsSet(l, 3))
+		importAsSingleModel = Lua::CheckBool(l, 3);
 	std::string errMsg;
 	std::shared_ptr<Model> mdl = nullptr;
 	if(f) {
-		mdl = pragma::asset::import_model(*f, errMsg, outputPath);
+		mdl = pragma::asset::import_model(*f, errMsg, outputPath, importAsSingleModel);
 	}
 	else
-		mdl = pragma::asset::import_model(fileName, errMsg, outputPath);
+		mdl = pragma::asset::import_model(fileName, errMsg, outputPath, importAsSingleModel);
 	if(mdl == nullptr) {
 		Lua::PushBool(l, false);
 		Lua::PushString(l, errMsg);

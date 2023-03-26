@@ -1341,23 +1341,23 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 	outputData.model = mdl;
 	return outputData;
 }
-std::shared_ptr<Model> pragma::asset::import_model(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath)
+std::shared_ptr<Model> pragma::asset::import_model(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
 {
-	auto data = ::import_model(&f, "", outErrMsg, outputPath, false);
+	auto data = ::import_model(&f, "", outErrMsg, outputPath, !importAsSingleModel);
 	if(!data)
 		return nullptr;
 	return data->model;
 }
-std::shared_ptr<Model> pragma::asset::import_model(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath)
+std::shared_ptr<Model> pragma::asset::import_model(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
 {
-	auto data = ::import_model(nullptr, fileName, outErrMsg, outputPath, false);
+	auto data = ::import_model(nullptr, fileName, outErrMsg, outputPath, !importAsSingleModel);
 	if(!data)
 		return nullptr;
 	return data->model;
 }
-std::optional<pragma::asset::GltfImportInfo> pragma::asset::import_gltf(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath)
+std::optional<pragma::asset::GltfImportInfo> pragma::asset::import_gltf(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
 {
-	auto data = ::import_model(&f, "", outErrMsg, outputPath, true);
+	auto data = ::import_model(&f, "", outErrMsg, outputPath, !importAsSingleModel);
 	if(!data)
 		return {};
 	GltfImportInfo importInfo {};
@@ -1365,9 +1365,9 @@ std::optional<pragma::asset::GltfImportInfo> pragma::asset::import_gltf(ufile::I
 	importInfo.mapName = std::move(data->mapName);
 	return importInfo;
 }
-std::optional<pragma::asset::GltfImportInfo> pragma::asset::import_gltf(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath)
+std::optional<pragma::asset::GltfImportInfo> pragma::asset::import_gltf(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
 {
-	auto data = ::import_model(nullptr, fileName, outErrMsg, outputPath, true);
+	auto data = ::import_model(nullptr, fileName, outErrMsg, outputPath, !importAsSingleModel);
 	if(!data)
 		return {};
 	GltfImportInfo importInfo {};

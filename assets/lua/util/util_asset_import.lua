@@ -62,12 +62,16 @@ function util.ListAssetImportFileHandler:ExtractFile(fileName,outPath)
 end
 function util.ListAssetImportFileHandler:GetFileList() return self.m_files end
 
-local function import_assets(handler,logCb,basePath,clearFiles,callback,onComplete)
-	basePath = basePath or ""
-	logCb = logCb or function(msg,severity)
+local function import_assets(handler,settings)
+	local basePath = settings.basePath or ""
+	local logCb = settings.logger or function(msg,severity)
 		if(severity ~= log.SEVERITY_INFO) then console.print_warning(msg)
 		else print(msg) end
 	end
+	local callback = settings.modelImportCallback
+	local onComplete = settings.onComplete
+	local clearFiles = settings.clearFiles
+
 	local files = handler:GetFileList()
 	local IMPORT_ASSET_TYPE_NATIVE = 0
 	local IMPORT_ASSET_TYPE_SOURCE = 1
@@ -281,14 +285,14 @@ local function import_assets(handler,logCb,basePath,clearFiles,callback,onComple
 					handled = true
 					local absPath = file.find_absolute_path(asset.get_asset_root_directory(asset.TYPE_MODEL) .. "/" .. mdl)
 					if(absPath ~= nil) then
-						local res,errMsg = asset.import_gltf(absPath,file.get_file_path(mdl))
+						local res,errMsg = asset.import_gltf(absPath,file.get_file_path(mdl),not settings.importAsCollection)
 						if(res ~= false) then
 							if(#res.mapName == 0) then logCb(#res.models .. " models have been imported!",log.SEVERITY_INFO)
 							else
 								logCb(#res.models .. " models and new map '" .. res.mapName .. "' have been imported!",log.SEVERITY_INFO)
 							end
-						else logCb("Unable to import model '" .. fileName .. "': " .. errMsg,log.SEVERITY_ERROR) end
-					else logCb("Unable to import model '" .. fileName .. "': Could not determine absolute file path!",log.SEVERITY_ERROR) end
+						else logCb("Unable to import model '" .. absPath .. "': " .. errMsg,log.SEVERITY_ERROR) end
+					else logCb("Unable to import model '" .. mdl .. "': Could not determine absolute file path!",log.SEVERITY_ERROR) end
 				end
 			end
 
@@ -306,12 +310,13 @@ local function import_assets(handler,logCb,basePath,clearFiles,callback,onComple
 	import_next_model()
 end
 
-function util.import_assets(files,logCb,basePath,dropped,callback,onComplete)
-	logCb = logCb or function(msg,severity)
+function util.import_assets(files,settings)
+	settings = settings or {}
+	settings.logger = settings.logger or function(msg,severity)
 		if(severity ~= log.SEVERITY_INFO) then console.print_warning(msg)
 		else print(msg) end
 	end
-	dropped = dropped or false
+	settings.dropped = settings.dropped or false
 	if(type(files) ~= "table") then files = {files} end
 
 	local nonZipFiles = {}
@@ -331,7 +336,7 @@ function util.import_assets(files,logCb,basePath,dropped,callback,onComplete)
 				hasZipAssets = true
 				local handler = util.ZipAssetImportFileHandler(zipFile)
 				zipFile = nil
-				import_assets(handler,logCb,basePath,nil,callback,onComplete)
+				import_assets(handler,settings)
 			end
 		else table.insert(nonZipFiles,f) end
 	end
@@ -339,6 +344,6 @@ function util.import_assets(files,logCb,basePath,dropped,callback,onComplete)
 		if(hasZipAssets == false) then logCb("No assets were detected!") end
 		return
 	end
-	local handler = dropped and util.DropAssetImportFileHandler(nonZipFiles) or util.ListAssetImportFileHandler(nonZipFiles)
-	import_assets(handler,logCb,basePath,nil,callback,onComplete)
+	local handler = settings.dropped and util.DropAssetImportFileHandler(nonZipFiles) or util.ListAssetImportFileHandler(nonZipFiles)
+	import_assets(handler,settings)
 end

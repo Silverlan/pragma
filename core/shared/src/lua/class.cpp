@@ -767,6 +767,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	classDefTransform.def(luabind::constructor<const Vector3 &, const Quat &>());
 	classDefTransform.def(luabind::constructor<const Vector3 &>());
 	classDefTransform.def(luabind::constructor<const Quat &>());
+	classDefTransform.def(luabind::constructor<const umath::ScaledTransform &>());
 	classDefTransform.def(luabind::constructor<>());
 	classDefTransform.def(luabind::const_self == luabind::const_self);
 	classDefTransform.def(luabind::tostring(luabind::self));

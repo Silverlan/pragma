@@ -31,5 +31,6 @@ void CMD_debug_glow_bloom(NetworkState *, pragma::BasePlayerComponent *, std::ve
 		return;
 	pEl->SetName(name);
 	pEl->SetSize(256, 256);
+	pEl->SetZPos(std::numeric_limits<int>::max());
 	pEl->Update();
 }

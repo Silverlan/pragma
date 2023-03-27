@@ -112,7 +112,16 @@ class DLLNETWORK Game : public CallbackHandler, public LuaCallbackHandler {
 	SurfaceMaterial *GetSurfaceMaterial(UInt32 id);
 	std::vector<SurfaceMaterial> &GetSurfaceMaterials();
 
-	enum class GameFlags : uint32_t { None = 0u, MapInitialized = 1u, GameInitialized = MapInitialized << 1u, MapLoaded = GameInitialized << 1u, InitialTick = MapLoaded << 1u, LevelTransition = InitialTick << 1u, ClosingGame = LevelTransition << 1u };
+	enum class GameFlags : uint32_t {
+		None = 0u,
+		MapInitialized = 1u,
+		GameInitialized = MapInitialized << 1u,
+		MapLoaded = GameInitialized << 1u,
+		InitialTick = MapLoaded << 1u,
+		LevelTransition = InitialTick << 1u,
+		ClosingGame = LevelTransition << 1u,
+		GameReady = ClosingGame << 1u,
+	};
 
 	Vector3 &GetGravity();
 	void SetGravity(Vector3 &gravity);
@@ -200,7 +209,8 @@ class DLLNETWORK Game : public CallbackHandler, public LuaCallbackHandler {
 	bool IsMultiPlayer() const;
 	bool IsSinglePlayer() const;
 	// Map
-	bool IsMapInitialized();
+	bool IsMapInitialized() const;
+	bool IsGameReady() const;
 	template<class TWorld, class TPolyMesh, class TPoly, class TBrushMesh>
 	void BuildVMF(const char *map);
 	virtual bool LoadMap(const std::string &map, const Vector3 &origin = {}, std::vector<EntityHandle> *entities = nullptr);

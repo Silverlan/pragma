@@ -33,6 +33,7 @@
 #include "pragma/entities/components/base_color_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/lua/policies/core_policies.hpp"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/game/value_driver.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/ai/navsystem.h"
@@ -384,7 +385,8 @@ void Lua::game::register_shared_functions(lua_State *l, luabind::module_ &modGam
 	  luabind::def("get_nav_mesh", Lua::game::get_nav_mesh), luabind::def("load_nav_mesh", Lua::game::load_nav_mesh),
 	  luabind::def(
 	    "load_nav_mesh", +[](lua_State *l) { return Lua::game::load_nav_mesh(l); }),
-	  luabind::def("is_map_loaded", Lua::game::is_map_loaded), luabind::def("get_map_name", Lua::game::get_map_name), luabind::def("get_game_state_flags", Lua::game::get_game_state_flags),
+	  luabind::def("is_map_loaded", Lua::game::is_map_loaded), luabind::def("get_map_name", Lua::game::get_map_name), luabind::def("is_game_initialized", &Game::IsGameInitialized), luabind::def("is_game_ready", &Game::IsGameReady),
+	  luabind::def("is_map_initialized", &Game::IsMapInitialized), luabind::def("get_game_state_flags", Lua::game::get_game_state_flags),
 	  luabind::def(
 	    "update_animations", +[](Game &game, float dt) { game.UpdateAnimations(dt); })];
 

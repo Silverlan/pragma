@@ -728,7 +728,8 @@ void Game::PostTick() { m_tLastTick = m_tCur; }
 void Game::SetGameFlags(GameFlags flags) { m_flags = flags; }
 Game::GameFlags Game::GetGameFlags() const { return m_flags; }
 
-bool Game::IsMapInitialized() { return (m_flags & GameFlags::MapInitialized) != GameFlags::None; }
+bool Game::IsMapInitialized() const { return (m_flags & GameFlags::MapInitialized) != GameFlags::None; }
+bool Game::IsGameReady() const { return (m_flags & GameFlags::GameReady) != GameFlags::None; }
 
 const MapInfo &Game::GetMapInfo() const { return m_mapInfo; }
 
@@ -897,6 +898,8 @@ void Game::OnGameReady()
 	m_ctCur.Reset();
 	m_ctReal.Reset();
 	CallCallbacks<void>("OnGameReady");
+
+	m_flags |= GameFlags::GameReady;
 	CallLuaCallbacks("OnGameReady");
 	for(auto *gmC : GetGamemodeComponents())
 		gmC->OnGameReady();

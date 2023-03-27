@@ -1774,6 +1774,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		  return std::tuple<Vector2, Vector2, Vector2, Vector2> {bounds->monitorPos, bounds->monitorSize, bounds->workPos, bounds->workSize};
 	  });
 	defWindow.def("SetWindowTitle", static_cast<void (*)(prosper::Window &, const std::string &)>([](prosper::Window &window, const std::string &title) { window->SetWindowTitle(title); }));
+	defWindow.def("GetWindowTitle", static_cast<std::string (*)(prosper::Window &)>([](prosper::Window &window) { return window->GetWindowTitle(); }));
 	defWindow.def("ShouldClose", static_cast<bool (*)(prosper::Window &)>([](prosper::Window &window) -> bool { return window->ShouldClose(); }));
 	defWindow.def("SetShouldClose", static_cast<void (*)(prosper::Window &, bool)>([](prosper::Window &window, bool shouldClose) { window->SetShouldClose(shouldClose); }));
 	defWindow.def("GetClipboardString", static_cast<std::string (*)(prosper::Window &)>([](prosper::Window &window) -> std::string { return window->GetClipboardString(); }));

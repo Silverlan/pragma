@@ -37,6 +37,46 @@ static void init_shaders()
 		g_bloomBlurV = c_engine->GetShader("pp_bloom_blur_v");
 }
 
+static constexpr uint32_t MAX_BLUR_RADIUS = 14;
+static constexpr double MAX_BLUR_SIGMA = 10.0;
+
+void CRendererPpBloomComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+{
+	using T = CRendererPpBloomComponent;
+
+	using TBlurRadius = uint32_t;
+	{
+		auto memberInfo = create_component_member_info<T, TBlurRadius, static_cast<void (T::*)(TBlurRadius)>(&T::SetBlurRadius), static_cast<TBlurRadius (T::*)() const>(&T::GetBlurRadius)>("blurRadius", ShaderPPBloomBlurBase::DEFAULT_RADIUS);
+		memberInfo.SetMin(0);
+		memberInfo.SetMax(MAX_BLUR_RADIUS);
+		registerMember(std::move(memberInfo));
+	}
+
+	using TBlurSigma = double;
+	{
+		auto memberInfo = create_component_member_info<T, TBlurSigma, static_cast<void (T::*)(TBlurSigma)>(&T::SetBlurSigma), static_cast<TBlurSigma (T::*)() const>(&T::GetBlurSigma)>("blurSigma", ShaderPPBloomBlurBase::DEFAULT_SIGMA);
+		memberInfo.SetMin(0);
+		memberInfo.SetMax(MAX_BLUR_SIGMA);
+		registerMember(std::move(memberInfo));
+	}
+
+	using TBloomThreshold = float;
+	{
+		auto memberInfo = create_component_member_info<T, TBloomThreshold, static_cast<void (T::*)(TBloomThreshold)>(&T::SetBloomThreshold), static_cast<TBloomThreshold (T::*)() const>(&T::GetBloomThreshold)>("bloomThreshold", 1.f);
+		memberInfo.SetMin(0);
+		memberInfo.SetMax(10.f);
+		registerMember(std::move(memberInfo));
+	}
+
+	using TBlurAmount = int32_t;
+	{
+		auto memberInfo = create_component_member_info<T, TBlurAmount, static_cast<void (T::*)(TBlurAmount)>(&T::SetBlurAmount), static_cast<TBlurAmount (T::*)() const>(&T::GetBlurAmount)>("blurAmount", -1);
+		memberInfo.SetMin(-1);
+		memberInfo.SetMax(20);
+		registerMember(std::move(memberInfo));
+	}
+}
+
 CRendererPpBloomComponent::CRendererPpBloomComponent(BaseEntity &ent) : CRendererPpBaseComponent(ent)
 {
 	init_shaders();
@@ -71,7 +111,7 @@ void CRendererPpBloomComponent::DoRenderEffect(const util::DrawSceneInfo &drawSc
 
 	static auto blurSize = 5.f;
 	static int32_t kernelSize = 9u;
-	uint32_t blurAmount = umath::clamp(cvBloomAmount->GetInt(), 0, 20);
+	uint32_t blurAmount = umath::clamp(m_blurAmount >= 0 ? m_blurAmount : cvBloomAmount->GetInt(), 0, 20);
 
 	prosper::util::ShaderInfo shaderInfo {};
 	shaderInfo.shaderH = static_cast<prosper::ShaderBlurBase *>(g_bloomBlurH.get());
@@ -90,13 +130,13 @@ void CRendererPpBloomComponent::InitializeLuaObject(lua_State *l) { return BaseE
 
 void CRendererPpBloomComponent::SetBlurRadius(uint32_t radius)
 {
-	radius = umath::clamp(radius, 0u, 15u);
+	radius = umath::clamp(radius, 0u, MAX_BLUR_RADIUS);
 	m_radius = radius;
 	SetPipelineDirty();
 }
 void CRendererPpBloomComponent::SetBlurSigma(double sigma)
 {
-	sigma = umath::clamp(sigma, 0.0, 10.0);
+	sigma = umath::clamp(sigma, 0.0, MAX_BLUR_SIGMA);
 	m_sigma = sigma;
 	SetPipelineDirty();
 }
@@ -111,6 +151,9 @@ void CRendererPpBloomComponent::SetBloomThreshold(float threshold)
 		rasterC->SetBloomThreshold(threshold);
 }
 float CRendererPpBloomComponent::GetBloomThreshold() const { return m_bloomThreshold; }
+
+void CRendererPpBloomComponent::SetBlurAmount(int32_t blurAmount) { m_blurAmount = blurAmount; }
+int32_t CRendererPpBloomComponent::GetBlurAmount() const { return m_blurAmount; }
 
 void CRendererPpBloomComponent::SetPipelineDirty()
 {

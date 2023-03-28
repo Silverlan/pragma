@@ -16,6 +16,7 @@ namespace pragma {
 	class CRasterizationRendererComponent;
 	class DLLCLIENT CRendererPpBloomComponent final : public CRendererPpBaseComponent {
 	  public:
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		CRendererPpBloomComponent(BaseEntity &ent);
 
 		void SetBlurRadius(uint32_t radius);
@@ -25,6 +26,9 @@ namespace pragma {
 
 		void SetBloomThreshold(float threshold);
 		float GetBloomThreshold() const;
+
+		void SetBlurAmount(int32_t blurAmount);
+		int32_t GetBlurAmount() const;
 
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual std::string GetIdentifier() const override { return "bloom"; }
@@ -40,6 +44,7 @@ namespace pragma {
 		std::shared_ptr<BloomPipelineInfo> m_bloomPipelineInfoV = nullptr;
 		bool m_pipelineDirty = false;
 		float m_bloomThreshold = 1.f;
+		int32_t m_blurAmount = -1;
 	};
 };
 

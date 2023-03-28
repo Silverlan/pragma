@@ -375,10 +375,11 @@ function udm.generate_lua_api_from_schema(schema)
 											end
 											class[setterName] = function(self,val)
 												if(type(val) == "number") then
+													local inVal = val
 													val = lib.detail.enumSets[stype][val]
-													if(val == nil) then error("Not a valid enum!") end
+													if(val == nil) then error("Not a valid enum! (Type: " .. tostring(stype) .. ", val: " .. tostring(inVal) .. ")") end
 												end
-												if(lib.detail.enumSets[stype][val] == nil) then error("Not a valid enum!") end
+												if(lib.detail.enumSets[stype][val] == nil) then error("Not a valid enum! (Type: " .. tostring(stype) .. ", val: " .. tostring(val) .. ")") end
 												self:GetUdmData():SetValue(name,udm.TYPE_STRING,val)
 												self:CallChangeListeners(name,val)
 											end
@@ -388,7 +389,7 @@ function udm.generate_lua_api_from_schema(schema)
 												local bitValues = 0
 												for _,strVal in ipairs(string.split(value,"|")) do
 													local val = lib.detail.enumSets[stype][strVal]
-													if(val == nil) then error("Not a valid enum!") end
+													if(val == nil) then error("Not a valid enum! (Type: " .. tostring(stype) .. ", val: " .. tostring(strVal) .. ")") end
 													bitValues = bit.bor(bitValues,val)
 												end
 												return bitValues

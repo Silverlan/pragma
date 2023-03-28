@@ -12,6 +12,7 @@ function gui.WIMenuItem:OnInitialize()
 
 	self:SetSize(128,16)
 	--self:SetAutoFillContents(true)
+	self.m_enabled = true
 
 	self:SetMouseInputEnabled(true)
 	local pBg = gui.create("WIRect")
@@ -79,15 +80,32 @@ end
 function gui.WIMenuItem:SetContextMenuHandler(handler) self.m_contextMenuHandler = handler end
 function gui.WIMenuItem:SetAction(fcOnClick) self.m_fcAction = fcOnClick end
 function gui.WIMenuItem:MouseCallback(mouseButton,keyState,modifier)
-	if(mouseButton == input.MOUSE_BUTTON_LEFT and keyState == input.STATE_PRESS) then
-		if(self.m_contextMenuHandler ~= nil) then
-			if(self:IsContextMenuOpen()) then gui.close_context_menu()
-			else self:OpenContextMenu() end
-		elseif(self.m_fcAction ~= nil) then self.m_fcAction(self) end
+	if(mouseButton == input.MOUSE_BUTTON_LEFT) then
+		if(self:IsEnabled() == false) then return util.EVENT_REPLY_HANDLED end
+		if(keyState == input.STATE_PRESS) then
+			if(self.m_contextMenuHandler ~= nil) then
+				if(self:IsContextMenuOpen()) then gui.close_context_menu()
+				else self:OpenContextMenu() end
+			elseif(self.m_fcAction ~= nil) then self.m_fcAction(self) end
+		end
 		return util.EVENT_REPLY_HANDLED
 	end
 	return util.EVENT_REPLY_UNHANDLED
 end
+function gui.WIMenuItem:SetEnabled(enabled)
+	self.m_enabled = enabled
+	if(enabled) then
+		if(util.is_valid(self.m_disabledOverlay)) then self.m_disabledOverlay:SetVisible(false) end
+		return
+	end
+	if(util.is_valid(self.m_disabledOverlay) == false) then
+		local disabledOverlay = gui.create("WIRect",self,0,0,self:GetWidth(),self:GetHeight(),0,0,1,1)
+		disabledOverlay:SetColor(Color(20,20,20,200))
+		self.m_disabledOverlay = disabledOverlay
+	end
+	self.m_disabledOverlay:SetVisible(true)
+end
+function gui.WIMenuItem:IsEnabled() return self.m_enabled or false end
 function gui.WIMenuItem:SetKeybindCommand(cmd)
 	self.m_keyboardCommand = cmd
 end

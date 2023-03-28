@@ -90,7 +90,8 @@ function gui.WIFileExplorer:ListFiles()
 		for _,fName in ipairs(tFiles) do
 			local pIcon = create_icon("page")
 
-			local fPath = path .. fName
+			local fPath = fName
+			if(path ~= "/") then fPath = path .. fPath end
 			local sz = file.get_size(fPath)
 			local fileType = (ext ~= nil) and ext:upper() or locale.get_text("unknown")
 			fileType = fileType .. " " .. locale.get_text("file")

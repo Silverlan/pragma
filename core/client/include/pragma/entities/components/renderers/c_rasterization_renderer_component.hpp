@@ -42,6 +42,7 @@ namespace pragma {
 		uint32_t vpResolution = 0;
 		uint32_t tileInfo; // First 16 bits = number of tiles (x-axis), second 16 bits = tile size
 		float lightmapExposurePow = 0.f;
+		float bloomThreshold = 1.f;
 	};
 
 	class ShaderGameWorldLightingPass;
@@ -169,6 +170,9 @@ namespace pragma {
 		rendering::HDRData &GetHDRInfo();
 		// GlowData &GetGlowInfo();
 		SSAOInfo &GetSSAOInfo();
+
+		void SetBloomThreshold(float threshold);
+		float GetBloomThreshold() const;
 
 		prosper::IDescriptorSet *GetDepthDescriptorSet() const;
 		void SetFogOverride(const std::shared_ptr<prosper::IDescriptorSetGroup> &descSetGroup);

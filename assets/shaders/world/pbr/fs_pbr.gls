@@ -16,5 +16,5 @@ void main()
 	vec4 albedoColor = texture(u_albedoMap,texCoords);
 	fs_color = calc_pbr(albedoColor,texCoords,u_pushConstants.debugMode);
 	if(CSPEC_BLOOM_OUTPUT_ENABLED == 1)
-		extract_bright_color(fs_color);
+		extract_bright_color(fs_color,u_renderer.bloomThreshold);
 }

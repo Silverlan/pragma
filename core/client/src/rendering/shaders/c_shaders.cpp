@@ -30,6 +30,7 @@
 #include "pragma/rendering/shaders/image/c_shader_calc_image_color.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
+#include "pragma/rendering/shaders/post_processing/c_shader_pp_bloom_blur.hpp"
 #include "pragma/rendering/shaders/image/c_shader_clear_color.hpp"
 #include "pragma/rendering/shaders/image/c_shader_resize_image.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_dof.hpp"
@@ -154,6 +155,10 @@ void register_game_shaders()
 	shaderManager.RegisterShader("pp_hdr", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPHDR(context, identifier); });
 	shaderManager.RegisterShader("pp_fog", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPFog(context, identifier); });
 	shaderManager.RegisterShader("pp_dof", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPDoF(context, identifier); });
+
+	shaderManager.RegisterShader("pp_bloom_blur_h", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPBloomBlurH(context, identifier); });
+	shaderManager.RegisterShader("pp_bloom_blur_v", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPBloomBlurV(context, identifier); });
+
 	shaderManager.RegisterShader("resize_image", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderResizeImage(context, identifier); });
 
 	shaderManager.RegisterShader("pp_water", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderPPWater(context, identifier); });

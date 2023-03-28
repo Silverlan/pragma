@@ -395,6 +395,9 @@ pragma::rendering::Prepass &CRasterizationRendererComponent::GetPrepass() { retu
 const pragma::rendering::ForwardPlusInstance &CRasterizationRendererComponent::GetForwardPlusInstance() const { return const_cast<CRasterizationRendererComponent *>(this)->GetForwardPlusInstance(); }
 pragma::rendering::ForwardPlusInstance &CRasterizationRendererComponent::GetForwardPlusInstance() { return m_hdrInfo.forwardPlusInstance; }
 
+void CRasterizationRendererComponent::SetBloomThreshold(float threshold) { m_rendererData.bloomThreshold = threshold; }
+float CRasterizationRendererComponent::GetBloomThreshold() const { return m_rendererData.bloomThreshold; }
+
 Float CRasterizationRendererComponent::GetHDRExposure() const { return m_hdrInfo.exposure; }
 Float CRasterizationRendererComponent::GetMaxHDRExposure() const { return m_hdrInfo.max_exposure; }
 void CRasterizationRendererComponent::SetMaxHDRExposure(Float exposure) { m_hdrInfo.max_exposure = exposure; }

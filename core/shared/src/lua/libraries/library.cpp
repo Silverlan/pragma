@@ -20,6 +20,9 @@
 #include "pragma/lua/libraries/lasset.hpp"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/libraries/lfile.h"
+#include "pragma/lua/policies/default_parameter_policy.hpp"
+#include "pragma/lua/converters/vector_converter_t.hpp"
+#include "pragma/lua/converters/pair_converter_t.hpp"
 #include "pragma/logging_wrapper.hpp"
 #include "pragma/debug/debug_render_info.hpp"
 #include "pragma/debug/intel_vtune.hpp"
@@ -469,6 +472,9 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("calc_dielectric_specular_reflection", &::umath::calc_dielectric_specular_reflection), luabind::def("calc_ballistic_velocity", &Lua::math::calc_ballistic_velocity), luabind::def("ease_in", &Lua::math::ease_in), luabind::def("ease_out", &Lua::math::ease_out),
 	  luabind::def("ease_in_out", &Lua::math::ease_in_out), luabind::def("get_frustum_plane_size", &Lua::math::get_frustum_plane_size), luabind::def("get_frustum_plane_boundaries", &Lua::math::get_frustum_plane_boundaries),
 	  luabind::def("get_frustum_plane_point", &Lua::math::get_frustum_plane_point),
+
+	  luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients, luabind::meta::join<luabind::default_parameter_policy<3, true>, luabind::default_parameter_policy<4, true>>::type {}),
+	  luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients, luabind::default_parameter_policy<4, true> {}), luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients),
 
 	  luabind::def("horizontal_fov_to_vertical_fov", &Lua::math::horizontal_fov_to_vertical_fov),
 	  luabind::def("horizontal_fov_to_vertical_fov", static_cast<double (*)(float, float)>([](float fovDeg, float widthOrAspectRatio) -> double { return Lua::math::horizontal_fov_to_vertical_fov(fovDeg, widthOrAspectRatio); })),

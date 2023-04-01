@@ -19,6 +19,7 @@ namespace Lua {
 		DLLNETWORK std::shared_ptr<Model> get_model(lua_State *l, const std::string &mdlName);
 		DLLNETWORK var<bool, std::string> LoadLibrary(lua_State *l, const std::string &path);
 		DLLNETWORK bool UnloadLibrary(lua_State *l, const std::string &path);
+		DLLNETWORK bool IsLibraryLoaded(NetworkState &nw, const std::string &path);
 		DLLNETWORK bool LibraryExists(lua_State *l, const std::string &library);
 		DLLNETWORK uint64_t GetTickCount();
 		DLLNETWORK tb<void> get_info(lua_State *l);

@@ -96,6 +96,8 @@ bool Lua::engine::UnloadLibrary(lua_State *l, const std::string &path)
 	return state->UnloadLibrary(path);
 }
 
+bool Lua::engine::IsLibraryLoaded(NetworkState &nw, const std::string &path) { return nw.GetLibraryModule(path) != nullptr; }
+
 Lua::var<bool, std::string> Lua::engine::LoadLibrary(lua_State *l, const std::string &path)
 {
 	NetworkState *state = ::engine->GetNetworkState(l);

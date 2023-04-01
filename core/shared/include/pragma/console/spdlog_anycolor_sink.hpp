@@ -45,7 +45,7 @@ class anycolor_sink : public spdlog::sinks::sink {
 	mutex_t &mutex_;
 	bool should_do_colors_;
 	std::unique_ptr<spdlog::formatter> formatter_;
-	std::array<std::string, spdlog::level::n_levels> colors_;
+	std::array<spdlog::memory_buf_t, spdlog::level::n_levels> colors_;
 
 	// print a range of formatted message to console
 	void print_range_(const spdlog::memory_buf_t &formatted, size_t start, size_t end);
@@ -105,7 +105,11 @@ template<typename ConsoleMutex>
 void SPDLOG_INLINE anycolor_sink<ConsoleMutex>::set_color(spdlog::level::level_enum level, const std::string &color)
 {
 	std::lock_guard<mutex_t> lock(mutex_);
+#ifdef SPDLOG_USE_STD_FORMAT
 	colors_[static_cast<size_t>(level)] = color;
+#else
+	colors_[static_cast<size_t>(level)].append(color.data(), color.data() + color.size());
+#endif
 }
 
 template<typename ConsoleMutex>
@@ -130,7 +134,12 @@ void SPDLOG_INLINE anycolor_sink<ConsoleMutex>::log(const spdlog::details::log_m
 		print_range_(col, 0, col.size());
 		print_range_(formatted, msg.color_range_start, msg.color_range_end);
 		// reset to orig colors
+#ifdef SPDLOG_USE_STD_FORMAT
 		auto &reset = Con::COLOR_RESET;
+#else
+		spdlog::memory_buf_t reset {};
+		reset.append(Con::COLOR_RESET.data(), Con::COLOR_RESET.data() + Con::COLOR_RESET.size());
+#endif
 		print_range_(reset, 0, reset.size());
 		print_range_(formatted, msg.color_range_end, formatted.size());
 	}

@@ -139,6 +139,14 @@ void pragma::set_file_log_level(::util::LogSeverity level)
 
 /////////////////////////////
 
+static void append_string(spdlog::memory_buf_t &dest, const std::string &str)
+{
+#ifdef SPDLOG_USE_STD_FORMAT
+	dest.append(str.begin(), str.end());
+#else
+	dest.append(str.data(), str.data() + str.length());
+#endif
+}
 class SpdPragmaPrefixFormatter : public spdlog::custom_flag_formatter {
   public:
 	virtual void format(const spdlog::details::log_msg &msg, const std::tm &tm, spdlog::memory_buf_t &dest) override
@@ -150,7 +158,7 @@ class SpdPragmaPrefixFormatter : public spdlog::custom_flag_formatter {
 				constexpr uint32_t prefixLen = 10;
 				msg.color_range_start = dest.size() + 1;
 				msg.color_range_end = dest.size() + prefixLen - 2;
-				dest.append(prefix.begin(), prefix.end());
+				append_string(dest, prefix);
 				break;
 			}
 		case spdlog::level::level_enum::err:
@@ -159,7 +167,7 @@ class SpdPragmaPrefixFormatter : public spdlog::custom_flag_formatter {
 				constexpr uint32_t prefixLen = 8;
 				msg.color_range_start = dest.size() + 1;
 				msg.color_range_end = dest.size() + prefixLen - 2;
-				dest.append(prefix.begin(), prefix.end());
+				append_string(dest, prefix);
 				break;
 			}
 		case spdlog::level::level_enum::critical:
@@ -168,7 +176,7 @@ class SpdPragmaPrefixFormatter : public spdlog::custom_flag_formatter {
 				constexpr uint32_t prefixLen = 11;
 				msg.color_range_start = dest.size() + 1;
 				msg.color_range_end = dest.size() + prefixLen - 2;
-				dest.append(prefix.begin(), prefix.end());
+				append_string(dest, prefix);
 				break;
 			}
 		case spdlog::level::level_enum::debug:
@@ -177,7 +185,7 @@ class SpdPragmaPrefixFormatter : public spdlog::custom_flag_formatter {
 				constexpr uint32_t prefixLen = 8;
 				msg.color_range_start = dest.size() + 1;
 				msg.color_range_end = dest.size() + prefixLen - 2;
-				dest.append(prefix.begin(), prefix.end());
+				append_string(dest, prefix);
 				break;
 			}
 		case spdlog::level::level_enum::info:
@@ -186,7 +194,7 @@ class SpdPragmaPrefixFormatter : public spdlog::custom_flag_formatter {
 				constexpr uint32_t prefixLen = 7;
 				msg.color_range_start = dest.size() + 1;
 				msg.color_range_end = dest.size() + prefixLen - 2;
-				dest.append(prefix.begin(), prefix.end());
+				append_string(dest, prefix);
 				break;
 			}
 		}
@@ -282,7 +290,7 @@ class color_reset_formatter : public spdlog::custom_flag_formatter {
 	virtual void format(const spdlog::details::log_msg &msg, const std::tm &tm, spdlog::memory_buf_t &dest) override
 	{
 		static auto prefix = Con::COLOR_RESET;
-		dest.append(prefix.begin(), prefix.end());
+		append_string(dest, prefix);
 	}
 
 	virtual std::unique_ptr<custom_flag_formatter> clone() const override { return spdlog::details::make_unique<color_reset_formatter>(); }
@@ -296,19 +304,19 @@ class color_formatter : public spdlog::custom_flag_formatter {
 		case spdlog::level::level_enum::warn:
 			{
 				static auto str = Con::COLOR_WARNING;
-				dest.append(str.begin(), str.end());
+				append_string(dest, str);
 				break;
 			}
 		case spdlog::level::level_enum::err:
 			{
 				static auto str = Con::COLOR_ERROR;
-				dest.append(str.begin(), str.end());
+				append_string(dest, str);
 				break;
 			}
 		case spdlog::level::level_enum::critical:
 			{
 				static auto str = Con::COLOR_CRITICAL;
-				dest.append(str.begin(), str.end());
+				append_string(dest, str);
 				break;
 			}
 		}
@@ -324,7 +332,12 @@ class category_name_formatter : public spdlog::custom_flag_formatter {
   public:
 	virtual void format(const spdlog::details::log_msg &msg, const std::tm &tm, spdlog::memory_buf_t &dest) override
 	{
-		if(msg.logger_name.length() >= PRAGMA_LOGGER_NAME.length() && msg.logger_name.substr(0, PRAGMA_LOGGER_NAME.length()) == PRAGMA_LOGGER_NAME)
+#ifdef SPDLOG_USE_STD_FORMAT
+		auto &loggerName = msg.logger_name;
+#else
+		std::string_view loggerName {msg.logger_name.begin(), msg.logger_name.end()};
+#endif
+		if(loggerName.size() >= PRAGMA_LOGGER_NAME.length() && loggerName.substr(0, PRAGMA_LOGGER_NAME.length()) == PRAGMA_LOGGER_NAME)
 			return; // Don't print category name for main logger
 		dest.reserve(dest.size() + CATEGORY_PREFIX.size() + msg.logger_name.size() + CATEGORY_POSTFIX.size());
 		dest.append(CATEGORY_PREFIX);

@@ -34,7 +34,7 @@ runs:
       id: build-pragma
       uses: Silverlan/pragma/github_actions/build@master
       with:
-        build-args: '--with-common-modules=0 --with-essential-client-modules=0 --module ${{ inputs.module }}'
+        build-args: '--with-lua-debugger=0 --with-common-modules=0 --with-essential-client-modules=0 --module ${{ inputs.module }}'
 
     - name: Set Output Variables
       shell: bash

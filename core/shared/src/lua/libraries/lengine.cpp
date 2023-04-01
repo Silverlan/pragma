@@ -89,6 +89,13 @@ bool Lua::engine::LibraryExists(lua_State *l, const std::string &library)
 	return FileManager::Exists(libAbs);
 }
 
+bool Lua::engine::UnloadLibrary(lua_State *l, const std::string &path)
+{
+	NetworkState *state = ::engine->GetNetworkState(l);
+	std::string err;
+	return state->UnloadLibrary(path);
+}
+
 Lua::var<bool, std::string> Lua::engine::LoadLibrary(lua_State *l, const std::string &path)
 {
 	NetworkState *state = ::engine->GetNetworkState(l);

@@ -62,8 +62,8 @@ void SGame::RegisterLua()
 
 	auto engineMod = luabind::module(GetLuaState(), "engine");
 	engineMod[luabind::def("shutdown", Lua::engine::exit), luabind::def("get_working_directory", Lua::engine::get_working_directory), luabind::def("set_record_console_output", Lua::engine::set_record_console_output), luabind::def("get_tick_count", Lua::engine::GetTickCount),
-	  luabind::def("load_library", Lua::engine::LoadLibrary), luabind::def("library_exists", Lua::engine::LibraryExists), luabind::def("get_info", Lua::engine::get_info), luabind::def("poll_console_output", Lua::engine::poll_console_output),
-	  luabind::def("get_git_info", Lua::engine::get_git_info)];
+	  luabind::def("load_library", Lua::engine::LoadLibrary), luabind::def("unload_library", Lua::engine::UnloadLibrary), luabind::def("library_exists", Lua::engine::LibraryExists), luabind::def("get_info", Lua::engine::get_info),
+	  luabind::def("poll_console_output", Lua::engine::poll_console_output), luabind::def("get_git_info", Lua::engine::get_git_info)];
 
 	Lua::RegisterLibrary(GetLuaState(), "game",
 	  {//{"create_light",Lua::engine::CreateLight},

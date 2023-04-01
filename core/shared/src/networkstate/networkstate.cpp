@@ -556,6 +556,39 @@ void NetworkState::InitializeDLLModule(lua_State *l, std::shared_ptr<util::Libra
 	}
 }
 
+bool NetworkState::UnloadLibrary(const std::string &library)
+{
+	auto libAbs = util::get_normalized_module_path(library, IsClient());
+	auto it = s_loadedLibraries.find(libAbs);
+	if(it == s_loadedLibraries.end())
+		return true;
+	auto lib = it->second.library;
+	auto it2 = std::find_if(m_libHandles.begin(), m_libHandles.end(), [&lib](const std::shared_ptr<std::shared_ptr<util::Library>> &ptr) { return ptr->get() == lib->get(); });
+	it = s_loadedLibraries.erase(it);
+
+	auto *ptrTerminateLua = (*lib)->FindSymbolAddress<void (*)(Lua::Interface &)>("pragma_terminate_lua");
+	for(auto &pair : m_initializedLibraries) {
+		auto it = std::find_if(pair.second.begin(), pair.second.end(), [&lib](const std::shared_ptr<util::Library> &ptr) { return ptr.get() == lib->get(); });
+		if(it != pair.second.end()) {
+			if(ptrTerminateLua != nullptr)
+				ptrTerminateLua(*engine->GetLuaInterface(pair.first));
+			pair.second.erase(it);
+		}
+	}
+
+	if(lib->get() == m_lastModuleHandle.get())
+		m_lastModuleHandle = nullptr;
+
+	auto *ptrDetach = (*lib)->FindSymbolAddress<void (*)()>("pragma_detach");
+	if(ptrDetach != nullptr)
+		ptrDetach();
+	lib = nullptr;
+	if(it2 != m_libHandles.end())
+		m_libHandles.erase(it2);
+	s_loadedLibraries.erase(it);
+	return true;
+}
+
 std::shared_ptr<util::Library> NetworkState::InitializeLibrary(std::string library, std::string *err, lua_State *l)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
@@ -565,7 +598,6 @@ std::shared_ptr<util::Library> NetworkState::InitializeLibrary(std::string libra
 	if(l == nullptr)
 		l = GetLuaState();
 	auto libAbs = util::get_normalized_module_path(library, IsClient());
-	auto brLast = libAbs.find_last_of('\\');
 
 	std::shared_ptr<util::Library> dllHandle = nullptr;
 	auto it = s_loadedLibraries.find(libAbs);

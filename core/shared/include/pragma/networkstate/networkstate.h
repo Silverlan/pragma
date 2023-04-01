@@ -126,6 +126,7 @@ class DLLNETWORK NetworkState : public CallbackHandler, public CVarHandler {
 
 	void InitializeLuaModules(lua_State *l);
 	virtual std::shared_ptr<util::Library> InitializeLibrary(std::string library, std::string *err = nullptr, lua_State *l = nullptr);
+	bool UnloadLibrary(const std::string &library);
 	std::shared_ptr<util::Library> LoadLibraryModule(const std::string &lib, const std::vector<std::string> &additionalSearchDirectories = {}, std::string *err = nullptr);
 	std::shared_ptr<util::Library> GetLibraryModule(const std::string &lib) const;
 

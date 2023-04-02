@@ -1,6 +1,14 @@
 util.register_class("ents.LuaScriptComponent",BaseEntityComponent)
 
-ents.LuaScriptComponent:RegisterMember("ScriptFile",udm.TYPE_STRING,"",{},"def")
+ents.LuaScriptComponent:RegisterMember("ScriptFile",udm.TYPE_STRING,"",{
+	specializationType = ents.ComponentInfo.MemberInfo.SPECIALIZATION_TYPE_FILE,
+	metaData = {
+		rootPath = "lua/",
+		basePath = "",
+		extensions = {"lua"},
+		stripExtension = false
+	}
+},"def")
 ents.LuaScriptComponent:RegisterMember("Code",udm.TYPE_STRING,"",{},"def")
 ents.LuaScriptComponent:RegisterMember("ExecuteOnSpawn",udm.TYPE_BOOLEAN,false,{},"def")
 function ents.LuaScriptComponent:__init()

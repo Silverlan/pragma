@@ -95,7 +95,7 @@ Example for using the `--module` parameter:
 --module pr_physx:"https://github.com/Silverlan/pr_physx.git"
 ```
 
-If you want to build Cycles with NVIDIA OptiX support, you will have to install the [OptiX SDK](https://developer.nvidia.com/designworks/optix/download), and then build Pragma with the `--with-pfm --with-all-pfm-modules --build-cycles` parameters.
+If you want to build Cycles with NVIDIA OptiX support, you will have to install the [OptiX SDK](https://developer.nvidia.com/designworks/optix/download), and then build Pragma with the `--with-pfm --with-all-pfm-modules --build-cycles` parameters. To build Cycles on Windows, you will also have to install [SlikSVN](https://sliksvn.com/download/) first.
 
 Modules
 ------

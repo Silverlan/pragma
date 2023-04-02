@@ -85,6 +85,34 @@ luabind::object meta_data_type_to_lua_object(lua_State *l, const pragma::ents::T
 	return Lua::nil;
 }
 
+static std::optional<pragma::ComponentId> find_component_id_by_class(Game &game,const luabind::object &o) { 
+	auto &manager = game.GetLuaEntityManager();
+	auto componentId = manager.FindComponentId(o);
+	return componentId;
+}
+size_t Lua::ents::get_lua_component_member_count(Game &game, pragma::ComponentId componentId)
+{
+	auto &manager = game.GetLuaEntityManager();
+	auto *o = manager.FindClassObject(componentId);
+	if(!o)
+		return 0;
+	auto *memberInfos = pragma::BaseLuaBaseEntityComponent::GetMemberInfos(*o);
+	if(!memberInfos)
+		return 0;
+	return memberInfos->size();
+}
+pragma::ComponentMemberInfo *Lua::ents::get_lua_component_member_info(Game &game, pragma::ComponentId componentId, pragma::ComponentMemberIndex memberIndex)
+{
+	auto &manager = game.GetLuaEntityManager();
+	auto *o = manager.FindClassObject(componentId);
+	if(!o)
+		return nullptr;
+	auto *memberInfos = pragma::BaseLuaBaseEntityComponent::GetMemberInfos(*o);
+	if(!memberInfos || memberIndex >= memberInfos->size())
+		return nullptr;
+	return &*(*memberInfos)[memberIndex].componentMemberInfo;
+}
+
 //void test_lua_policies(lua_State *l);
 void Lua::ents::register_library(lua_State *l)
 {
@@ -134,6 +162,8 @@ void Lua::ents::register_library(lua_State *l)
 		luabind::def("register",+[](lua_State *l,const std::string &className,const luabind::tableT<luabind::variant<std::string,pragma::ComponentId>> &tComponents) {
 			register_class(l,className,tComponents,LuaEntityType::Default);
 		}),
+		luabind::def("get_lua_component_member_count",get_lua_component_member_count),
+		luabind::def("get_lua_component_member_info",get_lua_component_member_info),
 		luabind::def("get_closest",get_closest),
 		luabind::def("get_farthest",get_farthest),
 		luabind::def("get_sorted_by_distance",get_sorted_by_distance),

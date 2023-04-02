@@ -23,14 +23,16 @@ class DLLNETWORK LuaEntityManager {
 	luabind::object *GetClassObject(std::string className);
 	EntityInfo *GetEntityInfo(std::string className);
 
-	void RegisterComponent(std::string className, luabind::object &o);
+	void RegisterComponent(std::string className, luabind::object &o,pragma::ComponentId componentId);
 	luabind::object *GetComponentClassObject(std::string className);
+	std::optional<pragma::ComponentId> FindComponentId(const luabind::object &o) const;
+	const luabind::object *FindClassObject(pragma::ComponentId componentId) const;
 
 	const std::unordered_map<std::string, EntityInfo> &GetRegisteredEntities() const { return m_ents; }
-	const std::unordered_map<std::string, luabind::object> &GetRegisteredComponents() const { return m_components; }
+	const std::unordered_map<std::string, std::pair<luabind::object, pragma::ComponentId>> &GetRegisteredComponents() const { return m_components; }
   private:
 	std::unordered_map<std::string, EntityInfo> m_ents;
-	std::unordered_map<std::string, luabind::object> m_components;
+	std::unordered_map < std::string, std::pair<luabind::object,pragma::ComponentId>> m_components;
 };
 
 #endif

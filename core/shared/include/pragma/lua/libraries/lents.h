@@ -33,6 +33,9 @@ namespace Lua {
 		DLLNETWORK opt<std::string> get_component_name(lua_State *l, pragma::ComponentId componentId);
 		DLLNETWORK opt<uint32_t> get_component_id(lua_State *l, const std::string &componentName);
 
+		DLLNETWORK size_t get_lua_component_member_count(Game &game, pragma::ComponentId componentId);
+		DLLNETWORK pragma::ComponentMemberInfo *get_lua_component_member_info(Game &game, pragma::ComponentId componentId, pragma::ComponentMemberIndex memberIndex);
+
 		DLLNETWORK tb<type<BaseEntity>> get_all(lua_State *l);
 		DLLNETWORK tb<type<BaseEntity>> get_all(lua_State *l, func<type<BaseEntity>> func);
 		DLLNETWORK tb<type<BaseEntity>> get_all(lua_State *l, EntityIterator::FilterFlags filterFlags = EntityIterator::FilterFlags::Default);
@@ -83,7 +86,6 @@ namespace Lua {
 			auto *state = ::engine->GetNetworkState(l);
 			auto *game = state->GetGameState();
 			auto &manager = game->GetLuaEntityManager();
-			manager.RegisterComponent(name, o);
 
 			auto &classManager = game->GetLuaClassManager();
 			auto componentFlags = pragma::ComponentFlags::None;
@@ -155,6 +157,7 @@ namespace Lua {
 				  return util::to_shared_handle<pragma::BaseEntityComponent>(std::shared_ptr<TComponent> {static_cast<TComponent *>(game->CreateLuaEntityComponent(ent, name))});
 			  },
 			  componentFlags);
+			manager.RegisterComponent(name, o, componentId);
 			Lua::PushInt(l, componentId);
 			return 1;
 		}

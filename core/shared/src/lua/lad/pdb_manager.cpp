@@ -11,10 +11,10 @@
 
 #include "pragma/lua/lad/pdb_manager.hpp"
 #include <sharedutils/scope_guard.h>
-// C:/Program Files (x86)/Microsoft Visual Studio 14.0/DIA SDK/include
-#include <C:/Program Files (x86)/Microsoft Visual Studio 14.0/DIA SDK/include/Dia2.h>
 
-#pragma comment(lib, "C:/Program Files (x86)/Microsoft Visual Studio 14.0/DIA SDK/lib/amd64/diaguids.lib")
+#include <C:/Program Files/Microsoft Visual Studio/2022/Community/DIA SDK/include/Dia2.h>
+
+#pragma comment(lib, "C:/Program Files/Microsoft Visual Studio/2022/Community/DIA SDK/lib/amd64/diaguids.lib")
 
 #undef max
 

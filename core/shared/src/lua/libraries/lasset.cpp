@@ -244,6 +244,9 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 					continue;
 				manager->Poll();
 			}
+		}),
+		luabind::def("type_to_string",+[](pragma::asset::Type type) -> std::string {
+		return std::string { magic_enum::enum_name(type)};
 		})
 	];
 

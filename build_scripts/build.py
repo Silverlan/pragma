@@ -749,6 +749,11 @@ if with_pfm:
 
 if with_vr:
 	download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git")
+
+if with_pfm:
+	download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git")
+	download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git")
+
 os.chdir(curDir)
 
 ########## Write Build Configuration ##########

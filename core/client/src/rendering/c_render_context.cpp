@@ -12,6 +12,7 @@
 #include <debug/prosper_debug.hpp>
 #include <shader/prosper_shader.hpp>
 #include <sharedutils/util_library.hpp>
+#include <sharedutils/util_debug.h>
 #include <pragma/util/util_module.hpp>
 #include <pragma/lua/lua_error_handling.hpp>
 #include <pragma/logging.hpp>
@@ -171,9 +172,13 @@ void RenderContext::ValidationCallback(prosper::DebugMessageSeverityFlags severi
 			if(l) {
 				std::stringstream ss;
 				if(Lua::get_callstack(l, ss))
-					LOGGER_VALIDATION.error("Lua callstack: {}", ss.str());
+					LOGGER_VALIDATION.debug("Lua callstack: {}", ss.str());
 			}
 		}
+		auto stackBacktraceString = util::get_formatted_stack_backtrace_string();
+		if(!stackBacktraceString.empty())
+			LOGGER_VALIDATION.debug("Backtrace: {}", stackBacktraceString);
+		pragma::flush_loggers();
 	}
 }
 
@@ -188,6 +193,10 @@ void RenderContext::OnWindowInitialized()
 
 void RenderContext::DrawFrame() { GetRenderContext().DrawFrameCore(); }
 
-void RenderContext::SetGfxAPIValidationEnabled(bool b) { umath::set_flag(m_stateFlags, StateFlags::GfxAPIValidationEnabled, b); }
+void RenderContext::SetGfxAPIValidationEnabled(bool b) {
+	umath::set_flag(m_stateFlags, StateFlags::GfxAPIValidationEnabled, b);
+	if(b)
+		spdlog::flush_on(spdlog::level::info); // Immediately flush all messages
+}
 void RenderContext::SetRenderAPI(const std::string &renderAPI) { m_renderAPI = renderAPI; }
 const std::string &RenderContext::GetRenderAPI() const { return m_renderAPI; }

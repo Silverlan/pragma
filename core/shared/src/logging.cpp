@@ -394,7 +394,7 @@ void pragma::detail::initialize_logger(::util::LogSeverity conLogLevel, ::util::
 		formatter->add_flag<color_reset_formatter>('Q');
 		formatter->add_flag<color_formatter>('w');
 		formatter->add_flag<category_name_formatter>('j');
-		formatter->set_pattern("[%H:%M:%S %z] [%^%q%$] %j%w%v%Q");
+		formatter->set_pattern("[%H:%M:%S.%e] [%^%q%$] %j%w%v%Q");
 		fileSink->set_formatter(std::move(formatter));
 
 		sinks.push_back(fileSink);

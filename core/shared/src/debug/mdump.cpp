@@ -15,6 +15,7 @@
 #include <sharedutils/util.h>
 #include <sharedutils/util_file.h>
 #include "pragma/engine_info.hpp"
+#include "pragma/logging.hpp"
 
 extern DLLNETWORK Engine *engine;
 
@@ -76,6 +77,8 @@ LONG MiniDumper::TopLevelFilter(struct _EXCEPTION_POINTERS *pExceptionInfo)
 		// load any version we can
 		hDll = ::LoadLibrary("DBGHELP.DLL");
 	}
+
+	spdlog::info("Generating crashdump...");
 
 	LPCTSTR szResult = NULL;
 

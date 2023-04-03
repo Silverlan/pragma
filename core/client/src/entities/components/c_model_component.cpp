@@ -236,6 +236,8 @@ void CModelComponent::UpdateRenderBufferList()
 		return;
 	}
 	umath::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired, false);
+	for(auto &bufData : m_lodMeshRenderBufferData)
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(bufData.renderBuffer);
 	m_lodMeshRenderBufferData.clear();
 	m_lodMeshRenderBufferData.reserve(m_lodRenderMeshes.size());
 	auto depthPrepassEnabled = IsDepthPrepassEnabled();

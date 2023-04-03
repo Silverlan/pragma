@@ -772,7 +772,12 @@ void CRenderComponent::UpdateBoneBuffer()
 }
 void CRenderComponent::ClearRenderBuffers()
 {
+	if(m_renderBuffer)
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderBuffer);
 	m_renderBuffer = nullptr;
+
+	if(m_renderDescSetGroup)
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderDescSetGroup);
 	m_renderDescSetGroup = nullptr;
 }
 pragma::rendering::RenderGroup CRenderComponent::GetRenderGroups() const { return *m_renderGroups; }

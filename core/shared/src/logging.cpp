@@ -229,6 +229,8 @@ void pragma::detail::close_logger()
 	for(auto &logger : g_customLoggers)
 		spdlog::drop(logger.first);
 	g_customLoggers.clear();
+
+	spdlog::shutdown();
 }
 
 static void init_logger(const std::string &name, std::shared_ptr<spdlog::logger> &logger)

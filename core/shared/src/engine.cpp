@@ -902,9 +902,25 @@ void Engine::DumpDebugInformation(ZIPFile &zip) const
 	auto logFileName = pragma::detail::get_log_file_name();
 	if(logFileName.has_value()) {
 		pragma::detail::close_logger();
+
+		/* For some reason this will fail sometimes
 		auto logContents = filemanager::read_file(*logFileName);
-		if(logContents.has_value())
+		if(logContents.has_value()) {
 			zip.AddFile("log.txt", *logContents);
+		}
+		*/
+
+		std::string path = util::get_program_path() + "/" + *logFileName;
+		auto *f = fopen(path.c_str(), "r");
+		if(f) {
+			fseek(f, 0, SEEK_END);
+			auto size = ftell(f);
+			fseek(f, 0, SEEK_SET);
+			std::vector<char> buf(size);
+			fread(buf.data(), 1, size, f);
+			zip.AddFile("log.txt", buf.data(), buf.size());
+			fclose(f);
+		}
 	}
 
 	if(filemanager::exists("git_info.txt")) {

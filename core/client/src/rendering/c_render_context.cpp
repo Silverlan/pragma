@@ -21,6 +21,9 @@ using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
 
+static spdlog::logger &LOGGER = pragma::register_logger("prosper");
+static spdlog::logger &LOGGER_VALIDATION = pragma::register_logger("prosper_validation");
+
 RenderContext::RenderContext() : m_monitor(nullptr), m_renderAPI {"vulkan"} {}
 RenderContext::~RenderContext() { m_graphicsAPILib = nullptr; }
 DLLNETWORK std::optional<std::string> g_customTitle;
@@ -68,8 +71,11 @@ void RenderContext::InitializeRenderAPI()
 	}
 	else
 		err = "Module '" + modulePath + "' not found!";
-	if(m_renderContext == nullptr)
-		throw std::runtime_error {"Unable to load Vulkan implementation library for Prosper: " + err + "!"};
+	if(m_renderContext == nullptr) {
+		std::string msg = "Unable to load Vulkan implementation library for Prosper: " + err + "!";
+		LOGGER.error(msg);
+		throw std::runtime_error {msg};
+	}
 
 	m_renderContext->SetLogHandler(&pragma::log, &pragma::is_log_level_enabled);
 
@@ -94,9 +100,9 @@ void RenderContext::InitializeRenderAPI()
 		msg << infoLog << "\r\n";
 		msg << "\r\n";
 		msg << debugInfoLog;
-		spdlog::warn(msg.str());
+		LOGGER.warn(msg.str());
 	});
-	prosper::debug::set_debug_validation_callback([](prosper::DebugReportObjectTypeEXT objectType, const std::string &msg) { spdlog::error("[prosper] {}", msg); });
+	prosper::debug::set_debug_validation_callback([](prosper::DebugReportObjectTypeEXT objectType, const std::string &msg) { LOGGER_VALIDATION.error("{}", msg); });
 	GLFW::initialize();
 }
 void RenderContext::Release()
@@ -155,7 +161,7 @@ void RenderContext::ValidationCallback(prosper::DebugMessageSeverityFlags severi
 				return;
 		}
 
-		Con::cerr << "[PR] " << strMsg << Con::endl;
+		LOGGER_VALIDATION.error(strMsg);
 		if(std::this_thread::get_id() == c_engine->GetMainThreadId()) {
 			// In many cases the error may have been caused by a Lua script, so we'll print
 			// some information here about the current Lua call stack.
@@ -165,7 +171,7 @@ void RenderContext::ValidationCallback(prosper::DebugMessageSeverityFlags severi
 			if(l) {
 				std::stringstream ss;
 				if(Lua::get_callstack(l, ss))
-					Con::cerr << "Lua callstack: " << ss.str() << Con::endl;
+					LOGGER_VALIDATION.error("Lua callstack: {}", ss.str());
 			}
 		}
 	}

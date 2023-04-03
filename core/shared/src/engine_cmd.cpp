@@ -30,6 +30,37 @@
 
 #undef CreateFile
 
+static std::optional<std::string> udm_convert(const std::string &fileName) {
+	std::string err;
+	auto formatType = udm::Data::GetFormatType(fileName, err);
+	if(formatType.has_value() == false) {
+		Con::cwar << "Unable to load UDM data: " << err << Con::endl;
+		return {};
+	}
+
+	std::optional<std::string> newFileName {};
+	switch(*formatType) {
+	case ::udm::FormatType::Ascii:
+		newFileName = util::convert_udm_file_to_binary(fileName, err);
+		break;
+	case ::udm::FormatType::Binary:
+		newFileName = util::convert_udm_file_to_ascii(fileName, err);
+		break;
+	}
+
+	if(!newFileName.has_value()) {
+		Con::cwar << "Failed to convert UDM file: " << err << Con::endl;
+		return {};
+	}
+
+	std::string rpath;
+	if(FileManager::FindAbsolutePath(*newFileName, rpath) == false) {
+		Con::cwar << "Unable to locate converted UDM file on disk!" << Con::endl;
+		return {};
+	}
+	return rpath;
+}
+
 static void install_binary_module(const std::string &module, const std::optional<std::string> &version = {});
 void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 {
@@ -58,35 +89,18 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 			  return;
 		  }
 		  auto &fileName = argv.front();
-		  std::string err;
-		  auto formatType = udm::Data::GetFormatType(fileName, err);
-		  if(formatType.has_value() == false) {
-			  Con::cwar << "Unable to load UDM data: " << err << Con::endl;
+		  if(filemanager::is_dir(fileName)) {
+			  auto f = fileName + "/*";
+			  std::vector<std::string> files;
+			  filemanager::find_files(f, &files,nullptr);
+			  for(auto &f : files)
+				  udm_convert(fileName +"/" +f);
 			  return;
 		  }
-
-		  std::optional<std::string> newFileName {};
-		  switch(*formatType) {
-		  case ::udm::FormatType::Ascii:
-			  newFileName = util::convert_udm_file_to_binary(fileName, err);
-			  break;
-		  case ::udm::FormatType::Binary:
-			  newFileName = util::convert_udm_file_to_ascii(fileName, err);
-			  break;
-		  }
-
-		  if(!newFileName.has_value()) {
-			  Con::cwar << "Failed to convert UDM file: " << err << Con::endl;
+		  auto rpath = udm_convert(fileName);
+		  if(!rpath)
 			  return;
-		  }
-
-		  std::string rpath;
-		  if(FileManager::FindAbsolutePath(*newFileName, rpath) == false) {
-			  Con::cwar << "Unable to locate converted UDM file on disk!" << Con::endl;
-			  return;
-		  }
-
-		  auto absPath = util::get_program_path() + '/' + rpath;
+		  auto absPath = util::get_program_path() + '/' + *rpath;
 		  util::open_path_in_explorer(ufile::get_path_from_filename(absPath), ufile::get_file_from_filename(absPath));
 	  },
 	  ConVarFlags::None, "Converts a UDM file from binary to ASCII or the other way around.");

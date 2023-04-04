@@ -911,15 +911,12 @@ void Engine::DumpDebugInformation(ZIPFile &zip) const
 		*/
 
 		std::string path = util::get_program_path() + "/" + *logFileName;
-		auto *f = fopen(path.c_str(), "r");
-		if(f) {
-			fseek(f, 0, SEEK_END);
-			auto size = ftell(f);
-			fseek(f, 0, SEEK_SET);
-			std::vector<char> buf(size);
-			fread(buf.data(), 1, size, f);
-			zip.AddFile("log.txt", buf.data(), buf.size());
-			fclose(f);
+		std::ifstream t {path};
+		if(t.is_open()) {
+			std::stringstream buffer;
+			buffer << t.rdbuf();
+			std::string log = buffer.str();
+			zip.AddFile("log.txt", log);
 		}
 	}
 

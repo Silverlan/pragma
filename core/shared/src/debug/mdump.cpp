@@ -79,6 +79,7 @@ LONG MiniDumper::TopLevelFilter(struct _EXCEPTION_POINTERS *pExceptionInfo)
 	}
 
 	spdlog::info("Generating crashdump...");
+	pragma::flush_loggers();
 
 	LPCTSTR szResult = NULL;
 

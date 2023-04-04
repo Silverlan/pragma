@@ -65,6 +65,7 @@ void pragma::log(const std::string &msg, util::LogSeverity severity) { spdlog::l
 
 bool pragma::is_log_level_enabled(::util::LogSeverity severity) { return spdlog::should_log(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(severity))); }
 
+static std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> g_customLoggers;
 void pragma::flush_loggers()
 {
 	auto logger0 = spdlog::get(PRAGMA_LOGGER_NAME);
@@ -73,6 +74,9 @@ void pragma::flush_loggers()
 		logger0->flush();
 	if(logger1)
 		logger1->flush();
+
+	for(auto &pair : g_customLoggers)
+		pair.second->flush();
 }
 
 static void update_pragma_log_level()
@@ -211,7 +215,6 @@ static std::optional<std::string> g_logFileName = "log.txt";
 static bool g_loggerInitialized = false;
 std::optional<std::string> pragma::detail::get_log_file_name() { return g_logFileName; }
 
-static std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> g_customLoggers;
 void pragma::detail::close_logger()
 {
 	pragma::logging::detail::shouldLogOutput = false;

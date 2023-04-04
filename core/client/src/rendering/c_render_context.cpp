@@ -175,9 +175,11 @@ void RenderContext::ValidationCallback(prosper::DebugMessageSeverityFlags severi
 					LOGGER_VALIDATION.debug("Lua callstack: {}", ss.str());
 			}
 		}
+#ifdef _WIN32
 		auto stackBacktraceString = util::get_formatted_stack_backtrace_string();
 		if(!stackBacktraceString.empty())
 			LOGGER_VALIDATION.debug("Backtrace: {}", stackBacktraceString);
+#endif
 		pragma::flush_loggers();
 	}
 }

@@ -15,7 +15,7 @@
 #include <mathutil/color.h>
 #include "luasystem.h"
 
-static bool lua_value_to_string(lua_State *L, int arg, int *r, std::string *val)
+bool Lua::lua_value_to_string(lua_State *L, int arg, int *r, std::string *val)
 {
 	Lua::PushValue(L, arg);
 	arg = Lua::GetStackTop(L);
@@ -241,7 +241,7 @@ static int log(lua_State *l, spdlog::level::level_enum lv)
 	for(; i <= n; i++) {
 		auto status = -1;
 		std::string val;
-		if(lua_value_to_string(l, i, &status, &val) == false)
+		if(Lua::lua_value_to_string(l, i, &status, &val) == false)
 			return status;
 		if(i > istart)
 			ss << "\t";
@@ -263,7 +263,14 @@ int Lua::log::warn(lua_State *l) { return ::log(l, spdlog::level::warn); }
 int Lua::log::error(lua_State *l) { return ::log(l, spdlog::level::err); }
 int Lua::log::critical(lua_State *l) { return ::log(l, spdlog::level::critical); }
 int Lua::log::debug(lua_State *l) { return ::log(l, spdlog::level::debug); }
-int Lua::log::color(lua_State *l)
+int Lua::log::register_logger(lua_State *l)
+{
+	std::string name = Lua::CheckString(l, 1);
+	auto &logger = pragma::register_logger(name);
+	Lua::Push<spdlog::logger *>(l, &logger);
+	return 1;
+}
+	int Lua::log::color(lua_State *l)
 {
 	auto level = static_cast<util::LogSeverity>(Lua::CheckInt(l, 1));
 	std::string c {};

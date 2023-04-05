@@ -10,6 +10,9 @@
 #include "pragma/networkdefinitions.h"
 #include <pragma/lua/luaapi.h>
 
+namespace Lua {
+	DLLNETWORK bool lua_value_to_string(lua_State *L, int arg, int *r, std::string *val);
+};
 namespace Lua::console {
 	DLLNETWORK int print(lua_State *l);
 	DLLNETWORK int print_table(lua_State *l, std::string tab, int idx = 1);
@@ -29,6 +32,7 @@ namespace Lua::log {
 	DLLNETWORK int critical(lua_State *l);
 	DLLNETWORK int debug(lua_State *l);
 	DLLNETWORK int color(lua_State *l);
+	DLLNETWORK int register_logger(lua_State *l);
 };
 
 namespace Lua::debug {

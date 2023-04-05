@@ -23,6 +23,7 @@
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 #include "pragma/lua/converters/vector_converter_t.hpp"
 #include "pragma/lua/converters/pair_converter_t.hpp"
+#include "pragma/logging.hpp"
 #include "pragma/logging_wrapper.hpp"
 #include "pragma/debug/debug_render_info.hpp"
 #include "pragma/debug/intel_vtune.hpp"
@@ -1065,6 +1066,87 @@ namespace Lua::ik {
 	void register_library(Lua::Interface &lua);
 };
 
+#include <spdlog/common.h>
+#include <spdlog/formatter.h>
+#include <spdlog/fmt/fmt.h>
+
+static std::string to_string(lua_State *l,int i)
+{
+	auto status = -1;
+	std::string val;
+	if(Lua::lua_value_to_string(l, i, &status, &val) == false)
+		return "unknown";
+	return val;
+}
+
+static int log(lua_State *l, spdlog::level::level_enum logLevel)
+{
+	auto &logger = Lua::Check<spdlog::logger>(l, 1);
+	const char *msg = Lua::CheckString(l, 2);
+	int32_t argOffset = 2;
+	auto n = lua_gettop(l) - argOffset; /* number of arguments */
+	switch(n) {
+	case 0:
+		logger.log(logLevel, msg);
+		break;
+	case 1:
+		logger.log(logLevel, std::vformat(msg, std::make_format_args(to_string(l, argOffset + 1))));
+		break;
+	case 2:
+		logger.log(logLevel, std::vformat(msg, std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2))));
+		break;
+	case 3:
+		logger.log(logLevel, std::vformat(msg, std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3))));
+		break;
+	case 4:
+		logger.log(logLevel, std::vformat(msg, std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4))));
+		break;
+	case 5:
+		logger.log(logLevel, std::vformat(msg, std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5))));
+		break;
+	case 6:
+		logger.log(logLevel,
+		  std::vformat(msg, std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6))));
+		break;
+	case 7:
+		logger.log(logLevel,
+		  std::vformat(msg,
+		    std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7))));
+		break;
+	case 8:
+		logger.log(logLevel,
+		  std::vformat(msg,
+		    std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7),
+		      to_string(l, argOffset + 8))));
+		break;
+	case 9:
+		logger.log(logLevel,
+		  std::vformat(msg,
+		    std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7),
+		      to_string(l, argOffset + 8), to_string(l, argOffset + 9))));
+		break;
+	case 10:
+		logger.log(logLevel,
+		  std::vformat(msg,
+		    std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7),
+		      to_string(l, argOffset + 8), to_string(l, argOffset + 9), to_string(l, argOffset + 10))));
+		break;
+	default:
+		logger.log(logLevel, msg);
+		break;
+	}
+	return 0;
+}
+
+template<spdlog::level::level_enum TLevel>
+static void add_log_func(lua_State *l,luabind::object &oLogger,const char *name)
+{
+	lua_pushcfunction(
+	  l, +[](lua_State *l) -> int { return log(l, TLevel); });
+	oLogger[name] = luabind::object {luabind::from_stack(l, -1)};
+	Lua::Pop(l, 1);
+}
+
 void Game::RegisterLuaLibraries()
 {
 	NetworkState::RegisterSharedLuaLibraries(GetLuaInterface());
@@ -1476,7 +1558,7 @@ void Game::RegisterLuaLibraries()
 	Lua::RegisterLibrary(GetLuaState(), "mesh", {{"generate_convex_hull", Lua::mesh::generate_convex_hull}, {"calc_smallest_enclosing_bbox", Lua::mesh::calc_smallest_enclosing_bbox}});
 
 	Lua::RegisterLibrary(GetLuaState(), "log",
-	  {{"info", Lua::log::info}, {"warn", Lua::log::warn}, {"error", Lua::log::error}, {"critical", Lua::log::critical}, {"debug", Lua::log::debug}, {"color", Lua::log::color}, {"prefix", +[](lua_State *l) {
+	  {{"info", Lua::log::info}, {"warn", Lua::log::warn}, {"error", Lua::log::error}, {"critical", Lua::log::critical}, {"debug", Lua::log::debug}, {"color", Lua::log::color}, {"register_logger", Lua::log::register_logger}, {"prefix", +[](lua_State *l) {
 		                                                                                                                                                                              std::string msg = Lua::CheckString(l, 1);
 		                                                                                                                                                                              auto colorFlags = static_cast<util::ConsoleColorFlags>(Lua::CheckInt(l, 2));
 		                                                                                                                                                                              auto strColorFlags = util::get_ansi_color_code(colorFlags);
@@ -1495,6 +1577,18 @@ void Game::RegisterLuaLibraries()
 	modLog[luabind::def("get_file_log_level", &pragma::get_file_log_level)];
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "log", {{"SEVERITY_INFO", 0}, {"SEVERITY_WARNING", 1}, {"SEVERITY_ERROR", 2}, {"SEVERITY_CRITICAL", 3}, {"SEVERITY_DEBUG", 4}});
+
+	auto classDefLogger = luabind::class_<spdlog::logger>("Logger");
+	modLog[classDefLogger];
+
+	luabind::object oLogger = luabind::globals(l)["log"];
+	oLogger = oLogger["Logger"];
+	add_log_func<spdlog::level::trace>(l, oLogger, "Trace");
+	add_log_func<spdlog::level::debug>(l, oLogger, "Debug");
+	add_log_func<spdlog::level::info>(l, oLogger, "Info");
+	add_log_func<spdlog::level::warn>(l, oLogger, "Warn");
+	add_log_func<spdlog::level::err>(l, oLogger, "Err");
+	add_log_func<spdlog::level::critical>(l, oLogger, "Critical");
 
 	Lua::RegisterLibrary(GetLuaState(), "regex", {{"match", Lua::regex::match}, {"search", Lua::regex::search}});
 	auto modRegex = luabind::module_(GetLuaState(), "regex");

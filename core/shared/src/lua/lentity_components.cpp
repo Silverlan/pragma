@@ -134,7 +134,7 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfig);
 
 void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {
-	pragma::lua::register_entity_component_classes(entsMod);
+	pragma::lua::register_entity_component_classes(GetLuaState(), entsMod);
 	Lua::register_gravity_component(entsMod);
 
 	auto classDefEntRef = luabind::class_<pragma::EntityURef>("UniversalEntityReference");

@@ -23,7 +23,15 @@
 #include <sharedutils/util_weak_handle.hpp>
 #include <sharedutils/functioncallback.h>
 #include <typeindex>
+#include <format>
 #include "pragma/entities/entity_component_manager.hpp"
+
+namespace spdlog {
+	class logger;
+	namespace level {
+		enum level_enum : int;
+	};
+};
 
 class BaseEntity;
 namespace pragma {
@@ -197,6 +205,40 @@ namespace pragma {
 
 		void Log(const std::string &msg, LogSeverity severity) const;
 
+		template<typename... Args>
+		void Log(spdlog::level::level_enum level, const std::string &msg) const;
+#ifdef _WIN32
+		template<typename... Args>
+		void Log(spdlog::level::level_enum level, std::format_string<Args...> fmt, Args &&...args) const;
+		template<typename... Args>
+		void LogTrace(std::format_string<Args...> fmt, Args &&...args) const;
+		template<typename... Args>
+		void LogDebug(std::format_string<Args...> fmt, Args &&...args) const;
+		template<typename... Args>
+		void LogInfo(std::format_string<Args...> fmt, Args &&...args) const;
+		template<typename... Args>
+		void LogWarn(std::format_string<Args...> fmt, Args &&...args) const;
+		template<typename... Args>
+		void LogError(std::format_string<Args...> fmt, Args &&...args) const;
+		template<typename... Args>
+		void LogCritical(std::format_string<Args...> fmt, Args &&...args) const;
+#else
+		template<typename... Args>
+		void Log(const std::string &fmt, std::format_string<Args...> fmt, Args &&...args) const;
+		template<typename... Args>
+		void LogTrace(const std::string &fmt, Args &&...args) const;
+		template<typename... Args>
+		void LogDebug(const std::string &fmt, Args &&...args) const;
+		template<typename... Args>
+		void LogInfo(const std::string &fmt, Args &&...args) const;
+		template<typename... Args>
+		void LogWarn(const std::string &fmt, Args &&...args) const;
+		template<typename... Args>
+		void LogError(const std::string &fmt, Args &&...args) const;
+		template<typename... Args>
+		void LogCritical(const std::string &fmt, Args &&...args) const;
+#endif
+
 		std::string GetUri() const;
 		std::string GetMemberUri(const std::string &memberName) const;
 		std::optional<std::string> GetMemberUri(ComponentMemberIndex memberIdx) const;
@@ -211,6 +253,7 @@ namespace pragma {
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version);
 		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const;
 		virtual void OnMembersChanged();
+		spdlog::logger &InitLogger() const;
 
 		// Used for typed callback lookups. If this function doesn't change outTypeIndex, the actual component's type is used
 		// as reference. Overwrite this on the serverside or clientside version of the component,

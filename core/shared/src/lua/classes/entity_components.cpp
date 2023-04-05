@@ -31,7 +31,9 @@
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/lua/lua_util_component.hpp"
 #include "pragma/lua/types/udm.hpp"
+#include "pragma/lua/libraries/lprint.h"
 #include "pragma/entities/components/base_parent_component.hpp"
+#include "pragma/entities/components/base_entity_component_logging.hpp"
 #include "pragma/physics/shape.hpp"
 #include "pragma/util/render_tile.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
@@ -533,7 +535,79 @@ static std::optional<umath::ScaledTransform> get_transform_member_pose(pragma::B
 	return {};
 }
 
-void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
+static std::string to_string(lua_State *l, int i)
+{
+	auto status = -1;
+	std::string val;
+	if(Lua::lua_value_to_string(l, i, &status, &val) == false)
+		return "unknown";
+	return val;
+}
+
+static int log(lua_State *l, spdlog::level::level_enum logLevel)
+{
+	auto &component = Lua::Check<pragma::BaseEntityComponent>(l, 1);
+	const char *msg = Lua::CheckString(l, 2);
+	int32_t argOffset = 2;
+	auto n = lua_gettop(l) - argOffset; /* number of arguments */
+	switch(n) {
+	case 0:
+		component.Log(logLevel, msg);
+		break;
+	case 1:
+		component.Log(logLevel, std::vformat(msg, std::make_format_args(to_string(l, argOffset + 1))));
+		break;
+	case 2:
+		component.Log(logLevel, std::vformat(msg, std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2))));
+		break;
+	case 3:
+		component.Log(logLevel, std::vformat(msg, std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3))));
+		break;
+	case 4:
+		component.Log(logLevel, std::vformat(msg, std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4))));
+		break;
+	case 5:
+		component.Log(logLevel, std::vformat(msg, std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5))));
+		break;
+	case 6:
+		component.Log(logLevel, std::vformat(msg, std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6))));
+		break;
+	case 7:
+		component.Log(logLevel, std::vformat(msg, std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7))));
+		break;
+	case 8:
+		component.Log(logLevel,
+		  std::vformat(msg, std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7), to_string(l, argOffset + 8))));
+		break;
+	case 9:
+		component.Log(logLevel,
+		  std::vformat(msg,
+		    std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7), to_string(l, argOffset + 8),
+		      to_string(l, argOffset + 9))));
+		break;
+	case 10:
+		component.Log(logLevel,
+		  std::vformat(msg,
+		    std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7), to_string(l, argOffset + 8),
+		      to_string(l, argOffset + 9), to_string(l, argOffset + 10))));
+		break;
+	default:
+		component.Log(logLevel, msg);
+		break;
+	}
+	return 0;
+}
+
+template<spdlog::level::level_enum TLevel>
+static void add_log_func(lua_State *l, luabind::object &oEntityComponent, const char *name)
+{
+	lua_pushcfunction(
+	  l, +[](lua_State *l) -> int { return log(l, TLevel); });
+	oEntityComponent[name] = luabind::object {luabind::from_stack(l, -1)};
+	Lua::Pop(l, 1);
+}
+
+void pragma::lua::register_entity_component_classes(lua_State *l, luabind::module_ &mod)
 {
 	auto entityComponentDef = pragma::lua::create_entity_component_class<pragma::BaseEntityComponent>("EntityComponent");
 	entityComponentDef.def("BroadcastEvent", static_cast<util::EventReply (pragma::BaseEntityComponent::*)(pragma::ComponentEventId) const>(&pragma::BaseEntityComponent::BroadcastEvent));
@@ -765,8 +839,8 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 		}
 		return t;
 	}));
-	entityComponentDef.def("Log", &pragma::BaseEntityComponent::Log);
-	entityComponentDef.def("Log", &pragma::BaseEntityComponent::Log, luabind::default_parameter_policy<3, pragma::BaseEntityComponent::LogSeverity::Warning> {});
+	entityComponentDef.def("Log", static_cast<void (pragma::BaseEntityComponent::*)(const std::string &, pragma::BaseEntityComponent::LogSeverity) const>(&pragma::BaseEntityComponent::Log));
+	entityComponentDef.def("Log", static_cast<void (pragma::BaseEntityComponent::*)(const std::string &, pragma::BaseEntityComponent::LogSeverity) const>(&pragma::BaseEntityComponent::Log), luabind::default_parameter_policy<3, pragma::BaseEntityComponent::LogSeverity::Warning> {});
 	entityComponentDef.add_static_constant("FREGISTER_NONE", umath::to_integral(pragma::ComponentFlags::None));
 	entityComponentDef.add_static_constant("FREGISTER_BIT_NETWORKED", umath::to_integral(pragma::ComponentFlags::Networked));
 
@@ -778,6 +852,15 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	entityComponentDef.add_static_constant("LOG_SEVERITY_CRITICAL", umath::to_integral(pragma::BaseEntityComponent::LogSeverity::Critical));
 	entityComponentDef.add_static_constant("LOG_SEVERITY_DEBUG", umath::to_integral(pragma::BaseEntityComponent::LogSeverity::Debug));
 	mod[entityComponentDef];
+
+	luabind::object oLogger = luabind::globals(l)["ents"];
+	oLogger = oLogger["EntityComponent"];
+	add_log_func<spdlog::level::trace>(l, oLogger, "LogTrace");
+	add_log_func<spdlog::level::debug>(l, oLogger, "LogDebug");
+	add_log_func<spdlog::level::info>(l, oLogger, "LogInfo");
+	add_log_func<spdlog::level::warn>(l, oLogger, "LogWarn");
+	add_log_func<spdlog::level::err>(l, oLogger, "LogError");
+	add_log_func<spdlog::level::critical>(l, oLogger, "LogCritical");
 
 	auto defBvhHitInfo = luabind::class_<pragma::BvhHitInfo>("HitInfo");
 	defBvhHitInfo.def_readonly("mesh", &pragma::BvhHitInfo::mesh);

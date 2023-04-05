@@ -9,6 +9,7 @@
 #include "pragma/util/ik.hpp"
 #include "pragma/lua/luaapi.h"
 #include "pragma/lua/custom_constructor.hpp"
+#include "pragma/lua/converters/pair_converter_t.hpp"
 #include <luainterface.hpp>
 
 namespace Lua::ik {
@@ -113,7 +114,12 @@ void Lua::ik::register_library(Lua::Interface &lua)
 	classSolver.def("AddTwistJoint", &pragma::ik::Solver::AddTwistJoint);
 	classSolver.def("AddTwistLimit", &pragma::ik::Solver::AddTwistLimit);
 	classSolver.def("AddSwivelHingeJoint", &pragma::ik::Solver::AddSwivelHingeJoint);
-	classSolver.def("AddBone", &pragma::ik::Solver::AddBone);
+	classSolver.def(
+	  "AddBone", +[](pragma::ik::Solver &solver, const Vector3 &pos, const Quat &rot, float radius, float length) -> std::pair<pragma::ik::Bone*,pragma::ik::BoneId> { 
+			pragma::ik::BoneId boneId;
+			auto &ikBone = solver.AddBone(pos, rot, radius, length, &boneId);
+		  return {&ikBone,boneId};
+	  });
 
 	classSolver.def("GetControlCount", &pragma::ik::Solver::GetControlCount);
 	classSolver.def("GetBoneCount", &pragma::ik::Solver::GetBoneCount);

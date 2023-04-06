@@ -23,7 +23,11 @@
 #include <sharedutils/util_weak_handle.hpp>
 #include <sharedutils/functioncallback.h>
 #include <typeindex>
+#ifdef _WIN32
+#if __cpp_lib_format >= 202207L
 #include <format>
+#endif
+#endif
 #include "pragma/entities/entity_component_manager.hpp"
 
 namespace spdlog {

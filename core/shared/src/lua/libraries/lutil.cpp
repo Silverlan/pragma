@@ -235,8 +235,9 @@ void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
 	defEntityData.def("IsSkybox", &pragma::asset::EntityData::IsSkybox);
 	defEntityData.def("IsClientSideOnly", &pragma::asset::EntityData::IsClientSideOnly);
 	defEntityData.def("SetClassName", &pragma::asset::EntityData::SetClassName);
-	defEntityData.def("SetOrigin", &pragma::asset::EntityData::SetOrigin);
-	defEntityData.def("SetRotation", &pragma::asset::EntityData::SetRotation);
+	defEntityData.def("SetPose", &pragma::asset::EntityData::SetPose);
+	defEntityData.def("GetPose", &pragma::asset::EntityData::GetPose);
+	defEntityData.def("GetEffectivePose", &pragma::asset::EntityData::GetEffectivePose);
 	defEntityData.def("SetLeafData", &pragma::asset::EntityData::SetLeafData);
 	defEntityData.def("SetKeyValue", &pragma::asset::EntityData::SetKeyValue);
 	defEntityData.def("AddOutput", &pragma::asset::EntityData::AddOutput);
@@ -251,8 +252,6 @@ void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
 	defEntityData.def("GetKeyValue", static_cast<std::string (pragma::asset::EntityData ::*)(const std::string &, const std::string &) const>(&pragma::asset::EntityData::GetKeyValue));
 	defEntityData.def("GetOutputs", static_cast<const std::vector<pragma::asset::Output> &(pragma::asset::EntityData ::*)() const>(&pragma::asset::EntityData::GetOutputs));
 	defEntityData.def("GetLeaves", static_cast<const std::vector<uint16_t> &(pragma::asset::EntityData ::*)() const>(&pragma::asset::EntityData::GetLeaves));
-	defEntityData.def("GetOrigin", &pragma::asset::EntityData::GetOrigin);
-	defEntityData.def("GetPose", &pragma::asset::EntityData::GetPose);
 	defEntityData.def(
 	  "GetLeafData", +[](const pragma::asset::EntityData &entData) -> std::pair<uint32_t, uint32_t> {
 		  uint32_t firstLeaf;

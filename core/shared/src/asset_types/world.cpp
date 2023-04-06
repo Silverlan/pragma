@@ -80,8 +80,6 @@ void pragma::asset::EntityData::SetClassName(const std::string &className)
 	m_className = className;
 	ustring::to_lower(m_className);
 }
-void pragma::asset::EntityData::SetOrigin(const Vector3 &origin) { m_origin = origin; }
-void pragma::asset::EntityData::SetRotation(const Quat &rot) { m_rotation = rot; }
 void pragma::asset::EntityData::SetKeyValue(const std::string &key, const std::string &value) { m_keyValues[key] = value; }
 void pragma::asset::EntityData::AddOutput(const Output &output)
 {
@@ -126,22 +124,29 @@ std::string pragma::asset::EntityData::GetKeyValue(const std::string &key, const
 	auto val = GetKeyValue(key);
 	return val.has_value() ? *val : def;
 }
-const Vector3 &pragma::asset::EntityData::GetOrigin() const { return m_origin; }
-umath::Transform pragma::asset::EntityData::GetPose() const
+
+umath::ScaledTransform pragma::asset::EntityData::GetEffectivePose() const
 {
-	auto origin = GetOrigin();
-	umath::Transform pose {};
-	pose.SetOrigin(origin);
-	pose.SetRotation(m_rotation);
-	auto &keyValues = GetKeyValues();
-	auto itAngles = keyValues.find("angles");
-	if(itAngles != keyValues.end()) {
-		EulerAngles ang {itAngles->second};
-		auto rot = uquat::create(ang);
-		pose.SetRotation(rot);
-	}
+	umath::ScaledTransform pose {};
+	if(m_pose)
+		pose = *m_pose;
+	auto kvOrigin = GetKeyValue("origin");
+	if(kvOrigin)
+		pose.SetOrigin(uvec::create(*kvOrigin));
+
+	auto kvAngles = GetKeyValue("angles");
+	if(kvAngles)
+		pose.SetRotation(uquat::create(EulerAngles {*kvAngles}));
+
+	auto kvScale = GetKeyValue("scale");
+	if(kvScale)
+		pose.SetScale(uvec::create(*kvScale));
 	return pose;
 }
+
+const std::optional<umath::ScaledTransform> &pragma::asset::EntityData::GetPose() const { return m_pose; }
+void pragma::asset::EntityData::SetPose(const umath::ScaledTransform &pose) { m_pose = pose; }
+void pragma::asset::EntityData::ClearPose() { m_pose = {}; }
 
 void pragma::asset::EntityData::GetLeafData(uint32_t &outFirstLeaf, uint32_t &outNumLeaves) const
 {

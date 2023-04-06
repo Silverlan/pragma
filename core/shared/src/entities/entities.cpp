@@ -47,7 +47,7 @@ BaseEntity *Game::CreateMapEntity(pragma::asset::EntityData &entData)
 		return nullptr;
 	auto pTrComponent = ent->GetTransformComponent();
 	if(pTrComponent != nullptr)
-		pTrComponent->SetPosition(entData.GetOrigin());
+		pTrComponent->SetPose(entData.GetEffectivePose());
 
 	for(auto &pair : entData.GetComponents()) {
 		auto flags = pair.second->GetFlags();

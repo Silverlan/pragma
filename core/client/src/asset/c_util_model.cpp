@@ -1230,14 +1230,8 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		uint32_t hashIdx = 0;
 		auto createEntity = [&relFileName, &hashIdx](const umath::ScaledTransform &pose, bool includeScale = true) -> std::shared_ptr<pragma::asset::EntityData> {
 			auto baseHash = std::hash<std::string> {}(relFileName.GetString() + "_" + std::to_string(hashIdx++));
-			auto ang = pose.GetAngles();
-			auto &scale = pose.GetScale();
 			auto ent = pragma::asset::EntityData::Create();
-			ent->SetKeyValue("uuid", util::uuid_to_string(util::generate_uuid_v4(baseHash)));
-			ent->SetKeyValue("angles", std::to_string(ang.p) + " " + std::to_string(ang.y) + " " + std::to_string(ang.r));
-			if(includeScale)
-				ent->SetKeyValue("scale", std::to_string(scale.x) + " " + std::to_string(scale.y) + " " + std::to_string(scale.z));
-			ent->SetOrigin(pose.GetOrigin());
+			ent->SetPose(pose);
 			return ent;
 		};
 
@@ -1562,7 +1556,7 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 				sceneDesc.modelCollection.reserve(sceneDesc.modelCollection.size() * 1.5 + 100);
 			sceneDesc.modelCollection.push_back({*mdl});
 			auto &mdlDesc = sceneDesc.modelCollection.back();
-			mdlDesc.pose = ent->GetPose();
+			mdlDesc.pose = ent->GetEffectivePose();
 		}
 		else if(ent->GetClassName() == "env_light_spot" || ent->GetClassName() == "env_light_point" || ent->GetClassName() == "env_light_environment") {
 			if(mapExp.has_value() && mapExp->includeMapLightSources == false)
@@ -1571,7 +1565,7 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 			auto &ls = sceneDesc.lightSources.back();
 
 			ls.name = ent->GetKeyValue("name", ent->GetClassName() + '_' + std::to_string(ent->GetMapIndex()));
-			ls.pose = ent->GetPose();
+			ls.pose = ent->GetEffectivePose();
 
 			auto color = ent->GetKeyValue("color");
 			if(color.has_value() == false)

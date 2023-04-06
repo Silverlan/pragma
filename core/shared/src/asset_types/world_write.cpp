@@ -138,8 +138,8 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data, Ent
 		entData->m_mapIndex = entIdx + 1; // Map indices always start at 1!
 		entData->SetClassName(udmEnt["className"].ToValue<std::string>(""));
 
-		auto pose = udmEnt["pose"].ToValue<umath::Transform>(umath::Transform {});
-		entData->SetOrigin(pose.GetOrigin());
+		auto pose = udmEnt["pose"].ToValue<umath::ScaledTransform>(umath::ScaledTransform {});
+		entData->SetPose(pose);
 
 		auto &keyValues = entData->GetKeyValues();
 		udmEnt["keyValues"](keyValues);
@@ -252,10 +252,7 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData, const std::string
 		if(umath::is_flag_set(entData->GetFlags(), EntityData::Flags::ClientsideOnly))
 			udmEnt["flags"]["clientsideOnly"] = true;
 
-		umath::ScaledTransform pose {};
-		pose.SetOrigin(entData->GetOrigin());
-		pose.SetRotation(entData->GetPose().GetRotation());
-		udmEnt["pose"] = pose;
+		udmEnt["pose"] = entData->GetPose();
 		udmEnt["keyValues"] = entData->GetKeyValues();
 
 		auto &outputs = entData->GetOutputs();
@@ -500,7 +497,8 @@ void pragma::asset::WorldData::WriteEntities(VFilePtrReal &f)
 		f->Write<uint64_t>(umath::to_integral(entData->GetFlags()));
 
 		f->WriteString(entData->GetClassName());
-		f->Write<Vector3>(entData->GetOrigin());
+		auto &pose = entData->GetPose();
+		f->Write<Vector3>(pose ? pose->GetOrigin() : uvec::ORIGIN);
 
 		// Keyvalues
 		auto &keyValues = entData->GetKeyValues();

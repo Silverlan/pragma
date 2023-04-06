@@ -150,7 +150,9 @@ void pragma::asset::WorldData::ReadEntities(VFilePtr &f, const std::vector<msys:
 		m_entities.push_back(entData);
 		entData->m_mapIndex = i + 1; // Map indices always start at 1!
 		entData->SetClassName(f->ReadString());
-		entData->SetOrigin(f->Read<Vector3>());
+		auto pose = umath::ScaledTransform();
+		pose.SetOrigin(f->Read<Vector3>());
+		entData->SetPose(pose);
 
 		auto numKeyValues = f->Read<uint32_t>();
 		auto &keyValues = entData->GetKeyValues();

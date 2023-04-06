@@ -64,8 +64,6 @@ namespace pragma::asset {
 		bool IsSkybox() const;
 		bool IsClientSideOnly() const;
 		void SetClassName(const std::string &className);
-		void SetOrigin(const Vector3 &origin);
-		void SetRotation(const Quat &rot);
 		void SetLeafData(uint32_t firstLeaf, uint32_t numLeaves);
 		void SetKeyValue(const std::string &key, const std::string &value);
 		void AddOutput(const Output &output);
@@ -85,9 +83,12 @@ namespace pragma::asset {
 		std::vector<Output> &GetOutputs();
 		const std::vector<uint16_t> &GetLeaves() const;
 		std::vector<uint16_t> &GetLeaves();
-		const Vector3 &GetOrigin() const;
-		umath::Transform GetPose() const;
 		void GetLeafData(uint32_t &outFirstLeaf, uint32_t &outNumLeaves) const;
+
+		const std::optional<umath::ScaledTransform> &GetPose() const;
+		umath::ScaledTransform GetEffectivePose() const;
+		void SetPose(const umath::ScaledTransform &pose);
+		void ClearPose();
 	  private:
 		friend WorldData;
 		EntityData() = default;
@@ -96,8 +97,7 @@ namespace pragma::asset {
 		std::unordered_map<std::string, std::string> m_keyValues;
 		std::vector<Output> m_outputs;
 		uint32_t m_mapIndex = 0u;
-		Vector3 m_origin = {};
-		Quat m_rotation = uquat::identity();
+		std::optional < umath::ScaledTransform> m_pose {};
 		std::vector<uint16_t> m_leaves = {};
 		Flags m_flags = Flags::None;
 

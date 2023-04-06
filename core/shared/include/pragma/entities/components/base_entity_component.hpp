@@ -70,6 +70,19 @@ namespace pragma {
 		double nextTick = 0.0;
 	};
 
+	template<typename... Args>
+#ifdef _WIN32
+
+#if __cpp_lib_format >= 202207L
+	using format_string_t = std::format_string<Args...>;
+#else
+	using format_string_t = std::string_view;
+#endif
+
+#else
+	using format_string_t = std::string_view;
+#endif
+
 	class DLLNETWORK BaseEntityComponent : public pragma::BaseLuaHandle, public std::enable_shared_from_this<BaseEntityComponent> {
 	  public:
 		// Note: Use BaseEntityComponent::OnEntityComponentAdded to initialize data for other components
@@ -207,37 +220,21 @@ namespace pragma {
 
 		template<typename... Args>
 		void Log(spdlog::level::level_enum level, const std::string &msg) const;
-#ifdef _WIN32
+
 		template<typename... Args>
-		void Log(spdlog::level::level_enum level, std::format_string<Args...> fmt, Args &&...args) const;
+		void Log(spdlog::level::level_enum level, format_string_t<Args...> fmt, Args &&...args) const;
 		template<typename... Args>
-		void LogTrace(std::format_string<Args...> fmt, Args &&...args) const;
+		void LogTrace(format_string_t<Args...> fmt, Args &&...args) const;
 		template<typename... Args>
-		void LogDebug(std::format_string<Args...> fmt, Args &&...args) const;
+		void LogDebug(format_string_t<Args...> fmt, Args &&...args) const;
 		template<typename... Args>
-		void LogInfo(std::format_string<Args...> fmt, Args &&...args) const;
+		void LogInfo(format_string_t<Args...> fmt, Args &&...args) const;
 		template<typename... Args>
-		void LogWarn(std::format_string<Args...> fmt, Args &&...args) const;
+		void LogWarn(format_string_t<Args...> fmt, Args &&...args) const;
 		template<typename... Args>
-		void LogError(std::format_string<Args...> fmt, Args &&...args) const;
+		void LogError(format_string_t<Args...> fmt, Args &&...args) const;
 		template<typename... Args>
-		void LogCritical(std::format_string<Args...> fmt, Args &&...args) const;
-#else
-		template<typename... Args>
-		void Log(const std::string &fmt, std::format_string<Args...> fmt, Args &&...args) const;
-		template<typename... Args>
-		void LogTrace(const std::string &fmt, Args &&...args) const;
-		template<typename... Args>
-		void LogDebug(const std::string &fmt, Args &&...args) const;
-		template<typename... Args>
-		void LogInfo(const std::string &fmt, Args &&...args) const;
-		template<typename... Args>
-		void LogWarn(const std::string &fmt, Args &&...args) const;
-		template<typename... Args>
-		void LogError(const std::string &fmt, Args &&...args) const;
-		template<typename... Args>
-		void LogCritical(const std::string &fmt, Args &&...args) const;
-#endif
+		void LogCritical(format_string_t<Args...> fmt, Args &&...args) const;
 
 		std::string GetUri() const;
 		std::string GetMemberUri(const std::string &memberName) const;

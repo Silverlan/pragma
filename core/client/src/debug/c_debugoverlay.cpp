@@ -170,17 +170,12 @@ bool DebugRenderer::WorldObject::InitializeBuffers()
 	m_vertexCount = 0;
 	if(m_vertices.empty())
 		return false;
-	auto createInfo = prosper::util::BufferCreateInfo {};
-	createInfo.size = m_vertices.size() * sizeof(m_vertices.front());
-	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
-	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
-	m_vertexBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo, m_vertices.data());
+	m_vertexBuffer = c_engine->GetRenderContext().AllocateTemporaryBuffer(util::size_of_container(m_vertices), sizeof(Vector4), m_vertices.data());
 	m_vertexCount = m_vertices.size();
 
 	if(m_colors.empty())
 		return true;
-	createInfo.size = m_colors.size() * sizeof(m_colors.front());
-	m_colorBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo, m_colors.data());
+	m_colorBuffer = c_engine->GetRenderContext().AllocateTemporaryBuffer(util::size_of_container(m_colors), sizeof(Vector4), m_colors.data());
 	return true;
 }
 

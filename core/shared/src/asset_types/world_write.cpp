@@ -252,7 +252,9 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData, const std::string
 		if(umath::is_flag_set(entData->GetFlags(), EntityData::Flags::ClientsideOnly))
 			udmEnt["flags"]["clientsideOnly"] = true;
 
-		udmEnt["pose"] = entData->GetPose();
+		auto &pose = entData->GetPose();
+		if(pose)
+			udmEnt["pose"] = *pose;
 		udmEnt["keyValues"] = entData->GetKeyValues();
 
 		auto &outputs = entData->GetOutputs();

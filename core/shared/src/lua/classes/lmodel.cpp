@@ -998,6 +998,19 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDefSkeleton.def("GetBoneHierarchy", Lua::Skeleton::GetBoneHierarchy);
 	classDefSkeleton.def("IsRootBone", static_cast<bool (*)(lua_State *, panima::Skeleton &, const std::string &)>(&Lua::Skeleton::IsRootBone));
 	classDefSkeleton.def("IsRootBone", static_cast<bool (*)(lua_State *, panima::Skeleton &, uint32_t)>(&Lua::Skeleton::IsRootBone));
+	classDefSkeleton.def(
+	  "ToDebugString", +[](const panima::Skeleton &skeleton) -> std::string {
+		  std::stringstream ss;
+		  std::function<void(const panima::Bone &, const std::string &t)> fprint = nullptr;
+		  fprint = [&fprint,&ss](const panima::Bone &bone,const std::string &t) {
+			  ss << t<< bone.name << "\n";
+			  for(auto &pair : bone.children)
+				  fprint(*pair.second,t +"\t");
+		  };
+		  for(auto &pair : skeleton.GetRootBones())
+			  fprint(*pair.second,"");
+		  return ss.str();
+	});
 	Lua::Bone::register_class(l, classDefSkeleton);
 
 	auto modelMeshGroupClassDef = luabind::class_<::ModelMeshGroup>("MeshGroup");

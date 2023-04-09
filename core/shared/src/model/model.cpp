@@ -439,6 +439,49 @@ bool Model::GetLocalBonePosition(uint32_t animId, uint32_t frameId, uint32_t bon
 util::WeakHandle<const Model> Model::GetHandle() const { return util::WeakHandle<const Model>(std::static_pointer_cast<const Model>(shared_from_this())); }
 util::WeakHandle<Model> Model::GetHandle() { return util::WeakHandle<Model>(std::static_pointer_cast<Model>(shared_from_this())); }
 
+bool Model::SetReferencePoses(const std::vector<umath::ScaledTransform> &poses, bool posesInParentSpace)
+{
+	auto &skeleton = GetSkeleton();
+	if(skeleton.GetBoneCount() != poses.size())
+		return false;
+	std::vector<umath::ScaledTransform> *relPoses = nullptr;
+	std::vector<umath::ScaledTransform> *absPoses = nullptr;
+	std::vector<umath::ScaledTransform> t;
+	t.resize(poses.size());
+	if(posesInParentSpace) {
+		relPoses = const_cast<std::vector<umath::ScaledTransform>*>(&poses);
+		absPoses = &t;
+		skeleton.TransformToGlobalSpace(*relPoses, *absPoses);
+	}
+	else {
+		absPoses = const_cast<std::vector<umath::ScaledTransform> *>(&poses);
+		relPoses = &t;
+		skeleton.TransformToParentSpace(*absPoses, *relPoses);
+	}
+
+	auto &ref = GetReference();
+	ref.SetBoneCount(poses.size());
+	for(auto i = decltype(poses.size()) {0u}; i < poses.size(); ++i)
+		ref.SetBonePose(i, (*absPoses)[i]);
+
+	auto animId = LookupAnimation("reference");
+	if(LookupAnimation("reference") != -1) {
+		auto anim = pragma::animation::Animation::Create();
+		animId = AddAnimation("reference", anim);
+	}
+
+	auto anim = GetAnimation(animId);
+	if(anim->GetFrameCount() == 0)
+		anim->AddFrame(Frame::Create(skeleton.GetBoneCount()));
+	auto frame = anim->GetFrame(0);
+	frame->SetBoneCount(skeleton.GetBoneCount());
+	anim->SetBoneList({});
+
+	for(auto i = decltype(poses.size()) {0u}; i < poses.size(); ++i)
+		frame->SetBonePose(i, (*relPoses)[i]);
+	return true;
+}
+
 Frame &Model::GetReference() { return *m_reference; }
 const Frame &Model::GetReference() const { return *m_reference; }
 void Model::SetReference(std::shared_ptr<Frame> frame) { m_reference = frame; }

@@ -16,6 +16,8 @@
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/lua/converters/pair_converter_t.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
+#include "pragma/lua/policies/default_parameter_policy.hpp"
+#include "pragma/lua/converters/vector_converter_t.hpp"
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/lua/classes/lcollisionmesh.h"
 #include "luasystem.h"
@@ -367,6 +369,8 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("TranslateLODMeshes", static_cast<void (*)(lua_State *, ::Model &, uint32_t, luabind::object)>(&Lua::Model::TranslateLODMeshes));
 	classDef.def("TranslateLODMeshes", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&Lua::Model::TranslateLODMeshes));
 	classDef.def("GetJoints", &Lua::Model::GetJoints);
+	classDef.def("SetReferencePoses", &::Model::SetReferencePoses);
+	classDef.def("SetReferencePoses", &::Model::SetReferencePoses, luabind::default_parameter_policy<3, false> {});
 	classDef.def("AddJoint", static_cast<JointInfo *(*)(lua_State *, ::Model &, JointType, BoneId, BoneId)>([](lua_State *l, ::Model &mdl, JointType type, BoneId child, BoneId parent) -> JointInfo * {
 		auto &joint = mdl.AddJoint(type, child, parent);
 		return &joint;

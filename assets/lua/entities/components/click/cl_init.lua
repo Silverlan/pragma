@@ -93,7 +93,7 @@ function ents.ClickComponent.inject_click_input(action,pressed,filter)
 	local clickC = (clickActor ~= nil) and clickActor:GetComponent(ents.COMPONENT_CLICK) or nil
 	if(clickC ~= nil) then
 		lastActorsClicked[action] = clickC
-		return (clickC:BroadcastEvent(ents.ClickComponent.EVENT_ON_CLICK,{action,true,hitPos}) or util.EVENT_REPLY_UNHANDLED),clickActor,hitPos,startPos,hitData
+		return (clickC:BroadcastEvent(ents.ClickComponent.EVENT_ON_CLICK,{action,true,hitPos,hitData}) or util.EVENT_REPLY_UNHANDLED),clickActor,hitPos,startPos,hitData
 	end
 	return util.EVENT_REPLY_UNHANDLED,clickActor,hitPos,startPos,hitData
 end

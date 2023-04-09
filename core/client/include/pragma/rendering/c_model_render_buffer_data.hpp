@@ -20,11 +20,23 @@ namespace pragma {
 };
 namespace pragma::rendering {
 	struct DLLCLIENT RenderBufferData {
+		enum class StateFlags : uint32_t {
+			None = 0,
+			EnableDepthPrepass = 1u,
+			EnableGlowPass = EnableDepthPrepass<<1u,
+		};
 		std::shared_ptr<prosper::IRenderBuffer> renderBuffer;
 		pragma::GameShaderSpecializationConstantFlag pipelineSpecializationFlags;
 		msys::MaterialHandle material;
-		bool enableDepthPrepass = true;
+		StateFlags stateFlags = StateFlags::EnableDepthPrepass;
+
+		void SetDepthPrepassEnabled(bool enabled);
+		bool IsDepthPrepassEnabled() const;
+
+		void SetGlowPassEnabled(bool enabled);
+		bool IsGlowPassEnabled() const;
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::rendering::RenderBufferData::StateFlags)
 
 #endif

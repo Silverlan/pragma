@@ -101,8 +101,11 @@ void Lua::ModelDef::register_class(lua_State *l, luabind::module_ &entsMod)
 	  "GetRenderMeshes", +[](pragma::CModelComponent &c) -> std::vector<std::shared_ptr<ModelSubMesh>> { return c.GetRenderMeshes(); });
 
 	auto defRenderBufferData = luabind::class_<pragma::rendering::RenderBufferData>("RenderBufferData");
+	defRenderBufferData.add_static_constant("STATE_FLAG_NONE", umath::to_integral(pragma::rendering::RenderBufferData::StateFlags::None));
+	defRenderBufferData.add_static_constant("STATE_FLAG_ENABLE_DEPTH_PREPASS_BIT", umath::to_integral(pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass));
+	defRenderBufferData.add_static_constant("STATE_FLAG_ENABLE_GLOW_PASS_BIT", umath::to_integral(pragma::rendering::RenderBufferData::StateFlags::EnableGlowPass));
 	defRenderBufferData.def(luabind::constructor<>());
-	defRenderBufferData.def_readwrite("enableDepthPrepass", &pragma::rendering::RenderBufferData::enableDepthPrepass);
+	defRenderBufferData.def_readwrite("stateFlags", &pragma::rendering::RenderBufferData::stateFlags);
 	defRenderBufferData.def_readwrite("pipelineSpecializationFlags", &pragma::rendering::RenderBufferData::pipelineSpecializationFlags);
 	defRenderBufferData.def_readwrite("material", &pragma::rendering::RenderBufferData::material);
 	defRenderBufferData.def_readwrite("renderBuffer", &pragma::rendering::RenderBufferData::renderBuffer);

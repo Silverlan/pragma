@@ -923,3 +923,11 @@ void CEOnRenderBoundsChanged::PushArguments(lua_State *l)
 	Lua::Push<Vector3>(l, sphere.pos);
 	Lua::PushNumber(l, sphere.radius);
 }
+
+/////////////////
+
+void pragma::rendering::RenderBufferData::SetDepthPrepassEnabled(bool enabled) { umath::set_flag(stateFlags, StateFlags::EnableDepthPrepass, enabled); }
+bool pragma::rendering::RenderBufferData::IsDepthPrepassEnabled() const { return umath::is_flag_set(stateFlags, StateFlags::EnableDepthPrepass); }
+
+void pragma::rendering::RenderBufferData::SetGlowPassEnabled(bool enabled) { umath::set_flag(stateFlags, StateFlags::EnableGlowPass, enabled); }
+bool pragma::rendering::RenderBufferData::IsGlowPassEnabled() const { return umath::is_flag_set(stateFlags, StateFlags::EnableGlowPass); }

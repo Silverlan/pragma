@@ -218,7 +218,7 @@ void CModelComponent::AddRenderMesh(CModelSubMesh &mesh, CMaterial &mat, bool en
 	pragma::rendering::RenderBufferData renderBufferData {};
 	renderBufferData.material = mat.GetHandle();
 	renderBufferData.renderBuffer = renderBuffer;
-	renderBufferData.enableDepthPrepass = enableDepthPrepass && shader && shader->IsDepthPrepassEnabled();
+	umath::set_flag(renderBufferData.stateFlags,pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass,enableDepthPrepass && shader && shader->IsDepthPrepassEnabled());
 	renderBufferData.pipelineSpecializationFlags = shader->GetMaterialPipelineSpecializationRequirements(mat);
 
 	m_lodRenderMeshes.insert(m_lodRenderMeshes.begin() + insertIdx, mesh.shared_from_this());
@@ -278,7 +278,7 @@ void CModelComponent::UpdateRenderBufferList()
 		auto &renderBufferData = m_lodMeshRenderBufferData.back();
 		renderBufferData.renderBuffer = renderBuffer;
 		renderBufferData.material = mat ? mat->GetHandle() : msys::MaterialHandle {};
-		renderBufferData.enableDepthPrepass = depthPrepassEnabled && shader && shader->IsDepthPrepassEnabled();
+		umath::set_flag(renderBufferData.stateFlags,pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass,depthPrepassEnabled && shader && shader->IsDepthPrepassEnabled());
 		if(mat == nullptr || shader == nullptr)
 			continue;
 		renderBufferData.pipelineSpecializationFlags = shader->GetMaterialPipelineSpecializationRequirements(*mat);

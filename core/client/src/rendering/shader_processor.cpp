@@ -226,7 +226,7 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh, pragma:
 		}
 		return false;
 	}
-	if((m_depthPrepass && !bufferData.enableDepthPrepass))
+	if((m_depthPrepass && !bufferData.IsDepthPrepassEnabled()))
 		return false;
 
 	if(m_cmdBuffer.RecordBindRenderBuffer(*bufferData.renderBuffer) == false) {

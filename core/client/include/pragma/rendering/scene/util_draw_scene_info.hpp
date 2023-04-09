@@ -31,7 +31,15 @@ namespace pragma {
 };
 namespace util {
 	struct DLLCLIENT DrawSceneInfo {
-		enum class Flags : uint8_t { None = 0u, FlipVertically = 1u, DisableRender = FlipVertically << 1u, Reflection = DisableRender << 1u, DisablePrepass = Reflection << 1u, DisableLightingPass = DisablePrepass << 1u };
+		enum class Flags : uint8_t {
+			None = 0u,
+			FlipVertically = 1u,
+			DisableRender = FlipVertically << 1u,
+			Reflection = DisableRender << 1u,
+			DisablePrepass = Reflection << 1u,
+			DisableLightingPass = DisablePrepass << 1u,
+			DisableGlowPass = DisableLightingPass << 1u,
+		};
 		DrawSceneInfo();
 		DrawSceneInfo(const DrawSceneInfo &other);
 		DrawSceneInfo &operator=(const DrawSceneInfo &other);

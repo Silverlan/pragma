@@ -155,6 +155,7 @@ if update:
 	print_msg("Updating Pragma repository...")
 	subprocess.run(["git","pull","--recurse-submodules"],check=True)
 
+
 mkpath(build_dir)
 mkpath(deps_dir)
 mkpath(install_dir)
@@ -219,6 +220,15 @@ def execscript(filepath):
 	execfile(filepath,g,l)
 
 	os.chdir(curDir)
+
+print_msg("Updating external libraries...")
+execscript(scripts_dir +"/scripts/external_libs.py")
+
+print_msg("Updating third-party libraries...")
+execscript(scripts_dir +"/scripts/third_party_libs.py")
+
+print_msg("Updating modules...")
+execscript(scripts_dir +"/scripts/modules.py")
 
 ########## System packages ##########
 if platform == "linux":

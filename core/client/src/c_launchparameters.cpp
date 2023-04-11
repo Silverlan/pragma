@@ -15,6 +15,8 @@ std::optional<int> g_launchParamRefreshRate {};
 std::optional<bool> g_launchParamNoBorder {};
 std::optional<uint32_t> g_launchParamWidth {};
 std::optional<uint32_t> g_launchParamHeight {};
+std::optional<Color> g_titleBarColor {};
+std::optional<Color> g_borderColor {};
 static void LPARAM_windowed(const std::vector<std::string> &argv) { g_launchParamWindowedMode = true; }
 
 static void LPARAM_refresh(const std::vector<std::string> &argv)
@@ -79,6 +81,26 @@ static void LPARAM_icon(const std::vector<std::string> &argv)
 	g_customWindowIcon = argv.front();
 }
 
+static void LPARAM_title_bar_color(const std::vector<std::string> &argv)
+{
+	if(argv.empty())
+		return;
+	auto strHex = argv.front();
+	if(!strHex.empty() && strHex.front() == '#')
+		strHex.erase(strHex.begin());
+	g_titleBarColor = Color::CreateFromHexColor(strHex);
+}
+
+static void LPARAM_border_bar_color(const std::vector<std::string> &argv)
+{
+	if(argv.empty())
+		return;
+	auto strHex = argv.front();
+	if(!strHex.empty() && strHex.front() == '#')
+		strHex.erase(strHex.begin());
+	g_borderColor = Color::CreateFromHexColor(strHex);
+}
+
 REGISTER_LAUNCH_PARAMETER_HELP(-windowed, LPARAM_windowed, "-window -startwindowed -sw", "start in windowed mode");
 REGISTER_LAUNCH_PARAMETER(-window, LPARAM_windowed);
 REGISTER_LAUNCH_PARAMETER(-startwindowed, LPARAM_windowed);
@@ -100,3 +122,5 @@ REGISTER_LAUNCH_PARAMETER_HELP(-graphics_api, LPARAM_render_api, "<moduleName>",
 REGISTER_LAUNCH_PARAMETER_HELP(-audio_api, LPARAM_audio_api, "<moduleName>", "Changes the audio API to use for audio playback.");
 REGISTER_LAUNCH_PARAMETER_HELP(-auto_exec, LPARAM_auto_exec, "<script>", "Auto-execute this Lua-script on launch.");
 REGISTER_LAUNCH_PARAMETER_HELP(-icon, LPARAM_icon, "<iconPath>", "Path to custom window icon location.");
+REGISTER_LAUNCH_PARAMETER_HELP(-title_bar_color, LPARAM_title_bar_color, "<hexColor>", "Hex color for the window title bar.");
+REGISTER_LAUNCH_PARAMETER_HELP(-border_color, LPARAM_border_bar_color, "<hexColor>", "Hex color for the window border.");

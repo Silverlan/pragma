@@ -9,7 +9,12 @@
 
 int main(int argc, char *argv[])
 try {
-	std::vector<std::string> extraArgs {"-icon", "materials/logo/pragma_window_icon.png"};
+	std::vector<std::string> extraArgs {
+	  "-icon",
+	  "materials/logo/pragma_window_icon.png",
+	  "-title_bar_color",
+	  "#262626",
+	};
 	auto cargs = pragma::merge_arguments(argc, argv, extraArgs);
 	auto hModule = pragma::launch_pragma(cargs.size(), cargs.data());
 	return hModule ? EXIT_SUCCESS : EXIT_FAILURE;

@@ -1807,7 +1807,13 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defWindow.def("IsResizable", static_cast<bool (*)(prosper::Window &)>([](prosper::Window &window) -> bool { return window->IsResizable(); }));
 	defWindow.def("IsDecorated", static_cast<bool (*)(prosper::Window &)>([](prosper::Window &window) -> bool { return window->IsDecorated(); }));
 	defWindow.def("IsFloating", static_cast<bool (*)(prosper::Window &)>([](prosper::Window &window) -> bool { return window->IsFloating(); }));
+	defWindow.def(
+	  "SetResizable", +[](prosper::Window &window, bool resizable) { window->SetResizable(resizable); });
 	defWindow.def("ClearCursor", static_cast<void (*)(prosper::Window &)>([](prosper::Window &window) { window->ClearCursor(); }));
+	defWindow.def(
+	  "SetBorderColor", +[](prosper::Window &window, const Color &color) { window->SetBorderColor(color); });
+	defWindow.def(
+	  "SetTitleBarColor", +[](prosper::Window &window, const Color &color) { window->SetTitleBarColor(color); });
 	defWindow.def("GetKeyState", static_cast<GLFW::KeyState (*)(prosper::Window &, GLFW::Key)>([](prosper::Window &window, GLFW::Key key) -> GLFW::KeyState { return window->GetKeyState(key); }));
 	defWindow.def("GetMouseButtonState", static_cast<GLFW::KeyState (*)(prosper::Window &, GLFW::MouseButton)>([](prosper::Window &window, GLFW::MouseButton mouseButton) -> GLFW::KeyState { return window->GetMouseButtonState(mouseButton); }));
 	defWindow.def("SetCursorInputMode", static_cast<void (*)(prosper::Window &, GLFW::CursorMode)>([](prosper::Window &window, GLFW::CursorMode cursorMode) { window->SetCursorInputMode(cursorMode); }));

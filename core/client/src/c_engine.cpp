@@ -63,6 +63,12 @@
 #include <pragma/asset/util_asset.hpp>
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
+#ifdef _WIN32
+
+#include <dwmapi.h>
+#pragma comment(lib, "dwmapi.lib")
+
+#endif
 
 extern "C" {
 void DLLCLIENT RunCEngine(int argc, char *argv[])
@@ -526,6 +532,8 @@ extern std::optional<int> g_launchParamRefreshRate;
 extern std::optional<bool> g_launchParamNoBorder;
 extern std::optional<uint32_t> g_launchParamWidth;
 extern std::optional<uint32_t> g_launchParamHeight;
+extern std::optional<Color> g_titleBarColor;
+extern std::optional<Color> g_borderColor;
 void register_game_shaders();
 bool CEngine::Initialize(int argc, char *argv[])
 {
@@ -624,6 +632,32 @@ bool CEngine::Initialize(int argc, char *argv[])
 	contextCreateInfo.presentMode = presentMode;
 
 	GetRenderContext().Initialize(contextCreateInfo);
+
+	auto &window = GetRenderContext().GetWindow();
+	if(g_titleBarColor.has_value())
+		window->SetTitleBarColor(*g_titleBarColor);
+	if(g_borderColor.has_value())
+		window->SetBorderColor(*g_borderColor);
+
+#ifdef _WIN32
+#if defined(WINVER) && (WINVER >= 0x0501)
+	auto h = GetConsoleWindow();
+	if(g_titleBarColor.has_value()) {
+		auto tmp = *g_titleBarColor;
+		umath::swap(tmp.r, tmp.b);
+		auto hex = tmp.ToHexColorRGB();
+		COLORREF hexCol = ::util::to_hex_number("0x" + hex);
+		DwmSetWindowAttribute(h, DWMWINDOWATTRIBUTE::DWMWA_CAPTION_COLOR, &hexCol, sizeof(hexCol));
+	}
+	if(g_borderColor.has_value()) {
+		auto tmp = *g_borderColor;
+		umath::swap(tmp.r, tmp.b);
+		auto hex = tmp.ToHexColorRGB();
+		COLORREF hexCol = ::util::to_hex_number("0x" + hex);
+		DwmSetWindowAttribute(h, DWMWINDOWATTRIBUTE::DWMWA_BORDER_COLOR, &hexCol, sizeof(hexCol));
+	}
+#endif
+#endif
 
 	auto &shaderManager = GetRenderContext().GetShaderManager();
 	shaderManager.RegisterShader("clear_color", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderClearColor(context, identifier); });
@@ -950,6 +984,12 @@ std::shared_ptr<prosper::Window> CEngine::CreateWindow(prosper::WindowSettings &
 	auto window = c_engine->GetRenderContext().CreateWindow(settings);
 	if(!window)
 		return nullptr;
+
+	if(g_titleBarColor.has_value())
+		(*window)->SetTitleBarColor(*g_titleBarColor);
+	if(g_borderColor.has_value())
+		(*window)->SetBorderColor(*g_borderColor);
+
 	auto *pWindow = window.get();
 	pWindow->GetStagingRenderTarget(); // This will initialize the staging target immediately
 	(*pWindow)->SetWindowSizeCallback([pWindow](GLFW::Window &window, Vector2i size) {

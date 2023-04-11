@@ -81,7 +81,8 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 		TickDeltaTimeTiedToFrameRate = ConsoleOpen << 1u,
 		EnableGpuPerformanceTimers = TickDeltaTimeTiedToFrameRate << 1u,
 		CEClosed = EnableGpuPerformanceTimers << 1u,
-		InputBindingsDirty = CEClosed << 1u
+		InputBindingsDirty = CEClosed << 1u,
+		WindowSizeChanged = InputBindingsDirty << 1u,
 	};
 	enum class GPUTimer : uint32_t {
 		GUI = 0,
@@ -174,6 +175,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	void ScrollInput(prosper::Window &window, Vector2 offset);
 	void OnWindowFocusChanged(prosper::Window &window, bool bFocus);
 	void OnFilesDropped(prosper::Window &window, std::vector<std::string> &files);
+	void OnWindowResized(prosper::Window &window, Vector2i size);
 	void JoystickButtonInput(prosper::Window &window, const GLFW::Joystick &joystick, uint32_t key, GLFW::KeyState state);
 	void JoystickAxisInput(prosper::Window &window, const GLFW::Joystick &joystick, uint32_t axis, GLFW::Modifier mods, float newVal, float deltaVal);
 	float GetRawJoystickAxisMagnitude() const;
@@ -260,6 +262,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	double m_tFPSTime;
 	util::Clock::time_point m_tLastFrame;
 	util::Clock::duration m_tDeltaFrameTime;
+	util::Clock::time_point m_tWindowResizeTime;
 	std::optional<std::chrono::nanoseconds> m_fixedFrameDeltaTimeInterpretation = {};
 
 	std::unordered_map<std::string, std::shared_ptr<al::IEffect>> m_auxEffects;

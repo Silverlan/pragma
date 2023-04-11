@@ -1010,7 +1010,13 @@ void CEngine::InitializeWindowInputCallbacks(prosper::Window &window)
 	window->SetScrollCallback([this, &window](GLFW::Window &glfwWindow, Vector2 offset) mutable { ScrollInput(window, offset); });
 	window->SetFocusCallback([this, &window](GLFW::Window &glfwWindow, bool bFocused) mutable { OnWindowFocusChanged(window, bFocused); });
 	window->SetDropCallback([this, &window](GLFW::Window &glfwWindow, std::vector<std::string> &files) mutable { OnFilesDropped(window, files); });
+	window->SetWindowSizeCallback([this, &window](GLFW::Window &glfwWindow, Vector2i size) mutable { OnWindowResized(window, size); });
 }
+void CEngine::OnWindowResized(prosper::Window &window, Vector2i size) {
+	m_stateFlags |= StateFlags::WindowSizeChanged;
+	m_tWindowResizeTime = util::Clock::now();
+}
+
 DLLCLIENT std::optional<std::string> g_customWindowIcon {};
 void CEngine::OnWindowInitialized()
 {
@@ -1558,6 +1564,19 @@ void CEngine::UpdateTickCount()
 
 void CEngine::Tick()
 {
+	if(umath::is_flag_set(m_stateFlags, StateFlags::WindowSizeChanged)) {
+		auto t = util::Clock::now();
+		auto dt = t - m_tWindowResizeTime;
+		// If the window is being resized by the user, we don't want to update the resolution constantly,
+		// so we add a small delay
+		if(dt > std::chrono::milliseconds {250}) {
+			umath::set_flag(m_stateFlags, StateFlags::WindowSizeChanged, false);
+			auto &window = GetWindow();
+			auto size = window.GetGlfwWindow().GetSize();
+			OnResolutionChanged(size.x, size.y);
+		}
+	}
+
 	Locale::Poll();
 	ProcessConsoleInput();
 	RunTickEvents();

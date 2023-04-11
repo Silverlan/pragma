@@ -221,15 +221,6 @@ def execscript(filepath):
 
 	os.chdir(curDir)
 
-print_msg("Updating external libraries...")
-execscript(scripts_dir +"/scripts/external_libs.py")
-
-print_msg("Updating third-party libraries...")
-execscript(scripts_dir +"/scripts/third_party_libs.py")
-
-print_msg("Updating modules...")
-execscript(scripts_dir +"/scripts/modules.py")
-
 ########## System packages ##########
 if platform == "linux":
 	if(no_sudo):
@@ -295,6 +286,16 @@ if platform == "linux":
 module_list = []
 cmake_args = []
 additional_build_targets = []
+
+########## submodules ##########
+print_msg("Updating external libraries...")
+execscript(scripts_dir +"/scripts/external_libs.py")
+
+print_msg("Updating third-party libraries...")
+execscript(scripts_dir +"/scripts/third_party_libs.py")
+
+print_msg("Updating modules...")
+execscript(scripts_dir +"/scripts/modules.py")
 
 ########## zlib ##########
 # Download

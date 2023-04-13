@@ -8,7 +8,7 @@ curDir = os.getcwd()
 
 third_party_libs_dir = curDir +"/third_party_libs"
 os.chdir(third_party_libs_dir)
-get_submodule("7zpp","https://github.com/Silverlan/7zip-cpp.git")
+get_submodule("7zpp","https://github.com/Silverlan/7zip-cpp.git","df81447")
 get_submodule("bvh","https://github.com/madmann91/bvh.git","2fd0db62022993963a7343669275647cb073e19a","v1")
 get_submodule("bzip2","https://github.com/sergiud/bzip2.git","c4a14bb87ee395fb2c69ef5dbb50762fe862517e","cmake")
 get_submodule("clip2tri","https://github.com/raptor/clip2tri.git","f62a734d22733814b8a970ed8a68a4d94c24fa5f")

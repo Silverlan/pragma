@@ -554,9 +554,20 @@ void Lua::util::register_library(lua_State *l)
 	  luabind::def(
 	    "generate_uuid_v4", +[](size_t seed) -> util::Uuid { return util::Uuid {::util::generate_uuid_v4(seed)}; }),
 	  luabind::def(
-	    "generate_uuid_v4", +[](const std::string &str) -> util::Uuid {
+	    "generate_uuid_v4",
+	    +[](const std::string &str) -> util::Uuid {
 		    auto seed = std::hash<std::string> {}(str);
 		    return util::Uuid {::util::generate_uuid_v4(seed)};
+	    }),
+	  luabind::def(
+	    "run_updater", +[]() -> bool {
+		    std::string processPath;
+#ifdef _WIN32
+		    processPath = "bin/updater.exe";
+#else
+			processPath = "lib/updater";
+#endif
+		    return ::util::start_process(processPath.c_str());
 	    })];
 	nsRetarget[luabind::def("initialize_retarget_data", &Lua::util::retarget::initialize_retarget_data)];
 	nsRetarget[luabind::def("apply_retarget_rig", &Lua::util::retarget::apply_retarget_rig)];

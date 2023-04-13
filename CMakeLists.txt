@@ -986,10 +986,12 @@ add_dependencies(iclient ishared client)
 add_dependencies(iserver ishared server)
 add_dependencies(server shared servermanager clientmanager util_bsp util_sound)
 add_dependencies(client shared clientmanager freetype wgui alsoundsystem util_timeline_scene util_image)
+add_dependencies(pragma_updater sharedutils-static)
 
 add_dependencies(pragma_server server)
 add_dependencies(pragma client server)
 add_dependencies(pragma pragma_server)
+add_dependencies(pragma pragma_updater)
 
 set_property(TARGET pragma PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
 set_property(TARGET pragma_server PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
@@ -1007,7 +1009,7 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT p
 if(WIN32)
 	set(BINARY_OUTPUT_DIR "bin")
 else()
-        set(BINARY_OUTPUT_DIR "lib")
+	set(BINARY_OUTPUT_DIR "lib")
 endif()
 
 set(PRAGMA_INSTALL_COMPONENT "pragma")

@@ -81,6 +81,7 @@
 #include <luabind/copy_policy.hpp>
 #include <luabind/discard_result_policy.hpp>
 #include <filesystem>
+#include <fmt/core.h>
 
 extern DLLNETWORK Engine *engine;
 
@@ -1087,52 +1088,52 @@ static int log(lua_State *l, spdlog::level::level_enum logLevel)
 	auto n = lua_gettop(l) - argOffset; /* number of arguments */
 	switch(n) {
 	case 0:
-		logger.log(logLevel, msg);
+		logger.log(logLevel, std::string{msg});
 		break;
 	case 1:
-		logger.log(logLevel, std::vformat(msg, std::make_format_args(to_string(l, argOffset + 1))));
+		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1))));
 		break;
 	case 2:
-		logger.log(logLevel, std::vformat(msg, std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2))));
+		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2))));
 		break;
 	case 3:
-		logger.log(logLevel, std::vformat(msg, std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3))));
+		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3))));
 		break;
 	case 4:
-		logger.log(logLevel, std::vformat(msg, std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4))));
+		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4))));
 		break;
 	case 5:
-		logger.log(logLevel, std::vformat(msg, std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5))));
+		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5))));
 		break;
 	case 6:
 		logger.log(logLevel,
-		  std::vformat(msg, std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6))));
+		  fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6))));
 		break;
 	case 7:
 		logger.log(logLevel,
-		  std::vformat(msg,
-		    std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7))));
+		  fmt::vformat(msg,
+		    fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7))));
 		break;
 	case 8:
 		logger.log(logLevel,
-		  std::vformat(msg,
-		    std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7),
+		  fmt::vformat(msg,
+		    fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7),
 		      to_string(l, argOffset + 8))));
 		break;
 	case 9:
 		logger.log(logLevel,
-		  std::vformat(msg,
-		    std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7),
+		  fmt::vformat(msg,
+		    fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7),
 		      to_string(l, argOffset + 8), to_string(l, argOffset + 9))));
 		break;
 	case 10:
 		logger.log(logLevel,
-		  std::vformat(msg,
-		    std::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7),
+		  fmt::vformat(msg,
+		    fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7),
 		      to_string(l, argOffset + 8), to_string(l, argOffset + 9), to_string(l, argOffset + 10))));
 		break;
 	default:
-		logger.log(logLevel, msg);
+		logger.log(logLevel, std::string{msg});
 		break;
 	}
 	return 0;

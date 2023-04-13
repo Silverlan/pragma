@@ -667,6 +667,7 @@ else:
 if with_lua_doc_generator:
 	cmake_args += ["-DCONFIG_BUILD_WITH_LAD=1"]
 
+cmake_args += additional_cmake_args
 cmake_configure(root,generator,cmake_args)
 
 print_msg("Build files have been written to \"" +build_dir +"\".")

@@ -737,9 +737,11 @@ unset(CMAKE_CXX_STANDARD)
 #
 
 # fmt
+unset(BUILD_SHARED_LIBS CACHE)
 set(FMT_TEST OFF CACHE BOOL OFF FORCE)
 set(FMT_DOC OFF CACHE BOOL OFF FORCE)
 register_third_party_library(fmt)
+set(BUILD_SHARED_LIBS ON CACHE BOOL ".." FORCE)
 #
 
 # 7zip cpp

@@ -453,6 +453,18 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 		  return files;
 	  });
 	defZip.def(
+	  "ExtractFiles", +[](lua_State *l, ZIPFile &zip, const std::string &outputPath) -> Lua::var<bool, Lua::opt<std::string>> {
+		  auto path = ::util::Path::CreateFile(outputPath);
+		  path.Canonicalize();
+		  path = ::util::Path::CreatePath(::util::get_program_path()) + path;
+
+		  std::string err;
+		  auto res = zip.ExtractFiles(path.GetString(), err);
+		  if(!res)
+			  return luabind::object {l, std::pair<bool, std::string> {res, err}};
+		  return luabind::object {l, res};
+	  });
+	defZip.def(
 	  "ExtractFile", +[](ZIPFile &zip, const std::string &zipFileName, const std::string &outputZipFileName) -> std::pair<bool, std::optional<std::string>> {
 		  std::vector<uint8_t> data;
 		  std::string err;

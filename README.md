@@ -28,6 +28,7 @@ Build Requirements
 
 ###### Windows
 - Visual Studio 2022 or newer
+- Windows SDK 10.0.22000.0 or newer
 
 ###### Linux
 - clang-14 or newer (Pragma is *not* compatible with gcc!)
@@ -88,7 +89,8 @@ Running the build-script with the arguments above will build and install Pragma 
 | `--install-directory <path>`            | Installation directory. Can be relative (to build directory) or absolute.                    | `install`        |
 | `--verbose <1/0>`                       | Print additional debug information.                                                          | `0`              |
 | `--update <1/0>`                        | Update Pragma and all submodules and modules to the latest versions.                         | `0`              |
-| `--module <moduleName>:<gitUrl>`        | Custom modules to install. Use this argument multiple times to use multiple modules.         |                  |
+| `--module <moduleName>:<gitUrl>`        | Custom modules to install. Use this parameter multiple times to use multiple modules.        |                  |
+| `--cmake-arg <arg>`                     | Custom CMake configuration option. Use this parameter multiple times for multiple options.   |                  |
 
 Example for using the `--module` parameter:
 ```console

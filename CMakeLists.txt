@@ -307,7 +307,7 @@ set(DEPENDENCY_SPDLOG_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/spdlog/
 search_lib_recursive(DEPENDENCY_SPDLOG_LIBRARY third_party_libs/spdlog/${BINARY_PRAGMA_DIR} spdlog)
 
 set(DEPENDENCY_FMT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/fmt/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_FMT_LIBRARY third_party_libs/fmt/${BINARY_PRAGMA_DIR} fmt)
+search_lib_recursive(DEPENDENCY_FMT_LIBRARY third_party_libs/fmt/${BINARY_PRAGMA_DIR} fmt STATIC)
 
 if(WIN32)
     set(DEPENDENCY_7ZPP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/7zpp/include CACHE STRING "" FORCE)

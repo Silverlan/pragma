@@ -70,6 +70,19 @@ void Lua::asset::register_library(Lua::Interface &lua, bool extended)
 				return {};
 			return assetManager->ClearUnused();
 		}),
+		luabind::def("clear_unused",+[](NetworkState &nw) -> std::optional<uint32_t> {
+			auto num = umath::to_integral(pragma::asset::Type::Count);
+			uint32_t numCleared = 0;
+			for (decltype(num) i=0u;i<num;++i)
+			{
+				auto type = static_cast<pragma::asset::Type>(i);
+				auto *assetManager = nw.GetAssetManager(type);
+				if(!assetManager)
+					continue;
+			    numCleared += assetManager->ClearUnused();
+			}
+			return numCleared;
+		}),
 		luabind::def("clear_unused_models",static_cast<uint32_t(*)(lua_State*)>([](lua_State *l) -> uint32_t {
 			auto *nw = engine->GetNetworkState(l);
 			return nw->GetModelManager().ClearUnused();

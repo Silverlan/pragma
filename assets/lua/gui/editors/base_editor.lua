@@ -18,11 +18,13 @@ function gui.WIBaseEditor:OnInitialize()
 	self:TrapFocus(true)
 	self:RequestFocus()
 
+	self.m_windowFrames = {}
+
 	local pMain = gui.create("WIRect",self)
 	pMain:SetColor(Color.Beige)--Color(40,40,40,255))
 	pMain:Update()
 	self.m_pMain = pMain
-	self.m_windowToPrimaryWindow = {}
+	self.m_windowToFrame = {}
 	self.m_windowFactories = {}
 
 	self.m_menuBar = gui.create("WIMenuBar",self)
@@ -43,6 +45,20 @@ function gui.WIBaseEditor:OnInitialize()
 	self.m_infoBar = pInfoBar
 end
 
+function gui.WIBaseEditor:RegisterFrame(category,frame)
+	self.m_windowFrames[category] = frame
+end
+
+function gui.WIBaseEditor:GetFirstFrame()
+	if(util.is_valid(self.m_firstFrame)) then return self.m_firstFrame end
+	for _,frame in pairs(self.m_windowFrames) do
+		if(util.is_valid(frame)) then
+			self.m_firstFrame = frame
+			return frame
+		end
+	end
+end
+
 function gui.WIBaseEditor:OnRemove()
 end
 
@@ -57,21 +73,26 @@ function gui.WIBaseEditor:GetInfoBar() return self.m_infoBar end
 function gui.WIBaseEditor:SetDeveloperModeEnabled(dev) self.m_devModeEnabled = dev or false end
 function gui.WIBaseEditor:IsDeveloperModeEnabled() return self.m_devModeEnabled or false end
 
-function gui.WIBaseEditor:AddWindowsMenuBarItem()
-	self.m_menuBar:AddItem(locale.get_text("windows"),function(pContext)
+function gui.WIBaseEditor:AddWindowsMenuBarItem(fcView)
+	self.m_menuBar:AddItem(locale.get_text("view"),function(pContext)
+		local pItem,pSubMenu = pContext:AddSubMenu(locale.get_text("windows"))
 		local windows = {}
 		for identifier,data in pairs(self.m_windowFactories) do
 			table.insert(windows,{data.title,identifier})
 		end
 		table.sort(windows,function(a,b) return a[1] < b[1] end)
 		for _,wdata in ipairs(windows) do
-			pContext:AddItem(wdata[1],function(pItem)
+			pSubMenu:AddItem(wdata[1],function(pItem)
 				self:OpenWindow(wdata[2])
 				self:GoToWindow(wdata[2])
 			end)
 		end
+		pSubMenu:ScheduleUpdate()
+
+		if(fcView ~= nil) then fcView(pContext) end
+
 		pContext:ScheduleUpdate()
-	end):SetName("windows")
+	end):SetName("view")
 end
 
 function gui.WIBaseEditor:InitializeGenericLayout()
@@ -88,20 +109,29 @@ function gui.WIBaseEditor:GoToWindow(identifier)
 	end
 end
 
-function gui.WIBaseEditor:RegisterWindow(primaryWindow,identifier,title,factory)
+function gui.WIBaseEditor:RegisterWindow(category,identifier,title,factory)
 	self.m_windowFactories[identifier] = {
-		window = primaryWindow,
+		category = category,
 		title = title,
 		factory = factory
 	}
 end
 
-function gui.WIBaseEditor:GetPrimaryWindow(window) return self.m_windowToPrimaryWindow[window] end
+function gui.WIBaseEditor:GetPrimaryWindow(window) return self.m_windowToFrame[window] end
 
 function gui.WIBaseEditor:CloseWindow(identifier)
 	if(self.m_windowFactories[identifier] == nil or util.is_valid(self.m_windowFactories[identifier].element)) then return end
 	local data = self.m_windowFactories[identifier]
-	if(util.is_valid(data.window)) then data.window:RemoveTab(identifier) end
+	local frame = self.m_windowToFrame[self.m_windowFactories[identifier].element]
+	if(util.is_valid(frame)) then frame:RemoveTab(identifier) end
+end
+
+function gui.WIBaseEditor:GetOpenWindowIdentifiers()
+	local t = {}
+	for identifier,data in pairs(self.m_windowFactories) do
+		if(util.is_valid(data.element)) then table.insert(t,identifier) end
+	end
+	return t
 end
 
 function gui.WIBaseEditor:IsWindowOpen(identifier)
@@ -113,22 +143,24 @@ function gui.WIBaseEditor:IsWindowActive(identifier)
 	if(self:IsWindowOpen(identifier) == false) then return false end
 	return self:GetWindow(identifier):IsVisible()
 end
-
 function gui.WIBaseEditor:OpenWindow(identifier,goToWindow)
 	if(self.m_windowFactories[identifier] == nil or util.is_valid(self.m_windowFactories[identifier].element)) then
 		if(goToWindow) then self:GoToWindow(identifier) end
 		if(self.m_windowFactories[identifier] ~= nil) then
-			return self.m_windowFactories[identifier].window:FindTab(identifier),self.m_windowFactories[identifier].element
+			local frame = self.m_windowToFrame[self.m_windowFactories[identifier].element]
+			return frame:FindTab(identifier),self.m_windowFactories[identifier].element
 		end
 		return
 	end
 	local data = self.m_windowFactories[identifier]
-	if(util.is_valid(data.window) == false) then return end
+	local frame = self.m_windowFrames[data.category]
+	if(util.is_valid(frame) == false) then frame = self:GetFirstFrame() end
+	if(util.is_valid(frame) == false) then return end
 	local el = data.factory()
 	if(util.is_valid(el) == false) then return end
-	self.m_windowToPrimaryWindow[el] = data.window
+	self.m_windowToFrame[el] = frame
 	data.element = el
-	local tab = data.window:AddTab(identifier,data.title,el)
+	local tab = frame:AddTab(identifier,data.title,el)
 	if(goToWindow) then self:GoToWindow(identifier) end
 	return tab,el
 end

@@ -48,6 +48,7 @@ end
 function gui.WIBaseEditor:RegisterFrame(category,frame)
 	self.m_windowFrames[category] = frame
 end
+function gui.WIBaseEditor:GetFrames() return self.m_windowFrames end
 
 function gui.WIBaseEditor:GetFirstFrame()
 	if(util.is_valid(self.m_firstFrame)) then return self.m_firstFrame end
@@ -143,12 +144,13 @@ function gui.WIBaseEditor:IsWindowActive(identifier)
 	if(self:IsWindowOpen(identifier) == false) then return false end
 	return self:GetWindow(identifier):IsVisible()
 end
+function gui.WIBaseEditor:GetOpenWindows() return self.m_windowToFrame end
 function gui.WIBaseEditor:OpenWindow(identifier,goToWindow)
 	if(self.m_windowFactories[identifier] == nil or util.is_valid(self.m_windowFactories[identifier].element)) then
 		if(goToWindow) then self:GoToWindow(identifier) end
 		if(self.m_windowFactories[identifier] ~= nil) then
 			local frame = self.m_windowToFrame[self.m_windowFactories[identifier].element]
-			return frame:FindTab(identifier),self.m_windowFactories[identifier].element
+			return frame:FindTab(identifier),self.m_windowFactories[identifier].element,frame
 		end
 		return
 	end
@@ -162,10 +164,39 @@ function gui.WIBaseEditor:OpenWindow(identifier,goToWindow)
 	data.element = el
 	local tab = frame:AddTab(identifier,data.title,el)
 	if(goToWindow) then self:GoToWindow(identifier) end
-	return tab,el
+	return tab,el,frame
 end
 
 function gui.WIBaseEditor:GetWindow(identifier) return self.m_windowFactories[identifier] ~= nil and self.m_windowFactories[identifier].element or nil end
+
+function gui.WIBaseEditor:DetachWindow(identifier)
+	local elWindow,frame,tab = self:GetWindowElements(identifier)
+	if(util.is_valid(frame) == false) then return false end
+	frame:DetachTab(identifier)
+	return true
+end
+
+function gui.WIBaseEditor:AttachWindow(identifier)
+	local elWindow,frame,tab = self:GetWindowElements(identifier)
+	if(util.is_valid(frame) == false) then return false end
+	frame:AttachTab(identifier)
+	return true
+end
+
+function gui.WIBaseEditor:IsWindowDetached(identifier)
+	local elWindow,frame,tab = self:GetWindowElements(identifier)
+	if(util.is_valid(frame) == false) then return false end
+	return frame:IsTabDetached(identifier)
+end
+
+function gui.WIBaseEditor:GetWindowElements(identifier)
+	if(self.m_windowFactories[identifier] == nil) then return end
+	local data = self.m_windowFactories[identifier]
+	local elWindow = data.element
+	local frame = self.m_windowFrames[data.category]
+	local tab = util.is_valid(frame) and frame:FindTab(identifier) or nil
+	return elWindow,frame,tab
+end
 
 function gui.WIBaseEditor:ClearLayout()
 	if(util.is_valid(self.m_contents)) then self.m_contents:Remove() end

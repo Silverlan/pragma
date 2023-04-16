@@ -1012,7 +1012,6 @@ void CEngine::InitializeWindowInputCallbacks(prosper::Window &window)
 	window->SetScrollCallback([this, &window](GLFW::Window &glfwWindow, Vector2 offset) mutable { ScrollInput(window, offset); });
 	window->SetFocusCallback([this, &window](GLFW::Window &glfwWindow, bool bFocused) mutable { OnWindowFocusChanged(window, bFocused); });
 	window->SetDropCallback([this, &window](GLFW::Window &glfwWindow, std::vector<std::string> &files) mutable { OnFilesDropped(window, files); });
-	window->SetWindowSizeCallback([this, &window](GLFW::Window &glfwWindow, Vector2i size) mutable { OnWindowResized(window, size); });
 }
 void CEngine::OnWindowResized(prosper::Window &window, Vector2i size) {
 	m_stateFlags |= StateFlags::WindowSizeChanged;
@@ -1025,6 +1024,7 @@ void CEngine::OnWindowInitialized()
 	pragma::RenderContext::OnWindowInitialized();
 	auto &window = GetRenderContext().GetWindow();
 	InitializeWindowInputCallbacks(window);
+	window->SetWindowSizeCallback([this, &window](GLFW::Window &glfwWindow, Vector2i size) mutable { OnWindowResized(window, size); });
 
 	if(g_customWindowIcon.has_value()) {
 		auto imgBuf = uimg::load_image(*g_customWindowIcon, uimg::PixelFormat::LDR);

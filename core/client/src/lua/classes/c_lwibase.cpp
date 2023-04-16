@@ -1272,8 +1272,10 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			     },
 			     1)
 			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false)
+				if(Lua::IsSet(l, -1) == false) {
+					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
+				}
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;
@@ -1316,8 +1318,10 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			     },
 			     1)
 			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false)
+				if(Lua::IsSet(l, -1) == false) {
+					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
+				}
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;
@@ -1344,8 +1348,10 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			     },
 			     1)
 			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false)
+				if(Lua::IsSet(l, -1) == false) {
+					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
+				}
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;
@@ -1372,8 +1378,10 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			     },
 			     1)
 			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false)
+				if(Lua::IsSet(l, -1) == false) {
+					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
+				}
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;
@@ -1446,8 +1454,10 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			     },
 			     1)
 			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false)
+				if(Lua::IsSet(l, -1) == false) {
+					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
+				}
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;
@@ -1471,8 +1481,10 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			     },
 			     1)
 			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false)
+				if(Lua::IsSet(l, -1) == false) {
+					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
+				}
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;
@@ -1496,8 +1508,10 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			     },
 			     1)
 			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false)
+				if(Lua::IsSet(l, -1) == false) {
+					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
+				}
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;
@@ -1524,8 +1538,10 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			       },
 			       1)
 			    == Lua::StatusCode::Ok) {
-				  if(Lua::IsSet(l, -1) == false)
+				  if(Lua::IsSet(l, -1) == false) {
+					  Lua::Pop(l, 1);
 					  return CallbackReturnType::NoReturnValue;
+				  }
 				  auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
 				  Lua::Pop(l, 1);
 				  *reply = result;
@@ -1551,8 +1567,10 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			     },
 			     1)
 			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false)
+				if(Lua::IsSet(l, -1) == false) {
+					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
+				}
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;

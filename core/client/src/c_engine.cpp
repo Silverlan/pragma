@@ -978,6 +978,8 @@ void CEngine::SetGPUProfilingEnabled(bool bEnabled)
 }
 std::shared_ptr<prosper::Window> CEngine::CreateWindow(prosper::WindowSettings &settings)
 {
+	if(settings.width == 0 || settings.height == 0)
+		return nullptr;
 	auto &mainWindowCreateInfo = c_engine->GetRenderContext().GetWindow().GetWindowSettings();
 	settings.flags = mainWindowCreateInfo.flags;
 	settings.api = mainWindowCreateInfo.api;

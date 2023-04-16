@@ -306,6 +306,31 @@ namespace prosper { // For some reason these need to be in the same namespaces a
 		out << "]";
 		return out;
 	}
+
+	static std::ostream &operator<<(std::ostream &out, const prosper::Window &window)
+	{
+		auto &ncWindow = const_cast<prosper::Window &>(window);
+		out << "Window";
+		out << "[Title:" << ncWindow.GetGlfwWindow().GetWindowTitle() << "]";
+		auto pos = ncWindow.GetGlfwWindow().GetPos();
+		out << "[Pos:" << pos.x << "," << pos.y << "]";
+		auto size = ncWindow.GetGlfwWindow().GetSize();
+		out << "[Size:" << size.x << "," << size.y << "]";
+		return out;
+	}
+};
+
+namespace GLFW {
+	static std::ostream &operator<<(std::ostream &out, const GLFW::Monitor &monitor)
+	{
+		out << "Monitor";
+		out << "[" << monitor.GetName() << "]";
+		auto pos = monitor.GetPos();
+		out << "[Pos:" << pos.x << "," << pos.y << "]";
+		auto videoMode = monitor.GetVideoMode();
+		out << "[Size:" << videoMode.width << "," << videoMode.height << "]";
+		return out;
+	}
 };
 
 std::shared_ptr<prosper::IBuffer> Lua::Vulkan::create_buffer(prosper::IPrContext &context, prosper::util::BufferCreateInfo &bufCreateInfo, ::DataStream &ds)
@@ -1763,9 +1788,33 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defWindowCreateInfo.def_readwrite("height", &prosper::WindowSettings::height);
 	prosperMod[defWindowCreateInfo];
 
+	auto defMonitor = luabind::class_<GLFW::Monitor>("Monitor");
+	defMonitor.def(luabind::tostring(luabind::self));
+	defMonitor.def("GetName", &GLFW::Monitor::GetName);
+	defMonitor.def("GetPhysicalSize", &GLFW::Monitor::GetPhysicalSize);
+	defMonitor.def(
+	  "GetVideoMode", +[](lua_State *l, const GLFW::Monitor &monitor) -> Lua::map<std::string, int> {
+		  auto t = luabind::newtable(l);
+		  auto videoMode = monitor.GetVideoMode();
+		  t["width"] = videoMode.width;
+		  t["height"] = videoMode.height;
+		  t["redBits"] = videoMode.redBits;
+		  t["greenBits"] = videoMode.greenBits;
+		  t["blueBits"] = videoMode.blueBits;
+		  t["refreshRate"] = videoMode.refreshRate;
+		  return t;
+	  });
+	defMonitor.def("GetPos", &GLFW::Monitor::GetPos);
+	defMonitor.def("GetGammaRamp", &GLFW::Monitor::GetGammaRamp);
+	defMonitor.def("SetGammaRamp", &GLFW::Monitor::SetGammaRamp);
+	defMonitor.def("SetGamma", &GLFW::Monitor::SetGamma);
+	defMonitor.def("GetSupportedVideoModes", &GLFW::Monitor::GetSupportedVideoModes);
+	prosperMod[defMonitor];
+
 	auto defWindow = luabind::class_<prosper::Window>("Window");
 	defWindow.def(
 	  "__eq", +[](prosper::Window &a, prosper::Window &b) -> bool { return &a == &b; });
+	defWindow.def(luabind::tostring(luabind::self));
 	defWindow.def(
 	  "GetMonitorBounds", +[](prosper::Window &window) -> std::optional<std::tuple<Vector2, Vector2, Vector2, Vector2>> {
 		  auto bounds = window->GetMonitorBounds();
@@ -1820,6 +1869,11 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defWindow.def("GetCursorInputMode", static_cast<GLFW::CursorMode (*)(prosper::Window &)>([](prosper::Window &window) -> GLFW::CursorMode { return window->GetCursorInputMode(); }));
 	defWindow.def("SetCursor", static_cast<void (*)(prosper::Window &, GLFW::Cursor &)>([](prosper::Window &window, GLFW::Cursor &cursor) { window->SetCursor(cursor); }));
 	defWindow.def("Close", &prosper::Window::Close);
+	defWindow.def(
+	  "GetMonitor", +[](prosper::Window &window) -> const GLFW::Monitor * {
+		  auto &glfwWindow = window.GetGlfwWindow();
+		  return glfwWindow.GetMonitor();
+	  });
 	defWindow.def("GetSwapchainImageCount", &prosper::Window::GetSwapchainImageCount);
 	defWindow.def("IsValid", static_cast<bool (*)(prosper::Window &)>([](prosper::Window &window) -> bool { return window.IsValid(); }));
 	defWindow.def("AddCloseListener",

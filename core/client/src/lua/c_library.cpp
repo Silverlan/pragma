@@ -109,6 +109,8 @@ static void register_gui(Lua::Interface &lua)
 
 	  luabind::def("find_focused_window", static_cast<prosper::Window *(*)()>([]() -> prosper::Window * { return WGUI::GetInstance().FindFocusedWindow(); }), luabind::pointer_policy<0> {}),
 	  luabind::def("get_primary_window", static_cast<prosper::Window *(*)()>([]() -> prosper::Window * { return &c_engine->GetRenderContext().GetWindow(); }), luabind::pointer_policy<0> {}),
+	  luabind::def(
+	    "get_primary_monitor", +[]() -> GLFW::Monitor { return GLFW::get_primary_monitor(); }),
 	  luabind::def("find_window_under_cursor", static_cast<prosper::Window *(*)()>([]() -> prosper::Window * { return WGUI::GetInstance().FindWindowUnderCursor(); }), luabind::pointer_policy<0> {}),
 
 	  luabind::def("get_focused_element", static_cast<::WIBase *(*)(lua_State *)>(&Lua::gui::get_focused_element)), luabind::def("get_focused_element", static_cast<::WIBase *(*)(lua_State *, prosper::Window &)>(&Lua::gui::get_focused_element)),

@@ -497,6 +497,7 @@ function udm.generate_lua_api_from_schema(schema)
 							end
 						end
 
+						local countName = "Get" .. baseName .. "Count"
 						local removeValueRangeName = "Remove" .. baseName .. "Range"
 						if(removeValueRangeName ~= nil) then
 							class[removeValueRangeName] = function(self,startIndex,count)
@@ -521,6 +522,11 @@ function udm.generate_lua_api_from_schema(schema)
 									while(#children > size) do children[#children] = nil end
 								end
 								self:CallChangeListeners(name,nil,udm.BaseSchemaType.ARRAY_EVENT_REMOVE_RANGE,startIndex,count)
+							end
+							local clearName = "Clear" .. baseName .. "s"
+							class[clearName] = function(self)
+								local n = class[countName](self)
+								class[removeValueRangeName](self,0,n)
 							end
 						end
 
@@ -557,7 +563,6 @@ function udm.generate_lua_api_from_schema(schema)
 							end
 						end
 
-						local countName = "Get" .. baseName .. "Count"
 						if(countName ~= nil) then
 							class[countName] = function(self,idx)
 								local a = self:GetCachedChild(name)

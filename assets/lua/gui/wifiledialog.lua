@@ -64,6 +64,11 @@ function gui.WIFileDialog:OnInitialize()
 	end)
 	self.m_pFileList = t
 
+	local options = gui.create("WIPFMControlsMenu",self)
+	options:SetAutoFillContentsToWidth(true)
+	options:SetAutoFillContentsToHeight(false)
+	self.m_pOptions = options
+
 	self:SetType(gui.WIFileDialog.TYPE_OPEN)
 	self:SetSize(512,256)
 end
@@ -77,7 +82,10 @@ function gui.WIFileDialog:GetRootPath() if(util.is_valid(self.m_pFileList) == tr
 function gui.WIFileDialog:GetPath() if(util.is_valid(self.m_pFileList) == true) then return self.m_pFileList:GetPath() else return "" end end
 function gui.WIFileDialog:GetAbsolutePath() if(util.is_valid(self.m_pFileList) == true) then return self.m_pFileList:GetAbsolutePath() else return "" end end
 function gui.WIFileDialog:GetSelectedFile(relativePath) if(util.is_valid(self.m_pFileList) == true) then return self.m_pFileList:GetSelectedFile(relativePath) else return "" end end
-function gui.WIFileDialog:Update() if(util.is_valid(self.m_pFileList) == true) then self.m_pFileList:Update() end end
+function gui.WIFileDialog:Update()
+	if(util.is_valid(self.m_pFileList) == true) then self.m_pFileList:Update() end
+	self:OnSizeChanged(self:GetWidth(),self:GetHeight())
+end
 
 function gui.WIFileDialog:SetFileName(fileName)
 	if(util.is_valid(self.m_pFileName) == false) then return end
@@ -108,6 +116,7 @@ function gui.WIFileDialog:GetFrame() return self.m_pFrame end
 function gui.WIFileDialog:Close()
 	gui.close_dialog()
 end
+function gui.WIFileDialog:GetOptionsPanel() return self.m_pOptions end
 function gui.WIFileDialog:OnSizeChanged(w,h)
 	local margin = 10
 	if(util.is_valid(self.m_pButtonCancel) == false) then return end
@@ -121,9 +130,16 @@ function gui.WIFileDialog:OnSizeChanged(w,h)
 	self.m_pPath:SetSize(256,24)
 	self.m_pPath:SetPos(margin,5)
 
+	local wFileList = w -margin *2
+	self.m_pOptions:Update()
+	self.m_pOptions:SizeToContents()
+	self.m_pOptions:SetWidth(wFileList)
+
 	if(util.is_valid(self.m_pFileList) == false) then return end
 	self.m_pFileList:SetPos(margin,self.m_pPath:GetY() +self.m_pPath:GetHeight())
-	self.m_pFileList:SetSize(w -margin *2,h -100)
+	self.m_pFileList:SetSize(wFileList,h -100 -self.m_pOptions:GetHeight())
+
+	self.m_pOptions:SetPos(self.m_pFileList:GetLeft(),self.m_pFileList:GetBottom() +10)
 
 	if(util.is_valid(self.m_pLbFileName) == false) then return end
 	self.m_pLbFileName:SetPos(margin,h -47)

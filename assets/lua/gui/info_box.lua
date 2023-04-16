@@ -89,7 +89,7 @@ gui.create_info_box = function(parent,text,type)
 	infoBox:SetText(text)
 	infoBox:SizeToContents()
 	parent:AddCallback("SetSize",function()
-		infoBox:SizeToContents()
+		if(infoBox:IsValid()) then infoBox:SizeToContents() end
 	end)
 	return infoBox
 end

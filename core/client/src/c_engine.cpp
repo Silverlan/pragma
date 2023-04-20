@@ -894,7 +894,7 @@ void CEngine::OpenConsole()
 		{
 			if(WGUI::IsOpen()) {
 				auto *console = WIConsole::Open();
-				if(console && m_consoleType == ConsoleType::GUIDetached) {
+				if(console && m_consoleType == ConsoleType::GUIDetached && !console->IsExternallyOwned()) {
 					console->Update();
 					auto *frame = console->GetFrame();
 					if(frame) {

@@ -420,6 +420,8 @@ static void register_gui(Lua::Interface &lua)
 	auto wiConsoleClassDef = luabind::class_<WIConsole, ::WIBase>("Console");
 	wiConsoleClassDef.def("GetCommandLineEntryElement", &WIConsole::GetCommandLineEntryElement);
 	wiConsoleClassDef.def("GetTextLogElement", &WIConsole::GetTextLogElement);
+	wiConsoleClassDef.def("SetExternallyOwned", &WIConsole::SetExternallyOwned);
+	wiConsoleClassDef.def("IsExternallyOwned", &WIConsole::IsExternallyOwned);
 	wiConsoleClassDef.def("GetFrame", &WIConsole::GetFrame);
 	wiConsoleClassDef.def(
 	  "GetText", +[](const ::WIConsole &console) { return console.GetText().cpp_str(); });

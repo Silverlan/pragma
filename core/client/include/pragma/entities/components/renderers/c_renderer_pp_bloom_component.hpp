@@ -11,6 +11,7 @@
 #include "pragma/entities/components/renderers/c_renderer_pp_base_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_bloom_blur.hpp"
+#include "pragma/rendering/controlled_blur_settings.hpp"
 
 namespace pragma {
 	class CRasterizationRendererComponent;
@@ -38,13 +39,8 @@ namespace pragma {
 	  private:
 		void SetPipelineDirty();
 		virtual void DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo) override;
-		uint32_t m_radius = ShaderPPBloomBlurBase::DEFAULT_RADIUS;
-		double m_sigma = ShaderPPBloomBlurBase::DEFAULT_SIGMA;
-		std::shared_ptr<BloomPipelineInfo> m_bloomPipelineInfoH = nullptr;
-		std::shared_ptr<BloomPipelineInfo> m_bloomPipelineInfoV = nullptr;
-		bool m_pipelineDirty = false;
+		ControlledBlurSettings m_controlledBlurSettings;
 		float m_bloomThreshold = 1.f;
-		int32_t m_blurAmount = -1;
 	};
 };
 

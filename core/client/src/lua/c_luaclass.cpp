@@ -53,7 +53,7 @@
 #include "pragma/lua/classes/c_lworldenvironment.hpp"
 #include "pragma/asset/c_util_model.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_glow.hpp"
+#include "pragma/rendering/shaders/post_processing/c_shader_pp_glow.hpp"
 #include <pragma/lua/lua_entity_component.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <wgui/fontmanager.h>
@@ -398,8 +398,8 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 
 	modShader[defShaderTextured3D];
 
-	auto defShaderGlow = luabind::class_<pragma::ShaderGlow, luabind::bases<pragma::ShaderGameWorldLightingPass, pragma::ShaderEntity, pragma::ShaderSceneLit, pragma::ShaderScene, prosper::ShaderGraphics, prosper::Shader>>("Glow");
-	defShaderGlow.add_static_constant("RENDER_PASS_COLOR_FORMAT", umath::to_integral(pragma::ShaderGlow::RENDER_PASS_FORMAT));
+	auto defShaderGlow = luabind::class_<pragma::ShaderPPGlow, luabind::bases<pragma::ShaderGameWorldLightingPass, pragma::ShaderEntity, pragma::ShaderSceneLit, pragma::ShaderScene, prosper::ShaderGraphics, prosper::Shader>>("Glow");
+	defShaderGlow.add_static_constant("RENDER_PASS_COLOR_FORMAT", umath::to_integral(pragma::ShaderPPGlow::RENDER_PASS_FORMAT));
 	modShader[defShaderGlow];
 
 	auto defShaderCompute = luabind::class_<prosper::ShaderCompute, prosper::Shader>("Compute");
@@ -758,14 +758,16 @@ void CGame::RegisterLuaClasses()
 	defRenderStats.add_static_constant("RENDER_PASS_LIGHTING_PASS_TRANSLUCENT", umath::to_integral(RenderStats::RenderPass::LightingPassTranslucent));
 	defRenderStats.add_static_constant("RENDER_PASS_PREPASS", umath::to_integral(RenderStats::RenderPass::Prepass));
 	defRenderStats.add_static_constant("RENDER_PASS_SHADOW_PASS", umath::to_integral(RenderStats::RenderPass::ShadowPass));
+	defRenderStats.add_static_constant("RENDER_PASS_GLOW_PASS", umath::to_integral(RenderStats::RenderPass::GlowPass));
 	defRenderStats.add_static_constant("RENDER_PASS_COUNT", umath::to_integral(RenderStats::RenderPass::Count));
-	static_assert(umath::to_integral(RenderStats::RenderPass::Count) == 4);
+	static_assert(umath::to_integral(RenderStats::RenderPass::Count) == 5);
 
 	defRenderStats.add_static_constant("TIMER_LIGHT_CULLING_GPU", umath::to_integral(RenderStats::RenderStage::LightCullingGpu));
 	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU", umath::to_integral(RenderStats::RenderStage::PostProcessingGpu));
 	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_FOG", umath::to_integral(RenderStats::RenderStage::PostProcessingGpuFog));
 	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_DOF", umath::to_integral(RenderStats::RenderStage::PostProcessingGpuDoF));
 	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_BLOOM", umath::to_integral(RenderStats::RenderStage::PostProcessingGpuBloom));
+	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_GLOW", umath::to_integral(RenderStats::RenderStage::PostProcessingGpuGlow));
 	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_TONE_MAPPING", umath::to_integral(RenderStats::RenderStage::PostProcessingGpuToneMapping));
 	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_FXAA", umath::to_integral(RenderStats::RenderStage::PostProcessingGpuFxaa));
 	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_SSAO", umath::to_integral(RenderStats::RenderStage::PostProcessingGpuSsao));
@@ -775,7 +777,7 @@ void CGame::RegisterLuaClasses()
 	defRenderStats.add_static_constant("TIMER_POST_PROCESSING_EXECUTION_CPU", umath::to_integral(RenderStats::RenderStage::PostProcessingExecutionCpu));
 	defRenderStats.add_static_constant("TIMER_UPDATE_RENDER_BUFFERS_CPU", umath::to_integral(RenderStats::RenderStage::UpdateRenderBuffersCpu));
 	defRenderStats.add_static_constant("TIMER_COUNT", umath::to_integral(RenderStats::RenderStage::Count));
-	static_assert(umath::to_integral(RenderStats::RenderStage::Count) == 13);
+	static_assert(umath::to_integral(RenderStats::RenderStage::Count) == 14);
 	defRenderStats.def("Copy", static_cast<RenderStats (*)(lua_State *, RenderStats &)>([](lua_State *l, RenderStats &renderStats) -> RenderStats { return renderStats; }));
 	defRenderStats.def("GetPassStats", static_cast<RenderPassStats *(*)(lua_State *, RenderStats &, RenderStats::RenderPass)>([](lua_State *l, RenderStats &renderStats, RenderStats::RenderPass pass) -> RenderPassStats * { return &renderStats.GetPassStats(pass); }));
 	defRenderStats.def("GetTime",

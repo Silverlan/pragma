@@ -9,6 +9,11 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/gui/debug/widebugglowbloom.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_glow_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/c_scene_component.hpp"
+#include "pragma/entities/entity_component_system_t.hpp"
 #include <sharedutils/util_string.h>
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_render_target.hpp>
@@ -31,13 +36,18 @@ WIDebugGlowBloom::~WIDebugGlowBloom()
 
 void WIDebugGlowBloom::UpdateBloomImage()
 {
-#if 0
 	auto &drawCmd = c_engine->GetDrawCommandBuffer();
 	auto *scene = c_game->GetScene();
-	auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent*>(scene->GetRenderer()) : nullptr;
+	auto *renderer = scene ? dynamic_cast<pragma::CRendererComponent *>(scene->GetRenderer()) : nullptr;
 	if(renderer == nullptr)
 		return;
-	auto &glowTexture = renderer->GetGlowInfo().renderTarget->GetTexture();
+	auto raster = renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>();
+	if(raster.expired())
+		return;
+	auto glowC = renderer->GetEntity().GetComponent<pragma::CRendererPpGlowComponent>();
+	if(glowC.expired())
+		return;
+	auto &glowTexture = glowC->GetGlowTexture();
 	auto &imgSrc = glowTexture.GetImage();
 	auto &imgDst = m_renderTarget->GetTexture().GetImage();
 		
@@ -46,7 +56,6 @@ void WIDebugGlowBloom::UpdateBloomImage()
 	drawCmd->RecordBlitImage({},imgSrc,imgDst);
 	drawCmd->RecordImageBarrier(imgSrc,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 	drawCmd->RecordImageBarrier(imgDst,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
-#endif
 }
 
 void WIDebugGlowBloom::DoUpdate()

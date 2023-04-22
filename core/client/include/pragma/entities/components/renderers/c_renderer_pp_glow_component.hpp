@@ -11,6 +11,7 @@
 #include "pragma/entities/components/renderers/c_renderer_pp_base_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_bloom_blur.hpp"
+#include "pragma/rendering/controlled_blur_settings.hpp"
 
 namespace pragma {
 	class CRasterizationRendererComponent;
@@ -19,11 +20,36 @@ namespace pragma {
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		CRendererPpGlowComponent(BaseEntity &ent);
 
+		void SetBlurRadius(uint32_t radius);
+		void SetBlurSigma(double sigma);
+		uint32_t GetBlurRadius() const;
+		double GetBlurSigma() const;
+
+		void SetBlurAmount(int32_t blurAmount);
+		int32_t GetBlurAmount() const;
+
+		prosper::Texture &GetGlowTexture();
+
+		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual std::string GetIdentifier() const override { return "glow"; }
 		virtual uint32_t GetPostProcessingWeight() const override { return umath::to_integral(CRendererComponent::StandardPostProcessingWeight::Bloom); }
+
+		virtual void OnTick(double dt) override;
 	  private:
+		void SetPipelineDirty();
 		virtual void DoRenderEffect(const util::DrawSceneInfo &drawSceneInfo) override;
+		void InitializeRenderTarget();
+		void RecordGlowPass(const util::DrawSceneInfo &drawSceneInfo);
+		void ExecuteGlowPass(const util::DrawSceneInfo &drawSceneInfo);
+		std::shared_ptr<prosper::RenderTarget> m_glowRt;
+
+		std::shared_ptr<prosper::RenderTarget> m_blurRt;
+		std::shared_ptr<prosper::BlurSet> m_blurSet = nullptr;
+
+		ControlledBlurSettings m_controlledBlurSettings;
+
+		std::shared_ptr<prosper::ISwapCommandBufferGroup> m_glowCommandBufferGroup = nullptr;
 	};
 };
 

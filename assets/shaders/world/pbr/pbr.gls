@@ -25,6 +25,7 @@
 #include "/functions/fs_linearize_depth.gls"
 #include "/debug/fs_debug_csm.gls"
 #include "debug.gls"
+#include "fs_util.gls"
 
 void apply_debug_heatmap_color(uint istart,uint iend,inout vec3 color)
 {
@@ -89,14 +90,7 @@ vec4 calc_pbr(vec4 albedoColor,vec2 texCoords,uint debugMode)
 
 	metallic = rma[RMA_CHANNEL_METALNESS] * u_material.material.metalnessFactor;
 
-	vec4 colorMod = get_instance_color();
-	baseColor = albedoColor;
-	if(CSPEC_ENABLE_TRANSLUCENCY == 1)
-		baseColor.a = apply_alpha_mode(baseColor.a *colorMod.a *u_material.material.color.a,u_material.material.alphaMode,u_material.material.alphaCutoff);
-	else
-		baseColor.a = 1.0;
-	baseColor.rgb *= colorMod.rgb *u_material.material.color.rgb;
-
+	baseColor = get_base_color(albedoColor);
 	if(CSPEC_WRINKLES_ENABLED == 1)
 	{
 		if(fs_in.wrinkleDelta != 0.0)
@@ -198,14 +192,8 @@ vec4 calc_pbr(vec4 albedoColor,vec2 texCoords,uint debugMode)
 
 	if(CSPEC_EMISSION_ENABLED == 1)
 	{
-		if(use_glow_map())
-		{
-			vec4 emissiveColor = texture(u_glowMap,texCoords);
-			if(true)//is_glow_srgb()) // TODO
-				emissiveColor.rgb = srgb_to_linear(emissiveColor.rgb);
-			emissiveColor.rgb *= u_material.material.emissionFactor.rgb;
-			result = add_glow_color(result,texCoords,emissiveColor,baseColor);
-		}
+		vec4 emissionColor = get_emission_color(result,baseColor,texCoords);
+		result = get_emission_color(result,baseColor,texCoords);
 	}
 
 	if(CSPEC_DEBUG_MODE_ENABLED == 1)

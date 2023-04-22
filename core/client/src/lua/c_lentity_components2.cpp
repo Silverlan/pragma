@@ -72,6 +72,12 @@ void RegisterLuaEntityComponents2_cl(lua_State *l, luabind::module_ &entsMod)
 	entsMod[defPpBloom];
 
 	auto defPpGlow = pragma::lua::create_entity_component_class<pragma::CRendererPpGlowComponent, pragma::BaseEntityComponent>("RendererPpGlowComponent");
+	defPpGlow.def("SetBlurRadius", &pragma::CRendererPpGlowComponent::SetBlurRadius);
+	defPpGlow.def("SetBlurSigma", &pragma::CRendererPpGlowComponent::SetBlurSigma);
+	defPpGlow.def("GetBlurRadius", &pragma::CRendererPpGlowComponent::GetBlurRadius);
+	defPpGlow.def("GetBlurSigma", &pragma::CRendererPpGlowComponent::GetBlurSigma);
+	defPpGlow.def("GetBlurAmount", &pragma::CRendererPpGlowComponent::GetBlurAmount);
+	defPpGlow.def("SetBlurAmount", &pragma::CRendererPpGlowComponent::SetBlurAmount);
 	entsMod[defPpGlow];
 
 	auto defPpToneMapping = pragma::lua::create_entity_component_class<pragma::CRendererPpToneMappingComponent, pragma::BaseEntityComponent>("RendererPpToneMappingComponent");

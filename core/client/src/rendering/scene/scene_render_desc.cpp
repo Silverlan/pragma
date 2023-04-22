@@ -225,11 +225,19 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(pragma::CRasterizationRendere
 		if(renderBufferData[meshIdx].IsGlowPassEnabled() && umath::is_flag_set(renderFlags,RenderFlags::Glow)) {
 			auto *renderQueueGlow = getRenderQueue(pragma::rendering::SceneRenderPass::Glow,false);
 			if(renderQueueGlow) {
-				pragma::rendering::RenderQueueItem itemGlow {static_cast<CBaseEntity &>(renderC.GetEntity()), meshIdx, *mat, pipelineId, nullptr};
-				if(fOptInsertItemToQueue)
-					fOptInsertItemToQueue(*renderQueueGlow, itemGlow);
-				else
-					renderQueueGlow->Add(itemGlow);
+				// TODO
+				auto *shader = static_cast<pragma::ShaderGameWorldLightingPass *>(c_engine->GetShader("glow").get());
+				auto pipelineIdx = shader->FindPipelineIndex(pragma::rendering::PassType::Generic,
+				  renderC.GetShaderPipelineSpecialization(), specializationFlags);
+
+				prosper::PipelineID pipelineId;
+				if(pipelineIdx.has_value() != false && shader->GetPipelineId(pipelineId, *pipelineIdx) == true && pipelineId != std::numeric_limits<decltype(pipelineId)>::max()) {
+					pragma::rendering::RenderQueueItem itemGlow {static_cast<CBaseEntity &>(renderC.GetEntity()), meshIdx, *mat, pipelineId, nullptr};
+					if(fOptInsertItemToQueue)
+						fOptInsertItemToQueue(*renderQueueGlow, itemGlow);
+					else
+						renderQueueGlow->Add(itemGlow);
+				}
 			}
 		}
 	}

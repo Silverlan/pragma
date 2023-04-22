@@ -192,8 +192,7 @@ namespace pragma {
 		pragma::ShaderPrepassBase &GetPrepassShader() const;
 
 		// Render
-		void RecordRenderParticleSystems(prosper::ICommandBuffer &cmd, const util::DrawSceneInfo &drawSceneInfo, std::vector<pragma::CParticleSystemComponent *> &particles, pragma::rendering::SceneRenderPass renderMode, bool depthPass, Bool bloom = false,
-		  std::vector<pragma::CParticleSystemComponent *> *bloomParticles = nullptr);
+		void RecordRenderParticleSystems(prosper::ICommandBuffer &cmd, const util::DrawSceneInfo &drawSceneInfo, const std::vector<pragma::CParticleSystemComponent *> &particles, pragma::rendering::SceneRenderPass renderMode, bool depthPass, Bool bloom = false);
 
 		// Renders all meshes from m_glowInfo.tmpGlowMeshes, and clears the container when done
 		void RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, const CSceneComponent &scene, pragma::rendering::SceneRenderPass renderMode);
@@ -225,6 +224,8 @@ namespace pragma {
 		void UpdateLightingPassRenderBuffers(const util::DrawSceneInfo &drawSceneInfo);
 		void RecordPrepass(const util::DrawSceneInfo &drawSceneInfo);
 		void ExecutePrepass(const util::DrawSceneInfo &drawSceneInfo);
+
+		const std::vector<pragma::CParticleSystemComponent *> &GetCulledParticles() const { return m_culledParticles; }
 
 		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetPrepassCommandBufferRecorder() const { return m_prepassCommandBufferGroup; }
 		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetShadowCommandBufferRecorder() const { return m_shadowCommandBufferGroup; }
@@ -272,6 +273,7 @@ namespace pragma {
 
 		std::vector<pragma::CLightComponent *> m_visLightSources;
 		std::vector<ComponentHandle<pragma::CLightComponent>> m_visShadowedLights;
+		std::vector<pragma::CParticleSystemComponent *> m_culledParticles;
 
 		// HDR
 		rendering::HDRData m_hdrInfo;

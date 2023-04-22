@@ -238,6 +238,7 @@ struct DLLCLIENT RenderStats {
 		LightingPassTranslucent,
 		Prepass,
 		ShadowPass,
+		GlowPass,
 
 		Count
 	};
@@ -248,6 +249,7 @@ struct DLLCLIENT RenderStats {
 		PostProcessingGpuFog,
 		PostProcessingGpuDoF,
 		PostProcessingGpuBloom,
+		PostProcessingGpuGlow,
 		PostProcessingGpuToneMapping,
 		PostProcessingGpuFxaa,
 		PostProcessingGpuSsao,

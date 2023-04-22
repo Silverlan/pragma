@@ -890,7 +890,7 @@ void Model::PrecacheTextureGroup(uint32_t i)
 {
 	if(i >= m_textureGroups.size())
 		return;
-	LoadMaterials(std::vector<uint32_t> {i}, false, true);
+	LoadMaterials(std::vector<uint32_t> {i}, true, false);
 }
 void Model::PrecacheTextureGroups()
 {

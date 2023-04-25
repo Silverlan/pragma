@@ -39,6 +39,7 @@ REGISTER_SHARED_CONVAR(sv_timeout_duration, "90", ConVarFlags::Archive | ConVarF
 REGISTER_SHARED_CONVAR(sv_tickrate, STRING(ENGINE_DEFAULT_TICK_RATE), ConVarFlags::Archive | ConVarFlags::Replicated,
   "Specifies the tickrate. A higher tickrate means smoother and more reliable physics, but also more data to transmit to clients. Higher values can result in more lag for clients.");
 REGISTER_SHARED_CONVAR(sv_acceleration, "33", ConVarFlags::Archive | ConVarFlags::Replicated, "Player acceleration. If this is too low, the player will be unable to reach full movement speed due to friction forces.");
+REGISTER_SHARED_CONVAR(sv_acceleration_ramp_up_time, "0", ConVarFlags::Archive | ConVarFlags::Replicated, "The time it takes to reach full acceleration.");
 
 REGISTER_CONVAR_SV(sv_allowdownload, "1", ConVarFlags::Archive, "Specifies whether clients are allowed to download resources from the server.");
 REGISTER_CONVAR_SV(sv_allowupload, "1", ConVarFlags::Archive, "Specifies whether clients are allowed to upload resources to the server (e.g. spraylogos).");

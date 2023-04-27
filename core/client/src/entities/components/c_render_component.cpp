@@ -653,6 +653,7 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 	CEOnUpdateRenderBuffers evData {drawCmd};
 	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_BUFFERS, evData);
 }
+const pragma::ShaderEntity::InstanceData &CRenderComponent::GetInstanceData() const { return m_instanceData; }
 void CRenderComponent::UpdateRenderDataMT(const CSceneComponent &scene, const CCameraComponent &cam, const Mat4 &vp)
 {
 	m_renderDataMutex.lock();

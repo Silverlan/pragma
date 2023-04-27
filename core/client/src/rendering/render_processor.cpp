@@ -715,6 +715,12 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 			if(inInstancedEntityGroup == false) {
 				auto *ent = item.GetEntity();
 				assert(ent);
+				if(prepass) {
+					// Skip translucent objects for prepass
+					auto &rbd = ent->GetRenderComponent()->GetInstanceData();
+					if(rbd.color.a < 1.f)
+						continue; // Skip translucent objects for prepass
+				}
 				// TODO: If we're instancing, there's technically no need to bind
 				// the entity (except for resetting the clip plane, etc.)
 				BindEntity(static_cast<CBaseEntity &>(*ent));

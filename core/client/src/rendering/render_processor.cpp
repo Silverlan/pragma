@@ -682,7 +682,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 		if(item.material != m_curMaterialIndex) {
 			if(optStats)
 				ttmp = std::chrono::steady_clock::now();
-			auto *mat = static_cast<Material *>(matManager.GetAsset(item.material)->assetObject.get());
+			auto *mat = item.GetMaterial();
 			assert(mat);
 			if(prepass) {
 				// Hack: Transparent objects do not need to be depth-sorted, so they're part of
@@ -713,7 +713,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 			// but we don't really care about which of the entity is bound, as long as *one of them*
 			// is bound. That means if we have already bound one, we can skip this block.
 			if(inInstancedEntityGroup == false) {
-				auto *ent = c_game->GetEntityByLocalIndex(item.entity);
+				auto *ent = item.GetEntity();
 				assert(ent);
 				// TODO: If we're instancing, there's technically no need to bind
 				// the entity (except for resetting the clip plane, etc.)

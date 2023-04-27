@@ -46,6 +46,12 @@ namespace pragma::rendering {
 		static auto constexpr UNIQUE = std::numeric_limits<uint16_t>::max() - 1;
 		RenderQueueItem() = default;
 		RenderQueueItem(CBaseEntity &ent, RenderMeshIndex meshIdx, CMaterial &mat, prosper::PipelineID pipelineId, const CCameraComponent *optCam = nullptr);
+		
+		CMaterial *GetMaterial() const;
+		CBaseEntity *GetEntity() const;
+		CModelSubMesh *GetMesh() const;
+		prosper::ShaderGraphics *GetShader(uint32_t &outPipelineIndex) const;
+		
 		MaterialIndex material;
 		prosper::PipelineID pipelineId = std::numeric_limits<prosper::PipelineID>::max();
 		EntityIndex entity;

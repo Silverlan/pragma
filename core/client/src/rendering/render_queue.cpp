@@ -11,9 +11,14 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
+#include <cmaterial_manager2.hpp>
 #include <cmaterial.h>
 
 using namespace pragma::rendering;
+
+extern DLLCLIENT CEngine *c_engine;
+extern DLLCLIENT ClientState *client;
+extern DLLCLIENT CGame *c_game;
 
 SortingKey::SortingKey(MaterialIndex material, prosper::ShaderIndex shader, bool instantiable, bool translucentKey)
 {
@@ -69,6 +74,23 @@ RenderQueueItem::RenderQueueItem(CBaseEntity &ent, RenderMeshIndex meshIdx, CMat
 		sortingKey.opaque.shader = pipelineId;
 		sortingKey.opaque.instantiable = renderC.IsInstantiable();
 	}
+}
+
+CMaterial *RenderQueueItem::GetMaterial() const { return static_cast<CMaterial *>(client->GetMaterialManager().GetAsset(material)->assetObject.get()); }
+CBaseEntity *RenderQueueItem::GetEntity() const { return static_cast<CBaseEntity *>(c_game->GetEntityByLocalIndex(entity)); }
+CModelSubMesh *RenderQueueItem::GetMesh() const
+{
+	auto *ent = GetEntity();
+	auto *renderC = ent ? ent->GetRenderComponent() : nullptr;
+	if(!renderC)
+		return nullptr;
+	auto &renderMeshes = renderC->GetRenderMeshes();
+	return mesh < renderMeshes.size() ? static_cast<CModelSubMesh *>(renderMeshes[mesh].get()) : nullptr;
+}
+prosper::ShaderGraphics *RenderQueueItem::GetShader(uint32_t &outPipelineIndex) const
+{
+	auto *shader = c_engine->GetRenderContext().GetShaderPipeline(pipelineId, outPipelineIndex);
+	return shader && shader->IsGraphicsShader() ? static_cast<prosper::ShaderGraphics *>(shader) : nullptr;
 }
 
 std::shared_ptr<RenderQueue> RenderQueue::Create(std::string name) { return std::shared_ptr<RenderQueue> {new RenderQueue {std::move(name)}}; }

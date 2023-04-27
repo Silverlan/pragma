@@ -321,6 +321,103 @@ void CGame::GetPrimaryCameraRenderMask(::pragma::rendering::RenderMask &inclusio
 	}
 }
 
+static void debug_dump_render_queues(const util::DrawSceneInfo &drawSceneInfo)
+{
+	std::stringstream ss;
+	ss << "Scene Info:\n";
+	ss << "Render Flags: " << magic_enum::flags::enum_name(drawSceneInfo.renderFlags) << "\n";
+	if(drawSceneInfo.clearColor)
+		ss << "Clear Color: " << *drawSceneInfo.clearColor << "\n";
+	if(drawSceneInfo.toneMapping)
+		ss << "Tone Mapping: " << magic_enum::enum_name(*drawSceneInfo.toneMapping) << "\n";
+	if(drawSceneInfo.clipPlane)
+		ss << "Clip Plane: " << *drawSceneInfo.clipPlane << "\n";
+	if(drawSceneInfo.pvsOrigin)
+		ss << "PVS Origin: " << *drawSceneInfo.pvsOrigin << "\n";
+	ss << "Exclusion Mask: " << umath::to_integral(drawSceneInfo.exclusionMask) << "\n";
+	ss << "Inclusion Mask: " << umath::to_integral(drawSceneInfo.inclusionMask) << "\n";
+	if(drawSceneInfo.outputImage) {
+		auto &img = *drawSceneInfo.outputImage;
+		ss << "Output Image: " << umath::to_integral(img.GetFormat()) << ", " << img.GetWidth() << "x" << img.GetHeight() << "\n";
+	}
+	ss << "Output Layer Id: " << drawSceneInfo.outputLayerId << "\n";
+	ss << "Flags: " << magic_enum::flags::enum_name(drawSceneInfo.flags) << "\n";
+
+	ss << "Render Queues:\n";
+	auto fPrintQueue = [&ss](const pragma::rendering::RenderQueue &queue) {
+		auto curMaterial = std::numeric_limits<MaterialIndex>::max();
+		auto curPipeline = std::numeric_limits<prosper::PipelineID>::max();
+		auto curEntity = std::numeric_limits<EntityIndex>::max();
+
+		queue.WaitForCompletion();
+		for(auto &item : queue.queue) {
+			if(item.material != curMaterial) {
+				curMaterial = item.material;
+				auto *mat = item.GetMaterial();
+				ss << util::get_true_color_code(Color::Lime) << "Material" << util::get_reset_color_code() << ": " << (mat ? mat->GetName() : "NULL") << "\n";
+			}
+			if(item.pipelineId != curPipeline) {
+				curPipeline = item.pipelineId;
+				uint32_t pipelineIdx;
+				auto *shader = item.GetShader(pipelineIdx);
+				ss << util::get_true_color_code(Color::Aqua) << "Shader" << util::get_reset_color_code() << ": ";
+				if(shader)
+					ss << shader->GetIdentifier() << " (" << pipelineIdx << ")\n";
+				else
+					ss << "NULL\n";
+			}
+			if(item.entity != curEntity) {
+				curEntity = item.entity;
+				auto *ent = item.GetEntity();
+				ss << util::get_true_color_code(Color::Orange) << "Entity" << util::get_reset_color_code() << ": " << (ent ? ent->ToString() : "NULL") << "\n";
+			}
+			auto *mesh = item.GetMesh();
+			ss << util::get_true_color_code(Color::White) << "Mesh" << util::get_reset_color_code() << ": ";
+			if(!mesh)
+				ss << "NULL\n";
+			else
+				ss << *mesh << "\n";
+		}
+	};
+
+	auto &renderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
+	auto &worldRenderQueues = renderDesc.GetWorldRenderQueues();
+	for(auto &queue : worldRenderQueues) {
+		ss << "\nWorld Render Queue...\n";
+		fPrintQueue(*queue);
+	}
+
+	auto n = umath::to_integral(pragma::rendering::SceneRenderPass::Count);
+	for(auto i = decltype(n) {0u}; i < n; ++i) {
+		for(auto translucent : {false, true}) {
+			auto *queue = renderDesc.GetRenderQueue(static_cast<pragma::rendering::SceneRenderPass>(i), translucent);
+			if(!queue)
+				continue;
+			queue->WaitForCompletion();
+			if(queue->queue.empty())
+				continue;
+			ss << "\n" << util::get_true_color_code(Color::Magenta) << "Scene pass" << util::get_reset_color_code() << ": " << magic_enum::enum_name(static_cast<pragma::rendering::SceneRenderPass>(i));
+			if(translucent)
+				ss << " (translucent)\n";
+			else
+				ss << " (opaque)\n";
+			fPrintQueue(*queue);
+		}
+	}
+
+	Con::cout << ss.str() << Con::endl;
+}
+static void debug_dump_render_queues(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
+{
+	Con::cout << "Dumping render queues..." << Con::endl;
+	uint32_t i = 0;
+	for(auto &drawSceneInfo : drawSceneInfos) {
+		Con::cout << util::get_true_color_code(Color::Red) << "Scene #" << (i++) << util::get_reset_color_code() << Con::endl;
+		debug_dump_render_queues(drawSceneInfo);
+	}
+}
+
+bool g_dumpRenderQueues = false;
 void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 {
 	if(cvDrawScene->GetBool() == false)
@@ -375,6 +472,11 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 	// It will call the render queue completion functions automatically once all render queues have
 	// finished building. No completion functions can be executed before this function is called.
 	GetRenderQueueBuilder().SetReadyForCompletion();
+
+	if(g_dumpRenderQueues && !drawSceneInfos.empty()) {
+		g_dumpRenderQueues = false;
+		debug_dump_render_queues(drawSceneInfos);
+	}
 
 	// Update time
 	UpdateShaderTimeData();

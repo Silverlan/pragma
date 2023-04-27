@@ -35,6 +35,7 @@
 #include <fsys/directory_watcher.h>
 
 extern DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool continuous);
+extern bool g_dumpRenderQueues;
 void CEngine::RegisterConsoleCommands()
 {
 	Engine::RegisterConsoleCommands();
@@ -221,6 +222,8 @@ void CEngine::RegisterConsoleCommands()
 		  Con::cout << "Done! Written shader files to '" << path << "'!" << Con::endl;
 	  },
 	  ConVarFlags::None, "Dumps the glsl code for the specified shader.");
+	conVarMap.RegisterConCommand(
+	  "debug_dump_render_queues", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { g_dumpRenderQueues = true; }, ConVarFlags::None, "Prints all render queues for the next frame to the console.");
 	conVarMap.RegisterConVar<bool>("debug_hide_gui", false, ConVarFlags::None, "Disables GUI rendering.");
 
 	conVarMap.RegisterConVar<bool>("render_vsync_enabled", true, ConVarFlags::Archive, "Enables or disables vsync. OpenGL only.");

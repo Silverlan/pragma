@@ -61,12 +61,12 @@ def mkpath(path):
 	pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
 def git_clone(url,directory=None,branch=None):
-    args = ["git", "clone", url, "--recurse-submodules"]
-    if branch:
-        args.extend(["-b", branch])
-    if directory:
-        args.append(directory)
-    subprocess.run(args, check=True)
+	args = ["git", "clone", url, "--recurse-submodules"]
+	if branch:
+		args.extend(["-b", branch])
+	if directory:
+		args.append(directory)
+	subprocess.run(args, check=True)
 
 def cmake_configure(scriptPath,generator,additionalArgs=[]):
 	args = ["cmake",scriptPath,"-G",generator]
@@ -192,19 +192,20 @@ def execfile(filepath, globals=None, locals=None, args=None):
 		exec(compile(file.read(), filepath, 'exec'), globals, locals)
 
 def get_submodule(directory,url,commitId=None,branch=None):
-    from scripts.shared import print_msg
-    from scripts.shared import git_clone
-    import os
-    import subprocess
-    from pathlib import Path
+	from scripts.shared import print_msg
+	from scripts.shared import git_clone
+	import os
+	import subprocess
+	from pathlib import Path
 
-    print_msg("Updating submodule '" +directory +"'...")
-    curDir = os.getcwd()
-    absDir = os.getcwd() +"/" +directory
-    if not Path(absDir).is_dir() or not os.listdir(absDir):
-        git_clone(url,directory,branch)
-    if commitId is not None:
-        os.chdir(absDir)
-        subprocess.run(["git","reset",commitId],check=True)
-    subprocess.run(["git","submodule","update","--init","--recursive"],check=True)
-    os.chdir(curDir)
+	print_msg("Updating submodule '" +directory +"'...")
+	curDir = os.getcwd()
+	absDir = os.getcwd() +"/" +directory
+	if not Path(absDir).is_dir() or not os.listdir(absDir):
+		git_clone(url,directory,branch)
+	if commitId is not None:
+		os.chdir(absDir)
+		subprocess.run(["git","fetch"],check=True)
+		subprocess.run(["git","checkout",commitId],check=True)
+	subprocess.run(["git","submodule","update","--init","--recursive"],check=True)
+	os.chdir(curDir)

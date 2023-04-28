@@ -882,7 +882,6 @@ set_target_folder(pngtest third_party_libs/libpng)
 set_target_folder(pngunknown third_party_libs/libpng)
 set_target_folder(pngvalid third_party_libs/libpng)
 
-message("ASSING LIBPNG INCLUDE DIRECTORY FOR ZLIB: ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib")
 target_include_directories(png PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 #
 

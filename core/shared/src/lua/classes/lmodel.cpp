@@ -1074,6 +1074,60 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	defJoint.add_static_constant("TYPE_DOF", umath::to_integral(JointType::DOF));
 	classDef.scope[defJoint];
 
+	auto defBoxCreateInfo = luabind::class_<pragma::model::BoxCreateInfo>("BoxCreateInfo");
+	defBoxCreateInfo.def(luabind::constructor<const Vector3 &, const Vector3 &>());
+	defBoxCreateInfo.def(luabind::constructor<>());
+	defBoxCreateInfo.def_readwrite("min", &pragma::model::BoxCreateInfo::min);
+	defBoxCreateInfo.def_readwrite("max", &pragma::model::BoxCreateInfo::max);
+	classDef.scope[defBoxCreateInfo];
+
+	auto defSphereCreateInfo = luabind::class_<pragma::model::SphereCreateInfo>("SphereCreateInfo");
+	defSphereCreateInfo.def(luabind::constructor<const Vector3 &, float>());
+	defSphereCreateInfo.def(luabind::constructor<>());
+	defSphereCreateInfo.def_readwrite("origin", &pragma::model::SphereCreateInfo::origin);
+	defSphereCreateInfo.def_readwrite("radius", &pragma::model::SphereCreateInfo::radius);
+	defSphereCreateInfo.def_readwrite("recursionLevel", &pragma::model::SphereCreateInfo::recursionLevel);
+	classDef.scope[defSphereCreateInfo];
+
+	auto defCylinderCreateInfo = luabind::class_<pragma::model::CylinderCreateInfo>("CylinderCreateInfo");
+	defCylinderCreateInfo.def(luabind::constructor<float, float>());
+	defCylinderCreateInfo.def(luabind::constructor<>());
+	defCylinderCreateInfo.def_readwrite("radius", &pragma::model::CylinderCreateInfo::radius);
+	defCylinderCreateInfo.def_readwrite("length", &pragma::model::CylinderCreateInfo::length);
+	defCylinderCreateInfo.def_readwrite("segmentCount", &pragma::model::CylinderCreateInfo::segmentCount);
+	classDef.scope[defCylinderCreateInfo];
+
+	auto defConeCreateInfo = luabind::class_<pragma::model::ConeCreateInfo>("ConeCreateInfo");
+	defConeCreateInfo.def(luabind::constructor<umath::Degree, float>());
+	defConeCreateInfo.def(luabind::constructor<float, float, float>());
+	defConeCreateInfo.def(luabind::constructor<>());
+	defConeCreateInfo.def_readwrite("startRadius", &pragma::model::ConeCreateInfo::startRadius);
+	defConeCreateInfo.def_readwrite("length", &pragma::model::ConeCreateInfo::length);
+	defConeCreateInfo.def_readwrite("endRadius", &pragma::model::ConeCreateInfo::endRadius);
+	defConeCreateInfo.def_readwrite("segmentCount", &pragma::model::ConeCreateInfo::segmentCount);
+	classDef.scope[defConeCreateInfo];
+
+	auto defCircleCreateInfo = luabind::class_<pragma::model::CircleCreateInfo>("CircleCreateInfo");
+	defCircleCreateInfo.def(luabind::constructor<float, bool>());
+	defCircleCreateInfo.def(luabind::constructor<float, bool>(), luabind::default_parameter_policy<2, true> {});
+	defCircleCreateInfo.def(luabind::constructor<>());
+	defCircleCreateInfo.def_readwrite("radius", &pragma::model::CircleCreateInfo::radius);
+	defCircleCreateInfo.def_readwrite("doubleSided", &pragma::model::CircleCreateInfo::doubleSided);
+	defCircleCreateInfo.def_readwrite("segmentCount", &pragma::model::CircleCreateInfo::segmentCount);
+	defCircleCreateInfo.def_readwrite("totalAngle", &pragma::model::CircleCreateInfo::totalAngle);
+	classDef.scope[defCircleCreateInfo];
+
+	auto defRingCreateInfo = luabind::class_<pragma::model::RingCreateInfo>("RingCreateInfo");
+	defRingCreateInfo.def(luabind::constructor<float, float, bool>());
+	defRingCreateInfo.def(luabind::constructor<float, float, bool>(), luabind::default_parameter_policy<3, true> {});
+	defRingCreateInfo.def(luabind::constructor<>());
+	defRingCreateInfo.def_readwrite("innerRadius", &pragma::model::RingCreateInfo::innerRadius);
+	defRingCreateInfo.def_readwrite("outerRadius", &pragma::model::RingCreateInfo::outerRadius);
+	defRingCreateInfo.def_readwrite("doubleSided", &pragma::model::RingCreateInfo::doubleSided);
+	defRingCreateInfo.def_readwrite("segmentCount", &pragma::model::RingCreateInfo::segmentCount);
+	defRingCreateInfo.def_readwrite("totalAngle", &pragma::model::RingCreateInfo::totalAngle);
+	classDef.scope[defRingCreateInfo];
+
 	// Assign definitions
 	classDef.scope[classDefSkeleton];
 	classDef.scope[modelMeshGroupClassDef];

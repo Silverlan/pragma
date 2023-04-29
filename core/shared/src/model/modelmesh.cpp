@@ -10,6 +10,7 @@
 #include <mathutil/uvec.h>
 #include <pragma/math/intersection.h>
 #include <udm.hpp>
+#include "pragma/math/icosphere.h"
 
 ModelMesh::ModelMesh() : std::enable_shared_from_this<ModelMesh>(), m_numVerts(0), m_numIndices(0) {}
 ModelMesh::ModelMesh(const ModelMesh &other) : m_min(other.m_min), m_max(other.m_max), m_numVerts(other.m_numVerts), m_numIndices(other.m_numIndices), m_center(other.m_center), m_subMeshes(other.m_subMeshes), m_referenceId {other.m_referenceId}
@@ -1010,4 +1011,296 @@ std::ostream &operator<<(std::ostream &out, const ModelSubMesh &o)
 	o.GetBounds(min, max);
 	out << "[Bounds:(" << min << ")(" << max << ")]";
 	return out;
+}
+
+pragma::model::BoxCreateInfo::BoxCreateInfo(const Vector3 &min, const Vector3 &max) : min {min}, max {max} {}
+pragma::model::SphereCreateInfo::SphereCreateInfo(const Vector3 &origin, float radius) : origin {origin}, radius {radius} {}
+pragma::model::CylinderCreateInfo::CylinderCreateInfo(float radius, float length) : radius {radius}, length {length} {}
+pragma::model::ConeCreateInfo::ConeCreateInfo(umath::Degree angle, float length) : length {length} { endRadius = length * umath::tan(umath::deg_to_rad(angle)); }
+pragma::model::ConeCreateInfo::ConeCreateInfo(float startRadius, float length, float endRadius) : startRadius {startRadius}, length {length}, endRadius {endRadius} { }
+pragma::model::CircleCreateInfo::CircleCreateInfo(float radius, bool doubleSided) : radius {radius}, doubleSided {doubleSided} {}
+pragma::model::RingCreateInfo::RingCreateInfo(float innerRadius, float outerRadius, bool doubleSided) : innerRadius {innerRadius}, outerRadius {outerRadius}, doubleSided {doubleSided} {}
+void pragma::model::create_quad(ModelSubMesh &mesh, const QuadCreateInfo &createInfo)
+{
+	auto size = createInfo.size;
+	Vector3 min {-size, 0.f, -size};
+	Vector3 max {size, 0.f, size};
+	std::vector<Vector3> uniqueVertices {
+	  min,                           // 0
+	  Vector3 {max.x, min.y, min.z}, // 1
+	  Vector3 {max.x, min.y, max.z}, // 2
+	  Vector3 {min.x, min.y, max.z}  // 3
+	};
+	std::vector<Vector3> verts {uniqueVertices.at(0), uniqueVertices.at(2), uniqueVertices.at(1), uniqueVertices.at(2), uniqueVertices.at(0), uniqueVertices.at(3)};
+	std::vector<Vector3> faceNormals {uvec::UP, uvec::UP};
+	std::vector<::Vector2> uvs {::Vector2 {0.f, 0.f}, ::Vector2 {1.f, 1.f}, ::Vector2 {1.f, 0.f}, ::Vector2 {1.f, 1.f}, ::Vector2 {0.f, 0.f}, ::Vector2 {0.f, 1.f}};
+	for(auto i = decltype(verts.size()) {0}; i < verts.size(); i += 3) {
+		auto &n = faceNormals[i / 3];
+		mesh.AddVertex(umath::Vertex {verts[i], uvs[i], n});
+		mesh.AddVertex(umath::Vertex {verts[i + 1], uvs[i + 1], n});
+		mesh.AddVertex(umath::Vertex {verts[i + 2], uvs[i + 2], n});
+
+		mesh.AddTriangle(static_cast<uint32_t>(i), static_cast<uint32_t>(i + 1), static_cast<uint32_t>(i + 2));
+	}
+	mesh.SetSkinTextureIndex(0);
+	mesh.Update();
+}
+std::shared_ptr<ModelSubMesh> pragma::model::create_quad(Game &game, const QuadCreateInfo &createInfo)
+{
+	auto mesh = game.CreateModelSubMesh();
+	create_quad(*mesh, createInfo);
+	return mesh;
+}
+void pragma::model::create_box(ModelSubMesh &mesh, const BoxCreateInfo &createInfo)
+{
+	auto &cmin = createInfo.min;
+	auto &cmax = createInfo.max;
+
+	auto min = cmin;
+	auto max = cmax;
+	uvec::to_min_max(min, max);
+	std::vector<Vector3> uniqueVertices {
+	  min,                          // 0
+	  Vector3(max.x, min.y, min.z), // 1
+	  Vector3(max.x, min.y, max.z), // 2
+	  Vector3(max.x, max.y, min.z), // 3
+	  max,                          // 4
+	  Vector3(min.x, max.y, min.z), // 5
+	  Vector3(min.x, min.y, max.z), // 6
+	  Vector3(min.x, max.y, max.z)  // 7
+	};
+	std::vector<Vector3> verts {
+	  uniqueVertices[0], uniqueVertices[6], uniqueVertices[7], // 1
+	  uniqueVertices[0], uniqueVertices[7], uniqueVertices[5], // 1
+	  uniqueVertices[3], uniqueVertices[0], uniqueVertices[5], // 2
+	  uniqueVertices[3], uniqueVertices[1], uniqueVertices[0], // 2
+	  uniqueVertices[2], uniqueVertices[0], uniqueVertices[1], // 3
+	  uniqueVertices[2], uniqueVertices[6], uniqueVertices[0], // 3
+	  uniqueVertices[7], uniqueVertices[6], uniqueVertices[2], // 4
+	  uniqueVertices[4], uniqueVertices[7], uniqueVertices[2], // 4
+	  uniqueVertices[4], uniqueVertices[1], uniqueVertices[3], // 5
+	  uniqueVertices[1], uniqueVertices[4], uniqueVertices[2], // 5
+	  uniqueVertices[4], uniqueVertices[3], uniqueVertices[5], // 6
+	  uniqueVertices[4], uniqueVertices[5], uniqueVertices[7], // 6
+	};
+	std::vector<Vector3> faceNormals {Vector3(-1, 0, 0), Vector3(-1, 0, 0), Vector3(0, 0, -1), Vector3(0, 0, -1), Vector3(0, -1, 0), Vector3(0, -1, 0), Vector3(0, 0, 1), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(1, 0, 0), Vector3(0, 1, 0), Vector3(0, 1, 0)};
+	std::vector<::Vector2> uvs {
+	  ::Vector2(0, 1), ::Vector2(1, 1), ::Vector2(1, 0), // 1
+	  ::Vector2(0, 1), ::Vector2(1, 0), ::Vector2(0, 0), // 1
+	  ::Vector2(0, 0), ::Vector2(1, 1), ::Vector2(1, 0), // 2
+	  ::Vector2(0, 0), ::Vector2(0, 1), ::Vector2(1, 1), // 2
+	  ::Vector2(0, 1), ::Vector2(1, 0), ::Vector2(0, 0), // 3
+	  ::Vector2(0, 1), ::Vector2(1, 1), ::Vector2(1, 0), // 3
+	  ::Vector2(0, 0), ::Vector2(0, 1), ::Vector2(1, 1), // 4
+	  ::Vector2(1, 0), ::Vector2(0, 0), ::Vector2(1, 1), // 4
+	  ::Vector2(0, 0), ::Vector2(1, 1), ::Vector2(1, 0), // 5
+	  ::Vector2(1, 1), ::Vector2(0, 0), ::Vector2(0, 1), // 5
+	  ::Vector2(1, 1), ::Vector2(1, 0), ::Vector2(0, 0), // 6
+	  ::Vector2(1, 1), ::Vector2(0, 0), ::Vector2(0, 1)  // 6
+	};
+	for(auto &uv : uvs)
+		uv.y = 1.f - uv.y;
+	for(auto i = decltype(verts.size()) {0}; i < verts.size(); i += 3) {
+		auto &n = faceNormals[i / 3];
+		mesh.AddVertex(umath::Vertex {verts[i], uvs[i], n});
+		mesh.AddVertex(umath::Vertex {verts[i + 1], uvs[i + 1], n});
+		mesh.AddVertex(umath::Vertex {verts[i + 2], uvs[i + 2], n});
+
+		mesh.AddTriangle(static_cast<uint32_t>(i), static_cast<uint32_t>(i + 1), static_cast<uint32_t>(i + 2));
+	}
+	mesh.SetSkinTextureIndex(0);
+	mesh.Update();
+}
+std::shared_ptr<ModelSubMesh> pragma::model::create_box(Game &game, const BoxCreateInfo &createInfo)
+{
+	auto mesh = game.CreateModelSubMesh();
+	create_box(*mesh, createInfo);
+	return mesh;
+}
+void pragma::model::create_sphere(ModelSubMesh &mesh, const SphereCreateInfo &createInfo)
+{
+	auto &origin = createInfo.origin;
+	auto radius = createInfo.radius;
+	auto recursionLevel = createInfo.recursionLevel;
+
+	auto &meshVerts = mesh.GetVertices();
+	std::vector<Vector3> verts;
+	std::vector<uint16_t> triangles;
+	IcoSphere::Create(origin, radius, verts, triangles, recursionLevel);
+	mesh.SetIndices(triangles);
+	meshVerts.reserve(verts.size());
+	for(auto &v : verts) {
+		meshVerts.push_back({});
+		auto &meshVert = meshVerts.back();
+		meshVert.position = v;
+		auto &n = meshVert.normal = uvec::get_normal(v - origin);
+		meshVert.uv = {umath::atan2(n.x, n.z) / (2.f * M_PI) + 0.5f, n.y * 0.5f + 0.5f};
+	}
+
+	mesh.SetSkinTextureIndex(0);
+	mesh.Update();
+}
+std::shared_ptr<ModelSubMesh> pragma::model::create_sphere(Game &game, const SphereCreateInfo &createInfo)
+{
+	auto mesh = game.CreateModelSubMesh();
+	create_sphere(*mesh, createInfo);
+	return mesh;
+}
+void pragma::model::create_cylinder(ModelSubMesh &mesh, const CylinderCreateInfo &createInfo)
+{
+	auto startRadius = createInfo.radius;
+	auto length = createInfo.length;
+	auto segmentCount = createInfo.segmentCount;
+
+	auto rot = uquat::create_look_rotation(uvec::FORWARD, uvec::UP);
+
+	auto &meshVerts = mesh.GetVertices();
+	std::vector<Vector3> verts;
+	std::vector<uint16_t> triangles;
+	umath::geometry::generate_truncated_cone_mesh({}, startRadius, {0.f, 0.f, 1.f}, length, startRadius, verts, &triangles, nullptr, segmentCount);
+	mesh.SetIndices(triangles);
+	meshVerts.reserve(verts.size());
+	for(auto &v : verts) {
+		meshVerts.push_back({});
+		meshVerts.back().position = v;
+		// TODO: uv coordinates, etc.
+	}
+	mesh.GenerateNormals();
+}
+std::shared_ptr<ModelSubMesh> pragma::model::create_cylinder(Game &game, const CylinderCreateInfo &createInfo)
+{
+	auto mesh = game.CreateModelSubMesh();
+	create_cylinder(*mesh, createInfo);
+	return mesh;
+}
+void pragma::model::create_cone(ModelSubMesh &mesh, const ConeCreateInfo &createInfo)
+{
+	auto startRadius = createInfo.startRadius;
+	auto length = createInfo.length;
+	auto endRadius = createInfo.endRadius;
+	auto segmentCount = createInfo.segmentCount;
+
+	auto rot = uquat::create_look_rotation(uvec::FORWARD, uvec::UP);
+
+	auto &meshVerts = mesh.GetVertices();
+	std::vector<Vector3> verts;
+	std::vector<uint16_t> triangles;
+	umath::geometry::generate_truncated_cone_mesh({}, startRadius, {0.f, 0.f, 1.f}, length, endRadius, verts, &triangles, nullptr, segmentCount);
+	mesh.SetIndices(triangles);
+	meshVerts.reserve(verts.size());
+	for(auto &v : verts) {
+		meshVerts.push_back({});
+		meshVerts.back().position = v;
+		// TODO: uv coordinates, etc.
+	}
+	mesh.GenerateNormals();
+}
+std::shared_ptr<ModelSubMesh> pragma::model::create_cone(Game &game, const ConeCreateInfo &createInfo)
+{
+	auto mesh = game.CreateModelSubMesh();
+	create_cone(*mesh, createInfo);
+	return mesh;
+}
+void pragma::model::create_circle(ModelSubMesh &mesh, const CircleCreateInfo &createInfo)
+{
+	RingCreateInfo ringCreateInfo {};
+	ringCreateInfo.doubleSided = createInfo.doubleSided;
+	ringCreateInfo.segmentCount = createInfo.segmentCount;
+	ringCreateInfo.totalAngle = createInfo.totalAngle;
+	ringCreateInfo.outerRadius = createInfo.radius;
+	create_ring(mesh, ringCreateInfo);
+}
+std::shared_ptr<ModelSubMesh> pragma::model::create_circle(Game &game, const CircleCreateInfo &createInfo)
+{
+	auto mesh = game.CreateModelSubMesh();
+	create_circle(*mesh, createInfo);
+	return mesh;
+}
+static void add_back_face(::ModelSubMesh &mesh)
+{
+	mesh.VisitIndices([&mesh](auto *indexData, uint32_t numIndices) {
+		auto idx0 = indexData[numIndices - 3];
+		auto idx1 = indexData[numIndices - 2];
+		auto idx2 = indexData[numIndices - 1];
+		mesh.AddTriangle(idx0, idx2, idx1);
+	});
+}
+void pragma::model::create_ring(ModelSubMesh &mesh, const RingCreateInfo &createInfo)
+{
+	auto innerRadius = createInfo.innerRadius;
+	auto segmentCount = createInfo.segmentCount;
+	auto doubleSided = createInfo.doubleSided;
+	auto totalAngle = createInfo.totalAngle;
+	auto outerRadius = createInfo.outerRadius;
+
+	if(innerRadius.has_value() && *innerRadius == 0.f)
+		innerRadius = {};
+	auto stepSize = umath::round(360.f / static_cast<float>(segmentCount));
+
+	auto &verts = mesh.GetVertices();
+	auto numVerts = segmentCount;
+	if(innerRadius.has_value())
+		numVerts *= 2;
+	else
+		++numVerts;
+	verts.reserve(segmentCount + 1);
+
+	auto numIndices = segmentCount * 3;
+	if(doubleSided)
+		numIndices *= 2;
+	if(innerRadius.has_value())
+		numIndices *= 2;
+	mesh.ReserveIndices(numIndices);
+
+	if(innerRadius.has_value() == false)
+		verts.push_back({});
+	auto end = (360 + (innerRadius.has_value() ? stepSize : 0));
+	for(uint32_t i = 0; i <= end; i += stepSize) {
+		auto endLoop = false;
+		if(i >= totalAngle) {
+			i = totalAngle;
+			end = totalAngle;
+			endLoop = true;
+		}
+		auto rad = umath::deg_to_rad(i);
+		if(innerRadius.has_value()) {
+			verts.push_back({});
+			verts.back().position = Vector3 {umath::sin(rad), 0.f, umath::cos(rad)} * *innerRadius;
+		}
+		verts.push_back({});
+		verts.back().position = Vector3 {umath::sin(rad), 0.f, umath::cos(rad)} * outerRadius;
+		if(i == 0u) {
+			if(endLoop)
+				break;
+			continue;
+		}
+		if(innerRadius.has_value() == false) {
+			mesh.AddTriangle(0, verts.size() - 2, verts.size() - 1);
+
+			if(doubleSided)
+				add_back_face(mesh);
+
+			if(endLoop)
+				break;
+			continue;
+		}
+		if(i == end)
+			break; // Skip last iteration
+		mesh.AddTriangle(verts.size() - 1, verts.size() - 2, verts.size());
+		if(doubleSided)
+			add_back_face(mesh);
+
+		mesh.AddTriangle(verts.size() - 3, verts.size() - 2, verts.size() - 1);
+		if(doubleSided)
+			add_back_face(mesh);
+		if(endLoop)
+			break;
+	}
+	mesh.GenerateNormals();
+}
+std::shared_ptr<ModelSubMesh> pragma::model::create_ring(Game &game, const RingCreateInfo &createInfo)
+{
+	auto mesh = game.CreateModelSubMesh();
+	create_ring(*mesh, createInfo);
+	return mesh;
 }

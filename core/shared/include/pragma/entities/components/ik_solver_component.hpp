@@ -9,6 +9,7 @@
 
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/entities/components/base_entity_component_member_register.hpp"
+#include "pragma/game/game_coordinate_system.hpp"
 #include "pragma/util/ik.hpp"
 #include <mathutil/uvec.h>
 
@@ -23,6 +24,7 @@ namespace pragma {
 		static ComponentEventId EVENT_UPDATE_IK;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
+		static std::optional<pragma::Axis> FindTwistAxis(Model &mdl, BoneId boneId0, BoneId boneId1);
 		IkSolverComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
@@ -43,13 +45,14 @@ namespace pragma {
 		void AddStateControl(BoneId boneId);
 
 		void AddFixedConstraint(BoneId boneId0, BoneId boneId1);
-		void AddHingeConstraint(BoneId boneId0, BoneId boneId1, umath::Degree minAngle, umath::Degree maxAngle);
-		void AddBallSocketConstraint(BoneId boneId0, BoneId boneId1, const EulerAngles &minLimits, const EulerAngles &maxLimits);
+		void AddHingeConstraint(BoneId boneId0, BoneId boneId1, umath::Degree minAngle, umath::Degree maxAngle, const Quat &offsetRotation = uquat::identity(), Axis twistAxis = Axis::X);
+		void AddBallSocketConstraint(BoneId boneId0, BoneId boneId1, const EulerAngles &minLimits, const EulerAngles &maxLimits, Axis twistAxis = Axis::Z);
 
 		udm::PProperty &GetIkRig() { return m_ikRig; }
 		void Solve();
 		void ResetIkRig();
 
+		const std::shared_ptr<pragma::ik::Solver> &GetIkSolver() const;
 		bool AddIkSolverByRig(const ik::RigConfig &ikRig);
 		bool AddIkSolverByChain(const std::string &boneName, uint32_t chainLength);
 		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
@@ -61,8 +64,9 @@ namespace pragma {
 		void ResetIkBones();
 		void UpdateIkRigFile();
 		void InitializeSolver();
+		static std::optional<umath::ScaledTransform> GetReferenceBonePose(Model &model, BoneId boneId);
 		std::optional<umath::ScaledTransform> GetReferenceBonePose(BoneId boneId) const;
-		pragma::ik::Bone *AddBone(BoneId boneId, const umath::Transform &pose, float radius, float length);
+		pragma::ik::Bone *AddBone(const std::string &boneName, BoneId boneId, const umath::Transform &pose, float radius, float length);
 		void AddControl(BoneId boneId, bool translation, bool rotation);
 		pragma::ik::Bone *GetIkBone(BoneId boneId);
 
@@ -70,7 +74,7 @@ namespace pragma {
 
 		udm::PProperty m_ikRig;
 		std::string m_ikRigFile;
-		std::unique_ptr<pragma::ik::Solver> m_ikSolver;
+		std::shared_ptr<pragma::ik::Solver> m_ikSolver;
 		std::unordered_map<BoneId, IkBoneId> m_boneIdToIkBoneId;
 		std::unordered_map<IkBoneId, BoneId> m_ikBoneIdToBoneId;
 		std::unordered_map<BoneId, std::shared_ptr<pragma::ik::IControl>> m_ikControls;

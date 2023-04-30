@@ -77,45 +77,56 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(u
 
 pragma::ik::RigConfig::RigConfig() {}
 
-std::vector<pragma::ik::PRigConfigBone>::iterator pragma::ik::RigConfig::FindBone(const std::string &name)
+std::vector<pragma::ik::PRigConfigBone>::iterator pragma::ik::RigConfig::FindBoneIt(const std::string &name)
 {
 	return std::find_if(m_bones.begin(), m_bones.end(), [&name](const PRigConfigBone &bone) { return bone->name == name; });
 }
-const std::vector<pragma::ik::PRigConfigBone>::iterator pragma::ik::RigConfig::FindBone(const std::string &name) const { return const_cast<RigConfig *>(this)->FindBone(name); }
+const std::vector<pragma::ik::PRigConfigBone>::iterator pragma::ik::RigConfig::FindBoneIt(const std::string &name) const { return const_cast<RigConfig *>(this)->FindBoneIt(name); }
 
-std::vector<pragma::ik::PRigConfigControl>::iterator pragma::ik::RigConfig::FindControl(const std::string &name)
+std::vector<pragma::ik::PRigConfigControl>::iterator pragma::ik::RigConfig::FindControlIt(const std::string &name)
 {
 	return std::find_if(m_controls.begin(), m_controls.end(), [&name](const PRigConfigControl &ctrl) { return ctrl->bone == name; });
 }
-const std::vector<pragma::ik::PRigConfigControl>::iterator pragma::ik::RigConfig::FindControl(const std::string &name) const { return const_cast<RigConfig *>(this)->FindControl(name); }
+const std::vector<pragma::ik::PRigConfigControl>::iterator pragma::ik::RigConfig::FindControlIt(const std::string &name) const { return const_cast<RigConfig *>(this)->FindControlIt(name); }
+
+pragma::ik::PRigConfigBone pragma::ik::RigConfig::FindBone(const std::string &name)
+{
+	auto it = FindBoneIt(name);
+	if(it == m_bones.end())
+		return nullptr;
+	return *it;
+}
 
 pragma::ik::PRigConfigBone pragma::ik::RigConfig::AddBone(const std::string &name)
 {
-	RemoveBone(name);
+	auto bone = FindBone(name);
+	if(bone)
+		return bone;
 	m_bones.push_back(std::make_shared<RigConfigBone>());
-	auto &bone = m_bones.back();
+	bone = m_bones.back();
 	bone->name = name;
 	return bone;
 }
 
 void pragma::ik::RigConfig::RemoveBone(const std::string &name)
 {
-	auto it = FindBone(name);
+	auto it = FindBoneIt(name);
 	if(it == m_bones.end())
 		return;
+	RemoveConstraints((*it)->name);
 	m_bones.erase(it);
 }
-bool pragma::ik::RigConfig::HasBone(const std::string &name) const { return FindBone(name) != m_bones.end(); }
+bool pragma::ik::RigConfig::HasBone(const std::string &name) const { return FindBoneIt(name) != m_bones.end(); }
 bool pragma::ik::RigConfig::IsBoneLocked(const std::string &name) const
 {
-	auto it = FindBone(name);
+	auto it = FindBoneIt(name);
 	if(it == m_bones.end())
 		return false;
 	return (*it)->locked;
 }
 void pragma::ik::RigConfig::SetBoneLocked(const std::string &name, bool locked)
 {
-	auto it = FindBone(name);
+	auto it = FindBoneIt(name);
 	if(it == m_bones.end())
 		return;
 	(*it)->locked = locked;
@@ -123,12 +134,12 @@ void pragma::ik::RigConfig::SetBoneLocked(const std::string &name, bool locked)
 
 void pragma::ik::RigConfig::RemoveControl(const std::string &name)
 {
-	auto it = FindControl(name);
+	auto it = FindControlIt(name);
 	if(it == m_controls.end())
 		return;
 	m_controls.erase(it);
 }
-bool pragma::ik::RigConfig::HasControl(const std::string &name) const { return FindControl(name) != m_controls.end(); }
+bool pragma::ik::RigConfig::HasControl(const std::string &name) const { return FindControlIt(name) != m_controls.end(); }
 
 pragma::ik::PRigConfigControl pragma::ik::RigConfig::AddControl(const std::string &bone, RigConfigControl::Type type)
 {
@@ -138,6 +149,17 @@ pragma::ik::PRigConfigControl pragma::ik::RigConfig::AddControl(const std::strin
 	ctrl->bone = bone;
 	ctrl->type = type;
 	return ctrl;
+}
+
+void pragma::ik::RigConfig::RemoveConstraints(const std::string &bone)
+{
+	for(auto it = m_constraints.begin(); it != m_constraints.end();) {
+		auto &c = *it;
+		if(c->bone0 == bone || c->bone1 == bone)
+			it = m_constraints.erase(it);
+		else
+			++it;
+	}
 }
 
 void pragma::ik::RigConfig::RemoveConstraints(const std::string &bone0, const std::string &bone1)
@@ -170,6 +192,7 @@ void pragma::ik::RigConfig::RemoveBone(const RigConfigBone &bone)
 	auto it = std::find_if(m_bones.begin(), m_bones.end(), [&bone](const PRigConfigBone &boneOther) { return boneOther.get() == &bone; });
 	if(it == m_bones.end())
 		return;
+	RemoveConstraints((*it)->name);
 	m_bones.erase(it);
 }
 
@@ -182,7 +205,7 @@ pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddFixedConstraint(const
 	c->type = RigConfigConstraint::Type::Fixed;
 	return c;
 }
-pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddHingeConstraint(const std::string &bone0, const std::string &bone1, umath::Degree minAngle, umath::Degree maxAngle)
+pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddHingeConstraint(const std::string &bone0, const std::string &bone1, umath::Degree minAngle, umath::Degree maxAngle, const Quat &offsetRotation)
 {
 	m_constraints.push_back(std::make_shared<RigConfigConstraint>());
 	auto &c = m_constraints.back();
@@ -191,9 +214,10 @@ pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddHingeConstraint(const
 	c->type = RigConfigConstraint::Type::Hinge;
 	c->minLimits.p = minAngle;
 	c->maxLimits.p = maxAngle;
+	c->offsetPose.SetRotation(offsetRotation);
 	return c;
 }
-pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddBallSocketConstraint(const std::string &bone0, const std::string &bone1, const EulerAngles &minAngles, const EulerAngles &maxAngles)
+pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddBallSocketConstraint(const std::string &bone0, const std::string &bone1, const EulerAngles &minAngles, const EulerAngles &maxAngles, Axis axis)
 {
 	m_constraints.push_back(std::make_shared<RigConfigConstraint>());
 	auto &c = m_constraints.back();
@@ -202,6 +226,7 @@ pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddBallSocketConstraint(
 	c->type = RigConfigConstraint::Type::BallSocket;
 	c->minLimits = minAngles;
 	c->maxLimits = maxAngles;
+	c->axis = axis;
 	return c;
 }
 

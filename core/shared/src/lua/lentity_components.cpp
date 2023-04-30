@@ -25,6 +25,7 @@
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/lua/libraries/lutil.hpp"
 #include "pragma/physics/raytraces.h"
+#include "pragma/model/model.h"
 #include "pragma/lua/lentity_components_base_types.hpp"
 #include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
@@ -429,10 +430,12 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defRigConfig.def("ToUdmData", &pragma::ik::RigConfig::ToUdmData);
 	defRigConfig.def("AddBone", &pragma::ik::RigConfig::AddBone);
 	defRigConfig.def("GetBones", &pragma::ik::RigConfig::GetBones);
+	defRigConfig.def("FindBone", &pragma::ik::RigConfig::FindBone);
 	defRigConfig.def("GetConstraints", &pragma::ik::RigConfig::GetConstraints);
 	defRigConfig.def("GetControls", &pragma::ik::RigConfig::GetControls);
 	defRigConfig.def("RemoveBone", static_cast<void (pragma::ik::RigConfig::*)(const std::string &)>(&pragma::ik::RigConfig::RemoveBone));
 	defRigConfig.def("RemoveControl", static_cast<void (pragma::ik::RigConfig::*)(const pragma::ik::RigConfigControl &)>(&pragma::ik::RigConfig::RemoveControl));
+	defRigConfig.def("RemoveControl", static_cast<void (pragma::ik::RigConfig::*)(const std::string &)>(&pragma::ik::RigConfig::RemoveControl));
 	defRigConfig.def("RemoveConstraint", static_cast<void (pragma::ik::RigConfig::*)(const pragma::ik::RigConfigConstraint &)>(&pragma::ik::RigConfig::RemoveConstraint));
 	defRigConfig.def("RemoveBone", static_cast<void (pragma::ik::RigConfig::*)(const pragma::ik::RigConfigBone &)>(&pragma::ik::RigConfig::RemoveBone));
 	defRigConfig.def("HasBone", &pragma::ik::RigConfig::HasBone);
@@ -440,10 +443,12 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defRigConfig.def("SetBoneLocked", &pragma::ik::RigConfig::SetBoneLocked);
 	defRigConfig.def("HasControl", &pragma::ik::RigConfig::HasControl);
 	defRigConfig.def("AddControl", &pragma::ik::RigConfig::AddControl);
-	defRigConfig.def("RemoveConstraints", &pragma::ik::RigConfig::RemoveConstraints);
+	defRigConfig.def("RemoveConstraints", static_cast<void (pragma::ik::RigConfig::*)(const std::string &, const std::string &)>(&pragma::ik::RigConfig::RemoveConstraints));
+	defRigConfig.def("RemoveConstraints", static_cast<void (pragma::ik::RigConfig::*)(const std::string &)>(&pragma::ik::RigConfig::RemoveConstraints));
 	defRigConfig.def("AddFixedConstraint", &pragma::ik::RigConfig::AddFixedConstraint);
 	defRigConfig.def("AddHingeConstraint", &pragma::ik::RigConfig::AddHingeConstraint);
 	defRigConfig.def("AddBallSocketConstraint", &pragma::ik::RigConfig::AddBallSocketConstraint);
+	defRigConfig.def("AddBallSocketConstraint", &pragma::ik::RigConfig::AddBallSocketConstraint, luabind::default_parameter_policy<6, pragma::Axis::Z> {});
 	defRigConfig.def(
 	  "Save", +[](lua_State *l, pragma::ik::RigConfig &rigConfig, const std::string &fileName) -> std::pair<bool, std::optional<std::string>> {
 		  auto fname = fileName;
@@ -477,11 +482,13 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defRigConstraint.def_readwrite("type", &pragma::ik::RigConfigConstraint::type);
 	defRigConstraint.def_readwrite("minLimits", &pragma::ik::RigConfigConstraint::minLimits);
 	defRigConstraint.def_readwrite("maxLimits", &pragma::ik::RigConfigConstraint::maxLimits);
+	defRigConstraint.def_readwrite("axis", &pragma::ik::RigConfigConstraint::axis);
 	defRigConfig.scope[defRigConstraint];
 
 	auto defIkSolver = pragma::lua::create_entity_component_class<pragma::IkSolverComponent, pragma::BaseEntityComponent>("IkSolverComponent");
 	defIkSolver.add_static_constant("EVENT_INITIALIZE_SOLVER", pragma::IkSolverComponent::EVENT_INITIALIZE_SOLVER);
 	defIkSolver.add_static_constant("EVENT_UPDATE_IK", pragma::IkSolverComponent::EVENT_UPDATE_IK);
+	defIkSolver.scope[luabind::def("find_forward_axis", &pragma::IkSolverComponent::FindTwistAxis)];
 	defIkSolver.def("SetIkRigFile", &pragma::IkSolverComponent::SetIkRigFile);
 	defIkSolver.def("GetIkRigFile", &pragma::IkSolverComponent::GetIkRigFile);
 	defIkSolver.def("AddSkeletalBone", &pragma::IkSolverComponent::AddSkeletalBone);
@@ -501,6 +508,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defIkSolver.def("GetSkeletalBoneId", &pragma::IkSolverComponent::GetSkeletalBoneId);
 	defIkSolver.def("Solve", &pragma::IkSolverComponent::Solve);
 	defIkSolver.def("ResetIkRig", &pragma::IkSolverComponent::ResetIkRig);
+	defIkSolver.def("GetIkSolver", &pragma::IkSolverComponent::GetIkSolver);
 	defIkSolver.scope[defRigConfig];
 	entsMod[defIkSolver];
 

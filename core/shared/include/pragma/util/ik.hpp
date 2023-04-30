@@ -28,24 +28,39 @@ namespace pragma::ik {
 	  public:
 		Bone(const Vector3 &pos, const Quat &rot, float radius, float length, float mass);
 		~Bone();
+		bool operator==(const Bone &other) const;
+		bool operator!=(const Bone &other) const { return !operator==(other); }
 		Vector3 GetPos() const;
 		Quat GetRot() const;
 		void SetPos(const Vector3 &pos) const;
 		void SetRot(const Quat &rot) const;
 		void SetPinned(bool pinned);
 		bool IsPinned();
+		void SetName(const std::string &name);
+		const std::string &GetName() const;
+		float GetRadius() const;
+		float GetLength() const;
+		float GetMass() const;
+		const umath::Transform &GetOriginalPose() const;
 		BEPUik::Bone *operator*();
 		BEPUik::Bone *operator->();
 	  private:
 		std::unique_ptr<BEPUik::Bone> m_bone;
+		std::string m_name;
+		umath::Transform m_origPose;
 	};
 	class DLLNETWORK IControl {
 	  public:
-		~IControl();
+		virtual ~IControl();
 		BEPUik::Control *operator*();
+		void SetTargetBone(Bone &bone);
+		Bone *GetTargetBone();
+		const Bone *GetTargetBone() const;
 	  protected:
 		IControl();
 		std::unique_ptr<BEPUik::Control> m_control;
+
+		Bone *m_bone = nullptr;
 	};
 	class DLLNETWORK ILinearMotorControl {
 	  public:
@@ -53,6 +68,8 @@ namespace pragma::ik {
 		const BEPUik::SingleBoneLinearMotor &GetLinearMotor() const;
 		void SetTargetPosition(const Vector3 &pos);
 		Vector3 GetTargetPosition() const;
+		void SetOffset(const Vector3 &offset);
+		Vector3 GetOffset() const;
 	};
 	class DLLNETWORK DragControl : public IControl, public ILinearMotorControl {
 	  public:
@@ -80,17 +97,48 @@ namespace pragma::ik {
 		Quat GetTargetOrientation() const;
 		virtual BEPUik::SingleBoneLinearMotor &GetLinearMotor() override;
 	};
+	enum class JointType : uint8_t {
+		DistanceJoint = 0,
+		BallSocketJoint,
+		AngularJoint,
+		PointOnLineJoint,
+		RevoluteJoint,
+		SwingLimit,
+		EllipseSwingLimit,
+		LinearAxisLimit,
+		TwistJoint,
+		TwistLimit,
+		SwivelHingeJoint,
+		Count,
+
+		Invalid = std::numeric_limits<uint8_t>::max()
+	};
 	class DLLNETWORK IJoint {
 	  public:
-		~IJoint();
+		IJoint(JointType type);
+		virtual ~IJoint();
 
 		void SetRigidity(float rigidity);
 		float GetRigidity();
 
+		Bone &GetConnectionA();
+		const Bone &GetConnectionA() const;
+		Bone &GetConnectionB();
+		const Bone &GetConnectionB() const;
+
+		JointType GetJointType() const { return m_jointType; }
+
 		BEPUik::IKJoint *operator*();
+		const BEPUik::IKJoint *operator*() const { return const_cast<IJoint *>(this)->operator*(); }
+		BEPUik::IKJoint *operator->();
+		const BEPUik::IKJoint *operator->() const { return const_cast<IJoint *>(this)->operator->(); }
 	  protected:
 		IJoint();
+		void SetJoint(std::unique_ptr<BEPUik::IKJoint> joint, Bone &connectionA, Bone &connectionB);
 		std::unique_ptr<BEPUik::IKJoint> m_joint;
+		Bone *m_connectionA = nullptr;
+		Bone *m_connectionB = nullptr;
+		JointType m_jointType = JointType::Invalid;
 	};
 	class DLLNETWORK DistanceJoint : public IJoint {
 	  public:
@@ -101,11 +149,24 @@ namespace pragma::ik {
 	  public:
 		PointOnLineJoint(Bone &bone0, Bone &bone1, const Vector3 &lineAnchor, const Vector3 &lineDirection, const Vector3 &anchorB);
 		~PointOnLineJoint();
+		const Vector3 &GetLineAnchor() const;
+		const Vector3 &GetLineDirection() const;
+		const Vector3 &GetAnchorB() const;
+	  private:
+		Vector3 m_lineAnchor;
+		Vector3 m_lineDirection;
+		Vector3 m_anchorB;
 	};
 	class DLLNETWORK BallSocketJoint : public IJoint {
 	  public:
 		BallSocketJoint(Bone &bone0, Bone &bone1, const Vector3 &anchor);
 		~BallSocketJoint();
+
+		const Vector3 &GetAnchor() const;
+		Vector3 GetOffsetA() const;
+		Vector3 GetOffsetB() const;
+	  private:
+		Vector3 m_anchor;
 	};
 	class DLLNETWORK AngularJoint : public IJoint {
 	  public:
@@ -116,40 +177,95 @@ namespace pragma::ik {
 	  public:
 		RevoluteJoint(Bone &bone0, Bone &bone1, const Vector3 &freeAxis);
 		~RevoluteJoint();
+		const Vector3 &GetFreeAxis() const;
+	  private:
+		Vector3 m_freeAxis;
 	};
 	class DLLNETWORK TwistJoint : public IJoint {
 	  public:
 		TwistJoint(Bone &bone0, Bone &bone1, const Vector3 &axisA, const Vector3 &axisB);
 		~TwistJoint();
+		const Vector3 &GetAxisA() const;
+		const Vector3 &GetAxisB() const;
+
+		void SetAxisA(const Vector3 &axisA);
+		void SetAxisB(const Vector3 &axisB);
+	  private:
+		Vector3 m_axisA;
+		Vector3 m_axisB;
 	};
 	class DLLNETWORK SwingLimit : public IJoint {
 	  public:
-		SwingLimit(Bone &bone0, Bone &bone1, const Vector3 &axisA, const Vector3 &axisB, float maxAngle);
+		SwingLimit(Bone &bone0, Bone &bone1, const Vector3 &axisA, const Vector3 &axisB, umath::Radian maxAngle);
 		~SwingLimit();
+
+		Vector3 GetAxisA() const;
+		Vector3 GetAxisB() const;
+		umath::Radian GetMaxAngle() const;
+
+		void SetAxisA(const Vector3 &axisA);
+		void SetAxisB(const Vector3 &axisB);
+		void SetMaxAngle(umath::Radian maxAngle);
+	  private:
+		umath::Radian m_maxAngle = 0.f;
 	};
 	class DLLNETWORK EllipseSwingLimit : public IJoint {
 	  public:
-		EllipseSwingLimit(Bone &bone0, Bone &bone1, const Vector3 &axisA, const Vector3 &axisB, const Vector3 &xAxis, float maxAngleX, float maxAngleY);
+		EllipseSwingLimit(Bone &bone0, Bone &bone1, const Vector3 &axisA, const Vector3 &axisB, const Vector3 &xAxis, umath::Radian maxAngleX, umath::Radian maxAngleY);
 		~EllipseSwingLimit();
+		const Vector3 &GetAxisA() const;
+		const Vector3 &GetAxisB() const;
+		const Vector3 &GetXAxis() const;
+		umath::Radian GetMaxAngleX() const;
+		umath::Radian GetMaxAngleY() const;
+	  private:
+		Vector3 m_axisA;
+		Vector3 m_axisB;
+		Vector3 m_xAxis;
+		umath::Radian m_maxAngleX = 0.f;
+		umath::Radian m_maxAngleY = 0.f;
 	};
 	class DLLNETWORK LinearAxisLimit : public IJoint {
 	  public:
 		LinearAxisLimit(Bone &bone0, Bone &bone1, const Vector3 &lineAnchor, const Vector3 &lineDirection, const Vector3 &anchorB, float minimumDistance, float maximumDistance);
 		~LinearAxisLimit();
+		const Vector3 &GetLineAnchor() const;
+		const Vector3 &GetLineDirection() const;
+		const Vector3 &GetAnchorB() const;
+		float GetMinimumDistance() const;
+		float GetMaximumDistance() const;
+	  private:
+		Vector3 m_lineAnchor;
+		Vector3 m_lineDirection;
+		Vector3 m_anchorB;
+		float m_minimumDistance = 0.f;
+		float m_maximumDistance = 0.f;
 	};
 	class DLLNETWORK TwistLimit : public IJoint {
 	  public:
-		TwistLimit(Bone &bone0, Bone &bone1, const Vector3 &axisA, const Vector3 &axisB, float maxAngle);
+		TwistLimit(Bone &bone0, Bone &bone1, const Vector3 &axisA, const Vector3 &axisB, umath::Radian maxAngle);
 		void SetMeasurementAxisA(const Vector3 &axis);
 		Vector3 GetMeasurementAxisA();
 		void SetMeasurementAxisB(const Vector3 &axis);
 		Vector3 GetMeasurementAxisB();
+		umath::Radian GetMaxAngle() const;
+		const Vector3 &GetAxisA() const;
+		const Vector3 &GetAxisB() const;
 		~TwistLimit();
+	  private:
+		Vector3 m_axisA;
+		Vector3 m_axisB;
+		umath::Radian m_maxAngle = 0.f;
 	};
 	class DLLNETWORK SwivelHingeJoint : public IJoint {
 	  public:
 		SwivelHingeJoint(Bone &bone0, Bone &bone1, const Vector3 &worldHingeAxis, const Vector3 &worldTwistAxis);
 		~SwivelHingeJoint();
+		const Vector3 &GetWorldHingeAxis() const;
+		const Vector3 &GetWorldTwistAxis() const;
+	  private:
+		Vector3 m_worldHingeAxis;
+		Vector3 m_worldTwistAxis;
 	};
 	class DLLNETWORK Solver {
 	  public:
@@ -180,8 +296,11 @@ namespace pragma::ik {
 		size_t GetJointCount() const;
 
 		IControl *GetControl(size_t index);
+		const IControl *GetControl(size_t index) const;
 		Bone *GetBone(BoneId index);
+		const Bone *GetBone(BoneId index) const;
 		IJoint *GetJoint(size_t index);
+		const IJoint *GetJoint(size_t index) const;
 
 		const std::vector<std::shared_ptr<IControl>> &GetControls() const;
 		const std::vector<std::shared_ptr<Bone>> &GetBones() const;

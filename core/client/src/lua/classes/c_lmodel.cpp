@@ -20,7 +20,7 @@
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-static std::shared_ptr<Model> Lua::Model::Client::create_generic_model(Game &game, ::ModelSubMesh &subMesh)
+std::shared_ptr<Model> Lua::Model::Client::create_generic_model(Game &game, ::ModelSubMesh &subMesh)
 {
 	auto mesh = game.CreateModelMesh();
 	mesh->AddSubMesh(subMesh.shared_from_this());

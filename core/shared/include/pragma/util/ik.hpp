@@ -315,6 +315,27 @@ namespace pragma::ik {
 		std::vector<BEPUik::Bone *> m_bepuBones;
 		std::vector<BEPUik::IKJoint *> m_bepuJoints;
 	};
+
+    DLLNETWORK void debug_print(const pragma::ik::Solver &solver);
 };
+
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::Bone &bone);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::IJoint &joint);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::BallSocketJoint &joint);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::AngularJoint &joint);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::PointOnLineJoint &joint);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::RevoluteJoint &joint);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::SwingLimit &joint);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::EllipseSwingLimit &joint);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::LinearAxisLimit &joint);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::TwistJoint &joint);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::TwistLimit &joint);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::SwivelHingeJoint &joint);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::IControl &control);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::ILinearMotorControl &control);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::DragControl &control);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::AngularPlaneControl &control);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::StateControl &control);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::Solver &solver);
 
 #endif

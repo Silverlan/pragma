@@ -19,15 +19,6 @@ namespace Lua::ik {
 	void register_library(Lua::Interface &lua);
 };
 
-static std::ostream &operator<<(std::ostream &out, const pragma::ik::Bone &bone)
-{
-	out << "Bone";
-	out << "[Name:" << bone.GetName() << "]";
-	out << "[Pos:" << bone.GetPos() << "]";
-	auto ang = EulerAngles {bone.GetRot()};
-	out << "[Ang:" << ang << "]";
-	return out;
-}
 static luabind::object joint_to_lua_object(lua_State *l, pragma::ik::IJoint &joint)
 {
 	switch(joint.GetJointType()) {
@@ -58,141 +49,6 @@ static luabind::object joint_to_lua_object(lua_State *l, pragma::ik::IJoint &joi
 	return Lua::nil;
 }
 
-static std::ostream &operator<<(std::ostream &out, const pragma::ik::IJoint &joint)
-{
-	out << magic_enum::enum_name(joint.GetJointType());
-	out << "[ConA:" << joint.GetConnectionA().GetName() << "]";
-	out << "[ConB:" << joint.GetConnectionB().GetName() << "]";
-	return out;
-}
-static std::ostream &operator<<(std::ostream &out, const pragma::ik::BallSocketJoint &joint)
-{
-	operator<<(out, static_cast<const pragma::ik::IJoint &>(joint));
-	out << "[Anchor:" << joint.GetAnchor() << "][OffsetA:" << joint.GetOffsetA() << "][OffsetB:" << joint.GetOffsetB() << "]";
-	return out;
-}
-static std::ostream &operator<<(std::ostream &out, const pragma::ik::AngularJoint &joint)
-{
-	operator<<(out, static_cast<const pragma::ik::IJoint &>(joint));
-	return out;
-}
-static std::ostream &operator<<(std::ostream &out, const pragma::ik::PointOnLineJoint &joint)
-{
-	operator<<(out, static_cast<const pragma::ik::IJoint &>(joint));
-	out << "[LineDir:" << joint.GetLineDirection() << "]";
-	out << "[AnchorB : " << joint.GetAnchorB() << "]";
-	return out;
-}
-static std::ostream &operator<<(std::ostream &out, const pragma::ik::RevoluteJoint &joint)
-{
-	operator<<(out, static_cast<const pragma::ik::IJoint &>(joint));
-	out << "[FreeAxis:" << joint.GetFreeAxis() << "]";
-	return out;
-}
-static std::ostream &operator<<(std::ostream &out, const pragma::ik::SwingLimit &joint)
-{
-	operator<<(out, static_cast<const pragma::ik::IJoint &>(joint));
-	out << "[AxisA:" << joint.GetAxisA() << "]";
-	out << "[AxisB:" << joint.GetAxisB() << "]";
-	out << "[MaxAngle:" << umath::rad_to_deg(joint.GetMaxAngle()) << "]";
-	return out;
-}
-static std::ostream &operator<<(std::ostream &out, const pragma::ik::EllipseSwingLimit &joint)
-{
-	operator<<(out, static_cast<const pragma::ik::IJoint &>(joint));
-	out << "[AxisA:" << joint.GetAxisA() << "]";
-	out << "[AxisB:" << joint.GetAxisB() << "]";
-	out << "[XAxis:" << joint.GetXAxis() << "]";
-	out << "[MaxAngleX:" << umath::rad_to_deg(joint.GetMaxAngleX()) << "]";
-	out << "[MaxAngleY:" << umath::rad_to_deg(joint.GetMaxAngleY()) << "]";
-	return out;
-}
-static std::ostream &operator<<(std::ostream &out, const pragma::ik::LinearAxisLimit &joint)
-{
-	operator<<(out, static_cast<const pragma::ik::IJoint &>(joint));
-	out << "[LineAnchor:" << joint.GetLineAnchor() << "]";
-	out << "[LineDir:" << joint.GetLineDirection() << "]";
-	out << "[AnchorB:" << joint.GetAnchorB() << "]";
-	out << "[MinDist:" << joint.GetMinimumDistance() << "]";
-	out << "[MaxDist:" << joint.GetMaximumDistance() << "]";
-	return out;
-}
-static std::ostream &operator<<(std::ostream &out, const pragma::ik::TwistJoint &joint)
-{
-	operator<<(out, static_cast<const pragma::ik::IJoint &>(joint));
-	out << "[AxisA:" << joint.GetAxisA() << "]";
-	out << "[AxisB:" << joint.GetAxisB() << "]";
-	return out;
-}
-static std::ostream &operator<<(std::ostream &out, const pragma::ik::TwistLimit &joint)
-{
-	operator<<(out, static_cast<const pragma::ik::IJoint &>(joint));
-	out << "[AxisA:" << joint.GetAxisA() << "]";
-	out << "[AxisB:" << joint.GetAxisB() << "]";
-	out << "[MaxAngle:" << umath::rad_to_deg(joint.GetMaxAngle()) << "]";
-	return out;
-}
-static std::ostream &operator<<(std::ostream &out, const pragma::ik::SwivelHingeJoint &joint)
-{
-	operator<<(out, static_cast<const pragma::ik::IJoint &>(joint));
-	out << "[WorldHingeAxis:" << joint.GetWorldHingeAxis() << "]";
-	out << "[WorldTwistAxis:" << joint.GetWorldTwistAxis() << "]";
-	return out;
-}
-
-static std::ostream &print_control_bone(std::ostream &out, const pragma::ik::IControl &control)
-{
-	auto *bone = control.GetTargetBone();
-	out << "[Bone:";
-	if(bone)
-		out << bone->GetName();
-	else
-		out << "NULL";
-	out << "]";
-	return out;
-}
-static std::ostream &operator<<(std::ostream &out, const pragma::ik::IControl &control)
-{
-	out << "Control";
-	return print_control_bone(out, control);
-}
-static std::ostream &operator<<(std::ostream &out, const pragma::ik::ILinearMotorControl &control)
-{
-	out << "[Offset:" << control.GetOffset() << "]";
-	out << "[TargetPos:" << control.GetTargetPosition() << "]";
-	return out;
-}
-static std::ostream &operator<<(std::ostream &out, const pragma::ik::DragControl &control)
-{
-	out << "DragControl";
-	operator<<(out, static_cast<const pragma::ik::ILinearMotorControl &>(control));
-	return print_control_bone(out, control);
-}
-static std::ostream &operator<<(std::ostream &out, const pragma::ik::AngularPlaneControl &control)
-{
-	out << "AngularPlaneControl";
-	out << "[BoneLocalAxis:" << control.GetBoneLocalAxis() << "]";
-	out << "[PlaneNormal:" << control.GetPlaneNormal() << "]";
-	operator<<(out, static_cast<const pragma::ik::IControl &>(control));
-	return out;
-}
-static std::ostream &operator<<(std::ostream &out, const pragma::ik::StateControl &control)
-{
-	out << "StateControl";
-	auto ang = EulerAngles {control.GetTargetOrientation()};
-	out << "[TargetAng:" << ang << "]";
-	operator<<(out, static_cast<const pragma::ik::ILinearMotorControl &>(control));
-	return print_control_bone(out, control);
-}
-static std::ostream &operator<<(std::ostream &out, const pragma::ik::Solver &solver)
-{
-	out << "IkSolver";
-	out << "[Bones:" << solver.GetBoneCount() << "]";
-	out << "[Controls:" << solver.GetControlCount() << "]";
-	out << "[Joints:" << solver.GetJointCount() << "]";
-	return out;
-}
-
 #ifdef __linux__
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, Bone);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, IJoint);
@@ -213,81 +69,6 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, AngularPlaneControl);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, StateControl);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, Solver);
 #endif
-
-static void debug_print(const pragma::ik::Solver &solver)
-{
-	std::stringstream ss;
-	ss << solver << "\n";
-	ss << "Bones:\n";
-	for(auto i = decltype(solver.GetBoneCount()) {0u}; i < solver.GetBoneCount(); ++i) {
-		auto &bone = *solver.GetBone(i);
-		ss << "\t" << bone << "\n";
-	}
-	ss << "Controls:\n";
-	for(auto i = decltype(solver.GetControlCount()) {0u}; i < solver.GetControlCount(); ++i) {
-		auto &control = *solver.GetControl(i);
-		if(typeid(control) == typeid(pragma::ik::DragControl))
-			ss << "\t" << static_cast<const pragma::ik::DragControl &>(control) << "\n";
-		else if(typeid(control) == typeid(pragma::ik::AngularPlaneControl))
-			ss << "\t" << static_cast<const pragma::ik::AngularPlaneControl &>(control) << "\n";
-		else if(typeid(control) == typeid(pragma::ik::StateControl))
-			ss << "\t" << static_cast<const pragma::ik::StateControl &>(control) << "\n";
-		else
-			ss << "\t" << control << "\n";
-	}
-	ss << "Joints:\n";
-	for(auto i = decltype(solver.GetJointCount()) {0u}; i < solver.GetJointCount(); ++i) {
-		auto &joint = *solver.GetJoint(i);
-		auto type = joint.GetJointType();
-		if(type == pragma::ik::JointType::DistanceJoint) {
-			if(i > 0)
-				ss << "\n";
-			ss << "\t" << static_cast<const pragma::ik::DistanceJoint &>(joint) << "\n";
-		}
-		else if(type == pragma::ik::JointType::BallSocketJoint) {
-			if(i > 0)
-				ss << "\n";
-			ss << "\t" << static_cast<const pragma::ik::BallSocketJoint &>(joint) << "\n";
-		}
-		else if(type == pragma::ik::JointType::AngularJoint) {
-			if(i > 0)
-				ss << "\n";
-			ss << "\t" << static_cast<const pragma::ik::AngularJoint &>(joint) << "\n";
-		}
-		else if(type == pragma::ik::JointType::PointOnLineJoint) {
-			if(i > 0)
-				ss << "\n";
-			ss << "\t" << static_cast<const pragma::ik::PointOnLineJoint &>(joint) << "\n";
-		}
-		else if(type == pragma::ik::JointType::RevoluteJoint) {
-			if(i > 0)
-				ss << "\n";
-			ss << "\t" << static_cast<const pragma::ik::RevoluteJoint &>(joint) << "\n";
-		}
-		else if(type == pragma::ik::JointType::SwingLimit)
-			ss << "\t" << static_cast<const pragma::ik::SwingLimit &>(joint) << "\n";
-		else if(type == pragma::ik::JointType::EllipseSwingLimit)
-			ss << "\t" << static_cast<const pragma::ik::EllipseSwingLimit &>(joint) << "\n";
-		else if(type == pragma::ik::JointType::LinearAxisLimit)
-			ss << "\t" << static_cast<const pragma::ik::LinearAxisLimit &>(joint) << "\n";
-		else if(type == pragma::ik::JointType::TwistJoint) {
-			if(i > 0)
-				ss << "\n";
-			ss << "\t" << static_cast<const pragma::ik::TwistJoint &>(joint) << "\n";
-		}
-		else if(type == pragma::ik::JointType::TwistLimit)
-			ss << "\t" << static_cast<const pragma::ik::TwistLimit &>(joint) << "\n";
-		else if(type == pragma::ik::JointType::SwivelHingeJoint) {
-			if(i > 0)
-				ss << "\n";
-			ss << "\t" << static_cast<const pragma::ik::SwivelHingeJoint &>(joint) << "\n";
-		}
-		else
-			ss << "\t" << joint << "\n";
-		static_assert(umath::to_integral(pragma::ik::JointType::Count) == 11, "Update this implementation when joints are removed or added!");
-	}
-	Con::cout << ss.str() << Con::endl;
-}
 
 void Lua::ik::register_library(Lua::Interface &lua)
 {
@@ -470,7 +251,7 @@ void Lua::ik::register_library(Lua::Interface &lua)
 	classSolver.def("GetControlCount", &pragma::ik::Solver::GetControlCount);
 	classSolver.def("GetBoneCount", &pragma::ik::Solver::GetBoneCount);
 	classSolver.def("GetJointCount", &pragma::ik::Solver::GetJointCount);
-	classSolver.def("DebugPrint", &debug_print);
+	classSolver.def("DebugPrint", &pragma::ik::debug_print);
 	classSolver.def("GetControl", static_cast<pragma::ik::IControl *(pragma::ik::Solver::*)(size_t)>(&pragma::ik::Solver::GetControl));
 	classSolver.def("GetBone", static_cast<pragma::ik::Bone *(pragma::ik::Solver::*)(pragma::ik::BoneId)>(&pragma::ik::Solver::GetBone));
 	classSolver.def(

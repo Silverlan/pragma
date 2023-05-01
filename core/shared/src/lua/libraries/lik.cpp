@@ -10,6 +10,7 @@
 #include "pragma/lua/luaapi.h"
 #include "pragma/lua/custom_constructor.hpp"
 #include "pragma/lua/converters/pair_converter_t.hpp"
+#include "pragma/lua/ostream_operator_alias.hpp"
 #include <luainterface.hpp>
 #include <luabind/copy_policy.hpp>
 #include <bepuik/joint/IKJoint.hpp>
@@ -191,6 +192,27 @@ static std::ostream &operator<<(std::ostream &out, const pragma::ik::Solver &sol
 	out << "[Joints:" << solver.GetJointCount() << "]";
 	return out;
 }
+
+#ifdef __linux__
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, Bone);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, IJoint);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, BallSocketJoint);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, AngularJoint);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, PointOnLineJoint);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, RevoluteJoint);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, SwingLimit);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, EllipseSwingLimit);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, LinearAxisLimit);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, TwistJoint);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, TwistLimit);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, SwivelHingeJoint);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, IControl);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, ILinearMotorControl);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, DragControl);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, AngularPlaneControl);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, StateControl);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, Solver);
+#endif
 
 static void debug_print(const pragma::ik::Solver &solver)
 {

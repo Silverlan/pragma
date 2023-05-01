@@ -194,6 +194,7 @@ void Lua::ik::register_library(Lua::Interface &lua)
 
 	auto classControl = luabind::class_<pragma::ik::IControl>("Control");
 	classControl.def(luabind::tostring(luabind::self));
+	classControl.def("GetTargetBone", static_cast<pragma::ik::Bone *(pragma::ik::IControl::*)()>(&pragma::ik::DragControl::GetTargetBone));
 	modIk[classControl];
 
 	auto classLinearMotorControl = luabind::class_<pragma::ik::ILinearMotorControl>("LinearMotorControl");

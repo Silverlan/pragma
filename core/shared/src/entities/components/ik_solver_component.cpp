@@ -398,14 +398,37 @@ void IkSolverComponent::AddHingeConstraint(BoneId boneId0, BoneId boneId1, umath
 */
 }
 
-std::optional<pragma::Axis> IkSolverComponent::FindTwistAxis(Model &mdl, BoneId boneId0, BoneId boneId1)
+std::optional<pragma::Axis> IkSolverComponent::FindTwistAxis(Model &mdl, BoneId boneId)
 {
-	auto refPose0 = IkSolverComponent::GetReferenceBonePose(mdl, boneId0);
-	auto refPose1 = IkSolverComponent::GetReferenceBonePose(mdl, boneId1);
-	if(!refPose0 || !refPose1)
+	auto refPose = IkSolverComponent::GetReferenceBonePose(mdl, boneId);
+	if(!refPose)
 		return {};
-	auto &rotBone1 = refPose1->GetRotation();
-	auto dirFromBone0ToBone1 = (refPose1->GetOrigin() - refPose0->GetOrigin());
+
+	auto bone = mdl.GetSkeleton().GetBone(boneId).lock();
+	std::vector<Vector3> normalList;
+	normalList.reserve(bone->children.size());
+	for(auto &pair : bone->children) {
+		auto pose = IkSolverComponent::GetReferenceBonePose(mdl, pair.first);
+		if(pose) {
+			auto normal = pose->GetOrigin() - refPose->GetOrigin();
+			uvec::normalize(&normal);
+			normalList.push_back(normal);
+		}
+	}
+	Vector3 norm = uvec::FORWARD;
+	if(!normalList.empty())
+		norm = uvec::calc_average(normalList);
+	else {
+		if(!bone->parent.expired()) {
+			auto refPoseParent = IkSolverComponent::GetReferenceBonePose(mdl, bone->parent.lock()->ID);
+			if(refPoseParent)
+				norm = (refPose->GetOrigin() - refPoseParent->GetOrigin());
+		}
+	}
+
+	auto &rotBone1 = refPose->GetRotation();
+	auto dirFromBone0ToBone1 = norm;
+	//
 	uvec::normalize(&dirFromBone0ToBone1);
 	auto forward = uquat::forward(rotBone1);
 	auto right = uquat::right(rotBone1);

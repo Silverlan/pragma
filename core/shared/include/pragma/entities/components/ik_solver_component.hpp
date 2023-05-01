@@ -24,7 +24,7 @@ namespace pragma {
 		static ComponentEventId EVENT_UPDATE_IK;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
-		static std::optional<pragma::Axis> FindTwistAxis(Model &mdl, BoneId boneId0, BoneId boneId1);
+		static std::optional<pragma::Axis> FindTwistAxis(Model &mdl, BoneId boneId);
 		IkSolverComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;

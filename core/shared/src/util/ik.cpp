@@ -85,7 +85,7 @@ static Quat from_bepu_quaternion(const BEPUik::Quaternion &r)
 static float to_bepu_length(float l) { return l * to_bepu_scale; }
 static float from_bepu_length(float l) { return l * to_pragma_scale; }
 
-pragma::ik::Bone::Bone(const Vector3 &pos, const Quat &rot, float radius, float length, float mass) : m_origPose {pos,rot}
+pragma::ik::Bone::Bone(const Vector3 &pos, const Quat &rot, float radius, float length, float mass) : m_origPose {pos, rot}
 {
 	m_bone = std::make_unique<BEPUik::Bone>();
 	m_bone->Position = to_bepu_vector3(pos);
@@ -116,7 +116,7 @@ BEPUik::Bone *pragma::ik::Bone::operator->() { return m_bone.get(); }
 pragma::ik::IControl::~IControl() {}
 BEPUik::Control *pragma::ik::IControl::operator*() { return m_control.get(); }
 
-pragma::ik::IControl::IControl() {}
+pragma::ik::IControl::IControl(ControlType type) : m_type {type} {}
 
 void pragma::ik::IControl::SetTargetBone(Bone &bone)
 {
@@ -133,7 +133,7 @@ Vector3 pragma::ik::ILinearMotorControl::GetTargetPosition() const { return from
 void pragma::ik::ILinearMotorControl::SetOffset(const Vector3 &offset) { GetLinearMotor().SetOffset(to_bepu_vector3(offset)); }
 Vector3 pragma::ik::ILinearMotorControl::GetOffset() const { return from_bepu_vector3(GetLinearMotor().GetOffset()); }
 
-pragma::ik::DragControl::DragControl(Bone &bone)
+pragma::ik::DragControl::DragControl(Bone &bone) : IControl {ControlType::Drag}
 {
 	auto ctrl = std::make_unique<BEPUik::DragControl>();
 	m_control = std::move(ctrl);
@@ -142,7 +142,7 @@ pragma::ik::DragControl::DragControl(Bone &bone)
 pragma::ik::DragControl::~DragControl() {}
 BEPUik::SingleBoneLinearMotor &pragma::ik::DragControl::GetLinearMotor() { return *static_cast<BEPUik::DragControl *>(m_control.get())->GetLinearMotor(); }
 
-pragma::ik::AngularPlaneControl::AngularPlaneControl(Bone &bone)
+pragma::ik::AngularPlaneControl::AngularPlaneControl(Bone &bone) : IControl {ControlType::AngularPlane}
 {
 	auto ctrl = std::make_unique<BEPUik::AngularPlaneControl>();
 	m_control = std::move(ctrl);
@@ -157,7 +157,7 @@ Vector3 pragma::ik::AngularPlaneControl::GetBoneLocalAxis() const { return from_
 BEPUik::SingleBoneAngularPlaneConstraint &pragma::ik::AngularPlaneControl::GetAngularMotor() { return *static_cast<BEPUik::AngularPlaneControl *>(m_control.get())->GetAngularMotor(); }
 const BEPUik::SingleBoneAngularPlaneConstraint &pragma::ik::AngularPlaneControl::GetAngularMotor() const { return const_cast<AngularPlaneControl *>(this)->GetAngularMotor(); }
 
-pragma::ik::StateControl::StateControl(Bone &bone)
+pragma::ik::StateControl::StateControl(Bone &bone) : IControl {ControlType::State}
 {
 	auto ctrl = std::make_unique<BEPUik::StateControl>();
 	m_control = std::move(ctrl);
@@ -205,7 +205,7 @@ pragma::ik::PointOnLineJoint::PointOnLineJoint(Bone &bone0, Bone &bone1, const V
 }
 pragma::ik::PointOnLineJoint::~PointOnLineJoint() {}
 const Vector3 &pragma::ik::PointOnLineJoint::GetLineAnchor() const { return m_lineAnchor; }
-const Vector3 &pragma::ik::PointOnLineJoint::GetLineDirection() const {return m_lineDirection;}
+const Vector3 &pragma::ik::PointOnLineJoint::GetLineDirection() const { return m_lineDirection; }
 const Vector3 &pragma::ik::PointOnLineJoint::GetAnchorB() const { return m_anchorB; }
 
 pragma::ik::BallSocketJoint::BallSocketJoint(Bone &bone0, Bone &bone1, const Vector3 &anchor) : IJoint {JointType::BallSocketJoint}, m_anchor {anchor}
@@ -241,7 +241,8 @@ pragma::ik::TwistJoint::TwistJoint(Bone &bone0, Bone &bone1, const Vector3 &axis
 pragma::ik::TwistJoint::~TwistJoint() {}
 const Vector3 &pragma::ik::TwistJoint::GetAxisA() const { return m_axisA; }
 const Vector3 &pragma::ik::TwistJoint::GetAxisB() const { return m_axisB; }
-void pragma::ik::TwistJoint::SetAxisA(const Vector3 &axisA) {
+void pragma::ik::TwistJoint::SetAxisA(const Vector3 &axisA)
+{
 	static_cast<BEPUik::IKTwistJoint *>(m_joint.get())->SetAxisA(to_bepu_axis(axisA));
 	static_cast<BEPUik::IKTwistJoint *>(m_joint.get())->ComputeMeasurementAxes();
 }
@@ -728,4 +729,3 @@ void pragma::ik::debug_print(const pragma::ik::Solver &solver)
 	}
 	Con::cout << ss.str() << Con::endl;
 }
-

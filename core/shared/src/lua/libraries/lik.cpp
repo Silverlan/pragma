@@ -193,8 +193,12 @@ void Lua::ik::register_library(Lua::Interface &lua)
 	modIk[classSwivelHingeJoint];
 
 	auto classControl = luabind::class_<pragma::ik::IControl>("Control");
+	classControl.add_static_constant("TYPE_DRAG", umath::to_integral(pragma::ik::ControlType::Drag));
+	classControl.add_static_constant("TYPE_ANGULAR_PLANE", umath::to_integral(pragma::ik::ControlType::AngularPlane));
+	classControl.add_static_constant("TYPE_STATE", umath::to_integral(pragma::ik::ControlType::State));
 	classControl.def(luabind::tostring(luabind::self));
 	classControl.def("GetTargetBone", static_cast<pragma::ik::Bone *(pragma::ik::IControl::*)()>(&pragma::ik::DragControl::GetTargetBone));
+	classControl.def("GetType", &pragma::ik::IControl::GetControlType);
 	modIk[classControl];
 
 	auto classLinearMotorControl = luabind::class_<pragma::ik::ILinearMotorControl>("LinearMotorControl");

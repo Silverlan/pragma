@@ -49,6 +49,14 @@ namespace pragma::ik {
 		std::string m_name;
 		umath::Transform m_origPose;
 	};
+	enum class ControlType : uint8_t {
+		Drag = 0,
+		AngularPlane,
+		State,
+		Count,
+
+		Invalid = std::numeric_limits<uint8_t>::max()
+	};
 	class DLLNETWORK IControl {
 	  public:
 		virtual ~IControl();
@@ -56,11 +64,13 @@ namespace pragma::ik {
 		void SetTargetBone(Bone &bone);
 		Bone *GetTargetBone();
 		const Bone *GetTargetBone() const;
+		ControlType GetControlType() const { return m_type; }
 	  protected:
-		IControl();
+		IControl(ControlType type);
 		std::unique_ptr<BEPUik::Control> m_control;
 
 		Bone *m_bone = nullptr;
+		ControlType m_type = ControlType::Invalid;
 	};
 	class DLLNETWORK ILinearMotorControl {
 	  public:
@@ -316,7 +326,7 @@ namespace pragma::ik {
 		std::vector<BEPUik::IKJoint *> m_bepuJoints;
 	};
 
-    DLLNETWORK void debug_print(const pragma::ik::Solver &solver);
+	DLLNETWORK void debug_print(const pragma::ik::Solver &solver);
 };
 
 DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::Bone &bone);

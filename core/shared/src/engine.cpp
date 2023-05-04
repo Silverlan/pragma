@@ -899,6 +899,17 @@ void Engine::DumpDebugInformation(ZIPFile &zip) const
 	}
 	zip.AddFile("engine.txt", engineInfo.str());
 
+	auto fAddFile = [&zip](const std::string &fileName, const std::string &zipFileName) {
+		std::string path = util::get_program_path() + "/" + fileName;
+		std::ifstream t {path};
+		if(t.is_open()) {
+			std::stringstream buffer;
+			buffer << t.rdbuf();
+			std::string log = buffer.str();
+			zip.AddFile(zipFileName, log);
+		}
+	};
+
 	auto logFileName = pragma::detail::get_log_file_name();
 	if(logFileName.has_value()) {
 		pragma::detail::close_logger();
@@ -910,21 +921,10 @@ void Engine::DumpDebugInformation(ZIPFile &zip) const
 		}
 		*/
 
-		std::string path = util::get_program_path() + "/" + *logFileName;
-		std::ifstream t {path};
-		if(t.is_open()) {
-			std::stringstream buffer;
-			buffer << t.rdbuf();
-			std::string log = buffer.str();
-			zip.AddFile("log.txt", log);
-		}
+		fAddFile(*logFileName, "log.txt");
 	}
 
-	if(filemanager::exists("git_info.txt")) {
-		auto infoContents = filemanager::read_file("git_info.txt");
-		if(infoContents.has_value())
-			zip.AddFile("git_info.txt", *infoContents);
-	}
+	fAddFile("git_info.txt", "git_info.txt");
 
 	auto fWriteConvars = [&zip](const std::map<std::string, std::shared_ptr<ConConf>> &cvarMap, const std::string &fileName) {
 		std::stringstream convars;

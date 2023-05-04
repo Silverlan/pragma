@@ -48,17 +48,20 @@ If you don't need the filmmaker, you can omit the `--with-pfm --with-all-pfm-mod
 > You can disable confirmation prompts (e.g. for automated builds) by adding the `--no-confirm` argument, however entering your password may still be required.
 <br/>
 
-Once the build script has been completed, you should find the build files in `pragma/build`, and the install files in `pragma/build/install`. The `install` directory should contain everything you need to run Pragma.
+Once the build script has been completed, you can find the build files in `pragma/build`, and the install files in `pragma/build/install`. The `install` directory contains everything you need to run Pragma.
 
-If you make any code changes to the core engine code, you can build the `pragma-install` target to build them. This will also re-install the binaries.
-
-If you make any code changes to a module, you will have to build the module build target first, and then build `pragma-install` afterwards.
-
-After the initial run of the main build script, you can run the following command from the root directory of Pragma to update Pragma to a newer version:
+###### Update
+To update Pragma to a newer version (assuming the command above has completed successfully at least once), you can use the following command:
 ```console
 python build_scripts/build.py --update
 ```
+
 This will pull all of the latest changes for the Pragma repository and the modules. The `--update` option will re-use all of the arguments used in the last execution of the build script, so you don't have to specify them again.
+
+###### Code Changes
+If you make any code changes to the core engine code, you can build the `pragma-install` target to build them. This will also re-install the binaries.
+
+If you make any code changes to a module, you will have to build the module build target first, and then build `pragma-install` afterwards.
 
 ### Build Customization
 
@@ -97,7 +100,14 @@ Example for using the `--module` parameter:
 --module pr_physx:"https://github.com/Silverlan/pr_physx.git"
 ```
 
-If you want to build Cycles with NVIDIA OptiX support, you will have to install the [OptiX SDK](https://developer.nvidia.com/designworks/optix/download), and then build Pragma with the `--with-pfm --with-all-pfm-modules --build-cycles` parameters. To build Cycles on Windows, you will also have to install [SlikSVN](https://sliksvn.com/download/) first.
+###### PFM
+To build Pragma with PFM, add the `--with-pfm --with-all-pfm-modules` options. Due to licensing issues, this will only include a pre-built version of the Cycles renderer **without** OptiX support.
+If you want to have full CUDA and OptiX support when rendering with Cycles, you will have to add the `--build-cycles` option as well. You will also have to install the following before you do so:
+- [SlikSVN](https://sliksvn.com/download/) (Windows only)
+- [CUDA Toolkit 11.6](https://developer.nvidia.com/cuda-11-6-0-download-archive)
+- [OptiX SDK 7.3.0](https://developer.nvidia.com/designworks/optix/download) (NVIDIA account required)
+
+Please note that newer versions of CUDA or OptiX will likely not work.
 
 Modules
 ------

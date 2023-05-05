@@ -101,6 +101,9 @@ Engine::Engine(int, char *[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(En
 	// (e.g. addons/imported/models/some_model.pmdl would return false even if the file exists)
 	filemanager::set_use_file_index_cache(true);
 
+	// Don't go into auto-sleep mode while the Engine is running
+	util::set_prevent_os_sleep_mode(true);
+
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::open_domain();
 #endif

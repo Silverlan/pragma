@@ -50,6 +50,11 @@ jobs:
           cd "${{ steps.build-pragma.outputs.install-dir }}"
           echo -e "ref: $GITHUB_REF \ncommit: $GITHUB_SHA\nbuild: $(date +"%Y-%m-%dT%H:%M:%SZ")" \
           > ./git_info.txt
+
+          # Enable experimental updates
+          cd cfg
+          echo "pfm_enable_experimental_updates \"1\"" >> client.cfg
+
           cd "$curDir"
 
           7z a pragma.zip "${{ steps.build-pragma.outputs.install-dir }}/**"

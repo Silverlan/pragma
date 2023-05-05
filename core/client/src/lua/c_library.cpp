@@ -965,6 +965,10 @@ static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua_S
 void CGame::RegisterLuaLibraries()
 {
 	Lua::util::register_library(GetLuaState());
+
+	auto osMod = luabind::module(GetLuaState(), "os");
+	Lua::util::register_os(GetLuaState(), osMod);
+
 	auto utilMod = luabind::module(GetLuaState(), "util");
 	Lua::util::register_shared(GetLuaState(), utilMod);
 	utilMod[luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::calc_world_direction_from_2d_coordinates), luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::Client::calc_world_direction_from_2d_coordinates),

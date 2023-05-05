@@ -30,6 +30,10 @@
 void SGame::RegisterLuaLibraries()
 {
 	Lua::util::register_library(GetLuaState());
+
+	auto osMod = luabind::module(GetLuaState(), "os");
+	Lua::util::register_os(GetLuaState(), osMod);
+
 	auto utilMod = luabind::module(GetLuaState(), "util");
 	Lua::util::register_shared(GetLuaState(), utilMod);
 	utilMod[luabind::def("fire_bullets", static_cast<luabind::object (*)(lua_State *, const BulletInfo &, bool)>(Lua::util::Server::fire_bullets)), luabind::def("fire_bullets", static_cast<luabind::object (*)(lua_State *, const BulletInfo &)>(Lua::util::Server::fire_bullets)),

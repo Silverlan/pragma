@@ -291,6 +291,8 @@ void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
 	pragma::lua::define_custom_constructor<pragma::asset::WorldData, [](NetworkState &nw) -> std::shared_ptr<pragma::asset::WorldData> { return pragma::asset::WorldData::Create(nw); }, NetworkState &>(l);
 }
 
+void Lua::util::register_os(lua_State *l, luabind::module_ &mod) { mod[luabind::def("set_prevent_os_sleep_mode", &::util::set_prevent_os_sleep_mode)]; }
+
 void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 {
 	mod[luabind::def("is_valid", static_cast<bool (*)(lua_State *)>(Lua::util::is_valid)), luabind::def("is_valid", static_cast<bool (*)(lua_State *, const luabind::object &)>(Lua::util::is_valid)),

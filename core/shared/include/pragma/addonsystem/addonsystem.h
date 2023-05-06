@@ -40,12 +40,14 @@ namespace upad {
 };
 class DLLNETWORK AddonSystem {
   public:
+	static bool MountAddon(const std::string &addonPath);
 	static void MountAddons();
 	static void UnmountAddons();
 	static const std::vector<AddonInfo> &GetMountedAddons();
 	static void Poll();
 	static DirectoryWatcherCallback *GetAddonWatcher();
   private:
+	static bool MountAddon(const std::string &addonPath, std::vector<AddonInfo> &outAddons, bool silent = true);
 	static std::vector<AddonInfo> m_addons;
 	static std::shared_ptr<DirectoryWatcherCallback> m_addonWatcher;
 	static upad::PADPackage *LoadPADPackage(const std::string &path);

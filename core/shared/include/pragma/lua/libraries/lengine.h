@@ -29,6 +29,8 @@ namespace Lua {
 
 		DLLNETWORK void set_record_console_output(bool record);
 		DLLNETWORK opt<mult<std::string, Con::MessageFlags, opt<Color>>> poll_console_output(lua_State *l);
+
+		DLLNETWORK void register_shared_functions(lua_State *l, luabind::module_ &modEn);
 	};
 };
 

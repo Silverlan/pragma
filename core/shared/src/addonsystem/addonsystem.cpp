@@ -68,21 +68,6 @@ static bool is_addon_mounted(const std::string &addonPath, const std::vector<Add
 	return it != addons.end();
 }
 
-static bool mount_directory_addon(const std::string &addonPath, std::vector<AddonInfo> &outAddons, bool silent = true)
-{
-	if(addonPath.find_first_of("\\/") != std::string::npos)
-		return false; // This is not a top-level directory (i.e. it's not an addon, but the sub-directory of an addon)
-	if(is_addon_mounted(addonPath, outAddons))
-		return true;
-	auto path = "addons\\" + addonPath;
-	FileManager::AddCustomMountDirectory(path.c_str(), static_cast<fsys::SearchFlags>(FSYS_SEARCH_ADDON));
-	outAddons.push_back(AddonInfo(path));
-	load_autorun_scripts([&path](const std::string &findTarget, std::vector<std::string> &outFiles) { FileManager::FindFiles((path + '\\' + findTarget).c_str(), &outFiles, nullptr); });
-	if(silent == false)
-		Con::cout << "Mounting addon '" << addonPath << "'..." << Con::endl;
-	return true;
-}
-
 #ifdef _WIN32
 static bool mount_linked_addon(const std::string &pathLink, std::vector<AddonInfo> &outAddons, bool silent = true)
 {
@@ -106,6 +91,37 @@ static bool mount_linked_addon(const std::string &pathLink, std::vector<AddonInf
 
 DirectoryWatcherCallback *AddonSystem::GetAddonWatcher() { return m_addonWatcher.get(); }
 
+bool AddonSystem::MountAddon(const std::string &paddonPath, std::vector<AddonInfo> &outAddons, bool silent) {
+	// Valid addon paths are: addons/addonName, addons/addonName/addons/subAddonName, etc.
+	auto addonPath = paddonPath;
+	ustring::replace(addonPath,"/", "\\"); // TODO: We should be using forward slashes, not backward slashes for the normalized paths!
+	auto path = util::Path::CreatePath(addonPath);
+	auto n = path.GetComponentCount();
+	if((n % 2) == 0)
+		return false;
+	if(n > 1) {
+		size_t curOffset = 0;
+		path.GetComponent(curOffset, &curOffset);
+		for(auto i = decltype(n) {1u}; i < n; i += 2) {
+			auto component = path.GetComponent(curOffset, &curOffset);
+			if(component != "addons")
+				return false; // This is not a top-level directory (i.e. it's not an addon, but the sub-directory of an addon)
+			path.GetComponent(curOffset, &curOffset);
+		}
+	}
+
+	if(is_addon_mounted(addonPath, outAddons))
+		return true;
+	auto fullPath = "addons\\" + addonPath;
+	FileManager::AddCustomMountDirectory(fullPath.c_str(), static_cast<fsys::SearchFlags>(FSYS_SEARCH_ADDON));
+	outAddons.push_back(AddonInfo(fullPath));
+	load_autorun_scripts([&fullPath](const std::string &findTarget, std::vector<std::string> &outFiles) { FileManager::FindFiles((fullPath + '\\' + findTarget).c_str(), &outFiles, nullptr); });
+	if(silent == false)
+		Con::cout << "Mounting addon '" << addonPath << "'..." << Con::endl;
+	return true;
+}
+bool AddonSystem::MountAddon(const std::string &addonPath) { return MountAddon(addonPath, m_addons); }
+
 void AddonSystem::MountAddons()
 {
 	std::vector<std::string> resFiles;
@@ -126,7 +142,7 @@ void AddonSystem::MountAddons()
 	}
 
 	for(auto &d : resDirs)
-		mount_directory_addon(d, m_addons);
+		MountAddon(d, m_addons);
 
 #ifdef _WIN32
 	std::vector<std::string> resLinks;
@@ -171,7 +187,7 @@ void AddonSystem::MountAddons()
 			  }
 			  else {
 				  // Directory
-				  mount_directory_addon(fName, m_addons, false);
+				  MountAddon(fName, m_addons, false);
 			  }
 		  },
 		  DirectoryWatcherCallback::WatchFlags::WatchSubDirectories | DirectoryWatcherCallback::WatchFlags::WatchDirectoryChanges);

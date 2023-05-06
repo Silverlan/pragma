@@ -544,6 +544,12 @@ void Engine::UpdateParallelJobs()
 
 ConVarMap *Engine::GetConVarMap() { return console_system::engine::get_convar_map(); }
 
+std::unique_ptr<Engine::ConVarInfoList> &Engine::GetConVarConfig(NetworkState &nw) { return m_svConfig; }
+Engine::StateInstance &Engine::GetStateInstance(NetworkState &nw)
+{
+	assert(m_svInstance != nullptr);
+	return *m_svInstance;
+}
 Engine::StateInstance &Engine::GetServerStateInstance() { return *m_svInstance; }
 
 void Engine::SetVerbose(bool bVerbose) { umath::set_flag(m_stateFlags, StateFlags::Verbose, bVerbose); }

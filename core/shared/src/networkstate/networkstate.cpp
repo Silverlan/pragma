@@ -701,7 +701,15 @@ ConVar *NetworkState::RegisterConVar(const std::string &scmd, const std::shared_
 		return static_cast<ConVar *>(cf.get());
 	}
 	auto itNew = m_conVars.insert(decltype(m_conVars)::value_type(scmd, cvar));
-	return static_cast<ConVar *>(itNew.first->second.get());
+	auto *cv = static_cast<ConVar *>(itNew.first->second.get());
+	auto &instance = engine->GetStateInstance(*this);
+	if(instance.config) {
+		// Use value from loaded config
+		auto *args = instance.config->find(scmd);
+		if(args && !args->empty())
+			cv->SetValue((*args)[0]);
+	}
+	return cv;
 }
 ConVar *NetworkState::CreateConVar(const std::string &scmd, const std::string &value, ConVarFlags flags, const std::string &help) { return RegisterConVar(scmd, ConVar::Create<std::string>(value, flags, help)); }
 

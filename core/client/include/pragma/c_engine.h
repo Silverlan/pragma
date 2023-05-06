@@ -59,15 +59,6 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 
 		Count
 	};
-  private:
-	struct DLLCLIENT ConVarInfo {
-		std::string cvar;
-		std::vector<std::string> argv;
-	};
-	struct DLLCLIENT ConVarInfoList {
-		std::vector<ConVarInfo> cvars;
-		ConVarInfo *find(const std::string &cmd);
-	};
   public:
 	enum class StateFlags : uint32_t {
 		None = 0u,
@@ -108,6 +99,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	void SetGPUProfilingEnabled(bool bEnabled);
 
 	virtual bool Initialize(int argc, char *argv[]) override;
+	virtual StateInstance &GetStateInstance(NetworkState &nw) override;
 	StateInstance &GetClientStateInstance();
 	const std::string &GetDefaultFontSetName() const;
 	const FontSet &GetDefaultFontSet() const;
@@ -143,8 +135,6 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	// Config
 	void LoadClientConfig();
 	void SaveClientConfig();
-	bool ExecConfig(const std::string &cfg, std::vector<ConVarInfo> &cmds);
-	void ExecCommands(ConVarInfoList &cmds);
 	void SetControllersEnabled(bool b);
 	bool GetControllersEnabled() const;
 
@@ -230,11 +220,12 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 
 	void SetGpuPerformanceTimersEnabled(bool enabled);
 	std::chrono::nanoseconds GetGpuExecutionTime(uint32_t swapchainIdx, GPUTimer timer) const;
+
+	virtual std::unique_ptr<ConVarInfoList> &GetConVarConfig(NetworkState &nw) override;
   protected:
 	friend CoreInputBindingLayer;
 	void DrawScene(std::shared_ptr<prosper::RenderTarget> &rt);
 	void WriteClientConfig(VFilePtrReal f);
-	void PreloadClientConfig();
 	void OnRenderResolutionChanged(uint32_t width, uint32_t height);
 	void LoadFontSets();
 	void UpdateDirtyInputBindings();
@@ -249,6 +240,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	virtual void OnWindowInitialized() override;
 	virtual void LoadConfig() override;
 	virtual void InitializeExternalArchiveManager() override;
+	virtual void PreloadConfig(StateInstance &instance, const std::string &configName) override;
 
 	virtual void RegisterConsoleCommands() override;
   private:
@@ -275,6 +267,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	float m_speedCamMouse;
 	float m_nearZ, m_farZ;
 	std::unique_ptr<StateInstance> m_clInstance;
+	std::unique_ptr<ConVarInfoList> m_clConfig;
 	std::optional<Vector2i> m_renderResolution = {};
 
 	std::shared_ptr<pragma::debug::GPUProfiler> m_gpuProfiler;
@@ -284,7 +277,6 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	std::unordered_map<std::string, FontSet> m_fontSets;
 	float m_rawInputJoystickMagnitude = 0.f;
 	std::unordered_map<GLFW::Key, GLFW::KeyState> m_joystickKeyStates;
-	std::unique_ptr<ConVarInfoList> m_preloadedConfig;
 
 	std::vector<std::shared_ptr<InputBindingLayer>> m_inputBindingLayers;
 	std::shared_ptr<InputBindingLayer> m_coreInputBindingLayer;

@@ -14,6 +14,31 @@
 #include <pragma/console/convars.h>
 #include <sharedutils/util_string.h>
 
+void Engine::PreloadConfig(StateInstance &instance, const std::string &configName)
+{
+	auto &cfg = GetConVarConfig(*instance.state);
+	cfg = std::make_unique<ConVarInfoList>();
+	auto &cmds = *cfg.get();
+	ExecConfig(configName, cmds.cvars);
+}
+
+Engine::ConVarInfoList::ConVarArgs *Engine::ConVarInfoList::find(const std::string &cmd)
+{
+	auto it = cvars.find(cmd);
+	return (it != cvars.end()) ? &it->second : nullptr;
+}
+
+bool Engine::ExecConfig(const std::string &cfg, std::unordered_map<std::string, ConVarInfoList::ConVarArgs> &cmds)
+{
+	return Engine::ExecConfig(cfg, [&cmds](std::string &cmd, std::vector<std::string> &argv) { cmds[cmd] = argv; });
+}
+
+void Engine::ExecCommands(ConVarInfoList &cmds)
+{
+	for(auto &pair : cmds.cvars)
+		RunConsoleCommand(pair.first, pair.second);
+}
+
 bool Engine::ExecConfig(const std::string &cfg, const std::function<void(std::string &, std::vector<std::string> &)> &callback)
 {
 	std::string path = cfg;
@@ -40,7 +65,10 @@ bool Engine::ExecConfig(const std::string &cfg)
 void Engine::LoadServerConfig()
 {
 	ExecConfig("engine.cfg");
-	ExecConfig("server.cfg");
+	PreloadConfig(*m_svInstance, "server.cfg");
+	auto &cfg = GetConVarConfig(*m_svInstance->state);
+	assert(cfg);
+	ExecCommands(*cfg);
 }
 
 void Engine::LoadConfig() { LoadServerConfig(); }

@@ -541,11 +541,17 @@ bool CEngine::Initialize(int argc, char *argv[])
 	if(Lua::get_extended_lua_modules_enabled()) {
 		RegisterConCommand("lc", [this](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { RunConsoleCommand("lua_run_cl", argv); });
 	}
-	auto &cmds = *m_preloadedConfig.get();
+	auto &cmds = m_clInstance->config->cvars;
+	auto findCmdArg = [&cmds](const std::string &cmd) -> std::optional<std::string> {
+		auto it = cmds.find(cmd);
+		if(it != cmds.end() && it->second.empty() == false)
+			return it->second.front();
+		return {};
+	};
 
-	auto *cviRenderAPI = cmds.find("render_api");
-	if(cviRenderAPI && cviRenderAPI->argv.empty() == false)
-		SetRenderAPI(cviRenderAPI->argv.front());
+	auto renderApi = findCmdArg("render_api");
+	if(renderApi)
+		SetRenderAPI(*renderApi);
 
 	// Initialize Window context
 	try {
@@ -558,13 +564,13 @@ bool CEngine::Initialize(int argc, char *argv[])
 		return false;
 	}
 
-	auto res = cmds.find("cl_window_resolution");
+	auto windowRes = findCmdArg("cl_window_resolution");
 	prosper::IPrContext::CreateInfo contextCreateInfo {};
 	contextCreateInfo.width = 1280;
 	contextCreateInfo.height = 1024;
-	if(res != nullptr && !res->argv.empty()) {
+	if(windowRes) {
 		std::vector<std::string> vals;
-		ustring::explode(res->argv[0], "x", vals);
+		ustring::explode(*windowRes, "x", vals);
 		if(vals.size() >= 2) {
 			contextCreateInfo.width = util::to_int(vals[0]);
 			contextCreateInfo.height = util::to_int(vals[1]);
@@ -572,20 +578,20 @@ bool CEngine::Initialize(int argc, char *argv[])
 	}
 	// SetResolution(Vector2i(contextCreateInfo.width,contextCreateInfo.height));
 
-	res = cmds.find("cl_render_resolution");
-	if(res != nullptr && !res->argv.empty()) {
+	auto renderRes = findCmdArg("cl_render_resolution");
+	if(renderRes) {
 		std::vector<std::string> vals;
-		ustring::explode(res->argv[0], "x", vals);
+		ustring::explode(*renderRes, "x", vals);
 		if(vals.size() >= 2) {
 			m_renderResolution = {util::to_int(vals[0]), util::to_int(vals[1])};
 		}
 	}
 	//
 
-	res = cmds.find("cl_render_window_mode");
+	auto windowMode = findCmdArg("cl_render_window_mode");
 	int mode = 0;
-	if(res != nullptr && !res->argv.empty())
-		mode = util::to_int(res->argv[0]);
+	if(windowMode)
+		mode = util::to_int(*windowMode);
 	auto &initialWindowSettings = GetRenderContext().GetInitialWindowSettings();
 	initialWindowSettings.windowedMode = (mode == 0);
 	initialWindowSettings.decorated = ((mode == 2) ? false : true);
@@ -601,17 +607,17 @@ bool CEngine::Initialize(int argc, char *argv[])
 	if(g_launchParamHeight.has_value())
 		initialWindowSettings.height = *g_launchParamHeight;
 
-	res = cmds.find("cl_render_monitor");
-	if(res != nullptr && !res->argv.empty()) {
-		auto monitor = util::to_int(res->argv[0]);
+	auto renderMonitor = findCmdArg("cl_render_monitor");
+	if(renderMonitor) {
+		auto monitor = util::to_int(*renderMonitor);
 		auto monitors = GLFW::get_monitors();
 		if(monitor < monitors.size() && monitor > 0)
 			initialWindowSettings.monitor = monitors[monitor];
 	}
 
-	res = cmds.find("cl_gpu_device");
-	if(res != nullptr && !res->argv.empty()) {
-		auto device = res->argv[0];
+	auto gpuDevice = findCmdArg("cl_gpu_device");
+	if(gpuDevice) {
+		auto device = *gpuDevice;
 		std::vector<std::string> subStrings;
 		ustring::explode(device, ",", subStrings);
 		if(subStrings.size() >= 2)
@@ -619,9 +625,9 @@ bool CEngine::Initialize(int argc, char *argv[])
 	}
 
 	auto presentMode = prosper::PresentModeKHR::Mailbox;
-	res = cmds.find("cl_render_present_mode");
-	if(res != nullptr && !res->argv.empty()) {
-		auto mode = util::to_int(res->argv[0]);
+	auto renderPresentMode = findCmdArg("cl_render_present_mode");
+	if(renderPresentMode) {
+		auto mode = util::to_int(*renderPresentMode);
 		if(mode == 0)
 			presentMode = prosper::PresentModeKHR::Immediate;
 		else if(mode == 1)
@@ -1013,7 +1019,8 @@ void CEngine::InitializeWindowInputCallbacks(prosper::Window &window)
 	window->SetFocusCallback([this, &window](GLFW::Window &glfwWindow, bool bFocused) mutable { OnWindowFocusChanged(window, bFocused); });
 	window->SetDropCallback([this, &window](GLFW::Window &glfwWindow, std::vector<std::string> &files) mutable { OnFilesDropped(window, files); });
 }
-void CEngine::OnWindowResized(prosper::Window &window, Vector2i size) {
+void CEngine::OnWindowResized(prosper::Window &window, Vector2i size)
+{
 	m_stateFlags |= StateFlags::WindowSizeChanged;
 	m_tWindowResizeTime = util::Clock::now();
 }
@@ -1087,6 +1094,18 @@ REGISTER_CONVAR_CALLBACK_CL(cl_controller_enabled, [](NetworkState *state, ConVa
 
 float CEngine::GetRawJoystickAxisMagnitude() const { return m_rawInputJoystickMagnitude; }
 
+CEngine::ConVarInfoList *CEngine::GetConVarConfig(NetworkState &nw)
+{
+	if(m_clInstance->state.get() == &nw)
+		return m_clConfig.get();
+	return Engine::GetConVarConfig(nw);
+}
+Engine::StateInstance &CEngine::GetStateInstance(NetworkState &nw)
+{
+	if(m_clInstance->state.get() == &nw)
+		return *m_clInstance;
+	return Engine::GetStateInstance(nw);
+}
 Engine::StateInstance &CEngine::GetClientStateInstance() { return *m_clInstance; }
 
 ::util::WeakHandle<prosper::Shader> CEngine::ReloadShader(const std::string &name)

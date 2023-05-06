@@ -63,6 +63,13 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	mutable std::shared_ptr<util::Library> m_libServer = nullptr;
 	mutable pragma::IServerState m_iServerState;
   public:
+	struct DLLNETWORK ConVarInfoList {
+		using ConVarArgs = std::vector<std::string>;
+		std::unordered_map<std::string, ConVarArgs> cvars;
+		ConVarArgs *find(const std::string &cmd);
+	};
+	virtual std::unique_ptr<ConVarInfoList> &GetConVarConfig(NetworkState &nw);
+
 	virtual std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &GetConVarPtrs();
 	static ConVarHandle GetConVarHandle(std::string scvar);
 	//
@@ -81,7 +88,11 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	enum class ConsoleType : uint8_t { None = 0, Terminal, GUI, GUIDetached };
   protected:
 	bool ExecConfig(const std::string &cfg, const std::function<void(std::string &, std::vector<std::string> &)> &callback);
+	bool ExecConfig(const std::string &cfg, std::unordered_map<std::string, ConVarInfoList::ConVarArgs> &cmds);
+	void ExecCommands(ConVarInfoList &cmds);
+	virtual void PreloadConfig(StateInstance &instance, const std::string &configName);
 	std::unique_ptr<StateInstance> m_svInstance;
+	std::unique_ptr<ConVarInfoList> m_svConfig;
 	bool m_bMountExternalGameResources = true;
 
 	std::atomic<bool> m_bRecordConsoleOutput = false;
@@ -173,6 +184,7 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	// NetState
 	virtual NetworkState *GetActiveState();
 
+	virtual StateInstance &GetStateInstance(NetworkState &nw);
 	StateInstance &GetServerStateInstance();
 
 	std::optional<ConsoleOutput> PollConsoleOutput();

@@ -15,9 +15,10 @@
 #include <string>
 #include <filesystem>
 #include <sharedutils/util.h>
-#pragma optimize("", off)
+#include <sharedutils/util_path.hpp>
 
-static int update_failed() {
+static int update_failed()
+{
 	std::cout << "Press any key to exit..." << std::endl;
 	std::cin.get();
 	return EXIT_FAILURE;
@@ -73,17 +74,29 @@ int main(int argc, char *argv[])
 	}
 
 	// Copy files from update folder to root folder
-	for(auto &f : std::filesystem::directory_iterator(updatePath)) {
-		auto fpath = f.path();
-		auto filename = fpath.filename().string();
-		if(filename == "." || filename == "..")
-			continue;
-		auto newPath = path + pathSeparator + filename;
-		std::cout << "Copying '" << fpath << "' to '" << newPath << "'..." << std::endl;
-		auto success = std::filesystem::copy_file(path, newPath, std::filesystem::copy_options::overwrite_existing);
-		if(success == false) {
-			std::cout << "Failed to copy file '" << fpath << "'!" << std::endl;
-			return update_failed();
+	auto pUpdatePath = util::Path::CreatePath(updatePath);
+	for(const auto &entry : std::filesystem::recursive_directory_iterator(updatePath)) {
+		if(std::filesystem::is_regular_file(entry)) {
+			auto fullSrcPath = entry.path().string();
+			auto relPath = util::Path::CreateFile(fullSrcPath);
+			relPath.MakeRelative(pUpdatePath);
+
+			auto filename = relPath.GetString();
+			auto newPath = path + pathSeparator + filename;
+			std::cout << "Copying '" << relPath << "'..." << std::endl;
+			auto success = true;
+			try {
+				std::filesystem::create_directories(ufile::get_path_from_filename(newPath));
+				success = std::filesystem::copy_file(fullSrcPath, newPath, std::filesystem::copy_options::overwrite_existing);
+			}
+			catch(const std::filesystem::filesystem_error &err) {
+				std::cout << "Failed to copy file '" << relPath << "': " << err.what() << "!" << std::endl;
+				return update_failed();
+			}
+			if(success == false) {
+				std::cout << "Failed to copy file '" << relPath << "'!" << std::endl;
+				return update_failed();
+			}
 		}
 	}
 
@@ -93,4 +106,3 @@ int main(int argc, char *argv[])
 
 	return EXIT_SUCCESS;
 }
-#pragma optimize("", on)

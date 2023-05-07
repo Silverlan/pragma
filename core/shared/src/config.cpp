@@ -14,11 +14,12 @@
 #include <pragma/console/convars.h>
 #include <sharedutils/util_string.h>
 
-void Engine::PreloadConfig(NwStateType type, const std::string &configName) {
+void Engine::PreloadConfig(NwStateType type, const std::string &configName)
+{
 	auto &cfg = GetConVarConfig(type);
 	cfg = std::make_unique<ConVarInfoList>();
 	auto &cmds = *cfg.get();
-	ExecConfig(configName, cmds.cvars);
+	ExecConfig(configName, cmds);
 }
 void Engine::PreloadConfig(StateInstance &instance, const std::string &configName)
 {
@@ -30,21 +31,29 @@ void Engine::PreloadConfig(StateInstance &instance, const std::string &configNam
 		PreloadConfig(NwStateType::Client, configName);
 }
 
-Engine::ConVarInfoList::ConVarArgs *Engine::ConVarInfoList::find(const std::string &cmd)
+Engine::ConVarInfoList::ConVarArgs *Engine::ConVarInfoList::Find(const std::string &cmd)
 {
-	auto it = cvars.find(cmd);
-	return (it != cvars.end()) ? &it->second : nullptr;
+	auto it = m_cvarMap.find(cmd);
+	return (it != m_cvarMap.end()) ? &it->second : nullptr;
 }
 
-bool Engine::ExecConfig(const std::string &cfg, std::unordered_map<std::string, ConVarInfoList::ConVarArgs> &cmds)
+void Engine::ConVarInfoList::Add(const std::string &cmd, const ConVarArgs &args)
 {
-	return Engine::ExecConfig(cfg, [&cmds](std::string &cmd, std::vector<std::string> &argv) { cmds[cmd] = argv; });
+	if(m_cvars.size() == m_cvars.capacity())
+		m_cvars.reserve(m_cvars.size() * 1.5 + 50);
+	m_cvars.push_back({cmd, args});
+	m_cvarMap[cmd] = args;
+}
+
+bool Engine::ExecConfig(const std::string &cfg, ConVarInfoList &infoList)
+{
+	return Engine::ExecConfig(cfg, [&infoList](std::string &cmd, std::vector<std::string> &argv) { infoList.Add(cmd, argv); });
 }
 
 void Engine::ExecCommands(ConVarInfoList &cmds)
 {
-	for(auto &pair : cmds.cvars)
-		RunConsoleCommand(pair.first, pair.second);
+	for(auto &cmd : cmds.GetConVars())
+		RunConsoleCommand(cmd.cmd, cmd.args);
 }
 
 bool Engine::ExecConfig(const std::string &cfg, const std::function<void(std::string &, std::vector<std::string> &)> &callback)

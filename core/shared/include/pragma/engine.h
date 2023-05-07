@@ -66,8 +66,18 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
   public:
 	struct DLLNETWORK ConVarInfoList {
 		using ConVarArgs = std::vector<std::string>;
-		std::unordered_map<std::string, ConVarArgs> cvars;
-		ConVarArgs *find(const std::string &cmd);
+		struct DLLNETWORK ConVarInfo {
+			std::string cmd;
+			ConVarArgs args;
+		};
+		ConVarArgs *Find(const std::string &cmd);
+		void Add(const std::string &cmd, const ConVarArgs &args);
+		std::vector<ConVarInfo> &GetConVars() { return m_cvars; }
+		const std::vector<ConVarInfo> &GetConVars() const { return m_cvars; }
+	  private:
+		std::vector<ConVarInfo> m_cvars;
+		// Only contains last convar, used for fast lookups
+		std::unordered_map<std::string, ConVarArgs> m_cvarMap;
 	};
 
 	virtual std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &GetConVarPtrs();
@@ -90,7 +100,7 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	virtual std::unique_ptr<ConVarInfoList> &GetConVarConfig(NwStateType type);
   protected:
 	bool ExecConfig(const std::string &cfg, const std::function<void(std::string &, std::vector<std::string> &)> &callback);
-	bool ExecConfig(const std::string &cfg, std::unordered_map<std::string, ConVarInfoList::ConVarArgs> &cmds);
+	bool ExecConfig(const std::string &cfg, ConVarInfoList &infoList);
 	void ExecCommands(ConVarInfoList &cmds);
 	void PreloadConfig(StateInstance &instance, const std::string &configName);
 	virtual void PreloadConfig(NwStateType type, const std::string &configName);

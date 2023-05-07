@@ -705,7 +705,7 @@ ConVar *NetworkState::RegisterConVar(const std::string &scmd, const std::shared_
 	auto &cfg = engine->GetConVarConfig(GetType());
 	if(cfg) {
 		// Use value from loaded config
-		auto *args = cfg->find(scmd);
+		auto *args = cfg->Find(scmd);
 		if(args && !args->empty())
 			cv->SetValue((*args)[0]);
 	}

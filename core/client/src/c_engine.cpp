@@ -543,7 +543,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 	}
 	auto &cmds = *m_clConfig;
 	auto findCmdArg = [&cmds](const std::string &cmd) -> std::optional<std::string> {
-		auto *args = cmds.find(cmd);
+		auto *args = cmds.Find(cmd);
 		if(args && !args->empty())
 			return args->front();
 		return {};

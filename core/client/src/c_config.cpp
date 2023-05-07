@@ -93,10 +93,9 @@ void CEngine::PreloadConfig(NwStateType type, const std::string &configName)
 	if(!cfg)
 		return;
 	std::string lan = Locale::DetermineSystemLanguage();
-	auto &cvars = cfg->cvars;
-	auto it = cvars.find("cl_language");
-	if(it != cvars.end() && !it->second.empty())
-		lan = it->second[0];
+	auto *args = cfg->Find("cl_language");
+	if(args && !args->empty())
+		lan = args->front();
 	Locale::SetLanguage(lan);
 	Locale::Load("inputs.txt");
 	Locale::Load("menu.txt");

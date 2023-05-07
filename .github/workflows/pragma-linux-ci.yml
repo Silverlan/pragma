@@ -1,9 +1,10 @@
 name: Build Linux
 on:
   push:
-    branches: [ master ]
+    branches: [ main, master, actions ]
   pull_request:
-    branches: [ master ]
+    branches: [ main, master, actions ]
+  workflow_dispatch:
 
 concurrency:
   group: environment-lin-${{ github.ref }}

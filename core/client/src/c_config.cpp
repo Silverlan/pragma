@@ -74,20 +74,22 @@ void CEngine::WriteClientConfig(VFilePtrReal f)
 void CEngine::LoadConfig()
 {
 	Engine::LoadConfig();
-	PreloadConfig(*m_clInstance, "client.cfg");
+	PreloadConfig(NwStateType::Client, "client.cfg");
 }
 
 void CEngine::LoadClientConfig()
 {
-	auto &cfg = GetConVarConfig(*m_clInstance->state);
+	auto &cfg = GetConVarConfig(NwStateType::Client);
 	if(cfg)
 		ExecCommands(*cfg);
 }
 
-void CEngine::PreloadConfig(StateInstance &instance, const std::string &configName)
+void CEngine::PreloadConfig(NwStateType type, const std::string &configName)
 {
-	Engine::PreloadConfig(instance, configName);
-	auto &cfg = GetConVarConfig(*m_clInstance->state);
+	Engine::PreloadConfig(type, configName);
+	if(type != NwStateType::Client)
+		return;
+	auto &cfg = GetConVarConfig(NwStateType::Client);
 	if(!cfg)
 		return;
 	std::string lan = Locale::DetermineSystemLanguage();

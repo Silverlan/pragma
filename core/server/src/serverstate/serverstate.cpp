@@ -240,6 +240,8 @@ void ServerState::Close()
 	NetworkState::Close();
 }
 
+NwStateType ServerState::GetType() const { return NwStateType::Server; }
+
 void ServerState::Think()
 {
 	NetworkState::Think();

@@ -14,12 +14,20 @@
 #include <pragma/console/convars.h>
 #include <sharedutils/util_string.h>
 
-void Engine::PreloadConfig(StateInstance &instance, const std::string &configName)
-{
-	auto &cfg = GetConVarConfig(*instance.state);
+void Engine::PreloadConfig(NwStateType type, const std::string &configName) {
+	auto &cfg = GetConVarConfig(type);
 	cfg = std::make_unique<ConVarInfoList>();
 	auto &cmds = *cfg.get();
 	ExecConfig(configName, cmds.cvars);
+}
+void Engine::PreloadConfig(StateInstance &instance, const std::string &configName)
+{
+	if(!instance.state)
+		return;
+	if(instance.state->IsServer())
+		PreloadConfig(NwStateType::Server, configName);
+	else
+		PreloadConfig(NwStateType::Client, configName);
 }
 
 Engine::ConVarInfoList::ConVarArgs *Engine::ConVarInfoList::find(const std::string &cmd)
@@ -65,8 +73,8 @@ bool Engine::ExecConfig(const std::string &cfg)
 void Engine::LoadServerConfig()
 {
 	ExecConfig("engine.cfg");
-	PreloadConfig(*m_svInstance, "server.cfg");
-	auto &cfg = GetConVarConfig(*m_svInstance->state);
+	PreloadConfig(NwStateType::Server, "server.cfg");
+	auto &cfg = GetConVarConfig(NwStateType::Server);
 	assert(cfg);
 	ExecCommands(*cfg);
 }

@@ -54,6 +54,7 @@ namespace util {
 namespace pragma::asset {
 	class AssetManager;
 };
+enum class NwStateType : uint8_t { Client = 0, Server };
 class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
   public:
 	static const uint32_t DEFAULT_TICK_RATE;
@@ -68,7 +69,6 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 		std::unordered_map<std::string, ConVarArgs> cvars;
 		ConVarArgs *find(const std::string &cmd);
 	};
-	virtual std::unique_ptr<ConVarInfoList> &GetConVarConfig(NetworkState &nw);
 
 	virtual std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &GetConVarPtrs();
 	static ConVarHandle GetConVarHandle(std::string scvar);
@@ -86,11 +86,14 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 		std::shared_ptr<Color> color;
 	};
 	enum class ConsoleType : uint8_t { None = 0, Terminal, GUI, GUIDetached };
+
+	virtual std::unique_ptr<ConVarInfoList> &GetConVarConfig(NwStateType type);
   protected:
 	bool ExecConfig(const std::string &cfg, const std::function<void(std::string &, std::vector<std::string> &)> &callback);
 	bool ExecConfig(const std::string &cfg, std::unordered_map<std::string, ConVarInfoList::ConVarArgs> &cmds);
 	void ExecCommands(ConVarInfoList &cmds);
-	virtual void PreloadConfig(StateInstance &instance, const std::string &configName);
+	void PreloadConfig(StateInstance &instance, const std::string &configName);
+	virtual void PreloadConfig(NwStateType type, const std::string &configName);
 	std::unique_ptr<StateInstance> m_svInstance;
 	std::unique_ptr<ConVarInfoList> m_svConfig;
 	bool m_bMountExternalGameResources = true;

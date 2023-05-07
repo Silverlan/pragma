@@ -56,6 +56,7 @@ namespace msys {
 class ResourceWatcherManager;
 class ALSound;
 enum class ALSoundType : int32_t;
+enum class NwStateType : uint8_t;
 namespace Lua {
 	enum class ErrorColorMode : uint32_t;
 	class Interface;
@@ -87,6 +88,8 @@ class DLLNETWORK NetworkState : public CallbackHandler, public CVarHandler {
 	void TerminateLuaModules(lua_State *l);
 	void DeregisterLuaModules(void *l, const std::string &identifier);
 	virtual bool ShouldRemoveSound(ALSound &snd);
+
+	virtual NwStateType GetType() const = 0;
 
 	// Assets
 	const pragma::asset::ModelManager &GetModelManager() const;

@@ -121,6 +121,7 @@ class DLLCLIENT ClientState : public NetworkState {
 	msys::MaterialHandle CreateMaterial(const std::string &shader);
 	bool LoadGUILuaFile(std::string f);
 	pragma::networking::IClient *GetClient();
+	virtual NwStateType GetType() const override;
 	void Think();
 	void Tick();
 	void Draw(util::DrawSceneInfo &drawSceneInfo);

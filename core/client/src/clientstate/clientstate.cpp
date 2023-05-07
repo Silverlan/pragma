@@ -348,6 +348,8 @@ void ClientState::ToggleMainMenu()
 		OpenMainMenu();
 }
 
+NwStateType ClientState::GetType() const { return NwStateType::Client; }
+
 void ClientState::Close()
 {
 	c_engine->GetRenderContext().GetPipelineLoader().Stop();

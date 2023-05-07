@@ -221,7 +221,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	void SetGpuPerformanceTimersEnabled(bool enabled);
 	std::chrono::nanoseconds GetGpuExecutionTime(uint32_t swapchainIdx, GPUTimer timer) const;
 
-	virtual std::unique_ptr<ConVarInfoList> &GetConVarConfig(NetworkState &nw) override;
+	virtual std::unique_ptr<ConVarInfoList> &GetConVarConfig(NwStateType type) override;
   protected:
 	friend CoreInputBindingLayer;
 	void DrawScene(std::shared_ptr<prosper::RenderTarget> &rt);
@@ -240,7 +240,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	virtual void OnWindowInitialized() override;
 	virtual void LoadConfig() override;
 	virtual void InitializeExternalArchiveManager() override;
-	virtual void PreloadConfig(StateInstance &instance, const std::string &configName) override;
+	virtual void PreloadConfig(NwStateType type, const std::string &configName) override;
 
 	virtual void RegisterConsoleCommands() override;
   private:

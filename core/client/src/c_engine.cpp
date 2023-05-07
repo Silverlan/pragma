@@ -1094,11 +1094,11 @@ REGISTER_CONVAR_CALLBACK_CL(cl_controller_enabled, [](NetworkState *state, ConVa
 
 float CEngine::GetRawJoystickAxisMagnitude() const { return m_rawInputJoystickMagnitude; }
 
-std::unique_ptr<CEngine::ConVarInfoList> &CEngine::GetConVarConfig(NetworkState &nw)
+std::unique_ptr<CEngine::ConVarInfoList> &CEngine::GetConVarConfig(NwStateType type)
 {
-	if(m_clInstance->state.get() == &nw)
+	if(type == NwStateType::Client)
 		return m_clConfig;
-	return Engine::GetConVarConfig(nw);
+	return Engine::GetConVarConfig(type);
 }
 Engine::StateInstance &CEngine::GetStateInstance(NetworkState &nw)
 {

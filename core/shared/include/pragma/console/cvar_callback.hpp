@@ -13,6 +13,8 @@
 #include <sharedutils/functioncallback.h>
 
 enum class Type : uint8_t;
+class NetworkState;
+class ConVar;
 class DLLNETWORK CvarCallback {
   public:
 	CvarCallback();

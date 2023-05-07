@@ -702,10 +702,10 @@ ConVar *NetworkState::RegisterConVar(const std::string &scmd, const std::shared_
 	}
 	auto itNew = m_conVars.insert(decltype(m_conVars)::value_type(scmd, cvar));
 	auto *cv = static_cast<ConVar *>(itNew.first->second.get());
-	auto &instance = engine->GetStateInstance(*this);
-	if(instance.config) {
+	auto &cfg = engine->GetConVarConfig(*this);
+	if(cfg) {
 		// Use value from loaded config
-		auto *args = instance.config->find(scmd);
+		auto *args = cfg->find(scmd);
 		if(args && !args->empty())
 			cv->SetValue((*args)[0]);
 	}

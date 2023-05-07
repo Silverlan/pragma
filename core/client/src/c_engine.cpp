@@ -541,11 +541,11 @@ bool CEngine::Initialize(int argc, char *argv[])
 	if(Lua::get_extended_lua_modules_enabled()) {
 		RegisterConCommand("lc", [this](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { RunConsoleCommand("lua_run_cl", argv); });
 	}
-	auto &cmds = m_clInstance->config->cvars;
+	auto &cmds = *m_clConfig;
 	auto findCmdArg = [&cmds](const std::string &cmd) -> std::optional<std::string> {
-		auto it = cmds.find(cmd);
-		if(it != cmds.end() && it->second.empty() == false)
-			return it->second.front();
+		auto *args = cmds.find(cmd);
+		if(args && !args->empty())
+			return args->front();
 		return {};
 	};
 
@@ -1094,10 +1094,10 @@ REGISTER_CONVAR_CALLBACK_CL(cl_controller_enabled, [](NetworkState *state, ConVa
 
 float CEngine::GetRawJoystickAxisMagnitude() const { return m_rawInputJoystickMagnitude; }
 
-CEngine::ConVarInfoList *CEngine::GetConVarConfig(NetworkState &nw)
+std::unique_ptr<CEngine::ConVarInfoList> &CEngine::GetConVarConfig(NetworkState &nw)
 {
 	if(m_clInstance->state.get() == &nw)
-		return m_clConfig.get();
+		return m_clConfig;
 	return Engine::GetConVarConfig(nw);
 }
 Engine::StateInstance &CEngine::GetStateInstance(NetworkState &nw)

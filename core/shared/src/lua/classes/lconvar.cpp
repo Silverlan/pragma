@@ -134,8 +134,11 @@ int Lua::console::AddChangeCallback(lua_State *l)
 	auto cvar = Lua::CheckString(l, 1);
 	Lua::CheckFunction(l, 2);
 	auto fc = luabind::object(luabind::from_stack(l, 2));
-	game->AddConVarCallback(cvar, fc);
-	return 0;
+	auto cb = game->AddConVarCallback(cvar, fc);
+	if(!cb.IsValid())
+		return 0;
+	Lua::Push(l, cb);
+	return 1;
 }
 
 void Lua::console::register_override(lua_State *l, const std::string &src, const std::string &dst)

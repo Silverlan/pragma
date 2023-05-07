@@ -1038,7 +1038,7 @@ Engine::~Engine()
 Engine *pragma::get_engine() { return engine; }
 ServerState *pragma::get_server_state() { return engine->GetServerStateInterface().get_server_state(); }
 
-REGISTER_ENGINE_CONVAR_CALLBACK(debug_profiling_enabled, [](NetworkState *, ConVar *, bool, bool enabled) {
+REGISTER_ENGINE_CONVAR_CALLBACK(debug_profiling_enabled, [](NetworkState *, const ConVar &, bool, bool enabled) {
 	if(engine == nullptr)
 		return;
 	engine->SetProfilingEnabled(enabled);

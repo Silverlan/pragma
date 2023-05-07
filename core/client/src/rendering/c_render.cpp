@@ -66,12 +66,12 @@ extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-static void CVAR_CALLBACK_render_vsync_enabled(NetworkState *, ConVar *, int, int val) { glfwSwapInterval((val == 0) ? 0 : 1); }
+static void CVAR_CALLBACK_render_vsync_enabled(NetworkState *, const ConVar &, int, int val) { glfwSwapInterval((val == 0) ? 0 : 1); }
 REGISTER_CONVAR_CALLBACK_CL(render_vsync_enabled, CVAR_CALLBACK_render_vsync_enabled);
 
 static CallbackHandle cbDrawPhysics;
 static CallbackHandle cbDrawPhysicsEnd;
-static void CVAR_CALLBACK_debug_physics_draw(NetworkState *, ConVar *, int, int val, bool serverside)
+static void CVAR_CALLBACK_debug_physics_draw(NetworkState *, const ConVar &, int, int val, bool serverside)
 {
 	if(cbDrawPhysics.IsValid())
 		cbDrawPhysics.Remove();
@@ -147,8 +147,8 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState *, ConVar *, int, int 
 		mode = pragma::physics::IVisualDebugger::DebugMode::Normals;
 	visDebugger->SetDebugMode(mode);
 }
-REGISTER_CONVAR_CALLBACK_CL(debug_physics_draw, [](NetworkState *nw, ConVar *cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, false); });
-REGISTER_CONVAR_CALLBACK_CL(sv_debug_physics_draw, [](NetworkState *nw, ConVar *cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, true); });
+REGISTER_CONVAR_CALLBACK_CL(debug_physics_draw, [](NetworkState *nw, const ConVar &cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, false); });
+REGISTER_CONVAR_CALLBACK_CL(sv_debug_physics_draw, [](NetworkState *nw, const ConVar &cv, int oldVal, int val) { CVAR_CALLBACK_debug_physics_draw(nw, cv, oldVal, val, true); });
 
 void Console::commands::debug_render_validation_error_enabled(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {

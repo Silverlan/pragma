@@ -115,7 +115,7 @@ static void cl_render_vr_enabled(bool b)
 		lastColor = Color::White;
 	}
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_render_vr_enabled, [](NetworkState *, ConVar *, bool, bool b) { cl_render_vr_enabled(b); })
+REGISTER_CONVAR_CALLBACK_CL(cl_render_vr_enabled, [](NetworkState *, const ConVar &, bool, bool b) { cl_render_vr_enabled(b); })
 
 /*REGISTER_CONVAR_CALLBACK_CL(cl_render_vr_resolution,[](NetworkState*,ConVar*,std::string,std::string val) {
 	
@@ -220,4 +220,4 @@ static void cl_vr_mirror_window_enabled(bool val)
 		return;
 	fSetMirrorWindowEnabled(val);
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_vr_mirror_window_enabled, [](NetworkState *, ConVar *, bool, bool val) { cl_vr_mirror_window_enabled(val); })
+REGISTER_CONVAR_CALLBACK_CL(cl_vr_mirror_window_enabled, [](NetworkState *, const ConVar &, bool, bool val) { cl_vr_mirror_window_enabled(val); })

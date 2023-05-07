@@ -71,13 +71,13 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-REGISTER_CONVAR_CALLBACK_CL(cl_render_shader_quality, [](NetworkState *, ConVar *, int, int val) {
+REGISTER_CONVAR_CALLBACK_CL(cl_render_shader_quality, [](NetworkState *, const ConVar &, int, int val) {
 	if(c_game == nullptr)
 		return;
 	c_game->GetWorldEnvironment().SetShaderQuality(val);
 });
 
-static void CVAR_CALLBACK_cl_render_shadow_resolution(NetworkState *, ConVar *, int, int val)
+static void CVAR_CALLBACK_cl_render_shadow_resolution(NetworkState *, const ConVar &, int, int val)
 {
 	if(c_game == nullptr)
 		return;

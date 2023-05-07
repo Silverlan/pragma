@@ -11,6 +11,7 @@
 #include <pragma/console/fcvar.h>
 #include "pragma/networkstate/networkstate.h"
 #include "pragma/lua/luafunction.h"
+#include "pragma/console/cvar_callback.hpp"
 #include <udm.hpp>
 
 enum class DLLNETWORK ConType : uint32_t {
@@ -91,6 +92,9 @@ class DLLNETWORK ConVar : public ConConf {
 	bool GetBool() const;
 	void AddCallback(int function);
 	ConConf *Copy();
+
+	const ConVarValue &GetRawValue() const { return m_value; }
+	const ConVarValue &GetRawDefault() const { return m_default; }
 };
 
 class DLLNETWORK ConCommand : public ConConf {
@@ -110,47 +114,6 @@ class DLLNETWORK ConCommand : public ConConf {
 	const std::function<void(const std::string &, std::vector<std::string> &)> &GetAutoCompleteCallback() const;
 	void SetAutoCompleteCallback(const std::function<void(const std::string &, std::vector<std::string> &)> &callback);
 	ConConf *Copy();
-};
-
-class NetworkState;
-class DLLNETWORK CvarCallbackFunction {
-  public:
-	enum class DLLNETWORK Type : uint32_t { Invalid = std::numeric_limits<uint32_t>::max(), Int = 0, String = 1, Float = 2, Bool = 3 };
-	CvarCallbackFunction();
-	CvarCallbackFunction(const std::function<void(NetworkState *, ConVar *, int, int)> &fc);
-	CvarCallbackFunction(const std::function<void(NetworkState *, ConVar *, std::string, std::string)> &fc);
-	CvarCallbackFunction(const std::function<void(NetworkState *, ConVar *, float, float)> &fc);
-	CvarCallbackFunction(const std::function<void(NetworkState *, ConVar *, bool, bool)> &fc);
-	CvarCallbackFunction(const CvarCallbackFunction &b);
-	void Call(NetworkState *state, ConVar *cvar, const std::string &prev);
-  private:
-	Type m_type;
-	std::function<void(NetworkState *, ConVar *, int, int)> m_functionInt;
-	std::function<void(NetworkState *, ConVar *, std::string, std::string)> m_functionString;
-	std::function<void(NetworkState *, ConVar *, float, float)> m_functionFloat;
-	std::function<void(NetworkState *, ConVar *, bool, bool)> m_functionBool;
-  public:
-	bool IsValid();
-	void SetFunction(const std::function<void(NetworkState *, ConVar *, int, int)> &fc);
-	void SetFunction(const std::function<void(NetworkState *, ConVar *, std::string, std::string)> &fc);
-	void SetFunction(const std::function<void(NetworkState *, ConVar *, float, float)> &fc);
-	void SetFunction(const std::function<void(NetworkState *, ConVar *, bool, bool)> &fc);
-};
-
-class DLLNETWORK CvarCallback {
-  public:
-	CvarCallback();
-	CvarCallback(LuaFunction fc);
-	CvarCallback(const std::shared_ptr<CvarCallbackFunction> &fc);
-	CvarCallback(const CvarCallback &cv);
-  private:
-	bool m_bLua;
-	LuaFunction m_functionLua;
-	std::shared_ptr<CvarCallbackFunction> m_function;
-  public:
-	bool IsLuaFunction() const;
-	LuaFunction *GetLuaFunction();
-	CvarCallbackFunction *GetFunction();
 };
 
 struct DLLNETWORK ConVarCreateInfo {
@@ -192,7 +155,7 @@ class DLLNETWORK ConVarMap {
 	std::unordered_map<std::string, unsigned int> m_conVarIDs;
 	std::unordered_map<unsigned int, std::string> m_conVarIdentifiers;
 	unsigned int m_conVarID;
-	std::unordered_map<std::string, std::vector<std::shared_ptr<CvarCallbackFunction>>> m_conVarCallbacks;
+	std::unordered_map<std::string, std::vector<CvarCallback>> m_conVarCallbacks;
 
 	std::shared_ptr<ConVar> RegisterConVar(const std::string &scmd, udm::Type type, const void *value, ConVarFlags flags, const std::string &help = "", const std::optional<std::string> &usageHelp = {},
 	  std::function<void(const std::string &, std::vector<std::string> &)> autoCompleteFunction = nullptr);
@@ -210,16 +173,16 @@ class DLLNETWORK ConVarMap {
 	  const std::function<void(const std::string &, std::vector<std::string> &)> &autoCompleteCallback = nullptr);
 	std::shared_ptr<ConCommand> RegisterConCommand(const ConCommandCreateInfo &createInfo);
 
-	void RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, ConVar *, int, int)> &function);
-	void RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, ConVar *, std::string, std::string)> &function);
-	void RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, ConVar *, float, float)> &function);
-	void RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, ConVar *, bool, bool)> &function);
+	CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, int, int)> &function);
+	CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, std::string, std::string)> &function);
+	CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, float, float)> &function);
+	CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, bool, bool)> &function);
 	std::shared_ptr<ConConf> GetConVar(const std::string &scmd);
 	std::map<std::string, std::shared_ptr<ConConf>> &GetConVars();
 	unsigned int GetConVarID(const std::string &scmd);
 	bool GetConVarIdentifier(unsigned int ID, std::string **str);
 	unsigned int GetConVarCount() { return m_conVarID - 1; }
-	std::unordered_map<std::string, std::vector<std::shared_ptr<CvarCallbackFunction>>> &GetConVarCallbacks();
+	std::unordered_map<std::string, std::vector<CvarCallback>> &GetConVarCallbacks();
 };
 #pragma warning(pop)
 #define cvar_newglobal_dec(glname)                                                                                                                                                                                                                                                               \
@@ -228,10 +191,10 @@ class DLLNETWORK ConVarMap {
 			DLLNETWORK ConVarMap *get_convar_map();                                                                                                                                                                                                                                              \
 			DLLNETWORK bool register_convar(const std::string &cvar, const std::string &value, ConVarFlags flags, const std::string &help);                                                                                                                                                      \
 			DLLNETWORK bool register_convar_callback(const std::string &scvar, int i);                                                                                                                                                                                                           \
-			DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(NetworkState *, ConVar *, int, int));                                                                                                                                                            \
-			DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(NetworkState *, ConVar *, std::string, std::string));                                                                                                                                            \
-			DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(NetworkState *, ConVar *, float, float));                                                                                                                                                        \
-			DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(NetworkState *, ConVar *, bool, bool));                                                                                                                                                          \
+			DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(NetworkState *, const ConVar &, int, int));                                                                                                                                                            \
+			DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(NetworkState *, const ConVar &, std::string, std::string));                                                                                                                                            \
+			DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(NetworkState *, const ConVar &, float, float));                                                                                                                                                        \
+			DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(NetworkState *, const ConVar &, bool, bool));                                                                                                                                                          \
 			DLLNETWORK bool register_concommand(const std::string &cvar, void (*function)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), ConVarFlags flags, const std::string &help);                                                                        \
 			DLLNETWORK bool register_concommand(const std::string &cvar, void (*function)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &), ConVarFlags flags, const std::string &help);                                                                               \
 			DLLNETWORK bool register_concommand(const std::string &cvar, void (*function)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), const std::string &help);                                                                                           \

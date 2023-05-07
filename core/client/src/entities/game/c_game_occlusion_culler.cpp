@@ -239,7 +239,7 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_find(NetworkState *state, pragma:
 	node->DebugPrint();
 }
 
-static void CVAR_CALLBACK_debug_render_octree_static_draw(NetworkState *, ConVar *, bool, bool val)
+static void CVAR_CALLBACK_debug_render_octree_static_draw(NetworkState *, const ConVar &, bool, bool val)
 {
 	if(c_game == nullptr)
 		return;
@@ -273,7 +273,7 @@ static void CVAR_CALLBACK_debug_render_octree_static_draw(NetworkState *, ConVar
 }
 REGISTER_CONVAR_CALLBACK_CL(debug_render_octree_static_draw, CVAR_CALLBACK_debug_render_octree_static_draw);
 
-static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(NetworkState *, ConVar *, bool, bool val)
+static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(NetworkState *, const ConVar &, bool, bool val)
 {
 	if(c_game == nullptr)
 		return;

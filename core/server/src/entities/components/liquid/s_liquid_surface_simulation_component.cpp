@@ -16,7 +16,7 @@
 using namespace pragma;
 
 static std::vector<SLiquidSurfaceSimulationComponent *> s_waterEntities = {};
-REGISTER_CONVAR_CALLBACK_CL(sv_water_surface_simulation_shared, [](NetworkState *, ConVar *, int, int val) {
+REGISTER_CONVAR_CALLBACK_CL(sv_water_surface_simulation_shared, [](NetworkState *, const ConVar &, int, int val) {
 	for(auto *entWater : s_waterEntities)
 		entWater->UpdateSurfaceSimulator();
 });

@@ -220,7 +220,7 @@ void ClientState::ShowFPSCounter(bool b)
 	m_hFps->Remove();
 }
 
-REGISTER_CONVAR_CALLBACK_CL(cl_show_fps, [](NetworkState *, ConVar *, bool, bool val) {
+REGISTER_CONVAR_CALLBACK_CL(cl_show_fps, [](NetworkState *, const ConVar &, bool, bool val) {
 	if(client == nullptr)
 		return;
 	client->ShowFPSCounter(val);
@@ -853,7 +853,7 @@ bool ClientState::GetServerConVarIdentifier(uint32_t id, std::string &cvar)
 	return r;
 }
 
-REGISTER_CONVAR_CALLBACK_CL(sv_tickrate, [](NetworkState *, ConVar *, int, int val) {
+REGISTER_CONVAR_CALLBACK_CL(sv_tickrate, [](NetworkState *, const ConVar &, int, int val) {
 	if(val < 0)
 		val = 0;
 	c_engine->SetTickRate(val);

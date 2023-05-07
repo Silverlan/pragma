@@ -206,7 +206,7 @@ void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene, con
 	}
 }
 
-static void cl_render_occlusion_culling_callback(NetworkState *, ConVar *, int, int val)
+static void cl_render_occlusion_culling_callback(NetworkState *, const ConVar &, int, int val)
 {
 	/*if(c_game == nullptr)
 		return;

@@ -73,7 +73,7 @@ void CEngine::RegisterConsoleCommands()
 		  }
 	  });
 	conVarMap.RegisterConVar<bool>("cl_downscale_imported_high_resolution_rma_textures", true, ConVarFlags::Archive, "If enabled, imported high-resolution RMA textures will be downscaled to a more memory-friendly size.");
-	conVarMap.RegisterConVarCallback("cl_downscale_imported_high_resolution_rma_textures", std::function<void(NetworkState *, ConVar *, bool, bool)> {[](NetworkState *nw, ConVar *cv, bool oldVal, bool newVal) -> void {
+	conVarMap.RegisterConVarCallback("cl_downscale_imported_high_resolution_rma_textures", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[](NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void {
 		//static_cast<msys::CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).SetDownscaleImportedRMATextures(newVal);
 	}});
 	conVarMap.RegisterConVar<uint8_t>("render_debug_mode", 0, ConVarFlags::None,
@@ -122,8 +122,8 @@ void CEngine::RegisterConsoleCommands()
 	  },
 	  ConVarFlags::None, "Prints information about the next frame.");
 	conVarMap.RegisterConVar<bool>("render_multithreaded_rendering_enabled", true, ConVarFlags::Archive, "Enables or disables multi-threaded rendering. Some renderers (like OpenGL) don't support multi-threaded rendering and will ignore this flag.");
-	conVarMap.RegisterConVarCallback("render_multithreaded_rendering_enabled", std::function<void(NetworkState *, ConVar *, bool, bool)> {[this](NetworkState *nw, ConVar *cv, bool, bool enabled) -> void { GetRenderContext().SetMultiThreadedRenderingEnabled(enabled); }});
-	conVarMap.RegisterConVarCallback("render_enable_verbose_output", std::function<void(NetworkState *, ConVar *, bool, bool)> {[this](NetworkState *nw, ConVar *cv, bool, bool enabled) -> void { pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED = enabled; }});
+	conVarMap.RegisterConVarCallback("render_multithreaded_rendering_enabled", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[this](NetworkState *nw, const ConVar &cv, bool, bool enabled) -> void { GetRenderContext().SetMultiThreadedRenderingEnabled(enabled); }});
+	conVarMap.RegisterConVarCallback("render_enable_verbose_output", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[this](NetworkState *nw, const ConVar &cv, bool, bool enabled) -> void { pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED = enabled; }});
 	conVarMap.RegisterConCommand(
 	  "crash",
 	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
@@ -227,7 +227,7 @@ void CEngine::RegisterConsoleCommands()
 	conVarMap.RegisterConVar<bool>("debug_hide_gui", false, ConVarFlags::None, "Disables GUI rendering.");
 
 	conVarMap.RegisterConVar<bool>("render_vsync_enabled", true, ConVarFlags::Archive, "Enables or disables vsync. OpenGL only.");
-	conVarMap.RegisterConVarCallback("render_vsync_enabled", std::function<void(NetworkState *, ConVar *, bool, bool)> {[this](NetworkState *nw, ConVar *cv, bool oldVal, bool newVal) -> void { GetRenderContext().GetWindow()->SetVSyncEnabled(newVal); }});
+	conVarMap.RegisterConVarCallback("render_vsync_enabled", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[this](NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void { GetRenderContext().GetWindow()->SetVSyncEnabled(newVal); }});
 
 	conVarMap.RegisterConVar<std::string>("audio_api", "fmod", ConVarFlags::Archive | ConVarFlags::Replicated, "The underlying audio API to use.", "<audioApi>", [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
 		auto audioAPIs = pragma::audio::get_available_audio_apis();

@@ -1090,7 +1090,7 @@ void CEngine::SetControllersEnabled(bool b)
 	});
 	GLFW::set_joystick_state_callback([this](const GLFW::Joystick &joystick, bool bConnected) { c_engine->CallCallbacks<void, std::reference_wrapper<const GLFW::Joystick>, bool>("OnJoystickStateChanged", std::ref(joystick), bConnected); });
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_controller_enabled, [](NetworkState *state, ConVar *cv, bool oldVal, bool newVal) { c_engine->SetControllersEnabled(newVal); });
+REGISTER_CONVAR_CALLBACK_CL(cl_controller_enabled, [](NetworkState *state, const ConVar &cv, bool oldVal, bool newVal) { c_engine->SetControllersEnabled(newVal); });
 
 float CEngine::GetRawJoystickAxisMagnitude() const { return m_rawInputJoystickMagnitude; }
 
@@ -1700,18 +1700,18 @@ uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 	return n;
 }
 
-REGISTER_CONVAR_CALLBACK_CL(cl_render_monitor, [](NetworkState *, ConVar *, int32_t, int32_t monitor) {
+REGISTER_CONVAR_CALLBACK_CL(cl_render_monitor, [](NetworkState *, const ConVar &, int32_t, int32_t monitor) {
 	auto monitors = GLFW::get_monitors();
 	if(monitor < monitors.size() && monitor >= 0)
 		c_engine->GetWindow().SetMonitor(monitors[monitor]);
 })
 
-REGISTER_CONVAR_CALLBACK_CL(cl_render_window_mode, [](NetworkState *, ConVar *, int32_t, int32_t val) {
+REGISTER_CONVAR_CALLBACK_CL(cl_render_window_mode, [](NetworkState *, const ConVar &, int32_t, int32_t val) {
 	c_engine->GetWindow().SetWindowedMode(val != 0);
 	c_engine->GetWindow().SetNoBorder(val == 2);
 })
 
-REGISTER_CONVAR_CALLBACK_CL(cl_window_resolution, [](NetworkState *, ConVar *, std::string, std::string val) {
+REGISTER_CONVAR_CALLBACK_CL(cl_window_resolution, [](NetworkState *, const ConVar &, std::string, std::string val) {
 	std::vector<std::string> vals;
 	ustring::explode(val, "x", vals);
 	if(vals.size() < 2)
@@ -1734,7 +1734,7 @@ REGISTER_CONVAR_CALLBACK_CL(cl_window_resolution, [](NetworkState *, ConVar *, s
 	menu->SetSize(x, y);
 })
 
-REGISTER_CONVAR_CALLBACK_CL(cl_render_resolution, [](NetworkState *, ConVar *, std::string, std::string val) {
+REGISTER_CONVAR_CALLBACK_CL(cl_render_resolution, [](NetworkState *, const ConVar &, std::string, std::string val) {
 	std::vector<std::string> vals;
 	ustring::explode(val, "x", vals);
 	if(vals.size() < 2) {
@@ -1747,7 +1747,7 @@ REGISTER_CONVAR_CALLBACK_CL(cl_render_resolution, [](NetworkState *, ConVar *, s
 	c_engine->SetRenderResolution(resolution);
 })
 
-REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled, [](NetworkState *, ConVar *, bool, bool enabled) {
+REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled, [](NetworkState *, const ConVar &, bool, bool enabled) {
 	if(c_engine == nullptr)
 		return;
 	c_engine->SetGPUProfilingEnabled(enabled);

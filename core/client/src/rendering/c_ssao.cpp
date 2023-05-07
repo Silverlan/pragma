@@ -142,7 +142,7 @@ void Console::commands::debug_ssao(NetworkState *state, pragma::BasePlayerCompon
 	pEl->SizeToContents();
 }
 
-static void cl_render_ssao_callback(NetworkState *, ConVar *, bool, bool val)
+static void cl_render_ssao_callback(NetworkState *, const ConVar &, bool, bool val)
 {
 	if(client == nullptr)
 		return;

@@ -63,7 +63,7 @@ static void reload_all_shadow_maps()
 	}
 }
 
-static void cmd_render_shadow_quality(NetworkState *, ConVar *, int, int quality)
+static void cmd_render_shadow_quality(NetworkState *, const ConVar &, int, int quality)
 {
 	reload_all_shadow_maps();
 	if(client == nullptr)
@@ -72,7 +72,7 @@ static void cmd_render_shadow_quality(NetworkState *, ConVar *, int, int quality
 }
 REGISTER_CONVAR_CALLBACK_CL(render_shadow_quality, cmd_render_shadow_quality);
 
-REGISTER_CONVAR_CALLBACK_CL(cl_render_shadow_dynamic, [](NetworkState *, ConVar *, bool, bool) { reload_all_shadow_maps(); });
+REGISTER_CONVAR_CALLBACK_CL(cl_render_shadow_dynamic, [](NetworkState *, const ConVar &, bool, bool) { reload_all_shadow_maps(); });
 
 prosper::IDescriptorSet *CShadowComponent::GetDescriptorSet()
 {

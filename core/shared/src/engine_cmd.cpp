@@ -165,10 +165,10 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 	map.RegisterConVar<bool>("sv_require_authentication", true, ConVarFlags::Archive | ConVarFlags::Replicated, "If enabled, clients will have to authenticate via steam to join the server.");
 
 	map.RegisterConVar<bool>("asset_multithreading_enabled", true, ConVarFlags::Archive, "If enabled, assets will be loaded in the background.");
-	map.RegisterConVarCallback("asset_multithreading_enabled", std::function<void(NetworkState *, ConVar *, bool, bool)> {[this](NetworkState *nw, ConVar *cv, bool oldVal, bool newVal) -> void { SetAssetMultiThreadedLoadingEnabled(newVal); }});
+	map.RegisterConVarCallback("asset_multithreading_enabled", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[this](NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void { SetAssetMultiThreadedLoadingEnabled(newVal); }});
 
 	map.RegisterConVar<bool>("asset_file_cache_enabled", true, ConVarFlags::Archive, "If enabled, all Pragma files will be indexed to improve lookup times.");
-	map.RegisterConVarCallback("asset_file_cache_enabled", std::function<void(NetworkState *, ConVar *, bool, bool)> {[this](NetworkState *nw, ConVar *cv, bool oldVal, bool newVal) -> void { filemanager::set_use_file_index_cache(newVal); }});
+	map.RegisterConVarCallback("asset_file_cache_enabled", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[this](NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void { filemanager::set_use_file_index_cache(newVal); }});
 }
 
 void Engine::RegisterConsoleCommands()

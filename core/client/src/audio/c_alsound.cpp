@@ -1026,4 +1026,4 @@ void CALSound::SetType(ALSoundType type)
 	UpdateVolume();
 }
 
-REGISTER_CONVAR_CALLBACK_CL(cl_audio_always_play, [](NetworkState *, ConVar *, bool, bool) { client->UpdateSoundVolume(); })
+REGISTER_CONVAR_CALLBACK_CL(cl_audio_always_play, [](NetworkState *, const ConVar &, bool, bool) { client->UpdateSoundVolume(); })

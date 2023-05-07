@@ -48,9 +48,9 @@ void CVarHandler::Initialize()
 		for(auto &pair : callbacks) {
 			auto it = m_cvarCallbacks.find(pair.first);
 			if(it == m_cvarCallbacks.end())
-				it = m_cvarCallbacks.insert(decltype(m_cvarCallbacks)::value_type(pair.first, std::vector<std::shared_ptr<CvarCallback>>())).first;
+				it = m_cvarCallbacks.insert(decltype(m_cvarCallbacks)::value_type(pair.first, std::vector<CvarCallback>())).first;
 			for(auto &f : pair.second)
-				it->second.push_back(std::make_shared<CvarCallback>(f));
+				it->second.push_back(CvarCallback {f});
 		}
 	}
 }
@@ -77,38 +77,30 @@ std::shared_ptr<ConCommand> CVarHandler::RegisterConCommand(const std::string &s
 	it = m_conVars.insert(decltype(m_conVars)::value_type(scmd, std::make_shared<ConCommand>(fc, flags, help))).first;
 	return std::static_pointer_cast<ConCommand>(it->second);
 }
-void CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, ConVar *, int, int)> &function)
+template<typename T>
+CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, T, T)> &function)
 {
 	auto it = m_cvarCallbacks.find(scvar);
 	if(it == m_cvarCallbacks.end())
 		it = m_cvarCallbacks.insert(decltype(m_cvarCallbacks)::value_type(scvar, {})).first;
+	auto f = [function](NetworkState *nw, const ConVar &cvar, const void *poldVal, const void *pnewVal) {
+		udm::visit(cvar.GetVarType(), [poldVal, pnewVal, &function, &nw, &cvar](auto tag) {
+			using TCvar = typename decltype(tag)::type;
+			if constexpr(udm::is_convertible<TCvar, T>()) {
+				auto oldVal = udm::convert<TCvar, T>(*static_cast<const TCvar *>(poldVal));
+				auto newVal = udm::convert<TCvar, T>(*static_cast<const TCvar *>(pnewVal));
+				function(nw, cvar, oldVal, newVal);
+			}
+		});
+	};
 	auto &callbacks = it->second;
-	callbacks.push_back(std::make_shared<CvarCallback>(std::make_shared<CvarCallbackFunction>(function)));
+	callbacks.push_back(CvarCallback{f});
+	return callbacks.back().GetFunction();
 }
-void CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, ConVar *, std::string, std::string)> &function)
-{
-	auto it = m_cvarCallbacks.find(scvar);
-	if(it == m_cvarCallbacks.end())
-		it = m_cvarCallbacks.insert(decltype(m_cvarCallbacks)::value_type(scvar, {})).first;
-	auto &callbacks = it->second;
-	callbacks.push_back(std::make_shared<CvarCallback>(std::make_shared<CvarCallbackFunction>(function)));
-}
-void CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, ConVar *, float, float)> &function)
-{
-	auto it = m_cvarCallbacks.find(scvar);
-	if(it == m_cvarCallbacks.end())
-		it = m_cvarCallbacks.insert(decltype(m_cvarCallbacks)::value_type(scvar, {})).first;
-	auto &callbacks = it->second;
-	callbacks.push_back(std::make_shared<CvarCallback>(std::make_shared<CvarCallbackFunction>(function)));
-}
-void CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, ConVar *, bool, bool)> &function)
-{
-	auto it = m_cvarCallbacks.find(scvar);
-	if(it == m_cvarCallbacks.end())
-		it = m_cvarCallbacks.insert(decltype(m_cvarCallbacks)::value_type(scvar, {})).first;
-	auto &callbacks = it->second;
-	callbacks.push_back(std::make_shared<CvarCallback>(std::make_shared<CvarCallbackFunction>(function)));
-}
+CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, int, int)> &function) { return RegisterConVarCallback<int>(scvar, function); }
+CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, std::string, std::string)> &function) { return RegisterConVarCallback<std::string>(scvar, function); }
+CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, float, float)> &function) { return RegisterConVarCallback<float>(scvar, function); }
+CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, bool, bool)> &function) { return RegisterConVarCallback<bool>(scvar, function); }
 
 bool CVarHandler::InvokeConVarChangeCallbacks(const std::string &cvarName)
 {
@@ -132,16 +124,35 @@ ConVar *CVarHandler::SetConVar(std::string scmd, std::string value, bool bApplyI
 	std::string prev = cvar->GetString();
 	if(bApplyIfEqual == false && prev == value)
 		return nullptr;
-	cvar->SetValue(value);
-	auto it = m_cvarCallbacks.find(scmd);
-	if(it != m_cvarCallbacks.end()) {
-		for(auto &ptrCb : it->second) {
-			if(!ptrCb->IsLuaFunction()) {
-				auto *fc = ptrCb->GetFunction();
-				fc->Call(nullptr, cvar, prev);
+	udm::visit_ng(cvar->GetVarType(), [this, &scmd, cvar, &value](auto tag) {
+		using T = typename decltype(tag)::type;
+		auto it = m_cvarCallbacks.find(scmd);
+		if(it == m_cvarCallbacks.end() || it->second.empty()) {
+			// We can skip the callbacks
+			cvar->SetValue(value);
+			return;
+		}
+		auto &rawValPrev = cvar->GetRawValue();
+		auto prevVal = rawValPrev ? *static_cast<T *>(rawValPrev.get()) : T {};
+		cvar->SetValue(value);
+		auto &rawValNew = cvar->GetRawValue();
+		if(!rawValNew)
+			return;
+		auto &newVal = *static_cast<T *>(rawValNew.get());
+		if(it != m_cvarCallbacks.end()) {
+			for(auto itCb = it->second.begin(); itCb != it->second.end();) {
+				auto &ptrCb = *itCb;
+				auto &fc = const_cast<CvarCallback &>(ptrCb).GetFunction();
+				if(!fc.IsValid())
+					itCb = it->second.erase(itCb);
+				else {
+					if(!ptrCb.IsLuaFunction())
+						fc.Call<void, NetworkState *, const ConVar &, const void *, const void *>(nullptr, *cvar, &prevVal, &newVal);
+					++itCb;
+				}
 			}
 		}
-	}
+	});
 	return cvar;
 }
 

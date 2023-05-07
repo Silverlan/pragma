@@ -542,7 +542,7 @@ void CRasterizationRenderer::Initialize()
 	AddComponent<CRasterizationRendererComponent>();
 }
 
-static void cl_render_ssao_callback(NetworkState *, ConVar *, bool, bool enabled)
+static void cl_render_ssao_callback(NetworkState *, const ConVar &, bool, bool enabled)
 {
 	if(c_game == nullptr)
 		return;

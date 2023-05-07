@@ -25,6 +25,7 @@
 #include "pragma/util/ammo_type.h"
 #include "pragma/math/surfacematerial.h"
 #include "pragma/entities/baseentity_net_event_manager.hpp"
+#include "pragma/console/cvar_callback.hpp"
 #include <fsys/filesystem.h>
 #include <sharedutils/util_weak_handle.hpp>
 #include <sharedutils/util_shared_handle.hpp>
@@ -49,7 +50,6 @@ namespace Lua {
 
 class BrushMesh;
 class Side;
-class CvarCallback;
 class NetworkState;
 class ConConf;
 struct TraceResult;
@@ -328,7 +328,7 @@ class DLLNETWORK Game : public CallbackHandler, public LuaCallbackHandler {
 	const pragma::lua::ClassManager &GetLuaClassManager() const;
 	pragma::lua::ClassManager &GetLuaClassManager();
 
-	void AddConVarCallback(const std::string &cvar, LuaFunction function);
+	CallbackHandle AddConVarCallback(const std::string &cvar, LuaFunction function);
 	unsigned int GetNetMessageID(std::string name);
 	std::string *GetNetMessageIdentifier(unsigned int ID);
 	virtual void OnPlayerDropped(pragma::BasePlayerComponent &pl, pragma::networking::DropReason reason);
@@ -347,7 +347,7 @@ class DLLNETWORK Game : public CallbackHandler, public LuaCallbackHandler {
 	float GetConVarFloat(const std::string &scmd);
 	bool GetConVarBool(const std::string &scmd);
 	ConVarFlags GetConVarFlags(const std::string &scmd);
-	const std::unordered_map<std::string, std::vector<std::shared_ptr<CvarCallback>>> &GetConVarCallbacks() const;
+	const std::unordered_map<std::string, std::vector<CvarCallback>> &GetConVarCallbacks() const;
 
 	virtual Float GetFrictionScale() const = 0;
 	virtual Float GetRestitutionScale() const = 0;
@@ -385,7 +385,7 @@ class DLLNETWORK Game : public CallbackHandler, public LuaCallbackHandler {
 	std::unique_ptr<pragma::lua::ClassManager> m_luaClassManager;
 	std::unique_ptr<LuaDirectoryWatcherManager> m_scriptWatcher = nullptr;
 	std::unique_ptr<SurfaceMaterialManager> m_surfaceMaterialManager = nullptr;
-	std::unordered_map<std::string, std::vector<std::shared_ptr<CvarCallback>>> m_cvarCallbacks;
+	std::unordered_map<std::string, std::vector<CvarCallback>> m_cvarCallbacks;
 	std::vector<std::unique_ptr<Timer>> m_timers;
 	std::unordered_map<std::string, int> m_luaNetMessages;
 	std::vector<std::string> m_luaNetMessageIndex;

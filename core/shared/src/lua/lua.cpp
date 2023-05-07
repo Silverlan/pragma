@@ -289,17 +289,18 @@ bool Game::LoadLuaComponentByName(const std::string &componentName)
 	return false;
 }
 
-void Game::AddConVarCallback(const std::string &cvar, LuaFunction function)
+CallbackHandle Game::AddConVarCallback(const std::string &cvar, LuaFunction function)
 {
 	auto lcvar = cvar;
 	ustring::to_lower(lcvar);
 	auto it = m_cvarCallbacks.find(lcvar);
 	if(it == m_cvarCallbacks.end())
-		it = m_cvarCallbacks.insert(std::make_pair(cvar, std::vector<std::shared_ptr<CvarCallback>> {})).first;
-	auto cb = std::make_shared<CvarCallback>(function);
+		it = m_cvarCallbacks.insert(std::make_pair(cvar, std::vector<CvarCallback> {})).first;
+	CvarCallback cb {function};
 	it->second.push_back(cb);
+	return cb.GetFunction();
 }
-const std::unordered_map<std::string, std::vector<std::shared_ptr<CvarCallback>>> &Game::GetConVarCallbacks() const { return m_cvarCallbacks; }
+const std::unordered_map<std::string, std::vector<CvarCallback>> &Game::GetConVarCallbacks() const { return m_cvarCallbacks; }
 
 void Game::RegisterLua()
 {

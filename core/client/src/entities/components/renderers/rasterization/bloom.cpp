@@ -110,7 +110,7 @@ void pragma::CRasterizationRendererComponent::RenderGlowMeshes(std::shared_ptr<p
 #endif
 }
 
-static void cmd_render_bloom_enabled(NetworkState *, ConVar *, bool, bool enabled)
+static void cmd_render_bloom_enabled(NetworkState *, const ConVar &, bool, bool enabled)
 {
 	if(client == nullptr)
 		return;

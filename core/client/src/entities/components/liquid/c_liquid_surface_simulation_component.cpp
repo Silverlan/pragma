@@ -19,12 +19,12 @@ extern DLLCLIENT CGame *c_game;
 using namespace pragma;
 
 static std::vector<CLiquidSurfaceSimulationComponent *> s_waterEntities = {};
-REGISTER_CONVAR_CALLBACK_CL(cl_water_surface_simulation_spacing, [](NetworkState *, ConVar *, int, int val) {
+REGISTER_CONVAR_CALLBACK_CL(cl_water_surface_simulation_spacing, [](NetworkState *, const ConVar &, int, int val) {
 	for(auto *entWater : s_waterEntities)
 		entWater->ReloadSurfaceSimulator();
 });
 
-REGISTER_CONVAR_CALLBACK_CL(cl_water_surface_simulation_enable_gpu_acceleration, [](NetworkState *, ConVar *, bool, bool val) {
+REGISTER_CONVAR_CALLBACK_CL(cl_water_surface_simulation_enable_gpu_acceleration, [](NetworkState *, const ConVar &, bool, bool val) {
 	for(auto *entWater : s_waterEntities)
 		entWater->ReloadSurfaceSimulator();
 });

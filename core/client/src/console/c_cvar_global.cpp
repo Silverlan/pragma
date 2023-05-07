@@ -1116,4 +1116,4 @@ static void cvar_net_graph(bool val)
 		return;
 	dbg = nullptr;
 }
-REGISTER_CONVAR_CALLBACK_CL(net_graph, [](NetworkState *, ConVar *, bool, bool val) { cvar_net_graph(val); })
+REGISTER_CONVAR_CALLBACK_CL(net_graph, [](NetworkState *, const ConVar &, bool, bool val) { cvar_net_graph(val); })

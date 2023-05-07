@@ -98,9 +98,9 @@ static void cvar_steam_steamworks_enabled(bool val)
 	if(nwCl != nullptr)
 		nwCl->CallCallbacks<void>("OnSteamworksShutdown");
 }
-REGISTER_ENGINE_CONVAR_CALLBACK(steam_steamworks_enabled, [](NetworkState *, ConVar *, bool prev, bool val) { cvar_steam_steamworks_enabled(val); });
+REGISTER_ENGINE_CONVAR_CALLBACK(steam_steamworks_enabled, [](NetworkState *, const ConVar &, bool prev, bool val) { cvar_steam_steamworks_enabled(val); });
 
-REGISTER_ENGINE_CONVAR_CALLBACK(sh_mount_external_game_resources, [](NetworkState *, ConVar *, bool prev, bool val) { engine->SetMountExternalGameResources(val); });
+REGISTER_ENGINE_CONVAR_CALLBACK(sh_mount_external_game_resources, [](NetworkState *, const ConVar &, bool prev, bool val) { engine->SetMountExternalGameResources(val); });
 REGISTER_ENGINE_CONCOMMAND(
   toggle,
   [](NetworkState *nw, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv) {
@@ -116,7 +116,7 @@ REGISTER_ENGINE_CONCOMMAND(
   },
   ConVarFlags::None, "Toggles the specified console variable between 0 and 1.");
 
-REGISTER_ENGINE_CONVAR_CALLBACK(log_enabled, [](NetworkState *, ConVar *, int prev, int val) {
+REGISTER_ENGINE_CONVAR_CALLBACK(log_enabled, [](NetworkState *, const ConVar &, int prev, int val) {
 	//if(!engine->IsActiveState(state))
 	//	return;
 	if(prev == 0 && val != 0)
@@ -125,7 +125,7 @@ REGISTER_ENGINE_CONVAR_CALLBACK(log_enabled, [](NetworkState *, ConVar *, int pr
 		engine->EndLogging();
 });
 
-REGISTER_ENGINE_CONVAR_CALLBACK(log_file, [](NetworkState *state, ConVar *, std::string prev, std::string val) {
+REGISTER_ENGINE_CONVAR_CALLBACK(log_file, [](NetworkState *state, const ConVar &, std::string prev, std::string val) {
 	//if(!engine->IsActiveState(state))
 	//	return;
 	std::string lprev = prev;
@@ -139,7 +139,7 @@ REGISTER_ENGINE_CONVAR_CALLBACK(log_file, [](NetworkState *state, ConVar *, std:
 	engine->StartLogging();
 });
 
-REGISTER_SHARED_CONVAR_CALLBACK(sv_gravity, [](NetworkState *state, ConVar *, std::string prev, std::string val) {
+REGISTER_SHARED_CONVAR_CALLBACK(sv_gravity, [](NetworkState *state, const ConVar &, std::string prev, std::string val) {
 	if(!state->IsGameActive())
 		return;
 	Vector3 gravity = uvec::create(val);

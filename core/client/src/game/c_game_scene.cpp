@@ -14,7 +14,7 @@ extern DLLCLIENT CGame *c_game;
 pragma::CSceneComponent *CGame::GetScene() { return m_scene.get(); }
 const pragma::CSceneComponent *CGame::GetScene() const { return const_cast<CGame *>(this)->GetScene(); }
 
-static void cl_fov_callback(NetworkState *, ConVar *, float, float val)
+static void cl_fov_callback(NetworkState *, const ConVar &, float, float val)
 {
 	if(c_game == nullptr)
 		return;
@@ -27,7 +27,7 @@ static void cl_fov_callback(NetworkState *, ConVar *, float, float val)
 REGISTER_CONVAR_CALLBACK_CL(cl_fov, cl_fov_callback)
 REGISTER_CONVAR_CALLBACK_CL(cl_render_fov, cl_fov_callback)
 
-static void cl_fov_viewmodel_callback(NetworkState *, ConVar *, int, int val)
+static void cl_fov_viewmodel_callback(NetworkState *, const ConVar &, int, int val)
 {
 	if(c_game == nullptr)
 		return;

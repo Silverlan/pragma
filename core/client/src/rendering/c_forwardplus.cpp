@@ -31,7 +31,7 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-static void cmd_forwardplus_tile_size(NetworkState *, ConVar *, int32_t, int32_t val)
+static void cmd_forwardplus_tile_size(NetworkState *, const ConVar &, int32_t, int32_t val)
 {
 	if(c_game == NULL)
 		return;

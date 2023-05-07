@@ -86,7 +86,7 @@ void CMD_debug_light_shadowmap(NetworkState *nw, pragma::BasePlayerComponent *, 
 	pElSm->Update();
 }
 
-static void CVAR_CALLBACK_cl_render_shadow_pssm_split_count(NetworkState *state, ConVar *, int, int)
+static void CVAR_CALLBACK_cl_render_shadow_pssm_split_count(NetworkState *state, const ConVar &, int, int)
 {
 	if(shadowmapTargetIdx == -1)
 		return;

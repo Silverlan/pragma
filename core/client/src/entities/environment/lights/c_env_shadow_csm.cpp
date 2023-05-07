@@ -44,7 +44,7 @@ Frustum::Frustum() : radius(0.f)
 	projection = umat::identity();
 }
 
-static void cmd_cl_render_shadow_pssm_split_count(NetworkState *, ConVar *, int, int val)
+static void cmd_cl_render_shadow_pssm_split_count(NetworkState *, const ConVar &, int, int val)
 {
 	if(c_game == NULL)
 		return;
@@ -60,7 +60,7 @@ static void cmd_cl_render_shadow_pssm_split_count(NetworkState *, ConVar *, int,
 }
 REGISTER_CONVAR_CALLBACK_CL(cl_render_shadow_pssm_split_count, cmd_cl_render_shadow_pssm_split_count);
 
-static void cmd_render_csm_max_distance(NetworkState *, ConVar *, float, float val)
+static void cmd_render_csm_max_distance(NetworkState *, const ConVar &, float, float val)
 {
 	if(c_game == NULL)
 		return;

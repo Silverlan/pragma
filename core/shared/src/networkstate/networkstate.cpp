@@ -371,40 +371,40 @@ ConVar *NetworkState::SetConVar(std::string scmd, std::string value, bool bApply
 	auto prev = cvar->GetString();
 	if(bApplyIfEqual == false && prev == value)
 		return nullptr;
-	cvar->SetValue(value);
+	std::array<const std::unordered_map<std::string, std::vector<CvarCallback>> *, 2> cvarCallbackList = {&m_cvarCallbacks, nullptr};
 	auto *game = GetGameState();
-	std::array<const std::unordered_map<std::string, std::vector<std::shared_ptr<CvarCallback>>> *, 2> cvarCallbackList = {&m_cvarCallbacks, nullptr};
 	if(game != nullptr)
 		cvarCallbackList.at(1) = &game->GetConVarCallbacks();
-	for(auto *cvarCallbacks : cvarCallbackList) {
-		if(cvarCallbacks == nullptr)
-			continue;
-		auto it = cvarCallbacks->find(scmd);
-		if(it != cvarCallbacks->end()) {
-			auto *game = GetGameState();
-			for(auto &cb : it->second) {
-				if(cb->IsLuaFunction()) {
-					if(game != nullptr) {
-						auto *luaFunc = cb->GetLuaFunction();
-						if(luaFunc != nullptr) {
-							game->ProtectedLuaCall(
-							  [&prev, &value, luaFunc](lua_State *l) {
-								  luaFunc->GetLuaObject().push(l);
-								  Lua::PushString(l, prev);
-								  Lua::PushString(l, value);
-								  return Lua::StatusCode::Ok;
-							  },
-							  0);
+	udm::visit(cvar->GetVarType(), [this, &cvarCallbackList, &scmd, cvar, &value](auto tag) {
+		using T = typename decltype(tag)::type;
+		if constexpr(console::is_valid_convar_type_v<T>) {
+			auto &rawValPrev = cvar->GetRawValue();
+			auto prevVal = rawValPrev ? *static_cast<T *>(rawValPrev.get()) : T {};
+			cvar->SetValue(value);
+			auto &rawValNew = cvar->GetRawValue();
+			if(!rawValNew)
+				return;
+			auto &newVal = *static_cast<T *>(rawValNew.get());
+			for(auto &cvList : cvarCallbackList) {
+				if(!cvList)
+					continue;
+				auto it = cvList->find(scmd);
+				if(it != cvList->end()) {
+					auto &cvarCallbacks = const_cast<std::vector<CvarCallback>&>(it->second);
+					for(auto itCb = cvarCallbacks.begin(); itCb != cvarCallbacks.end();) {
+						auto &ptrCb = *itCb;
+						auto &fc = const_cast<CvarCallback &>(ptrCb).GetFunction();
+						if(!fc.IsValid())
+							itCb = cvarCallbacks.erase(itCb);
+						else {
+							fc.Call<void, NetworkState *, const ConVar &, const void *, const void *>(this, *cvar, &prevVal, &newVal);
+							++itCb;
 						}
 					}
 				}
-				else { // WEAVETODO: Move this into the game-class
-					auto *fc = cb->GetFunction();
-					fc->Call(this, cvar, prev);
-				}
 			}
 		}
-	}
+	});
 	return cvar;
 }
 

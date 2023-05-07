@@ -390,7 +390,7 @@ ConVar *NetworkState::SetConVar(std::string scmd, std::string value, bool bApply
 					continue;
 				auto it = cvList->find(scmd);
 				if(it != cvList->end()) {
-					auto &cvarCallbacks = const_cast<std::vector<CvarCallback>&>(it->second);
+					auto &cvarCallbacks = const_cast<std::vector<CvarCallback> &>(it->second);
 					for(auto itCb = cvarCallbacks.begin(); itCb != cvarCallbacks.end();) {
 						auto &ptrCb = *itCb;
 						auto &fc = const_cast<CvarCallback &>(ptrCb).GetFunction();
@@ -711,7 +711,15 @@ ConVar *NetworkState::RegisterConVar(const std::string &scmd, const std::shared_
 	}
 	return cv;
 }
-ConVar *NetworkState::CreateConVar(const std::string &scmd, const std::string &value, ConVarFlags flags, const std::string &help) { return RegisterConVar(scmd, ConVar::Create<std::string>(value, flags, help)); }
+ConVar *NetworkState::CreateConVar(const std::string &scmd, udm::Type type, const std::string &value, ConVarFlags flags, const std::string &help)
+{
+	return udm::visit(type, [this, &scmd, &value, flags, &help](auto tag) -> ConVar * {
+		using T = typename decltype(tag)::type;
+		if constexpr(console::is_valid_convar_type_v<T> && udm::is_convertible<std::string, T>())
+			return RegisterConVar(scmd, ConVar::Create<T>(udm::convert<std::string, T>(value), flags, help));
+		return nullptr;
+	});
+}
 
 std::unordered_map<std::string, unsigned int> &NetworkState::GetConCommandIDs() { return m_conCommandIDs; }
 

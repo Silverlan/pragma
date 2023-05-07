@@ -27,7 +27,7 @@ void ConConf::Print(const std::string &name)
 		auto flags = cvar->GetFlags();
 		if(umath::is_flag_set(flags, ConVarFlags::Hidden) || umath::is_flag_set(flags, ConVarFlags::Password))
 			return;
-		Con::cout << "\"" << name << "\" = \"" << cvar->GetString() << "\" (Default: " << cvar->GetDefault() << ")" << Con::endl;
+		Con::cout << "\"" << name << "\" = \"" << cvar->GetString() << "\" (Type: " << magic_enum::enum_name(cvar->GetVarType()) << ") (Default: " << cvar->GetDefault() << ")" << Con::endl;
 		if(flags > ConVarFlags::None) {
 			util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 			if((flags & ConVarFlags::Cheat) == ConVarFlags::Cheat)
@@ -221,10 +221,15 @@ static void initialize_convar_map(ConVarMap *&r)
 
 #define cvar_newglobal(suffix, glname)                                                                                                                                                                                                                                                           \
 	DLLNETWORK ConVarMap *g_ConVars##suffix = nullptr;                                                                                                                                                                                                                                           \
-	bool console_system::glname::register_convar(const std::string &cvar, const std::string &value, ConVarFlags flags, const std::string &help)                                                                                                                                                  \
+	bool console_system::glname::register_convar(const std::string &cvar, udm::Type type, const std::string &value, ConVarFlags flags, const std::string &help)                                                                                                                                  \
 	{                                                                                                                                                                                                                                                                                            \
 		initialize_convar_map(g_ConVars##suffix);                                                                                                                                                                                                                                                \
-		g_ConVars##suffix->RegisterConVar<std::string>(cvar, value, flags, help);                                                                                                                                                                                                                \
+		udm::visit(type, [&cvar, type, &value, flags, &help](auto tag) {                                                                                                                                                                                                                         \
+			using T = typename decltype(tag)::type;                                                                                                                                                                                                                                              \
+			if constexpr(console::is_valid_convar_type_v<T> && udm::is_convertible<std::string, T>()) {                                                                                                                                                                                          \
+				g_ConVars##suffix->RegisterConVar<T>(cvar, udm::convert<std::string, T>(value), flags, help);                                                                                                                                                                                    \
+			}                                                                                                                                                                                                                                                                                    \
+		});                                                                                                                                                                                                                                                                                      \
 		return true;                                                                                                                                                                                                                                                                             \
 	}                                                                                                                                                                                                                                                                                            \
 	bool console_system::glname::register_convar_callback(const std::string &scvar, int)                                                                                                                                                                                                         \

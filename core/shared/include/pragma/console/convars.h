@@ -189,7 +189,7 @@ class DLLNETWORK ConVarMap {
 	namespace console_system {                                                                                                                                                                                                                                                                   \
 		namespace glname {                                                                                                                                                                                                                                                                       \
 			DLLNETWORK ConVarMap *get_convar_map();                                                                                                                                                                                                                                              \
-			DLLNETWORK bool register_convar(const std::string &cvar, const std::string &value, ConVarFlags flags, const std::string &help);                                                                                                                                                      \
+			DLLNETWORK bool register_convar(const std::string &cvar, udm::Type type, const std::string &value, ConVarFlags flags, const std::string &help);                                                                                                                                                      \
 			DLLNETWORK bool register_convar_callback(const std::string &scvar, int i);                                                                                                                                                                                                           \
 			DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(NetworkState *, const ConVar &, int, int));                                                                                                                                                            \
 			DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(NetworkState *, const ConVar &, std::string, std::string));                                                                                                                                            \
@@ -233,10 +233,10 @@ cvar_newglobal_dec(engine);
 #define _REGISTER_CONVAR_CALLBACK_EN(cvarName, function) __REGISTER_CONVAR_CALLBACK_EN(cvarName, function, __COUNTER__, __LINE__)
 
 #ifdef ENGINE_NETWORK // ConCommands are only DECLARED (Unless they're shared) within shared.dll, the function definitions must be done in a different library
-#define REGISTER_CONVAR_SV_INTERNAL(cmdName, value, flags, help) auto __reg_cvar_Server_##cmdName = console_system::server::register_convar(#cmdName, value, flags, help);
-#define REGISTER_CONVAR_SV(cmdName, value, flags, help)                                                                                                                                                                                                                                          \
+#define REGISTER_CONVAR_SV_INTERNAL(cmdName, type, value, flags, help) auto __reg_cvar_Server_##cmdName = console_system::server::register_convar(#cmdName, type, value, flags, help);
+#define REGISTER_CONVAR_SV(cmdName, type, value, flags, help)                                                                                                                                                                                                                                          \
 	static_assert((static_cast<uint32_t>(flags) & static_cast<uint32_t>(ConVarFlags::Replicated)) == 0, "ConVar with replicated flag needs to be shared!");                                                                                                                                      \
-	REGISTER_CONVAR_SV_INTERNAL(cmdName, value, flags, help)
+	REGISTER_CONVAR_SV_INTERNAL(cmdName, type, value, flags, help)
 
 #define REGISTER_CONVAR_CALLBACK_SV(cvarName, function) _REGISTER_CONVAR_CALLBACK_SV(cvarName, NULL)
 
@@ -246,7 +246,7 @@ cvar_newglobal_dec(engine);
 	auto __reg_cvar_Server_##cmdName##_in = console_system::server::register_concommand(("+" #cmdName), static_cast<void (*)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(nullptr), flags, help);                                                          \
 	auto __reg_cvar_Server_##cmdName##_out = console_system::server::register_concommand(("-" #cmdName), static_cast<void (*)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(nullptr), flags, help);
 
-#define REGISTER_CONVAR_CL(cmdName, value, flags, help) auto __reg_cvar_Client_##cmdName = console_system::client::register_convar(#cmdName, value, flags, help);
+#define REGISTER_CONVAR_CL(cmdName, type, value, flags, help) auto __reg_cvar_Client_##cmdName = console_system::client::register_convar(#cmdName, type, value, flags, help);
 
 #define REGISTER_CONVAR_CALLBACK_CL(cvarName, function) _REGISTER_CONVAR_CALLBACK_CL(cvarName, NULL)
 
@@ -256,7 +256,7 @@ cvar_newglobal_dec(engine);
 	auto __reg_cvar_Client_##cmdName##_in = console_system::client::register_concommand(("+" #cmdName), static_cast<void (*)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(nullptr), flags, help);                                                          \
 	auto __reg_cvar_Client_##cmdName##_out = console_system::client::register_concommand(("-" #cmdName), static_cast<void (*)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)>(nullptr), flags, help);
 
-#define REGISTER_CONVAR_EN(cmdName, value, flags, help) auto __reg_cvar_Engine_##cmdName = console_system::engine::register_convar(#cmdName, value, flags, help);
+#define REGISTER_CONVAR_EN(cmdName, type, value, flags, help) auto __reg_cvar_Engine_##cmdName = console_system::engine::register_convar(#cmdName, type, value, flags, help);
 
 #define REGISTER_CONVAR_CALLBACK_EN(cvarName, function) _REGISTER_CONVAR_CALLBACK_EN(cvarName, NULL)
 
@@ -274,22 +274,22 @@ cvar_newglobal_dec(engine);
 	_REGISTER_CONVAR_CALLBACK_SV(cvarName, function);                                                                                                                                                                                                                                            \
 	_REGISTER_CONVAR_CALLBACK_CL(cvarName, function);
 #else // For ConCommand definitions only
-#define REGISTER_CONVAR_SV_INTERNAL(cmdName, value, flags, help)
-#define REGISTER_CONVAR_SV(cmdName, value, flags, help)
+#define REGISTER_CONVAR_SV_INTERNAL(cmdName, type, value, flags, help)
+#define REGISTER_CONVAR_SV(cmdName, type, value, flags, help)
 #define REGISTER_CONVAR_CALLBACK_SV(cvarName, function) _REGISTER_CONVAR_CALLBACK_SV(cvarName, function)
 #define REGISTER_CONCOMMAND_SV(cmdName, function, flags, help) _REGISTER_CONCOMMAND_SV(cmdName, function, flags, help)
 #define REGISTER_CONCOMMAND_TOGGLE_SV(cmdName, functionIn, functionOut, flags, help)                                                                                                                                                                                                             \
 	_REGISTER_CONCOMMAND_SV("+", cmdName, functionIn, flags, help);                                                                                                                                                                                                                              \
 	_REGISTER_CONCOMMAND_SV("-", cmdName, functionOut, flags, help);
 
-#define REGISTER_CONVAR_CL(cmdName, value, flags, help)
+#define REGISTER_CONVAR_CL(cmdName, type, value, flags, help)
 #define REGISTER_CONVAR_CALLBACK_CL(cvarName, function) _REGISTER_CONVAR_CALLBACK_CL(cvarName, function)
 #define REGISTER_CONCOMMAND_CL(cmdName, function, flags, help) _REGISTER_CONCOMMAND_CL(cmdName, function, flags, help)
 #define REGISTER_CONCOMMAND_TOGGLE_CL(cmdName, functionIn, functionOut, flags, help)                                                                                                                                                                                                             \
 	auto __reg_cvar_Client_##cmdName##_in = console_system::client::register_concommand(("+" #cmdName), functionIn, flags, help);                                                                                                                                                                \
 	auto __reg_cvar_Client_##cmdName##_out = console_system::client::register_concommand(("-" #cmdName), functionOut, flags, help);
 
-#define REGISTER_CONVAR_EN(cmdName, value, flags, help)
+#define REGISTER_CONVAR_EN(cmdName, type, value, flags, help)
 #define REGISTER_CONVAR_CALLBACK_EN(cvarName, function) _REGISTER_CONVAR_CALLBACK_EN(cvarName, function)
 #define REGISTER_CONCOMMAND_EN(cmdName, function, flags, help) _REGISTER_CONCOMMAND_EN(cmdName, function, flags, help)
 
@@ -306,10 +306,10 @@ cvar_newglobal_dec(engine);
 	REGISTER_CONVAR_CALLBACK_CL(cvarName, function);
 #endif
 
-#define REGISTER_ENGINE_CONVAR(cmdName, value, flags, help) REGISTER_CONVAR_EN(cmdName, value, flags, help);
+#define REGISTER_ENGINE_CONVAR(cmdName, type, value, flags, help) REGISTER_CONVAR_EN(cmdName, type, value, flags, help);
 
-#define REGISTER_SHARED_CONVAR(cmdName, value, flags, help)                                                                                                                                                                                                                                      \
-	REGISTER_CONVAR_SV_INTERNAL(cmdName, value, flags, help);                                                                                                                                                                                                                                    \
-	REGISTER_CONVAR_CL(cmdName, value, flags, help);
+#define REGISTER_SHARED_CONVAR(cmdName, type, value, flags, help)                                                                                                                                                                                                                                      \
+	REGISTER_CONVAR_SV_INTERNAL(cmdName, type, value, flags, help);                                                                                                                                                                                                                                    \
+	REGISTER_CONVAR_CL(cmdName, type, value, flags, help);
 
 #endif

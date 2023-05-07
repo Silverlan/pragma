@@ -12,10 +12,10 @@
 #include <pragma/console/convars.h>
 #include "pragma/networking/portinfo.h"
 
-REGISTER_CONVAR_CL(playername, "player", ConVarFlags::Archive | ConVarFlags::Userinfo, "Local player name.");
-REGISTER_CONVAR_CL(password, "", ConVarFlags::Password, "Password which will be used for the next connection attempt.");
-REGISTER_CONVAR_CL(cl_updaterate, "20", ConVarFlags::Archive, "The amount of times per second user input is being transmitted to the server.");
-REGISTER_CONVAR_CL(net_graph, "0", ConVarFlags::None, "Displays a graph about current network transmissions.");
+REGISTER_CONVAR_CL(playername, udm::Type::String, "player", ConVarFlags::Archive | ConVarFlags::Userinfo, "Local player name.");
+REGISTER_CONVAR_CL(password, udm::Type::String, "", ConVarFlags::Password, "Password which will be used for the next connection attempt.");
+REGISTER_CONVAR_CL(cl_updaterate, udm::Type::UInt32, "20", ConVarFlags::Archive, "The amount of times per second user input is being transmitted to the server.");
+REGISTER_CONVAR_CL(net_graph, udm::Type::Boolean, "0", ConVarFlags::None, "Displays a graph about current network transmissions.");
 
 DLLCLIENT void CMD_cl_send(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 REGISTER_CONCOMMAND_CL(cl_send, CMD_cl_send, ConVarFlags::None, "Sends a text message to the server and displays it in the console. Usage: cl_send <message>");
@@ -35,8 +35,8 @@ REGISTER_CONCOMMAND_CL(disconnect, CMD_disconnect, ConVarFlags::None, "Disconnec
 DLLCLIENT void CMD_cl_debug_netmessages(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 REGISTER_CONCOMMAND_CL(cl_debug_netmessages, CMD_cl_debug_netmessages, ConVarFlags::None, "Prints out debug information about recent net-messages.");
 
-REGISTER_CONVAR_CL(cl_port_tcp, sci::DEFAULT_PORT_TCP, ConVarFlags::Archive | ConVarFlags::Userinfo, "Port used for TCP transmissions.");
-REGISTER_CONVAR_CL(cl_port_udp, sci::DEFAULT_PORT_UDP, ConVarFlags::Archive | ConVarFlags::Userinfo, "Port used for UDP transmissions.");
+REGISTER_CONVAR_CL(cl_port_tcp, udm::Type::String, sci::DEFAULT_PORT_TCP, ConVarFlags::Archive | ConVarFlags::Userinfo, "Port used for TCP transmissions.");
+REGISTER_CONVAR_CL(cl_port_udp, udm::Type::String, sci::DEFAULT_PORT_UDP, ConVarFlags::Archive | ConVarFlags::Userinfo, "Port used for UDP transmissions.");
 
-REGISTER_CONVAR_CL(cl_max_fps, "-1", ConVarFlags::Archive, "FPS will be clamped at this value. A value of < 0 deactivates the limit.");
+REGISTER_CONVAR_CL(cl_max_fps, udm::Type::Int32, "-1", ConVarFlags::Archive, "FPS will be clamped at this value. A value of < 0 deactivates the limit.");
 #endif

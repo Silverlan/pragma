@@ -188,7 +188,7 @@ class DLLNETWORK NetworkState : public CallbackHandler, public CVarHandler {
 
 	void CallOnNextTick(const std::function<void()> &f);
 
-	ConVar *CreateConVar(const std::string &scmd, const std::string &value, ConVarFlags flags, const std::string &help = "");
+	ConVar *CreateConVar(const std::string &scmd, udm::Type type, const std::string &value, ConVarFlags flags, const std::string &help = "");
 	ConVar *RegisterConVar(const std::string &scmd, const std::shared_ptr<ConVar> &cvar);
 	virtual ConCommand *CreateConCommand(const std::string &scmd, LuaFunction fc, ConVarFlags flags = ConVarFlags::None, const std::string &help = "");
   protected:

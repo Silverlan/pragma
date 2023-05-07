@@ -26,6 +26,9 @@ class ConCommand;
 namespace pragma {
 	class BasePlayerComponent;
 };
+namespace udm {
+	enum class Type : uint8_t;
+};
 #pragma warning(push)
 #pragma warning(disable : 4251)
 class DLLNETWORK CVarHandler {
@@ -78,7 +81,7 @@ class DLLNETWORK CVarHandler {
 
 	// These should be avoided, because convars and commands registered this way
 	// cannot be synchronized between server and client
-	std::shared_ptr<ConVar> RegisterConVar(const std::string &scmd, const std::string &value, ConVarFlags flags, const std::string &help = "");
+	std::shared_ptr<ConVar> RegisterConVar(const std::string &scmd, udm::Type type, const std::string &value, ConVarFlags flags, const std::string &help = "");
 	std::shared_ptr<ConCommand> RegisterConCommand(const std::string &scmd, const std::function<void(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> &fc, ConVarFlags flags = ConVarFlags::None, const std::string &help = "");
 	CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, int, int)> &function);
 	CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, std::string, std::string)> &function);

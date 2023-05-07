@@ -44,14 +44,14 @@ REGISTER_ENGINE_CONCOMMAND(
 	  engine->ClearCache();
   },
   ConVarFlags::None, "Deletes all cache files.");
-REGISTER_ENGINE_CONVAR(cache_version, "", ConVarFlags::Archive, "The engine version that the cache files are associated with. If this version doesn't match the current engine version, the cache will be cleared.");
-REGISTER_ENGINE_CONVAR(cache_version_target, "9", ConVarFlags::None, "If cache_version does not match this value, the cache files will be cleared and it will be set to it.");
-REGISTER_ENGINE_CONVAR(debug_profiling_enabled, "0", ConVarFlags::None, "Enables profiling timers.");
-REGISTER_ENGINE_CONVAR(sh_mount_external_game_resources, "1", ConVarFlags::Archive, "If set to 1, the game will attempt to load missing resources from external games.");
-REGISTER_ENGINE_CONVAR(sh_lua_remote_debugging, "0", ConVarFlags::Archive,
+REGISTER_ENGINE_CONVAR(cache_version, udm::Type::String, "", ConVarFlags::Archive, "The engine version that the cache files are associated with. If this version doesn't match the current engine version, the cache will be cleared.");
+REGISTER_ENGINE_CONVAR(cache_version_target, udm::Type::UInt32, "9", ConVarFlags::None, "If cache_version does not match this value, the cache files will be cleared and it will be set to it.");
+REGISTER_ENGINE_CONVAR(debug_profiling_enabled, udm::Type::Boolean, "0", ConVarFlags::None, "Enables profiling timers.");
+REGISTER_ENGINE_CONVAR(sh_mount_external_game_resources, udm::Type::Boolean, "1", ConVarFlags::Archive, "If set to 1, the game will attempt to load missing resources from external games.");
+REGISTER_ENGINE_CONVAR(sh_lua_remote_debugging, udm::Type::UInt8, "0", ConVarFlags::Archive,
   "0 = Remote debugging is disabled; 1 = Remote debugging is enabled serverside; 2 = Remote debugging is enabled clientside.\nCannot be changed during an active game. Also requires the \"-luaext\" launch parameter.\nRemote debugging cannot be enabled clientside and serverside at the same time.");
-REGISTER_ENGINE_CONVAR(lua_open_editor_on_error, "1", ConVarFlags::Archive, "1 = Whenever there's a Lua error, the engine will attempt to automatically open a Lua IDE and open the file and line which caused the error.");
-REGISTER_ENGINE_CONVAR(steam_steamworks_enabled, "1", ConVarFlags::Archive, "Enables or disables steamworks.");
+REGISTER_ENGINE_CONVAR(lua_open_editor_on_error, udm::Type::Boolean, "1", ConVarFlags::Archive, "1 = Whenever there's a Lua error, the engine will attempt to automatically open a Lua IDE and open the file and line which caused the error.");
+REGISTER_ENGINE_CONVAR(steam_steamworks_enabled, udm::Type::Boolean, "1", ConVarFlags::Archive, "Enables or disables steamworks.");
 static void cvar_steam_steamworks_enabled(bool val)
 {
 	static std::weak_ptr<util::Library> wpSteamworks = {};
@@ -339,4 +339,4 @@ REGISTER_ENGINE_CONCOMMAND(debug_profiling_physics_end, debug_profiling_physics_
 
 //////////////// SERVER ////////////////
 
-REGISTER_SHARED_CONVAR(rcon_password, "", ConVarFlags::Password, "Specifies a password which can be used to run console commands remotely on a server. If no password is specified, this feature is disabled.");
+REGISTER_SHARED_CONVAR(rcon_password, udm::Type::String, "", ConVarFlags::Password, "Specifies a password which can be used to run console commands remotely on a server. If no password is specified, this feature is disabled.");

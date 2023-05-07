@@ -46,8 +46,8 @@ REGISTER_CONCOMMAND_SV(heartbeat, CMD_heartbeat, ConVarFlags::None, "Instantly s
 DLLSERVER void CMD_sv_debug_netmessages(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 REGISTER_CONCOMMAND_SV(sv_debug_netmessages, CMD_sv_debug_netmessages, ConVarFlags::None, "Prints out debug information about recent net-messages.");
 
-REGISTER_CONVAR_SV(sv_port_tcp, "29150", ConVarFlags::Archive, "TCP port which will be used when starting a server.");
-REGISTER_CONVAR_SV(sv_port_udp, "29150", ConVarFlags::Archive, "UDP port which will be used when starting a server.");
-REGISTER_CONVAR_SV(sv_use_p2p_if_available, "1", ConVarFlags::Archive, "Use a peer-to-peer connection if the selected networking layer supports it.");
+REGISTER_CONVAR_SV(sv_port_tcp, udm::Type::String, "29150", ConVarFlags::Archive, "TCP port which will be used when starting a server.");
+REGISTER_CONVAR_SV(sv_port_udp, udm::Type::String, "29150", ConVarFlags::Archive, "UDP port which will be used when starting a server.");
+REGISTER_CONVAR_SV(sv_use_p2p_if_available, udm::Type::Boolean, "1", ConVarFlags::Archive, "Use a peer-to-peer connection if the selected networking layer supports it.");
 
 #endif

@@ -55,7 +55,7 @@ void CVarHandler::Initialize()
 	}
 }
 
-std::shared_ptr<ConVar> CVarHandler::RegisterConVar(const std::string &scmd, const std::string &value, ConVarFlags flags, const std::string &help)
+std::shared_ptr<ConVar> CVarHandler::RegisterConVar(const std::string &scmd, udm::Type type, const std::string &value, ConVarFlags flags, const std::string &help)
 {
 	auto it = m_conVars.find(scmd);
 	if(it != m_conVars.end()) {
@@ -63,7 +63,13 @@ std::shared_ptr<ConVar> CVarHandler::RegisterConVar(const std::string &scmd, con
 			return nullptr;
 		return std::static_pointer_cast<ConVar>(it->second);
 	}
-	it = m_conVars.insert(decltype(m_conVars)::value_type(scmd, ConVar::Create<std::string>(value, flags, help))).first;
+	udm::visit(type, [this,&it,&scmd,&value,&flags,&help](auto tag) {
+		using T = typename decltype(tag)::type;
+		if constexpr(console::is_valid_convar_type_v<T> && udm::is_convertible<std::string,T>())
+			it = m_conVars.insert(decltype(m_conVars)::value_type(scmd, ConVar::Create<T>(udm::convert<std::string,T>(value), flags, help))).first;
+	});
+	if(it == m_conVars.end())
+		return nullptr;
 	return std::static_pointer_cast<ConVar>(it->second);
 }
 std::shared_ptr<ConCommand> CVarHandler::RegisterConCommand(const std::string &scmd, const std::function<void(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> &fc, ConVarFlags flags, const std::string &help)

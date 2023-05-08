@@ -62,16 +62,25 @@ int main(int argc, char *argv[])
 		return update_failed();
 	}
 
-	auto updaterPath = updatePath + pathSeparator + "bin" + pathSeparator;
+	auto deleteFromUpdateFiles = [&updatePath, &pathSeparator](const std::string &fileName) {
+		auto updaterPath = updatePath + pathSeparator + fileName;
+		if(std::filesystem::exists(updaterPath)) {
+			std::cout << "Deleting '" << updaterPath << "'..." << std::endl;
+			std::filesystem::remove(updaterPath);
+		}
+	};
+
+	// We can't replace the updater executable because it's currently running, so we'll just skip it.
 #ifdef _WIN32
-	updaterPath += "updater.exe";
+	deleteFromUpdateFiles(std::string {"bin"} + pathSeparator + "updater.exe");
 #else
-	updaterPath += "updater";
+	deleteFromUpdateFiles(std::string {"bin"} + pathSeparator + "updater");
 #endif
-	if(std::filesystem::exists(updaterPath)) {
-		std::cout << "Deleting '" << updaterPath << "'..." << std::endl;
-		std::filesystem::remove(updaterPath);
-	}
+
+	// The Ubuntu Mono font is used as the console font in Pragma. Unfortunately, once loaded, it cannot be unloaded until
+	// the operating system is restarted, so we can't overwrite this file. Since this font is unlikely to change in an update,
+	// we'll just ignore it by deleting it from the update files.
+	deleteFromUpdateFiles(std::string {"fonts"} + pathSeparator + "ubuntu" + pathSeparator + "UbuntuMono-R.ttf");
 
 	// Copy files from update folder to root folder
 	auto pUpdatePath = util::Path::CreatePath(updatePath);

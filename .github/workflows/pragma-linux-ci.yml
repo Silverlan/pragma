@@ -52,8 +52,8 @@ jobs:
           # Enable experimental updates
           cd cfg
           echo "pfm_enable_experimental_updates \"1\"" >> client.cfg
+          cd ..
 
-          cd "$curDir"
           tar -czvf pragma.tar.gz *
           mv "${{ steps.build-pragma.outputs.install-dir }}/pragma.tar.gz" "$curDir/"
 

@@ -22,6 +22,7 @@ function InfoBox:OnInitialize()
 	self.m_bar = bar
 
 	self.m_btClose = gui.PFMButton.create(self,"gui/pfm/icon_clear","gui/pfm/icon_clear_activated",function()
+		self:CallCallbacks("OnClose")
 		if(self.m_removeOnClose) then
 			self:RemoveSafely()
 			return

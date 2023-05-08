@@ -145,6 +145,11 @@ function gui.WIBaseEditor:IsWindowActive(identifier)
 	return self:GetWindow(identifier):IsVisible()
 end
 function gui.WIBaseEditor:GetOpenWindows() return self.m_windowToFrame end
+function gui.WIBaseEditor:GetWindowFrame(identifier)
+	local data = self.m_windowFactories[identifier]
+	if(data == nil) then return end
+	return self.m_windowFrames[data.category]
+end
 function gui.WIBaseEditor:OpenWindow(identifier,goToWindow)
 	if(self.m_windowFactories[identifier] == nil or util.is_valid(self.m_windowFactories[identifier].element)) then
 		if(goToWindow) then self:GoToWindow(identifier) end

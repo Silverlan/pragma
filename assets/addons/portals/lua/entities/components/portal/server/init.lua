@@ -4,19 +4,23 @@ local Component = ents.PortalComponent
 
 function Component:OnTick(dt)
 	local touchC = self:GetEntity():GetComponent(ents.COMPONENT_TOUCH)
-	if(touchC == nil) then return end
+	if touchC == nil then
+		return
+	end
 	local surfC = self:GetEntity():GetComponent(ents.COMPONENT_SURFACE)
-	if(surfC == nil) then return end
+	if surfC == nil then
+		return
+	end
 	local plane = surfC:GetPlaneWs()
-	for _,ent in ipairs(touchC:GetTouchingEntities()) do
+	for _, ent in ipairs(touchC:GetTouchingEntities()) do
 		local n = plane:GetNormal()
 		local d = plane:GetDistance()
 		local pos = ent:GetPos()
-		local side = geometry.get_side_of_point_to_plane(n,d,pos)
-		if(side == geometry.PLANE_SIDE_FRONT) then
-			local posNext = pos +ent:GetVelocity() *dt
-			side = geometry.get_side_of_point_to_plane(n,d,posNext)
-			if(side == geometry.PLANE_SIDE_BACK) then
+		local side = geometry.get_side_of_point_to_plane(n, d, pos)
+		if side == geometry.PLANE_SIDE_FRONT then
+			local posNext = pos + ent:GetVelocity() * dt
+			side = geometry.get_side_of_point_to_plane(n, d, posNext)
+			if side == geometry.PLANE_SIDE_BACK then
 				-- Teleport the player
 				local nDst = self:GetTargetPlane():GetNormal()
 				local dDst = self:GetTargetPlane():GetDistance()
@@ -25,13 +29,15 @@ function Component:OnTick(dt)
 				local targetPos = self:GetTargetPose():GetOrigin()
 				local srcRot = self:GetSurfacePose():GetRotation()
 				local targetRot = self:GetTargetPose():GetRotation()
-				local srcPose = math.Transform(srcPos,srcRot)
-				local targetPose = math.Transform(targetPos,targetRot)
+				local srcPose = math.Transform(srcPos, srcRot)
+				local targetPose = math.Transform(targetPos, targetRot)
 
 				local newPose = self:ProjectPoseToTarget(ent:GetPose())
 
 				local tC = ent:GetComponent(ents.COMPONENT_TRANSFORM)
-				if(tC ~= nil) then tC:Teleport(newPose) end
+				if tC ~= nil then
+					tC:Teleport(newPose)
+				end
 			end
 		end
 	end
@@ -39,13 +45,13 @@ end
 
 function Component:UpdateMirrorState()
 	local physC = self:GetEntity():GetComponent(ents.COMPONENT_PHYSICS)
-	if(physC ~= nil) then
+	if physC ~= nil then
 		physC:SetCollisionFilterGroup(mirrored and phys.COLLISIONMASK_STATIC or phys.COLLISIONMASK_TRIGGER)
 		physC:SetCollisionCallbacksEnabled(not mirrored)
 	end
 
 	local mirrored = self:IsMirrored()
-	if(mirrored) then
+	if mirrored then
 		self:GetEntity():RemoveComponent(ents.COMPONENT_TOUCH)
 		self:SetTickPolicy(ents.TICK_POLICY_NEVER)
 	else
@@ -59,16 +65,20 @@ end
 
 function Component:OnEndTouch(ent)
 	local touchC = self:GetEntity():GetComponent(ents.COMPONENT_TOUCH)
-	if(touchC:GetTouchingEntityCount() == 0) then self:SetTickPolicy(ents.TICK_POLICY_NEVER) end
+	if touchC:GetTouchingEntityCount() == 0 then
+		self:SetTickPolicy(ents.TICK_POLICY_NEVER)
+	end
 end
 
-function Component:CanTrigger(ent,physObj)
-	return util.EVENT_REPLY_HANDLED,ent:IsPlayer()
+function Component:CanTrigger(ent, physObj)
+	return util.EVENT_REPLY_HANDLED, ent:IsPlayer()
 end
 
 function Component:OnPhysicsInitialized(physObj)
 	local physComponent = self:GetEntity():GetComponent(ents.COMPONENT_PHYSICS)
-	if(physComponent == nil) then return end
+	if physComponent == nil then
+		return
+	end
 	physComponent:SetCollisionFilterMask(phys.COLLISIONMASK_PLAYER)
 	self:UpdateMirrorState()
 end
@@ -76,9 +86,11 @@ end
 function Component:OnEntitySpawn()
 	local ent = self:GetEntity()
 	local touchComponent = ent:GetComponent(ents.COMPONENT_TOUCH)
-	if(touchComponent ~= nil) then
+	if touchComponent ~= nil then
 		touchComponent:SetTriggerFlags(ents.TouchComponent.TRIGGER_FLAG_BIT_PLAYERS)
 	end
 	local physComponent = ent:GetPhysicsComponent()
-	if(physComponent ~= nil) then physComponent:InitializePhysics(phys.TYPE_STATIC) end
+	if physComponent ~= nil then
+		physComponent:InitializePhysics(phys.TYPE_STATIC)
+	end
 end

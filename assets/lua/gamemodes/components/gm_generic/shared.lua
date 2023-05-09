@@ -1,4 +1,4 @@
-util.register_class("ents.GmGeneric",BaseEntityComponent)
+util.register_class("ents.GmGeneric", BaseEntityComponent)
 local Component = ents.GmGeneric
 
 game.load_sound_scripts("fx_footsteps.udm")
@@ -8,9 +8,9 @@ end
 
 function Component:Initialize()
 	BaseEntityComponent.Initialize(self)
-	
-	self:BindEvent(ents.GamemodeComponent.EVENT_ON_PLAYER_READY,"OnPlayerReady")
-	self:BindEvent(ents.GamemodeComponent.EVENT_ON_PLAYER_SPAWNED,"OnPlayerSpawned")
+
+	self:BindEvent(ents.GamemodeComponent.EVENT_ON_PLAYER_READY, "OnPlayerReady")
+	self:BindEvent(ents.GamemodeComponent.EVENT_ON_PLAYER_SPAWNED, "OnPlayerSpawned")
 end
 
 function Component:OnPlayerReady(pl)
@@ -36,21 +36,32 @@ function Component:InitializeDefaultPlayerDimensions(pl)
 	pl:SetSprintSpeed(320.0)
 	pl:SetCrouchedWalkSpeed(63.33)
 	local charComponent = pl:GetEntity():GetComponent(ents.COMPONENT_CHARACTER)
-	if(charComponent ~= nil) then charComponent:SetJumpPower(240.0) end
+	if charComponent ~= nil then
+		charComponent:SetJumpPower(240.0)
+	end
 end
 
 function Component:InitializePlayer(pl)
 	local ent = pl:GetEntity()
 	local charComponent = ent:AddComponent(ents.COMPONENT_CHARACTER)
-	if(charComponent ~= nil) then
-		charComponent:AddEventCallback(ents.CharacterComponent.EVENT_PLAY_FOOTSTEP_SOUND,function(footType,surfMat,intensity)
-			local sndComponent = charComponent:GetEntity():GetComponent(ents.COMPONENT_SOUND_EMITTER)
-			if(sndComponent == nil) then return end
-			local maxGain = 0.5
-			local sndInfo = ents.SoundEmitterComponent.SoundInfo(maxGain *intensity,1.0)
-			sndInfo.transmit = false
-			sndComponent:EmitSound(surfMat:GetFootstepSound(),bit.bor(sound.TYPE_EFFECT,sound.TYPE_PLAYER),sndInfo)
-		end)
+	if charComponent ~= nil then
+		charComponent:AddEventCallback(
+			ents.CharacterComponent.EVENT_PLAY_FOOTSTEP_SOUND,
+			function(footType, surfMat, intensity)
+				local sndComponent = charComponent:GetEntity():GetComponent(ents.COMPONENT_SOUND_EMITTER)
+				if sndComponent == nil then
+					return
+				end
+				local maxGain = 0.5
+				local sndInfo = ents.SoundEmitterComponent.SoundInfo(maxGain * intensity, 1.0)
+				sndInfo.transmit = false
+				sndComponent:EmitSound(
+					surfMat:GetFootstepSound(),
+					bit.bor(sound.TYPE_EFFECT, sound.TYPE_PLAYER),
+					sndInfo
+				)
+			end
+		)
 	end
 	self:InitializePlayerModel(pl)
 end
@@ -58,44 +69,50 @@ end
 function Component:InitializePlayerModel(pl)
 	local ent = pl:GetEntity()
 	local mdlComponent = ent:GetComponent(ents.COMPONENT_MODEL)
-	if(CLIENT == true) then
+	if CLIENT == true then
 		local vb = ents.get_view_body()
-		if(vb ~= nil) then
+		if vb ~= nil then
 			local mdlComponent = vb:GetModelComponent()
-			if(mdlComponent ~= nil) then
+			if mdlComponent ~= nil then
 				mdlComponent:SetModel("player/soldier_legs.wmd")
 			end
 		end
 		return
 	end
-	if(mdlComponent ~= nil) then mdlComponent:SetModel("player/soldier.wmd") end
+	if mdlComponent ~= nil then
+		mdlComponent:SetModel("player/soldier.wmd")
+	end
 end
 
 function Component:OnPlayerSpawned(pl)
 	local ent = pl:GetEntity()
 	local healthComponent = ent:GetComponent(ents.COMPONENT_HEALTH)
-	if(healthComponent ~= nil) then healthComponent:SetMaxHealth(100) end
-	
+	if healthComponent ~= nil then
+		healthComponent:SetMaxHealth(100)
+	end
+
 	local physComponent = ent:GetComponent(ents.COMPONENT_PHYSICS)
-	if(physComponent ~= nil) then
-		physComponent:SetCollisionBounds(Vector(-16,0,-16),Vector(16,pl:GetStandHeight(),16))
+	if physComponent ~= nil then
+		physComponent:SetCollisionBounds(Vector(-16, 0, -16), Vector(16, pl:GetStandHeight(), 16))
 		physComponent:InitializePhysics(phys.TYPE_CAPSULECONTROLLER)
 	end
-	
-	if(SERVER == true) then
-		if(healthComponent ~= nil) then healthComponent:SetHealth(100) end
-		
-		local pos,ang = self:FindSpawnPoint()
+
+	if SERVER == true then
+		if healthComponent ~= nil then
+			healthComponent:SetHealth(100)
+		end
+
+		local pos, ang = self:FindSpawnPoint()
 		local trComponent = ent:GetTransformComponent()
-		if(trComponent ~= nil) then
+		if trComponent ~= nil then
 			trComponent:SetPos(pos)
 			trComponent:SetAngles(ang)
 		end
-		
+
 		local charComponent = ent:GetCharacterComponent()
-		if(charComponent ~= nil) then
+		if charComponent ~= nil then
 			charComponent:SetViewAngles(ang)
 		end
 	end
 end
-ents.COMPONENT_GM_GENERIC = ents.register_component("gm_generic",Component)
+ents.COMPONENT_GM_GENERIC = ents.register_component("gm_generic", Component)

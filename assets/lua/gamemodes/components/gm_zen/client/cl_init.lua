@@ -4,5 +4,5 @@ local Component = ents.GmZen
 
 function Component:InitializeHud()
 	local p = gui.create("WIZenHUD")
-	p:SetSize(400,200)
+	p:SetSize(400, 200)
 end

@@ -6,7 +6,7 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 ]]
 
-util.register_class("ents.DebugEyes",BaseEntityComponent)
+util.register_class("ents.DebugEyes", BaseEntityComponent)
 local Component = ents.DebugEyes
 
 function Component:__init()
@@ -18,7 +18,7 @@ function Component:Initialize()
 end
 
 function Component:OnEntitySpawn()
-	self.m_cbDrawLines = game.add_callback("Think",function()
+	self.m_cbDrawLines = game.add_callback("Think", function()
 		self:DrawLines()
 	end)
 end
@@ -35,13 +35,15 @@ function Component:DrawLines()
 	local eyeC = ent:GetComponent(ents.COMPONENT_EYE)
 	local flexC = ent:GetComponent(ents.COMPONENT_FLEX)
 	local numEyes = (eyeC ~= nil) and mdl:GetEyeballCount() or 0
-	if(mdl == nil or numEyes == 0) then return end
-	for i=0,numEyes -1 do
+	if mdl == nil or numEyes == 0 then
+		return
+	end
+	for i = 0, numEyes - 1 do
 		local vt = eyeC:GetViewTarget()
 		local pose = eyeC:CalcEyeballPose(i)
-		if(pose ~= nil) then
+		if pose ~= nil then
 			drawInfo:SetColor(Color.Red)
-			debug.draw_line(pose:GetOrigin(),vt,drawInfo)
+			debug.draw_line(pose:GetOrigin(), vt, drawInfo)
 
 			--[[
 			-- TODO: This is probably not correct
@@ -63,4 +65,4 @@ function Component:DrawLines()
 		end
 	end
 end
-ents.COMPONENT_DEBUG_EYES = ents.register_component("debug_eyes",Component)
+ents.COMPONENT_DEBUG_EYES = ents.register_component("debug_eyes", Component)

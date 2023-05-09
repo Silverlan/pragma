@@ -6,4 +6,4 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 ]]
 
-ents.register("split_screen",{"split_screen"},Entity.TYPE_SHARED)
+ents.register("split_screen", { "split_screen" }, Entity.TYPE_SHARED)

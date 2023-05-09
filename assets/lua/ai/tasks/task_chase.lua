@@ -1,17 +1,21 @@
-util.register_class("ai.TaskChase",ai.BaseBehaviorTask)
+util.register_class("ai.TaskChase", ai.BaseBehaviorTask)
 ai.TaskChase.PARAM_MOVE_ACTIVITY = 0
-function ai.TaskChase:__tostring() return "Chase" end
-function ai.TaskChase:__init(taskType,selectorType)
-	ai.BaseBehaviorTask.__init(self,taskType,selectorType)
+function ai.TaskChase:__tostring()
+	return "Chase"
+end
+function ai.TaskChase:__init(taskType, selectorType)
+	ai.BaseBehaviorTask.__init(self, taskType, selectorType)
 end
 
-function ai.TaskChase:Start(schedule,npc)
+function ai.TaskChase:Start(schedule, npc)
 	local t = npc:GetPrimaryTarget()
-	if(t == nil) then return ai.BehaviorTask.RESULT_FAILED end
+	if t == nil then
+		return ai.BehaviorTask.RESULT_FAILED
+	end
 	local moveInfo = ai.MoveInfo()
 	local posDst = t:GetLastKnownPosition()
 	local bInView = t:IsInView()
-	if(bInView == false) then
+	if bInView == false then
 		-- Target can't be seen; Attempt to find target by moving
 		-- in last known direction
 		-- (This doesn't work very well, NPCs tend to move into walls)
@@ -35,16 +39,16 @@ function ai.TaskChase:Start(schedule,npc)
 	end]]
 	local ent = npc:GetEntity()
 	local trComponent = ent:GetTransformComponent()
-	if(trComponent ~= nil) then
+	if trComponent ~= nil then
 		local dist = trComponent:GetDistance(posDst)
 		moveInfo.moveOnPath = (bInView == false or dist > 400.0) and true or false
-		moveInfo.activity = self:GetParameterInt(schedule,self.PARAM_MOVE_ACTIVITY,Animation.ACT_RUN)
-		local moveState = npc:MoveTo(posDst,moveInfo)
-		if(moveState == ai.MOVE_STATE_TARGET_UNREACHABLE) then
-			if(moveInfo.moveOnPath == true) then
+		moveInfo.activity = self:GetParameterInt(schedule, self.PARAM_MOVE_ACTIVITY, Animation.ACT_RUN)
+		local moveState = npc:MoveTo(posDst, moveInfo)
+		if moveState == ai.MOVE_STATE_TARGET_UNREACHABLE then
+			if moveInfo.moveOnPath == true then
 				moveInfo.moveOnPath = false
-				moveState = npc:MoveTo(posDst,moveInfo) -- Try to move without path
-				if(moveState == ai.MOVE_STATE_TARGET_UNREACHABLE) then
+				moveState = npc:MoveTo(posDst, moveInfo) -- Try to move without path
+				if moveState == ai.MOVE_STATE_TARGET_UNREACHABLE then
 					npc:StopMoving()
 					-- TODO: Try to hide?
 					return ai.BehaviorTask.RESULT_FAILED -- We cannot reach our target (Path blocked?)

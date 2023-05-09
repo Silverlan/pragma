@@ -11,14 +11,14 @@ local LIGHTMAP_CACHE_VERSION = 1
 function util.load_lightmap_uv_cache(fileName)
 	fileName = file.remove_file_extension(fileName) .. ".lmd_b"
 
-	local udmData,err = udm.create("PLMD",LIGHTMAP_CACHE_VERSION)
-	if(udmData == false) then
+	local udmData, err = udm.create("PLMD", LIGHTMAP_CACHE_VERSION)
+	if udmData == false then
 		console.print_warning(err)
 		return false
 	end
 
-	local udmData,err = udm.load(fileName)
-	if(udmData == false) then
+	local udmData, err = udm.load(fileName)
+	if udmData == false then
 		console.print_warning(err)
 		return false
 	end
@@ -32,20 +32,22 @@ function util.load_lightmap_uv_cache(fileName)
 
 		local data = udmEntity:Get("data")
 		local err
-		if(data:IsValid()) then
+		if data:IsValid() then
 			local mdl
-			mdl,err = game.Model.Load(udm.AssetData(udmEntity:Get("data"),"PMDL",1))
-			if(mdl ~= false) then
+			mdl, err = game.Model.Load(udm.AssetData(udmEntity:Get("data"), "PMDL", 1))
+			if mdl ~= false then
 				lightmapData[model] = {
 					pose = pose,
 					meshData = meshData,
-					model = mdl
+					model = mdl,
 				}
 			end
 		else
 			err = "Invalid UDM model data"
 		end
-		if(err ~= nil) then console.print_warning("Failed to load lightmapped model '" .. (model or "unknown") .. "': " .. err) end
+		if err ~= nil then
+			console.print_warning("Failed to load lightmapped model '" .. (model or "unknown") .. "': " .. err)
+		end
 	end
 
 	local tEnts = {}
@@ -66,51 +68,55 @@ function util.load_lightmap_uv_cache(fileName)
 	return tEnts
 end
 
-function util.save_lightmap_uv_cache(fileName,entities)
+function util.save_lightmap_uv_cache(fileName, entities)
 	file.create_path(file.get_file_path(fileName))
 	fileName = file.remove_file_extension(fileName) .. ".lmd_b"
 
-	local udmData,err = udm.create("PLMD",LIGHTMAP_CACHE_VERSION)
-	if(udmData == false) then
+	local udmData, err = udm.create("PLMD", LIGHTMAP_CACHE_VERSION)
+	if udmData == false then
 		console.print_warning(err)
 		return
 	end
 
 	local assetData = udmData:GetAssetData():GetData()
-	local udmEntities = assetData:AddArray("entities",#entities)
+	local udmEntities = assetData:AddArray("entities", #entities)
 	local entIdx = 0
-	for _,ent in ipairs(entities) do
+	for _, ent in ipairs(entities) do
 		local mdl = ent:GetModel()
 		local meshGroups = mdl:GetMeshGroups()
 		local hasLightmappedMeshes = false
-		for i,meshGroup in ipairs(meshGroups) do
+		for i, meshGroup in ipairs(meshGroups) do
 			local meshes = meshGroup:GetMeshes()
-			for j,mesh in ipairs(meshes) do
+			for j, mesh in ipairs(meshes) do
 				local subMeshes = mesh:GetSubMeshes()
-				for k,subMesh in ipairs(subMeshes) do
+				for k, subMesh in ipairs(subMeshes) do
 					local hasLightmapSet = subMesh:HasUVSet("lightmap")
-					if(hasLightmapSet) then
+					if hasLightmapSet then
 						hasLightmappedMeshes = true
 						break
 					end
 				end
-				if(hasLightmappedMeshes) then break end
+				if hasLightmappedMeshes then
+					break
+				end
 			end
-			if(hasLightmappedMeshes) then break end
+			if hasLightmappedMeshes then
+				break
+			end
 		end
 
-		if(hasLightmappedMeshes) then
+		if hasLightmappedMeshes then
 			local pose = ent:GetPose()
-			local model = asset.get_normalized_path(ent:GetModel():GetName(),asset.TYPE_MODEL)
+			local model = asset.get_normalized_path(ent:GetModel():GetName(), asset.TYPE_MODEL)
 
 			-- We'll identify lightmapped entities by their position and model
 			local origin = pose:GetOrigin()
 			local udmEntity = udmEntities:Get(entIdx)
-			entIdx = entIdx +1
-			udmEntity:Set("pose",math.Transform(pose:GetOrigin(),pose:GetRotation()))
-			udmEntity:Set("model",model)
+			entIdx = entIdx + 1
+			udmEntity:Set("pose", math.Transform(pose:GetOrigin(), pose:GetRotation()))
+			udmEntity:Set("model", model)
 
-			ent:GetModel():Save(udm.AssetData(udmEntity:Get("data"),"PMDL",1))
+			ent:GetModel():Save(udm.AssetData(udmEntity:Get("data"), "PMDL", 1))
 		end
 	end
 	udmEntities:Resize(entIdx)

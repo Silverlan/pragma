@@ -10,7 +10,7 @@ Download
 ------
 All versions include the core Engine, as well as the Pragma Filmmaker.
 ###### Stable
-[![Download](https://wiki.pragma-engine.com/uploads/images/gallery/2020-08/firefox_2020-08-14_10-46-44.png)](https://github.com/Silverlan/pragma/assets/3609960/0640ae8a-288a-44e9-8223-f9fc81faa731)
+[![Download](https://wiki.pragma-engine.com/uploads/images/gallery/2020-08/firefox_2020-08-14_10-46-44.png)](https://github.com/Silverlan/pragma/releases/latest)
 
 You can find older releases in the [releases section](https://github.com/Silverlan/pragma/releases) of this repository. No installation is required, simply extract the archive somewhere and launch the `pragma` or `pfm` executable.
 

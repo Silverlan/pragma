@@ -43,6 +43,7 @@ function gui.WIBaseEditor:OnInitialize()
 	self.m_menuBar:SetAnchor(0, 0, 1, 0)
 
 	local pInfoBar = gui.create("WIPFMInfobar", self)
+	pInfoBar:SetName("info_bar")
 	pInfoBar:SetWidth(self:GetWidth())
 	pInfoBar:SetY(self:GetHeight() - pInfoBar:GetHeight())
 	pInfoBar:SetAnchor(0, 1, 1, 1)

@@ -6,6 +6,19 @@ What is this?
 ------
 This is the repository for the Pragma Game Engine. For more information, visit the official website: https://pragma-engine.com/
 
+Download
+------
+All versions include the core Engine, as well as the Pragma Filmmaker.
+###### Stable
+[![Download](https://wiki.pragma-engine.com/uploads/images/gallery/2020-08/firefox_2020-08-14_10-46-44.png)](https://github.com/Silverlan/pragma/releases/latest)
+
+You can find older releases in the [releases section](https://github.com/Silverlan/pragma/releases) of this repository. No installation is required, simply extract the archive somewhere and launch the `pragma` or `pfm` executable.
+
+###### Nightly
+In addition, there is also an automated nightly release with all of the latest features which you can find [here](https://github.com/Silverlan/pragma/releases/tag/nightly), but it is not guaranteed to be stable or functional.
+
+###### Updating
+PFM automatically checks for updates when you launch it, and can automatically install them as well, so you don't have to download new releases manually.
 
 Media
 ------

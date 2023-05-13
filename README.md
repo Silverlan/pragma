@@ -33,19 +33,6 @@ What platforms and hardware does it work on?
 - Graphics card: GTX 1050 Ti or newer
 - Memory: 4 GiB RAM or more
 
-Build Requirements
-------
-- ~60 GiB of disk space
-- CMake 3.21.4 or newer
-- Python 3.9.5 or newer
-
-###### Windows
-- Visual Studio 2022 or newer
-- Windows SDK 10.0.22000.0 or newer
-
-###### Linux
-- clang-14 or newer (Pragma is *not* compatible with gcc!)
-
 Contributions
 ------
 ###### PFM
@@ -63,6 +50,19 @@ To update Pragma/PFM, you can still use the auto-updater functionality of PFM. S
 The recommended way to work with Pragma is through the [Lua API](https://wiki.pragma-engine.com/books/lua-api). If this is not enough, and you need more control, you will have to build Pragma manually. You can find the build instructions below.
 
 Please consider creating a [binary module](https://github.com/Silverlan/pragma#modules) if you're planning on adding new features that don't require any changes to the existing code files. This way the module can simply be installed into existing releases of Pragma. (You will still have to set up a build of Pragma before creating a binary module.)
+
+Build Requirements
+------
+- ~60 GiB of disk space
+- CMake 3.21.4 or newer
+- Python 3.9.5 or newer
+
+###### Windows
+- Visual Studio 2022 or newer
+- Windows SDK 10.0.22000.0 or newer
+
+###### Linux
+- clang-14 or newer (Pragma is *not* compatible with gcc!)
 
 Build Instructions
 ------

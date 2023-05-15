@@ -85,6 +85,7 @@ namespace pragma {
 		void RebuildBvh();
 		void ClearBvh();
 		std::optional<Vector3> GetVertex(size_t idx) const;
+		size_t GetTriangleCount() const;
 
 		// For internal use only
 		static std::shared_ptr<pragma::BvhData> RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh>> &meshes, const std::vector<umath::ScaledTransform> *optPoses = nullptr, const std::function<bool()> &fIsCancelled = nullptr, std::vector<size_t> *optOutMeshIndices = nullptr);

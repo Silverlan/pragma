@@ -392,6 +392,8 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("EnableThinking", &::WIBase::EnableThinking);
 	classDef.def("DisableThinking", &::WIBase::DisableThinking);
 	classDef.def("SetThinkingEnabled", &::WIBase::SetThinkingEnabled);
+	classDef.def(
+	  "InvokeThink", +[](::WIBase &el) { el.Think(); });
 
 	classDef.def("AddAttachment", static_cast<WIAttachment *(::WIBase::*)(const std::string &, const Vector2 &)>(&::WIBase::AddAttachment));
 	classDef.def("AddAttachment", static_cast<WIAttachment *(*)(::WIBase &, const std::string &)>([](::WIBase &el, const std::string &name) { return el.AddAttachment(name); }));

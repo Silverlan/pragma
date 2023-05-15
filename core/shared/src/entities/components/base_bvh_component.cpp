@@ -239,7 +239,7 @@ std::shared_ptr<BvhData> BaseBvhComponent::SetBvhData(std::shared_ptr<BvhData> &
 	m_bvhData = bvhData;
 	return tmp;
 }
-
+size_t BaseBvhComponent::GetTriangleCount() const { return m_bvhData->primitives.size(); }
 std::optional<Vector3> BaseBvhComponent::GetVertex(size_t idx) const
 {
 	std::scoped_lock lock {m_bvhDataMutex};

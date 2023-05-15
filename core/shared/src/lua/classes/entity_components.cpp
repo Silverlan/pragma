@@ -901,6 +901,7 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	auto defBvh = Lua::create_base_entity_component_class<pragma::BaseBvhComponent>("BaseBvhComponent");
 	defBvh.def("RebuildBvh", static_cast<void (pragma::BaseBvhComponent::*)()>(&pragma::BaseBvhComponent::RebuildBvh));
 	defBvh.def("GetVertex", &pragma::BaseBvhComponent::GetVertex);
+	defBvh.def("GetTriangleCount", &pragma::BaseBvhComponent::GetTriangleCount);
 	defBvh.def(
 	  "IntersectionTest2", +[](pragma::BaseBvhComponent &c, const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) {
 		  auto t = std::chrono::steady_clock::now();

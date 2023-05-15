@@ -160,6 +160,10 @@ function ents.ViewerCamera:FitViewToScene(min, max)
 	end
 	self:FitCameraTargetToExtents(min, max)
 	self:FitZoomToExtents(min, max)
+
+	-- Zoom out a little bit
+	self:SetZoom(self:GetZoom() + 15.0)
+	return min, max
 end
 function ents.ViewerCamera:SetTarget(target)
 	self.m_target = target

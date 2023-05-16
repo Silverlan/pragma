@@ -50,7 +50,7 @@ Locale::LoadResult Locale::Load(const std::string &file, const std::string &lan,
 
 std::string Locale::GetFileLocation(const std::string &file, const std::string &lan) { return LOCALIZATION_ROOT_PATH + lan + "/texts/" + file; }
 
-Locale::LoadResult Locale::LoadFile(const std::string &file, const std::string &lan, Localization &outLoc)
+Locale::LoadResult Locale::ParseFile(const std::string &file, const std::string &lan, std::unordered_map<std::string, util::Utf8String> &outTexts)
 {
 	auto filePath = GetFileLocation(file, lan);
 	auto f = FileManager::OpenFile(filePath.c_str(), "r");
@@ -62,13 +62,14 @@ Locale::LoadResult Locale::LoadFile(const std::string &file, const std::string &
 			if(ustring::get_key_value(l, key, val)) {
 				ustring::replace(val, "\\\"", "\"");
 				ustring::replace(val, "\\n", "\n");
-				outLoc.texts[key] = val;
+				outTexts[key] = val;
 			}
 		}
 		return LoadResult::Success;
 	}
 	return LoadResult::Failed;
 }
+Locale::LoadResult Locale::LoadFile(const std::string &file, const std::string &lan, Localization &outLoc) { return ParseFile(file, lan, outLoc.texts); }
 
 Locale::LoadResult Locale::LoadFile(const std::string &file, const std::string &lan)
 {

@@ -69,3 +69,25 @@ int Lua::Locale::get_languages(lua_State *l)
 }
 
 bool Lua::Locale::localize(const std::string &identifier, const std::string &lan, const std::string &category, const std::string &text) { return ::Locale::Localize(identifier, lan, category, text); }
+
+void Lua::Locale::clear() { ::Locale::Clear(); }
+Lua::map<std::string, std::string> Lua::Locale::get_texts(lua_State *l)
+{
+	auto &texts = ::Locale::GetTexts();
+	auto t = luabind::newtable(l);
+	for(auto &pair : texts)
+		t[pair.first] = pair.second.cpp_str();
+	return t;
+}
+Lua::opt<Lua::map<std::string, std::string>> Lua::Locale::parse(lua_State *l, const std::string &fileName, const std::string &lan)
+{
+	std::unordered_map<std::string, util::Utf8String> texts;
+	auto res = ::Locale::ParseFile(fileName, lan, texts);
+	if(res != ::Locale::LoadResult::Success)
+		return Lua::nil;
+	auto t = luabind::newtable(l);
+	for(auto &pair : texts)
+		t[pair.first] = pair.second.cpp_str();
+	return t;
+}
+Lua::opt<Lua::map<std::string, std::string>> Lua::Locale::parse(lua_State *l, const std::string &fileName) { return parse(l, fileName, ::Locale::GetLanguage()); }

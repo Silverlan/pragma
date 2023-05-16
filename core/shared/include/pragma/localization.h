@@ -50,6 +50,7 @@ class DLLNETWORK Locale {
 	static void Poll();
 	static std::string DetermineSystemLanguage();
 	static LoadResult LoadFile(const std::string &file, const std::string &lan, Localization &outLoc);
+	static LoadResult ParseFile(const std::string &file, const std::string &lan, std::unordered_map<std::string, util::Utf8String> &outTexts);
 	static std::string GetFileLocation(const std::string &file, const std::string &lan);
 	static bool Localize(const std::string &identifier, const std::string &lan, const std::string &category, const util::Utf8String &text);
   private:

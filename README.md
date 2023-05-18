@@ -8,7 +8,7 @@ This is the repository for the Pragma Game Engine. For more information, visit t
 
 Download
 ------
-All versions include the core Engine, as well as the Pragma Filmmaker.
+All versions include the core Engine, as well as the Pragma Filmmaker (PFM).
 ###### Stable
 [![Download](https://wiki.pragma-engine.com/uploads/images/gallery/2020-08/firefox_2020-08-14_10-46-44.png)](https://github.com/Silverlan/pragma/releases/latest)
 

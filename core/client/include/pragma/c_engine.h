@@ -166,6 +166,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	void OnWindowFocusChanged(prosper::Window &window, bool bFocus);
 	void OnFilesDropped(prosper::Window &window, std::vector<std::string> &files);
 	void OnWindowResized(prosper::Window &window, Vector2i size);
+	bool OnWindowShouldClose(prosper::Window &window);
 	void JoystickButtonInput(prosper::Window &window, const GLFW::Joystick &joystick, uint32_t key, GLFW::KeyState state);
 	void JoystickAxisInput(prosper::Window &window, const GLFW::Joystick &joystick, uint32_t axis, GLFW::Modifier mods, float newVal, float deltaVal);
 	float GetRawJoystickAxisMagnitude() const;

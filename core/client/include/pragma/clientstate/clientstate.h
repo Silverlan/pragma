@@ -236,6 +236,7 @@ class DLLCLIENT ClientState : public NetworkState {
 	Bool CharInput(unsigned int c);
 	Bool ScrollInput(Vector2 offset);
 	void OnFilesDropped(std::vector<std::string> &files);
+	bool OnWindowShouldClose(prosper::Window &window);
 
 	Material *LoadMaterial(const std::string &path, const std::function<void(Material *)> &onLoaded, bool bReload = false);
 	Material *LoadMaterial(const std::string &path);

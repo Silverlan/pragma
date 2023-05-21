@@ -11,7 +11,7 @@
 #include <pragma/lua/luafunction_call.h>
 #include <sharedutils/util_file.h>
 #include <sharedutils/scope_guard.h>
-
+#include <prosper_window.hpp>
 Bool CGame::RawMouseInput(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods)
 {
 	if(m_inputCallbackHandler.CallLuaEvents<int, int, int>("OnMouseInput", static_cast<int>(button), static_cast<int>(state), static_cast<int>(mods)) == util::EventReply::Handled)
@@ -74,6 +74,12 @@ static std::unordered_map<std::string, std::string> g_droppedFiles;
 namespace pragma {
 	DLLCLIENT const std::unordered_map<std::string, std::string> &get_dropped_files() { return g_droppedFiles; }
 };
+bool CGame::OnWindowShouldClose(prosper::Window &window)
+{
+	bool ret = true;
+	CallLuaCallbacks<bool, prosper::Window *>("OnWindowShouldClose", &ret, &window);
+	return ret;
+}
 void CGame::OnFilesDropped(std::vector<std::string> &files)
 {
 	m_droppedFiles.reserve(files.size());

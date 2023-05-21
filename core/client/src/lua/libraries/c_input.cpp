@@ -72,3 +72,11 @@ void ClientState::OnFilesDropped(std::vector<std::string> &files)
 		return;
 	game->OnFilesDropped(files);
 }
+bool ClientState::OnWindowShouldClose(prosper::Window &window)
+{
+
+	auto *game = GetGameState();
+	if(game == nullptr)
+		return false;
+	return game->OnWindowShouldClose(window);
+}

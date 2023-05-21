@@ -259,6 +259,7 @@ class DLLCLIENT CGame : public Game {
 	Bool CharInput(unsigned int c);
 	Bool ScrollInput(Vector2 offset);
 	void OnFilesDropped(std::vector<std::string> &files);
+	bool OnWindowShouldClose(prosper::Window &window);
 
 	// Game
 	void Think();

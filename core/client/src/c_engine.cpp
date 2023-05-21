@@ -511,6 +511,11 @@ void CEngine::OnFilesDropped(prosper::Window &window, std::vector<std::string> &
 		return;
 	client->OnFilesDropped(files);
 }
+bool CEngine::OnWindowShouldClose(prosper::Window &window) {
+	if(client == nullptr)
+		return true;
+	return client->OnWindowShouldClose(window);
+}
 bool CEngine::IsWindowFocused() const { return umath::is_flag_set(m_stateFlags, StateFlags::WindowFocused); }
 
 void CEngine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
@@ -1018,6 +1023,7 @@ void CEngine::InitializeWindowInputCallbacks(prosper::Window &window)
 	window->SetScrollCallback([this, &window](GLFW::Window &glfwWindow, Vector2 offset) mutable { ScrollInput(window, offset); });
 	window->SetFocusCallback([this, &window](GLFW::Window &glfwWindow, bool bFocused) mutable { OnWindowFocusChanged(window, bFocused); });
 	window->SetDropCallback([this, &window](GLFW::Window &glfwWindow, std::vector<std::string> &files) mutable { OnFilesDropped(window, files); });
+	window->SetOnShouldCloseCallback([this, &window](GLFW::Window &glfwWindow) -> bool { return OnWindowShouldClose(window); });
 }
 void CEngine::OnWindowResized(prosper::Window &window, Vector2i size)
 {

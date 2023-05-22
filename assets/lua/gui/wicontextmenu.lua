@@ -272,6 +272,13 @@ function gui.WIContextMenu:AddSubMenu(name, onClick)
 		end
 	end)
 	pSubMenu = gui.create("WIContextMenu", self:GetParent())
+	local depth = 1
+	local parentMenu = self:GetParentMenu()
+	while util.is_valid(parentMenu) do
+		depth = depth + 1
+		parentMenu = parentMenu:GetParentMenu()
+	end
+	pSubMenu:SetName("context_menu_" .. tostring(depth))
 	pSubMenu:SetParentMenu(self)
 	pSubMenu:AddCallback("OnCursorExited", function()
 		pSubMenu:KillFocus()

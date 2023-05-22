@@ -21,6 +21,7 @@ function gui.WIMenuBar:OnInitialize()
 
 	self:SetSize(128, 24)
 
+	self:SetName("menu_bar")
 	local pMain = gui.create("WIRect")
 	self:SetBackgroundElement(pMain)
 	pMain:SetParent(self)

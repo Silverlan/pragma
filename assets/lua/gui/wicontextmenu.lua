@@ -318,6 +318,7 @@ gui.open_context_menu = function(window)
 	end
 	gui.impl.contextMenu.menu = gui.create("WIContextMenu", elBase)
 	if gui.impl.contextMenu.menu ~= nil then
+		gui.impl.contextMenu.menu:SetName("context_menu")
 		gui.impl.contextMenu.menu:RequestFocus()
 		gui.impl.contextMenu.menu:SetPos(elBase:GetCursorPos())
 	end

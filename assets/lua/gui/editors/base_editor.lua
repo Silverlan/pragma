@@ -94,6 +94,7 @@ function gui.WIBaseEditor:AddWindowsMenuBarItem(fcView)
 	self.m_menuBar
 		:AddItem(locale.get_text("view"), function(pContext)
 			local pItem, pSubMenu = pContext:AddSubMenu(locale.get_text("windows"))
+			pItem:SetName("windows")
 			local windows = {}
 			for identifier, data in pairs(self.m_windowFactories) do
 				table.insert(windows, { data.title, identifier })
@@ -102,10 +103,11 @@ function gui.WIBaseEditor:AddWindowsMenuBarItem(fcView)
 				return a[1] < b[1]
 			end)
 			for _, wdata in ipairs(windows) do
-				pSubMenu:AddItem(wdata[1], function(pItem)
+				local pSubItem = pSubMenu:AddItem(wdata[1], function(pItem)
 					self:OpenWindow(wdata[2])
 					self:GoToWindow(wdata[2])
 				end)
+				pSubItem:SetName(wdata[2])
 			end
 			pSubMenu:ScheduleUpdate()
 

@@ -322,12 +322,16 @@ pragma::ik::Solver::Solver(uint32_t controlIterationCount, uint32_t fixerIterati
 	m_solver->activeSet.UseAutomass = true;
 	m_solver->AutoscaleControlImpulses = true;
 	m_solver->AutoscaleControlMaximumForce = std::numeric_limits<float>::max();
-	m_solver->SetTimeStepDuration(0.1f);
-	m_solver->ControlIterationCount = controlIterationCount;
-	m_solver->FixerIterationCount = fixerIterationCount;
-	m_solver->VelocitySubiterationCount = 3;
+	m_solver->SetTimeStepDuration(0.01f);      //0.1f);
+	m_solver->ControlIterationCount = 100;     //controlIterationCount;
+	m_solver->FixerIterationCount = 100;       //fixerIterationCount;
+	m_solver->VelocitySubiterationCount = 100; //3;
 }
 pragma::ik::Solver::~Solver() {}
+void pragma::ik::Solver::SetTimeStepDuration(float duration) { m_solver->SetTimeStepDuration(duration); }
+void pragma::ik::Solver::SetControlIterationCount(uint32_t count) { m_solver->ControlIterationCount = count; }
+void pragma::ik::Solver::SetFixerIterationCount(uint32_t count) { m_solver->FixerIterationCount = count; }
+void pragma::ik::Solver::SetVelocitySubIterationCount(uint32_t count) { m_solver->VelocitySubiterationCount = count; }
 void pragma::ik::Solver::Solve() { m_solver->Solve(m_bepuControls); }
 pragma::ik::DragControl &pragma::ik::Solver::AddDragControl(Bone &bone)
 {

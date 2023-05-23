@@ -26,6 +26,7 @@ namespace pragma {
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		static std::optional<pragma::Axis> FindTwistAxis(Model &mdl, BoneId boneId);
 		IkSolverComponent(BaseEntity &ent);
+		virtual ~IkSolverComponent() override;
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnEntitySpawn() override;
@@ -60,6 +61,8 @@ namespace pragma {
 		// Internal use only
 		bool UpdateIkRig();
 	  protected:
+		static void UpdateGlobalSolverSettings();
+		void UpdateSolverSettings();
 		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
 		void ResetIkBones();
 		void UpdateIkRigFile();

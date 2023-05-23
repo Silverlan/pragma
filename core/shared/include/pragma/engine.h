@@ -54,7 +54,7 @@ namespace util {
 namespace pragma::asset {
 	class AssetManager;
 };
-enum class NwStateType : uint8_t { Client = 0, Server };
+enum class NwStateType : uint8_t { Client = 0, Server, Count };
 class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
   public:
 	static const uint32_t DEFAULT_TICK_RATE;

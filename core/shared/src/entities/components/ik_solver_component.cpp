@@ -16,6 +16,7 @@
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/logging.hpp"
+#include <pragma/entities/entity_iterator.hpp>
 #include <panima/skeleton.hpp>
 #include <panima/bone.hpp>
 
@@ -52,8 +53,44 @@ void IkSolverComponent::RegisterMembers(pragma::EntityComponentManager &componen
 	}
 }
 IkSolverComponent::IkSolverComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_ikRig {udm::Property::Create<udm::Element>()} {}
+void IkSolverComponent::UpdateGlobalSolverSettings()
+{
+	for(auto *nw : {pragma::get_engine()->GetServerNetworkState(), pragma::get_engine()->GetClientState()}) {
+		if(!nw)
+			continue;
+		auto *game = nw->GetGameState();
+		if(!game)
+			continue;
+		auto cIt = EntityCIterator<pragma::IkSolverComponent> {*game};
+		for(auto &solverC : cIt)
+			solverC.UpdateSolverSettings();
+	}
+}
+void IkSolverComponent::UpdateSolverSettings()
+{
+	auto &solver = GetIkSolver();
+	if(!solver)
+		return;
+	auto &game = GetGame();
+	solver->SetTimeStepDuration(game.GetConVarFloat("ik_solver_time_step_duration"));
+	solver->SetControlIterationCount(game.GetConVarInt("ik_solver_control_iteration_count"));
+	solver->SetFixerIterationCount(game.GetConVarInt("ik_solver_fixer_iteration_count"));
+	solver->SetVelocitySubIterationCount(game.GetConVarInt("ik_solver_velocity_sub_iteration_count"));
+}
+static std::array<uint32_t, umath::to_integral(NwStateType::Count)> g_solverCount {false, false};
 void IkSolverComponent::Initialize()
 {
+	auto &nw = GetNetworkState();
+	if(g_solverCount[umath::to_integral(nw.GetType())] == 0) {
+		++g_solverCount[umath::to_integral(nw.GetType())];
+
+		// Initialize change callbacks for this network state
+		nw.RegisterConVarCallback("ik_solver_time_step_duration", std::function<void(NetworkState *, const ConVar &, float, float)> {+[](NetworkState *state, const ConVar &cvar, float oldVal, float newVal) { UpdateGlobalSolverSettings(); }});
+		nw.RegisterConVarCallback("ik_solver_control_iteration_count", std::function<void(NetworkState *, const ConVar &, int32_t, int32_t)> {+[](NetworkState *state, const ConVar &cvar, int32_t oldVal, int32_t newVal) { UpdateGlobalSolverSettings(); }});
+		nw.RegisterConVarCallback("ik_solver_fixer_iteration_count", std::function<void(NetworkState *, const ConVar &, int32_t, int32_t)> {+[](NetworkState *state, const ConVar &cvar, int32_t oldVal, int32_t newVal) { UpdateGlobalSolverSettings(); }});
+		nw.RegisterConVarCallback("ik_solver_velocity_sub_iteration_count", std::function<void(NetworkState *, const ConVar &, int32_t, int32_t)> {+[](NetworkState *state, const ConVar &cvar, int32_t oldVal, int32_t newVal) { UpdateGlobalSolverSettings(); }});
+	}
+
 	BaseEntityComponent::Initialize();
 	GetEntity().AddComponent<ConstraintManagerComponent>();
 	auto constraintC = GetEntity().AddComponent<ConstraintComponent>();
@@ -63,8 +100,10 @@ void IkSolverComponent::Initialize()
 		return util::EventReply::Unhandled;
 	});
 }
+IkSolverComponent::~IkSolverComponent() { --g_solverCount[umath::to_integral(GetNetworkState().GetType())]; }
+
 void IkSolverComponent::SetIkRigFile(const std::string &RigConfigFile)
-{
+	{
 	m_ikRigFile = RigConfigFile;
 	UpdateIkRigFile();
 }
@@ -85,6 +124,7 @@ void IkSolverComponent::InitializeSolver()
 	m_boneIdToIkBoneId.clear();
 	m_ikBoneIdToBoneId.clear();
 	m_ikSolver = std::make_unique<pragma::ik::Solver>(100, 10);
+	UpdateSolverSettings();
 
 	ClearMembers();
 	OnMembersChanged();

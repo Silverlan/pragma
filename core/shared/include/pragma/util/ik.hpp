@@ -301,6 +301,11 @@ namespace pragma::ik {
 		SwivelHingeJoint &AddSwivelHingeJoint(Bone &bone0, Bone &bone1, const Vector3 &worldHingeAxis, const Vector3 &worldTwistAxis);
 		Bone &AddBone(const Vector3 &pos, const Quat &rot, float radius, float length, BoneId *optOutBoneId = nullptr);
 
+		void SetTimeStepDuration(float duration);
+		void SetControlIterationCount(uint32_t count);
+		void SetFixerIterationCount(uint32_t count);
+		void SetVelocitySubIterationCount(uint32_t count);
+
 		size_t GetControlCount() const;
 		size_t GetBoneCount() const;
 		size_t GetJointCount() const;

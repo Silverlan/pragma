@@ -73,7 +73,7 @@ void CModelComponent::UpdateBaseShaderSpecializationFlags()
 	umath::set_flag(m_baseShaderSpecializationConstantFlags, GameShaderSpecializationConstantFlag::EnableDepthBias, depthBias);
 
 	auto colorC = ent.GetComponent<CColorComponent>();
-	umath::set_flag(m_baseShaderSpecializationConstantFlags, GameShaderSpecializationConstantFlag::EnableTranslucencyBit, colorC.valid() && colorC->GetColor().a < 255);
+	umath::set_flag(m_baseShaderSpecializationConstantFlags, GameShaderSpecializationConstantFlag::EnableTranslucencyBit, colorC.valid() && colorC->GetColor().a < 1.f);
 }
 
 void CModelComponent::SetMaterialOverride(uint32_t idx, const std::string &matOverride)
@@ -282,6 +282,8 @@ void CModelComponent::UpdateRenderBufferList()
 		if(mat == nullptr || shader == nullptr)
 			continue;
 		renderBufferData.pipelineSpecializationFlags = shader->GetMaterialPipelineSpecializationRequirements(*mat);
+		if(mat->GetDataBlock()->GetBool("test_glow", false))
+			umath::set_flag(renderBufferData.stateFlags, pragma::rendering::RenderBufferData::StateFlags::EnableGlowPass);
 	}
 }
 

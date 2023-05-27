@@ -116,7 +116,7 @@ jobs:
           printf "This release includes all files necessary to run Pragma, as well as the latest version of the Pragma Filmmaker.\nFor information on how to work with Pragma/PFM, please visit the [wiki](https://wiki.pragma-engine.com/).\n\nLatest release date: $curDate" > tag_text.txt
 
       - name: Update nightly tag description
-        uses: softprops/action-gh-release@v0.1.14
+        uses: softprops/action-gh-release@v0.1.15
         with:
           body_path: tag_text.txt
           tag_name: "v${{ steps.determine-version.outputs.version }}"

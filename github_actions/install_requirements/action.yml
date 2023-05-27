@@ -9,7 +9,7 @@ runs:
   
     # For Cycles
     - name: Install Cuda
-      uses: Jimver/cuda-toolkit@v0.2.8
+      uses: Jimver/cuda-toolkit@v0.2.10
       with:
         cuda: '11.7.0'
     # TODO: Install OptiX

@@ -132,6 +132,9 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, pragma::MultiEntityUComponentRef
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, ValueDriver);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfig);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigBone);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigControl);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigConstraint);
 
 void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {
@@ -461,11 +464,13 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	  });
 
 	auto defRigBone = luabind::class_<pragma::ik::RigConfigBone>("Bone");
+	defRigBone.def(luabind::tostring(luabind::self));
 	defRigBone.def_readwrite("locked", &pragma::ik::RigConfigBone::locked);
 	defRigBone.def_readwrite("name", &pragma::ik::RigConfigBone::name);
 	defRigConfig.scope[defRigBone];
 
 	auto defRigControl = luabind::class_<pragma::ik::RigConfigControl>("Control");
+	defRigControl.def(luabind::tostring(luabind::self));
 	defRigControl.add_static_constant("TYPE_DRAG", umath::to_integral(pragma::ik::RigConfigControl::Type::Drag));
 	defRigControl.add_static_constant("TYPE_STATE", umath::to_integral(pragma::ik::RigConfigControl::Type::State));
 	defRigControl.def_readwrite("bone", &pragma::ik::RigConfigControl::bone);
@@ -474,6 +479,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defRigConfig.scope[defRigBone];
 
 	auto defRigConstraint = luabind::class_<pragma::ik::RigConfigConstraint>("Constraint");
+	defRigConstraint.def(luabind::tostring(luabind::self));
 	defRigConstraint.add_static_constant("TYPE_FIXED", umath::to_integral(pragma::ik::RigConfigConstraint::Type::Fixed));
 	defRigConstraint.add_static_constant("TYPE_HINGE", umath::to_integral(pragma::ik::RigConfigConstraint::Type::Hinge));
 	defRigConstraint.add_static_constant("TYPE_BALL_SOCKET", umath::to_integral(pragma::ik::RigConfigConstraint::Type::BallSocket));

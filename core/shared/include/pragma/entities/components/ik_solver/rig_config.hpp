@@ -90,5 +90,8 @@ namespace pragma::ik {
 	};
 };
 std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfig &config);
+std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigBone &bone);
+std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigControl &control);
+std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigConstraint &constraint);
 
 #endif

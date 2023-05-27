@@ -333,3 +333,29 @@ std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfig &config)
 	out << "RigConfig[bones:" << config.GetBones().size() << "][controls:" << config.GetControls().size() << "][constraints:" << config.GetConstraints().size() << "]";
 	return out;
 }
+
+std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigBone &bone)
+{
+	out << "RigConfigBone[name:" << bone.name << "][locked:" << (bone.locked ? "1" : "0") << "]";
+	return out;
+}
+std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigControl &control)
+{
+	out << "RigConfigControl[type:" << magic_enum::enum_name(control.type) << "][bone:" << control.bone << "]";
+	return out;
+}
+std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigConstraint &constraint)
+{
+	out << "RigConfigConstraint[type:" << magic_enum::enum_name(constraint.type) << "]";
+	out << "[bone0:" << constraint.bone0 << "]";
+	out << "[bone1:" << constraint.bone1 << "]";
+	out << "[axis:" << magic_enum::enum_name(constraint.axis) << "]";
+	out << "[minLimits:" << constraint.minLimits.p << "," << constraint.minLimits.y << "," << constraint.minLimits.r << "]";
+	out << "[maxLimits:" << constraint.maxLimits.p << "," << constraint.maxLimits.y << "," << constraint.maxLimits.r << "]";
+
+	auto &pos = constraint.offsetPose.GetOrigin();
+	EulerAngles ang {constraint.offsetPose.GetRotation()};
+	auto &scale = constraint.offsetPose.GetScale();
+	out << "[offsetPose:("<<pos.x<<","<<pos.y<<","<<pos.z<<")("<<ang.p<<","<<ang.y<<","<<ang.r<<")("<<scale.x<<","<<scale.y<<","<<scale.z<<")]";
+	return out;
+}

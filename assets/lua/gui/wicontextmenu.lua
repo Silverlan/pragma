@@ -236,8 +236,9 @@ end
 function gui.WIContextMenu:GetContents()
 	return self.m_contents
 end
-function gui.WIContextMenu:SetParentMenu(menu)
+function gui.WIContextMenu:SetParentMenu(menu, parentItem)
 	self.m_parentMenu = menu
+	self.m_parentItem = parentItem
 end
 function gui.WIContextMenu:GetParentMenu()
 	return self.m_parentMenu
@@ -252,6 +253,22 @@ function gui.WIContextMenu:AddSubMenu(name, onClick)
 	end
 	pItem:AddCallback("OnCursorEntered", function()
 		if util.is_valid(pSubMenu) then
+			local id
+			local itemName = pItem:GetName()
+			if #itemName > 0 then
+				id = "context_menu_" .. itemName
+			end
+			if id == nil then
+				local depth = 1
+				local parentMenu = self:GetParentMenu()
+				while util.is_valid(parentMenu) do
+					depth = depth + 1
+					parentMenu = parentMenu:GetParentMenu()
+				end
+				id = "context_menu_" .. tostring(depth)
+			end
+			pSubMenu:SetName(id)
+
 			pSubMenu:SetVisible(true)
 			local pos = pItem:GetAbsolutePos()
 			pSubMenu:SetX(pos.x + self:GetWidth())
@@ -272,14 +289,7 @@ function gui.WIContextMenu:AddSubMenu(name, onClick)
 		end
 	end)
 	pSubMenu = gui.create("WIContextMenu", self:GetParent())
-	local depth = 1
-	local parentMenu = self:GetParentMenu()
-	while util.is_valid(parentMenu) do
-		depth = depth + 1
-		parentMenu = parentMenu:GetParentMenu()
-	end
-	pSubMenu:SetName("context_menu_" .. tostring(depth))
-	pSubMenu:SetParentMenu(self)
+	pSubMenu:SetParentMenu(self, pItem)
 	pSubMenu:AddCallback("OnCursorExited", function()
 		pSubMenu:KillFocus()
 		pSubMenu:SetVisible(false)

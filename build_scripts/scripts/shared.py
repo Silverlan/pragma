@@ -191,9 +191,16 @@ def execfile(filepath, globals=None, locals=None, args=None):
 	with open(filepath, 'rb') as file:
 		exec(compile(file.read(), filepath, 'exec'), globals, locals)
 
+def reset_to_commit(sha):
+	subprocess.run(["git","fetch"],check=True)
+	subprocess.run(["git","checkout",sha,"--recurse-submodules"],check=True)
+	# subprocess.run(["git","submodule","init"],check=True)
+	# subprocess.run(["git","update","--recursive"],check=True)
+
 def get_submodule(directory,url,commitId=None,branch=None):
 	from scripts.shared import print_msg
 	from scripts.shared import git_clone
+	from scripts.shared import reset_to_commit
 	import os
 	import subprocess
 	from pathlib import Path
@@ -205,7 +212,6 @@ def get_submodule(directory,url,commitId=None,branch=None):
 		git_clone(url,directory,branch)
 	if commitId is not None:
 		os.chdir(absDir)
-		subprocess.run(["git","fetch"],check=True)
-		subprocess.run(["git","checkout",commitId],check=True)
+		reset_to_commit(commitId)
 	subprocess.run(["git","submodule","update","--init","--recursive"],check=True)
 	os.chdir(curDir)

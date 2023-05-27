@@ -212,7 +212,8 @@ def execscript(filepath):
 		"execfile": execfile,
 		"execscript": execscript,
 		"str2bool": str2bool,
-		"install_prebuilt_binaries": install_prebuilt_binaries
+		"install_prebuilt_binaries": install_prebuilt_binaries,
+		"reset_to_commit": reset_to_commit
 	}
 	if platform == "linux":
 		l["c_compiler"] = c_compiler
@@ -547,7 +548,8 @@ def execbuildscript(filepath):
 		"execfile": execfile,
 		"execbuildscript": execbuildscript,
 		"str2bool": str2bool,
-		"install_prebuilt_binaries": install_prebuilt_binaries
+		"install_prebuilt_binaries": install_prebuilt_binaries,
+		"reset_to_commit": reset_to_commit
 	}
 	if platform == "linux":
 		l["c_compiler"] = c_compiler

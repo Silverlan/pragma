@@ -164,7 +164,7 @@ CGame::CGame(NetworkState *state)
       //m_shaderOverride(NULL), // prosper TODO
       m_matLoad(), m_scene(nullptr),
       /*m_dummyVertexBuffer(nullptr),*/ m_tLastClientUpdate(0.0), // prosper TODO
-      m_snapshotTracker {}, m_userInputTracker {}, m_viewFov {util::FloatProperty::Create(pragma::BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV)}
+      m_snapshotTracker {}, m_userInputTracker {}, m_viewFov {util::FloatProperty::Create(pragma::BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV)}, m_luaInputBindingLayerRegister {std::make_unique<pragma::LuaInputBindingLayerRegister>()}
 {
 	std::fill(m_renderModesEnabled.begin(), m_renderModesEnabled.end(), true);
 	c_game = this;
@@ -303,6 +303,9 @@ void CGame::OnRemove()
 		m_luaGUIObjects.pop();
 	}
 	Lua::gui::clear_lua_callbacks(GetLuaState());
+
+	// This will make sure all lua-created input binding layers have been destroyed
+	m_luaInputBindingLayerRegister = nullptr;
 
 	DebugRenderer::ClearObjects();
 

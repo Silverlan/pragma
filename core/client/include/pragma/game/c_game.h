@@ -17,6 +17,7 @@
 #include "pragma/lua/c_lua_gui_manager.h"
 #include "pragma/rendering/rendersystem.h"
 #include "pragma/rendering/lighting/shadows/c_shadow_type.hpp"
+#include "pragma/input/input_binding_layer_lua.hpp"
 #include "pragma/lua/c_listener_handle.hpp"
 #include <material.h>
 #include <pragma/game/game.h>
@@ -345,6 +346,7 @@ class DLLCLIENT CGame : public Game {
 	LuaGUIManager &GetLuaGUIManager();
 	pragma::LuaShaderManager &GetLuaShaderManager();
 	pragma::LuaParticleModifierManager &GetLuaParticleModifierManager();
+	pragma::LuaInputBindingLayerRegister &GetLuaInputBindingLayerRegister();
 	Material *GetLoadMaterial();
 	virtual bool RunLua(const std::string &lua) override;
 	virtual bool InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t eventId, int32_t argsIdx, bool bInject) override;
@@ -507,6 +509,7 @@ class DLLCLIENT CGame : public Game {
 	std::shared_ptr<pragma::LuaParticleModifierManager> m_luaParticleModifierManager = nullptr;
 	double m_tServer = 0.0;
 	LuaCallbackHandler m_inputCallbackHandler;
+	std::unique_ptr<pragma::LuaInputBindingLayerRegister> m_luaInputBindingLayerRegister {};
 
 	// Shaders
 	void InitShaders();

@@ -444,6 +444,17 @@ static std::vector<GLFW::Key> get_mapped_keys(const std::string &cvarName, uint3
 	return mappedKeys;
 }
 
+static pragma::LuaInputBindingLayerRegister &get_input_binding_layer_register() { c_game->GetLuaInputBindingLayerRegister(); }
+static std::shared_ptr<InputBindingLayer> create_input_binding_layer()
+{
+	auto layer = std::shared_ptr<InputBindingLayer> {new InputBindingLayer {}, [](InputBindingLayer *layer) {
+		                                                 get_input_binding_layer_register().Remove(*layer);
+		                                                 delete layer;
+	                                                 }};
+	get_input_binding_layer_register().Add(*layer);
+	return layer;
+}
+
 void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool bGUI)
 {
 	register_gui(lua);
@@ -508,7 +519,8 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool bGUI)
 		    auto &inputHandler = c_game->GetInputCallbackHandler();
 		    return inputHandler.AddLuaCallback(identifier, f);
 	    }),
-	  luabind::def("add_input_binding_layer", &CEngine::AddInputBindingLayer),
+	  luabind::def(
+	    "add_input_binding_layer", +[](CEngine &en, std::shared_ptr<InputBindingLayer> &layer) { en.AddInputBindingLayer(layer); }),
 	  luabind::def("get_input_binding_layers", static_cast<std::vector<std::shared_ptr<InputBindingLayer>> (CEngine::*)()>(&CEngine::GetInputBindingLayers)),
 	  luabind::def("get_input_binding_layer", static_cast<std::shared_ptr<InputBindingLayer> (CEngine::*)(const std::string &)>(&CEngine::GetInputBindingLayer)), luabind::def("remove_input_binding_layer", &CEngine::RemoveInputBindingLayer),
 	  luabind::def("get_core_input_binding_layers", static_cast<std::shared_ptr<InputBindingLayer> (CEngine::*)()>(&CEngine::GetCoreInputBindingLayer)), luabind::def("update_effective_input_bindings", &CEngine::SetInputBindingsDirty),
@@ -603,7 +615,7 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool bGUI)
 	inputMod[defInLay];
 	pragma::lua::define_custom_constructor<InputBindingLayer,
 	  [](const std::string &name) -> std::shared_ptr<InputBindingLayer> {
-		  auto layer = std::make_shared<InputBindingLayer>();
+		  auto layer = create_input_binding_layer();
 		  layer->identifier = name;
 		  return layer;
 	  },

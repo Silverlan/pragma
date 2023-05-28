@@ -7,6 +7,9 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Publish Release
@@ -109,6 +112,14 @@ jobs:
           mv pragma.tar.gz "$filename"
           echo "filename=$filename" >> $GITHUB_OUTPUT
           
+      - name: Get PDB Debug Files
+        id: pdb-debug
+        shell: bash
+        run:   |
+          wget https://github.com/Silverlan/pragma/releases/download/nightly/debug_pdb.zip
+          filename="debug_pdb.zip"
+          echo "filename=$filename" >> $GITHUB_OUTPUT
+          
       - name: Generate nightly tag description
         shell: bash
         run:   |
@@ -136,3 +147,10 @@ jobs:
           tag: "v${{ steps.determine-version.outputs.version }}"
           token: ${{ secrets.GITHUB_TOKEN }}
           files: ${{ steps.linux-version.outputs.filename }}
+            
+      - name: Publish PDB Files
+        uses: pyTooling/Actions/releaser/composite@main
+        with:
+          tag: "v${{ steps.determine-version.outputs.version }}"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: ${{ steps.pdb-debug.outputs.filename }}

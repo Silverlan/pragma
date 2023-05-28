@@ -10,6 +10,9 @@ concurrency:
   group: environment-win-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build - ${{ matrix.config.os }}
@@ -83,6 +86,55 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: "pragma.zip"
           
+      # Publish debug PDB files
+      - name: Create PDB Archive
+        shell: bash
+        run: |
+          curDir="$PWD"
+          mkdir pdb
+          
+          source_directory="${{ steps.build-pragma.outputs.build-dir }}"
+          target_directory="$curDir/pdb"
+
+          move_file() {
+            local source_file="$1"
+            local destination_dir
+            local base_name
+            local destination_file
+            local counter=1
+
+            base_name=$(basename "$source_file")
+            destination_dir="$target_directory"
+            destination_file="$destination_dir/$base_name"
+
+            # Check if the destination file already exists
+            while [[ -e "$destination_file" ]]; do
+              # Append a number to the destination file name
+              destination_file="${destination_dir}/${base_name}_${counter}"
+              counter=$((counter + 1))
+            done
+
+            mv "$source_file" "$destination_file"
+            echo "Moved: $source_file -> $destination_file"
+          }
+
+          find "$source_directory" -type f -name "*.pdb" -print0 | while IFS= read -r -d '' file; do
+            move_file "$file"
+          done
+
+          cd "$curDir"
+          # 7z expects a standard windows path
+          winPath=$(echo "$curDir" | sed -e 's/^\///' -e 's/\//\\/g' -e 's/^./\0:/')
+          7z a debug_pdb.zip "$winPath/pdb/**"
+
+      - name: Update PDB release
+        uses: pyTooling/Actions/releaser/composite@main
+        with:
+          tag: nightly
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: "debug_pdb.zip"
+      #
+
       - name: Handle Error
         uses: Silverlan/common_actions/action_handle_error@main
         if: failure()

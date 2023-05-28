@@ -9,6 +9,7 @@
 #include "pragma/gui/wiscrollcontainer.h"
 #include <wgui/types/wiscrollbar.h>
 #include <mathutil/umath.h>
+#include <prosper_window.hpp>
 
 LINK_WGUI_TO_CLASS(WIScrollContainer, WIScrollContainer);
 WIScrollContainer::WIScrollContainer() : WIBase() { SetScrollInputEnabled(true); }
@@ -156,10 +157,20 @@ util::EventReply WIScrollContainer::ScrollCallback(Vector2 offset)
 {
 	if(WIBase::ScrollCallback(offset) == util::EventReply::Handled)
 		return util::EventReply::Handled;
-	if(m_hScrollBarH.IsValid())
-		m_hScrollBarH.get<WIScrollBar>()->ScrollCallback(Vector2(offset.x, 0.f));
-	if(m_hScrollBarV.IsValid())
-		m_hScrollBarV.get<WIScrollBar>()->ScrollCallback(Vector2(0.f, offset.y));
+	auto &window = WGUI::GetInstance().GetContext().GetWindow();
+	if(m_hScrollBarH.IsValid() && m_hScrollBarV.IsValid()) {
+		auto isShiftDown = (window->GetKeyState(GLFW::Key::LeftShift) != GLFW::KeyState::Release || window->GetKeyState(GLFW::Key::RightShift) != GLFW::KeyState::Release) ? true : false;
+		if(isShiftDown || m_hScrollBarV->IsVisible() == false)
+			m_hScrollBarH.get<WIScrollBar>()->ScrollCallback(Vector2(0.f, offset.y));
+		else
+			m_hScrollBarV.get<WIScrollBar>()->ScrollCallback(Vector2(0.f, offset.y));
+	}
+	else {
+		if(m_hScrollBarH.IsValid())
+			m_hScrollBarH.get<WIScrollBar>()->ScrollCallback(Vector2(offset.x, 0.f));
+		if(m_hScrollBarV.IsValid())
+			m_hScrollBarV.get<WIScrollBar>()->ScrollCallback(Vector2(0.f, offset.y));
+	}
 	return util::EventReply::Handled;
 }
 WIScrollBar *WIScrollContainer::GetHorizontalScrollBar() { return static_cast<WIScrollBar *>(m_hScrollBarH.get()); }
@@ -269,6 +280,7 @@ void WIScrollContainer::DoUpdate()
 		pWrapper->SetSize(w, h);
 		if(m_hScrollBarH.IsValid()) {
 			WIScrollBar *pScrollBar = m_hScrollBarH.get<WIScrollBar>();
+			pScrollBar->SetHorizontal(true);
 			pScrollBar->SetUp(size.x, w);
 			pScrollBar->SetScrollAmount(m_scrollAmountX);
 			pScrollBar->SetSize(GetWidth(), 10);

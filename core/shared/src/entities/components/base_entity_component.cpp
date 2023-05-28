@@ -116,6 +116,27 @@ static bool get_transform_member_value(const pragma::BaseEntityComponent &compon
 				auto idxPose = cPoseType ? component.GetMemberIndex(cPoseType->poseProperty) : std::optional<ComponentMemberIndex> {};
 				return idxPose.has_value() ? get_transform_member_value(component, *idxPose, space, outValue) : false;
 			}
+			switch(memberInfo->type) {
+			case pragma::ents::EntityMemberType::Vector3:
+				{
+					Vector3 value;
+					if(!get_transform_member_value<Vector3, parentSpaceOnly>(component, idx, space, value))
+						return false;
+					outValue = {};
+					outValue.SetOrigin(value);
+					return true;
+				}
+			case pragma::ents::EntityMemberType::EulerAngles:
+			case pragma::ents::EntityMemberType::Quaternion:
+				{
+					Quat value;
+					if(!get_transform_member_value<Quat, parentSpaceOnly>(component, idx, space, value))
+						return false;
+					outValue = {};
+					outValue.SetRotation(value);
+					return true;
+				}
+			}
 			return false;
 		}
 	}

@@ -12,7 +12,7 @@ luamake_root = deps_dir +"/luamake"
 if not Path(luamake_root).is_dir():
 	git_clone("https://github.com/actboy168/luamake")
 os.chdir(luamake_root)
-subprocess.run(["git","reset","--hard","ca3e3fe"],check=True)
+reset_to_commit("295950da763e2bf75956c56fdc7c8c2877aac4ad")
 subprocess.run(["git","submodule","init"],check=True)
 subprocess.run(["git","submodule","update"],check=True)
 if platform == "linux":
@@ -33,7 +33,7 @@ if not Path(luadebug_root).is_dir():
 	git_clone("https://github.com/actboy168/lua-debug")
 os.chdir(luadebug_root)
 subprocess.run(["git","fetch"],check=True)
-subprocess.run(["git","reset","--hard","b179c3c"],check=True) # TODO: Once a stable version has been released with commit b179c3c, change to that version
+reset_to_commit("b92f9760dac71f361bf6b85de550ab72701555ab")
 
 subprocess.run(["luamake","lua","compile/download_deps.lua"],shell=True,check=True,env=tmp_env)
 subprocess.run(["luamake"],shell=True,check=True,env=tmp_env)

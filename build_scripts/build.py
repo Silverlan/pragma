@@ -389,7 +389,7 @@ if not Path(geometric_tools_root).is_dir():
 	print_msg("GeometricTools not found. Downloading...")
 	git_clone("https://github.com/davideberly/GeometricTools")
 os.chdir("GeometricTools")
-subprocess.run(["git","reset","--hard","bd7a27d18ac9f31641b4e1246764fe30816fae74"],check=True)
+reset_to_commit("bd7a27d18ac9f31641b4e1246764fe30816fae74")
 os.chdir("../../")
 
 ########## SPIRV-Tools ##########
@@ -402,7 +402,7 @@ os.chdir("SPIRV-Tools")
 # Note: When updating to a newer version, the SPIRV-Headers commit below has to match
 # the one defined in https://github.com/KhronosGroup/SPIRV-Tools/blob/master/DEPS for the
 # timestamp of this commit
-subprocess.run(["git","reset","--hard","7826e19"],check=True)
+reset_to_commit("7826e19")
 os.chdir("../../")
 
 ########## SPIRV-Headers ##########
@@ -412,7 +412,7 @@ os.chdir("SPIRV-Tools/external")
 if not Path(os.getcwd() +"/SPIRV-Headers").is_dir():
 	git_clone("https://github.com/KhronosGroup/SPIRV-Headers")
 os.chdir("SPIRV-Headers")
-subprocess.run(["git","reset","--hard","4995a2f2723c401eb0ea3e10c81298906bf1422b"],check=True)
+reset_to_commit("4995a2f2723c401eb0ea3e10c81298906bf1422b")
 os.chdir("../../")
 os.chdir("../../")
 
@@ -427,7 +427,7 @@ if not Path(vcpkg_root).is_dir():
 
 if platform == "linux":
 	os.chdir("vcpkg")
-	subprocess.run(["git","reset","--hard","7d9775a3c3ffef3cbad688d7271a06803d3a2f51"],check=True)
+	reset_to_commit("7d9775a3c3ffef3cbad688d7271a06803d3a2f51")
 	os.chdir("..")
 
 	subprocess.run([vcpkg_root +"/bootstrap-vcpkg.sh","-disableMetrics"],check=True,shell=True)

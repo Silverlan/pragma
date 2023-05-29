@@ -937,6 +937,7 @@ WIBase *CGame::CreateGUIElement(std::string name, WIHandle *hParent)
 LuaGUIManager &CGame::GetLuaGUIManager() { return m_luaGUIElements; }
 pragma::LuaShaderManager &CGame::GetLuaShaderManager() { return *m_luaShaderManager; }
 pragma::LuaParticleModifierManager &CGame::GetLuaParticleModifierManager() { return *m_luaParticleModifierManager; }
+pragma::LuaInputBindingLayerRegister &CGame::GetLuaInputBindingLayerRegister() { return *m_luaInputBindingLayerRegister; }
 
 void CGame::SetUp()
 {

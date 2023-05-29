@@ -1,14 +1,65 @@
 --[[
-    Copyright (C) 2021 Silverlan
+    Copyright (C) 2023 Silverlan
 
     This Source Code Form is subject to the terms of the Mozilla Public
     License, v. 2.0. If a copy of the MPL was not distributed with this
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 ]]
 
-rig = rig or {}
+util = util or {}
+util.rig = util.rig or {}
 
-function rig.determine_head_bones(mdl)
+function util.rig.determine_mirrored_bone(mdl, boneName)
+	local skeleton = mdl:GetSkeleton()
+	local lnameToActualName = {}
+	for _, bone in ipairs(skeleton:GetBones()) do
+		lnameToActualName[bone:GetName():lower()] = bone:GetName()
+	end
+
+	local lname = boneName:lower()
+	local function check_candidate(identifier, identifierOther)
+		local pos = lname:find(identifier)
+		if pos ~= nil then
+			local otherName = lname:sub(0, pos - 1) .. identifierOther .. lname:sub(pos + #identifier)
+			if lnameToActualName[otherName] ~= nil then
+				return lnameToActualName[otherName]
+			end
+		end
+	end
+	local candidate = check_candidate("left", "right")
+	candidate = candidate or check_candidate("right", "left")
+	candidate = candidate or check_candidate("_l_", "_r_")
+	candidate = candidate or check_candidate("_r_", "_l_")
+	candidate = candidate or check_candidate("_l", "_r")
+	candidate = candidate or check_candidate("r_", "l_")
+	return candidate
+end
+
+function util.rig.determine_mirrored_bone_flip_factors(mdl, boneLeft, boneRight)
+	local skeleton = mdl:GetSkeleton()
+	local boneIdLeft = skeleton:LookupBone(boneLeft)
+	local boneIdRight = skeleton:LookupBone(boneRight)
+
+	local ref = mdl:GetReferencePose()
+	local poseLeft = ref:GetBonePose(boneIdLeft)
+	local poseRight = ref:GetBonePose(boneIdRight)
+	local angLeft = poseLeft:GetRotation():ToEulerAngles()
+	local angRight = poseRight:GetRotation():ToEulerAngles()
+	local pdiff = math.abs(math.get_angle_difference(angRight.p, angLeft.p))
+	local ydiff = math.abs(math.get_angle_difference(angRight.y, angLeft.y))
+	local rdiff = math.abs(math.get_angle_difference(angRight.r, angLeft.r))
+	local flipFactors
+	if pdiff > math.max(ydiff, rdiff) then
+		flipFactors = Vector(-1, -1, 1)
+	elseif ydiff > math.max(pdiff, rdiff) then
+		flipFactors = Vector(1, -1, -1)
+	else
+		flipFactors = Vector(-1, 1, -1)
+	end
+	return flipFactors
+end
+
+function util.rig.determine_head_bones(mdl)
 	local skeleton = mdl:GetSkeleton()
 
 	local headBoneId

@@ -444,7 +444,7 @@ static std::vector<GLFW::Key> get_mapped_keys(const std::string &cvarName, uint3
 	return mappedKeys;
 }
 
-static pragma::LuaInputBindingLayerRegister &get_input_binding_layer_register() { c_game->GetLuaInputBindingLayerRegister(); }
+static pragma::LuaInputBindingLayerRegister &get_input_binding_layer_register() { return c_game->GetLuaInputBindingLayerRegister(); }
 static std::shared_ptr<InputBindingLayer> create_input_binding_layer()
 {
 	auto layer = std::shared_ptr<InputBindingLayer> {new InputBindingLayer {}, [](InputBindingLayer *layer) {

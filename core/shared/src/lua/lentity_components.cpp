@@ -451,7 +451,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defRigConfig.def("AddFixedConstraint", &pragma::ik::RigConfig::AddFixedConstraint);
 	defRigConfig.def("AddHingeConstraint", &pragma::ik::RigConfig::AddHingeConstraint);
 	defRigConfig.def("AddBallSocketConstraint", &pragma::ik::RigConfig::AddBallSocketConstraint);
-	defRigConfig.def("AddBallSocketConstraint", &pragma::ik::RigConfig::AddBallSocketConstraint, luabind::default_parameter_policy<6, pragma::Axis::Z> {});
+	defRigConfig.def("AddBallSocketConstraint", &pragma::ik::RigConfig::AddBallSocketConstraint, luabind::default_parameter_policy<6, pragma::SignedAxis::Z> {});
 	defRigConfig.def(
 	  "Save", +[](lua_State *l, pragma::ik::RigConfig &rigConfig, const std::string &fileName) -> std::pair<bool, std::optional<std::string>> {
 		  auto fname = fileName;
@@ -475,6 +475,8 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defRigControl.add_static_constant("TYPE_STATE", umath::to_integral(pragma::ik::RigConfigControl::Type::State));
 	defRigControl.def_readwrite("bone", &pragma::ik::RigConfigControl::bone);
 	defRigControl.def_readwrite("type", &pragma::ik::RigConfigControl::type);
+	defRigControl.def_readwrite("maxForce", &pragma::ik::RigConfigControl::maxForce);
+	defRigControl.def_readwrite("rigidity", &pragma::ik::RigConfigControl::rigidity);
 	defRigConfig.scope[defRigControl];
 	defRigConfig.scope[defRigBone];
 

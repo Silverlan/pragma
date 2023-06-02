@@ -42,12 +42,20 @@ namespace pragma {
 		std::optional<BoneId> GetSkeletalBoneId(IkBoneId boneId) const;
 		std::optional<IkBoneId> GetIkBoneId(BoneId boneId) const;
 
-		void AddDragControl(BoneId boneId);
-		void AddStateControl(BoneId boneId);
+		void AddDragControl(BoneId boneId, float maxForce = -1.f, float rigidity = 1.f);
+		void AddStateControl(BoneId boneId, float maxForce = -1.f, float rigidity = 1.f);
 
-		void AddFixedConstraint(BoneId boneId0, BoneId boneId1);
-		void AddHingeConstraint(BoneId boneId0, BoneId boneId1, umath::Degree minAngle, umath::Degree maxAngle, const Quat &offsetRotation = uquat::identity(), Axis twistAxis = Axis::X);
-		void AddBallSocketConstraint(BoneId boneId0, BoneId boneId1, const EulerAngles &minLimits, const EulerAngles &maxLimits, Axis twistAxis = Axis::Z);
+		struct DLLNETWORK ConstraintInfo {
+			ConstraintInfo() = default;
+			ConstraintInfo(BoneId bone0, BoneId bone1);
+			BoneId boneId0 = 0;
+			BoneId boneId1 = 0;
+			float rigidity = 1'000.f;
+			float maxForce = -1.f;
+		};
+		void AddFixedConstraint(const ConstraintInfo &constraintInfo);
+		void AddHingeConstraint(const ConstraintInfo &constraintInfo, umath::Degree minAngle, umath::Degree maxAngle, const Quat &offsetRotation = uquat::identity(), SignedAxis twistAxis = SignedAxis::X);
+		void AddBallSocketConstraint(const ConstraintInfo &constraintInfo, const EulerAngles &minLimits, const EulerAngles &maxLimits, SignedAxis twistAxis = SignedAxis::Z);
 
 		udm::PProperty &GetIkRig() { return m_ikRig; }
 		void Solve();
@@ -70,7 +78,7 @@ namespace pragma {
 		static std::optional<umath::ScaledTransform> GetReferenceBonePose(Model &model, BoneId boneId);
 		std::optional<umath::ScaledTransform> GetReferenceBonePose(BoneId boneId) const;
 		pragma::ik::Bone *AddBone(const std::string &boneName, BoneId boneId, const umath::Transform &pose, float radius, float length);
-		void AddControl(BoneId boneId, bool translation, bool rotation);
+		void AddControl(BoneId boneId, bool translation, bool rotation, float maxForce = -1.f, float rigidity = 1.f);
 		pragma::ik::Bone *GetIkBone(BoneId boneId);
 
 		bool GetConstraintBones(BoneId boneId0, BoneId boneId1, pragma::ik::Bone **bone0, pragma::ik::Bone **bone1, umath::ScaledTransform &pose0, umath::ScaledTransform &pose1) const;

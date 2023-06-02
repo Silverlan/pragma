@@ -519,22 +519,64 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	    {"EXPRESSION_CODE_INFIX_OPERATOR", mup::ECmdCode::cmOPRT_INFIX}, {"EXPRESSION_CODE_POSTFIX_OPERATOR", mup::ECmdCode::cmOPRT_POSTFIX}});
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "math",
-	  {{"EASE_TYPE_BACK", umath::to_integral(umath::EaseType::Back)}, {"EASE_TYPE_BOUNCE", umath::to_integral(umath::EaseType::Bounce)}, {"EASE_TYPE_CIRCULAR", umath::to_integral(umath::EaseType::Circular)}, {"EASE_TYPE_CUBIC", umath::to_integral(umath::EaseType::Cubic)},
-	    {"EASE_TYPE_ELASTIC", umath::to_integral(umath::EaseType::Elastic)}, {"EASE_TYPE_EXPONENTIAL", umath::to_integral(umath::EaseType::Exponential)}, {"EASE_TYPE_LINEAR", umath::to_integral(umath::EaseType::Linear)},
-	    {"EASE_TYPE_QUADRATIC", umath::to_integral(umath::EaseType::Quadratic)}, {"EASE_TYPE_QUARTIC", umath::to_integral(umath::EaseType::Quartic)}, {"EASE_TYPE_QUINTIC", umath::to_integral(umath::EaseType::Quintic)}, {"EASE_TYPE_SINE", umath::to_integral(umath::EaseType::Sine)},
+	  {
+	    {"EASE_TYPE_BACK", umath::to_integral(umath::EaseType::Back)},
+	    {"EASE_TYPE_BOUNCE", umath::to_integral(umath::EaseType::Bounce)},
+	    {"EASE_TYPE_CIRCULAR", umath::to_integral(umath::EaseType::Circular)},
+	    {"EASE_TYPE_CUBIC", umath::to_integral(umath::EaseType::Cubic)},
+	    {"EASE_TYPE_ELASTIC", umath::to_integral(umath::EaseType::Elastic)},
+	    {"EASE_TYPE_EXPONENTIAL", umath::to_integral(umath::EaseType::Exponential)},
+	    {"EASE_TYPE_LINEAR", umath::to_integral(umath::EaseType::Linear)},
+	    {"EASE_TYPE_QUADRATIC", umath::to_integral(umath::EaseType::Quadratic)},
+	    {"EASE_TYPE_QUARTIC", umath::to_integral(umath::EaseType::Quartic)},
+	    {"EASE_TYPE_QUINTIC", umath::to_integral(umath::EaseType::Quintic)},
+	    {"EASE_TYPE_SINE", umath::to_integral(umath::EaseType::Sine)},
 
-	    {"MAX_SINT8", std::numeric_limits<int8_t>::max()}, {"MIN_SINT8", std::numeric_limits<int8_t>::lowest()}, {"MAX_UINT8", std::numeric_limits<uint8_t>::max()}, {"MIN_UINT8", std::numeric_limits<uint8_t>::lowest()}, {"MAX_SINT16", std::numeric_limits<int16_t>::max()},
-	    {"MIN_SINT16", std::numeric_limits<int16_t>::lowest()}, {"MAX_UINT16", std::numeric_limits<uint16_t>::max()}, {"MIN_UINT16", std::numeric_limits<uint16_t>::lowest()}, {"MAX_SINT32", std::numeric_limits<int32_t>::max()}, {"MIN_SINT32", std::numeric_limits<int32_t>::lowest()},
-	    {"MAX_UINT32", std::numeric_limits<uint32_t>::max()}, {"MIN_UINT32", std::numeric_limits<uint32_t>::lowest()}, {"MAX_SINT64", std::numeric_limits<int64_t>::max()}, {"MIN_SINT64", std::numeric_limits<int64_t>::lowest()}, {"MAX_UINT64", std::numeric_limits<uint64_t>::max()},
-	    {"MIN_UINT64", std::numeric_limits<uint64_t>::lowest()}, {"MAX_FLOAT", std::numeric_limits<float>::max()}, {"MIN_FLOAT", std::numeric_limits<float>::lowest()}, {"MAX_DOUBLE", std::numeric_limits<double>::max()}, {"MIN_DOUBLE", std::numeric_limits<double>::lowest()},
-	    {"MAX_LONG_DOUBLE", std::numeric_limits<long double>::max()}, {"MIN_LONG_DOUBLE", std::numeric_limits<long double>::lowest()},
+	    {"MAX_SINT8", std::numeric_limits<int8_t>::max()},
+	    {"MIN_SINT8", std::numeric_limits<int8_t>::lowest()},
+	    {"MAX_UINT8", std::numeric_limits<uint8_t>::max()},
+	    {"MIN_UINT8", std::numeric_limits<uint8_t>::lowest()},
+	    {"MAX_SINT16", std::numeric_limits<int16_t>::max()},
+	    {"MIN_SINT16", std::numeric_limits<int16_t>::lowest()},
+	    {"MAX_UINT16", std::numeric_limits<uint16_t>::max()},
+	    {"MIN_UINT16", std::numeric_limits<uint16_t>::lowest()},
+	    {"MAX_SINT32", std::numeric_limits<int32_t>::max()},
+	    {"MIN_SINT32", std::numeric_limits<int32_t>::lowest()},
+	    {"MAX_UINT32", std::numeric_limits<uint32_t>::max()},
+	    {"MIN_UINT32", std::numeric_limits<uint32_t>::lowest()},
+	    {"MAX_SINT64", std::numeric_limits<int64_t>::max()},
+	    {"MIN_SINT64", std::numeric_limits<int64_t>::lowest()},
+	    {"MAX_UINT64", std::numeric_limits<uint64_t>::max()},
+	    {"MIN_UINT64", std::numeric_limits<uint64_t>::lowest()},
+	    {"MAX_FLOAT", std::numeric_limits<float>::max()},
+	    {"MIN_FLOAT", std::numeric_limits<float>::lowest()},
+	    {"MAX_DOUBLE", std::numeric_limits<double>::max()},
+	    {"MIN_DOUBLE", std::numeric_limits<double>::lowest()},
+	    {"MAX_LONG_DOUBLE", std::numeric_limits<long double>::max()},
+	    {"MIN_LONG_DOUBLE", std::numeric_limits<long double>::lowest()},
 
-	    {"ROTATION_ORDER_XYZ", umath::to_integral(pragma::RotationOrder::XYZ)}, {"ROTATION_ORDER_YXZ", umath::to_integral(pragma::RotationOrder::YXZ)}, {"ROTATION_ORDER_XZX", umath::to_integral(pragma::RotationOrder::XZX)},
-	    {"ROTATION_ORDER_XYX", umath::to_integral(pragma::RotationOrder::XYX)}, {"ROTATION_ORDER_YXY", umath::to_integral(pragma::RotationOrder::YXY)}, {"ROTATION_ORDER_YZY", umath::to_integral(pragma::RotationOrder::YZY)},
-	    {"ROTATION_ORDER_ZYZ", umath::to_integral(pragma::RotationOrder::ZYZ)}, {"ROTATION_ORDER_ZXZ", umath::to_integral(pragma::RotationOrder::ZXZ)}, {"ROTATION_ORDER_XZY", umath::to_integral(pragma::RotationOrder::XZY)},
-	    {"ROTATION_ORDER_YZX", umath::to_integral(pragma::RotationOrder::YZX)}, {"ROTATION_ORDER_ZYX", umath::to_integral(pragma::RotationOrder::ZYX)}, {"ROTATION_ORDER_ZXY", umath::to_integral(pragma::RotationOrder::ZXY)},
+	    {"ROTATION_ORDER_XYZ", umath::to_integral(pragma::RotationOrder::XYZ)},
+	    {"ROTATION_ORDER_YXZ", umath::to_integral(pragma::RotationOrder::YXZ)},
+	    {"ROTATION_ORDER_XZX", umath::to_integral(pragma::RotationOrder::XZX)},
+	    {"ROTATION_ORDER_XYX", umath::to_integral(pragma::RotationOrder::XYX)},
+	    {"ROTATION_ORDER_YXY", umath::to_integral(pragma::RotationOrder::YXY)},
+	    {"ROTATION_ORDER_YZY", umath::to_integral(pragma::RotationOrder::YZY)},
+	    {"ROTATION_ORDER_ZYZ", umath::to_integral(pragma::RotationOrder::ZYZ)},
+	    {"ROTATION_ORDER_ZXZ", umath::to_integral(pragma::RotationOrder::ZXZ)},
+	    {"ROTATION_ORDER_XZY", umath::to_integral(pragma::RotationOrder::XZY)},
+	    {"ROTATION_ORDER_YZX", umath::to_integral(pragma::RotationOrder::YZX)},
+	    {"ROTATION_ORDER_ZYX", umath::to_integral(pragma::RotationOrder::ZYX)},
+	    {"ROTATION_ORDER_ZXY", umath::to_integral(pragma::RotationOrder::ZXY)},
 
-	    {"AXIS_X", umath::to_integral(pragma::Axis::X)}, {"AXIS_Y", umath::to_integral(pragma::Axis::Y)}, {"AXIS_Z", umath::to_integral(pragma::Axis::Z)}});
+	    {"AXIS_X", umath::to_integral(pragma::Axis::X)},
+	    {"AXIS_Y", umath::to_integral(pragma::Axis::Y)},
+	    {"AXIS_Z", umath::to_integral(pragma::Axis::Z)},
+	    {"AXIS_COUNT", umath::to_integral(pragma::Axis::Count)},
+
+	    {"AXIS_SIGNED_X", umath::to_integral(pragma::SignedAxis::NegX)},
+	    {"AXIS_SIGNED_Y", umath::to_integral(pragma::SignedAxis::NegY)},
+	    {"AXIS_SIGNED_Z", umath::to_integral(pragma::SignedAxis::NegZ)},
+	  });
 
 	auto &mathMod = lua.RegisterLibrary("math");
 	auto complexNumberClassDef = luabind::class_<std::complex<double>>("ComplexNumber");
@@ -1071,7 +1113,7 @@ namespace Lua::ik {
 #include <spdlog/formatter.h>
 #include <spdlog/fmt/fmt.h>
 
-static std::string to_string(lua_State *l,int i)
+static std::string to_string(lua_State *l, int i)
 {
 	auto status = -1;
 	std::string val;
@@ -1088,7 +1130,7 @@ static int log(lua_State *l, spdlog::level::level_enum logLevel)
 	auto n = lua_gettop(l) - argOffset; /* number of arguments */
 	switch(n) {
 	case 0:
-		logger.log(logLevel, std::string{msg});
+		logger.log(logLevel, std::string {msg});
 		break;
 	case 1:
 		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1))));
@@ -1106,41 +1148,36 @@ static int log(lua_State *l, spdlog::level::level_enum logLevel)
 		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5))));
 		break;
 	case 6:
-		logger.log(logLevel,
-		  fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6))));
+		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6))));
 		break;
 	case 7:
-		logger.log(logLevel,
-		  fmt::vformat(msg,
-		    fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7))));
+		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7))));
 		break;
 	case 8:
 		logger.log(logLevel,
-		  fmt::vformat(msg,
-		    fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7),
-		      to_string(l, argOffset + 8))));
+		  fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7), to_string(l, argOffset + 8))));
 		break;
 	case 9:
 		logger.log(logLevel,
 		  fmt::vformat(msg,
-		    fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7),
-		      to_string(l, argOffset + 8), to_string(l, argOffset + 9))));
+		    fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7), to_string(l, argOffset + 8),
+		      to_string(l, argOffset + 9))));
 		break;
 	case 10:
 		logger.log(logLevel,
 		  fmt::vformat(msg,
-		    fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7),
-		      to_string(l, argOffset + 8), to_string(l, argOffset + 9), to_string(l, argOffset + 10))));
+		    fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7), to_string(l, argOffset + 8),
+		      to_string(l, argOffset + 9), to_string(l, argOffset + 10))));
 		break;
 	default:
-		logger.log(logLevel, std::string{msg});
+		logger.log(logLevel, std::string {msg});
 		break;
 	}
 	return 0;
 }
 
 template<spdlog::level::level_enum TLevel>
-static void add_log_func(lua_State *l,luabind::object &oLogger,const char *name)
+static void add_log_func(lua_State *l, luabind::object &oLogger, const char *name)
 {
 	lua_pushcfunction(
 	  l, +[](lua_State *l) -> int { return log(l, TLevel); });
@@ -1559,15 +1596,16 @@ void Game::RegisterLuaLibraries()
 	Lua::RegisterLibrary(GetLuaState(), "mesh", {{"generate_convex_hull", Lua::mesh::generate_convex_hull}, {"calc_smallest_enclosing_bbox", Lua::mesh::calc_smallest_enclosing_bbox}});
 
 	Lua::RegisterLibrary(GetLuaState(), "log",
-	  {{"info", Lua::log::info}, {"warn", Lua::log::warn}, {"error", Lua::log::error}, {"critical", Lua::log::critical}, {"debug", Lua::log::debug}, {"color", Lua::log::color}, {"register_logger", Lua::log::register_logger}, {"prefix", +[](lua_State *l) {
-		                                                                                                                                                                              std::string msg = Lua::CheckString(l, 1);
-		                                                                                                                                                                              auto colorFlags = static_cast<util::ConsoleColorFlags>(Lua::CheckInt(l, 2));
-		                                                                                                                                                                              auto strColorFlags = util::get_ansi_color_code(colorFlags);
-		                                                                                                                                                                              auto strColorFlagsClear = util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
-		                                                                                                                                                                              auto prefix = strColorFlagsClear + "[" + strColorFlags + msg + strColorFlagsClear + "] ";
-		                                                                                                                                                                              Lua::PushString(l, prefix);
-		                                                                                                                                                                              return 1;
-	                                                                                                                                                                              }}});
+	  {{"info", Lua::log::info}, {"warn", Lua::log::warn}, {"error", Lua::log::error}, {"critical", Lua::log::critical}, {"debug", Lua::log::debug}, {"color", Lua::log::color}, {"register_logger", Lua::log::register_logger},
+	    {"prefix", +[](lua_State *l) {
+		     std::string msg = Lua::CheckString(l, 1);
+		     auto colorFlags = static_cast<util::ConsoleColorFlags>(Lua::CheckInt(l, 2));
+		     auto strColorFlags = util::get_ansi_color_code(colorFlags);
+		     auto strColorFlagsClear = util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+		     auto prefix = strColorFlagsClear + "[" + strColorFlags + msg + strColorFlagsClear + "] ";
+		     Lua::PushString(l, prefix);
+		     return 1;
+	     }}});
 
 	auto modLog = luabind::module_(GetLuaState(), "log");
 	modLog[luabind::def("is_log_level_enabled", &pragma::is_log_level_enabled)];

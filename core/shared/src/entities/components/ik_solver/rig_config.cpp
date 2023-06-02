@@ -39,7 +39,16 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(u
 		auto type = RigConfigControl::Type::Drag;
 		udmControl["bone"](bone);
 		udm::to_enum_value<RigConfigControl::Type>(udmControl["type"], type);
-		rig.AddControl(bone, type);
+		auto ctrl = rig.AddControl(bone, type);
+		if(ctrl) {
+			float maxForce;
+			if(udmControl["maxForce"](maxForce))
+				ctrl->maxForce = maxForce;
+
+			float rigidity;
+			if(udmControl["rigidity"](rigidity))
+				ctrl->rigidity = rigidity;
+		}
 	}
 
 	for(auto &udmConstraint : prop["constraints"]) {
@@ -48,9 +57,10 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(u
 		udmConstraint["bone0"](bone0);
 		udmConstraint["bone1"](bone1);
 		udm::to_enum_value<RigConfigConstraint::Type>(udmConstraint["type"], type);
+		PRigConfigConstraint constraint = nullptr;
 		switch(type) {
 		case RigConfigConstraint::Type::Fixed:
-			rig.AddFixedConstraint(bone0, bone1);
+			constraint = rig.AddFixedConstraint(bone0, bone1);
 			break;
 		case RigConfigConstraint::Type::Hinge:
 			{
@@ -58,7 +68,7 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(u
 				float maxAngle = 0.f;
 				udmConstraint["minAngle"](minAngle);
 				udmConstraint["maxAngle"](maxAngle);
-				rig.AddHingeConstraint(bone0, bone1, minAngle, maxAngle);
+				constraint = rig.AddHingeConstraint(bone0, bone1, minAngle, maxAngle);
 				break;
 			}
 		case RigConfigConstraint::Type::BallSocket:
@@ -67,9 +77,13 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(u
 				EulerAngles maxAngles {};
 				udmConstraint["minAngles"](minAngles);
 				udmConstraint["maxAngles"](maxAngles);
-				rig.AddBallSocketConstraint(bone0, bone1, minAngles, maxAngles);
+				constraint = rig.AddBallSocketConstraint(bone0, bone1, minAngles, maxAngles);
 				break;
 			}
+		}
+		if(constraint) {
+			udmConstraint["rigidity"](constraint->rigidity);
+			udmConstraint["maxForce"](constraint->maxForce);
 		}
 	}
 	return rig;
@@ -217,7 +231,7 @@ pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddHingeConstraint(const
 	c->offsetPose.SetRotation(offsetRotation);
 	return c;
 }
-pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddBallSocketConstraint(const std::string &bone0, const std::string &bone1, const EulerAngles &minAngles, const EulerAngles &maxAngles, Axis axis)
+pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddBallSocketConstraint(const std::string &bone0, const std::string &bone1, const EulerAngles &minAngles, const EulerAngles &maxAngles, SignedAxis axis)
 {
 	m_constraints.push_back(std::make_shared<RigConfigConstraint>());
 	auto &c = m_constraints.back();
@@ -263,9 +277,11 @@ void pragma::ik::RigConfig::ToUdmData(udm::LinkedPropertyWrapper &udmData) const
 	udmControls.Resize(m_controls.size());
 	for(auto i = decltype(m_controls.size()) {0u}; i < m_controls.size(); ++i) {
 		auto &ctrlData = m_controls[i];
-		auto udmBone = udmControls[i];
-		udmBone["bone"] = ctrlData->bone;
-		udmBone["type"] = udm::enum_to_string(ctrlData->type);
+		auto udmControl = udmControls[i];
+		udmControl["bone"] = ctrlData->bone;
+		udmControl["type"] = udm::enum_to_string(ctrlData->type);
+		udmControl["maxForce"] = ctrlData->maxForce;
+		udmControl["rigidity"] = ctrlData->rigidity;
 	}
 
 	udm::LinkedPropertyWrapper udmConstraints;
@@ -276,20 +292,24 @@ void pragma::ik::RigConfig::ToUdmData(udm::LinkedPropertyWrapper &udmData) const
 	udmConstraints.Resize(m_constraints.size());
 	for(auto i = decltype(m_constraints.size()) {0u}; i < m_constraints.size(); ++i) {
 		auto &constraintData = m_constraints[i];
-		auto udmBone = udmConstraints[i];
-		udmBone["bone0"] = constraintData->bone0;
-		udmBone["bone1"] = constraintData->bone1;
-		udmBone["type"] = udm::enum_to_string(constraintData->type);
+		auto udmConstraint = udmConstraints[i];
+		udmConstraint["bone0"] = constraintData->bone0;
+		udmConstraint["bone1"] = constraintData->bone1;
+		udmConstraint["type"] = udm::enum_to_string(constraintData->type);
+
+		udmConstraint["rigidity"] = constraintData->rigidity;
+		udmConstraint["maxForce"] = constraintData->maxForce;
+
 		switch(constraintData->type) {
 		case RigConfigConstraint::Type::Fixed:
 			break;
 		case RigConfigConstraint::Type::Hinge:
-			udmBone["minAngle"] = constraintData->minLimits.p;
-			udmBone["maxAngle"] = constraintData->maxLimits.p;
+			udmConstraint["minAngle"] = constraintData->minLimits.p;
+			udmConstraint["maxAngle"] = constraintData->maxLimits.p;
 			break;
 		case RigConfigConstraint::Type::BallSocket:
-			udmBone["minAngles"] = constraintData->minLimits;
-			udmBone["maxAngles"] = constraintData->maxLimits;
+			udmConstraint["minAngles"] = constraintData->minLimits;
+			udmConstraint["maxAngles"] = constraintData->maxLimits;
 			break;
 		}
 	}

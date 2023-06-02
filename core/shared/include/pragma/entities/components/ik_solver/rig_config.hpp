@@ -25,6 +25,8 @@ namespace pragma::ik {
 		enum class Type : uint8_t { Drag = 0, State };
 		std::string bone;
 		Type type = Type::Drag;
+		float maxForce = -1.f;
+		float rigidity = 1.f;
 	};
 
 	struct RigConfigConstraint {
@@ -32,10 +34,13 @@ namespace pragma::ik {
 		std::string bone0;
 		std::string bone1;
 		Type type = Type::Fixed;
-		Axis axis = Axis::Z;
+		SignedAxis axis = SignedAxis::Z;
 		EulerAngles minLimits;
 		EulerAngles maxLimits;
 		umath::ScaledTransform offsetPose {};
+
+		float rigidity = 1'000.f;
+		float maxForce = -1.f;
 	};
 
 	using PRigConfigBone = std::shared_ptr<RigConfigBone>;
@@ -70,7 +75,7 @@ namespace pragma::ik {
 		void RemoveBone(const RigConfigBone &bone);
 		PRigConfigConstraint AddFixedConstraint(const std::string &bone0, const std::string &bone1);
 		PRigConfigConstraint AddHingeConstraint(const std::string &bone0, const std::string &bone1, umath::Degree minAngle, umath::Degree maxAngle, const Quat &offsetRotation = uquat::identity());
-		PRigConfigConstraint AddBallSocketConstraint(const std::string &bone0, const std::string &bone1, const EulerAngles &minAngles, const EulerAngles &maxAngles, Axis axis = Axis::Z);
+		PRigConfigConstraint AddBallSocketConstraint(const std::string &bone0, const std::string &bone1, const EulerAngles &minAngles, const EulerAngles &maxAngles, SignedAxis axis = SignedAxis::Z);
 
 		const std::vector<PRigConfigBone> &GetBones() const { return m_bones; }
 		const std::vector<PRigConfigControl> &GetControls() const { return m_controls; }

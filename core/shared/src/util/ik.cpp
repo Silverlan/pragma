@@ -103,7 +103,7 @@ Quat pragma::ik::Bone::GetRot() const { return from_bepu_quaternion(m_bone->Orie
 void pragma::ik::Bone::SetPos(const Vector3 &pos) const { m_bone->Position = to_bepu_vector3(pos); }
 void pragma::ik::Bone::SetRot(const Quat &rot) const { m_bone->Orientation = to_bepu_quaternion(rot); }
 void pragma::ik::Bone::SetPinned(bool pinned) { m_bone->Pinned = pinned; }
-bool pragma::ik::Bone::IsPinned() { return m_bone->Pinned; }
+bool pragma::ik::Bone::IsPinned() const { return m_bone->Pinned; }
 void pragma::ik::Bone::SetName(const std::string &name) { m_name = name; }
 const std::string &pragma::ik::Bone::GetName() const { return m_name; }
 float pragma::ik::Bone::GetRadius() const { return from_bepu_length(m_bone->GetRadius()); }
@@ -125,6 +125,12 @@ void pragma::ik::IControl::SetTargetBone(Bone &bone)
 }
 pragma::ik::Bone *pragma::ik::IControl::GetTargetBone() { return m_bone; }
 const pragma::ik::Bone *pragma::ik::IControl::GetTargetBone() const { return const_cast<IControl *>(this)->GetTargetBone(); }
+
+void pragma::ik::IControl::SetMaxForce(float maxForce) { m_control->SetMaximumForce(maxForce); }
+float pragma::ik::IControl::GetMaxForce() const { return m_control->GetMaximumForce(); }
+
+void pragma::ik::IControl::SetRigidity(float rigidity) { m_control->SetRigidity(rigidity); }
+float pragma::ik::IControl::GetRigidity() const { return m_control->GetRigidity(); }
 
 const BEPUik::SingleBoneLinearMotor &pragma::ik::ILinearMotorControl::GetLinearMotor() const { return const_cast<ILinearMotorControl *>(this)->GetLinearMotor(); }
 void pragma::ik::ILinearMotorControl::SetTargetPosition(const Vector3 &pos) { GetLinearMotor().TargetPosition = to_bepu_vector3(pos); }
@@ -179,7 +185,10 @@ pragma::ik::IJoint::IJoint(JointType type) : m_jointType {type} {}
 pragma::ik::IJoint::~IJoint() {}
 
 void pragma::ik::IJoint::SetRigidity(float rigidity) { m_joint->SetRigidity(rigidity); }
-float pragma::ik::IJoint::GetRigidity() { return m_joint->GetRigidity(); }
+float pragma::ik::IJoint::GetRigidity() const { return m_joint->GetRigidity(); }
+
+void pragma::ik::IJoint::SetMaxForce(float maxForce) { m_joint->SetMaximumForce(maxForce); }
+float pragma::ik::IJoint::GetMaxForce() const { return m_joint->GetMaximumForce(); }
 
 pragma::ik::Bone &pragma::ik::IJoint::GetConnectionA() { return *m_connectionA; }
 const pragma::ik::Bone &pragma::ik::IJoint::GetConnectionA() const { return const_cast<pragma::ik::IJoint *>(this)->GetConnectionA(); }
@@ -320,7 +329,7 @@ pragma::ik::Solver::Solver(uint32_t controlIterationCount, uint32_t fixerIterati
 {
 	m_solver = std::make_unique<BEPUik::IKSolver>();
 	m_solver->activeSet.UseAutomass = true;
-	m_solver->AutoscaleControlImpulses = true;
+	m_solver->AutoscaleControlImpulses = false; //true;
 	m_solver->AutoscaleControlMaximumForce = std::numeric_limits<float>::max();
 	m_solver->SetTimeStepDuration(0.01f);      //0.1f);
 	m_solver->ControlIterationCount = 100;     //controlIterationCount;
@@ -492,6 +501,7 @@ std::ostream &operator<<(std::ostream &out, const pragma::ik::Bone &bone)
 	out << "[Pos:" << bone.GetPos() << "]";
 	auto ang = EulerAngles {bone.GetRot()};
 	out << "[Ang:" << ang << "]";
+	out << "[Pinned:" << (bone.IsPinned() ? "1" : "0") << "]";
 	return out;
 }
 static luabind::object joint_to_lua_object(lua_State *l, pragma::ik::IJoint &joint)
@@ -529,6 +539,8 @@ std::ostream &operator<<(std::ostream &out, const pragma::ik::IJoint &joint)
 	out << magic_enum::enum_name(joint.GetJointType());
 	out << "[ConA:" << joint.GetConnectionA().GetName() << "]";
 	out << "[ConB:" << joint.GetConnectionB().GetName() << "]";
+	out << "[Rigidity: " << joint.GetRigidity() << "]";
+	out << "[MaxForce: " << joint.GetMaxForce() << "]";
 	return out;
 }
 std::ostream &operator<<(std::ostream &out, const pragma::ik::BallSocketJoint &joint)
@@ -615,6 +627,8 @@ static std::ostream &print_control_bone(std::ostream &out, const pragma::ik::ICo
 	else
 		out << "NULL";
 	out << "]";
+	out << "[MaxForce:" << control.GetMaxForce() << "]";
+	out << "[Rigidity:" << control.GetRigidity() << "]";
 	return out;
 }
 std::ostream &operator<<(std::ostream &out, const pragma::ik::IControl &control)

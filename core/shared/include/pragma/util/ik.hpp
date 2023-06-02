@@ -35,7 +35,7 @@ namespace pragma::ik {
 		void SetPos(const Vector3 &pos) const;
 		void SetRot(const Quat &rot) const;
 		void SetPinned(bool pinned);
-		bool IsPinned();
+		bool IsPinned() const;
 		void SetName(const std::string &name);
 		const std::string &GetName() const;
 		float GetRadius() const;
@@ -65,6 +65,10 @@ namespace pragma::ik {
 		Bone *GetTargetBone();
 		const Bone *GetTargetBone() const;
 		ControlType GetControlType() const { return m_type; }
+		void SetMaxForce(float maxForce);
+		float GetMaxForce() const;
+		void SetRigidity(float rigidity);
+		float GetRigidity() const;
 	  protected:
 		IControl(ControlType type);
 		std::unique_ptr<BEPUik::Control> m_control;
@@ -129,7 +133,10 @@ namespace pragma::ik {
 		virtual ~IJoint();
 
 		void SetRigidity(float rigidity);
-		float GetRigidity();
+		float GetRigidity() const;
+
+		void SetMaxForce(float maxForce);
+		float GetMaxForce() const;
 
 		Bone &GetConnectionA();
 		const Bone &GetConnectionA() const;

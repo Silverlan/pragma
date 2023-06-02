@@ -593,7 +593,12 @@ void IkSolverComponent::AddBallSocketConstraint(const ConstraintInfo &constraint
 	// Apply the swing limit
 	//self.m_solver:AddSwingLimit(bone0,bone1,rotBone1WithOffset:GetForward(),rotBone1:GetForward(),math.rad(effectiveMaxLimits.y -effectiveMinLimits.y)):SetRigidity(16)
 	//self.m_solver:AddSwingLimit(bone0,bone1,rotBone1:GetForward(),rotBone1:GetForward(),math.rad(45)):SetRigidity(16)
+#if 0
+	auto dirToBone = refPose1.GetOrigin() - refPose0.GetOrigin();
+	uvec::normalize(&dirToBone);
+	auto &twistLimit = m_ikSolver->AddTwistLimit(*bone0, *bone1, dirToBone, uquat::right(rotBone1), umath::deg_to_rad(effectiveMaxLimits.p - effectiveMinLimits.p));
 	twistLimit.SetRigidity(1'000);
+#endif
 
 	//self:GetRigConfig():AddArray("constraints",udm.TYPE_ELEMENT)
 

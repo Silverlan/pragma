@@ -48,14 +48,22 @@ function util.rig.determine_mirrored_bone_flip_factors(mdl, boneLeft, boneRight)
 	local pdiff = math.abs(math.get_angle_difference(angRight.p, angLeft.p))
 	local ydiff = math.abs(math.get_angle_difference(angRight.y, angLeft.y))
 	local rdiff = math.abs(math.get_angle_difference(angRight.r, angLeft.r))
-	local flipFactors
-	if pdiff > math.max(ydiff, rdiff) then
-		flipFactors = Vector(-1, -1, 1)
-	elseif ydiff > math.max(pdiff, rdiff) then
-		flipFactors = Vector(1, -1, -1)
+
+	local rollAxis = math.AXIS_Z
+	rollAxis = ents.IkSolverComponent.find_forward_axis(mdl, boneIdLeft) or rollAxis
+
+	-- TODO: This may not be correct
+	local pitchAxis
+	if rollAxis == math.AXIS_X or rollAxis == math.AXIS_SIGNED_X then
+		pitchAxis = math.AXIS_Y
+	elseif rollAxis == math.AXIS_Y or rollAxis == math.AXIS_SIGNED_Y then
+		pitchAxis = math.AXIS_Z
 	else
-		flipFactors = Vector(-1, 1, -1)
+		pitchAxis = math.AXIS_X
 	end
+
+	local flipFactors = Vector(-1, -1, -1)
+	flipFactors:Set(pitchAxis, 1)
 	return flipFactors
 end
 

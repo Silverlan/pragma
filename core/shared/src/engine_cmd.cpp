@@ -170,10 +170,10 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 	map.RegisterConVar<bool>("asset_file_cache_enabled", true, ConVarFlags::Archive, "If enabled, all Pragma files will be indexed to improve lookup times.");
 	map.RegisterConVarCallback("asset_file_cache_enabled", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[this](NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void { filemanager::set_use_file_index_cache(newVal); }});
 
-	map.RegisterConVar<float>("ik_solver_time_step_duration", 0.1f, ConVarFlags::Archive | ConVarFlags::Replicated, "The time step duration elapsed by each position iteration.");
-	map.RegisterConVar<uint16_t>("ik_solver_control_iteration_count", 20, ConVarFlags::Archive | ConVarFlags::Replicated, "The number of solver iterations to perform in an attempt to reach specified goals.");
+	map.RegisterConVar<float>("ik_solver_time_step_duration", 0.01f, ConVarFlags::Archive | ConVarFlags::Replicated, "The time step duration elapsed by each position iteration.");
+	map.RegisterConVar<uint16_t>("ik_solver_control_iteration_count", 150, ConVarFlags::Archive | ConVarFlags::Replicated, "The number of solver iterations to perform in an attempt to reach specified goals.");
 	map.RegisterConVar<uint16_t>("ik_solver_fixer_iteration_count", 20, ConVarFlags::Archive | ConVarFlags::Replicated, "The number of solter iterations to perform after the control iterations in an attempt to minimize errors introduced by unreachable goals.");
-	map.RegisterConVar<uint16_t>("ik_solver_velocity_sub_iteration_count", 20, ConVarFlags::Archive | ConVarFlags::Replicated, "The number of velocity iterations to perform per control or fixer iteration.");
+	map.RegisterConVar<uint16_t>("ik_solver_velocity_sub_iteration_count", 5, ConVarFlags::Archive | ConVarFlags::Replicated, "The number of velocity iterations to perform per control or fixer iteration.");
 }
 
 void Engine::RegisterConsoleCommands()

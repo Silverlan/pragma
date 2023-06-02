@@ -736,15 +736,14 @@ if with_lua_debugger:
 	execscript(scripts_dir +"/scripts/build_lua_debug.py")
 
 ########## Addons ##########
-def download_addon(name,addonName,url):
+def download_addon(name,addonName,url,commitId=None):
 	print_msg("Downloading " +name +" addon...")
 	mkdir(install_dir +"/addons",cd=True)
 	if not Path(install_dir +"/addons/" +addonName).is_dir():
 		git_clone(url,addonName)
-	else:
+	if commitId is not None:
 		os.chdir(install_dir +"/addons/" +addonName)
-		print_msg("Updating " +name +"...")
-		subprocess.run(["git","pull"],check=True)
+		reset_to_commit(commitId)
 		os.chdir("..")
 
 	# Write commit SHA info for debugging purposes
@@ -761,15 +760,15 @@ def download_addon(name,addonName,url):
 
 curDir = os.getcwd()
 if with_pfm:
-	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git")
-	download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git")
+	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","ddec4dc4ee4b9dda5812b09871744fd55cb27c7a")
+	download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","044db97f82f90dd7451ba7fbf0e5de1ffecc1659")
 
 if with_vr:
-	download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git")
+	download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","479e430e1f4f011f8c9b76a0e07b71ca51696574")
 
 if with_pfm:
-	download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git")
-	download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git")
+	download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","38b6cbcc7e193d05be3ede64bd0fe0586fc52367")
+	download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","a06511e70d77c9de9f250cdaddd8875aeb140a47")
 
 os.chdir(curDir)
 

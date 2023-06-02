@@ -11,7 +11,12 @@
 
 namespace pragma {
 	enum class Axis : uint8_t { X = 0u, Y, Z, Count };
+	enum class SignedAxis : uint8_t { X = 0u, Y, Z, NegX, NegY, NegZ, Count };
 	enum class RotationOrder : uint16_t { XYZ = 0u, YXZ, XZX, XYX, YXY, YZY, ZYZ, ZXZ, XZY, YZX, ZYX, ZXY };
+	constexpr bool is_positive_axis(Axis axis) { return true; }
+	constexpr bool is_negative_axis(Axis axis) { return false; }
+	constexpr bool is_positive_axis(SignedAxis axis) {return (umath::to_integral(axis) < umath::to_integral(SignedAxis::NegX)); }
+	constexpr bool is_negative_axis(SignedAxis axis) { return !is_positive_axis(axis); }
 };
 
 #endif

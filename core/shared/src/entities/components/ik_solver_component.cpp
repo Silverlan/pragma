@@ -438,7 +438,7 @@ void IkSolverComponent::AddHingeConstraint(BoneId boneId0, BoneId boneId1, umath
 */
 }
 
-std::optional<pragma::Axis> IkSolverComponent::FindTwistAxis(Model &mdl, BoneId boneId)
+std::optional<pragma::SignedAxis> IkSolverComponent::FindTwistAxis(Model &mdl, BoneId boneId)
 {
 	auto refPose = IkSolverComponent::GetReferenceBonePose(mdl, boneId);
 	if(!refPose)
@@ -480,10 +480,10 @@ std::optional<pragma::Axis> IkSolverComponent::FindTwistAxis(Model &mdl, BoneId 
 	auto dra = umath::abs(dr);
 	auto dua = umath::abs(du);
 	if(dfa >= umath::max(dra, dua))
-		return pragma::Axis::Z; // Forward
+		return (df < 0) ? pragma::SignedAxis::NegZ : pragma::SignedAxis::Z; // Forward
 	else if(dra >= umath::max(dfa, dua))
-		return pragma::Axis::X; // Right
-	return pragma::Axis::Y;     // Up
+		return (dr < 0) ? pragma::SignedAxis::NegX : pragma::SignedAxis::X; // Right
+	return (du < 0) ? pragma::SignedAxis::NegY : pragma::SignedAxis::Y;     // Up
 }
 
 void IkSolverComponent::AddBallSocketConstraint(BoneId boneId0, BoneId boneId1, const EulerAngles &minLimits, const EulerAngles &maxLimits, Axis twistAxis)

@@ -24,7 +24,7 @@ namespace pragma {
 		static ComponentEventId EVENT_UPDATE_IK;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
-		static std::optional<pragma::Axis> FindTwistAxis(Model &mdl, BoneId boneId);
+		static std::optional<pragma::SignedAxis> FindTwistAxis(Model &mdl, BoneId boneId);
 		IkSolverComponent(BaseEntity &ent);
 		virtual ~IkSolverComponent() override;
 		virtual void Initialize() override;

@@ -502,6 +502,12 @@ std::ostream &operator<<(std::ostream &out, const pragma::ik::Bone &bone)
 	auto ang = EulerAngles {bone.GetRot()};
 	out << "[Ang:" << ang << "]";
 	out << "[Pinned:" << (bone.IsPinned() ? "1" : "0") << "]";
+
+	auto &origPose = bone.GetOriginalPose();
+	out << "[OrigPos:" << origPose.GetOrigin() << "]";
+	ang = EulerAngles {origPose.GetRotation()};
+	out << "[OrigAng:" << ang << "]";
+
 	return out;
 }
 static luabind::object joint_to_lua_object(lua_State *l, pragma::ik::IJoint &joint)

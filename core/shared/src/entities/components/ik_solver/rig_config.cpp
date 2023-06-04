@@ -84,6 +84,9 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(u
 		if(constraint) {
 			udmConstraint["rigidity"](constraint->rigidity);
 			udmConstraint["maxForce"](constraint->maxForce);
+
+			udmConstraint["offsetPose"](constraint->offsetPose);
+			udm::to_enum_value<pragma::SignedAxis>(udmConstraint["axis"], constraint->axis);
 		}
 	}
 	return rig;
@@ -299,6 +302,9 @@ void pragma::ik::RigConfig::ToUdmData(udm::LinkedPropertyWrapper &udmData) const
 
 		udmConstraint["rigidity"] = constraintData->rigidity;
 		udmConstraint["maxForce"] = constraintData->maxForce;
+
+		udmConstraint["axis"] = udm::enum_to_string(constraintData->axis);
+		udmConstraint["offsetPose"] = constraintData->offsetPose;
 
 		switch(constraintData->type) {
 		case RigConfigConstraint::Type::Fixed:

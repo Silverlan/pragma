@@ -1289,15 +1289,21 @@ void Game::RegisterLuaLibraries()
 	  luabind::def("get_file_extension", static_cast<luabind::object (*)(lua_State *, const std::string &, const std::vector<std::string> &)>(Lua::file::GetFileExtension)),
 	  luabind::def("get_file_extension", static_cast<luabind::object (*)(lua_State *, const std::string &)>(Lua::file::GetFileExtension)), luabind::def("get_size", FileManager::GetFileSize),
 	  luabind::def("get_size", static_cast<uint64_t (*)(std::string)>(+[](std::string path) { return FileManager::GetFileSize(path); })), luabind::def("compare_path", Lua::file::ComparePath),
-	  luabind::def("remove_file_extension", static_cast<std::string (*)(std::string)>([](std::string path) {
-		  ufile::remove_extension_from_filename(path);
-		  return path;
-	  })),
-	  luabind::def("remove_file_extension", static_cast<std::string (*)(lua_State *, std::string, luabind::table<>)>([](lua_State *l, std::string path, luabind::table<> t) {
-		  auto exts = Lua::table_to_vector<std::string>(l, t, 2);
-		  ufile::remove_extension_from_filename(path, exts);
-		  return path;
-	  })),
+	  luabind::def(
+	    "remove_file_extension",
+	    +[](std::string path) -> std::
+	                            pair<std::string, std::optional<std::string>> {
+		                            auto ext = ufile::remove_extension_from_filename(path);
+		                            return {path, ext};
+	                            }),
+	  luabind::def(
+	    "remove_file_extension",
+	    +[](lua_State *l, std::string path, luabind::table<> t) -> std::
+	                                                              pair<std::string, std::optional<std::string>> {
+		                                                              auto exts = Lua::table_to_vector<std::string>(l, t, 2);
+		                                                              auto ext = ufile::remove_extension_from_filename(path, exts);
+		                                                              return {path, ext};
+	                                                              }),
 	  luabind::def("strip_illegal_filename_characters", static_cast<std::string (*)(std::string)>([](std::string path) {
 		  // See https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
 		  std::string illegalCharacters = "/\\?%*:|\"<>";

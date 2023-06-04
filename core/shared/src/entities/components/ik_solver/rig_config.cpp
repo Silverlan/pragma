@@ -16,7 +16,14 @@ const std::vector<std::string> &pragma::ik::RigConfig::get_supported_extensions(
 }
 std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load(const std::string &fileName)
 {
-	auto udmData = udm::Data::Load(fileName);
+	auto nFileName = filemanager::find_available_file(fileName, get_supported_extensions());
+	std::shared_ptr<udm::Data> udmData = nullptr;
+	try {
+		udmData = udm::Data::Load(nFileName ? *nFileName : fileName);
+	}
+	catch(const udm::Exception &e) {
+		return {};
+	}
 	if(!udmData)
 		return {};
 	auto data = udmData->GetAssetData().GetData();

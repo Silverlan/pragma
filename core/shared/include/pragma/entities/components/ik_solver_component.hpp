@@ -25,6 +25,7 @@ namespace pragma {
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		static std::optional<pragma::SignedAxis> FindTwistAxis(Model &mdl, BoneId boneId);
+		static std::optional<std::string> GetControlBoneName(const std::string &propPath);
 		IkSolverComponent(BaseEntity &ent);
 		virtual ~IkSolverComponent() override;
 		virtual void Initialize() override;
@@ -41,6 +42,7 @@ namespace pragma {
 		size_t GetBoneCount() const;
 		std::optional<BoneId> GetSkeletalBoneId(IkBoneId boneId) const;
 		std::optional<IkBoneId> GetIkBoneId(BoneId boneId) const;
+		std::optional<BoneId> GetControlBoneId(const std::string &propPath);
 
 		void AddDragControl(BoneId boneId, float maxForce = -1.f, float rigidity = 1.f);
 		void AddStateControl(BoneId boneId, float maxForce = -1.f, float rigidity = 1.f);

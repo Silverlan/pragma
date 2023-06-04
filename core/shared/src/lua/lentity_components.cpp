@@ -497,6 +497,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defIkSolver.add_static_constant("EVENT_INITIALIZE_SOLVER", pragma::IkSolverComponent::EVENT_INITIALIZE_SOLVER);
 	defIkSolver.add_static_constant("EVENT_UPDATE_IK", pragma::IkSolverComponent::EVENT_UPDATE_IK);
 	defIkSolver.scope[luabind::def("find_forward_axis", &pragma::IkSolverComponent::FindTwistAxis)];
+	defIkSolver.scope[luabind::def("get_control_bone_name", &pragma::IkSolverComponent::GetControlBoneName)];
 	defIkSolver.def("SetIkRigFile", &pragma::IkSolverComponent::SetIkRigFile);
 	defIkSolver.def("GetIkRigFile", &pragma::IkSolverComponent::GetIkRigFile);
 	defIkSolver.def("AddSkeletalBone", &pragma::IkSolverComponent::AddSkeletalBone);
@@ -513,6 +514,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defIkSolver.def("AddIkSolverByChain", &pragma::IkSolverComponent::AddIkSolverByChain);
 	defIkSolver.def("GetIkRig", &pragma::IkSolverComponent::GetIkRig);
 	defIkSolver.def("GetIkBoneId", &pragma::IkSolverComponent::GetIkBoneId);
+	defIkSolver.def("GetControlBoneId", &pragma::IkSolverComponent::GetControlBoneId);
 	defIkSolver.def("GetSkeletalBoneId", &pragma::IkSolverComponent::GetSkeletalBoneId);
 	defIkSolver.def("Solve", &pragma::IkSolverComponent::Solve);
 	defIkSolver.def("ResetIkRig", &pragma::IkSolverComponent::ResetIkRig);

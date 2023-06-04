@@ -646,6 +646,31 @@ std::optional<IkSolverComponent::IkBoneId> IkSolverComponent::GetIkBoneId(BoneId
 		return {};
 	return it->second;
 }
+std::optional<std::string> IkSolverComponent::GetControlBoneName(const std::string &propPath)
+{
+	auto path = util::Path::CreatePath(propPath);
+	size_t nextOffset = 0;
+	if(path.GetComponent(0, &nextOffset) != "control")
+		return {};
+	auto boneName = path.GetComponent(nextOffset);
+	if(boneName.empty())
+		return {};
+	return std::string {boneName};
+}
+std::optional<BoneId> IkSolverComponent::GetControlBoneId(const std::string &propPath)
+{
+	auto boneName = GetControlBoneName(propPath);
+	if(!boneName)
+		return {};
+	auto &mdl = GetEntity().GetModel();
+	if(!mdl)
+		return {};
+	auto &skeleton = mdl->GetSkeleton();
+	auto boneId = skeleton.LookupBone(*boneName);
+	if(boneId == -1)
+		return {};
+	return boneId;
+}
 std::optional<BoneId> IkSolverComponent::GetSkeletalBoneId(IkBoneId boneId) const
 {
 	auto it = m_ikBoneIdToBoneId.find(boneId);

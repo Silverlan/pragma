@@ -553,7 +553,7 @@ static int log(lua_State *l, spdlog::level::level_enum logLevel)
 	auto n = lua_gettop(l) - argOffset; /* number of arguments */
 	switch(n) {
 	case 0:
-		component.Log(logLevel, std::string{msg});
+		component.Log(logLevel, std::string {msg});
 		break;
 	case 1:
 		component.Log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1))));
@@ -593,7 +593,7 @@ static int log(lua_State *l, spdlog::level::level_enum logLevel)
 		      to_string(l, argOffset + 9), to_string(l, argOffset + 10))));
 		break;
 	default:
-		component.Log(logLevel, std::string{msg});
+		component.Log(logLevel, std::string {msg});
 		break;
 	}
 	return 0;
@@ -670,6 +670,16 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	entityComponentDef.def("SetTransformMemberRot", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Quat &)>(&pragma::BaseEntityComponent::SetTransformMemberRot));
 	entityComponentDef.def("SetTransformMemberScale", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Vector3 &)>(&pragma::BaseEntityComponent::SetTransformMemberScale));
 	entityComponentDef.def("SetTransformMemberPose", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const umath::ScaledTransform &)>(&pragma::BaseEntityComponent::SetTransformMemberPose));
+	entityComponentDef.def(
+	  "GetTransformMemberSpace", +[](pragma::BaseEntityComponent &c, ComponentMemberIndex memberIndex) -> std::optional<umath::CoordinateSpace> {
+		  auto *memberInfo = c.GetMemberInfo(memberIndex);
+		  if(!memberInfo)
+			  return {};
+		  auto *cMetaData = memberInfo->FindTypeMetaData<pragma::ents::CoordinateTypeMetaData>();
+		  if(!cMetaData)
+			  return {};
+		  return cMetaData->space;
+	  });
 	entityComponentDef.def(
 	  "GetMemberIndices", +[](lua_State *l, pragma::BaseEntityComponent &component) -> std::vector<pragma::ComponentMemberIndex> {
 		  std::vector<pragma::ComponentMemberIndex> memberIndices;

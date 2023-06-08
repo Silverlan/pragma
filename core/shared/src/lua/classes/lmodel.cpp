@@ -1002,15 +1002,15 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	  "ToDebugString", +[](const panima::Skeleton &skeleton) -> std::string {
 		  std::stringstream ss;
 		  std::function<void(const panima::Bone &, const std::string &t)> fprint = nullptr;
-		  fprint = [&fprint,&ss](const panima::Bone &bone,const std::string &t) {
-			  ss << t<< bone.name << "\n";
+		  fprint = [&fprint, &ss](const panima::Bone &bone, const std::string &t) {
+			  ss << t << bone.name << "\n";
 			  for(auto &pair : bone.children)
-				  fprint(*pair.second,t +"\t");
+				  fprint(*pair.second, t + "\t");
 		  };
 		  for(auto &pair : skeleton.GetRootBones())
-			  fprint(*pair.second,"");
+			  fprint(*pair.second, "");
 		  return ss.str();
-	});
+	  });
 	Lua::Bone::register_class(l, classDefSkeleton);
 
 	auto modelMeshGroupClassDef = luabind::class_<::ModelMeshGroup>("MeshGroup");
@@ -1106,6 +1106,14 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	defConeCreateInfo.def_readwrite("endRadius", &pragma::model::ConeCreateInfo::endRadius);
 	defConeCreateInfo.def_readwrite("segmentCount", &pragma::model::ConeCreateInfo::segmentCount);
 	classDef.scope[defConeCreateInfo];
+
+	auto defEllipticConeCreateInfo = luabind::class_<pragma::model::EllipticConeCreateInfo, pragma::model::ConeCreateInfo>("EllipticConeCreateInfo");
+	defEllipticConeCreateInfo.def(luabind::constructor<umath::Degree, umath::Degree, float>());
+	defEllipticConeCreateInfo.def(luabind::constructor<float, float, float, float, float>());
+	defEllipticConeCreateInfo.def(luabind::constructor<>());
+	defEllipticConeCreateInfo.def_readwrite("startRadiusY", &pragma::model::EllipticConeCreateInfo::startRadiusY);
+	defEllipticConeCreateInfo.def_readwrite("endRadiusY", &pragma::model::EllipticConeCreateInfo::endRadiusY);
+	classDef.scope[defEllipticConeCreateInfo];
 
 	auto defCircleCreateInfo = luabind::class_<pragma::model::CircleCreateInfo>("CircleCreateInfo");
 	defCircleCreateInfo.def(luabind::constructor<float, bool>());

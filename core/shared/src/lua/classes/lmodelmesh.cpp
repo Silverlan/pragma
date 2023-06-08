@@ -133,6 +133,7 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.scope[luabind::def("create_sphere", static_cast<std::shared_ptr<::ModelSubMesh> (*)(Game &, const pragma::model::SphereCreateInfo &)>(&pragma::model::create_sphere))];
 	classDef.scope[luabind::def("create_cylinder", static_cast<std::shared_ptr<::ModelSubMesh> (*)(Game &, const pragma::model::CylinderCreateInfo &)>(&pragma::model::create_cylinder))];
 	classDef.scope[luabind::def("create_cone", static_cast<std::shared_ptr<::ModelSubMesh> (*)(Game &, const pragma::model::ConeCreateInfo &)>(&pragma::model::create_cone))];
+	classDef.scope[luabind::def("create_elliptic_cone", static_cast<std::shared_ptr<::ModelSubMesh> (*)(Game &, const pragma::model::EllipticConeCreateInfo &)>(&pragma::model::create_elliptic_cone))];
 	classDef.scope[luabind::def("create_circle", static_cast<std::shared_ptr<::ModelSubMesh> (*)(Game &, const pragma::model::CircleCreateInfo &)>(&pragma::model::create_circle))];
 	classDef.scope[luabind::def("create_ring", static_cast<std::shared_ptr<::ModelSubMesh> (*)(Game &, const pragma::model::RingCreateInfo &)>(&pragma::model::create_ring))];
 	classDef.def("SetName", &::ModelSubMesh::SetName);

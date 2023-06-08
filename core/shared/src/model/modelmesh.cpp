@@ -1016,8 +1016,13 @@ std::ostream &operator<<(std::ostream &out, const ModelSubMesh &o)
 pragma::model::BoxCreateInfo::BoxCreateInfo(const Vector3 &min, const Vector3 &max) : min {min}, max {max} {}
 pragma::model::SphereCreateInfo::SphereCreateInfo(const Vector3 &origin, float radius) : origin {origin}, radius {radius} {}
 pragma::model::CylinderCreateInfo::CylinderCreateInfo(float radius, float length) : radius {radius}, length {length} {}
+
 pragma::model::ConeCreateInfo::ConeCreateInfo(umath::Degree angle, float length) : length {length} { endRadius = length * umath::tan(umath::deg_to_rad(angle)); }
-pragma::model::ConeCreateInfo::ConeCreateInfo(float startRadius, float length, float endRadius) : startRadius {startRadius}, length {length}, endRadius {endRadius} { }
+pragma::model::ConeCreateInfo::ConeCreateInfo(float startRadius, float length, float endRadius) : startRadius {startRadius}, length {length}, endRadius {endRadius} {}
+
+pragma::model::EllipticConeCreateInfo::EllipticConeCreateInfo(umath::Degree angleX, umath::Degree angleY, float length) : ConeCreateInfo {angleX, length} { endRadiusY = length * umath::tan(umath::deg_to_rad(angleY)); }
+pragma::model::EllipticConeCreateInfo::EllipticConeCreateInfo(float startRadiusX, float startRadiusY, float length, float endRadiusX, float endRadiusY) : ConeCreateInfo {startRadiusX, length, endRadiusX}, startRadiusY {startRadiusY}, endRadiusY {endRadiusY} {}
+
 pragma::model::CircleCreateInfo::CircleCreateInfo(float radius, bool doubleSided) : radius {radius}, doubleSided {doubleSided} {}
 pragma::model::RingCreateInfo::RingCreateInfo(float innerRadius, float outerRadius, bool doubleSided) : innerRadius {innerRadius}, outerRadius {outerRadius}, doubleSided {doubleSided} {}
 void pragma::model::create_quad(ModelSubMesh &mesh, const QuadCreateInfo &createInfo)
@@ -1173,7 +1178,7 @@ std::shared_ptr<ModelSubMesh> pragma::model::create_cylinder(Game &game, const C
 	create_cylinder(*mesh, createInfo);
 	return mesh;
 }
-void pragma::model::create_cone(ModelSubMesh &mesh, const ConeCreateInfo &createInfo)
+static void create_cone(ModelSubMesh &mesh, const pragma::model::ConeCreateInfo &createInfo, const std::optional<std::pair<float, float>> &yRadius)
 {
 	auto startRadius = createInfo.startRadius;
 	auto length = createInfo.length;
@@ -1185,7 +1190,10 @@ void pragma::model::create_cone(ModelSubMesh &mesh, const ConeCreateInfo &create
 	auto &meshVerts = mesh.GetVertices();
 	std::vector<Vector3> verts;
 	std::vector<uint16_t> triangles;
-	umath::geometry::generate_truncated_cone_mesh({}, startRadius, {0.f, 0.f, 1.f}, length, endRadius, verts, &triangles, nullptr, segmentCount);
+	if(yRadius.has_value())
+		umath::geometry::generate_truncated_elliptic_cone_mesh({}, startRadius, yRadius->first, {0.f, 0.f, 1.f}, length, endRadius, yRadius->second, verts, &triangles, nullptr, segmentCount);
+	else
+		umath::geometry::generate_truncated_cone_mesh({}, startRadius, {0.f, 0.f, 1.f}, length, endRadius, verts, &triangles, nullptr, segmentCount);
 	mesh.SetIndices(triangles);
 	meshVerts.reserve(verts.size());
 	for(auto &v : verts) {
@@ -1195,10 +1203,18 @@ void pragma::model::create_cone(ModelSubMesh &mesh, const ConeCreateInfo &create
 	}
 	mesh.GenerateNormals();
 }
+void pragma::model::create_cone(ModelSubMesh &mesh, const ConeCreateInfo &createInfo) { ::create_cone(mesh, createInfo, {}); }
 std::shared_ptr<ModelSubMesh> pragma::model::create_cone(Game &game, const ConeCreateInfo &createInfo)
 {
 	auto mesh = game.CreateModelSubMesh();
 	create_cone(*mesh, createInfo);
+	return mesh;
+}
+void pragma::model::create_elliptic_cone(ModelSubMesh &mesh, const EllipticConeCreateInfo &createInfo) { ::create_cone(mesh, createInfo, std::pair<float, float> {createInfo.startRadiusY,createInfo.endRadiusY}); }
+std::shared_ptr<ModelSubMesh> pragma::model::create_elliptic_cone(Game &game, const EllipticConeCreateInfo &createInfo)
+{
+	auto mesh = game.CreateModelSubMesh();
+	create_elliptic_cone(*mesh, createInfo);
 	return mesh;
 }
 void pragma::model::create_circle(ModelSubMesh &mesh, const CircleCreateInfo &createInfo)

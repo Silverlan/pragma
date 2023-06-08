@@ -291,13 +291,23 @@ namespace pragma::model {
 		ConeCreateInfo() = default;
 		ConeCreateInfo(umath::Degree angle, float length);
 		ConeCreateInfo(float startRadius, float length, float endRadius);
-		float startRadius = 0.f;
 		float length = 0.f;
-		float endRadius = 0.f;
 		uint32_t segmentCount = 12;
+		float startRadius = 0.f;
+		float endRadius = 0.f;
 	};
 	DLLNETWORK void create_cone(ModelSubMesh &mesh, const ConeCreateInfo &createInfo);
 	DLLNETWORK std::shared_ptr<ModelSubMesh> create_cone(Game &game, const ConeCreateInfo &createInfo);
+
+	struct DLLNETWORK EllipticConeCreateInfo : public ConeCreateInfo {
+		EllipticConeCreateInfo() = default;
+		EllipticConeCreateInfo(umath::Degree angleX, umath::Degree angleY, float length);
+		EllipticConeCreateInfo(float startRadiusX, float startRadiusY, float length, float endRadiusX, float endRadiusY);
+		float startRadiusY = 0.f;
+		float endRadiusY = 0.f;
+	};
+	DLLNETWORK void create_elliptic_cone(ModelSubMesh &mesh, const EllipticConeCreateInfo &createInfo);
+	DLLNETWORK std::shared_ptr<ModelSubMesh> create_elliptic_cone(Game &game, const EllipticConeCreateInfo &createInfo);
 
 	struct DLLNETWORK CircleCreateInfo {
 		CircleCreateInfo() = default;

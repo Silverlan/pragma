@@ -228,10 +228,12 @@ namespace pragma::ik {
 	};
 	class DLLNETWORK EllipseSwingLimit : public IJoint {
 	  public:
-		EllipseSwingLimit(Bone &bone0, Bone &bone1, const Vector3 &axisA, const Vector3 &axisB, const Vector3 &xAxis, umath::Radian maxAngleX, umath::Radian maxAngleY);
+		EllipseSwingLimit(Bone &bone0, Bone &bone1, const Vector3 &axisA, const Vector3 &axisB, umath::Radian maxAngleX, umath::Radian maxAngleY);
 		~EllipseSwingLimit();
-		const Vector3 &GetAxisA() const;
-		const Vector3 &GetAxisB() const;
+		Vector3 GetAxisA() const;
+		Vector3 GetAxisB() const;
+		const Vector3 &GetOriginalAxisA() const;
+		const Vector3 &GetOriginalAxisB() const;
 		const Vector3 &GetXAxis() const;
 		umath::Radian GetMaxAngleX() const;
 		umath::Radian GetMaxAngleY() const;
@@ -266,8 +268,10 @@ namespace pragma::ik {
 		void SetMeasurementAxisB(const Vector3 &axis);
 		Vector3 GetMeasurementAxisB();
 		umath::Radian GetMaxAngle() const;
-		const Vector3 &GetAxisA() const;
-		const Vector3 &GetAxisB() const;
+		Vector3 GetAxisA() const;
+		Vector3 GetAxisB() const;
+		const Vector3 &GetOriginalAxisA() const;
+		const Vector3 &GetOriginalAxisB() const;
 		~TwistLimit();
 	  private:
 		Vector3 m_axisA;
@@ -301,7 +305,7 @@ namespace pragma::ik {
 		PointOnLineJoint &AddPointOnLineJoint(Bone &bone0, Bone &bone1, const Vector3 &lineAnchor, const Vector3 &lineDirection, const Vector3 &anchorB);
 		RevoluteJoint &AddRevoluteJoint(Bone &bone0, Bone &bone1, const Vector3 &freeAxis);
 		SwingLimit &AddSwingLimit(Bone &bone0, Bone &bone1, const Vector3 &axisA, const Vector3 &axisB, float maxAngle);
-		EllipseSwingLimit &AddEllipseSwingLimit(Bone &bone0, Bone &bone1, const Vector3 &axisA, const Vector3 &axisB, const Vector3 &xAxis, float maxAngleX, float maxAngleY);
+		EllipseSwingLimit &AddEllipseSwingLimit(Bone &bone0, Bone &bone1, const Vector3 &axisA, const Vector3 &axisB, float maxAngleX, float maxAngleY);
 		LinearAxisLimit &AddLinearAxisLimit(Bone &bone0, Bone &bone1, const Vector3 &lineAnchor, const Vector3 &lineDirection, const Vector3 &anchorB, float minimumDistance, float maximumDistance);
 		TwistJoint &AddTwistJoint(Bone &bone0, Bone &bone1, const Vector3 &axisA, const Vector3 &axisB);
 		TwistLimit &AddTwistLimit(Bone &bone0, Bone &bone1, const Vector3 &axisA, const Vector3 &axisB, float maxAngle);

@@ -156,6 +156,8 @@ void Lua::ik::register_library(Lua::Interface &lua)
 	classEllipseSwingLimit.def("GetAxisA", &pragma::ik::EllipseSwingLimit::GetAxisA, luabind::copy_policy<0> {});
 	classEllipseSwingLimit.def("GetAxisB", &pragma::ik::EllipseSwingLimit::GetAxisB, luabind::copy_policy<0> {});
 	classEllipseSwingLimit.def("GetXAxis", &pragma::ik::EllipseSwingLimit::GetXAxis, luabind::copy_policy<0> {});
+	classEllipseSwingLimit.def("GetOriginalAxisA", &pragma::ik::EllipseSwingLimit::GetOriginalAxisA, luabind::copy_policy<0> {});
+	classEllipseSwingLimit.def("GetOriginalAxisB", &pragma::ik::EllipseSwingLimit::GetOriginalAxisB, luabind::copy_policy<0> {});
 	classEllipseSwingLimit.def("GetMaxAngleX", &pragma::ik::EllipseSwingLimit::GetMaxAngleX);
 	classEllipseSwingLimit.def("GetMaxAngleY", &pragma::ik::EllipseSwingLimit::GetMaxAngleY);
 	modIk[classEllipseSwingLimit];
@@ -184,6 +186,8 @@ void Lua::ik::register_library(Lua::Interface &lua)
 	classTwistLimit.def("GetMaxAngle", &pragma::ik::TwistLimit::GetMaxAngle);
 	classTwistLimit.def("GetAxisA", &pragma::ik::TwistLimit::GetAxisA, luabind::copy_policy<0> {});
 	classTwistLimit.def("GetAxisB", &pragma::ik::TwistLimit::GetAxisB, luabind::copy_policy<0> {});
+	classTwistLimit.def("GetOriginalAxisA", &pragma::ik::TwistLimit::GetOriginalAxisA, luabind::copy_policy<0> {});
+	classTwistLimit.def("GetOriginalAxisB", &pragma::ik::TwistLimit::GetOriginalAxisB, luabind::copy_policy<0> {});
 	modIk[classTwistLimit];
 
 	auto classSwivelHingeJoint = luabind::class_<pragma::ik::SwivelHingeJoint, pragma::ik::IJoint>("SwivelHingeJoint");

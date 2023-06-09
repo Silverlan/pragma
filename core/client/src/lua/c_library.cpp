@@ -448,7 +448,8 @@ static pragma::LuaInputBindingLayerRegister &get_input_binding_layer_register() 
 static std::shared_ptr<InputBindingLayer> create_input_binding_layer()
 {
 	auto layer = std::shared_ptr<InputBindingLayer> {new InputBindingLayer {}, [](InputBindingLayer *layer) {
-		                                                 get_input_binding_layer_register().Remove(*layer);
+		                                                 if(!umath::is_flag_set(c_game->GetGameFlags(), Game::GameFlags::ClosingGame))
+			                                                 get_input_binding_layer_register().Remove(*layer);
 		                                                 delete layer;
 	                                                 }};
 	get_input_binding_layer_register().Add(*layer);

@@ -929,8 +929,7 @@ void IkSolverComponent::Solve()
 
 	// TODO: Reset pose?
 	ResetIkBones();
-	for(uint32_t i = 0; i < 5; ++i)
-		m_ikSolver->Solve();
+	m_ikSolver->Solve();
 }
 void IkSolverComponent::ResetIkBones()
 {

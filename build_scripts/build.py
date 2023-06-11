@@ -760,7 +760,7 @@ def download_addon(name,addonName,url,commitId=None):
 
 curDir = os.getcwd()
 if with_pfm:
-	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","e42325442e2a807c1046929765c6563db0a40923")
+	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","29ade466efcc2c0bc611a1f5e131024d97e13566")
 	download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","044db97f82f90dd7451ba7fbf0e5de1ffecc1659")
 
 if with_vr:

@@ -52,6 +52,12 @@ void IkSolverComponent::RegisterMembers(pragma::EntityComponentManager &componen
 		metaData["stripExtension"] = true;
 		registerMember(std::move(memberInfo));
 	}
+	{
+		using TResetSolver = bool;
+		auto memberInfo = create_component_member_info<T, TResetSolver, static_cast<void (T::*)(TResetSolver)>(&T::SetResetSolver), static_cast<TResetSolver (T::*)() const>(&T::ShouldResetSolver)>("resetSolver", true);
+		memberInfo.SetFlag(pragma::ComponentMemberFlags::HideInInterface);
+		registerMember(std::move(memberInfo));
+	}
 }
 IkSolverComponent::IkSolverComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_ikRig {udm::Property::Create<udm::Element>()} {}
 void IkSolverComponent::UpdateGlobalSolverSettings()
@@ -375,12 +381,6 @@ void IkSolverComponent::AddFixedConstraint(const ConstraintInfo &constraintInfo)
 	// Lock the angles
 	auto &joint = m_ikSolver->AddAngularJoint(*bone0, *bone1);
 	init_joint(constraintInfo, joint);
-
-	// Lock swing limit to 0
-	//self.m_solver:AddSwingLimit(bone0,bone1,self:GetDirectionFromBoneParent(boneId1),self:GetDirectionFromBoneParent(boneId1),math.rad(5)):SetRigidity(1000)
-
-	// Restrict twist
-	//self.m_solver:AddTwistLimit(bone0,bone1,rotBone1:GetForward(),rotBone1:GetForward(),math.rad(5)):SetRigidity(1000)
 }
 void IkSolverComponent::AddHingeConstraint(const ConstraintInfo &constraintInfo, umath::Degree minAngle, umath::Degree maxAngle, const Quat &offsetRotation, SignedAxis twistAxis)
 {
@@ -392,26 +392,26 @@ void IkSolverComponent::AddHingeConstraint(const ConstraintInfo &constraintInfo,
 	auto &rotBone1 = refPose1.GetRotation();
 
 	auto twistRotOffset = uquat::identity();
-	{
-		// If the twist axis is NOT the X axis, we'll have to rotate
-		// the main axis around a bit and adjust the limits accordingly.
-		switch(twistAxis) {
-		case pragma::SignedAxis::X:
-		case pragma::SignedAxis::NegX:
-			break;
-		case pragma::SignedAxis::Y:
-		case pragma::SignedAxis::NegY:
-			twistRotOffset = uquat::create(EulerAngles(0.0, 0.f, 90.f));
-			break;
-		case pragma::SignedAxis::Z:
-		case pragma::SignedAxis::NegZ:
-			twistRotOffset = uquat::create(EulerAngles(0.0, 90.f, 0.f));
-			umath::swap(minAngle, maxAngle);
-			minAngle *= -1.f;
-			maxAngle *= -1.f;
-			break;
-		}
+
+	// If the twist axis is NOT the X axis, we'll have to rotate
+	// the main axis around a bit and adjust the limits accordingly.
+	switch(twistAxis) {
+	case pragma::SignedAxis::X:
+	case pragma::SignedAxis::NegX:
+		break;
+	case pragma::SignedAxis::Y:
+	case pragma::SignedAxis::NegY:
+		twistRotOffset = uquat::create(EulerAngles(0.0, 0.f, 90.f));
+		break;
+	case pragma::SignedAxis::Z:
+	case pragma::SignedAxis::NegZ:
+		twistRotOffset = uquat::create(EulerAngles(0.0, 90.f, 0.f));
+		umath::swap(minAngle, maxAngle);
+		minAngle *= -1.f;
+		maxAngle *= -1.f;
+		break;
 	}
+
 	rotBone0 *= twistRotOffset;
 	rotBone1 *= twistRotOffset;
 
@@ -434,31 +434,6 @@ void IkSolverComponent::AddHingeConstraint(const ConstraintInfo &constraintInfo,
 	// Apply the swing limit
 	auto &swingLimit = m_ikSolver->AddSwingLimit(*bone0, *bone1, uquat::up(rotBone1WithOffset), uquat::up(rotBone1), umath::deg_to_rad(maxAngle - minAngle));
 	init_joint(constraintInfo, swingLimit);
-
-	/*
-	local rotBone0 = self:GetReferenceBonePose(boneId0):GetRotation()
-	local rotBone1 = self:GetReferenceBonePose(boneId1):GetRotation()
-
-	-- TODO: This does not belong here
-	rotBone0 = self:GetEntity():GetPose() *rotBone0
-	rotBone1 = self:GetEntity():GetPose() *rotBone1
-
-	-- The IK system only allows us to specify a general swing limit (in any direction). Since we want to be able to specify it in each
-	-- direction independently, we have to shift the rotation axes accordingly.
-	local rotBone1WithOffset = rotBone1 *EulerAngles(0,-(max +min),0):ToQuaternion()
-
-	local bone0 = self.m_solver:GetBone(self.m_boneIdToRigConfigBoneId[boneId0])
-	local bone1 = self.m_solver:GetBone(self.m_boneIdToRigConfigBoneId[boneId1])
-
-	-- BallSocket is required to ensure the distance and rotation to the parent is locked
-	self.m_solver:AddBallSocketJoint(bone0,bone1,bone1:GetPos())
-
-	-- Revolute joint to lock rotation to a single axis
-	self.m_solver:AddRevoluteJoint(bone0,bone1,rotBone0:GetUp())
-
-	-- Apply the swing limit
-	self.m_solver:AddSwingLimit(bone0,bone1,rotBone1WithOffset:GetForward(),rotBone1:GetForward(),math.rad(max -min)):SetRigidity(1000)
-*/
 }
 
 std::optional<pragma::SignedAxis> IkSolverComponent::FindTwistAxis(Model &mdl, BoneId boneId)
@@ -554,88 +529,41 @@ void IkSolverComponent::AddBallSocketConstraint(const ConstraintInfo &constraint
 		}
 	}
 
-	// The IK system only allows us to specify a general swing limit (in any direction). Since we want to be able to specify it in each
-	// direction independently, we have to shift the rotation axes accordingly.
-	auto rotBone1WithOffset = rotBone1; // * uquat::create(EulerAngles(effectiveMaxLimits.p + effectiveMinLimits.p, effectiveMaxLimits.y + effectiveMinLimits.y, 0.f)); //-(effectiveMaxLimits.r + effectiveMinLimits.r)));
-	                                    //uquat::rotate_y(rotBone1WithOffset, umath::deg_to_rad(effectiveMaxLimits.y + effectiveMinLimits.y));
-	                                    //uquat::rotate_x(rotBone1WithOffset, umath::deg_to_rad(effectiveMaxLimits.p + effectiveMinLimits.p));
+	auto refRot1 = rotBone1 * twistRotOffset; //uquat::create(ang);
 
+	constexpr auto useEllipseSwingLimit = true;
+	if(!useEllipseSwingLimit) {
+		// Convert ellipse swing limit to general swing limit
+		auto maxSpan = umath::max(effectiveMaxLimits.p - effectiveMinLimits.p, effectiveMaxLimits.y - effectiveMinLimits.y);
+		auto pMid = (effectiveMaxLimits.p + effectiveMinLimits.p) * 0.5f;
+		effectiveMaxLimits.p = pMid + maxSpan * 0.5f;
+		effectiveMinLimits.p = pMid - maxSpan * 0.5f;
+		auto yMid = (effectiveMaxLimits.y + effectiveMinLimits.y) * 0.5f;
+		effectiveMaxLimits.y = yMid + maxSpan * 0.5f;
+		effectiveMinLimits.y = yMid - maxSpan * 0.5f;
+	}
 
-	{
-		auto refRot1 = rotBone1 * twistRotOffset; //uquat::create(ang);
+	// This is not quite correct and can cause issues with certain configurations.
+	auto rotBone1WithOffset = refRot1 * uquat::create(EulerAngles(-(effectiveMaxLimits.p + effectiveMinLimits.p), effectiveMaxLimits.y + effectiveMinLimits.y, 0.f)); //-(effectiveMaxLimits.r + effectiveMinLimits.r)));
 
-		static auto useEllipseSwingLimit = true;
+	auto axisB = uquat::forward(refRot1);
+	auto span = umath::abs(effectiveMaxLimits.y - effectiveMinLimits.y);
+	if(span < 179.99f) {
 		if(!useEllipseSwingLimit) {
-			auto maxSpan = umath::max(effectiveMaxLimits.p - effectiveMinLimits.p, effectiveMaxLimits.y - effectiveMinLimits.y);
-			auto pMid = (effectiveMaxLimits.p + effectiveMinLimits.p) * 0.5f;
-			effectiveMaxLimits.p = pMid + maxSpan * 0.5f;
-			effectiveMinLimits.p = pMid - maxSpan * 0.5f;
-			auto yMid = (effectiveMaxLimits.y + effectiveMinLimits.y) * 0.5f;
-			effectiveMaxLimits.y = yMid + maxSpan * 0.5f;
-			effectiveMinLimits.y = yMid - maxSpan * 0.5f;
+			auto &ellipseSwingLimit = m_ikSolver->AddSwingLimit(*bone0, *bone1, uquat::forward(rotBone1WithOffset), axisB, umath::deg_to_rad(effectiveMaxLimits.y - effectiveMinLimits.y));
+			init_joint(constraintInfo, ellipseSwingLimit);
 		}
-
-		// This is not quite correct and can cause issues with certain configurations.
-		auto rotBone1WithOffset = refRot1 * uquat::create(EulerAngles(-(effectiveMaxLimits.p + effectiveMinLimits.p), effectiveMaxLimits.y + effectiveMinLimits.y, 0.f)); //-(effectiveMaxLimits.r + effectiveMinLimits.r)));
-
-		auto axisB = uquat::forward(refRot1);
-		auto span = umath::abs(effectiveMaxLimits.y - effectiveMinLimits.y);
-		if(span < 179.99f) {
-			if(!useEllipseSwingLimit) {
-				auto &ellipseSwingLimit = m_ikSolver->AddSwingLimit(*bone0, *bone1, uquat::forward(rotBone1WithOffset), axisB, umath::deg_to_rad(effectiveMaxLimits.y - effectiveMinLimits.y));
-				init_joint(constraintInfo, ellipseSwingLimit);
-			}
-			else {
-				auto &ellipseSwingLimit = m_ikSolver->AddEllipseSwingLimit(*bone0, *bone1, uquat::forward(rotBone1WithOffset), axisB, umath::deg_to_rad(effectiveMaxLimits.y - effectiveMinLimits.y), umath::deg_to_rad(effectiveMaxLimits.p - effectiveMinLimits.p));
-				init_joint(constraintInfo, ellipseSwingLimit);
-			}
-		}
-
-		// Revolute joint to lock rotation to a single axis
-		//m_ikSolver->AddRevoluteJoint(*bone0, *bone1, uquat::right(rotBone1WithOffset));
-
-		static auto twistLimitVal = 1.f;
-		if(twistLimitVal > 0.f) {
-			auto &twistLimit = m_ikSolver->AddTwistLimit(*bone0, *bone1, uquat::forward(rotBone1WithOffset), axisB, umath::deg_to_rad(twistLimitVal));
-			init_joint(constraintInfo, twistLimit);
+		else {
+			auto &ellipseSwingLimit = m_ikSolver->AddEllipseSwingLimit(*bone0, *bone1, uquat::forward(rotBone1WithOffset), axisB, umath::deg_to_rad(effectiveMaxLimits.y - effectiveMinLimits.y), umath::deg_to_rad(effectiveMaxLimits.p - effectiveMinLimits.p));
+			init_joint(constraintInfo, ellipseSwingLimit);
 		}
 	}
 
-	// Revolute joint to lock rotation to a single axis
-	//self.m_solver:AddRevoluteJoint(bone0,bone1,rotBone0:GetUp()) -- Test
-
-	// Apply the swing limit
-	//self.m_solver:AddSwingLimit(bone0,bone1,rotBone1WithOffset:GetForward(),rotBone1:GetForward(),math.rad(effectiveMaxLimits.y -effectiveMinLimits.y)):SetRigidity(16)
-	//self.m_solver:AddSwingLimit(bone0,bone1,rotBone1:GetForward(),rotBone1:GetForward(),math.rad(45)):SetRigidity(16)
-#if 0
-	auto dirToBone = refPose1.GetOrigin() - refPose0.GetOrigin();
-	uvec::normalize(&dirToBone);
-	auto &twistLimit = m_ikSolver->AddTwistLimit(*bone0, *bone1, dirToBone, uquat::right(rotBone1), umath::deg_to_rad(effectiveMaxLimits.p - effectiveMinLimits.p));
-	twistLimit.SetRigidity(1'000);
-#endif
-
-	//self:GetRigConfig():AddArray("constraints",udm.TYPE_ELEMENT)
-
-	/*local pose0 = self:GetReferenceBonePose(boneId0)
-	local pose1 = self:GetReferenceBonePose(boneId1)
-	local rot = pose0:GetRotation()
-	local angOffset = (effectiveMaxLimits -effectiveMinLimits) /2.0
-	rot = rot *angOffset:ToQuaternion()
-
-	local swingSpan = math.max(
-		effectiveMaxLimits.p -effectiveMinLimits.p,
-		effectiveMaxLimits.y -effectiveMinLimits.y
-	)
-	local twistSpan = effectiveMaxLimits.r -effectiveMinLimits.r
-
-	local bone0 = self.m_solver:GetBone(self.m_boneIdToRigConfigBoneId[boneId0])
-	local bone1 = self.m_solver:GetBone(self.m_boneIdToRigConfigBoneId[boneId1])
-	self.m_solver:AddBallSocketJoint(bone0,bone1,pose0:GetOrigin())
-
-	local axis = rot:GetForward()
-	--self.m_solver:AddSwingLimit(bone0,bone1,axis,(pose1:GetOrigin() -pose0:GetOrigin()):GetNormal(),math.rad(10)):SetRigidity(1000)
-*/
-	// TODO: Add twist limit
+	auto twistLimitVal = 1.f; // TODO
+	if(twistLimitVal > 0.f) {
+		auto &twistLimit = m_ikSolver->AddTwistLimit(*bone0, *bone1, uquat::forward(rotBone1WithOffset), axisB, umath::deg_to_rad(twistLimitVal));
+		init_joint(constraintInfo, twistLimit);
+	}
 }
 bool IkSolverComponent::UpdateIkRig()
 {
@@ -918,8 +846,11 @@ pragma::ik::Bone *IkSolverComponent::AddBone(const std::string &boneName, BoneId
 	m_ikBoneIdToBoneId[rigConfigBoneId] = boneId;
 	return rigConfigBone;
 }
+void IkSolverComponent::SetResetSolver(bool resetSolver) { m_resetIkPose = resetSolver; }
+bool IkSolverComponent::ShouldResetSolver() const { return m_resetIkPose; }
 void IkSolverComponent::ResetIkRig() { InitializeSolver(); }
 const std::shared_ptr<pragma::ik::Solver> &IkSolverComponent::GetIkSolver() const { return m_ikSolver; }
+
 void IkSolverComponent::Solve()
 {
 	InvokeEventCallbacks(EVENT_UPDATE_IK);
@@ -927,8 +858,8 @@ void IkSolverComponent::Solve()
 		return;
 	m_updateRequired = false;
 
-	// TODO: Reset pose?
-	ResetIkBones();
+	if(m_resetIkPose)
+		ResetIkBones();
 	m_ikSolver->Solve();
 }
 void IkSolverComponent::ResetIkBones()

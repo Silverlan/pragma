@@ -63,6 +63,9 @@ namespace pragma {
 		void Solve();
 		void ResetIkRig();
 
+		void SetResetSolver(bool resetSolver);
+		bool ShouldResetSolver() const;
+
 		const std::shared_ptr<pragma::ik::Solver> &GetIkSolver() const;
 		bool AddIkSolverByRig(const ik::RigConfig &ikRig);
 		bool AddIkSolverByChain(const std::string &boneName, uint32_t chainLength);
@@ -92,6 +95,7 @@ namespace pragma {
 		std::unordered_map<IkBoneId, BoneId> m_ikBoneIdToBoneId;
 		std::unordered_map<BoneId, std::shared_ptr<pragma::ik::IControl>> m_ikControls;
 		bool m_updateRequired = false;
+		bool m_resetIkPose = true;
 	};
 };
 

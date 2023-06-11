@@ -278,7 +278,7 @@ void pragma::ik::SwingLimit::SetMaxAngle(umath::Radian maxAngle) { static_cast<B
 pragma::ik::EllipseSwingLimit::EllipseSwingLimit(Bone &bone0, Bone &bone1, const Vector3 &axisA, const Vector3 &axisB, umath::Radian maxAngleX, umath::Radian maxAngleY)
     : IJoint {JointType::EllipseSwingLimit}, m_maxAngleX {maxAngleX}, m_maxAngleY {maxAngleY}, m_axisA {axisA}, m_axisB {axisB}
 {
-	auto joint = std::make_unique<BEPUik::IKEllipseSwingLimit2>(**bone0, **bone1, to_bepu_axis(axisA), to_bepu_axis(axisB), maxAngleX, maxAngleY);
+	auto joint = std::make_unique<BEPUik::IKEllipseSwingLimit>(**bone0, **bone1, to_bepu_axis(axisA), to_bepu_axis(axisB), maxAngleX, maxAngleY);
 	SetJoint(std::move(joint), bone0, bone1);
 }
 pragma::ik::EllipseSwingLimit::~EllipseSwingLimit() {}

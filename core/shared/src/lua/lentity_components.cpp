@@ -519,6 +519,8 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defIkSolver.def("Solve", &pragma::IkSolverComponent::Solve);
 	defIkSolver.def("ResetIkRig", &pragma::IkSolverComponent::ResetIkRig);
 	defIkSolver.def("GetIkSolver", &pragma::IkSolverComponent::GetIkSolver);
+	defIkSolver.def("SetResetSolver", &pragma::IkSolverComponent::SetResetSolver);
+	defIkSolver.def("ShouldResetSolver", &pragma::IkSolverComponent::ShouldResetSolver);
 	defIkSolver.scope[defRigConfig];
 	entsMod[defIkSolver];
 

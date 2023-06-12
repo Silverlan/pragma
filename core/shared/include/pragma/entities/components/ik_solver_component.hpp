@@ -21,7 +21,7 @@ namespace pragma {
 	  public:
 		using IkBoneId = pragma::ik::BoneId;
 		static ComponentEventId EVENT_INITIALIZE_SOLVER;
-		static ComponentEventId EVENT_UPDATE_IK;
+		static ComponentEventId EVENT_ON_IK_UPDATED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		static std::optional<pragma::SignedAxis> FindTwistAxis(Model &mdl, BoneId boneId);

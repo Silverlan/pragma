@@ -497,7 +497,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 
 	auto defIkSolver = pragma::lua::create_entity_component_class<pragma::IkSolverComponent, pragma::BaseEntityComponent>("IkSolverComponent");
 	defIkSolver.add_static_constant("EVENT_INITIALIZE_SOLVER", pragma::IkSolverComponent::EVENT_INITIALIZE_SOLVER);
-	defIkSolver.add_static_constant("EVENT_UPDATE_IK", pragma::IkSolverComponent::EVENT_UPDATE_IK);
+	defIkSolver.add_static_constant("EVENT_ON_IK_UPDATED", pragma::IkSolverComponent::EVENT_ON_IK_UPDATED);
 	defIkSolver.scope[luabind::def("find_forward_axis", &pragma::IkSolverComponent::FindTwistAxis)];
 	defIkSolver.scope[luabind::def("get_control_bone_name", &pragma::IkSolverComponent::GetControlBoneName)];
 	defIkSolver.def("SetIkRigFile", &pragma::IkSolverComponent::SetIkRigFile);

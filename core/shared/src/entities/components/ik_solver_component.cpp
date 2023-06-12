@@ -23,12 +23,12 @@
 using namespace pragma;
 
 ComponentEventId IkSolverComponent::EVENT_INITIALIZE_SOLVER = pragma::INVALID_COMPONENT_ID;
-ComponentEventId IkSolverComponent::EVENT_UPDATE_IK = pragma::INVALID_COMPONENT_ID;
+ComponentEventId IkSolverComponent::EVENT_ON_IK_UPDATED = pragma::INVALID_COMPONENT_ID;
 IkSolverComponent::ConstraintInfo::ConstraintInfo(BoneId bone0, BoneId bone1) : boneId0 {bone0}, boneId1 {bone1} {}
 void IkSolverComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	EVENT_INITIALIZE_SOLVER = registerEvent("INITIALIZE_SOLVER", ComponentEventInfo::Type::Broadcast);
-	EVENT_UPDATE_IK = registerEvent("UPDATE_IK", ComponentEventInfo::Type::Explicit);
+	EVENT_ON_IK_UPDATED = registerEvent("ON_IK_UPDATED", ComponentEventInfo::Type::Explicit);
 }
 static void set_ik_rig(const ComponentMemberInfo &memberInfo, IkSolverComponent &component, const pragma::ents::Element &value) { component.UpdateIkRig(); }
 static void get_ik_rig(const ComponentMemberInfo &memberInfo, IkSolverComponent &component, pragma::ents::Element &value) { value = component.GetIkRig(); }
@@ -257,15 +257,37 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 		return false;
 	}
 	auto &skeleton = mdl->GetSkeleton();
-	for(auto &boneData : rigConfig.GetBones()) {
+
+	using HierarchyDepth = uint8_t;
+	std::vector<std::pair<BoneId, HierarchyDepth>> bones;
+	auto &rigBones = rigConfig.GetBones();
+	bones.reserve(rigBones.size());
+
+	for(auto &boneData : rigBones) {
 		auto boneId = skeleton.LookupBone(boneData->name);
 		if(boneId == -1) {
 			spdlog::debug("Failed to add ik rig to ik solver {}: Bone {} does not exist in skeleton.", GetEntity().ToString(), boneData->name);
 			return false;
 		}
-		AddSkeletalBone(boneId);
-		if(boneData->locked)
-			SetBoneLocked(boneId, true);
+		HierarchyDepth depth = 0;
+		auto bone = skeleton.GetBone(boneId);
+		assert(!bone.expired());
+		auto parent = bone.lock()->parent;
+		while(!parent.expired()) {
+			++depth;
+			parent = parent.lock()->parent;
+		}
+		bones.push_back({boneId, depth});
+	}
+	// Sort the bones to be in hierarchical order. This is not necessary for the ik solver, but the order is important
+	// when the animation is updated.
+	std::sort(bones.begin(), bones.end(), [](const std::pair<BoneId, HierarchyDepth> &a, const std::pair<BoneId, HierarchyDepth> &b) { return a.second < b.second; });
+	for(auto i = decltype(bones.size()) {0u}; i < bones.size(); ++i) {
+		auto &bone = bones[i];
+		auto &rigBone = rigBones[i];
+		AddSkeletalBone(bone.first);
+		if(rigBone->locked)
+			SetBoneLocked(bone.first, true);
 	}
 
 	for(auto &controlData : rigConfig.GetControls()) {
@@ -853,14 +875,16 @@ const std::shared_ptr<pragma::ik::Solver> &IkSolverComponent::GetIkSolver() cons
 
 void IkSolverComponent::Solve()
 {
-	InvokeEventCallbacks(EVENT_UPDATE_IK);
-	if(!m_updateRequired)
+	if(!m_updateRequired) {
+		InvokeEventCallbacks(EVENT_ON_IK_UPDATED);
 		return;
+	}
 	m_updateRequired = false;
 
 	if(m_resetIkPose)
 		ResetIkBones();
 	m_ikSolver->Solve();
+	InvokeEventCallbacks(EVENT_ON_IK_UPDATED);
 }
 void IkSolverComponent::ResetIkBones()
 {

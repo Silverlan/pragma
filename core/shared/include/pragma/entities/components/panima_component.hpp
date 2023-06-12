@@ -130,7 +130,7 @@ namespace pragma {
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua_State *l) override;
 		util::Path &path;
-		panima::ChannelValueSubmitter submitter = nullptr;
+		panima::ChannelValueSubmitter submitter {};
 	};
 };
 

@@ -212,6 +212,21 @@ void PanimaComponent::DebugPrint()
 	Con::cout << "Animation info: \n" << ss.str() << Con::endl;
 }
 
+void PanimaComponent::SetPropertyEnabled(const std::string &propName, bool enabled)
+{
+	if(enabled) {
+		auto it = m_disabledProperties.find(pragma::register_global_string(propName));
+		if(it != m_disabledProperties.end()) {
+			m_disabledProperties.erase(it);
+			InitializeAnimationChannelValueSubmitters();
+		}
+		return;
+	}
+	m_disabledProperties.insert(pragma::register_global_string(propName));
+	InitializeAnimationChannelValueSubmitters();
+}
+bool PanimaComponent::IsPropertyEnabled(const std::string &propName) const { return m_disabledProperties.find(pragma::register_global_string(propName)) == m_disabledProperties.end(); }
+
 void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::AnimationManager &manager)
 {
 	auto *anim = manager.GetCurrentAnimation();
@@ -222,7 +237,7 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 	}
 	auto &channels = anim->GetChannels();
 	channelValueSubmitters.clear();
-	channelValueSubmitters.resize(channels.size(), nullptr);
+	channelValueSubmitters.resize(channels.size(), panima::ChannelValueSubmitter {});
 	uint32_t numInvalidChannels = 0;
 	auto shouldPrintWarning = [&numInvalidChannels]() {
 		if(numInvalidChannels >= 5) {
@@ -238,6 +253,8 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 	for(auto it = channels.begin(); it != channels.end(); ++it) {
 		auto &channel = *it;
 		auto &path = channel->targetPath;
+		if(!IsPropertyEnabled(path.path.GetString()))
+			continue;
 		size_t offset = 0;
 		if(path.path.GetComponent(offset, &offset) != "ec") // First path component denotes the type, which always has to be 'ec' for entity component in this case
 		{

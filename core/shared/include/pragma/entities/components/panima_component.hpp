@@ -11,6 +11,7 @@
 #include "pragma/types.hpp"
 #include <panima/types.hpp>
 #include <sharedutils/property/util_property.hpp>
+#include <unordered_set>
 
 #undef GetCurrentTime
 
@@ -63,6 +64,9 @@ namespace pragma {
 		void SetCurrentTimeFraction(panima::AnimationManager &manager, float t);
 		void ReloadAnimation();
 
+		void SetPropertyEnabled(const std::string &propName,bool enabled);
+		bool IsPropertyEnabled(const std::string &propName) const;
+
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		using BaseEntityComponent::Load;
@@ -75,6 +79,7 @@ namespace pragma {
 		void ResetAnimation(const std::shared_ptr<Model> &mdl);
 		util::PFloatProperty m_playbackRate = nullptr;
 		std::vector<std::pair<std::string, panima::PAnimationManager>> m_animationManagers;
+		std::unordered_set<const char*> m_disabledProperties;
 	};
 
 	struct DLLNETWORK CEAnim2OnAnimationComplete : public ComponentEvent {

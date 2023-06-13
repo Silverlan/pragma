@@ -13,6 +13,7 @@
 #include "pragma/entities/components/component_member_flags.hpp"
 #include "pragma/entities/components/constraints/constraint_component.hpp"
 #include "pragma/entities/components/constraints/constraint_manager_component.hpp"
+#include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/logging.hpp"
@@ -225,8 +226,9 @@ void IkSolverComponent::AddSkeletalBone(BoneId boneId)
 		return;
 	AddBone(bone.lock()->name, boneId, pose, 1.f, 1.f);
 }
-void IkSolverComponent::AddDragControl(BoneId boneId, float maxForce, float rigidity) { AddControl(boneId, true, false, maxForce, rigidity); }
-void IkSolverComponent::AddStateControl(BoneId boneId, float maxForce, float rigidity) { AddControl(boneId, true, true, maxForce, rigidity); }
+void IkSolverComponent::AddDragControl(BoneId boneId, float maxForce, float rigidity) { AddControl(boneId, pragma::ik::RigConfigControl::Type::Drag, maxForce, rigidity); }
+void IkSolverComponent::AddStateControl(BoneId boneId, float maxForce, float rigidity) { AddControl(boneId, pragma::ik::RigConfigControl::Type::State, maxForce, rigidity); }
+void IkSolverComponent::AddOrientedDragControl(BoneId boneId, float maxForce, float rigidity) { AddControl(boneId, pragma::ik::RigConfigControl::Type::OrientedDrag, maxForce, rigidity); }
 size_t IkSolverComponent::GetBoneCount() const { return m_ikSolver->GetBoneCount(); }
 pragma::ik::IControl *IkSolverComponent::GetControl(BoneId boneId)
 {
@@ -302,14 +304,7 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 			spdlog::debug("Failed to add ik rig to ik solver {}: Control bone {} does not exist in skeleton.", GetEntity().ToString(), controlData->bone);
 			return false;
 		}
-		switch(controlData->type) {
-		case pragma::ik::RigConfigControl::Type::Drag:
-			AddDragControl(boneId, controlData->maxForce, controlData->rigidity);
-			break;
-		case pragma::ik::RigConfigControl::Type::State:
-			AddStateControl(boneId, controlData->maxForce, controlData->rigidity);
-			break;
-		}
+		AddControl(boneId, controlData->type, controlData->maxForce, controlData->rigidity);
 	}
 
 	for(auto &constraintData : rigConfig.GetConstraints()) {
@@ -655,9 +650,8 @@ pragma::ik::Bone *IkSolverComponent::GetIkBone(BoneId boneId)
 		return nullptr;
 	return m_ikSolver->GetBone(*rigConfigBoneId);
 }
-void IkSolverComponent::AddControl(BoneId boneId, bool translation, bool rotation, float maxForce, float rigidity)
+void IkSolverComponent::AddControl(BoneId boneId, pragma::ik::RigConfigControl::Type type, float maxForce, float rigidity)
 {
-	assert((translation && rotation) || (translation && !rotation));
 	auto &mdl = GetEntity().GetModel();
 	if(!mdl) {
 		spdlog::debug("Failed to add control to ik solver {}: Entity has no model.", GetEntity().ToString());
@@ -682,20 +676,33 @@ void IkSolverComponent::AddControl(BoneId boneId, bool translation, bool rotatio
 	if(m_ikSolver->FindControl(*rigConfigBone) != nullptr)
 		return;
 	pragma::ik::IControl *control = nullptr;
-	pragma::ik::RigConfigControl::Type type;
-	if(rotation) {
-		auto &stateControl = m_ikSolver->AddStateControl(*rigConfigBone);
-		stateControl.SetTargetPosition(rigConfigBone->GetPos());
-		stateControl.SetTargetOrientation(rigConfigBone->GetRot());
-		control = &stateControl;
-		type = pragma::ik::RigConfigControl::Type::State;
+	switch(type) {
+	case pragma::ik::RigConfigControl::Type::State:
+		{
+			auto &stateControl = m_ikSolver->AddStateControl(*rigConfigBone);
+			stateControl.SetTargetPosition(rigConfigBone->GetPos());
+			stateControl.SetTargetOrientation(rigConfigBone->GetRot());
+			control = &stateControl;
+			break;
+		}
+	case pragma::ik::RigConfigControl::Type::Drag:
+		{
+			auto &dragControl = m_ikSolver->AddDragControl(*rigConfigBone);
+			dragControl.SetTargetPosition(rigConfigBone->GetPos());
+			control = &dragControl;
+			break;
+		}
+	case pragma::ik::RigConfigControl::Type::OrientedDrag:
+		{
+			auto &dragControl = m_ikSolver->AddOrientedDragControl(*rigConfigBone);
+			dragControl.SetTargetPosition(rigConfigBone->GetPos());
+			dragControl.SetTargetOrientation(rigConfigBone->GetRot());
+			control = &dragControl;
+			break;
+		}
 	}
-	else {
-		auto &dragControl = m_ikSolver->AddDragControl(*rigConfigBone);
-		dragControl.SetTargetPosition(rigConfigBone->GetPos());
-		control = &dragControl;
-		type = pragma::ik::RigConfigControl::Type::Drag;
-	}
+	static_assert(umath::to_integral(pragma::ik::RigConfigControl::Type::Count) == 3u);
+
 	control->SetMaxForce((maxForce < 0.f) ? std::numeric_limits<float>::max() : maxForce);
 	control->SetRigidity(rigidity);
 	auto &name = bone->name;
@@ -710,8 +717,10 @@ void IkSolverComponent::AddControl(BoneId boneId, bool translation, bool rotatio
 		auto coordMetaData = std::make_shared<ents::CoordinateTypeMetaData>();
 		coordMetaData->space = umath::CoordinateSpace::Object;
 
+		constexpr auto hasRotation = std::is_same_v<TControl, pragma::ik::OrientedDragControl> || std::is_same_v<TControl, pragma::ik::StateControl>;
+
 		std::shared_ptr<ents::PoseComponentTypeMetaData> compMetaData = nullptr;
-		if constexpr(std::is_same_v<TControl, pragma::ik::StateControl>) {
+		if constexpr(hasRotation) {
 			compMetaData = std::make_shared<ents::PoseComponentTypeMetaData>();
 			compMetaData->poseProperty = posePropName;
 		}
@@ -743,7 +752,7 @@ void IkSolverComponent::AddControl(BoneId boneId, bool translation, bool rotatio
 		RegisterMember(std::move(memberInfoPos));
 		ctrl.SetTargetPosition(rigConfigBone->GetPos());
 
-		if constexpr(std::is_same_v<TControl, pragma::ik::StateControl>) {
+		if constexpr(hasRotation) {
 			auto memberInfoRot = pragma::ComponentMemberInfo::CreateDummy();
 			memberInfoRot.SetName(rotPropName);
 			memberInfoRot.type = ents::EntityMemberType::Quaternion;
@@ -802,6 +811,7 @@ void IkSolverComponent::AddControl(BoneId boneId, bool translation, bool rotatio
 			})>();
 			RegisterMember(std::move(memberInfoPose));
 		}
+		//}
 	};
 	switch(type) {
 	case pragma::ik::RigConfigControl::Type::State:
@@ -810,7 +820,12 @@ void IkSolverComponent::AddControl(BoneId boneId, bool translation, bool rotatio
 	case pragma::ik::RigConfigControl::Type::Drag:
 		defGetSet(static_cast<pragma::ik::DragControl &>(*control));
 		break;
+	case pragma::ik::RigConfigControl::Type::OrientedDrag:
+		defGetSet(static_cast<pragma::ik::OrientedDragControl &>(*control));
+		break;
 	}
+	static_assert(umath::to_integral(pragma::ik::RigConfigControl::Type::Count) == 3u);
+
 	auto memberInfoLocked = pragma::ComponentMemberInfo::CreateDummy();
 	memberInfoLocked.SetName("control/" + name + "/locked");
 	memberInfoLocked.type = ents::EntityMemberType::Boolean;

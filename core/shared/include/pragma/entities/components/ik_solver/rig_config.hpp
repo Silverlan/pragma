@@ -22,7 +22,7 @@ namespace pragma::ik {
 	};
 
 	struct RigConfigControl {
-		enum class Type : uint8_t { Drag = 0, State };
+		enum class Type : uint8_t { Drag = 0, State, OrientedDrag, Count };
 		std::string bone;
 		Type type = Type::Drag;
 		float maxForce = -1.f;
@@ -30,7 +30,7 @@ namespace pragma::ik {
 	};
 
 	struct RigConfigConstraint {
-		enum class Type : uint8_t { Fixed = 0, Hinge, BallSocket };
+		enum class Type : uint8_t { Fixed = 0, Hinge, BallSocket, Count };
 		std::string bone0;
 		std::string bone1;
 		Type type = Type::Fixed;

@@ -139,7 +139,8 @@ Vector3 pragma::ik::ILinearMotorControl::GetTargetPosition() const { return from
 void pragma::ik::ILinearMotorControl::SetOffset(const Vector3 &offset) { GetLinearMotor().SetOffset(to_bepu_vector3(offset)); }
 Vector3 pragma::ik::ILinearMotorControl::GetOffset() const { return from_bepu_vector3(GetLinearMotor().GetOffset()); }
 
-pragma::ik::DragControl::DragControl(Bone &bone) : IControl {ControlType::Drag}
+pragma::ik::DragControl::DragControl(ControlType type) : IControl {type} {}
+pragma::ik::DragControl::DragControl(Bone &bone) : DragControl {ControlType::Drag}
 {
 	auto ctrl = std::make_unique<BEPUik::DragControl>();
 	m_control = std::move(ctrl);
@@ -173,6 +174,16 @@ pragma::ik::StateControl::~StateControl() {}
 void pragma::ik::StateControl::SetTargetOrientation(const Quat &rot) { static_cast<BEPUik::StateControl *>(m_control.get())->GetAngularMotor()->TargetOrientation = to_bepu_quaternion(rot); }
 Quat pragma::ik::StateControl::GetTargetOrientation() const { return from_bepu_quaternion(static_cast<BEPUik::StateControl *>(m_control.get())->GetAngularMotor()->TargetOrientation); }
 BEPUik::SingleBoneLinearMotor &pragma::ik::StateControl::GetLinearMotor() { return *static_cast<BEPUik::StateControl *>(m_control.get())->GetLinearMotor(); }
+
+pragma::ik::OrientedDragControl::OrientedDragControl(Bone &bone) : DragControl {ControlType::OrientedDrag}
+{
+	auto ctrl = std::make_unique<BEPUik::OrientedDragControl>();
+	m_control = std::move(ctrl);
+	SetTargetBone(bone);
+}
+pragma::ik::OrientedDragControl::~OrientedDragControl() {}
+void pragma::ik::OrientedDragControl::SetTargetOrientation(const Quat &rot) { static_cast<BEPUik::OrientedDragControl *>(m_control.get())->SetTargetOrientation(to_bepu_quaternion(rot)); }
+Quat pragma::ik::OrientedDragControl::GetTargetOrientation() const { return from_bepu_quaternion(static_cast<BEPUik::OrientedDragControl *>(m_control.get())->GetTargetOrientation()); }
 
 void pragma::ik::IJoint::SetJoint(std::unique_ptr<BEPUik::IKJoint> joint, Bone &connectionA, Bone &connectionB)
 {
@@ -349,6 +360,13 @@ void pragma::ik::Solver::Solve() { m_solver->Solve(m_bepuControls); }
 pragma::ik::DragControl &pragma::ik::Solver::AddDragControl(Bone &bone)
 {
 	auto ctrl = std::make_shared<DragControl>(bone);
+	m_controls.push_back(ctrl);
+	m_bepuControls.push_back(**ctrl);
+	return *ctrl;
+}
+pragma::ik::OrientedDragControl &pragma::ik::Solver::AddOrientedDragControl(Bone &bone)
+{
+	auto ctrl = std::make_shared<OrientedDragControl>(bone);
 	m_controls.push_back(ctrl);
 	m_bepuControls.push_back(**ctrl);
 	return *ctrl;

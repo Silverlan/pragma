@@ -9,6 +9,7 @@
 
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/entities/components/base_entity_component_member_register.hpp"
+#include "pragma/entities/components/ik_solver/rig_config.hpp"
 #include "pragma/game/game_coordinate_system.hpp"
 #include "pragma/util/ik.hpp"
 #include <mathutil/uvec.h>
@@ -46,6 +47,7 @@ namespace pragma {
 
 		void AddDragControl(BoneId boneId, float maxForce = -1.f, float rigidity = 1.f);
 		void AddStateControl(BoneId boneId, float maxForce = -1.f, float rigidity = 1.f);
+		void AddOrientedDragControl(BoneId boneId, float maxForce = -1.f, float rigidity = 1.f);
 
 		struct DLLNETWORK ConstraintInfo {
 			ConstraintInfo() = default;
@@ -83,7 +85,7 @@ namespace pragma {
 		static std::optional<umath::ScaledTransform> GetReferenceBonePose(Model &model, BoneId boneId);
 		std::optional<umath::ScaledTransform> GetReferenceBonePose(BoneId boneId) const;
 		pragma::ik::Bone *AddBone(const std::string &boneName, BoneId boneId, const umath::Transform &pose, float radius, float length);
-		void AddControl(BoneId boneId, bool translation, bool rotation, float maxForce = -1.f, float rigidity = 1.f);
+		void AddControl(BoneId boneId, pragma::ik::RigConfigControl::Type type, float maxForce = -1.f, float rigidity = 1.f);
 		pragma::ik::Bone *GetIkBone(BoneId boneId);
 
 		bool GetConstraintBones(BoneId boneId0, BoneId boneId1, pragma::ik::Bone **bone0, pragma::ik::Bone **bone1, umath::ScaledTransform &pose0, umath::ScaledTransform &pose1) const;

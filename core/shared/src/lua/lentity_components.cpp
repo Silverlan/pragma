@@ -475,6 +475,8 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defRigControl.def(luabind::tostring(luabind::self));
 	defRigControl.add_static_constant("TYPE_DRAG", umath::to_integral(pragma::ik::RigConfigControl::Type::Drag));
 	defRigControl.add_static_constant("TYPE_STATE", umath::to_integral(pragma::ik::RigConfigControl::Type::State));
+	defRigControl.add_static_constant("TYPE_ORIENTED_DRAG", umath::to_integral(pragma::ik::RigConfigControl::Type::OrientedDrag));
+	static_assert(umath::to_integral(pragma::ik::RigConfigControl::Type::Count) == 3u, "Update this list when new types are added!");
 	defRigControl.def_readwrite("bone", &pragma::ik::RigConfigControl::bone);
 	defRigControl.def_readwrite("type", &pragma::ik::RigConfigControl::type);
 	defRigControl.def_readwrite("maxForce", &pragma::ik::RigConfigControl::maxForce);
@@ -487,6 +489,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defRigConstraint.add_static_constant("TYPE_FIXED", umath::to_integral(pragma::ik::RigConfigConstraint::Type::Fixed));
 	defRigConstraint.add_static_constant("TYPE_HINGE", umath::to_integral(pragma::ik::RigConfigConstraint::Type::Hinge));
 	defRigConstraint.add_static_constant("TYPE_BALL_SOCKET", umath::to_integral(pragma::ik::RigConfigConstraint::Type::BallSocket));
+	static_assert(umath::to_integral(pragma::ik::RigConfigConstraint::Type::Count) == 3u, "Update this list when new types are added!");
 	defRigConstraint.def_readwrite("bone0", &pragma::ik::RigConfigConstraint::bone0);
 	defRigConstraint.def_readwrite("bone1", &pragma::ik::RigConfigConstraint::bone1);
 	defRigConstraint.def_readwrite("type", &pragma::ik::RigConfigConstraint::type);

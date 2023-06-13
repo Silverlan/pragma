@@ -53,6 +53,7 @@ namespace pragma::ik {
 		Drag = 0,
 		AngularPlane,
 		State,
+		OrientedDrag,
 		Count,
 
 		Invalid = std::numeric_limits<uint8_t>::max()
@@ -90,6 +91,8 @@ namespace pragma::ik {
 		DragControl(Bone &bone);
 		~DragControl();
 		virtual BEPUik::SingleBoneLinearMotor &GetLinearMotor() override;
+	  protected:
+		DragControl(ControlType type);
 	};
 	class DLLNETWORK AngularPlaneControl : public IControl {
 	  public:
@@ -110,6 +113,13 @@ namespace pragma::ik {
 		void SetTargetOrientation(const Quat &rot);
 		Quat GetTargetOrientation() const;
 		virtual BEPUik::SingleBoneLinearMotor &GetLinearMotor() override;
+	};
+	class DLLNETWORK OrientedDragControl : public DragControl {
+	  public:
+		OrientedDragControl(Bone &bone);
+		~OrientedDragControl();
+		void SetTargetOrientation(const Quat &rot);
+		Quat GetTargetOrientation() const;
 	};
 	enum class JointType : uint8_t {
 		DistanceJoint = 0,
@@ -294,6 +304,7 @@ namespace pragma::ik {
 		~Solver();
 		void Solve();
 		DragControl &AddDragControl(Bone &bone);
+		OrientedDragControl &AddOrientedDragControl(Bone &bone);
 		void RemoveControl(const IControl &ctrl);
 		AngularPlaneControl &AddAngularPlaneControl(Bone &bone);
 		IControl *FindControl(Bone &bone);

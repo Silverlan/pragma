@@ -217,6 +217,10 @@ void Lua::ik::register_library(Lua::Interface &lua)
 	classDragControl.def(luabind::tostring(luabind::self));
 	modIk[classDragControl];
 
+	auto classOrientedDragControl = luabind::class_<pragma::ik::OrientedDragControl, pragma::ik::DragControl>("OrientedDragControl");
+	classOrientedDragControl.def(luabind::tostring(luabind::self));
+	modIk[classOrientedDragControl];
+
 	auto classAngularPlaneControl = luabind::class_<pragma::ik::AngularPlaneControl, pragma::ik::IControl>("AngularPlaneControl");
 	classAngularPlaneControl.def(luabind::tostring(luabind::self));
 	classAngularPlaneControl.def("SetPlaneNormal", &pragma::ik::AngularPlaneControl::SetPlaneNormal);

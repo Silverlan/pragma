@@ -259,10 +259,16 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 	auto &skeleton = mdl->GetSkeleton();
 
 	using HierarchyDepth = uint8_t;
-	std::vector<std::pair<BoneId, HierarchyDepth>> bones;
+	struct BoneInfo {
+		uint32_t rigBoneIndex;
+		BoneId skeletonBoneIndex;
+		HierarchyDepth hierarchyDepth;
+	};
+	std::vector<BoneInfo> bones;
 	auto &rigBones = rigConfig.GetBones();
 	bones.reserve(rigBones.size());
 
+	uint32_t rigBoneIdx = 0;
 	for(auto &boneData : rigBones) {
 		auto boneId = skeleton.LookupBone(boneData->name);
 		if(boneId == -1) {
@@ -277,17 +283,17 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 			++depth;
 			parent = parent.lock()->parent;
 		}
-		bones.push_back({boneId, depth});
+		bones.push_back(BoneInfo {rigBoneIdx++, static_cast<BoneId>(boneId), depth});
 	}
 	// Sort the bones to be in hierarchical order. This is not necessary for the ik solver, but the order is important
 	// when the animation is updated.
-	std::sort(bones.begin(), bones.end(), [](const std::pair<BoneId, HierarchyDepth> &a, const std::pair<BoneId, HierarchyDepth> &b) { return a.second < b.second; });
+	std::sort(bones.begin(), bones.end(), [](const BoneInfo &a, const BoneInfo &b) { return a.hierarchyDepth < b.hierarchyDepth; });
 	for(auto i = decltype(bones.size()) {0u}; i < bones.size(); ++i) {
-		auto &bone = bones[i];
-		auto &rigBone = rigBones[i];
-		AddSkeletalBone(bone.first);
+		auto &boneInfo = bones[i];
+		auto &rigBone = rigBones[boneInfo.rigBoneIndex];
+		AddSkeletalBone(boneInfo.skeletonBoneIndex);
 		if(rigBone->locked)
-			SetBoneLocked(bone.first, true);
+			SetBoneLocked(boneInfo.skeletonBoneIndex, true);
 	}
 
 	for(auto &controlData : rigConfig.GetControls()) {
@@ -581,7 +587,7 @@ void IkSolverComponent::AddBallSocketConstraint(const ConstraintInfo &constraint
 		}
 	}
 
-	auto twistLimitVal = 1.f; // TODO
+	auto twistLimitVal = umath::abs(effectiveMaxLimits.r - effectiveMinLimits.r);
 	if(twistLimitVal > 0.f) {
 		auto &twistLimit = m_ikSolver->AddTwistLimit(*bone0, *bone1, uquat::forward(rotBone1WithOffset), axisB, umath::deg_to_rad(twistLimitVal));
 		init_joint(constraintInfo, twistLimit);

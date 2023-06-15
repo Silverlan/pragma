@@ -12,6 +12,7 @@
 #include <pragma/engine.h>
 #include "pragma/engine_version.h"
 #include "pragma/lua/classes/ldef_vector.h"
+#include "pragma/lua/libraries/lutil.hpp"
 #include "pragma/file_formats/wmd_load.h"
 #include "pragma/util/util_module.hpp"
 #include "luasystem.h"
@@ -86,7 +87,7 @@ void Lua::engine::LoadSoundScripts(lua_State *l, const std::string &fileName) { 
 
 bool Lua::engine::LibraryExists(lua_State *l, const std::string &library)
 {
-	auto libAbs = util::get_normalized_module_path(library, ::engine->GetNetworkState(l)->IsClient());
+	auto libAbs = ::util::get_normalized_module_path(library, ::engine->GetNetworkState(l)->IsClient());
 	return FileManager::Exists(libAbs);
 }
 
@@ -126,5 +127,12 @@ Lua::opt<Lua::mult<std::string, Con::MessageFlags, Lua::opt<Color>>> Lua::engine
 void Lua::engine::register_shared_functions(lua_State *l, luabind::module_ &modEn)
 {
 	modEn[luabind::def("set_record_console_output", Lua::engine::set_record_console_output), luabind::def("get_tick_count", &Lua::engine::GetTickCount), luabind::def("shutdown", &Lua::engine::exit), luabind::def("get_working_directory", Lua::engine::get_working_directory),
-	  luabind::def("get_git_info", Lua::engine::get_git_info), luabind::def("mount_addon", static_cast<bool (*)(const std::string &)>(&AddonSystem::MountAddon))];
+	  luabind::def("get_git_info", Lua::engine::get_git_info), luabind::def("mount_addon", static_cast<bool (*)(const std::string &)>(&AddonSystem::MountAddon)),
+	  luabind::def(
+	    "mount_sub_addon", +[](lua_State *l, const std::string &subAddon) {
+		    auto path = ::util::Path::CreatePath(Lua::util::get_addon_path(l));
+		    path.PopFront();
+		    path = path + "addons/" + subAddon;
+		    return AddonSystem::MountAddon(path.GetString());
+	    })];
 }

@@ -548,6 +548,9 @@ void IkSolverComponent::AddBallSocketConstraint(const ConstraintInfo &constraint
 			break;
 		case pragma::SignedAxis::Z:
 		case pragma::SignedAxis::NegZ:
+			twistRotOffset = uquat::create(EulerAngles(0.0, 0.f, pragma::is_negative_axis(twistAxis) ? 90.f : -90.f));
+			umath::swap(effectiveMinLimits.p, effectiveMinLimits.y);
+			umath::swap(effectiveMaxLimits.p, effectiveMaxLimits.y);
 			break;
 		}
 	}

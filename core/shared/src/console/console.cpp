@@ -94,6 +94,9 @@ void DebugConsole::close()
 	unsigned long numEvents;
 	WriteConsoleInput(GetStdHandle(STD_INPUT_HANDLE), &input, 0, &numEvents); // Workaround: Writes to the console to make sure the thread can end properly
 	//CloseHandle(GetStdHandle(STD_INPUT_HANDLE)); // Doesn't work?
+	fclose(stdin);
+	fclose(stdout);
+	fclose(stderr);
 	FreeConsole();
 #else
 	std::cout.rdbuf(this->_coutbuf);

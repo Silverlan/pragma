@@ -105,7 +105,7 @@ Engine::Engine(int, char *[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(En
 	debug::open_domain();
 #endif
 	Locale::Init();
-	OpenConsole();
+	// OpenConsole();
 
 	m_mainThreadId = std::this_thread::get_id();
 

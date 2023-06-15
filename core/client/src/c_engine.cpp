@@ -448,6 +448,11 @@ void CEngine::KeyboardInput(prosper::Window &window, GLFW::Key key, int scanCode
 			return;
 		}
 	}
+	if(key == GLFW::Key::GraveAccent) {
+		if(state == GLFW::KeyState::Press)
+			ToggleConsole();
+		return;
+	}
 	auto buttonState = state;
 	auto bValidButtonInput = GetInputButtonState(magnitude, mods, buttonState);
 	if(bValidButtonInput == true) {

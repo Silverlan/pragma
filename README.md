@@ -89,6 +89,8 @@ python build_scripts/build.py --update
 
 This will pull all of the latest changes for the Pragma repository and the modules. The `--update` option will re-use all of the arguments used in the last execution of the build script, so you don't have to specify them again.
 
+If you just wish to re-run the build script without updating to the latest commit, you can use the `--rerun` option instead. Like the `--update` option, this will also re-use the arguments used in the last execution of the build script.
+
 ###### Code Changes
 If you make any code changes to the core engine code, you can build the `pragma-install` target to build them. This will also re-install the binaries.
 
@@ -123,6 +125,7 @@ Running the build-script with the arguments above will build and install Pragma 
 | `--install-directory <path>`            | Installation directory. Can be relative (to build directory) or absolute.                    | `install`        |
 | `--verbose <1/0>`                       | Print additional debug information.                                                          | `0`              |
 | `--update <1/0>`                        | Update Pragma and all submodules and modules to the latest versions.                         | `0`              |
+| `--rerun <1/0>`                         | Re-run the build script with the previous arguments.                                         | `0`              |
 | `--module <moduleName>:<gitUrl>`        | Custom modules to install. Use this parameter multiple times to use multiple modules.        |                  |
 | `--cmake-arg <arg>`                     | Custom CMake configuration option. Use this parameter multiple times for multiple options.   |                  |
 

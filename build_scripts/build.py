@@ -39,6 +39,7 @@ parser.add_argument('--module', help='Custom modules to install. Use this parame
 # parser.add_argument('--log-file', help='Script output will be written to this file.', default='build_log.txt')
 parser.add_argument("--verbose", type=str2bool, nargs='?', const=True, default=False, help="Print additional verbose output.")
 parser.add_argument("--update", type=str2bool, nargs='?', const=True, default=False, help="Update Pragma and all submodules and modules to the latest versions.")
+parser.add_argument("--rerun", type=str2bool, nargs='?', const=True, default=False, help="Re-run the build script with the previous arguments.")
 if platform == "linux":
 	parser.add_argument("--no-sudo", type=str2bool, nargs='?', const=True, default=False, help="Will not run sudo commands. System packages will have to be installed manually.")
 	parser.add_argument("--no-confirm", type=str2bool, nargs='?', const=True, default=False, help="Disable any interaction with user (suitable for automated run).")
@@ -60,6 +61,10 @@ input_args = args
 #		logging.info("Running Pragma Build Script")
 
 if args["update"]:
+	args["rerun"] = True
+	args["update"] = True
+
+if args["rerun"]:
 	build_dir = normalize_path(args["build_directory"])
 	if not os.path.isabs(build_dir):
 		build_dir = os.getcwd() +"/" +build_dir
@@ -70,7 +75,6 @@ if args["update"]:
 		cfg = json.load(open(build_dir +"/build_config.json"))
 		for key,value in cfg["args"].items():
 			args[key] = value
-	args["update"] = True
 
 if platform == "linux":
 	c_compiler = args["c_compiler"]
@@ -99,6 +103,7 @@ scripts_dir = os.getcwd() +"/build_scripts"
 #log_file = args["log_file"]
 verbose = args["verbose"]
 modules = args["module"]
+rerun = args["rerun"]
 update = args["update"]
 modules_prebuilt = []
 
@@ -121,6 +126,7 @@ print("with_core_pfm_modules: " +str(with_core_pfm_modules))
 print("with_all_pfm_modules: " +str(with_all_pfm_modules))
 print("with_vr: " +str(with_vr))
 print("with_lua_debugger: " +str(with_lua_debugger))
+print("rerun: " +str(rerun))
 print("update: " +str(update))
 print("build: " +str(build))
 print("build_all: " +str(build_all))

@@ -68,7 +68,7 @@ Build Instructions
 ------
 To build Pragma, all you have to do is run the following command from a command-line interface:
 ```console
-git clone https://github.com/Silverlan/pragma.git --recurse-submodules && cd pragma && python build_scripts/build.py --with-pfm --with-all-pfm-modules --with-vr
+git clone https://github.com/Silverlan/pragma.git && cd pragma && python build_scripts/build.py --with-pfm --with-all-pfm-modules --with-vr
 ```
 
 This will clone Pragma and run the build-script, which will automatically download all dependencies, configure CMake, and build and install the project (this will take several hours).
@@ -130,6 +130,8 @@ Example for using the `--module` parameter:
 ```console
 --module pr_physx:"https://github.com/Silverlan/pr_physx.git"
 ```
+
+Alternatively you can also add custom modules by editing `pragma/build_scripts/user_modules.py`. (This is the recommended method.)
 
 ###### PFM
 To build Pragma with PFM, add the `--with-pfm --with-all-pfm-modules` options. Due to licensing issues, this will only include a pre-built version of the Cycles renderer **without** OptiX support.

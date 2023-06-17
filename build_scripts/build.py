@@ -3,6 +3,7 @@ from pathlib import Path
 from sys import platform
 from distutils.dir_util import copy_tree
 import argparse
+import re
 # import logging
 
 from scripts.shared import *
@@ -156,7 +157,7 @@ if update:
 	os.chdir(root)
 
 	print_msg("Updating Pragma repository...")
-	subprocess.run(["git","pull","--recurse-submodules"],check=True)
+	subprocess.run(["git","pull"],check=True)
 
 
 mkpath(build_dir)
@@ -445,30 +446,18 @@ if platform == "win32":
 print_msg("Downloading modules...")
 os.chdir(root +"/modules")
 
-if with_essential_client_modules:
-	modules.append( "pr_prosper_vulkan:\"https://github.com/Silverlan/pr_prosper_vulkan.git\"" )
-
-if with_common_modules:
-	modules.append( "pr_bullet:\"https://github.com/Silverlan/pr_bullet.git\"" )
-	modules.append( "pr_audio_soloud:\"https://github.com/Silverlan/pr_soloud.git\"" )
-	modules_prebuilt.append( "Silverlan/pr_mount_external_prebuilt" )
-
-if with_pfm:
-	if with_core_pfm_modules or with_all_pfm_modules:
-		modules.append( "pr_curl:https://github.com/Silverlan/pr_curl.git\"" )
-		modules.append( "pr_dmx:https://github.com/Silverlan/pr_dmx.git\"" )
-	if with_all_pfm_modules:
-		modules.append( "pr_chromium:https://github.com/Silverlan/pr_chromium.git" )
-		modules.append( "pr_unirender:https://github.com/Silverlan/pr_cycles.git" )
-		modules.append( "pr_curl:https://github.com/Silverlan/pr_curl.git" )
-		modules.append( "pr_dmx:https://github.com/Silverlan/pr_dmx.git" )
-		modules.append( "pr_xatlas:https://github.com/Silverlan/pr_xatlas.git" )
-	
-if with_lua_doc_generator or with_pfm:
-	modules.append( "pr_git:https://github.com/Silverlan/pr_git.git\"" )
-
-if with_vr:
-	modules.append( "pr_openvr:https://github.com/Silverlan/pr_openvr.git" )
+module_info = []
+def add_pragma_module(name,repositoryUrl,commitSha=None,branch=None):
+    for module in module_info:
+        if module["name"] == name:
+            return
+    module = {
+        "name": name,
+        "repositoryUrl": repositoryUrl,
+        "commitSha": commitSha,
+        "branch": branch
+    }
+    module_info.append(module)
 
 def execfile(filepath, globals=None, locals=None, args=None):
 	if globals is None:
@@ -567,42 +556,125 @@ def execbuildscript(filepath):
 
 	os.chdir(curDir)
 
-os.chdir(root)
-subprocess.run(["git","submodule","update","--recursive"],check=True)
+# Register modules that were added using the --module argument
+for module in modules:
+	os.chdir(root +"/modules")
+	index = module.find(':')
+	if index == -1:
+		add_pragma_module(
+			name=module
+		)
+	else:
+		add_pragma_module(
+			name=module[0:index].strip('\"'),
+			repositoryUrl=module[index +1:].strip('\"')
+		)
+
+g = {}
+l = {
+	"add_pragma_module": add_pragma_module
+}
+# Register user modules
+execfile(scripts_dir +"/user_modules.py",g,l)
+
+# Register argument-dependent modules
+if with_essential_client_modules:
+    add_pragma_module(
+        name="pr_prosper_vulkan",
+        commitSha="87a235e",
+        repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
+    )
+
+if with_common_modules:
+    add_pragma_module(
+        name="pr_bullet",
+        commitSha="4f1aea9",
+        repositoryUrl="https://github.com/Silverlan/pr_bullet.git"
+    )
+    add_pragma_module(
+        name="pr_audio_soloud",
+        commitSha="17652f0",
+        repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
+    )
+    modules_prebuilt.append("Silverlan/pr_mount_external_prebuilt")
+
+if with_pfm:
+    if with_core_pfm_modules or with_all_pfm_modules:
+        add_pragma_module(
+            name="pr_curl",
+            commitSha="4964981",
+            repositoryUrl="https://github.com/Silverlan/pr_curl.git"
+        )
+        add_pragma_module(
+            name="pr_dmx",
+            commitSha="ce90ad2",
+            repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
+        )
+    if with_all_pfm_modules:
+        add_pragma_module(
+            name="pr_chromium",
+            commitSha="15c88b4",
+            repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
+        )
+        add_pragma_module(
+            name="pr_unirender",
+            commitSha="9a30fe0",
+            repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
+        )
+        add_pragma_module(
+            name="pr_curl",
+            commitSha="4964981",
+            repositoryUrl="https://github.com/Silverlan/pr_curl.git"
+        )
+        add_pragma_module(
+            name="pr_dmx",
+            commitSha="ce90ad2",
+            repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
+        )
+        add_pragma_module(
+            name="pr_xatlas",
+            commitSha="6d1f30e",
+            repositoryUrl="https://github.com/Silverlan/pr_xatlas.git"
+        )
+
+if with_lua_doc_generator or with_pfm:
+    add_pragma_module(
+        name="pr_git",
+        commitSha="08085f9",
+        repositoryUrl="https://github.com/Silverlan/pr_git.git"
+    )
+
+if with_vr:
+    add_pragma_module(
+        name="pr_openvr",
+        commitSha="673302d",
+        repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
+    )
 
 # These modules are shipped with the Pragma repository and will have to be excluded from the
 # CMake configuration explicitly if they should be disabled.
 shippedModules = ["pr_audio_dummy","pr_prosper_opengl","pr_prosper_vulkan","pr_curl"]
 
-for module in modules:
-	os.chdir(root +"/modules")
+for module in module_info:
 	global moduleName
-	index = module.find(':')
-	if index == -1:
-		moduleName = module
-		moduleUrl = ""
-	else:
-		moduleName = module[0:index].strip('\"')
-		moduleUrl = module[index +1:].strip('\"')
+	moduleName = module["name"]
+	moduleUrl = module["repositoryUrl"]
+	commitId = module["commitSha"]
+	branch = module["branch"]
+	print("Module Name:", moduleName)
+	print("Repository URL:", moduleUrl)
+	print("Commit SHA:", commitId)
+	print("Branch:", branch)
+
+	os.chdir(root +"/modules")
 
 	moduleDir = os.getcwd() +"/" +moduleName +"/"
 
-	print("Module Name: " +moduleName)
-	print("Module URL: " +moduleUrl)
 	print("Module Directory: " +moduleDir)
 
-	if not Path(moduleDir).is_dir():
-		print_msg("Downloading module '" +moduleName +"'...")
-		git_clone(moduleUrl,moduleName)
-	elif not moduleName in shippedModules: # Shipped modules are already updated by the git submodule update command above
-		curDir = os.getcwd()
-		os.chdir(moduleDir)
-		print_msg("Updating module '" +moduleName +"'...")
-		result = subprocess.run(["git","pull","--recurse-submodules"],check=False)
-		exitCode = result.returncode
-		if exitCode != 0:
-			print_warning("'git pull' failed for submodule '" +moduleName +"' with exit code " +str(exitCode) +"! This is expected if you have made any changes to the submodule. Build script will continue...")
-		os.chdir(curDir)
+	if not moduleName in shippedModules:
+		if moduleUrl:
+			get_submodule(moduleName,moduleUrl,commitId,branch)
 
 	scriptPath = moduleDir +"build_scripts/setup.py"
 	if Path(scriptPath).is_file():

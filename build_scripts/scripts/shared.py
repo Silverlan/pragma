@@ -213,5 +213,7 @@ def get_submodule(directory,url,commitId=None,branch=None):
 	if commitId is not None:
 		os.chdir(absDir)
 		reset_to_commit(commitId)
+	else:
+		subprocess.run(["git","pull"],check=True)
 	subprocess.run(["git","submodule","update","--init","--recursive"],check=True)
 	os.chdir(curDir)

@@ -188,14 +188,14 @@ bool IkSolverComponent::AddIkSolverByChain(const std::string &boneName, uint32_t
 		// We want to be able to control the rotation of the last element in the chain (the effector), but
 		// not the other elements
 		if(i == ikChain.size() - 1) {
-			auto ctrl = rig.AddControl(skeleton.GetBone(ikChain[i]).lock()->name, pragma::ik::RigConfigControl::Type::State);
+			auto ctrl = rig.AddControl(skeleton.GetBone(ikChain[i]).lock()->name, pragma::ik::RigConfigControl::Type::OrientedDrag);
 			if(ctrl)
-				ctrl->rigidity = 1000.f;
+				ctrl->rigidity = 10.f;
 		}
 		else {
 			auto ctrl = rig.AddControl(skeleton.GetBone(ikChain[i]).lock()->name, pragma::ik::RigConfigControl::Type::Drag);
 			if(ctrl)
-				ctrl->rigidity = 1.f;
+				ctrl->rigidity = 5.f;
 		}
 	}
 

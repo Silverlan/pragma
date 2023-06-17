@@ -199,10 +199,14 @@ bool IkSolverComponent::AddIkSolverByChain(const std::string &boneName, uint32_t
 		}
 	}
 
+	// Inverted limits will ensure that limits are disabled
+	constexpr EulerAngles maxLimits {-1.f, -1.f, -1.f};
+	constexpr EulerAngles minLimits {1.f, 1.f, 1.f};
+
 	// Add generic ballsocket constraints with no twist
 	for(auto i = decltype(ikChain.size()) {1u}; i < ikChain.size(); ++i) {
 		// We need to allow some minor twisting to avoid instability
-		rig.AddBallSocketConstraint(skeleton.GetBone(ikChain[i - 1]).lock()->name, skeleton.GetBone(ikChain[i]).lock()->name, EulerAngles(-180.f, -180.f, -0.5), EulerAngles(180.f, 180.f, 0.5));
+		rig.AddBallSocketConstraint(skeleton.GetBone(ikChain[i - 1]).lock()->name, skeleton.GetBone(ikChain[i]).lock()->name,minLimits,maxLimits);
 	}
 	if(!AddIkSolverByRig(rig))
 		return false;
@@ -573,8 +577,8 @@ void IkSolverComponent::AddBallSocketConstraint(const ConstraintInfo &constraint
 	auto rotBone1WithOffset = refRot1 * uquat::create(EulerAngles(-(effectiveMaxLimits.p + effectiveMinLimits.p), effectiveMaxLimits.y + effectiveMinLimits.y, 0.f)); //-(effectiveMaxLimits.r + effectiveMinLimits.r)));
 
 	auto axisB = uquat::forward(refRot1);
-	auto span = umath::abs(effectiveMaxLimits.y - effectiveMinLimits.y);
-	if(span < 179.99f) {
+	auto span = effectiveMaxLimits.y - effectiveMinLimits.y;
+	if(span >= 0.f && span < 179.99f) {
 		if(!useEllipseSwingLimit) {
 			auto &ellipseSwingLimit = m_ikSolver->AddSwingLimit(*bone0, *bone1, uquat::forward(rotBone1WithOffset), axisB, umath::deg_to_rad(effectiveMaxLimits.y - effectiveMinLimits.y));
 			init_joint(constraintInfo, ellipseSwingLimit);
@@ -585,8 +589,8 @@ void IkSolverComponent::AddBallSocketConstraint(const ConstraintInfo &constraint
 		}
 	}
 
-	auto twistLimitVal = umath::abs(effectiveMaxLimits.r - effectiveMinLimits.r);
-	if(twistLimitVal > 0.f) {
+	auto twistLimitVal = effectiveMaxLimits.r - effectiveMinLimits.r;
+	if(twistLimitVal >= 0.f && twistLimitVal < 179.99f) {
 		auto &twistLimit = m_ikSolver->AddTwistLimit(*bone0, *bone1, uquat::forward(rotBone1WithOffset), axisB, umath::deg_to_rad(twistLimitVal));
 		init_joint(constraintInfo, twistLimit);
 	}

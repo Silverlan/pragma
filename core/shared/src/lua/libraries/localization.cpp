@@ -179,27 +179,69 @@ template<class TString>
 static void insert_arguments(const std::vector<TString> &args, TString &inOutText)
 {
 	size_t startPos = inOutText.find('{');
-	if(startPos == std::string::npos)
-		return;
-	for(auto i = decltype(args.size()) {0}; i < args.size(); ++i) {
-		std::string sarg = "{";
-		sarg += std::to_string(i);
-		sarg += "}";
-		auto pos = inOutText.find(sarg.c_str(), startPos);
-		while(pos != std::string::npos) {
-			inOutText = inOutText.replace(pos, 3, args[i]);
-			pos = inOutText.find(sarg.c_str(), pos + 1);
-		}
-	}
-
-	std::string sarg = "{}";
-	auto pos = inOutText.find(sarg.c_str(), startPos);
 	uint32_t argIdx = 0;
-	while(pos != std::string::npos) {
-		assert(argIdx < args.size());
-		if(argIdx >= args.size())
+	while(startPos != std::string::npos) {
+		auto endPos = inOutText.find('}', startPos);
+		if(endPos == std::string::npos)
 			return;
-		inOutText = inOutText.replace(pos, 2, args[argIdx++]);
+		if(endPos == startPos + 1) {
+			// Brackets without argument ("{}")
+			assert(argIdx < args.size());
+			if(argIdx < args.size())
+				inOutText = inOutText.replace(startPos, 2, args[argIdx++]);
+		}
+		else {
+			std::string_view inner {inOutText.c_str(), (endPos - startPos)};
+			int32_t argIdx = -1;
+			auto result = std::from_chars(inner.data(), inner.data() + inner.size(), argIdx);
+			if(result.ec != std::errc::invalid_argument) {
+				// Brackets with index argument (e.g. "{0}")
+				assert(argIdx < args.size());
+				if(argIdx < args.size())
+					inOutText = inOutText.replace(startPos, endPos - startPos, args[argIdx]);
+			}
+			else {
+				// Brackets with locale id (e.g. "{math_unit}")
+				auto innerText = Locale::GetText(std::string {inner});
+				inOutText = inOutText.replace(startPos, endPos - startPos, innerText);
+			}
+		}
+
+		startPos = inOutText.find('{', endPos + 1);
+	}
+}
+static void insert_arguments(const std::vector<std::string> &args, std::string &inOutText)
+{
+	size_t startPos = inOutText.find('{');
+	uint32_t argIdx = 0;
+	while(startPos != std::string::npos) {
+		auto endPos = inOutText.find('}', startPos);
+		if(endPos == std::string::npos)
+			return;
+		if(endPos == startPos + 1) {
+			// Brackets without argument ("{}")
+			assert(argIdx < args.size());
+			if(argIdx < args.size())
+				inOutText = inOutText.replace(startPos, 2, args[argIdx++]);
+		}
+		else {
+			std::string_view inner {inOutText.c_str() + startPos + 1, (endPos - startPos) - 1};
+			int32_t argIdx = -1;
+			auto result = std::from_chars(inner.data(), inner.data() + inner.size(), argIdx);
+			if(result.ec != std::errc::invalid_argument) {
+				// Brackets with index argument (e.g. "{0}")
+				assert(argIdx < args.size());
+				if(argIdx < args.size())
+					inOutText = inOutText.replace(startPos, endPos - startPos +1, args[argIdx]);
+			}
+			else {
+				// Brackets with locale id (e.g. "{math_unit}")
+				auto innerText = Locale::GetText(std::string {inner});
+				inOutText = inOutText.replace(startPos, endPos - startPos +1, innerText);
+			}
+		}
+
+		startPos = inOutText.find('{', endPos + 1);
 	}
 }
 bool Locale::GetText(const std::string &id, const std::vector<util::Utf8String> &args, util::Utf8String &outText)

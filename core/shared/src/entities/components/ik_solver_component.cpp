@@ -141,7 +141,7 @@ void IkSolverComponent::InitializeSolver()
 }
 bool IkSolverComponent::AddIkSolverByChain(const std::string &boneName, uint32_t chainLength)
 {
-	constexpr uint32_t minChainLength = 2;
+	constexpr uint32_t minChainLength = 3;
 	if(chainLength < minChainLength) {
 		spdlog::debug("Failed to add ik chain to ik solver {} with boneName={} and chainLength={}: Chain length has to be at least {}.", GetEntity().ToString(), boneName, chainLength, minChainLength);
 		return false;
@@ -154,9 +154,8 @@ bool IkSolverComponent::AddIkSolverByChain(const std::string &boneName, uint32_t
 	}
 	auto &skeleton = mdl->GetSkeleton();
 	auto &ref = mdl->GetReference();
-	auto effectiveChainLength = chainLength + 1;
 	std::vector<BoneId> ikChain;
-	ikChain.reserve(effectiveChainLength);
+	ikChain.reserve(chainLength);
 	auto boneId = skeleton.LookupBone(boneName);
 	if(boneId == -1) {
 		spdlog::debug("Failed to add ik chain to ik solver {} with boneName={} and chainLength={}: Bone not found in skeleton.", GetEntity().ToString(), boneName, chainLength);
@@ -164,7 +163,7 @@ bool IkSolverComponent::AddIkSolverByChain(const std::string &boneName, uint32_t
 	}
 
 	auto bone = skeleton.GetBone(boneId).lock();
-	for(auto i = decltype(effectiveChainLength) {0}; i < effectiveChainLength; ++i) {
+	for(auto i = decltype(chainLength) {0}; i < chainLength; ++i) {
 		if(bone == nullptr) {
 			spdlog::debug("Failed to add ik chain to ik solver {} with boneName={} and chainLength={}: Chain length exceeds number of parents.", GetEntity().ToString(), boneName, chainLength);
 			return false;

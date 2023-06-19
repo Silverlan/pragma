@@ -182,9 +182,10 @@ static void insert_arguments(const std::vector<TString> &args, TString &inOutTex
 		std::string sarg = "{";
 		sarg += std::to_string(i);
 		sarg += "}";
-		auto pos = inOutText.find(sarg.c_str());
-		if(pos != std::string::npos)
+		auto pos = inOutText.find(sarg.c_str(), startPos);
+		while(pos != std::string::npos) {
 			inOutText = inOutText.replace(pos, 3, args[i]);
+			pos = inOutText.find(sarg.c_str(), pos + 1);
 	}
 }
 bool Locale::GetText(const std::string &id, const std::vector<util::Utf8String> &args, util::Utf8String &outText)

@@ -175,7 +175,7 @@ bool Locale::SetLocalization(const std::string &id, const util::Utf8String &text
 }
 bool Locale::GetText(const std::string &id, util::Utf8String &outText) { return GetText(id, {}, outText); }
 bool Locale::GetText(const std::string &id, std::string &outText) { return GetText(id, {}, outText); }
-template<class TString>
+template<class TString, class TStringView>
 static void insert_arguments(const std::vector<TString> &args, TString &inOutText)
 {
 	size_t startPos = inOutText.find('{');
@@ -191,53 +191,19 @@ static void insert_arguments(const std::vector<TString> &args, TString &inOutTex
 				inOutText = inOutText.replace(startPos, 2, args[argIdx++]);
 		}
 		else {
-			std::string_view inner {inOutText.c_str(), (endPos - startPos)};
+			TStringView inner {inOutText.c_str() + startPos + 1, (endPos - startPos) - 1};
 			int32_t argIdx = -1;
 			auto result = std::from_chars(inner.data(), inner.data() + inner.size(), argIdx);
 			if(result.ec != std::errc::invalid_argument) {
 				// Brackets with index argument (e.g. "{0}")
 				assert(argIdx < args.size());
 				if(argIdx < args.size())
-					inOutText = inOutText.replace(startPos, endPos - startPos, args[argIdx]);
+					inOutText = inOutText.replace(startPos, endPos - startPos + 1, args[argIdx]);
 			}
 			else {
 				// Brackets with locale id (e.g. "{math_unit}")
 				auto innerText = Locale::GetText(std::string {inner});
-				inOutText = inOutText.replace(startPos, endPos - startPos, innerText);
-			}
-		}
-
-		startPos = inOutText.find('{', endPos + 1);
-	}
-}
-static void insert_arguments(const std::vector<std::string> &args, std::string &inOutText)
-{
-	size_t startPos = inOutText.find('{');
-	uint32_t argIdx = 0;
-	while(startPos != std::string::npos) {
-		auto endPos = inOutText.find('}', startPos);
-		if(endPos == std::string::npos)
-			return;
-		if(endPos == startPos + 1) {
-			// Brackets without argument ("{}")
-			assert(argIdx < args.size());
-			if(argIdx < args.size())
-				inOutText = inOutText.replace(startPos, 2, args[argIdx++]);
-		}
-		else {
-			std::string_view inner {inOutText.c_str() + startPos + 1, (endPos - startPos) - 1};
-			int32_t argIdx = -1;
-			auto result = std::from_chars(inner.data(), inner.data() + inner.size(), argIdx);
-			if(result.ec != std::errc::invalid_argument) {
-				// Brackets with index argument (e.g. "{0}")
-				assert(argIdx < args.size());
-				if(argIdx < args.size())
-					inOutText = inOutText.replace(startPos, endPos - startPos +1, args[argIdx]);
-			}
-			else {
-				// Brackets with locale id (e.g. "{math_unit}")
-				auto innerText = Locale::GetText(std::string {inner});
-				inOutText = inOutText.replace(startPos, endPos - startPos +1, innerText);
+				inOutText = inOutText.replace(startPos, endPos - startPos + 1, innerText);
 			}
 		}
 
@@ -250,7 +216,7 @@ bool Locale::GetText(const std::string &id, const std::vector<util::Utf8String> 
 	if(it == m_localization.texts.end())
 		return false;
 	outText = it->second;
-	insert_arguments(args, outText);
+	insert_arguments<util::Utf8String, util::Utf8StringView>(args, outText);
 	return true;
 }
 bool Locale::GetText(const std::string &id, const std::vector<std::string> &args, std::string &outText)
@@ -259,7 +225,7 @@ bool Locale::GetText(const std::string &id, const std::vector<std::string> &args
 	if(it == m_localization.texts.end())
 		return false;
 	outText = it->second.cpp_str();
-	insert_arguments(args, outText);
+	insert_arguments<std::string, std::string_view>(args, outText);
 	return true;
 }
 std::string Locale::GetText(const std::string &id, const std::vector<std::string> &args)
@@ -270,7 +236,7 @@ std::string Locale::GetText(const std::string &id, const std::vector<std::string
 		return std::string("<MISSING LOCALIZATION: ") + id + std::string(">");
 	}
 	auto r = it->second.cpp_str();
-	insert_arguments(args, r);
+	insert_arguments<std::string, std::string_view>(args, r);
 	return r;
 }
 util::Utf8String Locale::GetTextUtf8(const std::string &id, const std::vector<util::Utf8String> &args)
@@ -281,7 +247,7 @@ util::Utf8String Locale::GetTextUtf8(const std::string &id, const std::vector<ut
 		return std::string("<MISSING LOCALIZATION: ") + id + std::string(">");
 	}
 	auto r = it->second;
-	insert_arguments(args, r);
+	insert_arguments<util::Utf8String, util::Utf8StringView>(args, r);
 	return r;
 }
 std::string Locale::DetermineSystemLanguage()

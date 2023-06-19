@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/entities/environment/effects/c_env_sprite.h"
 #include "pragma/entities/components/c_attachable_component.hpp"
+#include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -36,6 +37,22 @@ void CSpriteComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
 	StartParticle();
+}
+
+void CSpriteComponent::OnEntityComponentAdded(BaseEntityComponent &component)
+{
+	BaseEnvSpriteComponent::OnEntityComponentAdded(component);
+	if(typeid(component) == typeid(pragma::CColorComponent)) {
+		FlagCallbackForRemoval(static_cast<pragma::CColorComponent *>(&component)->GetColorProperty()->AddCallback([this](std::reference_wrapper<const Vector4> oldColor, std::reference_wrapper<const Vector4> color) { UpdateColor(); }), CallbackType::Component, &component);
+	}
+}
+
+void CSpriteComponent::UpdateColor()
+{
+	auto colorC = GetEntity().GetComponent<CColorComponent>();
+	auto colorFactor = colorC.valid() ? colorC->GetColor() : Color::White.ToVector4();
+	if(m_hParticle.IsValid())
+		m_hParticle->SetColorFactor(colorFactor);
 }
 
 void CSpriteComponent::SetOrientationType(pragma::CParticleSystemComponent::OrientationType orientationType) { m_orientationType = orientationType; }
@@ -136,6 +153,8 @@ void CSpriteComponent::StartParticle()
 	}
 	pt->Start();
 	m_hParticle = pt->GetHandle<pragma::CParticleSystemComponent>();
+
+	UpdateColor();
 }
 
 void CSpriteComponent::ReceiveData(NetPacket &packet)

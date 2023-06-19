@@ -561,7 +561,11 @@ void IkSolverComponent::AddBallSocketConstraint(const ConstraintInfo &constraint
 
 	auto refRot1 = rotBone1 * twistRotOffset; //uquat::create(ang);
 
-	constexpr auto useEllipseSwingLimit = true;
+	auto useEllipseSwingLimit = true;
+	if(umath::abs((effectiveMaxLimits.p - effectiveMinLimits.p) - (effectiveMaxLimits.y - effectiveMinLimits.y)) <= 0.01f) {
+		// Swing limits are the same on both axes, so we can use a simple swing limit (which is less expensive)
+		useEllipseSwingLimit = false;
+	}
 	if(!useEllipseSwingLimit) {
 		// Convert ellipse swing limit to general swing limit
 		auto maxSpan = umath::max(effectiveMaxLimits.p - effectiveMinLimits.p, effectiveMaxLimits.y - effectiveMinLimits.y);

@@ -178,6 +178,9 @@ bool Locale::GetText(const std::string &id, std::string &outText) { return GetTe
 template<class TString>
 static void insert_arguments(const std::vector<TString> &args, TString &inOutText)
 {
+	size_t startPos = inOutText.find('{');
+	if(startPos == std::string::npos)
+		return;
 	for(auto i = decltype(args.size()) {0}; i < args.size(); ++i) {
 		std::string sarg = "{";
 		sarg += std::to_string(i);
@@ -186,6 +189,17 @@ static void insert_arguments(const std::vector<TString> &args, TString &inOutTex
 		while(pos != std::string::npos) {
 			inOutText = inOutText.replace(pos, 3, args[i]);
 			pos = inOutText.find(sarg.c_str(), pos + 1);
+		}
+	}
+
+	std::string sarg = "{}";
+	auto pos = inOutText.find(sarg.c_str(), startPos);
+	uint32_t argIdx = 0;
+	while(pos != std::string::npos) {
+		assert(argIdx < args.size());
+		if(argIdx >= args.size())
+			return;
+		inOutText = inOutText.replace(pos, 2, args[argIdx++]);
 	}
 }
 bool Locale::GetText(const std::string &id, const std::vector<util::Utf8String> &args, util::Utf8String &outText)

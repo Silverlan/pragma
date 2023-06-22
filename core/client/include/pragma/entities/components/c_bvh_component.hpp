@@ -13,8 +13,12 @@
 #include <unordered_set>
 
 namespace pragma {
+	namespace rendering {
+		struct RenderBufferData;
+	};
 	class DLLCLIENT CBvhComponent final : public BaseBvhComponent {
 	  public:
+		static bool ShouldConsiderMesh(const ModelSubMesh &mesh, const rendering::RenderBufferData &bufferData);
 		CBvhComponent(BaseEntity &ent) : BaseBvhComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;

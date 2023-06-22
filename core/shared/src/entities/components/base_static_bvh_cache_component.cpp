@@ -149,8 +149,10 @@ void BaseStaticBvhCacheComponent::Build(std::vector<std::shared_ptr<ModelSubMesh
 	m_bvhDataMutex.unlock();
 	m_buildWorker->ResetTask([this, meshes = std::move(meshes), meshPoses = std::move(meshPoses), meshToEntity = std::move(meshToEntity)](FunctionalParallelWorker &worker) {
 		std::vector<size_t> meshIndices;
-		auto bvhData = BaseBvhComponent::RebuildBvh(
-		  meshes, &meshPoses, [this]() -> bool { return m_buildWorker->IsTaskCancelled(); }, &meshIndices);
+		BaseBvhComponent::BvhBuildInfo buildInfo {};
+		buildInfo.isCancelled = [this]() -> bool { return m_buildWorker->IsTaskCancelled(); };
+		buildInfo.poses = &meshPoses;
+		auto bvhData = BaseBvhComponent::RebuildBvh(meshes, &buildInfo, &meshIndices);
 		if(!bvhData)
 			return;
 		if(worker.IsTaskCancelled())

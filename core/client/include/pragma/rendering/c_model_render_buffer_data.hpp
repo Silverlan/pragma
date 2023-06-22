@@ -23,7 +23,8 @@ namespace pragma::rendering {
 		enum class StateFlags : uint32_t {
 			None = 0,
 			EnableDepthPrepass = 1u,
-			EnableGlowPass = EnableDepthPrepass<<1u,
+			EnableGlowPass = EnableDepthPrepass << 1u,
+			ExcludeFromAccelerationStructures = EnableGlowPass << 1u,
 		};
 		std::shared_ptr<prosper::IRenderBuffer> renderBuffer;
 		pragma::GameShaderSpecializationConstantFlag pipelineSpecializationFlags;

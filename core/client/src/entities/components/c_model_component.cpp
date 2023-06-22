@@ -200,7 +200,7 @@ void CModelComponent::SetDepthPrepassEnabled(bool enabled) { umath::set_flag(m_s
 
 void CModelComponent::SetRenderBufferData(const std::vector<rendering::RenderBufferData> &renderBufferData) { m_lodMeshRenderBufferData = renderBufferData; }
 
-void CModelComponent::AddRenderMesh(CModelSubMesh &mesh, CMaterial &mat, bool enableDepthPrepass)
+void CModelComponent::AddRenderMesh(CModelSubMesh &mesh, CMaterial &mat, pragma::rendering::RenderBufferData::StateFlags stateFlags)
 {
 	if(m_lodRenderMeshGroups.empty())
 		return;
@@ -215,10 +215,13 @@ void CModelComponent::AddRenderMesh(CModelSubMesh &mesh, CMaterial &mat, bool en
 	auto &lodGroup = m_lodRenderMeshGroups.front();
 	auto insertIdx = lodGroup.first + lodGroup.second;
 
+	if(!shader || !shader->IsDepthPrepassEnabled())
+		umath::set_flag(stateFlags, pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass, false);
+
 	pragma::rendering::RenderBufferData renderBufferData {};
 	renderBufferData.material = mat.GetHandle();
 	renderBufferData.renderBuffer = renderBuffer;
-	umath::set_flag(renderBufferData.stateFlags,pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass,enableDepthPrepass && shader && shader->IsDepthPrepassEnabled());
+	renderBufferData.stateFlags = stateFlags;
 	renderBufferData.pipelineSpecializationFlags = shader->GetMaterialPipelineSpecializationRequirements(mat);
 
 	m_lodRenderMeshes.insert(m_lodRenderMeshes.begin() + insertIdx, mesh.shared_from_this());
@@ -278,7 +281,7 @@ void CModelComponent::UpdateRenderBufferList()
 		auto &renderBufferData = m_lodMeshRenderBufferData.back();
 		renderBufferData.renderBuffer = renderBuffer;
 		renderBufferData.material = mat ? mat->GetHandle() : msys::MaterialHandle {};
-		umath::set_flag(renderBufferData.stateFlags,pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass,depthPrepassEnabled && shader && shader->IsDepthPrepassEnabled());
+		umath::set_flag(renderBufferData.stateFlags, pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass, depthPrepassEnabled && shader && shader->IsDepthPrepassEnabled());
 		if(mat == nullptr || shader == nullptr)
 			continue;
 		renderBufferData.pipelineSpecializationFlags = shader->GetMaterialPipelineSpecializationRequirements(*mat);
@@ -289,7 +292,7 @@ void CModelComponent::UpdateRenderBufferList()
 
 void CModelComponent::SetBaseShaderSpecializationFlag(pragma::GameShaderSpecializationConstantFlag flag, bool enabled) { umath::set_flag(m_baseShaderSpecializationConstantFlags, flag, enabled); }
 
-void CModelComponent::UpdateRenderMeshes()
+void CModelComponent::UpdateRenderMeshes(bool requireBoundingVolumeUpdate)
 {
 	if(umath::is_flag_set(m_stateFlags, StateFlags::RenderMeshUpdateRequired | StateFlags::RenderBufferListUpdateRequired) == false)
 		return;
@@ -327,7 +330,7 @@ void CModelComponent::UpdateRenderMeshes()
 		}
 	}
 	UpdateRenderBufferList();
-	BroadcastEvent(EVENT_ON_RENDER_MESHES_UPDATED);
+	BroadcastEvent(EVENT_ON_RENDER_MESHES_UPDATED, CEOnRenderMeshesUpdated {requireBoundingVolumeUpdate});
 }
 
 void CModelComponent::UpdateLOD(UInt32 lod)
@@ -503,3 +506,8 @@ void CModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 	}
 	BaseModelComponent::OnModelChanged(model);
 }
+
+////////////
+
+CEOnRenderMeshesUpdated::CEOnRenderMeshesUpdated(bool requireBoundingVolumeUpdate) : requireBoundingVolumeUpdate {requireBoundingVolumeUpdate} {}
+void CEOnRenderMeshesUpdated::PushArguments(lua_State *l) { Lua::PushBool(l, requireBoundingVolumeUpdate); }

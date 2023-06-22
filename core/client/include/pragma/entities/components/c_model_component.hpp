@@ -65,7 +65,7 @@ namespace pragma {
 		const std::vector<rendering::RenderBufferData> &GetRenderBufferData() const { return const_cast<CModelComponent *>(this)->GetRenderBufferData(); };
 		std::vector<rendering::RenderBufferData> &GetRenderBufferData() { return m_lodMeshRenderBufferData; }
 		void SetRenderBufferData(const std::vector<rendering::RenderBufferData> &renderBufferData);
-		void AddRenderMesh(CModelSubMesh &mesh, CMaterial &mat, bool enableDepthPrepass = true);
+		void AddRenderMesh(CModelSubMesh &mesh, CMaterial &mat, pragma::rendering::RenderBufferData::StateFlags stateFlags = pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass);
 
 		RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod);
 		const RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod) const;
@@ -92,7 +92,7 @@ namespace pragma {
 		void SetLightmapUvBuffer(const CModelSubMesh &mesh, const std::shared_ptr<prosper::IBuffer> &buffer);
 		std::shared_ptr<prosper::IBuffer> GetLightmapUvBuffer(const CModelSubMesh &mesh) const;
 
-		void UpdateRenderMeshes();
+		void UpdateRenderMeshes(bool requireBoundingVolumeUpdate = true);
 		void ReloadRenderBufferList(bool immediate = false);
 		// Only use if LOD is handled externally!
 		void SetLOD(uint32_t lod);
@@ -114,6 +114,12 @@ namespace pragma {
 
 		std::vector<RenderMeshGroup> m_lodMeshGroups;
 		std::vector<RenderMeshGroup> m_lodRenderMeshGroups;
+	};
+
+	struct DLLCLIENT CEOnRenderMeshesUpdated : public ComponentEvent {
+		CEOnRenderMeshesUpdated(bool requireBoundingVolumeUpdate = true);
+		virtual void PushArguments(lua_State *l) override;
+		bool requireBoundingVolumeUpdate = true;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::CModelComponent::StateFlags)

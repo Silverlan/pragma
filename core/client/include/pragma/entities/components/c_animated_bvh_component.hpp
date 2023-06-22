@@ -21,6 +21,7 @@ namespace pragma {
 		};
 		AnimationBvhData animationBvhData;
 		std::vector<std::shared_ptr<ModelSubMesh>> renderMeshes;
+		std::vector<uint16_t> renderMeshIndices;
 		std::vector<MeshData> meshData;
 		std::vector<BvhTriangle> transformedTris;
 		std::condition_variable completeCondition;
@@ -42,6 +43,8 @@ namespace pragma {
 		void Cancel();
 		void WaitForCompletion();
 		bool IsBusy() const;
+		void UpdateDirtyBones();
+		void RebuildAnimatedBvh(bool force, const std::vector<bool> *optDirtyBones = nullptr);
 
 		AnimatedBvhData m_animatedBvhData;
 		CallbackHandle m_cbOnMatricesUpdated;
@@ -53,8 +56,12 @@ namespace pragma {
 		bool m_rebuildScheduled = false;
 		std::atomic<bool> m_cancelled = false;
 		std::atomic<bool> m_busy = false;
+		std::chrono::steady_clock::time_point m_tStart;
 		bool m_updateLazily = false;
 		uint32_t m_numJobs = 0;
+
+		std::vector<umath::ScaledTransform> m_prevBonePoses;
+		std::vector<bool> m_dirtyBones;
 	};
 };
 

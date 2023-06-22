@@ -86,6 +86,7 @@ void Lua::ModelDef::register_class(lua_State *l, luabind::module_ &entsMod)
 	defCModel.def("SetAutoLodEnabled", &pragma::CModelComponent::SetAutoLodEnabled);
 	defCModel.def("SetMaxDrawDistance", &pragma::CModelComponent::SetMaxDrawDistance);
 	defCModel.def("GetMaxDrawDistance", &pragma::CModelComponent::GetMaxDrawDistance);
+	defCModel.def("UpdateRenderMeshes", &pragma::CModelComponent::UpdateRenderMeshes, luabind::default_parameter_policy<2, true> {});
 	defCModel.def("UpdateRenderMeshes", &pragma::CModelComponent::UpdateRenderMeshes);
 	defCModel.def("SetRenderMeshesDirty", &pragma::CModelComponent::SetRenderMeshesDirty);
 	defCModel.def("ReloadRenderBufferList", &pragma::CModelComponent::ReloadRenderBufferList, luabind::default_parameter_policy<2, false> {});
@@ -96,7 +97,7 @@ void Lua::ModelDef::register_class(lua_State *l, luabind::module_ &entsMod)
 	defCModel.def(
 	  "GetRenderBufferData", +[](pragma::CModelComponent &c) -> std::vector<pragma::rendering::RenderBufferData> { return c.GetRenderBufferData(); });
 	defCModel.def("AddRenderMesh", &pragma::CModelComponent::AddRenderMesh);
-	defCModel.def("AddRenderMesh", &pragma::CModelComponent::AddRenderMesh, luabind::default_parameter_policy<4, true> {});
+	defCModel.def("AddRenderMesh", &pragma::CModelComponent::AddRenderMesh, luabind::default_parameter_policy<4, pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass> {});
 	defCModel.def(
 	  "GetRenderMeshes", +[](pragma::CModelComponent &c) -> std::vector<std::shared_ptr<ModelSubMesh>> { return c.GetRenderMeshes(); });
 
@@ -104,6 +105,7 @@ void Lua::ModelDef::register_class(lua_State *l, luabind::module_ &entsMod)
 	defRenderBufferData.add_static_constant("STATE_FLAG_NONE", umath::to_integral(pragma::rendering::RenderBufferData::StateFlags::None));
 	defRenderBufferData.add_static_constant("STATE_FLAG_ENABLE_DEPTH_PREPASS_BIT", umath::to_integral(pragma::rendering::RenderBufferData::StateFlags::EnableDepthPrepass));
 	defRenderBufferData.add_static_constant("STATE_FLAG_ENABLE_GLOW_PASS_BIT", umath::to_integral(pragma::rendering::RenderBufferData::StateFlags::EnableGlowPass));
+	defRenderBufferData.add_static_constant("STATE_FLAG_EXCLUDE_FROM_ACCELERATION_STRUCTURES_BIT", umath::to_integral(pragma::rendering::RenderBufferData::StateFlags::ExcludeFromAccelerationStructures));
 	defRenderBufferData.def(luabind::constructor<>());
 	defRenderBufferData.def_readwrite("stateFlags", &pragma::rendering::RenderBufferData::stateFlags);
 	defRenderBufferData.def_readwrite("pipelineSpecializationFlags", &pragma::rendering::RenderBufferData::pipelineSpecializationFlags);

@@ -11,6 +11,8 @@
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include "pragma/model/c_model.h"
+#include <panima/skeleton.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/debug/intel_vtune.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -34,6 +36,43 @@ CAnimatedBvhComponent::CAnimatedBvhComponent(BaseEntity &ent) : BaseEntityCompon
 }
 void CAnimatedBvhComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
+void CAnimatedBvhComponent::UpdateDirtyBones()
+{
+	auto animC = GetEntity().GetComponent<CAnimatedComponent>();
+	auto &processedPoses = animC->GetProcessedBones();
+	if(m_prevBonePoses.size() != processedPoses.size()) {
+		m_prevBonePoses.resize(processedPoses.size());
+		for(auto i = decltype(processedPoses.size()) {0u}; i < processedPoses.size(); ++i) {
+			m_prevBonePoses[i] = processedPoses[i].GetOrigin();
+		}
+
+		// Number of bones has changed, need to do a full rebuild!
+		RebuildAnimatedBvh();
+		return;
+	}
+
+	constexpr auto thresholdDistance = umath::pow2(0.4f);
+	m_dirtyBones.clear();
+	m_dirtyBones.resize(processedPoses.size(), false);
+	auto hasDirtyBones = false;
+	for(auto i = decltype(processedPoses.size()) {0u}; i < processedPoses.size(); ++i) {
+		auto &oldPose = m_prevBonePoses[i];
+		auto &newPose = processedPoses[i];
+		auto d = uquat::dot_product(oldPose.GetRotation(), newPose.GetRotation());
+		if(uvec::distance_sqr(newPose.GetOrigin(), oldPose.GetOrigin()) >= thresholdDistance || d < 0.999f) {
+			m_dirtyBones[i] = true;
+			hasDirtyBones = true;
+			oldPose = newPose;
+		}
+	}
+
+	if(!hasDirtyBones)
+		return;
+
+	// Update vertices associated with dirty bones only
+	RebuildAnimatedBvh(false, &m_dirtyBones);
+}
+
 void CAnimatedBvhComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -41,7 +80,7 @@ void CAnimatedBvhComponent::Initialize()
 	auto animC = GetEntity().GetComponent<CAnimatedComponent>();
 	if(animC.valid()) {
 		m_cbOnMatricesUpdated = animC->AddEventCallback(CAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-			RebuildAnimatedBvh();
+			UpdateDirtyBones();
 			return util::EventReply::Unhandled;
 		});
 		animC->SetSkeletonUpdateCallbacksEnabled(true);
@@ -79,7 +118,10 @@ void CAnimatedBvhComponent::RebuildTemporaryBvhData()
 		return;
 	auto &renderMeshes = mdlC->GetRenderMeshes();
 	Clear();
-	m_tmpBvhData = BaseBvhComponent::RebuildBvh(renderMeshes);
+
+	CBvhComponent::BvhBuildInfo buildInfo {};
+	buildInfo.shouldConsiderMesh = [mdlC](const ModelSubMesh &mesh, uint32_t meshIdx) -> bool { return CBvhComponent::ShouldConsiderMesh(mesh, *mdlC->GetRenderBufferData(meshIdx)); };
+	m_tmpBvhData = BaseBvhComponent::RebuildBvh(renderMeshes, &buildInfo);
 }
 
 void CAnimatedBvhComponent::SetUpdateLazily(bool updateLazily) { m_updateLazily = updateLazily; }
@@ -138,9 +180,11 @@ void CAnimatedBvhComponent::WaitForCompletion()
 	m_animatedBvhData.completeCondition.wait(lock, [this]() { return m_animatedBvhData.completeCount == m_numJobs; });
 }
 
-void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force)
+void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force) { return RebuildAnimatedBvh(force, nullptr); }
+
+void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force, const std::vector<bool> *optDirtyBones)
 {
-	if(IsBusy())
+	if(IsBusy()) // TODO: Cancel current rebuild if new rebuild is a *complete* rebuild and old rebuild isn't
 		return;
 		/*if(!force && m_updateLazily)
 	{
@@ -186,30 +230,60 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force)
 	auto &animBvhData = m_animatedBvhData.animationBvhData;
 	animBvhData.boneMatrices = animC->GetBoneMatrices();
 	m_animatedBvhData.renderMeshes = mdlC->GetRenderMeshes();
+	m_tStart = std::chrono::steady_clock::now();
 
 	auto &renderMeshes = m_animatedBvhData.renderMeshes;
 	auto &pool = get_thread_pool();
 
 	// Prepare mesh data
-	auto &meshDatas = m_animatedBvhData.meshData;
-	meshDatas.resize(renderMeshes.size());
 	constexpr uint32_t numVerticesPerBatch = 500;
 	uint32_t &numJobs = m_numJobs;
 	numJobs = 0;
 	size_t numIndices = 0;
-	for(auto &renderMesh : renderMeshes) {
+	for(auto it=renderMeshes.begin();it!=renderMeshes.end();) {
+		auto &renderMesh = *it;
+		auto idx = it - renderMeshes.begin();
+		if(!CBvhComponent::ShouldConsiderMesh(*renderMesh, *mdlC->GetRenderBufferData(idx))) {
+			it = renderMeshes.erase(it);
+			continue;
+		}
 		auto numVerts = renderMesh->GetVertexCount();
 		numJobs += numVerts / numVerticesPerBatch;
 		if((numVerts % numVerticesPerBatch) > 0)
 			++numJobs;
 		numIndices += renderMesh->GetIndexCount();
+		++it;
 	}
 	if(numIndices == 0)
 		return;
-	m_busy = true;
-	m_animatedBvhData.transformedTris.resize(numIndices / 3);
-
 	auto bvhC = GetEntity().GetComponent<CBvhComponent>();
+	if(bvhC.expired())
+		return;
+	m_busy = true;
+
+	auto &meshDatas = m_animatedBvhData.meshData;
+	meshDatas.resize(renderMeshes.size());
+
+	auto triCount = (numIndices / 3);
+	if(triCount != m_animatedBvhData.transformedTris.size()) {
+		optDirtyBones = nullptr; // Full update required
+		m_animatedBvhData.transformedTris.resize(triCount);
+	}
+
+	std::function<bool(uint32_t, const umath::Vertex &, const umath::VertexWeight &)> fShouldConsiderVertex = nullptr;
+	if(optDirtyBones) {
+		auto cpyDirtyBones = *optDirtyBones;
+		fShouldConsiderVertex = [cpyDirtyBones = std::move(cpyDirtyBones)](uint32_t vertIdx, const umath::Vertex &v, const umath::VertexWeight &vw) -> bool {
+			constexpr auto n = decltype(vw.boneIds)::length();
+			for(auto i = decltype(n) {0u}; i < n; ++i) {
+				assert(vw.boneIds[i] < cpyDirtyBones.size());
+				if(vw.boneIds[i] >= 0 && cpyDirtyBones[vw.boneIds[i]])
+					return true;
+			}
+			return false;
+		};
+	}
+
 	auto finalize = [this, bvhC, &animBvhData, &renderMeshes]() mutable -> pragma::ThreadPool::ResultHandler {
 		size_t indexOffset = 0;
 		uint32_t meshIdx = 0;
@@ -228,6 +302,10 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force)
 		auto oldBvh = bvhC->SetBvhData(m_tmpBvhData);
 		m_tmpBvhData = oldBvh;
 
+		auto dt = std::chrono::steady_clock::now() - m_tStart;
+		auto timePassed = dt.count() / 1'000'000.0;
+		// std::cout << "Time: " << timePassed << "ms" << std::endl;
+
 		m_busy = false;
 		return {};
 	};
@@ -237,7 +315,7 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force)
 		auto &meshData = meshDatas[i];
 		meshData.transformedVerts.resize(numVerts);
 
-		pool.BatchProcess(numVerts, numVerticesPerBatch, [this, numJobs, &mesh, &meshData, &animBvhData, finalize](uint32_t start, uint32_t end) mutable -> pragma::ThreadPool::ResultHandler {
+		pool.BatchProcess(numVerts, numVerticesPerBatch, [this, fShouldConsiderVertex, numJobs, &mesh, &meshData, &animBvhData, finalize](uint32_t start, uint32_t end) mutable -> pragma::ThreadPool::ResultHandler {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 			::debug::get_domain().BeginTask("bvh_animated_compute");
 #endif
@@ -255,6 +333,8 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force)
 						break;
 					auto &v = verts[i];
 					auto &vw = vertexWeights[i];
+					if(fShouldConsiderVertex && fShouldConsiderVertex(i, v, vw) == false)
+						continue;
 					Mat4 mat {0.f};
 					for(auto i = 0u; i < 4u; ++i) {
 						auto boneId = vw.boneIds[i];
@@ -262,6 +342,7 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force)
 							continue;
 						auto weight = vw.weights[i];
 						mat += weight * animBvhData.boneMatrices[boneId];
+						// TODO: Include flexes
 					}
 
 					Vector4 vpos {v.position.x, v.position.y, v.position.z, 1.f};

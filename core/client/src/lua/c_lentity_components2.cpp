@@ -42,7 +42,7 @@ void RegisterLuaEntityComponents2_cl(lua_State *l, luabind::module_ &entsMod)
 
 	auto defAnimatedBvh = pragma::lua::create_entity_component_class<pragma::CAnimatedBvhComponent, pragma::BaseEntityComponent>("AnimatedBvhComponent");
 	defAnimatedBvh.def("SetUpdateLazily", &pragma::CAnimatedBvhComponent::SetUpdateLazily);
-	defAnimatedBvh.def("RebuildAnimatedBvh", &pragma::CAnimatedBvhComponent::RebuildAnimatedBvh);
+	defAnimatedBvh.def("RebuildAnimatedBvh", static_cast<void (pragma::CAnimatedBvhComponent::*)(bool)>(&pragma::CAnimatedBvhComponent::RebuildAnimatedBvh));
 	entsMod[defAnimatedBvh];
 
 	auto defStaticBvh = pragma::lua::create_entity_component_class<pragma::CStaticBvhCacheComponent, pragma::BaseStaticBvhCacheComponent>("StaticBvhCacheComponent");

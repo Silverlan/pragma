@@ -320,7 +320,7 @@ std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(const std::vector<
 			++meshIdx;
 			return nullptr;
 		}
-		if(optBvhBuildInfo && optBvhBuildInfo->shouldConsiderMesh(*mesh,meshIdx) == false) {
+		if(optBvhBuildInfo && optBvhBuildInfo->shouldConsiderMesh && optBvhBuildInfo->shouldConsiderMesh(*mesh, meshIdx) == false) {
 			++meshIdx;
 			continue;
 		}
@@ -344,7 +344,7 @@ std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(const std::vector<
 	for(uint32_t meshIdx = 0; auto &mesh : meshes) {
 		if(optBvhBuildInfo && optBvhBuildInfo->isCancelled && optBvhBuildInfo->isCancelled())
 			return nullptr;
-		if(optBvhBuildInfo && optBvhBuildInfo->shouldConsiderMesh(*mesh,meshIdx) == false) {
+		if(optBvhBuildInfo && optBvhBuildInfo->shouldConsiderMesh && optBvhBuildInfo->shouldConsiderMesh(*mesh, meshIdx) == false) {
 			++meshIdx;
 			continue;
 		}

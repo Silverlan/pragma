@@ -184,11 +184,15 @@ static void insert_arguments(const std::vector<TString> &args, TString &inOutTex
 		auto endPos = inOutText.find('}', startPos);
 		if(endPos == std::string::npos)
 			return;
+		size_t numCharsAdded = 0;
 		if(endPos == startPos + 1) {
 			// Brackets without argument ("{}")
 			assert(argIdx < args.size());
-			if(argIdx < args.size())
-				inOutText = inOutText.replace(startPos, 2, args[argIdx++]);
+			if(argIdx < args.size()) {
+				auto &arg = args[argIdx++];
+				inOutText = inOutText.replace(startPos, 2, arg);
+				numCharsAdded = arg.size();
+			}
 		}
 		else {
 			TStringView inner {inOutText.c_str() + startPos + 1, (endPos - startPos) - 1};
@@ -197,17 +201,23 @@ static void insert_arguments(const std::vector<TString> &args, TString &inOutTex
 			if(result.ec != std::errc::invalid_argument) {
 				// Brackets with index argument (e.g. "{0}")
 				assert(argIdx < args.size());
-				if(argIdx < args.size())
-					inOutText = inOutText.replace(startPos, endPos - startPos + 1, args[argIdx]);
+				if(argIdx < args.size()) {
+					auto &arg = args[argIdx];
+					inOutText = inOutText.replace(startPos, endPos - startPos + 1, arg);
+					numCharsAdded = arg.size();
+				}
 			}
 			else {
 				// Brackets with locale id (e.g. "{math_unit}")
 				auto innerText = Locale::GetText(std::string {inner});
 				inOutText = inOutText.replace(startPos, endPos - startPos + 1, innerText);
+				numCharsAdded = innerText.size();
 			}
 		}
-
-		startPos = inOutText.find('{', endPos + 1);
+		endPos = startPos + numCharsAdded;
+		if(endPos >= inOutText.size())
+			break;
+		startPos = inOutText.find('{', endPos);
 	}
 }
 bool Locale::GetText(const std::string &id, const std::vector<util::Utf8String> &args, util::Utf8String &outText)

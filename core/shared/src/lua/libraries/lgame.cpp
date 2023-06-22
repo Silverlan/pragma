@@ -39,7 +39,7 @@
 #include "pragma/ai/navsystem.h"
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include <pragma/math/intersection.h>
-#pragma optimize("", off)
+
 extern DLLNETWORK Engine *engine;
 Lua::opt<Lua::type<CallbackHandle>> Lua::game::add_callback(lua_State *l, const std::string &identifier, const func<void> &function)
 {
@@ -418,4 +418,3 @@ void Lua::game::register_shared_functions(lua_State *l, luabind::module_ &modGam
 	classDefDescriptor->def("GetReferences", &pragma::ValueDriverDescriptor::GetReferences);
 	modGame[*classDefDescriptor];
 }
-#pragma optimize("", on)

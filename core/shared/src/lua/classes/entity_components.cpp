@@ -42,7 +42,7 @@
 #include <luabind/copy_policy.hpp>
 #include <luabind/discard_result_policy.hpp>
 #include <fmt/core.h>
-#pragma optimize("", off)
+
 namespace Lua {
 	template<typename... Types>
 	static luabind::class_<Types..., pragma::BaseEntityComponent> create_base_entity_component_class(const char *name)
@@ -3718,4 +3718,3 @@ void pragma::lua::base_liquid_surface_simulation_component::register_class(luabi
 }
 
 // --template-register-definition
-#pragma optimize("", on)

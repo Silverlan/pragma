@@ -37,7 +37,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("", off)
+
 CRendererPpVolumetricComponent::CRendererPpVolumetricComponent(BaseEntity &ent) : CRendererPpBaseComponent(ent)
 {
 	static auto g_shadersRegistered = false;
@@ -141,4 +141,3 @@ void CRendererPpVolumetricComponent::DoRenderEffect(const util::DrawSceneInfo &d
 	}
 }
 void CRendererPpVolumetricComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-#pragma optimize("", on)

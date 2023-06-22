@@ -29,7 +29,7 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 decltype(ShaderGlow::DESCRIPTOR_SET_MATERIAL) ShaderGlow::DESCRIPTOR_SET_MATERIAL = {{prosper::DescriptorSetInfo::Binding {// Material settings
                                                                                       prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit},
   prosper::DescriptorSetInfo::Binding {// Albedo Map
@@ -251,4 +251,3 @@ void ShaderGlow::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, co
 	pushConstants.drawOrigin = drawOrigin;
 	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, 0u, sizeof(pushConstants), &pushConstants);
 }
-#pragma optimize("", on)

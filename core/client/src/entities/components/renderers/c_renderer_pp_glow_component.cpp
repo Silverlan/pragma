@@ -29,7 +29,6 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-#pragma optimize("", off)
 static auto cvBloomEnabled = GetClientConVar("render_bloom_enabled");
 static auto cvBloomAmount = GetClientConVar("render_bloom_amount");
 
@@ -263,4 +262,3 @@ void CRendererPpGlowComponent::OnTick(double dt)
 	SetTickPolicy(TickPolicy::Never);
 	m_controlledBlurSettings.UpdateShaderPipelines();
 }
-#pragma optimize("", on)

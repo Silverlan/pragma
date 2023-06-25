@@ -1745,6 +1745,8 @@ void pragma::lua::base_toggle_component::register_class(luabind::module_ &mod)
 	def.def("GetTurnedOnProperty", &pragma::BaseToggleComponent::GetTurnedOnProperty);
 	def.add_static_constant("EVENT_ON_TURN_ON", pragma::BaseToggleComponent::EVENT_ON_TURN_ON);
 	def.add_static_constant("EVENT_ON_TURN_OFF", pragma::BaseToggleComponent::EVENT_ON_TURN_OFF);
+
+	def.add_static_constant("SPAWN_FLAG_START_ON_BIT", umath::to_integral(pragma::BaseToggleComponent::SpawnFlags::StartOn));
 }
 #include "pragma/entities/components/base_wheel_component.hpp"
 void pragma::lua::base_wheel_component::register_class(luabind::module_ &mod)
@@ -1791,6 +1793,9 @@ void pragma::lua::base_env_light_component::register_class(luabind::module_ &mod
 	def.add_static_constant("INTENSITY_TYPE_CANDELA", umath::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Candela));
 	def.add_static_constant("INTENSITY_TYPE_LUMEN", umath::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Lumen));
 	def.add_static_constant("INTENSITY_TYPE_LUX", umath::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Lux));
+
+	def.add_static_constant("LIGHT_FLAG_NONE", umath::to_integral(pragma::BaseEnvLightComponent::LightFlags::None));
+	def.add_static_constant("LIGHT_FLAG_BAKED_LIGHT_SOURCE_BIT", umath::to_integral(pragma::BaseEnvLightComponent::LightFlags::BakedLightSource));
 }
 #include "pragma/entities/environment/lights/env_light_spot.h"
 void pragma::lua::base_env_light_spot_component::register_class(luabind::module_ &mod)

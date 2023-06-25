@@ -838,15 +838,15 @@ def download_addon(name,addonName,url,commitId=None):
 
 curDir = os.getcwd()
 if with_pfm:
-	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","d8ccffe072abbbca74d19ee84fcba07f79dd0432")
+	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","246757e34e1fc5af313f0299d9dfbf20a1a7d9b9")
 	download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","044db97f82f90dd7451ba7fbf0e5de1ffecc1659")
 
 if with_vr:
 	download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","479e430e1f4f011f8c9b76a0e07b71ca51696574")
 
 if with_pfm:
-	download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","38b6cbcc7e193d05be3ede64bd0fe0586fc52367")
-	download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","93c8fa99f60811aea902cb82706b0e52daa2ada0")
+	download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")
+	download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","f0a9314523b8b2a467776766c732465151a67e01")
 
 os.chdir(curDir)
 

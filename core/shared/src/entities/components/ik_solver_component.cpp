@@ -132,6 +132,7 @@ void IkSolverComponent::InitializeSolver()
 	m_boneIdToIkBoneId.clear();
 	m_ikBoneIdToBoneId.clear();
 	m_ikSolver = std::make_unique<pragma::ik::Solver>(100, 10);
+	m_pinnedBones.clear();
 	UpdateSolverSettings();
 
 	ClearMembers();
@@ -205,7 +206,7 @@ bool IkSolverComponent::AddIkSolverByChain(const std::string &boneName, uint32_t
 	// Add generic ballsocket constraints with no twist
 	for(auto i = decltype(ikChain.size()) {1u}; i < ikChain.size(); ++i) {
 		// We need to allow some minor twisting to avoid instability
-		rig.AddBallSocketConstraint(skeleton.GetBone(ikChain[i - 1]).lock()->name, skeleton.GetBone(ikChain[i]).lock()->name,minLimits,maxLimits);
+		rig.AddBallSocketConstraint(skeleton.GetBone(ikChain[i - 1]).lock()->name, skeleton.GetBone(ikChain[i]).lock()->name, minLimits, maxLimits);
 	}
 	if(!AddIkSolverByRig(rig))
 		return false;
@@ -253,6 +254,18 @@ void IkSolverComponent::SetBoneLocked(BoneId boneId, bool locked)
 	if(!bone)
 		return;
 	bone->SetPinned(locked);
+	auto it = std::find_if(m_pinnedBones.begin(), m_pinnedBones.end(), [boneId](const PinnedBoneInfo &info) { return info.boneId == boneId; });
+	if(it != m_pinnedBones.end()) {
+		if(!locked)
+			m_pinnedBones.erase(it);
+		return;
+	}
+	m_pinnedBones.push_back({});
+	auto ikBoneId = GetIkBoneId(boneId);
+	assert(ikBoneId.has_value());
+	auto &info = m_pinnedBones.back();
+	info.boneId = boneId;
+	info.ikBoneId = *ikBoneId;
 }
 bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 {
@@ -907,10 +920,42 @@ const std::shared_ptr<pragma::ik::Solver> &IkSolverComponent::GetIkSolver() cons
 void IkSolverComponent::Solve()
 {
 	if(!m_updateRequired) {
+		auto animC = GetEntity().GetAnimatedComponent();
+		for(auto &info : m_pinnedBones) {
+			Vector3 pos;
+			Quat rot;
+			Vector3 scale;
+			if(animC.valid() && animC->GetLocalBonePosition(info.boneId, pos, rot, &scale)) {
+				if(uvec::distance_sqr(pos, info.oldPose.GetOrigin()) > 0.00001f || uquat::dot_product(rot, info.oldPose.GetRotation()) < 0.99999f || uvec::distance_sqr(scale, info.oldPose.GetScale()) > 0.00001f) {
+					m_updateRequired = true;
+				}
+			}
+		}
+	}
+
+	if(!m_updateRequired) {
 		InvokeEventCallbacks(EVENT_ON_IK_UPDATED);
 		return;
 	}
 	m_updateRequired = false;
+
+	{
+		auto animC = GetEntity().GetAnimatedComponent();
+		for(auto &info : m_pinnedBones) {
+			auto animC = GetEntity().GetAnimatedComponent(); // TODO: This is not very fast...
+			Vector3 pos;
+			Quat rot;
+			Vector3 scale;
+			if(animC.valid() && animC->GetLocalBonePosition(info.boneId, pos, rot, &scale)) {
+				auto *ikBone = m_ikSolver->GetBone(info.ikBoneId);
+				if(ikBone) {
+					ikBone->SetPos(pos);
+					ikBone->SetRot(rot);
+				}
+				info.oldPose = {pos, rot, scale};
+			}
+		}
+	}
 
 	if(m_resetIkPose)
 		ResetIkBones();
@@ -922,8 +967,10 @@ void IkSolverComponent::ResetIkBones()
 	auto numBones = m_ikSolver->GetBoneCount();
 	for(auto i = decltype(numBones) {0u}; i < numBones; ++i) {
 		auto *bone = m_ikSolver->GetBone(i);
+		if(!bone || bone->IsPinned())
+			continue; // Pinned bones are handled via forward kinematics
 		auto it = m_ikBoneIdToBoneId.find(i);
-		if(it == m_ikBoneIdToBoneId.end() || !bone)
+		if(it == m_ikBoneIdToBoneId.end())
 			continue;
 		auto boneId = it->second;
 		auto pose = GetReferenceBonePose(boneId);

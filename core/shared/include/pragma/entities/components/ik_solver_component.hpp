@@ -90,12 +90,19 @@ namespace pragma {
 
 		bool GetConstraintBones(BoneId boneId0, BoneId boneId1, pragma::ik::Bone **bone0, pragma::ik::Bone **bone1, umath::ScaledTransform &pose0, umath::ScaledTransform &pose1) const;
 
+		struct PinnedBoneInfo {
+			BoneId boneId;
+			IkBoneId ikBoneId;
+			umath::ScaledTransform oldPose;
+		};
+
 		udm::PProperty m_ikRig;
 		std::string m_ikRigFile;
 		std::shared_ptr<pragma::ik::Solver> m_ikSolver;
 		std::unordered_map<BoneId, IkBoneId> m_boneIdToIkBoneId;
 		std::unordered_map<IkBoneId, BoneId> m_ikBoneIdToBoneId;
 		std::unordered_map<BoneId, std::shared_ptr<pragma::ik::IControl>> m_ikControls;
+		std::vector<PinnedBoneInfo> m_pinnedBones;
 		bool m_updateRequired = false;
 		bool m_resetIkPose = true;
 	};

@@ -855,9 +855,26 @@ cfg = {}
 cfg["args"] = {}
 for key, value in input_args.items():
 	cfg["args"][key] = value
+
 cfg["original_args"] = ' '.join(sys.argv[1:])
 
 import json
+
+if rerun:
+	# Keep the "original_args" info from the existing build_config
+	try:
+		oldCfg = None
+		with open(build_dir +"/build_config.json", "r") as file:
+			oldCfg = json.load(file)
+
+		if oldCfg:
+			if "original_args" in oldCfg:
+				cfg["original_args"] = cfg["original_args"]
+
+
+	except json.JSONDecodeError as e:
+		print("Failed to load build_config.json:", e)
+
 json.dump(cfg,open(build_dir +"/build_config.json",'w'))
 
 ########## Build Pragma ##########

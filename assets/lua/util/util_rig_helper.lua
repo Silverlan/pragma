@@ -50,7 +50,7 @@ function util.rig.determine_mirrored_bone_flip_factors(mdl, boneLeft, boneRight)
 	local rdiff = math.abs(math.get_angle_difference(angRight.r, angLeft.r))
 
 	local rollAxis = math.AXIS_Z
-	rollAxis = ents.IkSolverComponent.find_forward_axis(mdl, boneIdLeft) or rollAxis
+	rollAxis = mdl:FindBoneTwistAxis(boneIdLeft) or rollAxis
 
 	-- TODO: This may not be correct
 	local pitchAxis
@@ -121,10 +121,20 @@ function util.rig.determine_head_bones(mdl)
 			headBoneId = headBoneId or firstHeadBoneId
 		end
 		if headBoneId == nil then
-			-- TODO: Try something else
-			-- Search for head +neck?
-			-- If all fails, use full body
-			return
+			local headBoneName
+			for boneId, bone in pairs(skeleton:GetBones()) do
+				local name = bone:GetName()
+				local lname = name:lower()
+				if lname:find("head") then
+					if headBoneName == nil or #name < #headBoneName then
+						headBoneName = name
+					end
+				end
+			end
+			if headBoneName == nil then
+				return
+			end
+			headBoneId = skeleton:LookupBone(headBoneName)
 		end
 	end
 

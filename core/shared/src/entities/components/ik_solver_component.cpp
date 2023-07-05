@@ -822,6 +822,7 @@ void IkSolverComponent::AddControl(BoneId boneId, pragma::ik::RigConfigControl::
 		bone->SetPinned(value);
 	})>();
 	RegisterMember(std::move(memberInfoLocked));
+#endif
 
 	// TODO: Position weight and rotation weight
 

@@ -449,7 +449,7 @@ bool Model::SetReferencePoses(const std::vector<umath::ScaledTransform> &poses, 
 	std::vector<umath::ScaledTransform> t;
 	t.resize(poses.size());
 	if(posesInParentSpace) {
-		relPoses = const_cast<std::vector<umath::ScaledTransform>*>(&poses);
+		relPoses = const_cast<std::vector<umath::ScaledTransform> *>(&poses);
 		absPoses = &t;
 		skeleton.TransformToGlobalSpace(*relPoses, *absPoses);
 	}
@@ -1925,4 +1925,73 @@ void Model::UpdateShape(const std::vector<SurfaceMaterial> *)
 	for(auto &cmesh : m_collisionMeshes)
 		cmesh->UpdateShape();
 }
-//void Model::GetWeights(std::vector<VertexWeight*> **weights) {*weights = &m_weights;}
+std::optional<umath::ScaledTransform> Model::GetReferenceBonePose(BoneId boneId) const
+{
+	auto &ref = GetReference();
+	umath::ScaledTransform pose;
+	if(!ref.GetBonePose(boneId, pose))
+		return {};
+	return pose;
+}
+std::optional<pragma::SignedAxis> Model::FindBoneTwistAxis(BoneId boneId) const
+{
+	auto refPose = GetReferenceBonePose(boneId);
+	if(!refPose)
+		return {};
+
+	auto bone = GetSkeleton().GetBone(boneId).lock();
+	std::vector<Vector3> normalList;
+	normalList.reserve(bone->children.size());
+	for(auto &pair : bone->children) {
+		auto pose = GetReferenceBonePose(pair.first);
+		if(pose) {
+			auto normal = pose->GetOrigin() - refPose->GetOrigin();
+			uvec::normalize(&normal);
+			normalList.push_back(normal);
+		}
+	}
+	Vector3 norm = uvec::FORWARD;
+	if(!normalList.empty())
+		norm = uvec::calc_average(normalList);
+	else {
+		if(!bone->parent.expired()) {
+			auto refPoseParent = GetReferenceBonePose(bone->parent.lock()->ID);
+			if(refPoseParent)
+				norm = (refPose->GetOrigin() - refPoseParent->GetOrigin());
+		}
+	}
+
+	auto &rotBone1 = refPose->GetRotation();
+	auto dirFromBone0ToBone1 = norm;
+	//
+	uvec::normalize(&dirFromBone0ToBone1);
+	auto forward = uquat::forward(rotBone1);
+	auto right = uquat::right(rotBone1);
+	auto up = uquat::up(rotBone1);
+	auto df = uvec::dot(dirFromBone0ToBone1, forward);
+	auto dr = uvec::dot(dirFromBone0ToBone1, right);
+	auto du = uvec::dot(dirFromBone0ToBone1, up);
+	auto dfa = umath::abs(df);
+	auto dra = umath::abs(dr);
+	auto dua = umath::abs(du);
+	if(dfa >= umath::max(dra, dua))
+		return (df < 0) ? pragma::SignedAxis::NegZ : pragma::SignedAxis::Z; // Forward
+	else if(dra >= umath::max(dfa, dua))
+		return (dr < 0) ? pragma::SignedAxis::NegX : pragma::SignedAxis::X; // Right
+	return (du < 0) ? pragma::SignedAxis::NegY : pragma::SignedAxis::Y;     // Up
+}
+Quat Model::GetTwistAxisRotationOffset(pragma::SignedAxis axis)
+{
+	switch(axis) {
+	case pragma::SignedAxis::X:
+	case pragma::SignedAxis::NegX:
+		return uquat::create(EulerAngles(0.0, pragma::is_negative_axis(axis) ? -90.f : 90.f, 0.f));
+	case pragma::SignedAxis::Y:
+	case pragma::SignedAxis::NegY:
+		return uquat::create(EulerAngles(pragma::is_negative_axis(axis) ? -90.f : 90.0, 0.f, 0.f));
+	case pragma::SignedAxis::Z:
+	case pragma::SignedAxis::NegZ:
+		return uquat::create(EulerAngles(0.0, 0.f, pragma::is_negative_axis(axis) ? -90.f : 90.f));
+	}
+	return uquat::identity();
+}

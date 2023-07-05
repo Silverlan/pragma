@@ -348,20 +348,12 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 	}
 	return true;
 }
-std::optional<umath::ScaledTransform> IkSolverComponent::GetReferenceBonePose(Model &model, BoneId boneId)
-{
-	auto &ref = model.GetReference();
-	umath::ScaledTransform pose;
-	if(!ref.GetBonePose(boneId, pose))
-		return {};
-	return pose;
-}
 std::optional<umath::ScaledTransform> IkSolverComponent::GetReferenceBonePose(BoneId boneId) const
 {
 	auto &mdl = GetEntity().GetModel();
 	if(!mdl)
 		return {};
-	return GetReferenceBonePose(*mdl, boneId);
+	return mdl->GetReferenceBonePose(boneId);
 }
 bool IkSolverComponent::GetConstraintBones(BoneId boneId0, BoneId boneId1, pragma::ik::Bone **bone0, pragma::ik::Bone **bone1, umath::ScaledTransform &pose0, umath::ScaledTransform &pose1) const
 {
@@ -475,54 +467,6 @@ void IkSolverComponent::AddHingeConstraint(const ConstraintInfo &constraintInfo,
 	init_joint(constraintInfo, swingLimit);
 }
 
-std::optional<pragma::SignedAxis> IkSolverComponent::FindTwistAxis(Model &mdl, BoneId boneId)
-{
-	auto refPose = IkSolverComponent::GetReferenceBonePose(mdl, boneId);
-	if(!refPose)
-		return {};
-
-	auto bone = mdl.GetSkeleton().GetBone(boneId).lock();
-	std::vector<Vector3> normalList;
-	normalList.reserve(bone->children.size());
-	for(auto &pair : bone->children) {
-		auto pose = IkSolverComponent::GetReferenceBonePose(mdl, pair.first);
-		if(pose) {
-			auto normal = pose->GetOrigin() - refPose->GetOrigin();
-			uvec::normalize(&normal);
-			normalList.push_back(normal);
-		}
-	}
-	Vector3 norm = uvec::FORWARD;
-	if(!normalList.empty())
-		norm = uvec::calc_average(normalList);
-	else {
-		if(!bone->parent.expired()) {
-			auto refPoseParent = IkSolverComponent::GetReferenceBonePose(mdl, bone->parent.lock()->ID);
-			if(refPoseParent)
-				norm = (refPose->GetOrigin() - refPoseParent->GetOrigin());
-		}
-	}
-
-	auto &rotBone1 = refPose->GetRotation();
-	auto dirFromBone0ToBone1 = norm;
-	//
-	uvec::normalize(&dirFromBone0ToBone1);
-	auto forward = uquat::forward(rotBone1);
-	auto right = uquat::right(rotBone1);
-	auto up = uquat::up(rotBone1);
-	auto df = uvec::dot(dirFromBone0ToBone1, forward);
-	auto dr = uvec::dot(dirFromBone0ToBone1, right);
-	auto du = uvec::dot(dirFromBone0ToBone1, up);
-	auto dfa = umath::abs(df);
-	auto dra = umath::abs(dr);
-	auto dua = umath::abs(du);
-	if(dfa >= umath::max(dra, dua))
-		return (df < 0) ? pragma::SignedAxis::NegZ : pragma::SignedAxis::Z; // Forward
-	else if(dra >= umath::max(dfa, dua))
-		return (dr < 0) ? pragma::SignedAxis::NegX : pragma::SignedAxis::X; // Right
-	return (du < 0) ? pragma::SignedAxis::NegY : pragma::SignedAxis::Y;     // Up
-}
-
 void IkSolverComponent::AddBallSocketConstraint(const ConstraintInfo &constraintInfo, const EulerAngles &minLimits, const EulerAngles &maxLimits, SignedAxis twistAxis)
 {
 	pragma::ik::Bone *bone0, *bone1;
@@ -541,30 +485,30 @@ void IkSolverComponent::AddBallSocketConstraint(const ConstraintInfo &constraint
 	auto &rotBone0 = refPose0.GetRotation();
 	auto &rotBone1 = refPose1.GetRotation();
 
-	Quat twistRotOffset = uquat::identity();
+	// If the twist axis is NOT the Z axis, we'll have to rotate
+	// the main axis around a bit and adjust the limits accordingly.
+	auto twistRotOffset = Model::GetTwistAxisRotationOffset(twistAxis);
+	uquat::inverse(twistRotOffset);
 	{
-		// If the twist axis is NOT the Z axis, we'll have to rotate
-		// the main axis around a bit and adjust the limits accordingly.
 		switch(twistAxis) {
 		case pragma::SignedAxis::X:
 		case pragma::SignedAxis::NegX:
-			twistRotOffset = uquat::create(EulerAngles(0.0, pragma::is_negative_axis(twistAxis) ? 90.f : -90.f, 0.f));
 			umath::swap(effectiveMinLimits.r, effectiveMinLimits.y);
 			umath::swap(effectiveMaxLimits.r, effectiveMaxLimits.y);
 			break;
 		case pragma::SignedAxis::Y:
 		case pragma::SignedAxis::NegY:
-			twistRotOffset = uquat::create(EulerAngles(pragma::is_negative_axis(twistAxis) ? 90.f : -90.0, 0.f, 0.f));
 			umath::swap(effectiveMinLimits.p, effectiveMinLimits.r);
 			umath::swap(effectiveMaxLimits.p, effectiveMaxLimits.r);
 
 			umath::swap(effectiveMinLimits.y, effectiveMaxLimits.y);
 			effectiveMinLimits.y *= -1.f;
 			effectiveMaxLimits.y *= -1.f;
+
+			//umath::swap(effectiveMinLimits.p, effectiveMinLimits.y);
 			break;
 		case pragma::SignedAxis::Z:
 		case pragma::SignedAxis::NegZ:
-			twistRotOffset = uquat::create(EulerAngles(0.0, 0.f, pragma::is_negative_axis(twistAxis) ? 90.f : -90.f));
 			umath::swap(effectiveMinLimits.p, effectiveMinLimits.y);
 			umath::swap(effectiveMaxLimits.p, effectiveMaxLimits.y);
 			break;
@@ -849,6 +793,7 @@ void IkSolverComponent::AddControl(BoneId boneId, pragma::ik::RigConfigControl::
 	}
 	static_assert(umath::to_integral(pragma::ik::RigConfigControl::Type::Count) == 3u);
 
+#if 0
 	auto memberInfoLocked = pragma::ComponentMemberInfo::CreateDummy();
 	memberInfoLocked.SetName("control/" + name + "/locked");
 	memberInfoLocked.type = ents::EntityMemberType::Boolean;

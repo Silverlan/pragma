@@ -22,6 +22,7 @@
 #include "pragma/model/model_flexes.hpp"
 #include "pragma/physics/ik/ik_controller.hpp"
 #include "pragma/phonememap.hpp"
+#include "pragma/game/game_coordinate_system.hpp"
 #include <udm_types.hpp>
 #include <sharedutils/def_handle.h>
 #include <memory>
@@ -512,6 +513,10 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	FlexAnimation *GetFlexAnimation(uint32_t idx);
 	const FlexAnimation *GetFlexAnimation(uint32_t idx) const { return const_cast<Model *>(this)->GetFlexAnimation(idx); }
 	const std::string *GetFlexAnimationName(uint32_t idx) const;
+
+	std::optional<umath::ScaledTransform> GetReferenceBonePose(BoneId boneId) const;
+	std::optional<pragma::SignedAxis> FindBoneTwistAxis(BoneId boneId) const;
+	static Quat GetTwistAxisRotationOffset(pragma::SignedAxis axis);
   protected:
 	Model(NetworkState *nw, uint32_t numBones, const std::string &name = "");
 	Model(const Model &other);

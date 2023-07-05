@@ -25,7 +25,6 @@ namespace pragma {
 		static ComponentEventId EVENT_ON_IK_UPDATED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
-		static std::optional<pragma::SignedAxis> FindTwistAxis(Model &mdl, BoneId boneId);
 		static std::optional<std::string> GetControlBoneName(const std::string &propPath);
 		IkSolverComponent(BaseEntity &ent);
 		virtual ~IkSolverComponent() override;
@@ -82,7 +81,6 @@ namespace pragma {
 		void ResetIkBones();
 		void UpdateIkRigFile();
 		void InitializeSolver();
-		static std::optional<umath::ScaledTransform> GetReferenceBonePose(Model &model, BoneId boneId);
 		std::optional<umath::ScaledTransform> GetReferenceBonePose(BoneId boneId) const;
 		pragma::ik::Bone *AddBone(const std::string &boneName, BoneId boneId, const umath::Transform &pose, float radius, float length);
 		void AddControl(BoneId boneId, pragma::ik::RigConfigControl::Type type, float maxForce = -1.f, float rigidity = 1.f);

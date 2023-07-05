@@ -182,6 +182,10 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("RemoveAttachment", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&RemoveAttachment));
 	classDef.def("RemoveAttachment", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&RemoveAttachment));
 
+	classDef.def("GetReferenceBonePose", &::Model::GetReferenceBonePose);
+	classDef.def("FindBoneTwistAxis", &::Model::FindBoneTwistAxis);
+	classDef.scope[luabind::def("get_twist_axis_rotation_offset", &::Model::GetTwistAxisRotationOffset)];
+
 	classDef.def("GetObjectAttachments", &GetObjectAttachments);
 	classDef.def("AddObjectAttachment", &AddObjectAttachment);
 	classDef.def("GetObjectAttachmentCount", &GetObjectAttachmentCount);

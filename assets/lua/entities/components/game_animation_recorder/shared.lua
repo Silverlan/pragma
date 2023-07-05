@@ -12,13 +12,27 @@ function Component:Initialize()
 	BaseEntityComponent.Initialize(self)
 
 	self.m_recordEntityList = {}
+	self.m_numRecordedFrames = 0
 end
 
 function Component:OnRemove()
 	util.remove(self.m_cbThink)
 end
 
+function Component:Reset()
+	self.m_recordEntityList = {}
+end
+
+function Component:GetRecordedFrameCount()
+	return self.m_numRecordedFrames
+end
+
+function Component:GetAnimations()
+	return self.m_animations
+end
+
 function Component:RecordFrame(t)
+	self.m_numRecordedFrames = self.m_numRecordedFrames + 1
 	for name, animData in pairs(self.m_animations) do
 		if animData.entity:IsValid() then
 			self:RecordEntity(name, t, animData)
@@ -41,20 +55,23 @@ end
 
 function Component:EndRecording()
 	if self.m_recording ~= true then
-		return
+		return 0
 	end
 	self.m_recording = nil
 	util.remove(self.m_cbThink)
 
+	local numProperties = 0
 	for name, animData in pairs(self.m_animations) do
 		for componentName, channels in pairs(animData.channels) do
 			for propName, channelInfo in pairs(channels) do
 				channelInfo.channel:Resize(channelInfo.size) -- Clear reserved, unused space
+				numProperties = numProperties + 1
 			end
 		end
 
 		animData.animation:UpdateDuration()
 	end
+	return numProperties
 end
 
 function Component:GetAnimation()
@@ -183,6 +200,7 @@ function Component:StartRecording()
 	end
 
 	self.m_recording = true
+	self.m_numRecordedFrames = 0
 	self.m_animations = {}
 
 	for _, entityInfo in ipairs(self.m_recordEntityList) do

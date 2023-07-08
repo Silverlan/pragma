@@ -701,9 +701,12 @@ for module in modules_prebuilt:
 	print_msg("Downloading prebuilt binaries for module '" +module +"'...")
 	install_prebuilt_binaries("https://github.com/" +module +"/releases/download/latest/")
 
+cmake_args.append("-DPRAGMA_INSTALL_CUSTOM_TARGETS=" +";".join(module_list))
+
 print("Modules:" +', '.join(module_list))
 print("Additional CMake Arguments:" +', '.join(cmake_args))
 print("Additional Build Targets:" +', '.join(additional_build_targets))
+
 
 ########## Configure Pragma ##########
 print_msg("Configuring Pragma...")
@@ -882,7 +885,7 @@ if build:
 	print_msg("Building Pragma...")
 
 	os.chdir(build_dir)
-	targets = ["pragma-install-full"] +module_list
+	targets = ["pragma-install-full"]
 	if with_pfm:
 		targets.append("pfm")
 	targets += additional_build_targets

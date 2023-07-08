@@ -453,7 +453,7 @@ print_msg("Downloading modules...")
 os.chdir(root +"/modules")
 
 module_info = []
-def add_pragma_module(name,repositoryUrl,commitSha=None,branch=None):
+def add_pragma_module(name,repositoryUrl=None,commitSha=None,branch=None):
     for module in module_info:
         if module["name"] == name:
             return

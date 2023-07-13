@@ -206,3 +206,4 @@ An example for a Lua-addon is the [Pragma Filmmaker](https://github.com/Silverla
 Special Thanks
 ------
 - [SlawekNowy](https://github.com/SlawekNowy): For helping to make Linux support possible
+- [REDxEYE](https://github.com/REDxEYE): For creating the [Pragma asset import plugin for Blender](https://github.com/REDxEYE/pragma_udm_io)

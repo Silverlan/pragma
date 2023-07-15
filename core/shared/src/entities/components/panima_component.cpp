@@ -214,18 +214,25 @@ void PanimaComponent::DebugPrint()
 
 void PanimaComponent::SetPropertyEnabled(const std::string &propName, bool enabled)
 {
+	panima::ChannelPath channelPath {propName};
+	auto normalizedPath = channelPath.ToUri(false);
 	if(enabled) {
-		auto it = m_disabledProperties.find(pragma::register_global_string(propName));
+		auto it = m_disabledProperties.find(pragma::register_global_string(normalizedPath));
 		if(it != m_disabledProperties.end()) {
 			m_disabledProperties.erase(it);
 			InitializeAnimationChannelValueSubmitters();
 		}
 		return;
 	}
-	m_disabledProperties.insert(pragma::register_global_string(propName));
+	m_disabledProperties.insert(pragma::register_global_string(normalizedPath));
 	InitializeAnimationChannelValueSubmitters();
 }
-bool PanimaComponent::IsPropertyEnabled(const std::string &propName) const { return m_disabledProperties.find(pragma::register_global_string(propName)) == m_disabledProperties.end(); }
+bool PanimaComponent::IsPropertyEnabled(const std::string &propName) const
+{
+	panima::ChannelPath channelPath {propName};
+	auto normalizedPath = channelPath.ToUri(false);
+	return m_disabledProperties.find(pragma::register_global_string(normalizedPath)) == m_disabledProperties.end();
+}
 
 void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::AnimationManager &manager)
 {

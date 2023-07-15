@@ -153,6 +153,18 @@ bool DebugRenderer::WorldObject::HasOutline() const { return m_bOutline; }
 const std::shared_ptr<prosper::IBuffer> &DebugRenderer::WorldObject::GetColorBuffer() const { return m_colorBuffer; }
 const std::shared_ptr<prosper::IBuffer> &DebugRenderer::WorldObject::GetVertexBuffer() const { return m_vertexBuffer; }
 uint32_t DebugRenderer::WorldObject::GetVertexCount() const { return (m_vertexCount != std::numeric_limits<uint32_t>::max()) ? m_vertexCount : m_vertices.size(); }
+void DebugRenderer::WorldObject::SetVertexPosition(uint32_t idx, const Vector3 &pos)
+{
+	if(idx >= m_vertices.size())
+		return;
+	m_vertices[idx] = pos;
+}
+std::optional<Vector3> DebugRenderer::WorldObject::GetVertexPosition(uint32_t idx) const
+{
+	if(idx >= m_vertices.size())
+		return {};
+	return m_vertices[idx];
+}
 void DebugRenderer::WorldObject::AddVertex(const Vector3 &v) { m_vertices.push_back(v); }
 std::vector<Vector3> &DebugRenderer::WorldObject::GetVertices() { return m_vertices; }
 std::vector<Vector4> &DebugRenderer::WorldObject::GetColors() { return m_colors; }

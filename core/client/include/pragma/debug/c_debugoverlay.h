@@ -99,6 +99,8 @@ namespace DebugRenderer {
 		const std::shared_ptr<prosper::IBuffer> &GetColorBuffer() const;
 		const std::shared_ptr<prosper::IBuffer> &GetVertexBuffer() const;
 		uint32_t GetVertexCount() const;
+		void SetVertexPosition(uint32_t idx, const Vector3 &pos);
+		std::optional<Vector3> GetVertexPosition(uint32_t idx) const;
 		void AddVertex(const Vector3 &v);
 		std::vector<Vector3> &GetVertices();
 		std::vector<Vector4> &GetColors();

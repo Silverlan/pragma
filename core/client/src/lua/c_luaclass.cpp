@@ -707,6 +707,62 @@ void CGame::RegisterLuaClasses()
 	defDebugRendererObject.def("SetScale", &::DebugRenderer::BaseObject::SetScale);
 	defDebugRendererObject.def("GetScale", &::DebugRenderer::BaseObject::GetScale, luabind::copy_policy<0> {});
 	defDebugRendererObject.def("SetPose", &::DebugRenderer::BaseObject::SetPose);
+	defDebugRendererObject.def(
+	  "GetVertexCount", +[](DebugRenderer::BaseObject &bo) -> size_t {
+		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+		  if(!o)
+			  return 0;
+		  return o->GetVertexCount();
+	  });
+	defDebugRendererObject.def(
+	  "GetVertexPosition", +[](DebugRenderer::BaseObject &bo, size_t index) -> std::optional<Vector3> {
+		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+		  if(!o)
+			  return {};
+		  return o->GetVertexPosition(index);
+	  });
+	defDebugRendererObject.def(
+	  "SetVertexPosition", +[](DebugRenderer::BaseObject &bo, size_t index, const Vector3 &pos) {
+		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+		  if(!o)
+			  return;
+		  o->SetVertexPosition(index, pos);
+	  });
+	defDebugRendererObject.def(
+	  "UpdateVertexBuffer", +[](DebugRenderer::BaseObject &bo) {
+		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+		  if(!o)
+			  return;
+		  o->UpdateVertexBuffer();
+	  });
+	defDebugRendererObject.def(
+	  "SetColor", +[](DebugRenderer::BaseObject &bo, const Vector4 &color) {
+		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+		  if(!o)
+			  return;
+		  o->SetColor(color);
+	  });
+	defDebugRendererObject.def(
+	  "GetColor", +[](DebugRenderer::BaseObject &bo, const Vector4 &color) -> std::optional<Vector4> {
+		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+		  if(!o)
+			  return {};
+		  return o->GetColor();
+	  });
+	defDebugRendererObject.def(
+	  "SetOutlineColor", +[](DebugRenderer::BaseObject &bo, const Vector4 &color) {
+		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+		  if(!o)
+			  return;
+		  o->SetOutlineColor(color);
+	  });
+	defDebugRendererObject.def(
+	  "GetOutlineColor", +[](DebugRenderer::BaseObject &bo, const Vector4 &color) -> std::optional<Vector4> {
+		  auto *o = dynamic_cast<DebugRenderer::WorldObject *>(&bo);
+		  if(!o)
+			  return {};
+		  return o->GetOutlineColor();
+	  });
 	defDebugRendererObject.def("GetPose", static_cast<const umath::ScaledTransform &(::DebugRenderer::BaseObject::*)() const>(&::DebugRenderer::BaseObject::GetPose), luabind::copy_policy<0> {});
 	debugMod[defDebugRendererObject];
 

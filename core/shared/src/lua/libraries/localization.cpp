@@ -206,6 +206,12 @@ static void insert_arguments(const std::vector<TString> &args, TString &inOutTex
 					inOutText = inOutText.replace(startPos, endPos - startPos + 1, arg);
 					numCharsAdded = arg.size();
 				}
+				else {
+					// Missing argument
+					std::string arg = "{" + std::string {inner} + "}";
+					inOutText = inOutText.replace(startPos, endPos - startPos + 1, arg);
+					numCharsAdded = arg.size();
+				}
 			}
 			else {
 				// Brackets with locale id (e.g. "{math_unit}")

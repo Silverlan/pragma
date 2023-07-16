@@ -849,7 +849,7 @@ if with_vr:
 
 if with_pfm:
 	download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")
-	download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","f0a9314523b8b2a467776766c732465151a67e01")
+	download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","5fdefdd8533e600c6df18dbc3048b72082e31898")
 
 os.chdir(curDir)
 

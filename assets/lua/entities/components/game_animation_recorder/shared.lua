@@ -62,10 +62,19 @@ function Component:EndRecording()
 
 	local numProperties = 0
 	for name, animData in pairs(self.m_animations) do
+		local panimaC
+		if animData.entity:IsValid() then
+			panimaC = animData.entity:GetComponent(ents.COMPONENT_PANIMA)
+		end
 		for componentName, channels in pairs(animData.channels) do
 			for propName, channelInfo in pairs(channels) do
 				channelInfo.channel:Resize(channelInfo.size) -- Clear reserved, unused space
 				numProperties = numProperties + 1
+
+				if panimaC ~= nil then
+					-- Re-enable property
+					panimaC:SetPropertyEnabled(channelInfo.channel:GetTargetPath():ToUri(), true)
+				end
 			end
 		end
 
@@ -130,7 +139,7 @@ function Component:InitializeChannels(entityInfo)
 		channels = {},
 	}
 	local channels = animData.channels
-
+	local panimaC = entityInfo.entity:GetComponent(ents.COMPONENT_PANIMA)
 	for componentName, props in pairs(entityInfo.properties) do
 		local c = entityInfo.entity:GetComponent(componentName)
 		if c == nil then
@@ -157,13 +166,18 @@ function Component:InitializeChannels(entityInfo)
 				else
 					local info = c:GetMemberInfo(idx)
 					channels[componentName] = channels[componentName] or {}
+					local targetPath = "ec/" .. componentName .. "/" .. propName
 					channels[componentName][propName] = {
 						size = 0,
 						capacity = 0,
-						channel = anim:AddChannel("ec/" .. componentName .. "/" .. propName, info.type),
+						channel = anim:AddChannel(targetPath, info.type),
 						component = c,
 						memberIndex = idx,
 					}
+					if panimaC ~= nil then
+						-- Disable running animation for this property
+						panimaC:SetPropertyEnabled(targetPath, false)
+					end
 				end
 			end
 		end

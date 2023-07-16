@@ -290,6 +290,30 @@ function gui.WIBaseEditor:AddFrame(parent)
 	if frame == nil then
 		return
 	end
+	frame:AddCallback("PopulateWindowMenu", function(frame, pContext)
+		local frameCategories = {}
+		for cat, frameOther in pairs(self.m_windowFrames) do
+			if frameOther:IsValid() and frameOther == frame then
+				frameCategories[cat] = true
+			end
+		end
+		local windows = {}
+		for identifier, windowData in pairs(self.m_windowFactories) do
+			if frameCategories[windowData.category] then
+				table.insert(windows, { windowData.title, identifier })
+			end
+		end
+		table.sort(windows, function(a, b)
+			return a[1] < b[1]
+		end)
+		for _, wdata in ipairs(windows) do
+			pContext:AddItem(wdata[1], function()
+				self:OpenWindow(wdata[2])
+				self:GoToWindow(wdata[2])
+			end)
+		end
+	end)
+
 	table.insert(self.m_frames, frame)
 	return frame
 end

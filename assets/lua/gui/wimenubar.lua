@@ -12,9 +12,6 @@ include("wicontextmenu.lua")
 util.register_class("gui.WIMenuBar", gui.HBox)
 
 local get_event
-function gui.WIMenuBar:__init()
-	gui.HBox.__init(self)
-end
 function gui.WIMenuBar:OnRemove() end
 function gui.WIMenuBar:OnInitialize()
 	gui.HBox.OnInitialize(self)

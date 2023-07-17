@@ -193,6 +193,12 @@ static void insert_arguments(const std::vector<TString> &args, TString &inOutTex
 				inOutText = inOutText.replace(startPos, 2, arg);
 				numCharsAdded = arg.size();
 			}
+			else {
+				// Missing argument
+				std::string arg = "{}";
+				inOutText = inOutText.replace(startPos, endPos - startPos + 1, arg);
+				numCharsAdded = arg.size();
+			}
 		}
 		else {
 			TStringView inner {inOutText.c_str() + startPos + 1, (endPos - startPos) - 1};

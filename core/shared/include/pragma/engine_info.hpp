@@ -19,12 +19,9 @@ namespace engine_info {
 	DLLNETWORK std::string get_server_executable_name();
 	DLLNETWORK std::string get_author_mail_address();
 	DLLNETWORK std::string get_website_url();
-	DLLNETWORK std::string get_modding_hub_url();
 	DLLNETWORK std::string get_wiki_url();
-	DLLNETWORK std::string get_forums_url();
 	DLLNETWORK std::string get_discord_url();
-	DLLNETWORK std::string get_twitter_url();
-	DLLNETWORK std::string get_reddit_url();
+	DLLNETWORK std::string get_github_url();
 	DLLNETWORK uint32_t get_steam_app_id();
 
 	constexpr uint16_t DEFAULT_SERVER_PORT = 29150;

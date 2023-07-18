@@ -38,12 +38,11 @@ Lua::tb<void> Lua::engine::get_info(lua_State *l)
 	t["version"] = get_engine_version();
 	t["prettyVersion"] = get_pretty_engine_version();
 	t["identifier"] = engine_info::get_identifier();
-	t["twitterURL"] = engine_info::get_twitter_url();
-	t["redditURL"] = engine_info::get_reddit_url();
 	t["discordURL"] = engine_info::get_discord_url();
 	t["steamAppId"] = engine_info::get_steam_app_id();
 	t["websiteURL"] = engine_info::get_website_url();
 	t["wikiURL"] = engine_info::get_wiki_url();
+	t["gitHubURL"] = engine_info::get_github_url();
 	t["name"] = engine_info::get_name();
 	return t;
 }

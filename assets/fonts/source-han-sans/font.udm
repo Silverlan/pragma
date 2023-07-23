@@ -1,4 +1,5 @@
 "source-han-sans"
 {
 	$string fileName "SourceHanSans-VF.ttf"
+	$uint32 fontSizeAdjustment 5
 }

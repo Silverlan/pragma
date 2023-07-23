@@ -864,6 +864,11 @@ void CEngine::LoadFontSets()
 					if(fontData["fileName"]) {
 						FontSetFileData fileData {};
 						fontData["fileName"](fileData.fileName);
+
+						uint32_t fontSizeAdjustment;
+						if(fontData["fontSizeAdjustment"](fontSizeAdjustment))
+							fileData.fontSizeAdjustment = fontSizeAdjustment;
+
 						fileData.fileName = dir + '/' + fileData.fileName;
 						fontSet.fileData.push_back(fileData);
 					}
@@ -871,6 +876,11 @@ void CEngine::LoadFontSets()
 						for(auto &udmFileData : fontData["files"]) {
 							FontSetFileData fileData {};
 							udmFileData["fileName"](fileData.fileName);
+
+							uint32_t fontSizeAdjustment;
+							if(fontData["fontSizeAdjustment"](fontSizeAdjustment))
+								fileData.fontSizeAdjustment = fontSizeAdjustment;
+
 							fileData.fileName = dir + '/' + fileData.fileName;
 							udm::to_flags(udmFileData["features"], fileData.flags);
 							fontSet.fileData.push_back(fileData);

@@ -601,6 +601,10 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defStringParallelJob.def("GetResult", static_cast<void (*)(lua_State *, util::ParallelJob<const std::string &> &)>([](lua_State *l, util::ParallelJob<const std::string &> &job) { Lua::Push(l, job.GetResult()); }));
 	modUtil[defStringParallelJob];
 
+	auto defDataStreamJob = luabind::class_<util::ParallelJob<const DataStream &>, util::BaseParallelJob>("ParallelJobData");
+	defDataStreamJob.def("GetResult", static_cast<void (*)(lua_State *, util::ParallelJob<const DataStream &> &)>([](lua_State *l, util::ParallelJob<const DataStream &> &job) { Lua::Push(l, job.GetResult()); }));
+	modUtil[defDataStreamJob];
+
 	auto defDataBlock = luabind::class_<ds::Block>("DataBlock");
 	defDataBlock.scope[luabind::def("load", static_cast<void (*)(lua_State *, const std::string &)>(Lua::DataBlock::load))];
 	defDataBlock.scope[luabind::def("load", static_cast<void (*)(lua_State *, LFile &)>(Lua::DataBlock::load))];

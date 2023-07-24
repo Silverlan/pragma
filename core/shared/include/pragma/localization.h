@@ -36,6 +36,8 @@ class DLLNETWORK Locale {
 	static LoadResult Load(const std::string &file, bool bReload = false);
 	static void SetLanguage(std::string lan);
 	static void ReloadFiles();
+	static bool GetRawText(const std::string &id, std::string &outText);
+	static bool GetRawText(const std::string &id, util::Utf8String &outText);
 	static bool GetText(const std::string &id, std::string &outText);
 	static bool GetText(const std::string &id, util::Utf8String &outText);
 	static bool GetText(const std::string &id, const std::vector<std::string> &args, std::string &outText);

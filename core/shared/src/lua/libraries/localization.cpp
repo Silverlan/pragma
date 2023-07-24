@@ -14,7 +14,7 @@
 #include <sharedutils/util_path.hpp>
 
 #undef CreateFile
-
+#pragma optimize("", off)
 decltype(Locale::m_localization) Locale::m_localization;
 decltype(Locale::m_language) Locale::m_language;
 decltype(Locale::m_loadedFiles) Locale::m_loadedFiles;
@@ -175,6 +175,22 @@ bool Locale::SetLocalization(const std::string &id, const util::Utf8String &text
 }
 bool Locale::GetText(const std::string &id, util::Utf8String &outText) { return GetText(id, {}, outText); }
 bool Locale::GetText(const std::string &id, std::string &outText) { return GetText(id, {}, outText); }
+bool Locale::GetRawText(const std::string &id, std::string &outText)
+{
+	auto it = m_localization.texts.find(id);
+	if(it == m_localization.texts.end())
+		return false;
+	outText = it->second.cpp_str();
+	return true;
+}
+bool Locale::GetRawText(const std::string &id, util::Utf8String &outText)
+{
+	auto it = m_localization.texts.find(id);
+	if(it == m_localization.texts.end())
+		return false;
+	outText = it->second;
+	return true;
+}
 template<class TString, class TStringView>
 static void insert_arguments(const std::vector<TString> &args, TString &inOutText)
 {

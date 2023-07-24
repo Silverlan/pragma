@@ -283,8 +283,23 @@ bool Locale::Localize(const std::string &identifier, const std::string &lan, con
 {
 	auto fileName = category + ".txt";
 	Localization loc {};
-	if(Locale::LoadFile(fileName, lan, loc) == LoadResult::Failed)
-		return false;
+	if(Locale::LoadFile(fileName, lan, loc) == LoadResult::Failed) {
+		auto success = false;
+		auto filePath = GetFileLocation(fileName, lan);
+		if(!filemanager::exists(filePath) && lan != "en") {
+			auto filePathEn = GetFileLocation(fileName, "en");
+			std::string absPath;
+			if(FileManager::FindLocalPath(filePathEn, absPath)) {
+				ustring::replace(absPath, "\\", "/");
+				auto newPath = absPath;
+				ustring::replace(newPath, "/en/", "/" + lan + "/");
+				if(filemanager::create_path(ufile::get_path_from_filename(newPath)) && filemanager::write_file(newPath, ""))
+					success = (Locale::LoadFile(fileName, lan, loc) != LoadResult::Failed); // Try again
+			}
+		}
+		if(!success)
+			return false;
+	}
 	loc.texts[identifier] = text;
 	std::vector<std::string> keys;
 	keys.reserve(loc.texts.size());

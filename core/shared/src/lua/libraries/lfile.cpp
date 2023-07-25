@@ -285,8 +285,62 @@ std::string Lua::file::to_relative_path(const std::string &path)
 	}
 	return opath.GetString();
 }
+static bool is_extension_blacklisted(const std::string &ext)
+{
+	using namespace ustring::string_switch;
+	switch(hash(ext)) {
+	// Windows File Extensions
+	case "exe"_:
+	case "dll"_:
+	// case "bat"_:
+	case "cmd"_:
+	case "com"_:
+	case "vbs"_:
+	case "ps1"_:
+	case "msi"_:
+	case "jar"_:
+	case "app"_:
+	case "scr"_:
+	case "reg"_:
+	case "vb"_:
+	case "js"_:
+	case "wsf"_:
+	case "pif"_:
+	case "pyc"_:
+	case "psd1"_:
+		// case "sh"_:
+		return true;
+
+	// Linux File Extensions
+	case "so"_:
+	case "ko"_:
+	case "run"_:
+	case "out"_:
+	case "AppImage"_:
+	case "deb"_:
+	case "rpm"_:
+	case "bash"_:
+	case "zsh"_:
+	case "csh"_:
+	case "awk"_:
+	case "pl"_:
+	case "php"_:
+	case "py"_:
+	case "rb"_:
+	case "class"_:
+	case "war"_:
+	case "cgi"_:
+		return true;
+	default:
+		return false;
+	}
+	return false;
+}
 bool Lua::file::validate_write_operation(lua_State *l, std::string &path, std::string &outRootPath)
 {
+	std::string ext;
+	if(ufile::get_extension(path, &ext) && is_extension_blacklisted(ext))
+		return false;
 	if(path.length() >= 7 && ustring::compare(path.c_str(), "addons", false, 6) && (path.at(6) == '/' || path.at(6) == '\\')) {
 		// Validate that this is an addon path
 		auto opath = util::Path::CreateFile(path);

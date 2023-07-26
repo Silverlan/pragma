@@ -184,6 +184,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def("GetReferenceBonePose", &::Model::GetReferenceBonePose);
 	classDef.def("FindBoneTwistAxis", &::Model::FindBoneTwistAxis);
+	classDef.def("FindBoneAxisForDirection", &::Model::FindBoneAxisForDirection);
 	classDef.scope[luabind::def("get_twist_axis_rotation_offset", &::Model::GetTwistAxisRotationOffset)];
 
 	classDef.def("GetObjectAttachments", &GetObjectAttachments);

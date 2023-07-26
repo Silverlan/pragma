@@ -516,6 +516,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 
 	std::optional<umath::ScaledTransform> GetReferenceBonePose(BoneId boneId) const;
 	std::optional<pragma::SignedAxis> FindBoneTwistAxis(BoneId boneId) const;
+	std::optional<pragma::SignedAxis> FindBoneAxisForDirection(BoneId boneId,const Vector3 &dir) const;
 	static Quat GetTwistAxisRotationOffset(pragma::SignedAxis axis);
   protected:
 	Model(NetworkState *nw, uint32_t numBones, const std::string &name = "");

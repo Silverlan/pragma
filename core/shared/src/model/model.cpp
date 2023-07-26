@@ -1933,6 +1933,27 @@ std::optional<umath::ScaledTransform> Model::GetReferenceBonePose(BoneId boneId)
 		return {};
 	return pose;
 }
+std::optional<pragma::SignedAxis> Model::FindBoneAxisForDirection(BoneId boneId, const Vector3 &dir) const
+{
+	auto refPose = GetReferenceBonePose(boneId);
+	if(!refPose)
+		return {};
+	auto &rotBone1 = refPose->GetRotation();
+	auto forward = uquat::forward(rotBone1);
+	auto right = uquat::right(rotBone1);
+	auto up = uquat::up(rotBone1);
+	auto df = uvec::dot(dir, forward);
+	auto dr = uvec::dot(dir, right);
+	auto du = uvec::dot(dir, up);
+	auto dfa = umath::abs(df);
+	auto dra = umath::abs(dr);
+	auto dua = umath::abs(du);
+	if(dfa >= umath::max(dra, dua))
+		return (df < 0) ? pragma::SignedAxis::NegZ : pragma::SignedAxis::Z; // Forward
+	else if(dra >= umath::max(dfa, dua))
+		return (dr < 0) ? pragma::SignedAxis::NegX : pragma::SignedAxis::X; // Right
+	return (du < 0) ? pragma::SignedAxis::NegY : pragma::SignedAxis::Y;     // Up
+}
 std::optional<pragma::SignedAxis> Model::FindBoneTwistAxis(BoneId boneId) const
 {
 	auto refPose = GetReferenceBonePose(boneId);
@@ -1961,24 +1982,9 @@ std::optional<pragma::SignedAxis> Model::FindBoneTwistAxis(BoneId boneId) const
 		}
 	}
 
-	auto &rotBone1 = refPose->GetRotation();
 	auto dirFromBone0ToBone1 = norm;
-	//
 	uvec::normalize(&dirFromBone0ToBone1);
-	auto forward = uquat::forward(rotBone1);
-	auto right = uquat::right(rotBone1);
-	auto up = uquat::up(rotBone1);
-	auto df = uvec::dot(dirFromBone0ToBone1, forward);
-	auto dr = uvec::dot(dirFromBone0ToBone1, right);
-	auto du = uvec::dot(dirFromBone0ToBone1, up);
-	auto dfa = umath::abs(df);
-	auto dra = umath::abs(dr);
-	auto dua = umath::abs(du);
-	if(dfa >= umath::max(dra, dua))
-		return (df < 0) ? pragma::SignedAxis::NegZ : pragma::SignedAxis::Z; // Forward
-	else if(dra >= umath::max(dfa, dua))
-		return (dr < 0) ? pragma::SignedAxis::NegX : pragma::SignedAxis::X; // Right
-	return (du < 0) ? pragma::SignedAxis::NegY : pragma::SignedAxis::Y;     // Up
+	return FindBoneAxisForDirection(boneId, dirFromBone0ToBone1);
 }
 Quat Model::GetTwistAxisRotationOffset(pragma::SignedAxis axis)
 {

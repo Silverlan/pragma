@@ -1306,6 +1306,12 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat->def("ToEulerAngles", Lua::Quaternion::ToEulerAngles);
 	defQuat->def("ToEulerAngles", static_cast<EulerAngles (*)(lua_State *, Quat &)>([](lua_State *l, Quat &rot) { return Lua::Quaternion::ToEulerAngles(l, rot, umath::to_integral(pragma::RotationOrder::YXZ)); }));
 	defQuat->def("ToAxisAngle", &Lua::Quaternion::ToAxisAngle);
+	defQuat->def(
+	  "GetAxisVector", +[](const Quat &rot, pragma::SignedAxis axis) {
+		  auto dir = pragma::axis_to_vector(axis);
+		  uvec::rotate(&dir, rot);
+		  return dir;
+	  });
 	defQuat->def("Set", &Lua::Quaternion::Set);
 	defQuat->def("Set", static_cast<void (*)(Quat &, const Quat &)>([](Quat &rot, const Quat &rotNew) { rot = rotNew; }));
 	defQuat->def("Set", static_cast<void (*)(Quat &, uint32_t, float)>([](Quat &rot, uint32_t idx, float value) {

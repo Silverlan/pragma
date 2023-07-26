@@ -163,7 +163,7 @@ function gui.WIToolBarTool:OnCursorExited()
 	end
 	self:ResetBackgroundColor()
 end
-function gui.WIToolBarTool:OnMouseEvent(mouseButton, keyState, modifier)
+function gui.WIToolBarTool:MouseCallback(mouseButton, keyState, modifier)
 	if self:IsEnabled() == false then
 		return
 	end

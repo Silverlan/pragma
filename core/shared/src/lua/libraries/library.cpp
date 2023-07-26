@@ -895,6 +895,13 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	defHSV.def_readwrite("v", &util::HSV::v);
 	defHSV.def("ToRGBColor", static_cast<void (*)(lua_State *, const util::HSV &)>([](lua_State *l, const util::HSV &hsv) { Lua::Push<Color>(l, util::hsv_to_rgb(hsv)); }));
 	defHSV.def("Lerp", static_cast<void (*)(lua_State *, const util::HSV &, const util::HSV &, float)>([](lua_State *l, const util::HSV &hsv0, const util::HSV &hsv1, float t) { Lua::Push<util::HSV>(l, util::lerp_hsv(hsv0, hsv1, t)); }));
+	defHSV.def(
+	  "Distance", +[](const util::HSV &hsv0, const util::HSV &hsv1) {
+		  auto dh = std::min(abs(hsv1.h - hsv0.h), 360 - abs(hsv1.h - hsv0.h)) / 180.0;
+		  auto ds = abs(hsv1.s - hsv0.s);
+		  auto dv = abs(hsv1.v - hsv0.v);
+		  return sqrtf(dh * dh + ds * ds + dv * dv);
+	  });
 	utilMod[defHSV];
 
 	auto defColor = luabind::class_<Color>("Color");

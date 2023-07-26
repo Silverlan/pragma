@@ -47,6 +47,9 @@ function InfoBox:OnInitialize()
 
 	self:SetType(InfoBox.TYPE_INFO)
 end
+function InfoBox:SetShowCloseButton(show)
+	self.m_btClose:SetVisible(show)
+end
 function InfoBox:SetRemoveOnClose(removeOnClose)
 	self.m_removeOnClose = removeOnClose
 end

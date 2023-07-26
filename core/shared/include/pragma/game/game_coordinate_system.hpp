@@ -15,8 +15,28 @@ namespace pragma {
 	enum class RotationOrder : uint16_t { XYZ = 0u, YXZ, XZX, XYX, YXY, YZY, ZYZ, ZXZ, XZY, YZX, ZYX, ZXY };
 	constexpr bool is_positive_axis(Axis axis) { return true; }
 	constexpr bool is_negative_axis(Axis axis) { return false; }
-	constexpr bool is_positive_axis(SignedAxis axis) {return (umath::to_integral(axis) < umath::to_integral(SignedAxis::NegX)); }
+	constexpr bool is_positive_axis(SignedAxis axis) { return (umath::to_integral(axis) < umath::to_integral(SignedAxis::NegX)); }
 	constexpr bool is_negative_axis(SignedAxis axis) { return !is_positive_axis(axis); }
+
+	constexpr Vector3 axis_to_vector(SignedAxis axis)
+	{
+		switch(axis) {
+		case pragma::SignedAxis::X:
+			return Vector3 {1.f, 0.f, 0.f};
+		case pragma::SignedAxis::Y:
+			return Vector3 {0.f, 1.f, 0.f};
+		case pragma::SignedAxis::Z:
+			return Vector3 {0.f, 0.f, 1.f};
+		case pragma::SignedAxis::NegX:
+			return Vector3 {-1.f, 0.f, 0.f};
+		case pragma::SignedAxis::NegY:
+			return Vector3 {0.f, -1.f, 0.f};
+		case pragma::SignedAxis::NegZ:
+			return Vector3 {0.f, 0.f, -1.f};
+		}
+		return Vector3 {};
+	}
+	constexpr Vector3 axis_to_vector(Axis axis) { return axis_to_vector(static_cast<SignedAxis>(axis)); }
 };
 
 #endif

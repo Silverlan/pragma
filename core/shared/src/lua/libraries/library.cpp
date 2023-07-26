@@ -456,9 +456,8 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("is_nan", static_cast<double (*)(double)>([](double val) -> double { return std::isnan(val); })), luabind::def("is_inf", static_cast<double (*)(double)>([](double val) -> double { return std::isinf(val); })),
 	  luabind::def("is_finite", static_cast<double (*)(double)>([](double val) -> double { return std::isfinite(val); })),
 #else
-        luabind::def("is_nan",static_cast<double(*)(double)>([](double val) -> double {return std::isnan<double>(val);})),
-        luabind::def("is_inf",static_cast<double(*)(double)>([](double val) -> double {return std::isinf<double>(val);})),
-        luabind::def("is_finite",static_cast<double(*)(double)>([](double val) -> double {return std::isfinite<double>(val);})),
+	  luabind::def("is_nan", static_cast<double (*)(double)>([](double val) -> double { return std::isnan<double>(val); })), luabind::def("is_inf", static_cast<double (*)(double)>([](double val) -> double { return std::isinf<double>(val); })),
+	  luabind::def("is_finite", static_cast<double (*)(double)>([](double val) -> double { return std::isfinite<double>(val); })),
 #endif
 	  luabind::def("cot", umath::cot), luabind::def("calc_fov_from_lens", &::umath::camera::calc_fov_from_lens), luabind::def("calc_focal_length_from_fov", &::umath::camera::calc_focal_length_from_fov),
 	  luabind::def("calc_fov_from_focal_length", &::umath::camera::calc_fov_from_focal_length), luabind::def("calc_aperture_size_from_fstop", &::umath::camera::calc_aperture_size_from_fstop),
@@ -504,7 +503,10 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		    std::array<float, 3> r;
 		    auto n = umath::find_bezier_roots(time, cp0Time, cp0OutTime, cp1InTime, cp1Time, r);
 		    return umath::calc_bezier_point(cp0Val, cp0OutVal, cp1InVal, cp1Val, r[0]);
-	    })];
+	    }),
+	  luabind::def(
+	    "axis_to_vector", static_cast<Vector3(*)(pragma::SignedAxis)>(&pragma::axis_to_vector))
+	];
 	lua_pushtablecfunction(lua.GetState(), "math", "parse_expression", parse_math_expression);
 	lua_pushtablecfunction(lua.GetState(), "math", "solve_quadric", Lua::math::solve_quadric);
 	lua_pushtablecfunction(lua.GetState(), "math", "solve_cubic", Lua::math::solve_cubic);

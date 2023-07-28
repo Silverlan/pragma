@@ -50,7 +50,9 @@ function gui.WIContextMenu:OnInitialize()
 	if util.is_valid(gui.impl.cbMouseInput) == false then
 		gui.impl.cbMouseInput = input.add_callback("OnMouseInput", function(button, action, mods)
 			if action == input.STATE_PRESS then
-				local el = gui.get_element_under_cursor(gui.find_focused_window())
+				local el = gui.get_element_under_cursor(gui.find_focused_window(), function(el)
+					return el:GetMouseInputEnabled()
+				end)
 				while util.is_valid(el) and el:GetClass() ~= "wicontextmenu" do
 					el = el:GetParent()
 				end
@@ -243,6 +245,15 @@ end
 function gui.WIContextMenu:GetParentMenu()
 	return self.m_parentMenu
 end
+function gui.WIContextMenu:CloseActiveSubMenu()
+	if util.is_valid(self.m_activeSubMenu) == false then
+		return
+	end
+	local pSubMenu = self.m_activeSubMenu
+	pSubMenu:SetVisible(false)
+	self:RequestFocus()
+	self.m_activeSubMenu = nil
+end
 function gui.WIContextMenu:AddSubMenu(name, onClick)
 	local pSubMenu
 	local pItem = self:AddItem(name, onClick or function()
@@ -253,6 +264,7 @@ function gui.WIContextMenu:AddSubMenu(name, onClick)
 	end
 	pItem:AddCallback("OnCursorEntered", function()
 		if util.is_valid(pSubMenu) then
+			self:CloseActiveSubMenu()
 			local id
 			local itemName = pItem:GetName()
 			if #itemName > 0 then
@@ -268,8 +280,8 @@ function gui.WIContextMenu:AddSubMenu(name, onClick)
 				id = "context_menu_" .. tostring(depth)
 			end
 			pSubMenu:SetName(id)
-
 			pSubMenu:SetVisible(true)
+			self.m_activeSubMenu = pSubMenu
 			local pos = pItem:GetAbsolutePos()
 			pSubMenu:SetX(pos.x + self:GetWidth())
 			pSubMenu:SetY(pos.y)
@@ -282,9 +294,8 @@ function gui.WIContextMenu:AddSubMenu(name, onClick)
 			if pSubMenu:IsCursorInBounds() then
 				pItem:KillFocus()
 				pSubMenu:RequestFocus()
-			else
-				pSubMenu:SetVisible(false)
-				self:RequestFocus()
+			elseif pSubMenu == self.m_activeSubMenu then
+				self:CloseActiveSubMenu()
 			end
 		end
 	end)

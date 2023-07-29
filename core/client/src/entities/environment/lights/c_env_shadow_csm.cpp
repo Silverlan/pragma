@@ -7,8 +7,10 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
+#include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -284,7 +286,6 @@ void CShadowCSMComponent::UpdateFrustum(pragma::CCameraComponent &cam, const Mat
 
 void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightDirectionalComponent &light)
 {
-	// TODO
 #if 0
 	auto pLightComponent = light.GetEntity().GetComponent<pragma::CLightComponent>();
 	auto *shadowScene = pLightComponent.valid() ? pLightComponent->FindShadowScene() : nullptr;
@@ -315,9 +316,9 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 			static uint32_t drawCountPerLayer = 4;
 			auto meshCount = drawCountPerLayer;
 			auto layerFlag = 1<<layer;
-			if(shaderCsm.BeginDraw(drawCmd) == true)
+			if(shaderCsm.RecordBeginDraw(drawCmd) == true)
 			{
-				shaderCsm.BindLight(*pLightComponent);
+				shaderCsm.RecordBindLight(*pLightComponent);
 				for(auto it=meshesInfo.entityMeshes.begin();it!=meshesInfo.entityMeshes.end();)
 				{
 					auto &info = *it;
@@ -336,7 +337,7 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 					}
 
 					// Bind entity to shader
-					shaderCsm.BindEntity(*ent,GetViewProjectionMatrix(layer));
+					shaderCsm.RecordBindEntity(*ent, GetViewProjectionMatrix(layer));
 
 					while(meshCount > 0 && info.meshes.empty() == false)
 					{

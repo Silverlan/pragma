@@ -80,6 +80,9 @@ void DLLCLIENT RunCEngine(int argc, char *argv[])
 	en = nullptr;
 }
 }
+#ifdef PRAGMA_ENABLE_NSIGHT_AFTERMATH
+void enable_nsight_aftermath_crash_tracker();
+#endif
 
 DLLCLIENT CEngine *c_engine = NULL;
 extern DLLCLIENT ClientState *client;
@@ -95,7 +98,9 @@ CEngine::CEngine(int argc, char *argv[])
       m_farZ(pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z), m_fps(0), m_tFPSTime(0.f), m_tLastFrame(util::Clock::now()), m_tDeltaFrameTime(0), m_audioAPI {"fmod"}
 {
 	c_engine = this;
-
+#ifdef PRAGMA_ENABLE_NSIGHT_AFTERMATH
+	enable_nsight_aftermath_crash_tracker();
+#endif
 	RegisterCallback<void, std::reference_wrapper<const GLFW::Joystick>, bool>("OnJoystickStateChanged");
 	RegisterCallback<void, std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("DrawFrame");
 	RegisterCallback<void>("PreDrawGUI");
@@ -128,7 +133,7 @@ CEngine::CEngine(int argc, char *argv[])
 
 	pragma::asset::AssetManager::ImporterInfo importerInfo {};
 	importerInfo.name = "glTF";
-	importerInfo.fileExtensions = {{"gltf", false}, {"glb", true}, {"vrm",true}}; // VRM is based on glTF ( https://vrm.dev/en/ )
+	importerInfo.fileExtensions = {{"gltf", false}, {"glb", true}, {"vrm", true}}; // VRM is based on glTF ( https://vrm.dev/en/ )
 	GetAssetManager().RegisterImporter(importerInfo, pragma::asset::Type::Model, [](Game &game, ufile::IFile &f, const std::optional<std::string> &mdlPath, std::string &errMsg) -> std::unique_ptr<pragma::asset::IAssetWrapper> {
 		util::Path path {};
 		if(mdlPath.has_value()) {
@@ -516,7 +521,8 @@ void CEngine::OnFilesDropped(prosper::Window &window, std::vector<std::string> &
 		return;
 	client->OnFilesDropped(files);
 }
-bool CEngine::OnWindowShouldClose(prosper::Window &window) {
+bool CEngine::OnWindowShouldClose(prosper::Window &window)
+{
 	if(client == nullptr)
 		return true;
 	return client->OnWindowShouldClose(window);

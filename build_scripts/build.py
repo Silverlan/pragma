@@ -653,7 +653,7 @@ if with_lua_doc_generator or with_pfm:
 if with_vr:
     add_pragma_module(
         name="pr_openvr",
-        commitSha="673302d",
+        commitSha="c9ce1901c1a523855328c2c1a2c6820559ddaaf9",
         repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
     )
 
@@ -841,7 +841,7 @@ def download_addon(name,addonName,url,commitId=None):
 
 curDir = os.getcwd()
 if with_pfm:
-	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","a2826eb4563ecb47bff3eff022f8603630b2e19d")
+	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","a6a3399f47a45dc3c48174a992dfddb41e7a0820")
 	download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","0eb73a5ebad0704ae2f77a1cf0112d7259991ec1")
 
 if with_vr:

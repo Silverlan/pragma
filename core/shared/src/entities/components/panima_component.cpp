@@ -212,6 +212,36 @@ void PanimaComponent::DebugPrint()
 	Con::cout << "Animation info: \n" << ss.str() << Con::endl;
 }
 
+bool PanimaComponent::IsPropertyAnimated(panima::AnimationManager &manager, const std::string &propName) const
+{
+	auto *anim = manager.GetCurrentAnimation();
+	if(!anim)
+		return false;
+	panima::ChannelPath channelPath {propName};
+	auto componentPath = ParseComponentChannelPath(channelPath);
+	if(!componentPath.has_value())
+		return false;
+	auto c = GetEntity().FindComponent(componentPath->first);
+	if(c.expired())
+		return false;
+	auto memberIdx = c->GetMemberIndex(componentPath->second.GetString());
+	if(!memberIdx.has_value())
+		return false;
+	auto *memberInfo = c->GetMemberInfo(*memberIdx);
+	if(!memberInfo)
+		return false;
+	if(!pragma::ents::is_udm_member_type(memberInfo->type))
+		return false;
+	auto &channels = anim->GetChannels();
+	auto numChannels = channels.size();
+	for(auto i = decltype(numChannels) {0u}; i < numChannels; ++i) {
+		auto &channel = channels[i];
+		if(channel->targetPath == channelPath)
+			return true;
+	}
+	return false;
+}
+
 void PanimaComponent::SetPropertyEnabled(const std::string &propName, bool enabled)
 {
 	panima::ChannelPath channelPath {propName};

@@ -712,7 +712,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 	if(lanInfo && lanInfo->configData) {
 		std::vector<std::string> characterSetRequirements;
 		(*lanInfo->configData)["font"]["characterSetRequirements"](characterSetRequirements);
-		if(std::find(characterSetRequirements.begin(), characterSetRequirements.end(), "jp") != characterSetRequirements.end()) {
+		if(std::find(characterSetRequirements.begin(), characterSetRequirements.end(), "jp") != characterSetRequirements.end() || std::find(characterSetRequirements.begin(), characterSetRequirements.end(), "zh") != characterSetRequirements.end()) {
 			std::string sourceHanSans = "source-han-sans";
 			if(FindFontSet(sourceHanSans))
 				defaultFontSet = sourceHanSans;

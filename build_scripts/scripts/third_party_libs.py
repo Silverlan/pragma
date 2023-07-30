@@ -33,7 +33,7 @@ get_submodule("recastnavigation","https://github.com/recastnavigation/recastnavi
 get_submodule("rectangle_bin_pack","https://github.com/juj/RectangleBinPack.git","f159bbeb55e54b510cb12b1011c53dadbf35ed8a")
 get_submodule("spdlog","https://github.com/Silverlan/spdlog.git","31b93be2e1829ff945f03b1754ea9ad1f32794be","v1.x")
 get_submodule("squish","https://github.com/ivan-kulikov-dev/squish.git","aeb01b8f88f97c994baff8453870f3e8a347afd7")
-get_submodule("tinygltf","https://github.com/syoyo/tinygltf.git","e12e0a9392328f9bacd81bfb7204577a80db70ff","release")
+get_submodule("tinygltf","https://github.com/syoyo/tinygltf.git","f51243da480806032cfb6f8d6799a7493397cb86","release")
 get_submodule("vorbis","https://github.com/xiph/vorbis.git","9eadeccdc4247127d91ac70555074239f5ce3529")
 get_submodule("vtflib","https://github.com/Silverlan/VTFLib.git","3e6b80bcd6dacf6bd4a35666869464fac55051cc")
 get_submodule("zlib","https://github.com/Silverlan/zlib.git","0dcc7471231d72376d592f80f06c2e2246c2b3c4")

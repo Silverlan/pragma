@@ -67,6 +67,9 @@ namespace pragma {
 		void SetPropertyEnabled(const std::string &propName,bool enabled);
 		bool IsPropertyEnabled(const std::string &propName) const;
 
+		// Return the animation value for the specified property WITHOUT applying math expressions
+		bool GetRawPropertyValue(panima::AnimationManager &manager,const std::string &propName,udm::Type type,void *outValue) const;
+
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		using BaseEntityComponent::Load;

@@ -307,10 +307,12 @@ function gui.WIBaseEditor:AddFrame(parent)
 			return a[1] < b[1]
 		end)
 		for _, wdata in ipairs(windows) do
-			pContext:AddItem(wdata[1], function()
-				self:OpenWindow(wdata[2])
-				self:GoToWindow(wdata[2])
-			end)
+			pContext
+				:AddItem(wdata[1], function()
+					self:OpenWindow(wdata[2])
+					self:GoToWindow(wdata[2])
+				end)
+				:SetName(wdata[2])
 		end
 	end)
 

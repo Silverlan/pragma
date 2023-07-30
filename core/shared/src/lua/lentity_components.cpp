@@ -388,17 +388,16 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defAnimated2.def("DebugPrint", static_cast<void (pragma::PanimaComponent::*)()>(&pragma::PanimaComponent::DebugPrint));
 	defAnimated2.def(
 	  "GetRawPropertyValue", +[](lua_State *l, pragma::PanimaComponent &c, panima::AnimationManager &manager, const std::string &propName, udm::Type type) -> Lua::opt<Lua::udm_ng> {
-		  return udm::visit_ng(type, [l, &c, &manager, &propName, type](auto tag) {
+		  luabind::object r = Lua::nil;
+		  udm::visit_ng(type, [l, &c, &manager, &propName, type, &r](auto tag) {
 			  using T = typename decltype(tag)::type;
 			  if constexpr(pragma::is_animatable_type_v<T>) {
 				  T value;
 				  if(c.GetRawPropertyValue(manager, propName, type, &value))
-					  return luabind::object {l, value};
-				  return Lua::nil;
+					  r = luabind::object {l, value};
 			  }
-			  else
-				  return Lua::nil;
 		  });
+		  return r;
 	  });
 	defAnimated2.add_static_constant("EVENT_HANDLE_ANIMATION_EVENT", pragma::PanimaComponent::EVENT_HANDLE_ANIMATION_EVENT);
 	defAnimated2.add_static_constant("EVENT_ON_PLAY_ANIMATION", pragma::PanimaComponent::EVENT_ON_PLAY_ANIMATION);

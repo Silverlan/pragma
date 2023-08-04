@@ -274,7 +274,7 @@ if platform == "linux":
 			"apt-get install python3-distutils",
 
 			#Ninja
-			"apt-get install ninja"
+			"apt-get install ninja-build"
 		]
 
 		print("")

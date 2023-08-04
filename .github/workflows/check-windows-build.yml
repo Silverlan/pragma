@@ -30,7 +30,7 @@ jobs:
       - name: Setup Pragma
         uses: Silverlan/pragma/github_actions/setup@LinuxSupport
         with:
-          branch: ${{ env.GITHUB_REF#refs/heads/ || 'master' }}
+          branch: ${{ github.ref_name }}
 
       # We need the latest Windows SDK
       - uses: GuillaumeFalourd/setup-windows10-sdk-action@v1.11

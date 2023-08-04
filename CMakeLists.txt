@@ -1035,8 +1035,6 @@ add_dependencies(iclient ishared client)
 add_dependencies(iserver ishared server)
 add_dependencies(server shared servermanager clientmanager util_bsp util_sound)
 add_dependencies(client shared clientmanager wgui alsoundsystem util_timeline_scene util_image)
-target_include_directories(client PRIVATE ${DEPENDENCY_FREETYPE_INCLUDE})
-target_link_libraries(client PRIVATE ${DEPENDENCY_FREETYPE_LIBRARY})
 add_dependencies(pragma_updater sharedutils-static)
 
 add_dependencies(pragma_server server)

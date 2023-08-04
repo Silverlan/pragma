@@ -388,11 +388,11 @@ static luabind::object get_property_value(lua_State *l, const ::udm::PropertyWra
 }
 static luabind::object get_property_value(lua_State *l, const ::udm::PropertyWrapper &val, ::udm::Type type)
 {
-	if(!static_cast<bool>(val))
+	if (!static_cast<bool>(val))
 		return {};
 	udm::Type valType;
-	auto *ptr = val.GetValuePtr(valType);
-	if(ptr == nullptr)
+	auto* ptr = val.GetValuePtr(valType);
+	if (ptr == nullptr)
 		return {};
 	if(valType == type)
 		return get_property_value(l, val);
@@ -918,7 +918,7 @@ void clear(TPropertyWrapper &prop)
 			el->children.clear();
 			return;
 		}
-		auto *a = prop.template GetValuePtr<::udm::Array>();
+        auto *a = prop.template GetValuePtr<::udm::Array>();
 		if(a)
 			a->Resize(0);
 	}

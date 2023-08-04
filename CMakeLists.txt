@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9) # for GENERATOR_IS_MULTI_CONFIG
+cmake_minimum_required(VERSION 3.11) # for GENERATOR_IS_MULTI_CONFIG and INTERFACE items on IMPORTED targets
 project(pragma)
 
 #set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE CACHE INTERNAL "" FORCE)
@@ -293,8 +293,14 @@ search_lib_recursive(DEPENDENCY_LIBLZMA_LIBRARY external_libs/util_bsp/third_par
 set(DEPENDENCY_LUABIND_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luabind CACHE STRING "" FORCE)
 search_lib_recursive(DEPENDENCY_LUABIND_LIBRARY lib/${BINARY_PRAGMA_DIR} luabind)
 
-set(DEPENDENCY_FREETYPE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/freetype/include CACHE STRING "" FORCE)
-search_lib_recursive(DEPENDENCY_FREETYPE_LIBRARY third_party_libs/freetype/${BINARY_PRAGMA_DIR} freetype)
+# set from outside
+# set(DEPENDENCY_FREETYPE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/freetype/include CACHE STRING "" FORCE)
+# search_lib_recursive(DEPENDENCY_FREETYPE_LIBRARY third_party_libs/freetype/${BINARY_PRAGMA_DIR} freetype)
+# if(UNIX)
+# set(DEPENDENCY_HARFBUZZ_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/harfbuzz/include CACHE STRING "" FORCE)
+# search_lib_recursive(DEPENDENCY_HARFBUZZ_LIBRARY third_party_libs/harfbuzz/${BINARY_PRAGMA_DIR} harfbuzz)
+# endif()
+
 
 #set(DEPENDENCY_ANVIL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/include CACHE PATH "Path to include directory." FORCE)
 #set(DEPENDENCY_ANVIL_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/include CACHE PATH  "Path to include directory." FORCE)
@@ -456,7 +462,8 @@ if(UNIX)
 	resolve_links(DEPENDENCY_GLFW_LIBRARY)
 	resolve_links(DEPENDENCY_GLSLANG_LIBRARY)
 	resolve_links(DEPENDENCY_GLSLANG_OGL_COMPILER_LIBRARY)
-	resolve_links(DEPENDENCY_GLSLANG_OS_DEPENDENT_LIBRARY)
+        resolve_links(DEPENDENCY_GLSLANG_OS_DEPENDENT_LIBRARY)
+        resolve_links(DEPENDENCY_HARFBUZZ_LIBRARY)
 	resolve_links(DEPENDENCY_ICLIENT_LIBRARY)
 	resolve_links(DEPENDENCY_IGLFW_LIBRARY)
 	resolve_links(DEPENDENCY_ISHARED_LIBRARY)
@@ -940,26 +947,58 @@ set_target_folder(Recast third_party_libs/recast)
 # endif()
 #
 
-# freetype2
-if(WIN32)
-	set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE)
-	set(CMAKE_DISABLE_FIND_PACKAGE_BZip2 TRUE)
-	set(CMAKE_DISABLE_FIND_PACKAGE_PNG TRUE)
-endif()
-register_third_party_library(freetype)
-if(WIN32)
-	unset(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz)
-	unset(CMAKE_DISABLE_FIND_PACKAGE_BZip2)
-	unset(CMAKE_DISABLE_FIND_PACKAGE_PNG)
-endif()
+# freetype2 and harfbuzz
+# From Freetype:
+# BZIP2: trivial, uses soname libbzip2.so.1.0, possible swap with our own version.
+# PNG: trivial, uses major 1.6 (libpng16.so.16), possible swap with our own version.
+# TODO: this may be no longer the case. future proof this.
+# Harfbuzz's most of deps can be disabled
+# add boostrap frretype as first step?
+# if(WIN32)
+# 	set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE)
+# 	set(CMAKE_DISABLE_FIND_PACKAGE_BZip2 TRUE)
+# 	set(CMAKE_DISABLE_FIND_PACKAGE_PNG TRUE)
+# endif()
+# register_third_party_library(freetype)
+# if(UNIX)
+#
+#     register_third_party_library(harfbuzz)
+#     add_dependencies(harfbuzz freetype)
+# endif()
+# if(WIN32)
+# 	unset(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz)
+# 	unset(CMAKE_DISABLE_FIND_PACKAGE_BZip2)
+# 	unset(CMAKE_DISABLE_FIND_PACKAGE_PNG)
+# endif()
 
-set_target_folder(freetype third_party_libs)
-target_include_directories(freetype PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
+add_library(freetype SHARED IMPORTED)
+if(WIN32)
+	set_property(TARGET freetype PROPERTY
+	IMPORTED_IMPLIB "${DEPENDENCY_FREETYPE_LIBRARY}") #pragma_install_lib should pick up the dll file to install, since I did not install a target here
+else()
+	set_property(TARGET freetype PROPERTY
+	IMPORTED_LOCATION "${DEPENDENCY_FREETYPE_LIBRARY}")
+endif()
+target_include_directories(freetype INTERFACE ${DEPENDENCY_FREETYPE_INCLUDE})
+
+
+if(UNIX)
+	add_library(harfbuzz SHARED IMPORTED)
+	set_property(TARGET harfbuzz PROPERTY
+	IMPORTED_LOCATION "${DEPENDENCY_HARFBUZZ_LIBRARY}")
+	target_include_directories(harfbuzz INTERFACE ${DEPENDENCY_HARFBUZZ_INCLUDE})
+endif()
+unset(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz)
+
+
+
+set_target_properties(freetype PROPERTIES FOLDER third_party_libs)
+#target_include_directories(freetype PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 #
 
 # dependencies
 add_dependencies(png zlib)
-add_dependencies(freetype zlib)
+#add_dependencies(freetype zlib)
 add_dependencies(zip zlib)
 add_dependencies(vorbis ogg)
 add_dependencies(util_pad zip)
@@ -978,7 +1017,7 @@ add_dependencies(iglfw vfilesystem)
 add_dependencies(prosper vfilesystem iglfw util_image util_udm muparserx lz4)
 
 add_dependencies(cmaterialsystem materialsystem util_image prosper VTFLib13)
-add_dependencies(wgui cmaterialsystem freetype util_formatted_text)
+add_dependencies(wgui cmaterialsystem util_formatted_text)
 
 add_dependencies(alsoundsystem vorbis vorbisfile vfilesystem util_sound samplerate)
 
@@ -1025,7 +1064,7 @@ endif()
 set(PRAGMA_INSTALL_COMPONENT "pragma")
 set(PRAGMA_INSTALL_COMPONENT_FULL "pragma-full")
 function(pragma_install TARGET_NAME DESTINATION_PATH)
-    #TODO: Depending if target is library or executable we should change type of target install
+    #Depending if target is library or executable we should change type of target install
     #Win32: all runtime
     #otherwise: pragma and pragma_server runtime, otherwise library
     set(TARGET_INSTALL_TYPE "")
@@ -1058,7 +1097,7 @@ pragma_install(alsoundsystem "${BINARY_OUTPUT_DIR}")
 pragma_install(client "${BINARY_OUTPUT_DIR}")
 pragma_install(cmaterialsystem "${BINARY_OUTPUT_DIR}")
 pragma_install(datasystem "${BINARY_OUTPUT_DIR}")
-pragma_install(freetype "${BINARY_OUTPUT_DIR}")
+#pragma_install(freetype "${BINARY_OUTPUT_DIR}")
 pragma_install(glfw "${BINARY_OUTPUT_DIR}")
 pragma_install(iclient "${BINARY_OUTPUT_DIR}")
 pragma_install(iglfw "${BINARY_OUTPUT_DIR}")
@@ -1179,6 +1218,9 @@ pragma_install_lib("${DEPENDENCY_BOOST_DATE_TIME_LIBRARY}" "${BINARY_OUTPUT_DIR}
 pragma_install_lib("${DEPENDENCY_BOOST_SYSTEM_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_BZIP2_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_FREETYPE_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+if(UNIX)
+pragma_install_lib("${DEPENDENCY_HARFBUZZ_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+endif()
 pragma_install_lib("${DEPENDENCY_LUA_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_LUABIND_BINARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_LIBNOISE_LIBRARY}" "${BINARY_OUTPUT_DIR}")
@@ -1286,6 +1328,15 @@ if(UNIX)
            -DINSTALL_LOCATION=${CMAKE_INSTALL_PREFIX}
            -P ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/patch_libraries.cmake
        COMMENT "Patching libraries...")
+       # HACK: This should be in the pr_chromium module!
+       add_custom_command(TARGET pragma-install
+       POST_BUILD
+       COMMAND patchelf --set-rpath '$ORIGIN' "${CMAKE_INSTALL_PREFIX}/modules/chromium/pr_chromium_subprocess"
+       )
+       add_custom_command(TARGET pragma-install-full
+       POST_BUILD
+       COMMAND patchelf --set-rpath '\$ORIGIN' "${CMAKE_INSTALL_PREFIX}/modules/chromium/pr_chromium_subprocess"
+       )
 endif()
 
 set_target_folder(pragma-install core)

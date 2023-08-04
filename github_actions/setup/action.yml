@@ -1,5 +1,9 @@
 name: Setup Pragma
 description: 'Setup Pragma'
+inputs:
+  branch:
+    description: 'The branch to clone Pragma from.'
+    default: 'master'
 runs:
   using: "composite"
   steps:
@@ -13,6 +17,6 @@ runs:
     - name: Download Pragma
       shell: bash
       run: |
-        git clone https://github.com/Silverlan/pragma.git --recurse-submodules
+        git clone https://github.com/Silverlan/pragma.git --recurse-submodules --branch ${{ inputs.branch }}
   
     - uses: Silverlan/common_actions/action_end@main

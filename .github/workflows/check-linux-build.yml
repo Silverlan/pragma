@@ -1,0 +1,42 @@
+name: Check Linux Build
+on:
+  push:
+    branches-ignore:
+      - master
+
+concurrency:
+  group: check-build-lin-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build - ${{ matrix.config.os }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: ubuntu-22.04
+            name: "Ubuntu GCC-11"
+            artifact: "ubuntu_gcc.7z"
+            build_type: "RelWithDebInfo"
+            cc: "clang-14"
+            cxx: "clang++-14"
+            archiver: "7z a"
+            generators: "Unix Makefiles"
+            build_dir: 'build'
+    steps:
+      - name: Setup Pragma
+        uses: Silverlan/pragma/github_actions/setup@LinuxSupport
+        with:
+          branch: ${{ env.GITHUB_REF#refs/heads/ || 'master' }}
+
+      - name: Build Pragma
+        uses: Silverlan/pragma/github_actions/build@master
+        id: build-pragma
+        with:
+          build-args: "--with-pfm --with-all-pfm-modules --with-vr --with-lua-debugger=0"
+
+      - name: Handle Error
+        uses: Silverlan/common_actions/action_handle_error@main
+        if: failure()

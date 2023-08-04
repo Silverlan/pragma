@@ -1,9 +1,9 @@
 name: Build Windows
 on:
   push:
-    branches: [ main, master, actions ]
+    branches: [ master ]
   pull_request:
-    branches: [ main, master, actions ]
+    branches: [ master ]
   workflow_dispatch:
 
 concurrency:

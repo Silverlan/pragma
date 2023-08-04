@@ -271,7 +271,7 @@ if platform == "linux":
 			"apt install libssh2-1",
 
 			# Required for OIIO
-			"apt-get install python3-distutils"
+			"apt-get install python3-distutils",
 
 			#Ninja
 			"apt-get install ninja"

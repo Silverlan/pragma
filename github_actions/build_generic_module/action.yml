@@ -24,6 +24,23 @@ runs:
     - name: Setup Pragma
       uses: Silverlan/pragma/github_actions/setup@master
 
+    # We need the latest Windows SDK
+    - name: Install Windows SDK
+      if: runner.os == 'Windows'
+      uses: GuillaumeFalourd/setup-windows10-sdk-action@v1.11
+      with:
+        sdk-version: 22621
+
+    - name: Set Additional CMake Arguments
+      shell: bash
+      id: set-cmake-args
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          echo "cmake-args=\"\"" >> $GITHUB_OUTPUT
+        else
+          echo "cmake-args=\"-DCMAKE_SYSTEM_VERSION=10.0.22621.0\"" >> $GITHUB_OUTPUT
+        fi
+
     - name: "Download Module"
       uses: actions/checkout@v3
       with:
@@ -34,7 +51,7 @@ runs:
       id: build-pragma
       uses: Silverlan/pragma/github_actions/build@master
       with:
-        build-args: '--with-common-modules=0 --with-essential-client-modules=0 --module ${{ inputs.module }}'
+        build-args: '--with-lua-debugger=0 --with-common-modules=0 --with-essential-client-modules=0 --cmake-arg=${{ steps.set-cmake-args.outputs.cmake-args }} --module ${{ inputs.module }}'
 
     - name: Set Output Variables
       shell: bash

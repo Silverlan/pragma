@@ -164,7 +164,7 @@ CGame::CGame(NetworkState *state)
       //m_shaderOverride(NULL), // prosper TODO
       m_matLoad(), m_scene(nullptr),
       /*m_dummyVertexBuffer(nullptr),*/ m_tLastClientUpdate(0.0), // prosper TODO
-      m_snapshotTracker {}, m_userInputTracker {}, m_viewFov {util::FloatProperty::Create(pragma::BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV)}
+      m_snapshotTracker {}, m_userInputTracker {}, m_viewFov {util::FloatProperty::Create(pragma::BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV)}, m_luaInputBindingLayerRegister {std::make_unique<pragma::LuaInputBindingLayerRegister>()}
 {
 	std::fill(m_renderModesEnabled.begin(), m_renderModesEnabled.end(), true);
 	c_game = this;
@@ -304,6 +304,9 @@ void CGame::OnRemove()
 	}
 	Lua::gui::clear_lua_callbacks(GetLuaState());
 
+	// This will make sure all lua-created input binding layers have been destroyed
+	m_luaInputBindingLayerRegister = nullptr;
+
 	DebugRenderer::ClearObjects();
 
 	SetTimeScale(1.f);
@@ -369,7 +372,7 @@ void CGame::OnGameWorldShaderSettingsChanged(const pragma::rendering::GameWorldS
 	}
 }
 
-static void cmd_render_ibl_enabled(NetworkState *, ConVar *, bool, bool enabled)
+static void cmd_render_ibl_enabled(NetworkState *, const ConVar &, bool, bool enabled)
 {
 	if(client == nullptr)
 		return;
@@ -379,7 +382,7 @@ REGISTER_CONVAR_CALLBACK_CL(render_ibl_enabled, cmd_render_ibl_enabled);
 REGISTER_CONVAR_CALLBACK_CL(render_dynamic_lighting_enabled, cmd_render_ibl_enabled);
 REGISTER_CONVAR_CALLBACK_CL(render_dynamic_shadows_enabled, cmd_render_ibl_enabled);
 
-static void cmd_render_queue_worker_thread_count(NetworkState *, ConVar *, int, int val)
+static void cmd_render_queue_worker_thread_count(NetworkState *, const ConVar &, int, int val)
 {
 	if(c_game == nullptr)
 		return;
@@ -388,7 +391,7 @@ static void cmd_render_queue_worker_thread_count(NetworkState *, ConVar *, int, 
 }
 REGISTER_CONVAR_CALLBACK_CL(render_queue_worker_thread_count, cmd_render_queue_worker_thread_count);
 
-static void cmd_render_queue_worker_jobs_per_batch(NetworkState *, ConVar *, int, int val)
+static void cmd_render_queue_worker_jobs_per_batch(NetworkState *, const ConVar &, int, int val)
 {
 	if(c_game == nullptr)
 		return;
@@ -609,7 +612,7 @@ void CGame::Initialize()
 	m_matLoad = mat ? mat->GetHandle() : nullptr;
 }
 
-static void render_debug_mode(NetworkState *, ConVar *, int32_t, int32_t debugMode)
+static void render_debug_mode(NetworkState *, const ConVar &, int32_t, int32_t debugMode)
 {
 	if(client == nullptr)
 		return;
@@ -623,7 +626,7 @@ static void render_debug_mode(NetworkState *, ConVar *, int32_t, int32_t debugMo
 }
 REGISTER_CONVAR_CALLBACK_CL(render_debug_mode, render_debug_mode);
 
-static void CVAR_CALLBACK_render_unlit(NetworkState *nw, ConVar *cv, bool prev, bool val) { render_debug_mode(nw, cv, prev, umath::to_integral(pragma::SceneDebugMode::Unlit)); }
+static void CVAR_CALLBACK_render_unlit(NetworkState *nw, const ConVar &cv, bool prev, bool val) { render_debug_mode(nw, cv, prev, umath::to_integral(pragma::SceneDebugMode::Unlit)); }
 REGISTER_CONVAR_CALLBACK_CL(render_unlit, CVAR_CALLBACK_render_unlit);
 
 void CGame::SetViewModelFOV(float fov) { *m_viewFov = fov; }
@@ -934,6 +937,7 @@ WIBase *CGame::CreateGUIElement(std::string name, WIHandle *hParent)
 LuaGUIManager &CGame::GetLuaGUIManager() { return m_luaGUIElements; }
 pragma::LuaShaderManager &CGame::GetLuaShaderManager() { return *m_luaShaderManager; }
 pragma::LuaParticleModifierManager &CGame::GetLuaParticleModifierManager() { return *m_luaParticleModifierManager; }
+pragma::LuaInputBindingLayerRegister &CGame::GetLuaInputBindingLayerRegister() { return *m_luaInputBindingLayerRegister; }
 
 void CGame::SetUp()
 {

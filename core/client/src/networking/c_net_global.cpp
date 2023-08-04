@@ -1582,7 +1582,7 @@ void NET_cl_add_shared_component(NetPacket packet)
 	ent->AddComponent(svComponentToClComponentTable.at(componentId));
 }
 
-REGISTER_CONVAR_CALLBACK_CL(debug_ai_navigation, [](NetworkState *state, ConVar *, bool, bool val) {
+REGISTER_CONVAR_CALLBACK_CL(debug_ai_navigation, [](NetworkState *state, const ConVar &, bool, bool val) {
 	CHECK_CHEATS("debug_ai_navigation", state, );
 	if(c_game == nullptr)
 		return;

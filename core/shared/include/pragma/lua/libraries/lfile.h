@@ -125,7 +125,7 @@ namespace Lua {
 	namespace file {
 		DLLNETWORK bool validate_write_operation(lua_State *l, std::string &path);
 		DLLNETWORK bool validate_write_operation(lua_State *l, std::string &path, std::string &outRootPath);
-		DLLNETWORK std::string to_relative_path(lua_State *l, const std::string &path);
+		DLLNETWORK std::string to_relative_path(const std::string &path);
 
 		DLLNETWORK std::shared_ptr<LFile> Open(lua_State *l, std::string path, FileOpenMode openMode, fsys::SearchFlags searchFlags = fsys::SearchFlags::All);
 		DLLNETWORK bool CreateDir(lua_State *l, std::string path);

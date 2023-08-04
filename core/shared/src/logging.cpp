@@ -7,11 +7,19 @@
 
 #include "stdafx_shared.h"
 #include "pragma/logging.hpp"
+#include "pragma/console/conout.h"
+#include "pragma/console/spdlog_anycolor_sink.hpp"
+#include "pragma/engine.h"
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/pattern_formatter.h>
 #include <spdlog/formatter.h>
 #include <spdlog/fmt/bundled/format.h>
+
+const std::string PRAGMA_LOGGER_NAME = "pragma_logger";
+const std::string PRAGMA_FILE_LOGGER_NAME = "pragma_logger_file";
+
+extern DLLNETWORK Engine *engine;
 
 int32_t pragma::logging::severity_to_spdlog_level(util::LogSeverity severity)
 {
@@ -57,19 +65,23 @@ void pragma::log(const std::string &msg, util::LogSeverity severity) { spdlog::l
 
 bool pragma::is_log_level_enabled(::util::LogSeverity severity) { return spdlog::should_log(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(severity))); }
 
+static std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> g_customLoggers;
 void pragma::flush_loggers()
 {
-	auto logger0 = spdlog::get("pragma_logger");
-	auto logger1 = spdlog::get("pragma_file_logger");
+	auto logger0 = spdlog::get(PRAGMA_LOGGER_NAME);
+	auto logger1 = spdlog::get(PRAGMA_FILE_LOGGER_NAME);
 	if(logger0)
 		logger0->flush();
 	if(logger1)
 		logger1->flush();
+
+	for(auto &pair : g_customLoggers)
+		pair.second->flush();
 }
 
 static void update_pragma_log_level()
 {
-	auto logger = spdlog::get("pragma_logger");
+	auto logger = spdlog::get(PRAGMA_LOGGER_NAME);
 	if(!logger)
 		return;
 	auto &sinks = logger->sinks();
@@ -83,7 +95,7 @@ static void update_pragma_log_level()
 }
 void pragma::set_console_log_level(::util::LogSeverity level)
 {
-	auto logger = spdlog::get("pragma_logger");
+	auto logger = spdlog::get(PRAGMA_LOGGER_NAME);
 	if(!logger)
 		return;
 	auto &sinks = logger->sinks();
@@ -96,7 +108,7 @@ void pragma::set_console_log_level(::util::LogSeverity level)
 }
 ::util::LogSeverity pragma::get_console_log_level()
 {
-	auto logger = spdlog::get("pragma_logger");
+	auto logger = spdlog::get(PRAGMA_LOGGER_NAME);
 	if(!logger)
 		return ::util::LogSeverity::Disabled;
 	auto &sinks = logger->sinks();
@@ -106,7 +118,7 @@ void pragma::set_console_log_level(::util::LogSeverity level)
 }
 void pragma::set_file_log_level(::util::LogSeverity level)
 {
-	auto logger = spdlog::get("pragma_logger");
+	auto logger = spdlog::get(PRAGMA_LOGGER_NAME);
 	if(logger) {
 		auto &sinks = logger->sinks();
 		if(sinks.size() >= 2) {
@@ -115,7 +127,7 @@ void pragma::set_file_log_level(::util::LogSeverity level)
 		}
 	}
 
-	auto loggerFile = spdlog::get("pragma_file_logger");
+	auto loggerFile = spdlog::get(PRAGMA_FILE_LOGGER_NAME);
 	if(loggerFile)
 		loggerFile->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(level)));
 
@@ -123,7 +135,7 @@ void pragma::set_file_log_level(::util::LogSeverity level)
 }
 ::util::LogSeverity pragma::get_file_log_level()
 {
-	auto loggerFile = spdlog::get("pragma_file_logger");
+	auto loggerFile = spdlog::get(PRAGMA_FILE_LOGGER_NAME);
 	if(!loggerFile)
 		return ::util::LogSeverity::Disabled;
 	return logging::spdlog_level_to_severity(loggerFile->level());
@@ -131,6 +143,14 @@ void pragma::set_file_log_level(::util::LogSeverity level)
 
 /////////////////////////////
 
+static void append_string(spdlog::memory_buf_t &dest, const std::string &str)
+{
+#ifdef SPDLOG_USE_STD_FORMAT
+	dest.append(str.begin(), str.end());
+#else
+	dest.append(str.data(), str.data() + str.length());
+#endif
+}
 class SpdPragmaPrefixFormatter : public spdlog::custom_flag_formatter {
   public:
 	virtual void format(const spdlog::details::log_msg &msg, const std::tm &tm, spdlog::memory_buf_t &dest) override
@@ -138,47 +158,47 @@ class SpdPragmaPrefixFormatter : public spdlog::custom_flag_formatter {
 		switch(msg.level) {
 		case spdlog::level::level_enum::warn:
 			{
-				constexpr const char *prefix = "[warning] " PRAGMA_CON_COLOR_WARNING;
+				static auto prefix = "[warning] " + Con::COLOR_WARNING;
 				constexpr uint32_t prefixLen = 10;
 				msg.color_range_start = dest.size() + 1;
 				msg.color_range_end = dest.size() + prefixLen - 2;
-				dest.append(prefix, prefix + prefixLen + ustring::length(PRAGMA_CON_COLOR_WARNING));
+				append_string(dest, prefix);
 				break;
 			}
 		case spdlog::level::level_enum::err:
 			{
-				constexpr const char *prefix = "[error] " PRAGMA_CON_COLOR_ERROR;
+				static auto prefix = "[error] " + Con::COLOR_ERROR;
 				constexpr uint32_t prefixLen = 8;
 				msg.color_range_start = dest.size() + 1;
 				msg.color_range_end = dest.size() + prefixLen - 2;
-				dest.append(prefix, prefix + prefixLen + ustring::length(PRAGMA_CON_COLOR_ERROR));
+				append_string(dest, prefix);
 				break;
 			}
 		case spdlog::level::level_enum::critical:
 			{
-				constexpr const char *prefix = "[critical] " PRAGMA_CON_COLOR_CRITICAL;
+				static auto prefix = "[critical] " + Con::COLOR_CRITICAL;
 				constexpr uint32_t prefixLen = 11;
 				msg.color_range_start = dest.size() + 1;
 				msg.color_range_end = dest.size() + prefixLen - 2;
-				dest.append(prefix, prefix + prefixLen + ustring::length(PRAGMA_CON_COLOR_CRITICAL));
+				append_string(dest, prefix);
 				break;
 			}
 		case spdlog::level::level_enum::debug:
 			{
-				constexpr const char *prefix = "[debug] ";
+				static std::string prefix = "[debug] ";
 				constexpr uint32_t prefixLen = 8;
 				msg.color_range_start = dest.size() + 1;
 				msg.color_range_end = dest.size() + prefixLen - 2;
-				dest.append(prefix, prefix + prefixLen);
+				append_string(dest, prefix);
 				break;
 			}
 		case spdlog::level::level_enum::info:
 			{
-				constexpr const char *prefix = "[info] ";
+				static std::string prefix = "[info] ";
 				constexpr uint32_t prefixLen = 7;
 				msg.color_range_start = dest.size() + 1;
 				msg.color_range_end = dest.size() + prefixLen - 2;
-				dest.append(prefix, prefix + prefixLen);
+				append_string(dest, prefix);
 				break;
 			}
 		}
@@ -192,20 +212,50 @@ namespace pragma::logging::detail {
 	extern DLLNETWORK std::shared_ptr<spdlog::logger> consoleOutputLogger;
 };
 static std::optional<std::string> g_logFileName = "log.txt";
+static bool g_loggerInitialized = false;
 std::optional<std::string> pragma::detail::get_log_file_name() { return g_logFileName; }
+
 void pragma::detail::close_logger()
 {
 	pragma::logging::detail::shouldLogOutput = false;
 	pragma::logging::detail::consoleOutputLogger = nullptr;
 
-	auto logger = spdlog::get("pragma_file_logger");
+	auto logger = spdlog::get(PRAGMA_FILE_LOGGER_NAME);
 	if(logger) {
 		logger->flush();
 		logger = nullptr;
 	}
 	spdlog::set_default_logger(nullptr);
-	spdlog::drop("pragma_logger");
-	spdlog::drop("pragma_file_logger");
+	spdlog::drop(PRAGMA_LOGGER_NAME);
+	spdlog::drop(PRAGMA_FILE_LOGGER_NAME);
+
+	for(auto &logger : g_customLoggers)
+		spdlog::drop(logger.first);
+	g_customLoggers.clear();
+
+	spdlog::shutdown();
+}
+
+static void init_logger(const std::string &name, std::shared_ptr<spdlog::logger> &logger)
+{
+	if(std::this_thread::get_id() != engine->GetMainThreadId())
+		throw std::runtime_error {"Custom loggers must be created on the main thread!"};
+	spdlog::info("Creating logger '{}'...", name);
+	auto mainLogger = spdlog::get(PRAGMA_LOGGER_NAME);
+	logger->sinks() = mainLogger->sinks();
+	logger->set_level(mainLogger->level());
+	g_customLoggers[name] = logger;
+	spdlog::register_logger(logger);
+}
+
+spdlog::logger &pragma::get_logger(const std::string &name)
+{
+	auto it = g_customLoggers.find(name);
+	if(it != g_customLoggers.end())
+		return *it->second;
+	auto logger = std::make_shared<spdlog::logger>(name);
+	init_logger(name, logger);
+	return *logger;
 }
 
 class short_level_formatter_c : public spdlog::custom_flag_formatter {
@@ -224,13 +274,13 @@ class short_level_formatter_c : public spdlog::custom_flag_formatter {
 			v = util::get_ansi_color_code(util::ConsoleColorFlags::Green);
 			break;
 		case spdlog::level::warn:
-			v = util::get_ansi_color_code(util::ConsoleColorFlags::Yellow | util::ConsoleColorFlags::Intensity);
+			v = Con::COLOR_WARNING;
 			break;
 		case spdlog::level::err:
-			v = util::get_ansi_color_code(util::ConsoleColorFlags::Red | util::ConsoleColorFlags::Intensity);
+			v = Con::COLOR_ERROR;
 			break;
 		case spdlog::level::critical:
-			v = util::get_ansi_color_code(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::BackgroundRed);
+			v = Con::COLOR_CRITICAL;
 			break;
 		}
 		v += spdlog::level::to_short_c_str(msg.level) + util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
@@ -244,9 +294,8 @@ class color_reset_formatter : public spdlog::custom_flag_formatter {
   public:
 	virtual void format(const spdlog::details::log_msg &msg, const std::tm &tm, spdlog::memory_buf_t &dest) override
 	{
-		constexpr const char *prefix = PRAGMA_CON_COLOR_RESET;
-		constexpr uint32_t prefixLen = ustring::length(PRAGMA_CON_COLOR_RESET);
-		dest.append(prefix, prefix + prefixLen);
+		static auto prefix = Con::COLOR_RESET;
+		append_string(dest, prefix);
 	}
 
 	virtual std::unique_ptr<custom_flag_formatter> clone() const override { return spdlog::details::make_unique<color_reset_formatter>(); }
@@ -259,20 +308,20 @@ class color_formatter : public spdlog::custom_flag_formatter {
 		switch(msg.level) {
 		case spdlog::level::level_enum::warn:
 			{
-				constexpr const char *str = PRAGMA_CON_COLOR_WARNING;
-				dest.append(str, str + ustring::length(PRAGMA_CON_COLOR_WARNING));
+				static auto str = Con::COLOR_WARNING;
+				append_string(dest, str);
 				break;
 			}
 		case spdlog::level::level_enum::err:
 			{
-				constexpr const char *str = PRAGMA_CON_COLOR_ERROR;
-				dest.append(str, str + ustring::length(PRAGMA_CON_COLOR_ERROR));
+				static auto str = Con::COLOR_ERROR;
+				append_string(dest, str);
 				break;
 			}
 		case spdlog::level::level_enum::critical:
 			{
-				constexpr const char *str = PRAGMA_CON_COLOR_CRITICAL;
-				dest.append(str, str + ustring::length(PRAGMA_CON_COLOR_CRITICAL));
+				static auto str = Con::COLOR_CRITICAL;
+				append_string(dest, str);
 				break;
 			}
 		}
@@ -281,17 +330,63 @@ class color_formatter : public spdlog::custom_flag_formatter {
 	virtual std::unique_ptr<custom_flag_formatter> clone() const override { return spdlog::details::make_unique<color_formatter>(); }
 };
 
+static std::string CATEGORY_COLOR = util::get_true_color_code(Color {96, 211, 148});
+static std::string CATEGORY_PREFIX = "[" + CATEGORY_COLOR;
+static std::string CATEGORY_POSTFIX = std::string {Con::COLOR_RESET} + "] ";
+class category_name_formatter : public spdlog::custom_flag_formatter {
+  public:
+	virtual void format(const spdlog::details::log_msg &msg, const std::tm &tm, spdlog::memory_buf_t &dest) override
+	{
+#ifdef SPDLOG_USE_STD_FORMAT
+		auto &loggerName = msg.logger_name;
+#else
+		std::string_view loggerName {msg.logger_name.begin(), msg.logger_name.end()};
+#endif
+		if(loggerName.size() >= PRAGMA_LOGGER_NAME.length() && loggerName.substr(0, PRAGMA_LOGGER_NAME.length()) == PRAGMA_LOGGER_NAME)
+			return; // Don't print category name for main logger
+		dest.reserve(dest.size() + CATEGORY_PREFIX.size() + msg.logger_name.size() + CATEGORY_POSTFIX.size());
+		dest.append(CATEGORY_PREFIX);
+		dest.append(msg.logger_name);
+		dest.append(CATEGORY_POSTFIX);
+	}
+
+	virtual std::unique_ptr<custom_flag_formatter> clone() const override { return spdlog::details::make_unique<category_name_formatter>(); }
+};
+
+static std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> g_preRegisteredLoggers;
+spdlog::logger &pragma::register_logger(const std::string &name)
+{
+	if(g_loggerInitialized)
+		return get_logger(name);
+	auto it = g_preRegisteredLoggers.find(name);
+	if(it != g_preRegisteredLoggers.end())
+		return *it->second;
+	auto logger = std::make_shared<spdlog::logger>(name);
+	g_preRegisteredLoggers[name] = logger;
+	return *logger;
+}
+
 void pragma::detail::initialize_logger(::util::LogSeverity conLogLevel, ::util::LogSeverity fileLogLevel, const std::optional<std::string> &logFile)
 {
+	if(g_loggerInitialized)
+		return;
 	g_logFileName = logFile;
-	auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+	auto consoleSink = std::make_shared<anycolor_color_sink_mt>();
+	consoleSink->set_color(spdlog::level::trace, util::get_ansi_color_code(util::ConsoleColorFlags::Red | util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Blue));
+	consoleSink->set_color(spdlog::level::debug, util::get_ansi_color_code(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Blue));
+	consoleSink->set_color(spdlog::level::info, util::get_true_color_code(Color {138, 201, 38})); // Green
+	consoleSink->set_color(spdlog::level::warn, Con::COLOR_WARNING);
+	consoleSink->set_color(spdlog::level::err, Con::COLOR_ERROR);
+	consoleSink->set_color(spdlog::level::critical, Con::COLOR_CRITICAL);
+	consoleSink->set_color(spdlog::level::off, Con::COLOR_RESET);
 	consoleSink->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(conLogLevel)));
 
 	auto formatter = std::make_unique<spdlog::pattern_formatter>();
 	formatter->add_flag<SpdPragmaPrefixFormatter>('*');
 	formatter->add_flag<short_level_formatter_c>('q');
 	formatter->add_flag<color_reset_formatter>('Q');
-	formatter->set_pattern("%*%v%Q");
+	formatter->add_flag<category_name_formatter>('j');
+	formatter->set_pattern("%j%*%v%Q");
 	consoleSink->set_formatter(std::move(formatter));
 
 	std::vector<spdlog::sink_ptr> sinks {};
@@ -303,19 +398,20 @@ void pragma::detail::initialize_logger(::util::LogSeverity conLogLevel, ::util::
 		formatter->add_flag<short_level_formatter_c>('q');
 		formatter->add_flag<color_reset_formatter>('Q');
 		formatter->add_flag<color_formatter>('w');
-		formatter->set_pattern("[%H:%M:%S %z] [%^%q%$] %w%v%Q");
+		formatter->add_flag<category_name_formatter>('j');
+		formatter->set_pattern("[%H:%M:%S.%e] [%^%q%$] %j%w%v%Q");
 		fileSink->set_formatter(std::move(formatter));
 
 		sinks.push_back(fileSink);
 
 		// We want to log all regular console output to file, so we'll create an additional logger to handle that
-		auto conFileLogger = std::make_shared<spdlog::logger>("pragma_file_logger", spdlog::sinks_init_list {fileSink});
+		auto conFileLogger = std::make_shared<spdlog::logger>(PRAGMA_FILE_LOGGER_NAME, spdlog::sinks_init_list {fileSink});
 		conFileLogger->set_level(spdlog::level::trace); // Always log all regular console output to file
 		pragma::logging::detail::shouldLogOutput = true;
 		pragma::logging::detail::consoleOutputLogger = conFileLogger;
 	}
 
-	auto logger = std::make_shared<spdlog::logger>("pragma_logger", sinks.begin(), sinks.end());
+	auto logger = std::make_shared<spdlog::logger>(PRAGMA_LOGGER_NAME, sinks.begin(), sinks.end());
 	logger->set_level(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(static_cast<::util::LogSeverity>(umath::min(umath::to_integral(conLogLevel), umath::to_integral(fileLogLevel))))));
 	spdlog::set_default_logger(logger);
 
@@ -327,4 +423,9 @@ void pragma::detail::initialize_logger(::util::LogSeverity conLogLevel, ::util::
 	}
 	else
 		spdlog::info("Log file has been disabled, log will not be written to disk.");
+
+	g_loggerInitialized = true;
+	for(auto &pair : g_preRegisteredLoggers)
+		init_logger(pair.first, pair.second);
+	g_preRegisteredLoggers.clear();
 }

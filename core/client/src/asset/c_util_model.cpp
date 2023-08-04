@@ -255,7 +255,12 @@ static bool load_image(tinygltf::Image *image, const int imageIdx, std::string *
 	return true;
 }
 
-static std::shared_ptr<Model> import_model(ufile::IFile *optFile, const std::string &optFileName, std::string &outErrMsg, const util::Path &outputPath)
+struct OutputData {
+	std::shared_ptr<Model> model;
+	std::vector<std::string> models;
+	std::string mapName;
+};
+static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::string &optFileName, std::string &outErrMsg, const util::Path &outputPath, bool importAsMap)
 {
 	auto verbose = true; // TODO
 	auto scale = static_cast<float>(util::pragma::metres_to_units(1.f));
@@ -326,7 +331,7 @@ static std::shared_ptr<Model> import_model(ufile::IFile *optFile, const std::str
 			outErrMsg = err;
 		else
 			outErrMsg = warn;
-		return nullptr;
+		return {};
 	}
 
 	auto TransformPos = [scale](const Vector3 &v) -> Vector3 { return v * scale; };
@@ -520,9 +525,8 @@ static std::shared_ptr<Model> import_model(ufile::IFile *optFile, const std::str
 				cmat->SetTexture(Material::ALBEDO_MAP_IDENTIFIER, "white");
 
 			auto &baseColorFactor = gltfMat.pbrMetallicRoughness.baseColorFactor;
-			if(baseColorFactor != std::vector<double> {1.0, 1.0, 1.0, 1.0}) {
-				dataBlock->AddValue("color", "color_factor", std::to_string(baseColorFactor.at(0) * 255.f) + ' ' + std::to_string(baseColorFactor.at(1) * 255.f) + ' ' + std::to_string(baseColorFactor.at(2) * 255.f) + ' ' + std::to_string(baseColorFactor.at(3) * 255.f));
-			}
+			if(baseColorFactor != std::vector<double> {1.0, 1.0, 1.0, 1.0})
+				dataBlock->AddValue("vector", "color_factor", std::to_string(baseColorFactor.at(0)) + ' ' + std::to_string(baseColorFactor.at(1)) + ' ' + std::to_string(baseColorFactor.at(2)) + ' ' + std::to_string(baseColorFactor.at(3)));
 
 			auto metallicRoughnessImg = fGetImage(gltfMat.pbrMetallicRoughness.metallicRoughnessTexture.index);
 			if(metallicRoughnessImg) {
@@ -580,153 +584,191 @@ static std::shared_ptr<Model> import_model(ufile::IFile *optFile, const std::str
 		return GLTFBufferData {accessor, bufView, buf};
 	};
 
+	auto getNodePose = [&](const tinygltf::Node &node) {
+		umath::ScaledTransform pose {};
+		if(node.translation.size() == 3) {
+			pose.SetOrigin(TransformPos(Vector3 {static_cast<float>(node.translation[0]), static_cast<float>(node.translation[1]), static_cast<float>(node.translation[2])}));
+		}
+		if(node.rotation.size() == 4) {
+			pose.SetRotation(Quat {static_cast<float>(node.rotation[3]), static_cast<float>(node.rotation[0]), static_cast<float>(node.rotation[1]), static_cast<float>(node.rotation[2])});
+		}
+		if(node.scale.size() == 3) {
+			pose.SetScale(Vector3 {static_cast<float>(node.scale[0]), static_cast<float>(node.scale[1]), static_cast<float>(node.scale[2])});
+		}
+		return pose;
+	};
+
 	auto &gltfMeshes = gltfMdl.meshes;
 	uint32_t absUnnamedFcIdx = 0;
 	struct NodeMeshData {
 		std::optional<std::string> name;
 		umath::ScaledTransform pose;
 	};
-	std::vector<NodeMeshData> nodeMeshDatas;
-	nodeMeshDatas.resize(gltfMeshes.size());
+	std::vector<std::vector<NodeMeshData>> meshToNodes;
+	meshToNodes.resize(gltfMeshes.size());
 	for(auto &node : gltfMdl.nodes) {
-		if(node.mesh >= nodeMeshDatas.size() || node.name.empty())
+		if(node.mesh >= meshToNodes.size() || node.name.empty())
 			continue;
-		umath::ScaledTransform pose {};
-		if(node.translation.size() == 3) {
-			pose.SetOrigin(TransformPos(Vector3 {static_cast<float>(node.translation[0]), static_cast<float>(node.translation[1]), static_cast<float>(node.translation[2])}));
-		}
-		if(node.rotation.size() == 4) {
-			pose.SetRotation(Quat {static_cast<float>(node.rotation[0]), static_cast<float>(node.rotation[1]), static_cast<float>(node.rotation[2]), static_cast<float>(node.rotation[3])});
-		}
-		if(node.scale.size() == 3) {
-			pose.SetScale(TransformPos(Vector3 {static_cast<float>(node.scale[0]), static_cast<float>(node.scale[1]), static_cast<float>(node.scale[2])}));
-		}
-		nodeMeshDatas[node.mesh] = {node.name, pose};
+		auto pose = getNodePose(node);
+		meshToNodes[node.mesh].push_back({node.name, pose});
 	}
+
+	struct InstanceInfo {
+		std::string name;
+		umath::ScaledTransform pose;
+	};
+	std::unordered_map<ModelMeshGroup *, std::vector<InstanceInfo>> meshInstances;
 	for(uint32_t meshIdx = 0; auto &gltfMesh : gltfMeshes) {
 		auto mesh = c_game->CreateModelMesh();
 		std::string name;
-		auto &nodeMeshData = nodeMeshDatas[meshIdx];
-		if(nodeMeshData.name.has_value())
-			name = *nodeMeshData.name;
-		else if(!gltfMesh.name.empty())
-			name = gltfMesh.name;
-		else
-			name = "mesh" + std::to_string(meshIdx);
-		uint32_t meshGroupId = 0;
-		auto meshGroup = mdl->AddMeshGroup(name, meshGroupId);
-		for(auto &primitive : gltfMesh.primitives) {
-			auto itPos = primitive.attributes.find("POSITION");
-			if(itPos == primitive.attributes.end())
+		auto &nodeMeshData = meshToNodes[meshIdx];
+		std::shared_ptr<ModelMeshGroup> firstMeshGroup = nullptr;
+		for(auto nodeIdx = decltype(nodeMeshData.size()) {0u}; nodeIdx < nodeMeshData.size(); ++nodeIdx) {
+			auto &nodeData = nodeMeshData[nodeIdx];
+			auto pose = nodeData.pose;
+			if(nodeData.name.has_value())
+				name = *nodeData.name;
+			else {
+				if(!gltfMesh.name.empty())
+					name = gltfMesh.name;
+				else
+					name = "mesh" + std::to_string(meshIdx);
+				if(nodeIdx > 0)
+					name += "_" + std::to_string(nodeIdx + 1);
+			}
+			if(importAsMap && nodeIdx > 0) {
+				// There are multiple instances of the same mesh, no need to parse the mesh again
+				InstanceInfo instanceInfo {};
+				instanceInfo.name = name;
+				instanceInfo.pose = pose;
+				meshInstances[firstMeshGroup.get()].push_back(std::move(instanceInfo));
 				continue;
-			auto &idxAccessor = gltfMdl.accessors.at(primitive.indices);
-			auto &idxBufView = gltfMdl.bufferViews.at(idxAccessor.bufferView);
-			auto &idxBuf = gltfMdl.buffers.at(idxBufView.buffer);
-
-			auto *srcIndexData = idxBuf.data.data() + idxBufView.byteOffset + idxAccessor.byteOffset;
-
-			auto subMesh = c_game->CreateModelSubMesh();
-			subMesh->SetSkinTextureIndex(primitive.material);
-			auto numIndices = idxAccessor.count;
-			switch(idxAccessor.componentType) {
-			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
-				{
-					subMesh->SetIndexType(pragma::model::IndexType::UInt16);
-					subMesh->SetIndexCount(numIndices);
-					auto &indexData = subMesh->GetIndexData();
-					memcpy(indexData.data(), srcIndexData, indexData.size());
-					break;
-				}
-			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
-				{
-					subMesh->SetIndexType(pragma::model::IndexType::UInt16);
-					subMesh->SetIndexCount(numIndices);
-					subMesh->VisitIndices([srcIndexData](auto *indexData, uint32_t numIndices) {
-						for(auto i = decltype(numIndices) {0u}; i < numIndices; ++i)
-							indexData[i] = srcIndexData[i];
-					});
-					break;
-				}
-			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
-				{
-					subMesh->SetIndexType(pragma::model::IndexType::UInt32);
-					subMesh->SetIndexCount(numIndices);
-					auto &indexData = subMesh->GetIndexData();
-					memcpy(indexData.data(), srcIndexData, indexData.size());
-					break;
-				}
 			}
+			uint32_t meshGroupId = 0;
+			auto meshGroup = mdl->AddMeshGroup(name, meshGroupId);
+			if(importAsMap) {
+				assert(nodeIdx == 0);
+				firstMeshGroup = meshGroup;
 
-			auto fGetVertexBufferData = [&primitive, &gltfMdl, &fGetBufferData](const std::string &identifier) -> std::optional<GLTFBufferData> {
-				auto it = primitive.attributes.find(identifier);
-				if(it == primitive.attributes.end())
-					return {};
-				return fGetBufferData(it->second);
-			};
-			auto posBufData = fGetVertexBufferData("POSITION");
-			auto normBufData = fGetVertexBufferData("NORMAL");
-			auto texCoordBufData = fGetVertexBufferData("TEXCOORD_0");
-			auto texCoordBufData1 = fGetVertexBufferData("TEXCOORD_1");
-			auto jointsBufData = fGetVertexBufferData("JOINTS_0");
-			auto weightsBufData = fGetVertexBufferData("WEIGHTS_0");
-
-			uint32_t iWeightChannel = 1;
-			while(fGetVertexBufferData("JOINTS_" + std::to_string(iWeightChannel++)).has_value())
-				Con::cwar << "Model has more than 4 bone weights, this is not supported!" << Con::endl;
-
-			auto &verts = subMesh->GetVertices();
-			auto numVerts = posBufData->accessor.count;
-			verts.resize(numVerts);
-
-			std::vector<Vector2> *lightmapUvs = nullptr;
-			if(texCoordBufData1.has_value()) {
-				lightmapUvs = &subMesh->AddUVSet("lightmap");
-				lightmapUvs->resize(numVerts);
+				InstanceInfo instanceInfo {};
+				instanceInfo.name = name;
+				instanceInfo.pose = pose;
+				meshInstances[meshGroup.get()].push_back(instanceInfo);
+				pose = {};
 			}
+			for(auto &primitive : gltfMesh.primitives) {
+				auto itPos = primitive.attributes.find("POSITION");
+				if(itPos == primitive.attributes.end())
+					continue;
+				auto &idxAccessor = gltfMdl.accessors.at(primitive.indices);
+				auto &idxBufView = gltfMdl.bufferViews.at(idxAccessor.bufferView);
+				auto &idxBuf = gltfMdl.buffers.at(idxBufView.buffer);
 
-			for(auto i = decltype(numVerts) {0u}; i < numVerts; ++i) {
-				auto &v = verts.at(i);
-				v.position = TransformPos(posBufData->GetIndexedValue<Vector3>(i));
-				if(normBufData.has_value())
-					v.normal = normBufData->GetIndexedValue<Vector3>(i);
-				if(texCoordBufData.has_value())
-					v.uv = texCoordBufData->GetIndexedValue<Vector2>(i);
-				if(lightmapUvs)
-					(*lightmapUvs).at(i) = texCoordBufData1->GetIndexedValue<Vector2>(i);
-			}
+				auto *srcIndexData = idxBuf.data.data() + idxBufView.byteOffset + idxAccessor.byteOffset;
 
-			if(nodeMeshData.pose != umath::ScaledTransform {}) {
-				for(auto &v : verts) {
-					v.position = nodeMeshData.pose * v.position;
-					uvec::rotate(&v.normal, nodeMeshData.pose.GetRotation());
-				}
-			}
-
-			if(jointsBufData.has_value() && weightsBufData.has_value()) {
-				auto &vertWeights = subMesh->GetVertexWeights();
-				vertWeights.resize(numVerts);
-
-				for(auto i = decltype(numVerts) {0u}; i < numVerts; ++i) {
-					auto &vw = vertWeights.at(i);
-
-					auto weights = weightsBufData->GetFloatArray<4>(i);
-					auto boneIds = jointsBufData->GetIntArray<4>(i);
-					for(uint8_t j = 0; j < 4; ++j) {
-						vw.weights[j] = weights[j];
-						vw.boneIds[j] = boneIds[j];
+				auto subMesh = c_game->CreateModelSubMesh();
+				subMesh->SetSkinTextureIndex(primitive.material);
+				auto numIndices = idxAccessor.count;
+				switch(idxAccessor.componentType) {
+				case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+					{
+						subMesh->SetIndexType(pragma::model::IndexType::UInt16);
+						subMesh->SetIndexCount(numIndices);
+						auto &indexData = subMesh->GetIndexData();
+						memcpy(indexData.data(), srcIndexData, indexData.size());
+						break;
+					}
+				case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+					{
+						subMesh->SetIndexType(pragma::model::IndexType::UInt16);
+						subMesh->SetIndexCount(numIndices);
+						subMesh->VisitIndices([srcIndexData](auto *indexData, uint32_t numIndices) {
+							for(auto i = decltype(numIndices) {0u}; i < numIndices; ++i)
+								indexData[i] = srcIndexData[i];
+						});
+						break;
+					}
+				case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
+					{
+						subMesh->SetIndexType(pragma::model::IndexType::UInt32);
+						subMesh->SetIndexCount(numIndices);
+						auto &indexData = subMesh->GetIndexData();
+						memcpy(indexData.data(), srcIndexData, indexData.size());
+						break;
 					}
 				}
-				// JOINTS_1  -> +4
-			}
 
-			for(auto i = decltype(idxAccessor.count) {0u}; i < idxAccessor.count; ++i) {
+				auto fGetVertexBufferData = [&primitive, &gltfMdl, &fGetBufferData](const std::string &identifier) -> std::optional<GLTFBufferData> {
+					auto it = primitive.attributes.find(identifier);
+					if(it == primitive.attributes.end())
+						return {};
+					return fGetBufferData(it->second);
+				};
+				auto posBufData = fGetVertexBufferData("POSITION");
+				auto normBufData = fGetVertexBufferData("NORMAL");
+				auto texCoordBufData = fGetVertexBufferData("TEXCOORD_0");
+				auto texCoordBufData1 = fGetVertexBufferData("TEXCOORD_1");
+				auto jointsBufData = fGetVertexBufferData("JOINTS_0");
+				auto weightsBufData = fGetVertexBufferData("WEIGHTS_0");
 
-				//idxAccessor.componentType == ;
-				//idxAccessor.type
-				//TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT,TINYGLTF_TYPE_SCALAR
+				uint32_t iWeightChannel = 1;
+				while(fGetVertexBufferData("JOINTS_" + std::to_string(iWeightChannel++)).has_value())
+					Con::cwar << "Model has more than 4 bone weights, this is not supported!" << Con::endl;
 
-				//	The indices data type. Valid values correspond to WebGL enums: 5121 (UNSIGNED_BYTE), 5123 (UNSIGNED_SHORT), 5125 (UNSIGNED_INT).
-			}
+				auto &verts = subMesh->GetVertices();
+				auto numVerts = posBufData->accessor.count;
+				verts.resize(numVerts);
+
+				std::vector<Vector2> *lightmapUvs = nullptr;
+				if(texCoordBufData1.has_value()) {
+					lightmapUvs = &subMesh->AddUVSet("lightmap");
+					lightmapUvs->resize(numVerts);
+				}
+
+				for(auto i = decltype(numVerts) {0u}; i < numVerts; ++i) {
+					auto &v = verts.at(i);
+					v.position = TransformPos(posBufData->GetIndexedValue<Vector3>(i));
+					if(normBufData.has_value())
+						v.normal = normBufData->GetIndexedValue<Vector3>(i);
+					if(texCoordBufData.has_value())
+						v.uv = texCoordBufData->GetIndexedValue<Vector2>(i);
+					if(lightmapUvs)
+						(*lightmapUvs).at(i) = texCoordBufData1->GetIndexedValue<Vector2>(i);
+				}
+
+				if(pose != umath::ScaledTransform {}) {
+					for(auto &v : verts) {
+						v.position *= pose.GetScale();
+						v.position = pose * v.position;
+						uvec::rotate(&v.normal, pose.GetRotation());
+					}
+				}
+
+				if(jointsBufData.has_value() && weightsBufData.has_value()) {
+					auto &vertWeights = subMesh->GetVertexWeights();
+					vertWeights.resize(numVerts);
+
+					for(auto i = decltype(numVerts) {0u}; i < numVerts; ++i) {
+						auto &vw = vertWeights.at(i);
+
+						auto weights = weightsBufData->GetFloatArray<4>(i);
+						auto boneIds = jointsBufData->GetIntArray<4>(i);
+						for(uint8_t j = 0; j < 4; ++j) {
+							vw.weights[j] = weights[j];
+							vw.boneIds[j] = boneIds[j];
+						}
+					}
+					// JOINTS_1  -> +4
+				}
+
+				for(auto i = decltype(idxAccessor.count) {0u}; i < idxAccessor.count; ++i) {
+
+					//idxAccessor.componentType == ;
+					//idxAccessor.type
+					//TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT,TINYGLTF_TYPE_SCALAR
+
+					//	The indices data type. Valid values correspond to WebGL enums: 5121 (UNSIGNED_BYTE), 5123 (UNSIGNED_SHORT), 5125 (UNSIGNED_INT).
+				}
 #if 0
 			primitive.attributes["POSITION"] = posAccessor;
 			primitive.attributes["NORMAL"] = normalAccessor;
@@ -743,102 +785,103 @@ static std::shared_ptr<Model> import_model(ufile::IFile *optFile, const std::str
 			}
 #endif
 
-			uint32_t targetIdx = 0;
-			for(auto &target : primitive.targets) {
-				util::ScopeGuard sg {[&targetIdx]() { ++targetIdx; }};
-				auto itPos = target.find("POSITION");
-				auto itNormal = target.find("NORMAL");
-				// auto itTangent = target.find("TANGENT");
-				if(itPos == target.end())
-					continue;
-				auto &posAccessor = gltfMdl.accessors.at(itPos->second);
-				auto &posBufView = gltfMdl.bufferViews.at(posAccessor.bufferView);
-				auto &posBuf = gltfMdl.buffers.at(posBufView.buffer);
-				auto posBufData = GLTFBufferData {posAccessor, posBufView, posBuf};
+				uint32_t targetIdx = 0;
+				for(auto &target : primitive.targets) {
+					util::ScopeGuard sg {[&targetIdx]() { ++targetIdx; }};
+					auto itPos = target.find("POSITION");
+					auto itNormal = target.find("NORMAL");
+					// auto itTangent = target.find("TANGENT");
+					if(itPos == target.end())
+						continue;
+					auto &posAccessor = gltfMdl.accessors.at(itPos->second);
+					auto &posBufView = gltfMdl.bufferViews.at(posAccessor.bufferView);
+					auto &posBuf = gltfMdl.buffers.at(posBufView.buffer);
+					auto posBufData = GLTFBufferData {posAccessor, posBufView, posBuf};
 
-				std::unique_ptr<GLTFBufferData> normBufData {};
-				if(itNormal != target.end()) {
-					auto &normAccessor = gltfMdl.accessors.at(itNormal->second);
-					auto &normBufView = gltfMdl.bufferViews.at(normAccessor.bufferView);
-					auto &normBuf = gltfMdl.buffers.at(normBufView.buffer);
-					normBufData = std::unique_ptr<GLTFBufferData> {new GLTFBufferData {normAccessor, normBufView, normBuf}};
-				}
-
-				auto isBeingUsed = false;
-				for(auto i = decltype(posAccessor.count) {0u}; i < posAccessor.count; ++i) {
-					auto pos = TransformPos(posBufData.GetIndexedValue<Vector3>(i));
-					if(!isBeingUsed && uvec::length_sqr(pos) > 0.001f) {
-						isBeingUsed = true;
-						break;
+					std::unique_ptr<GLTFBufferData> normBufData {};
+					if(itNormal != target.end()) {
+						auto &normAccessor = gltfMdl.accessors.at(itNormal->second);
+						auto &normBufView = gltfMdl.bufferViews.at(normAccessor.bufferView);
+						auto &normBuf = gltfMdl.buffers.at(normBufView.buffer);
+						normBufData = std::unique_ptr<GLTFBufferData> {new GLTFBufferData {normAccessor, normBufView, normBuf}};
 					}
-					if(normBufData) {
-						auto n = normBufData->GetIndexedValue<Vector3>(i);
-						if(!isBeingUsed && uvec::length_sqr(n) > 0.001f) {
+
+					auto isBeingUsed = false;
+					for(auto i = decltype(posAccessor.count) {0u}; i < posAccessor.count; ++i) {
+						auto pos = TransformPos(posBufData.GetIndexedValue<Vector3>(i));
+						if(!isBeingUsed && uvec::length_sqr(pos) > 0.001f) {
 							isBeingUsed = true;
 							break;
 						}
+						if(normBufData) {
+							auto n = normBufData->GetIndexedValue<Vector3>(i);
+							if(!isBeingUsed && uvec::length_sqr(n) > 0.001f) {
+								isBeingUsed = true;
+								break;
+							}
+						}
+					}
+					if(!isBeingUsed)
+						continue; // Skip this morph target if it's not actually doing anything
+
+					std::string morphTargetName;
+
+					if(gltfMesh.extras.Has("targetNames"))
+						morphTargetName = gltfMesh.extras.Get("targetNames").Get(targetIdx).Get<std::string>();
+					else
+						morphTargetName = std::to_string(absUnnamedFcIdx + targetIdx);
+
+					if(mdl->GetFlexController(morphTargetName) == nullptr) {
+						auto defaultWeight = (targetIdx < gltfMesh.weights.size()) ? gltfMesh.weights.at(targetIdx) : 0.f;
+						auto &fc = mdl->AddFlexController(morphTargetName);
+						fc.min = 0.f;
+						fc.max = 1.f;
+						// TODO: Apply default
+					}
+					uint32_t fcId = 0;
+					mdl->GetFlexControllerId(morphTargetName, fcId);
+
+					if(mdl->GetFlex(morphTargetName) == nullptr) {
+						auto &flex = mdl->AddFlex(morphTargetName);
+						auto va = mdl->AddVertexAnimation(morphTargetName);
+						flex.SetVertexAnimation(*va);
+
+						auto &operations = flex.GetOperations();
+						operations.push_back({});
+						auto &op = flex.GetOperations().back();
+						op.type = Flex::Operation::Type::Fetch;
+						op.d.index = fcId;
+					}
+					uint32_t flexId;
+					mdl->GetFlexId(morphTargetName, flexId);
+					auto &va = *mdl->GetFlex(flexId)->GetVertexAnimation();
+
+					assert(posAccessor.count == numVerts);
+					auto mva = va.AddMeshFrame(*mesh, *subMesh);
+					mva->SetVertexCount(numVerts);
+					if(normBufData)
+						mva->SetFlagEnabled(MeshVertexFrame::Flags::HasNormals);
+					for(auto i = decltype(posAccessor.count) {0u}; i < posAccessor.count; ++i) {
+						auto pos = TransformPos(posBufData.GetIndexedValue<Vector3>(i));
+						mva->SetVertexPosition(i, pos);
+						if(normBufData) {
+							auto n = normBufData->GetIndexedValue<Vector3>(i);
+							mva->SetVertexNormal(i, n);
+						}
 					}
 				}
-				if(!isBeingUsed)
-					continue; // Skip this morph target if it's not actually doing anything
-
-				std::string morphTargetName;
-
-				if(gltfMesh.extras.Has("targetNames"))
-					morphTargetName = gltfMesh.extras.Get("targetNames").Get(targetIdx).Get<std::string>();
-				else
-					morphTargetName = std::to_string(absUnnamedFcIdx + targetIdx);
-
-				if(mdl->GetFlexController(morphTargetName) == nullptr) {
-					auto defaultWeight = (targetIdx < gltfMesh.weights.size()) ? gltfMesh.weights.at(targetIdx) : 0.f;
-					auto &fc = mdl->AddFlexController(morphTargetName);
-					fc.min = 0.f;
-					fc.max = 1.f;
-					// TODO: Apply default
-				}
-				uint32_t fcId = 0;
-				mdl->GetFlexControllerId(morphTargetName, fcId);
-
-				if(mdl->GetFlex(morphTargetName) == nullptr) {
-					auto &flex = mdl->AddFlex(morphTargetName);
-					auto va = mdl->AddVertexAnimation(morphTargetName);
-					flex.SetVertexAnimation(*va);
-
-					auto &operations = flex.GetOperations();
-					operations.push_back({});
-					auto &op = flex.GetOperations().back();
-					op.type = Flex::Operation::Type::Fetch;
-					op.d.index = fcId;
-				}
-				uint32_t flexId;
-				mdl->GetFlexId(morphTargetName, flexId);
-				auto &va = *mdl->GetFlex(flexId)->GetVertexAnimation();
-
-				assert(posAccessor.count == numVerts);
-				auto mva = va.AddMeshFrame(*mesh, *subMesh);
-				mva->SetVertexCount(numVerts);
-				if(normBufData)
-					mva->SetFlagEnabled(MeshVertexFrame::Flags::HasNormals);
-				for(auto i = decltype(posAccessor.count) {0u}; i < posAccessor.count; ++i) {
-					auto pos = TransformPos(posBufData.GetIndexedValue<Vector3>(i));
-					mva->SetVertexPosition(i, pos);
-					if(normBufData) {
-						auto n = normBufData->GetIndexedValue<Vector3>(i);
-						mva->SetVertexNormal(i, n);
-					}
-				}
+				//idxBuf.
+				//primitive.indices
+				//primitive.mode
+				mesh->AddSubMesh(subMesh);
 			}
-			//idxBuf.
-			//primitive.indices
-			//primitive.mode
-			mesh->AddSubMesh(subMesh);
+			if(gltfMesh.primitives.empty() == false)
+				absUnnamedFcIdx += gltfMesh.primitives.front().targets.size(); // All primitives have same number of targets
+			meshGroup->AddMesh(mesh);
+			auto &bg = mdl->AddBodyGroup(name);
+			bg.meshGroups.push_back(meshGroupId);
+			++meshIdx;
 		}
-		if(gltfMesh.primitives.empty() == false)
-			absUnnamedFcIdx += gltfMesh.primitives.front().targets.size(); // All primitives have same number of targets
-		meshGroup->AddMesh(mesh);
-		auto &bg = mdl->AddBodyGroup(name);
-		bg.meshGroups.push_back(meshGroupId);
-		++meshIdx;
 	}
 
 	std::unordered_map<tinygltf::Node *, uint32_t> nodeToBoneIndex;
@@ -1121,11 +1164,211 @@ static std::shared_ptr<Model> import_model(ufile::IFile *optFile, const std::str
 #endif
 
 	mdl->Update(ModelUpdateFlags::All);
-	mdl->Save(*c_game, ::util::CONVERT_PATH + pragma::asset::get_asset_root_directory(pragma::asset::Type::Model) + std::string {"/"} + outputPath.GetString() + mdlName, err);
-	return mdl;
+
+	OutputData outputData {};
+	auto relFileName = outputPath + mdlName;
+	auto mdlWritePath = ::util::CONVERT_PATH + pragma::asset::get_asset_root_directory(pragma::asset::Type::Model) + std::string {"/"} + outputPath.GetString();
+	if(importAsMap) {
+		std::unordered_set<std::string> materialMap;
+		struct PropInfo {
+			std::string name;
+			std::string modelName;
+			umath::ScaledTransform pose;
+		};
+		std::vector<PropInfo> props;
+		auto &meshGroups = mdl->GetMeshGroups();
+		props.reserve(meshGroups.size());
+		outputData.models.reserve(meshGroups.size());
+		for(auto it = meshGroups.begin(); it != meshGroups.end(); ++it) {
+			auto &meshGroup = *it;
+			auto cpy = mdl->Copy(c_game);
+			auto &cpyMeshGroups = cpy->GetMeshGroups();
+			auto idx = it - meshGroups.begin();
+			assert(idx >= 0 && idx < meshGroups.size());
+			cpyMeshGroups = {meshGroups[idx]};
+
+			auto &bodyGroups = cpy->GetBodyGroups();
+			bodyGroups.clear();
+			cpy->AddBodyGroup(meshGroups[idx]->GetName());
+
+			cpy->RemoveUnusedMaterialReferences();
+			cpy->Update();
+
+			auto subMdlName = meshGroup->GetName();
+			ustring::replace(subMdlName, " ", "_");
+			ustring::replace(subMdlName, ".", "_");
+			ustring::to_lower(subMdlName);
+			cpy->Save(*c_game, mdlWritePath + subMdlName, err);
+			outputData.models.push_back((outputPath + subMdlName).GetString());
+
+			auto &mats = cpy->GetMaterials();
+			for(auto &mat : mats) {
+				if(!mat)
+					continue;
+				materialMap.insert(mat->GetName());
+			}
+
+			auto itInstances = meshInstances.find(meshGroup.get());
+			if(itInstances != meshInstances.end()) {
+				for(auto &instanceInfo : itInstances->second) {
+					props.push_back({});
+					auto mdlName = outputPath + subMdlName;
+					auto &propInfo = props.back();
+					propInfo.modelName = mdlName.GetString();
+					propInfo.name = instanceInfo.name;
+					propInfo.pose = instanceInfo.pose;
+				}
+			}
+		}
+
+		auto worldData = pragma::asset::WorldData::Create(*client);
+		auto &materials = worldData->GetMaterialTable();
+		materials.reserve(materialMap.size());
+		for(auto &mat : materialMap)
+			materials.push_back(mat);
+
+		uint32_t hashIdx = 0;
+		auto createEntity = [&relFileName, &hashIdx](const umath::ScaledTransform &pose, bool includeScale = true) -> std::shared_ptr<pragma::asset::EntityData> {
+			auto baseHash = std::hash<std::string> {}(relFileName.GetString() + "_" + std::to_string(hashIdx++));
+			auto ent = pragma::asset::EntityData::Create();
+			ent->SetPose(pose);
+			return ent;
+		};
+
+		for(auto i = decltype(props.size()) {0u}; i < props.size(); ++i) {
+			auto &propInfo = props[i];
+
+			auto ent = createEntity(propInfo.pose);
+			ent->SetClassName("prop_dynamic");
+			ent->SetKeyValue("model", propInfo.modelName);
+			ent->SetKeyValue("name", propInfo.name);
+			worldData->AddEntity(*ent);
+		}
+
+		for(auto &node : gltfMdl.nodes) {
+			auto itExt = node.extensions.find("KHR_lights_punctual");
+			if(itExt == node.extensions.end())
+				continue;
+			auto &extLight = itExt->second.Get("light");
+			if(extLight.IsInt() == false)
+				continue;
+			auto lightSourceIndex = extLight.GetNumberAsInt();
+			if(lightSourceIndex < 0 || lightSourceIndex >= gltfMdl.lights.size())
+				continue;
+			auto &light = gltfMdl.lights[lightSourceIndex];
+			auto pose = getNodePose(node);
+			auto color = light.color;
+			color.resize(3);
+			auto ent = createEntity(pose, false);
+			// TODO: Some of these probably have to be converted
+			ent->SetKeyValue("color", std::to_string(color[0]) + " " + std::to_string(color[1]) + " " + std::to_string(color[2]));
+			ent->SetKeyValue("intensity", std::to_string(light.intensity));
+			if(!node.name.empty())
+				ent->SetKeyValue("name", node.name);
+			if(light.type == "spot") {
+				ent->SetClassName("env_light_spot");
+
+				ent->SetKeyValue("radius", std::to_string(light.range));
+				ent->SetKeyValue("outerCutoff", std::to_string(light.spot.outerConeAngle));
+
+				auto blendFraction = pragma::BaseEnvLightSpotComponent::CalcBlendFraction(light.spot.outerConeAngle, light.spot.innerConeAngle);
+				ent->SetKeyValue("blendFraction", std::to_string(blendFraction));
+
+				worldData->AddEntity(*ent);
+			}
+			else if(light.type == "point") {
+				ent->SetClassName("env_light_point");
+				ent->SetKeyValue("radius", std::to_string(light.range));
+			}
+			else if(light.type == "directional")
+				;
+			else
+				continue; // Unknown light type
+			worldData->AddEntity(*ent);
+		}
+
+		for(auto &node : gltfMdl.nodes) {
+			if(node.camera < 0 || node.camera >= gltfMdl.cameras.size())
+				continue;
+			auto &cam = gltfMdl.cameras[node.camera];
+			if(cam.type != "perspective")
+				continue; // orthographic currently not supported
+			auto pose = getNodePose(node);
+			auto ent = createEntity(pose, false);
+			ent->SetClassName("env_camera");
+
+			ent->SetKeyValue("fov", std::to_string(umath::rad_to_deg(cam.perspective.yfov)));
+			ent->SetKeyValue("farz", std::to_string(util::pragma::metres_to_units(cam.perspective.znear)));
+			ent->SetKeyValue("nearz", std::to_string(util::pragma::metres_to_units(cam.perspective.zfar)));
+			ent->SetKeyValue("aspectRatio", std::to_string(cam.perspective.aspectRatio));
+
+			worldData->AddEntity(*ent);
+		}
+
+		auto mapWritePath = ::util::CONVERT_PATH + pragma::asset::get_asset_root_directory(pragma::asset::Type::Map) + std::string {"/"} + relFileName.GetString();
+
+		auto udmData = udm::Data::Create();
+		auto assetData = udmData->GetAssetData();
+		std::string errMsg;
+		auto res = worldData->Save(assetData, ufile::get_file_from_filename(mapWritePath), errMsg);
+		if(!res) {
+			err = "Failed to save map data '" + mapWritePath + "': " + errMsg;
+			return {};
+		}
+		auto ext = pragma::asset::get_udm_format_extension(pragma::asset::Type::Map, true);
+		assert(ext.has_value());
+		mapWritePath += "." + *ext;
+		filemanager::create_path(ufile::get_path_from_filename(mapWritePath));
+		try {
+			res = udmData->Save(mapWritePath);
+		}
+		catch(const udm::Exception &e) {
+			err = "Failed to save map file '" + mapWritePath + "': " + std::string {e.what()};
+		}
+		if(!res && err.empty())
+			err = "Failed to save map file '" + mapWritePath + "': Unknown error";
+		outputData.mapName = relFileName.GetString();
+		return outputData;
+	}
+
+	mdl->Save(*c_game, mdlWritePath + mdlName, err);
+	outputData.model = mdl;
+	return outputData;
 }
-std::shared_ptr<Model> pragma::asset::import_model(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath) { return ::import_model(&f, "", outErrMsg, outputPath); }
-std::shared_ptr<Model> pragma::asset::import_model(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath) { return ::import_model(nullptr, fileName, outErrMsg, outputPath); }
+std::shared_ptr<Model> pragma::asset::import_model(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
+{
+	auto data = ::import_model(&f, "", outErrMsg, outputPath, !importAsSingleModel);
+	if(!data)
+		return nullptr;
+	return data->model;
+}
+std::shared_ptr<Model> pragma::asset::import_model(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
+{
+	auto data = ::import_model(nullptr, fileName, outErrMsg, outputPath, !importAsSingleModel);
+	if(!data)
+		return nullptr;
+	return data->model;
+}
+std::optional<pragma::asset::GltfImportInfo> pragma::asset::import_gltf(ufile::IFile &f, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
+{
+	auto data = ::import_model(&f, "", outErrMsg, outputPath, !importAsSingleModel);
+	if(!data)
+		return {};
+	GltfImportInfo importInfo {};
+	importInfo.models = std::move(data->models);
+	importInfo.mapName = std::move(data->mapName);
+	return importInfo;
+}
+std::optional<pragma::asset::GltfImportInfo> pragma::asset::import_gltf(const std::string &fileName, std::string &outErrMsg, const util::Path &outputPath, bool importAsSingleModel)
+{
+	auto data = ::import_model(nullptr, fileName, outErrMsg, outputPath, !importAsSingleModel);
+	if(!data)
+		return {};
+	GltfImportInfo importInfo {};
+	importInfo.models = std::move(data->models);
+	importInfo.mapName = std::move(data->mapName);
+	return importInfo;
+}
 
 bool pragma::asset::import_texture(const std::string &fileName, const TextureImportInfo &texInfo, const std::string &outputPath, std::string &outErrMsg)
 {
@@ -1313,7 +1556,7 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 				sceneDesc.modelCollection.reserve(sceneDesc.modelCollection.size() * 1.5 + 100);
 			sceneDesc.modelCollection.push_back({*mdl});
 			auto &mdlDesc = sceneDesc.modelCollection.back();
-			mdlDesc.pose = ent->GetPose();
+			mdlDesc.pose = ent->GetEffectivePose();
 		}
 		else if(ent->GetClassName() == "env_light_spot" || ent->GetClassName() == "env_light_point" || ent->GetClassName() == "env_light_environment") {
 			if(mapExp.has_value() && mapExp->includeMapLightSources == false)
@@ -1322,7 +1565,7 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 			auto &ls = sceneDesc.lightSources.back();
 
 			ls.name = ent->GetKeyValue("name", ent->GetClassName() + '_' + std::to_string(ent->GetMapIndex()));
-			ls.pose = ent->GetPose();
+			ls.pose = ent->GetEffectivePose();
 
 			auto color = ent->GetKeyValue("color");
 			if(color.has_value() == false)

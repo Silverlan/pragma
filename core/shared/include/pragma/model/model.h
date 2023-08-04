@@ -22,6 +22,7 @@
 #include "pragma/model/model_flexes.hpp"
 #include "pragma/physics/ik/ik_controller.hpp"
 #include "pragma/phonememap.hpp"
+#include "pragma/game/game_coordinate_system.hpp"
 #include <udm_types.hpp>
 #include <sharedutils/def_handle.h>
 #include <memory>
@@ -171,6 +172,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 		Unused4 = Unused3 << 1u,
 		Unused5 = Unused4 << 1u,
 		DontPrecacheTextureGroups = Unused5 << 1u,
+		WorldGeometry = DontPrecacheTextureGroups << 1u,
 
 		Count = 8
 	};
@@ -465,6 +467,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	void SetReference(std::shared_ptr<Frame> frame);
 	const Frame &GetReference() const;
 	Frame &GetReference();
+	bool SetReferencePoses(const std::vector<umath::ScaledTransform> &poses,bool posesInParentSpace=false);
 	void Rotate(const Quat &rot);
 	void Translate(const Vector3 &t);
 	void Scale(const Vector3 &scale);
@@ -498,6 +501,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	util::WeakHandle<const Model> GetHandle() const;
 	util::WeakHandle<Model> GetHandle();
 
+	void RemoveUnusedMaterialReferences();
 	void ClipAgainstPlane(const Vector3 &n, double d, Model &mdlA, Model &mdlB, const std::vector<Mat4> *boneMatrices = nullptr);
 
 	std::vector<std::shared_ptr<FlexAnimation>> &GetFlexAnimations() { return m_flexAnimations; }
@@ -509,6 +513,11 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	FlexAnimation *GetFlexAnimation(uint32_t idx);
 	const FlexAnimation *GetFlexAnimation(uint32_t idx) const { return const_cast<Model *>(this)->GetFlexAnimation(idx); }
 	const std::string *GetFlexAnimationName(uint32_t idx) const;
+
+	std::optional<umath::ScaledTransform> GetReferenceBonePose(BoneId boneId) const;
+	std::optional<pragma::SignedAxis> FindBoneTwistAxis(BoneId boneId) const;
+	std::optional<pragma::SignedAxis> FindBoneAxisForDirection(BoneId boneId,const Vector3 &dir) const;
+	static Quat GetTwistAxisRotationOffset(pragma::SignedAxis axis);
   protected:
 	Model(NetworkState *nw, uint32_t numBones, const std::string &name = "");
 	Model(const Model &other);

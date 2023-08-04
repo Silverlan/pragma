@@ -514,29 +514,6 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 			c_game->StopProfilingStage(CGame::GPUProfilingPhase::Debug);
 		}
 
-		// TODO: Remove water pass entirely
-#if 0
-		if((drawSceneInfo.renderFlags &FRender::Water) != FRender::None)
-		{
-			c_game->StartProfilingStage(CGame::GPUProfilingPhase::Water);
-			InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_WATER,evDataLightingStage);
-
-			auto numShaderInvocations = rsys.Render(*sceneRenderDesc.GetRenderQueue(pragma::rendering::SceneRenderPass::Water,false /* translucent */),lightingStageStats);
-
-			if(numShaderInvocations > 0)
-			{
-				//auto &prepass = scene->GetPrepass(); // prosper TODO
-				// Note: The texture buffer was probably already resolved at this point (e.g. by particle render pass), however
-				// we will need the water depth values for the upcoming render passes as well, so we'll have to resolve again.
-				// To do that, we'll reset the MSAA texture, so at the next resolve-call it will update accordingly.
-				//prepass.textureDepth->Reset(); // prosper TODO
-				//prepass.textureDepth->Resolve(); // prosper TODO
-			}
-			InvokeEventCallbacks(EVENT_MT_END_RECORD_WATER,evDataLightingStage);
-			c_game->StopProfilingStage(CGame::GPUProfilingPhase::Water);
-		}
-#endif
-
 		if((drawSceneInfo.renderFlags & RenderFlags::View) != RenderFlags::None) {
 			c_game->StartProfilingStage(CGame::GPUProfilingPhase::View);
 			InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_VIEW, evDataLightingStage);

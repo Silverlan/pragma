@@ -54,7 +54,7 @@ namespace panima {
 	using AnimationId = uint32_t;
 	using AnimationChannelId = uint16_t;
 	class Animation;
-	class Channel;
+	struct Channel;
 	class Manager;
 	class Player;
 	class Pose;

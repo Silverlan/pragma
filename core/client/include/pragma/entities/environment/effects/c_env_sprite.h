@@ -30,9 +30,11 @@ namespace pragma {
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override { return true; }
 		virtual void OnEntitySpawn() override;
+		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 
 		void StopAndRemoveEntity();
 	  protected:
+		void UpdateColor();
 		ComponentHandle<CParticleSystemComponent> m_hParticle = {};
 		CallbackHandle m_hCbRenderCallback;
 		CParticleSystemComponent::OrientationType m_orientationType = CParticleSystemComponent::OrientationType::Aligned;

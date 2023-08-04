@@ -6,4 +6,4 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 ]]
 
-ents.register("impostor",{"impostor"},Entity.TYPE_SHARED)
+ents.register("impostor", { "impostor" }, Entity.TYPE_SHARED)

@@ -56,6 +56,7 @@ namespace msys {
 class ResourceWatcherManager;
 class ALSound;
 enum class ALSoundType : int32_t;
+enum class NwStateType : uint8_t;
 namespace Lua {
 	enum class ErrorColorMode : uint32_t;
 	class Interface;
@@ -87,6 +88,8 @@ class DLLNETWORK NetworkState : public CallbackHandler, public CVarHandler {
 	void TerminateLuaModules(lua_State *l);
 	void DeregisterLuaModules(void *l, const std::string &identifier);
 	virtual bool ShouldRemoveSound(ALSound &snd);
+
+	virtual NwStateType GetType() const = 0;
 
 	// Assets
 	const pragma::asset::ModelManager &GetModelManager() const;
@@ -126,6 +129,7 @@ class DLLNETWORK NetworkState : public CallbackHandler, public CVarHandler {
 
 	void InitializeLuaModules(lua_State *l);
 	virtual std::shared_ptr<util::Library> InitializeLibrary(std::string library, std::string *err = nullptr, lua_State *l = nullptr);
+	bool UnloadLibrary(const std::string &library);
 	std::shared_ptr<util::Library> LoadLibraryModule(const std::string &lib, const std::vector<std::string> &additionalSearchDirectories = {}, std::string *err = nullptr);
 	std::shared_ptr<util::Library> GetLibraryModule(const std::string &lib) const;
 
@@ -184,7 +188,7 @@ class DLLNETWORK NetworkState : public CallbackHandler, public CVarHandler {
 
 	void CallOnNextTick(const std::function<void()> &f);
 
-	ConVar *CreateConVar(const std::string &scmd, const std::string &value, ConVarFlags flags, const std::string &help = "");
+	ConVar *CreateConVar(const std::string &scmd, udm::Type type, const std::string &value, ConVarFlags flags, const std::string &help = "");
 	ConVar *RegisterConVar(const std::string &scmd, const std::shared_ptr<ConVar> &cvar);
 	virtual ConCommand *CreateConCommand(const std::string &scmd, LuaFunction fc, ConVarFlags flags = ConVarFlags::None, const std::string &help = "");
   protected:

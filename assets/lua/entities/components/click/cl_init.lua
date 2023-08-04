@@ -1,24 +1,27 @@
-util.register_class("ents.ClickComponent",BaseEntityComponent)
-ents.ClickComponent:RegisterMember("Priority",udm.TYPE_UINT32,0,{},ents.BaseEntityComponent.MEMBER_FLAG_DEFAULT)
+util.register_class("ents.ClickComponent", BaseEntityComponent)
+ents.ClickComponent:RegisterMember("Priority", udm.TYPE_UINT32, 0, {}, ents.BaseEntityComponent.MEMBER_FLAG_DEFAULT)
 
 local numClickComponents = 0
 local cbClick
 function ents.ClickComponent:Initialize()
 	BaseEntityComponent.Initialize(self)
-	if(numClickComponents == 0) then
+	if numClickComponents == 0 then
 		local pl = ents.get_local_player()
-		if(pl ~= nil) then
-			cbClick = pl:AddEventCallback(ents.PlayerComponent.EVENT_HANDLE_ACTION_INPUT,function(action,pressed,magnitude)
-				local handled = ents.ClickComponent.inject_click_input(action,pressed)
-				return handled
-			end)
+		if pl ~= nil then
+			cbClick = pl:AddEventCallback(
+				ents.PlayerComponent.EVENT_HANDLE_ACTION_INPUT,
+				function(action, pressed, magnitude)
+					local handled = ents.ClickComponent.inject_click_input(action, pressed)
+					return handled
+				end
+			)
 		end
 	end
-	numClickComponents = numClickComponents +1
+	numClickComponents = numClickComponents + 1
 end
 local function get_viewport_data(vp)
 	local vpData = {}
-	if(vp ~= nil) then
+	if vp ~= nil then
 		local absPos = vp:GetAbsolutePos()
 		vpData.width = vp:GetWidth()
 		vpData.height = vp:GetHeight()
@@ -31,30 +34,34 @@ local function get_viewport_data(vp)
 	end
 	local cursorPos = input.get_cursor_pos()
 	-- Check if element under cursor is a viewport
-	local elFocus = gui.get_element_under_cursor(function(el) return el:GetClass() == "wiviewport" end)
-	if(util.is_valid(elFocus)) then
+	local elFocus = gui.get_element_under_cursor(function(el)
+		return el:GetClass() == "wiviewport"
+	end)
+	if util.is_valid(elFocus) then
 		local viewport
-		if(elFocus:GetClass() == "wiviewport") then viewport = elFocus
+		if elFocus:GetClass() == "wiviewport" then
+			viewport = elFocus
 		else
 			-- Check if the focused element has a viewport
-			for vp,_ in pairs(gui.WIViewport.get_viewports()) do
-				if(vp:IsValid() and vp:IsVisible() and vp:IsDescendantOf(elFocus)) then
-					if(viewport == nil) then viewport = vp
+			for vp, _ in pairs(gui.WIViewport.get_viewports()) do
+				if vp:IsValid() and vp:IsVisible() and vp:IsDescendantOf(elFocus) then
+					if viewport == nil then
+						viewport = vp
 					else
 						-- Found more than one viewport; Pick the closest one to the mouse cursor
 						local pos0 = viewport:GetAbsolutePos()
-						local d0 = geometry.closest_point_on_aabb_to_point(pos0,pos0 +viewport:GetSize(),cursorPos)
+						local d0 = geometry.closest_point_on_aabb_to_point(pos0, pos0 + viewport:GetSize(), cursorPos)
 
 						local pos1 = vp:GetAbsolutePos()
-						local d1 = geometry.closest_point_on_aabb_to_point(pos1,pos1 +vp:GetSize(),cursorPos)
-						if(d1 < d0) then -- Viewport is closer
+						local d1 = geometry.closest_point_on_aabb_to_point(pos1, pos1 + vp:GetSize(), cursorPos)
+						if d1 < d0 then -- Viewport is closer
 							viewport = vp
 						end
 					end
 				end
 			end
 		end
-		if(viewport ~= nil) then
+		if viewport ~= nil then
 			-- Found viewport! Using viewport as base for click input
 			local absPos = viewport:GetAbsolutePos()
 			vpData.width = viewport:GetWidth()
@@ -80,63 +87,96 @@ local function get_viewport_data(vp)
 	return vpData
 end
 local lastActorsClicked = {}
-function ents.ClickComponent.inject_click_input(action,pressed,filter)
-	if(action ~= input.ACTION_ATTACK and action ~= input.ACTION_ATTACK2) then return util.EVENT_REPLY_UNHANDLED end
-	if(util.is_valid(lastActorsClicked[action])) then
+function ents.ClickComponent.inject_click_input(action, pressed, filter)
+	if action ~= input.ACTION_ATTACK and action ~= input.ACTION_ATTACK2 then
+		return util.EVENT_REPLY_UNHANDLED
+	end
+	if util.is_valid(lastActorsClicked[action]) then
 		local actor = lastActorsClicked[action]
 		lastActorsClicked[action] = nil
-		local handled = actor:BroadcastEvent(ents.ClickComponent.EVENT_ON_CLICK,{action,false})
-		if(pressed == false and handled == util.EVENT_REPLY_HANDLED) then return handled end
+		local handled = actor:BroadcastEvent(ents.ClickComponent.EVENT_ON_CLICK, { action, false })
+		if pressed == false and handled == util.EVENT_REPLY_HANDLED then
+			return handled
+		end
 	end
-	if(pressed == false) then return util.EVENT_REPLY_UNHANDLED end
-	local clickActor,hitPos,startPos,hitData = ents.ClickComponent.find_actor_under_cursor(filter)
+	if pressed == false then
+		return util.EVENT_REPLY_UNHANDLED
+	end
+	local clickActor, hitPos, startPos, hitData = ents.ClickComponent.find_actor_under_cursor(filter)
 	local clickC = (clickActor ~= nil) and clickActor:GetComponent(ents.COMPONENT_CLICK) or nil
-	if(clickC ~= nil) then
+	if clickC ~= nil then
 		lastActorsClicked[action] = clickC
-		return (clickC:BroadcastEvent(ents.ClickComponent.EVENT_ON_CLICK,{action,true,hitPos}) or util.EVENT_REPLY_UNHANDLED),clickActor,hitPos,startPos,hitData
+		return (
+			clickC:BroadcastEvent(ents.ClickComponent.EVENT_ON_CLICK, { action, true, hitPos, hitData })
+			or util.EVENT_REPLY_UNHANDLED
+		),
+			clickActor,
+			hitPos,
+			startPos,
+			hitData
 	end
-	return util.EVENT_REPLY_UNHANDLED,clickActor,hitPos,startPos,hitData
+	return util.EVENT_REPLY_UNHANDLED, clickActor, hitPos, startPos, hitData
 end
-function ents.ClickComponent.world_space_point_to_screen_space_uv(point,callback,vpData)
+function ents.ClickComponent.world_space_point_to_screen_space_uv(point, callback, vpData)
 	vpData = vpData or get_viewport_data()
 
 	local cam = vpData.camera
-	if(util.is_valid(cam) == false) then return end
-	if(callback ~= nil) then callback(vpData,cam) end
+	if util.is_valid(cam) == false then
+		return
+	end
+	if callback ~= nil then
+		callback(vpData, cam)
+	end
 	return cam:WorldSpaceToScreenSpace(point)
 end
 function ents.ClickComponent.get_ray_data(callback)
 	local vpData = get_viewport_data()
 
 	local cam = vpData.camera
-	if(util.is_valid(cam) == false) then return end
-	if(callback ~= nil) then callback(vpData,cam) end
-	local uv = Vector2(vpData.cursorPos.x /vpData.width,vpData.cursorPos.y /vpData.height)
+	if util.is_valid(cam) == false then
+		return
+	end
+	if callback ~= nil then
+		callback(vpData, cam)
+	end
+	local uv = Vector2(vpData.cursorPos.x / vpData.width, vpData.cursorPos.y / vpData.height)
 	local dir = cam:CalcRayDirection(uv)
-	return cam:GetPlanePoint(cam:GetNearZ(),uv),dir,vpData
+	return cam:GetPlanePoint(cam:GetNearZ(), uv), dir, vpData
 end
 function ents.ClickComponent.get_camera()
 	local vpData = get_viewport_data()
 	return vpData.camera
 end
-function ents.ClickComponent.get_viewport_data(vp) return get_viewport_data(vp) end
-local function get_local_planes(planes,ent)
+function ents.ClickComponent.get_viewport_data(vp)
+	return get_viewport_data(vp)
+end
+local function get_local_planes(planes, ent)
 	local pose = ent:GetPose():GetInverse()
 	local localPlanes = {}
-	for _,plane in ipairs(planes) do
-		table.insert(localPlanes,pose *plane)
+	for _, plane in ipairs(planes) do
+		table.insert(localPlanes, pose * plane)
 	end
 	return localPlanes
 end
-local function should_entity_pass(ent,entPl,filter)
+local function should_entity_pass(ent, entPl, filter)
 	local mdl = ent:GetModel()
 	local renderC = ent:GetComponent(ents.COMPONENT_RENDER)
-	return mdl ~= nil and ent ~= entPl and renderC ~= nil and renderC:GetSceneRenderPass() ~= game.SCENE_RENDER_PASS_VIEW and renderC:GetSceneRenderPass() ~= game.SCENE_RENDER_PASS_NONE and (filter == nil or filter(ent,renderC) == true) and
-		(ent:HasComponent(ents.COMPONENT_STATIC_BVH_USER) == false or ent:GetComponent(ents.COMPONENT_STATIC_BVH_USER):IsActive() == false)
+	return mdl ~= nil
+		and ent ~= entPl
+		and renderC ~= nil
+		and renderC:GetSceneRenderPass() ~= game.SCENE_RENDER_PASS_VIEW
+		and renderC:GetSceneRenderPass() ~= game.SCENE_RENDER_PASS_NONE
+		and (filter == nil or filter(ent, renderC) == true)
+		and (
+			ent:HasComponent(ents.COMPONENT_STATIC_BVH_USER) == false
+			or ent:GetComponent(ents.COMPONENT_STATIC_BVH_USER):IsActive() == false
+		)
 end
-function ents.ClickComponent.find_entities_in_kdop(planes,filter)
+function ents.ClickComponent.find_entities_in_kdop(planes, filter)
 	local pl = ents.get_local_player()
-	if(pl == nil) then return end
+	if pl == nil then
+		return
+	end
 	local entPl = pl:GetEntity()
 
 	debug.start_profiling_task("click_find_entities_in_kdop")
@@ -147,51 +187,62 @@ function ents.ClickComponent.find_entities_in_kdop(planes,filter)
 	local results = {}
 	local entToResultIdx = {}
 	local meshMap = {}
-	local function populate_results(c,indices)
-		for _,idx in ipairs(indices) do
-			local ent,subMesh = c:FindPrimitiveMeshInfo(idx)
-			if(ent ~= nil) then
+	local function populate_results(c, indices)
+		for _, idx in ipairs(indices) do
+			local ent, subMesh = c:FindPrimitiveMeshInfo(idx)
+			if ent ~= nil then
 				local idx = entToResultIdx[ent]
-				if(idx == nil) then
-					table.insert(results,{
+				if idx == nil then
+					table.insert(results, {
 						entity = ent,
-						meshes = {}
+						meshes = {},
 					})
 					entToResultIdx[ent] = #results
 					idx = #results
 				end
 				local uuid = tostring(subMesh:GetUuid())
-				if(meshMap[uuid] == nil) then
-					table.insert(results[idx].meshes,subMesh)
+				if meshMap[uuid] == nil then
+					table.insert(results[idx].meshes, subMesh)
 					meshMap[uuid] = true
 				end
 			end
 		end
 	end
-	for ent,c in ents.citerator(ents.COMPONENT_STATIC_BVH_CACHE) do
-		local localPlanes = get_local_planes(planes,ent)
-		local r,indices = c:IntersectionTestKDop(localPlanes,flags)
-		if(r ~= false) then
-			populate_results(c,indices)
+	for ent, c in ents.citerator(ents.COMPONENT_STATIC_BVH_CACHE) do
+		local localPlanes = get_local_planes(planes, ent)
+		local r, indices = c:IntersectionTestKDop(localPlanes, flags)
+		if r ~= false then
+			populate_results(c, indices)
 		end
 	end
 
-	for ent,c in ents.citerator(ents.COMPONENT_BVH,{ents.IteratorFilterComponent(ents.COMPONENT_CLICK),ents.IteratorFilterComponent(ents.COMPONENT_MODEL),ents.IteratorFilterComponent(ents.COMPONENT_RENDER)}) do
-		if(should_entity_pass(ent,entPl,filter)) then
-			local localPlanes = get_local_planes(planes,ent)
-			local r,indices = c:IntersectionTestKDop(localPlanes,flags)
-			if(r ~= false) then
-				populate_results(c,indices)
+	for ent, c in
+		ents.citerator(
+			ents.COMPONENT_BVH,
+			{
+				ents.IteratorFilterComponent(ents.COMPONENT_CLICK),
+				ents.IteratorFilterComponent(ents.COMPONENT_MODEL),
+				ents.IteratorFilterComponent(ents.COMPONENT_RENDER),
+			}
+		)
+	do
+		if should_entity_pass(ent, entPl, filter) then
+			local localPlanes = get_local_planes(planes, ent)
+			local r, indices = c:IntersectionTestKDop(localPlanes, flags)
+			if r ~= false then
+				populate_results(c, indices)
 			end
 		end
 	end
 	debug.stop_profiling_task()
 	return results
 end
-function ents.ClickComponent.raycast(pos,dir,filter,maxDist)
+function ents.ClickComponent.raycast(pos, dir, filter, maxDist)
 	maxDist = maxDist or 32768.0
 	local pl = ents.get_local_player()
-	if(pl == nil) then return end
+	if pl == nil then
+		return
+	end
 	local entPl = pl:GetEntity()
 	--[[local drawInfo = debug.DrawInfo()
 	drawInfo:SetDuration(12)
@@ -205,13 +256,13 @@ function ents.ClickComponent.raycast(pos,dir,filter,maxDist)
 	debug.start_profiling_task("click_component_picking")
 
 	-- Check static BVH caches
-	for ent,c in ents.citerator(ents.COMPONENT_STATIC_BVH_CACHE) do
-		local hitData = c:IntersectionTest(pos,dir,0.0,maxDist)
-		if(hitData ~= nil and (filter == nil or filter(hitData.entity))) then
-			if(hitData.distance < distClosest) then -- and hitData.distance > 0.0) then
+	for ent, c in ents.citerator(ents.COMPONENT_STATIC_BVH_CACHE) do
+		local hitData = c:IntersectionTest(pos, dir, 0.0, maxDist)
+		if hitData ~= nil and (filter == nil or filter(hitData.entity)) then
+			if hitData.distance < distClosest then -- and hitData.distance > 0.0) then
 				--debug.print("Clicked actor: ",hitData.entity)
 				distClosest = hitData.distance
-				hitPos = pos +dir *hitData.distance
+				hitPos = pos + dir * hitData.distance
 				actorClosest = hitData.entity
 				hitDataClosest = hitData
 			end
@@ -222,43 +273,43 @@ function ents.ClickComponent.raycast(pos,dir,filter,maxDist)
 	local function testEntity(ent)
 		local mdl = ent:GetModel()
 		local renderC = ent:GetComponent(ents.COMPONENT_RENDER)
-		if(should_entity_pass(ent,entPl,filter)) then
+		if should_entity_pass(ent, entPl, filter) then
 			local scale = ent:GetScale()
-			if(scale.x > 0.001 and scale.y > 0.001 and scale.z > 0.001) then
+			if scale.x > 0.001 and scale.y > 0.001 and scale.z > 0.001 then
 				local pose = ent:GetPose():GetInverse()
-				pose:SetScale(Vector(1,1,1))
+				pose:SetScale(Vector(1, 1, 1))
 
 				-- Move ray into entity space
-				local lpos = pose *pos
+				local lpos = pose * pos
 				local ldir = dir:Copy()
 				ldir:Rotate(pose:GetRotation())
-				
-				lpos = Vector(lpos.x /scale.x,lpos.y /scale.y,lpos.z /scale.z)
-				ldir = ldir *maxDist
-				ldir = Vector(ldir.x /scale.x,ldir.y /scale.y,ldir.z /scale.z)
+
+				lpos = Vector(lpos.x / scale.x, lpos.y / scale.y, lpos.z / scale.z)
+				ldir = ldir * maxDist
+				ldir = Vector(ldir.x / scale.x, ldir.y / scale.y, ldir.z / scale.z)
 				local lMaxDist = ldir:Length()
-				ldir = ldir /lMaxDist
+				ldir = ldir / lMaxDist
 
 				local bvhC = ent:GetComponent(ents.COMPONENT_BVH)
-				local hitData = bvhC:IntersectionTest(lpos,ldir,0.0,lMaxDist)
-				if(hitData ~= nil) then
+				local hitData = bvhC:IntersectionTest(lpos, ldir, 0.0, lMaxDist)
+				if hitData ~= nil then
 					local clickC = ent:GetComponent(ents.COMPONENT_CLICK)
 					local priority = (clickC ~= nil) and clickC:GetPriority() or 0
 					local hitDist = hitData.distance
 
-					if(math.abs(scale:LengthSqr() -1.0) > 0.001) then
+					if math.abs(scale:LengthSqr() - 1.0) > 0.001 then
 						-- Object is scaled; We have to calculate hit distance
 						-- for unscaled space
-						local lhitPos = lpos +ldir *hitDist
-						lhitPos = lhitPos *scale
-						lhitPos = pose:GetInverse() *lhitPos
-						local diff = lhitPos -pos
+						local lhitPos = lpos + ldir * hitDist
+						lhitPos = lhitPos * scale
+						lhitPos = pose:GetInverse() * lhitPos
+						local diff = lhitPos - pos
 						hitDist = diff:Length()
 					end
 
-					if(hitDist < distClosest or priority > priorityClosest) then -- and hitData.distance > 0.0) then
+					if hitDist < distClosest or priority > priorityClosest then -- and hitData.distance > 0.0) then
 						distClosest = hitDist
-						hitPos = pos +dir *hitDist
+						hitPos = pos + dir * hitDist
 						actorClosest = hitData.entity
 						hitDataClosest = hitData
 						priorityClosest = priority
@@ -280,7 +331,14 @@ function ents.ClickComponent.raycast(pos,dir,filter,maxDist)
 	end
 
 	local entCache = {}
-	for ent in ents.iterator({ents.IteratorFilterComponent(ents.COMPONENT_BVH),ents.IteratorFilterComponent(ents.COMPONENT_CLICK),ents.IteratorFilterComponent(ents.COMPONENT_MODEL),ents.IteratorFilterComponent(ents.COMPONENT_RENDER)}) do
+	for ent in
+		ents.iterator({
+			ents.IteratorFilterComponent(ents.COMPONENT_BVH),
+			ents.IteratorFilterComponent(ents.COMPONENT_CLICK),
+			ents.IteratorFilterComponent(ents.COMPONENT_MODEL),
+			ents.IteratorFilterComponent(ents.COMPONENT_RENDER),
+		})
+	do
 		entCache[ent:GetLocalIndex()] = true
 		testEntity(ent)
 	end
@@ -321,18 +379,22 @@ function ents.ClickComponent.raycast(pos,dir,filter,maxDist)
 		end
 	end]]
 	debug.stop_profiling_task()
-	return actorClosest,hitPos,pos,hitDataClosest
+	return actorClosest, hitPos, pos, hitDataClosest
 end
 function ents.ClickComponent.find_actor_under_cursor(filter)
-	local pos,dir = ents.ClickComponent.get_ray_data()
-	if(pos == nil) then return end
-	return ents.ClickComponent.raycast(pos,dir,filter)
+	local pos, dir = ents.ClickComponent.get_ray_data()
+	if pos == nil then
+		return
+	end
+	return ents.ClickComponent.raycast(pos, dir, filter)
 end
 function ents.ClickComponent:OnRemove()
-	numClickComponents = numClickComponents -1
-	if(numClickComponents == 0) then
-		if(util.is_valid(cbClick)) then cbClick:Remove() end
+	numClickComponents = numClickComponents - 1
+	if numClickComponents == 0 then
+		if util.is_valid(cbClick) then
+			cbClick:Remove()
+		end
 	end
 end
-ents.COMPONENT_CLICK = ents.register_component("click",ents.ClickComponent)
-ents.ClickComponent.EVENT_ON_CLICK = ents.register_component_event(ents.COMPONENT_CLICK,"on_clicked")
+ents.COMPONENT_CLICK = ents.register_component("click", ents.ClickComponent)
+ents.ClickComponent.EVENT_ON_CLICK = ents.register_component_event(ents.COMPONENT_CLICK, "on_clicked")

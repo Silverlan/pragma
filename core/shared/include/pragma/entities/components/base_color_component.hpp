@@ -8,14 +8,14 @@
 #define __BASE_COLOR_COMPONENT_HPP__
 
 #include "pragma/entities/components/base_entity_component.hpp"
-#include <sharedutils/property/util_property_color.hpp>
+#include <sharedutils/property/util_property_vector.h>
 
 namespace pragma {
 	struct DLLNETWORK CEOnColorChanged : public ComponentEvent {
-		CEOnColorChanged(const Color &oldColor, const Color &color);
+		CEOnColorChanged(const Vector4 &oldColor, const Vector4 &color);
 		virtual void PushArguments(lua_State *l) override;
-		const Color &oldColor;
-		const Color &color;
+		const Vector4 &oldColor;
+		const Vector4 &color;
 	};
 	class DLLNETWORK BaseColorComponent : public BaseEntityComponent {
 	  public:
@@ -23,8 +23,8 @@ namespace pragma {
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
-		const Color &GetColor() const;
-		const util::PColorProperty &GetColorProperty() const;
+		const Vector4 &GetColor() const;
+		const util::PVector4Property &GetColorProperty() const;
 
 		virtual ~BaseColorComponent() override;
 		void SetColor(const Color &color);
@@ -35,7 +35,7 @@ namespace pragma {
 	  protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 		BaseColorComponent(BaseEntity &ent);
-		util::PColorProperty m_color;
+		util::PVector4Property m_color;
 		CallbackHandle m_cbOnColorChanged = {};
 		pragma::NetEventId m_netEvSetColor = pragma::INVALID_NET_EVENT;
 	};

@@ -69,3 +69,29 @@ void Lua::initialize_lua_state(Lua::Interface &lua)
 		return 0;
 	});
 }
+
+static void dump_traceback(bool cl)
+{
+	auto *en = pragma::get_engine();
+	auto *state = en ? (cl ? en->GetClientState() : en->GetServerNetworkState()) : nullptr;
+	auto *g = cl ? state->GetGameState() : nullptr;
+	if(!g)
+		return;
+	Lua::PrintTraceback(g->GetLuaState());
+}
+static void dump_stack(bool cl)
+{
+	auto *en = pragma::get_engine();
+	auto *state = en ? (cl ? en->GetClientState() : en->GetServerNetworkState()) : nullptr;
+	auto *g = cl ? state->GetGameState() : nullptr;
+	if(!g)
+		return;
+	Lua::StackDump(g->GetLuaState());
+}
+namespace pragma::lua::debug {
+	// These are mainly used in the VS immediate window for debugging purposes
+	DLLNETWORK void dump_traceback_cl() { ::dump_traceback(true); }
+	DLLNETWORK void dump_traceback_sv() { ::dump_traceback(false); }
+	DLLNETWORK void dump_stack_cl() { ::dump_stack(true); }
+	DLLNETWORK void dump_stack_sv() { ::dump_stack(false); }
+};

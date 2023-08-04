@@ -61,9 +61,9 @@ void SGame::RegisterLua()
 	lua_setglobal(GetLuaState(), "CLIENT");
 
 	auto engineMod = luabind::module(GetLuaState(), "engine");
-	engineMod[luabind::def("shutdown", Lua::engine::exit), luabind::def("get_working_directory", Lua::engine::get_working_directory), luabind::def("set_record_console_output", Lua::engine::set_record_console_output), luabind::def("get_tick_count", Lua::engine::GetTickCount),
-	  luabind::def("load_library", Lua::engine::LoadLibrary), luabind::def("library_exists", Lua::engine::LibraryExists), luabind::def("get_info", Lua::engine::get_info), luabind::def("poll_console_output", Lua::engine::poll_console_output),
-	  luabind::def("get_git_info", Lua::engine::get_git_info)];
+	engineMod[luabind::def("load_library", Lua::engine::LoadLibrary), luabind::def("unload_library", Lua::engine::UnloadLibrary), luabind::def("is_library_loaded", Lua::engine::IsLibraryLoaded), luabind::def("library_exists", Lua::engine::LibraryExists),
+	  luabind::def("get_info", Lua::engine::get_info), luabind::def("poll_console_output", Lua::engine::poll_console_output)];
+	Lua::engine::register_shared_functions(GetLuaState(), engineMod);
 
 	Lua::RegisterLibrary(GetLuaState(), "game",
 	  {//{"create_light",Lua::engine::CreateLight},
@@ -71,7 +71,7 @@ void SGame::RegisterLua()
 	    //{"create_sprite",Lua::engine::CreateSprite},
 	    {"create_model", Lua::game::Server::create_model}, {"load_map", Lua::game::Server::load_map}});
 	auto gameMod = luabind::module(GetLuaState(), "game");
-	Lua::game::register_shared_functions(gameMod);
+	Lua::game::register_shared_functions(GetLuaState(), gameMod);
 	gameMod[luabind::def("change_map", static_cast<void (*)(const std::string &, const std::string &)>(Lua::game::Server::change_level)), luabind::def("change_map", static_cast<void (*)(const std::string &)>(Lua::game::Server::change_level)),
 	  luabind::def("set_gravity", Lua::game::Server::set_gravity), luabind::def("get_gravity", Lua::game::Server::get_gravity), luabind::def("load_model", Lua::game::Server::load_model),
 	  luabind::def("load_sound_scripts", static_cast<void (*)(lua_State *, const std::string &, bool)>(Lua::engine::LoadSoundScripts)), luabind::def("load_sound_scripts", static_cast<void (*)(lua_State *, const std::string &)>(Lua::engine::LoadSoundScripts)),

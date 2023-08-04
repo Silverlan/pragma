@@ -6,8 +6,8 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 ]]
 
-local Shader = util.register_class("shader.ExampleSimpleGameShader",shader.BaseTexturedLit3D)
+local Shader = util.register_class("shader.ExampleSimpleGameShader", shader.BaseTexturedLit3D)
 
 Shader.FragmentShader = "examples/fs_example_simple_game_shader"
 Shader.VertexShader = "world/vs_textured"
-shader.register("example_simple_game_shader",Shader)
+shader.register("example_simple_game_shader", Shader)

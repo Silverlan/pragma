@@ -58,6 +58,7 @@ class DLLCLIENT SceneRenderDesc {
 		View,
 		ViewTranslucent,
 		Water,
+		Glow,
 
 		Count,
 		Invalid = std::numeric_limits<uint8_t>::max()

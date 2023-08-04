@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar_global_functions.h"
+#include "pragma/gui/wgui_luainterface.h"
 #include <util_image.hpp>
 #include <wgui/types/witext.h>
 #include <wgui/types/wirect.h>
@@ -221,6 +222,16 @@ void GUIDebugCursorManager::SetTargetGUIElement(WIBase *optEl, bool clear)
 	if(pText) {
 		pText->SetText(GetElementInfo(el));
 		Con::cout << pText->GetText().cpp_str() << Con::endl;
+	}
+
+	auto *l = c_game->GetLuaState();
+	if(l) {
+		// Assign element to global 'debug_ui_element' Lua variable
+		auto o = WGUILuaInterface::GetLuaObject(l, el);
+		if(o)
+			luabind::globals(l)["debug_ui_element"] = o;
+		else
+			luabind::globals(l)["debug_ui_element"] = Lua::nil;
 	}
 
 	// Initialize border to highlight the element

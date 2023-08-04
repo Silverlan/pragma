@@ -13,7 +13,7 @@
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/rendering/shaders/post_processing/c_shader_glow.hpp"
+#include "pragma/rendering/shaders/post_processing/c_shader_pp_glow.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fxaa.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
@@ -41,8 +41,7 @@ extern DLLCLIENT CGame *c_game;
 
 using namespace pragma::rendering;
 
-void pragma::CRasterizationRendererComponent::RecordRenderParticleSystems(prosper::ICommandBuffer &cmd, const util::DrawSceneInfo &drawSceneInfo, std::vector<pragma::CParticleSystemComponent *> &particles, pragma::rendering::SceneRenderPass renderMode, bool depthPass, Bool bloom,
-  std::vector<pragma::CParticleSystemComponent *> *bloomParticles)
+void pragma::CRasterizationRendererComponent::RecordRenderParticleSystems(prosper::ICommandBuffer &cmd, const util::DrawSceneInfo &drawSceneInfo, const std::vector<pragma::CParticleSystemComponent *> &particles, pragma::rendering::SceneRenderPass renderMode, bool depthPass, Bool bloom)
 {
 	auto depthOnly = umath::is_flag_set(drawSceneInfo.renderFlags, RenderFlags::ParticleDepth);
 	if((depthOnly && bloom) || drawSceneInfo.scene.expired())
@@ -51,48 +50,11 @@ void pragma::CRasterizationRendererComponent::RecordRenderParticleSystems(prospe
 	auto renderFlags = ParticleRenderFlags::None;
 	umath::set_flag(renderFlags, ParticleRenderFlags::DepthOnly, depthOnly || depthPass);
 	umath::set_flag(renderFlags, ParticleRenderFlags::Bloom, bloom);
-	auto bFirst = true;
 	for(auto *particle : particles) {
 		if(particle != nullptr && particle->IsActive() == true && particle->GetSceneRenderPass() == renderMode && particle->GetParent() == nullptr) {
-			if(bFirst == true) {
-				bFirst = false;
-
-				// We need to end the current render pass, because we need the depth buffer with everything
-				// that has been rendered thus far.
-#if 0
-				EndRenderPass(drawSceneInfo);
-
-				auto &hdrInfo = GetHDRInfo();
-				auto &prepass = GetPrepass();
-				if(prepass.textureDepth->IsMSAATexture())
-				{
-					auto &msaaTex = static_cast<prosper::MSAATexture&>(*prepass.textureDepth);
-					msaaTex.Resolve(
-						cmd,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal,
-						prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal
-					); // Particles aren't multisampled, but requires scene depth buffer
-					msaaTex.Reset(); // Depth buffer isn't complete yet; We need to reset, otherwise the next resolve will not update it properly
-				}
-				//else
-				//	.RecordImageBarrier(**drawCmd,**prepass.textureDepth->GetImage(),prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
-
-				// Restart render pass
-				BeginRenderPass(drawSceneInfo,hdrInfo.rpPostParticle.get());
-#endif
-			}
-			//scene->ResolveDepthTexture(drawCmd); // Particles aren't multisampled, but requires scene depth buffer
+			if(bloom && !particle->IsBloomEnabled())
+				continue;
 			particle->RecordRender(cmd, const_cast<pragma::CSceneComponent &>(scene), *this, renderFlags);
-			if(bloomParticles != nullptr) {
-				if(particle->IsBloomEnabled())
-					bloomParticles->push_back(particle);
-				auto &children = particle->GetChildren();
-				bloomParticles->reserve(bloomParticles->size() + children.size());
-				for(auto &hChild : children) {
-					if(hChild.child.expired())
-						continue;
-					bloomParticles->push_back(hChild.child.get());
-				}
-			}
 		}
 	}
 }
@@ -239,6 +201,8 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 	}
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::Scene);
 
+	c_game->CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostLightingPass", drawSceneInfo);
+
 	// Post processing
 	if(drawSceneInfo.renderStats) {
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpu, *drawSceneInfo.commandBuffer);
@@ -267,8 +231,6 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 		drawCmd->RecordImageBarrier(GetHDRInfo().sceneRenderTarget->GetTexture().GetImage(), prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferSrcOptimal);
 	}
 
-	// Glow
-	// RenderGlowObjects(drawSceneInfo);
 	c_game->CallCallbacks<void, std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing", drawSceneInfo);
 	c_game->CallLuaCallbacks<void, const util::DrawSceneInfo *>("RenderPostProcessing", &drawSceneInfo);
 

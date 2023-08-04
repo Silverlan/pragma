@@ -38,7 +38,7 @@ void CFogControllerComponent::OnEntityComponentAdded(BaseEntityComponent &compon
 {
 	BaseEnvFogControllerComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(CColorComponent)) {
-		static_cast<CColorComponent &>(component).GetColorProperty()->AddCallback([this](std::reference_wrapper<const Color> oldColor, std::reference_wrapper<const Color> color) { GetFog().SetColor(color); });
+		static_cast<CColorComponent &>(component).GetColorProperty()->AddCallback([this](std::reference_wrapper<const Vector4> oldColor, std::reference_wrapper<const Vector4> color) { GetFog().SetColor(Color {color}); });
 	}
 }
 void CFogControllerComponent::OnEntitySpawn()

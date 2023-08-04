@@ -6,7 +6,7 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 ]]
 
-util.register_class("ents.DebugModelMesh",BaseEntityComponent)
+util.register_class("ents.DebugModelMesh", BaseEntityComponent)
 local Component = ents.DebugModelMesh
 
 function Component:Initialize()
@@ -24,22 +24,24 @@ end
 function Component:UpdateDebugMesh()
 	util.remove(self.m_dbgObject)
 	local mdl = self:GetEntity():GetModel()
-	if(mdl == nil) then return end
+	if mdl == nil then
+		return
+	end
 	local dbgTris = {}
-	for _,meshGroup in ipairs(mdl:GetMeshGroups()) do
-		for _,mesh in ipairs(meshGroup:GetMeshes()) do
-			for _,subMesh in ipairs(mesh:GetSubMeshes()) do
+	for _, meshGroup in ipairs(mdl:GetMeshGroups()) do
+		for _, mesh in ipairs(meshGroup:GetMeshes()) do
+			for _, subMesh in ipairs(mesh:GetSubMeshes()) do
 				local verts = subMesh:GetVertices()
 				local tris = subMesh:GetIndices()
-				for _,idx in ipairs(tris) do
-					table.insert(dbgTris,verts[idx +1])
+				for _, idx in ipairs(tris) do
+					table.insert(dbgTris, verts[idx + 1])
 				end
 			end
 		end
 	end
 	local drawInfo = debug.DrawInfo()
-	drawInfo:SetColor(Color(255,0,0,64))
+	drawInfo:SetColor(Color(255, 0, 0, 64))
 	drawInfo:SetOutlineColor(Color.White)
-	self.m_dbgObject = debug.draw_mesh(dbgTris,drawInfo)
+	self.m_dbgObject = debug.draw_mesh(dbgTris, drawInfo)
 end
-ents.COMPONENT_DEBUG_MODEL_MESH = ents.register_component("debug_model_mesh",Component)
+ents.COMPONENT_DEBUG_MODEL_MESH = ents.register_component("debug_model_mesh", Component)

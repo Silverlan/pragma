@@ -9,6 +9,7 @@
 #include "pragma/networkstate/networkstate.h"
 #include "pragma/util/lookup_identifier.hpp"
 #include "pragma/entities/entity_iterator.hpp"
+#include "pragma/lua/libraries/lfile.h"
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_path.hpp>
 #include <fsys/ifile.hpp>
@@ -220,3 +221,164 @@ bool util::HairFile::LoadFromAssetData(const udm::AssetData &data, std::string &
 	udmData["barycentricCoords"].GetBlobData(m_hairData.hairPointBarycentric);
 	return true;
 }
+
+std::optional<std::string> util::convert_udm_file_to_ascii(const std::string &fileName, std::string &outErr)
+{
+	auto formatType = udm::Data::GetFormatType(fileName, outErr);
+	if(formatType.has_value() == false) {
+		outErr = "Unable to load UDM data: " + outErr;
+		return {};
+	}
+	if(*formatType == udm::FormatType::Ascii)
+		return fileName; // Already in ascii format
+	auto udmData = util::load_udm_asset(fileName, &outErr);
+	if(udmData == nullptr) {
+		outErr = "Unable to load UDM data: " + outErr;
+		return {};
+	}
+	std::string rpath;
+	if(FileManager::FindAbsolutePath(fileName, rpath) == false) {
+		outErr = "Unable to locate UDM file on disk!";
+		return {};
+	}
+	auto path = util::Path::CreateFile(rpath);
+	path.MakeRelative(util::get_program_path());
+	auto outFileName = path.GetString();
+	std::string ext;
+	ufile::get_extension(outFileName, &ext);
+	ufile::remove_extension_from_filename(outFileName);
+	if(ext.empty())
+		ext = "udm";
+	else if(ext.length() > 2) {
+		if(ext.at(ext.length() - 1) == 'b' && ext.at(ext.length() - 2) == '_')
+			ext = ext.substr(0, ext.length() - 2);
+	}
+	outFileName += '.' + ext;
+	auto res = true;
+	try {
+		res = udmData->SaveAscii(outFileName, udm::AsciiSaveFlags::IncludeHeader | udm::AsciiSaveFlags::DontCompressLz4Arrays);
+	}
+	catch(const udm::Exception &e) {
+		outErr = "Unable to save UDM data: " + std::string {e.what()};
+	}
+	if(!res)
+		return {};
+	filemanager::remove_file(fileName);
+	return Lua::file::to_relative_path(outFileName);
+}
+std::optional<std::string> util::convert_udm_file_to_binary(const std::string &fileName, std::string &outErr)
+{
+	auto formatType = udm::Data::GetFormatType(fileName, outErr);
+	if(formatType.has_value() == false) {
+		outErr = "Unable to load UDM data: " + outErr;
+		return {};
+	}
+	if(*formatType == udm::FormatType::Binary)
+		return fileName; // Already in binary format
+	auto udmData = util::load_udm_asset(fileName, &outErr);
+	if(udmData == nullptr) {
+		outErr = "Unable to load UDM data: " + outErr;
+		return {};
+	}
+	std::string rpath;
+	if(FileManager::FindAbsolutePath(fileName, rpath) == false) {
+		outErr = "Unable to locate UDM file on disk!";
+		return {};
+	}
+	auto path = util::Path::CreateFile(rpath);
+	path.MakeRelative(util::get_program_path());
+	auto outFileName = path.GetString();
+	std::string ext;
+	ufile::get_extension(outFileName, &ext);
+	ufile::remove_extension_from_filename(outFileName);
+	if(ext.empty())
+		ext = "udm_b";
+	else
+		ext += "_b";
+	outFileName += '.' + ext;
+	auto res = true;
+	try {
+		res = udmData->Save(outFileName);
+	}
+	catch(const udm::Exception &e) {
+		outErr = "Unable to save UDM data: " + std::string {e.what()};
+	}
+	if(!res)
+		return {};
+	filemanager::remove_file(fileName);
+	return Lua::file::to_relative_path(outFileName);
+}
+
+// See https://lisyarus.github.io/blog/graphics/2023/02/24/blur-coefficients-generator.html
+static void generate_two_pass_gaussian_blur_coefficients(uint32_t uradius, double sigma, std::vector<double> &outOffsets, std::vector<double> &outWeights, bool linear = true, bool correction = true)
+{
+	if(sigma == 0.0)
+		return;
+	auto radius = static_cast<int32_t>(uradius);
+
+	std::vector<double> weights;
+	double sumWeights = 0.0;
+	for(int i = -radius; i <= radius; i++) {
+		double w = 0.0;
+		if(correction) {
+			w = (erf((i + 0.5) / sigma / sqrt(2.0)) - erf((i - 0.5) / sigma / sqrt(2.0))) / 2.0;
+		}
+		else {
+			w = exp(-i * i / sigma / sigma);
+		}
+		sumWeights += w;
+		weights.push_back(w);
+	}
+
+	for(int i = 0; i < weights.size(); i++)
+		weights[i] /= sumWeights;
+
+	auto &offsets = outOffsets;
+	auto &newWeights = outWeights;
+	offsets.reserve(2 * radius + 1);
+	newWeights.reserve(2 * radius + 1);
+
+	auto hasZeros = false;
+	if(linear) {
+		for(int i = -radius; i <= radius; i += 2) {
+			if(i == radius) {
+				offsets.push_back(i);
+				newWeights.push_back(weights[i + radius]);
+			}
+			else {
+				const double w0 = weights[i + radius + 0];
+				const double w1 = weights[i + radius + 1];
+
+				const double w = w0 + w1;
+				if(w > 0) {
+					offsets.push_back(i + w1 / w);
+				}
+				else {
+					hasZeros = true;
+					offsets.push_back(i);
+				}
+				newWeights.push_back(w);
+			}
+		}
+	}
+	else {
+		for(int i = -radius; i <= radius; i++) {
+			offsets.push_back(i);
+		}
+
+		for(double w : weights)
+			if(w == 0.0)
+				hasZeros = true;
+
+		newWeights = weights;
+	}
+}
+
+std::pair<std::vector<double>, std::vector<double>> util::generate_two_pass_gaussian_blur_coefficients(uint32_t radius, double sigma, bool linear, bool correction)
+{
+	std::vector<double> offsets;
+	std::vector<double> weights;
+	::generate_two_pass_gaussian_blur_coefficients(radius, sigma, offsets, weights, linear, correction);
+	return {std::move(offsets), std::move(weights)};
+}
+//

@@ -44,7 +44,7 @@ static double calc_light_luminance(const util::baking::LightSource &light, const
 		intensity = ::pragma::BaseEnvLightPointComponent::CalcIntensityAtPoint(light.position, light.intensity, pos);
 		break;
 	case util::baking::LightSource::Type::Directional:
-		intensity = ::pragma::BaseEnvLightDirectionalComponent::CalcIntensityAtPoint(light.intensity, pos);
+		intensity = ::pragma::BaseEnvLightDirectionalComponent::CalcIntensityAtPoint(light.intensity, pos) * 0.025f;
 		break;
 	}
 	return ulighting::srgb_to_luminance(light.color * intensity);

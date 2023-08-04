@@ -8,7 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/entities/components/renderers/rasterization/glow_data.hpp"
 #include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
-#include "pragma/rendering/shaders/post_processing/c_shader_glow.hpp"
+#include "pragma/rendering/shaders/post_processing/c_shader_pp_glow.hpp"
 #include <prosper_util.hpp>
 #include <shader/prosper_shader_blur.hpp>
 #include <shader/prosper_shader_t.hpp>
@@ -36,7 +36,7 @@ bool GlowData::Initialize(uint32_t width, uint32_t height, const HDRData &hdrInf
 	prosper::util::ImageCreateInfo imgCreateInfo {};
 	imgCreateInfo.width = width;
 	imgCreateInfo.height = height;
-	imgCreateInfo.format = pragma::ShaderGlow::RENDER_PASS_FORMAT;
+	imgCreateInfo.format = pragma::ShaderPPGlow::RENDER_PASS_FORMAT;
 	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferSrcBit; // Note: Transfer flag required for debugging purposes only (See debug_glow_bloom console command)
 	imgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	auto img = c_engine->GetRenderContext().CreateImage(imgCreateInfo);
@@ -45,7 +45,7 @@ bool GlowData::Initialize(uint32_t width, uint32_t height, const HDRData &hdrInf
 	samplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToEdge;
 	samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
 	auto tex = c_engine->GetRenderContext().CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
-	renderTarget = c_engine->GetRenderContext().CreateRenderTarget({tex, depthTex}, prosper::ShaderGraphics::GetRenderPass<pragma::ShaderGlow>(c_engine->GetRenderContext()));
+	renderTarget = c_engine->GetRenderContext().CreateRenderTarget({tex, depthTex}, prosper::ShaderGraphics::GetRenderPass<pragma::ShaderPPGlow>(c_engine->GetRenderContext()));
 	renderTarget->SetDebugName("glow_rt");
 
 	auto rtBlur = c_engine->GetRenderContext().CreateRenderTarget({tex}, prosper::ShaderGraphics::GetRenderPass<prosper::ShaderBlurBase>(c_engine->GetRenderContext(), umath::to_integral(prosper::ShaderBlurBase::Pipeline::R8G8B8A8Unorm)));

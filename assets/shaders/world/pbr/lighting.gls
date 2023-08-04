@@ -50,29 +50,25 @@ vec3 calc_pbr_lighting(vec2 uv,MaterialInfo materialInfo,vec4 baseColor)
 		// TODO: Lightmap mode should be determined by specialization constant to avoid if-condition overhead
 		if(useLightmaps)
 		{
-			vec4 colLightMap = texture(u_lightMap,fs_in.vert_uv_lightmap.xy);
+			vec4 colDirect = texture(u_lightMap,fs_in.vert_uv_lightmap.xy);
+			float exposure = get_lightmap_exposure_pow();
 			if(is_indirect_light_map_enabled())
 			{
-				float exposure = get_lightmap_exposure_pow();
 				vec3 colIndirect = texture(u_lightMapIndirect,fs_in.vert_uv_lightmap.xy).rgb;
-
-				color += colIndirect *exposure *baseColor.rgb;
-
 				if(is_directional_light_map_enabled())
 				{
 					vec3 dominantDir = texture(u_lightMapDominant,fs_in.vert_uv_lightmap.xy).rgb;
 					dominantDir = dominantDir *2.0 -1.0;
 					dominantDir = normalize(dominantDir);
 
-					vec3 shade = get_point_shade(-dominantDir,materialInfo,normal,view);
-					color += shade *colLightMap.rgb *exposure;
+					vec3 shade = get_point_shade_lm(-dominantDir,materialInfo,normal,view,colDirect.rgb *exposure);
+					color = baseColor.rgb *(shade +colIndirect.rgb *exposure);
 				}
 				else
-					color += colLightMap.rgb *baseColor.rgb;
-
+					color = baseColor.rgb *((colDirect.rgb +colIndirect.rgb) *exposure);
 			}
 			else
-				color.rgb += baseColor.rgb *(get_lightmap_exposure_pow() *colLightMap.rgb);
+				color.rgb += baseColor.rgb *(exposure *colDirect.rgb);
 		}
 	}
 

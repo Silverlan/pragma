@@ -214,7 +214,7 @@ void pragma::nav::CMesh::Clear()
 }
 
 static auto cvShowNavMeshes = GetClientConVar("debug_nav_show_meshes");
-REGISTER_CONVAR_CALLBACK_CL(debug_nav_show_meshes, [](NetworkState *, ConVar *, bool, bool val) {
+REGISTER_CONVAR_CALLBACK_CL(debug_nav_show_meshes, [](NetworkState *, const ConVar &, bool, bool val) {
 	if(c_game == NULL || c_game->LoadNavMesh() == false)
 		return;
 	auto &navMesh = c_game->GetNavMesh();

@@ -36,10 +36,20 @@ LuaEntityManager::EntityInfo *LuaEntityManager::GetEntityInfo(std::string classN
 	return &it->second;
 }
 
-void LuaEntityManager::RegisterComponent(std::string className, luabind::object &o)
+void LuaEntityManager::RegisterComponent(std::string className, luabind::object &o, pragma::ComponentId componentId)
 {
 	ustring::to_lower(className);
-	m_components[className] = o;
+	m_components[className] = {o,componentId};
+}
+std::optional<pragma::ComponentId> LuaEntityManager::FindComponentId(const luabind::object &o) const {
+	auto it = std::find_if(m_components.begin(), m_components.end(), [&o](const std::pair < std::string, std::pair<luabind::object, pragma::ComponentId>> &pair) {
+		return pair.second.first == o;
+	});
+	return (it != m_components.end()) ? it->second.second : std::optional<pragma::ComponentId> {};
+}
+const luabind::object *LuaEntityManager::FindClassObject(pragma::ComponentId componentId) const {
+	auto it = std::find_if(m_components.begin(), m_components.end(), [componentId](const std::pair<std::string, std::pair<luabind::object, pragma::ComponentId>> &pair) { return pair.second.second == componentId; });
+	return (it != m_components.end()) ? &it->second.first : nullptr;
 }
 luabind::object *LuaEntityManager::GetComponentClassObject(std::string className)
 {
@@ -47,5 +57,5 @@ luabind::object *LuaEntityManager::GetComponentClassObject(std::string className
 	auto it = m_components.find(className);
 	if(it == m_components.end())
 		return nullptr;
-	return &it->second;
+	return &it->second.first;
 }

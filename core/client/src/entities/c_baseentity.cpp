@@ -246,8 +246,11 @@ void CBaseEntity::ReceiveData(NetPacket &packet)
 					if(netComponent != nullptr)
 						netComponent->ReceiveData(packet);
 				}
-				else
-					spdlog::warn("Net data for entity {} contained component data for component '{}' which hasn't been attached to the entity clientside! Skipping...", ToString(), componentInfo->name);
+				else {
+					std::stringstream ss;
+					ss << componentInfo->name;
+					spdlog::warn("Net data for entity {} contained component data for component '{}' which hasn't been attached to the entity clientside! Skipping...", ToString(), ss.str());
+				}
 			}
 		}
 		else

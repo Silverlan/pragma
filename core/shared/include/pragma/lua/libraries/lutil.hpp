@@ -128,8 +128,12 @@ namespace Lua {
 
 		DLLNETWORK void register_library(lua_State *l);
 
-		DLLNETWORK void register_shared_generic(luabind::module_ &mod);
-		DLLNETWORK void register_shared(luabind::module_ &mod);
+		DLLNETWORK void register_shared_generic(lua_State *l, luabind::module_ &mod);
+		DLLNETWORK void register_shared(lua_State *l, luabind::module_ &mod);
+		DLLNETWORK void register_world_data(lua_State *l, luabind::module_ &mod);
+		DLLNETWORK void register_os(lua_State *l, luabind::module_ &mod);
+
+		DLLNETWORK bool start_debugger_server(lua_State *l);
 
 		struct DLLNETWORK Uuid {
 			::util::Uuid value;

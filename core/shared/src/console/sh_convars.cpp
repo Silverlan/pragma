@@ -44,14 +44,14 @@ REGISTER_ENGINE_CONCOMMAND(
 	  engine->ClearCache();
   },
   ConVarFlags::None, "Deletes all cache files.");
-REGISTER_ENGINE_CONVAR(cache_version, "", ConVarFlags::Archive, "The engine version that the cache files are associated with. If this version doesn't match the current engine version, the cache will be cleared.");
-REGISTER_ENGINE_CONVAR(cache_version_target, "8", ConVarFlags::None, "If cache_version does not match this value, the cache files will be cleared and it will be set to it.");
-REGISTER_ENGINE_CONVAR(debug_profiling_enabled, "0", ConVarFlags::None, "Enables profiling timers.");
-REGISTER_ENGINE_CONVAR(sh_mount_external_game_resources, "1", ConVarFlags::Archive, "If set to 1, the game will attempt to load missing resources from external games.");
-REGISTER_ENGINE_CONVAR(sh_lua_remote_debugging, "0", ConVarFlags::Archive,
+REGISTER_ENGINE_CONVAR(cache_version, udm::Type::String, "", ConVarFlags::Archive, "The engine version that the cache files are associated with. If this version doesn't match the current engine version, the cache will be cleared.");
+REGISTER_ENGINE_CONVAR(cache_version_target, udm::Type::UInt32, "9", ConVarFlags::None, "If cache_version does not match this value, the cache files will be cleared and it will be set to it.");
+REGISTER_ENGINE_CONVAR(debug_profiling_enabled, udm::Type::Boolean, "0", ConVarFlags::None, "Enables profiling timers.");
+REGISTER_ENGINE_CONVAR(sh_mount_external_game_resources, udm::Type::Boolean, "1", ConVarFlags::Archive, "If set to 1, the game will attempt to load missing resources from external games.");
+REGISTER_ENGINE_CONVAR(sh_lua_remote_debugging, udm::Type::UInt8, "0", ConVarFlags::Archive,
   "0 = Remote debugging is disabled; 1 = Remote debugging is enabled serverside; 2 = Remote debugging is enabled clientside.\nCannot be changed during an active game. Also requires the \"-luaext\" launch parameter.\nRemote debugging cannot be enabled clientside and serverside at the same time.");
-REGISTER_ENGINE_CONVAR(lua_open_editor_on_error, "1", ConVarFlags::Archive, "1 = Whenever there's a Lua error, the engine will attempt to automatically open a Lua IDE and open the file and line which caused the error.");
-REGISTER_ENGINE_CONVAR(steam_steamworks_enabled, "1", ConVarFlags::Archive, "Enables or disables steamworks.");
+REGISTER_ENGINE_CONVAR(lua_open_editor_on_error, udm::Type::Boolean, "1", ConVarFlags::Archive, "1 = Whenever there's a Lua error, the engine will attempt to automatically open a Lua IDE and open the file and line which caused the error.");
+REGISTER_ENGINE_CONVAR(steam_steamworks_enabled, udm::Type::Boolean, "1", ConVarFlags::Archive, "Enables or disables steamworks.");
 static void cvar_steam_steamworks_enabled(bool val)
 {
 	static std::weak_ptr<util::Library> wpSteamworks = {};
@@ -98,9 +98,9 @@ static void cvar_steam_steamworks_enabled(bool val)
 	if(nwCl != nullptr)
 		nwCl->CallCallbacks<void>("OnSteamworksShutdown");
 }
-REGISTER_ENGINE_CONVAR_CALLBACK(steam_steamworks_enabled, [](NetworkState *, ConVar *, bool prev, bool val) { cvar_steam_steamworks_enabled(val); });
+REGISTER_ENGINE_CONVAR_CALLBACK(steam_steamworks_enabled, [](NetworkState *, const ConVar &, bool prev, bool val) { cvar_steam_steamworks_enabled(val); });
 
-REGISTER_ENGINE_CONVAR_CALLBACK(sh_mount_external_game_resources, [](NetworkState *, ConVar *, bool prev, bool val) { engine->SetMountExternalGameResources(val); });
+REGISTER_ENGINE_CONVAR_CALLBACK(sh_mount_external_game_resources, [](NetworkState *, const ConVar &, bool prev, bool val) { engine->SetMountExternalGameResources(val); });
 REGISTER_ENGINE_CONCOMMAND(
   toggle,
   [](NetworkState *nw, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv) {
@@ -116,7 +116,7 @@ REGISTER_ENGINE_CONCOMMAND(
   },
   ConVarFlags::None, "Toggles the specified console variable between 0 and 1.");
 
-REGISTER_ENGINE_CONVAR_CALLBACK(log_enabled, [](NetworkState *, ConVar *, int prev, int val) {
+REGISTER_ENGINE_CONVAR_CALLBACK(log_enabled, [](NetworkState *, const ConVar &, int prev, int val) {
 	//if(!engine->IsActiveState(state))
 	//	return;
 	if(prev == 0 && val != 0)
@@ -125,7 +125,7 @@ REGISTER_ENGINE_CONVAR_CALLBACK(log_enabled, [](NetworkState *, ConVar *, int pr
 		engine->EndLogging();
 });
 
-REGISTER_ENGINE_CONVAR_CALLBACK(log_file, [](NetworkState *state, ConVar *, std::string prev, std::string val) {
+REGISTER_ENGINE_CONVAR_CALLBACK(log_file, [](NetworkState *state, const ConVar &, std::string prev, std::string val) {
 	//if(!engine->IsActiveState(state))
 	//	return;
 	std::string lprev = prev;
@@ -139,7 +139,7 @@ REGISTER_ENGINE_CONVAR_CALLBACK(log_file, [](NetworkState *state, ConVar *, std:
 	engine->StartLogging();
 });
 
-REGISTER_SHARED_CONVAR_CALLBACK(sv_gravity, [](NetworkState *state, ConVar *, std::string prev, std::string val) {
+REGISTER_SHARED_CONVAR_CALLBACK(sv_gravity, [](NetworkState *state, const ConVar &, std::string prev, std::string val) {
 	if(!state->IsGameActive())
 		return;
 	Vector3 gravity = uvec::create(val);
@@ -339,4 +339,4 @@ REGISTER_ENGINE_CONCOMMAND(debug_profiling_physics_end, debug_profiling_physics_
 
 //////////////// SERVER ////////////////
 
-REGISTER_SHARED_CONVAR(rcon_password, "", ConVarFlags::Password, "Specifies a password which can be used to run console commands remotely on a server. If no password is specified, this feature is disabled.");
+REGISTER_SHARED_CONVAR(rcon_password, udm::Type::String, "", ConVarFlags::Password, "Specifies a password which can be used to run console commands remotely on a server. If no password is specified, this feature is disabled.");

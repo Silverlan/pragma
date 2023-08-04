@@ -336,9 +336,6 @@ EulerAngles BaseCharacterComponent::LocalOrientationToWorld(const EulerAngles &a
 
 bool BaseCharacterComponent::UpdateMovement()
 {
-	static auto bskip = false;
-	if(bskip == true)
-		return false;
 	//if(m_entity->IsPlayer() == true)
 	//	m_entity->GetNetworkState()->GetGameState()->HandlePlayerMovement();
 	//if(true)
@@ -427,7 +424,8 @@ bool BaseCharacterComponent::UpdateMovement()
 
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
-	auto acceleration = CalcMovementAcceleration();
+	float timeToReachFullAcc = 0.f;
+	auto acceleration = CalcMovementAcceleration(timeToReachFullAcc);
 	auto tDelta = CFloat(game->DeltaTickTime()) * ts;
 
 	{
@@ -477,10 +475,20 @@ bool BaseCharacterComponent::UpdateMovement()
 	if(l > 0.f)
 		dir /= l;
 
+	if(l == 0.f)
+		m_timeSinceMovementStart = 0.f;
+	else
+		m_timeSinceMovementStart = umath::min(m_timeSinceMovementStart + tDelta, timeToReachFullAcc);
+
 	auto speedDir = glm::dot(dir, vel); // The speed in the movement direction of the current velocity
 	if(speedDir < umath::abs(speed.x)) {
 		auto speedDelta = speed.x - speedDir;
-		vel += dir * umath::min(speedDelta * tDelta * acceleration, speedDelta);
+
+		auto addSpeed = speedDelta * tDelta * acceleration;
+		auto f = (timeToReachFullAcc > 0.f) ? (m_timeSinceMovementStart / timeToReachFullAcc) : 1.f;
+		addSpeed *= f;
+
+		vel += dir * umath::min(addSpeed, speedDelta);
 	}
 
 	// Calculate sideways movement speed (NPC animation movement only)
@@ -755,11 +763,13 @@ float BaseCharacterComponent::CalcAirMovementModifier() const
 		return evData.airMovementModifier;
 	return 0.f;
 }
-float BaseCharacterComponent::CalcMovementAcceleration() const
+float BaseCharacterComponent::CalcMovementAcceleration(float &optOutRampUpTime) const
 {
 	CECalcMovementAcceleration evData {};
-	if(InvokeEventCallbacks(EVENT_CALC_MOVEMENT_ACCELERATION, evData) == util::EventReply::Handled)
+	if(InvokeEventCallbacks(EVENT_CALC_MOVEMENT_ACCELERATION, evData) == util::EventReply::Handled) {
+		optOutRampUpTime = evData.rampUpTime;
 		return evData.acceleration;
+	}
 	return 0.f;
 }
 
@@ -929,11 +939,13 @@ void CECalcAirMovementModifier::HandleReturnValues(lua_State *l)
 
 CECalcMovementAcceleration::CECalcMovementAcceleration() {}
 void CECalcMovementAcceleration::PushArguments(lua_State *l) {}
-uint32_t CECalcMovementAcceleration::GetReturnCount() { return 1; }
+uint32_t CECalcMovementAcceleration::GetReturnCount() { return 2; }
 void CECalcMovementAcceleration::HandleReturnValues(lua_State *l)
 {
+	if(Lua::IsSet(l, -2))
+		acceleration = Lua::CheckNumber(l, -2);
 	if(Lua::IsSet(l, -1))
-		acceleration = Lua::CheckNumber(l, -1);
+		rampUpTime = Lua::CheckNumber(l, -1);
 }
 
 //////////////////

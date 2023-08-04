@@ -414,33 +414,33 @@ float ClientState::GetSoundVolume(ALSoundType type)
 }
 std::unordered_map<ALSoundType, float> &ClientState::GetSoundVolumes() { return m_volTypes; }
 
-REGISTER_CONVAR_CALLBACK_CL(cl_audio_master_volume, [](NetworkState *, ConVar *, float, float vol) {
+REGISTER_CONVAR_CALLBACK_CL(cl_audio_master_volume, [](NetworkState *, const ConVar &, float, float vol) {
 	if(client == nullptr)
 		return;
 	client->SetMasterSoundVolume(vol);
 })
 
-REGISTER_CONVAR_CALLBACK_CL(cl_audio_hrtf_enabled, [](NetworkState *, ConVar *, bool, bool bEnabled) { c_engine->SetHRTFEnabled(bEnabled); })
+REGISTER_CONVAR_CALLBACK_CL(cl_audio_hrtf_enabled, [](NetworkState *, const ConVar &, bool, bool bEnabled) { c_engine->SetHRTFEnabled(bEnabled); })
 
-REGISTER_CONVAR_CALLBACK_CL(cl_effects_volume, [](NetworkState *, ConVar *, float, float vol) {
+REGISTER_CONVAR_CALLBACK_CL(cl_effects_volume, [](NetworkState *, const ConVar &, float, float vol) {
 	if(client == nullptr)
 		return;
 	client->SetSoundVolume(ALSoundType::Effect, vol);
 })
 
-REGISTER_CONVAR_CALLBACK_CL(cl_music_volume, [](NetworkState *, ConVar *, float, float vol) {
+REGISTER_CONVAR_CALLBACK_CL(cl_music_volume, [](NetworkState *, const ConVar &, float, float vol) {
 	if(client == nullptr)
 		return;
 	client->SetSoundVolume(ALSoundType::Music, vol);
 })
 
-REGISTER_CONVAR_CALLBACK_CL(cl_voice_volume, [](NetworkState *, ConVar *, float, float vol) {
+REGISTER_CONVAR_CALLBACK_CL(cl_voice_volume, [](NetworkState *, const ConVar &, float, float vol) {
 	if(client == nullptr)
 		return;
 	client->SetSoundVolume(ALSoundType::Voice, vol);
 })
 
-REGISTER_CONVAR_CALLBACK_CL(cl_gui_volume, [](NetworkState *, ConVar *, float, float vol) {
+REGISTER_CONVAR_CALLBACK_CL(cl_gui_volume, [](NetworkState *, const ConVar &, float, float vol) {
 	if(client == nullptr)
 		return;
 	client->SetSoundVolume(ALSoundType::GUI, vol);

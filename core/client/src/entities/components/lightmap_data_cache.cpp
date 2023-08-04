@@ -29,7 +29,7 @@ size_t LightmapDataCache::CalcPoseHash(const umath::Transform &pose)
 	return hash;
 }
 
-bool LightmapDataCache::Load(const std::string &path, LightmapDataCache &outCache, std::string &outErr)
+std::string LightmapDataCache::GetCacheFileName(const std::string &path)
 {
 	auto fpath = path;
 	std::string ext;
@@ -39,6 +39,12 @@ bool LightmapDataCache::Load(const std::string &path, LightmapDataCache &outCach
 		else
 			fpath += "." + std::string {FORMAT_MODEL_ASCII};
 	}
+	return fpath;
+}
+
+bool LightmapDataCache::Load(const std::string &path, LightmapDataCache &outCache, std::string &outErr)
+{
+	auto fpath = GetCacheFileName(path);
 	std::shared_ptr<udm::Data> udmData = nullptr;
 	try {
 		udmData = udm::Data::Load(fpath);

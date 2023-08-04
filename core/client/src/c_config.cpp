@@ -14,34 +14,6 @@
 #include "pragma/input/inputhelper.h"
 #include <pragma/logging.hpp>
 
-CEngine::ConVarInfo *CEngine::ConVarInfoList::find(const std::string &cmd)
-{
-	for(auto it = cvars.begin(); it != cvars.end(); ++it) {
-		auto &info = *it;
-		if(info.cvar == cmd)
-			return &info;
-	}
-	return nullptr;
-}
-
-bool CEngine::ExecConfig(const std::string &cfg, std::vector<ConVarInfo> &cmds)
-{
-	return Engine::ExecConfig(cfg, [&cmds](std::string &cmd, std::vector<std::string> &argv) {
-		cmds.push_back(ConVarInfo());
-		auto &info = cmds.back();
-		info.cvar = cmd;
-		info.argv = argv;
-	});
-}
-
-void CEngine::ExecCommands(ConVarInfoList &cmds)
-{
-	for(auto it = cmds.cvars.begin(); it != cmds.cvars.end(); ++it) {
-		auto &info = *it;
-		RunConsoleCommand(info.cvar, info.argv);
-	}
-}
-
 void CEngine::SaveClientConfig()
 {
 	FileManager::CreatePath("cfg");
@@ -102,29 +74,31 @@ void CEngine::WriteClientConfig(VFilePtrReal f)
 void CEngine::LoadConfig()
 {
 	Engine::LoadConfig();
-	PreloadClientConfig();
+	PreloadConfig(NwStateType::Client, "client.cfg");
 }
 
-void CEngine::PreloadClientConfig()
+void CEngine::LoadClientConfig()
 {
-	m_preloadedConfig = std::make_unique<ConVarInfoList>();
-	auto &cmds = *m_preloadedConfig.get();
-	ExecConfig("client.cfg", cmds.cvars);
+	auto &cfg = GetConVarConfig(NwStateType::Client);
+	if(cfg)
+		ExecCommands(*cfg);
+}
+
+void CEngine::PreloadConfig(NwStateType type, const std::string &configName)
+{
+	Engine::PreloadConfig(type, configName);
+	if(type != NwStateType::Client)
+		return;
+	auto &cfg = GetConVarConfig(NwStateType::Client);
+	if(!cfg)
+		return;
 	std::string lan = Locale::DetermineSystemLanguage();
-	auto res = cmds.find("cl_language");
-	if(res != nullptr && !res->argv.empty())
-		lan = res->argv[0];
+	auto *args = cfg->Find("cl_language");
+	if(args && !args->empty())
+		lan = args->front();
 	Locale::SetLanguage(lan);
 	Locale::Load("inputs.txt");
 	Locale::Load("menu.txt");
 	Locale::Load("misc.txt");
 	Locale::Load("components.txt");
-}
-
-void CEngine::LoadClientConfig()
-{
-	if(m_preloadedConfig != nullptr) {
-		ExecCommands(*m_preloadedConfig.get());
-		m_preloadedConfig = nullptr;
-	}
 }

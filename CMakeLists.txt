@@ -312,6 +312,9 @@ search_lib_recursive(DEPENDENCY_CPPBEPUIK_LIBRARY third_party_libs/cppbepuik/${B
 set(DEPENDENCY_SPDLOG_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/spdlog/include CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_SPDLOG_LIBRARY third_party_libs/spdlog/${BINARY_PRAGMA_DIR} spdlog)
 
+set(DEPENDENCY_FMT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/fmt/include CACHE PATH "Path to include directory.")
+search_lib_recursive(DEPENDENCY_FMT_LIBRARY third_party_libs/fmt/${BINARY_PRAGMA_DIR} fmt STATIC)
+
 if(WIN32)
     set(DEPENDENCY_7ZPP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/7zpp/include CACHE STRING "" FORCE)
     search_lib_recursive(DEPENDENCY_7ZPP_LIBRARY third_party_libs/7zpp/${BINARY_PRAGMA_DIR} 7zpp)
@@ -740,6 +743,14 @@ set_target_folder(spdlog third_party_libs)
 unset(CMAKE_CXX_STANDARD)
 #
 
+# fmt
+unset(BUILD_SHARED_LIBS CACHE)
+set(FMT_TEST OFF CACHE BOOL OFF FORCE)
+set(FMT_DOC OFF CACHE BOOL OFF FORCE)
+register_third_party_library(fmt)
+set(BUILD_SHARED_LIBS ON CACHE BOOL ".." FORCE)
+#
+
 # 7zip cpp
 if(WIN32)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
@@ -878,7 +889,6 @@ set_target_folder(pngtest third_party_libs/libpng)
 set_target_folder(pngunknown third_party_libs/libpng)
 set_target_folder(pngvalid third_party_libs/libpng)
 
-message("ASSING LIBPNG INCLUDE DIRECTORY FOR ZLIB: ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib")
 target_include_directories(png PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 #
 
@@ -1019,16 +1029,18 @@ if(WIN32)
 add_dependencies(util_zip 7zpp)
 endif()
 
-add_dependencies(shared materialsystem util_zip wms_shared util_pragma_doc luasystem networkmanager muparserx libz2 bzip2 clip2tri-static clipper-static poly2tri-static util_udm panima util_bsp util_smdmodel util_source_script rectangle_bin_pack Recast Detour util_pad noise-static noiseutils-static ogg vorbis vorbisfile cppbepuik spdlog)
+add_dependencies(shared materialsystem util_zip wms_shared util_pragma_doc luasystem networkmanager muparserx libz2 bzip2 clip2tri-static clipper-static poly2tri-static util_udm panima util_bsp util_smdmodel util_source_script rectangle_bin_pack Recast Detour util_pad noise-static noiseutils-static ogg vorbis vorbisfile cppbepuik spdlog fmt)
 add_dependencies(ishared util_udm shared)
 add_dependencies(iclient ishared client)
 add_dependencies(iserver ishared server)
 add_dependencies(server shared servermanager clientmanager util_bsp util_sound)
-add_dependencies(client shared clientmanager wgui alsoundsystem util_timeline_scene util_image)
+add_dependencies(client shared clientmanager freetype wgui alsoundsystem util_timeline_scene util_image)
+add_dependencies(pragma_updater sharedutils-static)
 
 add_dependencies(pragma_server server)
 add_dependencies(pragma client server)
 add_dependencies(pragma pragma_server)
+add_dependencies(pragma pragma_updater)
 
 set_property(TARGET pragma PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
 set_property(TARGET pragma_server PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
@@ -1105,8 +1117,9 @@ pragma_install(util_sound "${BINARY_OUTPUT_DIR}")
 pragma_install(vfilesystem "${BINARY_OUTPUT_DIR}")
 pragma_install(wgui "${BINARY_OUTPUT_DIR}")
 
+message("Custom install targets: ${PRAGMA_INSTALL_CUSTOM_TARGETS}")
 add_custom_target(pragma-install
-	DEPENDS pragma iclient iserver
+	DEPENDS pragma iclient iserver ${PRAGMA_INSTALL_CUSTOM_TARGETS}
 	COMMAND 
 		"${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT}
 		-DBUILD_TYPE=${CMAKE_BUILD_TYPE}

@@ -23,7 +23,19 @@
 #include <sharedutils/util_weak_handle.hpp>
 #include <sharedutils/functioncallback.h>
 #include <typeindex>
+#ifdef _WIN32
+#if __cpp_lib_format >= 202207L
+#include <format>
+#endif
+#endif
 #include "pragma/entities/entity_component_manager.hpp"
+
+namespace spdlog {
+	class logger;
+	namespace level {
+		enum level_enum : int;
+	};
+};
 
 class BaseEntity;
 namespace pragma {
@@ -61,6 +73,19 @@ namespace pragma {
 		double lastTick = 0.0;
 		double nextTick = 0.0;
 	};
+
+	template<typename... Args>
+#ifdef _WIN32
+
+#if __cpp_lib_format >= 202207L
+	using format_string_t = std::format_string<Args...>;
+#else
+	using format_string_t = std::string_view;
+#endif
+
+#else
+	using format_string_t = std::string_view;
+#endif
 
 	class DLLNETWORK BaseEntityComponent : public pragma::BaseLuaHandle, public std::enable_shared_from_this<BaseEntityComponent> {
 	  public:
@@ -197,6 +222,24 @@ namespace pragma {
 
 		void Log(const std::string &msg, LogSeverity severity) const;
 
+		template<typename... Args>
+		void Log(spdlog::level::level_enum level, const std::string &msg) const;
+
+		template<typename... Args>
+		void Log(spdlog::level::level_enum level, format_string_t<Args...> fmt, Args &&...args) const;
+		template<typename... Args>
+		void LogTrace(format_string_t<Args...> fmt, Args &&...args) const;
+		template<typename... Args>
+		void LogDebug(format_string_t<Args...> fmt, Args &&...args) const;
+		template<typename... Args>
+		void LogInfo(format_string_t<Args...> fmt, Args &&...args) const;
+		template<typename... Args>
+		void LogWarn(format_string_t<Args...> fmt, Args &&...args) const;
+		template<typename... Args>
+		void LogError(format_string_t<Args...> fmt, Args &&...args) const;
+		template<typename... Args>
+		void LogCritical(format_string_t<Args...> fmt, Args &&...args) const;
+
 		std::string GetUri() const;
 		std::string GetMemberUri(const std::string &memberName) const;
 		std::optional<std::string> GetMemberUri(ComponentMemberIndex memberIdx) const;
@@ -211,6 +254,7 @@ namespace pragma {
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version);
 		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const;
 		virtual void OnMembersChanged();
+		spdlog::logger &InitLogger() const;
 
 		// Used for typed callback lookups. If this function doesn't change outTypeIndex, the actual component's type is used
 		// as reference. Overwrite this on the serverside or clientside version of the component,

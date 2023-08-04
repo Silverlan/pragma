@@ -109,6 +109,8 @@ static void register_gui(Lua::Interface &lua)
 
 	  luabind::def("find_focused_window", static_cast<prosper::Window *(*)()>([]() -> prosper::Window * { return WGUI::GetInstance().FindFocusedWindow(); }), luabind::pointer_policy<0> {}),
 	  luabind::def("get_primary_window", static_cast<prosper::Window *(*)()>([]() -> prosper::Window * { return &c_engine->GetRenderContext().GetWindow(); }), luabind::pointer_policy<0> {}),
+	  luabind::def(
+	    "get_primary_monitor", +[]() -> GLFW::Monitor { return GLFW::get_primary_monitor(); }),
 	  luabind::def("find_window_under_cursor", static_cast<prosper::Window *(*)()>([]() -> prosper::Window * { return WGUI::GetInstance().FindWindowUnderCursor(); }), luabind::pointer_policy<0> {}),
 
 	  luabind::def("get_focused_element", static_cast<::WIBase *(*)(lua_State *)>(&Lua::gui::get_focused_element)), luabind::def("get_focused_element", static_cast<::WIBase *(*)(lua_State *, prosper::Window &)>(&Lua::gui::get_focused_element)),
@@ -193,7 +195,17 @@ static void register_gui(Lua::Interface &lua)
 		    if(monitor == nullptr)
 			    monitor = &primaryMonitor;
 		    return monitor->GetSupportedVideoModes();
-	    })];
+	    }),
+		  luabind::def("open_main_menu",+[](ClientState *cl) {
+			cl->OpenMainMenu();
+			}),
+		  luabind::def("close_main_menu",+[](ClientState *cl) {
+			cl->CloseMainMenu();
+			}),
+		  luabind::def("is_main_menu_open",+[](ClientState *cl) -> bool {
+			return cl->IsMainMenuOpen();
+		})
+		];
 
 	//
 	auto videoModeDef = luabind::class_<GLFW::Monitor::VideoMode>("VideoMode");
@@ -408,6 +420,8 @@ static void register_gui(Lua::Interface &lua)
 	auto wiConsoleClassDef = luabind::class_<WIConsole, ::WIBase>("Console");
 	wiConsoleClassDef.def("GetCommandLineEntryElement", &WIConsole::GetCommandLineEntryElement);
 	wiConsoleClassDef.def("GetTextLogElement", &WIConsole::GetTextLogElement);
+	wiConsoleClassDef.def("SetExternallyOwned", &WIConsole::SetExternallyOwned);
+	wiConsoleClassDef.def("IsExternallyOwned", &WIConsole::IsExternallyOwned);
 	wiConsoleClassDef.def("GetFrame", &WIConsole::GetFrame);
 	wiConsoleClassDef.def(
 	  "GetText", +[](const ::WIConsole &console) { return console.GetText().cpp_str(); });
@@ -428,6 +442,18 @@ static std::vector<GLFW::Key> get_mapped_keys(const std::string &cvarName, uint3
 	std::vector<GLFW::Key> mappedKeys;
 	c_engine->GetMappedKeys(cvarName, mappedKeys, maxKeys);
 	return mappedKeys;
+}
+
+static pragma::LuaInputBindingLayerRegister &get_input_binding_layer_register() { return c_game->GetLuaInputBindingLayerRegister(); }
+static std::shared_ptr<InputBindingLayer> create_input_binding_layer()
+{
+	auto layer = std::shared_ptr<InputBindingLayer> {new InputBindingLayer {}, [](InputBindingLayer *layer) {
+		                                                 if(!umath::is_flag_set(c_game->GetGameFlags(), Game::GameFlags::ClosingGame))
+			                                                 get_input_binding_layer_register().Remove(*layer);
+		                                                 delete layer;
+	                                                 }};
+	get_input_binding_layer_register().Add(*layer);
+	return layer;
 }
 
 void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool bGUI)
@@ -590,7 +616,7 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool bGUI)
 	inputMod[defInLay];
 	pragma::lua::define_custom_constructor<InputBindingLayer,
 	  [](const std::string &name) -> std::shared_ptr<InputBindingLayer> {
-		  auto layer = std::make_shared<InputBindingLayer>();
+		  auto layer = create_input_binding_layer();
 		  layer->identifier = name;
 		  return layer;
 	  },
@@ -951,8 +977,12 @@ static util::ParallelJob<uimg::ImageLayerSet> capture_raytraced_screenshot(lua_S
 void CGame::RegisterLuaLibraries()
 {
 	Lua::util::register_library(GetLuaState());
+
+	auto osMod = luabind::module(GetLuaState(), "os");
+	Lua::util::register_os(GetLuaState(), osMod);
+
 	auto utilMod = luabind::module(GetLuaState(), "util");
-	Lua::util::register_shared(utilMod);
+	Lua::util::register_shared(GetLuaState(), utilMod);
 	utilMod[luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::calc_world_direction_from_2d_coordinates), luabind::def("calc_world_direction_from_2d_coordinates", Lua::util::Client::calc_world_direction_from_2d_coordinates),
 	  luabind::def("create_particle_tracer", Lua::util::Client::create_particle_tracer), luabind::def("create_muzzle_flash", Lua::util::Client::create_muzzle_flash), luabind::def("fire_bullets", static_cast<luabind::object (*)(lua_State *, BulletInfo &)>(Lua::util::fire_bullets)),
 	  luabind::def("save_image", static_cast<bool (*)(lua_State *, uimg::ImageBuffer &, std::string, uimg::TextureInfo &, bool)>(save_image)),
@@ -1067,7 +1097,7 @@ void CGame::RegisterLuaLibraries()
 	ClientState::RegisterSharedLuaLibraries(GetLuaInterface());
 
 	GetLuaInterface().RegisterLibrary("asset",
-	  {{"export_map", Lua::util::Client::export_map}, {"import_model", Lua::util::Client::import_model}, {"export_texture", Lua::util::Client::export_texture}, {"export_material", Lua::util::Client::export_material},
+	  {{"export_map", Lua::util::Client::export_map}, {"import_model", Lua::util::Client::import_model}, {"import_gltf", Lua::util::Client::import_gltf}, {"export_texture", Lua::util::Client::export_texture}, {"export_material", Lua::util::Client::export_material},
 	    {"export_texture_as_vtf", static_cast<int32_t (*)(lua_State *)>([](lua_State *l) -> int32_t {
 		     std::string fileName = Lua::CheckString(l, 1);
 		     if(Lua::file::validate_write_operation(l, fileName) == false || FileManager::CreatePath(ufile::get_path_from_filename(fileName).c_str()) == false) {

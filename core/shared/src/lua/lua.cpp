@@ -53,6 +53,29 @@ void Game::InitializeLua()
 	lseed << "math.randomseed(" << tm.count() << ");";
 	Lua::RunString(GetLuaState(), lseed.str(), "internal");
 
+	// Add module paths
+	{
+		auto _G = luabind::globals(GetLuaState());
+		auto programPath = util::get_program_path();
+		auto path = FileManager::GetNormalizedPath(programPath + "/lua/?.lua");
+		path += ";" + FileManager::GetNormalizedPath(programPath + "/lua/modules/?.lua");
+#ifdef _WIN32
+		std::string ext = ".dll";
+#else
+		std::string ext = ".so";
+#endif
+		auto cpath = FileManager::GetNormalizedPath(programPath + "/modules/?" + ext);
+		std::replace(path.begin(), path.end(), '\\', '/');
+		std::replace(cpath.begin(), cpath.end(), '\\', '/');
+		luabind::object oPackage = _G["package"];
+		if(!oPackage) {
+			Con::cwar << "Unable to enable remote debugging: package library is missing!" << Con::endl;
+			return;
+		}
+		oPackage["path"] = path;
+		oPackage["cpath"] = cpath;
+	}
+
 	auto remDeb = engine->GetRemoteDebugging();
 	if((remDeb == 1 && IsServer()) == true || (remDeb == 2 && IsClient() == true))
 		Lua::debug::enable_remote_debugging(GetLuaState());
@@ -266,17 +289,18 @@ bool Game::LoadLuaComponentByName(const std::string &componentName)
 	return false;
 }
 
-void Game::AddConVarCallback(const std::string &cvar, LuaFunction function)
+CallbackHandle Game::AddConVarCallback(const std::string &cvar, LuaFunction function)
 {
 	auto lcvar = cvar;
 	ustring::to_lower(lcvar);
 	auto it = m_cvarCallbacks.find(lcvar);
 	if(it == m_cvarCallbacks.end())
-		it = m_cvarCallbacks.insert(std::make_pair(cvar, std::vector<std::shared_ptr<CvarCallback>> {})).first;
-	auto cb = std::make_shared<CvarCallback>(function);
+		it = m_cvarCallbacks.insert(std::make_pair(cvar, std::vector<CvarCallback> {})).first;
+	CvarCallback cb {function};
 	it->second.push_back(cb);
+	return cb.GetFunction();
 }
-const std::unordered_map<std::string, std::vector<std::shared_ptr<CvarCallback>>> &Game::GetConVarCallbacks() const { return m_cvarCallbacks; }
+const std::unordered_map<std::string, std::vector<CvarCallback>> &Game::GetConVarCallbacks() const { return m_cvarCallbacks; }
 
 void Game::RegisterLua()
 {

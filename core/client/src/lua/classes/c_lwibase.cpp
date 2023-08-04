@@ -152,6 +152,13 @@ static std::shared_ptr<prosper::Texture> draw_to_texture(WIBase &el, const Lua::
 	return context.CreateTexture({}, *imgDst, prosper::util::ImageViewCreateInfo {}, prosper::util::SamplerCreateInfo {});
 }
 
+static void clamp_to_parent_bounds(::WIBase &el, Vector2i &clampedPos, Vector2i &clamedSize)
+{
+	auto parent = el.GetParent();
+	Vector2i pos = el.GetPos();
+	Vector2i size = el.GetSize();
+}
+
 void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 {
 	classDef.def(luabind::tostring(luabind::self));
@@ -385,6 +392,8 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("EnableThinking", &::WIBase::EnableThinking);
 	classDef.def("DisableThinking", &::WIBase::DisableThinking);
 	classDef.def("SetThinkingEnabled", &::WIBase::SetThinkingEnabled);
+	classDef.def(
+	  "InvokeThink", +[](::WIBase &el) { el.Think(); });
 
 	classDef.def("AddAttachment", static_cast<WIAttachment *(::WIBase::*)(const std::string &, const Vector2 &)>(&::WIBase::AddAttachment));
 	classDef.def("AddAttachment", static_cast<WIAttachment *(*)(::WIBase &, const std::string &)>([](::WIBase &el, const std::string &name) { return el.AddAttachment(name); }));
@@ -426,6 +435,27 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("IsRemovalScheduled", &::WIBase::IsRemovalScheduled);
 	classDef.def("GetRootElement", static_cast<::WIBase *(::WIBase::*)()>(&::WIBase::GetRootElement));
 	classDef.def("GetRootWindow", static_cast<prosper::Window *(::WIBase::*)()>(&::WIBase::GetRootWindow));
+	classDef.def(
+	  "ClampToBounds", +[](const ::WIBase &el, Vector2i &pos) { el.ClampToBounds(pos); });
+	classDef.def(
+	  "ClampToBounds", +[](const ::WIBase &el, Vector2i &pos, Vector2i &size) { el.ClampToBounds(pos, size); });
+	classDef.def(
+	  "GetVisibleBounds", +[](const ::WIBase &el) -> std::pair<Vector2i, Vector2i> {
+		  Vector2i pos, size;
+		  el.GetVisibleBounds(pos, size);
+		  return {pos, size};
+	  });
+	classDef.def(
+	  "GetAbsoluteVisibleBounds", +[](const ::WIBase &el) -> std::tuple<Vector2i, Vector2i, Vector2i> {
+		  Vector2i pos, size;
+		  Vector2i absPosParent;
+		  el.GetAbsoluteVisibleBounds(pos, size, &absPosParent);
+		  return {pos, size, absPosParent};
+	  });
+	classDef.def(
+	  "ClampToVisibleBounds", +[](const ::WIBase &el, Vector2i &pos) { el.ClampToVisibleBounds(pos); });
+	classDef.def(
+	  "ClampToVisibleBounds", +[](const ::WIBase &el, Vector2i &pos, Vector2i &size) { el.ClampToVisibleBounds(pos, size); });
 
 	auto defDrawInfo = luabind::class_<::WIBase::DrawInfo>("DrawInfo");
 	defDrawInfo.def(luabind::constructor<const std::shared_ptr<prosper::ICommandBuffer> &>());
@@ -1272,8 +1302,10 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			     },
 			     1)
 			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false)
+				if(Lua::IsSet(l, -1) == false) {
+					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
+				}
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;
@@ -1316,8 +1348,10 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			     },
 			     1)
 			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false)
+				if(Lua::IsSet(l, -1) == false) {
+					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
+				}
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;
@@ -1344,8 +1378,10 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			     },
 			     1)
 			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false)
+				if(Lua::IsSet(l, -1) == false) {
+					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
+				}
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;
@@ -1372,8 +1408,10 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			     },
 			     1)
 			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false)
+				if(Lua::IsSet(l, -1) == false) {
+					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
+				}
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;
@@ -1446,8 +1484,10 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			     },
 			     1)
 			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false)
+				if(Lua::IsSet(l, -1) == false) {
+					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
+				}
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;
@@ -1471,8 +1511,10 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			     },
 			     1)
 			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false)
+				if(Lua::IsSet(l, -1) == false) {
+					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
+				}
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;
@@ -1496,8 +1538,10 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			     },
 			     1)
 			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false)
+				if(Lua::IsSet(l, -1) == false) {
+					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
+				}
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;
@@ -1524,8 +1568,10 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			       },
 			       1)
 			    == Lua::StatusCode::Ok) {
-				  if(Lua::IsSet(l, -1) == false)
+				  if(Lua::IsSet(l, -1) == false) {
+					  Lua::Pop(l, 1);
 					  return CallbackReturnType::NoReturnValue;
+				  }
 				  auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
 				  Lua::Pop(l, 1);
 				  *reply = result;
@@ -1551,8 +1597,10 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 			     },
 			     1)
 			  == Lua::StatusCode::Ok) {
-				if(Lua::IsSet(l, -1) == false)
+				if(Lua::IsSet(l, -1) == false) {
+					Lua::Pop(l, 1);
 					return CallbackReturnType::NoReturnValue;
+				}
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l, -1));
 				Lua::Pop(l, 1);
 				*reply = result;

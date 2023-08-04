@@ -176,7 +176,7 @@ void SGame::SetTimeScale(float t)
 	server->SendPacket("game_timescale", p, pragma::networking::Protocol::SlowReliable);
 }
 
-static void CVAR_CALLBACK_host_timescale(NetworkState *, ConVar *, float, float val) { s_game->SetTimeScale(val); }
+static void CVAR_CALLBACK_host_timescale(NetworkState *, const ConVar &, float, float val) { s_game->SetTimeScale(val); }
 REGISTER_CONVAR_CALLBACK_SV(host_timescale, CVAR_CALLBACK_host_timescale);
 
 void SGame::Initialize()

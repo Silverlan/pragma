@@ -12,7 +12,7 @@
 #include "pragma/logging.hpp"
 
 using namespace pragma;
-#pragma optimize("", off)
+
 void ConstraintLookAtComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = ConstraintLookAtComponent;
@@ -122,4 +122,3 @@ void ConstraintLookAtComponent::ApplyConstraint()
 
 	constraintInfo->drivenObjectC->SetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot);
 }
-#pragma optimize("", on)

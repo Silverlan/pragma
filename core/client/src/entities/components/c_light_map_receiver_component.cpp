@@ -18,6 +18,7 @@
 #include <pragma/entities/entity_component_manager_t.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/logging.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
@@ -29,8 +30,10 @@ void CLightMapReceiverComponent::RegisterMembers(pragma::EntityComponentManager 
 void CLightMapReceiverComponent::SetupLightMapUvData(CBaseEntity &ent, LightmapDataCache *cache)
 {
 	auto mdl = ent.GetModel();
-	if(!mdl)
+	if(!mdl) {
+		CLightMapComponent::LOGGER.warn("Unable to find lightmap uv data for entity '{}': Entity has no model!", ent.ToString());
 		return;
+	}
 	auto hasLightmapUvs = false;
 	for(auto &mg : mdl->GetMeshGroups()) {
 		for(auto &mesh : mg->GetMeshes()) {
@@ -59,8 +62,10 @@ void CLightMapReceiverComponent::UpdateLightMapUvData()
 	auto mdlC = GetEntity().GetComponent<CModelComponent>();
 	auto mdl = GetEntity().GetModel();
 	auto renderC = GetEntity().GetComponent<CRenderComponent>();
-	if(mdlC.expired() || renderC.expired() || mdl == nullptr)
+	if(mdlC.expired() || renderC.expired() || mdl == nullptr) {
+		CLightMapComponent::LOGGER.warn("Unable to initialize lightmap uv data for entity '{}': Entity has no model!", GetEntity().ToString());
 		return;
+	}
 	m_modelName = mdl->GetName();
 	umath::set_flag(m_stateFlags, StateFlags::IsModelBakedWithLightMaps, true);
 	m_uvDataPerMesh.clear();
@@ -117,8 +122,10 @@ void CLightMapReceiverComponent::UpdateRenderMeshBufferList()
 {
 	m_meshBufferIndices.clear();
 	auto mdlC = GetEntity().GetModelComponent();
-	if(!mdlC)
+	if(!mdlC) {
+		CLightMapComponent::LOGGER.warn("Unable to update render mesh buffer list: No model component found for entity '{}'!", GetEntity().ToString());
 		return;
+	}
 	umath::set_flag(m_stateFlags, StateFlags::RenderMeshBufferIndexTableDirty, false);
 	auto &renderMeshes = static_cast<CModelComponent *>(mdlC)->GetRenderMeshes();
 	m_meshBufferIndices.resize(renderMeshes.size());
@@ -132,11 +139,15 @@ void CLightMapReceiverComponent::UpdateModelMeshes()
 	m_meshes.clear();
 	auto mdlC = GetEntity().GetComponent<CModelComponent>();
 	auto mdl = GetEntity().GetModel();
-	if(mdlC.expired() || mdl == nullptr)
+	if(mdlC.expired() || mdl == nullptr) {
+		CLightMapComponent::LOGGER.warn("Unable to update model meshes: No model component found for entity '{}'!", GetEntity().ToString());
 		return;
+	}
 	auto renderC = GetEntity().GetComponent<CRenderComponent>();
-	if(renderC.expired())
+	if(renderC.expired()) {
+		CLightMapComponent::LOGGER.warn("Unable to update model meshes: No render component found for entity '{}'!", GetEntity().ToString());
 		return;
+	}
 	std::unordered_map<MeshIdx, BufferIdx> meshIdxToBufIdx {};
 	for(auto &pair : m_meshToMeshIdx) {
 		auto *mesh = pair.first;
@@ -172,8 +183,10 @@ const std::unordered_map<CLightMapReceiverComponent::MeshIdx, std::vector<Vector
 void CLightMapReceiverComponent::AssignBufferIndex(MeshIdx meshIdx, BufferIdx bufIdx)
 {
 	auto itMesh = m_meshes.find(meshIdx);
-	if(itMesh == m_meshes.end())
+	if(itMesh == m_meshes.end()) {
+		CLightMapComponent::LOGGER.warn("Unable to assign buffer index for buffer {} of mesh {} to lightmap receiver component of entity {}: Mesh not found!", bufIdx, meshIdx, GetEntity().ToString());
 		return;
+	}
 	m_meshToBufIdx.insert(std::make_pair(static_cast<CModelSubMesh *>(itMesh->second.get()), bufIdx));
 	umath::set_flag(m_stateFlags, StateFlags::RenderMeshBufferIndexTableDirty);
 }
@@ -196,8 +209,10 @@ void CLightMapReceiverComponent::UpdateMeshLightmapUvBuffers(CLightMapComponent 
 {
 	auto mdlC = GetEntity().GetComponent<CModelComponent>();
 	auto mdl = GetEntity().GetModel();
-	if(mdlC.expired() || mdl == nullptr)
+	if(mdlC.expired() || mdl == nullptr) {
+		CLightMapComponent::LOGGER.warn("Unable to update mesh lightmap uv buffers: No model component found for entity '{}'!", GetEntity().ToString());
 		return;
+	}
 	uint32_t subMeshIdx = 0u;
 	std::vector<std::shared_ptr<ModelMesh>> meshes;
 	mdlC->GetBaseModelMeshes(meshes);

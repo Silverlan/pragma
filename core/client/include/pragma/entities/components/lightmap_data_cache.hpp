@@ -42,6 +42,7 @@ namespace pragma {
 		static constexpr auto FORMAT_MODEL_ASCII = "lmd";
 		static size_t CalcPoseHash(const umath::Transform &pose);
 		static bool Load(const std::string &path, LightmapDataCache &outCache, std::string &outErr);
+		static std::string GetCacheFileName(const std::string &path);
 		struct MeshCacheData {
 			std::vector<Vector2> uvs;
 		};

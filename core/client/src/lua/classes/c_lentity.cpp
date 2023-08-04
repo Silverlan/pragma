@@ -29,6 +29,12 @@ void Lua::Entity::Client::register_class(luabind::class_<CBaseEntity, BaseEntity
 
 	classDef.def("GetSceneFlags", &CBaseEntity::GetSceneFlags);
 	classDef.def("AddToScene", &CBaseEntity::AddToScene);
+	classDef.def(
+	  "SyncScenes", +[](CBaseEntity &ent, const CBaseEntity &entOther) {
+		  ent.RemoveFromAllScenes();
+		  for(auto *scene : entOther.GetScenes())
+			  ent.AddToScene(*scene);
+	  });
 	classDef.def("RemoveFromScene", &CBaseEntity::RemoveFromScene);
 	classDef.def("RemoveFromAllScenes", &CBaseEntity::RemoveFromAllScenes);
 	classDef.def("IsInScene", &CBaseEntity::IsInScene);

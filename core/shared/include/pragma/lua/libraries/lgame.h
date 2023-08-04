@@ -41,7 +41,7 @@ namespace Lua {
 		DLLNETWORK Game::GameFlags get_game_state_flags(lua_State *l);
 		DLLNETWORK std::pair<bool, int> load_map(lua_State *l, std::string &mapName, BaseEntity **entWorld, Vector3 &origin);
 
-		DLLNETWORK void register_shared_functions(luabind::module_ &modGame);
+		DLLNETWORK void register_shared_functions(lua_State *l, luabind::module_ &modGame);
 	};
 };
 

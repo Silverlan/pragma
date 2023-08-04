@@ -31,5 +31,6 @@ void CMD_debug_hdr_bloom(NetworkState *, pragma::BasePlayerComponent *, std::vec
 		return;
 	pEl->SetName(name);
 	pEl->SetSize(256, 256);
+	pEl->SetZPos(std::numeric_limits<int>::max());
 	pEl->Update();
 }

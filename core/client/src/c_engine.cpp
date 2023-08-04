@@ -63,6 +63,12 @@
 #include <pragma/asset/util_asset.hpp>
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
+#ifdef _WIN32
+
+#include <dwmapi.h>
+#pragma comment(lib, "dwmapi.lib")
+
+#endif
 
 extern "C" {
 void DLLCLIENT RunCEngine(int argc, char *argv[])
@@ -74,6 +80,9 @@ void DLLCLIENT RunCEngine(int argc, char *argv[])
 	en = nullptr;
 }
 }
+#ifdef PRAGMA_ENABLE_NSIGHT_AFTERMATH
+void enable_nsight_aftermath_crash_tracker();
+#endif
 
 DLLCLIENT CEngine *c_engine = NULL;
 extern DLLCLIENT ClientState *client;
@@ -89,7 +98,9 @@ CEngine::CEngine(int argc, char *argv[])
       m_farZ(pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z), m_fps(0), m_tFPSTime(0.f), m_tLastFrame(util::Clock::now()), m_tDeltaFrameTime(0), m_audioAPI {"fmod"}
 {
 	c_engine = this;
-
+#ifdef PRAGMA_ENABLE_NSIGHT_AFTERMATH
+	enable_nsight_aftermath_crash_tracker();
+#endif
 	RegisterCallback<void, std::reference_wrapper<const GLFW::Joystick>, bool>("OnJoystickStateChanged");
 	RegisterCallback<void, std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("DrawFrame");
 	RegisterCallback<void>("PreDrawGUI");
@@ -122,7 +133,7 @@ CEngine::CEngine(int argc, char *argv[])
 
 	pragma::asset::AssetManager::ImporterInfo importerInfo {};
 	importerInfo.name = "glTF";
-	importerInfo.fileExtensions = {{"gltf", false}, {"glb", true}};
+	importerInfo.fileExtensions = {{"gltf", false}, {"glb", true}, {"vrm", true}}; // VRM is based on glTF ( https://vrm.dev/en/ )
 	GetAssetManager().RegisterImporter(importerInfo, pragma::asset::Type::Model, [](Game &game, ufile::IFile &f, const std::optional<std::string> &mdlPath, std::string &errMsg) -> std::unique_ptr<pragma::asset::IAssetWrapper> {
 		util::Path path {};
 		if(mdlPath.has_value()) {
@@ -442,6 +453,11 @@ void CEngine::KeyboardInput(prosper::Window &window, GLFW::Key key, int scanCode
 			return;
 		}
 	}
+	if(key == GLFW::Key::GraveAccent) {
+		if(state == GLFW::KeyState::Press)
+			ToggleConsole();
+		return;
+	}
 	auto buttonState = state;
 	auto bValidButtonInput = GetInputButtonState(magnitude, mods, buttonState);
 	if(bValidButtonInput == true) {
@@ -505,6 +521,12 @@ void CEngine::OnFilesDropped(prosper::Window &window, std::vector<std::string> &
 		return;
 	client->OnFilesDropped(files);
 }
+bool CEngine::OnWindowShouldClose(prosper::Window &window)
+{
+	if(client == nullptr)
+		return true;
+	return client->OnWindowShouldClose(window);
+}
 bool CEngine::IsWindowFocused() const { return umath::is_flag_set(m_stateFlags, StateFlags::WindowFocused); }
 
 void CEngine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
@@ -526,6 +548,8 @@ extern std::optional<int> g_launchParamRefreshRate;
 extern std::optional<bool> g_launchParamNoBorder;
 extern std::optional<uint32_t> g_launchParamWidth;
 extern std::optional<uint32_t> g_launchParamHeight;
+extern std::optional<Color> g_titleBarColor;
+extern std::optional<Color> g_borderColor;
 void register_game_shaders();
 bool CEngine::Initialize(int argc, char *argv[])
 {
@@ -533,11 +557,17 @@ bool CEngine::Initialize(int argc, char *argv[])
 	if(Lua::get_extended_lua_modules_enabled()) {
 		RegisterConCommand("lc", [this](NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { RunConsoleCommand("lua_run_cl", argv); });
 	}
-	auto &cmds = *m_preloadedConfig.get();
+	auto &cmds = *m_clConfig;
+	auto findCmdArg = [&cmds](const std::string &cmd) -> std::optional<std::string> {
+		auto *args = cmds.Find(cmd);
+		if(args && !args->empty())
+			return args->front();
+		return {};
+	};
 
-	auto *cviRenderAPI = cmds.find("render_api");
-	if(cviRenderAPI && cviRenderAPI->argv.empty() == false)
-		SetRenderAPI(cviRenderAPI->argv.front());
+	auto renderApi = findCmdArg("render_api");
+	if(renderApi)
+		SetRenderAPI(*renderApi);
 
 	// Initialize Window context
 	try {
@@ -550,13 +580,13 @@ bool CEngine::Initialize(int argc, char *argv[])
 		return false;
 	}
 
-	auto res = cmds.find("cl_window_resolution");
+	auto windowRes = findCmdArg("cl_window_resolution");
 	prosper::IPrContext::CreateInfo contextCreateInfo {};
 	contextCreateInfo.width = 1280;
 	contextCreateInfo.height = 1024;
-	if(res != nullptr && !res->argv.empty()) {
+	if(windowRes) {
 		std::vector<std::string> vals;
-		ustring::explode(res->argv[0], "x", vals);
+		ustring::explode(*windowRes, "x", vals);
 		if(vals.size() >= 2) {
 			contextCreateInfo.width = util::to_int(vals[0]);
 			contextCreateInfo.height = util::to_int(vals[1]);
@@ -564,20 +594,20 @@ bool CEngine::Initialize(int argc, char *argv[])
 	}
 	// SetResolution(Vector2i(contextCreateInfo.width,contextCreateInfo.height));
 
-	res = cmds.find("cl_render_resolution");
-	if(res != nullptr && !res->argv.empty()) {
+	auto renderRes = findCmdArg("cl_render_resolution");
+	if(renderRes) {
 		std::vector<std::string> vals;
-		ustring::explode(res->argv[0], "x", vals);
+		ustring::explode(*renderRes, "x", vals);
 		if(vals.size() >= 2) {
 			m_renderResolution = {util::to_int(vals[0]), util::to_int(vals[1])};
 		}
 	}
 	//
 
-	res = cmds.find("cl_render_window_mode");
+	auto windowMode = findCmdArg("cl_render_window_mode");
 	int mode = 0;
-	if(res != nullptr && !res->argv.empty())
-		mode = util::to_int(res->argv[0]);
+	if(windowMode)
+		mode = util::to_int(*windowMode);
 	auto &initialWindowSettings = GetRenderContext().GetInitialWindowSettings();
 	initialWindowSettings.windowedMode = (mode == 0);
 	initialWindowSettings.decorated = ((mode == 2) ? false : true);
@@ -593,17 +623,17 @@ bool CEngine::Initialize(int argc, char *argv[])
 	if(g_launchParamHeight.has_value())
 		initialWindowSettings.height = *g_launchParamHeight;
 
-	res = cmds.find("cl_render_monitor");
-	if(res != nullptr && !res->argv.empty()) {
-		auto monitor = util::to_int(res->argv[0]);
+	auto renderMonitor = findCmdArg("cl_render_monitor");
+	if(renderMonitor) {
+		auto monitor = util::to_int(*renderMonitor);
 		auto monitors = GLFW::get_monitors();
 		if(monitor < monitors.size() && monitor > 0)
 			initialWindowSettings.monitor = monitors[monitor];
 	}
 
-	res = cmds.find("cl_gpu_device");
-	if(res != nullptr && !res->argv.empty()) {
-		auto device = res->argv[0];
+	auto gpuDevice = findCmdArg("cl_gpu_device");
+	if(gpuDevice) {
+		auto device = *gpuDevice;
 		std::vector<std::string> subStrings;
 		ustring::explode(device, ",", subStrings);
 		if(subStrings.size() >= 2)
@@ -611,9 +641,9 @@ bool CEngine::Initialize(int argc, char *argv[])
 	}
 
 	auto presentMode = prosper::PresentModeKHR::Mailbox;
-	res = cmds.find("cl_render_present_mode");
-	if(res != nullptr && !res->argv.empty()) {
-		auto mode = util::to_int(res->argv[0]);
+	auto renderPresentMode = findCmdArg("cl_render_present_mode");
+	if(renderPresentMode) {
+		auto mode = util::to_int(*renderPresentMode);
 		if(mode == 0)
 			presentMode = prosper::PresentModeKHR::Immediate;
 		else if(mode == 1)
@@ -624,6 +654,32 @@ bool CEngine::Initialize(int argc, char *argv[])
 	contextCreateInfo.presentMode = presentMode;
 
 	GetRenderContext().Initialize(contextCreateInfo);
+
+	auto &window = GetRenderContext().GetWindow();
+	if(g_titleBarColor.has_value())
+		window->SetTitleBarColor(*g_titleBarColor);
+	if(g_borderColor.has_value())
+		window->SetBorderColor(*g_borderColor);
+
+#ifdef _WIN32
+#if defined(WINVER) && (WINVER >= 0x0501)
+	auto h = GetConsoleWindow();
+	if(g_titleBarColor.has_value()) {
+		auto tmp = *g_titleBarColor;
+		umath::swap(tmp.r, tmp.b);
+		auto hex = tmp.ToHexColorRGB();
+		COLORREF hexCol = ::util::to_hex_number("0x" + hex);
+		DwmSetWindowAttribute(h, DWMWINDOWATTRIBUTE::DWMWA_CAPTION_COLOR, &hexCol, sizeof(hexCol));
+	}
+	if(g_borderColor.has_value()) {
+		auto tmp = *g_borderColor;
+		umath::swap(tmp.r, tmp.b);
+		auto hex = tmp.ToHexColorRGB();
+		COLORREF hexCol = ::util::to_hex_number("0x" + hex);
+		DwmSetWindowAttribute(h, DWMWINDOWATTRIBUTE::DWMWA_BORDER_COLOR, &hexCol, sizeof(hexCol));
+	}
+#endif
+#endif
 
 	auto &shaderManager = GetRenderContext().GetShaderManager();
 	shaderManager.RegisterShader("clear_color", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderClearColor(context, identifier); });
@@ -656,7 +712,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 	if(lanInfo && lanInfo->configData) {
 		std::vector<std::string> characterSetRequirements;
 		(*lanInfo->configData)["font"]["characterSetRequirements"](characterSetRequirements);
-		if(std::find(characterSetRequirements.begin(), characterSetRequirements.end(), "jp") != characterSetRequirements.end()) {
+		if(std::find(characterSetRequirements.begin(), characterSetRequirements.end(), "jp") != characterSetRequirements.end() || std::find(characterSetRequirements.begin(), characterSetRequirements.end(), "zh") != characterSetRequirements.end()) {
 			std::string sourceHanSans = "source-han-sans";
 			if(FindFontSet(sourceHanSans))
 				defaultFontSet = sourceHanSans;
@@ -814,6 +870,11 @@ void CEngine::LoadFontSets()
 					if(fontData["fileName"]) {
 						FontSetFileData fileData {};
 						fontData["fileName"](fileData.fileName);
+
+						uint32_t fontSizeAdjustment;
+						if(fontData["fontSizeAdjustment"](fontSizeAdjustment))
+							fileData.fontSizeAdjustment = fontSizeAdjustment;
+
 						fileData.fileName = dir + '/' + fileData.fileName;
 						fontSet.fileData.push_back(fileData);
 					}
@@ -821,6 +882,11 @@ void CEngine::LoadFontSets()
 						for(auto &udmFileData : fontData["files"]) {
 							FontSetFileData fileData {};
 							udmFileData["fileName"](fileData.fileName);
+
+							uint32_t fontSizeAdjustment;
+							if(fontData["fontSizeAdjustment"](fontSizeAdjustment))
+								fileData.fontSizeAdjustment = fontSizeAdjustment;
+
 							fileData.fileName = dir + '/' + fileData.fileName;
 							udm::to_flags(udmFileData["features"], fileData.flags);
 							fontSet.fileData.push_back(fileData);
@@ -860,7 +926,7 @@ void CEngine::OpenConsole()
 		{
 			if(WGUI::IsOpen()) {
 				auto *console = WIConsole::Open();
-				if(console && m_consoleType == ConsoleType::GUIDetached) {
+				if(console && m_consoleType == ConsoleType::GUIDetached && !console->IsExternallyOwned()) {
 					console->Update();
 					auto *frame = console->GetFrame();
 					if(frame) {
@@ -944,12 +1010,20 @@ void CEngine::SetGPUProfilingEnabled(bool bEnabled)
 }
 std::shared_ptr<prosper::Window> CEngine::CreateWindow(prosper::WindowSettings &settings)
 {
+	if(settings.width == 0 || settings.height == 0)
+		return nullptr;
 	auto &mainWindowCreateInfo = c_engine->GetRenderContext().GetWindow().GetWindowSettings();
 	settings.flags = mainWindowCreateInfo.flags;
 	settings.api = mainWindowCreateInfo.api;
 	auto window = c_engine->GetRenderContext().CreateWindow(settings);
 	if(!window)
 		return nullptr;
+
+	if(g_titleBarColor.has_value())
+		(*window)->SetTitleBarColor(*g_titleBarColor);
+	if(g_borderColor.has_value())
+		(*window)->SetBorderColor(*g_borderColor);
+
 	auto *pWindow = window.get();
 	pWindow->GetStagingRenderTarget(); // This will initialize the staging target immediately
 	(*pWindow)->SetWindowSizeCallback([pWindow](GLFW::Window &window, Vector2i size) {
@@ -970,13 +1044,21 @@ void CEngine::InitializeWindowInputCallbacks(prosper::Window &window)
 	window->SetScrollCallback([this, &window](GLFW::Window &glfwWindow, Vector2 offset) mutable { ScrollInput(window, offset); });
 	window->SetFocusCallback([this, &window](GLFW::Window &glfwWindow, bool bFocused) mutable { OnWindowFocusChanged(window, bFocused); });
 	window->SetDropCallback([this, &window](GLFW::Window &glfwWindow, std::vector<std::string> &files) mutable { OnFilesDropped(window, files); });
+	window->SetOnShouldCloseCallback([this, &window](GLFW::Window &glfwWindow) -> bool { return OnWindowShouldClose(window); });
 }
+void CEngine::OnWindowResized(prosper::Window &window, Vector2i size)
+{
+	m_stateFlags |= StateFlags::WindowSizeChanged;
+	m_tWindowResizeTime = util::Clock::now();
+}
+
 DLLCLIENT std::optional<std::string> g_customWindowIcon {};
 void CEngine::OnWindowInitialized()
 {
 	pragma::RenderContext::OnWindowInitialized();
 	auto &window = GetRenderContext().GetWindow();
 	InitializeWindowInputCallbacks(window);
+	window->SetWindowSizeCallback([this, &window](GLFW::Window &glfwWindow, Vector2i size) mutable { OnWindowResized(window, size); });
 
 	if(g_customWindowIcon.has_value()) {
 		auto imgBuf = uimg::load_image(*g_customWindowIcon, uimg::PixelFormat::LDR);
@@ -1035,10 +1117,22 @@ void CEngine::SetControllersEnabled(bool b)
 	});
 	GLFW::set_joystick_state_callback([this](const GLFW::Joystick &joystick, bool bConnected) { c_engine->CallCallbacks<void, std::reference_wrapper<const GLFW::Joystick>, bool>("OnJoystickStateChanged", std::ref(joystick), bConnected); });
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_controller_enabled, [](NetworkState *state, ConVar *cv, bool oldVal, bool newVal) { c_engine->SetControllersEnabled(newVal); });
+REGISTER_CONVAR_CALLBACK_CL(cl_controller_enabled, [](NetworkState *state, const ConVar &cv, bool oldVal, bool newVal) { c_engine->SetControllersEnabled(newVal); });
 
 float CEngine::GetRawJoystickAxisMagnitude() const { return m_rawInputJoystickMagnitude; }
 
+std::unique_ptr<CEngine::ConVarInfoList> &CEngine::GetConVarConfig(NwStateType type)
+{
+	if(type == NwStateType::Client)
+		return m_clConfig;
+	return Engine::GetConVarConfig(type);
+}
+Engine::StateInstance &CEngine::GetStateInstance(NetworkState &nw)
+{
+	if(m_clInstance->state.get() == &nw)
+		return *m_clInstance;
+	return Engine::GetStateInstance(nw);
+}
 Engine::StateInstance &CEngine::GetClientStateInstance() { return *m_clInstance; }
 
 ::util::WeakHandle<prosper::Shader> CEngine::ReloadShader(const std::string &name)
@@ -1518,6 +1612,19 @@ void CEngine::UpdateTickCount()
 
 void CEngine::Tick()
 {
+	if(umath::is_flag_set(m_stateFlags, StateFlags::WindowSizeChanged)) {
+		auto t = util::Clock::now();
+		auto dt = t - m_tWindowResizeTime;
+		// If the window is being resized by the user, we don't want to update the resolution constantly,
+		// so we add a small delay
+		if(dt > std::chrono::milliseconds {250}) {
+			umath::set_flag(m_stateFlags, StateFlags::WindowSizeChanged, false);
+			auto &window = GetWindow();
+			auto size = window.GetGlfwWindow().GetSize();
+			OnResolutionChanged(size.x, size.y);
+		}
+	}
+
 	Locale::Poll();
 	ProcessConsoleInput();
 	RunTickEvents();
@@ -1620,18 +1727,18 @@ uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 	return n;
 }
 
-REGISTER_CONVAR_CALLBACK_CL(cl_render_monitor, [](NetworkState *, ConVar *, int32_t, int32_t monitor) {
+REGISTER_CONVAR_CALLBACK_CL(cl_render_monitor, [](NetworkState *, const ConVar &, int32_t, int32_t monitor) {
 	auto monitors = GLFW::get_monitors();
 	if(monitor < monitors.size() && monitor >= 0)
 		c_engine->GetWindow().SetMonitor(monitors[monitor]);
 })
 
-REGISTER_CONVAR_CALLBACK_CL(cl_render_window_mode, [](NetworkState *, ConVar *, int32_t, int32_t val) {
+REGISTER_CONVAR_CALLBACK_CL(cl_render_window_mode, [](NetworkState *, const ConVar &, int32_t, int32_t val) {
 	c_engine->GetWindow().SetWindowedMode(val != 0);
 	c_engine->GetWindow().SetNoBorder(val == 2);
 })
 
-REGISTER_CONVAR_CALLBACK_CL(cl_window_resolution, [](NetworkState *, ConVar *, std::string, std::string val) {
+REGISTER_CONVAR_CALLBACK_CL(cl_window_resolution, [](NetworkState *, const ConVar &, std::string, std::string val) {
 	std::vector<std::string> vals;
 	ustring::explode(val, "x", vals);
 	if(vals.size() < 2)
@@ -1654,7 +1761,7 @@ REGISTER_CONVAR_CALLBACK_CL(cl_window_resolution, [](NetworkState *, ConVar *, s
 	menu->SetSize(x, y);
 })
 
-REGISTER_CONVAR_CALLBACK_CL(cl_render_resolution, [](NetworkState *, ConVar *, std::string, std::string val) {
+REGISTER_CONVAR_CALLBACK_CL(cl_render_resolution, [](NetworkState *, const ConVar &, std::string, std::string val) {
 	std::vector<std::string> vals;
 	ustring::explode(val, "x", vals);
 	if(vals.size() < 2) {
@@ -1667,7 +1774,7 @@ REGISTER_CONVAR_CALLBACK_CL(cl_render_resolution, [](NetworkState *, ConVar *, s
 	c_engine->SetRenderResolution(resolution);
 })
 
-REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled, [](NetworkState *, ConVar *, bool, bool enabled) {
+REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled, [](NetworkState *, const ConVar &, bool, bool enabled) {
 	if(c_engine == nullptr)
 		return;
 	c_engine->SetGPUProfilingEnabled(enabled);

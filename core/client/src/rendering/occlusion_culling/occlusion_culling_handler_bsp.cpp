@@ -88,7 +88,7 @@ void OcclusionCullingHandlerBSP::PerformCulling(pragma::CSceneComponent &scene, 
 void OcclusionCullingHandlerBSP::SetCurrentNodeLocked(bool bLocked) { m_bLockCurrentNode = bLocked; }
 bool OcclusionCullingHandlerBSP::IsCurrentNodeLocked() const { return m_bLockCurrentNode; }
 
-static void debug_bsp_nodes(NetworkState *, ConVar *, int32_t, int32_t val)
+static void debug_bsp_nodes(NetworkState *, const ConVar &, int32_t, int32_t val)
 {
 	if(c_game == nullptr)
 		return;
@@ -233,7 +233,7 @@ static void debug_bsp_nodes(NetworkState *, ConVar *, int32_t, int32_t val)
 }
 REGISTER_CONVAR_CALLBACK_CL(debug_bsp_nodes, debug_bsp_nodes);
 
-static void debug_bsp_lock_callback(NetworkState *, ConVar *, int32_t, int32_t val)
+static void debug_bsp_lock_callback(NetworkState *, const ConVar &, int32_t, int32_t val)
 {
 	if(c_game == nullptr)
 		return;

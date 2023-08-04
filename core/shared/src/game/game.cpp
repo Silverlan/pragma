@@ -728,7 +728,8 @@ void Game::PostTick() { m_tLastTick = m_tCur; }
 void Game::SetGameFlags(GameFlags flags) { m_flags = flags; }
 Game::GameFlags Game::GetGameFlags() const { return m_flags; }
 
-bool Game::IsMapInitialized() { return (m_flags & GameFlags::MapInitialized) != GameFlags::None; }
+bool Game::IsMapInitialized() const { return (m_flags & GameFlags::MapInitialized) != GameFlags::None; }
+bool Game::IsGameReady() const { return (m_flags & GameFlags::GameReady) != GameFlags::None; }
 
 const MapInfo &Game::GetMapInfo() const { return m_mapInfo; }
 
@@ -800,15 +801,18 @@ bool Game::LoadMap(const std::string &map, const Vector3 &origin, std::vector<En
 	// Load entities
 	Con::cout << "Loading entities..." << Con::endl;
 
-	auto *entBvh = CreateEntity("entity");
-	assert(entBvh);
-	auto *bvhC = static_cast<pragma::BaseStaticBvhCacheComponent *>(entBvh->AddComponent("static_bvh_cache").get());
-	if(!bvhC) {
-		entBvh->Remove();
-		entBvh = nullptr;
+	pragma::BaseStaticBvhCacheComponent *bvhC = nullptr;
+	if(IsClient()) {
+		auto *entBvh = CreateEntity("entity");
+		assert(entBvh);
+		bvhC = static_cast<pragma::BaseStaticBvhCacheComponent *>(entBvh->AddComponent("static_bvh_cache").get());
+		if(!bvhC) {
+			entBvh->Remove();
+			entBvh = nullptr;
+		}
+		else
+			entBvh->Spawn();
 	}
-	else
-		entBvh->Spawn();
 
 	std::vector<EntityHandle> ents {};
 	InitializeMapEntities(*worldData, ents);
@@ -869,10 +873,16 @@ std::shared_ptr<Model> Game::LoadModel(const std::string &mdl, bool bReload)
 	if(asset)
 		return pragma::asset::ModelManager::GetAssetObject(*asset);
 	auto &mdlMananger = GetNetworkState()->GetModelManager();
-	auto r = bReload ? mdlMananger.ReloadAsset(mdl) : mdlMananger.LoadAsset(mdl);
+	util::FileAssetManager::PreloadResult result;
+	auto r = bReload ? mdlMananger.ReloadAsset(mdl, nullptr, &result) : mdlMananger.LoadAsset(mdl, nullptr, &result);
 	if(r != nullptr) {
 		CallCallbacks<void, std::reference_wrapper<std::shared_ptr<Model>>>("OnModelLoaded", r);
 		CallLuaCallbacks<void, std::shared_ptr<Model>>("OnModelLoaded", r);
+	}
+	else {
+		Con::cwar << "Failed to load model '" << mdl << "': " << magic_enum::enum_name(result.result) << Con::endl;
+		if(result.errorMessage)
+			Con::cwar << "Error Message:\n" << *result.errorMessage << Con::endl;
 	}
 	return r;
 }
@@ -888,6 +898,8 @@ void Game::OnGameReady()
 	m_ctCur.Reset();
 	m_ctReal.Reset();
 	CallCallbacks<void>("OnGameReady");
+
+	m_flags |= GameFlags::GameReady;
 	CallLuaCallbacks("OnGameReady");
 	for(auto *gmC : GetGamemodeComponents())
 		gmC->OnGameReady();

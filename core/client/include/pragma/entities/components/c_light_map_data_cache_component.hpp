@@ -25,9 +25,12 @@ namespace pragma {
 		const std::shared_ptr<LightmapDataCache> &GetLightMapDataCache() const;
 		void ReloadCache();
 		void InitializeUvBuffers();
+
+		virtual void OnTick(double dt) override;
 	  protected:
 		std::shared_ptr<LightmapDataCache> m_lightmapDataCache = nullptr;
 		std::string m_lightmapDataCacheFile;
+		bool m_lightmapDataCacheDirty = false;
 	};
 };
 

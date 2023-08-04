@@ -54,6 +54,7 @@ namespace util {
 namespace pragma::asset {
 	class AssetManager;
 };
+enum class NwStateType : uint8_t { Client = 0, Server, Count };
 class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
   public:
 	static const uint32_t DEFAULT_TICK_RATE;
@@ -63,6 +64,22 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	mutable std::shared_ptr<util::Library> m_libServer = nullptr;
 	mutable pragma::IServerState m_iServerState;
   public:
+	struct DLLNETWORK ConVarInfoList {
+		using ConVarArgs = std::vector<std::string>;
+		struct DLLNETWORK ConVarInfo {
+			std::string cmd;
+			ConVarArgs args;
+		};
+		ConVarArgs *Find(const std::string &cmd);
+		void Add(const std::string &cmd, const ConVarArgs &args);
+		std::vector<ConVarInfo> &GetConVars() { return m_cvars; }
+		const std::vector<ConVarInfo> &GetConVars() const { return m_cvars; }
+	  private:
+		std::vector<ConVarInfo> m_cvars;
+		// Only contains last convar, used for fast lookups
+		std::unordered_map<std::string, ConVarArgs> m_cvarMap;
+	};
+
 	virtual std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &GetConVarPtrs();
 	static ConVarHandle GetConVarHandle(std::string scvar);
 	//
@@ -79,9 +96,16 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 		std::shared_ptr<Color> color;
 	};
 	enum class ConsoleType : uint8_t { None = 0, Terminal, GUI, GUIDetached };
+
+	virtual std::unique_ptr<ConVarInfoList> &GetConVarConfig(NwStateType type);
   protected:
 	bool ExecConfig(const std::string &cfg, const std::function<void(std::string &, std::vector<std::string> &)> &callback);
+	bool ExecConfig(const std::string &cfg, ConVarInfoList &infoList);
+	void ExecCommands(ConVarInfoList &cmds);
+	void PreloadConfig(StateInstance &instance, const std::string &configName);
+	virtual void PreloadConfig(NwStateType type, const std::string &configName);
 	std::unique_ptr<StateInstance> m_svInstance;
+	std::unique_ptr<ConVarInfoList> m_svConfig;
 	bool m_bMountExternalGameResources = true;
 
 	std::atomic<bool> m_bRecordConsoleOutput = false;
@@ -173,6 +197,7 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	// NetState
 	virtual NetworkState *GetActiveState();
 
+	virtual StateInstance &GetStateInstance(NetworkState &nw);
 	StateInstance &GetServerStateInstance();
 
 	std::optional<ConsoleOutput> PollConsoleOutput();
@@ -230,6 +255,8 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	pragma::asset::AssetManager &GetAssetManager();
 	const pragma::asset::AssetManager &GetAssetManager() const;
 
+	void AddTickEvent(const std::function<void()> &ev);
+
 	// For internal use only
 	void SetReplicatedConVar(const std::string &cvar, const std::string &val);
   protected:
@@ -239,7 +266,6 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	void WriteEngineConfig(VFilePtrReal f);
 	void RegisterSharedConsoleCommands(ConVarMap &map);
 	void RunTickEvents();
-	void AddTickEvent(const std::function<void()> &ev);
 	virtual uint32_t DoClearUnusedAssets(pragma::asset::Type type) const;
 	virtual void RegisterConsoleCommands();
 	virtual void UpdateTickCount();
@@ -291,6 +317,7 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	std::vector<CallbackHandle> m_profileHandlers = {};
 
 	std::queue<std::function<void()>> m_tickEventQueue;
+	std::mutex m_tickEventQueueMutex;
 	StateFlags m_stateFlags;
 	mutable upad::PackageManager *m_padPackageManager = nullptr;
 	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase>> m_profilingStageManager = nullptr;

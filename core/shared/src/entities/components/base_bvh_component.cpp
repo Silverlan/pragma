@@ -239,7 +239,7 @@ std::shared_ptr<BvhData> BaseBvhComponent::SetBvhData(std::shared_ptr<BvhData> &
 	m_bvhData = bvhData;
 	return tmp;
 }
-
+size_t BaseBvhComponent::GetTriangleCount() const { return m_bvhData->primitives.size(); }
 std::optional<Vector3> BaseBvhComponent::GetVertex(size_t idx) const
 {
 	std::scoped_lock lock {m_bvhDataMutex};
@@ -263,6 +263,13 @@ std::optional<Vector3> BaseBvhComponent::GetVertex(size_t idx) const
 		}
 	}
 	return {};
+}
+
+void BaseBvhComponent::GetVertexData(std::vector<BvhTriangle> &outData) const
+{
+	std::scoped_lock lock {m_bvhDataMutex};
+	outData.resize(m_bvhData->primitives.size());
+	memcpy(outData.data(), m_bvhData->primitives.data(), util::size_of_container(outData));
 }
 
 bool BaseBvhComponent::SetVertexData(pragma::BvhData &bvhData, const std::vector<BvhTriangle> &data)
@@ -297,22 +304,23 @@ bool BaseBvhComponent::SetVertexData(const std::vector<BvhTriangle> &data)
 	return SetVertexData(*m_bvhData, data);
 }
 
-std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh>> &meshes, const std::vector<umath::ScaledTransform> *optPoses, const std::function<bool()> &fIsCancelled, std::vector<size_t> *optOutMeshIndices)
+bool BaseBvhComponent::ShouldConsiderMesh(const ModelSubMesh &mesh) { return mesh.GetGeometryType() == ModelSubMesh::GeometryType::Triangles; }
+
+std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo, std::vector<size_t> *optOutMeshIndices)
 {
 	auto bvhData = std::make_unique<pragma::BvhData>();
 
-	auto shouldUseMesh = [](const ModelSubMesh &mesh) { return mesh.GetGeometryType() == ModelSubMesh::GeometryType::Triangles; };
 	size_t numVerts = 0;
 	bvhData->meshRanges.reserve(meshes.size());
 	if(optOutMeshIndices)
 		optOutMeshIndices->reserve(meshes.size());
 	size_t primitiveOffset = 0;
 	for(uint32_t meshIdx = 0; auto &mesh : meshes) {
-		if(fIsCancelled && fIsCancelled()) {
+		if(optBvhBuildInfo && optBvhBuildInfo->isCancelled && optBvhBuildInfo->isCancelled()) {
 			++meshIdx;
 			return nullptr;
 		}
-		if(shouldUseMesh(*mesh) == false) {
+		if(optBvhBuildInfo && optBvhBuildInfo->shouldConsiderMesh && optBvhBuildInfo->shouldConsiderMesh(*mesh, meshIdx) == false) {
 			++meshIdx;
 			continue;
 		}
@@ -334,13 +342,13 @@ std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(const std::vector<
 	primitives.resize(numVerts / 3);
 	primitiveOffset = 0;
 	for(uint32_t meshIdx = 0; auto &mesh : meshes) {
-		if(fIsCancelled && fIsCancelled())
+		if(optBvhBuildInfo && optBvhBuildInfo->isCancelled && optBvhBuildInfo->isCancelled())
 			return nullptr;
-		if(shouldUseMesh(*mesh) == false) {
+		if(optBvhBuildInfo && optBvhBuildInfo->shouldConsiderMesh && optBvhBuildInfo->shouldConsiderMesh(*mesh, meshIdx) == false) {
 			++meshIdx;
 			continue;
 		}
-		auto *pose = optPoses ? &(*optPoses)[meshIdx] : nullptr;
+		auto *pose = (optBvhBuildInfo && optBvhBuildInfo->poses) ? &(*optBvhBuildInfo->poses)[meshIdx] : nullptr;
 		auto &verts = mesh->GetVertices();
 		mesh->VisitIndices([&verts, primitiveOffset, &primitives, pose](auto *indexDataSrc, uint32_t numIndicesSrc) {
 			for(auto i = decltype(numIndicesSrc) {0}; i < numIndicesSrc; i += 3) {

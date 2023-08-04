@@ -6,5 +6,6 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 ]]
 
-local Component = util.register_class("ents.RenderTargetComponent",BaseEntityComponent)
-ents.COMPONENT_RENDER_TARGET = ents.register_component("render_target",Component,ents.EntityComponent.FREGISTER_BIT_NETWORKED)
+local Component = util.register_class("ents.RenderTargetComponent", BaseEntityComponent)
+ents.COMPONENT_RENDER_TARGET =
+	ents.register_component("render_target", Component, ents.EntityComponent.FREGISTER_BIT_NETWORKED)

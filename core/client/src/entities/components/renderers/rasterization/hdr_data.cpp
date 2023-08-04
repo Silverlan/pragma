@@ -48,7 +48,7 @@ extern DLLCLIENT CGame *c_game;
 static const float EXPOSURE_FRAME_UPDATE = 0.25f; // Exposure will be updated every x seconds
 
 static CVar cvMaxExposure = GetClientConVar("render_hdr_max_exposure");
-static void CVAR_CALLBACK_render_hdr_max_exposure(NetworkState *, ConVar *, float, float val)
+static void CVAR_CALLBACK_render_hdr_max_exposure(NetworkState *, const ConVar &, float, float val)
 {
 	if(c_game == nullptr)
 		return;
@@ -468,7 +468,7 @@ void HDRData::UpdateExposure()
 
 static auto cvAntiAliasing = GetClientConVar("cl_render_anti_aliasing");
 static auto cvMsaaSamples = GetClientConVar("cl_render_msaa_samples");
-static void CVAR_CALLBACK_render_msaa_enabled(NetworkState *, ConVar *, int, int)
+static void CVAR_CALLBACK_render_msaa_enabled(NetworkState *, const ConVar &, int, int)
 {
 	if(c_game == nullptr)
 		return;
@@ -505,7 +505,7 @@ static void CVAR_CALLBACK_render_msaa_enabled(NetworkState *, ConVar *, int, int
 REGISTER_CONVAR_CALLBACK_CL(cl_render_anti_aliasing, CVAR_CALLBACK_render_msaa_enabled);
 REGISTER_CONVAR_CALLBACK_CL(cl_render_msaa_samples, CVAR_CALLBACK_render_msaa_enabled);
 
-static void CVAR_CALLBACK_render_bloom_resolution(NetworkState *, ConVar *, int, int width)
+static void CVAR_CALLBACK_render_bloom_resolution(NetworkState *, const ConVar &, int, int width)
 {
 	if(c_game == nullptr)
 		return;

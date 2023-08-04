@@ -298,7 +298,8 @@ void BasePlayerComponent::Initialize()
 		return util::EventReply::Handled;
 	});
 	BindEvent(BaseCharacterComponent::EVENT_CALC_MOVEMENT_ACCELERATION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		static_cast<pragma::CECalcMovementAcceleration &>(evData.get()).acceleration = CalcMovementAcceleration();
+		auto &evDataAcc = static_cast<pragma::CECalcMovementAcceleration &>(evData.get());
+		evDataAcc.acceleration = CalcMovementAcceleration(evDataAcc.rampUpTime);
 		return util::EventReply::Handled;
 	});
 	BindEvent(BaseCharacterComponent::EVENT_CALC_MOVEMENT_DIRECTION, [this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
@@ -479,7 +480,11 @@ Vector2 BasePlayerComponent::CalcMovementSpeed() const
 	return {speed, 0.f};
 }
 float BasePlayerComponent::CalcAirMovementModifier() const { return GetEntity().GetNetworkState()->GetGameState()->GetConVarFloat("sv_player_air_move_scale"); }
-float BasePlayerComponent::CalcMovementAcceleration() const { return GetEntity().GetNetworkState()->GetGameState()->GetConVarFloat("sv_acceleration"); }
+float BasePlayerComponent::CalcMovementAcceleration(float &optOutRampUpTime) const {
+	auto *game = GetEntity().GetNetworkState()->GetGameState();
+	optOutRampUpTime = game->GetConVarFloat("sv_acceleration_ramp_up_time");
+	return game->GetConVarFloat("sv_acceleration");
+}
 Vector3 BasePlayerComponent::CalcMovementDirection(const Vector3 &forward, const Vector3 &right) const
 {
 	Vector3 dir {};

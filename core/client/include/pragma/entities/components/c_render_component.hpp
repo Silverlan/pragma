@@ -187,6 +187,8 @@ namespace pragma {
 		bool IsInPvs(const Vector3 &camPos, const CWorldComponent &world) const;
 		bool IsInPvs(const Vector3 &camPos) const;
 
+		const pragma::ShaderEntity::InstanceData &GetInstanceData() const;
+
 		GameShaderSpecialization GetShaderPipelineSpecialization() const;
 		void ClearRenderBuffers();
 	  protected:

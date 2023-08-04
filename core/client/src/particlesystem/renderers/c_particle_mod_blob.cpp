@@ -259,7 +259,7 @@ void CParticleRendererBlob::OnParticleSystemStarted()
 #endif
 }
 
-REGISTER_CONVAR_CALLBACK_CL(debug_particle_blob_show_neighbor_links, [](NetworkState *state, ConVar *, bool, bool val) {
+REGISTER_CONVAR_CALLBACK_CL(debug_particle_blob_show_neighbor_links, [](NetworkState *state, const ConVar &, bool, bool val) {
 	CHECK_CHEATS("debug_particle_blob_show_neighbor_links", state, );
 	if(c_game == nullptr)
 		return;

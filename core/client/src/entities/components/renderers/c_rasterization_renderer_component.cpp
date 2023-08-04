@@ -20,6 +20,7 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <image/prosper_msaa_texture.hpp>
+#include <pragma/logging.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <prosper_command_buffer.hpp>
@@ -91,16 +92,20 @@ void CRasterizationRendererComponent::InitializeLuaObject(lua_State *l) { return
 static pragma::ComponentHandle<pragma::CLightMapComponent> g_lightmapC = {};
 void CRasterizationRendererComponent::UpdateLightmap(CLightMapComponent &lightMapC)
 {
-	if(!lightMapC.HasValidLightMap())
+	if(!lightMapC.HasValidLightMap()) {
+		CLightMapComponent::LOGGER.warn("Lightmap has no valid lightmap texture!");
 		return;
+	}
 	for(auto &renderer : EntityCIterator<CRasterizationRendererComponent> {*c_game})
 		renderer.SetLightMap(lightMapC);
 	g_lightmapC = lightMapC.GetHandle<CLightMapComponent>();
 }
 void CRasterizationRendererComponent::UpdateLightmap()
 {
-	if(g_lightmapC.expired())
+	if(g_lightmapC.expired()) {
+		CLightMapComponent::LOGGER.warn("No lightmap component found!");
 		return;
+	}
 	UpdateLightmap(*g_lightmapC);
 }
 
@@ -390,6 +395,9 @@ pragma::rendering::Prepass &CRasterizationRendererComponent::GetPrepass() { retu
 const pragma::rendering::ForwardPlusInstance &CRasterizationRendererComponent::GetForwardPlusInstance() const { return const_cast<CRasterizationRendererComponent *>(this)->GetForwardPlusInstance(); }
 pragma::rendering::ForwardPlusInstance &CRasterizationRendererComponent::GetForwardPlusInstance() { return m_hdrInfo.forwardPlusInstance; }
 
+void CRasterizationRendererComponent::SetBloomThreshold(float threshold) { m_rendererData.bloomThreshold = threshold; }
+float CRasterizationRendererComponent::GetBloomThreshold() const { return m_rendererData.bloomThreshold; }
+
 Float CRasterizationRendererComponent::GetHDRExposure() const { return m_hdrInfo.exposure; }
 Float CRasterizationRendererComponent::GetMaxHDRExposure() const { return m_hdrInfo.max_exposure; }
 void CRasterizationRendererComponent::SetMaxHDRExposure(Float exposure) { m_hdrInfo.max_exposure = exposure; }
@@ -462,8 +470,10 @@ void CRasterizationRendererComponent::SetLightMap(pragma::CLightMapComponent &li
 	if(m_lightMapInfo.cbExposure.IsValid())
 		m_lightMapInfo.cbExposure.Remove();
 	m_lightMapInfo.cbExposure = lightMapC.GetLightMapExposureProperty()->AddCallback([this, &lightMapC](std::reference_wrapper<const float> oldValue, std::reference_wrapper<const float> newValue) { m_rendererData.lightmapExposurePow = lightMapC.CalcLightMapPowExposurePow(); });
-	if(m_lightMapInfo.lightMapTexture == nullptr)
+	if(m_lightMapInfo.lightMapTexture == nullptr) {
+		CLightMapComponent::LOGGER.warn("Lightmap component has no light map texture!");
 		return;
+	}
 	auto &ds = *m_descSetGroupRenderer->GetDescriptorSet();
 
 	auto &dummyTex = c_engine->GetRenderContext().GetDummyTexture();
@@ -532,7 +542,7 @@ void CRasterizationRenderer::Initialize()
 	AddComponent<CRasterizationRendererComponent>();
 }
 
-static void cl_render_ssao_callback(NetworkState *, ConVar *, bool, bool enabled)
+static void cl_render_ssao_callback(NetworkState *, const ConVar &, bool, bool enabled)
 {
 	if(c_game == nullptr)
 		return;

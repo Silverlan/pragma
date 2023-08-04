@@ -131,12 +131,12 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component, uint32_t ev
 	else if(eventId == pragma::BaseColorComponent::EVENT_ON_COLOR_CHANGED) {
 		Lua::PushInt(l, 1);
 		Lua::GetTableValue(l, argsIdx);
-		auto &oldColor = Lua::Check<Color>(l, -1);
+		auto &oldColor = Lua::Check<Vector4>(l, -1);
 		Lua::Pop(l, 1);
 
 		Lua::PushInt(l, 2);
 		Lua::GetTableValue(l, argsIdx);
-		auto &color = Lua::Check<Color>(l, -1);
+		auto &color = Lua::Check<Vector4>(l, -1);
 		Lua::Pop(l, 1);
 
 		pragma::CEOnColorChanged evData {oldColor, color};

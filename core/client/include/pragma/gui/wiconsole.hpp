@@ -24,7 +24,7 @@ class DLLCLIENT WIConsole : public WIBase {
 	static void Close();
 	static WIConsole *GetConsole();
 
-	enum class Mode : uint8_t { Standard = 0, SimplifiedOverlay, ExternalWindow };
+	enum class Mode : uint8_t { Standard = 0, SimplifiedOverlay, ExternalWindow, ExternalOwnership };
 
 	WIConsole() = default;
 	virtual void Initialize() override;
@@ -36,6 +36,9 @@ class DLLCLIENT WIConsole : public WIBase {
 
 	WICommandLineEntry *GetCommandLineEntryElement();
 	WITextEntry *GetTextLogElement();
+
+	void SetExternallyOwned(bool externallyOwned);
+	bool IsExternallyOwned() const;
 
 	void SetFrame(WIFrame &frame);
 	WIFrame *GetFrame();

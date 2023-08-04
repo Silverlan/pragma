@@ -12,6 +12,9 @@
 #include <optional>
 #include <sharedutils/util_log.hpp>
 
+namespace spdlog {
+	class logger;
+};
 namespace pragma {
 	constexpr auto DEFAULT_CONSOLE_LOG_LEVEL = ::util::LogSeverity::Warning;
 	constexpr auto DEFAULT_FILE_LOG_LEVEL = ::util::LogSeverity::Info;
@@ -20,6 +23,8 @@ namespace pragma {
 		DLLNETWORK int32_t severity_to_spdlog_level(::util::LogSeverity severity);
 		DLLNETWORK ::util::LogSeverity spdlog_level_to_severity(int32_t spdlogLevel);
 	};
+	DLLNETWORK spdlog::logger &get_logger(const std::string &name);
+	DLLNETWORK spdlog::logger &register_logger(const std::string &name);
 	DLLNETWORK void log(const std::string &msg, ::util::LogSeverity severity = ::util::LogSeverity::Info);
 	DLLNETWORK bool is_log_level_enabled(::util::LogSeverity severity);
 	DLLNETWORK void flush_loggers();

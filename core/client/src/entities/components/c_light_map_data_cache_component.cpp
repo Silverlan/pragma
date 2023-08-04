@@ -12,6 +12,7 @@
 #include "pragma/entities/components/lightmap_data_cache.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
+#include "pragma/logging.hpp"
 #include <pragma/entities/components/base_model_component.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_manager_t.hpp>
@@ -27,8 +28,11 @@ void CLightMapDataCacheComponent::RegisterMembers(pragma::EntityComponentManager
 	using TDataCache = std::string;
 	{
 		auto memberInfo = create_component_member_info<T, TDataCache, static_cast<void (T::*)(const TDataCache &)>(&T::SetLightMapDataCachePath), static_cast<const TDataCache &(T::*)() const>(&T::GetLightMapDataCachePath)>("lightmapDataCache", "", AttributeSpecializationType::File);
+		memberInfo.SetSpecializationType(pragma::AttributeSpecializationType::File);
 		auto &metaData = memberInfo.AddMetaData();
-		metaData["extensions"] = std::vector<std::string> {LightmapDataCache::FORMAT_MODEL_BINARY, LightmapDataCache::FORMAT_MODEL_ASCII};
+		metaData["extensions"] = std::vector<std::string> {pragma::LightmapDataCache::FORMAT_MODEL_BINARY,pragma::LightmapDataCache::FORMAT_MODEL_ASCII};
+		metaData["stripRootPath"] = false;
+		metaData["stripExtension"] = false;
 		registerMember(std::move(memberInfo));
 	}
 }
@@ -36,14 +40,30 @@ CLightMapDataCacheComponent::CLightMapDataCacheComponent(BaseEntity &ent) : Base
 void CLightMapDataCacheComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void CLightMapDataCacheComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void CLightMapDataCacheComponent::SetLightMapDataCachePath(const std::string &cachePath) { m_lightmapDataCacheFile = cachePath; }
+void CLightMapDataCacheComponent::SetLightMapDataCachePath(const std::string &cachePath)
+{
+	m_lightmapDataCacheFile = cachePath;
+	m_lightmapDataCacheDirty = true;
+	SetTickPolicy(pragma::TickPolicy::Always);
+}
 const std::string &CLightMapDataCacheComponent::GetLightMapDataCachePath() const { return m_lightmapDataCacheFile; }
 const std::shared_ptr<LightmapDataCache> &CLightMapDataCacheComponent::GetLightMapDataCache() const { return m_lightmapDataCache; }
+
+void CLightMapDataCacheComponent::OnTick(double dt)
+{
+	SetTickPolicy(pragma::TickPolicy::Never);
+	if(m_lightmapDataCacheDirty) {
+		m_lightmapDataCacheDirty = false;
+		ReloadCache();
+	}
+}
 
 void CLightMapDataCacheComponent::InitializeUvBuffers()
 {
 	if(!m_lightmapDataCache)
 		return;
+	CLightMapComponent::LOGGER.info("Initializing lightmap uv buffers from cache for {} entities...", m_lightmapDataCache->cacheData.size());
+	uint32_t numInitialized = 0;
 	for(auto &pair : m_lightmapDataCache->cacheData) {
 		EntityIterator entIt {*c_game};
 		entIt.AttachFilter<EntityIteratorFilterUuid>(pair.first.uuid);
@@ -51,7 +71,11 @@ void CLightMapDataCacheComponent::InitializeUvBuffers()
 		if(it == entIt.end())
 			continue;
 		pragma::CLightMapReceiverComponent::SetupLightMapUvData(static_cast<CBaseEntity &>(**it), m_lightmapDataCache.get());
+		++numInitialized;
 	}
+
+	if(numInitialized == 0)
+		CLightMapComponent::LOGGER.warn("No entities found for lightmap data cache!");
 
 	// Generate lightmap uv buffers for all entities
 	std::vector<std::shared_ptr<prosper::IBuffer>> buffers {};
@@ -72,19 +96,30 @@ void CLightMapDataCacheComponent::InitializeUvBuffers()
 				auto *scene = c_game->GetRenderScene();
 				if(scene)
 					scene->SetLightMap(*lightMapC);
+				else
+					CLightMapComponent::LOGGER.error("Failed to set lightmap on render scene!");
 			}
+			else
+				CLightMapComponent::LOGGER.error("Failed to find lightmap component on entity with ID {}!", util::uuid_to_string(m_lightmapDataCache->lightmapEntityId));
 		}
+		else
+			CLightMapComponent::LOGGER.error("Failed to find lightmap entity with ID {}!", util::uuid_to_string(m_lightmapDataCache->lightmapEntityId));
 	}
+	else
+		CLightMapComponent::LOGGER.error("Failed to initialize global lightmap uv buffer!");
 }
 void CLightMapDataCacheComponent::ReloadCache()
 {
+	CLightMapComponent::LOGGER.info("Reloading lightmap data cache from cache file '{}'...", m_lightmapDataCacheFile);
 	m_lightmapDataCache = std::make_shared<LightmapDataCache>();
 	std::string err;
 	if(!LightmapDataCache::Load(m_lightmapDataCacheFile, *m_lightmapDataCache, err))
 		m_lightmapDataCache = nullptr;
 
-	if(!m_lightmapDataCache)
+	if(!m_lightmapDataCache) {
+		CLightMapComponent::LOGGER.error("Failed to load lightmap data cache: {}", err);
 		return;
+	}
 	std::unordered_map<std::string, std::shared_ptr<Model>> cachedModels;
 	for(auto &pair : m_lightmapDataCache->cacheData) {
 		EntityIterator entIt {*c_game};

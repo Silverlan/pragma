@@ -225,7 +225,7 @@ void CRaytracingComponent::InitializeBufferUpdateCallback()
 	//});
 }
 
-static void cmd_render_technique(NetworkState *, ConVar *, int32_t, int32_t val)
+static void cmd_render_technique(NetworkState *, const ConVar &, int32_t, int32_t val)
 {
 	if(c_game == nullptr)
 		return;

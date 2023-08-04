@@ -150,7 +150,9 @@ void pragma::asset::WorldData::ReadEntities(VFilePtr &f, const std::vector<msys:
 		m_entities.push_back(entData);
 		entData->m_mapIndex = i + 1; // Map indices always start at 1!
 		entData->SetClassName(f->ReadString());
-		entData->SetOrigin(f->Read<Vector3>());
+		auto pose = umath::ScaledTransform();
+		pose.SetOrigin(f->Read<Vector3>());
+		entData->SetPose(pose);
 
 		auto numKeyValues = f->Read<uint32_t>();
 		auto &keyValues = entData->GetKeyValues();
@@ -175,9 +177,11 @@ void pragma::asset::WorldData::ReadEntities(VFilePtr &f, const std::vector<msys:
 
 		auto &components = entData->GetComponents();
 		auto numComponents = f->Read<uint32_t>();
-		components.resize(numComponents);
-		for(auto &c : components)
-			c = f->ReadString();
+		components.reserve(numComponents);
+		for(auto &c : components) {
+			auto componentType = f->ReadString();
+			entData->AddComponent(componentType);
+		}
 
 		auto numLeaves = f->Read<uint32_t>();
 		auto &leaves = entData->GetLeaves();

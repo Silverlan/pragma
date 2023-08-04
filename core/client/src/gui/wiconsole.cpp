@@ -190,7 +190,8 @@ void WIConsole::Initialize()
 		pBgOutline->Remove();
 
 	auto *pEntry = wgui.Create<WICommandLineEntry>(this);
-	pEntry->SetSize(GetWidth() - 20, 24);
+	pEntry->SetName("console_entry");
+	pEntry->SetSize(GetWidth() - 20, 26);
 	pEntry->SetPos(10, GetBottom() - pEntry->GetHeight() - 10);
 	pEntry->SetAnchor(0, 1, 1, 1);
 	auto hScrollContainer = pLogScrollContainer->GetHandle();
@@ -401,7 +402,24 @@ WISnapArea *WIConsole::CreateSnapTarget(uint32_t x, uint32_t y, uint32_t w, uint
 	pFrame->AddSnapTarget(*pSnapTarget);
 	return pSnapTarget;
 }
-void WIConsole::UpdateConsoleMode() { SetSimpleConsoleMode(client->IsMainMenuOpen() == false); }
+void WIConsole::SetExternallyOwned(bool externallyOwned)
+{
+	m_mode = externallyOwned ? Mode::ExternalOwnership : Mode::Standard;
+	auto *frame = GetFrame();
+	if(frame)
+		frame->SetVisible(!externallyOwned);
+	if(!externallyOwned) {
+		SetParent(frame);
+		return;
+	}
+	SetSimpleConsoleMode(false, true);
+}
+bool WIConsole::IsExternallyOwned() const {return m_mode == Mode::ExternalOwnership; }
+void WIConsole::UpdateConsoleMode() {
+	if(m_mode == Mode::ExternalOwnership)
+		return;
+	SetSimpleConsoleMode(client->IsMainMenuOpen() == false);
+}
 void WIConsole::InitializeSnapAreas()
 {
 	const auto size = 242u;

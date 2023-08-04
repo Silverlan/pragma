@@ -56,6 +56,11 @@ namespace util {
 	};
 
 	enum class FogType : uint8_t { Linear = 0, Exponential = 1, Exponential2 = 2 };
+
+	DLLNETWORK std::optional<std::string> convert_udm_file_to_ascii(const std::string &fileName, std::string &outErr);
+	DLLNETWORK std::optional<std::string> convert_udm_file_to_binary(const std::string &fileName, std::string &outErr);
+
+	DLLNETWORK std::pair<std::vector<double>, std::vector<double>> generate_two_pass_gaussian_blur_coefficients(uint32_t radius, double sigma, bool linear = true, bool correction = true);
 };
 
 #endif

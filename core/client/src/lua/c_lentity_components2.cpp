@@ -17,6 +17,7 @@
 #include "pragma/entities/components/renderers/c_renderer_pp_fog_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_dof_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_bloom_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_glow_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_tone_mapping_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_fxaa_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_motion_blur_component.hpp"
@@ -41,7 +42,7 @@ void RegisterLuaEntityComponents2_cl(lua_State *l, luabind::module_ &entsMod)
 
 	auto defAnimatedBvh = pragma::lua::create_entity_component_class<pragma::CAnimatedBvhComponent, pragma::BaseEntityComponent>("AnimatedBvhComponent");
 	defAnimatedBvh.def("SetUpdateLazily", &pragma::CAnimatedBvhComponent::SetUpdateLazily);
-	defAnimatedBvh.def("RebuildAnimatedBvh", &pragma::CAnimatedBvhComponent::RebuildAnimatedBvh);
+	defAnimatedBvh.def("RebuildAnimatedBvh", static_cast<void (pragma::CAnimatedBvhComponent::*)(bool)>(&pragma::CAnimatedBvhComponent::RebuildAnimatedBvh));
 	entsMod[defAnimatedBvh];
 
 	auto defStaticBvh = pragma::lua::create_entity_component_class<pragma::CStaticBvhCacheComponent, pragma::BaseStaticBvhCacheComponent>("StaticBvhCacheComponent");
@@ -60,7 +61,24 @@ void RegisterLuaEntityComponents2_cl(lua_State *l, luabind::module_ &entsMod)
 	entsMod[defPpDof];
 
 	auto defPpBloom = pragma::lua::create_entity_component_class<pragma::CRendererPpBloomComponent, pragma::BaseEntityComponent>("RendererPpBloomComponent");
+	defPpBloom.def("SetBlurRadius", &pragma::CRendererPpBloomComponent::SetBlurRadius);
+	defPpBloom.def("SetBlurSigma", &pragma::CRendererPpBloomComponent::SetBlurSigma);
+	defPpBloom.def("GetBlurRadius", &pragma::CRendererPpBloomComponent::GetBlurRadius);
+	defPpBloom.def("GetBlurSigma", &pragma::CRendererPpBloomComponent::GetBlurSigma);
+	defPpBloom.def("GetBloomThreshold", &pragma::CRendererPpBloomComponent::GetBloomThreshold);
+	defPpBloom.def("SetBloomThreshold", &pragma::CRendererPpBloomComponent::SetBloomThreshold);
+	defPpBloom.def("GetBlurAmount", &pragma::CRendererPpBloomComponent::GetBlurAmount);
+	defPpBloom.def("SetBlurAmount", &pragma::CRendererPpBloomComponent::SetBlurAmount);
 	entsMod[defPpBloom];
+
+	auto defPpGlow = pragma::lua::create_entity_component_class<pragma::CRendererPpGlowComponent, pragma::BaseEntityComponent>("RendererPpGlowComponent");
+	defPpGlow.def("SetBlurRadius", &pragma::CRendererPpGlowComponent::SetBlurRadius);
+	defPpGlow.def("SetBlurSigma", &pragma::CRendererPpGlowComponent::SetBlurSigma);
+	defPpGlow.def("GetBlurRadius", &pragma::CRendererPpGlowComponent::GetBlurRadius);
+	defPpGlow.def("GetBlurSigma", &pragma::CRendererPpGlowComponent::GetBlurSigma);
+	defPpGlow.def("GetBlurAmount", &pragma::CRendererPpGlowComponent::GetBlurAmount);
+	defPpGlow.def("SetBlurAmount", &pragma::CRendererPpGlowComponent::SetBlurAmount);
+	entsMod[defPpGlow];
 
 	auto defPpToneMapping = pragma::lua::create_entity_component_class<pragma::CRendererPpToneMappingComponent, pragma::BaseEntityComponent>("RendererPpToneMappingComponent");
 	defPpToneMapping.def("SetApplyToHdrImage", &pragma::CRendererPpToneMappingComponent::SetApplyToHdrImage);

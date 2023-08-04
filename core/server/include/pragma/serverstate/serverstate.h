@@ -70,6 +70,7 @@ class DLLSERVER ServerState : public NetworkState {
 	virtual void Think() override;
 	virtual void Tick() override;
 	virtual void Close() override;
+	virtual NwStateType GetType() const override;
 	WMServerData &GetServerData();
 	void SendResourceFile(const std::string &f, const std::vector<pragma::networking::IServerClient *> &clients);
 	void SendResourceFile(const std::string &f);

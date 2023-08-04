@@ -20,6 +20,10 @@
 #include "pragma/lua/libraries/lasset.hpp"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/libraries/lfile.h"
+#include "pragma/lua/policies/default_parameter_policy.hpp"
+#include "pragma/lua/converters/vector_converter_t.hpp"
+#include "pragma/lua/converters/pair_converter_t.hpp"
+#include "pragma/logging.hpp"
 #include "pragma/logging_wrapper.hpp"
 #include "pragma/debug/debug_render_info.hpp"
 #include "pragma/debug/intel_vtune.hpp"
@@ -77,6 +81,7 @@
 #include <luabind/copy_policy.hpp>
 #include <luabind/discard_result_policy.hpp>
 #include <filesystem>
+#include <fmt/core.h>
 
 extern DLLNETWORK Engine *engine;
 
@@ -229,8 +234,14 @@ namespace umath {
 	float calc_bezier_point(float f1, float f2, float f3, float f4, float t);
 };
 
+bool Lua::util::start_debugger_server(lua_State *l)
+{
+	std::string fileName = "start_debugger_server.lua";
+	return engine->GetNetworkState(l)->GetGameState()->ExecuteLuaFile(fileName);
+}
+
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, HSV);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(std, match_results<const char *>); //I HAD TO DO THIS!!! I wanted to avoid this shit, but no.
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(std, match_results<const char *>);
 
 void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 {
@@ -241,7 +252,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	lua_pushnil(lua.GetState());
 	lua_setglobal(lua.GetState(), "loadfile");
 
-	std::array<std::string, 7> fRemoveOs = {"execute", "rename", "setlocale", "getenv", "remove", "exit", "tmpname"};
+	std::array<std::string, 7> fRemoveOs = {"execute", "rename", "setlocale" /*, "getenv"*/, "remove", "exit", "tmpname"};
 	Lua::GetGlobal(lua.GetState(), "os"); /* 1 */
 	auto tOs = Lua::GetStackTop(lua.GetState());
 	for(auto &name : fRemoveOs) {
@@ -445,9 +456,8 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("is_nan", static_cast<double (*)(double)>([](double val) -> double { return std::isnan(val); })), luabind::def("is_inf", static_cast<double (*)(double)>([](double val) -> double { return std::isinf(val); })),
 	  luabind::def("is_finite", static_cast<double (*)(double)>([](double val) -> double { return std::isfinite(val); })),
 #else
-        luabind::def("is_nan",static_cast<double(*)(double)>([](double val) -> double {return std::isnan<double>(val);})),
-        luabind::def("is_inf",static_cast<double(*)(double)>([](double val) -> double {return std::isinf<double>(val);})),
-        luabind::def("is_finite",static_cast<double(*)(double)>([](double val) -> double {return std::isfinite<double>(val);})),
+	  luabind::def("is_nan", static_cast<double (*)(double)>([](double val) -> double { return std::isnan<double>(val); })), luabind::def("is_inf", static_cast<double (*)(double)>([](double val) -> double { return std::isinf<double>(val); })),
+	  luabind::def("is_finite", static_cast<double (*)(double)>([](double val) -> double { return std::isfinite<double>(val); })),
 #endif
 	  luabind::def("cot", umath::cot), luabind::def("calc_fov_from_lens", &::umath::camera::calc_fov_from_lens), luabind::def("calc_focal_length_from_fov", &::umath::camera::calc_focal_length_from_fov),
 	  luabind::def("calc_fov_from_focal_length", &::umath::camera::calc_fov_from_focal_length), luabind::def("calc_aperture_size_from_fstop", &::umath::camera::calc_aperture_size_from_fstop),
@@ -463,6 +473,9 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("calc_dielectric_specular_reflection", &::umath::calc_dielectric_specular_reflection), luabind::def("calc_ballistic_velocity", &Lua::math::calc_ballistic_velocity), luabind::def("ease_in", &Lua::math::ease_in), luabind::def("ease_out", &Lua::math::ease_out),
 	  luabind::def("ease_in_out", &Lua::math::ease_in_out), luabind::def("get_frustum_plane_size", &Lua::math::get_frustum_plane_size), luabind::def("get_frustum_plane_boundaries", &Lua::math::get_frustum_plane_boundaries),
 	  luabind::def("get_frustum_plane_point", &Lua::math::get_frustum_plane_point),
+
+	  luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients, luabind::meta::join<luabind::default_parameter_policy<3, true>, luabind::default_parameter_policy<4, true>>::type {}),
+	  luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients, luabind::default_parameter_policy<4, true> {}), luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients),
 
 	  luabind::def("horizontal_fov_to_vertical_fov", &Lua::math::horizontal_fov_to_vertical_fov),
 	  luabind::def("horizontal_fov_to_vertical_fov", static_cast<double (*)(float, float)>([](float fovDeg, float widthOrAspectRatio) -> double { return Lua::math::horizontal_fov_to_vertical_fov(fovDeg, widthOrAspectRatio); })),
@@ -490,7 +503,10 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		    std::array<float, 3> r;
 		    auto n = umath::find_bezier_roots(time, cp0Time, cp0OutTime, cp1InTime, cp1Time, r);
 		    return umath::calc_bezier_point(cp0Val, cp0OutVal, cp1InVal, cp1Val, r[0]);
-	    })];
+	    }),
+	  luabind::def(
+	    "axis_to_vector", static_cast<Vector3(*)(pragma::SignedAxis)>(&pragma::axis_to_vector))
+	];
 	lua_pushtablecfunction(lua.GetState(), "math", "parse_expression", parse_math_expression);
 	lua_pushtablecfunction(lua.GetState(), "math", "solve_quadric", Lua::math::solve_quadric);
 	lua_pushtablecfunction(lua.GetState(), "math", "solve_cubic", Lua::math::solve_cubic);
@@ -505,22 +521,64 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	    {"EXPRESSION_CODE_INFIX_OPERATOR", mup::ECmdCode::cmOPRT_INFIX}, {"EXPRESSION_CODE_POSTFIX_OPERATOR", mup::ECmdCode::cmOPRT_POSTFIX}});
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "math",
-	  {{"EASE_TYPE_BACK", umath::to_integral(umath::EaseType::Back)}, {"EASE_TYPE_BOUNCE", umath::to_integral(umath::EaseType::Bounce)}, {"EASE_TYPE_CIRCULAR", umath::to_integral(umath::EaseType::Circular)}, {"EASE_TYPE_CUBIC", umath::to_integral(umath::EaseType::Cubic)},
-	    {"EASE_TYPE_ELASTIC", umath::to_integral(umath::EaseType::Elastic)}, {"EASE_TYPE_EXPONENTIAL", umath::to_integral(umath::EaseType::Exponential)}, {"EASE_TYPE_LINEAR", umath::to_integral(umath::EaseType::Linear)},
-	    {"EASE_TYPE_QUADRATIC", umath::to_integral(umath::EaseType::Quadratic)}, {"EASE_TYPE_QUARTIC", umath::to_integral(umath::EaseType::Quartic)}, {"EASE_TYPE_QUINTIC", umath::to_integral(umath::EaseType::Quintic)}, {"EASE_TYPE_SINE", umath::to_integral(umath::EaseType::Sine)},
+	  {
+	    {"EASE_TYPE_BACK", umath::to_integral(umath::EaseType::Back)},
+	    {"EASE_TYPE_BOUNCE", umath::to_integral(umath::EaseType::Bounce)},
+	    {"EASE_TYPE_CIRCULAR", umath::to_integral(umath::EaseType::Circular)},
+	    {"EASE_TYPE_CUBIC", umath::to_integral(umath::EaseType::Cubic)},
+	    {"EASE_TYPE_ELASTIC", umath::to_integral(umath::EaseType::Elastic)},
+	    {"EASE_TYPE_EXPONENTIAL", umath::to_integral(umath::EaseType::Exponential)},
+	    {"EASE_TYPE_LINEAR", umath::to_integral(umath::EaseType::Linear)},
+	    {"EASE_TYPE_QUADRATIC", umath::to_integral(umath::EaseType::Quadratic)},
+	    {"EASE_TYPE_QUARTIC", umath::to_integral(umath::EaseType::Quartic)},
+	    {"EASE_TYPE_QUINTIC", umath::to_integral(umath::EaseType::Quintic)},
+	    {"EASE_TYPE_SINE", umath::to_integral(umath::EaseType::Sine)},
 
-	    {"MAX_SINT8", std::numeric_limits<int8_t>::max()}, {"MIN_SINT8", std::numeric_limits<int8_t>::lowest()}, {"MAX_UINT8", std::numeric_limits<uint8_t>::max()}, {"MIN_UINT8", std::numeric_limits<uint8_t>::lowest()}, {"MAX_SINT16", std::numeric_limits<int16_t>::max()},
-	    {"MIN_SINT16", std::numeric_limits<int16_t>::lowest()}, {"MAX_UINT16", std::numeric_limits<uint16_t>::max()}, {"MIN_UINT16", std::numeric_limits<uint16_t>::lowest()}, {"MAX_SINT32", std::numeric_limits<int32_t>::max()}, {"MIN_SINT32", std::numeric_limits<int32_t>::lowest()},
-	    {"MAX_UINT32", std::numeric_limits<uint32_t>::max()}, {"MIN_UINT32", std::numeric_limits<uint32_t>::lowest()}, {"MAX_SINT64", std::numeric_limits<int64_t>::max()}, {"MIN_SINT64", std::numeric_limits<int64_t>::lowest()}, {"MAX_UINT64", std::numeric_limits<uint64_t>::max()},
-	    {"MIN_UINT64", std::numeric_limits<uint64_t>::lowest()}, {"MAX_FLOAT", std::numeric_limits<float>::max()}, {"MIN_FLOAT", std::numeric_limits<float>::lowest()}, {"MAX_DOUBLE", std::numeric_limits<double>::max()}, {"MIN_DOUBLE", std::numeric_limits<double>::lowest()},
-	    {"MAX_LONG_DOUBLE", std::numeric_limits<long double>::max()}, {"MIN_LONG_DOUBLE", std::numeric_limits<long double>::lowest()},
+	    {"MAX_SINT8", std::numeric_limits<int8_t>::max()},
+	    {"MIN_SINT8", std::numeric_limits<int8_t>::lowest()},
+	    {"MAX_UINT8", std::numeric_limits<uint8_t>::max()},
+	    {"MIN_UINT8", std::numeric_limits<uint8_t>::lowest()},
+	    {"MAX_SINT16", std::numeric_limits<int16_t>::max()},
+	    {"MIN_SINT16", std::numeric_limits<int16_t>::lowest()},
+	    {"MAX_UINT16", std::numeric_limits<uint16_t>::max()},
+	    {"MIN_UINT16", std::numeric_limits<uint16_t>::lowest()},
+	    {"MAX_SINT32", std::numeric_limits<int32_t>::max()},
+	    {"MIN_SINT32", std::numeric_limits<int32_t>::lowest()},
+	    {"MAX_UINT32", std::numeric_limits<uint32_t>::max()},
+	    {"MIN_UINT32", std::numeric_limits<uint32_t>::lowest()},
+	    {"MAX_SINT64", std::numeric_limits<int64_t>::max()},
+	    {"MIN_SINT64", std::numeric_limits<int64_t>::lowest()},
+	    {"MAX_UINT64", std::numeric_limits<uint64_t>::max()},
+	    {"MIN_UINT64", std::numeric_limits<uint64_t>::lowest()},
+	    {"MAX_FLOAT", std::numeric_limits<float>::max()},
+	    {"MIN_FLOAT", std::numeric_limits<float>::lowest()},
+	    {"MAX_DOUBLE", std::numeric_limits<double>::max()},
+	    {"MIN_DOUBLE", std::numeric_limits<double>::lowest()},
+	    {"MAX_LONG_DOUBLE", std::numeric_limits<long double>::max()},
+	    {"MIN_LONG_DOUBLE", std::numeric_limits<long double>::lowest()},
 
-	    {"ROTATION_ORDER_XYZ", umath::to_integral(pragma::RotationOrder::XYZ)}, {"ROTATION_ORDER_YXZ", umath::to_integral(pragma::RotationOrder::YXZ)}, {"ROTATION_ORDER_XZX", umath::to_integral(pragma::RotationOrder::XZX)},
-	    {"ROTATION_ORDER_XYX", umath::to_integral(pragma::RotationOrder::XYX)}, {"ROTATION_ORDER_YXY", umath::to_integral(pragma::RotationOrder::YXY)}, {"ROTATION_ORDER_YZY", umath::to_integral(pragma::RotationOrder::YZY)},
-	    {"ROTATION_ORDER_ZYZ", umath::to_integral(pragma::RotationOrder::ZYZ)}, {"ROTATION_ORDER_ZXZ", umath::to_integral(pragma::RotationOrder::ZXZ)}, {"ROTATION_ORDER_XZY", umath::to_integral(pragma::RotationOrder::XZY)},
-	    {"ROTATION_ORDER_YZX", umath::to_integral(pragma::RotationOrder::YZX)}, {"ROTATION_ORDER_ZYX", umath::to_integral(pragma::RotationOrder::ZYX)}, {"ROTATION_ORDER_ZXY", umath::to_integral(pragma::RotationOrder::ZXY)},
+	    {"ROTATION_ORDER_XYZ", umath::to_integral(pragma::RotationOrder::XYZ)},
+	    {"ROTATION_ORDER_YXZ", umath::to_integral(pragma::RotationOrder::YXZ)},
+	    {"ROTATION_ORDER_XZX", umath::to_integral(pragma::RotationOrder::XZX)},
+	    {"ROTATION_ORDER_XYX", umath::to_integral(pragma::RotationOrder::XYX)},
+	    {"ROTATION_ORDER_YXY", umath::to_integral(pragma::RotationOrder::YXY)},
+	    {"ROTATION_ORDER_YZY", umath::to_integral(pragma::RotationOrder::YZY)},
+	    {"ROTATION_ORDER_ZYZ", umath::to_integral(pragma::RotationOrder::ZYZ)},
+	    {"ROTATION_ORDER_ZXZ", umath::to_integral(pragma::RotationOrder::ZXZ)},
+	    {"ROTATION_ORDER_XZY", umath::to_integral(pragma::RotationOrder::XZY)},
+	    {"ROTATION_ORDER_YZX", umath::to_integral(pragma::RotationOrder::YZX)},
+	    {"ROTATION_ORDER_ZYX", umath::to_integral(pragma::RotationOrder::ZYX)},
+	    {"ROTATION_ORDER_ZXY", umath::to_integral(pragma::RotationOrder::ZXY)},
 
-	    {"AXIS_X", umath::to_integral(pragma::Axis::X)}, {"AXIS_Y", umath::to_integral(pragma::Axis::Y)}, {"AXIS_Z", umath::to_integral(pragma::Axis::Z)}});
+	    {"AXIS_X", umath::to_integral(pragma::Axis::X)},
+	    {"AXIS_Y", umath::to_integral(pragma::Axis::Y)},
+	    {"AXIS_Z", umath::to_integral(pragma::Axis::Z)},
+	    {"AXIS_COUNT", umath::to_integral(pragma::Axis::Count)},
+
+	    {"AXIS_SIGNED_X", umath::to_integral(pragma::SignedAxis::NegX)},
+	    {"AXIS_SIGNED_Y", umath::to_integral(pragma::SignedAxis::NegY)},
+	    {"AXIS_SIGNED_Z", umath::to_integral(pragma::SignedAxis::NegZ)},
+	  });
 
 	auto &mathMod = lua.RegisterLibrary("math");
 	auto complexNumberClassDef = luabind::class_<std::complex<double>>("ComplexNumber");
@@ -579,6 +637,11 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	auto modDebug = luabind::module_(lua.GetState(), "debug");
 	modDebug[luabind::def("move_state_to_string", Lua::debug::move_state_to_string), luabind::def("beep", Lua::debug::beep)];
 	lua_pushtablecfunction(lua.GetState(), "debug", "print", Lua::debug::print);
+	lua_pushtablecfunction(
+	  lua.GetState(), "debug", "start_debugger_server", +[](lua_State *l) -> int {
+		  auto res = Lua::util::start_debugger_server(l);
+		  return 1;
+	  });
 	auto classDefDrawInfo = luabind::class_<DebugRenderInfo>("DrawInfo");
 	classDefDrawInfo.def(luabind::constructor<>());
 	classDefDrawInfo.def(luabind::constructor<const umath::Transform &, const Color &>());
@@ -696,25 +759,81 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 
 	// util
 	Lua::RegisterLibraryEnums(lua.GetState(), "util",
-	  {{"SIZEOF_CHAR", sizeof(char)}, {"SIZEOF_BOOL", sizeof(bool)}, {"SIZEOF_INT", sizeof(int)}, {"SIZEOF_INT8", sizeof(int8_t)}, {"SIZEOF_INT16", sizeof(int16_t)}, {"SIZEOF_INT32", sizeof(int32_t)}, {"SIZEOF_INT64", sizeof(int64_t)}, {"SIZEOF_SHORT", sizeof(int16_t)},
-	    {"SIZEOF_FLOAT", sizeof(float)}, {"SIZEOF_DOUBLE", sizeof(double)}, {"SIZEOF_LONG_LONG", sizeof(long long)}, {"SIZEOF_LONG_DOUBLE", sizeof(long double)}, {"SIZEOF_VECTOR3", sizeof(Vector3)}, {"SIZEOF_VECTOR2", sizeof(Vector2)}, {"SIZEOF_VECTOR4", sizeof(Vector4)},
-	    {"SIZEOF_EULER_ANGLES", sizeof(EulerAngles)}, {"SIZEOF_QUATERNION", sizeof(Quat)}, {"SIZEOF_MAT2", sizeof(Mat2)}, {"SIZEOF_MAT2X3", sizeof(Mat2x3)}, {"SIZEOF_MAT2X4", sizeof(Mat2x4)}, {"SIZEOF_MAT3X2", sizeof(Mat3x2)}, {"SIZEOF_MAT3", sizeof(Mat3)},
-	    {"SIZEOF_MAT3X4", sizeof(Mat3x4)}, {"SIZEOF_MAT4X2", sizeof(Mat4x2)}, {"SIZEOF_MAT4X3", sizeof(Mat4x3)}, {"SIZEOF_MAT4", sizeof(Mat4)}, {"SIZEOF_VECTOR2I", sizeof(Vector2i)}, {"SIZEOF_VECTOR3I", sizeof(Vector3i)}, {"SIZEOF_VECTOR4I", sizeof(Vector4i)},
-	    {"SIZEOF_VERTEX", sizeof(umath::Vertex)}, {"SIZEOF_VERTEX_WEIGHT", sizeof(umath::VertexWeight)},
+	  {
+	    {"SIZEOF_CHAR", sizeof(char)},
+	    {"SIZEOF_BOOL", sizeof(bool)},
+	    {"SIZEOF_INT", sizeof(int)},
+	    {"SIZEOF_INT8", sizeof(int8_t)},
+	    {"SIZEOF_INT16", sizeof(int16_t)},
+	    {"SIZEOF_INT32", sizeof(int32_t)},
+	    {"SIZEOF_INT64", sizeof(int64_t)},
+	    {"SIZEOF_SHORT", sizeof(int16_t)},
+	    {"SIZEOF_FLOAT", sizeof(float)},
+	    {"SIZEOF_DOUBLE", sizeof(double)},
+	    {"SIZEOF_LONG_LONG", sizeof(long long)},
+	    {"SIZEOF_LONG_DOUBLE", sizeof(long double)},
+	    {"SIZEOF_VECTOR3", sizeof(Vector3)},
+	    {"SIZEOF_VECTOR2", sizeof(Vector2)},
+	    {"SIZEOF_VECTOR4", sizeof(Vector4)},
+	    {"SIZEOF_EULER_ANGLES", sizeof(EulerAngles)},
+	    {"SIZEOF_QUATERNION", sizeof(Quat)},
+	    {"SIZEOF_MAT2", sizeof(Mat2)},
+	    {"SIZEOF_MAT2X3", sizeof(Mat2x3)},
+	    {"SIZEOF_MAT2X4", sizeof(Mat2x4)},
+	    {"SIZEOF_MAT3X2", sizeof(Mat3x2)},
+	    {"SIZEOF_MAT3", sizeof(Mat3)},
+	    {"SIZEOF_MAT3X4", sizeof(Mat3x4)},
+	    {"SIZEOF_MAT4X2", sizeof(Mat4x2)},
+	    {"SIZEOF_MAT4X3", sizeof(Mat4x3)},
+	    {"SIZEOF_MAT4", sizeof(Mat4)},
+	    {"SIZEOF_VECTOR2I", sizeof(Vector2i)},
+	    {"SIZEOF_VECTOR3I", sizeof(Vector3i)},
+	    {"SIZEOF_VECTOR4I", sizeof(Vector4i)},
+	    {"SIZEOF_VERTEX", sizeof(umath::Vertex)},
+	    {"SIZEOF_VERTEX_WEIGHT", sizeof(umath::VertexWeight)},
 
-	    {"MIN_INT8", std::numeric_limits<int8_t>::lowest()}, {"MAX_INT8", std::numeric_limits<int8_t>::max()}, {"MIN_UINT8", std::numeric_limits<int8_t>::lowest()}, {"MAX_UINT8", std::numeric_limits<int8_t>::max()}, {"MIN_INT16", std::numeric_limits<int16_t>::lowest()},
-	    {"MAX_INT16", std::numeric_limits<int16_t>::max()}, {"MIN_UINT16", std::numeric_limits<int16_t>::lowest()}, {"MAX_UINT16", std::numeric_limits<int16_t>::max()}, {"MIN_INT32", std::numeric_limits<int32_t>::lowest()}, {"MAX_INT32", std::numeric_limits<int32_t>::max()},
-	    {"MIN_UINT32", std::numeric_limits<uint32_t>::lowest()}, {"MAX_UINT32", std::numeric_limits<uint32_t>::max()}, {"MIN_INT64", std::numeric_limits<int64_t>::lowest()}, {"MAX_INT64", std::numeric_limits<int64_t>::max()}, {"MIN_UINT64", std::numeric_limits<uint64_t>::lowest()},
+	    {"MIN_INT8", std::numeric_limits<int8_t>::lowest()},
+	    {"MAX_INT8", std::numeric_limits<int8_t>::max()},
+	    {"MIN_UINT8", std::numeric_limits<int8_t>::lowest()},
+	    {"MAX_UINT8", std::numeric_limits<int8_t>::max()},
+	    {"MIN_INT16", std::numeric_limits<int16_t>::lowest()},
+	    {"MAX_INT16", std::numeric_limits<int16_t>::max()},
+	    {"MIN_UINT16", std::numeric_limits<int16_t>::lowest()},
+	    {"MAX_UINT16", std::numeric_limits<int16_t>::max()},
+	    {"MIN_INT32", std::numeric_limits<int32_t>::lowest()},
+	    {"MAX_INT32", std::numeric_limits<int32_t>::max()},
+	    {"MIN_UINT32", std::numeric_limits<uint32_t>::lowest()},
+	    {"MAX_UINT32", std::numeric_limits<uint32_t>::max()},
+	    {"MIN_INT64", std::numeric_limits<int64_t>::lowest()},
+	    {"MAX_INT64", std::numeric_limits<int64_t>::max()},
+	    {"MIN_UINT64", std::numeric_limits<uint64_t>::lowest()},
 	    {"MAX_UINT64", std::numeric_limits<uint64_t>::max()},
 
-	    {"VAR_TYPE_INVALID", umath::to_integral(util::VarType::Invalid)}, {"VAR_TYPE_BOOL", umath::to_integral(util::VarType::Bool)}, {"VAR_TYPE_DOUBLE", umath::to_integral(util::VarType::Double)}, {"VAR_TYPE_FLOAT", umath::to_integral(util::VarType::Float)},
-	    {"VAR_TYPE_INT8", umath::to_integral(util::VarType::Int8)}, {"VAR_TYPE_INT16", umath::to_integral(util::VarType::Int16)}, {"VAR_TYPE_INT32", umath::to_integral(util::VarType::Int32)}, {"VAR_TYPE_INT64", umath::to_integral(util::VarType::Int64)},
-	    {"VAR_TYPE_LONG_DOUBLE", umath::to_integral(util::VarType::LongDouble)}, {"VAR_TYPE_STRING", umath::to_integral(util::VarType::String)}, {"VAR_TYPE_UINT8", umath::to_integral(util::VarType::UInt8)}, {"VAR_TYPE_UINT16", umath::to_integral(util::VarType::UInt16)},
-	    {"VAR_TYPE_UINT32", umath::to_integral(util::VarType::UInt32)}, {"VAR_TYPE_UINT64", umath::to_integral(util::VarType::UInt64)}, {"VAR_TYPE_EULER_ANGLES", umath::to_integral(util::VarType::EulerAngles)}, {"VAR_TYPE_COLOR", umath::to_integral(util::VarType::Color)},
-	    {"VAR_TYPE_VECTOR", umath::to_integral(util::VarType::Vector)}, {"VAR_TYPE_VECTOR2", umath::to_integral(util::VarType::Vector2)}, {"VAR_TYPE_VECTOR4", umath::to_integral(util::VarType::Vector4)}, {"VAR_TYPE_ENTITY", umath::to_integral(util::VarType::Entity)},
+	    {"VAR_TYPE_INVALID", umath::to_integral(util::VarType::Invalid)},
+	    {"VAR_TYPE_BOOL", umath::to_integral(util::VarType::Bool)},
+	    {"VAR_TYPE_DOUBLE", umath::to_integral(util::VarType::Double)},
+	    {"VAR_TYPE_FLOAT", umath::to_integral(util::VarType::Float)},
+	    {"VAR_TYPE_INT8", umath::to_integral(util::VarType::Int8)},
+	    {"VAR_TYPE_INT16", umath::to_integral(util::VarType::Int16)},
+	    {"VAR_TYPE_INT32", umath::to_integral(util::VarType::Int32)},
+	    {"VAR_TYPE_INT64", umath::to_integral(util::VarType::Int64)},
+	    {"VAR_TYPE_LONG_DOUBLE", umath::to_integral(util::VarType::LongDouble)},
+	    {"VAR_TYPE_STRING", umath::to_integral(util::VarType::String)},
+	    {"VAR_TYPE_UINT8", umath::to_integral(util::VarType::UInt8)},
+	    {"VAR_TYPE_UINT16", umath::to_integral(util::VarType::UInt16)},
+	    {"VAR_TYPE_UINT32", umath::to_integral(util::VarType::UInt32)},
+	    {"VAR_TYPE_UINT64", umath::to_integral(util::VarType::UInt64)},
+	    {"VAR_TYPE_EULER_ANGLES", umath::to_integral(util::VarType::EulerAngles)},
+	    {"VAR_TYPE_COLOR", umath::to_integral(util::VarType::Color)},
+	    {"VAR_TYPE_VECTOR", umath::to_integral(util::VarType::Vector)},
+	    {"VAR_TYPE_VECTOR2", umath::to_integral(util::VarType::Vector2)},
+	    {"VAR_TYPE_VECTOR4", umath::to_integral(util::VarType::Vector4)},
+	    {"VAR_TYPE_ENTITY", umath::to_integral(util::VarType::Entity)},
 	    {"VAR_TYPE_QUATERNION", umath::to_integral(util::VarType::Quaternion)},
 
-	    {"EVENT_REPLY_HANDLED", umath::to_integral(util::EventReply::Handled)}, {"EVENT_REPLY_UNHANDLED", umath::to_integral(util::EventReply::Unhandled)}});
+	    {"EVENT_REPLY_HANDLED", umath::to_integral(util::EventReply::Handled)},
+	    {"EVENT_REPLY_UNHANDLED", umath::to_integral(util::EventReply::Unhandled)},
+	  });
 	Lua::util::register_std_vector_types(lua.GetState());
 
 	auto classDefErrorCode = luabind::class_<ErrorCode>("ResultCode");
@@ -832,6 +951,13 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	defHSV.def_readwrite("v", &util::HSV::v);
 	defHSV.def("ToRGBColor", static_cast<void (*)(lua_State *, const util::HSV &)>([](lua_State *l, const util::HSV &hsv) { Lua::Push<Color>(l, util::hsv_to_rgb(hsv)); }));
 	defHSV.def("Lerp", static_cast<void (*)(lua_State *, const util::HSV &, const util::HSV &, float)>([](lua_State *l, const util::HSV &hsv0, const util::HSV &hsv1, float t) { Lua::Push<util::HSV>(l, util::lerp_hsv(hsv0, hsv1, t)); }));
+	defHSV.def(
+	  "Distance", +[](const util::HSV &hsv0, const util::HSV &hsv1) {
+		  auto dh = std::min(abs(hsv1.h - hsv0.h), 360 - abs(hsv1.h - hsv0.h)) / 180.0;
+		  auto ds = abs(hsv1.s - hsv0.s);
+		  auto dv = abs(hsv1.v - hsv0.v);
+		  return sqrtf(dh * dh + ds * ds + dv * dv);
+	  });
 	utilMod[defHSV];
 
 	auto defColor = luabind::class_<Color>("Color");
@@ -1048,6 +1174,82 @@ namespace Lua::ik {
 	void register_library(Lua::Interface &lua);
 };
 
+#include <spdlog/common.h>
+#include <spdlog/formatter.h>
+#include <spdlog/fmt/fmt.h>
+
+static std::string to_string(lua_State *l, int i)
+{
+	auto status = -1;
+	std::string val;
+	if(Lua::lua_value_to_string(l, i, &status, &val) == false)
+		return "unknown";
+	return val;
+}
+
+static int log(lua_State *l, spdlog::level::level_enum logLevel)
+{
+	auto &logger = Lua::Check<spdlog::logger>(l, 1);
+	const char *msg = Lua::CheckString(l, 2);
+	int32_t argOffset = 2;
+	auto n = lua_gettop(l) - argOffset; /* number of arguments */
+	switch(n) {
+	case 0:
+		logger.log(logLevel, std::string {msg});
+		break;
+	case 1:
+		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1))));
+		break;
+	case 2:
+		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2))));
+		break;
+	case 3:
+		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3))));
+		break;
+	case 4:
+		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4))));
+		break;
+	case 5:
+		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5))));
+		break;
+	case 6:
+		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6))));
+		break;
+	case 7:
+		logger.log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7))));
+		break;
+	case 8:
+		logger.log(logLevel,
+		  fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7), to_string(l, argOffset + 8))));
+		break;
+	case 9:
+		logger.log(logLevel,
+		  fmt::vformat(msg,
+		    fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7), to_string(l, argOffset + 8),
+		      to_string(l, argOffset + 9))));
+		break;
+	case 10:
+		logger.log(logLevel,
+		  fmt::vformat(msg,
+		    fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7), to_string(l, argOffset + 8),
+		      to_string(l, argOffset + 9), to_string(l, argOffset + 10))));
+		break;
+	default:
+		logger.log(logLevel, std::string {msg});
+		break;
+	}
+	return 0;
+}
+
+template<spdlog::level::level_enum TLevel>
+static void add_log_func(lua_State *l, luabind::object &oLogger, const char *name)
+{
+	lua_pushcfunction(
+	  l, +[](lua_State *l) -> int { return log(l, TLevel); });
+	oLogger[name] = luabind::object {luabind::from_stack(l, -1)};
+	Lua::Pop(l, 1);
+}
+
 void Game::RegisterLuaLibraries()
 {
 	NetworkState::RegisterSharedLuaLibraries(GetLuaInterface());
@@ -1152,15 +1354,21 @@ void Game::RegisterLuaLibraries()
 	  luabind::def("get_file_extension", static_cast<luabind::object (*)(lua_State *, const std::string &, const std::vector<std::string> &)>(Lua::file::GetFileExtension)),
 	  luabind::def("get_file_extension", static_cast<luabind::object (*)(lua_State *, const std::string &)>(Lua::file::GetFileExtension)), luabind::def("get_size", FileManager::GetFileSize),
 	  luabind::def("get_size", static_cast<uint64_t (*)(std::string)>(+[](std::string path) { return FileManager::GetFileSize(path); })), luabind::def("compare_path", Lua::file::ComparePath),
-	  luabind::def("remove_file_extension", static_cast<std::string (*)(std::string)>([](std::string path) {
-		  ufile::remove_extension_from_filename(path);
-		  return path;
-	  })),
-	  luabind::def("remove_file_extension", static_cast<std::string (*)(lua_State *, std::string, luabind::table<>)>([](lua_State *l, std::string path, luabind::table<> t) {
-		  auto exts = Lua::table_to_vector<std::string>(l, t, 2);
-		  ufile::remove_extension_from_filename(path, exts);
-		  return path;
-	  })),
+	  luabind::def(
+	    "remove_file_extension",
+	    +[](std::string path) -> std::
+	                            pair<std::string, std::optional<std::string>> {
+		                            auto ext = ufile::remove_extension_from_filename(path);
+		                            return {path, ext};
+	                            }),
+	  luabind::def(
+	    "remove_file_extension",
+	    +[](lua_State *l, std::string path, luabind::table<> t) -> std::
+	                                                              pair<std::string, std::optional<std::string>> {
+		                                                              auto exts = Lua::table_to_vector<std::string>(l, t, 2);
+		                                                              auto ext = ufile::remove_extension_from_filename(path, exts);
+		                                                              return {path, ext};
+	                                                              }),
 	  luabind::def("strip_illegal_filename_characters", static_cast<std::string (*)(std::string)>([](std::string path) {
 		  // See https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
 		  std::string illegalCharacters = "/\\?%*:|\"<>";
@@ -1459,15 +1667,16 @@ void Game::RegisterLuaLibraries()
 	Lua::RegisterLibrary(GetLuaState(), "mesh", {{"generate_convex_hull", Lua::mesh::generate_convex_hull}, {"calc_smallest_enclosing_bbox", Lua::mesh::calc_smallest_enclosing_bbox}});
 
 	Lua::RegisterLibrary(GetLuaState(), "log",
-	  {{"info", Lua::log::info}, {"warn", Lua::log::warn}, {"error", Lua::log::error}, {"critical", Lua::log::critical}, {"debug", Lua::log::debug}, {"color", Lua::log::color}, {"prefix", +[](lua_State *l) {
-		                                                                                                                                                                              std::string msg = Lua::CheckString(l, 1);
-		                                                                                                                                                                              auto colorFlags = static_cast<util::ConsoleColorFlags>(Lua::CheckInt(l, 2));
-		                                                                                                                                                                              auto strColorFlags = util::get_ansi_color_code(colorFlags);
-		                                                                                                                                                                              auto strColorFlagsClear = util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
-		                                                                                                                                                                              auto prefix = strColorFlagsClear + "[" + strColorFlags + msg + strColorFlagsClear + "] ";
-		                                                                                                                                                                              Lua::PushString(l, prefix);
-		                                                                                                                                                                              return 1;
-	                                                                                                                                                                              }}});
+	  {{"info", Lua::log::info}, {"warn", Lua::log::warn}, {"error", Lua::log::error}, {"critical", Lua::log::critical}, {"debug", Lua::log::debug}, {"color", Lua::log::color}, {"register_logger", Lua::log::register_logger},
+	    {"prefix", +[](lua_State *l) {
+		     std::string msg = Lua::CheckString(l, 1);
+		     auto colorFlags = static_cast<util::ConsoleColorFlags>(Lua::CheckInt(l, 2));
+		     auto strColorFlags = util::get_ansi_color_code(colorFlags);
+		     auto strColorFlagsClear = util::get_ansi_color_code(util::ConsoleColorFlags::Reset);
+		     auto prefix = strColorFlagsClear + "[" + strColorFlags + msg + strColorFlagsClear + "] ";
+		     Lua::PushString(l, prefix);
+		     return 1;
+	     }}});
 
 	auto modLog = luabind::module_(GetLuaState(), "log");
 	modLog[luabind::def("is_log_level_enabled", &pragma::is_log_level_enabled)];
@@ -1478,6 +1687,18 @@ void Game::RegisterLuaLibraries()
 	modLog[luabind::def("get_file_log_level", &pragma::get_file_log_level)];
 
 	Lua::RegisterLibraryEnums(GetLuaState(), "log", {{"SEVERITY_INFO", 0}, {"SEVERITY_WARNING", 1}, {"SEVERITY_ERROR", 2}, {"SEVERITY_CRITICAL", 3}, {"SEVERITY_DEBUG", 4}});
+
+	auto classDefLogger = luabind::class_<spdlog::logger>("Logger");
+	modLog[classDefLogger];
+
+	luabind::object oLogger = luabind::globals(l)["log"];
+	oLogger = oLogger["Logger"];
+	add_log_func<spdlog::level::trace>(l, oLogger, "Trace");
+	add_log_func<spdlog::level::debug>(l, oLogger, "Debug");
+	add_log_func<spdlog::level::info>(l, oLogger, "Info");
+	add_log_func<spdlog::level::warn>(l, oLogger, "Warn");
+	add_log_func<spdlog::level::err>(l, oLogger, "Err");
+	add_log_func<spdlog::level::critical>(l, oLogger, "Critical");
 
 	Lua::RegisterLibrary(GetLuaState(), "regex", {{"match", Lua::regex::match}, {"search", Lua::regex::search}});
 	auto modRegex = luabind::module_(GetLuaState(), "regex");

@@ -9,7 +9,18 @@
 
 int main(int argc, char *argv[])
 try {
-	std::vector<std::string> extraArgs {"-title", "Pragma Filmmaker", "-auto_exec", "pfm/startup.lua", "-icon", "materials/pfm/logo/icon_window.png", "+map empty", "+pfm"};
+	std::vector<std::string> extraArgs {
+	  "-title",
+	  "Pragma Filmmaker",
+	  "-auto_exec",
+	  "pfm/startup.lua",
+	  "-icon",
+	  "materials/pfm/logo/icon_window.png",
+	  "-title_bar_color",
+	  "#262626",
+	  "+map empty",
+	  "+pfm",
+	};
 	auto cargs = pragma::merge_arguments(argc, argv, extraArgs);
 	auto hModule = pragma::launch_pragma(cargs.size(), cargs.data());
 	return hModule ? EXIT_SUCCESS : EXIT_FAILURE;

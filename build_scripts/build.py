@@ -1,27 +1,12 @@
 import os
 from pathlib import Path
-import subprocess
 from sys import platform
 from distutils.dir_util import copy_tree
-import pathlib
 import argparse
-import shutil
-import logging
-import tarfile
-import urllib.request
-from urllib.parse import urlparse
-import zipfile
-import sys
+import re
+# import logging
 
-def str2bool(v):
-	if isinstance(v, bool):
-		return v
-	if v.lower() in ('yes', 'true', 't', 'y', '1'):
-		return True
-	elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-		return False
-	else:
-		raise argparse.ArgumentTypeError('Boolean value expected.')
+from scripts.shared import *
 
 parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev=False, formatter_class=argparse.ArgumentDefaultsHelpFormatter, epilog="")
 
@@ -34,23 +19,27 @@ else:
 	defaultGenerator = "Visual Studio 17 2022"
 parser.add_argument('--generator', help='The generator to use.', default=defaultGenerator)
 if platform == "win32":
-	parser.add_argument('--vcvars', help='Path to vcvars64.bat.', default="\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat\"")
+	parser.add_argument('--vcvars', help='Path to vcvars64.bat.', default="\"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat\"")
 parser.add_argument("--with-essential-client-modules", type=str2bool, nargs='?', const=True, default=True, help="Include essential modules required to run Pragma.")
 parser.add_argument("--with-common-modules", type=str2bool, nargs='?', const=True, default=True, help="Include non-essential but commonly used modules (e.g. audio and physics modules).")
 parser.add_argument("--with-pfm", type=str2bool, nargs='?', const=True, default=False, help="Include the Pragma Filmmaker.")
 parser.add_argument("--with-core-pfm-modules", type=str2bool, nargs='?', const=True, default=True, help="Include essential PFM modules.")
 parser.add_argument("--with-all-pfm-modules", type=str2bool, nargs='?', const=True, default=False, help="Include non-essential PFM modules (e.g. chromium and cycles).")
 parser.add_argument("--with-vr", type=str2bool, nargs='?', const=True, default=False, help="Include Virtual Reality support.")
+parser.add_argument("--with-lua-debugger", type=str2bool, nargs='?', const=True, default=False, help="Include Lua-debugger support.")
+parser.add_argument("--with-lua-doc-generator", type=str2bool, nargs='?', const=True, default=False, help="Include Lua documentation generator.")
 parser.add_argument("--build", type=str2bool, nargs='?', const=True, default=True, help="Build Pragma after configurating and generating build files.")
 parser.add_argument("--build-all", type=str2bool, nargs='?', const=True, default=False, help="Build all dependencies instead of downloading prebuilt binaries where available. Enabling this may significantly increase the disk space requirement and build time.")
 parser.add_argument('--build-config', help='The build configuration to use.', default='RelWithDebInfo')
 parser.add_argument('--build-directory', help='Directory to write the build files to. Can be relative or absolute.', default='build')
 parser.add_argument('--deps-directory', help='Directory to write the dependency files to. Can be relative or absolute.', default='deps')
 parser.add_argument('--install-directory', help='Installation directory. Can be relative (to build directory) or absolute.', default='install')
-parser.add_argument('--module', help='Custom modules to install. Use this argument multiple times to use multiple modules. Usage example: --module pr_physx:\"https://github.com/Silverlan/pr_physx.git\"', action='append', default=[])
+parser.add_argument('--cmake-arg', help='Additional cmake argument for configuring Pragma. This parameter can be used multiple times.', action='append', default=[])
+parser.add_argument('--module', help='Custom modules to install. Use this parameter multiple times to use multiple modules. Usage example: --module pr_physx:\"https://github.com/Silverlan/pr_physx.git\"', action='append', default=[])
 # parser.add_argument('--log-file', help='Script output will be written to this file.', default='build_log.txt')
 parser.add_argument("--verbose", type=str2bool, nargs='?', const=True, default=False, help="Print additional verbose output.")
 parser.add_argument("--update", type=str2bool, nargs='?', const=True, default=False, help="Update Pragma and all submodules and modules to the latest versions.")
+parser.add_argument("--rerun", type=str2bool, nargs='?', const=True, default=False, help="Re-run the build script with the previous arguments.")
 if platform == "linux":
 	parser.add_argument("--no-sudo", type=str2bool, nargs='?', const=True, default=False, help="Will not run sudo commands. System packages will have to be installed manually.")
 	parser.add_argument("--no-confirm", type=str2bool, nargs='?', const=True, default=False, help="Disable any interaction with user (suitable for automated run).")
@@ -71,12 +60,11 @@ input_args = args
 #
 #		logging.info("Running Pragma Build Script")
 
-def normalize_path(path):
-	normalizedPath = path
-	normalizedPath = normalizedPath.replace('\\','/')
-	return normalizedPath
-
 if args["update"]:
+	args["rerun"] = True
+	args["update"] = True
+
+if args["rerun"]:
 	build_dir = normalize_path(args["build_directory"])
 	if not os.path.isabs(build_dir):
 		build_dir = os.getcwd() +"/" +build_dir
@@ -87,7 +75,6 @@ if args["update"]:
 		cfg = json.load(open(build_dir +"/build_config.json"))
 		for key,value in cfg["args"].items():
 			args[key] = value
-	args["update"] = True
 
 if platform == "linux":
 	c_compiler = args["c_compiler"]
@@ -103,15 +90,20 @@ with_pfm = args["with_pfm"]
 with_core_pfm_modules = args["with_core_pfm_modules"]
 with_all_pfm_modules = args["with_all_pfm_modules"]
 with_vr = args["with_vr"]
+with_lua_debugger = args["with_lua_debugger"]
+with_lua_doc_generator = args["with_lua_doc_generator"]
 build = args["build"]
 build_all = args["build_all"]
 build_config = args["build_config"]
 build_directory = args["build_directory"]
 deps_directory = args["deps_directory"]
 install_directory = args["install_directory"]
+additional_cmake_args = args["cmake_arg"]
+scripts_dir = os.getcwd() +"/build_scripts"
 #log_file = args["log_file"]
 verbose = args["verbose"]
 modules = args["module"]
+rerun = args["rerun"]
 update = args["update"]
 modules_prebuilt = []
 
@@ -119,6 +111,11 @@ print("Inputs:")
 if platform == "linux":
 	print("cxx_compiler: " +cxx_compiler)
 	print("c_compiler: " +c_compiler)
+
+	if with_lua_doc_generator:
+		with_lua_doc_generator = 0
+		print_warning("Lua documentation generator is only supported on Windows! --with-lua-doc-generator flag will be ignored.")
+
 print("generator: " +generator)
 #if platform == "win32":
 #	print("vcvars: " +vcvars)
@@ -128,6 +125,8 @@ print("with_pfm: " +str(with_pfm))
 print("with_core_pfm_modules: " +str(with_core_pfm_modules))
 print("with_all_pfm_modules: " +str(with_all_pfm_modules))
 print("with_vr: " +str(with_vr))
+print("with_lua_debugger: " +str(with_lua_debugger))
+print("rerun: " +str(rerun))
 print("update: " +str(update))
 print("build: " +str(build))
 print("build_all: " +str(build_all))
@@ -138,33 +137,12 @@ print("install_directory: " +install_directory)
 if platform == "linux":
 	print("no_sudo: " +str(no_sudo))
 	print("no_confirm: " +str(no_confirm))
+print("cmake_args: " +', '.join(additional_cmake_args))
 print("modules: " +', '.join(modules))
 
 if platform == "linux":
 	os.environ["CC"] = c_compiler
 	os.environ["CXX"] = cxx_compiler
-
-def mkpath(path):
-	pathlib.Path(path).mkdir(parents=True, exist_ok=True)
-
-class bcolors:
-	HEADER = '\033[95m'
-	OKBLUE = '\033[94m'
-	OKCYAN = '\033[96m'
-	OKGREEN = '\033[92m'
-	WARNING = '\033[93m'
-	FAIL = '\033[91m'
-	ENDC = '\033[0m'
-	BOLD = '\033[1m'
-	UNDERLINE = '\033[4m'
-
-def print_msg(msg):
-	print(bcolors.OKGREEN +msg +bcolors.ENDC)
-	sys.stdout.flush()
-
-def print_warning(msg):
-	print(bcolors.FAIL +msg +bcolors.ENDC)
-	sys.stdout.flush()
 
 root = normalize_path(os.getcwd())
 build_dir = normalize_path(build_directory)
@@ -185,102 +163,74 @@ if update:
 	os.chdir(root)
 
 	print_msg("Updating Pragma repository...")
-	subprocess.run(["git","pull","--recurse-submodules"],check=True)
+	subprocess.run(["git","pull"],check=True)
+
 
 mkpath(build_dir)
 mkpath(deps_dir)
 mkpath(install_dir)
 mkpath(tools)
 
-def git_clone(url,directory=None):
-	args = ["git","clone",url,"--recurse-submodules"]
-	if directory:
-		args.append(directory)
-	subprocess.run(args,check=True)
+def execscript(filepath):
+	global generator
+	global build_config
+	global build_directory
+	global deps_directory
+	global install_directory
+	global verbose
+	global root
+	global build_dir
+	global deps_dir
+	global install_dir
+	global tools
 
-def cmake_configure(scriptPath,generator,additionalArgs=[]):
-	args = ["cmake",scriptPath,"-G",generator]
-	args += additionalArgs
-	subprocess.run(args,check=True)
+	curDir = os.getcwd()
 
-def cmake_build(buildConfig,targets=None):
-	args = ["cmake","--build",".","--config",buildConfig]
-	if targets:
-		args.append("--target")
-		args += targets
-	subprocess.run(args,check=True)
+	g = {}
+	l = {
+		"generator": generator,
+		"build_config": build_config,
+		"build_directory": build_directory,
+		"deps_directory": deps_directory,
+		"install_directory": install_directory,
+		"verbose": verbose,
 
-def mkdir(dirName,cd=False):
-	if not Path(dirName).is_dir():
-		os.makedirs(dirName)
-	if cd:
-		os.chdir(dirName)
+		"root": root,
+		"build_dir": build_dir,
+		"deps_dir": deps_dir,
+		"install_dir": install_dir,
+		"tools": tools,
 
-def http_download(url,fileName=None):
-	if not fileName:
-		a = urlparse(url)
-		fileName = os.path.basename(a.path)
-	urllib.request.urlretrieve(url,fileName)
-	return fileName
+		"build_all": build_all,
 
-# See https://stackoverflow.com/a/54748564
-from zipfile import ZipFile, ZipInfo
-class ZipFileWithPermissions(ZipFile):
-	def _extract_member(self, member, targetpath, pwd):
-		if not isinstance(member, ZipInfo):
-			member = self.getinfo(member)
-
-		targetpath = super()._extract_member(member, targetpath, pwd)
-
-		attr = member.external_attr >> 16
-		if attr != 0:
-			os.chmod(targetpath, attr)
-		return targetpath
-
-def extract(zipName,removeZip=True,format="zip"):
-	if format == "zip":
-		with ZipFileWithPermissions(zipName, 'r') as zip_ref:
-			zip_ref.extractall(".")
-	elif format == "tar.bz2":
-		tar = tarfile.open(zipName, "r:bz2")  
-		tar.extractall()
-		tar.close()
-	elif format == "tar.gz":
-		tar = tarfile.open(zipName, "r:gz")  
-		tar.extractall()
-		tar.close()
-	if removeZip:
-		os.remove(zipName)
-
-def http_extract(url,removeZip=True,format="zip"):
-	fileName = http_download(url)
-	extract(fileName,removeZip,format)
-
-def install_prebuilt_binaries(baseUrl):
+		"normalize_path": normalize_path,
+		"mkpath": mkpath,
+		"print_msg": print_msg,
+		"git_clone": git_clone,
+		"cmake_configure": cmake_configure,
+		"cmake_build": cmake_build,
+		"mkdir": mkdir,
+		"http_download": http_download,
+		"http_extract": http_extract,
+		"cp": cp,
+		"cp_dir": cp_dir,
+		"replace_text_in_file": replace_text_in_file,
+		"extract": extract,
+		"execfile": execfile,
+		"execscript": execscript,
+		"str2bool": str2bool,
+		"install_prebuilt_binaries": install_prebuilt_binaries,
+		"reset_to_commit": reset_to_commit
+	}
 	if platform == "linux":
-		http_extract(baseUrl +"binaries_linux64.tar.gz",format="tar.gz")
-	else:
-		http_extract(baseUrl +"binaries_windows64.zip")
+		l["c_compiler"] = c_compiler
+		l["cxx_compiler"] = cxx_compiler
+		l["no_confirm"] = no_confirm
+		l["no_sudo"] = no_sudo
 
+	execfile(filepath,g,l)
 
-def cp(src,dst):
-	shutil.copy2(src,dst)
-
-def cp_dir(src,dst):
-	shutil.copytree(src,dst,dirs_exist_ok=True)
-
-def replace_text_in_file(filepath,srcStr,dstStr):
-	filedata = None
-	with open(filepath, 'r') as file :
-		filedata = file.read()
-
-	if filedata:
-		# Replace the target string
-		filedata = filedata.replace(srcStr, dstStr)
-
-		# Write the file out again
-		with open(filepath, 'w') as file:
-			file.write(filedata)
+	os.chdir(curDir)
 
 ########## System packages ##########
 if platform == "linux":
@@ -350,6 +300,16 @@ if platform == "linux":
 module_list = []
 cmake_args = []
 additional_build_targets = []
+
+########## submodules ##########
+print_msg("Updating external libraries...")
+execscript(scripts_dir +"/scripts/external_libs.py")
+
+print_msg("Updating third-party libraries...")
+execscript(scripts_dir +"/scripts/third_party_libs.py")
+
+print_msg("Updating modules...")
+execscript(scripts_dir +"/scripts/modules.py")
 
 ########## zlib ##########
 # Download
@@ -427,7 +387,7 @@ else:
 	os.chdir(deps_dir)
 	mkdir("luajit_build")
 	os.chdir("luajit_build")
-	cmake_configure(root +"/third_party_libs/luajit",generator)
+	cmake_configure(root +"/third_party_libs/luajit",generator,["-DBUILD_SHARED_LIBS=1"])
 	cmake_build("Release")
 
 	lua_jit_lib = normalize_path(deps_dir +"/luajit_build/src/Release/luajit.lib")
@@ -439,7 +399,7 @@ if not Path(geometric_tools_root).is_dir():
 	print_msg("GeometricTools not found. Downloading...")
 	git_clone("https://github.com/davideberly/GeometricTools")
 os.chdir("GeometricTools")
-subprocess.run(["git","reset","--hard","bd7a27d18ac9f31641b4e1246764fe30816fae74"],check=True)
+reset_to_commit("bd7a27d18ac9f31641b4e1246764fe30816fae74")
 os.chdir("../../")
 
 ########## SPIRV-Tools ##########
@@ -452,7 +412,7 @@ os.chdir("SPIRV-Tools")
 # Note: When updating to a newer version, the SPIRV-Headers commit below has to match
 # the one defined in https://github.com/KhronosGroup/SPIRV-Tools/blob/master/DEPS for the
 # timestamp of this commit
-subprocess.run(["git","reset","--hard","7826e19"],check=True)
+reset_to_commit("7826e19")
 os.chdir("../../")
 
 ########## SPIRV-Headers ##########
@@ -462,7 +422,7 @@ os.chdir("SPIRV-Tools/external")
 if not Path(os.getcwd() +"/SPIRV-Headers").is_dir():
 	git_clone("https://github.com/KhronosGroup/SPIRV-Headers")
 os.chdir("SPIRV-Headers")
-subprocess.run(["git","reset","--hard","4995a2f2723c401eb0ea3e10c81298906bf1422b"],check=True)
+reset_to_commit("4995a2f2723c401eb0ea3e10c81298906bf1422b")
 os.chdir("../../")
 os.chdir("../../")
 
@@ -477,7 +437,7 @@ if not Path(vcpkg_root).is_dir():
 
 if platform == "linux":
 	os.chdir("vcpkg")
-	subprocess.run(["git","reset","--hard","7d9775a3c3ffef3cbad688d7271a06803d3a2f51"],check=True)
+	reset_to_commit("7d9775a3c3ffef3cbad688d7271a06803d3a2f51")
 	os.chdir("..")
 
 	subprocess.run([vcpkg_root +"/bootstrap-vcpkg.sh","-disableMetrics"],check=True,shell=True)
@@ -599,27 +559,18 @@ if platform == "linux":
 print_msg("Downloading modules...")
 os.chdir(root +"/modules")
 
-if with_essential_client_modules:
-	modules.append( "pr_prosper_vulkan:\"https://github.com/Silverlan/pr_prosper_vulkan.git\"" )
-
-if with_common_modules:
-	modules.append( "pr_bullet:\"https://github.com/Silverlan/pr_bullet.git\"" )
-	modules.append( "pr_audio_soloud:\"https://github.com/Silverlan/pr_soloud.git\"" )
-	modules_prebuilt.append( "Silverlan/pr_mount_external_prebuilt" )
-
-if with_pfm:
-	if with_core_pfm_modules or with_all_pfm_modules:
-		modules.append( "pr_curl:https://github.com/Silverlan/pr_curl.git\"" )
-		modules.append( "pr_dmx:https://github.com/Silverlan/pr_dmx.git\"" )
-	if with_all_pfm_modules:
-		modules.append( "pr_chromium:https://github.com/Silverlan/pr_chromium.git" )
-		modules.append( "pr_unirender:https://github.com/Silverlan/pr_cycles.git" )
-		modules.append( "pr_curl:https://github.com/Silverlan/pr_curl.git" )
-		modules.append( "pr_dmx:https://github.com/Silverlan/pr_dmx.git" )
-		modules.append( "pr_xatlas:https://github.com/Silverlan/pr_xatlas.git" )
-	
-if with_vr:
-	modules.append( "pr_openvr:https://github.com/Silverlan/pr_openvr.git" )
+module_info = []
+def add_pragma_module(name,repositoryUrl=None,commitSha=None,branch=None):
+    for module in module_info:
+        if module["name"] == name:
+            return
+    module = {
+        "name": name,
+        "repositoryUrl": repositoryUrl,
+        "commitSha": commitSha,
+        "branch": branch
+    }
+    module_info.append(module)
 
 def execfile(filepath, globals=None, locals=None, args=None):
 	if globals is None:
@@ -702,7 +653,8 @@ def execbuildscript(filepath):
 		"execfile": execfile,
 		"execbuildscript": execbuildscript,
 		"str2bool": str2bool,
-		"install_prebuilt_binaries": install_prebuilt_binaries
+		"install_prebuilt_binaries": install_prebuilt_binaries,
+		"reset_to_commit": reset_to_commit
 	}
 	if platform == "linux":
 		l["c_compiler"] = c_compiler
@@ -722,42 +674,125 @@ def execbuildscript(filepath):
 
 	os.chdir(curDir)
 
-os.chdir(root)
-subprocess.run(["git","submodule","update","--recursive"],check=True)
+# Register modules that were added using the --module argument
+for module in modules:
+	os.chdir(root +"/modules")
+	index = module.find(':')
+	if index == -1:
+		add_pragma_module(
+			name=module
+		)
+	else:
+		add_pragma_module(
+			name=module[0:index].strip('\"'),
+			repositoryUrl=module[index +1:].strip('\"')
+		)
+
+g = {}
+l = {
+	"add_pragma_module": add_pragma_module
+}
+# Register user modules
+execfile(scripts_dir +"/user_modules.py",g,l)
+
+# Register argument-dependent modules
+if with_essential_client_modules:
+    add_pragma_module(
+        name="pr_prosper_vulkan",
+        commitSha="0b8ba03",
+        repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
+    )
+
+if with_common_modules:
+    add_pragma_module(
+        name="pr_bullet",
+        commitSha="4f1aea9",
+        repositoryUrl="https://github.com/Silverlan/pr_bullet.git"
+    )
+    add_pragma_module(
+        name="pr_audio_soloud",
+        commitSha="17652f0",
+        repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
+    )
+    modules_prebuilt.append("Silverlan/pr_mount_external_prebuilt")
+
+if with_pfm:
+    if with_core_pfm_modules or with_all_pfm_modules:
+        add_pragma_module(
+            name="pr_curl",
+            commitSha="4964981",
+            repositoryUrl="https://github.com/Silverlan/pr_curl.git"
+        )
+        add_pragma_module(
+            name="pr_dmx",
+            commitSha="ce90ad2",
+            repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
+        )
+    if with_all_pfm_modules:
+        add_pragma_module(
+            name="pr_chromium",
+            commitSha="15c88b4",
+            repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
+        )
+        add_pragma_module(
+            name="pr_unirender",
+            commitSha="9a30fe0",
+            repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
+        )
+        add_pragma_module(
+            name="pr_curl",
+            commitSha="4964981",
+            repositoryUrl="https://github.com/Silverlan/pr_curl.git"
+        )
+        add_pragma_module(
+            name="pr_dmx",
+            commitSha="ce90ad2",
+            repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
+        )
+        add_pragma_module(
+            name="pr_xatlas",
+            commitSha="485eaad",
+            repositoryUrl="https://github.com/Silverlan/pr_xatlas.git"
+        )
+
+if with_lua_doc_generator or with_pfm:
+    add_pragma_module(
+        name="pr_git",
+        commitSha="08085f9",
+        repositoryUrl="https://github.com/Silverlan/pr_git.git"
+    )
+
+if with_vr:
+    add_pragma_module(
+        name="pr_openvr",
+        commitSha="c9ce1901c1a523855328c2c1a2c6820559ddaaf9",
+        repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
+    )
 
 # These modules are shipped with the Pragma repository and will have to be excluded from the
 # CMake configuration explicitly if they should be disabled.
 shippedModules = ["pr_audio_dummy","pr_prosper_opengl","pr_prosper_vulkan","pr_curl"]
 
-for module in modules:
-	os.chdir(root +"/modules")
+for module in module_info:
 	global moduleName
-	index = module.find(':')
-	if index == -1:
-		moduleName = module
-		moduleUrl = ""
-	else:
-		moduleName = module[0:index].strip('\"')
-		moduleUrl = module[index +1:].strip('\"')
+	moduleName = module["name"]
+	moduleUrl = module["repositoryUrl"]
+	commitId = module["commitSha"]
+	branch = module["branch"]
+	print("Module Name:", moduleName)
+	print("Repository URL:", moduleUrl)
+	print("Commit SHA:", commitId)
+	print("Branch:", branch)
+
+	os.chdir(root +"/modules")
 
 	moduleDir = os.getcwd() +"/" +moduleName +"/"
 
-	print("Module Name: " +moduleName)
-	print("Module URL: " +moduleUrl)
 	print("Module Directory: " +moduleDir)
 
-	if not Path(moduleDir).is_dir():
-		print_msg("Downloading module '" +moduleName +"'...")
-		git_clone(moduleUrl,moduleName)
-	elif not moduleName in shippedModules: # Shipped modules are already updated by the git submodule update command above
-		curDir = os.getcwd()
-		os.chdir(moduleDir)
-		print_msg("Updating module '" +moduleName +"'...")
-		result = subprocess.run(["git","pull","--recurse-submodules"],check=False)
-		exitCode = result.returncode
-		if exitCode != 0:
-			print_warning("'git pull' failed for submodule '" +moduleName +"' with exit code " +str(exitCode) +"! This is expected if you have made any changes to the submodule. Build script will continue...")
-		os.chdir(curDir)
+	if not moduleName in shippedModules:
+		if moduleUrl:
+			get_submodule(moduleName,moduleUrl,commitId,branch)
 
 	scriptPath = moduleDir +"build_scripts/setup.py"
 	if Path(scriptPath).is_file():
@@ -778,9 +813,12 @@ for module in modules_prebuilt:
 	print_msg("Downloading prebuilt binaries for module '" +module +"'...")
 	install_prebuilt_binaries("https://github.com/" +module +"/releases/download/latest/")
 
+cmake_args.append("-DPRAGMA_INSTALL_CUSTOM_TARGETS=" +";".join(module_list))
+
 print("Modules:" +', '.join(module_list))
 print("Additional CMake Arguments:" +', '.join(cmake_args))
 print("Additional Build Targets:" +', '.join(additional_build_targets))
+
 
 ########## Configure Pragma ##########
 print_msg("Configuring Pragma...")
@@ -826,6 +864,10 @@ else:
 		"-DDEPENDENCY_LUA_LIBRARY=" +lua_jit_lib +""
 	]
 
+if with_lua_doc_generator:
+	cmake_args += ["-DCONFIG_BUILD_WITH_LAD=1"]
+
+cmake_args += additional_cmake_args
 cmake_configure(root,generator,cmake_args)
 
 print_msg("Build files have been written to \"" +build_dir +"\".")
@@ -847,59 +889,59 @@ if platform == "win32":
 lua_ext_dir = deps_dir +"/lua_extensions"
 mkdir(lua_ext_dir,cd=True)
 
-# MoDebug
-mob_debug_root = lua_ext_dir +"/MobDebug-0.80"
-if not Path(mob_debug_root).is_dir():
-	print_msg("MobDebug not found. Downloading...")
+if with_lua_debugger:
+	# MoDebug
+	mob_debug_root = lua_ext_dir +"/MobDebug-0.80"
+	if not Path(mob_debug_root).is_dir():
+		print_msg("MobDebug not found. Downloading...")
+		if platform == "win32":
+			zipName = "0.80.zip"
+			http_extract("https://github.com/pkulchenko/MobDebug/archive/refs/tags/" +zipName)
+		else:
+			zipName = "0.80.tar.gz"
+			http_extract("https://github.com/pkulchenko/MobDebug/archive/refs/tags/" +zipName,format="tar.gz")
+	mkdir(install_dir +"/lua/modules/")
+	cp(lua_ext_dir +"/MobDebug-0.80/src/mobdebug.lua",install_dir +"/lua/modules/")
+
+	# Socket
+	curDir = os.getcwd()
+	os.chdir(lua_ext_dir)
+	luasocket_root = lua_ext_dir +"/luasocket"
+	if not Path(luasocket_root).is_dir():
+		print_msg("luasocket not found. Downloading...")
+		git_clone("https://github.com/LuaDist/luasocket.git")
+
+	print_msg("Building luasocket...")
+	os.chdir(luasocket_root)
+	mkdir("build",cd=True)
+	luasocket_args = ["-DLUA_INCLUDE_DIR=" +root +"/third_party_libs/luajit/src"]
 	if platform == "win32":
-		zipName = "0.80.zip"
-		http_extract("https://github.com/pkulchenko/MobDebug/archive/refs/tags/" +zipName)
+		luasocket_args.append("-DLUA_LIBRARY=" +deps_dir +"/luajit_build/src/Release/luajit.lib")
 	else:
-		zipName = "0.80.tar.gz"
-		http_extract("https://github.com/pkulchenko/MobDebug/archive/refs/tags/" +zipName,format="tar.gz")
-mkdir(install_dir +"/lua/modules/")
-cp(lua_ext_dir +"/MobDebug-0.80/src/mobdebug.lua",install_dir +"/lua/modules/")
-
-# Socket
-curDir = os.getcwd()
-os.chdir(lua_ext_dir)
-luasocket_root = lua_ext_dir +"/luasocket"
-if not Path(luasocket_root).is_dir():
-	print_msg("luasocket not found. Downloading...")
-	git_clone("https://github.com/LuaDist/luasocket.git")
-
-print_msg("Building luasocket...")
-os.chdir(luasocket_root)
-mkdir("build",cd=True)
-luasocket_args = ["-DLUA_INCLUDE_DIR=" +root +"/third_party_libs/luajit/src"]
-if platform == "win32":
-	luasocket_args.append("-DLUA_LIBRARY=" +deps_dir +"/luajit_build/src/Release/luajit.lib")
-else:
-	luasocket_args.append("-DLUA_LIBRARY=" +root +"/third_party_libs/luajit/src/libluajit-p.so")
-cmake_configure("..",generator,luasocket_args)
-cmake_build(build_config)
-cp(luasocket_root +"/src/socket.lua",install_dir +"/lua/modules/")
-mkdir(install_dir +"/modules/socket/")
-if platform == "win32":
-	cp(luasocket_root +"/build/socket/" +build_config +"/core.dll",install_dir +"/modules/socket/")
-else:
-	if(generator == "Ninja Multi-Config"):
-		cp(luasocket_root +"/build/socket/" +build_config +"/core.so",install_dir +"/modules/socket/")
+		luasocket_args.append("-DLUA_LIBRARY=" +root +"/third_party_libs/luajit/src/libluajit-p.so")
+	cmake_configure("..",generator,luasocket_args)
+	cmake_build(build_config)
+	cp(luasocket_root +"/src/socket.lua",install_dir +"/lua/modules/")
+	mkdir(install_dir +"/modules/socket/")
+	if platform == "win32":
+		cp(luasocket_root +"/build/socket/" +build_config +"/core.dll",install_dir +"/modules/socket/")
 	else:
 		cp(luasocket_root +"/build/socket/core.so",install_dir +"/modules/socket/")
+	os.chdir(curDir)
 
-os.chdir(curDir)
+########## lua-debug ##########
+if with_lua_debugger:
+	execscript(scripts_dir +"/scripts/build_lua_debug.py")
 
 ########## Addons ##########
-def download_addon(name,addonName,url):
+def download_addon(name,addonName,url,commitId=None):
 	print_msg("Downloading " +name +" addon...")
 	mkdir(install_dir +"/addons",cd=True)
 	if not Path(install_dir +"/addons/" +addonName).is_dir():
 		git_clone(url,addonName)
-	else:
+	if commitId is not None:
 		os.chdir(install_dir +"/addons/" +addonName)
-		print_msg("Updating " +name +"...")
-		subprocess.run(["git","pull"],check=True)
+		reset_to_commit(commitId)
 		os.chdir("..")
 
 	# Write commit SHA info for debugging purposes
@@ -916,11 +958,16 @@ def download_addon(name,addonName,url):
 
 curDir = os.getcwd()
 if with_pfm:
-	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git")
-	download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git")
+	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","e177275cc36301a76eb9cc6474b0029fcaa57bdd")
+	download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","362981334d7b2f023dbcb1a2d1972fdc843b15e7")
 
 if with_vr:
-	download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git")
+	download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","9ce92cca7cca68f71027ed3770a62fc7a3dbaf4b")
+
+if with_pfm:
+	download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")
+	download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","05de2723bcfdd219ca31628b2b1b9d1b68c08260")
+
 os.chdir(curDir)
 
 ########## Write Build Configuration ##########
@@ -929,7 +976,25 @@ cfg["args"] = {}
 for key, value in input_args.items():
 	cfg["args"][key] = value
 
+cfg["original_args"] = ' '.join(sys.argv[1:])
+
 import json
+
+if rerun:
+	# Keep the "original_args" info from the existing build_config
+	try:
+		oldCfg = None
+		with open(build_dir +"/build_config.json", "r") as file:
+			oldCfg = json.load(file)
+
+		if oldCfg:
+			if "original_args" in oldCfg:
+				cfg["original_args"] = cfg["original_args"]
+
+
+	except json.JSONDecodeError as e:
+		print("Failed to load build_config.json:", e)
+
 json.dump(cfg,open(build_dir +"/build_config.json",'w'))
 
 ########## Build Pragma ##########
@@ -937,7 +1002,7 @@ if build:
 	print_msg("Building Pragma...")
 
 	os.chdir(build_dir)
-	targets = ["pragma-install-full"] +module_list
+	targets = ["pragma-install-full"]
 	if with_pfm:
 		targets.append("pfm")
 	targets += additional_build_targets

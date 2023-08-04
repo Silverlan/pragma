@@ -63,6 +63,14 @@ std::shared_ptr<pragma::asset::WorldData> pragma::asset::WorldData::Create(Netwo
 
 ////////////
 
+std::shared_ptr<pragma::asset::ComponentData> pragma::asset::ComponentData::Create() { return std::shared_ptr<ComponentData> {new ComponentData {}}; }
+
+pragma::asset::ComponentData::ComponentData() : m_data {udm::Property::Create<udm::Element>()} {}
+pragma::asset::ComponentData::Flags pragma::asset::ComponentData::GetFlags() const { return m_flags; }
+void pragma::asset::ComponentData::SetFlags(Flags flags) { m_flags = flags; }
+
+////////////
+
 std::shared_ptr<pragma::asset::EntityData> pragma::asset::EntityData::Create() { return std::shared_ptr<EntityData> {new EntityData {}}; }
 bool pragma::asset::EntityData::IsWorld() const { return m_className == "world"; }
 bool pragma::asset::EntityData::IsSkybox() const { return m_className == "skybox"; }
@@ -72,8 +80,6 @@ void pragma::asset::EntityData::SetClassName(const std::string &className)
 	m_className = className;
 	ustring::to_lower(m_className);
 }
-void pragma::asset::EntityData::SetOrigin(const Vector3 &origin) { m_origin = origin; }
-void pragma::asset::EntityData::SetRotation(const Quat &rot) { m_rotation = rot; }
 void pragma::asset::EntityData::SetKeyValue(const std::string &key, const std::string &value) { m_keyValues[key] = value; }
 void pragma::asset::EntityData::AddOutput(const Output &output)
 {
@@ -91,8 +97,17 @@ uint32_t pragma::asset::EntityData::GetMapIndex() const { return m_mapIndex; }
 const std::string &pragma::asset::EntityData::GetClassName() const { return m_className; }
 pragma::asset::EntityData::Flags pragma::asset::EntityData::GetFlags() const { return m_flags; }
 void pragma::asset::EntityData::SetFlags(Flags flags) { m_flags = flags; }
-const std::vector<std::string> &pragma::asset::EntityData::GetComponents() const { return const_cast<EntityData *>(this)->GetComponents(); }
-std::vector<std::string> &pragma::asset::EntityData::GetComponents() { return m_components; }
+std::shared_ptr<pragma::asset::ComponentData> pragma::asset::EntityData::AddComponent(const std::string &name)
+{
+	auto it = m_components.find(name);
+	if(it != m_components.end())
+		return it->second;
+	auto component = ComponentData::Create();
+	m_components[name] = component;
+	return component;
+}
+const std::unordered_map<std::string, std::shared_ptr<pragma::asset::ComponentData>> &pragma::asset::EntityData::GetComponents() const { return const_cast<EntityData *>(this)->GetComponents(); }
+std::unordered_map<std::string, std::shared_ptr<pragma::asset::ComponentData>> &pragma::asset::EntityData::GetComponents() { return m_components; }
 const std::unordered_map<std::string, std::string> &pragma::asset::EntityData::GetKeyValues() const { return const_cast<EntityData *>(this)->GetKeyValues(); }
 std::unordered_map<std::string, std::string> &pragma::asset::EntityData::GetKeyValues() { return m_keyValues; }
 const std::vector<pragma::asset::Output> &pragma::asset::EntityData::GetOutputs() const { return const_cast<EntityData *>(this)->GetOutputs(); }
@@ -109,22 +124,29 @@ std::string pragma::asset::EntityData::GetKeyValue(const std::string &key, const
 	auto val = GetKeyValue(key);
 	return val.has_value() ? *val : def;
 }
-const Vector3 &pragma::asset::EntityData::GetOrigin() const { return m_origin; }
-umath::Transform pragma::asset::EntityData::GetPose() const
+
+umath::ScaledTransform pragma::asset::EntityData::GetEffectivePose() const
 {
-	auto origin = GetOrigin();
-	umath::Transform pose {};
-	pose.SetOrigin(origin);
-	pose.SetRotation(m_rotation);
-	auto &keyValues = GetKeyValues();
-	auto itAngles = keyValues.find("angles");
-	if(itAngles != keyValues.end()) {
-		EulerAngles ang {itAngles->second};
-		auto rot = uquat::create(ang);
-		pose.SetRotation(rot);
-	}
+	umath::ScaledTransform pose {};
+	if(m_pose)
+		pose = *m_pose;
+	auto kvOrigin = GetKeyValue("origin");
+	if(kvOrigin)
+		pose.SetOrigin(uvec::create(*kvOrigin));
+
+	auto kvAngles = GetKeyValue("angles");
+	if(kvAngles)
+		pose.SetRotation(uquat::create(EulerAngles {*kvAngles}));
+
+	auto kvScale = GetKeyValue("scale");
+	if(kvScale)
+		pose.SetScale(uvec::create(*kvScale));
 	return pose;
 }
+
+const std::optional<umath::ScaledTransform> &pragma::asset::EntityData::GetPose() const { return m_pose; }
+void pragma::asset::EntityData::SetPose(const umath::ScaledTransform &pose) { m_pose = pose; }
+void pragma::asset::EntityData::ClearPose() { m_pose = {}; }
 
 void pragma::asset::EntityData::GetLeafData(uint32_t &outFirstLeaf, uint32_t &outNumLeaves) const
 {

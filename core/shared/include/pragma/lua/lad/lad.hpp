@@ -25,12 +25,17 @@ namespace pragma::lua {
 		std::vector<LuaOverloadInfo> overloads;
 	};
 
+	struct LuaAttributeInfo {
+		std::string name;
+		luabind::detail::TypeInfo returnType;
+	};
+
 	struct LuaClassInfo {
 		using EnumSet = std::unordered_map<std::string, int32_t>;
 		luabind::detail::class_rep *classRep = nullptr;
 		std::string name;
 		std::vector<LuaMethodInfo> methods;
-		std::vector<std::string> attributes;
+		std::vector<LuaAttributeInfo> attributes;
 		std::vector<luabind::detail::class_rep *> bases;
 		std::unordered_map<std::string, EnumSet> enumSets;
 	};

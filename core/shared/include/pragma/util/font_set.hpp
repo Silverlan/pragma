@@ -11,6 +11,7 @@
 #include "pragma/networkdefinitions.h"
 #include <cinttypes>
 #include <string>
+#include <optional>
 #include <string_view>
 #include <vector>
 
@@ -18,6 +19,7 @@ enum class FontSetFlag : uint8_t { None = 0, Bold = 1, Italic = Bold << 1u, Mono
 struct DLLNETWORK FontSetFileData {
 	FontSetFlag flags = FontSetFlag::None;
 	std::string fileName;
+	std::optional<uint32_t> fontSizeAdjustment {};
 };
 struct DLLNETWORK FontSet {
 	std::vector<FontSetFileData> fileData;

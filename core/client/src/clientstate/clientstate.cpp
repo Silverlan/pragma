@@ -220,7 +220,7 @@ void ClientState::ShowFPSCounter(bool b)
 	m_hFps->Remove();
 }
 
-REGISTER_CONVAR_CALLBACK_CL(cl_show_fps, [](NetworkState *, ConVar *, bool, bool val) {
+REGISTER_CONVAR_CALLBACK_CL(cl_show_fps, [](NetworkState *, const ConVar &, bool, bool val) {
 	if(client == nullptr)
 		return;
 	client->ShowFPSCounter(val);
@@ -241,7 +241,7 @@ void ClientState::InitializeGUILua()
 	Lua::initialize_lua_state(GetGUILuaInterface());
 
 	auto utilMod = luabind::module(m_luaGUI->GetState(), "util");
-	Lua::util::register_shared_generic(utilMod);
+	Lua::util::register_shared_generic(m_luaGUI->GetState(), utilMod);
 	NetworkState::RegisterSharedLuaClasses(GetGUILuaInterface());
 	NetworkState::RegisterSharedLuaLibraries(GetGUILuaInterface());
 	ClientState::RegisterSharedLuaClasses(*m_luaGUI, true);
@@ -347,6 +347,8 @@ void ClientState::ToggleMainMenu()
 	else
 		OpenMainMenu();
 }
+
+NwStateType ClientState::GetType() const { return NwStateType::Client; }
 
 void ClientState::Close()
 {
@@ -851,7 +853,7 @@ bool ClientState::GetServerConVarIdentifier(uint32_t id, std::string &cvar)
 	return r;
 }
 
-REGISTER_CONVAR_CALLBACK_CL(sv_tickrate, [](NetworkState *, ConVar *, int, int val) {
+REGISTER_CONVAR_CALLBACK_CL(sv_tickrate, [](NetworkState *, const ConVar &, int, int val) {
 	if(val < 0)
 		val = 0;
 	c_engine->SetTickRate(val);

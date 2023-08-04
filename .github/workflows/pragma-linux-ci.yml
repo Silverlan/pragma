@@ -1,13 +1,17 @@
 name: Build Linux
 on:
   push:
-    branches: [ master ]
+    branches: [ main, master, actions ]
   pull_request:
-    branches: [ master ]
+    branches: [ main, master, actions ]
+  workflow_dispatch:
 
 concurrency:
   group: environment-lin-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -34,7 +38,7 @@ jobs:
         uses: Silverlan/pragma/github_actions/build@master
         id: build-pragma
         with:
-          build-args: "--with-pfm --with-all-pfm-modules --with-vr"
+          build-args: "--with-pfm --with-all-pfm-modules --with-vr --with-lua-debugger=0"
           
       - name: Create Release Archive
         shell: bash
@@ -44,6 +48,14 @@ jobs:
           cd "${{ steps.build-pragma.outputs.install-dir }}"
           echo -e "ref: $GITHUB_REF \ncommit: $GITHUB_SHA\nbuild: $(date +"%Y-%m-%dT%H:%M:%SZ")" \
           > ./git_info.txt
+
+          # Delete .git folders
+          find . -name ".git*" -exec rm -R {} \; 2>/dev/null || true
+
+          # Enable experimental updates
+          cd cfg
+          echo "pfm_enable_experimental_updates \"1\"" >> client.cfg
+          cd ..
 
           tar -czvf pragma.tar.gz *
           mv "${{ steps.build-pragma.outputs.install-dir }}/pragma.tar.gz" "$curDir/"
@@ -55,7 +67,7 @@ jobs:
           printf "This is an auto-generated pre-release, built from the latest version of the source code.\nIt includes all files necessary to run Pragma, as well as the latest version of the Pragma Filmmaker, however functionality and stability are **not** guaranteed.\n\nLatest release date: $curDate" > tag_text.txt
 
       - name: Update nightly tag description
-        uses: softprops/action-gh-release@v0.1.14
+        uses: softprops/action-gh-release@v0.1.15
         with:
           body_path: tag_text.txt
           tag_name: nightly

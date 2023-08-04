@@ -13,6 +13,7 @@
 #include <mathutil/umath.h>
 #include <mathutil/eulerangles.h>
 #include <udm_types.hpp>
+#include "pragma/game/game_coordinate_system.hpp"
 
 namespace pragma::ik {
 	struct RigConfigBone {
@@ -21,18 +22,25 @@ namespace pragma::ik {
 	};
 
 	struct RigConfigControl {
-		enum class Type : uint8_t { Drag = 0, State };
+		enum class Type : uint8_t { Drag = 0, State, OrientedDrag, Count };
 		std::string bone;
 		Type type = Type::Drag;
+		float maxForce = -1.f;
+		float rigidity = 1.f;
 	};
 
 	struct RigConfigConstraint {
-		enum class Type : uint8_t { Fixed = 0, Hinge, BallSocket };
+		enum class Type : uint8_t { Fixed = 0, Hinge, BallSocket, Count };
 		std::string bone0;
 		std::string bone1;
 		Type type = Type::Fixed;
+		SignedAxis axis = SignedAxis::Z;
 		EulerAngles minLimits;
 		EulerAngles maxLimits;
+		umath::ScaledTransform offsetPose {};
+
+		float rigidity = 1'000.f;
+		float maxForce = -1.f;
 	};
 
 	using PRigConfigBone = std::shared_ptr<RigConfigBone>;
@@ -49,6 +57,7 @@ namespace pragma::ik {
 		void ToUdmData(udm::LinkedPropertyWrapper &udmData) const;
 
 		PRigConfigBone AddBone(const std::string &name);
+		PRigConfigBone FindBone(const std::string &name);
 		void RemoveBone(const std::string &name);
 		bool HasBone(const std::string &name) const;
 		bool IsBoneLocked(const std::string &name) const;
@@ -59,13 +68,14 @@ namespace pragma::ik {
 
 		PRigConfigControl AddControl(const std::string &bone, RigConfigControl::Type type);
 
+		void RemoveConstraints(const std::string &bone);
 		void RemoveConstraints(const std::string &bone0, const std::string &bone1);
 		void RemoveConstraint(const RigConfigConstraint &constraint);
 		void RemoveControl(const RigConfigControl &control);
 		void RemoveBone(const RigConfigBone &bone);
 		PRigConfigConstraint AddFixedConstraint(const std::string &bone0, const std::string &bone1);
-		PRigConfigConstraint AddHingeConstraint(const std::string &bone0, const std::string &bone1, umath::Degree minAngle, umath::Degree maxAngle);
-		PRigConfigConstraint AddBallSocketConstraint(const std::string &bone0, const std::string &bone1, const EulerAngles &minAngles, const EulerAngles &maxAngles);
+		PRigConfigConstraint AddHingeConstraint(const std::string &bone0, const std::string &bone1, umath::Degree minAngle, umath::Degree maxAngle, const Quat &offsetRotation = uquat::identity());
+		PRigConfigConstraint AddBallSocketConstraint(const std::string &bone0, const std::string &bone1, const EulerAngles &minAngles, const EulerAngles &maxAngles, SignedAxis axis = SignedAxis::Z);
 
 		const std::vector<PRigConfigBone> &GetBones() const { return m_bones; }
 		const std::vector<PRigConfigControl> &GetControls() const { return m_controls; }
@@ -73,11 +83,11 @@ namespace pragma::ik {
 
 		bool Save(const std::string &fileName);
 	  private:
-		std::vector<PRigConfigBone>::iterator FindBone(const std::string &name);
-		const std::vector<PRigConfigBone>::iterator FindBone(const std::string &name) const;
+		std::vector<PRigConfigBone>::iterator FindBoneIt(const std::string &name);
+		const std::vector<PRigConfigBone>::iterator FindBoneIt(const std::string &name) const;
 
-		std::vector<PRigConfigControl>::iterator FindControl(const std::string &name);
-		const std::vector<PRigConfigControl>::iterator FindControl(const std::string &name) const;
+		std::vector<PRigConfigControl>::iterator FindControlIt(const std::string &name);
+		const std::vector<PRigConfigControl>::iterator FindControlIt(const std::string &name) const;
 
 		std::vector<PRigConfigBone> m_bones;
 		std::vector<PRigConfigControl> m_controls;
@@ -85,5 +95,8 @@ namespace pragma::ik {
 	};
 };
 std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfig &config);
+std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigBone &bone);
+std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigControl &control);
+std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigConstraint &constraint);
 
 #endif

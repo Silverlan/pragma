@@ -59,15 +59,6 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 
 		Count
 	};
-  private:
-	struct DLLCLIENT ConVarInfo {
-		std::string cvar;
-		std::vector<std::string> argv;
-	};
-	struct DLLCLIENT ConVarInfoList {
-		std::vector<ConVarInfo> cvars;
-		ConVarInfo *find(const std::string &cmd);
-	};
   public:
 	enum class StateFlags : uint32_t {
 		None = 0u,
@@ -81,7 +72,8 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 		TickDeltaTimeTiedToFrameRate = ConsoleOpen << 1u,
 		EnableGpuPerformanceTimers = TickDeltaTimeTiedToFrameRate << 1u,
 		CEClosed = EnableGpuPerformanceTimers << 1u,
-		InputBindingsDirty = CEClosed << 1u
+		InputBindingsDirty = CEClosed << 1u,
+		WindowSizeChanged = InputBindingsDirty << 1u,
 	};
 	enum class GPUTimer : uint32_t {
 		GUI = 0,
@@ -107,6 +99,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	void SetGPUProfilingEnabled(bool bEnabled);
 
 	virtual bool Initialize(int argc, char *argv[]) override;
+	virtual StateInstance &GetStateInstance(NetworkState &nw) override;
 	StateInstance &GetClientStateInstance();
 	const std::string &GetDefaultFontSetName() const;
 	const FontSet &GetDefaultFontSet() const;
@@ -142,8 +135,6 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	// Config
 	void LoadClientConfig();
 	void SaveClientConfig();
-	bool ExecConfig(const std::string &cfg, std::vector<ConVarInfo> &cmds);
-	void ExecCommands(ConVarInfoList &cmds);
 	void SetControllersEnabled(bool b);
 	bool GetControllersEnabled() const;
 
@@ -174,6 +165,8 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	void ScrollInput(prosper::Window &window, Vector2 offset);
 	void OnWindowFocusChanged(prosper::Window &window, bool bFocus);
 	void OnFilesDropped(prosper::Window &window, std::vector<std::string> &files);
+	void OnWindowResized(prosper::Window &window, Vector2i size);
+	bool OnWindowShouldClose(prosper::Window &window);
 	void JoystickButtonInput(prosper::Window &window, const GLFW::Joystick &joystick, uint32_t key, GLFW::KeyState state);
 	void JoystickAxisInput(prosper::Window &window, const GLFW::Joystick &joystick, uint32_t axis, GLFW::Modifier mods, float newVal, float deltaVal);
 	float GetRawJoystickAxisMagnitude() const;
@@ -228,11 +221,12 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 
 	void SetGpuPerformanceTimersEnabled(bool enabled);
 	std::chrono::nanoseconds GetGpuExecutionTime(uint32_t swapchainIdx, GPUTimer timer) const;
+
+	virtual std::unique_ptr<ConVarInfoList> &GetConVarConfig(NwStateType type) override;
   protected:
 	friend CoreInputBindingLayer;
 	void DrawScene(std::shared_ptr<prosper::RenderTarget> &rt);
 	void WriteClientConfig(VFilePtrReal f);
-	void PreloadClientConfig();
 	void OnRenderResolutionChanged(uint32_t width, uint32_t height);
 	void LoadFontSets();
 	void UpdateDirtyInputBindings();
@@ -247,6 +241,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	virtual void OnWindowInitialized() override;
 	virtual void LoadConfig() override;
 	virtual void InitializeExternalArchiveManager() override;
+	virtual void PreloadConfig(NwStateType type, const std::string &configName) override;
 
 	virtual void RegisterConsoleCommands() override;
   private:
@@ -260,6 +255,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	double m_tFPSTime;
 	util::Clock::time_point m_tLastFrame;
 	util::Clock::duration m_tDeltaFrameTime;
+	util::Clock::time_point m_tWindowResizeTime;
 	std::optional<std::chrono::nanoseconds> m_fixedFrameDeltaTimeInterpretation = {};
 
 	std::unordered_map<std::string, std::shared_ptr<al::IEffect>> m_auxEffects;
@@ -272,6 +268,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	float m_speedCamMouse;
 	float m_nearZ, m_farZ;
 	std::unique_ptr<StateInstance> m_clInstance;
+	std::unique_ptr<ConVarInfoList> m_clConfig;
 	std::optional<Vector2i> m_renderResolution = {};
 
 	std::shared_ptr<pragma::debug::GPUProfiler> m_gpuProfiler;
@@ -281,7 +278,6 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	std::unordered_map<std::string, FontSet> m_fontSets;
 	float m_rawInputJoystickMagnitude = 0.f;
 	std::unordered_map<GLFW::Key, GLFW::KeyState> m_joystickKeyStates;
-	std::unique_ptr<ConVarInfoList> m_preloadedConfig;
 
 	std::vector<std::shared_ptr<InputBindingLayer>> m_inputBindingLayers;
 	std::shared_ptr<InputBindingLayer> m_coreInputBindingLayer;

@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_bloom_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_pp_glow_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_dof_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_fog_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_tone_mapping_component.hpp"
@@ -61,6 +62,7 @@ void CRendererComponent::Initialize()
 	GetEntity().AddComponent<CRendererPpFogComponent>();
 	GetEntity().AddComponent<CRendererPpDoFComponent>();
 	GetEntity().AddComponent<CRendererPpBloomComponent>();
+	GetEntity().AddComponent<CRendererPpGlowComponent>();
 	GetEntity().AddComponent<CRendererPpToneMappingComponent>();
 	GetEntity().AddComponent<CRendererPpFxaaComponent>();
 }

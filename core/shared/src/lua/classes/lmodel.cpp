@@ -16,6 +16,8 @@
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/lua/converters/pair_converter_t.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
+#include "pragma/lua/policies/default_parameter_policy.hpp"
+#include "pragma/lua/converters/vector_converter_t.hpp"
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/lua/classes/lcollisionmesh.h"
 #include "luasystem.h"
@@ -162,6 +164,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 {
 	classDef.def(luabind::tostring(luabind::self));
 	classDef.def(luabind::const_self == luabind::const_self);
+	classDef.def("RemoveUnusedMaterialReferences", &::Model::RemoveUnusedMaterialReferences);
 	classDef.def("GetCollisionMeshes", &GetCollisionMeshes);
 	classDef.def("ClearCollisionMeshes", &ClearCollisionMeshes);
 	classDef.def("GetSkeleton", &GetSkeleton);
@@ -178,6 +181,11 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("SetAttachmentData", static_cast<void (*)(lua_State *, ::Model &, uint32_t, luabind::object)>(&SetAttachmentData));
 	classDef.def("RemoveAttachment", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&RemoveAttachment));
 	classDef.def("RemoveAttachment", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&RemoveAttachment));
+
+	classDef.def("GetReferenceBonePose", &::Model::GetReferenceBonePose);
+	classDef.def("FindBoneTwistAxis", &::Model::FindBoneTwistAxis);
+	classDef.def("FindBoneAxisForDirection", &::Model::FindBoneAxisForDirection);
+	classDef.scope[luabind::def("get_twist_axis_rotation_offset", &::Model::GetTwistAxisRotationOffset)];
 
 	classDef.def("GetObjectAttachments", &GetObjectAttachments);
 	classDef.def("AddObjectAttachment", &AddObjectAttachment);
@@ -366,6 +374,8 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("TranslateLODMeshes", static_cast<void (*)(lua_State *, ::Model &, uint32_t, luabind::object)>(&Lua::Model::TranslateLODMeshes));
 	classDef.def("TranslateLODMeshes", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&Lua::Model::TranslateLODMeshes));
 	classDef.def("GetJoints", &Lua::Model::GetJoints);
+	classDef.def("SetReferencePoses", &::Model::SetReferencePoses);
+	classDef.def("SetReferencePoses", &::Model::SetReferencePoses, luabind::default_parameter_policy<3, false> {});
 	classDef.def("AddJoint", static_cast<JointInfo *(*)(lua_State *, ::Model &, JointType, BoneId, BoneId)>([](lua_State *l, ::Model &mdl, JointType type, BoneId child, BoneId parent) -> JointInfo * {
 		auto &joint = mdl.AddJoint(type, child, parent);
 		return &joint;
@@ -993,6 +1003,19 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDefSkeleton.def("GetBoneHierarchy", Lua::Skeleton::GetBoneHierarchy);
 	classDefSkeleton.def("IsRootBone", static_cast<bool (*)(lua_State *, panima::Skeleton &, const std::string &)>(&Lua::Skeleton::IsRootBone));
 	classDefSkeleton.def("IsRootBone", static_cast<bool (*)(lua_State *, panima::Skeleton &, uint32_t)>(&Lua::Skeleton::IsRootBone));
+	classDefSkeleton.def(
+	  "ToDebugString", +[](const panima::Skeleton &skeleton) -> std::string {
+		  std::stringstream ss;
+		  std::function<void(const panima::Bone &, const std::string &t)> fprint = nullptr;
+		  fprint = [&fprint, &ss](const panima::Bone &bone, const std::string &t) {
+			  ss << t << bone.name << "\n";
+			  for(auto &pair : bone.children)
+				  fprint(*pair.second, t + "\t");
+		  };
+		  for(auto &pair : skeleton.GetRootBones())
+			  fprint(*pair.second, "");
+		  return ss.str();
+	  });
 	Lua::Bone::register_class(l, classDefSkeleton);
 
 	auto modelMeshGroupClassDef = luabind::class_<::ModelMeshGroup>("MeshGroup");
@@ -1055,6 +1078,68 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	defJoint.add_static_constant("TYPE_CONETWIST", umath::to_integral(JointType::ConeTwist));
 	defJoint.add_static_constant("TYPE_DOF", umath::to_integral(JointType::DOF));
 	classDef.scope[defJoint];
+
+	auto defBoxCreateInfo = luabind::class_<pragma::model::BoxCreateInfo>("BoxCreateInfo");
+	defBoxCreateInfo.def(luabind::constructor<const Vector3 &, const Vector3 &>());
+	defBoxCreateInfo.def(luabind::constructor<>());
+	defBoxCreateInfo.def_readwrite("min", &pragma::model::BoxCreateInfo::min);
+	defBoxCreateInfo.def_readwrite("max", &pragma::model::BoxCreateInfo::max);
+	classDef.scope[defBoxCreateInfo];
+
+	auto defSphereCreateInfo = luabind::class_<pragma::model::SphereCreateInfo>("SphereCreateInfo");
+	defSphereCreateInfo.def(luabind::constructor<const Vector3 &, float>());
+	defSphereCreateInfo.def(luabind::constructor<>());
+	defSphereCreateInfo.def_readwrite("origin", &pragma::model::SphereCreateInfo::origin);
+	defSphereCreateInfo.def_readwrite("radius", &pragma::model::SphereCreateInfo::radius);
+	defSphereCreateInfo.def_readwrite("recursionLevel", &pragma::model::SphereCreateInfo::recursionLevel);
+	classDef.scope[defSphereCreateInfo];
+
+	auto defCylinderCreateInfo = luabind::class_<pragma::model::CylinderCreateInfo>("CylinderCreateInfo");
+	defCylinderCreateInfo.def(luabind::constructor<float, float>());
+	defCylinderCreateInfo.def(luabind::constructor<>());
+	defCylinderCreateInfo.def_readwrite("radius", &pragma::model::CylinderCreateInfo::radius);
+	defCylinderCreateInfo.def_readwrite("length", &pragma::model::CylinderCreateInfo::length);
+	defCylinderCreateInfo.def_readwrite("segmentCount", &pragma::model::CylinderCreateInfo::segmentCount);
+	classDef.scope[defCylinderCreateInfo];
+
+	auto defConeCreateInfo = luabind::class_<pragma::model::ConeCreateInfo>("ConeCreateInfo");
+	defConeCreateInfo.def(luabind::constructor<umath::Degree, float>());
+	defConeCreateInfo.def(luabind::constructor<float, float, float>());
+	defConeCreateInfo.def(luabind::constructor<>());
+	defConeCreateInfo.def_readwrite("startRadius", &pragma::model::ConeCreateInfo::startRadius);
+	defConeCreateInfo.def_readwrite("length", &pragma::model::ConeCreateInfo::length);
+	defConeCreateInfo.def_readwrite("endRadius", &pragma::model::ConeCreateInfo::endRadius);
+	defConeCreateInfo.def_readwrite("segmentCount", &pragma::model::ConeCreateInfo::segmentCount);
+	classDef.scope[defConeCreateInfo];
+
+	auto defEllipticConeCreateInfo = luabind::class_<pragma::model::EllipticConeCreateInfo, pragma::model::ConeCreateInfo>("EllipticConeCreateInfo");
+	defEllipticConeCreateInfo.def(luabind::constructor<umath::Degree, umath::Degree, float>());
+	defEllipticConeCreateInfo.def(luabind::constructor<float, float, float, float, float>());
+	defEllipticConeCreateInfo.def(luabind::constructor<>());
+	defEllipticConeCreateInfo.def_readwrite("startRadiusY", &pragma::model::EllipticConeCreateInfo::startRadiusY);
+	defEllipticConeCreateInfo.def_readwrite("endRadiusY", &pragma::model::EllipticConeCreateInfo::endRadiusY);
+	classDef.scope[defEllipticConeCreateInfo];
+
+	auto defCircleCreateInfo = luabind::class_<pragma::model::CircleCreateInfo>("CircleCreateInfo");
+	defCircleCreateInfo.def(luabind::constructor<float, bool>());
+	defCircleCreateInfo.def(luabind::constructor<float, bool>(), luabind::default_parameter_policy<2, true> {});
+	defCircleCreateInfo.def(luabind::constructor<>());
+	defCircleCreateInfo.def_readwrite("radius", &pragma::model::CircleCreateInfo::radius);
+	defCircleCreateInfo.def_readwrite("doubleSided", &pragma::model::CircleCreateInfo::doubleSided);
+	defCircleCreateInfo.def_readwrite("segmentCount", &pragma::model::CircleCreateInfo::segmentCount);
+	defCircleCreateInfo.def_readwrite("totalAngle", &pragma::model::CircleCreateInfo::totalAngle);
+	classDef.scope[defCircleCreateInfo];
+
+	auto defRingCreateInfo = luabind::class_<pragma::model::RingCreateInfo>("RingCreateInfo");
+	defRingCreateInfo.def(luabind::constructor<float, float, bool>());
+	defRingCreateInfo.def(luabind::constructor<float, float, bool>(), luabind::default_parameter_policy<3, true> {});
+	defRingCreateInfo.def(luabind::constructor<>());
+	defRingCreateInfo.def_readwrite("innerRadius", &pragma::model::RingCreateInfo::innerRadius);
+	defRingCreateInfo.def_readwrite("outerRadius", &pragma::model::RingCreateInfo::outerRadius);
+	defRingCreateInfo.def_readwrite("doubleSided", &pragma::model::RingCreateInfo::doubleSided);
+	defRingCreateInfo.def_readwrite("segmentCount", &pragma::model::RingCreateInfo::segmentCount);
+	defRingCreateInfo.def_readwrite("totalAngle", &pragma::model::RingCreateInfo::totalAngle);
+	classDef.scope[defRingCreateInfo];
 
 	// Assign definitions
 	classDef.scope[classDefSkeleton];

@@ -9,10 +9,18 @@
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/entities/environment/lights/c_env_light_directional.h"
+#include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
+#include "pragma/entities/environment/c_env_camera.h"
+#include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/c_model_component.hpp"
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/model/c_model.h>
 #include <pragma/model/c_modelmesh.h>
 #include <prosper_command_buffer.hpp>
+#include <image/prosper_texture.hpp>
 
 using namespace pragma;
 
@@ -21,7 +29,6 @@ extern DLLCLIENT CGame *c_game;
 
 void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightDirectionalComponent &light, bool drawParticleShadows)
 {
-	// TODO
 #if 0
 	auto pLightComponent = light.GetEntity().GetComponent<pragma::CLightComponent>();
 	auto *shadowScene = pLightComponent.valid() ? pLightComponent->FindShadowScene() : nullptr;
@@ -77,8 +84,8 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 			auto pRenderComponent = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
 			if(ent->IsInert() == true || static_cast<CBaseEntity*>(ent)->IsInScene(*shadowScene) || pRenderComponent->ShouldDrawShadow(posCam) == false)
 				continue;
-			auto &mdlComponent = pRenderComponent->GetModelComponent();
-			auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+			auto *mdlComponent = pRenderComponent->GetModelComponent();
+			auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 			if(mdl == nullptr)
 				continue;
 			uint32_t renderFlags = 0;
@@ -126,7 +133,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 			clearImageInfo.subresourceRange.baseArrayLayer = layer;
 			clearImageInfo.subresourceRange.layerCount = 1u;
 			drawCmd->RecordClearImage(img,prosper::ImageLayout::TransferDstOptimal,1.f,clearImageInfo); // Clear this layer
-			auto &framebuffer = csm.GetFramebuffer(rp,layer);
+			auto framebuffer = csm.GetFramebuffer(rp,layer);
 
 			drawCmd->RecordImageBarrier(img,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal,layer);
 
@@ -174,7 +181,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 					{
 						bProcessMeshes = ((info.renderFlags &layerFlag) != 0) ? true : false;
 						if(bProcessMeshes == true)
-							shader.BindEntity(*const_cast<CBaseEntity*>(info.entity),csm.GetStaticPendingViewProjectionMatrix(layer));
+							shader.RecordBindEntity(*const_cast<CBaseEntity *>(info.entity), csm.GetStaticPendingViewProjectionMatrix(layer));
 					}
 					if(info.mesh != nullptr && bProcessMeshes == true)
 					{
@@ -183,9 +190,9 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 							if(bTranslucent == true)
 							{
 								auto &shaderTranslucent = static_cast<pragma::ShaderShadowCSMTransparent&>(shader);
-								if(info.material == prevMat || shaderTranslucent.BindMaterial(static_cast<CMaterial&>(*info.material)) == true)
+								if(info.material == prevMat || shaderTranslucent.RecordBindMaterial(static_cast<CMaterial &>(*info.material)) == true)
 								{
-									shaderTranslucent.Draw(*const_cast<CModelSubMesh*>(info.mesh));
+									shaderTranslucent.RecordDraw(*const_cast<CModelSubMesh *>(info.mesh));
 									prevMat = info.material;
 								}
 							}
@@ -193,16 +200,16 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 								bRetTranslucent = true;
 						}
 						else if(bTranslucent == false)
-							shader.Draw(*const_cast<CModelSubMesh*>(info.mesh));
+							shader.RecordDraw(*const_cast<CModelSubMesh *>(info.mesh));
 					}
 				}
 				return bRetTranslucent;
 			};
 			auto *scene = c_game->GetRenderScene();
 			auto *renderer = scene ? scene->GetRenderer() : nullptr;
-			if(renderer && renderer->IsRasterizationRenderer() && shaderCsm.BeginDraw(drawCmd) == true)
+			if(renderer && renderer->IsRasterizationRenderer() && shaderCsm.RecordBeginDraw(drawCmd) == true)
 			{
-				shaderCsm.BindLight(*pLightComponent);
+				shaderCsm.RecordBindLight(*pLightComponent);
 				auto bHasTranslucents = fDraw(shaderCsm,false);
 
 				if(drawParticleShadows == true)
@@ -214,18 +221,18 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 					{
 						auto p = ent->GetComponent<pragma::CParticleSystemComponent>();
 						if(p.valid() && p->GetCastShadows() == true)
-							p->RenderShadow(drawCmd,*scene,*static_cast<pragma::CRasterizationRendererComponent*>(renderer),pLightComponent.get(),layer);
+							p->RecordRenderShadow(drawCmd, *scene, *static_cast<pragma::CRasterizationRendererComponent *>(renderer), pLightComponent.get(), layer);
 					}
 				}
 
-				shaderCsm.EndDraw();
+				shaderCsm.RecordEndDraw();
 				if(bHasTranslucents == true && shaderCsmTransparent != nullptr)
 				{
-					if(shaderCsmTransparent->BeginDraw(drawCmd) == true)
+					if(shaderCsmTransparent->RecordBeginDraw(drawCmd) == true)
 					{
-						shaderCsmTransparent->BindLight(*pLightComponent);
+						shaderCsmTransparent->RecordBindLight(*pLightComponent);
 						fDraw(*shaderCsmTransparent,true); // Draw translucent shadows
-						shaderCsmTransparent->EndDraw();
+						shaderCsmTransparent->RecordEndDraw();
 					}
 				}
 			}

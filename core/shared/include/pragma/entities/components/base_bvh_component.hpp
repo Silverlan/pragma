@@ -64,6 +64,7 @@ namespace pragma {
 		static ComponentEventId EVENT_ON_CLEAR_BVH;
 		static ComponentEventId EVENT_ON_BVH_UPDATE_REQUESTED;
 		static ComponentEventId EVENT_ON_BVH_REBUILT;
+		static bool ShouldConsiderMesh(const ModelSubMesh &mesh);
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;
@@ -82,12 +83,19 @@ namespace pragma {
 		void SendBvhUpdateRequestOnInteraction();
 		static bool SetVertexData(pragma::BvhData &bvhData, const std::vector<BvhTriangle> &data);
 		bool SetVertexData(const std::vector<BvhTriangle> &data);
+		void GetVertexData(std::vector<BvhTriangle> &outData) const;
 		void RebuildBvh();
 		void ClearBvh();
 		std::optional<Vector3> GetVertex(size_t idx) const;
+		size_t GetTriangleCount() const;
 
 		// For internal use only
-		static std::shared_ptr<pragma::BvhData> RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh>> &meshes, const std::vector<umath::ScaledTransform> *optPoses = nullptr, const std::function<bool()> &fIsCancelled = nullptr, std::vector<size_t> *optOutMeshIndices = nullptr);
+		struct DLLNETWORK BvhBuildInfo {
+			const std::vector<umath::ScaledTransform> *poses = nullptr;
+			std::function<bool()> isCancelled = nullptr;
+			std::function<bool(const ModelSubMesh &, uint32_t)> shouldConsiderMesh = nullptr;
+		};
+		static std::shared_ptr<pragma::BvhData> RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo = nullptr, std::vector<size_t> *optOutMeshIndices = nullptr);
 		std::shared_ptr<BvhData> SetBvhData(std::shared_ptr<BvhData> &bvhData);
 		bool HasBvhData() const;
 	  protected:

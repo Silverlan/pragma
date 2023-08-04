@@ -10,7 +10,11 @@
 
 void main()
 {
-	fs_color = vec4(1,0,0,fs_in.vert_uv);
-	if(CSPEC_BLOOM_OUTPUT_ENABLED == 1)
-		extract_bright_color(fs_color);
+	fs_color = texture(u_albedoMap,fs_in.vert_uv);
+	vec4 colorMod = get_instance_color();
+	fs_color.r *= colorMod.r;
+	fs_color.g *= colorMod.g;
+	fs_color.b *= colorMod.b;
+	fs_color.a *= colorMod.a;
+	extract_bright_color(fs_color);
 }

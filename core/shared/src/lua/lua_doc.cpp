@@ -167,10 +167,34 @@ void Lua::doc::find_candidates(const std::string &name, std::vector<const pragma
 void Lua::doc::generate_autocomplete_script()
 {
 	initialize_pragma_documentation();
-	auto autocompleteScript = pragma::doc::zerobrane::generate_autocomplete_script(s_docInfo.collections);
 
 	filemanager::create_path("doc/ZeroBrane/api/lua");
-	filemanager::write_file("doc/ZeroBrane/api/lua/pragma.lua", autocompleteScript);
+	auto autocompleteScriptZb = pragma::doc::zerobrane::generate_autocomplete_script(s_docInfo.collections);
+	filemanager::write_file("doc/ZeroBrane/api/lua/pragma.lua", autocompleteScriptZb);
+
+	auto lsDoc = pragma::doc::luals::generate_doc(s_docInfo.collections);
+	for(auto &pair : lsDoc.streams) {
+		std::string path = "doc/LuaLS/meta/";
+		filemanager::create_path(path);
+		path += pair.first + ".lua";
+		auto &ss = pair.second;
+		if(pair.first == "_G") {
+			// Some types have global aliases which can't be detected automatically, so we define them here.
+			const std::unordered_map<std::string, std::string> globalAliases {
+			  {"Vector2i", "math.Vector2i"},
+			  {"Vector", "math.Vector"},
+			  {"Vector2", "math.Vector2"},
+			  {"Vector4", "math.Vector4"},
+			  {"EulerAngles", "math.EulerAngles"},
+			  {"Quaternion", "math.Quaternion"},
+			  {"Color", "util.Color"},
+			};
+			ss << "\n";
+			for(auto &pair : globalAliases)
+				ss << pair.first << " = " << pair.second << "\n";
+		}
+		filemanager::write_file(path, ss.str());
+	}
 
 	filemanager::create_path("doc/ZeroBrane/cfg");
 	filemanager::write_file("doc/ZeroBrane/cfg/pragma.lua",

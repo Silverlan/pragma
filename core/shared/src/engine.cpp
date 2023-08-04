@@ -105,7 +105,7 @@ Engine::Engine(int, char *[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(En
 	debug::open_domain();
 #endif
 	Locale::Init();
-	OpenConsole();
+	// OpenConsole();
 
 	m_mainThreadId = std::this_thread::get_id();
 
@@ -470,12 +470,26 @@ bool Engine::StopProfilingStage(CPUProfilingPhase stage) { return m_profilingSta
 
 void Engine::RunTickEvents()
 {
-	while(!m_tickEventQueue.empty()) {
-		m_tickEventQueue.front()();
-		m_tickEventQueue.pop();
+	m_tickEventQueueMutex.lock();
+	if(m_tickEventQueue.empty()) {
+		m_tickEventQueueMutex.unlock();
+		return;
+	}
+	auto queue = std::move(m_tickEventQueue);
+	m_tickEventQueue = {};
+	m_tickEventQueueMutex.unlock();
+
+	while(!queue.empty()) {
+		queue.front()();
+		queue.pop();
 	}
 }
-void Engine::AddTickEvent(const std::function<void()> &ev) { m_tickEventQueue.push(ev); }
+void Engine::AddTickEvent(const std::function<void()> &ev)
+{
+	m_tickEventQueueMutex.lock();
+	m_tickEventQueue.push(ev);
+	m_tickEventQueueMutex.unlock();
+}
 
 void Engine::Tick()
 {
@@ -530,6 +544,16 @@ void Engine::UpdateParallelJobs()
 
 ConVarMap *Engine::GetConVarMap() { return console_system::engine::get_convar_map(); }
 
+std::unique_ptr<Engine::ConVarInfoList> &Engine::GetConVarConfig(NwStateType type)
+{
+	assert(type == NwStateType::Server);
+	return m_svConfig;
+}
+Engine::StateInstance &Engine::GetStateInstance(NetworkState &nw)
+{
+	assert(m_svInstance != nullptr);
+	return *m_svInstance;
+}
 Engine::StateInstance &Engine::GetServerStateInstance() { return *m_svInstance; }
 
 void Engine::SetVerbose(bool bVerbose) { umath::set_flag(m_stateFlags, StateFlags::Verbose, bVerbose); }
@@ -885,19 +909,32 @@ void Engine::DumpDebugInformation(ZIPFile &zip) const
 	}
 	zip.AddFile("engine.txt", engineInfo.str());
 
+	auto fAddFile = [&zip](const std::string &fileName, const std::string &zipFileName) {
+		std::string path = util::get_program_path() + "/" + fileName;
+		std::ifstream t {path};
+		if(t.is_open()) {
+			std::stringstream buffer;
+			buffer << t.rdbuf();
+			std::string log = buffer.str();
+			zip.AddFile(zipFileName, log);
+		}
+	};
+
 	auto logFileName = pragma::detail::get_log_file_name();
 	if(logFileName.has_value()) {
 		pragma::detail::close_logger();
+
+		/* For some reason this will fail sometimes
 		auto logContents = filemanager::read_file(*logFileName);
-		if(logContents.has_value())
+		if(logContents.has_value()) {
 			zip.AddFile("log.txt", *logContents);
+		}
+		*/
+
+		fAddFile(*logFileName, "log.txt");
 	}
 
-	if(filemanager::exists("git_info.txt")) {
-		auto infoContents = filemanager::read_file("git_info.txt");
-		if(infoContents.has_value())
-			zip.AddFile("git_info.txt", *infoContents);
-	}
+	fAddFile("git_info.txt", "git_info.txt");
 
 	auto fWriteConvars = [&zip](const std::map<std::string, std::shared_ptr<ConConf>> &cvarMap, const std::string &fileName) {
 		std::stringstream convars;
@@ -1001,7 +1038,7 @@ Engine::~Engine()
 Engine *pragma::get_engine() { return engine; }
 ServerState *pragma::get_server_state() { return engine->GetServerStateInterface().get_server_state(); }
 
-REGISTER_ENGINE_CONVAR_CALLBACK(debug_profiling_enabled, [](NetworkState *, ConVar *, bool, bool enabled) {
+REGISTER_ENGINE_CONVAR_CALLBACK(debug_profiling_enabled, [](NetworkState *, const ConVar &, bool, bool enabled) {
 	if(engine == nullptr)
 		return;
 	engine->SetProfilingEnabled(enabled);

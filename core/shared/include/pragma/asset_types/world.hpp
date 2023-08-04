@@ -15,6 +15,7 @@
 #include <fsys/filesystem.h>
 #include <mathutil/uvec.h>
 #include <unordered_set>
+#include <udm.hpp>
 
 #undef GetClassName
 
@@ -37,6 +38,21 @@ namespace pragma::asset {
 		void Read(VFilePtr &f);
 	};
 
+	class DLLNETWORK ComponentData : public std::enable_shared_from_this<ComponentData> {
+	  public:
+		enum class Flags : uint64_t { None = 0u, ClientsideOnly = 1u };
+
+		static std::shared_ptr<ComponentData> Create();
+
+		Flags GetFlags() const;
+		void SetFlags(Flags flags);
+		udm::PProperty GetData() const { return m_data; }
+	  private:
+		ComponentData();
+		udm::PProperty m_data;
+		Flags m_flags = Flags::None;
+	};
+
 	class WorldData;
 	class DLLNETWORK EntityData : public std::enable_shared_from_this<EntityData> {
 	  public:
@@ -48,8 +64,6 @@ namespace pragma::asset {
 		bool IsSkybox() const;
 		bool IsClientSideOnly() const;
 		void SetClassName(const std::string &className);
-		void SetOrigin(const Vector3 &origin);
-		void SetRotation(const Quat &rot);
 		void SetLeafData(uint32_t firstLeaf, uint32_t numLeaves);
 		void SetKeyValue(const std::string &key, const std::string &value);
 		void AddOutput(const Output &output);
@@ -58,8 +72,9 @@ namespace pragma::asset {
 		const std::string &GetClassName() const;
 		Flags GetFlags() const;
 		void SetFlags(Flags flags);
-		const std::vector<std::string> &GetComponents() const;
-		std::vector<std::string> &GetComponents();
+		std::shared_ptr<ComponentData> AddComponent(const std::string &name);
+		const std::unordered_map<std::string, std::shared_ptr<ComponentData>> &GetComponents() const;
+		std::unordered_map<std::string, std::shared_ptr<ComponentData>> &GetComponents();
 		const std::unordered_map<std::string, std::string> &GetKeyValues() const;
 		std::unordered_map<std::string, std::string> &GetKeyValues();
 		std::optional<std::string> GetKeyValue(const std::string &key) const;
@@ -68,19 +83,21 @@ namespace pragma::asset {
 		std::vector<Output> &GetOutputs();
 		const std::vector<uint16_t> &GetLeaves() const;
 		std::vector<uint16_t> &GetLeaves();
-		const Vector3 &GetOrigin() const;
-		umath::Transform GetPose() const;
 		void GetLeafData(uint32_t &outFirstLeaf, uint32_t &outNumLeaves) const;
+
+		const std::optional<umath::ScaledTransform> &GetPose() const;
+		umath::ScaledTransform GetEffectivePose() const;
+		void SetPose(const umath::ScaledTransform &pose);
+		void ClearPose();
 	  private:
 		friend WorldData;
 		EntityData() = default;
-		std::string m_className;
-		std::vector<std::string> m_components;
+		std::string m_className = "entity";
+		std::unordered_map<std::string, std::shared_ptr<ComponentData>> m_components;
 		std::unordered_map<std::string, std::string> m_keyValues;
 		std::vector<Output> m_outputs;
 		uint32_t m_mapIndex = 0u;
-		Vector3 m_origin = {};
-		Quat m_rotation = uquat::identity();
+		std::optional < umath::ScaledTransform> m_pose {};
 		std::vector<uint16_t> m_leaves = {};
 		Flags m_flags = Flags::None;
 

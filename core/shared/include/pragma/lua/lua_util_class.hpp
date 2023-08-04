@@ -7,38 +7,58 @@
 #ifndef __LUA_UTIL_CLASS_HPP__
 #define __LUA_UTIL_CLASS_HPP__
 
+#include "pragma/networkdefinitions.h"
 #include <luasystem.h>
 #include <sharedutils/util_string_literal.hpp>
 
 namespace pragma {
 	namespace lua {
+		namespace detail {
+			DLLNETWORK std::string tostring(const luabind::object &o);
+			DLLNETWORK void register_lua_debug_tostring(lua_State *l, const std::type_info &typeInfo);
+		};
+
 		template<typename... Types>
-		luabind::class_<Types...> register_class(const char *name)
+		struct ClassWrapper {
+			ClassWrapper(lua_State *l, const char *name, const std::type_info &typeInfo) : l {l}, luaClass {name}, typeInfo {typeInfo} {}
+			~ClassWrapper() { detail::register_lua_debug_tostring(l, typeInfo); }
+			lua_State *l;
+			luabind::class_<Types...> luaClass;
+			const std::type_info &typeInfo;
+			luabind::class_<Types...> &operator*() { return luaClass; }
+			luabind::class_<Types...> *operator->() { return &luaClass; }
+		};
+
+		template<typename... Types>
+		ClassWrapper<Types...> register_class(lua_State *l, const char *name)
 		{
-			auto def = luabind::class_<Types...>(name);
-			def.def(luabind::tostring(luabind::self));
+			using FirstType = std::tuple_element_t<0, std::tuple<Types...>>;
+			ClassWrapper<Types...> def {l, name, typeid(FirstType)};
+			def->def(luabind::tostring(luabind::self));
 			return def;
 		}
 		template<typename TBase, typename... Types>
-		luabind::class_<TBase, Types...> register_class(const char *name, void (*tostring)(const TBase &))
+		ClassWrapper<TBase, Types...> register_class(lua_State *l, const char *name, void (*tostring)(const TBase &))
 		{
-			auto def = luabind::class_<Types...>(name);
-			def.def("__tostring", tostring);
+			ClassWrapper<TBase, Types...> def {l, name, typeid(TBase)};
+			def->def("__tostring", tostring);
 			return def;
 		}
 		template<util::StringLiteral TStr, typename... Types>
-		luabind::class_<Types...> register_class(const char *name)
+		ClassWrapper<Types...> register_class(lua_State *l, const char *name)
 		{
-			auto def = luabind::class_<Types...>(name);
-			def.def(
+			using FirstType = std::tuple_element_t<0, std::tuple<Types...>>;
+			ClassWrapper<Types...> def = {l, name, typeid(FirstType)};
+			def->def(
 			  "__tostring", +[]() -> const char * { return TStr; });
 			return def;
 		}
 		template<util::StringLiteral TStr, typename... Types>
-		luabind::class_<Types...> register_class()
+		ClassWrapper<Types...> register_class(lua_State *l)
 		{
-			auto def = luabind::class_<Types...>(TStr.value);
-			def.def(
+			using FirstType = std::tuple_element_t<0, std::tuple<Types...>>;
+			ClassWrapper<Types...> def {l, TStr.value, typeid(FirstType)};
+			def->def(
 			  "__tostring", +[]() -> const char * { return TStr.value; });
 			return def;
 		}

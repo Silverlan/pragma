@@ -439,6 +439,49 @@ bool Model::GetLocalBonePosition(uint32_t animId, uint32_t frameId, uint32_t bon
 util::WeakHandle<const Model> Model::GetHandle() const { return util::WeakHandle<const Model>(std::static_pointer_cast<const Model>(shared_from_this())); }
 util::WeakHandle<Model> Model::GetHandle() { return util::WeakHandle<Model>(std::static_pointer_cast<Model>(shared_from_this())); }
 
+bool Model::SetReferencePoses(const std::vector<umath::ScaledTransform> &poses, bool posesInParentSpace)
+{
+	auto &skeleton = GetSkeleton();
+	if(skeleton.GetBoneCount() != poses.size())
+		return false;
+	std::vector<umath::ScaledTransform> *relPoses = nullptr;
+	std::vector<umath::ScaledTransform> *absPoses = nullptr;
+	std::vector<umath::ScaledTransform> t;
+	t.resize(poses.size());
+	if(posesInParentSpace) {
+		relPoses = const_cast<std::vector<umath::ScaledTransform> *>(&poses);
+		absPoses = &t;
+		skeleton.TransformToGlobalSpace(*relPoses, *absPoses);
+	}
+	else {
+		absPoses = const_cast<std::vector<umath::ScaledTransform> *>(&poses);
+		relPoses = &t;
+		skeleton.TransformToParentSpace(*absPoses, *relPoses);
+	}
+
+	auto &ref = GetReference();
+	ref.SetBoneCount(poses.size());
+	for(auto i = decltype(poses.size()) {0u}; i < poses.size(); ++i)
+		ref.SetBonePose(i, (*absPoses)[i]);
+
+	auto animId = LookupAnimation("reference");
+	if(LookupAnimation("reference") != -1) {
+		auto anim = pragma::animation::Animation::Create();
+		animId = AddAnimation("reference", anim);
+	}
+
+	auto anim = GetAnimation(animId);
+	if(anim->GetFrameCount() == 0)
+		anim->AddFrame(Frame::Create(skeleton.GetBoneCount()));
+	auto frame = anim->GetFrame(0);
+	frame->SetBoneCount(skeleton.GetBoneCount());
+	anim->SetBoneList({});
+
+	for(auto i = decltype(poses.size()) {0u}; i < poses.size(); ++i)
+		frame->SetBonePose(i, (*relPoses)[i]);
+	return true;
+}
+
 Frame &Model::GetReference() { return *m_reference; }
 const Frame &Model::GetReference() const { return *m_reference; }
 void Model::SetReference(std::shared_ptr<Frame> frame) { m_reference = frame; }
@@ -717,6 +760,63 @@ void Model::Optimize()
 
 void Model::PrecacheMaterials() { LoadMaterials(true, false); }
 
+void Model::RemoveUnusedMaterialReferences()
+{
+	if(m_metaInfo.textures.size() != m_materials.size())
+		return;
+	std::vector<bool> inUse;
+	inUse.resize(m_metaInfo.textures.size(), false);
+	for(auto &meshGroup : GetMeshGroups()) {
+		for(auto &mesh : meshGroup->GetMeshes()) {
+			for(auto &subMesh : mesh->GetSubMeshes()) {
+				auto idx = subMesh->GetSkinTextureIndex();
+				if(idx >= inUse.size())
+					continue;
+				inUse[idx] = true;
+			}
+		}
+	}
+
+	std::vector<uint32_t> oldIndexToNewIndex {};
+	oldIndexToNewIndex.resize(m_metaInfo.textures.size(), std::numeric_limits<uint32_t>::max());
+	uint32_t oldIdx = 0;
+	for(auto it = m_metaInfo.textures.begin(); it != m_metaInfo.textures.end();) {
+		util::ScopeGuard sg {[&oldIdx]() { ++oldIdx; }};
+		auto idx = it - m_metaInfo.textures.begin();
+		if(inUse[oldIdx] == false) {
+			it = m_metaInfo.textures.erase(it);
+			m_materials.erase(m_materials.begin() + idx);
+			continue;
+		}
+		oldIndexToNewIndex[oldIdx] = idx;
+		++it;
+	}
+
+	auto &texGroups = GetTextureGroups();
+	for(auto &texGroup : texGroups) {
+		for(auto it = texGroup.textures.begin(); it != texGroup.textures.end();) {
+			auto idx = *it;
+			if(oldIndexToNewIndex[idx] == std::numeric_limits<uint32_t>::max()) {
+				it = texGroup.textures.erase(it);
+				continue;
+			}
+			*it = oldIndexToNewIndex[idx];
+			++it;
+		}
+	}
+
+	for(auto &meshGroup : GetMeshGroups()) {
+		for(auto &mesh : meshGroup->GetMeshes()) {
+			for(auto &subMesh : mesh->GetSubMeshes()) {
+				auto idx = subMesh->GetSkinTextureIndex();
+				if(idx >= oldIndexToNewIndex.size())
+					continue;
+				subMesh->SetSkinTextureIndex(oldIndexToNewIndex[idx]);
+			}
+		}
+	}
+}
+
 void Model::LoadMaterials(const std::vector<uint32_t> &textureGroupIds, bool precache, bool bReload)
 {
 	util::ScopeGuard resWatcherLock {};
@@ -790,7 +890,7 @@ void Model::PrecacheTextureGroup(uint32_t i)
 {
 	if(i >= m_textureGroups.size())
 		return;
-	LoadMaterials(std::vector<uint32_t> {i}, false, true);
+	LoadMaterials(std::vector<uint32_t> {i}, true, false);
 }
 void Model::PrecacheTextureGroups()
 {
@@ -1825,4 +1925,79 @@ void Model::UpdateShape(const std::vector<SurfaceMaterial> *)
 	for(auto &cmesh : m_collisionMeshes)
 		cmesh->UpdateShape();
 }
-//void Model::GetWeights(std::vector<VertexWeight*> **weights) {*weights = &m_weights;}
+std::optional<umath::ScaledTransform> Model::GetReferenceBonePose(BoneId boneId) const
+{
+	auto &ref = GetReference();
+	umath::ScaledTransform pose;
+	if(!ref.GetBonePose(boneId, pose))
+		return {};
+	return pose;
+}
+std::optional<pragma::SignedAxis> Model::FindBoneAxisForDirection(BoneId boneId, const Vector3 &dir) const
+{
+	auto refPose = GetReferenceBonePose(boneId);
+	if(!refPose)
+		return {};
+	auto &rotBone1 = refPose->GetRotation();
+	auto forward = uquat::forward(rotBone1);
+	auto right = uquat::right(rotBone1);
+	auto up = uquat::up(rotBone1);
+	auto df = uvec::dot(dir, forward);
+	auto dr = uvec::dot(dir, right);
+	auto du = uvec::dot(dir, up);
+	auto dfa = umath::abs(df);
+	auto dra = umath::abs(dr);
+	auto dua = umath::abs(du);
+	if(dfa >= umath::max(dra, dua))
+		return (df < 0) ? pragma::SignedAxis::NegZ : pragma::SignedAxis::Z; // Forward
+	else if(dra >= umath::max(dfa, dua))
+		return (dr < 0) ? pragma::SignedAxis::NegX : pragma::SignedAxis::X; // Right
+	return (du < 0) ? pragma::SignedAxis::NegY : pragma::SignedAxis::Y;     // Up
+}
+std::optional<pragma::SignedAxis> Model::FindBoneTwistAxis(BoneId boneId) const
+{
+	auto refPose = GetReferenceBonePose(boneId);
+	if(!refPose)
+		return {};
+
+	auto bone = GetSkeleton().GetBone(boneId).lock();
+	std::vector<Vector3> normalList;
+	normalList.reserve(bone->children.size());
+	for(auto &pair : bone->children) {
+		auto pose = GetReferenceBonePose(pair.first);
+		if(pose) {
+			auto normal = pose->GetOrigin() - refPose->GetOrigin();
+			uvec::normalize(&normal);
+			normalList.push_back(normal);
+		}
+	}
+	Vector3 norm = uvec::FORWARD;
+	if(!normalList.empty())
+		norm = uvec::calc_average(normalList);
+	else {
+		if(!bone->parent.expired()) {
+			auto refPoseParent = GetReferenceBonePose(bone->parent.lock()->ID);
+			if(refPoseParent)
+				norm = (refPose->GetOrigin() - refPoseParent->GetOrigin());
+		}
+	}
+
+	auto dirFromBone0ToBone1 = norm;
+	uvec::normalize(&dirFromBone0ToBone1);
+	return FindBoneAxisForDirection(boneId, dirFromBone0ToBone1);
+}
+Quat Model::GetTwistAxisRotationOffset(pragma::SignedAxis axis)
+{
+	switch(axis) {
+	case pragma::SignedAxis::X:
+	case pragma::SignedAxis::NegX:
+		return uquat::create(EulerAngles(0.0, pragma::is_negative_axis(axis) ? -90.f : 90.f, 0.f));
+	case pragma::SignedAxis::Y:
+	case pragma::SignedAxis::NegY:
+		return uquat::create(EulerAngles(pragma::is_negative_axis(axis) ? -90.f : 90.0, 0.f, 0.f));
+	case pragma::SignedAxis::Z:
+	case pragma::SignedAxis::NegZ:
+		return uquat::create(EulerAngles(0.0, 0.f, pragma::is_negative_axis(axis) ? -90.f : 90.f));
+	}
+	return uquat::identity();
+}

@@ -240,6 +240,8 @@ void ServerState::Close()
 	NetworkState::Close();
 }
 
+NwStateType ServerState::GetType() const { return NwStateType::Server; }
+
 void ServerState::Think()
 {
 	NetworkState::Think();
@@ -451,7 +453,7 @@ msys::MaterialManager &ServerState::GetMaterialManager() { return *engine->GetSe
 ModelSubMesh *ServerState::CreateSubMesh() const { return new ModelSubMesh; }
 ModelMesh *ServerState::CreateMesh() const { return new ModelMesh; }
 
-REGISTER_CONVAR_CALLBACK_SV(sv_tickrate, [](NetworkState *, ConVar *, int, int val) {
+REGISTER_CONVAR_CALLBACK_SV(sv_tickrate, [](NetworkState *, const ConVar &, int, int val) {
 	if(val < 0)
 		val = 0;
 	engine->SetTickRate(val);

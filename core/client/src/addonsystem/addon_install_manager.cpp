@@ -22,8 +22,11 @@ extern DLLCLIENT CEngine *c_engine;
 
 static const std::string &get_query_url()
 {
-	static auto url = engine_info::get_modding_hub_url() + "html/game/";
-	return url;
+	//static auto url = engine_info::get_modding_hub_url() + "html/game/";
+	//return url;
+	throw std::runtime_error {"This is obsolete, do not use!"};
+	static std::string r;
+	return r;
 }
 
 pragma::AddonInstallManager::AddonUpdateQuery::AddonUpdateQuery(const std::shared_ptr<AddonInfo> &info) : addonInfo(info) {}

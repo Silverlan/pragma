@@ -35,11 +35,14 @@ WIDebugHDRBloom::~WIDebugHDRBloom()
 void WIDebugHDRBloom::UpdateBloomImage()
 {
 	auto &drawCmd = c_engine->GetDrawCommandBuffer();
-	auto *scene = c_game->GetScene();
-	auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent *>(scene->GetRenderer()) : nullptr;
+	auto *scene = c_game->GetRenderScene();
+	auto *renderer = scene ? dynamic_cast<pragma::CRendererComponent *>(scene->GetRenderer()) : nullptr;
 	if(renderer == nullptr)
 		return;
-	auto &bloomTexture = renderer->GetHDRInfo().bloomBlurRenderTarget->GetTexture();
+	auto raster = renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>();
+	if(raster.expired())
+		return;
+	auto &bloomTexture = raster->GetHDRInfo().bloomBlurRenderTarget->GetTexture();
 	auto &imgSrc = bloomTexture.GetImage();
 	auto &imgDst = m_renderTarget->GetTexture().GetImage();
 

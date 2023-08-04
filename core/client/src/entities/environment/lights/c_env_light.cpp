@@ -472,7 +472,7 @@ void CLightComponent::UpdateColor()
 	if(colorC.expired())
 		return;
 	auto &color = colorC->GetColor();
-	m_bufferData.color = color.ToVector3();
+	m_bufferData.color = color;
 	if(m_renderBuffer != nullptr)
 		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, color), m_bufferData.color);
 
@@ -517,7 +517,7 @@ void CLightComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 		FlagCallbackForRemoval(static_cast<CRadiusComponent &>(component).GetRadiusProperty()->AddCallback([this](std::reference_wrapper<const float> oldRadius, std::reference_wrapper<const float> radius) { UpdateRadius(); }), CallbackType::Component, &component);
 	}
 	else if(typeid(component) == typeid(CColorComponent)) {
-		FlagCallbackForRemoval(static_cast<CColorComponent &>(component).GetColorProperty()->AddCallback([this](std::reference_wrapper<const Color> oldColor, std::reference_wrapper<const Color> color) { UpdateColor(); }), CallbackType::Component, &component);
+		FlagCallbackForRemoval(static_cast<CColorComponent &>(component).GetColorProperty()->AddCallback([this](std::reference_wrapper<const Vector4> oldColor, std::reference_wrapper<const Vector4> color) { UpdateColor(); }), CallbackType::Component, &component);
 	}
 	else if(typeid(component) == typeid(CLightSpotComponent)) {
 		m_bufferData.flags &= ~(LightBufferData::BufferFlags::TypeSpot | LightBufferData::BufferFlags::TypePoint | LightBufferData::BufferFlags::TypeDirectional);

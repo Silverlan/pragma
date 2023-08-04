@@ -153,6 +153,18 @@ bool DebugRenderer::WorldObject::HasOutline() const { return m_bOutline; }
 const std::shared_ptr<prosper::IBuffer> &DebugRenderer::WorldObject::GetColorBuffer() const { return m_colorBuffer; }
 const std::shared_ptr<prosper::IBuffer> &DebugRenderer::WorldObject::GetVertexBuffer() const { return m_vertexBuffer; }
 uint32_t DebugRenderer::WorldObject::GetVertexCount() const { return (m_vertexCount != std::numeric_limits<uint32_t>::max()) ? m_vertexCount : m_vertices.size(); }
+void DebugRenderer::WorldObject::SetVertexPosition(uint32_t idx, const Vector3 &pos)
+{
+	if(idx >= m_vertices.size())
+		return;
+	m_vertices[idx] = pos;
+}
+std::optional<Vector3> DebugRenderer::WorldObject::GetVertexPosition(uint32_t idx) const
+{
+	if(idx >= m_vertices.size())
+		return {};
+	return m_vertices[idx];
+}
 void DebugRenderer::WorldObject::AddVertex(const Vector3 &v) { m_vertices.push_back(v); }
 std::vector<Vector3> &DebugRenderer::WorldObject::GetVertices() { return m_vertices; }
 std::vector<Vector4> &DebugRenderer::WorldObject::GetColors() { return m_colors; }
@@ -170,17 +182,12 @@ bool DebugRenderer::WorldObject::InitializeBuffers()
 	m_vertexCount = 0;
 	if(m_vertices.empty())
 		return false;
-	auto createInfo = prosper::util::BufferCreateInfo {};
-	createInfo.size = m_vertices.size() * sizeof(m_vertices.front());
-	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
-	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
-	m_vertexBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo, m_vertices.data());
+	m_vertexBuffer = c_engine->GetRenderContext().AllocateTemporaryBuffer(util::size_of_container(m_vertices), sizeof(Vector4), m_vertices.data());
 	m_vertexCount = m_vertices.size();
 
 	if(m_colors.empty())
 		return true;
-	createInfo.size = m_colors.size() * sizeof(m_colors.front());
-	m_colorBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo, m_colors.data());
+	m_colorBuffer = c_engine->GetRenderContext().AllocateTemporaryBuffer(util::size_of_container(m_colors), sizeof(Vector4), m_colors.data());
 	return true;
 }
 

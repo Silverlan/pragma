@@ -121,6 +121,7 @@ class DLLCLIENT ClientState : public NetworkState {
 	msys::MaterialHandle CreateMaterial(const std::string &shader);
 	bool LoadGUILuaFile(std::string f);
 	pragma::networking::IClient *GetClient();
+	virtual NwStateType GetType() const override;
 	void Think();
 	void Tick();
 	void Draw(util::DrawSceneInfo &drawSceneInfo);
@@ -235,6 +236,7 @@ class DLLCLIENT ClientState : public NetworkState {
 	Bool CharInput(unsigned int c);
 	Bool ScrollInput(Vector2 offset);
 	void OnFilesDropped(std::vector<std::string> &files);
+	bool OnWindowShouldClose(prosper::Window &window);
 
 	Material *LoadMaterial(const std::string &path, const std::function<void(Material *)> &onLoaded, bool bReload = false);
 	Material *LoadMaterial(const std::string &path);

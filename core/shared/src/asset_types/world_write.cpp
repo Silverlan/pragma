@@ -138,8 +138,8 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data, Ent
 		entData->m_mapIndex = entIdx + 1; // Map indices always start at 1!
 		entData->SetClassName(udmEnt["className"].ToValue<std::string>(""));
 
-		auto pose = udmEnt["pose"].ToValue<umath::Transform>(umath::Transform {});
-		entData->SetOrigin(pose.GetOrigin());
+		auto pose = udmEnt["pose"].ToValue<umath::ScaledTransform>(umath::ScaledTransform {});
+		entData->SetPose(pose);
 
 		auto &keyValues = entData->GetKeyValues();
 		udmEnt["keyValues"](keyValues);
@@ -163,7 +163,33 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data, Ent
 		}
 
 		auto &components = entData->GetComponents();
-		udmEnt["components"](components);
+		auto udmComponents = udmEnt["components"];
+		components.reserve(udmComponents.GetSize());
+		if(udm::is_array_type(udmComponents.GetType())) {
+			for(auto udmComponent : udmComponents) {
+				auto *typeName = udmComponent.GetValuePtr<udm::String>();
+				if(typeName)
+					entData->AddComponent(std::string {*typeName});
+			}
+		}
+		else {
+			for(auto pair : udmComponents.ElIt()) {
+				auto name = pair.key;
+				auto &udmComponent = pair.property;
+				auto component = entData->AddComponent(std::string {name});
+
+				auto flags = component->GetFlags();
+				udmComponent["flags"](flags);
+				component->SetFlags(flags);
+
+				auto udmProperties = udmComponent["properties"];
+				auto *elProperties = udmProperties->GetValuePtr<udm::Element>();
+				if(elProperties) {
+					auto udmData = component->GetData();
+					udmData->GetValue<udm::Element>().Merge(*elProperties);
+				}
+			}
+		}
 
 		auto &leaves = entData->GetLeaves();
 		udmEnt["bspLeaves"].GetBlobData(leaves);
@@ -226,10 +252,9 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData, const std::string
 		if(umath::is_flag_set(entData->GetFlags(), EntityData::Flags::ClientsideOnly))
 			udmEnt["flags"]["clientsideOnly"] = true;
 
-		umath::ScaledTransform pose {};
-		pose.SetOrigin(entData->GetOrigin());
-		pose.SetRotation(entData->GetPose().GetRotation());
-		udmEnt["pose"] = pose;
+		auto &pose = entData->GetPose();
+		if(pose)
+			udmEnt["pose"] = *pose;
 		udmEnt["keyValues"] = entData->GetKeyValues();
 
 		auto &outputs = entData->GetOutputs();
@@ -245,7 +270,18 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData, const std::string
 			udmOutput["times"] = output.times;
 		}
 
-		udmEnt["components"] = entData->GetComponents();
+		auto udmComponents = udmEnt["components"];
+		for(auto &pair : entData->GetComponents()) {
+			if(pair.first.empty()) {
+				outErr = "Encountered empty component name!";
+				return false;
+			}
+			auto &componentData = *pair.second;
+			auto udmComponent = udmComponents[pair.first];
+			udmComponent["flags"] = componentData.GetFlags();
+			auto udmProperties = udmComponent.Add("properties");
+			udmProperties.Merge(udm::LinkedPropertyWrapper {*componentData.GetData()});
+		}
 
 		uint32_t firstLeaf, numLeaves;
 		entData->GetLeafData(firstLeaf, numLeaves);
@@ -463,7 +499,8 @@ void pragma::asset::WorldData::WriteEntities(VFilePtrReal &f)
 		f->Write<uint64_t>(umath::to_integral(entData->GetFlags()));
 
 		f->WriteString(entData->GetClassName());
-		f->Write<Vector3>(entData->GetOrigin());
+		auto &pose = entData->GetPose();
+		f->Write<Vector3>(pose ? pose->GetOrigin() : uvec::ORIGIN);
 
 		// Keyvalues
 		auto &keyValues = entData->GetKeyValues();
@@ -482,8 +519,8 @@ void pragma::asset::WorldData::WriteEntities(VFilePtrReal &f)
 		// Custom Components
 		auto &components = entData->GetComponents();
 		f->Write<uint32_t>(components.size());
-		for(auto &name : components)
-			f->WriteString(name);
+		for(auto &pair : components)
+			f->WriteString(pair.first);
 
 		// Leaves
 		auto cur = f->Tell();

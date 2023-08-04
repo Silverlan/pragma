@@ -5,13 +5,13 @@
  * Copyright (c) 2021 Silverlan
  */
 
-#ifndef __C_SHADER_GLOW_HPP__
-#define __C_SHADER_GLOW_HPP__
+#ifndef __C_SHADER_PP_GLOW_HPP__
+#define __C_SHADER_PP_GLOW_HPP__
 
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 
 namespace pragma {
-	class DLLCLIENT ShaderGlow : public ShaderGameWorldLightingPass {
+	class DLLCLIENT ShaderPPGlow : public ShaderGameWorldLightingPass {
 	  public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
@@ -25,7 +25,7 @@ namespace pragma {
 		};
 #pragma pack(pop)
 
-		ShaderGlow(prosper::IPrContext &context, const std::string &identifier);
+		ShaderPPGlow(prosper::IPrContext &context, const std::string &identifier);
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		bool RecordGlowMaterial(prosper::ShaderBindState &bindState, CMaterial &mat) const;
 	  protected:

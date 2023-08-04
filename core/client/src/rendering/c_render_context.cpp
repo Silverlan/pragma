@@ -12,6 +12,7 @@
 #include <debug/prosper_debug.hpp>
 #include <shader/prosper_shader.hpp>
 #include <sharedutils/util_library.hpp>
+#include <sharedutils/util_debug.h>
 #include <pragma/util/util_module.hpp>
 #include <pragma/lua/lua_error_handling.hpp>
 #include <pragma/logging.hpp>
@@ -20,6 +21,9 @@
 using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
+
+static spdlog::logger &LOGGER = pragma::register_logger("prosper");
+static spdlog::logger &LOGGER_VALIDATION = pragma::register_logger("prosper_validation");
 
 RenderContext::RenderContext() : m_monitor(nullptr), m_renderAPI {"vulkan"} {}
 RenderContext::~RenderContext() { m_graphicsAPILib = nullptr; }
@@ -68,8 +72,11 @@ void RenderContext::InitializeRenderAPI()
 	}
 	else
 		err = "Module '" + modulePath + "' not found!";
-	if(m_renderContext == nullptr)
-		throw std::runtime_error {"Unable to load Vulkan implementation library for Prosper: " + err + "!"};
+	if(m_renderContext == nullptr) {
+		std::string msg = "Unable to load Vulkan implementation library for Prosper: " + err + "!";
+		LOGGER.error(msg);
+		throw std::runtime_error {msg};
+	}
 
 	m_renderContext->SetLogHandler(&pragma::log, &pragma::is_log_level_enabled);
 
@@ -94,9 +101,9 @@ void RenderContext::InitializeRenderAPI()
 		msg << infoLog << "\r\n";
 		msg << "\r\n";
 		msg << debugInfoLog;
-		spdlog::warn(msg.str());
+		LOGGER.warn(msg.str());
 	});
-	prosper::debug::set_debug_validation_callback([](prosper::DebugReportObjectTypeEXT objectType, const std::string &msg) { spdlog::error("[prosper] {}", msg); });
+	prosper::debug::set_debug_validation_callback([](prosper::DebugReportObjectTypeEXT objectType, const std::string &msg) { LOGGER_VALIDATION.error("{}", msg); });
 	GLFW::initialize();
 }
 void RenderContext::Release()
@@ -155,7 +162,7 @@ void RenderContext::ValidationCallback(prosper::DebugMessageSeverityFlags severi
 				return;
 		}
 
-		Con::cerr << "[PR] " << strMsg << Con::endl;
+		LOGGER_VALIDATION.error(strMsg);
 		if(std::this_thread::get_id() == c_engine->GetMainThreadId()) {
 			// In many cases the error may have been caused by a Lua script, so we'll print
 			// some information here about the current Lua call stack.
@@ -165,9 +172,15 @@ void RenderContext::ValidationCallback(prosper::DebugMessageSeverityFlags severi
 			if(l) {
 				std::stringstream ss;
 				if(Lua::get_callstack(l, ss))
-					Con::cerr << "Lua callstack: " << ss.str() << Con::endl;
+					LOGGER_VALIDATION.debug("Lua callstack: {}", ss.str());
 			}
 		}
+#ifdef _WIN32
+		auto stackBacktraceString = util::get_formatted_stack_backtrace_string();
+		if(!stackBacktraceString.empty())
+			LOGGER_VALIDATION.debug("Backtrace: {}", stackBacktraceString);
+#endif
+		pragma::flush_loggers();
 	}
 }
 
@@ -182,6 +195,10 @@ void RenderContext::OnWindowInitialized()
 
 void RenderContext::DrawFrame() { GetRenderContext().DrawFrameCore(); }
 
-void RenderContext::SetGfxAPIValidationEnabled(bool b) { umath::set_flag(m_stateFlags, StateFlags::GfxAPIValidationEnabled, b); }
+void RenderContext::SetGfxAPIValidationEnabled(bool b) {
+	umath::set_flag(m_stateFlags, StateFlags::GfxAPIValidationEnabled, b);
+	if(b)
+		spdlog::flush_on(spdlog::level::info); // Immediately flush all messages
+}
 void RenderContext::SetRenderAPI(const std::string &renderAPI) { m_renderAPI = renderAPI; }
 const std::string &RenderContext::GetRenderAPI() const { return m_renderAPI; }

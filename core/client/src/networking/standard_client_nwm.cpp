@@ -109,7 +109,7 @@ void pragma::networking::NWMClientConnection::SetClient(StandardClient &client) 
 
 bool pragma::networking::NWMClientConnection::IsDisconnected() const { return m_bDisconnected; }
 
-REGISTER_CONVAR_CALLBACK_CL(sv_timeout_duration, [](NetworkState *, ConVar *, float, float val) {
+REGISTER_CONVAR_CALLBACK_CL(sv_timeout_duration, [](NetworkState *, const ConVar &, float, float val) {
 	if(client == nullptr)
 		return;
 	auto *cl = client->GetClient();

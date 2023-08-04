@@ -212,6 +212,134 @@ void PanimaComponent::DebugPrint()
 	Con::cout << "Animation info: \n" << ss.str() << Con::endl;
 }
 
+bool PanimaComponent::IsPropertyAnimated(panima::AnimationManager &manager, const std::string &propName) const
+{
+	auto *anim = manager.GetCurrentAnimation();
+	if(!anim)
+		return false;
+	panima::ChannelPath channelPath {propName};
+	auto componentPath = ParseComponentChannelPath(channelPath);
+	if(!componentPath.has_value())
+		return false;
+	auto c = GetEntity().FindComponent(componentPath->first);
+	if(c.expired())
+		return false;
+	auto memberIdx = c->GetMemberIndex(componentPath->second.GetString());
+	if(!memberIdx.has_value())
+		return false;
+	auto *memberInfo = c->GetMemberInfo(*memberIdx);
+	if(!memberInfo)
+		return false;
+	if(!pragma::ents::is_udm_member_type(memberInfo->type))
+		return false;
+	auto &channels = anim->GetChannels();
+	auto numChannels = channels.size();
+	for(auto i = decltype(numChannels) {0u}; i < numChannels; ++i) {
+		auto &channel = channels[i];
+		if(channel->targetPath == channelPath)
+			return true;
+	}
+	return false;
+}
+
+void PanimaComponent::SetPropertyEnabled(const std::string &propName, bool enabled)
+{
+	panima::ChannelPath channelPath {propName};
+	auto normalizedPath = channelPath.ToUri(false);
+	if(enabled) {
+		auto it = m_disabledProperties.find(pragma::register_global_string(normalizedPath));
+		if(it != m_disabledProperties.end()) {
+			m_disabledProperties.erase(it);
+			InitializeAnimationChannelValueSubmitters();
+		}
+		return;
+	}
+	m_disabledProperties.insert(pragma::register_global_string(normalizedPath));
+	InitializeAnimationChannelValueSubmitters();
+}
+bool PanimaComponent::IsPropertyEnabled(const std::string &propName) const
+{
+	panima::ChannelPath channelPath {propName};
+	auto normalizedPath = channelPath.ToUri(false);
+	return m_disabledProperties.find(pragma::register_global_string(normalizedPath)) == m_disabledProperties.end();
+}
+bool PanimaComponent::GetRawPropertyValue(panima::AnimationManager &manager, const std::string &propName, udm::Type type, void *outValue) const
+{
+	auto *anim = manager.GetCurrentAnimation();
+	if(!anim)
+		return false;
+	panima::ChannelPath channelPath {propName};
+	auto componentPath = ParseComponentChannelPath(channelPath);
+	if(!componentPath.has_value())
+		return false;
+	auto c = GetEntity().FindComponent(componentPath->first);
+	if(c.expired())
+		return false;
+	auto memberIdx = c->GetMemberIndex(componentPath->second.GetString());
+	if(!memberIdx.has_value())
+		return false;
+	auto *memberInfo = c->GetMemberInfo(*memberIdx);
+	if(!memberInfo)
+		return false;
+	if(!pragma::ents::is_udm_member_type(memberInfo->type))
+		return false;
+	auto memberType = static_cast<udm::Type>(memberInfo->type);
+	auto &player = manager.GetPlayer();
+	auto t = player.GetCurrentTime();
+	auto &channels = anim->GetChannels();
+	auto numChannels = channels.size();
+	// See if there is an animation channel for this property, and if there is, return
+	// its value for the current timestamp WITHOUT applying the math expression.
+	for(auto i = decltype(numChannels) {0u}; i < numChannels; ++i) {
+		auto &channel = channels[i];
+		if(channel->targetPath != channelPath)
+			continue;
+		auto valueType = channel->GetValueType();
+		return udm::visit_ng(valueType, [t, i, valueType, type, memberInfo, &channel, &player, outValue](auto tag) {
+			using T = typename decltype(tag)::type;
+			if constexpr(pragma::is_animatable_type_v<T>) {
+				auto value = channel->GetInterpolatedValue<T>(t, player.GetLastChannelTimestampIndex(i), memberInfo->interpolationFunction);
+				if(valueType == type) {
+					memcpy(outValue, &value, sizeof(value));
+					return true;
+				}
+				// Conversion required
+				return udm::visit_ng(type, [&value, outValue](auto tag) {
+					using TOut = typename decltype(tag)::type;
+					if constexpr(udm::is_convertible<T, TOut>()) {
+						auto cvalue = udm::convert<T, TOut>(value);
+						memcpy(outValue, &cvalue, sizeof(cvalue));
+						return true;
+					}
+					return false;
+				});
+			}
+			else
+				return false;
+		});
+	}
+	// No animation channel found, just return the current property value of the component
+	if(type == memberType) {
+		memberInfo->getterFunction(*memberInfo, *c, outValue);
+		return true;
+	}
+	// Conversion required
+	return udm::visit_ng(memberType, [type, memberInfo, &c, outValue](auto tag) {
+		using T = typename decltype(tag)::type;
+		T value;
+		memberInfo->getterFunction(*memberInfo, *c, &value);
+		return udm::visit_ng(type, [&value, outValue](auto tag) {
+			using TOut = typename decltype(tag)::type;
+			if constexpr(udm::is_convertible<T, TOut>()) {
+				auto cvalue = udm::convert<T, TOut>(value);
+				memcpy(outValue, &cvalue, sizeof(cvalue));
+				return true;
+			}
+			return false;
+		});
+	});
+}
+
 void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::AnimationManager &manager)
 {
 	auto *anim = manager.GetCurrentAnimation();
@@ -222,7 +350,7 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 	}
 	auto &channels = anim->GetChannels();
 	channelValueSubmitters.clear();
-	channelValueSubmitters.resize(channels.size(), nullptr);
+	channelValueSubmitters.resize(channels.size(), panima::ChannelValueSubmitter {});
 	uint32_t numInvalidChannels = 0;
 	auto shouldPrintWarning = [&numInvalidChannels]() {
 		if(numInvalidChannels >= 5) {
@@ -238,6 +366,8 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 	for(auto it = channels.begin(); it != channels.end(); ++it) {
 		auto &channel = *it;
 		auto &path = channel->targetPath;
+		if(!IsPropertyEnabled(path.path.GetString()))
+			continue;
 		size_t offset = 0;
 		if(path.path.GetComponent(offset, &offset) != "ec") // First path component denotes the type, which always has to be 'ec' for entity component in this case
 		{

@@ -2,3 +2,4 @@ build/
 .cache/
 deps/
 CMakeLists.txt.user
+build_scripts/user_modules.py

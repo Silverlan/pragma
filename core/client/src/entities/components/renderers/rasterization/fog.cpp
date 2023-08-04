@@ -38,7 +38,8 @@ void pragma::CRasterizationRendererComponent::RenderParticles(prosper::ICommandB
 {
 	assert(!depthPass || primCmdBuffer != nullptr);
 	// TODO: Only render particles if they're visible
-	std::vector<pragma::CParticleSystemComponent *> culledParticles;
+	auto &culledParticles = m_culledParticles;
+	culledParticles.clear();
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CParticleSystemComponent>>();
 	culledParticles.reserve(entIt.GetCount());
@@ -87,7 +88,7 @@ void pragma::CRasterizationRendererComponent::RenderParticles(prosper::ICommandB
 
 		// cmd.RecordImageBarrier(texDepth->GetImage(),prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 		if(primCmdBuffer->RecordBeginRenderPass(*hdrInfo.rtParticle) == true) {
-			RecordRenderParticleSystems(cmd, drawSceneInfo, culledParticles, pragma::rendering::SceneRenderPass::World, depthPass, false, nullptr);
+			RecordRenderParticleSystems(cmd, drawSceneInfo, culledParticles, pragma::rendering::SceneRenderPass::World, depthPass, false);
 			primCmdBuffer->RecordEndRenderPass();
 		}
 		// cmd.RecordImageBarrier(texDepth->GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal);
@@ -104,7 +105,7 @@ void pragma::CRasterizationRendererComponent::RenderParticles(prosper::ICommandB
 		}
 	}
 	else {
-		RecordRenderParticleSystems(cmd, drawSceneInfo, culledParticles, pragma::rendering::SceneRenderPass::World, depthPass, false, nullptr);
+		RecordRenderParticleSystems(cmd, drawSceneInfo, culledParticles, pragma::rendering::SceneRenderPass::World, depthPass, false);
 	}
 
 	//InvokeEventCallbacks(EVENT_MT_END_RECORD_PARTICLES,evDataLightingStage);

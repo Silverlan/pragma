@@ -12,7 +12,7 @@
 #include "pragma/logging.hpp"
 
 using namespace pragma;
-#pragma optimize("", off)
+
 void ConstraintChildOfComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = ConstraintChildOfComponent;
@@ -187,4 +187,3 @@ void ConstraintChildOfComponent::ApplyConstraint()
 	curPose.Interpolate(newPose, influence);
 	constraintInfo->drivenObjectC->SetTransformMemberPose(drivenObjPoseProp->GetMemberIndex(), umath::CoordinateSpace::World, curPose);
 }
-#pragma optimize("", on)

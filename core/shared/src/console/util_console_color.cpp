@@ -160,3 +160,36 @@ util::ConsoleColorFlags util::color_to_console_color_flags(const Color &color)
 	}
 	return bestCandidate;
 }
+
+std::string util::get_true_color_code(std::optional<Color> foregroundColor, std::optional<Color> backgroundColor, ConsoleDecoratorFlags flags)
+{
+	std::string colorCode;
+	if(foregroundColor)
+		colorCode += "\033[38;2;" + std::to_string(foregroundColor->r) + ";" + std::to_string(foregroundColor->g) + ";" + std::to_string(foregroundColor->b) + "m";
+	if(backgroundColor)
+		colorCode += "\033[48;2;" + std::to_string(backgroundColor->r) + ";" + std::to_string(backgroundColor->g) + ";" + std::to_string(backgroundColor->b) + "m";
+
+	if(flags != ConsoleDecoratorFlags::None) {
+		std::string decoratorCode;
+		if((flags & ConsoleDecoratorFlags::Bold) != ConsoleDecoratorFlags::None)
+			decoratorCode += ";1";
+		if((flags & ConsoleDecoratorFlags::Underline) != ConsoleDecoratorFlags::None)
+			decoratorCode += ";4";
+		if((flags & ConsoleDecoratorFlags::SlowBlink) != ConsoleDecoratorFlags::None)
+			decoratorCode += ";5";
+		if((flags & ConsoleDecoratorFlags::Framed) != ConsoleDecoratorFlags::None)
+			decoratorCode += ";51";
+		if((flags & ConsoleDecoratorFlags::Encircled) != ConsoleDecoratorFlags::None)
+			decoratorCode += ";52";
+		if((flags & ConsoleDecoratorFlags::Overlined) != ConsoleDecoratorFlags::None)
+			decoratorCode += ";53";
+		if((flags & ConsoleDecoratorFlags::Reset) != ConsoleDecoratorFlags::None)
+			decoratorCode += ";0";
+		if(decoratorCode.empty() == false) {
+			decoratorCode = decoratorCode.substr(1);
+			colorCode += "\033[" + decoratorCode + "m";
+		}
+	}
+	return colorCode;
+}
+std::string util::get_reset_color_code() { return "\u001b[0m"; }

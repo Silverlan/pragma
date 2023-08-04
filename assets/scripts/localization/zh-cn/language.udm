@@ -1,0 +1,9 @@
+"zh-cn"
+{
+	$string displayName "Chinese (Simplified)"
+	"font"
+	{
+		$array characterSetRequirements [string]["zh"]
+	}
+	$bool enabled true
+}

@@ -12,6 +12,7 @@
 #include "pragma/entities/components/base_generic_component.hpp"
 #include "pragma/entities/components/origin_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
+#include "pragma/logging.hpp"
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
@@ -52,22 +53,31 @@ void BaseEntityComponent::RegisterEvents(pragma::EntityComponentManager &compone
 	EVENT_ON_ENTITY_COMPONENT_REMOVED = registerEvent("ON_ENTITY_COMPONENT_REMOVED", ComponentEventInfo::Type::Broadcast);
 	EVENT_ON_MEMBERS_CHANGED = registerEvent("ON_MEMBERS_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
+
+spdlog::logger &BaseEntityComponent::InitLogger() const {
+	auto *info = GetComponentInfo();
+	assert(info != nullptr);
+	return pragma::register_logger("c_" + std::string {info->name.str});
+}
+
 void BaseEntityComponent::Log(const std::string &msg, LogSeverity severity) const
 {
-	auto print = [&msg](auto &con) { con << msg << Con::endl; };
+	auto &logger = InitLogger();
 	switch(severity) {
 	case LogSeverity::Normal:
+		logger.info(msg);
+		break;
 	case LogSeverity::Debug:
-		print(Con::cout);
+		logger.debug(msg);
 		break;
 	case LogSeverity::Warning:
-		print(Con::cwar);
+		logger.warn(msg);
 		break;
 	case LogSeverity::Error:
-		print(Con::cerr);
+		logger.error(msg);
 		break;
 	case LogSeverity::Critical:
-		print(Con::crit);
+		logger.critical(msg);
 		break;
 	}
 }
@@ -105,6 +115,27 @@ static bool get_transform_member_value(const pragma::BaseEntityComponent &compon
 				// we return the pose for our associated pose instead.
 				auto idxPose = cPoseType ? component.GetMemberIndex(cPoseType->poseProperty) : std::optional<ComponentMemberIndex> {};
 				return idxPose.has_value() ? get_transform_member_value(component, *idxPose, space, outValue) : false;
+			}
+			switch(memberInfo->type) {
+			case pragma::ents::EntityMemberType::Vector3:
+				{
+					Vector3 value;
+					if(!get_transform_member_value<Vector3, parentSpaceOnly>(component, idx, space, value))
+						return false;
+					outValue = {};
+					outValue.SetOrigin(value);
+					return true;
+				}
+			case pragma::ents::EntityMemberType::EulerAngles:
+			case pragma::ents::EntityMemberType::Quaternion:
+				{
+					Quat value;
+					if(!get_transform_member_value<Quat, parentSpaceOnly>(component, idx, space, value))
+						return false;
+					outValue = {};
+					outValue.SetRotation(value);
+					return true;
+				}
 			}
 			return false;
 		}

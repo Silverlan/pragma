@@ -90,17 +90,11 @@ bool ShaderPBR::BindDescriptorSetTexture(Material &mat, prosper::IDescriptorSet 
 
 static bool bind_default_texture(prosper::IDescriptorSet &ds, const std::string &defaultTexName, uint32_t bindingIndex, Texture **optOutTex)
 {
-	auto &matManager = static_cast<msys::CMaterialManager &>(client->GetMaterialManager());
-	auto &texManager = matManager.GetTextureManager();
-	auto *asset = texManager.FindCachedAsset(defaultTexName);
-	if(!asset) {
+	auto tex = pragma::ShaderGameWorldLightingPass::GetTexture(defaultTexName);
+	if(!tex) {
 		Con::cwar << "Attempted to bind texture '" << defaultTexName << "' to material descriptor set, but texture has not been loaded!" << Con::endl;
 		return false;
 	}
-	auto ptrTex = msys::TextureManager::GetAssetObject(*asset);
-	if(ptrTex == nullptr)
-		return false;
-	auto tex = std::static_pointer_cast<Texture>(ptrTex);
 
 	if(tex && tex->HasValidVkTexture())
 		ds.SetBindingTexture(*tex->GetVkTexture(), bindingIndex);
@@ -145,7 +139,10 @@ bool ShaderPBR::BindDescriptorSetBaseTextures(CMaterial &mat, const prosper::Des
 	if(BindDescriptorSetTexture(mat, ds, mat.GetRMAMap(), umath::to_integral(MaterialBinding::RMAMap), "pbr/rma_neutral") == false)
 		return false;
 
-	BindDescriptorSetTexture(mat, ds, mat.GetGlowMap(), umath::to_integral(MaterialBinding::EmissionMap));
+	if(umath::is_flag_set(matData->flags, ShaderGameWorldLightingPass::MaterialFlags::Glow))
+		BindDescriptorSetTexture(mat, ds, mat.GetGlowMap(), umath::to_integral(MaterialBinding::EmissionMap), "white");
+	else
+		BindDescriptorSetTexture(mat, ds, mat.GetGlowMap(), umath::to_integral(MaterialBinding::EmissionMap));
 
 	if(BindDescriptorSetTexture(mat, ds, mat.GetParallaxMap(), umath::to_integral(MaterialBinding::ParallaxMap), "black") == false)
 		return false;

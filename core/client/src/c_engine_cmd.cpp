@@ -11,8 +11,10 @@
 #include "pragma/rendering/render_processor.hpp"
 #include <pragma/asset/util_asset.hpp>
 #include <pragma/lua/libraries/ldebug.h>
+#include <pragma/lua/libraries/lutil.hpp>
 #include <pragma/lua/util.hpp>
 #include <pragma/lua/libraries/lutil.hpp>
+#include <pragma/logging.hpp>
 #include <pragma/rendering/render_apis.hpp>
 #include <pragma/console/convars.h>
 #include <sharedutils/util_file.h>
@@ -33,6 +35,7 @@
 #include <fsys/directory_watcher.h>
 
 extern DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool continuous);
+extern bool g_dumpRenderQueues;
 void CEngine::RegisterConsoleCommands()
 {
 	Engine::RegisterConsoleCommands();
@@ -70,7 +73,7 @@ void CEngine::RegisterConsoleCommands()
 		  }
 	  });
 	conVarMap.RegisterConVar<bool>("cl_downscale_imported_high_resolution_rma_textures", true, ConVarFlags::Archive, "If enabled, imported high-resolution RMA textures will be downscaled to a more memory-friendly size.");
-	conVarMap.RegisterConVarCallback("cl_downscale_imported_high_resolution_rma_textures", std::function<void(NetworkState *, ConVar *, bool, bool)> {[](NetworkState *nw, ConVar *cv, bool oldVal, bool newVal) -> void {
+	conVarMap.RegisterConVarCallback("cl_downscale_imported_high_resolution_rma_textures", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[](NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void {
 		//static_cast<msys::CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).SetDownscaleImportedRMATextures(newVal);
 	}});
 	conVarMap.RegisterConVar<uint8_t>("render_debug_mode", 0, ConVarFlags::None,
@@ -119,11 +122,12 @@ void CEngine::RegisterConsoleCommands()
 	  },
 	  ConVarFlags::None, "Prints information about the next frame.");
 	conVarMap.RegisterConVar<bool>("render_multithreaded_rendering_enabled", true, ConVarFlags::Archive, "Enables or disables multi-threaded rendering. Some renderers (like OpenGL) don't support multi-threaded rendering and will ignore this flag.");
-	conVarMap.RegisterConVarCallback("render_multithreaded_rendering_enabled", std::function<void(NetworkState *, ConVar *, bool, bool)> {[this](NetworkState *nw, ConVar *cv, bool, bool enabled) -> void { GetRenderContext().SetMultiThreadedRenderingEnabled(enabled); }});
-	conVarMap.RegisterConVarCallback("render_enable_verbose_output", std::function<void(NetworkState *, ConVar *, bool, bool)> {[this](NetworkState *nw, ConVar *cv, bool, bool enabled) -> void { pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED = enabled; }});
+	conVarMap.RegisterConVarCallback("render_multithreaded_rendering_enabled", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[this](NetworkState *nw, const ConVar &cv, bool, bool enabled) -> void { GetRenderContext().SetMultiThreadedRenderingEnabled(enabled); }});
+	conVarMap.RegisterConVarCallback("render_enable_verbose_output", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[this](NetworkState *nw, const ConVar &cv, bool, bool enabled) -> void { pragma::rendering::VERBOSE_RENDER_OUTPUT_ENABLED = enabled; }});
 	conVarMap.RegisterConCommand(
 	  "crash",
 	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  Con::cwar << "Crash command has been invoked. Crashing intentionally..." << Con::endl;
 		  if(!argv.empty() && argv.front() == "exception") {
 			  throw std::runtime_error {"Crash!"};
 			  return;
@@ -218,10 +222,12 @@ void CEngine::RegisterConsoleCommands()
 		  Con::cout << "Done! Written shader files to '" << path << "'!" << Con::endl;
 	  },
 	  ConVarFlags::None, "Dumps the glsl code for the specified shader.");
+	conVarMap.RegisterConCommand(
+	  "debug_dump_render_queues", [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { g_dumpRenderQueues = true; }, ConVarFlags::None, "Prints all render queues for the next frame to the console.");
 	conVarMap.RegisterConVar<bool>("debug_hide_gui", false, ConVarFlags::None, "Disables GUI rendering.");
 
 	conVarMap.RegisterConVar<bool>("render_vsync_enabled", true, ConVarFlags::Archive, "Enables or disables vsync. OpenGL only.");
-	conVarMap.RegisterConVarCallback("render_vsync_enabled", std::function<void(NetworkState *, ConVar *, bool, bool)> {[this](NetworkState *nw, ConVar *cv, bool oldVal, bool newVal) -> void { GetRenderContext().GetWindow()->SetVSyncEnabled(newVal); }});
+	conVarMap.RegisterConVarCallback("render_vsync_enabled", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[this](NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void { GetRenderContext().GetWindow()->SetVSyncEnabled(newVal); }});
 
 	conVarMap.RegisterConVar<std::string>("audio_api", "fmod", ConVarFlags::Archive | ConVarFlags::Replicated, "The underlying audio API to use.", "<audioApi>", [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
 		auto audioAPIs = pragma::audio::get_available_audio_apis();
@@ -526,4 +532,15 @@ void CEngine::RegisterConsoleCommands()
 			  Con::cwar << "Localization failed!" << Con::endl;
 	  },
 	  ConVarFlags::None, "Adds the specified text to the localization files. Usage: locale_localize <group> <language> <textIdentifier> <localizedText>");
+	conVarMap.RegisterConCommand(
+	  "debug_start_lua_debugger_server_cl",
+	  [this](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  auto *l = state->GetLuaState();
+		  if(!l) {
+			  Con::cwar << "Unable to start debugger server: No active Lua state!" << Con::endl;
+			  return;
+		  }
+		  Lua::util::start_debugger_server(l);
+	  },
+	  ConVarFlags::None, "Starts the Lua debugger server for the clientside lua state.");
 }

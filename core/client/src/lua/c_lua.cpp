@@ -65,6 +65,7 @@
 #include <image/prosper_render_target.hpp>
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/localization.h>
 #include <wgui/fontmanager.h>
 #include <udm.hpp>
 
@@ -88,6 +89,17 @@ void Lua::register_shared_client_state(lua_State *l)
 	Lua::RegisterLibrary(l, "locale", {{"get_text", Lua::Locale::get_text}, {"get_languages", Lua::Locale::get_languages}});
 	auto modLocale = luabind::module_(l, "locale");
 	modLocale[luabind::def("load", Lua::Locale::load), luabind::def("get_language", Lua::Locale::get_language), luabind::def("change_language", Lua::Locale::change_language), luabind::def("set_text", Lua::Locale::set_localization), luabind::def("localize", Lua::Locale::localize)];
+	modLocale[luabind::def("clear", Lua::Locale::clear)];
+	modLocale[luabind::def("get_texts", Lua::Locale::get_texts)];
+	modLocale[luabind::def(
+	  "get_raw_text", +[](const std::string &id) -> std::optional<std::string> {
+		  std::string text;
+		  if(::Locale::GetRawText(id, text))
+			  return text;
+		  return {};
+	  })];
+	modLocale[luabind::def("parse", static_cast<Lua::opt<Lua::map<std::string, std::string>> (*)(lua_State *, const std::string &, const std::string &)>(Lua::Locale::parse))];
+	modLocale[luabind::def("parse", static_cast<Lua::opt<Lua::map<std::string, std::string>> (*)(lua_State *, const std::string &)>(Lua::Locale::parse))];
 }
 
 void CGame::RegisterLua()
@@ -99,7 +111,8 @@ void CGame::RegisterLua()
 	modEngine[luabind::def("get_text_size", static_cast<Vector2i (*)(lua_State *, const std::string &, const std::string &)>(Lua::engine::get_text_size)),
 	  luabind::def("get_text_size", static_cast<Vector2i (*)(lua_State *, const std::string &, const FontInfo &)>(Lua::engine::get_text_size)),
 
-	  luabind::def("poll_console_output", Lua::engine::poll_console_output), luabind::def("library_exists", Lua::engine::LibraryExists), luabind::def("load_library", Lua::engine::LoadLibrary), luabind::def("get_info", Lua::engine::get_info)];
+	  luabind::def("poll_console_output", Lua::engine::poll_console_output), luabind::def("library_exists", Lua::engine::LibraryExists), luabind::def("load_library", Lua::engine::LoadLibrary), luabind::def("unload_library", Lua::engine::UnloadLibrary),
+	  luabind::def("is_library_loaded", Lua::engine::IsLibraryLoaded), luabind::def("get_info", Lua::engine::get_info)];
 
 	Lua::RegisterLibrary(GetLuaState(), "game",
 	  {
@@ -164,7 +177,7 @@ void CGame::RegisterLua()
 		})}*/
 	  });
 	auto modGame = luabind::module_(GetLuaState(), "game");
-	Lua::game::register_shared_functions(modGame);
+	Lua::game::register_shared_functions(GetLuaState(), modGame);
 	modGame[luabind::def("load_material", static_cast<Material *(*)(lua_State *, const std::string &, bool, bool)>(Lua::engine::load_material)), luabind::def("load_material", static_cast<Material *(*)(lua_State *, const std::string &, bool)>(Lua::engine::load_material)),
 	  luabind::def("load_material", static_cast<Material *(*)(lua_State *, const std::string &)>(Lua::engine::load_material)),
 	  luabind::def("load_texture", static_cast<std::shared_ptr<prosper::Texture> (*)(lua_State *, const std::string &, util::AssetLoadFlags)>(Lua::engine::load_texture)),

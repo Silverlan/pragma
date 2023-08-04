@@ -55,6 +55,7 @@ namespace pragma {
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua_State *l) override;
 		float acceleration = 0.f;
+		float rampUpTime = 0.f;
 	};
 	struct DLLNETWORK CECalcMovementDirection : public ComponentEvent {
 		CECalcMovementDirection(const Vector3 &forward, const Vector3 &right);
@@ -212,6 +213,7 @@ namespace pragma {
 		Vector3 m_axRight = {-1.f, 0.f, 0.f};
 		Quat m_axRot = uquat::identity();
 		float m_turnSpeed = 300.f;
+		float m_timeSinceMovementStart = 0.f;
 		float m_tDetachFromGround = 0.f;
 		util::PFloatProperty m_jumpPower = nullptr;
 		std::unique_ptr<float> m_turnYaw = nullptr;
@@ -237,7 +239,7 @@ namespace pragma {
 		// Calculates the forward and sideways movement speed
 		virtual Vector2 CalcMovementSpeed() const;
 		virtual float CalcAirMovementModifier() const;
-		virtual float CalcMovementAcceleration() const;
+		virtual float CalcMovementAcceleration(float &optOutRampUpTime) const;
 		virtual Vector3 CalcMovementDirection(const Vector3 &forward, const Vector3 &right) const;
 		void UpdateNeckControllers();
 

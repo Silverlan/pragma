@@ -7,6 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/console/console.h"
+#include "pragma/logging.hpp"
 #include <iostream>
 #ifdef _WIN32
 #include <windows.h>
@@ -44,6 +45,34 @@ void DebugConsole::open()
 		}
 	}
 	//
+
+	// Change the console font
+	if(handleOut) {
+		auto fontPath = util::get_program_path() + "\\fonts\\ubuntu\\UbuntuMono-R.ttf";
+		ustring::replace(fontPath, "/", "\\");
+		HANDLE m_stdOut = handleOut;
+		auto numFontsAdded = AddFontResourceEx(fontPath.c_str(), FR_NOT_ENUM, 0);
+		if(numFontsAdded > 0) {
+			SendNotifyMessage(HWND_BROADCAST, WM_FONTCHANGE, 0, 0);
+
+			CONSOLE_FONT_INFOEX cfi;
+			cfi.cbSize = sizeof cfi;
+			cfi.nFont = 0;
+			cfi.dwFontSize.X = 0;
+			cfi.dwFontSize.Y = 18;
+			cfi.FontFamily = FF_DONTCARE;
+			cfi.FontWeight = FW_NORMAL;
+			wcscpy(cfi.FaceName, L"Ubuntu Mono");
+			auto res = SetCurrentConsoleFontEx(handleOut, FALSE, &cfi);
+			if(res == 0) {
+				auto errMsg = util::get_last_system_error_string();
+				spdlog::warn("Failed to set console font: {}", errMsg);
+			}
+		}
+		else
+			spdlog::warn("Failed to set console font: AddFontResourceEx failed.");
+	}
+
 #else
 	// this will barf out everything.
 	this->_cinbuf = std::cin.rdbuf();
@@ -65,6 +94,9 @@ void DebugConsole::close()
 	unsigned long numEvents;
 	WriteConsoleInput(GetStdHandle(STD_INPUT_HANDLE), &input, 0, &numEvents); // Workaround: Writes to the console to make sure the thread can end properly
 	//CloseHandle(GetStdHandle(STD_INPUT_HANDLE)); // Doesn't work?
+	fclose(stdin);
+	fclose(stdout);
+	fclose(stderr);
 	FreeConsole();
 #else
 	std::cout.rdbuf(this->_coutbuf);

@@ -328,6 +328,14 @@ void Lua::animation::register_library(Lua::Interface &lua)
 			  return luabind::object {l, true};
 		  return luabind::object {l, err};
 	  });
+	cdChannel.def(
+	  "TestValueExpression", +[](lua_State *l, panima::Channel &channel, std::string expression) -> Lua::var<bool, std::string> {
+		  std::string err;
+		  auto res = channel.TestValueExpression(std::move(expression), err);
+		  if(res)
+			  return luabind::object {l, true};
+		  return luabind::object {l, err};
+	  });
 	cdChannel.def("ClearValueExpression", &panima::Channel::ClearValueExpression);
 	cdChannel.def(
 	  "GetValueExpression", +[](panima::Channel &channel) -> std::optional<std::string> {

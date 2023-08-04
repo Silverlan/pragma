@@ -78,6 +78,8 @@ void Lua::Lightmap::register_class(lua_State *l, luabind::module_ &entsMod)
 			  return {};
 		  return lightMap;
 	  });
+	defCLightMap.def("GetLightmapMaterialName", &pragma::CLightMapComponent::GetLightMapMaterialName);
+	defCLightMap.def("SetLightmapMaterial", &pragma::CLightMapComponent::SetLightMapMaterial);
 	defCLightMap.def("ConvertLightmapToBSPLuxelData", &pragma::CLightMapComponent::ConvertLightmapToBSPLuxelData);
 	defCLightMap.def("UpdateLightmapUvBuffers", &pragma::CLightMapComponent::UpdateLightmapUvBuffers);
 	defCLightMap.def("ReloadLightmapData", &pragma::CLightMapComponent::ReloadLightMapData);
@@ -190,6 +192,9 @@ void Lua::Lightmap::register_class(lua_State *l, luabind::module_ &entsMod)
 	auto defCLmCache = pragma::lua::create_entity_component_class<pragma::CLightMapDataCacheComponent, pragma::BaseEntityComponent>("LightMapDataCacheComponent");
 	defCLmCache.def("SetLightMapDataCachePath", &pragma::CLightMapDataCacheComponent::SetLightMapDataCachePath);
 	defCLmCache.def("GetLightMapDataCachePath", &pragma::CLightMapDataCacheComponent::GetLightMapDataCachePath);
+	defCLmCache.def(
+	  "GetLightMapDataCacheFilePath", +[](const pragma::CLightMapDataCacheComponent &component) -> std::string { return pragma::LightmapDataCache::GetCacheFileName(component.GetLightMapDataCachePath());
+	  });
 	defCLmCache.def("GetLightMapDataCache", &pragma::CLightMapDataCacheComponent::GetLightMapDataCache);
 	defCLmCache.def("ReloadCache", &pragma::CLightMapDataCacheComponent::ReloadCache);
 	entsMod[defCLmCache];

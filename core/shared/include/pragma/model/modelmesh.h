@@ -250,4 +250,87 @@ class DLLNETWORK ModelMesh : public std::enable_shared_from_this<ModelMesh> {
 DLLNETWORK std::ostream &operator<<(std::ostream &out, const ModelSubMesh &o);
 DLLNETWORK std::ostream &operator<<(std::ostream &out, const ModelMesh &o);
 
+namespace pragma::model {
+	struct DLLNETWORK QuadCreateInfo {
+		QuadCreateInfo() = default;
+		float size = 0.f;
+	};
+	DLLNETWORK void create_quad(ModelSubMesh &mesh, const QuadCreateInfo &createInfo);
+	DLLNETWORK std::shared_ptr<ModelSubMesh> create_quad(Game &game, const QuadCreateInfo &createInfo);
+
+	struct DLLNETWORK BoxCreateInfo {
+		BoxCreateInfo() = default;
+		BoxCreateInfo(const Vector3 &min, const Vector3 &max);
+		Vector3 min;
+		Vector3 max;
+	};
+	DLLNETWORK void create_box(ModelSubMesh &mesh, const BoxCreateInfo &createInfo);
+	DLLNETWORK std::shared_ptr<ModelSubMesh> create_box(Game &game, const BoxCreateInfo &createInfo);
+
+	struct DLLNETWORK SphereCreateInfo {
+		SphereCreateInfo() = default;
+		SphereCreateInfo(const Vector3 &origin, float radius);
+		Vector3 origin;
+		float radius = 0.f;
+		uint32_t recursionLevel = 1;
+	};
+	DLLNETWORK void create_sphere(ModelSubMesh &mesh, const SphereCreateInfo &createInfo);
+	DLLNETWORK std::shared_ptr<ModelSubMesh> create_sphere(Game &game, const SphereCreateInfo &createInfo);
+
+	struct DLLNETWORK CylinderCreateInfo {
+		CylinderCreateInfo() = default;
+		CylinderCreateInfo(float radius, float length);
+		float radius = 0.f;
+		float length = 0.f;
+		uint32_t segmentCount = 12;
+	};
+	DLLNETWORK void create_cylinder(ModelSubMesh &mesh, const CylinderCreateInfo &createInfo);
+	DLLNETWORK std::shared_ptr<ModelSubMesh> create_cylinder(Game &game, const CylinderCreateInfo &createInfo);
+
+	struct DLLNETWORK ConeCreateInfo {
+		ConeCreateInfo() = default;
+		ConeCreateInfo(umath::Degree angle, float length);
+		ConeCreateInfo(float startRadius, float length, float endRadius);
+		float length = 0.f;
+		uint32_t segmentCount = 12;
+		float startRadius = 0.f;
+		float endRadius = 0.f;
+	};
+	DLLNETWORK void create_cone(ModelSubMesh &mesh, const ConeCreateInfo &createInfo);
+	DLLNETWORK std::shared_ptr<ModelSubMesh> create_cone(Game &game, const ConeCreateInfo &createInfo);
+
+	struct DLLNETWORK EllipticConeCreateInfo : public ConeCreateInfo {
+		EllipticConeCreateInfo() = default;
+		EllipticConeCreateInfo(umath::Degree angleX, umath::Degree angleY, float length);
+		EllipticConeCreateInfo(float startRadiusX, float startRadiusY, float length, float endRadiusX, float endRadiusY);
+		float startRadiusY = 0.f;
+		float endRadiusY = 0.f;
+	};
+	DLLNETWORK void create_elliptic_cone(ModelSubMesh &mesh, const EllipticConeCreateInfo &createInfo);
+	DLLNETWORK std::shared_ptr<ModelSubMesh> create_elliptic_cone(Game &game, const EllipticConeCreateInfo &createInfo);
+
+	struct DLLNETWORK CircleCreateInfo {
+		CircleCreateInfo() = default;
+		CircleCreateInfo(float radius, bool doubleSided = true);
+		float radius = 0.f;
+		bool doubleSided = true;
+		uint32_t segmentCount = 36;
+		umath::Degree totalAngle = 360.f;
+	};
+	DLLNETWORK void create_circle(ModelSubMesh &mesh, const CircleCreateInfo &createInfo);
+	DLLNETWORK std::shared_ptr<ModelSubMesh> create_circle(Game &game, const CircleCreateInfo &createInfo);
+
+	struct DLLNETWORK RingCreateInfo {
+		RingCreateInfo() = default;
+		RingCreateInfo(float innerRadius, float outerRadius, bool doubleSided = true);
+		std::optional<float> innerRadius {};
+		float outerRadius = 0.f;
+		bool doubleSided = true;
+		uint32_t segmentCount = 36;
+		umath::Degree totalAngle = 360.f;
+	};
+	DLLNETWORK void create_ring(ModelSubMesh &mesh, const RingCreateInfo &createInfo);
+	DLLNETWORK std::shared_ptr<ModelSubMesh> create_ring(Game &game, const RingCreateInfo &createInfo);
+};
+
 #endif

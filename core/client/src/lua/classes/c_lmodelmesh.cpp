@@ -16,46 +16,6 @@
 
 void Lua::ModelMesh::Client::Create(lua_State *l) { Lua::Push<std::shared_ptr<::ModelMesh>>(l, std::make_shared<::CModelMesh>()); }
 void Lua::ModelSubMesh::Client::Create(lua_State *l) { Lua::Push<std::shared_ptr<::ModelSubMesh>>(l, std::make_shared<::CModelSubMesh>()); }
-void Lua::ModelSubMesh::Client::CreateQuad(lua_State *l, float size)
-{
-	auto subMesh = std::make_shared<::CModelSubMesh>();
-	Lua::ModelSubMesh::InitializeQuad(l, *subMesh, size);
-}
-void Lua::ModelSubMesh::Client::CreateBox(lua_State *l, const Vector3 &min, const Vector3 &max)
-{
-	auto subMesh = std::make_shared<::CModelSubMesh>();
-	Lua::ModelSubMesh::InitializeBox(l, *subMesh, min, max);
-}
-void Lua::ModelSubMesh::Client::CreateSphere(lua_State *l, const Vector3 &origin, float radius, uint32_t recursionLevel)
-{
-	auto subMesh = std::make_shared<::CModelSubMesh>();
-	Lua::ModelSubMesh::InitializeSphere(l, *subMesh, origin, radius, recursionLevel);
-}
-void Lua::ModelSubMesh::Client::CreateSphere(lua_State *l, const Vector3 &origin, float radius)
-{
-	auto subMesh = std::make_shared<::CModelSubMesh>();
-	Lua::ModelSubMesh::InitializeSphere(l, *subMesh, origin, radius);
-}
-void Lua::ModelSubMesh::Client::CreateCylinder(lua_State *l, float startRadius, float length, uint32_t segmentCount)
-{
-	auto subMesh = std::make_shared<::CModelSubMesh>();
-	Lua::ModelSubMesh::InitializeCylinder(l, *subMesh, startRadius, length, segmentCount);
-}
-void Lua::ModelSubMesh::Client::CreateCone(lua_State *l, float startRadius, float length, float endRadius, uint32_t segmentCount)
-{
-	auto subMesh = std::make_shared<::CModelSubMesh>();
-	Lua::ModelSubMesh::InitializeCone(l, *subMesh, startRadius, length, endRadius, segmentCount);
-}
-void Lua::ModelSubMesh::Client::CreateCircle(lua_State *l, float radius, bool doubleSided, uint32_t segmentCount)
-{
-	auto subMesh = std::make_shared<::CModelSubMesh>();
-	Lua::ModelSubMesh::InitializeCircle(l, *subMesh, radius, doubleSided, segmentCount);
-}
-void Lua::ModelSubMesh::Client::CreateRing(lua_State *l, float innerRadius, float outerRadius, bool doubleSided, uint32_t segmentCount)
-{
-	auto subMesh = std::make_shared<::CModelSubMesh>();
-	Lua::ModelSubMesh::InitializeRing(l, *subMesh, innerRadius, outerRadius, doubleSided, segmentCount);
-}
 void Lua::ModelSubMesh::Client::GetVkMesh(lua_State *l, ::ModelSubMesh &mesh) { Lua::Push<std::shared_ptr<::pragma::SceneMesh>>(l, static_cast<CModelSubMesh &>(mesh).GetSceneMesh()); }
 void Lua::ModelSubMesh::Client::GetTangents(lua_State *l, ::ModelSubMesh &mesh)
 {

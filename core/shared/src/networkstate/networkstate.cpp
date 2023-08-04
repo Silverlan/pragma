@@ -371,40 +371,40 @@ ConVar *NetworkState::SetConVar(std::string scmd, std::string value, bool bApply
 	auto prev = cvar->GetString();
 	if(bApplyIfEqual == false && prev == value)
 		return nullptr;
-	cvar->SetValue(value);
+	std::array<const std::unordered_map<std::string, std::vector<CvarCallback>> *, 2> cvarCallbackList = {&m_cvarCallbacks, nullptr};
 	auto *game = GetGameState();
-	std::array<const std::unordered_map<std::string, std::vector<std::shared_ptr<CvarCallback>>> *, 2> cvarCallbackList = {&m_cvarCallbacks, nullptr};
 	if(game != nullptr)
 		cvarCallbackList.at(1) = &game->GetConVarCallbacks();
-	for(auto *cvarCallbacks : cvarCallbackList) {
-		if(cvarCallbacks == nullptr)
-			continue;
-		auto it = cvarCallbacks->find(scmd);
-		if(it != cvarCallbacks->end()) {
-			auto *game = GetGameState();
-			for(auto &cb : it->second) {
-				if(cb->IsLuaFunction()) {
-					if(game != nullptr) {
-						auto *luaFunc = cb->GetLuaFunction();
-						if(luaFunc != nullptr) {
-							game->ProtectedLuaCall(
-							  [&prev, &value, luaFunc](lua_State *l) {
-								  luaFunc->GetLuaObject().push(l);
-								  Lua::PushString(l, prev);
-								  Lua::PushString(l, value);
-								  return Lua::StatusCode::Ok;
-							  },
-							  0);
+	udm::visit(cvar->GetVarType(), [this, &cvarCallbackList, &scmd, cvar, &value](auto tag) {
+		using T = typename decltype(tag)::type;
+		if constexpr(console::is_valid_convar_type_v<T>) {
+			auto &rawValPrev = cvar->GetRawValue();
+			auto prevVal = rawValPrev ? *static_cast<T *>(rawValPrev.get()) : T {};
+			cvar->SetValue(value);
+			auto &rawValNew = cvar->GetRawValue();
+			if(!rawValNew)
+				return;
+			auto &newVal = *static_cast<T *>(rawValNew.get());
+			for(auto &cvList : cvarCallbackList) {
+				if(!cvList)
+					continue;
+				auto it = cvList->find(scmd);
+				if(it != cvList->end()) {
+					auto &cvarCallbacks = const_cast<std::vector<CvarCallback> &>(it->second);
+					for(auto itCb = cvarCallbacks.begin(); itCb != cvarCallbacks.end();) {
+						auto &ptrCb = *itCb;
+						auto &fc = const_cast<CvarCallback &>(ptrCb).GetFunction();
+						if(!fc.IsValid())
+							itCb = cvarCallbacks.erase(itCb);
+						else {
+							fc.Call<void, NetworkState *, const ConVar &, const void *, const void *>(this, *cvar, &prevVal, &newVal);
+							++itCb;
 						}
 					}
 				}
-				else { // WEAVETODO: Move this into the game-class
-					auto *fc = cb->GetFunction();
-					fc->Call(this, cvar, prev);
-				}
 			}
 		}
-	}
+	});
 	return cvar;
 }
 
@@ -556,6 +556,39 @@ void NetworkState::InitializeDLLModule(lua_State *l, std::shared_ptr<util::Libra
 	}
 }
 
+bool NetworkState::UnloadLibrary(const std::string &library)
+{
+	auto libAbs = util::get_normalized_module_path(library, IsClient());
+	auto it = s_loadedLibraries.find(libAbs);
+	if(it == s_loadedLibraries.end())
+		return true;
+	auto lib = it->second.library;
+	auto it2 = std::find_if(m_libHandles.begin(), m_libHandles.end(), [&lib](const std::shared_ptr<std::shared_ptr<util::Library>> &ptr) { return ptr->get() == lib->get(); });
+	it = s_loadedLibraries.erase(it);
+
+	auto *ptrTerminateLua = (*lib)->FindSymbolAddress<void (*)(Lua::Interface &)>("pragma_terminate_lua");
+	for(auto &pair : m_initializedLibraries) {
+		auto it = std::find_if(pair.second.begin(), pair.second.end(), [&lib](const std::shared_ptr<util::Library> &ptr) { return ptr.get() == lib->get(); });
+		if(it != pair.second.end()) {
+			if(ptrTerminateLua != nullptr)
+				ptrTerminateLua(*engine->GetLuaInterface(pair.first));
+			pair.second.erase(it);
+		}
+	}
+
+	if(lib->get() == m_lastModuleHandle.get())
+		m_lastModuleHandle = nullptr;
+
+	auto *ptrDetach = (*lib)->FindSymbolAddress<void (*)()>("pragma_detach");
+	if(ptrDetach != nullptr)
+		ptrDetach();
+	lib = nullptr;
+	if(it2 != m_libHandles.end())
+		m_libHandles.erase(it2);
+	s_loadedLibraries.erase(it);
+	return true;
+}
+
 std::shared_ptr<util::Library> NetworkState::InitializeLibrary(std::string library, std::string *err, lua_State *l)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
@@ -565,7 +598,6 @@ std::shared_ptr<util::Library> NetworkState::InitializeLibrary(std::string libra
 	if(l == nullptr)
 		l = GetLuaState();
 	auto libAbs = util::get_normalized_module_path(library, IsClient());
-	auto brLast = libAbs.find_last_of('\\');
 
 	std::shared_ptr<util::Library> dllHandle = nullptr;
 	auto it = s_loadedLibraries.find(libAbs);
@@ -669,9 +701,25 @@ ConVar *NetworkState::RegisterConVar(const std::string &scmd, const std::shared_
 		return static_cast<ConVar *>(cf.get());
 	}
 	auto itNew = m_conVars.insert(decltype(m_conVars)::value_type(scmd, cvar));
-	return static_cast<ConVar *>(itNew.first->second.get());
+	auto *cv = static_cast<ConVar *>(itNew.first->second.get());
+	auto &cfg = engine->GetConVarConfig(GetType());
+	if(cfg) {
+		// Use value from loaded config
+		auto *args = cfg->Find(scmd);
+		if(args && !args->empty())
+			cv->SetValue((*args)[0]);
+	}
+	return cv;
 }
-ConVar *NetworkState::CreateConVar(const std::string &scmd, const std::string &value, ConVarFlags flags, const std::string &help) { return RegisterConVar(scmd, ConVar::Create<std::string>(value, flags, help)); }
+ConVar *NetworkState::CreateConVar(const std::string &scmd, udm::Type type, const std::string &value, ConVarFlags flags, const std::string &help)
+{
+	return udm::visit(type, [this, &scmd, &value, flags, &help](auto tag) -> ConVar * {
+		using T = typename decltype(tag)::type;
+		if constexpr(console::is_valid_convar_type_v<T> && udm::is_convertible<std::string, T>())
+			return RegisterConVar(scmd, ConVar::Create<T>(udm::convert<std::string, T>(value), flags, help));
+		return nullptr;
+	});
+}
 
 std::unordered_map<std::string, unsigned int> &NetworkState::GetConCommandIDs() { return m_conCommandIDs; }
 

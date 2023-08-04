@@ -82,25 +82,6 @@ void Lua::debug::enable_remote_debugging(lua_State *l)
 		Con::cwar << "Unable to enable remote debugging: Game has to be started with -luaext launch parameter!" << Con::endl;
 		return;
 	}
-	auto _G = luabind::globals(l);
-	auto programPath = util::get_program_path();
-	auto path = FileManager::GetNormalizedPath(programPath + "/lua/?.lua");
-	path += ";" + FileManager::GetNormalizedPath(programPath + "/lua/modules/?.lua");
-#ifdef _WIN32
-	std::string ext = ".dll";
-#else
-	std::string ext = ".so";
-#endif
-	auto cpath = FileManager::GetNormalizedPath(programPath + "/modules/?" + ext);
-	std::replace(path.begin(), path.end(), '\\', '/');
-	std::replace(cpath.begin(), cpath.end(), '\\', '/');
-	luabind::object oPackage = _G["package"];
-	if(!oPackage) {
-		Con::cwar << "Unable to enable remote debugging: package library is missing!" << Con::endl;
-		return;
-	}
-	oPackage["path"] = path;
-	oPackage["cpath"] = cpath;
 
 	Lua::GetGlobal(l, "require");
 	Lua::PushString(l, "modules/mobdebug"); // Note: This will disable jit!

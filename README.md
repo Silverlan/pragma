@@ -6,6 +6,19 @@ What is this?
 ------
 This is the repository for the Pragma Game Engine. For more information, visit the official website: https://pragma-engine.com/
 
+Download
+------
+All versions include the core Engine, as well as the Pragma Filmmaker (PFM).
+###### Stable
+[![Download](https://wiki.pragma-engine.com/uploads/images/gallery/2020-08/firefox_2020-08-14_10-46-44.png)](https://github.com/Silverlan/pragma/releases/latest)
+
+You can find older releases in the [releases section](https://github.com/Silverlan/pragma/releases) of this repository. No installation is required, simply extract the archive somewhere and launch the `pragma` or `pfm` executable.
+
+###### Nightly
+In addition, there is also an automated nightly release with all of the latest features which you can find [here](https://github.com/Silverlan/pragma/releases/tag/nightly), but it is not guaranteed to be stable or functional.
+
+###### Updating
+PFM automatically checks for updates when you launch it, and can automatically install them as well, so you don't have to download new releases manually.
 
 Media
 ------
@@ -20,6 +33,24 @@ What platforms and hardware does it work on?
 - Graphics card: GTX 1050 Ti or newer
 - Memory: 4 GiB RAM or more
 
+Contributions
+------
+###### PFM
+If you would like to contribute to the development of PFM, there is usually no need to build all of Pragma. PFM is a Lua-based addon for Pragma and can be found in "Pragma/addons/filmmaker", all you need is a source code editor of your choice (though Visual Studio Code is highly recommended) and some experience with Lua 5.1. Here are the recommended steps:
+1) Download and extract the [latest version](https://github.com/Silverlan/pragma/releases/tag/nightly) of Pragma
+2) Delete the existing "Pragma/addons/filmmaker" directory
+3) Fork the [PFM repository](https://github.com/Silverlan/pfm) and clone your fork into "Pragma/addons/filmmaker_fork". Do *not* fork into "addons/filmmaker", otherwise your changes will get overwritten the next time you update Pragma/PFM.
+4) (Optional) Follow the instructions on [the wiki](https://wiki.pragma-engine.com/books/lua-api/page/visual-studio-code) to set up Visual Studio Code for Lua development with Pragma
+
+You can find the Lua-script files for PFM in "Pragma/addons/filmmaker_fork/lua". For some basic information on how to use the Lua API in Pragma, please check out [the wiki](https://wiki.pragma-engine.com/books/lua-api).
+
+To update Pragma/PFM, you can still use the auto-updater functionality of PFM. Simply make sure to delete the "Pragma/addons/filmmaker" directory again after the update.
+
+###### Pragma
+The recommended way to work with Pragma is through the [Lua API](https://wiki.pragma-engine.com/books/lua-api). If this is not enough, and you need more control, you will have to build Pragma manually. You can find the build instructions below.
+
+Please consider creating a [binary module](https://github.com/Silverlan/pragma#modules) if you're planning on adding new features that don't require any changes to the existing code files. This way the module can simply be installed into existing releases of Pragma. (You will still have to set up a build of Pragma before creating a binary module.)
+
 Build Requirements
 ------
 - ~60 GiB of disk space
@@ -28,6 +59,7 @@ Build Requirements
 
 ###### Windows
 - Visual Studio 2022 or newer
+- Windows SDK 10.0.22000.0 or newer
 
 ###### Linux
 - clang-14 or newer (Pragma is *not* compatible with gcc!)
@@ -36,7 +68,7 @@ Build Instructions
 ------
 To build Pragma, all you have to do is run the following command from a command-line interface:
 ```console
-git clone https://github.com/Silverlan/pragma.git --recurse-submodules && cd pragma && python build_scripts/build.py --with-pfm --with-all-pfm-modules --with-vr
+git clone https://github.com/Silverlan/pragma.git && cd pragma && python build_scripts/build.py --with-pfm --with-all-pfm-modules --with-vr
 ```
 
 This will clone Pragma and run the build-script, which will automatically download all dependencies, configure CMake, and build and install the project (this will take several hours).
@@ -47,17 +79,22 @@ If you don't need the filmmaker, you can omit the `--with-pfm --with-all-pfm-mod
 > You can disable confirmation prompts (e.g. for automated builds) by adding the `--no-confirm` argument, however entering your password may still be required.
 <br/>
 
-Once the build script has been completed, you should find the build files in `pragma/build`, and the install files in `pragma/build/install`. The `install` directory should contain everything you need to run Pragma.
+Once the build script has been completed, you can find the build files in `pragma/build`, and the install files in `pragma/build/install`. The `install` directory contains everything you need to run Pragma.
 
-If you make any code changes to the core engine code, you can build the `pragma-install` target to build them. This will also re-install the binaries.
-
-If you make any code changes to a module, you will have to build the module build target first, and then build `pragma-install` afterwards.
-
-After the initial run of the main build script, you can run the following command from the root directory of Pragma to update Pragma to a newer version:
+###### Update
+To update Pragma to a newer version (assuming the command above has completed successfully at least once), you can use the following command:
 ```console
 python build_scripts/build.py --update
 ```
+
 This will pull all of the latest changes for the Pragma repository and the modules. The `--update` option will re-use all of the arguments used in the last execution of the build script, so you don't have to specify them again.
+
+If you just wish to re-run the build script without updating to the latest commit, you can use the `--rerun` option instead. Like the `--update` option, this will also re-use the arguments used in the last execution of the build script.
+
+###### Code Changes
+If you make any code changes to the core engine code, you can build the `pragma-install` target to build them. This will also re-install the binaries.
+
+If you make any code changes to a module, you will have to build the module build target first, and then build `pragma-install` afterwards.
 
 ### Build Customization
 
@@ -77,6 +114,9 @@ Running the build-script with the arguments above will build and install Pragma 
 | `--with-core-pfm-modules <1/0>`         | Include essential PFM modules.                                                               | `1`              |
 | `--with-all-pfm-modules <1/0>`          | Include non-essential PFM modules (e.g. chromium and cycles).                                | `0`              |
 | `--with-vr <1/0>`                       | Include Virtual Reality support.                                                             | `0`              |
+| `--with-lua-debugger <1/0>`             | Include Lua-debugger support.                                                                | `1`              |
+| `--with-lua-doc-generator <1/0>`        | Include Lua documentation generator.                                                         | `0`              |
+| `--build-cycles <1/0>`                  | Build the Cycles library (otherwise uses pre-built binaries). Requires --with-all-pfm-modules| `0`              |
 | `--build <1/0>`                         | Build Pragma after configurating and generating build files.                                 | `1`              |
 | `--build-all <1/0>`                     | Build all dependencies instead of downloading prebuilt binaries where available.             | `0`              |
 | `--build-config <config>`               | The build configuration to use.                                                              | `RelWithDebInfo` |
@@ -85,12 +125,25 @@ Running the build-script with the arguments above will build and install Pragma 
 | `--install-directory <path>`            | Installation directory. Can be relative (to build directory) or absolute.                    | `install`        |
 | `--verbose <1/0>`                       | Print additional debug information.                                                          | `0`              |
 | `--update <1/0>`                        | Update Pragma and all submodules and modules to the latest versions.                         | `0`              |
-| `--module <moduleName>:<gitUrl>`        | Custom modules to install. Use this argument multiple times to use multiple modules.         |                  |
+| `--rerun <1/0>`                         | Re-run the build script with the previous arguments.                                         | `0`              |
+| `--module <moduleName>:<gitUrl>`        | Custom modules to install. Use this parameter multiple times to use multiple modules.        |                  |
+| `--cmake-arg <arg>`                     | Custom CMake configuration option. Use this parameter multiple times for multiple options.   |                  |
 
 Example for using the `--module` parameter:
 ```console
 --module pr_physx:"https://github.com/Silverlan/pr_physx.git"
 ```
+
+Alternatively you can also add custom modules by editing `pragma/build_scripts/user_modules.py`. (This is the recommended method.)
+
+###### PFM
+To build Pragma with PFM, add the `--with-pfm --with-all-pfm-modules` options. Due to licensing issues, this will only include a pre-built version of the Cycles renderer **without** OptiX support.
+If you want to have full CUDA and OptiX support when rendering with Cycles, you will have to add the `--build-cycles` option as well. You will also have to install the following before you do so:
+- [SlikSVN](https://sliksvn.com/download/) (Windows only)
+- [CUDA Toolkit 11.6](https://developer.nvidia.com/cuda-11-6-0-download-archive)
+- [OptiX SDK 7.3.0](https://developer.nvidia.com/designworks/optix/download) (NVIDIA account required)
+
+Please note that newer versions of CUDA or OptiX will likely not work.
 
 Modules
 ------
@@ -153,3 +206,4 @@ An example for a Lua-addon is the [Pragma Filmmaker](https://github.com/Silverla
 Special Thanks
 ------
 - [SlawekNowy](https://github.com/SlawekNowy): For helping to make Linux support possible
+- [REDxEYE](https://github.com/REDxEYE): For creating the [Pragma asset import plugin for Blender](https://github.com/REDxEYE/pragma_udm_io)

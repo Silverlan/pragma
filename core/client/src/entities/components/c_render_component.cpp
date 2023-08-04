@@ -39,6 +39,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <util_image.hpp>
 
 using namespace pragma;
 
@@ -625,7 +626,8 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 		Vector4 color(1.f, 1.f, 1.f, 1.f);
 		auto pColorComponent = GetEntity().GetComponent<CColorComponent>();
 		if(pColorComponent.valid())
-			color = pColorComponent->GetColor().ToVector4();
+			color = pColorComponent->GetColor();
+		color = Vector4 {uimg::linear_to_srgb(reinterpret_cast<Vector3 &>(color)), color.w};
 
 		auto renderFlags = pragma::ShaderEntity::InstanceData::RenderFlags::None;
 		auto *pMdlComponent = GetModelComponent();
@@ -651,6 +653,7 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 	CEOnUpdateRenderBuffers evData {drawCmd};
 	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_BUFFERS, evData);
 }
+const pragma::ShaderEntity::InstanceData &CRenderComponent::GetInstanceData() const { return m_instanceData; }
 void CRenderComponent::UpdateRenderDataMT(const CSceneComponent &scene, const CCameraComponent &cam, const Mat4 &vp)
 {
 	m_renderDataMutex.lock();
@@ -770,7 +773,12 @@ void CRenderComponent::UpdateBoneBuffer()
 }
 void CRenderComponent::ClearRenderBuffers()
 {
+	if(m_renderBuffer)
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderBuffer);
 	m_renderBuffer = nullptr;
+
+	if(m_renderDescSetGroup)
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderDescSetGroup);
 	m_renderDescSetGroup = nullptr;
 }
 pragma::rendering::RenderGroup CRenderComponent::GetRenderGroups() const { return *m_renderGroups; }
@@ -916,3 +924,11 @@ void CEOnRenderBoundsChanged::PushArguments(lua_State *l)
 	Lua::Push<Vector3>(l, sphere.pos);
 	Lua::PushNumber(l, sphere.radius);
 }
+
+/////////////////
+
+void pragma::rendering::RenderBufferData::SetDepthPrepassEnabled(bool enabled) { umath::set_flag(stateFlags, StateFlags::EnableDepthPrepass, enabled); }
+bool pragma::rendering::RenderBufferData::IsDepthPrepassEnabled() const { return umath::is_flag_set(stateFlags, StateFlags::EnableDepthPrepass); }
+
+void pragma::rendering::RenderBufferData::SetGlowPassEnabled(bool enabled) { umath::set_flag(stateFlags, StateFlags::EnableGlowPass, enabled); }
+bool pragma::rendering::RenderBufferData::IsGlowPassEnabled() const { return umath::is_flag_set(stateFlags, StateFlags::EnableGlowPass); }

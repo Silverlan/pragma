@@ -36,6 +36,8 @@ class DLLNETWORK Locale {
 	static LoadResult Load(const std::string &file, bool bReload = false);
 	static void SetLanguage(std::string lan);
 	static void ReloadFiles();
+	static bool GetRawText(const std::string &id, std::string &outText);
+	static bool GetRawText(const std::string &id, util::Utf8String &outText);
 	static bool GetText(const std::string &id, std::string &outText);
 	static bool GetText(const std::string &id, util::Utf8String &outText);
 	static bool GetText(const std::string &id, const std::vector<std::string> &args, std::string &outText);
@@ -50,6 +52,7 @@ class DLLNETWORK Locale {
 	static void Poll();
 	static std::string DetermineSystemLanguage();
 	static LoadResult LoadFile(const std::string &file, const std::string &lan, Localization &outLoc);
+	static LoadResult ParseFile(const std::string &file, const std::string &lan, std::unordered_map<std::string, util::Utf8String> &outTexts);
 	static std::string GetFileLocation(const std::string &file, const std::string &lan);
 	static bool Localize(const std::string &identifier, const std::string &lan, const std::string &category, const util::Utf8String &text);
   private:

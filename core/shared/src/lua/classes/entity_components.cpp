@@ -31,7 +31,9 @@
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/lua/lua_util_component.hpp"
 #include "pragma/lua/types/udm.hpp"
+#include "pragma/lua/libraries/lprint.h"
 #include "pragma/entities/components/base_parent_component.hpp"
+#include "pragma/entities/components/base_entity_component_logging.hpp"
 #include "pragma/physics/shape.hpp"
 #include "pragma/util/render_tile.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
@@ -39,7 +41,8 @@
 #include <luabind/out_value_policy.hpp>
 #include <luabind/copy_policy.hpp>
 #include <luabind/discard_result_policy.hpp>
-#pragma optimize("", off)
+#include <fmt/core.h>
+
 namespace Lua {
 	template<typename... Types>
 	static luabind::class_<Types..., pragma::BaseEntityComponent> create_base_entity_component_class(const char *name)
@@ -533,7 +536,79 @@ static std::optional<umath::ScaledTransform> get_transform_member_pose(pragma::B
 	return {};
 }
 
-void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
+static std::string to_string(lua_State *l, int i)
+{
+	auto status = -1;
+	std::string val;
+	if(Lua::lua_value_to_string(l, i, &status, &val) == false)
+		return "unknown";
+	return val;
+}
+
+static int log(lua_State *l, spdlog::level::level_enum logLevel)
+{
+	auto &component = Lua::Check<pragma::BaseEntityComponent>(l, 1);
+	const char *msg = Lua::CheckString(l, 2);
+	int32_t argOffset = 2;
+	auto n = lua_gettop(l) - argOffset; /* number of arguments */
+	switch(n) {
+	case 0:
+		component.Log(logLevel, std::string {msg});
+		break;
+	case 1:
+		component.Log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1))));
+		break;
+	case 2:
+		component.Log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2))));
+		break;
+	case 3:
+		component.Log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3))));
+		break;
+	case 4:
+		component.Log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4))));
+		break;
+	case 5:
+		component.Log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5))));
+		break;
+	case 6:
+		component.Log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6))));
+		break;
+	case 7:
+		component.Log(logLevel, fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7))));
+		break;
+	case 8:
+		component.Log(logLevel,
+		  fmt::vformat(msg, fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7), to_string(l, argOffset + 8))));
+		break;
+	case 9:
+		component.Log(logLevel,
+		  fmt::vformat(msg,
+		    fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7), to_string(l, argOffset + 8),
+		      to_string(l, argOffset + 9))));
+		break;
+	case 10:
+		component.Log(logLevel,
+		  fmt::vformat(msg,
+		    fmt::make_format_args(to_string(l, argOffset + 1), to_string(l, argOffset + 2), to_string(l, argOffset + 3), to_string(l, argOffset + 4), to_string(l, argOffset + 5), to_string(l, argOffset + 6), to_string(l, argOffset + 7), to_string(l, argOffset + 8),
+		      to_string(l, argOffset + 9), to_string(l, argOffset + 10))));
+		break;
+	default:
+		component.Log(logLevel, std::string {msg});
+		break;
+	}
+	return 0;
+}
+
+template<spdlog::level::level_enum TLevel>
+static void add_log_func(lua_State *l, luabind::object &oEntityComponent, const char *name)
+{
+	lua_pushcfunction(
+	  l, +[](lua_State *l) -> int { return log(l, TLevel); });
+	oEntityComponent[name] = luabind::object {luabind::from_stack(l, -1)};
+	Lua::Pop(l, 1);
+}
+
+void pragma::lua::register_entity_component_classes(lua_State *l, luabind::module_ &mod)
 {
 	auto entityComponentDef = pragma::lua::create_entity_component_class<pragma::BaseEntityComponent>("EntityComponent");
 	entityComponentDef.def("BroadcastEvent", static_cast<util::EventReply (pragma::BaseEntityComponent::*)(pragma::ComponentEventId) const>(&pragma::BaseEntityComponent::BroadcastEvent));
@@ -595,6 +670,16 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	entityComponentDef.def("SetTransformMemberRot", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Quat &)>(&pragma::BaseEntityComponent::SetTransformMemberRot));
 	entityComponentDef.def("SetTransformMemberScale", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Vector3 &)>(&pragma::BaseEntityComponent::SetTransformMemberScale));
 	entityComponentDef.def("SetTransformMemberPose", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const umath::ScaledTransform &)>(&pragma::BaseEntityComponent::SetTransformMemberPose));
+	entityComponentDef.def(
+	  "GetTransformMemberSpace", +[](pragma::BaseEntityComponent &c, ComponentMemberIndex memberIndex) -> std::optional<umath::CoordinateSpace> {
+		  auto *memberInfo = c.GetMemberInfo(memberIndex);
+		  if(!memberInfo)
+			  return {};
+		  auto *cMetaData = memberInfo->FindTypeMetaData<pragma::ents::CoordinateTypeMetaData>();
+		  if(!cMetaData)
+			  return {};
+		  return cMetaData->space;
+	  });
 	entityComponentDef.def(
 	  "GetMemberIndices", +[](lua_State *l, pragma::BaseEntityComponent &component) -> std::vector<pragma::ComponentMemberIndex> {
 		  std::vector<pragma::ComponentMemberIndex> memberIndices;
@@ -765,8 +850,8 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 		}
 		return t;
 	}));
-	entityComponentDef.def("Log", &pragma::BaseEntityComponent::Log);
-	entityComponentDef.def("Log", &pragma::BaseEntityComponent::Log, luabind::default_parameter_policy<3, pragma::BaseEntityComponent::LogSeverity::Warning> {});
+	entityComponentDef.def("Log", static_cast<void (pragma::BaseEntityComponent::*)(const std::string &, pragma::BaseEntityComponent::LogSeverity) const>(&pragma::BaseEntityComponent::Log));
+	entityComponentDef.def("Log", static_cast<void (pragma::BaseEntityComponent::*)(const std::string &, pragma::BaseEntityComponent::LogSeverity) const>(&pragma::BaseEntityComponent::Log), luabind::default_parameter_policy<3, pragma::BaseEntityComponent::LogSeverity::Warning> {});
 	entityComponentDef.add_static_constant("FREGISTER_NONE", umath::to_integral(pragma::ComponentFlags::None));
 	entityComponentDef.add_static_constant("FREGISTER_BIT_NETWORKED", umath::to_integral(pragma::ComponentFlags::Networked));
 
@@ -778,6 +863,15 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	entityComponentDef.add_static_constant("LOG_SEVERITY_CRITICAL", umath::to_integral(pragma::BaseEntityComponent::LogSeverity::Critical));
 	entityComponentDef.add_static_constant("LOG_SEVERITY_DEBUG", umath::to_integral(pragma::BaseEntityComponent::LogSeverity::Debug));
 	mod[entityComponentDef];
+
+	luabind::object oLogger = luabind::globals(l)["ents"];
+	oLogger = oLogger["EntityComponent"];
+	add_log_func<spdlog::level::trace>(l, oLogger, "LogTrace");
+	add_log_func<spdlog::level::debug>(l, oLogger, "LogDebug");
+	add_log_func<spdlog::level::info>(l, oLogger, "LogInfo");
+	add_log_func<spdlog::level::warn>(l, oLogger, "LogWarn");
+	add_log_func<spdlog::level::err>(l, oLogger, "LogError");
+	add_log_func<spdlog::level::critical>(l, oLogger, "LogCritical");
 
 	auto defBvhHitInfo = luabind::class_<pragma::BvhHitInfo>("HitInfo");
 	defBvhHitInfo.def_readonly("mesh", &pragma::BvhHitInfo::mesh);
@@ -817,6 +911,7 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	auto defBvh = Lua::create_base_entity_component_class<pragma::BaseBvhComponent>("BaseBvhComponent");
 	defBvh.def("RebuildBvh", static_cast<void (pragma::BaseBvhComponent::*)()>(&pragma::BaseBvhComponent::RebuildBvh));
 	defBvh.def("GetVertex", &pragma::BaseBvhComponent::GetVertex);
+	defBvh.def("GetTriangleCount", &pragma::BaseBvhComponent::GetTriangleCount);
 	defBvh.def(
 	  "IntersectionTest2", +[](pragma::BaseBvhComponent &c, const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) {
 		  auto t = std::chrono::steady_clock::now();
@@ -1650,6 +1745,8 @@ void pragma::lua::base_toggle_component::register_class(luabind::module_ &mod)
 	def.def("GetTurnedOnProperty", &pragma::BaseToggleComponent::GetTurnedOnProperty);
 	def.add_static_constant("EVENT_ON_TURN_ON", pragma::BaseToggleComponent::EVENT_ON_TURN_ON);
 	def.add_static_constant("EVENT_ON_TURN_OFF", pragma::BaseToggleComponent::EVENT_ON_TURN_OFF);
+
+	def.add_static_constant("SPAWN_FLAG_START_ON_BIT", umath::to_integral(pragma::BaseToggleComponent::SpawnFlags::StartOn));
 }
 #include "pragma/entities/components/base_wheel_component.hpp"
 void pragma::lua::base_wheel_component::register_class(luabind::module_ &mod)
@@ -1696,6 +1793,9 @@ void pragma::lua::base_env_light_component::register_class(luabind::module_ &mod
 	def.add_static_constant("INTENSITY_TYPE_CANDELA", umath::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Candela));
 	def.add_static_constant("INTENSITY_TYPE_LUMEN", umath::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Lumen));
 	def.add_static_constant("INTENSITY_TYPE_LUX", umath::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Lux));
+
+	def.add_static_constant("LIGHT_FLAG_NONE", umath::to_integral(pragma::BaseEnvLightComponent::LightFlags::None));
+	def.add_static_constant("LIGHT_FLAG_BAKED_LIGHT_SOURCE_BIT", umath::to_integral(pragma::BaseEnvLightComponent::LightFlags::BakedLightSource));
 }
 #include "pragma/entities/environment/lights/env_light_spot.h"
 void pragma::lua::base_env_light_spot_component::register_class(luabind::module_ &mod)
@@ -3623,4 +3723,3 @@ void pragma::lua::base_liquid_surface_simulation_component::register_class(luabi
 }
 
 // --template-register-definition
-#pragma optimize("", on)

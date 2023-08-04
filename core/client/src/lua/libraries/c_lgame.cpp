@@ -813,28 +813,41 @@ int Lua::game::Client::test(lua_State *l)
 
 #endif
 
+namespace pragma {
+	DLLCLIENT const std::unordered_map<std::string, std::string> &get_dropped_files();
+};
 int Lua::game::Client::open_dropped_file(lua_State *l)
 {
 	auto &droppedFiles = c_game->GetDroppedFiles();
 	const CGame::DroppedFile *pf = nullptr;
+	std::optional<std::string> fullPath {};
 	if(Lua::IsString(l, 1)) {
 		auto *fileName = Lua::CheckString(l, 1);
 		auto it = std::find_if(droppedFiles.begin(), droppedFiles.end(), [&fileName](const CGame::DroppedFile &f) { return (f.fileName == fileName) ? true : false; });
-		if(it == droppedFiles.end())
-			return 0;
-		pf = &(*it);
+		if(it == droppedFiles.end()) {
+			auto &gDroppedFiles = pragma::get_dropped_files();
+			auto npath = util::Path::CreateFile(fileName).GetString();
+			ustring::to_lower(npath);
+			auto nfileName = ufile::get_file_from_filename(npath);
+			auto it = gDroppedFiles.find(nfileName);
+			if(it == gDroppedFiles.end())
+				return 0;
+			fullPath = it->second;
+		}
+		else
+			fullPath = it->fullPath;
 	}
 	else {
 		auto id = Lua::CheckInt(l, 1);
 		--id;
 		if(id < 0 || id >= droppedFiles.size())
 			return 0;
-		pf = &droppedFiles[id];
+		fullPath = droppedFiles[id].fullPath;
 	}
 	auto bBinary = false;
 	if(Lua::IsSet(l, 2) == true)
 		bBinary = Lua::CheckBool(l, 2);
-	auto f = FileManager::OpenSystemFile(pf->fullPath.c_str(), (bBinary == true) ? "rb" : "r");
+	auto f = FileManager::OpenSystemFile(fullPath->c_str(), (bBinary == true) ? "rb" : "r");
 	if(f == nullptr)
 		return 0;
 	auto r = std::make_shared<LFile>();

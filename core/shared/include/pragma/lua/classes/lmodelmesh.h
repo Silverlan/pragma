@@ -35,13 +35,6 @@ namespace Lua {
 		DLLNETWORK void Scale(lua_State *l, ::ModelMesh &mdl, const Vector3 &scale);
 	};
 	namespace ModelSubMesh {
-		DLLNETWORK void InitializeQuad(lua_State *l, ::ModelSubMesh &mesh, float size);
-		DLLNETWORK void InitializeBox(lua_State *l, ::ModelSubMesh &mesh, const Vector3 &min, const Vector3 &max);
-		DLLNETWORK void InitializeSphere(lua_State *l, ::ModelSubMesh &mesh, const Vector3 &origin, float radius, uint32_t recursionLevel = 1);
-		DLLNETWORK void InitializeCylinder(lua_State *l, ::ModelSubMesh &mesh, float startRadius, float length, uint32_t segmentCount = 12);
-		DLLNETWORK void InitializeCone(lua_State *l, ::ModelSubMesh &mesh, float startRadius, float length, float endRadius, uint32_t segmentCount = 12);
-		DLLNETWORK void InitializeCircle(lua_State *l, ::ModelSubMesh &mesh, float radius, bool doubleSided = true, uint32_t segmentCount = 36);
-		DLLNETWORK void InitializeRing(lua_State *l, ::ModelSubMesh &mesh, std::optional<float> innerRadius, float outerRadius, bool doubleSided = true, uint32_t segmentCount = 36);
 		DLLNETWORK void FlipTriangleWindingOrder(lua_State *l, ::ModelSubMesh &mesh);
 
 		DLLNETWORK void register_class(luabind::class_<::ModelSubMesh> &classDef);

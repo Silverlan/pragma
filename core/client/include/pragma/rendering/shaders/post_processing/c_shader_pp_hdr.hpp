@@ -31,7 +31,7 @@ namespace pragma {
 		enum class TextureBinding : uint32_t {
 			Texture = 0u,
 			Bloom,
-			// Glow
+			Glow
 		};
 
 #pragma pack(push, 1)
@@ -45,7 +45,11 @@ namespace pragma {
 #pragma pack(pop)
 
 		ShaderPPHDR(prosper::IPrContext &context, const std::string &identifier);
-		bool RecordDraw(prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetTexture, pragma::rendering::ToneMapping toneMapping, float exposure, float bloomScale, float glowScale, bool flipVertically = false) const;
+		bool RecordDraw(
+			prosper::ShaderBindState &bindState, prosper::IDescriptorSet &descSetTexture, 
+			pragma::rendering::ToneMapping toneMapping, float exposure, float bloomScale, float glowScale, 
+			bool flipVertically = false
+		) const;
 	  protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) override;

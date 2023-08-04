@@ -49,7 +49,7 @@ namespace pragma {
 			if(typeid(component) == typeid(CColorComponent)) {
 				if(m_colorCallback.IsValid())
 					m_colorCallback.Remove();
-				m_colorCallback = static_cast<CColorComponent &>(component).GetColorProperty()->AddCallback([this](std::reference_wrapper<const Color> oldColor, std::reference_wrapper<const Color> color) { ReloadDebugObject(); });
+				m_colorCallback = static_cast<CColorComponent &>(component).GetColorProperty()->AddCallback([this](std::reference_wrapper<const Vector4> oldColor, std::reference_wrapper<const Vector4> color) { ReloadDebugObject(); });
 			}
 			else if(typeid(component) == typeid(CTransformComponent)) {
 				if(m_poseCallback.IsValid())
@@ -83,7 +83,7 @@ namespace pragma {
 			auto pToggleComponent = ent.template GetComponent<CToggleComponent>();
 			if(pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false)
 				return;
-			auto color = Color::White;
+			auto color = Color::White.ToVector4();
 			auto pos = Vector3 {};
 			auto pColorComponent = ent.template GetComponent<CColorComponent>();
 			auto pTrComponent = ent.template GetComponent<CTransformComponent>();

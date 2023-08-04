@@ -90,7 +90,7 @@ void WIMainMenuMods::OnFirstEntered()
 	auto lan = Locale::GetLanguage();
 	if(lan != "de")
 		lan = "en";
-	SetInitialURL(engine_info::get_modding_hub_url() + "index_game.php?lan=" + lan);
+	// SetInitialURL(engine_info::get_modding_hub_url() + "index_game.php?lan=" + lan);
 
 	try {
 		auto &addons = AddonSystem::GetMountedAddons();

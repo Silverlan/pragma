@@ -25,6 +25,8 @@
 #include "pragma/lua/converters/pair_converter_t.hpp"
 #include "pragma/util/render_tile.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
+#include "pragma/lua/policies/default_parameter_policy.hpp"
+#include "pragma/asset_types/world.hpp"
 #include <pragma/game/game.h>
 #include "luasystem.h"
 #include "pragma/util/util_python.hpp"
@@ -49,6 +51,7 @@
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/util/util_rgbcsv.hpp"
 #include "pragma/util/util_variable_type.hpp"
+#include <util_image_buffer.hpp>
 #include <sharedutils/netpacket.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/scope_guard.h>
@@ -202,7 +205,95 @@ static std::unique_ptr<util::HairStrandData> generate_hair_file(const util::Hair
 	return hairFile;
 }
 
-void Lua::util::register_shared_generic(luabind::module_ &mod)
+void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
+{
+	auto defWorldData = luabind::class_<pragma::asset::WorldData>("WorldData");
+
+	auto defOutput = luabind::class_<pragma::asset::Output>("Output");
+	defOutput.def(luabind::constructor<>());
+	defOutput.def_readwrite("name", &pragma::asset::Output::name);
+	defOutput.def_readwrite("target", &pragma::asset::Output::target);
+	defOutput.def_readwrite("input", &pragma::asset::Output::input);
+	defOutput.def_readwrite("param", &pragma::asset::Output::param);
+	defOutput.def_readwrite("delay", &pragma::asset::Output::delay);
+	defOutput.def_readwrite("name", &pragma::asset::Output::times);
+	defWorldData.scope[defOutput];
+
+	auto defComponentData = luabind::class_<pragma::asset::ComponentData>("ComponentData");
+	defComponentData.add_static_constant("FLAG_NONE", umath::to_integral(pragma::asset::ComponentData::Flags::None));
+	defComponentData.add_static_constant("FLAG_CLIENTSIDE_ONLY_BIT", umath::to_integral(pragma::asset::ComponentData::Flags::ClientsideOnly));
+	defComponentData.def("GetFlags", &pragma::asset::ComponentData::GetFlags);
+	defComponentData.def("SetFlags", &pragma::asset::ComponentData::SetFlags);
+	defComponentData.def(
+	  "GetData", +[](pragma::asset::ComponentData &componentData) -> udm::LinkedPropertyWrapper { return udm::LinkedPropertyWrapper {*componentData.GetData()}; });
+	defWorldData.scope[defComponentData];
+
+	auto defEntityData = luabind::class_<pragma::asset::EntityData>("EntityData");
+	defEntityData.add_static_constant("FLAG_NONE", umath::to_integral(pragma::asset::EntityData::Flags::None));
+	defEntityData.add_static_constant("FLAG_CLIENTSIDE_ONLY_BIT", umath::to_integral(pragma::asset::EntityData::Flags::ClientsideOnly));
+	defEntityData.def("IsWorld", &pragma::asset::EntityData::IsWorld);
+	defEntityData.def("IsSkybox", &pragma::asset::EntityData::IsSkybox);
+	defEntityData.def("IsClientSideOnly", &pragma::asset::EntityData::IsClientSideOnly);
+	defEntityData.def("SetClassName", &pragma::asset::EntityData::SetClassName);
+	defEntityData.def("SetPose", &pragma::asset::EntityData::SetPose);
+	defEntityData.def("GetPose", &pragma::asset::EntityData::GetPose);
+	defEntityData.def("GetEffectivePose", &pragma::asset::EntityData::GetEffectivePose);
+	defEntityData.def("SetLeafData", &pragma::asset::EntityData::SetLeafData);
+	defEntityData.def("SetKeyValue", &pragma::asset::EntityData::SetKeyValue);
+	defEntityData.def("AddOutput", &pragma::asset::EntityData::AddOutput);
+	defEntityData.def("GetMapIndex", &pragma::asset::EntityData::GetMapIndex);
+	defEntityData.def("GetClassName", &pragma::asset::EntityData::GetClassName);
+	defEntityData.def("GetFlags", &pragma::asset::EntityData::GetFlags);
+	defEntityData.def("SetFlags", &pragma::asset::EntityData::SetFlags);
+	defEntityData.def("AddComponent", &pragma::asset::EntityData::AddComponent);
+	defEntityData.def("GetComponents", static_cast<const std::unordered_map<std::string, std::shared_ptr<pragma::asset::ComponentData>> &(pragma::asset::EntityData ::*)() const>(&pragma::asset::EntityData::GetComponents));
+	defEntityData.def("GetKeyValues", static_cast<const std::unordered_map<std::string, std::string> &(pragma::asset::EntityData ::*)() const>(&pragma::asset::EntityData::GetKeyValues));
+	defEntityData.def("GetKeyValue", static_cast<std::optional<std::string> (pragma::asset::EntityData ::*)(const std::string &) const>(&pragma::asset::EntityData::GetKeyValue));
+	defEntityData.def("GetKeyValue", static_cast<std::string (pragma::asset::EntityData ::*)(const std::string &, const std::string &) const>(&pragma::asset::EntityData::GetKeyValue));
+	defEntityData.def("GetOutputs", static_cast<const std::vector<pragma::asset::Output> &(pragma::asset::EntityData ::*)() const>(&pragma::asset::EntityData::GetOutputs));
+	defEntityData.def("GetLeaves", static_cast<const std::vector<uint16_t> &(pragma::asset::EntityData ::*)() const>(&pragma::asset::EntityData::GetLeaves));
+	defEntityData.def(
+	  "GetLeafData", +[](const pragma::asset::EntityData &entData) -> std::pair<uint32_t, uint32_t> {
+		  uint32_t firstLeaf;
+		  uint32_t numLeaves;
+		  entData.GetLeafData(firstLeaf, numLeaves);
+		  return {firstLeaf, numLeaves};
+	  });
+	defWorldData.scope[defEntityData];
+
+	defWorldData.add_static_constant("DATA_FLAG_NONE", umath::to_integral(pragma::asset::WorldData::DataFlags::None));
+	defWorldData.add_static_constant("DATA_FLAG_HAS_LIGHTMAP_ATLAS_BIT", umath::to_integral(pragma::asset::WorldData::DataFlags::HasLightmapAtlas));
+	defWorldData.add_static_constant("DATA_FLAG_HAS_BSP_TREE_BIT", umath::to_integral(pragma::asset::WorldData::DataFlags::HasBSPTree));
+	defWorldData.def("AddEntity", &pragma::asset::WorldData::AddEntity);
+	defWorldData.def("AddEntity", &pragma::asset::WorldData::AddEntity, luabind::default_parameter_policy<3, false> {});
+	defWorldData.def("SetLightMapAtlas", &pragma::asset::WorldData::SetLightMapAtlas);
+	defWorldData.def("SetLightMapEnabled", &pragma::asset::WorldData::SetLightMapEnabled);
+	defWorldData.def("SetLightMapIntensity", &pragma::asset::WorldData::SetLightMapIntensity);
+	defWorldData.def("SetLightMapExposure", &pragma::asset::WorldData::SetLightMapExposure);
+	defWorldData.def("GetLightMapIntensity", &pragma::asset::WorldData::GetLightMapIntensity);
+	defWorldData.def("GetLightMapExposure", &pragma::asset::WorldData::GetLightMapExposure);
+	defWorldData.def("GetEntities", &pragma::asset::WorldData::GetEntities);
+	defWorldData.def("GetMaterialTable", static_cast<const std::vector<std::string> &(pragma::asset::WorldData ::*)() const>(&pragma::asset::WorldData::GetMaterialTable));
+	defWorldData.def("FindWorld", &pragma::asset::WorldData::FindWorld);
+	// defWorldData.def("SetBSPTree", &pragma::asset::WorldData::SetBSPTree);
+	// defWorldData.def("GetBSPTree", &pragma::asset::WorldData::GetBSPTree);
+	defWorldData.def(
+	  "Save", +[](lua_State *l, pragma::asset::WorldData &worldData, udm::AssetDataArg assetData, const std::string &mapName) -> Lua::mult<bool, Lua::opt<std::string>> {
+		  std::string err;
+		  auto result = worldData.Save(assetData, mapName, err);
+		  if(result)
+			  return luabind::object {l, true};
+		  return luabind::object {l, std::pair<bool, std::string> {false, err}};
+	  });
+	mod[defWorldData];
+	pragma::lua::define_custom_constructor<pragma::asset::ComponentData, []() -> std::shared_ptr<pragma::asset::ComponentData> { return pragma::asset::ComponentData::Create(); }>(l);
+	pragma::lua::define_custom_constructor<pragma::asset::EntityData, []() -> std::shared_ptr<pragma::asset::EntityData> { return pragma::asset::EntityData::Create(); }>(l);
+	pragma::lua::define_custom_constructor<pragma::asset::WorldData, [](NetworkState &nw) -> std::shared_ptr<pragma::asset::WorldData> { return pragma::asset::WorldData::Create(nw); }, NetworkState &>(l);
+}
+
+void Lua::util::register_os(lua_State *l, luabind::module_ &mod) { mod[luabind::def("set_prevent_os_sleep_mode", &::util::set_prevent_os_sleep_mode)]; }
+
+void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 {
 	mod[luabind::def("is_valid", static_cast<bool (*)(lua_State *)>(Lua::util::is_valid)), luabind::def("is_valid", static_cast<bool (*)(lua_State *, const luabind::object &)>(Lua::util::is_valid)),
 	  luabind::def("remove", static_cast<void (*)(lua_State *, const luabind::object &)>(remove)), luabind::def("remove", static_cast<void (*)(lua_State *, const luabind::object &, bool)>(remove)),
@@ -267,23 +358,25 @@ void Lua::util::register_shared_generic(luabind::module_ &mod)
 			    std::function<uint32_t()> getTriangleCount = nullptr;
 			    std::function<uint32_t()> getVertexCount = nullptr;
 			    std::function<std::array<uint32_t, 3>(uint32_t)> getTriangle = nullptr;
-			    std::function<const Vector3 &(uint32_t)> getVertexPosition = nullptr;
-			    std::function<const Vector3 &(uint32_t)> getVertexNormal = nullptr;
-			    std::function<const Vector2 &(uint32_t)> getVertexUv = nullptr;
+			    std::function<Vector3(uint32_t)> getVertexPosition = nullptr;
+			    std::function<Vector3(uint32_t)> getVertexNormal = nullptr;
+			    std::function<Vector2(uint32_t)> getVertexUv = nullptr;
 		    };
 
 		    auto meshInterface = std::make_unique<MeshInterface>();
 		    meshInterface->getTriangleCount = [&mesh]() -> uint32_t { return mesh.GetTriangleCount(); };
 		    meshInterface->getVertexCount = [&mesh]() -> uint32_t { return mesh.GetVertexCount(); };
 		    meshInterface->getTriangle = [&mesh](uint32_t triIdx) -> std::array<uint32_t, 3> { return std::array<uint32_t, 3> {*mesh.GetIndex(triIdx * 3), *mesh.GetIndex(triIdx * 3 + 1), *mesh.GetIndex(triIdx * 3 + 2)}; };
-		    meshInterface->getVertexPosition = [&mesh](uint32_t vertIdx) -> const Vector3 & { return mesh.GetVertexPosition(vertIdx) * static_cast<float>(util::units_to_metres(1.f)); };
-		    meshInterface->getVertexNormal = [&mesh](uint32_t vertIdx) -> const Vector3 & { return mesh.GetVertexNormal(vertIdx); };
-		    meshInterface->getVertexUv = [&mesh](uint32_t vertIdx) -> const Vector2 & { return mesh.GetVertexUV(vertIdx); };
+		    meshInterface->getVertexPosition = [&mesh](uint32_t vertIdx) -> Vector3 { return mesh.GetVertexPosition(vertIdx) * static_cast<float>(util::units_to_metres(1.f)); };
+		    meshInterface->getVertexNormal = [&mesh](uint32_t vertIdx) -> Vector3 { return mesh.GetVertexNormal(vertIdx); };
+		    meshInterface->getVertexUv = [&mesh](uint32_t vertIdx) -> Vector2 { return mesh.GetVertexUV(vertIdx); };
 
 		    ::util::HairGenerator gen {};
 		    gen.SetMeshDataInterface(std::move(meshInterface));
 		    return gen.Generate(hairPerArea);
 	    })];
+
+	Lua::util::register_world_data(l, mod);
 
 	auto defHairStrandData = luabind::class_<::util::HairStrandData>("HairStrandData");
 	defHairStrandData.def(
@@ -362,6 +455,18 @@ void Lua::util::register_shared_generic(luabind::module_ &mod)
 		  return files;
 	  });
 	defZip.def(
+	  "ExtractFiles", +[](lua_State *l, ZIPFile &zip, const std::string &outputPath) -> Lua::var<bool, Lua::opt<std::string>> {
+		  auto path = ::util::Path::CreateFile(outputPath);
+		  path.Canonicalize();
+		  path = ::util::Path::CreatePath(::util::get_program_path()) + path;
+
+		  std::string err;
+		  auto res = zip.ExtractFiles(path.GetString(), err);
+		  if(!res)
+			  return luabind::object {l, std::pair<bool, std::string> {res, err}};
+		  return luabind::object {l, res};
+	  });
+	defZip.def(
 	  "ExtractFile", +[](ZIPFile &zip, const std::string &zipFileName, const std::string &outputZipFileName) -> std::pair<bool, std::optional<std::string>> {
 		  std::vector<uint8_t> data;
 		  std::string err;
@@ -378,9 +483,9 @@ void Lua::util::register_shared_generic(luabind::module_ &mod)
 	mod[defZip];
 }
 
-void Lua::util::register_shared(luabind::module_ &mod)
+void Lua::util::register_shared(lua_State *l, luabind::module_ &mod)
 {
-	register_shared_generic(mod);
+	register_shared_generic(l, mod);
 	mod[luabind::def("is_valid_entity", static_cast<bool (*)(lua_State *)>(Lua::util::is_valid_entity)), luabind::def("is_valid_entity", static_cast<bool (*)(lua_State *, const luabind::object &)>(Lua::util::is_valid_entity)),
 	  luabind::def("shake_screen", static_cast<void (*)(lua_State *, const Vector3 &, float, float, float, float, float, float)>(Lua::util::shake_screen)), luabind::def("shake_screen", static_cast<void (*)(lua_State *, float, float, float, float, float)>(Lua::util::shake_screen)),
 	  luabind::def("read_scene_file", Lua::util::read_scene_file)];
@@ -451,9 +556,20 @@ void Lua::util::register_library(lua_State *l)
 	  luabind::def(
 	    "generate_uuid_v4", +[](size_t seed) -> util::Uuid { return util::Uuid {::util::generate_uuid_v4(seed)}; }),
 	  luabind::def(
-	    "generate_uuid_v4", +[](const std::string &str) -> util::Uuid {
+	    "generate_uuid_v4",
+	    +[](const std::string &str) -> util::Uuid {
 		    auto seed = std::hash<std::string> {}(str);
 		    return util::Uuid {::util::generate_uuid_v4(seed)};
+	    }),
+	  luabind::def(
+	    "run_updater", +[]() -> bool {
+		    std::string processPath;
+#ifdef _WIN32
+		    processPath = "bin/updater.exe";
+#else
+			processPath = "lib/updater";
+#endif
+		    return ::util::start_process(processPath.c_str());
 	    })];
 	nsRetarget[luabind::def("initialize_retarget_data", &Lua::util::retarget::initialize_retarget_data)];
 	nsRetarget[luabind::def("apply_retarget_rig", &Lua::util::retarget::apply_retarget_rig)];

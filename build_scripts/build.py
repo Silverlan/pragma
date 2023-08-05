@@ -498,15 +498,14 @@ else:
 print_msg("Building freetype...")
 cmake_configure(freetype_root,generator,freetype_cmake_args)
 cmake_build("Release")
-if platform =="linux":
+if platform == "linux":
 	print_msg("Installing freetype to custom prefix...")
 	cmake_build("Release",["install"])
 else:
 	freetype_include_dir += freetype_root+"/include"
-	freetype_lib += freetype_root+"/build/freetype.lib"
+	freetype_lib += freetype_root+"/build/Release/freetype.lib"
+
 ########## harfbuzz (linux only) ##########
-
-
 harfbuzz_include_dir = ""
 harfbuzz_lib = ""
 if platform == "linux":

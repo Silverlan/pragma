@@ -147,6 +147,7 @@ if platform == "linux":
 root = normalize_path(os.getcwd())
 build_dir = normalize_path(build_directory)
 deps_dir = normalize_path(deps_directory)
+deps_dir_fs = deps_dir.replace("\\", "/")
 install_dir = install_directory
 tools = root +"/tools"
 
@@ -456,7 +457,7 @@ if platform == "win32":
 os.chdir(deps_dir)
 mkdir("zlib_build",cd=True)
 zlib_cmake_args = [
-		"-DCMAKE_INSTALL_PREFIX="+deps_dir+"/zlib_prefix",
+		"-DCMAKE_INSTALL_PREFIX=" +deps_dir_fs +"/zlib_prefix",
 		"-DBUILD_SHARED_LIBS=ON"
 		]
 cmake_configure(root+"/third_party_libs/zlib",generator,zlib_cmake_args)
@@ -477,8 +478,8 @@ os.chdir("freetype")
 subprocess.run(["git","reset","--hard","fbbcf50367403a6316a013b51690071198962920"],check=True)
 mkdir("build",cd=True)
 freetype_cmake_args =[
-	"-DCMAKE_MODULE_PATH="+deps_dir+"/zlib_prefix",
-	"-DCMAKE_PREFIX_PATH="+deps_dir+"/zlib_prefix"
+	"-DCMAKE_MODULE_PATH=" +deps_dir_fs +"/zlib_prefix",
+	"-DCMAKE_PREFIX_PATH=" +deps_dir_fs +"/zlib_prefix"
 ]
 if platform == "win32":
 	freetype_cmake_args += [
@@ -541,9 +542,9 @@ if platform == "linux":
 	print_msg("Rebuilding freetype against harfbuzz")
 	mkdir(freetype_root+"/build_final",cd=True)
 	freetype_cmake_args = [
-		"-DCMAKE_PREFIX_PATH="+deps_dir+"/harfbuzz_prefix"+deps_dir+"/zlib_prefix",
-		"-DCMAKE_INSTALL_PREFIX="+deps_dir+"/freetype_prefix",
-		 "-DCMAKE_MODULE_PATH="+deps_dir+"/harfbuzz_prefix"+";"+deps_dir+"/zlib_prefix",
+		"-DCMAKE_PREFIX_PATH=" +deps_dir_fs +"/harfbuzz_prefix" +deps_dir_fs +"/zlib_prefix",
+		"-DCMAKE_INSTALL_PREFIX=" +deps_dir_fs +"/freetype_prefix",
+		 "-DCMAKE_MODULE_PATH=" +deps_dir_fs +"/harfbuzz_prefix" +";" +deps_dir_fs +"/zlib_prefix",
 		"-DBUILD_SHARED_LIBS=ON"
 		]
 	cmake_configure(freetype_root,generator,freetype_cmake_args)

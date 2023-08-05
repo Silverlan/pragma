@@ -1,0 +1,48 @@
+name: Check Windows Build
+on:
+  push:
+    branches-ignore:
+      - master
+
+concurrency:
+  group: check-build-win-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build - ${{ matrix.config.os }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: windows-latest
+            name: "Windows x64 MSVC"
+            artifact: "Windows-MSVC.tar.xz"
+            build_type: "RelWithDebInfo"
+            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+            cc: "cl"
+            cxx: "cl"
+            archiver: "7z a"
+            generators: "Visual Studio 17 2022"
+            build_dir: 'build'
+    steps:
+      - name: Setup Pragma
+        uses: Silverlan/pragma/github_actions/setup@LinuxSupport
+        with:
+          branch: ${{ github.ref_name }}
+
+      # We need the latest Windows SDK
+      - uses: GuillaumeFalourd/setup-windows10-sdk-action@v1.11
+        with:
+          sdk-version: 22621
+          
+      - name: Build Pragma
+        uses: Silverlan/pragma/github_actions/build@master
+        id: build-pragma
+        with:
+          build-args: "--with-pfm --with-all-pfm-modules --with-vr --with-lua-debugger=0 --cmake-arg=\"-DCMAKE_SYSTEM_VERSION=10.0.22621.0\" --vcvars \"C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat\""
+
+      - name: Handle Error
+        uses: Silverlan/common_actions/action_handle_error@main
+        if: failure()

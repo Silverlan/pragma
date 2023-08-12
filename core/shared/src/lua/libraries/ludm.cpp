@@ -1669,6 +1669,9 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		luabind::def("type_to_string",+[](::udm::Type type) -> std::string {
 			return std::string{magic_enum::enum_name(type)};
 		}),
+		luabind::def("string_to_type",+[](const std::string &type) -> std::optional<::udm::Type> {
+			return magic_enum::enum_cast<::udm::Type>(type);
+		}),
 		luabind::def("is_array_type",+[](::udm::Type type) -> bool {
 			return ::udm::is_array_type(type);
 		}),

@@ -233,6 +233,7 @@ Vector3 BaseEnvLightComponent::CalcLightDirectionToPoint(const Vector3 &pos) con
 	return ev.direction;
 }
 BaseEnvLightComponent::ShadowType BaseEnvLightComponent::GetShadowType() const { return m_shadowType; }
+BaseEnvLightComponent::ShadowType BaseEnvLightComponent::GetEffectiveShadowType() const { return IsBaked() ? ShadowType ::None : GetShadowType(); }
 void BaseEnvLightComponent::SetShadowType(ShadowType type) { m_shadowType = type; }
 float BaseEnvLightComponent::GetFalloffExponent() const { return m_falloffExponent; }
 void BaseEnvLightComponent::SetFalloffExponent(float falloffExponent) { m_falloffExponent = falloffExponent; }

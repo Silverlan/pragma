@@ -83,6 +83,7 @@ namespace pragma {
 		pragma::NetEventId m_netEvSetFalloffExponent = pragma::INVALID_NET_EVENT;
 	  public:
 		ShadowType GetShadowType() const;
+		ShadowType GetEffectiveShadowType() const;
 		virtual void SetShadowType(ShadowType type);
 	};
 	struct DLLNETWORK CECalcLightDirectionToPoint : public ComponentEvent {

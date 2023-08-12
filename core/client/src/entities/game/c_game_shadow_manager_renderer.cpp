@@ -269,7 +269,7 @@ static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");
 void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, pragma::CLightComponent &light, pragma::CLightComponent::ShadowMapType smType, util::pragma::LightType type, bool drawParticleShadows)
 {
 	auto hShadowMap = light.GetShadowMap(smType);
-	if(hShadowMap.expired() || light.GetShadowType() == pragma::BaseEnvLightComponent::ShadowType::None || UpdateShadowCasters(drawCmd, light, smType) == false)
+	if(hShadowMap.expired() || light.GetEffectiveShadowType() == pragma::BaseEnvLightComponent::ShadowType::None || UpdateShadowCasters(drawCmd, light, smType) == false)
 		return;
 	auto &shader = (type != util::pragma::LightType::Spot) ? static_cast<pragma::ShaderShadow &>(*m_shader.get()) : static_cast<pragma::ShaderShadow &>(*m_shaderSpot.get());
 	pragma::ShaderShadowTransparent *shaderTransparent = nullptr;

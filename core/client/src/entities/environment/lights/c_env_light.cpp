@@ -285,15 +285,15 @@ void CLightComponent::UpdateShadowTypes()
 	if(m_renderBuffer != nullptr)
 		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, shadowIndex), m_bufferData.shadowIndex);
 }
-bool CLightComponent::ShouldCastShadows() const { return GetShadowType() != ShadowType::None; }
-bool CLightComponent::ShouldCastDynamicShadows() const { return GetShadowType() == ShadowType::Full; }
+bool CLightComponent::ShouldCastShadows() const { return GetEffectiveShadowType() != ShadowType::None; }
+bool CLightComponent::ShouldCastDynamicShadows() const { return GetEffectiveShadowType() == ShadowType::Full; }
 bool CLightComponent::ShouldCastStaticShadows() const { return ShouldCastShadows(); }
 void CLightComponent::SetShadowType(ShadowType type)
 {
 	if(type == GetShadowType())
 		return;
 	CBaseLightComponent::SetShadowType(type);
-	if(type != ShadowType::None)
+	if(GetEffectiveShadowType() != ShadowType::None)
 		InitializeShadowMap();
 	else {
 		m_shadowMapStatic = ComponentHandle<CShadowComponent> {};
@@ -343,7 +343,7 @@ void CLightComponent::InitializeShadowMap(CShadowComponent &sm)
 
 void CLightComponent::InitializeShadowMap()
 {
-	if(GetShadowType() == ShadowType::None)
+	if(GetEffectiveShadowType() == ShadowType::None)
 		return;
 	CEHandleShadowMap ceData {};
 	if(BroadcastEvent(EVENT_HANDLE_SHADOW_MAP, ceData) == util::EventReply::Unhandled)
@@ -352,7 +352,7 @@ void CLightComponent::InitializeShadowMap()
 		m_shadowMapStatic = ceData.resultShadow->GetHandle<CShadowComponent>();
 	if(m_shadowMapStatic.valid())
 		InitializeShadowMap(*m_shadowMapStatic);
-	if(GetShadowType() == ShadowType::Full) {
+	if(GetEffectiveShadowType() == ShadowType::Full) {
 		CEHandleShadowMap ceData {};
 		if(BroadcastEvent(EVENT_HANDLE_SHADOW_MAP, ceData) == util::EventReply::Unhandled)
 			m_shadowMapDynamic = GetEntity().AddComponent<CShadowComponent>(true);
@@ -571,7 +571,7 @@ pragma::ComponentHandle<CShadowComponent> CLightComponent::GetShadowMap(ShadowMa
 
 pragma::CShadowComponent *CLightComponent::GetShadowComponent() { return m_shadowComponent; }
 const pragma::CShadowComponent *CLightComponent::GetShadowComponent() const { return const_cast<CLightComponent *>(this)->GetShadowComponent(); }
-bool CLightComponent::HasShadowsEnabled() const { return m_shadowComponent && GetShadowType() != ShadowType::None; }
+bool CLightComponent::HasShadowsEnabled() const { return m_shadowComponent && GetEffectiveShadowType() != ShadowType::None; }
 
 Mat4 &CLightComponent::GetTransformationMatrix(unsigned int j)
 {

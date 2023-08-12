@@ -447,7 +447,7 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 
 	// TODO: Cleanup
 	auto shadowC = m_hLight->GetShadowComponent();
-	if(shadowC == nullptr || m_hLight->GetShadowType() == pragma::BaseEnvLightComponent::ShadowType::None) // TODO: Clear render target?
+	if(shadowC == nullptr || m_hLight->GetEffectiveShadowType() == pragma::BaseEnvLightComponent::ShadowType::None) // TODO: Clear render target?
 		return;
 
 	if(m_hLight->GetEntity().HasComponent<CLightDirectionalComponent>())

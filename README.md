@@ -14,6 +14,8 @@ All versions include the core Engine, as well as the Pragma Filmmaker (PFM).
 
 You can find older releases in the [releases section](https://github.com/Silverlan/pragma/releases) of this repository. No installation is required, simply extract the archive somewhere and launch the `pragma` or `pfm` executable.
 
+Supported languages: English, Deutsch, Français, Español, 日本語, 中文 (Zhōngwén)
+
 ###### Nightly
 In addition, there is also an automated nightly release with all of the latest features which you can find [here](https://github.com/Silverlan/pragma/releases/tag/nightly), but it is not guaranteed to be stable or functional.
 

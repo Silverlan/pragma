@@ -147,7 +147,6 @@ if platform == "linux":
 root = normalize_path(os.getcwd())
 build_dir = normalize_path(build_directory)
 deps_dir = normalize_path(deps_directory)
-deps_dir_fs = deps_dir.replace("\\", "/")
 install_dir = install_directory
 tools = root +"/tools"
 
@@ -156,6 +155,7 @@ if not os.path.isabs(build_dir):
 
 if not os.path.isabs(deps_dir):
 	deps_dir = os.getcwd() +"/" +deps_dir
+deps_dir_fs = deps_dir.replace("\\", "/")
 
 if not os.path.isabs(install_dir):
 	install_dir = build_dir +"/" +install_dir

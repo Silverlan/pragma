@@ -39,6 +39,8 @@
 #include <pragma/model/animation/animation_event.h>
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_path.hpp>
+#include <sharedutils/util_debug.h>
+#include <util_zip.h>
 #include <fsys/filesystem.h>
 
 const pragma::IServerState &Engine::GetServerStateInterface() const
@@ -99,7 +101,7 @@ Engine::Engine(int, char *[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(En
 {
 	// TODO: File cache doesn't work with absolute paths at the moment
 	// (e.g. addons/imported/models/some_model.pmdl would return false even if the file exists)
-    filemanager::set_use_file_index_cache(true);
+	filemanager::set_use_file_index_cache(true);
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::open_domain();
@@ -883,6 +885,30 @@ void Engine::Start()
 
 void Engine::UpdateTickCount() { m_ctTick.Update(); }
 
+extern std::string g_crashExceptionMessage;
+std::unique_ptr<ZIPFile> Engine::GenerateEngineDump(const std::string &baseName, std::string &outZipFileName, std::string &outErr)
+{
+	auto programPath = util::Path::CreatePath(util::get_program_path());
+	outZipFileName = util::get_date_time(baseName + "_%Y-%m-%d_%H-%M-%S.zip");
+	auto zipName = programPath + outZipFileName;
+	auto zipFile = ZIPFile::Open(zipName.GetString(), ZIPFile::OpenMode::Write);
+	if(!zipFile) {
+		outErr = "Failed to create dump file '" + zipName.GetString() + "'";
+		return nullptr;
+	}
+	// Write Exception
+	if(g_crashExceptionMessage.empty() == false)
+		zipFile->AddFile("exception.txt", g_crashExceptionMessage);
+
+	// Write Stack Backtrace
+	zipFile->AddFile("stack_backtrace.txt", util::get_formatted_stack_backtrace_string());
+
+	// Write Info
+	if(engine != nullptr)
+		engine->DumpDebugInformation(*zipFile.get());
+	return zipFile;
+}
+
 void Engine::DumpDebugInformation(ZIPFile &zip) const
 {
 	std::stringstream engineInfo;
@@ -922,7 +948,7 @@ void Engine::DumpDebugInformation(ZIPFile &zip) const
 
 	auto logFileName = pragma::detail::get_log_file_name();
 	if(logFileName.has_value()) {
-		pragma::detail::close_logger();
+		pragma::flush_loggers();
 
 		/* For some reason this will fail sometimes
 		auto logContents = filemanager::read_file(*logFileName);

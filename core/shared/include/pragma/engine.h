@@ -129,6 +129,7 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	virtual void Start();
 	void AddLaunchConVar(std::string cvar, std::string val);
 	virtual void DumpDebugInformation(ZIPFile &zip) const;
+	static std::unique_ptr<ZIPFile> GenerateEngineDump(const std::string &baseName, std::string &outZipFileName, std::string &outErr);
 	virtual void Close();
 	virtual void Release();
 	virtual void ClearConsole();

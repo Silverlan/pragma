@@ -21,7 +21,7 @@ extern DLLNETWORK Engine *engine;
 
 LPCSTR MiniDumper::m_szAppName;
 
-static std::string s_exceptionMessage = {};
+std::string g_crashExceptionMessage = {};
 MiniDumper::MiniDumper(LPCSTR szAppName)
 {
 	// if this assert fires then you have two instances of MiniDumper
@@ -36,17 +36,17 @@ MiniDumper::MiniDumper(LPCSTR szAppName)
 	set_terminate([]() {
 		auto eptr = std::current_exception();
 		if(!eptr) {
-			s_exceptionMessage = {};
+			g_crashExceptionMessage = {};
 			return;
 		}
 		try {
 			std::rethrow_exception(eptr);
 		}
 		catch(const std::exception &e) {
-			s_exceptionMessage = std::string {typeid(e).name()} + ": " + e.what();
+			g_crashExceptionMessage = std::string {typeid(e).name()} + ": " + e.what();
 		}
 		catch(...) {
-			s_exceptionMessage = "Unknown Exception";
+			g_crashExceptionMessage = "Unknown Exception";
 		}
 		// Relay exception to SetUnhandledExceptionFilter
 		std::rethrow_exception(eptr);
@@ -111,20 +111,11 @@ LONG MiniDumper::TopLevelFilter(struct _EXCEPTION_POINTERS *pExceptionInfo)
 					BOOL bOK = pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, &ExInfo, NULL, NULL);
 					::CloseHandle(hFile);
 					if(bOK) {
-						auto zipName = programPath + std::string("/") + util::get_date_time("crashdumps/crashdump_%Y-%m-%d_%H-%M-%S.zip");
-						auto zipFile = ZIPFile::Open(zipName, ZIPFile::OpenMode::Write);
-						if(zipFile != nullptr) {
-							// Write Exception
-							if(s_exceptionMessage.empty() == false)
-								zipFile->AddFile("exception.txt", s_exceptionMessage);
-
-							// Write Stack Backtrace
-							zipFile->AddFile("stack_backtrace.txt", util::get_formatted_stack_backtrace_string());
-
-							// Write Info
-							if(engine != nullptr)
-								engine->DumpDebugInformation(*zipFile.get());
-
+						std::string err;
+						std::string zipFileName;
+						pragma::detail::close_logger();
+						auto zipFile = Engine::GenerateEngineDump("crashdumps/crashdump", zipFileName, err);
+						if(zipFile) {
 							// Write Minidump
 							VFilePtrReal f = nullptr;
 							auto t = util::Clock::now();
@@ -146,13 +137,14 @@ LONG MiniDumper::TopLevelFilter(struct _EXCEPTION_POINTERS *pExceptionInfo)
 								std::remove(szDumpPath.c_str());
 							}
 							zipFile = nullptr;
-							sprintf(szScratch, "Saved dump file to '%s'. Please send it to a developer, along with a description of what you did to trigger the error.", zipName.c_str() /*,engine_info::get_author_mail_address().c_str()*/);
-							util::open_path_in_explorer(ufile::get_path_from_filename(zipName), ufile::get_file_from_filename(zipName));
+
+							sprintf(szScratch, "Saved dump file to '%s'. Please send it to a developer, along with a description of what you did to trigger the error.", zipFileName.c_str() /*,engine_info::get_author_mail_address().c_str()*/);
+							util::open_path_in_explorer(ufile::get_path_from_filename(zipFileName), ufile::get_file_from_filename(zipFileName));
 							szResult = szScratch;
 							retval = EXCEPTION_EXECUTE_HANDLER;
 						}
 						else {
-							sprintf(szScratch, "Failed to create dump file '%s'", zipName.c_str());
+							sprintf(szScratch, err.c_str());
 							szResult = szScratch;
 						}
 					}

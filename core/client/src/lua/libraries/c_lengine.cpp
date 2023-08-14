@@ -30,6 +30,7 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <image/prosper_render_target.hpp>
 #include <pragma/entities/environment/effects/particlesystemdata.h>
+#include <util_zip.h>
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
 
@@ -61,6 +62,17 @@ void Lua::engine::register_library(lua_State *l)
 	  luabind::def("set_tick_delta_time_tied_to_frame_rate", Lua::engine::set_tick_delta_time_tied_to_frame_rate), luabind::def("get_window_resolution", Lua::engine::get_window_resolution), luabind::def("get_render_resolution", Lua::engine::get_render_resolution),
 	  luabind::def("get_staging_render_target", Lua::engine::get_staging_render_target), luabind::def("get_current_frame_index", &Lua::engine::get_current_frame_index), luabind::def("get_default_font_set_name", &CEngine::GetDefaultFontSetName)];
 	modEngine[luabind::def("toggle_console", &Engine::ToggleConsole)];
+	modEngine[luabind::def(
+	  "generate_info_dump", +[](const std::string &baseName) -> std::optional<std::string> {
+		  std::string zipFileName;
+		  std::string err;
+		  auto zipFile = Engine::GenerateEngineDump(baseName, zipFileName, err);
+		  if(!zipFile)
+			  return {};
+		  zipFile = nullptr;
+		  return zipFileName;
+	  })];
+
 	Lua::engine::register_shared_functions(l, modEngine);
 
 	Lua::RegisterLibraryEnums(l, "engine",

@@ -275,6 +275,9 @@ set(DEPENDENCY_LIBVORBIS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vorb
 search_lib_recursive(DEPENDENCY_LIBVORBIS_LIBRARY third_party_libs/vorbis/lib/${BINARY_PRAGMA_DIR} vorbis)
 search_lib_recursive(DEPENDENCY_LIBVORBISFILE_LIBRARY third_party_libs/vorbis/lib/${BINARY_PRAGMA_DIR} vorbisfile)
 
+search_lib_recursive(DEPENDENCY_MPAHEADER_LIBRARY third_party_libs/mpaheader/${BINARY_PRAGMA_DIR} mpaheader)
+set(DEPENDENCY_MPAHEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/mpaheader/include CACHE PATH "Path to include directory.")
+
 search_lib_recursive(DEPENDENCY_LIBOGG_LIBRARY third_party_libs/ogg/${BINARY_PRAGMA_DIR} ogg)
 set(DEPENDENCY_LIBOGG_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/ogg/include CACHE PATH "Path to include directory.")
 set(OGG_LIBRARIES ${DEPENDENCY_LIBOGG_LIBRARY} CACHE STRING "" FORCE)
@@ -726,6 +729,11 @@ set_target_folder(luabind third_party_libs)
 target_include_directories(luabind PUBLIC ${LUA_INCLUDE_DIR})
 #
 
+# mpaheader
+register_third_party_library(mpaheader)
+set_target_folder(mpaheader third_party_libs)
+#
+
 # cppbepuik
 register_third_party_library(cppbepuik)
 set_target_folder(cppbepuik third_party_libs)
@@ -1027,6 +1035,7 @@ add_dependencies(prosper vfilesystem iglfw util_image util_udm muparserx lz4)
 add_dependencies(cmaterialsystem materialsystem util_image prosper VTFLib13)
 add_dependencies(wgui cmaterialsystem util_formatted_text)
 
+add_dependencies(util_sound mpaheader)
 add_dependencies(alsoundsystem vorbis vorbisfile vfilesystem util_sound samplerate)
 
 add_dependencies(servermanager networkmanager)
@@ -1239,6 +1248,7 @@ pragma_install_lib("${DEPENDENCY_VTFLIB_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_LIBZIP_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_LPNG_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_SPDLOG_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+pragma_install_lib("${DEPENDENCY_MPAHEADER_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 if(WIN32)
 pragma_install_lib_c("${DEPENDENCY_ZLIB_LIBRARY}" zlib1 "${BINARY_OUTPUT_DIR}")
 else()

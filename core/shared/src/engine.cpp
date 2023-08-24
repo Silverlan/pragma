@@ -900,8 +900,10 @@ std::unique_ptr<ZIPFile> Engine::GenerateEngineDump(const std::string &baseName,
 	if(g_crashExceptionMessage.empty() == false)
 		zipFile->AddFile("exception.txt", g_crashExceptionMessage);
 
+#ifdef _WIN32
 	// Write Stack Backtrace
 	zipFile->AddFile("stack_backtrace.txt", util::get_formatted_stack_backtrace_string());
+#endif
 
 	// Write Info
 	if(engine != nullptr)

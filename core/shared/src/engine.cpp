@@ -885,7 +885,9 @@ void Engine::Start()
 
 void Engine::UpdateTickCount() { m_ctTick.Update(); }
 
+#ifdef _WIN32
 extern std::string g_crashExceptionMessage;
+#endif
 std::unique_ptr<ZIPFile> Engine::GenerateEngineDump(const std::string &baseName, std::string &outZipFileName, std::string &outErr)
 {
 	auto programPath = util::Path::CreatePath(util::get_program_path());
@@ -896,11 +898,12 @@ std::unique_ptr<ZIPFile> Engine::GenerateEngineDump(const std::string &baseName,
 		outErr = "Failed to create dump file '" + zipName.GetString() + "'";
 		return nullptr;
 	}
+
+#ifdef _WIN32
 	// Write Exception
 	if(g_crashExceptionMessage.empty() == false)
 		zipFile->AddFile("exception.txt", g_crashExceptionMessage);
 
-#ifdef _WIN32
 	// Write Stack Backtrace
 	zipFile->AddFile("stack_backtrace.txt", util::get_formatted_stack_backtrace_string());
 #endif

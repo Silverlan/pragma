@@ -13,3 +13,7 @@
 # add_pragma_module(
 #     name = "pr_opencv"
 # )
+
+add_pragma_module(
+    name = "pr_source"
+)

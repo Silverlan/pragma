@@ -85,7 +85,8 @@ luabind::object meta_data_type_to_lua_object(lua_State *l, const pragma::ents::T
 	return Lua::nil;
 }
 
-static std::optional<pragma::ComponentId> find_component_id_by_class(Game &game,const luabind::object &o) { 
+static std::optional<pragma::ComponentId> find_component_id_by_class(Game &game, const luabind::object &o)
+{
 	auto &manager = game.GetLuaEntityManager();
 	auto componentId = manager.FindComponentId(o);
 	return componentId;
@@ -280,24 +281,55 @@ void Lua::ents::register_library(lua_State *l)
 			return "pragma:game/entity/ec/" +component +"?entity_uuid=" +::util::uuid_to_string(uuid.value);
 		}),
 		luabind::def("is_member_type_animatable",static_cast<bool(*)(pragma::ents::EntityMemberType)>(&pragma::is_animatable_type)),
-		luabind::def("is_member_type_udm_type",&pragma::ents::is_udm_member_type)
+		luabind::def("is_member_type_udm_type",&pragma::ents::is_udm_member_type),
+		luabind::def("member_type_to_string",+[](pragma::ents::EntityMemberType memberType) -> std::string {
+		return std::string { magic_enum::enum_name(memberType)};
+			}),
+		luabind::def("string_to_member_type",+[](const std::string &memberType) -> std::optional<pragma::ents::EntityMemberType> {
+			return magic_enum::enum_cast<pragma::ents::EntityMemberType>(memberType);
+			})
 	];
 	static_assert(umath::to_integral(pragma::ents::EntityMemberType::VersionIndex) == 0);
 	Lua::RegisterLibraryEnums(l, "ents",
-	  {{"MEMBER_TYPE_STRING", umath::to_integral(pragma::ents::EntityMemberType::String)}, {"MEMBER_TYPE_INT8", umath::to_integral(pragma::ents::EntityMemberType::Int8)}, {"MEMBER_TYPE_UINT8", umath::to_integral(pragma::ents::EntityMemberType::UInt8)},
-	    {"MEMBER_TYPE_INT16", umath::to_integral(pragma::ents::EntityMemberType::Int16)}, {"MEMBER_TYPE_UINT16", umath::to_integral(pragma::ents::EntityMemberType::UInt16)}, {"MEMBER_TYPE_INT32", umath::to_integral(pragma::ents::EntityMemberType::Int32)},
-	    {"MEMBER_TYPE_UINT32", umath::to_integral(pragma::ents::EntityMemberType::UInt32)}, {"MEMBER_TYPE_INT64", umath::to_integral(pragma::ents::EntityMemberType::Int64)}, {"MEMBER_TYPE_UINT64", umath::to_integral(pragma::ents::EntityMemberType::UInt64)},
-	    {"MEMBER_TYPE_FLOAT", umath::to_integral(pragma::ents::EntityMemberType::Float)}, {"MEMBER_TYPE_DOUBLE", umath::to_integral(pragma::ents::EntityMemberType::Double)}, {"MEMBER_TYPE_BOOLEAN", umath::to_integral(pragma::ents::EntityMemberType::Boolean)},
-	    {"MEMBER_TYPE_VECTOR2", umath::to_integral(pragma::ents::EntityMemberType::Vector2)}, {"MEMBER_TYPE_VECTOR3", umath::to_integral(pragma::ents::EntityMemberType::Vector3)}, {"MEMBER_TYPE_VECTOR4", umath::to_integral(pragma::ents::EntityMemberType::Vector4)},
-	    {"MEMBER_TYPE_QUATERNION", umath::to_integral(pragma::ents::EntityMemberType::Quaternion)}, {"MEMBER_TYPE_EULER_ANGLES", umath::to_integral(pragma::ents::EntityMemberType::EulerAngles)}, {"MEMBER_TYPE_SRGBA", umath::to_integral(pragma::ents::EntityMemberType::Srgba)},
-	    {"MEMBER_TYPE_HDR_COLOR", umath::to_integral(pragma::ents::EntityMemberType::HdrColor)}, {"MEMBER_TYPE_TRANSFORM", umath::to_integral(pragma::ents::EntityMemberType::Transform)}, {"MEMBER_TYPE_SCALED_TRANSFORM", umath::to_integral(pragma::ents::EntityMemberType::ScaledTransform)},
-	    {"MEMBER_TYPE_MAT4", umath::to_integral(pragma::ents::EntityMemberType::Mat4)}, {"MEMBER_TYPE_MAT3X4", umath::to_integral(pragma::ents::EntityMemberType::Mat3x4)}, {"MEMBER_TYPE_HALF", umath::to_integral(pragma::ents::EntityMemberType::Half)},
-	    {"MEMBER_TYPE_VECTOR2I", umath::to_integral(pragma::ents::EntityMemberType::Vector2i)}, {"MEMBER_TYPE_VECTOR3I", umath::to_integral(pragma::ents::EntityMemberType::Vector3i)}, {"MEMBER_TYPE_VECTOR4I", umath::to_integral(pragma::ents::EntityMemberType::Vector4i)},
-	    {"MEMBER_TYPE_ELEMENT", umath::to_integral(pragma::ents::EntityMemberType::Element)}, {"MEMBER_TYPE_ENTITY", umath::to_integral(pragma::ents::EntityMemberType::Entity)}, {"MEMBER_TYPE_MULTI_ENTITY", umath::to_integral(pragma::ents::EntityMemberType::MultiEntity)},
-	    {"MEMBER_TYPE_COMPONENT_PROPERTY", umath::to_integral(pragma::ents::EntityMemberType::ComponentProperty)}, {"MEMBER_TYPE_COUNT", umath::to_integral(pragma::ents::EntityMemberType::Count)}, {"MEMBER_TYPE_LAST", umath::to_integral(pragma::ents::EntityMemberType::Last)},
+	  {
+	    {"MEMBER_TYPE_STRING", umath::to_integral(pragma::ents::EntityMemberType::String)},
+	    {"MEMBER_TYPE_INT8", umath::to_integral(pragma::ents::EntityMemberType::Int8)},
+	    {"MEMBER_TYPE_UINT8", umath::to_integral(pragma::ents::EntityMemberType::UInt8)},
+	    {"MEMBER_TYPE_INT16", umath::to_integral(pragma::ents::EntityMemberType::Int16)},
+	    {"MEMBER_TYPE_UINT16", umath::to_integral(pragma::ents::EntityMemberType::UInt16)},
+	    {"MEMBER_TYPE_INT32", umath::to_integral(pragma::ents::EntityMemberType::Int32)},
+	    {"MEMBER_TYPE_UINT32", umath::to_integral(pragma::ents::EntityMemberType::UInt32)},
+	    {"MEMBER_TYPE_INT64", umath::to_integral(pragma::ents::EntityMemberType::Int64)},
+	    {"MEMBER_TYPE_UINT64", umath::to_integral(pragma::ents::EntityMemberType::UInt64)},
+	    {"MEMBER_TYPE_FLOAT", umath::to_integral(pragma::ents::EntityMemberType::Float)},
+	    {"MEMBER_TYPE_DOUBLE", umath::to_integral(pragma::ents::EntityMemberType::Double)},
+	    {"MEMBER_TYPE_BOOLEAN", umath::to_integral(pragma::ents::EntityMemberType::Boolean)},
+	    {"MEMBER_TYPE_VECTOR2", umath::to_integral(pragma::ents::EntityMemberType::Vector2)},
+	    {"MEMBER_TYPE_VECTOR3", umath::to_integral(pragma::ents::EntityMemberType::Vector3)},
+	    {"MEMBER_TYPE_VECTOR4", umath::to_integral(pragma::ents::EntityMemberType::Vector4)},
+	    {"MEMBER_TYPE_QUATERNION", umath::to_integral(pragma::ents::EntityMemberType::Quaternion)},
+	    {"MEMBER_TYPE_EULER_ANGLES", umath::to_integral(pragma::ents::EntityMemberType::EulerAngles)},
+	    {"MEMBER_TYPE_SRGBA", umath::to_integral(pragma::ents::EntityMemberType::Srgba)},
+	    {"MEMBER_TYPE_HDR_COLOR", umath::to_integral(pragma::ents::EntityMemberType::HdrColor)},
+	    {"MEMBER_TYPE_TRANSFORM", umath::to_integral(pragma::ents::EntityMemberType::Transform)},
+	    {"MEMBER_TYPE_SCALED_TRANSFORM", umath::to_integral(pragma::ents::EntityMemberType::ScaledTransform)},
+	    {"MEMBER_TYPE_MAT4", umath::to_integral(pragma::ents::EntityMemberType::Mat4)},
+	    {"MEMBER_TYPE_MAT3X4", umath::to_integral(pragma::ents::EntityMemberType::Mat3x4)},
+	    {"MEMBER_TYPE_HALF", umath::to_integral(pragma::ents::EntityMemberType::Half)},
+	    {"MEMBER_TYPE_VECTOR2I", umath::to_integral(pragma::ents::EntityMemberType::Vector2i)},
+	    {"MEMBER_TYPE_VECTOR3I", umath::to_integral(pragma::ents::EntityMemberType::Vector3i)},
+	    {"MEMBER_TYPE_VECTOR4I", umath::to_integral(pragma::ents::EntityMemberType::Vector4i)},
+	    {"MEMBER_TYPE_ELEMENT", umath::to_integral(pragma::ents::EntityMemberType::Element)},
+	    {"MEMBER_TYPE_ENTITY", umath::to_integral(pragma::ents::EntityMemberType::Entity)},
+	    {"MEMBER_TYPE_MULTI_ENTITY", umath::to_integral(pragma::ents::EntityMemberType::MultiEntity)},
+	    {"MEMBER_TYPE_COMPONENT_PROPERTY", umath::to_integral(pragma::ents::EntityMemberType::ComponentProperty)},
+	    {"MEMBER_TYPE_COUNT", umath::to_integral(pragma::ents::EntityMemberType::Count)},
+	    {"MEMBER_TYPE_LAST", umath::to_integral(pragma::ents::EntityMemberType::Last)},
 	    {"MEMBER_TYPE_INVALID", umath::to_integral(pragma::ents::EntityMemberType::Invalid)},
 
-	    {"INVALID_COMPONENT_ID", pragma::INVALID_COMPONENT_ID}, {"INVALID_COMPONENT_MEMBER_INDEX", pragma::INVALID_COMPONENT_MEMBER_INDEX}});
+	    {"INVALID_COMPONENT_ID", pragma::INVALID_COMPONENT_ID},
+	    {"INVALID_COMPONENT_MEMBER_INDEX", pragma::INVALID_COMPONENT_MEMBER_INDEX},
+	  });
 
 	auto componentInfoDef = luabind::class_<pragma::ComponentInfo>("ComponentInfo");
 	componentInfoDef.property(

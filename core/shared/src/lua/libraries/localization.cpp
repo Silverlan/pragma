@@ -333,6 +333,7 @@ bool Locale::Localize(const std::string &identifier, const std::string &lan, con
 
 		auto val = loc.texts[key];
 		ustring::replace<util::Utf8String>(val, "\"", "\\\"");
+		ustring::replace<util::Utf8String>(val, "\n", "\\n");
 		out << key << " = \"" << val << "\"";
 	}
 

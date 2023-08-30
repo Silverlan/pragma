@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/model/animation/skeletal_animation.hpp"
 #include "pragma/model/animation/play_animation_flags.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/lua/libraries/ludm.hpp"
 #include "pragma/lua/types/udm.hpp"
 #include "pragma/lua/custom_constructor.hpp"
@@ -246,6 +247,8 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	  });
 	cdChannel.def("Save", &panima::Channel::Save);
 	cdChannel.def("Load", &panima::Channel::Load);
+	cdChannel.def("ClearRange", &panima::Channel::ClearRange);
+	cdChannel.def("ClearRange", &panima::Channel::ClearRange, luabind::default_parameter_policy<4, true> {});
 	cdChannel.def(
 	  "RemoveValue", +[](lua_State *l, panima::Channel &channel, uint32_t idx) -> bool {
 		  auto &times = channel.GetTimesArray();
@@ -268,6 +271,27 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		  auto r = Lua::udm::set_array_value(l, channel.GetValueArray(), idx, value);
 		  channel.Update();
 		  return r;
+	  });
+	cdChannel.def(
+	  "InsertValues", +[](lua_State *l, panima::Channel &channel, const std::vector<float> &times, luabind::tableT<void> tValues) -> uint32_t {
+		  auto numTimes = times.size();
+		  auto numValues = Lua::GetObjectLength(l, tValues);
+		  if(numTimes != numValues)
+			  throw std::runtime_error {"Number of elements in times array (" + std::to_string(numTimes) + ") doesn't match number of values in values array (" + std::to_string(numValues) + ")! This is not allowed."};
+
+		  auto insertIndex = ::udm::visit(channel.GetValueType(), [&tValues, &channel, &times, numValues](auto tag) {
+			  using T = typename decltype(tag)::type;
+			  using TValue = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
+			  if constexpr(pragma::is_animatable_type_v<TValue>) {
+				  auto values = luabind::object_cast<std::vector<TValue>>(tValues);
+				  return channel.InsertValues<TValue>(times.size(), times.data(), values.data());
+			  }
+			  else
+				  return std::numeric_limits<uint32_t>::max();
+		  });
+
+		  channel.Update();
+		  return insertIndex;
 	  });
 	cdChannel.def(
 	  "SetValues", +[](lua_State *l, panima::Channel &channel, luabind::tableT<float> times, luabind::tableT<void> values) {
@@ -432,6 +456,8 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		  channel.Update();
 	  });
 	animMod[cdChannel];
+
+	Lua::RegisterLibraryValue(lua.GetState(), "panima", "VALUE_EPSILON", panima::Channel::VALUE_EPSILON);
 
 	pragma::lua::define_custom_constructor<panima::Channel, [](::udm::LinkedPropertyWrapper &times, ::udm::LinkedPropertyWrapper &values) -> std::shared_ptr<panima::Channel> { return std::make_shared<panima::Channel>(times.ClaimOwnership(), values.ClaimOwnership()); },
 	  ::udm::LinkedPropertyWrapper &, ::udm::LinkedPropertyWrapper &>(lua.GetState());

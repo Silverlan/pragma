@@ -1037,7 +1037,7 @@ add_dependencies(prosper vfilesystem iglfw util_image util_udm muparserx lz4)
 add_dependencies(cmaterialsystem materialsystem util_image prosper VTFLib13)
 add_dependencies(wgui cmaterialsystem util_formatted_text)
 
-add_dependencies(util_sound sharedutils mpaheader)
+add_dependencies(util_sound vfilesystem mpaheader ogg vorbis vorbisfile)
 add_dependencies(alsoundsystem vorbis vorbisfile vfilesystem util_sound samplerate)
 
 add_dependencies(servermanager networkmanager)

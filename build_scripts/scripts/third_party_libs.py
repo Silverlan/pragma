@@ -39,6 +39,6 @@ get_submodule("vtflib","https://github.com/Silverlan/VTFLib.git","3e6b80bcd6dacf
 get_submodule("zlib","https://github.com/Silverlan/zlib.git","0dcc7471231d72376d592f80f06c2e2246c2b3c4")
 get_submodule("fmt","https://github.com/fmtlib/fmt.git","a337011")
 get_submodule("cppbezierfit","https://github.com/Silverlan/cppbezierfit.git","efd3322b56326e2b1fa43d883bf5c9f781de7324")
-get_submodule("mpaheader","https://github.com/SlawekNowy/mpaheader.git","673fe5df38a6898408a328387055ab671f5bb450")
+get_submodule("mpaheader","https://github.com/SlawekNowy/mpaheader.git","2618c39")
 
 os.chdir(curDir)

@@ -176,6 +176,29 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, Slice);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, AnimationManager);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, Animation);
 
+static uint32_t insert_channel_values(lua_State *l, panima::Channel &channel, const std::vector<float> &times, luabind::tableT<void> tValues, float offset)
+{
+	auto numTimes = times.size();
+	auto numValues = Lua::GetObjectLength(l, tValues);
+	if(numTimes != numValues)
+		throw std::runtime_error {"Number of elements in times array (" + std::to_string(numTimes) + ") doesn't match number of values in values array (" + std::to_string(numValues) + ")! This is not allowed."};
+
+	auto insertIndex = ::udm::visit(channel.GetValueType(), [&tValues, &channel, &times, numValues, offset](auto tag) {
+		using T = typename decltype(tag)::type;
+		using TValue = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
+		if constexpr(pragma::is_animatable_type_v<TValue>) {
+			auto values = luabind::object_cast<std::vector<TValue>>(tValues);
+			return channel.InsertValues<TValue>(times.size(), times.data(), values.data(), offset);
+		}
+		else
+			return std::numeric_limits<uint32_t>::max();
+	});
+
+	channel.Update();
+	return insertIndex;
+}
+static uint32_t insert_channel_values(lua_State *l, panima::Channel &channel, const std::vector<float> &times, luabind::tableT<void> tValues) { return insert_channel_values(l, channel, times, tValues, 0.f); }
+
 void Lua::animation::register_library(Lua::Interface &lua)
 {
 	auto animMod = luabind::module(lua.GetState(), "panima");
@@ -272,27 +295,8 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		  channel.Update();
 		  return r;
 	  });
-	cdChannel.def(
-	  "InsertValues", +[](lua_State *l, panima::Channel &channel, const std::vector<float> &times, luabind::tableT<void> tValues) -> uint32_t {
-		  auto numTimes = times.size();
-		  auto numValues = Lua::GetObjectLength(l, tValues);
-		  if(numTimes != numValues)
-			  throw std::runtime_error {"Number of elements in times array (" + std::to_string(numTimes) + ") doesn't match number of values in values array (" + std::to_string(numValues) + ")! This is not allowed."};
-
-		  auto insertIndex = ::udm::visit(channel.GetValueType(), [&tValues, &channel, &times, numValues](auto tag) {
-			  using T = typename decltype(tag)::type;
-			  using TValue = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
-			  if constexpr(pragma::is_animatable_type_v<TValue>) {
-				  auto values = luabind::object_cast<std::vector<TValue>>(tValues);
-				  return channel.InsertValues<TValue>(times.size(), times.data(), values.data());
-			  }
-			  else
-				  return std::numeric_limits<uint32_t>::max();
-		  });
-
-		  channel.Update();
-		  return insertIndex;
-	  });
+	cdChannel.def("InsertValues", static_cast<uint32_t (*)(lua_State *, panima::Channel &, const std::vector<float> &, luabind::tableT<void>, float)>(&insert_channel_values));
+	cdChannel.def("InsertValues", static_cast<uint32_t (*)(lua_State *, panima::Channel &, const std::vector<float> &, luabind::tableT<void>)>(&insert_channel_values));
 	cdChannel.def(
 	  "SetValues", +[](lua_State *l, panima::Channel &channel, luabind::tableT<float> times, luabind::tableT<void> values) {
 		  auto numTimes = Lua::GetObjectLength(l, times);

@@ -1294,6 +1294,14 @@ void register_property_methods(TClassDef &classDef)
 	  .def(
 	    "GetFromPath", +[](lua_State *l, T &p, const std::string &path) -> ::udm::LinkedPropertyWrapper { return static_cast<TPropertyWrapper>(p).GetFromPath(path); })
 	  .def(
+	    "ClearUncompressedMemory",
+	    +[](lua_State *l, T &p) {
+		    auto *a = static_cast<TPropertyWrapper>(p).GetValuePtr<udm::ArrayLz4>();
+		    if(!a)
+			    return;
+		    a->ClearUncompressedMemory();
+	    })
+	  .def(
 	    "IsValid", +[](lua_State *l, T &prop) -> bool { return static_cast<bool>(static_cast<TPropertyWrapper>(prop)); });
 }
 

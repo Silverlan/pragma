@@ -474,6 +474,10 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("ease_in_out", &Lua::math::ease_in_out), luabind::def("get_frustum_plane_size", &Lua::math::get_frustum_plane_size), luabind::def("get_frustum_plane_boundaries", &Lua::math::get_frustum_plane_boundaries),
 	  luabind::def("get_frustum_plane_point", &Lua::math::get_frustum_plane_point),
 
+	  luabind::def("fit_bezier_curve", &bezierfit::fit),
+	  luabind::def("reduce_curve_points", &bezierfit::reduce),
+	  luabind::def("reduce_curve_points", &bezierfit::reduce, luabind::default_parameter_policy<2, 2.f> {}),
+
 	  luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients, luabind::meta::join<luabind::default_parameter_policy<3, true>, luabind::default_parameter_policy<4, true>>::type {}),
 	  luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients, luabind::default_parameter_policy<4, true> {}), luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients),
 

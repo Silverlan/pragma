@@ -509,7 +509,11 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		    return umath::calc_bezier_point(cp0Val, cp0OutVal, cp1InVal, cp1Val, r[0]);
 	    }),
 	  luabind::def(
-	    "axis_to_vector", static_cast<Vector3(*)(pragma::SignedAxis)>(&pragma::axis_to_vector))
+	    "axis_to_vector", static_cast<Vector3(*)(pragma::SignedAxis)>(&pragma::axis_to_vector)),
+	  luabind::def(
+	    "remap", +[](float value, float fromLow, float fromHigh, float toLow, float toHigh) {
+			   return toLow + (value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow);
+			  })
 	];
 	lua_pushtablecfunction(lua.GetState(), "math", "parse_expression", parse_math_expression);
 	lua_pushtablecfunction(lua.GetState(), "math", "solve_quadric", Lua::math::solve_quadric);

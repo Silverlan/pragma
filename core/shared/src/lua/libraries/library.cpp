@@ -508,6 +508,15 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		    auto n = umath::find_bezier_roots(time, cp0Time, cp0OutTime, cp1InTime, cp1Time, r);
 		    return umath::calc_bezier_point(cp0Val, cp0OutVal, cp1InVal, cp1Val, r[0]);
 	    }),
+		luabind::def("calc_bezier_point_fraction",+[](float t, const Vector2 &p0, const Vector2 &p1, const Vector2 &p2, const Vector2 &p3) {
+			auto u = 1 - t;
+			auto tt = t * t;
+			auto uu = u * u;
+			auto uuu = uu * u;
+			auto ttt = tt * t;
+
+			return uuu * p0 + 3 * uu * t * p1 + 3 * u * tt * p2 + ttt * p3;
+		  }),
 	  luabind::def(
 	    "axis_to_vector", static_cast<Vector3(*)(pragma::SignedAxis)>(&pragma::axis_to_vector)),
 	  luabind::def(

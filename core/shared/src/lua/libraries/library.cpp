@@ -71,6 +71,7 @@
 #include <panima/channel.hpp>
 #include <mathutil/camera.hpp>
 #include <mathutil/umath_frustum.hpp>
+#include <bezier_fit.hpp>
 #include <regex>
 #include <complex>
 #include <random>

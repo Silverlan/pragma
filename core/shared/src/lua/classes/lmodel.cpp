@@ -36,6 +36,7 @@
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_file.h>
 #include <mathutil/vertex.hpp>
+#include <panima/animation.hpp>
 #include <panima/skeleton.hpp>
 #include <panima/bone.hpp>
 #include <fsys/ifile.hpp>

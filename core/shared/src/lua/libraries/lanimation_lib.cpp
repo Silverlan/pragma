@@ -182,13 +182,34 @@ static uint32_t insert_channel_values(lua_State *l, panima::Channel &channel, co
 	auto numValues = Lua::GetObjectLength(l, tValues);
 	if(numTimes != numValues)
 		throw std::runtime_error {"Number of elements in times array (" + std::to_string(numTimes) + ") doesn't match number of values in values array (" + std::to_string(numValues) + ")! This is not allowed."};
-
-	auto insertIndex = ::udm::visit(channel.GetValueType(), [&tValues, &channel, &times, numValues, offset](auto tag) {
+	auto insertIndex = ::udm::visit(channel.GetValueType(), [l, &tValues, &channel, &times, numValues, offset](auto tag) {
 		using T = typename decltype(tag)::type;
 		using TValue = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
 		if constexpr(pragma::is_animatable_type_v<TValue>) {
-			auto values = luabind::object_cast<std::vector<TValue>>(tValues);
-			return channel.InsertValues<TValue>(times.size(), times.data(), values.data(), offset);
+			if constexpr(!std::is_same_v<T, bool>) {
+				auto values = luabind::object_cast<std::vector<TValue>>(tValues);
+				if(values.size() != times.size())
+					throw std::runtime_error {"Number of data values does not match number of time values!"};
+				return channel.InsertValues<TValue>(times.size(), times.data(), values.data(), offset);
+			}
+			else {
+				std::vector<TValue> values;
+				auto n = Lua::GetObjectLength(l, tValues);
+				values.reserve(n);
+				for(auto i = decltype(n) {1}; i <= n; ++i) {
+					try {
+						auto val = luabind::object_cast<bool>(tValues[i]);
+						values.push_back(static_cast<TValue>(val));
+					}
+					catch(const luabind::error &err) {
+						auto val = luabind::object_cast<TValue>(tValues[i]);
+						values.push_back(val);
+					}
+				}
+				if(values.size() != times.size())
+					throw std::runtime_error {"Number of data values does not match number of time values!"};
+				return channel.InsertValues<TValue>(times.size(), times.data(), values.data(), offset);
+			}
 		}
 		else
 			return std::numeric_limits<uint32_t>::max();

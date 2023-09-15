@@ -199,6 +199,78 @@ static uint32_t insert_channel_values(lua_State *l, panima::Channel &channel, co
 }
 static uint32_t insert_channel_values(lua_State *l, panima::Channel &channel, const std::vector<float> &times, luabind::tableT<void> tValues) { return insert_channel_values(l, channel, times, tValues, 0.f); }
 
+static Lua::mult<Lua::tb<float>, Lua::tb<void>> get_data_in_range(lua_State *l, panima::Channel &channel, float tStart, float tEnd)
+{
+	return ::udm::visit_ng(channel.GetValueType(), [l, &channel, tStart, tEnd](auto tag) {
+		using T = typename decltype(tag)::type;
+
+		std::vector<float> times;
+		std::vector<T> values;
+		auto n = channel.GetValueCount();
+		auto getInterpolatedValue = [&channel, n](float t, uint32_t &outIdx, bool prefix) -> std::optional<std::pair<float, T>> {
+			float f;
+			auto indices = channel.FindInterpolationIndices(t, f);
+			if(indices.first == std::numeric_limits<decltype(indices.first)>::max()) {
+				if(t <= *channel.GetTime(0)) {
+					indices = {0, 0};
+					f = 0.f;
+				}
+				else {
+					indices = {n - 1, n - 1};
+					f = 0.f;
+				}
+			}
+
+			if(f == 0.f)
+				outIdx = indices.first;
+			else if(f == 1.f)
+				outIdx = indices.second;
+			else {
+				outIdx = prefix ? indices.second : indices.first;
+
+				auto time0 = *channel.GetTime(indices.first);
+				auto time1 = *channel.GetTime(indices.second);
+				auto &value0 = channel.GetValue<T>(indices.first);
+				auto &value1 = channel.GetValue<T>(indices.second);
+				T result;
+				Lua::udm::lerp_value(value0, value1, f, result, udm::type_to_enum<T>());
+				return std::pair<float, T> {umath::lerp(time0, time1, f), result};
+			}
+			return {};
+		};
+
+		if(n > 0) {
+			uint32_t idxStart;
+			auto prefixValue = getInterpolatedValue(tStart, idxStart, true);
+
+			uint32_t idxEnd;
+			auto postfixValue = getInterpolatedValue(tEnd, idxEnd, false);
+
+			auto count = idxEnd - idxStart + 1;
+			if(prefixValue)
+				++count;
+			if(postfixValue)
+				++count;
+
+			times.reserve(count);
+			values.reserve(count);
+			if(prefixValue) {
+				times.push_back(prefixValue->first);
+				values.push_back(prefixValue->second);
+			}
+			for(auto i = idxStart; i <= idxEnd; ++i) {
+				times.push_back(*channel.GetTime(i));
+				values.push_back(channel.GetValue<T>(i));
+			}
+			if(postfixValue) {
+				times.push_back(postfixValue->first);
+				values.push_back(postfixValue->second);
+			}
+		}
+		return luabind::object {l, std::pair<std::vector<float>, std::vector<T>> {std::move(times), std::move(values)}};
+	});
+}
+
 void Lua::animation::register_library(Lua::Interface &lua)
 {
 	auto animMod = luabind::module(lua.GetState(), "panima");
@@ -295,6 +367,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		  channel.Update();
 		  return r;
 	  });
+	cdChannel.def("Validate", &panima::Channel::Validate);
 	cdChannel.def("InsertValues", static_cast<uint32_t (*)(lua_State *, panima::Channel &, const std::vector<float> &, luabind::tableT<void>, float)>(&insert_channel_values));
 	cdChannel.def("InsertValues", static_cast<uint32_t (*)(lua_State *, panima::Channel &, const std::vector<float> &, luabind::tableT<void>)>(&insert_channel_values));
 	cdChannel.def(
@@ -441,6 +514,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	  });
 	cdChannel.def("FindIndexRangeInTimeRange", &find_index_range_in_time_range);
 	cdChannel.def("FindIndexRangeInTimeRange", &find_index_range_in_time_range, luabind::default_parameter_policy<4, false> {});
+	cdChannel.def("GetDataInRange", &get_data_in_range);
 	cdChannel.def(
 	  "SortValues", +[](lua_State *l, panima::Channel &channel) {
 		  auto n = channel.GetTimeCount();
@@ -462,7 +536,9 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	animMod[cdChannel];
 
 	Lua::RegisterLibraryValue(lua.GetState(), "panima", "VALUE_EPSILON", panima::Channel::VALUE_EPSILON);
+	Lua::RegisterLibraryValue(lua.GetState(), "panima", "TIME_EPSILON", panima::Channel::TIME_EPSILON);
 
+	pragma::lua::define_custom_constructor<panima::Channel, []() -> std::shared_ptr<panima::Channel> { return std::make_shared<panima::Channel>(); }>(lua.GetState());
 	pragma::lua::define_custom_constructor<panima::Channel, [](::udm::LinkedPropertyWrapper &times, ::udm::LinkedPropertyWrapper &values) -> std::shared_ptr<panima::Channel> { return std::make_shared<panima::Channel>(times.ClaimOwnership(), values.ClaimOwnership()); },
 	  ::udm::LinkedPropertyWrapper &, ::udm::LinkedPropertyWrapper &>(lua.GetState());
 

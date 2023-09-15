@@ -244,6 +244,8 @@ bool Lua::util::start_debugger_server(lua_State *l)
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, HSV);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(std, match_results<const char *>);
 
+static std::vector<bezierfit::VECTOR> reduce(std::vector<bezierfit::VECTOR> points) { return bezierfit::reduce(points); }
+
 void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 {
 	// Remove sensitive functions and libraries
@@ -477,7 +479,8 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 
 	  luabind::def("fit_bezier_curve", &bezierfit::fit),
 	  luabind::def("reduce_curve_points", &bezierfit::reduce),
-	  luabind::def("reduce_curve_points", &bezierfit::reduce, luabind::default_parameter_policy<2, 2.f> {}),
+	  // luabind::def("reduce_curve_points", &bezierfit::reduce, luabind::default_parameter_policy<2, 2.f> {}), // Default float argument not supported in clang (state: 23-09-12)
+	  luabind::def("reduce_curve_points", &::reduce),
 
 	  luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients, luabind::meta::join<luabind::default_parameter_policy<3, true>, luabind::default_parameter_policy<4, true>>::type {}),
 	  luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients, luabind::default_parameter_policy<4, true> {}), luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients),

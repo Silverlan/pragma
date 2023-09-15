@@ -1296,7 +1296,7 @@ void register_property_methods(TClassDef &classDef)
 	  .def(
 	    "ClearUncompressedMemory",
 	    +[](lua_State *l, T &p) {
-		    auto *a = static_cast<TPropertyWrapper>(p).GetValuePtr<udm::ArrayLz4>();
+		    auto *a = static_cast<TPropertyWrapper>(p).template GetValuePtr<udm::ArrayLz4>();
 		    if(!a)
 			    return;
 		    a->ClearUncompressedMemory();

@@ -1089,14 +1089,15 @@ void pragma::animation::Animation::SetBoneWeight(uint32_t boneId, float weight)
 
 std::shared_ptr<panima::Animation> pragma::animation::Animation::ToPanimaAnimation(const panima::Skeleton &skel, const Frame *optRefPose) const
 {
+	auto &anim = const_cast<pragma::animation::Animation &>(*this);
+	auto &boneList = anim.GetBoneList();
+	auto &frames = anim.GetFrames();
+
 	std::shared_ptr<Frame> refPoseRel = nullptr;
 	if(optRefPose) {
 		refPoseRel = Frame::Create(*optRefPose);
 		refPoseRel->Localize(skel);
 	}
-	auto &anim = const_cast<pragma::animation::Animation &>(*this);
-	auto &boneList = anim.GetBoneList();
-	auto &frames = anim.GetFrames();
 	auto fps = anim.GetFPS();
 	uint32_t frameIdx = 0;
 	struct ValueData {
@@ -1135,6 +1136,7 @@ std::shared_ptr<panima::Animation> pragma::animation::Animation::ToPanimaAnimati
 		auto &boneName = pair.first;
 		auto &valueData = pair.second;
 		auto basePath = "ec/animated/bone/" + boneName + "/";
+		auto boneId = skel.LookupBone(boneName);
 
 		enum class PoseComponent : uint8_t { Position = 0, Rotation, Scale };
 		auto toChannel = [&valueData, &refPoseRel, &skel, &boneName](PoseComponent eComponent) -> std::shared_ptr<panima::Channel> {
@@ -1162,81 +1164,51 @@ std::shared_ptr<panima::Animation> pragma::animation::Animation::ToPanimaAnimati
 				components[2].push_back({vd.time, val.z});
 			}
 
+			auto origCdata = components;
 			for(auto &cdata : components)
 				cdata = bezierfit::reduce(cdata);
 
 			std::vector<float> times;
 			std::vector<Vector3> values;
-			std::array<uint32_t, 3> posIndices = {0, 0, 0};
-			auto complete = false;
-			while(!complete) {
-				std::array<float, 3> timeCur = {};
-				std::array<float, 3> timeNext = {};
-				std::array<float, 3> timeNextEffective = {};
-				std::array<float, 3> valCur = {};
-				std::array<float, 3> valNext = {};
-				for(uint8_t i = 0; i < 3; ++i) {
-					auto &cdata = components[i];
-					auto idxNext = posIndices[i];
-					if(idxNext >= cdata.size())
-						idxNext = cdata.size() - 1;
-					auto idxCur = (idxNext > 0) ? (idxNext - 1) : 0;
-					auto &vCur = cdata[idxCur];
-					auto &vNext = cdata[idxNext];
-
-					timeCur[i] = vCur.x;
-					timeNext[i] = vNext.x;
-
-					valCur[i] = vCur.y;
-					valNext[i] = vNext.y;
-
-					if(posIndices[i] >= cdata.size())
-						timeNextEffective[i] = std::numeric_limits<float>::max();
-					else
-						timeNextEffective[i] = timeNext[i];
-				}
-
-				uint8_t ci;
-				if(timeNextEffective[0] <= std::min(timeNextEffective[1], timeNextEffective[2]))
-					ci = 0;
-				else if(timeNextEffective[1] <= std::min(timeNextEffective[0], timeNextEffective[2]))
-					ci = 1;
-				else if(timeNextEffective[2] <= std::min(timeNextEffective[0], timeNextEffective[1]))
-					ci = 2;
-				auto t = timeNext[ci];
-
-				Vector3 value {};
-				for(uint8_t i = 0; i < 3; ++i) {
-					auto t0 = timeCur[i];
-					auto t1 = timeNext[i];
-					float f;
-					if(t < t0 || umath::abs(t1 - t0) < 0.0001f)
-						f = 0.f;
-					else if(t > t1)
-						f = 1.f;
-					else
-						f = umath::clamp((t - t0) / (t1 - t0), 0.f, 1.f);
-					auto v = umath::lerp(valCur[i], valNext[i], f);
-					value[i] = v;
-				}
-
-				times.push_back(t);
-				values.push_back(value);
-
-				for(uint8_t i = 0; i < 3; ++i) {
-					while(umath::abs(timeNext[i] - t) <= panima::Channel::TIME_EPSILON) {
-						++posIndices[i]; // Timestamp already covered
-
-						if(posIndices[i] < components[i].size()) {
-							auto &vNext = components[i][posIndices[i]];
-							timeNext[i] = vNext.x;
-						}
-						else
-							timeNext[i] = std::numeric_limits<float>::max();
+			std::array<std::vector<Vector2>::iterator, 3> iterators = {components[0].begin(), components[1].begin(), components[2].begin()};
+			std::optional<float> prevTime {};
+			auto getNextTime = [&iterators, &components, &prevTime]() -> std::optional<float> {
+				std::optional<float> t {};
+				for(auto i = decltype(iterators.size()) {0u}; i < iterators.size(); ++i) {
+					auto &it = iterators[i];
+					while(it != components[i].end() && prevTime && fabs(it->x - *prevTime) < panima::Channel::TIME_EPSILON) {
+						// Already covered; Skip
+						++it;
+					}
+					if(it == components[i].end())
+						continue;
+					auto tc = it->x;
+					if(!t || tc < *t) {
+						t = tc;
+						++it;
 					}
 				}
+				prevTime = t;
+				return t;
+			};
 
-				complete = posIndices[0] >= components[0].size() && posIndices[1] >= components[1].size() && posIndices[2] >= components[2].size();
+			times.reserve(components[0].size() + components[1].size() + components[2].size());
+			values.reserve(times.capacity());
+
+			// Calculate data value for each timestamp
+			auto t = getNextTime();
+			while(t) {
+				// Find index for t
+				auto it = std::lower_bound(valueData.begin(), valueData.end(), *t - panima::Channel::TIME_EPSILON, [t](const ValueData &valueData, float t) { return valueData.time < t; });
+				assert(it != valueData.end());
+				if(it == valueData.end())
+					throw std::logic_error {"Timestamp value not found!"};
+				auto idx = it - valueData.begin();
+				times.push_back(*t);
+				values.push_back(Vector3 {origCdata[0][idx].y, origCdata[1][idx].y, origCdata[2][idx].y});
+
+				// Insert into xdata
+				t = getNextTime();
 			}
 
 			if(values.size() == 2) {
@@ -1285,6 +1257,7 @@ std::shared_ptr<panima::Animation> pragma::animation::Animation::ToPanimaAnimati
 				quatValues.reserve(values.size());
 				for(auto &v : values)
 					quatValues.push_back(uquat::create(EulerAngles {v.x, v.y, v.z}));
+
 				valueArray.Resize(quatValues.size());
 				memcpy(valueArray.GetValuePtr(0), quatValues.data(), util::size_of_container(quatValues));
 			}

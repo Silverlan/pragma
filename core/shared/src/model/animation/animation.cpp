@@ -12,6 +12,10 @@
 #include <udm.hpp>
 #include <mathutil/umath.h>
 #include <panima/skeleton.hpp>
+#include <panima/animation.hpp>
+#include <panima/channel.hpp>
+#include <panima/bone.hpp>
+#include <bezier_fit.hpp>
 
 decltype(pragma::animation::Animation::s_activityEnumRegister) pragma::animation::Animation::s_activityEnumRegister;
 decltype(pragma::animation::Animation::s_eventEnumRegister) pragma::animation::Animation::s_eventEnumRegister;
@@ -1081,6 +1085,231 @@ void pragma::animation::Animation::SetBoneWeight(uint32_t boneId, float weight)
 	if(m_boneIds.size() > m_boneWeights.size())
 		m_boneWeights.resize(m_boneIds.size(), 1.f);
 	m_boneWeights.at(boneId) = weight;
+}
+
+std::shared_ptr<panima::Animation> pragma::animation::Animation::ToPanimaAnimation(const panima::Skeleton &skel, const Frame *optRefPose) const
+{
+	std::shared_ptr<Frame> refPoseRel = nullptr;
+	if(optRefPose) {
+		refPoseRel = Frame::Create(*optRefPose);
+		refPoseRel->Localize(skel);
+	}
+	auto &anim = const_cast<pragma::animation::Animation &>(*this);
+	auto &boneList = anim.GetBoneList();
+	auto &frames = anim.GetFrames();
+	auto fps = anim.GetFPS();
+	uint32_t frameIdx = 0;
+	struct ValueData {
+		float time;
+		umath::ScaledTransform pose;
+	};
+	std::unordered_map<std::string, std::vector<ValueData>> boneValues;
+	for(auto &frame : frames) {
+		auto t = frameIdx / static_cast<float>(fps - 1);
+		uint32_t i = 0;
+		for(auto boneIdx : boneList) {
+			auto bone = skel.GetBone(boneIdx).lock();
+			auto &name = bone->name;
+			auto it = boneValues.find(name);
+			if(it == boneValues.end()) {
+				it = boneValues.insert(std::make_pair(name, std::vector<ValueData> {})).first;
+				it->second.reserve(frames.size());
+			}
+			auto &valueData = it->second;
+			valueData.push_back({t, *frame->GetBoneTransform(i)});
+
+			++i;
+		}
+		++frameIdx;
+	}
+
+	struct BoneChannelData {
+		std::shared_ptr<panima::Channel> positionChannel;
+		std::shared_ptr<panima::Channel> rotationChannel;
+		std::shared_ptr<panima::Channel> scaleChannel;
+	};
+	std::unordered_map<std::string, std::shared_ptr<BoneChannelData>> boneNameToChannelData;
+	boneNameToChannelData.reserve(boneValues.size());
+	auto panimaAnim = std::make_shared<panima::Animation>();
+	for(auto &pair : boneValues) {
+		auto &boneName = pair.first;
+		auto &valueData = pair.second;
+		auto basePath = "ec/animated/bone/" + boneName + "/";
+
+		enum class PoseComponent : uint8_t { Position = 0, Rotation, Scale };
+		auto toChannel = [&valueData, &refPoseRel, &skel, &boneName](PoseComponent eComponent) -> std::shared_ptr<panima::Channel> {
+			std::array<std::vector<Vector2>, 3> components;
+			for(auto &cdata : components)
+				cdata.reserve(valueData.size());
+
+			auto getPoseValue = [eComponent](const umath::ScaledTransform &pose) {
+				switch(eComponent) {
+				case PoseComponent::Position:
+					return pose.GetOrigin();
+				case PoseComponent::Rotation:
+					{
+						EulerAngles ang {pose.GetRotation()};
+						return Vector3 {ang.p, ang.y, ang.r};
+					}
+				case PoseComponent::Scale:
+					return pose.GetScale();
+				}
+			};
+			for(auto &vd : valueData) {
+				auto val = getPoseValue(vd.pose);
+				components[0].push_back({vd.time, val.x});
+				components[1].push_back({vd.time, val.y});
+				components[2].push_back({vd.time, val.z});
+			}
+
+			for(auto &cdata : components)
+				cdata = bezierfit::reduce(cdata);
+
+			std::vector<float> times;
+			std::vector<Vector3> values;
+			std::array<uint32_t, 3> posIndices = {0, 0, 0};
+			auto complete = false;
+			while(!complete) {
+				std::array<float, 3> timeCur = {};
+				std::array<float, 3> timeNext = {};
+				std::array<float, 3> timeNextEffective = {};
+				std::array<float, 3> valCur = {};
+				std::array<float, 3> valNext = {};
+				for(uint8_t i = 0; i < 3; ++i) {
+					auto &cdata = components[i];
+					auto idxNext = posIndices[i];
+					if(idxNext >= cdata.size())
+						idxNext = cdata.size() - 1;
+					auto idxCur = (idxNext > 0) ? (idxNext - 1) : 0;
+					auto &vCur = cdata[idxCur];
+					auto &vNext = cdata[idxNext];
+
+					timeCur[i] = vCur.x;
+					timeNext[i] = vNext.x;
+
+					valCur[i] = vCur.y;
+					valNext[i] = vNext.y;
+
+					if(posIndices[i] >= cdata.size())
+						timeNextEffective[i] = std::numeric_limits<float>::max();
+					else
+						timeNextEffective[i] = timeNext[i];
+				}
+
+				uint8_t ci;
+				if(timeNextEffective[0] <= std::min(timeNextEffective[1], timeNextEffective[2]))
+					ci = 0;
+				else if(timeNextEffective[1] <= std::min(timeNextEffective[0], timeNextEffective[2]))
+					ci = 1;
+				else if(timeNextEffective[2] <= std::min(timeNextEffective[0], timeNextEffective[1]))
+					ci = 2;
+				auto t = timeNext[ci];
+
+				Vector3 value {};
+				for(uint8_t i = 0; i < 3; ++i) {
+					auto t0 = timeCur[i];
+					auto t1 = timeNext[i];
+					float f;
+					if(t < t0 || umath::abs(t1 - t0) < 0.0001f)
+						f = 0.f;
+					else if(t > t1)
+						f = 1.f;
+					else
+						f = umath::clamp((t - t0) / (t1 - t0), 0.f, 1.f);
+					auto v = umath::lerp(valCur[i], valNext[i], f);
+					value[i] = v;
+				}
+
+				times.push_back(t);
+				values.push_back(value);
+
+				for(uint8_t i = 0; i < 3; ++i) {
+					while(umath::abs(timeNext[i] - t) <= panima::Channel::TIME_EPSILON) {
+						++posIndices[i]; // Timestamp already covered
+
+						if(posIndices[i] < components[i].size()) {
+							auto &vNext = components[i][posIndices[i]];
+							timeNext[i] = vNext.x;
+						}
+						else
+							timeNext[i] = std::numeric_limits<float>::max();
+					}
+				}
+
+				complete = posIndices[0] >= components[0].size() && posIndices[1] >= components[1].size() && posIndices[2] >= components[2].size();
+			}
+
+			if(values.size() == 2) {
+				auto &v0 = values[0];
+				auto &v1 = values[1];
+				if(uvec::cmp<Vector3>(v0, v1)) {
+					times.erase(times.end() - 1);
+					values.erase(values.end() - 1);
+				}
+			}
+
+			if(values.size() == 1 && refPoseRel) {
+				// If there is only one value, we may be able to skip the channel altogether, if it is the same as from the reference pose
+				auto boneId = skel.LookupBone(boneName);
+				umath::ScaledTransform pose;
+				if(refPoseRel->GetBonePose(boneId, pose)) {
+					auto val = getPoseValue(pose);
+					auto &v0 = values[0];
+					if(uvec::cmp<Vector3>(v0, val)) {
+						times.erase(times.begin());
+						values.erase(values.begin());
+					}
+				}
+			}
+
+			if(times.empty())
+				return nullptr;
+
+			auto channel = std::make_shared<panima::Channel>();
+
+			auto &timeArray = channel->GetTimesArray();
+			timeArray.Resize(times.size());
+			memcpy(timeArray.GetValuePtr(0), times.data(), util::size_of_container(times));
+
+			if(eComponent != PoseComponent::Rotation) {
+				auto &valueArray = channel->GetValueArray();
+				valueArray.SetValueType(udm::Type::Vector3);
+				valueArray.Resize(values.size());
+				memcpy(valueArray.GetValuePtr(0), values.data(), util::size_of_container(values));
+			}
+			else {
+				auto &valueArray = channel->GetValueArray();
+				valueArray.SetValueType(udm::Type::Quaternion);
+
+				std::vector<Quat> quatValues;
+				quatValues.reserve(values.size());
+				for(auto &v : values)
+					quatValues.push_back(uquat::create(EulerAngles {v.x, v.y, v.z}));
+				valueArray.Resize(quatValues.size());
+				memcpy(valueArray.GetValuePtr(0), quatValues.data(), util::size_of_container(quatValues));
+			}
+			return channel;
+		};
+
+		auto positionChannel = toChannel(PoseComponent::Position);
+		if(positionChannel) {
+			positionChannel->targetPath = panima::ChannelPath {basePath + "position"};
+			panimaAnim->AddChannel(*positionChannel);
+		}
+
+		auto rotationChannel = toChannel(PoseComponent::Rotation);
+		if(rotationChannel) {
+			rotationChannel->targetPath = panima::ChannelPath {basePath + "rotation"};
+			panimaAnim->AddChannel(*rotationChannel);
+		}
+
+		auto scaleChannel = toChannel(PoseComponent::Scale);
+		if(scaleChannel) {
+			scaleChannel->targetPath = panima::ChannelPath {basePath + "scale"};
+			panimaAnim->AddChannel(*scaleChannel);
+		}
+	}
+	return panimaAnim;
 }
 
 bool pragma::animation::Animation::operator==(const Animation &other) const

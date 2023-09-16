@@ -1199,7 +1199,7 @@ std::shared_ptr<panima::Animation> pragma::animation::Animation::ToPanimaAnimati
 			auto t = getNextTime();
 			while(t) {
 				// Find index for t
-				auto it = std::lower_bound(valueData.begin(), valueData.end(), *t - panima::Channel::TIME_EPSILON, [t](const ValueData &valueData, float t) { return valueData.time < t; });
+				auto it = std::lower_bound(valueData.begin(), valueData.end(), *t - panima::Channel::TIME_EPSILON, [](const ValueData &valueData, float t) { return valueData.time < t; });
 				assert(it != valueData.end());
 				if(it == valueData.end())
 					throw std::logic_error {"Timestamp value not found!"};

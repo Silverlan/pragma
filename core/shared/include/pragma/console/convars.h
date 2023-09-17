@@ -27,7 +27,7 @@ enum class DLLNETWORK ConType : uint32_t {
 
 using ConVarValue = std::unique_ptr<void, void (*)(void *)>;
 namespace console {
-	constexpr bool is_valid_convar_type(udm::Type type) { return !udm::is_non_trivial_type(type) || type == udm::Type::String; }
+	constexpr bool is_valid_convar_type(udm::Type type) { return udm::is_common_type(type); }
 	template<typename T>
 	concept is_valid_convar_type_v = is_valid_convar_type(udm::type_to_enum<T>());
 

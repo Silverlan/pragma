@@ -47,7 +47,7 @@ void main()
 
 	uv = vSphereUv;
 
-	vec4 irisColor = texture(u_normalMap,clamp(vSphereUv,0.0,1.0));
+	vec4 irisColor = texture(u_normalMap,vSphereUv);
 	vec4 scleraColor = texture(u_albedoMap,uvBase);
 	vec4 albedoColor = mix(scleraColor,irisColor,irisColor.a);
 	fs_color = calc_pbr(albedoColor,uv,u_pushConstants.debugMode);

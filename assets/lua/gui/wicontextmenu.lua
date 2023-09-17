@@ -254,7 +254,7 @@ function gui.WIContextMenu:CloseActiveSubMenu()
 	self:RequestFocus()
 	self.m_activeSubMenu = nil
 end
-function gui.WIContextMenu:AddSubMenu(name, onClick)
+function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
 	local pSubMenu
 	local pItem = self:AddItem(name, onClick or function()
 		return false
@@ -262,9 +262,14 @@ function gui.WIContextMenu:AddSubMenu(name, onClick)
 	if pItem == nil then
 		return
 	end
+	local isPopulated = (fPopulate == nil)
 	pItem:AddCallback("OnCursorEntered", function()
 		if util.is_valid(pSubMenu) then
 			self:CloseActiveSubMenu()
+			if isPopulated == false then
+				fPopulate(pItem, pSubMenu)
+				isPopulated = true
+			end
 			local id
 			local itemName = pItem:GetName()
 			if #itemName > 0 then

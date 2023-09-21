@@ -1995,9 +1995,10 @@ Quat Model::GetTwistAxisRotationOffset(pragma::SignedAxis axis)
 	case pragma::SignedAxis::Y:
 	case pragma::SignedAxis::NegY:
 		return uquat::create(EulerAngles(pragma::is_negative_axis(axis) ? -90.f : 90.0, 0.f, 0.f));
-	case pragma::SignedAxis::Z:
 	case pragma::SignedAxis::NegZ:
-		return uquat::create(EulerAngles(0.0, 0.f, pragma::is_negative_axis(axis) ? -90.f : 90.f));
+		return uquat::create(EulerAngles(0.0, 0.f, 180.f));
+	case pragma::SignedAxis::Z:
+		break;
 	}
 	return uquat::identity();
 }

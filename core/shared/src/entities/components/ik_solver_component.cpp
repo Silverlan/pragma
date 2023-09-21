@@ -22,7 +22,7 @@
 #include <panima/bone.hpp>
 
 using namespace pragma;
-
+#pragma optimize("", off)
 ComponentEventId IkSolverComponent::EVENT_INITIALIZE_SOLVER = pragma::INVALID_COMPONENT_ID;
 ComponentEventId IkSolverComponent::EVENT_ON_IK_UPDATED = pragma::INVALID_COMPONENT_ID;
 IkSolverComponent::ConstraintInfo::ConstraintInfo(BoneId bone0, BoneId bone1) : boneId0 {bone0}, boneId1 {bone1} {}
@@ -489,31 +489,6 @@ void IkSolverComponent::AddBallSocketConstraint(const ConstraintInfo &constraint
 	// the main axis around a bit and adjust the limits accordingly.
 	auto twistRotOffset = Model::GetTwistAxisRotationOffset(twistAxis);
 	uquat::inverse(twistRotOffset);
-	{
-		switch(twistAxis) {
-		case pragma::SignedAxis::X:
-		case pragma::SignedAxis::NegX:
-			umath::swap(effectiveMinLimits.r, effectiveMinLimits.y);
-			umath::swap(effectiveMaxLimits.r, effectiveMaxLimits.y);
-			break;
-		case pragma::SignedAxis::Y:
-		case pragma::SignedAxis::NegY:
-			umath::swap(effectiveMinLimits.p, effectiveMinLimits.r);
-			umath::swap(effectiveMaxLimits.p, effectiveMaxLimits.r);
-
-			umath::swap(effectiveMinLimits.y, effectiveMaxLimits.y);
-			effectiveMinLimits.y *= -1.f;
-			effectiveMaxLimits.y *= -1.f;
-
-			//umath::swap(effectiveMinLimits.p, effectiveMinLimits.y);
-			break;
-		case pragma::SignedAxis::Z:
-		case pragma::SignedAxis::NegZ:
-			umath::swap(effectiveMinLimits.p, effectiveMinLimits.y);
-			umath::swap(effectiveMaxLimits.p, effectiveMaxLimits.y);
-			break;
-		}
-	}
 
 	auto refRot1 = rotBone1 * twistRotOffset; //uquat::create(ang);
 
@@ -534,24 +509,73 @@ void IkSolverComponent::AddBallSocketConstraint(const ConstraintInfo &constraint
 	}
 
 	// This is not quite correct and can cause issues with certain configurations.
-	auto rotBone1WithOffset = refRot1 * uquat::create(EulerAngles(-(effectiveMaxLimits.p + effectiveMinLimits.p), effectiveMaxLimits.y + effectiveMinLimits.y, 0.f)); //-(effectiveMaxLimits.r + effectiveMinLimits.r)));
+	//auto rotBone1WithOffset = refRot1 * uquat::create(EulerAngles(-(effectiveMaxLimits.p + effectiveMinLimits.p), effectiveMaxLimits.y + effectiveMinLimits.y, 0.f)); //-(effectiveMaxLimits.r + effectiveMinLimits.r)));
+	//auto rotBone1WithOffset = refRot1 * uquat::create(EulerAngles(effectiveMaxLimits.y + effectiveMinLimits.y, effectiveMaxLimits.p + effectiveMinLimits.p, 0.f));
+
+	auto q = EulerAngles((effectiveMinLimits.p + effectiveMaxLimits.p) * 2.f, (effectiveMinLimits.y + effectiveMaxLimits.y) * 2.f, (effectiveMinLimits.r + effectiveMaxLimits.r) * 2.f);
+	
+	// Eliminate rotation around twist axis
+	switch(twistAxis) {
+	case SignedAxis::X:
+	case SignedAxis::NegX:
+		q.p = 0.f;
+		break;
+	case SignedAxis::Y:
+	case SignedAxis::NegY:
+		q.y = 0.f;
+		break;
+	case SignedAxis::Z:
+	case SignedAxis::NegZ:
+		q.r = 0.f;
+		break;
+	}
+
+	//auto twistVector = uquat::forward(refRot1);
+	//uvec::rotate(&twistVector, q);
+
+	auto twistVector = uquat::forward(twistRotOffset);
+	uvec::rotate(&twistVector, uquat::create(q));
+	twistVector = rotBone1 * twistVector;
+
+	//auto rotBone1WithOffset = refRot1 * uquat::create(EulerAngles(effectiveMaxLimits.p + effectiveMinLimits.p, effectiveMaxLimits.y + effectiveMinLimits.y, 0.f));
+	//auto x = uquat::forward(rotBone1WithOffset);
+	auto x = twistVector;
+
+	//auto rotBone1WithOffset = refRot1 * uquat::create(tmp);
+	//auto rotBone1WithOffset = refRot1 * uquat::create(tmp);
+	//auto x = uquat::forward(rotBone1WithOffset);
+	/*Vector3 x;
+	switch(twistAxis) {
+	case SignedAxis::X:
+	case SignedAxis::NegX:
+		x = -uquat::right(rotBone1WithOffset);
+		break;
+	case SignedAxis::Y:
+	case SignedAxis::NegY:
+		x = uquat::up(rotBone1WithOffset);
+		break;
+	case SignedAxis::Z:
+	case SignedAxis::NegZ:
+		x = uquat::forward(rotBone1WithOffset);
+		break;
+	}*/
 
 	auto axisB = uquat::forward(refRot1);
 	auto span = effectiveMaxLimits.y - effectiveMinLimits.y;
 	if(span >= 0.f && span < 179.99f) {
 		if(!useEllipseSwingLimit) {
-			auto &ellipseSwingLimit = m_ikSolver->AddSwingLimit(*bone0, *bone1, uquat::forward(rotBone1WithOffset), axisB, umath::deg_to_rad(effectiveMaxLimits.y - effectiveMinLimits.y));
+			auto &ellipseSwingLimit = m_ikSolver->AddSwingLimit(*bone0, *bone1, x, axisB, umath::deg_to_rad(effectiveMaxLimits.y - effectiveMinLimits.y));
 			init_joint(constraintInfo, ellipseSwingLimit);
 		}
 		else {
-			auto &ellipseSwingLimit = m_ikSolver->AddEllipseSwingLimit(*bone0, *bone1, uquat::forward(rotBone1WithOffset), axisB, umath::deg_to_rad(effectiveMaxLimits.y - effectiveMinLimits.y), umath::deg_to_rad(effectiveMaxLimits.p - effectiveMinLimits.p));
+			auto &ellipseSwingLimit = m_ikSolver->AddEllipseSwingLimit(*bone0, *bone1, x, axisB, umath::deg_to_rad(effectiveMaxLimits.y - effectiveMinLimits.y), umath::deg_to_rad(effectiveMaxLimits.p - effectiveMinLimits.p));
 			init_joint(constraintInfo, ellipseSwingLimit);
 		}
 	}
 
 	auto twistLimitVal = effectiveMaxLimits.r - effectiveMinLimits.r;
 	if(twistLimitVal >= 0.f && twistLimitVal < 179.99f) {
-		auto &twistLimit = m_ikSolver->AddTwistLimit(*bone0, *bone1, uquat::forward(rotBone1WithOffset), axisB, umath::deg_to_rad(twistLimitVal));
+		auto &twistLimit = m_ikSolver->AddTwistLimit(*bone0, *bone1, x, axisB, umath::deg_to_rad(twistLimitVal));
 		init_joint(constraintInfo, twistLimit);
 	}
 }

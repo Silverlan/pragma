@@ -750,6 +750,8 @@ void Lua::WIText::register_class(luabind::class_<::WIText, ::WIBase> &classDef)
 	classDef.def(
 	  "GetText", +[](const ::WIText &text) { return text.GetText().cpp_str(); });
 	classDef.def("GetTextHeight", &::WIText::GetTextHeight);
+	classDef.def("CalcTextSize", &::WIText::CalcTextSize);
+	classDef.def("GetTextWidth", &::WIText::GetTextWidth);
 	classDef.def("SetFont", static_cast<void (*)(lua_State *, ::WIText &, const std::string &)>([](lua_State *l, ::WIText &hPanel, const std::string &font) { hPanel.SetFont(font); }));
 	classDef.def(
 	  "GetFont", +[](lua_State *l, ::WIText &hPanel) -> std::optional<std::string> {

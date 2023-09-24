@@ -388,11 +388,11 @@ static luabind::object get_property_value(lua_State *l, const ::udm::PropertyWra
 }
 static luabind::object get_property_value(lua_State *l, const ::udm::PropertyWrapper &val, ::udm::Type type)
 {
-	if (!static_cast<bool>(val))
+	if(!static_cast<bool>(val))
 		return {};
 	udm::Type valType;
-	auto* ptr = val.GetValuePtr(valType);
-	if (ptr == nullptr)
+	auto *ptr = val.GetValuePtr(valType);
+	if(ptr == nullptr)
 		return {};
 	if(valType == type)
 		return get_property_value(l, val);
@@ -918,7 +918,7 @@ void clear(TPropertyWrapper &prop)
 			el->children.clear();
 			return;
 		}
-        auto *a = prop.template GetValuePtr<::udm::Array>();
+		auto *a = prop.template GetValuePtr<::udm::Array>();
 		if(a)
 			a->Resize(0);
 	}
@@ -1293,6 +1293,14 @@ void register_property_methods(TClassDef &classDef)
 	    "AddArray", +[](lua_State *l, T &p, const std::string &name, uint32_t size, ::udm::Type type, ::udm::ArrayType arrayType) -> ::udm::LinkedPropertyWrapper { return static_cast<TPropertyWrapper>(p).AddArray(name, size, type, arrayType); })
 	  .def(
 	    "GetFromPath", +[](lua_State *l, T &p, const std::string &path) -> ::udm::LinkedPropertyWrapper { return static_cast<TPropertyWrapper>(p).GetFromPath(path); })
+	  .def(
+	    "ClearUncompressedMemory",
+	    +[](lua_State *l, T &p) {
+		    auto *a = static_cast<TPropertyWrapper>(p).template GetValuePtr<udm::ArrayLz4>();
+		    if(!a)
+			    return;
+		    a->ClearUncompressedMemory();
+	    })
 	  .def(
 	    "IsValid", +[](lua_State *l, T &prop) -> bool { return static_cast<bool>(static_cast<TPropertyWrapper>(prop)); });
 }
@@ -1738,6 +1746,15 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		    if(!newFileName)
 				return luabind::object{l,std::pair<bool,std::string>{false,err}};
 			return luabind::object{l,*newFileName};
+		}),
+		luabind::def("get_default_value",+[](lua_State *l,::udm::Type type) -> luabind::object {
+			return ::udm::visit<true,true,true>(type,[l,type](auto tag){
+                using T = typename decltype(tag)::type;
+				if constexpr(!::udm::is_non_trivial_type(::udm::type_to_enum<T>()))
+					return luabind::object{l,T{}};
+				else
+					return Lua::nil;
+			});
 		})
 	];
 

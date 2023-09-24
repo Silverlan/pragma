@@ -228,14 +228,13 @@ void pragma::CEyeComponent::UpdateEyeballMT(const Eyeball &eyeball, uint32_t eye
 	uvec::normalize(&state.forward);
 
 	if(config.eyeMove == false) {
-		// TODO
+		state.forward = -state.forward;
 	}
 
 	state.right = uvec::cross(state.forward, state.up);
 	uvec::normalize(&state.right);
 
-	auto dz = eyeball.zOffset;
-	state.forward = state.forward + (eyeball.zOffset + dz) * state.right;
+	state.forward = state.forward + (eyeball.zOffset * 2.f) * state.right;
 
 	// Jitter
 	state.forward += umath::random(-config.jitter.x, config.jitter.x) * state.right;

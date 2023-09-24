@@ -176,6 +176,122 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, Slice);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, AnimationManager);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, Animation);
 
+static uint32_t insert_channel_values(lua_State *l, panima::Channel &channel, const std::vector<float> &times, luabind::tableT<void> tValues, float offset)
+{
+	auto numTimes = times.size();
+	auto numValues = Lua::GetObjectLength(l, tValues);
+	if(numTimes != numValues)
+		throw std::runtime_error {"Number of elements in times array (" + std::to_string(numTimes) + ") doesn't match number of values in values array (" + std::to_string(numValues) + ")! This is not allowed."};
+	auto insertIndex = ::udm::visit(channel.GetValueType(), [l, &tValues, &channel, &times, numValues, offset](auto tag) {
+		using T = typename decltype(tag)::type;
+		using TValue = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
+		if constexpr(pragma::is_animatable_type_v<TValue>) {
+			if constexpr(!std::is_same_v<T, bool>) {
+				auto values = luabind::object_cast<std::vector<TValue>>(tValues);
+				if(values.size() != times.size())
+					throw std::runtime_error {"Number of data values does not match number of time values!"};
+				return channel.InsertValues<TValue>(times.size(), times.data(), values.data(), offset);
+			}
+			else {
+				std::vector<TValue> values;
+				auto n = Lua::GetObjectLength(l, tValues);
+				values.reserve(n);
+				for(auto i = decltype(n) {1}; i <= n; ++i) {
+					try {
+						auto val = luabind::object_cast<bool>(tValues[i]);
+						values.push_back(static_cast<TValue>(val));
+					}
+					catch(const luabind::error &err) {
+						auto val = luabind::object_cast<TValue>(tValues[i]);
+						values.push_back(val);
+					}
+				}
+				if(values.size() != times.size())
+					throw std::runtime_error {"Number of data values does not match number of time values!"};
+				return channel.InsertValues<TValue>(times.size(), times.data(), values.data(), offset);
+			}
+		}
+		else
+			return std::numeric_limits<uint32_t>::max();
+	});
+
+	channel.Update();
+	return insertIndex;
+}
+static uint32_t insert_channel_values(lua_State *l, panima::Channel &channel, const std::vector<float> &times, luabind::tableT<void> tValues) { return insert_channel_values(l, channel, times, tValues, 0.f); }
+
+static Lua::mult<Lua::tb<float>, Lua::tb<void>> get_data_in_range(lua_State *l, panima::Channel &channel, float tStart, float tEnd)
+{
+	return ::udm::visit_ng(channel.GetValueType(), [l, &channel, tStart, tEnd](auto tag) {
+		using T = typename decltype(tag)::type;
+
+		std::vector<float> times;
+		std::vector<T> values;
+		auto n = channel.GetValueCount();
+		auto getInterpolatedValue = [&channel, n](float t, uint32_t &outIdx, bool prefix) -> std::optional<std::pair<float, T>> {
+			float f;
+			auto indices = channel.FindInterpolationIndices(t, f);
+			if(indices.first == std::numeric_limits<decltype(indices.first)>::max()) {
+				if(t <= *channel.GetTime(0)) {
+					indices = {0, 0};
+					f = 0.f;
+				}
+				else {
+					indices = {n - 1, n - 1};
+					f = 0.f;
+				}
+			}
+
+			if(f == 0.f)
+				outIdx = indices.first;
+			else if(f == 1.f)
+				outIdx = indices.second;
+			else {
+				outIdx = prefix ? indices.second : indices.first;
+
+				auto time0 = *channel.GetTime(indices.first);
+				auto time1 = *channel.GetTime(indices.second);
+				auto &value0 = channel.GetValue<T>(indices.first);
+				auto &value1 = channel.GetValue<T>(indices.second);
+				T result;
+				Lua::udm::lerp_value(value0, value1, f, result, udm::type_to_enum<T>());
+				return std::pair<float, T> {umath::lerp(time0, time1, f), result};
+			}
+			return {};
+		};
+
+		if(n > 0) {
+			uint32_t idxStart;
+			auto prefixValue = getInterpolatedValue(tStart, idxStart, true);
+
+			uint32_t idxEnd;
+			auto postfixValue = getInterpolatedValue(tEnd, idxEnd, false);
+
+			auto count = idxEnd - idxStart + 1;
+			if(prefixValue)
+				++count;
+			if(postfixValue)
+				++count;
+
+			times.reserve(count);
+			values.reserve(count);
+			if(prefixValue) {
+				times.push_back(prefixValue->first);
+				values.push_back(prefixValue->second);
+			}
+			for(auto i = idxStart; i <= idxEnd; ++i) {
+				times.push_back(*channel.GetTime(i));
+				values.push_back(channel.GetValue<T>(i));
+			}
+			if(postfixValue) {
+				times.push_back(postfixValue->first);
+				values.push_back(postfixValue->second);
+			}
+		}
+		return luabind::object {l, std::pair<std::vector<float>, std::vector<T>> {std::move(times), std::move(values)}};
+	});
+}
+
 void Lua::animation::register_library(Lua::Interface &lua)
 {
 	auto animMod = luabind::module(lua.GetState(), "panima");
@@ -272,27 +388,9 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		  channel.Update();
 		  return r;
 	  });
-	cdChannel.def(
-	  "InsertValues", +[](lua_State *l, panima::Channel &channel, const std::vector<float> &times, luabind::tableT<void> tValues) -> uint32_t {
-		  auto numTimes = times.size();
-		  auto numValues = Lua::GetObjectLength(l, tValues);
-		  if(numTimes != numValues)
-			  throw std::runtime_error {"Number of elements in times array (" + std::to_string(numTimes) + ") doesn't match number of values in values array (" + std::to_string(numValues) + ")! This is not allowed."};
-
-		  auto insertIndex = ::udm::visit(channel.GetValueType(), [&tValues, &channel, &times, numValues](auto tag) {
-			  using T = typename decltype(tag)::type;
-			  using TValue = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
-			  if constexpr(pragma::is_animatable_type_v<TValue>) {
-				  auto values = luabind::object_cast<std::vector<TValue>>(tValues);
-				  return channel.InsertValues<TValue>(times.size(), times.data(), values.data());
-			  }
-			  else
-				  return std::numeric_limits<uint32_t>::max();
-		  });
-
-		  channel.Update();
-		  return insertIndex;
-	  });
+	cdChannel.def("Validate", &panima::Channel::Validate);
+	cdChannel.def("InsertValues", static_cast<uint32_t (*)(lua_State *, panima::Channel &, const std::vector<float> &, luabind::tableT<void>, float)>(&insert_channel_values));
+	cdChannel.def("InsertValues", static_cast<uint32_t (*)(lua_State *, panima::Channel &, const std::vector<float> &, luabind::tableT<void>)>(&insert_channel_values));
 	cdChannel.def(
 	  "SetValues", +[](lua_State *l, panima::Channel &channel, luabind::tableT<float> times, luabind::tableT<void> values) {
 		  auto numTimes = Lua::GetObjectLength(l, times);
@@ -437,6 +535,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	  });
 	cdChannel.def("FindIndexRangeInTimeRange", &find_index_range_in_time_range);
 	cdChannel.def("FindIndexRangeInTimeRange", &find_index_range_in_time_range, luabind::default_parameter_policy<4, false> {});
+	cdChannel.def("GetDataInRange", &get_data_in_range);
 	cdChannel.def(
 	  "SortValues", +[](lua_State *l, panima::Channel &channel) {
 		  auto n = channel.GetTimeCount();
@@ -458,7 +557,9 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	animMod[cdChannel];
 
 	Lua::RegisterLibraryValue(lua.GetState(), "panima", "VALUE_EPSILON", panima::Channel::VALUE_EPSILON);
+	Lua::RegisterLibraryValue(lua.GetState(), "panima", "TIME_EPSILON", panima::Channel::TIME_EPSILON);
 
+	pragma::lua::define_custom_constructor<panima::Channel, []() -> std::shared_ptr<panima::Channel> { return std::make_shared<panima::Channel>(); }>(lua.GetState());
 	pragma::lua::define_custom_constructor<panima::Channel, [](::udm::LinkedPropertyWrapper &times, ::udm::LinkedPropertyWrapper &values) -> std::shared_ptr<panima::Channel> { return std::make_shared<panima::Channel>(times.ClaimOwnership(), values.ClaimOwnership()); },
 	  ::udm::LinkedPropertyWrapper &, ::udm::LinkedPropertyWrapper &>(lua.GetState());
 

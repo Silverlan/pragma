@@ -101,7 +101,7 @@ Engine::Engine(int, char *[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(En
 {
 	// TODO: File cache doesn't work with absolute paths at the moment
 	// (e.g. addons/imported/models/some_model.pmdl would return false even if the file exists)
-	filemanager::set_use_file_index_cache(true);
+    filemanager::set_use_file_index_cache(true);
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::open_domain();
@@ -885,7 +885,9 @@ void Engine::Start()
 
 void Engine::UpdateTickCount() { m_ctTick.Update(); }
 
+#ifdef _WIN32
 extern std::string g_crashExceptionMessage;
+#endif
 std::unique_ptr<ZIPFile> Engine::GenerateEngineDump(const std::string &baseName, std::string &outZipFileName, std::string &outErr)
 {
 	auto programPath = util::Path::CreatePath(util::get_program_path());
@@ -896,11 +898,12 @@ std::unique_ptr<ZIPFile> Engine::GenerateEngineDump(const std::string &baseName,
 		outErr = "Failed to create dump file '" + zipName.GetString() + "'";
 		return nullptr;
 	}
+
+#ifdef _WIN32
 	// Write Exception
 	if(g_crashExceptionMessage.empty() == false)
 		zipFile->AddFile("exception.txt", g_crashExceptionMessage);
 
-#ifdef _WIN32
 	// Write Stack Backtrace
 	zipFile->AddFile("stack_backtrace.txt", util::get_formatted_stack_backtrace_string());
 #endif

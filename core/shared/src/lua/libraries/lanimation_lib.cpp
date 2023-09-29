@@ -248,6 +248,19 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	pragma::lua::define_custom_constructor<panima::TimeFrame, []() -> panima::TimeFrame { return panima::TimeFrame {}; }>(lua.GetState());
 
 	auto cdChannel = luabind::class_<panima::Channel>("Channel");
+	cdChannel.scope[luabind::def(
+	  "merge_data_arrays", +[](lua_State *l, const std::vector<float> &times0, const luabind::object &oValues0, const std::vector<float> &times1, const luabind::object &oValues1, ::udm::Type valueType) -> Lua::mult<Lua::tb<float>, Lua::tb<void>> {
+		  return ::udm::visit_ng(valueType, [l, &times0, &times1, &oValues0, &oValues1](auto tag) {
+			  using T = typename decltype(tag)::type;
+			  using TValue = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
+			  std::vector<float> times;
+			  std::vector<TValue> values;
+			  auto values0 = luabind::object_cast<std::vector<TValue>>(oValues0);
+			  auto values1 = luabind::object_cast<std::vector<TValue>>(oValues1);
+			  panima::Channel::MergeDataArrays(times0, values0, times1, values1, times, values);
+			  return luabind::object {l, std::pair<std::vector<float>, std::vector<TValue>> {std::move(times), std::move(values)}};
+		  });
+	  })];
 
 	auto cdPath = luabind::class_<panima::ChannelPath>("Path");
 	cdPath.def(luabind::constructor<>());
@@ -463,7 +476,17 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	  });
 	cdChannel.def("FindIndexRangeInTimeRange", &find_index_range_in_time_range);
 	cdChannel.def("FindIndexRangeInTimeRange", &find_index_range_in_time_range, luabind::default_parameter_policy<4, false> {});
-	cdChannel.def("GetDataInRange", &get_data_in_range);
+	cdChannel.def(
+	  "GetDataInRange", +[](lua_State *l, panima::Channel &channel, float tStart, float tEnd) -> Lua::mult<Lua::tb<float>, Lua::tb<void>> {
+		  return ::udm::visit_ng(channel.GetValueType(), [l, &channel, tStart, tEnd](auto tag) {
+			  using T = typename decltype(tag)::type;
+			  using TValue = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
+			  std::vector<float> times;
+			  std::vector<TValue> values;
+			  channel.GetDataInRange<TValue>(tStart, tEnd, times, values);
+			  return luabind::object {l, std::pair<std::vector<float>, std::vector<TValue>> {std::move(times), std::move(values)}};
+		  });
+	  });
 	cdChannel.def(
 	  "SortValues", +[](lua_State *l, panima::Channel &channel) {
 		  auto n = channel.GetTimeCount();

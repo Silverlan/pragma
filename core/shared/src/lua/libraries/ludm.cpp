@@ -1380,21 +1380,10 @@ using lua_udm_underlying_numeric_type = std::conditional_t<std::is_same_v<T, boo
 template<typename T>
 static lua_udm_underlying_numeric_type<T> get_numeric_component(const T &value, int32_t idx)
 {
-
-	if constexpr(udm::is_arithmetic<T>)
-		return value;
-	else if constexpr(udm::is_vector_type<T> || std::is_same_v<T, udm::EulerAngles> || std::is_same_v<T, udm::Srgba> || std::is_same_v<T, udm::HdrColor>)
-		return value[idx];
-	else if constexpr(std::is_same_v<T, udm::Quaternion>) {
-		// Quaternion memory order is xyzw, but we want wxyz
-		if(idx == 0)
-			return value[3];
-		return value[idx - 1];
-	}
-	else {
-		static_assert(std::is_same_v<lua_udm_underlying_numeric_type<T>, float>);
-		return *(reinterpret_cast<const float *>(&value) + idx);
-	}
+	if constexpr(std::is_same_v<T, bool>)
+		return static_cast<uint8_t>(value);
+	else
+		return udm::get_numeric_component(value,idx);
 }
 
 static Lua::type<uint32_t> get_numeric_component(lua_State *l, const luabind::object &value, int32_t idx, udm::Type type)
@@ -1406,7 +1395,7 @@ static Lua::type<uint32_t> get_numeric_component(lua_State *l, const luabind::ob
 		if constexpr(std::is_same_v<lua_udm_underlying_numeric_type<T>, void>)
 			return Lua::nil;
 		else
-			return luabind::object {l, get_numeric_component<T>(get_lua_object_udm_value<T>(value), idx)};
+			return luabind::object {l, ::get_numeric_component<T>(get_lua_object_udm_value<T>(value), idx)};
 	});
 }
 
@@ -1416,7 +1405,7 @@ static Lua::udm_ng lerp_value(lua_State *l, const luabind::object &value0, const
 	return ::udm::visit_ng(type, [l, &value0, &value1, t, type](auto tag) {
 		using T = typename decltype(tag)::type;
 		T valuer;
-		Lua::udm::lerp_value<T>(get_lua_object_udm_value<T>(value0), get_lua_object_udm_value<T>(value1), t, valuer, type);
+		::udm::lerp_value<T>(get_lua_object_udm_value<T>(value0), get_lua_object_udm_value<T>(value1), t, valuer, type);
 		return luabind::object {l, valuer};
 	});
 }

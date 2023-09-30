@@ -176,13 +176,13 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, Slice);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, AnimationManager);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, Animation);
 
-static uint32_t insert_channel_values(lua_State *l, panima::Channel &channel, const std::vector<float> &times, luabind::tableT<void> tValues, float offset)
+static uint32_t insert_channel_values(lua_State *l, panima::Channel &channel, const std::vector<float> &times, luabind::tableT<void> tValues, float offset, panima::Channel::InsertFlags flags)
 {
 	auto numTimes = times.size();
 	auto numValues = Lua::GetObjectLength(l, tValues);
 	if(numTimes != numValues)
 		throw std::runtime_error {"Number of elements in times array (" + std::to_string(numTimes) + ") doesn't match number of values in values array (" + std::to_string(numValues) + ")! This is not allowed."};
-	auto insertIndex = ::udm::visit(channel.GetValueType(), [l, &tValues, &channel, &times, numValues, offset](auto tag) {
+	auto insertIndex = ::udm::visit(channel.GetValueType(), [l, &tValues, &channel, &times, numValues, offset, flags](auto tag) {
 		using T = typename decltype(tag)::type;
 		using TValue = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
 		if constexpr(pragma::is_animatable_type_v<TValue>) {
@@ -190,7 +190,7 @@ static uint32_t insert_channel_values(lua_State *l, panima::Channel &channel, co
 				auto values = luabind::object_cast<std::vector<TValue>>(tValues);
 				if(values.size() != times.size())
 					throw std::runtime_error {"Number of data values does not match number of time values!"};
-				return channel.InsertValues<TValue>(times.size(), times.data(), values.data(), offset);
+				return channel.InsertValues<TValue>(times.size(), times.data(), values.data(), offset, flags);
 			}
 			else {
 				std::vector<TValue> values;
@@ -208,7 +208,7 @@ static uint32_t insert_channel_values(lua_State *l, panima::Channel &channel, co
 				}
 				if(values.size() != times.size())
 					throw std::runtime_error {"Number of data values does not match number of time values!"};
-				return channel.InsertValues<TValue>(times.size(), times.data(), values.data(), offset);
+				return channel.InsertValues<TValue>(times.size(), times.data(), values.data(), offset, flags);
 			}
 		}
 		else
@@ -218,6 +218,7 @@ static uint32_t insert_channel_values(lua_State *l, panima::Channel &channel, co
 	channel.Update();
 	return insertIndex;
 }
+static uint32_t insert_channel_values(lua_State *l, panima::Channel &channel, const std::vector<float> &times, luabind::tableT<void> tValues, float offset) { return insert_channel_values(l, channel, times, tValues, offset, panima::Channel::InsertFlags::ClearExistingDataInRange); }
 static uint32_t insert_channel_values(lua_State *l, panima::Channel &channel, const std::vector<float> &times, luabind::tableT<void> tValues) { return insert_channel_values(l, channel, times, tValues, 0.f); }
 
 void Lua::animation::register_library(Lua::Interface &lua)
@@ -261,6 +262,9 @@ void Lua::animation::register_library(Lua::Interface &lua)
 			  return luabind::object {l, std::pair<std::vector<float>, std::vector<TValue>> {std::move(times), std::move(values)}};
 		  });
 	  })];
+	cdChannel.add_static_constant("INSERT_FLAG_NONE", umath::to_integral(panima::Channel::InsertFlags::None));
+	cdChannel.add_static_constant("INSERT_FLAG_BIT_CLEAR_EXISTING_DATA_IN_RANGE", umath::to_integral(panima::Channel::InsertFlags::ClearExistingDataInRange));
+	cdChannel.add_static_constant("INSERT_FLAG_BIT_DECIMATE_INSERTED_DATA", umath::to_integral(panima::Channel::InsertFlags::DecimateInsertedData));
 
 	auto cdPath = luabind::class_<panima::ChannelPath>("Path");
 	cdPath.def(luabind::constructor<>());
@@ -330,6 +334,44 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		  return r;
 	  });
 	cdChannel.def("Validate", &panima::Channel::Validate);
+	cdChannel.def(
+	  "DebugPrint", +[](panima::Channel &channel) {
+		  auto data = ::udm::Data::Create();
+		  auto udmData = data->GetAssetData().GetData();
+		  channel.Save(udmData);
+		  std::stringstream ss;
+		  data->ToAscii(ss, ::udm::AsciiSaveFlags::DontCompressLz4Arrays);
+		  Con::cout << ss.str() << Con::endl;
+	  });
+	cdChannel.def(
+	  "PopulateRandom", +[](panima::Channel &channel, uint32_t numValues, float minTime, float maxTime, float minVal, float maxVal) {
+		  return ::udm::visit_ng(channel.GetValueType(), [&channel, numValues, minTime, maxTime, minVal, maxVal](auto tag) {
+			  using T = typename decltype(tag)::type;
+			  using TValue = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
+			  if constexpr(panima::is_animatable_type(::udm::type_to_enum<TValue>())) {
+				  std::vector<float> times;
+				  std::vector<TValue> values;
+				  times.reserve(numValues);
+				  values.reserve(numValues);
+				  auto nc = ::udm::get_numeric_component_count(::udm::type_to_enum<TValue>());
+				  for(auto i = decltype(numValues) {0u}; i < numValues; ++i) {
+					  times.push_back(umath::random(minTime, maxTime));
+
+					  using TBase = std::conditional_t<std::is_same_v<TValue, ::udm::Quaternion>, ::udm::EulerAngles, TValue>;
+					  TBase value {};
+					  for(auto i = decltype(nc) {0u}; i < nc; ++i)
+						  ::udm::get_numeric_component(value, i) = umath::random(minVal, maxVal);
+					  if constexpr(std::is_same_v<TValue, ::udm::Quaternion>)
+						  values.push_back(uquat::create(value));
+					  else
+						  values.push_back(value);
+				  }
+				  std::sort(times.begin(), times.end());
+				  channel.InsertValues<TValue>(numValues, times.data(), values.data());
+			  }
+		  });
+	  });
+	cdChannel.def("InsertValues", static_cast<uint32_t (*)(lua_State *, panima::Channel &, const std::vector<float> &, luabind::tableT<void>, float, panima::Channel::InsertFlags)>(&insert_channel_values));
 	cdChannel.def("InsertValues", static_cast<uint32_t (*)(lua_State *, panima::Channel &, const std::vector<float> &, luabind::tableT<void>, float)>(&insert_channel_values));
 	cdChannel.def("InsertValues", static_cast<uint32_t (*)(lua_State *, panima::Channel &, const std::vector<float> &, luabind::tableT<void>)>(&insert_channel_values));
 	cdChannel.def(
@@ -411,6 +453,16 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	  "GetInterpolatedValue", +[](lua_State *l, panima::Channel &channel, float t, bool clampToBounds) -> Lua::opt<Lua::udm_ng> { return get_interpolated_value(l, channel, t, clampToBounds); });
 	cdChannel.def(
 	  "GetInterpolatedValue", +[](lua_State *l, panima::Channel &channel, float t) -> Lua::opt<Lua::udm_ng> { return get_interpolated_value(l, channel, t, true); });
+	// Default float argument not supported in clang (state: 23-09-12)
+	// cdChannel.def("Decimate", static_cast<void (panima::Channel::*)(float, float, float)>(&panima::Channel::Decimate), luabind::default_parameter_policy<4, 0.03f> {});
+	// cdChannel.def("Decimate", static_cast<void (panima::Channel::*)(float)>(&panima::Channel::Decimate), luabind::default_parameter_policy<2, 0.03f> {});
+	cdChannel.def("Decimate", static_cast<void (panima::Channel::*)(float, float, float)>(&panima::Channel::Decimate));
+	cdChannel.def(
+	  "Decimate", +[](panima::Channel &channel, float tStart, float tEnd) { return channel.Decimate(tStart, tEnd); });
+	cdChannel.def("Decimate", static_cast<void (panima::Channel::*)(float)>(&panima::Channel::Decimate));
+	cdChannel.def(
+	  "Decimate", +[](panima::Channel &channel) { return channel.Decimate(); });
+
 	cdChannel.def(
 	  "GetValue", +[](lua_State *l, panima::Channel &channel, uint32_t idx) -> Lua::udm_ng {
 		  if(idx >= channel.GetValueCount())

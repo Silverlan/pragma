@@ -286,10 +286,10 @@ void pragma::ik::SwingLimit::SetAxisA(const Vector3 &axisA) { static_cast<BEPUik
 void pragma::ik::SwingLimit::SetAxisB(const Vector3 &axisB) { static_cast<BEPUik::IKSwingLimit *>(m_joint.get())->SetAxisB(to_bepu_axis(axisB)); }
 void pragma::ik::SwingLimit::SetMaxAngle(umath::Radian maxAngle) { static_cast<BEPUik::IKSwingLimit *>(m_joint.get())->SetMaximumAngle(maxAngle); }
 
-pragma::ik::EllipseSwingLimit::EllipseSwingLimit(Bone &bone0, Bone &bone1, const Vector3 &axisA, const Vector3 &axisB, umath::Radian maxAngleX, umath::Radian maxAngleY)
+pragma::ik::EllipseSwingLimit::EllipseSwingLimit(Bone &bone0, Bone &bone1, const Vector3 &axisA, const Vector3 &axisB, const Vector3 &axisBRight, const Vector3 &axisBUp, umath::Radian maxAngleX, umath::Radian maxAngleY)
     : IJoint {JointType::EllipseSwingLimit}, m_maxAngleX {maxAngleX}, m_maxAngleY {maxAngleY}, m_axisA {axisA}, m_axisB {axisB}
 {
-	auto joint = std::make_unique<BEPUik::IKEllipseSwingLimit>(**bone0, **bone1, to_bepu_axis(axisA), to_bepu_axis(axisB), maxAngleX, maxAngleY);
+	auto joint = std::make_unique<BEPUik::IKEllipseSwingLimit>(**bone0, **bone1, to_bepu_axis(axisA), to_bepu_axis(axisB), to_bepu_axis(axisBRight), to_bepu_axis(axisBUp), maxAngleX, maxAngleY);
 	SetJoint(std::move(joint), bone0, bone1);
 }
 pragma::ik::EllipseSwingLimit::~EllipseSwingLimit() {}
@@ -456,9 +456,9 @@ pragma::ik::SwingLimit &pragma::ik::Solver::AddSwingLimit(Bone &bone0, Bone &bon
 	m_bepuJoints.push_back(**joint);
 	return *joint;
 }
-pragma::ik::EllipseSwingLimit &pragma::ik::Solver::AddEllipseSwingLimit(Bone &bone0, Bone &bone1, const Vector3 &axisA, const Vector3 &axisB, float maxAngleX, float maxAngleY)
+pragma::ik::EllipseSwingLimit &pragma::ik::Solver::AddEllipseSwingLimit(Bone &bone0, Bone &bone1, const Vector3 &axisA, const Vector3 &axisB, const Vector3 &axisBRight, const Vector3 &axisBUp, float maxAngleX, float maxAngleY)
 {
-	auto joint = std::make_shared<EllipseSwingLimit>(bone0, bone1, axisA, axisB, maxAngleX, maxAngleY);
+	auto joint = std::make_shared<EllipseSwingLimit>(bone0, bone1, axisA, axisB, axisBRight, axisBUp, maxAngleX, maxAngleY);
 	m_joints.push_back(joint);
 	m_bepuJoints.push_back(**joint);
 	return *joint;

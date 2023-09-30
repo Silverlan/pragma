@@ -274,8 +274,8 @@ if platform == "linux":
 			# Required for OIIO
 			"apt-get install python3-distutils",
 
-            #install freetype for linking. X server frontends (Gnome, KDE etc) already include it somewhere down the line. Also install pkg-config for easy export of flags.
-            "apt-get install pkg-config libfreetype-dev"
+            		#install freetype for linking. X server frontends (Gnome, KDE etc) already include it somewhere down the line. Also install pkg-config for easy export of flags.
+            		"apt-get install pkg-config libfreetype-dev",
 
 
 			#Ninja

@@ -375,6 +375,12 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdChannel.def("InsertValues", static_cast<uint32_t (*)(lua_State *, panima::Channel &, const std::vector<float> &, luabind::tableT<void>, float)>(&insert_channel_values));
 	cdChannel.def("InsertValues", static_cast<uint32_t (*)(lua_State *, panima::Channel &, const std::vector<float> &, luabind::tableT<void>)>(&insert_channel_values));
 	cdChannel.def(
+	  "InsertValue", +[](lua_State *l, panima::Channel &channel, float t, const luabind::object &value) -> uint32_t {
+		  auto tValues = luabind::newtable(l);
+		  tValues[1] = value;
+		  return insert_channel_values(l, channel, std::vector<float> {t}, tValues);
+	  });
+	cdChannel.def(
 	  "SetValues", +[](lua_State *l, panima::Channel &channel, luabind::tableT<float> times, luabind::tableT<void> values) {
 		  auto numTimes = Lua::GetObjectLength(l, times);
 		  auto numValues = Lua::GetObjectLength(l, values);

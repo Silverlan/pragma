@@ -45,6 +45,10 @@ class VFilePtrInternalReal;
 namespace udm {
 	struct AssetData;
 };
+namespace panima {
+	class Skeleton;
+	class Animation;
+};
 namespace pragma::animation {
 	class DLLNETWORK Animation : public std::enable_shared_from_this<Animation> {
 	  public:
@@ -112,6 +116,8 @@ namespace pragma::animation {
 		bool GetBoneWeight(uint32_t boneId, float &weight) const;
 		const std::vector<float> &GetBoneWeights() const;
 		std::vector<float> &GetBoneWeights();
+
+		std::shared_ptr<panima::Animation> ToPanimaAnimation(const panima::Skeleton &skel, const Frame *optRefPose = nullptr) const;
 
 		// If reference frame is specified, it will be used to optimize frame data and reduce the file size
 		bool Save(udm::AssetDataArg outData, std::string &outErr, const Frame *optReference = nullptr, bool enableOptimizations = true);

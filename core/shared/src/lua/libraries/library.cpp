@@ -71,6 +71,7 @@
 #include <panima/channel.hpp>
 #include <mathutil/camera.hpp>
 #include <mathutil/umath_frustum.hpp>
+#include <bezier_fit.hpp>
 #include <regex>
 #include <complex>
 #include <random>
@@ -242,6 +243,8 @@ bool Lua::util::start_debugger_server(lua_State *l)
 
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(util, HSV);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(std, match_results<const char *>);
+
+static std::vector<bezierfit::VECTOR> reduce(std::vector<bezierfit::VECTOR> points) { return bezierfit::reduce(points); }
 
 void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 {
@@ -474,6 +477,11 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("ease_in_out", &Lua::math::ease_in_out), luabind::def("get_frustum_plane_size", &Lua::math::get_frustum_plane_size), luabind::def("get_frustum_plane_boundaries", &Lua::math::get_frustum_plane_boundaries),
 	  luabind::def("get_frustum_plane_point", &Lua::math::get_frustum_plane_point),
 
+	  luabind::def("fit_bezier_curve", &bezierfit::fit),
+	  luabind::def("reduce_curve_points", &bezierfit::reduce),
+	  // luabind::def("reduce_curve_points", &bezierfit::reduce, luabind::default_parameter_policy<2, 2.f> {}), // Default float argument not supported in clang (state: 23-09-12)
+	  luabind::def("reduce_curve_points", &::reduce),
+
 	  luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients, luabind::meta::join<luabind::default_parameter_policy<3, true>, luabind::default_parameter_policy<4, true>>::type {}),
 	  luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients, luabind::default_parameter_policy<4, true> {}), luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients),
 
@@ -504,8 +512,21 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		    auto n = umath::find_bezier_roots(time, cp0Time, cp0OutTime, cp1InTime, cp1Time, r);
 		    return umath::calc_bezier_point(cp0Val, cp0OutVal, cp1InVal, cp1Val, r[0]);
 	    }),
+		luabind::def("calc_bezier_point_fraction",+[](float t, const Vector2 &p0, const Vector2 &p1, const Vector2 &p2, const Vector2 &p3) {
+			auto u = 1 - t;
+			auto tt = t * t;
+			auto uu = u * u;
+			auto uuu = uu * u;
+			auto ttt = tt * t;
+
+			return uuu * p0 + 3 * uu * t * p1 + 3 * u * tt * p2 + ttt * p3;
+		  }),
 	  luabind::def(
-	    "axis_to_vector", static_cast<Vector3(*)(pragma::SignedAxis)>(&pragma::axis_to_vector))
+	    "axis_to_vector", static_cast<Vector3(*)(pragma::SignedAxis)>(&pragma::axis_to_vector)),
+	  luabind::def(
+	    "remap", +[](float value, float fromLow, float fromHigh, float toLow, float toHigh) {
+			   return toLow + (value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow);
+			  })
 	];
 	lua_pushtablecfunction(lua.GetState(), "math", "parse_expression", parse_math_expression);
 	lua_pushtablecfunction(lua.GetState(), "math", "solve_quadric", Lua::math::solve_quadric);

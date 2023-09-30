@@ -121,6 +121,7 @@ function udm.BaseSchemaType:ChangeUniqueId(uuid)
 	referenceables[newUniqueId] = self
 end
 function udm.BaseSchemaType:OnInitialize() end
+function udm.BaseSchemaType:OnUdmChildArrayInitialized(name) end
 function udm.BaseSchemaType:IsValid()
 	return self:GetUdmData():IsValid()
 end
@@ -195,6 +196,11 @@ function udm.BaseSchemaType:AddChangeListener(keyName, listener)
 	table.insert(self.m_changeListeners[keyName], cb)
 	return cb
 end
+function udm.BaseSchemaType:OnArrayValueChanged(name, idx) end
+function udm.BaseSchemaType:OnArrayValueAdded(name, idx) end
+function udm.BaseSchemaType:OnArrayValueRangeAdded(name, startIndex, count) end
+function udm.BaseSchemaType:OnArrayValueRangeRemoved(name, startIndex, count) end
+function udm.BaseSchemaType:OnArrayValueRemoved(name, idx) end
 local function get_getter_name(udmChildData, name)
 	local nameUpper = name:sub(1, 1):upper() .. name:sub(2)
 	return udmChildData:GetValue("getterName", udm.TYPE_STRING) or ("Get" .. nameUpper)
@@ -567,6 +573,7 @@ function udm.generate_lua_api_from_schema(schema)
 												(udmType == udm.TYPE_ARRAY_LZ4) and udm.ARRAY_TYPE_COMPRESSED
 													or udm.ARRAY_TYPE_RAW
 											)
+											self:OnUdmChildArrayInitialized(name)
 										else
 											self:GetUdmData():Get(name):SetValueType(valueType)
 										end
@@ -584,7 +591,8 @@ function udm.generate_lua_api_from_schema(schema)
 										end
 										child:SetValue(i, type, value)
 									end
-									self:CallChangeListeners(name, i - 1, udm.BaseSchemaType.ARRAY_EVENT_SET)
+									self:OnArrayValueChanged(name, i)
+									self:CallChangeListeners(name, i, udm.BaseSchemaType.ARRAY_EVENT_SET)
 								end
 							end
 						end
@@ -603,6 +611,7 @@ function udm.generate_lua_api_from_schema(schema)
 									local prop, err =
 										udm.create_property_from_schema(schema, valueType, self, child, true)
 									table.insert(self:GetTypedChildren()[name], prop)
+									self:OnArrayValueAdded(name, newSize - 1)
 									self:CallChangeListeners(name, newSize - 1, udm.BaseSchemaType.ARRAY_EVENT_ADD)
 									return prop
 								end
@@ -633,6 +642,7 @@ function udm.generate_lua_api_from_schema(schema)
 										child.m_udmData = el:Get(i - 1)
 									end
 								end
+								self:OnArrayValueRangeAdded(name, startIndex, count)
 								self:CallChangeListeners(
 									name,
 									nil,
@@ -671,6 +681,7 @@ function udm.generate_lua_api_from_schema(schema)
 										children[#children] = nil
 									end
 								end
+								self:OnArrayValueRangeRemoved(name, startIndex, count)
 								self:CallChangeListeners(
 									name,
 									nil,
@@ -718,6 +729,7 @@ function udm.generate_lua_api_from_schema(schema)
 									local child = children[i]
 									child.m_udmData = a:Get(i - 1)
 								end
+								self:OnArrayValueRemoved(name, idx)
 								self:CallChangeListeners(name, idx, udm.BaseSchemaType.ARRAY_EVENT_REMOVE, curVal)
 								return true
 							end

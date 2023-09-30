@@ -36,6 +36,7 @@
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_file.h>
 #include <mathutil/vertex.hpp>
+#include <panima/animation.hpp>
 #include <panima/skeleton.hpp>
 #include <panima/bone.hpp>
 #include <fsys/ifile.hpp>
@@ -768,6 +769,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	// Animation
 	auto classDefAnimation = luabind::class_<pragma::animation::Animation>("Animation")
+	                           .def("ToPanimaAnimation", &::pragma::animation::Animation::ToPanimaAnimation)
 	                           .def("GetFrame", &Lua::Animation::GetFrame)
 	                           .def("GetBoneList", &Lua::Animation::GetBoneList)
 	                           .def("GetActivity", &pragma::animation::Animation::GetActivity)

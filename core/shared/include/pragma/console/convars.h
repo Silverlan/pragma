@@ -27,14 +27,14 @@ enum class DLLNETWORK ConType : uint32_t {
 
 using ConVarValue = std::unique_ptr<void, void (*)(void *)>;
 namespace console {
-	constexpr bool is_valid_convar_type(udm::Type type) { return !udm::is_non_trivial_type(type) || type == udm::Type::String; }
+	constexpr bool is_valid_convar_type(udm::Type type) { return udm::is_common_type(type); }
 	template<typename T>
 	concept is_valid_convar_type_v = is_valid_convar_type(udm::type_to_enum<T>());
 
 	template<bool ENABLE_DEFAULT_RETURN = true>
 	constexpr decltype(auto) visit(udm::Type type, auto vs)
 	{
-		return udm::visit<true, true, true, ENABLE_DEFAULT_RETURN>(type, vs);
+		return udm::visit_c<ENABLE_DEFAULT_RETURN>(type, vs);
 	}
 };
 
@@ -189,12 +189,12 @@ class DLLNETWORK ConVarMap {
 	namespace console_system {                                                                                                                                                                                                                                                                   \
 		namespace glname {                                                                                                                                                                                                                                                                       \
 			DLLNETWORK ConVarMap *get_convar_map();                                                                                                                                                                                                                                              \
-			DLLNETWORK bool register_convar(const std::string &cvar, udm::Type type, const std::string &value, ConVarFlags flags, const std::string &help);                                                                                                                                                      \
+			DLLNETWORK bool register_convar(const std::string &cvar, udm::Type type, const std::string &value, ConVarFlags flags, const std::string &help);                                                                                                                                      \
 			DLLNETWORK bool register_convar_callback(const std::string &scvar, int i);                                                                                                                                                                                                           \
-			DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(NetworkState *, const ConVar &, int, int));                                                                                                                                                            \
-			DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(NetworkState *, const ConVar &, std::string, std::string));                                                                                                                                            \
-			DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(NetworkState *, const ConVar &, float, float));                                                                                                                                                        \
-			DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(NetworkState *, const ConVar &, bool, bool));                                                                                                                                                          \
+			DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(NetworkState *, const ConVar &, int, int));                                                                                                                                                      \
+			DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(NetworkState *, const ConVar &, std::string, std::string));                                                                                                                                      \
+			DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(NetworkState *, const ConVar &, float, float));                                                                                                                                                  \
+			DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(NetworkState *, const ConVar &, bool, bool));                                                                                                                                                    \
 			DLLNETWORK bool register_concommand(const std::string &cvar, void (*function)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), ConVarFlags flags, const std::string &help);                                                                        \
 			DLLNETWORK bool register_concommand(const std::string &cvar, void (*function)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &), ConVarFlags flags, const std::string &help);                                                                               \
 			DLLNETWORK bool register_concommand(const std::string &cvar, void (*function)(NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), const std::string &help);                                                                                           \
@@ -234,7 +234,7 @@ cvar_newglobal_dec(engine);
 
 #ifdef ENGINE_NETWORK // ConCommands are only DECLARED (Unless they're shared) within shared.dll, the function definitions must be done in a different library
 #define REGISTER_CONVAR_SV_INTERNAL(cmdName, type, value, flags, help) auto __reg_cvar_Server_##cmdName = console_system::server::register_convar(#cmdName, type, value, flags, help);
-#define REGISTER_CONVAR_SV(cmdName, type, value, flags, help)                                                                                                                                                                                                                                          \
+#define REGISTER_CONVAR_SV(cmdName, type, value, flags, help)                                                                                                                                                                                                                                    \
 	static_assert((static_cast<uint32_t>(flags) & static_cast<uint32_t>(ConVarFlags::Replicated)) == 0, "ConVar with replicated flag needs to be shared!");                                                                                                                                      \
 	REGISTER_CONVAR_SV_INTERNAL(cmdName, type, value, flags, help)
 
@@ -308,8 +308,8 @@ cvar_newglobal_dec(engine);
 
 #define REGISTER_ENGINE_CONVAR(cmdName, type, value, flags, help) REGISTER_CONVAR_EN(cmdName, type, value, flags, help);
 
-#define REGISTER_SHARED_CONVAR(cmdName, type, value, flags, help)                                                                                                                                                                                                                                      \
-	REGISTER_CONVAR_SV_INTERNAL(cmdName, type, value, flags, help);                                                                                                                                                                                                                                    \
+#define REGISTER_SHARED_CONVAR(cmdName, type, value, flags, help)                                                                                                                                                                                                                                \
+	REGISTER_CONVAR_SV_INTERNAL(cmdName, type, value, flags, help);                                                                                                                                                                                                                              \
 	REGISTER_CONVAR_CL(cmdName, type, value, flags, help);
 
 #endif

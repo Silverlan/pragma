@@ -130,7 +130,7 @@ ConVar *CVarHandler::SetConVar(std::string scmd, std::string value, bool bApplyI
 	std::string prev = cvar->GetString();
 	if(bApplyIfEqual == false && prev == value)
 		return nullptr;
-	udm::visit_ng(cvar->GetVarType(), [this, &scmd, cvar, &value](auto tag) {
+	udm::visit_c(cvar->GetVarType(), [this, &scmd, cvar, &value](auto tag) {
 		using T = typename decltype(tag)::type;
 		auto it = m_cvarCallbacks.find(scmd);
 		if(it == m_cvarCallbacks.end() || it->second.empty()) {

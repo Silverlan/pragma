@@ -661,7 +661,7 @@ if with_common_modules:
         commitSha="17652f0",
         repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
     )
-    #modules_prebuilt.append("Silverlan/pr_mount_external_prebuilt")
+    modules_prebuilt.append("Silverlan/pr_mount_external_prebuilt")
 
 if with_pfm:
     if with_core_pfm_modules or with_all_pfm_modules:

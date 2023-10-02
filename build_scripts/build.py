@@ -275,7 +275,7 @@ if platform == "linux":
 			"apt-get install python3-distutils",
 
             #install freetype for linking. X server frontends (Gnome, KDE etc) already include it somewhere down the line. Also install pkg-config for easy export of flags.
-            "apt-get install pkg-config libfreetype-dev"
+            "apt-get install pkg-config libfreetype-dev",
 
 
 			#Ninja
@@ -661,7 +661,7 @@ if with_common_modules:
         commitSha="17652f0",
         repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
     )
-    modules_prebuilt.append("Silverlan/pr_mount_external_prebuilt")
+    #modules_prebuilt.append("Silverlan/pr_mount_external_prebuilt")
 
 if with_pfm:
     if with_core_pfm_modules or with_all_pfm_modules:

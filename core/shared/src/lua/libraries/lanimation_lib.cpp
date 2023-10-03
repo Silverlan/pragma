@@ -196,14 +196,25 @@ static uint32_t insert_channel_values(lua_State *l, panima::Channel &channel, co
 				std::vector<TValue> values;
 				auto n = Lua::GetObjectLength(l, tValues);
 				values.reserve(n);
-				for(auto i = decltype(n) {1}; i <= n; ++i) {
-					try {
-						auto val = luabind::object_cast<bool>(tValues[i]);
-						values.push_back(static_cast<TValue>(val));
-					}
-					catch(const luabind::error &err) {
-						auto val = luabind::object_cast<TValue>(tValues[i]);
-						values.push_back(val);
+				if(n > 0) {
+					auto type = Lua::GetType(tValues[1]);
+					switch(type) {
+					case Lua::Type::Bool:
+						{
+							for(auto i = decltype(n) {1}; i <= n; ++i) {
+								auto val = luabind::object_cast<bool>(tValues[i]);
+								values.push_back(static_cast<TValue>(val));
+							}
+							break;
+						}
+					default:
+						{
+							for(auto i = decltype(n) {1}; i <= n; ++i) {
+								auto val = luabind::object_cast<TValue>(tValues[i]);
+								values.push_back(val);
+							}
+							break;
+						}
 					}
 				}
 				if(values.size() != times.size())

@@ -15,6 +15,7 @@
 #include "pragma/console/util_console_color.hpp"
 #include "pragma/console/conout.h"
 #include <pragma/debug/debug_lua_zerobrane.hpp>
+#include <pragma/lua/luafunction_call.h>
 #include <sharedutils/util.h>
 #include <sharedutils/util_file.h>
 #include <stack>
@@ -283,6 +284,10 @@ int Lua::HandleTracebackError(lua_State *l)
 	if(!Lua::IsString(l, -1))
 		return 1;
 	std::string msg = Lua::ToString(l, -1);
+	auto *nw = pragma::get_engine()->GetNetworkState(l);
+	auto *game = nw ? nw->GetGameState() : nullptr;
+	if(game)
+		game->CallLuaCallbacks<void, std::string>("OnLuaError", msg);
 	Lua::PrintTraceback(l, &msg);
 	return 1;
 }

@@ -440,11 +440,13 @@ if not Path(vcpkg_root).is_dir():
 	print_msg("vcpkg not found, downloading...")
 	git_clone("https://github.com/Microsoft/vcpkg.git")
 
+os.chdir("vcpkg")
+reset_to_commit("ced4b6dbc1fcae4a30b39d004ba67242a79434a5")
+# This is a temporary fix for https://github.com/microsoft/vcpkg/issues/34173
+# Once the issue has been resolved, the vcpkg commit id above should be updated, and the line below removed
+replace_text_in_file(vcpkg_root +"/ports/openimageio/portfile.cmake","SHA512 59c38667ae792f5c5cc6f7f9655159e9b0e048d99f1232766407c01ab635a319ad4ba28cd3c6a115924ea0e4ec994d4c1bdb2f6301fbb9ae11b2820768bd1ff1","SHA512 6b87c805907a2f7c98f40e987fb6ebf769f8519f5d8a8b7393bed62a41cee1118bb32d2bc4d23fd464973e237077d08771ff85f72073caa57799d71bd098038f")
+os.chdir("..")
 if platform == "linux":
-	os.chdir("vcpkg")
-	reset_to_commit("7d9775a3c3ffef3cbad688d7271a06803d3a2f51")
-	os.chdir("..")
-
 	subprocess.run([vcpkg_root +"/bootstrap-vcpkg.sh","-disableMetrics"],check=True,shell=True)
 else:
 	subprocess.run([vcpkg_root +"/bootstrap-vcpkg.bat","-disableMetrics"],check=True,shell=True)
@@ -683,7 +685,7 @@ if with_pfm:
         )
         add_pragma_module(
             name="pr_unirender",
-            commitSha="86b24c469a188937d2dd7ce6ba5cf14f8f2d1e50",
+            commitSha="00f9e8d1a5c1009ae594a163922202de0d8b48f5",
             repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
         )
         add_pragma_module(
@@ -902,7 +904,7 @@ def download_addon(name,addonName,url,commitId=None):
 
 curDir = os.getcwd()
 if with_pfm:
-	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","d4888b9b6895c163f30f8728a78e1b1fa4b714e0")
+	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","dfc18a3aef10e5292b6c1ce62787d8d6cbf05fff")
 	download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","362981334d7b2f023dbcb1a2d1972fdc843b15e7")
 
 if with_vr:

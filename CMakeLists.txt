@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.11) # for GENERATOR_IS_MULTI_CONFIG and INTERFACE items on IMPORTED targets
+cmake_minimum_required(VERSION 3.13) # 3.11 for GENERATOR_IS_MULTI_CONFIG and INTERFACE items on IMPORTED targets
+#3.13 for IMPORTED_TARGET GLOBAL for pkg_check_modules
 project(pragma)
 
 #set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE CACHE INTERNAL "" FORCE)
@@ -304,6 +305,12 @@ search_lib_recursive(DEPENDENCY_LUABIND_LIBRARY lib/${BINARY_PRAGMA_DIR} luabind
 # search_lib_recursive(DEPENDENCY_HARFBUZZ_LIBRARY third_party_libs/harfbuzz/${BINARY_PRAGMA_DIR} harfbuzz)
 # endif()
 
+if(UNIX)
+    find_package(Freetype REQUIRED)
+    set(DEPENDENCY_FREETYPE_INCLUDE ${FREETYPE_INCLUDE_DIR_freetype2} CACHE STRING "" FORCE)
+    set(DEPENDENCY_FREETYPE_LIBRARY ${FREETYPE_LIBRARIES} CACHE STRING "" FORCE)
+endif()
+
 
 #set(DEPENDENCY_ANVIL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/include CACHE PATH "Path to include directory." FORCE)
 #set(DEPENDENCY_ANVIL_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/include CACHE PATH  "Path to include directory." FORCE)
@@ -464,7 +471,9 @@ if(UNIX)
 	resolve_links(DEPENDENCY_DETOUR_LIBRARY)
 	resolve_links(DEPENDENCY_FBXSDK_LIBRARY)
 	resolve_links(DEPENDENCY_FLANN_LIBRARY)
+if(WIN32)
 	resolve_links(DEPENDENCY_FREETYPE_LIBRARY)
+endif()
 	resolve_links(DEPENDENCY_GLFW_LIBRARY)
 	resolve_links(DEPENDENCY_GLSLANG_LIBRARY)
 	resolve_links(DEPENDENCY_GLSLANG_OGL_COMPILER_LIBRARY)
@@ -987,28 +996,21 @@ set_target_folder(Recast third_party_libs/recast)
 # 	unset(CMAKE_DISABLE_FIND_PACKAGE_PNG)
 # endif()
 
-add_library(freetype SHARED IMPORTED)
+
 if(WIN32)
+    add_library(freetype SHARED IMPORTED)
 	set_property(TARGET freetype PROPERTY
 	IMPORTED_IMPLIB "${DEPENDENCY_FREETYPE_LIBRARY}") #pragma_install_lib should pick up the dll file to install, since I did not install a target here
-else()
-	set_property(TARGET freetype PROPERTY
-	IMPORTED_LOCATION "${DEPENDENCY_FREETYPE_LIBRARY}")
-endif()
+
 target_include_directories(freetype INTERFACE ${DEPENDENCY_FREETYPE_INCLUDE})
-
-
-if(UNIX)
-	add_library(harfbuzz SHARED IMPORTED)
-	set_property(TARGET harfbuzz PROPERTY
-	IMPORTED_LOCATION "${DEPENDENCY_HARFBUZZ_LIBRARY}")
-	target_include_directories(harfbuzz INTERFACE ${DEPENDENCY_HARFBUZZ_INCLUDE})
 endif()
-unset(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz)
+#in linux the check is done in wgui
 
 
 
+if(WIN32)
 set_target_properties(freetype PROPERTIES FOLDER third_party_libs)
+endif()
 #target_include_directories(freetype PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 #
 
@@ -1234,9 +1236,13 @@ pragma_install_create_directory(modules)
 pragma_install_lib("${DEPENDENCY_BOOST_DATE_TIME_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_BOOST_SYSTEM_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_BZIP2_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+#In Linux there is a cyclic deps between freetype,harfbuzz,pango,cairo and most importantly fontconfig.
+#Fontconfig in linux is reposnsible for discovery of fonts. (think C:\Windows\Fonts for linux but customizable via configs) 
+#recently I hit a snag in which harfbuzz failed to load due to missing pango symbols.
+#The AppImage team hit similar snag too, see https://github.com/AppImageCommunity/pkg2appimage/pull/323 and https://github.com/probonopd/linuxdeployqt/issues/261
+# Even if I would include pango and cairo into our pipeline, CEF would complain (coincidentally hitting AppImage's snag too), since that DOES use system fonts. (fontconfig has persistent presence in all graphical managers in linux)
+if(WIN32)
 pragma_install_lib("${DEPENDENCY_FREETYPE_LIBRARY}" "${BINARY_OUTPUT_DIR}")
-if(UNIX)
-pragma_install_lib("${DEPENDENCY_HARFBUZZ_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 endif()
 pragma_install_lib("${DEPENDENCY_LUA_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_LUABIND_BINARY}" "${BINARY_OUTPUT_DIR}")
@@ -1346,15 +1352,7 @@ if(UNIX)
            -DINSTALL_LOCATION=${CMAKE_INSTALL_PREFIX}
            -P ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/patch_libraries.cmake
        COMMENT "Patching libraries...")
-       # HACK: This should be in the pr_chromium module!
-       add_custom_command(TARGET pragma-install
-       POST_BUILD
-       COMMAND patchelf --set-rpath '$ORIGIN' "${CMAKE_INSTALL_PREFIX}/modules/chromium/pr_chromium_subprocess"
-       )
-       add_custom_command(TARGET pragma-install-full
-       POST_BUILD
-       COMMAND patchelf --set-rpath '\$ORIGIN' "${CMAKE_INSTALL_PREFIX}/modules/chromium/pr_chromium_subprocess"
-       )
+
 endif()
 
 set_target_folder(pragma-install core)

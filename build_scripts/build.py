@@ -274,6 +274,10 @@ if platform == "linux":
 			# Required for OIIO
 			"apt-get install python3-distutils",
 
+            #install freetype for linking. X server frontends (Gnome, KDE etc) already include it somewhere down the line. Also install pkg-config for easy export of flags.
+            "apt-get install pkg-config libfreetype-dev",
+
+
 			#Ninja
 			"apt-get install ninja-build"
 		]
@@ -455,107 +459,44 @@ if platform == "win32":
 	cp(deps_dir +"/vcpkg/installed/x64-windows/bin/7zip.dll",install_dir +"/bin/")
 
 ########## zlib (for freetype) ############
+if platform == "win32":
+    os.chdir(deps_dir)
+    mkdir("zlib_build",cd=True)
+    zlib_cmake_args = [
+    		"-DCMAKE_INSTALL_PREFIX="+deps_dir_fs+"/zlib_prefix",
+    		"-DBUILD_SHARED_LIBS=ON"
+    		]
+    cmake_configure(root+"/third_party_libs/zlib",generator,zlib_cmake_args)
+    cmake_build("Release")
+    cmake_build("Release",["install"])
 
-os.chdir(deps_dir)
-mkdir("zlib_build",cd=True)
-zlib_cmake_args = [
-		"-DCMAKE_INSTALL_PREFIX=" +deps_dir_fs +"/zlib_prefix",
-		"-DBUILD_SHARED_LIBS=ON"
-		]
-cmake_configure(root+"/third_party_libs/zlib",generator,zlib_cmake_args)
-cmake_build("Release")
-cmake_build("Release",["install"])
-
-########## freetype (interim, no harfbuzz; final in win32) ##########
-
-#set now in win32, but later in linux
+########## freetype (built in win32, sys in linux (set in cmake)) ##########
 freetype_include_dir = ""
 freetype_lib = ""
-print_msg("Downloading freetype...")
-os.chdir(deps_dir)
-if not Path(os.getcwd()+"/freetype").is_dir():
-	git_clone("https://github.com/freetype/freetype")
-freetype_root = deps_dir+"/freetype"
-os.chdir("freetype")
-subprocess.run(["git","reset","--hard","fbbcf50367403a6316a013b51690071198962920"],check=True)
-mkdir("build",cd=True)
-freetype_cmake_args =[
-	"-DCMAKE_MODULE_PATH=" +deps_dir_fs +"/zlib_prefix",
-	"-DCMAKE_PREFIX_PATH=" +deps_dir_fs +"/zlib_prefix"
-]
 if platform == "win32":
-	freetype_cmake_args += [
-		"-DCMAKE_DISABLE_FIND_PACKAGE_HarfBuzz=TRUE",
-		"-DCMAKE_DISABLE_FIND_PACKAGE_BZip2=TRUE",
-		"-DCMAKE_DISABLE_FIND_PACKAGE_PNG=TRUE"
-		]
+    print_msg("Downloading freetype...")
+    os.chdir(deps_dir)
+    if not Path(os.getcwd()+"/freetype").is_dir():
+	    git_clone("https://github.com/freetype/freetype")
+    freetype_root = deps_dir+"/freetype"
+    os.chdir("freetype")
+    subprocess.run(["git","reset","--hard","fbbcf50367403a6316a013b51690071198962920"],check=True)
+    mkdir("build",cd=True)
+    freetype_cmake_args =[
+    	"-DCMAKE_MODULE_PATH="+deps_dir_fs+"/zlib_prefix",
+    	"-DCMAKE_PREFIX_PATH="+deps_dir_fs+"/zlib_prefix"
+    ]
+    freetype_cmake_args += [
+        "-DCMAKE_DISABLE_FIND_PACKAGE_HarfBuzz=TRUE",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_BZip2=TRUE",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_PNG=TRUE"
+    ]
 
-else:
-	freetype_cmake_args += [
-
-		"-DCMAKE_DISABLE_FIND_PACKAGE_HarfBuzz=TRUE", # we don't want to pick up the system one by accident
-		"-DCMAKE_INSTALL_PREFIX="+deps_dir+"/freetype_bootstrap",
-		"-DBUILD_SHARED_LIBS=ON"
-		]
-
-print_msg("Building freetype...")
-cmake_configure(freetype_root,generator,freetype_cmake_args)
-cmake_build("Release")
-if platform == "linux":
-	print_msg("Installing freetype to custom prefix...")
-	cmake_build("Release",["install"])
-else:
-	freetype_include_dir += freetype_root+"/include"
-	freetype_lib += freetype_root+"/build/Release/freetype.lib"
-
-########## harfbuzz (linux only) ##########
-harfbuzz_include_dir = ""
-harfbuzz_lib = ""
-if platform == "linux":
-	freetype_bootstrap_prefix_dir = ""
-	harfbuzz_root = ""
-	harfbuzz_prefix = ""
-	print_msg("Downloading harfbuzz...")
-	os.chdir(deps_dir)
-	if not Path(os.getcwd()+"/harfbuzz").is_dir():
-		git_clone("https://github.com/harfbuzz/harfbuzz")
-	os.chdir("harfbuzz")
-	harfbuzz_root = os.getcwd()
-	#CAUTION: The following code uses harfbuzz's cmake build system, which is marked as deprecated. Take note, should you update harfbuzz, that CMakeLists.txt may disappear without warning.
-	subprocess.run(["git","reset","--hard","afcae83a064843d71d47624bc162e121cc56c08b"],check=True)
-	mkdir("build",cd=True)
-	harfbuzz_cmake_args = [
-		"-DCMAKE_PREFIX_PATH="+deps_dir+"/freetype_bootstrap",
-		"-DCMAKE_INSTALL_PREFIX="+deps_dir+"/harfbuzz_prefix",
-		"-DHB_HAVE_FREETYPE=ON",
-		"-DBUILD_SHARED_LIBS=ON"
-		]
-
-	print_msg("Building harfbuzz...")
-	cmake_configure(harfbuzz_root,generator,harfbuzz_cmake_args)
-	cmake_build("Release")
-	cmake_build("Release",["install"])
-	harfbuzz_include_dir += deps_dir+"/harfbuzz_prefix/include"
-	harfbuzz_lib += deps_dir+"/harfbuzz_prefix/lib/libharfbuzz.so"
-
-
-	########## freetype with harfbuzz (linux only)  ##########
-	os.chdir(freetype_root)
-	print_msg("Rebuilding freetype against harfbuzz")
-	mkdir(freetype_root+"/build_final",cd=True)
-	freetype_cmake_args = [
-		"-DCMAKE_PREFIX_PATH=" +deps_dir_fs +"/harfbuzz_prefix" +deps_dir_fs +"/zlib_prefix",
-		"-DCMAKE_INSTALL_PREFIX=" +deps_dir_fs +"/freetype_prefix",
-		 "-DCMAKE_MODULE_PATH=" +deps_dir_fs +"/harfbuzz_prefix" +";" +deps_dir_fs +"/zlib_prefix",
-		"-DBUILD_SHARED_LIBS=ON"
-		]
-	cmake_configure(freetype_root,generator,freetype_cmake_args)
-	cmake_build("Release")
-	cmake_build("Release",["install"])
-
-	freetype_include_dir += deps_dir+"/freetype_prefix/include/freetype2"
-	freetype_lib += deps_dir+"/freetype_prefix/lib/libfreetype.so"
-
+    print_msg("Building freetype...")
+    cmake_configure(freetype_root,generator,freetype_cmake_args)
+    cmake_build("Release")
+    freetype_include_dir += freetype_root+"/include"
+    freetype_lib += freetype_root+"/build/Release/freetype.lib"
 
 ########## Modules ##########
 print_msg("Downloading modules...")
@@ -663,8 +604,8 @@ def execbuildscript(filepath):
 		l["cxx_compiler"] = cxx_compiler
 		l["no_confirm"] = no_confirm
 		l["no_sudo"] = no_sudo
-		l["harfbuzz_include_dir"] = harfbuzz_include_dir
-		l["harfbuzz_lib"] = harfbuzz_lib
+	#	l["harfbuzz_include_dir"] = harfbuzz_include_dir
+	#	l["harfbuzz_lib"] = harfbuzz_lib
 	#else:
 	#	l["vcvars"] = "vcvars"
 
@@ -845,10 +786,7 @@ if platform == "linux":
 		"-DDEPENDENCY_BOOST_REGEX_LIBRARY=" +boost_root +"/stage/lib/boost_regex.a",
 		"-DDEPENDENCY_BOOST_SYSTEM_LIBRARY=" +boost_root +"/stage/lib/boost_system.a",
 		"-DDEPENDENCY_BOOST_THREAD_LIBRARY=" +boost_root +"/stage/lib/boost_thread.a",
-		"-DDEPENDENCY_LIBZIP_CONF_INCLUDE=" +build_dir +"/third_party_libs/libzip",
-
-		"-DDEPENDENCY_HARFBUZZ_INCLUDE="+harfbuzz_include_dir,
-		"-DDEPENDENCY_HARFBUZZ_LIBRARY="+harfbuzz_lib
+		"-DDEPENDENCY_LIBZIP_CONF_INCLUDE=" +build_dir +"/third_party_libs/libzip"
 	]
 else:
 	cmake_args += [

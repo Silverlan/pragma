@@ -38,15 +38,7 @@ What platforms and hardware does it work on?
 Contributions
 ------
 ###### PFM
-If you would like to contribute to the development of PFM, there is usually no need to build all of Pragma. PFM is a Lua-based addon for Pragma and can be found in "Pragma/addons/filmmaker", all you need is a source code editor of your choice (though Visual Studio Code is highly recommended) and some experience with Lua 5.1. Here are the recommended steps:
-1) Download and extract the [latest version](https://github.com/Silverlan/pragma/releases/tag/nightly) of Pragma
-2) Delete the existing "Pragma/addons/filmmaker" directory
-3) Fork the [PFM repository](https://github.com/Silverlan/pfm) and clone your fork into "Pragma/addons/filmmaker_fork". Do *not* fork into "addons/filmmaker", otherwise your changes will get overwritten the next time you update Pragma/PFM.
-4) (Optional) Follow the instructions on [the wiki](https://wiki.pragma-engine.com/books/lua-api/page/visual-studio-code) to set up Visual Studio Code for Lua development with Pragma
-
-You can find the Lua-script files for PFM in "Pragma/addons/filmmaker_fork/lua". For some basic information on how to use the Lua API in Pragma, please check out [the wiki](https://wiki.pragma-engine.com/books/lua-api).
-
-To update Pragma/PFM, you can still use the auto-updater functionality of PFM. Simply make sure to delete the "Pragma/addons/filmmaker" directory again after the update.
+If you would like to contribute to the development of the Pragma Filmmaker, please go to the [PFM repository](https://github.com/Silverlan/pfm#contributions) for more information.
 
 ###### Pragma
 The recommended way to work with Pragma is through the [Lua API](https://wiki.pragma-engine.com/books/lua-api). If this is not enough, and you need more control, you will have to build Pragma manually. You can find the build instructions below.

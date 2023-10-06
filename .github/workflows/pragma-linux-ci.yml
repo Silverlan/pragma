@@ -80,6 +80,13 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: "pragma.tar.gz"
           
+      # Tests are currently not functional on Linux GitHub runners
+      #- name: Run Tests
+      #  uses: Silverlan/pragma/github_actions/run_tests@master
+      #  timeout-minutes: 10
+      #  with:
+      #    install-dir: "${{ steps.build-pragma.outputs.install-dir }}"
+
       - name: Handle Error
         uses: Silverlan/common_actions/action_handle_error@main
         if: failure()

@@ -1772,6 +1772,12 @@ void Lua::udm::register_library(Lua::Interface &lua)
 				else
 					return Lua::nil;
 			});
+		}),
+		luabind::def("get_underlying_numeric_type",+[](lua_State *l,::udm::Type type) -> ::udm::Type {
+			return ::udm::visit_ng(type,[l,type](auto tag){
+                using T = typename decltype(tag)::type;
+				return ::udm::type_to_enum<lua_udm_underlying_numeric_type<T>>();
+			});
 		})
 	];
 

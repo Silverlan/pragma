@@ -536,6 +536,43 @@ static std::optional<umath::ScaledTransform> get_transform_member_pose(pragma::B
 	return {};
 }
 
+template<typename T>
+static std::optional<std::pair<T, umath::CoordinateSpace>> convert_pos_to_member_space(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, const T &value)
+{
+	umath::CoordinateSpace memberSpace;
+	T newValue = value;
+	if(!component.ConvertPosToMemberSpace(idx, space, newValue, &memberSpace))
+		return {};
+	return std::pair<T, umath::CoordinateSpace> {newValue, memberSpace};
+}
+template<typename T>
+static std::optional<std::pair<T, umath::CoordinateSpace>> convert_rot_to_member_space(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, const T &value)
+{
+	umath::CoordinateSpace memberSpace;
+	T newValue = value;
+	if(!component.ConvertRotToMemberSpace(idx, space, newValue, &memberSpace))
+		return {};
+	return std::pair<T, umath::CoordinateSpace> {newValue, memberSpace};
+}
+template<typename T>
+static std::optional<std::pair<T, umath::CoordinateSpace>> convert_scale_to_member_space(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, const T &value)
+{
+	umath::CoordinateSpace memberSpace;
+	T newValue = value;
+	if(!component.ConvertScaleToMemberSpace(idx, space, newValue, &memberSpace))
+		return {};
+	return std::pair<T, umath::CoordinateSpace> {newValue, memberSpace};
+}
+template<typename T>
+static std::optional<std::pair<T, umath::CoordinateSpace>> convert_pose_to_member_space(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, const T &value)
+{
+	umath::CoordinateSpace memberSpace;
+	T newValue = value;
+	if(!component.ConvertPoseToMemberSpace(idx, space, newValue, &memberSpace))
+		return {};
+	return std::pair<T, umath::CoordinateSpace> {newValue, memberSpace};
+}
+
 static std::string to_string(lua_State *l, int i)
 {
 	auto status = -1;
@@ -666,6 +703,10 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	entityComponentDef.def("GetTransformMemberParentRot", &get_transform_member_rot<true>);
 	entityComponentDef.def("GetTransformMemberParentScale", &get_transform_member_scale<true>);
 	entityComponentDef.def("GetTransformMemberParentPose", &get_transform_member_pose<true>);
+	entityComponentDef.def("ConvertPosToMemberSpace", &convert_pos_to_member_space<Vector3>);
+	entityComponentDef.def("ConvertRotToMemberSpace", &convert_rot_to_member_space<Quat>);
+	entityComponentDef.def("ConvertScaleToMemberSpace", &convert_scale_to_member_space<Vector3>);
+	entityComponentDef.def("ConvertPoseToMemberSpace", &convert_pose_to_member_space<umath::ScaledTransform>);
 	entityComponentDef.def("SetTransformMemberPos", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Vector3 &)>(&pragma::BaseEntityComponent::SetTransformMemberPos));
 	entityComponentDef.def("SetTransformMemberRot", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Quat &)>(&pragma::BaseEntityComponent::SetTransformMemberRot));
 	entityComponentDef.def("SetTransformMemberScale", static_cast<bool (pragma::BaseEntityComponent::*)(ComponentMemberIndex, umath::CoordinateSpace, const Vector3 &)>(&pragma::BaseEntityComponent::SetTransformMemberScale));

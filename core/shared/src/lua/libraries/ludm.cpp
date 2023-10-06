@@ -1380,6 +1380,8 @@ using lua_udm_underlying_numeric_type = std::conditional_t<std::is_same_v<T, boo
 template<typename T>
 static lua_udm_underlying_numeric_type<T> get_numeric_component(const T &value, int32_t idx)
 {
+	if(idx >= udm::get_numeric_component_count(udm::type_to_enum<T>()))
+		throw std::runtime_error {"Index " + std::to_string(idx) + " exceeds component count of UDM type '" + std::string {magic_enum::enum_name(udm::type_to_enum<T>())} + "'!"};
 	if constexpr(std::is_same_v<T, bool>)
 		return static_cast<uint8_t>(value);
 	else
@@ -1389,6 +1391,8 @@ static lua_udm_underlying_numeric_type<T> get_numeric_component(const T &value, 
 template<typename T>
 static void set_numeric_component(T &value, int32_t idx, lua_udm_underlying_numeric_type<T> compVal)
 {
+	if(idx >= udm::get_numeric_component_count(udm::type_to_enum<T>()))
+		throw std::runtime_error {"Index " + std::to_string(idx) + " exceeds component count of UDM type '" + std::string {magic_enum::enum_name(udm::type_to_enum<T>())} + "'!"};
 	udm::set_numeric_component(value, idx, compVal);
 }
 

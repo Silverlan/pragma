@@ -15,7 +15,7 @@ runs:
       shell: bash
       run: |
         cd "${{inputs.install-dir}}"
-        ./pragma_server.exe -log 2 2 +map "test_physics" +"lua_exec tests/ci_runner_tests.lua"
+        ./pragma_server.exe -luaext -log 2 2 +map "test_physics" +"lua_exec tests/ci_runner_tests.lua"
         EXIT_CODE=$?
         # Check the exit code
         if [ $EXIT_CODE -eq 0 ]; then

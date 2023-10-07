@@ -9,6 +9,7 @@
 #include "pragma/lua/classes/c_lwibase.h"
 #include <wgui/wibase.h>
 #include <wgui/wihandle.h>
+#include <wgui/types/witooltip.h>
 #include "luasystem.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/widropdownmenu.h>
@@ -1439,6 +1440,23 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 	}
 	else if(name == "onchildadded") {
 		hCallback = FunctionCallback<void, ::WIBase *>::Create([l, hPanel, o](::WIBase *el) mutable {
+			if(!hPanel.IsValid())
+				return;
+			Lua::CallFunction(l, [&o, hPanel, el](lua_State *l) mutable {
+				o.push(l);
+
+				auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
+				obj.push(l);
+				if(el) {
+					auto objEl = WGUILuaInterface::GetLuaObject(l, *el);
+					objEl.push(l);
+				}
+				return Lua::StatusCode::Ok;
+			});
+		});
+	}
+	else if(name == "onshowtooltip") {
+		hCallback = FunctionCallback<void, ::WITooltip *>::Create([l, hPanel, o](::WITooltip *el) mutable {
 			if(!hPanel.IsValid())
 				return;
 			Lua::CallFunction(l, [&o, hPanel, el](lua_State *l) mutable {

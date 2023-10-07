@@ -70,6 +70,7 @@
 #include <prosper_prepared_command_buffer.hpp>
 #include <luabind/copy_policy.hpp>
 #include <fsys/ifile.hpp>
+#include <wgui/types/witooltip.h>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
@@ -323,6 +324,13 @@ static void register_gui(Lua::Interface &lua)
 	auto wiProgressBarClassDef = luabind::class_<WIProgressBar, ::WIBase>("ProgressBar");
 	Lua::WIProgressBar::register_class(wiProgressBarClassDef);
 	guiMod[wiProgressBarClassDef];
+
+	auto wiTooltipClassDef = luabind::class_<WITooltip, ::WIBase>("Tooltip");
+	wiTooltipClassDef.def(
+	  "SetText", +[](WITooltip &elTooltip, const std::string &text) { elTooltip.SetText(text); });
+	wiTooltipClassDef.def(
+	  "GetText", +[](const WITooltip &elTooltip) { return elTooltip.GetText().cpp_str(); });
+	guiMod[wiTooltipClassDef];
 
 	auto wiSliderClassDef = luabind::class_<WISlider, luabind::bases<WIProgressBar, ::WIBase>>("Slider");
 	Lua::WISlider::register_class(wiSliderClassDef);

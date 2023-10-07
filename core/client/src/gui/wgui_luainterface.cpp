@@ -14,6 +14,7 @@
 #include <pragma/lua/raw_object.hpp>
 #include "pragma/gui/wiluahandlewrapper.h"
 #include <wgui/types/witextentry.h>
+#include <wgui/types/witooltip.h>
 #include "pragma/gui/wiluabase.h"
 #include <pragma/lua/converters/gui_element_converter_t.hpp>
 #include <pragma/lua/lua_call.hpp>
@@ -383,6 +384,8 @@ luabind::object WGUILuaInterface::CreateLuaObject(lua_State *l, WIBase &p)
 			return cast_to_type<WISlider>(l, p);
 		return cast_to_type<WIProgressBar>(l, p);
 	}
+	else if(dynamic_cast<WITooltip *>(&p) != nullptr)
+		return cast_to_type<WITooltip>(l, p);
 	return pragma::lua::raw_object_to_luabind_object(l, p.GetHandle());
 }
 

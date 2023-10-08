@@ -335,6 +335,12 @@ Lua::tb<std::string> Lua::asset::get_supported_import_file_extensions(lua_State 
 		t[idx++] = "vmt";
 		t[idx++] = "vmat_c";
 	}
+	else if(type == pragma::asset::Type::Map) {
+		// These are implemented using the old importer system, so they're not included in the import information
+		// retrieved above. We'll add them to the list manually for now.
+		// TODO: Move these to the new importer system and remove these entries!
+		t[idx++] = "bsp";
+	}
 	else if(type == pragma::asset::Type::ParticleSystem)
 		t[idx++] = "pcf";
 	return t;

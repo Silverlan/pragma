@@ -233,6 +233,16 @@ function gui.WIBaseEditor:OpenWindow(identifier, goToWindow)
 	return tab, el, frame
 end
 
+function gui.WIBaseEditor:GetWindows()
+	local windows = {}
+	for identifier, data in pairs(self.m_windowFactories) do
+		if util.is_valid(data.element) then
+			windows[identifier] = data.element
+		end
+	end
+	return windows
+end
+
 function gui.WIBaseEditor:GetWindow(identifier)
 	return self.m_windowFactories[identifier] ~= nil and self.m_windowFactories[identifier].element or nil
 end

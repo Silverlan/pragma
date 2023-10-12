@@ -17,7 +17,7 @@ void ConstraintLookAtComponent::RegisterMembers(pragma::EntityComponentManager &
 {
 	using T = ConstraintLookAtComponent;
 	{
-		auto memberInfo = create_component_member_info<T, TrackAxis, &T::SetTrackAxis, &T::GetTrackAxis>("trackAxis", TrackAxis::X);
+		auto memberInfo = create_component_member_info<T, TrackAxis, &T::SetTrackAxis, &T::GetTrackAxis>("trackAxis", TrackAxis::Z);
 		registerMember(std::move(memberInfo));
 	}
 }

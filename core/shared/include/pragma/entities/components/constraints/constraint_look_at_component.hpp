@@ -32,7 +32,7 @@ namespace pragma {
 		pragma::EntityUComponentMemberRef m_drivenObjectPosition;
 		bool m_drivenObjectRotationInitialized = false;
 
-		TrackAxis m_trackAxis = TrackAxis::X;
+		TrackAxis m_trackAxis = TrackAxis::Z;
 	};
 };
 

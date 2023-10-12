@@ -36,6 +36,7 @@ class GUIDebugCursorManager {
 
 	CallbackHandle m_cbThink = {};
 	CallbackHandle m_cbScroll = {};
+	CallbackHandle m_cbMiddleMouse = {};
 	CallbackHandle m_cbOnClose = {};
 	std::weak_ptr<prosper::Window> m_curWindow {};
 	WIHandle m_hText = {};
@@ -54,6 +55,8 @@ void GUIDebugCursorManager::Clear()
 		m_cbThink.Remove();
 	if(m_cbScroll.IsValid())
 		m_cbScroll.Remove();
+	if(m_cbMiddleMouse.IsValid())
+		m_cbMiddleMouse.Remove();
 	if(m_cbOnClose.IsValid())
 		m_cbOnClose.Remove();
 	if(m_hText.IsValid())
@@ -107,6 +110,32 @@ bool GUIDebugCursorManager::Initialize()
 			SelectNextChildInHierarchy();
 		return CallbackReturnType::HasReturnValue;
 	}));
+	m_cbMiddleMouse = c_engine->AddCallback("OnMouseInput",
+	  FunctionCallback<bool, std::reference_wrapper<prosper::Window>, GLFW::MouseButton, GLFW::KeyState, GLFW::Modifier>::CreateWithOptionalReturn(
+	    [this](bool *reply, std::reference_wrapper<prosper::Window> window, GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) -> CallbackReturnType {
+		    if(button == GLFW::MouseButton::Middle) {
+			    *reply = true;
+			    if(state == GLFW::KeyState::Press && !m_cursorElementList.empty()) {
+				    auto &hEl = m_cursorElementList.front();
+				    if(hEl.IsValid()) {
+					    auto *el = hEl.get();
+					    auto *cl = c_engine->GetClientState();
+					    auto *game = cl ? cl->GetGameState() : nullptr;
+					    if(game) {
+						    auto *l = game->GetLuaState();
+						    luabind::object g = luabind::globals(l);
+						    // Assign UI element to global variable x
+						    g["x"] = WGUILuaInterface::GetLuaObject(l, *el);
+						    std::stringstream ss;
+						    el->Print(ss);
+						    Con::cout << "Assigned element '" << ss.str() << "' to global variable 'x'!" << Con::endl;
+					    }
+				    }
+			    }
+			    return CallbackReturnType::HasReturnValue;
+		    }
+		    return CallbackReturnType::NoReturnValue;
+	    }));
 	m_cbOnClose = client->AddCallback("OnClose", FunctionCallback<void>::Create([this]() { Clear(); }));
 
 	m_cbThink = client->AddCallback("Think", FunctionCallback<void>::Create([this]() { OnThink(); }));

@@ -1399,6 +1399,8 @@ static void set_numeric_component(T &value, int32_t idx, lua_udm_underlying_nume
 static Lua::type<uint32_t> get_numeric_component(lua_State *l, const luabind::object &value, int32_t idx, udm::Type type)
 {
 	type = (type != udm::Type::Invalid) ? type : determine_lua_object_udm_type(value);
+	if(type == udm::Type::Invalid)
+		return Lua::nil;
 	return ::udm::visit_ng(type, [l, &value, idx](auto tag) {
 		using T = typename decltype(tag)::type;
 		using BaseType = lua_udm_underlying_numeric_type<T>;
@@ -1412,6 +1414,8 @@ static Lua::type<uint32_t> get_numeric_component(lua_State *l, const luabind::ob
 static luabind::object set_numeric_component(lua_State *l, const luabind::object &value, int32_t idx, udm::Type type, const Lua::udm_numeric &componentValue)
 {
 	type = (type != udm::Type::Invalid) ? type : determine_lua_object_udm_type(value);
+	if(type == udm::Type::Invalid)
+		return Lua::nil;
 	return ::udm::visit_ng(type, [l, &value, idx, &componentValue](auto tag) {
 		using T = typename decltype(tag)::type;
 		using BaseType = lua_udm_underlying_numeric_type<T>;
@@ -1429,6 +1433,8 @@ static luabind::object set_numeric_component(lua_State *l, const luabind::object
 static Lua::udm_ng lerp_value(lua_State *l, const luabind::object &value0, const luabind::object &value1, float t, udm::Type type)
 {
 	type = (type != udm::Type::Invalid) ? type : determine_lua_object_udm_type(value0);
+	if(type == udm::Type::Invalid)
+		return Lua::nil;
 	return ::udm::visit_ng(type, [l, &value0, &value1, t, type](auto tag) {
 		using T = typename decltype(tag)::type;
 		T valuer;

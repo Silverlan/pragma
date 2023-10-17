@@ -150,6 +150,14 @@ end
 function gui.WIFileDialog:GetFileList()
 	return self.m_pFileList
 end
+function gui.WIFileDialog:MakePathRelative(path)
+	local p = util.Path.CreateFilePath(path)
+	p:MakeRelative(self:GetRootPath())
+	return p:GetString()
+end
+function gui.WIFileDialog:MakePathAbsolute(path)
+	return util.Path.CreatePath(self:GetRootPath()):GetString() .. path
+end
 function gui.WIFileDialog:GetFilePath(relativePath)
 	if util.is_valid(self.m_pFileList) == false then
 		return ""

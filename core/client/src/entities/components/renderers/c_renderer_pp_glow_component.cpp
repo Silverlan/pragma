@@ -117,7 +117,7 @@ void CRendererPpGlowComponent::ExecuteGlowPass(const util::DrawSceneInfo &drawSc
 	auto &texture = m_glowRt->GetTexture();
 	drawCmd->RecordImageBarrier(texture.GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::TransferDstOptimal);
 	drawCmd->RecordClearImage(texture.GetImage(), prosper::ImageLayout::TransferDstOptimal, std::array<float, 4> {0.f, 0.f, 0.f, 0.f});
-	drawCmd->RecordImageBarrier(texture.GetImage(), prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
+	drawCmd->RecordImageBarrier(texture.GetImage(), prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 
 	//
 
@@ -191,8 +191,8 @@ void CRendererPpGlowComponent::InitializeRenderTarget()
 	prosper::util::ImageCreateInfo createInfo {};
 	createInfo.width = cRenderer->GetPrepass().textureDepth->GetImage().GetWidth();
 	createInfo.height = cRenderer->GetPrepass().textureDepth->GetImage().GetHeight();
-	createInfo.format = prosper::Format::R32G32B32A32_SFloat;
-	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit;
+	createInfo.format = prosper::Format::R16G16B16A16_SFloat;
+	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferDstBit;
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 
 	auto img = context.CreateImage(createInfo);

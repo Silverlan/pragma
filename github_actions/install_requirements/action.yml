@@ -1,5 +1,10 @@
 name: Install Requirements
 description: 'Install Requirements'
+inputs:
+  with_cuda:
+    description: 'Install CUDA?'
+    required: true
+    default: '1'
 runs:
   using: "composite"
   steps:
@@ -10,6 +15,7 @@ runs:
     # For Cycles
     - name: Install Cuda
       uses: Jimver/cuda-toolkit@v0.2.10
+      if: ${{ inputs.with_cuda == '1' }}
       with:
         cuda: '11.7.0'
     # TODO: Install OptiX

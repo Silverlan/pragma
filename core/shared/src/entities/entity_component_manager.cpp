@@ -425,7 +425,8 @@ std::optional<ComponentEventId> EntityComponentManager::FindEventId(ComponentId 
 	auto *componentInfo = GetComponentInfo(componentId);
 	if(!componentInfo)
 		return {};
-	auto fullName = componentInfo->name + '_' + evName;
+	std::string fullName = componentInfo->name;
+	fullName = fullName + '_' + evName;
 	auto it = std::find_if(m_componentEvents.begin(), m_componentEvents.end(), [componentId, &fullName](const std::pair<ComponentEventId, ComponentEventInfo> &pair) { return pair.second.componentId == componentId && pair.second.name == fullName; });
 	if(it == m_componentEvents.end())
 		return {};

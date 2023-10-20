@@ -84,6 +84,7 @@ void main()
 	if(debugMode == DEBUG_EYE_DIR)
 	{
 		fs_color = vec4(abs(eyeDir.x),abs(eyeDir.y),abs(eyeDir.z),1.0);
+		fs_brightColor = fs_color;
 		gl_FragDepth = gl_FragCoord.z;
 		return;
 	}
@@ -98,6 +99,7 @@ void main()
 	{
 		vec3 fragNormal = calc_implicit_area_normal(vm,intersection);
 		fs_color = vec4(fragNormal,1.0);
+		fs_brightColor = fs_color;
 		gl_FragDepth = gl_FragCoord.z;
 		return;
 	}
@@ -106,6 +108,7 @@ void main()
 	vec3 fragPosWs = (vmInv *vec4(intersection.xyz,1.0)).xyz;
 	vec4 colSum = calc_interpolated_color(fragPosWs); // Expensive!
 	fs_color = vec4(colSum.rgb,1.0);
+	fs_brightColor = fs_color;
 
 	if(debugMode == DEBUG_FLAT_COLOR)
 	{
@@ -150,7 +153,9 @@ void main()
 		vec3 color = vec3(0,0,0);
 		color.rgb = get_ibl_contribution(materialInfo, normal, view, 1.0 /* reflectionProbeIntensity */);
 		color.rgb += calc_pbr_direct_lighting(materialInfo,normal,view,fragPosWs,false /* areShadowsEnabled */);
+		color = clamp(color,0.0,1.0);
 		fs_color.rgb = color;
+		fs_brightColor = fs_color;
 	}
 #endif
 	gl_FragDepth = calc_frag_depth(get_projection_matrix(),vec4(intersection,1.0));

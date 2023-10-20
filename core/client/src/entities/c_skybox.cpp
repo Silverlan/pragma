@@ -260,7 +260,8 @@ void CSkyboxComponent::ValidateMaterials()
 	auto *mat = mdlC->GetRenderMaterial(0);
 	if(!mat)
 		return;
-	auto &texturePaths = mdl->GetMetaInfo().texturePaths;
+	auto &metaInfo = mdl->GetMetaInfo();
+	auto &texturePaths = metaInfo.texturePaths;
 	auto &texturePath = texturePaths.front();
 	auto *texInfo = mat ? mat->GetTextureInfo("skybox") : nullptr;
 	if(texInfo) {
@@ -286,11 +287,13 @@ void CSkyboxComponent::ValidateMaterials()
 		}
 		return;
 	}
-	// Attempt to use HDR textures, otherwise LDR
-	auto texture = ufile::get_file_from_filename(mat->GetName());
-	ufile::remove_extension_from_filename(texture, pragma::asset::get_supported_extensions(pragma::asset::Type::Material));
-	if(CreateCubemapFromIndividualTextures(texturePath + texture + ".pmat", "_hdr") || CreateCubemapFromIndividualTextures(texturePath + texture + ".pmat"))
-		mdl->LoadMaterials();
+	if(!metaInfo.textures.empty()) {
+		// Attempt to use HDR textures, otherwise LDR
+		auto texture = ufile::get_file_from_filename(metaInfo.textures.front());
+		ufile::remove_extension_from_filename(texture, pragma::asset::get_supported_extensions(pragma::asset::Type::Material));
+		if(CreateCubemapFromIndividualTextures(texturePath + texture + ".pmat", "_hdr") || CreateCubemapFromIndividualTextures(texturePath + texture + ".pmat"))
+			mdl->LoadMaterials();
+	}
 }
 void CSkyboxComponent::SetSkyMaterial(Material *mat)
 {

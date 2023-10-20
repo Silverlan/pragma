@@ -191,6 +191,7 @@ namespace pragma {
 		virtual void OnEntitySpawn();
 		virtual void OnEntityPostSpawn();
 		virtual void Initialize();
+		virtual void PostInitialize();
 		virtual void OnRemove();
 
 		ComponentHandle<const BaseEntityComponent> GetHandle() const;

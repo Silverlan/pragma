@@ -396,10 +396,9 @@ std::optional<ComponentMemberIndex> BaseEntityComponent::DoGetMemberIndex(const 
 }
 util::TWeakSharedHandle<const BaseEntityComponent> BaseEntityComponent::GetHandle() const { return GetHandle<BaseEntityComponent>(); }
 util::TWeakSharedHandle<BaseEntityComponent> BaseEntityComponent::GetHandle() { return GetHandle<BaseEntityComponent>(); }
-void BaseEntityComponent::Initialize()
+void BaseEntityComponent::Initialize() { InitializeLuaObject(GetEntity().GetLuaState()); }
+void BaseEntityComponent::PostInitialize()
 {
-	InitializeLuaObject(GetEntity().GetLuaState());
-
 	auto &ent = GetEntity();
 	OnAttached(ent);
 	if(ent.IsSpawned()) {

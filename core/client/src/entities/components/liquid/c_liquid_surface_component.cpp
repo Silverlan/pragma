@@ -38,7 +38,7 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-
+#pragma optimize("", off)
 void CLiquidSurfaceComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -181,9 +181,11 @@ void CLiquidSurfaceComponent::InitializeRenderData()
 			}
 			descSetEffects->Update();
 
-			auto renderC = GetEntity().GetComponent<CModelComponent>();
-			renderC->SetRenderMeshesDirty();
-			renderC->UpdateRenderMeshes();
+			auto mdlC = GetEntity().GetComponent<CModelComponent>();
+			if(mdlC.valid()) {
+				mdlC->SetRenderMeshesDirty();
+				mdlC->UpdateRenderMeshes();
+			}
 		}
 	}
 }

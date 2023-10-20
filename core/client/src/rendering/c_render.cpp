@@ -165,6 +165,7 @@ void Console::commands::debug_render_validation_error_enabled(NetworkState *stat
 
 void Console::commands::debug_render_depth_buffer(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
+	c_engine->GetRenderContext().WaitIdle();
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
 	if(dbg) {
 		dbg = nullptr;

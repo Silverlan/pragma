@@ -26,6 +26,7 @@ parser.add_argument("--with-pfm", type=str2bool, nargs='?', const=True, default=
 parser.add_argument("--with-core-pfm-modules", type=str2bool, nargs='?', const=True, default=True, help="Include essential PFM modules.")
 parser.add_argument("--with-all-pfm-modules", type=str2bool, nargs='?', const=True, default=False, help="Include non-essential PFM modules (e.g. chromium and cycles).")
 parser.add_argument("--with-vr", type=str2bool, nargs='?', const=True, default=False, help="Include Virtual Reality support.")
+parser.add_argument("--with-source-engine-entities", type=str2bool, nargs='?', const=True, default=True, help="Include addons with support for Source Engine entities.")
 parser.add_argument("--with-lua-debugger", type=str2bool, nargs='?', const=True, default=False, help="Include Lua-debugger support.")
 parser.add_argument("--with-lua-doc-generator", type=str2bool, nargs='?', const=True, default=False, help="Include Lua documentation generator.")
 parser.add_argument("--build", type=str2bool, nargs='?', const=True, default=True, help="Build Pragma after configurating and generating build files.")
@@ -90,6 +91,7 @@ with_pfm = args["with_pfm"]
 with_core_pfm_modules = args["with_core_pfm_modules"]
 with_all_pfm_modules = args["with_all_pfm_modules"]
 with_vr = args["with_vr"]
+with_source_engine_entities = args["with_source_engine_entities"]
 with_lua_debugger = args["with_lua_debugger"]
 with_lua_doc_generator = args["with_lua_doc_generator"]
 build = args["build"]
@@ -905,6 +907,10 @@ if with_pfm:
 	download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")
 	download_addon("PFM Bedroom Demo","pfm_demo_bedroom","https://github.com/Silverlan/pfm_demo_bedroom.git","26a4bd95432a05b0094473cf17a60838662b485c")
 	download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","b3042180aa7c2af9bcbbe99da6ed74eb5291c987")
+
+if with_source_engine_entities:
+	download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","a70f575")
+	download_addon("TF2","pragma_tf2","https://github.com/Silverlan/pragma_tf2.git","eddee1f")
 
 os.chdir(curDir)
 

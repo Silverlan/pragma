@@ -1,0 +1,18 @@
+"pbr"
+{
+	"properties"
+	{
+		$float roughness_factor 0.659
+		$string surfacematerial "concrete"
+		"rma_info"
+		{
+			$bool requires_ao_update 1
+		}
+		$float metalness_factor 0.263
+	}
+	"textures"
+	{
+		$string albedo_map "white_surface"
+		$string rma_map "pbr/rma_neutral"
+	}
+}

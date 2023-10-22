@@ -479,6 +479,17 @@ void IkSolverComponent::AddBallSocketConstraint(const ConstraintInfo &constraint
 
 	auto effectiveMinLimits = minLimits * 0.5f;
 	auto effectiveMaxLimits = maxLimits * 0.5f;
+
+	std::array<bool, 3> limitEnabled = {};
+	for(uint8_t i = 0; i < 3; ++i) {
+		// We'll consider the limit to be disabled if the min value is larger than the max value
+		limitEnabled[i] = effectiveMaxLimits[i] >= effectiveMinLimits[i];
+		if(!limitEnabled[i]) {
+			effectiveMaxLimits[i] = 0.f;
+			effectiveMinLimits[i] = 0.f;
+		}
+	}
+
 	for(uint8_t i = 0; i < 3; ++i)
 		clamp_angles(effectiveMinLimits[i], effectiveMaxLimits[i]);
 
@@ -512,22 +523,30 @@ void IkSolverComponent::AddBallSocketConstraint(const ConstraintInfo &constraint
 	auto effectiveLimitSpan = effectiveMinLimits + effectiveMaxLimits;
 	float effectiveTwistSpan;
 
+	auto enableTwistLimit = true;
+	auto enableSwingLimit = true;
 	// Eliminate rotation around twist axis (twist is handled separately using a twist limit, see further below)
 	switch(etwistAxis) {
 	case SignedAxis::X:
 	case SignedAxis::NegX:
 		effectiveTwistSpan = effectiveLimitSpan.p;
 		effectiveLimitSpan.p = 0.f;
+		enableTwistLimit = limitEnabled[0];
+		enableSwingLimit = limitEnabled[1] && limitEnabled[2];
 		break;
 	case SignedAxis::Y:
 	case SignedAxis::NegY:
 		effectiveTwistSpan = effectiveLimitSpan.y;
 		effectiveLimitSpan.y = 0.f;
+		enableTwistLimit = limitEnabled[1];
+		enableSwingLimit = limitEnabled[0] && limitEnabled[2];
 		break;
 	case SignedAxis::Z:
 	case SignedAxis::NegZ:
 		effectiveTwistSpan = effectiveLimitSpan.r;
 		effectiveLimitSpan.r = 0.f;
+		enableTwistLimit = limitEnabled[2];
+		enableSwingLimit = limitEnabled[0] && limitEnabled[1];
 		break;
 	}
 
@@ -554,8 +573,8 @@ void IkSolverComponent::AddBallSocketConstraint(const ConstraintInfo &constraint
 	auto axisB = uquat::forward(refRot1);
 	auto axisBRight = uquat::right(refRot1);
 	auto axisBUp = uquat::up(refRot1);
-	auto span = effectiveMaxLimits.y - effectiveMinLimits.y;
-	if(span >= 0.f && span < 179.99f) {
+	auto span = effectiveMaxLimits.y - effectiveMinLimits.y; // TODO: Use enableTwistLimit to check if the limit is enabled
+	if(enableSwingLimit && span >= 0.f && span < 179.99f) {
 		if(!useEllipseSwingLimit) {
 			auto &ellipseSwingLimit = m_ikSolver->AddSwingLimit(*bone0, *bone1, axisA, axisB, umath::deg_to_rad(effectiveMaxLimits.y - effectiveMinLimits.y));
 			init_joint(constraintInfo, ellipseSwingLimit);
@@ -567,11 +586,13 @@ void IkSolverComponent::AddBallSocketConstraint(const ConstraintInfo &constraint
 	}
 
 	// Twist motion
-	auto twistLimitVal = effectiveTwistSpan;
-	if(twistLimitVal >= 0.f && twistLimitVal < 179.99f) {
-		// Note: Using a different max/min angle limit for twist rotation is currently not supported
-		auto &twistLimit = m_ikSolver->AddTwistLimit(*bone0, *bone1, axisA, axisB, umath::deg_to_rad(twistLimitVal));
-		init_joint(constraintInfo, twistLimit);
+	if(enableTwistLimit) {
+		auto twistLimitVal = effectiveTwistSpan;
+		if(twistLimitVal >= 0.f && twistLimitVal < 179.99f) {
+			// Note: Using a different max/min angle limit for twist rotation is currently not supported
+			auto &twistLimit = m_ikSolver->AddTwistLimit(*bone0, *bone1, axisA, axisB, umath::deg_to_rad(twistLimitVal));
+			init_joint(constraintInfo, twistLimit);
+		}
 	}
 }
 bool IkSolverComponent::UpdateIkRig()

@@ -10,6 +10,7 @@
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
 #include "pragma/entities/components/c_bvh_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/model/modelmesh.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 
@@ -42,6 +43,8 @@ void CStaticBvhCacheComponent::TestRebuildBvh()
 		}
 		auto &pose = ent.GetPose();
 		for(auto &mesh : renderMeshes) {
+			if(!ShouldConsiderMesh(*mesh))
+				continue;
 			meshes.push_back(mesh);
 			meshToEntity.push_back(&ent);
 			meshPoses.push_back(pose);

@@ -353,16 +353,21 @@ class category_name_formatter : public spdlog::custom_flag_formatter {
 	virtual std::unique_ptr<custom_flag_formatter> clone() const override { return spdlog::details::make_unique<category_name_formatter>(); }
 };
 
-static std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> g_preRegisteredLoggers;
+static std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> &get_pre_registered_loggers()
+{
+	static std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> g_preRegisteredLoggers;
+	return g_preRegisteredLoggers;
+}
+
 spdlog::logger &pragma::register_logger(const std::string &name)
 {
 	if(g_loggerInitialized)
 		return get_logger(name);
-	auto it = g_preRegisteredLoggers.find(name);
-	if(it != g_preRegisteredLoggers.end())
+	auto it = get_pre_registered_loggers().find(name);
+	if(it != get_pre_registered_loggers().end())
 		return *it->second;
 	auto logger = std::make_shared<spdlog::logger>(name);
-	g_preRegisteredLoggers[name] = logger;
+	get_pre_registered_loggers()[name] = logger;
 	return *logger;
 }
 
@@ -425,7 +430,7 @@ void pragma::detail::initialize_logger(::util::LogSeverity conLogLevel, ::util::
 		spdlog::info("Log file has been disabled, log will not be written to disk.");
 
 	g_loggerInitialized = true;
-	for(auto &pair : g_preRegisteredLoggers)
+	for(auto &pair : get_pre_registered_loggers())
 		init_logger(pair.first, pair.second);
-	g_preRegisteredLoggers.clear();
+	get_pre_registered_loggers().clear();
 }

@@ -25,6 +25,10 @@ namespace pragma {
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 
 		void SetStaticBvhCacheComponent(BaseStaticBvhCacheComponent *component);
+		void InitializeDynamicBvhSubstitute(size_t staticBvhCacheVersion);
+		size_t GetStaticBvhCacheVersion() const { return m_staticBvhCacheVersion; }
+		bool HasDynamicBvhSubstitute() const;
+		void DestroyDynamicBvhSubstitute();
 		bool IsActive() const;
 	  protected:
 		BaseStaticBvhUserComponent(BaseEntity &ent);
@@ -34,6 +38,7 @@ namespace pragma {
 		CallbackHandle m_cbOnPoseChanged;
 		pragma::ComponentHandle<BaseStaticBvhCacheComponent> m_staticBvhComponent {};
 		bool m_isActive = false;
+		size_t m_staticBvhCacheVersion = 0;
 	};
 };
 

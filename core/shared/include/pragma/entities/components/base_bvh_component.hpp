@@ -82,6 +82,7 @@ namespace pragma {
 
 		void SendBvhUpdateRequestOnInteraction();
 		static bool SetVertexData(pragma::BvhData &bvhData, const std::vector<BvhTriangle> &data);
+		static void DeleteRange(pragma::BvhData &bvhData, size_t start, size_t end);
 		bool SetVertexData(const std::vector<BvhTriangle> &data);
 		void GetVertexData(std::vector<BvhTriangle> &outData) const;
 		void RebuildBvh();

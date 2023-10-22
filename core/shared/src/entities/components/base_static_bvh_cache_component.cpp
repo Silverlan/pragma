@@ -9,9 +9,11 @@
 #include "pragma/entities/components/base_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/base_static_bvh_user_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
+#include "pragma/logging.hpp"
 
 using namespace pragma;
 
+static spdlog::logger &LOGGER = pragma::register_logger("bvh");
 class FunctionalParallelWorker : public util::ParallelWorker<void> {
   public:
 	using Task = std::function<void(FunctionalParallelWorker &)>;
@@ -49,6 +51,7 @@ BaseStaticBvhCacheComponent::BaseStaticBvhCacheComponent(BaseEntity &ent) : Base
 BaseStaticBvhCacheComponent::~BaseStaticBvhCacheComponent()
 {
 	if(m_buildWorker) {
+		LOGGER.info("Cancelling BVH cache build...");
 		m_buildWorker->Cancel();
 		m_buildWorker->Wait();
 		m_buildWorker = nullptr;
@@ -132,21 +135,23 @@ void FunctionalParallelWorker::DoCancel(const std::string &resultMsg, std::optio
 
 bool BaseStaticBvhCacheComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, BvhHitInfo &outHitInfo) const
 {
-	const_cast<BaseStaticBvhCacheComponent *>(this)->UpdateBuild();
-	if(m_buildWorker)
-		m_buildWorker->WaitForTask();
+	//const_cast<BaseStaticBvhCacheComponent *>(this)->UpdateBuild();
+	//if(m_buildWorker)
+	//	m_buildWorker->WaitForTask();
 	return BaseBvhComponent::IntersectionTest(origin, dir, minDist, maxDist, outHitInfo);
 }
 
 void BaseStaticBvhCacheComponent::Build(std::vector<std::shared_ptr<ModelSubMesh>> &&meshes, std::vector<BaseEntity *> &&meshToEntity, std::vector<umath::ScaledTransform> &&meshPoses)
 {
+	LOGGER.info("Building new static BVH cache...");
+	m_bvhInitialized = true;
 	if(!m_buildWorker) {
 		m_buildWorker = std::make_unique<FunctionalParallelWorker>();
 		m_buildWorker->Start();
 	}
-	m_bvhDataMutex.lock();
-	m_bvhData = nullptr; // No longer valid
-	m_bvhDataMutex.unlock();
+	// m_bvhDataMutex.lock();
+	// m_bvhData = nullptr; // No longer valid
+	// m_bvhDataMutex.unlock();
 	m_buildWorker->ResetTask([this, meshes = std::move(meshes), meshPoses = std::move(meshPoses), meshToEntity = std::move(meshToEntity)](FunctionalParallelWorker &worker) {
 		std::vector<size_t> meshIndices;
 		BaseBvhComponent::BvhBuildInfo buildInfo {};
@@ -165,27 +170,53 @@ void BaseStaticBvhCacheComponent::Build(std::vector<std::shared_ptr<ModelSubMesh
 		}
 		if(worker.IsTaskCancelled())
 			return;
-		m_bvhDataMutex.lock();
-		m_bvhData = std::move(bvhData);
-		m_bvhDataMutex.unlock();
+		m_bvhPendingWorkerResult->bvhData = std::move(bvhData);
+		m_bvhPendingWorkerResult->complete = true;
 	});
+
+	m_bvhPendingWorkerResult = std::unique_ptr<BvhPendingWorkerResult> {new BvhPendingWorkerResult {}};
+	SetTickPolicy(TickPolicy::Always);
 }
 
 void BaseStaticBvhCacheComponent::SetCacheDirty()
 {
+	if(m_staticBvhDirty)
+		return;
+	LOGGER.info("Marking static BVH cache as dirty...");
 	m_staticBvhDirty = true;
 	SetTickPolicy(TickPolicy::Always);
-
-	if(m_buildWorker)
-		m_buildWorker->CancelTask();
-	m_bvhDataMutex.lock();
-	m_bvhData = nullptr;
-	m_bvhDataMutex.unlock();
 }
 void BaseStaticBvhCacheComponent::OnTick(double tDelta)
 {
-	SetTickPolicy(TickPolicy::Never);
-	UpdateBuild();
+	if(m_bvhPendingWorkerResult) {
+		if(m_bvhPendingWorkerResult->complete) {
+			auto pendingResult = std::move(m_bvhPendingWorkerResult);
+			m_bvhPendingWorkerResult = nullptr;
+
+			LOGGER.info("Finalizing new static BVH cache (version {})...", m_currentBvhCacheVersion);
+			m_bvhDataMutex.lock();
+			m_bvhData = pendingResult->bvhData;
+			m_bvhDataMutex.unlock();
+
+			while(!pendingResult->callOnComplete.empty()) {
+				auto &f = pendingResult->callOnComplete.front();
+				f();
+				pendingResult->callOnComplete.pop();
+			}
+
+			++m_currentBvhCacheVersion;
+			for(auto *userC : m_entities) {
+				if(userC->HasDynamicBvhSubstitute() && userC->GetStaticBvhCacheVersion() <= m_currentBvhCacheVersion) {
+					LOGGER.info("Destroying dynamic BVH substitution for entity {}...", userC->GetEntity().ToString());
+					userC->DestroyDynamicBvhSubstitute(); // We no longer need the dynamic BVH for this, the entity should be up-to-date with the static BVH
+				}
+			}
+		}
+	}
+	else {
+		SetTickPolicy(TickPolicy::Never);
+		UpdateBuild();
+	}
 }
 void BaseStaticBvhCacheComponent::UpdateBuild()
 {
@@ -196,8 +227,19 @@ void BaseStaticBvhCacheComponent::UpdateBuild()
 }
 void BaseStaticBvhCacheComponent::SetEntityDirty(BaseEntity &ent)
 {
-	// TODO: Only reload meshes for this entity (unless meshes themselves have changed)
 	SetCacheDirty();
+
+	if(!m_bvhInitialized)
+		return;
+
+	// Immediately remove entity from BVH
+	RemoveEntityFromBvh(ent);
+
+	auto *c = static_cast<BaseStaticBvhUserComponent *>(ent.AddComponent("static_bvh_user").get());
+	if(c) {
+		LOGGER.info("Initializing dynamic BVH substitution for entity {} (static BVH cache version {})...", ent.ToString(), m_currentBvhCacheVersion + 1);
+		c->InitializeDynamicBvhSubstitute(m_currentBvhCacheVersion + 1); // Temporarily initialize a dynamic BVH until the new static BVH has been built
+	}
 }
 void BaseStaticBvhCacheComponent::AddEntity(BaseEntity &ent)
 {
@@ -207,9 +249,9 @@ void BaseStaticBvhCacheComponent::AddEntity(BaseEntity &ent)
 		return;
 	c->SetStaticBvhCacheComponent(this);
 	m_entities.insert(c);
-
-	SetCacheDirty();
 	c->UpdateBvhStatus();
+
+	SetEntityDirty(ent);
 }
 void BaseStaticBvhCacheComponent::RemoveEntity(BaseEntity &ent, bool removeFinal)
 {
@@ -223,4 +265,31 @@ void BaseStaticBvhCacheComponent::RemoveEntity(BaseEntity &ent, bool removeFinal
 		return;
 	SetCacheDirty();
 	m_entities.erase(it);
+	RemoveEntityFromBvh(ent);
+}
+void BaseStaticBvhCacheComponent::RemoveEntityFromBvh(const BaseEntity &ent)
+{
+	m_bvhDataMutex.lock();
+	if(m_bvhData) {
+		LOGGER.info("Removing entity {} from static BVH cache...", ent.ToString());
+
+		// Delete the entity from the current BVH
+		auto &meshRanges = get_bvh_mesh_ranges(*m_bvhData);
+		auto it = std::find_if(meshRanges.begin(), meshRanges.end(), [&ent](const BvhMeshRange &range) { return range.entity == &ent; });
+		if(it != meshRanges.end()) {
+			auto &meshRange = *it;
+			BaseBvhComponent::DeleteRange(*m_bvhData, meshRange.start, meshRange.end);
+		}
+	}
+	m_bvhDataMutex.unlock();
+
+	if(m_bvhPendingWorkerResult) {
+		// A new BVH is currently being built, we'll have to remove the entity once it is complete
+		auto hEnt = ent.GetHandle();
+		m_bvhPendingWorkerResult->callOnComplete.push([this, hEnt]() {
+			if(hEnt.IsValid() == false)
+				return;
+			RemoveEntityFromBvh(*hEnt.get());
+		});
+	}
 }

@@ -45,6 +45,14 @@ void BaseStaticBvhUserComponent::OnEntitySpawn()
 }
 void BaseStaticBvhUserComponent::UpdateBvhStatus()
 {
+	if(HasDynamicBvhSubstitute()) {
+		if(m_isActive) {
+			m_isActive = false;
+			BroadcastEvent(EVENT_ON_ACTIVATION_STATE_CHANGED);
+		}
+		return;
+	}
+
 	auto isStatic = GetEntity().IsStatic();
 	if(GetEntity().FindComponent("panima").valid())
 		isStatic = false;
@@ -99,3 +107,15 @@ void BaseStaticBvhUserComponent::OnRemove()
 		m_staticBvhComponent->RemoveEntity(GetEntity());
 }
 void BaseStaticBvhUserComponent::SetStaticBvhCacheComponent(BaseStaticBvhCacheComponent *component) { m_staticBvhComponent = component ? component->GetHandle<BaseStaticBvhCacheComponent>() : pragma::ComponentHandle<BaseStaticBvhCacheComponent> {}; }
+void BaseStaticBvhUserComponent::InitializeDynamicBvhSubstitute(size_t staticBvhCacheVersion)
+{
+	m_staticBvhCacheVersion = staticBvhCacheVersion;
+	GetEntity().AddComponent("bvh");
+	UpdateBvhStatus();
+}
+bool BaseStaticBvhUserComponent::HasDynamicBvhSubstitute() const { return GetEntity().FindComponent("bvh").valid(); }
+void BaseStaticBvhUserComponent::DestroyDynamicBvhSubstitute()
+{
+	GetEntity().RemoveComponent("bvh");
+	UpdateBvhStatus();
+}

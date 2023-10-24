@@ -205,8 +205,8 @@ util::EventReply CLightSpotVolComponent::HandleEvent(ComponentEventId eventId, C
 #include "pragma/lua/classes/c_lmaterial.h"
 void CLightSpotVolComponent::InitializeVolumetricLight()
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	if(!mdlComponent)
+	auto mdlComponent = GetEntity().GetComponent<CModelComponent>();
+	if(mdlComponent.expired())
 		return;
 	auto newMeshes = UpdateMeshData();
 	if(!newMeshes)
@@ -215,15 +215,15 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 	auto mdl = c_game->CreateModel();
 	auto group = mdl->AddMeshGroup("reference");
 
-	auto mat = client->CreateMaterial("lightcone", "light_cone");
+	auto mat = client->CreateMaterial("lightcone", "noop");
 	auto *cmat = static_cast<CMaterial *>(mat.get());
 	auto &data = mat->GetDataBlock();
 	data->AddValue("int", "alpha_mode", std::to_string(umath::to_integral(AlphaMode::Blend)));
 	data->AddValue("float", "cone_height", std::to_string(CalcEndRadius()));
 	cmat->SetTexture("albedo_map", "error");
 	cmat->UpdateTextures();
-	Lua::Material::Client::InitializeShaderData(nullptr, cmat, false);
 	cmat->SetLoaded(true);
+	Lua::Material::Client::InitializeShaderData(nullptr, cmat, false);
 	m_material = mat->GetHandle();
 
 	auto mesh = std::make_shared<CModelMesh>();
@@ -234,6 +234,7 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 
 	mdl->Update(ModelUpdateFlags::All);
 	mdlComponent->SetModel(mdl);
+	mdlComponent->SetDepthPrepassEnabled(false);
 	m_model = mdl;
 }
 

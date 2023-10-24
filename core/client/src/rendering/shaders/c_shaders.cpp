@@ -17,6 +17,7 @@
 #include "pragma/rendering/shaders/world/c_shader_flat.hpp"
 #include "pragma/rendering/shaders/world/c_shader_test.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
+#include "pragma/rendering/shaders/world/c_shader_noop.hpp"
 #include "pragma/rendering/shaders/c_shader_depth_to_rgb.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_model.hpp"
@@ -105,6 +106,7 @@ void register_game_shaders()
 	// shaderManager.RegisterShader("flat",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderFlat(context,identifier);});
 	// shaderManager.RegisterShader("test",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderTest(context,identifier);});
 	shaderManager.RegisterShader("unlit", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderUnlit(context, identifier); }); // TODO: Fixme
+	shaderManager.RegisterShader("noop", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderNoop(context, identifier); });
 	shaderManager.RegisterShader("wireframe", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderWireframe(context, identifier); });
 	// shaderManager.RegisterShader("texturedalphatransition",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderTexturedAlphaTransition(context,identifier);});
 	shaderManager.RegisterShader("skybox", [](prosper::IPrContext &context, const std::string &identifier) { return new pragma::ShaderSkybox(context, identifier); });

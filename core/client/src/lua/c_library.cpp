@@ -185,6 +185,7 @@ static void register_gui(Lua::Interface &lua)
 		  return t;
 	  })),
 	  luabind::def("get_delta_time", static_cast<float (*)(lua_State *)>([](lua_State *l) -> float { return WGUI::GetInstance().GetDeltaTime(); })),
+	  luabind::def("get_next_gui_element_index", static_cast<uint64_t (*)(lua_State *)>([](lua_State *l) -> uint64_t { return WGUI::GetInstance().GetNextGuiElementIndex(); })),
 	  luabind::def("add_base_element", static_cast<::WIBase *(*)(const prosper::Window &)>([](const prosper::Window &window) -> ::WIBase * { return WGUI::GetInstance().AddBaseElement(&window); })),
 	  luabind::def("add_base_element", static_cast<::WIBase *(*)()>([]() -> ::WIBase * { return WGUI::GetInstance().AddBaseElement(); })),
 	  luabind::def(

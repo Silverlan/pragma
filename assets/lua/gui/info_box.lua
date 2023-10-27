@@ -82,6 +82,9 @@ end
 function InfoBox:GetType()
 	return self.m_type
 end
+function InfoBox:GetText()
+	return self.m_text:GetText()
+end
 function InfoBox:SetText(text)
 	self.m_text:SetText(text)
 	self:SizeToContents()

@@ -12,8 +12,8 @@ parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev
 
 # See https://stackoverflow.com/a/43357954/1879228 for boolean args
 if platform == "linux":
-	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-14')
-	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-14')
+	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-15')
+	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-15')
 	defaultGenerator = "Unix Makefiles"
 else:
 	defaultGenerator = "Visual Studio 17 2022"
@@ -248,7 +248,7 @@ if platform == "linux":
 			"apt install build-essential",
 			"add-apt-repository ppa:savoury1/llvm-defaults-14",
 			"apt update",
-			"apt install clang-14",
+			"apt install clang-15",
 			"apt install libstdc++-12-dev",
 			"apt install libstdc++6",
 			"apt-get install patchelf",

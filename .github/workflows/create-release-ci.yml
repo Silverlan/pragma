@@ -98,9 +98,9 @@ jobs:
         id: windows-version
         shell: bash
         run:   |
-          wget https://github.com/Silverlan/pragma/releases/download/nightly/pragma.zip
+          wget https://github.com/Silverlan/pragma/releases/download/nightly/pragma-win64.zip
           filename="pragma-v${{ steps.determine-version.outputs.version }}-win64.zip"
-          mv pragma.zip "$filename"
+          mv pragma-win64.zip "$filename"
           echo "filename=$filename" >> $GITHUB_OUTPUT
         env:
           filename: ${{ steps.determine-version.outputs.filename }}
@@ -109,9 +109,9 @@ jobs:
         id: linux-version
         shell: bash
         run:   |
-          wget https://github.com/Silverlan/pragma/releases/download/nightly/pragma.tar.gz
+          wget https://github.com/Silverlan/pragma/releases/download/nightly/pragma-lin64.tar.gz
           filename="pragma-v${{ steps.determine-version.outputs.version }}-lin64.tar.gz"
-          mv pragma.tar.gz "$filename"
+          mv pragma-lin64.tar.gz "$filename"
           echo "filename=$filename" >> $GITHUB_OUTPUT
 
       - name: Create Pragma Directory

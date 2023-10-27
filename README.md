@@ -33,7 +33,6 @@ What platforms and hardware does it work on?
 ------
 - Windows 10 (or newer) / Ubuntu 22.04 LTS (or newer)
 - Graphics card: GTX 1050 Ti or newer
-- Memory: 4 GiB RAM or more
 
 Contributions
 ------

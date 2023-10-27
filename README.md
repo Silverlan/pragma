@@ -56,7 +56,7 @@ Build Requirements
 - Windows SDK 10.0.22000.0 or newer
 
 ###### Linux
-- clang-14 or newer (Pragma is *not* compatible with gcc!)
+- clang-15 or newer (Pragma is *not* compatible with gcc!)
 
 Build Instructions
 ------

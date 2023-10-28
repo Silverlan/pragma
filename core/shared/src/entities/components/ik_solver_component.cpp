@@ -22,7 +22,7 @@
 #include <panima/bone.hpp>
 
 using namespace pragma;
-#pragma optimize("", off)
+
 ComponentEventId IkSolverComponent::EVENT_INITIALIZE_SOLVER = pragma::INVALID_COMPONENT_ID;
 ComponentEventId IkSolverComponent::EVENT_ON_IK_UPDATED = pragma::INVALID_COMPONENT_ID;
 IkSolverComponent::ConstraintInfo::ConstraintInfo(BoneId bone0, BoneId bone1) : boneId0 {bone0}, boneId1 {bone1} {}

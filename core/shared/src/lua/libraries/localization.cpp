@@ -14,7 +14,7 @@
 #include <sharedutils/util_path.hpp>
 
 #undef CreateFile
-#pragma optimize("", off)
+
 decltype(Locale::m_localization) Locale::m_localization;
 decltype(Locale::m_language) Locale::m_language;
 decltype(Locale::m_loadedFiles) Locale::m_loadedFiles;

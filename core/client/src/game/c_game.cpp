@@ -742,11 +742,13 @@ void CGame::Resize(bool reloadRenderTarget)
 {
 	if(reloadRenderTarget)
 		ReloadRenderFrameBuffer();
-	auto *cam = GetPrimaryCamera();
-	if(cam == nullptr)
-		return;
-	cam->SetAspectRatio(c_engine->GetWindow().GetAspectRatio());
-	cam->UpdateMatrices();
+	auto *cam = GetRenderCamera();
+	if(cam != nullptr) {
+		cam->SetAspectRatio(c_engine->GetWindow().GetAspectRatio());
+		cam->UpdateMatrices();
+	}
+
+	CallLuaCallbacks("OnRenderTargetResized");
 }
 
 void CGame::PreGUIDraw() { CallLuaCallbacks<void>("PreGUIDraw"); }

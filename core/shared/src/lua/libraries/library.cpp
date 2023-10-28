@@ -1407,6 +1407,8 @@ void Game::RegisterLuaLibraries()
 		  return FileManager::CopyFile(srcFile.c_str(), dstFile.c_str());
 	  })),
 	  luabind::def(
+	    "update_file_index_cache", +[](lua_State *l, const std::string &path) { filemanager::update_file_index_cache(path); }),
+	  luabind::def(
 	    "is_empty", +[](const std::string &path) -> std::optional<bool> {
 		    auto paths = FileManager::FindAbsolutePaths(path);
 		    auto allEmpty = true;

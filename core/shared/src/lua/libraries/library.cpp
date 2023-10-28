@@ -1408,10 +1408,19 @@ void Game::RegisterLuaLibraries()
 	  })),
 	  luabind::def(
 	    "is_empty", +[](const std::string &path) -> std::optional<bool> {
-		    std::string rpath;
-		    if(!FileManager::FindAbsolutePath(path, rpath))
-			    return {};
-		    return std::filesystem::is_empty(rpath);
+		    auto paths = FileManager::FindAbsolutePaths(path);
+		    auto allEmpty = true;
+		    for(auto &path : paths) {
+			    try {
+				    if(!std::filesystem::is_empty(path)) {
+					    allEmpty = false;
+					    break;
+				    }
+			    }
+			    catch(const std::runtime_error &err) {
+			    }
+		    }
+		    return allEmpty;
 	    })];
 
 	auto classDefFile = luabind::class_<LFile>("File");

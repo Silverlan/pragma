@@ -906,7 +906,7 @@ if with_vr:
 if with_pfm:
 	download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")
 	download_addon("PFM Bedroom Demo","pfm_demo_bedroom","https://github.com/Silverlan/pfm_demo_bedroom.git","0fed1d5b54a25c3ded2ce906e7da80ca8dd2fb0d")
-	download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","aa7d1dc56f8e5cfb6619f4ba13af641aafd9e50f")
+	download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","a584457716ffa8be1611ae3becc10f5139f7083e")
 
 if with_source_engine_entities:
 	download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","a70f575")

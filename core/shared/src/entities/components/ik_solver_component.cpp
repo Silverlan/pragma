@@ -118,6 +118,8 @@ void IkSolverComponent::SetIkRigFile(const std::string &RigConfigFile)
 const std::string &IkSolverComponent::GetIkRigFile() const { return m_ikRigFile; }
 void IkSolverComponent::UpdateIkRigFile()
 {
+	if(!m_ikRigFile.empty())
+		m_ikRig = udm::Property::Create<udm::Element>();
 	InitializeSolver(); // Clear Rig
 	if(!m_ikRigFile.empty()) {
 		auto rigConfig = pragma::ik::RigConfig::load("scripts/ik_rigs/" + m_ikRigFile);

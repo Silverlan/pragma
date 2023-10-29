@@ -97,8 +97,8 @@ Running the build-script with the arguments above will build and install Pragma 
 | --------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------- |
 | `--help`                                | Display this help                                                                            |                  |
 | `--generator <generator>`               | The generator to use.                                                                        | Windows: `Visual Studio 17 2022`<br/>Linux: `Unix Makefiles` |
-| `--c-compiler`                          | [Linux only] The C-compiler to use.                                                          | `clang-14`       |
-| `--cxx-compiler`                        | [Linux only] The C++-compiler to use.                                                        | `clang++-14`     |
+| `--c-compiler`                          | [Linux only] The C-compiler to use.                                                          | `clang-15`       |
+| `--cxx-compiler`                        | [Linux only] The C++-compiler to use.                                                        | `clang++-15`     |
 | `--no-sudo`                             | [Linux only] Will not run sudo commands. System packages will have to be installed manually. | `0`              |
 | `--no-confirm`                          | [Linux only] Disable any interaction with user (suitable for automated run).                 | `0`              |
 | `--with-essential-client-modules <1/0>` | Include essential modules required to run Pragma.                                            | `1`              |

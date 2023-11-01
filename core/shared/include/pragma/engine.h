@@ -265,6 +265,7 @@ class DLLNETWORK Engine : public CVarHandler, public CallbackHandler {
 	bool RunEngineConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(ConConf *, float &)> &callback = nullptr);
 	void WriteServerConfig(VFilePtrReal f);
 	void WriteEngineConfig(VFilePtrReal f);
+	void RestoreConVarsForUnknownCommands(VFilePtrReal f, const ConVarInfoList &origCvarValues, const std::map<std::string, std::shared_ptr<ConConf>> &stateConVars);
 	void RegisterSharedConsoleCommands(ConVarMap &map);
 	void RunTickEvents();
 	virtual uint32_t DoClearUnusedAssets(pragma::asset::Type type) const;

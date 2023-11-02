@@ -372,7 +372,19 @@ void Lua::game::register_shared_functions(lua_State *l, luabind::module_ &modGam
 	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua_State *, Game &, const std::string &, luabind::object, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
 	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua_State *, Game &, const std::string &, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
 	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua_State *, Game &, const std::string &, luabind::object)>(Lua::game::call_callbacks)),
-	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua_State *, Game &, const std::string &)>(Lua::game::call_callbacks)), luabind::def("clear_callbacks", Lua::game::clear_callbacks), luabind::def("register_ammo_type", Lua::game::register_ammo_type),
+	  luabind::def("call_callbacks", static_cast<luabind::object (*)(lua_State *, Game &, const std::string &)>(Lua::game::call_callbacks)), luabind::def("clear_callbacks", Lua::game::clear_callbacks),
+
+	  // Aliases
+	  luabind::def("add_event_listener", Lua::game::add_callback),
+	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua_State *, Game &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
+	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua_State *, Game &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
+	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua_State *, Game &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
+	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua_State *, Game &, const std::string &, luabind::object, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
+	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua_State *, Game &, const std::string &, luabind::object, luabind::object)>(Lua::game::call_callbacks)),
+	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua_State *, Game &, const std::string &, luabind::object)>(Lua::game::call_callbacks)),
+	  luabind::def("call_event_listeners", static_cast<luabind::object (*)(lua_State *, Game &, const std::string &)>(Lua::game::call_callbacks)), luabind::def("clear_event_listeners", Lua::game::clear_callbacks),
+
+	  luabind::def("register_ammo_type", Lua::game::register_ammo_type),
 	  luabind::def(
 	    "register_ammo_type", +[](lua_State *l, const std::string &name, int32_t damage, float force) { return Lua::game::register_ammo_type(l, name, damage, force); }),
 	  luabind::def(

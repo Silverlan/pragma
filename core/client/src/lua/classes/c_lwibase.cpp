@@ -313,6 +313,16 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("CallCallbacks", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
 	classDef.def("CallCallbacks", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
 	classDef.def("CallCallbacks", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("AddEventListener", &AddCallback);
+	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
 	classDef.def("FadeIn", static_cast<void (*)(lua_State *, ::WIBase &, float)>(&FadeIn));
 	classDef.def("FadeIn", static_cast<void (*)(lua_State *, ::WIBase &, float, float)>(&FadeIn));
 	classDef.def("FadeOut", static_cast<void (::WIBase::*)(float, bool)>(&::WIBase::FadeOut));

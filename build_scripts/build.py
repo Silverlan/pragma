@@ -696,6 +696,11 @@ if with_pfm:
             commitSha="485eaad",
             repositoryUrl="https://github.com/Silverlan/pr_xatlas.git"
         )
+        add_pragma_module(
+            name="pr_davinci",
+            commitSha="bdc505a280e4053838bb67b82542b8e78bb3d5b9",
+            repositoryUrl="https://github.com/Silverlan/pr_davinci.git"
+        )
 
 if with_lua_doc_generator or with_pfm:
     add_pragma_module(

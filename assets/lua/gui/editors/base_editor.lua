@@ -230,6 +230,7 @@ function gui.WIBaseEditor:OpenWindow(identifier, goToWindow)
 	if goToWindow then
 		self:GoToWindow(identifier)
 	end
+	self:CallCallbacks("OnWindowOpened", identifier, el, frame, tab)
 	return tab, el, frame
 end
 

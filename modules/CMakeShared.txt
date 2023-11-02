@@ -177,6 +177,4 @@ function(register_pragma_module IDENTIFIER)
 		set_source_files_properties("${CMAKE_CURRENT_LIST_DIR}/src/${PRECOMPILED_HEADER}.cpp" PROPERTIES COMPILE_FLAGS "/Yc${PRECOMPILED_HEADER}.h")
 	endif()
 	set_target_properties(${PROJ_NAME} PROPERTIES ${TARGET_PROPERTIES})
-
-	add_dependencies(${PROJ_NAME} ishared)
 endfunction(register_pragma_module)

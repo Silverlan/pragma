@@ -70,18 +70,29 @@ bool FunctionalParallelWorker::IsTaskCancelled() const { return m_taskCancelled;
 
 void FunctionalParallelWorker::CancelTask()
 {
+	if(!IsPending())
+		return;
 	m_taskMutex.lock();
 	m_taskCancelled = true;
-	m_taskComplete = false;
 	m_nextTask = nullptr;
+
+	m_taskAvailableMutex.lock();
+	m_taskAvailableCond.notify_one();
+	m_taskAvailableMutex.unlock();
+
 	m_taskMutex.unlock();
+
+	WaitForTask();
+
+	m_taskComplete = false;
+	m_taskCancelled = false;
 }
 
 void FunctionalParallelWorker::ResetTask(const Task &task)
 {
+	CancelTask();
+
 	m_taskMutex.lock();
-	m_taskCancelled = true;
-	m_taskComplete = false;
 	m_nextTask = task;
 	m_taskMutex.unlock();
 
@@ -96,25 +107,33 @@ FunctionalParallelWorker::FunctionalParallelWorker() : util::ParallelWorker<void
 	AddThread([this]() {
 		while(!IsCancelled()) {
 			auto ul = std::unique_lock<std::mutex> {m_taskAvailableMutex};
-			m_taskAvailableCond.wait(ul, [this]() -> bool { return m_taskAvailable || IsCancelled(); });
+			m_taskAvailableCond.wait(ul, [this]() -> bool { return m_taskAvailable || IsCancelled() || m_taskCancelled; });
 			if(IsCancelled())
 				break;
 			m_taskMutex.lock();
 			auto task = std::move(m_nextTask);
 			m_nextTask = nullptr;
 			m_taskAvailable = false;
+			auto taskCancelled = m_taskCancelled ? true : false;
 			m_taskCancelled = false;
 			m_taskMutex.unlock();
 
-			task(*this);
-			if(!IsTaskCancelled()) {
-				m_taskCompleteMutex.lock();
-				m_taskComplete = true;
-				m_taskCompleteCond.notify_one();
-				m_taskCompleteMutex.unlock();
+			if(!taskCancelled) {
+				assert(task != nullptr);
+				if(task)
+					task(*this);
 			}
+
+			m_taskCompleteMutex.lock();
+			m_taskComplete = true;
+			m_taskCompleteCond.notify_one();
+			m_taskCompleteMutex.unlock();
 		}
+
+		m_taskCompleteMutex.lock();
 		m_taskComplete = true;
+		m_taskCompleteCond.notify_one();
+		m_taskCompleteMutex.unlock();
 	});
 }
 void FunctionalParallelWorker::WaitForTask()

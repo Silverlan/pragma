@@ -200,5 +200,5 @@ Special Thanks
 ------
 - [SlawekNowy](https://github.com/SlawekNowy): For helping to make Linux support possible
 - [REDxEYE](https://github.com/REDxEYE): For creating the [Pragma asset import plugin for Blender](https://github.com/REDxEYE/pragma_udm_io)
-- [ZeqMacaw]: For their work on [Crowbar](https://github.com/ZeqMacaw/Crowbar)
+- [ZeqMacaw](https://github.com/ZeqMacaw): For their work on [Crowbar](https://github.com/ZeqMacaw/Crowbar)
 - All of the contributors of the [third-party libraries](https://github.com/Silverlan/pragma/blob/master/build_scripts/scripts/third_party_libs.py) used by Pragma/PFM

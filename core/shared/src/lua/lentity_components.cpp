@@ -624,6 +624,8 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defConstraintChildOfComponent.def("IsRotationAxisEnabled", &pragma::ConstraintChildOfComponent::IsRotationAxisEnabled);
 	defConstraintChildOfComponent.def("SetScaleAxisEnabled", &pragma::ConstraintChildOfComponent::SetScaleAxisEnabled);
 	defConstraintChildOfComponent.def("IsScaleAxisEnabled", &pragma::ConstraintChildOfComponent::IsScaleAxisEnabled);
+	defConstraintChildOfComponent.def("CalcInversePose", &pragma::ConstraintChildOfComponent::CalcInversePose);
+	defConstraintChildOfComponent.def("GetConstraint", &pragma::ConstraintChildOfComponent::GetConstraint);
 	entsMod[defConstraintChildOfComponent];
 
 	auto defConstraintLimitDistance = pragma::lua::create_entity_component_class<pragma::ConstraintLimitDistanceComponent, pragma::BaseEntityComponent>("ConstraintLimitDistanceComponent");

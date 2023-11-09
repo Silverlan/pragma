@@ -80,8 +80,10 @@ void ConstraintLimitRotationComponent::InitializeLuaObject(lua_State *l) { pragm
 void ConstraintLimitRotationComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
-	if(typeid(component) == typeid(ConstraintComponent))
+	if(typeid(component) == typeid(ConstraintComponent)) {
 		m_constraintC = component.GetHandle<ConstraintComponent>();
+		m_constraintC->SetDriverEnabled(false);
+	}
 }
 void ConstraintLimitRotationComponent::SetLimit(pragma::Axis axis, const Vector2 &limit) { m_limits[umath::to_integral(axis)] = limit; }
 const Vector2 &ConstraintLimitRotationComponent::GetLimit(pragma::Axis axis) const { return m_limits[umath::to_integral(axis)]; }
@@ -93,7 +95,7 @@ void ConstraintLimitRotationComponent::ApplyConstraint()
 	if(m_constraintC.expired())
 		return;
 	auto influence = m_constraintC->GetInfluence();
-	auto constraintInfo = m_constraintC->GetConstraintParticipants(true);
+	auto &constraintInfo = m_constraintC->GetConstraintParticipants();
 	if(!constraintInfo || influence == 0.f)
 		return;
 	Quat rot;
@@ -115,5 +117,5 @@ void ConstraintLimitRotationComponent::ApplyConstraint()
 	rot = uquat::create(ang);
 
 	rot = uquat::slerp(origRot, rot, influence);
-	constraintInfo->drivenObjectC->SetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot);
+	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot);
 }

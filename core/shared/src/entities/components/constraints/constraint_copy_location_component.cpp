@@ -37,7 +37,7 @@ void ConstraintCopyLocationComponent::ApplyConstraint()
 	if(m_constraintC.expired())
 		return;
 	auto influence = m_constraintC->GetInfluence();
-	auto constraintInfo = m_constraintC->GetConstraintParticipants();
+	auto &constraintInfo = m_constraintC->GetConstraintParticipants();
 	if(!constraintInfo || influence == 0.f)
 		return;
 	Vector3 posDriven;
@@ -58,5 +58,5 @@ void ConstraintCopyLocationComponent::ApplyConstraint()
 		m_constraintSpaceC->ApplyFilter(posDriver, posDriven, posDriver);
 
 	posDriver = uvec::lerp(posDriven, posDriver, influence);
-	constraintInfo->drivenObjectC->SetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriver);
+	const_cast<BaseEntityComponent&>(*constraintInfo->drivenObjectC).SetTransformMemberPos(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), posDriver);
 }

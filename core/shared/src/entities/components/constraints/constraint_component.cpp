@@ -19,12 +19,14 @@ ComponentEventId ConstraintComponent::EVENT_APPLY_CONSTRAINT = pragma::INVALID_C
 ComponentEventId ConstraintComponent::EVENT_ON_DRIVER_CHANGED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId ConstraintComponent::EVENT_ON_DRIVEN_OBJECT_CHANGED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId ConstraintComponent::EVENT_ON_ORDER_INDEX_CHANGED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId ConstraintComponent::EVENT_ON_PARTICIPANTS_FLAGGED_DIRTY = pragma::INVALID_COMPONENT_ID;
 void ConstraintComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	EVENT_APPLY_CONSTRAINT = registerEvent("APPLY_CONSTRAINT", ComponentEventInfo::Type::Explicit);
 	EVENT_ON_DRIVER_CHANGED = registerEvent("ON_DRIVER_CHANGED", ComponentEventInfo::Type::Broadcast);
 	EVENT_ON_DRIVEN_OBJECT_CHANGED = registerEvent("ON_DRIVEN_OBJECT_CHANGED", ComponentEventInfo::Type::Broadcast);
 	EVENT_ON_ORDER_INDEX_CHANGED = registerEvent("ON_ORDER_INDEX_CHANGED", ComponentEventInfo::Type::Explicit);
+	EVENT_ON_PARTICIPANTS_FLAGGED_DIRTY = registerEvent("ON_PARTICIPANTS_FLAGGED_DIRTY", ComponentEventInfo::Type::Broadcast);
 }
 void ConstraintComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
@@ -76,33 +78,57 @@ void ConstraintComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void ConstraintComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ConstraintComponent::ApplyConstraint() { InvokeEventCallbacks(EVENT_APPLY_CONSTRAINT); }
 
-std::optional<ConstraintComponent::ConstraintParticipants> ConstraintComponent::GetConstraintParticipants(bool drivenObjectOnly) const
+void ConstraintComponent::SetDriverEnabled(bool enabled) { m_hasDriver = enabled; }
+bool ConstraintComponent::HasDriver() const { return m_hasDriver; }
+
+void ConstraintComponent::SetConstraintParticipantsDirty()
 {
+	if(!m_constraintParticipants)
+		return;
+	m_constraintParticipants = {};
+	InvokeEventCallbacks(EVENT_ON_PARTICIPANTS_FLAGGED_DIRTY);
+}
+
+const std::optional<ConstraintComponent::ConstraintParticipants> &ConstraintComponent::GetConstraintParticipants() const { return const_cast<ConstraintComponent *>(this)->UpdateConstraintParticipants(); }
+
+const std::optional<ConstraintComponent::ConstraintParticipants> &ConstraintComponent::UpdateConstraintParticipants()
+{
+	if(m_constraintParticipants)
+		return m_constraintParticipants;
 	auto &game = *GetEntity().GetNetworkState()->GetGameState();
 
 	auto &drivenObj = GetDrivenObject();
 	auto *drivenObjC = drivenObj.GetComponent(game);
 	drivenObj.UpdateMemberIndex(game);
 	auto idxDrivenObject = drivenObj.GetMemberIndex();
-	if(!drivenObjC || idxDrivenObject == pragma::INVALID_COMPONENT_MEMBER_INDEX)
-		return {};
+	if(!drivenObjC || idxDrivenObject == pragma::INVALID_COMPONENT_MEMBER_INDEX) {
+		if(m_constraintParticipants)
+			m_constraintParticipants = {};
+		return m_constraintParticipants;
+	}
 
 	ConstraintParticipants participants {};
-	participants.drivenObjectC = const_cast<pragma::BaseEntityComponent *>(drivenObjC);
+	participants.drivenObjectC = const_cast<pragma::BaseEntityComponent *>(drivenObjC)->GetHandle();
 	participants.drivenObjectPropIdx = idxDrivenObject;
-	if(drivenObjectOnly)
-		return participants;
+	if(!m_hasDriver) {
+		m_constraintParticipants = std::move(participants);
+		return m_constraintParticipants;
+	}
 
 	auto &driver = GetDriver();
 	auto *driverC = driver.GetComponent(game);
 	driver.UpdateMemberIndex(game);
 	auto idxDriver = driver.GetMemberIndex();
-	if(!driverC || idxDriver == pragma::INVALID_COMPONENT_MEMBER_INDEX)
-		return {};
+	if(!driverC || idxDriver == pragma::INVALID_COMPONENT_MEMBER_INDEX) {
+		if(m_constraintParticipants)
+			m_constraintParticipants = {};
+		return m_constraintParticipants;
+	}
 
-	participants.driverC = const_cast<pragma::BaseEntityComponent *>(driverC);
+	participants.driverC = const_cast<pragma::BaseEntityComponent *>(driverC)->GetHandle();
 	participants.driverPropIdx = idxDriver;
-	return participants;
+	m_constraintParticipants = std::move(participants);
+	return m_constraintParticipants;
 }
 
 void ConstraintComponent::OnEntitySpawn() { BaseEntityComponent::OnEntitySpawn(); }
@@ -118,6 +144,7 @@ float ConstraintComponent::GetInfluence() const { return m_influence; }
 
 void ConstraintComponent::SetDriver(const pragma::EntityUComponentMemberRef &driver)
 {
+	SetConstraintParticipantsDirty();
 	m_driver = driver;
 	BroadcastEvent(EVENT_ON_DRIVER_CHANGED);
 }
@@ -135,6 +162,7 @@ void ConstraintComponent::OnTick(double tDelta)
 
 void ConstraintComponent::SetDrivenObject(const pragma::EntityUComponentMemberRef &drivenObject)
 {
+	SetConstraintParticipantsDirty();
 	if(m_curDrivenConstraintManager.valid())
 		m_curDrivenConstraintManager->RemoveConstraint(*this);
 	m_drivenObject = drivenObject;

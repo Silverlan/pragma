@@ -136,8 +136,10 @@ void ConstraintLimitScaleComponent::InitializeLuaObject(lua_State *l) { pragma::
 void ConstraintLimitScaleComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
-	if(typeid(component) == typeid(ConstraintComponent))
+	if(typeid(component) == typeid(ConstraintComponent)) {
 		m_constraintC = component.GetHandle<ConstraintComponent>();
+		m_constraintC->SetDriverEnabled(false);
+	}
 }
 void ConstraintLimitScaleComponent::SetMinimum(pragma::Axis axis, float value) { m_minimum[umath::to_integral(axis)] = value; }
 void ConstraintLimitScaleComponent::SetMaximum(pragma::Axis axis, float value) { m_maximum[umath::to_integral(axis)] = value; }
@@ -155,7 +157,7 @@ void ConstraintLimitScaleComponent::ApplyConstraint()
 	if(m_constraintC.expired())
 		return;
 	auto influence = m_constraintC->GetInfluence();
-	auto constraintInfo = m_constraintC->GetConstraintParticipants(true);
+	auto &constraintInfo = m_constraintC->GetConstraintParticipants();
 	if(!constraintInfo || influence == 0.f)
 		return;
 	Vector3 scale;
@@ -175,5 +177,5 @@ void ConstraintLimitScaleComponent::ApplyConstraint()
 	}
 
 	scale = uvec::lerp(origScale, scale, influence);
-	constraintInfo->drivenObjectC->SetTransformMemberScale(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), scale);
+	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberScale(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), scale);
 }

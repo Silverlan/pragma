@@ -64,7 +64,7 @@ void ConstraintLookAtComponent::ApplyConstraint()
 	if(m_constraintC.expired())
 		return;
 	auto influence = m_constraintC->GetInfluence();
-	auto constraintInfo = m_constraintC->GetConstraintParticipants();
+	auto &constraintInfo = m_constraintC->GetConstraintParticipants();
 	if(!constraintInfo || influence == 0.f)
 		return;
 	if(!m_drivenObjectRotationInitialized) {
@@ -84,7 +84,7 @@ void ConstraintLookAtComponent::ApplyConstraint()
 	auto &game = *GetEntity().GetNetworkState()->GetGameState();
 	m_drivenObjectPosition.UpdateMemberIndex(game);
 	auto *drivenObjectPosC = m_drivenObjectPosition.GetComponent(game);
-	if(!drivenObjectPosC || drivenObjectPosC != constraintInfo->drivenObjectC)
+	if(!drivenObjectPosC || drivenObjectPosC != constraintInfo->drivenObjectC.get())
 		return;
 	auto idxDrivenObjectPos = m_drivenObjectPosition.GetMemberIndex();
 	if(idxDrivenObjectPos == pragma::INVALID_COMPONENT_MEMBER_INDEX)
@@ -120,5 +120,5 @@ void ConstraintLookAtComponent::ApplyConstraint()
 	if(res)
 		rot = uquat::slerp(curRot, rot, influence);
 
-	constraintInfo->drivenObjectC->SetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot);
+	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot);
 }

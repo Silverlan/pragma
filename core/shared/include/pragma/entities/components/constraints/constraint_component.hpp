@@ -14,17 +14,22 @@ namespace pragma {
 	class DLLNETWORK ConstraintComponent final : public BaseEntityComponent {
 	  public:
 		struct DLLNETWORK ConstraintParticipants {
-			pragma::BaseEntityComponent *driverC;
-			pragma::BaseEntityComponent *drivenObjectC;
+			pragma::ComponentHandle<pragma::BaseEntityComponent> driverC;
+			pragma::ComponentHandle<pragma::BaseEntityComponent> drivenObjectC;
 			pragma::ComponentMemberIndex driverPropIdx;
 			pragma::ComponentMemberIndex drivenObjectPropIdx;
 		};
 
-		enum class CoordinateSpace : uint8_t { World = umath::to_integral(umath::CoordinateSpace::World), Local = umath::to_integral(umath::CoordinateSpace::Local), Object = umath::to_integral(umath::CoordinateSpace::Object) };
+		enum class CoordinateSpace : uint8_t {
+			World = umath::to_integral(umath::CoordinateSpace::World),
+			Local = umath::to_integral(umath::CoordinateSpace::Local),
+			Object = umath::to_integral(umath::CoordinateSpace::Object),
+		};
 		static ComponentEventId EVENT_APPLY_CONSTRAINT;
 		static ComponentEventId EVENT_ON_DRIVER_CHANGED;
 		static ComponentEventId EVENT_ON_DRIVEN_OBJECT_CHANGED;
 		static ComponentEventId EVENT_ON_ORDER_INDEX_CHANGED;
+		static ComponentEventId EVENT_ON_PARTICIPANTS_FLAGGED_DIRTY;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
@@ -54,17 +59,23 @@ namespace pragma {
 		int32_t GetOrderIndex() const;
 
 		void ApplyConstraint();
+		void SetDriverEnabled(bool enabled);
+		bool HasDriver() const;
 
-		std::optional<ConstraintParticipants> GetConstraintParticipants(bool drivenObjectOnly = false) const;
+		const std::optional<ConstraintParticipants> &GetConstraintParticipants() const;
 
 		virtual void InitializeLuaObject(lua_State *lua) override;
 	  protected:
+		void SetConstraintParticipantsDirty();
+		const std::optional<ConstraintParticipants> &UpdateConstraintParticipants();
 		friend ConstraintManagerComponent;
 		pragma::EntityUComponentMemberRef m_driver;
 		pragma::EntityUComponentMemberRef m_drivenObject;
 		CoordinateSpace m_driverSpace = CoordinateSpace::World;
 		CoordinateSpace m_drivenObjectSpace = CoordinateSpace::World;
 		pragma::ComponentHandle<ConstraintManagerComponent> m_curDrivenConstraintManager;
+		std::optional<ConstraintComponent::ConstraintParticipants> m_constraintParticipants {};
+		bool m_hasDriver = true;
 		bool m_registeredWithConstraintManager = false;
 		int32_t m_orderIndex = 0;
 		float m_influence = 1.f;

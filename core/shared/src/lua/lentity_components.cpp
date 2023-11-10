@@ -368,6 +368,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defAnimated2.def("SetPropertyEnabled", &pragma::PanimaComponent::SetPropertyEnabled);
 	defAnimated2.def("IsPropertyEnabled", &pragma::PanimaComponent::IsPropertyEnabled);
 	defAnimated2.def("IsPropertyAnimated", &pragma::PanimaComponent::IsPropertyAnimated);
+	defAnimated2.def("UpdateAnimationChannelSubmitters", &pragma::PanimaComponent::UpdateAnimationChannelSubmitters);
 	defAnimated2.def("ClearAnimationManagers", &pragma::PanimaComponent::ClearAnimationManagers);
 	defAnimated2.def("AddAnimationManager", &pragma::PanimaComponent::AddAnimationManager);
 	defAnimated2.def("RemoveAnimationManager", static_cast<void (pragma::PanimaComponent::*)(const panima::AnimationManager &)>(&pragma::PanimaComponent::RemoveAnimationManager));

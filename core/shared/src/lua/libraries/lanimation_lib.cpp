@@ -319,6 +319,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	  });
 	cdChannel.def("Save", &panima::Channel::Save);
 	cdChannel.def("Load", &panima::Channel::Load);
+	cdChannel.def("ClearAnimationData", &panima::Channel::ClearAnimationData);
 	cdChannel.def("ClearRange", &panima::Channel::ClearRange);
 	cdChannel.def("ClearRange", &panima::Channel::ClearRange, luabind::default_parameter_policy<4, true> {});
 	cdChannel.def(
@@ -580,6 +581,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	Lua::RegisterLibraryValue(lua.GetState(), "panima", "TIME_EPSILON", panima::Channel::TIME_EPSILON);
 
 	pragma::lua::define_custom_constructor<panima::Channel, []() -> std::shared_ptr<panima::Channel> { return std::make_shared<panima::Channel>(); }>(lua.GetState());
+	pragma::lua::define_custom_constructor<panima::Channel, [](panima::Channel &channel) -> std::shared_ptr<panima::Channel> { return std::make_shared<panima::Channel>(channel); }, panima::Channel &>(lua.GetState());
 	pragma::lua::define_custom_constructor<panima::Channel, [](::udm::LinkedPropertyWrapper &times, ::udm::LinkedPropertyWrapper &values) -> std::shared_ptr<panima::Channel> { return std::make_shared<panima::Channel>(times.ClaimOwnership(), values.ClaimOwnership()); },
 	  ::udm::LinkedPropertyWrapper &, ::udm::LinkedPropertyWrapper &>(lua.GetState());
 
@@ -694,7 +696,8 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		  anim.SetDuration(duration);
 		  return duration;
 	  });
-	cdAnim2.def("RemoveChannel", &panima::Animation::RemoveChannel);
+	cdAnim2.def("RemoveChannel", static_cast<void (panima::Animation::*)(std::string)>(&panima::Animation::RemoveChannel));
+	cdAnim2.def("RemoveChannel", static_cast<void (panima::Animation::*)(const panima::Channel &)>(&panima::Animation::RemoveChannel));
 	cdAnim2.def("AddChannel", static_cast<void (panima::Animation::*)(panima::Channel &)>(&panima::Animation::AddChannel));
 	cdAnim2.def(
 	  "AddChannel", +[](lua_State *l, panima::Animation &anim, const std::string &path, ::udm::Type valueType) -> opt<std::shared_ptr<panima::Channel>> {

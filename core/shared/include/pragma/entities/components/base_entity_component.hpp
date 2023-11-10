@@ -129,6 +129,11 @@ namespace pragma {
 		bool GetTransformMemberScale(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &outScale) const;
 		bool GetTransformMemberPose(ComponentMemberIndex idx, umath::CoordinateSpace space, umath::ScaledTransform &outPose) const;
 
+		bool ConvertTransformMemberPosToTargetSpace(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &inOutPos) const;
+		bool ConvertTransformMemberRotToTargetSpace(ComponentMemberIndex idx, umath::CoordinateSpace space, Quat &inOutRot) const;
+		bool ConvertTransformMemberScaleToTargetSpace(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &inOutScale) const;
+		bool ConvertTransformMemberPoseToTargetSpace(ComponentMemberIndex idx, umath::CoordinateSpace space, umath::ScaledTransform &inOutPose) const;
+
 		bool GetTransformMemberParentPos(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &outPos) const;
 		bool GetTransformMemberParentRot(ComponentMemberIndex idx, umath::CoordinateSpace space, Quat &outRot) const;
 		bool GetTransformMemberParentScale(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &outScale) const;

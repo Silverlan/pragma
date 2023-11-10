@@ -67,6 +67,7 @@ namespace pragma {
 		void SetPropertyEnabled(const std::string &propName, bool enabled);
 		bool IsPropertyEnabled(const std::string &propName) const;
 		bool IsPropertyAnimated(panima::AnimationManager &manager, const std::string &propName) const;
+		void UpdateAnimationChannelSubmitters();
 
 		// Return the animation value for the specified property WITHOUT applying math expressions
 		bool GetRawPropertyValue(panima::AnimationManager &manager, const std::string &propName, udm::Type type, void *outValue) const;

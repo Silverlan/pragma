@@ -212,6 +212,8 @@ void PanimaComponent::DebugPrint()
 	Con::cout << "Animation info: \n" << ss.str() << Con::endl;
 }
 
+void PanimaComponent::UpdateAnimationChannelSubmitters() { InitializeAnimationChannelValueSubmitters(); }
+
 bool PanimaComponent::IsPropertyAnimated(panima::AnimationManager &manager, const std::string &propName) const
 {
 	auto *anim = manager.GetCurrentAnimation();

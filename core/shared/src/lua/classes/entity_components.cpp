@@ -535,6 +535,34 @@ static std::optional<umath::ScaledTransform> get_transform_member_pose(pragma::B
 	}
 	return {};
 }
+static std::optional<Vector3> convert_transform_member_pos_to_target_space(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, const Vector3 &pos)
+{
+	auto newPos = pos;
+	if(component.ConvertTransformMemberPosToTargetSpace(idx, space, newPos))
+		return newPos;
+	return {};
+}
+static std::optional<Quat> convert_transform_member_rot_to_target_space(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, const Quat &rot)
+{
+	auto newRot = rot;
+	if(component.ConvertTransformMemberRotToTargetSpace(idx, space, newRot))
+		return newRot;
+	return {};
+}
+static std::optional<Vector3> convert_transform_member_scale_to_target_space(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, const Vector3 &scale)
+{
+	auto newScale = scale;
+	if(component.ConvertTransformMemberScaleToTargetSpace(idx, space, newScale))
+		return newScale;
+	return {};
+}
+static std::optional<umath::ScaledTransform> convert_transform_member_pose_to_target_space(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, const umath::ScaledTransform &pose)
+{
+	auto newPose = pose;
+	if(component.ConvertTransformMemberPoseToTargetSpace(idx, space, newPose))
+		return newPose;
+	return {};
+}
 
 template<typename T>
 static std::optional<std::pair<T, umath::CoordinateSpace>> convert_pos_to_member_space(pragma::BaseEntityComponent &component, pragma::ComponentMemberIndex idx, umath::CoordinateSpace space, const T &value)
@@ -699,6 +727,10 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	entityComponentDef.def("GetTransformMemberRot", &get_transform_member_rot<false>);
 	entityComponentDef.def("GetTransformMemberScale", &get_transform_member_scale<false>);
 	entityComponentDef.def("GetTransformMemberPose", &get_transform_member_pose<false>);
+	entityComponentDef.def("ConvertTransformMemberPosToTargetSpace", &convert_transform_member_pos_to_target_space);
+	entityComponentDef.def("ConvertTransformMemberRotToTargetSpace", &convert_transform_member_rot_to_target_space);
+	entityComponentDef.def("ConvertTransformMemberScaleToTargetSpace", &convert_transform_member_scale_to_target_space);
+	entityComponentDef.def("ConvertTransformMemberPoseToTargetSpace", &convert_transform_member_pose_to_target_space);
 	entityComponentDef.def("GetTransformMemberParentPos", &get_transform_member_pos<true>);
 	entityComponentDef.def("GetTransformMemberParentRot", &get_transform_member_rot<true>);
 	entityComponentDef.def("GetTransformMemberParentScale", &get_transform_member_scale<true>);

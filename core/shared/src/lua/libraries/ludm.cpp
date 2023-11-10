@@ -2089,6 +2089,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 	  "ClaimOwnership", +[](lua_State *l, ::udm::LinkedPropertyWrapper &prop) -> ::udm::PProperty { return prop.ClaimOwnership(); });
 	modUdm[cdLinkedPropWrap];
 	pragma::lua::define_custom_constructor<::udm::LinkedPropertyWrapper, [](::udm::Property &prop) -> ::udm::LinkedPropertyWrapper { return ::udm::LinkedPropertyWrapper {prop}; }, ::udm::Property &>(lua.GetState());
+	pragma::lua::define_custom_constructor<::udm::LinkedPropertyWrapper, [](::udm::LinkedPropertyWrapper &prop) -> ::udm::LinkedPropertyWrapper { return prop; }, ::udm::LinkedPropertyWrapper &>(lua.GetState());
 
 	auto cdAssetData = luabind::class_<::udm::AssetData, ::udm::LinkedPropertyWrapper, ::udm::PropertyWrapper>("AssetData");
 	cdAssetData.def(luabind::tostring(luabind::self));

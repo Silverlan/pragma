@@ -75,6 +75,16 @@ bool ShaderEye::OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor, CM
 ///////////////////////
 
 ShaderEyeLegacy::ShaderEyeLegacy(prosper::IPrContext &context, const std::string &identifier) : ShaderEye {context, identifier, "world/eye/vs_eye", "world/eye/fs_eye_legacy"} {}
+bool ShaderEyeLegacy::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, CMaterial &mat) const
+{
+	if(ShaderEye::RecordBindMaterial(shaderProcessor, mat) == false)
+		return false;
+	auto irisUvClampThreshold = 0.5f;
+	mat.GetDataBlock()->GetFloat("iris_uv_clamp_threshold", &irisUvClampThreshold);
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, sizeof(ShaderPBR::PushConstants) + offsetof(PushConstants, irisUvClampThreshold),
+	  sizeof(irisUvClampThreshold), &irisUvClampThreshold);
+	return true;
+}
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderEyeLegacy::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
 	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);

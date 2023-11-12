@@ -20,7 +20,8 @@ namespace pragma {
 		struct PushConstants {
 			Vector4 irisProjectionU = {};
 			Vector4 irisProjectionV = {};
-			Vector4 eyeOrigin = {};
+			Vector3 eyeOrigin = {};
+			float irisUvClampThreshold = 0.5f; // Only used in legacy shader
 
 			float maxDilationFactor = 1.f;
 			float dilationFactor = 0.5f;
@@ -44,6 +45,7 @@ namespace pragma {
 	  public:
 		ShaderEyeLegacy(prosper::IPrContext &context, const std::string &identifier);
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
+		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, CMaterial &mat) const override;
 	  private:
 	};
 };

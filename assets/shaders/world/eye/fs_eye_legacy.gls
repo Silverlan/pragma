@@ -24,9 +24,7 @@ void main()
 	// Transform into projection space
 	mat4 cViewProj = get_view_projection_matrix();
 	vec4 vProjPos = cViewProj *vec4(worldPos,1.0);
-
 	worldPosProjZ.w = vProjPos.z;
-	worldPosProjZ.xyz = fs_in.vert_pos_ws.xyz;
 
 	vec2 vCorneaUv;
 	vCorneaUv.x = dot(irisProjectionU,vec4(worldPosProjZ.xyz,1.0));
@@ -47,7 +45,8 @@ void main()
 
 	uv = vSphereUv;
 
-	vec4 irisColor = texture(u_normalMap,vSphereUv);
+	float irisUvClampThreshold = u_pushConstants.eyeOrigin.w;
+	vec4 irisColor = texture(u_normalMap,clamp(vSphereUv,irisUvClampThreshold -0.5,irisUvClampThreshold +0.5));
 	vec4 scleraColor = texture(u_albedoMap,uvBase);
 	vec4 albedoColor = mix(scleraColor,irisColor,irisColor.a);
 	fs_color = calc_pbr(albedoColor,uv,u_pushConstants.debugMode);

@@ -139,17 +139,10 @@ std::optional<pragma::EntityUComponentMemberRef> ConstraintChildOfComponent::Fin
 		return {};
 	if(memberInfo->type == pragma::ents::EntityMemberType::Transform || memberInfo->type == pragma::ents::EntityMemberType::ScaledTransform)
 		return pragma::EntityUComponentMemberRef {c.GetEntity(), c.GetComponentId(), memberInfo->GetName()};
-	auto *metaData = memberInfo->FindTypeMetaData<pragma::ents::PoseComponentTypeMetaData>();
-	if(!metaData) {
-		// Not a pose property, but we'll also allow positional and rotational properties
-		if(memberInfo->type == pragma::ents::EntityMemberType::Vector3 || memberInfo->type == pragma::ents::EntityMemberType::Quaternion || memberInfo->type == pragma::ents::EntityMemberType::EulerAngles)
-			return pragma::EntityUComponentMemberRef {c.GetEntity(), c.GetComponentId(), memberInfo->GetName()};
-		return {};
-	}
-	auto *poseMemberInfo = c.FindMemberInfo(metaData->poseProperty);
-	if(!poseMemberInfo)
-		return {};
-	return pragma::EntityUComponentMemberRef {c.GetEntity(), c.GetComponentId(), metaData->poseProperty};
+	// Not a pose property, but we'll also allow positional and rotational properties
+	if(memberInfo->type == pragma::ents::EntityMemberType::Vector3 || memberInfo->type == pragma::ents::EntityMemberType::Quaternion || memberInfo->type == pragma::ents::EntityMemberType::EulerAngles)
+		return pragma::EntityUComponentMemberRef {c.GetEntity(), c.GetComponentId(), memberInfo->GetName()};
+	return {};
 }
 
 void ConstraintChildOfComponent::SetPropertyInfosDirty()

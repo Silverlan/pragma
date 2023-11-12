@@ -70,24 +70,28 @@ void ConstraintLookAtComponent::ApplyConstraint()
 	if(!m_drivenObjectRotationInitialized) {
 		m_drivenObjectRotationInitialized = true;
 		auto &memberInfo = *constraintInfo->drivenObjectC->GetMemberInfo(constraintInfo->drivenObjectPropIdx);
-		auto *metaData = memberInfo.FindTypeMetaData<pragma::ents::PoseComponentTypeMetaData>();
-		if(metaData) {
-			auto *poseMemberInfo = constraintInfo->drivenObjectC->FindMemberInfo(metaData->poseProperty);
-			auto *poseMetaData = poseMemberInfo ? poseMemberInfo->FindTypeMetaData<pragma::ents::PoseTypeMetaData>() : nullptr;
-			if(!poseMemberInfo) {
-				spdlog::trace("Unable to initialize track_to constraint '{}' with driven object property {} of driven object '{}': Property has no associated rotation.", GetEntity().ToString(), constraintInfo->drivenObjectPropIdx, constraintInfo->drivenObjectC->GetEntity().ToString());
-				return;
-			}
-			m_drivenObjectPosition = {constraintInfo->drivenObjectC->GetEntity(), constraintInfo->drivenObjectC->GetComponentId(), poseMetaData->posProperty};
+		auto *metaData = memberInfo.FindTypeMetaData<pragma::ents::PoseTypeMetaData>();
+		if(!metaData) {
+			spdlog::trace("Unable to initialize look_at constraint '{}' with driven object property {} of driven object '{}': Property has no pose type meta data.", GetEntity().ToString(), constraintInfo->drivenObjectPropIdx, constraintInfo->drivenObjectC->GetEntity().ToString());
+			return;
 		}
+		m_drivenObjectPosition = {constraintInfo->drivenObjectC->GetEntity(), constraintInfo->drivenObjectC->GetComponentId(), metaData->posProperty};
+		m_drivenObjectRotation = {constraintInfo->drivenObjectC->GetEntity(), constraintInfo->drivenObjectC->GetComponentId(), metaData->rotProperty};
 	}
 	auto &game = *GetEntity().GetNetworkState()->GetGameState();
 	m_drivenObjectPosition.UpdateMemberIndex(game);
+	m_drivenObjectRotation.UpdateMemberIndex(game);
 	auto *drivenObjectPosC = m_drivenObjectPosition.GetComponent(game);
 	if(!drivenObjectPosC || drivenObjectPosC != constraintInfo->drivenObjectC.get())
 		return;
+	auto *drivenObjectRotC = m_drivenObjectRotation.GetComponent(game);
+	if(!drivenObjectRotC || drivenObjectRotC != constraintInfo->drivenObjectC.get())
+		return;
 	auto idxDrivenObjectPos = m_drivenObjectPosition.GetMemberIndex();
 	if(idxDrivenObjectPos == pragma::INVALID_COMPONENT_MEMBER_INDEX)
+		return;
+	auto idxDrivenObjectRot = m_drivenObjectRotation.GetMemberIndex();
+	if(idxDrivenObjectRot == pragma::INVALID_COMPONENT_MEMBER_INDEX)
 		return;
 
 	Vector3 posDriven;
@@ -112,7 +116,7 @@ void ConstraintLookAtComponent::ApplyConstraint()
 		dir /= l;
 
 	Quat curRot;
-	res = constraintInfo->drivenObjectC->GetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), curRot);
+	res = constraintInfo->drivenObjectC->GetTransformMemberRot(idxDrivenObjectRot, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), curRot);
 
 	auto rot = curRot;
 	rotate_towards_axis(rot, dir, m_trackAxis);
@@ -120,5 +124,5 @@ void ConstraintLookAtComponent::ApplyConstraint()
 	if(res)
 		rot = uquat::slerp(curRot, rot, influence);
 
-	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot);
+	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberRot(idxDrivenObjectRot, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot);
 }

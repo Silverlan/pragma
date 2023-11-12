@@ -75,12 +75,11 @@ void FunctionalParallelWorker::CancelTask()
 	m_taskMutex.lock();
 	m_taskCancelled = true;
 	m_nextTask = nullptr;
+	m_taskMutex.unlock();
 
 	m_taskAvailableMutex.lock();
 	m_taskAvailableCond.notify_one();
 	m_taskAvailableMutex.unlock();
-
-	m_taskMutex.unlock();
 
 	WaitForTask();
 
@@ -171,6 +170,8 @@ void BaseStaticBvhCacheComponent::Build(std::vector<std::shared_ptr<ModelSubMesh
 	// m_bvhDataMutex.lock();
 	// m_bvhData = nullptr; // No longer valid
 	// m_bvhDataMutex.unlock();
+	m_buildWorker->CancelTask();
+	m_bvhPendingWorkerResult = std::unique_ptr<BvhPendingWorkerResult> {new BvhPendingWorkerResult {}};
 	m_buildWorker->ResetTask([this, meshes = std::move(meshes), meshPoses = std::move(meshPoses), meshToEntity = std::move(meshToEntity)](FunctionalParallelWorker &worker) {
 		std::vector<size_t> meshIndices;
 		BaseBvhComponent::BvhBuildInfo buildInfo {};
@@ -193,7 +194,6 @@ void BaseStaticBvhCacheComponent::Build(std::vector<std::shared_ptr<ModelSubMesh
 		m_bvhPendingWorkerResult->complete = true;
 	});
 
-	m_bvhPendingWorkerResult = std::unique_ptr<BvhPendingWorkerResult> {new BvhPendingWorkerResult {}};
 	SetTickPolicy(TickPolicy::Always);
 }
 

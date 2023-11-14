@@ -789,8 +789,7 @@ static void set_array_values(udm::PropertyWrapper &p, const std::string &name, :
 	set_array_values<T>(a.GetValue<udm::Array>(), type, t, size, arrayType);
 }
 template<typename T>
-concept is_assignable_type = !
-std::is_same_v<T, ::udm::Element> && !std::is_same_v<T, ::udm::Utf8String> && !std::is_same_v<T, ::udm::Array> && !std::is_same_v<T, ::udm::ArrayLz4>;
+concept is_assignable_type = !std::is_same_v<T, ::udm::Element> && !std::is_same_v<T, ::udm::Utf8String> && !std::is_same_v<T, ::udm::Array> && !std::is_same_v<T, ::udm::ArrayLz4>;
 static void insert_array_value(lua_State *l, udm::PropertyWrapper &p, uint32_t idx, const luabind::object &o)
 {
 	auto *a = p.GetValuePtr<udm::Array>();
@@ -1461,6 +1460,13 @@ static bool is_supported_array_value_type(::udm::Type valueType, ::udm::ArrayTyp
 	return false;
 }
 
+static bool is_same_element(lua_State *l, ::udm::LinkedPropertyWrapper &prop0, ::udm::LinkedPropertyWrapper &prop1)
+{
+	auto *el0 = prop0.GetValuePtr<::udm::Element>();
+	auto *el1 = prop1.GetValuePtr<::udm::Element>();
+	return (el0 && el1) && el0 == el1;
+}
+
 void Lua::udm::register_library(Lua::Interface &lua)
 {
 	auto modUdm = luabind::module(lua.GetState(), "udm");
@@ -1784,7 +1790,8 @@ void Lua::udm::register_library(Lua::Interface &lua)
                 using T = typename decltype(tag)::type;
 				return ::udm::type_to_enum<lua_udm_underlying_numeric_type<T>>();
 			});
-		})
+		}),
+		luabind::def("is_same_element", &is_same_element)
 	];
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "udm",

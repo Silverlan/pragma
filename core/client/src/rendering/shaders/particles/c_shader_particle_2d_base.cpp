@@ -147,15 +147,19 @@ void ShaderParticle2DBase::InitializeRenderPass(std::shared_ptr<prosper::IRender
 {
 	auto sampleCount = GetSampleCount(GetBasePipelineIndex(pipelineIdx));
 	if(pipelineIdx != GetDepthPipelineIndex()) {
-		CreateCachedRenderPass<ShaderParticle2DBase>({{{RENDER_PASS_FORMAT, prosper::ImageLayout::ColorAttachmentOptimal, prosper::AttachmentLoadOp::Load, prosper::AttachmentStoreOp::Store, sampleCount, prosper::ImageLayout::ColorAttachmentOptimal},
-		                                               {// Bloom Attachment
-		                                                 RENDER_PASS_FORMAT, prosper::ImageLayout::ColorAttachmentOptimal, prosper::AttachmentLoadOp::Load, prosper::AttachmentStoreOp::Store, sampleCount, prosper::ImageLayout::ColorAttachmentOptimal},
-		                                               {RENDER_PASS_DEPTH_FORMAT, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AttachmentLoadOp::Load, prosper::AttachmentStoreOp::Store, sampleCount, prosper::ImageLayout::DepthStencilAttachmentOptimal}}},
-		  outRenderPass, pipelineIdx);
+		prosper::util::RenderPassCreateInfo rpCreateInfo {
+		  {{RENDER_PASS_FORMAT, prosper::ImageLayout::ColorAttachmentOptimal, prosper::AttachmentLoadOp::Load, prosper::AttachmentStoreOp::Store, sampleCount, prosper::ImageLayout::ColorAttachmentOptimal},
+		    {RENDER_PASS_FORMAT, prosper::ImageLayout::ColorAttachmentOptimal, prosper::AttachmentLoadOp::Load, prosper::AttachmentStoreOp::Store, sampleCount, prosper::ImageLayout::ColorAttachmentOptimal}, // Bloom Attachment
+		    {RENDER_PASS_DEPTH_FORMAT, prosper::ImageLayout::DepthStencilAttachmentOptimal, prosper::AttachmentLoadOp::Load, prosper::AttachmentStoreOp::Store, sampleCount, prosper::ImageLayout::DepthStencilAttachmentOptimal}},
+		};
+		rpCreateInfo.subPasses.push_back(prosper::util::RenderPassCreateInfo::SubPass {std::vector<std::size_t> {0ull, 1ull}, true});
+		CreateCachedRenderPass<ShaderParticle2DBase>(rpCreateInfo, outRenderPass, pipelineIdx);
 	}
 	else {
 		auto sampleCount = GetSampleCount(pipelineIdx);
-		prosper::util::RenderPassCreateInfo rpInfo {{pragma::ShaderPrepass::get_normal_render_pass_attachment_info(sampleCount), pragma::ShaderPrepass::get_depth_render_pass_attachment_info(sampleCount)}};
+		prosper::util::RenderPassCreateInfo rpInfo {
+		  {pragma::ShaderPrepass::get_normal_render_pass_attachment_info(sampleCount), pragma::ShaderPrepass::get_depth_render_pass_attachment_info(sampleCount)},
+		};
 		CreateCachedRenderPass<ShaderPrepass>({rpInfo}, outRenderPass, pipelineIdx);
 		// Depth only
 		/*CreateCachedRenderPass<ShaderParticle2DBase>({{

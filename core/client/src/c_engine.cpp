@@ -1620,10 +1620,12 @@ void CEngine::Tick()
 		// If the window is being resized by the user, we don't want to update the resolution constantly,
 		// so we add a small delay
 		if(dt > std::chrono::milliseconds {250}) {
-			umath::set_flag(m_stateFlags, StateFlags::WindowSizeChanged, false);
 			auto &window = GetWindow();
 			auto size = window.GetGlfwWindow().GetSize();
-			OnResolutionChanged(size.x, size.y);
+			if(size.x > 0 && size.y > 0) { // If either size is 0, the window is probably minimized and we don't need to update.
+				umath::set_flag(m_stateFlags, StateFlags::WindowSizeChanged, false);
+				OnResolutionChanged(size.x, size.y);
+			}
 		}
 	}
 
@@ -1664,6 +1666,7 @@ void CEngine::OnResolutionChanged(uint32_t width, uint32_t height)
 void CEngine::OnRenderResolutionChanged(uint32_t width, uint32_t height)
 {
 	GetRenderContext().GetWindow().ReloadStagingRenderTarget();
+	umath::set_flag(m_stateFlags, StateFlags::FirstFrame, true);
 
 	auto &wgui = WGUI::GetInstance();
 	auto *baseEl = wgui.GetBaseElement();

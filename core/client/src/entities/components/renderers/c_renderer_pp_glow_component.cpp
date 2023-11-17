@@ -192,7 +192,7 @@ void CRendererPpGlowComponent::InitializeRenderTarget()
 	createInfo.width = cRenderer->GetPrepass().textureDepth->GetImage().GetWidth();
 	createInfo.height = cRenderer->GetPrepass().textureDepth->GetImage().GetHeight();
 	createInfo.format = prosper::Format::R16G16B16A16_SFloat;
-	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferDstBit;
+	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 
 	auto img = context.CreateImage(createInfo);

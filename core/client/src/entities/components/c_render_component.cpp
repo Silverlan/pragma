@@ -24,6 +24,7 @@
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include "pragma/console/c_cvar_global_functions.h"
 #include <pragma/debug/intel_vtune.hpp>
 #include <pragma/lua/classes/ldef_mat4.h>
 #include <pragma/model/model.h>
@@ -35,10 +36,12 @@
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <prosper_command_buffer.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
+#include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/console/sh_cmd.h>
 #include <util_image.hpp>
 
 using namespace pragma;
@@ -932,3 +935,69 @@ bool pragma::rendering::RenderBufferData::IsDepthPrepassEnabled() const { return
 
 void pragma::rendering::RenderBufferData::SetGlowPassEnabled(bool enabled) { umath::set_flag(stateFlags, StateFlags::EnableGlowPass, enabled); }
 bool pragma::rendering::RenderBufferData::IsGlowPassEnabled() const { return umath::is_flag_set(stateFlags, StateFlags::EnableGlowPass); }
+
+void Console::commands::debug_entity_render_buffer(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+{
+	auto charComponent = pl->GetEntity().GetCharacterComponent();
+	if(charComponent.expired())
+		return;
+	auto ents = command::find_target_entity(state, *charComponent, argv);
+	if(ents.empty()) {
+		Con::cwar << "No target entity found!" << Con::endl;
+		return;
+	}
+	auto *ent = ents.front();
+	auto mdlC = ent->GetComponent<pragma::CModelComponent>();
+	if(mdlC.expired()) {
+		Con::cwar << "Target entity has no model component!" << Con::endl;
+	}
+	else {
+		auto vdata = mdlC->GetRenderBufferData();
+		if(vdata.empty()) {
+			Con::cwar << "No render buffer data found!" << Con::endl;
+			return;
+		}
+		size_t lod = 0;
+		for(auto &data : vdata) {
+			Con::cout << "Render buffer data for LOD " << lod << ": " << Con::endl;
+			Con::cout << "pipelineSpecializationFlags: " << magic_enum::enum_name(data.pipelineSpecializationFlags) << Con::endl;
+			Con::cout << "material: ";
+			if(data.material)
+				Con::cout << data.material->GetName();
+			else
+				Con::cout << "NULL";
+			Con::cout << Con::endl;
+			Con::cout << "stateFlags: " << magic_enum::enum_name(data.stateFlags) << Con::endl;
+		}
+		Con::cout << Con::endl;
+	}
+
+	auto renderC = ent->GetComponent<pragma::CRenderComponent>();
+	if(renderC.expired()) {
+		Con::cwar << "Target entity has no render component!" << Con::endl;
+	}
+	else {
+		auto printInstanceData = [](const pragma::ShaderEntity::InstanceData &instanceData) {
+			Con::cout << "modelMatrix: " << umat::to_string(instanceData.modelMatrix) << Con::endl;
+			Con::cout << "color: " << instanceData.color << Con::endl;
+			Con::cout << "renderFlags: " << magic_enum::enum_name(instanceData.renderFlags) << Con::endl;
+			Con::cout << "entityIndex: " << instanceData.entityIndex << Con::endl;
+			Con::cout << "padding: " << instanceData.padding << Con::endl;
+		};
+		auto &instanceData = renderC->GetInstanceData();
+		Con::cout << "Instance data:" << Con::endl;
+		printInstanceData(instanceData);
+
+		auto &buf = renderC->GetRenderBuffer();
+		pragma::ShaderEntity::InstanceData bufData;
+		if(!buf.Read(0, sizeof(bufData), &bufData))
+			Con::cwar << "Failed to read buffer data!" << Con::endl;
+		else {
+			if(memcmp(&instanceData, &bufData, sizeof(bufData)) != 0) {
+				Con::cwar << "Instance data does not match data in buffer! Data in buffer:" << Con::endl;
+				printInstanceData(bufData);
+			}
+		}
+		Con::cout << Con::endl;
+	}
+}

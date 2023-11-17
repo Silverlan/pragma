@@ -45,6 +45,10 @@ bool ShaderEye::BindEyeball(rendering::ShaderProcessor &shaderProcessor, uint32_
 	pushConstants.eyeOrigin.x = eyeOrigin.x;
 	pushConstants.eyeOrigin.y = eyeOrigin.y;
 	pushConstants.eyeOrigin.z = eyeOrigin.z;
+	if(IsLegacyShader()) {
+		auto &irisUvClampRange = eyeballData->config.irisUvClampRange;
+		memcpy(&pushConstants.irisUvClampRange, &irisUvClampRange, sizeof(irisUvClampRange));
+	}
 	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(), prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit, sizeof(ShaderPBR::PushConstants), sizeof(pushConstants), &pushConstants);
 	return true;
 }

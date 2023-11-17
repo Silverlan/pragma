@@ -40,6 +40,7 @@ REGISTER_CONCOMMAND_CL(debug_ai_schedule, CMD_debug_ai_schedule, ConVarFlags::No
 REGISTER_CONCOMMAND_CL(debug_aim_info, CMD_debug_aim_info, ConVarFlags::None, "Prints information about whatever the local player is looking at.");
 REGISTER_CONCOMMAND_CL(debug_light_sources, Console::commands::debug_light_sources, ConVarFlags::None, "Prints debug information about all light sources in the scene.");
 REGISTER_CONCOMMAND_CL(debug_gui_cursor, Console::commands::debug_gui_cursor, ConVarFlags::None, "Prints information about the GUI element currently hovered over by the cursor.");
+REGISTER_CONCOMMAND_CL(debug_entity_render_buffer, Console::commands::debug_entity_render_buffer, ConVarFlags::None, "Prints debug information about an entity's render buffer.");
 REGISTER_CONCOMMAND_CL(debug_font_glyph_map, Console::commands::debug_font_glyph_map, ConVarFlags::None, "Displays the glyph map for the specified font.");
 REGISTER_CONCOMMAND_CL(debug_dump_font_glyph_map, Console::commands::debug_dump_font_glyph_map, ConVarFlags::None, "Dumps the glyph map for the specified font to an image file.");
 REGISTER_CONCOMMAND_CL(debug_render_depth_buffer, Console::commands::debug_render_depth_buffer, ConVarFlags::None, "Draws the scene depth buffer to screen.");

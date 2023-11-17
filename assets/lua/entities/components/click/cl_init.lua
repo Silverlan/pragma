@@ -217,14 +217,11 @@ function ents.ClickComponent.find_entities_in_kdop(planes, filter)
 	end
 
 	for ent, c in
-		ents.citerator(
-			ents.COMPONENT_BVH,
-			{
-				ents.IteratorFilterComponent(ents.COMPONENT_CLICK),
-				ents.IteratorFilterComponent(ents.COMPONENT_MODEL),
-				ents.IteratorFilterComponent(ents.COMPONENT_RENDER),
-			}
-		)
+		ents.citerator(ents.COMPONENT_BVH, {
+			ents.IteratorFilterComponent(ents.COMPONENT_CLICK),
+			ents.IteratorFilterComponent(ents.COMPONENT_MODEL),
+			ents.IteratorFilterComponent(ents.COMPONENT_RENDER),
+		})
 	do
 		if should_entity_pass(ent, entPl, filter) then
 			local localPlanes = get_local_planes(planes, ent)
@@ -307,7 +304,7 @@ function ents.ClickComponent.raycast(pos, dir, filter, maxDist)
 						hitDist = diff:Length()
 					end
 
-					if hitDist < distClosest or priority > priorityClosest then -- and hitData.distance > 0.0) then
+					if priority > priorityClosest or (priority == priorityClosest and hitDist < distClosest) then -- and hitData.distance > 0.0) then
 						distClosest = hitDist
 						hitPos = pos + dir * hitDist
 						actorClosest = hitData.entity

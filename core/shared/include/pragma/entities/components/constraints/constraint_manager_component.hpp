@@ -31,17 +31,20 @@ namespace pragma {
 		virtual void OnEntitySpawn() override;
 		virtual void OnRemove() override;
 
-		void ApplyConstraints();
+		static void ApplyConstraints(const NetworkState &nw);
 
 		virtual void InitializeLuaObject(lua_State *lua) override;
 	  protected:
 		friend ConstraintComponent;
+		std::vector<ConstraintInfo> &GetConstraints();
+		const std::vector<ConstraintInfo> &GetConstraints() const { return const_cast<ConstraintManagerComponent *>(this)->GetConstraints(); }
 		void Clear();
 		void AddConstraint(ConstraintComponent &constraint);
 		void RemoveConstraint(ConstraintComponent &constraint);
+		void ReleaseConstraint(ConstraintComponent &constraint);
 		void ChangeOrder(ConstraintComponent &constraint, int32_t newOrderIndex);
 		std::vector<ConstraintInfo>::iterator FindConstraint(ConstraintComponent &constraint);
-		std::vector<ConstraintInfo> m_constraints;
+		std::vector<ConstraintComponent *> m_ownConstraints;
 	};
 };
 

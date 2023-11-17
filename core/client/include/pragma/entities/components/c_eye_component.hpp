@@ -37,6 +37,17 @@ namespace pragma {
 			float eyeSize = 0.f;
 			float dilation = 0.5f;
 			float irisScale = 1.f;
+
+			// This is a workaround for the legacy eye shader.
+			// Usually the iris uv coordinates are clamped to the range [0,1] to prevent it
+			// from repeating over the eyeball.
+			// However, some models have improperly defined eyeballs, in which case the
+			// uv coordinates exceed the normal range [0,1]. In these cases the
+			// uv coordinates must *not* be clamped, or the iris will not be rendered properly.
+			// To accomplish that, this value can be set to a really high range to effectively disable the clamping.
+			// The material parameter 'iris_uv_clamp_range' can be used to change this value.
+			// If this problem is ever fixed properly, this workaround can be removed.
+			Vector2 irisUvClampRange = {0.f, 1.f};
 		};
 
 		struct EyeballData {

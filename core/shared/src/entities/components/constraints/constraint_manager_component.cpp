@@ -14,15 +14,22 @@
 
 using namespace pragma;
 
+static std::vector<ConstraintManagerComponent::ConstraintInfo> &get_constraints(const NetworkState &nw)
+{
+	static std::vector<ConstraintManagerComponent::ConstraintInfo> g_sv;
+	static std::vector<ConstraintManagerComponent::ConstraintInfo> g_cl;
+	return nw.IsServer() ? g_sv : g_cl;
+}
 ComponentEventId ConstraintManagerComponent::EVENT_APPLY_CONSTRAINT = pragma::INVALID_COMPONENT_ID;
 void ConstraintManagerComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_APPLY_CONSTRAINT = registerEvent("APPLY_CONSTRAINT", ComponentEventInfo::Type::Explicit); }
 ConstraintManagerComponent::ConstraintManagerComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 void ConstraintManagerComponent::Initialize() { BaseEntityComponent::Initialize(); }
 void ConstraintManagerComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void ConstraintManagerComponent::ApplyConstraints()
+std::vector<ConstraintManagerComponent::ConstraintInfo> &ConstraintManagerComponent::GetConstraints() { return get_constraints(GetNetworkState()); }
+void ConstraintManagerComponent::ApplyConstraints(const NetworkState &nw)
 {
-	for(auto &cData : m_constraints)
+	for(auto &cData : get_constraints(nw))
 		cData.constraint->ApplyConstraint();
 }
 void ConstraintManagerComponent::OnEntitySpawn() { BaseEntityComponent::OnEntitySpawn(); }
@@ -31,16 +38,25 @@ void ConstraintManagerComponent::OnRemove()
 	BaseEntityComponent::OnRemove();
 	Clear();
 }
-void ConstraintManagerComponent::Clear() { m_constraints.clear(); }
+void ConstraintManagerComponent::Clear()
+{
+	if(m_ownConstraints.empty())
+		return;
+	auto constraints = std::move(m_ownConstraints);
+	m_ownConstraints.clear();
+	for(auto *c : constraints)
+		ReleaseConstraint(*c);
+}
 void ConstraintManagerComponent::ChangeOrder(ConstraintComponent &constraint, int32_t newOrderIndex)
 {
+	auto &constraints = GetConstraints();
 	auto curIt = FindConstraint(constraint);
-	assert(curIt != m_constraints.end());
-	if(curIt == m_constraints.end()) {
+	assert(curIt != constraints.end());
+	if(curIt == constraints.end()) {
 		spdlog::warn("Attempted to change constraint order for constraint '{}' in constraint manager '{}', but constraint was not registered with manager.", constraint.GetEntity().ToString(), GetEntity().ToString());
 		return;
 	}
-	auto targetIt = std::lower_bound(m_constraints.begin(), m_constraints.end(), newOrderIndex, [](const ConstraintInfo &info, int32_t idx) { return info->GetOrderIndex() < idx; });
+	auto targetIt = std::lower_bound(constraints.begin(), constraints.end(), newOrderIndex, [](const ConstraintInfo &info, int32_t idx) { return info->GetOrderIndex() < idx; });
 	constraint.m_orderIndex = newOrderIndex;
 	// Only re-sort the affected range
 	if(curIt < targetIt)
@@ -51,21 +67,35 @@ void ConstraintManagerComponent::ChangeOrder(ConstraintComponent &constraint, in
 }
 void ConstraintManagerComponent::AddConstraint(ConstraintComponent &constraint)
 {
-	assert(FindConstraint(constraint) == m_constraints.end());
-	util::insert_sorted(m_constraints, ConstraintInfo {&constraint}, [](const ConstraintInfo &a, const ConstraintInfo &b) { return a->GetOrderIndex() < b->GetOrderIndex(); });
+	auto &constraints = GetConstraints();
+	assert(FindConstraint(constraint) == constraints.end());
+	util::insert_sorted(constraints, ConstraintInfo {&constraint}, [](const ConstraintInfo &a, const ConstraintInfo &b) { return a->GetOrderIndex() < b->GetOrderIndex(); });
+	m_ownConstraints.push_back(&constraint);
 }
 std::vector<ConstraintManagerComponent::ConstraintInfo>::iterator ConstraintManagerComponent::FindConstraint(ConstraintComponent &constraint)
 {
-	auto it = std::lower_bound(m_constraints.begin(), m_constraints.end(), constraint.GetOrderIndex(), [](const ConstraintInfo &info, int32_t idx) { return info->GetOrderIndex() < idx; });
-	if(it == m_constraints.end())
-		return m_constraints.end();
-	for(auto i = it; i != m_constraints.end(); ++i) {
+	auto &constraints = GetConstraints();
+	auto it = std::lower_bound(constraints.begin(), constraints.end(), constraint.GetOrderIndex(), [](const ConstraintInfo &info, int32_t idx) { return info->GetOrderIndex() < idx; });
+	if(it == constraints.end())
+		return constraints.end();
+	for(auto i = it; i != constraints.end(); ++i) {
 		if((*i)->GetOrderIndex() > constraint.GetOrderIndex())
 			break;
 		if(**i == &constraint)
 			return i;
 	}
-	return m_constraints.end();
+	return constraints.end();
+}
+void ConstraintManagerComponent::ReleaseConstraint(ConstraintComponent &constraint)
+{
+	auto &constraints = GetConstraints();
+	auto it = FindConstraint(constraint);
+	if(it == constraints.end())
+		return;
+	constraints.erase(it);
+	auto itOwn = std::find(m_ownConstraints.begin(), m_ownConstraints.end(), &constraint);
+	if(itOwn != m_ownConstraints.end())
+		m_ownConstraints.erase(itOwn);
 }
 void ConstraintManagerComponent::RemoveConstraint(ConstraintComponent &constraint)
 {
@@ -73,8 +103,5 @@ void ConstraintManagerComponent::RemoveConstraint(ConstraintComponent &constrain
 		Clear();
 		return;
 	}
-	auto it = FindConstraint(constraint);
-	if(it == m_constraints.end())
-		return;
-	m_constraints.erase(it);
+	ReleaseConstraint(constraint);
 }

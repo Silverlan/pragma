@@ -230,7 +230,18 @@ function gui.WIBaseEditor:OpenWindow(identifier, goToWindow)
 	if goToWindow then
 		self:GoToWindow(identifier)
 	end
+	self:CallCallbacks("OnWindowOpened", identifier, el, frame, tab)
 	return tab, el, frame
+end
+
+function gui.WIBaseEditor:GetWindows()
+	local windows = {}
+	for identifier, data in pairs(self.m_windowFactories) do
+		if util.is_valid(data.element) then
+			windows[identifier] = data.element
+		end
+	end
+	return windows
 end
 
 function gui.WIBaseEditor:GetWindow(identifier)

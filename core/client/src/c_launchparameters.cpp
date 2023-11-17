@@ -17,6 +17,7 @@ std::optional<uint32_t> g_launchParamWidth {};
 std::optional<uint32_t> g_launchParamHeight {};
 std::optional<Color> g_titleBarColor {};
 std::optional<Color> g_borderColor {};
+bool g_windowless = false;
 static void LPARAM_windowed(const std::vector<std::string> &argv) { g_launchParamWindowedMode = true; }
 
 static void LPARAM_refresh(const std::vector<std::string> &argv)
@@ -81,6 +82,14 @@ static void LPARAM_icon(const std::vector<std::string> &argv)
 	g_customWindowIcon = argv.front();
 }
 
+static void LPARAM_windowless(const std::vector<std::string> &argv)
+{
+	auto windowless = true;
+	if(!argv.empty())
+		windowless = util::to_boolean(argv.front());
+	g_windowless = windowless;
+}
+
 static void LPARAM_title_bar_color(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
@@ -122,5 +131,6 @@ REGISTER_LAUNCH_PARAMETER_HELP(-graphics_api, LPARAM_render_api, "<moduleName>",
 REGISTER_LAUNCH_PARAMETER_HELP(-audio_api, LPARAM_audio_api, "<moduleName>", "Changes the audio API to use for audio playback.");
 REGISTER_LAUNCH_PARAMETER_HELP(-auto_exec, LPARAM_auto_exec, "<script>", "Auto-execute this Lua-script on launch.");
 REGISTER_LAUNCH_PARAMETER_HELP(-icon, LPARAM_icon, "<iconPath>", "Path to custom window icon location.");
+REGISTER_LAUNCH_PARAMETER_HELP(-windowless, LPARAM_windowless, "<1/0>", "If enabled, Pragma will be launched without a visible window.");
 REGISTER_LAUNCH_PARAMETER_HELP(-title_bar_color, LPARAM_title_bar_color, "<hexColor>", "Hex color for the window title bar.");
 REGISTER_LAUNCH_PARAMETER_HELP(-border_color, LPARAM_border_bar_color, "<hexColor>", "Hex color for the window border.");

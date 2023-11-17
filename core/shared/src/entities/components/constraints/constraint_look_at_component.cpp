@@ -17,7 +17,7 @@ void ConstraintLookAtComponent::RegisterMembers(pragma::EntityComponentManager &
 {
 	using T = ConstraintLookAtComponent;
 	{
-		auto memberInfo = create_component_member_info<T, TrackAxis, &T::SetTrackAxis, &T::GetTrackAxis>("trackAxis", TrackAxis::X);
+		auto memberInfo = create_component_member_info<T, TrackAxis, &T::SetTrackAxis, &T::GetTrackAxis>("trackAxis", TrackAxis::Z);
 		registerMember(std::move(memberInfo));
 	}
 }
@@ -29,6 +29,7 @@ void ConstraintLookAtComponent::Initialize()
 
 	GetEntity().AddComponent<ConstraintComponent>();
 	BindEventUnhandled(ConstraintComponent::EVENT_APPLY_CONSTRAINT, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ApplyConstraint(); });
+	BindEventUnhandled(ConstraintComponent::EVENT_ON_DRIVER_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ResetDrivenRotation(); });
 	BindEventUnhandled(ConstraintComponent::EVENT_ON_DRIVEN_OBJECT_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { ResetDrivenRotation(); });
 }
 void ConstraintLookAtComponent::ResetDrivenRotation() { m_drivenObjectRotationInitialized = false; }
@@ -64,30 +65,59 @@ void ConstraintLookAtComponent::ApplyConstraint()
 	if(m_constraintC.expired())
 		return;
 	auto influence = m_constraintC->GetInfluence();
-	auto constraintInfo = m_constraintC->GetConstraintParticipants();
+	auto &constraintInfo = m_constraintC->GetConstraintParticipants();
 	if(!constraintInfo || influence == 0.f)
 		return;
 	if(!m_drivenObjectRotationInitialized) {
 		m_drivenObjectRotationInitialized = true;
-		auto &memberInfo = *constraintInfo->drivenObjectC->GetMemberInfo(constraintInfo->drivenObjectPropIdx);
-		auto *metaData = memberInfo.FindTypeMetaData<pragma::ents::PoseComponentTypeMetaData>();
-		if(metaData) {
-			auto *poseMemberInfo = constraintInfo->drivenObjectC->FindMemberInfo(metaData->poseProperty);
-			auto *poseMetaData = poseMemberInfo ? poseMemberInfo->FindTypeMetaData<pragma::ents::PoseTypeMetaData>() : nullptr;
-			if(!poseMemberInfo) {
-				spdlog::trace("Unable to initialize track_to constraint '{}' with driven object property {} of driven object '{}': Property has no associated rotation.", GetEntity().ToString(), constraintInfo->drivenObjectPropIdx, constraintInfo->drivenObjectC->GetEntity().ToString());
-				return;
-			}
-			m_drivenObjectPosition = {constraintInfo->drivenObjectC->GetEntity(), constraintInfo->drivenObjectC->GetComponentId(), poseMetaData->posProperty};
+
+		auto *memberInfoDriver = constraintInfo->driverC->GetMemberInfo(constraintInfo->driverPropIdx);
+		auto *metaDataPoseDriver = memberInfoDriver ? memberInfoDriver->FindTypeMetaData<pragma::ents::PoseTypeMetaData>() : nullptr;
+		std::optional<pragma::ComponentMemberIndex> driverPosPropertyIndex {};
+		if(metaDataPoseDriver)
+			driverPosPropertyIndex = constraintInfo->driverC->GetMemberIndex(metaDataPoseDriver->posProperty);
+		else
+			driverPosPropertyIndex = constraintInfo->driverPropIdx;
+
+		if(!driverPosPropertyIndex.has_value()) {
+			spdlog::trace("Unable to initialize look_at constraint '{}' with driver property {} of driver '{}': Driver property is not valid!", GetEntity().ToString(), constraintInfo->driverPropIdx, constraintInfo->driverC->GetEntity().ToString());
+			return;
 		}
+		memberInfoDriver = constraintInfo->driverC->GetMemberInfo(*driverPosPropertyIndex);
+		assert(memberInfoDriver != nullptr);
+		if(memberInfoDriver->type != pragma::ents::EntityMemberType::Vector3) {
+			spdlog::trace("Unable to initialize look_at constraint '{}' with driver property {} of driver '{}': Driver property does not have supported type!", GetEntity().ToString(), constraintInfo->driverPropIdx, constraintInfo->driverC->GetEntity().ToString());
+			return;
+		}
+
+		auto *memberInfo = constraintInfo->drivenObjectC->GetMemberInfo(constraintInfo->drivenObjectPropIdx);
+		auto *metaData = memberInfo ? memberInfo->FindTypeMetaData<pragma::ents::PoseTypeMetaData>() : nullptr;
+		if(!metaData) {
+			spdlog::trace("Unable to initialize look_at constraint '{}' with driven object property {} of driven object '{}': Property has no pose type meta data.", GetEntity().ToString(), constraintInfo->drivenObjectPropIdx, constraintInfo->drivenObjectC->GetEntity().ToString());
+			return;
+		}
+		m_drivenObjectPosition = {constraintInfo->drivenObjectC->GetEntity(), constraintInfo->drivenObjectC->GetComponentId(), metaData->posProperty};
+		m_drivenObjectRotation = {constraintInfo->drivenObjectC->GetEntity(), constraintInfo->drivenObjectC->GetComponentId(), metaData->rotProperty};
+		m_driverPosition = {constraintInfo->driverC->GetEntity(), constraintInfo->driverC->GetComponentId(), memberInfoDriver->GetName()};
 	}
 	auto &game = *GetEntity().GetNetworkState()->GetGameState();
 	m_drivenObjectPosition.UpdateMemberIndex(game);
+	m_drivenObjectRotation.UpdateMemberIndex(game);
+	m_driverPosition.UpdateMemberIndex(game);
 	auto *drivenObjectPosC = m_drivenObjectPosition.GetComponent(game);
-	if(!drivenObjectPosC || drivenObjectPosC != constraintInfo->drivenObjectC)
+	if(!drivenObjectPosC || drivenObjectPosC != constraintInfo->drivenObjectC.get())
+		return;
+	auto *drivenObjectRotC = m_drivenObjectRotation.GetComponent(game);
+	if(!drivenObjectRotC || drivenObjectRotC != constraintInfo->drivenObjectC.get())
 		return;
 	auto idxDrivenObjectPos = m_drivenObjectPosition.GetMemberIndex();
 	if(idxDrivenObjectPos == pragma::INVALID_COMPONENT_MEMBER_INDEX)
+		return;
+	auto idxDrivenObjectRot = m_drivenObjectRotation.GetMemberIndex();
+	if(idxDrivenObjectRot == pragma::INVALID_COMPONENT_MEMBER_INDEX)
+		return;
+	auto idxDriverPos = m_driverPosition.GetMemberIndex();
+	if(idxDriverPos == pragma::INVALID_COMPONENT_MEMBER_INDEX)
 		return;
 
 	Vector3 posDriven;
@@ -98,7 +128,7 @@ void ConstraintLookAtComponent::ApplyConstraint()
 	}
 
 	Vector3 posDriver;
-	res = constraintInfo->driverC->GetTransformMemberPos(constraintInfo->driverPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDriverSpace()), posDriver);
+	res = constraintInfo->driverC->GetTransformMemberPos(idxDriverPos, static_cast<umath::CoordinateSpace>(m_constraintC->GetDriverSpace()), posDriver);
 	if(!res) {
 		spdlog::trace("Failed to transform component property value for property {} for driver of constraint '{}'.", constraintInfo->driverPropIdx, GetEntity().ToString());
 		return;
@@ -112,7 +142,7 @@ void ConstraintLookAtComponent::ApplyConstraint()
 		dir /= l;
 
 	Quat curRot;
-	res = constraintInfo->drivenObjectC->GetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), curRot);
+	res = constraintInfo->drivenObjectC->GetTransformMemberRot(idxDrivenObjectRot, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), curRot);
 
 	auto rot = curRot;
 	rotate_towards_axis(rot, dir, m_trackAxis);
@@ -120,5 +150,5 @@ void ConstraintLookAtComponent::ApplyConstraint()
 	if(res)
 		rot = uquat::slerp(curRot, rot, influence);
 
-	constraintInfo->drivenObjectC->SetTransformMemberRot(constraintInfo->drivenObjectPropIdx, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot);
+	const_cast<BaseEntityComponent &>(*constraintInfo->drivenObjectC).SetTransformMemberRot(idxDrivenObjectRot, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()), rot);
 }

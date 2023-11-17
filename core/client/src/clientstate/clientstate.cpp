@@ -322,7 +322,8 @@ void ClientState::CloseMainMenu()
 	auto w = c_engine->GetRenderContext().GetWindowWidth();
 	auto h = c_engine->GetRenderContext().GetWindowHeight();
 	auto &window = c_engine->GetWindow();
-	window->SetCursorPos(Vector2i(w / 2, h / 2));
+	if(window->IsFocused())
+		window->SetCursorPos(Vector2i(w / 2, h / 2));
 	window->SetCursorInputMode(GLFW::CursorMode::Disabled);
 }
 void ClientState::OpenMainMenu()

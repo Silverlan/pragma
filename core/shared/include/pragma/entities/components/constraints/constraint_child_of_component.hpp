@@ -8,6 +8,7 @@
 #define __CONSTRAINT_CHILD_OF_COMPONENT_HPP__
 
 #include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/entities/components/constraints/constraint_component.hpp"
 #include "pragma/game/game_coordinate_system.hpp"
 
 namespace pragma {
@@ -28,16 +29,35 @@ namespace pragma {
 		void SetScaleAxisEnabled(pragma::Axis axis, bool enabled);
 		bool IsScaleAxisEnabled(pragma::Axis axis) const;
 
+		const pragma::ComponentHandle<ConstraintComponent> &GetConstraint() const;
+
 		virtual void InitializeLuaObject(lua_State *lua) override;
+		std::optional<umath::ScaledTransform> CalcInversePose(umath::ScaledTransform &pose) const;
 	  protected:
-		static std::optional<pragma::EntityUComponentMemberRef> FindPosePropertyReference(pragma::BaseEntityComponent &c, pragma::ComponentMemberIndex basePropIdx);
+		enum class Type : uint8_t {
+			Pose = 0,
+			Position,
+			Rotation
+		};
+		struct PropertyInfo {
+			pragma::EntityUComponentMemberRef propertyRef;
+			Type type;
+		};
+
+		static std::optional<pragma::EntityUComponentMemberRef> FindPosePropertyReference(const pragma::BaseEntityComponent &c, pragma::ComponentMemberIndex basePropIdx);
+		void SetPropertyInfosDirty();
+		bool UpdatePropertyInfos();
 		void ApplyConstraint();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
+		std::optional<umath::ScaledTransform> CalcConstraintPose(umath::ScaledTransform *optPose, bool inverse, pragma::ComponentMemberIndex &outDrivenPropertyIndex, ConstraintComponent::ConstraintParticipants &outConstraintParticipants) const;
 		pragma::ComponentHandle<ConstraintComponent> m_constraintC;
 		void UpdateAxisState();
 		std::array<bool, 3> m_locationEnabled;
 		std::array<bool, 3> m_rotationEnabled;
 		std::array<bool, 3> m_scaleEnabled;
+		std::optional<PropertyInfo> m_drivenObjectPropertyInfo {};
+		std::optional<PropertyInfo> m_driverPropertyInfo {};
 		bool m_allAxesEnabled = true;
 	};
 };

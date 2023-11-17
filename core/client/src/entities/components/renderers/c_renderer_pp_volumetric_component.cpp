@@ -101,13 +101,25 @@ void CRendererPpVolumetricComponent::DoRenderEffect(const util::DrawSceneInfo &d
 	pushConstants.farZ = cam->GetFarZ();
 	pushConstants.SetResolution(m_renderTarget->GetTexture().GetImage().GetWidth(), m_renderTarget->GetTexture().GetImage().GetHeight());
 	auto &frustumPlanes = cam->GetFrustumPlanes();
+
+	EntityIterator entIt {*c_game, EntityIterator::FilterFlags::Default};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightSpotVolComponent>>();
+	std::vector<BaseEntity *> ents;
+	ents.reserve(entIt.GetCount());
+	for(auto *ent : entIt) {
+		auto renderC = ent->GetComponent<CRenderComponent>();
+		if(renderC.expired())
+			continue;
+		// Make sure render buffers are up to date
+		renderC->UpdateRenderBuffers(drawCmd);
+		ents.push_back(ent);
+	}
+
 	constexpr float lightIntensityFactor = 0.01f;
 	if(drawCmd->RecordBeginRenderPass(*m_renderTarget) == true) {
 		prosper::ShaderBindState bindState {*drawCmd};
 		if(shaderLightCone.RecordBeginDraw(bindState) == true) {
-			EntityIterator entIt {*c_game, EntityIterator::FilterFlags::Default};
-			entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightSpotVolComponent>>();
-			for(auto *ent : entIt) {
+			for(auto *ent : ents) {
 				auto volC = ent->GetComponent<pragma::CLightSpotVolComponent>();
 				auto mdlC = ent->GetComponent<CModelComponent>();
 				auto renderC = ent->GetComponent<CRenderComponent>();

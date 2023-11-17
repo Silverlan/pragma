@@ -54,7 +54,8 @@ void BaseEntityComponent::RegisterEvents(pragma::EntityComponentManager &compone
 	EVENT_ON_MEMBERS_CHANGED = registerEvent("ON_MEMBERS_CHANGED", ComponentEventInfo::Type::Broadcast);
 }
 
-spdlog::logger &BaseEntityComponent::InitLogger() const {
+spdlog::logger &BaseEntityComponent::InitLogger() const
+{
 	auto *info = GetComponentInfo();
 	assert(info != nullptr);
 	return pragma::register_logger("c_" + std::string {info->name.str});
@@ -101,7 +102,9 @@ TValue get_identity_value()
 	return TValue {};
 }
 template<typename TValue, bool parentSpaceOnly = false>
-static bool get_transform_member_value(const pragma::BaseEntityComponent &component, ComponentMemberIndex idx, umath::CoordinateSpace space, TValue &outValue)
+static bool get_transform_member_value(const pragma::BaseEntityComponent &component, ComponentMemberIndex idx, umath::CoordinateSpace space, TValue &outValue);
+template<typename TValue, bool parentSpaceOnly = false>
+static bool get_transform_member_value(const pragma::BaseEntityComponent &component, ComponentMemberIndex idx, umath::CoordinateSpace space, TValue &outValue, void (*getValue)(const pragma::ComponentMemberInfo &, pragma::BaseEntityComponent &, void *, const void *))
 {
 	auto *memberInfo = component.GetMemberInfo(idx);
 	if(!memberInfo || !memberInfo->getterFunction || (space != umath::CoordinateSpace::Local && space != umath::CoordinateSpace::World && space != umath::CoordinateSpace::Object))
@@ -114,13 +117,13 @@ static bool get_transform_member_value(const pragma::BaseEntityComponent &compon
 				// position or rotation. In this case we want to take our pos/rot siblings into account, so
 				// we return the pose for our associated pose instead.
 				auto idxPose = cPoseType ? component.GetMemberIndex(cPoseType->poseProperty) : std::optional<ComponentMemberIndex> {};
-				return idxPose.has_value() ? get_transform_member_value(component, *idxPose, space, outValue) : false;
+				return idxPose.has_value() ? get_transform_member_value(component, *idxPose, space, outValue, getValue) : false;
 			}
 			switch(memberInfo->type) {
 			case pragma::ents::EntityMemberType::Vector3:
 				{
 					Vector3 value;
-					if(!get_transform_member_value<Vector3, parentSpaceOnly>(component, idx, space, value))
+					if(!get_transform_member_value<Vector3, parentSpaceOnly>(component, idx, space, value, getValue))
 						return false;
 					outValue = {};
 					outValue.SetOrigin(value);
@@ -130,7 +133,7 @@ static bool get_transform_member_value(const pragma::BaseEntityComponent &compon
 			case pragma::ents::EntityMemberType::Quaternion:
 				{
 					Quat value;
-					if(!get_transform_member_value<Quat, parentSpaceOnly>(component, idx, space, value))
+					if(!get_transform_member_value<Quat, parentSpaceOnly>(component, idx, space, value, getValue))
 						return false;
 					outValue = {};
 					outValue.SetRotation(value);
@@ -142,13 +145,13 @@ static bool get_transform_member_value(const pragma::BaseEntityComponent &compon
 	}
 	auto *cMetaData = memberInfo->FindTypeMetaData<pragma::ents::CoordinateTypeMetaData>();
 	if constexpr(!parentSpaceOnly) {
-		auto result = pragma::ents::visit_member(memberInfo->type, [&component, memberInfo, &outValue](auto tag) -> bool {
+		auto result = pragma::ents::visit_member(memberInfo->type, [&component, memberInfo, &outValue, getValue](auto tag) -> bool {
 			using T = typename decltype(tag)::type;
 			if constexpr(!udm::is_convertible<T, TValue>())
 				return false;
 			else {
 				T value;
-				memberInfo->getterFunction(*memberInfo, const_cast<pragma::BaseEntityComponent &>(component), &value);
+				getValue(*memberInfo, const_cast<pragma::BaseEntityComponent &>(component), &value, &outValue);
 				outValue = udm::convert<T, TValue>(value);
 				return true;
 			}
@@ -173,7 +176,7 @@ static bool get_transform_member_value(const pragma::BaseEntityComponent &compon
 				return true; // Nothing to do
 			}
 		default:
-			return get_transform_member_value(component, *idxParent, space, outValue);
+			return get_transform_member_value(component, *idxParent, space, outValue, getValue);
 		}
 		return false; // Unreachable
 	}
@@ -234,13 +237,84 @@ static bool get_transform_member_value(const pragma::BaseEntityComponent &compon
 	}
 	return false; // Unreachable
 }
+template<typename TValue, bool parentSpaceOnly>
+bool get_transform_member_value(const pragma::BaseEntityComponent &component, ComponentMemberIndex idx, umath::CoordinateSpace space, TValue &outValue)
+{
+	return get_transform_member_value<TValue, parentSpaceOnly>(
+	  component, idx, space, outValue, +[](const pragma::ComponentMemberInfo &memberInfo, pragma::BaseEntityComponent &component, void *outData, const void *) { memberInfo.getterFunction(memberInfo, component, outData); });
+}
+
+template<typename TValue>
+static std::optional<TValue> get_value_in_property_space(pragma::BaseEntityComponent &component, const pragma::ComponentMemberInfo &memberInfo, umath::CoordinateSpace space, const TValue &value, umath::CoordinateSpace *optOutPropSpace = nullptr)
+{
+	if((space != umath::CoordinateSpace::Local && space != umath::CoordinateSpace::World && space != umath::CoordinateSpace::Object))
+		return {};
+	auto *cMetaData = memberInfo.FindTypeMetaData<pragma::ents::CoordinateTypeMetaData>();
+	auto valueSpace = cMetaData ? cMetaData->space : umath::CoordinateSpace::World;
+	if(optOutPropSpace)
+		*optOutPropSpace = valueSpace;
+	if(valueSpace == space)
+		return value;
+	auto idxParent = cMetaData ? component.GetMemberIndex(cMetaData->parentProperty) : std::optional<ComponentMemberIndex> {};
+	switch(space) {
+	case umath::CoordinateSpace::Local:
+		{
+			umath::ScaledTransform parentPose {};
+			if(!idxParent.has_value()) {
+				if(valueSpace == umath::CoordinateSpace::World)
+					parentPose = get_entity_pose(component);
+			}
+			else if(!get_transform_member_value(component, *idxParent, valueSpace, parentPose))
+				return {};
+			auto valueInPropSpace = parentPose * value;
+			return valueInPropSpace;
+		}
+	case umath::CoordinateSpace::Object:
+		{
+			if(valueSpace == umath::CoordinateSpace::World) {
+				// Effectively the same as the else branch below, but faster
+				auto valueInPropSpace = get_entity_pose(component) * value;
+				return valueInPropSpace;
+			}
+			else {
+				if(!idxParent.has_value())
+					return value; // Object space is equivalent to local space
+				umath::ScaledTransform parentPose {};
+				if(!get_transform_member_value(component, *idxParent, valueSpace, parentPose))
+					return {};
+				auto valueInPropSpace = parentPose.GetInverse() * value;
+				return valueInPropSpace;
+			}
+			return {};
+		}
+	case umath::CoordinateSpace::World:
+		{
+			if(valueSpace == umath::CoordinateSpace::Object || !idxParent.has_value()) {
+				// Effectively the same as the else branch below, but faster
+				auto valueInPropSpace = get_entity_pose(component).GetInverse() * value;
+				return valueInPropSpace;
+			}
+			else {
+				umath::ScaledTransform parentPose;
+				if(!idxParent.has_value())
+					parentPose = get_entity_pose(component);
+				else if(!get_transform_member_value(component, *idxParent, umath::CoordinateSpace::World, parentPose))
+					return {};
+				auto valueInPropSpace = parentPose.GetInverse() * value;
+				return valueInPropSpace;
+			}
+			return {};
+		}
+	}
+	return {};
+}
+
 template<typename TValue>
 static bool set_transform_member_value(pragma::BaseEntityComponent &component, ComponentMemberIndex idx, umath::CoordinateSpace space, const TValue &value)
 {
 	auto *memberInfo = component.GetMemberInfo(idx);
-	if(!memberInfo || !memberInfo->setterFunction || (space != umath::CoordinateSpace::Local && space != umath::CoordinateSpace::World && space != umath::CoordinateSpace::Object))
-		return false;
-	auto *cMetaData = memberInfo->FindTypeMetaData<pragma::ents::CoordinateTypeMetaData>();
+	if(!memberInfo)
+		return {};
 	auto setValue = [memberInfo, &component](const TValue &value) {
 		return pragma::ents::visit_member(memberInfo->type, [&component, memberInfo, &value](auto tag) -> bool {
 			using T = typename decltype(tag)::type;
@@ -253,62 +327,30 @@ static bool set_transform_member_value(pragma::BaseEntityComponent &component, C
 			}
 		});
 	};
-	auto valueSpace = cMetaData ? cMetaData->space : umath::CoordinateSpace::World;
-	if(valueSpace == space)
-		return setValue(value);
-	auto idxParent = cMetaData ? component.GetMemberIndex(cMetaData->parentProperty) : std::optional<ComponentMemberIndex> {};
-	switch(space) {
-	case umath::CoordinateSpace::Local:
-		{
-			umath::ScaledTransform parentPose {};
-			if(!idxParent.has_value()) {
-				if(valueSpace == umath::CoordinateSpace::World)
-					parentPose = get_entity_pose(component);
-			}
-			else if(!get_transform_member_value(component, *idxParent, valueSpace, parentPose))
-				return false;
-			auto valueInPropSpace = parentPose * value;
-			return setValue(valueInPropSpace);
-		}
-	case umath::CoordinateSpace::Object:
-		{
-			if(valueSpace == umath::CoordinateSpace::World) {
-				// Effectively the same as the else branch below, but faster
-				auto valueInPropSpace = get_entity_pose(component) * value;
-				return setValue(valueInPropSpace);
-			}
-			else {
-				if(!idxParent.has_value())
-					return setValue(value); // Object space is equivalent to local space
-				umath::ScaledTransform parentPose {};
-				if(!get_transform_member_value(component, *idxParent, valueSpace, parentPose))
-					return false;
-				auto valueInPropSpace = parentPose.GetInverse() * value;
-				return setValue(valueInPropSpace);
-			}
-			return false;
-		}
-	case umath::CoordinateSpace::World:
-		{
-			if(valueSpace == umath::CoordinateSpace::Object || !idxParent.has_value()) {
-				// Effectively the same as the else branch below, but faster
-				auto valueInPropSpace = get_entity_pose(component).GetInverse() * value;
-				return setValue(valueInPropSpace);
-			}
-			else {
-				umath::ScaledTransform parentPose;
-				if(!idxParent.has_value())
-					parentPose = get_entity_pose(component);
-				else if(!get_transform_member_value(component, *idxParent, umath::CoordinateSpace::World, parentPose))
-					return false;
-				auto valueInPropSpace = parentPose.GetInverse() * value;
-				return setValue(valueInPropSpace);
-			}
-			return false;
-		}
-	}
-	return false;
+	auto valueInPropSpace = get_value_in_property_space<TValue>(component, *memberInfo, space, value);
+	if(!valueInPropSpace)
+		return false;
+	return setValue(*valueInPropSpace);
 }
+
+template<class T>
+bool convert_transform_member_value_to_target_space(const BaseEntityComponent &component, ComponentMemberIndex idx, umath::CoordinateSpace space, T &inOutPos)
+{
+	return get_transform_member_value<T>(
+	  component, idx, space, inOutPos, +[](const pragma::ComponentMemberInfo &memberInfo, pragma::BaseEntityComponent &component, void *outData, const void *inOutPos) {
+		  if(!pragma::ents::is_udm_member_type(memberInfo.type))
+			  throw std::invalid_argument {"Property has type '" + std::string {magic_enum::enum_name(memberInfo.type)} + "', which is not a valid UDM type!"};
+		  constexpr auto type = udm::type_to_enum<T>();
+		  if(static_cast<udm::Type>(memberInfo.type) != type) // Type has to be an exact match
+			  throw std::invalid_argument {"Property type '" + std::string {magic_enum::enum_name(memberInfo.type)} + "' does not match expected type '" + std::string {magic_enum::enum_name(type)} + "'!"};
+		  memcpy(outData, inOutPos, sizeof(T));
+	  });
+}
+bool BaseEntityComponent::ConvertTransformMemberPosToTargetSpace(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &inOutPos) const { return convert_transform_member_value_to_target_space(*this, idx, space, inOutPos); }
+bool BaseEntityComponent::ConvertTransformMemberRotToTargetSpace(ComponentMemberIndex idx, umath::CoordinateSpace space, Quat &inOutRot) const { return convert_transform_member_value_to_target_space(*this, idx, space, inOutRot); }
+bool BaseEntityComponent::ConvertTransformMemberScaleToTargetSpace(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &inOutScale) const { return convert_transform_member_value_to_target_space(*this, idx, space, inOutScale); }
+bool BaseEntityComponent::ConvertTransformMemberPoseToTargetSpace(ComponentMemberIndex idx, umath::CoordinateSpace space, umath::ScaledTransform &inOutPose) const { return convert_transform_member_value_to_target_space(*this, idx, space, inOutPose); }
+
 bool BaseEntityComponent::GetTransformMemberPos(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &outPos) const { return get_transform_member_value(*this, idx, space, outPos); }
 bool BaseEntityComponent::GetTransformMemberRot(ComponentMemberIndex idx, umath::CoordinateSpace space, Quat &outRot) const { return get_transform_member_value(*this, idx, space, outRot); }
 bool BaseEntityComponent::GetTransformMemberScale(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &outScale) const { return get_transform_member_value(*this, idx, space, outScale); }
@@ -323,6 +365,23 @@ bool BaseEntityComponent::GetTransformMemberParentPos(ComponentMemberIndex idx, 
 bool BaseEntityComponent::GetTransformMemberParentRot(ComponentMemberIndex idx, umath::CoordinateSpace space, Quat &outRot) const { return get_transform_member_value<std::remove_reference_t<decltype(outRot)>, true>(*this, idx, space, outRot); }
 bool BaseEntityComponent::GetTransformMemberParentScale(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &outScale) const { return get_transform_member_value<std::remove_reference_t<decltype(outScale)>, true>(*this, idx, space, outScale); }
 bool BaseEntityComponent::GetTransformMemberParentPose(ComponentMemberIndex idx, umath::CoordinateSpace space, umath::ScaledTransform &outPose) const { return get_transform_member_value<std::remove_reference_t<decltype(outPose)>, true>(*this, idx, space, outPose); }
+
+template<typename TValue>
+static bool convert_value_to_member_space(const pragma::BaseEntityComponent &component, ComponentMemberIndex idx, umath::CoordinateSpace space, TValue &inOutValue, umath::CoordinateSpace *optOutMemberSpace)
+{
+	auto *memberInfo = component.GetMemberInfo(idx);
+	if(!memberInfo)
+		return {};
+	auto valueInPropSpace = get_value_in_property_space<TValue>(const_cast<pragma::BaseEntityComponent &>(component), *memberInfo, space, inOutValue);
+	if(!valueInPropSpace)
+		return false;
+	inOutValue = *valueInPropSpace;
+	return true;
+}
+bool BaseEntityComponent::ConvertPosToMemberSpace(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &inOutPos, umath::CoordinateSpace *optOutMemberSpace) const { return convert_value_to_member_space(*this, idx, space, inOutPos, optOutMemberSpace); }
+bool BaseEntityComponent::ConvertRotToMemberSpace(ComponentMemberIndex idx, umath::CoordinateSpace space, Quat &inOutRot, umath::CoordinateSpace *optOutMemberSpace) const { return convert_value_to_member_space(*this, idx, space, inOutRot, optOutMemberSpace); }
+bool BaseEntityComponent::ConvertScaleToMemberSpace(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &inOutScale, umath::CoordinateSpace *optOutMemberSpace) const { return convert_value_to_member_space(*this, idx, space, inOutScale, optOutMemberSpace); }
+bool BaseEntityComponent::ConvertPoseToMemberSpace(ComponentMemberIndex idx, umath::CoordinateSpace space, umath::ScaledTransform &inOutPose, umath::CoordinateSpace *optOutMemberSpace) const { return convert_value_to_member_space(*this, idx, space, inOutPose, optOutMemberSpace); }
 
 const ComponentMemberInfo *BaseEntityComponent::FindMemberInfo(const std::string &name) const
 {
@@ -364,10 +423,9 @@ std::optional<ComponentMemberIndex> BaseEntityComponent::DoGetMemberIndex(const 
 }
 util::TWeakSharedHandle<const BaseEntityComponent> BaseEntityComponent::GetHandle() const { return GetHandle<BaseEntityComponent>(); }
 util::TWeakSharedHandle<BaseEntityComponent> BaseEntityComponent::GetHandle() { return GetHandle<BaseEntityComponent>(); }
-void BaseEntityComponent::Initialize()
+void BaseEntityComponent::Initialize() { InitializeLuaObject(GetEntity().GetLuaState()); }
+void BaseEntityComponent::PostInitialize()
 {
-	InitializeLuaObject(GetEntity().GetLuaState());
-
 	auto &ent = GetEntity();
 	OnAttached(ent);
 	if(ent.IsSpawned()) {

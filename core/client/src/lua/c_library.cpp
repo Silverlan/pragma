@@ -70,6 +70,7 @@
 #include <prosper_prepared_command_buffer.hpp>
 #include <luabind/copy_policy.hpp>
 #include <fsys/ifile.hpp>
+#include <wgui/types/witooltip.h>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
@@ -184,6 +185,7 @@ static void register_gui(Lua::Interface &lua)
 		  return t;
 	  })),
 	  luabind::def("get_delta_time", static_cast<float (*)(lua_State *)>([](lua_State *l) -> float { return WGUI::GetInstance().GetDeltaTime(); })),
+	  luabind::def("get_next_gui_element_index", static_cast<uint64_t (*)(lua_State *)>([](lua_State *l) -> uint64_t { return WGUI::GetInstance().GetNextGuiElementIndex(); })),
 	  luabind::def("add_base_element", static_cast<::WIBase *(*)(const prosper::Window &)>([](const prosper::Window &window) -> ::WIBase * { return WGUI::GetInstance().AddBaseElement(&window); })),
 	  luabind::def("add_base_element", static_cast<::WIBase *(*)()>([]() -> ::WIBase * { return WGUI::GetInstance().AddBaseElement(); })),
 	  luabind::def(
@@ -323,6 +325,13 @@ static void register_gui(Lua::Interface &lua)
 	auto wiProgressBarClassDef = luabind::class_<WIProgressBar, ::WIBase>("ProgressBar");
 	Lua::WIProgressBar::register_class(wiProgressBarClassDef);
 	guiMod[wiProgressBarClassDef];
+
+	auto wiTooltipClassDef = luabind::class_<WITooltip, ::WIBase>("Tooltip");
+	wiTooltipClassDef.def(
+	  "SetText", +[](WITooltip &elTooltip, const std::string &text) { elTooltip.SetText(text); });
+	wiTooltipClassDef.def(
+	  "GetText", +[](const WITooltip &elTooltip) { return elTooltip.GetText().cpp_str(); });
+	guiMod[wiTooltipClassDef];
 
 	auto wiSliderClassDef = luabind::class_<WISlider, luabind::bases<WIProgressBar, ::WIBase>>("Slider");
 	Lua::WISlider::register_class(wiSliderClassDef);
@@ -516,6 +525,12 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool bGUI)
 	  luabind::def("get_mapped_keys", &get_mapped_keys), luabind::def("get_mapped_keys", &get_mapped_keys, luabind::default_parameter_policy<2, std::numeric_limits<uint32_t>::max()> {}),
 	  luabind::def(
 	    "add_callback",
+	    +[](const std::string &identifier, const Lua::func<void> &f) -> CallbackHandle {
+		    auto &inputHandler = c_game->GetInputCallbackHandler();
+		    return inputHandler.AddLuaCallback(identifier, f);
+	    }),
+	  luabind::def(
+	    "add_event_listener",
 	    +[](const std::string &identifier, const Lua::func<void> &f) -> CallbackHandle {
 		    auto &inputHandler = c_game->GetInputCallbackHandler();
 		    return inputHandler.AddLuaCallback(identifier, f);

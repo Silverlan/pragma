@@ -562,7 +562,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPlane(const Vector
 	auto rMesh = DrawMesh(mesh, color, duration);
 	if(rMesh != nullptr)
 		r->AddObject(rMesh);
-	Color colInv = {255 - color.r, 255 - color.g, 255 - color.b, color.a};
+	Color colInv = {static_cast<int16_t>(255 - color.r), static_cast<int16_t>(255 - color.g), static_cast<int16_t>(255 - color.b), static_cast<int16_t>(color.a)};
 	auto rLines = DrawLines({v0, v2, v1, v3, origin, origin + n * 100.f}, colInv, duration);
 	if(rLines != nullptr)
 		r->AddObject(rLines);

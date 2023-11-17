@@ -57,8 +57,8 @@ jobs:
           echo "pfm_enable_experimental_updates \"1\"" >> client.cfg
           cd ..
 
-          tar -czvf pragma.tar.gz *
-          mv "${{ steps.build-pragma.outputs.install-dir }}/pragma.tar.gz" "$curDir/"
+          tar -czvf pragma-lin64.tar.gz *
+          mv "${{ steps.build-pragma.outputs.install-dir }}/pragma-lin64.tar.gz" "$curDir/"
 
       - name: Generate nightly tag description
         shell: bash
@@ -78,8 +78,15 @@ jobs:
         with:
           tag: nightly
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: "pragma.tar.gz"
+          files: "pragma-lin64.tar.gz"
           
+      # Tests are currently not functional on Linux GitHub runners
+      #- name: Run Tests
+      #  uses: Silverlan/pragma/github_actions/run_tests@master
+      #  timeout-minutes: 10
+      #  with:
+      #    install-dir: "${{ steps.build-pragma.outputs.install-dir }}"
+
       - name: Handle Error
         uses: Silverlan/common_actions/action_handle_error@main
         if: failure()

@@ -30,9 +30,11 @@ namespace pragma {
 		void ResetDrivenRotation();
 		pragma::ComponentHandle<ConstraintComponent> m_constraintC;
 		pragma::EntityUComponentMemberRef m_drivenObjectPosition;
+		pragma::EntityUComponentMemberRef m_drivenObjectRotation;
+		pragma::EntityUComponentMemberRef m_driverPosition;
 		bool m_drivenObjectRotationInitialized = false;
 
-		TrackAxis m_trackAxis = TrackAxis::X;
+		TrackAxis m_trackAxis = TrackAxis::Z;
 	};
 };
 

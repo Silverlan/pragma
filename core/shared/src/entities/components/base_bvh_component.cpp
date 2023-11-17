@@ -272,12 +272,8 @@ void BaseBvhComponent::GetVertexData(std::vector<BvhTriangle> &outData) const
 	memcpy(outData.data(), m_bvhData->primitives.data(), util::size_of_container(outData));
 }
 
-bool BaseBvhComponent::SetVertexData(pragma::BvhData &bvhData, const std::vector<BvhTriangle> &data)
+static void refit(pragma::BvhData &bvhData)
 {
-	if(bvhData.primitives.size() != data.size())
-		return false;
-	memcpy(bvhData.primitives.data(), data.data(), util::size_of_container(data));
-
 	// Update bounding boxes
 	bvh::HierarchyRefitter<bvh::Bvh<float>> refitter {bvhData.bvh};
 	refitter.refit([&](bvh::Bvh<float>::Node &leaf) {
@@ -289,6 +285,27 @@ bool BaseBvhComponent::SetVertexData(pragma::BvhData &bvhData, const std::vector
 		}
 		leaf.bounding_box_proxy() = bbox;
 	});
+}
+
+void BaseBvhComponent::DeleteRange(pragma::BvhData &bvhData, size_t start, size_t end)
+{
+	if(end == start)
+		return;
+	// We can't actually delete primitives, so we'll just move all of the vertices to a single point to effectively
+	// invalidate it
+	auto &p = bvhData.primitives[start / 3];
+	p = {{p.p0[0], p.p0[1], p.p0[2]}, {p.p0[0], p.p0[1], p.p0[2]}, {p.p0[0], p.p0[1], p.p0[2]}};
+	for(size_t i = (start / 3) + 1; i < (end / 3); ++i)
+		bvhData.primitives[i] = p;
+	refit(bvhData);
+}
+
+bool BaseBvhComponent::SetVertexData(pragma::BvhData &bvhData, const std::vector<BvhTriangle> &data)
+{
+	if(bvhData.primitives.size() != data.size())
+		return false;
+	memcpy(bvhData.primitives.data(), data.data(), util::size_of_container(data));
+	refit(bvhData);
 	return true;
 }
 

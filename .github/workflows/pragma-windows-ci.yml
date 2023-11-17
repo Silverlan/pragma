@@ -64,7 +64,7 @@ jobs:
 
           cd "$curDir"
 
-          7z a pragma.zip "${{ steps.build-pragma.outputs.install-dir }}/**"
+          7z a pragma-win64.zip "${{ steps.build-pragma.outputs.install-dir }}/**"
           
       - name: Generate nightly tag description
         shell: bash
@@ -84,7 +84,7 @@ jobs:
         with:
           tag: nightly
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: "pragma.zip"
+          files: "pragma-win64.zip"
           
       # Publish debug PDB files
       - name: Create PDB Archive
@@ -134,6 +134,12 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: "debug_pdb.zip"
       #
+
+      - name: Run Tests
+        uses: Silverlan/pragma/github_actions/run_tests@master
+        timeout-minutes: 10
+        with:
+          install-dir: "${{ steps.build-pragma.outputs.install-dir }}"
 
       - name: Handle Error
         uses: Silverlan/common_actions/action_handle_error@main

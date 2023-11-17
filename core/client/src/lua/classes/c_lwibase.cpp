@@ -9,6 +9,7 @@
 #include "pragma/lua/classes/c_lwibase.h"
 #include <wgui/wibase.h>
 #include <wgui/wihandle.h>
+#include <wgui/types/witooltip.h>
 #include "luasystem.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/widropdownmenu.h>
@@ -312,6 +313,16 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("CallCallbacks", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
 	classDef.def("CallCallbacks", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
 	classDef.def("CallCallbacks", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("AddEventListener", &AddCallback);
+	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListeners", static_cast<void (*)(lua_State *, ::WIBase &, std::string, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
 	classDef.def("FadeIn", static_cast<void (*)(lua_State *, ::WIBase &, float)>(&FadeIn));
 	classDef.def("FadeIn", static_cast<void (*)(lua_State *, ::WIBase &, float, float)>(&FadeIn));
 	classDef.def("FadeOut", static_cast<void (::WIBase::*)(float, bool)>(&::WIBase::FadeOut));
@@ -750,6 +761,8 @@ void Lua::WIText::register_class(luabind::class_<::WIText, ::WIBase> &classDef)
 	classDef.def(
 	  "GetText", +[](const ::WIText &text) { return text.GetText().cpp_str(); });
 	classDef.def("GetTextHeight", &::WIText::GetTextHeight);
+	classDef.def("CalcTextSize", &::WIText::CalcTextSize);
+	classDef.def("GetTextWidth", &::WIText::GetTextWidth);
 	classDef.def("SetFont", static_cast<void (*)(lua_State *, ::WIText &, const std::string &)>([](lua_State *l, ::WIText &hPanel, const std::string &font) { hPanel.SetFont(font); }));
 	classDef.def(
 	  "GetFont", +[](lua_State *l, ::WIText &hPanel) -> std::optional<std::string> {
@@ -1437,6 +1450,23 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 	}
 	else if(name == "onchildadded") {
 		hCallback = FunctionCallback<void, ::WIBase *>::Create([l, hPanel, o](::WIBase *el) mutable {
+			if(!hPanel.IsValid())
+				return;
+			Lua::CallFunction(l, [&o, hPanel, el](lua_State *l) mutable {
+				o.push(l);
+
+				auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
+				obj.push(l);
+				if(el) {
+					auto objEl = WGUILuaInterface::GetLuaObject(l, *el);
+					objEl.push(l);
+				}
+				return Lua::StatusCode::Ok;
+			});
+		});
+	}
+	else if(name == "onshowtooltip") {
+		hCallback = FunctionCallback<void, ::WITooltip *>::Create([l, hPanel, o](::WITooltip *el) mutable {
 			if(!hPanel.IsValid())
 				return;
 			Lua::CallFunction(l, [&o, hPanel, el](lua_State *l) mutable {

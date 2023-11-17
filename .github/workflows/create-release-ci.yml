@@ -98,19 +98,56 @@ jobs:
         id: windows-version
         shell: bash
         run:   |
-          wget https://github.com/Silverlan/pragma/releases/download/nightly/pragma.zip
+          wget https://github.com/Silverlan/pragma/releases/download/nightly/pragma-win64.zip
           filename="pragma-v${{ steps.determine-version.outputs.version }}-win64.zip"
-          mv pragma.zip "$filename"
+          mv pragma-win64.zip "$filename"
           echo "filename=$filename" >> $GITHUB_OUTPUT
-          
+        env:
+          filename: ${{ steps.determine-version.outputs.filename }}
+
       - name: Get latest Linux Version
         id: linux-version
         shell: bash
         run:   |
-          wget https://github.com/Silverlan/pragma/releases/download/nightly/pragma.tar.gz
+          wget https://github.com/Silverlan/pragma/releases/download/nightly/pragma-lin64.tar.gz
           filename="pragma-v${{ steps.determine-version.outputs.version }}-lin64.tar.gz"
-          mv pragma.tar.gz "$filename"
+          mv pragma-lin64.tar.gz "$filename"
           echo "filename=$filename" >> $GITHUB_OUTPUT
+
+      - name: Create Pragma Directory
+        run: |
+          mkdir pragma-windows
+          mkdir pragma-linux
+
+      - name: Extract Zip Archive
+        run: |
+          unzip -q "${{ steps.windows-version.outputs.filename }}" -d pragma-windows
+          tar -xzvf "${{ steps.linux-version.outputs.filename }}" -C pragma-linux
+          rm -f "${{ steps.windows-version.outputs.filename }}"
+          rm -f "${{ steps.linux-version.outputs.filename }}"
+
+      - name: Apply file changes
+        run: |
+          for dir in pragma-windows pragma-linux; do
+            # Disable experimental updates in client.cfg
+            sed -i 's/pfm_enable_experimental_updates "1"/pfm_enable_experimental_updates "0"/' "$dir/cfg/client.cfg"
+      
+            # Re-create zip archive
+            if [ "$dir" == "pragma-windows" ]; then
+              cd pragma-windows
+              7z a "${{ steps.windows-version.outputs.filename }}" "./**"
+              mv "${{ steps.windows-version.outputs.filename }}" "../"
+              cd ..
+            elif [ "$dir" == "pragma-linux" ]; then
+              cd pragma-linux
+              tar -czvf "${{ steps.linux-version.outputs.filename }}" *
+              mv "${{ steps.linux-version.outputs.filename }}" "../"
+              cd ..
+            fi
+
+            # Remove the current directory
+            rm -rf "$dir"
+          done
           
       - name: Get PDB Debug Files
         id: pdb-debug

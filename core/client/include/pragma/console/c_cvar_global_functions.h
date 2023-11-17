@@ -73,6 +73,7 @@ namespace Console {
 		DLLCLIENT void debug_render_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 		DLLCLIENT void debug_light_sources(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 		DLLCLIENT void debug_gui_cursor(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+		DLLCLIENT void debug_entity_render_buffer(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 		DLLCLIENT void debug_steam_audio_dump_scene(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 		DLLCLIENT void debug_lightmaps(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 		DLLCLIENT void debug_particle_alpha_mode(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);

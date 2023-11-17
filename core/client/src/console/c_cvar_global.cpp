@@ -192,7 +192,7 @@ DLLCLIENT void CMD_sound_play(NetworkState *, pragma::BasePlayerComponent *, std
 {
 	if(argv.empty())
 		return;
-	if(client->PrecacheSound(argv[0]) == 0)
+	if(client->PrecacheSound(argv[0]) == false)
 		return;
 	client->PlaySound(argv[0], ALSoundType::GUI, ALCreateFlags::None);
 }

@@ -4,6 +4,10 @@ inputs:
   branch:
     description: 'The branch to clone Pragma from.'
     default: 'master'
+  with_cuda:
+    description: 'Install CUDA?'
+    required: true
+    default: '1'
 runs:
   using: "composite"
   steps:
@@ -13,6 +17,8 @@ runs:
   
     - name: Install Requirements
       uses: Silverlan/pragma/github_actions/install_requirements@master
+      with:
+        with_cuda: ${{ inputs.with_cuda }}
       
     - name: Download Pragma
       shell: bash

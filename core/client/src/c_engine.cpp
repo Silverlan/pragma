@@ -550,6 +550,7 @@ extern std::optional<uint32_t> g_launchParamWidth;
 extern std::optional<uint32_t> g_launchParamHeight;
 extern std::optional<Color> g_titleBarColor;
 extern std::optional<Color> g_borderColor;
+extern bool g_windowless;
 void register_game_shaders();
 bool CEngine::Initialize(int argc, char *argv[])
 {
@@ -584,6 +585,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 	prosper::IPrContext::CreateInfo contextCreateInfo {};
 	contextCreateInfo.width = 1280;
 	contextCreateInfo.height = 1024;
+	contextCreateInfo.windowless = g_windowless;
 	if(windowRes) {
 		std::vector<std::string> vals;
 		ustring::explode(*windowRes, "x", vals);

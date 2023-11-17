@@ -68,7 +68,12 @@ function ents.ViewerCamera:UpdatePose()
 	self:UpdatePosition()
 	local position = self:GetEntity():GetPos()
 	local target = self:GetLookAtTarget()
-	local dir = (target - position):GetNormal()
+	local diff = target - position
+	local l = diff:Length()
+	local dir = vector.FORWARD
+	if l > 0.0001 then
+		dir = diff / l
+	end
 	local rot = Quaternion(dir, self.m_up)
 	self:GetEntity():SetRotation(rot)
 

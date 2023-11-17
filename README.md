@@ -33,20 +33,11 @@ What platforms and hardware does it work on?
 ------
 - Windows 10 (or newer) / Ubuntu 22.04 LTS (or newer)
 - Graphics card: GTX 1050 Ti or newer
-- Memory: 4 GiB RAM or more
 
 Contributions
 ------
 ###### PFM
-If you would like to contribute to the development of PFM, there is usually no need to build all of Pragma. PFM is a Lua-based addon for Pragma and can be found in "Pragma/addons/filmmaker", all you need is a source code editor of your choice (though Visual Studio Code is highly recommended) and some experience with Lua 5.1. Here are the recommended steps:
-1) Download and extract the [latest version](https://github.com/Silverlan/pragma/releases/tag/nightly) of Pragma
-2) Delete the existing "Pragma/addons/filmmaker" directory
-3) Fork the [PFM repository](https://github.com/Silverlan/pfm) and clone your fork into "Pragma/addons/filmmaker_fork". Do *not* fork into "addons/filmmaker", otherwise your changes will get overwritten the next time you update Pragma/PFM.
-4) (Optional) Follow the instructions on [the wiki](https://wiki.pragma-engine.com/books/lua-api/page/visual-studio-code) to set up Visual Studio Code for Lua development with Pragma
-
-You can find the Lua-script files for PFM in "Pragma/addons/filmmaker_fork/lua". For some basic information on how to use the Lua API in Pragma, please check out [the wiki](https://wiki.pragma-engine.com/books/lua-api).
-
-To update Pragma/PFM, you can still use the auto-updater functionality of PFM. Simply make sure to delete the "Pragma/addons/filmmaker" directory again after the update.
+If you would like to contribute to the development of the Pragma Filmmaker, please go to the [PFM repository](https://github.com/Silverlan/pfm#contributions) for more information.
 
 ###### Pragma
 The recommended way to work with Pragma is through the [Lua API](https://wiki.pragma-engine.com/books/lua-api). If this is not enough, and you need more control, you will have to build Pragma manually. You can find the build instructions below.
@@ -64,7 +55,7 @@ Build Requirements
 - Windows SDK 10.0.22000.0 or newer
 
 ###### Linux
-- clang-14 or newer (Pragma is *not* compatible with gcc!)
+- clang-15 or newer (Pragma is *not* compatible with gcc!)
 
 Build Instructions
 ------
@@ -106,8 +97,8 @@ Running the build-script with the arguments above will build and install Pragma 
 | --------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------- |
 | `--help`                                | Display this help                                                                            |                  |
 | `--generator <generator>`               | The generator to use.                                                                        | Windows: `Visual Studio 17 2022`<br/>Linux: `Unix Makefiles` |
-| `--c-compiler`                          | [Linux only] The C-compiler to use.                                                          | `clang-14`       |
-| `--cxx-compiler`                        | [Linux only] The C++-compiler to use.                                                        | `clang++-14`     |
+| `--c-compiler`                          | [Linux only] The C-compiler to use.                                                          | `clang-15`       |
+| `--cxx-compiler`                        | [Linux only] The C++-compiler to use.                                                        | `clang++-15`     |
 | `--no-sudo`                             | [Linux only] Will not run sudo commands. System packages will have to be installed manually. | `0`              |
 | `--no-confirm`                          | [Linux only] Disable any interaction with user (suitable for automated run).                 | `0`              |
 | `--with-essential-client-modules <1/0>` | Include essential modules required to run Pragma.                                            | `1`              |
@@ -209,3 +200,5 @@ Special Thanks
 ------
 - [SlawekNowy](https://github.com/SlawekNowy): For helping to make Linux support possible
 - [REDxEYE](https://github.com/REDxEYE): For creating the [Pragma asset import plugin for Blender](https://github.com/REDxEYE/pragma_udm_io)
+- [ZeqMacaw](https://github.com/ZeqMacaw): For their work on [Crowbar](https://github.com/ZeqMacaw/Crowbar)
+- All of the contributors of the [third-party libraries](https://github.com/Silverlan/pragma/blob/master/build_scripts/scripts/third_party_libs.py) used by Pragma/PFM

@@ -130,6 +130,7 @@ pragma::ComponentHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::
 		ptrComponentOther->OnEntityComponentAdded(*ptrComponent, false);
 		ptrComponent->OnEntityComponentAdded(*ptrComponentOther, true);
 	}
+	ptrComponent->PostInitialize();
 	return {ptrComponent};
 }
 pragma::ComponentHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::AddComponent(const std::string &name, bool bForceCreateNew)

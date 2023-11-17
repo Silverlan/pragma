@@ -56,6 +56,11 @@ void CEngine::WriteClientConfig(VFilePtrReal f)
 	auto *stateCl = GetClientState();
 	if(stateCl != NULL) {
 		auto &cvars = stateCl->GetConVars();
+
+		auto &cfg = GetConVarConfig(NwStateType::Client);
+		if(cfg)
+			RestoreConVarsForUnknownCommands(f, *cfg, cvars);
+
 		for(auto &pair : cvars) {
 			if(stateSv == NULL || stateSv->GetConVar(pair.first) == NULL) {
 				auto &cf = pair.second;

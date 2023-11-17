@@ -194,15 +194,20 @@ bool pragma::CEyeComponent::GetEyeballProjectionVectors(uint32_t eyeballIndex, V
 void pragma::CEyeComponent::UpdateEyeMaterialData()
 {
 	auto &mdl = GetEntity().GetModel();
-	for(auto &data : m_eyeballData)
+	for(auto &data : m_eyeballData) {
 		data.config.irisScale = 1.f;
+		data.config.irisUvClampRange = {0.f, 1.f};
+	}
 	auto numEyeballs = umath::min(mdl->GetEyeballCount(), static_cast<uint32_t>(m_eyeballData.size()));
 	for(auto eyeballIndex = decltype(numEyeballs) {0u}; eyeballIndex < numEyeballs; ++eyeballIndex) {
 		auto &eyeball = *mdl->GetEyeball(eyeballIndex);
 		auto *mat = mdl->GetMaterial(0, eyeball.irisMaterialIndex);
 		if(!mat)
 			continue;
-		m_eyeballData[eyeballIndex].config.irisScale = mat->GetDataBlock()->GetFloat("iris_scale", 1.f);
+		auto &config = m_eyeballData[eyeballIndex].config;
+		auto &data = mat->GetDataBlock();
+		config.irisScale = data->GetFloat("iris_scale", 1.f);
+		data->GetVector2("iris_uv_clamp_range", &config.irisUvClampRange);
 	}
 }
 void pragma::CEyeComponent::UpdateEyeballMT(const Eyeball &eyeball, uint32_t eyeballIndex)

@@ -31,12 +31,12 @@ pragma::AnimationUpdateManager::AnimationUpdateManager(Game &game) : game {game}
 void pragma::AnimationUpdateManager::UpdateEntityState(BaseEntity &ent)
 {
 	auto animC = ent.GetAnimatedComponent();
-	if(animC.valid() && umath::is_flag_set(animC->GetStateFlags(),BaseEntityComponent::StateFlags::Removed))
-		animC = pragma::ComponentHandle<BaseAnimatedComponent>{};
+	if(animC.valid() && umath::is_flag_set(animC->GetStateFlags(), BaseEntityComponent::StateFlags::Removed))
+		animC = pragma::ComponentHandle<BaseAnimatedComponent> {};
 
 	auto panimaC = ent.GetComponent<PanimaComponent>();
-	if(panimaC.valid() && umath::is_flag_set(panimaC->GetStateFlags(),BaseEntityComponent::StateFlags::Removed))
-		panimaC = pragma::ComponentHandle<PanimaComponent>{};
+	if(panimaC.valid() && umath::is_flag_set(panimaC->GetStateFlags(), BaseEntityComponent::StateFlags::Removed))
+		panimaC = pragma::ComponentHandle<PanimaComponent> {};
 
 	auto it = std::find_if(m_animatedEntities.begin(), m_animatedEntities.end(), [&ent](const AnimatedEntity &animEnt) { return animEnt.entity == &ent; });
 	if(animC.expired() && panimaC.expired()) {
@@ -58,11 +58,7 @@ void pragma::AnimationUpdateManager::UpdateEntityAnimationDrivers(double dt)
 	for(auto *ent : EntityIterator {game, m_animationDriverComponentId})
 		ent->GetComponent<pragma::AnimationDriverComponent>()->ApplyDriver();
 }
-void pragma::AnimationUpdateManager::UpdateConstraints(double dt)
-{
-	for(auto *ent : EntityIterator {game, m_constraintManagerComponentId})
-		ent->GetComponent<pragma::ConstraintManagerComponent>()->ApplyConstraints();
-}
+void pragma::AnimationUpdateManager::UpdateConstraints(double dt) { pragma::ConstraintManagerComponent::ApplyConstraints(*game.GetNetworkState()); }
 void pragma::AnimationUpdateManager::UpdateAnimations(double dt)
 {
 	for(auto &entInfo : m_animatedEntities) {

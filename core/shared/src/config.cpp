@@ -114,6 +114,25 @@ void Engine::SaveEngineConfig()
 	WriteEngineConfig(f);
 }
 
+void Engine::RestoreConVarsForUnknownCommands(VFilePtrReal f, const ConVarInfoList &origCvarValues, const std::map<std::string, std::shared_ptr<ConConf>> &stateConVars)
+{
+	// We need to restore commands from the previous config in cases where we don't know the command.
+	// In this case the command may be from a script or module that hasn't been loaded during this instance and
+	// we don't want to lose its value.
+	for(auto &conVarInfo : origCvarValues.GetConVars()) {
+		auto it = stateConVars.find(conVarInfo.cmd);
+		if(it == stateConVars.end()) {
+			std::string l = conVarInfo.cmd;
+			for(auto &arg : conVarInfo.args) {
+				l += " ";
+				l += "\"" + arg + "\"";
+			}
+			l += "\n";
+			f->WriteString(l.c_str());
+		}
+	}
+}
+
 void Engine::WriteEngineConfig(VFilePtrReal f)
 {
 	auto &cvars = GetConVars();
@@ -134,6 +153,11 @@ void Engine::WriteServerConfig(VFilePtrReal f)
 	auto *stateSv = GetServerState();
 	if(stateSv != nullptr) {
 		auto &cvars = stateSv->GetConVars();
+
+		auto &cfg = GetConVarConfig(NwStateType::Server);
+		if(cfg)
+			RestoreConVarsForUnknownCommands(f, *cfg, cvars);
+
 		for(auto it = cvars.begin(); it != cvars.end(); it++) {
 			auto &cf = it->second;
 			if(cf->GetType() == ConType::Var) {

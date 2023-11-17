@@ -12,8 +12,8 @@ parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev
 
 # See https://stackoverflow.com/a/43357954/1879228 for boolean args
 if platform == "linux":
-	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-14')
-	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-14')
+	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-15')
+	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-15')
 	defaultGenerator = "Unix Makefiles"
 else:
 	defaultGenerator = "Visual Studio 17 2022"
@@ -26,6 +26,7 @@ parser.add_argument("--with-pfm", type=str2bool, nargs='?', const=True, default=
 parser.add_argument("--with-core-pfm-modules", type=str2bool, nargs='?', const=True, default=True, help="Include essential PFM modules.")
 parser.add_argument("--with-all-pfm-modules", type=str2bool, nargs='?', const=True, default=False, help="Include non-essential PFM modules (e.g. chromium and cycles).")
 parser.add_argument("--with-vr", type=str2bool, nargs='?', const=True, default=False, help="Include Virtual Reality support.")
+parser.add_argument("--with-source-engine-entities", type=str2bool, nargs='?', const=True, default=True, help="Include addons with support for Source Engine entities.")
 parser.add_argument("--with-lua-debugger", type=str2bool, nargs='?', const=True, default=False, help="Include Lua-debugger support.")
 parser.add_argument("--with-lua-doc-generator", type=str2bool, nargs='?', const=True, default=False, help="Include Lua documentation generator.")
 parser.add_argument("--build", type=str2bool, nargs='?', const=True, default=True, help="Build Pragma after configurating and generating build files.")
@@ -90,6 +91,7 @@ with_pfm = args["with_pfm"]
 with_core_pfm_modules = args["with_core_pfm_modules"]
 with_all_pfm_modules = args["with_all_pfm_modules"]
 with_vr = args["with_vr"]
+with_source_engine_entities = args["with_source_engine_entities"]
 with_lua_debugger = args["with_lua_debugger"]
 with_lua_doc_generator = args["with_lua_doc_generator"]
 build = args["build"]
@@ -246,7 +248,7 @@ if platform == "linux":
 			"apt install build-essential",
 			"add-apt-repository ppa:savoury1/llvm-defaults-14",
 			"apt update",
-			"apt install clang-14",
+			"apt install clang-15",
 			"apt install libstdc++-12-dev",
 			"apt install libstdc++6",
 			"apt-get install patchelf",
@@ -440,11 +442,10 @@ if not Path(vcpkg_root).is_dir():
 	print_msg("vcpkg not found, downloading...")
 	git_clone("https://github.com/Microsoft/vcpkg.git")
 
+os.chdir("vcpkg")
+reset_to_commit("3b7578831da081ba164be30da8d9382a64841059")
+os.chdir("..")
 if platform == "linux":
-	os.chdir("vcpkg")
-	reset_to_commit("7d9775a3c3ffef3cbad688d7271a06803d3a2f51")
-	os.chdir("..")
-
 	subprocess.run([vcpkg_root +"/bootstrap-vcpkg.sh","-disableMetrics"],check=True,shell=True)
 else:
 	subprocess.run([vcpkg_root +"/bootstrap-vcpkg.bat","-disableMetrics"],check=True,shell=True)
@@ -461,7 +462,7 @@ if platform == "win32":
     os.chdir(deps_dir)
     mkdir("zlib_build",cd=True)
     zlib_cmake_args = [
-    		"-DCMAKE_INSTALL_PREFIX="+deps_dir+"/zlib_prefix",
+    		"-DCMAKE_INSTALL_PREFIX="+deps_dir_fs+"/zlib_prefix",
     		"-DBUILD_SHARED_LIBS=ON"
     		]
     cmake_configure(root+"/third_party_libs/zlib",generator,zlib_cmake_args)
@@ -469,7 +470,6 @@ if platform == "win32":
     cmake_build("Release",["install"])
 
 ########## freetype (built in win32, sys in linux (set in cmake)) ##########
-
 freetype_include_dir = ""
 freetype_lib = ""
 if platform == "win32":
@@ -482,8 +482,8 @@ if platform == "win32":
     subprocess.run(["git","reset","--hard","fbbcf50367403a6316a013b51690071198962920"],check=True)
     mkdir("build",cd=True)
     freetype_cmake_args =[
-    	"-DCMAKE_MODULE_PATH="+deps_dir+"/zlib_prefix",
-    	"-DCMAKE_PREFIX_PATH="+deps_dir+"/zlib_prefix"
+    	"-DCMAKE_MODULE_PATH="+deps_dir_fs+"/zlib_prefix",
+    	"-DCMAKE_PREFIX_PATH="+deps_dir_fs+"/zlib_prefix"
     ]
     freetype_cmake_args += [
         "-DCMAKE_DISABLE_FIND_PACKAGE_HarfBuzz=TRUE",
@@ -495,12 +495,7 @@ if platform == "win32":
     cmake_configure(freetype_root,generator,freetype_cmake_args)
     cmake_build("Release")
     freetype_include_dir += freetype_root+"/include"
-    freetype_lib += freetype_root+"/build/freetype.lib"
-    
-
-
-
-
+    freetype_lib += freetype_root+"/build/Release/freetype.lib"
 
 ########## Modules ##########
 print_msg("Downloading modules...")
@@ -683,7 +678,7 @@ if with_pfm:
         )
         add_pragma_module(
             name="pr_unirender",
-            commitSha="86b24c469a188937d2dd7ce6ba5cf14f8f2d1e50",
+            commitSha="0e09d47be6249d78f58f28688e338ad9dd377621",
             repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
         )
         add_pragma_module(
@@ -700,6 +695,11 @@ if with_pfm:
             name="pr_xatlas",
             commitSha="485eaad",
             repositoryUrl="https://github.com/Silverlan/pr_xatlas.git"
+        )
+        add_pragma_module(
+            name="pr_davinci",
+            commitSha="4752379de1752de3ec713e60920c2f7a684c9902",
+            repositoryUrl="https://github.com/Silverlan/pr_davinci.git"
         )
 
 if with_lua_doc_generator or with_pfm:
@@ -902,7 +902,7 @@ def download_addon(name,addonName,url,commitId=None):
 
 curDir = os.getcwd()
 if with_pfm:
-	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","d4888b9b6895c163f30f8728a78e1b1fa4b714e0")
+	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","064294df36d459ce6bc6be2190a2aa9f87eb3c6b")
 	download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","362981334d7b2f023dbcb1a2d1972fdc843b15e7")
 
 if with_vr:
@@ -910,7 +910,12 @@ if with_vr:
 
 if with_pfm:
 	download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")
-	download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","05de2723bcfdd219ca31628b2b1b9d1b68c08260")
+	download_addon("PFM Bedroom Demo","pfm_demo_bedroom","https://github.com/Silverlan/pfm_demo_bedroom.git","0fed1d5b54a25c3ded2ce906e7da80ca8dd2fb0d")
+	download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","a584457716ffa8be1611ae3becc10f5139f7083e")
+
+if with_source_engine_entities:
+	download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","a70f575")
+	download_addon("TF2","pragma_tf2","https://github.com/Silverlan/pragma_tf2.git","eddee1f")
 
 os.chdir(curDir)
 

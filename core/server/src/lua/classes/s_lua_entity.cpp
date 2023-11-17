@@ -20,7 +20,10 @@ extern DLLSERVER SGame *s_game;
 extern DLLSERVER ServerState *server;
 
 SLuaEntity::SLuaEntity() : SBaseEntity {} {}
-void SLuaEntity::Initialize() { SBaseEntity::Initialize(); }
+void SLuaEntity::Initialize() {
+	// We're skipping SBaseEntity on purpose, because it would overwrite our Lua class name
+	BaseEntity::Initialize();
+}
 void SLuaEntity::SetupLua(const luabind::object &o, const std::string &className)
 {
 	m_className = pragma::ents::register_class_name(className);

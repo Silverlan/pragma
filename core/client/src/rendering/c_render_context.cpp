@@ -105,6 +105,15 @@ void RenderContext::InitializeRenderAPI()
 	});
 	prosper::debug::set_debug_validation_callback([](prosper::DebugReportObjectTypeEXT objectType, const std::string &msg) { LOGGER_VALIDATION.error("{}", msg); });
 	GLFW::initialize();
+
+	if(GetRenderContext().IsValidationEnabled()) {
+		// A VkImageStencilUsageCreateInfoEXT error is caused due to a bug in Anvil: https://github.com/GPUOpen-LibrariesAndSDKs/Anvil/issues/153
+		// We'll just ignore it for now, since it doesn't affect us in any way.
+		// TODO: Remove this condition once the Anvil bug has been dealt with.
+		SetValidationErrorDisabled("VUID-VkImageStencilUsageCreateInfo-stencilUsage-requiredbitmask", true);
+
+		SetValidationErrorDisabled("VUID-VkMappedMemoryRange-size-01390", true);
+	}
 }
 void RenderContext::Release()
 {
@@ -145,11 +154,6 @@ void RenderContext::ValidationCallback(prosper::DebugMessageSeverityFlags severi
 {
 	if((severityFlags & (prosper::DebugMessageSeverityFlags::ErrorBit | prosper::DebugMessageSeverityFlags::WarningBit)) != prosper::DebugMessageSeverityFlags::None) {
 		std::string strMsg = message;
-		// A VkImageStencilUsageCreateInfoEXT error is caused due to a bug in Anvil: https://github.com/GPUOpen-LibrariesAndSDKs/Anvil/issues/153
-		// We'll just ignore it for now, since it doesn't affect us in any way.
-		// TODO: Remove this condition once the Anvil bug has been dealt with.
-		if(strMsg.find("value of stencilUsage must not be 0. The Vulkan spec states: stencilUsage must not be 0") != std::string::npos)
-			return;
 
 		auto p = strMsg.find("[ VUID-");
 		if(p == std::string::npos)
@@ -195,7 +199,8 @@ void RenderContext::OnWindowInitialized()
 
 void RenderContext::DrawFrame() { GetRenderContext().DrawFrameCore(); }
 
-void RenderContext::SetGfxAPIValidationEnabled(bool b) {
+void RenderContext::SetGfxAPIValidationEnabled(bool b)
+{
 	umath::set_flag(m_stateFlags, StateFlags::GfxAPIValidationEnabled, b);
 	if(b)
 		spdlog::flush_on(spdlog::level::info); // Immediately flush all messages

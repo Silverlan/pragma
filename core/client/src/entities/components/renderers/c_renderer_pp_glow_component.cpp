@@ -13,6 +13,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_bloom_blur.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/rendering/shaders/world/c_shader_glow.hpp"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
@@ -80,19 +81,22 @@ void CRendererPpGlowComponent::DoRenderEffect(const util::DrawSceneInfo &drawSce
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto &texture = m_glowRt->GetTexture();
 	// Blit high-res bloom image into low-res image, which is cheaper to blur
-	drawCmd->RecordImageBarrier(hdrInfo.bloomTexture->GetImage(), prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferSrcOptimal);
-	drawCmd->RecordImageBarrier(hdrInfo.bloomBlurRenderTarget->GetTexture().GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::TransferDstOptimal);
+	drawCmd->RecordImageBarrier(texture.GetImage(), prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferSrcOptimal);
+	drawCmd->RecordImageBarrier(m_blurRt->GetTexture().GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::TransferDstOptimal);
 	drawCmd->RecordBlitTexture(texture, m_blurRt->GetTexture().GetImage());
 
 	if(!m_controlledBlurSettings.IsValid())
 		return;
 
+	drawCmd->RecordImageBarrier(texture.GetImage(), prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 	drawCmd->RecordImageBarrier(m_blurRt->GetTexture().GetImage(), prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 	m_controlledBlurSettings.RecordBlur(drawCmd, *m_blurSet);
 	//drawCmd->RecordImageBarrier(bloomTexture->GetImage(), prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 }
 void CRendererPpGlowComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void CRendererPpGlowComponent::ExecuteGlowPass(const util::DrawSceneInfo &drawSceneInfo) {
+void CRendererPpGlowComponent::ExecuteGlowPass(const util::DrawSceneInfo &drawSceneInfo)
+{
+#if 0
 	static auto matInitialized = false;
 	if(!matInitialized) {
 		auto mat = pragma::get_client_state()->LoadMaterial("models/antlion_guard/antlionguard2");
@@ -102,6 +106,7 @@ void CRendererPpGlowComponent::ExecuteGlowPass(const util::DrawSceneInfo &drawSc
 			matInitialized = true;
 		}
 	}
+#endif
 
 	if(drawSceneInfo.renderStats)
 		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuGlow, *drawSceneInfo.commandBuffer);
@@ -122,12 +127,13 @@ void CRendererPpGlowComponent::ExecuteGlowPass(const util::DrawSceneInfo &drawSc
 	//
 
 	// TODO: This shouldn't be here
-	if(drawSceneInfo.commandBuffer->RecordBeginRenderPass(*m_glowRt)) {
+	if(drawSceneInfo.commandBuffer->RecordBeginRenderPass(*m_glowRt, {prosper::ClearColorValue {std::array<float, 4> {0.f, 0.f, 0.f, 1.f}}, prosper::ClearColorValue {std::array<float, 4> {0.f, 0.f, 0.f, 1.f}}}, prosper::IPrimaryCommandBuffer::RenderPassFlags::SecondaryCommandBuffers)) {
 		m_glowCommandBufferGroup->ExecuteCommands(*drawCmd);
 
 		// TODO
 		auto cRenderer = GetEntity().GetComponent<CRasterizationRendererComponent>();
-		m_renderer->RecordRenderParticleSystems(*drawCmd, drawSceneInfo, cRenderer->GetCulledParticles(), pragma::rendering::SceneRenderPass::World, false /* depthPass */, true /* glow */);
+		if(cRenderer.valid())
+			m_renderer->RecordRenderParticleSystems(*drawCmd, drawSceneInfo, cRenderer->GetCulledParticles(), pragma::rendering::SceneRenderPass::World, false /* depthPass */, true /* glow */);
 	}
 
 	drawSceneInfo.commandBuffer->RecordEndRenderPass();
@@ -191,18 +197,21 @@ void CRendererPpGlowComponent::InitializeRenderTarget()
 	prosper::util::ImageCreateInfo createInfo {};
 	createInfo.width = cRenderer->GetPrepass().textureDepth->GetImage().GetWidth();
 	createInfo.height = cRenderer->GetPrepass().textureDepth->GetImage().GetHeight();
-	createInfo.format = prosper::Format::R16G16B16A16_SFloat;
+	createInfo.format = pragma::ShaderGlow::RENDER_PASS_FORMAT;
 	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 
 	auto img = context.CreateImage(createInfo);
 	auto tex = context.CreateTexture({}, *img, prosper::util::ImageViewCreateInfo {}, prosper::util::SamplerCreateInfo {});
+
+	auto imgBloom = context.CreateImage(createInfo);
+	auto texBloom = context.CreateTexture({}, *imgBloom, prosper::util::ImageViewCreateInfo {}, prosper::util::SamplerCreateInfo {});
 	//auto &descSetHdrResolve = *dsgBloomTonemapping->GetDescriptorSet();
 	//descSetHdrResolve.SetBindingTexture(*bloomBlurTexture, umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Bloom));
 
 	auto rp = static_cast<prosper::ShaderGraphics *>(pragma::get_cengine()->GetShader("glow").get())->GetRenderPass();
 
-	auto rt = context.CreateRenderTarget({tex, cRenderer->GetPrepass().textureDepth}, rp);
+	auto rt = context.CreateRenderTarget({tex, texBloom, cRenderer->GetPrepass().textureDepth}, rp);
 	m_glowRt = rt;
 
 	// Blur

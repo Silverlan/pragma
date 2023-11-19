@@ -19,9 +19,9 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-void CStaticBvhCacheComponent::InitializeLuaObject(lua_State *l) { return BaseBvhComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void CStaticBvhCacheComponent::InitializeLuaObject(lua_State *l) { return BaseStaticBvhCacheComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
-void CStaticBvhCacheComponent::Initialize() { BaseBvhComponent::Initialize(); }
+void CStaticBvhCacheComponent::Initialize() { BaseStaticBvhCacheComponent::Initialize(); }
 
 void CStaticBvhCacheComponent::DoRebuildBvh() {}
 

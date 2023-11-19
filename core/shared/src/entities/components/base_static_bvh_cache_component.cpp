@@ -57,11 +57,19 @@ BaseStaticBvhCacheComponent::~BaseStaticBvhCacheComponent()
 		m_buildWorker = nullptr;
 	}
 }
-void BaseStaticBvhCacheComponent::Initialize() { BaseBvhComponent::Initialize(); }
+void BaseStaticBvhCacheComponent::Initialize()
+{
+	BaseBvhComponent::Initialize();
+
+	// Make sure to remove the static bvh cache before everything else when the game shuts down, otherwise the shutdown may take a long time
+	m_onEndGame = GetGame().AddCallback("EndGame", FunctionCallback<void>::Create([this]() { GetEntity().Remove(); }));
+}
 
 void BaseStaticBvhCacheComponent::OnRemove()
 {
 	BaseBvhComponent::OnRemove();
+	if(m_onEndGame.IsValid())
+		m_onEndGame.Remove();
 	for(auto *ent : m_entities)
 		ent->SetStaticBvhCacheComponent(nullptr);
 }

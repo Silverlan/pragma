@@ -50,6 +50,7 @@ namespace pragma {
 		std::shared_ptr<FunctionalParallelWorker> m_buildWorker = nullptr;
 		std::unordered_set<BaseStaticBvhUserComponent *> m_entities;
 		std::unique_ptr<BvhPendingWorkerResult> m_bvhPendingWorkerResult;
+		CallbackHandle m_onEndGame;
 		size_t m_currentBvhCacheVersion = 0;
 	};
 };

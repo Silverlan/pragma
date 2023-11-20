@@ -902,7 +902,7 @@ def download_addon(name,addonName,url,commitId=None):
 
 curDir = os.getcwd()
 if with_pfm:
-	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","1b4e773c44d00b9591dc1708e59c47554edfc234")
+	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","d644ab33b493e96cedd1efd735e52243b9da7f9c")
 	download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","362981334d7b2f023dbcb1a2d1972fdc843b15e7")
 
 if with_vr:
@@ -911,7 +911,7 @@ if with_vr:
 if with_pfm:
 	download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")
 	download_addon("PFM Bedroom Demo","pfm_demo_bedroom","https://github.com/Silverlan/pfm_demo_bedroom.git","0fed1d5b54a25c3ded2ce906e7da80ca8dd2fb0d")
-	download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","a584457716ffa8be1611ae3becc10f5139f7083e")
+	download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","479a76b54251a39b59ade991ed3461079a94306e")
 
 if with_source_engine_entities:
 	download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","a70f575")

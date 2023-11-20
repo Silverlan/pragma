@@ -662,7 +662,7 @@ if with_pfm:
     if with_core_pfm_modules or with_all_pfm_modules:
         add_pragma_module(
             name="pr_curl",
-            commitSha="ba0e2e7",
+            commitSha="b63b1014e1ff4d7a7a2f0b81655b0ab407f681c8",
             repositoryUrl="https://github.com/Silverlan/pr_curl.git"
         )
         add_pragma_module(
@@ -683,7 +683,7 @@ if with_pfm:
         )
         add_pragma_module(
             name="pr_curl",
-            commitSha="ba0e2e7",
+            commitSha="b63b1014e1ff4d7a7a2f0b81655b0ab407f681c8",
             repositoryUrl="https://github.com/Silverlan/pr_curl.git"
         )
         add_pragma_module(

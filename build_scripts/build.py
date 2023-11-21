@@ -698,7 +698,7 @@ if with_pfm:
         )
         add_pragma_module(
             name="pr_davinci",
-            commitSha="22fb32e42d59b4c980102e82c5791aed946a69d1",
+            commitSha="a0dacdc159f80df9925e7e651b95e731ab347990",
             repositoryUrl="https://github.com/Silverlan/pr_davinci.git"
         )
 
@@ -902,7 +902,7 @@ def download_addon(name,addonName,url,commitId=None):
 
 curDir = os.getcwd()
 if with_pfm:
-	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","d644ab33b493e96cedd1efd735e52243b9da7f9c")
+	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","a1a09f1bbff02e6111c2db03bd9a1e6233d71850")
 	download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","362981334d7b2f023dbcb1a2d1972fdc843b15e7")
 
 if with_vr:

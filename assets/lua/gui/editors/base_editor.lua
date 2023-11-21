@@ -352,6 +352,7 @@ function gui.WIBaseEditor:CreateWindow(class)
 end
 
 function gui.WIBaseEditor:Close()
+	prosper.wait_idle(true)
 	self:Remove()
 end
 function gui.WIBaseEditor:Open() end

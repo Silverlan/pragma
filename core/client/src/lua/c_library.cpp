@@ -65,6 +65,7 @@
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
 #include <impl_texture_formats.h>
+#include <util_sound.hpp>
 #include <prosper_window.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_prepared_command_buffer.hpp>
@@ -558,9 +559,39 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool bGUI)
 	    })];
 
 	Lua::RegisterLibrary(lua.GetState(), "sound",
-	  {{"create", Lua::sound::create}, LUA_LIB_SOUND_SHARED, {"create_dsp_effect", Lua::sound::register_aux_effect}, {"get_dsp_effect", Lua::sound::get_aux_effect}, {"set_distance_model", &Lua::sound::set_distance_model}, {"get_distance_model", &Lua::sound::get_distance_model},
-	    {"is_supported", &Lua::sound::is_supported}, {"get_doppler_factor", &Lua::sound::get_doppler_factor}, {"set_doppler_factor", &Lua::sound::set_doppler_factor}, {"get_speed_of_sound", &Lua::sound::get_speed_of_sound}, {"set_speed_of_sound", &Lua::sound::set_speed_of_sound},
-	    {"get_device_name", &Lua::sound::get_device_name}, {"add_global_effect", &Lua::sound::add_global_effect}, {"remove_global_effect", &Lua::sound::remove_global_effect}, {"set_global_effect_parameters", &Lua::sound::set_global_effect_parameters}});
+	  {
+	    {"create", Lua::sound::create},
+	    LUA_LIB_SOUND_SHARED,
+	    {"create_dsp_effect", Lua::sound::register_aux_effect},
+	    {"get_dsp_effect", Lua::sound::get_aux_effect},
+	    {"set_distance_model", &Lua::sound::set_distance_model},
+	    {"get_distance_model", &Lua::sound::get_distance_model},
+	    {"is_supported", &Lua::sound::is_supported},
+	    {"get_doppler_factor", &Lua::sound::get_doppler_factor},
+	    {"set_doppler_factor", &Lua::sound::set_doppler_factor},
+	    {"get_speed_of_sound", &Lua::sound::get_speed_of_sound},
+	    {"set_speed_of_sound", &Lua::sound::set_speed_of_sound},
+	    {"get_device_name", &Lua::sound::get_device_name},
+	    {"add_global_effect", &Lua::sound::add_global_effect},
+	    {"remove_global_effect", &Lua::sound::remove_global_effect},
+	    {"set_global_effect_parameters", &Lua::sound::set_global_effect_parameters},
+	    {"get_duration",
+	      +[](lua_State *l) -> int32_t {
+		      std::string path = Lua::CheckString(l, 1);
+		      auto absPath = pragma::asset::find_file(path, pragma::asset::Type::Sound);
+		      if(absPath.has_value() == false) {
+			      Lua::PushNil(l);
+			      return 1;
+		      }
+		      float duration;
+		      auto success = ::util::sound::get_duration(std::string {pragma::asset::get_asset_root_directory(pragma::asset::Type::Sound)} + "/" + *absPath, duration);
+		      if(success)
+			      Lua::PushNumber(l, duration);
+		      else
+			      Lua::PushNil(l);
+		      return 1;
+	      }},
+	  });
 	Lua::RegisterLibraryEnums(lua.GetState(), "sound",
 	  {{"GLOBAL_EFFECT_FLAG_NONE", umath::to_integral(al::ISoundSystem::GlobalEffectFlag::None)}, {"GLOBAL_EFFECT_FLAG_BIT_RELATIVE", umath::to_integral(al::ISoundSystem::GlobalEffectFlag::RelativeSounds)},
 	    {"GLOBAL_EFFECT_FLAG_BIT_WORLD", umath::to_integral(al::ISoundSystem::GlobalEffectFlag::WorldSounds)}, {"GLOBAL_EFFECT_FLAG_ALL", umath::to_integral(al::ISoundSystem::GlobalEffectFlag::All)},

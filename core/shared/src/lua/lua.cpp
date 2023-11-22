@@ -54,27 +54,7 @@ void Game::InitializeLua()
 	Lua::RunString(GetLuaState(), lseed.str(), "internal");
 
 	// Add module paths
-	{
-		auto _G = luabind::globals(GetLuaState());
-		auto programPath = util::get_program_path();
-		auto path = FileManager::GetNormalizedPath(programPath + "/lua/?.lua");
-		path += ";" + FileManager::GetNormalizedPath(programPath + "/lua/modules/?.lua");
-#ifdef _WIN32
-		std::string ext = ".dll";
-#else
-		std::string ext = ".so";
-#endif
-		auto cpath = FileManager::GetNormalizedPath(programPath + "/modules/?" + ext);
-		std::replace(path.begin(), path.end(), '\\', '/');
-		std::replace(cpath.begin(), cpath.end(), '\\', '/');
-		luabind::object oPackage = _G["package"];
-		if(!oPackage) {
-			Con::cwar << "Unable to enable remote debugging: package library is missing!" << Con::endl;
-			return;
-		}
-		oPackage["path"] = path;
-		oPackage["cpath"] = cpath;
-	}
+	UpdatePackagePaths();
 
 	auto remDeb = engine->GetRemoteDebugging();
 	if((remDeb == 1 && IsServer()) == true || (remDeb == 2 && IsClient() == true))

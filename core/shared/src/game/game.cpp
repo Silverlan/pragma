@@ -733,6 +733,32 @@ bool Game::IsGameReady() const { return (m_flags & GameFlags::GameReady) != Game
 
 const MapInfo &Game::GetMapInfo() const { return m_mapInfo; }
 
+void Game::UpdatePackagePaths()
+{
+	auto path = util::Path::CreatePath(util::get_program_path());
+	std::vector<std::string> packagePaths = {};
+	auto &addons = AddonSystem::GetMountedAddons();
+	packagePaths.reserve(2 + addons.size());
+	packagePaths.push_back((path + "lua/?.lua").GetString());
+	packagePaths.push_back((path + "lua/modules/?.lua").GetString());
+
+	for(auto &addonInfo : addons) {
+		auto path = util::Path::CreatePath(addonInfo.GetAbsolutePath()) + "lua/modules/?.lua";
+		packagePaths.push_back(path.GetString());
+	}
+	auto package = luabind::object {luabind::globals(GetLuaState())["package"]};
+	if(Lua::GetType(package) == Lua::Type::Nil)
+		return;
+	package["path"] = ustring::implode(packagePaths, ";");
+
+#ifdef _WIN32
+	std::string ext = ".dll";
+#else
+	std::string ext = ".so";
+#endif
+	package["cpath"] = (path + ("modules/?" + ext)).GetString();
+}
+
 bool Game::LoadSoundScripts(const char *file) { return m_stateNetwork->LoadSoundScripts(file, true); }
 bool Game::LoadMap(const std::string &map, const Vector3 &origin, std::vector<EntityHandle> *entities)
 {

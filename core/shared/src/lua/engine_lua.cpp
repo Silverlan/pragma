@@ -43,8 +43,8 @@ void Lua::initialize_lua_state(Lua::Interface &lua)
 		    {LUA_BITLIBNAME, luaopen_bit32},
 #endif
 	    };
+	loadedLibs.push_back({LUA_LOADLIBNAME, luaopen_package});
 	if(s_bExtendedModules == true) {
-		loadedLibs.push_back({LUA_LOADLIBNAME, luaopen_package});
 		loadedLibs.push_back({LUA_IOLIBNAME, luaopen_io});
 	}
 	for(auto &lib : loadedLibs) {

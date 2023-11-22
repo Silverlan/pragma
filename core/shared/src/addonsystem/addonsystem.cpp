@@ -32,6 +32,16 @@ upad::PADPackage *AddonSystem::LoadPADPackage(const std::string &path)
 	return package;
 }
 
+static void update_package_paths()
+{
+
+	auto *sv = engine->GetServerNetworkState();
+	if(sv != nullptr && sv->IsGameActive())
+		sv->GetGameState()->UpdatePackagePaths();
+	auto *cl = engine->GetClientState();
+	if(cl != nullptr && cl->IsGameActive())
+		cl->GetGameState()->UpdatePackagePaths();
+}
 static void load_autorun_scripts(const std::function<void(const std::string &, std::vector<std::string> &)> &fFindFiles)
 {
 	std::vector<Game *> games;
@@ -91,10 +101,11 @@ static bool mount_linked_addon(const std::string &pathLink, std::vector<AddonInf
 
 DirectoryWatcherCallback *AddonSystem::GetAddonWatcher() { return m_addonWatcher.get(); }
 
-bool AddonSystem::MountAddon(const std::string &paddonPath, std::vector<AddonInfo> &outAddons, bool silent) {
+bool AddonSystem::MountAddon(const std::string &paddonPath, std::vector<AddonInfo> &outAddons, bool silent)
+{
 	// Valid addon paths are: addons/addonName, addons/addonName/addons/subAddonName, etc.
 	auto addonPath = paddonPath;
-	ustring::replace(addonPath,"/", "\\"); // TODO: We should be using forward slashes, not backward slashes for the normalized paths!
+	ustring::replace(addonPath, "/", "\\"); // TODO: We should be using forward slashes, not backward slashes for the normalized paths!
 	auto path = util::Path::CreatePath(addonPath);
 	auto n = path.GetComponentCount();
 	if((n % 2) == 0)
@@ -115,6 +126,7 @@ bool AddonSystem::MountAddon(const std::string &paddonPath, std::vector<AddonInf
 	auto fullPath = "addons\\" + addonPath;
 	FileManager::AddCustomMountDirectory(fullPath.c_str(), static_cast<fsys::SearchFlags>(FSYS_SEARCH_ADDON));
 	outAddons.push_back(AddonInfo(fullPath));
+	update_package_paths();
 	load_autorun_scripts([&fullPath](const std::string &findTarget, std::vector<std::string> &outFiles) { FileManager::FindFiles((fullPath + '\\' + findTarget).c_str(), &outFiles, nullptr); });
 	if(silent == false)
 		Con::cout << "Mounting addon '" << addonPath << "'..." << Con::endl;

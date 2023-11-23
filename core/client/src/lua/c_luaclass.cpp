@@ -80,6 +80,28 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
+static void reload_textures(CMaterial &mat)
+{
+	auto &data = mat.GetDataBlock();
+	if(!data)
+		return;
+	auto *pdata = data->GetData();
+	if(!pdata)
+		return;
+	std::unordered_map<std::string, std::string> textureMappings;
+	for(auto &pair : *pdata) {
+		auto &val = static_cast<ds::Value &>(*pair.second);
+		auto &type = typeid(val);
+		if(type != typeid(ds::Texture))
+			continue;
+		auto &datTex = static_cast<ds::Texture &>(val);
+		textureMappings[pair.first] = datTex.GetString();
+	}
+
+	for(auto &pair : textureMappings)
+		mat.SetTexture(pair.first, pair.second);
+}
+
 void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 {
 	auto &modEngine = lua.RegisterLibrary("engine");
@@ -166,6 +188,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, Material *, const std::string &, Lua::Vulkan::Texture &, const std::string &)>(&Lua::Material::Client::SetTexture));
 	materialClassDef.def("GetTextureInfo", &Lua::Material::Client::GetTexture);
 	materialClassDef.def("GetData", &Lua::Material::Client::GetData);
+	materialClassDef.def("ReloadTextures", &reload_textures);
 	materialClassDef.def("InitializeShaderDescriptorSet", static_cast<void (*)(lua_State *, ::Material *, bool)>(&Lua::Material::Client::InitializeShaderData));
 	materialClassDef.def("InitializeShaderDescriptorSet", static_cast<void (*)(lua_State *, ::Material *)>(&Lua::Material::Client::InitializeShaderData));
 	materialClassDef.def("ClearSpriteSheetAnimation", static_cast<void (*)(lua_State *, ::Material &)>([](lua_State *l, ::Material &mat) { static_cast<CMaterial &>(mat).ClearSpriteSheetAnimation(); }));

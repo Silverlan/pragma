@@ -1367,7 +1367,8 @@ void Game::RegisterLuaLibraries()
 		  auto res = FileManager::FindAbsolutePath(path, rpath);
 		  if(res == false)
 			  return {};
-		  auto absPath = ::util::Path {rpath};
+		  auto isPathToDir = !path.empty() && (path.back() == '/' || path.back() == '\\');
+		  auto absPath = isPathToDir ? ::util::Path::CreatePath(rpath) : ::util::Path::CreateFile(rpath);
 		  absPath.MakeRelative(util::get_program_path());
 		  return luabind::object {l, absPath.GetString()};
 	  })),
@@ -1514,9 +1515,9 @@ void Game::RegisterLuaLibraries()
 	classDefFile.def("IgnoreComments", static_cast<void (*)(lua_State *, LFile &, std::string)>(&Lua_LFile_IgnoreComments));
 	classDefFile.def("IgnoreComments", static_cast<void (*)(lua_State *, LFile &, std::string, std::string)>(&Lua_LFile_IgnoreComments));
 	classDefFile.def("Read", static_cast<void (*)(lua_State *, LFile &, uint32_t)>(&Lua_LFile_Read));
-	classDefFile.def("Read", static_cast<void (*)(lua_State *, LFile &, ::DataStream & ds, uint32_t)>(&Lua_LFile_Read));
-	classDefFile.def("Write", static_cast<void (*)(lua_State *, LFile &, ::DataStream & ds)>(&Lua_LFile_Write));
-	classDefFile.def("Write", static_cast<void (*)(lua_State *, LFile &, ::DataStream & ds, uint32_t)>(&Lua_LFile_Write));
+	classDefFile.def("Read", static_cast<void (*)(lua_State *, LFile &, ::DataStream &ds, uint32_t)>(&Lua_LFile_Read));
+	classDefFile.def("Write", static_cast<void (*)(lua_State *, LFile &, ::DataStream &ds)>(&Lua_LFile_Write));
+	classDefFile.def("Write", static_cast<void (*)(lua_State *, LFile &, ::DataStream &ds, uint32_t)>(&Lua_LFile_Write));
 	classDefFile.def("GetPath", &Lua_LFile_GetPath);
 	fileMod[classDefFile];
 

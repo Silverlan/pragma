@@ -701,6 +701,11 @@ if with_pfm:
             commitSha="2363a3d366c3d4e9cf6f51264f480d35466dfecc",
             repositoryUrl="https://github.com/Silverlan/pr_davinci.git"
         )
+        add_pragma_module(
+            name="pr_opencv",
+            commitSha="1b6b32e10495afe10101fc82298af4048e44a1f8",
+            repositoryUrl="https://github.com/Silverlan/pr_opencv.git"
+        )
 
 if with_lua_doc_generator or with_pfm:
     add_pragma_module(

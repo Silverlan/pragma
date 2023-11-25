@@ -869,15 +869,27 @@ static bool save_image(lua_State *l, uimg::ImageBuffer &imgBuffer, std::string f
 	return c_game->SaveImage(imgBuffer, fileName, imgWriteInfo, cubemap);
 }
 
-static bool save_image(lua_State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::ImageFormat format, float quality, pragma::lua::LuaThreadWrapper *tw = nullptr)
+static std::vector<std::string> &get_image_file_extensions()
+{
+	static std::vector<std::string> exts;
+	if(exts.empty()) {
+		exts.reserve(umath::to_integral(uimg::ImageFormat::Count));
+		auto n = umath::to_integral(uimg::ImageFormat::Count);
+		for(auto i = decltype(n) {0u}; i < n; ++i)
+			exts.push_back(uimg::get_file_extension(static_cast<uimg::ImageFormat>(i)));
+	}
+	return exts;
+}
+
+static std::pair<bool, std::optional<std::string>> save_image(lua_State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::ImageFormat format, float quality, pragma::lua::LuaThreadWrapper *tw = nullptr)
 {
 	if(Lua::file::validate_write_operation(l, fileName) == false)
-		return false;
-	ufile::remove_extension_from_filename(fileName);
+		return std::pair<bool, std::optional<std::string>> {false, {}};
+	ufile::remove_extension_from_filename(fileName, get_image_file_extensions());
 	fileName += '.' + uimg::get_file_extension(format);
 	auto fp = filemanager::open_file<VFilePtrReal>(fileName, filemanager::FileMode::Write | filemanager::FileMode::Binary);
 	if(!fp)
-		return false;
+		return std::pair<bool, std::optional<std::string>> {false, {}};
 	if(tw) {
 		auto pImgBuffer = imgBuffer.shared_from_this();
 		auto task = [fp, pImgBuffer, format, quality]() -> pragma::lua::LuaThreadPool::ResultHandler {
@@ -889,12 +901,12 @@ static bool save_image(lua_State *l, uimg::ImageBuffer &imgBuffer, std::string f
 			tw->GetPool().AddTask(task);
 		else
 			tw->GetTask()->AddSubTask(task);
-		return true;
+		return std::pair<bool, std::optional<std::string>> {true, fileName};
 	}
 	fsys::File f {fp};
-	return uimg::save_image(f, imgBuffer, format, quality);
+	return std::pair<bool, std::optional<std::string>> {true, fileName};
 }
-static bool save_image(lua_State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::ImageFormat format) { return save_image(l, imgBuffer, fileName, format, 1.f); }
+static std::pair<bool, std::optional<std::string>> save_image(lua_State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::ImageFormat format) { return save_image(l, imgBuffer, fileName, format, 1.f); }
 static bool save_image(lua_State *l, luabind::table<> t, std::string fileName, uimg::TextureInfo &texInfo, bool cubemap)
 {
 	auto n = Lua::GetObjectLength(l, t);
@@ -1039,10 +1051,10 @@ void CGame::RegisterLuaLibraries()
 	    "save_image", +[](lua_State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::ImageFormat format, float quality) { return save_image(l, imgBuffer, fileName, format, quality); }),
 	  luabind::def(
 	    "save_image", +[](lua_State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::ImageFormat format, float quality, const pragma::lua::LuaThreadWrapper &tw) { return save_image(l, imgBuffer, fileName, format, quality, const_cast<pragma::lua::LuaThreadWrapper *>(&tw)); }),
-	  luabind::def("save_image", static_cast<bool (*)(lua_State *, uimg::ImageBuffer &, std::string, uimg::ImageFormat)>(save_image)), luabind::def("save_image", static_cast<bool (*)(lua_State *, luabind::table<>, std::string, uimg::TextureInfo &, bool)>(save_image)),
-	  luabind::def("save_image", static_cast<bool (*)(lua_State *, luabind::table<>, std::string, uimg::TextureInfo &)>(save_image)), luabind::def("save_image", static_cast<bool (*)(lua_State *, prosper::IImage &, std::string, uimg::TextureInfo &)>(save_image)),
-	  luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &, bool, uimg::Format)>(load_image)), luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &, bool)>(load_image)),
-	  luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &)>(load_image)),
+	  luabind::def("save_image", static_cast<std::pair<bool, std::optional<std::string>> (*)(lua_State *, uimg::ImageBuffer &, std::string, uimg::ImageFormat)>(save_image)),
+	  luabind::def("save_image", static_cast<bool (*)(lua_State *, luabind::table<>, std::string, uimg::TextureInfo &, bool)>(save_image)), luabind::def("save_image", static_cast<bool (*)(lua_State *, luabind::table<>, std::string, uimg::TextureInfo &)>(save_image)),
+	  luabind::def("save_image", static_cast<bool (*)(lua_State *, prosper::IImage &, std::string, uimg::TextureInfo &)>(save_image)), luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &, bool, uimg::Format)>(load_image)),
+	  luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &, bool)>(load_image)), luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &)>(load_image)),
 	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua_State *, uint32_t, uint32_t, uint32_t, bool, bool)>(capture_raytraced_screenshot)),
 	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua_State *, uint32_t, uint32_t, uint32_t, bool)>(capture_raytraced_screenshot)),
 	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua_State *, uint32_t, uint32_t, uint32_t)>(capture_raytraced_screenshot)),

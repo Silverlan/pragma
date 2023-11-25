@@ -241,10 +241,7 @@ namespace glm {
 	std::ostream &operator<<(std::ostream &out, Vector4 &o) { return ::operator<<(out, o); }
 
 #define DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(type)                                                                                                                                                                                                                                            \
-	std::ostream &operator<<(std::ostream &out, const Mat##type &o)                                                                                                                                                                                                                              \
-	{                                                                                                                                                                                                                                                                                            \
-		return ::operator<<(out, o);                                                                                                                                                                                                                                                             \
-	}
+	std::ostream &operator<<(std::ostream &out, const Mat##type &o) { return ::operator<<(out, o); }
 
 	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(2x2)
 	DEFINE_OSTREAM_MATRIX_OPERATOR_INTERNAL(2x3)
@@ -1336,6 +1333,13 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat->def("ClampRotation", static_cast<Quat (*)(lua_State *, Quat &, const EulerAngles &)>([](lua_State *l, Quat &rot, const EulerAngles &bounds) -> Quat { return uquat::clamp_rotation(rot, -bounds, bounds); }));
 	defQuat->def("Distance", &uquat::distance);
 	defQuat->def("GetConjugate", static_cast<Quat (*)(const Quat &)>(&glm::conjugate));
+	defQuat->def(
+	  "Equals", +[](const Quat &a, const Quat &b, float epsilon) { return umath::abs(a.x - b.x) <= epsilon && umath::abs(a.y - b.y) <= epsilon && umath::abs(a.z - b.z) <= epsilon && umath::abs(a.w - b.w) <= epsilon; });
+	defQuat->def(
+	  "Equals", +[](const Quat &a, const Quat &b) {
+		  float epsilon = 0.001f;
+		  return umath::abs(a.x - b.x) <= epsilon && umath::abs(a.y - b.y) <= epsilon && umath::abs(a.z - b.z) <= epsilon && umath::abs(a.w - b.w) <= epsilon;
+	  });
 	modMath[*defQuat];
 	pragma::lua::define_custom_constructor<Quat, &uquat::identity>(lua.GetState());
 	pragma::lua::define_custom_constructor<Quat, static_cast<Quat (*)(const Vector3 &, float)>(&uquat::create), const Vector3 &, float>(lua.GetState());

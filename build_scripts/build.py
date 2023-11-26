@@ -698,7 +698,7 @@ if with_pfm:
         )
         add_pragma_module(
             name="pr_davinci",
-            commitSha="2363a3d366c3d4e9cf6f51264f480d35466dfecc",
+            commitSha="e8863cd1b8e047ddcdf47b7ae6291e9962568d09",
             repositoryUrl="https://github.com/Silverlan/pr_davinci.git"
         )
         add_pragma_module(

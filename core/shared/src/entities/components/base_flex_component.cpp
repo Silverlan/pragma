@@ -20,7 +20,7 @@ void BaseFlexComponent::RegisterMembers(pragma::EntityComponentManager &componen
 	using T = BaseFlexComponent;
 	{
 		using TEnableFlexControllerLimitsEnabled = bool;
-		auto memberInfo = create_component_member_info<T, TEnableFlexControllerLimitsEnabled, &SetFlexControllerLimitsEnabled, &AreFlexControllerLimitsEnabled>("flexControllerLimitsEnabled", true);
+		auto memberInfo = create_component_member_info<T, TEnableFlexControllerLimitsEnabled, &T::SetFlexControllerLimitsEnabled, &T::AreFlexControllerLimitsEnabled>("flexControllerLimitsEnabled", true);
 		registerMember(std::move(memberInfo));
 	}
 

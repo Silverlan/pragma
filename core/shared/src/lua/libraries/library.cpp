@@ -957,6 +957,10 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	auto callbackHandlerClassDef = luabind::class_<CallbackHandler>("CallbackHandler");
 	Lua::CallbackHandler::register_class(callbackHandlerClassDef);
 
+	auto _G = luabind::object {luabind::globals(lua.GetState())};
+	// Add alias
+	_G["util"]["EventListenerHandler"] = _G["util"]["CallbackHandler"];
+
 	auto utilMod = luabind::module(lua.GetState(), "util");
 	utilMod[classDefErrorCode];
 	utilMod[classDefCallback];
@@ -1014,7 +1018,6 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	defColor.def("CalcPerceivedLuminance", static_cast<void (*)(lua_State *, const Color &)>([](lua_State *l, const Color &color) { Lua::PushNumber(l, color.CalcPerceivedLuminance()); }));
 	utilMod[defColor];
 
-	auto _G = luabind::globals(lua.GetState());
 	_G["Color"] = _G["util"]["Color"]; // Add to global table for quicker access
 	_G["util"]["Color"]["Clear"] = Color(0, 0, 0, 0);
 	// Pink Colors

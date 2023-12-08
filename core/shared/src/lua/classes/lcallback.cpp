@@ -38,6 +38,18 @@ void Lua::CallbackHandler::register_class(luabind::class_<::CallbackHandler> &cl
 	classDef.def("CallCallbacks", static_cast<void (*)(lua_State *, ::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
 	classDef.def("CallCallbacks", static_cast<void (*)(lua_State *, ::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
 	classDef.def("CallCallbacks", static_cast<void (*)(lua_State *, ::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+
+	// Aliases
+	classDef.def("AddEventListener", &AddCallback);
+	classDef.def("CallEventListener", static_cast<void (*)(lua_State *, ::CallbackHandler &, const std::string &)>(&CallCallbacks));
+	classDef.def("CallEventListener", static_cast<void (*)(lua_State *, ::CallbackHandler &, const std::string &, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListener", static_cast<void (*)(lua_State *, ::CallbackHandler &, const std::string &, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListener", static_cast<void (*)(lua_State *, ::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListener", static_cast<void (*)(lua_State *, ::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListener", static_cast<void (*)(lua_State *, ::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListener", static_cast<void (*)(lua_State *, ::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListener", static_cast<void (*)(lua_State *, ::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
+	classDef.def("CallEventListener", static_cast<void (*)(lua_State *, ::CallbackHandler &, const std::string &, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object, luabind::object)>(&CallCallbacks));
 }
 
 namespace Lua {

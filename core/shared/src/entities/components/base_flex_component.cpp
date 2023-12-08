@@ -86,7 +86,7 @@ std::optional<ComponentMemberIndex> BaseFlexComponent::DoGetMemberIndex(const st
 		return idx;
 	idx = DynamicMemberRegister::GetMemberIndex(name);
 	if(idx.has_value())
-		return *idx + GetStaticMemberCount();
+		return *idx;
 	return std::optional<ComponentMemberIndex> {};
 }
 void BaseFlexComponent::SetFlexController(const std::string &name, float val, float duration, bool clampToLimits)

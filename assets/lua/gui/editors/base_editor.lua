@@ -201,6 +201,13 @@ function gui.WIBaseEditor:GetWindowFrame(identifier)
 	end
 	return self.m_windowFrames[data.category]
 end
+function gui.WIBaseEditor:RegisterWindows()
+	for _, windowData in ipairs(pfm.get_registered_windows()) do
+		self:RegisterWindow(windowData.category, windowData.name, windowData.localizedName, function()
+			return windowData.factory(self)
+		end)
+	end
+end
 function gui.WIBaseEditor:OpenWindow(identifier, goToWindow)
 	if self.m_windowFactories[identifier] == nil or util.is_valid(self.m_windowFactories[identifier].element) then
 		if goToWindow then

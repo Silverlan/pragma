@@ -37,11 +37,24 @@ std::vector<BaseEntity *> command::find_named_targets(NetworkState *state, const
 	if(game == nullptr)
 		return {};
 	std::vector<BaseEntity *> ents;
-	EntityIterator entIt {*game, EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
-	entIt.AttachFilter<EntityIteratorFilterEntity>(targetName);
-	ents.reserve(entIt.GetCount());
-	for(auto *ent : entIt)
-		ents.push_back(ent);
+	{
+		auto uuid = util::uuid_string_to_bytes(targetName);
+		if(uuid != util::Uuid {}) {
+			// Check for UUID
+			EntityIterator entIt {*game, EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+			entIt.AttachFilter<EntityIteratorFilterUuid>(uuid);
+			ents.reserve(entIt.GetCount());
+			for(auto *ent : entIt)
+				ents.push_back(ent);
+		}
+	}
+	if(ents.empty()) {
+		EntityIterator entIt {*game, EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+		entIt.AttachFilter<EntityIteratorFilterEntity>(targetName);
+		ents.reserve(entIt.GetCount());
+		for(auto *ent : entIt)
+			ents.push_back(ent);
+	}
 	if(ents.empty()) {
 		auto index = ustring::to_int(targetName);
 		auto *ent = game->GetEntityByLocalIndex(index);

@@ -759,18 +759,6 @@ bool CALSound::IsRelative() const
 		return false;
 	return (*this)->IsRelative();
 }
-void CALSound::SetTimeOffset(float sec)
-{
-	if(m_bTerminated == true)
-		return;
-	(*this)->SetTimeOffset(sec);
-}
-float CALSound::GetTimeOffset() const
-{
-	if(m_bTerminated == true)
-		return 0.f;
-	return (*this)->GetTimeOffset();
-}
 float CALSound::GetDuration() const
 {
 	if(m_bTerminated == true)

@@ -39,8 +39,6 @@ void Lua::ALSound::register_class(luabind::class_<::ALSound> &classDef)
 	classDef.def("Stop", &::ALSound::Stop);
 	classDef.def("SetOffset", &::ALSound::SetOffset);
 	classDef.def("GetOffset", &::ALSound::GetOffset);
-	classDef.def("SetTimeOffset", &::ALSound::SetTimeOffset);
-	classDef.def("GetTimeOffset", &::ALSound::GetTimeOffset);
 	classDef.def("SetPitch", &::ALSound::SetPitch);
 	classDef.def("GetPitch", &::ALSound::GetPitch);
 	classDef.def("SetLooping", &::ALSound::SetLooping);

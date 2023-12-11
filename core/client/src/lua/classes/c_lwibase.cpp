@@ -51,18 +51,34 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-DLLCLIENT Con::c_cout &operator<<(Con::c_cout &os, const ::WIBase &handle)
+template<class TStream>
+static TStream &print_ui_element(TStream &os, const ::WIBase &handle)
 {
 	const WIBase *p = &handle;
-	os << "WIElement[" << p->GetClass() << "][" << p->GetName() << "][" << p->GetIndex() << "][" << &handle << "]";
+	auto pos = p->GetAbsolutePos();
+	auto &size = p->GetSize();
+	os << "WIElement[" << p->GetClass() << "][" << p->GetName() << "][" << p->GetIndex() << "][" << &handle << "][Pos:" << pos.x << "," << pos.y << "][Sz:" << size.x << "," << size.y << "]";
+	auto *elText = dynamic_cast<const WIText *>(p);
+	if(elText) {
+		auto text = elText->GetText().cpp_str();
+		if(text.length() > 10)
+			text = text.substr(0, 10) + "...";
+		os << "[" << text << "]";
+	}
+	else {
+		auto *elTex = dynamic_cast<const WITexturedShape *>(p);
+		if(elTex) {
+			auto *mat = const_cast<WITexturedShape *>(elTex)->GetMaterial();
+			if(mat)
+				os << "[" << mat->GetName() << "]";
+			else
+				os << "[NULL]";
+		}
+	}
 	return os;
 }
-DLLCLIENT std::ostream &operator<<(std::ostream &os, const ::WIBase &handle)
-{
-	const WIBase *p = &handle;
-	os << "WIElement[" << p->GetClass() << "][" << p->GetName() << "][" << p->GetIndex() << "][" << &handle << "]";
-	return os;
-}
+DLLCLIENT Con::c_cout &operator<<(Con::c_cout &os, const ::WIBase &handle) { return print_ui_element<Con::c_cout>(os, handle); }
+DLLCLIENT std::ostream &operator<<(std::ostream &os, const ::WIBase &handle) { return print_ui_element<std::ostream>(os, handle); }
 
 extern DLLCLIENT ClientState *client;
 
@@ -158,6 +174,17 @@ static void clamp_to_parent_bounds(::WIBase &el, Vector2i &clampedPos, Vector2i 
 	auto parent = el.GetParent();
 	Vector2i pos = el.GetPos();
 	Vector2i size = el.GetSize();
+}
+
+static void debug_print_hierarchy(const ::WIBase &el, const std::string &t = "")
+{
+	Con::cout << t << el << Con::endl;
+	auto subT = t + "\t";
+	for(auto &hChild : *const_cast<::WIBase &>(el).GetChildren()) {
+		if(hChild.IsValid() == false)
+			continue;
+		debug_print_hierarchy(*hChild, subT);
+	}
 }
 
 void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
@@ -467,6 +494,8 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	  "ClampToVisibleBounds", +[](const ::WIBase &el, Vector2i &pos) { el.ClampToVisibleBounds(pos); });
 	classDef.def(
 	  "ClampToVisibleBounds", +[](const ::WIBase &el, Vector2i &pos, Vector2i &size) { el.ClampToVisibleBounds(pos, size); });
+	classDef.def(
+	  "DebugPrintHierarchy", +[](const ::WIBase &el) { debug_print_hierarchy(el); });
 
 	auto defDrawInfo = luabind::class_<::WIBase::DrawInfo>("DrawInfo");
 	defDrawInfo.def(luabind::constructor<const std::shared_ptr<prosper::ICommandBuffer> &>());
@@ -1176,7 +1205,7 @@ namespace Lua {
 				else if(cbInfo.luaState == l) {
 					auto &o = cbInfo.luaFunction;
 					auto bReturn = false;
-					Lua::Execute(l, [l, &o, &hPanel, numArgs, argOffset, &bReturn, &name](int (*traceback)(lua_State * l)) {
+					Lua::Execute(l, [l, &o, &hPanel, numArgs, argOffset, &bReturn, &name](int (*traceback)(lua_State *l)) {
 						auto n = Lua::GetStackTop(l);
 						auto r = Lua::CallFunction(
 						  l,

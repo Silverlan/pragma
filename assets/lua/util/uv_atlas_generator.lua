@@ -18,13 +18,16 @@ function util.UVAtlasGenerator:AddEntity(ent, meshFilter)
 	if mdl == nil or mdlC == nil or renderC == nil then
 		return
 	end
+
 	mdl = game.load_model(mdl:GetName()) -- Get original model
 	if mdl == nil then
 		return
 	end
+
 	if self.m_entities[ent] ~= nil then
 		return
 	end
+
 	mdl = mdl:Copy(bit.bor(game.Model.FCOPY_DEEP, game.Model.FCOPY_BIT_COPY_UNIQUE_IDS))
 
 	local skin = mdlC:GetSkin()

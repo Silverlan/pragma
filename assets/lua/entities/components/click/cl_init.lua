@@ -255,7 +255,7 @@ function ents.ClickComponent.raycast(pos, dir, filter, maxDist)
 	-- Check static BVH caches
 	for ent, c in ents.citerator(ents.COMPONENT_STATIC_BVH_CACHE) do
 		local hitData = c:IntersectionTest(pos, dir, 0.0, maxDist)
-		if hitData ~= nil and (filter == nil or filter(hitData.entity)) then
+		if hitData ~= nil and util.is_valid(hitData.entity) and (filter == nil or filter(hitData.entity)) then
 			if hitData.distance < distClosest then -- and hitData.distance > 0.0) then
 				--debug.print("Clicked actor: ",hitData.entity)
 				distClosest = hitData.distance

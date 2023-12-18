@@ -37,6 +37,11 @@ function ents.GUI3D:Initialize()
 	self:SetMsaaEnabled(false)
 	self:SetRefreshRate(24)
 	self.m_lastFrameRendered = 0.0
+
+	self:BindEvent(ents.ClickComponent.EVENT_ON_CLICK, "OnClick")
+end
+function ents.GUI3D:OnClick(button, pressed, hitPos)
+	return self:InjectMouseInput(button, pressed and input.STATE_PRESS or input.STATE_RELEASE)
 end
 function ents.GUI3D:SetRefreshRate(refreshRate)
 	self.m_refreshRate = refreshRate
@@ -143,14 +148,15 @@ function ents.GUI3D:CalcCursorPos(origin, dir)
 			return
 		end
 	end
-	origin = trComponent:WorldToLocal(origin)
-	dir:Rotate(trComponent:GetRotation():GetInverse())
+
+	local pose = math.Transform(trComponent:GetOrigin(), trComponent:GetRotation())
+	local invPose = pose:GetInverse()
+	origin = invPose * origin
+	dir:Rotate(invPose:GetRotation())
 	local p = self.m_pGui
 	if origin == nil or util.is_valid(p) == false then
 		return
 	end
-	--local dot = dir:DotProduct(self:GetForward())
-	--print(dot) -- TODO
 
 	local verts = self.m_interfaceMesh:GetVertices()
 	local uvs = self.m_interfaceMesh:GetUVs()
@@ -175,8 +181,6 @@ function ents.GUI3D:CalcCursorPos(origin, dir)
 			bc.y = bc.y % 1.0
 			local x = bc.x * p:GetWidth()
 			local y = bc.y * p:GetHeight()
-			--print(x,y)
-			--pCursor:SetPos(x,y)
 			return Vector2(x, y)
 		end --else self:OnExitedUseRange() end
 	end
@@ -275,29 +279,12 @@ function ents.GUI3D:InitializeGUICallbacks()
 					local key = self.m_keyDown
 					self.m_keyDown = nil
 					if key > input.KEY_BACKSPACE then
-						local elFocus = gui.get_focused_element()
-						self.m_pGui:InjectKeyboardInput(key, state, self.m_keyMods)
-						-- We don't want the element focus to change to any of the 3D elements, so we'll restore the focus back
-						if util.is_valid(elFocus) and gui.get_focused_element() ~= elFocus then
-							elFocus:RequestFocus()
-						end
+						self:InjectKeyboardInput(key, state)
 						return util.EVENT_REPLY_HANDLED
 					end
 					return util.EVENT_REPLY_UNHANDLED
 				end
-				local pos = self:CalcCursorPos()
-				if pos ~= nil then
-					local elFocus = gui.get_focused_element()
-					local res = self.m_pGui:InjectMouseInput(pos, bt, state)
-					if res == util.EVENT_REPLY_UNHANDLED then
-						self:BroadcastEvent(ents.GUI3D.EVENT_ON_UNHANDLED_MOUSE_INPUT, { pos, bt, state })
-					end
-					-- debug.print("InjectMouseInput ",self.m_pGui,pos,bt,state)
-					-- We don't want the element focus to change to any of the 3D elements, so we'll restore the focus back
-					if util.is_valid(elFocus) and gui.get_focused_element() ~= elFocus then
-						elFocus:RequestFocus()
-					end
-				end
+				self:InjectMouseInput(bt, state)
 				return util.EVENT_REPLY_HANDLED
 			end
 		)
@@ -312,6 +299,40 @@ function ents.GUI3D:InitializeGUICallbacks()
 		end
 		return false
 	end)
+end
+function ents.GUI3D:InjectKeyboardInput(key, state)
+	log.info("Injecting keyboard input with key = " .. key .. ", state = " .. state .. " into 3D UI element...")
+	local elFocus = gui.get_focused_element()
+	self.m_pGui:InjectKeyboardInput(key, state, self.m_keyMods)
+	-- We don't want the element focus to change to any of the 3D elements, so we'll restore the focus back
+	if util.is_valid(elFocus) and gui.get_focused_element() ~= elFocus then
+		elFocus:RequestFocus()
+	end
+end
+function ents.GUI3D:InjectMouseInput(bt, state, pos)
+	log.info(
+		"Injecting mouse input with button = "
+			.. bt
+			.. ", state = "
+			.. state
+			.. ", pos = "
+			.. tostring(pos)
+			.. " into 3D UI element..."
+	)
+	pos = pos or self:CalcCursorPos()
+	if pos == nil then
+		return
+	end
+	local elFocus = gui.get_focused_element()
+	local res = self.m_pGui:InjectMouseInput(pos, bt, state)
+	if res == util.EVENT_REPLY_UNHANDLED then
+		self:BroadcastEvent(ents.GUI3D.EVENT_ON_UNHANDLED_MOUSE_INPUT, { pos, bt, state })
+	end
+	-- debug.print("InjectMouseInput ",self.m_pGui,pos,bt,state)
+	-- We don't want the element focus to change to any of the 3D elements, so we'll restore the focus back
+	if util.is_valid(elFocus) and gui.get_focused_element() ~= elFocus then
+		elFocus:RequestFocus()
+	end
 end
 function ents.GUI3D:InitializeGUIDrawCallback()
 	self.m_cbDrawGUI = game.add_callback("PostGUIDraw", function()
@@ -402,6 +423,7 @@ function ents.GUI3D:DrawGUIElement()
 	end
 end
 function ents.GUI3D:InitializeRenderTarget(w, h)
+	log.info("Creating render target for 3D UI element with resolution " .. w .. "x" .. h .. "...")
 	local msaa = self.m_drawToTexInfo.enableMsaa
 	local sampling = true
 	local rt = gui.create_render_target(w, h, msaa, sampling)
@@ -429,6 +451,8 @@ function ents.GUI3D:InitializeRenderTarget(w, h)
 	end
 
 	local imgCreateInfo = colImg:GetCreateInfo()
+	imgCreateInfo.width = w
+	imgCreateInfo.height = h
 	imgCreateInfo.samples = prosper.SAMPLE_COUNT_1_BIT
 	if ENABLE_MIPMAPS then
 		imgCreateInfo.flags = prosper.ImageCreateInfo.FLAG_FULL_MIPMAP_CHAIN_BIT

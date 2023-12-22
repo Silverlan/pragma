@@ -33,15 +33,17 @@ extern DLLCLIENT ClientState *client;
 
 ComponentEventId CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId CModelComponent::EVENT_ON_MATERIAL_OVERRIDES_CLEARED = INVALID_COMPONENT_ID;
+ComponentEventId CModelComponent::EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED = INVALID_COMPONENT_ID;
 void CModelComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CModelComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	BaseModelComponent::RegisterEvents(componentManager, registerEvent);
 	EVENT_ON_RENDER_MESHES_UPDATED = registerEvent("EVENT_ON_RENDER_MESHES_UPDATED", ComponentEventInfo::Type::Explicit);
 	EVENT_ON_MATERIAL_OVERRIDES_CLEARED = registerEvent("EVENT_ON_MATERIAL_OVERRIDES_CLEARED", ComponentEventInfo::Type::Broadcast);
+	EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED = registerEvent("EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED", ComponentEventInfo::Type::Broadcast);
 }
 
-CModelComponent::CModelComponent(BaseEntity &ent) : BaseModelComponent(ent), m_baseShaderSpecializationConstantFlags {pragma::GameShaderSpecializationConstantFlag::None} {}
+CModelComponent::CModelComponent(BaseEntity &ent) : BaseModelComponent(ent), m_baseShaderSpecializationConstantFlags {pragma::GameShaderSpecializationConstantFlag::None}, m_staticShaderSpecializationConstantFlags {pragma::GameShaderSpecializationConstantFlag::None} {}
 
 void CModelComponent::Initialize()
 {
@@ -74,6 +76,10 @@ void CModelComponent::UpdateBaseShaderSpecializationFlags()
 
 	auto colorC = ent.GetComponent<CColorComponent>();
 	umath::set_flag(m_baseShaderSpecializationConstantFlags, GameShaderSpecializationConstantFlag::EnableTranslucencyBit, colorC.valid() && colorC->GetColor().a < 1.f);
+
+	m_baseShaderSpecializationConstantFlags |= m_staticShaderSpecializationConstantFlags;
+
+	InvokeEventCallbacks(EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED);
 }
 
 void CModelComponent::SetMaterialOverride(uint32_t idx, const std::string &matOverride)

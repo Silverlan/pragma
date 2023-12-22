@@ -176,6 +176,7 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("AddVertex", &Lua::ModelSubMesh::AddVertex);
 	classDef.def("GetBounds", &Lua::ModelSubMesh::GetBounds);
 	classDef.def("GetCenter", &Lua::ModelSubMesh::GetCenter);
+	classDef.def("SetCenter", &::ModelSubMesh::SetCenter);
 	classDef.def("SetVertex", &Lua::ModelSubMesh::SetVertex);
 	classDef.def("SetVertexPosition", &Lua::ModelSubMesh::SetVertexPosition);
 	classDef.def("SetVertexNormal", &Lua::ModelSubMesh::SetVertexNormal);

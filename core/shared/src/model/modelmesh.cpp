@@ -144,8 +144,8 @@ void umath::normalize_uv_coordinates(Vector2 &uv)
 
 ModelSubMesh::ModelSubMesh()
     : std::enable_shared_from_this<ModelSubMesh>(), m_skinTextureIndex(0), m_numAlphas(0), m_alphas(std::make_shared<std::vector<Vector2>>()), m_indexData(std::make_shared<std::vector<uint8_t>>()), m_vertexWeights(std::make_shared<std::vector<umath::VertexWeight>>()),
-      m_extendedVertexWeights(std::make_shared<std::vector<umath::VertexWeight>>()),
-      m_vertices(std::make_shared<std::vector<umath::Vertex>>()), m_uvSets {std::make_shared<std::unordered_map<std::string, std::vector<Vector2>>>()}, m_extensions {udm::Property::Create(udm::Type::Element)}, m_uuid {util::generate_uuid_v4()}
+      m_extendedVertexWeights(std::make_shared<std::vector<umath::VertexWeight>>()), m_vertices(std::make_shared<std::vector<umath::Vertex>>()), m_uvSets {std::make_shared<std::unordered_map<std::string, std::vector<Vector2>>>()}, m_extensions {udm::Property::Create(udm::Type::Element)},
+      m_uuid {util::generate_uuid_v4()}
 {
 }
 ModelSubMesh::ModelSubMesh(const ModelSubMesh &other)
@@ -472,6 +472,7 @@ void ModelSubMesh::Transform(const umath::ScaledTransform &pose)
 	Rotate(pose.GetRotation());
 	Translate(pose.GetOrigin());
 }
+void ModelSubMesh::SetCenter(const Vector3 &center) { m_center = center; }
 const Vector3 &ModelSubMesh::GetCenter() const { return m_center; }
 uint32_t ModelSubMesh::GetVertexCount() const { return static_cast<uint32_t>(m_vertices->size()); }
 uint32_t ModelSubMesh::GetIndexCount() const { return m_indexData->size() / size_of_index(m_indexType); }
@@ -1210,7 +1211,7 @@ std::shared_ptr<ModelSubMesh> pragma::model::create_cone(Game &game, const ConeC
 	create_cone(*mesh, createInfo);
 	return mesh;
 }
-void pragma::model::create_elliptic_cone(ModelSubMesh &mesh, const EllipticConeCreateInfo &createInfo) { ::create_cone(mesh, createInfo, std::pair<float, float> {createInfo.startRadiusY,createInfo.endRadiusY}); }
+void pragma::model::create_elliptic_cone(ModelSubMesh &mesh, const EllipticConeCreateInfo &createInfo) { ::create_cone(mesh, createInfo, std::pair<float, float> {createInfo.startRadiusY, createInfo.endRadiusY}); }
 std::shared_ptr<ModelSubMesh> pragma::model::create_elliptic_cone(Game &game, const EllipticConeCreateInfo &createInfo)
 {
 	auto mesh = game.CreateModelSubMesh();

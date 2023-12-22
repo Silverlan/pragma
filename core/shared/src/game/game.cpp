@@ -387,6 +387,8 @@ bool Game::LoadNavMesh(bool bReload)
 	return m_navMesh != nullptr;
 }
 
+void Game::InitializeMountedAddon(const AddonInfo &addonInfo) const { m_scriptWatcher->MountDirectory(addonInfo.GetAbsolutePath() + "/lua", true); }
+
 void Game::Initialize()
 {
 	m_componentManager = InitializeEntityComponentManager();
@@ -398,7 +400,7 @@ void Game::Initialize()
 	m_scriptWatcher->MountDirectory("lua");
 	auto &addons = AddonSystem::GetMountedAddons();
 	for(auto &info : addons)
-		m_scriptWatcher->MountDirectory(info.GetAbsolutePath() + "/lua", true);
+		InitializeMountedAddon(info);
 
 	LoadSoundScripts("fx.udm");
 }

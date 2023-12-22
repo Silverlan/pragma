@@ -7,6 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/addonsystem/addonsystem.h"
+#include "pragma/logging.hpp"
 #include <fsys/filesystem.h>
 #include <util_pad.hpp>
 #include <sharedutils/util_file.h>
@@ -130,6 +131,22 @@ bool AddonSystem::MountAddon(const std::string &paddonPath, std::vector<AddonInf
 	load_autorun_scripts([&fullPath](const std::string &findTarget, std::vector<std::string> &outFiles) { FileManager::FindFiles((fullPath + '\\' + findTarget).c_str(), &outFiles, nullptr); });
 	if(silent == false)
 		Con::cout << "Mounting addon '" << addonPath << "'..." << Con::endl;
+	spdlog::info("Mounting addon '{}'...", addonPath);
+
+	// The function calls above may have added other addons, so we need to search for our addon again
+	auto it = std::find_if(outAddons.begin(), outAddons.end(), [&fullPath](const AddonInfo &addonInfo) { return addonInfo.GetLocalPath() == fullPath; });
+	if(it != outAddons.end()) {
+		// Inform the game states about the newly mounted addons
+		auto &addonInfo = *it;
+		auto *sv = engine->GetServerNetworkState();
+		auto *cl = engine->GetClientState();
+		std::vector<Game *> gameStates = {sv ? sv->GetGameState() : nullptr, cl ? cl->GetGameState() : nullptr};
+		for(auto *game : gameStates) {
+			if(!game)
+				continue;
+			game->InitializeMountedAddon(addonInfo);
+		}
+	}
 	return true;
 }
 bool AddonSystem::MountAddon(const std::string &addonPath) { return MountAddon(addonPath, m_addons); }

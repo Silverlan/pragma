@@ -107,6 +107,7 @@ namespace pragma {
 		const std::vector<ComponentInfo> &GetRegisteredComponentTypes() const;
 		ComponentMemberIndex RegisterMember(ComponentInfo &componentInfo, ComponentMemberInfo &&memberInfo);
 
+		void LinkComponentType(ComponentId linkFrom, ComponentId linkTo);
 		CallbackHandle AddCreationCallback(ComponentId componentId, const std::function<void(std::reference_wrapper<BaseEntityComponent>)> &onCreate);
 		CallbackHandle AddCreationCallback(const std::string &componentName, const std::function<void(std::reference_wrapper<BaseEntityComponent>)> &onCreate);
 
@@ -153,9 +154,14 @@ namespace pragma {
 		ComponentId RegisterComponentType(const std::string &name, const std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity &)> &factory, ComponentFlags flags, const std::type_index *typeIndex);
 		virtual void OnComponentTypeRegistered(const ComponentInfo &componentInfo);
 
+		struct ComponentTypeLinkInfo {
+			ComponentId targetType;
+			CallbackHandle onCreateCallback;
+		};
 		std::vector<ComponentInfo> m_preRegistered;
 		std::vector<ComponentInfo> m_componentInfos;
 		std::unordered_map<std::type_index, ComponentId> m_typeIndexToComponentId;
+		std::unordered_map<ComponentId, std::vector<ComponentTypeLinkInfo>> m_linkedComponentTypes;
 		std::vector<std::shared_ptr<std::type_index>> m_componentIdToTypeIndex;
 		ComponentId m_nextComponentId = 0u;
 

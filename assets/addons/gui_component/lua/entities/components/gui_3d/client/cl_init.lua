@@ -74,7 +74,13 @@ function ents.GUI3D:GetGUIElement()
 	return self.m_pGui
 end
 function ents.GUI3D:SetInterfaceMesh(mesh)
+	if util.is_same_object(mesh, self.m_interfaceMesh) then
+		return
+	end
 	self.m_interfaceMesh = mesh
+	if self:GetEntity():IsSpawned() then
+		self:UpdateModel()
+	end
 end
 function ents.GUI3D:CreateSquareMesh()
 	local subMesh = game.Model.Mesh.Sub.create()
@@ -499,14 +505,24 @@ end
 function ents.GUI3D:SetShader(shaderName)
 	self.m_shaderName = shaderName
 end
-function ents.GUI3D:OnEntitySpawn()
-	self:InitializeGUICallbacks()
-	if self.m_pGui == nil then
+function ents.GUI3D:UpdateModel()
+	if self.m_material == nil then
 		return
 	end
 	local mdl = self:InitializeModel(self.m_interfaceMesh)
 	local mdlComponent = self:GetEntity():GetComponent(ents.COMPONENT_MODEL)
 	if mdl == nil or mdlComponent == nil then
+		return
+	end
+
+	local matIdx = mdl:AddMaterial(0, self.m_material)
+	self.m_interfaceMesh:SetSkinTextureIndex(matIdx)
+
+	mdlComponent:SetModel(mdl)
+end
+function ents.GUI3D:OnEntitySpawn()
+	self:InitializeGUICallbacks()
+	if self.m_pGui == nil then
 		return
 	end
 
@@ -526,11 +542,8 @@ function ents.GUI3D:OnEntitySpawn()
 		mat:GetData():SetValue("float", "roughness_factor", "1.0")
 	end
 	mat:SetTexture("albedo_map", self.m_renderTargetDst:GetTexture())
-
-	local matIdx = mdl:AddMaterial(0, mat)
-	self.m_interfaceMesh:SetSkinTextureIndex(matIdx)
-
-	mdlComponent:SetModel(mdl)
+	self.m_material = mat
+	self:UpdateModel()
 end
 function ents.GUI3D:OnRemove()
 	util.remove(self.m_pGui)

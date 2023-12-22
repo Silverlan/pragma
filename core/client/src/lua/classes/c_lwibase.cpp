@@ -582,6 +582,7 @@ void Lua::WITexturedShape::register_class(luabind::class_<::WITexturedShape, lua
 	classDef.def("InvertVertexUVCoordinates", static_cast<void (*)(::WITexturedShape &)>([](::WITexturedShape &el) { el.InvertVertexUVCoordinates(); }));
 	classDef.def("ClearTexture", &::WITexturedShape::ClearTexture);
 	classDef.def("SizeToTexture", &::WITexturedShape::SizeToTexture);
+	classDef.def("GetTextureSize", &::WITexturedShape::GetTextureSize);
 	classDef.def("SetChannelSwizzle", &::WITexturedShape::SetChannelSwizzle);
 	classDef.def("SetChannelSwizzle", &::WITexturedShape::GetChannelSwizzle);
 	classDef.def("SetShader", static_cast<void (::WITexturedShape::*)(wgui::ShaderTextured &)>(&::WITexturedShape::SetShader));

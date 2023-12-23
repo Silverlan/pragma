@@ -980,6 +980,23 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 		  uvec::normalize(&n);
 		  return n;
 	  });
+	defBvhHitInfo.def(
+	  "CalcHitUv", +[](const pragma::BvhHitInfo &hitInfo) -> std::optional<Vector2> {
+		  if(!hitInfo.mesh)
+			  return {};
+		  auto idx = hitInfo.primitiveIndex * 3;
+		  auto vIdx0 = hitInfo.mesh->GetIndex(idx);
+		  auto vIdx1 = hitInfo.mesh->GetIndex(idx + 1);
+		  auto vIdx2 = hitInfo.mesh->GetIndex(idx + 2);
+		  if(!vIdx0.has_value() || !vIdx1.has_value() || !vIdx2.has_value())
+			  return {};
+		  auto uv0 = hitInfo.mesh->GetVertexUV(*vIdx0);
+		  auto uv1 = hitInfo.mesh->GetVertexUV(*vIdx1);
+		  auto uv2 = hitInfo.mesh->GetVertexUV(*vIdx2);
+		  auto u = hitInfo.u;
+		  auto v = hitInfo.v;
+		  return (1.f -(hitInfo.u +hitInfo.v)) * uv0 + hitInfo.u * uv1 + hitInfo.v * uv2;
+	  });
 
 	auto defBvh = Lua::create_base_entity_component_class<pragma::BaseBvhComponent>("BaseBvhComponent");
 	defBvh.def("RebuildBvh", static_cast<void (pragma::BaseBvhComponent::*)()>(&pragma::BaseBvhComponent::RebuildBvh));

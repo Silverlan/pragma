@@ -73,11 +73,18 @@ end
 function ents.GUI3D:GetGUIElement()
 	return self.m_pGui
 end
-function ents.GUI3D:SetInterfaceMesh(mesh)
+function ents.GUI3D:SetInterfaceMesh(mesh, intersectionTestMesh)
 	if util.is_same_object(mesh, self.m_interfaceMesh) then
 		return
 	end
 	self.m_interfaceMesh = mesh
+
+	intersectionTestMesh = intersectionTestMesh or mesh
+	-- We need these for :CalcCursorPos
+	self.m_verts = intersectionTestMesh:GetVertices()
+	self.m_uvs = intersectionTestMesh:GetUVs()
+	self.m_triangles = intersectionTestMesh:GetIndices()
+
 	if self:GetEntity():IsSpawned() then
 		self:UpdateModel()
 	end
@@ -164,9 +171,9 @@ function ents.GUI3D:CalcCursorPos(origin, dir)
 		return
 	end
 
-	local verts = self.m_interfaceMesh:GetVertices()
-	local uvs = self.m_interfaceMesh:GetUVs()
-	local triangles = self.m_interfaceMesh:GetIndices()
+	local verts = self.m_verts
+	local triangles = self.m_triangles
+	local uvs = self.m_uvs
 
 	local ent = self:GetEntity()
 	local trComponent = ent:GetComponent(ents.COMPONENT_TRANSFORM)

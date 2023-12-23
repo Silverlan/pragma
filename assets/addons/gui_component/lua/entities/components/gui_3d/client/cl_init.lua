@@ -73,6 +73,9 @@ end
 function ents.GUI3D:GetGUIElement()
 	return self.m_pGui
 end
+function ents.GUI3D:SetIntersectionTestBvh(bvh)
+	self.m_intersectionTestBvh = bvh
+end
 function ents.GUI3D:SetInterfaceMesh(mesh, intersectionTestMesh)
 	if util.is_same_object(mesh, self.m_interfaceMesh) then
 		return
@@ -171,9 +174,25 @@ function ents.GUI3D:CalcCursorPos(origin, dir)
 		return
 	end
 
+	if util.is_valid(self.m_intersectionTestBvh) then
+		local maxDist = 32768.0
+		local hitData = self.m_intersectionTestBvh:IntersectionTest(origin, dir, 0.0, maxDist)
+		if hitData ~= nil then
+			local uv = hitData:CalcHitUv()
+			uv.x = uv.x * p:GetWidth()
+			uv.y = uv.y * p:GetHeight()
+			return uv
+		end
+		return
+	end
+
 	local verts = self.m_verts
 	local triangles = self.m_triangles
 	local uvs = self.m_uvs
+
+	if verts == nil then
+		return
+	end
 
 	local ent = self:GetEntity()
 	local trComponent = ent:GetComponent(ents.COMPONENT_TRANSFORM)
@@ -222,6 +241,7 @@ function ents.GUI3D:SetCursorPos(origin, dir)
 	if util.is_valid(p) == false then
 		return false
 	end
+
 	local pos = self:CalcCursorPos(origin, dir)
 	self.m_cursorPos = pos
 	if pos ~= nil then

@@ -24,6 +24,7 @@
 #include "pragma/lua/policies/core_policies.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
+#include "pragma/lua/types/nil_type.hpp"
 #include "pragma/lua/libraries/lray.h"
 #include "pragma/model/brush/brushmesh.h"
 #include "pragma/audio/alsound.h"
@@ -158,10 +159,16 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	classDef.def("AddComponent", static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent> (*)(BaseEntity &, const std::string &)>([](BaseEntity &ent, const std::string &name) -> pragma::ComponentHandle<pragma::BaseEntityComponent> { return ent.AddComponent(name); }));
 	classDef.def("AddComponent", static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent> (BaseEntity::*)(pragma::ComponentId, bool)>(&BaseEntity::AddComponent));
 	classDef.def("AddComponent", static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent> (*)(BaseEntity &, pragma::ComponentId)>([](BaseEntity &ent, pragma::ComponentId componentId) { return ent.AddComponent(componentId); }));
+	classDef.def(
+	  "RemoveComponent", +[](Lua::nil_type) {}); // Don't do anything if component type is nil
 	classDef.def("RemoveComponent", static_cast<void (BaseEntity::*)(pragma::BaseEntityComponent &)>(&BaseEntity::RemoveComponent));
 	classDef.def("RemoveComponent", static_cast<void (BaseEntity::*)(const std::string &)>(&BaseEntity::RemoveComponent));
 	classDef.def("RemoveComponent", static_cast<void (BaseEntity::*)(pragma::ComponentId)>(&BaseEntity::RemoveComponent));
+	classDef.def(
+	  "ClearComponents", +[](Lua::nil_type) {}); // Don't do anything if component type is nil
 	classDef.def("ClearComponents", &BaseEntity::ClearComponents);
+	classDef.def(
+	  "HasComponent", +[](Lua::nil_type) -> bool { return false; }); // Return false if no component id was specified
 	classDef.def("HasComponent", static_cast<bool (*)(lua_State *, BaseEntity &, const std::string &)>([](lua_State *l, BaseEntity &ent, const std::string &name) {
 		auto *nw = engine->GetNetworkState(l);
 		auto *game = nw->GetGameState();
@@ -173,6 +180,8 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	}));
 	classDef.def("HasComponent", static_cast<bool (BaseEntity::*)(pragma::ComponentId) const>(&BaseEntity::HasComponent));
 	classDef.def("HasComponent", static_cast<bool (*)(BaseEntity &, luabind::object)>([](BaseEntity &ent, luabind::object) { return false; }));
+	classDef.def(
+	  "GetComponent", +[](Lua::nil_type) {}); // Return nil if no component id was specified
 	classDef.def("GetComponent", static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent> (BaseEntity::*)(const std::string &) const>(&BaseEntity::FindComponent));
 	classDef.def("GetComponent", static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent> (BaseEntity::*)(pragma::ComponentId) const>(&BaseEntity::FindComponent));
 	classDef.def("GetComponent", static_cast<void (*)(BaseEntity &, luabind::object)>([](BaseEntity &ent, luabind::object) {}));

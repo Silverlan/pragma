@@ -80,6 +80,15 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	classDef.def("GetIndex", &BaseEntity::GetIndex);
 	classDef.def("GetLocalIndex", &BaseEntity::GetLocalIndex);
 	classDef.def("IsMapEntity", &BaseEntity::IsMapEntity);
+	classDef.def(
+	  "CallOnRemove", +[](lua_State *l, BaseEntity &ent, const Lua::func<void> &function) -> CallbackHandle {
+		  return ent.CallOnRemove(FunctionCallback<void>::Create([l, function]() {
+			  auto c = Lua::CallFunction(l, [&function](lua_State *l) -> Lua::StatusCode {
+				  function.push(l);
+				  return Lua::StatusCode::Ok;
+			  });
+		  }));
+	  });
 	classDef.def("IsCharacter", &BaseEntity::IsCharacter);
 	classDef.def("IsPlayer", &BaseEntity::IsPlayer);
 	classDef.def("IsWorld", &BaseEntity::IsWorld);

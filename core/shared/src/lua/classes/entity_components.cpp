@@ -673,6 +673,36 @@ static void add_log_func(lua_State *l, luabind::object &oEntityComponent, const 
 	Lua::Pop(l, 1);
 }
 
+static CallbackHandle add_event_callback(lua_State *l, pragma::BaseEntityComponent &hComponent, uint32_t eventId, const Lua::func<void> &function)
+{
+	auto hCb = hComponent.AddEventCallback(eventId, [l, function](std::reference_wrapper<pragma::ComponentEvent> ev) -> util::EventReply {
+		// We need to create a copy of the lua-state pointer, since the callback can remove itself, which
+		// would also cause the std::function-object to be destroyed (and therefore the captured variables).
+		auto lTmp = l;
+		auto oCallbackTmp = function;
+
+		auto nstack = Lua::GetStackTop(l);
+		auto c = Lua::CallFunction(
+		  l,
+		  [&oCallbackTmp, &ev](lua_State *l) -> Lua::StatusCode {
+			  oCallbackTmp.push(l);
+			  ev.get().PushArguments(l);
+			  return Lua::StatusCode::Ok;
+		  },
+		  LUA_MULTRET);
+		auto numRet = Lua::GetStackTop(l) - nstack;
+		if(c == Lua::StatusCode::Ok && numRet > 0 && Lua::IsNone(lTmp, -1) == false) {
+			auto result = Lua::IsNumber(lTmp, -numRet) ? static_cast<util::EventReply>(Lua::CheckInt(lTmp, -numRet)) : util::EventReply::Unhandled;
+			if(result == util::EventReply::Handled)
+				ev.get().HandleReturnValues(l);
+			Lua::Pop(lTmp, numRet); // Pop result(s)
+			return result;
+		}
+		return util::EventReply::Unhandled;
+	});
+	return hCb;
+}
+
 void pragma::lua::register_entity_component_classes(lua_State *l, luabind::module_ &mod)
 {
 	auto entityComponentDef = pragma::lua::create_entity_component_class<pragma::BaseEntityComponent>("EntityComponent");
@@ -859,34 +889,8 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 		auto &info = *componentManager.GetComponentInfo(component.GetComponentId());
 		return std::string {*info.name};
 	}));
-	entityComponentDef.def("AddEventCallback", static_cast<CallbackHandle (*)(lua_State *, pragma::BaseEntityComponent &, uint32_t, const Lua::func<void> &)>([](lua_State *l, pragma::BaseEntityComponent &hComponent, uint32_t eventId, const Lua::func<void> &function) {
-		auto hCb = hComponent.AddEventCallback(eventId, [l, function](std::reference_wrapper<pragma::ComponentEvent> ev) -> util::EventReply {
-			// We need to create a copy of the lua-state pointer, since the callback can remove itself, which
-			// would also cause the std::function-object to be destroyed (and therefore the captured variables).
-			auto lTmp = l;
-			auto oCallbackTmp = function;
-
-			auto nstack = Lua::GetStackTop(l);
-			auto c = Lua::CallFunction(
-			  l,
-			  [&oCallbackTmp, &ev](lua_State *l) -> Lua::StatusCode {
-				  oCallbackTmp.push(l);
-				  ev.get().PushArguments(l);
-				  return Lua::StatusCode::Ok;
-			  },
-			  LUA_MULTRET);
-			auto numRet = Lua::GetStackTop(l) - nstack;
-			if(c == Lua::StatusCode::Ok && numRet > 0 && Lua::IsNone(lTmp, -1) == false) {
-				auto result = Lua::IsNumber(lTmp, -numRet) ? static_cast<util::EventReply>(Lua::CheckInt(lTmp, -numRet)) : util::EventReply::Unhandled;
-				if(result == util::EventReply::Handled)
-					ev.get().HandleReturnValues(l);
-				Lua::Pop(lTmp, numRet); // Pop result(s)
-				return result;
-			}
-			return util::EventReply::Unhandled;
-		});
-		return hCb;
-	}));
+	entityComponentDef.def("AddEventCallback", &add_event_callback);
+	entityComponentDef.def("AddEventListener", &add_event_callback); // Alias
 	entityComponentDef.def("InjectEvent", static_cast<util::EventReply (pragma::BaseEntityComponent::*)(pragma::ComponentEventId)>(&pragma::BaseEntityComponent::InjectEvent));
 	entityComponentDef.def("InjectEvent", static_cast<void (*)(lua_State *, pragma::BaseEntityComponent &, uint32_t, const luabind::tableT<void> &)>([](lua_State *l, pragma::BaseEntityComponent &hComponent, uint32_t eventId, const luabind::tableT<void> &eventArgs) {
 		int32_t t = 3;
@@ -995,7 +999,7 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 		  auto uv2 = hitInfo.mesh->GetVertexUV(*vIdx2);
 		  auto u = hitInfo.u;
 		  auto v = hitInfo.v;
-		  return (1.f -(hitInfo.u +hitInfo.v)) * uv0 + hitInfo.u * uv1 + hitInfo.v * uv2;
+		  return (1.f - (hitInfo.u + hitInfo.v)) * uv0 + hitInfo.u * uv1 + hitInfo.v * uv2;
 	  });
 
 	auto defBvh = Lua::create_base_entity_component_class<pragma::BaseBvhComponent>("BaseBvhComponent");

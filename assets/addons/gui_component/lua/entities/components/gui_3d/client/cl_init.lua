@@ -183,6 +183,7 @@ function ents.GUI3D:CalcCursorPos(origin, dir)
 	local pose = math.Transform(trComponent:GetOrigin(), trComponent:GetRotation())
 	local invPose = pose:GetInverse()
 	origin = invPose * origin
+	dir = dir:Copy()
 	dir:Rotate(invPose:GetRotation())
 	local p = self.m_pGui
 	if origin == nil or util.is_valid(p) == false then

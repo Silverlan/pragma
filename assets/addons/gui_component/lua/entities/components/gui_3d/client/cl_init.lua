@@ -69,12 +69,16 @@ function ents.GUI3D:ScheduleRender()
 end
 function ents.GUI3D:SetGUIElement(el)
 	self.m_pGui = el
+	self:Setup()
 end
 function ents.GUI3D:GetGUIElement()
 	return self.m_pGui
 end
 function ents.GUI3D:SetIntersectionTestBvh(bvh)
 	self.m_intersectionTestBvh = bvh
+end
+function ents.GUI3D:GetInterfaceMesh()
+	return self.m_interfaceMesh
 end
 function ents.GUI3D:SetInterfaceMesh(mesh, intersectionTestMesh)
 	if util.is_same_object(mesh, self.m_interfaceMesh) then
@@ -547,16 +551,7 @@ function ents.GUI3D:UpdateModel()
 
 	mdlComponent:SetModel(mdl)
 end
-function ents.GUI3D:OnEntitySpawn()
-	self:InitializeGUICallbacks()
-	if self.m_pGui == nil then
-		return
-	end
-
-	if self.m_pGui:IsUpdateScheduled() then
-		self.m_pGui:Update()
-	end
-	self:InitializeGUIDrawCallback()
+function ents.GUI3D:ReloadRenderTarget()
 	self:InitializeRenderTarget(self.m_pGui:GetWidth(), self.m_pGui:GetHeight())
 	if self.m_renderTargetDst == nil then
 		return
@@ -569,8 +564,30 @@ function ents.GUI3D:OnEntitySpawn()
 		mat:GetData():SetValue("float", "roughness_factor", "1.0")
 	end
 	mat:SetTexture("albedo_map", self.m_renderTargetDst:GetTexture())
+	mat:UpdateTextures()
+	mat:InitializeShaderDescriptorSet()
+	mat:SetLoaded(true)
 	self.m_material = mat
 	self:UpdateModel()
+end
+function ents.GUI3D:Setup()
+	if self.m_initialized or self:GetEntity():IsSpawned() == false then
+		return
+	end
+	self:InitializeGUICallbacks()
+	if self.m_pGui == nil then
+		return
+	end
+
+	self.m_initialized = true
+	if self.m_pGui:IsUpdateScheduled() then
+		self.m_pGui:Update()
+	end
+	self:InitializeGUIDrawCallback()
+	self:ReloadRenderTarget()
+end
+function ents.GUI3D:OnEntitySpawn()
+	self:Setup()
 end
 function ents.GUI3D:OnRemove()
 	util.remove(self.m_pGui)

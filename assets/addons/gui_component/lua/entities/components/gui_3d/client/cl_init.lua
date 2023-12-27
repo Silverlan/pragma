@@ -40,7 +40,18 @@ function ents.GUI3D:Initialize()
 
 	self:BindEvent(ents.ClickComponent.EVENT_ON_CLICK, "OnClick")
 end
-function ents.GUI3D:OnClick(button, pressed, hitPos)
+function ents.GUI3D:OnClick(action, pressed, hitPos)
+	local button
+	if action == input.ACTION_ATTACK then
+		button = input.MOUSE_BUTTON_LEFT
+	elseif action == input.ACTION_ATTACK2 then
+		button = input.MOUSE_BUTTON_RIGHT
+	elseif action == input.ACTION_ATTACK3 then
+		button = input.MOUSE_BUTTON_MIDDLE
+	end
+	if button == nil then
+		return
+	end
 	return self:InjectMouseInput(button, pressed and input.STATE_PRESS or input.STATE_RELEASE)
 end
 function ents.GUI3D:SetRefreshRate(refreshRate)

@@ -911,7 +911,7 @@ if with_pfm:
 	download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","0f969464c1cf49cf2b264b95a42f9b69dce16a5f")
 
 if with_vr:
-	download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","3556ffbb123b67c765f1cabc131b4f2d68e8e003")
+	download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","7dfc97d4d3539ea3050cde52351e795519328727")
 
 if with_pfm:
 	download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")

@@ -1,14 +1,14 @@
 util.register_class("ents.ClickComponent", BaseEntityComponent)
 ents.ClickComponent:RegisterMember("Priority", udm.TYPE_UINT32, 0, {}, ents.BaseEntityComponent.MEMBER_FLAG_DEFAULT)
 
-local numClickComponents = 0
-local cbClick
+ents.ClickComponent.impl = ents.ClickComponent.impl or {}
+ents.ClickComponent.impl.numClickComponents = 0
 function ents.ClickComponent:Initialize()
 	BaseEntityComponent.Initialize(self)
-	if numClickComponents == 0 then
+	if ents.ClickComponent.impl.numClickComponents == 0 then
 		local pl = ents.get_local_player()
 		if pl ~= nil then
-			cbClick = pl:AddEventCallback(
+			ents.ClickComponent.cbClick = pl:AddEventCallback(
 				ents.PlayerComponent.EVENT_HANDLE_ACTION_INPUT,
 				function(action, pressed, magnitude)
 					local handled = ents.ClickComponent.inject_click_input(action, pressed)
@@ -17,7 +17,7 @@ function ents.ClickComponent:Initialize()
 			)
 		end
 	end
-	numClickComponents = numClickComponents + 1
+	ents.ClickComponent.impl.numClickComponents = ents.ClickComponent.impl.numClickComponents + 1
 end
 local function get_viewport_data(vp)
 	local vpData = {}
@@ -105,7 +105,11 @@ function ents.ClickComponent.inject_click_input(action, pressed, filter)
 	local clickActor, hitPos, startPos, hitData = ents.ClickComponent.find_actor_under_cursor(filter)
 	local clickC = (clickActor ~= nil) and clickActor:GetComponent(ents.COMPONENT_CLICK) or nil
 	if clickC ~= nil then
-		lastActorsClicked[action] = clickC
+		if pressed then
+			lastActorsClicked[action] = clickC
+		else
+			lastActorsClicked[action] = nil
+		end
 		return (
 			clickC:BroadcastEvent(ents.ClickComponent.EVENT_ON_CLICK, { action, true, hitPos, hitData })
 			or util.EVENT_REPLY_UNHANDLED
@@ -141,7 +145,13 @@ function ents.ClickComponent.get_ray_data(callback)
 	end
 	local uv = Vector2(vpData.cursorPos.x / vpData.width, vpData.cursorPos.y / vpData.height)
 	local dir = cam:CalcRayDirection(uv)
-	return cam:GetPlanePoint(cam:GetNearZ(), uv), dir, vpData
+	local pos = cam:GetPlanePoint(cam:GetNearZ(), uv)
+
+	--[[local drawInfo = debug.DrawInfo()
+	drawInfo:SetDuration(12)
+	drawInfo:SetColor(Color.Aqua)
+	debug.draw_line(pos, pos + dir * 1000, drawInfo)]]
+	return pos, dir, vpData
 end
 function ents.ClickComponent.get_camera()
 	local vpData = get_viewport_data()
@@ -379,17 +389,17 @@ function ents.ClickComponent.raycast(pos, dir, filter, maxDist)
 	return actorClosest, hitPos, pos, hitDataClosest
 end
 function ents.ClickComponent.find_actor_under_cursor(filter)
-	local pos, dir = ents.ClickComponent.get_ray_data()
+	local pos, dir, vpData = ents.ClickComponent.get_ray_data()
 	if pos == nil then
 		return
 	end
 	return ents.ClickComponent.raycast(pos, dir, filter)
 end
 function ents.ClickComponent:OnRemove()
-	numClickComponents = numClickComponents - 1
-	if numClickComponents == 0 then
-		if util.is_valid(cbClick) then
-			cbClick:Remove()
+	ents.ClickComponent.impl.numClickComponents = ents.ClickComponent.impl.numClickComponents - 1
+	if ents.ClickComponent.impl.numClickComponents == 0 then
+		if util.is_valid(ents.ClickComponent.cbClick) then
+			ents.ClickComponent.cbClick:Remove()
 		end
 	end
 end

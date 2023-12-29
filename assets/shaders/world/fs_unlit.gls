@@ -7,14 +7,15 @@
 
 #include "pbr/fs_config.gls"
 #include "pbr/pbr.gls"
+#include "pbr/fs_util.gls"
 
 void main()
 {
 	vec4 albedoColor = texture(u_albedoMap,fs_in.vert_uv);
-	fs_color = albedoColor;
-	vec4 colorMod = get_instance_color();
-	fs_color.rgb *= colorMod.rgb *u_material.material.color.rgb;
-	fs_color.a = apply_alpha_mode(albedoColor.a *colorMod.a *u_material.material.color.a,u_material.material.alphaMode,u_material.material.alphaCutoff);
-	if(CSPEC_BLOOM_OUTPUT_ENABLED == 1)
-		extract_bright_color(fs_color);
+	vec4 baseColor = get_base_color(albedoColor);
+	fs_color = baseColor;
+	if(CSPEC_BLOOM_OUTPUT_ENABLED == 1) {
+		fs_color = get_emission_color(fs_color,baseColor,fs_in.vert_uv);
+		extract_bright_color(fs_color,u_renderer.bloomThreshold);
+	}
 }

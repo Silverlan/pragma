@@ -74,9 +74,9 @@ util::EventReply WIKeyEntry::KeyboardCallback(GLFW::Key key, int scanCode, GLFW:
 	ApplyKey(key);
 	return util::EventReply::Handled;
 }
-util::EventReply WIKeyEntry::ScrollCallback(Vector2 offset)
+util::EventReply WIKeyEntry::ScrollCallback(Vector2 offset, bool offsetAsPixels)
 {
-	if(WIBase::ScrollCallback(offset) == util::EventReply::Handled)
+	if(WIBase::ScrollCallback(offset, offsetAsPixels) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	if(offset.y >= 0.f)
 		ApplyKey(static_cast<GLFW::Key>(GLFW_CUSTOM_KEY_SCRL_UP));
@@ -136,7 +136,7 @@ void WIKeyEntry::OnFocusGained()
 		*reply = util::EventReply::Handled;
 		return CallbackReturnType::HasReturnValue;
 	}));
-	pRect->AddCallback("OnScroll", FunctionCallback<util::EventReply, Vector2>::CreateWithOptionalReturn([hRect, hKeyEntry](util::EventReply *reply, Vector2 offset) mutable -> CallbackReturnType {
+	pRect->AddCallback("OnScroll", FunctionCallback<util::EventReply, Vector2, bool>::CreateWithOptionalReturn([hRect, hKeyEntry](util::EventReply *reply, Vector2 offset, bool offsetAsPixels) mutable -> CallbackReturnType {
 		if(!hKeyEntry.IsValid()) {
 			*reply = util::EventReply::Handled;
 			return CallbackReturnType::HasReturnValue;

@@ -19,7 +19,7 @@ class DLLCLIENT WIScrollContainer : public WIBase {
 	virtual ~WIScrollContainer() override;
 	virtual void Initialize() override;
 	virtual void SetSize(int x, int y) override;
-	virtual util::EventReply ScrollCallback(Vector2 offset) override;
+	virtual util::EventReply ScrollCallback(Vector2 offset, bool offsetAsPixels = false) override;
 	virtual void SizeToContents(bool x = true, bool y = true) override;
 	WIScrollBar *GetHorizontalScrollBar();
 	WIScrollBar *GetVerticalScrollBar();

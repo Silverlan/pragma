@@ -154,7 +154,7 @@ static std::optional<util::EventReply> GUI_Callback_OnCharEvent(WIBase &p, int c
 	return reply;
 }
 
-static std::optional<util::EventReply> GUI_Callback_OnScroll(WIBase &p, Vector2 offset)
+static std::optional<util::EventReply> GUI_Callback_OnScroll(WIBase &p, Vector2 offset, bool offsetAsPixels)
 {
 	lua_State *luaStates[2] = {client->GetGUILuaState(), NULL};
 	if(c_game != NULL)
@@ -171,11 +171,12 @@ static std::optional<util::EventReply> GUI_Callback_OnScroll(WIBase &p, Vector2 
 				auto functionIdx = Lua::GetStackTop(lua);
 				if(Lua::CallFunction(
 				     lua,
-				     [functionIdx, &o, &offset](lua_State *l) {
+				     [functionIdx, &o, &offset, &offsetAsPixels](lua_State *l) {
 					     Lua::PushValue(l, functionIdx);
 					     o.push(l);
 					     Lua::PushNumber(l, offset.x);
 					     Lua::PushNumber(l, offset.y);
+					     Lua::PushBool(l, offsetAsPixels);
 					     return Lua::StatusCode::Ok;
 				     },
 				     1)
@@ -284,8 +285,8 @@ void WGUILuaInterface::InitializeGUIElement(WIBase &p)
 		}
 		return CallbackReturnType::NoReturnValue;
 	}));
-	p.AddCallback("OnScroll", FunctionCallback<util::EventReply, Vector2>::CreateWithOptionalReturn([&p](util::EventReply *reply, Vector2 offset) -> CallbackReturnType {
-		auto r = GUI_Callback_OnScroll(p, offset);
+	p.AddCallback("OnScroll", FunctionCallback<util::EventReply, Vector2, bool>::CreateWithOptionalReturn([&p](util::EventReply *reply, Vector2 offset, bool offsetAsPixels) -> CallbackReturnType {
+		auto r = GUI_Callback_OnScroll(p, offset, offsetAsPixels);
 		if(r.has_value()) {
 			*reply = *r;
 			return CallbackReturnType::HasReturnValue;

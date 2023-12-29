@@ -101,6 +101,7 @@ namespace Lua {
 		DLLCLIENT ::util::EventReply InjectKeyPress(lua_State *l, ::WIBase &hPanel, int key);
 		DLLCLIENT ::util::EventReply InjectCharInput(lua_State *l, ::WIBase &hPanel, std::string c, uint32_t mods);
 		DLLCLIENT ::util::EventReply InjectCharInput(lua_State *l, ::WIBase &hPanel, std::string c);
+		DLLCLIENT ::util::EventReply InjectScrollInput(lua_State *l, ::WIBase &hPanel, const Vector2 &mousePos, const Vector2 &offset, bool offsetAsPixels);
 		DLLCLIENT ::util::EventReply InjectScrollInput(lua_State *l, ::WIBase &hPanel, const Vector2 &mousePos, const Vector2 &offset);
 		DLLCLIENT void FindChildByName(lua_State *l, ::WIBase &hPanel, std::string name);
 		DLLCLIENT void FindChildrenByName(lua_State *l, ::WIBase &hPanel, std::string name);

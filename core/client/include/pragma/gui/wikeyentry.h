@@ -26,7 +26,7 @@ class DLLCLIENT WIKeyEntry : public WITextEntryBase {
 	virtual void Initialize() override;
 	virtual void SetSize(int x, int y) override;
 	virtual util::EventReply KeyboardCallback(GLFW::Key key, int scanCode, GLFW::KeyState state, GLFW::Modifier mods) override;
-	virtual util::EventReply ScrollCallback(Vector2 offset) override;
+	virtual util::EventReply ScrollCallback(Vector2 offset, bool offsetAsPixels = false) override;
 	virtual util::EventReply CharCallback(unsigned int c, GLFW::Modifier mods = GLFW::Modifier::None) override;
 	virtual void OnFocusGained() override;
 	virtual void OnFocusKilled() override;

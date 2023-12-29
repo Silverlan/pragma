@@ -370,7 +370,8 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("InjectKeyPress", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, int)>(&InjectKeyPress));
 	classDef.def("InjectCharInput", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, std::string, uint32_t)>(&InjectCharInput));
 	classDef.def("InjectCharInput", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, std::string)>(&InjectCharInput));
-	classDef.def("InjectScrollInput", &InjectScrollInput);
+	classDef.def("InjectScrollInput", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, const Vector2 &, const Vector2 &, bool)>(&InjectScrollInput));
+	classDef.def("InjectScrollInput", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, const Vector2 &, const Vector2 &)>(&InjectScrollInput));
 	classDef.def("IsDescendant", &::WIBase::IsDescendant);
 	classDef.def("IsDescendantOf", &::WIBase::IsDescendantOf);
 	classDef.def("IsAncestor", &::WIBase::IsAncestor);
@@ -1641,18 +1642,19 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 		  });
 	}
 	else if(name == "onscroll") {
-		hCallback = FunctionCallback<::util::EventReply, Vector2>::CreateWithOptionalReturn([l, hPanel, o](::util::EventReply *reply, Vector2 offset) mutable -> CallbackReturnType {
+		hCallback = FunctionCallback<::util::EventReply, Vector2, bool>::CreateWithOptionalReturn([l, hPanel, o](::util::EventReply *reply, Vector2 offset, bool offsetAsPixels) mutable -> CallbackReturnType {
 			if(!hPanel.IsValid())
 				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(
 			     l,
-			     [&o, hPanel, &offset](lua_State *l) mutable {
+			     [&o, hPanel, &offset, &offsetAsPixels](lua_State *l) mutable {
 				     o.push(l);
 
 				     auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 				     obj.push(l);
 				     Lua::PushNumber(l, offset.x);
 				     Lua::PushNumber(l, offset.y);
+				     Lua::PushBool(l, offsetAsPixels);
 				     return Lua::StatusCode::Ok;
 			     },
 			     1)
@@ -1880,16 +1882,17 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l, ::WIBase &hPanel, const Vec
 	const char *cStr = c.c_str();
 	return hPanel.InjectCharInput(cStr[0]);
 }
-::util::EventReply Lua::WIBase::InjectScrollInput(lua_State *l, ::WIBase &hPanel, const Vector2 &mousePos, const Vector2 &offset)
+::util::EventReply Lua::WIBase::InjectScrollInput(lua_State *l, ::WIBase &hPanel, const Vector2 &mousePos, const Vector2 &offset, bool offsetAsPixels)
 {
 	auto &window = c_engine->GetWindow();
 	auto cursorPos = window->GetCursorPos();
 	auto absPos = hPanel.GetAbsolutePos();
 	window->SetCursorPosOverride(Vector2 {static_cast<float>(absPos.x + mousePos.x), static_cast<float>(absPos.y + mousePos.y)});
-	auto result = hPanel.InjectScrollInput(offset);
+	auto result = hPanel.InjectScrollInput(offset, offsetAsPixels);
 	window->ClearCursorPosOverride();
 	return result;
 }
+::util::EventReply Lua::WIBase::InjectScrollInput(lua_State *l, ::WIBase &hPanel, const Vector2 &mousePos, const Vector2 &offset) { return InjectScrollInput(l, hPanel, mousePos, offset, false); }
 void Lua::WIBase::FindChildByName(lua_State *l, ::WIBase &hPanel, std::string name)
 {
 	auto *el = hPanel.FindChildByName(name);

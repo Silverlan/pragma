@@ -153,23 +153,23 @@ void WIScrollContainer::Initialize()
 	m_hChildAdded = pWrapper->AddCallback("OnChildAdded", FunctionCallback<void, WIBase *>::Create(std::bind(&WIScrollContainer::OnWrapperChildAdded, this, std::placeholders::_1)));
 	m_hChildRemoved = pWrapper->AddCallback("OnChildRemoved", FunctionCallback<void, WIBase *>::Create(std::bind(&WIScrollContainer::OnWrapperChildRemoved, this, std::placeholders::_1)));
 }
-util::EventReply WIScrollContainer::ScrollCallback(Vector2 offset)
+util::EventReply WIScrollContainer::ScrollCallback(Vector2 offset, bool offsetAsPixels)
 {
-	if(WIBase::ScrollCallback(offset) == util::EventReply::Handled)
+	if(WIBase::ScrollCallback(offset, offsetAsPixels) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	auto &window = WGUI::GetInstance().GetContext().GetWindow();
 	if(m_hScrollBarH.IsValid() && m_hScrollBarV.IsValid()) {
 		auto isShiftDown = (window->GetKeyState(GLFW::Key::LeftShift) != GLFW::KeyState::Release || window->GetKeyState(GLFW::Key::RightShift) != GLFW::KeyState::Release) ? true : false;
 		if(isShiftDown || m_hScrollBarV->IsVisible() == false)
-			m_hScrollBarH.get<WIScrollBar>()->ScrollCallback(Vector2(0.f, offset.y));
+			m_hScrollBarH.get<WIScrollBar>()->ScrollCallback(Vector2(0.f, offset.y), offsetAsPixels);
 		else
-			m_hScrollBarV.get<WIScrollBar>()->ScrollCallback(Vector2(0.f, offset.y));
+			m_hScrollBarV.get<WIScrollBar>()->ScrollCallback(Vector2(0.f, offset.y), offsetAsPixels);
 	}
 	else {
 		if(m_hScrollBarH.IsValid())
-			m_hScrollBarH.get<WIScrollBar>()->ScrollCallback(Vector2(offset.x, 0.f));
+			m_hScrollBarH.get<WIScrollBar>()->ScrollCallback(Vector2(offset.x, 0.f), offsetAsPixels);
 		if(m_hScrollBarV.IsValid())
-			m_hScrollBarV.get<WIScrollBar>()->ScrollCallback(Vector2(0.f, offset.y));
+			m_hScrollBarV.get<WIScrollBar>()->ScrollCallback(Vector2(0.f, offset.y), offsetAsPixels);
 	}
 	return util::EventReply::Handled;
 }

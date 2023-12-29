@@ -11,6 +11,8 @@ include_component("click")
 
 util.register_class("ents.GUI3D", BaseEntityComponent)
 
+include("drag_scrolling.lua")
+
 local ENABLE_MIPMAPS = false
 
 function ents.GUI3D:__init()
@@ -291,6 +293,7 @@ function ents.GUI3D:IsAutoCursorUpdateEnabled()
 end
 function ents.GUI3D:OnTick()
 	self:UpdateCursorPos()
+	self:UpdateDragScrolling()
 end
 function ents.GUI3D:UpdateCursorPos()
 	if self.m_interfaceMesh == nil or self.m_autoCursorUpdateEnabled ~= true then
@@ -333,8 +336,7 @@ function ents.GUI3D:InitializeGUICallbacks()
 					end
 					return util.EVENT_REPLY_UNHANDLED
 				end
-				self:InjectMouseInput(bt, state)
-				return util.EVENT_REPLY_HANDLED
+				return self:InjectMouseInput(bt, state)
 			end
 		)
 	end
@@ -358,7 +360,24 @@ function ents.GUI3D:InjectKeyboardInput(key, state)
 		elFocus:RequestFocus()
 	end
 end
-function ents.GUI3D:InjectMouseInput(bt, state, pos)
+function ents.GUI3D:DoInjectMouseInput(bt, state, pos)
+	pos = pos or self:CalcCursorPos()
+	if pos == nil then
+		return util.EVENT_REPLY_UNHANDLED
+	end
+	local elFocus = gui.get_focused_element()
+	local res = self.m_pGui:InjectMouseInput(pos, bt, state)
+	if res == util.EVENT_REPLY_UNHANDLED then
+		res = self:BroadcastEvent(ents.GUI3D.EVENT_ON_UNHANDLED_MOUSE_INPUT, { pos, bt, state })
+	end
+	-- debug.print("InjectMouseInput ",self.m_pGui,pos,bt,state)
+	-- We don't want the element focus to change to any of the 3D elements, so we'll restore the focus back
+	if util.is_valid(elFocus) and gui.get_focused_element() ~= elFocus then
+		elFocus:RequestFocus()
+	end
+	return res
+end
+function ents.GUI3D:InjectMouseInput(bt, state, pos, useCursor)
 	log.info(
 		"Injecting mouse input with button = "
 			.. bt
@@ -368,20 +387,28 @@ function ents.GUI3D:InjectMouseInput(bt, state, pos)
 			.. tostring(pos)
 			.. " into 3D UI element..."
 	)
-	pos = pos or self:CalcCursorPos()
 	if pos == nil then
-		return
+		local fGetCursorPos
+		if useCursor then
+			if util.is_valid(self.m_cursor) then
+				fGetCursorPos = function()
+					return self:GetCursorPos()
+				end
+			end
+		else
+			fGetCursorPos = function()
+				return self:CalcCursorPos()
+			end
+		end
+		if self:HandleDragScrollingMouseInput(bt, state, fGetCursorPos) == util.EVENT_REPLY_HANDLED then
+			return util.EVENT_REPLY_HANDLED
+		end
+		pos = fGetCursorPos()
+		if pos == nil then
+			return util.EVENT_REPLY_UNHANDLED
+		end
 	end
-	local elFocus = gui.get_focused_element()
-	local res = self.m_pGui:InjectMouseInput(pos, bt, state)
-	if res == util.EVENT_REPLY_UNHANDLED then
-		self:BroadcastEvent(ents.GUI3D.EVENT_ON_UNHANDLED_MOUSE_INPUT, { pos, bt, state })
-	end
-	-- debug.print("InjectMouseInput ",self.m_pGui,pos,bt,state)
-	-- We don't want the element focus to change to any of the 3D elements, so we'll restore the focus back
-	if util.is_valid(elFocus) and gui.get_focused_element() ~= elFocus then
-		elFocus:RequestFocus()
-	end
+	return self:DoInjectMouseInput(bt, state, pos)
 end
 function ents.GUI3D:InitializeGUIDrawCallback()
 	self.m_cbDrawGUI = game.add_callback("PostGUIDraw", function()
@@ -602,6 +629,7 @@ function ents.GUI3D:OnEntitySpawn()
 	self:Setup()
 end
 function ents.GUI3D:OnRemove()
+	self:StopDragScrolling()
 	util.remove(self.m_pGui)
 	util.remove(self.m_cbActionInput)
 	util.remove(self.m_cbScrollInput)

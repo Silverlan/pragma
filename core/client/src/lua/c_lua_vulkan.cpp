@@ -691,6 +691,38 @@ static std::shared_ptr<prosper::Texture> get_color_attachment_texture(lua_State 
 	return nullptr;
 }
 
+static std::optional<std::vector<std::shared_ptr<prosper::IImage>>> create_individual_images_from_layers(prosper::IImage &img)
+{
+	auto &context = c_engine->GetRenderContext();
+	auto createInfo = img.GetCreateInfo();
+	createInfo.layers = 1;
+	createInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
+	umath::remove_flag(createInfo.flags, prosper::util::ImageCreateInfo::Flags::Cubemap);
+
+	auto numLayers = img.GetLayerCount();
+	std::vector<std::shared_ptr<prosper::IImage>> images;
+	images.reserve(numLayers);
+	for(uint8_t i = 0; i < numLayers; ++i) {
+		auto img = context.CreateImage(createInfo);
+		if(!img)
+			return {};
+		images.push_back(img);
+	}
+
+	auto &cmd = context.GetSetupCommandBuffer();
+	cmd->RecordImageBarrier(img, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::TransferSrcOptimal);
+	prosper::util::BlitInfo blitInfo {};
+	for(auto i = decltype(images.size()) {0u}; i < images.size(); ++i) {
+		auto &dstImg = images[i];
+		blitInfo.srcSubresourceLayer.baseArrayLayer = i;
+		cmd->RecordBlitImage(blitInfo, img, *dstImg);
+		cmd->RecordImageBarrier(*dstImg, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
+	}
+	cmd->RecordImageBarrier(img, prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
+	context.FlushSetupCommandBuffer();
+	return images;
+}
+
 void register_vulkan_lua_interface2(Lua::Interface &lua, luabind::module_ &prosperMod); // Registration is split up to avoid compiler errors
 void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 {
@@ -1507,6 +1539,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImage.def(luabind::tostring(luabind::self));
 	defVkImage.def(luabind::const_self == luabind::const_self);
 	defVkImage.def("IsValid", &Lua::Vulkan::VKImage::IsValid);
+	defVkImage.def("CreateIndividualImagesFromLayers", &create_individual_images_from_layers);
 	defVkImage.def("GetAspectSubresourceLayout", &prosper::IImage::GetSubresourceLayout);
 	defVkImage.def("GetAspectSubresourceLayout", static_cast<std::optional<prosper::util::SubresourceLayout> (*)(Lua::Vulkan::Image &, uint32_t)>([](Lua::Vulkan::Image &img, uint32_t layer) -> std::optional<prosper::util::SubresourceLayout> { return img.GetSubresourceLayout(layer); }));
 	defVkImage.def("GetAspectSubresourceLayout", static_cast<std::optional<prosper::util::SubresourceLayout> (*)(Lua::Vulkan::Image &)>([](Lua::Vulkan::Image &img) -> std::optional<prosper::util::SubresourceLayout> { return img.GetSubresourceLayout(); }));

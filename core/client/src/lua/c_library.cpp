@@ -33,6 +33,7 @@
 #include "pragma/ai/c_lai.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
+#include "pragma/rendering/shaders/c_shader_equirectangular_to_cubemap.hpp"
 #include "pragma/asset/c_util_model.hpp"
 #include <pragma/debug/debug_render_info.hpp>
 #include <pragma/game/game_resources.hpp>
@@ -1061,7 +1062,8 @@ void CGame::RegisterLuaLibraries()
 	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua_State *, uint32_t, uint32_t, uint32_t)>(capture_raytraced_screenshot)),
 	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua_State *, uint32_t, uint32_t)>(capture_raytraced_screenshot)),
 	  luabind::def(
-	    "cubemap_to_equirectangular_texture", +[](lua_State *l, prosper::Texture &cubemap) -> luabind::object {
+	    "cubemap_to_equirectangular_texture",
+	    +[](lua_State *l, prosper::Texture &cubemap) -> luabind::object {
 		    auto *shader = static_cast<pragma::ShaderCubemapToEquirectangular *>(c_engine->GetShader("cubemap_to_equirectangular").get());
 		    if(shader == nullptr)
 			    return {};
@@ -1069,6 +1071,16 @@ void CGame::RegisterLuaLibraries()
 		    if(equiRect == nullptr)
 			    return {};
 		    return {l, equiRect};
+	    }),
+	  luabind::def(
+	    "equirectangular_to_cubemap_texture", +[](lua_State *l, prosper::Texture &equiRect, uint32_t resolution) -> luabind::object {
+		    auto *shader = static_cast<pragma::ShaderEquirectangularToCubemap *>(c_engine->GetShader("equirectangular_to_cubemap").get());
+		    if(shader == nullptr)
+			    return {};
+		    auto tex = shader->EquirectangularTextureToCubemap(equiRect, resolution);
+		    if(tex == nullptr)
+			    return {};
+		    return {l, tex};
 	    })];
 	utilMod[
 	  // luabind::def("fire_bullets",static_cast<int32_t(*)(lua_State*)>(Lua::util::fire_bullets)),

@@ -18,6 +18,7 @@ namespace Lua {
 	namespace gui {
 		struct DrawToTextureInfo {
 			bool enableMsaa = false;
+			bool useStencil = false;
 			std::optional<uint32_t> width {};
 			std::optional<uint32_t> height {};
 			std::optional<Color> clearColor {};

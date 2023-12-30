@@ -235,6 +235,7 @@ static void register_gui(Lua::Interface &lua)
 	auto defDrawToTex = luabind::class_<Lua::gui::DrawToTextureInfo>("DrawToTextureInfo");
 	defDrawToTex.def(luabind::constructor<>());
 	defDrawToTex.def_readwrite("enableMsaa", &Lua::gui::DrawToTextureInfo::enableMsaa);
+	defDrawToTex.def_readwrite("useStencil", &Lua::gui::DrawToTextureInfo::useStencil);
 	defDrawToTex.def_readwrite("width", &Lua::gui::DrawToTextureInfo::width);
 	defDrawToTex.def_readwrite("height", &Lua::gui::DrawToTextureInfo::height);
 	defDrawToTex.def_readwrite("clearColor", &Lua::gui::DrawToTextureInfo::clearColor);

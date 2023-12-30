@@ -112,6 +112,7 @@ static bool render_ui(WIBase &el, prosper::RenderTarget &rt, const Lua::gui::Dra
 	WIBase::DrawInfo drawInfo {drawCmd};
 	drawInfo.size = {el.GetWidth(), el.GetHeight()};
 	drawInfo.useScissor = false;
+	drawInfo.useStencil = info.useStencil;
 	drawInfo.msaa = useMsaa;
 	std::optional<Mat4> rotMat = el.GetRotationMatrix() ? *el.GetRotationMatrix() : std::optional<Mat4> {};
 	if(rotMat.has_value()) {

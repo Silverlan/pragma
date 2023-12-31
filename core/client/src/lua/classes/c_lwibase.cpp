@@ -448,7 +448,13 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("SetAnchorTop", &::WIBase::SetAnchorTop);
 	classDef.def("SetAnchorBottom", &::WIBase::SetAnchorBottom);
 	classDef.def("ClearAnchor", &::WIBase::ClearAnchor);
-	classDef.def("GetAnchor", &::WIBase::GetAnchor, luabind::meta::join<luabind::out_value<2>, luabind::out_value<3>, luabind::out_value<4>, luabind::out_value<5>>::type {});
+	classDef.def(
+	  "GetAnchor", +[](::WIBase &el) -> std::optional<std::tuple<float, float, float, float>> {
+		  float left, top, right, bottom;
+		  if(!el.GetAnchor(left, top, right, bottom))
+			  return {};
+		  return std::tuple<float, float, float, float> {left, top, right, bottom};
+	  });
 	classDef.def("HasAnchor", &::WIBase::HasAnchor);
 	classDef.def("SetRemoveOnParentRemoval", &::WIBase::SetRemoveOnParentRemoval);
 	classDef.def("GetCenter", &::WIBase::GetCenter);

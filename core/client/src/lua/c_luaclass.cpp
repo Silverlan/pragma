@@ -25,6 +25,9 @@
 #include "pragma/lua/classes/lshaderinfo.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
+#include "pragma/rendering/shaders/image/c_shader_flip_image.hpp"
+#include "pragma/rendering/shaders/image/c_shader_merge_images.hpp"
+#include "pragma/rendering/shaders/image/c_shader_merge_2d_image_into_equirectangular.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
@@ -453,6 +456,37 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 		    Lua::Push(l, rma);
 	    }));
 	modShader[defShaderComposeRMA];
+
+	auto defShaderFlipImage = luabind::class_<pragma::ShaderFlipImage, luabind::bases<prosper::ShaderGraphics, prosper::Shader>>("FlipImage");
+	defShaderFlipImage.def(
+	  "RecordDraw", +[](pragma::ShaderFlipImage &shader, Lua::Vulkan::CommandBuffer &hCommandBuffer, Lua::Vulkan::DescriptorSet &ds, bool flipHorizontally, bool flipVertically) { return shader.RecordDraw(hCommandBuffer, *ds.GetDescriptorSet(), flipHorizontally, flipVertically); });
+	modShader[defShaderFlipImage];
+
+	auto defShaderMergeImages = luabind::class_<pragma::ShaderMergeImages, luabind::bases<prosper::ShaderGraphics, prosper::Shader>>("MergeImages");
+	defShaderMergeImages.def(
+	  "RecordDraw", +[](pragma::ShaderMergeImages &shader, Lua::Vulkan::CommandBuffer &hCommandBuffer, Lua::Vulkan::DescriptorSet &ds, Lua::Vulkan::DescriptorSet &ds2) { return shader.RecordDraw(hCommandBuffer, *ds.GetDescriptorSet(), *ds2.GetDescriptorSet()); });
+	modShader[defShaderMergeImages];
+
+	auto defShaderMergeIntoEquirect = luabind::class_<pragma::ShaderMerge2dImageIntoEquirectangular, luabind::bases<prosper::ShaderGraphics, prosper::Shader>>("Merge2dImageIntoEquirectangular");
+	defShaderMergeIntoEquirect.add_static_constant("CUBE_FACE_POSITIVE_X", sizeof(pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace::PositiveX));
+	defShaderMergeIntoEquirect.add_static_constant("CUBE_FACE_NEGATIVE_X", sizeof(pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace::NegativeX));
+	defShaderMergeIntoEquirect.add_static_constant("CUBE_FACE_POSITIVE_Y", sizeof(pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace::PositiveY));
+	defShaderMergeIntoEquirect.add_static_constant("CUBE_FACE_NEGATIVE_Y", sizeof(pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace::NegativeY));
+	defShaderMergeIntoEquirect.add_static_constant("CUBE_FACE_POSITIVE_Z", sizeof(pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace::PositiveZ));
+	defShaderMergeIntoEquirect.add_static_constant("CUBE_FACE_NEGATIVE_Z", sizeof(pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace::NegativeZ));
+	static_assert(umath::to_integral(pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace::Count) == 6);
+	defShaderMergeIntoEquirect.def(
+	  "RecordDraw",
+	  +[](pragma::ShaderMerge2dImageIntoEquirectangular &shader, Lua::Vulkan::CommandBuffer &hCommandBuffer, Lua::Vulkan::DescriptorSet &dsEquirect, Lua::Vulkan::DescriptorSet &ds2d) { return shader.RecordDraw(hCommandBuffer, *dsEquirect.GetDescriptorSet(), *ds2d.GetDescriptorSet()); });
+	defShaderMergeIntoEquirect.def(
+	  "RecordDraw", +[](pragma::ShaderMerge2dImageIntoEquirectangular &shader, Lua::Vulkan::CommandBuffer &hCommandBuffer, Lua::Vulkan::DescriptorSet &dsEquirect, Lua::Vulkan::DescriptorSet &ds2d, pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace cubeFace) {
+		  return shader.RecordDraw(hCommandBuffer, *dsEquirect.GetDescriptorSet(), *ds2d.GetDescriptorSet(), cubeFace);
+	  });
+	defShaderMergeIntoEquirect.def(
+	  "RecordDraw", +[](pragma::ShaderMerge2dImageIntoEquirectangular &shader, Lua::Vulkan::CommandBuffer &hCommandBuffer, Lua::Vulkan::DescriptorSet &dsEquirect, Lua::Vulkan::DescriptorSet &ds2d, pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace cubeFace, umath::Degree range) {
+		  return shader.RecordDraw(hCommandBuffer, *dsEquirect.GetDescriptorSet(), *ds2d.GetDescriptorSet(), cubeFace, range);
+	  });
+	modShader[defShaderMergeIntoEquirect];
 
 	// Custom Shaders
 	auto defVertexBinding = luabind::class_<pragma::LuaVertexBinding>("VertexBinding");

@@ -45,7 +45,7 @@ runs:
       run: |
         # We write the dependencies and build files to c:/ because the workspace disk provided by the runner isn't large enough
         python build_scripts/build.py --build-config "${{inputs.build-config}}" --build-directory "c:/pragma/build" --deps-directory "c:/pragma/deps" ${{inputs.build-args}}
-        
+
     - name: Set Output Variables
       shell: bash
       id: set-output-vars
@@ -60,5 +60,13 @@ runs:
           echo "deps-dir=c:/pragma/deps" >> $GITHUB_OUTPUT
           echo "install-dir=c:/pragma/build/install" >> $GITHUB_OUTPUT
         fi
+
+    # Using the pragma build-script to build lua-debug results in errors, so we'll build it manually
+    - name: Build lua-debug
+      uses: Silverlan/pragma/github_actions/build_luadebug@master
+      with:
+        root_dir: '${{ steps.set-output-vars.outputs.root-dir }}'
+        deps_dir: '${{ steps.set-output-vars.outputs.deps-dir }}'
+        install_dir: '${{ steps.set-output-vars.outputs.install-dir }}'
 
     - uses: Silverlan/common_actions/action_end@main

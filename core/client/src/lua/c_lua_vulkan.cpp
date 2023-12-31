@@ -1636,6 +1636,13 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 			  return;
 		  push_image_buffers(l, info.includeLayers, info.includeMipmaps, imgBuffers);
 	  });
+	defVkImage.def(
+	  "CreateWorkingImage", +[](lua_State *l, Lua::Vulkan::Image &img, Lua::Vulkan::CommandBuffer &cmd) -> std::shared_ptr<prosper::IImage> {
+		  auto imgCreateInfo = img.GetCreateInfo();
+		  imgCreateInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
+		  imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit;
+		  return img.Copy(cmd, imgCreateInfo);
+	  });
 	defVkImage.def("GetMemoryBuffer", static_cast<prosper::IBuffer *(*)(lua_State *, Lua::Vulkan::Image &)>([](lua_State *l, Lua::Vulkan::Image &img) -> prosper::IBuffer * {
 		auto *buf = img.GetMemoryBuffer();
 		if(buf == nullptr)

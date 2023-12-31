@@ -33,6 +33,6 @@ get_submodule("util_versioned_archive","https://github.com/Silverlan/util_versio
 get_submodule("util_vmf","https://github.com/Silverlan/util_vmf.git","cdba99d")
 get_submodule("util_zip","https://github.com/Silverlan/util_zip.git","63b2609")
 get_submodule("vfilesystem","https://github.com/Silverlan/vfilesystem.git","867e856")
-get_submodule("wgui","https://github.com/Silverlan/wgui.git","5e9997554ccac67b41d4d28cd68934b8e74b4c5d")
+get_submodule("wgui","https://github.com/Silverlan/wgui.git","0f1b0192507e625054912b481ddfeff80e64dc08")
 
 os.chdir(curDir)

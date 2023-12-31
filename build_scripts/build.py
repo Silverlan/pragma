@@ -717,7 +717,7 @@ if with_lua_doc_generator or with_pfm:
 if with_vr:
     add_pragma_module(
         name="pr_openvr",
-        commitSha="c0a3f4b56bc74a946492fdf9ad0b0dd2fa2985c5",
+        commitSha="f66a5cf4e686de64ec02050bffe6496049d05c5f",
         repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
     )
 

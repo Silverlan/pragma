@@ -880,7 +880,10 @@ if with_lua_debugger:
 
 ########## lua-debug ##########
 if with_lua_debugger:
+	curDir = os.getcwd()
+	os.chdir(scripts_dir)
 	execscript(scripts_dir +"/scripts/build_lua_debug.py")
+	os.chdir(curDir)
 
 ########## Addons ##########
 def download_addon(name,addonName,url,commitId=None):

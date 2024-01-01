@@ -42,6 +42,10 @@ function ents.GUI3D:Initialize()
 
 	self:BindEvent(ents.ClickComponent.EVENT_ON_CLICK, "OnClick")
 end
+function ents.GUI3D:SetUseStencil(useStencil)
+	-- Enabling stencil rendering is more expensive but will enable UI scissors
+	self.m_drawToTexInfo.useStencil = useStencil
+end
 function ents.GUI3D:OnClick(action, pressed, hitPos)
 	local button
 	if action == input.ACTION_ATTACK then
@@ -425,6 +429,9 @@ function ents.GUI3D:GetRenderTarget()
 	return self.m_renderTarget
 end
 function ents.GUI3D:DrawGUIElement()
+	if self:GetEntity():IsTurnedOn() == false then
+		return
+	end
 	if self.m_alwaysRender then
 		self.m_renderScheduled = true
 	end

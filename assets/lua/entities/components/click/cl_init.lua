@@ -244,6 +244,9 @@ function ents.ClickComponent.find_entities_in_kdop(planes, filter)
 	debug.stop_profiling_task()
 	return results
 end
+function ents.ClickComponent.is_entity_valid(ent)
+	return util.is_valid(ent) and ent:IsTurnedOn()
+end
 function ents.ClickComponent.raycast(pos, dir, filter, maxDist)
 	maxDist = maxDist or 32768.0
 	local pl = ents.get_local_player()
@@ -265,7 +268,11 @@ function ents.ClickComponent.raycast(pos, dir, filter, maxDist)
 	-- Check static BVH caches
 	for ent, c in ents.citerator(ents.COMPONENT_STATIC_BVH_CACHE) do
 		local hitData = c:IntersectionTest(pos, dir, 0.0, maxDist)
-		if hitData ~= nil and util.is_valid(hitData.entity) and (filter == nil or filter(hitData.entity)) then
+		if
+			hitData ~= nil
+			and ents.ClickComponent.is_entity_valid(hitData.entity)
+			and (filter == nil or filter(hitData.entity))
+		then
 			if hitData.distance < distClosest then -- and hitData.distance > 0.0) then
 				--debug.print("Clicked actor: ",hitData.entity)
 				distClosest = hitData.distance
@@ -280,7 +287,7 @@ function ents.ClickComponent.raycast(pos, dir, filter, maxDist)
 	local function testEntity(ent)
 		local mdl = ent:GetModel()
 		local renderC = ent:GetComponent(ents.COMPONENT_RENDER)
-		if should_entity_pass(ent, entPl, filter) then
+		if ents.ClickComponent.is_entity_valid(ent) and should_entity_pass(ent, entPl, filter) then
 			local scale = ent:GetScale()
 			if scale.x > 0.001 and scale.y > 0.001 and scale.z > 0.001 then
 				local pose = ent:GetPose():GetInverse()

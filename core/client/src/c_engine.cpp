@@ -105,6 +105,8 @@ CEngine::CEngine(int argc, char *argv[])
 	RegisterCallback<void, std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("DrawFrame");
 	RegisterCallback<void>("PreDrawGUI");
 	RegisterCallback<void>("PostDrawGUI");
+	RegisterCallback<void>("PreRecordGUI");
+	RegisterCallback<void>("PostRecordGUI");
 	RegisterCallback<void>("Draw");
 
 	RegisterCallbackWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, GLFW::MouseButton, GLFW::KeyState, GLFW::Modifier>("OnMouseInput");
@@ -1420,6 +1422,9 @@ void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 		StartProfilingStage(GPUProfilingPhase::GUI);
 
 		WGUI::GetInstance().SetLockedForDrawing(true);
+		CallCallbacks<void>("PreRecordGUI");
+		if(c_game != nullptr)
+			c_game->PreGUIRecord();
 		auto &context = GetRenderContext();
 		for(auto &window : context.GetWindows()) {
 			if(!window || window->IsValid() == false || window->GetState() != prosper::Window::State::Active)
@@ -1433,6 +1438,9 @@ void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 			});
 			swapCmdGroup.EndRecording();
 		}
+		CallCallbacks<void>("PostRecordGUI");
+		if(c_game != nullptr)
+			c_game->PostGUIRecord();
 
 		StopProfilingStage(GPUProfilingPhase::GUI);
 	}

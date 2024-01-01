@@ -366,8 +366,10 @@ else:
 	boost_root = os.getcwd() +"/boost"
 	if not Path(boost_root).is_dir():
 		print_msg("boost not found. Downloading...")
-		zipName = "boost_1_78_0.zip"
 		git_clone("https://github.com/ClausKlein/boost-cmake.git","boost")
+		os.chdir("boost")
+		reset_to_commit("fba51e4")
+		os.chdir("../")
 
 # Build
 print_msg("Building boost...")

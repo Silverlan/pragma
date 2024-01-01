@@ -344,6 +344,8 @@ void register_vulkan_lua_interface2(Lua::Interface &lua, luabind::module_ &prosp
 	prosperMod[defVkMemory];
 #endif
 	auto defVkCommandBuffer = luabind::class_<Lua::Vulkan::CommandBuffer>("CommandBuffer");
+	defVkCommandBuffer.add_static_constant("RENDER_PASS_FLAG_NONE", umath::to_integral(prosper::IPrimaryCommandBuffer::RenderPassFlags::None));
+	defVkCommandBuffer.add_static_constant("RENDER_PASS_FLAG_SECONDARY_COMMAND_BUFFERS_BIT", umath::to_integral(prosper::IPrimaryCommandBuffer::RenderPassFlags::SecondaryCommandBuffers));
 	defVkCommandBuffer.def(luabind::tostring(luabind::self));
 	defVkCommandBuffer.def(luabind::const_self == luabind::const_self);
 	defVkCommandBuffer.def("IsRecording", &Lua::Vulkan::CommandBuffer::IsRecording);
@@ -790,10 +792,10 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBeginRenderPass(lua_State *l, CommandBu
 	static_assert(sizeof(Lua::Vulkan::ClearValue) == sizeof(prosper::ClearValue));
 	auto &primaryCmdBuffer = dynamic_cast<prosper::IPrimaryCommandBuffer &>(hCommandBuffer);
 	if(rpInfo.layerId.has_value()) {
-		auto r = primaryCmdBuffer.RecordBeginRenderPass(*rpInfo.renderTarget, *rpInfo.layerId, reinterpret_cast<std::vector<prosper::ClearValue> &>(rpInfo.clearValues), prosper::IPrimaryCommandBuffer::RenderPassFlags::None, rpInfo.renderPass.get());
+		auto r = primaryCmdBuffer.RecordBeginRenderPass(*rpInfo.renderTarget, *rpInfo.layerId, reinterpret_cast<std::vector<prosper::ClearValue> &>(rpInfo.clearValues), rpInfo.renderPassFlags, rpInfo.renderPass.get());
 		return r;
 	}
-	auto r = primaryCmdBuffer.RecordBeginRenderPass(*rpInfo.renderTarget, reinterpret_cast<std::vector<prosper::ClearValue> &>(rpInfo.clearValues), prosper::IPrimaryCommandBuffer::RenderPassFlags::None, rpInfo.renderPass.get());
+	auto r = primaryCmdBuffer.RecordBeginRenderPass(*rpInfo.renderTarget, reinterpret_cast<std::vector<prosper::ClearValue> &>(rpInfo.clearValues), rpInfo.renderPassFlags, rpInfo.renderPass.get());
 	return r;
 }
 bool Lua::Vulkan::VKCommandBuffer::RecordEndRenderPass(lua_State *l, CommandBuffer &hCommandBuffer)

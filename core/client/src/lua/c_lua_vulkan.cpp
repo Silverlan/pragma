@@ -1806,6 +1806,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defRenderPassInfo.def("AddClearValue", static_cast<void (*)(lua_State *, Lua::Vulkan::RenderPassInfo &, Lua::Vulkan::ClearValue &)>([](lua_State *l, Lua::Vulkan::RenderPassInfo &rpInfo, Lua::Vulkan::ClearValue &clearValue) { rpInfo.clearValues.push_back(clearValue); }));
 	defRenderPassInfo.def("SetRenderPass", static_cast<void (*)(lua_State *, Lua::Vulkan::RenderPassInfo &)>([](lua_State *l, Lua::Vulkan::RenderPassInfo &rpInfo) { rpInfo.renderPass = nullptr; }));
 	defRenderPassInfo.def("SetRenderPass", static_cast<void (*)(lua_State *, Lua::Vulkan::RenderPassInfo &, Lua::Vulkan::RenderPass &)>([](lua_State *l, Lua::Vulkan::RenderPassInfo &rpInfo, Lua::Vulkan::RenderPass &rp) { rpInfo.renderPass = rp.shared_from_this(); }));
+	defRenderPassInfo.def_readwrite("renderPassFlags", &Lua::Vulkan::RenderPassInfo::renderPassFlags);
 	prosperMod[defRenderPassInfo];
 
 	auto defWindowCreateInfo = luabind::class_<prosper::WindowSettings>("WindowCreateInfo");

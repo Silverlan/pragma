@@ -40,6 +40,7 @@
 #include <pragma/lua/lua_call.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_render_pass.hpp>
+#include <prosper_swap_command_buffer.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 #include <sharedutils/property/util_property_color.hpp>
 #include <sharedutils/util_hash.hpp>
@@ -47,6 +48,7 @@
 #include <util_formatted_text.hpp>
 #include <prosper_window.hpp>
 #include <luabind/copy_policy.hpp>
+#include <pragma/debug/intel_vtune.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -84,26 +86,9 @@ extern DLLCLIENT ClientState *client;
 
 static bool operator==(::WIBase &a, ::WIBase &b) { return &a == &b; }
 
-static bool render_ui(WIBase &el, prosper::RenderTarget &rt, const Lua::gui::DrawToTextureInfo &info)
+static void record_render_ui(WIBase &el, prosper::IImage &img, const Lua::gui::DrawToTextureInfo &info, const std::shared_ptr<prosper::ICommandBuffer> &drawCmd)
 {
-	auto &context = rt.GetContext();
-	auto drawCmd = info.commandBuffer;
-	if(!drawCmd)
-		drawCmd = context.GetWindow().GetDrawCommandBuffer();
-	else if(!drawCmd->IsPrimary())
-		return false;
-	auto &img = rt.GetTexture().GetImage();
 	auto useMsaa = (img.GetSampleCount() > prosper::SampleCountFlags::e1Bit);
-	if(useMsaa && !info.resolvedImage)
-		return false;
-	auto *texStencil = rt.GetTexture(1);
-	if(!texStencil)
-		return false;
-	auto &imgStencil = texStencil->GetImage();
-
-	std::vector<prosper::ClearValue> clearVals = {prosper::ClearValue {}, prosper::ClearValue {prosper::ClearDepthStencilValue {0.f, 0}}};
-
-	drawCmd->GetPrimaryCommandBufferPtr()->RecordBeginRenderPass(rt, clearVals);
 	if(info.clearColor) {
 		auto clearCol = info.clearColor->ToVector4();
 		drawCmd->RecordClearAttachment(img, std::array<float, 4> {clearCol[0], clearCol[1], clearCol[2], clearCol[3]});
@@ -124,6 +109,32 @@ static bool render_ui(WIBase &el, prosper::RenderTarget &rt, const Lua::gui::Dra
 	el.Draw(drawInfo, drawState, {}, {}, drawInfo.size, el.GetScale());
 	if(rotMat.has_value())
 		el.SetRotation(*rotMat);
+}
+static bool render_ui(WIBase &el, prosper::RenderTarget &rt, const Lua::gui::DrawToTextureInfo &info)
+{
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().BeginTask("draw_ui_to_texture");
+	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
+#endif
+	auto &context = rt.GetContext();
+	auto drawCmd = info.commandBuffer;
+	if(!drawCmd)
+		drawCmd = context.GetWindow().GetDrawCommandBuffer();
+	else if(!drawCmd->IsPrimary())
+		return false;
+	auto &img = rt.GetTexture().GetImage();
+	auto useMsaa = (img.GetSampleCount() > prosper::SampleCountFlags::e1Bit);
+	if(useMsaa && !info.resolvedImage)
+		return false;
+	auto *texStencil = rt.GetTexture(1);
+	if(!texStencil)
+		return false;
+	auto &imgStencil = texStencil->GetImage();
+
+	std::vector<prosper::ClearValue> clearVals = {prosper::ClearValue {}, prosper::ClearValue {prosper::ClearDepthStencilValue {0.f, 0}}};
+
+	drawCmd->GetPrimaryCommandBufferPtr()->RecordBeginRenderPass(rt, clearVals);
+	record_render_ui(el, rt.GetTexture().GetImage(), info, drawCmd);
 	drawCmd->GetPrimaryCommandBufferPtr()->RecordEndRenderPass();
 
 	if(!useMsaa) {
@@ -135,6 +146,11 @@ static bool render_ui(WIBase &el, prosper::RenderTarget &rt, const Lua::gui::Dra
 	drawCmd->RecordResolveImage(img, *info.resolvedImage);
 	drawCmd->RecordImageBarrier(*info.resolvedImage, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 	return true;
+}
+
+static void record_draw_ui(WIBase &el, Lua::Vulkan::CommandBufferRecorder &cmdBufGroup, prosper::IImage &img, const Lua::gui::DrawToTextureInfo &info)
+{
+	cmdBufGroup.Record([&el, &img, &info](prosper::ISecondaryCommandBuffer &drawCmd) mutable { record_render_ui(el, img, info, drawCmd.shared_from_this()); });
 }
 
 static std::shared_ptr<prosper::Texture> draw_to_texture(WIBase &el, const Lua::gui::DrawToTextureInfo &info)
@@ -322,6 +338,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("DrawToTexture", &draw_to_texture);
 	classDef.def(
 	  "DrawToTexture", +[](::WIBase &el) { return draw_to_texture(el, {}); });
+	classDef.def("RecordDraw", &record_draw_ui);
 	classDef.def("GetX", &GetX);
 	classDef.def("GetY", &GetY);
 	classDef.def("SetX", &SetX);

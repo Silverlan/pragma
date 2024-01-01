@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 from sys import platform
 from distutils.dir_util import copy_tree
+from urllib.error import URLError, HTTPError
+import tarfile
 import argparse
 import re
 # import logging
@@ -352,8 +354,14 @@ if platform == "linux":
 	boost_root = os.getcwd() +"/boost_1_78_0"
 	if not Path(boost_root).is_dir():
 		print_msg("boost not found. Downloading...")
-		zipName = "boost_1_78_0.zip"
-		http_extract("https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/" +zipName)
+		zipName = "boost_1_78_0.tar.gz"
+		boost_url0 = "https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/" +zipName
+		# Mirror in case above url goes down ( https://github.com/boostorg/boost/issues/842 )
+		boost_url1 = "https://sourceforge.net/projects/boost/files/boost/1.78.0/" +zipName
+		try:
+			http_extract(boost_url0,format="tar.gz")
+		except (URLError, HTTPError, tarfile.ReadError, tarfile.ExtractError) as e:
+			http_extract(boost_url1,format="tar.gz")
 else:
 	boost_root = os.getcwd() +"/boost"
 	if not Path(boost_root).is_dir():

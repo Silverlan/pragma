@@ -40,7 +40,16 @@ function ents.GUI3D:Initialize()
 	self:SetRefreshRate(24)
 	self.m_lastFrameRendered = 0.0
 
+	self.m_cmdBufferRecorder = prosper.create_command_buffer_recorder()
+	self:SetRenderWhenReady(true)
+
 	self:BindEvent(ents.ClickComponent.EVENT_ON_CLICK, "OnClick")
+end
+-- If enabled, rendering will only start if the render command buffer has been fully written to, otherwise
+-- rendering may be delayed to a future frame. This may result in lost UI frames.
+-- If enabled, rendering will be forced to wait for the render command buffer to complete. This may slow down rendering altogether.
+function ents.GUI3D:SetRenderWhenReady(renderWhenReady)
+	self.m_renderWhenReady = renderWhenReady
 end
 function ents.GUI3D:SetUseStencil(useStencil)
 	-- Enabling stencil rendering is more expensive but will enable UI scissors
@@ -414,8 +423,13 @@ function ents.GUI3D:InjectMouseInput(bt, state, pos, useCursor)
 	end
 	return self:DoInjectMouseInput(bt, state, pos)
 end
-function ents.GUI3D:InitializeGUIDrawCallback()
-	self.m_cbDrawGUI = game.add_callback("PostGUIDraw", function()
+function ents.GUI3D:InitializeGUIDrawCallbacks()
+	-- We'll need the recorded command buffer for the GUI in time for the main scene render, so we'll
+	-- start with it as soon as possible
+	self.m_cbRecordGUI = game.add_callback("PreGUIRecord", function()
+		self:RecordDraw()
+	end)
+	self.m_cbDrawGUI = game.add_callback("PreRenderScenes", function()
 		self:DrawGUIElement()
 	end)
 end
@@ -428,7 +442,10 @@ end
 function ents.GUI3D:GetRenderTarget()
 	return self.m_renderTarget
 end
-function ents.GUI3D:DrawGUIElement()
+function ents.GUI3D:RecordDraw()
+	if self.m_readyForRendering then
+		return
+	end
 	if self:GetEntity():IsTurnedOn() == false then
 		return
 	end
@@ -468,7 +485,26 @@ function ents.GUI3D:DrawGUIElement()
 			prosper.IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
 		)
 	end
-	p:DrawToTexture(rt, drawInfo)
+	-- Pre-record draw calls
+	self.m_cmdBufferRecorder:StartRecording(rt:GetRenderPass(), rt:GetFramebuffer())
+	p:RecordDraw(self.m_cmdBufferRecorder, rt:GetTexture():GetImage(), drawInfo)
+	self.m_cmdBufferRecorder:EndRecording()
+	self.m_readyForRendering = true
+end
+function ents.GUI3D:DrawGUIElement()
+	if self.m_readyForRendering ~= true then
+		return
+	end
+	if self.m_renderWhenReady and self.m_cmdBufferRecorder:IsPending() then
+		-- Render command buffer is not ready yet, delay rendering to the next frame.
+		return
+	end
+	self.m_readyForRendering = nil
+
+	local drawCmd = game.get_draw_command_buffer()
+	drawCmd:RecordBeginRenderPass(self.m_rpInfo)
+	self.m_cmdBufferRecorder:ExecuteCommands(drawCmd)
+	drawCmd:RecordEndRenderPass()
 	-- Image now in shader read-only optimal layout
 
 	-- The interface will be rendered on a 3D object, which means it will be subject to gamma-correction.
@@ -511,6 +547,14 @@ function ents.GUI3D:InitializeRenderTarget(w, h)
 	local sampling = true
 	local rt = gui.create_render_target(w, h, msaa, sampling)
 	self.m_renderTarget = rt
+
+	local rpInfo = prosper.RenderPassInfo(rt)
+	rpInfo:SetClearValues({
+		prosper.ClearValue(),
+		prosper.ClearValue(0.0, 0),
+	})
+	rpInfo.renderPassFlags = prosper.CommandBuffer.RENDER_PASS_FLAG_SECONDARY_COMMAND_BUFFERS_BIT
+	self.m_rpInfo = rpInfo
 
 	local colTex = rt:GetColorAttachmentTexture()
 	local colImg = colTex:GetImage()
@@ -629,7 +673,7 @@ function ents.GUI3D:Setup()
 	if self.m_pGui:IsUpdateScheduled() then
 		self.m_pGui:Update()
 	end
-	self:InitializeGUIDrawCallback()
+	self:InitializeGUIDrawCallbacks()
 	self:ReloadRenderTarget()
 end
 function ents.GUI3D:OnEntitySpawn()
@@ -641,6 +685,7 @@ function ents.GUI3D:OnRemove()
 	util.remove(self.m_cbActionInput)
 	util.remove(self.m_cbScrollInput)
 	util.remove(self.m_cbDrawGUI)
+	util.remove(self.m_cbRecordGUI)
 end
 ents.COMPONENT_GUI3D = ents.register_component("gui_3d", ents.GUI3D)
 ents.GUI3D.EVENT_ON_UNHANDLED_MOUSE_INPUT = ents.register_component_event(ents.COMPONENT_GUI3D, "unhandled_mouse_input")

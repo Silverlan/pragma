@@ -50,7 +50,7 @@ runs:
       shell: bash
       id: set-output-vars
       run: |
-        echo "root-dir=$PWD/pragma" >> $GITHUB_OUTPUT
+        root_path="$PWD/pragma"
         if [ "$RUNNER_OS" == "Linux" ]; then
           echo "build-dir=$PWD/pragma/build" >> $GITHUB_OUTPUT
           echo "deps-dir=$PWD/pragma/deps" >> $GITHUB_OUTPUT
@@ -59,7 +59,11 @@ runs:
           echo "build-dir=c:/pragma/build" >> $GITHUB_OUTPUT
           echo "deps-dir=c:/pragma/deps" >> $GITHUB_OUTPUT
           echo "install-dir=c:/pragma/build/install" >> $GITHUB_OUTPUT
+
+          # Convert to Windows-style path
+          root_path=$(echo "$root_path" | sed -e 's/^\///' -e 's/\//\\/g' -e 's/^./\0:/')
         fi
+        echo "root-dir=$root_path" >> $GITHUB_OUTPUT
 
     # Using the pragma build-script to build lua-debug results in errors, so we'll build it manually
     - name: Build lua-debug

@@ -751,6 +751,8 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	  luabind::def("create_gradient_texture", &Lua::Vulkan::create_gradient_texture), luabind::def("blur_texture", &Lua::Vulkan::blur_texture), luabind::def("blur_texture", &Lua::Vulkan::blur_texture, luabind::default_parameter_policy<3, static_cast<uint32_t>(1)> {}),
 	  luabind::def("create_event", &prosper::IPrContext::CreateEvent, luabind::render_context_policy<1> {}), luabind::def("create_fence", static_cast<std::shared_ptr<prosper::IFence> (*)(bool)>(&Lua::Vulkan::create_fence)),
 	  luabind::def("create_fence", static_cast<std::shared_ptr<prosper::IFence> (*)()>(&Lua::Vulkan::create_fence)), luabind::def("calculate_mipmap_count", &prosper::util::calculate_mipmap_count),
+	  luabind::def(
+	    "create_command_buffer_recorder", +[]() -> std::shared_ptr<Lua::Vulkan::CommandBufferRecorder> { return c_engine->GetRenderContext().CreateSwapCommandBufferGroup(c_engine->GetWindow()); }),
 	  luabind::def("calculate_mipmap_size", static_cast<Vector2i (*)(uint32_t, uint32_t, uint32_t)>(&Lua::Vulkan::calculate_mipmap_size)), luabind::def("calculate_mipmap_size", static_cast<uint32_t (*)(uint32_t, uint32_t)>(&Lua::Vulkan::calculate_mipmap_size)),
 	  luabind::def("result_to_string", static_cast<std::string (*)(prosper::Result)>(&::prosper::util::to_string)), luabind::def("format_to_string", static_cast<std::string (*)(prosper::Format)>(&::prosper::util::to_string)),
 	  luabind::def("shader_stage_to_string", static_cast<std::string (*)(prosper::ShaderStage)>(&::prosper::util::to_string)), luabind::def("is_depth_format", ::prosper::util::is_depth_format), luabind::def("is_compressed_format", ::prosper::util::is_compressed_format),
@@ -1774,6 +1776,8 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defCommandBufferRecorder.def(luabind::const_self == luabind::const_self);
 	defCommandBufferRecorder.def("IsValid", static_cast<bool (*)()>([]() -> bool { return true; }));
 	defCommandBufferRecorder.def("IsPending", &Lua::Vulkan::CommandBufferRecorder::IsPending);
+	defCommandBufferRecorder.def("StartRecording", &Lua::Vulkan::CommandBufferRecorder::StartRecording);
+	defCommandBufferRecorder.def("EndRecording", &Lua::Vulkan::CommandBufferRecorder::EndRecording);
 	defCommandBufferRecorder.def("ExecuteCommands", static_cast<bool (*)(Lua::Vulkan::CommandBufferRecorder &, Lua::Vulkan::CommandBuffer &)>([](Lua::Vulkan::CommandBufferRecorder &recorder, Lua::Vulkan::CommandBuffer &drawCmd) -> bool {
 		return drawCmd.IsPrimary() && recorder.ExecuteCommands(dynamic_cast<prosper::IPrimaryCommandBuffer &>(drawCmd));
 	}));

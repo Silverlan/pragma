@@ -1493,11 +1493,10 @@ void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 			auto idx = GetPerformanceTimerIndex(GPUTimer::GUI);
 			m_gpuTimers[idx]->End(*primWindowCmd);
 		}
-		WGUI::GetInstance().SetLockedForDrawing(false);
 		CallCallbacks<void>("PostDrawGUI");
-
 		if(c_game != nullptr)
 			c_game->PostGUIDraw();
+		WGUI::GetInstance().SetLockedForDrawing(false);
 	}
 }
 

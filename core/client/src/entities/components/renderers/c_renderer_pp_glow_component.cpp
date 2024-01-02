@@ -119,10 +119,10 @@ void CRendererPpGlowComponent::ExecuteGlowPass(const util::DrawSceneInfo &drawSc
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingBloom);
 
 	auto &drawCmd = drawSceneInfo.commandBuffer;
-	auto &texture = m_glowRt->GetTexture();
-	drawCmd->RecordImageBarrier(texture.GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::TransferDstOptimal);
-	drawCmd->RecordClearImage(texture.GetImage(), prosper::ImageLayout::TransferDstOptimal, std::array<float, 4> {0.f, 0.f, 0.f, 0.f});
-	drawCmd->RecordImageBarrier(texture.GetImage(), prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
+	auto &texGlow = m_glowRt->GetTexture();
+	drawCmd->RecordImageBarrier(texGlow.GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::TransferDstOptimal);
+	drawCmd->RecordClearImage(texGlow.GetImage(), prosper::ImageLayout::TransferDstOptimal, std::array<float, 4> {0.f, 0.f, 0.f, 0.f});
+	drawCmd->RecordImageBarrier(texGlow.GetImage(), prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
 
 	//
 
@@ -199,7 +199,7 @@ void CRendererPpGlowComponent::InitializeRenderTarget()
 	createInfo.height = cRenderer->GetPrepass().textureDepth->GetImage().GetHeight();
 	createInfo.format = pragma::ShaderGlow::RENDER_PASS_FORMAT;
 	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
-	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
+	createInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
 
 	auto img = context.CreateImage(createInfo);
 	auto tex = context.CreateTexture({}, *img, prosper::util::ImageViewCreateInfo {}, prosper::util::SamplerCreateInfo {});
@@ -212,6 +212,7 @@ void CRendererPpGlowComponent::InitializeRenderTarget()
 	auto rp = static_cast<prosper::ShaderGraphics *>(pragma::get_cengine()->GetShader("glow").get())->GetRenderPass();
 
 	auto rt = context.CreateRenderTarget({tex, texBloom, cRenderer->GetPrepass().textureDepth}, rp);
+	rt->SetDebugName("scene_glow_rt");
 	m_glowRt = rt;
 
 	// Blur
@@ -226,7 +227,7 @@ void CRendererPpGlowComponent::InitializeRenderTarget()
 	imgCreateInfo.format = pragma::ShaderGameWorldLightingPass::RENDER_PASS_FORMAT;
 	imgCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
 	// imgCreateInfo.samples = sampleCount;
-	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
+	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 
 	imgCreateInfo.usage
 	  = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::TransferSrcBit; // Note: Transfer flag required for debugging purposes only (See debug_glow_bloom console command)
@@ -257,7 +258,7 @@ void CRendererPpGlowComponent::InitializeRenderTarget()
 	imgCreateInfo.width = width;
 	imgCreateInfo.height = height;
 	m_blurRt = context.CreateRenderTarget({bloomBlurTexture}, prosper::ShaderGraphics::GetRenderPass<prosper::ShaderBlurBase>(context, umath::to_integral(prosper::ShaderBlurBase::Pipeline::R16G16B16A16Sfloat)));
-	m_blurRt->SetDebugName("scene_bloom_rt");
+	m_blurRt->SetDebugName("scene_glow_blur_rt");
 	m_blurSet = prosper::BlurSet::Create(context, m_blurRt);
 
 	auto &descSet = *cRenderer->GetHDRInfo().dsgBloomTonemapping->GetDescriptorSet();

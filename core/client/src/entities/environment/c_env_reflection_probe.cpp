@@ -378,6 +378,17 @@ void CReflectionProbeComponent::OnEntitySpawn()
 		Con::cwar << "Invalid/missing IBL reflection resources for cubemap " << GetCubemapIdentifier() << "! Please run 'map_build_reflection_probes' to build all reflection probes!" << Con::endl;
 }
 
+void CReflectionProbeComponent::OnRemove()
+{
+	BaseEntityComponent::OnRemove();
+	if(m_iblData) {
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblData->brdfMap);
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblData->irradianceMap);
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblData->prefilterMap);
+	}
+	c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblDsg);
+}
+
 std::string CReflectionProbeComponent::GetCubemapIBLMaterialFilePath() const
 {
 	if(m_iblMat.empty() == false)

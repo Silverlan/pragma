@@ -753,6 +753,8 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	  luabind::def("create_fence", static_cast<std::shared_ptr<prosper::IFence> (*)()>(&Lua::Vulkan::create_fence)), luabind::def("calculate_mipmap_count", &prosper::util::calculate_mipmap_count),
 	  luabind::def(
 	    "create_command_buffer_recorder", +[]() -> std::shared_ptr<Lua::Vulkan::CommandBufferRecorder> { return c_engine->GetRenderContext().CreateSwapCommandBufferGroup(c_engine->GetWindow()); }),
+	  luabind::def(
+	    "create_command_buffer_recorder", +[](const std::string &debugName) -> std::shared_ptr<Lua::Vulkan::CommandBufferRecorder> { return c_engine->GetRenderContext().CreateSwapCommandBufferGroup(c_engine->GetWindow(), true, debugName); }),
 	  luabind::def("calculate_mipmap_size", static_cast<Vector2i (*)(uint32_t, uint32_t, uint32_t)>(&Lua::Vulkan::calculate_mipmap_size)), luabind::def("calculate_mipmap_size", static_cast<uint32_t (*)(uint32_t, uint32_t)>(&Lua::Vulkan::calculate_mipmap_size)),
 	  luabind::def("result_to_string", static_cast<std::string (*)(prosper::Result)>(&::prosper::util::to_string)), luabind::def("format_to_string", static_cast<std::string (*)(prosper::Format)>(&::prosper::util::to_string)),
 	  luabind::def("shader_stage_to_string", static_cast<std::string (*)(prosper::ShaderStage)>(&::prosper::util::to_string)), luabind::def("is_depth_format", ::prosper::util::is_depth_format), luabind::def("is_compressed_format", ::prosper::util::is_compressed_format),

@@ -1778,6 +1778,9 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defCommandBufferRecorder.def(luabind::const_self == luabind::const_self);
 	defCommandBufferRecorder.def("IsValid", static_cast<bool (*)()>([]() -> bool { return true; }));
 	defCommandBufferRecorder.def("IsPending", &Lua::Vulkan::CommandBufferRecorder::IsPending);
+	defCommandBufferRecorder.def("SetOneTimeSubmit", &Lua::Vulkan::CommandBufferRecorder::SetOneTimeSubmit);
+	defCommandBufferRecorder.def("GetOneTimeSubmit", &Lua::Vulkan::CommandBufferRecorder::GetOneTimeSubmit);
+	defCommandBufferRecorder.def("Wait", &Lua::Vulkan::CommandBufferRecorder::Wait);
 	defCommandBufferRecorder.def("StartRecording", &Lua::Vulkan::CommandBufferRecorder::StartRecording);
 	defCommandBufferRecorder.def("EndRecording", &Lua::Vulkan::CommandBufferRecorder::EndRecording);
 	defCommandBufferRecorder.def("ExecuteCommands", static_cast<bool (*)(Lua::Vulkan::CommandBufferRecorder &, Lua::Vulkan::CommandBuffer &)>([](Lua::Vulkan::CommandBufferRecorder &recorder, Lua::Vulkan::CommandBuffer &drawCmd) -> bool {

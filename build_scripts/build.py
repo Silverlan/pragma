@@ -391,7 +391,7 @@ else:
 
 	# boost_url = "https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.bz2"
 	# The URL above is currently unavailable, so we'll use this mirror for the time being ( https://github.com/boostorg/boost/issues/842 )
-	boost_url = "https://sourceforge.net/projects/boost/files/boost/1.80.0/boost_1_80_0.tar.bz2"
+	boost_url = "https://archives.boost.io/release/1.80.0/source/boost_1_80_0.tar.bz2"
 	cmake_configure("..",generator,["-DBOOST_DISABLE_TESTS=ON","-DZLIB_INCLUDE_DIR=" +ZLIB_INCLUDE,"-DZLIB_LIBRARY=" +ZLIB_LIBPATH,"-DBOOST_URL=" +boost_url])
 	cmake_build("Release")
 	os.chdir("../..")

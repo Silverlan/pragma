@@ -40,8 +40,9 @@ function ents.GUI3D:Initialize()
 	self:SetRefreshRate(24)
 	self.m_lastFrameRendered = 0.0
 
-	self.m_cmdBufferRecorder = prosper.create_command_buffer_recorder()
-	self:SetRenderWhenReady(true)
+	self.m_cmdBufferRecorder = prosper.create_command_buffer_recorder("gui_3d")
+	self.m_cmdBufferRecorder:SetOneTimeSubmit(false)
+	self:SetRenderWhenReady(false) --true)
 
 	self:BindEvent(ents.ClickComponent.EVENT_ON_CLICK, "OnClick")
 end
@@ -432,6 +433,14 @@ function ents.GUI3D:InitializeGUIDrawCallbacks()
 	self.m_cbDrawGUI = game.add_callback("PreRenderScenes", function()
 		self:DrawGUIElement()
 	end)
+	-- The recording MUST be complete by the time "PostGUIDraw" is called. This is usually the case,
+	-- but we'll wait on the command buffer recorder, just in case it is still busy.
+	self.m_cbEndRecordGUI = game.add_callback("PostGUIDraw", function()
+		if self.m_cmdBufferRecorder ~= nil then
+			self.m_cmdBufferRecorder:Wait()
+			self:DrawGUIElement()
+		end
+	end)
 end
 function ents.GUI3D:SetClearColor(clearColor)
 	self.m_drawToTexInfo.clearColor = clearColor
@@ -512,6 +521,12 @@ function ents.GUI3D:DrawGUIElement()
 	-- to neutralize it.
 	local rtDst = self.m_renderTargetDst
 	local imgDst = rtDst:GetTexture():GetImage()
+	local imgSrc = self.m_renderTarget:GetColorAttachmentTexture():GetImage()
+	drawCmd:RecordImageBarrier(
+		imgSrc,
+		prosper.IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+	)
 	drawCmd:RecordImageBarrier(
 		imgDst,
 		prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
@@ -525,6 +540,11 @@ function ents.GUI3D:DrawGUIElement()
 		imgDst,
 		prosper.IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 		prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+	)
+	drawCmd:RecordImageBarrier(
+		imgSrc,
+		prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		prosper.IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
 	)
 
 	if ENABLE_MIPMAPS then
@@ -681,11 +701,15 @@ function ents.GUI3D:OnEntitySpawn()
 end
 function ents.GUI3D:OnRemove()
 	self:StopDragScrolling()
+	if self.m_cmdBufferRecorder ~= nil then
+		self.m_cmdBufferRecorder:Wait() -- Ensure the render recorder is not busy anymore
+	end
 	util.remove(self.m_pGui)
 	util.remove(self.m_cbActionInput)
 	util.remove(self.m_cbScrollInput)
 	util.remove(self.m_cbDrawGUI)
 	util.remove(self.m_cbRecordGUI)
+	util.remove(self.m_cbEndRecordGUI)
 end
 ents.COMPONENT_GUI3D = ents.register_component("gui_3d", ents.GUI3D)
 ents.GUI3D.EVENT_ON_UNHANDLED_MOUSE_INPUT = ents.register_component_event(ents.COMPONENT_GUI3D, "unhandled_mouse_input")

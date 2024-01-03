@@ -13,6 +13,7 @@
 #include "luasystem.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/widropdownmenu.h>
+#include <wgui/types/wiroot.h>
 #include "pragma/lua/libraries/c_gui_callbacks.hpp"
 #include "pragma/gui/wisilkicon.h"
 #include "pragma/gui/wisnaparea.hpp"
@@ -311,6 +312,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def(
 	  "SetParentAndUpdateWindow", +[](lua_State *l, ::WIBase &hPanel, ::WIBase &hParent, uint32_t index) { hPanel.SetParentAndUpdateWindow(&hParent, index); });
 	classDef.def("ClearParent", &ClearParent);
+	classDef.def("ResetParent", &ResetParent);
 	classDef.def(
 	  "GetChildren", +[](lua_State *l, ::WIBase &hPanel) -> luabind::tableT<::WIBase> {
 		  auto &children = *hPanel.GetChildren();
@@ -1043,7 +1045,8 @@ void Lua::WIBase::Wrap(lua_State *l, ::WIBase &hPanel, const std::string &wrappe
 	auto o = WGUILuaInterface::GetLuaObject(l, *el);
 	o.push(l);
 }
-void Lua::WIBase::ClearParent(lua_State *l, ::WIBase &hPanel) { hPanel.SetParent(WGUI::GetInstance().GetBaseElement()); }
+void Lua::WIBase::ClearParent(lua_State *l, ::WIBase &hPanel) { hPanel.SetParent(nullptr); }
+void Lua::WIBase::ResetParent(lua_State *l, ::WIBase &hPanel) { hPanel.SetParent(WGUI::GetInstance().GetBaseElement()); }
 void Lua::WIBase::GetChildren(lua_State *l, ::WIBase &hPanel, std::string className)
 {
 
@@ -1852,7 +1855,10 @@ void Lua::WIBase::FadeIn(lua_State *l, ::WIBase &hPanel, float tFadeIn, float al
 void Lua::WIBase::FadeIn(lua_State *l, ::WIBase &hPanel, float tFadeIn) { Lua::WIBase::FadeIn(l, hPanel, tFadeIn, 255.f); }
 void Lua::WIBase::InjectMouseMoveInput(lua_State *l, ::WIBase &hPanel, const Vector2 &mousePos)
 {
-
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().BeginTask("inect_mouse_move_input");
+	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
+#endif
 	auto &window = c_engine->GetWindow();
 	auto absPos = hPanel.GetAbsolutePos();
 	window->SetCursorPosOverride(Vector2 {static_cast<float>(absPos.x + mousePos.x), static_cast<float>(absPos.y + mousePos.y)});

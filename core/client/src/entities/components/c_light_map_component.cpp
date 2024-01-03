@@ -39,6 +39,7 @@
 #include <pragma/console/command_options.hpp>
 #include <pragma/util/util_game.hpp>
 #include <fsys/ifile.hpp>
+#include <wgui/types/wiroot.h>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

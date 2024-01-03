@@ -54,6 +54,7 @@
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_window.hpp>
+#include <wgui/types/wiroot.h>
 
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ClientState::GetConVarPtrs() { return *conVarPtrs; }

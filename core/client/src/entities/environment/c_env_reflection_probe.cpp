@@ -26,6 +26,7 @@
 #include <texturemanager/texturemanager.h>
 #include <texture_type.h>
 #include <wgui/types/wirect.h>
+#include <wgui/types/wiroot.h>
 #include <pragma/entities/baseentity_events.hpp>
 #include <pragma/console/command_options.hpp>
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"

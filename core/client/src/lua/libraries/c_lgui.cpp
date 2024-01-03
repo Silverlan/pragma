@@ -10,6 +10,7 @@
 #include "pragma/lua/libraries/c_lgui.h"
 #include <wgui/wgui.h>
 #include <wgui/wibase.h>
+#include <wgui/types/wiroot.h>
 #include "pragma/game/c_game.h"
 #include "luasystem.h"
 #include "pragma/lua/classes/c_lwibase.h"

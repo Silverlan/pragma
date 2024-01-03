@@ -73,6 +73,7 @@
 #include <luabind/copy_policy.hpp>
 #include <fsys/ifile.hpp>
 #include <wgui/types/witooltip.h>
+#include <wgui/types/wiroot.h>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

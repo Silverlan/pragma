@@ -11,6 +11,7 @@
 #include <wgui/types/witext.h>
 #include <wgui/types/wibutton.h>
 #include <wgui/types/wirect.h>
+#include <wgui/types/wiroot.h>
 #include <mathutil/umath.h>
 #include <prosper_window.hpp>
 

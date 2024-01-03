@@ -10,6 +10,7 @@
 #include "pragma/game/c_game.h"
 #include "pragma/gui/wgui_luainterface.h"
 #include <wgui/wibase.h>
+#include <wgui/types/wiroot.h>
 #include "pragma/lua/classes/c_ldef_wguihandles.h"
 #include <pragma/lua/raw_object.hpp>
 #include "pragma/gui/wiluahandlewrapper.h"
@@ -200,7 +201,7 @@ void WGUILuaInterface::OnGameStart() { m_cbLuaReleased = c_game->AddCallback("On
 
 void WGUILuaInterface::OnGameLuaReleased(lua_State *)
 {
-	WIBase *el = WGUI::GetInstance().GetBaseElement();
+	auto *el = WGUI::GetInstance().GetBaseElement();
 	if(el == nullptr)
 		return;
 	ClearLuaObjects(el);

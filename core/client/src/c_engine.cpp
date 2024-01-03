@@ -56,6 +56,7 @@
 #include <wgui/types/wicontextmenu.hpp>
 #include <wgui/types/witext.h>
 #include <wgui/types/witext_tags.hpp>
+#include <wgui/types/wiroot.h>
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
 #include <queries/prosper_query_pool.hpp>

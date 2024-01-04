@@ -1853,24 +1853,43 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 }
 void Lua::WIBase::FadeIn(lua_State *l, ::WIBase &hPanel, float tFadeIn, float alphaTarget) { hPanel.FadeIn(tFadeIn, alphaTarget / 255.f); }
 void Lua::WIBase::FadeIn(lua_State *l, ::WIBase &hPanel, float tFadeIn) { Lua::WIBase::FadeIn(l, hPanel, tFadeIn, 255.f); }
+static std::optional<Vector2> get_cursor_pos_override(WIRoot *elRoot)
+{
+	if(!elRoot)
+		return {};
+	return elRoot->GetCursorPosOverride();
+}
+static void restore_cursor_pos_override(WIRoot *elRoot, const std::optional<Vector2> &pos)
+{
+	if(!elRoot)
+		return;
+	if(pos)
+		elRoot->SetCursorPosOverride(*pos);
+	else
+		elRoot->ClearCursorPosOverride();
+}
 void Lua::WIBase::InjectMouseMoveInput(lua_State *l, ::WIBase &hPanel, const Vector2 &mousePos)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::get_domain().BeginTask("inect_mouse_move_input");
 	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
-	auto &window = c_engine->GetWindow();
+	auto *elRoot = hPanel.GetBaseRootElement();
 	auto absPos = hPanel.GetAbsolutePos();
-	window->SetCursorPosOverride(Vector2 {static_cast<float>(absPos.x + mousePos.x), static_cast<float>(absPos.y + mousePos.y)});
-	::util::ScopeGuard sg {[&window]() { window->ClearCursorPosOverride(); }};
+	auto origOverride = get_cursor_pos_override(elRoot);
+	if(elRoot)
+		elRoot->SetCursorPosOverride(Vector2 {static_cast<float>(absPos.x + mousePos.x), static_cast<float>(absPos.y + mousePos.y)});
+	::util::ScopeGuard sg {[elRoot, &origOverride]() { restore_cursor_pos_override(elRoot, origOverride); }};
 	hPanel.InjectMouseMoveInput(mousePos.x, mousePos.y);
 }
 ::util::EventReply Lua::WIBase::InjectMouseInput(lua_State *l, ::WIBase &hPanel, const Vector2 &mousePos, int button, int action, int mods)
 {
-	auto &window = c_engine->GetWindow();
+	auto *elRoot = hPanel.GetBaseRootElement();
 	auto absPos = hPanel.GetAbsolutePos();
-	window->SetCursorPosOverride(Vector2 {static_cast<float>(absPos.x + mousePos.x), static_cast<float>(absPos.y + mousePos.y)});
-	::util::ScopeGuard sg {[&window]() { window->ClearCursorPosOverride(); }};
+	auto origOverride = get_cursor_pos_override(elRoot);
+	if(elRoot)
+		elRoot->SetCursorPosOverride(Vector2 {static_cast<float>(absPos.x + mousePos.x), static_cast<float>(absPos.y + mousePos.y)});
+	::util::ScopeGuard sg {[elRoot, &origOverride]() { restore_cursor_pos_override(elRoot, origOverride); }};
 	return hPanel.InjectMouseInput(GLFW::MouseButton(button), GLFW::KeyState(action), GLFW::Modifier(mods));
 }
 ::util::EventReply Lua::WIBase::InjectMouseInput(lua_State *l, ::WIBase &hPanel, const Vector2 &mousePos, int button, int action) { return InjectMouseInput(l, hPanel, mousePos, button, action, 0); }
@@ -1914,12 +1933,15 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l, ::WIBase &hPanel, const Vec
 }
 ::util::EventReply Lua::WIBase::InjectScrollInput(lua_State *l, ::WIBase &hPanel, const Vector2 &mousePos, const Vector2 &offset, bool offsetAsPixels)
 {
-	auto &window = c_engine->GetWindow();
-	auto cursorPos = window->GetCursorPos();
+	auto *elRoot = hPanel.GetBaseRootElement();
+	auto cursorPos = elRoot ? elRoot->GetCursorPos() : Vector2 {};
 	auto absPos = hPanel.GetAbsolutePos();
-	window->SetCursorPosOverride(Vector2 {static_cast<float>(absPos.x + mousePos.x), static_cast<float>(absPos.y + mousePos.y)});
+	auto origOverride = get_cursor_pos_override(elRoot);
+	if(elRoot)
+		elRoot->SetCursorPosOverride(Vector2 {static_cast<float>(absPos.x + mousePos.x), static_cast<float>(absPos.y + mousePos.y)});
 	auto result = hPanel.InjectScrollInput(offset, offsetAsPixels);
-	window->ClearCursorPosOverride();
+	if(elRoot)
+		restore_cursor_pos_override(elRoot, origOverride);
 	return result;
 }
 ::util::EventReply Lua::WIBase::InjectScrollInput(lua_State *l, ::WIBase &hPanel, const Vector2 &mousePos, const Vector2 &offset) { return InjectScrollInput(l, hPanel, mousePos, offset, false); }

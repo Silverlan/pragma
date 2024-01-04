@@ -667,7 +667,8 @@ ModelMesh *ClientState::CreateMesh() const { return new CModelMesh; }
 static auto cvMatStreaming = GetClientConVar("cl_material_streaming_enabled");
 Material *ClientState::LoadMaterial(const std::string &path, bool precache, bool bReload)
 {
-	spdlog::info("Loading material '{}'...", path);
+	if(spdlog::get_level() <= spdlog::level::debug)
+		spdlog::debug("Loading material '{}'...", path);
 	return LoadMaterial(path, nullptr, bReload, !precache /*!cvMatStreaming->GetBool()*/);
 }
 

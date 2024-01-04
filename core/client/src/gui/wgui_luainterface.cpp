@@ -388,6 +388,8 @@ luabind::object WGUILuaInterface::CreateLuaObject(lua_State *l, WIBase &p)
 	}
 	else if(dynamic_cast<WITooltip *>(&p) != nullptr)
 		return cast_to_type<WITooltip>(l, p);
+	else if(dynamic_cast<WIRoot *>(&p) != nullptr)
+		return cast_to_type<WIRoot>(l, p);
 	return pragma::lua::raw_object_to_luabind_object(l, p.GetHandle());
 }
 

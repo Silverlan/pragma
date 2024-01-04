@@ -430,6 +430,14 @@ static void register_gui(Lua::Interface &lua)
 	Lua::WIDropDownMenu::register_class(wiDropDownMenuClassDef);
 	guiMod[wiDropDownMenuClassDef];
 
+	auto wiRootDef = luabind::class_<WIRoot, ::WIBase>("Root");
+	wiRootDef.def("GetRootCursorPos", &::WIRoot::GetCursorPos);
+	wiRootDef.def("SetRootCursorPosOverride", &::WIRoot::SetCursorPosOverride);
+	wiRootDef.def("GetRootCursorPosOverride", &::WIRoot::GetCursorPosOverride);
+	wiRootDef.def("ClearRootCursorPosOverride", &::WIRoot::ClearCursorPosOverride);
+	wiRootDef.def("GetAssociatedWindow", static_cast<prosper::Window *(::WIRoot::*)()>(&::WIRoot::GetWindow));
+	guiMod[wiRootDef];
+
 	auto wiConsoleClassDef = luabind::class_<WIConsole, ::WIBase>("Console");
 	wiConsoleClassDef.def("GetCommandLineEntryElement", &WIConsole::GetCommandLineEntryElement);
 	wiConsoleClassDef.def("GetTextLogElement", &WIConsole::GetTextLogElement);

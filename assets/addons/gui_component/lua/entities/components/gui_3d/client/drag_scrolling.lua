@@ -17,7 +17,7 @@ function Component:UpdateDragScrolling()
 			return
 		end
 		self.m_dragScrollingCursorTracker:Update(newPos)
-		if self.m_dragScrollingCursorTracker:HasExceededMoveThreshold(20) then
+		if self.m_dragScrollingCursorTracker:HasExceededMoveThreshold(60) then
 			self:StartDragScrolling()
 		end
 	end

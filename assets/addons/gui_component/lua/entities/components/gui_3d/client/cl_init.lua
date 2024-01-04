@@ -42,7 +42,7 @@ function ents.GUI3D:Initialize()
 
 	self.m_cmdBufferRecorder = prosper.create_command_buffer_recorder("gui_3d")
 	self.m_cmdBufferRecorder:SetOneTimeSubmit(false)
-	self:SetRenderWhenReady(false) --true)
+	self:SetRenderWhenReady(true)
 
 	self:BindEvent(ents.ClickComponent.EVENT_ON_CLICK, "OnClick")
 end
@@ -268,15 +268,21 @@ function ents.GUI3D:SetCursor(texture, w, h)
 	el:SetZPos(10000)
 	self.m_cursor = el
 end
-function ents.GUI3D:SetCursorPos(origin, dir)
+function ents.GUI3D:SetCursorPos(origin, dir, fConsiderPos)
 	local p = self.m_pGui
 	if util.is_valid(p) == false then
 		return false
 	end
 
 	local pos = self:CalcCursorPos(origin, dir)
+	if fConsiderPos ~= nil and fConsiderPos(pos) == false then
+		return true
+	end
 	self.m_cursorPos = pos
 	if pos ~= nil then
+		if util.get_type_name(p) == "Root" then
+			p:SetRootCursorPosOverride(pos)
+		end
 		p:InjectMouseMoveInput(pos)
 	end
 	if util.is_valid(self.m_cursor) then
@@ -285,7 +291,7 @@ function ents.GUI3D:SetCursorPos(origin, dir)
 			self.m_cursor:SetPos(pos.x - self.m_cursor:GetWidth() / 2, pos.y - self.m_cursor:GetHeight() / 2)
 		end
 	end
-	return pos ~= nil
+	return pos ~= nil, pos
 end
 function ents.GUI3D:GetCursorPos()
 	if util.is_valid(self.m_cursor) == false then
@@ -319,7 +325,16 @@ function ents.GUI3D:UpdateCursorPos()
 	--[[if(lp:GetDistance(self) <= 200.0) then -- TODO
 		self:OnEnteredUseRange()
 	else self:OnExitedUseRange() end]]
-	self:SetCursorPos(self:GetLocalRayData(false))
+	local origin, dir = self:GetLocalRayData(false)
+	local res, posCursor = self:SetCursorPos(origin, dir, function(pos)
+		return pos ~= self.m_prevCursorPos
+	end)
+	if res then
+		posCursor = posCursor or self.m_prevCursorPos
+	end
+	-- We only want to run functions like 'InjectMouseMoveInput' if the cursor position has actually changed,
+	-- so we'll keep track of the previous cursor position
+	self.m_prevCursorPos = posCursor
 end
 function ents.GUI3D:InitializeGUICallbacks()
 	local pl = ents.get_local_player()

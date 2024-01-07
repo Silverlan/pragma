@@ -54,6 +54,7 @@
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_window.hpp>
+#include <wgui/types/wiroot.h>
 
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ClientState::GetConVarPtrs() { return *conVarPtrs; }
@@ -666,7 +667,8 @@ ModelMesh *ClientState::CreateMesh() const { return new CModelMesh; }
 static auto cvMatStreaming = GetClientConVar("cl_material_streaming_enabled");
 Material *ClientState::LoadMaterial(const std::string &path, bool precache, bool bReload)
 {
-	spdlog::info("Loading material '{}'...", path);
+	if(spdlog::get_level() <= spdlog::level::debug)
+		spdlog::debug("Loading material '{}'...", path);
 	return LoadMaterial(path, nullptr, bReload, !precache /*!cvMatStreaming->GetBool()*/);
 }
 

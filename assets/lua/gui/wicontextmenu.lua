@@ -14,11 +14,9 @@ util.register_class("gui.WIContextMenu", gui.Base)
 gui.impl = gui.impl or {}
 gui.impl.contextMenu = gui.impl.contextMenu or {
 	activeMenuCount = 0,
+	menues = {},
 }
 
-function gui.WIContextMenu:__init()
-	gui.Base.__init(self)
-end
 function gui.WIContextMenu:OnRemove()
 	gui.impl.contextMenu.activeMenuCount = gui.impl.contextMenu.activeMenuCount - 1
 	if gui.impl.contextMenu.activeMenuCount == 0 and util.is_valid(gui.impl.cbMouseInput) == true then
@@ -50,7 +48,8 @@ function gui.WIContextMenu:OnInitialize()
 	if util.is_valid(gui.impl.cbMouseInput) == false then
 		gui.impl.cbMouseInput = input.add_callback("OnMouseInput", function(button, action, mods)
 			if action == input.STATE_PRESS then
-				local el = gui.get_element_under_cursor(gui.find_focused_window(), function(el)
+				local window = gui.find_focused_window()
+				local el = gui.get_element_under_cursor(window, function(el)
 					return el:GetMouseInputEnabled()
 				end)
 				while util.is_valid(el) and el:GetClass() ~= "wicontextmenu" do
@@ -59,7 +58,7 @@ function gui.WIContextMenu:OnInitialize()
 				if util.is_valid(el) then
 					return
 				end
-				gui.close_context_menu()
+				gui.close_all_context_menues()
 			end
 		end)
 	end
@@ -229,7 +228,7 @@ function gui.WIContextMenu:AddItem(name, fcOnClick, keybind)
 				return
 			end
 		end
-		gui.close_context_menu()
+		gui.close_context_menu(pItem:GetRootElement())
 	end)
 	pItem:SizeToContents()
 	table.insert(self.m_tItems, pItem)
@@ -327,15 +326,18 @@ function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
 
 	return pItem, pSubMenu
 end
-gui.close_context_menu = function()
-	if gui.impl.contextMenu.menu == nil or util.is_valid(gui.impl.contextMenu.menu) == false then
-		return
+local function get_base_element(window)
+	local typeName = util.get_type_name(window)
+	if typeName == "Root" then
+		return window
 	end
-	gui.impl.contextMenu.menu:RemoveSafely()
-	gui.impl.contextMenu.menu = nil
-end
-gui.open_context_menu = function(window)
-	gui.close_context_menu()
+	if typeName ~= "Window" then
+		local elBase = window:GetRootElement()
+		if util.is_valid(elBase) == false or util.get_type_name(elBase) ~= "Root" then
+			return
+		end
+		return elBase
+	end
 	if util.is_valid(window) == false then
 		window = gui.find_focused_window()
 		if util.is_valid(window) == false then
@@ -346,19 +348,54 @@ gui.open_context_menu = function(window)
 		return
 	end
 	local elBase = gui.get_base_element(window)
+	if util.is_valid(elBase) == false or util.get_type_name(elBase) ~= "Root" then
+		return
+	end
+	return elBase
+end
+gui.close_all_context_menues = function()
+	for _, elMenu in pairs(gui.impl.contextMenu.menues) do
+		if elMenu:IsValid() then
+			elMenu:RemoveSafely()
+		end
+	end
+	gui.impl.contextMenu.menues = {}
+end
+gui.close_context_menu = function(window)
+	window = window or gui.get_base_element()
+	local elBase = get_base_element(window)
 	if util.is_valid(elBase) == false then
 		return
 	end
-	gui.impl.contextMenu.menu = gui.create("WIContextMenu", elBase)
-	if gui.impl.contextMenu.menu ~= nil then
-		gui.impl.contextMenu.menu:SetName("context_menu")
-		gui.impl.contextMenu.menu:RequestFocus()
-		gui.impl.contextMenu.menu:SetPos(elBase:GetCursorPos())
+
+	if util.is_valid(gui.impl.contextMenu.menues[elBase]) == false then
+		return
 	end
-	return gui.impl.contextMenu.menu
+	gui.impl.contextMenu.menues[elBase]:RemoveSafely()
+	gui.impl.contextMenu.menues[elBase] = nil
 end
-gui.is_context_menu_open = function()
-	return (gui.impl.contextMenu.menu ~= nil and util.is_valid(gui.impl.contextMenu.menu) == true) and true or false
+gui.open_context_menu = function(window)
+	window = window or gui.get_base_element()
+	gui.close_context_menu(window)
+	local elBase = get_base_element(window)
+	if util.is_valid(elBase) == false then
+		return
+	end
+	local menu = gui.create("WIContextMenu", elBase)
+	if menu ~= nil then
+		menu:SetName("context_menu")
+		menu:RequestFocus()
+		menu:SetPos(elBase:GetCursorPos())
+		gui.impl.contextMenu.menues[elBase] = menu
+	end
+	return menu
+end
+gui.is_context_menu_open = function(elBase)
+	elBase = elBase or gui.get_base_element()
+	if util.is_valid(elBase) == false then
+		return false
+	end
+	return util.is_valid(gui.impl.contextMenu.menues[elBase])
 end
 gui.set_context_menu_skin = function(skin)
 	gui.impl.contextMenu.skin = skin

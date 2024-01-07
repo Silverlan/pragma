@@ -33,6 +33,7 @@
 #include "pragma/ai/c_lai.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
+#include "pragma/rendering/shaders/c_shader_equirectangular_to_cubemap.hpp"
 #include "pragma/asset/c_util_model.hpp"
 #include <pragma/debug/debug_render_info.hpp>
 #include <pragma/game/game_resources.hpp>
@@ -65,12 +66,14 @@
 #include <cmaterialmanager.h>
 #include <cmaterial_manager2.hpp>
 #include <impl_texture_formats.h>
+#include <util_sound.hpp>
 #include <prosper_window.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_prepared_command_buffer.hpp>
 #include <luabind/copy_policy.hpp>
 #include <fsys/ifile.hpp>
 #include <wgui/types/witooltip.h>
+#include <wgui/types/wiroot.h>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
@@ -234,6 +237,7 @@ static void register_gui(Lua::Interface &lua)
 	auto defDrawToTex = luabind::class_<Lua::gui::DrawToTextureInfo>("DrawToTextureInfo");
 	defDrawToTex.def(luabind::constructor<>());
 	defDrawToTex.def_readwrite("enableMsaa", &Lua::gui::DrawToTextureInfo::enableMsaa);
+	defDrawToTex.def_readwrite("useStencil", &Lua::gui::DrawToTextureInfo::useStencil);
 	defDrawToTex.def_readwrite("width", &Lua::gui::DrawToTextureInfo::width);
 	defDrawToTex.def_readwrite("height", &Lua::gui::DrawToTextureInfo::height);
 	defDrawToTex.def_readwrite("clearColor", &Lua::gui::DrawToTextureInfo::clearColor);
@@ -426,6 +430,14 @@ static void register_gui(Lua::Interface &lua)
 	Lua::WIDropDownMenu::register_class(wiDropDownMenuClassDef);
 	guiMod[wiDropDownMenuClassDef];
 
+	auto wiRootDef = luabind::class_<WIRoot, ::WIBase>("Root");
+	wiRootDef.def("GetRootCursorPos", &::WIRoot::GetCursorPos);
+	wiRootDef.def("SetRootCursorPosOverride", &::WIRoot::SetCursorPosOverride);
+	wiRootDef.def("GetRootCursorPosOverride", &::WIRoot::GetCursorPosOverride);
+	wiRootDef.def("ClearRootCursorPosOverride", &::WIRoot::ClearCursorPosOverride);
+	wiRootDef.def("GetAssociatedWindow", static_cast<prosper::Window *(::WIRoot::*)()>(&::WIRoot::GetWindow));
+	guiMod[wiRootDef];
+
 	auto wiConsoleClassDef = luabind::class_<WIConsole, ::WIBase>("Console");
 	wiConsoleClassDef.def("GetCommandLineEntryElement", &WIConsole::GetCommandLineEntryElement);
 	wiConsoleClassDef.def("GetTextLogElement", &WIConsole::GetTextLogElement);
@@ -558,9 +570,39 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool bGUI)
 	    })];
 
 	Lua::RegisterLibrary(lua.GetState(), "sound",
-	  {{"create", Lua::sound::create}, LUA_LIB_SOUND_SHARED, {"create_dsp_effect", Lua::sound::register_aux_effect}, {"get_dsp_effect", Lua::sound::get_aux_effect}, {"set_distance_model", &Lua::sound::set_distance_model}, {"get_distance_model", &Lua::sound::get_distance_model},
-	    {"is_supported", &Lua::sound::is_supported}, {"get_doppler_factor", &Lua::sound::get_doppler_factor}, {"set_doppler_factor", &Lua::sound::set_doppler_factor}, {"get_speed_of_sound", &Lua::sound::get_speed_of_sound}, {"set_speed_of_sound", &Lua::sound::set_speed_of_sound},
-	    {"get_device_name", &Lua::sound::get_device_name}, {"add_global_effect", &Lua::sound::add_global_effect}, {"remove_global_effect", &Lua::sound::remove_global_effect}, {"set_global_effect_parameters", &Lua::sound::set_global_effect_parameters}});
+	  {
+	    {"create", Lua::sound::create},
+	    LUA_LIB_SOUND_SHARED,
+	    {"create_dsp_effect", Lua::sound::register_aux_effect},
+	    {"get_dsp_effect", Lua::sound::get_aux_effect},
+	    {"set_distance_model", &Lua::sound::set_distance_model},
+	    {"get_distance_model", &Lua::sound::get_distance_model},
+	    {"is_supported", &Lua::sound::is_supported},
+	    {"get_doppler_factor", &Lua::sound::get_doppler_factor},
+	    {"set_doppler_factor", &Lua::sound::set_doppler_factor},
+	    {"get_speed_of_sound", &Lua::sound::get_speed_of_sound},
+	    {"set_speed_of_sound", &Lua::sound::set_speed_of_sound},
+	    {"get_device_name", &Lua::sound::get_device_name},
+	    {"add_global_effect", &Lua::sound::add_global_effect},
+	    {"remove_global_effect", &Lua::sound::remove_global_effect},
+	    {"set_global_effect_parameters", &Lua::sound::set_global_effect_parameters},
+	    {"get_duration",
+	      +[](lua_State *l) -> int32_t {
+		      std::string path = Lua::CheckString(l, 1);
+		      auto absPath = pragma::asset::find_file(path, pragma::asset::Type::Sound);
+		      if(absPath.has_value() == false) {
+			      Lua::PushNil(l);
+			      return 1;
+		      }
+		      float duration;
+		      auto success = ::util::sound::get_duration(std::string {pragma::asset::get_asset_root_directory(pragma::asset::Type::Sound)} + "/" + *absPath, duration);
+		      if(success)
+			      Lua::PushNumber(l, duration);
+		      else
+			      Lua::PushNil(l);
+		      return 1;
+	      }},
+	  });
 	Lua::RegisterLibraryEnums(lua.GetState(), "sound",
 	  {{"GLOBAL_EFFECT_FLAG_NONE", umath::to_integral(al::ISoundSystem::GlobalEffectFlag::None)}, {"GLOBAL_EFFECT_FLAG_BIT_RELATIVE", umath::to_integral(al::ISoundSystem::GlobalEffectFlag::RelativeSounds)},
 	    {"GLOBAL_EFFECT_FLAG_BIT_WORLD", umath::to_integral(al::ISoundSystem::GlobalEffectFlag::WorldSounds)}, {"GLOBAL_EFFECT_FLAG_ALL", umath::to_integral(al::ISoundSystem::GlobalEffectFlag::All)},
@@ -838,15 +880,27 @@ static bool save_image(lua_State *l, uimg::ImageBuffer &imgBuffer, std::string f
 	return c_game->SaveImage(imgBuffer, fileName, imgWriteInfo, cubemap);
 }
 
-static bool save_image(lua_State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::ImageFormat format, float quality, pragma::lua::LuaThreadWrapper *tw = nullptr)
+static std::vector<std::string> &get_image_file_extensions()
+{
+	static std::vector<std::string> exts;
+	if(exts.empty()) {
+		exts.reserve(umath::to_integral(uimg::ImageFormat::Count));
+		auto n = umath::to_integral(uimg::ImageFormat::Count);
+		for(auto i = decltype(n) {0u}; i < n; ++i)
+			exts.push_back(uimg::get_file_extension(static_cast<uimg::ImageFormat>(i)));
+	}
+	return exts;
+}
+
+static std::pair<bool, std::optional<std::string>> save_image(lua_State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::ImageFormat format, float quality, pragma::lua::LuaThreadWrapper *tw = nullptr)
 {
 	if(Lua::file::validate_write_operation(l, fileName) == false)
-		return false;
-	ufile::remove_extension_from_filename(fileName);
+		return std::pair<bool, std::optional<std::string>> {false, {}};
+	ufile::remove_extension_from_filename(fileName, get_image_file_extensions());
 	fileName += '.' + uimg::get_file_extension(format);
 	auto fp = filemanager::open_file<VFilePtrReal>(fileName, filemanager::FileMode::Write | filemanager::FileMode::Binary);
 	if(!fp)
-		return false;
+		return std::pair<bool, std::optional<std::string>> {false, {}};
 	if(tw) {
 		auto pImgBuffer = imgBuffer.shared_from_this();
 		auto task = [fp, pImgBuffer, format, quality]() -> pragma::lua::LuaThreadPool::ResultHandler {
@@ -858,12 +912,12 @@ static bool save_image(lua_State *l, uimg::ImageBuffer &imgBuffer, std::string f
 			tw->GetPool().AddTask(task);
 		else
 			tw->GetTask()->AddSubTask(task);
-		return true;
+		return std::pair<bool, std::optional<std::string>> {true, fileName};
 	}
 	fsys::File f {fp};
-	return uimg::save_image(f, imgBuffer, format, quality);
+	return std::pair<bool, std::optional<std::string>> {true, fileName};
 }
-static bool save_image(lua_State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::ImageFormat format) { return save_image(l, imgBuffer, fileName, format, 1.f); }
+static std::pair<bool, std::optional<std::string>> save_image(lua_State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::ImageFormat format) { return save_image(l, imgBuffer, fileName, format, 1.f); }
 static bool save_image(lua_State *l, luabind::table<> t, std::string fileName, uimg::TextureInfo &texInfo, bool cubemap)
 {
 	auto n = Lua::GetObjectLength(l, t);
@@ -1008,16 +1062,17 @@ void CGame::RegisterLuaLibraries()
 	    "save_image", +[](lua_State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::ImageFormat format, float quality) { return save_image(l, imgBuffer, fileName, format, quality); }),
 	  luabind::def(
 	    "save_image", +[](lua_State *l, uimg::ImageBuffer &imgBuffer, std::string fileName, uimg::ImageFormat format, float quality, const pragma::lua::LuaThreadWrapper &tw) { return save_image(l, imgBuffer, fileName, format, quality, const_cast<pragma::lua::LuaThreadWrapper *>(&tw)); }),
-	  luabind::def("save_image", static_cast<bool (*)(lua_State *, uimg::ImageBuffer &, std::string, uimg::ImageFormat)>(save_image)), luabind::def("save_image", static_cast<bool (*)(lua_State *, luabind::table<>, std::string, uimg::TextureInfo &, bool)>(save_image)),
-	  luabind::def("save_image", static_cast<bool (*)(lua_State *, luabind::table<>, std::string, uimg::TextureInfo &)>(save_image)), luabind::def("save_image", static_cast<bool (*)(lua_State *, prosper::IImage &, std::string, uimg::TextureInfo &)>(save_image)),
-	  luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &, bool, uimg::Format)>(load_image)), luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &, bool)>(load_image)),
-	  luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &)>(load_image)),
+	  luabind::def("save_image", static_cast<std::pair<bool, std::optional<std::string>> (*)(lua_State *, uimg::ImageBuffer &, std::string, uimg::ImageFormat)>(save_image)),
+	  luabind::def("save_image", static_cast<bool (*)(lua_State *, luabind::table<>, std::string, uimg::TextureInfo &, bool)>(save_image)), luabind::def("save_image", static_cast<bool (*)(lua_State *, luabind::table<>, std::string, uimg::TextureInfo &)>(save_image)),
+	  luabind::def("save_image", static_cast<bool (*)(lua_State *, prosper::IImage &, std::string, uimg::TextureInfo &)>(save_image)), luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &, bool, uimg::Format)>(load_image)),
+	  luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &, bool)>(load_image)), luabind::def("load_image", static_cast<luabind::object (*)(lua_State *, const std::string &)>(load_image)),
 	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua_State *, uint32_t, uint32_t, uint32_t, bool, bool)>(capture_raytraced_screenshot)),
 	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua_State *, uint32_t, uint32_t, uint32_t, bool)>(capture_raytraced_screenshot)),
 	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua_State *, uint32_t, uint32_t, uint32_t)>(capture_raytraced_screenshot)),
 	  luabind::def("capture_raytraced_screenshot", static_cast<util::ParallelJob<uimg::ImageLayerSet> (*)(lua_State *, uint32_t, uint32_t)>(capture_raytraced_screenshot)),
 	  luabind::def(
-	    "cubemap_to_equirectangular_texture", +[](lua_State *l, prosper::Texture &cubemap) -> luabind::object {
+	    "cubemap_to_equirectangular_texture",
+	    +[](lua_State *l, prosper::Texture &cubemap) -> luabind::object {
 		    auto *shader = static_cast<pragma::ShaderCubemapToEquirectangular *>(c_engine->GetShader("cubemap_to_equirectangular").get());
 		    if(shader == nullptr)
 			    return {};
@@ -1025,6 +1080,16 @@ void CGame::RegisterLuaLibraries()
 		    if(equiRect == nullptr)
 			    return {};
 		    return {l, equiRect};
+	    }),
+	  luabind::def(
+	    "equirectangular_to_cubemap_texture", +[](lua_State *l, prosper::Texture &equiRect, uint32_t resolution) -> luabind::object {
+		    auto *shader = static_cast<pragma::ShaderEquirectangularToCubemap *>(c_engine->GetShader("equirectangular_to_cubemap").get());
+		    if(shader == nullptr)
+			    return {};
+		    auto tex = shader->EquirectangularTextureToCubemap(equiRect, resolution);
+		    if(tex == nullptr)
+			    return {};
+		    return {l, tex};
 	    })];
 	utilMod[
 	  // luabind::def("fire_bullets",static_cast<int32_t(*)(lua_State*)>(Lua::util::fire_bullets)),

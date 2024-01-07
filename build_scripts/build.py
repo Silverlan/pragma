@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 from sys import platform
 from distutils.dir_util import copy_tree
+from urllib.error import URLError, HTTPError
+import tarfile
 import argparse
 import re
 # import logging
@@ -352,14 +354,22 @@ if platform == "linux":
 	boost_root = os.getcwd() +"/boost_1_78_0"
 	if not Path(boost_root).is_dir():
 		print_msg("boost not found. Downloading...")
-		zipName = "boost_1_78_0.zip"
-		http_extract("https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/" +zipName)
+		zipName = "boost_1_78_0.tar.gz"
+		boost_url0 = "https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/" +zipName
+		# Mirror in case above url goes down ( https://github.com/boostorg/boost/issues/842 )
+		boost_url1 = "https://sourceforge.net/projects/boost/files/boost/1.78.0/" +zipName
+		try:
+			http_extract(boost_url0,format="tar.gz")
+		except (URLError, HTTPError, tarfile.ReadError, tarfile.ExtractError) as e:
+			http_extract(boost_url1,format="tar.gz")
 else:
 	boost_root = os.getcwd() +"/boost"
 	if not Path(boost_root).is_dir():
 		print_msg("boost not found. Downloading...")
-		zipName = "boost_1_78_0.zip"
 		git_clone("https://github.com/ClausKlein/boost-cmake.git","boost")
+		os.chdir("boost")
+		reset_to_commit("fba51e4")
+		os.chdir("../")
 
 # Build
 print_msg("Building boost...")
@@ -379,7 +389,10 @@ if platform == "linux":
 else:
 	mkdir("build",cd=True)
 
-	cmake_configure("..",generator,["-DBOOST_DISABLE_TESTS=ON","-DZLIB_INCLUDE_DIR=" +ZLIB_INCLUDE,"-DZLIB_LIBRARY=" +ZLIB_LIBPATH])
+	# boost_url = "https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.bz2"
+	# The URL above is currently unavailable, so we'll use this mirror for the time being ( https://github.com/boostorg/boost/issues/842 )
+	boost_url = "https://archives.boost.io/release/1.80.0/source/boost_1_80_0.tar.bz2"
+	cmake_configure("..",generator,["-DBOOST_DISABLE_TESTS=ON","-DZLIB_INCLUDE_DIR=" +ZLIB_INCLUDE,"-DZLIB_LIBRARY=" +ZLIB_LIBPATH,"-DBOOST_URL=" +boost_url])
 	cmake_build("Release")
 	os.chdir("../..")
 
@@ -641,7 +654,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
     add_pragma_module(
         name="pr_prosper_vulkan",
-        commitSha="0b8ba03",
+        commitSha="837fb0d3b74344bb3de3221988ba470be4873be0",
         repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
     )
 
@@ -653,7 +666,7 @@ if with_common_modules:
     )
     add_pragma_module(
         name="pr_audio_soloud",
-        commitSha="17652f0",
+        commitSha="f5faf1f996fbbf67421cb78c576a61b78aba5498",
         repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
     )
     #modules_prebuilt.append("Silverlan/pr_mount_external_prebuilt")
@@ -662,7 +675,7 @@ if with_pfm:
     if with_core_pfm_modules or with_all_pfm_modules:
         add_pragma_module(
             name="pr_curl",
-            commitSha="ba0e2e7",
+            commitSha="b63b1014e1ff4d7a7a2f0b81655b0ab407f681c8",
             repositoryUrl="https://github.com/Silverlan/pr_curl.git"
         )
         add_pragma_module(
@@ -673,7 +686,7 @@ if with_pfm:
     if with_all_pfm_modules:
         add_pragma_module(
             name="pr_chromium",
-            commitSha="15c88b4",
+            commitSha="251dcf7580a14c7d137d72f17cfeb0d999dd1515",
             repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
         )
         add_pragma_module(
@@ -683,7 +696,7 @@ if with_pfm:
         )
         add_pragma_module(
             name="pr_curl",
-            commitSha="ba0e2e7",
+            commitSha="b63b1014e1ff4d7a7a2f0b81655b0ab407f681c8",
             repositoryUrl="https://github.com/Silverlan/pr_curl.git"
         )
         add_pragma_module(
@@ -698,8 +711,13 @@ if with_pfm:
         )
         add_pragma_module(
             name="pr_davinci",
-            commitSha="4752379de1752de3ec713e60920c2f7a684c9902",
+            commitSha="e8863cd1b8e047ddcdf47b7ae6291e9962568d09",
             repositoryUrl="https://github.com/Silverlan/pr_davinci.git"
+        )
+        add_pragma_module(
+            name="pr_opencv",
+            commitSha="97a8b4477c584a10f5d70a2f29b0febf0d64a311",
+            repositoryUrl="https://github.com/Silverlan/pr_opencv.git"
         )
 
 if with_lua_doc_generator or with_pfm:
@@ -712,7 +730,7 @@ if with_lua_doc_generator or with_pfm:
 if with_vr:
     add_pragma_module(
         name="pr_openvr",
-        commitSha="c9ce1901c1a523855328c2c1a2c6820559ddaaf9",
+        commitSha="f66a5cf4e686de64ec02050bffe6496049d05c5f",
         repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
     )
 
@@ -875,7 +893,10 @@ if with_lua_debugger:
 
 ########## lua-debug ##########
 if with_lua_debugger:
+	curDir = os.getcwd()
+	os.chdir(scripts_dir)
 	execscript(scripts_dir +"/scripts/build_lua_debug.py")
+	os.chdir(curDir)
 
 ########## Addons ##########
 def download_addon(name,addonName,url,commitId=None):
@@ -902,16 +923,16 @@ def download_addon(name,addonName,url,commitId=None):
 
 curDir = os.getcwd()
 if with_pfm:
-	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","064294df36d459ce6bc6be2190a2aa9f87eb3c6b")
-	download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","362981334d7b2f023dbcb1a2d1972fdc843b15e7")
+	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","d180790bd290a12c3ac2f70e0d6038f8dd3017bf")
+	download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","0f969464c1cf49cf2b264b95a42f9b69dce16a5f")
 
 if with_vr:
-	download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","9ce92cca7cca68f71027ed3770a62fc7a3dbaf4b")
+	download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","26912f1dbd1f25fed244592bce59ac4b59007ed1")
 
 if with_pfm:
 	download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")
 	download_addon("PFM Bedroom Demo","pfm_demo_bedroom","https://github.com/Silverlan/pfm_demo_bedroom.git","0fed1d5b54a25c3ded2ce906e7da80ca8dd2fb0d")
-	download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","a584457716ffa8be1611ae3becc10f5139f7083e")
+	download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","494aba78be98caf34249e3c7cb3e43477634c272")
 
 if with_source_engine_entities:
 	download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","a70f575")

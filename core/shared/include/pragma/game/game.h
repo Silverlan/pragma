@@ -48,6 +48,7 @@ namespace Lua {
 
 #undef DrawText
 
+class AddonInfo;
 class BrushMesh;
 class Side;
 class NetworkState;
@@ -153,6 +154,7 @@ class DLLNETWORK Game : public CallbackHandler, public LuaCallbackHandler {
 	virtual void SetUp();
 	virtual void Initialize();
 	virtual void OnInitialized();
+	void InitializeMountedAddon(const AddonInfo &addonInfo) const;
 
 	const pragma::EntityComponentManager &GetEntityComponentManager() const;
 	pragma::EntityComponentManager &GetEntityComponentManager();
@@ -229,6 +231,7 @@ class DLLNETWORK Game : public CallbackHandler, public LuaCallbackHandler {
 	LuaEntityManager &GetLuaEntityManager();
 	const LuaEntityManager &GetLuaEntityManager() const { return const_cast<Game *>(this)->GetLuaEntityManager(); }
 	pragma::AnimationUpdateManager &GetAnimationUpdateManager();
+	void UpdatePackagePaths();
 
 	void SetWorld(pragma::BaseWorldComponent *entWorld);
 	void CloseMap();

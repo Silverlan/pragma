@@ -349,7 +349,7 @@ bool HDRData::ReloadBloomRenderTarget(uint32_t width)
 	imgCreateInfo.format = pragma::ShaderGameWorldLightingPass::RENDER_PASS_FORMAT;
 	imgCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
 	// imgCreateInfo.samples = sampleCount;
-	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
+	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 
 	imgCreateInfo.usage
 	  = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::TransferSrcBit; // Note: Transfer flag required for debugging purposes only (See debug_glow_bloom console command)
@@ -380,7 +380,7 @@ bool HDRData::ReloadBloomRenderTarget(uint32_t width)
 	imgCreateInfo.width = width;
 	imgCreateInfo.height = height;
 	bloomBlurRenderTarget = context.CreateRenderTarget({bloomBlurTexture}, prosper::ShaderGraphics::GetRenderPass<prosper::ShaderBlurBase>(context, umath::to_integral(prosper::ShaderBlurBase::Pipeline::R16G16B16A16Sfloat)));
-	bloomBlurRenderTarget->SetDebugName("scene_bloom_rt");
+	bloomBlurRenderTarget->SetDebugName("scene_bloom_blur_rt");
 	bloomBlurSet = prosper::BlurSet::Create(context, bloomBlurRenderTarget);
 
 	auto &descSetHdrResolve = *dsgBloomTonemapping->GetDescriptorSet();

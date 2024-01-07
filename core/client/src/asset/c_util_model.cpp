@@ -794,16 +794,24 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 					if(itPos == target.end())
 						continue;
 					auto &posAccessor = gltfMdl.accessors.at(itPos->second);
+					if(posAccessor.bufferView == -1)
+						continue;
 					auto &posBufView = gltfMdl.bufferViews.at(posAccessor.bufferView);
+					if(posBufView.buffer == -1)
+						continue;
 					auto &posBuf = gltfMdl.buffers.at(posBufView.buffer);
 					auto posBufData = GLTFBufferData {posAccessor, posBufView, posBuf};
 
 					std::unique_ptr<GLTFBufferData> normBufData {};
 					if(itNormal != target.end()) {
 						auto &normAccessor = gltfMdl.accessors.at(itNormal->second);
-						auto &normBufView = gltfMdl.bufferViews.at(normAccessor.bufferView);
-						auto &normBuf = gltfMdl.buffers.at(normBufView.buffer);
-						normBufData = std::unique_ptr<GLTFBufferData> {new GLTFBufferData {normAccessor, normBufView, normBuf}};
+						if(normAccessor.bufferView != -1) {
+							auto &normBufView = gltfMdl.bufferViews.at(normAccessor.bufferView);
+							if(normBufView.buffer != -1) {
+								auto &normBuf = gltfMdl.buffers.at(normBufView.buffer);
+								normBufData = std::unique_ptr<GLTFBufferData> {new GLTFBufferData {normAccessor, normBufView, normBuf}};
+							}
+						}
 					}
 
 					auto isBeingUsed = false;

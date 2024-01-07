@@ -30,17 +30,7 @@ namespace pragma::audio {
 		util::TWeakSharedHandle<ISoundSource> GetHandle() const;
 		ISoundSystem &GetSoundSystem() const;
 
-		virtual uint32_t GetFrequency() const = 0;
-		virtual ChannelConfig GetChannelConfig() const;
-		virtual SampleType GetSampleType() const;
-		virtual uint64_t GetLength() const;
-		std::pair<uint64_t, uint64_t> GetLoopFramePoints() const;
-		std::pair<float, float> GetLoopTimePoints() const;
-
-		float GetDuration() const;
-		float GetInverseFrequency() const;
-		std::string GetChannelConfigName() const;
-		std::string GetSampleTypeName() const;
+		double GetDuration() const;
 		bool IsMono() const;
 		bool IsStereo() const;
 
@@ -55,15 +45,8 @@ namespace pragma::audio {
 		virtual void SetPriority(uint32_t priority) = 0;
 		virtual uint32_t GetPriority() const = 0;
 
-		virtual uint64_t GetFrameLength() const = 0;
-		virtual void SetFrameOffset(uint64_t offset) = 0;
-		virtual uint64_t GetFrameOffset(uint64_t *latency = nullptr) const = 0;
-
-		virtual void SetOffset(float offset) = 0;
-		virtual float GetOffset() const = 0;
-
-		virtual void SetTimeOffset(float offset) = 0;
-		virtual float GetTimeOffset() const = 0;
+		virtual void SetOffset(double offset) = 0;
+		virtual double GetOffset() const = 0;
 
 		virtual void SetLooping(bool bLoop) = 0;
 		virtual bool IsLooping() const = 0;

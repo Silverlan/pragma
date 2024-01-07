@@ -21,7 +21,7 @@ pfm.is_log_category_enabled = function(categories)
 end
 
 pfm.set_log_category_enabled = function(category, enabled)
-	g_enabledCategories = math.set_flag_enabled(g_enabledCategories, category, enabled)
+	g_enabledCategories = math.set_flag(g_enabledCategories, category, enabled)
 end
 
 pfm.set_enabled_log_categories = function(categories)

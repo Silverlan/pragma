@@ -771,9 +771,9 @@ bool Model::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
 	}
 
 	auto &bodyGroups = GetBodyGroups();
-	auto udmBodyGroups = udm["bodyGroups"];
+	auto udmBodyGroups = udm.Add("bodyGroups");
 	for(auto &bg : bodyGroups) {
-		auto udmBodyGroup = udmBodyGroups[bg.name];
+		auto udmBodyGroup = udmBodyGroups.Add(bg.name);
 		udmBodyGroup["meshGroups"] = bg.meshGroups;
 	}
 

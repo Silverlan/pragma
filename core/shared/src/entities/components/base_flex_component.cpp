@@ -15,6 +15,23 @@
 
 using namespace pragma;
 
+void BaseFlexComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+{
+	using T = BaseFlexComponent;
+	{
+		using TEnableFlexControllerLimitsEnabled = bool;
+		auto memberInfo = create_component_member_info<T, TEnableFlexControllerLimitsEnabled, &T::SetFlexControllerLimitsEnabled, &T::AreFlexControllerLimitsEnabled>("flexControllerLimitsEnabled", true);
+		registerMember(std::move(memberInfo));
+	}
+
+	{
+		using TFlexControllerScale = float;
+		auto memberInfo = create_component_member_info<T, TFlexControllerScale, static_cast<void (T::*)(TFlexControllerScale)>(&T::SetFlexControllerScale), static_cast<TFlexControllerScale (T::*)() const>(&T::GetFlexControllerScale)>("flexControllerScale", 1.f);
+		memberInfo.SetMin(-5.f);
+		memberInfo.SetMax(5.f);
+		registerMember(std::move(memberInfo));
+	}
+}
 BaseFlexComponent::BaseFlexComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 void BaseFlexComponent::Initialize()
 {
@@ -49,8 +66,9 @@ void BaseFlexComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 		memberInfo.userIndex = idx++;
 		memberInfo.SetGetterFunction<BaseFlexComponent, float,
 		  static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseFlexComponent &, float &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseFlexComponent &component, float &outValue) { outValue = component.GetFlexController(memberInfo.userIndex); })>();
-		memberInfo.SetSetterFunction<BaseFlexComponent, float,
-		  static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseFlexComponent &, const float &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseFlexComponent &component, const float &value) { component.SetFlexController(memberInfo.userIndex, value); })>();
+		memberInfo.SetSetterFunction<BaseFlexComponent, float, static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseFlexComponent &, const float &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseFlexComponent &component, const float &value) {
+			component.SetFlexController(memberInfo.userIndex, value, 0.f, component.AreFlexControllerLimitsEnabled());
+		})>();
 		RegisterMember(std::move(memberInfo));
 	}
 }
@@ -59,7 +77,7 @@ const ComponentMemberInfo *BaseFlexComponent::GetMemberInfo(ComponentMemberIndex
 	auto numStatic = GetStaticMemberCount();
 	if(idx < numStatic)
 		return BaseEntityComponent::GetMemberInfo(idx);
-	return DynamicMemberRegister::GetMemberInfo(idx - numStatic);
+	return DynamicMemberRegister::GetMemberInfo(idx);
 }
 std::optional<ComponentMemberIndex> BaseFlexComponent::DoGetMemberIndex(const std::string &name) const
 {
@@ -68,7 +86,7 @@ std::optional<ComponentMemberIndex> BaseFlexComponent::DoGetMemberIndex(const st
 		return idx;
 	idx = DynamicMemberRegister::GetMemberIndex(name);
 	if(idx.has_value())
-		return *idx + GetStaticMemberCount();
+		return *idx;
 	return std::optional<ComponentMemberIndex> {};
 }
 void BaseFlexComponent::SetFlexController(const std::string &name, float val, float duration, bool clampToLimits)
@@ -92,6 +110,9 @@ bool BaseFlexComponent::GetScaledFlexController(uint32_t flexId, float &val) con
 	val *= GetFlexControllerScale();
 	return true;
 }
+
+void BaseFlexComponent::SetFlexControllerLimitsEnabled(bool enabled) { m_enableFlexControllerLimits = enabled; }
+bool BaseFlexComponent::AreFlexControllerLimitsEnabled() const { return m_enableFlexControllerLimits; }
 
 void BaseFlexComponent::SetFlexControllerScale(float scale) { m_flexControllerScale = scale; }
 float BaseFlexComponent::GetFlexControllerScale() const { return m_flexControllerScale; }

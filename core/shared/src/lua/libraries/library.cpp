@@ -957,6 +957,10 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	auto callbackHandlerClassDef = luabind::class_<CallbackHandler>("CallbackHandler");
 	Lua::CallbackHandler::register_class(callbackHandlerClassDef);
 
+	auto _G = luabind::object {luabind::globals(lua.GetState())};
+	// Add alias
+	_G["util"]["EventListenerHandler"] = _G["util"]["CallbackHandler"];
+
 	auto utilMod = luabind::module(lua.GetState(), "util");
 	utilMod[classDefErrorCode];
 	utilMod[classDefCallback];
@@ -1014,7 +1018,6 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	defColor.def("CalcPerceivedLuminance", static_cast<void (*)(lua_State *, const Color &)>([](lua_State *l, const Color &color) { Lua::PushNumber(l, color.CalcPerceivedLuminance()); }));
 	utilMod[defColor];
 
-	auto _G = luabind::globals(lua.GetState());
 	_G["Color"] = _G["util"]["Color"]; // Add to global table for quicker access
 	_G["util"]["Color"]["Clear"] = Color(0, 0, 0, 0);
 	// Pink Colors
@@ -1367,7 +1370,8 @@ void Game::RegisterLuaLibraries()
 		  auto res = FileManager::FindAbsolutePath(path, rpath);
 		  if(res == false)
 			  return {};
-		  auto absPath = ::util::Path {rpath};
+		  auto isPathToDir = !path.empty() && (path.back() == '/' || path.back() == '\\');
+		  auto absPath = isPathToDir ? ::util::Path::CreatePath(rpath) : ::util::Path::CreateFile(rpath);
 		  absPath.MakeRelative(util::get_program_path());
 		  return luabind::object {l, absPath.GetString()};
 	  })),
@@ -1514,9 +1518,9 @@ void Game::RegisterLuaLibraries()
 	classDefFile.def("IgnoreComments", static_cast<void (*)(lua_State *, LFile &, std::string)>(&Lua_LFile_IgnoreComments));
 	classDefFile.def("IgnoreComments", static_cast<void (*)(lua_State *, LFile &, std::string, std::string)>(&Lua_LFile_IgnoreComments));
 	classDefFile.def("Read", static_cast<void (*)(lua_State *, LFile &, uint32_t)>(&Lua_LFile_Read));
-	classDefFile.def("Read", static_cast<void (*)(lua_State *, LFile &, ::DataStream & ds, uint32_t)>(&Lua_LFile_Read));
-	classDefFile.def("Write", static_cast<void (*)(lua_State *, LFile &, ::DataStream & ds)>(&Lua_LFile_Write));
-	classDefFile.def("Write", static_cast<void (*)(lua_State *, LFile &, ::DataStream & ds, uint32_t)>(&Lua_LFile_Write));
+	classDefFile.def("Read", static_cast<void (*)(lua_State *, LFile &, ::DataStream &ds, uint32_t)>(&Lua_LFile_Read));
+	classDefFile.def("Write", static_cast<void (*)(lua_State *, LFile &, ::DataStream &ds)>(&Lua_LFile_Write));
+	classDefFile.def("Write", static_cast<void (*)(lua_State *, LFile &, ::DataStream &ds, uint32_t)>(&Lua_LFile_Write));
 	classDefFile.def("GetPath", &Lua_LFile_GetPath);
 	fileMod[classDefFile];
 

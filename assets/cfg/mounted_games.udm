@@ -33,7 +33,10 @@
 			"common/SourceFilmmaker/game/hl2/",
 			"common/SourceFilmmaker/game/left4dead2_movies/",
 			"common/SourceFilmmaker/game/platform/",
-			"common/SourceFilmmaker/game/portal2/"
+			"common/SourceFilmmaker/game/portal2/",
+			"common/SourceFilmmaker/game/left4dead/",
+			"common/SourceFilmmaker/game/left4dead_dlc1/",
+			"common/SourceFilmmaker/game/left4dead_dlc2/"
 		]
 		$bool mount_workshop 1
 	}

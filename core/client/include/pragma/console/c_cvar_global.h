@@ -77,6 +77,7 @@ REGISTER_CONCOMMAND_CL(vk_print_memory_stats, Console::commands::vk_print_memory
 REGISTER_CONCOMMAND_CL(debug_font, Console::commands::debug_font, ConVarFlags::None, "Displays the glyph map for the specified font. If no arguments are specified, all available fonts will be listed. Usage: debug_font <fontName>");
 REGISTER_CONCOMMAND_CL(debug_texture_mipmaps, Console::commands::debug_texture_mipmaps, ConVarFlags::None, "Displays the mipmaps of the given texture. Usage: debug_texture_mipmaps <texturePath>");
 REGISTER_CONCOMMAND_CL(debug_hitboxes, Console::commands::debug_hitboxes, ConVarFlags::None, "Displays the hitboxes for the entity under the crosshair, or the entity with the given name (If it was specified.).");
+REGISTER_CONCOMMAND_CL(debug_dump_component_properties, Console::commands::debug_dump_component_properties, ConVarFlags::None, "Dumps entity component property values to the console.");
 
 REGISTER_CONCOMMAND_CL(debug_pbr_ibl, Console::commands::debug_pbr_ibl, ConVarFlags::None, "Displays the irradiance, prefilter and brdf map for the closest cubemap.");
 REGISTER_CONCOMMAND_CL(debug_particle_alpha_mode, Console::commands::debug_particle_alpha_mode, ConVarFlags::None, "Specifies the blend mode arguments for particle systems that use the \

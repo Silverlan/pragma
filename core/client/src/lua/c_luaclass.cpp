@@ -25,6 +25,9 @@
 #include "pragma/lua/classes/lshaderinfo.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
+#include "pragma/rendering/shaders/image/c_shader_flip_image.hpp"
+#include "pragma/rendering/shaders/image/c_shader_merge_images.hpp"
+#include "pragma/rendering/shaders/image/c_shader_merge_2d_image_into_equirectangular.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
@@ -80,6 +83,28 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
+static void reload_textures(CMaterial &mat)
+{
+	auto &data = mat.GetDataBlock();
+	if(!data)
+		return;
+	auto *pdata = data->GetData();
+	if(!pdata)
+		return;
+	std::unordered_map<std::string, std::string> textureMappings;
+	for(auto &pair : *pdata) {
+		auto &val = static_cast<ds::Value &>(*pair.second);
+		auto &type = typeid(val);
+		if(type != typeid(ds::Texture))
+			continue;
+		auto &datTex = static_cast<ds::Texture &>(val);
+		textureMappings[pair.first] = datTex.GetString();
+	}
+
+	for(auto &pair : textureMappings)
+		mat.SetTexture(pair.first, pair.second);
+}
+
 void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 {
 	auto &modEngine = lua.RegisterLibrary("engine");
@@ -166,6 +191,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	materialClassDef.def("SetTexture", static_cast<void (*)(lua_State *, Material *, const std::string &, Lua::Vulkan::Texture &, const std::string &)>(&Lua::Material::Client::SetTexture));
 	materialClassDef.def("GetTextureInfo", &Lua::Material::Client::GetTexture);
 	materialClassDef.def("GetData", &Lua::Material::Client::GetData);
+	materialClassDef.def("ReloadTextures", &reload_textures);
 	materialClassDef.def("InitializeShaderDescriptorSet", static_cast<void (*)(lua_State *, ::Material *, bool)>(&Lua::Material::Client::InitializeShaderData));
 	materialClassDef.def("InitializeShaderDescriptorSet", static_cast<void (*)(lua_State *, ::Material *)>(&Lua::Material::Client::InitializeShaderData));
 	materialClassDef.def("ClearSpriteSheetAnimation", static_cast<void (*)(lua_State *, ::Material &)>([](lua_State *l, ::Material &mat) { static_cast<CMaterial &>(mat).ClearSpriteSheetAnimation(); }));
@@ -431,6 +457,37 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	    }));
 	modShader[defShaderComposeRMA];
 
+	auto defShaderFlipImage = luabind::class_<pragma::ShaderFlipImage, luabind::bases<prosper::ShaderGraphics, prosper::Shader>>("FlipImage");
+	defShaderFlipImage.def(
+	  "RecordDraw", +[](pragma::ShaderFlipImage &shader, Lua::Vulkan::CommandBuffer &hCommandBuffer, Lua::Vulkan::DescriptorSet &ds, bool flipHorizontally, bool flipVertically) { return shader.RecordDraw(hCommandBuffer, *ds.GetDescriptorSet(), flipHorizontally, flipVertically); });
+	modShader[defShaderFlipImage];
+
+	auto defShaderMergeImages = luabind::class_<pragma::ShaderMergeImages, luabind::bases<prosper::ShaderGraphics, prosper::Shader>>("MergeImages");
+	defShaderMergeImages.def(
+	  "RecordDraw", +[](pragma::ShaderMergeImages &shader, Lua::Vulkan::CommandBuffer &hCommandBuffer, Lua::Vulkan::DescriptorSet &ds, Lua::Vulkan::DescriptorSet &ds2) { return shader.RecordDraw(hCommandBuffer, *ds.GetDescriptorSet(), *ds2.GetDescriptorSet()); });
+	modShader[defShaderMergeImages];
+
+	auto defShaderMergeIntoEquirect = luabind::class_<pragma::ShaderMerge2dImageIntoEquirectangular, luabind::bases<prosper::ShaderGraphics, prosper::Shader>>("Merge2dImageIntoEquirectangular");
+	defShaderMergeIntoEquirect.add_static_constant("CUBE_FACE_POSITIVE_X", sizeof(pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace::PositiveX));
+	defShaderMergeIntoEquirect.add_static_constant("CUBE_FACE_NEGATIVE_X", sizeof(pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace::NegativeX));
+	defShaderMergeIntoEquirect.add_static_constant("CUBE_FACE_POSITIVE_Y", sizeof(pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace::PositiveY));
+	defShaderMergeIntoEquirect.add_static_constant("CUBE_FACE_NEGATIVE_Y", sizeof(pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace::NegativeY));
+	defShaderMergeIntoEquirect.add_static_constant("CUBE_FACE_POSITIVE_Z", sizeof(pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace::PositiveZ));
+	defShaderMergeIntoEquirect.add_static_constant("CUBE_FACE_NEGATIVE_Z", sizeof(pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace::NegativeZ));
+	static_assert(umath::to_integral(pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace::Count) == 6);
+	defShaderMergeIntoEquirect.def(
+	  "RecordDraw",
+	  +[](pragma::ShaderMerge2dImageIntoEquirectangular &shader, Lua::Vulkan::CommandBuffer &hCommandBuffer, Lua::Vulkan::DescriptorSet &dsEquirect, Lua::Vulkan::DescriptorSet &ds2d) { return shader.RecordDraw(hCommandBuffer, *dsEquirect.GetDescriptorSet(), *ds2d.GetDescriptorSet()); });
+	defShaderMergeIntoEquirect.def(
+	  "RecordDraw", +[](pragma::ShaderMerge2dImageIntoEquirectangular &shader, Lua::Vulkan::CommandBuffer &hCommandBuffer, Lua::Vulkan::DescriptorSet &dsEquirect, Lua::Vulkan::DescriptorSet &ds2d, pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace cubeFace) {
+		  return shader.RecordDraw(hCommandBuffer, *dsEquirect.GetDescriptorSet(), *ds2d.GetDescriptorSet(), cubeFace);
+	  });
+	defShaderMergeIntoEquirect.def(
+	  "RecordDraw", +[](pragma::ShaderMerge2dImageIntoEquirectangular &shader, Lua::Vulkan::CommandBuffer &hCommandBuffer, Lua::Vulkan::DescriptorSet &dsEquirect, Lua::Vulkan::DescriptorSet &ds2d, pragma::ShaderMerge2dImageIntoEquirectangular::CubeFace cubeFace, umath::Degree range) {
+		  return shader.RecordDraw(hCommandBuffer, *dsEquirect.GetDescriptorSet(), *ds2d.GetDescriptorSet(), cubeFace, range);
+	  });
+	modShader[defShaderMergeIntoEquirect];
+
 	// Custom Shaders
 	auto defVertexBinding = luabind::class_<pragma::LuaVertexBinding>("VertexBinding");
 	defVertexBinding.def(luabind::constructor<>());
@@ -651,6 +708,22 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGUI)
 	modShader[defShaderImageProcessing];
 
 	auto defShaderTextured3DBase = luabind::class_<pragma::LuaShaderWrapperTextured3D, luabind::bases<pragma::LuaShaderWrapperGraphicsBase, pragma::LuaShaderWrapperBase>>("BaseTexturedLit3D");
+	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_FLAG_NONE", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::None));
+	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_LIGHT_MAPS_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableLightMapsBit));
+	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_ANIMATION_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableAnimationBit));
+	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_MORPH_TARGET_ANIMATION_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableMorphTargetAnimationBit));
+	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_EMISSION_ENABLED_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EmissionEnabledBit));
+	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_WRINKLES_ENABLED_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::WrinklesEnabledBit));
+	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_TRANSLUCENCY_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableTranslucencyBit));
+	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_RMA_MAP_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableRmaMapBit));
+	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_NORMAL_MAP_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableNormalMapBit));
+	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_PARALLAX_ENABLED_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::ParallaxEnabledBit));
+	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_CLIPPING_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableClippingBit));
+	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_3D_ORIGIN_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::Enable3dOriginBit));
+	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_EXTENDED_VERTEX_WEIGHTS_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableExtendedVertexWeights));
+	defShaderTextured3DBase.add_static_constant("SPECIALIZATION_CONSTANT_ENABLE_DEPTH_BIAS_BIT", umath::to_integral(pragma::GameShaderSpecializationConstantFlag::EnableDepthBias));
+	static_assert(umath::to_integral(pragma::GameShaderSpecializationConstantFlag::Last) == 4096, "Update this list when adding new flags!");
+
 	defShaderTextured3DBase.def(luabind::constructor<>());
 	defShaderTextured3DBase.def("InitializeGfxPipelineVertexAttributes", &pragma::LuaShaderWrapperTextured3D::Lua_InitializeGfxPipelineVertexAttributes, &pragma::LuaShaderWrapperTextured3D::Lua_default_InitializeGfxPipelineVertexAttributes);
 	defShaderTextured3DBase.def("InitializeGfxPipelinePushConstantRanges", &pragma::LuaShaderWrapperTextured3D::Lua_InitializeGfxPipelinePushConstantRanges, &pragma::LuaShaderWrapperTextured3D::Lua_default_InitializeGfxPipelinePushConstantRanges);

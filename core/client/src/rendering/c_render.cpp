@@ -31,6 +31,7 @@
 #include "pragma/rendering/rendersystem.h"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/entities/baseentity.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include <pragma/lua/luacallback.h>
@@ -49,6 +50,7 @@
 #include "pragma/physics/c_phys_visual_debugger.hpp"
 #include <pragma/console/sh_cmd.h>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/lua/classes/entity_components.hpp>
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_util.hpp>
@@ -61,6 +63,9 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/physics/visual_debugger.hpp>
 #include <pragma/physics/environment.hpp>
+#include <pragma/entities/attribute_specialization_type.hpp>
+#include <pragma/entities/components/component_member_flags.hpp>
+#include <pragma/entities/entity_component_manager_t.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -161,6 +166,122 @@ void Console::commands::debug_render_validation_error_enabled(NetworkState *stat
 	if(argv.size() > 1)
 		enabled = util::to_boolean(argv[1]);
 	c_engine->SetValidationErrorDisabled(id, !enabled);
+}
+
+static void print_component_properties(const pragma::ComponentMemberInfo &memberInfo, pragma::BaseEntityComponent &component)
+{
+	auto name = static_cast<std::string>(memberInfo.GetName().str);
+	Con::cout << "Name: " << name << Con::endl;
+	Con::cout << "Specialization Type: " << magic_enum::enum_name(memberInfo.GetSpecializationType()) << Con::endl;
+	auto *customSpecType = memberInfo.GetCustomSpecializationType();
+	if(customSpecType)
+		Con::cout << "Custom Specialization Type: " << *customSpecType << Con::endl;
+
+	auto min = memberInfo.GetMin();
+	if(min)
+		Con::cout << "Min: " << *min << Con::endl;
+
+	auto max = memberInfo.GetMin();
+	if(max)
+		Con::cout << "Max: " << *max << Con::endl;
+
+	auto stepSize = memberInfo.GetStepSize();
+	if(stepSize)
+		Con::cout << "Step Size: " << *stepSize << Con::endl;
+
+	auto &metaData = memberInfo.GetMetaData();
+	if(metaData) {
+		std::stringstream ss;
+		metaData->ToAscii(udm::AsciiSaveFlags::DontCompressLz4Arrays, ss, name);
+		Con::cout << "Meta Data:" << Con::endl;
+		Con::cout << ss.str() << Con::endl;
+		Con::cout << Con::endl;
+	}
+
+	Con::cout << "Is Enum: " << (memberInfo.IsEnum() ? "Yes" : "No") << Con::endl;
+
+	if(memberInfo.IsEnum()) {
+		std::vector<int64_t> values;
+		if(memberInfo.GetEnumValues(values)) {
+			Con::cout << "Enum Values:" << Con::endl;
+			for(auto v : values)
+				Con::cout << v << "," << Con::endl;
+		}
+	}
+
+	Con::cout << "Flags: " << magic_enum::flags::enum_name(memberInfo.GetFlags()) << Con::endl;
+	Con::cout << "Type: " << magic_enum::enum_name(memberInfo.type) << Con::endl;
+	Con::cout << "User Index: " << memberInfo.userIndex << Con::endl;
+
+	Con::cout << "Default Value: ";
+	pragma::ents::visit_member(memberInfo.type, [&memberInfo](auto tag) {
+		using T = typename decltype(tag)::type;
+		if(pragma::ents::is_udm_member_type(memberInfo.type)) {
+			if constexpr(udm::is_convertible<T, udm::String>()) {
+				T defaultVal;
+				memberInfo.GetDefault<T>(defaultVal);
+				auto strDefaultVal = udm::convert<T, udm::String>(defaultVal);
+				Con::cout << strDefaultVal;
+				return;
+			}
+		}
+		Con::cout << "<Not convertible to string>";
+	});
+	Con::cout << Con::endl;
+
+	Con::cout << "Value: ";
+	pragma::ents::visit_member(memberInfo.type, [&memberInfo, &component](auto tag) {
+		using T = typename decltype(tag)::type;
+		if(pragma::ents::is_udm_member_type(memberInfo.type)) {
+			if constexpr(udm::is_convertible<T, udm::String>()) {
+				T value;
+				memberInfo.getterFunction(memberInfo, component, &value);
+				auto strVal = udm::convert<T, udm::String>(value);
+				Con::cout << strVal;
+				return;
+			}
+		}
+		Con::cout << "<Not convertible to string>";
+	});
+	Con::cout << Con::endl << Con::endl;
+}
+void Console::commands::debug_dump_component_properties(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+{
+	auto &ent = pl->GetEntity();
+	if(ent.IsCharacter() == false)
+		return;
+	auto charComponent = ent.GetCharacterComponent();
+	if(charComponent.expired())
+		return;
+	auto ents = command::find_target_entity(state, *charComponent, argv);
+	if(ents.empty())
+		return;
+	auto *entTgt = ents.front();
+	Con::cout << "Properties of target entity '";
+	entTgt->print(Con::cout);
+	Con::cout << "':" << Con::endl;
+	for(auto &c : entTgt->GetComponents()) {
+		std::vector<const pragma::ComponentMemberInfo *> memberInfos;
+		uint32_t i = 0;
+		auto *info = c->GetMemberInfo(i++);
+		while(info != nullptr) {
+			memberInfos.push_back(info);
+			info = c->GetMemberInfo(i++);
+		}
+		if(memberInfos.empty())
+			continue;
+		auto *cInfo = c->GetComponentInfo();
+		std::string cName = "Unknown";
+		if(cInfo)
+			cName = cInfo->name.str;
+		Con::cout << "Component '" << cName << "':" << Con::endl;
+		uint32_t idx = 0;
+		for(auto &memberInfo : memberInfos) {
+			Con::cout << "Index " << (idx++) << ":" << Con::endl;
+			print_component_properties(*memberInfo, *c);
+		}
+		Con::cout << Con::endl << Con::endl << Con::endl;
+	};
 }
 
 void Console::commands::debug_render_depth_buffer(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)

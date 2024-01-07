@@ -13,6 +13,7 @@
 #include <pragma/lua/types/udm.hpp>
 #include <prosper_util.hpp>
 #include <prosper_prepared_command_buffer.hpp>
+#include <prosper_command_buffer.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
 
@@ -94,6 +95,7 @@ namespace Lua {
 			std::vector<ClearValue> clearValues = {};
 			std::optional<uint32_t> layerId = {};
 			std::shared_ptr<RenderPass> renderPass = nullptr;
+			prosper::IPrimaryCommandBuffer::RenderPassFlags renderPassFlags = prosper::IPrimaryCommandBuffer::RenderPassFlags::None;
 		};
 	};
 };

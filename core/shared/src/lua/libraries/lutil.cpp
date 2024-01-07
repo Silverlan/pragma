@@ -488,7 +488,9 @@ void Lua::util::register_shared(lua_State *l, luabind::module_ &mod)
 	register_shared_generic(l, mod);
 	mod[luabind::def("is_valid_entity", static_cast<bool (*)(lua_State *)>(Lua::util::is_valid_entity)), luabind::def("is_valid_entity", static_cast<bool (*)(lua_State *, const luabind::object &)>(Lua::util::is_valid_entity)),
 	  luabind::def("shake_screen", static_cast<void (*)(lua_State *, const Vector3 &, float, float, float, float, float, float)>(Lua::util::shake_screen)), luabind::def("shake_screen", static_cast<void (*)(lua_State *, float, float, float, float, float)>(Lua::util::shake_screen)),
-	  luabind::def("read_scene_file", Lua::util::read_scene_file)];
+	  luabind::def("read_scene_file", Lua::util::read_scene_file),
+	  luabind::def(
+	    "get_program_path", +[]() { return ::util::Path::CreatePath(::util::get_program_path()).GetString(); })];
 }
 static Lua::mult<bool, Lua::opt<std::string>> exec_python(lua_State *l, const std::string &fileName, const std::vector<std::string> &args)
 {

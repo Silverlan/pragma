@@ -136,6 +136,9 @@ def install_prebuilt_binaries(baseUrl):
 def cp(src,dst):
 	shutil.copy2(src,dst)
 
+def mv(src, dst):
+	shutil.move(src,dst)
+
 def cp_dir(src,dst):
 	shutil.copytree(src,dst,dirs_exist_ok=True)
 

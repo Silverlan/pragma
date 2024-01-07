@@ -50,12 +50,14 @@ decltype(ShaderPBR::DESCRIPTOR_SET_MATERIAL) ShaderPBR::DESCRIPTOR_SET_MATERIAL 
     prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
 static_assert(umath::to_integral(ShaderPBR::MaterialBinding::Count) == 9, "Number of bindings in material descriptor set does not match MaterialBinding enum count!");
 
-decltype(ShaderPBR::DESCRIPTOR_SET_PBR) ShaderPBR::DESCRIPTOR_SET_PBR = {{prosper::DescriptorSetInfo::Binding {// Irradiance Map
-                                                                            prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-  prosper::DescriptorSetInfo::Binding {// Prefilter Map
-    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
-  prosper::DescriptorSetInfo::Binding {// BRDF Map
-    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}}};
+decltype(ShaderPBR::DESCRIPTOR_SET_PBR) ShaderPBR::DESCRIPTOR_SET_PBR = {
+  {prosper::DescriptorSetInfo::Binding {// Irradiance Map
+     prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit, prosper::PrDescriptorSetBindingFlags::Cubemap},
+    prosper::DescriptorSetInfo::Binding {// Prefilter Map
+      prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit, prosper::PrDescriptorSetBindingFlags::Cubemap},
+    prosper::DescriptorSetInfo::Binding {// BRDF Map
+      prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},
+};
 ShaderPBR::ShaderPBR(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderGameWorldLightingPass {context, identifier, vsShader, fsShader, gsShader} {}
 ShaderPBR::ShaderPBR(prosper::IPrContext &context, const std::string &identifier) : ShaderPBR {context, identifier, "world/vs_textured", "world/pbr/fs_pbr"} {}
 
@@ -187,10 +189,11 @@ void ShaderPBR::OnPipelinesInitialized()
 	ShaderGameWorldLightingPass::OnPipelinesInitialized();
 	auto &context = c_engine->GetRenderContext();
 	m_defaultPbrDsg = context.CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_PBR);
-	auto &dummyTex = context.GetDummyCubemapTexture();
+	auto &dummyTex = context.GetDummyTexture();
+	auto &dummyCubemapTex = context.GetDummyCubemapTexture();
 	auto &ds = *m_defaultPbrDsg->GetDescriptorSet(0);
-	ds.SetBindingTexture(*dummyTex, umath::to_integral(PBRBinding::IrradianceMap));
-	ds.SetBindingTexture(*dummyTex, umath::to_integral(PBRBinding::PrefilterMap));
+	ds.SetBindingTexture(*dummyCubemapTex, umath::to_integral(PBRBinding::IrradianceMap));
+	ds.SetBindingTexture(*dummyCubemapTex, umath::to_integral(PBRBinding::PrefilterMap));
 	ds.SetBindingTexture(*dummyTex, umath::to_integral(PBRBinding::BRDFMap));
 }
 prosper::IDescriptorSet &ShaderPBR::GetDefaultPbrDescriptorSet() const { return *m_defaultPbrDsg->GetDescriptorSet(); }

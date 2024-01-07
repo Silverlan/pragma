@@ -13,6 +13,7 @@
 namespace pragma {
 	class DLLNETWORK BaseFlexComponent : public BaseEntityComponent, public DynamicMemberRegister {
 	  public:
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 
 		// Flex Controllers
@@ -30,12 +31,16 @@ namespace pragma {
 		void SetFlexControllerScale(float scale);
 		float GetFlexControllerScale() const;
 
+		void SetFlexControllerLimitsEnabled(bool enabled);
+		bool AreFlexControllerLimitsEnabled() const;
+
 		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
 	  protected:
 		void OnModelChanged(const std::shared_ptr<Model> &model);
 		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
 		BaseFlexComponent(BaseEntity &ent);
 		float m_flexControllerScale = 1.f;
+		bool m_enableFlexControllerLimits = true;
 	};
 };
 

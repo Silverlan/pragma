@@ -9,6 +9,9 @@
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
+#include "pragma/rendering/shaders/image/c_shader_flip_image.hpp"
+#include "pragma/rendering/shaders/image/c_shader_merge_images.hpp"
+#include "pragma/rendering/shaders/image/c_shader_merge_2d_image_into_equirectangular.hpp"
 #include "pragma/lua/converters/shader_converter_t.hpp"
 #include <pragma/lua/util.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -71,6 +74,12 @@ void Lua::shader::push_shader(lua_State *l, prosper::Shader &shader)
 			}
 			else if(dynamic_cast<pragma::ShaderComposeRMA *>(&shader))
 				Lua::PushRaw<pragma::ShaderComposeRMA *>(l, static_cast<pragma::ShaderComposeRMA *>(&shader));
+			else if(dynamic_cast<pragma::ShaderFlipImage *>(&shader))
+				Lua::PushRaw<pragma::ShaderFlipImage *>(l, static_cast<pragma::ShaderFlipImage *>(&shader));
+			else if(dynamic_cast<pragma::ShaderMergeImages *>(&shader))
+				Lua::PushRaw<pragma::ShaderMergeImages *>(l, static_cast<pragma::ShaderMergeImages *>(&shader));
+			else if(dynamic_cast<pragma::ShaderMerge2dImageIntoEquirectangular *>(&shader))
+				Lua::PushRaw<pragma::ShaderMerge2dImageIntoEquirectangular *>(l, static_cast<pragma::ShaderMerge2dImageIntoEquirectangular *>(&shader));
 			else
 				Lua::PushRaw<prosper::ShaderGraphics *>(l, static_cast<prosper::ShaderGraphics *>(&shader));
 		}

@@ -151,8 +151,8 @@ int Lua::sound::precache(lua_State *l)
 	auto mode = ALChannel::Auto;
 	if(Lua::IsSet(l, 2))
 		mode = static_cast<ALChannel>(Lua::CheckInt<int>(l, 2));
-	state->PrecacheSound(snd.c_str(), mode);
-	return 0;
+	Lua::PushBool(l, state->PrecacheSound(snd.c_str(), mode));
+	return 1;
 }
 
 int Lua::sound::stop_all(lua_State *l)

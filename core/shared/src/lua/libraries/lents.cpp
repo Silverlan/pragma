@@ -253,6 +253,9 @@ void Lua::ents::register_library(lua_State *l)
 				callback(c.get().GetLuaObject());
 			});
 		}),
+		luabind::def("link_component_type",+[](Game &game,pragma::ComponentId linkFrom,pragma::ComponentId linkTo) {
+			game.GetEntityComponentManager().LinkComponentType(linkFrom,linkTo);
+		}),
 		luabind::def("parse_uri",+[](const std::string &uriPath) -> std::optional<pragma::EntityUComponentMemberRef> {
 			pragma::EntityUComponentMemberRef ref;
 			if(!BaseEntity::ParseUri(uriPath,ref))

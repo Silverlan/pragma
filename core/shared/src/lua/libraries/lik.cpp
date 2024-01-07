@@ -265,6 +265,10 @@ void Lua::ik::register_library(Lua::Interface &lua)
 	classSolver.def("GetBoneCount", &pragma::ik::Solver::GetBoneCount);
 	classSolver.def("GetJointCount", &pragma::ik::Solver::GetJointCount);
 	classSolver.def("DebugPrint", &pragma::ik::debug_print);
+	classSolver.def("SetTimeStepDuration", &pragma::ik::Solver::SetTimeStepDuration);
+	classSolver.def("SetControlIterationCount", &pragma::ik::Solver::SetControlIterationCount);
+	classSolver.def("SetFixerIterationCount", &pragma::ik::Solver::SetFixerIterationCount);
+	classSolver.def("SetVelocitySubIterationCount", &pragma::ik::Solver::SetVelocitySubIterationCount);
 	classSolver.def("GetControl", static_cast<pragma::ik::IControl *(pragma::ik::Solver::*)(size_t)>(&pragma::ik::Solver::GetControl));
 	classSolver.def("GetBone", static_cast<pragma::ik::Bone *(pragma::ik::Solver::*)(pragma::ik::BoneId)>(&pragma::ik::Solver::GetBone));
 	classSolver.def(

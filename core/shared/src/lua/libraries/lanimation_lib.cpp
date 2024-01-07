@@ -319,6 +319,9 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	  });
 	cdChannel.def("Save", &panima::Channel::Save);
 	cdChannel.def("Load", &panima::Channel::Load);
+	cdChannel.def("InsertSample", &panima::Channel::InsertSample);
+	cdChannel.def("ScaleTimeInRange", &panima::Channel::ScaleTimeInRange);
+	cdChannel.def("ShiftTimeInRange", &panima::Channel::ShiftTimeInRange);
 	cdChannel.def("ClearAnimationData", &panima::Channel::ClearAnimationData);
 	cdChannel.def("ClearRange", &panima::Channel::ClearRange);
 	cdChannel.def("ClearRange", &panima::Channel::ClearRange, luabind::default_parameter_policy<4, true> {});

@@ -18,10 +18,10 @@
 #include "pragma/gui/debug/widebugshadowmap.hpp"
 #include <pragma/console/sh_cmd.h>
 #include <image/prosper_render_target.hpp>
+#include <wgui/types/wiroot.h>
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
 static WIHandle hGUIShadowmap;
 static int numShadowmapTargets = 0;
 static int shadowmapTargetIdx = -1;

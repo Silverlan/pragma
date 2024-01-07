@@ -1,0 +1,50 @@
+name: Build lua-debug
+description: 'Build lua-debug'
+inputs:
+  root_dir:
+    description: 'Path to pragma directory.'
+    default: 'pragma'
+  deps_dir:
+    description: 'Path to dependencies directory, where the build files for luamake and lua-debug will be stored.'
+    default: 'deps'
+  install_dir:
+    description: 'Path to install directory, where the lua-debug files will be copied to.'
+    default: 'install'
+runs:
+  using: "composite"
+  steps:
+    - uses: Silverlan/common_actions/action_start@main
+      with:
+        name: "pragma > build_luadebug"
+  
+    - name: Install Ninja
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y ninja-build
+
+    - name: Build luamake
+      shell: bash
+      run: |
+        python "${{inputs.root_dir}}/build_scripts/scripts/lua_debug/build_luamake.py" "${{inputs.deps_dir}}"
+
+    - name: Build luadebug
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        python "${{inputs.root_dir}}/build_scripts/scripts/lua_debug/build_luadebug.py" "${{inputs.deps_dir}}"
+
+    # On Windows we have to run this in powershell
+    - name: Build luadebug
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        python "${{inputs.root_dir}}/build_scripts/scripts/lua_debug/build_luadebug.py" "${{inputs.deps_dir}}"
+
+    - name: Install
+      shell: bash
+      run: |
+        python "${{inputs.root_dir}}/build_scripts/scripts/lua_debug/install_files.py" "${{inputs.deps_dir}}" "${{inputs.install_dir}}"
+  
+    - uses: Silverlan/common_actions/action_end@main

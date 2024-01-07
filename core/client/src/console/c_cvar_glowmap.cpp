@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/gui/debug/widebugglowbloom.hpp"
+#include <wgui/types/wiroot.h>
 
 extern DLLCLIENT CGame *c_game;
 

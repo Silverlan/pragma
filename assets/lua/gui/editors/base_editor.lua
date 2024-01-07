@@ -201,6 +201,13 @@ function gui.WIBaseEditor:GetWindowFrame(identifier)
 	end
 	return self.m_windowFrames[data.category]
 end
+function gui.WIBaseEditor:RegisterWindows()
+	for _, windowData in ipairs(pfm.get_registered_windows()) do
+		self:RegisterWindow(windowData.category, windowData.name, windowData.localizedName, function()
+			return windowData.factory(self)
+		end)
+	end
+end
 function gui.WIBaseEditor:OpenWindow(identifier, goToWindow)
 	if self.m_windowFactories[identifier] == nil or util.is_valid(self.m_windowFactories[identifier].element) then
 		if goToWindow then
@@ -230,9 +237,12 @@ function gui.WIBaseEditor:OpenWindow(identifier, goToWindow)
 	if goToWindow then
 		self:GoToWindow(identifier)
 	end
+	self:OnWindowOpened(identifier, el, frame, tab)
 	self:CallCallbacks("OnWindowOpened", identifier, el, frame, tab)
 	return tab, el, frame
 end
+
+function gui.WIBaseEditor:OnWindowOpened(identifier, el, frame, tab) end
 
 function gui.WIBaseEditor:GetWindows()
 	local windows = {}
@@ -352,6 +362,7 @@ function gui.WIBaseEditor:CreateWindow(class)
 end
 
 function gui.WIBaseEditor:Close()
+	prosper.wait_idle(true)
 	self:Remove()
 end
 function gui.WIBaseEditor:Open() end

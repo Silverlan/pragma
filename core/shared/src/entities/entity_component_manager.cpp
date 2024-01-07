@@ -293,6 +293,20 @@ ComponentId EntityComponentManager::PreRegisterComponentType(const std::string &
 }
 ComponentId EntityComponentManager::RegisterComponentType(const std::string &name, const std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity &)> &factory, ComponentFlags flags, std::type_index typeIndex) { return RegisterComponentType(name, factory, flags, &typeIndex); }
 ComponentId EntityComponentManager::RegisterComponentType(const std::string &name, const std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity &)> &factory, ComponentFlags flags) { return RegisterComponentType(name, factory, flags, nullptr); }
+void EntityComponentManager::LinkComponentType(ComponentId linkFrom, ComponentId linkTo)
+{
+	auto it = m_linkedComponentTypes.find(linkFrom);
+	if(it == m_linkedComponentTypes.end())
+		it = m_linkedComponentTypes.insert(std::make_pair(linkFrom, std::vector<ComponentTypeLinkInfo> {})).first;
+	auto &infos = it->second;
+	auto itV = std::find_if(infos.begin(), infos.end(), [linkTo](const ComponentTypeLinkInfo &linkInfo) { return linkInfo.targetType == linkTo; });
+	if(itV != infos.end())
+		return;
+	infos.push_back({});
+	auto &linkInfo = infos.back();
+	linkInfo.targetType = linkTo;
+	linkInfo.onCreateCallback = AddCreationCallback(linkTo, [linkFrom](std::reference_wrapper<BaseEntityComponent> c) { c.get().GetEntity().AddComponent(linkFrom); });
+}
 CallbackHandle EntityComponentManager::AddCreationCallback(ComponentId componentId, const std::function<void(std::reference_wrapper<BaseEntityComponent>)> &onCreate)
 {
 	auto *info = GetComponentInfo(componentId);

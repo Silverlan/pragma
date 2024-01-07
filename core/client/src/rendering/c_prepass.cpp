@@ -18,6 +18,7 @@
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <wgui/types/wirect.h>
+#include <wgui/types/wiroot.h>
 #include <image/prosper_render_target.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_msaa_texture.hpp>

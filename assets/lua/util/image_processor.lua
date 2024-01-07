@@ -34,12 +34,17 @@ function util.ImageProcessor:__init(w, h)
 	self:Reset()
 end
 
-function util.ImageProcessor:SetInputTexture(tex)
+function util.ImageProcessor:CreateTextureDescriptorSet(tex)
 	local dsInfo = shader.DescriptorSetInfo({
 		shader.DescriptorSetBinding(prosper.DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, prosper.SHADER_STAGE_FRAGMENT_BIT),
 	})
 	local ds = prosper.create_descriptor_set(dsInfo)
 	ds:SetBindingTexture(0, tex)
+	return ds
+end
+
+function util.ImageProcessor:SetInputTexture(tex)
+	local ds = self:CreateTextureDescriptorSet(tex)
 	self.m_inputTexture = {
 		texture = tex,
 		descriptorSet = ds,
@@ -191,4 +196,37 @@ function util.ImageProcessor:Apply(drawCmd, inputTex)
 		prosper.ACCESS_COLOR_ATTACHMENT_WRITE_BIT,prosper.ACCESS_SHADER_READ_BIT
 	)]]
 	return tex
+end
+
+function util.ImageProcessor:Finalize(drawCmd)
+	local texInput = self:GetInputTexture()
+	local lastTexInfo = self.m_textures[self.m_prevTexture]
+	if texInput == nil or lastTexInfo == nil then
+		return false
+	end
+	local lastTex = lastTexInfo.texture
+	drawCmd:RecordImageBarrier(
+		texInput:GetImage(),
+		prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		prosper.IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+	)
+	drawCmd:RecordImageBarrier(
+		lastTex:GetImage(),
+		prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		prosper.IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
+	)
+
+	drawCmd:RecordBlitImage(lastTex:GetImage(), texInput:GetImage(), prosper.BlitInfo())
+
+	drawCmd:RecordImageBarrier(
+		texInput:GetImage(),
+		prosper.IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+	)
+	drawCmd:RecordImageBarrier(
+		lastTex:GetImage(),
+		prosper.IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+	)
+	return true
 end

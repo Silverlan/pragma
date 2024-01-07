@@ -11,6 +11,8 @@ include_component("click")
 
 util.register_class("ents.GUI3D", BaseEntityComponent)
 
+include("drag_scrolling.lua")
+
 local ENABLE_MIPMAPS = false
 
 function ents.GUI3D:__init()
@@ -37,6 +39,36 @@ function ents.GUI3D:Initialize()
 	self:SetMsaaEnabled(false)
 	self:SetRefreshRate(24)
 	self.m_lastFrameRendered = 0.0
+
+	self.m_cmdBufferRecorder = prosper.create_command_buffer_recorder("gui_3d")
+	self.m_cmdBufferRecorder:SetOneTimeSubmit(false)
+	self:SetRenderWhenReady(true)
+
+	self:BindEvent(ents.ClickComponent.EVENT_ON_CLICK, "OnClick")
+end
+-- If enabled, rendering will only start if the render command buffer has been fully written to, otherwise
+-- rendering may be delayed to a future frame. This may result in lost UI frames.
+-- If enabled, rendering will be forced to wait for the render command buffer to complete. This may slow down rendering altogether.
+function ents.GUI3D:SetRenderWhenReady(renderWhenReady)
+	self.m_renderWhenReady = renderWhenReady
+end
+function ents.GUI3D:SetUseStencil(useStencil)
+	-- Enabling stencil rendering is more expensive but will enable UI scissors
+	self.m_drawToTexInfo.useStencil = useStencil
+end
+function ents.GUI3D:OnClick(action, pressed, hitPos)
+	local button
+	if action == input.ACTION_ATTACK then
+		button = input.MOUSE_BUTTON_LEFT
+	elseif action == input.ACTION_ATTACK2 then
+		button = input.MOUSE_BUTTON_RIGHT
+	elseif action == input.ACTION_ATTACK3 then
+		button = input.MOUSE_BUTTON_MIDDLE
+	end
+	if button == nil then
+		return
+	end
+	return self:InjectMouseInput(button, pressed and input.STATE_PRESS or input.STATE_RELEASE)
 end
 function ents.GUI3D:SetRefreshRate(refreshRate)
 	self.m_refreshRate = refreshRate
@@ -64,12 +96,32 @@ function ents.GUI3D:ScheduleRender()
 end
 function ents.GUI3D:SetGUIElement(el)
 	self.m_pGui = el
+	self:Setup()
 end
 function ents.GUI3D:GetGUIElement()
 	return self.m_pGui
 end
-function ents.GUI3D:SetInterfaceMesh(mesh)
+function ents.GUI3D:SetIntersectionTestBvh(bvh)
+	self.m_intersectionTestBvh = bvh
+end
+function ents.GUI3D:GetInterfaceMesh()
+	return self.m_interfaceMesh
+end
+function ents.GUI3D:SetInterfaceMesh(mesh, intersectionTestMesh)
+	if util.is_same_object(mesh, self.m_interfaceMesh) then
+		return
+	end
 	self.m_interfaceMesh = mesh
+
+	intersectionTestMesh = intersectionTestMesh or mesh
+	-- We need these for :CalcCursorPos
+	self.m_verts = intersectionTestMesh:GetVertices()
+	self.m_uvs = intersectionTestMesh:GetUVs()
+	self.m_triangles = intersectionTestMesh:GetIndices()
+
+	if self:GetEntity():IsSpawned() then
+		self:UpdateModel()
+	end
 end
 function ents.GUI3D:CreateSquareMesh()
 	local subMesh = game.Model.Mesh.Sub.create()
@@ -143,18 +195,36 @@ function ents.GUI3D:CalcCursorPos(origin, dir)
 			return
 		end
 	end
-	origin = trComponent:WorldToLocal(origin)
-	dir:Rotate(trComponent:GetRotation():GetInverse())
+
+	local pose = math.Transform(trComponent:GetOrigin(), trComponent:GetRotation())
+	local invPose = pose:GetInverse()
+	origin = invPose * origin
+	dir = dir:Copy()
+	dir:Rotate(invPose:GetRotation())
 	local p = self.m_pGui
 	if origin == nil or util.is_valid(p) == false then
 		return
 	end
-	--local dot = dir:DotProduct(self:GetForward())
-	--print(dot) -- TODO
 
-	local verts = self.m_interfaceMesh:GetVertices()
-	local uvs = self.m_interfaceMesh:GetUVs()
-	local triangles = self.m_interfaceMesh:GetIndices()
+	if util.is_valid(self.m_intersectionTestBvh) then
+		local maxDist = 32768.0
+		local hitData = self.m_intersectionTestBvh:IntersectionTest(origin, dir, 0.0, maxDist)
+		if hitData ~= nil then
+			local uv = hitData:CalcHitUv()
+			uv.x = uv.x * p:GetWidth()
+			uv.y = uv.y * p:GetHeight()
+			return uv
+		end
+		return
+	end
+
+	local verts = self.m_verts
+	local triangles = self.m_triangles
+	local uvs = self.m_uvs
+
+	if verts == nil then
+		return
+	end
 
 	local ent = self:GetEntity()
 	local trComponent = ent:GetComponent(ents.COMPONENT_TRANSFORM)
@@ -175,8 +245,6 @@ function ents.GUI3D:CalcCursorPos(origin, dir)
 			bc.y = bc.y % 1.0
 			local x = bc.x * p:GetWidth()
 			local y = bc.y * p:GetHeight()
-			--print(x,y)
-			--pCursor:SetPos(x,y)
 			return Vector2(x, y)
 		end --else self:OnExitedUseRange() end
 	end
@@ -200,14 +268,21 @@ function ents.GUI3D:SetCursor(texture, w, h)
 	el:SetZPos(10000)
 	self.m_cursor = el
 end
-function ents.GUI3D:SetCursorPos(origin, dir)
+function ents.GUI3D:SetCursorPos(origin, dir, fConsiderPos)
 	local p = self.m_pGui
 	if util.is_valid(p) == false then
 		return false
 	end
+
 	local pos = self:CalcCursorPos(origin, dir)
+	if fConsiderPos ~= nil and fConsiderPos(pos) == false then
+		return true
+	end
 	self.m_cursorPos = pos
 	if pos ~= nil then
+		if util.get_type_name(p) == "Root" then
+			p:SetRootCursorPosOverride(pos)
+		end
 		p:InjectMouseMoveInput(pos)
 	end
 	if util.is_valid(self.m_cursor) then
@@ -216,7 +291,7 @@ function ents.GUI3D:SetCursorPos(origin, dir)
 			self.m_cursor:SetPos(pos.x - self.m_cursor:GetWidth() / 2, pos.y - self.m_cursor:GetHeight() / 2)
 		end
 	end
-	return pos ~= nil
+	return pos ~= nil, pos
 end
 function ents.GUI3D:GetCursorPos()
 	if util.is_valid(self.m_cursor) == false then
@@ -238,6 +313,7 @@ function ents.GUI3D:IsAutoCursorUpdateEnabled()
 end
 function ents.GUI3D:OnTick()
 	self:UpdateCursorPos()
+	self:UpdateDragScrolling()
 end
 function ents.GUI3D:UpdateCursorPos()
 	if self.m_interfaceMesh == nil or self.m_autoCursorUpdateEnabled ~= true then
@@ -249,7 +325,16 @@ function ents.GUI3D:UpdateCursorPos()
 	--[[if(lp:GetDistance(self) <= 200.0) then -- TODO
 		self:OnEnteredUseRange()
 	else self:OnExitedUseRange() end]]
-	self:SetCursorPos(self:GetLocalRayData(false))
+	local origin, dir = self:GetLocalRayData(false)
+	local res, posCursor = self:SetCursorPos(origin, dir, function(pos)
+		return pos ~= self.m_prevCursorPos
+	end)
+	if res then
+		posCursor = posCursor or self.m_prevCursorPos
+	end
+	-- We only want to run functions like 'InjectMouseMoveInput' if the cursor position has actually changed,
+	-- so we'll keep track of the previous cursor position
+	self.m_prevCursorPos = posCursor
 end
 function ents.GUI3D:InitializeGUICallbacks()
 	local pl = ents.get_local_player()
@@ -275,30 +360,12 @@ function ents.GUI3D:InitializeGUICallbacks()
 					local key = self.m_keyDown
 					self.m_keyDown = nil
 					if key > input.KEY_BACKSPACE then
-						local elFocus = gui.get_focused_element()
-						self.m_pGui:InjectKeyboardInput(key, state, self.m_keyMods)
-						-- We don't want the element focus to change to any of the 3D elements, so we'll restore the focus back
-						if util.is_valid(elFocus) and gui.get_focused_element() ~= elFocus then
-							elFocus:RequestFocus()
-						end
+						self:InjectKeyboardInput(key, state)
 						return util.EVENT_REPLY_HANDLED
 					end
 					return util.EVENT_REPLY_UNHANDLED
 				end
-				local pos = self:CalcCursorPos()
-				if pos ~= nil then
-					local elFocus = gui.get_focused_element()
-					local res = self.m_pGui:InjectMouseInput(pos, bt, state)
-					if res == util.EVENT_REPLY_UNHANDLED then
-						self:BroadcastEvent(ents.GUI3D.EVENT_ON_UNHANDLED_MOUSE_INPUT, { pos, bt, state })
-					end
-					-- debug.print("InjectMouseInput ",self.m_pGui,pos,bt,state)
-					-- We don't want the element focus to change to any of the 3D elements, so we'll restore the focus back
-					if util.is_valid(elFocus) and gui.get_focused_element() ~= elFocus then
-						elFocus:RequestFocus()
-					end
-				end
-				return util.EVENT_REPLY_HANDLED
+				return self:InjectMouseInput(bt, state)
 			end
 		)
 	end
@@ -313,9 +380,81 @@ function ents.GUI3D:InitializeGUICallbacks()
 		return false
 	end)
 end
-function ents.GUI3D:InitializeGUIDrawCallback()
-	self.m_cbDrawGUI = game.add_callback("PostGUIDraw", function()
+function ents.GUI3D:InjectKeyboardInput(key, state)
+	log.info("Injecting keyboard input with key = " .. key .. ", state = " .. state .. " into 3D UI element...")
+	local elFocus = gui.get_focused_element()
+	self.m_pGui:InjectKeyboardInput(key, state, self.m_keyMods)
+	-- We don't want the element focus to change to any of the 3D elements, so we'll restore the focus back
+	if util.is_valid(elFocus) and gui.get_focused_element() ~= elFocus then
+		elFocus:RequestFocus()
+	end
+end
+function ents.GUI3D:DoInjectMouseInput(bt, state, pos)
+	pos = pos or self:CalcCursorPos()
+	if pos == nil then
+		return util.EVENT_REPLY_UNHANDLED
+	end
+	local elFocus = gui.get_focused_element()
+	local res = self.m_pGui:InjectMouseInput(pos, bt, state)
+	if res == util.EVENT_REPLY_UNHANDLED then
+		res = self:BroadcastEvent(ents.GUI3D.EVENT_ON_UNHANDLED_MOUSE_INPUT, { pos, bt, state })
+	end
+	-- debug.print("InjectMouseInput ",self.m_pGui,pos,bt,state)
+	-- We don't want the element focus to change to any of the 3D elements, so we'll restore the focus back
+	if util.is_valid(elFocus) and gui.get_focused_element() ~= elFocus then
+		elFocus:RequestFocus()
+	end
+	return res
+end
+function ents.GUI3D:InjectMouseInput(bt, state, pos, useCursor)
+	log.info(
+		"Injecting mouse input with button = "
+			.. bt
+			.. ", state = "
+			.. state
+			.. ", pos = "
+			.. tostring(pos)
+			.. " into 3D UI element..."
+	)
+	if pos == nil then
+		local fGetCursorPos
+		if useCursor then
+			if util.is_valid(self.m_cursor) then
+				fGetCursorPos = function()
+					return self:GetCursorPos()
+				end
+			end
+		else
+			fGetCursorPos = function()
+				return self:CalcCursorPos()
+			end
+		end
+		if self:HandleDragScrollingMouseInput(bt, state, fGetCursorPos) == util.EVENT_REPLY_HANDLED then
+			return util.EVENT_REPLY_HANDLED
+		end
+		pos = fGetCursorPos()
+		if pos == nil then
+			return util.EVENT_REPLY_UNHANDLED
+		end
+	end
+	return self:DoInjectMouseInput(bt, state, pos)
+end
+function ents.GUI3D:InitializeGUIDrawCallbacks()
+	-- We'll need the recorded command buffer for the GUI in time for the main scene render, so we'll
+	-- start with it as soon as possible
+	self.m_cbRecordGUI = game.add_callback("PreGUIRecord", function()
+		self:RecordDraw()
+	end)
+	self.m_cbDrawGUI = game.add_callback("PreRenderScenes", function()
 		self:DrawGUIElement()
+	end)
+	-- The recording MUST be complete by the time "PostGUIDraw" is called. This is usually the case,
+	-- but we'll wait on the command buffer recorder, just in case it is still busy.
+	self.m_cbEndRecordGUI = game.add_callback("PostGUIDraw", function()
+		if self.m_cmdBufferRecorder ~= nil then
+			self.m_cmdBufferRecorder:Wait()
+			self:DrawGUIElement()
+		end
 	end)
 end
 function ents.GUI3D:SetClearColor(clearColor)
@@ -327,7 +466,13 @@ end
 function ents.GUI3D:GetRenderTarget()
 	return self.m_renderTarget
 end
-function ents.GUI3D:DrawGUIElement()
+function ents.GUI3D:RecordDraw()
+	if self.m_readyForRendering then
+		return
+	end
+	if self:GetEntity():IsTurnedOn() == false then
+		return
+	end
 	if self.m_alwaysRender then
 		self.m_renderScheduled = true
 	end
@@ -364,7 +509,26 @@ function ents.GUI3D:DrawGUIElement()
 			prosper.IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
 		)
 	end
-	p:DrawToTexture(rt, drawInfo)
+	-- Pre-record draw calls
+	self.m_cmdBufferRecorder:StartRecording(rt:GetRenderPass(), rt:GetFramebuffer())
+	p:RecordDraw(self.m_cmdBufferRecorder, rt:GetTexture():GetImage(), drawInfo)
+	self.m_cmdBufferRecorder:EndRecording()
+	self.m_readyForRendering = true
+end
+function ents.GUI3D:DrawGUIElement()
+	if self.m_readyForRendering ~= true then
+		return
+	end
+	if self.m_renderWhenReady and self.m_cmdBufferRecorder:IsPending() then
+		-- Render command buffer is not ready yet, delay rendering to the next frame.
+		return
+	end
+	self.m_readyForRendering = nil
+
+	local drawCmd = game.get_draw_command_buffer()
+	drawCmd:RecordBeginRenderPass(self.m_rpInfo)
+	self.m_cmdBufferRecorder:ExecuteCommands(drawCmd)
+	drawCmd:RecordEndRenderPass()
 	-- Image now in shader read-only optimal layout
 
 	-- The interface will be rendered on a 3D object, which means it will be subject to gamma-correction.
@@ -372,6 +536,12 @@ function ents.GUI3D:DrawGUIElement()
 	-- to neutralize it.
 	local rtDst = self.m_renderTargetDst
 	local imgDst = rtDst:GetTexture():GetImage()
+	local imgSrc = self.m_renderTarget:GetColorAttachmentTexture():GetImage()
+	drawCmd:RecordImageBarrier(
+		imgSrc,
+		prosper.IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+	)
 	drawCmd:RecordImageBarrier(
 		imgDst,
 		prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
@@ -385,6 +555,11 @@ function ents.GUI3D:DrawGUIElement()
 		imgDst,
 		prosper.IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 		prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+	)
+	drawCmd:RecordImageBarrier(
+		imgSrc,
+		prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		prosper.IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
 	)
 
 	if ENABLE_MIPMAPS then
@@ -402,10 +577,19 @@ function ents.GUI3D:DrawGUIElement()
 	end
 end
 function ents.GUI3D:InitializeRenderTarget(w, h)
+	log.info("Creating render target for 3D UI element with resolution " .. w .. "x" .. h .. "...")
 	local msaa = self.m_drawToTexInfo.enableMsaa
 	local sampling = true
 	local rt = gui.create_render_target(w, h, msaa, sampling)
 	self.m_renderTarget = rt
+
+	local rpInfo = prosper.RenderPassInfo(rt)
+	rpInfo:SetClearValues({
+		prosper.ClearValue(),
+		prosper.ClearValue(0.0, 0),
+	})
+	rpInfo.renderPassFlags = prosper.CommandBuffer.RENDER_PASS_FLAG_SECONDARY_COMMAND_BUFFERS_BIT
+	self.m_rpInfo = rpInfo
 
 	local colTex = rt:GetColorAttachmentTexture()
 	local colImg = colTex:GetImage()
@@ -429,6 +613,8 @@ function ents.GUI3D:InitializeRenderTarget(w, h)
 	end
 
 	local imgCreateInfo = colImg:GetCreateInfo()
+	imgCreateInfo.width = w
+	imgCreateInfo.height = h
 	imgCreateInfo.samples = prosper.SAMPLE_COUNT_1_BIT
 	if ENABLE_MIPMAPS then
 		imgCreateInfo.flags = prosper.ImageCreateInfo.FLAG_FULL_MIPMAP_CHAIN_BIT
@@ -475,9 +661,8 @@ end
 function ents.GUI3D:SetShader(shaderName)
 	self.m_shaderName = shaderName
 end
-function ents.GUI3D:OnEntitySpawn()
-	self:InitializeGUICallbacks()
-	if self.m_pGui == nil then
+function ents.GUI3D:UpdateModel()
+	if self.m_material == nil then
 		return
 	end
 	local mdl = self:InitializeModel(self.m_interfaceMesh)
@@ -486,10 +671,12 @@ function ents.GUI3D:OnEntitySpawn()
 		return
 	end
 
-	if self.m_pGui:IsUpdateScheduled() then
-		self.m_pGui:Update()
-	end
-	self:InitializeGUIDrawCallback()
+	local matIdx = mdl:AddMaterial(0, self.m_material)
+	self.m_interfaceMesh:SetSkinTextureIndex(matIdx)
+
+	mdlComponent:SetModel(mdl)
+end
+function ents.GUI3D:ReloadRenderTarget()
 	self:InitializeRenderTarget(self.m_pGui:GetWidth(), self.m_pGui:GetHeight())
 	if self.m_renderTargetDst == nil then
 		return
@@ -502,17 +689,42 @@ function ents.GUI3D:OnEntitySpawn()
 		mat:GetData():SetValue("float", "roughness_factor", "1.0")
 	end
 	mat:SetTexture("albedo_map", self.m_renderTargetDst:GetTexture())
+	mat:UpdateTextures()
+	mat:InitializeShaderDescriptorSet()
+	mat:SetLoaded(true)
+	self.m_material = mat
+	self:UpdateModel()
+end
+function ents.GUI3D:Setup()
+	if self.m_initialized or self:GetEntity():IsSpawned() == false then
+		return
+	end
+	self:InitializeGUICallbacks()
+	if self.m_pGui == nil then
+		return
+	end
 
-	local matIdx = mdl:AddMaterial(0, mat)
-	self.m_interfaceMesh:SetSkinTextureIndex(matIdx)
-
-	mdlComponent:SetModel(mdl)
+	self.m_initialized = true
+	if self.m_pGui:IsUpdateScheduled() then
+		self.m_pGui:Update()
+	end
+	self:InitializeGUIDrawCallbacks()
+	self:ReloadRenderTarget()
+end
+function ents.GUI3D:OnEntitySpawn()
+	self:Setup()
 end
 function ents.GUI3D:OnRemove()
+	self:StopDragScrolling()
+	if self.m_cmdBufferRecorder ~= nil then
+		self.m_cmdBufferRecorder:Wait() -- Ensure the render recorder is not busy anymore
+	end
 	util.remove(self.m_pGui)
 	util.remove(self.m_cbActionInput)
 	util.remove(self.m_cbScrollInput)
 	util.remove(self.m_cbDrawGUI)
+	util.remove(self.m_cbRecordGUI)
+	util.remove(self.m_cbEndRecordGUI)
 end
 ents.COMPONENT_GUI3D = ents.register_component("gui_3d", ents.GUI3D)
 ents.GUI3D.EVENT_ON_UNHANDLED_MOUSE_INPUT = ents.register_component_event(ents.COMPONENT_GUI3D, "unhandled_mouse_input")

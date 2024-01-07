@@ -46,12 +46,14 @@ decltype(ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE) ShaderRayTracing::DESCRIPT
 decltype(ShaderRayTracing::DESCRIPTOR_SET_SCENE) ShaderRayTracing::DESCRIPTOR_SET_SCENE = {&ShaderForwardPLightCulling::DESCRIPTOR_SET_SCENE};
 decltype(ShaderRayTracing::DESCRIPTOR_SET_LIGHTS) ShaderRayTracing::DESCRIPTOR_SET_LIGHTS = {{prosper::DescriptorSetInfo::Binding {// Light Buffers
   prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::ComputeBit}}};
-decltype(ShaderRayTracing::DESCRIPTOR_SET_IBL) ShaderRayTracing::DESCRIPTOR_SET_IBL = {{prosper::DescriptorSetInfo::Binding {// Irradiance Map
-                                                                                          prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::ComputeBit},
-  prosper::DescriptorSetInfo::Binding {// Prefilter Map
-    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::ComputeBit},
-  prosper::DescriptorSetInfo::Binding {// BRDF Map
-    prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::ComputeBit}}};
+decltype(ShaderRayTracing::DESCRIPTOR_SET_IBL) ShaderRayTracing::DESCRIPTOR_SET_IBL = {
+  {prosper::DescriptorSetInfo::Binding {// Irradiance Map
+     prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::ComputeBit, prosper::PrDescriptorSetBindingFlags::Cubemap},
+    prosper::DescriptorSetInfo::Binding {// Prefilter Map
+      prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::ComputeBit, prosper::PrDescriptorSetBindingFlags::Cubemap},
+    prosper::DescriptorSetInfo::Binding {// BRDF Map
+      prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::ComputeBit}},
+};
 ShaderRayTracing::ShaderRayTracing(prosper::IPrContext &context, const std::string &identifier) : prosper::ShaderCompute(context, identifier, "world/raytracing/raytracing.gls") {}
 
 void ShaderRayTracing::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)

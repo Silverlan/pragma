@@ -11,6 +11,7 @@
 #include <util_image.hpp>
 #include <wgui/types/witext.h>
 #include <wgui/types/wirect.h>
+#include <wgui/types/wiroot.h>
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
 

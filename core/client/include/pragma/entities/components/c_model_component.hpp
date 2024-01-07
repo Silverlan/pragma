@@ -24,6 +24,7 @@ namespace pragma {
 	  public:
 		static ComponentEventId EVENT_ON_RENDER_MESHES_UPDATED;
 		static ComponentEventId EVENT_ON_MATERIAL_OVERRIDES_CLEARED;
+		static ComponentEventId EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED;
 
 		enum class StateFlags : uint8_t { None = 0u, AutoLodDisabled = 1u, RenderMeshUpdateRequired = AutoLodDisabled << 1u, RenderBufferListUpdateRequired = RenderMeshUpdateRequired << 1u, DepthPrepassDisabled = RenderBufferListUpdateRequired << 1u };
 
@@ -86,6 +87,13 @@ namespace pragma {
 		void SetBaseShaderSpecializationFlags(pragma::GameShaderSpecializationConstantFlag flags) { m_baseShaderSpecializationConstantFlags = flags; }
 		void SetBaseShaderSpecializationFlag(pragma::GameShaderSpecializationConstantFlag flag, bool enabled = true);
 
+		GameShaderSpecializationConstantFlag GetStaticShaderSpecializationFlags() const { return m_staticShaderSpecializationConstantFlags; }
+		void SetStaticShaderSpecializationFlags(GameShaderSpecializationConstantFlag flags)
+		{
+			m_staticShaderSpecializationConstantFlags = flags;
+			UpdateBaseShaderSpecializationFlags();
+		}
+
 		bool IsDepthPrepassEnabled() const;
 		void SetDepthPrepassEnabled(bool enabled);
 
@@ -111,6 +119,7 @@ namespace pragma {
 		std::vector<std::shared_ptr<ModelMesh>> m_lodMeshes;
 		std::vector<std::shared_ptr<ModelSubMesh>> m_lodRenderMeshes;
 		pragma::GameShaderSpecializationConstantFlag m_baseShaderSpecializationConstantFlags;
+		pragma::GameShaderSpecializationConstantFlag m_staticShaderSpecializationConstantFlags;
 
 		std::vector<RenderMeshGroup> m_lodMeshGroups;
 		std::vector<RenderMeshGroup> m_lodRenderMeshGroups;

@@ -81,6 +81,7 @@ namespace Console {
 		DLLCLIENT void debug_dump_font_glyph_map(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 		DLLCLIENT void debug_render_depth_buffer(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 		DLLCLIENT void debug_render_validation_error_enabled(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+		DLLCLIENT void debug_dump_component_properties(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 
 		DLLCLIENT void debug_audio_aux_effect(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 		DLLCLIENT void debug_audio_sounds(NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);

@@ -753,6 +753,8 @@ void CGame::Resize(bool reloadRenderTarget)
 
 void CGame::PreGUIDraw() { CallLuaCallbacks<void>("PreGUIDraw"); }
 void CGame::PostGUIDraw() { CallLuaCallbacks<void>("PostGUIDraw"); }
+void CGame::PreGUIRecord() { CallLuaCallbacks<void>("PreGUIRecord"); }
+void CGame::PostGUIRecord() { CallLuaCallbacks<void>("PostGUIRecord"); }
 void CGame::SetDefaultGameRenderEnabled(bool enabled) { m_defaultGameRenderEnabled = enabled; }
 bool CGame::IsDefaultGameRenderEnabled() const { return m_defaultGameRenderEnabled; }
 uint32_t CGame::GetNumberOfScenesQueuedForRendering() const { return m_sceneRenderQueue.size(); }

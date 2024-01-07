@@ -64,6 +64,7 @@ class DLLNETWORK ModelSubMesh : public std::enable_shared_from_this<ModelSubMesh
 	void ClearTriangles();
 	virtual void Centralize(const Vector3 &origin);
 	const Vector3 &GetCenter() const;
+	void SetCenter(const Vector3 &center);
 	uint32_t GetVertexCount() const;
 	uint32_t GetIndexCount() const;
 	uint32_t GetTriangleCount() const;

@@ -26,6 +26,7 @@
 #include <texturemanager/texturemanager.h>
 #include <texture_type.h>
 #include <wgui/types/wirect.h>
+#include <wgui/types/wiroot.h>
 #include <pragma/entities/baseentity_events.hpp>
 #include <pragma/console/command_options.hpp>
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
@@ -376,6 +377,17 @@ void CReflectionProbeComponent::OnEntitySpawn()
 	BaseEntityComponent::OnEntitySpawn();
 	if(LoadIBLReflectionsFromFile() == false)
 		Con::cwar << "Invalid/missing IBL reflection resources for cubemap " << GetCubemapIdentifier() << "! Please run 'map_build_reflection_probes' to build all reflection probes!" << Con::endl;
+}
+
+void CReflectionProbeComponent::OnRemove()
+{
+	BaseEntityComponent::OnRemove();
+	if(m_iblData) {
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblData->brdfMap);
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblData->irradianceMap);
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblData->prefilterMap);
+	}
+	c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_iblDsg);
 }
 
 std::string CReflectionProbeComponent::GetCubemapIBLMaterialFilePath() const

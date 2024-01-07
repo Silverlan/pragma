@@ -691,6 +691,38 @@ static std::shared_ptr<prosper::Texture> get_color_attachment_texture(lua_State 
 	return nullptr;
 }
 
+static std::optional<std::vector<std::shared_ptr<prosper::IImage>>> create_individual_images_from_layers(prosper::IImage &img)
+{
+	auto &context = c_engine->GetRenderContext();
+	auto createInfo = img.GetCreateInfo();
+	createInfo.layers = 1;
+	createInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
+	umath::remove_flag(createInfo.flags, prosper::util::ImageCreateInfo::Flags::Cubemap);
+
+	auto numLayers = img.GetLayerCount();
+	std::vector<std::shared_ptr<prosper::IImage>> images;
+	images.reserve(numLayers);
+	for(uint8_t i = 0; i < numLayers; ++i) {
+		auto img = context.CreateImage(createInfo);
+		if(!img)
+			return {};
+		images.push_back(img);
+	}
+
+	auto &cmd = context.GetSetupCommandBuffer();
+	cmd->RecordImageBarrier(img, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::TransferSrcOptimal);
+	prosper::util::BlitInfo blitInfo {};
+	for(auto i = decltype(images.size()) {0u}; i < images.size(); ++i) {
+		auto &dstImg = images[i];
+		blitInfo.srcSubresourceLayer.baseArrayLayer = i;
+		cmd->RecordBlitImage(blitInfo, img, *dstImg);
+		cmd->RecordImageBarrier(*dstImg, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
+	}
+	cmd->RecordImageBarrier(img, prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
+	context.FlushSetupCommandBuffer();
+	return images;
+}
+
 void register_vulkan_lua_interface2(Lua::Interface &lua, luabind::module_ &prosperMod); // Registration is split up to avoid compiler errors
 void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 {
@@ -719,6 +751,10 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	  luabind::def("create_gradient_texture", &Lua::Vulkan::create_gradient_texture), luabind::def("blur_texture", &Lua::Vulkan::blur_texture), luabind::def("blur_texture", &Lua::Vulkan::blur_texture, luabind::default_parameter_policy<3, static_cast<uint32_t>(1)> {}),
 	  luabind::def("create_event", &prosper::IPrContext::CreateEvent, luabind::render_context_policy<1> {}), luabind::def("create_fence", static_cast<std::shared_ptr<prosper::IFence> (*)(bool)>(&Lua::Vulkan::create_fence)),
 	  luabind::def("create_fence", static_cast<std::shared_ptr<prosper::IFence> (*)()>(&Lua::Vulkan::create_fence)), luabind::def("calculate_mipmap_count", &prosper::util::calculate_mipmap_count),
+	  luabind::def(
+	    "create_command_buffer_recorder", +[]() -> std::shared_ptr<Lua::Vulkan::CommandBufferRecorder> { return c_engine->GetRenderContext().CreateSwapCommandBufferGroup(c_engine->GetWindow()); }),
+	  luabind::def(
+	    "create_command_buffer_recorder", +[](const std::string &debugName) -> std::shared_ptr<Lua::Vulkan::CommandBufferRecorder> { return c_engine->GetRenderContext().CreateSwapCommandBufferGroup(c_engine->GetWindow(), true, debugName); }),
 	  luabind::def("calculate_mipmap_size", static_cast<Vector2i (*)(uint32_t, uint32_t, uint32_t)>(&Lua::Vulkan::calculate_mipmap_size)), luabind::def("calculate_mipmap_size", static_cast<uint32_t (*)(uint32_t, uint32_t)>(&Lua::Vulkan::calculate_mipmap_size)),
 	  luabind::def("result_to_string", static_cast<std::string (*)(prosper::Result)>(&::prosper::util::to_string)), luabind::def("format_to_string", static_cast<std::string (*)(prosper::Format)>(&::prosper::util::to_string)),
 	  luabind::def("shader_stage_to_string", static_cast<std::string (*)(prosper::ShaderStage)>(&::prosper::util::to_string)), luabind::def("is_depth_format", ::prosper::util::is_depth_format), luabind::def("is_compressed_format", ::prosper::util::is_compressed_format),
@@ -1507,6 +1543,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImage.def(luabind::tostring(luabind::self));
 	defVkImage.def(luabind::const_self == luabind::const_self);
 	defVkImage.def("IsValid", &Lua::Vulkan::VKImage::IsValid);
+	defVkImage.def("CreateIndividualImagesFromLayers", &create_individual_images_from_layers);
 	defVkImage.def("GetAspectSubresourceLayout", &prosper::IImage::GetSubresourceLayout);
 	defVkImage.def("GetAspectSubresourceLayout", static_cast<std::optional<prosper::util::SubresourceLayout> (*)(Lua::Vulkan::Image &, uint32_t)>([](Lua::Vulkan::Image &img, uint32_t layer) -> std::optional<prosper::util::SubresourceLayout> { return img.GetSubresourceLayout(layer); }));
 	defVkImage.def("GetAspectSubresourceLayout", static_cast<std::optional<prosper::util::SubresourceLayout> (*)(Lua::Vulkan::Image &)>([](Lua::Vulkan::Image &img) -> std::optional<prosper::util::SubresourceLayout> { return img.GetSubresourceLayout(); }));
@@ -1602,6 +1639,13 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		  if(result == false || imgBuffers.empty())
 			  return;
 		  push_image_buffers(l, info.includeLayers, info.includeMipmaps, imgBuffers);
+	  });
+	defVkImage.def(
+	  "CreateWorkingImage", +[](lua_State *l, Lua::Vulkan::Image &img, Lua::Vulkan::CommandBuffer &cmd) -> std::shared_ptr<prosper::IImage> {
+		  auto imgCreateInfo = img.GetCreateInfo();
+		  imgCreateInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
+		  imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit;
+		  return img.Copy(cmd, imgCreateInfo);
 	  });
 	defVkImage.def("GetMemoryBuffer", static_cast<prosper::IBuffer *(*)(lua_State *, Lua::Vulkan::Image &)>([](lua_State *l, Lua::Vulkan::Image &img) -> prosper::IBuffer * {
 		auto *buf = img.GetMemoryBuffer();
@@ -1734,6 +1778,11 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defCommandBufferRecorder.def(luabind::const_self == luabind::const_self);
 	defCommandBufferRecorder.def("IsValid", static_cast<bool (*)()>([]() -> bool { return true; }));
 	defCommandBufferRecorder.def("IsPending", &Lua::Vulkan::CommandBufferRecorder::IsPending);
+	defCommandBufferRecorder.def("SetOneTimeSubmit", &Lua::Vulkan::CommandBufferRecorder::SetOneTimeSubmit);
+	defCommandBufferRecorder.def("GetOneTimeSubmit", &Lua::Vulkan::CommandBufferRecorder::GetOneTimeSubmit);
+	defCommandBufferRecorder.def("Wait", &Lua::Vulkan::CommandBufferRecorder::Wait);
+	defCommandBufferRecorder.def("StartRecording", &Lua::Vulkan::CommandBufferRecorder::StartRecording);
+	defCommandBufferRecorder.def("EndRecording", &Lua::Vulkan::CommandBufferRecorder::EndRecording);
 	defCommandBufferRecorder.def("ExecuteCommands", static_cast<bool (*)(Lua::Vulkan::CommandBufferRecorder &, Lua::Vulkan::CommandBuffer &)>([](Lua::Vulkan::CommandBufferRecorder &recorder, Lua::Vulkan::CommandBuffer &drawCmd) -> bool {
 		return drawCmd.IsPrimary() && recorder.ExecuteCommands(dynamic_cast<prosper::IPrimaryCommandBuffer &>(drawCmd));
 	}));
@@ -1762,6 +1811,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defRenderPassInfo.def("AddClearValue", static_cast<void (*)(lua_State *, Lua::Vulkan::RenderPassInfo &, Lua::Vulkan::ClearValue &)>([](lua_State *l, Lua::Vulkan::RenderPassInfo &rpInfo, Lua::Vulkan::ClearValue &clearValue) { rpInfo.clearValues.push_back(clearValue); }));
 	defRenderPassInfo.def("SetRenderPass", static_cast<void (*)(lua_State *, Lua::Vulkan::RenderPassInfo &)>([](lua_State *l, Lua::Vulkan::RenderPassInfo &rpInfo) { rpInfo.renderPass = nullptr; }));
 	defRenderPassInfo.def("SetRenderPass", static_cast<void (*)(lua_State *, Lua::Vulkan::RenderPassInfo &, Lua::Vulkan::RenderPass &)>([](lua_State *l, Lua::Vulkan::RenderPassInfo &rpInfo, Lua::Vulkan::RenderPass &rp) { rpInfo.renderPass = rp.shared_from_this(); }));
+	defRenderPassInfo.def_readwrite("renderPassFlags", &Lua::Vulkan::RenderPassInfo::renderPassFlags);
 	prosperMod[defRenderPassInfo];
 
 	auto defWindowCreateInfo = luabind::class_<prosper::WindowSettings>("WindowCreateInfo");

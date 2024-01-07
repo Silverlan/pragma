@@ -44,8 +44,6 @@ class DLLCLIENT CALSound : public al::SoundSource, public ALSound {
 	virtual void Stop() override;
 	virtual void Pause() override;
 	virtual void Rewind() override;
-	virtual void SetOffset(float offset) override;
-	virtual float GetOffset() const override;
 	virtual void SetPitch(float pitch) override;
 	virtual float GetPitch() const override;
 	virtual void SetLooping(bool loop) override;
@@ -63,8 +61,8 @@ class DLLCLIENT CALSound : public al::SoundSource, public ALSound {
 	virtual Vector3 GetDirection() const override;
 	virtual void SetRelative(bool b) override;
 	virtual bool IsRelative() const override;
-	virtual void SetTimeOffset(float sec) override;
-	virtual float GetTimeOffset() const override;
+	virtual void SetOffset(float sec) override;
+	virtual float GetOffset() const override;
 	virtual float GetDuration() const override;
 	virtual float GetReferenceDistance() const override;
 	virtual void SetReferenceDistance(float dist) override;

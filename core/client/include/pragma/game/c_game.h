@@ -378,6 +378,8 @@ class DLLCLIENT CGame : public Game {
 	// GUI
 	void PreGUIDraw();
 	void PostGUIDraw();
+	void PreGUIRecord();
+	void PostGUIRecord();
 
 	// HDR
 	void Resize(bool reloadRenderTarget);

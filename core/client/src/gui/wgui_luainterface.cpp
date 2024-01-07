@@ -10,6 +10,7 @@
 #include "pragma/game/c_game.h"
 #include "pragma/gui/wgui_luainterface.h"
 #include <wgui/wibase.h>
+#include <wgui/types/wiroot.h>
 #include "pragma/lua/classes/c_ldef_wguihandles.h"
 #include <pragma/lua/raw_object.hpp>
 #include "pragma/gui/wiluahandlewrapper.h"
@@ -154,7 +155,7 @@ static std::optional<util::EventReply> GUI_Callback_OnCharEvent(WIBase &p, int c
 	return reply;
 }
 
-static std::optional<util::EventReply> GUI_Callback_OnScroll(WIBase &p, Vector2 offset)
+static std::optional<util::EventReply> GUI_Callback_OnScroll(WIBase &p, Vector2 offset, bool offsetAsPixels)
 {
 	lua_State *luaStates[2] = {client->GetGUILuaState(), NULL};
 	if(c_game != NULL)
@@ -171,11 +172,12 @@ static std::optional<util::EventReply> GUI_Callback_OnScroll(WIBase &p, Vector2 
 				auto functionIdx = Lua::GetStackTop(lua);
 				if(Lua::CallFunction(
 				     lua,
-				     [functionIdx, &o, &offset](lua_State *l) {
+				     [functionIdx, &o, &offset, &offsetAsPixels](lua_State *l) {
 					     Lua::PushValue(l, functionIdx);
 					     o.push(l);
 					     Lua::PushNumber(l, offset.x);
 					     Lua::PushNumber(l, offset.y);
+					     Lua::PushBool(l, offsetAsPixels);
 					     return Lua::StatusCode::Ok;
 				     },
 				     1)
@@ -199,7 +201,7 @@ void WGUILuaInterface::OnGameStart() { m_cbLuaReleased = c_game->AddCallback("On
 
 void WGUILuaInterface::OnGameLuaReleased(lua_State *)
 {
-	WIBase *el = WGUI::GetInstance().GetBaseElement();
+	auto *el = WGUI::GetInstance().GetBaseElement();
 	if(el == nullptr)
 		return;
 	ClearLuaObjects(el);
@@ -284,8 +286,8 @@ void WGUILuaInterface::InitializeGUIElement(WIBase &p)
 		}
 		return CallbackReturnType::NoReturnValue;
 	}));
-	p.AddCallback("OnScroll", FunctionCallback<util::EventReply, Vector2>::CreateWithOptionalReturn([&p](util::EventReply *reply, Vector2 offset) -> CallbackReturnType {
-		auto r = GUI_Callback_OnScroll(p, offset);
+	p.AddCallback("OnScroll", FunctionCallback<util::EventReply, Vector2, bool>::CreateWithOptionalReturn([&p](util::EventReply *reply, Vector2 offset, bool offsetAsPixels) -> CallbackReturnType {
+		auto r = GUI_Callback_OnScroll(p, offset, offsetAsPixels);
 		if(r.has_value()) {
 			*reply = *r;
 			return CallbackReturnType::HasReturnValue;
@@ -386,6 +388,8 @@ luabind::object WGUILuaInterface::CreateLuaObject(lua_State *l, WIBase &p)
 	}
 	else if(dynamic_cast<WITooltip *>(&p) != nullptr)
 		return cast_to_type<WITooltip>(l, p);
+	else if(dynamic_cast<WIRoot *>(&p) != nullptr)
+		return cast_to_type<WIRoot>(l, p);
 	return pragma::lua::raw_object_to_luabind_object(l, p.GetHandle());
 }
 

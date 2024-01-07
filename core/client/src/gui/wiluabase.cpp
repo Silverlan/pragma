@@ -93,15 +93,15 @@ util::EventReply WILuaBase::CharCallback(unsigned int c, GLFW::Modifier mods)
 	CallLuaMember<uint32_t, unsigned int, uint32_t>("CharCallback", &reply, c, umath::to_integral(mods));
 	return static_cast<util::EventReply>(reply);
 }
-util::EventReply WILuaBase::ScrollCallback(Vector2 offset)
+util::EventReply WILuaBase::ScrollCallback(Vector2 offset, bool offsetAsPixels)
 {
 	auto hThis = GetHandle();
-	if(WIBase::ScrollCallback(offset) == util::EventReply::Handled)
+	if(WIBase::ScrollCallback(offset, offsetAsPixels) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	if(!hThis.IsValid())
 		return util::EventReply::Unhandled;
 	uint32_t reply = umath::to_integral(util::EventReply::Unhandled);
-	CallLuaMember<uint32_t, double, double>("ScrollCallback", &reply, offset.x, offset.y);
+	CallLuaMember<uint32_t, double, double, bool>("ScrollCallback", &reply, offset.x, offset.y, offsetAsPixels);
 	return static_cast<util::EventReply>(reply);
 }
 

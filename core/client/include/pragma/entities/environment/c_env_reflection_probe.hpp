@@ -43,6 +43,7 @@ namespace pragma {
 		CReflectionProbeComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
+		virtual void OnRemove() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		bool CaptureIBLReflectionsFromScene(const std::vector<BaseEntity *> *optEntityList = nullptr, bool renderJob = false);
 		bool GenerateIBLReflectionsFromEnvMap(const std::string &envMapFileName);

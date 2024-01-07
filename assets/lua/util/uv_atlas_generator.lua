@@ -1,11 +1,3 @@
---[[
-    Copyright (C) 2019  Florian Weischer
-
-    This Source Code Form is subject to the terms of the Mozilla Public
-    License, v. 2.0. If a copy of the MPL was not distributed with this
-    file, You can obtain one at http://mozilla.org/MPL/2.0/.
-]]
-
 util.register_class("util.UVAtlasGenerator")
 function util.UVAtlasGenerator:__init(lmUuid)
 	local r = engine.load_library("pr_xatlas")
@@ -26,13 +18,16 @@ function util.UVAtlasGenerator:AddEntity(ent, meshFilter)
 	if mdl == nil or mdlC == nil or renderC == nil then
 		return
 	end
+
 	mdl = game.load_model(mdl:GetName()) -- Get original model
 	if mdl == nil then
 		return
 	end
+
 	if self.m_entities[ent] ~= nil then
 		return
 	end
+
 	mdl = mdl:Copy(bit.bor(game.Model.FCOPY_DEEP, game.Model.FCOPY_BIT_COPY_UNIQUE_IDS))
 
 	local skin = mdlC:GetSkin()

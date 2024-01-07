@@ -56,6 +56,7 @@
 #include <wgui/types/wicontextmenu.hpp>
 #include <wgui/types/witext.h>
 #include <wgui/types/witext_tags.hpp>
+#include <wgui/types/wiroot.h>
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
 #include <queries/prosper_query_pool.hpp>
@@ -105,6 +106,8 @@ CEngine::CEngine(int argc, char *argv[])
 	RegisterCallback<void, std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("DrawFrame");
 	RegisterCallback<void>("PreDrawGUI");
 	RegisterCallback<void>("PostDrawGUI");
+	RegisterCallback<void>("PreRecordGUI");
+	RegisterCallback<void>("PostRecordGUI");
 	RegisterCallback<void>("Draw");
 
 	RegisterCallbackWithOptionalReturn<bool, std::reference_wrapper<prosper::Window>, GLFW::MouseButton, GLFW::KeyState, GLFW::Modifier>("OnMouseInput");
@@ -671,14 +674,16 @@ bool CEngine::Initialize(int argc, char *argv[])
 		umath::swap(tmp.r, tmp.b);
 		auto hex = tmp.ToHexColorRGB();
 		COLORREF hexCol = ::util::to_hex_number("0x" + hex);
-		DwmSetWindowAttribute(h, DWMWINDOWATTRIBUTE::DWMWA_CAPTION_COLOR, &hexCol, sizeof(hexCol));
+		const DWORD ATTR_CAPTION_COLOR = 35; // See DWMWINDOWATTRIBUTE::DWMWA_CAPTION_COLOR, can't use the enum because it may not be available and there's no way to check for it
+		DwmSetWindowAttribute(h, ATTR_CAPTION_COLOR, &hexCol, sizeof(hexCol));
 	}
 	if(g_borderColor.has_value()) {
 		auto tmp = *g_borderColor;
 		umath::swap(tmp.r, tmp.b);
 		auto hex = tmp.ToHexColorRGB();
 		COLORREF hexCol = ::util::to_hex_number("0x" + hex);
-		DwmSetWindowAttribute(h, DWMWINDOWATTRIBUTE::DWMWA_BORDER_COLOR, &hexCol, sizeof(hexCol));
+		const DWORD ATTR_BORDER_COLOR = 34; // See DWMWINDOWATTRIBUTE::DWMWA_BORDER_COLOR, can't use the enum because it may not be available and there's no way to check for it
+		DwmSetWindowAttribute(h, ATTR_BORDER_COLOR, &hexCol, sizeof(hexCol));
 	}
 #endif
 #endif
@@ -1418,6 +1423,9 @@ void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 		StartProfilingStage(GPUProfilingPhase::GUI);
 
 		WGUI::GetInstance().SetLockedForDrawing(true);
+		CallCallbacks<void>("PreRecordGUI");
+		if(c_game != nullptr)
+			c_game->PreGUIRecord();
 		auto &context = GetRenderContext();
 		for(auto &window : context.GetWindows()) {
 			if(!window || window->IsValid() == false || window->GetState() != prosper::Window::State::Active)
@@ -1431,6 +1439,9 @@ void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 			});
 			swapCmdGroup.EndRecording();
 		}
+		CallCallbacks<void>("PostRecordGUI");
+		if(c_game != nullptr)
+			c_game->PostGUIRecord();
 
 		StopProfilingStage(GPUProfilingPhase::GUI);
 	}
@@ -1483,11 +1494,10 @@ void CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 			auto idx = GetPerformanceTimerIndex(GPUTimer::GUI);
 			m_gpuTimers[idx]->End(*primWindowCmd);
 		}
-		WGUI::GetInstance().SetLockedForDrawing(false);
 		CallCallbacks<void>("PostDrawGUI");
-
 		if(c_game != nullptr)
 			c_game->PostGUIDraw();
+		WGUI::GetInstance().SetLockedForDrawing(false);
 	}
 }
 
@@ -1620,10 +1630,12 @@ void CEngine::Tick()
 		// If the window is being resized by the user, we don't want to update the resolution constantly,
 		// so we add a small delay
 		if(dt > std::chrono::milliseconds {250}) {
-			umath::set_flag(m_stateFlags, StateFlags::WindowSizeChanged, false);
 			auto &window = GetWindow();
 			auto size = window.GetGlfwWindow().GetSize();
-			OnResolutionChanged(size.x, size.y);
+			if(size.x > 0 && size.y > 0) { // If either size is 0, the window is probably minimized and we don't need to update.
+				umath::set_flag(m_stateFlags, StateFlags::WindowSizeChanged, false);
+				OnResolutionChanged(size.x, size.y);
+			}
 		}
 	}
 
@@ -1664,6 +1676,7 @@ void CEngine::OnResolutionChanged(uint32_t width, uint32_t height)
 void CEngine::OnRenderResolutionChanged(uint32_t width, uint32_t height)
 {
 	GetRenderContext().GetWindow().ReloadStagingRenderTarget();
+	umath::set_flag(m_stateFlags, StateFlags::FirstFrame, true);
 
 	auto &wgui = WGUI::GetInstance();
 	auto *baseEl = wgui.GetBaseElement();

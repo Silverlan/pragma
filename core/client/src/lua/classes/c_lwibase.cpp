@@ -13,6 +13,7 @@
 #include "luasystem.h"
 #include <wgui/types/wirect.h>
 #include <wgui/types/widropdownmenu.h>
+#include <wgui/types/wiroot.h>
 #include "pragma/lua/libraries/c_gui_callbacks.hpp"
 #include "pragma/gui/wisilkicon.h"
 #include "pragma/gui/wisnaparea.hpp"
@@ -40,6 +41,7 @@
 #include <pragma/lua/lua_call.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_render_pass.hpp>
+#include <prosper_swap_command_buffer.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 #include <sharedutils/property/util_property_color.hpp>
 #include <sharedutils/util_hash.hpp>
@@ -47,29 +49,74 @@
 #include <util_formatted_text.hpp>
 #include <prosper_window.hpp>
 #include <luabind/copy_policy.hpp>
+#include <pragma/debug/intel_vtune.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-DLLCLIENT Con::c_cout &operator<<(Con::c_cout &os, const ::WIBase &handle)
+template<class TStream>
+static TStream &print_ui_element(TStream &os, const ::WIBase &handle)
 {
 	const WIBase *p = &handle;
-	os << "WIElement[" << p->GetClass() << "][" << p->GetName() << "][" << p->GetIndex() << "][" << &handle << "]";
+	auto pos = p->GetAbsolutePos();
+	auto &size = p->GetSize();
+	os << "WIElement[" << p->GetClass() << "][" << p->GetName() << "][" << p->GetIndex() << "][" << &handle << "][Pos:" << pos.x << "," << pos.y << "][Sz:" << size.x << "," << size.y << "]";
+	auto *elText = dynamic_cast<const WIText *>(p);
+	if(elText) {
+		auto text = elText->GetText().cpp_str();
+		if(text.length() > 10)
+			text = text.substr(0, 10) + "...";
+		os << "[" << text << "]";
+	}
+	else {
+		auto *elTex = dynamic_cast<const WITexturedShape *>(p);
+		if(elTex) {
+			auto *mat = const_cast<WITexturedShape *>(elTex)->GetMaterial();
+			if(mat)
+				os << "[" << mat->GetName() << "]";
+			else
+				os << "[NULL]";
+		}
+	}
 	return os;
 }
-DLLCLIENT std::ostream &operator<<(std::ostream &os, const ::WIBase &handle)
-{
-	const WIBase *p = &handle;
-	os << "WIElement[" << p->GetClass() << "][" << p->GetName() << "][" << p->GetIndex() << "][" << &handle << "]";
-	return os;
-}
+DLLCLIENT Con::c_cout &operator<<(Con::c_cout &os, const ::WIBase &handle) { return print_ui_element<Con::c_cout>(os, handle); }
+DLLCLIENT std::ostream &operator<<(std::ostream &os, const ::WIBase &handle) { return print_ui_element<std::ostream>(os, handle); }
 
 extern DLLCLIENT ClientState *client;
 
 static bool operator==(::WIBase &a, ::WIBase &b) { return &a == &b; }
 
+static void record_render_ui(WIBase &el, prosper::IImage &img, const Lua::gui::DrawToTextureInfo &info, const std::shared_ptr<prosper::ICommandBuffer> &drawCmd)
+{
+	auto useMsaa = (img.GetSampleCount() > prosper::SampleCountFlags::e1Bit);
+	if(info.clearColor) {
+		auto clearCol = info.clearColor->ToVector4();
+		drawCmd->RecordClearAttachment(img, std::array<float, 4> {clearCol[0], clearCol[1], clearCol[2], clearCol[3]});
+	}
+
+	WIBase::DrawInfo drawInfo {drawCmd};
+	drawInfo.size = {el.GetWidth(), el.GetHeight()};
+	drawInfo.useScissor = false;
+	drawInfo.useStencil = info.useStencil;
+	drawInfo.msaa = useMsaa;
+	std::optional<Mat4> rotMat = el.GetRotationMatrix() ? *el.GetRotationMatrix() : std::optional<Mat4> {};
+	if(rotMat.has_value()) {
+		el.ResetRotation(); // We'll temporarily disable the rotation for this element
+		drawInfo.useStencil = true;
+	}
+	wgui::DrawState drawState {};
+	drawState.SetScissor(0, 0, drawInfo.size.x, drawInfo.size.y);
+	el.Draw(drawInfo, drawState, {}, {}, drawInfo.size, el.GetScale());
+	if(rotMat.has_value())
+		el.SetRotation(*rotMat);
+}
 static bool render_ui(WIBase &el, prosper::RenderTarget &rt, const Lua::gui::DrawToTextureInfo &info)
 {
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().BeginTask("draw_ui_to_texture");
+	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
+#endif
 	auto &context = rt.GetContext();
 	auto drawCmd = info.commandBuffer;
 	if(!drawCmd)
@@ -88,25 +135,7 @@ static bool render_ui(WIBase &el, prosper::RenderTarget &rt, const Lua::gui::Dra
 	std::vector<prosper::ClearValue> clearVals = {prosper::ClearValue {}, prosper::ClearValue {prosper::ClearDepthStencilValue {0.f, 0}}};
 
 	drawCmd->GetPrimaryCommandBufferPtr()->RecordBeginRenderPass(rt, clearVals);
-	if(info.clearColor) {
-		auto clearCol = info.clearColor->ToVector4();
-		drawCmd->RecordClearAttachment(img, std::array<float, 4> {clearCol[0], clearCol[1], clearCol[2], clearCol[3]});
-	}
-
-	WIBase::DrawInfo drawInfo {drawCmd};
-	drawInfo.size = {el.GetWidth(), el.GetHeight()};
-	drawInfo.useScissor = false;
-	drawInfo.msaa = useMsaa;
-	std::optional<Mat4> rotMat = el.GetRotationMatrix() ? *el.GetRotationMatrix() : std::optional<Mat4> {};
-	if(rotMat.has_value()) {
-		el.ResetRotation(); // We'll temporarily disable the rotation for this element
-		drawInfo.useStencil = true;
-	}
-	wgui::DrawState drawState {};
-	drawState.SetScissor(0, 0, drawInfo.size.x, drawInfo.size.y);
-	el.Draw(drawInfo, drawState, {}, {}, drawInfo.size, el.GetScale());
-	if(rotMat.has_value())
-		el.SetRotation(*rotMat);
+	record_render_ui(el, rt.GetTexture().GetImage(), info, drawCmd);
 	drawCmd->GetPrimaryCommandBufferPtr()->RecordEndRenderPass();
 
 	if(!useMsaa) {
@@ -118,6 +147,11 @@ static bool render_ui(WIBase &el, prosper::RenderTarget &rt, const Lua::gui::Dra
 	drawCmd->RecordResolveImage(img, *info.resolvedImage);
 	drawCmd->RecordImageBarrier(*info.resolvedImage, prosper::ImageLayout::TransferDstOptimal, prosper::ImageLayout::ShaderReadOnlyOptimal);
 	return true;
+}
+
+static void record_draw_ui(WIBase &el, Lua::Vulkan::CommandBufferRecorder &cmdBufGroup, prosper::IImage &img, const Lua::gui::DrawToTextureInfo &info)
+{
+	cmdBufGroup.Record([&el, &img, &info](prosper::ISecondaryCommandBuffer &drawCmd) mutable { record_render_ui(el, img, info, drawCmd.shared_from_this()); });
 }
 
 static std::shared_ptr<prosper::Texture> draw_to_texture(WIBase &el, const Lua::gui::DrawToTextureInfo &info)
@@ -158,6 +192,17 @@ static void clamp_to_parent_bounds(::WIBase &el, Vector2i &clampedPos, Vector2i 
 	auto parent = el.GetParent();
 	Vector2i pos = el.GetPos();
 	Vector2i size = el.GetSize();
+}
+
+static void debug_print_hierarchy(const ::WIBase &el, const std::string &t = "")
+{
+	Con::cout << t << el << Con::endl;
+	auto subT = t + "\t";
+	for(auto &hChild : *const_cast<::WIBase &>(el).GetChildren()) {
+		if(hChild.IsValid() == false)
+			continue;
+		debug_print_hierarchy(*hChild, subT);
+	}
 }
 
 void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
@@ -267,6 +312,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def(
 	  "SetParentAndUpdateWindow", +[](lua_State *l, ::WIBase &hPanel, ::WIBase &hParent, uint32_t index) { hPanel.SetParentAndUpdateWindow(&hParent, index); });
 	classDef.def("ClearParent", &ClearParent);
+	classDef.def("ResetParent", &ResetParent);
 	classDef.def(
 	  "GetChildren", +[](lua_State *l, ::WIBase &hPanel) -> luabind::tableT<::WIBase> {
 		  auto &children = *hPanel.GetChildren();
@@ -294,6 +340,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("DrawToTexture", &draw_to_texture);
 	classDef.def(
 	  "DrawToTexture", +[](::WIBase &el) { return draw_to_texture(el, {}); });
+	classDef.def("RecordDraw", &record_draw_ui);
 	classDef.def("GetX", &GetX);
 	classDef.def("GetY", &GetY);
 	classDef.def("SetX", &SetX);
@@ -343,7 +390,8 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("InjectKeyPress", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, int)>(&InjectKeyPress));
 	classDef.def("InjectCharInput", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, std::string, uint32_t)>(&InjectCharInput));
 	classDef.def("InjectCharInput", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, std::string)>(&InjectCharInput));
-	classDef.def("InjectScrollInput", &InjectScrollInput);
+	classDef.def("InjectScrollInput", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, const Vector2 &, const Vector2 &, bool)>(&InjectScrollInput));
+	classDef.def("InjectScrollInput", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, const Vector2 &, const Vector2 &)>(&InjectScrollInput));
 	classDef.def("IsDescendant", &::WIBase::IsDescendant);
 	classDef.def("IsDescendantOf", &::WIBase::IsDescendantOf);
 	classDef.def("IsAncestor", &::WIBase::IsAncestor);
@@ -419,7 +467,13 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("SetAnchorTop", &::WIBase::SetAnchorTop);
 	classDef.def("SetAnchorBottom", &::WIBase::SetAnchorBottom);
 	classDef.def("ClearAnchor", &::WIBase::ClearAnchor);
-	classDef.def("GetAnchor", &::WIBase::GetAnchor, luabind::meta::join<luabind::out_value<2>, luabind::out_value<3>, luabind::out_value<4>, luabind::out_value<5>>::type {});
+	classDef.def(
+	  "GetAnchor", +[](::WIBase &el) -> std::optional<std::tuple<float, float, float, float>> {
+		  float left, top, right, bottom;
+		  if(!el.GetAnchor(left, top, right, bottom))
+			  return {};
+		  return std::tuple<float, float, float, float> {left, top, right, bottom};
+	  });
 	classDef.def("HasAnchor", &::WIBase::HasAnchor);
 	classDef.def("SetRemoveOnParentRemoval", &::WIBase::SetRemoveOnParentRemoval);
 	classDef.def("GetCenter", &::WIBase::GetCenter);
@@ -467,6 +521,8 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	  "ClampToVisibleBounds", +[](const ::WIBase &el, Vector2i &pos) { el.ClampToVisibleBounds(pos); });
 	classDef.def(
 	  "ClampToVisibleBounds", +[](const ::WIBase &el, Vector2i &pos, Vector2i &size) { el.ClampToVisibleBounds(pos, size); });
+	classDef.def(
+	  "DebugPrintHierarchy", +[](const ::WIBase &el) { debug_print_hierarchy(el); });
 
 	auto defDrawInfo = luabind::class_<::WIBase::DrawInfo>("DrawInfo");
 	defDrawInfo.def(luabind::constructor<const std::shared_ptr<prosper::ICommandBuffer> &>());
@@ -553,6 +609,7 @@ void Lua::WITexturedShape::register_class(luabind::class_<::WITexturedShape, lua
 	classDef.def("InvertVertexUVCoordinates", static_cast<void (*)(::WITexturedShape &)>([](::WITexturedShape &el) { el.InvertVertexUVCoordinates(); }));
 	classDef.def("ClearTexture", &::WITexturedShape::ClearTexture);
 	classDef.def("SizeToTexture", &::WITexturedShape::SizeToTexture);
+	classDef.def("GetTextureSize", &::WITexturedShape::GetTextureSize);
 	classDef.def("SetChannelSwizzle", &::WITexturedShape::SetChannelSwizzle);
 	classDef.def("SetChannelSwizzle", &::WITexturedShape::GetChannelSwizzle);
 	classDef.def("SetShader", static_cast<void (::WITexturedShape::*)(wgui::ShaderTextured &)>(&::WITexturedShape::SetShader));
@@ -988,7 +1045,8 @@ void Lua::WIBase::Wrap(lua_State *l, ::WIBase &hPanel, const std::string &wrappe
 	auto o = WGUILuaInterface::GetLuaObject(l, *el);
 	o.push(l);
 }
-void Lua::WIBase::ClearParent(lua_State *l, ::WIBase &hPanel) { hPanel.SetParent(WGUI::GetInstance().GetBaseElement()); }
+void Lua::WIBase::ClearParent(lua_State *l, ::WIBase &hPanel) { hPanel.SetParent(nullptr); }
+void Lua::WIBase::ResetParent(lua_State *l, ::WIBase &hPanel) { hPanel.SetParent(WGUI::GetInstance().GetBaseElement()); }
 void Lua::WIBase::GetChildren(lua_State *l, ::WIBase &hPanel, std::string className)
 {
 
@@ -1176,7 +1234,7 @@ namespace Lua {
 				else if(cbInfo.luaState == l) {
 					auto &o = cbInfo.luaFunction;
 					auto bReturn = false;
-					Lua::Execute(l, [l, &o, &hPanel, numArgs, argOffset, &bReturn, &name](int (*traceback)(lua_State * l)) {
+					Lua::Execute(l, [l, &o, &hPanel, numArgs, argOffset, &bReturn, &name](int (*traceback)(lua_State *l)) {
 						auto n = Lua::GetStackTop(l);
 						auto r = Lua::CallFunction(
 						  l,
@@ -1611,18 +1669,19 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 		  });
 	}
 	else if(name == "onscroll") {
-		hCallback = FunctionCallback<::util::EventReply, Vector2>::CreateWithOptionalReturn([l, hPanel, o](::util::EventReply *reply, Vector2 offset) mutable -> CallbackReturnType {
+		hCallback = FunctionCallback<::util::EventReply, Vector2, bool>::CreateWithOptionalReturn([l, hPanel, o](::util::EventReply *reply, Vector2 offset, bool offsetAsPixels) mutable -> CallbackReturnType {
 			if(!hPanel.IsValid())
 				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(
 			     l,
-			     [&o, hPanel, &offset](lua_State *l) mutable {
+			     [&o, hPanel, &offset, &offsetAsPixels](lua_State *l) mutable {
 				     o.push(l);
 
 				     auto obj = WGUILuaInterface::GetLuaObject(l, *hPanel.get());
 				     obj.push(l);
 				     Lua::PushNumber(l, offset.x);
 				     Lua::PushNumber(l, offset.y);
+				     Lua::PushBool(l, offsetAsPixels);
 				     return Lua::StatusCode::Ok;
 			     },
 			     1)
@@ -1794,21 +1853,43 @@ CallbackHandle Lua::WIBase::AddCallback(lua_State *l, ::WIBase &panel, std::stri
 }
 void Lua::WIBase::FadeIn(lua_State *l, ::WIBase &hPanel, float tFadeIn, float alphaTarget) { hPanel.FadeIn(tFadeIn, alphaTarget / 255.f); }
 void Lua::WIBase::FadeIn(lua_State *l, ::WIBase &hPanel, float tFadeIn) { Lua::WIBase::FadeIn(l, hPanel, tFadeIn, 255.f); }
+static std::optional<Vector2> get_cursor_pos_override(WIRoot *elRoot)
+{
+	if(!elRoot)
+		return {};
+	return elRoot->GetCursorPosOverride();
+}
+static void restore_cursor_pos_override(WIRoot *elRoot, const std::optional<Vector2> &pos)
+{
+	if(!elRoot)
+		return;
+	if(pos)
+		elRoot->SetCursorPosOverride(*pos);
+	else
+		elRoot->ClearCursorPosOverride();
+}
 void Lua::WIBase::InjectMouseMoveInput(lua_State *l, ::WIBase &hPanel, const Vector2 &mousePos)
 {
-
-	auto &window = c_engine->GetWindow();
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().BeginTask("inect_mouse_move_input");
+	util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
+#endif
+	auto *elRoot = hPanel.GetBaseRootElement();
 	auto absPos = hPanel.GetAbsolutePos();
-	window->SetCursorPosOverride(Vector2 {static_cast<float>(absPos.x + mousePos.x), static_cast<float>(absPos.y + mousePos.y)});
-	::util::ScopeGuard sg {[&window]() { window->ClearCursorPosOverride(); }};
+	auto origOverride = get_cursor_pos_override(elRoot);
+	if(elRoot)
+		elRoot->SetCursorPosOverride(Vector2 {static_cast<float>(absPos.x + mousePos.x), static_cast<float>(absPos.y + mousePos.y)});
+	::util::ScopeGuard sg {[elRoot, &origOverride]() { restore_cursor_pos_override(elRoot, origOverride); }};
 	hPanel.InjectMouseMoveInput(mousePos.x, mousePos.y);
 }
 ::util::EventReply Lua::WIBase::InjectMouseInput(lua_State *l, ::WIBase &hPanel, const Vector2 &mousePos, int button, int action, int mods)
 {
-	auto &window = c_engine->GetWindow();
+	auto *elRoot = hPanel.GetBaseRootElement();
 	auto absPos = hPanel.GetAbsolutePos();
-	window->SetCursorPosOverride(Vector2 {static_cast<float>(absPos.x + mousePos.x), static_cast<float>(absPos.y + mousePos.y)});
-	::util::ScopeGuard sg {[&window]() { window->ClearCursorPosOverride(); }};
+	auto origOverride = get_cursor_pos_override(elRoot);
+	if(elRoot)
+		elRoot->SetCursorPosOverride(Vector2 {static_cast<float>(absPos.x + mousePos.x), static_cast<float>(absPos.y + mousePos.y)});
+	::util::ScopeGuard sg {[elRoot, &origOverride]() { restore_cursor_pos_override(elRoot, origOverride); }};
 	return hPanel.InjectMouseInput(GLFW::MouseButton(button), GLFW::KeyState(action), GLFW::Modifier(mods));
 }
 ::util::EventReply Lua::WIBase::InjectMouseInput(lua_State *l, ::WIBase &hPanel, const Vector2 &mousePos, int button, int action) { return InjectMouseInput(l, hPanel, mousePos, button, action, 0); }
@@ -1850,16 +1931,20 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l, ::WIBase &hPanel, const Vec
 	const char *cStr = c.c_str();
 	return hPanel.InjectCharInput(cStr[0]);
 }
-::util::EventReply Lua::WIBase::InjectScrollInput(lua_State *l, ::WIBase &hPanel, const Vector2 &mousePos, const Vector2 &offset)
+::util::EventReply Lua::WIBase::InjectScrollInput(lua_State *l, ::WIBase &hPanel, const Vector2 &mousePos, const Vector2 &offset, bool offsetAsPixels)
 {
-	auto &window = c_engine->GetWindow();
-	auto cursorPos = window->GetCursorPos();
+	auto *elRoot = hPanel.GetBaseRootElement();
+	auto cursorPos = elRoot ? elRoot->GetCursorPos() : Vector2 {};
 	auto absPos = hPanel.GetAbsolutePos();
-	window->SetCursorPosOverride(Vector2 {static_cast<float>(absPos.x + mousePos.x), static_cast<float>(absPos.y + mousePos.y)});
-	auto result = hPanel.InjectScrollInput(offset);
-	window->ClearCursorPosOverride();
+	auto origOverride = get_cursor_pos_override(elRoot);
+	if(elRoot)
+		elRoot->SetCursorPosOverride(Vector2 {static_cast<float>(absPos.x + mousePos.x), static_cast<float>(absPos.y + mousePos.y)});
+	auto result = hPanel.InjectScrollInput(offset, offsetAsPixels);
+	if(elRoot)
+		restore_cursor_pos_override(elRoot, origOverride);
 	return result;
 }
+::util::EventReply Lua::WIBase::InjectScrollInput(lua_State *l, ::WIBase &hPanel, const Vector2 &mousePos, const Vector2 &offset) { return InjectScrollInput(l, hPanel, mousePos, offset, false); }
 void Lua::WIBase::FindChildByName(lua_State *l, ::WIBase &hPanel, std::string name)
 {
 	auto *el = hPanel.FindChildByName(name);

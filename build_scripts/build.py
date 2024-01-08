@@ -43,6 +43,7 @@ parser.add_argument('--module', help='Custom modules to install. Use this parame
 parser.add_argument("--verbose", type=str2bool, nargs='?', const=True, default=False, help="Print additional verbose output.")
 parser.add_argument("--update", type=str2bool, nargs='?', const=True, default=False, help="Update Pragma and all submodules and modules to the latest versions.")
 parser.add_argument("--rerun", type=str2bool, nargs='?', const=True, default=False, help="Re-run the build script with the previous arguments.")
+parser.add_argument("--skip-repository-updates", type=str2bool, nargs='?', const=True, default=False, help=argparse.SUPPRESS)
 if platform == "linux":
 	parser.add_argument("--no-sudo", type=str2bool, nargs='?', const=True, default=False, help="Will not run sudo commands. System packages will have to be installed manually.")
 	parser.add_argument("--no-confirm", type=str2bool, nargs='?', const=True, default=False, help="Disable any interaction with user (suitable for automated run).")
@@ -103,6 +104,7 @@ build_directory = args["build_directory"]
 deps_directory = args["deps_directory"]
 install_directory = args["install_directory"]
 additional_cmake_args = args["cmake_arg"]
+skip_repository_updates = args["skip_repository_updates"]
 scripts_dir = os.getcwd() +"/build_scripts"
 #log_file = args["log_file"]
 verbose = args["verbose"]
@@ -755,9 +757,10 @@ for module in module_info:
 
 	print("Module Directory: " +moduleDir)
 
-	if not moduleName in shippedModules:
-		if moduleUrl:
-			get_submodule(moduleName,moduleUrl,commitId,branch)
+	if not skip_repository_updates:
+		if not moduleName in shippedModules:
+			if moduleUrl:
+				get_submodule(moduleName,moduleUrl,commitId,branch)
 
 	scriptPath = moduleDir +"build_scripts/setup.py"
 	if Path(scriptPath).is_file():
@@ -922,21 +925,22 @@ def download_addon(name,addonName,url,commitId=None):
 	os.chdir("..")
 
 curDir = os.getcwd()
-if with_pfm:
-	download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","d180790bd290a12c3ac2f70e0d6038f8dd3017bf")
-	download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","0f969464c1cf49cf2b264b95a42f9b69dce16a5f")
+if not skip_repository_updates:
+	if with_pfm:
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","d180790bd290a12c3ac2f70e0d6038f8dd3017bf")
+		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","0f969464c1cf49cf2b264b95a42f9b69dce16a5f")
 
-if with_vr:
-	download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","26912f1dbd1f25fed244592bce59ac4b59007ed1")
+	if with_vr:
+		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","26912f1dbd1f25fed244592bce59ac4b59007ed1")
 
-if with_pfm:
-	download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")
-	download_addon("PFM Bedroom Demo","pfm_demo_bedroom","https://github.com/Silverlan/pfm_demo_bedroom.git","0fed1d5b54a25c3ded2ce906e7da80ca8dd2fb0d")
-	download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","494aba78be98caf34249e3c7cb3e43477634c272")
+	if with_pfm:
+		download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")
+		download_addon("PFM Bedroom Demo","pfm_demo_bedroom","https://github.com/Silverlan/pfm_demo_bedroom.git","0fed1d5b54a25c3ded2ce906e7da80ca8dd2fb0d")
+		download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","494aba78be98caf34249e3c7cb3e43477634c272")
 
-if with_source_engine_entities:
-	download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","a70f575")
-	download_addon("TF2","pragma_tf2","https://github.com/Silverlan/pragma_tf2.git","eddee1f")
+	if with_source_engine_entities:
+		download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","a70f575")
+		download_addon("TF2","pragma_tf2","https://github.com/Silverlan/pragma_tf2.git","eddee1f")
 
 os.chdir(curDir)
 

@@ -9,43 +9,12 @@
 #include "pragma/entities/components/base_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/base_static_bvh_user_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
+#include "pragma/util/functional_parallel_worker.hpp"
 #include "pragma/logging.hpp"
 
 using namespace pragma;
 
 static spdlog::logger &LOGGER = pragma::register_logger("bvh");
-class FunctionalParallelWorker : public util::ParallelWorker<void> {
-  public:
-	using Task = std::function<void(FunctionalParallelWorker &)>;
-	FunctionalParallelWorker();
-	void WaitForTask();
-	virtual void GetResult() override;
-
-	void ResetTask(const Task &task);
-	void CancelTask();
-	bool IsTaskCancelled() const;
-
-	using util::ParallelWorker<void>::SetResultMessage;
-	using util::ParallelWorker<void>::UpdateProgress;
-  private:
-	using util::ParallelWorker<void>::AddThread;
-	virtual void DoCancel(const std::string &resultMsg, std::optional<int32_t> resultCode) override;
-	std::mutex m_taskMutex;
-
-	Task m_nextTask;
-	std::atomic<bool> m_taskCancelled = false;
-
-	std::condition_variable m_taskAvailableCond;
-
-	std::condition_variable m_taskCompleteCond;
-	std::mutex m_taskCompleteMutex;
-
-	std::atomic<bool> m_taskAvailable = false;
-	std::atomic<bool> m_taskComplete = false;
-	std::mutex m_taskAvailableMutex;
-	template<typename TJob, typename... TARGS>
-	friend util::ParallelJob<typename TJob::RESULT_TYPE> util::create_parallel_job(TARGS &&...args);
-};
 
 BaseStaticBvhCacheComponent::BaseStaticBvhCacheComponent(BaseEntity &ent) : BaseBvhComponent(ent) {}
 BaseStaticBvhCacheComponent::~BaseStaticBvhCacheComponent()
@@ -74,91 +43,6 @@ void BaseStaticBvhCacheComponent::OnRemove()
 		ent->SetStaticBvhCacheComponent(nullptr);
 }
 
-bool FunctionalParallelWorker::IsTaskCancelled() const { return m_taskCancelled; }
-
-void FunctionalParallelWorker::CancelTask()
-{
-	if(!IsPending())
-		return;
-	m_taskMutex.lock();
-	m_taskCancelled = true;
-	m_nextTask = nullptr;
-	m_taskMutex.unlock();
-
-	m_taskAvailableMutex.lock();
-	m_taskAvailableCond.notify_one();
-	m_taskAvailableMutex.unlock();
-
-	WaitForTask();
-
-	m_taskComplete = false;
-	m_taskCancelled = false;
-}
-
-void FunctionalParallelWorker::ResetTask(const Task &task)
-{
-	CancelTask();
-
-	m_taskMutex.lock();
-	m_nextTask = task;
-	m_taskMutex.unlock();
-
-	m_taskAvailableMutex.lock();
-	m_taskAvailable = true;
-	m_taskAvailableCond.notify_one();
-	m_taskAvailableMutex.unlock();
-}
-
-FunctionalParallelWorker::FunctionalParallelWorker() : util::ParallelWorker<void> {}
-{
-	AddThread([this]() {
-		while(!IsCancelled()) {
-			auto ul = std::unique_lock<std::mutex> {m_taskAvailableMutex};
-			m_taskAvailableCond.wait(ul, [this]() -> bool { return m_taskAvailable || IsCancelled() || m_taskCancelled; });
-			if(IsCancelled())
-				break;
-			m_taskMutex.lock();
-			auto task = std::move(m_nextTask);
-			m_nextTask = nullptr;
-			m_taskAvailable = false;
-			auto taskCancelled = m_taskCancelled ? true : false;
-			m_taskCancelled = false;
-			m_taskMutex.unlock();
-
-			if(!taskCancelled) {
-				assert(task != nullptr);
-				if(task)
-					task(*this);
-			}
-
-			m_taskCompleteMutex.lock();
-			m_taskComplete = true;
-			m_taskCompleteCond.notify_one();
-			m_taskCompleteMutex.unlock();
-		}
-
-		m_taskCompleteMutex.lock();
-		m_taskComplete = true;
-		m_taskCompleteCond.notify_one();
-		m_taskCompleteMutex.unlock();
-	});
-}
-void FunctionalParallelWorker::WaitForTask()
-{
-	auto ul = std::unique_lock<std::mutex> {m_taskCompleteMutex};
-	m_taskCompleteCond.wait(ul, [this]() -> bool { return m_taskComplete; });
-}
-void FunctionalParallelWorker::GetResult() { return; } //std::move(m_result);}
-void FunctionalParallelWorker::DoCancel(const std::string &resultMsg, std::optional<int32_t> resultCode)
-{
-	util::ParallelWorker<void>::DoCancel(resultMsg, resultCode);
-
-	m_taskAvailableMutex.lock();
-	m_taskAvailable = true;
-	m_taskAvailableCond.notify_one();
-	m_taskAvailableMutex.unlock();
-}
-
 bool BaseStaticBvhCacheComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, BvhHitInfo &outHitInfo) const
 {
 	//const_cast<BaseStaticBvhCacheComponent *>(this)->UpdateBuild();
@@ -172,7 +56,7 @@ void BaseStaticBvhCacheComponent::Build(std::vector<std::shared_ptr<ModelSubMesh
 	LOGGER.info("Building new static BVH cache...");
 	m_bvhInitialized = true;
 	if(!m_buildWorker) {
-		m_buildWorker = std::make_unique<FunctionalParallelWorker>();
+		m_buildWorker = std::make_unique<util::FunctionalParallelWorker>(true);
 		m_buildWorker->Start();
 	}
 	// m_bvhDataMutex.lock();
@@ -180,7 +64,7 @@ void BaseStaticBvhCacheComponent::Build(std::vector<std::shared_ptr<ModelSubMesh
 	// m_bvhDataMutex.unlock();
 	m_buildWorker->CancelTask();
 	m_bvhPendingWorkerResult = std::unique_ptr<BvhPendingWorkerResult> {new BvhPendingWorkerResult {}};
-	m_buildWorker->ResetTask([this, meshes = std::move(meshes), meshPoses = std::move(meshPoses), meshToEntity = std::move(meshToEntity)](FunctionalParallelWorker &worker) {
+	m_buildWorker->ResetTask([this, meshes = std::move(meshes), meshPoses = std::move(meshPoses), meshToEntity = std::move(meshToEntity)](util::FunctionalParallelWorker &worker) {
 		std::vector<size_t> meshIndices;
 		BaseBvhComponent::BvhBuildInfo buildInfo {};
 		buildInfo.isCancelled = [this]() -> bool { return m_buildWorker->IsTaskCancelled(); };

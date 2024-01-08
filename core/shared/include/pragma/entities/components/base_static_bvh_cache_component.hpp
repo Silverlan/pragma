@@ -11,7 +11,9 @@
 #include "pragma/util/util_thread_pool.hpp"
 #include <unordered_set>
 
-class FunctionalParallelWorker;
+namespace util {
+	class FunctionalParallelWorker;
+};
 namespace pragma {
 	class BaseStaticBvhUserComponent;
 	class DLLNETWORK BaseStaticBvhCacheComponent : public BaseBvhComponent {
@@ -47,7 +49,7 @@ namespace pragma {
 		virtual void TestRebuildBvh() = 0;
 		bool m_staticBvhDirty = false;
 		bool m_bvhInitialized = false; // Was the bvh initialized at least once?
-		std::shared_ptr<FunctionalParallelWorker> m_buildWorker = nullptr;
+		std::shared_ptr<util::FunctionalParallelWorker> m_buildWorker = nullptr;
 		std::unordered_set<BaseStaticBvhUserComponent *> m_entities;
 		std::unique_ptr<BvhPendingWorkerResult> m_bvhPendingWorkerResult;
 		CallbackHandle m_onEndGame;

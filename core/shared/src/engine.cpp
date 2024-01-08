@@ -101,7 +101,7 @@ Engine::Engine(int, char *[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(En
 {
 	// TODO: File cache doesn't work with absolute paths at the moment
 	// (e.g. addons/imported/models/some_model.pmdl would return false even if the file exists)
-    filemanager::set_use_file_index_cache(true);
+	filemanager::set_use_file_index_cache(true);
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::open_domain();
@@ -262,6 +262,18 @@ void Engine::Close()
 	if(umath::is_flag_set(m_stateFlags, StateFlags::Closed))
 		return;
 	umath::set_flag(m_stateFlags, StateFlags::Closed);
+
+	if(ShouldRunUpdaterOnClose()) {
+		std::string processPath;
+#ifdef _WIN32
+		processPath = "bin/updater.exe";
+#else
+		processPath = "lib/updater";
+#endif
+		if(!::util::start_process(processPath.c_str()))
+			Con::cwar << "Failed to launch updater '" << processPath << "'! Please execute manually to install update." << Con::endl;
+	}
+
 	// Cancel all running jobs, then wait until
 	// they have completed
 	for(auto &jobInfo : m_parallelJobs)
@@ -396,6 +408,9 @@ uint32_t Engine::ClearUnusedAssets(const std::vector<pragma::asset::Type> &types
 		spdlog::info("{} assets have been cleared!", n);
 	return n;
 }
+
+void Engine::SetRunUpdaterOnClose(bool run) { umath::set_flag(m_stateFlags, StateFlags::RunUpdaterOnClose, run); }
+bool Engine::ShouldRunUpdaterOnClose() const { return umath::is_flag_set(m_stateFlags, StateFlags::RunUpdaterOnClose); }
 
 void Engine::ClearCache()
 {

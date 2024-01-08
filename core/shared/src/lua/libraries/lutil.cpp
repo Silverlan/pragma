@@ -616,15 +616,7 @@ void Lua::util::register_library(lua_State *l)
 		    return util::Uuid {::util::generate_uuid_v4(seed)};
 	    }),
 	  luabind::def(
-	    "run_updater", +[]() -> bool {
-		    std::string processPath;
-#ifdef _WIN32
-		    processPath = "bin/updater.exe";
-#else
-			processPath = "lib/updater";
-#endif
-		    return ::util::start_process(processPath.c_str());
-	    })];
+	    "run_updater", +[](Engine &engine) { engine.SetRunUpdaterOnClose(true); })];
 	nsRetarget[luabind::def("initialize_retarget_data", &Lua::util::retarget::initialize_retarget_data)];
 	nsRetarget[luabind::def("apply_retarget_rig", &Lua::util::retarget::apply_retarget_rig)];
 	nsRetarget[luabind::def("initialize_retarget_flex_data", &Lua::util::retarget::initialize_retarget_flex_data)];

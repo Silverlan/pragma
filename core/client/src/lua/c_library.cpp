@@ -1176,6 +1176,10 @@ void CGame::RegisterLuaLibraries()
 	Game::RegisterLuaLibraries();
 	ClientState::RegisterSharedLuaLibraries(GetLuaInterface());
 
+	auto consoleMod = luabind::module(GetLuaState(), "console");
+	consoleMod[luabind::def(
+	  "save_config", +[](CEngine &engine) { engine.SaveClientConfig(); })];
+
 	GetLuaInterface().RegisterLibrary("asset",
 	  {{"export_map", Lua::util::Client::export_map}, {"import_model", Lua::util::Client::import_model}, {"import_gltf", Lua::util::Client::import_gltf}, {"export_texture", Lua::util::Client::export_texture}, {"export_material", Lua::util::Client::export_material},
 	    {"export_texture_as_vtf", static_cast<int32_t (*)(lua_State *)>([](lua_State *l) -> int32_t {

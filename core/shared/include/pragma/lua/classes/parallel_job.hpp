@@ -27,6 +27,7 @@ namespace pragma::lua {
 		void AddLuaTask(const Lua::func<bool> &task, const Lua::func<bool> &cancel, float taskProgress);
 		void CallOnComplete(const Lua::func<void> &func);
 		void UpdateProgress(float progress);
+		void SetProgressCallback(const Lua::func<float> &func);
 	  private:
 		virtual void DoCancel(const std::string &resultMsg, std::optional<int32_t> resultCode) override;
 		void Clear();
@@ -41,6 +42,9 @@ namespace pragma::lua {
 			float progressAmount = 1.f;
 		};
 		void UpdateTaskProgress(const Task &task, float taskProgress);
+
+		std::optional<Lua::func<float>> m_progressCallback = {};
+		float m_lastProgress = 0.f;
 
 		std::function<void(LuaWorker &)> m_onComplete = nullptr;
 		luabind::object m_result {};

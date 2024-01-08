@@ -617,12 +617,37 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defWorker.def("UpdateProgress", &pragma::lua::LuaWorker::UpdateProgress);
 	defWorker.def("AddTask", static_cast<void (*)(pragma::lua::LuaWorker &, const std::shared_ptr<util::ParallelJob<luabind::object>> &, float)>(&add_task));
 	defWorker.def("AddTask", static_cast<void (*)(lua_State *, pragma::lua::LuaWorker &, const luabind::object &, const luabind::object &, float)>(&add_task));
+	defWorker.def("SetProgressCallback", &pragma::lua::LuaWorker::SetProgressCallback);
+	defWorker.def(
+	  "Cancel", +[](pragma::lua::LuaWorker &worker) { worker.Cancel(); });
+	defWorker.def(
+	  "IsComplete", +[](pragma::lua::LuaWorker &worker) { return worker.IsComplete(); });
+	defWorker.def(
+	  "IsPending", +[](pragma::lua::LuaWorker &worker) { return worker.IsPending(); });
+	defWorker.def(
+	  "IsCancelled", +[](pragma::lua::LuaWorker &worker) { return worker.IsCancelled(); });
+	defWorker.def(
+	  "IsSuccessful", +[](pragma::lua::LuaWorker &worker) { return worker.IsSuccessful(); });
+	defWorker.def(
+	  "IsThreadActive", +[](pragma::lua::LuaWorker &worker) { return worker.IsThreadActive(); });
+	defWorker.def(
+	  "GetProgress", +[](pragma::lua::LuaWorker &worker) { return worker.GetProgress(); });
+	defWorker.def(
+	  "GetStatus", +[](pragma::lua::LuaWorker &worker) { return worker.GetStatus(); });
+	defWorker.def(
+	  "GetResultMessage", +[](pragma::lua::LuaWorker &worker) { return worker.GetResultMessage(); });
+	defWorker.def(
+	  "GetResultCode", +[](pragma::lua::LuaWorker &worker) { return worker.GetResultCode(); });
+	defWorker.def(
+	  "IsValid", +[](pragma::lua::LuaWorker &worker) { return worker.IsValid(); });
 	modUtil[defWorker];
 
 	auto defLuaParallelJob = luabind::class_<util::ParallelJob<luabind::object>, util::BaseParallelJob>("ParallelJob");
 	defLuaParallelJob.def("GetResult", static_cast<luabind::object (*)(lua_State *, util::ParallelJob<luabind::object> &)>([](lua_State *l, util::ParallelJob<luabind::object> &job) -> luabind::object { return job.GetResult(); }));
 	defLuaParallelJob.def(
 	  "CallOnComplete", +[](util::ParallelJob<luabind::object> &job, const Lua::func<void> &onComplete) { static_cast<pragma::lua::LuaWorker &>(job.GetWorker()).CallOnComplete(onComplete); });
+	defLuaParallelJob.def(
+	  "SetProgressCallback", +[](util::ParallelJob<luabind::object> &job, const Lua::func<float> &func) { static_cast<pragma::lua::LuaWorker &>(job.GetWorker()).SetProgressCallback(func); });
 	modUtil[defLuaParallelJob];
 	modUtil[luabind::def(
 	  "create_parallel_job", +[](Game &game, const std::string &name, const Lua::func<void> &func, const Lua::func<void> &cancelFunc) -> std::shared_ptr<util::ParallelJob<luabind::object>> {

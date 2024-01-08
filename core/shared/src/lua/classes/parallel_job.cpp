@@ -192,6 +192,7 @@ void LuaWorker::CallOnComplete(const Lua::func<void> &func)
 		  0);
 	};
 }
+void LuaWorker::SetProgressCallback(const Lua::func<float> &func) { m_progressCallback = func; }
 void LuaWorker::UpdateProgress(float progress) { util::ParallelWorker<luabind::object>::UpdateProgress(progress); }
 void LuaWorker::DoCancel(const std::string &resultMsg, std::optional<int32_t> resultCode)
 {
@@ -241,6 +242,25 @@ void LuaWorker::Update()
 		UpdateTaskProgress(task, 0.f);
 		m_updateFuncs.pop();
 	}
+
+	if(m_progressCallback) {
+		auto progress = GetProgress();
+		if(progress != m_lastProgress) {
+			m_lastProgress = progress;
+			auto *l = m_progressCallback->interpreter();
+			auto r = Lua::CallFunction(
+			  l,
+			  [this, progress](lua_State *l) -> Lua::StatusCode {
+				  m_progressCallback->push(l);
+				  luabind::object o {l, this};
+				  o.push(l);
+				  Lua::Push(l, progress);
+				  return Lua::StatusCode::Ok;
+			  },
+			  0);
+		}
+	}
+
 	if(GetStatus() != util::JobStatus::Pending)
 		Finalize();
 }

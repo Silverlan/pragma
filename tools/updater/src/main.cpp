@@ -30,15 +30,21 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	std::string path = argv[0];
 
-	std::string pragmaExecutableName;
+	std::string executableName;
 #ifdef _WIN32
-	pragmaExecutableName = "pragma.exe";
+	executableName = "pragma.exe";
 #else
-	pragmaExecutableName = "pragma";
+	executableName = "pragma";
 #endif
-	std::cout << "Waiting for pragma to close..." << std::endl;
+
+	auto launchParams = util::get_launch_parameters(argc, argv);
+	auto itExe = launchParams.find("-executable");
+	if(itExe != launchParams.end())
+		executableName = itExe->second;
+
+	std::cout << "Waiting for " << executableName << " to close... " << std::endl;
 	// Wait until pragma has been closed
-	while(util::is_process_running(pragmaExecutableName.c_str()))
+	while(util::is_process_running(executableName.c_str()))
 		std::this_thread::sleep_for(std::chrono::milliseconds(250));
 
 	auto pos = path.find_last_of("\\/");

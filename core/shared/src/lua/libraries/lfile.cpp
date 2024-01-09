@@ -432,8 +432,8 @@ bool Lua::file::Delete(lua_State *l, std::string ppath)
 	if(validate_write_operation(l, path) == false)
 		return false;
 	if(Lua::get_extended_lua_modules_enabled() && FileManager::Exists(path) == false && FileManager::Exists(ppath))
-		return FileManager::RemoveFile(ppath.c_str());
-	return FileManager::RemoveFile(path.c_str());
+		return filemanager::remove_file(ppath);
+	return filemanager::remove_file(path);
 }
 
 bool Lua::file::DeleteDir(lua_State *l, std::string ppath)
@@ -442,8 +442,8 @@ bool Lua::file::DeleteDir(lua_State *l, std::string ppath)
 	if(validate_write_operation(l, path) == false)
 		return false;
 	if(Lua::get_extended_lua_modules_enabled() && FileManager::Exists(path) == false && FileManager::Exists(ppath))
-		return FileManager::RemoveDirectory(ppath.c_str());
-	return FileManager::RemoveDirectory(path.c_str());
+		return filemanager::remove_directory(ppath);
+	return filemanager::remove_directory(path);
 }
 
 std::shared_ptr<LFile> Lua::file::open_external_asset_file(lua_State *l, const std::string &path, const std::optional<std::string> &game)

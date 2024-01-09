@@ -608,6 +608,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modUtil[*defImageLayerSet];
 
 	auto defWorker = luabind::class_<pragma::lua::LuaWorker>("Worker");
+	defWorker.add_static_constant("TASK_STATUS_PENDING", umath::to_integral(pragma::lua::LuaWorker::TaskStatus::Pending));
+	defWorker.add_static_constant("TASK_STATUS_COMPLETE", umath::to_integral(pragma::lua::LuaWorker::TaskStatus::Complete));
+	defWorker.def("GetResult", &pragma::lua::LuaWorker::GetResult);
 	defWorker.def("SetResult", &pragma::lua::LuaWorker::SetResult);
 	defWorker.def("SetStatus", &pragma::lua::LuaWorker::SetStatus);
 	defWorker.def(

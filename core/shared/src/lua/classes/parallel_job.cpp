@@ -47,14 +47,14 @@ void LuaWorker::AddTask(const luabind::object &subJob, const Lua::func<bool> &on
 
 	Task task {};
 	task.progressAmount = taskProgress;
-	task.update = [this, cpySubJob, job, onCompleteTask](const Task &task) mutable -> bool {
+	task.update = [this, cpySubJob, job, onCompleteTask](const Task &task) mutable -> TaskStatus {
 		UpdateTaskProgress(task, job->GetProgress());
 		if(job->IsComplete() == false)
-			return false;
+			return TaskStatus::Pending;
 		if(!job->IsSuccessful()) {
 			SetStatus(job->GetStatus(), job->GetResultMessage());
 			cpySubJob = {};
-			return true;
+			return TaskStatus::Complete;
 		}
 		auto *l = onCompleteTask.interpreter();
 		auto r = Lua::CallFunction(
@@ -65,17 +65,14 @@ void LuaWorker::AddTask(const luabind::object &subJob, const Lua::func<bool> &on
 			  o.push(l);
 			  return Lua::StatusCode::Ok;
 		  },
-		  1);
+		  0);
 		if(r != Lua::StatusCode::Ok) {
 			SetStatus(util::JobStatus::Failed, "Lua Error");
 			cpySubJob = {};
-			return true;
+			return TaskStatus::Complete;
 		}
-		auto res = Lua::IsSet(l, -1) && Lua::CheckBool(l, -1);
-		Lua::Pop(l);
-		if(res)
-			cpySubJob = {};
-		return res;
+		cpySubJob = {};
+		return TaskStatus::Complete;
 	};
 	task.cancel = [job](const Task &task) {
 		job->Cancel();
@@ -87,12 +84,12 @@ void LuaWorker::AddLuaTask(const std::shared_ptr<util::ParallelJob<luabind::obje
 {
 	Task task {};
 	task.progressAmount = taskProgress;
-	task.update = [this, subJob](const Task &task) -> bool {
+	task.update = [this, subJob](const Task &task) -> TaskStatus {
 		UpdateTaskProgress(task, subJob->GetProgress());
 		if(subJob->IsComplete() == false)
-			return false;
+			return TaskStatus::Pending;
 		SetStatus(subJob->GetStatus(), subJob->GetResultMessage());
-		return true;
+		return TaskStatus::Complete;
 	};
 	task.cancel = [subJob](const Task &task) {
 		subJob->Cancel();
@@ -104,13 +101,13 @@ void LuaWorker::AddLuaTask(const std::shared_ptr<util::ParallelJob<luabind::obje
 {
 	Task task {};
 	task.progressAmount = taskProgress;
-	task.update = [this, subJob, onCompleteTask](const Task &task) -> bool {
+	task.update = [this, subJob, onCompleteTask](const Task &task) -> TaskStatus {
 		UpdateTaskProgress(task, subJob->GetProgress());
 		if(subJob->IsComplete() == false)
-			return false;
+			return TaskStatus::Pending;
 		if(!subJob->IsSuccessful()) {
 			SetStatus(subJob->GetStatus(), subJob->GetResultMessage());
-			return true;
+			return TaskStatus::Complete;
 		}
 		auto *l = onCompleteTask.interpreter();
 		auto r = Lua::CallFunction(
@@ -121,14 +118,12 @@ void LuaWorker::AddLuaTask(const std::shared_ptr<util::ParallelJob<luabind::obje
 			  o.push(l);
 			  return Lua::StatusCode::Ok;
 		  },
-		  1);
+		  0);
 		if(r != Lua::StatusCode::Ok) {
 			SetStatus(util::JobStatus::Failed, "Lua Error");
-			return true;
+			return TaskStatus::Complete;
 		}
-		auto res = Lua::IsSet(l, -1) && Lua::CheckBool(l, -1);
-		Lua::Pop(l);
-		return res;
+		return TaskStatus::Complete;
 	};
 	task.cancel = [subJob](const Task &task) {
 		subJob->Cancel();
@@ -136,11 +131,11 @@ void LuaWorker::AddLuaTask(const std::shared_ptr<util::ParallelJob<luabind::obje
 	};
 	m_updateFuncs.push(std::move(task));
 }
-void LuaWorker::AddLuaTask(const Lua::func<bool> &luaFunc, const Lua::func<bool> &cancelFunc, float taskProgress)
+void LuaWorker::AddLuaTask(const Lua::func<TaskStatus> &luaFunc, const Lua::func<bool> &cancelFunc, float taskProgress)
 {
 	Task task {};
 	task.progressAmount = taskProgress;
-	task.update = [this, luaFunc, taskProgress](const Task &task) {
+	task.update = [this, luaFunc, taskProgress](const Task &task) -> TaskStatus {
 		auto *l = luaFunc.interpreter();
 		auto r = Lua::CallFunction(
 		  l,
@@ -154,11 +149,26 @@ void LuaWorker::AddLuaTask(const Lua::func<bool> &luaFunc, const Lua::func<bool>
 		if(r != Lua::StatusCode::Ok) {
 			SetStatus(util::JobStatus::Failed, "Lua Error");
 			UpdateTaskProgress(task, 1.f);
-			return true;
+			return TaskStatus::Complete;
 		}
-		auto res = Lua::IsSet(l, -1) && Lua::CheckBool(l, -1);
+		auto res = TaskStatus::Complete;
+		luabind::object o {luabind::from_stack(l, -1)};
+		try {
+			res = Lua::IsSet(l, -1) ? luabind::object_cast<TaskStatus>(o) : res;
+		}
+		catch(const luabind::cast_failed &err) {
+			luaFunc.push(l);
+			lua_Debug ar;
+			lua_getinfo(l, ">S", &ar);
+
+			auto t = static_cast<Lua::Type>(luabind::type(o));
+			std::stringstream ss;
+			ss << "Expected worker to return util.Worker.TASK_STATUS enum, got " + std::string {magic_enum::enum_name(t)} + " with error: " + std::string {err.what()};
+			ss << ", defined in " << ar.source << ":" << ar.linedefined;
+			Con::cerr << ss.str() << Con::endl;
+		}
 		Lua::Pop(l);
-		if(res)
+		if(res == TaskStatus::Complete)
 			UpdateTaskProgress(task, 1.f);
 		return res;
 	};
@@ -237,7 +247,7 @@ void LuaWorker::Update()
 		return;
 	}
 	auto &task = m_updateFuncs.front();
-	if(task.update(task)) {
+	if(task.update(task) == TaskStatus::Complete) {
 		m_curProgress += task.progressAmount;
 		UpdateTaskProgress(task, 0.f);
 		m_updateFuncs.pop();

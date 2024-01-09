@@ -16,6 +16,11 @@
 namespace pragma::lua {
 	class DLLNETWORK LuaWorker : public util::ParallelWorker<luabind::object> {
 	  public:
+		enum class TaskStatus : uint8_t {
+			Complete = 0,
+			Pending,
+		};
+
 		LuaWorker(Game &game, const std::string &name);
 		virtual ~LuaWorker() override;
 		virtual luabind::object GetResult() override;
@@ -24,7 +29,7 @@ namespace pragma::lua {
 		void AddTask(const luabind::object &subJob, const Lua::func<bool> &onCompleteTask, float taskProgress);
 		void AddLuaTask(const std::shared_ptr<util::ParallelJob<luabind::object>> &subJob, float taskProgress);
 		void AddLuaTask(const std::shared_ptr<util::ParallelJob<luabind::object>> &subJob, const Lua::func<bool> &onCompleteTask, float taskProgress);
-		void AddLuaTask(const Lua::func<bool> &task, const Lua::func<bool> &cancel, float taskProgress);
+		void AddLuaTask(const Lua::func<TaskStatus> &task, const Lua::func<bool> &cancel, float taskProgress);
 		void CallOnComplete(const Lua::func<void> &func);
 		void UpdateProgress(float progress);
 		void SetProgressCallback(const Lua::func<float> &func);
@@ -37,7 +42,7 @@ namespace pragma::lua {
 		friend util::ParallelJob<typename TJob::RESULT_TYPE> util::create_parallel_job(TARGS &&...args);
 
 		struct Task {
-			std::function<bool(const Task &)> update;
+			std::function<TaskStatus(const Task &)> update;
 			std::function<bool(const Task &)> cancel;
 			float progressAmount = 1.f;
 		};

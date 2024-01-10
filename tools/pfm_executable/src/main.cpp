@@ -8,6 +8,7 @@
 #include "pragma/pragma_executable.hpp"
 
 int main(int argc, char *argv[])
+{
 try {
 	std::vector<std::string> extraArgs {
 	  "-title",
@@ -32,7 +33,7 @@ catch(const std::exception &e) //it would not work if you pass by value
 
 	std::get_terminate();
 }
-
+}
 #ifdef _WIN32
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) { return main(__argc, __argv); }
 #endif

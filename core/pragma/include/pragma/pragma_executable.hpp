@@ -86,9 +86,9 @@ namespace pragma {
 	static MODULE_HANDLE launch_pragma(int argc, char *argv[], bool server = false)
 	{
 #ifdef __linux__
-		const char *library = server ? "libshared.so" : "libclient.so";
+        const char *library = server ? "libserver.so" : "libclient.so";
 #else
-		const char *library = server ? "shared.dll" : "client.dll";
+        const char *library = server ? "server.dll" : "client.dll";
 #endif
 		const char *runEngineSymbol = server ? "RunEngine" : "RunCEngine";
 
@@ -145,7 +145,7 @@ namespace pragma {
 #ifdef LINUX_THREAD_TEST
 		std::thread t([]() { std::cout << "Linux Thread Test"; });
 #endif
-		void (*runEngine)(int, char *[]) = (void (*)(int, char *[]))dlsym(hEngine, "RunCEngine");
+        void (*runEngine)(int, char *[]) = (void (*)(int, char *[]))dlsym(hEngine, runEngineSymbol);
 		if(runEngine != nullptr) {
 			runEngine(argc, argv);
 			return hEngine;

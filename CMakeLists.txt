@@ -438,13 +438,13 @@ set(DEPENDENCY_EIGEN_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/eigen CA
 set(DEPENDENCY_TINYGLTF_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/tinygltf CACHE PATH "Path to include directory.")
 
 if(UNIX)
-	set(DEPENDENCY_BOOST_CHRONO_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_chrono.a CACHE PATH "Path to library." FORCE)
-	set(DEPENDENCY_BOOST_DATE_TIME_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_date_time.a CACHE PATH "Path to library." FORCE)
-	set(DEPENDENCY_BOOST_FILESYSTEM_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_filesystem.a CACHE PATH "Path to library." FORCE)
-	set(DEPENDENCY_BOOST_IOSTREAMS_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_iostreams.a CACHE PATH "Path to library." FORCE)
-	set(DEPENDENCY_BOOST_REGEX_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_regex.a CACHE PATH "Path to library." FORCE)
-	set(DEPENDENCY_BOOST_SYSTEM_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_system.a CACHE PATH "Path to library." FORCE)
-	set(DEPENDENCY_BOOST_THREAD_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_thread.a CACHE PATH "Path to library." FORCE)
+	set(DEPENDENCY_BOOST_CHRONO_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_chrono.so CACHE PATH "Path to library." FORCE)
+	set(DEPENDENCY_BOOST_DATE_TIME_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_date_time.so CACHE PATH "Path to library." FORCE)
+	set(DEPENDENCY_BOOST_FILESYSTEM_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_filesystem.so CACHE PATH "Path to library." FORCE)
+	set(DEPENDENCY_BOOST_IOSTREAMS_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_iostreams.so CACHE PATH "Path to library." FORCE)
+	set(DEPENDENCY_BOOST_REGEX_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_regex.so CACHE PATH "Path to library." FORCE)
+	set(DEPENDENCY_BOOST_SYSTEM_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_system.so CACHE PATH "Path to library." FORCE)
+	set(DEPENDENCY_BOOST_THREAD_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_thread.so CACHE PATH "Path to library." FORCE)
 
 	# Resolve links
 	function(resolve_links ID)
@@ -1083,6 +1083,8 @@ else()
         set(BINARY_OUTPUT_DIR "lib")
 endif()
 
+set(EXECUTABLE_OUTPUT_DIR "bin")
+
 set(PRAGMA_INSTALL_COMPONENT "pragma")
 set(PRAGMA_INSTALL_COMPONENT_FULL "pragma-full")
 function(pragma_install TARGET_NAME DESTINATION_PATH)
@@ -1236,8 +1238,14 @@ endfunction(pragma_install_create_directory)
 
 pragma_install_create_directory(modules)
 # pragma_install_lib("${DEPENDENCY_ASSIMP_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+
+pragma_install_lib("${DEPENDENCY_BOOST_CHRONO_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_BOOST_DATE_TIME_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+pragma_install_lib("${DEPENDENCY_BOOST_FILESYSTEM_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+pragma_install_lib("${DEPENDENCY_BOOST_IOSTREAMS_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+pragma_install_lib("${DEPENDENCY_BOOST_REGEX_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_BOOST_SYSTEM_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+pragma_install_lib("${DEPENDENCY_BOOST_THREAD_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_BZIP2_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 #In Linux there is a cyclic deps between freetype,harfbuzz,pango,cairo and most importantly fontconfig.
 #Fontconfig in linux is reposnsible for discovery of fonts. (think C:\Windows\Fonts for linux but customizable via configs) 

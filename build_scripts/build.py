@@ -323,7 +323,7 @@ execscript(scripts_dir +"/scripts/modules.py")
 ########## zlib ##########
 # Download
 os.chdir(deps_dir)
-zlib_root = os.getcwd() +"/zlib-1.2.8"
+zlib_root = os.getcwd() +"/zlib"
 if platform == "linux":
 	zlib_lib_path = zlib_root +"/build"
 	zlib_lib = zlib_lib_path +"/libz.a"
@@ -333,9 +333,13 @@ else:
 zlib_include_dirs = zlib_root +" " +zlib_lib_path
 if not Path(zlib_root).is_dir():
 	print_msg("zlib not found. Downloading...")
-	git_clone("https://github.com/fmrico/zlib-1.2.8.git")
+	git_clone("https://github.com/madler/zlib")
+	os.chdir("zlib")
+	#Bump to zlib 1.3 to fix  CVE-2022-37434
+	reset_to_commit("09155eaa2f9270dc4ed1fa13e2b4b2613e6e4851")
 
-os.chdir("zlib-1.2.8")
+	os.chdir("../")
+os.chdir("zlib")
 
 # Build
 print_msg("Building zlib...")
@@ -350,19 +354,22 @@ os.chdir("../..")
 ########## boost ##########
 # Download
 os.chdir(deps_dir)
+#TODO: Newer versions of clang have an bound error with boost::mpl::integral_c bounds (this relied on UB on compile-time constants). See issue https://github.com/boostorg/mpl/issues/69. For now I'll bump boost to 1.81. Macports has a patch that works for 1.76 and up. Investigate.
+#Also boost is a package in vcpkg. Look if we can integrate that.
 if platform == "linux":
-	boost_root = os.getcwd() +"/boost_1_78_0"
+	boost_root = os.getcwd() +"/boost_1_81_0"
 	if not Path(boost_root).is_dir():
 		print_msg("boost not found. Downloading...")
-		zipName = "boost_1_78_0.tar.gz"
-		boost_url0 = "https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/" +zipName
+		zipName = "boost_1_81_0.tar.gz"
+		boost_url0 = "https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/" +zipName
 		# Mirror in case above url goes down ( https://github.com/boostorg/boost/issues/842 )
-		boost_url1 = "https://sourceforge.net/projects/boost/files/boost/1.78.0/" +zipName
+		boost_url1 = "https://sourceforge.net/projects/boost/files/boost/1.81.0/" +zipName
 		try:
 			http_extract(boost_url0,format="tar.gz")
 		except (URLError, HTTPError, tarfile.ReadError, tarfile.ExtractError) as e:
 			http_extract(boost_url1,format="tar.gz")
 else:
+    #TODO
 	boost_root = os.getcwd() +"/boost"
 	if not Path(boost_root).is_dir():
 		print_msg("boost not found. Downloading...")
@@ -379,13 +386,15 @@ ZLIB_SOURCE = normalize_path(zlib_root)
 ZLIB_INCLUDE = normalize_path(zlib_root)
 ZLIB_LIBPATH = normalize_path(zlib_lib_path)
 if platform == "linux":
+    #do we even need static build?
 	subprocess.run([boost_root +"/bootstrap.sh"],check=True,shell=True)
-	subprocess.run(["./b2","address-model=64","stage","variant=release","link=shared","runtime-link=shared","-j3"],check=True,shell=True)
-	subprocess.run(["./b2","address-model=64","stage","variant=release","link=static","runtime-link=shared","-j3"],check=True,shell=True)
+	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","address-model=64","stage","variant=release","link=shared","runtime-link=shared","-j3"],check=True,shell=True)
+	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","address-model=64","stage","variant=release","link=static","runtime-link=shared","-j3"],check=True,shell=True)
 
 	print_msg("Building boost zlib libraries...")
-	subprocess.run(["./b2","address-model=64","stage","variant=release","link=shared","runtime-link=shared","--with-iostreams","-sZLIB_SOURCE=" +ZLIB_SOURCE,"-sZLIB_INCLUDE=" +ZLIB_INCLUDE,"-sZLIB_LIBPATH=" +ZLIB_LIBPATH],check=True,shell=True)
-	subprocess.run(["./b2","address-model=64","stage","variant=release","link=static","runtime-link=shared","--with-iostreams","-sZLIB_SOURCE=" +ZLIB_SOURCE,"-sZLIB_INCLUDE=" +ZLIB_INCLUDE,"-sZLIB_LIBPATH=" +ZLIB_LIBPATH],check=True,shell=True)
+	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","address-model=64","stage","variant=release","link=shared","runtime-link=shared","--with-iostreams","-sZLIB_SOURCE=" +ZLIB_SOURCE,"-sZLIB_INCLUDE=" +ZLIB_INCLUDE,"-sZLIB_LIBPATH=" +ZLIB_LIBPATH],check=True,shell=True)
+    
+	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","address-model=64","stage","variant=release","link=static","runtime-link=shared","--with-iostreams","-sZLIB_SOURCE=" +ZLIB_SOURCE,"-sZLIB_INCLUDE=" +ZLIB_INCLUDE,"-sZLIB_LIBPATH=" +ZLIB_LIBPATH],check=True,shell=True)
 else:
 	mkdir("build",cd=True)
 
@@ -803,11 +812,11 @@ if platform == "linux":
 	cmake_args += [
 		"-DDEPENDENCY_BOOST_INCLUDE=" +boost_root,
 		"-DDEPENDENCY_BOOST_LIBRARY_LOCATION=" +boost_root +"/stage/lib",
-		"-DDEPENDENCY_BOOST_CHRONO_LIBRARY=" +boost_root +"/stage/lib/boost_chrono.a",
-		"-DDEPENDENCY_BOOST_DATE_TIME_LIBRARY=" +boost_root +"/stage/lib/boost_date_time.a",
-		"-DDEPENDENCY_BOOST_REGEX_LIBRARY=" +boost_root +"/stage/lib/boost_regex.a",
-		"-DDEPENDENCY_BOOST_SYSTEM_LIBRARY=" +boost_root +"/stage/lib/boost_system.a",
-		"-DDEPENDENCY_BOOST_THREAD_LIBRARY=" +boost_root +"/stage/lib/boost_thread.a",
+		"-DDEPENDENCY_BOOST_CHRONO_LIBRARY=" +boost_root +"/stage/lib/libboost_chrono.so",
+		"-DDEPENDENCY_BOOST_DATE_TIME_LIBRARY=" +boost_root +"/stage/lib/libboost_date_time.so",
+		"-DDEPENDENCY_BOOST_REGEX_LIBRARY=" +boost_root +"/stage/lib/libboost_regex.so",
+		"-DDEPENDENCY_BOOST_SYSTEM_LIBRARY=" +boost_root +"/stage/lib/libboost_system.so",
+		"-DDEPENDENCY_BOOST_THREAD_LIBRARY=" +boost_root +"/stage/lib/libsboost_thread.so",
 		"-DDEPENDENCY_LIBZIP_CONF_INCLUDE=" +build_dir +"/third_party_libs/libzip"
 	]
 else:
@@ -982,11 +991,6 @@ if build:
 	cmake_build(build_config,targets)
 
 
-	#HACK: For some reason hafbuzz is not named libharfbuzz.so.0. Fix that by adding a symlink.
-	if platform=="linux":
-		os.chdir(install_dir+"/lib")
-		if not Path(os.getcwd()+"/libharfbuzz.so.0").is_symlink():
-			os.symlink("libharfbuzz.so","libharfbuzz.so.0")
 
 
 

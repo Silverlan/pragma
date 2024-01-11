@@ -11,6 +11,7 @@
 #include "pragma/lua/classes/lproperty.hpp"
 #include <pragma/lua/luaapi.h>
 #include <mathutil/uvec.h>
+#include <sharedutils/util_parallel_job.hpp>
 
 struct TraceResult;
 struct BulletInfo;
@@ -122,7 +123,7 @@ namespace Lua {
 		DLLNETWORK std::string get_addon_path(lua_State *l, const std::string &relPath);
 		DLLNETWORK std::string get_string_hash(const std::string &str);
 		DLLNETWORK luabind::object get_class_value(lua_State *l, const luabind::object &o, const std::string &key);
-		DLLNETWORK void pack_zip_archive(lua_State *l, const std::string &zipFileName, const luabind::table<> &t);
+		DLLNETWORK Lua::var<bool, ::util::ParallelJob<luabind::object>> pack_zip_archive(lua_State *l, Game &game, const std::string &zipFileName, const luabind::table<> &t);
 
 		DLLNETWORK void register_std_vector_types(lua_State *l);
 

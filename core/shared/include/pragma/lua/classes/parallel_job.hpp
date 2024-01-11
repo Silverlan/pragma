@@ -30,6 +30,7 @@ namespace pragma::lua {
 		void AddLuaTask(const std::shared_ptr<util::ParallelJob<luabind::object>> &subJob, float taskProgress);
 		void AddLuaTask(const std::shared_ptr<util::ParallelJob<luabind::object>> &subJob, const Lua::func<bool> &onCompleteTask, float taskProgress);
 		void AddLuaTask(const Lua::func<TaskStatus> &task, const Lua::func<bool> &cancel, float taskProgress);
+		void AddCppTask(const std::shared_ptr<util::BaseParallelJob> &subJob, const std::function<void()> &onComplete, float taskProgress);
 		void CallOnComplete(const Lua::func<void> &func);
 		void UpdateProgress(float progress);
 		void SetProgressCallback(const Lua::func<float> &func);

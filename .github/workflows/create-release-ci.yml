@@ -40,7 +40,7 @@ jobs:
         id: determine-version
         run:   |
           mkdir source
-          wget https://github.com/Silverlan/pragma/archive/refs/tags/nightly.zip
+          wget https://github.com/${{ github.repository }}/archive/refs/tags/nightly.zip
           unzip nightly.zip -d source
           rm nightly.zip
           fileName="./source/pragma-nightly/core/shared/include/pragma/engine_version.h"
@@ -98,7 +98,7 @@ jobs:
         id: windows-version
         shell: bash
         run:   |
-          wget https://github.com/Silverlan/pragma/releases/download/nightly/pragma-win64.zip
+          wget https://github.com/${{ github.repository }}/releases/download/nightly/pragma-win64.zip
           filename="pragma-v${{ steps.determine-version.outputs.version }}-win64.zip"
           mv pragma-win64.zip "$filename"
           echo "filename=$filename" >> $GITHUB_OUTPUT
@@ -109,7 +109,7 @@ jobs:
         id: linux-version
         shell: bash
         run:   |
-          wget https://github.com/Silverlan/pragma/releases/download/nightly/pragma-lin64.tar.gz
+          wget https://github.com/${{ github.repository }}/releases/download/nightly/pragma-lin64.tar.gz
           filename="pragma-v${{ steps.determine-version.outputs.version }}-lin64.tar.gz"
           mv pragma-lin64.tar.gz "$filename"
           echo "filename=$filename" >> $GITHUB_OUTPUT
@@ -153,7 +153,7 @@ jobs:
         id: pdb-debug
         shell: bash
         run:   |
-          wget https://github.com/Silverlan/pragma/releases/download/nightly/debug_pdb.zip
+          wget https://github.com/${{ github.repository }}/releases/download/nightly/debug_pdb.zip
           filename="debug_pdb.zip"
           echo "filename=$filename" >> $GITHUB_OUTPUT
           

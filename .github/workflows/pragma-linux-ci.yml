@@ -33,9 +33,11 @@ jobs:
     steps:
       - name: Setup Pragma
         uses: Silverlan/pragma/github_actions/setup@master
+        with:
+          clone_url: "https://github.com/${{ github.repository }}.git"
 
       - name: Build Pragma
-        uses: Silverlan/pragma/github_actions/build@master
+        uses: ./pragma/github_actions/build
         id: build-pragma
         with:
           build-args: "--with-pfm --with-all-pfm-modules --with-vr --with-lua-debugger=0"
@@ -82,7 +84,7 @@ jobs:
           
       # Tests are currently not functional on Linux GitHub runners
       #- name: Run Tests
-      #  uses: Silverlan/pragma/github_actions/run_tests@master
+      #  uses: ./pragma/github_actions/run_tests
       #  timeout-minutes: 10
       #  with:
       #    install-dir: "${{ steps.build-pragma.outputs.install-dir }}"

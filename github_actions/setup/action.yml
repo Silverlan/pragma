@@ -1,6 +1,9 @@
 name: Setup Pragma
 description: 'Setup Pragma'
 inputs:
+  clone_url:
+    description: 'The repository url where pragma resides.'
+    default: 'https://github.com/Silverlan/pragma.git'
   branch:
     description: 'The branch to clone Pragma from.'
     default: 'master'
@@ -23,6 +26,6 @@ runs:
     - name: Download Pragma
       shell: bash
       run: |
-        git clone https://github.com/Silverlan/pragma.git --recurse-submodules --branch ${{ inputs.branch }}
+        git clone ${{ inputs.clone_url }} --recurse-submodules --branch ${{ inputs.branch }} pragma
   
     - uses: Silverlan/common_actions/action_end@main

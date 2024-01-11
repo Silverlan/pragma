@@ -26,7 +26,11 @@ namespace util {
 		void CallOnRemove(const std::function<void(void)> &callOnRemove);
 		void UpdateProgress(float progress) { util::ParallelWorker<T>::UpdateProgress(progress); }
 
-		virtual T GetResult() override { return T {}; }
+		virtual T GetResult() override
+		{
+			if constexpr(!std::is_same_v<T, void>)
+				return T {};
+		}
 
 		using util::ParallelWorker<void>::SetResultMessage;
 		using util::ParallelWorker<void>::UpdateProgress;

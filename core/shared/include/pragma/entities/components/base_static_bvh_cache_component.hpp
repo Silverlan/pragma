@@ -9,11 +9,9 @@
 
 #include "pragma/entities/components/base_bvh_component.hpp"
 #include "pragma/util/util_thread_pool.hpp"
+#include "pragma/util/functional_parallel_worker.hpp"
 #include <unordered_set>
 
-namespace util {
-	class FunctionalParallelWorker;
-};
 namespace pragma {
 	class BaseStaticBvhUserComponent;
 	class DLLNETWORK BaseStaticBvhCacheComponent : public BaseBvhComponent {

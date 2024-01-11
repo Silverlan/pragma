@@ -29,7 +29,9 @@ function gui.WIBaseEditor:OnInitialize()
 	self.m_windowToFrame = {}
 	self.m_windowFactories = {}
 
-	self.m_menuBar = gui.create("WIMenuBar", self)
+	self.m_menuBarContainer = gui.create("WIBase", self)
+
+	self.m_menuBar = gui.create("WIMenuBar", self.m_menuBarContainer)
 	self.m_menuBar:SetName("menu_bar")
 	self.m_menuBar:AddCallback("OnClose", function(pMenuBar)
 		if util.is_valid(self) then
@@ -39,8 +41,10 @@ function gui.WIBaseEditor:OnInitialize()
 	end)
 
 	self:SetSize(1024, 768)
-	self.m_menuBar:SetSize(self:GetWidth(), 20)
-	self.m_menuBar:SetAnchor(0, 0, 1, 0)
+	self.m_menuBarContainer:SetSize(self:GetWidth(), 20)
+	self.m_menuBarContainer:SetAnchor(0, 0, 1, 0)
+	self.m_menuBar:SetSize(self.m_menuBarContainer:GetSize())
+	self.m_menuBar:SetAnchor(0, 0, 1, 1)
 
 	local pInfoBar = gui.create("WIPFMInfobar", self)
 	pInfoBar:SetName("info_bar")
@@ -344,6 +348,11 @@ end
 function gui.WIBaseEditor:GetMenuBar()
 	return self.m_menuBar
 end
+
+function gui.WIBaseEditor:GetMenuBarContainer()
+	return self.m_menuBarContainer
+end
+
 function gui.WIBaseEditor:SetBackgroundColor(col)
 	self.m_pMain:SetColor(col)
 end

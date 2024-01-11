@@ -27,6 +27,7 @@
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 #include "pragma/asset_types/world.hpp"
+#include "pragma/util/functional_parallel_worker.hpp"
 #include <pragma/game/game.h>
 #include "luasystem.h"
 #include "pragma/util/util_python.hpp"
@@ -293,6 +294,67 @@ void Lua::util::register_world_data(lua_State *l, luabind::module_ &mod)
 
 void Lua::util::register_os(lua_State *l, luabind::module_ &mod) { mod[luabind::def("set_prevent_os_sleep_mode", &::util::set_prevent_os_sleep_mode)]; }
 
+static Lua::var<bool, Lua::opt<std::string>, ::util::FunctionalParallelWorker> extract_files(lua_State *l, Game &game, const Lua::type<ZIPFile> &ozip, const std::string &outputPath, bool runInBackground = false)
+{
+	auto path = ::util::Path::CreateFile(outputPath);
+	path.Canonicalize();
+	path = ::util::Path::CreatePath(::util::get_program_path()) + path;
+
+	auto &zip = *luabind::object_cast<ZIPFile *>(ozip);
+	if(runInBackground) {
+		auto job = ::util::create_parallel_job<::util::FunctionalParallelWorker>(false);
+		auto cpyOzip = ozip;
+		auto &worker = static_cast<::util::FunctionalParallelWorker &>(job.GetWorker());
+		worker.CallOnRemove([cpyOzip]() mutable {
+			cpyOzip = luabind::object {}; // We need to keep a reference to the zip file alive until the job is complete
+		});
+		worker.ResetTask([&zip, path = std::move(path)](::util::FunctionalParallelWorker &worker) mutable {
+			std::condition_variable waitCond;
+			std::mutex mutex;
+			std::atomic<bool> complete = false;
+
+			std::string err;
+			auto res = zip.ExtractFiles(path.GetString(), err, [&worker, &mutex, &waitCond, &complete](float progress, bool pcomplete) mutable {
+				worker.UpdateProgress(progress);
+				if(pcomplete) {
+					worker.SetStatus(::util::JobStatus::Successful);
+
+					mutex.lock();
+					complete = true;
+					waitCond.notify_one();
+					mutex.unlock();
+					return false;
+				}
+				auto cancelled = worker.IsCancelled();
+				if(cancelled) {
+					mutex.lock();
+					complete = true;
+					waitCond.notify_one();
+					mutex.unlock();
+				}
+				return cancelled;
+			});
+			if(!res) {
+				worker.SetStatus(::util::JobStatus::Failed, err);
+				return;
+			}
+
+			auto ul = std::unique_lock<std::mutex> {mutex};
+			waitCond.wait(ul, [&complete]() -> bool { return complete; });
+
+			if(!worker.IsCancelled())
+				worker.SetStatus(util::JobStatus::Successful);
+		});
+		return luabind::object {l, job};
+	}
+
+	std::string err;
+	auto res = zip.ExtractFiles(path.GetString(), err);
+	if(!res)
+		return luabind::object {l, std::pair<bool, std::string> {res, err}};
+	return luabind::object {l, res};
+}
+
 void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 {
 	mod[luabind::def("is_valid", static_cast<bool (*)(lua_State *)>(Lua::util::is_valid)), luabind::def("is_valid", static_cast<bool (*)(lua_State *, const luabind::object &)>(Lua::util::is_valid)),
@@ -454,18 +516,8 @@ void Lua::util::register_shared_generic(lua_State *l, luabind::module_ &mod)
 			  return {};
 		  return files;
 	  });
-	defZip.def(
-	  "ExtractFiles", +[](lua_State *l, ZIPFile &zip, const std::string &outputPath) -> Lua::var<bool, Lua::opt<std::string>> {
-		  auto path = ::util::Path::CreateFile(outputPath);
-		  path.Canonicalize();
-		  path = ::util::Path::CreatePath(::util::get_program_path()) + path;
-
-		  std::string err;
-		  auto res = zip.ExtractFiles(path.GetString(), err);
-		  if(!res)
-			  return luabind::object {l, std::pair<bool, std::string> {res, err}};
-		  return luabind::object {l, res};
-	  });
+	defZip.def("ExtractFiles", &extract_files);
+	defZip.def("ExtractFiles", &extract_files, luabind::default_parameter_policy<5, false> {});
 	defZip.def(
 	  "ExtractFile", +[](ZIPFile &zip, const std::string &zipFileName, const std::string &outputZipFileName) -> std::pair<bool, std::optional<std::string>> {
 		  std::vector<uint8_t> data;
@@ -564,15 +616,7 @@ void Lua::util::register_library(lua_State *l)
 		    return util::Uuid {::util::generate_uuid_v4(seed)};
 	    }),
 	  luabind::def(
-	    "run_updater", +[]() -> bool {
-		    std::string processPath;
-#ifdef _WIN32
-		    processPath = "bin/updater.exe";
-#else
-			processPath = "lib/updater";
-#endif
-		    return ::util::start_process(processPath.c_str());
-	    })];
+	    "run_updater", +[](Engine &engine) { engine.SetRunUpdaterOnClose(true); })];
 	nsRetarget[luabind::def("initialize_retarget_data", &Lua::util::retarget::initialize_retarget_data)];
 	nsRetarget[luabind::def("apply_retarget_rig", &Lua::util::retarget::apply_retarget_rig)];
 	nsRetarget[luabind::def("initialize_retarget_flex_data", &Lua::util::retarget::initialize_retarget_flex_data)];

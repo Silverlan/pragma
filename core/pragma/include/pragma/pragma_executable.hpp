@@ -86,9 +86,9 @@ namespace pragma {
 	static MODULE_HANDLE launch_pragma(int argc, char *argv[], bool server = false)
 	{
 #ifdef __linux__
-        const char *library = server ? "libserver.so" : "libclient.so";
+        const char *library = server ? "libshared.so" : "libclient.so";
 #else
-        const char *library = server ? "server.dll" : "client.dll";
+        const char *library = server ? "shared.dll" : "client.dll";
 #endif
 		const char *runEngineSymbol = server ? "RunEngine" : "RunCEngine";
 

@@ -43,6 +43,7 @@ jobs:
           owner: 'Slaweknowy'
           branch: master
           repository: 'pr_source'
+          submodule: true
           access-token: ${{ secrets.PR_SOURCE_REPO_TOKEN }}
       
       - name: Move repo to target location

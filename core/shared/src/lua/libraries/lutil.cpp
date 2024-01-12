@@ -1612,7 +1612,7 @@ Lua::var<bool, ::util::ParallelJob<luabind::object>> Lua::util::pack_zip_archive
 	struct ResultData {
 		std::vector<std::string> notFound;
 	};
-	auto job = ::util::create_parallel_job<::util::TFunctionalParallelWorkerWithResult<ResultData>>(false);
+	auto job = ::util::create_parallel_job<::util::TFunctionalParallelWorkerWithResult<ResultData>, bool>(false);
 	auto &worker = static_cast<::util::TFunctionalParallelWorkerWithResult<ResultData> &>(job.GetWorker());
 	worker.ResetTask([files = std::move(files), customTextFiles = std::move(customTextFiles), customBinaryFiles = std::move(customBinaryFiles), pzip = std::move(pzip)](::util::TFunctionalParallelWorker<ResultData> &worker) mutable {
 		std::vector<std::string> notFound;

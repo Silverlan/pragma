@@ -32,10 +32,10 @@ namespace util {
 				return T {};
 		}
 
-		using util::ParallelWorker<void>::SetResultMessage;
-		using util::ParallelWorker<void>::UpdateProgress;
+		using util::ParallelWorker<T>::SetResultMessage;
+		using util::ParallelWorker<T>::UpdateProgress;
 	  private:
-		using util::ParallelWorker<void>::AddThread;
+		using util::ParallelWorker<T>::AddThread;
 		virtual void DoCancel(const std::string &resultMsg, std::optional<int32_t> resultCode) override;
 		bool IsFinished() const;
 		std::function<void(void)> m_callOnRemove = nullptr;

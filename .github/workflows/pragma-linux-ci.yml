@@ -36,6 +36,19 @@ jobs:
         with:
           clone_url: "https://github.com/${{ github.repository }}.git"
 
+
+      - name: Clone pr_source repo
+        uses: GuillaumeFalourd/clone-github-repo-action@main
+        with:
+          owner: 'Slaweknowy'
+          branch: master
+          repository: 'pr_source'
+          access-token: ${{ secrets.PR_SOURCE_REPO_TOKEN }}
+      
+      - name: Access cloned repository content
+        run: |
+          mv pr_source modules/
+
       - name: Build Pragma
         uses: ./pragma/github_actions/build
         id: build-pragma

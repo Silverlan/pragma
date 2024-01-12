@@ -60,7 +60,14 @@ static TStream &print_ui_element(TStream &os, const ::WIBase &handle)
 	const WIBase *p = &handle;
 	auto pos = p->GetAbsolutePos();
 	auto &size = p->GetSize();
-	os << "WIElement[" << p->GetClass() << "][" << p->GetName() << "][" << p->GetIndex() << "][" << &handle << "][Pos:" << pos.x << "," << pos.y << "][Sz:" << size.x << "," << size.y << "]";
+	os << "WIElement[" << p->GetClass() << "]";
+	os << "[" << p->GetName() << "]";
+	os << "[" << p->GetIndex() << "]";
+	os << "[" << &handle << "]";
+	os << "[Pos:" << pos.x << ", " << pos.y << "]";
+	os << "[Sz:" << size.x << ", " << size.y << "]";
+	os << "[Vis:" << (p->IsVisible() ? "1" : "0") << "(" << (p->IsSelfVisible() ? "1" : "0") << ")]";
+
 	auto *elText = dynamic_cast<const WIText *>(p);
 	if(elText) {
 		auto text = elText->GetText().cpp_str();
@@ -97,13 +104,13 @@ static void record_render_ui(WIBase &el, prosper::IImage &img, const Lua::gui::D
 
 	WIBase::DrawInfo drawInfo {drawCmd};
 	drawInfo.size = {el.GetWidth(), el.GetHeight()};
-	drawInfo.useScissor = false;
-	drawInfo.useStencil = info.useStencil;
-	drawInfo.msaa = useMsaa;
+	umath::set_flag(drawInfo.flags, WIBase::DrawInfo::Flags::UseScissor, false);
+	umath::set_flag(drawInfo.flags, WIBase::DrawInfo::Flags::UseStencil, info.useStencil);
+	umath::set_flag(drawInfo.flags, WIBase::DrawInfo::Flags::Msaa, useMsaa);
 	std::optional<Mat4> rotMat = el.GetRotationMatrix() ? *el.GetRotationMatrix() : std::optional<Mat4> {};
 	if(rotMat.has_value()) {
 		el.ResetRotation(); // We'll temporarily disable the rotation for this element
-		drawInfo.useStencil = true;
+		umath::set_flag(drawInfo.flags, WIBase::DrawInfo::Flags::UseStencil, true);
 	}
 	wgui::DrawState drawState {};
 	drawState.SetScissor(0, 0, drawInfo.size.x, drawInfo.size.y);
@@ -525,13 +532,16 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	  "DebugPrintHierarchy", +[](const ::WIBase &el) { debug_print_hierarchy(el); });
 
 	auto defDrawInfo = luabind::class_<::WIBase::DrawInfo>("DrawInfo");
+	defDrawInfo.add_static_constant("FLAG_NONE", umath::to_integral(::WIBase::DrawInfo::Flags::None));
+	defDrawInfo.add_static_constant("FLAG_USE_SCISSOR_BIT", umath::to_integral(::WIBase::DrawInfo::Flags::UseScissor));
+	defDrawInfo.add_static_constant("FLAG_USE_STENCIL_BIT", umath::to_integral(::WIBase::DrawInfo::Flags::UseStencil));
+	defDrawInfo.add_static_constant("FLAG_MSAA_BIT", umath::to_integral(::WIBase::DrawInfo::Flags::Msaa));
+	defDrawInfo.add_static_constant("FLAG_DONT_SKIP_IF_OUT_OF_BOUNDS_BIT", umath::to_integral(::WIBase::DrawInfo::Flags::DontSkipIfOutOfBounds));
 	defDrawInfo.def(luabind::constructor<const std::shared_ptr<prosper::ICommandBuffer> &>());
 	defDrawInfo.def_readwrite("offset", &::WIBase::DrawInfo::offset);
 	defDrawInfo.def_readwrite("size", &::WIBase::DrawInfo::size);
 	defDrawInfo.def_readwrite("transform", &::WIBase::DrawInfo::transform);
-	defDrawInfo.def_readwrite("useScissor", &::WIBase::DrawInfo::useScissor);
-	defDrawInfo.def_readwrite("useStencil", &::WIBase::DrawInfo::useStencil);
-	defDrawInfo.def_readwrite("msaa", &::WIBase::DrawInfo::msaa);
+	defDrawInfo.def_readwrite("flags", &::WIBase::DrawInfo::flags);
 	defDrawInfo.property("commandBuffer", static_cast<luabind::object (*)(lua_State *, ::WIBase::DrawInfo &)>([](lua_State *l, ::WIBase::DrawInfo &drawInfo) -> luabind::object {
 		return drawInfo.commandBuffer ? luabind::object {l, drawInfo.commandBuffer} : luabind::object {};
 	}),

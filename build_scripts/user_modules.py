@@ -13,3 +13,11 @@
 # add_pragma_module(
 #     name = "pr_opencv"
 # )
+
+
+add_pragma_module(
+     name = "pr_source",
+     repositoryUrl = "https://github.com/Slaweknowy/pr_source.git",
+     commitSha = None,
+     branch = None
+)

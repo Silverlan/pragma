@@ -16,8 +16,5 @@
 
 
 add_pragma_module(
-     name = "pr_source",
-     repositoryUrl = "https://github.com/Slaweknowy/pr_source.git",
-     commitSha = None,
-     branch = None
+     name = "pr_source"
 )

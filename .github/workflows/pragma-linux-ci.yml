@@ -45,9 +45,9 @@ jobs:
           repository: 'pr_source'
           access-token: ${{ secrets.PR_SOURCE_REPO_TOKEN }}
       
-      - name: Access cloned repository content
+      - name: Move repo to target location
         run: |
-          mv pr_source modules/
+          mv pr_source ./pragma/modules/
 
       - name: Build Pragma
         uses: ./pragma/github_actions/build

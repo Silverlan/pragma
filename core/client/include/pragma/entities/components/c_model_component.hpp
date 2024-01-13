@@ -26,7 +26,13 @@ namespace pragma {
 		static ComponentEventId EVENT_ON_MATERIAL_OVERRIDES_CLEARED;
 		static ComponentEventId EVENT_ON_GAME_SHADER_SPECIALIZATION_CONSTANT_FLAGS_UPDATED;
 
-		enum class StateFlags : uint8_t { None = 0u, AutoLodDisabled = 1u, RenderMeshUpdateRequired = AutoLodDisabled << 1u, RenderBufferListUpdateRequired = RenderMeshUpdateRequired << 1u, DepthPrepassDisabled = RenderBufferListUpdateRequired << 1u };
+		enum class StateFlags : uint8_t {
+			None = 0u,
+			AutoLodDisabled = 1u,
+			RenderMeshUpdateRequired = AutoLodDisabled << 1u,
+			RenderBufferListUpdateRequired = RenderMeshUpdateRequired << 1u,
+			DepthPrepassDisabled = RenderBufferListUpdateRequired << 1u,
+		};
 
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
@@ -99,6 +105,9 @@ namespace pragma {
 
 		void SetLightmapUvBuffer(const CModelSubMesh &mesh, const std::shared_ptr<prosper::IBuffer> &buffer);
 		std::shared_ptr<prosper::IBuffer> GetLightmapUvBuffer(const CModelSubMesh &mesh) const;
+
+		virtual void OnTick(double tDelta) override;
+		void FlushRenderData();
 
 		void UpdateRenderMeshes(bool requireBoundingVolumeUpdate = true);
 		void ReloadRenderBufferList(bool immediate = false);

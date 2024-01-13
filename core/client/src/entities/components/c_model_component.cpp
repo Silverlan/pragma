@@ -57,8 +57,14 @@ void CModelComponent::Initialize()
 	BindEventUnhandled(CRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateBaseShaderSpecializationFlags(); });
 	BindEventUnhandled(CRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateBaseShaderSpecializationFlags(); });
 	BindEventUnhandled(CColorComponent::EVENT_ON_COLOR_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateBaseShaderSpecializationFlags(); });
-	BindEventUnhandled(EVENT_ON_SKIN_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateRenderBufferList(); });
-	BindEventUnhandled(EVENT_ON_BODY_GROUP_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateRenderMeshes(); });
+	BindEventUnhandled(EVENT_ON_SKIN_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		umath::set_flag(m_stateFlags, StateFlags::RenderBufferListUpdateRequired);
+		SetTickPolicy(TickPolicy::Always);
+	});
+	BindEventUnhandled(EVENT_ON_BODY_GROUP_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		umath::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired);
+		SetTickPolicy(TickPolicy::Always);
+	});
 }
 
 void CModelComponent::UpdateBaseShaderSpecializationFlags()
@@ -471,13 +477,28 @@ void CModelComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 		m_bvhComponent = nullptr;
 }
 
+void CModelComponent::FlushRenderData()
+{
+	if(umath::is_flag_set(m_stateFlags, StateFlags::RenderMeshUpdateRequired))
+		UpdateRenderMeshes();
+	if(umath::is_flag_set(m_stateFlags, StateFlags::RenderBufferListUpdateRequired))
+		UpdateRenderBufferList();
+}
+
+void CModelComponent::OnTick(double tDelta)
+{
+	FlushRenderData();
+	SetTickPolicy(TickPolicy::Never);
+}
+
 bool CModelComponent::SetBodyGroup(UInt32 groupId, UInt32 id)
 {
 	auto r = BaseModelComponent::SetBodyGroup(groupId, id);
 	if(r == false)
 		return r;
 	umath::set_flag(m_stateFlags, StateFlags::RenderMeshUpdateRequired);
-	UpdateLOD(m_lod); // Update our active meshes
+	SetTickPolicy(TickPolicy::Always);
+	// UpdateLOD(m_lod); // Update our active meshes
 	return true;
 }
 

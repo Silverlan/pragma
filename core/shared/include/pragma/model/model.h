@@ -199,8 +199,9 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 		CopyCollisionMeshesBit = CopyVertexAnimationsBit << 1u,
 		CopyFlexAnimationsBit = CopyCollisionMeshesBit << 1u,
 		CopyUniqueIdsBit = CopyFlexAnimationsBit << 1u,
+		CopyVertexData = CopyUniqueIdsBit << 1u,
 
-		DeepCopy = CopyMeshesBit | CopyAnimationsBit | CopyVertexAnimationsBit | CopyCollisionMeshesBit | CopyFlexAnimationsBit
+		DeepCopy = CopyMeshesBit | CopyVertexData | CopyAnimationsBit | CopyVertexAnimationsBit | CopyCollisionMeshesBit | CopyFlexAnimationsBit
 	};
   public:
 	static constexpr auto PMDL_IDENTIFIER = "PMDL";
@@ -467,7 +468,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	void SetReference(std::shared_ptr<Frame> frame);
 	const Frame &GetReference() const;
 	Frame &GetReference();
-	bool SetReferencePoses(const std::vector<umath::ScaledTransform> &poses,bool posesInParentSpace=false);
+	bool SetReferencePoses(const std::vector<umath::ScaledTransform> &poses, bool posesInParentSpace = false);
 	void Rotate(const Quat &rot);
 	void Translate(const Vector3 &t);
 	void Scale(const Vector3 &scale);
@@ -516,7 +517,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 
 	std::optional<umath::ScaledTransform> GetReferenceBonePose(BoneId boneId) const;
 	std::optional<pragma::SignedAxis> FindBoneTwistAxis(BoneId boneId) const;
-	std::optional<pragma::SignedAxis> FindBoneAxisForDirection(BoneId boneId,const Vector3 &dir) const;
+	std::optional<pragma::SignedAxis> FindBoneAxisForDirection(BoneId boneId, const Vector3 &dir) const;
 	static Quat GetTwistAxisRotationOffset(pragma::SignedAxis axis);
   protected:
 	Model(NetworkState *nw, uint32_t numBones, const std::string &name = "");

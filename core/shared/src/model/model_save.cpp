@@ -142,6 +142,7 @@ std::shared_ptr<Model> Model::Copy(Game *game, CopyFlags copyFlags) const
 	std::unordered_map<ModelMesh *, ModelMesh *> oldMeshToNewMesh;
 	std::unordered_map<ModelSubMesh *, ModelSubMesh *> oldSubMeshToNewSubMesh;
 	if((copyFlags & CopyFlags::CopyMeshesBit) != CopyFlags::None) {
+		auto copyVertexData = umath::is_flag_set(copyFlags, CopyFlags::CopyVertexData);
 		for(auto &meshGroup : mdl->m_meshGroups) {
 			auto newMeshGroup = ModelMeshGroup::Create(meshGroup->GetName());
 			static_assert(sizeof(ModelMeshGroup) == 72, "Update this function when making changes to this class!");
@@ -150,7 +151,7 @@ std::shared_ptr<Model> Model::Copy(Game *game, CopyFlags copyFlags) const
 				auto newMesh = mesh->Copy();
 				oldMeshToNewMesh[mesh.get()] = newMesh.get();
 				for(auto &subMesh : newMesh->GetSubMeshes()) {
-					auto newSubMesh = subMesh->Copy(true);
+					auto newSubMesh = subMesh->Copy(copyVertexData);
 					if(umath::is_flag_set(copyFlags, CopyFlags::CopyUniqueIdsBit))
 						newSubMesh->SetUuid(subMesh->GetUuid());
 					oldSubMeshToNewSubMesh[subMesh.get()] = newSubMesh.get();

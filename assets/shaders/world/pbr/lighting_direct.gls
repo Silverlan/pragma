@@ -3,10 +3,11 @@
 
 #include "material.gls"
 #include "/modules/fs_renderer.gls"
-#include "lighting/light_spot.gls"
+#include "lighting/light_spot_shadow.gls"
 #include "lighting/light_point.gls"
 #include "lighting/light_directional.gls"
 
+#ifndef PR_F_CALC_PBR_DIRECT_LIGHTING_DEFINED
 vec3 calc_pbr_direct_lighting(MaterialInfo materialInfo,vec3 normal,vec3 view,vec3 vertPos, bool enableShadows)
 {
 	vec3 color = vec3(0.0, 0.0, 0.0);
@@ -50,5 +51,6 @@ vec3 calc_pbr_direct_lighting(MaterialInfo materialInfo,vec3 normal,vec3 view,ve
 	}
 	return color;
 }
+#endif
 
 #endif

@@ -295,6 +295,31 @@ std::string Locale::DetermineSystemLanguage()
 		lan = "en";
 	return *lan;
 }
+void Locale::LoadAll()
+{
+	auto &lan = GetLanguage();
+	std::vector<std::string> files;
+	filemanager::find_files(LOCALIZATION_ROOT_PATH + lan + "/texts/*.txt", &files, nullptr);
+	for(auto &f : files)
+		LoadFile(f, lan);
+}
+util::Utf8String Locale::GetUsedCharacters()
+{
+	std::unordered_set<uint32_t> usedCharacters;
+	for(auto &pair : m_localization.texts) {
+		for(auto c : pair.second)
+			usedCharacters.insert(c);
+	}
+	std::vector<uint32_t> vUsedCharacters;
+	vUsedCharacters.reserve(usedCharacters.size());
+	for(auto c : usedCharacters)
+		vUsedCharacters.push_back(c);
+	std::sort(vUsedCharacters.begin(), vUsedCharacters.end());
+	util::Utf8String usedCharsStr;
+	for(auto c : vUsedCharacters)
+		usedCharsStr += c;
+	return usedCharsStr;
+}
 bool Locale::Localize(const std::string &identifier, const std::string &lan, const std::string &category, const util::Utf8String &text)
 {
 	auto fileName = category + ".txt";

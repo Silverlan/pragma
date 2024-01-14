@@ -451,6 +451,8 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	}));
 	classDef.def("Update", &::WIBase::Update);
 	classDef.def("ApplySkin", &::WIBase::ApplySkin);
+	classDef.def("ApplySkin", &::WIBase::ApplySkin, luabind::default_parameter_policy<2, static_cast<WISkin *>(nullptr)> {});
+	classDef.def("RefreshSkin", &::WIBase::RefreshSkin);
 	classDef.def("SetLeft", &::WIBase::SetLeft);
 	classDef.def("SetRight", &::WIBase::SetRight);
 	classDef.def("SetTop", &::WIBase::SetTop);

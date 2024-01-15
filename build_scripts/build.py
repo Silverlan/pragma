@@ -985,14 +985,19 @@ if build:
 	print_msg("Building Pragma...")
 
 	os.chdir(build_dir)
-	targets = ["pragma-install-full"]
+
+    
+	print_msg("Running build command...")
+	cmake_build(build_config,["pragma-install-full"])
+	targets = []
 	if with_pfm:
 		targets.append("pfm")
 	targets += additional_build_targets
-	targets.append("pragma-install")
+	#targets.append("pragma-install")
 
-	print_msg("Running build command...")
 	cmake_build(build_config,targets)
+
+	cmake_build(build_config,["pragma-install"])
 
 
 

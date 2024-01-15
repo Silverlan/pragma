@@ -1143,14 +1143,14 @@ pragma_install(wgui "${BINARY_OUTPUT_DIR}")
 
 message("Custom install targets: ${PRAGMA_INSTALL_CUSTOM_TARGETS}")
 add_custom_target(pragma-install
-	DEPENDS pragma iclient iserver ${PRAGMA_INSTALL_CUSTOM_TARGETS}
+	DEPENDS pragma-install-full ${PRAGMA_INSTALL_CUSTOM_TARGETS}
 	COMMAND 
 		"${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT}
 		-DBUILD_TYPE=${CMAKE_BUILD_TYPE}
 		-P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
 )
 add_custom_target(pragma-install-full
-	DEPENDS pragma-install
+	DEPENDS pragma iclient iserver
 	COMMAND 
 		"${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT_FULL}
 		-DBUILD_TYPE=${CMAKE_BUILD_TYPE}

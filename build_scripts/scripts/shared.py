@@ -7,6 +7,7 @@ import shutil
 import tarfile
 import urllib.request
 import zipfile
+import multiprocessing
 from pathlib import Path
 from urllib.parse import urlparse
 from sys import platform
@@ -78,6 +79,8 @@ def cmake_build(buildConfig,targets=None):
 	if targets:
 		args.append("--target")
 		args += targets
+    args.append("--parallel")
+    args.append(multiprocessing.cpu_count())
 	subprocess.run(args,check=True)
 
 def mkdir(dirName,cd=False):

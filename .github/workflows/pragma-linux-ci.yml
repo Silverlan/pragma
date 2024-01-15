@@ -60,6 +60,11 @@ jobs:
         id: build-pragma
         with:
           build-args: "--with-pfm --with-all-pfm-modules --with-vr --with-lua-debugger=0"
+
+          
+      - name: "Actually patch libraries we're about to pack"
+        run: |
+          bash ./pragma/build_scripts/cmake/patch_libraries.sh ${{ steps.build-pragma.outputs.install-dir }}
           
       - name: Create Release Archive
         shell: bash

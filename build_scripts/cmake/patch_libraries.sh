@@ -38,7 +38,7 @@ for f in $(find "$1/modules" -type f -executable -exec bash -c "[[ \"\$(head -c 
 done
 
 
-for f in $(find $1 -maxdepth 0 -type f -executable -exec bash -c "[[ \"\$(head -c 4 -- \"\${1}\")\" == \$'\\x7FELF' ]]" -- \{\} \; -print); do
+for f in $(find $1 -maxdepth 1 -type f -executable -exec bash -c "[[ \"\$(head -c 4 -- \"\${1}\")\" == \$'\\x7FELF' ]]" -- \{\} \; -print); do
     echo "Patching $f ..."
     patch_library "$f"
 done

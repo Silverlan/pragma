@@ -80,7 +80,7 @@ def cmake_build(buildConfig,targets=None):
 		args.append("--target")
 		args += targets
 	args.append("--parallel")
-	args.append(multiprocessing.cpu_count())
+	args.append(str(multiprocessing.cpu_count()))
 	subprocess.run(args,check=True)
 
 def mkdir(dirName,cd=False):

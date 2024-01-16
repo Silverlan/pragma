@@ -30,7 +30,9 @@ parser.add_argument("--with-all-pfm-modules", type=str2bool, nargs='?', const=Tr
 parser.add_argument("--with-vr", type=str2bool, nargs='?', const=True, default=False, help="Include Virtual Reality support.")
 parser.add_argument("--with-source-engine-entities", type=str2bool, nargs='?', const=True, default=True, help="Include addons with support for Source Engine entities.")
 parser.add_argument("--with-lua-debugger", type=str2bool, nargs='?', const=True, default=False, help="Include Lua-debugger support.")
-parser.add_argument("--with-lua-doc-generator", type=str2bool, nargs='?', const=True, default=False, help="Include Lua documentation generator.")
+parser.add_argument("--with-lua-doc-generator", type=str2bool, nargs='?', const=True, default=False, help="Include Lua documentation generator. Requires the --dia-include-path and --dia-library-path options.")
+parser.add_argument('--dia-include-path', help='The include path to the Debug Interface Access SDK (required for Lua doc generator).', default='')
+parser.add_argument('--dia-library-path', help='The path to the "diaguids.lib" library of Debug Interface Access SDK (required for Lua doc generator).', default='')
 parser.add_argument("--build", type=str2bool, nargs='?', const=True, default=True, help="Build Pragma after configurating and generating build files.")
 parser.add_argument("--build-all", type=str2bool, nargs='?', const=True, default=False, help="Build all dependencies instead of downloading prebuilt binaries where available. Enabling this may significantly increase the disk space requirement and build time.")
 parser.add_argument('--build-config', help='The build configuration to use.', default='RelWithDebInfo')
@@ -97,6 +99,8 @@ with_vr = args["with_vr"]
 with_source_engine_entities = args["with_source_engine_entities"]
 with_lua_debugger = args["with_lua_debugger"]
 with_lua_doc_generator = args["with_lua_doc_generator"]
+dia_include_path = args["dia_include_path"]
+dia_library_path = args["dia_library_path"]
 build = args["build"]
 build_all = args["build_all"]
 build_config = args["build_config"]
@@ -830,7 +834,13 @@ else:
 	]
 
 if with_lua_doc_generator:
-	cmake_args += ["-DCONFIG_BUILD_WITH_LAD=1"]
+	if len(dia_include_path) > 0 and len(dia_library_path) > 0:
+		print_msg("Lua documentation generator is enabled!")
+		cmake_args += ["-DCONFIG_BUILD_WITH_LAD=1"]
+		cmake_args += ["-DDEPENDENCY_DIA_INCLUDE=" +dia_include_path]
+		cmake_args += ["-DDEPENDENCY_DIA_LIBRARY=" +dia_library_path]
+	else:
+		raise ArgumentError("Both the --dia-include-path and --dia-library-path options have to be specified to enable Lua documentation generator support!")
 
 cmake_args += additional_cmake_args
 cmake_configure(root,generator,cmake_args)

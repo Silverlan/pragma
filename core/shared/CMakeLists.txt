@@ -59,12 +59,14 @@ endif()
 
 
 if(MSVC)
-option(CONFIG_BUILD_WITH_LAD "Build with Lua documentation system?" OFF)
+	option(CONFIG_BUILD_WITH_LAD "Build with Lua documentation system?" OFF)
 endif()
 
 if(${CONFIG_BUILD_WITH_LAD})
-        add_definitions(-DENABLE_LAD)
+    add_definitions(-DENABLE_LAD)
 	add_definitions(-DENABLE_PDB_MANAGER)
+	link_external_library(dia)
+endif()
 endif()
 
 def_project(shared lib)

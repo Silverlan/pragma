@@ -9,9 +9,7 @@
 #include "pragma/debug/intel_vtune.hpp"
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-#include <C:/Program Files (x86)/Intel/oneAPI/vtune/2023.1.0/sdk/include/ittnotify.h>
-
-#pragma comment(lib, "C:/Program Files (x86)/Intel/oneAPI/vtune/2023.1.0/sdk/lib64/libittnotify.lib")
+#include <ittnotify.h>
 
 debug::VTuneDomain::VTuneDomain()
 {

@@ -120,6 +120,8 @@ Running the build-script with the arguments above will build and install Pragma 
 | `--rerun <1/0>`                         | Re-run the build script with the previous arguments.                                         | `0`              |
 | `--module <moduleName>:<gitUrl>`        | Custom modules to install. Use this parameter multiple times to use multiple modules.        |                  |
 | `--cmake-arg <arg>`                     | Custom CMake configuration option. Use this parameter multiple times for multiple options.   |                  |
+| `--vtune-include-path <path>`           | Path to VTune include folder. Required for CPU profiling with Intel VTune Profiler.          |                  |
+| `--vtune-library-path <libPath>`        | Path to "libittnotify" VTune library. Required for CPU profiling with Intel VTune Profiler.  |                  |
 
 Example for using the `--module` parameter:
 ```console

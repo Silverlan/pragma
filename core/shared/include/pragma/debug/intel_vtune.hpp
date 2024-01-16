@@ -7,8 +7,6 @@
 #ifndef __INTEL_VTUNE_HPP__
 #define __INTEL_VTUNE_HPP__
 
-// #define PRAGMA_ENABLE_VTUNE_PROFILING
-
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 #include "pragma/networkdefinitions.h"
 

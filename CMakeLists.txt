@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.13) # 3.11 for GENERATOR_IS_MULTI_CONFIG and IN
 #3.13 for IMPORTED_TARGET GLOBAL for pkg_check_modules
 project(pragma)
 
+option(CONFIG_BUILD_WITH_VTUNE_SUPPORT "Build with VTune profiler support?" OFF)
+
+if(${CONFIG_BUILD_WITH_VTUNE_SUPPORT})
+    add_definitions(-DPRAGMA_ENABLE_VTUNE_PROFILING)
+endif()
+
 #set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE CACHE INTERNAL "" FORCE)
 #set_target_properties(freetype PROPERTIES CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE)
 set(CONFIG_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build Type")

@@ -33,6 +33,8 @@ parser.add_argument("--with-lua-debugger", type=str2bool, nargs='?', const=True,
 parser.add_argument("--with-lua-doc-generator", type=str2bool, nargs='?', const=True, default=False, help="Include Lua documentation generator. Requires the --dia-include-path and --dia-library-path options.")
 parser.add_argument('--dia-include-path', help='The include path to the Debug Interface Access SDK (required for Lua doc generator).', default='')
 parser.add_argument('--dia-library-path', help='The path to the "diaguids.lib" library of Debug Interface Access SDK (required for Lua doc generator).', default='')
+parser.add_argument('--vtune-include-path', help='The include path to the VTune profiler (required for CPU profiling).', default='')
+parser.add_argument('--vtune-library-path', help='The path to the "libittnotify" library of the VTune profiler (required for CPU profiling).', default='')
 parser.add_argument("--build", type=str2bool, nargs='?', const=True, default=True, help="Build Pragma after configurating and generating build files.")
 parser.add_argument("--build-all", type=str2bool, nargs='?', const=True, default=False, help="Build all dependencies instead of downloading prebuilt binaries where available. Enabling this may significantly increase the disk space requirement and build time.")
 parser.add_argument('--build-config', help='The build configuration to use.', default='RelWithDebInfo')
@@ -101,6 +103,8 @@ with_lua_debugger = args["with_lua_debugger"]
 with_lua_doc_generator = args["with_lua_doc_generator"]
 dia_include_path = args["dia_include_path"]
 dia_library_path = args["dia_library_path"]
+vtune_include_path = args["vtune_include_path"]
+vtune_library_path = args["vtune_library_path"]
 build = args["build"]
 build_all = args["build_all"]
 build_config = args["build_config"]
@@ -841,6 +845,15 @@ if with_lua_doc_generator:
 		cmake_args += ["-DDEPENDENCY_DIA_LIBRARY=" +dia_library_path]
 	else:
 		raise ArgumentError("Both the --dia-include-path and --dia-library-path options have to be specified to enable Lua documentation generator support!")
+
+if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
+	if len(vtune_include_path) > 0 and len(vtune_library_path) > 0:
+		print_msg("VTune profiler support is enabled!")
+		cmake_args += ["-DCONFIG_BUILD_WITH_VTUNE_SUPPORT=1"]
+		cmake_args += ["-DDEPENDENCY_VTUNE_PROFILER_INCLUDE=" +vtune_include_path]
+		cmake_args += ["-DDEPENDENCY_VTUNE_PROFILER_LIBRARY=" +vtune_library_path]
+	else:
+		raise ArgumentError("Both the --vtune-include-path and --vtune-library-path options have to be specified to enable VTune support!")
 
 cmake_args += additional_cmake_args
 cmake_configure(root,generator,cmake_args)

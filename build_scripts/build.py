@@ -71,8 +71,8 @@ input_args = args
 if args["update"]:
 	args["rerun"] = True
 	args["update"] = True
-
-if args["rerun"]:
+elif args["rerun"]:
+	print_msg("--rerun option has been set, restoring previous build script options...")
 	build_dir = normalize_path(args["build_directory"])
 	if not os.path.isabs(build_dir):
 		build_dir = os.getcwd() +"/" +build_dir
@@ -179,6 +179,14 @@ if update:
 
 	print_msg("Updating Pragma repository...")
 	subprocess.run(["git","pull"],check=True)
+
+	argv = sys.argv
+	argv.remove("--update")
+	argv.append("--rerun")
+	print_msg("Build script may have changed, re-running...")
+	print("argv: ",argv)
+	os.execv(sys.executable, ['python'] +argv)
+	sys.exit(0)
 
 
 mkpath(build_dir)

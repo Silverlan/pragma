@@ -725,9 +725,10 @@ function udm.generate_lua_api_from_schema(schema)
 								table.remove(children, idx + 1)
 
 								-- Update UDM data for typed children (due to index change)
+								local udmData = self:GetUdmData():Get(name)
 								for i = idx + 1, #children do
 									local child = children[i]
-									child.m_udmData = a:Get(i - 1)
+									child:ReloadUdmData(udmData:Get(i - 1))
 								end
 								self:OnArrayValueRemoved(name, idx)
 								self:CallChangeListeners(name, idx, udm.BaseSchemaType.ARRAY_EVENT_REMOVE, curVal)

@@ -53,7 +53,7 @@
 	"steam"
 	{
 		$uint32 app_id 420
-		$string game_path "common/half-life 2/ep2/"
+		$string game_path "common/Half-Life 2/ep2/"
 		$bool mount_workshop 0
 	}
 	"engine"
@@ -71,7 +71,7 @@
 	"steam"
 	{
 		$uint32 app_id 380
-		$string game_path "common/half-life 2/episodic/"
+		$string game_path "common/Half-Life 2/episodic/"
 		$bool mount_workshop 0
 	}
 	"engine"
@@ -207,7 +207,7 @@
 	"steam"
 	{
 		$uint32 app_id 500
-		$string game_path "common/left 4 dead/left4dead/"
+		$string game_path "common/Left 4 Dead/left4dead/"
 		$bool mount_workshop 0
 	}
 	"engine"
@@ -251,7 +251,7 @@
 	"steam"
 	{
 		$uint32 app_id 340
-		$string game_path "common/half-life 2/lostcoast/"
+		$string game_path "common/Half-Life 2/lostcoast/"
 		$bool mount_workshop 0
 	}
 	"engine"
@@ -269,7 +269,7 @@
 	"steam"
 	{
 		$uint32 app_id 320
-		$string game_path "common/half-life 2 deathmatch/hl2mp/"
+		$string game_path "common/Half-Life 2 Deathmatch/hl2mp/"
 		$bool mount_workshop 0
 	}
 	"engine"
@@ -367,7 +367,7 @@
 	"steam"
 	{
 		$uint32 app_id 570
-		$string game_path "common/dota 2 beta/game/dota/"
+		$string game_path "common/Dota 2 beta/game/dota/"
 		$bool mount_workshop 1
 	}
 	"engine"
@@ -447,8 +447,8 @@
 	{
 		$uint32 app_id 440
 		$array game_paths [string][
-			"common/team fortress 2/tf/",
-			"common/team fortress 2/hl2/"
+			"common/Team Fortress 2/tf/",
+			"common/Team Fortress 2/hl2/"
 		]
 		$bool mount_workshop 1
 	}

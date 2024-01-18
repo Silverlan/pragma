@@ -178,7 +178,7 @@ void WILuaBase::Render(const DrawInfo &drawInfo, wgui::DrawState &drawState, con
 		drawArgs.SetArgumentValue(hash("h"), drawInfo.size.y);
 		drawArgs.SetArgumentValue(hash("stencilPipeline"), umath::to_integral(stencilPipeline));
 		drawArgs.SetArgumentValue(hash("testStencilLevel"), testStencilLevel);
-		drawArgs.SetArgumentValue(hash("msaa"), drawInfo.msaa);
+		drawArgs.SetArgumentValue(hash("msaa"), umath::is_flag_set(drawInfo.flags, DrawInfo::Flags::Msaa));
 		drawArgs.SetArgumentValue(hash("matDraw"), matDraw);
 		drawArgs.SetArgumentValue(hash("scale"), scale);
 		drawArgs.SetArgumentValue(hash("viewportSize"), wgui::ElementData::ToViewportSize(drawInfo.size));

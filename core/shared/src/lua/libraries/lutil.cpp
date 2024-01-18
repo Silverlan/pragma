@@ -52,6 +52,7 @@
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/util/util_rgbcsv.hpp"
 #include "pragma/util/util_variable_type.hpp"
+#include "pragma/lua/classes/parallel_job.hpp"
 #include <util_image_buffer.hpp>
 #include <sharedutils/netpacket.hpp>
 #include <sharedutils/util_file.h>
@@ -1564,15 +1565,13 @@ luabind::object Lua::util::get_class_value(lua_State *l, const luabind::object &
 	return ro;
 }
 
-void Lua::util::pack_zip_archive(lua_State *l, const std::string &pzipFileName, const luabind::table<> &t)
+Lua::var<bool, ::util::ParallelJob<luabind::object>> Lua::util::pack_zip_archive(lua_State *l, Game &game, const std::string &pzipFileName, const luabind::table<> &t)
 {
 	auto zipFileName = pzipFileName;
 	ufile::remove_extension_from_filename(zipFileName);
 	zipFileName += ".zip";
-	if(Lua::file::validate_write_operation(l, zipFileName) == false) {
-		Lua::PushBool(l, false);
-		return;
-	}
+	if(Lua::file::validate_write_operation(l, zipFileName) == false)
+		return luabind::object {l, false};
 
 	std::unordered_map<std::string, std::string> files {};
 	std::unordered_map<std::string, std::string> customTextFiles {};
@@ -1606,33 +1605,79 @@ void Lua::util::pack_zip_archive(lua_State *l, const std::string &pzipFileName, 
 	}
 
 	auto zip = ZIPFile::Open(zipFileName, ZIPFile::OpenMode::Write);
-	if(zip == nullptr) {
-		Lua::PushBool(l, false);
-		return;
-	}
-	auto tNotFound = luabind::newtable(l);
-	uint32_t notFoundIdx = 1;
-	for(auto &pair : files) {
-		auto f = FileManager::OpenFile(pair.second.c_str(), "rb");
-		if(f == nullptr) {
-			tNotFound[notFoundIdx++] = pair.second;
-			continue;
+	if(zip == nullptr)
+		return luabind::object {l, false};
+	auto pzip = std::shared_ptr<ZIPFile> {std::move(zip)};
+
+	struct ResultData {
+		std::vector<std::string> notFound;
+	};
+	auto job = ::util::create_parallel_job<::util::TFunctionalParallelWorkerWithResult<ResultData>, bool>(false);
+	auto &worker = static_cast<::util::TFunctionalParallelWorkerWithResult<ResultData> &>(job.GetWorker());
+	worker.ResetTask([files = std::move(files), customTextFiles = std::move(customTextFiles), customBinaryFiles = std::move(customBinaryFiles), pzip = std::move(pzip)](::util::TFunctionalParallelWorker<ResultData> &worker) mutable {
+		std::vector<std::string> notFound;
+		size_t numFilesTotal = files.size() + customTextFiles.size() + customBinaryFiles.size();
+		size_t curFileIdx = 0;
+		auto incrementFileIndex = [&worker, &curFileIdx, numFilesTotal]() {
+			auto progress = (numFilesTotal > 0) ? (curFileIdx / static_cast<float>(numFilesTotal)) : 1.f;
+			worker.UpdateProgress(progress * 0.05f);
+			++curFileIdx;
+		};
+		for(auto &pair : files) {
+			incrementFileIndex();
+			if(worker.IsCancelled())
+				return;
+			auto f = filemanager::open_file(pair.second, filemanager::FileMode::Read | filemanager::FileMode::Binary);
+			if(f == nullptr) {
+				if(notFound.size() == notFound.capacity())
+					notFound.reserve(notFound.size() * 1.5 + 100);
+				notFound.push_back(pair.second);
+				continue;
+			}
+			auto sz = f->GetSize();
+			std::vector<uint8_t> data {};
+			data.resize(sz);
+			f->Read(data.data(), sz);
+			if(worker.IsCancelled())
+				return;
+			pzip->AddFile(pair.first, data.data(), sz);
 		}
-		auto sz = f->GetSize();
-		std::vector<uint8_t> data {};
-		data.resize(sz);
-		f->Read(data.data(), sz);
-		zip->AddFile(pair.first, data.data(), sz);
-	}
-	for(auto &pair : customTextFiles)
-		zip->AddFile(pair.first, pair.second);
-	for(auto &pair : customBinaryFiles) {
-		auto &ds = pair.second;
-		zip->AddFile(pair.first, ds->GetData(), ds->GetInternalSize());
-	}
-	zip = nullptr;
-	Lua::PushBool(l, true);
-	tNotFound.push(l);
+		for(auto &pair : customTextFiles) {
+			incrementFileIndex();
+			if(worker.IsCancelled())
+				return;
+			pzip->AddFile(pair.first, pair.second);
+		}
+		for(auto &pair : customBinaryFiles) {
+			incrementFileIndex();
+			if(worker.IsCancelled())
+				return;
+			auto &ds = pair.second;
+			pzip->AddFile(pair.first, ds->GetData(), ds->GetInternalSize());
+		}
+		incrementFileIndex();
+		pzip->SetPackProgressCallback([&worker](double progress) { worker.UpdateProgress(0.05f + progress * 0.95f); });
+		pzip = nullptr;
+
+		if(!worker.IsCancelled()) {
+			ResultData resultData {};
+			resultData.notFound = std::move(notFound);
+			static_cast<::util::TFunctionalParallelWorkerWithResult<ResultData> &>(worker).SetResult(std::move(resultData));
+			worker.SetStatus(::util::JobStatus::Successful);
+		}
+	});
+	auto pjob = std::make_shared<::util::ParallelJob<ResultData>>(job);
+	auto jobWrapper = std::make_shared<::util::ParallelJob<luabind::object>>(::util::create_parallel_job<pragma::lua::LuaWorker>(game, "pack_zip_archive"));
+	auto &workerWrapper = static_cast<pragma::lua::LuaWorker &>(jobWrapper->GetWorker());
+	workerWrapper.AddCppTask(
+	  pjob,
+	  [&worker, &workerWrapper, l]() {
+		  auto &resultData = worker.GetResultRef();
+		  luabind::object o {l, resultData.notFound};
+		  workerWrapper.SetResult(o);
+	  },
+	  1.f);
+	return luabind::object {l, jobWrapper};
 }
 
 std::string Lua::util::get_addon_path(lua_State *l, const std::string &relPath)

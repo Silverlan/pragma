@@ -29,7 +29,7 @@
 #include <fsys/ifile.hpp>
 
 extern DLLNETWORK Engine *engine;
-
+#pragma optimize("", off)
 template<class TPropertyWrapper, class TClass, typename T>
 void prop_set_basic_type_indexed(lua_State *l, TClass &p, int32_t idx, const T &v)
 {
@@ -220,14 +220,14 @@ static luabind::object get_array_values(lua_State *l, ::udm::LinkedPropertyWrapp
 	if(::udm::is_numeric_type(*type) || ::udm::is_generic_type(*type))
 		udm::visit_ng(*type, vs);
 	else if(::udm::is_non_trivial_type(*type)) {
-		udm::visit<false, false, true>(*type, [&vs, size, pArray, &t](auto tag) {
+		udm::visit<false, false, true>(*type, [&vs, size, pArray, &p, &t](auto tag) {
 			using T = typename decltype(tag)::type;
 			// TODO: Add support for other non-trivial types
 			if constexpr(std::is_same_v<T, udm::String>)
 				vs(tag);
 			else if constexpr(std::is_same_v<T, udm::Element>) {
 				for(auto i = decltype(size) {0u}; i < size; ++i)
-					t[i + 1] = (*pArray)[i];
+					t[i + 1] = p[i];
 			}
 		});
 	}
@@ -254,13 +254,13 @@ static luabind::object get_array_value(lua_State *l, ::udm::LinkedPropertyWrappe
 	if(::udm::is_numeric_type(*type) || ::udm::is_generic_type(*type))
 		return udm::visit_ng(*type, vs);
 	else if(::udm::is_non_trivial_type(*type)) {
-		return udm::visit<false, false, true>(*type, [l, &vs, size, pArray, idx](auto tag) -> luabind::object {
+		return udm::visit<false, false, true>(*type, [l, &vs, size, pArray, &p, idx](auto tag) -> luabind::object {
 			using T = typename decltype(tag)::type;
 			// TODO: Add support for other non-trivial types
 			if constexpr(std::is_same_v<T, udm::String>)
 				return vs(tag);
 			else if constexpr(std::is_same_v<T, udm::Element>)
-				return luabind::object {l, (*pArray)[idx]};
+				return luabind::object {l, p[idx]};
 			return Lua::nil;
 		});
 	}
@@ -863,6 +863,7 @@ static void set_array_values(lua_State *l, udm::PropertyWrapper &p, const std::s
 
 static ::udm::LinkedPropertyWrapper x_get(lua_State *l, ::udm::Element &p, const std::string &key) { return static_cast<::udm::PropertyWrapper &>(p)[key]; }
 static ::udm::LinkedPropertyWrapper x_get(lua_State *l, ::udm::PropertyWrapper &p, const std::string &key) { return static_cast<::udm::PropertyWrapper &>(p)[key]; }
+static ::udm::LinkedPropertyWrapper x_get(lua_State *l, ::udm::LinkedPropertyWrapper &p, const std::string &key) { return static_cast<::udm::LinkedPropertyWrapper &>(p)[key]; }
 static ::udm::LinkedPropertyWrapper x_get(lua_State *l, ::udm::Property &p, const std::string &key) { return static_cast<::udm::PropertyWrapper>(p)[key]; }
 
 static ::udm::LinkedPropertyWrapper i_get(lua_State *l, ::udm::Element &p, int32_t idx)
@@ -870,6 +871,12 @@ static ::udm::LinkedPropertyWrapper i_get(lua_State *l, ::udm::Element &p, int32
 	if(idx < 0)
 		return {};
 	return static_cast<::udm::PropertyWrapper &>(p)[idx];
+}
+static ::udm::LinkedPropertyWrapper i_get(lua_State *l, ::udm::LinkedPropertyWrapper &p, int32_t idx)
+{
+	if(idx < 0)
+		return {};
+	return static_cast<::udm::LinkedPropertyWrapper &>(p)[idx];
 }
 static ::udm::LinkedPropertyWrapper i_get(lua_State *l, ::udm::PropertyWrapper &p, int32_t idx)
 {
@@ -961,8 +968,24 @@ void register_property_methods(TClassDef &classDef)
 	  //.def("Get",+[](lua_State *l,T &p,const std::string &key) -> ::udm::LinkedPropertyWrapper {
 	  //	return static_cast<TPropertyWrapper>(p)[key];
 	  //})
-	  .def("Get", static_cast<::udm::LinkedPropertyWrapper (*)(lua_State *, T &, const std::string &)>(&x_get))
-	  .def("Get", static_cast<::udm::LinkedPropertyWrapper (*)(lua_State *, T &, int32_t)>(&i_get))
+	  .def(
+	    "Get",
+	    +[](lua_State *l, T &p, const std::string &key) -> ::udm::LinkedPropertyWrapper {
+		    TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
+		    auto *lp = tp.GetLinked();
+		    if(lp)
+			    return x_get(l, *lp, key);
+		    return x_get(l, p, key);
+	    })
+	  .def(
+	    "Get",
+	    +[](lua_State *l, T &p, int32_t idx) -> ::udm::LinkedPropertyWrapper {
+		    TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
+		    auto *lp = tp.GetLinked();
+		    if(lp)
+			    return i_get(l, *lp, idx);
+		    return i_get(l, p, idx);
+	    })
 	  //.def("Get",+[](lua_State *l,T &p,uint32_t idx) -> ::udm::LinkedPropertyWrapper {
 	  //	return static_cast<TPropertyWrapper>(p)[idx];
 	  //})

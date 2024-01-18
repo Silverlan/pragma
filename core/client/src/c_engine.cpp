@@ -724,6 +724,15 @@ bool CEngine::Initialize(int argc, char *argv[])
 			if(FindFontSet(sourceHanSans))
 				defaultFontSet = sourceHanSans;
 		}
+		auto udmReqChars = (*lanInfo->configData)["font"]["requiredChars"];
+		if(udmReqChars) {
+			auto *fontSet = const_cast<FontSet *>(FindFontSet(defaultFontSet));
+			if(fontSet) {
+				std::string reqChars;
+				udmReqChars(reqChars);
+				fontSet->requiredChars = util::Utf8String {reqChars};
+			}
+		}
 	}
 
 	auto fail = [&]() {
@@ -749,7 +758,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 		fail();
 		return false;
 	}
-	auto r = gui.Initialize(GetRenderResolution(), fontData->fileName);
+	auto r = gui.Initialize(GetRenderResolution(), fontData->fileName, fontSet.requiredChars);
 	if(r != WGUI::ResultCode::Ok) {
 		Con::cerr << "Unable to initialize GUI library: ";
 		switch(r) {

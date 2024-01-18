@@ -55,6 +55,10 @@ class DLLNETWORK Locale {
 	static LoadResult ParseFile(const std::string &file, const std::string &lan, std::unordered_map<std::string, util::Utf8String> &outTexts);
 	static std::string GetFileLocation(const std::string &file, const std::string &lan);
 	static bool Localize(const std::string &identifier, const std::string &lan, const std::string &category, const util::Utf8String &text);
+	static util::Utf8String GetUsedCharacters();
+
+	// Loads all available scripts for the current language. For debugging purposes only.
+	static void LoadAll();
   private:
 	static Localization m_localization;
 	static std::vector<std::string> m_loadedFiles;

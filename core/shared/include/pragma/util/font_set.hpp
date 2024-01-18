@@ -14,6 +14,7 @@
 #include <optional>
 #include <string_view>
 #include <vector>
+#include <sharedutils/util_utf8.hpp>
 
 enum class FontSetFlag : uint8_t { None = 0, Bold = 1, Italic = Bold << 1u, Mono = Italic << 1u, Serif = Mono << 1u, Sans = Serif << 1u };
 struct DLLNETWORK FontSetFileData {
@@ -24,6 +25,7 @@ struct DLLNETWORK FontSetFileData {
 struct DLLNETWORK FontSet {
 	std::vector<FontSetFileData> fileData;
 	std::vector<std::string> features;
+	std::optional<util::Utf8String> requiredChars {};
 	FontSetFileData *FindFontFileCandidate(FontSetFlag flags);
 	const FontSetFileData *FindFontFileCandidate(FontSetFlag flags) const;
 	bool HasFeature(const std::string_view &feature) const;

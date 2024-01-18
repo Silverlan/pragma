@@ -5,7 +5,7 @@
 #include "normal.gls"
 #include "lighting_direct.gls"
 #include "lighting/ibl.gls"
-#include "lighting/light_spot.gls"
+#include "lighting/light_spot_shadow.gls"
 #include "lighting/light_point.gls"
 #include "lighting/light_directional.gls"
 #include "/modules/fs_renderer.gls"

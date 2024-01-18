@@ -30,7 +30,11 @@ parser.add_argument("--with-all-pfm-modules", type=str2bool, nargs='?', const=Tr
 parser.add_argument("--with-vr", type=str2bool, nargs='?', const=True, default=False, help="Include Virtual Reality support.")
 parser.add_argument("--with-source-engine-entities", type=str2bool, nargs='?', const=True, default=True, help="Include addons with support for Source Engine entities.")
 parser.add_argument("--with-lua-debugger", type=str2bool, nargs='?', const=True, default=False, help="Include Lua-debugger support.")
-parser.add_argument("--with-lua-doc-generator", type=str2bool, nargs='?', const=True, default=False, help="Include Lua documentation generator.")
+parser.add_argument("--with-lua-doc-generator", type=str2bool, nargs='?', const=True, default=False, help="Include Lua documentation generator. Requires the --dia-include-path and --dia-library-path options.")
+parser.add_argument('--dia-include-path', help='The include path to the Debug Interface Access SDK (required for Lua doc generator).', default='')
+parser.add_argument('--dia-library-path', help='The path to the "diaguids.lib" library of Debug Interface Access SDK (required for Lua doc generator).', default='')
+parser.add_argument('--vtune-include-path', help='The include path to the VTune profiler (required for CPU profiling).', default='')
+parser.add_argument('--vtune-library-path', help='The path to the "libittnotify" library of the VTune profiler (required for CPU profiling).', default='')
 parser.add_argument("--build", type=str2bool, nargs='?', const=True, default=True, help="Build Pragma after configurating and generating build files.")
 parser.add_argument("--build-all", type=str2bool, nargs='?', const=True, default=False, help="Build all dependencies instead of downloading prebuilt binaries where available. Enabling this may significantly increase the disk space requirement and build time.")
 parser.add_argument('--build-config', help='The build configuration to use.', default='RelWithDebInfo')
@@ -67,8 +71,8 @@ input_args = args
 if args["update"]:
 	args["rerun"] = True
 	args["update"] = True
-
-if args["rerun"]:
+elif args["rerun"]:
+	print_msg("--rerun option has been set, restoring previous build script options...")
 	build_dir = normalize_path(args["build_directory"])
 	if not os.path.isabs(build_dir):
 		build_dir = os.getcwd() +"/" +build_dir
@@ -97,6 +101,10 @@ with_vr = args["with_vr"]
 with_source_engine_entities = args["with_source_engine_entities"]
 with_lua_debugger = args["with_lua_debugger"]
 with_lua_doc_generator = args["with_lua_doc_generator"]
+dia_include_path = args["dia_include_path"]
+dia_library_path = args["dia_library_path"]
+vtune_include_path = args["vtune_include_path"]
+vtune_library_path = args["vtune_library_path"]
 build = args["build"]
 build_all = args["build_all"]
 build_config = args["build_config"]
@@ -171,6 +179,14 @@ if update:
 
 	print_msg("Updating Pragma repository...")
 	subprocess.run(["git","pull"],check=True)
+
+	argv = sys.argv
+	argv.remove("--update")
+	argv.append("--rerun")
+	print_msg("Build script may have changed, re-running...")
+	print("argv: ",argv)
+	os.execv(sys.executable, ['python'] +argv)
+	sys.exit(0)
 
 
 mkpath(build_dir)
@@ -839,7 +855,22 @@ else:
 	]
 
 if with_lua_doc_generator:
-	cmake_args += ["-DCONFIG_BUILD_WITH_LAD=1"]
+	if len(dia_include_path) > 0 and len(dia_library_path) > 0:
+		print_msg("Lua documentation generator is enabled!")
+		cmake_args += ["-DCONFIG_BUILD_WITH_LAD=1"]
+		cmake_args += ["-DDEPENDENCY_DIA_INCLUDE=" +dia_include_path]
+		cmake_args += ["-DDEPENDENCY_DIA_LIBRARY=" +dia_library_path]
+	else:
+		raise ArgumentError("Both the --dia-include-path and --dia-library-path options have to be specified to enable Lua documentation generator support!")
+
+if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
+	if len(vtune_include_path) > 0 and len(vtune_library_path) > 0:
+		print_msg("VTune profiler support is enabled!")
+		cmake_args += ["-DCONFIG_BUILD_WITH_VTUNE_SUPPORT=1"]
+		cmake_args += ["-DDEPENDENCY_VTUNE_PROFILER_INCLUDE=" +vtune_include_path]
+		cmake_args += ["-DDEPENDENCY_VTUNE_PROFILER_LIBRARY=" +vtune_library_path]
+	else:
+		raise ArgumentError("Both the --vtune-include-path and --vtune-library-path options have to be specified to enable VTune support!")
 
 cmake_args += additional_cmake_args
 cmake_configure(root,generator,cmake_args)
@@ -936,11 +967,11 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","56830b164329997139721c62102773330c174199")
-		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","0f969464c1cf49cf2b264b95a42f9b69dce16a5f")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","933881b67dda62d16ebd2ee36b580e5b3d4022b0")
+		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","56d46dacb398fa7540e794359eaf1081c9df1edd")
 
 	if with_vr:
-		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","26912f1dbd1f25fed244592bce59ac4b59007ed1")
+		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","7e1169a9b4a31b3cae4982455280dc1f6863d37c")
 
 	if with_pfm:
 		download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")

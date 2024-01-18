@@ -250,22 +250,24 @@ bool ModelSubMesh::IsEqual(const ModelSubMesh &other) const
 void ModelSubMesh::Copy(ModelSubMesh &cpy, bool fullCopy) const
 {
 	cpy.m_name = m_name;
-	cpy.m_vertices = std::make_shared<std::vector<umath::Vertex>>(*cpy.m_vertices);
-	cpy.m_alphas = std::make_shared<std::vector<Vector2>>(*cpy.m_alphas);
-	cpy.m_indexData = std::make_shared<std::vector<uint8_t>>(*cpy.m_indexData);
-	cpy.m_vertexWeights = std::make_shared<std::vector<umath::VertexWeight>>(*cpy.m_vertexWeights);
-	cpy.m_extendedVertexWeights = std::make_shared<std::vector<umath::VertexWeight>>(*cpy.m_extendedVertexWeights);
-	cpy.m_uvSets = std::make_shared<std::unordered_map<std::string, std::vector<Vector2>>>(*cpy.m_uvSets);
+	if(fullCopy) {
+		cpy.m_vertices = std::make_shared<std::vector<umath::Vertex>>(*cpy.m_vertices);
+		cpy.m_alphas = std::make_shared<std::vector<Vector2>>(*cpy.m_alphas);
+		cpy.m_indexData = std::make_shared<std::vector<uint8_t>>(*cpy.m_indexData);
+		cpy.m_vertexWeights = std::make_shared<std::vector<umath::VertexWeight>>(*cpy.m_vertexWeights);
+		cpy.m_extendedVertexWeights = std::make_shared<std::vector<umath::VertexWeight>>(*cpy.m_extendedVertexWeights);
+		cpy.m_uvSets = std::make_shared<std::unordered_map<std::string, std::vector<Vector2>>>(*cpy.m_uvSets);
 
-	// Copy extension data
-	std::stringstream extStream {};
-	ufile::OutStreamFile extStreamFileOut {std::move(extStream)};
-	m_extensions->Write(extStreamFileOut);
+		// Copy extension data
+		std::stringstream extStream {};
+		ufile::OutStreamFile extStreamFileOut {std::move(extStream)};
+		m_extensions->Write(extStreamFileOut);
 
-	cpy.m_extensions = udm::Property::Create(udm::Type::Element);
-	ufile::InStreamFile extStreamFileIn {std::move(extStreamFileOut.MoveStream())};
-	cpy.m_extensions->Read(extStreamFileIn);
-	//
+		cpy.m_extensions = udm::Property::Create(udm::Type::Element);
+		ufile::InStreamFile extStreamFileIn {std::move(extStreamFileOut.MoveStream())};
+		cpy.m_extensions->Read(extStreamFileIn);
+		//
+	}
 	static_assert(sizeof(ModelSubMesh) == 280, "Update this function when making changes to this class!");
 }
 std::shared_ptr<ModelSubMesh> ModelSubMesh::Copy(bool fullCopy) const

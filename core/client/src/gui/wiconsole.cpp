@@ -152,7 +152,9 @@ void WIConsole::Initialize()
 
 	EnableThinking();
 	SetSize(512, 256);
-	FontManager::LoadFont("console", "vera/VeraMono", 12);
+	FontInfo::FontSettings settings {};
+	settings.fontSize = 12;
+	FontManager::LoadFont("console", "vera/VeraMono", settings);
 
 	auto &wgui = WGUI::GetInstance();
 	auto *pLogBg = wgui.Create<WIRect>(this);
@@ -414,8 +416,9 @@ void WIConsole::SetExternallyOwned(bool externallyOwned)
 	}
 	SetSimpleConsoleMode(false, true);
 }
-bool WIConsole::IsExternallyOwned() const {return m_mode == Mode::ExternalOwnership; }
-void WIConsole::UpdateConsoleMode() {
+bool WIConsole::IsExternallyOwned() const { return m_mode == Mode::ExternalOwnership; }
+void WIConsole::UpdateConsoleMode()
+{
 	if(m_mode == Mode::ExternalOwnership)
 		return;
 	SetSimpleConsoleMode(client->IsMainMenuOpen() == false);

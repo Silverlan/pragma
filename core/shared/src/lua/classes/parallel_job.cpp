@@ -22,11 +22,11 @@ LuaWorker::~LuaWorker() { Clear(); }
 luabind::object LuaWorker::GetResult() { return m_result; }
 void LuaWorker::Wait()
 {
-	// The Lua-function can only run on the main thread, so we cannot actually
-	// wait for it. We'll cancel the task instead.
 	auto status = GetStatus();
-	if(status == util::JobStatus::Pending)
-		SetStatus(util::JobStatus::Failed, "Premature cancellation.");
+	while(status == util::JobStatus::Pending) {
+		Update();
+		status = GetStatus();
+	}
 	Clear();
 	m_mutex.lock();
 	m_cond.notify_one();
@@ -184,6 +184,30 @@ void LuaWorker::AddLuaTask(const Lua::func<TaskStatus> &luaFunc, const Lua::func
 		  },
 		  0);
 		return r == Lua::StatusCode::Ok;
+	};
+	m_updateFuncs.push(std::move(task));
+}
+void LuaWorker::AddCppTask(const std::shared_ptr<util::BaseParallelJob> &subJob, const std::function<void()> &onComplete, float taskProgress)
+{
+	Task task {};
+	task.progressAmount = taskProgress;
+	task.update = [this, subJob, onComplete](const Task &task) -> TaskStatus {
+		if(subJob->GetStatus() == util::JobStatus::Initial)
+			subJob->Start();
+		UpdateTaskProgress(task, subJob->GetProgress());
+		if(subJob->IsComplete() == false)
+			return TaskStatus::Pending;
+		if(!subJob->IsSuccessful()) {
+			SetStatus(subJob->GetStatus(), subJob->GetResultMessage());
+			return TaskStatus::Complete;
+		}
+		onComplete();
+		SetStatus(util::JobStatus::Successful);
+		return TaskStatus::Complete;
+	};
+	task.cancel = [subJob](const Task &task) {
+		subJob->Cancel();
+		return true;
 	};
 	m_updateFuncs.push(std::move(task));
 }

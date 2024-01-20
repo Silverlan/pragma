@@ -11,11 +11,17 @@
 #include <pragma/serverstate/serverstate.h>
 #include <sharedutils/util_string.h>
 #include <pragma/console/convars.h>
+#include <atomic>
+#ifdef __linux__
+
+#include <pthread.h>
+#endif
 
 extern Engine *engine;
-static bool bCheckInput = true;
+static std::atomic_bool bCheckInput = true;
 static void KeyboardInput()
 {
+	//TODO: Rewrite this to use non-blocking algorythms
 	std::string line;
 	while(bCheckInput) {
 		std::getline(std::cin, line);
@@ -48,7 +54,16 @@ Engine::ConsoleInstance::ConsoleInstance()
 
 Engine::ConsoleInstance::~ConsoleInstance()
 {
+#ifdef __linux__
+	//In linux we most likely run from console. Relinquish our control of cin.
+	bCheckInput = false;
+#endif
 	console->close();
+#ifdef __linux__
+	//It is impossible to unblock KeyboardInput by putting \n. I have to cancel the thread.
+	auto natConsoleThread = consoleThread->native_handle();
+	pthread_cancel(natConsoleThread);
+#endif
 	consoleThread->join();
 }
 

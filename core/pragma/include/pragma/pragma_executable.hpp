@@ -80,10 +80,27 @@ static std::string get_last_system_error_string(DWORD errorMessageID)
 #else
 #define MODULE_HANDLE void *
 #endif
-#define MODULE_NULL nullptr
+#define MODULE_NULL                                                                                                                                                                                                                                                                              \
+	std::unique_ptr<ModuleWrapper> {}
 
 namespace pragma {
-	static MODULE_HANDLE launch_pragma(int argc, char *argv[], bool server = false)
+	struct ModuleWrapper {
+		static std::unique_ptr<ModuleWrapper> Create(const MODULE_HANDLE handle) { return std::unique_ptr<ModuleWrapper> {new ModuleWrapper {handle}}; }
+		~ModuleWrapper()
+		{
+#ifdef _WIN32
+			FreeLibrary(handle);
+#else
+			dlclose(handle);
+#endif
+		}
+		MODULE_HANDLE GetHandle() { return handle; }
+	  private:
+		ModuleWrapper(const MODULE_HANDLE &handle) : handle {handle} {}
+		MODULE_HANDLE handle;
+	};
+
+	static std::unique_ptr<ModuleWrapper> launch_pragma(int argc, char *argv[], bool server = false)
 	{
 #ifdef __linux__
         const char *library = server ? "libshared.so" : "libclient.so";
@@ -125,11 +142,14 @@ namespace pragma {
 			MessageBox(nullptr, msg.str().c_str(), "Critical Error", MB_OK | MB_ICONERROR);
 			return MODULE_NULL;
 		}
+
+		auto wrapper = ModuleWrapper::Create(hEngine);
 		void (*runEngine)(int, char *[]) = (void (*)(int, char *[]))GetProcAddress(hEngine, runEngineSymbol);
 		if(runEngine != nullptr) {
 			runEngine(argc, argv);
-			return hEngine;
+			return wrapper;
 		}
+		wrapper = {};
 		return MODULE_NULL;
 #else
 		std::string path = "lib/";
@@ -142,14 +162,16 @@ namespace pragma {
 			sleep(5);
 			return MODULE_NULL;
 		}
+		auto wrapper = ModuleWrapper::Create(hEngine);
 #ifdef LINUX_THREAD_TEST
 		std::thread t([]() { std::cout << "Linux Thread Test"; });
 #endif
         void (*runEngine)(int, char *[]) = (void (*)(int, char *[]))dlsym(hEngine, runEngineSymbol);
 		if(runEngine != nullptr) {
 			runEngine(argc, argv);
-			return hEngine;
+			return wrapper;
 		}
+		wrapper = {};
 		return MODULE_NULL;
 #endif
 #ifdef _DEBUG

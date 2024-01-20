@@ -70,6 +70,7 @@ namespace pragma {
 		void UpdateAnimationChannelSubmitters();
 
 		// Return the animation value for the specified property WITHOUT applying math expressions
+		bool GetRawAnimatedPropertyValue(panima::AnimationManager &manager, const std::string &propName, udm::Type type, void *outValue) const;
 		bool GetRawPropertyValue(panima::AnimationManager &manager, const std::string &propName, udm::Type type, void *outValue) const;
 
 		virtual void InitializeLuaObject(lua_State *l) override;
@@ -78,6 +79,7 @@ namespace pragma {
 	  protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version) override;
 		void InvokeValueSubmitters(panima::AnimationManager &manager);
+		bool GetRawAnimatedPropertyValue(panima::AnimationManager &manager, const std::string &propName, udm::Type type, void *outValue, const ComponentMemberInfo **optOutMemberInfo, pragma::BaseEntityComponent **optOutComponent) const;
 		std::vector<std::pair<std::string, panima::PAnimationManager>>::iterator FindAnimationManager(const std::string_view &name);
 		void InitializeAnimationChannelValueSubmitters();
 		void InitializeAnimationChannelValueSubmitters(panima::AnimationManager &manager);

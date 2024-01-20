@@ -265,8 +265,12 @@ bool PanimaComponent::IsPropertyEnabled(const std::string &propName) const
 	auto normalizedPath = channelPath.ToUri(false);
 	return m_disabledProperties.find(pragma::register_global_string(normalizedPath)) == m_disabledProperties.end();
 }
-bool PanimaComponent::GetRawPropertyValue(panima::AnimationManager &manager, const std::string &propName, udm::Type type, void *outValue) const
+bool PanimaComponent::GetRawAnimatedPropertyValue(panima::AnimationManager &manager, const std::string &propName, udm::Type type, void *outValue, const ComponentMemberInfo **optOutMemberInfo, pragma::BaseEntityComponent **optOutComponent) const
 {
+	if(optOutMemberInfo)
+		*optOutMemberInfo = nullptr;
+	if(optOutComponent)
+		*optOutComponent = nullptr;
 	auto *anim = manager.GetCurrentAnimation();
 	if(!anim)
 		return false;
@@ -277,12 +281,16 @@ bool PanimaComponent::GetRawPropertyValue(panima::AnimationManager &manager, con
 	auto c = GetEntity().FindComponent(componentPath->first);
 	if(c.expired())
 		return false;
+	if(optOutComponent)
+		*optOutComponent = c.get();
 	auto memberIdx = c->GetMemberIndex(componentPath->second.GetString());
 	if(!memberIdx.has_value())
 		return false;
 	auto *memberInfo = c->GetMemberInfo(*memberIdx);
 	if(!memberInfo)
 		return false;
+	if(optOutMemberInfo)
+		*optOutMemberInfo = memberInfo;
 	if(!pragma::ents::is_udm_member_type(memberInfo->type))
 		return false;
 	auto memberType = static_cast<udm::Type>(memberInfo->type);
@@ -320,6 +328,17 @@ bool PanimaComponent::GetRawPropertyValue(panima::AnimationManager &manager, con
 				return false;
 		});
 	}
+	return false;
+}
+bool PanimaComponent::GetRawAnimatedPropertyValue(panima::AnimationManager &manager, const std::string &propName, udm::Type type, void *outValue) const { return GetRawAnimatedPropertyValue(manager, propName, type, outValue, nullptr, nullptr); }
+bool PanimaComponent::GetRawPropertyValue(panima::AnimationManager &manager, const std::string &propName, udm::Type type, void *outValue) const
+{
+	const ComponentMemberInfo *memberInfo = nullptr;
+	pragma::BaseEntityComponent *c = nullptr;
+	auto res = GetRawAnimatedPropertyValue(manager, propName, type, outValue, &memberInfo, &c);
+	if(res || !memberInfo)
+		return res;
+	auto memberType = static_cast<udm::Type>(memberInfo->type);
 	// No animation channel found, just return the current property value of the component
 	if(type == memberType) {
 		memberInfo->getterFunction(*memberInfo, *c, outValue);

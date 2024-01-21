@@ -672,7 +672,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
     add_pragma_module(
         name="pr_prosper_vulkan",
-        commitSha="122072785ab9771d9657b3efe80206389eacf35f",
+        commitSha="efe945f597fb5afd0847b708328f433597d93e56",
         repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
     )
 
@@ -684,7 +684,7 @@ if with_common_modules:
     )
     add_pragma_module(
         name="pr_audio_soloud",
-        commitSha="f5faf1f996fbbf67421cb78c576a61b78aba5498",
+        commitSha="bca5052ab9b7b28f2d3f94237c896a9b30fb1753",
         repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
     )
     modules_prebuilt.append("Silverlan/pr_mount_external_prebuilt")
@@ -958,7 +958,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","bce488e338f8eb145230b1ce76be0a934b78063b")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","113a74d3b5c508b4993f7cfa90897cef045ed3b9")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","56d46dacb398fa7540e794359eaf1081c9df1edd")
 
 	if with_vr:

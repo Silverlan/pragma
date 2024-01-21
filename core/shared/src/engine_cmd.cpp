@@ -100,7 +100,7 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 		  auto rpath = udm_convert(fileName);
 		  if(!rpath)
 			  return;
-		  auto absPath = util::get_program_path() + '/' + *rpath;
+		  auto absPath = *rpath;
 		  util::open_path_in_explorer(ufile::get_path_from_filename(absPath), ufile::get_file_from_filename(absPath));
 	  },
 	  ConVarFlags::None, "Converts a UDM file from binary to ASCII or the other way around.");

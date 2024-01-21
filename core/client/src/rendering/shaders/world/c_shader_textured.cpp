@@ -136,6 +136,11 @@ ShaderGameWorldLightingPass::ShaderGameWorldLightingPass(prosper::IPrContext &co
 	}
 
 	auto numPipelines = ShaderSpecializationManager::GetPipelineCount();
+	if(GetContext().IsValidationEnabled()) {
+		// Initializing all pipelines with the validator enabled will take a very long time, and in most cases we don't need
+		// them for debugging, so we'll just use 1.
+		numPipelines = 1;
+	}
 	SetPipelineCount(numPipelines);
 }
 ShaderGameWorldLightingPass::~ShaderGameWorldLightingPass()
@@ -166,6 +171,8 @@ GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetStaticSpeci
 }
 std::optional<uint32_t> ShaderGameWorldLightingPass::FindPipelineIndex(rendering::PassType passType, GameShaderSpecialization specialization, GameShaderSpecializationConstantFlag specializationFlags) const
 {
+	if(GetContext().IsValidationEnabled())
+		return 0; // We only have 1 pipeline if validation mode is enabled
 	return ShaderSpecializationManager::FindSpecializationPipelineIndex(passType, GetStaticSpecializationConstantFlags(specialization) | specializationFlags);
 }
 static std::optional<Vector3> get_emission_factor(CMaterial &mat)

@@ -85,7 +85,7 @@ static std::string get_last_system_error_string(DWORD errorMessageID)
 
 namespace pragma {
 	struct ModuleWrapper {
-		static std::unique_ptr<ModuleWrapper> Create(const MODULE_HANDLE handle) { return std::unique_ptr<ModuleWrapper> {new ModuleWrapper {handle}}; }
+		static std::unique_ptr<ModuleWrapper> Create(MODULE_HANDLE handle) { return std::unique_ptr<ModuleWrapper> {new ModuleWrapper {handle}}; }
 		~ModuleWrapper()
 		{
 #ifdef _WIN32
@@ -96,7 +96,7 @@ namespace pragma {
 		}
 		MODULE_HANDLE GetHandle() { return handle; }
 	  private:
-		ModuleWrapper(const MODULE_HANDLE &handle) : handle {handle} {}
+		ModuleWrapper(MODULE_HANDLE &handle) : handle {handle} {}
 		MODULE_HANDLE handle;
 	};
 

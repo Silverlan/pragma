@@ -13,8 +13,13 @@ function udm.BaseSchemaType:__tostring()
 	local str = self.TypeName
 	if self:IsValid() == false then
 		str = str["INVALID"]
-	elseif self.GetUniqueId then
-		str = str .. "[" .. tostring(self:GetUniqueId()) .. "]"
+	else
+		if self.GetUniqueId then
+			str = str .. "[" .. tostring(self:GetUniqueId()) .. "]"
+		end
+		if self.GetName then
+			str = str .. "[" .. tostring(self:GetName()) .. "]"
+		end
 	end
 	return str
 end

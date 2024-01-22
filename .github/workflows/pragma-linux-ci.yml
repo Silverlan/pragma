@@ -94,7 +94,7 @@ jobs:
         if: always()
         with:
           name: CMakeCache
-          path: "${{ steps.build-pragma.outputs.build-dir }}/CMakeCache.txt"
+          path: "pragma/build/CMakeCache.txt"
           overwrite: true
 
       - name: Handle Error

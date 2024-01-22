@@ -89,13 +89,39 @@ jobs:
       #  with:
       #    install-dir: "${{ steps.build-pragma.outputs.install-dir }}"
 
+      - name: Generate File Lists
+        shell: bash
+        if: always()
+        run: |
+          curDir=$(pwd)
+
+          if [ -d "pragma/build" ]; then
+            cd pragma/build
+            sudo tree --dirsfirst > "$curDir/files_pragma_build.txt"
+            cd "$curDir"
+          fi
+          if [ -d "pragma/deps" ]; then
+            cd pragma/deps
+            sudo tree --dirsfirst > "$curDir/files_pragma_deps.txt"
+            cd "$curDir"
+          fi
+          if [ -d "pragma/build/install" ]; then
+            cd pragma/build/install
+            sudo tree --dirsfirst > "$curDir/files_pragma_install.txt"
+            cd "$curDir"
+          fi
+
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: CMakeCache
-          path: "pragma/build/CMakeCache.txt"
+          name: Artifacts
           overwrite: true
+          path: |
+            "pragma/build/CMakeCache.txt"
+            "files_pragma_build.txt"
+            "files_pragma_deps.txt"
+            "files_pragma_install.txt"
 
       - name: Handle Error
         uses: Silverlan/common_actions/action_handle_error@main

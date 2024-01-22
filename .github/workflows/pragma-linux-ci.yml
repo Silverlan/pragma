@@ -89,6 +89,14 @@ jobs:
       #  with:
       #    install-dir: "${{ steps.build-pragma.outputs.install-dir }}"
 
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: CMakeCache
+          path: "${{ steps.build-pragma.outputs.build-dir }}/CMakeCache.txt"
+          overwrite: true
+
       - name: Handle Error
         uses: Silverlan/common_actions/action_handle_error@main
         if: failure()

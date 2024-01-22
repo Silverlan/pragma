@@ -135,13 +135,20 @@ jobs:
           tag: nightly
           token: ${{ secrets.GITHUB_TOKEN }}
           files: "debug_pdb.zip"
-      #
 
       - name: Run Tests
         uses: ./pragma/github_actions/run_tests
         timeout-minutes: 10
         with:
           install-dir: "${{ steps.build-pragma.outputs.install-dir }}"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: CMakeCache
+          path: "${{ steps.build-pragma.outputs.build-dir }}/CMakeCache.txt"
+          overwrite: true
 
       - name: Handle Error
         uses: Silverlan/common_actions/action_handle_error@main

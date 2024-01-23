@@ -150,17 +150,17 @@ jobs:
 
           if [ -d "c:/pragma/build" ]; then
             cd c:/pragma/build
-            sudo tree --dirsfirst > "$curDir/files_pragma_build.txt"
+            tree --dirsfirst > "$curDir/files_pragma_build.txt"
             cd "$curDir"
           fi
           if [ -d "c:/pragma/deps" ]; then
             cd c:/pragma/deps
-            sudo tree --dirsfirst > "$curDir/files_pragma_deps.txt"
+            tree --dirsfirst > "$curDir/files_pragma_deps.txt"
             cd "$curDir"
           fi
           if [ -d "c:/pragma/build/install" ]; then
             cd c:/pragma/build/install
-            sudo tree --dirsfirst > "$curDir/files_pragma_install.txt"
+            tree --dirsfirst > "$curDir/files_pragma_install.txt"
             cd "$curDir"
           fi
 

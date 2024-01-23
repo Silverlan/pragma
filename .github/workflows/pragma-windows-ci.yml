@@ -146,6 +146,9 @@ jobs:
         shell: bash
         if: always()
         run: |
+          # Install tree command
+          choco install tree
+
           curDir=$(pwd)
 
           if [ -d "c:/pragma/build" ]; then

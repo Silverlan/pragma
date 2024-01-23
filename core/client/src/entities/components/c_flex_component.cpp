@@ -44,7 +44,10 @@ void CFlexComponent::UpdateFlexControllers(float dt)
 		auto &info = pair.second;
 		if(info.endTime != 0.f && t >= info.endTime && info.targetValue != 0.f)
 			info.targetValue = 0.f;
-		info.value = umath::lerp(info.value, info.targetValue, umath::min(dt / flexDrag, 1.f));
+		auto newVal = umath::lerp(info.value, info.targetValue, umath::min(dt / flexDrag, 1.f));
+		if(!m_flexDataUpdateRequired && umath::abs(newVal - info.value) > 0.001f)
+			m_flexDataUpdateRequired = true;
+		info.value = newVal;
 	}
 	InvokeEventCallbacks(EVENT_ON_FLEX_CONTROLLERS_UPDATED);
 }
@@ -188,7 +191,6 @@ void CFlexComponent::SetFlexController(uint32_t flexId, float val, float duratio
 	auto &flexInfo = it->second;
 	flexInfo.targetValue = val;
 	flexInfo.endTime = (duration > 0.f) ? c_game->CurTime() + duration : 0.f;
-	m_flexDataUpdateRequired = true;
 	//InitializeVertexAnimationBuffer();
 
 	//if(m_vertexAnimationBuffer == nullptr) // prosper TODO

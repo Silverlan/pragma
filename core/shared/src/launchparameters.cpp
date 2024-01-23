@@ -81,7 +81,7 @@ void Engine::InitLaunchOptions(int argc, char *argv[])
 				}
 				launchCmdArgs.reserve(launchCmdArgs.size() + subArgs.size());
 				for(auto &arg : subArgs)
-					launchCmdArgs.insert(launchCmdArgs.begin(), arg);
+					launchCmdArgs.push_back(arg);
 				m_launchCommands.push_back({arg.substr(1), launchCmdArgs});
 				break;
 			}

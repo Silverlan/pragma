@@ -304,25 +304,7 @@ if platform == "linux":
 			"apt-get install ninja-build"
 		]
 
-		print("")
-		print_msg("The following system packages will be installed:")
-		for cmd in commands:
-			print(cmd)
-
-		if not no_confirm:
-			user_input = input("Your password may be required to install them. Do you want to continue (Y/n)?")
-			if user_input.lower() == 'yes' or user_input.lower() == 'y':
-				pass
-			elif user_input.lower() == 'no' or user_input.lower() == 'n':
-				sys.exit(0)
-			else:
-				print("Invalid input, please type 'y' for yes or 'n' for no. Aborting...")
-				sys.exit(0)
-
-		print_msg("Installing system packages...")
-		for cmd in commands:
-			print_msg("Running " +cmd +"...")
-			subprocess.run(["sudo"] +cmd.split() +["-y"],check=True)
+		install_system_packages(commands)
 
 module_list = []
 cmake_args = []
@@ -634,10 +616,14 @@ def execbuildscript(filepath):
 		l["cxx_compiler"] = cxx_compiler
 		l["no_confirm"] = no_confirm
 		l["no_sudo"] = no_sudo
+		l["install_system_packages"] = install_system_packages
 	#	l["harfbuzz_include_dir"] = harfbuzz_include_dir
 	#	l["harfbuzz_lib"] = harfbuzz_lib
 	#else:
 	#	l["vcvars"] = "vcvars"
+
+	if platform == "win32":
+		l["determine_vsdevcmd_path"] = determine_vsdevcmd_path
 
 	execfile(filepath,g,l)
 

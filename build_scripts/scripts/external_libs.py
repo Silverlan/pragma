@@ -20,7 +20,7 @@ get_submodule("panima","https://github.com/Silverlan/panima.git","9a32d345bdee87
 get_submodule("prosper","https://github.com/Silverlan/prosper.git","f405b5114f8abaf30ed5d92604e0b14854606cb1")
 get_submodule("util_bsp","https://github.com/Silverlan/util_bsp.git","3c11053")
 get_submodule("util_formatted_text","https://github.com/Silverlan/util_formatted_text.git","3bd9e2de37d0cb14bf8228fde5e25c97698e927b")
-get_submodule("util_image","https://github.com/Slaweknowy/util_image.git","7d20a036691672ac49c0813c6052c2d9c0029f39")
+get_submodule("util_image","https://github.com/Slaweknowy/util_image.git","6117529aeca1dc2015940525c6808fe930546775")
 get_submodule("util_pad","https://github.com/Silverlan/util_pad.git","7a827f8")
 get_submodule("util_pragma_doc","https://github.com/Silverlan/util_pragma_doc.git","6a4a089")
 get_submodule("util_smdmodel","https://github.com/Silverlan/util_smdmodel.git","5e581ab")

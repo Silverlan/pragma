@@ -159,23 +159,32 @@ jobs:
         shell: bash
         if: always()
         run: |
+          # Install tree command
+          choco install tree
+          
           curDir=$(pwd)
 
           if [ -d "c:/pragma/build" ]; then
             cd c:/pragma/build
-            sudo tree --dirsfirst > "$curDir/files_pragma_build.txt"
+            tree --dirsfirst > "$curDir/files_pragma_build.txt"
             cd "$curDir"
           fi
           if [ -d "c:/pragma/deps" ]; then
             cd c:/pragma/deps
-            sudo tree --dirsfirst > "$curDir/files_pragma_deps.txt"
+            tree --dirsfirst > "$curDir/files_pragma_deps.txt"
             cd "$curDir"
           fi
           if [ -d "c:/pragma/build/install" ]; then
             cd c:/pragma/build/install
-            sudo tree --dirsfirst > "$curDir/files_pragma_install.txt"
+            tree --dirsfirst > "$curDir/files_pragma_install.txt"
             cd "$curDir"
           fi
+
+          mkdir artifacts
+          cp -u "c:/pragma/build/CMakeCache.txt" artifacts/
+          cp -u "files_pragma_build.txt" artifacts/
+          cp -u "files_pragma_deps.txt" artifacts/
+          cp -u "files_pragma_install.txt" artifacts/
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -183,11 +192,7 @@ jobs:
         with:
           name: Artifacts
           overwrite: true
-          path: |
-            "pragma/build/CMakeCache.txt"
-            "files_pragma_build.txt"
-            "files_pragma_deps.txt"
-            "files_pragma_install.txt"
+          path: "artifacts"
 
       - name: Handle Error
         uses: Silverlan/common_actions/action_handle_error@main

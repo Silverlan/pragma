@@ -135,17 +135,19 @@ jobs:
             cd "$curDir"
           fi
 
+          mkdir artifacts
+          cp -u "pragma/build/CMakeCache.txt" artifacts/
+          cp -u "files_pragma_build.txt" artifacts/
+          cp -u "files_pragma_deps.txt" artifacts/
+          cp -u "files_pragma_install.txt" artifacts/
+
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: Artifacts
           overwrite: true
-          path: |
-            "pragma/build/CMakeCache.txt"
-            "files_pragma_build.txt"
-            "files_pragma_deps.txt"
-            "files_pragma_install.txt"
+          path: "artifacts"
 
       - name: Handle Error
         uses: Silverlan/common_actions/action_handle_error@main

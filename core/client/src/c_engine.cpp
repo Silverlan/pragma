@@ -481,13 +481,6 @@ void CEngine::CharInput(prosper::Window &window, unsigned int c)
 		return;
 	if(WGUI::GetInstance().HandleCharInput(window, c))
 		return;
-	if(c == '`') {
-		if(IsConsoleOpen())
-			CloseConsole();
-		else
-			OpenConsole();
-		return;
-	}
 	if(client != nullptr && client->CharInput(c) == false)
 		return;
 }

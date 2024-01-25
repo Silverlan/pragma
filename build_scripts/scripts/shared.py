@@ -242,7 +242,7 @@ if platform == "win32":
 		return vsdevcmd_path
 
 if platform == "linux":
-	def install_system_packages(packages):
+	def install_system_packages(packages, no_confirm):
 		print("")
 		print_msg("The following system packages will be installed:")
 		for cmd in packages:

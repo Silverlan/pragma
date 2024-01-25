@@ -304,7 +304,7 @@ if platform == "linux":
 			"apt-get install ninja-build"
 		]
 
-		install_system_packages(commands)
+		install_system_packages(commands, no_confirm)
 
 module_list = []
 cmake_args = []

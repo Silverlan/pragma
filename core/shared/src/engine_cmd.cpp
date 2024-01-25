@@ -140,7 +140,7 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 			autoCompleteOptions.push_back(strOption);
 		}
 	});
-	map.RegisterConVar<std::string>("net_library", "steam_networking", ConVarFlags::Archive | ConVarFlags::Replicated, "The underlying networking library to use for multiplayer games.", "<netLibrary>", [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
+	map.RegisterConVar<std::string>("net_library", "game_networking", ConVarFlags::Archive | ConVarFlags::Replicated, "The underlying networking library to use for multiplayer games.", "<netLibrary>", [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
 		auto netLibs = pragma::networking::GetAvailableNetworkingModules();
 		auto it = netLibs.begin();
 		std::vector<std::string_view> similarCandidates {};
@@ -162,7 +162,7 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 			autoCompleteOptions.push_back(strOption);
 		}
 	});
-	map.RegisterConVar<bool>("sv_require_authentication", true, ConVarFlags::Archive | ConVarFlags::Replicated, "If enabled, clients will have to authenticate via steam to join the server.");
+	map.RegisterConVar<bool>("sv_require_authentication", false, ConVarFlags::Archive | ConVarFlags::Replicated, "If enabled, clients will have to authenticate via steam to join the server.");
 
 	map.RegisterConVar<bool>("asset_multithreading_enabled", true, ConVarFlags::Archive, "If enabled, assets will be loaded in the background.");
 	map.RegisterConVarCallback("asset_multithreading_enabled", std::function<void(NetworkState *, const ConVar &, bool, bool)> {[this](NetworkState *nw, const ConVar &cv, bool oldVal, bool newVal) -> void { SetAssetMultiThreadedLoadingEnabled(newVal); }});

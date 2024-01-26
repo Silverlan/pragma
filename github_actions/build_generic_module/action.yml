@@ -9,9 +9,9 @@ inputs:
     required: true
     default: "RelWithDebInfo"
   build-args:
-    description: 'Additional build arguments'
+    description: 'Module Build arguments'
     required: true
-    default: ""
+    default: "--module ${{ inputs.module }}"
 outputs:
   build-dir:
     description: 'The directory where the build files are written to.'
@@ -55,7 +55,7 @@ runs:
       id: build-pragma
       uses: Silverlan/pragma/github_actions/build@master
       with:
-        build-args: '--with-lua-debugger=0 --with-common-modules=0 --with-essential-client-modules=0 --cmake-arg=${{ steps.set-cmake-args.outputs.cmake-args }} --module ${{ inputs.module }} ${{ inputs.build-args }}'
+        build-args: '--with-lua-debugger=0 --with-common-modules=0 --with-essential-client-modules=0 --cmake-arg=${{ steps.set-cmake-args.outputs.cmake-args }} ${{ inputs.build-args }}'
 
     - name: Set Output Variables
       shell: bash

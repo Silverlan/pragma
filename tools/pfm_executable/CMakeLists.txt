@@ -90,6 +90,7 @@ if(WIN32)
 	set_property(TARGET ${PROJ_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
 	set_property(TARGET ${PROJ_NAME} PROPERTY VS_DEBUGGER_COMMAND "${CMAKE_INSTALL_PREFIX}/${PROJ_NAME}.exe")
 	set_property(TARGET ${PROJ_NAME} PROPERTY VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext")
+	set_target_folder(${PROJ_NAME} core)
 
 	target_compile_options(${PROJ_NAME} PRIVATE /wd4251)
 	target_compile_options(${PROJ_NAME} PRIVATE /wd4996)

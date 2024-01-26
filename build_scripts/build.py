@@ -783,7 +783,7 @@ for module in modules_prebuilt:
 	print_msg("Downloading prebuilt binaries for module '" +module +"'...")
 	install_prebuilt_binaries("https://github.com/" +module +"/releases/download/latest/")
 
-cmake_args.append("-DPRAGMA_INSTALL_CUSTOM_TARGETS=" +";".join(module_list))
+cmake_args.append("-DPRAGMA_INSTALL_CUSTOM_TARGETS=" +";".join(module_list +additional_build_targets))
 
 print("Modules:" +', '.join(module_list))
 print("Additional CMake Arguments:" +', '.join(cmake_args))

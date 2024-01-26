@@ -1,6 +1,5 @@
-cmake_minimum_required(VERSION 3.24) # 3.11 for GENERATOR_IS_MULTI_CONFIG and INTERFACE items on IMPORTED targets
+cmake_minimum_required(VERSION 3.13) # 3.11 for GENERATOR_IS_MULTI_CONFIG and INTERFACE items on IMPORTED targets
 #3.13 for IMPORTED_TARGET GLOBAL for pkg_check_modules
-#3.24 for LINK_GROUP. Needed for compressonator.
 project(pragma)
 
 option(CONFIG_BUILD_WITH_VTUNE_SUPPORT "Build with VTune profiler support?" OFF)

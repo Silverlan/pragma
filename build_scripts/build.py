@@ -28,7 +28,7 @@ parser.add_argument("--with-pfm", type=str2bool, nargs='?', const=True, default=
 parser.add_argument("--with-core-pfm-modules", type=str2bool, nargs='?', const=True, default=True, help="Include essential PFM modules.")
 parser.add_argument("--with-all-pfm-modules", type=str2bool, nargs='?', const=True, default=False, help="Include non-essential PFM modules (e.g. chromium and cycles).")
 parser.add_argument("--with-vr", type=str2bool, nargs='?', const=True, default=False, help="Include Virtual Reality support.")
-parser.add_argument("--with-source-engine-entities", type=str2bool, nargs='?', const=True, default=True, help="Include addons with support for Source Engine entities.")
+parser.add_argument("--with-common-entities", type=str2bool, nargs='?', const=True, default=True, help="Include addons with support for common entity types.")
 parser.add_argument("--with-lua-debugger", type=str2bool, nargs='?', const=True, default=False, help="Include Lua-debugger support.")
 parser.add_argument("--with-lua-doc-generator", type=str2bool, nargs='?', const=True, default=False, help="Include Lua documentation generator. Requires the --dia-include-path and --dia-library-path options.")
 parser.add_argument('--dia-include-path', help='The include path to the Debug Interface Access SDK (required for Lua doc generator).', default='')
@@ -98,7 +98,7 @@ with_pfm = args["with_pfm"]
 with_core_pfm_modules = args["with_core_pfm_modules"]
 with_all_pfm_modules = args["with_all_pfm_modules"]
 with_vr = args["with_vr"]
-with_source_engine_entities = args["with_source_engine_entities"]
+with_common_entities = args["with_common_entities"]
 with_lua_debugger = args["with_lua_debugger"]
 with_lua_doc_generator = args["with_lua_doc_generator"]
 dia_include_path = args["dia_include_path"]
@@ -955,7 +955,7 @@ if not skip_repository_updates:
 		download_addon("PFM Bedroom Demo","pfm_demo_bedroom","https://github.com/Silverlan/pfm_demo_bedroom.git","0fed1d5b54a25c3ded2ce906e7da80ca8dd2fb0d")
 		download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","494aba78be98caf34249e3c7cb3e43477634c272")
 
-	if with_source_engine_entities:
+	if with_common_entities:
 		download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","a70f575")
 		download_addon("TF2","pragma_tf2","https://github.com/Silverlan/pragma_tf2.git","eddee1f")
 

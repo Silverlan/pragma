@@ -267,7 +267,8 @@ void BaseModelComponent::SetModel(const std::string &mdl)
 	m_modelName = nullptr;
 
 	if(mdl.empty() == true) {
-		SetModel(std::shared_ptr<Model>(nullptr));
+		if(m_model)
+			SetModel(std::shared_ptr<Model> {});
 		return;
 	}
 
@@ -287,6 +288,9 @@ void BaseModelComponent::SetModel(const std::string &mdl)
 			return;
 		}
 	}
+
+	if(m_model.get() == model.get())
+		return; // Nothing to do
 
 	SetModel(model);
 }

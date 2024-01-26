@@ -719,7 +719,7 @@ if with_pfm:
     if with_all_pfm_modules:
         add_pragma_module(
             name="pr_chromium",
-            commitSha="d58bc42930b8a35350b63cda3629fab0130c8ba0",
+            commitSha="b1e95c9bd67551e724fef4e8d21c5d0fe656be28",
             repositoryUrl="https://github.com/SlawekNowy/pr_chromium.git"
         )
         add_pragma_module(

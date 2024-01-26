@@ -10,7 +10,6 @@ import zipfile
 from pathlib import Path
 from urllib.parse import urlparse
 from sys import platform
-import requests
 
 def init_global_vars():
 	if("--deps_dir" in  sys.argv):
@@ -233,9 +232,7 @@ if platform == "win32":
 		# Download vswhere.exe to deps_dir
 		vswhere_path = os.path.join(deps_dir, "vswhere.exe")
 		if not os.path.exists(vswhere_path):
-			response = requests.get(vswhere_url)
-			with open(vswhere_path, 'wb') as vswhere_file:
-				vswhere_file.write(response.content)
+			urllib.request.urlretrieve(vswhere_url, vswhere_path)
 
 		installation_path = subprocess.check_output([vswhere_path, "-property", "installationPath"], text=True).strip()
 		vsdevcmd_path = os.path.join(installation_path, "Common7", "Tools", "vsdevcmd.bat")

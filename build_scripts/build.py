@@ -515,7 +515,7 @@ print_msg("Downloading modules...")
 os.chdir(root +"/modules")
 
 module_info = []
-def add_pragma_module(name,repositoryUrl=None,commitSha=None,branch=None):
+def add_pragma_module(name,repositoryUrl=None,commitSha=None,branch=None,skipBuildTarget=False):
     for module in module_info:
         if module["name"] == name:
             return
@@ -523,7 +523,8 @@ def add_pragma_module(name,repositoryUrl=None,commitSha=None,branch=None):
         "name": name,
         "repositoryUrl": repositoryUrl,
         "commitSha": commitSha,
-        "branch": branch
+        "branch": branch,
+		"skipBuildTarget": skipBuildTarget
     }
     module_info.append(module)
 
@@ -636,16 +637,21 @@ def execbuildscript(filepath):
 # Register modules that were added using the --module argument
 for module in modules:
 	os.chdir(root +"/modules")
-	index = module.find(':')
-	if index == -1:
-		add_pragma_module(
-			name=module
-		)
-	else:
-		add_pragma_module(
-			name=module[0:index].strip('\"'),
-			repositoryUrl=module[index +1:].strip('\"')
-		)
+	parts = module.split(":")
+	moduleName = parts[0]
+	repositoryUrl = None
+	skipBuildTarget = False
+	if len(parts) > 1:
+		for part in parts[1:]:
+			if part == "skipBuildTarget":
+				skipBuildTarget = True
+			else:
+				repositoryUrl = part.strip('\"')
+	add_pragma_module(
+		name=moduleName.strip('\"'),
+		repositoryUrl=repositoryUrl,
+		skipBuildTarget=skipBuildTarget
+	)
 
 g = {}
 l = {
@@ -748,6 +754,7 @@ for module in module_info:
 	moduleUrl = module["repositoryUrl"]
 	commitId = module["commitSha"]
 	branch = module["branch"]
+	skipBuildTarget = module["skipBuildTarget"]
 	print("Module Name:", moduleName)
 	print("Repository URL:", moduleUrl)
 	print("Commit SHA:", commitId)
@@ -769,7 +776,8 @@ for module in module_info:
 		print_msg("Executing module setup script...")
 		execbuildscript(scriptPath)
 
-	module_list.append(moduleName)
+	if not skipBuildTarget:
+		module_list.append(moduleName)
 
 for module in shippedModules:
 	if module != "pr_curl": # Curl is currently required

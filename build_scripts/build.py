@@ -648,7 +648,7 @@ for module in modules:
 			else:
 				repositoryUrl = part.strip('\"')
 	add_pragma_module(
-		name=moduleName.strip('\"'),
+		name=moduleArgName.strip('\"'),
 		repositoryUrl=repositoryUrl,
 		skipBuildTarget=skipBuildTarget
 	)

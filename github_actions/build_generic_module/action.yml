@@ -49,7 +49,7 @@ runs:
         if [ -z "$build_args" ]; then
           build_args="--module ${{ inputs.module }}"
         fi
-        echo "build-args=\"$build_args\"" >> $GITHUB_OUTPUT
+        echo "build-args=$build_args" >> $GITHUB_OUTPUT
 
     - name: "Download Module"
       uses: actions/checkout@v3

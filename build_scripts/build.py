@@ -638,7 +638,7 @@ def execbuildscript(filepath):
 for module in modules:
 	os.chdir(root +"/modules")
 	parts = module.split(":")
-	moduleName = parts[0]
+	moduleArgName = parts[0]
 	repositoryUrl = None
 	skipBuildTarget = False
 	if len(parts) > 1:

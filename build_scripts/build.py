@@ -750,7 +750,8 @@ if with_networking:
     add_pragma_module(
         name="pr_steam_networking_sockets",
         commitSha="d1127f8c981be69448a68b4d4b7665a6e5df6cf4",
-        repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git"
+        repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
+		skipBuildTarget=True
     )
 
 # These modules are shipped with the Pragma repository and will have to be excluded from the

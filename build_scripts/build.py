@@ -28,6 +28,7 @@ parser.add_argument("--with-pfm", type=str2bool, nargs='?', const=True, default=
 parser.add_argument("--with-core-pfm-modules", type=str2bool, nargs='?', const=True, default=True, help="Include essential PFM modules.")
 parser.add_argument("--with-all-pfm-modules", type=str2bool, nargs='?', const=True, default=False, help="Include non-essential PFM modules (e.g. chromium and cycles).")
 parser.add_argument("--with-vr", type=str2bool, nargs='?', const=True, default=False, help="Include Virtual Reality support.")
+parser.add_argument("--with-networking", type=str2bool, nargs='?', const=True, default=False, help="Include networking module(s) for multiplayer support.")
 parser.add_argument("--with-common-entities", type=str2bool, nargs='?', const=True, default=True, help="Include addons with support for common entity types.")
 parser.add_argument("--with-lua-debugger", type=str2bool, nargs='?', const=True, default=False, help="Include Lua-debugger support.")
 parser.add_argument("--with-lua-doc-generator", type=str2bool, nargs='?', const=True, default=False, help="Include Lua documentation generator. Requires the --dia-include-path and --dia-library-path options.")
@@ -98,6 +99,7 @@ with_pfm = args["with_pfm"]
 with_core_pfm_modules = args["with_core_pfm_modules"]
 with_all_pfm_modules = args["with_all_pfm_modules"]
 with_vr = args["with_vr"]
+with_networking = args["with_networking"]
 with_common_entities = args["with_common_entities"]
 with_lua_debugger = args["with_lua_debugger"]
 with_lua_doc_generator = args["with_lua_doc_generator"]
@@ -742,6 +744,13 @@ if with_vr:
         name="pr_openvr",
         commitSha="9207c54f58800aaacd79c7907cab72fb6401e28d",
         repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
+    )
+
+if with_networking:
+    add_pragma_module(
+        name="pr_steam_networking_sockets",
+        commitSha="d1127f8c981be69448a68b4d4b7665a6e5df6cf4",
+        repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git"
     )
 
 # These modules are shipped with the Pragma repository and will have to be excluded from the

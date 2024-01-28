@@ -11,6 +11,7 @@
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include <prosper_command_buffer.hpp>
@@ -127,6 +128,10 @@ void Lua::Render::register_class(lua_State *l, luabind::module_ &entsMod)
 	defCRender.def("ShouldDraw", static_cast<bool (*)(lua_State *, pragma::CRenderComponent &)>([](lua_State *l, pragma::CRenderComponent &hComponent) -> bool { return hComponent.ShouldDraw(); }));
 	defCRender.def("ShouldDrawShadow", static_cast<bool (*)(lua_State *, pragma::CRenderComponent &)>([](lua_State *l, pragma::CRenderComponent &hComponent) -> bool { return hComponent.ShouldDrawShadow(); }));
 	defCRender.def("ClearBuffers", static_cast<void (*)(lua_State *, pragma::CRenderComponent &)>([](lua_State *l, pragma::CRenderComponent &hComponent) { hComponent.ClearRenderBuffers(); }));
+	defCRender.def("SetTranslucencyPassDistanceOverride", &pragma::CRenderComponent::SetTranslucencyPassDistanceOverride);
+	defCRender.def("ClearTranslucencyPassDistanceOverride", &pragma::CRenderComponent::ClearTranslucencyPassDistanceOverride);
+	defCRender.def("GetTranslucencyPassDistanceOverrideSqr", &pragma::CRenderComponent::GetTranslucencyPassDistanceOverrideSqr);
+
 	// defCRender.add_static_constant("EVENT_ON_UPDATE_RENDER_DATA",pragma::CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA);
 	defCRender.add_static_constant("EVENT_ON_RENDER_BOUNDS_CHANGED", pragma::CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED);
 	defCRender.add_static_constant("EVENT_ON_RENDER_MODE_CHANGED", pragma::CRenderComponent::EVENT_ON_RENDER_MODE_CHANGED);

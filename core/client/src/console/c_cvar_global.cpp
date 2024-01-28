@@ -512,33 +512,40 @@ void CMD_screenshot(NetworkState *, pragma::BasePlayerComponent *, std::vector<s
 #endif
 	{
 		// Just use the last rendered image
-		auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent *>(scene->GetRenderer()) : nullptr;
-		if(renderer == nullptr)
+		auto *renderer = scene ? dynamic_cast<pragma::CRendererComponent *>(scene->GetRenderer()) : nullptr;
+		if(renderer == nullptr) {
+			Con::cwar << "No scene renderer found!" << Con::endl;
 			return;
+		}
+		auto rasterC = renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>();
+		if(rasterC.expired()) {
+			Con::cwar << "No rasterization renderer found!" << Con::endl;
+			return;
+		}
 
 		enum class ImageStage : uint8_t { GameScene = 0, ScreenOutput };
 		auto stage = ImageStage::ScreenOutput;
 		std::shared_ptr<prosper::RenderTarget> rt = nullptr;
 		switch(stage) {
 		case ImageStage::GameScene:
-			rt = renderer->GetHDRInfo().toneMappedRenderTarget;
+			rt = rasterC->GetHDRInfo().toneMappedRenderTarget;
 			break;
 		case ImageStage::ScreenOutput:
 			rt = c_engine->GetRenderContext().GetWindow().GetStagingRenderTarget();
 			break;
 		}
-		if(rt == nullptr)
+		if(rt == nullptr) {
+			Con::cwar << "Scene render target is invalid!" << Con::endl;
 			return;
+		}
 		c_engine->GetRenderContext().WaitIdle(); // Make sure rendering is complete
 
 		auto &img = rt->GetTexture().GetImage();
 		imgScreenshot = img.shared_from_this();
 
-		auto layout = img.GetSubresourceLayout();
-		if(layout.has_value() == false)
-			return;
+		auto bufSize = img.GetWidth() * img.GetHeight() * prosper::util::get_byte_size(img.GetFormat());
 		auto extents = img.GetExtents();
-		bufScreenshot = c_engine->GetRenderContext().AllocateTemporaryBuffer(layout->size);
+		bufScreenshot = c_engine->GetRenderContext().AllocateTemporaryBuffer(bufSize);
 
 		// TODO: Check if image formats are compatible (https://www.khronos.org/registry/vulkan/specs/1.1-extensions/html/vkspec.html#features-formats-compatibility)
 		// before issuing the copy command
@@ -553,13 +560,17 @@ void CMD_screenshot(NetworkState *, pragma::BasePlayerComponent *, std::vector<s
 		cmdBuffer->StopRecording();
 		c_engine->GetRenderContext().SubmitCommandBuffer(*cmdBuffer, true);
 	}
-	if(bufScreenshot == nullptr)
+	if(bufScreenshot == nullptr) {
+		Con::cwar << "Failed to create screenshot image buffer!" << Con::endl;
 		return;
+	}
 	auto imgFormat = uimg::ImageFormat::PNG;
 	auto path = get_screenshot_name(game, imgFormat);
 	auto fp = FileManager::OpenFile<VFilePtrReal>(path.c_str(), "wb");
-	if(fp == nullptr)
+	if(fp == nullptr) {
+		Con::cwar << "Failed to open image output file '" << path << "' for writing!" << Con::endl;
 		return;
+	}
 	auto format = imgScreenshot->GetFormat();
 	auto bSwapped = false;
 	if(format == prosper::Format::B8G8R8A8_UNorm) {

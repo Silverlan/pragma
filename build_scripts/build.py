@@ -698,7 +698,7 @@ if with_pfm:
     if with_all_pfm_modules:
         add_pragma_module(
             name="pr_chromium",
-            commitSha="a72aff6f45f95f79444b5531fd2793bd4fa58333",
+            commitSha="aa4f365772d58199a10c7cffe1d430e7698f8c40",
             repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
         )
         add_pragma_module(

@@ -25,9 +25,9 @@ void WISlider::Initialize()
 
 void WISlider::SetSize(int x, int y) { WIProgressBar::SetSize(x, y); }
 
-void WISlider::Think()
+void WISlider::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
-	WIProgressBar::Think();
+	WIProgressBar::Think(drawCmd);
 	if(m_bMoveSlider == false)
 		return;
 	int x;

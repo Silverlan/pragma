@@ -30,7 +30,7 @@ class DLLCLIENT WITransformable : public WIBase {
 	void SetResizable(bool b);
 	bool IsDraggable();
 	bool IsResizable();
-	virtual void Think() override;
+	virtual void Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd) override;
 	virtual util::EventReply MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) override;
 	virtual void OnCursorMoved(int x, int y) override;
 	void SetMinWidth(int w);

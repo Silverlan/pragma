@@ -19,7 +19,7 @@ class DLLCLIENT WIMainMenuOptions : public WIMainMenuBase {
 	WIMainMenuOptions();
 	virtual ~WIMainMenuOptions() override;
 	virtual void Initialize() override;
-	virtual void Think() override;
+	virtual void Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd) override;
   protected:
 	std::vector<WIHandle> m_labels;
 	WIHandle m_hResolutionList;

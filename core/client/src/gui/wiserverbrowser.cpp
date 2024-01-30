@@ -194,13 +194,13 @@ WIServerBrowser::WIServerBrowser() : WIFrame(), m_bRefreshScheduled(false)
 
 WIServerBrowser::~WIServerBrowser() { m_msQueryDispatcher = nullptr; }
 
-void WIServerBrowser::Think()
+void WIServerBrowser::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	if(m_msQueryDispatcher)
 		m_msQueryDispatcher->Poll();
 	if(m_bRefreshScheduled == true)
 		DoRefresh();
-	WIFrame::Think();
+	WIFrame::Think(drawCmd);
 }
 
 void WIServerBrowser::OnServerDoubleClick(unsigned int idx)

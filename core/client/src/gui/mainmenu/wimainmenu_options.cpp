@@ -332,9 +332,9 @@ void WIMainMenuOptions::InitializeGeneralSettings()
 
 	InitializeOptionsList(pList);
 }
-void WIMainMenuOptions::Think()
+void WIMainMenuOptions::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
-	WIMainMenuBase::Think();
+	WIMainMenuBase::Think(drawCmd);
 	UpdateMemoryUsage();
 }
 void WIMainMenuOptions::UpdateMemoryUsage()

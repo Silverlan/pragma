@@ -50,7 +50,7 @@ class DLLCLIENT WIImageSlideShow : public WIBase {
 	WIImageSlideShow();
 	virtual void Initialize() override;
 	virtual void SetSize(int x, int y) override;
-	virtual void Think() override;
+	virtual void Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd) override;
 	virtual void SetColor(float r, float g, float b, float a = 1.f) override;
 	void SetImages(const std::vector<std::string> &images);
 };

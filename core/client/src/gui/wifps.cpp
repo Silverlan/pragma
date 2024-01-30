@@ -38,9 +38,9 @@ void WIFPS::Initialize()
 	}
 }
 
-void WIFPS::Think()
+void WIFPS::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
-	WIBase::Think();
+	WIBase::Think(drawCmd);
 	if(!m_text.IsValid())
 		return;
 	auto &tCur = client->RealTime();

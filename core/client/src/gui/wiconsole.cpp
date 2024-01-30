@@ -344,9 +344,9 @@ void WIConsole::OnRemove()
 		m_cbCommandEntryVisibility.Remove();
 	c_engine->SetRecordConsoleOutput(false);
 }
-void WIConsole::Think()
+void WIConsole::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
-	WIBase::Think();
+	WIBase::Think(drawCmd);
 	if(m_hLog.IsValid() == false)
 		return;
 	auto conOutput = c_engine->PollConsoleOutput();

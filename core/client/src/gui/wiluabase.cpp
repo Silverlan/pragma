@@ -42,10 +42,10 @@ void WILuaBase::OnSkinApplied()
 		CallLuaMember("OnSkinApplied");
 }
 
-void WILuaBase::Think()
+void WILuaBase::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	auto hThis = GetHandle();
-	WIBase::Think();
+	WIBase::Think(drawCmd);
 	if(hThis.IsValid() == false)
 		return;
 	CallLuaMember("OnThink");

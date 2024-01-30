@@ -88,9 +88,9 @@ void WIMainMenuNewGame::Initialize()
 	EnableThinking();
 }
 
-void WIMainMenuNewGame::Think()
+void WIMainMenuNewGame::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
-	WIMainMenuBase::Think();
+	WIMainMenuBase::Think(drawCmd);
 	DisableThinking();
 
 	// We'll delay loading the map list until actually needed,

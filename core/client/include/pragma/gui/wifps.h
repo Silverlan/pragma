@@ -20,7 +20,7 @@ class DLLCLIENT WIFPS : public WIBase {
 	WIFPS();
 	virtual ~WIFPS() override;
 	virtual void Initialize() override;
-	virtual void Think() override;
+	virtual void Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd) override;
 };
 
 #endif

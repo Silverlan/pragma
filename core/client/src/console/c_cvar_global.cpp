@@ -429,116 +429,42 @@ void CMD_screenshot(NetworkState *, pragma::BasePlayerComponent *, std::vector<s
 	auto scene = game->GetScene();
 	std::shared_ptr<prosper::IImage> imgScreenshot = nullptr;
 	std::shared_ptr<prosper::IBuffer> bufScreenshot = nullptr;
-#if 0
-	{
-		//c_engine->RunConsoleCommand("render_technique",std::vector<std::string>{"1"});
-		/*
-		EntityIterator entIt {*c_game};
-		entIt.AttachFilter<TEntityIteratorFilterComponent<CRenderComponent>>();
-		auto technique = static_cast<RenderingTechnique>(val);
-		switch(technique)
-		{
-		case RenderingTechnique::Raytracing:
-		{
-		CRaytracingComponent::InitializeBuffers();
-		for(auto *ent : entIt)
-		ent->AddComponent<CRaytracingComponent>();
-		break;
-		}
-		default:
-		{
-		CRaytracingComponent::ClearBuffers();
-		for(auto *ent : entIt)
-		ent->RemoveComponent<CRaytracingComponent>();
-		break;
-		}
-		}
-		*/
-		auto rtRenderer = pragma::rendering::RaytracingRenderer::Create<pragma::rendering::RaytracingRenderer>(*scene);
-		auto oldRenderer = scene->GetRenderer() ? scene->GetRenderer()->shared_from_this() : nullptr;
-		scene->SetRenderer(rtRenderer);
-
-		EntityIterator entIt {*c_game};
-		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
-		std::queue<EntityHandle> entsRevertRaytracingComponent = {};
-		for(auto *ent : entIt)
-		{
-			if(ent->HasComponent<pragma::CRaytracingComponent>() || ent->IsPlayer()) // TODO
-				continue;
-			// This entity didn't have a raytracing component, so we'll add a temporary one here.
-			// We'll want to make sure to remove it again once we're done.
-			ent->AddComponent<pragma::CRaytracingComponent>();
-			entsRevertRaytracingComponent.push(ent->GetHandle());
-		}
-
-		prosper::util::ImageCreateInfo createInfo {};
-		createInfo.format = prosper::Format::R8G8B8A8_UNorm;
-		//createInfo.flags = prosper::util::ImageCreateInfo::Flags::Cubemap | prosper::util::ImageCreateInfo::Flags::FullMipmapChain;
-
-		createInfo.width = 2'048;
-		createInfo.height = 2'048;
-		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUToCPU;
-		createInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
-		createInfo.tiling = prosper::ImageTiling::Linear;
-		createInfo.usage = prosper::ImageUsageFlags::SampledBit | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT | prosper::ImageUsageFlags::TransferDstBit;
-		auto &dev = c_engine->GetDevice();
-		imgScreenshot = .CreateImage(dev,createInfo);
-
-		// TODO: Render
-		auto drawCmd = c_engine->GetSetupCommandBuffer();
-		c_game->RenderScene(drawCmd,*imgScreenshot,FRender::All &~FRender::View);
-
-		// We're flushing the command buffer for each layer
-		// individually to make sure we're not gonna hit the TDR
-		c_engine->FlushSetupCommandBuffer();
-
-		static auto keepRtAlive = false;
-		if(keepRtAlive)
-			return;
-		
-		// Reset renderer
-		scene->SetRenderer(oldRenderer);
-
-		//c_engine->RunConsoleCommand("render_technique",std::vector<std::string>{"0"});
-		while(entsRevertRaytracingComponent.empty() == false)
-		{
-			auto &hEnt = entsRevertRaytracingComponent.front();
-			if(hEnt.IsValid())
-				hEnt->RemoveComponent<pragma::CRaytracingComponent>();
-			entsRevertRaytracingComponent.pop();
-		}
-	}
-	else
-#endif
 	{
 		// Just use the last rendered image
-		auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent *>(scene->GetRenderer()) : nullptr;
-		if(renderer == nullptr)
+		auto *renderer = scene ? dynamic_cast<pragma::CRendererComponent *>(scene->GetRenderer()) : nullptr;
+		if(renderer == nullptr) {
+			Con::cwar << "No scene renderer found!" << Con::endl;
 			return;
+		}
+		auto rasterC = renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>();
+		if(rasterC.expired()) {
+			Con::cwar << "No rasterization renderer found!" << Con::endl;
+			return;
+		}
 
 		enum class ImageStage : uint8_t { GameScene = 0, ScreenOutput };
 		auto stage = ImageStage::ScreenOutput;
 		std::shared_ptr<prosper::RenderTarget> rt = nullptr;
 		switch(stage) {
 		case ImageStage::GameScene:
-			rt = renderer->GetHDRInfo().toneMappedRenderTarget;
+			rt = rasterC->GetHDRInfo().toneMappedRenderTarget;
 			break;
 		case ImageStage::ScreenOutput:
 			rt = c_engine->GetRenderContext().GetWindow().GetStagingRenderTarget();
 			break;
 		}
-		if(rt == nullptr)
+		if(rt == nullptr) {
+			Con::cwar << "Scene render target is invalid!" << Con::endl;
 			return;
+		}
 		c_engine->GetRenderContext().WaitIdle(); // Make sure rendering is complete
 
 		auto &img = rt->GetTexture().GetImage();
 		imgScreenshot = img.shared_from_this();
 
-		auto layout = img.GetSubresourceLayout();
-		if(layout.has_value() == false)
-			return;
+		auto bufSize = img.GetWidth() * img.GetHeight() * prosper::util::get_byte_size(img.GetFormat());
 		auto extents = img.GetExtents();
-		bufScreenshot = c_engine->GetRenderContext().AllocateTemporaryBuffer(layout->size);
+		bufScreenshot = c_engine->GetRenderContext().AllocateTemporaryBuffer(bufSize);
 
 		// TODO: Check if image formats are compatible (https://www.khronos.org/registry/vulkan/specs/1.1-extensions/html/vkspec.html#features-formats-compatibility)
 		// before issuing the copy command
@@ -553,13 +479,17 @@ void CMD_screenshot(NetworkState *, pragma::BasePlayerComponent *, std::vector<s
 		cmdBuffer->StopRecording();
 		c_engine->GetRenderContext().SubmitCommandBuffer(*cmdBuffer, true);
 	}
-	if(bufScreenshot == nullptr)
+	if(bufScreenshot == nullptr) {
+		Con::cwar << "Failed to create screenshot image buffer!" << Con::endl;
 		return;
+	}
 	auto imgFormat = uimg::ImageFormat::PNG;
 	auto path = get_screenshot_name(game, imgFormat);
 	auto fp = FileManager::OpenFile<VFilePtrReal>(path.c_str(), "wb");
-	if(fp == nullptr)
+	if(fp == nullptr) {
+		Con::cwar << "Failed to open image output file '" << path << "' for writing!" << Con::endl;
 		return;
+	}
 	auto format = imgScreenshot->GetFormat();
 	auto bSwapped = false;
 	if(format == prosper::Format::B8G8R8A8_UNorm) {
@@ -576,84 +506,6 @@ void CMD_screenshot(NetworkState *, pragma::BasePlayerComponent *, std::vector<s
 	auto extents = imgScreenshot->GetExtents();
 	auto numBytes = extents.width * extents.height * byteSize;
 	bufScreenshot->Map(0ull, numBytes, prosper::IBuffer::MapFlags::None, &data);
-#if 0
-	auto layout = imgScreenshot->GetSubresourceLayout();
-	if(layout.has_value() == false)
-		return;
-	auto offset = layout->offset;
-	auto rowPitch = layout->row_pitch;
-	std::vector<unsigned char> pixels(numBytes);
-	size_t pos = 0;
-	auto *ptr = static_cast<const char*>(data);
-	for(auto y=decltype(extents.height){0u};y<extents.height;++y)
-	{
-		ptr = static_cast<const char*>(data) +offset +y *rowPitch;
-		auto *row = ptr;
-		if(format == prosper::Format::R8G8B8A8_UNorm)
-		{
-			for(auto x=decltype(extents.width){0};x<extents.width;++x)
-			{
-				auto *px = static_cast<const unsigned char*>(static_cast<const void*>(row));
-				pixels[pos] = (bSwapped == false) ? px[0] : px[2];
-				pixels[pos +1] = px[1];
-				pixels[pos +2] = (bSwapped == false) ? px[2] : px[0];
-				pos += 3;
-				row += byteSize;
-			}
-		}
-		else if(format == prosper::Format::R8G8B8_UNorm_PoorCoverage)
-		{
-			for(auto x=decltype(extents.width){0};x<extents.width;++x)
-			{
-				auto *px = static_cast<const unsigned char*>(static_cast<const void*>(row));
-				pixels[pos] = (bSwapped == false) ? px[0] : px[2];
-				pixels[pos +1] = px[1];
-				pixels[pos +2] = (bSwapped == false) ? px[2] : px[0];
-				pos += 3;
-				row += byteSize;
-			}
-		}
-		else if(format == prosper::Format::R8_UNorm)
-		{
-			for(auto x=decltype(extents.width){0};x<extents.width;++x)
-			{
-				auto *px = static_cast<const unsigned char*>(static_cast<const void*>(row));
-				pixels[pos] = px[0];
-				pixels[pos +1] = px[0];
-				pixels[pos +2] = px[0];
-				pos += 3;
-				row += byteSize;
-			}
-		}
-		else if(format == prosper::Format::R16_UNorm)
-		{
-			for(auto x=decltype(extents.width){0};x<extents.width;++x)
-			{
-				auto *px = static_cast<const unsigned char*>(static_cast<const void*>(row));
-				pixels[pos] = px[0];
-				pixels[pos +1] = px[0];
-				pixels[pos +2] = px[0];
-				pos += 3;
-				row += byteSize;
-			}
-		}
-		else if(format == prosper::Format::D16_UNorm)
-		{
-			for(auto x=decltype(extents.width){0};x<extents.width;++x)
-			{
-				auto val = 0.f;
-				auto *px = static_cast<const unsigned char*>(static_cast<const void*>(row));
-				memcpy(&val,px,byteSize);
-				val = umath::min(val *100.f,255.f);
-				pixels[pos] = static_cast<unsigned char>(val);
-				pixels[pos +1] = static_cast<unsigned char>(val);
-				pixels[pos +2] = static_cast<unsigned char>(val);
-				pos += 3;
-				row += byteSize;
-			}
-		}
-	}
-#endif
 	auto imgBuf = uimg::ImageBuffer::Create(data, extents.width, extents.height, uimg::Format::RGBA8);
 	fsys::File f {fp};
 	uimg::save_image(f, *imgBuf, imgFormat);

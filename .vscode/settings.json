@@ -88,6 +88,7 @@
         "typeinfo": "cpp",
         "valarray": "cpp",
         "variant": "cpp",
-        "ios": "cpp"
+        "ios": "cpp",
+        "rope": "cpp"
     }
 }

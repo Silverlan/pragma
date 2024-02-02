@@ -15,14 +15,16 @@ Engine::LaunchCommand::LaunchCommand(const std::string &cmd, const std::vector<s
 
 std::stringstream LaunchParaMap::LAUNCHPARAMETERS_HELP;
 
-const std::unordered_map<std::string, std::function<void(const std::vector<std::string> &)>> &LaunchParaMap::GetParameters() const { return m_parameters; }
-void LaunchParaMap::RegisterParameter(const std::string &name, const std::function<void(const std::vector<std::string> &)> &f) { m_parameters.insert(std::make_pair(name, f)); }
+LaunchParaMap::~LaunchParaMap() { m_parameters.clear(); }
+
+const std::unordered_map<std::string, LaunchParameterFunc> &LaunchParaMap::GetParameters() const { return m_parameters; }
+void LaunchParaMap::RegisterParameter(const std::string &name, const LaunchParameterFunc &f) { m_parameters.insert(std::make_pair(name, f)); }
 
 DLLNETWORK LaunchParaMap *g_LaunchParameters = NULL;
 
 DLLNETWORK LaunchParaMap *GetLaunchParaMap() { return g_LaunchParameters; }
 
-DLLNETWORK void RegisterLaunchParameter(std::string name, const std::function<void(const std::vector<std::string> &)> &function)
+DLLNETWORK void RegisterLaunchParameter(std::string name, const LaunchParameterFunc &function)
 {
 	if(g_LaunchParameters == NULL) {
 		static LaunchParaMap map;
@@ -31,7 +33,7 @@ DLLNETWORK void RegisterLaunchParameter(std::string name, const std::function<vo
 	g_LaunchParameters->RegisterParameter(name, function);
 }
 
-DLLNETWORK void RegisterLaunchParameterHelp(std::string name, const std::function<void(const std::vector<std::string> &)> &function, std::string descCmd, std::string descHelp)
+DLLNETWORK void RegisterLaunchParameterHelp(std::string name, const LaunchParameterFunc &function, std::string descCmd, std::string descHelp)
 {
 	RegisterLaunchParameter(name, function);
 	std::stringstream pre;

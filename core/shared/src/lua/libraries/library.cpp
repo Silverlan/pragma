@@ -23,6 +23,7 @@
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 #include "pragma/lua/converters/vector_converter_t.hpp"
 #include "pragma/lua/converters/pair_converter_t.hpp"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/logging.hpp"
 #include "pragma/logging_wrapper.hpp"
 #include "pragma/debug/debug_render_info.hpp"
@@ -754,7 +755,8 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	    static_cast<void (*)(lua_State *, const std::string &, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &)>(
 	      [](lua_State *l, const std::string &name, const Lua::func<void, pragma::BasePlayerComponent, float, Lua::variadic<std::string>> &function) { Lua::console::CreateConCommand(l, name, function, ""); })),
 	  luabind::def("get_convar", &Lua::console::GetConVar), luabind::def("get_convar_int", &Lua::console::GetConVarInt), luabind::def("get_convar_float", &Lua::console::GetConVarFloat), luabind::def("get_convar_string", &Lua::console::GetConVarString),
-	  luabind::def("get_convar_bool", &Lua::console::GetConVarBool), luabind::def("get_convar_flags", &Lua::console::GetConVarFlags), luabind::def("register_override", &Lua::console::register_override), luabind::def("clear_override", &Lua::console::clear_override)];
+	  luabind::def("get_convar_bool", &Lua::console::GetConVarBool), luabind::def("get_convar_flags", &Lua::console::GetConVarFlags), luabind::def("register_override", &Lua::console::register_override), luabind::def("clear_override", &Lua::console::clear_override),
+	  luabind::def("is_open", &Engine::IsConsoleOpen), luabind::def("toggle", &Engine::ToggleConsole), luabind::def("open", &Engine::OpenConsole), luabind::def("close", &Engine::CloseConsole)];
 
 	static const auto fGetConVarName = [](lua_State *l, ConVar &cvar) -> std::string {
 		auto *nw = engine->GetNetworkState(l);

@@ -1,3 +1,25 @@
+--[[
+    Copyright (C) 2024 Silverlan
+
+    This Source Code Form is subject to the terms of the Mozilla Public
+    License, v. 2.0. If a copy of the MPL was not distributed with this
+    file, You can obtain one at http://mozilla.org/MPL/2.0/.
+]]
+
+console.register_command("debug_click_raycast", function(pl, key, cmd)
+	local pos, dir, vpData = ents.ClickComponent.get_ray_data()
+	if pos == nil then
+		console.print_warning("Failed to determine ray data!")
+		return
+	end
+	print("Ray start position: ", pos)
+	print("Ray direction: ", dir)
+	local drawInfo = debug.DrawInfo()
+	drawInfo:SetDuration(12)
+	drawInfo:SetColor(Color.Aqua)
+	debug.draw_line(pos, pos + dir * 1000, drawInfo)
+end)
+
 util.register_class("ents.ClickComponent", BaseEntityComponent)
 ents.ClickComponent:RegisterMember("Priority", udm.TYPE_UINT32, 0, {}, ents.BaseEntityComponent.MEMBER_FLAG_DEFAULT)
 
@@ -146,11 +168,6 @@ function ents.ClickComponent.get_ray_data(callback)
 	local uv = Vector2(vpData.cursorPos.x / vpData.width, vpData.cursorPos.y / vpData.height)
 	local dir = cam:CalcRayDirection(uv)
 	local pos = cam:GetPlanePoint(cam:GetNearZ(), uv)
-
-	--[[local drawInfo = debug.DrawInfo()
-	drawInfo:SetDuration(12)
-	drawInfo:SetColor(Color.Aqua)
-	debug.draw_line(pos, pos + dir * 1000, drawInfo)]]
 	return pos, dir, vpData
 end
 function ents.ClickComponent.get_camera()

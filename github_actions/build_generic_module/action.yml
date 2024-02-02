@@ -8,6 +8,10 @@ inputs:
     description: 'The build configuration to use.'
     required: true
     default: "RelWithDebInfo"
+  build-args:
+    description: 'Module Build arguments'
+    required: true
+    default: ""
 outputs:
   build-dir:
     description: 'The directory where the build files are written to.'
@@ -31,7 +35,7 @@ runs:
       with:
         sdk-version: 22621
 
-    - name: Set Additional CMake Arguments
+    - name: Set Build and CMake Arguments
       shell: bash
       id: set-cmake-args
       run: |
@@ -40,6 +44,12 @@ runs:
         else
           echo "cmake-args=\"-DCMAKE_SYSTEM_VERSION=10.0.22621.0\"" >> $GITHUB_OUTPUT
         fi
+
+        build_args="${{ inputs.build-args }}"
+        if [ -z "$build_args" ]; then
+          build_args="--module ${{ inputs.module }}"
+        fi
+        echo "build-args=$build_args" >> $GITHUB_OUTPUT
 
     - name: "Download Module"
       uses: actions/checkout@v3
@@ -51,7 +61,7 @@ runs:
       id: build-pragma
       uses: Silverlan/pragma/github_actions/build@master
       with:
-        build-args: '--with-lua-debugger=0 --with-common-modules=0 --with-essential-client-modules=0 --cmake-arg=${{ steps.set-cmake-args.outputs.cmake-args }} --module ${{ inputs.module }}'
+        build-args: '--with-lua-debugger=0 --with-common-modules=0 --with-essential-client-modules=0 --cmake-arg=${{ steps.set-cmake-args.outputs.cmake-args }} ${{ steps.set-cmake-args.outputs.build-args }}'
 
     - name: Set Output Variables
       shell: bash

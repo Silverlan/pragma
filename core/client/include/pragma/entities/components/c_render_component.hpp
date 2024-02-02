@@ -54,7 +54,7 @@ namespace pragma {
 			InstantiationDisabled = IsInstantiable << 1u,
 			RenderBoundsDirty = InstantiationDisabled << 1u,
 			ShouldDraw = RenderBoundsDirty << 1u,
-			ShouldDrawShadow = ShouldDraw << 1u
+			ShouldDrawShadow = ShouldDraw << 1u,
 		};
 		static constexpr auto USE_HOST_MEMORY_FOR_RENDER_DATA = true;
 
@@ -189,6 +189,10 @@ namespace pragma {
 
 		const pragma::ShaderEntity::InstanceData &GetInstanceData() const;
 
+		void SetTranslucencyPassDistanceOverride(double distance);
+		void ClearTranslucencyPassDistanceOverride();
+		const std::optional<double> &GetTranslucencyPassDistanceOverrideSqr() const;
+
 		GameShaderSpecialization GetShaderPipelineSpecialization() const;
 		void ClearRenderBuffers();
 	  protected:
@@ -239,6 +243,7 @@ namespace pragma {
 		pragma::ShaderEntity::InstanceData m_instanceData {};
 		std::shared_ptr<prosper::SwapBuffer> m_renderBuffer = nullptr;
 		std::shared_ptr<prosper::SwapDescriptorSet> m_renderDescSetGroup = nullptr;
+		std::optional<double> m_translucencyPassDistanceOverrideSqr {};
 	};
 
 	// Events

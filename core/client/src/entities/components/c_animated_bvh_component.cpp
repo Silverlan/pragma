@@ -38,6 +38,8 @@ void CAnimatedBvhComponent::InitializeLuaObject(lua_State *l) { return BaseEntit
 
 void CAnimatedBvhComponent::UpdateDirtyBones()
 {
+	if(IsBusy())
+		return;
 	auto animC = GetEntity().GetComponent<CAnimatedComponent>();
 	auto &processedPoses = animC->GetProcessedBones();
 	if(m_prevBonePoses.size() != processedPoses.size()) {
@@ -240,7 +242,7 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force, const std::vector<boo
 	uint32_t &numJobs = m_numJobs;
 	numJobs = 0;
 	size_t numIndices = 0;
-	for(auto it=renderMeshes.begin();it!=renderMeshes.end();) {
+	for(auto it = renderMeshes.begin(); it != renderMeshes.end();) {
 		auto &renderMesh = *it;
 		auto idx = it - renderMeshes.begin();
 		if(!CBvhComponent::ShouldConsiderMesh(*renderMesh, *mdlC->GetRenderBufferData(idx))) {

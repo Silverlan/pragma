@@ -309,9 +309,9 @@ WITransformable::ResizeMode WITransformable::InvertResizeAxis(ResizeMode mode, b
 		return ResizeMode::none;
 	};
 }
-void WITransformable::Think()
+void WITransformable::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
-	WIBase::Think();
+	WIBase::Think(drawCmd);
 	if(umath::is_flag_set(m_stateFlags, StateFlags::Resizing) == true) {
 		Vector2i cursorPos = {};
 		GetMousePos(&cursorPos.x, &cursorPos.y);

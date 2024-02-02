@@ -150,6 +150,7 @@ local function import_assets(handler, settings)
 
 	local extractedFiles = {}
 	local mdlAssets = {}
+	local importedAssets = {}
 	if
 		assetType == IMPORT_ASSET_TYPE_NONE
 		or assetType == IMPORT_ASSET_TYPE_SOURCE
@@ -333,7 +334,7 @@ local function import_assets(handler, settings)
 				end
 			end
 			if onComplete ~= nil then
-				onComplete()
+				onComplete(importedAssets)
 			end
 			return
 		end
@@ -357,6 +358,17 @@ local function import_assets(handler, settings)
 						local res, errMsg =
 							asset.import_gltf(absPath, file.get_file_path(mdl), not settings.importAsCollection)
 						if res ~= false then
+							if #res.models > 0 then
+								importedAssets[asset.TYPE_MODEL] = importedAssets[asset.TYPE_MODEL] or {}
+								for _, mdlName in ipairs(res.models) do
+									table.insert(importedAssets[asset.TYPE_MODEL], mdlName)
+								end
+							end
+							if #res.mapName > 0 then
+								importedAssets[asset.TYPE_MAP] = importedAssets[asset.TYPE_MAP] or {}
+								table.insert(importedAssets[asset.TYPE_MODEL], res.mapName)
+							end
+
 							if #res.mapName == 0 then
 								logCb(#res.models .. " models have been imported!", log.SEVERITY_INFO)
 							else
@@ -378,9 +390,12 @@ local function import_assets(handler, settings)
 			end
 
 			if handled == false then
-				local mdl = game.load_model(mdl)
+				local mdlName = mdl
+				local mdl = game.load_model(mdlName)
 				if mdl ~= nil then
 					logCb("Model has been imported successfully!", log.SEVERITY_INFO)
+					importedAssets[asset.TYPE_MODEL] = importedAssets[asset.TYPE_MODEL] or {}
+					table.insert(importedAssets[asset.TYPE_MODEL], mdlName)
 				else
 					logCb("Failed to import model!", log.SEVERITY_ERROR)
 				end

@@ -867,6 +867,9 @@ void CRenderComponent::ClearBuffers()
 	pragma::clear_vertex_animation_buffer();
 	CRaytracingComponent::ClearBuffers();
 }
+void CRenderComponent::SetTranslucencyPassDistanceOverride(double distance) { m_translucencyPassDistanceOverrideSqr = umath::pow2(distance); }
+void CRenderComponent::ClearTranslucencyPassDistanceOverride() { m_translucencyPassDistanceOverrideSqr = {}; }
+const std::optional<double> &CRenderComponent::GetTranslucencyPassDistanceOverrideSqr() const { return m_translucencyPassDistanceOverrideSqr; }
 
 /////////////////
 

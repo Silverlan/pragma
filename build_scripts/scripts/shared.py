@@ -223,3 +223,42 @@ def get_submodule(directory,url,commitId=None,branch=None):
 		subprocess.run(["git","pull"],check=True)
 	subprocess.run(["git","submodule","update","--init","--recursive"],check=True)
 	os.chdir(curDir)
+
+if platform == "win32":
+	def determine_vsdevcmd_path(deps_dir):
+		# Create the deps_dir if it doesn't exist
+		if not os.path.exists(deps_dir):
+			os.makedirs(deps_dir)
+
+		vswhere_url = "https://github.com/microsoft/vswhere/releases/download/3.1.7/vswhere.exe"
+
+		# Download vswhere.exe to deps_dir
+		vswhere_path = os.path.join(deps_dir, "vswhere.exe")
+		if not os.path.exists(vswhere_path):
+			urllib.request.urlretrieve(vswhere_url, vswhere_path)
+
+		installation_path = subprocess.check_output([vswhere_path, "-property", "installationPath"], text=True).strip()
+		vsdevcmd_path = os.path.join(installation_path, "Common7", "Tools", "vsdevcmd.bat")
+		return vsdevcmd_path
+
+if platform == "linux":
+	def install_system_packages(packages, no_confirm):
+		print("")
+		print_msg("The following system packages will be installed:")
+		for cmd in packages:
+			print(cmd)
+
+		if not no_confirm:
+			user_input = input("Your password may be required to install them. Do you want to continue (Y/n)?")
+			if user_input.lower() == 'yes' or user_input.lower() == 'y':
+				pass
+			elif user_input.lower() == 'no' or user_input.lower() == 'n':
+				sys.exit(0)
+			else:
+				print("Invalid input, please type 'y' for yes or 'n' for no. Aborting...")
+				sys.exit(0)
+
+		print_msg("Installing system packages...")
+		for cmd in packages:
+			print_msg("Running " +cmd +"...")
+			subprocess.run(["sudo"] +cmd.split() +["-y"],check=True)

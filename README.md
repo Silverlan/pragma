@@ -107,6 +107,7 @@ Running the build-script with the arguments above will build and install Pragma 
 | `--with-core-pfm-modules <1/0>`         | Include essential PFM modules.                                                               | `1`              |
 | `--with-all-pfm-modules <1/0>`          | Include non-essential PFM modules (e.g. chromium and cycles).                                | `0`              |
 | `--with-vr <1/0>`                       | Include Virtual Reality support.                                                             | `0`              |
+| `--with-networking <1/0>`               | Include networking module(s) for multiplayer support.                                        | `0`              |
 | `--with-lua-debugger <1/0>`             | Include Lua-debugger support.                                                                | `0`              |
 | `--build-cycles <1/0>`                  | Build the Cycles library (otherwise uses pre-built binaries). Requires --with-all-pfm-modules| `0`              |
 | `--build <1/0>`                         | Build Pragma after configurating and generating build files.                                 | `1`              |

@@ -59,9 +59,9 @@ void WIImageSlideShow::SetSize(int x, int y)
 	ScheduleUpdate();
 }
 
-void WIImageSlideShow::Think()
+void WIImageSlideShow::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
-	WIBase::Think();
+	WIBase::Think(drawCmd);
 	if(!IsVisible())
 		return;
 	m_tLastFade.Update();

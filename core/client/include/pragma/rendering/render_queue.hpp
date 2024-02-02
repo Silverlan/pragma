@@ -40,18 +40,24 @@ namespace pragma::rendering {
 		};
 
 		void SetDistance(const Vector3 &origin, const CCameraComponent &cam);
+		void SetDistance(double distanceSqr, const CCameraComponent &cam);
 	};
 	struct RenderQueueItem {
+		struct TranslucencyPassInfo {
+			TranslucencyPassInfo(const CCameraComponent &camera) : camera {camera} {}
+			const CCameraComponent &camera;
+			std::optional<double> distanceOverrideSqr {};
+		};
 		static auto constexpr INSTANCED = std::numeric_limits<uint16_t>::max();
 		static auto constexpr UNIQUE = std::numeric_limits<uint16_t>::max() - 1;
 		RenderQueueItem() = default;
-		RenderQueueItem(CBaseEntity &ent, RenderMeshIndex meshIdx, CMaterial &mat, prosper::PipelineID pipelineId, const CCameraComponent *optCam = nullptr);
-		
+		RenderQueueItem(CBaseEntity &ent, RenderMeshIndex meshIdx, CMaterial &mat, prosper::PipelineID pipelineId, const TranslucencyPassInfo *optTranslucencyPassInfo = nullptr);
+
 		CMaterial *GetMaterial() const;
 		CBaseEntity *GetEntity() const;
 		CModelSubMesh *GetMesh() const;
 		prosper::ShaderGraphics *GetShader(uint32_t &outPipelineIndex) const;
-		
+
 		MaterialIndex material;
 		prosper::PipelineID pipelineId = std::numeric_limits<prosper::PipelineID>::max();
 		EntityIndex entity;

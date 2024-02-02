@@ -22,7 +22,7 @@ class DLLCLIENT WISlider : public WIProgressBar {
 	virtual void Initialize() override;
 	virtual void SetSize(int x, int y) override;
 	virtual util::EventReply MouseCallback(GLFW::MouseButton button, GLFW::KeyState state, GLFW::Modifier mods) override;
-	virtual void Think() override;
+	virtual void Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd) override;
 
 	bool IsBeingDragged() const;
 };

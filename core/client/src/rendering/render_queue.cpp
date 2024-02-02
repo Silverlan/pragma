@@ -39,7 +39,12 @@ void SortingKey::SetDistance(const Vector3 &origin, const CCameraComponent &cam)
 	auto &p1 = cam.GetEntity().GetPosition();
 	auto v = p1 - p0;
 	// Double precision since we're working with the square of the far plane
-	auto distSqr = umath::pow2(static_cast<double>(v.x)) + umath::pow2(static_cast<double>(v.y)) + umath::pow2(static_cast<double>(v.z));
+	auto distSqr = std::max(umath::pow2(static_cast<double>(v.x)) + umath::pow2(static_cast<double>(v.y)) + umath::pow2(static_cast<double>(v.z)), 0.0);
+	SetDistance(distSqr, cam);
+}
+
+void SortingKey::SetDistance(double distSqr, const CCameraComponent &cam)
+{
 	auto nearZ = umath::pow2(static_cast<double>(cam.GetNearZ()));
 	auto farZ = umath::pow2(static_cast<double>(cam.GetFarZ()));
 	// Map the distance to [0,1] and invert (since we want objects that are furthest away to be rendered first)
@@ -49,19 +54,23 @@ void SortingKey::SetDistance(const Vector3 &origin, const CCameraComponent &cam)
 	translucent.distance = glm::floatBitsToUint(static_cast<float>(distSqr));
 }
 
-RenderQueueItem::RenderQueueItem(CBaseEntity &ent, RenderMeshIndex meshIdx, CMaterial &mat, prosper::PipelineID pipelineId, const CCameraComponent *optCam)
-    : material {mat.GetIndex()}, pipelineId {pipelineId}, entity {ent.GetLocalIndex()}, mesh {meshIdx}, translucentKey {optCam ? true : false}
+RenderQueueItem::RenderQueueItem(CBaseEntity &ent, RenderMeshIndex meshIdx, CMaterial &mat, prosper::PipelineID pipelineId, const TranslucencyPassInfo *optTranslucencyPassInfo)
+    : material {mat.GetIndex()}, pipelineId {pipelineId}, entity {ent.GetLocalIndex()}, mesh {meshIdx}, translucentKey {optTranslucencyPassInfo ? true : false}
 {
 	instanceSetIndex = RenderQueueItem::UNIQUE;
 	auto &renderC = *ent.GetRenderComponent();
 	auto instantiable = renderC.IsInstantiable();
-	if(optCam) {
-		// TODO: This isn't very efficient, find a better way to handle this!
-		auto &renderMeshes = renderC.GetRenderMeshes();
-		if(meshIdx < renderMeshes.size()) {
-			auto &pose = ent.GetPose();
-			auto pos = pose * renderMeshes[meshIdx]->GetCenter();
-			sortingKey.SetDistance(pos, *optCam);
+	if(optTranslucencyPassInfo) {
+		if(optTranslucencyPassInfo->distanceOverrideSqr)
+			sortingKey.SetDistance(*optTranslucencyPassInfo->distanceOverrideSqr, optTranslucencyPassInfo->camera);
+		else {
+			// TODO: This isn't very efficient, find a better way to handle this!
+			auto &renderMeshes = renderC.GetRenderMeshes();
+			if(meshIdx < renderMeshes.size()) {
+				auto &pose = ent.GetPose();
+				auto pos = pose * renderMeshes[meshIdx]->GetCenter();
+				sortingKey.SetDistance(pos, optTranslucencyPassInfo->camera);
+			}
 		}
 
 		sortingKey.translucent.material = material;
@@ -112,7 +121,15 @@ void RenderQueue::Clear()
 	queue.clear();
 	sortedItemIndices.clear();
 }
-void RenderQueue::Add(CBaseEntity &ent, RenderMeshIndex meshIdx, CMaterial &mat, prosper::PipelineID pipelineId, const CCameraComponent *optCam) { Add({ent, meshIdx, mat, pipelineId, optCam}); }
+void RenderQueue::Add(CBaseEntity &ent, RenderMeshIndex meshIdx, CMaterial &mat, prosper::PipelineID pipelineId, const CCameraComponent *optCam)
+{
+	if(optCam) {
+		RenderQueueItem::TranslucencyPassInfo translucencyPassInfo {*optCam};
+		Add({ent, meshIdx, mat, pipelineId, &translucencyPassInfo});
+	}
+	else
+		Add({ent, meshIdx, mat, pipelineId});
+}
 void RenderQueue::Add(const RenderQueueItem &item)
 {
 	m_queueMutex.lock();

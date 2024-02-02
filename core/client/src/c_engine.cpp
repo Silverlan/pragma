@@ -1377,7 +1377,7 @@ void CEngine::DrawFrame()
 
 	StartProfilingStage(CPUProfilingPhase::GUI);
 	auto &gui = WGUI::GetInstance();
-	gui.Think();
+	gui.Think(primWindowCmd);
 	StopProfilingStage(CPUProfilingPhase::GUI);
 
 	auto &stagingRt = GetRenderContext().GetWindow().GetStagingRenderTarget();

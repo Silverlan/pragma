@@ -385,7 +385,13 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("IsFadingOut", &::WIBase::IsFadingOut);
 	classDef.def("IsFadingIn", &::WIBase::IsFadingIn);
 	classDef.def("GetClass", &::WIBase::GetClass);
-	classDef.def("Think", &::WIBase::Think);
+	classDef.def(
+	  "Think", +[](::WIBase &el, std::shared_ptr<prosper::ICommandBuffer> &cmd) {
+		  if(!cmd->IsPrimary())
+			  return;
+		  auto primaryCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(cmd);
+		  el.Think(primaryCmdBuffer);
+	  });
 	classDef.def("InjectMouseMoveInput", &InjectMouseMoveInput);
 	classDef.def("InjectMouseInput", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, const Vector2 &, int, int, int)>(&InjectMouseInput));
 	classDef.def("InjectMouseInput", static_cast<::util::EventReply (*)(lua_State *, ::WIBase &, const Vector2 &, int, int)>(&InjectMouseInput));
@@ -461,7 +467,12 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("DisableThinking", &::WIBase::DisableThinking);
 	classDef.def("SetThinkingEnabled", &::WIBase::SetThinkingEnabled);
 	classDef.def(
-	  "InvokeThink", +[](::WIBase &el) { el.Think(); });
+	  "InvokeThink", +[](::WIBase &el, std::shared_ptr<prosper::ICommandBuffer> &cmd) {
+		  if(!cmd->IsPrimary())
+			  return;
+		  auto primaryCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(cmd);
+		  el.Think(primaryCmdBuffer);
+	  });
 
 	classDef.def("AddAttachment", static_cast<WIAttachment *(::WIBase::*)(const std::string &, const Vector2 &)>(&::WIBase::AddAttachment));
 	classDef.def("AddAttachment", static_cast<WIAttachment *(*)(::WIBase &, const std::string &)>([](::WIBase &el, const std::string &name) { return el.AddAttachment(name); }));

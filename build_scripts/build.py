@@ -28,7 +28,8 @@ parser.add_argument("--with-pfm", type=str2bool, nargs='?', const=True, default=
 parser.add_argument("--with-core-pfm-modules", type=str2bool, nargs='?', const=True, default=True, help="Include essential PFM modules.")
 parser.add_argument("--with-all-pfm-modules", type=str2bool, nargs='?', const=True, default=False, help="Include non-essential PFM modules (e.g. chromium and cycles).")
 parser.add_argument("--with-vr", type=str2bool, nargs='?', const=True, default=False, help="Include Virtual Reality support.")
-parser.add_argument("--with-source-engine-entities", type=str2bool, nargs='?', const=True, default=True, help="Include addons with support for Source Engine entities.")
+parser.add_argument("--with-networking", type=str2bool, nargs='?', const=True, default=False, help="Include networking module(s) for multiplayer support.")
+parser.add_argument("--with-common-entities", type=str2bool, nargs='?', const=True, default=True, help="Include addons with support for common entity types.")
 parser.add_argument("--with-lua-debugger", type=str2bool, nargs='?', const=True, default=False, help="Include Lua-debugger support.")
 parser.add_argument("--with-lua-doc-generator", type=str2bool, nargs='?', const=True, default=False, help="Include Lua documentation generator. Requires the --dia-include-path and --dia-library-path options.")
 parser.add_argument('--dia-include-path', help='The include path to the Debug Interface Access SDK (required for Lua doc generator).', default='')
@@ -98,7 +99,8 @@ with_pfm = args["with_pfm"]
 with_core_pfm_modules = args["with_core_pfm_modules"]
 with_all_pfm_modules = args["with_all_pfm_modules"]
 with_vr = args["with_vr"]
-with_source_engine_entities = args["with_source_engine_entities"]
+with_networking = args["with_networking"]
+with_common_entities = args["with_common_entities"]
 with_lua_debugger = args["with_lua_debugger"]
 with_lua_doc_generator = args["with_lua_doc_generator"]
 dia_include_path = args["dia_include_path"]
@@ -304,25 +306,7 @@ if platform == "linux":
 			"apt-get install ninja-build"
 		]
 
-		print("")
-		print_msg("The following system packages will be installed:")
-		for cmd in commands:
-			print(cmd)
-
-		if not no_confirm:
-			user_input = input("Your password may be required to install them. Do you want to continue (Y/n)?")
-			if user_input.lower() == 'yes' or user_input.lower() == 'y':
-				pass
-			elif user_input.lower() == 'no' or user_input.lower() == 'n':
-				sys.exit(0)
-			else:
-				print("Invalid input, please type 'y' for yes or 'n' for no. Aborting...")
-				sys.exit(0)
-
-		print_msg("Installing system packages...")
-		for cmd in commands:
-			print_msg("Running " +cmd +"...")
-			subprocess.run(["sudo"] +cmd.split() +["-y"],check=True)
+		install_system_packages(commands, no_confirm)
 
 module_list = []
 cmake_args = []
@@ -548,7 +532,7 @@ print_msg("Downloading modules...")
 os.chdir(root +"/modules")
 
 module_info = []
-def add_pragma_module(name,repositoryUrl=None,commitSha=None,branch=None):
+def add_pragma_module(name,repositoryUrl=None,commitSha=None,branch=None,skipBuildTarget=False):
     for module in module_info:
         if module["name"] == name:
             return
@@ -556,7 +540,8 @@ def add_pragma_module(name,repositoryUrl=None,commitSha=None,branch=None):
         "name": name,
         "repositoryUrl": repositoryUrl,
         "commitSha": commitSha,
-        "branch": branch
+        "branch": branch,
+		"skipBuildTarget": skipBuildTarget
     }
     module_info.append(module)
 
@@ -649,10 +634,14 @@ def execbuildscript(filepath):
 		l["cxx_compiler"] = cxx_compiler
 		l["no_confirm"] = no_confirm
 		l["no_sudo"] = no_sudo
+		l["install_system_packages"] = install_system_packages
 	#	l["harfbuzz_include_dir"] = harfbuzz_include_dir
 	#	l["harfbuzz_lib"] = harfbuzz_lib
 	#else:
 	#	l["vcvars"] = "vcvars"
+
+	if platform == "win32":
+		l["determine_vsdevcmd_path"] = determine_vsdevcmd_path
 
 	execfile(filepath,g,l)
 
@@ -665,16 +654,21 @@ def execbuildscript(filepath):
 # Register modules that were added using the --module argument
 for module in modules:
 	os.chdir(root +"/modules")
-	index = module.find(':')
-	if index == -1:
-		add_pragma_module(
-			name=module
-		)
-	else:
-		add_pragma_module(
-			name=module[0:index].strip('\"'),
-			repositoryUrl=module[index +1:].strip('\"')
-		)
+	parts = module.split(":")
+	moduleArgName = parts[0]
+	repositoryUrl = None
+	skipBuildTarget = False
+	if len(parts) > 1:
+		for part in parts[1:]:
+			if part == "skipBuildTarget":
+				skipBuildTarget = True
+			else:
+				repositoryUrl = part.strip('\"')
+	add_pragma_module(
+		name=moduleArgName.strip('\"'),
+		repositoryUrl=repositoryUrl,
+		skipBuildTarget=skipBuildTarget
+	)
 
 g = {}
 l = {
@@ -687,7 +681,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
     add_pragma_module(
         name="pr_prosper_vulkan",
-        commitSha="efe945f597fb5afd0847b708328f433597d93e56",
+        commitSha="e21d3aa373c4bc776e80dbd9a3b563459e6d3008",
         repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
     )
 
@@ -699,7 +693,7 @@ if with_common_modules:
     )
     add_pragma_module(
         name="pr_audio_soloud",
-        commitSha="bca5052ab9b7b28f2d3f94237c896a9b30fb1753",
+        commitSha="0d82a619deff13cde9fd05c62a00ded933a9558e",
         repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
     )
     #modules_prebuilt.append("Silverlan/pr_mount_external_prebuilt")
@@ -719,12 +713,12 @@ if with_pfm:
     if with_all_pfm_modules:
         add_pragma_module(
             name="pr_chromium",
-            commitSha="e69e3f042b82d0183eca5430910ff462b0150923",
+            commitSha="60175334879209744da26b337e49a53290f13686",
             repositoryUrl="https://github.com/SlawekNowy/pr_chromium.git"
         )
         add_pragma_module(
             name="pr_unirender",
-            commitSha="d23d8460b27faf93b0311bdf51d1022b0d79e897",
+            commitSha="c41a3215eb6b707f491c2efc58dc2d616895a3cf",
             repositoryUrl="https://github.com/Slaweknowy/pr_cycles.git"
         )
         add_pragma_module(
@@ -763,8 +757,16 @@ if with_lua_doc_generator or with_pfm:
 if with_vr:
     add_pragma_module(
         name="pr_openvr",
-        commitSha="9207c54f58800aaacd79c7907cab72fb6401e28d",
+        commitSha="1ba663f90e857f1f9bd30a836a1c89c83f4a4ef1",
         repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
+    )
+
+if with_networking:
+    add_pragma_module(
+        name="pr_steam_networking_sockets",
+        commitSha="d1127f8c981be69448a68b4d4b7665a6e5df6cf4",
+        repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
+		skipBuildTarget=True
     )
 
 # These modules are shipped with the Pragma repository and will have to be excluded from the
@@ -777,6 +779,7 @@ for module in module_info:
 	moduleUrl = module["repositoryUrl"]
 	commitId = module["commitSha"]
 	branch = module["branch"]
+	skipBuildTarget = module["skipBuildTarget"]
 	print("Module Name:", moduleName)
 	print("Repository URL:", moduleUrl)
 	print("Commit SHA:", commitId)
@@ -798,7 +801,8 @@ for module in module_info:
 		print_msg("Executing module setup script...")
 		execbuildscript(scriptPath)
 
-	module_list.append(moduleName)
+	if not skipBuildTarget:
+		module_list.append(moduleName)
 
 for module in shippedModules:
 	if module != "pr_curl": # Curl is currently required
@@ -812,7 +816,7 @@ for module in modules_prebuilt:
 	print_msg("Downloading prebuilt binaries for module '" +module +"'...")
 	install_prebuilt_binaries("https://github.com/" +module +"/releases/download/latest/")
 
-cmake_args.append("-DPRAGMA_INSTALL_CUSTOM_TARGETS=" +";".join(module_list))
+cmake_args.append("-DPRAGMA_INSTALL_CUSTOM_TARGETS=" +";".join(module_list +additional_build_targets))
 
 print("Modules:" +', '.join(module_list))
 print("Additional CMake Arguments:" +', '.join(cmake_args))
@@ -973,18 +977,18 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","518f0d44705240022772450ca5a381278e4d72fe")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","5344986cd2dde8dcc887703ebb2eccf3a6ea7ac9")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","56d46dacb398fa7540e794359eaf1081c9df1edd")
 
 	if with_vr:
-		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","7e1169a9b4a31b3cae4982455280dc1f6863d37c")
+		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","908786fa9318205395296486012c7d47cbceb3dc")
 
 	if with_pfm:
 		download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")
 		download_addon("PFM Bedroom Demo","pfm_demo_bedroom","https://github.com/Silverlan/pfm_demo_bedroom.git","0fed1d5b54a25c3ded2ce906e7da80ca8dd2fb0d")
 		download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","494aba78be98caf34249e3c7cb3e43477634c272")
 
-	if with_source_engine_entities:
+	if with_common_entities:
 		download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","a70f575")
 		download_addon("TF2","pragma_tf2","https://github.com/Silverlan/pragma_tf2.git","eddee1f")
 

@@ -40,9 +40,9 @@ WIMainMenuMods::~WIMainMenuMods()
 	}
 }
 
-void WIMainMenuMods::Think()
+void WIMainMenuMods::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
-	WIBase::Think();
+	WIBase::Think(drawCmd);
 	if(IsVisible() == true) {
 		m_downloadMutex.lock();
 		for(auto it = m_downloads.begin(); it != m_downloads.end();) {

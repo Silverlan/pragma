@@ -216,19 +216,26 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(pragma::CRasterizationRendere
 			}
 			continue;
 		}
-		pragma::rendering::RenderQueueItem item {static_cast<CBaseEntity &>(renderC.GetEntity()), meshIdx, *mat, pipelineId, translucent ? &cam : nullptr};
+
+		pragma::rendering::RenderQueueItem::TranslucencyPassInfo translucenyPassInfo {cam};
+		if(translucent) {
+			auto &distanceBiasSqr = renderC.GetTranslucencyPassDistanceOverrideSqr();
+			if(distanceBiasSqr)
+				translucenyPassInfo.distanceOverrideSqr = distanceBiasSqr;
+		}
+
+		pragma::rendering::RenderQueueItem item {static_cast<CBaseEntity &>(renderC.GetEntity()), meshIdx, *mat, pipelineId, translucent ? &translucenyPassInfo : nullptr};
 		if(fOptInsertItemToQueue)
 			fOptInsertItemToQueue(*renderQueue, item);
 		else
 			renderQueue->Add(item);
 
-		if(renderBufferData[meshIdx].IsGlowPassEnabled() && umath::is_flag_set(renderFlags,RenderFlags::Glow)) {
-			auto *renderQueueGlow = getRenderQueue(pragma::rendering::SceneRenderPass::Glow,false);
+		if(renderBufferData[meshIdx].IsGlowPassEnabled() && umath::is_flag_set(renderFlags, RenderFlags::Glow)) {
+			auto *renderQueueGlow = getRenderQueue(pragma::rendering::SceneRenderPass::Glow, false);
 			if(renderQueueGlow) {
 				// TODO
 				auto *shader = static_cast<pragma::ShaderGameWorldLightingPass *>(c_engine->GetShader("glow").get());
-				auto pipelineIdx = shader->FindPipelineIndex(pragma::rendering::PassType::Generic,
-				  renderC.GetShaderPipelineSpecialization(), specializationFlags);
+				auto pipelineIdx = shader->FindPipelineIndex(pragma::rendering::PassType::Generic, renderC.GetShaderPipelineSpecialization(), specializationFlags);
 
 				prosper::PipelineID pipelineId;
 				if(pipelineIdx.has_value() != false && shader->GetPipelineId(pipelineId, *pipelineIdx) == true && pipelineId != std::numeric_limits<decltype(pipelineId)>::max()) {

@@ -542,6 +542,13 @@ def execfile(filepath, globals=None, locals=None, args=None):
 	with open(filepath, 'rb') as file:
 		exec(compile(file.read(), filepath, 'exec'), globals, locals)
 
+external_libs_dir = root +"/external_libs"
+modules_dir = root +"/modules"
+third_party_libs_dir = root +"/third_party_libs"
+external_libs_bin_dir = build_dir +"/external_libs"
+modules_bin_dir = build_dir +"/modules"
+third_party_libs_bin_dir = build_dir +"/third_party_libs"
+
 def execbuildscript(filepath):
 	global module_list
 	global cmake_args
@@ -552,6 +559,12 @@ def execbuildscript(filepath):
 	global build_config
 	global build_directory
 	global deps_directory
+	global external_libs_dir
+	global modules_dir
+	global third_party_libs_dir
+	global external_libs_bin_dir
+	global modules_bin_dir
+	global third_party_libs_bin_dir
 	global install_directory
 	global verbose
 	global root
@@ -574,6 +587,13 @@ def execbuildscript(filepath):
 		"build_config": build_config,
 		"build_directory": build_directory,
 		"deps_directory": deps_directory,
+		"external_libs_dir": external_libs_dir,
+		"modules_dir": modules_dir,
+		"third_party_libs_dir": third_party_libs_dir,
+		"external_libs_bin_dir": external_libs_bin_dir,
+		"modules_bin_dir": modules_bin_dir,
+		"third_party_libs_bin_dir": third_party_libs_bin_dir,
+
 		"install_directory": install_directory,
 		"verbose": verbose,
 
@@ -599,6 +619,7 @@ def execbuildscript(filepath):
 		"mkpath": mkpath,
 		"print_msg": print_msg,
 		"git_clone": git_clone,
+		"git_clone_commit": git_clone_commit,
 		"cmake_configure": cmake_configure,
 		"cmake_build": cmake_build,
 		"mkdir": mkdir,

@@ -296,6 +296,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("GetBodyGroups", &Lua::Model::GetBodyGroups);
 	classDef.def("GetBodyGroup", &Lua::Model::GetBodyGroup);
 	classDef.def("GetExtensionData", &::Model::GetExtensionData);
+	classDef.def("GenerateHitboxes", &::Model::GenerateHitboxes);
 
 	classDef.def("GetTextureGroupCount", &Lua::Model::GetTextureGroupCount);
 	classDef.def("GetTextureGroups", &Lua::Model::GetTextureGroups);

@@ -429,6 +429,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	void GetHitboxBones(HitGroup group, std::vector<uint32_t> &boneIds) const;
 	std::vector<uint32_t> GetHitboxBones() const;
 	void GetHitboxBones(std::vector<uint32_t> &boneIds) const;
+	void GenerateHitboxes();
 
 	void UpdateShape(const std::vector<SurfaceMaterial> *materials = nullptr);
 	const std::vector<uint32_t> &GetBaseMeshes() const;

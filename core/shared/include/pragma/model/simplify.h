@@ -27,10 +27,10 @@
 #include <math.h>
 #include <float.h> //FLT_EPSILON, DBL_EPSILON
 
-#define loopi(start_l, end_l) for(int i = start_l; i < end_l; ++i)
-#define loopi(start_l, end_l) for(int i = start_l; i < end_l; ++i)
-#define loopj(start_l, end_l) for(int j = start_l; j < end_l; ++j)
-#define loopk(start_l, end_l) for(int k = start_l; k < end_l; ++k)
+#define loopi(start_l, end_l) for(int64_t i = start_l; i < end_l; ++i)
+#define loopi(start_l, end_l) for(int64_t i = start_l; i < end_l; ++i)
+#define loopj(start_l, end_l) for(int64_t j = start_l; j < end_l; ++j)
+#define loopk(start_l, end_l) for(int64_t k = start_l; k < end_l; ++k)
 
 struct vector3 {
 	double x, y, z;
@@ -323,8 +323,9 @@ class SymetricMatrix {
 namespace Simplify {
 	// Global Variables & Strctures
 	enum Attributes { NONE, NORMAL = 2, TEXCOORD = 4, COLOR = 8 };
+	using Index = uint64_t;
 	struct Triangle {
-		int v[3];
+		Index v[3];
 		double err[4];
 		int deleted, dirty, attr;
 		vec3f n;
@@ -333,12 +334,12 @@ namespace Simplify {
 	};
 	struct Vertex {
 		vec3f p;
-		int tstart, tcount;
+		Index tstart, tcount;
 		SymetricMatrix q;
 		int border;
 	};
 	struct Ref {
-		int tid, tvertex;
+		Index tid, tvertex;
 	};
 	std::vector<Triangle> triangles;
 	std::vector<Vertex> vertices;
@@ -349,10 +350,10 @@ namespace Simplify {
 	// Helper functions
 
 	double vertex_error(SymetricMatrix q, double x, double y, double z);
-	double calculate_error(int id_v1, int id_v2, vec3f &p_result);
-	bool flipped(vec3f p, int i0, int i1, Vertex &v0, Vertex &v1, std::vector<int> &deleted);
-	void update_uvs(int i0, const Vertex &v, const vec3f &p, std::vector<int> &deleted);
-	void update_triangles(int i0, Vertex &v, std::vector<int> &deleted, int &deleted_triangles);
+	double calculate_error(Index id_v1, Index id_v2, vec3f &p_result);
+	bool flipped(vec3f p, Index i0, Index i1, Vertex &v0, Vertex &v1, std::vector<int> &deleted);
+	void update_uvs(Index i0, const Vertex &v, const vec3f &p, std::vector<int> &deleted);
+	void update_triangles(Index i0, Vertex &v, std::vector<int> &deleted, int &deleted_triangles);
 	void update_mesh(int iteration);
 	void compact_mesh();
 	//
@@ -372,7 +373,7 @@ namespace Simplify {
 		// main iteration loop
 		int deleted_triangles = 0;
 		std::vector<int> deleted0, deleted1;
-		int triangle_count = triangles.size();
+		auto triangle_count = triangles.size();
 		//int iteration = 0;
 		//loop(iteration,0,100)
 		for(int iteration = 0; iteration < 100; iteration++) {
@@ -414,9 +415,9 @@ namespace Simplify {
 				loopj(0, 3) if(t.err[j] < threshold)
 				{
 
-					int i0 = t.v[j];
+					auto i0 = t.v[j];
 					Vertex &v0 = vertices[i0];
-					int i1 = t.v[(j + 1) % 3];
+					auto i1 = t.v[(j + 1) % 3];
 					Vertex &v1 = vertices[i1];
 					// Border check
 					if(v0.border != v1.border)
@@ -442,12 +443,12 @@ namespace Simplify {
 					// not flipped, so remove edge
 					v0.p = p;
 					v0.q = v1.q + v0.q;
-					int tstart = refs.size();
+					Index tstart = refs.size();
 
 					update_triangles(i0, v0, deleted0, deleted_triangles);
 					update_triangles(i0, v1, deleted1, deleted_triangles);
 
-					int tcount = refs.size() - tstart;
+					Index tcount = refs.size() - tstart;
 
 					if(tcount <= v0.tcount) {
 						// save ram
@@ -510,9 +511,9 @@ namespace Simplify {
 
 				loopj(0, 3) if(t.err[j] < threshold)
 				{
-					int i0 = t.v[j];
+					auto i0 = t.v[j];
 					Vertex &v0 = vertices[i0];
-					int i1 = t.v[(j + 1) % 3];
+					auto i1 = t.v[(j + 1) % 3];
 					Vertex &v1 = vertices[i1];
 
 					// Border check
@@ -540,12 +541,12 @@ namespace Simplify {
 					// not flipped, so remove edge
 					v0.p = p;
 					v0.q = v1.q + v0.q;
-					int tstart = refs.size();
+					Index tstart = refs.size();
 
 					update_triangles(i0, v0, deleted0, deleted_triangles);
 					update_triangles(i0, v1, deleted1, deleted_triangles);
 
-					int tcount = refs.size() - tstart;
+					Index tcount = refs.size() - tstart;
 
 					if(tcount <= v0.tcount) {
 						// save ram
@@ -570,7 +571,7 @@ namespace Simplify {
 
 	// Check if a triangle flips when this edge is removed
 
-	bool flipped(vec3f p, int i0, int i1, Vertex &v0, Vertex &v1, std::vector<int> &deleted)
+	bool flipped(vec3f p, Index i0, Index i1, Vertex &v0, Vertex &v1, std::vector<int> &deleted)
 	{
 
 		loopk(0, v0.tcount)
@@ -579,9 +580,9 @@ namespace Simplify {
 			if(t.deleted)
 				continue;
 
-			int s = refs[v0.tstart + k].tvertex;
-			int id1 = t.v[(s + 1) % 3];
-			int id2 = t.v[(s + 2) % 3];
+			Index s = refs[v0.tstart + k].tvertex;
+			auto id1 = t.v[(s + 1) % 3];
+			auto id2 = t.v[(s + 2) % 3];
 
 			if(id1 == i1 || id2 == i1) // delete ?
 			{
@@ -607,7 +608,7 @@ namespace Simplify {
 
 	// update_uvs
 
-	void update_uvs(int i0, const Vertex &v, const vec3f &p, std::vector<int> &deleted)
+	void update_uvs(Index i0, const Vertex &v, const vec3f &p, std::vector<int> &deleted)
 	{
 		loopk(0, v.tcount)
 		{
@@ -626,7 +627,7 @@ namespace Simplify {
 
 	// Update triangle connections and edge error after a edge is collapsed
 
-	void update_triangles(int i0, Vertex &v, std::vector<int> &deleted, int &deleted_triangles)
+	void update_triangles(Index i0, Vertex &v, std::vector<int> &deleted, int &deleted_triangles)
 	{
 		vec3f p;
 		loopk(0, v.tcount)
@@ -656,7 +657,7 @@ namespace Simplify {
 	{
 		if(iteration > 0) // compact triangles
 		{
-			int dst = 0;
+			Index dst = 0;
 			loopi(0, triangles.size()) if(!triangles[i].deleted) { triangles[dst++] = triangles[i]; }
 			triangles.resize(dst);
 		}
@@ -673,7 +674,7 @@ namespace Simplify {
 			Triangle &t = triangles[i];
 			loopj(0, 3) vertices[t.v[j]].tcount++;
 		}
-		int tstart = 0;
+		Index tstart = 0;
 		loopi(0, vertices.size())
 		{
 			Vertex &v = vertices[i];
@@ -705,7 +706,7 @@ namespace Simplify {
 		if(iteration == 0) {
 			// Identify boundary : vertices[].border=0,1
 
-			std::vector<int> vcount, vids;
+			std::vector<uint64_t> vcount, vids;
 
 			loopi(0, vertices.size()) vertices[i].border = 0;
 
@@ -716,11 +717,12 @@ namespace Simplify {
 				vids.clear();
 				loopj(0, v.tcount)
 				{
-					int k = refs[v.tstart + j].tid;
+					Index k = refs[v.tstart + j].tid;
 					Triangle &t = triangles[k];
 					loopk(0, 3)
 					{
-						int ofs = 0, id = t.v[k];
+						Index ofs = 0;
+						auto id = t.v[k];
 						while(ofs < vcount.size()) {
 							if(vids[ofs] == id)
 								break;
@@ -764,7 +766,7 @@ namespace Simplify {
 
 	void compact_mesh()
 	{
-		int dst = 0;
+		Index dst = 0;
 		loopi(0, vertices.size()) { vertices[i].tcount = 0; }
 		loopi(0, triangles.size()) if(!triangles[i].deleted)
 		{
@@ -794,7 +796,7 @@ namespace Simplify {
 
 	// Error for one edge
 
-	double calculate_error(int id_v1, int id_v2, vec3f &p_result)
+	double calculate_error(Index id_v1, Index id_v2, vec3f &p_result)
 	{
 		// compute interpolated vertex
 
@@ -869,7 +871,7 @@ namespace Simplify {
 		}
 		char line[1000];
 		memset(line, 0, 1000);
-		int vertex_cnt = 0;
+		Index vertex_cnt = 0;
 		int material = -1;
 		std::map<std::string, int> material_map;
 		std::vector<vec3f> uvs;

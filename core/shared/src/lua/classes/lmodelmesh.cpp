@@ -90,6 +90,8 @@ void Lua::ModelMesh::register_class(luabind::class_<::ModelMesh> &classDef)
 			return;
 		Lua::Push(l, subMeshes.at(index));
 	}));
+	classDef.def("Simplify", &::ModelSubMesh::Simplify);
+	classDef.def("Simplify", &::ModelSubMesh::Simplify, luabind::default_parameter_policy<3, double {5.0}> {});
 }
 void Lua::ModelMesh::GetVertexCount(lua_State *l, ::ModelMesh &mesh) { Lua::PushInt(l, mesh.GetVertexCount()); }
 void Lua::ModelMesh::GetTriangleVertexCount(lua_State *l, ::ModelMesh &mesh) { Lua::PushInt(l, mesh.GetIndexCount()); }

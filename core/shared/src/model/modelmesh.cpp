@@ -7,6 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/model/modelmesh.h"
+#include "pragma/model/simplify.h"
 #include <mathutil/uvec.h>
 #include <pragma/math/intersection.h>
 #include <udm.hpp>
@@ -867,6 +868,70 @@ void ModelSubMesh::RemoveVertex(uint64_t idx)
 		m_vertexWeights->erase(m_vertexWeights->begin() + idx);
 	if(idx < m_extendedVertexWeights->size())
 		m_extendedVertexWeights->erase(m_extendedVertexWeights->begin() + idx);
+}
+
+std::shared_ptr<ModelSubMesh> ModelSubMesh::Simplify(uint32_t targetVertexCount, double aggressiveness) const
+{
+	Simplify::vertices.clear();
+	auto &verts = GetVertices();
+	Simplify::vertices.reserve(verts.size());
+	for(auto &v : verts) {
+		Simplify::Vertex sv {};
+		sv.p.x = v.position.x;
+		sv.p.y = v.position.y;
+		sv.p.z = v.position.z;
+		Simplify::vertices.push_back(sv);
+	}
+
+	Simplify::triangles.clear();
+	VisitIndices([&verts](auto *indexDataSrc, uint32_t numIndicesSrc) {
+		Simplify::triangles.reserve(numIndicesSrc / 3);
+		for(auto i = decltype(numIndicesSrc) {0u}; i < numIndicesSrc; i += 3) {
+			Simplify::triangles.push_back({});
+			auto &tri = Simplify::triangles.back();
+
+			for(uint8_t j = 0; j < 3; ++j) {
+				auto idx = indexDataSrc[i + j];
+				tri.v[j] = idx;
+
+				auto &uv = verts[idx].uv;
+				tri.uvs[j] = vec3f {uv.x, uv.y, 0.f};
+				tri.attr |= Simplify::Attributes::TEXCOORD;
+			}
+		}
+	});
+
+	Simplify::simplify_mesh(targetVertexCount, aggressiveness, true);
+
+	auto cpy = Copy(true);
+	auto &newVerts = cpy->GetVertices();
+
+	newVerts.resize(Simplify::vertices.size());
+	newVerts.clear();
+	for(auto &v : Simplify::vertices) {
+		newVerts.push_back({});
+		auto &newVert = newVerts.back();
+		newVert.position = {v.p.x, v.p.y, v.p.z};
+	}
+
+	auto idxType = cpy->GetUdmIndexType();
+	cpy->SetIndexCount(Simplify::triangles.size() * 3);
+	cpy->VisitIndices([&cpy](auto *indexDataDst, uint32_t numIndicesDst) {
+		size_t idx = 0;
+		for(auto &tri : Simplify::triangles) {
+			for(uint8_t i = 0; i < 3; ++i) {
+				indexDataDst[idx++] = tri.v[i];
+				auto &uv = tri.uvs[i];
+				cpy->GetVertex(tri.v[i]).uv = {uv.x, uv.y};
+			}
+		}
+	});
+
+	cpy->GenerateNormals();
+
+	Simplify::vertices.clear();
+	Simplify::triangles.clear();
+	return cpy;
 }
 
 bool ModelSubMesh::Save(udm::AssetDataArg outData, std::string &outErr)

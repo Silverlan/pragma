@@ -405,7 +405,7 @@ uint32_t BaseModelComponent::GetHitboxCount() const
 }
 const BaseBvhComponent *BaseModelComponent::GetBvhComponent() const { return const_cast<BaseModelComponent *>(this)->GetBvhComponent(); }
 BaseBvhComponent *BaseModelComponent::GetBvhComponent() { return m_bvhComponent; }
-bool BaseModelComponent::GetHitboxBounds(uint32_t boneId, Vector3 &min, Vector3 &max, Vector3 &origin, Quat &rot) const
+bool BaseModelComponent::GetHitboxBounds(uint32_t boneId, Vector3 &min, Vector3 &max, Vector3 &origin, Quat &rot, umath::CoordinateSpace space) const
 {
 	if(HasModel() == false) {
 		min = Vector3 {0.f, 0.f, 0.f};
@@ -416,21 +416,38 @@ bool BaseModelComponent::GetHitboxBounds(uint32_t boneId, Vector3 &min, Vector3 
 	}
 	GetModel().get()->GetHitboxBounds(boneId, min, max);
 	auto &ent = GetEntity();
-	auto pTrComponent = ent.GetTransformComponent();
-	auto scale = pTrComponent ? pTrComponent->GetScale() : Vector3 {1.f, 1.f, 1.f};
-	min *= scale;
-	max *= scale;
 	auto animComponent = ent.GetAnimatedComponent();
-	Vector3 boneScale {1.f, 1.f, 1.f};
-	if(animComponent.valid() && animComponent->GetGlobalBonePosition(boneId, origin, rot, &boneScale) == false) {
-		auto pPhysComponent = ent.GetPhysicsComponent();
-		if(pPhysComponent)
-			origin = pPhysComponent->GetOrigin();
-		if(pTrComponent)
-			rot = pTrComponent->GetRotation();
+	auto &processedBones = animComponent->GetProcessedBones();
+	if(animComponent.expired() || boneId >= processedBones.size())
+		return false;
+	switch(space) {
+	case umath::CoordinateSpace::Local:
+		{
+			origin = uvec::ORIGIN;
+			rot = uquat::identity();
+			break;
+		}
+	case umath::CoordinateSpace::Object:
+		{
+			auto &pose = processedBones[boneId];
+			origin = pose.GetOrigin();
+			rot = pose.GetRotation();
+
+			min *= pose.GetScale();
+			max *= pose.GetScale();
+			break;
+		}
+	case umath::CoordinateSpace::World:
+		{
+			auto pose = ent.GetPose() * processedBones[boneId];
+			origin = pose.GetOrigin();
+			rot = pose.GetRotation();
+
+			min *= pose.GetScale();
+			max *= pose.GetScale();
+			break;
+		}
 	}
-	min *= boneScale;
-	max *= boneScale;
 	return true;
 }
 uint32_t BaseModelComponent::GetFlexControllerCount() const

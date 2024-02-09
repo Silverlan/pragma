@@ -3663,12 +3663,22 @@ void pragma::lua::base_model_component::register_class(luabind::module_ &mod)
 	def.def("LookupBlendController", &pragma::BaseModelComponent::LookupBlendController);
 	def.def("LookupAttachment", &pragma::BaseModelComponent::LookupAttachment);
 	def.def("GetHitboxCount", &pragma::BaseModelComponent::GetHitboxCount);
-	def.def("GetHitboxBounds", static_cast<luabind::mult<Vector3, Vector3, Vector3, Quat> (*)(lua_State *, pragma::BaseModelComponent &, uint32_t)>([](lua_State *l, pragma::BaseModelComponent &hEnt, uint32_t boneId) -> luabind::mult<Vector3, Vector3, Vector3, Quat> {
-		Vector3 min, max, origin;
-		auto rot = uquat::identity();
-		hEnt.GetHitboxBounds(boneId, min, max, origin, rot);
-		return {l, min, max, origin, rot};
-	}));
+	def.def(
+	  "GetHitboxBounds", +[](lua_State *l, pragma::BaseModelComponent &hEnt, uint32_t boneId) -> std::optional<std::tuple<Vector3, Vector3, Vector3, Quat>> {
+		  Vector3 min, max, origin;
+		  auto rot = uquat::identity();
+		  if(!hEnt.GetHitboxBounds(boneId, min, max, origin, rot))
+			  return {};
+		  return std::tuple<Vector3, Vector3, Vector3, Quat> {min, max, origin, rot};
+	  });
+	def.def(
+	  "GetHitboxBounds", +[](lua_State *l, pragma::BaseModelComponent &hEnt, uint32_t boneId, umath::CoordinateSpace space) -> std::optional<std::tuple<Vector3, Vector3, Vector3, Quat>> {
+		  Vector3 min, max, origin;
+		  auto rot = uquat::identity();
+		  if(!hEnt.GetHitboxBounds(boneId, min, max, origin, rot, space))
+			  return {};
+		  return std::tuple<Vector3, Vector3, Vector3, Quat> {min, max, origin, rot};
+	  });
 	def.def("LookupBone", &pragma::BaseModelComponent::LookupBone);
 	def.def("GetAttachmentTransform", static_cast<luabind::optional<luabind::mult<Vector3, Quat>> (*)(lua_State *, pragma::BaseModelComponent &, std::string)>([](lua_State *l, pragma::BaseModelComponent &hEnt, std::string attachment) -> luabind::optional<luabind::mult<Vector3, Quat>> {
 		Vector3 offset(0, 0, 0);

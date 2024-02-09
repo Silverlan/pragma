@@ -243,6 +243,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	bool SaveLegacy(Game *game, const std::string &name, const std::string &rootPath = "") const;
 	std::shared_ptr<Model> Copy(Game *game, CopyFlags copyFlags = CopyFlags::ShallowCopy) const;
 	bool FindMaterial(const std::string &texture, std::string &matPath) const;
+	bool GenerateLowLevelLODs(Game &game);
 	MetaInfo &GetMetaInfo() const;
 	Vector3 GetOrigin() const;
 	const Vector3 &GetEyeOffset() const;

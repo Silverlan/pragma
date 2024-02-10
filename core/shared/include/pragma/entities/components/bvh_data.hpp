@@ -8,12 +8,13 @@
 #define __BVH_DATA_HPP__
 
 #include "pragma/networkdefinitions.h"
-#include <bvh/bvh.hpp>
-#include <bvh/triangle.hpp>
-#include <bvh/sweep_sah_builder.hpp>
-#include <bvh/single_ray_traverser.hpp>
-#include <bvh/primitive_intersectors.hpp>
-#include <bvh/hierarchy_refitter.hpp>
+#include <bvh/v2/bvh.h>
+#include <bvh/v2/vec.h>
+#include <bvh/v2/tri.h>
+#include <bvh/v2/bbox.h>
+#include <bvh/v2/executor.h>
+#include <bvh/v2/thread_pool.h>
+#include <memory>
 
 namespace pragma::bvh {
 	struct DLLNETWORK HitInfo {
@@ -56,22 +57,35 @@ namespace pragma::bvh {
 		bool operator<(const MeshRange &other) const { return start < other.start; }
 	};
 
-	using Primitive = ::bvh::Triangle<float>;
+	using Scalar = float;
+	using Vec = ::bvh::v2::Vec<Scalar, 3>;
+	using BBox = ::bvh::v2::BBox<Scalar, 3>;
+	using Primitive = ::bvh::v2::Tri<Scalar, 3>;
+	using Node = ::bvh::v2::Node<Scalar, 3>;
+	using Bvh = ::bvh::v2::Bvh<Node>;
+	using Ray = ::bvh::v2::Ray<Scalar, 3>;
+	using PrecomputedTri = ::bvh::v2::PrecomputedTri<Scalar>;
 	struct DLLNETWORK BvhData {
-		struct IntersectorData {
-			IntersectorData(::bvh::SweepSahBuilder<::bvh::Bvh<float>> builder, ::bvh::ClosestPrimitiveIntersector<::bvh::Bvh<float>, ::bvh::Triangle<float>> primitiveIntersector, ::bvh::SingleRayTraverser<::bvh::Bvh<float>> traverser);
-			::bvh::SweepSahBuilder<::bvh::Bvh<float>> builder;
-			::bvh::ClosestPrimitiveIntersector<::bvh::Bvh<float>, ::bvh::Triangle<float>> primitiveIntersector;
-			::bvh::SingleRayTraverser<::bvh::Bvh<float>> traverser;
+		struct HitData {
+			size_t primitiveIndex;
+			float u;
+			float v;
+			float tmin;
+			float tmax;
 		};
 		BvhData();
-		::bvh::Bvh<float> bvh;
+		Bvh bvh;
 		std::vector<Primitive> primitives;
 		std::vector<MeshRange> meshRanges;
 
 		const MeshRange *FindMeshRange(size_t primIdx) const;
-		void InitializeIntersectorData();
-		std::unique_ptr<IntersectorData> intersectorData;
+		bool Raycast(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, HitData &outHitData);
+		void Refit();
+		void InitializeBvh();
+	  private:
+		::bvh::v2::ThreadPool thread_pool;
+		std::unique_ptr<::bvh::v2::ParallelExecutor> executor {};
+		std::vector<PrecomputedTri> precomputed_tris;
 	};
 
 	DLLNETWORK Primitive create_triangle(const Vector3 &a, const Vector3 &b, const Vector3 &c);
@@ -81,7 +95,7 @@ namespace pragma::bvh {
 	DLLNETWORK bool test_bvh_intersection_with_aabb(const pragma::bvh::BvhData &bvhData, const Vector3 &min, const Vector3 &max, size_t nodeIdx = 0, pragma::bvh::IntersectionInfo *outIntersectionInfo = nullptr);
 	DLLNETWORK bool test_bvh_intersection_with_kdop(const pragma::bvh::BvhData &bvhData, const std::vector<umath::Plane> &kdop, size_t nodeIdx = 0, pragma::bvh::IntersectionInfo *outIntersectionInfo = nullptr);
 
-	DLLNETWORK ::bvh::Ray<float> get_ray(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist);
+	DLLNETWORK Ray get_ray(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist);
 };
 
 #endif

@@ -141,6 +141,7 @@ void CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 	// TODO: Hitbox BVH
 	auto ray = pragma::bvh::get_ray(origin, dir, minDist, maxDist);
 	for(auto &pair : m_hitboxBvhs) {
+		#if 0
 		Vector3 min, max;
 		float t;
 		auto res = umath::intersection::line_aabb(origin, dir, min, max, &t);
@@ -168,6 +169,7 @@ void CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 			hitInfo.entity = it->entity ? it->entity->GetHandle() : GetEntity().GetHandle();*/
 			return;
 		}
+		#endif
 		//umath::intersection::line_obb(origin, dir, min, max, &t, pos, rot);
 		//std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo, std::vector<size_t> *optOutMeshIndices)
 		/*struct DLLNETWORK BvhHitInfo {
@@ -279,9 +281,9 @@ void CHitboxBvhComponent::DebugDraw()
 		std::vector<Vector3> dbgMeshVerts;
 		dbgMeshVerts.reserve(pair.second->primitives.size() * 3);
 		for(auto &prim : pair.second->primitives) {
-			auto p0 = prim.p0;
-			auto p1 = prim.p1();
-			auto p2 = prim.p2();
+			auto &p0 = prim.p0;
+			auto &p1 = prim.p1;
+			auto &p2 = prim.p2;
 			auto v0 = Vector3 {p0[0], p0[1], p0[2]};
 			auto v1 = Vector3 {p1[0], p1[1], p1[2]};
 			auto v2 = Vector3 {p2[0], p2[1], p2[2]};

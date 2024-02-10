@@ -92,15 +92,9 @@ std::optional<Vector3> BaseBvhComponent::GetVertex(size_t idx) const
 	case 0:
 		return *reinterpret_cast<const Vector3 *>(&prim.p0.values);
 	case 1:
-		{
-			auto p1 = prim.p1();
-			return *reinterpret_cast<const Vector3 *>(&p1.values);
-		}
+		return *reinterpret_cast<const Vector3 *>(&prim.p1.values);
 	case 2:
-		{
-			auto p2 = prim.p2();
-			return *reinterpret_cast<const Vector3 *>(&p2.values);
-		}
+		return *reinterpret_cast<const Vector3 *>(&prim.p2.values);
 	}
 	return {};
 }
@@ -112,20 +106,7 @@ void BaseBvhComponent::GetVertexData(std::vector<pragma::bvh::Primitive> &outDat
 	memcpy(outData.data(), m_bvhData->primitives.data(), util::size_of_container(outData));
 }
 
-static void refit(pragma::bvh::BvhData &bvhData)
-{
-	// Update bounding boxes
-	::bvh::HierarchyRefitter<::bvh::Bvh<float>> refitter {bvhData.bvh};
-	refitter.refit([&](::bvh::Bvh<float>::Node &leaf) {
-		assert(leaf.is_leaf());
-		auto bbox = ::bvh::BoundingBox<float>::empty();
-		for(size_t i = 0; i < leaf.primitive_count; ++i) {
-			auto &triangle = bvhData.primitives[bvhData.bvh.primitive_indices[leaf.first_child_or_primitive + i]];
-			bbox.extend(triangle.bounding_box());
-		}
-		leaf.bounding_box_proxy() = bbox;
-	});
-}
+static void refit(pragma::bvh::BvhData &bvhData) { bvhData.Refit(); }
 
 void BaseBvhComponent::DeleteRange(pragma::bvh::BvhData &bvhData, size_t start, size_t end)
 {
@@ -227,7 +208,7 @@ std::shared_ptr<pragma::bvh::BvhData> BaseBvhComponent::RebuildBvh(const std::ve
 		++meshIdx;
 	}
 
-	bvhData->InitializeIntersectorData();
+	bvhData->InitializeBvh();
 	return std::move(bvhData);
 }
 
@@ -300,14 +281,13 @@ bool BaseBvhComponent::IntersectionTestKDop(const std::vector<umath::Plane> &pla
 #endif
 	return test_bvh_intersection_with_kdop(*bvhData, planes);
 }
+
 bool BaseBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::bvh::HitInfo &outHitInfo) const
 {
 	auto bvhData = GetUpdatedBvh();
 	if(!bvhData || bvhData->primitives.empty())
 		return false;
-	auto &traverser = bvhData->intersectorData->traverser;
-	auto &primitiveIntersector = bvhData->intersectorData->primitiveIntersector;
-
+	bvh::BvhData::HitData bvhHitData;
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("bvh_mutex_wait");
 #endif
@@ -315,21 +295,22 @@ bool BaseBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &di
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().EndTask();
 #endif
-	auto hit = traverser.traverse(pragma::bvh::get_ray(origin,dir,minDist,maxDist), primitiveIntersector);
+	auto hit = bvhData->Raycast(origin, dir, minDist, maxDist, bvhHitData);
 	m_bvhDataMutex.unlock();
 	if(hit) {
 		pragma::bvh::MeshRange search {};
-		search.start = hit->primitive_index * 3;
+		search.start = bvhHitData.primitiveIndex * 3;
 		auto it = std::upper_bound(bvhData->meshRanges.begin(), bvhData->meshRanges.end(), search);
 		assert(it != bvhData->meshRanges.begin());
 		--it;
 
+		auto distance = minDist + (maxDist - minDist) * (bvhHitData.tmax - bvhHitData.tmin); // TODO: Is this correct?
 		auto &hitInfo = outHitInfo;
-		hitInfo.primitiveIndex = hit->primitive_index - it->start / 3;
-		hitInfo.distance = hit->distance();
-		hitInfo.u = hit->intersection.u;
-		hitInfo.v = hit->intersection.v;
-		hitInfo.t = hit->intersection.t;
+		hitInfo.primitiveIndex = bvhHitData.primitiveIndex - it->start / 3;
+		hitInfo.distance = distance;
+		hitInfo.u = bvhHitData.u;
+		hitInfo.v = bvhHitData.v;
+		hitInfo.t = bvhHitData.tmax;
 		hitInfo.mesh = it->mesh;
 		hitInfo.entity = it->entity ? it->entity->GetHandle() : GetEntity().GetHandle();
 		return true;

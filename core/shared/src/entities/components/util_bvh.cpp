@@ -13,6 +13,6 @@ std::unique_ptr<pragma::bvh::BvhData> pragma::bvh::create_bvh_data(std::vector<p
 {
 	auto bvhData = std::make_unique<BvhData>();
 	bvhData->primitives = std::move(triangles);
-	bvhData->InitializeIntersectorData();
+	bvhData->InitializeBvh();
 	return bvhData;
 }

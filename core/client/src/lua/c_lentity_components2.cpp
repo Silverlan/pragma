@@ -14,6 +14,7 @@
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
 #include "pragma/entities/components/c_optical_camera_component.hpp"
 #include "pragma/entities/components/c_motion_blur_data_component.hpp"
+#include "pragma/entities/components/c_hitbox_bvh_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_fog_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_dof_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_bloom_component.hpp"
@@ -54,6 +55,9 @@ void RegisterLuaEntityComponents2_cl(lua_State *l, luabind::module_ &entsMod)
 
 	auto defOpticalCamera = pragma::lua::create_entity_component_class<pragma::COpticalCameraComponent, pragma::BaseEntityComponent>("OpticalCameraComponent");
 	entsMod[defOpticalCamera];
+
+	auto defHitboxBvh = pragma::lua::create_entity_component_class<pragma::CHitboxBvhComponent, pragma::BaseEntityComponent>("HitboxBvhComponent");
+	entsMod[defHitboxBvh];
 
 	auto defDebugHitbox = pragma::lua::create_entity_component_class<pragma::CDebugHitboxComponent, pragma::BaseEntityComponent>("DebugHitboxComponent");
 	entsMod[defDebugHitbox];

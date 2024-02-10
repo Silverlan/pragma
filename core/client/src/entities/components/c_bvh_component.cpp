@@ -42,7 +42,7 @@ void CBvhComponent::OnEntitySpawn()
 	UpdateBvhStatus();
 }
 
-bool CBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, BvhHitInfo &outHitInfo) const
+bool CBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, bvh::HitInfo &outHitInfo) const
 {
 	// TODO: If dirty?
 	return BaseBvhComponent::IntersectionTest(origin, dir, minDist, maxDist, outHitInfo);

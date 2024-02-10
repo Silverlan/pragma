@@ -26,7 +26,7 @@ namespace pragma {
 		virtual void OnRemove() override;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
-		virtual bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, BvhHitInfo &outHitInfo) const override;
+		virtual bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, bvh::HitInfo &outHitInfo) const override;
 		using BaseBvhComponent::IntersectionTest;
 	  private:
 		void UpdateBvhStatus();

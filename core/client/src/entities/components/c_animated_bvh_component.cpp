@@ -293,7 +293,7 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force, const std::vector<boo
 			renderMesh->VisitIndices([this, meshIdx, &indexOffset](auto *indexDataSrc, uint32_t numIndicesSrc) {
 				auto &verts = m_animatedBvhData.meshData.at(meshIdx).transformedVerts;
 				for(auto i = decltype(numIndicesSrc) {0}; i < numIndicesSrc; i += 3)
-					m_animatedBvhData.transformedTris[(indexOffset + i) / 3] = {verts[indexDataSrc[i]], verts[indexDataSrc[i + 1]], verts[indexDataSrc[i + 2]]};
+					m_animatedBvhData.transformedTris[(indexOffset + i) / 3] = {bvh::create_triangle(verts[indexDataSrc[i]], verts[indexDataSrc[i + 1]], verts[indexDataSrc[i + 2]])};
 				indexOffset += numIndicesSrc;
 			});
 			++meshIdx;

@@ -13,168 +13,8 @@
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/debug/intel_vtune.hpp"
-#include <mathutil/umath_geometry.hpp>
-#include <sharedutils/util_hash.hpp>
-#include <bvh/bvh.hpp>
-#include <bvh/triangle.hpp>
-#include <bvh/sweep_sah_builder.hpp>
-#include <bvh/single_ray_traverser.hpp>
-#include <bvh/primitive_intersectors.hpp>
-#include <bvh/hierarchy_refitter.hpp>
 
 using namespace pragma;
-
-using Primitive = bvh::Triangle<float>;
-static_assert(sizeof(BvhTriangle) == sizeof(Primitive));
-namespace pragma {
-	struct BvhData {
-		struct IntersectorData {
-			IntersectorData(bvh::SweepSahBuilder<bvh::Bvh<float>> builder, bvh::ClosestPrimitiveIntersector<bvh::Bvh<float>, bvh::Triangle<float>> primitiveIntersector, bvh::SingleRayTraverser<bvh::Bvh<float>> traverser)
-			    : builder {std::move(builder)}, primitiveIntersector {std::move(primitiveIntersector)}, traverser {std::move(traverser)}
-			{
-			}
-			bvh::SweepSahBuilder<bvh::Bvh<float>> builder;
-			bvh::ClosestPrimitiveIntersector<bvh::Bvh<float>, bvh::Triangle<float>> primitiveIntersector;
-			bvh::SingleRayTraverser<bvh::Bvh<float>> traverser;
-		};
-		BvhData();
-		bvh::Bvh<float> bvh;
-		std::vector<Primitive> primitives;
-		std::vector<BvhMeshRange> meshRanges;
-
-		const BvhMeshRange *FindMeshRange(size_t primIdx) const
-		{
-			BvhMeshRange search {};
-			search.start = primIdx * 3;
-			auto it = std::upper_bound(meshRanges.begin(), meshRanges.end(), search);
-			if(it == meshRanges.begin())
-				return nullptr;
-			--it;
-			return &*it;
-		}
-
-		void InitializeIntersectorData();
-		std::unique_ptr<IntersectorData> intersectorData;
-	};
-};
-
-BvhMeshIntersectionInfo *pragma::BvhIntersectionInfo::GetMeshIntersectionInfo() { return m_isMeshIntersectionInfo ? static_cast<BvhMeshIntersectionInfo *>(this) : nullptr; }
-
-std::vector<BvhMeshRange> &pragma::get_bvh_mesh_ranges(BvhData &bvhData) { return bvhData.meshRanges; }
-
-void pragma::BvhIntersectionInfo::Clear() { primitives.clear(); }
-
-static void get_bvh_bounds(const bvh::BoundingBox<float> &bb, Vector3 &outMin, Vector3 &outMax)
-{
-	constexpr auto epsilon = 0.001f;
-	outMin = Vector3 {umath::min(bb.min.values[0], bb.max.values[0]) - epsilon, umath::min(bb.min.values[1], bb.max.values[1]) - epsilon, umath::min(bb.min.values[2], bb.max.values[2]) - epsilon};
-	outMax = Vector3 {umath::max(bb.min.values[0], bb.max.values[0]) + epsilon, umath::max(bb.min.values[1], bb.max.values[1]) + epsilon, umath::max(bb.min.values[2], bb.max.values[2]) + epsilon};
-}
-static bool test_bvh_intersection(const pragma::BvhData &bvhData, const std::function<bool(const Vector3 &, const Vector3 &)> &testAabb, const std::function<bool(const Primitive &)> &testTri, size_t nodeIdx = 0, BvhIntersectionInfo *outIntersectionInfo = nullptr)
-{
-	auto &bvh = bvhData.bvh;
-	auto &node = bvh.nodes.get()[nodeIdx];
-	Vector3 v0, v1;
-	get_bvh_bounds(node.bounding_box_proxy().to_bounding_box(), v0, v1);
-	auto intersect = testAabb(v0, v1);
-	if(!intersect)
-		return false;
-	if(node.is_leaf()) {
-		auto hasHit = false;
-		auto *meshIntersectionInfo = outIntersectionInfo ? outIntersectionInfo->GetMeshIntersectionInfo() : nullptr;
-		for(auto i = decltype(node.primitive_count) {0u}; i < node.primitive_count; ++i) {
-			auto primIdx = bvh.primitive_indices[node.first_child_or_primitive + i];
-
-			if(meshIntersectionInfo) {
-				auto skip = false;
-				auto idx = primIdx * 3;
-				for(auto *meshRange : meshIntersectionInfo->GetTemporaryMeshRanges()) {
-					if(idx >= meshRange->start && idx < meshRange->end) {
-						skip = true;
-						break;
-					}
-				}
-				if(skip)
-					continue;
-			}
-
-			auto &prim = bvhData.primitives[primIdx];
-			auto p1 = prim.p1();
-			auto p2 = prim.p2();
-			auto res = testTri(prim);
-			if(res) {
-				if(!outIntersectionInfo)
-					return true;
-				auto addPrim = true;
-				if(meshIntersectionInfo) {
-					auto *meshRange = bvhData.FindMeshRange(primIdx);
-					assert(meshRange != nullptr);
-					meshIntersectionInfo->GetTemporaryMeshRanges().push_back(meshRange);
-
-					auto &tmpMeshes = meshIntersectionInfo->GetTemporarMeshMap();
-					auto hash = util::hash_combine<uint64_t>(util::hash_combine<uint64_t>(0, reinterpret_cast<uint64_t>(meshRange->mesh.get())), reinterpret_cast<uint64_t>(meshRange->entity));
-					auto it = tmpMeshes.find(hash);
-					if(it != tmpMeshes.end())
-						addPrim = false;
-					else
-						tmpMeshes.insert(hash);
-				}
-				if(addPrim) {
-					if(outIntersectionInfo->primitives.size() == outIntersectionInfo->primitives.capacity())
-						outIntersectionInfo->primitives.reserve(outIntersectionInfo->primitives.size() * 1.75);
-					outIntersectionInfo->primitives.push_back(primIdx);
-				}
-				hasHit = true;
-			}
-		}
-		if(meshIntersectionInfo)
-			meshIntersectionInfo->GetTemporaryMeshRanges().clear();
-		return hasHit;
-	}
-	if(!outIntersectionInfo) {
-		return test_bvh_intersection(bvhData, testAabb, testTri, node.first_child_or_primitive, outIntersectionInfo) || test_bvh_intersection(bvhData, testAabb, testTri, node.first_child_or_primitive + 1, outIntersectionInfo);
-	}
-	// We have to visit both
-	auto a = test_bvh_intersection(bvhData, testAabb, testTri, node.first_child_or_primitive, outIntersectionInfo);
-	auto b = test_bvh_intersection(bvhData, testAabb, testTri, node.first_child_or_primitive + 1, outIntersectionInfo);
-	return a || b;
-}
-static bool test_bvh_intersection_with_aabb(const pragma::BvhData &bvhData, const Vector3 &min, const Vector3 &max, size_t nodeIdx = 0, BvhIntersectionInfo *outIntersectionInfo = nullptr)
-{
-	return test_bvh_intersection(
-	  bvhData, [&min, &max](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return umath::intersection::aabb_aabb(min, max, aabbMin, aabbMax) != umath::intersection::Intersect::Outside; },
-	  [&min, &max](const Primitive &prim) -> bool {
-		  auto p1 = prim.p1();
-		  auto p2 = prim.p2();
-		  return umath::intersection::aabb_triangle(min, max, *reinterpret_cast<const Vector3 *>(&prim.p0.values), *reinterpret_cast<const Vector3 *>(&p1.values), *reinterpret_cast<const Vector3 *>(&p2.values));
-	  },
-	  nodeIdx, outIntersectionInfo);
-}
-static bool test_bvh_intersection_with_kdop(const pragma::BvhData &bvhData, const std::vector<umath::Plane> &kdop, size_t nodeIdx = 0, BvhIntersectionInfo *outIntersectionInfo = nullptr)
-{
-	return test_bvh_intersection(
-	  bvhData, [&kdop](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return umath::intersection::aabb_in_plane_mesh(aabbMin, aabbMax, kdop) != umath::intersection::Intersect::Outside; },
-	  [&kdop](const Primitive &prim) -> bool {
-		  Vector3 v0, v1;
-		  get_bvh_bounds(prim.bounding_box(), v0, v1);
-		  return umath::intersection::aabb_in_plane_mesh(v0, v1, kdop) != umath::intersection::Intersect::Outside;
-	  },
-	  nodeIdx, outIntersectionInfo);
-}
-
-pragma::BvhData::BvhData() {}
-
-void pragma::BvhData::InitializeIntersectorData()
-{
-	auto [bboxes, centers] = bvh::compute_bounding_boxes_and_centers(primitives.data(), primitives.size());
-	auto global_bbox = bvh::compute_bounding_boxes_union(bboxes.get(), primitives.size());
-
-	bvh::SweepSahBuilder<bvh::Bvh<float>> builder {bvh};
-	builder.build(global_bbox, bboxes.get(), centers.get(), primitives.size());
-	bvh::ClosestPrimitiveIntersector<bvh::Bvh<float>, bvh::Triangle<float>> primitive_intersector(bvh, primitives.data());
-	bvh::SingleRayTraverser<bvh::Bvh<float>> traverser {bvh};
-	intersectorData = std::make_unique<IntersectorData>(std::move(builder), std::move(primitive_intersector), std::move(traverser));
-}
 
 ComponentEventId BaseBvhComponent::EVENT_ON_CLEAR_BVH = INVALID_COMPONENT_ID;
 ComponentEventId BaseBvhComponent::EVENT_ON_BVH_UPDATE_REQUESTED = INVALID_COMPONENT_ID;
@@ -226,7 +66,7 @@ bool BaseBvhComponent::HasBvhData() const
 	return m_bvhData != nullptr;
 }
 
-std::shared_ptr<BvhData> BaseBvhComponent::SetBvhData(std::shared_ptr<BvhData> &bvhData)
+std::shared_ptr<pragma::bvh::BvhData> BaseBvhComponent::SetBvhData(std::shared_ptr<pragma::bvh::BvhData> &bvhData)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("bvh_mutex_wait");
@@ -265,20 +105,20 @@ std::optional<Vector3> BaseBvhComponent::GetVertex(size_t idx) const
 	return {};
 }
 
-void BaseBvhComponent::GetVertexData(std::vector<BvhTriangle> &outData) const
+void BaseBvhComponent::GetVertexData(std::vector<pragma::bvh::Primitive> &outData) const
 {
 	std::scoped_lock lock {m_bvhDataMutex};
 	outData.resize(m_bvhData->primitives.size());
 	memcpy(outData.data(), m_bvhData->primitives.data(), util::size_of_container(outData));
 }
 
-static void refit(pragma::BvhData &bvhData)
+static void refit(pragma::bvh::BvhData &bvhData)
 {
 	// Update bounding boxes
-	bvh::HierarchyRefitter<bvh::Bvh<float>> refitter {bvhData.bvh};
-	refitter.refit([&](bvh::Bvh<float>::Node &leaf) {
+	::bvh::HierarchyRefitter<::bvh::Bvh<float>> refitter {bvhData.bvh};
+	refitter.refit([&](::bvh::Bvh<float>::Node &leaf) {
 		assert(leaf.is_leaf());
-		auto bbox = bvh::BoundingBox<float>::empty();
+		auto bbox = ::bvh::BoundingBox<float>::empty();
 		for(size_t i = 0; i < leaf.primitive_count; ++i) {
 			auto &triangle = bvhData.primitives[bvhData.bvh.primitive_indices[leaf.first_child_or_primitive + i]];
 			bbox.extend(triangle.bounding_box());
@@ -287,7 +127,7 @@ static void refit(pragma::BvhData &bvhData)
 	});
 }
 
-void BaseBvhComponent::DeleteRange(pragma::BvhData &bvhData, size_t start, size_t end)
+void BaseBvhComponent::DeleteRange(pragma::bvh::BvhData &bvhData, size_t start, size_t end)
 {
 	if(end == start)
 		return;
@@ -300,7 +140,7 @@ void BaseBvhComponent::DeleteRange(pragma::BvhData &bvhData, size_t start, size_
 	refit(bvhData);
 }
 
-bool BaseBvhComponent::SetVertexData(pragma::BvhData &bvhData, const std::vector<BvhTriangle> &data)
+bool BaseBvhComponent::SetVertexData(pragma::bvh::BvhData &bvhData, const std::vector<pragma::bvh::Primitive> &data)
 {
 	if(bvhData.primitives.size() != data.size())
 		return false;
@@ -309,7 +149,7 @@ bool BaseBvhComponent::SetVertexData(pragma::BvhData &bvhData, const std::vector
 	return true;
 }
 
-bool BaseBvhComponent::SetVertexData(const std::vector<BvhTriangle> &data)
+bool BaseBvhComponent::SetVertexData(const std::vector<pragma::bvh::Primitive> &data)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("bvh_mutex_wait");
@@ -323,9 +163,9 @@ bool BaseBvhComponent::SetVertexData(const std::vector<BvhTriangle> &data)
 
 bool BaseBvhComponent::ShouldConsiderMesh(const ModelSubMesh &mesh) { return mesh.GetGeometryType() == ModelSubMesh::GeometryType::Triangles; }
 
-std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo, std::vector<size_t> *optOutMeshIndices)
+std::shared_ptr<pragma::bvh::BvhData> BaseBvhComponent::RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo, std::vector<size_t> *optOutMeshIndices)
 {
-	auto bvhData = std::make_unique<pragma::BvhData>();
+	auto bvhData = std::make_unique<pragma::bvh::BvhData>();
 
 	size_t numVerts = 0;
 	bvhData->meshRanges.reserve(meshes.size());
@@ -391,16 +231,16 @@ std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(const std::vector<
 	return std::move(bvhData);
 }
 
-std::vector<BvhMeshRange> &BaseBvhComponent::GetMeshRanges() { return m_bvhData->meshRanges; }
+std::vector<pragma::bvh::MeshRange> &BaseBvhComponent::GetMeshRanges() { return m_bvhData->meshRanges; }
 
-const std::shared_ptr<BvhData> &BaseBvhComponent::GetUpdatedBvh() const
+const std::shared_ptr<pragma::bvh::BvhData> &BaseBvhComponent::GetUpdatedBvh() const
 {
 	if(m_sendBvhUpdateRequestOnInteraction)
 		InvokeEventCallbacks(EVENT_ON_BVH_UPDATE_REQUESTED);
 	return m_bvhData;
 }
 void BaseBvhComponent::SendBvhUpdateRequestOnInteraction() { m_sendBvhUpdateRequestOnInteraction = true; }
-bool BaseBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3 &max, BvhIntersectionInfo &outIntersectionInfo) const
+bool BaseBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3 &max, bvh::IntersectionInfo &outIntersectionInfo) const
 {
 	auto bvhData = GetUpdatedBvh();
 	if(!bvhData || bvhData->primitives.empty())
@@ -430,7 +270,7 @@ bool BaseBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3 &m
 #endif
 	return test_bvh_intersection_with_aabb(*bvhData, min, max);
 }
-bool BaseBvhComponent::IntersectionTestKDop(const std::vector<umath::Plane> &planes, BvhIntersectionInfo &outIntersectionInfo) const
+bool BaseBvhComponent::IntersectionTestKDop(const std::vector<umath::Plane> &planes, pragma::bvh::IntersectionInfo &outIntersectionInfo) const
 {
 	auto bvhData = GetUpdatedBvh();
 	if(!bvhData || bvhData->primitives.empty())
@@ -460,19 +300,13 @@ bool BaseBvhComponent::IntersectionTestKDop(const std::vector<umath::Plane> &pla
 #endif
 	return test_bvh_intersection_with_kdop(*bvhData, planes);
 }
-bool BaseBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, BvhHitInfo &outHitInfo) const
+bool BaseBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::bvh::HitInfo &outHitInfo) const
 {
 	auto bvhData = GetUpdatedBvh();
 	if(!bvhData || bvhData->primitives.empty())
 		return false;
 	auto &traverser = bvhData->intersectorData->traverser;
 	auto &primitiveIntersector = bvhData->intersectorData->primitiveIntersector;
-	bvh::Ray<float> ray {
-	  bvh::Vector3<float>(origin.x, origin.y, origin.z), // origin
-	  bvh::Vector3<float>(dir.x, dir.y, dir.z),          // direction
-	  minDist,                                           // minimum distance
-	  maxDist                                            // maximum distance
-	};
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("bvh_mutex_wait");
@@ -481,10 +315,10 @@ bool BaseBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &di
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().EndTask();
 #endif
-	auto hit = traverser.traverse(ray, primitiveIntersector);
+	auto hit = traverser.traverse(pragma::bvh::get_ray(origin,dir,minDist,maxDist), primitiveIntersector);
 	m_bvhDataMutex.unlock();
 	if(hit) {
-		BvhMeshRange search {};
+		pragma::bvh::MeshRange search {};
 		search.start = hit->primitive_index * 3;
 		auto it = std::upper_bound(bvhData->meshRanges.begin(), bvhData->meshRanges.end(), search);
 		assert(it != bvhData->meshRanges.begin());
@@ -503,11 +337,11 @@ bool BaseBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &di
 	return false;
 }
 
-const BvhMeshRange *BaseBvhComponent::FindPrimitiveMeshInfo(size_t primIdx) const { return m_bvhData->FindMeshRange(primIdx); }
+const pragma::bvh::MeshRange *BaseBvhComponent::FindPrimitiveMeshInfo(size_t primIdx) const { return m_bvhData->FindMeshRange(primIdx); }
 
-std::optional<pragma::BvhHitInfo> BaseBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) const
+std::optional<pragma::bvh::HitInfo> BaseBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) const
 {
-	pragma::BvhHitInfo hitInfo {};
+	pragma::bvh::HitInfo hitInfo {};
 	if(IntersectionTest(origin, dir, minDist, maxDist, hitInfo))
 		return hitInfo;
 	return {};

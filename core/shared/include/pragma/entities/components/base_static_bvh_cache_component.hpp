@@ -27,14 +27,14 @@ namespace pragma {
 		void AddEntity(BaseEntity &ent);
 		void RemoveEntity(BaseEntity &ent, bool removeFinal = true);
 
-		virtual bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, BvhHitInfo &outHitInfo) const override;
+		virtual bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::bvh::HitInfo &outHitInfo) const override;
 		using BaseBvhComponent::IntersectionTest;
 
 		virtual bool IsStaticBvh() const override { return true; }
 	  protected:
 		struct BvhPendingWorkerResult {
 			std::queue<std::function<void()>> callOnComplete;
-			std::shared_ptr<pragma::BvhData> bvhData;
+			std::shared_ptr<pragma::bvh::BvhData> bvhData;
 			std::atomic<bool> complete = false;
 		};
 

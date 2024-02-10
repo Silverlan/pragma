@@ -43,7 +43,7 @@ void BaseStaticBvhCacheComponent::OnRemove()
 		ent->SetStaticBvhCacheComponent(nullptr);
 }
 
-bool BaseStaticBvhCacheComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, BvhHitInfo &outHitInfo) const
+bool BaseStaticBvhCacheComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::bvh::HitInfo &outHitInfo) const
 {
 	//const_cast<BaseStaticBvhCacheComponent *>(this)->UpdateBuild();
 	//if(m_buildWorker)
@@ -186,7 +186,7 @@ void BaseStaticBvhCacheComponent::RemoveEntityFromBvh(const BaseEntity &ent)
 
 		// Delete the entity from the current BVH
 		auto &meshRanges = get_bvh_mesh_ranges(*m_bvhData);
-		auto it = std::find_if(meshRanges.begin(), meshRanges.end(), [&ent](const BvhMeshRange &range) { return range.entity == &ent; });
+		auto it = std::find_if(meshRanges.begin(), meshRanges.end(), [&ent](const pragma::bvh::MeshRange &range) { return range.entity == &ent; });
 		if(it != meshRanges.end()) {
 			auto &meshRange = *it;
 			BaseBvhComponent::DeleteRange(*m_bvhData, meshRange.start, meshRange.end);

@@ -13,7 +13,7 @@
 
 namespace pragma {
 	namespace bvh {
-		DLLNETWORK std::unique_ptr<BvhData> create_bvh_data(std::vector<Primitive> &&triangles);
+		DLLNETWORK std::unique_ptr<MeshBvhTree> create_bvh_data(std::vector<Primitive> &&triangles);
 	};
 };
 

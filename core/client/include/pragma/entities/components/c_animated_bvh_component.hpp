@@ -52,7 +52,7 @@ namespace pragma {
 		CallbackHandle m_cbRebuildScheduled;
 		CallbackHandle m_cbOnBvhUpdateRequested;
 		CallbackHandle m_cbOnBvhRebuilt;
-		std::shared_ptr<bvh::BvhData> m_tmpBvhData = nullptr;
+		std::shared_ptr<bvh::MeshBvhTree> m_tmpBvhData = nullptr;
 		bool m_rebuildScheduled = false;
 		std::atomic<bool> m_cancelled = false;
 		std::atomic<bool> m_busy = false;

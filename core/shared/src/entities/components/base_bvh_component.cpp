@@ -66,7 +66,7 @@ bool BaseBvhComponent::HasBvhData() const
 	return m_bvhData != nullptr;
 }
 
-std::shared_ptr<pragma::bvh::BvhData> BaseBvhComponent::SetBvhData(std::shared_ptr<pragma::bvh::BvhData> &bvhData)
+std::shared_ptr<pragma::bvh::MeshBvhTree> BaseBvhComponent::SetBvhData(std::shared_ptr<pragma::bvh::MeshBvhTree> &bvhData)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("bvh_mutex_wait");
@@ -106,9 +106,9 @@ void BaseBvhComponent::GetVertexData(std::vector<pragma::bvh::Primitive> &outDat
 	memcpy(outData.data(), m_bvhData->primitives.data(), util::size_of_container(outData));
 }
 
-static void refit(pragma::bvh::BvhData &bvhData) { bvhData.Refit(); }
+static void refit(pragma::bvh::MeshBvhTree &bvhData) { bvhData.Refit(); }
 
-void BaseBvhComponent::DeleteRange(pragma::bvh::BvhData &bvhData, size_t start, size_t end)
+void BaseBvhComponent::DeleteRange(pragma::bvh::MeshBvhTree &bvhData, size_t start, size_t end)
 {
 	if(end == start)
 		return;
@@ -121,7 +121,7 @@ void BaseBvhComponent::DeleteRange(pragma::bvh::BvhData &bvhData, size_t start, 
 	refit(bvhData);
 }
 
-bool BaseBvhComponent::SetVertexData(pragma::bvh::BvhData &bvhData, const std::vector<pragma::bvh::Primitive> &data)
+bool BaseBvhComponent::SetVertexData(pragma::bvh::MeshBvhTree &bvhData, const std::vector<pragma::bvh::Primitive> &data)
 {
 	if(bvhData.primitives.size() != data.size())
 		return false;
@@ -144,9 +144,9 @@ bool BaseBvhComponent::SetVertexData(const std::vector<pragma::bvh::Primitive> &
 
 bool BaseBvhComponent::ShouldConsiderMesh(const ModelSubMesh &mesh) { return mesh.GetGeometryType() == ModelSubMesh::GeometryType::Triangles; }
 
-std::shared_ptr<pragma::bvh::BvhData> BaseBvhComponent::RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo, std::vector<size_t> *optOutMeshIndices)
+std::shared_ptr<pragma::bvh::MeshBvhTree> BaseBvhComponent::RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo, std::vector<size_t> *optOutMeshIndices)
 {
-	auto bvhData = std::make_unique<pragma::bvh::BvhData>();
+	auto bvhData = std::make_unique<pragma::bvh::MeshBvhTree>();
 
 	size_t numVerts = 0;
 	bvhData->meshRanges.reserve(meshes.size());
@@ -214,7 +214,7 @@ std::shared_ptr<pragma::bvh::BvhData> BaseBvhComponent::RebuildBvh(const std::ve
 
 std::vector<pragma::bvh::MeshRange> &BaseBvhComponent::GetMeshRanges() { return m_bvhData->meshRanges; }
 
-const std::shared_ptr<pragma::bvh::BvhData> &BaseBvhComponent::GetUpdatedBvh() const
+const std::shared_ptr<pragma::bvh::MeshBvhTree> &BaseBvhComponent::GetUpdatedBvh() const
 {
 	if(m_sendBvhUpdateRequestOnInteraction)
 		InvokeEventCallbacks(EVENT_ON_BVH_UPDATE_REQUESTED);
@@ -287,7 +287,7 @@ bool BaseBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &di
 	auto bvhData = GetUpdatedBvh();
 	if(!bvhData || bvhData->primitives.empty())
 		return false;
-	bvh::BvhData::HitData bvhHitData;
+	bvh::MeshBvhTree::HitData bvhHitData;
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("bvh_mutex_wait");
 #endif
@@ -304,13 +304,13 @@ bool BaseBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &di
 		assert(it != bvhData->meshRanges.begin());
 		--it;
 
-		auto distance = minDist + (maxDist - minDist) * bvhHitData.tmax;
+		auto distance = minDist + (maxDist - minDist) * bvhHitData.t;
 		auto &hitInfo = outHitInfo;
 		hitInfo.primitiveIndex = bvhHitData.primitiveIndex - it->start / 3;
 		hitInfo.distance = distance;
 		hitInfo.u = bvhHitData.u;
 		hitInfo.v = bvhHitData.v;
-		hitInfo.t = bvhHitData.tmax;
+		hitInfo.t = bvhHitData.t;
 		hitInfo.mesh = it->mesh;
 		hitInfo.entity = it->entity ? it->entity->GetHandle() : GetEntity().GetHandle();
 		return true;

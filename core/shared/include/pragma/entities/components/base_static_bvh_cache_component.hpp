@@ -34,7 +34,7 @@ namespace pragma {
 	  protected:
 		struct BvhPendingWorkerResult {
 			std::queue<std::function<void()>> callOnComplete;
-			std::shared_ptr<pragma::bvh::BvhData> bvhData;
+			std::shared_ptr<pragma::bvh::MeshBvhTree> bvhData;
 			std::atomic<bool> complete = false;
 		};
 

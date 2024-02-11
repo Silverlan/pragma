@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_hitbox_bvh_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/components/c_animated_component.hpp"
 #include <pragma/entities/components/bvh_data.hpp>
 #include <pragma/entities/components/util_bvh.hpp>
 #include "pragma/model/c_model.h"
@@ -19,10 +20,6 @@
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
-struct HitboxBvh {
-	std::shared_ptr<pragma::bvh::BvhData> bvh;
-};
 
 using namespace pragma;
 #pragma optimize("", off)
@@ -41,6 +38,8 @@ void CHitboxBvhComponent::InitializeBvh()
 		return;
 	InitializeModel();
 	InitializeHitboxMeshes();
+	InitializeHitboxBvh();
+	DebugDraw();
 }
 
 void CHitboxBvhComponent::OnEntitySpawn()
@@ -68,6 +67,50 @@ bool CHitboxBvhComponent::InitializeModel()
 
 	// TODO: Only initialize bvh meshes ONCE per model! -> Re-use between entities
 	return true;
+}
+
+void CHitboxBvhComponent::UpdateTest() { UpdateHitboxBvh(); }
+
+void CHitboxBvhComponent::UpdateHitboxBvh()
+{
+	if(!m_hitboxBvh)
+		return;
+	auto *animC = static_cast<CAnimatedComponent *>(GetEntity().GetAnimatedComponent().get());
+	if(!animC)
+		return;
+	auto &bonePoses = animC->GetProcessedBones();
+	for(auto &hbObb : m_hitboxBvh->primitives) {
+		if(hbObb.boneId >= bonePoses.size())
+			continue;
+		auto &pose = bonePoses[hbObb.boneId];
+		hbObb.pose = pose;
+		//m_hitboxBvh->bvh.nodes[0];
+		// TODO: Re-scale min,max bounds?
+	}
+	m_hitboxBvh->Refit();
+}
+
+void CHitboxBvhComponent::InitializeHitboxBvh()
+{
+	auto &mdl = GetEntity().GetModel();
+	auto &hitboxes = mdl->GetHitboxes();
+	auto bvhTree = std::make_unique<ObbBvhTree>();
+	auto &hitboxObbs = bvhTree->primitives;
+	hitboxObbs.reserve(hitboxes.size());
+	auto &ref = mdl->GetReference();
+	for(auto &pair : hitboxes) {
+		umath::ScaledTransform pose;
+		if(!ref.GetBonePose(pair.first, pose))
+			continue;
+		auto &hb = pair.second;
+		hitboxObbs.push_back({hb.min, hb.max});
+		auto &hbObb = hitboxObbs.back();
+		hbObb.pose = pose;
+		hbObb.boneId = pair.first;
+	}
+
+	bvhTree->InitializeBvh();
+	m_hitboxBvh = std::move(bvhTree);
 }
 
 void CHitboxBvhComponent::InitializeHitboxMeshes()
@@ -112,7 +155,7 @@ void CHitboxBvhComponent::InitializeHitboxMeshes()
 
 		std::vector<bvh::Primitive> bvhTris;
 		bvhTris.reserve(triIndices.size());
-		mesh->VisitIndices([&triIndices, &verts, &invPose, & bvhTris](auto *indexDataSrc, uint32_t numIndicesSrc) {
+		mesh->VisitIndices([&triIndices, &verts, &invPose, &bvhTris](auto *indexDataSrc, uint32_t numIndicesSrc) {
 			for(auto triIdx : triIndices) {
 				auto idx0 = indexDataSrc[triIdx * 3];
 				auto idx1 = indexDataSrc[triIdx * 3 + 1];
@@ -130,18 +173,36 @@ void CHitboxBvhComponent::InitializeHitboxMeshes()
 		auto bvhData = bvh::create_bvh_data(std::move(bvhTris));
 		m_hitboxBvhs[boneId] = std::move(bvhData);
 	}
-
-	DebugDraw();
 }
 
 void CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::bvh::HitInfo &outHitInfo)
 {
-	// TODO: CHeck hitbox intersections
-	// If intersection:
-	// TODO: Hitbox BVH
-	auto ray = pragma::bvh::get_ray(origin, dir, minDist, maxDist);
-	for(auto &pair : m_hitboxBvhs) {
-		#if 0
+	if(!m_hitboxBvh)
+		return;
+
+	auto localOrigin = origin;
+	auto localDir = dir;
+	auto &entPose = GetEntity().GetPose();
+	localOrigin -= entPose.GetOrigin();
+	uvec::rotate(&localDir, uquat::get_inverse(entPose.GetRotation()));
+
+	// Put raycast into relative space
+	std::vector<ObbBvhTree::HitData> hits;
+	auto res = m_hitboxBvh->Raycast(localOrigin, localDir, minDist, maxDist, hits);
+	Con::cout << (res ? "1" : "0") << Con::endl;
+	if(!res)
+		return;
+	for(auto &hitData : hits) {
+		auto &hObb = m_hitboxBvh->primitives[hitData.primitiveIndex];
+		// TODO: We need ALL hits!
+		// TODO: Get hitbox mesh
+
+		// TODO: CHeck hitbox intersections
+		// If intersection:
+		// TODO: Hitbox BVH
+		auto ray = pragma::bvh::get_ray(origin, dir, minDist, maxDist);
+		for(auto &pair : m_hitboxBvhs) {
+#if 0
 		Vector3 min, max;
 		float t;
 		auto res = umath::intersection::line_aabb(origin, dir, min, max, &t);
@@ -169,10 +230,10 @@ void CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 			hitInfo.entity = it->entity ? it->entity->GetHandle() : GetEntity().GetHandle();*/
 			return;
 		}
-		#endif
-		//umath::intersection::line_obb(origin, dir, min, max, &t, pos, rot);
-		//std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo, std::vector<size_t> *optOutMeshIndices)
-		/*struct DLLNETWORK BvhHitInfo {
+#endif
+			//umath::intersection::line_obb(origin, dir, min, max, &t, pos, rot);
+			//std::shared_ptr<pragma::BvhData> BaseBvhComponent::RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo, std::vector<size_t> *optOutMeshIndices)
+			/*struct DLLNETWORK BvhHitInfo {
 			std::shared_ptr<ModelSubMesh> mesh;
 			EntityHandle entity;
 			size_t primitiveIndex;
@@ -182,7 +243,8 @@ void CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 			float v;
 		};*/
 
-		//pair.second->
+			//pair.second->
+		}
 	}
 }
 
@@ -268,9 +330,18 @@ void pragma::CHitboxBvhComponent::generate_hitbox_meshes(Model &mdl)
 #include "pragma/debug/c_debugoverlay.h"
 void CHitboxBvhComponent::DebugDraw()
 {
+	if(!m_hitboxBvh)
+		return;
 	auto color = Color::Red;
 	auto outlineColor = Color::Lime;
-	auto duration = 200.f;
+	auto duration = 20.f;
+	for(auto &hObb : m_hitboxBvh->primitives) {
+		auto pose = hObb.pose;
+		pose.TranslateLocal(hObb.position);
+		auto &pos = pose.GetOrigin();
+		::DebugRenderer::DrawBox(pos, -hObb.halfExtents, hObb.halfExtents, EulerAngles {pose.GetRotation()}, color, outlineColor, duration);
+	}
+
 	auto &mdl = GetEntity().GetModel();
 	auto &ref = mdl->GetReference();
 	Con::cout << "Count: " << m_hitboxBvhs.size() << Con::endl;
@@ -296,4 +367,194 @@ void CHitboxBvhComponent::DebugDraw()
 		}
 		::DebugRenderer::DrawMesh(dbgMeshVerts, color, outlineColor, duration);
 	}
+}
+
+#include <mathutil/boundingvolume.h>
+#include <bvh/v2/stack.h>
+
+pragma::CHitboxBvhComponent::HitboxObb::HitboxObb(const Vector3 &min, const Vector3 &max) : min {min}, max {max}
+{
+	position = (max + min) / 2.f;
+	halfExtents = (max - min) / 2.f;
+}
+
+pragma::bvh::BBox pragma::CHitboxBvhComponent::HitboxObb::ToBvhBBox(Vector3 &outOrigin) const
+{
+	// Calculate world space axes
+	glm::mat3 rotationMatrix = glm::mat3_cast(pose.GetRotation());
+	glm::vec3 worldX = rotationMatrix * glm::vec3(1.0f, 0.0f, 0.0f);
+	glm::vec3 worldY = rotationMatrix * glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 worldZ = rotationMatrix * glm::vec3(0.0f, 0.0f, 1.0f);
+
+	// Calculate AABB extents
+	glm::vec3 xAxisExtents = glm::abs(worldX * halfExtents.x);
+	glm::vec3 yAxisExtents = glm::abs(worldY * halfExtents.y);
+	glm::vec3 zAxisExtents = glm::abs(worldZ * halfExtents.z);
+
+	auto posRot = position;
+	uvec::rotate(&posRot, pose.GetRotation());
+	auto &origin = outOrigin;
+	origin = pose.GetOrigin() + posRot;
+
+	// Calculate AABB min and max
+	auto aabbMin = origin - xAxisExtents - yAxisExtents - zAxisExtents;
+	auto aabbMax = origin + xAxisExtents + yAxisExtents + zAxisExtents;
+	return pragma::bvh::BBox {pragma::bvh::to_bvh_vector(aabbMin), pragma::bvh::to_bvh_vector(aabbMax)};
+	/*auto &basePose = pose;
+
+	auto posRot = position;
+	uvec::rotate(&posRot, basePose.GetRotation());
+	auto origin = basePose.GetOrigin() + posRot;
+
+	Mat3 mRot {basePose.GetRotation()};
+	for(uint8_t x = 0; x < 3; ++x) {
+		for(uint8_t y = 0; y < 3; ++y)
+			mRot[x][y] = glm::abs(mRot[x][y]);
+	}
+
+	auto hfAabb = mRot * Vector3 {1.f, 1.f, 1.f};
+	return pragma::bvh::BBox {pragma::bvh::to_bvh_vector(origin - hfAabb), pragma::bvh::to_bvh_vector(origin + hfAabb)};*/
+}
+
+std::vector<pragma::bvh::BBox> g_test_bboxes;
+std::vector<pragma::bvh::Vec> g_test_centers;
+bool ObbBvhTree::DoInitializeBvh(::bvh::v2::ParallelExecutor &executor, ::bvh::v2::DefaultBuilder<pragma::bvh::Node>::Config &config)
+{
+	auto numObbs = primitives.size();
+	if(numObbs == 0)
+		return false;
+	std::vector<pragma::bvh::BBox> bboxes {numObbs};
+	std::vector<pragma::bvh::Vec> centers {numObbs};
+	executor.for_each(0, numObbs, [&](size_t begin, size_t end) {
+		for(size_t i = begin; i < end; ++i) {
+			Vector3 center;
+			bboxes[i] = primitives[i].ToBvhBBox(center);
+			centers[i] = bvh::to_bvh_vector(center);
+		}
+	});
+	g_test_bboxes = bboxes;
+	g_test_centers = centers;
+
+	bvh = ::bvh::v2::DefaultBuilder<pragma::bvh::Node>::build(GetThreadPool(), bboxes, centers, config);
+	return true;
+}
+
+static Vector3 to_vec(pragma::bvh::Vec vec) { return Vector3 {vec.values[0], vec.values[1], vec.values[2]}; }
+static void draw_node(const pragma::bvh::Node &node, const Vector3 &offset = {})
+{
+	auto bbox = node.get_bbox();
+	auto vstart = to_vec(bbox.min);
+	auto vend = to_vec(bbox.max);
+	DebugRenderer::DrawBox(vstart + offset, vend + offset, EulerAngles {}, Color {0, 255, 0, 64}, Color::Aqua, 12.f);
+}
+static void draw_bvh_tree(pragma::bvh::Bvh &bvh)
+{
+	constexpr size_t stack_size = 64;
+	::bvh::v2::SmallStack<pragma::bvh::Bvh::Index, stack_size> stack;
+	auto start = bvh.get_root().index;
+	stack.push(start);
+restart:
+	while(!stack.is_empty()) {
+		auto top = stack.pop();
+		while(top.prim_count == 0) {
+			auto &left = bvh.nodes[top.first_id];
+			auto &right = bvh.nodes[top.first_id + 1];
+
+			draw_node(left);
+			draw_node(right);
+
+			if(true) {
+				auto near_index = left.index;
+				if(true)
+					stack.push(right.index);
+				top = near_index;
+			}
+		}
+	}
+}
+
+#include "pragma/lua/converters/pair_converter_t.hpp"
+#include "pragma/lua/converters/vector_converter_t.hpp"
+bool ObbBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, std::vector<HitData> &outHits)
+{
+	constexpr size_t invalid_id = std::numeric_limits<size_t>::max();
+	constexpr size_t stack_size = 64;
+	constexpr bool use_robust_traversal = false;
+
+	auto *l = c_engine->GetClientState()->GetGameState()->GetLuaState();
+	std::vector<Vector3> tmpCenters;
+	for(auto &c : g_test_centers)
+		tmpCenters.push_back({c.values[0], c.values[1], c.values[2]});
+	std::vector<std::pair<Vector3, Vector3>> tmpBoxes;
+	for(auto &c : g_test_bboxes) {
+		tmpBoxes.push_back(std::pair<Vector3, Vector3> {Vector3 {c.min.values[0], c.min.values[1], c.min.values[2]}, Vector3 {c.max.values[0], c.max.values[1], c.max.values[2]}});
+	}
+
+	//for(auto &bbox : tmpBoxes) {
+	//	DebugRenderer::DrawBox(bbox.first, bbox.second, EulerAngles {}, Color {0, 0, 255, 32}, Color::White, 12.f);
+	//}
+	// draw_bvh_tree(bvh);
+	/*luabind::object t {luabind::newtable(l)};
+	t["bboxes"] = tmpBoxes;
+	t["centers"] = tmpCenters;
+	luabind::object tHits {luabind::newtable(l)};
+	uint32_t hitIdx = 1;*/
+
+	auto distDiff = maxDist - minDist;
+	::bvh::v2::SmallStack<pragma::bvh::Bvh::Index, stack_size> stack;
+	auto ray = pragma::bvh::get_ray(origin, dir, minDist, maxDist);
+	bvh.intersect<false, use_robust_traversal>(
+	  ray, bvh.get_root().index, stack,
+	  [&](size_t parent, size_t begin, size_t end) {
+		  for(size_t i = begin; i < end; ++i) {
+			  size_t j = pragma::bvh::should_permute ? i : bvh.prim_ids[i];
+
+			  auto &obb = primitives[j];
+			  float dist;
+
+			  /*auto &pose = obb.pose;
+			auto ang = EulerAngles {pose.GetRotation()};
+			luabind::object tHit {luabind::newtable(l)};
+			tHit["min"] = obb.min;
+			tHit["max"] = obb.max;
+			tHit["pose"] = obb.pose;
+			tHits[hitIdx] = tHit;
+			++hitIdx;*/
+			  auto &parentNode = bvh.nodes[parent];
+			  //auto nodeBbox = parentNode.get_bbox();
+			  //auto center = to_vec(nodeBbox.get_center());
+			  //auto min = to_vec(nodeBbox.min);
+			  //auto max = to_vec(nodeBbox.max);
+			  //min -= center;
+			  //max -= center;
+			  //DebugRenderer::DrawBox(center, min, max, EulerAngles {obb.pose.GetRotation()}, Color {0, 255, 255, 32}, Color::White, 12.f);
+			  DebugRenderer::DrawBox(obb.pose.GetOrigin(), obb.min, obb.max, EulerAngles {obb.pose.GetRotation()}, Color {0, 255, 255, 64}, Color::White, 12.f);
+			  auto tmpDir = dir * maxDist;
+			  if(umath::intersection::line_obb(origin, tmpDir, obb.min, obb.max, &dist, obb.pose.GetOrigin(), obb.pose.GetRotation())) {
+				  dist *= maxDist;
+				  if(dist < ray.tmax) {
+					  if(outHits.size() == outHits.capacity())
+						  outHits.reserve(outHits.size() * 2 + 5);
+					  HitData hitData {};
+					  hitData.primitiveIndex = i;
+
+					  ray.tmax = dist;
+					  if(distDiff > 0.0001f)
+						  hitData.t = (ray.tmax - minDist) / distDiff;
+					  else
+						  hitData.t = 0.f;
+
+					  util::insert_sorted(outHits, hitData, [](const HitData &a, const HitData &b) { return a.t < b.t; });
+				  }
+			  }
+		  }
+		  return false;
+	  },
+	  [](const pragma::bvh::Node &left, const pragma::bvh::Node &right) {
+		  draw_node(left, Vector3 {0, 200, 0});
+		  draw_node(right, Vector3 {0, 200, 0});
+	  });
+	//t["hits"] = tHits;
+	//luabind::globals(l)["test"] = t;
+	return !outHits.empty();
 }

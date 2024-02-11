@@ -12,7 +12,7 @@
 
 namespace pragma {
 	namespace bvh {
-		struct BvhData;
+		struct BvhTree;
 	};
 	class BaseStaticBvhCacheComponent;
 	class DLLNETWORK BaseBvhComponent : public BaseEntityComponent {
@@ -37,8 +37,8 @@ namespace pragma {
 		const bvh::MeshRange *FindPrimitiveMeshInfo(size_t primIdx) const;
 
 		void SendBvhUpdateRequestOnInteraction();
-		static bool SetVertexData(pragma::bvh::BvhData &bvhData, const std::vector<bvh::Primitive> &data);
-		static void DeleteRange(pragma::bvh::BvhData &bvhData, size_t start, size_t end);
+		static bool SetVertexData(pragma::bvh::MeshBvhTree &bvhData, const std::vector<bvh::Primitive> &data);
+		static void DeleteRange(pragma::bvh::MeshBvhTree &bvhData, size_t start, size_t end);
 		bool SetVertexData(const std::vector<bvh::Primitive> &data);
 		void GetVertexData(std::vector<bvh::Primitive> &outData) const;
 		void RebuildBvh();
@@ -52,15 +52,15 @@ namespace pragma {
 			std::function<bool()> isCancelled = nullptr;
 			std::function<bool(const ModelSubMesh &, uint32_t)> shouldConsiderMesh = nullptr;
 		};
-		static std::shared_ptr<pragma::bvh::BvhData> RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo = nullptr, std::vector<size_t> *optOutMeshIndices = nullptr);
-		std::shared_ptr<bvh::BvhData> SetBvhData(std::shared_ptr<bvh::BvhData> &bvhData);
+		static std::shared_ptr<pragma::bvh::MeshBvhTree> RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo = nullptr, std::vector<size_t> *optOutMeshIndices = nullptr);
+		std::shared_ptr<bvh::MeshBvhTree> SetBvhData(std::shared_ptr<bvh::MeshBvhTree> &bvhData);
 		bool HasBvhData() const;
 	  protected:
 		BaseBvhComponent(BaseEntity &ent);
 		virtual void DoRebuildBvh() = 0;
-		const std::shared_ptr<bvh::BvhData> &GetUpdatedBvh() const;
+		const std::shared_ptr<bvh::MeshBvhTree> &GetUpdatedBvh() const;
 		std::vector<bvh::MeshRange> &GetMeshRanges();
-		std::shared_ptr<bvh::BvhData> m_bvhData = nullptr;
+		std::shared_ptr<bvh::MeshBvhTree> m_bvhData = nullptr;
 		ComponentHandle<BaseStaticBvhCacheComponent> m_staticCache;
 		mutable std::mutex m_bvhDataMutex;
 		bool m_sendBvhUpdateRequestOnInteraction = false;

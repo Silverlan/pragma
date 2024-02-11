@@ -133,7 +133,19 @@ bool pragma::bvh::test_bvh_intersection_with_kdop(const pragma::bvh::BvhData &bv
 	  nodeIdx, outIntersectionInfo);
 }
 
-pragma::bvh::BvhData::BvhData() {}
+static std::unique_ptr<::bvh::v2::ThreadPool> g_threadPool {};
+static size_t g_bvhCount = 0;
+pragma::bvh::BvhData::BvhData()
+{
+	if(g_bvhCount++ == 0)
+		g_threadPool = std::make_unique<::bvh::v2::ThreadPool>();
+}
+pragma::bvh::BvhData::~BvhData()
+{
+	if(--g_bvhCount == 0)
+		g_threadPool = nullptr;
+}
+
 const pragma::bvh::MeshRange *pragma::bvh::BvhData::FindMeshRange(size_t primIdx) const
 {
 	MeshRange search {};
@@ -167,18 +179,26 @@ bool pragma::bvh::BvhData::Raycast(const Vector3 &origin, const Vector3 &dir, fl
 		}
 		return prim_id != invalid_id;
 	});
-	outHitData.tmin = ray.tmin;
-	outHitData.tmax = ray.tmax;
+	auto distDiff = maxDist - minDist;
+	if(distDiff > 0.0001f) {
+		outHitData.tmin = (ray.tmin - minDist) / distDiff;
+		outHitData.tmax = (ray.tmax - minDist) / distDiff;
+	}
+	else {
+		outHitData.tmin = 0.f;
+		outHitData.tmax = 0.f;
+	}
 	return prim_id != invalid_id;
 }
 
-void pragma::bvh::BvhData::Refit() { ::bvh::v2::ReinsertionOptimizer<Node>::optimize(thread_pool, bvh); }
+void pragma::bvh::BvhData::Refit() { ::bvh::v2::ReinsertionOptimizer<Node>::optimize(*g_threadPool, bvh); }
 
 void pragma::bvh::BvhData::InitializeBvh()
 {
-	executor = std::make_unique<::bvh::v2::ParallelExecutor>(thread_pool);
-
 	auto numTris = primitives.size();
+	if(numTris == 0)
+		return;
+	executor = std::make_unique<::bvh::v2::ParallelExecutor>(*g_threadPool);
 	std::vector<pragma::bvh::BBox> bboxes {numTris};
 	std::vector<Vec> centers {numTris};
 	executor->for_each(0, numTris, [&](size_t begin, size_t end) {
@@ -190,7 +210,7 @@ void pragma::bvh::BvhData::InitializeBvh()
 
 	::bvh::v2::DefaultBuilder<Node>::Config config;
 	config.quality = ::bvh::v2::DefaultBuilder<Node>::Quality::High;
-	bvh = ::bvh::v2::DefaultBuilder<Node>::build(thread_pool, bboxes, centers, config);
+	bvh = ::bvh::v2::DefaultBuilder<Node>::build(*g_threadPool, bboxes, centers, config);
 
 	precomputed_tris.resize(numTris);
 	executor->for_each(0, numTris, [&](size_t begin, size_t end) {

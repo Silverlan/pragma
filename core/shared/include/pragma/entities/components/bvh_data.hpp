@@ -74,6 +74,7 @@ namespace pragma::bvh {
 			float tmax;
 		};
 		BvhData();
+		~BvhData();
 		Bvh bvh;
 		std::vector<Primitive> primitives;
 		std::vector<MeshRange> meshRanges;
@@ -83,7 +84,6 @@ namespace pragma::bvh {
 		void Refit();
 		void InitializeBvh();
 	  private:
-		::bvh::v2::ThreadPool thread_pool;
 		std::unique_ptr<::bvh::v2::ParallelExecutor> executor {};
 		std::vector<PrecomputedTri> precomputed_tris;
 	};

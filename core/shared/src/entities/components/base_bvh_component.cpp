@@ -304,7 +304,7 @@ bool BaseBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &di
 		assert(it != bvhData->meshRanges.begin());
 		--it;
 
-		auto distance = minDist + (maxDist - minDist) * (bvhHitData.tmax - bvhHitData.tmin); // TODO: Is this correct?
+		auto distance = minDist + (maxDist - minDist) * bvhHitData.tmax;
 		auto &hitInfo = outHitInfo;
 		hitInfo.primitiveIndex = bvhHitData.primitiveIndex - it->start / 3;
 		hitInfo.distance = distance;

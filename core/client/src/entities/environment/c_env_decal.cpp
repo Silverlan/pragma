@@ -375,7 +375,7 @@ bool CDecalComponent::ApplyDecal()
 
 	// c_game->DrawBox(projectorAABB.first,projectorAABB.second,{},Color::Red,12.f);
 
-	pragma::BvhIntersectionInfo bvhIntersectInfo {};
+	pragma::bvh::IntersectionInfo bvhIntersectInfo {};
 	std::vector<DecalProjector::MeshData> meshDatas {};
 	std::unordered_set<ModelSubMesh *> coveredMeshes;
 	auto findIntersectionMeshes = [&projectorAABB, &bvhIntersectInfo, &meshDatas, &coveredMeshes](const pragma::BaseBvhComponent &bvhC) {

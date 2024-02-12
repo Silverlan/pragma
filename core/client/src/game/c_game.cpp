@@ -1596,7 +1596,13 @@ bool CGame::GetActionInput(Action action)
 }
 
 void CGame::DrawLine(const Vector3 &start, const Vector3 &end, const Color &color, float duration) { DebugRenderer::DrawLine(start, end, color, duration); }
-void CGame::DrawBox(const Vector3 &start, const Vector3 &end, const EulerAngles &ang, const Color &color, float duration) { DebugRenderer::DrawBox(start, end, ang, color, duration); }
+void CGame::DrawBox(const Vector3 &origin, const Vector3 &start, const Vector3 &end, const EulerAngles &ang, const Color &colorOutline, const std::optional<Color> &fillColor, float duration)
+{
+	if(fillColor)
+		DebugRenderer::DrawBox(start, end, ang, *fillColor, colorOutline, duration);
+	else
+		DebugRenderer::DrawBox(start, end, ang, colorOutline, duration);
+}
 void CGame::DrawPlane(const Vector3 &n, float dist, const Color &color, float duration) { DebugRenderer::DrawPlane(n, dist, color, duration); }
 static auto cvRenderPhysics = GetClientConVar("debug_physics_draw");
 static auto cvSvRenderPhysics = GetClientConVar("sv_debug_physics_draw");

@@ -730,7 +730,13 @@ void SGame::OnClientConVarChanged(pragma::BasePlayerComponent &pl, std::string c
 }
 
 void SGame::DrawLine(const Vector3 &start, const Vector3 &end, const Color &color, float duration) { SDebugRenderer::DrawLine(start, end, color, duration); }
-void SGame::DrawBox(const Vector3 &start, const Vector3 &end, const EulerAngles &ang, const Color &color, float duration) { SDebugRenderer::DrawBox(start, end, ang, color, duration); }
+void SGame::DrawBox(const Vector3 &origin, const Vector3 &start, const Vector3 &end, const EulerAngles &ang, const Color &colorOutline, const std::optional<Color> &fillColor, float duration)
+{
+	if(fillColor)
+		SDebugRenderer::DrawBox(start, end, ang, *fillColor, colorOutline, duration);
+	else
+		SDebugRenderer::DrawBox(start, end, ang, colorOutline, duration);
+}
 void SGame::DrawPlane(const Vector3 &n, float dist, const Color &color, float duration) { SDebugRenderer::DrawPlane(n, dist, color, duration); }
 
 static CVar cvFriction = GetServerConVar("sv_friction");

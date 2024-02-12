@@ -367,7 +367,7 @@ class DLLNETWORK Game : public CallbackHandler, public LuaCallbackHandler {
 
 	// Debug
 	virtual void DrawLine(const Vector3 &start, const Vector3 &end, const Color &color, float duration = 0.f) = 0;
-	virtual void DrawBox(const Vector3 &start, const Vector3 &end, const EulerAngles &ang, const Color &color, float duration = 0.f) = 0;
+	virtual void DrawBox(const Vector3 &origin, const Vector3 &start, const Vector3 &end, const EulerAngles &ang, const Color &colorOutline, const std::optional<Color> &fillColor, float duration = 0.f) = 0;
 	virtual void DrawPlane(const Vector3 &n, float dist, const Color &color, float duration = 0.f) = 0;
 	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage, CPUProfilingPhase> *GetProfilingStageManager();
 	bool StartProfilingStage(CPUProfilingPhase stage);

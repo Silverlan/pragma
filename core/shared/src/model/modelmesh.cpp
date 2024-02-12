@@ -150,7 +150,7 @@ ModelSubMesh::ModelSubMesh()
 {
 }
 ModelSubMesh::ModelSubMesh(const ModelSubMesh &other)
-    : m_skinTextureIndex(other.m_skinTextureIndex), m_center(other.m_center), m_vertices(other.m_vertices), m_alphas(other.m_alphas), m_numAlphas(other.m_numAlphas), m_indexData(other.m_indexData), m_vertexWeights(other.m_vertexWeights),
+    : m_uuid {util::generate_uuid_v4()}, m_skinTextureIndex(other.m_skinTextureIndex), m_center(other.m_center), m_vertices(other.m_vertices), m_alphas(other.m_alphas), m_numAlphas(other.m_numAlphas), m_indexData(other.m_indexData), m_vertexWeights(other.m_vertexWeights),
       m_extendedVertexWeights(other.m_extendedVertexWeights), m_min(other.m_min), m_max(other.m_max), m_pose {other.m_pose}, m_uvSets {other.m_uvSets}, m_geometryType {other.m_geometryType}, m_referenceId {other.m_referenceId}, m_indexType {other.m_indexType}, m_name {other.m_name}
 {
 	// Copy extension data

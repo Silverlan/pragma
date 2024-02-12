@@ -37,14 +37,19 @@ namespace pragma {
 		void InitializeBvh();
 		void UpdateTest();
 		bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::bvh::HitInfo &outHitInfo);
+		void UpdateHitboxBvh();
 	  private:
+		struct HitboxBvhInfo {
+			std::shared_ptr<pragma::bvh::MeshBvhTree> bvhTree;
+			std::shared_ptr<ModelSubMesh> mesh;
+			std::vector<uint32_t> bvhTriToOriginalTri;
+		};
 		void DebugDraw();
 		void OnModelChanged();
 		void InitializeHitboxBvh();
-		void UpdateHitboxBvh();
 		bool InitializeModel();
 		void InitializeHitboxMeshes();
-		std::unordered_map<BoneId, std::shared_ptr<pragma::bvh::MeshBvhTree>> m_hitboxBvhs;
+		std::unordered_map<BoneId, std::vector<HitboxBvhInfo>> m_hitboxBvhs;
 		std::shared_ptr<ObbBvhTree> m_hitboxBvh;
 	};
 

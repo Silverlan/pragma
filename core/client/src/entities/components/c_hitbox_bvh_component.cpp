@@ -9,6 +9,7 @@
 #include "pragma/entities/components/c_hitbox_bvh_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
+#include "pragma/debug/c_debugoverlay.h"
 #include <pragma/entities/components/bvh_data.hpp>
 #include <pragma/entities/components/util_bvh.hpp>
 #include "pragma/model/c_model.h"
@@ -18,6 +19,8 @@
 #include <panima/bone.hpp>
 #include <panima/skeleton.hpp>
 #include <pragma/entities/components/base_bvh_component.hpp>
+#include <mathutil/boundingvolume.h>
+#include <bvh/v2/stack.h>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -40,7 +43,6 @@ void CHitboxBvhComponent::InitializeBvh()
 	if(!GetEntity().IsSpawned())
 		return;
 	InitializeModel();
-	InitializeHitboxMeshes();
 	InitializeHitboxBvh();
 	DebugDraw();
 }
@@ -87,10 +89,9 @@ void CHitboxBvhComponent::UpdateHitboxBvh()
 			continue;
 		auto &pose = bonePoses[hbObb.boneId];
 		hbObb.pose = pose;
-		//m_hitboxBvh->bvh.nodes[0];
 		// TODO: Re-scale min,max bounds?
 	}
-	m_hitboxBvh->Refit();
+	//m_hitboxBvh->Refit();
 }
 
 void CHitboxBvhComponent::InitializeHitboxBvh()
@@ -114,19 +115,6 @@ void CHitboxBvhComponent::InitializeHitboxBvh()
 		hbObb.pose = pose;
 		hbObb.boneId = pair.first;
 	}
-
-	// Test
-	/*Vector3 pos {0.f, 50.f, 0.f};
-	hitboxObbs.push_back({pos + Vector3 {-5.f, -5.f, -5.f}, pos + Vector3 {5.f, 5.f, 5.f}});
-	pos = {20.f, 30.f, 0.f};
-	hitboxObbs.push_back({pos + Vector3 {-5.f, -5.f, -5.f}, pos + Vector3 {5.f, 5.f, 5.f}});
-	pos = {0.f, 40.f, 20.f};
-	hitboxObbs.push_back({pos + Vector3 {-5.f, -5.f, -5.f}, pos + Vector3 {5.f, 5.f, 5.f}});*/
-	//pos = {-20.f, 30.f, 0.f};
-	//hitboxObbs.push_back({pos + Vector3 {-5.f, -5.f, -5.f}, pos + Vector3 {5.f, 5.f, 5.f}});
-	//pos = {0.f, 30.f, -20.f};
-	//hitboxObbs.push_back({pos + Vector3 {-5.f, -5.f, -5.f}, pos + Vector3 {5.f, 5.f, 5.f}});
-	//
 
 	bvhTree->InitializeBvh();
 	m_hitboxBvh = std::move(bvhTree);
@@ -201,15 +189,17 @@ void CHitboxBvhComponent::InitializeHitboxMeshes()
 
 		if(!valid)
 			continue;
-
 		auto bvhData = bvh::create_bvh_data(std::move(bvhTris));
-		m_hitboxBvhs[boneId] = std::move(bvhData);
+		auto it = m_hitboxBvhs.find(boneId);
+		if(it == m_hitboxBvhs.end())
+			it = m_hitboxBvhs.insert(std::make_pair(boneId, std::vector<HitboxBvhInfo> {})).first;
+		it->second.push_back({});
+		auto &hitboxBvhInfo = it->second.back();
+		hitboxBvhInfo.bvhTree = std::move(bvhData);
+		hitboxBvhInfo.bvhTriToOriginalTri = std::move(triIndices);
+		hitboxBvhInfo.mesh = mesh;
 	}
 }
-
-#include "pragma/debug/c_debugoverlay.h"
-#include <mathutil/boundingvolume.h>
-#include <bvh/v2/stack.h>
 
 static Vector3 to_vec(pragma::bvh::Vec vec) { return Vector3 {vec.values[0], vec.values[1], vec.values[2]}; }
 static void draw_node(const pragma::bvh::Node &node, const umath::ScaledTransform &pose = {}, float duration = 20.f)
@@ -300,7 +290,7 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 		auto boneId = hObb.boneId;
 		if(boneId >= effectiveBonePoses.size())
 			continue;
-		//Con::cout << "Bone: " << ent.GetModel()->GetSkeleton().GetBone(boneId).lock()->name << Con::endl;
+		Con::cout << "Bone: " << ent.GetModel()->GetSkeleton().GetBone(boneId).lock()->name << Con::endl;
 		auto bonePoseInv = effectiveBonePoses[boneId].GetInverse();
 
 		// Move ray to bone space
@@ -308,29 +298,40 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 		auto dirBs = dirEs;
 		uvec::rotate(&dirBs, bonePoseInv.GetRotation());
 
-		auto &meshBvh = it->second;
+		auto &hitboxBvhInfos = it->second;
+		std::optional<float> closestDistance {};
+		// TODO: Closest mesh!
+		for(auto &hitboxBvhInfo : hitboxBvhInfos) {
+			auto &meshBvh = hitboxBvhInfo.bvhTree;
 
-		auto &root = meshBvh->bvh.get_root();
-		auto bbox = root.get_bbox();
-		auto min = to_vec(bbox.min);
-		auto max = to_vec(bbox.max);
-		//::DebugRenderer::DrawBox(bonePose.GetOrigin(), to_vec(bbox.min), to_vec(bbox.max), bonePose.GetRotation(), Color {128, 128, 128, 255}, Color::Aqua, 12.f);
+			auto &root = meshBvh->bvh.get_root();
+			auto bbox = root.get_bbox();
+			auto min = to_vec(bbox.min);
+			auto max = to_vec(bbox.max);
 
-		//::DebugRenderer::DrawLine(originBs, originBs + dirBs * 500.f, Color::Aquamarine, 12.f);
-		//draw_bvh_tree(meshBvh->bvh, 60.f, bonePoseInv.GetInverse());
-		//originBs = Vector3 {0.f, 30.f, 0.f};
-		//dirBs = Vector3 {0.f, -1.f, 0.f};
-		bvh::MeshBvhTree::HitData meshHitData;
-		auto res = meshBvh->Raycast(originBs, dirBs, minDist, maxDist, meshHitData);
-		if(!res)
-			continue;
+			auto bonePose = bonePoseInv.GetInverse();
+			::DebugRenderer::DrawBox(bonePose.GetOrigin(), to_vec(bbox.min), to_vec(bbox.max), bonePose.GetRotation(), Color {128, 128, 128, 255}, Color::Aqua, 12.f);
 
-		outHitInfo.distance = meshHitData.t * maxDist;
-		outHitInfo.primitiveIndex = meshHitData.primitiveIndex;
-		outHitInfo.u = meshHitData.u;
-		outHitInfo.v = meshHitData.v;
-		outHitInfo.t = meshHitData.t;
-		return true;
+			bvh::MeshBvhTree::HitData meshHitData;
+			auto res = meshBvh->Raycast(originBs, dirBs, minDist, maxDist, meshHitData);
+			if(!res)
+				continue;
+			if(meshHitData.primitiveIndex >= hitboxBvhInfo.bvhTriToOriginalTri.size())
+				continue; // Unreachable
+			if(closestDistance && meshHitData.t >= *closestDistance)
+				continue;
+			closestDistance = meshHitData.t;
+
+			outHitInfo.mesh = hitboxBvhInfo.mesh;
+			outHitInfo.distance = meshHitData.t * maxDist;
+			outHitInfo.primitiveIndex = hitboxBvhInfo.bvhTriToOriginalTri[meshHitData.primitiveIndex];
+			outHitInfo.u = meshHitData.u;
+			outHitInfo.v = meshHitData.v;
+			outHitInfo.t = meshHitData.t;
+		}
+		outHitInfo.entity = GetEntity().GetHandle();
+		if(closestDistance.has_value())
+			return true;
 	}
 	return false;
 }
@@ -443,26 +444,28 @@ void CHitboxBvhComponent::DebugDraw()
 
 	auto &mdl = GetEntity().GetModel();
 	auto &ref = mdl->GetReference();
-	Con::cout << "Count: " << m_hitboxBvhs.size() << Con::endl;
 	for(auto &pair : m_hitboxBvhs) {
 		umath::ScaledTransform pose;
 		if(!ref.GetBonePose(pair.first, pose))
 			continue;
 		std::vector<Vector3> dbgMeshVerts;
-		dbgMeshVerts.reserve(pair.second->primitives.size() * 3);
-		for(auto &prim : pair.second->primitives) {
-			auto &p0 = prim.p0;
-			auto &p1 = prim.p1;
-			auto &p2 = prim.p2;
-			auto v0 = Vector3 {p0[0], p0[1], p0[2]};
-			auto v1 = Vector3 {p1[0], p1[1], p1[2]};
-			auto v2 = Vector3 {p2[0], p2[1], p2[2]};
-			v0 = pose * v0;
-			v1 = pose * v1;
-			v2 = pose * v2;
-			dbgMeshVerts.push_back(v0);
-			dbgMeshVerts.push_back(v1);
-			dbgMeshVerts.push_back(v2);
+		auto &hitboxBvhInfos = pair.second;
+		for(auto &hitboxBvhInfo : hitboxBvhInfos) {
+			dbgMeshVerts.reserve(dbgMeshVerts.size() + hitboxBvhInfo.bvhTree->primitives.size() * 3);
+			for(auto &prim : hitboxBvhInfo.bvhTree->primitives) {
+				auto &p0 = prim.p0;
+				auto &p1 = prim.p1;
+				auto &p2 = prim.p2;
+				auto v0 = Vector3 {p0[0], p0[1], p0[2]};
+				auto v1 = Vector3 {p1[0], p1[1], p1[2]};
+				auto v2 = Vector3 {p2[0], p2[1], p2[2]};
+				v0 = pose * v0;
+				v1 = pose * v1;
+				v2 = pose * v2;
+				dbgMeshVerts.push_back(v0);
+				dbgMeshVerts.push_back(v1);
+				dbgMeshVerts.push_back(v2);
+			}
 		}
 		::DebugRenderer::DrawMesh(dbgMeshVerts, color, outlineColor, duration);
 	}

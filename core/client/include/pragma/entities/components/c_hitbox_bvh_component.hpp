@@ -36,7 +36,7 @@ namespace pragma {
 		virtual void OnEntitySpawn() override;
 		void InitializeBvh();
 		void UpdateTest();
-		void IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::bvh::HitInfo &outHitInfo);
+		bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::bvh::HitInfo &outHitInfo);
 	  private:
 		void DebugDraw();
 		void OnModelChanged();

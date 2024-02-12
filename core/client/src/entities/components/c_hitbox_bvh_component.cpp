@@ -201,64 +201,6 @@ void CHitboxBvhComponent::InitializeHitboxMeshes()
 	}
 }
 
-static Vector3 to_vec(pragma::bvh::Vec vec) { return Vector3 {vec.values[0], vec.values[1], vec.values[2]}; }
-static void draw_node(const pragma::bvh::Node &node, const umath::ScaledTransform &pose = {}, float duration = 20.f)
-{
-	auto bbox = node.get_bbox();
-	auto vstart = to_vec(bbox.min);
-	auto vend = to_vec(bbox.max);
-	DebugRenderer::DrawBox(pose.GetOrigin(), vstart, vend, pose.GetRotation(), Color {0, 255, 0, 64}, Color::Aqua, duration);
-}
-static void print_bvh_tree(pragma::bvh::Bvh &bvh)
-{
-	std::stringstream ss;
-	std::function<void(const pragma::bvh::Node &, std::string)> printStack = nullptr;
-	printStack = [&printStack, &ss, &bvh](const pragma::bvh::Node &node, std::string t) {
-		auto bbox = node.get_bbox();
-		auto min = to_vec(bbox.min);
-		auto max = to_vec(bbox.max);
-		auto isLeaf = node.index.prim_count > 0;
-		ss << t;
-		if(isLeaf)
-			ss << "Leaf";
-		else
-			ss << "Node";
-		ss << "[" << min.x << "," << min.y << "," << min.z << "][" << max.x << "," << max.y << "," << max.z << "]\n";
-		if(isLeaf)
-			return;
-		printStack(bvh.nodes[node.index.first_id], t + "\t");
-		printStack(bvh.nodes[node.index.first_id + 1], t + "\t");
-	};
-	printStack(bvh.get_root(), "");
-	Con::cout << "Tree:" << ss.str() << Con::endl;
-}
-static void draw_bvh_tree(pragma::bvh::Bvh &bvh, float duration = 20.f, const umath::ScaledTransform &pose = {})
-{
-	constexpr size_t stack_size = 64;
-	::bvh::v2::SmallStack<pragma::bvh::Bvh::Index, stack_size> stack;
-	draw_node(bvh.get_root(), pose, duration);
-	auto start = bvh.get_root().index;
-	stack.push(start);
-restart:
-	while(!stack.is_empty()) {
-		auto top = stack.pop();
-		while(top.prim_count == 0) {
-			auto &left = bvh.nodes[top.first_id];
-			auto &right = bvh.nodes[top.first_id + 1];
-
-			draw_node(left, pose, duration);
-			draw_node(right, pose, duration);
-
-			if(true) {
-				auto near_index = left.index;
-				if(true)
-					stack.push(right.index);
-				top = near_index;
-			}
-		}
-	}
-}
-
 bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::bvh::HitInfo &outHitInfo)
 {
 	if(!m_hitboxBvh)
@@ -290,7 +232,6 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 		auto boneId = hObb.boneId;
 		if(boneId >= effectiveBonePoses.size())
 			continue;
-		Con::cout << "Bone: " << ent.GetModel()->GetSkeleton().GetBone(boneId).lock()->name << Con::endl;
 		auto bonePoseInv = effectiveBonePoses[boneId].GetInverse();
 
 		// Move ray to bone space
@@ -300,17 +241,8 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 
 		auto &hitboxBvhInfos = it->second;
 		std::optional<float> closestDistance {};
-		// TODO: Closest mesh!
 		for(auto &hitboxBvhInfo : hitboxBvhInfos) {
 			auto &meshBvh = hitboxBvhInfo.bvhTree;
-
-			auto &root = meshBvh->bvh.get_root();
-			auto bbox = root.get_bbox();
-			auto min = to_vec(bbox.min);
-			auto max = to_vec(bbox.max);
-
-			auto bonePose = bonePoseInv.GetInverse();
-			::DebugRenderer::DrawBox(bonePose.GetOrigin(), to_vec(bbox.min), to_vec(bbox.max), bonePose.GetRotation(), Color {128, 128, 128, 255}, Color::Aqua, 12.f);
 
 			bvh::MeshBvhTree::HitData meshHitData;
 			auto res = meshBvh->Raycast(originBs, dirBs, minDist, maxDist, meshHitData);
@@ -422,10 +354,13 @@ void pragma::CHitboxBvhComponent::generate_hitbox_meshes(Model &mdl)
 			}
 		}
 	}
+	/*
+	// Debug Print
 	std::stringstream ss;
 	extData->ToAscii(udm::AsciiSaveFlags::DontCompressLz4Arrays, ss, "");
 	Con::cout << "Extension data:" << Con::endl;
 	Con::cout << ss.str() << Con::endl;
+	*/
 }
 
 void CHitboxBvhComponent::DebugDraw()
@@ -479,40 +414,24 @@ pragma::CHitboxBvhComponent::HitboxObb::HitboxObb(const Vector3 &min, const Vect
 
 pragma::bvh::BBox pragma::CHitboxBvhComponent::HitboxObb::ToBvhBBox(Vector3 &outOrigin) const
 {
-	// Calculate world space axes
-	glm::mat3 rotationMatrix = glm::mat3_cast(pose.GetRotation());
-	glm::vec3 worldX = rotationMatrix * glm::vec3(1.0f, 0.0f, 0.0f);
-	glm::vec3 worldY = rotationMatrix * glm::vec3(0.0f, 1.0f, 0.0f);
-	glm::vec3 worldZ = rotationMatrix * glm::vec3(0.0f, 0.0f, 1.0f);
+	// Calculate AABB around OBB
+	auto rotationMatrix = glm::mat3_cast(pose.GetRotation());
+	auto worldX = rotationMatrix * Vector3(1.0f, 0.0f, 0.0f);
+	auto worldY = rotationMatrix * Vector3(0.0f, 1.0f, 0.0f);
+	auto worldZ = rotationMatrix * Vector3(0.0f, 0.0f, 1.0f);
 
-	// Calculate AABB extents
-	glm::vec3 xAxisExtents = glm::abs(worldX * halfExtents.x);
-	glm::vec3 yAxisExtents = glm::abs(worldY * halfExtents.y);
-	glm::vec3 zAxisExtents = glm::abs(worldZ * halfExtents.z);
+	auto xAxisExtents = glm::abs(worldX * halfExtents.x);
+	auto yAxisExtents = glm::abs(worldY * halfExtents.y);
+	auto zAxisExtents = glm::abs(worldZ * halfExtents.z);
 
 	auto posRot = position;
 	uvec::rotate(&posRot, pose.GetRotation());
 	auto &origin = outOrigin;
 	origin = pose.GetOrigin() + posRot;
 
-	// Calculate AABB min and max
 	auto aabbMin = origin - xAxisExtents - yAxisExtents - zAxisExtents;
 	auto aabbMax = origin + xAxisExtents + yAxisExtents + zAxisExtents;
 	return pragma::bvh::BBox {pragma::bvh::to_bvh_vector(aabbMin), pragma::bvh::to_bvh_vector(aabbMax)};
-	/*auto &basePose = pose;
-
-	auto posRot = position;
-	uvec::rotate(&posRot, basePose.GetRotation());
-	auto origin = basePose.GetOrigin() + posRot;
-
-	Mat3 mRot {basePose.GetRotation()};
-	for(uint8_t x = 0; x < 3; ++x) {
-		for(uint8_t y = 0; y < 3; ++y)
-			mRot[x][y] = glm::abs(mRot[x][y]);
-	}
-
-	auto hfAabb = mRot * Vector3 {1.f, 1.f, 1.f};
-	return pragma::bvh::BBox {pragma::bvh::to_bvh_vector(origin - hfAabb), pragma::bvh::to_bvh_vector(origin + hfAabb)};*/
 }
 
 bool ObbBvhTree::DoInitializeBvh(::bvh::v2::ParallelExecutor &executor, ::bvh::v2::DefaultBuilder<pragma::bvh::Node>::Config &config)
@@ -534,8 +453,6 @@ bool ObbBvhTree::DoInitializeBvh(::bvh::v2::ParallelExecutor &executor, ::bvh::v
 	return true;
 }
 
-#include "pragma/lua/converters/pair_converter_t.hpp"
-#include "pragma/lua/converters/vector_converter_t.hpp"
 bool ObbBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, std::vector<HitData> &outHits)
 {
 	constexpr size_t invalid_id = std::numeric_limits<size_t>::max();

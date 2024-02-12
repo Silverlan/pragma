@@ -14,13 +14,14 @@
 #include <bvh/v2/reinsertion_optimizer.h>
 
 static_assert(sizeof(Vector3) == sizeof(::pragma::bvh::Vec));
-static const ::pragma::bvh::Vec &to_bvh_vector(const Vector3 &v) { return reinterpret_cast<const ::pragma::bvh::Vec &>(v); }
+const ::pragma::bvh::Vec &pragma::bvh::to_bvh_vector(const Vector3 &v) { return reinterpret_cast<const ::pragma::bvh::Vec &>(v); }
+const Vector3 &pragma::bvh::from_bvh_vector(const ::pragma::bvh::Vec &v) { return reinterpret_cast<const Vector3 &>(v); }
 
 pragma::bvh::MeshIntersectionInfo *pragma::bvh::IntersectionInfo::GetMeshIntersectionInfo() { return m_isMeshIntersectionInfo ? static_cast<pragma::bvh::MeshIntersectionInfo *>(this) : nullptr; }
 
 pragma::bvh::Primitive pragma::bvh::create_triangle(const Vector3 &a, const Vector3 &b, const Vector3 &c) { return pragma::bvh::Primitive {to_bvh_vector(a), to_bvh_vector(b), to_bvh_vector(c)}; }
 
-std::vector<pragma::bvh::MeshRange> &pragma::bvh::get_bvh_mesh_ranges(pragma::bvh::BvhData &bvhData) { return bvhData.meshRanges; }
+std::vector<pragma::bvh::MeshRange> &pragma::bvh::get_bvh_mesh_ranges(pragma::bvh::MeshBvhTree &bvhData) { return bvhData.meshRanges; }
 
 void pragma::bvh::IntersectionInfo::Clear() { primitives.clear(); }
 
@@ -30,7 +31,7 @@ static void get_bvh_bounds(const pragma::bvh::BBox &bb, Vector3 &outMin, Vector3
 	outMin = Vector3 {umath::min(bb.min.values[0], bb.max.values[0]) - epsilon, umath::min(bb.min.values[1], bb.max.values[1]) - epsilon, umath::min(bb.min.values[2], bb.max.values[2]) - epsilon};
 	outMax = Vector3 {umath::max(bb.min.values[0], bb.max.values[0]) + epsilon, umath::max(bb.min.values[1], bb.max.values[1]) + epsilon, umath::max(bb.min.values[2], bb.max.values[2]) + epsilon};
 }
-bool pragma::bvh::test_bvh_intersection(const pragma::bvh::BvhData &bvhData, const std::function<bool(const Vector3 &, const Vector3 &)> &testAabb, const std::function<bool(const pragma::bvh::Primitive &)> &testTri, size_t nodeIdx, pragma::bvh::IntersectionInfo *outIntersectionInfo)
+bool pragma::bvh::test_bvh_intersection(const pragma::bvh::MeshBvhTree &bvhData, const std::function<bool(const Vector3 &, const Vector3 &)> &testAabb, const std::function<bool(const pragma::bvh::Primitive &)> &testTri, size_t nodeIdx, pragma::bvh::IntersectionInfo *outIntersectionInfo)
 {
 	auto &bvh = bvhData.bvh;
 	auto &node = bvh.nodes[nodeIdx];
@@ -94,7 +95,8 @@ bool pragma::bvh::test_bvh_intersection(const pragma::bvh::BvhData &bvhData, con
 				  meshIntersectionInfo->GetTemporaryMeshRanges().clear();
 			  return hasHit;
 		  },
-		  [&testAabb](const Node &left, const Node &right, bool &hit_left, bool &hit_right) {
+		  [&testAabb](const Node &left, const Node &right) {
+			  bool hit_left, hit_right;
 			  {
 				  Vector3 v0_l, v1_l;
 				  get_bvh_bounds(left.get_bbox(), v0_l, v1_l);
@@ -106,6 +108,7 @@ bool pragma::bvh::test_bvh_intersection(const pragma::bvh::BvhData &bvhData, con
 				  get_bvh_bounds(right.get_bbox(), v0_r, v1_r);
 				  hit_right = testAabb(v0_r, v1_r);
 			  }
+			  return std::make_tuple(hit_left, hit_right);
 		  });
 	};
 	if(!outIntersectionInfo)
@@ -114,14 +117,14 @@ bool pragma::bvh::test_bvh_intersection(const pragma::bvh::BvhData &bvhData, con
 		traverse.template operator()<false>();
 	return hasAnyHit;
 }
-bool pragma::bvh::test_bvh_intersection_with_aabb(const pragma::bvh::BvhData &bvhData, const Vector3 &min, const Vector3 &max, size_t nodeIdx, pragma::bvh::IntersectionInfo *outIntersectionInfo)
+bool pragma::bvh::test_bvh_intersection_with_aabb(const pragma::bvh::MeshBvhTree &bvhData, const Vector3 &min, const Vector3 &max, size_t nodeIdx, pragma::bvh::IntersectionInfo *outIntersectionInfo)
 {
 	return test_bvh_intersection(
 	  bvhData, [&min, &max](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return umath::intersection::aabb_aabb(min, max, aabbMin, aabbMax) != umath::intersection::Intersect::Outside; },
 	  [&min, &max](const pragma::bvh::Primitive &prim) -> bool { return umath::intersection::aabb_triangle(min, max, *reinterpret_cast<const Vector3 *>(&prim.p0.values), *reinterpret_cast<const Vector3 *>(&prim.p1.values), *reinterpret_cast<const Vector3 *>(&prim.p2.values)); }, nodeIdx,
 	  outIntersectionInfo);
 }
-bool pragma::bvh::test_bvh_intersection_with_kdop(const pragma::bvh::BvhData &bvhData, const std::vector<umath::Plane> &kdop, size_t nodeIdx, pragma::bvh::IntersectionInfo *outIntersectionInfo)
+bool pragma::bvh::test_bvh_intersection_with_kdop(const pragma::bvh::MeshBvhTree &bvhData, const std::vector<umath::Plane> &kdop, size_t nodeIdx, pragma::bvh::IntersectionInfo *outIntersectionInfo)
 {
 	return test_bvh_intersection(
 	  bvhData, [&kdop](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return umath::intersection::aabb_in_plane_mesh(aabbMin, aabbMax, kdop) != umath::intersection::Intersect::Outside; },
@@ -135,18 +138,30 @@ bool pragma::bvh::test_bvh_intersection_with_kdop(const pragma::bvh::BvhData &bv
 
 static std::unique_ptr<::bvh::v2::ThreadPool> g_threadPool {};
 static size_t g_bvhCount = 0;
-pragma::bvh::BvhData::BvhData()
+pragma::bvh::BvhTree::BvhTree()
 {
 	if(g_bvhCount++ == 0)
 		g_threadPool = std::make_unique<::bvh::v2::ThreadPool>();
 }
-pragma::bvh::BvhData::~BvhData()
+pragma::bvh::BvhTree::~BvhTree()
 {
 	if(--g_bvhCount == 0)
 		g_threadPool = nullptr;
 }
+::bvh::v2::ThreadPool &pragma::bvh::BvhTree::GetThreadPool() { return *g_threadPool; }
 
-const pragma::bvh::MeshRange *pragma::bvh::BvhData::FindMeshRange(size_t primIdx) const
+void pragma::bvh::BvhTree::Refit() { ::bvh::v2::ReinsertionOptimizer<Node>::optimize(*g_threadPool, bvh); }
+
+void pragma::bvh::BvhTree::InitializeBvh()
+{
+	executor = std::make_unique<::bvh::v2::ParallelExecutor>(*g_threadPool);
+	::bvh::v2::DefaultBuilder<Node>::Config config;
+	config.quality = ::bvh::v2::DefaultBuilder<Node>::Quality::High;
+	if(!DoInitializeBvh(*executor, config))
+		executor = {};
+}
+
+const pragma::bvh::MeshRange *pragma::bvh::MeshBvhTree::FindMeshRange(size_t primIdx) const
 {
 	MeshRange search {};
 	search.start = primIdx * 3;
@@ -157,8 +172,33 @@ const pragma::bvh::MeshRange *pragma::bvh::BvhData::FindMeshRange(size_t primIdx
 	return &*it;
 }
 
-constexpr bool should_permute = true;
-bool pragma::bvh::BvhData::Raycast(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, HitData &outHitData)
+bool pragma::bvh::MeshBvhTree::DoInitializeBvh(::bvh::v2::ParallelExecutor &executor, ::bvh::v2::DefaultBuilder<Node>::Config &config)
+{
+	auto numTris = primitives.size();
+	if(numTris == 0)
+		return false;
+	std::vector<pragma::bvh::BBox> bboxes {numTris};
+	std::vector<Vec> centers {numTris};
+	executor.for_each(0, numTris, [&](size_t begin, size_t end) {
+		for(size_t i = begin; i < end; ++i) {
+			bboxes[i] = primitives[i].get_bbox();
+			centers[i] = primitives[i].get_center();
+		}
+	});
+
+	bvh = ::bvh::v2::DefaultBuilder<Node>::build(GetThreadPool(), bboxes, centers, config);
+
+	precomputed_tris.resize(numTris);
+	executor.for_each(0, numTris, [&](size_t begin, size_t end) {
+		for(size_t i = begin; i < end; ++i) {
+			auto j = should_permute ? bvh.prim_ids[i] : i;
+			precomputed_tris[i] = primitives[j];
+		}
+	});
+	return true;
+}
+
+bool pragma::bvh::MeshBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, HitData &outHitData)
 {
 	constexpr size_t invalid_id = std::numeric_limits<size_t>::max();
 	constexpr size_t stack_size = 64;
@@ -180,45 +220,69 @@ bool pragma::bvh::BvhData::Raycast(const Vector3 &origin, const Vector3 &dir, fl
 		return prim_id != invalid_id;
 	});
 	auto distDiff = maxDist - minDist;
-	if(distDiff > 0.0001f) {
-		outHitData.tmin = (ray.tmin - minDist) / distDiff;
-		outHitData.tmax = (ray.tmax - minDist) / distDiff;
-	}
-	else {
-		outHitData.tmin = 0.f;
-		outHitData.tmax = 0.f;
-	}
+	if(distDiff > 0.0001f)
+		outHitData.t = (ray.tmax - minDist) / distDiff;
+	else
+		outHitData.t = 0.f;
 	return prim_id != invalid_id;
 }
 
-void pragma::bvh::BvhData::Refit() { ::bvh::v2::ReinsertionOptimizer<Node>::optimize(*g_threadPool, bvh); }
+pragma::bvh::Ray pragma::bvh::get_ray(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) { return Ray {to_bvh_vector(origin), to_bvh_vector(dir), minDist, maxDist}; }
 
-void pragma::bvh::BvhData::InitializeBvh()
+void pragma::bvh::debug::print_bvh_tree(pragma::bvh::Bvh &bvh)
 {
-	auto numTris = primitives.size();
-	if(numTris == 0)
-		return;
-	executor = std::make_unique<::bvh::v2::ParallelExecutor>(*g_threadPool);
-	std::vector<pragma::bvh::BBox> bboxes {numTris};
-	std::vector<Vec> centers {numTris};
-	executor->for_each(0, numTris, [&](size_t begin, size_t end) {
-		for(size_t i = begin; i < end; ++i) {
-			bboxes[i] = primitives[i].get_bbox();
-			centers[i] = primitives[i].get_center();
-		}
-	});
-
-	::bvh::v2::DefaultBuilder<Node>::Config config;
-	config.quality = ::bvh::v2::DefaultBuilder<Node>::Quality::High;
-	bvh = ::bvh::v2::DefaultBuilder<Node>::build(*g_threadPool, bboxes, centers, config);
-
-	precomputed_tris.resize(numTris);
-	executor->for_each(0, numTris, [&](size_t begin, size_t end) {
-		for(size_t i = begin; i < end; ++i) {
-			auto j = should_permute ? bvh.prim_ids[i] : i;
-			precomputed_tris[i] = primitives[j];
-		}
-	});
+	std::stringstream ss;
+	std::function<void(const pragma::bvh::Node &, std::string)> printStack = nullptr;
+	printStack = [&printStack, &ss, &bvh](const pragma::bvh::Node &node, std::string t) {
+		auto bbox = node.get_bbox();
+		auto min = from_bvh_vector(bbox.min);
+		auto max = from_bvh_vector(bbox.max);
+		auto isLeaf = node.index.prim_count > 0;
+		ss << t;
+		if(isLeaf)
+			ss << "Leaf";
+		else
+			ss << "Node";
+		ss << "[" << min.x << "," << min.y << "," << min.z << "][" << max.x << "," << max.y << "," << max.z << "]\n";
+		if(isLeaf)
+			return;
+		printStack(bvh.nodes[node.index.first_id], t + "\t");
+		printStack(bvh.nodes[node.index.first_id + 1], t + "\t");
+	};
+	printStack(bvh.get_root(), "");
+	Con::cout << "BVH Tree:" << ss.str() << Con::endl;
 }
 
-pragma::bvh::Ray pragma::bvh::get_ray(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) { return Ray {to_bvh_vector(origin), to_bvh_vector(dir), minDist, maxDist}; }
+void pragma::bvh::debug::draw_bvh_tree(Game &game, pragma::bvh::Bvh &bvh, const umath::ScaledTransform &pose, float duration)
+{
+	constexpr size_t stack_size = 64;
+	::bvh::v2::SmallStack<pragma::bvh::Bvh::Index, stack_size> stack;
+	draw_node(game, bvh.get_root(), pose, duration);
+	auto start = bvh.get_root().index;
+	stack.push(start);
+restart:
+	while(!stack.is_empty()) {
+		auto top = stack.pop();
+		while(top.prim_count == 0) {
+			auto &left = bvh.nodes[top.first_id];
+			auto &right = bvh.nodes[top.first_id + 1];
+
+			draw_node(game, left, pose, duration);
+			draw_node(game, right, pose, duration);
+
+			if(true) {
+				auto near_index = left.index;
+				if(true)
+					stack.push(right.index);
+				top = near_index;
+			}
+		}
+	}
+}
+void pragma::bvh::debug::draw_node(Game &game, const pragma::bvh::Node &node, const umath::ScaledTransform &pose, float duration)
+{
+	auto bbox = node.get_bbox();
+	auto vstart = from_bvh_vector(bbox.min);
+	auto vend = from_bvh_vector(bbox.max);
+	game.DrawBox(pose.GetOrigin(), vstart, vend, pose.GetRotation(), Color::Aqua, Color {0, 255, 0, 64}, duration);
+}

@@ -109,6 +109,13 @@ namespace pragma::bvh {
 
 	DLLNETWORK Ray get_ray(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist);
 	DLLNETWORK const ::pragma::bvh::Vec &to_bvh_vector(const Vector3 &v);
+	DLLNETWORK const Vector3 &from_bvh_vector(const ::pragma::bvh::Vec &v);
+
+	namespace debug {
+		DLLNETWORK void print_bvh_tree(pragma::bvh::Bvh &bvh);
+		DLLNETWORK void draw_bvh_tree(Game &game, pragma::bvh::Bvh &bvh, const umath::ScaledTransform &pose = {}, float duration = 20.f);
+		DLLNETWORK void draw_node(Game &game, const pragma::bvh::Node &node, const umath::ScaledTransform &pose = {}, float duration = 20.f);
+	};
 };
 
 #endif

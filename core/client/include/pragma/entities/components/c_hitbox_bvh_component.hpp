@@ -24,7 +24,7 @@ namespace pragma {
 			Vector3 min;
 			Vector3 max;
 
-			BoneId boneId;
+			BoneId boneId = std::numeric_limits<uint16_t>::max();
 		};
 
 		static void generate_hitbox_meshes(Model &mdl);

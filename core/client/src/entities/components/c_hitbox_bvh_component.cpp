@@ -109,6 +109,19 @@ void CHitboxBvhComponent::InitializeHitboxBvh()
 		hbObb.boneId = pair.first;
 	}
 
+	// Test
+	/*Vector3 pos {0.f, 50.f, 0.f};
+	hitboxObbs.push_back({pos + Vector3 {-5.f, -5.f, -5.f}, pos + Vector3 {5.f, 5.f, 5.f}});
+	pos = {20.f, 30.f, 0.f};
+	hitboxObbs.push_back({pos + Vector3 {-5.f, -5.f, -5.f}, pos + Vector3 {5.f, 5.f, 5.f}});
+	pos = {0.f, 40.f, 20.f};
+	hitboxObbs.push_back({pos + Vector3 {-5.f, -5.f, -5.f}, pos + Vector3 {5.f, 5.f, 5.f}});*/
+	//pos = {-20.f, 30.f, 0.f};
+	//hitboxObbs.push_back({pos + Vector3 {-5.f, -5.f, -5.f}, pos + Vector3 {5.f, 5.f, 5.f}});
+	//pos = {0.f, 30.f, -20.f};
+	//hitboxObbs.push_back({pos + Vector3 {-5.f, -5.f, -5.f}, pos + Vector3 {5.f, 5.f, 5.f}});
+	//
+
 	bvhTree->InitializeBvh();
 	m_hitboxBvh = std::move(bvhTree);
 }
@@ -155,11 +168,21 @@ void CHitboxBvhComponent::InitializeHitboxMeshes()
 
 		std::vector<bvh::Primitive> bvhTris;
 		bvhTris.reserve(triIndices.size());
-		mesh->VisitIndices([&triIndices, &verts, &invPose, &bvhTris](auto *indexDataSrc, uint32_t numIndicesSrc) {
+		auto valid = true;
+		mesh->VisitIndices([&triIndices, &verts, &invPose, &bvhTris, &valid](auto *indexDataSrc, uint32_t numIndicesSrc) {
+			auto numVerts = verts.size();
 			for(auto triIdx : triIndices) {
+				if(triIdx + 2 >= numIndicesSrc) {
+					valid = false;
+					return;
+				}
 				auto idx0 = indexDataSrc[triIdx * 3];
 				auto idx1 = indexDataSrc[triIdx * 3 + 1];
 				auto idx2 = indexDataSrc[triIdx * 3 + 2];
+				if(idx0 >= numVerts || idx1 >= numVerts || idx2 >= numVerts) {
+					valid = false;
+					return;
+				}
 				auto &v0 = verts[idx0];
 				auto &v1 = verts[idx1];
 				auto &v2 = verts[idx2];
@@ -169,6 +192,9 @@ void CHitboxBvhComponent::InitializeHitboxMeshes()
 				bvhTris.push_back(bvh::create_triangle(pos0, pos1, pos2));
 			}
 		});
+
+		if(!valid)
+			continue;
 
 		auto bvhData = bvh::create_bvh_data(std::move(bvhTris));
 		m_hitboxBvhs[boneId] = std::move(bvhData);
@@ -416,8 +442,6 @@ pragma::bvh::BBox pragma::CHitboxBvhComponent::HitboxObb::ToBvhBBox(Vector3 &out
 	return pragma::bvh::BBox {pragma::bvh::to_bvh_vector(origin - hfAabb), pragma::bvh::to_bvh_vector(origin + hfAabb)};*/
 }
 
-std::vector<pragma::bvh::BBox> g_test_bboxes;
-std::vector<pragma::bvh::Vec> g_test_centers;
 bool ObbBvhTree::DoInitializeBvh(::bvh::v2::ParallelExecutor &executor, ::bvh::v2::DefaultBuilder<pragma::bvh::Node>::Config &config)
 {
 	auto numObbs = primitives.size();
@@ -432,25 +456,47 @@ bool ObbBvhTree::DoInitializeBvh(::bvh::v2::ParallelExecutor &executor, ::bvh::v
 			centers[i] = bvh::to_bvh_vector(center);
 		}
 	});
-	g_test_bboxes = bboxes;
-	g_test_centers = centers;
 
 	bvh = ::bvh::v2::DefaultBuilder<pragma::bvh::Node>::build(GetThreadPool(), bboxes, centers, config);
 	return true;
 }
 
 static Vector3 to_vec(pragma::bvh::Vec vec) { return Vector3 {vec.values[0], vec.values[1], vec.values[2]}; }
-static void draw_node(const pragma::bvh::Node &node, const Vector3 &offset = {})
+static void draw_node(const pragma::bvh::Node &node, const Vector3 &offset = {}, float duration = 20.f)
 {
 	auto bbox = node.get_bbox();
 	auto vstart = to_vec(bbox.min);
 	auto vend = to_vec(bbox.max);
-	DebugRenderer::DrawBox(vstart + offset, vend + offset, EulerAngles {}, Color {0, 255, 0, 64}, Color::Aqua, 12.f);
+	DebugRenderer::DrawBox(vstart + offset, vend + offset, EulerAngles {}, Color {0, 255, 0, 64}, Color::Aqua, duration);
 }
-static void draw_bvh_tree(pragma::bvh::Bvh &bvh)
+static void print_bvh_tree(pragma::bvh::Bvh &bvh)
+{
+	std::stringstream ss;
+	std::function<void(const pragma::bvh::Node &, std::string)> printStack = nullptr;
+	printStack = [&printStack, &ss, &bvh](const pragma::bvh::Node &node, std::string t) {
+		auto bbox = node.get_bbox();
+		auto min = to_vec(bbox.min);
+		auto max = to_vec(bbox.max);
+		auto isLeaf = node.index.prim_count > 0;
+		ss << t;
+		if(isLeaf)
+			ss << "Leaf";
+		else
+			ss << "Node";
+		ss << "[" << min.x << "," << min.y << "," << min.z << "][" << max.x << "," << max.y << "," << max.z << "]\n";
+		if(isLeaf)
+			return;
+		printStack(bvh.nodes[node.index.first_id], t + "\t");
+		printStack(bvh.nodes[node.index.first_id + 1], t + "\t");
+	};
+	printStack(bvh.get_root(), "");
+	Con::cout << "Tree:" << ss.str() << Con::endl;
+}
+static void draw_bvh_tree(pragma::bvh::Bvh &bvh, float duration = 20.f)
 {
 	constexpr size_t stack_size = 64;
 	::bvh::v2::SmallStack<pragma::bvh::Bvh::Index, stack_size> stack;
+	draw_node(bvh.get_root(), {}, duration);
 	auto start = bvh.get_root().index;
 	stack.push(start);
 restart:
@@ -460,8 +506,8 @@ restart:
 			auto &left = bvh.nodes[top.first_id];
 			auto &right = bvh.nodes[top.first_id + 1];
 
-			draw_node(left);
-			draw_node(right);
+			draw_node(left, {}, duration);
+			draw_node(right, {}, duration);
 
 			if(true) {
 				auto near_index = left.index;
@@ -481,80 +527,39 @@ bool ObbBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir, float minDis
 	constexpr size_t stack_size = 64;
 	constexpr bool use_robust_traversal = false;
 
-	auto *l = c_engine->GetClientState()->GetGameState()->GetLuaState();
-	std::vector<Vector3> tmpCenters;
-	for(auto &c : g_test_centers)
-		tmpCenters.push_back({c.values[0], c.values[1], c.values[2]});
-	std::vector<std::pair<Vector3, Vector3>> tmpBoxes;
-	for(auto &c : g_test_bboxes) {
-		tmpBoxes.push_back(std::pair<Vector3, Vector3> {Vector3 {c.min.values[0], c.min.values[1], c.min.values[2]}, Vector3 {c.max.values[0], c.max.values[1], c.max.values[2]}});
-	}
-
-	//for(auto &bbox : tmpBoxes) {
-	//	DebugRenderer::DrawBox(bbox.first, bbox.second, EulerAngles {}, Color {0, 0, 255, 32}, Color::White, 12.f);
-	//}
-	// draw_bvh_tree(bvh);
-	/*luabind::object t {luabind::newtable(l)};
-	t["bboxes"] = tmpBoxes;
-	t["centers"] = tmpCenters;
-	luabind::object tHits {luabind::newtable(l)};
-	uint32_t hitIdx = 1;*/
+	print_bvh_tree(bvh);
 
 	auto distDiff = maxDist - minDist;
 	::bvh::v2::SmallStack<pragma::bvh::Bvh::Index, stack_size> stack;
 	auto ray = pragma::bvh::get_ray(origin, dir, minDist, maxDist);
-	bvh.intersect<false, use_robust_traversal>(
-	  ray, bvh.get_root().index, stack,
-	  [&](size_t parent, size_t begin, size_t end) {
-		  for(size_t i = begin; i < end; ++i) {
-			  size_t j = pragma::bvh::should_permute ? i : bvh.prim_ids[i];
+	bvh.intersect<false, use_robust_traversal>(ray, bvh.get_root().index, stack, [&](size_t begin, size_t end) {
+		for(size_t i = begin; i < end; ++i) {
+			size_t j = bvh.prim_ids[i];
 
-			  auto &obb = primitives[j];
-			  float dist;
+			auto &obb = primitives[j];
+			float dist;
 
-			  /*auto &pose = obb.pose;
-			auto ang = EulerAngles {pose.GetRotation()};
-			luabind::object tHit {luabind::newtable(l)};
-			tHit["min"] = obb.min;
-			tHit["max"] = obb.max;
-			tHit["pose"] = obb.pose;
-			tHits[hitIdx] = tHit;
-			++hitIdx;*/
-			  auto &parentNode = bvh.nodes[parent];
-			  //auto nodeBbox = parentNode.get_bbox();
-			  //auto center = to_vec(nodeBbox.get_center());
-			  //auto min = to_vec(nodeBbox.min);
-			  //auto max = to_vec(nodeBbox.max);
-			  //min -= center;
-			  //max -= center;
-			  //DebugRenderer::DrawBox(center, min, max, EulerAngles {obb.pose.GetRotation()}, Color {0, 255, 255, 32}, Color::White, 12.f);
-			  DebugRenderer::DrawBox(obb.pose.GetOrigin(), obb.min, obb.max, EulerAngles {obb.pose.GetRotation()}, Color {0, 255, 255, 64}, Color::White, 12.f);
-			  auto tmpDir = dir * maxDist;
-			  if(umath::intersection::line_obb(origin, tmpDir, obb.min, obb.max, &dist, obb.pose.GetOrigin(), obb.pose.GetRotation())) {
-				  dist *= maxDist;
-				  if(dist < ray.tmax) {
-					  if(outHits.size() == outHits.capacity())
-						  outHits.reserve(outHits.size() * 2 + 5);
-					  HitData hitData {};
-					  hitData.primitiveIndex = i;
+			auto tmpDir = dir * maxDist;
+			auto hit = umath::intersection::line_obb(origin, tmpDir, obb.min, obb.max, &dist, obb.pose.GetOrigin(), obb.pose.GetRotation());
+			auto hitColor = hit ? Color {255, 255, 0, 64} : Color {0, 255, 255, 64};
+			DebugRenderer::DrawBox(obb.pose.GetOrigin(), obb.min, obb.max, EulerAngles {obb.pose.GetRotation()}, hitColor, Color::White, 12.f);
+			if(hit) {
+				dist *= maxDist;
+				if(outHits.size() == outHits.capacity())
+					outHits.reserve(outHits.size() * 2 + 5);
+				HitData hitData {};
+				hitData.primitiveIndex = i;
 
-					  ray.tmax = dist;
-					  if(distDiff > 0.0001f)
-						  hitData.t = (ray.tmax - minDist) / distDiff;
-					  else
-						  hitData.t = 0.f;
+				ray.tmax = dist;
+				if(distDiff > 0.0001f)
+					hitData.t = (ray.tmax - minDist) / distDiff;
+				else
+					hitData.t = 0.f;
 
-					  util::insert_sorted(outHits, hitData, [](const HitData &a, const HitData &b) { return a.t < b.t; });
-				  }
-			  }
-		  }
-		  return false;
-	  },
-	  [](const pragma::bvh::Node &left, const pragma::bvh::Node &right) {
-		  draw_node(left, Vector3 {0, 200, 0});
-		  draw_node(right, Vector3 {0, 200, 0});
-	  });
-	//t["hits"] = tHits;
-	//luabind::globals(l)["test"] = t;
+				util::insert_sorted(outHits, hitData, [](const HitData &a, const HitData &b) { return a.t < b.t; });
+			}
+		}
+		return false;
+	});
 	return !outHits.empty();
 }

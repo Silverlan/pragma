@@ -9,6 +9,7 @@
 #include "pragma/entities/components/c_hitbox_bvh_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/debug/c_debugoverlay.h"
 #include <pragma/entities/components/bvh_data.hpp>
 #include <pragma/entities/components/util_bvh.hpp>
@@ -242,7 +243,16 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 {
 	if(!m_hitboxBvh)
 		return false;
-	auto &ent = GetEntity();
+	auto &ent = static_cast<CBaseEntity &>(GetEntity());
+	auto *renderC = ent.GetRenderComponent();
+	if(!renderC)
+		return false;
+
+	auto &renderBounds = renderC->GetAbsoluteRenderBounds();
+	float t;
+	if(umath::intersection::line_aabb(origin, dir, renderBounds.min, renderBounds.max, &t) != umath::intersection::Result::Intersect || t > maxDist)
+		return false; // Ray doesn't intersect with render bounds, so we can quit early
+
 	auto animC = ent.GetAnimatedComponent();
 	if(animC.expired())
 		return false;

@@ -17,8 +17,7 @@ namespace pragma {
 	  public:
 		struct DLLCLIENT HitboxObb {
 			HitboxObb(const Vector3 &min, const Vector3 &max);
-			pragma::bvh::BBox ToBvhBBox(Vector3 &outOrigin) const;
-			umath::ScaledTransform pose;
+			pragma::bvh::BBox ToBvhBBox(const umath::ScaledTransform &pose, Vector3 &outOrigin) const;
 			Vector3 position; // Position relative to bone
 			Vector3 halfExtents;
 			Vector3 min;
@@ -59,9 +58,11 @@ namespace pragma {
 			float t;
 		};
 
-		bool Raycast(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, std::vector<HitData> &outHits);
+		void InitializeBvh(const std::vector<umath::ScaledTransform> &poses);
+		bool Raycast(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, const std::vector<umath::ScaledTransform> &bonePoses, std::vector<HitData> &outHits);
 		std::vector<pragma::CHitboxBvhComponent::HitboxObb> primitives;
 	  private:
+		const std::vector<umath::ScaledTransform> *m_poses = nullptr;
 		virtual bool DoInitializeBvh(::bvh::v2::ParallelExecutor &executor, ::bvh::v2::DefaultBuilder<pragma::bvh::Node>::Config &config) override;
 	};
 };

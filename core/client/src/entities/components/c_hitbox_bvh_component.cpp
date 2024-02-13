@@ -21,6 +21,7 @@
 #include <pragma/entities/components/base_bvh_component.hpp>
 #include <mathutil/boundingvolume.h>
 #include <bvh/v2/stack.h>
+#include <ranges>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -84,27 +85,49 @@ void CHitboxBvhComponent::UpdateHitboxBvh()
 	if(!animC)
 		return;
 	auto &bonePoses = animC->GetProcessedBones();
-	for(auto &hbObb : m_hitboxBvh->primitives) {
-		if(hbObb.boneId >= bonePoses.size())
-			continue;
-		auto &pose = bonePoses[hbObb.boneId];
-		hbObb.pose = pose;
-		// TODO: Re-scale min,max bounds?
+	auto &bvh = m_hitboxBvh->bvh;
+	// It's important to process the nodes in reverse order, as this makes
+	// sure that children are processed before their parents.
+	for(auto &node : std::ranges::reverse_view {bvh.nodes}) {
+		if(node.is_leaf()) {
+			// refit node according to contents
+			auto begin = node.index.first_id;
+			auto end = begin + node.index.prim_count;
+			for(size_t i = begin; i < end; ++i) {
+				size_t j = bvh.prim_ids[i];
+
+				auto &hbObb = m_hitboxBvh->primitives[j];
+				if(hbObb.boneId >= bonePoses.size())
+					continue;
+				auto &pose = bonePoses[hbObb.boneId];
+				Vector3 origin;
+				auto bbox = hbObb.ToBvhBBox(pose, origin);
+				node.set_bbox(bbox);
+			}
+		}
+		else {
+			auto &left = bvh.nodes[node.index.first_id];
+			auto &right = bvh.nodes[node.index.first_id + 1];
+			node.set_bbox(left.get_bbox().extend(right.get_bbox()));
+		}
 	}
-	//m_hitboxBvh->Refit();
+	m_hitboxBvh->Refit();
 }
 
 void CHitboxBvhComponent::InitializeHitboxBvh()
 {
-	auto &mdl = GetEntity().GetModel();
+	auto &ent = GetEntity();
+	auto animC = ent.GetAnimatedComponent();
+	if(animC.expired())
+		return;
+	auto &mdl = ent.GetModel();
 	auto &hitboxes = mdl->GetHitboxes();
 	auto bvhTree = std::make_unique<ObbBvhTree>();
 	auto &hitboxObbs = bvhTree->primitives;
 	hitboxObbs.reserve(hitboxes.size());
-	auto &ref = mdl->GetReference();
+	auto numBones = mdl->GetSkeleton().GetBoneCount();
 	for(auto &pair : hitboxes) {
-		umath::ScaledTransform pose;
-		if(!ref.GetBonePose(pair.first, pose))
+		if(pair.first >= numBones)
 			continue;
 		auto it = m_hitboxBvhs.find(pair.first);
 		if(it == m_hitboxBvhs.end())
@@ -112,11 +135,9 @@ void CHitboxBvhComponent::InitializeHitboxBvh()
 		auto &hb = pair.second;
 		hitboxObbs.push_back({hb.min, hb.max});
 		auto &hbObb = hitboxObbs.back();
-		hbObb.pose = pose;
 		hbObb.boneId = pair.first;
 	}
-
-	bvhTree->InitializeBvh();
+	bvhTree->InitializeBvh(animC->GetProcessedBones());
 	m_hitboxBvh = std::move(bvhTree);
 }
 
@@ -219,7 +240,7 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 
 	// Raycast against our hitbox BVH
 	std::vector<ObbBvhTree::HitData> hits;
-	auto res = m_hitboxBvh->Raycast(originEs, dirEs, minDist, maxDist, hits);
+	auto res = m_hitboxBvh->Raycast(originEs, dirEs, minDist, maxDist, effectiveBonePoses, hits);
 	if(!res)
 		return false;
 
@@ -367,17 +388,25 @@ void CHitboxBvhComponent::DebugDraw()
 {
 	if(!m_hitboxBvh)
 		return;
+	auto &ent = GetEntity();
+	auto animC = ent.GetAnimatedComponent();
+	if(animC.expired())
+		return;
+	auto &effectivePoses = animC->GetProcessedBones();
+	auto numBones = effectivePoses.size();
 	auto color = Color::Red;
 	auto outlineColor = Color::Lime;
 	auto duration = 20.f;
 	for(auto &hObb : m_hitboxBvh->primitives) {
-		auto pose = hObb.pose;
+		if(hObb.boneId >= numBones)
+			continue;
+		auto &pose = effectivePoses[hObb.boneId];
 		pose.TranslateLocal(hObb.position);
 		auto &pos = pose.GetOrigin();
 		::DebugRenderer::DrawBox(pos, -hObb.halfExtents, hObb.halfExtents, EulerAngles {pose.GetRotation()}, color, outlineColor, duration);
 	}
 
-	auto &mdl = GetEntity().GetModel();
+	auto &mdl = ent.GetModel();
 	auto &ref = mdl->GetReference();
 	for(auto &pair : m_hitboxBvhs) {
 		umath::ScaledTransform pose;
@@ -412,7 +441,7 @@ pragma::CHitboxBvhComponent::HitboxObb::HitboxObb(const Vector3 &min, const Vect
 	halfExtents = (max - min) / 2.f;
 }
 
-pragma::bvh::BBox pragma::CHitboxBvhComponent::HitboxObb::ToBvhBBox(Vector3 &outOrigin) const
+pragma::bvh::BBox pragma::CHitboxBvhComponent::HitboxObb::ToBvhBBox(const umath::ScaledTransform &pose, Vector3 &outOrigin) const
 {
 	// Calculate AABB around OBB
 	auto rotationMatrix = glm::mat3_cast(pose.GetRotation());
@@ -439,12 +468,16 @@ bool ObbBvhTree::DoInitializeBvh(::bvh::v2::ParallelExecutor &executor, ::bvh::v
 	auto numObbs = primitives.size();
 	if(numObbs == 0)
 		return false;
+	auto numBones = m_poses->size();
 	std::vector<pragma::bvh::BBox> bboxes {numObbs};
 	std::vector<pragma::bvh::Vec> centers {numObbs};
 	executor.for_each(0, numObbs, [&](size_t begin, size_t end) {
 		for(size_t i = begin; i < end; ++i) {
 			Vector3 center;
-			bboxes[i] = primitives[i].ToBvhBBox(center);
+			auto &hObb = primitives[i];
+			if(hObb.boneId >= numBones)
+				continue;
+			bboxes[i] = hObb.ToBvhBBox((*m_poses)[hObb.boneId], center);
 			centers[i] = bvh::to_bvh_vector(center);
 		}
 	});
@@ -453,7 +486,14 @@ bool ObbBvhTree::DoInitializeBvh(::bvh::v2::ParallelExecutor &executor, ::bvh::v
 	return true;
 }
 
-bool ObbBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, std::vector<HitData> &outHits)
+void ObbBvhTree::InitializeBvh(const std::vector<umath::ScaledTransform> &poses)
+{
+	m_poses = &poses;
+	pragma::bvh::BvhTree::InitializeBvh();
+	m_poses = nullptr;
+}
+
+bool ObbBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, const std::vector<umath::ScaledTransform> &bonePoses, std::vector<HitData> &outHits)
 {
 	constexpr size_t invalid_id = std::numeric_limits<size_t>::max();
 	constexpr size_t stack_size = 64;
@@ -462,15 +502,19 @@ bool ObbBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir, float minDis
 	auto distDiff = maxDist - minDist;
 	::bvh::v2::SmallStack<pragma::bvh::Bvh::Index, stack_size> stack;
 	auto ray = pragma::bvh::get_ray(origin, dir, minDist, maxDist);
+	auto numBones = bonePoses.size();
 	bvh.intersect<false, use_robust_traversal>(ray, bvh.get_root().index, stack, [&](size_t begin, size_t end) {
 		for(size_t i = begin; i < end; ++i) {
 			size_t j = bvh.prim_ids[i];
 
 			auto &obb = primitives[j];
+			if(obb.boneId >= numBones)
+				continue;
+			auto &pose = bonePoses[obb.boneId];
 			float dist;
 
 			auto tmpDir = dir * maxDist;
-			auto hit = umath::intersection::line_obb(origin, tmpDir, obb.min, obb.max, &dist, obb.pose.GetOrigin(), obb.pose.GetRotation());
+			auto hit = umath::intersection::line_obb(origin, tmpDir, obb.min, obb.max, &dist, pose.GetOrigin(), pose.GetRotation());
 			if(hit) {
 				dist *= maxDist;
 				if(outHits.size() == outHits.capacity())

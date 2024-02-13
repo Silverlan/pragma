@@ -15,3 +15,4 @@ external_libs/*
 !external_libs/sharedutils-static*
 !external_libs/.clang-format*
 !external_libs/CMakeLists.txt
+*.pyc

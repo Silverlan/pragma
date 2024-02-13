@@ -158,8 +158,8 @@ void CHitboxBvhComponent::InitializeHitboxMeshes()
 	}
 	auto &skeleton = mdl->GetSkeleton();
 	auto &ref = mdl->GetReference();
-	for(auto udmHbMesh : udmHbMeshes.ElIt()) {
-		auto &boneName = udmHbMesh.key;
+	for(auto udmHbMeshPair : udmHbMeshes.ElIt()) {
+		auto &boneName = udmHbMeshPair.key;
 		auto boneId = skeleton.LookupBone(std::string {boneName});
 		if(boneId < 0)
 			continue;
@@ -168,56 +168,59 @@ void CHitboxBvhComponent::InitializeHitboxMeshes()
 			continue;
 		auto invPose = pose.GetInverse();
 
-		std::string meshUuid;
-		udmHbMesh.property["meshUuid"](meshUuid);
-		auto itMesh = mdlMeshes.find(meshUuid);
-		if(itMesh == mdlMeshes.end())
-			continue;
-		auto &mesh = itMesh->second;
-		std::vector<uint32_t> triIndices;
-		udmHbMesh.property["triangleIndices"](triIndices);
-		if(triIndices.empty())
-			continue;
-		auto &verts = mesh->GetVertices();
+		auto &udmBoneMeshes = udmHbMeshPair.property;
+		for(auto udmBoneMesh : udmBoneMeshes) {
+			std::string meshUuid;
+			udmBoneMesh["meshUuid"](meshUuid);
+			auto itMesh = mdlMeshes.find(meshUuid);
+			if(itMesh == mdlMeshes.end())
+				continue;
+			auto &mesh = itMesh->second;
+			std::vector<uint32_t> triIndices;
+			udmBoneMesh["triangleIndices"](triIndices);
+			if(triIndices.empty())
+				continue;
+			auto &verts = mesh->GetVertices();
 
-		std::vector<bvh::Primitive> bvhTris;
-		bvhTris.reserve(triIndices.size());
-		auto valid = true;
-		mesh->VisitIndices([&triIndices, &verts, &invPose, &bvhTris, &valid](auto *indexDataSrc, uint32_t numIndicesSrc) {
-			auto numVerts = verts.size();
-			for(auto triIdx : triIndices) {
-				if(triIdx + 2 >= numIndicesSrc) {
-					valid = false;
-					return;
+			std::vector<bvh::Primitive> bvhTris;
+			bvhTris.reserve(triIndices.size());
+			auto valid = true;
+			mesh->VisitIndices([&triIndices, &verts, &invPose, &bvhTris, &valid](auto *indexDataSrc, uint32_t numIndicesSrc) {
+				auto numVerts = verts.size();
+				for(auto triIdx : triIndices) {
+					if(triIdx + 2 >= numIndicesSrc) {
+						valid = false;
+						return;
+					}
+					auto idx0 = indexDataSrc[triIdx * 3];
+					auto idx1 = indexDataSrc[triIdx * 3 + 1];
+					auto idx2 = indexDataSrc[triIdx * 3 + 2];
+					if(idx0 >= numVerts || idx1 >= numVerts || idx2 >= numVerts) {
+						valid = false;
+						return;
+					}
+					auto &v0 = verts[idx0];
+					auto &v1 = verts[idx1];
+					auto &v2 = verts[idx2];
+					auto pos0 = invPose * v0.position;
+					auto pos1 = invPose * v1.position;
+					auto pos2 = invPose * v2.position;
+					bvhTris.push_back(bvh::create_triangle(pos0, pos1, pos2));
 				}
-				auto idx0 = indexDataSrc[triIdx * 3];
-				auto idx1 = indexDataSrc[triIdx * 3 + 1];
-				auto idx2 = indexDataSrc[triIdx * 3 + 2];
-				if(idx0 >= numVerts || idx1 >= numVerts || idx2 >= numVerts) {
-					valid = false;
-					return;
-				}
-				auto &v0 = verts[idx0];
-				auto &v1 = verts[idx1];
-				auto &v2 = verts[idx2];
-				auto pos0 = invPose * v0.position;
-				auto pos1 = invPose * v1.position;
-				auto pos2 = invPose * v2.position;
-				bvhTris.push_back(bvh::create_triangle(pos0, pos1, pos2));
-			}
-		});
+			});
 
-		if(!valid)
-			continue;
-		auto bvhData = bvh::create_bvh_data(std::move(bvhTris));
-		auto it = m_hitboxBvhs.find(boneId);
-		if(it == m_hitboxBvhs.end())
-			it = m_hitboxBvhs.insert(std::make_pair(boneId, std::vector<HitboxBvhInfo> {})).first;
-		it->second.push_back({});
-		auto &hitboxBvhInfo = it->second.back();
-		hitboxBvhInfo.bvhTree = std::move(bvhData);
-		hitboxBvhInfo.bvhTriToOriginalTri = std::move(triIndices);
-		hitboxBvhInfo.mesh = mesh;
+			if(!valid)
+				continue;
+			auto bvhData = bvh::create_bvh_data(std::move(bvhTris));
+			auto it = m_hitboxBvhs.find(boneId);
+			if(it == m_hitboxBvhs.end())
+				it = m_hitboxBvhs.insert(std::make_pair(boneId, std::vector<HitboxBvhInfo> {})).first;
+			it->second.push_back({});
+			auto &hitboxBvhInfo = it->second.back();
+			hitboxBvhInfo.bvhTree = std::move(bvhData);
+			hitboxBvhInfo.bvhTriToOriginalTri = std::move(triIndices);
+			hitboxBvhInfo.mesh = mesh;
+		}
 	}
 }
 
@@ -352,6 +355,11 @@ void pragma::CHitboxBvhComponent::generate_hitbox_meshes(Model &mdl)
 		if(isTestBone) {
 			::DebugRenderer::DrawBox(pos, hbMin, hbMax, rot, Color {255, 255, 0, 64}, Color::White, 20.f);
 		}
+		struct BoneMesh {
+			std::string meshUuid;
+			std::vector<uint32_t> usedTris;
+		};
+		std::vector<std::shared_ptr<BoneMesh>> boneMeshes;
 		for(auto &pair : lodLast.meshReplacements) {
 			auto mg = mdl.GetMeshGroup(pair.second);
 			if(!mg)
@@ -390,11 +398,24 @@ void pragma::CHitboxBvhComponent::generate_hitbox_meshes(Model &mdl)
 
 						if(usedTris.empty())
 							continue;
-						auto udmHb = udmHbMeshes[bone->name];
-						udmHb["meshUuid"] = util::uuid_to_string(uuid);
-						udmHb.AddArray("triangleIndices", usedTris, udm::ArrayType::Compressed);
+						if(boneMeshes.size() == boneMeshes.capacity())
+							boneMeshes.reserve(boneMeshes.size() * 2 + 10);
+						auto bm = std::make_shared<BoneMesh>();
+						bm->meshUuid = util::uuid_to_string(uuid);
+						bm->usedTris = std::move(usedTris);
+						boneMeshes.push_back(bm);
 					}
 				}
+			}
+		}
+
+		if(!boneMeshes.empty()) {
+			auto udmBoneMeshes = udmHbMeshes.AddArray(bone->name, boneMeshes.size());
+			uint32_t idx = 0;
+			for(auto &bm : boneMeshes) {
+				udmBoneMeshes[idx]["meshUuid"] = bm->meshUuid;
+				udmBoneMeshes[idx].AddArray("triangleIndices", bm->usedTris, udm::ArrayType::Compressed);
+				++idx;
 			}
 		}
 	}

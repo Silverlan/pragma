@@ -83,7 +83,7 @@ namespace pragma {
 		void InitializeHitboxBvh();
 		bool InitializeModel();
 		void InitializeHitboxMeshCache();
-		void InitializeHitboxMeshes();
+		void InitializeHitboxMeshBvhs();
 		std::unordered_map<BoneId, std::vector<std::shared_ptr<bvh::MeshHitboxBvhCache>>> m_hitboxBvhs;
 		std::shared_ptr<ObbBvhTree> m_hitboxBvh;
 	};

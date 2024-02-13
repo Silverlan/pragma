@@ -64,6 +64,7 @@ void CHitboxBvhComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnModelChanged(); });
+	BindEventUnhandled(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { InitializeHitboxMeshBvhs(); });
 }
 
 void CHitboxBvhComponent::InitializeBvh()
@@ -93,7 +94,8 @@ bool CHitboxBvhComponent::InitializeModel()
 	auto udmHbMeshes = extData["hitboxMeshes"];
 	if(!udmHbMeshes)
 		pragma::CHitboxBvhComponent::generate_hitbox_meshes(*mdl);
-	InitializeHitboxMeshes();
+	InitializeHitboxMeshCache();
+	InitializeHitboxMeshBvhs();
 	// TODO: Save model
 	// std::string err;
 	// mdl->Save(GetGame(), err);
@@ -164,25 +166,51 @@ void CHitboxBvhComponent::InitializeHitboxBvh()
 		auto &hbObb = hitboxObbs.back();
 		hbObb.boneId = pair.first;
 	}
+	if(hitboxObbs.empty()) {
+		m_hitboxBvh = nullptr;
+		return;
+	}
 	bvhTree->InitializeBvh(animC->GetProcessedBones());
 	m_hitboxBvh = std::move(bvhTree);
 }
 
-void CHitboxBvhComponent::InitializeHitboxMeshes()
+void CHitboxBvhComponent::InitializeHitboxMeshBvhs()
 {
+	m_hitboxBvhs.clear();
 	auto &ent = GetEntity();
-	InitializeHitboxMeshCache();
+	auto *mdlC = ent.GetModelComponent();
+	if(!mdlC)
+		return;
 	auto &mdl = ent.GetModel();
 	auto mdlName = ent.GetModelName();
 	auto &bvhCache = GetGlobalBvhCache();
 	auto *cache = bvhCache.GetModelCache(mdlName);
 	if(!cache)
 		return;
+	auto numLods = mdl->GetLODCount();
+	if(numLods == 0)
+		return;
+	auto &lastLod = mdl->GetLODs().back();
+	std::vector<std::shared_ptr<ModelSubMesh>> lodMeshes;
+	mdl->GetBodyGroupMeshes(mdlC->GetBodyGroups(), lastLod.lod, lodMeshes);
+
+	std::unordered_set<std::string> renderMeshUuids;
+	renderMeshUuids.reserve(lodMeshes.size());
+	for(auto &subMesh : lodMeshes)
+		renderMeshUuids.insert(util::uuid_to_string(subMesh->GetUuid()));
+	// Get the BVH caches for the current body groups
 	for(auto &[boneId, boneCache] : cache->boneCache) {
-		auto &rtCache = m_hitboxBvhs[boneId] = std::vector<std::shared_ptr<pragma::bvh::MeshHitboxBvhCache>> {};
-		rtCache.reserve(boneCache->meshCache.size());
-		for(auto &[uuid, meshCache] : boneCache->meshCache)
-			rtCache.push_back(meshCache);
+		std::vector<std::shared_ptr<pragma::bvh::MeshHitboxBvhCache>> *boneMeshCache = nullptr;
+		for(auto &[uuid, meshCache] : boneCache->meshCache) {
+			if(renderMeshUuids.find(uuid) == renderMeshUuids.end())
+				continue;
+			if(boneMeshCache == nullptr) {
+				auto &rtCache = m_hitboxBvhs[boneId] = std::vector<std::shared_ptr<pragma::bvh::MeshHitboxBvhCache>> {};
+				rtCache.reserve(boneCache->meshCache.size());
+				boneMeshCache = &rtCache;
+			}
+			boneMeshCache->push_back(meshCache);
+		}
 	}
 }
 

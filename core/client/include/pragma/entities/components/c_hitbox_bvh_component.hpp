@@ -13,6 +13,21 @@
 
 namespace pragma {
 	class ObbBvhTree;
+	namespace bvh {
+		struct DLLCLIENT DebugDrawInfo {
+			enum class Flags : uint8_t {
+				None = 0u,
+				DrawTraversedNodesBit = 1u,
+				DrawTraversedLeavesBit = DrawTraversedNodesBit << 1u,
+				DrawHitLeavesBit = DrawTraversedLeavesBit << 1u,
+				DrawTraversedMeshesBit = DrawHitLeavesBit << 1u,
+				DrawHitMeshesBit = DrawTraversedMeshesBit << 1u,
+			};
+			Flags flags = Flags::DrawHitLeavesBit;
+			umath::ScaledTransform basePose;
+			float duration = 0.1f;
+		};
+	};
 	class DLLCLIENT CHitboxBvhComponent final : public BaseEntityComponent {
 	  public:
 		struct DLLCLIENT HitboxObb {
@@ -35,8 +50,9 @@ namespace pragma {
 		virtual void OnEntitySpawn() override;
 		void InitializeBvh();
 		void UpdateTest();
-		bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::bvh::HitInfo &outHitInfo);
+		bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::bvh::HitInfo &outHitInfo, const bvh::DebugDrawInfo *debugDrawInfo = nullptr);
 		void UpdateHitboxBvh();
+		void DebugDrawHitboxMeshes(BoneId boneId, float duration = 12.f) const;
 	  private:
 		struct HitboxBvhInfo {
 			std::shared_ptr<pragma::bvh::MeshBvhTree> bvhTree;
@@ -59,12 +75,13 @@ namespace pragma {
 		};
 
 		void InitializeBvh(const std::vector<umath::ScaledTransform> &poses);
-		bool Raycast(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, const std::vector<umath::ScaledTransform> &bonePoses, std::vector<HitData> &outHits);
+		bool Raycast(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, const std::vector<umath::ScaledTransform> &bonePoses, std::vector<HitData> &outHits, const bvh::DebugDrawInfo *debugDrawInfo = nullptr);
 		std::vector<pragma::CHitboxBvhComponent::HitboxObb> primitives;
 	  private:
 		const std::vector<umath::ScaledTransform> *m_poses = nullptr;
 		virtual bool DoInitializeBvh(::bvh::v2::ParallelExecutor &executor, ::bvh::v2::DefaultBuilder<pragma::bvh::Node>::Config &config) override;
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::bvh::DebugDrawInfo::Flags)
 
 #endif

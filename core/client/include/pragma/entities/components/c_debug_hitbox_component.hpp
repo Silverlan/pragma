@@ -24,8 +24,14 @@ namespace pragma {
 		virtual void OnEntitySpawn() override;
 		virtual void OnRemove() override;
 		virtual void OnTick(double tDelta) override;
+
+		void SetHitboxColor(BoneId boneId, const std::optional<Color> &color);
 	  protected:
+		void InitializeDebugObjects();
+		void ClearDebugObjects();
 		std::vector<std::shared_ptr<DebugRenderer::BaseObject>> m_debugObjects;
+		std::unordered_map<BoneId, Color> m_hitboxColors;
+		bool m_dirty = false;
 	};
 };
 

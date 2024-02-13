@@ -30,6 +30,10 @@ void CDebugHitboxComponent::OnTick(double tDelta)
 	auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	if(mdl == nullptr)
 		return;
+	if(m_dirty) {
+		m_dirty = false;
+		InitializeDebugObjects();
+	}
 	auto boneIds = mdl->GetHitboxBones();
 	uint32_t objId = 0;
 	auto numObjs = m_debugObjects.size();
@@ -49,16 +53,32 @@ void CDebugHitboxComponent::OnTick(double tDelta)
 void CDebugHitboxComponent::OnRemove()
 {
 	BaseEntityComponent::OnRemove();
+	ClearDebugObjects();
+}
+void CDebugHitboxComponent::SetHitboxColor(BoneId boneId, const std::optional<Color> &color)
+{
+	m_dirty = true;
+	if(color) {
+		m_hitboxColors[boneId] = *color;
+		return;
+	}
+
+	auto it = m_hitboxColors.find(boneId);
+	if(it != m_hitboxColors.end())
+		m_hitboxColors.erase(it);
+}
+void CDebugHitboxComponent::ClearDebugObjects()
+{
 	for(auto &obj : m_debugObjects) {
 		if(!obj->IsValid())
 			continue;
 		obj->Remove();
 	}
+	m_debugObjects.clear();
 }
-void CDebugHitboxComponent::OnEntitySpawn()
+void CDebugHitboxComponent::InitializeDebugObjects()
 {
-	BaseEntityComponent::OnEntitySpawn();
-
+	ClearDebugObjects();
 	auto mdlComponent = GetEntity().GetModelComponent();
 	auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	if(mdl == nullptr)
@@ -71,37 +91,47 @@ void CDebugHitboxComponent::OnEntitySpawn()
 			Quat rot;
 			if(mdlComponent->GetHitboxBounds(boneId, min, max, origin, rot) == true) {
 				Color col {255, 255, 255, 255};
-				switch(hb.group) {
-				case HitGroup::Head:
-					col = Color::Red;
-					break;
-				case HitGroup::Chest:
-					col = Color::Lime;
-					break;
-				case HitGroup::Stomach:
-					col = Color::Blue;
-					break;
-				case HitGroup::LeftArm:
-					col = Color::Yellow;
-					break;
-				case HitGroup::RightArm:
-					col = Color::Cyan;
-					break;
-				case HitGroup::LeftLeg:
-					col = Color::Magenta;
-					break;
-				case HitGroup::RightLeg:
-					col = Color::OrangeRed;
-					break;
-				case HitGroup::Gear:
-					col = Color::SpringGreen;
-					break;
-				case HitGroup::Tail:
-					col = Color::Violet;
-					break;
+				auto it = m_hitboxColors.find(boneId);
+				if(it != m_hitboxColors.end())
+					col = it->second;
+				else {
+					switch(hb.group) {
+					case HitGroup::Head:
+						col = Color::Red;
+						break;
+					case HitGroup::Chest:
+						col = Color::Lime;
+						break;
+					case HitGroup::Stomach:
+						col = Color::Blue;
+						break;
+					case HitGroup::LeftArm:
+						col = Color::Yellow;
+						break;
+					case HitGroup::RightArm:
+						col = Color::Cyan;
+						break;
+					case HitGroup::LeftLeg:
+						col = Color::Magenta;
+						break;
+					case HitGroup::RightLeg:
+						col = Color::OrangeRed;
+						break;
+					case HitGroup::Gear:
+						col = Color::SpringGreen;
+						break;
+					case HitGroup::Tail:
+						col = Color::Violet;
+						break;
+					}
 				}
 				m_debugObjects.push_back(::DebugRenderer::DrawBox(origin, min, max, rot, col));
 			}
 		}
 	}
+}
+void CDebugHitboxComponent::OnEntitySpawn()
+{
+	BaseEntityComponent::OnEntitySpawn();
+	InitializeDebugObjects();
 }

@@ -163,7 +163,6 @@ void CHitboxBvhComponent::InitializeHitboxMeshes()
 		auto boneId = skeleton.LookupBone(std::string {boneName});
 		if(boneId < 0)
 			continue;
-
 		umath::ScaledTransform pose;
 		if(!ref.GetBonePose(boneId, pose))
 			continue;
@@ -222,7 +221,19 @@ void CHitboxBvhComponent::InitializeHitboxMeshes()
 	}
 }
 
-bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::bvh::HitInfo &outHitInfo)
+static void draw_mesh(const pragma::bvh::MeshBvhTree &bvhTree, const umath::ScaledTransform &pose, const Color &color, const Color &outlineColor, float duration = 0.1f)
+{
+	std::vector<Vector3> verts;
+	verts.reserve(bvhTree.primitives.size() * 3);
+	for(auto &tri : bvhTree.primitives) {
+		verts.push_back(pose * pragma::bvh::from_bvh_vector(tri.p0));
+		verts.push_back(pose * pragma::bvh::from_bvh_vector(tri.p1));
+		verts.push_back(pose * pragma::bvh::from_bvh_vector(tri.p2));
+	}
+	DebugRenderer::DrawMesh(verts, color, outlineColor, duration);
+}
+
+bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::bvh::HitInfo &outHitInfo, const bvh::DebugDrawInfo *debugDrawInfo)
 {
 	if(!m_hitboxBvh)
 		return false;
@@ -238,13 +249,16 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 	auto dirEs = dir;
 	uvec::rotate(&dirEs, entPoseInv.GetRotation());
 
+	auto debugDraw = (debugDrawInfo->flags != bvh::DebugDrawInfo::Flags::None);
+
 	// Raycast against our hitbox BVH
 	std::vector<ObbBvhTree::HitData> hits;
-	auto res = m_hitboxBvh->Raycast(originEs, dirEs, minDist, maxDist, effectiveBonePoses, hits);
+	auto res = m_hitboxBvh->Raycast(originEs, dirEs, minDist, maxDist, effectiveBonePoses, hits, debugDrawInfo);
 	if(!res)
 		return false;
 
 	// Now we can do a more precise raycast against the hitbox mesh bvh trees
+	Con::cout << Con::endl;
 	for(auto &hitData : hits) {
 		auto &hObb = m_hitboxBvh->primitives[hitData.primitiveIndex];
 		auto it = m_hitboxBvhs.find(hObb.boneId);
@@ -253,6 +267,7 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 		auto boneId = hObb.boneId;
 		if(boneId >= effectiveBonePoses.size())
 			continue;
+		Con::cout << ent.GetModel()->GetSkeleton().GetBone(hObb.boneId).lock()->name << Con::endl;
 		auto bonePoseInv = effectiveBonePoses[boneId].GetInverse();
 
 		// Move ray to bone space
@@ -267,6 +282,12 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 
 			bvh::MeshBvhTree::HitData meshHitData;
 			auto res = meshBvh->Raycast(originBs, dirBs, minDist, maxDist, meshHitData);
+			if(debugDraw) {
+				if(umath::is_flag_set(debugDrawInfo->flags, bvh::DebugDrawInfo::Flags::DrawTraversedMeshesBit) || (res && umath::is_flag_set(debugDrawInfo->flags, bvh::DebugDrawInfo::Flags::DrawHitMeshesBit))) {
+					auto color = res ? Color {0, 255, 0, 64} : Color {255, 0, 0, 64};
+					draw_mesh(*meshBvh, effectiveBonePoses[boneId] * debugDrawInfo->basePose, color, Color::White, debugDrawInfo->duration);
+				}
+			}
 			if(!res)
 				continue;
 			if(meshHitData.primitiveIndex >= hitboxBvhInfo.bvhTriToOriginalTri.size())
@@ -313,7 +334,9 @@ void pragma::CHitboxBvhComponent::generate_hitbox_meshes(Model &mdl)
 		umath::ScaledTransform pose;
 		if(!ref.GetBonePose(pair.first, pose))
 			continue;
-		auto isTestBone = (bone->name == "ValveBiped.Bip01_L_ForeArm");
+		auto isTestBone = (bone->name == "lShldrTwist");
+		//ValveBiped.Bip01_L_UpperArm "); // No hitbox for UpperArm? -> but rShldrTwist2 has hitbox!
+		//ValveBiped.Bip01_L_ForeArm ");
 		auto &pos = pose.GetOrigin();
 		auto &rot = pose.GetRotation();
 		std::vector<umath::Plane> planes {
@@ -344,7 +367,7 @@ void pragma::CHitboxBvhComponent::generate_hitbox_meshes(Model &mdl)
 					subMesh->GetBounds(smMin, smMax);
 					if(umath::intersection::aabb_in_plane_mesh(smMin, smMax, planes) != umath::intersection::Intersect::Outside) {
 						if(isTestBone) {
-							::DebugRenderer::DrawBox(smMin, smMax, EulerAngles {}, Color {0, 0, 255, 64}, Color::White, 20.f);
+							::DebugRenderer::DrawBox(smMin, smMax, EulerAngles {}, Color {0, 0, 255, 64}, Color::White, 60.f);
 						}
 						auto &verts = subMesh->GetVertices();
 						auto numVerts = verts.size();
@@ -382,6 +405,43 @@ void pragma::CHitboxBvhComponent::generate_hitbox_meshes(Model &mdl)
 	Con::cout << "Extension data:" << Con::endl;
 	Con::cout << ss.str() << Con::endl;
 	*/
+}
+
+void CHitboxBvhComponent::DebugDrawHitboxMeshes(BoneId boneId, float duration) const
+{
+	auto it = m_hitboxBvhs.find(boneId);
+	if(it == m_hitboxBvhs.end())
+		return;
+	const std::array<Color, 6> colors {Color::Red, Color::Lime, Color::Blue, Color::Yellow, Color::Cyan, Color::Magenta};
+	auto &hitboxBvhInfos = it->second;
+	uint32_t colorIdx = 0;
+	for(auto &hitboxBvhInfo : hitboxBvhInfos) {
+		auto &col = colors[colorIdx];
+		auto &verts = hitboxBvhInfo.mesh->GetVertices();
+
+		std::vector<Vector3> dbgVerts;
+		dbgVerts.reserve(dbgVerts.size() + hitboxBvhInfo.mesh->GetIndexCount());
+		hitboxBvhInfo.mesh->VisitIndices([&verts, &dbgVerts, &hitboxBvhInfo](auto *indexDataSrc, uint32_t numIndicesSrc) {
+			dbgVerts.reserve(hitboxBvhInfo.bvhTriToOriginalTri.size());
+			for(auto triIdx : hitboxBvhInfo.bvhTriToOriginalTri) {
+				auto idx0 = triIdx * 3;
+				auto idx1 = idx0 + 1;
+				auto idx2 = idx0 + 2;
+				if(idx2 >= numIndicesSrc)
+					continue;
+				idx0 = indexDataSrc[idx0];
+				idx1 = indexDataSrc[idx1];
+				idx2 = indexDataSrc[idx2];
+				dbgVerts.push_back(verts[idx0].position);
+				dbgVerts.push_back(verts[idx1].position);
+				dbgVerts.push_back(verts[idx2].position);
+			}
+		});
+
+		DebugRenderer::DrawMesh(dbgVerts, col, Color::White, duration);
+
+		colorIdx = (colorIdx + 1) % colors.size();
+	}
 }
 
 void CHitboxBvhComponent::DebugDraw()
@@ -493,45 +553,65 @@ void ObbBvhTree::InitializeBvh(const std::vector<umath::ScaledTransform> &poses)
 	m_poses = nullptr;
 }
 
-bool ObbBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, const std::vector<umath::ScaledTransform> &bonePoses, std::vector<HitData> &outHits)
+bool ObbBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, const std::vector<umath::ScaledTransform> &bonePoses, std::vector<HitData> &outHits, const bvh::DebugDrawInfo *debugDrawInfo)
 {
 	constexpr size_t invalid_id = std::numeric_limits<size_t>::max();
 	constexpr size_t stack_size = 64;
 	constexpr bool use_robust_traversal = false;
 
+	std::function<void(const bvh::Node &, const bvh::Node &)> innerFn = [](const bvh::Node &, const bvh::Node &) {};
+	if(debugDrawInfo && umath::is_flag_set(debugDrawInfo->flags, bvh::DebugDrawInfo::Flags::DrawTraversedNodesBit)) {
+		auto &game = *pragma::get_cengine()->GetClientState()->GetGameState();
+		innerFn = [&game, debugDrawInfo](const bvh::Node &a, const bvh::Node &b) {
+			auto col = Color {255, 0, 255, 64};
+			bvh::debug::draw_node(game, a, debugDrawInfo->basePose, col, debugDrawInfo->duration);
+			bvh::debug::draw_node(game, b, debugDrawInfo->basePose, col, debugDrawInfo->duration);
+		};
+	}
+
 	auto distDiff = maxDist - minDist;
 	::bvh::v2::SmallStack<pragma::bvh::Bvh::Index, stack_size> stack;
 	auto ray = pragma::bvh::get_ray(origin, dir, minDist, maxDist);
 	auto numBones = bonePoses.size();
-	bvh.intersect<false, use_robust_traversal>(ray, bvh.get_root().index, stack, [&](size_t begin, size_t end) {
-		for(size_t i = begin; i < end; ++i) {
-			size_t j = bvh.prim_ids[i];
+	bvh.intersect<false, use_robust_traversal>(
+	  ray, bvh.get_root().index, stack,
+	  [&](size_t begin, size_t end) {
+		  for(size_t i = begin; i < end; ++i) {
+			  size_t j = bvh.prim_ids[i];
 
-			auto &obb = primitives[j];
-			if(obb.boneId >= numBones)
-				continue;
-			auto &pose = bonePoses[obb.boneId];
-			float dist;
+			  auto &hObb = primitives[j];
+			  if(hObb.boneId >= numBones)
+				  continue;
+			  auto &pose = bonePoses[hObb.boneId];
+			  float dist;
 
-			auto tmpDir = dir * maxDist;
-			auto hit = umath::intersection::line_obb(origin, tmpDir, obb.min, obb.max, &dist, pose.GetOrigin(), pose.GetRotation());
-			if(hit) {
-				dist *= maxDist;
-				if(outHits.size() == outHits.capacity())
-					outHits.reserve(outHits.size() * 2 + 5);
-				HitData hitData {};
-				hitData.primitiveIndex = j;
+			  auto tmpDir = dir * maxDist;
+			  auto hit = umath::intersection::line_obb(origin, tmpDir, hObb.min, hObb.max, &dist, pose.GetOrigin(), pose.GetRotation());
+			  if(debugDrawInfo && (umath::is_flag_set(debugDrawInfo->flags, bvh::DebugDrawInfo::Flags::DrawTraversedLeavesBit) || (umath::is_flag_set(debugDrawInfo->flags, bvh::DebugDrawInfo::Flags::DrawHitLeavesBit) && hit))) {
+				  auto &game = *pragma::get_cengine()->GetClientState()->GetGameState();
+				  auto col = hit ? Color {0, 255, 0, 64} : Color {0, 0, 255, 64};
+				  Vector3 center;
+				  auto bbox = hObb.ToBvhBBox(pose, center);
+				  bvh::debug::draw_node(game, bbox, debugDrawInfo->basePose, col, debugDrawInfo->duration);
+			  }
+			  if(hit) {
+				  dist *= maxDist;
+				  if(outHits.size() == outHits.capacity())
+					  outHits.reserve(outHits.size() * 2 + 5);
+				  HitData hitData {};
+				  hitData.primitiveIndex = j;
 
-				ray.tmax = dist;
-				if(distDiff > 0.0001f)
-					hitData.t = (ray.tmax - minDist) / distDiff;
-				else
-					hitData.t = 0.f;
+				  ray.tmax = dist;
+				  if(distDiff > 0.0001f)
+					  hitData.t = (ray.tmax - minDist) / distDiff;
+				  else
+					  hitData.t = 0.f;
 
-				util::insert_sorted(outHits, hitData, [](const HitData &a, const HitData &b) { return a.t < b.t; });
-			}
-		}
-		return false;
-	});
+				  util::insert_sorted(outHits, hitData, [](const HitData &a, const HitData &b) { return a.t < b.t; });
+			  }
+		  }
+		  return false;
+	  },
+	  innerFn);
 	return !outHits.empty();
 }

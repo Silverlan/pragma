@@ -11,6 +11,8 @@
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_bvh_component.hpp>
 
+class Model;
+class ModelSubMesh;
 namespace pragma {
 	class ObbBvhTree;
 	namespace bvh {
@@ -27,6 +29,26 @@ namespace pragma {
 			umath::ScaledTransform basePose;
 			float duration = 0.1f;
 		};
+		struct DLLCLIENT MeshHitboxBvhCache {
+			using TriangleIndex = uint32_t;
+			std::shared_ptr<pragma::bvh::MeshBvhTree> bvhTree;
+			std::shared_ptr<::ModelSubMesh> mesh;
+			std::vector<TriangleIndex> bvhTriToOriginalTri;
+		};
+		struct DLLCLIENT BoneHitboxBvhCache {
+			using Uuid = std::string;
+			std::unordered_map<Uuid, std::shared_ptr<MeshHitboxBvhCache>> meshCache;
+		};
+		struct DLLCLIENT ModelHitboxBvhCache {
+			std::unordered_map<BoneId, std::shared_ptr<BoneHitboxBvhCache>> boneCache;
+		};
+		struct DLLCLIENT HitboxBvhCache {
+			using ModelName = std::string;
+			ModelHitboxBvhCache *GetModelCache(const ModelName &mdlName);
+			ModelHitboxBvhCache &AddModelCache(const ModelName &mdlName);
+		  private:
+			std::unordered_map<ModelName, std::shared_ptr<ModelHitboxBvhCache>> m_modelBvhCache;
+		};
 	};
 	class DLLCLIENT CHitboxBvhComponent final : public BaseEntityComponent {
 	  public:
@@ -41,9 +63,10 @@ namespace pragma {
 			BoneId boneId = std::numeric_limits<uint16_t>::max();
 		};
 
-		static void generate_hitbox_meshes(Model &mdl);
+		static void generate_hitbox_meshes(::Model &mdl);
 
 		CHitboxBvhComponent(BaseEntity &ent);
+		virtual ~CHitboxBvhComponent() override;
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnRemove() override;
@@ -53,18 +76,15 @@ namespace pragma {
 		bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::bvh::HitInfo &outHitInfo, const bvh::DebugDrawInfo *debugDrawInfo = nullptr);
 		void UpdateHitboxBvh();
 		void DebugDrawHitboxMeshes(BoneId boneId, float duration = 12.f) const;
+		bvh::HitboxBvhCache &GetGlobalBvhCache() const;
 	  private:
-		struct HitboxBvhInfo {
-			std::shared_ptr<pragma::bvh::MeshBvhTree> bvhTree;
-			std::shared_ptr<ModelSubMesh> mesh;
-			std::vector<uint32_t> bvhTriToOriginalTri;
-		};
 		void DebugDraw();
 		void OnModelChanged();
 		void InitializeHitboxBvh();
 		bool InitializeModel();
+		void InitializeHitboxMeshCache();
 		void InitializeHitboxMeshes();
-		std::unordered_map<BoneId, std::vector<HitboxBvhInfo>> m_hitboxBvhs;
+		std::unordered_map<BoneId, std::vector<std::shared_ptr<bvh::MeshHitboxBvhCache>>> m_hitboxBvhs;
 		std::shared_ptr<ObbBvhTree> m_hitboxBvh;
 	};
 

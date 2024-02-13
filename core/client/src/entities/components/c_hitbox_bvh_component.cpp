@@ -31,7 +31,33 @@ static spdlog::logger &LOGGER = pragma::register_logger("bvh");
 
 using namespace pragma;
 #pragma optimize("", off)
-CHitboxBvhComponent::CHitboxBvhComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+static std::shared_ptr<pragma::bvh::HitboxBvhCache> g_hbBvhCache {};
+static size_t g_hbBvhCount = 0;
+
+pragma::bvh::ModelHitboxBvhCache *pragma::bvh::HitboxBvhCache::GetModelCache(const ModelName &mdlName)
+{
+	auto it = m_modelBvhCache.find(mdlName);
+	return (it != m_modelBvhCache.end()) ? it->second.get() : nullptr;
+}
+pragma::bvh::ModelHitboxBvhCache &pragma::bvh::HitboxBvhCache::AddModelCache(const ModelName &mdlName)
+{
+	auto it = m_modelBvhCache.find(mdlName);
+	if(it == m_modelBvhCache.end())
+		it = m_modelBvhCache.insert(std::make_pair(mdlName, std::make_shared<ModelHitboxBvhCache>())).first;
+	return *it->second;
+}
+
+CHitboxBvhComponent::CHitboxBvhComponent(BaseEntity &ent) : BaseEntityComponent(ent)
+{
+	if(g_hbBvhCount++ == 0)
+		g_hbBvhCache = std::make_shared<pragma::bvh::HitboxBvhCache>();
+}
+CHitboxBvhComponent::~CHitboxBvhComponent()
+{
+	if(--g_hbBvhCount == 0)
+		g_hbBvhCache = nullptr;
+}
+pragma::bvh::HitboxBvhCache &CHitboxBvhComponent::GetGlobalBvhCache() const { return *g_hbBvhCache; }
 void CHitboxBvhComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 
 void CHitboxBvhComponent::Initialize()
@@ -144,11 +170,35 @@ void CHitboxBvhComponent::InitializeHitboxBvh()
 
 void CHitboxBvhComponent::InitializeHitboxMeshes()
 {
-	auto &mdl = GetEntity().GetModel();
+	auto &ent = GetEntity();
+	InitializeHitboxMeshCache();
+	auto &mdl = ent.GetModel();
+	auto mdlName = ent.GetModelName();
+	auto &bvhCache = GetGlobalBvhCache();
+	auto *cache = bvhCache.GetModelCache(mdlName);
+	if(!cache)
+		return;
+	for(auto &[boneId, boneCache] : cache->boneCache) {
+		auto &rtCache = m_hitboxBvhs[boneId] = std::vector<std::shared_ptr<pragma::bvh::MeshHitboxBvhCache>> {};
+		rtCache.reserve(boneCache->meshCache.size());
+		for(auto &[uuid, meshCache] : boneCache->meshCache)
+			rtCache.push_back(meshCache);
+	}
+}
+
+void CHitboxBvhComponent::InitializeHitboxMeshCache()
+{
+	auto &ent = GetEntity();
+	auto &mdl = ent.GetModel();
+	auto mdlName = ent.GetModelName();
+	auto &bvhCache = GetGlobalBvhCache();
+	if(bvhCache.GetModelCache(mdlName))
+		return; // Cache already exists
 	auto extData = mdl->GetExtensionData();
 	auto udmHbMeshes = extData["hitboxMeshes"];
 	if(!udmHbMeshes)
 		return;
+	auto &mdlCache = bvhCache.AddModelCache(mdlName);
 	std::unordered_map<std::string, std::shared_ptr<ModelSubMesh>> mdlMeshes;
 	for(auto &mg : mdl->GetMeshGroups()) {
 		for(auto &m : mg->GetMeshes()) {
@@ -161,6 +211,7 @@ void CHitboxBvhComponent::InitializeHitboxMeshes()
 	}
 	auto &skeleton = mdl->GetSkeleton();
 	auto &ref = mdl->GetReference();
+	auto &boneCaches = mdlCache.boneCache;
 	for(auto udmHbMeshPair : udmHbMeshes.ElIt()) {
 		auto &boneName = udmHbMeshPair.key;
 		auto boneId = skeleton.LookupBone(std::string {boneName});
@@ -215,14 +266,17 @@ void CHitboxBvhComponent::InitializeHitboxMeshes()
 			if(!valid)
 				continue;
 			auto bvhData = bvh::create_bvh_data(std::move(bvhTris));
-			auto it = m_hitboxBvhs.find(boneId);
-			if(it == m_hitboxBvhs.end())
-				it = m_hitboxBvhs.insert(std::make_pair(boneId, std::vector<HitboxBvhInfo> {})).first;
-			it->second.push_back({});
-			auto &hitboxBvhInfo = it->second.back();
-			hitboxBvhInfo.bvhTree = std::move(bvhData);
-			hitboxBvhInfo.bvhTriToOriginalTri = std::move(triIndices);
-			hitboxBvhInfo.mesh = mesh;
+
+			auto it = boneCaches.find(boneId);
+			if(it == boneCaches.end())
+				it = boneCaches.insert(std::make_pair(boneId, std::make_shared<pragma::bvh::BoneHitboxBvhCache>())).first;
+			auto meshBvhCache = std::make_shared<pragma::bvh::MeshHitboxBvhCache>();
+			meshBvhCache->bvhTree = std::move(bvhData);
+			meshBvhCache->bvhTriToOriginalTri = std::move(triIndices);
+			meshBvhCache->mesh = mesh;
+
+			auto &boneCache = *it->second;
+			boneCache.meshCache[meshUuid] = meshBvhCache;
 		}
 	}
 }
@@ -293,7 +347,7 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 		auto &hitboxBvhInfos = it->second;
 		std::optional<float> closestDistance {};
 		for(auto &hitboxBvhInfo : hitboxBvhInfos) {
-			auto &meshBvh = hitboxBvhInfo.bvhTree;
+			auto &meshBvh = hitboxBvhInfo->bvhTree;
 
 			bvh::MeshBvhTree::HitData meshHitData;
 			auto res = meshBvh->Raycast(originBs, dirBs, minDist, maxDist, meshHitData);
@@ -305,15 +359,15 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 			}
 			if(!res)
 				continue;
-			if(meshHitData.primitiveIndex >= hitboxBvhInfo.bvhTriToOriginalTri.size())
+			if(meshHitData.primitiveIndex >= hitboxBvhInfo->bvhTriToOriginalTri.size())
 				continue; // Unreachable
 			if(closestDistance && meshHitData.t >= *closestDistance)
 				continue;
 			closestDistance = meshHitData.t;
 
-			outHitInfo.mesh = hitboxBvhInfo.mesh;
+			outHitInfo.mesh = hitboxBvhInfo->mesh;
 			outHitInfo.distance = meshHitData.t * maxDist;
-			outHitInfo.primitiveIndex = hitboxBvhInfo.bvhTriToOriginalTri[meshHitData.primitiveIndex];
+			outHitInfo.primitiveIndex = hitboxBvhInfo->bvhTriToOriginalTri[meshHitData.primitiveIndex];
 			outHitInfo.u = meshHitData.u;
 			outHitInfo.v = meshHitData.v;
 			outHitInfo.t = meshHitData.t;
@@ -452,13 +506,13 @@ void CHitboxBvhComponent::DebugDrawHitboxMeshes(BoneId boneId, float duration) c
 	uint32_t colorIdx = 0;
 	for(auto &hitboxBvhInfo : hitboxBvhInfos) {
 		auto &col = colors[colorIdx];
-		auto &verts = hitboxBvhInfo.mesh->GetVertices();
+		auto &verts = hitboxBvhInfo->mesh->GetVertices();
 
 		std::vector<Vector3> dbgVerts;
-		dbgVerts.reserve(dbgVerts.size() + hitboxBvhInfo.mesh->GetIndexCount());
-		hitboxBvhInfo.mesh->VisitIndices([&verts, &dbgVerts, &hitboxBvhInfo](auto *indexDataSrc, uint32_t numIndicesSrc) {
-			dbgVerts.reserve(hitboxBvhInfo.bvhTriToOriginalTri.size());
-			for(auto triIdx : hitboxBvhInfo.bvhTriToOriginalTri) {
+		dbgVerts.reserve(dbgVerts.size() + hitboxBvhInfo->mesh->GetIndexCount());
+		hitboxBvhInfo->mesh->VisitIndices([&verts, &dbgVerts, &hitboxBvhInfo](auto *indexDataSrc, uint32_t numIndicesSrc) {
+			dbgVerts.reserve(hitboxBvhInfo->bvhTriToOriginalTri.size());
+			for(auto triIdx : hitboxBvhInfo->bvhTriToOriginalTri) {
 				auto idx0 = triIdx * 3;
 				auto idx1 = idx0 + 1;
 				auto idx2 = idx0 + 2;
@@ -510,8 +564,8 @@ void CHitboxBvhComponent::DebugDraw()
 		std::vector<Vector3> dbgMeshVerts;
 		auto &hitboxBvhInfos = pair.second;
 		for(auto &hitboxBvhInfo : hitboxBvhInfos) {
-			dbgMeshVerts.reserve(dbgMeshVerts.size() + hitboxBvhInfo.bvhTree->primitives.size() * 3);
-			for(auto &prim : hitboxBvhInfo.bvhTree->primitives) {
+			dbgMeshVerts.reserve(dbgMeshVerts.size() + hitboxBvhInfo->bvhTree->primitives.size() * 3);
+			for(auto &prim : hitboxBvhInfo->bvhTree->primitives) {
 				auto &p0 = prim.p0;
 				auto &p1 = prim.p1;
 				auto &p2 = prim.p2;

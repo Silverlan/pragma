@@ -110,6 +110,7 @@ namespace pragma::bvh {
 	DLLNETWORK Ray get_ray(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist);
 	DLLNETWORK const ::pragma::bvh::Vec &to_bvh_vector(const Vector3 &v);
 	DLLNETWORK const Vector3 &from_bvh_vector(const ::pragma::bvh::Vec &v);
+	DLLNETWORK bool is_mesh_bvh_compatible(const ::ModelSubMesh &mesh);
 
 	namespace debug {
 		static Color DEFAULT_NODE_COLOR = Color {0, 255, 0, 64};

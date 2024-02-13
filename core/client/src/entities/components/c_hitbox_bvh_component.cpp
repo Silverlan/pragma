@@ -152,6 +152,8 @@ void CHitboxBvhComponent::InitializeHitboxMeshes()
 	for(auto &mg : mdl->GetMeshGroups()) {
 		for(auto &m : mg->GetMeshes()) {
 			for(auto &sm : m->GetSubMeshes()) {
+				if(!bvh::is_mesh_bvh_compatible(*sm))
+					continue;
 				mdlMeshes[util::uuid_to_string(sm->GetUuid())] = sm;
 			}
 		}
@@ -366,6 +368,8 @@ void pragma::CHitboxBvhComponent::generate_hitbox_meshes(Model &mdl)
 				continue;
 			for(auto &mesh : mg->GetMeshes()) {
 				for(auto &subMesh : mesh->GetSubMeshes()) {
+					if(!bvh::is_mesh_bvh_compatible(*subMesh))
+						continue;
 					auto &uuid = subMesh->GetUuid();
 					if(uuid == util::Uuid {}) {
 						LOGGER.warn("Mesh with invalid uuid in model '{}'! Skipping...", mdl.GetName());

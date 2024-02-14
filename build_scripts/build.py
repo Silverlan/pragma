@@ -557,6 +557,13 @@ def execfile(filepath, globals=None, locals=None, args=None):
 	with open(filepath, 'rb') as file:
 		exec(compile(file.read(), filepath, 'exec'), globals, locals)
 
+external_libs_dir = root +"/external_libs"
+modules_dir = root +"/modules"
+third_party_libs_dir = root +"/third_party_libs"
+external_libs_bin_dir = build_dir +"/external_libs"
+modules_bin_dir = build_dir +"/modules"
+third_party_libs_bin_dir = build_dir +"/third_party_libs"
+
 def execbuildscript(filepath):
 	global module_list
 	global cmake_args
@@ -567,6 +574,12 @@ def execbuildscript(filepath):
 	global build_config
 	global build_directory
 	global deps_directory
+	global external_libs_dir
+	global modules_dir
+	global third_party_libs_dir
+	global external_libs_bin_dir
+	global modules_bin_dir
+	global third_party_libs_bin_dir
 	global install_directory
 	global verbose
 	global root
@@ -589,6 +602,13 @@ def execbuildscript(filepath):
 		"build_config": build_config,
 		"build_directory": build_directory,
 		"deps_directory": deps_directory,
+		"external_libs_dir": external_libs_dir,
+		"modules_dir": modules_dir,
+		"third_party_libs_dir": third_party_libs_dir,
+		"external_libs_bin_dir": external_libs_bin_dir,
+		"modules_bin_dir": modules_bin_dir,
+		"third_party_libs_bin_dir": third_party_libs_bin_dir,
+
 		"install_directory": install_directory,
 		"verbose": verbose,
 
@@ -614,6 +634,7 @@ def execbuildscript(filepath):
 		"mkpath": mkpath,
 		"print_msg": print_msg,
 		"git_clone": git_clone,
+		"git_clone_commit": git_clone_commit,
 		"cmake_configure": cmake_configure,
 		"cmake_build": cmake_build,
 		"mkdir": mkdir,
@@ -977,7 +998,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","5344986cd2dde8dcc887703ebb2eccf3a6ea7ac9")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","fb881fe5604016b7a3225124bbdeb4a99c545e4c")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","56d46dacb398fa7540e794359eaf1081c9df1edd")
 
 	if with_vr:

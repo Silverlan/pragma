@@ -83,7 +83,7 @@ namespace pragma {
 		using BaseEntityComponent::Load;
 
 		uint32_t GetHitboxCount() const;
-		bool GetHitboxBounds(uint32_t boneId, Vector3 &min, Vector3 &max, Vector3 &origin, Quat &rot) const;
+		bool GetHitboxBounds(uint32_t boneId, Vector3 &min, Vector3 &max, Vector3 &origin, Quat &rot, umath::CoordinateSpace space = umath::CoordinateSpace::World) const;
 
 		const BaseBvhComponent *GetBvhComponent() const;
 		BaseBvhComponent *GetBvhComponent();

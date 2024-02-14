@@ -69,6 +69,19 @@ def git_clone(url,directory=None,branch=None):
 		args.append(directory)
 	subprocess.run(args, check=True)
 
+def git_clone_commit(name, path, url, commitSha, branch=None):
+	if not Path(path).is_dir():
+		parent_path = Path(path).parent
+		Path(parent_path).mkdir(parents=True, exist_ok=True)
+		print_msg(name +" not found, downloading...")
+		os.chdir(parent_path)
+		directory_name = Path(path).name
+		git_clone(url,directory=directory_name,branch=branch)
+
+	os.chdir(path)
+	reset_to_commit(commitSha)
+	return path
+
 def cmake_configure(scriptPath,generator,additionalArgs=[]):
 	args = ["cmake",scriptPath,"-G",generator]
 	args += additionalArgs

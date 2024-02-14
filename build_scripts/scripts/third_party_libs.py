@@ -18,7 +18,7 @@ get_submodule("exprtk","https://github.com/ArashPartow/exprtk.git","f46bffcd6966
 get_submodule("freetype","https://github.com/aseprite/freetype2.git","e8ebfe9")
 get_submodule("glfw","https://github.com/glfw/glfw.git","7482de6","3.3-stable")
 get_submodule("gli","https://github.com/g-truc/gli.git","779b99ac6656e4d30c3b24e96e0136a59649a869")
-get_submodule("glm","https://github.com/g-truc/glm.git","bf71a834948186f4097caa076cd2663c69a10e1e")
+get_submodule("glm","https://github.com/g-truc/glm.git","d58f9bcfedfdb4ef78f2c547601238b4fdbd14b8")
 get_submodule("libnoise","https://github.com/qknight/libnoise.git","2fb16f638aac6868d550c735898f217cdefa3559")
 get_submodule("libpng","https://github.com/glennrp/libpng.git","5a0b7e9c29ec23f87c601622cb2db01781a6cbba","libpng16")
 get_submodule("libsamplerate","https://github.com/libsndfile/libsamplerate.git","a2eb2814150a4ada0b49ea3cc5e51170572fc606")
@@ -38,7 +38,7 @@ get_submodule("vorbis","https://github.com/xiph/vorbis.git","9eadeccdc4247127d91
 get_submodule("vtflib","https://github.com/Silverlan/VTFLib.git","3e6b80bcd6dacf6bd4a35666869464fac55051cc")
 get_submodule("zlib","https://github.com/Silverlan/zlib.git","0dcc7471231d72376d592f80f06c2e2246c2b3c4")
 get_submodule("fmt","https://github.com/fmtlib/fmt.git","a337011")
-get_submodule("cppbezierfit","https://github.com/Silverlan/cppbezierfit.git","514d1e7cbe09df3ae608d59518ab0f83fe6da338")
+get_submodule("cppbezierfit","https://github.com/Silverlan/cppbezierfit.git","92f8c50bb76022558a476b4b951becb306ea32f5")
 get_submodule("mpaheader","https://github.com/SlawekNowy/mpaheader.git","2618c39")
 
 os.chdir(curDir)

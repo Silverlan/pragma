@@ -46,6 +46,7 @@
 #include "pragma/entities/components/liquid/c_liquid_volume_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_control_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_surface_simulation_component.hpp"
+#include "pragma/entities/components/c_debug_hitbox_component.hpp"
 // --template-include-location
 #include "pragma/entities/environment/audio/c_env_sound_dsp.h"
 #include "pragma/entities/environment/audio/c_env_sound_dsp_chorus.h"
@@ -288,6 +289,8 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CRaytracingRendererComponent>("raytracing_renderer");
 	componentManager.RegisterComponentType<pragma::CLiquidControlComponent>("liquid_control");
 	componentManager.RegisterComponentType<pragma::CLiquidSurfaceSimulationComponent>("liquid_surface_simulation");
+
+	componentManager.RegisterComponentType<pragma::CDebugHitboxComponent>("debug_hitbox");
 	// --template-component-register-location
 
 	auto *l = GetLuaState();

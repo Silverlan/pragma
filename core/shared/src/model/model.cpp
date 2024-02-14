@@ -2002,3 +2002,92 @@ Quat Model::GetTwistAxisRotationOffset(pragma::SignedAxis axis)
 	}
 	return uquat::identity();
 }
+
+bool Model::GenerateLowLevelLODs(Game &game)
+{
+	auto &lods = GetLODs();
+	std::string suffix = "_lod_gen";
+
+	if(!lods.empty()) {
+		for(auto &lodInfo : lods) {
+			for(auto &pair : lodInfo.meshReplacements) {
+				auto mg = GetMeshGroup(pair.second);
+				if(!mg)
+					continue;
+				auto &name = mg->GetName();
+				if(name.length() >= suffix.length() && name.substr(name.length() - suffix.length()) == suffix)
+					return false; // Generated LODs already exist
+			}
+		}
+
+		auto &lastLodInfo = lods.back();
+		auto hasMeshesWithHighVertexCount = false;
+		for(auto &pair : lastLodInfo.meshReplacements) {
+			auto mg = GetMeshGroup(pair.second);
+			if(!mg)
+				continue;
+			for(auto &m : mg->GetMeshes()) {
+				for(auto &sm : m->GetSubMeshes()) {
+					if(sm->GetVertexCount() > 600) {
+						hasMeshesWithHighVertexCount = true;
+						goto endLoop;
+					}
+				}
+			}
+		}
+	endLoop:
+
+		if(!hasMeshesWithHighVertexCount)
+			return false; // LODs with low vertex count already exist, no need to generate any
+	}
+
+	auto &baseMeshGroups = GetBaseMeshes();
+	std::unordered_set<uint32_t> mgIds;
+	mgIds.reserve(baseMeshGroups.size());
+	for(auto idx : baseMeshGroups)
+		mgIds.insert(idx);
+	for(auto &bg : m_bodyGroups) {
+		mgIds.reserve(mgIds.size() + bg.meshGroups.size());
+		for(auto idx : bg.meshGroups)
+			mgIds.insert(idx);
+	}
+
+	std::unordered_map<uint32_t, uint32_t> replaceIds;
+	auto aggressiveness = 5.0;
+	for(auto mgId : mgIds) {
+		auto mg = GetMeshGroup(mgId);
+		if(!mg)
+			continue;
+		auto &name = mg->GetName();
+		auto lodName = name + suffix;
+		uint32_t lodMgId;
+		auto mgLod = AddMeshGroup(lodName, lodMgId);
+		for(auto &mesh : mg->GetMeshes()) {
+			auto mLod = mesh->Copy();
+			mLod->GetSubMeshes().clear();
+
+			for(auto &subMesh : mesh->GetSubMeshes()) {
+				// Determine a suitable (subjective) target vertex count
+				auto targetVertexCount = subMesh->GetVertexCount() / 10;
+				auto min = umath::min(subMesh->GetVertexCount(), static_cast<uint32_t>(12));
+				targetVertexCount = umath::clamp(targetVertexCount, min, static_cast<uint32_t>(300));
+
+				auto lodSubMesh = subMesh->Simplify(targetVertexCount, aggressiveness);
+				mLod->AddSubMesh(lodSubMesh);
+			}
+			mgLod->AddMesh(mLod);
+		}
+		replaceIds[mgId] = lodMgId;
+	}
+
+	uint32_t lod = 100;
+	float distance = 5'000.f;
+	if(!lods.empty()) {
+		// Use the highest LOD as reference
+		auto &lodLast = lods.back();
+		distance = lodLast.distance * 2.f;
+		lod = lodLast.lod * 2;
+	}
+	AddLODInfo(lod, distance, replaceIds);
+	return true;
+}

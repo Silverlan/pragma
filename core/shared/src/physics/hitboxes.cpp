@@ -7,7 +7,8 @@
 
 #include "stdafx_shared.h"
 #include "pragma/model/model.h"
-
+#include "pragma/model/modelmesh.h"
+#include <panima/skeleton.hpp>
 void Model::AddHitbox(uint32_t boneId, HitGroup group, const Vector3 &min, const Vector3 &max) { AddHitbox(boneId, Hitbox(group, min, max)); }
 void Model::AddHitbox(uint32_t boneId, const Hitbox &hitbox)
 {
@@ -71,4 +72,55 @@ void Model::GetHitboxBones(std::vector<uint32_t> &boneIds) const
 	boneIds.reserve(boneIds.size() + m_hitboxes.size());
 	for(auto &it : m_hitboxes)
 		boneIds.push_back(it.first);
+}
+void Model::GenerateHitboxes()
+{
+	struct BoneBounds {
+		Vector3 min {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
+		Vector3 max {std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()};
+	};
+	std::vector<BoneBounds> boneBounds;
+	auto &skeleton = GetSkeleton();
+	auto numBones = skeleton.GetBoneCount();
+	boneBounds.resize(numBones);
+
+	auto &ref = GetReference();
+	std::vector<umath::ScaledTransform> bonePoses;
+	bonePoses.resize(numBones);
+	for(auto i = decltype(numBones) {0u}; i < numBones; ++i) {
+		ref.GetBonePose(i, bonePoses[i]);
+		bonePoses[i] = bonePoses[i].GetInverse();
+	}
+
+	for(auto &meshGroup : m_meshGroups) {
+		for(auto &mesh : meshGroup->GetMeshes()) {
+			for(auto &subMesh : mesh->GetSubMeshes()) {
+				auto &verts = subMesh->GetVertices();
+				auto &vertWeights = subMesh->GetVertexWeights();
+				for(auto vertIdx = decltype(vertWeights.size()) {0u}; vertIdx < vertWeights.size(); ++vertIdx) {
+					auto &v = verts[vertIdx];
+					auto &vw = vertWeights[vertIdx];
+					constexpr auto n = decltype(vw.boneIds)::length();
+					for(auto j = decltype(n) {0}; j < n; ++j) {
+						auto boneId = vw.boneIds[j];
+						if(boneId < 0)
+							continue;
+						auto pos = v.position;
+						pos = bonePoses[boneId] * pos;
+						uvec::min(&boneBounds[boneId].min, pos);
+						uvec::max(&boneBounds[boneId].max, pos);
+					}
+				}
+			}
+		}
+	}
+
+	for(auto boneId = decltype(boneBounds.size()) {0u}; boneId < boneBounds.size(); ++boneId) {
+		auto &bounds = boneBounds[boneId];
+		if(bounds.min.x == std::numeric_limits<float>::lowest())
+			continue;
+		if((bounds.max.x - bounds.min.x) > 1.f && (bounds.max.y - bounds.min.y) > 1.f && (bounds.max.z - bounds.min.z) > 1.f) {
+			AddHitbox(boneId, HitGroup::Generic, bounds.min, bounds.max);
+		}
+	}
 }

@@ -161,6 +161,7 @@ class DLLNETWORK ModelSubMesh : public std::enable_shared_from_this<ModelSubMesh
 	void Scale(const Vector3 &scale);
 	void ClipAgainstPlane(const Vector3 &n, double d, ModelSubMesh &clippedMeshA, ModelSubMesh &clippedMeshB, const std::vector<Mat4> *boneMatrices = nullptr, ModelSubMesh *clippedCoverMeshA = nullptr, ModelSubMesh *clippedCoverMeshB = nullptr);
 	virtual std::shared_ptr<ModelSubMesh> Copy(bool fullCopy = false) const;
+	std::shared_ptr<ModelSubMesh> Simplify(uint32_t targetVertexCount, double aggressiveness = 5.0) const;
 
 	void ApplyUVMapping(const Vector3 &nu, const Vector3 &nv, uint32_t w, uint32_t h, float ou, float ov, float su, float sv);
 	void RemoveVertex(uint64_t idx);

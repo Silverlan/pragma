@@ -76,9 +76,11 @@ namespace pragma::bvh {
 		void Refit();
 		void InitializeBvh();
 		::bvh::v2::ThreadPool &GetThreadPool();
+	  protected:
+		::bvh::v2::DefaultBuilder<Node>::Config InitializeExecutor();
+		std::unique_ptr<::bvh::v2::ParallelExecutor> executor {};
 	  private:
 		virtual bool DoInitializeBvh(::bvh::v2::ParallelExecutor &executor, ::bvh::v2::DefaultBuilder<Node>::Config &config) = 0;
-		std::unique_ptr<::bvh::v2::ParallelExecutor> executor {};
 	};
 
 	struct DLLNETWORK MeshBvhTree : public BvhTree {
@@ -98,6 +100,7 @@ namespace pragma::bvh {
 		void Deserialize(const std::vector<uint8_t> &data, std::vector<pragma::bvh::Primitive> &&primitives);
 	  private:
 		virtual bool DoInitializeBvh(::bvh::v2::ParallelExecutor &executor, ::bvh::v2::DefaultBuilder<Node>::Config &config) override;
+		void InitializePrecomputedTris();
 		std::vector<PrecomputedTri> precomputed_tris;
 	};
 

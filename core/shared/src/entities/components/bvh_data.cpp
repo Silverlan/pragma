@@ -157,15 +157,22 @@ void pragma::bvh::BvhTree::Refit() { ::bvh::v2::ReinsertionOptimizer<Node>::opti
 
 void pragma::bvh::BvhTree::InitializeBvh()
 {
-	executor = std::make_unique<::bvh::v2::ParallelExecutor>(*g_threadPool);
-	::bvh::v2::DefaultBuilder<Node>::Config config;
-	config.quality = ::bvh::v2::DefaultBuilder<Node>::Quality::High;
+	auto config = InitializeExecutor();
 	if(!DoInitializeBvh(*executor, config))
 		executor = {};
 }
 
+::bvh::v2::DefaultBuilder<pragma::bvh::Node>::Config pragma::bvh::BvhTree::InitializeExecutor()
+{
+	executor = std::make_unique<::bvh::v2::ParallelExecutor>(*g_threadPool);
+	::bvh::v2::DefaultBuilder<Node>::Config config;
+	config.quality = ::bvh::v2::DefaultBuilder<Node>::Quality::High;
+	return config;
+}
+
 void pragma::bvh::MeshBvhTree::Deserialize(const std::vector<uint8_t> &data, std::vector<pragma::bvh::Primitive> &&primitives)
 {
+	InitializeExecutor();
 	struct BinaryStream : public ::bvh::v2::InputStream {
 		BinaryStream(const std::vector<uint8_t> &data) : m_data {data} {}
 	  protected:
@@ -185,7 +192,8 @@ void pragma::bvh::MeshBvhTree::Deserialize(const std::vector<uint8_t> &data, std
 
 	BinaryStream binStream {data};
 	bvh = pragma::bvh::Bvh::deserialize(binStream);
-	primitives = std::move(primitives);
+	this->primitives = std::move(primitives);
+	InitializePrecomputedTris();
 }
 
 const pragma::bvh::MeshRange *pragma::bvh::MeshBvhTree::FindMeshRange(size_t primIdx) const
@@ -197,6 +205,20 @@ const pragma::bvh::MeshRange *pragma::bvh::MeshBvhTree::FindMeshRange(size_t pri
 		return nullptr;
 	--it;
 	return &*it;
+}
+
+void pragma::bvh::MeshBvhTree::InitializePrecomputedTris()
+{
+	auto numTris = primitives.size();
+	if(numTris == 0)
+		return;
+	precomputed_tris.resize(numTris);
+	executor->for_each(0, numTris, [&](size_t begin, size_t end) {
+		for(size_t i = begin; i < end; ++i) {
+			auto j = should_permute ? bvh.prim_ids[i] : i;
+			precomputed_tris[i] = primitives[j];
+		}
+	});
 }
 
 bool pragma::bvh::MeshBvhTree::DoInitializeBvh(::bvh::v2::ParallelExecutor &executor, ::bvh::v2::DefaultBuilder<Node>::Config &config)
@@ -214,14 +236,7 @@ bool pragma::bvh::MeshBvhTree::DoInitializeBvh(::bvh::v2::ParallelExecutor &exec
 	});
 
 	bvh = ::bvh::v2::DefaultBuilder<Node>::build(GetThreadPool(), bboxes, centers, config);
-
-	precomputed_tris.resize(numTris);
-	executor.for_each(0, numTris, [&](size_t begin, size_t end) {
-		for(size_t i = begin; i < end; ++i) {
-			auto j = should_permute ? bvh.prim_ids[i] : i;
-			precomputed_tris[i] = primitives[j];
-		}
-	});
+	InitializePrecomputedTris();
 	return true;
 }
 

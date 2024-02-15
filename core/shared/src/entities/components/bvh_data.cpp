@@ -7,6 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/entities/components/bvh_data.hpp"
+#include "pragma/model/c_modelmesh.h"
 #include <sharedutils/util_hash.hpp>
 #include <mathutil/umath_geometry.hpp>
 #include <bvh/v2/default_builder.h>
@@ -14,8 +15,10 @@
 #include <bvh/v2/reinsertion_optimizer.h>
 
 static_assert(sizeof(Vector3) == sizeof(::pragma::bvh::Vec));
+
 const ::pragma::bvh::Vec &pragma::bvh::to_bvh_vector(const Vector3 &v) { return reinterpret_cast<const ::pragma::bvh::Vec &>(v); }
 const Vector3 &pragma::bvh::from_bvh_vector(const ::pragma::bvh::Vec &v) { return reinterpret_cast<const Vector3 &>(v); }
+bool pragma::bvh::is_mesh_bvh_compatible(const ::ModelSubMesh &mesh) { return mesh.GetGeometryType() == ModelSubMesh::GeometryType::Triangles; }
 
 pragma::bvh::MeshIntersectionInfo *pragma::bvh::IntersectionInfo::GetMeshIntersectionInfo() { return m_isMeshIntersectionInfo ? static_cast<pragma::bvh::MeshIntersectionInfo *>(this) : nullptr; }
 
@@ -161,6 +164,30 @@ void pragma::bvh::BvhTree::InitializeBvh()
 		executor = {};
 }
 
+void pragma::bvh::MeshBvhTree::Deserialize(const std::vector<uint8_t> &data, std::vector<pragma::bvh::Primitive> &&primitives)
+{
+	struct BinaryStream : public ::bvh::v2::InputStream {
+		BinaryStream(const std::vector<uint8_t> &data) : m_data {data} {}
+	  protected:
+		virtual size_t read_raw(void *data, size_t sz) override
+		{
+			if(m_readPos >= m_data.size())
+				return 0;
+			auto remaining = m_data.size() - m_readPos;
+			auto szRead = umath::min(remaining, sz);
+			memcpy(data, m_data.data() + m_readPos, szRead);
+			m_readPos += szRead;
+			return szRead;
+		}
+		const std::vector<uint8_t> &m_data;
+		size_t m_readPos = 0;
+	};
+
+	BinaryStream binStream {data};
+	bvh = pragma::bvh::Bvh::deserialize(binStream);
+	primitives = std::move(primitives);
+}
+
 const pragma::bvh::MeshRange *pragma::bvh::MeshBvhTree::FindMeshRange(size_t primIdx) const
 {
 	MeshRange search {};
@@ -257,7 +284,7 @@ void pragma::bvh::debug::draw_bvh_tree(Game &game, pragma::bvh::Bvh &bvh, const 
 {
 	constexpr size_t stack_size = 64;
 	::bvh::v2::SmallStack<pragma::bvh::Bvh::Index, stack_size> stack;
-	draw_node(game, bvh.get_root(), pose, duration);
+	draw_node(game, bvh.get_root(), pose, DEFAULT_NODE_COLOR, duration);
 	auto start = bvh.get_root().index;
 	stack.push(start);
 restart:
@@ -267,8 +294,8 @@ restart:
 			auto &left = bvh.nodes[top.first_id];
 			auto &right = bvh.nodes[top.first_id + 1];
 
-			draw_node(game, left, pose, duration);
-			draw_node(game, right, pose, duration);
+			draw_node(game, left, pose, DEFAULT_NODE_COLOR, duration);
+			draw_node(game, right, pose, DEFAULT_NODE_COLOR, duration);
 
 			if(true) {
 				auto near_index = left.index;
@@ -279,10 +306,14 @@ restart:
 		}
 	}
 }
-void pragma::bvh::debug::draw_node(Game &game, const pragma::bvh::Node &node, const umath::ScaledTransform &pose, float duration)
+void pragma::bvh::debug::draw_node(Game &game, const pragma::bvh::BBox &bbox, const umath::ScaledTransform &pose, const Color &col, float duration)
 {
-	auto bbox = node.get_bbox();
 	auto vstart = from_bvh_vector(bbox.min);
 	auto vend = from_bvh_vector(bbox.max);
-	game.DrawBox(pose.GetOrigin(), vstart, vend, pose.GetRotation(), Color::Aqua, Color {0, 255, 0, 64}, duration);
+	game.DrawBox(pose.GetOrigin(), vstart, vend, pose.GetRotation(), Color::White, col, duration);
+}
+void pragma::bvh::debug::draw_node(Game &game, const pragma::bvh::Node &node, const umath::ScaledTransform &pose, const Color &col, float duration)
+{
+	auto bbox = node.get_bbox();
+	draw_node(game, bbox, pose, col, duration);
 }

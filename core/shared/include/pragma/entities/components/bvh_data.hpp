@@ -95,6 +95,7 @@ namespace pragma::bvh {
 		std::vector<MeshRange> meshRanges;
 
 		const MeshRange *FindMeshRange(size_t primIdx) const;
+		void Deserialize(const std::vector<uint8_t> &data, std::vector<pragma::bvh::Primitive> &&primitives);
 	  private:
 		virtual bool DoInitializeBvh(::bvh::v2::ParallelExecutor &executor, ::bvh::v2::DefaultBuilder<Node>::Config &config) override;
 		std::vector<PrecomputedTri> precomputed_tris;

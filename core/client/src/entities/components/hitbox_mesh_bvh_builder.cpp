@@ -53,7 +53,7 @@ static std::unique_ptr<pragma::bvh::MeshBvhTree> generate_mesh_bvh(ModelSubMesh 
 	return pragma::bvh::create_bvh_data(std::move(bvhTris));
 }
 
-static bool generate_mesh_bvh(Model &mdl, const std::string &boneName, pragma::bvh::HitboxMeshBvhBuilder::BoneMeshInfo &boneMeshInfo)
+static bool generate_mesh_bvh(Model &mdl, const std::string &boneName, pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo)
 {
 	auto &skeleton = mdl.GetSkeleton();
 	auto &ref = mdl.GetReference();
@@ -77,7 +77,7 @@ static bool generate_mesh_bvh(Model &mdl, const std::string &boneName, pragma::b
 	return true;
 }
 
-static bool calc_bone_mesh_info(pragma::bvh::HitboxMeshBvhBuilder::BoneMeshInfo &boneMeshInfo, std::shared_ptr<ModelSubMesh> subMesh, std::vector<umath::Plane> planes, Vector3 hbMin, Vector3 hbMax, umath::ScaledTransform pose, util::Uuid uuid)
+static bool calc_bone_mesh_info(pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo, std::shared_ptr<ModelSubMesh> subMesh, std::vector<umath::Plane> planes, Vector3 hbMin, Vector3 hbMax, umath::ScaledTransform pose, util::Uuid uuid)
 {
 	Vector3 smMin, smMax;
 	subMesh->GetBounds(smMin, smMax);
@@ -110,7 +110,7 @@ static bool calc_bone_mesh_info(pragma::bvh::HitboxMeshBvhBuilder::BoneMeshInfo 
 	return true;
 }
 
-static bool generate_bvh_mesh(Model &mdl, const std::string &boneName, pragma::bvh::HitboxMeshBvhBuilder::BoneMeshInfo &boneMeshInfo)
+static bool generate_bvh_mesh(Model &mdl, const std::string &boneName, pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo)
 {
 	auto &skeleton = mdl.GetSkeleton();
 	auto &ref = mdl.GetReference();
@@ -135,16 +135,16 @@ static bool generate_bvh_mesh(Model &mdl, const std::string &boneName, pragma::b
 	return true;
 }
 
-static void serialize(Model &mdl, const std::string &boneName, pragma::bvh::HitboxMeshBvhBuilder::BoneMeshInfo &boneMeshInfo)
+static void serialize(Model &mdl, const std::string &boneName, pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo)
 {
 	::bvh::v2::StdOutputStream outputStream {boneMeshInfo.serializedBvh};
 	auto &bvh = boneMeshInfo.meshBvhTree->bvh;
 	bvh.serialize(outputStream);
 }
 
-pragma::bvh::HitboxMeshBvhBuilder::HitboxMeshBvhBuilder(BS::thread_pool &threadPool) : m_threadPool {threadPool} {}
+pragma::bvh::HitboxMeshBvhBuildTask::HitboxMeshBvhBuildTask(BS::thread_pool &threadPool) : m_threadPool {threadPool} {}
 
-bool pragma::bvh::HitboxMeshBvhBuilder::Generate(Model &mdl)
+bool pragma::bvh::HitboxMeshBvhBuildTask::Build(Model &mdl)
 {
 	auto &lods = mdl.GetLODs();
 	if(lods.empty())
@@ -157,14 +157,14 @@ bool pragma::bvh::HitboxMeshBvhBuilder::Generate(Model &mdl)
 		auto bone = skeleton.GetBone(boneId).lock();
 		if(!bone)
 			continue;
-		Generate(mdl, boneId, hb, lodLast);
+		Build(mdl, boneId, hb, lodLast);
 	}
 
 	Serialize(mdl);
 	return true;
 }
 
-bool pragma::bvh::HitboxMeshBvhBuilder::Generate(Model &mdl, BoneId boneId, const Hitbox &hb, const LODInfo &lodInfo)
+bool pragma::bvh::HitboxMeshBvhBuildTask::Build(Model &mdl, BoneId boneId, const Hitbox &hb, const LODInfo &lodInfo)
 {
 	auto &skeleton = mdl.GetSkeleton();
 	auto &ref = mdl.GetReference();
@@ -201,7 +201,7 @@ bool pragma::bvh::HitboxMeshBvhBuilder::Generate(Model &mdl, BoneId boneId, cons
 				}
 
 				auto &boneName = bone->name;
-				auto bm = std::make_shared<pragma::bvh::HitboxMeshBvhBuilder::BoneMeshInfo>();
+				auto bm = std::make_shared<pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo>();
 				auto genResult = m_threadPool.submit_task([&mdl, subMesh, planes, hbMin, hbMax, pose, uuid, boneName, bm]() -> bool {
 					auto success = calc_bone_mesh_info(*bm, subMesh, planes, hbMin, hbMax, pose, uuid);
 					if(!success)
@@ -223,10 +223,11 @@ bool pragma::bvh::HitboxMeshBvhBuilder::Generate(Model &mdl, BoneId boneId, cons
 	return true;
 }
 
-void pragma::bvh::HitboxMeshBvhBuilder::Serialize(Model &mdl)
+void pragma::bvh::HitboxMeshBvhBuildTask::Serialize(Model &mdl)
 {
 	auto extData = mdl.GetExtensionData();
-	auto udmHbMeshes = extData["hitboxMeshes"];
+	auto ubmHitboxBvh = extData["hitboxBvh"];
+	auto udmHbMeshes = ubmHitboxBvh["hitboxMeshes"];
 	for(auto &[boneName, boneMeshInfos] : m_boneMeshMap) {
 		for(auto it = boneMeshInfos.begin(); it != boneMeshInfos.end();) {
 			auto &boneMeshInfo = *it;
@@ -262,11 +263,10 @@ void pragma::bvh::HitboxMeshBvhBuilder::Serialize(Model &mdl)
 	}
 }
 
-pragma::bvh::HitboxMeshBvhBuilderManager::HitboxMeshBvhBuilderManager() : m_threadPool {10} {}
+pragma::bvh::HitboxMeshBvhBuilder::HitboxMeshBvhBuilder() : m_threadPool {10} {}
 
-std::optional<std::future<void>> pragma::bvh::HitboxMeshBvhBuilderManager::BuildModel(Model &mdl)
+void pragma::bvh::HitboxMeshBvhBuilder::BuildModel(Model &mdl)
 {
-	HitboxMeshBvhBuilder builder {m_threadPool};
-	builder.Generate(mdl);
-	return {};
+	HitboxMeshBvhBuildTask builder {m_threadPool};
+	builder.Build(mdl);
 }

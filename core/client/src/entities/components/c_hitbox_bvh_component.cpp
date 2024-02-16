@@ -101,10 +101,10 @@ bool CHitboxBvhComponent::InitializeModel()
 		return false;
 	mdl->GenerateLowLevelLODs(GetGame());
 	auto extData = mdl->GetExtensionData();
-	auto udmHbMeshes = extData["hitboxMeshes"];
-
-	pragma::bvh::HitboxMeshBvhBuilderManager manager {};
-	manager.BuildModel(*mdl);
+	if(!extData["hitboxBvh"]) {
+		pragma::bvh::HitboxMeshBvhBuilder manager {};
+		manager.BuildModel(*mdl);
+	}
 
 	//cache.boneCache
 
@@ -250,9 +250,10 @@ void CHitboxBvhComponent::InitializeHitboxMeshCache()
 	if(bvhCache.GetModelCache(mdlName))
 		return; // Cache already exists
 	auto extData = mdl->GetExtensionData();
-	auto udmHbMeshes = extData["hitboxMeshes"];
-	if(!udmHbMeshes)
+	auto udmHbBvh = extData["hitboxBvh"];
+	if(!udmHbBvh)
 		return;
+	auto udmHbMeshes = udmHbBvh["hitboxMeshes"];
 	auto &mdlCache = bvhCache.AddModelCache(mdlName);
 	auto mdlMeshes = pragma::bvh::get_uuid_mesh_map(*mdl);
 	auto &skeleton = mdl->GetSkeleton();
@@ -379,7 +380,10 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 
 	// Raycast against our hitbox BVH
 	std::vector<ObbBvhTree::HitData> hits;
+	auto tt = std::chrono::steady_clock::now();
 	WaitForHitboxBvhUpdate(); // Ensure hitbox bvh update is complete
+	auto dt = std::chrono::steady_clock::now() - tt;
+	Con::cout << "DT: " << (dt.count() / 1'000'000.0) << "ms" << Con::endl;
 	auto res = m_hitboxBvh->Raycast(originEs, dirEs, minDist, maxDist, effectiveBonePoses, hits, debugDrawInfo);
 	if(!res)
 		return false;

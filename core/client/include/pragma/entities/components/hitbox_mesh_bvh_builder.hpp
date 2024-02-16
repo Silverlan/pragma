@@ -20,7 +20,7 @@ struct LODInfo;
 struct Hitbox;
 namespace pragma::bvh {
 	struct MeshBvhTree;
-	class DLLCLIENT HitboxMeshBvhBuilder {
+	class DLLCLIENT HitboxMeshBvhBuildTask {
 	  public:
 		struct DLLCLIENT BoneMeshInfo {
 			std::string meshUuid;
@@ -32,26 +32,25 @@ namespace pragma::bvh {
 			std::stringstream serializedBvh;
 		};
 
-		HitboxMeshBvhBuilder(BS::thread_pool &threadPool);
-		bool Generate(Model &mdl);
+		HitboxMeshBvhBuildTask(BS::thread_pool &threadPool);
+		bool Build(Model &mdl);
 	  private:
 		using BoneName = std::string;
-		bool Generate(Model &mdl, BoneId boneId, const Hitbox &hitbox, const LODInfo &lodInfo);
+		bool Build(Model &mdl, BoneId boneId, const Hitbox &hitbox, const LODInfo &lodInfo);
 		void Serialize(Model &mdl);
-		void GenerateHitboxMesh(Model &mdl, ModelSubMesh &subMesh);
-		void GenerateMeshBvh(Model &mdl, ModelSubMesh &subMesh);
+		void BuildHitboxMesh(Model &mdl, ModelSubMesh &subMesh);
+		void BuildMeshBvh(Model &mdl, ModelSubMesh &subMesh);
 
 		BS::thread_pool &m_threadPool;
 		std::unordered_map<BoneName, std::vector<std::shared_ptr<BoneMeshInfo>>> m_boneMeshMap;
 	};
 
-	class DLLCLIENT HitboxMeshBvhBuilderManager {
+	class DLLCLIENT HitboxMeshBvhBuilder {
 	  public:
-		HitboxMeshBvhBuilderManager();
-		std::optional<std::future<void>> BuildModel(Model &mdl);
+		HitboxMeshBvhBuilder();
+		void BuildModel(Model &mdl);
 	  private:
 		BS::thread_pool m_threadPool;
-		//
 	};
 };
 

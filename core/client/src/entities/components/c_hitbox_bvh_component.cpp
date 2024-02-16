@@ -20,6 +20,7 @@
 #include <panima/bone.hpp>
 #include <panima/skeleton.hpp>
 #include <pragma/entities/components/base_bvh_component.hpp>
+#include <pragma/asset/util_asset.hpp>
 #include <sharedutils/BS_thread_pool.hpp>
 #include <mathutil/boundingvolume.h>
 #include <bvh/v2/stack.h>
@@ -36,7 +37,8 @@ static size_t g_hbBvhCount = 0;
 
 pragma::bvh::ModelHitboxBvhCache *pragma::bvh::HitboxBvhCache::GetModelCache(const ModelName &mdlName)
 {
-	auto it = m_modelBvhCache.find(mdlName);
+	auto normName = pragma::asset::get_normalized_path(mdlName, pragma::asset::Type::Model);
+	auto it = m_modelBvhCache.find(normName);
 	return (it != m_modelBvhCache.end()) ? it->second.get() : nullptr;
 }
 pragma::bvh::ModelHitboxBvhCache &pragma::bvh::HitboxBvhCache::AddModelCache(const ModelName &mdlName)

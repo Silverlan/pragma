@@ -63,8 +63,6 @@ namespace pragma {
 			BoneId boneId = std::numeric_limits<uint16_t>::max();
 		};
 
-		static void generate_hitbox_meshes(::Model &mdl);
-
 		CHitboxBvhComponent(BaseEntity &ent);
 		virtual ~CHitboxBvhComponent() override;
 		virtual void Initialize() override;
@@ -78,6 +76,7 @@ namespace pragma {
 		void DebugDrawHitboxMeshes(BoneId boneId, float duration = 12.f) const;
 		bvh::HitboxBvhCache &GetGlobalBvhCache() const;
 	  private:
+		void WaitForHitboxBvhUpdate();
 		void DebugDraw();
 		void OnModelChanged();
 		void InitializeHitboxBvh();
@@ -102,7 +101,7 @@ namespace pragma {
 		std::vector<pragma::CHitboxBvhComponent::HitboxObb> primitives;
 	  private:
 		const std::vector<umath::ScaledTransform> *m_poses = nullptr;
-		virtual bool DoInitializeBvh(::bvh::v2::ParallelExecutor &executor, ::bvh::v2::DefaultBuilder<pragma::bvh::Node>::Config &config) override;
+		virtual bool DoInitializeBvh(pragma::bvh::Executor &executor, ::bvh::v2::DefaultBuilder<pragma::bvh::Node>::Config &config) override;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::bvh::DebugDrawInfo::Flags)

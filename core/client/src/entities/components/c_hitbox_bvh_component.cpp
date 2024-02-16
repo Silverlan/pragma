@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_hitbox_bvh_component.hpp"
+#include "pragma/entities/components/hitbox_mesh_bvh_builder.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
@@ -15,7 +16,6 @@
 #include <pragma/entities/components/util_bvh.hpp>
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/logging.hpp"
 #include <panima/skeleton.hpp>
 #include <panima/bone.hpp>
 #include <panima/skeleton.hpp>
@@ -27,8 +27,6 @@
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
-static spdlog::logger &LOGGER = pragma::register_logger("bvh");
 
 using namespace pragma;
 #pragma optimize("", off)
@@ -58,11 +56,16 @@ CHitboxBvhComponent::CHitboxBvhComponent(BaseEntity &ent) : BaseEntityComponent(
 }
 CHitboxBvhComponent::~CHitboxBvhComponent()
 {
-	m_hitboxBvhUpdate.wait();
+	WaitForHitboxBvhUpdate();
 	if(--g_hbBvhCount == 0) {
 		g_hbThreadPool = {};
 		g_hbBvhCache = nullptr;
 	}
+}
+void CHitboxBvhComponent::WaitForHitboxBvhUpdate()
+{
+	if(m_hitboxBvhUpdate.valid())
+		m_hitboxBvhUpdate.wait();
 }
 pragma::bvh::HitboxBvhCache &CHitboxBvhComponent::GetGlobalBvhCache() const { return *g_hbBvhCache; }
 void CHitboxBvhComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
@@ -99,8 +102,14 @@ bool CHitboxBvhComponent::InitializeModel()
 	mdl->GenerateLowLevelLODs(GetGame());
 	auto extData = mdl->GetExtensionData();
 	auto udmHbMeshes = extData["hitboxMeshes"];
-	if(!udmHbMeshes)
-		pragma::CHitboxBvhComponent::generate_hitbox_meshes(*mdl);
+
+	pragma::bvh::HitboxMeshBvhBuilderManager manager {};
+	manager.BuildModel(*mdl);
+
+	//cache.boneCache
+
+	//if(!udmHbMeshes)
+	//	pragma::CHitboxBvhComponent::generate_hitbox_meshes(*mdl);
 	InitializeHitboxMeshCache();
 	InitializeHitboxMeshBvhs();
 	// TODO: Save model
@@ -125,7 +134,7 @@ void CHitboxBvhComponent::UpdateHitboxBvh()
 	auto &hitboxBvh = m_hitboxBvh;
 	auto &bvh = m_hitboxBvh->bvh;
 
-	m_hitboxBvhUpdate.wait();
+	WaitForHitboxBvhUpdate();
 	m_hitboxBvhUpdatePoses.resize(bonePoses.size());
 	memcpy(m_hitboxBvhUpdatePoses.data(), bonePoses.data(), util::size_of_container(bonePoses));
 	auto &updatePoses = m_hitboxBvhUpdatePoses;
@@ -161,7 +170,7 @@ void CHitboxBvhComponent::UpdateHitboxBvh()
 
 void CHitboxBvhComponent::InitializeHitboxBvh()
 {
-	m_hitboxBvhUpdate.wait();
+	WaitForHitboxBvhUpdate();
 
 	auto &ent = GetEntity();
 	auto animC = ent.GetAnimatedComponent();
@@ -232,57 +241,6 @@ void CHitboxBvhComponent::InitializeHitboxMeshBvhs()
 	}
 }
 
-static std::unique_ptr<pragma::bvh::MeshBvhTree> generate_mesh_bvh(ModelSubMesh &mesh, const std::vector<uint32_t> &triIndices, const umath::ScaledTransform &invPose)
-{
-	auto &verts = mesh.GetVertices();
-
-	std::vector<pragma::bvh::Primitive> bvhTris;
-	bvhTris.reserve(triIndices.size());
-	auto valid = true;
-	mesh.VisitIndices([&triIndices, &verts, &invPose, &bvhTris, &valid](auto *indexDataSrc, uint32_t numIndicesSrc) {
-		auto numVerts = verts.size();
-		for(auto triIdx : triIndices) {
-			if(triIdx + 2 >= numIndicesSrc) {
-				valid = false;
-				return;
-			}
-			auto idx0 = indexDataSrc[triIdx * 3];
-			auto idx1 = indexDataSrc[triIdx * 3 + 1];
-			auto idx2 = indexDataSrc[triIdx * 3 + 2];
-			if(idx0 >= numVerts || idx1 >= numVerts || idx2 >= numVerts) {
-				valid = false;
-				return;
-			}
-			auto &v0 = verts[idx0];
-			auto &v1 = verts[idx1];
-			auto &v2 = verts[idx2];
-			auto pos0 = invPose * v0.position;
-			auto pos1 = invPose * v1.position;
-			auto pos2 = invPose * v2.position;
-			bvhTris.push_back(pragma::bvh::create_triangle(pos0, pos1, pos2));
-		}
-	});
-
-	if(!valid)
-		return nullptr;
-	return pragma::bvh::create_bvh_data(std::move(bvhTris));
-}
-
-static auto get_uuid_mesh_map(Model &mdl)
-{
-	std::unordered_map<std::string, std::shared_ptr<ModelSubMesh>> mdlMeshes;
-	for(auto &mg : mdl.GetMeshGroups()) {
-		for(auto &m : mg->GetMeshes()) {
-			for(auto &sm : m->GetSubMeshes()) {
-				if(!pragma::bvh::is_mesh_bvh_compatible(*sm))
-					continue;
-				mdlMeshes[util::uuid_to_string(sm->GetUuid())] = sm;
-			}
-		}
-	}
-	return mdlMeshes;
-}
-
 void CHitboxBvhComponent::InitializeHitboxMeshCache()
 {
 	auto &ent = GetEntity();
@@ -296,10 +254,11 @@ void CHitboxBvhComponent::InitializeHitboxMeshCache()
 	if(!udmHbMeshes)
 		return;
 	auto &mdlCache = bvhCache.AddModelCache(mdlName);
-	auto mdlMeshes = get_uuid_mesh_map(*mdl);
+	auto mdlMeshes = pragma::bvh::get_uuid_mesh_map(*mdl);
 	auto &skeleton = mdl->GetSkeleton();
 	auto &ref = mdl->GetReference();
 	auto &boneCaches = mdlCache.boneCache;
+
 	for(auto udmHbMeshPair : udmHbMeshes.ElIt()) {
 		auto &boneName = udmHbMeshPair.key;
 		auto boneId = skeleton.LookupBone(std::string {boneName});
@@ -420,7 +379,7 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 
 	// Raycast against our hitbox BVH
 	std::vector<ObbBvhTree::HitData> hits;
-	m_hitboxBvhUpdate.wait(); // Ensure hitbox bvh update is complete
+	WaitForHitboxBvhUpdate(); // Ensure hitbox bvh update is complete
 	auto res = m_hitboxBvh->Raycast(originEs, dirEs, minDist, maxDist, effectiveBonePoses, hits, debugDrawInfo);
 	if(!res)
 		return false;
@@ -479,169 +438,6 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 }
 
 void CHitboxBvhComponent::OnRemove() {}
-
-void pragma::CHitboxBvhComponent::generate_hitbox_meshes(Model &mdl)
-{
-	auto &lods = mdl.GetLODs();
-	if(lods.empty())
-		return;
-
-	struct BoneMeshInfo {
-		std::string meshUuid;
-		std::shared_ptr<ModelSubMesh> subMesh;
-		std::vector<uint32_t> usedTris;
-		std::unique_ptr<pragma::bvh::MeshBvhTree> meshBvhTree {};
-	};
-	std::unordered_map<std::string, std::vector<std::shared_ptr<BoneMeshInfo>>> boneMeshMap;
-
-	auto lodLast = lods.back();
-
-	// 1) Generate meshes per hitbox
-	auto &ref = mdl.GetReference();
-	auto &hitboxes = mdl.GetHitboxes();
-	auto &skeleton = mdl.GetSkeleton();
-	for(auto &pair : hitboxes) {
-		auto bone = skeleton.GetBone(pair.first).lock();
-		if(!bone)
-			continue;
-		Con::cout << "Bone: " << bone->name << Con::endl;
-		auto &hb = pair.second;
-		umath::ScaledTransform pose;
-		if(!ref.GetBonePose(pair.first, pose))
-			continue;
-		auto isTestBone = (bone->name == "lShldrTwist");
-		//ValveBiped.Bip01_L_UpperArm "); // No hitbox for UpperArm? -> but rShldrTwist2 has hitbox!
-		//ValveBiped.Bip01_L_ForeArm ");
-		auto &pos = pose.GetOrigin();
-		auto &rot = pose.GetRotation();
-		std::vector<umath::Plane> planes {
-		  umath::Plane {uquat::up(rot), pos + uquat::up(rot) * hb.max.y},
-		  umath::Plane {-uquat::up(rot), pos + uquat::up(rot) * hb.min.y},
-		  umath::Plane {uquat::forward(rot), pos + uquat::forward(rot) * hb.max.z},
-		  umath::Plane {-uquat::forward(rot), pos + uquat::forward(rot) * hb.min.z},
-		  umath::Plane {-uquat::right(rot), pos - uquat::right(rot) * hb.max.x},
-		  umath::Plane {uquat::right(rot), pos - uquat::right(rot) * hb.min.x},
-		};
-		auto &hbMin = hb.min;
-		auto &hbMax = hb.max;
-		if(isTestBone) {
-			::DebugRenderer::DrawBox(pos, hbMin, hbMax, rot, Color {255, 255, 0, 64}, Color::White, 20.f);
-		}
-		std::vector<std::shared_ptr<BoneMeshInfo>> boneMeshes;
-		for(auto &pair : lodLast.meshReplacements) {
-			auto mg = mdl.GetMeshGroup(pair.second);
-			if(!mg)
-				continue;
-			for(auto &mesh : mg->GetMeshes()) {
-				for(auto &subMesh : mesh->GetSubMeshes()) {
-					if(!bvh::is_mesh_bvh_compatible(*subMesh))
-						continue;
-					auto &uuid = subMesh->GetUuid();
-					if(uuid == util::Uuid {}) {
-						LOGGER.warn("Mesh with invalid uuid in model '{}'! Skipping...", mdl.GetName());
-						continue;
-					}
-					Vector3 smMin, smMax;
-					subMesh->GetBounds(smMin, smMax);
-					if(umath::intersection::aabb_in_plane_mesh(smMin, smMax, planes) != umath::intersection::Intersect::Outside) {
-						if(isTestBone) {
-							::DebugRenderer::DrawBox(smMin, smMax, EulerAngles {}, Color {0, 0, 255, 64}, Color::White, 60.f);
-						}
-						auto &verts = subMesh->GetVertices();
-						auto numVerts = verts.size();
-
-						std::vector<uint32_t> usedTris;
-						usedTris.reserve(subMesh->GetTriangleCount());
-						subMesh->VisitIndices([&verts, &usedTris, &hbMin, &hbMax, &pose](auto *indexDataSrc, uint32_t numIndicesSrc) {
-							for(auto i = decltype(numIndicesSrc) {0u}; i < numIndicesSrc; i += 3) {
-								auto idx0 = indexDataSrc[i];
-								auto idx1 = indexDataSrc[i + 1];
-								auto idx2 = indexDataSrc[i + 2];
-								auto &v0 = verts[idx0];
-								auto &v1 = verts[idx1];
-								auto &v2 = verts[idx2];
-
-								if(umath::intersection::obb_triangle(hbMin, hbMax, pose, v0.position, v1.position, v2.position))
-									usedTris.push_back(i / 3);
-							}
-						});
-
-						if(usedTris.empty())
-							continue;
-						if(boneMeshes.size() == boneMeshes.capacity())
-							boneMeshes.reserve(boneMeshes.size() * 2 + 10);
-						auto bm = std::make_shared<BoneMeshInfo>();
-						bm->subMesh = subMesh;
-						bm->meshUuid = util::uuid_to_string(uuid);
-						bm->usedTris = std::move(usedTris);
-						boneMeshes.push_back(bm);
-					}
-				}
-			}
-		}
-
-		if(!boneMeshes.empty())
-			boneMeshMap[bone->name] = std::move(boneMeshes);
-	}
-
-	// 2) Generate mesh BVHs
-	using BoneName = std::string;
-	using MeshUuid = std::string;
-	auto meshMap = get_uuid_mesh_map(mdl);
-	for(auto &[boneName, boneMeshes] : boneMeshMap) {
-		auto boneId = skeleton.LookupBone(boneName);
-		if(boneId < 0)
-			continue;
-		umath::ScaledTransform pose;
-		if(!ref.GetBonePose(boneId, pose))
-			continue;
-		auto invPose = pose.GetInverse();
-		for(auto &boneMesh : boneMeshes) {
-			auto itMesh = meshMap.find(boneMesh->meshUuid);
-			if(itMesh == meshMap.end())
-				continue;
-			auto meshBvh = generate_mesh_bvh(*itMesh->second, boneMesh->usedTris, invPose);
-			if(!meshBvh)
-				continue;
-			boneMesh->meshBvhTree = std::move(meshBvh);
-		}
-	}
-
-	// 3) Serialize and store in extension data
-	auto extData = mdl.GetExtensionData();
-	auto udmHbMeshes = extData["hitboxMeshes"];
-	for(auto &[boneName, boneMeshes] : boneMeshMap) {
-		auto udmBoneMeshes = udmHbMeshes.AddArray(boneName, boneMeshes.size());
-		uint32_t idx = 0;
-		for(auto &boneMeshInfo : boneMeshes) {
-			udmBoneMeshes[idx]["meshUuid"] = boneMeshInfo->meshUuid;
-			udmBoneMeshes[idx].AddArray("triangleIndices", boneMeshInfo->usedTris, udm::ArrayType::Compressed);
-
-			std::stringstream ss;
-			::bvh::v2::StdOutputStream oStream {ss};
-			auto &bvh = boneMeshInfo->meshBvhTree->bvh;
-			bvh.serialize(oStream);
-			auto view = ss.view();
-			auto extData = boneMeshInfo->subMesh->GetExtensionData();
-			auto udmBvh = udmBoneMeshes[idx]["bvh"];
-			udmBvh["data"] = ::udm::compress_lz4_blob(view.data(), view.size());
-			static_assert(sizeof(decltype(boneMeshInfo->meshBvhTree->primitives[0])) == sizeof(Vector3) * 3);
-			auto numVerts = boneMeshInfo->meshBvhTree->primitives.size() * 3;
-			auto *verts = reinterpret_cast<Vector3 *>(boneMeshInfo->meshBvhTree->primitives.data());
-			udmBvh.AddArray<Vector3>("primitives", numVerts, verts, udm::ArrayType::Compressed);
-
-			++idx;
-		}
-	}
-
-	/*
-	// Debug Print
-	std::stringstream ss;
-	extData->ToAscii(udm::AsciiSaveFlags::DontCompressLz4Arrays, ss, "");
-	Con::cout << "Extension data:" << Con::endl;
-	Con::cout << ss.str() << Con::endl;
-	*/
-}
 
 void CHitboxBvhComponent::DebugDrawHitboxMeshes(BoneId boneId, float duration) const
 {
@@ -759,7 +555,7 @@ pragma::bvh::BBox pragma::CHitboxBvhComponent::HitboxObb::ToBvhBBox(const umath:
 	return pragma::bvh::BBox {pragma::bvh::to_bvh_vector(aabbMin), pragma::bvh::to_bvh_vector(aabbMax)};
 }
 
-bool ObbBvhTree::DoInitializeBvh(::bvh::v2::ParallelExecutor &executor, ::bvh::v2::DefaultBuilder<pragma::bvh::Node>::Config &config)
+bool ObbBvhTree::DoInitializeBvh(pragma::bvh::Executor &executor, ::bvh::v2::DefaultBuilder<pragma::bvh::Node>::Config &config)
 {
 	auto numObbs = primitives.size();
 	if(numObbs == 0)

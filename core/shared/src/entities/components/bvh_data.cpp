@@ -7,7 +7,8 @@
 
 #include "stdafx_shared.h"
 #include "pragma/entities/components/bvh_data.hpp"
-#include "pragma/model/c_modelmesh.h"
+#include "pragma/model/model.h"
+#include "pragma/model/modelmesh.h"
 #include <sharedutils/util_hash.hpp>
 #include <mathutil/umath_geometry.hpp>
 #include <bvh/v2/default_builder.h>
@@ -164,7 +165,10 @@ void pragma::bvh::BvhTree::InitializeBvh()
 
 ::bvh::v2::DefaultBuilder<pragma::bvh::Node>::Config pragma::bvh::BvhTree::InitializeExecutor()
 {
-	executor = std::make_unique<::bvh::v2::ParallelExecutor>(*g_threadPool);
+	if constexpr(std::is_same_v<Executor, ::bvh::v2::ParallelExecutor>)
+		executor = std::make_unique<Executor>(*g_threadPool);
+	else
+		executor = std::make_unique<Executor>();
 	::bvh::v2::DefaultBuilder<Node>::Config config;
 	config.quality = ::bvh::v2::DefaultBuilder<Node>::Quality::High;
 	return config;
@@ -221,7 +225,7 @@ void pragma::bvh::MeshBvhTree::InitializePrecomputedTris()
 	});
 }
 
-bool pragma::bvh::MeshBvhTree::DoInitializeBvh(::bvh::v2::ParallelExecutor &executor, ::bvh::v2::DefaultBuilder<Node>::Config &config)
+bool pragma::bvh::MeshBvhTree::DoInitializeBvh(Executor &executor, ::bvh::v2::DefaultBuilder<Node>::Config &config)
 {
 	auto numTris = primitives.size();
 	if(numTris == 0)
@@ -235,7 +239,8 @@ bool pragma::bvh::MeshBvhTree::DoInitializeBvh(::bvh::v2::ParallelExecutor &exec
 		}
 	});
 
-	bvh = ::bvh::v2::DefaultBuilder<Node>::build(GetThreadPool(), bboxes, centers, config);
+	bvh = ::bvh::v2::DefaultBuilder<Node>::build(bboxes, centers, config);
+	//bvh = ::bvh::v2::DefaultBuilder<Node>::build(GetThreadPool(), bboxes, centers, config);
 	InitializePrecomputedTris();
 	return true;
 }
@@ -270,6 +275,21 @@ bool pragma::bvh::MeshBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir
 }
 
 pragma::bvh::Ray pragma::bvh::get_ray(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) { return Ray {to_bvh_vector(origin), to_bvh_vector(dir), minDist, maxDist}; }
+
+std::unordered_map<std::string, std::shared_ptr<ModelSubMesh>> pragma::bvh::get_uuid_mesh_map(Model &mdl)
+{
+	std::unordered_map<std::string, std::shared_ptr<ModelSubMesh>> mdlMeshes;
+	for(auto &mg : mdl.GetMeshGroups()) {
+		for(auto &m : mg->GetMeshes()) {
+			for(auto &sm : m->GetSubMeshes()) {
+				if(!pragma::bvh::is_mesh_bvh_compatible(*sm))
+					continue;
+				mdlMeshes[util::uuid_to_string(sm->GetUuid())] = sm;
+			}
+		}
+	}
+	return mdlMeshes;
+}
 
 void pragma::bvh::debug::print_bvh_tree(pragma::bvh::Bvh &bvh)
 {

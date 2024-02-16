@@ -163,7 +163,7 @@ namespace pragma {
 			return MODULE_NULL;
 		}
 		auto wrapper = ModuleWrapper::Create(hEngine);
-#ifdef LINUX_THREAD_TEST
+#if 0
 		std::thread t([]() { std::cout << "Linux Thread Test"; });
 #endif
         void (*runEngine)(int, char *[]) = (void (*)(int, char *[]))dlsym(hEngine, runEngineSymbol);

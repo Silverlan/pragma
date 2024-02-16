@@ -20,6 +20,7 @@
 #include <panima/bone.hpp>
 #include <panima/skeleton.hpp>
 #include <pragma/entities/components/base_bvh_component.hpp>
+#include <sharedutils/BS_thread_pool.hpp>
 #include <mathutil/boundingvolume.h>
 #include <bvh/v2/stack.h>
 #include <ranges>
@@ -32,6 +33,7 @@ static spdlog::logger &LOGGER = pragma::register_logger("bvh");
 using namespace pragma;
 #pragma optimize("", off)
 static std::shared_ptr<pragma::bvh::HitboxBvhCache> g_hbBvhCache {};
+static std::unique_ptr<BS::thread_pool> g_hbThreadPool {};
 static size_t g_hbBvhCount = 0;
 
 pragma::bvh::ModelHitboxBvhCache *pragma::bvh::HitboxBvhCache::GetModelCache(const ModelName &mdlName)
@@ -49,13 +51,18 @@ pragma::bvh::ModelHitboxBvhCache &pragma::bvh::HitboxBvhCache::AddModelCache(con
 
 CHitboxBvhComponent::CHitboxBvhComponent(BaseEntity &ent) : BaseEntityComponent(ent)
 {
-	if(g_hbBvhCount++ == 0)
+	if(g_hbBvhCount++ == 0) {
+		g_hbThreadPool = std::make_unique<BS::thread_pool>(10);
 		g_hbBvhCache = std::make_shared<pragma::bvh::HitboxBvhCache>();
+	}
 }
 CHitboxBvhComponent::~CHitboxBvhComponent()
 {
-	if(--g_hbBvhCount == 0)
+	m_hitboxBvhUpdate.wait();
+	if(--g_hbBvhCount == 0) {
+		g_hbThreadPool = {};
 		g_hbBvhCache = nullptr;
+	}
 }
 pragma::bvh::HitboxBvhCache &CHitboxBvhComponent::GetGlobalBvhCache() const { return *g_hbBvhCache; }
 void CHitboxBvhComponent::InitializeLuaObject(lua_State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
@@ -113,38 +120,49 @@ void CHitboxBvhComponent::UpdateHitboxBvh()
 	auto *animC = static_cast<CAnimatedComponent *>(GetEntity().GetAnimatedComponent().get());
 	if(!animC)
 		return;
-	auto &bonePoses = animC->GetProcessedBones();
-	auto &bvh = m_hitboxBvh->bvh;
-	// It's important to process the nodes in reverse order, as this makes
-	// sure that children are processed before their parents.
-	for(auto &node : std::ranges::reverse_view {bvh.nodes}) {
-		if(node.is_leaf()) {
-			// refit node according to contents
-			auto begin = node.index.first_id;
-			auto end = begin + node.index.prim_count;
-			for(size_t i = begin; i < end; ++i) {
-				size_t j = bvh.prim_ids[i];
 
-				auto &hbObb = m_hitboxBvh->primitives[j];
-				if(hbObb.boneId >= bonePoses.size())
-					continue;
-				auto &pose = bonePoses[hbObb.boneId];
-				Vector3 origin;
-				auto bbox = hbObb.ToBvhBBox(pose, origin);
-				node.set_bbox(bbox);
+	auto &bonePoses = animC->GetProcessedBones();
+	auto &hitboxBvh = m_hitboxBvh;
+	auto &bvh = m_hitboxBvh->bvh;
+
+	m_hitboxBvhUpdate.wait();
+	m_hitboxBvhUpdatePoses.resize(bonePoses.size());
+	memcpy(m_hitboxBvhUpdatePoses.data(), bonePoses.data(), util::size_of_container(bonePoses));
+	auto &updatePoses = m_hitboxBvhUpdatePoses;
+	m_hitboxBvhUpdate = g_hbThreadPool->submit_task([&updatePoses, &hitboxBvh, &bvh]() {
+		// It's important to process the nodes in reverse order, as this makes
+		// sure that children are processed before their parents.
+		for(auto &node : std::ranges::reverse_view {bvh.nodes}) {
+			if(node.is_leaf()) {
+				// refit node according to contents
+				auto begin = node.index.first_id;
+				auto end = begin + node.index.prim_count;
+				for(size_t i = begin; i < end; ++i) {
+					size_t j = bvh.prim_ids[i];
+
+					auto &hbObb = hitboxBvh->primitives[j];
+					if(hbObb.boneId >= updatePoses.size())
+						continue;
+					auto &pose = updatePoses[hbObb.boneId];
+					Vector3 origin;
+					auto bbox = hbObb.ToBvhBBox(pose, origin);
+					node.set_bbox(bbox);
+				}
+			}
+			else {
+				auto &left = bvh.nodes[node.index.first_id];
+				auto &right = bvh.nodes[node.index.first_id + 1];
+				node.set_bbox(left.get_bbox().extend(right.get_bbox()));
 			}
 		}
-		else {
-			auto &left = bvh.nodes[node.index.first_id];
-			auto &right = bvh.nodes[node.index.first_id + 1];
-			node.set_bbox(left.get_bbox().extend(right.get_bbox()));
-		}
-	}
-	m_hitboxBvh->Refit();
+		hitboxBvh->Refit();
+	});
 }
 
 void CHitboxBvhComponent::InitializeHitboxBvh()
 {
+	m_hitboxBvhUpdate.wait();
+
 	auto &ent = GetEntity();
 	auto animC = ent.GetAnimatedComponent();
 	if(animC.expired())
@@ -158,8 +176,8 @@ void CHitboxBvhComponent::InitializeHitboxBvh()
 	for(auto &pair : hitboxes) {
 		if(pair.first >= numBones)
 			continue;
-		auto it = m_hitboxBvhs.find(pair.first);
-		if(it == m_hitboxBvhs.end())
+		auto it = m_hitboxMeshBvhCaches.find(pair.first);
+		if(it == m_hitboxMeshBvhCaches.end())
 			continue; // No mesh for this hitbox
 		auto &hb = pair.second;
 		hitboxObbs.push_back({hb.min, hb.max});
@@ -176,7 +194,7 @@ void CHitboxBvhComponent::InitializeHitboxBvh()
 
 void CHitboxBvhComponent::InitializeHitboxMeshBvhs()
 {
-	m_hitboxBvhs.clear();
+	m_hitboxMeshBvhCaches.clear();
 	auto &ent = GetEntity();
 	auto *mdlC = ent.GetModelComponent();
 	if(!mdlC)
@@ -205,7 +223,7 @@ void CHitboxBvhComponent::InitializeHitboxMeshBvhs()
 			if(renderMeshUuids.find(uuid) == renderMeshUuids.end())
 				continue;
 			if(boneMeshCache == nullptr) {
-				auto &rtCache = m_hitboxBvhs[boneId] = std::vector<std::shared_ptr<pragma::bvh::MeshHitboxBvhCache>> {};
+				auto &rtCache = m_hitboxMeshBvhCaches[boneId] = std::vector<std::shared_ptr<pragma::bvh::MeshHitboxBvhCache>> {};
 				rtCache.reserve(boneCache->meshCache.size());
 				boneMeshCache = &rtCache;
 			}
@@ -402,6 +420,7 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 
 	// Raycast against our hitbox BVH
 	std::vector<ObbBvhTree::HitData> hits;
+	m_hitboxBvhUpdate.wait(); // Ensure hitbox bvh update is complete
 	auto res = m_hitboxBvh->Raycast(originEs, dirEs, minDist, maxDist, effectiveBonePoses, hits, debugDrawInfo);
 	if(!res)
 		return false;
@@ -410,8 +429,8 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 	Con::cout << Con::endl;
 	for(auto &hitData : hits) {
 		auto &hObb = m_hitboxBvh->primitives[hitData.primitiveIndex];
-		auto it = m_hitboxBvhs.find(hObb.boneId);
-		if(it == m_hitboxBvhs.end())
+		auto it = m_hitboxMeshBvhCaches.find(hObb.boneId);
+		if(it == m_hitboxMeshBvhCaches.end())
 			continue;
 		auto boneId = hObb.boneId;
 		if(boneId >= effectiveBonePoses.size())
@@ -626,8 +645,8 @@ void pragma::CHitboxBvhComponent::generate_hitbox_meshes(Model &mdl)
 
 void CHitboxBvhComponent::DebugDrawHitboxMeshes(BoneId boneId, float duration) const
 {
-	auto it = m_hitboxBvhs.find(boneId);
-	if(it == m_hitboxBvhs.end())
+	auto it = m_hitboxMeshBvhCaches.find(boneId);
+	if(it == m_hitboxMeshBvhCaches.end())
 		return;
 	const std::array<Color, 6> colors {Color::Red, Color::Lime, Color::Blue, Color::Yellow, Color::Cyan, Color::Magenta};
 	auto &hitboxBvhInfos = it->second;
@@ -685,7 +704,7 @@ void CHitboxBvhComponent::DebugDraw()
 
 	auto &mdl = ent.GetModel();
 	auto &ref = mdl->GetReference();
-	for(auto &pair : m_hitboxBvhs) {
+	for(auto &pair : m_hitboxMeshBvhCaches) {
 		umath::ScaledTransform pose;
 		if(!ref.GetBonePose(pair.first, pose))
 			continue;

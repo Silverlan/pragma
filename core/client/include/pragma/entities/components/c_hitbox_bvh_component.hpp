@@ -84,8 +84,11 @@ namespace pragma {
 		bool InitializeModel();
 		void InitializeHitboxMeshCache();
 		void InitializeHitboxMeshBvhs();
-		std::unordered_map<BoneId, std::vector<std::shared_ptr<bvh::MeshHitboxBvhCache>>> m_hitboxBvhs;
+		std::unordered_map<BoneId, std::vector<std::shared_ptr<bvh::MeshHitboxBvhCache>>> m_hitboxMeshBvhCaches;
 		std::shared_ptr<ObbBvhTree> m_hitboxBvh;
+
+		std::vector<umath::ScaledTransform> m_hitboxBvhUpdatePoses;
+		std::future<void> m_hitboxBvhUpdate;
 	};
 
 	struct DLLCLIENT ObbBvhTree : public pragma::bvh::BvhTree {

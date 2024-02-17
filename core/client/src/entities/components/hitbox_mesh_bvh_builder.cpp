@@ -77,11 +77,11 @@ static bool generate_mesh_bvh(Model &mdl, const std::string &boneName, pragma::b
 	return true;
 }
 
-static bool calc_bone_mesh_info(pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo, std::shared_ptr<ModelSubMesh> subMesh, std::vector<umath::Plane> planes, Vector3 hbMin, Vector3 hbMax, umath::ScaledTransform pose, util::Uuid uuid)
+static bool calc_bone_mesh_info(pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo, std::shared_ptr<ModelSubMesh> subMesh, std::array<umath::Plane, 6> planes, Vector3 hbMin, Vector3 hbMax, umath::ScaledTransform pose, util::Uuid uuid)
 {
 	Vector3 smMin, smMax;
 	subMesh->GetBounds(smMin, smMax);
-	if(umath::intersection::aabb_in_plane_mesh(smMin, smMax, planes) == umath::intersection::Intersect::Outside)
+	if(umath::intersection::aabb_in_plane_mesh(smMin, smMax, planes.begin(), planes.end()) == umath::intersection::Intersect::Outside)
 		return false;
 	auto &verts = subMesh->GetVertices();
 	auto numVerts = verts.size();
@@ -176,14 +176,7 @@ bool pragma::bvh::HitboxMeshBvhBuildTask::Build(Model &mdl, BoneId boneId, const
 		return false;
 	auto &pos = pose.GetOrigin();
 	auto &rot = pose.GetRotation();
-	const std::vector<umath::Plane> planes {
-	  umath::Plane {uquat::up(rot), pos + uquat::up(rot) * hb.max.y},
-	  umath::Plane {-uquat::up(rot), pos + uquat::up(rot) * hb.min.y},
-	  umath::Plane {uquat::forward(rot), pos + uquat::forward(rot) * hb.max.z},
-	  umath::Plane {-uquat::forward(rot), pos + uquat::forward(rot) * hb.min.z},
-	  umath::Plane {-uquat::right(rot), pos - uquat::right(rot) * hb.max.x},
-	  umath::Plane {uquat::right(rot), pos - uquat::right(rot) * hb.min.x},
-	};
+	auto planes = umath::geometry::get_obb_planes(pos, rot, hb.min, hb.max);
 	auto &hbMin = hb.min;
 	auto &hbMax = hb.max;
 	for(auto &pair : lodInfo.meshReplacements) {

@@ -131,11 +131,11 @@ bool pragma::bvh::test_bvh_intersection_with_aabb(const pragma::bvh::MeshBvhTree
 bool pragma::bvh::test_bvh_intersection_with_kdop(const pragma::bvh::MeshBvhTree &bvhData, const std::vector<umath::Plane> &kdop, size_t nodeIdx, pragma::bvh::IntersectionInfo *outIntersectionInfo)
 {
 	return test_bvh_intersection(
-	  bvhData, [&kdop](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return umath::intersection::aabb_in_plane_mesh(aabbMin, aabbMax, kdop) != umath::intersection::Intersect::Outside; },
+	  bvhData, [&kdop](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return umath::intersection::aabb_in_plane_mesh(aabbMin, aabbMax, kdop.begin(), kdop.end()) != umath::intersection::Intersect::Outside; },
 	  [&kdop](const pragma::bvh::Primitive &prim) -> bool {
 		  Vector3 v0, v1;
 		  get_bvh_bounds(prim.get_bbox(), v0, v1);
-		  return umath::intersection::aabb_in_plane_mesh(v0, v1, kdop) != umath::intersection::Intersect::Outside;
+		  return umath::intersection::aabb_in_plane_mesh(v0, v1, kdop.begin(), kdop.end()) != umath::intersection::Intersect::Outside;
 	  },
 	  nodeIdx, outIntersectionInfo);
 }

@@ -138,8 +138,12 @@ void CHitboxBvhComponent::InitializeLuaObject(lua_State *l) { return BaseEntityC
 void CHitboxBvhComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
+	auto animC = GetEntity().AddComponent<CAnimatedComponent>();
+	if(animC.valid())
+		animC->SetSkeletonUpdateCallbacksEnabled(true);
 	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { OnModelChanged(); });
 	BindEventUnhandled(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { InitializeHitboxMeshBvhs(); });
+	BindEventUnhandled(CAnimatedComponent::EVENT_ON_SKELETON_UPDATED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { UpdateHitboxBvh(); });
 }
 
 void CHitboxBvhComponent::InitializeBvh()
@@ -201,6 +205,9 @@ void CHitboxBvhComponent::UpdateHitboxBvh()
 	auto *animC = static_cast<CAnimatedComponent *>(GetEntity().GetAnimatedComponent().get());
 	if(!animC)
 		return;
+
+	// Note: This is called on the animation thread (which is executed during rendering), but we don't need a mutex
+	// as raycasts must not occur during rendering anyway.
 
 	auto &bonePoses = animC->GetProcessedBones();
 	auto &hitboxBvh = m_hitboxBvh;

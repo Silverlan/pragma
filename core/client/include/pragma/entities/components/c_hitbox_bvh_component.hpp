@@ -81,7 +81,6 @@ namespace pragma {
 		virtual void OnEntitySpawn() override;
 		void InitializeBvh();
 		bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::bvh::HitInfo &outHitInfo, const bvh::DebugDrawInfo *debugDrawInfo = nullptr);
-		void UpdateHitboxBvh();
 		void DebugDrawHitboxMeshes(BoneId boneId, float duration = 12.f) const;
 		bvh::HitboxBvhCache &GetGlobalBvhCache() const;
 	  private:
@@ -92,6 +91,7 @@ namespace pragma {
 		void InitializeHitboxBvh();
 		bool InitializeModel();
 		void InitializeHitboxMeshBvhs();
+		void UpdateHitboxBvh();
 		std::shared_future<void> m_hitboxMeshCacheTask;
 		std::unordered_map<BoneId, std::vector<std::shared_ptr<bvh::MeshHitboxBvhCache>>> m_hitboxMeshBvhCaches;
 		std::shared_ptr<ObbBvhTree> m_hitboxBvh;

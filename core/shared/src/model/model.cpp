@@ -1114,7 +1114,7 @@ void Model::GetSubMeshes(const std::vector<uint32_t> &meshIds, std::vector<std::
 			for(auto it = groupMeshes.begin(); it != groupMeshes.end(); ++it) {
 				auto &mesh = *it;
 				outMeshes.reserve(outMeshes.size() + mesh->GetSubMeshCount());
-				for(auto &subMesh : outMeshes)
+				for(auto &subMesh : mesh->GetSubMeshes())
 					outMeshes.push_back(subMesh);
 			}
 		}

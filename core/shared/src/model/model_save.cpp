@@ -289,6 +289,24 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 	udm["maxEyeDeflection"](m_maxEyeDeflection);
 	udm["mass"](m_mass);
 
+	auto udmLods = udm["lods"];
+	m_lods.reserve(udmLods.GetSize());
+	for(auto &udmLod : udmLods) {
+		m_lods.push_back({});
+		auto &lodInfo = m_lods.back();
+		udmLod["distance"](lodInfo.distance);
+		udmLod["lod"](lodInfo.lod);
+
+		auto udmMeshGroupReplacements = udmLod["meshGroupReplacements"];
+		for(auto &udmMeshGroupReplacement : udmMeshGroupReplacements) {
+			uint32_t source = 0u;
+			uint32_t target = 0u;
+			udmMeshGroupReplacement["source"](source);
+			udmMeshGroupReplacement["target"](target);
+			lodInfo.meshReplacements[source] = target;
+		}
+	}
+
 	udm["render"]["bounds"]["min"](m_renderMin);
 	udm["render"]["bounds"]["max"](m_renderMax);
 
@@ -699,6 +717,21 @@ bool Model::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
 	udm["eyeOffset"] = GetEyeOffset();
 	udm["maxEyeDeflection"] = m_maxEyeDeflection;
 	udm["mass"] = m_mass;
+
+	auto udmLods = udm.AddArray("lods", m_lods.size());
+	uint32_t idx = 0;
+	for(auto &lodInfo : m_lods) {
+		auto udmLod = udmLods[idx++];
+		udmLod["distance"] = lodInfo.distance;
+		udmLod["lod"] = lodInfo.lod;
+		auto udmMeshGroupReplacements = udmLod.AddArray("meshGroupReplacements", lodInfo.meshReplacements.size());
+		uint32_t idxMg = 0;
+		for(auto &pair : lodInfo.meshReplacements) {
+			auto udmMeshGroupReplacement = udmMeshGroupReplacements[idxMg++];
+			udmMeshGroupReplacement["source"] = pair.first;
+			udmMeshGroupReplacement["target"] = pair.second;
+		}
+	}
 
 	Vector3 min, max;
 	GetRenderBounds(min, max);

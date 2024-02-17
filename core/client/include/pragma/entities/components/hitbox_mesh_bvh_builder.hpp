@@ -22,6 +22,7 @@ namespace pragma::bvh {
 	struct MeshBvhTree;
 	class DLLCLIENT HitboxMeshBvhBuildTask {
 	  public:
+		using BoneName = std::string;
 		struct DLLCLIENT BoneMeshInfo {
 			std::string meshUuid;
 			std::shared_ptr<ModelSubMesh> subMesh;
@@ -34,8 +35,8 @@ namespace pragma::bvh {
 
 		HitboxMeshBvhBuildTask(BS::thread_pool &threadPool);
 		bool Build(Model &mdl);
+		const std::unordered_map<BoneName, std::vector<std::shared_ptr<BoneMeshInfo>>> &GetResult() const { return m_boneMeshMap; }
 	  private:
-		using BoneName = std::string;
 		bool Build(Model &mdl, BoneId boneId, const Hitbox &hitbox, const LODInfo &lodInfo);
 		void Serialize(Model &mdl);
 		void BuildHitboxMesh(Model &mdl, ModelSubMesh &subMesh);
@@ -48,7 +49,8 @@ namespace pragma::bvh {
 	class DLLCLIENT HitboxMeshBvhBuilder {
 	  public:
 		HitboxMeshBvhBuilder();
-		void BuildModel(Model &mdl);
+		HitboxMeshBvhBuildTask BuildModel(Model &mdl);
+		BS::thread_pool &GetThreadPool() { return m_threadPool; }
 	  private:
 		BS::thread_pool m_threadPool;
 	};

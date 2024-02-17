@@ -10,6 +10,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_bvh_component.hpp>
+#include "pragma/entities/components/hitbox_mesh_bvh_builder.hpp"
 
 class Model;
 class ModelSubMesh;
@@ -40,14 +41,23 @@ namespace pragma {
 			std::unordered_map<Uuid, std::shared_ptr<MeshHitboxBvhCache>> meshCache;
 		};
 		struct DLLCLIENT ModelHitboxBvhCache {
+			std::shared_future<void> task;
+			std::atomic<bool> complete = false;
+
 			std::unordered_map<BoneId, std::shared_ptr<BoneHitboxBvhCache>> boneCache;
 		};
 		struct DLLCLIENT HitboxBvhCache {
 			using ModelName = std::string;
+			HitboxBvhCache(Game &game);
+			~HitboxBvhCache();
 			ModelHitboxBvhCache *GetModelCache(const ModelName &mdlName);
-			ModelHitboxBvhCache &AddModelCache(const ModelName &mdlName);
+			std::shared_future<void> GenerateModelCache(const ModelName &mdlName, Model &mdl);
 		  private:
+			void PrepareModel(Model &mdl);
+			void InitializeModelHitboxBvhCache(Model &mdl, const HitboxMeshBvhBuildTask &buildTask, ModelHitboxBvhCache &mdlHbBvhCache);
 			std::unordered_map<ModelName, std::shared_ptr<ModelHitboxBvhCache>> m_modelBvhCache;
+			Game &m_game;
+			pragma::bvh::HitboxMeshBvhBuilder m_builder;
 		};
 	};
 	class DLLCLIENT CHitboxBvhComponent final : public BaseEntityComponent {
@@ -70,19 +80,19 @@ namespace pragma {
 		virtual void OnRemove() override;
 		virtual void OnEntitySpawn() override;
 		void InitializeBvh();
-		void UpdateTest();
 		bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::bvh::HitInfo &outHitInfo, const bvh::DebugDrawInfo *debugDrawInfo = nullptr);
 		void UpdateHitboxBvh();
 		void DebugDrawHitboxMeshes(BoneId boneId, float duration = 12.f) const;
 		bvh::HitboxBvhCache &GetGlobalBvhCache() const;
 	  private:
+		void Reset();
 		void WaitForHitboxBvhUpdate();
 		void DebugDraw();
 		void OnModelChanged();
 		void InitializeHitboxBvh();
 		bool InitializeModel();
-		void InitializeHitboxMeshCache();
 		void InitializeHitboxMeshBvhs();
+		std::shared_future<void> m_hitboxMeshCacheTask;
 		std::unordered_map<BoneId, std::vector<std::shared_ptr<bvh::MeshHitboxBvhCache>>> m_hitboxMeshBvhCaches;
 		std::shared_ptr<ObbBvhTree> m_hitboxBvh;
 

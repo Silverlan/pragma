@@ -12,8 +12,10 @@
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/debug/c_debugoverlay.h"
+#include "pragma/logging.hpp"
 #include <pragma/entities/components/bvh_data.hpp>
 #include <pragma/entities/components/util_bvh.hpp>
+#include <pragma/debug/intel_vtune.hpp>
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include <panima/skeleton.hpp>
@@ -30,35 +32,96 @@ extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
+
+static spdlog::logger &LOGGER = pragma::register_logger("bvh");
+
 #pragma optimize("", off)
 static std::shared_ptr<pragma::bvh::HitboxBvhCache> g_hbBvhCache {};
 static std::unique_ptr<BS::thread_pool> g_hbThreadPool {};
 static size_t g_hbBvhCount = 0;
 
+pragma::bvh::HitboxBvhCache::HitboxBvhCache(Game &game) : m_game {game} {}
+pragma::bvh::HitboxBvhCache::~HitboxBvhCache()
+{
+	for(auto &[mdlName, mdlCache] : m_modelBvhCache) {
+		if(mdlCache->task.valid())
+			mdlCache->task.wait();
+	}
+}
 pragma::bvh::ModelHitboxBvhCache *pragma::bvh::HitboxBvhCache::GetModelCache(const ModelName &mdlName)
 {
 	auto normName = pragma::asset::get_normalized_path(mdlName, pragma::asset::Type::Model);
 	auto it = m_modelBvhCache.find(normName);
-	return (it != m_modelBvhCache.end()) ? it->second.get() : nullptr;
+	return (it != m_modelBvhCache.end() && it->second->complete) ? it->second.get() : nullptr;
 }
-pragma::bvh::ModelHitboxBvhCache &pragma::bvh::HitboxBvhCache::AddModelCache(const ModelName &mdlName)
+void pragma::bvh::HitboxBvhCache::PrepareModel(Model &mdl)
 {
-	auto it = m_modelBvhCache.find(mdlName);
-	if(it == m_modelBvhCache.end())
-		it = m_modelBvhCache.insert(std::make_pair(mdlName, std::make_shared<ModelHitboxBvhCache>())).first;
-	return *it->second;
+	auto t = std::chrono::steady_clock::now();
+	auto savingRequired = false;
+	if(mdl.GenerateLowLevelLODs(m_game))
+		savingRequired = true;
+	if(mdl.GetHitboxCount() == 0 && mdl.GenerateHitboxes())
+		savingRequired = true;
+	if(savingRequired) {
+		std::string err;
+		if(!mdl.Save(m_game, err))
+			LOGGER.warn("Failed to save model '{}': {}", mdl.GetName(), err);
+	}
+}
+void pragma::bvh::HitboxBvhCache::InitializeModelHitboxBvhCache(Model &mdl, const HitboxMeshBvhBuildTask &buildTask, ModelHitboxBvhCache &mdlHbBvhCache)
+{
+	auto &skeleton = mdl.GetSkeleton();
+	auto &boneCaches = mdlHbBvhCache.boneCache;
+	auto &boneMeshMap = buildTask.GetResult();
+	for(auto &[boneName, boneMeshInfos] : boneMeshMap) {
+		auto boneId = skeleton.LookupBone(boneName);
+		if(boneId < 0)
+			continue;
+		for(auto &boneMeshInfo : boneMeshInfos) {
+			auto it = boneCaches.find(boneId);
+			if(it == boneCaches.end())
+				it = boneCaches.insert(std::make_pair(boneId, std::make_shared<pragma::bvh::BoneHitboxBvhCache>())).first;
+			auto meshBvhCache = std::make_shared<pragma::bvh::MeshHitboxBvhCache>();
+			meshBvhCache->bvhTree = std::move(boneMeshInfo->meshBvhTree);
+			meshBvhCache->bvhTriToOriginalTri = std::move(boneMeshInfo->usedTris);
+			meshBvhCache->mesh = boneMeshInfo->subMesh;
+
+			auto &boneCache = *it->second;
+			boneCache.meshCache[boneMeshInfo->meshUuid] = meshBvhCache;
+		}
+	}
+}
+std::shared_future<void> pragma::bvh::HitboxBvhCache::GenerateModelCache(const ModelName &mdlName, Model &mdl)
+{
+	auto normName = pragma::asset::get_normalized_path(mdlName, pragma::asset::Type::Model);
+	auto it = m_modelBvhCache.find(normName);
+	if(it != m_modelBvhCache.end())
+		return it->second->task;
+
+	PrepareModel(mdl);
+
+	auto &builder = m_builder;
+	auto mdlCache = std::make_shared<ModelHitboxBvhCache>();
+	auto buildModelTask = builder.GetThreadPool().submit_task([this, &builder, &mdl, &mdlCache = *mdlCache]() {
+		auto task = builder.BuildModel(mdl);
+		InitializeModelHitboxBvhCache(mdl, task, mdlCache);
+		mdlCache.complete = true;
+	});
+	mdlCache->task = buildModelTask.share();
+	m_modelBvhCache.insert(std::make_pair(normName, mdlCache));
+	return mdlCache->task;
 }
 
 CHitboxBvhComponent::CHitboxBvhComponent(BaseEntity &ent) : BaseEntityComponent(ent)
 {
 	if(g_hbBvhCount++ == 0) {
 		g_hbThreadPool = std::make_unique<BS::thread_pool>(10);
-		g_hbBvhCache = std::make_shared<pragma::bvh::HitboxBvhCache>();
+		g_hbBvhCache = std::make_shared<pragma::bvh::HitboxBvhCache>(GetGame());
 	}
 }
 CHitboxBvhComponent::~CHitboxBvhComponent()
 {
-	WaitForHitboxBvhUpdate();
+	Reset();
 	if(--g_hbBvhCount == 0) {
 		g_hbThreadPool = {};
 		g_hbBvhCache = nullptr;
@@ -88,41 +151,48 @@ void CHitboxBvhComponent::InitializeBvh()
 	DebugDraw();
 }
 
+void CHitboxBvhComponent::Reset()
+{
+	WaitForHitboxBvhUpdate();
+	m_hitboxBvhUpdate = {};
+	m_hitboxMeshCacheTask = {};
+	m_hitboxMeshBvhCaches.clear();
+	m_hitboxBvh = nullptr;
+	m_hitboxBvhUpdatePoses.clear();
+}
+
 void CHitboxBvhComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
 	InitializeBvh();
 }
 
-void CHitboxBvhComponent::OnModelChanged() { InitializeBvh(); }
+void CHitboxBvhComponent::OnModelChanged()
+{
+	Reset();
+	InitializeBvh();
+}
 
 bool CHitboxBvhComponent::InitializeModel()
 {
-	auto &mdl = GetEntity().GetModel();
+	auto &ent = GetEntity();
+	auto &mdl = ent.GetModel();
 	if(!mdl)
 		return false;
-	mdl->GenerateLowLevelLODs(GetGame());
-	auto extData = mdl->GetExtensionData();
-	if(!extData["hitboxBvh"]) {
-		pragma::bvh::HitboxMeshBvhBuilder manager {};
-		manager.BuildModel(*mdl);
+
+	auto mdlName = ent.GetModelName();
+	auto &globalBvhCache = GetGlobalBvhCache();
+	auto *mdlCache = globalBvhCache.GetModelCache(mdlName);
+	if(mdlCache) {
+		// Cache already exists
+		InitializeHitboxMeshBvhs();
+		return true;
 	}
 
-	//cache.boneCache
-
-	//if(!udmHbMeshes)
-	//	pragma::CHitboxBvhComponent::generate_hitbox_meshes(*mdl);
-	InitializeHitboxMeshCache();
-	InitializeHitboxMeshBvhs();
-	// TODO: Save model
-	// std::string err;
-	// mdl->Save(GetGame(), err);
-
-	// TODO: Only initialize bvh meshes ONCE per model! -> Re-use between entities
+	// Cache doesn't exist, we'll have to generate it and delay the initialization of the BVHs
+	m_hitboxMeshCacheTask = globalBvhCache.GenerateModelCache(mdlName, *mdl);
 	return true;
 }
-
-void CHitboxBvhComponent::UpdateTest() { UpdateHitboxBvh(); }
 
 void CHitboxBvhComponent::UpdateHitboxBvh()
 {
@@ -243,104 +313,6 @@ void CHitboxBvhComponent::InitializeHitboxMeshBvhs()
 	}
 }
 
-void CHitboxBvhComponent::InitializeHitboxMeshCache()
-{
-	auto &ent = GetEntity();
-	auto &mdl = ent.GetModel();
-	auto mdlName = ent.GetModelName();
-	auto &bvhCache = GetGlobalBvhCache();
-	if(bvhCache.GetModelCache(mdlName))
-		return; // Cache already exists
-	auto extData = mdl->GetExtensionData();
-	auto udmHbBvh = extData["hitboxBvh"];
-	if(!udmHbBvh)
-		return;
-	auto udmHbMeshes = udmHbBvh["hitboxMeshes"];
-	auto &mdlCache = bvhCache.AddModelCache(mdlName);
-	auto mdlMeshes = pragma::bvh::get_uuid_mesh_map(*mdl);
-	auto &skeleton = mdl->GetSkeleton();
-	auto &ref = mdl->GetReference();
-	auto &boneCaches = mdlCache.boneCache;
-
-	for(auto udmHbMeshPair : udmHbMeshes.ElIt()) {
-		auto &boneName = udmHbMeshPair.key;
-		auto boneId = skeleton.LookupBone(std::string {boneName});
-		if(boneId < 0)
-			continue;
-		umath::ScaledTransform pose;
-		if(!ref.GetBonePose(boneId, pose))
-			continue;
-		auto invPose = pose.GetInverse();
-
-		auto &udmBoneMeshes = udmHbMeshPair.property;
-		for(auto udmBoneMesh : udmBoneMeshes) {
-			std::string meshUuid;
-			udmBoneMesh["meshUuid"](meshUuid);
-			auto itMesh = mdlMeshes.find(meshUuid);
-			if(itMesh == mdlMeshes.end())
-				continue;
-			auto &mesh = itMesh->second;
-			std::vector<uint32_t> triIndices;
-			udmBoneMesh["triangleIndices"](triIndices);
-			if(triIndices.empty())
-				continue;
-			auto &verts = mesh->GetVertices();
-
-			std::vector<bvh::Primitive> bvhTris;
-			bvhTris.reserve(triIndices.size());
-			auto valid = true;
-			mesh->VisitIndices([&triIndices, &verts, &invPose, &bvhTris, &valid](auto *indexDataSrc, uint32_t numIndicesSrc) {
-				auto numVerts = verts.size();
-				for(auto triIdx : triIndices) {
-					if(triIdx + 2 >= numIndicesSrc) {
-						valid = false;
-						return;
-					}
-					auto idx0 = indexDataSrc[triIdx * 3];
-					auto idx1 = indexDataSrc[triIdx * 3 + 1];
-					auto idx2 = indexDataSrc[triIdx * 3 + 2];
-					if(idx0 >= numVerts || idx1 >= numVerts || idx2 >= numVerts) {
-						valid = false;
-						return;
-					}
-					auto &v0 = verts[idx0];
-					auto &v1 = verts[idx1];
-					auto &v2 = verts[idx2];
-					auto pos0 = invPose * v0.position;
-					auto pos1 = invPose * v1.position;
-					auto pos2 = invPose * v2.position;
-					bvhTris.push_back(bvh::create_triangle(pos0, pos1, pos2));
-				}
-			});
-
-			if(!valid)
-				continue;
-			auto udmBvh = udmBoneMesh["bvh"];
-			std::vector<uint8_t> data;
-			udmBvh["data"].GetBlobData(data);
-			if(data.empty())
-				continue;
-
-			std::vector<pragma::bvh::Primitive> primitives;
-			udmBvh["primitives"](primitives);
-			if(primitives.empty())
-				continue;
-
-			auto it = boneCaches.find(boneId);
-			if(it == boneCaches.end())
-				it = boneCaches.insert(std::make_pair(boneId, std::make_shared<pragma::bvh::BoneHitboxBvhCache>())).first;
-			auto meshBvhCache = std::make_shared<pragma::bvh::MeshHitboxBvhCache>();
-			meshBvhCache->bvhTree = std::make_shared<pragma::bvh::MeshBvhTree>();
-			meshBvhCache->bvhTree->Deserialize(data, std::move(primitives));
-			meshBvhCache->bvhTriToOriginalTri = std::move(triIndices);
-			meshBvhCache->mesh = mesh;
-
-			auto &boneCache = *it->second;
-			boneCache.meshCache[meshUuid] = meshBvhCache;
-		}
-	}
-}
-
 static void draw_mesh(const pragma::bvh::MeshBvhTree &bvhTree, const umath::ScaledTransform &pose, const Color &color, const Color &outlineColor, float duration = 0.1f)
 {
 	std::vector<Vector3> verts;
@@ -355,21 +327,39 @@ static void draw_mesh(const pragma::bvh::MeshBvhTree &bvhTree, const umath::Scal
 
 bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::bvh::HitInfo &outHitInfo, const bvh::DebugDrawInfo *debugDrawInfo)
 {
-	if(!m_hitboxBvh)
-		return false;
 	auto &ent = static_cast<CBaseEntity &>(GetEntity());
 	auto *renderC = ent.GetRenderComponent();
 	if(!renderC)
 		return false;
+
+	auto animC = ent.GetAnimatedComponent();
+	if(animC.expired())
+		return false;
+
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().BeginTask("hitbox_bvh_raycast");
+#endif
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	util::ScopeGuard sgVtune {[]() { ::debug::get_domain().EndTask(); }};
+#endif
 
 	auto &renderBounds = renderC->GetAbsoluteRenderBounds();
 	float t;
 	if(umath::intersection::line_aabb(origin, dir, renderBounds.min, renderBounds.max, &t) != umath::intersection::Result::Intersect || t > maxDist)
 		return false; // Ray doesn't intersect with render bounds, so we can quit early
 
-	auto animC = ent.GetAnimatedComponent();
-	if(animC.expired())
-		return false;
+	if(!m_hitboxBvh) {
+		// Lazy initialization
+		if(m_hitboxMeshCacheTask.valid()) {
+			m_hitboxMeshCacheTask.wait();
+			m_hitboxMeshCacheTask = {};
+			InitializeHitboxMeshBvhs();
+			InitializeHitboxBvh();
+		}
+		if(!m_hitboxBvh)
+			return false;
+	}
+
 	auto &effectiveBonePoses = animC->GetProcessedBones();
 
 	// Move ray to entity space
@@ -382,16 +372,13 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 
 	// Raycast against our hitbox BVH
 	std::vector<ObbBvhTree::HitData> hits;
-	auto tt = std::chrono::steady_clock::now();
 	WaitForHitboxBvhUpdate(); // Ensure hitbox bvh update is complete
-	auto dt = std::chrono::steady_clock::now() - tt;
-	Con::cout << "DT: " << (dt.count() / 1'000'000.0) << "ms" << Con::endl;
+
 	auto res = m_hitboxBvh->Raycast(originEs, dirEs, minDist, maxDist, effectiveBonePoses, hits, debugDrawInfo);
 	if(!res)
 		return false;
 
 	// Now we can do a more precise raycast against the hitbox mesh bvh trees
-	Con::cout << Con::endl;
 	for(auto &hitData : hits) {
 		auto &hObb = m_hitboxBvh->primitives[hitData.primitiveIndex];
 		auto it = m_hitboxMeshBvhCaches.find(hObb.boneId);
@@ -400,7 +387,6 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 		auto boneId = hObb.boneId;
 		if(boneId >= effectiveBonePoses.size())
 			continue;
-		Con::cout << ent.GetModel()->GetSkeleton().GetBone(hObb.boneId).lock()->name << Con::endl;
 		auto bonePoseInv = effectiveBonePoses[boneId].GetInverse();
 
 		// Move ray to bone space

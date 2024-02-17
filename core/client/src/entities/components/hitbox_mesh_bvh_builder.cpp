@@ -263,10 +263,11 @@ void pragma::bvh::HitboxMeshBvhBuildTask::Serialize(Model &mdl)
 	}
 }
 
-pragma::bvh::HitboxMeshBvhBuilder::HitboxMeshBvhBuilder() : m_threadPool {10} {}
+pragma::bvh::HitboxMeshBvhBuilder::HitboxMeshBvhBuilder() : m_threadPool {15} {}
 
-void pragma::bvh::HitboxMeshBvhBuilder::BuildModel(Model &mdl)
+pragma::bvh::HitboxMeshBvhBuildTask pragma::bvh::HitboxMeshBvhBuilder::BuildModel(Model &mdl)
 {
-	HitboxMeshBvhBuildTask builder {m_threadPool};
-	builder.Build(mdl);
+	HitboxMeshBvhBuildTask task {m_threadPool};
+	task.Build(mdl);
+	return task;
 }

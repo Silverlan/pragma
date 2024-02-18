@@ -7,6 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/entities/components/bvh_data.hpp"
+#include "pragma/entities/components/c_hitbox_bvh_component.hpp"
 #include "pragma/model/model.h"
 #include "pragma/model/modelmesh.h"
 #include <sharedutils/util_hash.hpp>
@@ -34,6 +35,22 @@ static void get_bvh_bounds(const pragma::bvh::BBox &bb, Vector3 &outMin, Vector3
 	constexpr auto epsilon = 0.001f;
 	outMin = Vector3 {umath::min(bb.min.values[0], bb.max.values[0]) - epsilon, umath::min(bb.min.values[1], bb.max.values[1]) - epsilon, umath::min(bb.min.values[2], bb.max.values[2]) - epsilon};
 	outMax = Vector3 {umath::max(bb.min.values[0], bb.max.values[0]) + epsilon, umath::max(bb.min.values[1], bb.max.values[1]) + epsilon, umath::max(bb.min.values[2], bb.max.values[2]) + epsilon};
+}
+std::tuple<bool, bool> pragma::bvh::test_node_aabb_intersection(const std::function<bool(const Vector3 &, const Vector3 &)> &testAabb, const pragma::bvh::Node &left, const pragma::bvh::Node &right)
+{
+	bool hit_left, hit_right;
+	{
+		Vector3 v0_l, v1_l;
+		get_bvh_bounds(left.get_bbox(), v0_l, v1_l);
+		hit_left = testAabb(v0_l, v1_l);
+	}
+
+	{
+		Vector3 v0_r, v1_r;
+		get_bvh_bounds(right.get_bbox(), v0_r, v1_r);
+		hit_right = testAabb(v0_r, v1_r);
+	}
+	return std::make_tuple(hit_left, hit_right);
 }
 bool pragma::bvh::test_bvh_intersection(const pragma::bvh::MeshBvhTree &bvhData, const std::function<bool(const Vector3 &, const Vector3 &)> &testAabb, const std::function<bool(const pragma::bvh::Primitive &)> &testTri, size_t nodeIdx, pragma::bvh::IntersectionInfo *outIntersectionInfo)
 {
@@ -99,27 +116,22 @@ bool pragma::bvh::test_bvh_intersection(const pragma::bvh::MeshBvhTree &bvhData,
 				  meshIntersectionInfo->GetTemporaryMeshRanges().clear();
 			  return hasHit;
 		  },
-		  [&testAabb](const Node &left, const Node &right) {
-			  bool hit_left, hit_right;
-			  {
-				  Vector3 v0_l, v1_l;
-				  get_bvh_bounds(left.get_bbox(), v0_l, v1_l);
-				  hit_left = testAabb(v0_l, v1_l);
-			  }
-
-			  {
-				  Vector3 v0_r, v1_r;
-				  get_bvh_bounds(right.get_bbox(), v0_r, v1_r);
-				  hit_right = testAabb(v0_r, v1_r);
-			  }
-			  return std::make_tuple(hit_left, hit_right);
-		  });
+		  [&testAabb](const Node &left, const Node &right) { return test_node_aabb_intersection(testAabb, left, right); });
 	};
 	if(!outIntersectionInfo)
 		traverse.template operator()<true>();
 	else
 		traverse.template operator()<false>();
 	return hasAnyHit;
+}
+bool pragma::bvh::test_bvh_intersection_with_obb(const pragma::bvh::MeshBvhTree &bvhData, const Vector3 &origin, const Quat &rot, const Vector3 &min, const Vector3 &max, size_t nodeIdx, pragma::bvh::IntersectionInfo *outIntersectionInfo)
+{
+	auto planes = umath::geometry::get_obb_planes(origin, rot, min, max);
+	return test_bvh_intersection(
+	  bvhData, [&origin, &rot, &min, &max, &planes](const Vector3 &aabbMin, const Vector3 &aabbMax) -> bool { return umath::intersection::aabb_in_plane_mesh(aabbMin, aabbMax, planes.begin(), planes.end()) != umath::intersection::Intersect::Outside; },
+	  [&min, &max, &origin, &rot](
+	    const pragma::bvh::Primitive &prim) -> bool { return umath::intersection::obb_triangle(min, max, origin, rot, *reinterpret_cast<const Vector3 *>(&prim.p0.values), *reinterpret_cast<const Vector3 *>(&prim.p1.values), *reinterpret_cast<const Vector3 *>(&prim.p2.values)); },
+	  nodeIdx, outIntersectionInfo);
 }
 bool pragma::bvh::test_bvh_intersection_with_aabb(const pragma::bvh::MeshBvhTree &bvhData, const Vector3 &min, const Vector3 &max, size_t nodeIdx, pragma::bvh::IntersectionInfo *outIntersectionInfo)
 {

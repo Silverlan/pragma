@@ -17,6 +17,12 @@ namespace pragma {
 	class BaseStaticBvhCacheComponent;
 	class DLLNETWORK BaseBvhComponent : public BaseEntityComponent {
 	  public:
+		struct DLLNETWORK IntersectionHandler {
+			std::function<bool(const Vector3 &, const Vector3 &, float, float, bvh::HitInfo &)> intersectionTest;
+			std::function<bool(const Vector3 &, const Vector3 &, bvh::IntersectionInfo *)> intersectionTestAabb;
+			std::function<bool(const std::vector<umath::Plane> &, bvh::IntersectionInfo *)> intersectionTestKDop;
+		};
+
 		static ComponentEventId EVENT_ON_CLEAR_BVH;
 		static ComponentEventId EVENT_ON_BVH_UPDATE_REQUESTED;
 		static ComponentEventId EVENT_ON_BVH_REBUILT;
@@ -35,6 +41,8 @@ namespace pragma {
 		void SetStaticCache(BaseStaticBvhCacheComponent *staticCache);
 		virtual bool IsStaticBvh() const { return false; }
 		const bvh::MeshRange *FindPrimitiveMeshInfo(size_t primIdx) const;
+
+		void SetIntersectionHandler(std::unique_ptr<IntersectionHandler> &&intersectionHandler);
 
 		void SendBvhUpdateRequestOnInteraction();
 		static bool SetVertexData(pragma::bvh::MeshBvhTree &bvhData, const std::vector<bvh::Primitive> &data);
@@ -61,6 +69,7 @@ namespace pragma {
 		const std::shared_ptr<bvh::MeshBvhTree> &GetUpdatedBvh() const;
 		std::vector<bvh::MeshRange> &GetMeshRanges();
 		std::shared_ptr<bvh::MeshBvhTree> m_bvhData = nullptr;
+		mutable std::unique_ptr<IntersectionHandler> m_intersectionHandler {};
 		ComponentHandle<BaseStaticBvhCacheComponent> m_staticCache;
 		mutable std::mutex m_bvhDataMutex;
 		bool m_sendBvhUpdateRequestOnInteraction = false;

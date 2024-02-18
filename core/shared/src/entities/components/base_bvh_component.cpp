@@ -223,6 +223,9 @@ const std::shared_ptr<pragma::bvh::MeshBvhTree> &BaseBvhComponent::GetUpdatedBvh
 void BaseBvhComponent::SendBvhUpdateRequestOnInteraction() { m_sendBvhUpdateRequestOnInteraction = true; }
 bool BaseBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3 &max, bvh::IntersectionInfo &outIntersectionInfo) const
 {
+	if(m_intersectionHandler)
+		return m_intersectionHandler->intersectionTestAabb(min, max, &outIntersectionInfo);
+
 	auto bvhData = GetUpdatedBvh();
 	if(!bvhData || bvhData->primitives.empty())
 		return false;
@@ -238,6 +241,9 @@ bool BaseBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3 &m
 }
 bool BaseBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3 &max) const
 {
+	if(m_intersectionHandler)
+		return m_intersectionHandler->intersectionTestAabb(min, max, nullptr);
+
 	auto bvhData = GetUpdatedBvh();
 	if(!bvhData || bvhData->primitives.empty())
 		return false;
@@ -253,6 +259,9 @@ bool BaseBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3 &m
 }
 bool BaseBvhComponent::IntersectionTestKDop(const std::vector<umath::Plane> &planes, pragma::bvh::IntersectionInfo &outIntersectionInfo) const
 {
+	if(m_intersectionHandler)
+		return m_intersectionHandler->intersectionTestKDop(planes, &outIntersectionInfo);
+
 	auto bvhData = GetUpdatedBvh();
 	if(!bvhData || bvhData->primitives.empty())
 		return false;
@@ -268,6 +277,9 @@ bool BaseBvhComponent::IntersectionTestKDop(const std::vector<umath::Plane> &pla
 }
 bool BaseBvhComponent::IntersectionTestKDop(const std::vector<umath::Plane> &planes) const
 {
+	if(m_intersectionHandler)
+		return m_intersectionHandler->intersectionTestKDop(planes, nullptr);
+
 	auto bvhData = GetUpdatedBvh();
 	if(!bvhData || bvhData->primitives.empty())
 		return false;
@@ -284,6 +296,18 @@ bool BaseBvhComponent::IntersectionTestKDop(const std::vector<umath::Plane> &pla
 
 bool BaseBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::bvh::HitInfo &outHitInfo) const
 {
+	/*umath::CoordinateSpace space;
+	if(space == WorldSpace) {
+		// Move ray to entity space
+		auto entPoseInv = ent.GetPose().GetInverse();
+		auto originEs = entPoseInv * origin;
+		auto dirEs = dir;
+		uvec::rotate(&dirEs, entPoseInv.GetRotation());
+	}*/
+
+	if(m_intersectionHandler)
+		return m_intersectionHandler->intersectionTest(origin, dir, minDist, maxDist, outHitInfo);
+
 	auto bvhData = GetUpdatedBvh();
 	if(!bvhData || bvhData->primitives.empty())
 		return false;
@@ -319,6 +343,8 @@ bool BaseBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &di
 }
 
 const pragma::bvh::MeshRange *BaseBvhComponent::FindPrimitiveMeshInfo(size_t primIdx) const { return m_bvhData->FindMeshRange(primIdx); }
+
+void BaseBvhComponent::SetIntersectionHandler(std::unique_ptr<IntersectionHandler> &&intersectionHandler) { m_intersectionHandler = std::move(intersectionHandler); }
 
 std::optional<pragma::bvh::HitInfo> BaseBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) const
 {

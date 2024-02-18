@@ -26,7 +26,6 @@
 #include <sharedutils/BS_thread_pool.hpp>
 #include <mathutil/boundingvolume.h>
 #include <bvh/v2/stack.h>
-#include <ranges>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -220,7 +219,8 @@ void CHitboxBvhComponent::UpdateHitboxBvh()
 	m_hitboxBvhUpdate = g_hbThreadPool->submit_task([&updatePoses, &hitboxBvh, &bvh]() {
 		// It's important to process the nodes in reverse order, as this makes
 		// sure that children are processed before their parents.
-		for(auto &node : std::ranges::reverse_view {bvh.nodes}) {
+		for(auto it = bvh.nodes.rbegin(); it != bvh.nodes.rend(); ++it) {
+			auto &node = *it;
 			if(node.is_leaf()) {
 				// refit node according to contents
 				auto begin = node.index.first_id;

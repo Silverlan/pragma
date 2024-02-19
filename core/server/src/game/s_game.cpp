@@ -738,6 +738,7 @@ void SGame::DrawBox(const Vector3 &origin, const Vector3 &start, const Vector3 &
 		SDebugRenderer::DrawBox(start, end, ang, colorOutline, duration);
 }
 void SGame::DrawPlane(const Vector3 &n, float dist, const Color &color, float duration) { SDebugRenderer::DrawPlane(n, dist, color, duration); }
+void SGame::DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration) { SDebugRenderer::DrawMesh(meshVerts, color, colorOutline, duration); }
 
 static CVar cvFriction = GetServerConVar("sv_friction");
 Float SGame::GetFrictionScale() const { return cvFriction->GetFloat(); }

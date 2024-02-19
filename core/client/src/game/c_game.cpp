@@ -1604,6 +1604,7 @@ void CGame::DrawBox(const Vector3 &origin, const Vector3 &start, const Vector3 &
 		DebugRenderer::DrawBox(start, end, ang, colorOutline, duration);
 }
 void CGame::DrawPlane(const Vector3 &n, float dist, const Color &color, float duration) { DebugRenderer::DrawPlane(n, dist, color, duration); }
+void CGame::DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration) { DebugRenderer::DrawMesh(meshVerts, color, colorOutline, duration); }
 static auto cvRenderPhysics = GetClientConVar("debug_physics_draw");
 static auto cvSvRenderPhysics = GetClientConVar("sv_debug_physics_draw");
 void CGame::RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pragma::CCameraComponent &cam)

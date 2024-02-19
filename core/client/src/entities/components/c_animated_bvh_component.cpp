@@ -123,7 +123,7 @@ void CAnimatedBvhComponent::RebuildTemporaryBvhData()
 
 	CBvhComponent::BvhBuildInfo buildInfo {};
 	buildInfo.shouldConsiderMesh = [mdlC](const ModelSubMesh &mesh, uint32_t meshIdx) -> bool { return CBvhComponent::ShouldConsiderMesh(mesh, *mdlC->GetRenderBufferData(meshIdx)); };
-	m_tmpBvhData = BaseBvhComponent::RebuildBvh(renderMeshes, &buildInfo);
+	m_tmpBvhData = BaseBvhComponent::RebuildBvh(renderMeshes, &buildInfo, nullptr, &GetEntity());
 }
 
 void CAnimatedBvhComponent::SetUpdateLazily(bool updateLazily) { m_updateLazily = updateLazily; }

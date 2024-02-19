@@ -19,6 +19,7 @@
 #include "pragma/entities/components/usable_component.hpp"
 #include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/components/composite_component.hpp"
+#include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/components/constraints/constraint_component.hpp"
 #include "pragma/entities/components/constraints/constraint_manager_component.hpp"
 #include "pragma/entities/components/constraints/constraint_space_component.hpp"
@@ -65,6 +66,7 @@ void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentM
 	componentManager.RegisterComponentType<pragma::ConstraintLookAtComponent>("constraint_look_at");
 	componentManager.RegisterComponentType<pragma::ConstraintChildOfComponent>("constraint_child_of");
 	componentManager.RegisterComponentType<pragma::LifelineLinkComponent>("lifeline_link");
+	componentManager.RegisterComponentType<pragma::IntersectionHandlerComponent>("intersection_handler");
 
 	pragma::BaseEntityComponent::RegisterEvents(componentManager, [&componentManager](const std::string &evName, pragma::ComponentEventInfo::Type type) -> pragma::ComponentEventId { return componentManager.RegisterEvent(evName, typeid(pragma::BaseEntityComponent), type); });
 	BaseEntity::RegisterEvents(componentManager);

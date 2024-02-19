@@ -23,6 +23,7 @@
 #include "pragma/entities/components/renderers/c_renderer_pp_fxaa_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_motion_blur_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_volumetric_component.hpp"
+#include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/components/c_debug_hitbox_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -75,7 +76,7 @@ void RegisterLuaEntityComponents2_cl(lua_State *l, luabind::module_ &entsMod)
 	defHitboxBvh.def("DebugDrawHitboxMeshes", &pragma::CHitboxBvhComponent::DebugDrawHitboxMeshes);
 	defHitboxBvh.def(
 	  "IntersectionTest", +[](pragma::CHitboxBvhComponent &bvhC, const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, const pragma::bvh::DebugDrawInfo &debugDrawInfo) -> std::optional<float> {
-		  pragma::bvh::HitInfo hitInfo {};
+		  pragma::HitInfo hitInfo {};
 		  if(!bvhC.IntersectionTest(origin, dir, minDist, maxDist, hitInfo, &debugDrawInfo))
 			  return {};
 		  return hitInfo.distance;

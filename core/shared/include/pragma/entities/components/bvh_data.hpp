@@ -17,44 +17,25 @@
 #include <bvh/v2/default_builder.h>
 #include <memory>
 
+namespace pragma {
+	struct IntersectionInfo;
+};
 namespace pragma::bvh {
 	constexpr bool should_permute = true;
-
-	struct DLLNETWORK HitInfo {
-		std::shared_ptr<ModelSubMesh> mesh;
-		EntityHandle entity;
-		size_t primitiveIndex;
-		float distance;
-		float t;
-		float u;
-		float v;
-	};
-
-	struct MeshIntersectionInfo;
-	struct DLLNETWORK IntersectionInfo {
-		void Clear();
-		std::vector<size_t> primitives;
-
-		MeshIntersectionInfo *GetMeshIntersectionInfo();
-	  protected:
-		bool m_isMeshIntersectionInfo = false;
-	};
-
-	struct MeshRange;
-	struct DLLNETWORK MeshIntersectionInfo : public IntersectionInfo {
-		MeshIntersectionInfo() { m_isMeshIntersectionInfo = true; }
-
-		// For internal use only
-		std::vector<const pragma::bvh::MeshRange *> &GetTemporaryMeshRanges() { return m_tmpMeshRanges; }
-		std::unordered_set<size_t> &GetTemporarMeshMap() { return m_tmpMeshes; }
-	  protected:
-		std::vector<const pragma::bvh::MeshRange *> m_tmpMeshRanges;
-		std::unordered_set<size_t> m_tmpMeshes;
-	};
 
 	struct DLLNETWORK MeshRange {
 		BaseEntity *entity = nullptr;
 		std::shared_ptr<ModelSubMesh> mesh;
+		size_t start;
+		size_t end;
+		bool operator<(const MeshRange &other) const { return start < other.start; }
+	};
+
+	struct DLLNETWORK MeshIntersectionRange {
+		MeshIntersectionRange(const MeshRange &range) : entity {range.entity}, mesh {range.mesh.get()}, start {range.start}, end {range.end} {}
+		MeshIntersectionRange(ModelSubMesh &mesh, size_t start, size_t end) : mesh {&mesh}, start {start}, end {end} {}
+		BaseEntity *entity = nullptr;
+		ModelSubMesh *mesh = nullptr;
 		size_t start;
 		size_t end;
 		bool operator<(const MeshRange &other) const { return start < other.start; }
@@ -107,12 +88,18 @@ namespace pragma::bvh {
 
 	DLLNETWORK Primitive create_triangle(const Vector3 &a, const Vector3 &b, const Vector3 &c);
 	DLLNETWORK std::vector<bvh::MeshRange> &get_bvh_mesh_ranges(bvh::MeshBvhTree &bvhData);
+
+	struct DLLNETWORK IntersectionCache {
+		std::vector<pragma::bvh::MeshIntersectionRange> meshRanges;
+		std::unordered_set<size_t> meshes;
+	};
+
 	DLLNETWORK std::tuple<bool, bool> test_node_aabb_intersection(const std::function<bool(const Vector3 &, const Vector3 &)> &testAabb, const pragma::bvh::Node &left, const pragma::bvh::Node &right);
 	DLLNETWORK bool test_bvh_intersection(const pragma::bvh::MeshBvhTree &bvhData, const std::function<bool(const Vector3 &, const Vector3 &)> &testAabb, const std::function<bool(const pragma::bvh::Primitive &)> &testTri, size_t nodeIdx = 0,
-	  pragma::bvh::IntersectionInfo *outIntersectionInfo = nullptr);
-	DLLNETWORK bool test_bvh_intersection_with_aabb(const pragma::bvh::MeshBvhTree &bvhData, const Vector3 &min, const Vector3 &max, size_t nodeIdx = 0, pragma::bvh::IntersectionInfo *outIntersectionInfo = nullptr);
-	DLLNETWORK bool test_bvh_intersection_with_obb(const pragma::bvh::MeshBvhTree &bvhData, const Vector3 &origin, const Quat &rot, const Vector3 &min, const Vector3 &max, size_t nodeIdx = 0, pragma::bvh::IntersectionInfo *outIntersectionInfo = nullptr);
-	DLLNETWORK bool test_bvh_intersection_with_kdop(const pragma::bvh::MeshBvhTree &bvhData, const std::vector<umath::Plane> &kdop, size_t nodeIdx = 0, pragma::bvh::IntersectionInfo *outIntersectionInfo = nullptr);
+	  pragma::IntersectionInfo *outIntersectionInfo = nullptr);
+	DLLNETWORK bool test_bvh_intersection_with_aabb(const pragma::bvh::MeshBvhTree &bvhData, const Vector3 &min, const Vector3 &max, size_t nodeIdx = 0, pragma::IntersectionInfo *outIntersectionInfo = nullptr);
+	DLLNETWORK bool test_bvh_intersection_with_obb(const pragma::bvh::MeshBvhTree &bvhData, const Vector3 &origin, const Quat &rot, const Vector3 &min, const Vector3 &max, size_t nodeIdx = 0, pragma::IntersectionInfo *outIntersectionInfo = nullptr);
+	DLLNETWORK bool test_bvh_intersection_with_kdop(const pragma::bvh::MeshBvhTree &bvhData, const std::vector<umath::Plane> &kdop, size_t nodeIdx = 0, pragma::IntersectionInfo *outIntersectionInfo = nullptr);
 
 	DLLNETWORK Ray get_ray(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist);
 	DLLNETWORK const ::pragma::bvh::Vec &to_bvh_vector(const Vector3 &v);

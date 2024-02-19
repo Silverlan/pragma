@@ -42,7 +42,7 @@ void CBvhComponent::OnEntitySpawn()
 	UpdateBvhStatus();
 }
 
-bool CBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, bvh::HitInfo &outHitInfo) const
+bool CBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, HitInfo &outHitInfo) const
 {
 	// TODO: If dirty?
 	return BaseBvhComponent::IntersectionTest(origin, dir, minDist, maxDist, outHitInfo);
@@ -50,19 +50,19 @@ bool CBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, 
 
 void CBvhComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
-	BaseEntityComponent::OnEntityComponentAdded(component);
+	BaseBvhComponent::OnEntityComponentAdded(component);
 	if(GetEntity().IsSpawned() && typeid(component) == typeid(CAnimatedComponent))
 		UpdateBvhStatus();
 }
 void CBvhComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 {
-	BaseEntityComponent::OnEntityComponentAdded(component);
+	BaseBvhComponent::OnEntityComponentAdded(component);
 	if(GetEntity().IsSpawned() && typeid(component) == typeid(CAnimatedComponent))
 		UpdateBvhStatus();
 }
 void CBvhComponent::OnRemove()
 {
-	BaseEntityComponent::OnRemove();
+	BaseBvhComponent::OnRemove();
 	GetEntity().RemoveComponent<CAnimatedBvhComponent>();
 }
 
@@ -87,5 +87,5 @@ void CBvhComponent::DoRebuildBvh()
 	auto &renderMeshes = mdlC->GetRenderMeshes();
 	BvhBuildInfo buildInfo {};
 	buildInfo.shouldConsiderMesh = [mdlC](const ModelSubMesh &mesh, uint32_t meshIdx) -> bool { return ShouldConsiderMesh(mesh, *mdlC->GetRenderBufferData(meshIdx)); };
-	m_bvhData = BaseBvhComponent::RebuildBvh(renderMeshes, &buildInfo);
+	m_bvhData = BaseBvhComponent::RebuildBvh(renderMeshes, &buildInfo, nullptr, &GetEntity());
 }

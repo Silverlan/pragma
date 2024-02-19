@@ -14,6 +14,7 @@
 
 namespace pragma {
 	class BaseStaticBvhUserComponent;
+	struct HitInfo;
 	class DLLNETWORK BaseStaticBvhCacheComponent : public BaseBvhComponent {
 	  public:
 		virtual void Initialize() override;
@@ -27,7 +28,7 @@ namespace pragma {
 		void AddEntity(BaseEntity &ent);
 		void RemoveEntity(BaseEntity &ent, bool removeFinal = true);
 
-		virtual bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::bvh::HitInfo &outHitInfo) const override;
+		virtual bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, HitInfo &outHitInfo) const override;
 		using BaseBvhComponent::IntersectionTest;
 
 		virtual bool IsStaticBvh() const override { return true; }

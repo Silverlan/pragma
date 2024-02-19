@@ -43,7 +43,7 @@ void BaseStaticBvhCacheComponent::OnRemove()
 		ent->SetStaticBvhCacheComponent(nullptr);
 }
 
-bool BaseStaticBvhCacheComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::bvh::HitInfo &outHitInfo) const
+bool BaseStaticBvhCacheComponent::IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, pragma::HitInfo &outHitInfo) const
 {
 	//const_cast<BaseStaticBvhCacheComponent *>(this)->UpdateBuild();
 	//if(m_buildWorker)

@@ -32,6 +32,7 @@ namespace pragma {
 	};
 	class BaseBvhComponent;
 	class BaseStaticBvhCacheComponent;
+	class IntersectionHandlerComponent;
 	class DLLNETWORK BaseModelComponent : public BaseEntityComponent, public DynamicMemberRegister {
 	  public:
 		static ComponentEventId EVENT_ON_MODEL_CHANGED;
@@ -82,11 +83,17 @@ namespace pragma {
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		using BaseEntityComponent::Load;
 
+		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
+		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
+
 		uint32_t GetHitboxCount() const;
 		bool GetHitboxBounds(uint32_t boneId, Vector3 &min, Vector3 &max, Vector3 &origin, Quat &rot, umath::CoordinateSpace space = umath::CoordinateSpace::World) const;
 
 		const BaseBvhComponent *GetBvhComponent() const;
 		BaseBvhComponent *GetBvhComponent();
+
+		const IntersectionHandlerComponent *GetIntersectionHandlerComponent() const;
+		IntersectionHandlerComponent *GetIntersectionHandlerComponent();
 
 		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
 	  protected:
@@ -97,6 +104,7 @@ namespace pragma {
 		std::shared_ptr<Model> m_model = nullptr;
 
 		BaseBvhComponent *m_bvhComponent = nullptr;
+		IntersectionHandlerComponent *m_intersectionHandlerComponent = nullptr;
 		std::vector<unsigned int> m_bodyGroups;
 		std::unique_ptr<std::string> m_modelName = nullptr;
 		std::shared_ptr<util::UInt32Property> m_skin = nullptr;

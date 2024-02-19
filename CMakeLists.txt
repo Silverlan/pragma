@@ -10,15 +10,17 @@ endif()
 
 #set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE CACHE INTERNAL "" FORCE)
 #set_target_properties(freetype PROPERTIES CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE)
-set(CONFIG_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build Type")
-set_property(CACHE CONFIG_BUILD_TYPE PROPERTY STRINGS RelWithDebInfo Release Debug)
+set(CONFIG_BUILD_TYPE "$<CONFIG>" CACHE STRING "Build Type" FORCE)
+#set_property(CACHE CONFIG_BUILD_TYPE PROPERTY STRINGS RelWithDebInfo Release Debug)
+
+set(CACHE CMAKE_CONFIGURATION_TYPES PROPERTY STRING "RelWithDebInfo;Release;Debug")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 if(UNIX)
 	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
-set(CMAKE_BUILD_TYPE ${CONFIG_BUILD_TYPE} CACHE STRING "" FORCE)
+#set(CMAKE_BUILD_TYPE ${CONFIG_BUILD_TYPE} CACHE STRING "" FORCE)
 
 get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(is_multi_config)
@@ -228,15 +230,17 @@ search_lib_recursive_ext(DEPENDENCY_UTIL_UDM_LIBRARY util_udm STATIC)
 set(DEPENDENCY_PANIMA_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/panima/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_PANIMA_LIBRARY panima STATIC)
 
-set(DEPENDENCY_UTIL_ZIP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_zip/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_UTIL_ZIP_LIBRARY external_libs/util_zip/${BINARY_PRAGMA_DIR} util_zip STATIC)
 
 if(WIN32)
 	set(ZLIB_LIB_NAME "zlib" CACHE INTERNAL "" FORCE)
 else()
 	set(ZLIB_LIB_NAME "z" CACHE INTERNAL "" FORCE)
 endif()
-search_lib_recursive(DEPENDENCY_ZLIB_LIBRARY third_party_libs/zlib/${BINARY_PRAGMA_DIR} ${ZLIB_LIB_NAME})
+search_lib_recursive(DEPENDENCY_ZLIB_LIBRARY "third_party_libs/zlib/${BINARY_PRAGMA_DIR}" ${ZLIB_LIB_NAME})
+
+set(DEPENDENCY_UTIL_ZIP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_zip/include CACHE PATH "Path to include directory.")
+search_lib_recursive(DEPENDENCY_UTIL_ZIP_LIBRARY "external_libs/util_zip/${BINARY_PRAGMA_DIR}" util_zip STATIC)
+
 
 set(DEPENDENCY_ZLIB_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib CACHE PATH "Path to include directory.")
 
@@ -290,7 +294,7 @@ set(DEPENDENCY_LIBOGG_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs
 set(OGG_LIBRARIES ${DEPENDENCY_LIBOGG_LIBRARY} CACHE STRING "" FORCE)
 
 set(DEPENDENCY_BZIP2_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/bzip2 CACHE STRING "" FORCE)
-search_lib_recursive(DEPENDENCY_BZIP2_LIBRARY third_party_libs/bzip2/${BINARY_PRAGMA_DIR} bz2)
+search_lib_recursive(DEPENDENCY_BZIP2_LIBRARY third_party_libs/bzip2/${BINARY_PRAGMA_DIR} "bz2$<$<CONFIG:Debug>:d>")
 
 
 set(DEPENDENCY_LZ4_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_source2/third_party_libs/lz4/lib CACHE STRING "Path to include directory." FORCE)
@@ -329,10 +333,10 @@ set(DEPENDENCY_CPPBEZIERFIT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/c
 search_lib_recursive(DEPENDENCY_CPPBEZIERFIT_LIBRARY third_party_libs/cppbezierfit/${BINARY_PRAGMA_DIR} cppbezierfit STATIC)
 
 set(DEPENDENCY_SPDLOG_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/spdlog/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_SPDLOG_LIBRARY third_party_libs/spdlog/${BINARY_PRAGMA_DIR} spdlog)
+search_lib_recursive(DEPENDENCY_SPDLOG_LIBRARY third_party_libs/spdlog/${BINARY_PRAGMA_DIR} spdlog$<$<CONFIG:Debug>:d>)
 
 set(DEPENDENCY_FMT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/fmt/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_FMT_LIBRARY third_party_libs/fmt/${BINARY_PRAGMA_DIR} fmt STATIC)
+search_lib_recursive(DEPENDENCY_FMT_LIBRARY third_party_libs/fmt/${BINARY_PRAGMA_DIR} fmt$<$<CONFIG:Debug>:d> STATIC)
 
 if(WIN32)
     set(DEPENDENCY_7ZPP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/7zpp/include CACHE STRING "" FORCE)
@@ -391,9 +395,9 @@ search_lib_recursive(DEPENDENCY_LIBZIP_LIBRARY third_party_libs/libzip/lib/${BIN
 set(DEPENDENCY_LPNG_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libpng CACHE PATH "Path to include directory.")
 set(DEPENDENCY_LPNG_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/libpng CACHE PATH "Path to include directory.")
 if(WIN32)
-	set(LIBPNG_LIB_NAME "libpng16" CACHE INTERNAL "" FORCE)
+	set(LIBPNG_LIB_NAME "libpng16$<$<CONFIG:Debug>:d>" CACHE INTERNAL "" FORCE)
 else()
-	set(LIBPNG_LIB_NAME "png16" CACHE INTERNAL "" FORCE)
+	set(LIBPNG_LIB_NAME "png16$<$<CONFIG:Debug>:d>" CACHE INTERNAL "" FORCE)
 endif()
 search_lib_recursive(DEPENDENCY_LPNG_LIBRARY third_party_libs/libpng/${BINARY_PRAGMA_DIR} ${LIBPNG_LIB_NAME})
 
@@ -552,9 +556,6 @@ set(DEPENDENCY_LIBOGG_INCLUDE ${OGG_INCLUDE_DIRS} CACHE STRING "" FORCE)
 set(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/zlib CACHE STRING "" FORCE)
 set(DEPENDENCY_ZLIB_INCLUDE ${ZLIB_INCLUDE_DIR} CACHE STRING "" FORCE)
 
-set(ZLIB_VERSION_STRING "1.2.0" CACHE STRING "" FORCE) # Arbitrary version number larger then 1.1.2 to disable an error message from libzip, because the zlib-library does not exist at this point in time yet
-set(ZLIB_INCLUDE_DIR ${DEPENDENCY_ZLIB_INCLUDE} CACHE STRING "" FORCE)
-set(ZLIB_LIBRARY ${DEPENDENCY_ZLIB_LIBRARY} CACHE STRING "" FORCE)
 
 function(register_third_party_library LIB_NAME)
 	message("Processing third-party library '${LIB_NAME}'...")
@@ -854,6 +855,13 @@ set_target_folder(zlib third_party_libs/zlib)
 set_target_folder(zlibstatic third_party_libs/zlib)
 
 target_include_directories(materialsystem PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
+
+
+
+set(ZLIB_INCLUDE_DIR ${DEPENDENCY_ZLIB_INCLUDE} CACHE STRING "" FORCE)
+set(ZLIB_LIBRARY "$<TARGET_FILE:zlib>" CACHE STRING "" FORCE)
+add_library(ZLIB::ZLIB ALIAS zlib) #for libzip just ahead.
+set(ZLIB_LINK_LIBRARY_NAME "ZLIB::ZLIB")
 #
 
 # libzip

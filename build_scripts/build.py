@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev
 if platform == "linux":
 	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-15')
 	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-15')
-	defaultGenerator = "Unix Makefiles"
+	defaultGenerator = "Ninja Multi-Config"
 else:
 	defaultGenerator = "Visual Studio 17 2022"
 parser.add_argument('--generator', help='The generator to use.', default=defaultGenerator)
@@ -778,8 +778,8 @@ if with_lua_doc_generator or with_pfm:
 if with_vr:
     add_pragma_module(
         name="pr_openvr",
-        commitSha="1ba663f90e857f1f9bd30a836a1c89c83f4a4ef1",
-        repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
+        commitSha="2e84c0f1012d2d86bb42d0c962e359c8ee8f1636",
+        repositoryUrl="https://github.com/SlawekNowy/pr_openvr.git"
     )
 
 if with_networking:

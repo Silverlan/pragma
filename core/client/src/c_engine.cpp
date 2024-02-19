@@ -568,7 +568,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 
 	// Initialize Window context
 	try {
-		InitializeRenderAPI();
+        InitializeRenderAPI();
 	}
 	catch(const std::runtime_error &err) {
 		spdlog::error("Unable to initialize graphics API: {}", err.what());

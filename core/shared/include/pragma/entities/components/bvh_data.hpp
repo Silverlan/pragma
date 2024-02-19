@@ -94,7 +94,7 @@ namespace pragma::bvh {
 		std::unordered_set<size_t> meshes;
 	};
 
-	DLLNETWORK std::tuple<bool, bool> test_node_aabb_intersection(const std::function<bool(const Vector3 &, const Vector3 &)> &testAabb, const pragma::bvh::Node &left, const pragma::bvh::Node &right);
+	DLLNETWORK std::tuple<bool, bool, bool> test_node_aabb_intersection(const std::function<bool(const Vector3 &, const Vector3 &)> &testAabb, const pragma::bvh::Node &left, const pragma::bvh::Node &right);
 	DLLNETWORK bool test_bvh_intersection(const pragma::bvh::MeshBvhTree &bvhData, const std::function<bool(const Vector3 &, const Vector3 &)> &testAabb, const std::function<bool(const pragma::bvh::Primitive &)> &testTri, size_t nodeIdx = 0,
 	  pragma::IntersectionInfo *outIntersectionInfo = nullptr);
 	DLLNETWORK bool test_bvh_intersection_with_aabb(const pragma::bvh::MeshBvhTree &bvhData, const Vector3 &min, const Vector3 &max, size_t nodeIdx = 0, pragma::IntersectionInfo *outIntersectionInfo = nullptr);

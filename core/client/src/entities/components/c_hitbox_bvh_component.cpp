@@ -230,32 +230,21 @@ void CHitboxBvhComponent::UpdateHitboxBvh()
 	memcpy(m_hitboxBvhUpdatePoses.data(), bonePoses.data(), util::size_of_container(bonePoses));
 	auto &updatePoses = m_hitboxBvhUpdatePoses;
 	m_hitboxBvhUpdate = g_hbThreadPool->submit_task([&updatePoses, &hitboxBvh, &bvh]() {
-		// It's important to process the nodes in reverse order, as this makes
-		// sure that children are processed before their parents.
-		for(auto it = bvh.nodes.rbegin(); it != bvh.nodes.rend(); ++it) {
-			auto &node = *it;
-			if(node.is_leaf()) {
-				// refit node according to contents
-				auto begin = node.index.first_id;
-				auto end = begin + node.index.prim_count;
-				for(size_t i = begin; i < end; ++i) {
-					size_t j = bvh.prim_ids[i];
+		bvh.refit([&bvh, &hitboxBvh, &updatePoses](pragma::bvh::Node &node) {
+			auto begin = node.index.first_id;
+			auto end = begin + node.index.prim_count;
+			for(size_t i = begin; i < end; ++i) {
+				size_t j = bvh.prim_ids[i];
 
-					auto &hbObb = hitboxBvh->primitives[j];
-					if(hbObb.boneId >= updatePoses.size())
-						continue;
-					auto &pose = updatePoses[hbObb.boneId];
-					Vector3 origin;
-					auto bbox = hbObb.ToBvhBBox(pose, origin);
-					node.set_bbox(bbox);
-				}
+				auto &hbObb = hitboxBvh->primitives[j];
+				if(hbObb.boneId >= updatePoses.size())
+					continue;
+				auto &pose = updatePoses[hbObb.boneId];
+				Vector3 origin;
+				auto bbox = hbObb.ToBvhBBox(pose, origin);
+				node.set_bbox(bbox);
 			}
-			else {
-				auto &left = bvh.nodes[node.index.first_id];
-				auto &right = bvh.nodes[node.index.first_id + 1];
-				node.set_bbox(left.get_bbox().extend(right.get_bbox()));
-			}
-		}
+		});
 		hitboxBvh->Refit();
 	});
 }
@@ -838,7 +827,7 @@ bool pragma::bvh::test_bvh_intersection(const ObbBvhTree &bvhData, const std::fu
 
 	auto primitivesRequired = outIntersectionInfo != nullptr && typeid(*outIntersectionInfo) == typeid(PrimitiveIntersectionInfo);
 	auto traverse = [&]<bool ReturnOnFirstHit>() {
-		bvh.traverse<ReturnOnFirstHit>(
+		bvh.traverse_top_down<ReturnOnFirstHit>(
 		  bvh.get_root().index, stack,
 		  [outIntersectionInfo, primitivesRequired, &bvhData, &testObb, &hasAnyHit](size_t begin, size_t end) {
 			  auto hasHit = false;

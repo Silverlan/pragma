@@ -327,11 +327,13 @@ static void draw_mesh(const pragma::bvh::MeshBvhTree &bvhTree, const umath::Scal
 	std::vector<Vector3> verts;
 	verts.reserve(bvhTree.primitives.size() * 3);
 	for(auto &tri : bvhTree.primitives) {
-		verts.push_back(pose * pragma::bvh::from_bvh_vector(tri.p0));
-		verts.push_back(pose * pragma::bvh::from_bvh_vector(tri.p1));
-		verts.push_back(pose * pragma::bvh::from_bvh_vector(tri.p2));
+		verts.push_back(pragma::bvh::from_bvh_vector(tri.p0));
+		verts.push_back(pragma::bvh::from_bvh_vector(tri.p1));
+		verts.push_back(pragma::bvh::from_bvh_vector(tri.p2));
 	}
-	DebugRenderer::DrawMesh(verts, color, outlineColor, duration);
+	auto o = DebugRenderer::DrawMesh(verts, color, outlineColor, duration);
+	if(o)
+		o->SetPose(pose);
 }
 
 bool CHitboxBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3 &max, IntersectionInfo *outIntersectionInfo) const
@@ -554,6 +556,8 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 	auto &effectiveBonePoses = animC->GetProcessedBones();
 
 	auto debugDraw = (debugDrawInfo && debugDrawInfo->flags != bvh::DebugDrawInfo::Flags::None);
+	if(debugDraw)
+		const_cast<bvh::DebugDrawInfo *>(debugDrawInfo)->basePose = GetEntity().GetPose();
 
 	// Raycast against our hitbox BVH
 	std::vector<bvh::ObbBvhTree::HitData> hits;
@@ -589,7 +593,7 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 			if(debugDraw) {
 				if(umath::is_flag_set(debugDrawInfo->flags, bvh::DebugDrawInfo::Flags::DrawTraversedMeshesBit) || (res && umath::is_flag_set(debugDrawInfo->flags, bvh::DebugDrawInfo::Flags::DrawHitMeshesBit))) {
 					auto color = res ? Color {0, 255, 0, 64} : Color {255, 0, 0, 64};
-					draw_mesh(*meshBvh, effectiveBonePoses[boneId] * debugDrawInfo->basePose, color, Color::White, debugDrawInfo->duration);
+					draw_mesh(*meshBvh, debugDrawInfo->basePose * effectiveBonePoses[boneId], color, Color::White, debugDrawInfo->duration);
 				}
 			}
 			if(!res)
@@ -624,19 +628,35 @@ void CHitboxBvhComponent::OnRemove()
 
 void CHitboxBvhComponent::DebugDrawHitboxMeshes(BoneId boneId, float duration) const
 {
+	auto &ent = GetEntity();
+	auto animC = ent.GetAnimatedComponent();
+	if(animC.expired())
+		return;
+	auto &mdl = ent.GetModel();
+	if(!mdl)
+		return;
+	auto &effectivePoses = animC->GetProcessedBones();
+	if(boneId >= effectivePoses.size())
+		return;
 	auto it = m_hitboxMeshBvhCaches.find(boneId);
 	if(it == m_hitboxMeshBvhCaches.end())
 		return;
 	const std::array<Color, 6> colors {Color::Red, Color::Lime, Color::Blue, Color::Yellow, Color::Cyan, Color::Magenta};
 	auto &hitboxBvhInfos = it->second;
 	uint32_t colorIdx = 0;
+	auto pose = GetEntity().GetPose();
+	auto &ref = mdl->GetReference();
+	umath::ScaledTransform refBonePose;
+	ref.GetBonePose(boneId, refBonePose);
+	auto relPose = effectivePoses[boneId] * refBonePose.GetInverse();
+	pose *= relPose;
 	for(auto &hitboxBvhInfo : hitboxBvhInfos) {
 		auto &col = colors[colorIdx];
 		auto &verts = hitboxBvhInfo->mesh->GetVertices();
 
 		std::vector<Vector3> dbgVerts;
 		dbgVerts.reserve(dbgVerts.size() + hitboxBvhInfo->mesh->GetIndexCount());
-		hitboxBvhInfo->mesh->VisitIndices([&verts, &dbgVerts, &hitboxBvhInfo](auto *indexDataSrc, uint32_t numIndicesSrc) {
+		hitboxBvhInfo->mesh->VisitIndices([&verts, &pose, &dbgVerts, &hitboxBvhInfo](auto *indexDataSrc, uint32_t numIndicesSrc) {
 			dbgVerts.reserve(hitboxBvhInfo->bvhTriToOriginalTri.size());
 			for(auto triIdx : hitboxBvhInfo->bvhTriToOriginalTri) {
 				auto idx0 = triIdx * 3;
@@ -653,7 +673,9 @@ void CHitboxBvhComponent::DebugDrawHitboxMeshes(BoneId boneId, float duration) c
 			}
 		});
 
-		DebugRenderer::DrawMesh(dbgVerts, col, Color::White, duration);
+		auto o = DebugRenderer::DrawMesh(dbgVerts, col, Color::White, duration);
+		if(o)
+			o->SetPose(pose);
 
 		colorIdx = (colorIdx + 1) % colors.size();
 	}

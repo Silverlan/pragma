@@ -111,9 +111,9 @@ namespace pragma::bvh {
 	namespace debug {
 		static Color DEFAULT_NODE_COLOR = Color {0, 255, 0, 64};
 		DLLNETWORK void print_bvh_tree(pragma::bvh::Bvh &bvh);
-		DLLNETWORK void draw_bvh_tree(Game &game, pragma::bvh::Bvh &bvh, const umath::ScaledTransform &pose = {}, float duration = 20.f);
-		DLLNETWORK void draw_node(Game &game, const pragma::bvh::Node &node, const umath::ScaledTransform &pose = {}, const Color &col = DEFAULT_NODE_COLOR, float duration = 20.f);
-		DLLNETWORK void draw_node(Game &game, const pragma::bvh::BBox &bbox, const umath::ScaledTransform &pose = {}, const Color &col = DEFAULT_NODE_COLOR, float duration = 20.f);
+		DLLNETWORK void draw_bvh_tree(const Game &game, pragma::bvh::Bvh &bvh, const umath::ScaledTransform &pose = {}, float duration = 20.f);
+		DLLNETWORK void draw_node(const Game &game, const pragma::bvh::Node &node, const umath::ScaledTransform &pose = {}, const Color &col = DEFAULT_NODE_COLOR, float duration = 20.f);
+		DLLNETWORK void draw_node(const Game &game, const pragma::bvh::BBox &bbox, const umath::ScaledTransform &pose = {}, const Color &col = DEFAULT_NODE_COLOR, float duration = 20.f);
 	};
 };
 

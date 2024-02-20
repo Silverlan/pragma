@@ -338,7 +338,7 @@ void pragma::bvh::debug::print_bvh_tree(pragma::bvh::Bvh &bvh)
 	Con::cout << "BVH Tree:" << ss.str() << Con::endl;
 }
 
-void pragma::bvh::debug::draw_bvh_tree(Game &game, pragma::bvh::Bvh &bvh, const umath::ScaledTransform &pose, float duration)
+void pragma::bvh::debug::draw_bvh_tree(const Game &game, pragma::bvh::Bvh &bvh, const umath::ScaledTransform &pose, float duration)
 {
 	constexpr size_t stack_size = 64;
 	::bvh::v2::SmallStack<pragma::bvh::Bvh::Index, stack_size> stack;
@@ -364,13 +364,13 @@ restart:
 		}
 	}
 }
-void pragma::bvh::debug::draw_node(Game &game, const pragma::bvh::BBox &bbox, const umath::ScaledTransform &pose, const Color &col, float duration)
+void pragma::bvh::debug::draw_node(const Game &game, const pragma::bvh::BBox &bbox, const umath::ScaledTransform &pose, const Color &col, float duration)
 {
 	auto vstart = from_bvh_vector(bbox.min);
 	auto vend = from_bvh_vector(bbox.max);
-	game.DrawBox(pose.GetOrigin(), vstart, vend, pose.GetRotation(), Color::White, col, duration);
+	const_cast<Game &>(game).DrawBox(pose.GetOrigin(), vstart, vend, pose.GetRotation(), Color::White, col, duration);
 }
-void pragma::bvh::debug::draw_node(Game &game, const pragma::bvh::Node &node, const umath::ScaledTransform &pose, const Color &col, float duration)
+void pragma::bvh::debug::draw_node(const Game &game, const pragma::bvh::Node &node, const umath::ScaledTransform &pose, const Color &col, float duration)
 {
 	auto bbox = node.get_bbox();
 	draw_node(game, bbox, pose, col, duration);

@@ -77,18 +77,19 @@ static bool generate_mesh_bvh(Model &mdl, const std::string &boneName, pragma::b
 	return true;
 }
 
-static bool calc_bone_mesh_info(pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo, std::shared_ptr<ModelSubMesh> subMesh, std::array<umath::Plane, 6> planes, Vector3 hbMin, Vector3 hbMax, umath::ScaledTransform pose, util::Uuid uuid)
+static bool calc_bone_mesh_info(pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo, BoneId boneId, std::shared_ptr<ModelSubMesh> subMesh, std::array<umath::Plane, 6> planes, Vector3 hbMin, Vector3 hbMax, umath::ScaledTransform pose, util::Uuid uuid)
 {
 	Vector3 smMin, smMax;
 	subMesh->GetBounds(smMin, smMax);
 	if(umath::intersection::aabb_in_plane_mesh(smMin, smMax, planes.begin(), planes.end()) == umath::intersection::Intersect::Outside)
 		return false;
 	auto &verts = subMesh->GetVertices();
+	auto &vertWeights = subMesh->GetVertexWeights();
 	auto numVerts = verts.size();
 
 	std::vector<uint32_t> usedTris;
 	usedTris.reserve(subMesh->GetTriangleCount());
-	subMesh->VisitIndices([&verts, &usedTris, &hbMin, &hbMax, &pose](auto *indexDataSrc, uint32_t numIndicesSrc) {
+	subMesh->VisitIndices([&verts, &vertWeights , & usedTris, &hbMin, &hbMax, &pose, boneId](auto *indexDataSrc, uint32_t numIndicesSrc) {
 		for(auto i = decltype(numIndicesSrc) {0u}; i < numIndicesSrc; i += 3) {
 			auto idx0 = indexDataSrc[i];
 			auto idx1 = indexDataSrc[i + 1];
@@ -96,7 +97,22 @@ static bool calc_bone_mesh_info(pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInf
 			auto &v0 = verts[idx0];
 			auto &v1 = verts[idx1];
 			auto &v2 = verts[idx2];
+			auto &vw0 = vertWeights[idx0];
+			auto &vw1 = vertWeights[idx1];
+			auto &vw2 = vertWeights[idx2];
 
+			auto hasBone = false;
+			for(uint8_t j = 0; j < 4; ++j) {
+				for(auto &vw : {vw0, vw1, vw2}) {
+					if(vw.boneIds[j] == boneId && vw.weights[j] > 0.5f) {
+						hasBone = true;
+						goto endLoop;
+					}
+				}
+			}
+		endLoop:
+			if(!hasBone)
+				continue;
 			if(umath::intersection::obb_triangle(hbMin, hbMax, pose, v0.position, v1.position, v2.position))
 				usedTris.push_back(i / 3);
 		}
@@ -195,8 +211,8 @@ bool pragma::bvh::HitboxMeshBvhBuildTask::Build(Model &mdl, BoneId boneId, const
 
 				auto &boneName = bone->name;
 				auto bm = std::make_shared<pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo>();
-				auto genResult = m_threadPool.submit_task([&mdl, subMesh, planes, hbMin, hbMax, pose, uuid, boneName, bm]() -> bool {
-					auto success = calc_bone_mesh_info(*bm, subMesh, planes, hbMin, hbMax, pose, uuid);
+				auto genResult = m_threadPool.submit_task([&mdl, subMesh, planes, hbMin, hbMax, pose, uuid, boneName, bm, boneId]() -> bool {
+					auto success = calc_bone_mesh_info(*bm, boneId, subMesh, planes, hbMin, hbMax, pose, uuid);
 					if(!success)
 						return false;
 					if(!generate_bvh_mesh(mdl, boneName, *bm))

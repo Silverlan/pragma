@@ -26,6 +26,7 @@
 #include "pragma/lua/libraries/lutil.hpp"
 #include "pragma/physics/raytraces.h"
 #include "pragma/model/model.h"
+#include "pragma/model/modelmesh.h"
 #include "pragma/lua/lentity_components_base_types.hpp"
 #include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
@@ -44,6 +45,7 @@
 #include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/entities/components/ik_solver/rig_config.hpp"
 #include "pragma/entities/components/origin_component.hpp"
+#include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/components/constraints/constraint_component.hpp"
 #include "pragma/entities/components/constraints/constraint_space_component.hpp"
 #include "pragma/entities/components/constraints/constraint_manager_component.hpp"
@@ -135,6 +137,33 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfig);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigBone);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigControl);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigConstraint);
+
+enum class BvhIntersectionFlags : uint32_t {
+	None = 0u,
+	ReturnPrimitives = 1u,
+	ReturnMeshes = ReturnPrimitives << 1u,
+};
+REGISTER_BASIC_BITWISE_OPERATORS(BvhIntersectionFlags)
+using IntersectionTestResult = Lua::type<std::pair<bool, Lua::var<std::optional<std::vector<uint64_t>>, std::optional<std::vector<pragma::MeshIntersectionInfo::MeshInfo>>>>>;
+static IntersectionTestResult bvh_intersection_test(lua_State *l, const std::function<bool(pragma::IntersectionInfo *)> &fTest, BvhIntersectionFlags flags)
+{
+	if(!umath::is_flag_set(flags, BvhIntersectionFlags::ReturnPrimitives | BvhIntersectionFlags::ReturnMeshes)) {
+		auto res = fTest(nullptr);
+		return luabind::object {l, std::pair<bool, std::optional<std::vector<uint64_t>>> {res, {}}};
+	}
+	if(umath::is_flag_set(flags, BvhIntersectionFlags::ReturnPrimitives)) {
+		pragma::PrimitiveIntersectionInfo info {};
+		auto res = fTest(&info);
+		if(!res)
+			return luabind::object {l, std::pair<bool, std::optional<std::vector<uint64_t>>> {res, {}}};
+		return luabind::object {l, std::pair<bool, std::optional<std::vector<uint64_t>>> {res, std::move(info.primitives)}};
+	}
+	pragma::MeshIntersectionInfo info {};
+	auto res = fTest(&info);
+	if(!res)
+		return luabind::object {l, std::pair<bool, std::optional<std::vector<uint64_t>>> {res, {}}};
+	return luabind::object {l, std::pair<bool, std::optional<std::vector<pragma::MeshIntersectionInfo::MeshInfo>>> {res, std::move(info.meshInfos)}};
+}
 
 void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {
@@ -259,6 +288,93 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defVelocity.def("GetVelocityProperty", &pragma::VelocityComponent::GetVelocityProperty);
 	defVelocity.def("GetAngularVelocityProperty", &pragma::VelocityComponent::GetAngularVelocityProperty);
 	entsMod[defVelocity];
+
+	auto defIntersectionHandler = pragma::lua::create_entity_component_class<pragma::IntersectionHandlerComponent, pragma::BaseEntityComponent>("IntersectionHandlerComponent");
+	defIntersectionHandler.def(
+	  "IntersectionTest2", +[](pragma::IntersectionHandlerComponent &c, const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) {
+		  auto t = std::chrono::steady_clock::now();
+		  c.IntersectionTest(origin, dir, umath::CoordinateSpace::Object, minDist, maxDist);
+		  auto dt = std::chrono::steady_clock::now() - t;
+		  std::cout << "Internal2: " << (dt.count() / 1'000'000.0) << "ms" << std::endl;
+	  });
+	defIntersectionHandler.def(
+	  "IntersectionTest3", +[](lua_State *l, size_t tStart) {
+		  auto t = std::chrono::steady_clock::now();
+		  auto dt = std::chrono::steady_clock::now().time_since_epoch().count() - tStart;
+		  std::cout << "Lua Overhead: " << (dt / 1'000'000.0) << "ms" << std::endl;
+	  });
+	defIntersectionHandler.def(
+	  "IntersectionTest", +[](pragma::IntersectionHandlerComponent &c, const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) -> std::optional<pragma::HitInfo> { return c.IntersectionTest(origin, dir, umath::CoordinateSpace::Object, minDist, maxDist); });
+	// defBvh.def("IntersectionTest", static_cast<std::optional<pragma::bvh::HitInfo> (pragma::IntersectionHandlerComponent::*)(const Vector3 &, const Vector3 &, float, float) const>(&pragma::IntersectionHandlerComponent::IntersectionTest));
+	defIntersectionHandler.def("IntersectionTestAabb", static_cast<bool (pragma::IntersectionHandlerComponent::*)(const Vector3 &, const Vector3 &) const>(&pragma::IntersectionHandlerComponent::IntersectionTestAabb));
+	defIntersectionHandler.def(
+	  "IntersectionTestAabb", +[](lua_State *l, const pragma::IntersectionHandlerComponent &bvhC, const Vector3 &min, const Vector3 &max, BvhIntersectionFlags flags) -> IntersectionTestResult {
+		  return bvh_intersection_test(
+		    l, [&bvhC, &min, &max](pragma::IntersectionInfo *info) { return info ? bvhC.IntersectionTestAabb(min, max, *info) : bvhC.IntersectionTestAabb(min, max); }, flags);
+	  });
+	defIntersectionHandler.def("IntersectionTestKDop", static_cast<bool (pragma::IntersectionHandlerComponent::*)(const std::vector<umath::Plane> &) const>(&pragma::IntersectionHandlerComponent::IntersectionTestKDop));
+	defIntersectionHandler.def(
+	  "IntersectionTestKDop", +[](lua_State *l, const pragma::IntersectionHandlerComponent &bvhC, const std::vector<umath::Plane> &planes, BvhIntersectionFlags flags) -> IntersectionTestResult {
+		  return bvh_intersection_test(
+		    l, [&bvhC, &planes](pragma::IntersectionInfo *info) { return info ? bvhC.IntersectionTestKDop(planes, *info) : bvhC.IntersectionTestKDop(planes); }, flags);
+	  });
+	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_NONE", umath::to_integral(BvhIntersectionFlags::None));
+	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_BIT_RETURN_PRIMITIVES", umath::to_integral(BvhIntersectionFlags::ReturnPrimitives));
+	defIntersectionHandler.add_static_constant("INTERSECTION_FLAG_BIT_RETURN_MESHES", umath::to_integral(BvhIntersectionFlags::ReturnMeshes));
+
+	auto defBvhHitInfo = luabind::class_<pragma::HitInfo>("HitInfo");
+	defBvhHitInfo.def_readonly("mesh", &pragma::HitInfo::mesh);
+	defBvhHitInfo.def_readonly("entity", &pragma::HitInfo::entity);
+	defBvhHitInfo.property(
+	  "entity",
+	  +[](lua_State *l, pragma::HitInfo &info) {
+		  if(info.entity.expired())
+			  Lua::PushNil(l);
+		  else
+			  info.entity->PushLuaObject(l);
+	  },
+	  +[](pragma::HitInfo &info, BaseEntity *ent) { info.entity = ent ? ent->GetHandle() : EntityHandle {}; });
+	defBvhHitInfo.def_readonly("primitiveIndex", &pragma::HitInfo::primitiveIndex);
+	defBvhHitInfo.def_readonly("distance", &pragma::HitInfo::distance);
+	defBvhHitInfo.def_readonly("t", &pragma::HitInfo::t);
+	defBvhHitInfo.def_readonly("u", &pragma::HitInfo::u);
+	defBvhHitInfo.def_readonly("v", &pragma::HitInfo::v);
+	defBvhHitInfo.def(
+	  "CalcHitNormal", +[](const pragma::HitInfo &hitInfo) -> std::optional<Vector3> {
+		  if(!hitInfo.mesh)
+			  return {};
+		  auto idx = hitInfo.primitiveIndex * 3;
+		  auto vIdx0 = hitInfo.mesh->GetIndex(idx);
+		  auto vIdx1 = hitInfo.mesh->GetIndex(idx + 1);
+		  auto vIdx2 = hitInfo.mesh->GetIndex(idx + 2);
+		  if(!vIdx0.has_value() || !vIdx1.has_value() || !vIdx2.has_value())
+			  return {};
+		  auto n0 = hitInfo.mesh->GetVertexNormal(*vIdx0);
+		  auto n1 = hitInfo.mesh->GetVertexNormal(*vIdx1);
+		  auto n2 = hitInfo.mesh->GetVertexNormal(*vIdx2);
+		  auto n = hitInfo.t * n0 + hitInfo.u * n1 + hitInfo.v * n2;
+		  uvec::normalize(&n);
+		  return n;
+	  });
+	defBvhHitInfo.def(
+	  "CalcHitUv", +[](const pragma::HitInfo &hitInfo) -> std::optional<Vector2> {
+		  if(!hitInfo.mesh)
+			  return {};
+		  auto idx = hitInfo.primitiveIndex * 3;
+		  auto vIdx0 = hitInfo.mesh->GetIndex(idx);
+		  auto vIdx1 = hitInfo.mesh->GetIndex(idx + 1);
+		  auto vIdx2 = hitInfo.mesh->GetIndex(idx + 2);
+		  if(!vIdx0.has_value() || !vIdx1.has_value() || !vIdx2.has_value())
+			  return {};
+		  auto uv0 = hitInfo.mesh->GetVertexUV(*vIdx0);
+		  auto uv1 = hitInfo.mesh->GetVertexUV(*vIdx1);
+		  auto uv2 = hitInfo.mesh->GetVertexUV(*vIdx2);
+		  auto u = hitInfo.u;
+		  auto v = hitInfo.v;
+		  return (1.f - (hitInfo.u + hitInfo.v)) * uv0 + hitInfo.u * uv1 + hitInfo.v * uv2;
+	  });
+	defIntersectionHandler.scope[defBvhHitInfo];
+	entsMod[defIntersectionHandler];
 
 	auto defGlobal = pragma::lua::create_entity_component_class<pragma::GlobalNameComponent, pragma::BaseEntityComponent>("GlobalComponent");
 	defGlobal.def("GetGlobalName", &pragma::GlobalNameComponent::GetGlobalName);

@@ -30,7 +30,7 @@ void iterate_occlusion_tree(const typename OcclusionOctree<T>::Node &node, std::
 	if(node.IsEmpty() == true)
 		return;
 	auto &nodeBounds = node.GetWorldBounds();
-	if(optFrustumPlanes && umath::intersection::aabb_in_plane_mesh(nodeBounds.first, nodeBounds.second, *optFrustumPlanes) == umath::intersection::Intersect::Outside)
+	if(optFrustumPlanes && umath::intersection::aabb_in_plane_mesh(nodeBounds.first, nodeBounds.second, optFrustumPlanes->begin(), optFrustumPlanes->end()) == umath::intersection::Intersect::Outside)
 		return;
 	auto &objs = node.GetObjects();
 	for(auto &o : objs)

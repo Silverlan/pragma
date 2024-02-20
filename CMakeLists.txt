@@ -401,7 +401,7 @@ set(DEPENDENCY_RECTANGLEBINPACK_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_li
 search_lib_recursive(DEPENDENCY_RECTANGLEBINPACK_LIBRARY third_party_libs/rectangle_bin_pack/${BINARY_PRAGMA_DIR} rectangle_bin_pack STATIC)
 
 set(DEPENDENCY_MINIBALL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/miniball/cpp/main CACHE PATH "Path to include directory.")
-set(DEPENDENCY_BVH_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/bvh/include CACHE PATH "Path to include directory.")
+set(DEPENDENCY_BVH_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/bvh/src CACHE PATH "Path to include directory.")
 
 set(DEPENDENCY_VTFLIB_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vtflib/src CACHE PATH "Path to include directory.")
 set(DEPENDENCY_VTFLIB_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/vtflib/src CACHE PATH "Path to include directory.")

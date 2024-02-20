@@ -344,6 +344,7 @@ namespace Simplify {
 	std::vector<Triangle> triangles;
 	std::vector<Vertex> vertices;
 	std::vector<Ref> refs;
+	std::vector<Index> newVertexIndexToOriginalIndex;
 	std::string mtllib;
 	std::vector<std::string> materials;
 
@@ -771,15 +772,18 @@ namespace Simplify {
 		loopi(0, triangles.size()) if(!triangles[i].deleted)
 		{
 			Triangle &t = triangles[i];
-			triangles[dst++] = t;
+			triangles[dst] = t;
+			++dst;
 			loopj(0, 3) vertices[t.v[j]].tcount = 1;
 		}
 		triangles.resize(dst);
 		dst = 0;
+		newVertexIndexToOriginalIndex.resize(vertices.size());
 		loopi(0, vertices.size()) if(vertices[i].tcount)
 		{
 			vertices[i].tstart = dst;
 			vertices[dst].p = vertices[i].p;
+			newVertexIndexToOriginalIndex[dst] = i;
 			dst++;
 		}
 		loopi(0, triangles.size())
@@ -788,6 +792,7 @@ namespace Simplify {
 			loopj(0, 3) t.v[j] = vertices[t.v[j]].tstart;
 		}
 		vertices.resize(dst);
+		newVertexIndexToOriginalIndex.resize(dst);
 	}
 
 	// Error between vertex and Quadric

@@ -123,7 +123,7 @@ void CAnimatedBvhComponent::RebuildTemporaryBvhData()
 
 	CBvhComponent::BvhBuildInfo buildInfo {};
 	buildInfo.shouldConsiderMesh = [mdlC](const ModelSubMesh &mesh, uint32_t meshIdx) -> bool { return CBvhComponent::ShouldConsiderMesh(mesh, *mdlC->GetRenderBufferData(meshIdx)); };
-	m_tmpBvhData = BaseBvhComponent::RebuildBvh(renderMeshes, &buildInfo);
+	m_tmpBvhData = BaseBvhComponent::RebuildBvh(renderMeshes, &buildInfo, nullptr, &GetEntity());
 }
 
 void CAnimatedBvhComponent::SetUpdateLazily(bool updateLazily) { m_updateLazily = updateLazily; }
@@ -293,7 +293,7 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force, const std::vector<boo
 			renderMesh->VisitIndices([this, meshIdx, &indexOffset](auto *indexDataSrc, uint32_t numIndicesSrc) {
 				auto &verts = m_animatedBvhData.meshData.at(meshIdx).transformedVerts;
 				for(auto i = decltype(numIndicesSrc) {0}; i < numIndicesSrc; i += 3)
-					m_animatedBvhData.transformedTris[(indexOffset + i) / 3] = {verts[indexDataSrc[i]], verts[indexDataSrc[i + 1]], verts[indexDataSrc[i + 2]]};
+					m_animatedBvhData.transformedTris[(indexOffset + i) / 3] = {bvh::create_triangle(verts[indexDataSrc[i]], verts[indexDataSrc[i + 1]], verts[indexDataSrc[i + 2]])};
 				indexOffset += numIndicesSrc;
 			});
 			++meshIdx;

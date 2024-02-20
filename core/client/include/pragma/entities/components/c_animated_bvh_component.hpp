@@ -23,7 +23,7 @@ namespace pragma {
 		std::vector<std::shared_ptr<ModelSubMesh>> renderMeshes;
 		std::vector<uint16_t> renderMeshIndices;
 		std::vector<MeshData> meshData;
-		std::vector<BvhTriangle> transformedTris;
+		std::vector<bvh::Primitive> transformedTris;
 		std::condition_variable completeCondition;
 		mutable std::mutex completeMutex;
 		uint32_t completeCount = 0;
@@ -52,7 +52,7 @@ namespace pragma {
 		CallbackHandle m_cbRebuildScheduled;
 		CallbackHandle m_cbOnBvhUpdateRequested;
 		CallbackHandle m_cbOnBvhRebuilt;
-		std::shared_ptr<BvhData> m_tmpBvhData = nullptr;
+		std::shared_ptr<bvh::MeshBvhTree> m_tmpBvhData = nullptr;
 		bool m_rebuildScheduled = false;
 		std::atomic<bool> m_cancelled = false;
 		std::atomic<bool> m_busy = false;

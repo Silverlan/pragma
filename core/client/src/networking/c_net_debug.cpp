@@ -142,6 +142,17 @@ void NET_cl_debug_drawplane(NetPacket packet)
 	auto dur = packet->Read<float>();
 	DebugRenderer::DrawPlane(n, d, col, dur);
 }
+void NET_cl_debug_draw_mesh(NetPacket packet)
+{
+	auto numTris = packet->Read<uint32_t>();
+	std::vector<Vector3> verts;
+	verts.resize(numTris * 3);
+	packet->Read(verts.data(), util::size_of_container(verts));
+	auto color = packet->Read<Color>();
+	auto colorOutline = packet->Read<Color>();
+	auto duration = packet->Read<float>();
+	DebugRenderer::DrawMesh(verts, color, colorOutline, duration);
+}
 void NET_cl_debug_drawtruncatedcone(NetPacket packet)
 {
 	auto origin = packet->Read<Vector3>();

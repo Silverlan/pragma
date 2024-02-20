@@ -282,7 +282,7 @@ bool SceneRenderDesc::ShouldCull(pragma::CRenderComponent &renderC, pragma::Rend
 	max += pos;
 	return fShouldCull(min, max);
 }
-bool SceneRenderDesc::ShouldCull(const Vector3 &min, const Vector3 &max, const std::vector<umath::Plane> &frustumPlanes) { return umath::intersection::aabb_in_plane_mesh(min, max, frustumPlanes) == umath::intersection::Intersect::Outside; }
+bool SceneRenderDesc::ShouldCull(const Vector3 &min, const Vector3 &max, const std::vector<umath::Plane> &frustumPlanes) { return umath::intersection::aabb_in_plane_mesh(min, max, frustumPlanes.begin(), frustumPlanes.end()) == umath::intersection::Intersect::Outside; }
 
 static auto cvEntitiesPerJob = GetClientConVar("render_queue_entities_per_worker_job");
 void SceneRenderDesc::CollectRenderMeshesFromOctree(pragma::CRasterizationRendererComponent *optRasterizationRenderer, RenderFlags renderFlags, bool enableClipping, const OcclusionOctree<CBaseEntity *> &tree, const pragma::CSceneComponent &scene, const pragma::CCameraComponent &cam,
@@ -375,7 +375,7 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(pragma::CRasterizationRender
 {
 	CollectRenderMeshesFromOctree(
 	  optRasterizationRenderer, renderFlags, enableClipping, tree, scene, cam, vp, renderMask, [this](pragma::rendering::SceneRenderPass renderMode, bool translucent) { return GetRenderQueue(renderMode, translucent); },
-	  [frustumPlanes](const Vector3 &min, const Vector3 &max) -> bool { return umath::intersection::aabb_in_plane_mesh(min, max, frustumPlanes) == umath::intersection::Intersect::Outside; }, bspTrees, bspLeafNodes, 0, nullptr);
+	  [frustumPlanes](const Vector3 &min, const Vector3 &max) -> bool { return umath::intersection::aabb_in_plane_mesh(min, max, frustumPlanes.begin(), frustumPlanes.end()) == umath::intersection::Intersect::Outside; }, bspTrees, bspLeafNodes, 0, nullptr);
 }
 
 bool SceneRenderDesc::ShouldConsiderEntity(CBaseEntity &ent, const pragma::CSceneComponent &scene, RenderFlags renderFlags, pragma::rendering::RenderMask renderMask)

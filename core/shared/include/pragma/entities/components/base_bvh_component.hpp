@@ -8,57 +8,15 @@
 #define __BASE_BVH_COMPONENT_HPP__
 
 #include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/entities/components/util_bvh.hpp"
 
 namespace pragma {
-	struct DLLNETWORK BvhHitInfo {
-		std::shared_ptr<ModelSubMesh> mesh;
-		EntityHandle entity;
-		size_t primitiveIndex;
-		float distance;
-		float t;
-		float u;
-		float v;
+	struct HitInfo;
+	struct IntersectionInfo;
+	namespace bvh {
+		struct BvhTree;
 	};
-
-	struct BvhMeshIntersectionInfo;
-	struct DLLNETWORK BvhIntersectionInfo {
-		void Clear();
-		std::vector<size_t> primitives;
-
-		BvhMeshIntersectionInfo *GetMeshIntersectionInfo();
-	  protected:
-		bool m_isMeshIntersectionInfo = false;
-	};
-
-	struct BvhMeshRange;
-	struct DLLNETWORK BvhMeshIntersectionInfo : public BvhIntersectionInfo {
-		BvhMeshIntersectionInfo() { m_isMeshIntersectionInfo = true; }
-
-		// For internal use only
-		std::vector<const pragma::BvhMeshRange *> &GetTemporaryMeshRanges() { return m_tmpMeshRanges; }
-		std::unordered_set<size_t> &GetTemporarMeshMap() { return m_tmpMeshes; }
-	  protected:
-		std::vector<const pragma::BvhMeshRange *> m_tmpMeshRanges;
-		std::unordered_set<size_t> m_tmpMeshes;
-	};
-
-	struct DLLNETWORK BvhMeshRange {
-		BaseEntity *entity = nullptr;
-		std::shared_ptr<ModelSubMesh> mesh;
-		size_t start;
-		size_t end;
-		bool operator<(const BvhMeshRange &other) const { return start < other.start; }
-	};
-
-	struct DLLNETWORK BvhTriangle {
-		Vector3 p0, e1, e2, n;
-		BvhTriangle() = default;
-		BvhTriangle(const Vector3 &p0, const Vector3 &p1, const Vector3 &p2) : p0(p0), e1(p0 - p1), e2(p2 - p0) { n = cross(e1, e2); }
-	};
-
-	struct BvhData;
 	class BaseStaticBvhCacheComponent;
-	DLLNETWORK std::vector<BvhMeshRange> &get_bvh_mesh_ranges(BvhData &bvhData);
 	class DLLNETWORK BaseBvhComponent : public BaseEntityComponent {
 	  public:
 		static ComponentEventId EVENT_ON_CLEAR_BVH;
@@ -68,27 +26,29 @@ namespace pragma {
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;
+		virtual void OnRemove() override;
 
 		virtual ~BaseBvhComponent() override;
-		std::optional<BvhHitInfo> IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) const;
-		virtual bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, BvhHitInfo &outHitInfo) const;
+		virtual bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, HitInfo &outHitInfo) const;
 		bool IntersectionTestAabb(const Vector3 &min, const Vector3 &max) const;
-		bool IntersectionTestAabb(const Vector3 &min, const Vector3 &max, BvhIntersectionInfo &outIntersectionInfo) const;
+		bool IntersectionTestAabb(const Vector3 &min, const Vector3 &max, IntersectionInfo &outIntersectionInfo) const;
 		bool IntersectionTestKDop(const std::vector<umath::Plane> &planes) const;
-		bool IntersectionTestKDop(const std::vector<umath::Plane> &planes, BvhIntersectionInfo &outIntersectionInfo) const;
+		bool IntersectionTestKDop(const std::vector<umath::Plane> &planes, IntersectionInfo &outIntersectionInfo) const;
 		void SetStaticCache(BaseStaticBvhCacheComponent *staticCache);
 		virtual bool IsStaticBvh() const { return false; }
-		const BvhMeshRange *FindPrimitiveMeshInfo(size_t primIdx) const;
+		const bvh::MeshRange *FindPrimitiveMeshInfo(size_t primIdx) const;
 
 		void SendBvhUpdateRequestOnInteraction();
-		static bool SetVertexData(pragma::BvhData &bvhData, const std::vector<BvhTriangle> &data);
-		static void DeleteRange(pragma::BvhData &bvhData, size_t start, size_t end);
-		bool SetVertexData(const std::vector<BvhTriangle> &data);
-		void GetVertexData(std::vector<BvhTriangle> &outData) const;
+		static bool SetVertexData(pragma::bvh::MeshBvhTree &bvhData, const std::vector<bvh::Primitive> &data);
+		static void DeleteRange(pragma::bvh::MeshBvhTree &bvhData, size_t start, size_t end);
+		bool SetVertexData(const std::vector<bvh::Primitive> &data);
+		void GetVertexData(std::vector<bvh::Primitive> &outData) const;
 		void RebuildBvh();
 		void ClearBvh();
 		std::optional<Vector3> GetVertex(size_t idx) const;
 		size_t GetTriangleCount() const;
+
+		void DebugDrawBvhTree(const Vector3 &origin, const Vector3 &dir, float maxDist, float duration = 12.f) const;
 
 		// For internal use only
 		struct DLLNETWORK BvhBuildInfo {
@@ -96,15 +56,15 @@ namespace pragma {
 			std::function<bool()> isCancelled = nullptr;
 			std::function<bool(const ModelSubMesh &, uint32_t)> shouldConsiderMesh = nullptr;
 		};
-		static std::shared_ptr<pragma::BvhData> RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo = nullptr, std::vector<size_t> *optOutMeshIndices = nullptr);
-		std::shared_ptr<BvhData> SetBvhData(std::shared_ptr<BvhData> &bvhData);
+		static std::shared_ptr<pragma::bvh::MeshBvhTree> RebuildBvh(const std::vector<std::shared_ptr<ModelSubMesh>> &meshes, const BvhBuildInfo *optBvhBuildInfo = nullptr, std::vector<size_t> *optOutMeshIndices = nullptr, BaseEntity *ent = nullptr);
+		std::shared_ptr<bvh::MeshBvhTree> SetBvhData(std::shared_ptr<bvh::MeshBvhTree> &bvhData);
 		bool HasBvhData() const;
 	  protected:
 		BaseBvhComponent(BaseEntity &ent);
 		virtual void DoRebuildBvh() = 0;
-		const std::shared_ptr<BvhData> &GetUpdatedBvh() const;
-		std::vector<BvhMeshRange> &GetMeshRanges();
-		std::shared_ptr<BvhData> m_bvhData = nullptr;
+		const std::shared_ptr<bvh::MeshBvhTree> &GetUpdatedBvh() const;
+		std::vector<bvh::MeshRange> &GetMeshRanges();
+		std::shared_ptr<bvh::MeshBvhTree> m_bvhData = nullptr;
 		ComponentHandle<BaseStaticBvhCacheComponent> m_staticCache;
 		mutable std::mutex m_bvhDataMutex;
 		bool m_sendBvhUpdateRequestOnInteraction = false;

@@ -18,6 +18,7 @@
 #include "pragma/entities/components/c_attachable_component.hpp"
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/renderers/c_raytracing_renderer_component.hpp"
+#include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/components/c_raytracing_component.hpp"
 #include "pragma/entities/components/c_bvh_component.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
@@ -520,9 +521,9 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 		return {};
 
 	auto *mdlC = GetModelComponent();
-	auto *bvhC = mdlC ? mdlC->GetBvhComponent() : nullptr;
-	if(bvhC) {
-		auto res = bvhC->IntersectionTest(lstart, n, 0.f, d);
+	auto *intersectionHandlerC = mdlC ? mdlC->GetIntersectionHandlerComponent() : nullptr;
+	if(intersectionHandlerC) {
+		auto res = intersectionHandlerC->IntersectionTest(lstart, n, umath::CoordinateSpace::Object, 0.f, d);
 		if(!res.has_value())
 			return {};
 		Intersection::LineMeshResult result {};

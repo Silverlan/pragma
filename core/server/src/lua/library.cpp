@@ -18,6 +18,8 @@
 #include <pragma/asset/util_asset.hpp>
 #include <pragma/debug/debug_render_info.hpp>
 #include <pragma/util/util_splash_damage_info.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/util/giblet_create_info.hpp>
 #include <pragma/util/bulletinfo.h>
 #include <pragma/lua/libraries/lasset.hpp>
@@ -114,7 +116,7 @@ void SGame::RegisterLuaLibraries()
 	  luabind::def("draw_pose", &Lua::DebugRenderer::Server::DrawAxis), luabind::def("draw_text", static_cast<void (*)(const std::string &, const Vector2 &, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawText)),
 	  luabind::def("draw_text", static_cast<void (*)(const std::string &, float, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawText)), luabind::def("draw_path", &Lua::DebugRenderer::Server::DrawPath),
 	  luabind::def("draw_spline", static_cast<void (*)(lua_State *, luabind::table<>, uint32_t, float, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)),
-	  luabind::def("draw_spline", static_cast<void (*)(lua_State *, luabind::table<>, uint32_t, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)), luabind::def("draw_plane", &Lua::DebugRenderer::Server::DrawPlane)];
+	  luabind::def("draw_spline", static_cast<void (*)(lua_State *, luabind::table<>, uint32_t, const DebugRenderInfo &)>(Lua::DebugRenderer::Server::DrawSpline)), luabind::def("draw_plane", &Lua::DebugRenderer::Server::DrawPlane), luabind::def("draw_mesh", &SGame::DrawMesh)];
 
 	Lua::ai::server::register_library(GetLuaInterface());
 

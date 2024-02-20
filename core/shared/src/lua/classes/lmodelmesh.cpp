@@ -288,8 +288,18 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("ReserveVertices", static_cast<void (*)(lua_State *, ::ModelSubMesh &, uint32_t)>([](lua_State *l, ::ModelSubMesh &mesh, uint32_t numVerts) { mesh.GetVertices().reserve(numVerts); }));
 	classDef.def("ReserveTriangles", static_cast<void (*)(lua_State *, ::ModelSubMesh &, uint32_t)>([](lua_State *l, ::ModelSubMesh &mesh, uint32_t numTris) { mesh.ReserveIndices(numTris * 3); }));
 	classDef.def("ReserveVertexWeights", static_cast<void (*)(lua_State *, ::ModelSubMesh &, uint32_t)>([](lua_State *l, ::ModelSubMesh &mesh, uint32_t numVerts) { mesh.GetVertexWeights().reserve(numVerts); }));
-	classDef.def("Simplify", &::ModelSubMesh::Simplify);
-	classDef.def("Simplify", &::ModelSubMesh::Simplify, luabind::default_parameter_policy<3, double {5.0}> {});
+	classDef.def(
+	  "Simplify", +[](::ModelSubMesh &subMesh, uint32_t targetVertexCount, double aggressiveness) -> std::tuple<std::shared_ptr<::ModelSubMesh>, std::vector<uint64_t>> {
+		  std::vector<uint64_t> vertexMapping;
+		  auto simplifiedMesh = subMesh.Simplify(targetVertexCount, aggressiveness, &vertexMapping);
+		  return std::tuple<std::shared_ptr<::ModelSubMesh>, std::vector<uint64_t>> {simplifiedMesh, std::move(vertexMapping)};
+	  });
+	classDef.def(
+	  "Simplify", +[](::ModelSubMesh &subMesh, uint32_t targetVertexCount) -> std::tuple<std::shared_ptr<::ModelSubMesh>, std::vector<uint64_t>> {
+		  std::vector<uint64_t> vertexMapping;
+		  auto simplifiedMesh = subMesh.Simplify(targetVertexCount, 5.0, &vertexMapping);
+		  return std::tuple<std::shared_ptr<::ModelSubMesh>, std::vector<uint64_t>> {simplifiedMesh, std::move(vertexMapping)};
+	  });
 	classDef.def(
 	  "Save", +[](lua_State *l, ::ModelSubMesh &mesh, udm::AssetData &assetData) {
 		  auto *nw = engine->GetNetworkState(l);

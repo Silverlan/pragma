@@ -66,7 +66,11 @@ bool DebugRenderer::BaseObject::IsValid() const { return m_bValid; }
 void DebugRenderer::BaseObject::Remove() { m_bValid = false; }
 const umath::ScaledTransform &DebugRenderer::BaseObject::GetPose() const { return const_cast<BaseObject *>(this)->GetPose(); }
 umath::ScaledTransform &DebugRenderer::BaseObject::GetPose() { return m_pose; }
-void DebugRenderer::BaseObject::SetPose(const umath::ScaledTransform &pose) { m_pose = pose; }
+void DebugRenderer::BaseObject::SetPose(const umath::ScaledTransform &pose)
+{
+	m_pose = pose;
+	UpdateModelMatrix();
+}
 const Vector3 &DebugRenderer::BaseObject::GetPos() const { return m_pose.GetOrigin(); }
 void DebugRenderer::BaseObject::SetPos(const Vector3 &pos)
 {

@@ -19,6 +19,7 @@ DECLARE_NETMESSAGE_CL(debug_drawaxis);
 DECLARE_NETMESSAGE_CL(debug_drawpath);
 DECLARE_NETMESSAGE_CL(debug_drawspline);
 DECLARE_NETMESSAGE_CL(debug_drawplane);
+DECLARE_NETMESSAGE_CL(debug_draw_mesh);
 DECLARE_NETMESSAGE_CL(debug_drawtruncatedcone);
 DECLARE_NETMESSAGE_CL(debug_drawcylinder);
 

@@ -1114,7 +1114,7 @@ void Model::GetSubMeshes(const std::vector<uint32_t> &meshIds, std::vector<std::
 			for(auto it = groupMeshes.begin(); it != groupMeshes.end(); ++it) {
 				auto &mesh = *it;
 				outMeshes.reserve(outMeshes.size() + mesh->GetSubMeshCount());
-				for(auto &subMesh : outMeshes)
+				for(auto &subMesh : mesh->GetSubMeshes())
 					outMeshes.push_back(subMesh);
 			}
 		}
@@ -2053,7 +2053,7 @@ bool Model::GenerateLowLevelLODs(Game &game)
 	}
 
 	std::unordered_map<uint32_t, uint32_t> replaceIds;
-	auto aggressiveness = 5.0;
+	auto aggressiveness = 6.0;
 	for(auto mgId : mgIds) {
 		auto mg = GetMeshGroup(mgId);
 		if(!mg)
@@ -2073,12 +2073,19 @@ bool Model::GenerateLowLevelLODs(Game &game)
 				targetVertexCount = umath::clamp(targetVertexCount, min, static_cast<uint32_t>(300));
 
 				auto lodSubMesh = subMesh->Simplify(targetVertexCount, aggressiveness);
+				if(lodSubMesh->GetVertexCount() == subMesh->GetVertexCount())
+					continue;
 				mLod->AddSubMesh(lodSubMesh);
 			}
+			if(mLod->GetSubMeshes().empty())
+				continue;
 			mgLod->AddMesh(mLod);
 		}
 		replaceIds[mgId] = lodMgId;
 	}
+
+	if(replaceIds.empty())
+		return false;
 
 	uint32_t lod = 100;
 	float distance = 5'000.f;

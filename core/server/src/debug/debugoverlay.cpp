@@ -161,3 +161,13 @@ void SDebugRenderer::DrawPlane(const Vector3 &n, float dist, const Color &color,
 	server->SendPacket("debug_drawplane", p, pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawPlane(const umath::Plane &plane, const Color &color, float duration) { DrawPlane(const_cast<umath::Plane &>(plane).GetNormal(), static_cast<float>(plane.GetDistance()), color, duration); }
+void SDebugRenderer::DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration)
+{
+	NetPacket p;
+	p->Write<uint32_t>(meshVerts.size() / 3);
+	p->Write(reinterpret_cast<const uint8_t *>(meshVerts.data()), util::size_of_container(meshVerts));
+	p->Write<Color>(color);
+	p->Write<Color>(colorOutline);
+	p->Write<float>(duration);
+	server->SendPacket("debug_draw_mesh", p, pragma::networking::Protocol::FastUnreliable);
+}

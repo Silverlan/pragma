@@ -207,17 +207,15 @@ function ents.ClickComponent.find_entities_in_kdop(planes, filter)
 	local entPl = pl:GetEntity()
 
 	debug.start_profiling_task("click_find_entities_in_kdop")
-	local flags = bit.bor(
-		ents.BvhComponent.BVH_INTERSECTION_FLAG_BIT_RETURN_PRIMITIVES,
-		ents.BvhComponent.BVH_INTERSECTION_FLAG_BIT_DISCONTINUE_ON_FIRST_HIT_PER_MESH
-	)
+	local flags = ents.IntersectionHandlerComponent.INTERSECTION_FLAG_BIT_RETURN_MESHES
 	local results = {}
 	local entToResultIdx = {}
 	local meshMap = {}
-	local function populate_results(c, indices)
-		for _, idx in ipairs(indices) do
-			local ent, subMesh = c:FindPrimitiveMeshInfo(idx)
-			if ent ~= nil then
+	local function populate_results(meshes)
+		for _, meshInfo in ipairs(meshes) do
+			local ent = meshInfo.entity
+			local subMesh = meshInfo.mesh
+			if subMesh ~= nil then
 				local idx = entToResultIdx[ent]
 				if idx == nil then
 					table.insert(results, {
@@ -236,15 +234,18 @@ function ents.ClickComponent.find_entities_in_kdop(planes, filter)
 		end
 	end
 	for ent, c in ents.citerator(ents.COMPONENT_STATIC_BVH_CACHE) do
-		local localPlanes = get_local_planes(planes, ent)
-		local r, indices = c:IntersectionTestKDop(localPlanes, flags)
-		if r ~= false then
-			populate_results(c, indices)
+		local intersectionC = ent:GetComponent(ents.COMPONENT_INTERSECTION_HANDLER)
+		if intersectionC ~= nil then
+			local localPlanes = get_local_planes(planes, ent)
+			local r, meshes = intersectionC:IntersectionTestKDop(localPlanes, flags)
+			if r ~= false then
+				populate_results(meshes)
+			end
 		end
 	end
 
 	for ent, c in
-		ents.citerator(ents.COMPONENT_BVH, {
+		ents.citerator(ents.COMPONENT_INTERSECTION_HANDLER, {
 			ents.IteratorFilterComponent(ents.COMPONENT_CLICK),
 			ents.IteratorFilterComponent(ents.COMPONENT_MODEL),
 			ents.IteratorFilterComponent(ents.COMPONENT_RENDER),
@@ -252,9 +253,9 @@ function ents.ClickComponent.find_entities_in_kdop(planes, filter)
 	do
 		if should_entity_pass(ent, entPl, filter) then
 			local localPlanes = get_local_planes(planes, ent)
-			local r, indices = c:IntersectionTestKDop(localPlanes, flags)
+			local r, meshes = c:IntersectionTestKDop(localPlanes, flags)
 			if r ~= false then
-				populate_results(c, indices)
+				populate_results(meshes)
 			end
 		end
 	end
@@ -284,18 +285,21 @@ function ents.ClickComponent.raycast(pos, dir, filter, maxDist)
 
 	-- Check static BVH caches
 	for ent, c in ents.citerator(ents.COMPONENT_STATIC_BVH_CACHE) do
-		local hitData = c:IntersectionTest(pos, dir, 0.0, maxDist)
-		if
-			hitData ~= nil
-			and ents.ClickComponent.is_entity_valid(hitData.entity)
-			and (filter == nil or filter(hitData.entity))
-		then
-			if hitData.distance < distClosest then -- and hitData.distance > 0.0) then
-				--debug.print("Clicked actor: ",hitData.entity)
-				distClosest = hitData.distance
-				hitPos = pos + dir * hitData.distance
-				actorClosest = hitData.entity
-				hitDataClosest = hitData
+		local intersectionC = ent:GetComponent(ents.COMPONENT_INTERSECTION_HANDLER)
+		if intersectionC ~= nil then
+			local hitData = intersectionC:IntersectionTest(pos, dir, 0.0, maxDist)
+			if
+				hitData ~= nil
+				and ents.ClickComponent.is_entity_valid(hitData.entity)
+				and (filter == nil or filter(hitData.entity))
+			then
+				if hitData.distance < distClosest then -- and hitData.distance > 0.0) then
+					--debug.print("Clicked actor: ",hitData.entity)
+					distClosest = hitData.distance
+					hitPos = pos + dir * hitData.distance
+					actorClosest = hitData.entity
+					hitDataClosest = hitData
+				end
 			end
 		end
 	end
@@ -321,8 +325,8 @@ function ents.ClickComponent.raycast(pos, dir, filter, maxDist)
 				local lMaxDist = ldir:Length()
 				ldir = ldir / lMaxDist
 
-				local bvhC = ent:GetComponent(ents.COMPONENT_BVH)
-				local hitData = bvhC:IntersectionTest(lpos, ldir, 0.0, lMaxDist)
+				local intersectionHandlerC = ent:GetComponent(ents.COMPONENT_INTERSECTION_HANDLER)
+				local hitData = intersectionHandlerC:IntersectionTest(lpos, ldir, 0.0, lMaxDist)
 				if hitData ~= nil then
 					local clickC = ent:GetComponent(ents.COMPONENT_CLICK)
 					local priority = (clickC ~= nil) and clickC:GetPriority() or 0
@@ -364,7 +368,7 @@ function ents.ClickComponent.raycast(pos, dir, filter, maxDist)
 	local entCache = {}
 	for ent in
 		ents.iterator({
-			ents.IteratorFilterComponent(ents.COMPONENT_BVH),
+			ents.IteratorFilterComponent(ents.COMPONENT_INTERSECTION_HANDLER),
 			ents.IteratorFilterComponent(ents.COMPONENT_CLICK),
 			ents.IteratorFilterComponent(ents.COMPONENT_MODEL),
 			ents.IteratorFilterComponent(ents.COMPONENT_RENDER),
@@ -414,6 +418,7 @@ function ents.ClickComponent.raycast(pos, dir, filter, maxDist)
 end
 function ents.ClickComponent.find_actor_under_cursor(filter)
 	local pos, dir, vpData = ents.ClickComponent.get_ray_data()
+	--print("find_actor_under_cursor: ", pos, dir)
 	if pos == nil then
 		return
 	end

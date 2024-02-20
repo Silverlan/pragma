@@ -1381,6 +1381,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat->def("GetNormal", &uquat::get_normal);
 	defQuat->def("Copy", &Lua::Quaternion::Copy);
 	defQuat->def("ToMatrix", static_cast<Mat4 (*)(const Quat &)>(&glm::toMat4));
+	defQuat->def("ToMatrix3", static_cast<Mat3 (*)(const Quat &)>(&glm::toMat3));
 	defQuat->def("Lerp", &uquat::lerp);
 	defQuat->def("Slerp", &uquat::slerp);
 	defQuat->def("ToEulerAngles", Lua::Quaternion::ToEulerAngles);

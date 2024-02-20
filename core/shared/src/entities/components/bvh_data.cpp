@@ -177,8 +177,6 @@ pragma::bvh::BvhTree::~BvhTree()
 }
 ::bvh::v2::ThreadPool &pragma::bvh::BvhTree::GetThreadPool() { return *g_threadPool; }
 
-void pragma::bvh::BvhTree::Refit() { ::bvh::v2::ReinsertionOptimizer<Node>::optimize(*g_threadPool, bvh); }
-
 void pragma::bvh::BvhTree::InitializeBvh()
 {
 	auto config = InitializeExecutor();
@@ -282,7 +280,9 @@ bool pragma::bvh::MeshBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir
 	bvh.intersect<false, use_robust_traversal>(ray, bvh.get_root().index, stack, [&](size_t begin, size_t end) {
 		for(size_t i = begin; i < end; ++i) {
 			size_t j = bvh.prim_ids[i];
-			if(auto hit = precomputed_tris[i].intersect(ray)) {
+			auto &prim = primitives[j];
+			pragma::bvh::PrecomputedTri tri {prim.p0, prim.p1, prim.p2};
+			if(auto hit = tri.intersect(ray)) {
 				prim_id = j;
 				std::tie(u, v) = *hit;
 			}

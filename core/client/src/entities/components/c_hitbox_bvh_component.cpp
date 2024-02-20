@@ -245,7 +245,6 @@ void CHitboxBvhComponent::UpdateHitboxBvh()
 				node.set_bbox(bbox);
 			}
 		});
-		hitboxBvh->Refit();
 	});
 }
 

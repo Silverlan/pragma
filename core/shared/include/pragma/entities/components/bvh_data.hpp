@@ -55,7 +55,6 @@ namespace pragma::bvh {
 		virtual ~BvhTree();
 		Bvh bvh;
 
-		void Refit();
 		void InitializeBvh();
 		::bvh::v2::ThreadPool &GetThreadPool();
 	  protected:

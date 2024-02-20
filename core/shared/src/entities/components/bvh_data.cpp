@@ -281,9 +281,9 @@ bool pragma::bvh::MeshBvhTree::Raycast(const Vector3 &origin, const Vector3 &dir
 	auto ray = get_ray(origin, dir, minDist, maxDist);
 	bvh.intersect<false, use_robust_traversal>(ray, bvh.get_root().index, stack, [&](size_t begin, size_t end) {
 		for(size_t i = begin; i < end; ++i) {
-			size_t j = should_permute ? i : bvh.prim_ids[i];
-			if(auto hit = precomputed_tris[j].intersect(ray)) {
-				prim_id = i;
+			size_t j = bvh.prim_ids[i];
+			if(auto hit = precomputed_tris[i].intersect(ray)) {
+				prim_id = j;
 				std::tie(u, v) = *hit;
 			}
 		}

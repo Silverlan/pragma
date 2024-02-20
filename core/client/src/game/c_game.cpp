@@ -1599,9 +1599,9 @@ void CGame::DrawLine(const Vector3 &start, const Vector3 &end, const Color &colo
 void CGame::DrawBox(const Vector3 &origin, const Vector3 &start, const Vector3 &end, const EulerAngles &ang, const Color &colorOutline, const std::optional<Color> &fillColor, float duration)
 {
 	if(fillColor)
-		DebugRenderer::DrawBox(start, end, ang, *fillColor, colorOutline, duration);
+		DebugRenderer::DrawBox(origin, start, end, ang, *fillColor, colorOutline, duration);
 	else
-		DebugRenderer::DrawBox(start, end, ang, colorOutline, duration);
+		DebugRenderer::DrawBox(origin, start, end, ang, colorOutline, duration);
 }
 void CGame::DrawPlane(const Vector3 &n, float dist, const Color &color, float duration) { DebugRenderer::DrawPlane(n, dist, color, duration); }
 void CGame::DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration) { DebugRenderer::DrawMesh(meshVerts, color, colorOutline, duration); }

@@ -86,10 +86,12 @@ static bool calc_bone_mesh_info(pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInf
 	auto &verts = subMesh->GetVertices();
 	auto &vertWeights = subMesh->GetVertexWeights();
 	auto numVerts = verts.size();
+	if(vertWeights.size() != numVerts)
+		return false;
 
 	std::vector<uint32_t> usedTris;
 	usedTris.reserve(subMesh->GetTriangleCount());
-	subMesh->VisitIndices([&verts, &vertWeights , & usedTris, &hbMin, &hbMax, &pose, boneId](auto *indexDataSrc, uint32_t numIndicesSrc) {
+	subMesh->VisitIndices([&verts, &vertWeights, &usedTris, &hbMin, &hbMax, &pose, boneId](auto *indexDataSrc, uint32_t numIndicesSrc) {
 		for(auto i = decltype(numIndicesSrc) {0u}; i < numIndicesSrc; i += 3) {
 			auto idx0 = indexDataSrc[i];
 			auto idx1 = indexDataSrc[i + 1];

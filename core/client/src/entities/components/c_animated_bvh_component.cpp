@@ -238,7 +238,7 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force, const std::vector<boo
 	auto &pool = get_thread_pool();
 
 	// Prepare mesh data
-	constexpr uint32_t numVerticesPerBatch = 500;
+	constexpr uint32_t numVerticesPerBatch = 5'000;
 	uint32_t &numJobs = m_numJobs;
 	numJobs = 0;
 	size_t numIndices = 0;

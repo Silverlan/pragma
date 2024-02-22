@@ -18,6 +18,16 @@ namespace udm {
 namespace Lua {
 	class Interface;
 	namespace udm {
+		class DLLNETWORK LuaUdmArrayIterator {
+		  public:
+			LuaUdmArrayIterator(::udm::PropertyWrapper &prop);
+
+			::udm::ArrayIterator<::udm::LinkedPropertyWrapper> begin() { return m_property->begin(); }
+			::udm::ArrayIterator<::udm::LinkedPropertyWrapper> end() { return m_property->end(); }
+		  private:
+			::udm::PropertyWrapper *m_property = nullptr;
+		};
+
 		DLLNETWORK void register_library(Lua::Interface &lua);
 		DLLNETWORK void set_array_values(lua_State *l, ::udm::Array &a, luabind::tableT<void> t, uint32_t tIdx);
 		DLLNETWORK bool set_array_value(lua_State *l, ::udm::Array &a, int32_t idx, const luabind::object &o);

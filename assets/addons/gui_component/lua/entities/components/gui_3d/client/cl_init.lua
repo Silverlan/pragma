@@ -101,8 +101,8 @@ end
 function ents.GUI3D:GetGUIElement()
 	return self.m_pGui
 end
-function ents.GUI3D:SetIntersectionTestBvh(bvh)
-	self.m_intersectionTestBvh = bvh
+function ents.GUI3D:SetIntersectionHandler(intersectionHandlerC)
+	self.m_intersectionHandlerC = intersectionHandlerC
 end
 function ents.GUI3D:GetInterfaceMesh()
 	return self.m_interfaceMesh
@@ -206,14 +206,14 @@ function ents.GUI3D:CalcCursorPos(origin, dir)
 		return
 	end
 
-	if util.is_valid(self.m_intersectionTestBvh) then
-		local scale = self.m_intersectionTestBvh:GetEntity():GetScale()
+	if util.is_valid(self.m_intersectionHandlerC) then
+		local scale = self.m_intersectionHandlerC:GetEntity():GetScale()
 		if math.max(scale.x, scale.y, scale.z) > 0.0001 then
 			origin.x = origin.x / scale.x
 			origin.y = origin.y / scale.y
 			origin.z = origin.z / scale.z
 			local maxDist = 32768.0
-			local hitData = self.m_intersectionTestBvh:IntersectionTest(origin, dir, 0.0, maxDist)
+			local hitData = self.m_intersectionHandlerC:IntersectionTest(origin, dir, 0.0, maxDist)
 			if hitData ~= nil then
 				local uv = hitData:CalcHitUv()
 				uv.x = uv.x * p:GetWidth()

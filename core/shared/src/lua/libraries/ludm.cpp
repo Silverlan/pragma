@@ -491,6 +491,32 @@ namespace Lua::udm {
 	void register_types(Lua::Interface &lua, luabind::module_ &modUdm);
 };
 
+static bool compare_numeric_values(const Lua::udm_ng &ov0, const Lua::udm_ng &ov1, ::udm::Type type, double epsilon = 0.0001)
+{
+	if(::udm::is_numeric_type(type)) {
+		return ::udm::visit<true, false, false>(type, [&ov0, &ov1, epsilon](auto tag) {
+			using T = typename decltype(tag)::type;
+			return umath::abs(luabind::object_cast<T>(ov0) - luabind::object_cast<T>(ov1)) < epsilon;
+		});
+	}
+	return ::udm::visit<false, true, false>(type, [&ov0, &ov1, epsilon](auto tag) {
+		using T = typename decltype(tag)::type;
+		if constexpr(!std::is_same_v<T, ::udm::Nil> && !std::is_same_v<T, ::udm::Transform> && !std::is_same_v<T, ::udm::ScaledTransform>) {
+			constexpr auto type = ::udm::type_to_enum<T>();
+			auto n = ::udm::get_numeric_component_count(type);
+			auto *v0 = luabind::object_cast<T *>(ov0);
+			auto *v1 = luabind::object_cast<T *>(ov1);
+			for(auto i = decltype(n) {0u}; i < n; ++i) {
+				auto f0 = ::get_numeric_component<T>(*v0, i);
+				auto f1 = ::get_numeric_component<T>(*v1, i);
+				if(umath::abs(f1 - f0) >= epsilon)
+					return false;
+			}
+		}
+		return true;
+	});
+}
+
 void Lua::udm::register_library(Lua::Interface &lua)
 {
 	auto modUdm = luabind::module(lua.GetState(), "udm");
@@ -815,7 +841,12 @@ void Lua::udm::register_library(Lua::Interface &lua)
 				return ::udm::type_to_enum<lua_udm_underlying_numeric_type<T>>();
 			});
 		}),
-		luabind::def("is_same_element", &is_same_element)
+		luabind::def("is_same_element", &is_same_element),
+		luabind::def("compare_numeric_values",&compare_numeric_values),
+		luabind::def("compare_numeric_values",+[](const Lua::udm_ng &ov0, const Lua::udm_ng &ov1, ::udm::Type type) {
+			return compare_numeric_values(ov0,ov1,type);
+		})
+		// luabind::def("compare_numeric_values",&compare_numeric_values,luabind::default_parameter_policy<4,0.0001>{}) // Currently not supported by clang compiler
 	];
 
 	Lua::RegisterLibraryEnums(lua.GetState(), "udm",

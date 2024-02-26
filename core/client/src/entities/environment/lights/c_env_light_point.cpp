@@ -55,7 +55,8 @@ void CLightPointComponent::Initialize()
 		auto &sphere = pRenderComponent->GetUpdatedAbsoluteRenderSphere();
 		for(auto i = decltype(directions.size()) {0}; i < directions.size(); ++i) {
 			//auto &dir = directions[i];
-			if(umath::intersection::sphere_in_plane_mesh(sphere.pos - this->GetEntity().GetPosition(), sphere.radius, m_frustumPlanes.at(i), true) != umath::intersection::Intersect::Outside)
+			auto &plane = m_frustumPlanes.at(i);
+			if(umath::intersection::sphere_in_plane_mesh(sphere.pos - this->GetEntity().GetPosition(), sphere.radius, plane.begin(), plane.end(), true) != umath::intersection::Intersect::Outside)
 				shouldPassData.renderFlags |= 1 << i;
 			//if(pLightComponent->IsInCone(shouldPassData.entity,dir,ang) == true)
 			//	shouldPassData.renderFlags |= 1<<i;

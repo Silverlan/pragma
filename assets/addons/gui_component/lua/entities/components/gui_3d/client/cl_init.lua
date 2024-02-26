@@ -101,8 +101,8 @@ end
 function ents.GUI3D:GetGUIElement()
 	return self.m_pGui
 end
-function ents.GUI3D:SetIntersectionTestBvh(bvh)
-	self.m_intersectionTestBvh = bvh
+function ents.GUI3D:SetIntersectionHandler(intersectionHandlerC)
+	self.m_intersectionHandlerC = intersectionHandlerC
 end
 function ents.GUI3D:GetInterfaceMesh()
 	return self.m_interfaceMesh
@@ -206,14 +206,14 @@ function ents.GUI3D:CalcCursorPos(origin, dir)
 		return
 	end
 
-	if util.is_valid(self.m_intersectionTestBvh) then
-		local scale = self.m_intersectionTestBvh:GetEntity():GetScale()
+	if util.is_valid(self.m_intersectionHandlerC) then
+		local scale = self.m_intersectionHandlerC:GetEntity():GetScale()
 		if math.max(scale.x, scale.y, scale.z) > 0.0001 then
 			origin.x = origin.x / scale.x
 			origin.y = origin.y / scale.y
 			origin.z = origin.z / scale.z
 			local maxDist = 32768.0
-			local hitData = self.m_intersectionTestBvh:IntersectionTest(origin, dir, 0.0, maxDist)
+			local hitData = self.m_intersectionHandlerC:IntersectionTest(origin, dir, 0.0, maxDist)
 			if hitData ~= nil then
 				local uv = hitData:CalcHitUv()
 				uv.x = uv.x * p:GetWidth()
@@ -351,6 +351,12 @@ function ents.GUI3D:InitializeGUICallbacks()
 				if util.is_valid(self.m_pGui) == false then
 					return util.EVENT_REPLY_UNHANDLED
 				end
+
+				local renderC = self:GetEntityComponent(ents.COMPONENT_RENDER)
+				if renderC == nil or renderC:GetSceneRenderPass() == game.SCENE_RENDER_PASS_NONE then
+					return util.EVENT_REPLY_UNHANDLED
+				end
+
 				local bt
 				if action == input.ACTION_ATTACK then
 					bt = input.MOUSE_BUTTON_LEFT
@@ -379,15 +385,29 @@ function ents.GUI3D:InitializeGUICallbacks()
 		if util.is_valid(self.m_pGui) == false then
 			return
 		end
+
+		local renderC = self:GetEntityComponent(ents.COMPONENT_RENDER)
+		if renderC == nil or renderC:GetSceneRenderPass() == game.SCENE_RENDER_PASS_NONE then
+			return util.EVENT_REPLY_UNHANDLED
+		end
+
 		local pos = self:CalcCursorPos()
 		if pos ~= nil then
 			self.m_pGui:InjectScrollInput(pos, Vector2(x, y) * 10.0)
+			return false
 		end
-		return false
 	end)
 end
 function ents.GUI3D:InjectKeyboardInput(key, state)
-	log.info("Injecting keyboard input with key = " .. key .. ", state = " .. state .. " into 3D UI element...")
+	log.info(
+		"Injecting keyboard input with key = "
+			.. key
+			.. ", state = "
+			.. state
+			.. " into 3D UI element '"
+			.. tostring(self:GetEntity())
+			.. "'..."
+	)
 	local elFocus = gui.get_focused_element()
 	self.m_pGui:InjectKeyboardInput(key, state, self.m_keyMods)
 	-- We don't want the element focus to change to any of the 3D elements, so we'll restore the focus back
@@ -400,6 +420,17 @@ function ents.GUI3D:DoInjectMouseInput(bt, state, pos)
 	if pos == nil then
 		return util.EVENT_REPLY_UNHANDLED
 	end
+	log.info(
+		"Injecting mouse input with button = "
+			.. bt
+			.. ", state = "
+			.. state
+			.. ", pos = "
+			.. tostring(pos)
+			.. " into 3D UI element '"
+			.. tostring(self:GetEntity())
+			.. "'..."
+	)
 	local elFocus = gui.get_focused_element()
 	local res = self.m_pGui:InjectMouseInput(pos, bt, state)
 	if res == util.EVENT_REPLY_UNHANDLED then
@@ -413,15 +444,6 @@ function ents.GUI3D:DoInjectMouseInput(bt, state, pos)
 	return res
 end
 function ents.GUI3D:InjectMouseInput(bt, state, pos, useCursor)
-	log.info(
-		"Injecting mouse input with button = "
-			.. bt
-			.. ", state = "
-			.. state
-			.. ", pos = "
-			.. tostring(pos)
-			.. " into 3D UI element..."
-	)
 	if pos == nil then
 		local fGetCursorPos
 		if useCursor then

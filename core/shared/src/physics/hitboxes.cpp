@@ -73,7 +73,7 @@ void Model::GetHitboxBones(std::vector<uint32_t> &boneIds) const
 	for(auto &it : m_hitboxes)
 		boneIds.push_back(it.first);
 }
-void Model::GenerateHitboxes()
+bool Model::GenerateHitboxes()
 {
 	struct BoneBounds {
 		Vector3 min {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
@@ -115,12 +115,15 @@ void Model::GenerateHitboxes()
 		}
 	}
 
+	auto hitboxesAdded = false;
 	for(auto boneId = decltype(boneBounds.size()) {0u}; boneId < boneBounds.size(); ++boneId) {
 		auto &bounds = boneBounds[boneId];
 		if(bounds.min.x == std::numeric_limits<float>::lowest())
 			continue;
 		if((bounds.max.x - bounds.min.x) > 1.f && (bounds.max.y - bounds.min.y) > 1.f && (bounds.max.z - bounds.min.z) > 1.f) {
 			AddHitbox(boneId, HitGroup::Generic, bounds.min, bounds.max);
+			hitboxesAdded = true;
 		}
 	}
+	return hitboxesAdded;
 }

@@ -150,7 +150,7 @@ ModelSubMesh::ModelSubMesh()
 {
 }
 ModelSubMesh::ModelSubMesh(const ModelSubMesh &other)
-    : m_skinTextureIndex(other.m_skinTextureIndex), m_center(other.m_center), m_vertices(other.m_vertices), m_alphas(other.m_alphas), m_numAlphas(other.m_numAlphas), m_indexData(other.m_indexData), m_vertexWeights(other.m_vertexWeights),
+    : m_uuid {util::generate_uuid_v4()}, m_skinTextureIndex(other.m_skinTextureIndex), m_center(other.m_center), m_vertices(other.m_vertices), m_alphas(other.m_alphas), m_numAlphas(other.m_numAlphas), m_indexData(other.m_indexData), m_vertexWeights(other.m_vertexWeights),
       m_extendedVertexWeights(other.m_extendedVertexWeights), m_min(other.m_min), m_max(other.m_max), m_pose {other.m_pose}, m_uvSets {other.m_uvSets}, m_geometryType {other.m_geometryType}, m_referenceId {other.m_referenceId}, m_indexType {other.m_indexType}, m_name {other.m_name}
 {
 	// Copy extension data
@@ -870,8 +870,10 @@ void ModelSubMesh::RemoveVertex(uint64_t idx)
 		m_extendedVertexWeights->erase(m_extendedVertexWeights->begin() + idx);
 }
 
-std::shared_ptr<ModelSubMesh> ModelSubMesh::Simplify(uint32_t targetVertexCount, double aggressiveness) const
+std::shared_ptr<ModelSubMesh> ModelSubMesh::Simplify(uint32_t targetVertexCount, double aggressiveness, std::vector<uint64_t> *optOutNewVertexIndexToOriginalIndex) const
 {
+	Simplify::newVertexIndexToOriginalIndex.clear();
+
 	Simplify::vertices.clear();
 	auto &verts = GetVertices();
 	Simplify::vertices.reserve(verts.size());
@@ -901,7 +903,7 @@ std::shared_ptr<ModelSubMesh> ModelSubMesh::Simplify(uint32_t targetVertexCount,
 		}
 	});
 
-	Simplify::simplify_mesh(targetVertexCount, aggressiveness, true);
+	Simplify::simplify_mesh(targetVertexCount, aggressiveness, false);
 
 	auto cpy = Copy(true);
 	auto &newVerts = cpy->GetVertices();
@@ -929,8 +931,22 @@ std::shared_ptr<ModelSubMesh> ModelSubMesh::Simplify(uint32_t targetVertexCount,
 
 	cpy->GenerateNormals();
 
+	auto &cpyVertWeights = cpy->GetVertexWeights();
+	auto &srcVertWeights = GetVertexWeights();
+	if(!srcVertWeights.empty()) {
+		cpyVertWeights.resize(newVerts.size());
+		for(size_t idxNew = 0; idxNew < Simplify::newVertexIndexToOriginalIndex.size(); ++idxNew) {
+			auto idxOld = Simplify::newVertexIndexToOriginalIndex[idxNew];
+			cpyVertWeights[idxNew] = srcVertWeights[idxOld];
+		}
+	}
+
 	Simplify::vertices.clear();
 	Simplify::triangles.clear();
+	if(optOutNewVertexIndexToOriginalIndex) {
+		*optOutNewVertexIndexToOriginalIndex = std::move(Simplify::newVertexIndexToOriginalIndex);
+		Simplify::newVertexIndexToOriginalIndex.clear();
+	}
 	return cpy;
 }
 

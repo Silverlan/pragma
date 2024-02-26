@@ -14,6 +14,7 @@
 
 namespace pragma {
 	class BaseStaticBvhUserComponent;
+	struct HitInfo;
 	class DLLNETWORK BaseStaticBvhCacheComponent : public BaseBvhComponent {
 	  public:
 		virtual void Initialize() override;
@@ -27,14 +28,14 @@ namespace pragma {
 		void AddEntity(BaseEntity &ent);
 		void RemoveEntity(BaseEntity &ent, bool removeFinal = true);
 
-		virtual bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, BvhHitInfo &outHitInfo) const override;
+		virtual bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, HitInfo &outHitInfo) const override;
 		using BaseBvhComponent::IntersectionTest;
 
 		virtual bool IsStaticBvh() const override { return true; }
 	  protected:
 		struct BvhPendingWorkerResult {
 			std::queue<std::function<void()>> callOnComplete;
-			std::shared_ptr<pragma::BvhData> bvhData;
+			std::shared_ptr<pragma::bvh::MeshBvhTree> bvhData;
 			std::atomic<bool> complete = false;
 		};
 

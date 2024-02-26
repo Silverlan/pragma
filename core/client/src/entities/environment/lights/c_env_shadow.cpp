@@ -395,7 +395,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 				  }
 
 				  auto &planes = lightPointC->GetFrustumPlanes(static_cast<CubeMapSide>(i));
-				  auto fShouldCull = [&planes](const Vector3 &min, const Vector3 &max) -> bool { return umath::intersection::aabb_in_plane_mesh(min, max, planes) == umath::intersection::Intersect::Outside; };
+				  auto fShouldCull = [&planes](const Vector3 &min, const Vector3 &max) -> bool { return umath::intersection::aabb_in_plane_mesh(min, max, planes.begin(), planes.end()) == umath::intersection::Intersect::Outside; };
 				  for(auto it = renderQueue->queue.begin(); it != renderQueue->queue.end();) {
 					  auto &item = *it;
 					  auto *ent = static_cast<CBaseEntity *>(c_game->GetEntityByLocalIndex(item.entity));

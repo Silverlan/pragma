@@ -12,6 +12,7 @@
 #include "pragma/entities/components/c_static_bvh_cache_component.hpp"
 #include "pragma/entities/components/c_bvh_component.hpp"
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
+#include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/model/c_modelmesh.h"
@@ -375,12 +376,12 @@ bool CDecalComponent::ApplyDecal()
 
 	// c_game->DrawBox(projectorAABB.first,projectorAABB.second,{},Color::Red,12.f);
 
-	pragma::BvhIntersectionInfo bvhIntersectInfo {};
+	pragma::PrimitiveIntersectionInfo bvhIntersectInfo {};
 	std::vector<DecalProjector::MeshData> meshDatas {};
 	std::unordered_set<ModelSubMesh *> coveredMeshes;
 	auto findIntersectionMeshes = [&projectorAABB, &bvhIntersectInfo, &meshDatas, &coveredMeshes](const pragma::BaseBvhComponent &bvhC) {
 		if(!bvhC.IntersectionTestAabb(projectorAABB.first, projectorAABB.second, bvhIntersectInfo)) {
-			bvhIntersectInfo.Clear();
+			bvhIntersectInfo.primitives.clear();
 			return;
 		}
 		for(auto idx : bvhIntersectInfo.primitives) {
@@ -397,7 +398,7 @@ bool CDecalComponent::ApplyDecal()
 			meshData.pose = meshInfo->entity->GetPose();
 			meshData.subMeshes.push_back(meshInfo->mesh.get());
 		}
-		bvhIntersectInfo.Clear();
+		bvhIntersectInfo.primitives.clear();
 	};
 
 	{

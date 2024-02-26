@@ -17,6 +17,7 @@ endif()
 
 add_include_dir(libogg_build)
 add_include_dir(bzip2)
+add_include_dir(bvh)
 
 add_external_library(servermanager)
 add_external_library(clientmanager)

@@ -739,7 +739,7 @@ if with_pfm:
         )
         add_pragma_module(
             name="pr_unirender",
-            commitSha="c41a3215eb6b707f491c2efc58dc2d616895a3cf",
+            commitSha="87c5720d75cef315eb6e863ebf375e85805a1aca",
             repositoryUrl="https://github.com/Slaweknowy/pr_cycles.git"
         )
         add_pragma_module(
@@ -998,7 +998,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","fb881fe5604016b7a3225124bbdeb4a99c545e4c")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","da3d2070dc8e8a941e781e116c02c65d24a776de")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","56d46dacb398fa7540e794359eaf1081c9df1edd")
 
 	if with_vr:

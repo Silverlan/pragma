@@ -14,6 +14,7 @@
 #include "pragma/entities/components/c_static_bvh_user_component.hpp"
 #include "pragma/entities/components/c_optical_camera_component.hpp"
 #include "pragma/entities/components/c_motion_blur_data_component.hpp"
+#include "pragma/entities/components/c_hitbox_bvh_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_fog_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_dof_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_bloom_component.hpp"
@@ -22,12 +23,14 @@
 #include "pragma/entities/components/renderers/c_renderer_pp_fxaa_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_motion_blur_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_pp_volumetric_component.hpp"
+#include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/components/c_debug_hitbox_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>
+#include <pragma/lua/lua_util_class.hpp>
 // --template-include-location
 
 void RegisterLuaEntityComponents2_cl(lua_State *l, luabind::module_ &entsMod)
@@ -55,7 +58,34 @@ void RegisterLuaEntityComponents2_cl(lua_State *l, luabind::module_ &entsMod)
 	auto defOpticalCamera = pragma::lua::create_entity_component_class<pragma::COpticalCameraComponent, pragma::BaseEntityComponent>("OpticalCameraComponent");
 	entsMod[defOpticalCamera];
 
+	auto defHitboxBvh = pragma::lua::create_entity_component_class<pragma::CHitboxBvhComponent, pragma::BaseEntityComponent>("HitboxBvhComponent");
+
+	auto defDebugDrawInfo = luabind::class_<pragma::bvh::DebugDrawInfo>("DebugDrawInfo");
+	defDebugDrawInfo.add_static_constant("FLAG_NONE", umath::to_integral(pragma::bvh::DebugDrawInfo::Flags::None));
+	defDebugDrawInfo.add_static_constant("FLAG_DRAW_TRAVERSED_NODES_BIT", umath::to_integral(pragma::bvh::DebugDrawInfo::Flags::DrawTraversedNodesBit));
+	defDebugDrawInfo.add_static_constant("FLAG_DRAW_TRAVERSED_LEAVES_BIT", umath::to_integral(pragma::bvh::DebugDrawInfo::Flags::DrawTraversedLeavesBit));
+	defDebugDrawInfo.add_static_constant("FLAG_DRAW_HIT_LEAVES_BIT", umath::to_integral(pragma::bvh::DebugDrawInfo::Flags::DrawHitLeavesBit));
+	defDebugDrawInfo.add_static_constant("FLAG_DRAW_TRAVERSED_MESHES_BIT", umath::to_integral(pragma::bvh::DebugDrawInfo::Flags::DrawTraversedMeshesBit));
+	defDebugDrawInfo.add_static_constant("FLAG_DRAW_HIT_MESHES_BIT", umath::to_integral(pragma::bvh::DebugDrawInfo::Flags::DrawHitMeshesBit));
+	defDebugDrawInfo.def(luabind::constructor<>());
+	defDebugDrawInfo.def_readwrite("flags", &pragma::bvh::DebugDrawInfo::flags);
+	defDebugDrawInfo.def_readwrite("pose", &pragma::bvh::DebugDrawInfo::basePose);
+	defDebugDrawInfo.def_readwrite("duration", &pragma::bvh::DebugDrawInfo::duration);
+	defHitboxBvh.scope[defDebugDrawInfo];
+
+	defHitboxBvh.def("DebugDrawHitboxMeshes", &pragma::CHitboxBvhComponent::DebugDrawHitboxMeshes);
+	defHitboxBvh.def(
+	  "IntersectionTest", +[](pragma::CHitboxBvhComponent &bvhC, const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, const pragma::bvh::DebugDrawInfo &debugDrawInfo) -> std::optional<float> {
+		  pragma::HitInfo hitInfo {};
+		  if(!bvhC.IntersectionTest(origin, dir, minDist, maxDist, hitInfo, &debugDrawInfo))
+			  return {};
+		  return hitInfo.distance;
+	  });
+
+	entsMod[defHitboxBvh];
+
 	auto defDebugHitbox = pragma::lua::create_entity_component_class<pragma::CDebugHitboxComponent, pragma::BaseEntityComponent>("DebugHitboxComponent");
+	defDebugHitbox.def("SetHitboxColor", &pragma::CDebugHitboxComponent::SetHitboxColor);
 	entsMod[defDebugHitbox];
 
 	auto defPpFog = pragma::lua::create_entity_component_class<pragma::CRendererPpFogComponent, pragma::BaseEntityComponent>("RendererPpFogComponent");

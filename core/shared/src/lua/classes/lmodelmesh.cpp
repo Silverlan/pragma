@@ -262,22 +262,44 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("GetGeometryType", static_cast<void (*)(lua_State *, ::ModelSubMesh &)>([](lua_State *l, ::ModelSubMesh &mesh) { Lua::PushInt(l, umath::to_integral(mesh.GetGeometryType())); }));
 	classDef.def("SetGeometryType", static_cast<void (*)(lua_State *, ::ModelSubMesh &, uint32_t)>([](lua_State *l, ::ModelSubMesh &mesh, uint32_t geometryType) { mesh.SetGeometryType(static_cast<::ModelSubMesh::GeometryType>(geometryType)); }));
 	classDef.def("AddLine", static_cast<void (*)(lua_State *, ::ModelSubMesh &, uint32_t, uint32_t)>([](lua_State *l, ::ModelSubMesh &mesh, uint32_t idx0, uint32_t idx1) { mesh.AddLine(idx0, idx1); }));
-
-	classDef.def("Simplify", &::ModelSubMesh::Simplify);
-#ifdef _WIN32
-	classDef.def("Simplify", &::ModelSubMesh::Simplify, luabind::default_parameter_policy<3, double {5.0}> {});
-#else
-	      classDef.def(
-      "Simplify", +[](::ModelSubMesh &subMesh, uint32_t targetVertexCount, double aggressiveness) -> std::tuple<std::shared_ptr<::ModelSubMesh>> {
-          auto simplifiedMesh = subMesh.Simplify(targetVertexCount, aggressiveness);
-          return std::tuple<std::shared_ptr<::ModelSubMesh>> {simplifiedMesh};
-      });
-    classDef.def(
-      "Simplify", +[](::ModelSubMesh &subMesh, uint32_t targetVertexCount) -> std::tuple<std::shared_ptr<::ModelSubMesh>> {
-          auto simplifiedMesh = subMesh.Simplify(targetVertexCount, 5.0);
-          return std::tuple<std::shared_ptr<::ModelSubMesh>> {simplifiedMesh};
-      });
-#endif
+	classDef.def("AddPoint", static_cast<void (*)(lua_State *, ::ModelSubMesh &, uint32_t)>([](lua_State *l, ::ModelSubMesh &mesh, uint32_t idx) { mesh.AddPoint(idx); }));
+	classDef.def("GetPose", static_cast<void (*)(lua_State *, ::ModelSubMesh &)>([](lua_State *l, ::ModelSubMesh &mesh) { Lua::Push<umath::ScaledTransform>(l, mesh.GetPose()); }));
+	classDef.def("SetPose", static_cast<void (*)(lua_State *, ::ModelSubMesh &, const umath::ScaledTransform &)>([](lua_State *l, ::ModelSubMesh &mesh, const umath::ScaledTransform &pose) { mesh.SetPose(pose); }));
+	classDef.def("Transform", static_cast<void (*)(lua_State *, ::ModelSubMesh &, const umath::ScaledTransform &)>([](lua_State *l, ::ModelSubMesh &mesh, const umath::ScaledTransform &pose) { mesh.Transform(pose); }));
+	classDef.def("ClearVertices", static_cast<void (*)(lua_State *, ::ModelSubMesh &)>([](lua_State *l, ::ModelSubMesh &mesh) { mesh.GetVertices().clear(); }));
+	classDef.def("ClearIndices", static_cast<void (*)(lua_State *, ::ModelSubMesh &)>([](lua_State *l, ::ModelSubMesh &mesh) { mesh.GetIndexData().clear(); }));
+	classDef.def("ClearAlphas", static_cast<void (*)(lua_State *, ::ModelSubMesh &)>([](lua_State *l, ::ModelSubMesh &mesh) { mesh.GetAlphas().clear(); }));
+	classDef.def("ClearUVSets", static_cast<void (*)(lua_State *, ::ModelSubMesh &)>([](lua_State *l, ::ModelSubMesh &mesh) { mesh.GetUVSets().clear(); }));
+	classDef.def("ClearVertexWeights", static_cast<void (*)(lua_State *, ::ModelSubMesh &)>([](lua_State *l, ::ModelSubMesh &mesh) { mesh.GetVertexWeights().clear(); }));
+	classDef.def("ClearExtendedVertexWeights", static_cast<void (*)(lua_State *, ::ModelSubMesh &)>([](lua_State *l, ::ModelSubMesh &mesh) { mesh.GetExtendedVertexWeights().clear(); }));
+	classDef.def("ClearVertexData", static_cast<void (*)(lua_State *, ::ModelSubMesh &)>([](lua_State *l, ::ModelSubMesh &mesh) {
+		mesh.GetIndexData().clear();
+		mesh.GetVertices().clear();
+		mesh.GetAlphas().clear();
+		mesh.GetUVSets().clear();
+		mesh.GetVertexWeights().clear();
+		mesh.GetExtendedVertexWeights().clear();
+	}));
+	classDef.def("HasUVSet", static_cast<void (*)(lua_State *, ::ModelSubMesh &, const std::string &)>([](lua_State *l, ::ModelSubMesh &mesh, const std::string &uvSetName) {
+		auto *uvSet = mesh.GetUVSet(uvSetName);
+		Lua::PushBool(l, uvSet ? true : false);
+	}));
+	classDef.def("ReserveIndices", &::ModelSubMesh::ReserveIndices);
+	classDef.def("ReserveVertices", static_cast<void (*)(lua_State *, ::ModelSubMesh &, uint32_t)>([](lua_State *l, ::ModelSubMesh &mesh, uint32_t numVerts) { mesh.GetVertices().reserve(numVerts); }));
+	classDef.def("ReserveTriangles", static_cast<void (*)(lua_State *, ::ModelSubMesh &, uint32_t)>([](lua_State *l, ::ModelSubMesh &mesh, uint32_t numTris) { mesh.ReserveIndices(numTris * 3); }));
+	classDef.def("ReserveVertexWeights", static_cast<void (*)(lua_State *, ::ModelSubMesh &, uint32_t)>([](lua_State *l, ::ModelSubMesh &mesh, uint32_t numVerts) { mesh.GetVertexWeights().reserve(numVerts); }));
+	classDef.def(
+	  "Simplify", +[](::ModelSubMesh &subMesh, uint32_t targetVertexCount, double aggressiveness) -> std::tuple<std::shared_ptr<::ModelSubMesh>, std::vector<uint64_t>> {
+		  std::vector<uint64_t> vertexMapping;
+		  auto simplifiedMesh = subMesh.Simplify(targetVertexCount, aggressiveness, &vertexMapping);
+		  return std::tuple<std::shared_ptr<::ModelSubMesh>, std::vector<uint64_t>> {simplifiedMesh, std::move(vertexMapping)};
+	  });
+	classDef.def(
+	  "Simplify", +[](::ModelSubMesh &subMesh, uint32_t targetVertexCount) -> std::tuple<std::shared_ptr<::ModelSubMesh>, std::vector<uint64_t>> {
+		  std::vector<uint64_t> vertexMapping;
+		  auto simplifiedMesh = subMesh.Simplify(targetVertexCount, 5.0, &vertexMapping);
+		  return std::tuple<std::shared_ptr<::ModelSubMesh>, std::vector<uint64_t>> {simplifiedMesh, std::move(vertexMapping)};
+	  });
 	classDef.def(
 	  "Save", +[](lua_State *l, ::ModelSubMesh &mesh, udm::AssetData &assetData) {
 		  auto *nw = engine->GetNetworkState(l);

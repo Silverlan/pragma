@@ -17,8 +17,16 @@ function Component:UpdateDragScrolling()
 			return
 		end
 		self.m_dragScrollingCursorTracker:Update(newPos)
-		if self.m_dragScrollingCursorTracker:HasExceededMoveThreshold(60) then
+		if self.m_dragScrollingCursorTracker:HasExceededMoveThreshold(60, math.AXIS_Y) then
 			self:StartDragScrolling()
+		elseif self.m_dragScrollingCursorTracker:HasExceededMoveThreshold(60, math.AXIS_X) then
+			-- If the user has dragged the mouse horizontally, we'll assume they want an UI input.
+			-- We need to do this, otherwise interacting with sliders would not be possible.
+			-- This isn't ideal, but other solutions would require changes to the GUI system.
+			local bt = self.m_dragScrollingButton
+			local pos = self.m_dragGetCursorPos()
+			self:StopDragScrolling()
+			self:DoInjectMouseInput(bt, input.STATE_PRESS, pos)
 		end
 	end
 	if self.m_lastDragCursorPos ~= nil then
@@ -51,7 +59,7 @@ function Component:HandleDragScrollingMouseInput(bt, state, fGetCursorPos)
 		return util.EVENT_REPLY_HANDLED
 	end
 	if state == input.STATE_PRESS and self:IsDragScrollingEnabled() then
-		return self:InitDragScrollingMode(fGetCursorPos) and util.EVENT_REPLY_HANDLED or util.EVENT_REPLY_UNHANDLED
+		return self:InitDragScrollingMode(bt, fGetCursorPos) and util.EVENT_REPLY_HANDLED or util.EVENT_REPLY_UNHANDLED
 	end
 	if state == input.STATE_RELEASE and self.m_dragScrollingCursorTracker ~= nil then
 		self.m_dragScrollingCursorTracker = nil
@@ -60,11 +68,12 @@ function Component:HandleDragScrollingMouseInput(bt, state, fGetCursorPos)
 	end
 	return util.EVENT_REPLY_UNHANDLED
 end
-function Component:InitDragScrollingMode(fGetCursorPos)
+function Component:InitDragScrollingMode(bt, fGetCursorPos)
 	local pos = fGetCursorPos()
 	if pos == nil then
 		return false
 	end
+	self.m_dragScrollingButton = bt
 	self.m_dragScrollingCursorTracker = gui.CursorTracker(pos)
 	self.m_dragGetCursorPos = fGetCursorPos
 	return true
@@ -79,6 +88,7 @@ function Component:StartDragScrolling()
 	self.m_lastDragCursorPos = fDragGetCursorPos()
 end
 function Component:StopDragScrolling()
+	self.m_dragScrollingButton = nil
 	self.m_lastDragCursorPos = nil
 	self.m_dragScrollingCursorTracker = nil
 	self.m_dragGetCursorPos = nil

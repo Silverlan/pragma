@@ -10,6 +10,7 @@
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
+#include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/model/modelmanager.h"
@@ -403,8 +404,22 @@ uint32_t BaseModelComponent::GetHitboxCount() const
 		return 0;
 	return mdl.get()->GetHitboxCount();
 }
+void BaseModelComponent::OnEntityComponentAdded(BaseEntityComponent &component)
+{
+	BaseEntityComponent::OnEntityComponentAdded(component);
+	if(typeid(component) == typeid(IntersectionHandlerComponent))
+		m_intersectionHandlerComponent = static_cast<IntersectionHandlerComponent *>(&component);
+}
+void BaseModelComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
+{
+	BaseEntityComponent::OnEntityComponentRemoved(component);
+	if(typeid(component) == typeid(IntersectionHandlerComponent))
+		m_intersectionHandlerComponent = nullptr;
+}
 const BaseBvhComponent *BaseModelComponent::GetBvhComponent() const { return const_cast<BaseModelComponent *>(this)->GetBvhComponent(); }
 BaseBvhComponent *BaseModelComponent::GetBvhComponent() { return m_bvhComponent; }
+const IntersectionHandlerComponent *BaseModelComponent::GetIntersectionHandlerComponent() const { return const_cast<BaseModelComponent *>(this)->GetIntersectionHandlerComponent(); }
+IntersectionHandlerComponent *BaseModelComponent::GetIntersectionHandlerComponent() { return m_intersectionHandlerComponent; }
 bool BaseModelComponent::GetHitboxBounds(uint32_t boneId, Vector3 &min, Vector3 &max, Vector3 &origin, Quat &rot, umath::CoordinateSpace space) const
 {
 	if(HasModel() == false) {

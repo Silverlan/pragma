@@ -510,7 +510,7 @@ bool CHC::InsideViewFrustum(CHCNode *cNode)
 {
 	if(cvCulling->GetInt() == 0)
 		return true;
-	return umath::intersection::aabb_in_plane_mesh(cNode->GetMin(), cNode->GetMax(), m_frustumPlanes) != umath::intersection::Intersect::Outside;
+	return umath::intersection::aabb_in_plane_mesh(cNode->GetMin(), cNode->GetMax(), m_frustumPlanes.begin(), m_frustumPlanes.end()) != umath::intersection::Intersect::Outside;
 }
 
 bool CHC::WasVisible(CHCNode *cNode) { return (cNode->IsVisible() && (cNode->GetLastVisited() == (m_frameID - 1))) ? true : false; }

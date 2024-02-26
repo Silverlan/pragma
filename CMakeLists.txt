@@ -1,5 +1,6 @@
-cmake_minimum_required(VERSION 3.13) # 3.11 for GENERATOR_IS_MULTI_CONFIG and INTERFACE items on IMPORTED targets
+cmake_minimum_required(VERSION 3.15) # 3.11 for GENERATOR_IS_MULTI_CONFIG and INTERFACE items on IMPORTED targets
 #3.13 for IMPORTED_TARGET GLOBAL for pkg_check_modules
+#3.15 for MSVC_RUNTIME_LIBRARY
 project(pragma)
 
 option(CONFIG_BUILD_WITH_VTUNE_SUPPORT "Build with VTune profiler support?" OFF)
@@ -8,9 +9,24 @@ if(${CONFIG_BUILD_WITH_VTUNE_SUPPORT})
     add_definitions(-DPRAGMA_ENABLE_VTUNE_PROFILING)
 endif()
 
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+if(LINUX)
+	set(CMAKE_CXX_DEBUG_FLAGS "${CMAKE_CXX_DEBUG_FLAGS} -Og -g")
+endif()
+
 #set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE CACHE INTERNAL "" FORCE)
 #set_target_properties(freetype PROPERTIES CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE)
-set(CONFIG_BUILD_TYPE "$<CONFIG>" CACHE STRING "Build Type" FORCE)
+
+#TODO: get "Ninja Multi-Config to work"
+get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(is_multi_config)
+	set(CONFIG_BUILD_TYPE "$<CONFIG>" CACHE STRING "Build Type" FORCE)
+else()
+	set(CONFIG_BUILD_TYPE "Debug" CACHE STRING "Build Type" FORCE)
+	set(CMAKE_BUILD_TYPE "${CONFIG_BUILD_TYPE}")
+endif()
+
+
 #set_property(CACHE CONFIG_BUILD_TYPE PROPERTY STRINGS RelWithDebInfo Release Debug)
 
 set(CACHE CMAKE_CONFIGURATION_TYPES PROPERTY STRING "RelWithDebInfo;Release;Debug")
@@ -22,7 +38,6 @@ endif()
 
 #set(CMAKE_BUILD_TYPE ${CONFIG_BUILD_TYPE} CACHE STRING "" FORCE)
 
-get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(is_multi_config)
 	set(BINARY_PRAGMA_DIR ${CONFIG_BUILD_TYPE} CACHE INTERNAL "" FORCE)
 else()
@@ -846,6 +861,7 @@ target_include_directories(vorbis PUBLIC "${DEPENDENCY_LIBOGG_BUILD_INCLUDE}")
 #
 
 # zlib
+
 register_third_party_library(zlib)
 target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 target_include_directories(zlibstatic PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
@@ -862,6 +878,7 @@ set(ZLIB_INCLUDE_DIR ${DEPENDENCY_ZLIB_INCLUDE} CACHE STRING "" FORCE)
 set(ZLIB_LIBRARY "$<TARGET_FILE:zlib>" CACHE STRING "" FORCE)
 add_library(ZLIB::ZLIB ALIAS zlib) #for libzip just ahead.
 set(ZLIB_LINK_LIBRARY_NAME "ZLIB::ZLIB")
+
 #
 
 # libzip

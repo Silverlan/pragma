@@ -4,8 +4,7 @@ lib_dir="$root_dir/lib"
 
 patch_library() {
     if [ -e $1 ]; then
-	    patchelf --force-rpath --set-rpath '$ORIGIN' $1;
-	    patchelf --force-rpath --add-rpath '$ORIGIN/lib' $1
+	    patchelf --set-rpath '$ORIGIN:$ORIGIN/lib' $1;
     fi;
 }
 
@@ -15,8 +14,8 @@ patch_module() {
     if [ -e $1 ]; then
         #https://stackoverflow.com/a/28523143
         relative_path=$(realpath --relative-to="$(dirname "$1")" "$lib_dir")
-	    patchelf --force-rpath --set-rpath '$ORIGIN' $1;
-	    patchelf --force-rpath --add-rpath "\$ORIGIN/$relative_path" $1
+	    patchelf --set-rpath '$ORIGIN' $1;
+	    patchelf --add-rpath "\$ORIGIN/$relative_path" $1
     fi;
 }
 

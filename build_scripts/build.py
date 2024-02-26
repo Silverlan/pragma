@@ -728,13 +728,13 @@ if with_pfm:
         )
         add_pragma_module(
             name="pr_dmx",
-            commitSha="ce90ad2",
-            repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
+            commitSha="0b48a3701bc69ba74f6b781d1e53e8bdedaf2c27",
+            repositoryUrl="https://github.com/Slaweknowy/pr_dmx.git"
         )
     if with_all_pfm_modules:
         add_pragma_module(
             name="pr_chromium",
-            commitSha="60175334879209744da26b337e49a53290f13686",
+            commitSha="7d03a7af089c926fb228da6a5f9ebd2b4508e184",
             repositoryUrl="https://github.com/SlawekNowy/pr_chromium.git"
         )
         add_pragma_module(
@@ -749,8 +749,8 @@ if with_pfm:
         )
         add_pragma_module(
             name="pr_dmx",
-            commitSha="ce90ad2",
-            repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
+            commitSha="0b48a3701bc69ba74f6b781d1e53e8bdedaf2c27",
+            repositoryUrl="https://github.com/Slaweknowy/pr_dmx.git"
         )
         add_pragma_module(
             name="pr_xatlas",

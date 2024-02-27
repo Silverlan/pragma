@@ -660,7 +660,7 @@ def execbuildscript(filepath):
 # Register modules that were added using the --module argument
 for module in modules:
 	os.chdir(root +"/modules")
-	parts = module.split(":")
+	parts = re.split(r':(?!\/\/)', module)
 	moduleArgName = parts[0]
 	repositoryUrl = None
 	skipBuildTarget = False

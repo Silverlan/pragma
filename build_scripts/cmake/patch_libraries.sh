@@ -20,15 +20,23 @@ patch_module() {
 }
 
 
-#This will iterate over all encountered SO and executables of ELF. The CUDA kernels are thankfully ommitted. See https://unix.stackexchange.com/a/699959.
-for f in $(find "$1/lib" -type f -executable -exec bash -c "[[ \"\$(head -c 4 -- \"\${1}\")\" == \$'\\x7FELF' ]]" -- \{\} \; -print); do
+#This will iterate over all encountered SO and executables of ELF. See https://unix.stackexchange.com/a/699959.
+
+# Some ELFs are not marked as executables. That is fine. We now account for that too.
+for f in $(find "$root_dir/lib" -type f -exec bash -c "[[ \"\$(head -c 4 -- \"\${1}\")\" == \$'\\x7FELF' ]]" -- \{\} \; -print 2> /dev/null); do
     echo "Patching $f ..."
     patch_library "$f"
 done
 
-for f in $(find "$1/modules" -type f -executable -exec bash -c "[[ \"\$(head -c 4 -- \"\${1}\")\" == \$'\\x7FELF' ]]" -- \{\} \; -print); do
+
+for f in $(find "$root_dir/modules" -type f -exec bash -c "[[ \"\$(head -c 4 -- \"\${1}\")\" == \$'\\x7FELF' ]]" -- \{\} \; -print 2> /dev/null ); do
     if [[ "$f" == *"libtbb"* ]]; then
         # skip libtbb otherwise we will corrupt it.
+        echo "Skipped $f..."
+        continue
+    fi;
+    if [[ "$f" == *".cubin" ]]; then
+        # Cubins are compiled via nvcc, skip those too.
         echo "Skipped $f..."
         continue
     fi;
@@ -37,7 +45,7 @@ for f in $(find "$1/modules" -type f -executable -exec bash -c "[[ \"\$(head -c 
 done
 
 
-for f in $(find $1 -maxdepth 1 -type f -executable -exec bash -c "[[ \"\$(head -c 4 -- \"\${1}\")\" == \$'\\x7FELF' ]]" -- \{\} \; -print); do
+for f in $(find $root_dir -maxdepth 1 -type f -exec bash -c "[[ \"\$(head -c 4 -- \"\${1}\")\" == \$'\\x7FELF' ]]" -- \{\} \; -print 2> /dev/null); do
     echo "Patching $f ..."
     patch_library "$f"
 done

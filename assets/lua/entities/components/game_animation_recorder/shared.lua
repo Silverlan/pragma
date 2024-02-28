@@ -12,7 +12,7 @@ function Component:Initialize()
 	BaseEntityComponent.Initialize(self)
 
 	self.m_recordEntityList = {}
-	self.m_numRecordedFrames = 0
+	self.m_entityRecordIndices = {}
 end
 
 function Component:OnRemove()
@@ -21,6 +21,8 @@ end
 
 function Component:Reset()
 	self.m_recordEntityList = {}
+	self.m_entityRecordIndices = {}
+	self.m_numRecordedFrames = 0
 end
 
 function Component:GetRecordedFrameCount()
@@ -44,10 +46,31 @@ function Component:AddEntity(ent, properties)
 	properties = properties or {
 		["transform"] = { "position", "rotation" },
 	}
+	if self.m_entityRecordIndices[ent] ~= nil then
+		assert(not self.m_recording)
+		local record = self.m_recordEntityList[self.m_entityRecordIndices[ent]]
+		for componentName, componentProps in pairs(properties) do
+			if record.properties[componentName] == nil then
+				record.properties[componentName] = componentProps
+			else
+				local propMap = {}
+				for _, prop in ipairs(record.properties[componentName]) do
+					propMap[prop] = true
+				end
+				for _, prop in ipairs(componentProps) do
+					if propMap[prop] == nil then
+						table.insert(record.properties[componentName], prop)
+					end
+				end
+			end
+		end
+		return
+	end
 	table.insert(self.m_recordEntityList, {
 		entity = ent,
 		properties = properties,
 	})
+	self.m_entityRecordIndices[ent] = #self.m_recordEntityList
 	if self.m_recording == true then
 		self:InitializeChannels(self.m_recordEntityList[#self.m_recordEntityList])
 	end
@@ -109,9 +132,13 @@ function Component:RecordEntity(channelName, time, entityInfo)
 					local i = channelInfo.size
 					local addValue = true
 					if i >= 2 then
+						local valueType = channelInfo.channel:GetValueType()
 						local v0 = channelInfo.channel:GetValue(i - 2)
 						local v1 = channelInfo.channel:GetValue(i - 1)
-						if value == v0 and value == v1 then
+						if
+							udm.compare_numeric_values(value, v0, valueType)
+							and udm.compare_numeric_values(value, v1, valueType)
+						then
 							-- Value hasn't changed, just update the time from the last entry
 							channelInfo.channel:SetTime(i - 1, time)
 							addValue = false

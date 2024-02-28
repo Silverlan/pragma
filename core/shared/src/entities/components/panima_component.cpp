@@ -17,6 +17,7 @@
 #include "pragma/lua/l_entity_handles.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/lua/lua_call.hpp"
+#include "pragma/debug/intel_vtune.hpp"
 #include <sharedutils/util_uri.hpp>
 #include <panima/animation_manager.hpp>
 #include <panima/channel.hpp>
@@ -212,7 +213,15 @@ void PanimaComponent::DebugPrint()
 	Con::cout << "Animation info: \n" << ss.str() << Con::endl;
 }
 
-void PanimaComponent::UpdateAnimationChannelSubmitters() { InitializeAnimationChannelValueSubmitters(); }
+void PanimaComponent::UpdateAnimationChannelSubmitters() {
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().BeginTask("panima_update_channel_values");
+#endif
+	InitializeAnimationChannelValueSubmitters();
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	::debug::get_domain().EndTask();
+#endif
+}
 
 bool PanimaComponent::IsPropertyAnimated(panima::AnimationManager &manager, const std::string &propName) const
 {

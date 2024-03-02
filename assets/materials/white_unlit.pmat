@@ -1,7 +1,7 @@
-"pbr"
+"unlit"
 {
 	"textures"
 	{
-		$string albedo_map "white_unlit"
+		$string albedo_map "white"
 	}
 }

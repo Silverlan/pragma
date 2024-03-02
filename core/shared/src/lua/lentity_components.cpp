@@ -216,6 +216,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	classDefMemRef.def(luabind::constructor<const BaseEntity &, pragma::ComponentId, const std::string &>());
 	classDefMemRef.def(luabind::constructor<const BaseEntity &, const std::string &, const std::string &>());
 	classDefMemRef.def(luabind::constructor<const std::string &>());
+	classDefMemRef.def(luabind::constructor<>());
 	classDefMemRef.def(luabind::tostring(luabind::self));
 	classDefMemRef.def("GetMemberInfo", &pragma::EntityUComponentMemberRef::GetMemberInfo);
 	classDefMemRef.def(

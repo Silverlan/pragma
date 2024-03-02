@@ -23,9 +23,14 @@ namespace pragma {
 		void SetTrackAxis(TrackAxis axis);
 		TrackAxis GetTrackAxis() const;
 
+		void SetUpTarget(const pragma::EntityUComponentMemberRef &upTarget);
+		const pragma::EntityUComponentMemberRef &GetUpTarget() const;
+
 		virtual void InitializeLuaObject(lua_State *lua) override;
 	  protected:
 		void ApplyConstraint();
+		static std::optional<pragma::EntityUComponentMemberRef> FindPoseProperty(const pragma::BaseEntityComponent &c, pragma::ComponentMemberIndex basePropIdx);
+		std::pair<pragma::BaseEntityComponent *, pragma::ComponentMemberIndex> UpdateUpTarget();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		void ResetDrivenRotation();
 		pragma::ComponentHandle<ConstraintComponent> m_constraintC;
@@ -33,6 +38,7 @@ namespace pragma {
 		pragma::EntityUComponentMemberRef m_drivenObjectRotation;
 		pragma::EntityUComponentMemberRef m_driverPosition;
 		bool m_drivenObjectRotationInitialized = false;
+		pragma::EntityUComponentMemberRef m_upTarget;
 
 		TrackAxis m_trackAxis = TrackAxis::Z;
 	};

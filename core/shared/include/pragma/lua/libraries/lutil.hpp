@@ -184,6 +184,7 @@ namespace Lua {
 			};
 			std::shared_ptr<RetargetFlexData> initialize_retarget_flex_data(luabind::object remapData);
 			void retarget_flex_controllers(RetargetFlexData &retargetFlexData, pragma::BaseFlexComponent &flexCSrc, pragma::BaseFlexComponent &flexCDst);
+			void retarget_flex_controllers(RetargetFlexData &retargetFlexData, const std::unordered_map<uint32_t, float> &srcFlexValues, pragma::BaseFlexComponent &flexCDst);
 		};
 	};
 };

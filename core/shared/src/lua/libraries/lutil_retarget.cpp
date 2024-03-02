@@ -34,6 +34,28 @@ std::shared_ptr<Lua::util::retarget::RetargetFlexData> Lua::util::retarget::init
 	}
 	return data;
 }
+void Lua::util::retarget::retarget_flex_controllers(RetargetFlexData &retargetFlexData, const std::unordered_map<uint32_t, float> &srcFlexValues, pragma::BaseFlexComponent &flexCDst)
+{
+	std::unordered_map<uint32_t, float> accMap;
+	for(auto &pair : retargetFlexData.remapData) {
+		auto itVal = srcFlexValues.find(pair.first);
+		if(itVal == srcFlexValues.end())
+			continue;
+		auto val = itVal->second;
+		auto &mappingData = pair.second;
+		for(auto &pair : mappingData) {
+			auto flexIdDst = pair.first;
+			auto &data = pair.second;
+			auto srcVal = umath::clamp(val, data.minSource, data.maxSource);
+			auto f = srcVal / (data.maxSource - data.minSource);
+			auto dstVal = data.minTarget + f * (data.maxTarget - data.minTarget);
+			auto it = accMap.find(flexIdDst);
+			dstVal = dstVal + ((it != accMap.end()) ? it->second : 0.f);
+			flexCDst.SetFlexController(flexIdDst, dstVal, 0.f, false);
+			accMap[flexIdDst] = dstVal;
+		}
+	}
+}
 void Lua::util::retarget::retarget_flex_controllers(RetargetFlexData &retargetFlexData, pragma::BaseFlexComponent &flexCSrc, pragma::BaseFlexComponent &flexCDst)
 {
 	std::unordered_map<uint32_t, float> accMap;

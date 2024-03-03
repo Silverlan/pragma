@@ -12,7 +12,7 @@
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include "pragma/model/animation/bone.hpp"
 
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(panima, Bone);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::animation, Bone);
 
 void Lua::Bone::register_class(lua_State *l, luabind::class_<pragma::animation::Skeleton> &classDef)
 {

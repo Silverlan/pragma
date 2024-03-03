@@ -16,8 +16,8 @@
 #include "pragma/entities/parentinfo.h"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/model/model.h"
-#include <panima/skeleton.hpp>
-#include <panima/bone.hpp>
+#include "pragma/model/animation/skeleton.hpp"
+#include "pragma/model/animation/bone.hpp"
 
 using namespace pragma;
 

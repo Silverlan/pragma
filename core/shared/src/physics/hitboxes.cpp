@@ -8,7 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/model/model.h"
 #include "pragma/model/modelmesh.h"
-#include <panima/skeleton.hpp>
+#include "pragma/model/animation/skeleton.hpp"
 void Model::AddHitbox(uint32_t boneId, HitGroup group, const Vector3 &min, const Vector3 &max) { AddHitbox(boneId, Hitbox(group, min, max)); }
 void Model::AddHitbox(uint32_t boneId, const Hitbox &hitbox)
 {

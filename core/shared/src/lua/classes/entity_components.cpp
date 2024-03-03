@@ -1141,14 +1141,14 @@ namespace Lua {
 	DLLNETWORK bool get_bullet_master(BaseEntity &ent);
 	DLLNETWORK AnimationEvent get_animation_event(lua_State *l, int32_t tArgs, uint32_t eventId);
 	namespace Animated {
-		static BoneId get_bone_id(lua_State *l, pragma::BaseAnimatedComponent &hAnim, uint32_t boneId) { return boneId; }
-		static BoneId get_bone_id(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const std::string &boneId)
+		static pragma::animation::BoneId get_bone_id(lua_State *l, pragma::BaseAnimatedComponent &hAnim, uint32_t boneId) { return boneId; }
+		static pragma::animation::BoneId get_bone_id(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const std::string &boneId)
 		{
 
 			auto &ent = hAnim.GetEntity();
 			auto &mdl = ent.GetModel();
 			if(!mdl)
-				return std::numeric_limits<BoneId>::max();
+				return std::numeric_limits<pragma::animation::BoneId>::max();
 			return mdl->LookupBone(boneId);
 		}
 		template<typename TBoneId>
@@ -1496,7 +1496,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	def.def("GetPlaybackRateProperty", &pragma::BaseAnimatedComponent::GetPlaybackRateProperty);
 	def.def(
 	  "GetEffectiveBoneTransforms", +[](pragma::BaseAnimatedComponent &animC) -> std::vector<umath::ScaledTransform> { return animC.GetProcessedBones(); });
-	register_base_animated_component_bone_methods<BoneId>(def);
+	register_base_animated_component_bone_methods<pragma::animation::BoneId>(def);
 	register_base_animated_component_bone_methods<std::string>(def);
 	def.def("UpdateEffectiveBoneTransforms", &pragma::BaseAnimatedComponent::UpdateSkeleton);
 	def.def("AdvanceAnimations", &pragma::BaseAnimatedComponent::MaintainAnimations);

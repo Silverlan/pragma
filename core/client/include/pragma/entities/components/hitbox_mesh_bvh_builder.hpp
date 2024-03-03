@@ -37,7 +37,7 @@ namespace pragma::bvh {
 		bool Build(Model &mdl);
 		const std::unordered_map<BoneName, std::vector<std::shared_ptr<BoneMeshInfo>>> &GetResult() const { return m_boneMeshMap; }
 	  private:
-		bool Build(Model &mdl, BoneId boneId, const Hitbox &hitbox, const LODInfo &lodInfo);
+		bool Build(Model &mdl, pragma::animation::BoneId boneId, const Hitbox &hitbox, const LODInfo &lodInfo);
 		void Serialize(Model &mdl);
 		void BuildHitboxMesh(Model &mdl, ModelSubMesh &subMesh);
 		void BuildMeshBvh(Model &mdl, ModelSubMesh &subMesh);

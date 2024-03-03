@@ -8,8 +8,8 @@
 #include "stdafx_client.h"
 #include "pragma/entities/components/hitbox_mesh_bvh_builder.hpp"
 #include "pragma/logging.hpp"
-#include <panima/skeleton.hpp>
-#include <panima/bone.hpp>
+#include <pragma/model/animation/skeleton.hpp>
+#include <pragma/model/animation/bone.hpp>
 #include <pragma/entities/components/bvh_data.hpp>
 #include <pragma/entities/components/util_bvh.hpp>
 #include <pragma/model/model.h>
@@ -77,7 +77,7 @@ static bool generate_mesh_bvh(Model &mdl, const std::string &boneName, pragma::b
 	return true;
 }
 
-static bool calc_bone_mesh_info(pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo, BoneId boneId, std::shared_ptr<ModelSubMesh> subMesh, std::array<umath::Plane, 6> planes, Vector3 hbMin, Vector3 hbMax, umath::ScaledTransform pose, util::Uuid uuid)
+static bool calc_bone_mesh_info(pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo &boneMeshInfo, pragma::animation::BoneId boneId, std::shared_ptr<ModelSubMesh> subMesh, std::array<umath::Plane, 6> planes, Vector3 hbMin, Vector3 hbMax, umath::ScaledTransform pose, util::Uuid uuid)
 {
 	Vector3 smMin, smMax;
 	subMesh->GetBounds(smMin, smMax);
@@ -182,7 +182,7 @@ bool pragma::bvh::HitboxMeshBvhBuildTask::Build(Model &mdl)
 	return true;
 }
 
-bool pragma::bvh::HitboxMeshBvhBuildTask::Build(Model &mdl, BoneId boneId, const Hitbox &hb, const LODInfo &lodInfo)
+bool pragma::bvh::HitboxMeshBvhBuildTask::Build(Model &mdl, pragma::animation::BoneId boneId, const Hitbox &hb, const LODInfo &lodInfo)
 {
 	auto &skeleton = mdl.GetSkeleton();
 	auto &ref = mdl.GetReference();
@@ -211,7 +211,7 @@ bool pragma::bvh::HitboxMeshBvhBuildTask::Build(Model &mdl, BoneId boneId, const
 					continue;
 				}
 
-				auto &boneName = bone->name;
+				std::string boneName = bone->name;
 				auto bm = std::make_shared<pragma::bvh::HitboxMeshBvhBuildTask::BoneMeshInfo>();
 				auto genResult = m_threadPool.submit_task([&mdl, subMesh, planes, hbMin, hbMax, pose, uuid, boneName, bm, boneId]() -> bool {
 					auto success = calc_bone_mesh_info(*bm, boneId, subMesh, planes, hbMin, hbMax, pose, uuid);

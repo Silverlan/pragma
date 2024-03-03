@@ -22,8 +22,8 @@
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>
 #include <luainterface.hpp>
-#include <panima/pose.hpp>
-#include <panima/skeleton.hpp>
+#include "pragma/model/animation/pose.hpp"
+#include "pragma/model/animation/skeleton.hpp"
 #include <panima/channel.hpp>
 #include <panima/channel_t.hpp>
 #include <panima/player.hpp>
@@ -236,18 +236,18 @@ void Lua::animation::register_library(Lua::Interface &lua)
 {
 	auto animMod = luabind::module(lua.GetState(), "panima");
 
-	auto cdPose = luabind::class_<panima::Pose>("Pose");
+	auto cdPose = luabind::class_<pragma::animation::Pose>("Pose");
 	cdPose.def(luabind::tostring(luabind::self));
 	cdPose.def(luabind::constructor<>());
-	cdPose.def("SetTransformCount", &panima::Pose::SetTransformCount);
-	cdPose.def("SetBoneIndex", &panima::Pose::SetBoneIndex);
-	cdPose.def("GetTransform", static_cast<umath::ScaledTransform *(panima::Pose::*)(BoneId)>(&panima::Pose::GetTransform));
-	cdPose.def("SetTransform", &panima::Pose::SetTransform);
-	cdPose.def("Clear", &panima::Pose::Clear);
-	cdPose.def("Lerp", &panima::Pose::Lerp);
-	cdPose.def("Localize", &panima::Pose::Localize);
-	cdPose.def("Globalize", &panima::Pose::Globalize);
-	cdPose.def("GetBoneTranslationTable", static_cast<std::vector<uint32_t> &(panima::Pose::*)()>(&panima::Pose::GetBoneTranslationTable));
+	cdPose.def("SetTransformCount", &pragma::animation::Pose::SetTransformCount);
+	cdPose.def("SetBoneIndex", &pragma::animation::Pose::SetBoneIndex);
+	cdPose.def("GetTransform", static_cast<umath::ScaledTransform *(pragma::animation::Pose::*)(pragma::animation::BoneId)>(&pragma::animation::Pose::GetTransform));
+	cdPose.def("SetTransform", &pragma::animation::Pose::SetTransform);
+	cdPose.def("Clear", &pragma::animation::Pose::Clear);
+	cdPose.def("Lerp", &pragma::animation::Pose::Lerp);
+	cdPose.def("Localize", &pragma::animation::Pose::Localize);
+	cdPose.def("Globalize", &pragma::animation::Pose::Globalize);
+	cdPose.def("GetBoneTranslationTable", static_cast<std::vector<uint32_t> &(pragma::animation::Pose::*)()>(&pragma::animation::Pose::GetBoneTranslationTable));
 	animMod[cdPose];
 
 	auto cdTimeFrame = luabind::class_<panima::TimeFrame>("TimeFrame");

@@ -61,7 +61,7 @@
 #include <se_scene.hpp>
 #include <pragma/math/intersection.h>
 #include <pragma/model/modelmesh.h>
-#include <panima/skeleton.hpp>
+#include "pragma/model/animation/skeleton.hpp"
 #include <luabind/class_info.hpp>
 #include <util_zip.h>
 #include <fsys/ifile.hpp>

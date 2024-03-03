@@ -11,8 +11,8 @@
 #include "pragma/file_formats/wmd_load.h"
 #include "pragma/asset/util_asset.hpp"
 #include <sharedutils/util_path.hpp>
-#include <panima/skeleton.hpp>
-#include <panima/bone.hpp>
+#include "pragma/model/animation/skeleton.hpp"
+#include "pragma/model/animation/bone.hpp"
 #include <fsys/ifile.hpp>
 #include <pragma/debug/intel_vtune.hpp>
 
@@ -204,7 +204,7 @@ std::shared_ptr<Model> pragma::asset::ModelManager::CreateModel(const std::strin
 
 	if(bAddReference == true) {
 		auto frame = Frame::Create(1);
-		auto *root = new panima::Bone;
+		auto *root = new pragma::animation::Bone;
 		root->name = "root";
 		auto rootID = skeleton.AddBone(root);
 		mdl->SetBindPoseBoneMatrix(0, glm::inverse(umat::identity()));

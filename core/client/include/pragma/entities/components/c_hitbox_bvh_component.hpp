@@ -44,7 +44,7 @@ namespace pragma {
 			std::shared_future<void> task;
 			std::atomic<bool> complete = false;
 
-			std::unordered_map<BoneId, std::shared_ptr<BoneHitboxBvhCache>> boneCache;
+			std::unordered_map<pragma::animation::BoneId, std::shared_ptr<BoneHitboxBvhCache>> boneCache;
 		};
 		struct DLLCLIENT HitboxBvhCache {
 			using ModelName = std::string;
@@ -74,7 +74,7 @@ namespace pragma {
 		bool IntersectionTest(const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist, HitInfo &outHitInfo, const bvh::DebugDrawInfo *debugDrawInfo = nullptr) const;
 		bool IntersectionTestAabb(const Vector3 &min, const Vector3 &max, IntersectionInfo *outIntersectionInfo = nullptr) const;
 		bool IntersectionTestKDop(const std::vector<umath::Plane> &planes, IntersectionInfo *outIntersectionInfo = nullptr) const;
-		void DebugDrawHitboxMeshes(BoneId boneId, float duration = 12.f) const;
+		void DebugDrawHitboxMeshes(pragma::animation::BoneId boneId, float duration = 12.f) const;
 		bvh::HitboxBvhCache &GetGlobalBvhCache() const;
 	  private:
 		void Reset();
@@ -87,7 +87,7 @@ namespace pragma {
 		void InitializeHitboxMeshBvhs();
 		void UpdateHitboxBvh();
 		std::shared_future<void> m_hitboxMeshCacheTask;
-		std::unordered_map<BoneId, std::vector<std::shared_ptr<bvh::MeshHitboxBvhCache>>> m_hitboxMeshBvhCaches;
+		std::unordered_map<pragma::animation::BoneId, std::vector<std::shared_ptr<bvh::MeshHitboxBvhCache>>> m_hitboxMeshBvhCaches;
 		std::shared_ptr<bvh::ObbBvhTree> m_hitboxBvh;
 
 		std::vector<umath::ScaledTransform> m_hitboxBvhUpdatePoses;
@@ -104,7 +104,7 @@ namespace pragma {
 			Vector3 min;
 			Vector3 max;
 
-			BoneId boneId = std::numeric_limits<uint16_t>::max();
+			pragma::animation::BoneId boneId = std::numeric_limits<pragma::animation::BoneId>::max();
 		};
 
 		struct DLLCLIENT ObbBvhTree : public pragma::bvh::BvhTree {

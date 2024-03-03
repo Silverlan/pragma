@@ -20,6 +20,7 @@
 #include "pragma/math/surfacematerial.h"
 #include "pragma/model/modelupdateflags.hpp"
 #include "pragma/model/model_flexes.hpp"
+#include "pragma/physics/jointinfo.h"
 #include "pragma/physics/ik/ik_controller.hpp"
 #include "pragma/phonememap.hpp"
 #include "pragma/game/game_coordinate_system.hpp"
@@ -149,7 +150,9 @@ class VertexAnimation;
 class FlexAnimation;
 class NetworkState;
 using FlexControllerId = uint32_t;
-using BoneId = uint16_t;
+namespace pragma::animation {
+	using BoneId = uint16_t;
+};
 enum class JointType : uint8_t;
 namespace umath {
 	class ScaledTransform;
@@ -366,8 +369,8 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 
 	bool FindSubMeshIndex(const ModelMeshGroup *optMeshGroup, const ModelMesh *optMesh, const ModelSubMesh *optSubMesh, uint32_t &outGroupIdx, uint32_t &outMeshIdx, uint32_t &outSubMeshIdx) const;
 
-	const panima::Skeleton &GetSkeleton() const;
-	panima::Skeleton &GetSkeleton();
+	const pragma::animation::Skeleton &GetSkeleton() const;
+	pragma::animation::Skeleton &GetSkeleton();
 	uint32_t GetBoneCount() const;
 	bool GetLocalBonePosition(uint32_t animId, uint32_t frameId, uint32_t boneId, Vector3 &rPos, Quat &rRot, Vector3 *scale = nullptr);
 	bool IsRootBone(uint32_t boneId) const;
@@ -487,7 +490,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 
 	const std::vector<JointInfo> &GetJoints() const;
 	std::vector<JointInfo> &GetJoints();
-	JointInfo &AddJoint(JointType type, BoneId child, BoneId parent);
+	JointInfo &AddJoint(JointType type, pragma::animation::BoneId child, pragma::animation::BoneId parent);
 
 	const std::vector<Eyeball> &GetEyeballs() const;
 	std::vector<Eyeball> &GetEyeballs();
@@ -517,9 +520,10 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	const FlexAnimation *GetFlexAnimation(uint32_t idx) const { return const_cast<Model *>(this)->GetFlexAnimation(idx); }
 	const std::string *GetFlexAnimationName(uint32_t idx) const;
 
-	std::optional<umath::ScaledTransform> GetReferenceBonePose(BoneId boneId) const;
-	std::optional<pragma::SignedAxis> FindBoneTwistAxis(BoneId boneId) const;
-	std::optional<pragma::SignedAxis> FindBoneAxisForDirection(BoneId boneId, const Vector3 &dir) const;
+
+	std::optional<umath::ScaledTransform> GetReferenceBonePose(pragma::animation::BoneId boneId) const;
+	std::optional<pragma::SignedAxis> FindBoneTwistAxis(pragma::animation::BoneId boneId) const;
+	std::optional<pragma::SignedAxis> FindBoneAxisForDirection(pragma::animation::BoneId boneId, const Vector3 &dir) const;
 	static Quat GetTwistAxisRotationOffset(pragma::SignedAxis axis);
   protected:
 	Model(NetworkState *nw, uint32_t numBones, const std::string &name = "");
@@ -568,7 +572,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	std::vector<std::shared_ptr<pragma::animation::Animation>> m_animations;
 	std::vector<std::shared_ptr<VertexAnimation>> m_vertexAnimations;
 	std::unordered_map<std::string, unsigned int> m_animationIDs;
-	std::shared_ptr<panima::Skeleton> m_skeleton = nullptr;
+	std::shared_ptr<pragma::animation::Skeleton> m_skeleton = nullptr;
 
 	std::vector<FlexController> m_flexControllers;
 	std::vector<Flex> m_flexes;

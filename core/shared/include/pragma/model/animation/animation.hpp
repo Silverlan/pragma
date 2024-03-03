@@ -5,8 +5,8 @@
  * Copyright (c) 2021 Silverlan
  */
 
-#ifndef __ANIMATION_HPP__
-#define __ANIMATION_HPP__
+#ifndef __PRAGMA_ANIMATION_HPP__
+#define __PRAGMA_ANIMATION_HPP__
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/model/animation/frame.h"
@@ -45,11 +45,9 @@ class VFilePtrInternalReal;
 namespace udm {
 	struct AssetData;
 };
-namespace panima {
+namespace pragma::animation {
 	class Skeleton;
 	class Animation;
-};
-namespace pragma::animation {
 	class DLLNETWORK Animation : public std::enable_shared_from_this<Animation> {
 	  public:
 		static util::EnumRegister &GetActivityEnumRegister();
@@ -63,7 +61,7 @@ namespace pragma::animation {
 		};
 		static std::shared_ptr<Animation> Create();
 		static std::shared_ptr<Animation> Create(const Animation &other, ShareMode share = ShareMode::None);
-		static std::shared_ptr<Animation> Load(const udm::AssetData &data, std::string &outErr, const panima::Skeleton *optSkeleton = nullptr, const Frame *optReference = nullptr);
+		static std::shared_ptr<Animation> Load(const udm::AssetData &data, std::string &outErr, const pragma::animation::Skeleton *optSkeleton = nullptr, const Frame *optReference = nullptr);
 		const std::pair<Vector3, Vector3> &GetRenderBounds() const;
 		void SetRenderBounds(const Vector3 &min, const Vector3 &max);
 		void CalcRenderBounds(Model &mdl);
@@ -102,9 +100,9 @@ namespace pragma::animation {
 		AnimationBlendController *GetBlendController();
 		const AnimationBlendController *GetBlendController() const;
 		void ClearBlendController();
-		void Localize(const panima::Skeleton &skeleton);
-		void Rotate(const panima::Skeleton &skeleton, const Quat &rot);
-		void Translate(const panima::Skeleton &skeleton, const Vector3 &t);
+		void Localize(const pragma::animation::Skeleton &skeleton);
+		void Rotate(const pragma::animation::Skeleton &skeleton, const Quat &rot);
+		void Translate(const pragma::animation::Skeleton &skeleton, const Vector3 &t);
 		void Scale(const Vector3 &scale);
 		// Reverses all frames in the animation
 		void Reverse();
@@ -117,7 +115,7 @@ namespace pragma::animation {
 		const std::vector<float> &GetBoneWeights() const;
 		std::vector<float> &GetBoneWeights();
 
-		std::shared_ptr<panima::Animation> ToPanimaAnimation(const panima::Skeleton &skel, const Frame *optRefPose = nullptr) const;
+		std::shared_ptr<panima::Animation> ToPanimaAnimation(const pragma::animation::Skeleton &skel, const Frame *optRefPose = nullptr) const;
 
 		// If reference frame is specified, it will be used to optimize frame data and reduce the file size
 		bool Save(udm::AssetDataArg outData, std::string &outErr, const Frame *optReference = nullptr, bool enableOptimizations = true);
@@ -128,13 +126,13 @@ namespace pragma::animation {
 	  private:
 		static util::EnumRegister s_activityEnumRegister;
 		static util::EnumRegister s_eventEnumRegister;
-		bool LoadFromAssetData(const udm::AssetData &data, std::string &outErr, const panima::Skeleton *optSkeleton = nullptr, const Frame *optReference = nullptr);
+		bool LoadFromAssetData(const udm::AssetData &data, std::string &outErr, const pragma::animation::Skeleton *optSkeleton = nullptr, const Frame *optReference = nullptr);
 		Animation();
 		Animation(const Animation &other, ShareMode share = ShareMode::None);
 
 		std::vector<std::shared_ptr<Frame>> m_frames;
 		// Contains a list of model bone Ids which are used by this animation
-		std::vector<BoneId> m_boneIds;
+		std::vector<pragma::animation::BoneId> m_boneIds;
 		std::vector<float> m_boneWeights;
 		// Maps a model bone id to a local bone id (m_boneIds index)
 		std::unordered_map<uint32_t, uint32_t> m_boneIdMap;

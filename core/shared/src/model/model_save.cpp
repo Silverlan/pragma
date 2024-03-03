@@ -19,8 +19,8 @@
 #include <fsys/filesystem.h>
 #include <sharedutils/util_file.h>
 #include <udm.hpp>
-#include <panima/skeleton.hpp>
-#include <panima/bone.hpp>
+#include "pragma/model/animation/skeleton.hpp"
+#include "pragma/model/animation/bone.hpp"
 
 #define INDEX_OFFSET_INDEX_SIZE sizeof(uint64_t)
 #define INDEX_OFFSET_MODEL_DATA 0
@@ -119,7 +119,7 @@ std::shared_ptr<Model> Model::Copy(Game *game, CopyFlags copyFlags) const
 	mdl->m_animations = m_animations;
 	mdl->m_flexAnimations = m_flexAnimations;
 	mdl->m_animationIDs = m_animationIDs;
-	mdl->m_skeleton = std::make_unique<panima::Skeleton>(*m_skeleton);
+	mdl->m_skeleton = std::make_unique<pragma::animation::Skeleton>(*m_skeleton);
 	mdl->m_bindPose = m_bindPose;
 	mdl->m_eyeOffset = m_eyeOffset;
 	mdl->m_collisionMin = m_collisionMin;
@@ -325,7 +325,7 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 	auto isStatic = umath::is_flag_set(flags, Model::Flags::Static);
 	if(!isStatic) {
 		auto udmSkeleton = udm["skeleton"];
-		m_skeleton = panima::Skeleton::Load(udm::AssetData {udmSkeleton}, outErr);
+		m_skeleton = pragma::animation::Skeleton::Load(udm::AssetData {udmSkeleton}, outErr);
 		if(m_skeleton == nullptr)
 			return false;
 		auto &ref = GetReference();
@@ -1110,8 +1110,8 @@ bool Model::SaveLegacy(Game *game, const std::string &name, const std::string &r
 		f->WriteString(path);
 
 	if(!bStatic) {
-		std::function<void(VFilePtrReal &, panima::Bone &)> fWriteChildBones;
-		fWriteChildBones = [&fWriteChildBones](VFilePtrReal &f, panima::Bone &bone) {
+		std::function<void(VFilePtrReal &, pragma::animation::Bone &)> fWriteChildBones;
+		fWriteChildBones = [&fWriteChildBones](VFilePtrReal &f, pragma::animation::Bone &bone) {
 			auto &children = bone.children;
 			f->Write<uint32_t>(static_cast<uint32_t>(children.size()));
 			for(auto &pair : children) {
@@ -1122,8 +1122,10 @@ bool Model::SaveLegacy(Game *game, const std::string &name, const std::string &r
 
 		write_offset(f, offIndex + INDEX_OFFSET_BONES * INDEX_OFFSET_INDEX_SIZE); // Bones
 		f->Write<uint32_t>(static_cast<uint32_t>(bones.size()));
-		for(auto &bone : bones)
-			f->WriteString(bone->name);
+		for(auto &bone : bones) {
+			std::string name = bone->name;
+			f->WriteString(name);
+		}
 		for(auto &bone : bones) {
 			auto *pos = refPose.GetBonePosition(bone->ID);
 			auto *rot = refPose.GetBoneOrientation(bone->ID);
@@ -1323,8 +1325,8 @@ bool Model::SaveLegacy(Game *game, const std::string &name, const std::string &r
 	f->Write<uint32_t>(joints.size());
 	for(auto &joint : joints) {
 		f->Write<JointType>(joint.type);
-		f->Write<BoneId>(joint.child);
-		f->Write<BoneId>(joint.parent);
+		f->Write<pragma::animation::BoneId>(joint.child);
+		f->Write<pragma::animation::BoneId>(joint.parent);
 		f->Write<bool>(joint.collide);
 		f->Write<uint8_t>(joint.args.size());
 		for(auto &pair : joint.args) {

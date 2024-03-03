@@ -5,8 +5,8 @@
  * Copyright (c) 2021 Silverlan
  */
 
-#ifndef __SKELETON_H__
-#define __SKELETON_H__
+#ifndef __SKELETON_UTIL_HPP__
+#define __SKELETON_UTIL_HPP__
 #include "pragma/networkdefinitions.h"
 #include <udm_types.hpp>
 #include <iostream>

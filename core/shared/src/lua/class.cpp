@@ -230,7 +230,7 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Quat);
 
 /* namespace panima
 {
-std::ostream &operator<<(std::ostream &out,const panima::Bone &o)
+std::ostream &operator<<(std::ostream &out,const pragma::animation::Bone &o)
 {
     return ::operator<<(out,o);
 }

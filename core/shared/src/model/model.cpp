@@ -20,12 +20,12 @@
 #include "pragma/model/animation/flex_animation.hpp"
 #include "pragma/file_formats/wmd.h"
 #include "pragma/asset/util_asset.hpp"
+#include "pragma/model/animation/skeleton.hpp"
+#include "pragma/model/animation/bone.hpp"
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
 #include <stack>
-#include <panima/skeleton.hpp>
-#include <panima/bone.hpp>
 
 extern DLLNETWORK Engine *engine;
 
@@ -105,8 +105,8 @@ Model::Model(NetworkState *nw, uint32_t numBones, const std::string &name) : Mod
 Model::Model(const Model &other)
     : m_networkState(other.m_networkState), m_metaInfo(other.m_metaInfo), m_stateFlags(other.m_stateFlags), m_mass(other.m_mass), m_blendControllers(other.m_blendControllers), m_bodyGroups(other.m_bodyGroups), m_hitboxes(other.m_hitboxes), m_name(other.m_name),
       m_animationIDs(other.m_animationIDs), m_bindPose(other.m_bindPose), m_collisionMin(other.m_collisionMin), m_collisionMax(other.m_collisionMax), m_renderMin(other.m_renderMin), m_renderMax(other.m_renderMax), m_joints(other.m_joints), m_baseMeshes(other.m_baseMeshes),
-      m_lods(other.m_lods), m_attachments(other.m_attachments), m_materials(other.m_materials), m_textureGroups(other.m_textureGroups), m_skeleton(std::make_unique<panima::Skeleton>(*other.m_skeleton)), m_reference(Frame::Create(*other.m_reference)), m_vertexCount(other.m_vertexCount),
-      m_triangleCount(other.m_triangleCount), m_flexControllers(other.m_flexControllers), m_flexes(other.m_flexes), m_phonemeMap(other.m_phonemeMap)
+      m_lods(other.m_lods), m_attachments(other.m_attachments), m_materials(other.m_materials), m_textureGroups(other.m_textureGroups), m_skeleton(std::make_unique<pragma::animation::Skeleton>(*other.m_skeleton)), m_reference(Frame::Create(*other.m_reference)),
+      m_vertexCount(other.m_vertexCount), m_triangleCount(other.m_triangleCount), m_flexControllers(other.m_flexControllers), m_flexes(other.m_flexes), m_phonemeMap(other.m_phonemeMap)
 {
 	m_stateFlags |= StateFlags::AllMaterialsLoaded;
 	m_meshGroups.reserve(other.m_meshGroups.size());
@@ -487,7 +487,7 @@ const Frame &Model::GetReference() const { return *m_reference; }
 void Model::SetReference(std::shared_ptr<Frame> frame) { m_reference = frame; }
 const std::vector<JointInfo> &Model::GetJoints() const { return const_cast<Model *>(this)->GetJoints(); }
 std::vector<JointInfo> &Model::GetJoints() { return m_joints; }
-JointInfo &Model::AddJoint(JointType type, BoneId child, BoneId parent)
+JointInfo &Model::AddJoint(JointType type, pragma::animation::BoneId child, pragma::animation::BoneId parent)
 {
 	m_joints.push_back(JointInfo(type, child, parent));
 	return m_joints.back();
@@ -504,7 +504,7 @@ void Model::Construct()
 {
 	m_stateFlags |= StateFlags::Valid;
 	m_name = "";
-	m_skeleton = std::make_unique<panima::Skeleton>();
+	m_skeleton = std::make_unique<pragma::animation::Skeleton>();
 	m_mass = 0.f;
 	m_extensions = udm::Property::Create(udm::Type::Element);
 	uvec::zero(&m_collisionMin);
@@ -1651,8 +1651,8 @@ int32_t Model::LookupAnimation(const std::string &name) const
 
 void Model::GetAnimations(std::unordered_map<std::string, uint32_t> **anims) { *anims = &m_animationIDs; }
 
-const panima::Skeleton &Model::GetSkeleton() const { return *m_skeleton; }
-panima::Skeleton &Model::GetSkeleton() { return *m_skeleton; }
+const pragma::animation::Skeleton &Model::GetSkeleton() const { return *m_skeleton; }
+pragma::animation::Skeleton &Model::GetSkeleton() { return *m_skeleton; }
 
 std::shared_ptr<pragma::animation::Animation> Model::GetAnimation(uint32_t ID) const
 {
@@ -1925,7 +1925,7 @@ void Model::UpdateShape(const std::vector<SurfaceMaterial> *)
 	for(auto &cmesh : m_collisionMeshes)
 		cmesh->UpdateShape();
 }
-std::optional<umath::ScaledTransform> Model::GetReferenceBonePose(BoneId boneId) const
+std::optional<umath::ScaledTransform> Model::GetReferenceBonePose(pragma::animation::BoneId boneId) const
 {
 	auto &ref = GetReference();
 	umath::ScaledTransform pose;
@@ -1933,7 +1933,7 @@ std::optional<umath::ScaledTransform> Model::GetReferenceBonePose(BoneId boneId)
 		return {};
 	return pose;
 }
-std::optional<pragma::SignedAxis> Model::FindBoneAxisForDirection(BoneId boneId, const Vector3 &dir) const
+std::optional<pragma::SignedAxis> Model::FindBoneAxisForDirection(pragma::animation::BoneId boneId, const Vector3 &dir) const
 {
 	auto refPose = GetReferenceBonePose(boneId);
 	if(!refPose)
@@ -1954,7 +1954,7 @@ std::optional<pragma::SignedAxis> Model::FindBoneAxisForDirection(BoneId boneId,
 		return (dr < 0) ? pragma::SignedAxis::NegX : pragma::SignedAxis::X; // Right
 	return (du < 0) ? pragma::SignedAxis::NegY : pragma::SignedAxis::Y;     // Up
 }
-std::optional<pragma::SignedAxis> Model::FindBoneTwistAxis(BoneId boneId) const
+std::optional<pragma::SignedAxis> Model::FindBoneTwistAxis(pragma::animation::BoneId boneId) const
 {
 	auto refPose = GetReferenceBonePose(boneId);
 	if(!refPose)

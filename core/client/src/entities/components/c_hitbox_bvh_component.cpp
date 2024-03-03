@@ -21,9 +21,9 @@
 #include <pragma/debug/intel_vtune.hpp>
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include <panima/skeleton.hpp>
-#include <panima/bone.hpp>
-#include <panima/skeleton.hpp>
+#include <pragma/model/animation/skeleton.hpp>
+#include <pragma/model/animation/bone.hpp>
+#include <pragma/model/animation/skeleton.hpp>
 #include <pragma/entities/components/base_bvh_component.hpp>
 #include <pragma/asset/util_asset.hpp>
 #include <sharedutils/BS_thread_pool.hpp>
@@ -625,7 +625,7 @@ void CHitboxBvhComponent::OnRemove()
 	}
 }
 
-void CHitboxBvhComponent::DebugDrawHitboxMeshes(BoneId boneId, float duration) const
+void CHitboxBvhComponent::DebugDrawHitboxMeshes(animation::BoneId boneId, float duration) const
 {
 	auto &ent = GetEntity();
 	auto animC = ent.GetAnimatedComponent();

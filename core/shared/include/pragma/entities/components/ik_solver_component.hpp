@@ -35,24 +35,24 @@ namespace pragma {
 		void SetIkRigFile(const std::string &ikRigFile);
 		const std::string &GetIkRigFile() const;
 
-		void AddSkeletalBone(BoneId boneId);
-		void SetBoneLocked(BoneId boneId, bool locked);
-		pragma::ik::Bone *GetBone(BoneId boneId);
-		pragma::ik::IControl *GetControl(BoneId boneId);
+		void AddSkeletalBone(pragma::animation::BoneId boneId);
+		void SetBoneLocked(pragma::animation::BoneId boneId, bool locked);
+		pragma::ik::Bone *GetBone(pragma::animation::BoneId boneId);
+		pragma::ik::IControl *GetControl(pragma::animation::BoneId boneId);
 		size_t GetBoneCount() const;
-		std::optional<BoneId> GetSkeletalBoneId(IkBoneId boneId) const;
-		std::optional<IkBoneId> GetIkBoneId(BoneId boneId) const;
-		std::optional<BoneId> GetControlBoneId(const std::string &propPath);
+		std::optional<pragma::animation::BoneId> GetSkeletalBoneId(IkBoneId boneId) const;
+		std::optional<IkBoneId> GetIkBoneId(pragma::animation::BoneId boneId) const;
+		std::optional<pragma::animation::BoneId> GetControlBoneId(const std::string &propPath);
 
-		void AddDragControl(BoneId boneId, float maxForce = -1.f, float rigidity = 1.f);
-		void AddStateControl(BoneId boneId, float maxForce = -1.f, float rigidity = 1.f);
-		void AddOrientedDragControl(BoneId boneId, float maxForce = -1.f, float rigidity = 1.f);
+		void AddDragControl(pragma::animation::BoneId boneId, float maxForce = -1.f, float rigidity = 1.f);
+		void AddStateControl(pragma::animation::BoneId boneId, float maxForce = -1.f, float rigidity = 1.f);
+		void AddOrientedDragControl(pragma::animation::BoneId boneId, float maxForce = -1.f, float rigidity = 1.f);
 
 		struct DLLNETWORK ConstraintInfo {
 			ConstraintInfo() = default;
-			ConstraintInfo(BoneId bone0, BoneId bone1);
-			BoneId boneId0 = 0;
-			BoneId boneId1 = 0;
+			ConstraintInfo(pragma::animation::BoneId bone0, pragma::animation::BoneId bone1);
+			pragma::animation::BoneId boneId0 = 0;
+			pragma::animation::BoneId boneId1 = 0;
 			float rigidity = 1'000.f;
 			float maxForce = -1.f;
 		};
@@ -81,15 +81,15 @@ namespace pragma {
 		void ResetIkBones();
 		void UpdateIkRigFile();
 		void InitializeSolver();
-		std::optional<umath::ScaledTransform> GetReferenceBonePose(BoneId boneId) const;
-		pragma::ik::Bone *AddBone(const std::string &boneName, BoneId boneId, const umath::Transform &pose, float radius, float length);
-		void AddControl(BoneId boneId, pragma::ik::RigConfigControl::Type type, float maxForce = -1.f, float rigidity = 1.f);
-		pragma::ik::Bone *GetIkBone(BoneId boneId);
+		std::optional<umath::ScaledTransform> GetReferenceBonePose(pragma::animation::BoneId boneId) const;
+		pragma::ik::Bone *AddBone(const std::string &boneName, pragma::animation::BoneId boneId, const umath::Transform &pose, float radius, float length);
+		void AddControl(pragma::animation::BoneId boneId, pragma::ik::RigConfigControl::Type type, float maxForce = -1.f, float rigidity = 1.f);
+		pragma::ik::Bone *GetIkBone(pragma::animation::BoneId boneId);
 
-		bool GetConstraintBones(BoneId boneId0, BoneId boneId1, pragma::ik::Bone **bone0, pragma::ik::Bone **bone1, umath::ScaledTransform &pose0, umath::ScaledTransform &pose1) const;
+		bool GetConstraintBones(pragma::animation::BoneId boneId0, pragma::animation::BoneId boneId1, pragma::ik::Bone **bone0, pragma::ik::Bone **bone1, umath::ScaledTransform &pose0, umath::ScaledTransform &pose1) const;
 
 		struct PinnedBoneInfo {
-			BoneId boneId;
+			pragma::animation::BoneId boneId;
 			IkBoneId ikBoneId;
 			umath::ScaledTransform oldPose;
 		};
@@ -97,9 +97,9 @@ namespace pragma {
 		udm::PProperty m_ikRig;
 		std::string m_ikRigFile;
 		std::shared_ptr<pragma::ik::Solver> m_ikSolver;
-		std::unordered_map<BoneId, IkBoneId> m_boneIdToIkBoneId;
-		std::unordered_map<IkBoneId, BoneId> m_ikBoneIdToBoneId;
-		std::unordered_map<BoneId, std::shared_ptr<pragma::ik::IControl>> m_ikControls;
+		std::unordered_map<pragma::animation::BoneId, IkBoneId> m_boneIdToIkBoneId;
+		std::unordered_map<IkBoneId, pragma::animation::BoneId> m_ikBoneIdToBoneId;
+		std::unordered_map<pragma::animation::BoneId, std::shared_ptr<pragma::ik::IControl>> m_ikControls;
 		std::vector<PinnedBoneInfo> m_pinnedBones;
 		bool m_updateRequired = false;
 		bool m_resetIkPose = true;

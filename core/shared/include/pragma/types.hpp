@@ -51,6 +51,8 @@ namespace pragma::animation {
 	class Pose;
 	struct Bone;
 	class Skeleton;
+
+	static constexpr auto INVALID_BONE_INDEX = std::numeric_limits<BoneId>::max();
 };
 
 namespace panima {

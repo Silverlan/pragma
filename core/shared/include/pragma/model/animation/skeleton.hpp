@@ -50,7 +50,6 @@ namespace pragma::animation {
 		std::vector<std::shared_ptr<Bone>> m_bones;
 		std::unordered_map<pragma::animation::BoneId, std::shared_ptr<Bone>> m_rootBones;
 		std::vector<umath::ScaledTransform> m_referencePoses;
-		std::unordered_map<pragma::animation::BoneId, BoneMetaData> m_boneMetadata;
 	};
 };
 

@@ -39,4 +39,31 @@ namespace pragma {
 	constexpr Vector3 axis_to_vector(Axis axis) { return axis_to_vector(static_cast<SignedAxis>(axis)); }
 };
 
+constexpr pragma::SignedAxis operator+(pragma::SignedAxis axis)
+{
+	switch(axis) {
+	case pragma::SignedAxis::NegX:
+		return pragma::SignedAxis::X;
+	case pragma::SignedAxis::NegY:
+		return pragma::SignedAxis::Y;
+	case pragma::SignedAxis::NegZ:
+		return pragma::SignedAxis::Z;
+	default:
+		return axis;
+	}
+}
+constexpr pragma::SignedAxis operator-(pragma::SignedAxis axis)
+{
+	switch(axis) {
+	case pragma::SignedAxis::X:
+		return pragma::SignedAxis::NegX;
+	case pragma::SignedAxis::Y:
+		return pragma::SignedAxis::NegY;
+	case pragma::SignedAxis::Z:
+		return pragma::SignedAxis::NegZ;
+	default:
+		return axis;
+	}
+}
+
 #endif

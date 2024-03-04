@@ -23,7 +23,6 @@ pragma::animation::Skeleton::Skeleton(const Skeleton &other)
 	for(auto &bone : other.m_bones)
 		m_bones.push_back(std::make_shared<Bone>(*bone));
 	m_rootBones = other.m_rootBones;
-	m_boneMetadata = other.m_boneMetadata;
 	for(auto &pair : m_rootBones)
 		pair.second = m_bones[pair.first];
 	m_referencePoses = other.m_referencePoses;
@@ -39,7 +38,7 @@ pragma::animation::Skeleton::Skeleton(const Skeleton &other)
 	};
 	fUpdateHierarchy(m_rootBones, nullptr);
 #ifdef _MSC_VER
-	static_assert(sizeof(Skeleton) == 176, "Update this function when making changes to this class!");
+	static_assert(sizeof(Skeleton) == 112, "Update this function when making changes to this class!");
 #endif
 }
 
@@ -119,7 +118,7 @@ std::weak_ptr<pragma::animation::Bone> pragma::animation::Skeleton::GetBone(prag
 bool pragma::animation::Skeleton::operator==(const Skeleton &other) const
 {
 #ifdef _MSC_VER
-	static_assert(sizeof(Skeleton) == 176, "Update this function when making changes to this class!");
+	static_assert(sizeof(Skeleton) == 112, "Update this function when making changes to this class!");
 #endif
 	if(!(m_bones.size() == other.m_bones.size() && m_rootBones.size() == other.m_rootBones.size()))
 		return false;

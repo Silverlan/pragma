@@ -48,6 +48,11 @@ namespace pragma {
 	DLLNETWORK const char *register_global_string(const char *str);
 };
 
+template<>
+struct std::hash<pragma::GString> {
+	std::size_t operator()(const pragma::GString &k) const { return std::hash<std::string>()(k.c_str()); }
+};
+
 DLLNETWORK std::ostream &operator<<(std::ostream &stream, const pragma::GString &str);
 
 #endif

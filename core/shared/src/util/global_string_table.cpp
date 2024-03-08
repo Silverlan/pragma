@@ -98,6 +98,7 @@ size_t pragma::GString::length() const { return str ? strlen(str) : 0; }
 pragma::GString::operator const char *() const { return str ? str : ""; }
 pragma::GString::operator std::string() const { return str ? str : ""; }
 pragma::GString::operator std::string_view() const { return str ? str : ""; }
+pragma::GString::operator bool() const { return str ? true : false; }
 
 bool pragma::GString::operator==(const char *str) const
 {

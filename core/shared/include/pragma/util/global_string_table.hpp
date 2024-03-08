@@ -36,6 +36,7 @@ namespace pragma {
 		operator const char *() const;
 		operator std::string() const;
 		operator std::string_view() const;
+		operator bool() const;
 		const char *operator*() const;
 		const char *c_str() const;
 		bool empty() const;

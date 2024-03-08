@@ -237,7 +237,7 @@ util::TSharedHandle<BaseEntityComponent> EntityComponentManager::CreateComponent
 		// Attempt to create the component by name instead.
 		// This will automatically attempt to load the appropriate
 		// component script.
-		auto name = preRegInfo.name; // Name has to be copied, because pre-register information may be invalidated by the 'CreateComponent'-call
+		std::string name = preRegInfo.name; // Name has to be copied, because pre-register information may be invalidated by the 'CreateComponent'-call
 		return CreateComponent(name, ent);
 	}
 	auto &info = m_componentInfos.at(componentId);

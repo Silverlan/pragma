@@ -60,8 +60,21 @@ void luabind::default_converter<std::vector<T>>::to_lua(lua_State *L, std::vecto
 		if constexpr(std::is_fundamental_v<decltype(element)>)
 			t[index] = element;
 		else {
+			auto top = lua_gettop(L);
 			converter.to_lua(L, element);
-			lua_rawseti(L, -2, index);
+
+			auto num = lua_gettop(L) - top;
+			if(num == 1)
+				lua_rawseti(L, -2, index);
+			else {
+				// Multiple values, add as sub-table
+				auto subTable = luabind::newtable(L);
+				for(int i = 0; i < num; ++i)
+					subTable[i + 1] = luabind::object {luabind::from_stack(L, -num + i)};
+				lua_pop(L, num);
+				subTable.push(L);
+				lua_rawseti(L, -2, index); // Add the sub-table to the main table
+			}
 		}
 		++index;
 	}

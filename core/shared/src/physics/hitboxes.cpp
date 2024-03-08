@@ -73,7 +73,7 @@ void Model::GetHitboxBones(std::vector<uint32_t> &boneIds) const
 	for(auto &it : m_hitboxes)
 		boneIds.push_back(it.first);
 }
-bool Model::GenerateHitboxes()
+std::unordered_map<pragma::animation::BoneId, Hitbox> Model::CalcHitboxes() const
 {
 	struct BoneBounds {
 		Vector3 min {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
@@ -116,14 +116,23 @@ bool Model::GenerateHitboxes()
 	}
 
 	auto hitboxesAdded = false;
+	std::unordered_map<pragma::animation::BoneId, Hitbox> hitboxes;
+	hitboxes.reserve(boneBounds.size());
 	for(auto boneId = decltype(boneBounds.size()) {0u}; boneId < boneBounds.size(); ++boneId) {
 		auto &bounds = boneBounds[boneId];
 		if(bounds.min.x == std::numeric_limits<float>::lowest())
 			continue;
 		if((bounds.max.x - bounds.min.x) > 1.f && (bounds.max.y - bounds.min.y) > 1.f && (bounds.max.z - bounds.min.z) > 1.f) {
-			AddHitbox(boneId, HitGroup::Generic, bounds.min, bounds.max);
-			hitboxesAdded = true;
+			Hitbox hb {HitGroup::Generic, bounds.min, bounds.max};
+			hitboxes[boneId] = hb;
 		}
 	}
-	return hitboxesAdded;
+	return hitboxes;
+}
+bool Model::GenerateHitboxes()
+{
+	auto hitboxes = CalcHitboxes();
+	for(auto &[boneId, hb] : hitboxes)
+		AddHitbox(boneId, hb);
+	return !hitboxes.empty();
 }

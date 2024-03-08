@@ -433,6 +433,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	void GetHitboxBones(HitGroup group, std::vector<uint32_t> &boneIds) const;
 	std::vector<uint32_t> GetHitboxBones() const;
 	void GetHitboxBones(std::vector<uint32_t> &boneIds) const;
+	std::unordered_map<pragma::animation::BoneId, Hitbox> CalcHitboxes() const;
 	bool GenerateHitboxes();
 
 	void UpdateShape(const std::vector<SurfaceMaterial> *materials = nullptr);
@@ -520,6 +521,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	const FlexAnimation *GetFlexAnimation(uint32_t idx) const { return const_cast<Model *>(this)->GetFlexAnimation(idx); }
 	const std::string *GetFlexAnimationName(uint32_t idx) const;
 
+	void GenerateBoneMetadata();
 
 	std::optional<umath::ScaledTransform> GetReferenceBonePose(pragma::animation::BoneId boneId) const;
 	std::optional<pragma::SignedAxis> FindBoneTwistAxis(pragma::animation::BoneId boneId) const;

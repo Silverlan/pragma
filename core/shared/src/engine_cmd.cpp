@@ -224,15 +224,18 @@ void Engine::RegisterConsoleCommands()
 	conVarMap.RegisterConCommand(
 	  "lua_exec",
 	  [](NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
-		  if(argv.empty() || !state->IsGameActive())
+		  if(argv.empty()) {
+			  Con::cwar << "No argument given to execute!" << Con::endl;
 			  return;
-		  Game *game = state->GetGameState();
-		  if(game == NULL)
+		  }
+		  if(!state->IsGameActive() || state->GetGameState() == nullptr) {
+			  Con::cwar << "No game is active! Lua code cannot be executed without an active game!" << Con::endl;
 			  return;
+		  }
 		  auto fname = argv.at(0);
 		  if(argv.size() > 1 && argv[1] == "nocache") {
 			  Lua::set_ignore_include_cache(true);
-			  game->ExecuteLuaFile(fname);
+			  state->GetGameState()->ExecuteLuaFile(fname);
 			  Lua::set_ignore_include_cache(false);
 			  return;
 		  }

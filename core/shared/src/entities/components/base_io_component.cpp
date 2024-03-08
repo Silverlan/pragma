@@ -190,7 +190,7 @@ void BaseIOComponent::Input(std::string input, BaseEntity *activator, BaseEntity
 	else if(input == "fireuser4")
 		TriggerOutput("onuser4", activator);
 	else
-		Con::cout << "WARNING: Unhandled input '" << input << "' for entity '" << entThis.GetClass() << "'!" << Con::endl;
+		Con::cout << "WARNING: Unhandled input '" << input << "' for entity '" << std::string {entThis.GetClass()} << "'!" << Con::endl;
 }
 
 void BaseIOComponent::TriggerOutput(std::string name, BaseEntity *activator, IoFlags flags)

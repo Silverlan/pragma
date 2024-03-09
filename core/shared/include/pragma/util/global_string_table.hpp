@@ -56,9 +56,4 @@ struct std::hash<pragma::GString> {
 
 DLLNETWORK std::ostream &operator<<(std::ostream &stream, const pragma::GString &str);
 
-namespace pragma {
-	// This is required, otherwise the clang compiler will not be able to find the right overload
-	DLLNETWORK std::ostream &operator<<(std::ostream &stream, const pragma::GString &str);
-};
-
 #endif

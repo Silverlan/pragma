@@ -126,3 +126,5 @@ std::ostream &operator<<(std::ostream &stream, const pragma::GString &str)
 		stream << str.c_str();
 	return stream;
 }
+
+std::ostream &pragma::operator<<(std::ostream &stream, const pragma::GString &str) { return ::operator<<(stream, str); }

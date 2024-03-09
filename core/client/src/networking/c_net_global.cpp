@@ -1113,7 +1113,7 @@ void NET_cl_debug_ai_navigation(NetPacket packet)
 	auto currentNodeIdx = packet->Read<uint32_t>();
 	points.reserve(numNodes * 2 - 2);
 	std::shared_ptr<DebugRenderer::BaseObject> dbgNode = nullptr;
-	Con::ccl << "New path for " << std::string {npc->GetClass()} << ":" << Con::endl;
+	Con::ccl << "New path for " << npc->GetClass() << ":" << Con::endl;
 	for(auto nodeId = decltype(numNodes) {0}; nodeId < numNodes; ++nodeId) {
 		auto pos = packet->Read<Vector3>() + Vector3(0.f, 20.f, 0.f);
 		points.push_back(pos);

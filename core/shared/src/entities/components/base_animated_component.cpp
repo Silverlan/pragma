@@ -579,7 +579,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo, doubl
 
 #if DEBUG_VERBOSE_ANIMATION == 1
 	if(&animInfo == &m_baseAnim) {
-		Con::cout << std::string {GetEntity().GetClass()} << " is playing base animation '" << hModel->GetAnimationName(animId) << "'"
+		Con::cout << GetEntity().GetClass() << " is playing base animation '" << hModel->GetAnimationName(animId) << "'"
 		          << ": Cycle " << cycle << " => " << cycleNew << "; Looping: " << (bLoop ? "true" : "false") << "; Frame Count: " << numFrames << "; Speed: " << animSpeed << Con::endl;
 	}
 #endif

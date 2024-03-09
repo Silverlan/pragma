@@ -201,7 +201,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 			// Sanity check
 			if(std::isnan(rot.w) || std::isnan(rot.x) || std::isnan(rot.y) || std::isnan(rot.z)) {
 				std::stringstream ss {};
-				ss << "UpdatePhysicsData: NaN rotation (" << rot.w << "," << rot.x << "," << rot.y << "," << rot.z << ") for entity " << std::string {ent.GetClass()} << "!";
+				ss << "UpdatePhysicsData: NaN rotation (" << rot.w << "," << rot.x << "," << rot.y << "," << rot.z << ") for entity " << ent.GetClass() << "!";
 				spdlog::error(ss.str());
 				throw std::runtime_error(ss.str());
 			}
@@ -215,7 +215,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 				// Sanity check
 				if(std::isnan(angVel.x) || std::isnan(angVel.y) || std::isnan(angVel.z)) {
 					std::stringstream ss {};
-					ss << "UpdatePhysicsData: NaN angular velocity (" << angVel.x << "," << angVel.y << "," << angVel.z << ") for entity " << std::string {ent.GetClass()} << "!";
+					ss << "UpdatePhysicsData: NaN angular velocity (" << angVel.x << "," << angVel.y << "," << angVel.z << ") for entity " << ent.GetClass() << "!";
 					spdlog::error(ss.str());
 					throw std::runtime_error(ss.str());
 				}
@@ -235,7 +235,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 			// Sanity check
 			if(std::isnan(pos.x) || std::isnan(pos.y) || std::isnan(pos.z)) {
 				std::stringstream ss {};
-				ss << "UpdatePhysicsData: NaN position (" << pos.x << "," << pos.y << "," << pos.z << ") for entity " << std::string {ent.GetClass()} << "!";
+				ss << "UpdatePhysicsData: NaN position (" << pos.x << "," << pos.y << "," << pos.z << ") for entity " << ent.GetClass() << "!";
 				spdlog::error(ss.str());
 				throw std::runtime_error(ss.str());
 			}

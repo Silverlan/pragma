@@ -385,7 +385,7 @@ void CWorld::Initialize()
 Con::c_cout &CWorld::print(Con::c_cout &os)
 {
 	os << "CWorld[" << m_index << "]"
-	   << "[" << std::string {GetClass()} << "]"
+	   << "[" << GetClass() << "]"
 	   << "[";
 	auto &mdl = GetModel();
 	if(mdl == nullptr)
@@ -399,7 +399,7 @@ Con::c_cout &CWorld::print(Con::c_cout &os)
 std::ostream &CWorld::print(std::ostream &os)
 {
 	os << "CWorld[" << m_index << "]"
-	   << "[" << std::string {GetClass()} << "]"
+	   << "[" << GetClass() << "]"
 	   << "[";
 	auto &mdl = GetModel();
 	if(mdl == nullptr)

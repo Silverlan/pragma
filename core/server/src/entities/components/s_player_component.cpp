@@ -50,7 +50,7 @@ Con::c_cout &SPlayerComponent::print(Con::c_cout &os)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	auto nameC = ent.GetNameComponent();
 	os << "Player[" << (nameC.valid() ? nameC->GetName() : "") << "][" << ent.GetIndex() << "]"
-	   << "[" << std::string {ent.GetClass()} << "]"
+	   << "[" << ent.GetClass() << "]"
 	   << "[";
 	auto mdlComponent = ent.GetModelComponent();
 	if(!mdlComponent || mdlComponent->GetModel() == nullptr)
@@ -66,7 +66,7 @@ std::ostream &SPlayerComponent::print(std::ostream &os)
 	auto &ent = static_cast<SBaseEntity &>(GetEntity());
 	auto nameC = ent.GetNameComponent();
 	os << "Player[" << (nameC.valid() ? nameC->GetName() : "") << "][" << ent.GetIndex() << "]"
-	   << "[" << std::string {ent.GetClass()} << "]"
+	   << "[" << ent.GetClass() << "]"
 	   << "[";
 	auto mdlComponent = ent.GetModelComponent();
 	if(!mdlComponent || mdlComponent->GetModel() == nullptr)

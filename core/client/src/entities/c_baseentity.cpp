@@ -208,7 +208,7 @@ Bool CBaseEntity::ReceiveNetEvent(UInt32 eventId, NetPacket &p)
 		if(pNetComponent->ReceiveNetEvent(eventId, p))
 			return true;
 	}
-	Con::cwar << Con::PREFIX_CLIENT << "Unhandled net event '" << eventId << "' for entity " << GetClass() << Con::endl;
+	Con::cwar << Con::PREFIX_CLIENT << "Unhandled net event '" << eventId << "' for entity " << std::string {GetClass()} << Con::endl;
 	return false;
 }
 

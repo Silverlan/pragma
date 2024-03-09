@@ -218,7 +218,7 @@ Con::c_cout &BasePlayerComponent::print(Con::c_cout &os)
 	auto &ent = GetEntity();
 	auto nameComponent = ent.GetNameComponent();
 	os << "Player[" << (nameComponent.valid() ? nameComponent->GetName() : "") << "][" << ent.GetIndex() << "]"
-	   << "[" << ent.GetClass() << "]"
+	   << "[" << std::string {ent.GetClass()} << "]"
 	   << "[";
 	auto &hMdl = GetEntity().GetModel();
 	if(hMdl == nullptr)
@@ -234,7 +234,7 @@ std::ostream &BasePlayerComponent::print(std::ostream &os)
 	auto &ent = GetEntity();
 	auto nameComponent = ent.GetNameComponent();
 	os << "Player[" << (nameComponent.valid() ? nameComponent->GetName() : "") << "][" << ent.GetIndex() << "]"
-	   << "[" << ent.GetClass() << "]"
+	   << "[" << std::string {ent.GetClass()} << "]"
 	   << "[";
 	auto &hMdl = GetEntity().GetModel();
 	if(hMdl == nullptr)
@@ -480,7 +480,8 @@ Vector2 BasePlayerComponent::CalcMovementSpeed() const
 	return {speed, 0.f};
 }
 float BasePlayerComponent::CalcAirMovementModifier() const { return GetEntity().GetNetworkState()->GetGameState()->GetConVarFloat("sv_player_air_move_scale"); }
-float BasePlayerComponent::CalcMovementAcceleration(float &optOutRampUpTime) const {
+float BasePlayerComponent::CalcMovementAcceleration(float &optOutRampUpTime) const
+{
 	auto *game = GetEntity().GetNetworkState()->GetGameState();
 	optOutRampUpTime = game->GetConVarFloat("sv_acceleration_ramp_up_time");
 	return game->GetConVarFloat("sv_acceleration");

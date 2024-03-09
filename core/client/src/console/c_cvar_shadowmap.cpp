@@ -40,12 +40,12 @@ static bool get_shadow_map(NetworkState *nw, std::vector<std::string> &argv, pra
 	auto *ent = static_cast<CBaseEntity *>(ents.front());
 	auto *pLightComponent = static_cast<pragma::CLightComponent *>(ent->FindComponent("light").get());
 	if(pLightComponent == nullptr) {
-		Con::cwar << "Entity '" << ent->GetClass() << "'(" << argv.front() << ") is not a light!" << Con::endl;
+		Con::cwar << "Entity '" << std::string {ent->GetClass()} << "'(" << argv.front() << ") is not a light!" << Con::endl;
 		return false;
 	}
 	*light = pLightComponent;
 	if(pLightComponent->GetLight() == nullptr) {
-		Con::cwar << "Entity '" << ent->GetClass() << "'(" << argv.front() << ") has no light attached!" << Con::endl;
+		Con::cwar << "Entity '" << std::string {ent->GetClass()} << "'(" << argv.front() << ") has no light attached!" << Con::endl;
 		return false;
 	}
 	auto hShadowmap = (*light)->GetShadowMap(smType);

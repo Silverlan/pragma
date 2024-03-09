@@ -162,7 +162,7 @@ void ResourceWatcherManager::OnResourceChanged(const util::Path &rootPath, const
 							if(!mdlComponent || FileManager::ComparePath(mdlComponent->GetModelName(), strPath) == false)
 								continue;
 #if RESOURCE_WATCHER_VERBOSE > 0
-							Con::cout << "[ResourceWatcher] Reloading model for entity " << ent->GetClass() << "..." << Con::endl;
+							Con::cout << "[ResourceWatcher] Reloading model for entity " << std::string {ent->GetClass()} << "..." << Con::endl;
 #endif
 							mdlComponent->SetModel(std::shared_ptr<Model>(nullptr));
 							mdlComponent->SetModel(strPath);

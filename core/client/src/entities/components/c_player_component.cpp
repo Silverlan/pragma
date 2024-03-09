@@ -59,7 +59,7 @@ Con::c_cout &CPlayerComponent::print(Con::c_cout &os)
 	auto &ent = GetEntity();
 	auto nameC = ent.GetNameComponent();
 	os << "CPlayer[" << (nameC.valid() ? nameC->GetName() : "") << "][" << ent.GetIndex() << "]"
-	   << "[" << ent.GetClass() << "]"
+	   << "[" << std::string {ent.GetClass()} << "]"
 	   << "[";
 	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
@@ -75,7 +75,7 @@ std::ostream &CPlayerComponent::print(std::ostream &os)
 	auto &ent = GetEntity();
 	auto nameC = ent.GetNameComponent();
 	os << "CPlayer[" << (nameC.valid() ? nameC->GetName() : "") << "][" << ent.GetIndex() << "]"
-	   << "[" << ent.GetClass() << "]"
+	   << "[" << std::string {ent.GetClass()} << "]"
 	   << "[";
 	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)

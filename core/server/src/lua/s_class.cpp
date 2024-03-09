@@ -141,13 +141,13 @@ void SGame::RegisterLuaClasses()
 			//luabind::default_converter<EntityHandleT> x{};
 		//	x.to_cpp(nullptr,luabind::by_value<EntityHandleT>{},0);
 
-			Con::cout<<"Entity: "<<ent->GetClass()<<Con::endl;
+			Con::cout<<"Entity: "<<std::string{ent->GetClass()}<<Con::endl;
 		})),
 		luabind::def("test_entity_handle_const_param",static_cast<void(*)(const EntityHandleT&)>([](const EntityHandleT &ent) {
-			Con::cout<<"Entity: "<<ent->GetClass()<<Con::endl;
+			Con::cout<<"Entity: "<<std::string{ent->GetClass()}<<Con::endl;
 		})),
 		luabind::def("test_entity_handle_const_pointer_param",static_cast<void(*)(const EntityHandleT*)>([](const EntityHandleT *ent) {
-			Con::cout<<"Entity: "<<(*ent)->GetClass()<<Con::endl;
+			Con::cout<<"Entity: "<<std::string{(*ent)->GetClass()}<<Con::endl;
 		})),
 		luabind::def("test_entity_handle_ret",static_cast<EntityHandleT(*)(Game&)>([](Game &game) -> EntityHandleT {
 			return game.GetWorld()->GetEntity().GetHandle();

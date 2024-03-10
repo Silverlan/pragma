@@ -152,6 +152,7 @@ class NetworkState;
 using FlexControllerId = uint32_t;
 namespace pragma::animation {
 	using BoneId = uint16_t;
+	struct MetaRig;
 };
 enum class JointType : uint8_t;
 namespace umath {
@@ -176,8 +177,11 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 		Unused5 = Unused4 << 1u,
 		DontPrecacheTextureGroups = Unused5 << 1u,
 		WorldGeometry = DontPrecacheTextureGroups << 1u,
+		GeneratedHitboxes = WorldGeometry<<1u,
+		GeneratedLODs = GeneratedHitboxes<<1u,
+		GeneratedMetaRig = GeneratedLODs<<1u,
 
-		Count = 8
+		Count = 12
 	};
 
 	enum class StateFlags : uint32_t { None = 0u, Valid = 1u, AllMaterialsLoaded = Valid << 1u, MaterialsLoadInitiated = AllMaterialsLoaded << 1u };
@@ -371,6 +375,11 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 
 	const pragma::animation::Skeleton &GetSkeleton() const;
 	pragma::animation::Skeleton &GetSkeleton();
+
+	const pragma::animation::MetaRig *GetMetaRig() const;
+	pragma::animation::MetaRig *GetMetaRig();
+	bool GenerateMetaRig();
+
 	uint32_t GetBoneCount() const;
 	bool GetLocalBonePosition(uint32_t animId, uint32_t frameId, uint32_t boneId, Vector3 &rPos, Quat &rRot, Vector3 *scale = nullptr);
 	bool IsRootBone(uint32_t boneId) const;
@@ -521,8 +530,6 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	const FlexAnimation *GetFlexAnimation(uint32_t idx) const { return const_cast<Model *>(this)->GetFlexAnimation(idx); }
 	const std::string *GetFlexAnimationName(uint32_t idx) const;
 
-	void GenerateBoneMetadata();
-
 	std::optional<umath::ScaledTransform> GetReferenceBonePose(pragma::animation::BoneId boneId) const;
 	std::optional<pragma::SignedAxis> FindBoneTwistAxis(pragma::animation::BoneId boneId) const;
 	std::optional<pragma::SignedAxis> FindBoneAxisForDirection(pragma::animation::BoneId boneId, const Vector3 &dir) const;
@@ -575,6 +582,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	std::vector<std::shared_ptr<VertexAnimation>> m_vertexAnimations;
 	std::unordered_map<std::string, unsigned int> m_animationIDs;
 	std::shared_ptr<pragma::animation::Skeleton> m_skeleton = nullptr;
+	std::shared_ptr<pragma::animation::MetaRig> m_metaRig = nullptr;
 
 	std::vector<FlexController> m_flexControllers;
 	std::vector<Flex> m_flexes;

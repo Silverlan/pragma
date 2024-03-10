@@ -131,6 +131,9 @@ std::unordered_map<pragma::animation::BoneId, Hitbox> Model::CalcHitboxes() cons
 }
 bool Model::GenerateHitboxes()
 {
+	if(umath::is_flag_set(m_metaInfo.flags, Flags::GeneratedHitboxes))
+		return false;
+	umath::set_flag(m_metaInfo.flags, Flags::GeneratedHitboxes);
 	auto hitboxes = CalcHitboxes();
 	for(auto &[boneId, hb] : hitboxes)
 		AddHitbox(boneId, hb);

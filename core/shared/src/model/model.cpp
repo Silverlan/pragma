@@ -11,6 +11,7 @@
 #include <pragma/engine.h>
 #include "materialmanager.h"
 #include "pragma/model/animation/activities.h"
+#include "pragma/model/animation/meta_rig.hpp"
 #include <mathutil/umath.h>
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/model/modelmesh.h"
@@ -200,7 +201,7 @@ bool Model::IsEqual(const Model &other) const
 	if(m_skeleton && *m_skeleton != *other.m_skeleton)
 		return false;
 #ifdef _WIN32
-	static_assert(sizeof(Model) == 1008, "Update this function when making changes to this class!");
+	static_assert(sizeof(Model) == 1024, "Update this function when making changes to this class!");
 #endif
 	return true;
 }
@@ -1654,6 +1655,25 @@ void Model::GetAnimations(std::unordered_map<std::string, uint32_t> **anims) { *
 const pragma::animation::Skeleton &Model::GetSkeleton() const { return *m_skeleton; }
 pragma::animation::Skeleton &Model::GetSkeleton() { return *m_skeleton; }
 
+const pragma::animation::MetaRig *Model::GetMetaRig() const { return const_cast<Model *>(this)->GetMetaRig(); }
+pragma::animation::MetaRig *Model::GetMetaRig() { return m_metaRig.get(); }
+bool Model::GenerateMetaRig()
+{
+	if(umath::is_flag_set(m_metaInfo.flags, Flags::GeneratedMetaRig))
+		return false;
+	umath::set_flag(m_metaInfo.flags, Flags::GeneratedMetaRig);
+	auto libRig = m_networkState->InitializeLibrary("pr_rig");
+	if(!libRig)
+		return false;
+	auto *generateMetaRig = libRig->FindSymbolAddress<bool (*)(const Model &, pragma::animation::MetaRig &)>("generate_meta_rig");
+	if(!generateMetaRig)
+		return false;
+	m_metaRig = std::make_shared<pragma::animation::MetaRig>();
+	if(!generateMetaRig(*this, *m_metaRig))
+		return false;
+	return true;
+}
+
 std::shared_ptr<pragma::animation::Animation> Model::GetAnimation(uint32_t ID) const
 {
 	if(ID >= m_animations.size())
@@ -2005,6 +2025,9 @@ Quat Model::GetTwistAxisRotationOffset(pragma::SignedAxis axis)
 
 bool Model::GenerateLowLevelLODs(Game &game)
 {
+	if(umath::is_flag_set(m_metaInfo.flags, Flags::GeneratedLODs))
+		return false;
+	umath::set_flag(m_metaInfo.flags, Flags::GeneratedLODs);
 	auto &lods = GetLODs();
 	std::string suffix = "_lod_gen";
 

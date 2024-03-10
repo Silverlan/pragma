@@ -13,6 +13,7 @@
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/model/animation/flex_animation.hpp"
+#include "pragma/model/animation/meta_rig.hpp"
 #include "pragma/file_formats/wmd.h"
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/logging.hpp"
@@ -120,6 +121,7 @@ std::shared_ptr<Model> Model::Copy(Game *game, CopyFlags copyFlags) const
 	mdl->m_flexAnimations = m_flexAnimations;
 	mdl->m_animationIDs = m_animationIDs;
 	mdl->m_skeleton = std::make_unique<pragma::animation::Skeleton>(*m_skeleton);
+	mdl->m_metaRig = std::make_unique<pragma::animation::MetaRig>(*m_metaRig);
 	mdl->m_bindPose = m_bindPose;
 	mdl->m_eyeOffset = m_eyeOffset;
 	mdl->m_collisionMin = m_collisionMin;
@@ -208,7 +210,7 @@ std::shared_ptr<Model> Model::Copy(Game *game, CopyFlags copyFlags) const
 	//
 
 #ifdef _WIN32
-	static_assert(sizeof(Model) == 1008, "Update this function when making changes to this class!");
+	static_assert(sizeof(Model) == 1024, "Update this function when making changes to this class!");
 #endif
 	return mdl;
 }
@@ -320,7 +322,11 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 	readFlag(udm, Model::Flags::Static, "static", flags);
 	readFlag(udm, Model::Flags::Inanimate, "inanimate", flags);
 	readFlag(udm, Model::Flags::DontPrecacheTextureGroups, "dontPrecacheSkins", flags);
-	static_assert(umath::to_integral(Model::Flags::Count) == 8, "Update this list when new flags have been added!");
+	readFlag(udm, Model::Flags::WorldGeometry, "worldGeometry", flags);
+	readFlag(udm, Model::Flags::GeneratedHitboxes, "generatedHitboxes", flags);
+	readFlag(udm, Model::Flags::GeneratedLODs, "generatedLODs", flags);
+	readFlag(udm, Model::Flags::GeneratedMetaRig, "generatedMetaRig", flags);
+	static_assert(umath::to_integral(Model::Flags::Count) == 12, "Update this list when new flags have been added!");
 
 	auto isStatic = umath::is_flag_set(flags, Model::Flags::Static);
 	if(!isStatic) {
@@ -383,6 +389,35 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 			udmHb["bone"](boneId);
 			if(boneId != std::numeric_limits<uint32_t>::max())
 				hitboxes[boneId] = hb;
+		}
+
+		auto udmMetaRig = udm["metaRig"];
+		if(udmMetaRig) {
+			auto metaRig = std::make_shared<pragma::animation::MetaRig>();
+			udm::to_enum_value<pragma::animation::RigType>(udmMetaRig["rigType"], metaRig->rigType);
+			udmMetaRig["forwardFacingRotationOffset"](metaRig->forwardFacingRotationOffset);
+			auto udmBones = udmMetaRig["bones"];
+			auto numBones = udmBones.GetSize();
+			for(auto &udmBone : udmBones) {
+				std::string type;
+				udmBone["type"](type);
+				auto etype = pragma::animation::get_meta_rig_bone_type_enum(type);
+				if(!etype)
+					continue;
+				std::string bone;
+				udmBone["bone"](bone);
+				auto boneId = m_skeleton->LookupBone(bone);
+				if(boneId == pragma::animation::INVALID_BONE_INDEX)
+					continue;
+				auto &metaBone = metaRig->bones[umath::to_integral(*etype)];
+				metaBone.boneId = boneId;
+				udmBone["normalizedRotationOffset"](metaBone.normalizedRotationOffset);
+
+				auto udmBounds = udmBone["bounds"];
+				udmBounds["min"](metaBone.bounds.first);
+				udmBounds["max"](metaBone.bounds.second);
+			}
+			m_metaRig = metaRig;
 		}
 	}
 
@@ -748,7 +783,11 @@ bool Model::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
 	writeModelFlag(Model::Flags::Static, "static");
 	writeModelFlag(Model::Flags::Inanimate, "inanimate");
 	writeModelFlag(Model::Flags::DontPrecacheTextureGroups, "dontPrecacheSkins");
-	static_assert(umath::to_integral(Model::Flags::Count) == 8, "Update this list when new flags have been added!");
+	writeModelFlag(Model::Flags::WorldGeometry, "worldGeometry");
+	writeModelFlag(Model::Flags::GeneratedHitboxes, "generatedHitboxes");
+	writeModelFlag(Model::Flags::GeneratedLODs, "generatedLODs");
+	writeModelFlag(Model::Flags::GeneratedMetaRig, "generatedMetaRig");
+	static_assert(umath::to_integral(Model::Flags::Count) == 12, "Update this list when new flags have been added!");
 
 	auto isStatic = umath::is_flag_set(flags, Model::Flags::Static);
 	if(!isStatic) {
@@ -801,6 +840,36 @@ bool Model::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
 			udmHb["bounds"]["min"] = hb.min;
 			udmHb["bounds"]["max"] = hb.max;
 			udmHb["bone"] = pair.first;
+		}
+
+		if(m_metaRig) {
+			auto udmMetaRig = udm["metaRig"];
+			udmMetaRig["rigType"] = udm::enum_to_string(m_metaRig->rigType);
+			udmMetaRig["forwardFacingRotationOffset"] = m_metaRig->forwardFacingRotationOffset;
+
+			size_t numValidMetaBones = 0;
+			for(auto &metaBone : m_metaRig->bones) {
+				auto bone = m_skeleton->GetBone(metaBone.boneId);
+				if(bone.expired())
+					continue;
+				++numValidMetaBones;
+			}
+
+			auto udmBones = udmMetaRig.AddArray("bones", numValidMetaBones);
+			size_t idx = 0;
+			for(size_t i = 0; i < m_metaRig->bones.size(); ++i) {
+				auto &metaBone = m_metaRig->bones[i];
+				auto bone = m_skeleton->GetBone(metaBone.boneId);
+				if(bone.expired())
+					continue;
+				auto udmBone = udmBones[idx++];
+				udmBone["type"] = pragma::animation::get_meta_rig_bone_type_name(static_cast<pragma::animation::MetaRigBoneType>(i));
+				udmBone["bone"] = std::string {bone.lock()->name};
+				udmBone["normalizedRotationOffset"] = metaBone.normalizedRotationOffset;
+				auto udmBounds = udmBone["bounds"];
+				udmBounds["min"] = metaBone.bounds.first;
+				udmBounds["max"] = metaBone.bounds.second;
+			}
 		}
 	}
 

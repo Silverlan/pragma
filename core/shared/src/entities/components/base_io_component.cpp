@@ -120,7 +120,7 @@ bool BaseIOComponent::FireSingleOutput(Output &output, BaseEntity *activator, Io
 		ustring::to_lower(className);
 		EntityIterator entIt {*game};
 		entIt.AttachFilter<EntityIteratorFilterUser>([&className, &output](BaseEntity &ent, std::size_t index) -> bool {
-			if(ustring::compare(ent.GetClass(), className.c_str(), false))
+			if(ustring::compare(ent.GetClass().c_str(), className.c_str(), false))
 				return true;
 			auto pNameComponent = static_cast<pragma::BaseNameComponent *>(ent.FindComponent("name").get());
 			return pNameComponent != nullptr && ustring::compare(pNameComponent->GetName(), output.entities, false);
@@ -190,7 +190,7 @@ void BaseIOComponent::Input(std::string input, BaseEntity *activator, BaseEntity
 	else if(input == "fireuser4")
 		TriggerOutput("onuser4", activator);
 	else
-		Con::cout << "WARNING: Unhandled input '" << input << "' for entity '" << std::string {entThis.GetClass()} << "'!" << Con::endl;
+		Con::cout << "WARNING: Unhandled input '" << input << "' for entity '" << entThis.GetClass() << "'!" << Con::endl;
 }
 
 void BaseIOComponent::TriggerOutput(std::string name, BaseEntity *activator, IoFlags flags)

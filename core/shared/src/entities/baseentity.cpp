@@ -80,7 +80,7 @@ Con::c_cout &BaseEntity::print(Con::c_cout &os)
 {
 	auto *componentManager = GetComponentManager();
 	auto pNameComponent = componentManager ? static_cast<pragma::BaseNameComponent *>(FindComponent("name").get()) : nullptr;
-	os << "Entity[G:" << m_index << "][L:" << GetLocalIndex() << "][C:" << std::string {GetClass()} << "][N:" << (pNameComponent != nullptr ? pNameComponent->GetName() : "") << "][";
+	os << "Entity[G:" << m_index << "][L:" << GetLocalIndex() << "][C:" << GetClass() << "][N:" << (pNameComponent != nullptr ? pNameComponent->GetName() : "") << "][";
 	auto mdlComponent = componentManager ? GetModelComponent() : nullptr;
 	auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	if(hMdl == nullptr)
@@ -94,7 +94,7 @@ Con::c_cout &BaseEntity::print(Con::c_cout &os)
 std::ostream &BaseEntity::print(std::ostream &os)
 {
 	auto pNameComponent = static_cast<pragma::BaseNameComponent *>(FindComponent("name").get());
-	os << "Entity[G:" << m_index << "][L:" << GetLocalIndex() << "][C:" << std::string {GetClass()} << "][N:" << (pNameComponent != nullptr ? pNameComponent->GetName() : "") << "][";
+	os << "Entity[G:" << m_index << "][L:" << GetLocalIndex() << "][C:" << GetClass() << "][N:" << (pNameComponent != nullptr ? pNameComponent->GetName() : "") << "][";
 	auto mdlComponent = GetModelComponent();
 	auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	if(hMdl == nullptr)

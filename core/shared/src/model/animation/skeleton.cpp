@@ -250,7 +250,7 @@ void pragma::animation::Skeleton::Merge(Skeleton &other)
 	mergeHierarchy = [this, &bones, &rootBones, &mergeHierarchy](const std::unordered_map<pragma::animation::BoneId, std::shared_ptr<Bone>> &otherBones, std::shared_ptr<Bone> parent) {
 		for(auto &pair : otherBones) {
 			auto &otherBone = pair.second;
-			auto it = std::find_if(bones.begin(), bones.end(), [&otherBone](const std::shared_ptr<Bone> &bone) { return ustring::compare(bone->name, otherBone->name, true); });
+			auto it = std::find_if(bones.begin(), bones.end(), [&otherBone](const std::shared_ptr<Bone> &bone) { return ustring::compare(bone->name.c_str(), otherBone->name.c_str(), true); });
 			if(it == bones.end()) {
 				// Bone doesn't exist yet; Add to hierarchy
 				bones.push_back(std::make_shared<Bone>());

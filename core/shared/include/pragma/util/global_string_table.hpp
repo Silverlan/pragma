@@ -33,10 +33,10 @@ namespace pragma {
 		bool operator!=(const std::string_view &str) const;
 		bool operator==(const GString &str) const;
 		bool operator!=(const GString &str) const;
-		operator const char *() const;
+		explicit operator const char *() const;
 		operator std::string() const;
 		operator std::string_view() const;
-		operator bool() const;
+		explicit operator bool() const;
 		const char *operator*() const;
 		const char *c_str() const;
 		bool empty() const;

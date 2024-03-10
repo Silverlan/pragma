@@ -8,6 +8,7 @@
 #define __GAME_COORDINATE_SYSTEM_HPP__
 
 #include <cinttypes>
+#include <mathutil/uvec.h>
 
 namespace pragma {
 	enum class Axis : uint8_t { X = 0u, Y, Z, Count };

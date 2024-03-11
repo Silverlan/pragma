@@ -131,8 +131,8 @@
 	{
 		$uint32 app_id 280
 		$array game_paths [string][
-			"common/half-life 2/hl1/",
-			"common/half-life 2/hl1_hd/"
+			"common/Half-Life 2/hl1/",
+			"common/Half-Life 2/hl1_hd/"
 		]
 		$bool mount_workshop 0
 	}
@@ -141,7 +141,12 @@
 		$string name "source_engine"
 		$array archives [string][
 			"hl1_hd_pak_dir.vpk",
-			"hl1_pak_dir.vpk"
+			"hl1_pak_dir.vpk",
+            "hl2_misc_dir.vpk"
+			"hl2_pak_dir.vpk",
+			"hl2_sound_misc_dir.vpk",
+			"hl2_sound_vo_english_dir.vpk",
+			"hl2_textures_dir.vpk"
 		]
 	}
 }
@@ -170,14 +175,19 @@
 	"steam"
 	{
 		$uint32 app_id 240
-		$string game_path "common/counter-strike source/cstrike/"
+		$string game_path "common/Counter-Strike Source/cstrike/"
 		$bool mount_workshop 0
 	}
 	"engine"
 	{
 		$string name "source_engine"
 		$array archives [string][
-			"cstrike_pak_dir.vpk"
+			"cstrike_pak_dir.vpk",
+            "hl2_misc_dir.vpk"
+			"hl2_pak_dir.vpk",
+			"hl2_sound_misc_dir.vpk",
+			"hl2_sound_vo_english_dir.vpk",
+			"hl2_textures_dir.vpk"
 		]
 	}
 }
@@ -276,7 +286,12 @@
 	{
 		$string name "source_engine"
 		$array archives [string][
-			"hl2mp_pak_dir.vpk"
+			"hl2mp_pak_dir.vpk",
+            
+            "hl2_misc_dir.vpk"
+			"hl2_sound_misc_dir.vpk",
+			"hl2_sound_vo_english_dir.vpk",
+			"hl2_textures_dir.vpk"
 		]
 	}
 }
@@ -299,7 +314,11 @@
 	{
 		$string name "source_engine"
 		$array archives [string][
-			"platform_misc_dir.vpk"
+			"platform_misc_dir.vpk",
+            "hl2_misc_dir.vpk"
+			"hl2_sound_misc_dir.vpk",
+			"hl2_sound_vo_english_dir.vpk",
+			"hl2_textures_dir.vpk"
 		]
 	}
 }
@@ -434,7 +453,11 @@
 	{
 		$string name "source_engine"
 		$array archives [string][
-			"portal_pak_dir.vpk"
+			"portal_pak_dir.vpk",
+            "hl2_misc_dir.vpk"
+			"hl2_sound_misc_dir.vpk",
+			"hl2_sound_vo_english_dir.vpk",
+			"hl2_textures_dir.vpk"
 		]
 	}
 }
@@ -459,7 +482,11 @@
 			"tf2_misc_dir.vpk",
 			"tf2_sound_misc_dir.vpk",
 			"tf2_sound_vo_english_dir.vpk",
-			"tf2_textures_dir.vpk"
+			"tf2_textures_dir.vpk",
+            "hl2_misc_dir.vpk"
+			"hl2_sound_misc_dir.vpk",
+			"hl2_sound_vo_english_dir.vpk",
+			"hl2_textures_dir.vpk"
 		]
 	}
 }

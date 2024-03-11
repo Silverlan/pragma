@@ -83,7 +83,11 @@ void pragma::CurlQueryHandler::StartDownload() { s_fStartDownload(m_curl); }
 void pragma::CurlQueryHandler::CancelDownload() { s_fCancelDownload(m_curl); }
 bool pragma::CurlQueryHandler::IsComplete() const { return s_fIsComplete(m_curl); }
 void pragma::CurlQueryHandler::SetErrorHandler(const std::function<void(uint32_t)> &f) { s_fSetErrorHandler(m_curl, f); }
-std::string pragma::CurlQueryHandler::CodeToString(int32_t code) const { return s_fCodeToString(code); }
+std::string pragma::CurlQueryHandler::CodeToString(int32_t code) const {
+    std::string str;
+    s_fCodeToString(code, str);
+    return str;
+}
 bool pragma::CurlQueryHandler::IsErrorCode(int32_t code) const { return s_fIsErrorCode(code); }
 
 void pragma::CurlQueryHandler::Initialize()

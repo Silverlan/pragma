@@ -1,4 +1,4 @@
-import os
+# import os
 from pathlib import Path
 from sys import platform
 from distutils.dir_util import copy_tree
@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev
 if platform == "linux":
 	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-15')
 	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-15')
-	defaultGenerator = "Unix Makefiles"
+	defaultGenerator = "Ninja Multi-Config"
 else:
 	defaultGenerator = "Visual Studio 17 2022"
 parser.add_argument('--generator', help='The generator to use.', default=defaultGenerator)
@@ -709,8 +709,8 @@ if with_essential_client_modules:
 if with_common_modules:
     add_pragma_module(
         name="pr_bullet",
-        commitSha="4f1aea9",
-        repositoryUrl="https://github.com/Silverlan/pr_bullet.git"
+        commitSha="013f8f3befa67df294bd49f76248234ddef7e5e2",
+        repositoryUrl="https://github.com/Slaweknowy/pr_bullet.git"
     )
     add_pragma_module(
         name="pr_audio_soloud",
@@ -723,8 +723,8 @@ if with_pfm:
     if with_core_pfm_modules or with_all_pfm_modules:
         add_pragma_module(
             name="pr_curl",
-            commitSha="87ae87d95ded57b84cdec2a58728e00185dbf40a",
-            repositoryUrl="https://github.com/Silverlan/pr_curl.git"
+            commitSha="19780e3ae9222b6202c37a222303deb6f49dd1d1",
+            repositoryUrl="https://github.com/SlawekNowy/pr_curl.git"
         )
         add_pragma_module(
             name="pr_dmx",
@@ -744,8 +744,8 @@ if with_pfm:
         )
         add_pragma_module(
             name="pr_curl",
-            commitSha="87ae87d95ded57b84cdec2a58728e00185dbf40a",
-            repositoryUrl="https://github.com/Silverlan/pr_curl.git"
+            commitSha="19780e3ae9222b6202c37a222303deb6f49dd1d1",
+            repositoryUrl="https://github.com/SlawekNowy/pr_curl.git"
         )
         add_pragma_module(
             name="pr_dmx",
@@ -960,9 +960,9 @@ if with_lua_debugger:
 	cp(luasocket_root +"/src/socket.lua",install_dir +"/lua/modules/")
 	mkdir(install_dir +"/modules/socket/")
 	if platform == "win32":
-		cp(luasocket_root +"/build/socket/" +build_config +"/core.dll",install_dir +"/modules/socket/")
+		cp(luasocket_root +"/build/socket/" +build_config +"/core.dll",install_dir +"/lua/modules/socket/")
 	else:
-		cp(luasocket_root +"/build/socket/core.so",install_dir +"/modules/socket/")
+		cp(luasocket_root +"/build/socket/"+build_config +"/core.so",install_dir +"/lua/modules/socket/")
 	os.chdir(curDir)
 
 ########## lua-debug ##########

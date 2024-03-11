@@ -15,19 +15,73 @@
 #ifdef __linux__
 
 #include <pthread.h>
+
+#include <fcntl.h>
+#include <signal.h>
+#include <poll.h>
 #endif
+
+#ifdef __linux__
+ //https://stackoverflow.com/a/76104592
+    // Returns 1 on success, 0 when not done, and -1 on failure (check errno)
+// str is initially expected to be an empty string and should only altered by this function.
+static int getline_async_thread_safe( std::string& str,const int& fd = 0, char delim = '\n') {
+    int chars_read;
+    do {
+        char buf[2] = { 0 };
+        pollfd fd_stdin {0,POLLIN,0};
+
+        //sigemptyset(&signalset);
+        ppoll(&fd_stdin,1,NULL,nullptr);
+        chars_read = (int) read(fd, buf, 1);
+        if (chars_read == 1) {
+            if (*buf == delim) {
+                return 1;
+            }
+            str.append(buf);
+        } else {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                chars_read = 0;
+                break;
+            }
+        }
+    } while (chars_read > 0);
+
+    return chars_read;
+}
+#endif
+
+
 
 extern Engine *engine;
 static std::atomic_bool bCheckInput = true;
 static void KeyboardInput()
 {
 	//TODO: Rewrite this to use non-blocking algorythms
-	std::string line;
+    std::string line;
+#ifdef _WIN32
 	while(bCheckInput) {
 		std::getline(std::cin, line);
 		if(bCheckInput)
 			engine->ConsoleInput(line);
-	}
+    }
+#else
+    int retval;
+    while(bCheckInput) {
+        retval = getline_async_thread_safe(line);
+        if (retval > 0) {
+            // Process std::string output
+            // Make sure to reset string if continuing through loop
+            if(bCheckInput)
+                engine->ConsoleInput(line);
+
+            line = "";
+
+        }
+        // line = "";
+
+    }
+#endif
 }
 
 void Engine::ConsoleInput(const std::string_view &line) // TODO: Make sure input-thread and engine don't access m_consoleInput at the same time?

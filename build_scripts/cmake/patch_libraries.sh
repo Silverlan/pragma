@@ -19,6 +19,17 @@ patch_module() {
     fi;
 }
 
+patch_module_unirender() {
+
+    if [ -e $1 ]; then
+        #https://stackoverflow.com/a/28523143
+        relative_path=$(realpath --relative-to="$(dirname "$1")" "$lib_dir")
+	    patchelf --set-rpath '$ORIGIN' $1;
+	    patchelf --add-rpath "\$ORIGIN/$relative_path" $1
+	    patchelf --add-rpath "\$ORIGIN/cycles" $1
+    fi;
+}
+
 
 #This will iterate over all encountered SO and executables of ELF. See https://unix.stackexchange.com/a/699959.
 
@@ -40,6 +51,18 @@ for f in $(find "$root_dir/modules" -type f -exec bash -c "[[ \"\$(head -c 4 -- 
         echo "Skipped $f..."
         continue
     fi;
+    if [[ "$f" == *"modules/unirender"* && "$f" != *"modules/unirender/cycles"* ]]; then
+        #special handling. To avoid duplication of dependencies we add cycles directory to rpath.
+        echo "Patching $f ..."
+        patch_module_unirender "$f"
+        continue
+    fi;
+    echo "Patching $f ..."
+    patch_module "$f"
+done
+
+
+for f in $(find "$root_dir/bin" -type f -exec bash -c "[[ \"\$(head -c 4 -- \"\${1}\")\" == \$'\\x7FELF' ]]" -- \{\} \; -print 2> /dev/null ); do
     echo "Patching $f ..."
     patch_module "$f"
 done

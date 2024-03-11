@@ -1,7 +1,10 @@
-cmake_minimum_required(VERSION 3.15) # 3.11 for GENERATOR_IS_MULTI_CONFIG and INTERFACE items on IMPORTED targets
+cmake_minimum_required(VERSION 3.24) # 3.11 for GENERATOR_IS_MULTI_CONFIG and INTERFACE items on IMPORTED targets
 #3.13 for IMPORTED_TARGET GLOBAL for pkg_check_modules
 #3.15 for MSVC_RUNTIME_LIBRARY
+#3.24 for CMAKE_COLOR_DIAGNOSTICS
+#TODO: 3.29 for picking linker in UNIX environments
 project(pragma)
+set(CMAKE_COLOR_DIAGNOSTICS ON)
 
 option(CONFIG_BUILD_WITH_VTUNE_SUPPORT "Build with VTune profiler support?" OFF)
 
@@ -14,6 +17,15 @@ if(LINUX)
 	set(CMAKE_CXX_DEBUG_FLAGS "${CMAKE_CXX_DEBUG_FLAGS} -Og -g")
 endif()
 
+
+if(MSVC)
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /we4715")
+	set (CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} /we4715")
+else()
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type")
+	set (CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type")
+endif()
+
 #set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE CACHE INTERNAL "" FORCE)
 #set_target_properties(freetype PROPERTIES CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE)
 
@@ -22,19 +34,24 @@ get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(is_multi_config)
 	set(CONFIG_BUILD_TYPE "$<CONFIG>" CACHE STRING "Build Type" FORCE)
 else()
-	set(CONFIG_BUILD_TYPE "Debug" CACHE STRING "Build Type" FORCE)
+	set(CONFIG_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build Type" FORCE)
 	set(CMAKE_BUILD_TYPE "${CONFIG_BUILD_TYPE}")
 endif()
 
 
 #set_property(CACHE CONFIG_BUILD_TYPE PROPERTY STRINGS RelWithDebInfo Release Debug)
 
-set(CACHE CMAKE_CONFIGURATION_TYPES PROPERTY STRING "RelWithDebInfo;Release;Debug")
+set(CACHE CMAKE_CONFIGURATION_TYPES PROPERTY STRING "RelWithDebInfo;Release;Debug;")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 if(UNIX)
 	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
+
+
+
+
+
 
 #set(CMAKE_BUILD_TYPE ${CONFIG_BUILD_TYPE} CACHE STRING "" FORCE)
 

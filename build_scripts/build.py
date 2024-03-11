@@ -675,7 +675,7 @@ def execbuildscript(filepath):
 # Register modules that were added using the --module argument
 for module in modules:
 	os.chdir(root +"/modules")
-	parts = module.split(":")
+	parts = re.split(r':(?!\/\/)', module)
 	moduleArgName = parts[0]
 	repositoryUrl = None
 	skipBuildTarget = False
@@ -998,7 +998,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","da3d2070dc8e8a941e781e116c02c65d24a776de")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","ee61fae172b24e7271a3289c741edce8d64f639e")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","56d46dacb398fa7540e794359eaf1081c9df1edd")
 
 	if with_vr:

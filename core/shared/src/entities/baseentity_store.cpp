@@ -105,7 +105,9 @@ bool BaseEntity::ParseUri(std::string uriPath, pragma::EntityUComponentMemberRef
 	auto scheme = uri.scheme();
 	if(!scheme.empty() && uri.scheme() != "pragma")
 		return false;
-	util::Path path {uri.path()};
+	auto uriPathNorm = uri.path();
+	ustring::replace(uriPathNorm, "%20", " ");
+	util::Path path {uriPathNorm};
 	size_t offset = 0;
 	if(path.GetComponent(offset, &offset) != "game" || path.GetComponent(offset, &offset) != "entity")
 		return false;

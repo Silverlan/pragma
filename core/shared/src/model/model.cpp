@@ -1221,13 +1221,13 @@ void Model::Update(ModelUpdateFlags flags)
 	}
 }
 
-void Model::GetCollisionBounds(Vector3 &min, Vector3 &max)
+void Model::GetCollisionBounds(Vector3 &min, Vector3 &max) const
 {
 	min = m_collisionMin;
 	max = m_collisionMax;
 }
 
-void Model::GetRenderBounds(Vector3 &min, Vector3 &max)
+void Model::GetRenderBounds(Vector3 &min, Vector3 &max) const
 {
 	min = m_renderMin;
 	max = m_renderMax;

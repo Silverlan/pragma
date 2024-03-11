@@ -387,8 +387,8 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	void CalculateRenderBounds();
 	void CalculateCollisionBounds();
 	virtual void Update(ModelUpdateFlags flags = ModelUpdateFlags::AllData);
-	void GetCollisionBounds(Vector3 &min, Vector3 &max);
-	void GetRenderBounds(Vector3 &min, Vector3 &max);
+	void GetCollisionBounds(Vector3 &min, Vector3 &max) const;
+	void GetRenderBounds(Vector3 &min, Vector3 &max) const;
 	void SetCollisionBounds(const Vector3 &min, const Vector3 &max);
 	void SetRenderBounds(const Vector3 &min, const Vector3 &max);
 	Mat4 *GetBindPoseBoneMatrix(uint32_t boneID);

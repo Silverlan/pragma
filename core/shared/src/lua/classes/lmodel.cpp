@@ -984,10 +984,14 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	defRig.add_static_constant("BONE_TYPE_TAIL_MIDDLE1", umath::to_integral(pragma::animation::MetaRigBoneType::TailMiddle1));
 	defRig.add_static_constant("BONE_TYPE_TAIL_TIP", umath::to_integral(pragma::animation::MetaRigBoneType::TailTip));
 	defRig.add_static_constant("BONE_TYPE_LEFT_WING", umath::to_integral(pragma::animation::MetaRigBoneType::LeftWing));
+	defRig.add_static_constant("BONE_TYPE_LEFT_WING_MIDDLE", umath::to_integral(pragma::animation::MetaRigBoneType::LeftWingMiddle));
+	defRig.add_static_constant("BONE_TYPE_LEFT_WING_TIP", umath::to_integral(pragma::animation::MetaRigBoneType::LeftWingTip));
 	defRig.add_static_constant("BONE_TYPE_RIGHT_WING", umath::to_integral(pragma::animation::MetaRigBoneType::RightWing));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_WING_MIDDLE", umath::to_integral(pragma::animation::MetaRigBoneType::RightWingMiddle));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_WING_TIP", umath::to_integral(pragma::animation::MetaRigBoneType::RightWingTip));
 	defRig.add_static_constant("BONE_TYPE_COUNT", umath::to_integral(pragma::animation::MetaRigBoneType::Count));
 	defRig.add_static_constant("BONE_TYPE_INVALID", umath::to_integral(pragma::animation::MetaRigBoneType::Invalid));
-	static_assert(umath::to_integral(pragma::animation::MetaRigBoneType::Count) == 63, "Update this list when new bone types are addded!");
+	static_assert(umath::to_integral(pragma::animation::MetaRigBoneType::Count) == 67, "Update this list when new bone types are addded!");
 	classDef.scope[defRig];
 
 	// Flex Animation

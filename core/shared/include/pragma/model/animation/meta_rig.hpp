@@ -90,7 +90,11 @@ namespace pragma::animation {
 		TailTip,
 
 		LeftWing,
+		LeftWingMiddle,
+		LeftWingTip,
 		RightWing,
+		RightWingMiddle,
+		RightWingTip,
 		Count,
 
 		Invalid = std::numeric_limits<uint8_t>::max(),
@@ -246,10 +250,18 @@ constexpr const char *pragma::animation::get_meta_rig_bone_type_name(MetaRigBone
 		return "center_eye";
 	case MetaRigBoneType::LeftWing:
 		return "left_wing";
+	case MetaRigBoneType::LeftWingMiddle:
+		return "left_wing_middle";
+	case MetaRigBoneType::LeftWingTip:
+		return "left_wing_tip";
 	case MetaRigBoneType::RightWing:
 		return "right_wing";
+	case MetaRigBoneType::RightWingMiddle:
+		return "right_wing_middle";
+	case MetaRigBoneType::RightWingTip:
+		return "right_wing_tip";
 	}
-	static_assert(umath::to_integral(MetaRigBoneType::Count) == 63, "Update this list when new types are added!");
+	static_assert(umath::to_integral(MetaRigBoneType::Count) == 67, "Update this list when new types are added!");
 	return nullptr;
 }
 
@@ -381,10 +393,18 @@ constexpr std::optional<pragma::animation::MetaRigBoneType> pragma::animation::g
 		return pragma::animation::MetaRigBoneType::CenterEye;
 	case "left_wing"_:
 		return pragma::animation::MetaRigBoneType::LeftWing;
+	case "left_wing_middle"_:
+		return pragma::animation::MetaRigBoneType::LeftWingMiddle;
+	case "left_wing_tip"_:
+		return pragma::animation::MetaRigBoneType::LeftWingTip;
 	case "right_wing"_:
 		return pragma::animation::MetaRigBoneType::RightWing;
+	case "right_wing_middle"_:
+		return pragma::animation::MetaRigBoneType::RightWingMiddle;
+	case "right_wing_tip"_:
+		return pragma::animation::MetaRigBoneType::RightWingTip;
 	}
-	static_assert(umath::to_integral(MetaRigBoneType::Count) == 63, "Update this list when new types are added!");
+	static_assert(umath::to_integral(MetaRigBoneType::Count) == 67, "Update this list when new types are added!");
 	return {};
 }
 
@@ -430,6 +450,8 @@ constexpr std::optional<pragma::animation::BoneSide> pragma::animation::get_meta
 	case MetaRigBoneType::LeftLittleFinger2:
 	case MetaRigBoneType::LeftLittleFinger3:
 	case MetaRigBoneType::LeftWing:
+	case MetaRigBoneType::LeftWingMiddle:
+	case MetaRigBoneType::LeftWingTip:
 		return pragma::animation::BoneSide::Left;
 	case MetaRigBoneType::RightEar:
 	case MetaRigBoneType::RightEye:
@@ -456,9 +478,11 @@ constexpr std::optional<pragma::animation::BoneSide> pragma::animation::get_meta
 	case MetaRigBoneType::RightLittleFinger2:
 	case MetaRigBoneType::RightLittleFinger3:
 	case MetaRigBoneType::RightWing:
+	case MetaRigBoneType::RightWingMiddle:
+	case MetaRigBoneType::RightWingTip:
 		return pragma::animation::BoneSide::Right;
 	}
-	static_assert(umath::to_integral(MetaRigBoneType::Count) == 63, "Update this list when new types are added!");
+	static_assert(umath::to_integral(MetaRigBoneType::Count) == 67, "Update this list when new types are added!");
 	return {};
 }
 

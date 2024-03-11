@@ -375,6 +375,8 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 								auto path = util::Path::CreateFile(*filePath);
 								path.PopFront();
 								auto *mdl = static_cast<pragma::asset::ModelAssetWrapper &>(*aw).GetModel();
+								if(mdl)
+									mdl->ApplyPostImportProcessing();
 								if(mdl && mdl->Save(game, ::util::CONVERT_PATH + "models/" + path.GetString(), err) == false)
 									return nullptr;
 								break;
@@ -410,6 +412,8 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 				auto path = util::Path::CreateFile(*filePath);
 				// path.PopFront();
 				auto *mdl = static_cast<pragma::asset::ModelAssetWrapper &>(*aw).GetModel();
+				if(mdl)
+					mdl->ApplyPostImportProcessing();
 				if(mdl && mdl->Save(game, ::util::CONVERT_PATH + "models/" + path.GetString(), err) == false)
 					return nullptr;
 				return aw;

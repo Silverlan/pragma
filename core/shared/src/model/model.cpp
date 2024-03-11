@@ -1673,6 +1673,16 @@ bool Model::GenerateMetaRig()
 		return false;
 	return true;
 }
+void Model::ApplyPostImportProcessing()
+{
+	if(GenerateMetaRig()) {
+		// Probably a character model
+		if(m_hitboxes.empty())
+			GenerateHitboxes();
+		// Low-level LODs are used for fast BVH intersections
+		GenerateLowLevelLODs(*m_networkState->GetGameState());
+	}
+}
 
 std::shared_ptr<pragma::animation::Animation> Model::GetAnimation(uint32_t ID) const
 {

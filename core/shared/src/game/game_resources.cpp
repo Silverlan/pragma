@@ -103,6 +103,7 @@ static bool port_model(NetworkState *nw, const std::string &path, std::string md
 			     Con::cwar << "Unable to save model '" << outPath << "': Unable to open file!" << Con::endl;
 			     return false;
 		     }
+		     mdl->ApplyPostImportProcessing();
 		     auto udmData = udm::Data::Create();
 		     std::string err;
 		     if(mdl->Save(*game, udmData->GetAssetData(), err) == false) {

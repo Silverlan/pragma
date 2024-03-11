@@ -1339,6 +1339,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		return outputData;
 	}
 
+	mdl->ApplyPostImportProcessing();
 	mdl->Save(*c_game, mdlWritePath + mdlName, err);
 	outputData.model = mdl;
 	return outputData;

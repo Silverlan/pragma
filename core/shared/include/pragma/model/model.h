@@ -379,6 +379,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	const pragma::animation::MetaRig *GetMetaRig() const;
 	pragma::animation::MetaRig *GetMetaRig();
 	bool GenerateMetaRig();
+	void ApplyPostImportProcessing();
 
 	uint32_t GetBoneCount() const;
 	bool GetLocalBonePosition(uint32_t animId, uint32_t frameId, uint32_t boneId, Vector3 &rPos, Quat &rRot, Vector3 *scale = nullptr);

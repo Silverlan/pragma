@@ -900,6 +900,10 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.scope[defBoneInfo];
 
 	auto defRig = luabind::class_<pragma::animation::MetaRig>("MetaRig");
+	defRig.def_readonly("rigType", &pragma::animation::MetaRig::rigType);
+	defRig.def_readonly("forwardFacingRotationOffset", &pragma::animation::MetaRig::forwardFacingRotationOffset);
+	defRig.def_readonly("forwardAxis", &pragma::animation::MetaRig::forwardAxis);
+	defRig.def_readonly("upAxis", &pragma::animation::MetaRig::upAxis);
 	defRig.def(luabind::tostring(luabind::self));
 	defRig.def(
 	  "GetNormalizedBoneInfo", +[](const pragma::animation::MetaRig &metaRig, pragma::animation::MetaRigBoneType boneType) -> const pragma::animation::MetaRigBone * {
@@ -915,6 +919,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 			  throw std::runtime_error {"Invalid bone type index!"};
 		  return metaRig.bones[idx].boneId;
 	  });
+	defRig.add_static_constant("RIG_TYPE_BIPED", umath::to_integral(pragma::animation::RigType::Biped));
+	defRig.add_static_constant("RIG_TYPE_QUADRUPED", umath::to_integral(pragma::animation::RigType::Quadruped));
+
 	defRig.add_static_constant("BONE_TYPE_HIPS", umath::to_integral(pragma::animation::MetaRigBoneType::Hips));
 	defRig.add_static_constant("BONE_TYPE_PELVIS", umath::to_integral(pragma::animation::MetaRigBoneType::Pelvis));
 	defRig.add_static_constant("BONE_TYPE_SPINE", umath::to_integral(pragma::animation::MetaRigBoneType::Spine));

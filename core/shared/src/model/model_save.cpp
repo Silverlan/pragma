@@ -396,6 +396,8 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 			auto metaRig = std::make_shared<pragma::animation::MetaRig>();
 			udm::to_enum_value<pragma::animation::RigType>(udmMetaRig["rigType"], metaRig->rigType);
 			udmMetaRig["forwardFacingRotationOffset"](metaRig->forwardFacingRotationOffset);
+			udm::to_enum_value<pragma::SignedAxis>(udmMetaRig["forwardAxis"], metaRig->forwardAxis);
+			udm::to_enum_value<pragma::SignedAxis>(udmMetaRig["upAxis"], metaRig->upAxis);
 			auto udmBones = udmMetaRig["bones"];
 			auto numBones = udmBones.GetSize();
 			for(auto &udmBone : udmBones) {
@@ -846,6 +848,8 @@ bool Model::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
 			auto udmMetaRig = udm["metaRig"];
 			udmMetaRig["rigType"] = udm::enum_to_string(m_metaRig->rigType);
 			udmMetaRig["forwardFacingRotationOffset"] = m_metaRig->forwardFacingRotationOffset;
+			udmMetaRig["forwardAxis"] = udm::enum_to_string(m_metaRig->forwardAxis);
+			udmMetaRig["upAxis"] = udm::enum_to_string(m_metaRig->upAxis);
 
 			size_t numValidMetaBones = 0;
 			for(auto &metaBone : m_metaRig->bones) {

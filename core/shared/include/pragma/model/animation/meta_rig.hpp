@@ -114,6 +114,8 @@ namespace pragma::animation {
 		pragma::animation::BoneId GetBoneId(const pragma::GString &type) const;
 		RigType rigType = RigType::Biped;
 		Quat forwardFacingRotationOffset = uquat::identity();
+		pragma::SignedAxis forwardAxis = pragma::SignedAxis::Z;
+		pragma::SignedAxis upAxis = pragma::SignedAxis::Y;
 	};
 };
 

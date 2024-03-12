@@ -8,8 +8,8 @@
 #define __LDEF_SKELETON_HPP__
 
 #include "pragma/lua/ldefinitions.h"
-#include <panima/skeleton.hpp>
+#include "pragma/model/animation/skeleton.hpp"
 
-lua_registercheck(Skeleton, panima::Skeleton);
+lua_registercheck(Skeleton, pragma::animation::Skeleton);
 
 #endif

@@ -12,8 +12,8 @@
 #include "pragma/file_formats/wad.h"
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include <sharedutils/util_ifile.hpp>
-#include <panima/skeleton.hpp>
-#include <panima/bone.hpp>
+#include "pragma/model/animation/skeleton.hpp"
+#include "pragma/model/animation/bone.hpp"
 
 #define WMD_VERSION 38
 
@@ -213,7 +213,7 @@ void pragma::asset::WmdFormatHandler::LoadBones(unsigned short version, unsigned
 	if(!m_bStatic) {
 		reference->ReserveBoneIds(reference->GetBoneCount() + numBones);
 		for(unsigned int i = 0; i < numBones; i++) {
-			auto *bone = new panima::Bone;
+			auto *bone = new pragma::animation::Bone;
 			bone->name = m_file->ReadString();
 			skeleton.AddBone(bone);
 			reference->AddBoneId(i);
@@ -221,7 +221,7 @@ void pragma::asset::WmdFormatHandler::LoadBones(unsigned short version, unsigned
 	}
 	auto frame = Frame::Create((numBones == 0) ? 1 : numBones);
 	if(numBones == 0) {
-		auto *root = new panima::Bone;
+		auto *root = new pragma::animation::Bone;
 		root->name = "root";
 		unsigned int rootID = skeleton.AddBone(root);
 		mdl.SetBindPoseBoneMatrix(0, glm::inverse(umat::identity()));
@@ -997,7 +997,7 @@ void pragma::asset::WmdFormatHandler::LoadLODData(unsigned short version, Model 
 	//
 }
 
-void pragma::asset::WmdFormatHandler::LoadChildBones(const panima::Skeleton &skeleton, std::shared_ptr<panima::Bone> bone)
+void pragma::asset::WmdFormatHandler::LoadChildBones(const pragma::animation::Skeleton &skeleton, std::shared_ptr<pragma::animation::Bone> bone)
 {
 	unsigned int numChildren = m_file->Read<unsigned int>();
 	for(unsigned int i = 0; i < numChildren; i++) {
@@ -1061,8 +1061,8 @@ void pragma::asset::WmdFormatHandler::LoadJoints(Model &mdl)
 	auto numJoints = m_file->Read<uint32_t>();
 	for(auto i = decltype(numJoints) {0u}; i < numJoints; ++i) {
 		auto type = m_file->Read<JointType>();
-		auto child = m_file->Read<BoneId>();
-		auto parent = m_file->Read<BoneId>();
+		auto child = m_file->Read<pragma::animation::BoneId>();
+		auto parent = m_file->Read<pragma::animation::BoneId>();
 		auto &joint = mdl.AddJoint(type, child, parent);
 		joint.collide = m_file->Read<bool>();
 		auto numArgs = m_file->Read<uint8_t>();

@@ -74,7 +74,7 @@ namespace pragma::asset {
 		void LoadBlendControllers(Model &mdl);
 		void LoadIKControllers(uint16_t version, Model &mdl);
 		void LoadAnimations(unsigned short version, Model &mdl);
-		void LoadChildBones(const panima::Skeleton &skeleton, std::shared_ptr<panima::Bone> bone);
+		void LoadChildBones(const pragma::animation::Skeleton &skeleton, std::shared_ptr<pragma::animation::Bone> bone);
 		bool m_bStatic;
 		Game *m_gameState = nullptr;
 	};

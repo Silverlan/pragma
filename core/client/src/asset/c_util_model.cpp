@@ -38,8 +38,8 @@
 #include <cmaterialmanager.h>
 #include <cmaterial.h>
 #include <udm.hpp>
-#include <panima/skeleton.hpp>
-#include <panima/bone.hpp>
+#include <pragma/model/animation/skeleton.hpp>
+#include <pragma/model/animation/bone.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -897,13 +897,13 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		auto &skeleton = mdl->GetSkeleton();
 		auto &skin = gltfMdl.skins.front();
 		skeleton.GetBones().reserve(skin.joints.size());
-		std::unordered_map<int, panima::Bone *> nodeIdxToBone;
+		std::unordered_map<int, pragma::animation::Bone *> nodeIdxToBone;
 		for(auto i = decltype(skin.joints.size()) {0u}; i < skin.joints.size(); ++i) {
 			auto nodeIdx = skin.joints[i];
 			auto &node = gltfMdl.nodes[nodeIdx];
 			nodeToBoneIndex[&node] = i;
 
-			auto *bone = new panima::Bone {};
+			auto *bone = new pragma::animation::Bone {};
 			bone->name = node.name;
 			skeleton.AddBone(bone);
 			nodeIdxToBone[nodeIdx] = bone;
@@ -1339,6 +1339,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 		return outputData;
 	}
 
+	mdl->ApplyPostImportProcessing();
 	mdl->Save(*c_game, mdlWritePath + mdlName, err);
 	outputData.model = mdl;
 	return outputData;

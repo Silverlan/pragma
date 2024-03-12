@@ -18,14 +18,14 @@
 #include "pragma/model/model.h"
 #include "pragma/logging.hpp"
 #include <pragma/entities/entity_iterator.hpp>
-#include <panima/skeleton.hpp>
-#include <panima/bone.hpp>
+#include "pragma/model/animation/skeleton.hpp"
+#include "pragma/model/animation/bone.hpp"
 
 using namespace pragma;
 
 ComponentEventId IkSolverComponent::EVENT_INITIALIZE_SOLVER = pragma::INVALID_COMPONENT_ID;
 ComponentEventId IkSolverComponent::EVENT_ON_IK_UPDATED = pragma::INVALID_COMPONENT_ID;
-IkSolverComponent::ConstraintInfo::ConstraintInfo(BoneId bone0, BoneId bone1) : boneId0 {bone0}, boneId1 {bone1} {}
+IkSolverComponent::ConstraintInfo::ConstraintInfo(pragma::animation::BoneId bone0, pragma::animation::BoneId bone1) : boneId0 {bone0}, boneId1 {bone1} {}
 void IkSolverComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	EVENT_INITIALIZE_SOLVER = registerEvent("INITIALIZE_SOLVER", ComponentEventInfo::Type::Broadcast);
@@ -157,7 +157,7 @@ bool IkSolverComponent::AddIkSolverByChain(const std::string &boneName, uint32_t
 	}
 	auto &skeleton = mdl->GetSkeleton();
 	auto &ref = mdl->GetReference();
-	std::vector<BoneId> ikChain;
+	std::vector<pragma::animation::BoneId> ikChain;
 	ikChain.reserve(chainLength);
 	auto boneId = skeleton.LookupBone(boneName);
 	if(boneId == -1) {
@@ -216,7 +216,7 @@ bool IkSolverComponent::AddIkSolverByChain(const std::string &boneName, uint32_t
 	rig.ToUdmData(prop);
 	return true;
 }
-void IkSolverComponent::AddSkeletalBone(BoneId boneId)
+void IkSolverComponent::AddSkeletalBone(pragma::animation::BoneId boneId)
 {
 	auto &ent = GetEntity();
 	auto &mdl = ent.GetModel();
@@ -232,25 +232,25 @@ void IkSolverComponent::AddSkeletalBone(BoneId boneId)
 		return;
 	AddBone(bone.lock()->name, boneId, pose, 1.f, 1.f);
 }
-void IkSolverComponent::AddDragControl(BoneId boneId, float maxForce, float rigidity) { AddControl(boneId, pragma::ik::RigConfigControl::Type::Drag, maxForce, rigidity); }
-void IkSolverComponent::AddStateControl(BoneId boneId, float maxForce, float rigidity) { AddControl(boneId, pragma::ik::RigConfigControl::Type::State, maxForce, rigidity); }
-void IkSolverComponent::AddOrientedDragControl(BoneId boneId, float maxForce, float rigidity) { AddControl(boneId, pragma::ik::RigConfigControl::Type::OrientedDrag, maxForce, rigidity); }
+void IkSolverComponent::AddDragControl(pragma::animation::BoneId boneId, float maxForce, float rigidity) { AddControl(boneId, pragma::ik::RigConfigControl::Type::Drag, maxForce, rigidity); }
+void IkSolverComponent::AddStateControl(pragma::animation::BoneId boneId, float maxForce, float rigidity) { AddControl(boneId, pragma::ik::RigConfigControl::Type::State, maxForce, rigidity); }
+void IkSolverComponent::AddOrientedDragControl(pragma::animation::BoneId boneId, float maxForce, float rigidity) { AddControl(boneId, pragma::ik::RigConfigControl::Type::OrientedDrag, maxForce, rigidity); }
 size_t IkSolverComponent::GetBoneCount() const { return m_ikSolver->GetBoneCount(); }
-pragma::ik::IControl *IkSolverComponent::GetControl(BoneId boneId)
+pragma::ik::IControl *IkSolverComponent::GetControl(pragma::animation::BoneId boneId)
 {
 	auto it = m_ikControls.find(boneId);
 	if(it == m_ikControls.end())
 		return nullptr;
 	return it->second.get();
 }
-pragma::ik::Bone *IkSolverComponent::GetBone(BoneId boneId)
+pragma::ik::Bone *IkSolverComponent::GetBone(pragma::animation::BoneId boneId)
 {
 	auto it = m_boneIdToIkBoneId.find(boneId);
 	if(it == m_boneIdToIkBoneId.end())
 		return nullptr;
 	return m_ikSolver->GetBone(it->second);
 }
-void IkSolverComponent::SetBoneLocked(BoneId boneId, bool locked)
+void IkSolverComponent::SetBoneLocked(pragma::animation::BoneId boneId, bool locked)
 {
 	auto *bone = GetBone(boneId);
 	if(!bone)
@@ -281,7 +281,7 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 	using HierarchyDepth = uint8_t;
 	struct BoneInfo {
 		uint32_t rigBoneIndex;
-		BoneId skeletonBoneIndex;
+		pragma::animation::BoneId skeletonBoneIndex;
 		HierarchyDepth hierarchyDepth;
 	};
 	std::vector<BoneInfo> bones;
@@ -303,7 +303,7 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 			++depth;
 			parent = parent.lock()->parent;
 		}
-		bones.push_back(BoneInfo {rigBoneIdx++, static_cast<BoneId>(boneId), depth});
+		bones.push_back(BoneInfo {rigBoneIdx++, static_cast<pragma::animation::BoneId>(boneId), depth});
 	}
 	// Sort the bones to be in hierarchical order. This is not necessary for the ik solver, but the order is important
 	// when the animation is updated.
@@ -333,7 +333,7 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 			return false;
 		}
 
-		ConstraintInfo constraintInfo {static_cast<BoneId>(boneId0), static_cast<BoneId>(boneId1)};
+		ConstraintInfo constraintInfo {static_cast<pragma::animation::BoneId>(boneId0), static_cast<pragma::animation::BoneId>(boneId1)};
 		constraintInfo.rigidity = constraintData->rigidity;
 		constraintInfo.maxForce = constraintData->maxForce;
 		switch(constraintData->type) {
@@ -350,14 +350,14 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 	}
 	return true;
 }
-std::optional<umath::ScaledTransform> IkSolverComponent::GetReferenceBonePose(BoneId boneId) const
+std::optional<umath::ScaledTransform> IkSolverComponent::GetReferenceBonePose(pragma::animation::BoneId boneId) const
 {
 	auto &mdl = GetEntity().GetModel();
 	if(!mdl)
 		return {};
 	return mdl->GetReferenceBonePose(boneId);
 }
-bool IkSolverComponent::GetConstraintBones(BoneId boneId0, BoneId boneId1, pragma::ik::Bone **bone0, pragma::ik::Bone **bone1, umath::ScaledTransform &pose0, umath::ScaledTransform &pose1) const
+bool IkSolverComponent::GetConstraintBones(pragma::animation::BoneId boneId0, pragma::animation::BoneId boneId1, pragma::ik::Bone **bone0, pragma::ik::Bone **bone1, umath::ScaledTransform &pose0, umath::ScaledTransform &pose1) const
 {
 	auto itBone0 = m_boneIdToIkBoneId.find(boneId0);
 	auto itBone1 = m_boneIdToIkBoneId.find(boneId1);
@@ -613,7 +613,7 @@ void IkSolverComponent::OnEntitySpawn()
 	SetTickPolicy(pragma::TickPolicy::Always);
 	InitializeSolver();
 }
-std::optional<IkSolverComponent::IkBoneId> IkSolverComponent::GetIkBoneId(BoneId boneId) const
+std::optional<IkSolverComponent::IkBoneId> IkSolverComponent::GetIkBoneId(pragma::animation::BoneId boneId) const
 {
 	auto it = m_boneIdToIkBoneId.find(boneId);
 	if(it == m_boneIdToIkBoneId.end())
@@ -631,7 +631,7 @@ std::optional<std::string> IkSolverComponent::GetControlBoneName(const std::stri
 		return {};
 	return std::string {boneName};
 }
-std::optional<BoneId> IkSolverComponent::GetControlBoneId(const std::string &propPath)
+std::optional<pragma::animation::BoneId> IkSolverComponent::GetControlBoneId(const std::string &propPath)
 {
 	auto boneName = GetControlBoneName(propPath);
 	if(!boneName)
@@ -645,21 +645,21 @@ std::optional<BoneId> IkSolverComponent::GetControlBoneId(const std::string &pro
 		return {};
 	return boneId;
 }
-std::optional<BoneId> IkSolverComponent::GetSkeletalBoneId(IkBoneId boneId) const
+std::optional<pragma::animation::BoneId> IkSolverComponent::GetSkeletalBoneId(IkBoneId boneId) const
 {
 	auto it = m_ikBoneIdToBoneId.find(boneId);
 	if(it == m_ikBoneIdToBoneId.end())
 		return {};
 	return it->second;
 }
-pragma::ik::Bone *IkSolverComponent::GetIkBone(BoneId boneId)
+pragma::ik::Bone *IkSolverComponent::GetIkBone(pragma::animation::BoneId boneId)
 {
 	auto rigConfigBoneId = GetIkBoneId(boneId);
 	if(!rigConfigBoneId.has_value())
 		return nullptr;
 	return m_ikSolver->GetBone(*rigConfigBoneId);
 }
-void IkSolverComponent::AddControl(BoneId boneId, pragma::ik::RigConfigControl::Type type, float maxForce, float rigidity)
+void IkSolverComponent::AddControl(pragma::animation::BoneId boneId, pragma::ik::RigConfigControl::Type type, float maxForce, float rigidity)
 {
 	auto &mdl = GetEntity().GetModel();
 	if(!mdl) {
@@ -714,7 +714,7 @@ void IkSolverComponent::AddControl(BoneId boneId, pragma::ik::RigConfigControl::
 
 	control->SetMaxForce((maxForce < 0.f) ? std::numeric_limits<float>::max() : maxForce);
 	control->SetRigidity(rigidity);
-	auto &name = bone->name;
+	std::string name = bone->name;
 	using TComponent = IkSolverComponent;
 	auto defGetSet = [this, &bone, rigConfigBone, &name, boneId](auto &ctrl) {
 		using TControl = std::remove_reference_t<decltype(ctrl)>;
@@ -888,7 +888,7 @@ std::optional<ComponentMemberIndex> IkSolverComponent::DoGetMemberIndex(const st
 		return *idx; // +GetStaticMemberCount();
 	return std::optional<ComponentMemberIndex> {};
 }
-pragma::ik::Bone *IkSolverComponent::AddBone(const std::string &boneName, BoneId boneId, const umath::Transform &pose, float radius, float length)
+pragma::ik::Bone *IkSolverComponent::AddBone(const std::string &boneName, pragma::animation::BoneId boneId, const umath::Transform &pose, float radius, float length)
 {
 	auto rigConfigBone = GetIkBone(boneId);
 	if(rigConfigBone)

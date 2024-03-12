@@ -19,8 +19,10 @@ extern DLLCLIENT ClientState *client;
 #if LUA_ENABLE_RUN_GUI == 1
 void CMD_lua_run_gui(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
-	if(argv.empty())
+	if(argv.empty()) {
+		Con::cwar << "No argument given to execute!" << Con::endl;
 		return;
+	}
 	std::string lua = argv[0];
 	for(auto i = 1; i < argv.size(); i++) {
 		lua += " ";
@@ -33,17 +35,21 @@ void CMD_lua_run_gui(NetworkState *state, pragma::BasePlayerComponent *, std::ve
 
 DLLCLIENT void CMD_lua_run_cl(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)
 {
-	if(argv.empty() || !state->IsGameActive())
+	if(argv.empty()) {
+		Con::cwar << "No argument given to execute!" << Con::endl;
 		return;
-	Game *game = state->GetGameState();
-	if(game == NULL)
+	}
+	if(!state->IsGameActive() || state->GetGameState() == nullptr) {
+		Con::cwar << "No game is active! Lua code cannot be executed without an active game!" << Con::endl;
 		return;
+	}
+
 	std::string lua = argv[0];
 	for(auto i = 1; i < argv.size(); i++) {
 		lua += " ";
 		lua += argv[i];
 	}
-	game->RunLua(lua);
+	state->GetGameState()->RunLua(lua);
 }
 
 DLLCLIENT void CMD_lua_reload_entity(NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv)

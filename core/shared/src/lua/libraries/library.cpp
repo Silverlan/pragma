@@ -527,8 +527,11 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def(
 	    "remap", +[](float value, float fromLow, float fromHigh, float toLow, float toHigh) {
 			   return toLow + (value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow);
-			  })
+			  }),
+		luabind::def("is_positive_axis",static_cast<bool(*)(pragma::SignedAxis)>(&pragma::is_positive_axis)),
+		luabind::def("is_negative_axis",static_cast<bool(*)(pragma::SignedAxis)>(&pragma::is_negative_axis))
 	];
+
 	lua_pushtablecfunction(lua.GetState(), "math", "parse_expression", parse_math_expression);
 	lua_pushtablecfunction(lua.GetState(), "math", "solve_quadric", Lua::math::solve_quadric);
 	lua_pushtablecfunction(lua.GetState(), "math", "solve_cubic", Lua::math::solve_cubic);

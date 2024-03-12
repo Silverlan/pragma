@@ -10,7 +10,7 @@
 #include "pragma/model/animation/animation.hpp"
 #include <udm.hpp>
 #include <panima/channel.hpp>
-#include <panima/pose.hpp>
+#include "pragma/model/animation/pose.hpp"
 #include <panima/slice.hpp>
 
 Activity pragma::animation::skeletal::get_activity(const panima::Animation &anim)
@@ -65,7 +65,7 @@ void pragma::animation::skeletal::set_render_bounds(panima::Animation &anim, con
 	udmRenderBounds["max"] = max;
 #endif
 }
-pragma::animation::skeletal::BoneChannelMap pragma::animation::skeletal::get_bone_channel_map(const panima::Animation &animation, const panima::Skeleton &skeleton)
+pragma::animation::skeletal::BoneChannelMap pragma::animation::skeletal::get_bone_channel_map(const panima::Animation &animation, const pragma::animation::Skeleton &skeleton)
 {
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
 	BoneChannelMap boneChannelMap;
@@ -103,7 +103,7 @@ pragma::animation::skeletal::BoneChannelMap pragma::animation::skeletal::get_bon
 	return {};
 #endif
 }
-void pragma::animation::skeletal::animation_slice_to_animated_pose(const BoneChannelMap &boneChannelMap, const panima::Slice &slice, panima::Pose &pose)
+void pragma::animation::skeletal::animation_slice_to_animated_pose(const BoneChannelMap &boneChannelMap, const panima::Slice &slice, pragma::animation::Pose &pose)
 {
 	auto &transforms = pose.GetTransforms();
 	pose.SetTransformCount(boneChannelMap.size());

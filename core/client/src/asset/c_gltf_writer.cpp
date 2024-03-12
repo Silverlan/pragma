@@ -27,8 +27,8 @@
 #include <pragma/util/resource_watcher.h>
 #include <datasystem_color.h>
 #include <datasystem_vector.h>
-#include <panima/skeleton.hpp>
-#include <panima/bone.hpp>
+#include <pragma/model/animation/skeleton.hpp>
+#include <pragma/model/animation/bone.hpp>
 
 // #define ENABLE_GLTF_VALIDATION
 #define GLTF_ASSERT(c, msg)                                                                                                                                                                                                                                                                      \
@@ -883,8 +883,8 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 		// Transform pose to relative
 		auto referenceRelative = Frame::Create(mdl.GetReference());
 		inverseBindPoseMatrices.resize(skeleton.GetBoneCount());
-		std::function<void(panima::Bone &, const umath::Transform &)> fToRelativeTransforms = nullptr;
-		fToRelativeTransforms = [this, &fToRelativeTransforms, &referenceRelative, &inverseBindPoseMatrices](panima::Bone &bone, const umath::Transform &parentPose) {
+		std::function<void(pragma::animation::Bone &, const umath::Transform &)> fToRelativeTransforms = nullptr;
+		fToRelativeTransforms = [this, &fToRelativeTransforms, &referenceRelative, &inverseBindPoseMatrices](pragma::animation::Bone &bone, const umath::Transform &parentPose) {
 			auto pose = referenceRelative->GetBoneTransform(bone.ID) ? *referenceRelative->GetBoneTransform(bone.ID) : umath::Transform {};
 
 			auto scaledPose = pose;
@@ -915,8 +915,8 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 		}
 
 		std::unordered_set<uint32_t> traversedJoints {};
-		std::function<void(panima::Bone &, tinygltf::Node &)> fIterateSkeleton = nullptr;
-		fIterateSkeleton = [this, &fIterateSkeleton, &referenceRelative, &traversedJoints](panima::Bone &bone, tinygltf::Node &parentNode) {
+		std::function<void(pragma::animation::Bone &, tinygltf::Node &)> fIterateSkeleton = nullptr;
+		fIterateSkeleton = [this, &fIterateSkeleton, &referenceRelative, &traversedJoints](pragma::animation::Bone &bone, tinygltf::Node &parentNode) {
 			auto nodeIdx = m_boneIdxToNodeIdx[bone.ID];
 			parentNode.children.push_back(nodeIdx);
 			traversedJoints.insert(nodeIdx);
@@ -1148,7 +1148,8 @@ void pragma::asset::GLTFWriter::WriteAnimations(::Model &mdl)
 					scales.push_back(scale);
 				}
 			}
-			auto bufBone = AddBufferView("anim_" + gltfAnim.name + "_bone_" + bone.name + "_data", animBufferIdx, dataOffset, sizePerVertex * numFrames, {});
+			std::string boneName = bone.name;
+			auto bufBone = AddBufferView("anim_" + gltfAnim.name + "_bone_" + boneName + "_data", animBufferIdx, dataOffset, sizePerVertex * numFrames, {});
 
 			// Write animation data to buffer
 			memcpy(animData.data() + dataOffset, translations.data(), translations.size() * sizeof(translations.front()));
@@ -1163,11 +1164,11 @@ void pragma::asset::GLTFWriter::WriteAnimations(::Model &mdl)
 			}
 
 			// Initialize accessors
-			auto translationsAccessor = AddAccessor("anim_" + gltfAnim.name + "_bone_" + bone.name + "_translations", TINYGLTF_COMPONENT_TYPE_FLOAT, TINYGLTF_TYPE_VEC3, 0, numFrames, bufBone);
-			auto rotationsAccessor = AddAccessor("anim_" + gltfAnim.name + "_bone_" + bone.name + "_rotations", TINYGLTF_COMPONENT_TYPE_FLOAT, TINYGLTF_TYPE_VEC4, translations.size() * sizeof(translations.front()), numFrames, bufBone);
+			auto translationsAccessor = AddAccessor("anim_" + gltfAnim.name + "_bone_" + boneName + "_translations", TINYGLTF_COMPONENT_TYPE_FLOAT, TINYGLTF_TYPE_VEC3, 0, numFrames, bufBone);
+			auto rotationsAccessor = AddAccessor("anim_" + gltfAnim.name + "_bone_" + boneName + "_rotations", TINYGLTF_COMPONENT_TYPE_FLOAT, TINYGLTF_TYPE_VEC4, translations.size() * sizeof(translations.front()), numFrames, bufBone);
 			auto scalesAccessor = std::numeric_limits<uint32_t>::max();
 			if(useScales) {
-				scalesAccessor = AddAccessor("anim_" + gltfAnim.name + "_bone_" + bone.name + "_scales", TINYGLTF_COMPONENT_TYPE_FLOAT, TINYGLTF_TYPE_VEC3, translations.size() * sizeof(translations.front()) + rotations.size() * sizeof(rotations.front()), numFrames, bufBone);
+				scalesAccessor = AddAccessor("anim_" + gltfAnim.name + "_bone_" + boneName + "_scales", TINYGLTF_COMPONENT_TYPE_FLOAT, TINYGLTF_TYPE_VEC3, translations.size() * sizeof(translations.front()) + rotations.size() * sizeof(rotations.front()), numFrames, bufBone);
 			}
 
 			// Initialize samplers

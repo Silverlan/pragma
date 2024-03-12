@@ -13,9 +13,11 @@
 #include <cinttypes>
 
 enum class Activity : uint16_t;
-using BoneId = uint16_t;
 namespace util {
 	class EnumRegister;
+};
+namespace pragma::animation {
+	using BoneId = uint16_t;
 };
 namespace pragma::animation::skeletal {
 	static constexpr std::string_view SK_ANIMATED_COMPONENT_NAME = "sk_animated";
@@ -25,7 +27,7 @@ namespace pragma::animation::skeletal {
 		uint32_t rotationChannel = INVALID_CHANNEL;
 		uint32_t scaleChannel = INVALID_CHANNEL;
 	};
-	using BoneChannelMap = std::unordered_map<BoneId, AnimBoneChannelDesc>;
+	using BoneChannelMap = std::unordered_map<pragma::animation::BoneId, AnimBoneChannelDesc>;
 
 	util::EnumRegister &get_activity_enum_register();
 	Activity get_activity(const panima::Animation &anim);
@@ -36,10 +38,10 @@ namespace pragma::animation::skeletal {
 	std::pair<Vector3, Vector3> get_render_bounds(const panima::Animation &anim);
 	void set_render_bounds(panima::Animation &anim, const Vector3 &min, const Vector3 &max);
 
-	BoneChannelMap get_bone_channel_map(const panima::Animation &animation, const panima::Skeleton &skeleton);
-	void animation_slice_to_animated_pose(const BoneChannelMap &boneChannelMap, const panima::Slice &slice, panima::Pose &pose);
+	BoneChannelMap get_bone_channel_map(const panima::Animation &animation, const pragma::animation::Skeleton &skeleton);
+	void animation_slice_to_animated_pose(const BoneChannelMap &boneChannelMap, const panima::Slice &slice, pragma::animation::Pose &pose);
 
-	void interpolate_animated_poses(const panima::Pose &pose0, const panima::Pose &pose1, panima::Pose &poseDst, float f);
+	void interpolate_animated_poses(const pragma::animation::Pose &pose0, const pragma::animation::Pose &pose1, pragma::animation::Pose &poseDst, float f);
 
 	bool is_bone_position_channel(const panima::Channel &channel);
 	bool is_bone_rotation_channel(const panima::Channel &channel);

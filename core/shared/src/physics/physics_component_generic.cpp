@@ -28,8 +28,8 @@
 #include "pragma/model/model.h"
 #include "pragma/entities/components/basegravity.h"
 #include "pragma/game/game_coordinate_system.hpp"
-#include <panima/skeleton.hpp>
-#include <panima/bone.hpp>
+#include "pragma/model/animation/skeleton.hpp"
+#include "pragma/model/animation/bone.hpp"
 
 using namespace pragma;
 
@@ -444,8 +444,8 @@ PhysObjHandle BasePhysicsComponent::InitializePhysics(const physics::PhysObjCrea
 	}
 
 	// Move all collision objects to their respective bone counterparts (To keep our previous pose)
-	std::function<void(std::unordered_map<uint32_t,std::shared_ptr<panima::Bone>>&)> fUpdateCollisionObjects;
-	fUpdateCollisionObjects = [this,&fUpdateCollisionObjects](std::unordered_map<uint32_t,std::shared_ptr<panima::Bone>> &bones) {
+	std::function<void(std::unordered_map<pragma::animation::BoneId, std::shared_ptr<pragma::animation::Bone>> &)> fUpdateCollisionObjects;
+	fUpdateCollisionObjects = [this,&fUpdateCollisionObjects](std::unordered_map<pragma::animation::BoneId,std::shared_ptr<pragma::animation::Bone>> &bones) {
 		for(auto &it : bones)
 		{
 			UpdateBoneCollisionObject(it.first,true,true);

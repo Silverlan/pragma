@@ -12,7 +12,7 @@
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_model.h"
-#include <panima/skeleton.hpp>
+#include <pragma/model/animation/skeleton.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/debug/intel_vtune.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>

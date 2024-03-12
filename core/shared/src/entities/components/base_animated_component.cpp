@@ -19,8 +19,8 @@
 #include "pragma/model/model.h"
 #include "pragma/audio/alsound_type.h"
 #include "pragma/lua/luafunction_call.h"
-#include <panima/skeleton.hpp>
-#include <panima/bone.hpp>
+#include "pragma/model/animation/skeleton.hpp"
+#include "pragma/model/animation/bone.hpp"
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
@@ -228,10 +228,10 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 	auto &skeleton = mdl->GetSkeleton();
 	auto &bones = skeleton.GetBones();
 	ReserveMembers(bones.size() * 3);
-	std::function<void(const panima::Bone &, const std::string &)> fAddBone = nullptr;
-	fAddBone = [&](const panima::Bone &bone, const std::string &parentPathName) {
+	std::function<void(const pragma::animation::Bone &, const std::string &)> fAddBone = nullptr;
+	fAddBone = [&](const pragma::animation::Bone &bone, const std::string &parentPathName) {
 		const auto &name = bone.name;
-		auto lname = name;
+		std::string lname = name;
 		// ustring::to_lower(lname);
 
 		std::shared_ptr<ents::ParentTypeMetaData> parentMetaData {};

@@ -122,223 +122,222 @@ DLLCLIENT void NET_cl_snd_ev(NetPacket packet)
 	std::shared_ptr<ALSound> as = client->GetSoundByIndex(idx);
 	if(as == NULL)
 		return;
-	CALSound *cas = static_cast<CALSound *>(as.get());
 	switch(static_cast<ALSound::NetEvent>(ev)) {
 	case ALSound::NetEvent::Play:
-		cas->Play();
+		as->Play();
 		break;
 	case ALSound::NetEvent::Stop:
-		cas->Stop();
+		as->Stop();
 		break;
 	case ALSound::NetEvent::Pause:
-		cas->Pause();
+		as->Pause();
 		break;
 	case ALSound::NetEvent::Rewind:
-		cas->Rewind();
+		as->Rewind();
 		break;
 	case ALSound::NetEvent::SetOffset:
 		{
 			float offset = packet->Read<float>();
-			cas->SetOffset(offset);
+			as->SetOffset(offset);
 			break;
 		}
 	case ALSound::NetEvent::SetPitch:
 		{
 			float pitch = packet->Read<float>();
-			cas->SetPitch(pitch);
+			as->SetPitch(pitch);
 			break;
 		}
 	case ALSound::NetEvent::SetLooping:
 		{
 			bool loop = packet->Read<bool>();
-			cas->SetLooping(loop);
+			as->SetLooping(loop);
 			break;
 		}
 	case ALSound::NetEvent::SetGain:
 		{
 			float gain = packet->Read<float>();
-			cas->SetGain(gain);
+			as->SetGain(gain);
 			break;
 		}
 	case ALSound::NetEvent::SetPos:
 		{
 			Vector3 pos = nwm::read_vector(packet);
-			cas->SetPosition(pos);
+			as->SetPosition(pos);
 			break;
 		}
 	case ALSound::NetEvent::SetVelocity:
 		{
 			Vector3 vel = nwm::read_vector(packet);
-			cas->SetVelocity(vel);
+			as->SetVelocity(vel);
 			break;
 		}
 	case ALSound::NetEvent::SetDirection:
 		{
 			Vector3 dir = nwm::read_vector(packet);
-			cas->SetDirection(dir);
+			as->SetDirection(dir);
 			break;
 		}
 	case ALSound::NetEvent::SetRelative:
 		{
 			bool relative = packet->Read<bool>();
-			cas->SetRelative(relative);
+			as->SetRelative(relative);
 			break;
 		}
 	case ALSound::NetEvent::SetReferenceDistance:
 		{
 			float distRef = packet->Read<float>();
-			cas->SetReferenceDistance(distRef);
+			as->SetReferenceDistance(distRef);
 			break;
 		}
 	case ALSound::NetEvent::SetRolloffFactor:
 		{
 			float rolloff = packet->Read<float>();
-			cas->SetRolloffFactor(rolloff);
+			as->SetRolloffFactor(rolloff);
 			break;
 		}
 	case ALSound::NetEvent::SetRoomRolloffFactor:
 		{
 			auto roomRolloff = packet->Read<float>();
-			cas->SetRoomRolloffFactor(roomRolloff);
+			as->SetRoomRolloffFactor(roomRolloff);
 			break;
 		}
 	case ALSound::NetEvent::SetMaxDistance:
 		{
 			float dist = packet->Read<float>();
-			cas->SetMaxDistance(dist);
+			as->SetMaxDistance(dist);
 			break;
 		}
 	case ALSound::NetEvent::SetMinGain:
 		{
 			float gain = packet->Read<float>();
-			cas->SetMinGain(gain);
+			as->SetMinGain(gain);
 			break;
 		}
 	case ALSound::NetEvent::SetMaxGain:
 		{
 			float gain = packet->Read<float>();
-			cas->SetMaxGain(gain);
+			as->SetMaxGain(gain);
 			break;
 		}
 	case ALSound::NetEvent::SetConeInnerAngle:
 		{
 			float coneInnerAngle = packet->Read<float>();
-			cas->SetInnerConeAngle(coneInnerAngle);
+			as->SetInnerConeAngle(coneInnerAngle);
 			break;
 		}
 	case ALSound::NetEvent::SetConeOuterAngle:
 		{
 			float coneOuterAngle = packet->Read<float>();
-			cas->SetOuterConeAngle(coneOuterAngle);
+			as->SetOuterConeAngle(coneOuterAngle);
 			break;
 		}
 	case ALSound::NetEvent::SetConeOuterGain:
 		{
 			float coneOuterGain = packet->Read<float>();
-			cas->SetOuterConeGain(coneOuterGain);
+			as->SetOuterConeGain(coneOuterGain);
 			break;
 		}
 	case ALSound::NetEvent::SetConeOuterGainHF:
 		{
 			float coneOuterGainHF = packet->Read<float>();
-			cas->SetOuterConeGainHF(coneOuterGainHF);
+			as->SetOuterConeGainHF(coneOuterGainHF);
 			break;
 		}
 	case ALSound::NetEvent::SetFlags:
 		{
 			unsigned int flags = packet->Read<unsigned int>();
-			cas->SetFlags(flags);
+			as->SetFlags(flags);
 			break;
 		}
 	case ALSound::NetEvent::SetType:
 		{
 			auto type = packet->Read<ALSoundType>();
-			cas->SetType(type);
+			as->SetType(type);
 			break;
 		}
 	case ALSound::NetEvent::SetSource:
 		{
 			auto *ent = nwm::read_entity(packet);
-			cas->SetSource(ent);
+			as->SetSource(ent);
 			break;
 		}
 	case ALSound::NetEvent::SetRange:
 		{
 			auto start = packet->Read<float>();
 			auto end = packet->Read<float>();
-			cas->SetRange(start, end);
+			as->SetRange(start, end);
 			break;
 		}
 	case ALSound::NetEvent::ClearRange:
 		{
-			cas->ClearRange();
+			as->ClearRange();
 			break;
 		}
 	case ALSound::NetEvent::SetFadeInDuration:
 		{
 			auto t = packet->Read<float>();
-			cas->SetFadeInDuration(t);
+			as->SetFadeInDuration(t);
 			break;
 		}
 	case ALSound::NetEvent::SetFadeOutDuration:
 		{
 			auto t = packet->Read<float>();
-			cas->SetFadeOutDuration(t);
+			as->SetFadeOutDuration(t);
 			break;
 		}
 	case ALSound::NetEvent::FadeIn:
 		{
 			auto t = packet->Read<float>();
-			cas->FadeIn(t);
+			as->FadeIn(t);
 			break;
 		}
 	case ALSound::NetEvent::FadeOut:
 		{
 			auto t = packet->Read<float>();
-			cas->FadeOut(t);
+			as->FadeOut(t);
 			break;
 		}
 	case ALSound::NetEvent::SetIndex:
 		{
 			auto idx = packet->Read<uint32_t>();
-			CALSound::SetIndex(cas, idx);
+			CALSound::SetIndex(as.get(), idx);
 			break;
 		}
 	case ALSound::NetEvent::SetPriority:
 		{
 			auto priority = packet->Read<uint32_t>();
-			cas->SetPriority(priority);
+			as->SetPriority(priority);
 			break;
 		}
 	case ALSound::NetEvent::SetOrientation:
 		{
 			auto at = packet->Read<Vector3>();
 			auto up = packet->Read<Vector3>();
-			cas->SetOrientation(at, up);
+			as->SetOrientation(at, up);
 			break;
 		}
 	case ALSound::NetEvent::SetDopplerFactor:
 		{
 			auto factor = packet->Read<float>();
-			cas->SetDopplerFactor(factor);
+			as->SetDopplerFactor(factor);
 			break;
 		}
 	case ALSound::NetEvent::SetLeftStereoAngle:
 		{
 			auto ang = packet->Read<float>();
-			cas->SetLeftStereoAngle(ang);
+			as->SetLeftStereoAngle(ang);
 			break;
 		}
 	case ALSound::NetEvent::SetRightStereoAngle:
 		{
 			auto ang = packet->Read<float>();
-			cas->SetRightStereoAngle(ang);
+			as->SetRightStereoAngle(ang);
 			break;
 		}
 	case ALSound::NetEvent::SetAirAbsorptionFactor:
 		{
 			auto factor = packet->Read<float>();
-			cas->SetAirAbsorptionFactor(factor);
+			as->SetAirAbsorptionFactor(factor);
 			break;
 		}
 	case ALSound::NetEvent::SetGainAuto:
@@ -346,7 +345,7 @@ DLLCLIENT void NET_cl_snd_ev(NetPacket packet)
 			auto directHF = packet->Read<float>();
 			auto send = packet->Read<float>();
 			auto sendHF = packet->Read<float>();
-			cas->SetGainAuto(directHF, send, sendHF);
+			as->SetGainAuto(directHF, send, sendHF);
 			break;
 		}
 	case ALSound::NetEvent::SetDirectFilter:
@@ -354,7 +353,7 @@ DLLCLIENT void NET_cl_snd_ev(NetPacket packet)
 			auto gain = packet->Read<float>();
 			auto gainHF = packet->Read<float>();
 			auto gainLF = packet->Read<float>();
-			cas->SetDirectFilter({gain, gainHF, gainLF});
+			as->SetDirectFilter({gain, gainHF, gainLF});
 			break;
 		}
 	case ALSound::NetEvent::AddEffect:
@@ -363,13 +362,13 @@ DLLCLIENT void NET_cl_snd_ev(NetPacket packet)
 			auto gain = packet->Read<float>();
 			auto gainHF = packet->Read<float>();
 			auto gainLF = packet->Read<float>();
-			cas->AddEffect(effectName, {gain, gainHF, gainLF});
+			as->AddEffect(effectName, {gain, gainHF, gainLF});
 			break;
 		}
 	case ALSound::NetEvent::RemoveEffect:
 		{
 			auto effectName = packet->ReadString();
-			cas->RemoveEffect(effectName);
+			as->RemoveEffect(effectName);
 			break;
 		}
 	case ALSound::NetEvent::SetEffectParameters:
@@ -378,13 +377,13 @@ DLLCLIENT void NET_cl_snd_ev(NetPacket packet)
 			auto gain = packet->Read<float>();
 			auto gainHF = packet->Read<float>();
 			auto gainLF = packet->Read<float>();
-			cas->SetEffectParameters(effectName, {gain, gainHF, gainLF});
+			as->SetEffectParameters(effectName, {gain, gainHF, gainLF});
 			break;
 		}
 	case ALSound::NetEvent::SetEntityMapIndex:
 		{
 			auto idx = packet->Read<uint32_t>();
-			//cas->SetIdentifier("world_sound" +std::to_string(idx)); // Has to correspond to identifier in c_game_audio.cpp
+			//as->SetIdentifier("world_sound" +std::to_string(idx)); // Has to correspond to identifier in c_game_audio.cpp
 			break;
 		}
 	default:

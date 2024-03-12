@@ -9,8 +9,8 @@
 #include "pragma/model/animation/frame.h"
 #include "pragma/model/modelmesh.h"
 #include "pragma/model/model.h"
-#include <panima/skeleton.hpp>
-#include <panima/bone.hpp>
+#include "pragma/model/animation/skeleton.hpp"
+#include "pragma/model/animation/bone.hpp"
 
 static uint16_t get_bone_index(const std::vector<uint16_t> *optBoneList, unsigned int id)
 {
@@ -23,11 +23,11 @@ static uint16_t get_bone_index(const std::vector<uint16_t> *optBoneList, unsigne
 	return 0;
 }
 
-static void get_global_bone_transforms(const pragma::animation::Animation *optAnim, const panima::Skeleton &skeleton, Frame &frame)
+static void get_global_bone_transforms(const pragma::animation::Animation *optAnim, const pragma::animation::Skeleton &skeleton, Frame &frame)
 {
 	auto *boneList = optAnim ? &optAnim->GetBoneList() : nullptr;
-	std::function<void(Frame &, const std::unordered_map<uint32_t, std::shared_ptr<panima::Bone>> &, const Vector3 &, const Quat &)> fGetGlobalBoneTransforms;
-	fGetGlobalBoneTransforms = [&fGetGlobalBoneTransforms, &boneList](Frame &frame, const std::unordered_map<uint32_t, std::shared_ptr<panima::Bone>> &bones, const Vector3 &posParent, const Quat &rotParent) {
+	std::function<void(Frame &, const std::unordered_map<pragma::animation::BoneId, std::shared_ptr<pragma::animation::Bone>> &, const Vector3 &, const Quat &)> fGetGlobalBoneTransforms;
+	fGetGlobalBoneTransforms = [&fGetGlobalBoneTransforms, &boneList](Frame &frame, const std::unordered_map<pragma::animation::BoneId, std::shared_ptr<pragma::animation::Bone>> &bones, const Vector3 &posParent, const Quat &rotParent) {
 		for(auto &pair : bones) {
 			//auto &parent = pair.second->parent;
 			auto idx = get_bone_index(boneList, pair.first);
@@ -46,10 +46,10 @@ static void get_global_bone_transforms(const pragma::animation::Animation *optAn
 	fGetGlobalBoneTransforms(frame, skeleton.GetRootBones(), {}, uquat::identity());
 }
 
-static void get_local_bone_transforms(const pragma::animation::Animation *optAnim, const panima::Skeleton &skeleton, Frame &frame)
+static void get_local_bone_transforms(const pragma::animation::Animation *optAnim, const pragma::animation::Skeleton &skeleton, Frame &frame)
 {
-	std::function<void(const pragma::animation::Animation *, Frame &, const std::unordered_map<uint32_t, std::shared_ptr<panima::Bone>> &)> fGetLocalBoneTransforms;
-	fGetLocalBoneTransforms = [&fGetLocalBoneTransforms](const pragma::animation::Animation *optAnim, Frame &frame, const std::unordered_map<uint32_t, std::shared_ptr<panima::Bone>> &bones) {
+	std::function<void(const pragma::animation::Animation *, Frame &, const std::unordered_map<pragma::animation::BoneId, std::shared_ptr<pragma::animation::Bone>> &)> fGetLocalBoneTransforms;
+	fGetLocalBoneTransforms = [&fGetLocalBoneTransforms](const pragma::animation::Animation *optAnim, Frame &frame, const std::unordered_map<pragma::animation::BoneId, std::shared_ptr<pragma::animation::Bone>> &bones) {
 		auto *boneList = optAnim ? &optAnim->GetBoneList() : nullptr;
 		for(auto it = bones.begin(); it != bones.end(); ++it) {
 			auto &bone = it->second;
@@ -121,7 +121,7 @@ Frame::Frame(const Frame &other) : m_move(nullptr)
 const FlexFrameData &Frame::GetFlexFrameData() const { return const_cast<Frame *>(this)->GetFlexFrameData(); }
 FlexFrameData &Frame::GetFlexFrameData() { return m_flexFrameData; }
 
-std::vector<uint32_t> Frame::GetLocalRootBoneIds(const pragma::animation::Animation &anim, const panima::Skeleton &skeleton) const
+std::vector<uint32_t> Frame::GetLocalRootBoneIds(const pragma::animation::Animation &anim, const pragma::animation::Skeleton &skeleton) const
 {
 	auto &boneIds = anim.GetBoneList();
 	auto &rootBones = skeleton.GetRootBones();
@@ -148,14 +148,14 @@ void Frame::Translate(const Vector3 &t)
 		pose.TranslateGlobal(t);
 }
 
-void Frame::Rotate(const panima::Skeleton &skeleton, const Quat &rot)
+void Frame::Rotate(const pragma::animation::Skeleton &skeleton, const Quat &rot)
 {
 	for(auto &pair : skeleton.GetRootBones()) {
 		auto id = pair.first;
 		m_bones.at(id).RotateGlobal(rot);
 	}
 }
-void Frame::Translate(const panima::Skeleton &skeleton, const Vector3 &t)
+void Frame::Translate(const pragma::animation::Skeleton &skeleton, const Vector3 &t)
 {
 	for(auto &pair : skeleton.GetRootBones()) {
 		auto id = pair.first;
@@ -163,13 +163,13 @@ void Frame::Translate(const panima::Skeleton &skeleton, const Vector3 &t)
 	}
 }
 
-void Frame::Rotate(const pragma::animation::Animation &anim, const panima::Skeleton &skeleton, const Quat &rot)
+void Frame::Rotate(const pragma::animation::Animation &anim, const pragma::animation::Skeleton &skeleton, const Quat &rot)
 {
 	auto localRootBoneIds = GetLocalRootBoneIds(anim, skeleton);
 	for(auto id : localRootBoneIds)
 		m_bones.at(id).RotateGlobal(rot);
 }
-void Frame::Translate(const pragma::animation::Animation &anim, const panima::Skeleton &skeleton, const Vector3 &t)
+void Frame::Translate(const pragma::animation::Animation &anim, const pragma::animation::Skeleton &skeleton, const Vector3 &t)
 {
 	auto localRootBoneIds = GetLocalRootBoneIds(anim, skeleton);
 	for(auto id : localRootBoneIds)
@@ -233,12 +233,12 @@ void Frame::SetBonePose(uint32_t boneId, const umath::Transform &pose)
 	All animations are usually localized by the model compiler, except for the bind/reference pose, which is created on the fly when loading the model.
 	This is the only case where ::Localize is called here.
 */
-void Frame::Localize(const pragma::animation::Animation &anim, const panima::Skeleton &skeleton) { get_local_bone_transforms(&anim, skeleton, *this); }
+void Frame::Localize(const pragma::animation::Animation &anim, const pragma::animation::Skeleton &skeleton) { get_local_bone_transforms(&anim, skeleton, *this); }
 
-void Frame::Globalize(const pragma::animation::Animation &anim, const panima::Skeleton &skeleton) { get_global_bone_transforms(&anim, skeleton, *this); }
+void Frame::Globalize(const pragma::animation::Animation &anim, const pragma::animation::Skeleton &skeleton) { get_global_bone_transforms(&anim, skeleton, *this); }
 
-void Frame::Localize(const panima::Skeleton &skeleton) { get_local_bone_transforms(nullptr, skeleton, *this); }
-void Frame::Globalize(const panima::Skeleton &skeleton) { get_global_bone_transforms(nullptr, skeleton, *this); }
+void Frame::Localize(const pragma::animation::Skeleton &skeleton) { get_local_bone_transforms(nullptr, skeleton, *this); }
+void Frame::Globalize(const pragma::animation::Skeleton &skeleton) { get_global_bone_transforms(nullptr, skeleton, *this); }
 
 Vector2 *Frame::GetMoveOffset() { return m_move.get(); }
 void Frame::GetMoveOffset(float *x, float *z)

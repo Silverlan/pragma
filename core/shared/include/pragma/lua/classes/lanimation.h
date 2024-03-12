@@ -61,13 +61,13 @@ namespace Lua {
 		DLLNETWORK void SetBoneOrientation(lua_State *l, ::Frame &frame, unsigned int boneID, const Quat &rot);
 		DLLNETWORK void SetBoneTransform(lua_State *l, ::Frame &frame, unsigned int boneID, const Vector3 &pos, const Quat &rot);
 		DLLNETWORK void SetBoneTransform(lua_State *l, ::Frame &frame, unsigned int boneID, const Vector3 &pos, const Quat &rot, const Vector3 &scale);
-		DLLNETWORK void Localize(lua_State *l, ::Frame &frame, pragma::animation::Animation &anim, panima::Skeleton *skeleton);
-		DLLNETWORK void Globalize(lua_State *l, ::Frame &frame, pragma::animation::Animation &anim, panima::Skeleton *skeleton);
-		DLLNETWORK void Localize(lua_State *l, ::Frame &frame, panima::Skeleton *skeleton);
-		DLLNETWORK void Globalize(lua_State *l, ::Frame &frame, panima::Skeleton *skeleton);
+		DLLNETWORK void Localize(lua_State *l, ::Frame &frame, pragma::animation::Animation &anim, pragma::animation::Skeleton *skeleton);
+		DLLNETWORK void Globalize(lua_State *l, ::Frame &frame, pragma::animation::Animation &anim, pragma::animation::Skeleton *skeleton);
+		DLLNETWORK void Localize(lua_State *l, ::Frame &frame, pragma::animation::Skeleton *skeleton);
+		DLLNETWORK void Globalize(lua_State *l, ::Frame &frame, pragma::animation::Skeleton *skeleton);
 		DLLNETWORK void CalcRenderBounds(lua_State *l, ::Frame &frame, pragma::animation::Animation &anim, const std::shared_ptr<::Model> &mdl);
-		DLLNETWORK void Rotate(lua_State *l, ::Frame &frame, pragma::animation::Animation &anim, panima::Skeleton *skeleton, const Quat &rot);
-		DLLNETWORK void Translate(lua_State *l, ::Frame &frame, pragma::animation::Animation &anim, panima::Skeleton *skeleton, const Vector3 &t);
+		DLLNETWORK void Rotate(lua_State *l, ::Frame &frame, pragma::animation::Animation &anim, pragma::animation::Skeleton *skeleton, const Quat &rot);
+		DLLNETWORK void Translate(lua_State *l, ::Frame &frame, pragma::animation::Animation &anim, pragma::animation::Skeleton *skeleton, const Vector3 &t);
 		DLLNETWORK void Scale(lua_State *l, ::Frame &frame, const Vector3 &scale);
 		DLLNETWORK void GetMoveTranslation(lua_State *l, ::Frame &frame);
 		DLLNETWORK void GetMoveTranslationX(lua_State *l, ::Frame &frame);
@@ -77,7 +77,7 @@ namespace Lua {
 		DLLNETWORK void SetMoveTranslationZ(lua_State *l, ::Frame &frame, float z);
 		DLLNETWORK void SetBoneScale(lua_State *l, ::Frame &frame, uint32_t boneId, const Vector3 &scale);
 		DLLNETWORK void GetBoneScale(lua_State *l, ::Frame &frame, uint32_t boneId);
-		DLLNETWORK void GetLocalBoneTransform(lua_State *, ::Frame &frame, panima::Skeleton &skeleton, uint32_t boneId);
+		DLLNETWORK void GetLocalBoneTransform(lua_State *, ::Frame &frame, pragma::animation::Skeleton &skeleton, uint32_t boneId);
 		DLLNETWORK void GetBoneCount(lua_State *, ::Frame &frame);
 		DLLNETWORK void SetBoneCount(lua_State *, ::Frame &frame, uint32_t boneCount);
 		DLLNETWORK void SetBonePose(lua_State *, ::Frame &frame, uint32_t boneId, const umath::ScaledTransform &pose);

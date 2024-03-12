@@ -55,7 +55,7 @@ void CDebugHitboxComponent::OnRemove()
 	BaseEntityComponent::OnRemove();
 	ClearDebugObjects();
 }
-void CDebugHitboxComponent::SetHitboxColor(BoneId boneId, const std::optional<Color> &color)
+void CDebugHitboxComponent::SetHitboxColor(animation::BoneId boneId, const std::optional<Color> &color)
 {
 	m_dirty = true;
 	if(color) {

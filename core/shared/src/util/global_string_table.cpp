@@ -11,6 +11,7 @@
 namespace pragma::ents {
 	struct StringTable {
 		const char *RegisterString(const std::string &str);
+		const char *RegisterString(const std::string_view &str);
 		const char *RegisterString(const char *str);
 		std::unordered_map<std::string, const char *> strings;
 		~StringTable();
@@ -20,6 +21,13 @@ pragma::ents::StringTable::~StringTable()
 {
 	for(auto &pair : strings)
 		delete[] pair.second;
+}
+
+const char *pragma::ents::StringTable::RegisterString(const std::string_view &str)
+{
+	// TODO: Once https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0919r2.html is part of the C++ standard, we can use string_view directly for the map
+	// lookup. Until then we'll convert it to a std::string.
+	return RegisterString(std::string {str});
 }
 
 const char *pragma::ents::StringTable::RegisterString(const std::string &str)
@@ -53,11 +61,13 @@ const char *pragma::ents::StringTable::RegisterString(const char *str)
 
 DLLNETWORK pragma::ents::StringTable g_stringTable;
 const char *pragma::register_global_string(const std::string &str) { return g_stringTable.RegisterString(str); }
+const char *pragma::register_global_string(const std::string_view &str) { return g_stringTable.RegisterString(str); }
 const char *pragma::register_global_string(const char *str) { return g_stringTable.RegisterString(str); }
 
 pragma::GString::GString() {}
 pragma::GString::GString(const char *str) : str {str} {}
 pragma::GString::GString(const std::string &str) : str {pragma::register_global_string(str)} {}
+pragma::GString::GString(const std::string_view &str) : str {pragma::register_global_string(str)} {}
 pragma::GString::GString(const GString &other) : str {other.str} {}
 
 pragma::GString &pragma::GString::operator=(const char *str)
@@ -66,6 +76,11 @@ pragma::GString &pragma::GString::operator=(const char *str)
 	return *this;
 }
 pragma::GString &pragma::GString::operator=(const std::string &str)
+{
+	this->str = pragma::register_global_string(str);
+	return *this;
+}
+pragma::GString &pragma::GString::operator=(const std::string_view &str)
 {
 	this->str = pragma::register_global_string(str);
 	return *this;
@@ -82,6 +97,8 @@ size_t pragma::GString::length() const { return str ? strlen(str) : 0; }
 
 pragma::GString::operator const char *() const { return str ? str : ""; }
 pragma::GString::operator std::string() const { return str ? str : ""; }
+pragma::GString::operator std::string_view() const { return str ? str : ""; }
+pragma::GString::operator bool() const { return str ? true : false; }
 
 bool pragma::GString::operator==(const char *str) const
 {
@@ -96,6 +113,8 @@ bool pragma::GString::operator==(const char *str) const
 bool pragma::GString::operator!=(const char *str) const { return !(*this == str); }
 bool pragma::GString::operator==(const std::string &str) const { return *this == str.c_str(); }
 bool pragma::GString::operator!=(const std::string &str) const { return !(*this == str); }
+bool pragma::GString::operator==(const std::string_view &str) const { return *this == str.data(); }
+bool pragma::GString::operator!=(const std::string_view &str) const { return !(*this == str); }
 bool pragma::GString::operator==(const GString &other) const { return *this == other.str; }
 bool pragma::GString::operator!=(const GString &other) const { return !(*this == other); }
 

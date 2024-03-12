@@ -25,12 +25,12 @@ namespace pragma {
 		virtual void OnRemove() override;
 		virtual void OnTick(double tDelta) override;
 
-		void SetHitboxColor(BoneId boneId, const std::optional<Color> &color);
+		void SetHitboxColor(animation::BoneId boneId, const std::optional<Color> &color);
 	  protected:
 		void InitializeDebugObjects();
 		void ClearDebugObjects();
 		std::vector<std::shared_ptr<DebugRenderer::BaseObject>> m_debugObjects;
-		std::unordered_map<BoneId, Color> m_hitboxColors;
+		std::unordered_map<animation::BoneId, Color> m_hitboxColors;
 		bool m_dirty = false;
 	};
 };

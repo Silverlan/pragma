@@ -11,10 +11,10 @@
 #include "pragma/logging.hpp"
 #include <udm.hpp>
 #include <mathutil/umath.h>
-#include <panima/skeleton.hpp>
+#include "pragma/model/animation/skeleton.hpp"
 #include <panima/animation.hpp>
 #include <panima/channel.hpp>
-#include <panima/bone.hpp>
+#include "pragma/model/animation/bone.hpp"
 #include <bezier_fit.hpp>
 
 decltype(pragma::animation::Animation::s_activityEnumRegister) pragma::animation::Animation::s_activityEnumRegister;
@@ -23,7 +23,7 @@ decltype(pragma::animation::Animation::s_eventEnumRegister) pragma::animation::A
 util::EnumRegister &pragma::animation::Animation::GetActivityEnumRegister() { return s_activityEnumRegister; }
 util::EnumRegister &pragma::animation::Animation::GetEventEnumRegister() { return s_eventEnumRegister; }
 
-std::shared_ptr<pragma::animation::Animation> pragma::animation::Animation::Load(const udm::AssetData &data, std::string &outErr, const panima::Skeleton *optSkeleton, const Frame *optReference)
+std::shared_ptr<pragma::animation::Animation> pragma::animation::Animation::Load(const udm::AssetData &data, std::string &outErr, const pragma::animation::Skeleton *optSkeleton, const Frame *optReference)
 {
 	auto anim = pragma::animation::Animation::Create();
 	if(anim->LoadFromAssetData(data, outErr, optSkeleton, optReference) == false)
@@ -89,7 +89,7 @@ static void apply_channel_animation_values(udm::LinkedPropertyWrapper &udmProp, 
 	}
 }
 
-bool pragma::animation::Animation::LoadFromAssetData(const udm::AssetData &data, std::string &outErr, const panima::Skeleton *optSkeleton, const Frame *optReference)
+bool pragma::animation::Animation::LoadFromAssetData(const udm::AssetData &data, std::string &outErr, const pragma::animation::Skeleton *optSkeleton, const Frame *optReference)
 {
 	if(data.GetAssetType() != PANIM_IDENTIFIER) {
 		outErr = "Incorrect format!";
@@ -169,7 +169,7 @@ bool pragma::animation::Animation::LoadFromAssetData(const udm::AssetData &data,
 		}
 	}
 
-	std::vector<BoneId> nodeToLocalBoneId;
+	std::vector<pragma::animation::BoneId> nodeToLocalBoneId;
 	if(udm["bones"]) {
 		// Backwards compatibility
 		udm["bones"](m_boneIds);
@@ -208,9 +208,9 @@ bool pragma::animation::Animation::LoadFromAssetData(const udm::AssetData &data,
 					else {
 						auto n = udmSet.GetSize();
 						m_boneIds.resize(offset + n);
-						udmSet.GetBlobData(m_boneIds.data() + offset, n * sizeof(BoneId), udm::Type::UInt16);
+						udmSet.GetBlobData(m_boneIds.data() + offset, n * sizeof(pragma::animation::BoneId), udm::Type::UInt16);
 					}
-					nodeToLocalBoneId.resize(m_boneIds.size(), std::numeric_limits<BoneId>::max());
+					nodeToLocalBoneId.resize(m_boneIds.size(), std::numeric_limits<pragma::animation::BoneId>::max());
 					for(auto i = offset; i < m_boneIds.size(); ++i)
 						nodeToLocalBoneId[nodeIdx + (i - offset)] = i;
 
@@ -881,14 +881,14 @@ pragma::animation::Animation::Animation(const Animation &other, ShareMode share)
 
 void pragma::animation::Animation::Reverse() { std::reverse(m_frames.begin(), m_frames.end()); }
 
-void pragma::animation::Animation::Rotate(const panima::Skeleton &skeleton, const Quat &rot)
+void pragma::animation::Animation::Rotate(const pragma::animation::Skeleton &skeleton, const Quat &rot)
 {
 	uvec::rotate(&m_renderBounds.first, rot);
 	uvec::rotate(&m_renderBounds.second, rot);
 	for(auto &frame : m_frames)
 		frame->Rotate(*this, skeleton, rot);
 }
-void pragma::animation::Animation::Translate(const panima::Skeleton &skeleton, const Vector3 &t)
+void pragma::animation::Animation::Translate(const pragma::animation::Skeleton &skeleton, const Vector3 &t)
 {
 	m_renderBounds.first += t;
 	m_renderBounds.second += t;
@@ -938,7 +938,7 @@ void pragma::animation::Animation::SetRenderBounds(const Vector3 &min, const Vec
 
 std::vector<std::shared_ptr<Frame>> &pragma::animation::Animation::GetFrames() { return m_frames; }
 
-void pragma::animation::Animation::Localize(const panima::Skeleton &skeleton)
+void pragma::animation::Animation::Localize(const pragma::animation::Skeleton &skeleton)
 {
 	for(auto it = m_frames.begin(); it != m_frames.end(); ++it)
 		(*it)->Localize(*this, skeleton);
@@ -1087,7 +1087,7 @@ void pragma::animation::Animation::SetBoneWeight(uint32_t boneId, float weight)
 	m_boneWeights.at(boneId) = weight;
 }
 
-std::shared_ptr<panima::Animation> pragma::animation::Animation::ToPanimaAnimation(const panima::Skeleton &skel, const Frame *optRefPose) const
+std::shared_ptr<panima::Animation> pragma::animation::Animation::ToPanimaAnimation(const pragma::animation::Skeleton &skel, const Frame *optRefPose) const
 {
 	auto &anim = const_cast<pragma::animation::Animation &>(*this);
 	auto &boneList = anim.GetBoneList();
@@ -1110,7 +1110,7 @@ std::shared_ptr<panima::Animation> pragma::animation::Animation::ToPanimaAnimati
 		uint32_t i = 0;
 		for(auto boneIdx : boneList) {
 			auto bone = skel.GetBone(boneIdx).lock();
-			auto &name = bone->name;
+			std::string name = bone->name;
 			auto it = boneValues.find(name);
 			if(it == boneValues.end()) {
 				it = boneValues.insert(std::make_pair(name, std::vector<ValueData> {})).first;

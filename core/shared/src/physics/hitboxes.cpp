@@ -8,7 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/model/model.h"
 #include "pragma/model/modelmesh.h"
-#include <panima/skeleton.hpp>
+#include "pragma/model/animation/skeleton.hpp"
 void Model::AddHitbox(uint32_t boneId, HitGroup group, const Vector3 &min, const Vector3 &max) { AddHitbox(boneId, Hitbox(group, min, max)); }
 void Model::AddHitbox(uint32_t boneId, const Hitbox &hitbox)
 {
@@ -73,7 +73,7 @@ void Model::GetHitboxBones(std::vector<uint32_t> &boneIds) const
 	for(auto &it : m_hitboxes)
 		boneIds.push_back(it.first);
 }
-bool Model::GenerateHitboxes()
+std::unordered_map<pragma::animation::BoneId, Hitbox> Model::CalcHitboxes() const
 {
 	struct BoneBounds {
 		Vector3 min {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
@@ -116,14 +116,26 @@ bool Model::GenerateHitboxes()
 	}
 
 	auto hitboxesAdded = false;
+	std::unordered_map<pragma::animation::BoneId, Hitbox> hitboxes;
+	hitboxes.reserve(boneBounds.size());
 	for(auto boneId = decltype(boneBounds.size()) {0u}; boneId < boneBounds.size(); ++boneId) {
 		auto &bounds = boneBounds[boneId];
 		if(bounds.min.x == std::numeric_limits<float>::lowest())
 			continue;
 		if((bounds.max.x - bounds.min.x) > 1.f && (bounds.max.y - bounds.min.y) > 1.f && (bounds.max.z - bounds.min.z) > 1.f) {
-			AddHitbox(boneId, HitGroup::Generic, bounds.min, bounds.max);
-			hitboxesAdded = true;
+			Hitbox hb {HitGroup::Generic, bounds.min, bounds.max};
+			hitboxes[boneId] = hb;
 		}
 	}
-	return hitboxesAdded;
+	return hitboxes;
+}
+bool Model::GenerateHitboxes()
+{
+	if(umath::is_flag_set(m_metaInfo.flags, Flags::GeneratedHitboxes))
+		return false;
+	umath::set_flag(m_metaInfo.flags, Flags::GeneratedHitboxes);
+	auto hitboxes = CalcHitboxes();
+	for(auto &[boneId, hb] : hitboxes)
+		AddHitbox(boneId, hb);
+	return !hitboxes.empty();
 }

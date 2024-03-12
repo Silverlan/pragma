@@ -10,8 +10,8 @@
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/model/model.h"
 #include "pragma/lua/libraries/lutil.hpp"
-#include <panima/skeleton.hpp>
-#include <panima/bone.hpp>
+#include "pragma/model/animation/skeleton.hpp"
+#include "pragma/model/animation/bone.hpp"
 
 std::shared_ptr<Lua::util::retarget::RetargetFlexData> Lua::util::retarget::initialize_retarget_flex_data(luabind::object remapData)
 {
@@ -33,6 +33,28 @@ std::shared_ptr<Lua::util::retarget::RetargetFlexData> Lua::util::retarget::init
 		}
 	}
 	return data;
+}
+void Lua::util::retarget::retarget_flex_controllers(RetargetFlexData &retargetFlexData, const std::unordered_map<uint32_t, float> &srcFlexValues, pragma::BaseFlexComponent &flexCDst)
+{
+	std::unordered_map<uint32_t, float> accMap;
+	for(auto &pair : retargetFlexData.remapData) {
+		auto itVal = srcFlexValues.find(pair.first);
+		if(itVal == srcFlexValues.end())
+			continue;
+		auto val = itVal->second;
+		auto &mappingData = pair.second;
+		for(auto &pair : mappingData) {
+			auto flexIdDst = pair.first;
+			auto &data = pair.second;
+			auto srcVal = umath::clamp(val, data.minSource, data.maxSource);
+			auto f = srcVal / (data.maxSource - data.minSource);
+			auto dstVal = data.minTarget + f * (data.maxTarget - data.minTarget);
+			auto it = accMap.find(flexIdDst);
+			dstVal = dstVal + ((it != accMap.end()) ? it->second : 0.f);
+			flexCDst.SetFlexController(flexIdDst, dstVal, 0.f, false);
+			accMap[flexIdDst] = dstVal;
+		}
+	}
 }
 void Lua::util::retarget::retarget_flex_controllers(RetargetFlexData &retargetFlexData, pragma::BaseFlexComponent &flexCSrc, pragma::BaseFlexComponent &flexCDst)
 {
@@ -69,7 +91,7 @@ std::shared_ptr<Lua::util::retarget::RetargetData> Lua::util::retarget::initiali
 	retargetData->origBindPoseBoneDistances = Lua::table_to_vector<float>(l, origBindPoseBoneDistances, 3);
 
 	for(luabind::iterator it {bindPosesOther}, end; it != end; ++it) {
-		auto key = luabind::object_cast<BoneId>(it.key());
+		auto key = luabind::object_cast<pragma::animation::BoneId>(it.key());
 		luabind::object val {*it};
 
 		if(key >= retargetData->bindPosesOther.size())
@@ -88,22 +110,22 @@ std::shared_ptr<Lua::util::retarget::RetargetData> Lua::util::retarget::initiali
 	retargetData->absBonePoses.resize(retargetData->origBindPoseToRetargetBindPose.size());
 
 	for(luabind::iterator it {tUntranslatedBones}, end; it != end; ++it) {
-		auto key = luabind::object_cast<BoneId>(it.key());
+		auto key = luabind::object_cast<pragma::animation::BoneId>(it.key());
 		luabind::object val {*it};
 
 		retargetData->untranslatedBones.insert(key);
 	}
 
 	for(luabind::iterator it {tTranslationTable}, end; it != end; ++it) {
-		auto key = luabind::object_cast<BoneId>(it.key());
+		auto key = luabind::object_cast<pragma::animation::BoneId>(it.key());
 		luabind::object val {*it};
 
-		retargetData->translationTable[key] = TranslationData {luabind::object_cast<BoneId>(val[1]), luabind::object_cast<umath::Transform>(val[2])};
+		retargetData->translationTable[key] = TranslationData {luabind::object_cast<pragma::animation::BoneId>(val[1]), luabind::object_cast<umath::Transform>(val[2])};
 	}
 	return retargetData;
 }
 
-static void FixProportionsAndUpdateUnmappedBonesAndApply(panima::Skeleton &skeleton, Lua::util::retarget::RetargetData &retargetData, std::optional<uint32_t> boneId, std::optional<uint32_t> parentBoneId)
+static void FixProportionsAndUpdateUnmappedBonesAndApply(pragma::animation::Skeleton &skeleton, Lua::util::retarget::RetargetData &retargetData, std::optional<uint32_t> boneId, std::optional<uint32_t> parentBoneId)
 {
 	if(!boneId.has_value()) {
 		for(auto &pair : skeleton.GetRootBones())
@@ -141,7 +163,7 @@ static void FixProportionsAndUpdateUnmappedBonesAndApply(panima::Skeleton &skele
 	for(auto &pair : skeleton.GetBone(*boneId).lock()->children)
 		FixProportionsAndUpdateUnmappedBonesAndApply(skeleton, retargetData, pair.first, boneId);
 }
-void Lua::util::retarget::apply_retarget_rig(Lua::util::retarget::RetargetData &retargetData, Model &mdl, pragma::BaseAnimatedComponent &animSrc, pragma::BaseAnimatedComponent &animDst, panima::Skeleton &skeleton)
+void Lua::util::retarget::apply_retarget_rig(Lua::util::retarget::RetargetData &retargetData, Model &mdl, pragma::BaseAnimatedComponent &animSrc, pragma::BaseAnimatedComponent &animDst, pragma::animation::Skeleton &skeleton)
 {
 	animDst.UpdateSkeleton(); // Make sure the target entity's bone transforms have been updated
 
@@ -166,8 +188,8 @@ void Lua::util::retarget::apply_retarget_rig(Lua::util::retarget::RetargetData &
 	}
 
 	FixProportionsAndUpdateUnmappedBonesAndApply(skeleton, retargetData, {}, {});
-	std::function<void(const panima::Bone &, const umath::ScaledTransform &)> applyPose;
-	applyPose = [&applyPose, &animSrc, &retargetData](const panima::Bone &bone, const umath::ScaledTransform &parentPose) {
+	std::function<void(const pragma::animation::Bone &, const umath::ScaledTransform &)> applyPose;
+	applyPose = [&applyPose, &animSrc, &retargetData](const pragma::animation::Bone &bone, const umath::ScaledTransform &parentPose) {
 		// We need to bring all bone poses into relative space (relative to the respective parent), as well as
 		// apply the bind pose conversion transform.
 		auto boneId = bone.ID;

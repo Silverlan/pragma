@@ -28,8 +28,8 @@
 #include <assimp/IOStream.hpp>
 #include <assimp/DefaultLogger.hpp>
 #endif
-#include <panima/skeleton.hpp>
-#include <panima/bone.hpp>
+#include "pragma/model/animation/skeleton.hpp"
+#include "pragma/model/animation/bone.hpp"
 
 extern DLLNETWORK Engine *engine;
 
@@ -159,7 +159,7 @@ int Lua::import::import_wrmi(lua_State *l)
 	skeleton.GetRootBones().clear();
 	for(auto i = decltype(numBones) {0}; i < numBones; ++i) {
 		auto name = f.ReadString();
-		auto *bone = new panima::Bone();
+		auto *bone = new pragma::animation::Bone();
 		bone->name = name;
 		skeleton.AddBone(bone);
 	}
@@ -172,8 +172,8 @@ int Lua::import::import_wrmi(lua_State *l)
 		reference.SetBoneOrientation(i, rot);
 	}
 
-	std::function<void(std::shared_ptr<panima::Bone> &)> fReadChildBones = nullptr;
-	fReadChildBones = [&f, &fReadChildBones, &skeleton](std::shared_ptr<panima::Bone> &parent) {
+	std::function<void(std::shared_ptr<pragma::animation::Bone> &)> fReadChildBones = nullptr;
+	fReadChildBones = [&f, &fReadChildBones, &skeleton](std::shared_ptr<pragma::animation::Bone> &parent) {
 		auto numChildren = f.Read<uint32_t>();
 		for(auto i = decltype(numChildren) {0}; i < numChildren; ++i) {
 			auto boneId = f.Read<uint32_t>();
@@ -675,7 +675,7 @@ static bool import_model_asset(NetworkState &nw,VFilePtr hFile,const std::string
 				std::string boneName = aiBone.mName.C_Str();
 				if(skeleton.LookupBone(boneName) != -1)
 					continue;
-				auto *bone = new panima::Bone{};
+				auto *bone = new pragma::animation::Bone{};
 				bone->name = std::move(boneName);
 				skeleton.AddBone(bone);
 			}
@@ -750,9 +750,9 @@ static bool import_model_asset(NetworkState &nw,VFilePtr hFile,const std::string
 	
 	// Build skeleton
 	auto referencePose = Frame::Create(1);
-	std::function<std::shared_ptr<panima::Bone>(aiNode&,panima::Bone*)> fIterateBones = nullptr;
-	fIterateBones = [&fIterateBones,&skeleton,&referencePose,&fGetAbsolutePose](aiNode &node,panima::Bone *parent) -> std::shared_ptr<panima::Bone> {
-		auto *bone = new panima::Bone{};
+	std::function<std::shared_ptr<pragma::animation::Bone>(aiNode&,pragma::animation::Bone*)> fIterateBones = nullptr;
+	fIterateBones = [&fIterateBones,&skeleton,&referencePose,&fGetAbsolutePose](aiNode &node,pragma::animation::Bone *parent) -> std::shared_ptr<pragma::animation::Bone> {
+		auto *bone = new pragma::animation::Bone{};
 		bone->name = node.mName.C_Str();
 		auto boneIdx = skeleton.AddBone(bone);
 		if(bone->name.empty())
@@ -845,7 +845,7 @@ int Lua::import::import_model_asset(lua_State *l)
 		Lua::SetTableValue(l,tTextures);
 	}
 
-	Lua::Push<std::shared_ptr<panima::Skeleton>>(l,skeleton);
+	Lua::Push<std::shared_ptr<pragma::animation::Skeleton>>(l,skeleton);
 	Lua::Push<std::shared_ptr<Frame>>(l,referencePose);
 	return ::import_model_asset(*engine->GetNetworkState(l),f);
 #endif

@@ -28,17 +28,18 @@
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/model/animation/flex_animation.hpp"
 #include "pragma/model/modelmesh.h"
-
+#include "pragma/model/animation/meta_rig.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include <material_manager2.hpp>
 #include <luabind/iterator_policy.hpp>
 #include <pragma/lua/lua_call.hpp>
+#include <pragma/lua/lua_util_class.hpp>
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_file.h>
 #include <mathutil/vertex.hpp>
 #include <panima/animation.hpp>
-#include <panima/skeleton.hpp>
-#include <panima/bone.hpp>
+#include "pragma/model/animation/skeleton.hpp"
+#include "pragma/model/animation/bone.hpp"
 #include <fsys/ifile.hpp>
 #include <udm.hpp>
 
@@ -158,11 +159,30 @@ static std::ostream &operator<<(std::ostream &out, const Model &mdl)
 	return out;
 }
 
+namespace pragma::animation {
+	std::ostream &operator<<(std::ostream &out, const pragma::animation::MetaRigBone &boneInfo)
+	{
+		out << "MetaRigBone";
+		out << "[BoneId:" << boneInfo.boneId << "]";
+		out << "[Min:" << boneInfo.bounds.first.x << ", " << boneInfo.bounds.first.y << ", " << boneInfo.bounds.first.z << "]";
+		out << "[Max:" << boneInfo.bounds.second.x << ", " << boneInfo.bounds.second.y << ", " << boneInfo.bounds.second.z << "]";
+		auto ang = EulerAngles {boneInfo.normalizedRotationOffset};
+		out << "[Ang:" << ang.p << ", " << ang.y << "," << ang.r << "]";
+		return out;
+	}
+	std::ostream &operator<<(std::ostream &out, const pragma::animation::MetaRig &rig)
+	{
+		out << "MetaRig";
+		return out;
+	}
+};
+
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, Vertex);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, VertexWeight);
 
 void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef, luabind::class_<::ModelMesh> &classDefModelMesh, luabind::class_<::ModelSubMesh> &classDefModelSubMesh)
 {
+	classDef.add_static_constant("INVALID_BONE_INDEX", pragma::animation::INVALID_BONE_INDEX);
 	classDef.def(luabind::tostring(luabind::self));
 	classDef.def(luabind::const_self == luabind::const_self);
 	classDef.def("RemoveUnusedMaterialReferences", &::Model::RemoveUnusedMaterialReferences);
@@ -297,6 +317,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("GetBodyGroup", &Lua::Model::GetBodyGroup);
 	classDef.def("GetExtensionData", &::Model::GetExtensionData);
 	classDef.def("GenerateHitboxes", &::Model::GenerateHitboxes);
+	classDef.def("GenerateMetaRig", &::Model::GenerateMetaRig);
 
 	classDef.def("GetTextureGroupCount", &Lua::Model::GetTextureGroupCount);
 	classDef.def("GetTextureGroups", &Lua::Model::GetTextureGroups);
@@ -379,7 +400,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("GetJoints", &Lua::Model::GetJoints);
 	classDef.def("SetReferencePoses", &::Model::SetReferencePoses);
 	classDef.def("SetReferencePoses", &::Model::SetReferencePoses, luabind::default_parameter_policy<3, false> {});
-	classDef.def("AddJoint", static_cast<JointInfo *(*)(lua_State *, ::Model &, JointType, BoneId, BoneId)>([](lua_State *l, ::Model &mdl, JointType type, BoneId child, BoneId parent) -> JointInfo * {
+	classDef.def("AddJoint", static_cast<JointInfo *(*)(lua_State *, ::Model &, JointType, pragma::animation::BoneId, pragma::animation::BoneId)>([](lua_State *l, ::Model &mdl, JointType type, pragma::animation::BoneId child, pragma::animation::BoneId parent) -> JointInfo * {
 		auto &joint = mdl.AddJoint(type, child, parent);
 		return &joint;
 	}));
@@ -702,10 +723,10 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	                       .def("GetBoneRotation", &Lua::Frame::GetBoneOrientation)
 	                       .def("SetBonePosition", &Lua::Frame::SetBonePosition)
 	                       .def("SetBoneRotation", &Lua::Frame::SetBoneOrientation)
-	                       .def("Localize", static_cast<void (*)(lua_State *, ::Frame &, pragma::animation::Animation &, panima::Skeleton *)>(&Lua::Frame::Localize))
-	                       .def("Localize", static_cast<void (*)(lua_State *, ::Frame &, panima::Skeleton *)>(&Lua::Frame::Localize))
-	                       .def("Globalize", static_cast<void (*)(lua_State *, ::Frame &, pragma::animation::Animation &, panima::Skeleton *)>(&Lua::Frame::Globalize))
-	                       .def("Globalize", static_cast<void (*)(lua_State *, ::Frame &, panima::Skeleton *)>(&Lua::Frame::Globalize))
+	                       .def("Localize", static_cast<void (*)(lua_State *, ::Frame &, pragma::animation::Animation &, pragma::animation::Skeleton *)>(&Lua::Frame::Localize))
+	                       .def("Localize", static_cast<void (*)(lua_State *, ::Frame &, pragma::animation::Skeleton *)>(&Lua::Frame::Localize))
+	                       .def("Globalize", static_cast<void (*)(lua_State *, ::Frame &, pragma::animation::Animation &, pragma::animation::Skeleton *)>(&Lua::Frame::Globalize))
+	                       .def("Globalize", static_cast<void (*)(lua_State *, ::Frame &, pragma::animation::Skeleton *)>(&Lua::Frame::Globalize))
 	                       .def("CalcRenderBounds", &Lua::Frame::CalcRenderBounds)
 	                       .def("Rotate", &Lua::Frame::Rotate)
 	                       .def("Translate", &Lua::Frame::Translate)
@@ -868,6 +889,111 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	//for(auto &pair : ACTIVITY_NAMES)
 	//	classDefAnimation.add_static_constant(pair.second.c_str(),pair.first);
 
+	auto defBoneInfo = luabind::class_<pragma::animation::MetaRigBone>("MetaRigBone");
+	defBoneInfo.def(luabind::tostring(luabind::self));
+	defBoneInfo.def_readonly("boneId", &pragma::animation::MetaRigBone::boneId);
+	defBoneInfo.def_readonly("normalizedRotationOffset", &pragma::animation::MetaRigBone::normalizedRotationOffset);
+	defBoneInfo.property(
+	  "min", +[](const pragma::animation::MetaRigBone &boneInfo) -> Vector3 { return boneInfo.bounds.first; });
+	defBoneInfo.property(
+	  "max", +[](const pragma::animation::MetaRigBone &boneInfo) -> Vector3 { return boneInfo.bounds.second; });
+	classDef.scope[defBoneInfo];
+
+	auto defRig = luabind::class_<pragma::animation::MetaRig>("MetaRig");
+	defRig.def_readonly("rigType", &pragma::animation::MetaRig::rigType);
+	defRig.def_readonly("forwardFacingRotationOffset", &pragma::animation::MetaRig::forwardFacingRotationOffset);
+	defRig.def_readonly("forwardAxis", &pragma::animation::MetaRig::forwardAxis);
+	defRig.def_readonly("upAxis", &pragma::animation::MetaRig::upAxis);
+	defRig.def(luabind::tostring(luabind::self));
+	defRig.def(
+	  "GetNormalizedBoneInfo", +[](const pragma::animation::MetaRig &metaRig, pragma::animation::MetaRigBoneType boneType) -> const pragma::animation::MetaRigBone * {
+		  auto idx = umath::to_integral(boneType);
+		  if(idx >= metaRig.bones.size())
+			  throw std::runtime_error {"Invalid bone type index!"};
+		  return &metaRig.bones[idx];
+	  });
+	defRig.def(
+	  "GetBoneId", +[](const pragma::animation::MetaRig &metaRig, pragma::animation::MetaRigBoneType boneType) -> pragma::animation::BoneId {
+		  auto idx = umath::to_integral(boneType);
+		  if(idx >= metaRig.bones.size())
+			  throw std::runtime_error {"Invalid bone type index!"};
+		  return metaRig.bones[idx].boneId;
+	  });
+	defRig.add_static_constant("RIG_TYPE_BIPED", umath::to_integral(pragma::animation::RigType::Biped));
+	defRig.add_static_constant("RIG_TYPE_QUADRUPED", umath::to_integral(pragma::animation::RigType::Quadruped));
+
+	defRig.add_static_constant("BONE_TYPE_HIPS", umath::to_integral(pragma::animation::MetaRigBoneType::Hips));
+	defRig.add_static_constant("BONE_TYPE_PELVIS", umath::to_integral(pragma::animation::MetaRigBoneType::Pelvis));
+	defRig.add_static_constant("BONE_TYPE_SPINE", umath::to_integral(pragma::animation::MetaRigBoneType::Spine));
+	defRig.add_static_constant("BONE_TYPE_SPINE1", umath::to_integral(pragma::animation::MetaRigBoneType::Spine1));
+	defRig.add_static_constant("BONE_TYPE_SPINE2", umath::to_integral(pragma::animation::MetaRigBoneType::Spine2));
+	defRig.add_static_constant("BONE_TYPE_SPINE3", umath::to_integral(pragma::animation::MetaRigBoneType::Spine3));
+	defRig.add_static_constant("BONE_TYPE_NECK", umath::to_integral(pragma::animation::MetaRigBoneType::Neck));
+	defRig.add_static_constant("BONE_TYPE_HEAD", umath::to_integral(pragma::animation::MetaRigBoneType::Head));
+	defRig.add_static_constant("BONE_TYPE_LEFT_EAR", umath::to_integral(pragma::animation::MetaRigBoneType::LeftEar));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_EAR", umath::to_integral(pragma::animation::MetaRigBoneType::RightEar));
+	defRig.add_static_constant("BONE_TYPE_LEFT_EYE", umath::to_integral(pragma::animation::MetaRigBoneType::LeftEye));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_EYE", umath::to_integral(pragma::animation::MetaRigBoneType::RightEye));
+	defRig.add_static_constant("BONE_TYPE_CENTER_EYE", umath::to_integral(pragma::animation::MetaRigBoneType::CenterEye));
+	defRig.add_static_constant("BONE_TYPE_LEFT_UPPER_ARM", umath::to_integral(pragma::animation::MetaRigBoneType::LeftUpperArm));
+	defRig.add_static_constant("BONE_TYPE_LEFT_LOWER_ARM", umath::to_integral(pragma::animation::MetaRigBoneType::LeftLowerArm));
+	defRig.add_static_constant("BONE_TYPE_LEFT_HAND", umath::to_integral(pragma::animation::MetaRigBoneType::LeftHand));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_UPPER_ARM", umath::to_integral(pragma::animation::MetaRigBoneType::RightUpperArm));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_LOWER_ARM", umath::to_integral(pragma::animation::MetaRigBoneType::RightLowerArm));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_HAND", umath::to_integral(pragma::animation::MetaRigBoneType::RightHand));
+	defRig.add_static_constant("BONE_TYPE_LEFT_UPPER_LEG", umath::to_integral(pragma::animation::MetaRigBoneType::LeftUpperLeg));
+	defRig.add_static_constant("BONE_TYPE_LEFT_LOWER_LEG", umath::to_integral(pragma::animation::MetaRigBoneType::LeftLowerLeg));
+	defRig.add_static_constant("BONE_TYPE_LEFT_FOOT", umath::to_integral(pragma::animation::MetaRigBoneType::LeftFoot));
+	defRig.add_static_constant("BONE_TYPE_LEFT_TOE", umath::to_integral(pragma::animation::MetaRigBoneType::LeftToe));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_UPPER_LEG", umath::to_integral(pragma::animation::MetaRigBoneType::RightUpperLeg));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_LOWER_LEG", umath::to_integral(pragma::animation::MetaRigBoneType::RightLowerLeg));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_FOOT", umath::to_integral(pragma::animation::MetaRigBoneType::RightFoot));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_TOE", umath::to_integral(pragma::animation::MetaRigBoneType::RightToe));
+	defRig.add_static_constant("BONE_TYPE_LEFT_THUMB1", umath::to_integral(pragma::animation::MetaRigBoneType::LeftThumb1));
+	defRig.add_static_constant("BONE_TYPE_LEFT_THUMB2", umath::to_integral(pragma::animation::MetaRigBoneType::LeftThumb2));
+	defRig.add_static_constant("BONE_TYPE_LEFT_THUMB3", umath::to_integral(pragma::animation::MetaRigBoneType::LeftThumb3));
+	defRig.add_static_constant("BONE_TYPE_LEFT_INDEX_FINGER1", umath::to_integral(pragma::animation::MetaRigBoneType::LeftIndexFinger1));
+	defRig.add_static_constant("BONE_TYPE_LEFT_INDEX_FINGER2", umath::to_integral(pragma::animation::MetaRigBoneType::LeftIndexFinger2));
+	defRig.add_static_constant("BONE_TYPE_LEFT_INDEX_FINGER3", umath::to_integral(pragma::animation::MetaRigBoneType::LeftIndexFinger3));
+	defRig.add_static_constant("BONE_TYPE_LEFT_MIDDLE_FINGER1", umath::to_integral(pragma::animation::MetaRigBoneType::LeftMiddleFinger1));
+	defRig.add_static_constant("BONE_TYPE_LEFT_MIDDLE_FINGER2", umath::to_integral(pragma::animation::MetaRigBoneType::LeftMiddleFinger2));
+	defRig.add_static_constant("BONE_TYPE_LEFT_MIDDLE_FINGER3", umath::to_integral(pragma::animation::MetaRigBoneType::LeftMiddleFinger3));
+	defRig.add_static_constant("BONE_TYPE_LEFT_RING_FINGER1", umath::to_integral(pragma::animation::MetaRigBoneType::LeftRingFinger1));
+	defRig.add_static_constant("BONE_TYPE_LEFT_RING_FINGER2", umath::to_integral(pragma::animation::MetaRigBoneType::LeftRingFinger2));
+	defRig.add_static_constant("BONE_TYPE_LEFT_RING_FINGER3", umath::to_integral(pragma::animation::MetaRigBoneType::LeftRingFinger3));
+	defRig.add_static_constant("BONE_TYPE_LEFT_LITTLE_FINGER1", umath::to_integral(pragma::animation::MetaRigBoneType::LeftLittleFinger1));
+	defRig.add_static_constant("BONE_TYPE_LEFT_LITTLE_FINGER2", umath::to_integral(pragma::animation::MetaRigBoneType::LeftLittleFinger2));
+	defRig.add_static_constant("BONE_TYPE_LEFT_LITTLE_FINGER3", umath::to_integral(pragma::animation::MetaRigBoneType::LeftLittleFinger3));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_THUMB1", umath::to_integral(pragma::animation::MetaRigBoneType::RightThumb1));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_THUMB2", umath::to_integral(pragma::animation::MetaRigBoneType::RightThumb2));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_THUMB3", umath::to_integral(pragma::animation::MetaRigBoneType::RightThumb3));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_INDEX_FINGER1", umath::to_integral(pragma::animation::MetaRigBoneType::RightIndexFinger1));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_INDEX_FINGER2", umath::to_integral(pragma::animation::MetaRigBoneType::RightIndexFinger2));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_INDEX_FINGER3", umath::to_integral(pragma::animation::MetaRigBoneType::RightIndexFinger3));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_MIDDLE_FINGER1", umath::to_integral(pragma::animation::MetaRigBoneType::RightMiddleFinger1));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_MIDDLE_FINGER2", umath::to_integral(pragma::animation::MetaRigBoneType::RightMiddleFinger2));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_MIDDLE_FINGER3", umath::to_integral(pragma::animation::MetaRigBoneType::RightMiddleFinger3));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_RING_FINGER1", umath::to_integral(pragma::animation::MetaRigBoneType::RightRingFinger1));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_RING_FINGER2", umath::to_integral(pragma::animation::MetaRigBoneType::RightRingFinger2));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_RING_FINGER3", umath::to_integral(pragma::animation::MetaRigBoneType::RightRingFinger3));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_LITTLE_FINGER1", umath::to_integral(pragma::animation::MetaRigBoneType::RightLittleFinger1));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_LITTLE_FINGER2", umath::to_integral(pragma::animation::MetaRigBoneType::RightLittleFinger2));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_LITTLE_FINGER3", umath::to_integral(pragma::animation::MetaRigBoneType::RightLittleFinger3));
+	defRig.add_static_constant("BONE_TYPE_TAIL_BASE", umath::to_integral(pragma::animation::MetaRigBoneType::TailBase));
+	defRig.add_static_constant("BONE_TYPE_TAIL_MIDDLE", umath::to_integral(pragma::animation::MetaRigBoneType::TailMiddle));
+	defRig.add_static_constant("BONE_TYPE_TAIL_MIDDLE1", umath::to_integral(pragma::animation::MetaRigBoneType::TailMiddle1));
+	defRig.add_static_constant("BONE_TYPE_TAIL_TIP", umath::to_integral(pragma::animation::MetaRigBoneType::TailTip));
+	defRig.add_static_constant("BONE_TYPE_LEFT_WING", umath::to_integral(pragma::animation::MetaRigBoneType::LeftWing));
+	defRig.add_static_constant("BONE_TYPE_LEFT_WING_MIDDLE", umath::to_integral(pragma::animation::MetaRigBoneType::LeftWingMiddle));
+	defRig.add_static_constant("BONE_TYPE_LEFT_WING_TIP", umath::to_integral(pragma::animation::MetaRigBoneType::LeftWingTip));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_WING", umath::to_integral(pragma::animation::MetaRigBoneType::RightWing));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_WING_MIDDLE", umath::to_integral(pragma::animation::MetaRigBoneType::RightWingMiddle));
+	defRig.add_static_constant("BONE_TYPE_RIGHT_WING_TIP", umath::to_integral(pragma::animation::MetaRigBoneType::RightWingTip));
+	defRig.add_static_constant("BONE_TYPE_COUNT", umath::to_integral(pragma::animation::MetaRigBoneType::Count));
+	defRig.add_static_constant("BONE_TYPE_INVALID", umath::to_integral(pragma::animation::MetaRigBoneType::Invalid));
+	static_assert(umath::to_integral(pragma::animation::MetaRigBoneType::Count) == 67, "Update this list when new bone types are addded!");
+	classDef.scope[defRig];
+
 	// Flex Animation
 	auto classDefFlexAnim = luabind::class_<FlexAnimation>("FlexAnimation");
 	classDefFlexAnim.def("GetFps", static_cast<float (*)(lua_State *, FlexAnimation &)>([](lua_State *l, FlexAnimation &flexAnim) -> float { return flexAnim.GetFps(); }));
@@ -994,25 +1120,25 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDefMeshVertexAnimation.scope[classDefMeshVertexFrame];
 	classDefVertexAnimation.scope[classDefMeshVertexAnimation];
 
-	auto classDefSkeleton = luabind::class_<panima::Skeleton>("Skeleton");
+	auto classDefSkeleton = luabind::class_<pragma::animation::Skeleton>("Skeleton");
 	classDefSkeleton.def("GetBone", &Lua::Skeleton::GetBone);
 	classDefSkeleton.def("GetRootBones", &Lua::Skeleton::GetRootBones);
 	classDefSkeleton.def("GetBones", &Lua::Skeleton::GetBones);
 	classDefSkeleton.def("LookupBone", &Lua::Skeleton::LookupBone);
-	classDefSkeleton.def("AddBone", static_cast<std::shared_ptr<panima::Bone> (*)(lua_State *, panima::Skeleton &, const std::string &, panima::Bone &)>(&Lua::Skeleton::AddBone));
-	classDefSkeleton.def("AddBone", static_cast<std::shared_ptr<panima::Bone> (*)(lua_State *, panima::Skeleton &, const std::string &)>(&Lua::Skeleton::AddBone));
-	classDefSkeleton.def("GetBoneCount", &panima::Skeleton::GetBoneCount);
-	classDefSkeleton.def("Merge", &panima::Skeleton::Merge);
+	classDefSkeleton.def("AddBone", static_cast<std::shared_ptr<pragma::animation::Bone> (*)(lua_State *, pragma::animation::Skeleton &, const std::string &, pragma::animation::Bone &)>(&Lua::Skeleton::AddBone));
+	classDefSkeleton.def("AddBone", static_cast<std::shared_ptr<pragma::animation::Bone> (*)(lua_State *, pragma::animation::Skeleton &, const std::string &)>(&Lua::Skeleton::AddBone));
+	classDefSkeleton.def("GetBoneCount", &pragma::animation::Skeleton::GetBoneCount);
+	classDefSkeleton.def("Merge", &pragma::animation::Skeleton::Merge);
 	classDefSkeleton.def("ClearBones", &Lua::Skeleton::ClearBones);
 	classDefSkeleton.def("MakeRootBone", Lua::Skeleton::MakeRootBone);
 	classDefSkeleton.def("GetBoneHierarchy", Lua::Skeleton::GetBoneHierarchy);
-	classDefSkeleton.def("IsRootBone", static_cast<bool (*)(lua_State *, panima::Skeleton &, const std::string &)>(&Lua::Skeleton::IsRootBone));
-	classDefSkeleton.def("IsRootBone", static_cast<bool (*)(lua_State *, panima::Skeleton &, uint32_t)>(&Lua::Skeleton::IsRootBone));
+	classDefSkeleton.def("IsRootBone", static_cast<bool (*)(lua_State *, pragma::animation::Skeleton &, const std::string &)>(&Lua::Skeleton::IsRootBone));
+	classDefSkeleton.def("IsRootBone", static_cast<bool (*)(lua_State *, pragma::animation::Skeleton &, uint32_t)>(&Lua::Skeleton::IsRootBone));
 	classDefSkeleton.def(
-	  "ToDebugString", +[](const panima::Skeleton &skeleton) -> std::string {
+	  "ToDebugString", +[](const pragma::animation::Skeleton &skeleton) -> std::string {
 		  std::stringstream ss;
-		  std::function<void(const panima::Bone &, const std::string &t)> fprint = nullptr;
-		  fprint = [&fprint, &ss](const panima::Bone &bone, const std::string &t) {
+		  std::function<void(const pragma::animation::Bone &, const std::string &t)> fprint = nullptr;
+		  fprint = [&fprint, &ss](const pragma::animation::Bone &bone, const std::string &t) {
 			  ss << t << bone.name << "\n";
 			  for(auto &pair : bone.children)
 				  fprint(*pair.second, t + "\t");

@@ -20,10 +20,10 @@
 class Frame;
 class ModelSubMesh;
 struct AnimationEvent;
-using BoneId = uint16_t;
 enum class ALSoundType : int32_t;
 namespace pragma {
 	namespace animation {
+		using BoneId = uint16_t;
 		class Animation;
 	};
 	class DLLNETWORK BaseAnimatedComponent : public BaseEntityComponent, public DynamicMemberRegister {

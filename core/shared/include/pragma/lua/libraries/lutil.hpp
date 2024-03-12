@@ -141,7 +141,7 @@ namespace Lua {
 		};
 
 		struct DLLNETWORK TranslationData {
-			BoneId boneIdOther;
+			pragma::animation::BoneId boneIdOther;
 			umath::Transform transform;
 		};
 
@@ -159,9 +159,9 @@ namespace Lua {
 
 				std::vector<umath::Transform> bindPoseTransforms;
 				std::vector<umath::ScaledTransform> relBindPoses;
-				std::unordered_set<BoneId> untranslatedBones;
+				std::unordered_set<pragma::animation::BoneId> untranslatedBones;
 
-				std::unordered_map<BoneId, TranslationData> translationTable;
+				std::unordered_map<pragma::animation::BoneId, TranslationData> translationTable;
 			};
 			std::shared_ptr<RetargetData> initialize_retarget_data(luabind::object absBonePoses, luabind::object origBindPoseToRetargetBindPose, luabind::object origBindPoseBoneDistances,
 
@@ -170,7 +170,7 @@ namespace Lua {
 			  luabind::object bindPoseTransforms, luabind::object relBindPoses,
 
 			  luabind::object tUntranslatedBones, luabind::object tTranslationTable);
-			void apply_retarget_rig(RetargetData &testData, Model &mdl, pragma::BaseAnimatedComponent &animSrc, pragma::BaseAnimatedComponent &animDst, panima::Skeleton &skeleton);
+			void apply_retarget_rig(RetargetData &testData, Model &mdl, pragma::BaseAnimatedComponent &animSrc, pragma::BaseAnimatedComponent &animDst, pragma::animation::Skeleton &skeleton);
 
 			struct DLLNETWORK RetargetFlexData {
 				struct RemapData {
@@ -184,6 +184,7 @@ namespace Lua {
 			};
 			std::shared_ptr<RetargetFlexData> initialize_retarget_flex_data(luabind::object remapData);
 			void retarget_flex_controllers(RetargetFlexData &retargetFlexData, pragma::BaseFlexComponent &flexCSrc, pragma::BaseFlexComponent &flexCDst);
+			void retarget_flex_controllers(RetargetFlexData &retargetFlexData, const std::unordered_map<uint32_t, float> &srcFlexValues, pragma::BaseFlexComponent &flexCDst);
 		};
 	};
 };

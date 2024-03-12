@@ -230,7 +230,7 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(glm, Quat);
 
 /* namespace panima
 {
-std::ostream &operator<<(std::ostream &out,const panima::Bone &o)
+std::ostream &operator<<(std::ostream &out,const pragma::animation::Bone &o)
 {
     return ::operator<<(out,o);
 }
@@ -1190,7 +1190,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector->def(float() / luabind::const_self);
 	defVector->def(float() * luabind::const_self);
 	defVector->def(Quat() * luabind::const_self);
-	defVector->def("GetNormal", uvec::get_normal);
+	defVector->def("GetNormal", static_cast<Vector3 (*)(Vector3)>(&uvec::get_normal));
 	defVector->def("Normalize", &Lua::Vector::Normalize);
 	defVector->def("ToEulerAngles", static_cast<EulerAngles (*)(const Vector3 &)>(uvec::to_angle));
 	defVector->def("Length", uvec::length);

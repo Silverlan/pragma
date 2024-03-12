@@ -148,7 +148,7 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d, ModelSubMesh &cl
 			const auto &vw0 = vertexWeights.at(idx0);
 			const auto &vw1 = vertexWeights.at(idx1);
 
-			std::unordered_map<BoneId, float> weightMap {};
+			std::unordered_map<pragma::animation::BoneId, float> weightMap {};
 			for(auto i = 0u; i < 4u; ++i) {
 				for(auto &vw : {vw0, vw1}) {
 					if(vw.boneIds[i] != -1) {
@@ -160,7 +160,7 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d, ModelSubMesh &cl
 					}
 				}
 			}
-			std::array<std::pair<BoneId, float>, 4> weights {std::pair<BoneId, float> {-1, 0.f}};
+			std::array<std::pair<pragma::animation::BoneId, float>, 4> weights {std::pair<pragma::animation::BoneId, float> {-1, 0.f}};
 			auto weightSum = 0.f;
 			auto weightIdx = 0u;
 			for(auto &pair : weightMap) {
@@ -306,7 +306,7 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d, ModelSubMesh &cl
 					w = 1.f - (w / weightSum);
 
 				using WeightCount = uint32_t;
-				std::unordered_map<BoneId, std::pair<float, WeightCount>> weights {};
+				std::unordered_map<pragma::animation::BoneId, std::pair<float, WeightCount>> weights {};
 				weights.reserve(newPoints.size() * 4);
 				for(auto i = decltype(newPoints.size()) {0u}; i < newPoints.size(); ++i) {
 					auto &p = newPoints.at(i);
@@ -324,11 +324,11 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n, double d, ModelSubMesh &cl
 					}
 				}
 				using Weight = float;
-				std::vector<std::pair<BoneId, Weight>> sortedWeights {};
+				std::vector<std::pair<pragma::animation::BoneId, Weight>> sortedWeights {};
 				sortedWeights.reserve(weights.size());
 				for(auto &pair : weights)
 					sortedWeights.push_back({pair.first, pair.second.first / static_cast<float>(pair.second.second)});
-				std::sort(sortedWeights.begin(), sortedWeights.end(), [](const std::pair<BoneId, Weight> &a, const std::pair<BoneId, Weight> &b) { return a.second > b.second; });
+				std::sort(sortedWeights.begin(), sortedWeights.end(), [](const std::pair<pragma::animation::BoneId, Weight> &a, const std::pair<pragma::animation::BoneId, Weight> &b) { return a.second > b.second; });
 
 				umath::VertexWeight r {};
 				auto num = umath::min(sortedWeights.size(), static_cast<size_t>(4));

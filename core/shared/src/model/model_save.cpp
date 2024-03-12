@@ -13,14 +13,15 @@
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/model/animation/flex_animation.hpp"
+#include "pragma/model/animation/meta_rig.hpp"
 #include "pragma/file_formats/wmd.h"
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/logging.hpp"
 #include <fsys/filesystem.h>
 #include <sharedutils/util_file.h>
 #include <udm.hpp>
-#include <panima/skeleton.hpp>
-#include <panima/bone.hpp>
+#include "pragma/model/animation/skeleton.hpp"
+#include "pragma/model/animation/bone.hpp"
 
 #define INDEX_OFFSET_INDEX_SIZE sizeof(uint64_t)
 #define INDEX_OFFSET_MODEL_DATA 0
@@ -119,7 +120,8 @@ std::shared_ptr<Model> Model::Copy(Game *game, CopyFlags copyFlags) const
 	mdl->m_animations = m_animations;
 	mdl->m_flexAnimations = m_flexAnimations;
 	mdl->m_animationIDs = m_animationIDs;
-	mdl->m_skeleton = std::make_unique<panima::Skeleton>(*m_skeleton);
+	mdl->m_skeleton = std::make_unique<pragma::animation::Skeleton>(*m_skeleton);
+	mdl->m_metaRig = std::make_unique<pragma::animation::MetaRig>(*m_metaRig);
 	mdl->m_bindPose = m_bindPose;
 	mdl->m_eyeOffset = m_eyeOffset;
 	mdl->m_collisionMin = m_collisionMin;
@@ -208,7 +210,7 @@ std::shared_ptr<Model> Model::Copy(Game *game, CopyFlags copyFlags) const
 	//
 
 #ifdef _WIN32
-	static_assert(sizeof(Model) == 1008, "Update this function when making changes to this class!");
+	static_assert(sizeof(Model) == 1024, "Update this function when making changes to this class!");
 #endif
 	return mdl;
 }
@@ -320,12 +322,16 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 	readFlag(udm, Model::Flags::Static, "static", flags);
 	readFlag(udm, Model::Flags::Inanimate, "inanimate", flags);
 	readFlag(udm, Model::Flags::DontPrecacheTextureGroups, "dontPrecacheSkins", flags);
-	static_assert(umath::to_integral(Model::Flags::Count) == 8, "Update this list when new flags have been added!");
+	readFlag(udm, Model::Flags::WorldGeometry, "worldGeometry", flags);
+	readFlag(udm, Model::Flags::GeneratedHitboxes, "generatedHitboxes", flags);
+	readFlag(udm, Model::Flags::GeneratedLODs, "generatedLODs", flags);
+	readFlag(udm, Model::Flags::GeneratedMetaRig, "generatedMetaRig", flags);
+	static_assert(umath::to_integral(Model::Flags::Count) == 12, "Update this list when new flags have been added!");
 
 	auto isStatic = umath::is_flag_set(flags, Model::Flags::Static);
 	if(!isStatic) {
 		auto udmSkeleton = udm["skeleton"];
-		m_skeleton = panima::Skeleton::Load(udm::AssetData {udmSkeleton}, outErr);
+		m_skeleton = pragma::animation::Skeleton::Load(udm::AssetData {udmSkeleton}, outErr);
 		if(m_skeleton == nullptr)
 			return false;
 		auto &ref = GetReference();
@@ -383,6 +389,37 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 			udmHb["bone"](boneId);
 			if(boneId != std::numeric_limits<uint32_t>::max())
 				hitboxes[boneId] = hb;
+		}
+
+		auto udmMetaRig = udm["metaRig"];
+		if(udmMetaRig) {
+			auto metaRig = std::make_shared<pragma::animation::MetaRig>();
+			udm::to_enum_value<pragma::animation::RigType>(udmMetaRig["rigType"], metaRig->rigType);
+			udmMetaRig["forwardFacingRotationOffset"](metaRig->forwardFacingRotationOffset);
+			udm::to_enum_value<pragma::SignedAxis>(udmMetaRig["forwardAxis"], metaRig->forwardAxis);
+			udm::to_enum_value<pragma::SignedAxis>(udmMetaRig["upAxis"], metaRig->upAxis);
+			auto udmBones = udmMetaRig["bones"];
+			auto numBones = udmBones.GetSize();
+			for(auto &udmBone : udmBones) {
+				std::string type;
+				udmBone["type"](type);
+				auto etype = pragma::animation::get_meta_rig_bone_type_enum(type);
+				if(!etype)
+					continue;
+				std::string bone;
+				udmBone["bone"](bone);
+				auto boneId = m_skeleton->LookupBone(bone);
+				if(boneId == pragma::animation::INVALID_BONE_INDEX)
+					continue;
+				auto &metaBone = metaRig->bones[umath::to_integral(*etype)];
+				metaBone.boneId = boneId;
+				udmBone["normalizedRotationOffset"](metaBone.normalizedRotationOffset);
+
+				auto udmBounds = udmBone["bounds"];
+				udmBounds["min"](metaBone.bounds.first);
+				udmBounds["max"](metaBone.bounds.second);
+			}
+			m_metaRig = metaRig;
 		}
 	}
 
@@ -748,7 +785,11 @@ bool Model::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
 	writeModelFlag(Model::Flags::Static, "static");
 	writeModelFlag(Model::Flags::Inanimate, "inanimate");
 	writeModelFlag(Model::Flags::DontPrecacheTextureGroups, "dontPrecacheSkins");
-	static_assert(umath::to_integral(Model::Flags::Count) == 8, "Update this list when new flags have been added!");
+	writeModelFlag(Model::Flags::WorldGeometry, "worldGeometry");
+	writeModelFlag(Model::Flags::GeneratedHitboxes, "generatedHitboxes");
+	writeModelFlag(Model::Flags::GeneratedLODs, "generatedLODs");
+	writeModelFlag(Model::Flags::GeneratedMetaRig, "generatedMetaRig");
+	static_assert(umath::to_integral(Model::Flags::Count) == 12, "Update this list when new flags have been added!");
 
 	auto isStatic = umath::is_flag_set(flags, Model::Flags::Static);
 	if(!isStatic) {
@@ -801,6 +842,38 @@ bool Model::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
 			udmHb["bounds"]["min"] = hb.min;
 			udmHb["bounds"]["max"] = hb.max;
 			udmHb["bone"] = pair.first;
+		}
+
+		if(m_metaRig) {
+			auto udmMetaRig = udm["metaRig"];
+			udmMetaRig["rigType"] = udm::enum_to_string(m_metaRig->rigType);
+			udmMetaRig["forwardFacingRotationOffset"] = m_metaRig->forwardFacingRotationOffset;
+			udmMetaRig["forwardAxis"] = udm::enum_to_string(m_metaRig->forwardAxis);
+			udmMetaRig["upAxis"] = udm::enum_to_string(m_metaRig->upAxis);
+
+			size_t numValidMetaBones = 0;
+			for(auto &metaBone : m_metaRig->bones) {
+				auto bone = m_skeleton->GetBone(metaBone.boneId);
+				if(bone.expired())
+					continue;
+				++numValidMetaBones;
+			}
+
+			auto udmBones = udmMetaRig.AddArray("bones", numValidMetaBones);
+			size_t idx = 0;
+			for(size_t i = 0; i < m_metaRig->bones.size(); ++i) {
+				auto &metaBone = m_metaRig->bones[i];
+				auto bone = m_skeleton->GetBone(metaBone.boneId);
+				if(bone.expired())
+					continue;
+				auto udmBone = udmBones[idx++];
+				udmBone["type"] = pragma::animation::get_meta_rig_bone_type_name(static_cast<pragma::animation::MetaRigBoneType>(i));
+				udmBone["bone"] = std::string {bone.lock()->name};
+				udmBone["normalizedRotationOffset"] = metaBone.normalizedRotationOffset;
+				auto udmBounds = udmBone["bounds"];
+				udmBounds["min"] = metaBone.bounds.first;
+				udmBounds["max"] = metaBone.bounds.second;
+			}
 		}
 	}
 
@@ -1110,8 +1183,8 @@ bool Model::SaveLegacy(Game *game, const std::string &name, const std::string &r
 		f->WriteString(path);
 
 	if(!bStatic) {
-		std::function<void(VFilePtrReal &, panima::Bone &)> fWriteChildBones;
-		fWriteChildBones = [&fWriteChildBones](VFilePtrReal &f, panima::Bone &bone) {
+		std::function<void(VFilePtrReal &, pragma::animation::Bone &)> fWriteChildBones;
+		fWriteChildBones = [&fWriteChildBones](VFilePtrReal &f, pragma::animation::Bone &bone) {
 			auto &children = bone.children;
 			f->Write<uint32_t>(static_cast<uint32_t>(children.size()));
 			for(auto &pair : children) {
@@ -1122,8 +1195,10 @@ bool Model::SaveLegacy(Game *game, const std::string &name, const std::string &r
 
 		write_offset(f, offIndex + INDEX_OFFSET_BONES * INDEX_OFFSET_INDEX_SIZE); // Bones
 		f->Write<uint32_t>(static_cast<uint32_t>(bones.size()));
-		for(auto &bone : bones)
-			f->WriteString(bone->name);
+		for(auto &bone : bones) {
+			std::string name = bone->name;
+			f->WriteString(name);
+		}
 		for(auto &bone : bones) {
 			auto *pos = refPose.GetBonePosition(bone->ID);
 			auto *rot = refPose.GetBoneOrientation(bone->ID);
@@ -1323,8 +1398,8 @@ bool Model::SaveLegacy(Game *game, const std::string &name, const std::string &r
 	f->Write<uint32_t>(joints.size());
 	for(auto &joint : joints) {
 		f->Write<JointType>(joint.type);
-		f->Write<BoneId>(joint.child);
-		f->Write<BoneId>(joint.parent);
+		f->Write<pragma::animation::BoneId>(joint.child);
+		f->Write<pragma::animation::BoneId>(joint.parent);
 		f->Write<bool>(joint.collide);
 		f->Write<uint8_t>(joint.args.size());
 		for(auto &pair : joint.args) {

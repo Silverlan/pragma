@@ -36,7 +36,7 @@ namespace Lua {
 		DLLNETWORK void RemoveKeyValue(lua_State *l, JointInfo &joint, const std::string &key);
 	};
 	namespace Bone {
-		DLLNETWORK void register_class(lua_State *l, luabind::class_<panima::Skeleton> &classDef);
+		DLLNETWORK void register_class(lua_State *l, luabind::class_<pragma::animation::Skeleton> &classDef);
 	};
 	namespace Model {
 		DLLNETWORK void register_class(lua_State *l, luabind::class_<::Model> &classDef, luabind::class_<::ModelMesh> &classDefModelMesh, luabind::class_<::ModelSubMesh> &classDefModelSubMesh);

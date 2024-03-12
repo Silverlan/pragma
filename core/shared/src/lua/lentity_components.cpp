@@ -216,6 +216,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	classDefMemRef.def(luabind::constructor<const BaseEntity &, pragma::ComponentId, const std::string &>());
 	classDefMemRef.def(luabind::constructor<const BaseEntity &, const std::string &, const std::string &>());
 	classDefMemRef.def(luabind::constructor<const std::string &>());
+	classDefMemRef.def(luabind::constructor<>());
 	classDefMemRef.def(luabind::tostring(luabind::self));
 	classDefMemRef.def("GetMemberInfo", &pragma::EntityUComponentMemberRef::GetMemberInfo);
 	classDefMemRef.def(
@@ -745,6 +746,8 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defConstraintLookAtComponent.add_static_constant("TRACK_AXIS_NEG_Z", umath::to_integral(pragma::ConstraintLookAtComponent::TrackAxis::NegZ));
 	defConstraintLookAtComponent.def("SetTrackAxis", &pragma::ConstraintLookAtComponent::SetTrackAxis);
 	defConstraintLookAtComponent.def("GetTrackAxis", &pragma::ConstraintLookAtComponent::GetTrackAxis);
+	defConstraintLookAtComponent.def("SetUpTarget", &pragma::ConstraintLookAtComponent::SetUpTarget);
+	defConstraintLookAtComponent.def("GetUpTarget", &pragma::ConstraintLookAtComponent::GetUpTarget);
 	entsMod[defConstraintLookAtComponent];
 
 	auto defConstraintChildOfComponent = pragma::lua::create_entity_component_class<pragma::ConstraintChildOfComponent, pragma::BaseEntityComponent>("ConstraintChildOfComponent");

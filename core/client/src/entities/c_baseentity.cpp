@@ -233,7 +233,8 @@ void CBaseEntity::ReceiveData(NetPacket &packet)
 			if(componentInfo == nullptr)
 				throw std::invalid_argument("Invalid component id " + std::to_string(clId) + "!");
 			else {
-				auto component = FindComponent(componentInfo->name);
+				std::string componentName {componentInfo->name};
+				auto component = FindComponent(componentName); // TODO: FindComponent should use std::string_view
 				if(component.expired()) {
 					// The client doesn't know about component, so we'll add it here.
 					// This should usually never happen, except for cases where components

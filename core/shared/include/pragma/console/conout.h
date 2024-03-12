@@ -9,6 +9,7 @@
 #define __CONOUT_H__
 #include "pragma/definitions.h"
 #include "pragma/console/util_console_color.hpp"
+#include "pragma/util/global_string_table.hpp"
 #include <sharedutils/util_log.hpp>
 #include <iostream>
 #include <sstream>

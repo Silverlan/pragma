@@ -112,10 +112,14 @@ namespace pragma::animation {
 	};
 
 	enum class RigType : uint8_t { Biped = 0, Quadruped };
+	class Skeleton;
 	struct DLLNETWORK MetaRig {
 		std::array<MetaRigBone, umath::to_integral(pragma::animation::MetaRigBoneType::Count)> bones;
 
+		void DebugPrint(Skeleton &skeleton);
+		const MetaRigBone *GetBone(pragma::animation::MetaRigBoneType type) const;
 		pragma::animation::BoneId GetBoneId(const pragma::GString &type) const;
+		pragma::animation::BoneId GetBoneId(pragma::animation::MetaRigBoneType &type) const;
 		RigType rigType = RigType::Biped;
 		Quat forwardFacingRotationOffset = uquat::identity();
 		pragma::SignedAxis forwardAxis = pragma::SignedAxis::Z;

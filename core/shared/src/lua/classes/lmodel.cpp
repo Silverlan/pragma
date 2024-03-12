@@ -318,6 +318,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("GetExtensionData", &::Model::GetExtensionData);
 	classDef.def("GenerateHitboxes", &::Model::GenerateHitboxes);
 	classDef.def("GenerateMetaRig", &::Model::GenerateMetaRig);
+	classDef.def("GetMetaRig", &::Model::GetMetaRig);
+	classDef.def("ClearMetaRig", &::Model::ClearMetaRig);
+	classDef.def("GetMetaRigReferencePose", &::Model::GetMetaRigReferencePose);
 
 	classDef.def("GetTextureGroupCount", &Lua::Model::GetTextureGroupCount);
 	classDef.def("GetTextureGroups", &Lua::Model::GetTextureGroups);
@@ -913,12 +916,14 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 		  return &metaRig.bones[idx];
 	  });
 	defRig.def(
-	  "GetBoneId", +[](const pragma::animation::MetaRig &metaRig, pragma::animation::MetaRigBoneType boneType) -> pragma::animation::BoneId {
-		  auto idx = umath::to_integral(boneType);
-		  if(idx >= metaRig.bones.size())
-			  throw std::runtime_error {"Invalid bone type index!"};
-		  return metaRig.bones[idx].boneId;
+	  "GetBoneId", +[](const pragma::animation::MetaRig &metaRig, pragma::animation::MetaRigBoneType boneType) -> std::optional<pragma::animation::BoneId> {
+		  auto boneId = metaRig.GetBoneId(boneType);
+		  if(boneId == pragma::animation::INVALID_BONE_INDEX)
+			  return {};
+		  return boneId;
 	  });
+	defRig.def("GetBone", &pragma::animation::MetaRig::GetBone);
+	defRig.def("DebugPrint", &pragma::animation::MetaRig::DebugPrint);
 	defRig.add_static_constant("RIG_TYPE_BIPED", umath::to_integral(pragma::animation::RigType::Biped));
 	defRig.add_static_constant("RIG_TYPE_QUADRUPED", umath::to_integral(pragma::animation::RigType::Quadruped));
 

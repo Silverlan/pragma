@@ -1655,8 +1655,23 @@ void Model::GetAnimations(std::unordered_map<std::string, uint32_t> **anims) { *
 const pragma::animation::Skeleton &Model::GetSkeleton() const { return *m_skeleton; }
 pragma::animation::Skeleton &Model::GetSkeleton() { return *m_skeleton; }
 
-const pragma::animation::MetaRig *Model::GetMetaRig() const { return const_cast<Model *>(this)->GetMetaRig(); }
-pragma::animation::MetaRig *Model::GetMetaRig() { return m_metaRig.get(); }
+const std::shared_ptr<pragma::animation::MetaRig> &Model::GetMetaRig() const { return m_metaRig; }
+void Model::ClearMetaRig() { m_metaRig = nullptr; }
+std::optional<umath::ScaledTransform> Model::GetMetaRigReferencePose(pragma::animation::MetaRigBoneType type) const
+{
+	auto &metaRig = GetMetaRig();
+	if(!metaRig)
+		return {};
+	auto &ref = GetReference();
+	auto *bone = metaRig->GetBone(type);
+	if(!bone || bone->boneId == pragma::animation::INVALID_BONE_INDEX)
+		return {};
+	umath::ScaledTransform pose;
+	if(!ref.GetBonePose(bone->boneId, pose))
+		return {};
+	pose.SetRotation(pose.GetRotation() * bone->normalizedRotationOffset);
+	return pose;
+}
 bool Model::GenerateMetaRig()
 {
 	if(umath::is_flag_set(m_metaInfo.flags, Flags::GeneratedMetaRig))

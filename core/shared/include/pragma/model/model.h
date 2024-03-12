@@ -153,6 +153,7 @@ using FlexControllerId = uint32_t;
 namespace pragma::animation {
 	using BoneId = uint16_t;
 	struct MetaRig;
+	enum class MetaRigBoneType : uint8_t;
 };
 enum class JointType : uint8_t;
 namespace umath {
@@ -177,9 +178,9 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 		Unused5 = Unused4 << 1u,
 		DontPrecacheTextureGroups = Unused5 << 1u,
 		WorldGeometry = DontPrecacheTextureGroups << 1u,
-		GeneratedHitboxes = WorldGeometry<<1u,
-		GeneratedLODs = GeneratedHitboxes<<1u,
-		GeneratedMetaRig = GeneratedLODs<<1u,
+		GeneratedHitboxes = WorldGeometry << 1u,
+		GeneratedLODs = GeneratedHitboxes << 1u,
+		GeneratedMetaRig = GeneratedLODs << 1u,
 
 		Count = 12
 	};
@@ -376,9 +377,10 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	const pragma::animation::Skeleton &GetSkeleton() const;
 	pragma::animation::Skeleton &GetSkeleton();
 
-	const pragma::animation::MetaRig *GetMetaRig() const;
-	pragma::animation::MetaRig *GetMetaRig();
+	const std::shared_ptr<pragma::animation::MetaRig> &GetMetaRig() const;
 	bool GenerateMetaRig();
+	void ClearMetaRig();
+	std::optional<umath::ScaledTransform> GetMetaRigReferencePose(pragma::animation::MetaRigBoneType type) const;
 	void ApplyPostImportProcessing();
 
 	uint32_t GetBoneCount() const;

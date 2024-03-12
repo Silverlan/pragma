@@ -922,7 +922,6 @@ void pragma::lua::register_entity_component_classes(lua_State *l, luabind::modul
 	add_log_func<spdlog::level::err>(l, oLogger, "LogError");
 	add_log_func<spdlog::level::critical>(l, oLogger, "LogCritical");
 
-
 	auto defBvh = Lua::create_base_entity_component_class<pragma::BaseBvhComponent>("BaseBvhComponent");
 
 	auto defIntersectionMeshInfo = luabind::class_<pragma::MeshIntersectionInfo::MeshInfo>("IntersectionMeshInfo");
@@ -1646,6 +1645,15 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		return luabind::object {l, *flags};
 	}));
 	def.def("SetLayeredAnimationFlags", &pragma::BaseAnimatedComponent::SetLayeredAnimationFlags);
+	def.def("GetMetaBoneId", &pragma::BaseAnimatedComponent::GetMetaBoneId);
+	def.def(
+	  "GetMetaBonePose", +[](pragma::BaseAnimatedComponent &animC, animation::MetaRigBoneType boneType, umath::CoordinateSpace space) -> std::optional<umath::ScaledTransform> {
+		  umath::ScaledTransform pose;
+		  if(!animC.GetMetaBonePose(boneType, pose, space))
+			  return {};
+		  return pose;
+	  });
+	def.def("SetMetaBonePose", static_cast<bool (pragma::BaseAnimatedComponent::*)(pragma::animation::MetaRigBoneType, const umath::ScaledTransform &, umath::CoordinateSpace)>(&pragma::BaseAnimatedComponent::SetMetaBonePose));
 
 	def.add_static_constant("EVENT_HANDLE_ANIMATION_EVENT", pragma::BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT);
 	def.add_static_constant("EVENT_ON_PLAY_ANIMATION", pragma::BaseAnimatedComponent::EVENT_ON_PLAY_ANIMATION);

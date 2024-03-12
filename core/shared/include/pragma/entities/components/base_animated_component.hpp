@@ -25,6 +25,7 @@ namespace pragma {
 	namespace animation {
 		using BoneId = uint16_t;
 		class Animation;
+		enum class MetaRigBoneType : uint8_t;
 	};
 	class DLLNETWORK BaseAnimatedComponent : public BaseEntityComponent, public DynamicMemberRegister {
 	  public:
@@ -141,6 +142,12 @@ namespace pragma {
 		void SetLocalBonePosition(UInt32 boneId, const Vector3 &pos, const Quat &rot);
 		void SetLocalBonePosition(UInt32 boneId, const Vector3 &pos);
 		void SetLocalBoneRotation(UInt32 boneId, const Quat &rot);
+
+		std::optional<animation::BoneId> GetMetaBoneId(animation::MetaRigBoneType boneType) const;
+		bool SetMetaBonePose(animation::MetaRigBoneType boneType, const umath::ScaledTransform &pose, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
+		bool SetMetaBonePose(animation::MetaRigBoneType boneType, const Vector3 *optPos, const Quat *optRot = nullptr, const Vector3 *optScale = nullptr, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
+		bool GetMetaBonePose(animation::MetaRigBoneType boneType, umath::ScaledTransform &outPose, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
+		bool GetMetaBonePose(animation::MetaRigBoneType boneType, Vector3 *optOutPos, Quat *optOutRot = nullptr, Vector3 *optOutScale = nullptr, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
 
 		float GetCycle() const;
 		void SetCycle(float cycle);

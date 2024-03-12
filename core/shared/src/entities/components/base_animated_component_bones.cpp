@@ -12,7 +12,7 @@
 #include "pragma/model/model.h"
 #include "pragma/model/animation/skeleton.hpp"
 #include "pragma/model/animation/bone.hpp"
-
+#include "pragma/model/animation/meta_rig.hpp"
 using namespace pragma;
 static void get_local_bone_position(std::vector<umath::ScaledTransform> &transforms, std::shared_ptr<pragma::animation::Bone> &bone, const Vector3 &fscale = {1.f, 1.f, 1.f}, Vector3 *pos = nullptr, Quat *rot = nullptr, Vector3 *scale = nullptr)
 {
@@ -322,6 +322,109 @@ void BaseAnimatedComponent::SetLocalBoneRotation(UInt32 boneId, const Quat &rot)
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	get_local_bone_position(hModel, m_bones, bone, pTrComponent ? pTrComponent->GetScale() : Vector3 {1.f, 1.f, 1.f}, nullptr, &nrot);
 	SetBoneRotation(boneId, nrot);
+}
+
+std::optional<animation::BoneId> BaseAnimatedComponent::GetMetaBoneId(animation::MetaRigBoneType boneType) const
+{
+	auto &hModel = GetEntity().GetModel();
+	if(hModel == nullptr)
+		return {};
+	auto &metaRig = hModel->GetMetaRig();
+	if(!metaRig)
+		return {};
+	auto boneId = metaRig->GetBoneId(animation::get_meta_rig_bone_type_name(boneType));
+	return (boneId != animation::INVALID_BONE_INDEX) ? boneId : std::optional<animation::BoneId> {};
+}
+bool BaseAnimatedComponent::SetMetaBonePose(animation::MetaRigBoneType boneType, const umath::ScaledTransform &pose, umath::CoordinateSpace space)
+{
+	auto &hModel = GetEntity().GetModel();
+	if(hModel == nullptr)
+		return {};
+	auto &metaRig = hModel->GetMetaRig();
+	if(!metaRig)
+		return {};
+	auto boneId = GetMetaBoneId(boneType);
+	if(!boneId)
+		return false;
+	umath::ScaledTransform newPose;
+	switch(space) {
+	case umath::CoordinateSpace::World:
+		{
+			newPose = GetEntity().GetPose().GetInverse() * pose;
+			break;
+		}
+	case umath::CoordinateSpace::Object:
+		{
+			newPose = pose;
+			break;
+		}
+	case umath::CoordinateSpace::Local:
+		{
+			SetBonePosition(*boneId, pose.GetOrigin(), pose.GetRotation(), pose.GetScale());
+			return true;
+		}
+	}
+	newPose.SetRotation(newPose.GetRotation() * uquat::get_inverse(metaRig->bones[umath::to_integral(boneType)].normalizedRotationOffset));
+
+	SetLocalBonePosition(*boneId, newPose.GetOrigin(), newPose.GetRotation(), newPose.GetScale());
+	return true;
+}
+bool BaseAnimatedComponent::SetMetaBonePose(animation::MetaRigBoneType boneType, const Vector3 *optPos, const Quat *optRot, const Vector3 *optScale, umath::CoordinateSpace space)
+{
+	umath::ScaledTransform curPose;
+	if(!GetMetaBonePose(boneType, curPose, space))
+		return false;
+	if(optPos)
+		curPose.SetOrigin(*optPos);
+	if(optRot)
+		curPose.SetRotation(*optRot);
+	if(optScale)
+		curPose.SetScale(*optScale);
+	return SetMetaBonePose(boneType, curPose, space);
+}
+bool BaseAnimatedComponent::GetMetaBonePose(animation::MetaRigBoneType boneType, umath::ScaledTransform &outPose, umath::CoordinateSpace space) const
+{
+	auto &hModel = GetEntity().GetModel();
+	if(hModel == nullptr)
+		return {};
+	auto &metaRig = hModel->GetMetaRig();
+	if(!metaRig)
+		return {};
+	auto boneId = GetMetaBoneId(boneType);
+	if(!boneId)
+		return false;
+	if(!GetLocalBonePosition(*boneId, outPose.GetOrigin(), outPose.GetRotation(), &outPose.GetScale()))
+		return false;
+	outPose.SetRotation(outPose.GetRotation() * metaRig->bones[umath::to_integral(boneType)].normalizedRotationOffset);
+	switch(space) {
+	case umath::CoordinateSpace::World:
+		{
+			outPose = GetEntity().GetPose() * outPose;
+			break;
+		}
+	case umath::CoordinateSpace::Object:
+		break;
+	case umath::CoordinateSpace::Local:
+		{
+			GetBonePosition(*boneId, outPose.GetOrigin(), outPose.GetRotation(), outPose.GetScale());
+			outPose.SetRotation(metaRig->bones[umath::to_integral(boneType)].normalizedRotationOffset * outPose.GetRotation());
+			break;
+		}
+	}
+	return true;
+}
+bool BaseAnimatedComponent::GetMetaBonePose(animation::MetaRigBoneType boneType, Vector3 *optOutPos, Quat *optOutRot, Vector3 *optOutScale, umath::CoordinateSpace space) const
+{
+	umath::ScaledTransform curPose;
+	if(!GetMetaBonePose(boneType, curPose, space))
+		return false;
+	if(optOutPos)
+		*optOutPos = curPose.GetOrigin();
+	if(optOutRot)
+		*optOutRot = curPose.GetRotation();
+	if(optOutScale)
+		*optOutScale = curPose.GetScale();
+	return true;
 }
 
 std::optional<Mat4> BaseAnimatedComponent::GetBoneMatrix(unsigned int boneID) const

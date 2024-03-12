@@ -121,7 +121,7 @@ std::shared_ptr<Model> Model::Copy(Game *game, CopyFlags copyFlags) const
 	mdl->m_flexAnimations = m_flexAnimations;
 	mdl->m_animationIDs = m_animationIDs;
 	mdl->m_skeleton = std::make_unique<pragma::animation::Skeleton>(*m_skeleton);
-	mdl->m_metaRig = std::make_unique<pragma::animation::MetaRig>(*m_metaRig);
+	mdl->m_metaRig = m_metaRig ? std::make_unique<pragma::animation::MetaRig>(*m_metaRig) : nullptr;
 	mdl->m_bindPose = m_bindPose;
 	mdl->m_eyeOffset = m_eyeOffset;
 	mdl->m_collisionMin = m_collisionMin;

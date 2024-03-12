@@ -960,9 +960,9 @@ if with_lua_debugger:
 	cp(luasocket_root +"/src/socket.lua",install_dir +"/lua/modules/")
 	mkdir(install_dir +"/modules/socket/")
 	if platform == "win32":
-		cp(luasocket_root +"/build/socket/" +build_config +"/core.dll",install_dir +"/lua/modules/socket/")
+		cp(luasocket_root +"/build/socket/" +build_config +"/core.dll",install_dir +"/modules/socket/")
 	else:
-		cp(luasocket_root +"/build/socket/"+build_config +"/core.so",install_dir +"/lua/modules/socket/")
+		cp(luasocket_root +"/build/socket/"+build_config +"/core.so",install_dir +"/modules/socket/")
 	os.chdir(curDir)
 
 ########## lua-debug ##########
@@ -1010,7 +1010,7 @@ if not skip_repository_updates:
 		download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","494aba78be98caf34249e3c7cb3e43477634c272")
 
 	if with_common_entities:
-		download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","a70f575")
+		download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","f652b19")
 		download_addon("TF2","pragma_tf2","https://github.com/Silverlan/pragma_tf2.git","eddee1f")
 
 os.chdir(curDir)

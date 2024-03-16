@@ -181,10 +181,10 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, Vertex);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, VertexWeight);
 
 template<typename TResult, typename TBoneIdentifier, bool (::Model::*GetValue)(pragma::animation::BoneId, TResult &, umath::CoordinateSpace) const>
-std::optional<TResult> get_reference_bone_value(const ::Model &mdl, const TBoneIdentifier &boneIdentifier, umath::CoordinateSpace space)
+std::optional<TResult> get_reference_bone_value(const ::Model &mdl, TBoneIdentifier boneIdentifier, umath::CoordinateSpace space)
 {
 	pragma::animation::BoneId boneId;
-	if constexpr(std::is_same_v<TBoneIdentifier, std::string>)
+	if constexpr(std::is_same_v<TBoneIdentifier, const std::string &>)
 		boneId = mdl.LookupBone(boneIdentifier);
 	else
 		boneId = boneIdentifier;
@@ -194,13 +194,25 @@ std::optional<TResult> get_reference_bone_value(const ::Model &mdl, const TBoneI
 	return result;
 }
 
+template<typename TResult, typename TBoneIdentifier, bool (::Model::*GetValue)(pragma::animation::BoneId, TResult &, umath::CoordinateSpace) const>
+std::optional<TResult> get_reference_bone_value_ls(const ::Model &mdl, TBoneIdentifier boneIdentifier)
+{
+	return get_reference_bone_value<TResult, TBoneIdentifier, GetValue>(mdl, boneIdentifier, umath::CoordinateSpace::Local);
+}
+
 template<typename TResult>
 void def_bone_methods(luabind::class_<::Model> &classDef)
 {
-	classDef.def("GetReferenceBonePose", &get_reference_bone_value<umath::ScaledTransform, TResult, &::Model::GetReferenceBonePose>, luabind::default_parameter_policy<3, umath::CoordinateSpace::Local> {});
-	classDef.def("GetReferenceBonePos", &get_reference_bone_value<Vector3, TResult, &::Model::GetReferenceBonePos>, luabind::default_parameter_policy<3, umath::CoordinateSpace::Local> {});
-	classDef.def("GetReferenceBoneRot", &get_reference_bone_value<Quat, TResult, &::Model::GetReferenceBoneRot>, luabind::default_parameter_policy<3, umath::CoordinateSpace::Local> {});
-	classDef.def("GetReferenceBoneScale", &get_reference_bone_value<Vector3, TResult, &::Model::GetReferenceBoneScale>, luabind::default_parameter_policy<3, umath::CoordinateSpace::Local> {});
+	// Note: luabind::default_parameter_policy would be a better choice here, but doesn't work for the CoordinateSpace parameter for some unknown reason
+	classDef.def("GetReferenceBonePose", &get_reference_bone_value_ls<umath::ScaledTransform, TResult, &::Model::GetReferenceBonePose>);
+	classDef.def("GetReferenceBonePos", &get_reference_bone_value_ls<Vector3, TResult, &::Model::GetReferenceBonePos>);
+	classDef.def("GetReferenceBoneRot", &get_reference_bone_value_ls<Quat, TResult, &::Model::GetReferenceBoneRot>);
+	classDef.def("GetReferenceBoneScale", &get_reference_bone_value_ls<Vector3, TResult, &::Model::GetReferenceBoneScale>);
+
+	classDef.def("GetReferenceBonePose", &get_reference_bone_value<umath::ScaledTransform, TResult, &::Model::GetReferenceBonePose>);
+	classDef.def("GetReferenceBonePos", &get_reference_bone_value<Vector3, TResult, &::Model::GetReferenceBonePos>);
+	classDef.def("GetReferenceBoneRot", &get_reference_bone_value<Quat, TResult, &::Model::GetReferenceBoneRot>);
+	classDef.def("GetReferenceBoneScale", &get_reference_bone_value<Vector3, TResult, &::Model::GetReferenceBoneScale>);
 }
 
 void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef, luabind::class_<::ModelMesh> &classDefModelMesh, luabind::class_<::ModelSubMesh> &classDefModelSubMesh)
@@ -251,7 +263,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("GetAnimationName", &GetAnimationName);
 
 	def_bone_methods<pragma::animation::BoneId>(classDef);
-	def_bone_methods<std::string>(classDef);
+	def_bone_methods<const std::string &>(classDef);
 
 	classDef.def("PrecacheTextureGroup", &PrecacheTextureGroup);
 	classDef.def("PrecacheTextureGroups", &PrecacheTextureGroups);

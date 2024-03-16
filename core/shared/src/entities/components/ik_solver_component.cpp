@@ -913,7 +913,7 @@ void IkSolverComponent::Solve()
 			Vector3 pos;
 			Quat rot;
 			Vector3 scale;
-			if(animC.valid() && animC->GetLocalBonePosition(info.boneId, pos, rot, &scale)) {
+			if(animC.valid() && animC->GetBonePose(info.boneId, &pos, &rot, &scale, umath::CoordinateSpace::Object)) {
 				if(uvec::distance_sqr(pos, info.oldPose.GetOrigin()) > 0.00001f || uquat::dot_product(rot, info.oldPose.GetRotation()) < 0.99999f || uvec::distance_sqr(scale, info.oldPose.GetScale()) > 0.00001f) {
 					m_updateRequired = true;
 				}
@@ -934,7 +934,7 @@ void IkSolverComponent::Solve()
 			Vector3 pos;
 			Quat rot;
 			Vector3 scale;
-			if(animC.valid() && animC->GetLocalBonePosition(info.boneId, pos, rot, &scale)) {
+			if(animC.valid() && animC->GetBonePose(info.boneId, &pos, &rot, &scale, umath::CoordinateSpace::Object)) {
 				auto *ikBone = m_ikSolver->GetBone(info.ikBoneId);
 				if(ikBone) {
 					ikBone->SetPos(pos);

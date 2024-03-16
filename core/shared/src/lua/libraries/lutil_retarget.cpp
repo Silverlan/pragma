@@ -195,10 +195,10 @@ void Lua::util::retarget::apply_retarget_rig(Lua::util::retarget::RetargetData &
 		auto boneId = bone.ID;
 		auto pose = retargetData.absBonePoses[boneId] * retargetData.origBindPoseToRetargetBindPose[boneId];
 		auto relPose = parentPose.GetInverse() * pose;
-		auto *srcScale = animSrc.GetBoneScale(boneId);
-		if(srcScale)
-			relPose.SetScale(*srcScale);
-		animSrc.SetBonePosition(boneId, relPose.GetOrigin(), relPose.GetRotation(), relPose.GetScale());
+		Vector3 srcScale;
+		if(animSrc.GetBoneScale(boneId, srcScale))
+			relPose.SetScale(srcScale);
+		animSrc.SetBonePose(boneId, relPose);
 		// TODO: There are currently a few issues with scaling (e.g. broken eyes), so we'll disable it for now. This should be re-enabled once the issues have been resolved!
 		// UPDATE: Broken eyes should now be fixed with scaling, so it should work properly now? (TODO: TESTME and remove the line below if all is in order)
 		// animSrc:SetBoneScale(boneId,Vector(1,1,1))
@@ -227,7 +227,7 @@ void Lua::util::retarget::apply_retarget_rig(Lua::util::retarget::RetargetData &
 			umath::ScaledTransform framePose;
 			frame->GetBonePose(i, framePose);
 			pose = pose * framePose;
-			animSrc.SetBonePosition(boneId, pose.GetOrigin(), pose.GetRotation(), pose.GetScale());
+			animSrc.SetBonePose(boneId, pose);
 		}
 	}
 }

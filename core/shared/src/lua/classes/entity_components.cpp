@@ -1140,327 +1140,118 @@ namespace Lua {
 	DLLNETWORK bool get_bullet_master(BaseEntity &ent);
 	DLLNETWORK AnimationEvent get_animation_event(lua_State *l, int32_t tArgs, uint32_t eventId);
 	namespace Animated {
-		static pragma::animation::BoneId get_bone_id(lua_State *l, pragma::BaseAnimatedComponent &hAnim, uint32_t boneId) { return boneId; }
-		static pragma::animation::BoneId get_bone_id(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const std::string &boneId)
+		static pragma::animation::BoneId get_bone_id(const pragma::BaseAnimatedComponent &hAnim, uint32_t boneId) { return boneId; }
+		static pragma::animation::BoneId get_bone_id(const pragma::BaseAnimatedComponent &hAnim, const std::string &boneId)
 		{
-
 			auto &ent = hAnim.GetEntity();
 			auto &mdl = ent.GetModel();
 			if(!mdl)
 				return std::numeric_limits<pragma::animation::BoneId>::max();
 			return mdl->LookupBone(boneId);
 		}
-		template<typename TBoneId>
-		static std::optional<Mat4> GetBoneMatrix(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			return hAnim.GetBoneMatrix(boneId);
-		}
-		template<typename TBoneId>
-		static std::optional<std::tuple<Vector3, Quat, Vector3>> GetBoneTransform(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			Vector3 pos = {};
-			auto rot = uquat::identity();
-			Vector3 scale = {1.f, 1.f, 1.f};
-			auto r = hAnim.GetBonePosition(boneId, pos, rot, scale);
-			if(r == false)
-				return {};
-			return std::tuple<Vector3, Quat, Vector3> {pos, rot, scale};
-		}
-		template<typename TBoneId>
-		static std::optional<umath::ScaledTransform> GetBonePose(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			Vector3 pos = {};
-			auto rot = uquat::identity();
-			Vector3 scale = {1.f, 1.f, 1.f};
-			auto r = hAnim.GetBonePosition(boneId, pos, rot, scale);
-			if(r == false)
-				return {};
-			return umath::ScaledTransform {pos, rot, scale};
-		}
-		template<typename TBoneId>
-		static std::optional<umath::ScaledTransform> GetBoneBindPose(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			auto &ent = hAnim.GetEntity();
-			auto mdl = ent.GetModel();
-			if(mdl == nullptr)
-				return {};
-			auto &ref = mdl->GetReference();
-			umath::ScaledTransform transform;
-			if(ref.GetBonePose(boneId, transform) == false)
-				return {};
-			return transform;
-		}
-		template<typename TBoneId>
-		static std::optional<Vector3> GetBonePos(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			auto *pos = hAnim.GetBonePosition(boneId);
-			if(pos == nullptr)
-				return {};
-			return *pos;
-		}
-		template<typename TBoneId>
-		static std::optional<Quat> GetBoneRot(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			auto *rot = hAnim.GetBoneRotation(boneId);
-			if(rot == nullptr)
-				return {};
-			return *rot;
-		}
-		template<typename TBoneId>
-		static std::optional<std::tuple<Vector3, Quat, Vector3>> GetLocalBoneTransform(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			Vector3 pos = {};
-			auto rot = uquat::identity();
-			Vector3 scale(1.f, 1.f, 1.f);
-			auto r = hAnim.GetLocalBonePosition(boneId, pos, rot, &scale);
-			if(r == false)
-				return {};
-			return std::tuple<Vector3, Quat, Vector3> {pos, rot, scale};
-		}
-		template<typename TBoneId>
-		static std::optional<umath::ScaledTransform> GetLocalBonePose(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			Vector3 pos = {};
-			auto rot = uquat::identity();
-			Vector3 scale(1.f, 1.f, 1.f);
-			auto r = hAnim.GetLocalBonePosition(boneId, pos, rot, &scale);
-			if(r == false)
-				return {};
-			return umath::ScaledTransform {pos, rot, scale};
-		}
-		template<typename TBoneId>
-		static std::optional<std::tuple<Vector3, Quat, Vector3>> GetGlobalBoneTransform(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			Vector3 pos = {};
-			auto rot = uquat::identity();
-			Vector3 scale(1.f, 1.f, 1.f);
-			auto r = hAnim.GetGlobalBonePosition(boneId, pos, rot, &scale);
-			if(r == false)
-				return {};
-			return std::tuple<Vector3, Quat, Vector3> {pos, rot, scale};
-		}
-		template<typename TBoneId>
-		static std::optional<umath::ScaledTransform> GetGlobalBonePose(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			Vector3 pos = {};
-			auto rot = uquat::identity();
-			Vector3 scale(1.f, 1.f, 1.f);
-			auto r = hAnim.GetGlobalBonePosition(boneId, pos, rot, &scale);
-			if(r == false)
-				return {};
-			return umath::ScaledTransform {pos, rot, scale};
-		}
-		template<typename TBoneId>
-		static std::optional<Quat> GetBoneRotation(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			auto *rot = hAnim.GetBoneRotation(boneId);
-			if(rot == nullptr)
-				return {};
-			return *rot;
-		}
-		template<typename TBoneId>
-		static std::optional<EulerAngles> GetBoneAngles(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			EulerAngles ang;
-			auto r = hAnim.GetBoneAngles(boneId, ang);
-			if(r == false)
-				return {};
-			return ang;
-		}
-		template<typename TBoneId>
-		static void SetBoneTransform(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier, const Vector3 &pos, const Quat &rot, const Vector3 &scale)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			hAnim.SetBonePosition(boneId, pos, rot, scale);
-		}
-		template<typename TBoneId>
-		static void SetBoneTransform(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier, const Vector3 &pos, const Quat &rot)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			hAnim.SetBonePosition(boneId, pos, rot);
-		}
-		template<typename TBoneId>
-		static void SetBoneTransform(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier, const Vector3 &pos, const EulerAngles &ang, const Vector3 &scale)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			hAnim.SetBonePosition(boneId, pos, uquat::create(ang), scale);
-		}
-		template<typename TBoneId>
-		static void SetBoneTransform(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier, const Vector3 &pos, const EulerAngles &ang)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			hAnim.SetBonePosition(boneId, pos, ang);
-		}
-		template<typename TBoneId>
-		static void SetBonePose(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier, const umath::ScaledTransform &pose)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			hAnim.SetBonePosition(boneId, pose.GetOrigin(), pose.GetRotation(), pose.GetScale());
-		}
-		template<typename TBoneId>
-		static void SetBonePose(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier, const umath::Transform &pose)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			hAnim.SetBonePosition(boneId, pose.GetOrigin(), pose.GetRotation());
-		}
-
-		template<typename TBoneId>
-		static void SetBonePos(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier, const Vector3 &pos)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			hAnim.SetBonePosition(boneId, pos);
-		}
-		template<typename TBoneId>
-		static void SetBoneRot(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier, const Quat &rot)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			hAnim.SetBoneRotation(boneId, rot);
-		}
-		template<typename TBoneId>
-		static void SetBoneAngles(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier, const EulerAngles &ang)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			hAnim.SetBoneRotation(boneId, uquat::create(ang));
-		}
-		template<typename TBoneId>
-		static void SetBoneScale(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier, const Vector3 &scale)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			hAnim.SetBoneScale(boneId, scale);
-		}
-		template<typename TBoneId>
-		static std::optional<Vector3> GetBoneScale(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			auto *scale = hAnim.GetBoneScale(boneId);
-			if(scale == nullptr)
-				return {};
-			return *scale;
-		}
-
-		template<typename TBoneId>
-		static void SetLocalBoneTransform(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier, const Vector3 &pos, const Quat &rot, const Vector3 &scale)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			hAnim.SetLocalBonePosition(boneId, pos, rot, scale);
-		}
-		template<typename TBoneId>
-		static void SetLocalBonePose(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier, const umath::ScaledTransform &pose)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			hAnim.SetLocalBonePosition(boneId, pose.GetOrigin(), pose.GetRotation(), pose.GetScale());
-		}
-		template<typename TBoneId>
-		static void SetLocalBonePos(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier, const Vector3 &pos)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			hAnim.SetLocalBonePosition(boneId, pos);
-		}
-		template<typename TBoneId>
-		static void SetLocalBoneRot(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier, const Quat &rot)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			hAnim.SetLocalBoneRotation(boneId, rot);
-		}
-
-		template<typename TBoneId>
-		static void SetGlobalBoneTransform(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier, const Vector3 &pos, const Quat &rot, const Vector3 &scale)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			hAnim.SetGlobalBonePosition(boneId, pos, rot, scale);
-		}
-		template<typename TBoneId>
-		static void SetGlobalBonePose(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier, const umath::ScaledTransform &pose)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			hAnim.SetGlobalBonePosition(boneId, pose.GetOrigin(), pose.GetRotation(), pose.GetScale());
-		}
-		template<typename TBoneId>
-		static void SetGlobalBonePos(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier, const Vector3 &pos)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			hAnim.SetGlobalBonePosition(boneId, pos);
-		}
-		template<typename TBoneId>
-		static void SetGlobalBoneRot(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier, const Quat &rot)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			hAnim.SetGlobalBoneRotation(boneId, rot);
-		}
-		template<typename TBoneId>
-		static umath::ScaledTransform *GetEffectiveBoneTransform(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			auto &transforms = hAnim.GetProcessedBones();
-			if(boneId >= transforms.size())
-				return nullptr;
-			return &transforms.at(boneId);
-		}
-		template<typename TBoneId>
-		static void SetEffectiveBoneTransform(lua_State *l, pragma::BaseAnimatedComponent &hAnim, const TBoneId &boneIdentifier, const umath::ScaledTransform &t)
-		{
-			auto boneId = get_bone_id(l, hAnim, boneIdentifier);
-			auto &transforms = hAnim.GetProcessedBones();
-			if(boneId >= transforms.size())
-				return;
-			transforms.at(boneId) = t;
-		}
 	};
 };
 #include "pragma/model/modelmesh.h"
-template<typename TBoneId>
-static void register_base_animated_component_bone_methods(luabind::class_<pragma::BaseAnimatedComponent, pragma::BaseEntityComponent> &def)
+
+template<typename TResult, typename TBoneIdentifier, bool (pragma::BaseAnimatedComponent::*GetValue)(pragma::animation::BoneId, TResult &, umath::CoordinateSpace) const>
+std::optional<TResult> get_bone_value(const pragma::BaseAnimatedComponent &animC, const TBoneIdentifier &boneIdentifier, umath::CoordinateSpace space)
 {
-	def.def("GetBoneMatrix", &Lua::Animated::GetBoneMatrix<TBoneId>);
-	def.def("GetBoneTransform", &Lua::Animated::GetBoneTransform<TBoneId>);
-	def.def("GetBonePose", &Lua::Animated::GetBonePose<TBoneId>);
-	def.def("GetBoneBindPose", &Lua::Animated::GetBoneBindPose<TBoneId>);
-	def.def("GetBonePos", &Lua::Animated::GetBonePos<TBoneId>);
-	def.def("GetBoneRot", &Lua::Animated::GetBoneRot<TBoneId>);
-	def.def("GetLocalBoneTransform", &Lua::Animated::GetLocalBoneTransform<TBoneId>);
-	def.def("GetLocalBonePose", &Lua::Animated::GetLocalBonePose<TBoneId>);
-	def.def("GetGlobalBoneTransform", &Lua::Animated::GetGlobalBoneTransform<TBoneId>);
-	def.def("GetGlobalBonePose", &Lua::Animated::GetGlobalBonePose<TBoneId>);
-	def.def("GetBoneRotation", &Lua::Animated::GetBoneRotation<TBoneId>);
-	def.def("GetBoneAngles", &Lua::Animated::GetBoneAngles<TBoneId>);
-	def.def("SetBoneTransform", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, const TBoneId &, const Vector3 &, const Quat &, const Vector3 &)>(&Lua::Animated::SetBoneTransform<TBoneId>));
-	def.def("SetBoneTransform", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, const TBoneId &, const Vector3 &, const Quat &)>(&Lua::Animated::SetBoneTransform<TBoneId>));
-	def.def("SetBoneTransform", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, const TBoneId &, const Vector3 &, const EulerAngles &, const Vector3 &)>(&Lua::Animated::SetBoneTransform<TBoneId>));
-	def.def("SetBoneTransform", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, const TBoneId &, const Vector3 &, const EulerAngles &)>(&Lua::Animated::SetBoneTransform<TBoneId>));
+	pragma::animation::BoneId boneId;
+	if constexpr(std::is_same_v<TBoneIdentifier, std::string>) {
+		auto &mdl = animC.GetEntity().GetModel();
+		if(!mdl)
+			return {};
+		boneId = mdl->LookupBone(boneIdentifier);
+	}
+	else
+		boneId = boneIdentifier;
+	TResult result;
+	if(!(animC.*GetValue)(boneId, result, space))
+		return {};
+	return result;
+}
 
-	def.def("SetBonePose", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, const TBoneId &, const umath::ScaledTransform &)>(&Lua::Animated::SetBonePose<TBoneId>));
-	def.def("SetBonePose", static_cast<void (*)(lua_State *, pragma::BaseAnimatedComponent &, const TBoneId &, const umath::Transform &)>(&Lua::Animated::SetBonePose<TBoneId>));
+template<typename TValue, typename TBoneIdentifier, bool (pragma::BaseAnimatedComponent::*SetValue)(pragma::animation::BoneId, const TValue &, umath::CoordinateSpace)>
+bool set_bone_value(pragma::BaseAnimatedComponent &animC, const TBoneIdentifier &boneIdentifier, const TValue &value, umath::CoordinateSpace space)
+{
+	pragma::animation::BoneId boneId;
+	if constexpr(std::is_same_v<TBoneIdentifier, std::string>) {
+		auto &mdl = animC.GetEntity().GetModel();
+		if(!mdl)
+			return {};
+		boneId = mdl->LookupBone(boneIdentifier);
+	}
+	else
+		boneId = boneIdentifier;
+	TValue result;
+	return (animC.*SetValue)(boneId, result, space);
+}
 
-	def.def("SetBonePos", &Lua::Animated::SetBonePos<TBoneId>);
-	def.def("SetBoneRot", &Lua::Animated::SetBoneRot<TBoneId>);
-	def.def("SetBoneAngles", &Lua::Animated::SetBoneAngles<TBoneId>);
-	def.def("SetBoneScale", &Lua::Animated::SetBoneScale<TBoneId>);
-	def.def("GetBoneScale", &Lua::Animated::GetBoneScale<TBoneId>);
+template<typename TBoneId>
+static void register_base_animated_component_bone_methods(luabind::class_<pragma::BaseAnimatedComponent, pragma::BaseEntityComponent> &classDef)
+{
+	classDef.def("GetReferenceBonePose", &get_bone_value<umath::ScaledTransform, TBoneId, &pragma::BaseAnimatedComponent::GetReferenceBonePose>, luabind::default_parameter_policy<3, umath::CoordinateSpace::Object> {});
+	classDef.def("GetReferenceBonePos", &get_bone_value<Vector3, TBoneId, &pragma::BaseAnimatedComponent::GetReferenceBonePos>, luabind::default_parameter_policy<3, umath::CoordinateSpace::Object> {});
+	classDef.def("GetReferenceBoneRot", &get_bone_value<Quat, TBoneId, &pragma::BaseAnimatedComponent::GetReferenceBoneRot>, luabind::default_parameter_policy<3, umath::CoordinateSpace::Object> {});
+	classDef.def("GetReferenceBoneScale", &get_bone_value<Vector3, TBoneId, &pragma::BaseAnimatedComponent::GetReferenceBoneScale>, luabind::default_parameter_policy<3, umath::CoordinateSpace::Object> {});
 
-	def.def("SetLocalBoneTransform", &Lua::Animated::SetLocalBoneTransform<TBoneId>);
-	def.def("SetLocalBonePose", &Lua::Animated::SetLocalBonePose<TBoneId>);
-	def.def("SetLocalBonePos", &Lua::Animated::SetLocalBonePos<TBoneId>);
-	def.def("SetLocalBoneRot", &Lua::Animated::SetLocalBoneRot<TBoneId>);
+	classDef.def("GetBonePose", &get_bone_value<umath::ScaledTransform, TBoneId, &pragma::BaseAnimatedComponent::GetBonePose>, luabind::default_parameter_policy<3, umath::CoordinateSpace::Local> {});
+	classDef.def("GetBonePos", &get_bone_value<Vector3, TBoneId, &pragma::BaseAnimatedComponent::GetBonePos>, luabind::default_parameter_policy<3, umath::CoordinateSpace::Local> {});
+	classDef.def("GetBoneRot", &get_bone_value<Quat, TBoneId, &pragma::BaseAnimatedComponent::GetBoneRot>, luabind::default_parameter_policy<3, umath::CoordinateSpace::Local> {});
+	classDef.def("GetBoneScale", &get_bone_value<Vector3, TBoneId, &pragma::BaseAnimatedComponent::GetBoneScale>, luabind::default_parameter_policy<3, umath::CoordinateSpace::Local> {});
 
-	def.def("SetGlobalBoneTransform", &Lua::Animated::SetGlobalBoneTransform<TBoneId>);
-	def.def("SetGlobalBonePose", &Lua::Animated::SetGlobalBonePose<TBoneId>);
-	def.def("SetGlobalBonePos", &Lua::Animated::SetGlobalBonePos<TBoneId>);
-	def.def("SetGlobalBoneRot", &Lua::Animated::SetGlobalBoneRot<TBoneId>);
+	classDef.def("SetBonePose", &set_bone_value<umath::ScaledTransform, TBoneId, &pragma::BaseAnimatedComponent::SetBonePose>, luabind::default_parameter_policy<4, umath::CoordinateSpace::Local> {});
+	classDef.def("SetBonePos", &set_bone_value<Vector3, TBoneId, &pragma::BaseAnimatedComponent::SetBonePos>, luabind::default_parameter_policy<4, umath::CoordinateSpace::Local> {});
+	classDef.def("SetBoneRot", &set_bone_value<Quat, TBoneId, &pragma::BaseAnimatedComponent::SetBoneRot>, luabind::default_parameter_policy<4, umath::CoordinateSpace::Local> {});
+	classDef.def("SetBoneScale", &set_bone_value<Vector3, TBoneId, &pragma::BaseAnimatedComponent::SetBoneScale>, luabind::default_parameter_policy<4, umath::CoordinateSpace::Local> {});
 
-	def.def("GetEffectiveBoneTransform", &Lua::Animated::GetEffectiveBoneTransform<TBoneId>);
-	def.def("SetEffectiveBoneTransform", &Lua::Animated::SetEffectiveBoneTransform<TBoneId>);
+	classDef.def(
+	  "GetBoneMatrix", +[](const pragma::BaseAnimatedComponent &animC, const TBoneId &boneIdentifier) -> std::optional<Mat4> {
+		  pragma::animation::BoneId boneId;
+		  if constexpr(std::is_same_v<TBoneId, std::string>) {
+			  auto &mdl = animC.GetEntity().GetModel();
+			  if(!mdl)
+				  return {};
+			  boneId = mdl->LookupBone(boneIdentifier);
+		  }
+		  else
+			  boneId = boneIdentifier;
+		  return animC.GetBoneMatrix(boneId);
+	  });
+
+	classDef.def(
+	  "GetEffectiveBonePose", +[](const pragma::BaseAnimatedComponent &animC, const TBoneId &boneIdentifier) -> std::optional<umath::ScaledTransform> {
+		  pragma::animation::BoneId boneId;
+		  if constexpr(std::is_same_v<TBoneId, std::string>) {
+			  auto &mdl = animC.GetEntity().GetModel();
+			  if(!mdl)
+				  return {};
+			  boneId = mdl->LookupBone(boneIdentifier);
+		  }
+		  else
+			  boneId = boneIdentifier;
+		  auto &transforms = animC.GetProcessedBones();
+		  if(boneId >= transforms.size())
+			  return {};
+		  return transforms[boneId];
+	  });
+	classDef.def(
+	  "SetEffectiveBonePose", +[](pragma::BaseAnimatedComponent &animC, const TBoneId &boneIdentifier, const umath::ScaledTransform &pose) -> bool {
+		  pragma::animation::BoneId boneId;
+		  if constexpr(std::is_same_v<TBoneId, std::string>) {
+			  auto &mdl = animC.GetEntity().GetModel();
+			  if(!mdl)
+				  return {};
+			  boneId = mdl->LookupBone(boneIdentifier);
+		  }
+		  else
+			  boneId = boneIdentifier;
+		  auto &transforms = animC.GetProcessedBones();
+		  if(boneId >= transforms.size())
+			  return false;
+		  transforms[boneId] = pose;
+		  return true;
+	  });
 }
 void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 {
@@ -1494,7 +1285,18 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	def.def("GetPlaybackRate", &pragma::BaseAnimatedComponent::GetPlaybackRate);
 	def.def("GetPlaybackRateProperty", &pragma::BaseAnimatedComponent::GetPlaybackRateProperty);
 	def.def(
-	  "GetEffectiveBoneTransforms", +[](pragma::BaseAnimatedComponent &animC) -> std::vector<umath::ScaledTransform> { return animC.GetProcessedBones(); });
+	  "GetEffectiveBonePoses", +[](pragma::BaseAnimatedComponent &animC) -> std::vector<umath::ScaledTransform> { return animC.GetProcessedBones(); });
+
+	def.def("GetBoneMatrix", &pragma::BaseAnimatedComponent::GetBoneMatrix);
+	def.def(
+	  "GetBoneMatrix", +[](const pragma::BaseAnimatedComponent &animC, const std::string &boneName) -> std::optional<Mat4> {
+		  auto boneId = Lua::Animated::get_bone_id(animC, boneName);
+		  if(boneId == -1)
+			  return {};
+		  return animC.GetBoneMatrix(boneId);
+	  });
+	//GetBoneBindPose
+
 	register_base_animated_component_bone_methods<pragma::animation::BoneId>(def);
 	register_base_animated_component_bone_methods<std::string>(def);
 	def.def("UpdateEffectiveBoneTransforms", &pragma::BaseAnimatedComponent::UpdateSkeleton);

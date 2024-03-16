@@ -399,6 +399,63 @@ uint32_t Model::GetBodyGroupCount() const { return static_cast<uint32_t>(m_bodyG
 std::vector<BodyGroup> &Model::GetBodyGroups() { return m_bodyGroups; }
 void Model::Remove() { delete this; }
 bool Model::IsRootBone(uint32_t boneId) const { return m_skeleton->IsRootBone(boneId); }
+
+bool Model::GetReferenceBonePose(pragma::animation::BoneId boneId, umath::Transform &outPose, umath::CoordinateSpace space) const
+{
+	auto &ref = GetReference();
+	auto numBones = ref.GetBoneCount();
+	if(boneId >= numBones)
+		return false;
+}
+bool Model::GetReferenceBonePose(pragma::animation::BoneId boneId, umath::ScaledTransform &outPose, umath::CoordinateSpace space) const { return GetReferenceBonePose(boneId, &outPose.GetOrigin(), &outPose.GetRotation(), &outPose.GetScale(), space); }
+bool Model::GetReferenceBonePos(pragma::animation::BoneId boneId, Vector3 &outPos, umath::CoordinateSpace space) const { return GetReferenceBonePose(boneId, &outPos, nullptr, nullptr, space); }
+bool Model::GetReferenceBoneRot(pragma::animation::BoneId boneId, Quat &outRot, umath::CoordinateSpace space) const { return GetReferenceBonePose(boneId, nullptr, &outRot, nullptr, space); }
+bool Model::GetReferenceBoneScale(pragma::animation::BoneId boneId, Vector3 &outScale, umath::CoordinateSpace space) const { return GetReferenceBonePose(boneId, nullptr, nullptr, &outScale, space); }
+bool Model::GetReferenceBonePose(pragma::animation::BoneId boneId, Vector3 *optOutPos, Quat *optOutRot, Vector3 *optOutScale, umath::CoordinateSpace space) const
+{
+	auto &ref = GetReference();
+	auto *t = ref.GetBoneTransform(boneId);
+	if(!t)
+		return false;
+	switch(space) {
+	case umath::CoordinateSpace::Object:
+	case umath::CoordinateSpace::World:
+		{
+			if(optOutPos)
+				*optOutPos = t->GetOrigin();
+			if(optOutRot)
+				*optOutRot = t->GetRotation();
+			if(optOutScale) {
+				auto *scale = ref.GetBoneScale(boneId);
+				*optOutScale = scale ? *scale : uvec::IDENTITY_SCALE;
+			}
+			return true;
+		}
+	case umath::CoordinateSpace::Local:
+		{
+			auto &skel = GetSkeleton();
+			auto bone = skel.GetBone(boneId).lock();
+			if(!bone)
+				return false;
+			umath::ScaledTransform parentPose;
+			umath::ScaledTransform pose;
+			auto parent = bone->parent.lock();
+			if(parent)
+				GetReferenceBonePose(parent->ID, parentPose, umath::CoordinateSpace::Object);
+			GetReferenceBonePose(boneId, pose, umath::CoordinateSpace::Object);
+			pose = parentPose.GetInverse() * pose;
+			if(optOutPos)
+				*optOutPos = pose.GetOrigin();
+			if(optOutRot)
+				*optOutRot = pose.GetRotation();
+			if(optOutScale)
+				*optOutScale = pose.GetScale();
+			return true;
+		}
+	}
+	return false;
+}
+
 bool Model::GetLocalBonePosition(uint32_t animId, uint32_t frameId, uint32_t boneId, Vector3 &rPos, Quat &rRot, Vector3 *scale)
 {
 	rPos = Vector3 {0.f, 0.f, 0.f};

@@ -180,6 +180,29 @@ namespace pragma::animation {
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, Vertex);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, VertexWeight);
 
+template<typename TResult, typename TBoneIdentifier, bool (::Model::*GetValue)(pragma::animation::BoneId, TResult &, umath::CoordinateSpace) const>
+std::optional<TResult> get_reference_bone_value(const ::Model &mdl, const TBoneIdentifier &boneIdentifier, umath::CoordinateSpace space)
+{
+	pragma::animation::BoneId boneId;
+	if constexpr(std::is_same_v<TBoneIdentifier, std::string>)
+		boneId = mdl.LookupBone(boneIdentifier);
+	else
+		boneId = boneIdentifier;
+	TResult result;
+	if(!(mdl.*GetValue)(boneId, result, space))
+		return {};
+	return result;
+}
+
+template<typename TResult>
+void def_bone_methods(luabind::class_<::Model> &classDef)
+{
+	classDef.def("GetReferenceBonePose", &get_reference_bone_value<umath::ScaledTransform, TResult, &::Model::GetReferenceBonePose>, luabind::default_parameter_policy<3, umath::CoordinateSpace::Local> {});
+	classDef.def("GetReferenceBonePos", &get_reference_bone_value<Vector3, TResult, &::Model::GetReferenceBonePos>, luabind::default_parameter_policy<3, umath::CoordinateSpace::Local> {});
+	classDef.def("GetReferenceBoneRot", &get_reference_bone_value<Quat, TResult, &::Model::GetReferenceBoneRot>, luabind::default_parameter_policy<3, umath::CoordinateSpace::Local> {});
+	classDef.def("GetReferenceBoneScale", &get_reference_bone_value<Vector3, TResult, &::Model::GetReferenceBoneScale>, luabind::default_parameter_policy<3, umath::CoordinateSpace::Local> {});
+}
+
 void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef, luabind::class_<::ModelMesh> &classDefModelMesh, luabind::class_<::ModelSubMesh> &classDefModelSubMesh)
 {
 	classDef.add_static_constant("INVALID_BONE_INDEX", pragma::animation::INVALID_BONE_INDEX);
@@ -203,7 +226,6 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("RemoveAttachment", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&RemoveAttachment));
 	classDef.def("RemoveAttachment", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&RemoveAttachment));
 
-	classDef.def("GetReferenceBonePose", &::Model::GetReferenceBonePose);
 	classDef.def("FindBoneTwistAxis", &::Model::FindBoneTwistAxis);
 	classDef.def("FindBoneAxisForDirection", &::Model::FindBoneAxisForDirection);
 	classDef.scope[luabind::def("get_twist_axis_rotation_offset", &::Model::GetTwistAxisRotationOffset)];
@@ -227,6 +249,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("GetAnimation", static_cast<void (*)(lua_State *, ::Model &, const char *)>(&GetAnimation));
 	classDef.def("GetAnimation", static_cast<void (*)(lua_State *, ::Model &, unsigned int)>(&GetAnimation));
 	classDef.def("GetAnimationName", &GetAnimationName);
+
+	def_bone_methods<pragma::animation::BoneId>(classDef);
+	def_bone_methods<std::string>(classDef);
 
 	classDef.def("PrecacheTextureGroup", &PrecacheTextureGroup);
 	classDef.def("PrecacheTextureGroups", &PrecacheTextureGroups);
@@ -908,6 +933,10 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	defRig.def_readonly("forwardAxis", &pragma::animation::MetaRig::forwardAxis);
 	defRig.def_readonly("upAxis", &pragma::animation::MetaRig::upAxis);
 	defRig.def(luabind::tostring(luabind::self));
+	defRig.scope[luabind::def("get_bone_name", &pragma::animation::get_meta_rig_bone_type_name)];
+	defRig.scope[luabind::def("get_bone_enum", &pragma::animation::get_meta_rig_bone_type_enum)];
+	defRig.scope[luabind::def("get_bone_side", &pragma::animation::get_meta_rig_bone_type_side)];
+	defRig.scope[luabind::def("get_bone_parent", &pragma::animation::get_meta_rig_bone_parent_type)];
 	defRig.def(
 	  "GetNormalizedBoneInfo", +[](const pragma::animation::MetaRig &metaRig, pragma::animation::MetaRigBoneType boneType) -> const pragma::animation::MetaRigBone * {
 		  auto idx = umath::to_integral(boneType);
@@ -926,6 +955,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	defRig.def("DebugPrint", &pragma::animation::MetaRig::DebugPrint);
 	defRig.add_static_constant("RIG_TYPE_BIPED", umath::to_integral(pragma::animation::RigType::Biped));
 	defRig.add_static_constant("RIG_TYPE_QUADRUPED", umath::to_integral(pragma::animation::RigType::Quadruped));
+
+	defRig.add_static_constant("BONE_SIDE_LEFT", umath::to_integral(pragma::animation::BoneSide::Left));
+	defRig.add_static_constant("BONE_SIDE_RIGHT", umath::to_integral(pragma::animation::BoneSide::Right));
 
 	defRig.add_static_constant("BONE_TYPE_HIPS", umath::to_integral(pragma::animation::MetaRigBoneType::Hips));
 	defRig.add_static_constant("BONE_TYPE_PELVIS", umath::to_integral(pragma::animation::MetaRigBoneType::Pelvis));

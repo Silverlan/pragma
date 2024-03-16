@@ -135,7 +135,7 @@ bool BaseModelComponent::GetAttachment(unsigned int attID, Vector3 *pos, Quat *r
 	if(animC.valid()) {
 		Quat rotBone;
 		Vector3 posBone;
-		if(animC->GetLocalBonePosition(att->bone, posBone, rotBone) == false)
+		if(animC->GetBonePose(att->bone, &posBone, &rotBone, nullptr, umath::CoordinateSpace::Object) == false)
 			return false;
 		pose *= umath::Transform {posBone, rotBone};
 		pose *= umath::Transform {att->offset, uquat::create(att->angles)};

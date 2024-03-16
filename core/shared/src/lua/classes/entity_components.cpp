@@ -1226,11 +1226,13 @@ static void register_base_animated_component_bone_methods(luabind::class_<pragma
 	classDef.def("GetBoneRot", &get_bone_value<Quat, TBoneId, &pragma::BaseAnimatedComponent::GetBoneRot>);
 	classDef.def("GetBoneScale", &get_bone_value<Vector3, TBoneId, &pragma::BaseAnimatedComponent::GetBoneScale>);
 
+	classDef.def("SetBonePose", &set_bone_value_ls<umath::Transform, TBoneId, &pragma::BaseAnimatedComponent::SetBonePose>);
 	classDef.def("SetBonePose", &set_bone_value_ls<umath::ScaledTransform, TBoneId, &pragma::BaseAnimatedComponent::SetBonePose>);
 	classDef.def("SetBonePos", &set_bone_value_ls<Vector3, TBoneId, &pragma::BaseAnimatedComponent::SetBonePos>);
 	classDef.def("SetBoneRot", &set_bone_value_ls<Quat, TBoneId, &pragma::BaseAnimatedComponent::SetBoneRot>);
 	classDef.def("SetBoneScale", &set_bone_value_ls<Vector3, TBoneId, &pragma::BaseAnimatedComponent::SetBoneScale>);
 
+	classDef.def("SetBonePose", &set_bone_value<umath::Transform, TBoneId, &pragma::BaseAnimatedComponent::SetBonePose>);
 	classDef.def("SetBonePose", &set_bone_value<umath::ScaledTransform, TBoneId, &pragma::BaseAnimatedComponent::SetBonePose>);
 	classDef.def("SetBonePos", &set_bone_value<Vector3, TBoneId, &pragma::BaseAnimatedComponent::SetBonePos>);
 	classDef.def("SetBoneRot", &set_bone_value<Quat, TBoneId, &pragma::BaseAnimatedComponent::SetBoneRot>);

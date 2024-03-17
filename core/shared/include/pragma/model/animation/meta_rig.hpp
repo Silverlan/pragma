@@ -101,6 +101,7 @@ namespace pragma::animation {
 	};
 	constexpr const char *get_meta_rig_bone_type_name(MetaRigBoneType type);
 	constexpr std::optional<MetaRigBoneType> get_meta_rig_bone_type_enum(const std::string_view &boneType);
+	constexpr std::optional<MetaRigBoneType> get_meta_rig_bone_parent_type(MetaRigBoneType type);
 
 	enum class BoneSide : uint8_t { Left = 0, Right, None };
 	constexpr std::optional<BoneSide> get_meta_rig_bone_type_side(MetaRigBoneType type);
@@ -487,6 +488,144 @@ constexpr std::optional<pragma::animation::BoneSide> pragma::animation::get_meta
 		return pragma::animation::BoneSide::Right;
 	}
 	static_assert(umath::to_integral(MetaRigBoneType::Count) == 67, "Update this list when new types are added!");
+	return {};
+}
+
+constexpr std::optional<pragma::animation::MetaRigBoneType> pragma::animation::get_meta_rig_bone_parent_type(MetaRigBoneType type)
+{
+	switch(type) {
+	case MetaRigBoneType::Pelvis:
+	case MetaRigBoneType::Spine:
+		return MetaRigBoneType::Hips;
+	case MetaRigBoneType::Spine1:
+		return MetaRigBoneType::Spine;
+	case MetaRigBoneType::Spine2:
+		return MetaRigBoneType::Spine1;
+	case MetaRigBoneType::Spine3:
+		return MetaRigBoneType::Spine2;
+	case MetaRigBoneType::Neck:
+		return MetaRigBoneType::Spine3;
+	case MetaRigBoneType::Head:
+		return MetaRigBoneType::Neck;
+	case MetaRigBoneType::LeftEar:
+		return MetaRigBoneType::Head;
+	case MetaRigBoneType::RightEar:
+		return MetaRigBoneType::Head;
+	case MetaRigBoneType::LeftEye:
+		return MetaRigBoneType::Head;
+	case MetaRigBoneType::RightEye:
+		return MetaRigBoneType::Head;
+	case MetaRigBoneType::CenterEye:
+		return MetaRigBoneType::Head;
+	case MetaRigBoneType::LeftUpperArm:
+		return MetaRigBoneType::Spine3;
+	case MetaRigBoneType::LeftLowerArm:
+		return MetaRigBoneType::LeftUpperArm;
+	case MetaRigBoneType::LeftHand:
+		return MetaRigBoneType::LeftLowerArm;
+	case MetaRigBoneType::RightUpperArm:
+		return MetaRigBoneType::Spine3;
+	case MetaRigBoneType::RightLowerArm:
+		return MetaRigBoneType::RightUpperArm;
+	case MetaRigBoneType::RightHand:
+		return MetaRigBoneType::RightLowerArm;
+	case MetaRigBoneType::LeftUpperLeg:
+		return MetaRigBoneType::Hips;
+	case MetaRigBoneType::LeftLowerLeg:
+		return MetaRigBoneType::LeftUpperLeg;
+	case MetaRigBoneType::LeftFoot:
+		return MetaRigBoneType::LeftLowerLeg;
+	case MetaRigBoneType::LeftToe:
+		return MetaRigBoneType::LeftFoot;
+	case MetaRigBoneType::RightUpperLeg:
+		return MetaRigBoneType::Hips;
+	case MetaRigBoneType::RightLowerLeg:
+		return MetaRigBoneType::RightUpperLeg;
+	case MetaRigBoneType::RightFoot:
+		return MetaRigBoneType::RightLowerLeg;
+	case MetaRigBoneType::RightToe:
+		return MetaRigBoneType::RightFoot;
+	case MetaRigBoneType::LeftThumb1:
+		return MetaRigBoneType::LeftHand;
+	case MetaRigBoneType::LeftThumb2:
+		return MetaRigBoneType::LeftThumb1;
+	case MetaRigBoneType::LeftThumb3:
+		return MetaRigBoneType::LeftThumb2;
+	case MetaRigBoneType::LeftIndexFinger1:
+		return MetaRigBoneType::LeftHand;
+	case MetaRigBoneType::LeftIndexFinger2:
+		return MetaRigBoneType::LeftIndexFinger1;
+	case MetaRigBoneType::LeftIndexFinger3:
+		return MetaRigBoneType::LeftIndexFinger2;
+	case MetaRigBoneType::LeftMiddleFinger1:
+		return MetaRigBoneType::LeftHand;
+	case MetaRigBoneType::LeftMiddleFinger2:
+		return MetaRigBoneType::LeftMiddleFinger1;
+	case MetaRigBoneType::LeftMiddleFinger3:
+		return MetaRigBoneType::LeftMiddleFinger2;
+	case MetaRigBoneType::LeftRingFinger1:
+		return MetaRigBoneType::LeftHand;
+	case MetaRigBoneType::LeftRingFinger2:
+		return MetaRigBoneType::LeftRingFinger1;
+	case MetaRigBoneType::LeftRingFinger3:
+		return MetaRigBoneType::LeftRingFinger2;
+	case MetaRigBoneType::LeftLittleFinger1:
+		return MetaRigBoneType::LeftHand;
+	case MetaRigBoneType::LeftLittleFinger2:
+		return MetaRigBoneType::LeftLittleFinger1;
+	case MetaRigBoneType::LeftLittleFinger3:
+		return MetaRigBoneType::LeftLittleFinger2;
+	case MetaRigBoneType::RightThumb1:
+		return MetaRigBoneType::RightHand;
+	case MetaRigBoneType::RightThumb2:
+		return MetaRigBoneType::RightThumb1;
+	case MetaRigBoneType::RightThumb3:
+		return MetaRigBoneType::RightThumb2;
+	case MetaRigBoneType::RightIndexFinger1:
+		return MetaRigBoneType::RightHand;
+	case MetaRigBoneType::RightIndexFinger2:
+		return MetaRigBoneType::RightIndexFinger1;
+	case MetaRigBoneType::RightIndexFinger3:
+		return MetaRigBoneType::RightIndexFinger2;
+	case MetaRigBoneType::RightMiddleFinger1:
+		return MetaRigBoneType::RightHand;
+	case MetaRigBoneType::RightMiddleFinger2:
+		return MetaRigBoneType::RightMiddleFinger1;
+	case MetaRigBoneType::RightMiddleFinger3:
+		return MetaRigBoneType::RightMiddleFinger2;
+	case MetaRigBoneType::RightRingFinger1:
+		return MetaRigBoneType::RightHand;
+	case MetaRigBoneType::RightRingFinger2:
+		return MetaRigBoneType::RightRingFinger1;
+	case MetaRigBoneType::RightRingFinger3:
+		return MetaRigBoneType::RightRingFinger2;
+	case MetaRigBoneType::RightLittleFinger1:
+		return MetaRigBoneType::RightHand;
+	case MetaRigBoneType::RightLittleFinger2:
+		return MetaRigBoneType::RightLittleFinger1;
+	case MetaRigBoneType::RightLittleFinger3:
+		return MetaRigBoneType::RightLittleFinger2;
+	case MetaRigBoneType::TailBase:
+		return MetaRigBoneType::Hips;
+	case MetaRigBoneType::TailMiddle:
+		return MetaRigBoneType::TailBase;
+	case MetaRigBoneType::TailMiddle1:
+		return MetaRigBoneType::TailMiddle;
+	case MetaRigBoneType::TailTip:
+		return MetaRigBoneType::TailMiddle1;
+	case MetaRigBoneType::LeftWing:
+		return MetaRigBoneType::Spine;
+	case MetaRigBoneType::LeftWingMiddle:
+		return MetaRigBoneType::LeftWing;
+	case MetaRigBoneType::LeftWingTip:
+		return MetaRigBoneType::LeftWingMiddle;
+	case MetaRigBoneType::RightWing:
+		return MetaRigBoneType::Spine;
+	case MetaRigBoneType::RightWingMiddle:
+		return MetaRigBoneType::RightWing;
+	case MetaRigBoneType::RightWingTip:
+		return MetaRigBoneType::RightWingMiddle;
+	}
 	return {};
 }
 

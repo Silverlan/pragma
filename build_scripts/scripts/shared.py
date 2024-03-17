@@ -103,7 +103,14 @@ def http_download(url,fileName=None):
 	if not fileName:
 		a = urlparse(url)
 		fileName = os.path.basename(a.path)
-	urllib.request.urlretrieve(url,fileName)
+	try:
+		urllib.request.urlretrieve(url,fileName)
+	except PermissionError as e:
+		print_warning("Failed to download '" +url +"' as '" +fileName +"' (PermissionError) (cwd: " + os.getcwd() +"): {}".format(e))
+		raise
+	except urllib.error.URLError as e:
+		print_warning("Failed to download '" +url +"' as '" +fileName +"' (URLError) (cwd: " + os.getcwd() +"): {}".format(e))
+		raise
 	return fileName
 
 # See https://stackoverflow.com/a/54748564

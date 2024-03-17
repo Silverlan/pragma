@@ -59,6 +59,7 @@
 #include "pragma/entities/components/constraints/constraint_look_at_component.hpp"
 #include "pragma/entities/components/constraints/constraint_child_of_component.hpp"
 #include "pragma/entities/components/lifeline_link_component.hpp"
+#include "pragma/entities/components/meta_rig_component.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
@@ -163,6 +164,20 @@ static IntersectionTestResult bvh_intersection_test(lua_State *l, const std::fun
 	if(!res)
 		return luabind::object {l, std::pair<bool, std::optional<std::vector<uint64_t>>> {res, {}}};
 	return luabind::object {l, std::pair<bool, std::optional<std::vector<pragma::MeshIntersectionInfo::MeshInfo>>> {res, std::move(info.meshInfos)}};
+}
+
+template<typename TResult, bool (pragma::MetaRigComponent::*GetValue)(pragma::animation::MetaRigBoneType, TResult &, umath::CoordinateSpace) const>
+std::optional<TResult> get_meta_bone_value(const pragma::MetaRigComponent &metaC, pragma::animation::MetaRigBoneType bone, umath::CoordinateSpace space)
+{
+	TResult result;
+	if(!(metaC.*GetValue)(bone, result, space))
+		return {};
+	return result;
+}
+template<typename TResult, bool (pragma::MetaRigComponent::*GetValue)(pragma::animation::MetaRigBoneType, TResult &, umath::CoordinateSpace) const>
+std::optional<TResult> get_meta_bone_value_ls(const pragma::MetaRigComponent &metaC, pragma::animation::MetaRigBoneType bone)
+{
+	return get_meta_bone_value<TResult, GetValue>(metaC, bone, umath::CoordinateSpace::Local);
 }
 
 void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
@@ -289,6 +304,23 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defVelocity.def("GetVelocityProperty", &pragma::VelocityComponent::GetVelocityProperty);
 	defVelocity.def("GetAngularVelocityProperty", &pragma::VelocityComponent::GetAngularVelocityProperty);
 	entsMod[defVelocity];
+
+	auto defMetaRig = pragma::lua::create_entity_component_class<pragma::MetaRigComponent, pragma::BaseEntityComponent>("MetaRigComponent");
+	defMetaRig.def("GetBonePose", &get_meta_bone_value<umath::ScaledTransform, &pragma::MetaRigComponent::GetBonePose>);
+	defMetaRig.def("GetBonePos", &get_meta_bone_value<Vector3, &pragma::MetaRigComponent::GetBonePos>);
+	defMetaRig.def("GetBoneRot", &get_meta_bone_value<Quat, &pragma::MetaRigComponent::GetBoneRot>);
+	defMetaRig.def("GetBoneScale", &get_meta_bone_value<Vector3, &pragma::MetaRigComponent::GetBoneScale>);
+
+	defMetaRig.def("GetBonePose", &get_meta_bone_value_ls<umath::ScaledTransform, &pragma::MetaRigComponent::GetBonePose>);
+	defMetaRig.def("GetBonePos", &get_meta_bone_value_ls<Vector3, &pragma::MetaRigComponent::GetBonePos>);
+	defMetaRig.def("GetBoneRot", &get_meta_bone_value_ls<Quat, &pragma::MetaRigComponent::GetBoneRot>);
+	defMetaRig.def("GetBoneScale", &get_meta_bone_value_ls<Vector3, &pragma::MetaRigComponent::GetBoneScale>);
+
+	defMetaRig.def("SetBonePose", &pragma::MetaRigComponent::SetBonePose, luabind::default_parameter_policy<4, umath::CoordinateSpace::Local> {});
+	defMetaRig.def("SetBonePos", &pragma::MetaRigComponent::SetBonePos, luabind::default_parameter_policy<4, umath::CoordinateSpace::Local> {});
+	defMetaRig.def("SetBoneRot", &pragma::MetaRigComponent::SetBoneRot, luabind::default_parameter_policy<4, umath::CoordinateSpace::Local> {});
+	defMetaRig.def("SetBoneScale", &pragma::MetaRigComponent::SetBoneScale, luabind::default_parameter_policy<4, umath::CoordinateSpace::Local> {});
+	entsMod[defMetaRig];
 
 	auto defIntersectionHandler = pragma::lua::create_entity_component_class<pragma::IntersectionHandlerComponent, pragma::BaseEntityComponent>("IntersectionHandlerComponent");
 	defIntersectionHandler.def(

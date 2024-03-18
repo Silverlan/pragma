@@ -298,8 +298,8 @@ if platform == "linux":
 			# Required for OIIO
 			"apt-get install python3-distutils",
 
-            #install freetype for linking. X server frontends (Gnome, KDE etc) already include it somewhere down the line. Also install pkg-config for easy export of flags.
-            "apt-get install pkg-config libfreetype-dev",
+			#install freetype for linking. X server frontends (Gnome, KDE etc) already include it somewhere down the line. Also install pkg-config for easy export of flags.
+			"apt-get install pkg-config libfreetype-dev",
 
 
 			#Ninja
@@ -474,43 +474,43 @@ if platform == "win32":
 
 ########## zlib (for freetype) ############
 if platform == "win32":
-    os.chdir(deps_dir)
-    mkdir("zlib_build",cd=True)
-    zlib_cmake_args = [
-    		"-DCMAKE_INSTALL_PREFIX="+deps_dir_fs+"/zlib_prefix",
-    		"-DBUILD_SHARED_LIBS=ON"
-    		]
-    cmake_configure(root+"/third_party_libs/zlib",generator,zlib_cmake_args)
-    cmake_build("Release")
-    cmake_build("Release",["install"])
+	os.chdir(deps_dir)
+	mkdir("zlib_build",cd=True)
+	zlib_cmake_args = [
+			"-DCMAKE_INSTALL_PREFIX="+deps_dir_fs+"/zlib_prefix",
+			"-DBUILD_SHARED_LIBS=ON"
+			]
+	cmake_configure(root+"/third_party_libs/zlib",generator,zlib_cmake_args)
+	cmake_build("Release")
+	cmake_build("Release",["install"])
 
 ########## freetype (built in win32, sys in linux (set in cmake)) ##########
 freetype_include_dir = ""
 freetype_lib = ""
 if platform == "win32":
-    print_msg("Downloading freetype...")
-    os.chdir(deps_dir)
-    if not Path(os.getcwd()+"/freetype").is_dir():
-	    git_clone("https://github.com/freetype/freetype")
-    freetype_root = deps_dir+"/freetype"
-    os.chdir("freetype")
-    subprocess.run(["git","reset","--hard","fbbcf50367403a6316a013b51690071198962920"],check=True)
-    mkdir("build",cd=True)
-    freetype_cmake_args =[
-    	"-DCMAKE_MODULE_PATH="+deps_dir_fs+"/zlib_prefix",
-    	"-DCMAKE_PREFIX_PATH="+deps_dir_fs+"/zlib_prefix"
-    ]
-    freetype_cmake_args += [
-        "-DCMAKE_DISABLE_FIND_PACKAGE_HarfBuzz=TRUE",
-        "-DCMAKE_DISABLE_FIND_PACKAGE_BZip2=TRUE",
-        "-DCMAKE_DISABLE_FIND_PACKAGE_PNG=TRUE"
-    ]
+	print_msg("Downloading freetype...")
+	os.chdir(deps_dir)
+	if not Path(os.getcwd()+"/freetype").is_dir():
+		git_clone("https://github.com/freetype/freetype")
+	freetype_root = deps_dir+"/freetype"
+	os.chdir("freetype")
+	subprocess.run(["git","reset","--hard","fbbcf50367403a6316a013b51690071198962920"],check=True)
+	mkdir("build",cd=True)
+	freetype_cmake_args =[
+		"-DCMAKE_MODULE_PATH="+deps_dir_fs+"/zlib_prefix",
+		"-DCMAKE_PREFIX_PATH="+deps_dir_fs+"/zlib_prefix"
+	]
+	freetype_cmake_args += [
+		"-DCMAKE_DISABLE_FIND_PACKAGE_HarfBuzz=TRUE",
+		"-DCMAKE_DISABLE_FIND_PACKAGE_BZip2=TRUE",
+		"-DCMAKE_DISABLE_FIND_PACKAGE_PNG=TRUE"
+	]
 
-    print_msg("Building freetype...")
-    cmake_configure(freetype_root,generator,freetype_cmake_args)
-    cmake_build("Release")
-    freetype_include_dir += freetype_root+"/include"
-    freetype_lib += freetype_root+"/build/Release/freetype.lib"
+	print_msg("Building freetype...")
+	cmake_configure(freetype_root,generator,freetype_cmake_args)
+	cmake_build("Release")
+	freetype_include_dir += freetype_root+"/include"
+	freetype_lib += freetype_root+"/build/Release/freetype.lib"
 
 ########## Modules ##########
 print_msg("Downloading modules...")
@@ -518,17 +518,25 @@ os.chdir(root +"/modules")
 
 module_info = []
 def add_pragma_module(name,repositoryUrl=None,commitSha=None,branch=None,skipBuildTarget=False):
-    for module in module_info:
-        if module["name"] == name:
-            return
-    module = {
-        "name": name,
-        "repositoryUrl": repositoryUrl,
-        "commitSha": commitSha,
-        "branch": branch,
+	for module in module_info:
+		if module["name"] == name:
+			return
+	module = {
+		"name": name,
+		"repositoryUrl": repositoryUrl,
+		"commitSha": commitSha,
+		"branch": branch,
 		"skipBuildTarget": skipBuildTarget
-    }
-    module_info.append(module)
+	}
+	module_info.append(module)
+
+def add_pragma_module_prebuilt(name,engineVersion="",baseUrl="https://github.com/Silverlan/pragma_prebuilt_modules/releases/download/"):
+	url = baseUrl
+	if len(engineVersion) > 0:
+		url = url +engineVersion +"/"
+	url = url +name +"/"
+
+	modules_prebuilt.append(url)
 
 def execfile(filepath, globals=None, locals=None, args=None):
 	if globals is None:
@@ -685,95 +693,96 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 
 # Register argument-dependent modules
 if with_essential_client_modules:
-    add_pragma_module(
-        name="pr_prosper_vulkan",
-        commitSha="e21d3aa373c4bc776e80dbd9a3b563459e6d3008",
-        repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
-    )
+	add_pragma_module(
+		name="pr_prosper_vulkan",
+		commitSha="e21d3aa373c4bc776e80dbd9a3b563459e6d3008",
+		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
+	)
 
 if with_common_modules:
-    add_pragma_module(
-        name="pr_bullet",
-        commitSha="4f1aea9",
-        repositoryUrl="https://github.com/Silverlan/pr_bullet.git"
-    )
-    add_pragma_module(
-        name="pr_audio_soloud",
-        commitSha="0d82a619deff13cde9fd05c62a00ded933a9558e",
-        repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
-    )
-    modules_prebuilt.append("Silverlan/pr_mount_external_prebuilt")
+	add_pragma_module(
+		name="pr_bullet",
+		commitSha="4f1aea9",
+		repositoryUrl="https://github.com/Silverlan/pr_bullet.git"
+	)
+	add_pragma_module(
+		name="pr_audio_soloud",
+		commitSha="0d82a619deff13cde9fd05c62a00ded933a9558e",
+		repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
+	)
+	add_pragma_module_prebuilt("pr_mount_external")
+	add_pragma_module_prebuilt("pr_rig")
 
 if with_pfm:
-    if with_core_pfm_modules or with_all_pfm_modules:
-        add_pragma_module(
-            name="pr_curl",
-            commitSha="87ae87d95ded57b84cdec2a58728e00185dbf40a",
-            repositoryUrl="https://github.com/Silverlan/pr_curl.git"
-        )
-        add_pragma_module(
-            name="pr_dmx",
-            commitSha="ce90ad2",
-            repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
-        )
-    if with_all_pfm_modules:
-        add_pragma_module(
-            name="pr_chromium",
-            commitSha="bcfcb8c33f0a47f2e0823b1c675c85749ad76f31",
-            repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
-        )
-        add_pragma_module(
-            name="pr_unirender",
-            commitSha="1f0df83e5d529078b598db974b9906b92145313c",
-            repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
-        )
-        add_pragma_module(
-            name="pr_curl",
-            commitSha="87ae87d95ded57b84cdec2a58728e00185dbf40a",
-            repositoryUrl="https://github.com/Silverlan/pr_curl.git"
-        )
-        add_pragma_module(
-            name="pr_dmx",
-            commitSha="ce90ad2",
-            repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
-        )
-        add_pragma_module(
-            name="pr_xatlas",
-            commitSha="485eaad",
-            repositoryUrl="https://github.com/Silverlan/pr_xatlas.git"
-        )
-        add_pragma_module(
-            name="pr_davinci",
-            commitSha="e8863cd1b8e047ddcdf47b7ae6291e9962568d09",
-            repositoryUrl="https://github.com/Silverlan/pr_davinci.git"
-        )
-        add_pragma_module(
-            name="pr_opencv",
-            commitSha="97a8b4477c584a10f5d70a2f29b0febf0d64a311",
-            repositoryUrl="https://github.com/Silverlan/pr_opencv.git"
-        )
+	if with_core_pfm_modules or with_all_pfm_modules:
+		add_pragma_module(
+			name="pr_curl",
+			commitSha="87ae87d95ded57b84cdec2a58728e00185dbf40a",
+			repositoryUrl="https://github.com/Silverlan/pr_curl.git"
+		)
+		add_pragma_module(
+			name="pr_dmx",
+			commitSha="ce90ad2",
+			repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
+		)
+	if with_all_pfm_modules:
+		add_pragma_module(
+			name="pr_chromium",
+			commitSha="bcfcb8c33f0a47f2e0823b1c675c85749ad76f31",
+			repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
+		)
+		add_pragma_module(
+			name="pr_unirender",
+			commitSha="1f0df83e5d529078b598db974b9906b92145313c",
+			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
+		)
+		add_pragma_module(
+			name="pr_curl",
+			commitSha="87ae87d95ded57b84cdec2a58728e00185dbf40a",
+			repositoryUrl="https://github.com/Silverlan/pr_curl.git"
+		)
+		add_pragma_module(
+			name="pr_dmx",
+			commitSha="ce90ad2",
+			repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
+		)
+		add_pragma_module(
+			name="pr_xatlas",
+			commitSha="485eaad",
+			repositoryUrl="https://github.com/Silverlan/pr_xatlas.git"
+		)
+		add_pragma_module(
+			name="pr_davinci",
+			commitSha="e8863cd1b8e047ddcdf47b7ae6291e9962568d09",
+			repositoryUrl="https://github.com/Silverlan/pr_davinci.git"
+		)
+		add_pragma_module(
+			name="pr_opencv",
+			commitSha="97a8b4477c584a10f5d70a2f29b0febf0d64a311",
+			repositoryUrl="https://github.com/Silverlan/pr_opencv.git"
+		)
 
 if with_lua_doc_generator or with_pfm:
-    add_pragma_module(
-        name="pr_git",
-        commitSha="84d7c32",
-        repositoryUrl="https://github.com/Silverlan/pr_git.git"
-    )
+	add_pragma_module(
+		name="pr_git",
+		commitSha="84d7c32",
+		repositoryUrl="https://github.com/Silverlan/pr_git.git"
+	)
 
 if with_vr:
-    add_pragma_module(
-        name="pr_openvr",
-        commitSha="1ba663f90e857f1f9bd30a836a1c89c83f4a4ef1",
-        repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
-    )
+	add_pragma_module(
+		name="pr_openvr",
+		commitSha="1ba663f90e857f1f9bd30a836a1c89c83f4a4ef1",
+		repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
+	)
 
 if with_networking:
-    add_pragma_module(
-        name="pr_steam_networking_sockets",
-        commitSha="d1127f8c981be69448a68b4d4b7665a6e5df6cf4",
-        repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
+	add_pragma_module(
+		name="pr_steam_networking_sockets",
+		commitSha="d1127f8c981be69448a68b4d4b7665a6e5df6cf4",
+		repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
 		skipBuildTarget=True
-    )
+	)
 
 # These modules are shipped with the Pragma repository and will have to be excluded from the
 # CMake configuration explicitly if they should be disabled.
@@ -818,9 +827,9 @@ for module in shippedModules:
 			cmake_args.append("-DPRAGMA_DISABLE_MODULE_" +module +"=OFF")
 
 os.chdir(install_dir)
-for module in modules_prebuilt:
-	print_msg("Downloading prebuilt binaries for module '" +module +"'...")
-	install_prebuilt_binaries("https://github.com/" +module +"/releases/download/latest/")
+for url in modules_prebuilt:
+	print_msg("Downloading prebuilt binaries for module '" +url +"'...")
+	install_prebuilt_binaries(url)
 
 cmake_args.append("-DPRAGMA_INSTALL_CUSTOM_TARGETS=" +";".join(module_list +additional_build_targets))
 

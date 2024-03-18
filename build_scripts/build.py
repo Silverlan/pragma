@@ -297,8 +297,8 @@ if platform == "linux":
 			# Required for OIIO
 			"apt-get install python3-distutils",
 
-            #install freetype for linking. X server frontends (Gnome, KDE etc) already include it somewhere down the line. Also install pkg-config for easy export of flags.
-            "apt-get install pkg-config libfreetype-dev",
+			#install freetype for linking. X server frontends (Gnome, KDE etc) already include it somewhere down the line. Also install pkg-config for easy export of flags.
+			"apt-get install pkg-config libfreetype-dev",
 
 
 			#Ninja
@@ -497,15 +497,15 @@ if platform == "win32":
 
 ########## zlib (for freetype) ############
 if platform == "win32":
-    os.chdir(deps_dir)
-    mkdir("zlib_build",cd=True)
-    zlib_cmake_args = [
-    		"-DCMAKE_INSTALL_PREFIX="+deps_dir_fs+"/zlib_prefix",
-    		"-DBUILD_SHARED_LIBS=ON"
-    		]
-    cmake_configure(root+"/third_party_libs/zlib",generator,zlib_cmake_args)
-    cmake_build("Release")
-    cmake_build("Release",["install"])
+	os.chdir(deps_dir)
+	mkdir("zlib_build",cd=True)
+	zlib_cmake_args = [
+			"-DCMAKE_INSTALL_PREFIX="+deps_dir_fs+"/zlib_prefix",
+			"-DBUILD_SHARED_LIBS=ON"
+			]
+	cmake_configure(root+"/third_party_libs/zlib",generator,zlib_cmake_args)
+	cmake_build("Release")
+	cmake_build("Release",["install"])
 
 
 ########## compressonator deps ##########
@@ -517,29 +517,29 @@ if platform == "linux":
 freetype_include_dir = ""
 freetype_lib = ""
 if platform == "win32":
-    print_msg("Downloading freetype...")
-    os.chdir(deps_dir)
-    if not Path(os.getcwd()+"/freetype").is_dir():
-	    git_clone("https://github.com/freetype/freetype")
-    freetype_root = deps_dir+"/freetype"
-    os.chdir("freetype")
-    subprocess.run(["git","reset","--hard","fbbcf50367403a6316a013b51690071198962920"],check=True)
-    mkdir("build",cd=True)
-    freetype_cmake_args =[
-    	"-DCMAKE_MODULE_PATH="+deps_dir_fs+"/zlib_prefix",
-    	"-DCMAKE_PREFIX_PATH="+deps_dir_fs+"/zlib_prefix"
-    ]
-    freetype_cmake_args += [
-        "-DCMAKE_DISABLE_FIND_PACKAGE_HarfBuzz=TRUE",
-        "-DCMAKE_DISABLE_FIND_PACKAGE_BZip2=TRUE",
-        "-DCMAKE_DISABLE_FIND_PACKAGE_PNG=TRUE"
-    ]
+	print_msg("Downloading freetype...")
+	os.chdir(deps_dir)
+	if not Path(os.getcwd()+"/freetype").is_dir():
+		git_clone("https://github.com/freetype/freetype")
+	freetype_root = deps_dir+"/freetype"
+	os.chdir("freetype")
+	subprocess.run(["git","reset","--hard","fbbcf50367403a6316a013b51690071198962920"],check=True)
+	mkdir("build",cd=True)
+	freetype_cmake_args =[
+		"-DCMAKE_MODULE_PATH="+deps_dir_fs+"/zlib_prefix",
+		"-DCMAKE_PREFIX_PATH="+deps_dir_fs+"/zlib_prefix"
+	]
+	freetype_cmake_args += [
+		"-DCMAKE_DISABLE_FIND_PACKAGE_HarfBuzz=TRUE",
+		"-DCMAKE_DISABLE_FIND_PACKAGE_BZip2=TRUE",
+		"-DCMAKE_DISABLE_FIND_PACKAGE_PNG=TRUE"
+	]
 
-    print_msg("Building freetype...")
-    cmake_configure(freetype_root,generator,freetype_cmake_args)
-    cmake_build("Release")
-    freetype_include_dir += freetype_root+"/include"
-    freetype_lib += freetype_root+"/build/Release/freetype.lib"
+	print_msg("Building freetype...")
+	cmake_configure(freetype_root,generator,freetype_cmake_args)
+	cmake_build("Release")
+	freetype_include_dir += freetype_root+"/include"
+	freetype_lib += freetype_root+"/build/Release/freetype.lib"
 
 ########## Modules ##########
 print_msg("Downloading modules...")
@@ -794,11 +794,11 @@ if with_pfm:
         )
 
 if with_lua_doc_generator or with_pfm:
-    add_pragma_module(
-        name="pr_git",
-        commitSha="84d7c32",
-        repositoryUrl="https://github.com/Silverlan/pr_git.git"
-    )
+	add_pragma_module(
+		name="pr_git",
+		commitSha="84d7c32",
+		repositoryUrl="https://github.com/Silverlan/pr_git.git"
+	)
 
 if with_vr:
     add_pragma_module(
@@ -808,12 +808,12 @@ if with_vr:
     )
 
 if with_networking:
-    add_pragma_module(
-        name="pr_steam_networking_sockets",
-        commitSha="d1127f8c981be69448a68b4d4b7665a6e5df6cf4",
-        repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
+	add_pragma_module(
+		name="pr_steam_networking_sockets",
+		commitSha="d1127f8c981be69448a68b4d4b7665a6e5df6cf4",
+		repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
 		skipBuildTarget=True
-    )
+	)
 
 # These modules are shipped with the Pragma repository and will have to be excluded from the
 # CMake configuration explicitly if they should be disabled.
@@ -858,9 +858,9 @@ for module in shippedModules:
 			cmake_args.append("-DPRAGMA_DISABLE_MODULE_" +module +"=OFF")
 
 os.chdir(install_dir)
-for module in modules_prebuilt:
-	print_msg("Downloading prebuilt binaries for module '" +module +"'...")
-	install_prebuilt_binaries("https://github.com/" +module +"/releases/download/latest/")
+for url in modules_prebuilt:
+	print_msg("Downloading prebuilt binaries for module '" +url +"'...")
+	install_prebuilt_binaries(url)
 
 cmake_args.append("-DPRAGMA_INSTALL_CUSTOM_TARGETS=" +";".join(module_list +additional_build_targets))
 

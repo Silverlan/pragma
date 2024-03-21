@@ -160,7 +160,7 @@ bool BaseModelComponent::GetAttachment(const std::string &name, Vector3 *pos, Qu
 	return GetAttachment(hMdl->LookupAttachment(name), pos, rot);
 }
 
-void BaseModelComponent::OnRemove() {}
+void BaseModelComponent::OnRemove() { BaseEntityComponent::OnRemove(); }
 
 void BaseModelComponent::GetAnimations(Activity activity, std::vector<unsigned int> &animations) const
 {

@@ -96,9 +96,21 @@ namespace pragma {
 		static ComponentEventId EVENT_ON_MEMBERS_CHANGED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
-		enum class StateFlags : uint32_t { None = 0u, IsThinking = 1u, IsLogicEnabled = IsThinking << 1u, Removed = IsLogicEnabled << 1u };
+		enum class StateFlags : uint32_t {
+			None = 0u,
+			IsThinking = 1u,
+			IsLogicEnabled = IsThinking << 1u,
+			Removed = IsLogicEnabled << 1u,
+			CleanedUp = Removed << 1u,
+		};
 
-		enum class LogSeverity : uint8_t { Normal = 0, Warning, Error, Critical, Debug };
+		enum class LogSeverity : uint8_t {
+			Normal = 0,
+			Warning,
+			Error,
+			Critical,
+			Debug,
+		};
 
 		BaseEntityComponent(const BaseEntityComponent &) = delete;
 		BaseEntityComponent &operator=(const BaseEntityComponent &) = delete;

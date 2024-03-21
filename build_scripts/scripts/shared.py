@@ -241,6 +241,25 @@ def get_submodule(directory,url,commitId=None,branch=None):
 	subprocess.run(["git","submodule","update","--init","--recursive"],check=True)
 	os.chdir(curDir)
 
+def compile_lua_file(deps_dir, luaFile):
+	from scripts.shared import normalize_path
+	curDir = os.getcwd()
+	os.chdir(deps_dir)
+	lua_compile_root = normalize_path(deps_dir +"/lua_compile")
+	if not Path(lua_compile_root).is_dir():
+		mkdir("lua_compile",True)
+		print_msg("lua_compile not found. Downloading...")
+		if platform == "win32":
+			http_extract("https://github.com/Silverlan/lua_compile/releases/download/latest/binaries_windows64.zip")
+		else:
+			http_extract("https://github.com/Silverlan/lua_compile/releases/download/latest/binaries_linux64.tar.gz")
+	os.chdir(lua_compile_root)
+	if platform == "win32":
+		subprocess.run(["lua_compile.exe",luaFile],check=True)
+	else:
+		subprocess.run(["lua_compile",luaFile],check=True)
+	os.chdir(curDir)
+
 if platform == "win32":
 	def determine_vsdevcmd_path(deps_dir):
 		# Create the deps_dir if it doesn't exist

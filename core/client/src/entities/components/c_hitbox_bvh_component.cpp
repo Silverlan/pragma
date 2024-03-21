@@ -619,6 +619,7 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 
 void CHitboxBvhComponent::OnRemove()
 {
+	BaseEntityComponent::OnRemove();
 	auto intersectionHandlerC = GetEntity().GetComponent<IntersectionHandlerComponent>();
 	if(intersectionHandlerC.valid()) {
 		intersectionHandlerC->ClearIntersectionHandler();

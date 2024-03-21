@@ -813,6 +813,7 @@ for module in module_info:
 
 	scriptPath = moduleDir +"build_scripts/setup.py"
 	if Path(scriptPath).is_file():
+		os.chdir(moduleDir)
 		print_msg("Executing module setup script...")
 		execbuildscript(scriptPath)
 

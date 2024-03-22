@@ -272,6 +272,7 @@ namespace pragma {
 		friend EntityComponentManager;
 		friend BaseEntityComponentSystem;
 		BaseEntityComponent(BaseEntity &ent);
+		void CleanUp();
 		void UpdateTickPolicy();
 		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData);
 		virtual void Load(udm::LinkedPropertyWrapperArg udm, uint32_t version);

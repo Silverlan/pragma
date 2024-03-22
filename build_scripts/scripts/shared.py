@@ -255,9 +255,9 @@ def compile_lua_file(deps_dir, luaFile):
 			http_extract("https://github.com/Silverlan/lua_compile/releases/download/latest/binaries_linux64.tar.gz",format="tar.gz")
 	os.chdir(lua_compile_root)
 	if platform == "win32":
-		subprocess.run(["lua_compile.exe",luaFile],check=True)
+		subprocess.run([os.getcwd() +"/lua_compile.exe",luaFile],check=True)
 	else:
-		subprocess.run(["lua_compile",luaFile],check=True)
+		subprocess.run([os.getcwd() +"/lua_compile",luaFile],check=True)
 	os.chdir(curDir)
 
 if platform == "win32":

@@ -582,12 +582,6 @@ void Lua::util::register_library(lua_State *l)
 	  luabind::def("exec", static_cast<Lua::mult<bool, Lua::opt<std::string>> (*)(lua_State *, const std::string &, const std::vector<std::string> &)>(&exec_python)), luabind::def("init_blender", &pragma::python::init_blender), luabind::def("reload", &pragma::python::reload)];
 
 	auto utilMod = luabind::module(l, "util");
-	auto retargetMod = luabind::module(l, "retarget");
-	auto defRetargetData = luabind::class_<util::retarget::RetargetData>("RetargetData");
-	auto defRetargetFlexData = luabind::class_<util::retarget::RetargetFlexData>("RetargetFlexData");
-	auto nsRetarget = luabind::namespace_("retarget");
-	nsRetarget[defRetargetData];
-	nsRetarget[defRetargetFlexData];
 
 	auto defRenderTile = luabind::class_<pragma::rendering::Tile>("RenderTile");
 	defRenderTile.def(luabind::constructor<>());
@@ -618,12 +612,6 @@ void Lua::util::register_library(lua_State *l)
 	    }),
 	  luabind::def(
 	    "run_updater", +[](Engine &engine) { engine.SetRunUpdaterOnClose(true); })];
-	nsRetarget[luabind::def("initialize_retarget_data", &Lua::util::retarget::initialize_retarget_data)];
-	nsRetarget[luabind::def("apply_retarget_rig", &Lua::util::retarget::apply_retarget_rig)];
-	nsRetarget[luabind::def("initialize_retarget_flex_data", &Lua::util::retarget::initialize_retarget_flex_data)];
-	nsRetarget[luabind::def("apply_retarget_flex", static_cast<void (*)(Lua::util::retarget::RetargetFlexData &, pragma::BaseFlexComponent &, pragma::BaseFlexComponent &)>(&Lua::util::retarget::retarget_flex_controllers))];
-	nsRetarget[luabind::def("apply_retarget_flex", static_cast<void (*)(Lua::util::retarget::RetargetFlexData &, const std::unordered_map<uint32_t, float> &, pragma::BaseFlexComponent &)>(&Lua::util::retarget::retarget_flex_controllers))];
-	utilMod[nsRetarget];
 
 	auto defUuid = luabind::class_<util::Uuid>("Uuid");
 	defUuid.def(

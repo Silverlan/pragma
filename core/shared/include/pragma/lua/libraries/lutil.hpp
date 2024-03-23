@@ -139,53 +139,6 @@ namespace Lua {
 		struct DLLNETWORK Uuid {
 			::util::Uuid value;
 		};
-
-		struct DLLNETWORK TranslationData {
-			pragma::animation::BoneId boneIdOther;
-			umath::Transform transform;
-		};
-
-		namespace retarget {
-			struct DLLNETWORK RetargetData {
-				std::vector<umath::ScaledTransform> absBonePoses;
-				std::vector<umath::ScaledTransform> origBindPoseToRetargetBindPose;
-				std::vector<float> origBindPoseBoneDistances;
-
-				std::vector<umath::ScaledTransform> bindPosesOther;
-				std::vector<umath::ScaledTransform> origBindPoses;
-				std::vector<umath::ScaledTransform> tmpPoses;
-				std::vector<umath::ScaledTransform> retargetPoses;
-				umath::Transform invRootPose;
-
-				std::vector<umath::Transform> bindPoseTransforms;
-				std::vector<umath::ScaledTransform> relBindPoses;
-				std::unordered_set<pragma::animation::BoneId> untranslatedBones;
-
-				std::unordered_map<pragma::animation::BoneId, TranslationData> translationTable;
-			};
-			std::shared_ptr<RetargetData> initialize_retarget_data(luabind::object absBonePoses, luabind::object origBindPoseToRetargetBindPose, luabind::object origBindPoseBoneDistances,
-
-			  luabind::object bindPosesOther, luabind::object origBindPoses, luabind::object tmpPoses, luabind::object retargetPoses, luabind::object invRootPose,
-
-			  luabind::object bindPoseTransforms, luabind::object relBindPoses,
-
-			  luabind::object tUntranslatedBones, luabind::object tTranslationTable);
-			void apply_retarget_rig(RetargetData &testData, Model &mdl, pragma::BaseAnimatedComponent &animSrc, pragma::BaseAnimatedComponent &animDst, pragma::animation::Skeleton &skeleton);
-
-			struct DLLNETWORK RetargetFlexData {
-				struct RemapData {
-					float minSource;
-					float maxSource;
-
-					float minTarget;
-					float maxTarget;
-				};
-				std::unordered_map<uint32_t, std::unordered_map<uint32_t, RemapData>> remapData;
-			};
-			std::shared_ptr<RetargetFlexData> initialize_retarget_flex_data(luabind::object remapData);
-			void retarget_flex_controllers(RetargetFlexData &retargetFlexData, pragma::BaseFlexComponent &flexCSrc, pragma::BaseFlexComponent &flexCDst);
-			void retarget_flex_controllers(RetargetFlexData &retargetFlexData, const std::unordered_map<uint32_t, float> &srcFlexValues, pragma::BaseFlexComponent &flexCDst);
-		};
 	};
 };
 

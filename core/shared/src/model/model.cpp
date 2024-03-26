@@ -1743,6 +1743,22 @@ bool Model::GenerateMetaRig()
 	m_metaRig = std::make_shared<pragma::animation::MetaRig>();
 	if(!generateMetaRig(*this, *m_metaRig))
 		return false;
+	GenerateMetaBlendShapes();
+	return true;
+}
+bool Model::GenerateMetaBlendShapes()
+{
+	if(umath::is_flag_set(m_metaInfo.flags, Flags::GeneratedMetaBlendShapes))
+		return false;
+	umath::set_flag(m_metaInfo.flags, Flags::GeneratedMetaBlendShapes);
+	auto libRig = m_networkState->InitializeLibrary("pr_rig");
+	if(!libRig)
+		return false;
+	auto *generateMetaBlendShapes = libRig->FindSymbolAddress<bool (*)(Model &)>("generate_meta_blend_shapes");
+	if(!generateMetaBlendShapes)
+		return false;
+	if(!generateMetaBlendShapes(*this))
+		return false;
 	return true;
 }
 void Model::ApplyPostImportProcessing()

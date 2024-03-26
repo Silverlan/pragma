@@ -181,8 +181,9 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 		GeneratedHitboxes = WorldGeometry << 1u,
 		GeneratedLODs = GeneratedHitboxes << 1u,
 		GeneratedMetaRig = GeneratedLODs << 1u,
+		GeneratedMetaBlendShapes = GeneratedMetaRig << 1u,
 
-		Count = 12
+		Count = 13,
 	};
 
 	enum class StateFlags : uint32_t { None = 0u, Valid = 1u, AllMaterialsLoaded = Valid << 1u, MaterialsLoadInitiated = AllMaterialsLoaded << 1u };
@@ -379,6 +380,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 
 	const std::shared_ptr<pragma::animation::MetaRig> &GetMetaRig() const;
 	bool GenerateMetaRig();
+	bool GenerateMetaBlendShapes();
 	void ClearMetaRig();
 	std::optional<umath::ScaledTransform> GetMetaRigReferencePose(pragma::animation::MetaRigBoneType type) const;
 	void ApplyPostImportProcessing();

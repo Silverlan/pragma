@@ -326,7 +326,8 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 	readFlag(udm, Model::Flags::GeneratedHitboxes, "generatedHitboxes", flags);
 	readFlag(udm, Model::Flags::GeneratedLODs, "generatedLODs", flags);
 	readFlag(udm, Model::Flags::GeneratedMetaRig, "generatedMetaRig", flags);
-	static_assert(umath::to_integral(Model::Flags::Count) == 12, "Update this list when new flags have been added!");
+	readFlag(udm, Model::Flags::GeneratedMetaBlendShapes, "generatedMetaBlendShapes", flags);
+	static_assert(umath::to_integral(Model::Flags::Count) == 13, "Update this list when new flags have been added!");
 
 	auto isStatic = umath::is_flag_set(flags, Model::Flags::Static);
 	if(!isStatic) {
@@ -789,7 +790,8 @@ bool Model::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
 	writeModelFlag(Model::Flags::GeneratedHitboxes, "generatedHitboxes");
 	writeModelFlag(Model::Flags::GeneratedLODs, "generatedLODs");
 	writeModelFlag(Model::Flags::GeneratedMetaRig, "generatedMetaRig");
-	static_assert(umath::to_integral(Model::Flags::Count) == 12, "Update this list when new flags have been added!");
+	writeModelFlag(Model::Flags::GeneratedMetaBlendShapes, "generatedMetaBlendShapes");
+	static_assert(umath::to_integral(Model::Flags::Count) == 13, "Update this list when new flags have been added!");
 
 	auto isStatic = umath::is_flag_set(flags, Model::Flags::Static);
 	if(!isStatic) {

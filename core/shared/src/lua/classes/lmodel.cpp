@@ -170,6 +170,12 @@ namespace pragma::animation {
 		out << "[Ang:" << ang.p << ", " << ang.y << "," << ang.r << "]";
 		return out;
 	}
+	std::ostream &operator<<(std::ostream &out, const pragma::animation::MetaRigBlendShape &blendShapeInfo)
+	{
+		out << "MetaRigBlendShape";
+		out << "[FlexControllerId:" << blendShapeInfo.flexControllerId << "]";
+		return out;
+	}
 	std::ostream &operator<<(std::ostream &out, const pragma::animation::MetaRig &rig)
 	{
 		out << "MetaRig";
@@ -355,6 +361,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("GetExtensionData", &::Model::GetExtensionData);
 	classDef.def("GenerateHitboxes", &::Model::GenerateHitboxes);
 	classDef.def("GenerateMetaRig", &::Model::GenerateMetaRig);
+	classDef.def("GenerateMetaBlendShapes", &::Model::GenerateMetaBlendShapes);
 	classDef.def("GetMetaRig", &::Model::GetMetaRig);
 	classDef.def("ClearMetaRig", &::Model::ClearMetaRig);
 	classDef.def("GetMetaRigReferencePose", &::Model::GetMetaRigReferencePose);
@@ -939,6 +946,11 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	  "max", +[](const pragma::animation::MetaRigBone &boneInfo) -> Vector3 { return boneInfo.bounds.second; });
 	classDef.scope[defBoneInfo];
 
+	auto defBlendShapeInfo = luabind::class_<pragma::animation::MetaRigBlendShape>("MetaRigBlendShape");
+	defBlendShapeInfo.def(luabind::tostring(luabind::self));
+	defBlendShapeInfo.def_readonly("flexControllerId", &pragma::animation::MetaRigBlendShape::flexControllerId);
+	classDef.scope[defBlendShapeInfo];
+
 	auto defRig = luabind::class_<pragma::animation::MetaRig>("MetaRig");
 	defRig.def_readonly("rigType", &pragma::animation::MetaRig::rigType);
 	defRig.def_readonly("forwardFacingRotationOffset", &pragma::animation::MetaRig::forwardFacingRotationOffset);
@@ -949,6 +961,8 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	defRig.scope[luabind::def("get_bone_enum", &pragma::animation::get_meta_rig_bone_type_enum)];
 	defRig.scope[luabind::def("get_bone_side", &pragma::animation::get_meta_rig_bone_type_side)];
 	defRig.scope[luabind::def("get_bone_parent", &pragma::animation::get_meta_rig_bone_parent_type)];
+	defRig.scope[luabind::def("get_blend_shape_name", &pragma::animation::get_blend_shape_name)];
+	defRig.scope[luabind::def("get_blend_shape_enum", &pragma::animation::get_blend_shape_enum)];
 	defRig.def(
 	  "GetNormalizedBoneInfo", +[](const pragma::animation::MetaRig &metaRig, pragma::animation::MetaRigBoneType boneType) -> const pragma::animation::MetaRigBone * {
 		  auto idx = umath::to_integral(boneType);
@@ -964,6 +978,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 		  return boneId;
 	  });
 	defRig.def("GetBone", &pragma::animation::MetaRig::GetBone);
+	defRig.def("GetBlendShape", &pragma::animation::MetaRig::GetBlendShape);
 	defRig.def("DebugPrint", &pragma::animation::MetaRig::DebugPrint);
 	defRig.add_static_constant("RIG_TYPE_BIPED", umath::to_integral(pragma::animation::RigType::Biped));
 	defRig.add_static_constant("RIG_TYPE_QUADRUPED", umath::to_integral(pragma::animation::RigType::Quadruped));

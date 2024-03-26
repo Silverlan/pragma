@@ -7,6 +7,7 @@
 
 #include "pragma/model/animation/meta_rig.hpp"
 #include "pragma/model/animation/skeleton.hpp"
+#include "pragma/model/model.h"
 
 pragma::animation::BoneId pragma::animation::MetaRig::GetBoneId(const pragma::GString &type) const
 {
@@ -24,8 +25,9 @@ pragma::animation::BoneId pragma::animation::MetaRig::GetBoneId(pragma::animatio
 	return bones[i].boneId;
 }
 
-void pragma::animation::MetaRig::DebugPrint(Skeleton &skeleton)
+void pragma::animation::MetaRig::DebugPrint(const Model &mdl)
 {
+	auto &skeleton = mdl.GetSkeleton();
 	std::stringstream ss;
 	ss << "MetaRig\n";
 	auto printBone = [&ss, &skeleton](MetaRigBoneType boneType, const MetaRigBone &rigBone) {
@@ -40,7 +42,28 @@ void pragma::animation::MetaRig::DebugPrint(Skeleton &skeleton)
 	};
 	for(size_t i = 0; i < bones.size(); ++i)
 		printBone(static_cast<MetaRigBoneType>(i), bones[i]);
+	ss << "\nBlend shapes:\n";
+	for(size_t i = 0; i < umath::to_integral(BlendShape::Count); ++i) {
+		auto blendShape = static_cast<BlendShape>(i);
+		auto &blendShapeInfo = blendShapes[i];
+		auto flexConId = blendShapeInfo.flexControllerId;
+		ss << magic_enum::enum_name(blendShape) << " = ";
+		auto *flexCon = mdl.GetFlexController(flexConId);
+		if(!flexCon)
+			ss << "NULL";
+		else
+			ss << flexCon->name;
+		ss << "\n";
+	}
+
 	Con::cout << ss.str() << Con::endl;
+}
+const pragma::animation::MetaRigBlendShape *pragma::animation::MetaRig::GetBlendShape(pragma::animation::BlendShape blendShape) const
+{
+	auto i = umath::to_integral(blendShape);
+	if(i >= blendShapes.size() || blendShapes[i].flexControllerId == pragma::animation::INVALID_FLEX_CONTROLLER_INDEX)
+		return nullptr;
+	return &blendShapes[i];
 }
 const pragma::animation::MetaRigBone *pragma::animation::MetaRig::GetBone(pragma::animation::MetaRigBoneType type) const
 {

@@ -29,6 +29,7 @@ namespace pragma::animation {
 
 		Neck,
 		Head,
+		Jaw,
 		LeftEar,
 		RightEar,
 		LeftEye,
@@ -177,7 +178,7 @@ namespace pragma::animation {
 		Count
 	};
 	constexpr const char *get_blend_shape_name(BlendShape blendShape);
-	constexpr std::optional<BlendShape> get_blend_shape_enum(const char *name);
+	constexpr std::optional<BlendShape> get_blend_shape_enum(const std::string_view &name);
 
 	struct DLLNETWORK MetaRigBone {
 		pragma::animation::BoneId boneId = pragma::animation::INVALID_BONE_INDEX;
@@ -214,6 +215,8 @@ constexpr const char *pragma::animation::get_meta_rig_bone_type_name(MetaRigBone
 		return "head";
 	case MetaRigBoneType::Neck:
 		return "neck";
+	case MetaRigBoneType::Jaw:
+		return "jaw";
 	case MetaRigBoneType::LeftUpperArm:
 		return "left_upper_arm";
 	case MetaRigBoneType::LeftLowerArm:
@@ -345,7 +348,7 @@ constexpr const char *pragma::animation::get_meta_rig_bone_type_name(MetaRigBone
 	case MetaRigBoneType::RightWingTip:
 		return "right_wing_tip";
 	}
-	static_assert(umath::to_integral(MetaRigBoneType::Count) == 67, "Update this list when new types are added!");
+	static_assert(umath::to_integral(MetaRigBoneType::Count) == 68, "Update this list when new types are added!");
 	return nullptr;
 }
 
@@ -357,6 +360,8 @@ constexpr std::optional<pragma::animation::MetaRigBoneType> pragma::animation::g
 		return pragma::animation::MetaRigBoneType::Head;
 	case "neck"_:
 		return pragma::animation::MetaRigBoneType::Neck;
+	case "jaw"_:
+		return pragma::animation::MetaRigBoneType::Jaw;
 	case "left_upper_arm"_:
 		return pragma::animation::MetaRigBoneType::LeftUpperArm;
 	case "left_lower_arm"_:
@@ -488,7 +493,7 @@ constexpr std::optional<pragma::animation::MetaRigBoneType> pragma::animation::g
 	case "right_wing_tip"_:
 		return pragma::animation::MetaRigBoneType::RightWingTip;
 	}
-	static_assert(umath::to_integral(MetaRigBoneType::Count) == 67, "Update this list when new types are added!");
+	static_assert(umath::to_integral(MetaRigBoneType::Count) == 68, "Update this list when new types are added!");
 	return {};
 }
 
@@ -503,6 +508,7 @@ constexpr std::optional<pragma::animation::BoneSide> pragma::animation::get_meta
 	case MetaRigBoneType::Spine3:
 	case MetaRigBoneType::Neck:
 	case MetaRigBoneType::Head:
+	case MetaRigBoneType::Jaw:
 	case MetaRigBoneType::CenterEye:
 	case MetaRigBoneType::TailBase:
 	case MetaRigBoneType::TailMiddle:
@@ -566,7 +572,7 @@ constexpr std::optional<pragma::animation::BoneSide> pragma::animation::get_meta
 	case MetaRigBoneType::RightWingTip:
 		return pragma::animation::BoneSide::Right;
 	}
-	static_assert(umath::to_integral(MetaRigBoneType::Count) == 67, "Update this list when new types are added!");
+	static_assert(umath::to_integral(MetaRigBoneType::Count) == 68, "Update this list when new types are added!");
 	return {};
 }
 
@@ -586,6 +592,8 @@ constexpr std::optional<pragma::animation::MetaRigBoneType> pragma::animation::g
 		return MetaRigBoneType::Spine3;
 	case MetaRigBoneType::Head:
 		return MetaRigBoneType::Neck;
+	case MetaRigBoneType::Jaw:
+		return MetaRigBoneType::Head;
 	case MetaRigBoneType::LeftEar:
 		return MetaRigBoneType::Head;
 	case MetaRigBoneType::RightEar:
@@ -705,6 +713,7 @@ constexpr std::optional<pragma::animation::MetaRigBoneType> pragma::animation::g
 	case MetaRigBoneType::RightWingTip:
 		return MetaRigBoneType::RightWingMiddle;
 	}
+	static_assert(umath::to_integral(MetaRigBoneType::Count) == 68, "Update this list when new types are added!");
 	return {};
 }
 
@@ -838,7 +847,7 @@ constexpr const char *pragma::animation::get_blend_shape_name(BlendShape blendSh
 	}
 	static_assert(umath::to_integral(BlendShape::Count) == 61, "Update this list when new blend shape types are added!");
 }
-constexpr std::optional<pragma::animation::BlendShape> pragma::animation::get_blend_shape_enum(const char *name)
+constexpr std::optional<pragma::animation::BlendShape> pragma::animation::get_blend_shape_enum(const std::string_view &name)
 {
 	using namespace ustring::string_switch_ci;
 	switch(ustring::string_switch_ci::hash(name)) {

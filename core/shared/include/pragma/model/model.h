@@ -149,9 +149,9 @@ class Game;
 class VertexAnimation;
 class FlexAnimation;
 class NetworkState;
-using FlexControllerId = uint32_t;
 namespace pragma::animation {
 	using BoneId = uint16_t;
+	using FlexControllerId = uint32_t;
 	struct MetaRig;
 	enum class MetaRigBoneType : uint8_t;
 };

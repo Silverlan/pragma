@@ -469,7 +469,17 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("LookupFlexController", &Lua::Model::GetFlexControllerId);
 	classDef.def("GetFlexController", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&Lua::Model::GetFlexController));
 	classDef.def("GetFlexController", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&Lua::Model::GetFlexController));
+	classDef.def(
+	  "AddFlexController", +[](::Model &mdl, const std::string &name, float min, float max) -> pragma::animation::FlexControllerId {
+		  uint32_t id;
+		  if(mdl.GetFlexControllerId(name, id))
+			  return id;
+		  mdl.GetFlexControllers().push_back({name, min, max});
+		  return mdl.GetFlexControllers().size() - 1;
+	  });
 	classDef.def("GetFlexes", &Lua::Model::GetFlexes);
+	classDef.def(
+	  "AddFlex", +[](::Model &mdl, const ::Flex &flex) { mdl.GetFlexes().push_back(flex); });
 	classDef.def("LookupFlex", &Lua::Model::GetFlexId);
 	classDef.def("GetFlexFormula", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&Lua::Model::GetFlexFormula));
 	classDef.def("GetFlexFormula", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&Lua::Model::GetFlexFormula));
@@ -704,6 +714,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	// Flex
 	auto classDefFlex = luabind::class_<::Flex>("Flex");
+	classDefFlex.def(luabind::constructor<>());
 	classDefFlex.def(
 	  "__tostring", +[](const ::Flex &flex) -> std::string {
 		  std::stringstream ss;
@@ -711,7 +722,11 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 		  ss << "[" << flex.GetName() << "]";
 		  return ss.str();
 	  });
+	classDefFlex.def(
+	  "SetName", +[](::Flex &flex, const std::string &name) { flex.SetName(name); });
 	classDefFlex.def("GetName", static_cast<void (*)(lua_State *, ::Flex &)>([](lua_State *l, ::Flex &flex) { Lua::PushString(l, flex.GetName()); }));
+	classDefFlex.def(
+	  "AddOperation", +[](::Flex &flex, const ::Flex::Operation &op) { flex.GetOperations().push_back(op); });
 	classDefFlex.def("GetOperations", static_cast<void (*)(lua_State *, ::Flex &)>([](lua_State *l, ::Flex &flex) {
 		auto t = Lua::CreateTable(l);
 		auto &ops = flex.GetOperations();
@@ -755,9 +770,12 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	// Operation
 	auto classDefFlexOp = luabind::class_<::Flex::Operation>("Operation");
+	classDefFlexOp.def(luabind::constructor<>());
 	classDefFlexOp.def_readwrite("type", reinterpret_cast<uint32_t Flex::Operation::*>(&Flex::Operation::type));
 	classDefFlexOp.def_readwrite("index", reinterpret_cast<int32_t Flex::Operation::*>(&Flex::Operation::d));
 	classDefFlexOp.def_readwrite("value", reinterpret_cast<float Flex::Operation::*>(&Flex::Operation::d));
+	classDefFlexOp.def(
+	  "SetName", +[](::Flex &flex, const std::string name) { flex.SetName(name); });
 	classDefFlexOp.def("GetName", static_cast<void (*)(lua_State *, ::Flex &)>([](lua_State *l, ::Flex &flex) { Lua::PushString(l, flex.GetName()); }));
 	classDefFlex.scope[classDefFlexOp];
 

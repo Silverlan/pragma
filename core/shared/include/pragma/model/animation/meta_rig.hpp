@@ -104,6 +104,7 @@ namespace pragma::animation {
 	constexpr const char *get_meta_rig_bone_type_name(MetaRigBoneType type);
 	constexpr std::optional<MetaRigBoneType> get_meta_rig_bone_type_enum(const std::string_view &boneType);
 	constexpr std::optional<MetaRigBoneType> get_meta_rig_bone_parent_type(MetaRigBoneType type);
+	DLLNETWORK std::vector<pragma::animation::MetaRigBoneType> get_meta_rig_bone_children(MetaRigBoneType type);
 
 	enum class BoneSide : uint8_t { Left = 0, Right, None };
 	constexpr std::optional<BoneSide> get_meta_rig_bone_type_side(MetaRigBoneType type);

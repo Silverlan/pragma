@@ -979,6 +979,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	defRig.scope[luabind::def("get_bone_enum", &pragma::animation::get_meta_rig_bone_type_enum)];
 	defRig.scope[luabind::def("get_bone_side", &pragma::animation::get_meta_rig_bone_type_side)];
 	defRig.scope[luabind::def("get_bone_parent", &pragma::animation::get_meta_rig_bone_parent_type)];
+	defRig.scope[luabind::def("get_bone_children", &pragma::animation::get_meta_rig_bone_children)];
 	defRig.scope[luabind::def("get_blend_shape_name", &pragma::animation::get_blend_shape_name)];
 	defRig.scope[luabind::def("get_blend_shape_enum", &pragma::animation::get_blend_shape_enum)];
 	defRig.def(

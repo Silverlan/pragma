@@ -719,8 +719,7 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 bool Model::Save(Game &game, const std::string &fileName, std::string &outErr)
 {
 	auto udmData = udm::Data::Create();
-	std::string err;
-	auto result = Save(game, udmData->GetAssetData(), err);
+	auto result = Save(game, udmData->GetAssetData(), outErr);
 	if(result == false)
 		return false;
 	FileManager::CreatePath(ufile::get_path_from_filename(fileName).c_str());

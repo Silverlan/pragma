@@ -2219,3 +2219,66 @@ bool Model::GenerateLowLevelLODs(Game &game)
 	AddLODInfo(lod, distance, replaceIds);
 	return true;
 }
+
+void Model::TransformBone(pragma::animation::BoneId boneId, const umath::Transform &t, umath::CoordinateSpace space)
+{
+	auto bone = m_skeleton->GetBone(boneId).lock();
+	if(!bone)
+		return;
+	switch(space) {
+	case umath::CoordinateSpace::View:
+	case umath::CoordinateSpace::Screen:
+		return;
+	case umath::CoordinateSpace::Object:
+	case umath::CoordinateSpace::World:
+		{
+			umath::ScaledTransform parentInvPose {};
+			auto parent = bone->parent.lock();
+			if(parent) {
+				m_reference->GetBonePose(parent->ID, parentInvPose);
+				parentInvPose = parentInvPose.GetInverse();
+			}
+
+			umath::ScaledTransform curPose;
+			GetReferenceBonePose(boneId, curPose);
+			auto oldRelPose = parentInvPose * curPose;
+			auto newPose = t * curPose;
+			m_reference->SetBonePose(bone->ID, newPose);
+
+			auto newRelPose = parentInvPose * newPose;
+			auto oldPoseToNewPose = oldRelPose.GetInverse() * newRelPose;
+
+			for(auto &anim : m_animations) {
+				if(anim->HasFlag(FAnim::Gesture))
+					continue;
+				auto &boneMap = anim->GetBoneMap();
+				auto it = boneMap.find(bone->ID);
+				if(it == boneMap.end())
+					continue;
+				auto i = it->second;
+				for(auto &frame : anim->GetFrames()) {
+					umath::ScaledTransform pose;
+					if(!frame->GetBonePose(i, pose))
+						continue;
+					pose = pose * oldPoseToNewPose;
+					frame->SetBonePose(i, pose);
+				}
+			}
+			break;
+		}
+	case umath::CoordinateSpace::Local:
+		if(bone->parent.expired())
+			return TransformBone(boneId, t, umath::CoordinateSpace::World);
+		umath::ScaledTransform parentPose;
+		m_reference->GetBonePose(bone->parent.lock()->ID, parentPose);
+
+		umath::ScaledTransform curPose;
+		GetReferenceBonePose(boneId, curPose);
+
+		auto newPose = parentPose.GetInverse() * curPose;
+		newPose = t * newPose;
+		newPose = parentPose * newPose;
+
+		return TransformBone(boneId, newPose, umath::CoordinateSpace::World);
+	}
+}

@@ -378,6 +378,8 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	const pragma::animation::Skeleton &GetSkeleton() const;
 	pragma::animation::Skeleton &GetSkeleton();
 
+	void TransformBone(pragma::animation::BoneId boneId, const umath::Transform &t, umath::CoordinateSpace space = umath::CoordinateSpace::World);
+
 	const std::shared_ptr<pragma::animation::MetaRig> &GetMetaRig() const;
 	bool GenerateMetaRig();
 	bool GenerateMetaBlendShapes();

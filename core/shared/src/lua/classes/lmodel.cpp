@@ -230,6 +230,8 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("GetCollisionMeshes", &GetCollisionMeshes);
 	classDef.def("ClearCollisionMeshes", &ClearCollisionMeshes);
 	classDef.def("GetSkeleton", &GetSkeleton);
+	classDef.def("TransformBone", &::Model::TransformBone);
+	classDef.def("TransformBone", &::Model::TransformBone, luabind::default_parameter_policy<4, umath::CoordinateSpace::World> {});
 	classDef.def("GetAttachmentCount", &GetAttachmentCount);
 	classDef.def("GetAttachments", &GetAttachments);
 	classDef.def("GetAttachment", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&GetAttachment));
@@ -956,24 +958,24 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	auto defBoneInfo = luabind::class_<pragma::animation::MetaRigBone>("MetaRigBone");
 	defBoneInfo.def(luabind::tostring(luabind::self));
-	defBoneInfo.def_readonly("boneId", &pragma::animation::MetaRigBone::boneId);
-	defBoneInfo.def_readonly("normalizedRotationOffset", &pragma::animation::MetaRigBone::normalizedRotationOffset);
+	defBoneInfo.def_readwrite("boneId", &pragma::animation::MetaRigBone::boneId);
+	defBoneInfo.def_readwrite("normalizedRotationOffset", &pragma::animation::MetaRigBone::normalizedRotationOffset);
 	defBoneInfo.property(
-	  "min", +[](const pragma::animation::MetaRigBone &boneInfo) -> Vector3 { return boneInfo.bounds.first; });
+	  "min", +[](const pragma::animation::MetaRigBone &boneInfo) -> Vector3 { return boneInfo.bounds.first; }, +[](pragma::animation::MetaRigBone &boneInfo, const Vector3 &min) { boneInfo.bounds.first = min; });
 	defBoneInfo.property(
-	  "max", +[](const pragma::animation::MetaRigBone &boneInfo) -> Vector3 { return boneInfo.bounds.second; });
+	  "max", +[](const pragma::animation::MetaRigBone &boneInfo) -> Vector3 { return boneInfo.bounds.second; }, +[](pragma::animation::MetaRigBone &boneInfo, const Vector3 &max) { boneInfo.bounds.second = max; });
 	classDef.scope[defBoneInfo];
 
 	auto defBlendShapeInfo = luabind::class_<pragma::animation::MetaRigBlendShape>("MetaRigBlendShape");
 	defBlendShapeInfo.def(luabind::tostring(luabind::self));
-	defBlendShapeInfo.def_readonly("flexControllerId", &pragma::animation::MetaRigBlendShape::flexControllerId);
+	defBlendShapeInfo.def_readwrite("flexControllerId", &pragma::animation::MetaRigBlendShape::flexControllerId);
 	classDef.scope[defBlendShapeInfo];
 
 	auto defRig = luabind::class_<pragma::animation::MetaRig>("MetaRig");
-	defRig.def_readonly("rigType", &pragma::animation::MetaRig::rigType);
-	defRig.def_readonly("forwardFacingRotationOffset", &pragma::animation::MetaRig::forwardFacingRotationOffset);
-	defRig.def_readonly("forwardAxis", &pragma::animation::MetaRig::forwardAxis);
-	defRig.def_readonly("upAxis", &pragma::animation::MetaRig::upAxis);
+	defRig.def_readwrite("rigType", &pragma::animation::MetaRig::rigType);
+	defRig.def_readwrite("forwardFacingRotationOffset", &pragma::animation::MetaRig::forwardFacingRotationOffset);
+	defRig.def_readwrite("forwardAxis", &pragma::animation::MetaRig::forwardAxis);
+	defRig.def_readwrite("upAxis", &pragma::animation::MetaRig::upAxis);
 	defRig.def(luabind::tostring(luabind::self));
 	defRig.scope[luabind::def("get_bone_name", &pragma::animation::get_meta_rig_bone_type_name)];
 	defRig.scope[luabind::def("get_bone_enum", &pragma::animation::get_meta_rig_bone_type_enum)];

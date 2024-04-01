@@ -203,6 +203,10 @@ void Lua::ik::register_library(Lua::Interface &lua)
 	classControl.def(luabind::tostring(luabind::self));
 	classControl.def("GetTargetBone", static_cast<pragma::ik::Bone *(pragma::ik::IControl::*)()>(&pragma::ik::DragControl::GetTargetBone));
 	classControl.def("GetType", &pragma::ik::IControl::GetControlType);
+	classControl.def("SetMaxForce", &pragma::ik::IControl::SetMaxForce);
+	classControl.def("GetMaxForce", &pragma::ik::IControl::GetMaxForce);
+	classControl.def("SetRigidity", &pragma::ik::IControl::SetRigidity);
+	classControl.def("GetRigidity", &pragma::ik::IControl::GetRigidity);
 	modIk[classControl];
 
 	auto classLinearMotorControl = luabind::class_<pragma::ik::ILinearMotorControl>("LinearMotorControl");

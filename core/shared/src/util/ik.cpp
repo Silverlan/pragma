@@ -109,6 +109,9 @@ const std::string &pragma::ik::Bone::GetName() const { return m_name; }
 float pragma::ik::Bone::GetRadius() const { return from_bepu_length(m_bone->GetRadius()); }
 float pragma::ik::Bone::GetLength() const { return from_bepu_length(m_bone->GetHeight()); }
 float pragma::ik::Bone::GetMass() const { return m_bone->GetMass(); }
+void pragma::ik::Bone::SetRadius(float radius) { m_bone->SetRadius(to_bepu_length(radius)); }
+void pragma::ik::Bone::SetLength(float length) { m_bone->SetHeight(to_bepu_length(length)); }
+void pragma::ik::Bone::SetMass(float mass) { m_bone->SetMass(mass); }
 
 BEPUik::Bone *pragma::ik::Bone::operator*() { return m_bone.get(); }
 BEPUik::Bone *pragma::ik::Bone::operator->() { return m_bone.get(); }

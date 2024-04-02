@@ -7,6 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/entities/components/ik_solver_component.hpp"
+#include "pragma/model/model.h"
 
 using namespace pragma;
 

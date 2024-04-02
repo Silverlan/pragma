@@ -7,6 +7,8 @@
 
 #include "stdafx_shared.h"
 #include "pragma/entities/components/ik_solver_component.hpp"
+#include "pragma/model/model.h"
+#include "pragma/logging.hpp"
 
 using namespace pragma;
 
@@ -116,6 +118,8 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 		uint32_t rigBoneIndex;
 		pragma::animation::BoneId skeletonBoneIndex;
 		HierarchyDepth hierarchyDepth;
+
+		const pragma::ik::RigConfigBone *configBone = nullptr;
 	};
 	std::vector<BoneInfo> bones;
 	auto &rigBones = rigConfig.GetBones();
@@ -125,7 +129,7 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 	for(auto &boneData : rigBones) {
 		auto boneId = skeleton.LookupBone(boneData->name);
 		if(boneId == -1) {
-			spdlog::debug("Failed to add ik rig to ik solver {}: Bone {} does not exist in skeleton.", GetEntity().ToString(), boneData->name);
+			spdlog::debug("Failed to add ik rig to ik solver {}: Bone {} does not exist in skeleton.", GetEntity().ToString(), boneData->name.str);
 			return false;
 		}
 		HierarchyDepth depth = 0;
@@ -136,15 +140,32 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 			++depth;
 			parent = parent.lock()->parent;
 		}
-		bones.push_back(BoneInfo {rigBoneIdx++, static_cast<pragma::animation::BoneId>(boneId), depth});
+		bones.push_back(BoneInfo {rigBoneIdx++, static_cast<pragma::animation::BoneId>(boneId), depth, boneData.get()});
 	}
+
+	auto &ref = mdl->GetReference();
+
 	// Sort the bones to be in hierarchical order. This is not necessary for the ik solver, but the order is important
 	// when the animation is updated.
 	std::sort(bones.begin(), bones.end(), [](const BoneInfo &a, const BoneInfo &b) { return a.hierarchyDepth < b.hierarchyDepth; });
 	for(auto i = decltype(bones.size()) {0u}; i < bones.size(); ++i) {
 		auto &boneInfo = bones[i];
+		auto bone = skeleton.GetBone(boneInfo.skeletonBoneIndex).lock();
+		if(!bone)
+			continue;
+		umath::ScaledTransform pose {};
+		ref.GetBonePose(boneInfo.skeletonBoneIndex, pose);
 		auto &rigBone = rigBones[boneInfo.rigBoneIndex];
-		AddSkeletalBone(boneInfo.skeletonBoneIndex);
+		float radius = 1.f;
+		float length = 1.f;
+		if(boneInfo.configBone) {
+			radius = boneInfo.configBone->length;
+			length = boneInfo.configBone->width;
+			if(boneInfo.configBone->ikPose)
+				pose = *boneInfo.configBone->ikPose;
+		}
+
+		auto *ikBone = AddBone(bone->name, boneInfo.skeletonBoneIndex, pose, radius, length);
 		if(rigBone->locked)
 			SetBoneLocked(boneInfo.skeletonBoneIndex, true);
 	}
@@ -152,7 +173,7 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 	for(auto &controlData : rigConfig.GetControls()) {
 		auto boneId = skeleton.LookupBone(controlData->bone);
 		if(boneId == -1) {
-			spdlog::debug("Failed to add ik rig to ik solver {}: Control bone {} does not exist in skeleton.", GetEntity().ToString(), controlData->bone);
+			spdlog::debug("Failed to add ik rig to ik solver {}: Control bone {} does not exist in skeleton.", GetEntity().ToString(), controlData->bone.str);
 			return false;
 		}
 		AddControl(boneId, controlData->type, controlData->maxForce, controlData->rigidity);
@@ -162,7 +183,7 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 		auto boneId0 = skeleton.LookupBone(constraintData->bone0);
 		auto boneId1 = skeleton.LookupBone(constraintData->bone1);
 		if(boneId0 == -1 || boneId1 == -1) {
-			spdlog::debug("Failed to add ik rig to ik solver {}: Constraint bone {} or {} does not exist in skeleton.", GetEntity().ToString(), constraintData->bone0, constraintData->bone1);
+			spdlog::debug("Failed to add ik rig to ik solver {}: Constraint bone {} or {} does not exist in skeleton.", GetEntity().ToString(), constraintData->bone0.str, constraintData->bone1.str);
 			return false;
 		}
 
@@ -186,7 +207,7 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 		auto boneId0 = skeleton.LookupBone(jointData->bone0);
 		auto boneId1 = skeleton.LookupBone(jointData->bone1);
 		if(boneId0 == -1 || boneId1 == -1) {
-			spdlog::debug("Failed to add ik rig to ik solver {}: Constraint bone {} or {} does not exist in skeleton.", GetEntity().ToString(), jointData->bone0, jointData->bone1);
+			spdlog::debug("Failed to add ik rig to ik solver {}: Constraint bone {} or {} does not exist in skeleton.", GetEntity().ToString(), jointData->bone0.str, jointData->bone1.str);
 			return false;
 		}
 
@@ -196,6 +217,7 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 		jointInfo.maxAngle = jointData->maxAngle;
 		jointInfo.rigidity = jointData->rigidity;
 		jointInfo.anchorPosition = jointData->anchorPosition;
+		jointInfo.measurementAxisA = jointData->measurementAxisA;
 		switch(jointData->type) {
 		case pragma::ik::RigConfigJoint::Type::BallSocketJoint:
 			AddBallSocketJoint(jointInfo);

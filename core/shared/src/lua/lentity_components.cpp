@@ -69,6 +69,7 @@
 #include "pragma/lua/converters/vector_converter_t.hpp"
 #include "pragma/lua/converters/pair_converter_t.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
+#include "pragma/lua/converters/global_string_converter_t.hpp"
 #include "pragma/lua/lua_util_component.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include <pragma/physics/movetypes.h>
@@ -615,9 +616,9 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defRigConfig.def("FindBone", &pragma::ik::RigConfig::FindBone);
 	defRigConfig.def("GetConstraints", &pragma::ik::RigConfig::GetConstraints);
 	defRigConfig.def("GetControls", &pragma::ik::RigConfig::GetControls);
-	defRigConfig.def("RemoveBone", static_cast<void (pragma::ik::RigConfig::*)(const std::string &)>(&pragma::ik::RigConfig::RemoveBone));
+	defRigConfig.def("RemoveBone", static_cast<void (pragma::ik::RigConfig::*)(const pragma::GString &)>(&pragma::ik::RigConfig::RemoveBone));
 	defRigConfig.def("RemoveControl", static_cast<void (pragma::ik::RigConfig::*)(const pragma::ik::RigConfigControl &)>(&pragma::ik::RigConfig::RemoveControl));
-	defRigConfig.def("RemoveControl", static_cast<void (pragma::ik::RigConfig::*)(const std::string &)>(&pragma::ik::RigConfig::RemoveControl));
+	defRigConfig.def("RemoveControl", static_cast<void (pragma::ik::RigConfig::*)(const pragma::GString &)>(&pragma::ik::RigConfig::RemoveControl));
 	defRigConfig.def("RemoveConstraint", static_cast<void (pragma::ik::RigConfig::*)(const pragma::ik::RigConfigConstraint &)>(&pragma::ik::RigConfig::RemoveConstraint));
 	defRigConfig.def("RemoveBone", static_cast<void (pragma::ik::RigConfig::*)(const pragma::ik::RigConfigBone &)>(&pragma::ik::RigConfig::RemoveBone));
 	defRigConfig.def("HasBone", &pragma::ik::RigConfig::HasBone);
@@ -625,8 +626,8 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defRigConfig.def("SetBoneLocked", &pragma::ik::RigConfig::SetBoneLocked);
 	defRigConfig.def("HasControl", &pragma::ik::RigConfig::HasControl);
 	defRigConfig.def("AddControl", &pragma::ik::RigConfig::AddControl);
-	defRigConfig.def("RemoveConstraints", static_cast<void (pragma::ik::RigConfig::*)(const std::string &, const std::string &)>(&pragma::ik::RigConfig::RemoveConstraints));
-	defRigConfig.def("RemoveConstraints", static_cast<void (pragma::ik::RigConfig::*)(const std::string &)>(&pragma::ik::RigConfig::RemoveConstraints));
+	defRigConfig.def("RemoveConstraints", static_cast<void (pragma::ik::RigConfig::*)(const pragma::GString &, const pragma::GString &)>(&pragma::ik::RigConfig::RemoveConstraints));
+	defRigConfig.def("RemoveConstraints", static_cast<void (pragma::ik::RigConfig::*)(const pragma::GString &)>(&pragma::ik::RigConfig::RemoveConstraints));
 	defRigConfig.def("AddFixedConstraint", &pragma::ik::RigConfig::AddFixedConstraint);
 	defRigConfig.def("AddHingeConstraint", &pragma::ik::RigConfig::AddHingeConstraint);
 	defRigConfig.def("AddBallSocketConstraint", &pragma::ik::RigConfig::AddBallSocketConstraint);

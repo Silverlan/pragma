@@ -126,21 +126,21 @@ void IkSolverComponent::InitializeSolver()
 
 	BroadcastEvent(EVENT_INITIALIZE_SOLVER);
 }
-void IkSolverComponent::AddSkeletalBone(pragma::animation::BoneId boneId)
+pragma::ik::Bone *IkSolverComponent::AddSkeletalBone(pragma::animation::BoneId boneId)
 {
 	auto &ent = GetEntity();
 	auto &mdl = ent.GetModel();
 	if(!mdl)
-		return;
+		return nullptr;
 	auto &skeleton = mdl->GetSkeleton();
 	auto bone = skeleton.GetBone(boneId);
 	if(bone.expired())
-		return;
+		return nullptr;
 	auto &ref = mdl->GetReference();
 	umath::ScaledTransform pose;
 	if(!ref.GetBonePose(boneId, pose))
-		return;
-	AddBone(bone.lock()->name, boneId, pose, 1.f, 1.f);
+		return nullptr;
+	return AddBone(bone.lock()->name, boneId, pose, 1.f, 1.f);
 }
 void IkSolverComponent::AddDragControl(pragma::animation::BoneId boneId, float maxForce, float rigidity) { AddControl(boneId, pragma::ik::RigConfigControl::Type::Drag, maxForce, rigidity); }
 void IkSolverComponent::AddStateControl(pragma::animation::BoneId boneId, float maxForce, float rigidity) { AddControl(boneId, pragma::ik::RigConfigControl::Type::State, maxForce, rigidity); }
@@ -216,7 +216,12 @@ void IkSolverComponent::AddBallSocketJoint(const JointInfo &jointInfo)
 	umath::ScaledTransform refPose0, refPose1;
 	if(!GetConstraintBones(jointInfo.boneId0, jointInfo.boneId1, &bone0, &bone1, refPose0, refPose1))
 		return;
-	m_ikSolver->AddBallSocketJoint(*bone0, *bone1, jointInfo.anchorPosition);
+	Vector3 anchorPosition;
+	if(jointInfo.anchorPosition)
+		anchorPosition = *jointInfo.anchorPosition;
+	else
+		anchorPosition = refPose0.GetOrigin();
+	m_ikSolver->AddBallSocketJoint(*bone0, *bone1, anchorPosition);
 }
 void IkSolverComponent::AddSwingLimit(const JointInfo &jointInfo)
 {
@@ -232,7 +237,9 @@ void IkSolverComponent::AddTwistLimit(const JointInfo &jointInfo)
 	umath::ScaledTransform refPose0, refPose1;
 	if(!GetConstraintBones(jointInfo.boneId0, jointInfo.boneId1, &bone0, &bone1, refPose0, refPose1))
 		return;
-	m_ikSolver->AddTwistLimit(*bone0, *bone1, jointInfo.axisA, jointInfo.axisB, umath::deg_to_rad(jointInfo.maxAngle));
+	auto &twistLimit = m_ikSolver->AddTwistLimit(*bone0, *bone1, jointInfo.axisA, jointInfo.axisB, umath::deg_to_rad(jointInfo.maxAngle));
+	if(jointInfo.measurementAxisA)
+		twistLimit.SetMeasurementAxisA(*jointInfo.measurementAxisA);
 }
 void IkSolverComponent::AddSwivelHingeJoint(const JointInfo &jointInfo)
 {

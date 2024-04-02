@@ -35,7 +35,7 @@ namespace pragma {
 		void SetIkRigFile(const std::string &ikRigFile);
 		const std::string &GetIkRigFile() const;
 
-		void AddSkeletalBone(pragma::animation::BoneId boneId);
+		pragma::ik::Bone *AddSkeletalBone(pragma::animation::BoneId boneId);
 		void SetBoneLocked(pragma::animation::BoneId boneId, bool locked);
 		pragma::ik::Bone *GetBone(pragma::animation::BoneId boneId);
 		pragma::ik::IControl *GetControl(pragma::animation::BoneId boneId);
@@ -65,11 +65,12 @@ namespace pragma {
 			JointInfo(pragma::animation::BoneId bone0, pragma::animation::BoneId bone1);
 			pragma::animation::BoneId boneId0 = 0;
 			pragma::animation::BoneId boneId1 = 0;
-			Vector3 anchorPosition;
 			Vector3 axisA;
 			Vector3 axisB;
 			umath::Degree maxAngle = 0;
 			float rigidity = 1.f;
+			std::optional<Vector3> anchorPosition {};
+			std::optional<Vector3> measurementAxisA {};
 		};
 		void AddBallSocketJoint(const JointInfo &jointInfo);
 		void AddSwingLimit(const JointInfo &jointInfo);

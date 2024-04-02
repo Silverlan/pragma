@@ -41,6 +41,9 @@ namespace pragma::ik {
 		float GetRadius() const;
 		float GetLength() const;
 		float GetMass() const;
+		void SetRadius(float radius);
+		void SetLength(float length);
+		void SetMass(float mass);
 		const umath::Transform &GetOriginalPose() const;
 		BEPUik::Bone *operator*();
 		BEPUik::Bone *operator->();

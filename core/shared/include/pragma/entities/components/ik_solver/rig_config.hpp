@@ -27,7 +27,7 @@ namespace pragma::ik {
 		float length = 0.25f;
 
 		// If not set, bone pose will be used instead
-		std::optional<umath::ScaledTransform> ikPose {};
+		std::optional<umath::Transform> ikPose {};
 	};
 
 	struct DLLNETWORK RigConfigControl {
@@ -75,9 +75,9 @@ namespace pragma::ik {
 		pragma::GString bone0;
 		pragma::GString bone1;
 		Type type = Type::BallSocketJoint;
-		Vector3 axisA;
-		Vector3 axisB;
-		umath::Degree maxAngle = 0;
+		std::optional<Vector3> axisA {};
+		std::optional<Vector3> axisB {};
+		std::optional<umath::Degree> maxAngle {};
 		float rigidity = 1.f;
 		std::optional<Vector3> anchorPosition {};
 		std::optional<Vector3> measurementAxisA {};

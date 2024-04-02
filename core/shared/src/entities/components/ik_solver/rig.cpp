@@ -212,9 +212,12 @@ bool IkSolverComponent::AddIkSolverByRig(const pragma::ik::RigConfig &rigConfig)
 		}
 
 		JointInfo jointInfo {static_cast<pragma::animation::BoneId>(boneId0), static_cast<pragma::animation::BoneId>(boneId1)};
-		jointInfo.axisA = jointData->axisA;
-		jointInfo.axisB = jointData->axisB;
-		jointInfo.maxAngle = jointData->maxAngle;
+		if(jointData->axisA)
+			jointInfo.axisA = *jointData->axisA;
+		if(jointData->axisB)
+			jointInfo.axisB = *jointData->axisB;
+		if(jointData->maxAngle)
+			jointInfo.maxAngle = *jointData->maxAngle;
 		jointInfo.rigidity = jointData->rigidity;
 		jointInfo.anchorPosition = jointData->anchorPosition;
 		jointInfo.measurementAxisA = jointData->measurementAxisA;

@@ -7,17 +7,19 @@
 #ifndef __IK_RIG_CONFIG_HPP__
 #define __IK_RIG_CONFIG_HPP__
 
+#include "pragma/networkdefinitions.h"
 #include <string>
 #include <cinttypes>
 #include <optional>
 #include <mathutil/umath.h>
 #include <mathutil/eulerangles.h>
+#include <mathutil/transform.hpp>
 #include <udm_types.hpp>
 #include "pragma/game/game_coordinate_system.hpp"
 #include "pragma/util/global_string_table.hpp"
 
 namespace pragma::ik {
-	struct RigConfigBone {
+	struct DLLNETWORK RigConfigBone {
 		pragma::GString name;
 		bool locked = false;
 		// TODO: What units are these? Meters?
@@ -28,7 +30,7 @@ namespace pragma::ik {
 		std::optional<umath::ScaledTransform> ikPose {};
 	};
 
-	struct RigConfigControl {
+	struct DLLNETWORK RigConfigControl {
 		enum class Type : uint8_t {
 			Drag = 0,
 			State,
@@ -41,7 +43,7 @@ namespace pragma::ik {
 		float rigidity = 1.f;
 	};
 
-	struct RigConfigConstraint {
+	struct DLLNETWORK RigConfigConstraint {
 		enum class Type : uint8_t {
 			Fixed = 0,
 			Hinge,
@@ -60,7 +62,7 @@ namespace pragma::ik {
 		float maxForce = -1.f;
 	};
 
-	struct RigConfigJoint {
+	struct DLLNETWORK RigConfigJoint {
 		enum class Type : uint8_t {
 			BallSocketJoint = 0,
 			SwingLimit,
@@ -85,7 +87,7 @@ namespace pragma::ik {
 	using PRigConfigControl = std::shared_ptr<RigConfigControl>;
 	using PRigConfigConstraint = std::shared_ptr<RigConfigConstraint>;
 	using PRigConfigJoint = std::shared_ptr<RigConfigJoint>;
-	class RigConfig {
+	class DLLNETWORK RigConfig {
 	  public:
 		static std::optional<RigConfig> load(const std::string &fileName);
 		static std::optional<RigConfig> load_from_udm_data(udm::LinkedPropertyWrapper &prop);
@@ -144,10 +146,10 @@ namespace pragma::ik {
 		std::vector<PRigConfigJoint> m_joints;
 	};
 };
-std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfig &config);
-std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigBone &bone);
-std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigControl &control);
-std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigConstraint &constraint);
-std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigJoint &joint);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfig &config);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigBone &bone);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigControl &control);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigConstraint &constraint);
+DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigJoint &joint);
 
 #endif

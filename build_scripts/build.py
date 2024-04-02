@@ -764,8 +764,8 @@ if with_pfm:
         )
         add_pragma_module(
             name="pr_opencv",
-            commitSha="97a8b4477c584a10f5d70a2f29b0febf0d64a311",
-            repositoryUrl="https://github.com/Silverlan/pr_opencv.git"
+            commitSha="58dc78b95f4ca3c36a209e7011a591126d941878",
+            repositoryUrl="https://github.com/SlawekNowy/pr_opencv.git"
         )
 
 if with_lua_doc_generator or with_pfm:
@@ -884,6 +884,11 @@ else:
 		"-DDEPENDENCY_LUAJIT_LIBRARY=" +lua_jit_lib +"",
 		"-DDEPENDENCY_LUA_LIBRARY=" +lua_jit_lib +""
 	]
+
+cmake_args.append("-DPME_EXTERNAL_LIB_LOCATION=" +external_libs_dir)
+cmake_args.append("-DPME_EXTERNAL_LIB_BIN_LOCATION=" +external_libs_bin_dir)
+cmake_args.append("-DPME_THIRD_PARTY_LIB_LOCATION=" +third_party_libs_dir)
+
 
 if with_lua_doc_generator:
 	if len(dia_include_path) > 0 and len(dia_library_path) > 0:

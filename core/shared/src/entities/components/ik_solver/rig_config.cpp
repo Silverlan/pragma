@@ -96,6 +96,60 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(u
 			udm::to_enum_value<pragma::SignedAxis>(udmConstraint["axis"], constraint->axis);
 		}
 	}
+
+	for(auto &udmJoint : prop["joints"]) {
+		std::string bone0, bone1;
+		udmJoint["bone0"](bone0);
+		udmJoint["bone1"](bone1);
+		auto type = RigConfigJoint::Type::BallSocketJoint;
+		udm::to_enum_value<RigConfigJoint::Type>(udmJoint["type"], type);
+		PRigConfigJoint joint = nullptr;
+		switch(type) {
+		case RigConfigJoint::Type::BallSocketJoint:
+			joint = rig.AddBallSocketJoint(bone0, bone1);
+			break;
+		case RigConfigJoint::Type::SwingLimit:
+			{
+				Vector3 axisA, axisB;
+				float maxAngle = 0.f;
+				udmJoint["axisA"](axisA);
+				udmJoint["axisB"](axisB);
+				udmJoint["maxAngle"](maxAngle);
+				joint = rig.AddSwingLimit(bone0, bone1, axisA, axisB, maxAngle);
+				break;
+			}
+		case RigConfigJoint::Type::TwistLimit:
+			{
+				Vector3 axisA, axisB;
+				float maxAngle = 0.f;
+				float rigidity = 1.f;
+				udmJoint["axisA"](axisA);
+				udmJoint["axisB"](axisB);
+				udmJoint["maxAngle"](maxAngle);
+				udmJoint["rigidity"](rigidity);
+				joint = rig.AddTwistLimit(bone0, bone1, axisA, axisB, maxAngle, rigidity);
+				break;
+			}
+		case RigConfigJoint::Type::SwivelHingeJoint:
+			{
+				Vector3 axisA, axisB;
+				udmJoint["axisA"](axisA);
+				udmJoint["axisB"](axisB);
+				joint = rig.AddSwivelHingeJoint(bone0, bone1, axisA, axisB);
+				break;
+			}
+		case RigConfigJoint::Type::TwistJoint:
+			{
+				Vector3 axisA, axisB;
+				float rigidity = 1.f;
+				udmJoint["axisA"](axisA);
+				udmJoint["axisB"](axisB);
+				udmJoint["rigidity"](rigidity);
+				joint = rig.AddTwistJoint(bone0, bone1, axisA, axisB, rigidity);
+				break;
+			}
+		}
+	}
 	return rig;
 }
 
@@ -165,14 +219,100 @@ void pragma::ik::RigConfig::RemoveControl(const std::string &name)
 }
 bool pragma::ik::RigConfig::HasControl(const std::string &name) const { return FindControlIt(name) != m_controls.end(); }
 
-pragma::ik::PRigConfigControl pragma::ik::RigConfig::AddControl(const std::string &bone, RigConfigControl::Type type)
+pragma::ik::PRigConfigControl pragma::ik::RigConfig::AddControl(const std::string &bone, RigConfigControl::Type type, float rigidity)
 {
 	RemoveControl(bone);
 	m_controls.push_back(std::make_shared<RigConfigControl>());
 	auto &ctrl = m_controls.back();
 	ctrl->bone = bone;
 	ctrl->type = type;
+	ctrl->rigidity = rigidity;
 	return ctrl;
+}
+
+void pragma::ik::RigConfig::RemoveJoints(const std::string &bone)
+{
+	for(auto it = m_joints.begin(); it != m_joints.end();) {
+		auto &c = *it;
+		if(c->bone0 == bone || c->bone1 == bone)
+			it = m_joints.erase(it);
+		else
+			++it;
+	}
+}
+void pragma::ik::RigConfig::RemoveJoints(const std::string &bone0, const std::string &bone1)
+{
+	for(auto it = m_joints.begin(); it != m_joints.end();) {
+		auto &c = *it;
+		if((c->bone0 == bone0 && c->bone1 == bone1) || (c->bone0 == bone1 && c->bone1 == bone0))
+			it = m_joints.erase(it);
+		else
+			++it;
+	}
+}
+void pragma::ik::RigConfig::RemoveJoint(const RigConfigJoint &joint)
+{
+	auto it = std::find_if(m_joints.begin(), m_joints.end(), [&joint](const PRigConfigJoint &jointOther) { return jointOther.get() == &joint; });
+	if(it == m_joints.end())
+		return;
+	m_joints.erase(it);
+}
+pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddBallSocketJoint(const std::string &bone0, const std::string &bone1)
+{
+	m_joints.push_back(std::make_shared<RigConfigJoint>());
+	auto &j = m_joints.back();
+	j->bone0 = bone0;
+	j->bone1 = bone1;
+	j->type = RigConfigJoint::Type::BallSocketJoint;
+	return j;
+}
+pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddSwingLimit(const std::string &bone0, const std::string &bone1, const Vector3 &axisA, const Vector3 &axisB, umath::Degree maxAngle)
+{
+	m_joints.push_back(std::make_shared<RigConfigJoint>());
+	auto &j = m_joints.back();
+	j->bone0 = bone0;
+	j->bone1 = bone1;
+	j->axisA = axisA;
+	j->axisB = axisB;
+	j->maxAngle = maxAngle;
+	j->type = RigConfigJoint::Type::SwingLimit;
+	return j;
+}
+pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddTwistLimit(const std::string &bone0, const std::string &bone1, const Vector3 &axisA, const Vector3 &axisB, umath::Degree maxAngle, float rigidity)
+{
+	m_joints.push_back(std::make_shared<RigConfigJoint>());
+	auto &j = m_joints.back();
+	j->bone0 = bone0;
+	j->bone1 = bone1;
+	j->axisA = axisA;
+	j->axisB = axisB;
+	j->maxAngle = maxAngle;
+	j->rigidity = rigidity;
+	j->type = RigConfigJoint::Type::TwistLimit;
+	return j;
+}
+pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddSwivelHingeJoint(const std::string &bone0, const std::string &bone1, const Vector3 &axisA, const Vector3 &axisB)
+{
+	m_joints.push_back(std::make_shared<RigConfigJoint>());
+	auto &j = m_joints.back();
+	j->bone0 = bone0;
+	j->bone1 = bone1;
+	j->axisA = axisA;
+	j->axisB = axisB;
+	j->type = RigConfigJoint::Type::SwivelHingeJoint;
+	return j;
+}
+pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddTwistJoint(const std::string &bone0, const std::string &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity)
+{
+	m_joints.push_back(std::make_shared<RigConfigJoint>());
+	auto &j = m_joints.back();
+	j->bone0 = bone0;
+	j->bone1 = bone1;
+	j->axisA = axisA;
+	j->axisB = axisB;
+	j->rigidity = rigidity;
+	j->type = RigConfigJoint::Type::TwistJoint;
+	return j;
 }
 
 void pragma::ik::RigConfig::RemoveConstraints(const std::string &bone)
@@ -326,6 +466,26 @@ void pragma::ik::RigConfig::ToUdmData(udm::LinkedPropertyWrapper &udmData) const
 			break;
 		}
 	}
+
+	udm::LinkedPropertyWrapper udmJoints;
+	if(udmData["joints"])
+		udmJoints = udmData["joints"];
+	else
+		udmJoints = udmData.AddArray("joints", 0, ::udm::Type::Element);
+	udmJoints.Resize(m_joints.size());
+	for(auto i = decltype(m_joints.size()) {0u}; i < m_joints.size(); ++i) {
+		auto &jointData = m_joints[i];
+		auto udmJoint = udmJoints[i];
+		udmJoint["bone0"] = jointData->bone0;
+		udmJoint["bone1"] = jointData->bone1;
+		udmJoint["type"] = udm::enum_to_string(jointData->type);
+
+		udmJoint["rigidity"] = jointData->rigidity;
+		udmJoint["maxAngle"] = jointData->maxAngle;
+
+		udmJoint["axisA"] = jointData->axisA;
+		udmJoint["axisB"] = jointData->axisB;
+	}
 }
 
 bool pragma::ik::RigConfig::Save(const std::string &fileName)
@@ -389,6 +549,6 @@ std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigConstrain
 	auto &pos = constraint.offsetPose.GetOrigin();
 	EulerAngles ang {constraint.offsetPose.GetRotation()};
 	auto &scale = constraint.offsetPose.GetScale();
-	out << "[offsetPose:("<<pos.x<<","<<pos.y<<","<<pos.z<<")("<<ang.p<<","<<ang.y<<","<<ang.r<<")("<<scale.x<<","<<scale.y<<","<<scale.z<<")]";
+	out << "[offsetPose:(" << pos.x << "," << pos.y << "," << pos.z << ")(" << ang.p << "," << ang.y << "," << ang.r << ")(" << scale.x << "," << scale.y << "," << scale.z << ")]";
 	return out;
 }

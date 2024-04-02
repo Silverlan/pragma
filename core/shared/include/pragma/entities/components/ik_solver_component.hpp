@@ -60,6 +60,23 @@ namespace pragma {
 		void AddHingeConstraint(const ConstraintInfo &constraintInfo, umath::Degree minAngle, umath::Degree maxAngle, const Quat &offsetRotation = uquat::identity(), SignedAxis twistAxis = SignedAxis::X);
 		void AddBallSocketConstraint(const ConstraintInfo &constraintInfo, const EulerAngles &minLimits, const EulerAngles &maxLimits, SignedAxis twistAxis = SignedAxis::Z);
 
+		struct DLLNETWORK JointInfo {
+			JointInfo() = default;
+			JointInfo(pragma::animation::BoneId bone0, pragma::animation::BoneId bone1);
+			pragma::animation::BoneId boneId0 = 0;
+			pragma::animation::BoneId boneId1 = 0;
+			Vector3 anchorPosition;
+			Vector3 axisA;
+			Vector3 axisB;
+			umath::Degree maxAngle = 0;
+			float rigidity = 1.f;
+		};
+		void AddBallSocketJoint(const JointInfo &jointInfo);
+		void AddSwingLimit(const JointInfo &jointInfo);
+		void AddTwistLimit(const JointInfo &jointInfo);
+		void AddSwivelHingeJoint(const JointInfo &jointInfo);
+		void AddTwistJoint(const JointInfo &jointInfo);
+
 		udm::PProperty &GetIkRig() { return m_ikRig; }
 		void Solve();
 		void ResetIkRig();

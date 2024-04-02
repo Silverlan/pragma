@@ -22,7 +22,12 @@ namespace pragma::ik {
 	};
 
 	struct RigConfigControl {
-		enum class Type : uint8_t { Drag = 0, State, OrientedDrag, Count };
+		enum class Type : uint8_t {
+			Drag = 0,
+			State,
+			OrientedDrag,
+			Count,
+		};
 		std::string bone;
 		Type type = Type::Drag;
 		float maxForce = -1.f;
@@ -30,7 +35,12 @@ namespace pragma::ik {
 	};
 
 	struct RigConfigConstraint {
-		enum class Type : uint8_t { Fixed = 0, Hinge, BallSocket, Count };
+		enum class Type : uint8_t {
+			Fixed = 0,
+			Hinge,
+			BallSocket,
+			Count,
+		};
 		std::string bone0;
 		std::string bone1;
 		Type type = Type::Fixed;
@@ -43,9 +53,30 @@ namespace pragma::ik {
 		float maxForce = -1.f;
 	};
 
+	struct RigConfigJoint {
+		enum class Type : uint8_t {
+			BallSocketJoint = 0,
+			SwingLimit,
+			TwistLimit,
+			SwivelHingeJoint,
+			TwistJoint,
+
+			Count,
+		};
+		std::string bone0;
+		std::string bone1;
+		Type type = Type::BallSocketJoint;
+		Vector3 axisA;
+		Vector3 axisB;
+		Vector3 anchorPosition {};
+		umath::Degree maxAngle = 0;
+		float rigidity = 1.f;
+	};
+
 	using PRigConfigBone = std::shared_ptr<RigConfigBone>;
 	using PRigConfigControl = std::shared_ptr<RigConfigControl>;
 	using PRigConfigConstraint = std::shared_ptr<RigConfigConstraint>;
+	using PRigConfigJoint = std::shared_ptr<RigConfigJoint>;
 	class RigConfig {
 	  public:
 		static std::optional<RigConfig> load(const std::string &fileName);
@@ -66,7 +97,16 @@ namespace pragma::ik {
 		void RemoveControl(const std::string &name);
 		bool HasControl(const std::string &name) const;
 
-		PRigConfigControl AddControl(const std::string &bone, RigConfigControl::Type type);
+		PRigConfigControl AddControl(const std::string &bone, RigConfigControl::Type type, float rigidity = 1.f);
+
+		void RemoveJoints(const std::string &bone);
+		void RemoveJoints(const std::string &bone0, const std::string &bone1);
+		void RemoveJoint(const RigConfigJoint &joint);
+		PRigConfigJoint AddBallSocketJoint(const std::string &bone0, const std::string &bone1);
+		PRigConfigJoint AddSwingLimit(const std::string &bone0, const std::string &bone1, const Vector3 &axisA, const Vector3 &axisB, umath::Degree maxAngle);
+		PRigConfigJoint AddTwistLimit(const std::string &bone0, const std::string &bone1, const Vector3 &axisA, const Vector3 &axisB, umath::Degree maxAngle, float rigidity);
+		PRigConfigJoint AddSwivelHingeJoint(const std::string &bone0, const std::string &bone1, const Vector3 &axisA, const Vector3 &axisB);
+		PRigConfigJoint AddTwistJoint(const std::string &bone0, const std::string &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity);
 
 		void RemoveConstraints(const std::string &bone);
 		void RemoveConstraints(const std::string &bone0, const std::string &bone1);
@@ -80,6 +120,7 @@ namespace pragma::ik {
 		const std::vector<PRigConfigBone> &GetBones() const { return m_bones; }
 		const std::vector<PRigConfigControl> &GetControls() const { return m_controls; }
 		const std::vector<PRigConfigConstraint> &GetConstraints() const { return m_constraints; }
+		const std::vector<PRigConfigJoint> &GetJoints() const { return m_joints; }
 
 		bool Save(const std::string &fileName);
 	  private:
@@ -92,11 +133,13 @@ namespace pragma::ik {
 		std::vector<PRigConfigBone> m_bones;
 		std::vector<PRigConfigControl> m_controls;
 		std::vector<PRigConfigConstraint> m_constraints;
+		std::vector<PRigConfigJoint> m_joints;
 	};
 };
 std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfig &config);
 std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigBone &bone);
 std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigControl &control);
 std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigConstraint &constraint);
+std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfigJoint &joint);
 
 #endif

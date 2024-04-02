@@ -702,8 +702,8 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
     add_pragma_module(
         name="pr_prosper_vulkan",
-        commitSha="e21d3aa373c4bc776e80dbd9a3b563459e6d3008",
-        repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
+        commitSha="f59f11c54e942155fedc4243960ab7c487c49204",
+        repositoryUrl="https://github.com/SlawekNowy/pr_prosper_vulkan.git"
     )
 
 if with_common_modules:
@@ -723,7 +723,7 @@ if with_pfm:
     if with_core_pfm_modules or with_all_pfm_modules:
         add_pragma_module(
             name="pr_curl",
-            commitSha="19780e3ae9222b6202c37a222303deb6f49dd1d1",
+            commitSha="1e35c603ad2211476a8498f7dbded470d1b85cd9",
             repositoryUrl="https://github.com/SlawekNowy/pr_curl.git"
         )
         add_pragma_module(
@@ -744,7 +744,7 @@ if with_pfm:
         )
         add_pragma_module(
             name="pr_curl",
-            commitSha="19780e3ae9222b6202c37a222303deb6f49dd1d1",
+            commitSha="1e35c603ad2211476a8498f7dbded470d1b85cd9",
             repositoryUrl="https://github.com/SlawekNowy/pr_curl.git"
         )
         add_pragma_module(

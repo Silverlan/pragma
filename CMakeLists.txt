@@ -40,8 +40,7 @@ endif()
 
 
 #set_property(CACHE CONFIG_BUILD_TYPE PROPERTY STRINGS RelWithDebInfo Release Debug)
-
-set(CACHE CMAKE_CONFIGURATION_TYPES PROPERTY STRING "RelWithDebInfo;Release;Debug;")
+set(CMAKE_CONFIGURATION_TYPES "RelWithDebInfo;Release;Debug;" CACHE STRING "Supported configuration options" FORCE)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 if(UNIX)
@@ -638,7 +637,6 @@ add_subdirectory(core)
 
 message("Processing external libraries...")
 add_subdirectory(external_libs)
-
 set_target_folder(wgui external_libs/wgui)
 set_target_folder(sample_application external_libs/wgui)
 target_include_directories(util_image PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)

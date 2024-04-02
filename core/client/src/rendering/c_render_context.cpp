@@ -65,7 +65,7 @@ void RenderContext::InitializeRenderAPI()
 		else {
 			std::string errMsg;
 			auto title = g_customTitle.has_value() ? *g_customTitle : engine_info::get_name();
-			auto success = fInitRenderAPI(title, false, m_renderContext, errMsg);
+            auto success = fInitRenderAPI(title, false, m_renderContext, errMsg);
 			if(success == false)
 				err = errMsg;
 		}

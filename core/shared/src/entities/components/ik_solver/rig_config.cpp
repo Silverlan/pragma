@@ -32,45 +32,37 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load(const std::stri
 std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(udm::LinkedPropertyWrapper &prop)
 {
 	RigConfig rig {};
-	for(auto &udmBone : prop["bones"]) {
+	for(const auto &udmBone : prop["bones"]) {
 		std::string name;
 		bool locked = false;
-		udmBone["name"](name);
-		udmBone["locked"](locked);
+		udmBone["name"] >> name;
+		udmBone["locked"] >> locked;
 		auto bone = rig.AddBone(name);
 		rig.SetBoneLocked(name, locked);
 
-		udmBone["width"](bone->width);
-		udmBone["length"](bone->length);
-
-		umath::Transform ikPose;
-		if(udmBone["ikPose"](ikPose))
-			bone->ikPose = ikPose;
+		udmBone["width"] >> bone->width;
+		udmBone["length"] >> bone->length;
+		udmBone["ikPose"] >> bone->ikPose;
 	}
 
-	for(auto &udmControl : prop["controls"]) {
+	for(const auto &udmControl : prop["controls"]) {
 		std::string bone;
 		auto type = RigConfigControl::Type::Drag;
-		udmControl["bone"](bone);
-		udm::to_enum_value<RigConfigControl::Type>(udmControl["type"], type);
+		udmControl["bone"] >> bone;
+		udmControl["type"] >> type;
 		auto ctrl = rig.AddControl(bone, type);
 		if(ctrl) {
-			float maxForce;
-			if(udmControl["maxForce"](maxForce))
-				ctrl->maxForce = maxForce;
-
-			float rigidity;
-			if(udmControl["rigidity"](rigidity))
-				ctrl->rigidity = rigidity;
+			udmControl["maxForce"] >> ctrl->maxForce;
+			udmControl["rigidity"] >> ctrl->rigidity;
 		}
 	}
 
-	for(auto &udmConstraint : prop["constraints"]) {
+	for(const auto &udmConstraint : prop["constraints"]) {
 		std::string bone0, bone1;
 		auto type = RigConfigConstraint::Type::Fixed;
-		udmConstraint["bone0"](bone0);
-		udmConstraint["bone1"](bone1);
-		udm::to_enum_value<RigConfigConstraint::Type>(udmConstraint["type"], type);
+		udmConstraint["bone0"] >> bone0;
+		udmConstraint["bone1"] >> bone1;
+		udmConstraint["type"] >> type;
 		PRigConfigConstraint constraint = nullptr;
 		switch(type) {
 		case RigConfigConstraint::Type::Fixed:
@@ -80,8 +72,8 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(u
 			{
 				float minAngle = 0.f;
 				float maxAngle = 0.f;
-				udmConstraint["minAngle"](minAngle);
-				udmConstraint["maxAngle"](maxAngle);
+				udmConstraint["minAngle"] >> minAngle;
+				udmConstraint["maxAngle"] >> maxAngle;
 				constraint = rig.AddHingeConstraint(bone0, bone1, minAngle, maxAngle);
 				break;
 			}
@@ -89,33 +81,33 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(u
 			{
 				EulerAngles minAngles {};
 				EulerAngles maxAngles {};
-				udmConstraint["minAngles"](minAngles);
-				udmConstraint["maxAngles"](maxAngles);
+				udmConstraint["minAngles"] >> minAngles;
+				udmConstraint["maxAngles"] >> maxAngles;
 				constraint = rig.AddBallSocketConstraint(bone0, bone1, minAngles, maxAngles);
 				break;
 			}
 		}
 		if(constraint) {
-			udmConstraint["rigidity"](constraint->rigidity);
-			udmConstraint["maxForce"](constraint->maxForce);
+			udmConstraint["rigidity"] >> constraint->rigidity;
+			udmConstraint["maxForce"] >> constraint->maxForce;
 
-			udmConstraint["offsetPose"](constraint->offsetPose);
-			udm::to_enum_value<pragma::SignedAxis>(udmConstraint["axis"], constraint->axis);
+			udmConstraint["offsetPose"] >> constraint->offsetPose;
+			udmConstraint["axis"] >> constraint->axis;
 		}
 	}
 
-	for(auto &udmJoint : prop["joints"]) {
+	for(const auto &udmJoint : prop["joints"]) {
 		std::string bone0, bone1;
-		udmJoint["bone0"](bone0);
-		udmJoint["bone1"](bone1);
+		udmJoint["bone0"] >> bone0;
+		udmJoint["bone1"] >> bone1;
 		auto type = RigConfigJoint::Type::BallSocketJoint;
-		udm::to_enum_value<RigConfigJoint::Type>(udmJoint["type"], type);
+		udmJoint["type"] >> type;
 		PRigConfigJoint joint = nullptr;
 		switch(type) {
 		case RigConfigJoint::Type::BallSocketJoint:
 			{
 				Vector3 anchorPosition;
-				udmJoint["anchorPosition"](anchorPosition);
+				udmJoint["anchorPosition"] >> anchorPosition;
 				joint = rig.AddBallSocketJoint(bone0, bone1, anchorPosition);
 				break;
 			}
@@ -123,9 +115,9 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(u
 			{
 				Vector3 axisA, axisB;
 				float maxAngle = 0.f;
-				udmJoint["axisA"](axisA);
-				udmJoint["axisB"](axisB);
-				udmJoint["maxAngle"](maxAngle);
+				udmJoint["axisA"] >> axisA;
+				udmJoint["axisB"] >> axisB;
+				udmJoint["maxAngle"] >> maxAngle;
 				joint = rig.AddSwingLimit(bone0, bone1, axisA, axisB, maxAngle);
 				break;
 			}
@@ -134,18 +126,18 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(u
 				Vector3 axisA, axisB;
 				float maxAngle = 0.f;
 				float rigidity = 1.f;
-				udmJoint["axisA"](axisA);
-				udmJoint["axisB"](axisB);
-				udmJoint["maxAngle"](maxAngle);
-				udmJoint["rigidity"](rigidity);
+				udmJoint["axisA"] >> axisA;
+				udmJoint["axisB"] >> axisB;
+				udmJoint["maxAngle"] >> maxAngle;
+				udmJoint["rigidity"] >> rigidity;
 				joint = rig.AddTwistLimit(bone0, bone1, axisA, axisB, maxAngle, rigidity);
 				break;
 			}
 		case RigConfigJoint::Type::SwivelHingeJoint:
 			{
 				Vector3 axisA, axisB;
-				udmJoint["axisA"](axisA);
-				udmJoint["axisB"](axisB);
+				udmJoint["axisA"] >> axisA;
+				udmJoint["axisB"] >> axisB;
 				joint = rig.AddSwivelHingeJoint(bone0, bone1, axisA, axisB);
 				break;
 			}
@@ -153,19 +145,16 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(u
 			{
 				Vector3 axisA, axisB;
 				float rigidity = 1.f;
-				udmJoint["axisA"](axisA);
-				udmJoint["axisB"](axisB);
-				udmJoint["rigidity"](rigidity);
+				udmJoint["axisA"] >> axisA;
+				udmJoint["axisB"] >> axisB;
+				udmJoint["rigidity"] >> rigidity;
 				joint = rig.AddTwistJoint(bone0, bone1, axisA, axisB, rigidity);
 				break;
 			}
 		}
 
-		if(joint) {
-			Vector3 measurementAxisA;
-			if(udmJoint["measurementAxisA"](measurementAxisA))
-				joint->measurementAxisA = measurementAxisA;
-		}
+		if(joint)
+			udmJoint["measurementAxisA"] >> joint->measurementAxisA;
 	}
 	return rig;
 }
@@ -437,12 +426,11 @@ void pragma::ik::RigConfig::ToUdmData(udm::LinkedPropertyWrapper &udmData) const
 	for(auto i = decltype(m_bones.size()) {0u}; i < m_bones.size(); ++i) {
 		auto &boneData = m_bones[i];
 		auto udmBone = udmBones[i];
-		udmBone["name"] = boneData->name.c_str();
-		udmBone["locked"] = boneData->locked;
-		udmBone["width"] = boneData->width;
-		udmBone["length"] = boneData->length;
-		if(boneData->ikPose)
-			udmBone["ikPose"] = *boneData->ikPose;
+		udmBone["name"] << boneData->name.c_str();
+		udmBone["locked"] << boneData->locked;
+		udmBone["width"] << boneData->width;
+		udmBone["length"] << boneData->length;
+		udmBone["ikPose"] << boneData->ikPose;
 	}
 
 	udm::LinkedPropertyWrapper udmControls;
@@ -454,10 +442,10 @@ void pragma::ik::RigConfig::ToUdmData(udm::LinkedPropertyWrapper &udmData) const
 	for(auto i = decltype(m_controls.size()) {0u}; i < m_controls.size(); ++i) {
 		auto &ctrlData = m_controls[i];
 		auto udmControl = udmControls[i];
-		udmControl["bone"] = ctrlData->bone.c_str();
-		udmControl["type"] = udm::enum_to_string(ctrlData->type);
-		udmControl["maxForce"] = ctrlData->maxForce;
-		udmControl["rigidity"] = ctrlData->rigidity;
+		udmControl["bone"] << ctrlData->bone.c_str();
+		udmControl["type"] << udm::enum_to_string(ctrlData->type);
+		udmControl["maxForce"] << ctrlData->maxForce;
+		udmControl["rigidity"] << ctrlData->rigidity;
 	}
 
 	udm::LinkedPropertyWrapper udmConstraints;
@@ -469,26 +457,26 @@ void pragma::ik::RigConfig::ToUdmData(udm::LinkedPropertyWrapper &udmData) const
 	for(auto i = decltype(m_constraints.size()) {0u}; i < m_constraints.size(); ++i) {
 		auto &constraintData = m_constraints[i];
 		auto udmConstraint = udmConstraints[i];
-		udmConstraint["bone0"] = constraintData->bone0.c_str();
-		udmConstraint["bone1"] = constraintData->bone1.c_str();
-		udmConstraint["type"] = udm::enum_to_string(constraintData->type);
+		udmConstraint["bone0"] << constraintData->bone0.c_str();
+		udmConstraint["bone1"] << constraintData->bone1.c_str();
+		udmConstraint["type"] << constraintData->type;
 
-		udmConstraint["rigidity"] = constraintData->rigidity;
-		udmConstraint["maxForce"] = constraintData->maxForce;
+		udmConstraint["rigidity"] << constraintData->rigidity;
+		udmConstraint["maxForce"] << constraintData->maxForce;
 
-		udmConstraint["axis"] = udm::enum_to_string(constraintData->axis);
-		udmConstraint["offsetPose"] = constraintData->offsetPose;
+		udmConstraint["axis"] << constraintData->axis;
+		udmConstraint["offsetPose"] << constraintData->offsetPose;
 
 		switch(constraintData->type) {
 		case RigConfigConstraint::Type::Fixed:
 			break;
 		case RigConfigConstraint::Type::Hinge:
-			udmConstraint["minAngle"] = constraintData->minLimits.p;
-			udmConstraint["maxAngle"] = constraintData->maxLimits.p;
+			udmConstraint["minAngle"] << constraintData->minLimits.p;
+			udmConstraint["maxAngle"] << constraintData->maxLimits.p;
 			break;
 		case RigConfigConstraint::Type::BallSocket:
-			udmConstraint["minAngles"] = constraintData->minLimits;
-			udmConstraint["maxAngles"] = constraintData->maxLimits;
+			udmConstraint["minAngles"] << constraintData->minLimits;
+			udmConstraint["maxAngles"] << constraintData->maxLimits;
 			break;
 		}
 	}
@@ -502,19 +490,17 @@ void pragma::ik::RigConfig::ToUdmData(udm::LinkedPropertyWrapper &udmData) const
 	for(auto i = decltype(m_joints.size()) {0u}; i < m_joints.size(); ++i) {
 		auto &jointData = m_joints[i];
 		auto udmJoint = udmJoints[i];
-		udmJoint["bone0"] = jointData->bone0;
-		udmJoint["bone1"] = jointData->bone1;
-		udmJoint["type"] = udm::enum_to_string(jointData->type);
+		udmJoint["bone0"] << jointData->bone0.c_str();
+		udmJoint["bone1"] << jointData->bone1.c_str();
+		udmJoint["type"] << jointData->type;
 
-		udmJoint["rigidity"] = jointData->rigidity;
-		udmJoint["maxAngle"] = jointData->maxAngle;
+		udmJoint["rigidity"] << jointData->rigidity;
+		udmJoint["maxAngle"] << jointData->maxAngle;
 
-		udmJoint["axisA"] = jointData->axisA;
-		udmJoint["axisB"] = jointData->axisB;
-		if(jointData->measurementAxisA)
-			udmJoint["measurementAxisA"] = *jointData->measurementAxisA;
-		if(jointData->anchorPosition)
-			udmJoint["anchorPosition"] = *jointData->anchorPosition;
+		udmJoint["axisA"] << jointData->axisA;
+		udmJoint["axisB"] << jointData->axisB;
+		udmJoint["measurementAxisA"] << jointData->measurementAxisA;
+		udmJoint["anchorPosition"] << jointData->anchorPosition;
 	}
 }
 

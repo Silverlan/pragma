@@ -458,7 +458,11 @@ if not Path(vcpkg_root).is_dir():
 	git_clone("https://github.com/Microsoft/vcpkg.git")
 
 os.chdir("vcpkg")
-reset_to_commit("3b7578831da081ba164be30da8d9382a64841059")
+reset_to_commit("ce1916404fc6f2b645f419a6d47b7ebafe686582") # See https://github.com/microsoft/vcpkg/commit/ce1916404fc6f2b645f419a6d47b7ebafe686582
+# This is a hotfix for the xz repository (required by oiio, which is in turn required by cycles), which was taken down on GitHub
+# and as a result causes build errors with vcpkg (State: 24-04-03)
+# See https://github.com/microsoft/vcpkg/issues/37839#issuecomment-2028011285 for more information
+replace_text_in_file(os.getcwd() +"/ports/liblzma/portfile.cmake","REPO tukaani-project/xz","REPO bminor/xz")
 os.chdir("..")
 if platform == "linux":
 	subprocess.run([vcpkg_root +"/bootstrap-vcpkg.sh","-disableMetrics"],check=True,shell=True)

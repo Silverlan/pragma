@@ -177,7 +177,9 @@ void BaseOcclusionOctree::Node::DebugDraw(bool b, bool applyToChildren, uint32_t
 			auto center = (m_worldBounds.first + m_worldBounds.second) * 0.5f;
 			auto min = (m_worldBounds.first - center) - Vector3(1.f, 1.f, 1.f);
 			auto max = (m_worldBounds.second - center) - Vector3(1.f, 1.f, 1.f);
-			m_debugObject = DebugRenderer::DrawBox(center + min, center + max, EulerAngles(), colMesh, *col.second);
+			DebugRenderInfo renderInfo {colMesh, *col.second};
+			renderInfo.SetOrigin(center);
+			m_debugObject = DebugRenderer::DrawBox(min, max, renderInfo);
 		}
 		UpdateDebugObject();
 	}

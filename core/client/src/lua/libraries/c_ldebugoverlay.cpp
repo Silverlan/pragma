@@ -33,7 +33,7 @@ std::shared_ptr<::DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawLin
 }
 std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawLine(const Vector3 &start, const Vector3 &end, const DebugRenderInfo &renderInfo)
 {
-	auto o = ::DebugRenderer::DrawLine(start, end, {renderInfo.color, renderInfo.duration});
+	auto o = ::DebugRenderer::DrawLine(start, end, renderInfo);
 	if(o)
 		o->SetPose(renderInfo.pose);
 	return get_dbg_object(o, renderInfo.duration);

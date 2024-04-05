@@ -47,7 +47,7 @@ void ShaderDebug::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 	}
 
 	VERTEX_BINDING_VERTEX.stride = std::numeric_limits<decltype(VERTEX_BINDING_VERTEX.stride)>::max();
-	switch(static_cast<Pipeline>(pipelineIdx)) {
+	switch(static_cast<Pipeline>(basePipelineIdx)) {
 	case Pipeline::Triangle:
 		break;
 	case Pipeline::Line:

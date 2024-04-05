@@ -11,6 +11,7 @@
 #include "pragma/rendering/shaders/debug/c_shader_debug_text.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/math/icosphere.h"
+#include <pragma/debug/debug_render_info.hpp>
 #include <pragma/math/util_hermite.h>
 #include <pragma/math/e_frustum.h>
 #include <wgui/types/witext.h>
@@ -630,9 +631,7 @@ void DebugRenderer::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pr
 	std::queue<std::shared_ptr<DebugRenderer::BaseObject>> outlines;
 	static std::mutex g_renderDbgMutex;
 	g_renderDbgMutex.lock();
-	for(auto &pair : s_debugObjects) {
-		auto type = pair.first;
-		auto &meshes = pair.second;
+	for(auto &[type, meshes] : s_debugObjects) {
 		if(type == DebugRenderer::Type::Other) {
 			for(auto it = meshes.begin(); it != meshes.end();) {
 				auto &mesh = *it;
@@ -646,33 +645,43 @@ void DebugRenderer::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pr
 		if(meshes.empty())
 			continue;
 		auto itPipeline = shaderPipeline.find(type);
-		prosper::ShaderBindState bindState {*drawCmd};
-		if(itPipeline == shaderPipeline.end() || shader->RecordBeginDraw(bindState, itPipeline->second) == false)
+		if(itPipeline == shaderPipeline.end())
 			continue;
-		auto pipelineId = itPipeline->second;
-		if(pipelineId == pragma::ShaderDebug::Pipeline::Line || pipelineId == pragma::ShaderDebug::Pipeline::Wireframe || pipelineId == pragma::ShaderDebug::Pipeline::LineStrip)
-			drawCmd->RecordSetLineWidth(2.f);
+		auto curPipelineId = std::numeric_limits<std::underlying_type_t<pragma::ShaderDebug::Pipeline>>::max();
+		auto basePipelineId = itPipeline->second;
+		prosper::ShaderBindState bindState {*drawCmd};
 		for(auto it = meshes.begin(); it != meshes.end();) {
 			auto &mesh = *it;
-			if(!is_obj_valid(mesh, t))
+			if(!is_obj_valid(mesh, t)) {
 				it = meshes.erase(it);
-			else {
-				auto &o = mesh.obj;
-				if(o->IsVisible() == true && o->GetType() == DebugRenderer::ObjectType::World) {
-					auto *ptrO = static_cast<DebugRenderer::WorldObject *>(o.get());
-					auto &colBuffer = ptrO->GetColorBuffer();
-					auto mvp = vp * ptrO->GetModelMatrix();
-					if(colBuffer == nullptr)
-						shader->RecordDraw(bindState, *ptrO->GetVertexBuffer(), ptrO->GetVertexCount(), mvp, ptrO->GetColor());
-					else {
-						//shader->Draw(ptrO->GetVertexBuffer(),ptrO->GetVertexCount(),mvp);
-						// prosper TODO: Vertex color shader
-					}
-					if(ptrO->HasOutline())
-						outlines.push(o);
-				}
-				++it;
+				continue;
 			}
+			auto pipelineId = basePipelineId;
+			if(mesh.obj->ShouldIgnoreDepth())
+				pipelineId = static_cast<pragma::ShaderDebug::Pipeline>(umath::to_integral(pipelineId) + umath::to_integral(pragma::ShaderDebug::Pipeline::Count));
+			if(curPipelineId != umath::to_integral(pipelineId)) {
+				if(shader->RecordBeginDraw(bindState, pipelineId) == false)
+					continue;
+				curPipelineId = umath::to_integral(pipelineId);
+				if(basePipelineId == pragma::ShaderDebug::Pipeline::Line || basePipelineId == pragma::ShaderDebug::Pipeline::Wireframe || basePipelineId == pragma::ShaderDebug::Pipeline::LineStrip)
+					drawCmd->RecordSetLineWidth(2.f);
+			}
+
+			auto &o = mesh.obj;
+			if(o->IsVisible() == true && o->GetType() == DebugRenderer::ObjectType::World) {
+				auto *ptrO = static_cast<DebugRenderer::WorldObject *>(o.get());
+				auto &colBuffer = ptrO->GetColorBuffer();
+				auto mvp = vp * ptrO->GetModelMatrix();
+				if(colBuffer == nullptr)
+					shader->RecordDraw(bindState, *ptrO->GetVertexBuffer(), ptrO->GetVertexCount(), mvp, ptrO->GetColor());
+				else {
+					//shader->Draw(ptrO->GetVertexBuffer(),ptrO->GetVertexCount(),mvp);
+					// prosper TODO: Vertex color shader
+				}
+				if(ptrO->HasOutline())
+					outlines.push(o);
+			}
+			++it;
 		}
 		shader->RecordEndDraw(bindState);
 	}

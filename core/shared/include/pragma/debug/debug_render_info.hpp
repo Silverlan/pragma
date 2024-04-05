@@ -25,6 +25,7 @@ struct DLLNETWORK DebugRenderInfo {
 	Color color;
 	std::optional<Color> outlineColor {};
 	float duration = 0.f;
+	bool ignoreDepthBuffer = false;
 
 	DebugRenderInfo &SetOrigin(const Vector3 &origin)
 	{
@@ -49,6 +50,11 @@ struct DLLNETWORK DebugRenderInfo {
 	DebugRenderInfo &SetDuration(float duration)
 	{
 		this->duration = duration;
+		return *this;
+	}
+	DebugRenderInfo &SetIgnoreDepthBuffer(bool ignoreDepthBuffer)
+	{
+		this->ignoreDepthBuffer = ignoreDepthBuffer;
 		return *this;
 	}
 };

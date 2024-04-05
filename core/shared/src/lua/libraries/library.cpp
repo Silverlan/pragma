@@ -678,6 +678,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	classDefDrawInfo.def("SetColor", &DebugRenderInfo::SetColor, luabind::discard_result {});
 	classDefDrawInfo.def("SetOutlineColor", &DebugRenderInfo::SetOutlineColor, luabind::discard_result {});
 	classDefDrawInfo.def("SetDuration", &DebugRenderInfo::SetDuration, luabind::discard_result {});
+	classDefDrawInfo.def("SetIgnoreDepthBuffer", &DebugRenderInfo::SetIgnoreDepthBuffer, luabind::discard_result {});
 	modDebug[classDefDrawInfo];
 
 	auto isBreakDefined = false;

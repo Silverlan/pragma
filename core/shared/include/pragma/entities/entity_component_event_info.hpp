@@ -12,6 +12,7 @@
 #include <typeindex>
 #include <string>
 #include <optional>
+#include <functional>
 
 namespace pragma {
 	struct DLLNETWORK ComponentEventInfo {

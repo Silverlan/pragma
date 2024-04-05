@@ -133,10 +133,6 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, pragma::MultiEntityURef);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, pragma::MultiEntityUComponentRef);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, ValueDriver);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfig);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigBone);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigControl);
-DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigConstraint);
 
 enum class BvhIntersectionFlags : uint32_t {
 	None = 0u,

@@ -749,11 +749,6 @@ register_third_party_library(mpaheader)
 set_target_folder(mpaheader third_party_libs)
 #
 
-# cppbepuik
-register_third_party_library(cppbepuik)
-set_target_folder(cppbepuik third_party_libs)
-#
-
 # cppbezierfit
 register_third_party_library(cppbezierfit)
 set_target_folder(cppbezierfit third_party_libs)

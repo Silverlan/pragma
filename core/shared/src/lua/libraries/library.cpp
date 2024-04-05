@@ -1199,9 +1199,6 @@ namespace Lua::doc {
 namespace Lua::animation {
 	void register_library(Lua::Interface &lua);
 };
-namespace Lua::ik {
-	void register_library(Lua::Interface &lua);
-};
 
 #include <spdlog/common.h>
 #include <spdlog/formatter.h>
@@ -1768,5 +1765,4 @@ void Game::RegisterLuaLibraries()
 	Lua::physenv::register_library(GetLuaInterface());
 	Lua::doc::register_library(GetLuaInterface());
 	Lua::animation::register_library(GetLuaInterface());
-	Lua::ik::register_library(GetLuaInterface());
 }

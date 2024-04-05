@@ -716,6 +716,7 @@ if with_common_modules:
 	)
 	add_pragma_module_prebuilt("pr_mount_external")
 	add_pragma_module_prebuilt("pr_rig")
+	add_pragma_module_prebuilt("pr_ik")
 
 if with_pfm:
 	if with_core_pfm_modules or with_all_pfm_modules:

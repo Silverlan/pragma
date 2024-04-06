@@ -105,7 +105,7 @@ void CFlammableComponent::UpdateFlameParticlePositions()
 		}
 		else {
 			auto animComponent = ent.GetAnimatedComponent();
-			if(animComponent.expired() || animComponent->GetGlobalBonePosition(info.boneId, pos) == false)
+			if(animComponent.expired() || animComponent->GetBonePos(info.boneId, pos, umath::CoordinateSpace::World) == false)
 				pos = ent.GetCenter();
 		}
 		pTrComponent->SetPosition(pos);

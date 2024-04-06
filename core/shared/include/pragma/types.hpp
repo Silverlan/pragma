@@ -47,12 +47,14 @@ namespace pragma::asset {
 };
 namespace pragma::animation {
 	using BoneId = uint16_t;
+	using FlexControllerId = uint32_t;
 	using LayeredAnimationSlot = uint32_t;
 	class Pose;
 	struct Bone;
 	class Skeleton;
 
 	static constexpr auto INVALID_BONE_INDEX = std::numeric_limits<BoneId>::max();
+	static constexpr auto INVALID_FLEX_CONTROLLER_INDEX = std::numeric_limits<FlexControllerId>::max();
 };
 
 namespace panima {

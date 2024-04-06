@@ -15,7 +15,11 @@ void NET_cl_debug_drawpoint(NetPacket packet)
 	auto pos = packet->Read<Vector3>();
 	auto col = packet->Read<Color>();
 	auto dur = packet->Read<float>();
-	DebugRenderer::DrawPoint(pos, col, dur);
+	DebugRenderInfo renderInfo {};
+	renderInfo.SetOrigin(pos);
+	renderInfo.SetColor(col);
+	renderInfo.SetDuration(dur);
+	DebugRenderer::DrawPoint(renderInfo);
 }
 void NET_cl_debug_drawline(NetPacket packet)
 {
@@ -23,7 +27,10 @@ void NET_cl_debug_drawline(NetPacket packet)
 	auto end = packet->Read<Vector3>();
 	auto col = packet->Read<Color>();
 	auto dur = packet->Read<float>();
-	DebugRenderer::DrawLine(start, end, col, dur);
+	DebugRenderInfo renderInfo {};
+	renderInfo.SetColor(col);
+	renderInfo.SetDuration(dur);
+	DebugRenderer::DrawLine(start, end, renderInfo);
 }
 void NET_cl_debug_drawbox(NetPacket packet)
 {
@@ -34,13 +41,17 @@ void NET_cl_debug_drawbox(NetPacket packet)
 	auto col = packet->Read<Color>();
 	auto bOutlineColor = packet->Read<bool>();
 	Color colOutline = {};
-	if(bOutlineColor == true)
-		colOutline = packet->Read<Color>();
 	auto dur = packet->Read<float>();
-	if(bOutlineColor == false)
-		DebugRenderer::DrawBox(center, min, max, ang, col, dur);
-	else
-		DebugRenderer::DrawBox(center, min, max, ang, col, colOutline, dur);
+	DebugRenderInfo renderInfo {};
+	renderInfo.SetOrigin(center);
+	renderInfo.SetColor(col);
+	renderInfo.SetDuration(dur);
+	renderInfo.SetRotation(uquat::create(ang));
+	if(bOutlineColor == true) {
+		colOutline = packet->Read<Color>();
+		renderInfo.SetOutlineColor(colOutline);
+	}
+	DebugRenderer::DrawBox(min, max, renderInfo);
 }
 void NET_cl_debug_drawtext(NetPacket packet)
 {
@@ -58,18 +69,15 @@ void NET_cl_debug_drawtext(NetPacket packet)
 	if(bColor == true)
 		col = packet->Read<Color>();
 	auto duration = packet->Read<float>();
-	if(bSize == true) {
-		if(bColor == true)
-			DebugRenderer::DrawText(text, pos, size, col, duration);
-		else
-			DebugRenderer::DrawText(text, pos, size, duration);
-	}
-	else {
-		if(bColor == true)
-			DebugRenderer::DrawText(text, pos, scale, col, duration);
-		else
-			DebugRenderer::DrawText(text, pos, scale, duration);
-	}
+	DebugRenderInfo renderInfo {};
+	renderInfo.SetOrigin(pos);
+	if(bColor == true)
+		renderInfo.SetColor(col);
+	renderInfo.SetDuration(duration);
+	if(bSize == true)
+		DebugRenderer::DrawText(renderInfo, text, size);
+	else
+		DebugRenderer::DrawText(renderInfo, text, scale);
 }
 void NET_cl_debug_drawsphere(NetPacket packet)
 {
@@ -79,12 +87,15 @@ void NET_cl_debug_drawsphere(NetPacket packet)
 	auto dur = packet->Read<float>();
 	auto recursionLevel = packet->Read<uint32_t>();
 	auto bOutline = packet->Read<bool>();
-	if(bOutline == false)
-		DebugRenderer::DrawSphere(origin, radius, col, dur, recursionLevel);
-	else {
+	DebugRenderInfo renderInfo {};
+	renderInfo.SetOrigin(origin);
+	renderInfo.SetColor(col);
+	renderInfo.SetDuration(dur);
+	if(bOutline) {
 		auto colOutline = packet->Read<Color>();
-		DebugRenderer::DrawSphere(origin, radius, col, colOutline, dur, recursionLevel);
+		renderInfo.SetOutlineColor(colOutline);
 	}
+	DebugRenderer::DrawSphere(renderInfo, radius, recursionLevel);
 }
 void NET_cl_debug_drawcone(NetPacket packet)
 {
@@ -96,19 +107,26 @@ void NET_cl_debug_drawcone(NetPacket packet)
 	auto duration = packet->Read<float>();
 	auto segmentCount = packet->Read<uint32_t>();
 	auto bOutline = packet->Read<bool>();
-	if(bOutline == false)
-		DebugRenderer::DrawCone(origin, dir, dist, angle, col, duration, segmentCount);
-	else {
+	DebugRenderInfo renderInfo {};
+	renderInfo.SetOrigin(origin);
+	renderInfo.SetColor(col);
+	renderInfo.SetDuration(duration);
+	if(bOutline) {
 		auto colOutline = packet->Read<Color>();
-		DebugRenderer::DrawCone(origin, dir, dist, angle, col, colOutline, duration, segmentCount);
+		renderInfo.SetOutlineColor(colOutline);
 	}
+	DebugRenderer::DrawCone(renderInfo, dir, dist, angle, segmentCount);
 }
 void NET_cl_debug_drawaxis(NetPacket packet)
 {
 	auto origin = packet->Read<Vector3>();
 	auto ang = packet->Read<EulerAngles>();
 	auto dur = packet->Read<float>();
-	DebugRenderer::DrawAxis(origin, ang, dur);
+	DebugRenderInfo renderInfo {};
+	renderInfo.SetOrigin(origin);
+	renderInfo.SetRotation(uquat::create(ang));
+	renderInfo.SetDuration(dur);
+	DebugRenderer::DrawAxis(renderInfo);
 }
 void NET_cl_debug_drawpath(NetPacket packet)
 {
@@ -119,7 +137,10 @@ void NET_cl_debug_drawpath(NetPacket packet)
 		path.push_back(packet->Read<Vector3>());
 	auto col = packet->Read<Color>();
 	auto duration = packet->Read<float>();
-	DebugRenderer::DrawPath(path, col, duration);
+	DebugRenderInfo renderInfo {};
+	renderInfo.SetColor(col);
+	renderInfo.SetDuration(duration);
+	DebugRenderer::DrawPath(path, renderInfo);
 }
 void NET_cl_debug_drawspline(NetPacket packet)
 {
@@ -132,7 +153,10 @@ void NET_cl_debug_drawspline(NetPacket packet)
 	auto numSegments = packet->Read<uint32_t>();
 	auto curvature = packet->Read<float>();
 	auto duration = packet->Read<float>();
-	DebugRenderer::DrawSpline(path, col, numSegments, curvature, duration);
+	DebugRenderInfo renderInfo {};
+	renderInfo.SetColor(col);
+	renderInfo.SetDuration(duration);
+	DebugRenderer::DrawSpline(path, numSegments, curvature, renderInfo);
 }
 void NET_cl_debug_drawplane(NetPacket packet)
 {
@@ -140,7 +164,10 @@ void NET_cl_debug_drawplane(NetPacket packet)
 	auto d = packet->Read<float>();
 	auto col = packet->Read<Color>();
 	auto dur = packet->Read<float>();
-	DebugRenderer::DrawPlane(n, d, col, dur);
+	DebugRenderInfo renderInfo {};
+	renderInfo.SetColor(col);
+	renderInfo.SetDuration(dur);
+	DebugRenderer::DrawPlane(n, d, renderInfo);
 }
 void NET_cl_debug_draw_mesh(NetPacket packet)
 {
@@ -151,7 +178,11 @@ void NET_cl_debug_draw_mesh(NetPacket packet)
 	auto color = packet->Read<Color>();
 	auto colorOutline = packet->Read<Color>();
 	auto duration = packet->Read<float>();
-	DebugRenderer::DrawMesh(verts, color, colorOutline, duration);
+	DebugRenderInfo renderInfo {};
+	renderInfo.SetColor(color);
+	renderInfo.SetOutlineColor(colorOutline);
+	renderInfo.SetDuration(duration);
+	DebugRenderer::DrawMesh(verts, renderInfo);
 }
 void NET_cl_debug_drawtruncatedcone(NetPacket packet)
 {
@@ -164,12 +195,15 @@ void NET_cl_debug_drawtruncatedcone(NetPacket packet)
 	auto dur = packet->Read<float>();
 	auto segmentCount = packet->Read<uint32_t>();
 	auto bOutline = packet->Read<bool>();
-	if(bOutline == false)
-		DebugRenderer::DrawTruncatedCone(origin, startRadius, dir, dist, endRadius, col, dur, segmentCount);
-	else {
-		auto outlineColor = packet->Read<Color>();
-		DebugRenderer::DrawTruncatedCone(origin, startRadius, dir, dist, endRadius, col, outlineColor, dur, segmentCount);
+	DebugRenderInfo renderInfo {};
+	renderInfo.SetOrigin(origin);
+	renderInfo.SetColor(col);
+	renderInfo.SetDuration(dur);
+	if(bOutline) {
+		auto colOutline = packet->Read<Color>();
+		renderInfo.SetOutlineColor(colOutline);
 	}
+	DebugRenderer::DrawTruncatedCone(renderInfo, startRadius, dir, dist, endRadius, segmentCount);
 }
 void NET_cl_debug_drawcylinder(NetPacket packet)
 {
@@ -181,10 +215,13 @@ void NET_cl_debug_drawcylinder(NetPacket packet)
 	auto dur = packet->Read<float>();
 	auto segmentCount = packet->Read<uint32_t>();
 	auto bOutline = packet->Read<bool>();
-	if(bOutline == false)
-		DebugRenderer::DrawCylinder(origin, dir, dist, radius, col, dur, segmentCount);
-	else {
-		auto outlineColor = packet->Read<Color>();
-		DebugRenderer::DrawCylinder(origin, dir, dist, radius, col, outlineColor, dur, segmentCount);
+	DebugRenderInfo renderInfo {};
+	renderInfo.SetOrigin(origin);
+	renderInfo.SetColor(col);
+	renderInfo.SetDuration(dur);
+	if(bOutline) {
+		auto colOutline = packet->Read<Color>();
+		renderInfo.SetOutlineColor(colOutline);
 	}
+	DebugRenderer::DrawCylinder(renderInfo, dir, dist, radius, segmentCount);
 }

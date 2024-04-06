@@ -125,7 +125,11 @@ void CDebugHitboxComponent::InitializeDebugObjects()
 						break;
 					}
 				}
-				m_debugObjects.push_back(::DebugRenderer::DrawBox(origin, min, max, rot, col));
+
+				DebugRenderInfo renderInfo {col};
+				renderInfo.SetOrigin(origin);
+				renderInfo.SetRotation(rot);
+				m_debugObjects.push_back(::DebugRenderer::DrawBox(min, max, renderInfo));
 			}
 		}
 	}

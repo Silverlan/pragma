@@ -15,12 +15,14 @@
 #include <mathutil/color.h>
 #include <mathutil/glmutil.h>
 #include <mathutil/transform.hpp>
+#include <pragma/debug/debug_render_info.hpp>
 
 namespace prosper {
 	class Buffer;
 };
 
 class WIText;
+struct DebugRenderInfo;
 namespace DebugRenderer {
 	enum class DLLCLIENT Type : uint32_t {
 		Triangles = 0,
@@ -40,14 +42,13 @@ namespace DebugRenderer {
 	};
 #pragma pack(pop)
 	class DLLCLIENT BaseObject {
-	  protected:
-		BaseObject();
-		umath::ScaledTransform m_pose {};
-		Mat4 m_modelMatrix = umat::identity();
-		bool m_bValid = false;
-		bool m_bVisible = true;
-		void UpdateModelMatrix();
 	  public:
+		enum class Flags : uint32_t {
+			None = 0,
+			Valid = 1,
+			Visible = Valid << 1,
+			IgnoreDepth = Visible << 1,
+		};
 		virtual ~BaseObject() = default;
 		const umath::ScaledTransform &GetPose() const;
 		umath::ScaledTransform &GetPose();
@@ -63,9 +64,17 @@ namespace DebugRenderer {
 		const Mat4 &GetModelMatrix() const;
 		bool IsVisible() const;
 		void SetVisible(bool b);
+		bool ShouldIgnoreDepth() const;
+		void SetIgnoreDepth(bool b);
 		virtual void Remove();
 		bool IsValid() const;
 		virtual ObjectType GetType() const = 0;
+	  protected:
+		BaseObject();
+		umath::ScaledTransform m_pose {};
+		Mat4 m_modelMatrix = umat::identity();
+		Flags m_flags = Flags::Visible;
+		void UpdateModelMatrix();
 	};
 	class DLLCLIENT CollectionObject : public BaseObject {
 	  protected:
@@ -133,41 +142,32 @@ namespace DebugRenderer {
 		void Initialize(CallbackHandle &hCallback);
 		WIText *GetTextElement() const;
 	};
-	std::shared_ptr<DebugRenderer::BaseObject> DrawPoints(const std::shared_ptr<prosper::IBuffer> &vertexBuffer, uint32_t vertexCount, const Color &color, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawPoints(const std::vector<Vector3> &points, const Color &color, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawPoint(const Vector3 &pos, const Color &color, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawLines(const std::vector<Vector3> &lines, const Color &color, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawLine(const Vector3 &start, const Vector3 &end, const Color &color, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawBox(const Vector3 &center, const Vector3 &min, const Vector3 &max, const EulerAngles &ang, const Color &color, const Color &outlineColor, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawBox(const Vector3 &center, const Vector3 &min, const Vector3 &max, const Color &color, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawBox(const Vector3 &start, const Vector3 &end, const Color &color, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawBox(const Vector3 &center, const Vector3 &min, const Vector3 &max, const EulerAngles &ang, const Color &color, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawBox(const Vector3 &start, const Vector3 &end, const EulerAngles &ang, const Color &color, const Color &outlineColor, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawBox(const Vector3 &start, const Vector3 &end, const EulerAngles &ang, const Color &color, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawText(const std::string &text, const Vector3 &pos, const Vector2 &worldSize, const Color &color, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawText(const std::string &text, const Vector3 &pos, float sizeScale, const Color &color, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawText(const std::string &text, const Vector3 &pos, const Vector2 &worldSize, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawText(const std::string &text, const Vector3 &pos, float sizeScale, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawMesh(const std::vector<Vector3> &verts, const Color &color, const Color &outlineColor, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawMesh(const std::vector<Vector3> &verts, const Color &color, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawSphere(const Vector3 &origin, float radius, const Color &color, const Color &outlineColor, float duration = 0.f, uint32_t recursionLevel = 1);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawSphere(const Vector3 &origin, float radius, const Color &color, float duration = 0.f, uint32_t recursionLevel = 1);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawTruncatedCone(const Vector3 &origin, float startRadius, const Vector3 &dir, float dist, float endRadius, const Color &color, const Color &outlineColor, float duration = 0.f, uint32_t segmentCount = 12);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawTruncatedCone(const Vector3 &origin, float startRadius, const Vector3 &dir, float dist, float endRadius, const Color &color, float duration = 0.f, uint32_t segmentCount = 12);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawCylinder(const Vector3 &origin, const Vector3 &dir, float dist, float radius, const Color &color, float duration = 0.f, uint32_t segmentCount = 12);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawCylinder(const Vector3 &origin, const Vector3 &dir, float dist, float radius, const Color &color, const Color &outlineColor, float duration = 0.f, uint32_t segmentCount = 12);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawCone(const Vector3 &origin, const Vector3 &dir, float dist, float angle, const Color &color, const Color &outlineColor, float duration = 0.f, uint32_t segmentCount = 12);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawCone(const Vector3 &origin, const Vector3 &dir, float dist, float angle, const Color &color, float duration = 0.f, uint32_t segmentCount = 12);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawPath(const std::vector<Vector3> &path, const Color &color, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawSpline(const std::vector<Vector3> &path, const Color &color, uint32_t segmentCount, float curvature = 1.f, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawPlane(const Vector3 &n, float dist, const Color &color, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawPlane(const umath::Plane &plane, const Color &color, float duration = 0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawFrustum(const std::vector<Vector3> &points, float duration = 0.f);
-	std::array<std::shared_ptr<DebugRenderer::BaseObject>, 3> DrawAxis(const Vector3 &origin, const Vector3 &x, const Vector3 &y, const Vector3 &z, float duration = 0.f);
-	std::array<std::shared_ptr<DebugRenderer::BaseObject>, 3> DrawAxis(const Vector3 &origin, const EulerAngles &ang, float duration = 0.f);
-	std::array<std::shared_ptr<DebugRenderer::BaseObject>, 3> DrawAxis(const Vector3 &origin, float duration = 0.f);
+	std::shared_ptr<DebugRenderer::BaseObject> DrawPoints(const std::shared_ptr<prosper::IBuffer> &vertexBuffer, uint32_t vertexCount, const DebugRenderInfo &renderInfo = {});
+	std::shared_ptr<DebugRenderer::BaseObject> DrawPoints(const std::vector<Vector3> &points, const DebugRenderInfo &renderInfo = {});
+	std::shared_ptr<DebugRenderer::BaseObject> DrawPoint(const DebugRenderInfo &renderInfo);
+	std::shared_ptr<DebugRenderer::BaseObject> DrawLines(const std::vector<Vector3> &lines, const DebugRenderInfo &renderInfo = {});
+	std::shared_ptr<DebugRenderer::BaseObject> DrawLine(const Vector3 &start, const Vector3 &end, const DebugRenderInfo &renderInfo = {});
+	std::shared_ptr<DebugRenderer::BaseObject> DrawBox(const Vector3 &start, const Vector3 &end, const DebugRenderInfo &renderInfo = {});
+	std::shared_ptr<DebugRenderer::BaseObject> DrawText(const DebugRenderInfo &renderInfo, const std::string &text, const Vector2 &worldSize);
+	std::shared_ptr<DebugRenderer::BaseObject> DrawText(const DebugRenderInfo &renderInfo, const std::string &text, float sizeScale);
+	std::shared_ptr<DebugRenderer::BaseObject> DrawText(const DebugRenderInfo &renderInfo, const std::string &text, const Vector2 &worldSize);
+	std::shared_ptr<DebugRenderer::BaseObject> DrawMesh(const std::vector<Vector3> &verts, const DebugRenderInfo &renderInfo = {});
+	std::shared_ptr<DebugRenderer::BaseObject> DrawSphere(const DebugRenderInfo &renderInfo, float radius, uint32_t recursionLevel = 1);
+	std::shared_ptr<DebugRenderer::BaseObject> DrawTruncatedCone(const DebugRenderInfo &renderInfo, float startRadius, const Vector3 &dir, float dist, float endRadius, uint32_t segmentCount = 12);
+	std::shared_ptr<DebugRenderer::BaseObject> DrawCylinder(const DebugRenderInfo &renderInfo, const Vector3 &dir, float dist, float radius, uint32_t segmentCount = 12);
+	std::shared_ptr<DebugRenderer::BaseObject> DrawCylinder(const DebugRenderInfo &renderInfo, float dist, float radius, uint32_t segmentCount = 12);
+	std::shared_ptr<DebugRenderer::BaseObject> DrawCone(const DebugRenderInfo &renderInfo, const Vector3 &dir, float dist, float angle, uint32_t segmentCount = 12);
+	std::shared_ptr<DebugRenderer::BaseObject> DrawPath(const std::vector<Vector3> &path, const DebugRenderInfo &renderInfo = {});
+	std::shared_ptr<DebugRenderer::BaseObject> DrawSpline(const std::vector<Vector3> &path, uint32_t segmentCount, float curvature = 1.f, const DebugRenderInfo &renderInfo = {});
+	std::shared_ptr<DebugRenderer::BaseObject> DrawPlane(const Vector3 &n, float dist, const DebugRenderInfo &renderInfo = {});
+	std::shared_ptr<DebugRenderer::BaseObject> DrawPlane(const umath::Plane &plane, const DebugRenderInfo &renderInfo = {});
+	std::shared_ptr<DebugRenderer::BaseObject> DrawFrustum(const std::vector<Vector3> &points, const DebugRenderInfo &renderInfo = {});
+	std::array<std::shared_ptr<DebugRenderer::BaseObject>, 3> DrawAxis(const DebugRenderInfo &renderInfo, const Vector3 &x, const Vector3 &y, const Vector3 &z);
+	std::array<std::shared_ptr<DebugRenderer::BaseObject>, 3> DrawAxis(const DebugRenderInfo &renderInfo);
 	void ClearObjects();
 	void Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pragma::CCameraComponent &cam);
 };
+
+REGISTER_BASIC_BITWISE_OPERATORS(DebugRenderer::BaseObject::Flags)
 
 #endif

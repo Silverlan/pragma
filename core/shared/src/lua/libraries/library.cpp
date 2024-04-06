@@ -678,6 +678,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	classDefDrawInfo.def("SetColor", &DebugRenderInfo::SetColor, luabind::discard_result {});
 	classDefDrawInfo.def("SetOutlineColor", &DebugRenderInfo::SetOutlineColor, luabind::discard_result {});
 	classDefDrawInfo.def("SetDuration", &DebugRenderInfo::SetDuration, luabind::discard_result {});
+	classDefDrawInfo.def("SetIgnoreDepthBuffer", &DebugRenderInfo::SetIgnoreDepthBuffer, luabind::discard_result {});
 	modDebug[classDefDrawInfo];
 
 	auto isBreakDefined = false;
@@ -1197,9 +1198,6 @@ namespace Lua::doc {
 	void register_library(Lua::Interface &lua);
 };
 namespace Lua::animation {
-	void register_library(Lua::Interface &lua);
-};
-namespace Lua::ik {
 	void register_library(Lua::Interface &lua);
 };
 
@@ -1768,5 +1766,4 @@ void Game::RegisterLuaLibraries()
 	Lua::physenv::register_library(GetLuaInterface());
 	Lua::doc::register_library(GetLuaInterface());
 	Lua::animation::register_library(GetLuaInterface());
-	Lua::ik::register_library(GetLuaInterface());
 }

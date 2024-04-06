@@ -211,7 +211,7 @@ static void debug_bsp_nodes(NetworkState *, const ConVar &, int32_t, int32_t val
 
 		if(val == 1) {
 			// Draw vis leafs
-			dbgObjects.push_back(DebugRenderer::DrawBox(pCurrentNode->min, pCurrentNode->max, {Color {255, 0, 0, 255}, Color::Aqua}));
+			dbgObjects.push_back(DebugRenderer::DrawBox(pCurrentNode->min, pCurrentNode->max, EulerAngles {}, Color {255, 0, 0, 255}, Color::Aqua));
 			auto &nodes = bspTree->GetNodes();
 			std::vector<util::BSPTree::Node *> clusterNodes {};
 			clusterNodes.reserve(visClusters.size());
@@ -226,7 +226,7 @@ static void debug_bsp_nodes(NetworkState *, const ConVar &, int32_t, int32_t val
 					Con::cwar << "Reference to invalid cluster id " << clusterId << Con::endl;
 					continue;
 				}
-				dbgObjects.push_back(DebugRenderer::DrawBox(pNode->min, pNode->max, {Color {0, 255, 0, 64}, Color::ForestGreen}));
+				dbgObjects.push_back(DebugRenderer::DrawBox(pNode->min, pNode->max, EulerAngles {}, Color {0, 255, 0, 64}, Color::ForestGreen));
 			}
 		}
 	}

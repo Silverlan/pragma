@@ -346,7 +346,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 		auto boneId = footInfo.effectorBoneId;
 		Vector3 pos {};
 		auto rot = uquat::identity();
-		animComponent->GetBonePose(boneId, &pos, &rot, nullptr, umath::CoordinateSpace::World);
+		animComponent->GetGlobalBonePosition(boneId, pos, rot);
 
 		auto srcPos = pos + up * yExtent;
 		auto dstPos = pos - up * yExtent;
@@ -406,7 +406,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 			auto &t = rootDeltaTransforms.back();
 			Vector3 pos {};
 			auto rot = uquat::identity();
-			if(animComponent->GetBonePose(rootNodeInfo->boneId, &pos, &rot, nullptr, umath::CoordinateSpace::Object) == true) {
+			if(animComponent->GetLocalBonePosition(rootNodeInfo->boneId, pos, rot) == true) {
 				auto *posRef = reference.GetBonePosition(rootNodeInfo->boneId);
 				auto *rotRef = reference.GetBoneOrientation(rootNodeInfo->boneId);
 				if(posRef != nullptr && rotRef != nullptr) {
@@ -576,7 +576,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 				auto tLocal = *rootDeltaTransform * tNode;
 				auto pos = tLocal.GetOrigin();
 				auto rot = tLocal.GetRotation() * nodeInfo->deltaRotation;
-				animComponent->SetBonePose(nodeInfo->boneId, &pos, &rot, nullptr, umath::CoordinateSpace::Object);
+				animComponent->SetLocalBonePosition(nodeInfo->boneId, pos, rot);
 
 				fIterateIkTree(nodeInfo->children, tNode, rootDeltaTransform, false);
 				++nodeIdx;
@@ -610,9 +610,9 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 
 		auto posBone = Vector3 {};
 		auto rotBone = uquat::identity();
-		animComponent->GetBonePose(footData.boneId, &posBone, &rotBone, nullptr, umath::CoordinateSpace::Object);
+		animComponent->GetLocalBonePosition(footData.boneId, posBone, rotBone);
 
 		rotBone = rotDelta * footData.rotation;
-		animComponent->GetBonePose(footData.boneId, &posBone, &rotBone, nullptr, umath::CoordinateSpace::Object);
+		animComponent->SetLocalBonePosition(footData.boneId, posBone, rotBone);
 	}
 }

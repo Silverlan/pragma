@@ -34,6 +34,7 @@
 #include "pragma/entities/components/submergible_component.hpp"
 #include "pragma/entities/components/logic_component.hpp"
 #include "pragma/entities/components/ik_component.hpp"
+#include "pragma/entities/components/ik_solver_component.hpp"
 #include "pragma/entities/components/map_component.hpp"
 #include "pragma/entities/components/usable_component.hpp"
 #include "pragma/entities/components/base_weapon_component.hpp"
@@ -42,6 +43,7 @@
 #include "pragma/entities/components/global_component.hpp"
 #include "pragma/entities/components/damageable_component.hpp"
 #include "pragma/entities/components/animation_driver_component.hpp"
+#include "pragma/entities/components/ik_solver/rig_config.hpp"
 #include "pragma/entities/components/origin_component.hpp"
 #include "pragma/entities/components/intersection_handler_component.hpp"
 #include "pragma/entities/components/constraints/constraint_component.hpp"
@@ -57,7 +59,6 @@
 #include "pragma/entities/components/constraints/constraint_look_at_component.hpp"
 #include "pragma/entities/components/constraints/constraint_child_of_component.hpp"
 #include "pragma/entities/components/lifeline_link_component.hpp"
-#include "pragma/entities/components/meta_rig_component.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
@@ -67,7 +68,6 @@
 #include "pragma/lua/converters/vector_converter_t.hpp"
 #include "pragma/lua/converters/pair_converter_t.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
-#include "pragma/lua/converters/global_string_converter_t.hpp"
 #include "pragma/lua/lua_util_component.hpp"
 #include "pragma/lua/ostream_operator_alias.hpp"
 #include <pragma/physics/movetypes.h>
@@ -133,6 +133,10 @@ DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, pragma::MultiEntityURef);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, pragma::MultiEntityUComponentRef);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, BaseEntityComponent);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma, ValueDriver);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfig);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigBone);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigControl);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigConstraint);
 
 enum class BvhIntersectionFlags : uint32_t {
 	None = 0u,
@@ -159,20 +163,6 @@ static IntersectionTestResult bvh_intersection_test(lua_State *l, const std::fun
 	if(!res)
 		return luabind::object {l, std::pair<bool, std::optional<std::vector<uint64_t>>> {res, {}}};
 	return luabind::object {l, std::pair<bool, std::optional<std::vector<pragma::MeshIntersectionInfo::MeshInfo>>> {res, std::move(info.meshInfos)}};
-}
-
-template<typename TResult, bool (pragma::MetaRigComponent::*GetValue)(pragma::animation::MetaRigBoneType, TResult &, umath::CoordinateSpace) const>
-std::optional<TResult> get_meta_bone_value(const pragma::MetaRigComponent &metaC, pragma::animation::MetaRigBoneType bone, umath::CoordinateSpace space)
-{
-	TResult result;
-	if(!(metaC.*GetValue)(bone, result, space))
-		return {};
-	return result;
-}
-template<typename TResult, bool (pragma::MetaRigComponent::*GetValue)(pragma::animation::MetaRigBoneType, TResult &, umath::CoordinateSpace) const>
-std::optional<TResult> get_meta_bone_value_ls(const pragma::MetaRigComponent &metaC, pragma::animation::MetaRigBoneType bone)
-{
-	return get_meta_bone_value<TResult, GetValue>(metaC, bone, umath::CoordinateSpace::Local);
 }
 
 void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
@@ -299,23 +289,6 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defVelocity.def("GetVelocityProperty", &pragma::VelocityComponent::GetVelocityProperty);
 	defVelocity.def("GetAngularVelocityProperty", &pragma::VelocityComponent::GetAngularVelocityProperty);
 	entsMod[defVelocity];
-
-	auto defMetaRig = pragma::lua::create_entity_component_class<pragma::MetaRigComponent, pragma::BaseEntityComponent>("MetaRigComponent");
-	defMetaRig.def("GetBonePose", &get_meta_bone_value<umath::ScaledTransform, &pragma::MetaRigComponent::GetBonePose>);
-	defMetaRig.def("GetBonePos", &get_meta_bone_value<Vector3, &pragma::MetaRigComponent::GetBonePos>);
-	defMetaRig.def("GetBoneRot", &get_meta_bone_value<Quat, &pragma::MetaRigComponent::GetBoneRot>);
-	defMetaRig.def("GetBoneScale", &get_meta_bone_value<Vector3, &pragma::MetaRigComponent::GetBoneScale>);
-
-	defMetaRig.def("GetBonePose", &get_meta_bone_value_ls<umath::ScaledTransform, &pragma::MetaRigComponent::GetBonePose>);
-	defMetaRig.def("GetBonePos", &get_meta_bone_value_ls<Vector3, &pragma::MetaRigComponent::GetBonePos>);
-	defMetaRig.def("GetBoneRot", &get_meta_bone_value_ls<Quat, &pragma::MetaRigComponent::GetBoneRot>);
-	defMetaRig.def("GetBoneScale", &get_meta_bone_value_ls<Vector3, &pragma::MetaRigComponent::GetBoneScale>);
-
-	defMetaRig.def("SetBonePose", &pragma::MetaRigComponent::SetBonePose, luabind::default_parameter_policy<4, umath::CoordinateSpace::Local> {});
-	defMetaRig.def("SetBonePos", &pragma::MetaRigComponent::SetBonePos, luabind::default_parameter_policy<4, umath::CoordinateSpace::Local> {});
-	defMetaRig.def("SetBoneRot", &pragma::MetaRigComponent::SetBoneRot, luabind::default_parameter_policy<4, umath::CoordinateSpace::Local> {});
-	defMetaRig.def("SetBoneScale", &pragma::MetaRigComponent::SetBoneScale, luabind::default_parameter_policy<4, umath::CoordinateSpace::Local> {});
-	entsMod[defMetaRig];
 
 	auto defIntersectionHandler = pragma::lua::create_entity_component_class<pragma::IntersectionHandlerComponent, pragma::BaseEntityComponent>("IntersectionHandlerComponent");
 	defIntersectionHandler.def(
@@ -596,6 +569,109 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defIK.def("SetIKEffectorPos", &pragma::IKComponent::SetIKEffectorPos);
 	defIK.def("GetIKEffectorPos", &pragma::IKComponent::GetIKEffectorPos);
 	entsMod[defIK];
+
+	auto defRigConfig = luabind::class_<pragma::ik::RigConfig>("RigConfig");
+	defRigConfig.def(luabind::constructor<>());
+	defRigConfig.def(luabind::tostring(luabind::self));
+	defRigConfig.scope[luabind::def("load", &pragma::ik::RigConfig::load)];
+	defRigConfig.scope[luabind::def("load_from_udm_data", &pragma::ik::RigConfig::load_from_udm_data)];
+	defRigConfig.scope[luabind::def("get_supported_extensions", &pragma::ik::RigConfig::get_supported_extensions)];
+	defRigConfig.def("DebugPrint", &pragma::ik::RigConfig::DebugPrint);
+	defRigConfig.def("ToUdmData", &pragma::ik::RigConfig::ToUdmData);
+	defRigConfig.def("AddBone", &pragma::ik::RigConfig::AddBone);
+	defRigConfig.def("GetBones", &pragma::ik::RigConfig::GetBones);
+	defRigConfig.def("FindBone", &pragma::ik::RigConfig::FindBone);
+	defRigConfig.def("GetConstraints", &pragma::ik::RigConfig::GetConstraints);
+	defRigConfig.def("GetControls", &pragma::ik::RigConfig::GetControls);
+	defRigConfig.def("RemoveBone", static_cast<void (pragma::ik::RigConfig::*)(const std::string &)>(&pragma::ik::RigConfig::RemoveBone));
+	defRigConfig.def("RemoveControl", static_cast<void (pragma::ik::RigConfig::*)(const pragma::ik::RigConfigControl &)>(&pragma::ik::RigConfig::RemoveControl));
+	defRigConfig.def("RemoveControl", static_cast<void (pragma::ik::RigConfig::*)(const std::string &)>(&pragma::ik::RigConfig::RemoveControl));
+	defRigConfig.def("RemoveConstraint", static_cast<void (pragma::ik::RigConfig::*)(const pragma::ik::RigConfigConstraint &)>(&pragma::ik::RigConfig::RemoveConstraint));
+	defRigConfig.def("RemoveBone", static_cast<void (pragma::ik::RigConfig::*)(const pragma::ik::RigConfigBone &)>(&pragma::ik::RigConfig::RemoveBone));
+	defRigConfig.def("HasBone", &pragma::ik::RigConfig::HasBone);
+	defRigConfig.def("IsBoneLocked", &pragma::ik::RigConfig::IsBoneLocked);
+	defRigConfig.def("SetBoneLocked", &pragma::ik::RigConfig::SetBoneLocked);
+	defRigConfig.def("HasControl", &pragma::ik::RigConfig::HasControl);
+	defRigConfig.def("AddControl", &pragma::ik::RigConfig::AddControl);
+	defRigConfig.def("RemoveConstraints", static_cast<void (pragma::ik::RigConfig::*)(const std::string &, const std::string &)>(&pragma::ik::RigConfig::RemoveConstraints));
+	defRigConfig.def("RemoveConstraints", static_cast<void (pragma::ik::RigConfig::*)(const std::string &)>(&pragma::ik::RigConfig::RemoveConstraints));
+	defRigConfig.def("AddFixedConstraint", &pragma::ik::RigConfig::AddFixedConstraint);
+	defRigConfig.def("AddHingeConstraint", &pragma::ik::RigConfig::AddHingeConstraint);
+	defRigConfig.def("AddBallSocketConstraint", &pragma::ik::RigConfig::AddBallSocketConstraint);
+	defRigConfig.def("AddBallSocketConstraint", &pragma::ik::RigConfig::AddBallSocketConstraint, luabind::default_parameter_policy<6, pragma::SignedAxis::Z> {});
+	defRigConfig.def(
+	  "Save", +[](lua_State *l, pragma::ik::RigConfig &rigConfig, const std::string &fileName) -> std::pair<bool, std::optional<std::string>> {
+		  auto fname = fileName;
+		  if(Lua::file::validate_write_operation(l, fname) == false)
+			  return std::pair<bool, std::optional<std::string>> {false, "Invalid write location!"};
+		  auto res = rigConfig.Save(fname);
+		  if(!res)
+			  return std::pair<bool, std::optional<std::string>> {false, "Unknown error"};
+		  return std::pair<bool, std::optional<std::string>> {true, {}};
+	  });
+
+	auto defRigBone = luabind::class_<pragma::ik::RigConfigBone>("Bone");
+	defRigBone.def(luabind::tostring(luabind::self));
+	defRigBone.def_readwrite("locked", &pragma::ik::RigConfigBone::locked);
+	defRigBone.def_readwrite("name", &pragma::ik::RigConfigBone::name);
+	defRigConfig.scope[defRigBone];
+
+	auto defRigControl = luabind::class_<pragma::ik::RigConfigControl>("Control");
+	defRigControl.def(luabind::tostring(luabind::self));
+	defRigControl.add_static_constant("TYPE_DRAG", umath::to_integral(pragma::ik::RigConfigControl::Type::Drag));
+	defRigControl.add_static_constant("TYPE_STATE", umath::to_integral(pragma::ik::RigConfigControl::Type::State));
+	defRigControl.add_static_constant("TYPE_ORIENTED_DRAG", umath::to_integral(pragma::ik::RigConfigControl::Type::OrientedDrag));
+	static_assert(umath::to_integral(pragma::ik::RigConfigControl::Type::Count) == 3u, "Update this list when new types are added!");
+	defRigControl.def_readwrite("bone", &pragma::ik::RigConfigControl::bone);
+	defRigControl.def_readwrite("type", &pragma::ik::RigConfigControl::type);
+	defRigControl.def_readwrite("maxForce", &pragma::ik::RigConfigControl::maxForce);
+	defRigControl.def_readwrite("rigidity", &pragma::ik::RigConfigControl::rigidity);
+	defRigConfig.scope[defRigControl];
+	defRigConfig.scope[defRigBone];
+
+	auto defRigConstraint = luabind::class_<pragma::ik::RigConfigConstraint>("Constraint");
+	defRigConstraint.def(luabind::tostring(luabind::self));
+	defRigConstraint.add_static_constant("TYPE_FIXED", umath::to_integral(pragma::ik::RigConfigConstraint::Type::Fixed));
+	defRigConstraint.add_static_constant("TYPE_HINGE", umath::to_integral(pragma::ik::RigConfigConstraint::Type::Hinge));
+	defRigConstraint.add_static_constant("TYPE_BALL_SOCKET", umath::to_integral(pragma::ik::RigConfigConstraint::Type::BallSocket));
+	static_assert(umath::to_integral(pragma::ik::RigConfigConstraint::Type::Count) == 3u, "Update this list when new types are added!");
+	defRigConstraint.def_readwrite("bone0", &pragma::ik::RigConfigConstraint::bone0);
+	defRigConstraint.def_readwrite("bone1", &pragma::ik::RigConfigConstraint::bone1);
+	defRigConstraint.def_readwrite("type", &pragma::ik::RigConfigConstraint::type);
+	defRigConstraint.def_readwrite("minLimits", &pragma::ik::RigConfigConstraint::minLimits);
+	defRigConstraint.def_readwrite("maxLimits", &pragma::ik::RigConfigConstraint::maxLimits);
+	defRigConstraint.def_readwrite("axis", &pragma::ik::RigConfigConstraint::axis);
+	defRigConfig.scope[defRigConstraint];
+
+	auto defIkSolver = pragma::lua::create_entity_component_class<pragma::IkSolverComponent, pragma::BaseEntityComponent>("IkSolverComponent");
+	defIkSolver.add_static_constant("EVENT_INITIALIZE_SOLVER", pragma::IkSolverComponent::EVENT_INITIALIZE_SOLVER);
+	defIkSolver.add_static_constant("EVENT_ON_IK_UPDATED", pragma::IkSolverComponent::EVENT_ON_IK_UPDATED);
+	defIkSolver.scope[luabind::def("get_control_bone_name", &pragma::IkSolverComponent::GetControlBoneName)];
+	defIkSolver.def("SetIkRigFile", &pragma::IkSolverComponent::SetIkRigFile);
+	defIkSolver.def("GetIkRigFile", &pragma::IkSolverComponent::GetIkRigFile);
+	defIkSolver.def("AddSkeletalBone", &pragma::IkSolverComponent::AddSkeletalBone);
+	defIkSolver.def("SetBoneLocked", &pragma::IkSolverComponent::SetBoneLocked);
+	defIkSolver.def("GetBone", &pragma::IkSolverComponent::GetBone);
+	defIkSolver.def("GetBoneCount", &pragma::IkSolverComponent::GetBoneCount);
+	defIkSolver.def("GetControl", &pragma::IkSolverComponent::GetControl);
+	defIkSolver.def("AddDragControl", &pragma::IkSolverComponent::AddDragControl);
+	defIkSolver.def("AddStateControl", &pragma::IkSolverComponent::AddStateControl);
+	defIkSolver.def("AddFixedConstraint", &pragma::IkSolverComponent::AddFixedConstraint);
+	defIkSolver.def("AddHingeConstraint", &pragma::IkSolverComponent::AddHingeConstraint);
+	defIkSolver.def("AddBallSocketConstraint", &pragma::IkSolverComponent::AddBallSocketConstraint);
+	defIkSolver.def("AddIkSolverByRig", &pragma::IkSolverComponent::AddIkSolverByRig);
+	defIkSolver.def("AddIkSolverByChain", &pragma::IkSolverComponent::AddIkSolverByChain);
+	defIkSolver.def("GetIkRig", &pragma::IkSolverComponent::GetIkRig);
+	defIkSolver.def("GetIkBoneId", &pragma::IkSolverComponent::GetIkBoneId);
+	defIkSolver.def("GetControlBoneId", &pragma::IkSolverComponent::GetControlBoneId);
+	defIkSolver.def("GetSkeletalBoneId", &pragma::IkSolverComponent::GetSkeletalBoneId);
+	defIkSolver.def("Solve", &pragma::IkSolverComponent::Solve);
+	defIkSolver.def("ResetIkRig", &pragma::IkSolverComponent::ResetIkRig);
+	defIkSolver.def("GetIkSolver", &pragma::IkSolverComponent::GetIkSolver);
+	defIkSolver.def("SetResetSolver", &pragma::IkSolverComponent::SetResetSolver);
+	defIkSolver.def("ShouldResetSolver", &pragma::IkSolverComponent::ShouldResetSolver);
+	defIkSolver.scope[defRigConfig];
+	entsMod[defIkSolver];
 
 	auto defOrigin = pragma::lua::create_entity_component_class<pragma::OriginComponent, pragma::BaseEntityComponent>("OriginComponent");
 	defOrigin.add_static_constant("EVENT_ON_ORIGIN_CHANGED", pragma::OriginComponent::EVENT_ON_ORIGIN_CHANGED);

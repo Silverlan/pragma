@@ -170,12 +170,6 @@ namespace pragma::animation {
 		out << "[Ang:" << ang.p << ", " << ang.y << "," << ang.r << "]";
 		return out;
 	}
-	std::ostream &operator<<(std::ostream &out, const pragma::animation::MetaRigBlendShape &blendShapeInfo)
-	{
-		out << "MetaRigBlendShape";
-		out << "[FlexControllerId:" << blendShapeInfo.flexControllerId << "]";
-		return out;
-	}
 	std::ostream &operator<<(std::ostream &out, const pragma::animation::MetaRig &rig)
 	{
 		out << "MetaRig";
@@ -186,41 +180,6 @@ namespace pragma::animation {
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, Vertex);
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(umath, VertexWeight);
 
-template<typename TResult, typename TBoneIdentifier, bool (::Model::*GetValue)(pragma::animation::BoneId, TResult &, umath::CoordinateSpace) const>
-std::optional<TResult> get_reference_bone_value(const ::Model &mdl, TBoneIdentifier boneIdentifier, umath::CoordinateSpace space)
-{
-	pragma::animation::BoneId boneId;
-	if constexpr(std::is_same_v<TBoneIdentifier, const std::string &>)
-		boneId = mdl.LookupBone(boneIdentifier);
-	else
-		boneId = boneIdentifier;
-	TResult result;
-	if(!(mdl.*GetValue)(boneId, result, space))
-		return {};
-	return result;
-}
-
-template<typename TResult, typename TBoneIdentifier, bool (::Model::*GetValue)(pragma::animation::BoneId, TResult &, umath::CoordinateSpace) const>
-std::optional<TResult> get_reference_bone_value_ls(const ::Model &mdl, TBoneIdentifier boneIdentifier)
-{
-	return get_reference_bone_value<TResult, TBoneIdentifier, GetValue>(mdl, boneIdentifier, umath::CoordinateSpace::Local);
-}
-
-template<typename TResult>
-void def_bone_methods(luabind::class_<::Model> &classDef)
-{
-	// Note: luabind::default_parameter_policy would be a better choice here, but doesn't work for the CoordinateSpace parameter for some unknown reason
-	classDef.def("GetReferenceBonePose", &get_reference_bone_value_ls<umath::ScaledTransform, TResult, &::Model::GetReferenceBonePose>);
-	classDef.def("GetReferenceBonePos", &get_reference_bone_value_ls<Vector3, TResult, &::Model::GetReferenceBonePos>);
-	classDef.def("GetReferenceBoneRot", &get_reference_bone_value_ls<Quat, TResult, &::Model::GetReferenceBoneRot>);
-	classDef.def("GetReferenceBoneScale", &get_reference_bone_value_ls<Vector3, TResult, &::Model::GetReferenceBoneScale>);
-
-	classDef.def("GetReferenceBonePose", &get_reference_bone_value<umath::ScaledTransform, TResult, &::Model::GetReferenceBonePose>);
-	classDef.def("GetReferenceBonePos", &get_reference_bone_value<Vector3, TResult, &::Model::GetReferenceBonePos>);
-	classDef.def("GetReferenceBoneRot", &get_reference_bone_value<Quat, TResult, &::Model::GetReferenceBoneRot>);
-	classDef.def("GetReferenceBoneScale", &get_reference_bone_value<Vector3, TResult, &::Model::GetReferenceBoneScale>);
-}
-
 void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef, luabind::class_<::ModelMesh> &classDefModelMesh, luabind::class_<::ModelSubMesh> &classDefModelSubMesh)
 {
 	classDef.add_static_constant("INVALID_BONE_INDEX", pragma::animation::INVALID_BONE_INDEX);
@@ -230,8 +189,6 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("GetCollisionMeshes", &GetCollisionMeshes);
 	classDef.def("ClearCollisionMeshes", &ClearCollisionMeshes);
 	classDef.def("GetSkeleton", &GetSkeleton);
-	classDef.def("TransformBone", &::Model::TransformBone);
-	classDef.def("TransformBone", &::Model::TransformBone, luabind::default_parameter_policy<4, umath::CoordinateSpace::World> {});
 	classDef.def("GetAttachmentCount", &GetAttachmentCount);
 	classDef.def("GetAttachments", &GetAttachments);
 	classDef.def("GetAttachment", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&GetAttachment));
@@ -246,6 +203,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("RemoveAttachment", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&RemoveAttachment));
 	classDef.def("RemoveAttachment", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&RemoveAttachment));
 
+	classDef.def("GetReferenceBonePose", &::Model::GetReferenceBonePose);
 	classDef.def("FindBoneTwistAxis", &::Model::FindBoneTwistAxis);
 	classDef.def("FindBoneAxisForDirection", &::Model::FindBoneAxisForDirection);
 	classDef.scope[luabind::def("get_twist_axis_rotation_offset", &::Model::GetTwistAxisRotationOffset)];
@@ -269,9 +227,6 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("GetAnimation", static_cast<void (*)(lua_State *, ::Model &, const char *)>(&GetAnimation));
 	classDef.def("GetAnimation", static_cast<void (*)(lua_State *, ::Model &, unsigned int)>(&GetAnimation));
 	classDef.def("GetAnimationName", &GetAnimationName);
-
-	def_bone_methods<pragma::animation::BoneId>(classDef);
-	def_bone_methods<const std::string &>(classDef);
 
 	classDef.def("PrecacheTextureGroup", &PrecacheTextureGroup);
 	classDef.def("PrecacheTextureGroups", &PrecacheTextureGroups);
@@ -363,10 +318,6 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("GetExtensionData", &::Model::GetExtensionData);
 	classDef.def("GenerateHitboxes", &::Model::GenerateHitboxes);
 	classDef.def("GenerateMetaRig", &::Model::GenerateMetaRig);
-	classDef.def("GenerateMetaBlendShapes", &::Model::GenerateMetaBlendShapes);
-	classDef.def("GetMetaRig", &::Model::GetMetaRig);
-	classDef.def("ClearMetaRig", &::Model::ClearMetaRig);
-	classDef.def("GetMetaRigReferencePose", &::Model::GetMetaRigReferencePose);
 
 	classDef.def("GetTextureGroupCount", &Lua::Model::GetTextureGroupCount);
 	classDef.def("GetTextureGroups", &Lua::Model::GetTextureGroups);
@@ -471,17 +422,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("LookupFlexController", &Lua::Model::GetFlexControllerId);
 	classDef.def("GetFlexController", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&Lua::Model::GetFlexController));
 	classDef.def("GetFlexController", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&Lua::Model::GetFlexController));
-	classDef.def(
-	  "AddFlexController", +[](::Model &mdl, const std::string &name, float min, float max) -> pragma::animation::FlexControllerId {
-		  uint32_t id;
-		  if(mdl.GetFlexControllerId(name, id))
-			  return id;
-		  mdl.GetFlexControllers().push_back({name, min, max});
-		  return mdl.GetFlexControllers().size() - 1;
-	  });
 	classDef.def("GetFlexes", &Lua::Model::GetFlexes);
-	classDef.def(
-	  "AddFlex", +[](::Model &mdl, const ::Flex &flex) { mdl.GetFlexes().push_back(flex); });
 	classDef.def("LookupFlex", &Lua::Model::GetFlexId);
 	classDef.def("GetFlexFormula", static_cast<void (*)(lua_State *, ::Model &, const std::string &)>(&Lua::Model::GetFlexFormula));
 	classDef.def("GetFlexFormula", static_cast<void (*)(lua_State *, ::Model &, uint32_t)>(&Lua::Model::GetFlexFormula));
@@ -716,7 +657,6 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	// Flex
 	auto classDefFlex = luabind::class_<::Flex>("Flex");
-	classDefFlex.def(luabind::constructor<>());
 	classDefFlex.def(
 	  "__tostring", +[](const ::Flex &flex) -> std::string {
 		  std::stringstream ss;
@@ -724,11 +664,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 		  ss << "[" << flex.GetName() << "]";
 		  return ss.str();
 	  });
-	classDefFlex.def(
-	  "SetName", +[](::Flex &flex, const std::string &name) { flex.SetName(name); });
 	classDefFlex.def("GetName", static_cast<void (*)(lua_State *, ::Flex &)>([](lua_State *l, ::Flex &flex) { Lua::PushString(l, flex.GetName()); }));
-	classDefFlex.def(
-	  "AddOperation", +[](::Flex &flex, const ::Flex::Operation &op) { flex.GetOperations().push_back(op); });
 	classDefFlex.def("GetOperations", static_cast<void (*)(lua_State *, ::Flex &)>([](lua_State *l, ::Flex &flex) {
 		auto t = Lua::CreateTable(l);
 		auto &ops = flex.GetOperations();
@@ -772,12 +708,9 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	// Operation
 	auto classDefFlexOp = luabind::class_<::Flex::Operation>("Operation");
-	classDefFlexOp.def(luabind::constructor<>());
 	classDefFlexOp.def_readwrite("type", reinterpret_cast<uint32_t Flex::Operation::*>(&Flex::Operation::type));
 	classDefFlexOp.def_readwrite("index", reinterpret_cast<int32_t Flex::Operation::*>(&Flex::Operation::d));
 	classDefFlexOp.def_readwrite("value", reinterpret_cast<float Flex::Operation::*>(&Flex::Operation::d));
-	classDefFlexOp.def(
-	  "SetName", +[](::Flex &flex, const std::string name) { flex.SetName(name); });
 	classDefFlexOp.def("GetName", static_cast<void (*)(lua_State *, ::Flex &)>([](lua_State *l, ::Flex &flex) { Lua::PushString(l, flex.GetName()); }));
 	classDefFlex.scope[classDefFlexOp];
 
@@ -958,32 +891,20 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	auto defBoneInfo = luabind::class_<pragma::animation::MetaRigBone>("MetaRigBone");
 	defBoneInfo.def(luabind::tostring(luabind::self));
-	defBoneInfo.def_readwrite("boneId", &pragma::animation::MetaRigBone::boneId);
-	defBoneInfo.def_readwrite("normalizedRotationOffset", &pragma::animation::MetaRigBone::normalizedRotationOffset);
+	defBoneInfo.def_readonly("boneId", &pragma::animation::MetaRigBone::boneId);
+	defBoneInfo.def_readonly("normalizedRotationOffset", &pragma::animation::MetaRigBone::normalizedRotationOffset);
 	defBoneInfo.property(
-	  "min", +[](const pragma::animation::MetaRigBone &boneInfo) -> Vector3 { return boneInfo.bounds.first; }, +[](pragma::animation::MetaRigBone &boneInfo, const Vector3 &min) { boneInfo.bounds.first = min; });
+	  "min", +[](const pragma::animation::MetaRigBone &boneInfo) -> Vector3 { return boneInfo.bounds.first; });
 	defBoneInfo.property(
-	  "max", +[](const pragma::animation::MetaRigBone &boneInfo) -> Vector3 { return boneInfo.bounds.second; }, +[](pragma::animation::MetaRigBone &boneInfo, const Vector3 &max) { boneInfo.bounds.second = max; });
+	  "max", +[](const pragma::animation::MetaRigBone &boneInfo) -> Vector3 { return boneInfo.bounds.second; });
 	classDef.scope[defBoneInfo];
 
-	auto defBlendShapeInfo = luabind::class_<pragma::animation::MetaRigBlendShape>("MetaRigBlendShape");
-	defBlendShapeInfo.def(luabind::tostring(luabind::self));
-	defBlendShapeInfo.def_readwrite("flexControllerId", &pragma::animation::MetaRigBlendShape::flexControllerId);
-	classDef.scope[defBlendShapeInfo];
-
 	auto defRig = luabind::class_<pragma::animation::MetaRig>("MetaRig");
-	defRig.def_readwrite("rigType", &pragma::animation::MetaRig::rigType);
-	defRig.def_readwrite("forwardFacingRotationOffset", &pragma::animation::MetaRig::forwardFacingRotationOffset);
-	defRig.def_readwrite("forwardAxis", &pragma::animation::MetaRig::forwardAxis);
-	defRig.def_readwrite("upAxis", &pragma::animation::MetaRig::upAxis);
+	defRig.def_readonly("rigType", &pragma::animation::MetaRig::rigType);
+	defRig.def_readonly("forwardFacingRotationOffset", &pragma::animation::MetaRig::forwardFacingRotationOffset);
+	defRig.def_readonly("forwardAxis", &pragma::animation::MetaRig::forwardAxis);
+	defRig.def_readonly("upAxis", &pragma::animation::MetaRig::upAxis);
 	defRig.def(luabind::tostring(luabind::self));
-	defRig.scope[luabind::def("get_bone_name", &pragma::animation::get_meta_rig_bone_type_name)];
-	defRig.scope[luabind::def("get_bone_enum", &pragma::animation::get_meta_rig_bone_type_enum)];
-	defRig.scope[luabind::def("get_bone_side", &pragma::animation::get_meta_rig_bone_type_side)];
-	defRig.scope[luabind::def("get_bone_parent", &pragma::animation::get_meta_rig_bone_parent_type)];
-	defRig.scope[luabind::def("get_bone_children", &pragma::animation::get_meta_rig_bone_children)];
-	defRig.scope[luabind::def("get_blend_shape_name", &pragma::animation::get_blend_shape_name)];
-	defRig.scope[luabind::def("get_blend_shape_enum", &pragma::animation::get_blend_shape_enum)];
 	defRig.def(
 	  "GetNormalizedBoneInfo", +[](const pragma::animation::MetaRig &metaRig, pragma::animation::MetaRigBoneType boneType) -> const pragma::animation::MetaRigBone * {
 		  auto idx = umath::to_integral(boneType);
@@ -992,20 +913,14 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 		  return &metaRig.bones[idx];
 	  });
 	defRig.def(
-	  "GetBoneId", +[](const pragma::animation::MetaRig &metaRig, pragma::animation::MetaRigBoneType boneType) -> std::optional<pragma::animation::BoneId> {
-		  auto boneId = metaRig.GetBoneId(boneType);
-		  if(boneId == pragma::animation::INVALID_BONE_INDEX)
-			  return {};
-		  return boneId;
+	  "GetBoneId", +[](const pragma::animation::MetaRig &metaRig, pragma::animation::MetaRigBoneType boneType) -> pragma::animation::BoneId {
+		  auto idx = umath::to_integral(boneType);
+		  if(idx >= metaRig.bones.size())
+			  throw std::runtime_error {"Invalid bone type index!"};
+		  return metaRig.bones[idx].boneId;
 	  });
-	defRig.def("GetBone", &pragma::animation::MetaRig::GetBone);
-	defRig.def("GetBlendShape", &pragma::animation::MetaRig::GetBlendShape);
-	defRig.def("DebugPrint", &pragma::animation::MetaRig::DebugPrint);
 	defRig.add_static_constant("RIG_TYPE_BIPED", umath::to_integral(pragma::animation::RigType::Biped));
 	defRig.add_static_constant("RIG_TYPE_QUADRUPED", umath::to_integral(pragma::animation::RigType::Quadruped));
-
-	defRig.add_static_constant("BONE_SIDE_LEFT", umath::to_integral(pragma::animation::BoneSide::Left));
-	defRig.add_static_constant("BONE_SIDE_RIGHT", umath::to_integral(pragma::animation::BoneSide::Right));
 
 	defRig.add_static_constant("BONE_TYPE_HIPS", umath::to_integral(pragma::animation::MetaRigBoneType::Hips));
 	defRig.add_static_constant("BONE_TYPE_PELVIS", umath::to_integral(pragma::animation::MetaRigBoneType::Pelvis));
@@ -1015,7 +930,6 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	defRig.add_static_constant("BONE_TYPE_SPINE3", umath::to_integral(pragma::animation::MetaRigBoneType::Spine3));
 	defRig.add_static_constant("BONE_TYPE_NECK", umath::to_integral(pragma::animation::MetaRigBoneType::Neck));
 	defRig.add_static_constant("BONE_TYPE_HEAD", umath::to_integral(pragma::animation::MetaRigBoneType::Head));
-	defRig.add_static_constant("BONE_TYPE_JAW", umath::to_integral(pragma::animation::MetaRigBoneType::Jaw));
 	defRig.add_static_constant("BONE_TYPE_LEFT_EAR", umath::to_integral(pragma::animation::MetaRigBoneType::LeftEar));
 	defRig.add_static_constant("BONE_TYPE_RIGHT_EAR", umath::to_integral(pragma::animation::MetaRigBoneType::RightEar));
 	defRig.add_static_constant("BONE_TYPE_LEFT_EYE", umath::to_integral(pragma::animation::MetaRigBoneType::LeftEye));
@@ -1077,7 +991,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	defRig.add_static_constant("BONE_TYPE_RIGHT_WING_TIP", umath::to_integral(pragma::animation::MetaRigBoneType::RightWingTip));
 	defRig.add_static_constant("BONE_TYPE_COUNT", umath::to_integral(pragma::animation::MetaRigBoneType::Count));
 	defRig.add_static_constant("BONE_TYPE_INVALID", umath::to_integral(pragma::animation::MetaRigBoneType::Invalid));
-	static_assert(umath::to_integral(pragma::animation::MetaRigBoneType::Count) == 68, "Update this list when new bone types are addded!");
+	static_assert(umath::to_integral(pragma::animation::MetaRigBoneType::Count) == 67, "Update this list when new bone types are addded!");
 	classDef.scope[defRig];
 
 	// Flex Animation

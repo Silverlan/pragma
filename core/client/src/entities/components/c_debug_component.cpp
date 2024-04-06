@@ -17,12 +17,7 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-void CDebugTextComponent::ReloadDebugObject(Color color, const Vector3 &pos)
-{
-	DebugRenderInfo renderInfo {color};
-	renderInfo.pose.SetOrigin(pos);
-	m_debugObject = DebugRenderer::DrawText(renderInfo, m_debugText, m_size);
-}
+void CDebugTextComponent::ReloadDebugObject(Color color, const Vector3 &pos) { m_debugObject = DebugRenderer::DrawText(m_debugText, pos, m_size, color); }
 void CDebugTextComponent::SetText(const std::string &text)
 {
 	BaseDebugTextComponent::SetText(text);
@@ -64,12 +59,7 @@ void CBaseDebugOutlineComponent::ReceiveData(NetPacket &packet)
 
 void CDebugPointComponent::ReceiveData(NetPacket &packet) { m_bAxis = packet->Read<bool>(); }
 void CDebugPointComponent::InitializeLuaObject(lua_State *l) { return BaseDebugPointComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-void CDebugPointComponent::ReloadDebugObject(Color color, const Vector3 &pos)
-{
-	DebugRenderInfo renderInfo {color};
-	renderInfo.SetOrigin(pos);
-	m_debugObject = DebugRenderer::DrawPoint(renderInfo);
-}
+void CDebugPointComponent::ReloadDebugObject(Color color, const Vector3 &pos) { m_debugObject = DebugRenderer::DrawPoint(pos, color); }
 
 ////////////////
 
@@ -118,12 +108,10 @@ void CDebugBoxComponent::ReloadDebugObject(Color color, const Vector3 &pos)
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	auto ang = pTrComponent != nullptr ? pTrComponent->GetAngles() : EulerAngles {};
-	DebugRenderInfo renderInfo {color};
 	if(m_outlineColor.a > 0)
-		renderInfo.SetOutlineColor(m_outlineColor);
-	renderInfo.SetOrigin(pos);
-	renderInfo.SetRotation(uquat::create(ang));
-	m_debugObject = DebugRenderer::DrawBox(m_bounds.first, m_bounds.second, renderInfo);
+		m_debugObject = DebugRenderer::DrawBox(pos, m_bounds.first, m_bounds.second, ang, color, m_outlineColor);
+	else
+		m_debugObject = DebugRenderer::DrawBox(pos, m_bounds.first, m_bounds.second, ang, color);
 }
 Bool CDebugBoxComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
@@ -150,11 +138,10 @@ void CDebugSphereComponent::ReloadDebugObject(Color color, const Vector3 &pos)
 	auto pRadiusComponent = GetEntity().GetComponent<CRadiusComponent>();
 	if(pRadiusComponent.expired())
 		return;
-	DebugRenderInfo renderInfo {color};
 	if(m_outlineColor.a > 0)
-		renderInfo.SetOutlineColor(m_outlineColor);
-	renderInfo.SetOrigin(pos);
-	m_debugObject = DebugRenderer::DrawSphere(renderInfo, pRadiusComponent->GetRadius(), m_recursionLevel);
+		m_debugObject = DebugRenderer::DrawSphere(pos, pRadiusComponent->GetRadius(), color, m_outlineColor, 0.f, m_recursionLevel);
+	else
+		m_debugObject = DebugRenderer::DrawSphere(pos, pRadiusComponent->GetRadius(), color, 0.f, m_recursionLevel);
 }
 
 ////////////////
@@ -189,16 +176,18 @@ void CDebugConeComponent::ReloadDebugObject(Color color, const Vector3 &pos)
 	auto pTrComponent = ent.GetTransformComponent();
 	if(pRadiusComponent.expired() || pTrComponent == nullptr)
 		return;
-	DebugRenderInfo renderInfo {color};
-	if(m_outlineColor.a > 0)
-		renderInfo.SetOutlineColor(m_outlineColor);
-	renderInfo.SetOrigin(pos);
 	if(m_startRadius > 0.f) {
 		// Truncated Cone
-		m_debugObject = DebugRenderer::DrawTruncatedCone(renderInfo, m_startRadius, pTrComponent->GetForward(), pRadiusComponent->GetRadius(), m_coneAngle, m_segmentCount);
+		if(m_outlineColor.a > 0)
+			m_debugObject = DebugRenderer::DrawTruncatedCone(pos, m_startRadius, pTrComponent->GetForward(), pRadiusComponent->GetRadius(), m_coneAngle, color, m_outlineColor, 0.f, m_segmentCount);
+		else
+			m_debugObject = DebugRenderer::DrawTruncatedCone(pos, m_startRadius, pTrComponent->GetForward(), pRadiusComponent->GetRadius(), m_coneAngle, color, 0.f, m_segmentCount);
 		return;
 	}
-	m_debugObject = DebugRenderer::DrawCone(renderInfo, pTrComponent->GetForward(), pRadiusComponent->GetRadius(), m_coneAngle, m_segmentCount);
+	if(m_outlineColor.a > 0)
+		m_debugObject = DebugRenderer::DrawCone(pos, pTrComponent->GetForward(), pRadiusComponent->GetRadius(), m_coneAngle, color, m_outlineColor, 0.f, m_segmentCount);
+	else
+		m_debugObject = DebugRenderer::DrawCone(pos, pTrComponent->GetForward(), pRadiusComponent->GetRadius(), m_coneAngle, color, 0.f, m_segmentCount);
 }
 Bool CDebugConeComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {
@@ -236,11 +225,10 @@ void CDebugCylinderComponent::ReloadDebugObject(Color color, const Vector3 &pos)
 	auto pTrComponent = ent.GetTransformComponent();
 	if(pRadiusComponent.expired() || pTrComponent == nullptr)
 		return;
-	DebugRenderInfo renderInfo {color};
 	if(m_outlineColor.a > 0)
-		renderInfo.SetOutlineColor(m_outlineColor);
-	renderInfo.SetOrigin(pos);
-	m_debugObject = DebugRenderer::DrawCylinder(renderInfo, pTrComponent->GetForward(), m_length, pRadiusComponent->GetRadius(), m_segmentCount);
+		m_debugObject = DebugRenderer::DrawCylinder(pos, pTrComponent->GetForward(), m_length, pRadiusComponent->GetRadius(), color, m_outlineColor, m_segmentCount);
+	else
+		m_debugObject = DebugRenderer::DrawCylinder(pos, pTrComponent->GetForward(), m_length, pRadiusComponent->GetRadius(), color, 0.f, m_segmentCount);
 }
 Bool CDebugCylinderComponent::ReceiveNetEvent(pragma::NetEventId eventId, NetPacket &packet)
 {

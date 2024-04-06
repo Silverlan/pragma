@@ -225,7 +225,7 @@ void DecalProjector::DebugDraw(float duration) const
 	auto &pose = GetPose();
 	for(auto &l : lines)
 		l = pose * (l * prismSize);
-	::DebugRenderer::DrawLines(lines, {Color::White, duration});
+	::DebugRenderer::DrawLines(lines, Color::White, duration);
 
 	lines.clear();
 	auto &prismPos = pose.GetOrigin();
@@ -242,7 +242,7 @@ void DecalProjector::DebugDraw(float duration) const
 	lines.push_back(points.at(4));
 	for(auto &l : lines)
 		l = pose * (l * prismSize);
-	::DebugRenderer::DrawLines(lines, {Color::Black, duration});
+	::DebugRenderer::DrawLines(lines, Color::Black, duration);
 }
 
 /////////

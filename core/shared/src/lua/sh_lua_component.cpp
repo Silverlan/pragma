@@ -154,7 +154,7 @@ static std::optional<BaseLuaBaseEntityComponent::MemberIndex> find_member_info_i
 	auto *members = get_class_members(oClass);
 	if(!members)
 		return {};
-	auto itMember = std::find_if(members->memberDeclarations.begin(), members->memberDeclarations.end(), [&memberName](const BaseLuaBaseEntityComponent::MemberInfo &memberInfo) { return ustring::compare<std::string_view>(memberName, memberInfo.memberName, false); });
+	auto itMember = std::find_if(members->memberDeclarations.begin(), members->memberDeclarations.end(), [&memberName](const BaseLuaBaseEntityComponent::MemberInfo &memberInfo) { return ustring::compare(memberName, memberInfo.memberName, false); });
 	if(itMember == members->memberDeclarations.end())
 		return {};
 	return itMember - members->memberDeclarations.begin();
@@ -500,7 +500,7 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 		members.push_back(std::make_shared<ClassMembers>(oClass));
 		it = members.end() - 1;
 	}
-	auto itMember = std::find_if((*it)->memberDeclarations.begin(), (*it)->memberDeclarations.end(), [&functionName](const MemberInfo &memberInfo) { return ustring::compare<std::string_view>(functionName, memberInfo.functionName, false); });
+	auto itMember = std::find_if((*it)->memberDeclarations.begin(), (*it)->memberDeclarations.end(), [&functionName](const MemberInfo &memberInfo) { return ustring::compare(functionName, memberInfo.functionName, false); });
 	if(itMember == (*it)->memberDeclarations.end()) {
 		luabind::object onChange;
 		auto componentMemberInfo = pragma::lua::get_component_member_info(l, functionName, memberType, initialValue, memberFlags, attributes, onChange, false);
@@ -657,7 +657,7 @@ void BaseLuaBaseEntityComponent::OnMemberValueChanged(uint32_t memberIdx)
 	if((member.flags & MemberFlags::OutputBit) != MemberFlags::None) {
 		auto *pIoComponent = static_cast<pragma::BaseIOComponent *>(GetEntity().FindComponent("io").get());
 		if(pIoComponent != nullptr)
-			pIoComponent->TriggerOutput("OnSet" + std::string {member.functionName}, &GetEntity());
+			pIoComponent->TriggerOutput("OnSet" + member.functionName, &GetEntity());
 	}
 	if(member.onChange)
 		member.onChange(GetLuaObject());
@@ -776,7 +776,7 @@ void BaseLuaBaseEntityComponent::InitializeMembers(const std::vector<BaseLuaBase
 
 		if((member.flags & (MemberFlags::KeyValueBit | MemberFlags::InputBit)) != MemberFlags::None) {
 			// We only need this for quick keyvalue or input lookups
-			std::string lmemberName = member.functionName;
+			auto lmemberName = member.functionName;
 			ustring::to_lower(lmemberName);
 
 			auto kvName = name_to_keyvalue_name(member.functionName);
@@ -1292,7 +1292,7 @@ void BaseLuaBaseEntityComponent::Save(udm::LinkedPropertyWrapperArg udm)
 		if((member.flags & MemberFlags::StoreBit) == MemberFlags::None)
 			continue;
 		auto value = GetMemberValue(member);
-		write_value(udm["members." + std::string {member.functionName}], value, detail::member_type_to_util_type(member.type));
+		write_value(udm["members." + member.functionName], value, detail::member_type_to_util_type(member.type));
 	}
 	CallLuaMethod<void, udm::LinkedPropertyWrapper>("Save", udm);
 }
@@ -1304,7 +1304,7 @@ void BaseLuaBaseEntityComponent::Load(udm::LinkedPropertyWrapperArg udm, uint32_
 		if((member.flags & MemberFlags::StoreBit) == MemberFlags::None)
 			continue;
 		std::any value;
-		auto udmMember = udm["members." + std::string {member.functionName}];
+		auto udmMember = udm["members." + member.functionName];
 		if(udmMember) {
 			read_value(game, udmMember, value, detail::member_type_to_util_type(member.type));
 			SetMemberValue(member, value);

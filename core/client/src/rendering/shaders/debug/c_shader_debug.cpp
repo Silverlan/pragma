@@ -21,10 +21,7 @@ using namespace pragma;
 decltype(ShaderDebug::VERTEX_BINDING_VERTEX) ShaderDebug::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex};
 decltype(ShaderDebug::VERTEX_ATTRIBUTE_POSITION) ShaderDebug::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX, prosper::Format::R32G32B32_SFloat};
 
-ShaderDebug::ShaderDebug(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader) : ShaderScene(context, identifier, vsShader, fsShader)
-{
-	SetPipelineCount(umath::to_integral(Pipeline::Count) * umath::to_integral(PipelineType::Count));
-}
+ShaderDebug::ShaderDebug(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader) : ShaderScene(context, identifier, vsShader, fsShader) { SetPipelineCount(umath::to_integral(Pipeline::Count)); }
 ShaderDebug::ShaderDebug(prosper::IPrContext &context, const std::string &identifier) : ShaderDebug(context, identifier, "debug/vs_debug", "debug/fs_debug") {}
 
 bool ShaderDebug::ShouldInitializePipeline(uint32_t pipelineIdx) { return true; }
@@ -33,21 +30,12 @@ void ShaderDebug::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 {
 	ShaderScene::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
 
-	auto basePipelineIdx = pipelineIdx % umath::to_integral(Pipeline::Count);
-	auto pipelineType = static_cast<PipelineType>(pipelineIdx / umath::to_integral(Pipeline::Count));
-
 	prosper::util::set_generic_alpha_color_blend_attachment_properties(pipelineInfo);
 	pipelineInfo.ToggleDepthBias(true, 1.f, 0.f, 0.f);
 	pipelineInfo.ToggleDynamicStates(true, {prosper::DynamicState::DepthBias});
 
-	switch(pipelineType) {
-	case PipelineType::NoDepth:
-		pipelineInfo.ToggleDepthTest(true, prosper::CompareOp::Always);
-		break;
-	}
-
 	VERTEX_BINDING_VERTEX.stride = std::numeric_limits<decltype(VERTEX_BINDING_VERTEX.stride)>::max();
-	switch(static_cast<Pipeline>(basePipelineIdx)) {
+	switch(static_cast<Pipeline>(pipelineIdx)) {
 	case Pipeline::Triangle:
 		break;
 	case Pipeline::Line:

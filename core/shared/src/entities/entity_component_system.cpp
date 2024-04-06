@@ -215,7 +215,6 @@ void BaseEntityComponentSystem::RemoveComponent(pragma::BaseEntityComponent &com
 	}
 	component.OnRemove();
 	OnComponentRemoved(component);
-	component.CleanUp();
 
 	// Safe to free now
 	tmpHandle = util::TSharedHandle<BaseEntityComponent> {};

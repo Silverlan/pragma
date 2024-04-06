@@ -21,6 +21,7 @@
 using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
+
 static spdlog::logger &LOGGER = pragma::register_logger("prosper");
 static spdlog::logger &LOGGER_VALIDATION = pragma::register_logger("prosper_validation");
 

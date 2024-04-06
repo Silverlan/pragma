@@ -357,6 +357,9 @@ endif()
 #set(DEPENDENCY_ANVIL_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/include CACHE PATH  "Path to include directory." FORCE)
 #set(DEPENDENCY_ANVIL_DEPS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/deps CACHE PATH "Path to include directory." FORCE)
 
+set(DEPENDENCY_CPPBEPUIK_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/cppbepuik/include CACHE PATH "Path to include directory.")
+search_lib_recursive(DEPENDENCY_CPPBEPUIK_LIBRARY third_party_libs/cppbepuik/${BINARY_PRAGMA_DIR} cppbepuik STATIC)
+
 set(DEPENDENCY_CPPBEZIERFIT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/cppbezierfit/include CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_CPPBEZIERFIT_LIBRARY third_party_libs/cppbezierfit/${BINARY_PRAGMA_DIR} cppbezierfit STATIC)
 
@@ -777,6 +780,11 @@ register_third_party_library(mpaheader)
 set_target_folder(mpaheader third_party_libs)
 #
 
+# cppbepuik
+register_third_party_library(cppbepuik)
+set_target_folder(cppbepuik third_party_libs)
+#
+
 # cppbezierfit
 register_third_party_library(cppbezierfit)
 set_target_folder(cppbezierfit third_party_libs)
@@ -1089,7 +1097,7 @@ if(WIN32)
 add_dependencies(util_zip 7zpp)
 endif()
 
-add_dependencies(shared materialsystem util_zip wms_shared util_pragma_doc luasystem networkmanager muparserx libz2 bzip2 clip2tri-static clipper-static poly2tri-static util_udm panima util_bsp util_smdmodel util_source_script rectangle_bin_pack Recast Detour util_pad noise-static noiseutils-static ogg vorbis vorbisfile cppbezierfit spdlog fmt)
+add_dependencies(shared materialsystem util_zip wms_shared util_pragma_doc luasystem networkmanager muparserx libz2 bzip2 clip2tri-static clipper-static poly2tri-static util_udm panima util_bsp util_smdmodel util_source_script rectangle_bin_pack Recast Detour util_pad noise-static noiseutils-static ogg vorbis vorbisfile cppbepuik cppbezierfit spdlog fmt)
 add_dependencies(ishared util_udm shared)
 add_dependencies(iclient ishared client)
 add_dependencies(iserver ishared server)

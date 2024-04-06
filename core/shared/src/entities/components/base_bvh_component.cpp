@@ -384,7 +384,7 @@ void BaseBvhComponent::Initialize()
 
 void BaseBvhComponent::OnRemove()
 {
-	BaseEntityComponent::OnRemove();
+	BaseEntityComponent::Initialize();
 
 	auto intersectionHandlerC = GetEntity().GetComponent<IntersectionHandlerComponent>();
 	if(intersectionHandlerC.valid())

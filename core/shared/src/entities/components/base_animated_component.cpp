@@ -267,10 +267,12 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		memberInfoPose.AddTypeMetaData(coordMetaData);
 		memberInfoPose.SetGetterFunction<BaseAnimatedComponent, umath::ScaledTransform,
 		  static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, umath::ScaledTransform &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, umath::ScaledTransform &outValue) {
-			  if(!component.GetBonePose(memberInfo.userIndex, outValue)) {
+			  auto *pose = component.GetBonePose(memberInfo.userIndex);
+			  if(!pose) {
 				  outValue = {};
 				  return;
 			  }
+			  outValue = *pose;
 		  })>();
 		memberInfoPose.SetSetterFunction<BaseAnimatedComponent, umath::ScaledTransform,
 		  static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, const umath::ScaledTransform &)>(
@@ -285,13 +287,15 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		if(parentMetaData)
 			memberInfoPos.AddTypeMetaData(parentMetaData);
 		memberInfoPos.SetGetterFunction<BaseAnimatedComponent, Vector3, static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, Vector3 &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, Vector3 &outValue) {
-			if(!component.GetBonePos(memberInfo.userIndex, outValue)) {
+			auto *pos = component.GetBonePosition(memberInfo.userIndex);
+			if(!pos) {
 				outValue = {};
 				return;
 			}
+			outValue = *pos;
 		})>();
 		memberInfoPos.SetSetterFunction<BaseAnimatedComponent, Vector3,
-		  static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, const Vector3 &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, const Vector3 &value) { component.SetBonePos(memberInfo.userIndex, value); })>();
+		  static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, const Vector3 &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, const Vector3 &value) { component.SetBonePosition(memberInfo.userIndex, value); })>();
 
 		auto memberInfoRot = memberInfoPos;
 		memberInfoRot.SetName("bone/" + lname + "/rotation");
@@ -302,13 +306,15 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		if(parentMetaData)
 			memberInfoRot.AddTypeMetaData(parentMetaData);
 		memberInfoRot.SetGetterFunction<BaseAnimatedComponent, Quat, static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, Quat &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, Quat &outValue) {
-			if(!component.GetBoneRot(memberInfo.userIndex, outValue)) {
+			auto *rot = component.GetBoneRotation(memberInfo.userIndex);
+			if(!rot) {
 				outValue = uquat::identity();
 				return;
 			}
+			outValue = *rot;
 		})>();
 		memberInfoRot.SetSetterFunction<BaseAnimatedComponent, Quat,
-		  static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, const Quat &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, const Quat &value) { component.SetBoneRot(memberInfo.userIndex, value); })>();
+		  static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, const Quat &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, const Quat &value) { component.SetBoneRotation(memberInfo.userIndex, value); })>();
 
 		auto memberInfoScale = memberInfoPos;
 		memberInfoScale.SetName("bone/" + lname + "/scale");
@@ -318,10 +324,12 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		if(parentMetaData)
 			memberInfoScale.AddTypeMetaData(parentMetaData);
 		memberInfoScale.SetGetterFunction<BaseAnimatedComponent, Vector3, static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, Vector3 &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, Vector3 &outValue) {
-			if(!component.GetBoneScale(memberInfo.userIndex, outValue)) {
+			auto *scale = component.GetBoneScale(memberInfo.userIndex);
+			if(!scale) {
 				outValue = Vector3 {1.f, 1.f, 1.f};
 				return;
 			}
+			outValue = *scale;
 		})>();
 		memberInfoScale.SetSetterFunction<BaseAnimatedComponent, Vector3,
 		  static_cast<void (*)(const pragma::ComponentMemberInfo &, BaseAnimatedComponent &, const Vector3 &)>([](const pragma::ComponentMemberInfo &memberInfo, BaseAnimatedComponent &component, const Vector3 &value) { component.SetBoneScale(memberInfo.userIndex, value); })>();
@@ -790,8 +798,8 @@ bool BaseAnimatedComponent::MaintainAnimations(double dt)
 	auto n = umath::min(bones.size(), bonePoses.size());
 	for(auto i = decltype(n) {0}; i < n; ++i) {
 		auto boneId = bones[i];
-		auto &pose = bonePoses.at(i);
-		SetBonePose(boneId, pose);
+		auto &orientation = bonePoses.at(i);
+		SetBonePosition(boneId, orientation.GetOrigin(), orientation.GetRotation(), nullptr, false);
 		if(boneScales.empty() == false)
 			SetBoneScale(boneId, boneScales.at(i));
 	}
@@ -996,7 +1004,12 @@ void BaseAnimatedComponent::PlayAnimation(int animation, FPlayAnim flags)
 					pose.SetScale(*scale);
 
 				pose = poseParent * pose;
-				SetBonePose(i, pos ? &pose.GetOrigin() : nullptr, rot ? &pose.GetRotation() : nullptr, scale ? &pose.GetScale() : nullptr);
+				if(pos)
+					SetBonePosition(i, pose.GetOrigin());
+				if(rot)
+					SetBoneRotation(i, pose.GetRotation());
+				if(scale)
+					SetBoneScale(i, pose.GetScale());
 			}
 		}
 	}

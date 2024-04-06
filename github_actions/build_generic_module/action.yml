@@ -12,10 +12,6 @@ inputs:
     description: 'Module Build arguments'
     required: true
     default: ""
-  with-cuda:
-    description: 'Install CUDA?'
-    required: true
-    default: '0'
 outputs:
   build-dir:
     description: 'The directory where the build files are written to.'
@@ -31,8 +27,6 @@ runs:
   steps:
     - name: Setup Pragma
       uses: Silverlan/pragma/github_actions/setup@master
-      with:
-        with_cuda: ${{ inputs.with-cuda }}
 
     # We need the latest Windows SDK
     - name: Install Windows SDK

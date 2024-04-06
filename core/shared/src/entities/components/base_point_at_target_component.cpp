@@ -32,7 +32,6 @@ void BasePointAtTargetComponent::Initialize()
 }
 void BasePointAtTargetComponent::OnRemove()
 {
-	BaseEntityComponent::OnRemove();
 	if(m_cbOnPoseChanged.IsValid())
 		m_cbOnPoseChanged.Remove();
 	if(m_cbOnPoseChangedThis.IsValid())

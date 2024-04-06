@@ -45,13 +45,6 @@ BaseEntityComponent::~BaseEntityComponent()
 		}
 		m_callbackInfos = nullptr;
 	}
-	if(!umath::is_flag_set(m_stateFlags, StateFlags::CleanedUp)) {
-		auto *info = this->GetComponentInfo();
-		std::string typeName = info ? info->name : "UNKNOWN";
-		std::string msg = "Component of type '" + typeName + "' was not cleaned up properly! Was :CleanUp not called?";
-		Con::cerr << msg << Con::endl;
-		throw std::runtime_error {msg};
-	}
 	GetEntity().GetNetworkState()->GetGameState()->GetEntityComponentManager().DeregisterComponent(*this);
 }
 void BaseEntityComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
@@ -440,9 +433,8 @@ void BaseEntityComponent::PostInitialize()
 		OnEntityPostSpawn();
 	}
 }
-void BaseEntityComponent::CleanUp()
+void BaseEntityComponent::OnRemove()
 {
-	umath::set_flag(m_stateFlags, StateFlags::CleanedUp);
 	OnDetached(GetEntity());
 	if(m_eventCallbacks) {
 		for(auto &pair : *m_eventCallbacks) {
@@ -470,7 +462,6 @@ void BaseEntityComponent::CleanUp()
 		umath::set_flag(m_stateFlags, StateFlags::IsLogicEnabled, false);
 	}
 }
-void BaseEntityComponent::OnRemove() {}
 bool BaseEntityComponent::ShouldTransmitNetData() const { return false; }
 bool BaseEntityComponent::ShouldTransmitSnapshotData() const { return false; }
 void BaseEntityComponent::FlagCallbackForRemoval(const CallbackHandle &hCallback, CallbackType cbType, BaseEntityComponent *component)

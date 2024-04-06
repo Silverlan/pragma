@@ -589,7 +589,7 @@ void BasePhysicsComponent::UpdatePhysicsBone(Frame &reference, const std::shared
 	auto rotConstraint = invRot * o->GetRotation() * (*rotRef);
 	auto localRot = rotConstraint;
 	entity_space_to_bone_space(animComponent->GetBoneTransforms(), *bone, localOffset, localRot);
-	animComponent->SetBonePose(boneId, &localOffset, &localRot, nullptr);
+	animComponent->SetBonePosition(boneId, localOffset, localRot, nullptr, false);
 }
 
 void BasePhysicsComponent::PostPhysicsSimulate(Frame &reference, std::unordered_map<animation::BoneId, std::shared_ptr<pragma::animation::Bone>> &bones, Vector3 &moveOffset, Quat &invRot, UInt32 physRootBoneId)
@@ -731,7 +731,7 @@ void BasePhysicsComponent::UpdateRagdollPose()
 		UpdatePhysicsBone(reference, physRootBone, invRot);
 
 	Vector3 posRoot;
-	animatedComponent->GetBonePos(physRootBoneId, posRoot, umath::CoordinateSpace::Object);
+	animatedComponent->GetLocalBonePosition(physRootBoneId, posRoot);
 
 	auto moveOffset = -posRoot;
 	PostPhysicsSimulate(reference, rootBones, moveOffset, invRot, physRootBoneId);
@@ -876,10 +876,10 @@ void BasePhysicsComponent::UpdateBoneCollisionObject(UInt32 boneId, Bool updateP
 		return;
 	Vector3 pos;
 	Quat rot;
-	animatedComponent->GetBonePose(boneId, &pos, &rot, nullptr, umath::CoordinateSpace::Object);
+	animatedComponent->GetLocalBonePosition(boneId, pos, rot);
 	rot *= uquat::get_inverse(*rotRef);
 	Vector3 posRoot;
-	animatedComponent->GetBonePos(physRootBoneId, posRoot, umath::CoordinateSpace::Object);
+	animatedComponent->GetLocalBonePosition(physRootBoneId, posRoot);
 	auto offsetRoot = -(physRoot->GetOrigin() * physRoot->GetRotation()) - posRoot;
 	auto pTrComponent = ent.GetTransformComponent();
 	for(auto it = objs.begin(); it != objs.end(); ++it) {

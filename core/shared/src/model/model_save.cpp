@@ -121,7 +121,7 @@ std::shared_ptr<Model> Model::Copy(Game *game, CopyFlags copyFlags) const
 	mdl->m_flexAnimations = m_flexAnimations;
 	mdl->m_animationIDs = m_animationIDs;
 	mdl->m_skeleton = std::make_unique<pragma::animation::Skeleton>(*m_skeleton);
-	mdl->m_metaRig = m_metaRig ? std::make_unique<pragma::animation::MetaRig>(*m_metaRig) : nullptr;
+	mdl->m_metaRig = std::make_unique<pragma::animation::MetaRig>(*m_metaRig);
 	mdl->m_bindPose = m_bindPose;
 	mdl->m_eyeOffset = m_eyeOffset;
 	mdl->m_collisionMin = m_collisionMin;
@@ -326,8 +326,7 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 	readFlag(udm, Model::Flags::GeneratedHitboxes, "generatedHitboxes", flags);
 	readFlag(udm, Model::Flags::GeneratedLODs, "generatedLODs", flags);
 	readFlag(udm, Model::Flags::GeneratedMetaRig, "generatedMetaRig", flags);
-	readFlag(udm, Model::Flags::GeneratedMetaBlendShapes, "generatedMetaBlendShapes", flags);
-	static_assert(umath::to_integral(Model::Flags::Count) == 13, "Update this list when new flags have been added!");
+	static_assert(umath::to_integral(Model::Flags::Count) == 12, "Update this list when new flags have been added!");
 
 	auto isStatic = umath::is_flag_set(flags, Model::Flags::Static);
 	if(!isStatic) {
@@ -400,6 +399,7 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 			udm::to_enum_value<pragma::SignedAxis>(udmMetaRig["forwardAxis"], metaRig->forwardAxis);
 			udm::to_enum_value<pragma::SignedAxis>(udmMetaRig["upAxis"], metaRig->upAxis);
 			auto udmBones = udmMetaRig["bones"];
+			auto numBones = udmBones.GetSize();
 			for(auto &udmBone : udmBones) {
 				std::string type;
 				udmBone["type"](type);
@@ -419,22 +419,6 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 				udmBounds["min"](metaBone.bounds.first);
 				udmBounds["max"](metaBone.bounds.second);
 			}
-
-			auto udmBlendShapes = udmMetaRig["blendShapes"];
-			for(auto &udmBlendShape : udmBlendShapes) {
-				std::string type;
-				udmBlendShape["type"](type);
-				auto etype = pragma::animation::get_blend_shape_enum(type);
-				if(!etype)
-					continue;
-				pragma::animation::FlexControllerId flexCId = pragma::animation::INVALID_FLEX_CONTROLLER_INDEX;
-				udmBlendShape["flexControllerId"](flexCId);
-				if(flexCId == pragma::animation::INVALID_FLEX_CONTROLLER_INDEX)
-					continue;
-				auto &blendShape = metaRig->blendShapes[umath::to_integral(*etype)];
-				blendShape.flexControllerId = flexCId;
-			}
-
 			m_metaRig = metaRig;
 		}
 	}
@@ -719,7 +703,8 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 bool Model::Save(Game &game, const std::string &fileName, std::string &outErr)
 {
 	auto udmData = udm::Data::Create();
-	auto result = Save(game, udmData->GetAssetData(), outErr);
+	std::string err;
+	auto result = Save(game, udmData->GetAssetData(), err);
 	if(result == false)
 		return false;
 	FileManager::CreatePath(ufile::get_path_from_filename(fileName).c_str());
@@ -804,8 +789,7 @@ bool Model::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
 	writeModelFlag(Model::Flags::GeneratedHitboxes, "generatedHitboxes");
 	writeModelFlag(Model::Flags::GeneratedLODs, "generatedLODs");
 	writeModelFlag(Model::Flags::GeneratedMetaRig, "generatedMetaRig");
-	writeModelFlag(Model::Flags::GeneratedMetaBlendShapes, "generatedMetaBlendShapes");
-	static_assert(umath::to_integral(Model::Flags::Count) == 13, "Update this list when new flags have been added!");
+	static_assert(umath::to_integral(Model::Flags::Count) == 12, "Update this list when new flags have been added!");
 
 	auto isStatic = umath::is_flag_set(flags, Model::Flags::Static);
 	if(!isStatic) {
@@ -889,24 +873,6 @@ bool Model::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
 				auto udmBounds = udmBone["bounds"];
 				udmBounds["min"] = metaBone.bounds.first;
 				udmBounds["max"] = metaBone.bounds.second;
-			}
-
-			size_t numValidBlendShapes = 0;
-			for(auto &blendShape : m_metaRig->blendShapes) {
-				if(blendShape.flexControllerId == pragma::animation::INVALID_FLEX_CONTROLLER_INDEX)
-					continue;
-				++numValidBlendShapes;
-			}
-
-			auto udmBlendShapes = udmMetaRig.AddArray("blendShapes", numValidBlendShapes);
-			idx = 0;
-			for(size_t i = 0; i < m_metaRig->blendShapes.size(); ++i) {
-				auto &blendShape = m_metaRig->blendShapes[i];
-				if(blendShape.flexControllerId == pragma::animation::INVALID_FLEX_CONTROLLER_INDEX)
-					continue;
-				auto udmBlendShape = udmBlendShapes[idx++];
-				udmBlendShape["type"] = pragma::animation::get_blend_shape_name(static_cast<pragma::animation::BlendShape>(i));
-				udmBlendShape["flexControllerId"] = blendShape.flexControllerId;
 			}
 		}
 	}

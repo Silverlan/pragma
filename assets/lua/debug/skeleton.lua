@@ -12,7 +12,7 @@ debug.print_skeleton = function(skeleton)
 	end
 end
 local function draw_skeleton(animC, rootPose, bone, parentPose, lines)
-	local pose = rootPose * animC:GetEffectiveBonePose(bone:GetID())
+	local pose = rootPose * animC:GetEffectiveBoneTransform(bone:GetID())
 	if parentPose ~= nil then
 		table.insert(lines, parentPose:GetOrigin())
 		table.insert(lines, pose:GetOrigin())

@@ -176,7 +176,7 @@ umath::Transform pragma::CEyeComponent::CalcEyeballPose(uint32_t eyeballIndex, u
 
 	Vector3 bonePos;
 	Quat boneRot;
-	m_animC->GetBonePose(eyeball->boneIndex, &bonePos, &boneRot, nullptr, umath::CoordinateSpace::World);
+	m_animC->GetGlobalBonePosition(eyeball->boneIndex, bonePos, boneRot);
 	umath::Transform bonePose {bonePos, boneRot};
 	if(optOutBonePose)
 		*optOutBonePose = bonePose;

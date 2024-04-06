@@ -16,7 +16,6 @@
 #include "pragma/lua/luaobjectbase.h"
 #include "pragma/util/util_variable_type.hpp"
 #include "pragma/lua/types/udm.hpp"
-#include "pragma/util/global_string_table.hpp"
 #include <pragma/lua/luaapi.h>
 #include <udm.hpp>
 #include <any>
@@ -159,8 +158,8 @@ namespace pragma {
 			MemberInfo &operator=(const MemberInfo &other);
 			MemberInfo &operator=(MemberInfo &&other);
 
-			pragma::GString functionName;
-			pragma::GString memberName;
+			std::string functionName;
+			std::string memberName;
 			size_t memberNameHash;
 			std::string memberVariableName;
 			ents::EntityMemberType type;
@@ -305,7 +304,7 @@ namespace pragma {
 		std::vector<MemberInfo> m_members = {};
 		std::vector<DynamicMemberInfo> m_dynamicMembers;
 		uint32_t m_dynamicMemberStartOffset = 0;
-		std::unordered_map<pragma::GString, size_t> m_memberNameToIndex = {};
+		std::unordered_map<std::string, size_t> m_memberNameToIndex = {};
 		uint32_t m_classMemberIndex = std::numeric_limits<uint32_t>::max();
 		bool m_bShouldTransmitNetData = false;
 		bool m_bShouldTransmitSnapshotData = false;

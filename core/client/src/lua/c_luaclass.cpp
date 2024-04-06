@@ -777,8 +777,6 @@ void CGame::RegisterLuaClasses()
 	defDebugRendererObject.def("GetAngles", &::DebugRenderer::BaseObject::GetAngles);
 	defDebugRendererObject.def("IsVisible", &::DebugRenderer::BaseObject::IsVisible);
 	defDebugRendererObject.def("SetVisible", &::DebugRenderer::BaseObject::SetVisible);
-	defDebugRendererObject.def("ShouldIgnoreDepth", &::DebugRenderer::BaseObject::ShouldIgnoreDepth);
-	defDebugRendererObject.def("SetIgnoreDepth", &::DebugRenderer::BaseObject::SetIgnoreDepth);
 	defDebugRendererObject.def("SetScale", &::DebugRenderer::BaseObject::SetScale);
 	defDebugRendererObject.def("GetScale", &::DebugRenderer::BaseObject::GetScale, luabind::copy_policy<0> {});
 	defDebugRendererObject.def("SetPose", &::DebugRenderer::BaseObject::SetPose);

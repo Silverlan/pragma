@@ -11,6 +11,7 @@
 #include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/components/constraints/constraint_manager_component.hpp"
+#include "pragma/entities/components/ik_solver_component.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 

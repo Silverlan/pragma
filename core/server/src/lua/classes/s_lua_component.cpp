@@ -32,7 +32,7 @@ void SLuaBaseEntityComponent::OnMemberValueChanged(uint32_t memberIdx)
 	auto itNwIndex = m_networkedMemberInfo->memberIndexToNetworkedIndex.find(memberIdx);
 	if(itNwIndex == m_networkedMemberInfo->memberIndexToNetworkedIndex.end()) {
 		// This should be unreachable!
-		throw std::logic_error("Invalid networked variable '" + std::string {member.functionName} + "'!");
+		throw std::logic_error("Invalid networked variable '" + member.functionName + "'!");
 		return;
 	}
 	auto nwIndex = itNwIndex->second;

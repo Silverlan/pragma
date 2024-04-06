@@ -199,7 +199,7 @@ void pragma::nav::CMesh::ShowNavMeshes(bool b)
 	}*/
 	auto col = Color::Aqua;
 	col.a = 32;
-	m_dbgNavMesh = DebugRenderer::DrawMesh(triangleVerts, col, Color::Maroon);
+	m_dbgNavMesh = DebugRenderer::DrawMesh(triangleVerts, {col, Color::Maroon});
 }
 
 void pragma::nav::CMesh::Clear()

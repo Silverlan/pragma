@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <string>
 
+class Model;
 namespace pragma::animation {
 	enum class MetaRigBoneType : uint8_t {
 		// Note: Child bone types must not be defined before their parent!
@@ -28,6 +29,7 @@ namespace pragma::animation {
 
 		Neck,
 		Head,
+		Jaw,
 		LeftEar,
 		RightEar,
 		LeftEye,
@@ -101,9 +103,83 @@ namespace pragma::animation {
 	};
 	constexpr const char *get_meta_rig_bone_type_name(MetaRigBoneType type);
 	constexpr std::optional<MetaRigBoneType> get_meta_rig_bone_type_enum(const std::string_view &boneType);
+	constexpr std::optional<MetaRigBoneType> get_meta_rig_bone_parent_type(MetaRigBoneType type);
+	DLLNETWORK std::vector<pragma::animation::MetaRigBoneType> get_meta_rig_bone_children(MetaRigBoneType type);
 
 	enum class BoneSide : uint8_t { Left = 0, Right, None };
 	constexpr std::optional<BoneSide> get_meta_rig_bone_type_side(MetaRigBoneType type);
+
+	enum class BlendShape : uint32_t {
+		Neutral = 0,
+		BrowDownLeft,
+		BrowDownRight,
+		BrowInnerUp,
+		BrowOuterUpLeft,
+		BrowOuterUpRight,
+		CheekPuff,
+		CheekSquintLeft,
+		CheekSquintRight,
+		EyeBlinkLeft,
+		EyeBlinkRight,
+		EyeLookDownLeft,
+		EyeLookDownRight,
+		EyeLookInLeft,
+		EyeLookInRight,
+		EyeLookOutLeft,
+		EyeLookOutRight,
+		EyeLookUpLeft,
+		EyeLookUpRight,
+		EyeSquintLeft,
+		EyeSquintRight,
+		EyeWideLeft,
+		EyeWideRight,
+		JawForward,
+		JawLeft,
+		JawOpen,
+		JawRight,
+		MouthClose,
+		MouthDimpleLeft,
+		MouthDimpleRight,
+		MouthFrownLeft,
+		MouthFrownRight,
+		MouthFunnel,
+		MouthLeft,
+		MouthLowerDownLeft,
+		MouthLowerDownRight,
+		MouthPressLeft,
+		MouthPressRight,
+		MouthPucker,
+		MouthRight,
+		MouthRollLower,
+		MouthRollUpper,
+		MouthShrugLower,
+		MouthShrugUpper,
+		MouthSmileLeft,
+		MouthSmileRight,
+		MouthStretchLeft,
+		MouthStretchRight,
+		MouthUpperUpLeft,
+		MouthUpperUpRight,
+		NoseSneerLeft,
+		NoseSneerRight,
+
+		TongueOut,
+
+		EyeDilationLeft,
+		EyeDilationRight,
+		EyeConstrictLeft,
+		EyeConstrictRight,
+
+		CheekSuckLeft,
+		CheekSuckRight,
+
+		MouthTightenerLeft,
+		MouthTightenerRight,
+
+		Count
+	};
+	constexpr const char *get_blend_shape_name(BlendShape blendShape);
+	constexpr std::optional<BlendShape> get_blend_shape_enum(const std::string_view &name);
 
 	struct DLLNETWORK MetaRigBone {
 		pragma::animation::BoneId boneId = pragma::animation::INVALID_BONE_INDEX;
@@ -111,11 +187,21 @@ namespace pragma::animation {
 		Quat normalizedRotationOffset; // Rotation offset from bone rotation to normalized rotation
 	};
 
-	enum class RigType : uint8_t { Biped = 0, Quadruped };
-	struct DLLNETWORK MetaRig {
-		std::array<MetaRigBone, umath::to_integral(pragma::animation::MetaRigBoneType::Count)> bones;
+	struct DLLNETWORK MetaRigBlendShape {
+		FlexControllerId flexControllerId = pragma::animation::INVALID_FLEX_CONTROLLER_INDEX;
+	};
 
+	enum class RigType : uint8_t { Biped = 0, Quadruped };
+	class Skeleton;
+	struct DLLNETWORK MetaRig {
+		std::array<MetaRigBone, umath::to_integral(MetaRigBoneType::Count)> bones;
+		std::array<MetaRigBlendShape, umath::to_integral(BlendShape::Count)> blendShapes;
+
+		void DebugPrint(const Model &mdl);
+		const MetaRigBone *GetBone(pragma::animation::MetaRigBoneType type) const;
+		const MetaRigBlendShape *GetBlendShape(pragma::animation::BlendShape blendShape) const;
 		pragma::animation::BoneId GetBoneId(const pragma::GString &type) const;
+		pragma::animation::BoneId GetBoneId(pragma::animation::MetaRigBoneType &type) const;
 		RigType rigType = RigType::Biped;
 		Quat forwardFacingRotationOffset = uquat::identity();
 		pragma::SignedAxis forwardAxis = pragma::SignedAxis::Z;
@@ -130,6 +216,8 @@ constexpr const char *pragma::animation::get_meta_rig_bone_type_name(MetaRigBone
 		return "head";
 	case MetaRigBoneType::Neck:
 		return "neck";
+	case MetaRigBoneType::Jaw:
+		return "jaw";
 	case MetaRigBoneType::LeftUpperArm:
 		return "left_upper_arm";
 	case MetaRigBoneType::LeftLowerArm:
@@ -261,18 +349,20 @@ constexpr const char *pragma::animation::get_meta_rig_bone_type_name(MetaRigBone
 	case MetaRigBoneType::RightWingTip:
 		return "right_wing_tip";
 	}
-	static_assert(umath::to_integral(MetaRigBoneType::Count) == 67, "Update this list when new types are added!");
+	static_assert(umath::to_integral(MetaRigBoneType::Count) == 68, "Update this list when new types are added!");
 	return nullptr;
 }
 
 constexpr std::optional<pragma::animation::MetaRigBoneType> pragma::animation::get_meta_rig_bone_type_enum(const std::string_view &boneType)
 {
-	using namespace ustring::string_switch;
-	switch(ustring::string_switch::hash(boneType)) {
+	using namespace ustring::string_switch_ci;
+	switch(ustring::string_switch_ci::hash(boneType)) {
 	case "head"_:
 		return pragma::animation::MetaRigBoneType::Head;
 	case "neck"_:
 		return pragma::animation::MetaRigBoneType::Neck;
+	case "jaw"_:
+		return pragma::animation::MetaRigBoneType::Jaw;
 	case "left_upper_arm"_:
 		return pragma::animation::MetaRigBoneType::LeftUpperArm;
 	case "left_lower_arm"_:
@@ -404,7 +494,7 @@ constexpr std::optional<pragma::animation::MetaRigBoneType> pragma::animation::g
 	case "right_wing_tip"_:
 		return pragma::animation::MetaRigBoneType::RightWingTip;
 	}
-	static_assert(umath::to_integral(MetaRigBoneType::Count) == 67, "Update this list when new types are added!");
+	static_assert(umath::to_integral(MetaRigBoneType::Count) == 68, "Update this list when new types are added!");
 	return {};
 }
 
@@ -419,6 +509,7 @@ constexpr std::optional<pragma::animation::BoneSide> pragma::animation::get_meta
 	case MetaRigBoneType::Spine3:
 	case MetaRigBoneType::Neck:
 	case MetaRigBoneType::Head:
+	case MetaRigBoneType::Jaw:
 	case MetaRigBoneType::CenterEye:
 	case MetaRigBoneType::TailBase:
 	case MetaRigBoneType::TailMiddle:
@@ -482,7 +573,391 @@ constexpr std::optional<pragma::animation::BoneSide> pragma::animation::get_meta
 	case MetaRigBoneType::RightWingTip:
 		return pragma::animation::BoneSide::Right;
 	}
-	static_assert(umath::to_integral(MetaRigBoneType::Count) == 67, "Update this list when new types are added!");
+	static_assert(umath::to_integral(MetaRigBoneType::Count) == 68, "Update this list when new types are added!");
+	return {};
+}
+
+constexpr std::optional<pragma::animation::MetaRigBoneType> pragma::animation::get_meta_rig_bone_parent_type(MetaRigBoneType type)
+{
+	switch(type) {
+	case MetaRigBoneType::Pelvis:
+	case MetaRigBoneType::Spine:
+		return MetaRigBoneType::Hips;
+	case MetaRigBoneType::Spine1:
+		return MetaRigBoneType::Spine;
+	case MetaRigBoneType::Spine2:
+		return MetaRigBoneType::Spine1;
+	case MetaRigBoneType::Spine3:
+		return MetaRigBoneType::Spine2;
+	case MetaRigBoneType::Neck:
+		return MetaRigBoneType::Spine3;
+	case MetaRigBoneType::Head:
+		return MetaRigBoneType::Neck;
+	case MetaRigBoneType::Jaw:
+		return MetaRigBoneType::Head;
+	case MetaRigBoneType::LeftEar:
+		return MetaRigBoneType::Head;
+	case MetaRigBoneType::RightEar:
+		return MetaRigBoneType::Head;
+	case MetaRigBoneType::LeftEye:
+		return MetaRigBoneType::Head;
+	case MetaRigBoneType::RightEye:
+		return MetaRigBoneType::Head;
+	case MetaRigBoneType::CenterEye:
+		return MetaRigBoneType::Head;
+	case MetaRigBoneType::LeftUpperArm:
+		return MetaRigBoneType::Spine3;
+	case MetaRigBoneType::LeftLowerArm:
+		return MetaRigBoneType::LeftUpperArm;
+	case MetaRigBoneType::LeftHand:
+		return MetaRigBoneType::LeftLowerArm;
+	case MetaRigBoneType::RightUpperArm:
+		return MetaRigBoneType::Spine3;
+	case MetaRigBoneType::RightLowerArm:
+		return MetaRigBoneType::RightUpperArm;
+	case MetaRigBoneType::RightHand:
+		return MetaRigBoneType::RightLowerArm;
+	case MetaRigBoneType::LeftUpperLeg:
+		return MetaRigBoneType::Hips;
+	case MetaRigBoneType::LeftLowerLeg:
+		return MetaRigBoneType::LeftUpperLeg;
+	case MetaRigBoneType::LeftFoot:
+		return MetaRigBoneType::LeftLowerLeg;
+	case MetaRigBoneType::LeftToe:
+		return MetaRigBoneType::LeftFoot;
+	case MetaRigBoneType::RightUpperLeg:
+		return MetaRigBoneType::Hips;
+	case MetaRigBoneType::RightLowerLeg:
+		return MetaRigBoneType::RightUpperLeg;
+	case MetaRigBoneType::RightFoot:
+		return MetaRigBoneType::RightLowerLeg;
+	case MetaRigBoneType::RightToe:
+		return MetaRigBoneType::RightFoot;
+	case MetaRigBoneType::LeftThumb1:
+		return MetaRigBoneType::LeftHand;
+	case MetaRigBoneType::LeftThumb2:
+		return MetaRigBoneType::LeftThumb1;
+	case MetaRigBoneType::LeftThumb3:
+		return MetaRigBoneType::LeftThumb2;
+	case MetaRigBoneType::LeftIndexFinger1:
+		return MetaRigBoneType::LeftHand;
+	case MetaRigBoneType::LeftIndexFinger2:
+		return MetaRigBoneType::LeftIndexFinger1;
+	case MetaRigBoneType::LeftIndexFinger3:
+		return MetaRigBoneType::LeftIndexFinger2;
+	case MetaRigBoneType::LeftMiddleFinger1:
+		return MetaRigBoneType::LeftHand;
+	case MetaRigBoneType::LeftMiddleFinger2:
+		return MetaRigBoneType::LeftMiddleFinger1;
+	case MetaRigBoneType::LeftMiddleFinger3:
+		return MetaRigBoneType::LeftMiddleFinger2;
+	case MetaRigBoneType::LeftRingFinger1:
+		return MetaRigBoneType::LeftHand;
+	case MetaRigBoneType::LeftRingFinger2:
+		return MetaRigBoneType::LeftRingFinger1;
+	case MetaRigBoneType::LeftRingFinger3:
+		return MetaRigBoneType::LeftRingFinger2;
+	case MetaRigBoneType::LeftLittleFinger1:
+		return MetaRigBoneType::LeftHand;
+	case MetaRigBoneType::LeftLittleFinger2:
+		return MetaRigBoneType::LeftLittleFinger1;
+	case MetaRigBoneType::LeftLittleFinger3:
+		return MetaRigBoneType::LeftLittleFinger2;
+	case MetaRigBoneType::RightThumb1:
+		return MetaRigBoneType::RightHand;
+	case MetaRigBoneType::RightThumb2:
+		return MetaRigBoneType::RightThumb1;
+	case MetaRigBoneType::RightThumb3:
+		return MetaRigBoneType::RightThumb2;
+	case MetaRigBoneType::RightIndexFinger1:
+		return MetaRigBoneType::RightHand;
+	case MetaRigBoneType::RightIndexFinger2:
+		return MetaRigBoneType::RightIndexFinger1;
+	case MetaRigBoneType::RightIndexFinger3:
+		return MetaRigBoneType::RightIndexFinger2;
+	case MetaRigBoneType::RightMiddleFinger1:
+		return MetaRigBoneType::RightHand;
+	case MetaRigBoneType::RightMiddleFinger2:
+		return MetaRigBoneType::RightMiddleFinger1;
+	case MetaRigBoneType::RightMiddleFinger3:
+		return MetaRigBoneType::RightMiddleFinger2;
+	case MetaRigBoneType::RightRingFinger1:
+		return MetaRigBoneType::RightHand;
+	case MetaRigBoneType::RightRingFinger2:
+		return MetaRigBoneType::RightRingFinger1;
+	case MetaRigBoneType::RightRingFinger3:
+		return MetaRigBoneType::RightRingFinger2;
+	case MetaRigBoneType::RightLittleFinger1:
+		return MetaRigBoneType::RightHand;
+	case MetaRigBoneType::RightLittleFinger2:
+		return MetaRigBoneType::RightLittleFinger1;
+	case MetaRigBoneType::RightLittleFinger3:
+		return MetaRigBoneType::RightLittleFinger2;
+	case MetaRigBoneType::TailBase:
+		return MetaRigBoneType::Hips;
+	case MetaRigBoneType::TailMiddle:
+		return MetaRigBoneType::TailBase;
+	case MetaRigBoneType::TailMiddle1:
+		return MetaRigBoneType::TailMiddle;
+	case MetaRigBoneType::TailTip:
+		return MetaRigBoneType::TailMiddle1;
+	case MetaRigBoneType::LeftWing:
+		return MetaRigBoneType::Spine;
+	case MetaRigBoneType::LeftWingMiddle:
+		return MetaRigBoneType::LeftWing;
+	case MetaRigBoneType::LeftWingTip:
+		return MetaRigBoneType::LeftWingMiddle;
+	case MetaRigBoneType::RightWing:
+		return MetaRigBoneType::Spine;
+	case MetaRigBoneType::RightWingMiddle:
+		return MetaRigBoneType::RightWing;
+	case MetaRigBoneType::RightWingTip:
+		return MetaRigBoneType::RightWingMiddle;
+	}
+	static_assert(umath::to_integral(MetaRigBoneType::Count) == 68, "Update this list when new types are added!");
+	return {};
+}
+
+constexpr const char *pragma::animation::get_blend_shape_name(BlendShape blendShape)
+{
+	switch(blendShape) {
+	case BlendShape::Neutral:
+		return "_neutral";
+	case BlendShape::BrowDownLeft:
+		return "browDownLeft";
+	case BlendShape::BrowDownRight:
+		return "browDownRight";
+	case BlendShape::BrowInnerUp:
+		return "browInnerUp";
+	case BlendShape::BrowOuterUpLeft:
+		return "browOuterUpLeft";
+	case BlendShape::BrowOuterUpRight:
+		return "browOuterUpRight";
+	case BlendShape::CheekPuff:
+		return "cheekPuff";
+	case BlendShape::CheekSquintLeft:
+		return "cheekSquintLeft";
+	case BlendShape::CheekSquintRight:
+		return "cheekSquintRight";
+	case BlendShape::EyeBlinkLeft:
+		return "eyeBlinkLeft";
+	case BlendShape::EyeBlinkRight:
+		return "eyeBlinkRight";
+	case BlendShape::EyeLookDownLeft:
+		return "eyeLookDownLeft";
+	case BlendShape::EyeLookDownRight:
+		return "eyeLookDownRight";
+	case BlendShape::EyeLookInLeft:
+		return "eyeLookInLeft";
+	case BlendShape::EyeLookInRight:
+		return "eyeLookInRight";
+	case BlendShape::EyeLookOutLeft:
+		return "eyeLookOutLeft";
+	case BlendShape::EyeLookOutRight:
+		return "eyeLookOutRight";
+	case BlendShape::EyeLookUpLeft:
+		return "eyeLookUpLeft";
+	case BlendShape::EyeLookUpRight:
+		return "eyeLookUpRight";
+	case BlendShape::EyeSquintLeft:
+		return "eyeSquintLeft";
+	case BlendShape::EyeSquintRight:
+		return "eyeSquintRight";
+	case BlendShape::EyeWideLeft:
+		return "eyeWideLeft";
+	case BlendShape::EyeWideRight:
+		return "eyeWideRight";
+	case BlendShape::JawForward:
+		return "jawForward";
+	case BlendShape::JawLeft:
+		return "jawLeft";
+	case BlendShape::JawOpen:
+		return "jawOpen";
+	case BlendShape::JawRight:
+		return "jawRight";
+	case BlendShape::MouthClose:
+		return "mouthClose";
+	case BlendShape::MouthDimpleLeft:
+		return "mouthDimpleLeft";
+	case BlendShape::MouthDimpleRight:
+		return "mouthDimpleRight";
+	case BlendShape::MouthFrownLeft:
+		return "mouthFrownLeft";
+	case BlendShape::MouthFrownRight:
+		return "mouthFrownRight";
+	case BlendShape::MouthFunnel:
+		return "mouthFunnel";
+	case BlendShape::MouthLeft:
+		return "mouthLeft";
+	case BlendShape::MouthLowerDownLeft:
+		return "mouthLowerDownLeft";
+	case BlendShape::MouthLowerDownRight:
+		return "mouthLowerDownRight";
+	case BlendShape::MouthPressLeft:
+		return "mouthPressLeft";
+	case BlendShape::MouthPressRight:
+		return "mouthPressRight";
+	case BlendShape::MouthPucker:
+		return "mouthPucker";
+	case BlendShape::MouthRight:
+		return "mouthRight";
+	case BlendShape::MouthRollLower:
+		return "mouthRollLower";
+	case BlendShape::MouthRollUpper:
+		return "mouthRollUpper";
+	case BlendShape::MouthShrugLower:
+		return "mouthShrugLower";
+	case BlendShape::MouthShrugUpper:
+		return "mouthShrugUpper";
+	case BlendShape::MouthSmileLeft:
+		return "mouthSmileLeft";
+	case BlendShape::MouthSmileRight:
+		return "mouthSmileRight";
+	case BlendShape::MouthStretchLeft:
+		return "mouthStretchLeft";
+	case BlendShape::MouthStretchRight:
+		return "mouthStretchRight";
+	case BlendShape::MouthUpperUpLeft:
+		return "mouthUpperUpLeft";
+	case BlendShape::MouthUpperUpRight:
+		return "mouthUpperUpRight";
+	case BlendShape::NoseSneerLeft:
+		return "noseSneerLeft";
+	case BlendShape::NoseSneerRight:
+		return "noseSneerRight";
+	case BlendShape::TongueOut:
+		return "tongueOut";
+	case BlendShape::EyeDilationLeft:
+		return "eyeDilationLeft";
+	case BlendShape::EyeDilationRight:
+		return "eyeDilationRight";
+	case BlendShape::EyeConstrictLeft:
+		return "eyeConstrictLeft";
+	case BlendShape::EyeConstrictRight:
+		return "eyeConstrictRight";
+	case BlendShape::CheekSuckLeft:
+		return "cheekSuckLeft";
+	case BlendShape::CheekSuckRight:
+		return "cheekSuckRight";
+	case BlendShape::MouthTightenerLeft:
+		return "mouthTightenerLeft";
+	case BlendShape::MouthTightenerRight:
+		return "mouthTightenerRight";
+	default:
+		return "";
+	}
+	static_assert(umath::to_integral(BlendShape::Count) == 61, "Update this list when new blend shape types are added!");
+}
+constexpr std::optional<pragma::animation::BlendShape> pragma::animation::get_blend_shape_enum(const std::string_view &name)
+{
+	using namespace ustring::string_switch_ci;
+	switch(ustring::string_switch_ci::hash(name)) {
+	case "_neutral"_:
+		return BlendShape::Neutral;
+	case "browdownleft"_:
+		return BlendShape::BrowDownLeft;
+	case "browdownright"_:
+		return BlendShape::BrowDownRight;
+	case "browinnerup"_:
+		return BlendShape::BrowInnerUp;
+	case "browouterupleft"_:
+		return BlendShape::BrowOuterUpLeft;
+	case "browouterupright"_:
+		return BlendShape::BrowOuterUpRight;
+	case "cheekpuff"_:
+		return BlendShape::CheekPuff;
+	case "cheeksquintleft"_:
+		return BlendShape::CheekSquintLeft;
+	case "cheeksquintright"_:
+		return BlendShape::CheekSquintRight;
+	case "eyeblinkleft"_:
+		return BlendShape::EyeBlinkLeft;
+	case "eyeblinkright"_:
+		return BlendShape::EyeBlinkRight;
+	case "eyelookdownleft"_:
+		return BlendShape::EyeLookDownLeft;
+	case "eyelookdownright"_:
+		return BlendShape::EyeLookDownRight;
+	case "eyelookinleft"_:
+		return BlendShape::EyeLookInLeft;
+	case "eyelookinright"_:
+		return BlendShape::EyeLookInRight;
+	case "eyelookoutleft"_:
+		return BlendShape::EyeLookOutLeft;
+	case "eyelookoutright"_:
+		return BlendShape::EyeLookOutRight;
+	case "eyelookupleft"_:
+		return BlendShape::EyeLookUpLeft;
+	case "eyelookupright"_:
+		return BlendShape::EyeLookUpRight;
+	case "eyesquintleft"_:
+		return BlendShape::EyeSquintLeft;
+	case "eyesquintright"_:
+		return BlendShape::EyeSquintRight;
+	case "eyewideleft"_:
+		return BlendShape::EyeWideLeft;
+	case "eyewideright"_:
+		return BlendShape::EyeWideRight;
+	case "jawforward"_:
+		return BlendShape::JawForward;
+	case "jawleft"_:
+		return BlendShape::JawLeft;
+	case "jawopen"_:
+		return BlendShape::JawOpen;
+	case "jawright"_:
+		return BlendShape::JawRight;
+	case "mouthclose"_:
+		return BlendShape::MouthClose;
+	case "mouthdimpleleft"_:
+		return BlendShape::MouthDimpleLeft;
+	case "mouthdimpleright"_:
+		return BlendShape::MouthDimpleRight;
+	case "mouthfrownleft"_:
+		return BlendShape::MouthFrownLeft;
+	case "mouthfrownright"_:
+		return BlendShape::MouthFrownRight;
+	case "mouthfunnel"_:
+		return BlendShape::MouthFunnel;
+	case "mouthleft"_:
+		return BlendShape::MouthLeft;
+	case "mouthlowerdownleft"_:
+		return BlendShape::MouthLowerDownLeft;
+	case "mouthlowerdownright"_:
+		return BlendShape::MouthLowerDownRight;
+	case "mouthpressleft"_:
+		return BlendShape::MouthPressLeft;
+	case "mouthpressright"_:
+		return BlendShape::MouthPressRight;
+	case "mouthpucker"_:
+		return BlendShape::MouthPucker;
+	case "mouthright"_:
+		return BlendShape::MouthRight;
+	case "mouthrolllower"_:
+		return BlendShape::MouthRollLower;
+	case "mouthrollupper"_:
+		return BlendShape::MouthRollUpper;
+	case "mouthshruglower"_:
+		return BlendShape::MouthShrugLower;
+	case "mouthshrugupper"_:
+		return BlendShape::MouthShrugUpper;
+	case "mouthsmileleft"_:
+		return BlendShape::MouthSmileLeft;
+	case "mouthsmileright"_:
+		return BlendShape::MouthSmileRight;
+	case "mouthstretchleft"_:
+		return BlendShape::MouthStretchLeft;
+	case "mouthstretchright"_:
+		return BlendShape::MouthStretchRight;
+	case "mouthupperupleft"_:
+		return BlendShape::MouthUpperUpLeft;
+	case "mouthupperupright"_:
+		return BlendShape::MouthUpperUpRight;
+	case "nosesneerleft"_:
+		return BlendShape::NoseSneerLeft;
+	case "nosesneerright"_:
+		return BlendShape::NoseSneerRight;
+	}
+	static_assert(umath::to_integral(BlendShape::Count) == 61, "Update this list when new blend shape types are added!");
 	return {};
 }
 

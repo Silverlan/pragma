@@ -522,6 +522,13 @@ bool pragma::animation::Animation::Save(udm::AssetDataArg outData, std::string &
 		udm.Add("fadeOutTime", udm::Type::Nil);
 
 	auto bones = GetBoneList();
+	if(bones.empty() && !m_frames.empty()) {
+		auto &frame = m_frames.front();
+		auto numBones = frame->GetBoneCount();
+		bones.resize(numBones);
+		for(size_t i = 0; i < numBones; ++i)
+			bones[i] = i;
+	}
 	auto numBones = bones.size();
 	auto hasMove = false;
 	for(auto &frame : m_frames) {
@@ -577,7 +584,7 @@ bool pragma::animation::Animation::Save(udm::AssetDataArg outData, std::string &
 		auto &frameTransforms = frame->GetBoneTransforms();
 		auto &scales = frame->GetBoneScales();
 		if(frameTransforms.size() != numBones || (!scales.empty() && scales.size() != numBones)) {
-			outErr = "Number of transforms (" + std::to_string(frameTransforms.size()) + " in frame does not match number of bones (" + std::to_string(numBones) + ")!";
+			outErr = "Number of transforms (" + std::to_string(frameTransforms.size()) + ") in frame does not match number of bones (" + std::to_string(numBones) + ")!";
 			return false;
 		}
 		auto t = frameIdx / static_cast<float>(m_fps);
@@ -849,8 +856,8 @@ std::shared_ptr<pragma::animation::Animation> pragma::animation::Animation::Crea
 pragma::animation::Animation::Animation() : m_flags(FAnim::None), m_activity(Activity::Invalid), m_activityWeight(1), m_fps(24), m_fadeIn(nullptr), m_fadeOut(nullptr) {}
 
 pragma::animation::Animation::Animation(const Animation &other, ShareMode share)
-    : m_boneIds(other.m_boneIds), m_boneIdMap(other.m_boneIdMap), m_flags(other.m_flags), m_activity(other.m_activity), m_activityWeight(other.m_activityWeight), m_fps(other.m_fps), m_boneWeights(other.m_boneWeights),
-      m_renderBounds(other.m_renderBounds), m_blendController {other.m_blendController}
+    : m_boneIds(other.m_boneIds), m_boneIdMap(other.m_boneIdMap), m_flags(other.m_flags), m_activity(other.m_activity), m_activityWeight(other.m_activityWeight), m_fps(other.m_fps), m_boneWeights(other.m_boneWeights), m_renderBounds(other.m_renderBounds),
+      m_blendController {other.m_blendController}
 {
 	m_fadeIn = (other.m_fadeIn != nullptr) ? std::make_unique<float>(*other.m_fadeIn) : nullptr;
 	m_fadeOut = (other.m_fadeOut != nullptr) ? std::make_unique<float>(*other.m_fadeOut) : nullptr;

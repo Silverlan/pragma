@@ -1595,16 +1595,25 @@ bool CGame::GetActionInput(Action action)
 	return pl->GetActionInput(action);
 }
 
-void CGame::DrawLine(const Vector3 &start, const Vector3 &end, const Color &color, float duration) { DebugRenderer::DrawLine(start, end, color, duration); }
+void CGame::DrawLine(const Vector3 &start, const Vector3 &end, const Color &color, float duration) { DebugRenderer::DrawLine(start, end, {color, duration}); }
 void CGame::DrawBox(const Vector3 &origin, const Vector3 &start, const Vector3 &end, const EulerAngles &ang, const Color &colorOutline, const std::optional<Color> &fillColor, float duration)
 {
-	if(fillColor)
-		DebugRenderer::DrawBox(origin, start, end, ang, *fillColor, colorOutline, duration);
-	else
-		DebugRenderer::DrawBox(origin, start, end, ang, colorOutline, duration);
+	DebugRenderInfo renderInfo {};
+	renderInfo.SetOrigin(origin);
+	renderInfo.SetRotation(uquat::create(ang));
+	renderInfo.SetDuration(duration);
+	if(fillColor) {
+		renderInfo.SetColor(*fillColor);
+		renderInfo.SetOutlineColor(colorOutline);
+		DebugRenderer::DrawBox(start, end, renderInfo);
+	}
+	else {
+		renderInfo.SetColor(colorOutline);
+		DebugRenderer::DrawBox(start, end, renderInfo);
+	}
 }
-void CGame::DrawPlane(const Vector3 &n, float dist, const Color &color, float duration) { DebugRenderer::DrawPlane(n, dist, color, duration); }
-void CGame::DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration) { DebugRenderer::DrawMesh(meshVerts, color, colorOutline, duration); }
+void CGame::DrawPlane(const Vector3 &n, float dist, const Color &color, float duration) { DebugRenderer::DrawPlane(n, dist, {color, duration}); }
+void CGame::DrawMesh(const std::vector<Vector3> &meshVerts, const Color &color, const Color &colorOutline, float duration) { DebugRenderer::DrawMesh(meshVerts, {color, colorOutline, duration}); }
 static auto cvRenderPhysics = GetClientConVar("debug_physics_draw");
 static auto cvSvRenderPhysics = GetClientConVar("sv_debug_physics_draw");
 void CGame::RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd, pragma::CCameraComponent &cam)

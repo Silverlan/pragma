@@ -31,7 +31,14 @@ namespace pragma {
 			Point,
 			Vertex,
 
-			Count
+			Count,
+		};
+
+		enum class PipelineType : uint8_t {
+			Standard,
+			NoDepth,
+
+			Count,
 		};
 
 		ShaderDebug(prosper::IPrContext &context, const std::string &identifier);

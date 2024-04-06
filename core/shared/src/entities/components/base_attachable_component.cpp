@@ -244,7 +244,7 @@ AttachmentData *BaseAttachableComponent::AttachToBone(BaseEntity *ent, uint32_t 
 			return nullptr;
 		Vector3 pos;
 		auto rot = uquat::identity();
-		animComponentParent->GetBonePosition(m_attachment->bone, pos, rot);
+		animComponentParent->GetBonePose(m_attachment->bone, &pos, &rot);
 		auto pTrComponentParent = entParent.GetTransformComponent();
 		if(pTrComponentParent)
 			pTrComponentParent->LocalToWorld(&pos, &rot);
@@ -434,7 +434,7 @@ std::optional<umath::Transform> BaseAttachableComponent::GetParentPose() const
 		if(m_attachment->bone != -1) {
 			auto animComponentParent = entParent.GetAnimatedComponent();
 			if(animComponentParent.valid())
-				animComponentParent->GetBonePosition(m_attachment->bone, pos, rot);
+				animComponentParent->GetBonePose(m_attachment->bone, &pos, &rot);
 		}
 		else if(m_attachment->attachment != -1) {
 			auto pMdlCParent = entParent.GetModelComponent();
@@ -501,10 +501,10 @@ void BaseAttachableComponent::UpdateAttachmentOffset(bool invokeUpdateEvents)
 							if(boneIdxParent != -1) {
 								auto &bone = bones[i];
 								auto &boneParent = bonesParent[boneIdxParent];
-								auto *pos = animComponentParent->GetBonePosition(boneParent->ID);
-								auto *orientation = animComponentParent->GetBoneRotation(boneParent->ID);
-								if(pos != nullptr && orientation != nullptr)
-									animComponent->SetBonePosition(bone->ID, *pos, *orientation);
+								Vector3 pos;
+								Quat rot;
+								if(animComponentParent->GetBonePose(boneParent->ID, &pos, &rot))
+									animComponent->SetBonePose(bone->ID, &pos, &rot);
 							}
 						}
 					}

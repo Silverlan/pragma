@@ -28,6 +28,7 @@
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 #include "pragma/asset_types/world.hpp"
 #include "pragma/util/functional_parallel_worker.hpp"
+#include "pragma/util/rig_config.hpp"
 #include <pragma/game/game.h>
 #include "luasystem.h"
 #include "pragma/util/util_python.hpp"
@@ -563,6 +564,10 @@ static Lua::mult<bool, Lua::opt<std::string>> exec_python(lua_State *l, const st
 }
 static Lua::mult<bool, Lua::opt<std::string>> exec_python(lua_State *l, const std::string &fileName) { return exec_python(l, fileName, {}); }
 DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::rendering, pragma::rendering::Tile);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfig);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigBone);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigControl);
+DEFINE_OSTREAM_OPERATOR_NAMESPACE_ALIAS(pragma::ik, pragma::ik::RigConfigConstraint);
 void Lua::util::register_library(lua_State *l)
 {
 	auto pythonMod = luabind::module(l, "python");
@@ -582,12 +587,80 @@ void Lua::util::register_library(lua_State *l)
 	  luabind::def("exec", static_cast<Lua::mult<bool, Lua::opt<std::string>> (*)(lua_State *, const std::string &, const std::vector<std::string> &)>(&exec_python)), luabind::def("init_blender", &pragma::python::init_blender), luabind::def("reload", &pragma::python::reload)];
 
 	auto utilMod = luabind::module(l, "util");
-	auto retargetMod = luabind::module(l, "retarget");
-	auto defRetargetData = luabind::class_<util::retarget::RetargetData>("RetargetData");
-	auto defRetargetFlexData = luabind::class_<util::retarget::RetargetFlexData>("RetargetFlexData");
-	auto nsRetarget = luabind::namespace_("retarget");
-	nsRetarget[defRetargetData];
-	nsRetarget[defRetargetFlexData];
+
+	auto defRigConfig = luabind::class_<pragma::ik::RigConfig>("IkRigConfig");
+	defRigConfig.def(luabind::constructor<>());
+	defRigConfig.def(luabind::tostring(luabind::self));
+	defRigConfig.scope[luabind::def("load", &pragma::ik::RigConfig::load)];
+	defRigConfig.scope[luabind::def("load_from_udm_data", &pragma::ik::RigConfig::load_from_udm_data)];
+	defRigConfig.scope[luabind::def("get_supported_extensions", &pragma::ik::RigConfig::get_supported_extensions)];
+	defRigConfig.def("DebugPrint", &pragma::ik::RigConfig::DebugPrint);
+	defRigConfig.def("ToUdmData", &pragma::ik::RigConfig::ToUdmData);
+	defRigConfig.def("AddBone", &pragma::ik::RigConfig::AddBone);
+	defRigConfig.def("GetBones", &pragma::ik::RigConfig::GetBones);
+	defRigConfig.def("FindBone", &pragma::ik::RigConfig::FindBone);
+	defRigConfig.def("GetConstraints", &pragma::ik::RigConfig::GetConstraints);
+	defRigConfig.def("GetControls", &pragma::ik::RigConfig::GetControls);
+	defRigConfig.def("RemoveBone", static_cast<void (pragma::ik::RigConfig::*)(const pragma::GString &)>(&pragma::ik::RigConfig::RemoveBone));
+	defRigConfig.def("RemoveControl", static_cast<void (pragma::ik::RigConfig::*)(const pragma::ik::RigConfigControl &)>(&pragma::ik::RigConfig::RemoveControl));
+	defRigConfig.def("RemoveControl", static_cast<void (pragma::ik::RigConfig::*)(const pragma::GString &)>(&pragma::ik::RigConfig::RemoveControl));
+	defRigConfig.def("RemoveConstraint", static_cast<void (pragma::ik::RigConfig::*)(const pragma::ik::RigConfigConstraint &)>(&pragma::ik::RigConfig::RemoveConstraint));
+	defRigConfig.def("RemoveBone", static_cast<void (pragma::ik::RigConfig::*)(const pragma::ik::RigConfigBone &)>(&pragma::ik::RigConfig::RemoveBone));
+	defRigConfig.def("HasBone", &pragma::ik::RigConfig::HasBone);
+	defRigConfig.def("IsBoneLocked", &pragma::ik::RigConfig::IsBoneLocked);
+	defRigConfig.def("SetBoneLocked", &pragma::ik::RigConfig::SetBoneLocked);
+	defRigConfig.def("HasControl", &pragma::ik::RigConfig::HasControl);
+	defRigConfig.def("AddControl", &pragma::ik::RigConfig::AddControl);
+	defRigConfig.def("RemoveConstraints", static_cast<void (pragma::ik::RigConfig::*)(const pragma::GString &, const pragma::GString &)>(&pragma::ik::RigConfig::RemoveConstraints));
+	defRigConfig.def("RemoveConstraints", static_cast<void (pragma::ik::RigConfig::*)(const pragma::GString &)>(&pragma::ik::RigConfig::RemoveConstraints));
+	defRigConfig.def("AddFixedConstraint", &pragma::ik::RigConfig::AddFixedConstraint);
+	defRigConfig.def("AddHingeConstraint", &pragma::ik::RigConfig::AddHingeConstraint);
+	defRigConfig.def("AddBallSocketConstraint", &pragma::ik::RigConfig::AddBallSocketConstraint);
+	defRigConfig.def("AddBallSocketConstraint", &pragma::ik::RigConfig::AddBallSocketConstraint, luabind::default_parameter_policy<6, pragma::SignedAxis::Z> {});
+	defRigConfig.def(
+	  "Save", +[](lua_State *l, pragma::ik::RigConfig &rigConfig, const std::string &fileName) -> std::pair<bool, std::optional<std::string>> {
+		  auto fname = fileName;
+		  if(Lua::file::validate_write_operation(l, fname) == false)
+			  return std::pair<bool, std::optional<std::string>> {false, "Invalid write location!"};
+		  auto res = rigConfig.Save(fname);
+		  if(!res)
+			  return std::pair<bool, std::optional<std::string>> {false, "Unknown error"};
+		  return std::pair<bool, std::optional<std::string>> {true, {}};
+	  });
+
+	auto defRigBone = luabind::class_<pragma::ik::RigConfigBone>("IkBone");
+	defRigBone.def(luabind::tostring(luabind::self));
+	defRigBone.def_readwrite("locked", &pragma::ik::RigConfigBone::locked);
+	defRigBone.def_readwrite("name", &pragma::ik::RigConfigBone::name);
+	defRigConfig.scope[defRigBone];
+
+	auto defRigControl = luabind::class_<pragma::ik::RigConfigControl>("IkControl");
+	defRigControl.def(luabind::tostring(luabind::self));
+	defRigControl.add_static_constant("TYPE_DRAG", umath::to_integral(pragma::ik::RigConfigControl::Type::Drag));
+	defRigControl.add_static_constant("TYPE_STATE", umath::to_integral(pragma::ik::RigConfigControl::Type::State));
+	defRigControl.add_static_constant("TYPE_ORIENTED_DRAG", umath::to_integral(pragma::ik::RigConfigControl::Type::OrientedDrag));
+	static_assert(umath::to_integral(pragma::ik::RigConfigControl::Type::Count) == 3u, "Update this list when new types are added!");
+	defRigControl.def_readwrite("bone", &pragma::ik::RigConfigControl::bone);
+	defRigControl.def_readwrite("type", &pragma::ik::RigConfigControl::type);
+	defRigControl.def_readwrite("maxForce", &pragma::ik::RigConfigControl::maxForce);
+	defRigControl.def_readwrite("rigidity", &pragma::ik::RigConfigControl::rigidity);
+	defRigConfig.scope[defRigControl];
+	defRigConfig.scope[defRigBone];
+
+	auto defRigConstraint = luabind::class_<pragma::ik::RigConfigConstraint>("IkConstraint");
+	defRigConstraint.def(luabind::tostring(luabind::self));
+	defRigConstraint.add_static_constant("TYPE_FIXED", umath::to_integral(pragma::ik::RigConfigConstraint::Type::Fixed));
+	defRigConstraint.add_static_constant("TYPE_HINGE", umath::to_integral(pragma::ik::RigConfigConstraint::Type::Hinge));
+	defRigConstraint.add_static_constant("TYPE_BALL_SOCKET", umath::to_integral(pragma::ik::RigConfigConstraint::Type::BallSocket));
+	static_assert(umath::to_integral(pragma::ik::RigConfigConstraint::Type::Count) == 3u, "Update this list when new types are added!");
+	defRigConstraint.def_readwrite("bone0", &pragma::ik::RigConfigConstraint::bone0);
+	defRigConstraint.def_readwrite("bone1", &pragma::ik::RigConfigConstraint::bone1);
+	defRigConstraint.def_readwrite("type", &pragma::ik::RigConfigConstraint::type);
+	defRigConstraint.def_readwrite("minLimits", &pragma::ik::RigConfigConstraint::minLimits);
+	defRigConstraint.def_readwrite("maxLimits", &pragma::ik::RigConfigConstraint::maxLimits);
+	defRigConstraint.def_readwrite("axis", &pragma::ik::RigConfigConstraint::axis);
+	defRigConfig.scope[defRigConstraint];
+	utilMod[defRigConfig];
 
 	auto defRenderTile = luabind::class_<pragma::rendering::Tile>("RenderTile");
 	defRenderTile.def(luabind::constructor<>());
@@ -618,12 +691,6 @@ void Lua::util::register_library(lua_State *l)
 	    }),
 	  luabind::def(
 	    "run_updater", +[](Engine &engine) { engine.SetRunUpdaterOnClose(true); })];
-	nsRetarget[luabind::def("initialize_retarget_data", &Lua::util::retarget::initialize_retarget_data)];
-	nsRetarget[luabind::def("apply_retarget_rig", &Lua::util::retarget::apply_retarget_rig)];
-	nsRetarget[luabind::def("initialize_retarget_flex_data", &Lua::util::retarget::initialize_retarget_flex_data)];
-	nsRetarget[luabind::def("apply_retarget_flex", static_cast<void (*)(Lua::util::retarget::RetargetFlexData &, pragma::BaseFlexComponent &, pragma::BaseFlexComponent &)>(&Lua::util::retarget::retarget_flex_controllers))];
-	nsRetarget[luabind::def("apply_retarget_flex", static_cast<void (*)(Lua::util::retarget::RetargetFlexData &, const std::unordered_map<uint32_t, float> &, pragma::BaseFlexComponent &)>(&Lua::util::retarget::retarget_flex_controllers))];
-	utilMod[nsRetarget];
 
 	auto defUuid = luabind::class_<util::Uuid>("Uuid");
 	defUuid.def(

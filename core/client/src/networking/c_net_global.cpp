@@ -1133,7 +1133,7 @@ void NET_cl_debug_ai_navigation(NetPacket packet)
 			s_aiNavDebugObjects.erase(it);
 		});
 	}
-	s_aiNavDebugObjects[npc] = {DebugRenderer::DrawPath(points, Color::Yellow), DebugRenderer::DrawSpline(points, Color::OrangeRed, 10, 1.f), dbgNode};
+	s_aiNavDebugObjects[npc] = {DebugRenderer::DrawPath(points, Color::Yellow), DebugRenderer::DrawSpline(points, 10, 1.f, {Color::OrangeRed}), dbgNode};
 }
 
 void NET_cl_debug_ai_schedule_print(NetPacket packet)

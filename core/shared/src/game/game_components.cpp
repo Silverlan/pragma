@@ -12,7 +12,6 @@
 #include "pragma/entities/components/damageable_component.hpp"
 #include "pragma/entities/components/global_component.hpp"
 #include "pragma/entities/components/ik_component.hpp"
-#include "pragma/entities/components/ik_solver_component.hpp"
 #include "pragma/entities/components/map_component.hpp"
 #include "pragma/entities/components/submergible_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
@@ -35,13 +34,13 @@
 #include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/entities/components/origin_component.hpp"
 #include "pragma/entities/components/lifeline_link_component.hpp"
+#include "pragma/entities/components/meta_rig_component.hpp"
 #include "pragma/entities/components/basegravity.h"
 
 void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
 {
 	componentManager.RegisterComponentType<pragma::DamageableComponent>("damageable");
 	componentManager.RegisterComponentType<pragma::IKComponent>("ik");
-	componentManager.RegisterComponentType<pragma::IkSolverComponent>("ik_solver");
 	componentManager.RegisterComponentType<pragma::LogicComponent>("logic");
 	componentManager.RegisterComponentType<pragma::GravityComponent>("gravity");
 	componentManager.RegisterComponentType<pragma::MapComponent>("map");
@@ -67,6 +66,7 @@ void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentM
 	componentManager.RegisterComponentType<pragma::ConstraintChildOfComponent>("constraint_child_of");
 	componentManager.RegisterComponentType<pragma::LifelineLinkComponent>("lifeline_link");
 	componentManager.RegisterComponentType<pragma::IntersectionHandlerComponent>("intersection_handler");
+	componentManager.RegisterComponentType<pragma::MetaRigComponent>("meta_rig");
 
 	pragma::BaseEntityComponent::RegisterEvents(componentManager, [&componentManager](const std::string &evName, pragma::ComponentEventInfo::Type type) -> pragma::ComponentEventId { return componentManager.RegisterEvent(evName, typeid(pragma::BaseEntityComponent), type); });
 	BaseEntity::RegisterEvents(componentManager);

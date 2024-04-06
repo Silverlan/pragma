@@ -147,7 +147,11 @@ void BaseWeaponComponent::OnTick(double)
 	}
 }
 
-void BaseWeaponComponent::OnRemove() { EndAttack(); }
+void BaseWeaponComponent::OnRemove()
+{
+	BaseEntityComponent::OnRemove();
+	EndAttack();
+}
 
 void BaseWeaponComponent::EndAttack()
 {

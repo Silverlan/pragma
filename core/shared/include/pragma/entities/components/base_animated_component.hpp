@@ -25,6 +25,7 @@ namespace pragma {
 	namespace animation {
 		using BoneId = uint16_t;
 		class Animation;
+		enum class MetaRigBoneType : uint8_t;
 	};
 	class DLLNETWORK BaseAnimatedComponent : public BaseEntityComponent, public DynamicMemberRegister {
 	  public:
@@ -90,16 +91,30 @@ namespace pragma {
 
 		virtual void MaintainAnimationMovement(const Vector3 &disp);
 
-		void SetGlobalBonePosition(UInt32 boneId, const Vector3 &pos, const Quat &rot, const Vector3 &scale);
-		void SetGlobalBonePosition(UInt32 boneId, const Vector3 &pos, const Quat &rot);
-		void SetGlobalBonePosition(UInt32 boneId, const Vector3 &pos);
-		void SetGlobalBoneRotation(UInt32 boneId, const Quat &rot);
+		bool GetReferenceBonePose(animation::BoneId boneId, umath::Transform &outPose, umath::CoordinateSpace space = umath::CoordinateSpace::Object) const;
+		bool GetReferenceBonePose(animation::BoneId boneId, umath::ScaledTransform &outPose, umath::CoordinateSpace space = umath::CoordinateSpace::Object) const;
+		bool GetReferenceBonePos(animation::BoneId boneId, Vector3 &outPos, umath::CoordinateSpace space = umath::CoordinateSpace::Object) const;
+		bool GetReferenceBoneRot(animation::BoneId boneId, Quat &outRot, umath::CoordinateSpace space = umath::CoordinateSpace::Object) const;
+		bool GetReferenceBoneScale(animation::BoneId boneId, Vector3 &outScale, umath::CoordinateSpace space = umath::CoordinateSpace::Object) const;
+		bool GetReferenceBonePose(animation::BoneId boneId, Vector3 *optOutPos, Quat *optOutRot, Vector3 *optOutScale = nullptr, umath::CoordinateSpace space = umath::CoordinateSpace::Object) const;
+
+		bool GetBonePose(animation::BoneId boneId, umath::Transform &outPose, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
+		bool GetBonePose(animation::BoneId boneId, umath::ScaledTransform &outPose, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
+		bool GetBonePos(animation::BoneId boneId, Vector3 &outPos, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
+		bool GetBoneRot(animation::BoneId boneId, Quat &outRot, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
+		bool GetBoneScale(animation::BoneId boneId, Vector3 &outScale, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
+		bool GetBonePose(animation::BoneId boneId, Vector3 *optOutPos, Quat *optOutRot, Vector3 *optOutScale = nullptr, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
+
+		bool SetBonePose(animation::BoneId boneId, const umath::Transform &pose, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
+		bool SetBonePose(animation::BoneId boneId, const umath::ScaledTransform &pose, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
+		bool SetBonePos(animation::BoneId boneId, const Vector3 &pos, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
+		bool SetBoneRot(animation::BoneId boneId, const Quat &rot, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
+		bool SetBoneScale(animation::BoneId boneId, const Vector3 &scale, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
+		bool SetBonePose(animation::BoneId boneId, const Vector3 *optPos, const Quat *optRot, const Vector3 *optScale = nullptr, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
 
 		bool IsPlayingAnimation() const;
 		bool CalcAnimationMovementSpeed(float *x, float *z, int32_t frameOffset = 0) const;
 
-		void SetBoneScale(uint32_t boneId, const Vector3 &scale);
-		const Vector3 *GetBoneScale(uint32_t boneId) const;
 		std::optional<Mat4> GetBoneMatrix(unsigned int boneID) const;
 
 		bool IsAnimated() const;
@@ -109,38 +124,11 @@ namespace pragma {
 		std::optional<FPlayAnim> GetLayeredAnimationFlags(uint32_t layerIdx) const;
 		void SetLayeredAnimationFlags(uint32_t layerIdx, FPlayAnim flags);
 
-		// Returns the bone position / rotation in world space. Very expensive.
-		Bool GetGlobalBonePosition(UInt32 boneId, Vector3 &pos, Quat &rot, Vector3 *scale = nullptr) const;
-		Bool GetGlobalBonePosition(UInt32 boneId, Vector3 &pos) const;
-		Bool GetGlobalBoneRotation(UInt32 boneId, Quat &rot) const;
-		// Returns the bone position / rotation in entity space. Very expensive.
-		Bool GetLocalBonePosition(UInt32 boneId, Vector3 &pos, Quat &rot, Vector3 *scale = nullptr) const;
-		Bool GetLocalBonePosition(UInt32 boneId, Vector3 &pos) const;
-		Bool GetLocalBoneRotation(UInt32 boneId, Quat &rot) const;
-
-		// Returns the bone position / rotation in bone space.
-		Bool GetBonePosition(UInt32 boneId, Vector3 &pos, Quat &rot, Vector3 &scale) const;
-		Bool GetBonePosition(UInt32 boneId, Vector3 &pos, Quat &rot) const;
-		Bool GetBonePosition(UInt32 boneId, Vector3 &pos) const;
-		Bool GetBoneRotation(UInt32 boneId, Quat &rot) const;
-		// Returns the bone position / angles in bone space.
-		Bool GetBonePosition(UInt32 boneId, Vector3 &pos, EulerAngles &ang) const;
-		Bool GetBoneAngles(UInt32 boneId, EulerAngles &ang) const;
-		// Returns the bone position in bone space, or null if the bone doesn't exist.
-		const Vector3 *GetBonePosition(UInt32 boneId) const;
-		// Returns the bone rotation in bone space, or null if the bone doesn't exist.
-		const Quat *GetBoneRotation(UInt32 boneId) const;
-		const umath::ScaledTransform *GetBonePose(UInt32 boneId) const;
-		void SetBonePosition(UInt32 boneId, const Vector3 &pos, const Quat &rot, const Vector3 &scale);
-		void SetBonePosition(UInt32 boneId, const Vector3 &pos, const Quat &rot);
-		void SetBonePosition(UInt32 boneId, const Vector3 &pos, const EulerAngles &ang);
-		void SetBonePosition(UInt32 boneId, const Vector3 &pos);
-		void SetBoneRotation(UInt32 boneId, const Quat &rot);
-		void SetBonePose(UInt32 boneId, const umath::ScaledTransform &pose);
-		void SetLocalBonePosition(UInt32 boneId, const Vector3 &pos, const Quat &rot, const Vector3 &scale);
-		void SetLocalBonePosition(UInt32 boneId, const Vector3 &pos, const Quat &rot);
-		void SetLocalBonePosition(UInt32 boneId, const Vector3 &pos);
-		void SetLocalBoneRotation(UInt32 boneId, const Quat &rot);
+		std::optional<animation::BoneId> GetMetaBoneId(animation::MetaRigBoneType boneType) const;
+		bool SetMetaBonePose(animation::MetaRigBoneType boneType, const umath::ScaledTransform &pose, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
+		bool SetMetaBonePose(animation::MetaRigBoneType boneType, const Vector3 *optPos, const Quat *optRot = nullptr, const Vector3 *optScale = nullptr, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
+		bool GetMetaBonePose(animation::MetaRigBoneType boneType, umath::ScaledTransform &outPose, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
+		bool GetMetaBonePose(animation::MetaRigBoneType boneType, Vector3 *optOutPos, Quat *optOutRot = nullptr, Vector3 *optOutScale = nullptr, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
 
 		float GetCycle() const;
 		void SetCycle(float cycle);
@@ -193,8 +181,6 @@ namespace pragma {
 
 		const std::vector<umath::ScaledTransform> &GetProcessedBones() const;
 		std::vector<umath::ScaledTransform> &GetProcessedBones();
-
-		void SetBonePosition(UInt32 boneId, const Vector3 &pos, const Quat &rot, const Vector3 *scale, Bool updatePhysics);
 
 		// Transforms all bone positions / rotations to entity space
 		bool UpdateSkeleton();

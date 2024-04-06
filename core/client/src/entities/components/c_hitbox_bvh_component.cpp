@@ -330,7 +330,7 @@ static void draw_mesh(const pragma::bvh::MeshBvhTree &bvhTree, const umath::Scal
 		verts.push_back(pragma::bvh::from_bvh_vector(tri.p1));
 		verts.push_back(pragma::bvh::from_bvh_vector(tri.p2));
 	}
-	auto o = DebugRenderer::DrawMesh(verts, color, outlineColor, duration);
+	auto o = DebugRenderer::DrawMesh(verts, {color, outlineColor, duration});
 	if(o)
 		o->SetPose(pose);
 }
@@ -619,6 +619,7 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 
 void CHitboxBvhComponent::OnRemove()
 {
+	BaseEntityComponent::OnRemove();
 	auto intersectionHandlerC = GetEntity().GetComponent<IntersectionHandlerComponent>();
 	if(intersectionHandlerC.valid()) {
 		intersectionHandlerC->ClearIntersectionHandler();
@@ -672,7 +673,7 @@ void CHitboxBvhComponent::DebugDrawHitboxMeshes(animation::BoneId boneId, float 
 			}
 		});
 
-		auto o = DebugRenderer::DrawMesh(dbgVerts, col, Color::White, duration);
+		auto o = DebugRenderer::DrawMesh(dbgVerts, {col, Color::White, duration});
 		if(o)
 			o->SetPose(pose);
 
@@ -698,7 +699,10 @@ void CHitboxBvhComponent::DebugDraw()
 			continue;
 		auto pose = hObb.GetPose(effectivePoses);
 		auto &pos = pose.GetOrigin();
-		::DebugRenderer::DrawBox(pos, -hObb.halfExtents, hObb.halfExtents, EulerAngles {pose.GetRotation()}, color, outlineColor, duration);
+		DebugRenderInfo renderInfo {color, outlineColor, duration};
+		renderInfo.pose.SetOrigin(pos);
+		renderInfo.pose.SetRotation(pose.GetRotation());
+		::DebugRenderer::DrawBox(-hObb.halfExtents, hObb.halfExtents, renderInfo);
 	}
 
 	auto &mdl = ent.GetModel();
@@ -726,7 +730,7 @@ void CHitboxBvhComponent::DebugDraw()
 				dbgMeshVerts.push_back(v2);
 			}
 		}
-		::DebugRenderer::DrawMesh(dbgMeshVerts, color, outlineColor, duration);
+		::DebugRenderer::DrawMesh(dbgMeshVerts, {color, outlineColor, duration});
 	}
 }
 

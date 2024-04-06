@@ -15,6 +15,8 @@
 
 struct DLLNETWORK DebugRenderInfo {
 	DebugRenderInfo() = default;
+	DebugRenderInfo(const Color &color, float duration = 0.f) : color {color}, duration {duration} {}
+	DebugRenderInfo(const Color &color, const Color &colorOutline, float duration = 0.f) : color {color}, outlineColor {colorOutline}, duration {duration} {}
 	DebugRenderInfo(const umath::Transform &pose, const Color &color) : pose {pose}, color {color} {}
 	DebugRenderInfo(const umath::Transform &pose, const Color &color, const Color &outlineColor) : pose {pose}, color {color}, outlineColor {outlineColor} {}
 	DebugRenderInfo(const umath::Transform &pose, const Color &color, float duration) : pose {pose}, color {color}, duration {duration} {}
@@ -23,6 +25,7 @@ struct DLLNETWORK DebugRenderInfo {
 	Color color;
 	std::optional<Color> outlineColor {};
 	float duration = 0.f;
+	bool ignoreDepthBuffer = false;
 
 	DebugRenderInfo &SetOrigin(const Vector3 &origin)
 	{
@@ -47,6 +50,11 @@ struct DLLNETWORK DebugRenderInfo {
 	DebugRenderInfo &SetDuration(float duration)
 	{
 		this->duration = duration;
+		return *this;
+	}
+	DebugRenderInfo &SetIgnoreDepthBuffer(bool ignoreDepthBuffer)
+	{
+		this->ignoreDepthBuffer = ignoreDepthBuffer;
 		return *this;
 	}
 };

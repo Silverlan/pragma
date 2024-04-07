@@ -106,14 +106,7 @@ def http_download(url,fileName=None):
 	if not fileName:
 		a = urlparse(url)
 		fileName = os.path.basename(a.path)
-	try:
-		urllib.request.urlretrieve(url,fileName)
-	except PermissionError as e:
-		print_warning("Failed to download '" +url +"' as '" +fileName +"' (PermissionError) (cwd: " + os.getcwd() +"): {}".format(e))
-		raise
-	except urllib.error.URLError as e:
-		print_warning("Failed to download '" +url +"' as '" +fileName +"' (URLError) (cwd: " + os.getcwd() +"): {}".format(e))
-		raise
+	urllib.request.urlretrieve(url,fileName)
 	return fileName
 
 # See https://stackoverflow.com/a/54748564
@@ -242,25 +235,6 @@ def get_submodule(directory,url,commitId=None,branch=None):
 	else:
 		subprocess.run(["git","pull"],check=True)
 	subprocess.run(["git","submodule","update","--init","--recursive"],check=True)
-	os.chdir(curDir)
-
-def compile_lua_file(deps_dir, luaFile):
-	from scripts.shared import normalize_path
-	curDir = os.getcwd()
-	os.chdir(deps_dir)
-	lua_compile_root = normalize_path(deps_dir +"/lua_compile")
-	if not Path(lua_compile_root).is_dir():
-		mkdir("lua_compile",True)
-		print_msg("lua_compile not found. Downloading...")
-		if platform == "win32":
-			http_extract("https://github.com/Silverlan/lua_compile/releases/download/latest/binaries_windows64.zip")
-		else:
-			http_extract("https://github.com/Silverlan/lua_compile/releases/download/latest/binaries_linux64.tar.gz",format="tar.gz")
-	os.chdir(lua_compile_root)
-	if platform == "win32":
-		subprocess.run([os.getcwd() +"/lua_compile.exe",luaFile],check=True)
-	else:
-		subprocess.run([os.getcwd() +"/lua_compile",luaFile],check=True)
 	os.chdir(curDir)
 
 if platform == "win32":

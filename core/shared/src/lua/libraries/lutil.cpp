@@ -628,13 +628,13 @@ void Lua::util::register_library(lua_State *l)
 		  return std::pair<bool, std::optional<std::string>> {true, {}};
 	  });
 
-	auto defRigBone = luabind::class_<pragma::ik::RigConfigBone>("IkBone");
+	auto defRigBone = luabind::class_<pragma::ik::RigConfigBone>("Bone");
 	defRigBone.def(luabind::tostring(luabind::self));
 	defRigBone.def_readwrite("locked", &pragma::ik::RigConfigBone::locked);
 	defRigBone.def_readwrite("name", &pragma::ik::RigConfigBone::name);
 	defRigConfig.scope[defRigBone];
 
-	auto defRigControl = luabind::class_<pragma::ik::RigConfigControl>("IkControl");
+	auto defRigControl = luabind::class_<pragma::ik::RigConfigControl>("Control");
 	defRigControl.def(luabind::tostring(luabind::self));
 	defRigControl.add_static_constant("TYPE_DRAG", umath::to_integral(pragma::ik::RigConfigControl::Type::Drag));
 	defRigControl.add_static_constant("TYPE_STATE", umath::to_integral(pragma::ik::RigConfigControl::Type::State));
@@ -647,7 +647,7 @@ void Lua::util::register_library(lua_State *l)
 	defRigConfig.scope[defRigControl];
 	defRigConfig.scope[defRigBone];
 
-	auto defRigConstraint = luabind::class_<pragma::ik::RigConfigConstraint>("IkConstraint");
+	auto defRigConstraint = luabind::class_<pragma::ik::RigConfigConstraint>("Constraint");
 	defRigConstraint.def(luabind::tostring(luabind::self));
 	defRigConstraint.add_static_constant("TYPE_FIXED", umath::to_integral(pragma::ik::RigConfigConstraint::Type::Fixed));
 	defRigConstraint.add_static_constant("TYPE_HINGE", umath::to_integral(pragma::ik::RigConfigConstraint::Type::Hinge));

@@ -89,6 +89,9 @@ namespace pragma::ik {
 	using PRigConfigJoint = std::shared_ptr<RigConfigJoint>;
 	class DLLNETWORK RigConfig {
 	  public:
+		static constexpr auto PIKR_EXTENSION_BINARY = "pikr_b";
+		static constexpr auto PIKR_EXTENSION_ASCII = "pikr";
+
 		static std::optional<RigConfig> load(const std::string &fileName);
 		static std::optional<RigConfig> load_from_udm_data(udm::LinkedPropertyWrapper &prop);
 		static const std::vector<std::string> &get_supported_extensions();

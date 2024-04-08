@@ -15,7 +15,7 @@
 
 const std::vector<std::string> &pragma::ik::RigConfig::get_supported_extensions()
 {
-	static std::vector<std::string> exts = {"pikr", "pikr_b"};
+	static std::vector<std::string> exts = {PIKR_EXTENSION_ASCII, PIKR_EXTENSION_BINARY};
 	return exts;
 }
 std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load(const std::string &fileName)

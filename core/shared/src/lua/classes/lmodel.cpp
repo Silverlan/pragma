@@ -273,6 +273,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	def_bone_methods<pragma::animation::BoneId>(classDef);
 	def_bone_methods<const std::string &>(classDef);
 
+	classDef.def("CalcBoneLength", &::Model::CalcBoneLength);
 	classDef.def("PrecacheTextureGroup", &PrecacheTextureGroup);
 	classDef.def("PrecacheTextureGroups", &PrecacheTextureGroups);
 	classDef.def("GetReferencePose", &GetReference);

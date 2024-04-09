@@ -1781,6 +1781,29 @@ std::shared_ptr<pragma::animation::Animation> Model::GetAnimation(uint32_t ID) c
 uint32_t Model::GetAnimationCount() const { return static_cast<uint32_t>(m_animations.size()); }
 std::shared_ptr<ModelMesh> Model::CreateMesh() const { return std::make_shared<ModelMesh>(); }
 std::shared_ptr<ModelSubMesh> Model::CreateSubMesh() const { return std::make_shared<ModelSubMesh>(); }
+float Model::CalcBoneLength(pragma::animation::BoneId boneId) const
+{
+	umath::ScaledTransform pose;
+	m_reference->GetBonePose(boneId, pose);
+
+	auto bone = m_skeleton->GetBone(boneId).lock();
+	if(!bone)
+		return 0.f;
+	auto n = bone->children.size();
+	if(n == 0) {
+		if(!bone->parent.expired())
+			return CalcBoneLength(bone->parent.lock()->ID); // Assume same length as parent
+		return 0.f;
+	}
+	Vector3 avgChildPos {};
+	for(auto &[childId, child] : bone->children) {
+		umath::ScaledTransform childPose;
+		m_reference->GetBonePose(childId, childPose);
+		avgChildPos += childPose.GetOrigin();
+	}
+	avgChildPos /= static_cast<float>(n);
+	return uvec::distance(pose.GetOrigin(), avgChildPos);
+}
 bool Model::HasVertexWeights() const
 {
 	for(auto &meshGroup : GetMeshGroups()) {

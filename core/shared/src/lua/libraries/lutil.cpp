@@ -617,6 +617,9 @@ void Lua::util::register_library(lua_State *l)
 	defRigConfig.def("AddHingeConstraint", &pragma::ik::RigConfig::AddHingeConstraint);
 	defRigConfig.def("AddBallSocketConstraint", &pragma::ik::RigConfig::AddBallSocketConstraint);
 	defRigConfig.def("AddBallSocketConstraint", &pragma::ik::RigConfig::AddBallSocketConstraint, luabind::default_parameter_policy<6, pragma::SignedAxis::Z> {});
+	defRigConfig.def("SetRootBone", &pragma::ik::RigConfig::SetRootBone);
+	defRigConfig.def("ClearRootBone", &pragma::ik::RigConfig::ClearRootBone);
+	defRigConfig.def("GetRootBone", &pragma::ik::RigConfig::GetRootBone);
 	defRigConfig.def(
 	  "Save", +[](lua_State *l, pragma::ik::RigConfig &rigConfig, const std::string &fileName) -> std::pair<bool, std::optional<std::string>> {
 		  auto fname = fileName;

@@ -33,8 +33,10 @@ endif()
 get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(is_multi_config)
 	set(CONFIG_BUILD_TYPE "$<CONFIG>" CACHE STRING "Build Type" FORCE)
+	
+	set(CMAKE_BUILD_TYPE "") #ignored in multi-config scenarios but not in  anvil's ChooseMSVCCRT
 else()
-	set(CONFIG_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build Type" FORCE)
+	set(CONFIG_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build Type")
 	set(CMAKE_BUILD_TYPE "${CONFIG_BUILD_TYPE}")
 endif()
 
@@ -1184,14 +1186,14 @@ add_custom_target(pragma-install
 	DEPENDS pragma-install-full ${PRAGMA_INSTALL_CUSTOM_TARGETS}
 	COMMAND 
 		"${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT}
-		-DBUILD_TYPE=${CMAKE_BUILD_TYPE}
+		-DBUILD_TYPE=${CONFIG_BUILD_TYPE}
 		-P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
 )
 add_custom_target(pragma-install-full
 	DEPENDS pragma iclient iserver
 	COMMAND 
 		"${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT_FULL}
-		-DBUILD_TYPE=${CMAKE_BUILD_TYPE}
+		-DBUILD_TYPE=${CONFIG_BUILD_TYPE}
 		-P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
 )
 

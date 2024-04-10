@@ -901,7 +901,7 @@ if with_lua_doc_generator:
 		cmake_args += ["-DDEPENDENCY_DIA_INCLUDE=" +dia_include_path]
 		cmake_args += ["-DDEPENDENCY_DIA_LIBRARY=" +dia_library_path]
 	else:
-		raise ArgumentError("Both the --dia-include-path and --dia-library-path options have to be specified to enable Lua documentation generator support!")
+		raise argparse.ArgumentError(message="Both the --dia-include-path and --dia-library-path options have to be specified to enable Lua documentation generator support!")
 
 if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
 	if len(vtune_include_path) > 0 and len(vtune_library_path) > 0:
@@ -910,7 +910,7 @@ if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
 		cmake_args += ["-DDEPENDENCY_VTUNE_PROFILER_INCLUDE=" +vtune_include_path]
 		cmake_args += ["-DDEPENDENCY_VTUNE_PROFILER_LIBRARY=" +vtune_library_path]
 	else:
-		raise ArgumentError("Both the --vtune-include-path and --vtune-library-path options have to be specified to enable VTune support!")
+		raise argparse.ArgumentError(message="Both the --vtune-include-path and --vtune-library-path options have to be specified to enable VTune support!")
 
 cmake_args += additional_cmake_args
 cmake_configure(root,generator,cmake_args)

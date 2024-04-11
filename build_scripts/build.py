@@ -415,13 +415,16 @@ if platform == "linux":
 	os.chdir(root +"/third_party_libs/luajit/src")
 	subprocess.run(["make"],check=True)
 else:
-	os.chdir(deps_dir)
-	mkdir("luajit_build")
-	os.chdir("luajit_build")
-	cmake_configure(root +"/third_party_libs/luajit",generator,["-DBUILD_SHARED_LIBS=1"])
-	cmake_build("Release")
-
-	lua_jit_lib = normalize_path(deps_dir +"/luajit_build/src/Release/luajit.lib")
+	os.chdir(root +"/third_party_libs/luajit/src")
+	subprocess.run(["msvcbuild.bat"],check=True)    
+	lua_jit_lib = normalize_path(deps_dir +"/third_party_libs/luajit/src/lua51.lib")
+	# os.chdir(deps_dir)
+	# mkdir("luajit_build")
+	# os.chdir("luajit_build")
+	# cmake_configure(root +"/third_party_libs/luajit",generator,["-DBUILD_SHARED_LIBS=1"])
+	# cmake_build("Release")
+    
+	# lua_jit_lib = normalize_path(deps_dir +"/luajit_build/src/Release/luajit.lib")
 
 ########## GeometricTools ##########
 os.chdir(deps_dir)

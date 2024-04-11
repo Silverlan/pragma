@@ -23,8 +23,8 @@ namespace pragma::ik {
 		pragma::GString name;
 		bool locked = false;
 		// TODO: What units are these? Meters?
-		float width = 1.f;
-		float length = 0.25f;
+		float length = 1.f;
+		float radius = 0.25f;
 
 		// If not set, bone pose will be used instead
 		std::optional<umath::Transform> ikPose {};

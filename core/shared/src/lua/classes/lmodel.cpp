@@ -961,7 +961,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	defBoneInfo.def(luabind::tostring(luabind::self));
 	defBoneInfo.def_readwrite("boneId", &pragma::animation::MetaRigBone::boneId);
 	defBoneInfo.def_readwrite("radius", &pragma::animation::MetaRigBone::radius);
-	defBoneInfo.def_readwrite("height", &pragma::animation::MetaRigBone::height);
+	defBoneInfo.def_readwrite("length", &pragma::animation::MetaRigBone::length);
 	defBoneInfo.def_readwrite("normalizedRotationOffset", &pragma::animation::MetaRigBone::normalizedRotationOffset);
 	defBoneInfo.property(
 	  "min", +[](const pragma::animation::MetaRigBone &boneInfo) -> Vector3 { return boneInfo.bounds.first; }, +[](pragma::animation::MetaRigBone &boneInfo, const Vector3 &min) { boneInfo.bounds.first = min; });

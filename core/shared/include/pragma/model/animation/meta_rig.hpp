@@ -190,7 +190,7 @@ namespace pragma::animation {
 		Quat normalizedRotationOffset; // Rotation offset from bone rotation to normalized rotation
 
 		float radius = 0.f;
-		float height = 0.f;
+		float length = 0.f;
 	};
 
 	struct DLLNETWORK MetaRigBlendShape {

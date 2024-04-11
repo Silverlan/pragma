@@ -45,7 +45,7 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(u
 		auto bone = rig.AddBone(name);
 		rig.SetBoneLocked(name, locked);
 
-		udmBone["width"] >> bone->width;
+		udmBone["radius"] >> bone->radius;
 		udmBone["length"] >> bone->length;
 		udmBone["ikPose"] >> bone->ikPose;
 	}
@@ -435,7 +435,7 @@ void pragma::ik::RigConfig::ToUdmData(udm::LinkedPropertyWrapper &udmData) const
 		auto udmBone = udmBones[i];
 		udmBone["name"] << boneData->name.c_str();
 		udmBone["locked"] << boneData->locked;
-		udmBone["width"] << boneData->width;
+		udmBone["radius"] << boneData->radius;
 		udmBone["length"] << boneData->length;
 		udmBone["ikPose"] << boneData->ikPose;
 	}

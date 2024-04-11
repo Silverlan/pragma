@@ -415,10 +415,20 @@ if platform == "linux":
 	os.chdir(root +"/third_party_libs/luajit/src")
 	subprocess.run(["make"],check=True)
 else:
+	#devcmd_path = determine_vsdevcmd_path(deps_dir)
+	#os.chdir(root +"/third_party_libs/luajit/src")
 	devcmd_path = determine_vsdevcmd_path(deps_dir)
-	os.chdir(root +"/third_party_libs/luajit/src")
-	subprocess.run([devcmd_path+" -no_logo & msvcbuild.bat"],check=True)    
-	lua_jit_lib = normalize_path(deps_dir +"/third_party_libs/luajit/src/lua51.lib")
+	luajit_build_script = root+"/third_party_libs/luajit/src/msvcbuild.bat"
+	luajit_build_script_wrapper = os.path.join(deps_dir,"luajit_build","build_luajit.bat")
+	Path(os.path.join(deps_dir,"luajit_build")).mkdir(parents=True,exist_ok=True)
+	print_msg("Generating luajit batch-script...")
+	print("Writing '" +luajit_build_script_wrapper +"'...")
+	with open(luajit_build_script_wrapper, 'w') as file:
+		file.write(devcmd_path +"\n")
+		file.write(luajit_build_script +"\n")
+	subprocess.check_call( [luajit_build_script_wrapper] )
+	#subprocess.run([devcmd_path+" -no_logo & msvcbuild.bat"],check=True)    
+	lua_jit_lib = normalize_path(root +"/third_party_libs/luajit/src/lua51.lib")
 	# os.chdir(deps_dir)
 	# mkdir("luajit_build")
 	# os.chdir("luajit_build")

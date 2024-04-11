@@ -67,6 +67,8 @@ bool pragma::animation::MetaRig::LoadFromAssetData(const Skeleton &skeleton, con
 		auto &metaBone = metaRig->bones[umath::to_integral(*etype)];
 		metaBone.boneId = boneId;
 		udmBone["normalizedRotationOffset"] >> metaBone.normalizedRotationOffset;
+		udmBone["radius"] >> metaBone.radius;
+		udmBone["height"] >> metaBone.height;
 
 		auto udmBounds = udmBone["bounds"];
 		udmBounds["min"] >> metaBone.bounds.first;
@@ -119,6 +121,10 @@ bool pragma::animation::MetaRig::Save(const Skeleton &skeleton, udm::AssetDataAr
 		udmBone["type"] << pragma::animation::get_meta_rig_bone_type_name(static_cast<pragma::animation::MetaRigBoneType>(i));
 		udmBone["bone"] << std::string {bone.lock()->name};
 		udmBone["normalizedRotationOffset"] << metaBone.normalizedRotationOffset;
+
+		udmBone["radius"] << metaBone.radius;
+		udmBone["height"] << metaBone.height;
+
 		auto udmBounds = udmBone["bounds"];
 		udmBounds["min"] << metaBone.bounds.first;
 		udmBounds["max"] << metaBone.bounds.second;

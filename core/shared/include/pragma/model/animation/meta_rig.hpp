@@ -188,6 +188,9 @@ namespace pragma::animation {
 		pragma::animation::BoneId boneId = pragma::animation::INVALID_BONE_INDEX;
 		std::pair<Vector3, Vector3> bounds;
 		Quat normalizedRotationOffset; // Rotation offset from bone rotation to normalized rotation
+
+		float radius = 0.f;
+		float height = 0.f;
 	};
 
 	struct DLLNETWORK MetaRigBlendShape {

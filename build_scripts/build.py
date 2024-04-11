@@ -256,9 +256,6 @@ def execscript(filepath):
 	execfile(filepath,g,l)
 
 	os.chdir(curDir)
-    
-
-	
 
 ########## System packages ##########
 if platform == "linux":
@@ -418,9 +415,8 @@ if platform == "linux":
 	os.chdir(root +"/third_party_libs/luajit/src")
 	subprocess.run(["make"],check=True)
 else:
-	devcmd_path = determine_vcvars_path(deps_dir)
 	os.chdir(root +"/third_party_libs/luajit/src")
-	subprocess.run([devcmd_path+" &  msvcbuild.bat"],check=True)    
+	subprocess.run(["msvcbuild.bat"],check=True)    
 	lua_jit_lib = normalize_path(deps_dir +"/third_party_libs/luajit/src/lua51.lib")
 	# os.chdir(deps_dir)
 	# mkdir("luajit_build")
@@ -673,7 +669,7 @@ def execbuildscript(filepath):
 	#	l["vcvars"] = "vcvars"
 
 	if platform == "win32":
-		l["determine_vcvars_path"] = determine_vcvars_path
+		l["determine_vsdevcmd_path"] = determine_vsdevcmd_path
 
 	execfile(filepath,g,l)
 

@@ -239,7 +239,7 @@ def get_submodule(directory,url,commitId=None,branch=None):
 	os.chdir(curDir)
 
 if platform == "win32":
-	def determine_vcvars_path(deps_dir):
+	def determine_vsdevcmd_path(deps_dir):
 		# Create the deps_dir if it doesn't exist
 		if not os.path.exists(deps_dir):
 			os.makedirs(deps_dir)
@@ -252,7 +252,7 @@ if platform == "win32":
 			urllib.request.urlretrieve(vswhere_url, vswhere_path)
 
 		installation_path = subprocess.check_output([vswhere_path, "-property", "installationPath"], text=True).strip()
-		vsdevcmd_path = os.path.join(installation_path, "VC", "Auxiliary","build", "vcvars64.bat")
+		vsdevcmd_path = os.path.join(installation_path, "Common7", "Tools", "vsdevcmd.bat")
 		return vsdevcmd_path
 
 if platform == "linux":

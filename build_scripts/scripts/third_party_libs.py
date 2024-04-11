@@ -23,7 +23,7 @@ get_submodule("libpng","https://github.com/glennrp/libpng.git","5a0b7e9c29ec23f8
 get_submodule("libsamplerate","https://github.com/libsndfile/libsamplerate.git","a2eb2814150a4ada0b49ea3cc5e51170572fc606")
 get_submodule("libzip","https://github.com/nih-at/libzip.git","210b09d9d2d0f4c0bbc64f92ad45c1ac53598fec")
 get_submodule("luabind","https://github.com/Slaweknowy/luabind-deboostified.git","6e84534247e7d5af3b7c42b6f67095760c59e061")
-get_submodule("luajit","https://github.com/SlawekNowy/LuaJIT.git","fdaaf5e18d6df39338e0b4bc370330bb06b26340","v2.1")
+get_submodule("luajit","https://github.com/SlawekNowy/LuaJIT.git","47c2e77860d8d05dbfa1fe1fea994cc0f4caa583","v2.1")
 get_submodule("miniball","https://github.com/Silverlan/miniball.git","609fbf16e7a9cc3dc8f88e4d1c7a1d8ead842bb1")
 get_submodule("muparserx","https://github.com/Silverlan/muparserx.git","1d4656bd671ab856a79f767c483a78c0a036918b")
 get_submodule("ogg","https://github.com/xiph/ogg.git","db5c7a49ce7ebda47b15b78471e78fb7f2483e22")

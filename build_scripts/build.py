@@ -424,8 +424,8 @@ else:
 	print_msg("Generating luajit batch-script...")
 	print("Writing '" +luajit_build_script_wrapper +"'...")
 	with open(luajit_build_script_wrapper, 'w') as file:
-		file.write(devcmd_path +"\n")
-		file.write(luajit_build_script +"\n")
+		file.write("\""+devcmd_path +"\"\n")
+		file.write("\""+luajit_build_script +"\"\n")
 	subprocess.check_call( [luajit_build_script_wrapper] )
 	#subprocess.run([devcmd_path+" -no_logo & msvcbuild.bat"],check=True)    
 	lua_jit_lib = normalize_path(root +"/third_party_libs/luajit/src/lua51.lib")

@@ -17,12 +17,133 @@ pragma::animation::BoneId pragma::animation::MetaRig::GetBoneId(const pragma::GS
 	return GetBoneId(*eType);
 }
 
-pragma::animation::BoneId pragma::animation::MetaRig::GetBoneId(pragma::animation::MetaRigBoneType &type) const
+pragma::animation::BoneId pragma::animation::MetaRig::GetBoneId(pragma::animation::MetaRigBoneType type) const
 {
 	auto i = umath::to_integral(type);
 	if(i >= bones.size())
 		return pragma::animation::INVALID_BONE_INDEX;
 	return bones[i].boneId;
+}
+
+std::shared_ptr<pragma::animation::MetaRig> pragma::animation::MetaRig::Load(const Skeleton &skeleton, const udm::AssetData &data, std::string &outErr)
+{
+	auto metaRig = std::make_shared<MetaRig>();
+	if(metaRig->LoadFromAssetData(skeleton, data, outErr) == false)
+		return nullptr;
+	return metaRig;
+}
+
+bool pragma::animation::MetaRig::LoadFromAssetData(const Skeleton &skeleton, const udm::AssetData &data, std::string &outErr)
+{
+	if(data.GetAssetType() != PMRIG_IDENTIFIER) {
+		outErr = "Incorrect format!";
+		return false;
+	}
+
+	auto udm = *data;
+	auto version = data.GetAssetVersion();
+	if(version < 1) {
+		outErr = "Invalid version!";
+		return false;
+	}
+
+	auto &udmMetaRig = udm;
+	auto metaRig = std::make_shared<pragma::animation::MetaRig>();
+	udm::to_enum_value<pragma::animation::RigType>(udmMetaRig["rigType"], metaRig->rigType);
+	udmMetaRig["forwardFacingRotationOffset"](metaRig->forwardFacingRotationOffset);
+	udm::to_enum_value<pragma::SignedAxis>(udmMetaRig["forwardAxis"], metaRig->forwardAxis);
+	udm::to_enum_value<pragma::SignedAxis>(udmMetaRig["upAxis"], metaRig->upAxis);
+	auto udmBones = udmMetaRig["bones"];
+	for(auto &udmBone : udmBones) {
+		std::string type;
+		udmBone["type"](type);
+		auto etype = pragma::animation::get_meta_rig_bone_type_enum(type);
+		if(!etype)
+			continue;
+		std::string bone;
+		udmBone["bone"](bone);
+		auto boneId = skeleton.LookupBone(bone);
+		if(boneId == pragma::animation::INVALID_BONE_INDEX)
+			continue;
+		auto &metaBone = metaRig->bones[umath::to_integral(*etype)];
+		metaBone.boneId = boneId;
+		udmBone["normalizedRotationOffset"](metaBone.normalizedRotationOffset);
+
+		auto udmBounds = udmBone["bounds"];
+		udmBounds["min"](metaBone.bounds.first);
+		udmBounds["max"](metaBone.bounds.second);
+	}
+
+	auto udmBlendShapes = udmMetaRig["blendShapes"];
+	for(auto &udmBlendShape : udmBlendShapes) {
+		std::string type;
+		udmBlendShape["type"](type);
+		auto etype = pragma::animation::get_blend_shape_enum(type);
+		if(!etype)
+			continue;
+		pragma::animation::FlexControllerId flexCId = pragma::animation::INVALID_FLEX_CONTROLLER_INDEX;
+		udmBlendShape["flexControllerId"](flexCId);
+		if(flexCId == pragma::animation::INVALID_FLEX_CONTROLLER_INDEX)
+			continue;
+		auto &blendShape = metaRig->blendShapes[umath::to_integral(*etype)];
+		blendShape.flexControllerId = flexCId;
+	}
+	return true;
+}
+
+bool pragma::animation::MetaRig::Save(const Skeleton &skeleton, udm::AssetDataArg outData, std::string &outErr)
+{
+	outData.SetAssetType(PMRIG_IDENTIFIER);
+	outData.SetAssetVersion(FORMAT_VERSION);
+	auto udmMetaRig = *outData;
+
+	udmMetaRig["rigType"] = udm::enum_to_string(rigType);
+	udmMetaRig["forwardFacingRotationOffset"] = forwardFacingRotationOffset;
+	udmMetaRig["forwardAxis"] = udm::enum_to_string(forwardAxis);
+	udmMetaRig["upAxis"] = udm::enum_to_string(upAxis);
+
+	size_t numValidMetaBones = 0;
+	for(auto &metaBone : bones) {
+		auto bone = skeleton.GetBone(metaBone.boneId);
+		if(bone.expired())
+			continue;
+		++numValidMetaBones;
+	}
+
+	auto udmBones = udmMetaRig.AddArray("bones", numValidMetaBones);
+	size_t idx = 0;
+	for(size_t i = 0; i < bones.size(); ++i) {
+		auto &metaBone = bones[i];
+		auto bone = skeleton.GetBone(metaBone.boneId);
+		if(bone.expired())
+			continue;
+		auto udmBone = udmBones[idx++];
+		udmBone["type"] = pragma::animation::get_meta_rig_bone_type_name(static_cast<pragma::animation::MetaRigBoneType>(i));
+		udmBone["bone"] = std::string {bone.lock()->name};
+		udmBone["normalizedRotationOffset"] = metaBone.normalizedRotationOffset;
+		auto udmBounds = udmBone["bounds"];
+		udmBounds["min"] = metaBone.bounds.first;
+		udmBounds["max"] = metaBone.bounds.second;
+	}
+
+	size_t numValidBlendShapes = 0;
+	for(auto &blendShape : blendShapes) {
+		if(blendShape.flexControllerId == pragma::animation::INVALID_FLEX_CONTROLLER_INDEX)
+			continue;
+		++numValidBlendShapes;
+	}
+
+	auto udmBlendShapes = udmMetaRig.AddArray("blendShapes", numValidBlendShapes);
+	idx = 0;
+	for(size_t i = 0; i < blendShapes.size(); ++i) {
+		auto &blendShape = blendShapes[i];
+		if(blendShape.flexControllerId == pragma::animation::INVALID_FLEX_CONTROLLER_INDEX)
+			continue;
+		auto udmBlendShape = udmBlendShapes[idx++];
+		udmBlendShape["type"] = pragma::animation::get_blend_shape_name(static_cast<pragma::animation::BlendShape>(i));
+		udmBlendShape["flexControllerId"] = blendShape.flexControllerId;
+	}
+	return true;
 }
 
 void pragma::animation::MetaRig::DebugPrint(const Model &mdl)
@@ -38,6 +159,8 @@ void pragma::animation::MetaRig::DebugPrint(const Model &mdl)
 		ss << "\t\tNormalized rotation offset: " << ang.p << "," << ang.y << "," << ang.r << "\n";
 		auto &[min, max] = rigBone.bounds;
 		ss << "\t\tBounds: (" << min.x << "," << min.y << "," << min.z << ") (" << max.x << "," << max.y << "," << max.z << ")\n";
+		ss << "\t\tRadius: " << rigBone.radius << "\n";
+		ss << "\t\tHeight: " << rigBone.height << "\n";
 		ss << "\n";
 	};
 	for(size_t i = 0; i < bones.size(); ++i)

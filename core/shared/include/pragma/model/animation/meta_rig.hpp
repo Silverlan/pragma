@@ -16,6 +16,9 @@
 #include <string>
 
 class Model;
+namespace udm {
+	struct AssetData;
+};
 namespace pragma::animation {
 	enum class MetaRigBoneType : uint8_t {
 		// Note: Child bone types must not be defined before their parent!
@@ -194,18 +197,24 @@ namespace pragma::animation {
 	enum class RigType : uint8_t { Biped = 0, Quadruped };
 	class Skeleton;
 	struct DLLNETWORK MetaRig {
+		static constexpr uint32_t FORMAT_VERSION = 1u;
+		static constexpr auto PMRIG_IDENTIFIER = "PMRIG";
+		static std::shared_ptr<MetaRig> Load(const Skeleton &skeleton, const udm::AssetData &data, std::string &outErr);
 		std::array<MetaRigBone, umath::to_integral(MetaRigBoneType::Count)> bones;
 		std::array<MetaRigBlendShape, umath::to_integral(BlendShape::Count)> blendShapes;
 
+		bool Save(const Skeleton &skeleton, const udm::AssetData &outData, std::string &outErr);
 		void DebugPrint(const Model &mdl);
 		const MetaRigBone *GetBone(pragma::animation::MetaRigBoneType type) const;
 		const MetaRigBlendShape *GetBlendShape(pragma::animation::BlendShape blendShape) const;
 		pragma::animation::BoneId GetBoneId(const pragma::GString &type) const;
-		pragma::animation::BoneId GetBoneId(pragma::animation::MetaRigBoneType &type) const;
+		pragma::animation::BoneId GetBoneId(pragma::animation::MetaRigBoneType type) const;
 		RigType rigType = RigType::Biped;
 		Quat forwardFacingRotationOffset = uquat::identity();
 		pragma::SignedAxis forwardAxis = pragma::SignedAxis::Z;
 		pragma::SignedAxis upAxis = pragma::SignedAxis::Y;
+	  private:
+		bool LoadFromAssetData(const Skeleton &skeleton, const udm::AssetData &data, std::string &outErr);
 	};
 };
 

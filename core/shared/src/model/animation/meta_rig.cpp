@@ -49,40 +49,38 @@ bool pragma::animation::MetaRig::LoadFromAssetData(const Skeleton &skeleton, con
 
 	auto &udmMetaRig = udm;
 	auto metaRig = std::make_shared<pragma::animation::MetaRig>();
-	udm::to_enum_value<pragma::animation::RigType>(udmMetaRig["rigType"], metaRig->rigType);
-	udmMetaRig["forwardFacingRotationOffset"](metaRig->forwardFacingRotationOffset);
-	udm::to_enum_value<pragma::SignedAxis>(udmMetaRig["forwardAxis"], metaRig->forwardAxis);
-	udm::to_enum_value<pragma::SignedAxis>(udmMetaRig["upAxis"], metaRig->upAxis);
-	auto udmBones = udmMetaRig["bones"];
-	for(auto &udmBone : udmBones) {
+	udmMetaRig["rigType"] >> metaRig->rigType;
+	udmMetaRig["forwardFacingRotationOffset"] >> metaRig->forwardFacingRotationOffset;
+	udmMetaRig["forwardAxis"] >> metaRig->forwardAxis;
+	udmMetaRig["upAxis"] >> metaRig->upAxis;
+	for(auto &udmBone : udmMetaRig["bones"]) {
 		std::string type;
-		udmBone["type"](type);
+		udmBone["type"] >> type;
 		auto etype = pragma::animation::get_meta_rig_bone_type_enum(type);
 		if(!etype)
 			continue;
 		std::string bone;
-		udmBone["bone"](bone);
+		udmBone["bone"] >> bone;
 		auto boneId = skeleton.LookupBone(bone);
 		if(boneId == pragma::animation::INVALID_BONE_INDEX)
 			continue;
 		auto &metaBone = metaRig->bones[umath::to_integral(*etype)];
 		metaBone.boneId = boneId;
-		udmBone["normalizedRotationOffset"](metaBone.normalizedRotationOffset);
+		udmBone["normalizedRotationOffset"] >> metaBone.normalizedRotationOffset;
 
 		auto udmBounds = udmBone["bounds"];
-		udmBounds["min"](metaBone.bounds.first);
-		udmBounds["max"](metaBone.bounds.second);
+		udmBounds["min"] >> metaBone.bounds.first;
+		udmBounds["max"] >> metaBone.bounds.second;
 	}
 
-	auto udmBlendShapes = udmMetaRig["blendShapes"];
-	for(auto &udmBlendShape : udmBlendShapes) {
+	for(auto &udmBlendShape : udmMetaRig["blendShapes"]) {
 		std::string type;
-		udmBlendShape["type"](type);
+		udmBlendShape["type"] >> type;
 		auto etype = pragma::animation::get_blend_shape_enum(type);
 		if(!etype)
 			continue;
 		pragma::animation::FlexControllerId flexCId = pragma::animation::INVALID_FLEX_CONTROLLER_INDEX;
-		udmBlendShape["flexControllerId"](flexCId);
+		udmBlendShape["flexControllerId"] >> flexCId;
 		if(flexCId == pragma::animation::INVALID_FLEX_CONTROLLER_INDEX)
 			continue;
 		auto &blendShape = metaRig->blendShapes[umath::to_integral(*etype)];
@@ -97,10 +95,10 @@ bool pragma::animation::MetaRig::Save(const Skeleton &skeleton, udm::AssetDataAr
 	outData.SetAssetVersion(FORMAT_VERSION);
 	auto udmMetaRig = *outData;
 
-	udmMetaRig["rigType"] = udm::enum_to_string(rigType);
-	udmMetaRig["forwardFacingRotationOffset"] = forwardFacingRotationOffset;
-	udmMetaRig["forwardAxis"] = udm::enum_to_string(forwardAxis);
-	udmMetaRig["upAxis"] = udm::enum_to_string(upAxis);
+	udmMetaRig["rigType"] << rigType;
+	udmMetaRig["forwardFacingRotationOffset"] << forwardFacingRotationOffset;
+	udmMetaRig["forwardAxis"] << forwardAxis;
+	udmMetaRig["upAxis"] << upAxis;
 
 	size_t numValidMetaBones = 0;
 	for(auto &metaBone : bones) {
@@ -118,12 +116,12 @@ bool pragma::animation::MetaRig::Save(const Skeleton &skeleton, udm::AssetDataAr
 		if(bone.expired())
 			continue;
 		auto udmBone = udmBones[idx++];
-		udmBone["type"] = pragma::animation::get_meta_rig_bone_type_name(static_cast<pragma::animation::MetaRigBoneType>(i));
-		udmBone["bone"] = std::string {bone.lock()->name};
-		udmBone["normalizedRotationOffset"] = metaBone.normalizedRotationOffset;
+		udmBone["type"] << pragma::animation::get_meta_rig_bone_type_name(static_cast<pragma::animation::MetaRigBoneType>(i));
+		udmBone["bone"] << std::string {bone.lock()->name};
+		udmBone["normalizedRotationOffset"] << metaBone.normalizedRotationOffset;
 		auto udmBounds = udmBone["bounds"];
-		udmBounds["min"] = metaBone.bounds.first;
-		udmBounds["max"] = metaBone.bounds.second;
+		udmBounds["min"] << metaBone.bounds.first;
+		udmBounds["max"] << metaBone.bounds.second;
 	}
 
 	size_t numValidBlendShapes = 0;
@@ -140,8 +138,8 @@ bool pragma::animation::MetaRig::Save(const Skeleton &skeleton, udm::AssetDataAr
 		if(blendShape.flexControllerId == pragma::animation::INVALID_FLEX_CONTROLLER_INDEX)
 			continue;
 		auto udmBlendShape = udmBlendShapes[idx++];
-		udmBlendShape["type"] = pragma::animation::get_blend_shape_name(static_cast<pragma::animation::BlendShape>(i));
-		udmBlendShape["flexControllerId"] = blendShape.flexControllerId;
+		udmBlendShape["type"] << pragma::animation::get_blend_shape_name(static_cast<pragma::animation::BlendShape>(i));
+		udmBlendShape["flexControllerId"] << blendShape.flexControllerId;
 	}
 	return true;
 }

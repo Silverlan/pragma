@@ -15,7 +15,7 @@
 
 const std::vector<std::string> &pragma::ik::RigConfig::get_supported_extensions()
 {
-	static std::vector<std::string> exts = {"pikr", "pikr_b"};
+	static std::vector<std::string> exts = {PIKR_EXTENSION_ASCII, PIKR_EXTENSION_BINARY};
 	return exts;
 }
 std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load(const std::string &fileName)
@@ -36,6 +36,7 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load(const std::stri
 std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(udm::LinkedPropertyWrapper &prop)
 {
 	RigConfig rig {};
+	prop["rootBone"] >> rig.m_rootBone;
 	for(const auto &udmBone : prop["bones"]) {
 		std::string name;
 		bool locked = false;
@@ -421,6 +422,8 @@ void pragma::ik::RigConfig::DebugPrint() const
 
 void pragma::ik::RigConfig::ToUdmData(udm::LinkedPropertyWrapper &udmData) const
 {
+	udmData["rootBone"] = m_rootBone;
+
 	udm::LinkedPropertyWrapper udmBones;
 	if(udmData["bones"])
 		udmBones = udmData["bones"];

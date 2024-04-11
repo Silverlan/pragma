@@ -34,6 +34,8 @@ namespace DebugRenderer {
 	RuntimeObject::RuntimeObject(const std::shared_ptr<DebugRenderer::BaseObject> &o, float duration) : obj(o), time(client->RealTime() + duration) {}
 }
 
+static void init_debug_object(DebugRenderer::BaseObject &o, const DebugRenderInfo &renderInfo) { o.SetIgnoreDepth(renderInfo.ignoreDepthBuffer); }
+
 static constexpr uint32_t s_maxDebugObjectCount = 100'000;
 static std::unordered_map<DebugRenderer::Type, std::vector<DebugRenderer::RuntimeObject>> s_debugObjects {{DebugRenderer::Type::Triangles, {}}, {DebugRenderer::Type::Lines, {}}, {DebugRenderer::Type::LinesStrip, {}}, {DebugRenderer::Type::Points, {}},
   {DebugRenderer::Type::PointsVertex, {}}, {DebugRenderer::Type::Other, {}}};
@@ -247,6 +249,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoints(const std::
 	if(vertexCount == 0)
 		return nullptr;
 	auto o = std::make_shared<DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
+	init_debug_object(*o, renderInfo);
 	if(o->InitializeBuffers(vertexBuffer, vertexCount) == false)
 		return nullptr;
 	cleanup();
@@ -260,6 +263,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoints(const std::
 	if(points.empty())
 		return nullptr;
 	auto o = std::make_shared<DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
+	init_debug_object(*o, renderInfo);
 	auto &oVerts = o->GetVertices();
 	oVerts = points;
 	if(o->InitializeBuffers() == false)
@@ -278,6 +282,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoint(const DebugR
 std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawLines(const std::vector<Vector3> &lines, const DebugRenderInfo &renderInfo)
 {
 	auto o = std::make_shared<DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
+	init_debug_object(*o, renderInfo);
 	auto &oVerts = o->GetVertices();
 	oVerts = lines;
 	if(o->InitializeBuffers() == false)
@@ -425,6 +430,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawMesh(const std::ve
 	if(verts.empty() == true)
 		return nullptr;
 	auto o = std::make_shared<DebugRenderer::WorldObject>(renderInfo.color.ToVector4());
+	init_debug_object(*o, renderInfo);
 	auto &oVerts = o->GetVertices();
 	oVerts = verts;
 	if(o->InitializeBuffers() == false)

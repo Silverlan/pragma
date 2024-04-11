@@ -317,6 +317,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	std::optional<float> CalcFlexWeight(uint32_t flexId, const std::function<std::optional<float>(uint32_t)> &fFetchFlexControllerWeight, const std::function<std::optional<float>(uint32_t)> &fFetchFlexWeight) const;
 	virtual std::shared_ptr<ModelMesh> CreateMesh() const;
 	virtual std::shared_ptr<ModelSubMesh> CreateSubMesh() const;
+	float CalcBoneLength(pragma::animation::BoneId boneId) const;
 
 	// Vertex animations
 	const std::vector<std::shared_ptr<VertexAnimation>> &GetVertexAnimations() const;

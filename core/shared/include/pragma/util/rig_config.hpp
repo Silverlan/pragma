@@ -89,6 +89,9 @@ namespace pragma::ik {
 	using PRigConfigJoint = std::shared_ptr<RigConfigJoint>;
 	class DLLNETWORK RigConfig {
 	  public:
+		static constexpr auto PIKR_EXTENSION_BINARY = "pikr_b";
+		static constexpr auto PIKR_EXTENSION_ASCII = "pikr";
+
 		static std::optional<RigConfig> load(const std::string &fileName);
 		static std::optional<RigConfig> load_from_udm_data(udm::LinkedPropertyWrapper &prop);
 		static const std::vector<std::string> &get_supported_extensions();
@@ -132,6 +135,10 @@ namespace pragma::ik {
 		const std::vector<PRigConfigConstraint> &GetConstraints() const { return m_constraints; }
 		const std::vector<PRigConfigJoint> &GetJoints() const { return m_joints; }
 
+		void SetRootBone(const std::string &rootBone) { m_rootBone = rootBone; }
+		void ClearRootBone() { m_rootBone = {}; }
+		const std::optional<std::string> &GetRootBone() const { return m_rootBone; }
+
 		bool Save(const std::string &fileName);
 	  private:
 		std::vector<PRigConfigBone>::iterator FindBoneIt(const pragma::GString &name);
@@ -140,6 +147,7 @@ namespace pragma::ik {
 		std::vector<PRigConfigControl>::iterator FindControlIt(const pragma::GString &name);
 		const std::vector<PRigConfigControl>::iterator FindControlIt(const pragma::GString &name) const;
 
+		std::optional<std::string> m_rootBone {};
 		std::vector<PRigConfigBone> m_bones;
 		std::vector<PRigConfigControl> m_controls;
 		std::vector<PRigConfigConstraint> m_constraints;

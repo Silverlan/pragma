@@ -3497,6 +3497,8 @@ void pragma::lua::base_debug_line_component::register_class(luabind::module_ &mo
 void pragma::lua::base_debug_box_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseDebugBoxComponent>("BaseDebugBoxComponent");
+	def.def("SetBounds", &pragma::BaseDebugBoxComponent::SetBounds);
+	def.def("GetBounds", &pragma::BaseDebugBoxComponent::GetBounds);
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 

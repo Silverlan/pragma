@@ -42,6 +42,9 @@ namespace pragma {
 			TBaseComponent::OnRemove();
 			m_debugObject = nullptr;
 		}
+		void SetColorOverride(const Color &color) { m_colorOverride = color; }
+		void ClearColorOverride() { m_colorOverride = {}; }
+		const std::optional<Color> &GetColorOverride() const { return m_colorOverride; }
 	  protected:
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override
 		{
@@ -84,17 +87,22 @@ namespace pragma {
 			if(pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false)
 				return;
 			auto color = Color::White.ToVector4();
-			auto pos = Vector3 {};
-			auto pColorComponent = ent.template GetComponent<CColorComponent>();
+			if(m_colorOverride)
+				color = m_colorOverride->ToVector4();
+			else {
+				auto pColorComponent = ent.template GetComponent<CColorComponent>();
+				if(pColorComponent.valid())
+					color = pColorComponent->GetColor();
+			}
 			auto pTrComponent = ent.template GetComponent<CTransformComponent>();
-			if(pColorComponent.valid())
-				color = pColorComponent->GetColor();
+			auto pos = Vector3 {};
 			if(pTrComponent.valid())
 				pos = pTrComponent->GetPosition();
 			ReloadDebugObject(color, pos);
 		}
 		virtual void ReloadDebugObject(Color color, const Vector3 &pos) = 0;
 		std::shared_ptr<DebugRenderer::BaseObject> m_debugObject = nullptr;
+		std::optional<Color> m_colorOverride {};
 		CallbackHandle m_poseCallback = {};
 		CallbackHandle m_colorCallback = {};
 	};

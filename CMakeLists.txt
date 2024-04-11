@@ -882,12 +882,13 @@ set_target_folder(zlibstatic third_party_libs/zlib)
 target_include_directories(materialsystem PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 
 
-
+if(UNIX)
+#intervene here beacuse libzip uses pkgconfig
 set(ZLIB_INCLUDE_DIR ${DEPENDENCY_ZLIB_INCLUDE} CACHE STRING "" FORCE)
 set(ZLIB_LIBRARY "$<TARGET_FILE:zlib>" CACHE STRING "" FORCE)
 add_library(ZLIB::ZLIB ALIAS zlib) #for libzip just ahead.
 set(ZLIB_LINK_LIBRARY_NAME "ZLIB::ZLIB")
-
+endif()
 #
 
 # libzip

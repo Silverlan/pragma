@@ -417,7 +417,7 @@ if platform == "linux":
 else:
 	devcmd_path = determine_vsdevcmd_path(deps_dir)
 	os.chdir(root +"/third_party_libs/luajit/src")
-	subprocess.run([devcmd_path+" -nologo & msvcbuild.bat"],check=True)    
+	subprocess.run([devcmd_path+" -no_logo & msvcbuild.bat"],check=True)    
 	lua_jit_lib = normalize_path(deps_dir +"/third_party_libs/luajit/src/lua51.lib")
 	# os.chdir(deps_dir)
 	# mkdir("luajit_build")

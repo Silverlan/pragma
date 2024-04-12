@@ -424,7 +424,7 @@ else:
 	print_msg("Generating luajit batch-script...")
 	print("Writing '" +luajit_build_script_wrapper +"'...")
 	with open(luajit_build_script_wrapper, 'w') as file:
-		file.write("call \""+vcvars_path +"\"\n")
+		file.write("call \""+vcvars_path +"\" -arch=amd64 -host_arch=amd64\n") #TODO: allow arm64 to be usable by this.
 		file.write("cd \""+root+"/third_party_libs/luajit/src\"\n")
 		file.write("call \""+luajit_build_script +"\"\n")
 	subprocess.check_call( [luajit_build_script_wrapper] )

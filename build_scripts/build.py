@@ -760,7 +760,7 @@ if with_pfm:
         )
         add_pragma_module(
             name="pr_unirender",
-            commitSha="8473db63ae67e3e907a4453afccd1e7d112ea096",
+            commitSha="aa653298d52bbe98e323f4d7411c6b7ec9520a55",
             repositoryUrl="https://github.com/Slaweknowy/pr_cycles.git"
         )
         add_pragma_module(
@@ -785,7 +785,7 @@ if with_pfm:
         )
         add_pragma_module(
             name="pr_opencv",
-            commitSha="58dc78b95f4ca3c36a209e7011a591126d941878",
+            commitSha="8fbbf6f0f4192081d9a732667677addc76b99d13",
             repositoryUrl="https://github.com/SlawekNowy/pr_opencv.git"
         )
 

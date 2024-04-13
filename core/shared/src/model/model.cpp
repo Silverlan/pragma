@@ -406,6 +406,11 @@ bool Model::GetReferenceBonePose(pragma::animation::BoneId boneId, umath::Transf
 	auto numBones = ref.GetBoneCount();
 	if(boneId >= numBones)
 		return false;
+	umath::ScaledTransform scaledPose;
+	if(!GetReferenceBonePose(boneId, scaledPose, space))
+		return false;
+	outPose = scaledPose;
+	return true;
 }
 bool Model::GetReferenceBonePose(pragma::animation::BoneId boneId, umath::ScaledTransform &outPose, umath::CoordinateSpace space) const { return GetReferenceBonePose(boneId, &outPose.GetOrigin(), &outPose.GetRotation(), &outPose.GetScale(), space); }
 bool Model::GetReferenceBonePos(pragma::animation::BoneId boneId, Vector3 &outPos, umath::CoordinateSpace space) const { return GetReferenceBonePose(boneId, &outPos, nullptr, nullptr, space); }

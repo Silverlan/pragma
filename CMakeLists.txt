@@ -793,7 +793,7 @@ else()
 	set(SPDLOG_USE_STD_FORMAT OFF CACHE BOOL OFF FORCE)
 endif()
 set(SPDLOG_CLOCK_COARSE ON CACHE BOOL ON FORCE)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 20) # bump to c++23 after we change scope ops in luabind.
 register_third_party_library(spdlog)
 set_target_folder(spdlog third_party_libs)
 unset(CMAKE_CXX_STANDARD)

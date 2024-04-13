@@ -311,7 +311,8 @@ if platform == "linux":
 module_list = []
 cmake_args = []
 additional_build_targets = []
-
+#windows interop: ensure all deps are build using one MSVC runtime.
+msvc_cmake_args = ["-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"]
 ########## submodules ##########
 print_msg("Updating external libraries...")
 execscript(scripts_dir +"/scripts/external_libs.py")
@@ -346,7 +347,7 @@ os.chdir("zlib")
 # Build
 print_msg("Building zlib...")
 mkdir("build",cd=True)
-cmake_configure("..",generator)
+cmake_configure("..",generator,msvc_cmake_args)
 cmake_build(build_config)
 if platform == "win32":
 	zlib_conf_root = normalize_path(os.getcwd())
@@ -403,7 +404,7 @@ else:
 	# boost_url = "https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.bz2"
 	# The URL above is currently unavailable, so we'll use this mirror for the time being ( https://github.com/boostorg/boost/issues/842 )
 	boost_url = "https://archives.boost.io/release/1.80.0/source/boost_1_80_0.tar.bz2"
-	cmake_configure("..",generator,["-DBOOST_DISABLE_TESTS=ON","-DZLIB_INCLUDE_DIR=" +ZLIB_INCLUDE,"-DZLIB_LIBRARY=" +ZLIB_LIBPATH,"-DBOOST_URL=" +boost_url])
+	cmake_configure("..",generator,["-DBOOST_DISABLE_TESTS=ON","-DZLIB_INCLUDE_DIR=" +ZLIB_INCLUDE,"-DZLIB_LIBRARY=" +ZLIB_LIBPATH,"-DBOOST_URL=" +boost_url]+msvc_cmake_args)
 	cmake_build("Release")
 	os.chdir("../..")
 
@@ -508,7 +509,7 @@ if platform == "win32":
     		"-DCMAKE_INSTALL_PREFIX="+deps_dir_fs+"/zlib_prefix",
     		"-DBUILD_SHARED_LIBS=ON"
     		]
-    cmake_configure(root+"/third_party_libs/zlib",generator,zlib_cmake_args)
+    cmake_configure(root+"/third_party_libs/zlib",generator,zlib_cmake_args+msvc_cmake_args)
     cmake_build("Release")
     cmake_build("Release",["install"])
 
@@ -541,7 +542,7 @@ if platform == "win32":
     ]
 
     print_msg("Building freetype...")
-    cmake_configure(freetype_root,generator,freetype_cmake_args)
+    cmake_configure(freetype_root,generator,freetype_cmake_args+msvc_cmake_args)
     cmake_build("Release")
     freetype_include_dir += freetype_root+"/include"
     freetype_lib += freetype_root+"/build/Release/freetype.lib"
@@ -612,6 +613,7 @@ def execbuildscript(filepath):
 	g = {
 		"module_list": module_list,
 		"cmake_args": cmake_args,
+		"msvc_cmake_args": msvc_cmake_args,
 		"additional_build_targets": additional_build_targets
 	}
 	l = {
@@ -928,7 +930,7 @@ if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
 		raise argparse.ArgumentError(None,"Both the --vtune-include-path and --vtune-library-path options have to be specified to enable VTune support!")
 
 cmake_args += additional_cmake_args
-cmake_configure(root,generator,cmake_args)
+cmake_configure(root,generator,cmake_args+msvc_cmake_args)
 
 print_msg("Build files have been written to \"" +build_dir +"\".")
 
@@ -979,7 +981,7 @@ if with_lua_debugger:
 		luasocket_args.append("-DLUA_LIBRARY=" +root +"/third_party_libs/luajit/src/lua51.lib")
 	else:
 		luasocket_args.append("-DLUA_LIBRARY=" +root +"/third_party_libs/luajit/src/libluajit-p.so")
-	cmake_configure("..",generator,luasocket_args)
+	cmake_configure("..",generator,luasocket_args+msvc_cmake_args)
 	cmake_build(build_config)
 	cp(luasocket_root +"/src/socket.lua",install_dir +"/lua/modules/")
 	mkdir(install_dir +"/modules/socket/")

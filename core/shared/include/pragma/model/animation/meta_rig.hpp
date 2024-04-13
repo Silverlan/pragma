@@ -212,6 +212,7 @@ namespace pragma::animation {
 		void DebugPrint(const Model &mdl);
 		const MetaRigBone *GetBone(pragma::animation::MetaRigBoneType type) const;
 		const MetaRigBlendShape *GetBlendShape(pragma::animation::BlendShape blendShape) const;
+		std::optional<pragma::animation::MetaRigBoneType> FindMetaBoneType(pragma::animation::BoneId boneId) const;
 		pragma::animation::BoneId GetBoneId(const pragma::GString &type) const;
 		pragma::animation::BoneId GetBoneId(pragma::animation::MetaRigBoneType type) const;
 		RigType rigType = RigType::Biped;

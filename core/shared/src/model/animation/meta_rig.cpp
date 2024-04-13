@@ -185,6 +185,16 @@ void pragma::animation::MetaRig::DebugPrint(const Model &mdl)
 
 	Con::cout << ss.str() << Con::endl;
 }
+std::optional<pragma::animation::MetaRigBoneType> pragma::animation::MetaRig::FindMetaBoneType(pragma::animation::BoneId boneId) const
+{
+	size_t i = 0;
+	for(auto &bone : bones) {
+		if(bone.boneId == boneId)
+			return static_cast<pragma::animation::MetaRigBoneType>(i);
+		++i;
+	}
+	return {};
+}
 const pragma::animation::MetaRigBlendShape *pragma::animation::MetaRig::GetBlendShape(pragma::animation::BlendShape blendShape) const
 {
 	auto i = umath::to_integral(blendShape);

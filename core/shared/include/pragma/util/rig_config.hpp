@@ -19,6 +19,9 @@
 #include "pragma/util/global_string_table.hpp"
 
 namespace pragma::ik {
+	// We'll assume 73 units to be roughly the size of a human and use that as a reference, i.e. a scale of 1.0 represents 73 game units
+	constexpr float REFERENCE_HUMAN_UNIT_SIZE = 73.f;
+
 	struct DLLNETWORK RigConfigBone {
 		pragma::GString name;
 		bool locked = false;
@@ -139,6 +142,10 @@ namespace pragma::ik {
 		void ClearRootBone() { m_rootBone = {}; }
 		const std::optional<std::string> &GetRootBone() const { return m_rootBone; }
 
+		float CalcScaleFactor() const;
+		void SetScaleFactor(float factor) { m_scaleFactor = factor; }
+		float GetScaleFactor() const { return m_scaleFactor; }
+
 		bool Save(const std::string &fileName);
 	  private:
 		std::vector<PRigConfigBone>::iterator FindBoneIt(const pragma::GString &name);
@@ -152,6 +159,7 @@ namespace pragma::ik {
 		std::vector<PRigConfigControl> m_controls;
 		std::vector<PRigConfigConstraint> m_constraints;
 		std::vector<PRigConfigJoint> m_joints;
+		float m_scaleFactor = 1.f;
 	};
 };
 DLLNETWORK std::ostream &operator<<(std::ostream &out, const pragma::ik::RigConfig &config);

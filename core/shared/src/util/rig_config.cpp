@@ -12,7 +12,7 @@
 #include <fsys/filesystem.h>
 #include <udm.hpp>
 #include <sharedutils/util_path.hpp>
-
+#pragma optimize("", off)
 const std::vector<std::string> &pragma::ik::RigConfig::get_supported_extensions()
 {
 	static std::vector<std::string> exts = {PIKR_EXTENSION_ASCII, PIKR_EXTENSION_BINARY};
@@ -35,6 +35,8 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load(const std::stri
 }
 std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(udm::LinkedPropertyWrapper &prop)
 {
+	if(!prop["bones"])
+		return {};
 	RigConfig rig {};
 	prop["rootBone"] >> rig.m_rootBone;
 	for(const auto &udmBone : prop["bones"]) {
@@ -509,6 +511,27 @@ void pragma::ik::RigConfig::ToUdmData(udm::LinkedPropertyWrapper &udmData) const
 		udmJoint["measurementAxisA"] << jointData->measurementAxisA;
 		udmJoint["anchorPosition"] << jointData->anchorPosition;
 	}
+}
+
+float pragma::ik::RigConfig::CalcScaleFactor() const
+{
+	Vector3 min {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
+	Vector3 max {std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()};
+	size_t n = 0;
+	for(auto &joint : m_joints) {
+		if(!joint->anchorPosition)
+			continue;
+		for(uint8_t i = 0; i < 3; ++i) {
+			min[i] = umath::min(min[i], (*joint->anchorPosition)[i]);
+			max[i] = umath::max(max[i], (*joint->anchorPosition)[i]);
+		}
+		++n;
+	}
+	if(n == 0)
+		return 1.f;
+	auto dim = umath::max(umath::abs(max.x - min.x), umath::abs(max.y - min.y), umath::abs(max.z - min.z));
+	dim /= REFERENCE_HUMAN_UNIT_SIZE;
+	return dim;
 }
 
 bool pragma::ik::RigConfig::Save(const std::string &fileName)

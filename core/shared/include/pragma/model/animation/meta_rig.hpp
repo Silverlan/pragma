@@ -220,6 +220,7 @@ namespace pragma::animation {
 		pragma::SignedAxis forwardAxis = pragma::SignedAxis::Z;
 		pragma::SignedAxis upAxis = pragma::SignedAxis::Y;
 
+		// Bounds in normalized space (with forwardFacingRotationOffset applied)
 		Vector3 min {};
 		Vector3 max {};
 	  private:

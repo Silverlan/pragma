@@ -721,7 +721,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
     add_pragma_module(
         name="pr_prosper_vulkan",
-        commitSha="f59f11c54e942155fedc4243960ab7c487c49204",
+        commitSha="185fe54e2ce98062b25e03f65ae002153d442e70",
         repositoryUrl="https://github.com/SlawekNowy/pr_prosper_vulkan.git"
     )
 
@@ -797,7 +797,7 @@ if with_lua_doc_generator or with_pfm:
 if with_vr:
     add_pragma_module(
         name="pr_openvr",
-        commitSha="2e84c0f1012d2d86bb42d0c962e359c8ee8f1636",
+        commitSha="3df87434fead3394e5befe60e8d9e3560bc083e1",
         repositoryUrl="https://github.com/SlawekNowy/pr_openvr.git"
     )
 

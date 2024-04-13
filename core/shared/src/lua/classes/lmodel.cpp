@@ -368,7 +368,13 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("GetMetaRig", &::Model::GetMetaRig);
 	classDef.def("ClearMetaRig", &::Model::ClearMetaRig);
 	classDef.def("GetMetaRigReferencePose", &::Model::GetMetaRigReferencePose);
-
+	classDef.def(
+	  "GenerateStandardMetaRigReferenceBonePoses", +[](const ::Model &mdl) -> std::optional<std::vector<umath::ScaledTransform>> {
+		  std::vector<umath::ScaledTransform> poses;
+		  if(!mdl.GenerateStandardMetaRigReferenceBonePoses(poses))
+			  return {};
+		  return poses;
+	  });
 	classDef.def("GetTextureGroupCount", &Lua::Model::GetTextureGroupCount);
 	classDef.def("GetTextureGroups", &Lua::Model::GetTextureGroups);
 	classDef.def("GetTextureGroup", &Lua::Model::GetTextureGroup);

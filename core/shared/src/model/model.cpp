@@ -406,6 +406,11 @@ bool Model::GetReferenceBonePose(pragma::animation::BoneId boneId, umath::Transf
 	auto numBones = ref.GetBoneCount();
 	if(boneId >= numBones)
 		return false;
+	umath::ScaledTransform scaledPose;
+	if(!GetReferenceBonePose(boneId, scaledPose, space))
+		return false;
+	outPose = scaledPose;
+	return true;
 }
 bool Model::GetReferenceBonePose(pragma::animation::BoneId boneId, umath::ScaledTransform &outPose, umath::CoordinateSpace space) const { return GetReferenceBonePose(boneId, &outPose.GetOrigin(), &outPose.GetRotation(), &outPose.GetScale(), space); }
 bool Model::GetReferenceBonePos(pragma::animation::BoneId boneId, Vector3 &outPos, umath::CoordinateSpace space) const { return GetReferenceBonePose(boneId, &outPos, nullptr, nullptr, space); }
@@ -1714,6 +1719,55 @@ pragma::animation::Skeleton &Model::GetSkeleton() { return *m_skeleton; }
 
 const std::shared_ptr<pragma::animation::MetaRig> &Model::GetMetaRig() const { return m_metaRig; }
 void Model::ClearMetaRig() { m_metaRig = nullptr; }
+void Model::GenerateStandardMetaRigReferenceBonePoses(const pragma::animation::MetaRig &metaRig, const pragma::animation::Skeleton &skeleton, const Frame &refFrame, std::vector<umath::ScaledTransform> &outPoses)
+{
+	std::vector<umath::ScaledTransform> relPoses;
+	auto relRef = Frame::Create(refFrame);
+	relRef->Localize(skeleton);
+
+	std::unordered_map<pragma::animation::BoneId, pragma::animation::MetaRigBoneType> boneIdToMetaId;
+	for(size_t i = 0; i < metaRig.bones.size(); ++i) {
+		auto &metaBone = metaRig.bones[i];
+		if(metaBone.boneId == pragma::animation::INVALID_BONE_INDEX)
+			continue;
+		boneIdToMetaId[metaBone.boneId] = static_cast<pragma::animation::MetaRigBoneType>(i);
+	}
+
+	auto numBones = skeleton.GetBoneCount();
+	outPoses.resize(numBones);
+	std::function<void(const pragma::animation::Bone &, const umath::ScaledTransform &)> generateStandardBonePose = nullptr;
+	generateStandardBonePose = [&metaRig, &generateStandardBonePose, &relRef, &outPoses, &boneIdToMetaId](const pragma::animation::Bone &bone, const umath::ScaledTransform &parentPose) {
+		umath::ScaledTransform relRefPose;
+		relRef->GetBonePose(bone.ID, relRefPose);
+		auto pose = parentPose * relRefPose;
+
+		auto it = boneIdToMetaId.find(bone.ID);
+		if(it != boneIdToMetaId.end()) {
+			auto metaBoneId = it->second;
+			auto &metaBone = *metaRig.GetBone(metaBoneId);
+			auto refRot = pragma::animation::get_meta_rig_reference_rotation(metaBoneId);
+			if(refRot)
+				pose.SetRotation(*refRot * uquat::get_inverse(metaBone.normalizedRotationOffset));
+		}
+		outPoses[bone.ID] = pose;
+
+		for(auto &[childId, child] : bone.children)
+			generateStandardBonePose(*child, pose);
+	};
+	for(auto &[boneId, bone] : skeleton.GetRootBones())
+		generateStandardBonePose(*bone, {});
+
+	auto invBaseRot = uquat::get_inverse(metaRig.forwardFacingRotationOffset);
+	for(auto &pose : outPoses)
+		pose.RotateGlobal(invBaseRot);
+}
+bool Model::GenerateStandardMetaRigReferenceBonePoses(std::vector<umath::ScaledTransform> &outPoses) const
+{
+	if(!m_metaRig)
+		return false;
+	GenerateStandardMetaRigReferenceBonePoses(*m_metaRig, *m_skeleton, *m_reference, outPoses);
+	return true;
+}
 std::optional<umath::ScaledTransform> Model::GetMetaRigReferencePose(pragma::animation::MetaRigBoneType type) const
 {
 	auto &metaRig = GetMetaRig();

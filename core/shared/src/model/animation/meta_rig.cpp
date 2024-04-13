@@ -48,11 +48,12 @@ bool pragma::animation::MetaRig::LoadFromAssetData(const Skeleton &skeleton, con
 	}
 
 	auto &udmMetaRig = udm;
-	auto metaRig = std::make_shared<pragma::animation::MetaRig>();
-	udmMetaRig["rigType"] >> metaRig->rigType;
-	udmMetaRig["forwardFacingRotationOffset"] >> metaRig->forwardFacingRotationOffset;
-	udmMetaRig["forwardAxis"] >> metaRig->forwardAxis;
-	udmMetaRig["upAxis"] >> metaRig->upAxis;
+	udmMetaRig["rigType"] >> rigType;
+	udmMetaRig["forwardFacingRotationOffset"] >> forwardFacingRotationOffset;
+	udmMetaRig["forwardAxis"] >> forwardAxis;
+	udmMetaRig["upAxis"] >> upAxis;
+	udmMetaRig["bounds"]["min"] >> min;
+	udmMetaRig["bounds"]["max"] >> max;
 	for(auto &udmBone : udmMetaRig["bones"]) {
 		std::string type;
 		udmBone["type"] >> type;
@@ -64,11 +65,11 @@ bool pragma::animation::MetaRig::LoadFromAssetData(const Skeleton &skeleton, con
 		auto boneId = skeleton.LookupBone(bone);
 		if(boneId == pragma::animation::INVALID_BONE_INDEX)
 			continue;
-		auto &metaBone = metaRig->bones[umath::to_integral(*etype)];
+		auto &metaBone = bones[umath::to_integral(*etype)];
 		metaBone.boneId = boneId;
 		udmBone["normalizedRotationOffset"] >> metaBone.normalizedRotationOffset;
 		udmBone["radius"] >> metaBone.radius;
-		udmBone["height"] >> metaBone.height;
+		udmBone["length"] >> metaBone.length;
 
 		auto udmBounds = udmBone["bounds"];
 		udmBounds["min"] >> metaBone.bounds.first;
@@ -85,7 +86,7 @@ bool pragma::animation::MetaRig::LoadFromAssetData(const Skeleton &skeleton, con
 		udmBlendShape["flexControllerId"] >> flexCId;
 		if(flexCId == pragma::animation::INVALID_FLEX_CONTROLLER_INDEX)
 			continue;
-		auto &blendShape = metaRig->blendShapes[umath::to_integral(*etype)];
+		auto &blendShape = blendShapes[umath::to_integral(*etype)];
 		blendShape.flexControllerId = flexCId;
 	}
 	return true;
@@ -101,6 +102,8 @@ bool pragma::animation::MetaRig::Save(const Skeleton &skeleton, udm::AssetDataAr
 	udmMetaRig["forwardFacingRotationOffset"] << forwardFacingRotationOffset;
 	udmMetaRig["forwardAxis"] << forwardAxis;
 	udmMetaRig["upAxis"] << upAxis;
+	udmMetaRig["bounds"]["min"] << min;
+	udmMetaRig["bounds"]["max"] << max;
 
 	size_t numValidMetaBones = 0;
 	for(auto &metaBone : bones) {
@@ -123,7 +126,7 @@ bool pragma::animation::MetaRig::Save(const Skeleton &skeleton, udm::AssetDataAr
 		udmBone["normalizedRotationOffset"] << metaBone.normalizedRotationOffset;
 
 		udmBone["radius"] << metaBone.radius;
-		udmBone["height"] << metaBone.height;
+		udmBone["length"] << metaBone.length;
 
 		auto udmBounds = udmBone["bounds"];
 		udmBounds["min"] << metaBone.bounds.first;
@@ -155,6 +158,13 @@ void pragma::animation::MetaRig::DebugPrint(const Model &mdl)
 	auto &skeleton = mdl.GetSkeleton();
 	std::stringstream ss;
 	ss << "MetaRig\n";
+	ss << "Rig type: " << magic_enum::enum_name(rigType) << "\n";
+	EulerAngles forwardFacingRotationAngles {forwardFacingRotationOffset};
+	ss << "Forward facing rotation offset " << forwardFacingRotationAngles.p << "," << forwardFacingRotationAngles.y << "," << forwardFacingRotationAngles.r << "\n";
+	ss << "Forward axis: " << magic_enum::enum_name(forwardAxis) << "\n";
+	ss << "Up axis: " << magic_enum::enum_name(upAxis) << "\n";
+	ss << "Min: " << min.x << "," << min.y << "," << min.z << "\n";
+	ss << "Max: " << max.x << "," << max.y << "," << max.z << "\n";
 	auto printBone = [&ss, &skeleton](MetaRigBoneType boneType, const MetaRigBone &rigBone) {
 		ss << "\t" << magic_enum::enum_name(boneType) << "\n";
 		auto bone = skeleton.GetBone(rigBone.boneId).lock();
@@ -164,7 +174,7 @@ void pragma::animation::MetaRig::DebugPrint(const Model &mdl)
 		auto &[min, max] = rigBone.bounds;
 		ss << "\t\tBounds: (" << min.x << "," << min.y << "," << min.z << ") (" << max.x << "," << max.y << "," << max.z << ")\n";
 		ss << "\t\tRadius: " << rigBone.radius << "\n";
-		ss << "\t\tHeight: " << rigBone.height << "\n";
+		ss << "\t\tLength: " << rigBone.length << "\n";
 		ss << "\n";
 	};
 	for(size_t i = 0; i < bones.size(); ++i)

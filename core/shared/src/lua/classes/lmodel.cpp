@@ -1002,6 +1002,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 		  return boneId;
 	  });
 	defRig.def("GetBone", &pragma::animation::MetaRig::GetBone);
+	defRig.def("FindMetaBoneType", &pragma::animation::MetaRig::FindMetaBoneType);
 	defRig.def("GetBlendShape", &pragma::animation::MetaRig::GetBlendShape);
 	defRig.def("DebugPrint", &pragma::animation::MetaRig::DebugPrint);
 	defRig.add_static_constant("RIG_TYPE_BIPED", umath::to_integral(pragma::animation::RigType::Biped));

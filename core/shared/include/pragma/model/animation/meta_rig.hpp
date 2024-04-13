@@ -219,6 +219,9 @@ namespace pragma::animation {
 		Quat forwardFacingRotationOffset = uquat::identity();
 		pragma::SignedAxis forwardAxis = pragma::SignedAxis::Z;
 		pragma::SignedAxis upAxis = pragma::SignedAxis::Y;
+
+		Vector3 min {};
+		Vector3 max {};
 	  private:
 		bool LoadFromAssetData(const Skeleton &skeleton, const udm::AssetData &data, std::string &outErr);
 	};

@@ -996,48 +996,6 @@ bool Model::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
 				udmFlexC["max"] = flexC.max;
 			}
 
-			auto &eyeballs = GetEyeballs();
-			auto udmEyeballs = udm["eyeballs"];
-			uint32_t eyeballIdx = 0;
-			for(auto &eyeball : eyeballs) {
-				std::string name = eyeball.name;
-				if(name.empty()) {
-					name = "eyeball" + std::to_string(eyeballIdx);
-					Con::cwar << "Eyeball with no name found, assigning name '" << name << "'" << Con::endl;
-				}
-				auto udmEyeball = udmEyeballs[name];
-				udmEyeball["index"] = eyeballIdx++;
-				udmEyeball["bone"] = eyeball.boneIndex;
-				udmEyeball["origin"] = eyeball.origin;
-				udmEyeball["zOffset"] = eyeball.zOffset;
-				udmEyeball["radius"] = eyeball.radius;
-				udmEyeball["up"] = eyeball.up;
-				udmEyeball["forward"] = eyeball.forward;
-				udmEyeball["maxDilationFactor"] = eyeball.maxDilationFactor;
-
-				udmEyeball["iris"]["material"] = eyeball.irisMaterialIndex;
-				udmEyeball["iris"]["uvRadius"] = eyeball.irisUvRadius;
-				udmEyeball["iris"]["scale"] = eyeball.irisScale;
-
-				auto readLid = [](udm::LinkedPropertyWrapperArg prop, Eyeball::LidFlexDesc &lid) {
-					prop["raiser"]["lidFlexIndex"](lid.lidFlexIndex);
-
-					prop["raiser"]["raiserFlexIndex"](lid.raiserFlexIndex);
-					prop["raiser"]["targetAngle"](lid.raiserValue);
-					lid.raiserValue = umath::deg_to_rad(lid.raiserValue);
-
-					prop["neutral"]["neutralFlexIndex"](lid.neutralFlexIndex);
-					prop["neutral"]["targetAngle"](lid.neutralValue);
-					lid.neutralValue = umath::deg_to_rad(lid.neutralValue);
-
-					prop["lowerer"]["lowererFlexIndex"](lid.lowererFlexIndex);
-					prop["lowerer"]["targetAngle"](lid.lowererValue);
-					lid.lowererValue = umath::deg_to_rad(lid.lowererValue);
-				};
-				readLid(udmEyeball["eyelids"]["upperLid"], eyeball.upperLid);
-				readLid(udmEyeball["eyelids"]["lowerLid"], eyeball.lowerLid);
-			}
-
 			auto &phonemeMap = GetPhonemeMap();
 			auto udmPhonemes = udm["phonemes"];
 			for(auto &pairPhoneme : phonemeMap.phonemes)
@@ -1053,6 +1011,48 @@ bool Model::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
 				if(flexAnim->Save(udm::AssetData {udmFlexAnim}, outErr) == false)
 					return false;
 			}
+		}
+
+		auto &eyeballs = GetEyeballs();
+		auto udmEyeballs = udm["eyeballs"];
+		uint32_t eyeballIdx = 0;
+		for(auto &eyeball : eyeballs) {
+			std::string name = eyeball.name;
+			if(name.empty()) {
+				name = "eyeball" + std::to_string(eyeballIdx);
+				Con::cwar << "Eyeball with no name found, assigning name '" << name << "'" << Con::endl;
+			}
+			auto udmEyeball = udmEyeballs[name];
+			udmEyeball["index"] = eyeballIdx++;
+			udmEyeball["bone"] = eyeball.boneIndex;
+			udmEyeball["origin"] = eyeball.origin;
+			udmEyeball["zOffset"] = eyeball.zOffset;
+			udmEyeball["radius"] = eyeball.radius;
+			udmEyeball["up"] = eyeball.up;
+			udmEyeball["forward"] = eyeball.forward;
+			udmEyeball["maxDilationFactor"] = eyeball.maxDilationFactor;
+
+			udmEyeball["iris"]["material"] = eyeball.irisMaterialIndex;
+			udmEyeball["iris"]["uvRadius"] = eyeball.irisUvRadius;
+			udmEyeball["iris"]["scale"] = eyeball.irisScale;
+
+			auto readLid = [](udm::LinkedPropertyWrapperArg prop, Eyeball::LidFlexDesc &lid) {
+				prop["raiser"]["lidFlexIndex"](lid.lidFlexIndex);
+
+				prop["raiser"]["raiserFlexIndex"](lid.raiserFlexIndex);
+				prop["raiser"]["targetAngle"](lid.raiserValue);
+				lid.raiserValue = umath::deg_to_rad(lid.raiserValue);
+
+				prop["neutral"]["neutralFlexIndex"](lid.neutralFlexIndex);
+				prop["neutral"]["targetAngle"](lid.neutralValue);
+				lid.neutralValue = umath::deg_to_rad(lid.neutralValue);
+
+				prop["lowerer"]["lowererFlexIndex"](lid.lowererFlexIndex);
+				prop["lowerer"]["targetAngle"](lid.lowererValue);
+				lid.lowererValue = umath::deg_to_rad(lid.lowererValue);
+			};
+			readLid(udmEyeball["eyelids"]["upperLid"], eyeball.upperLid);
+			readLid(udmEyeball["eyelids"]["lowerLid"], eyeball.lowerLid);
 		}
 	}
 

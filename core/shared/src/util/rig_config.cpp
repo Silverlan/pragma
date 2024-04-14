@@ -424,7 +424,7 @@ void pragma::ik::RigConfig::DebugPrint() const
 
 void pragma::ik::RigConfig::ToUdmData(udm::LinkedPropertyWrapper &udmData) const
 {
-	udmData["rootBone"] = m_rootBone;
+	udmData["rootBone"] << m_rootBone;
 
 	udm::LinkedPropertyWrapper udmBones;
 	if(udmData["bones"])

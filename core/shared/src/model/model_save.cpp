@@ -333,8 +333,10 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 	if(!isStatic) {
 		auto udmSkeleton = udm["skeleton"];
 		m_skeleton = pragma::animation::Skeleton::Load(udm::AssetData {udmSkeleton}, outErr);
-		if(m_skeleton == nullptr)
+		if(m_skeleton == nullptr) {
+			outErr = "Failed to load skeleton: " + outErr;
 			return false;
+		}
 		auto &ref = GetReference();
 		auto &poses = m_skeleton->GetBonePoses();
 		ref.SetBoneCount(poses.size());
@@ -395,8 +397,10 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 		auto udmMetaRig = udm["metaRig"];
 		if(udmMetaRig) {
 			m_metaRig = pragma::animation::MetaRig::Load(*m_skeleton, udm::AssetData {udmMetaRig}, outErr);
-			if(!m_metaRig)
+			if(!m_metaRig) {
+				outErr = "Failed to load meta rig: " + outErr;
 				return false;
+			}
 		}
 	}
 
@@ -433,8 +437,10 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 	for(auto i = decltype(numColMeshes) {0u}; i < numColMeshes; ++i) {
 		auto &colMesh = colMeshes[i];
 		colMesh = CollisionMesh::Load(game, *this, udm::AssetData {udmColMeshes[i]}, outErr);
-		if(colMesh == nullptr)
+		if(colMesh == nullptr) {
+			outErr = "Failed to load collision mesh " + std::to_string(i) + ": " + outErr;
 			return false;
+		}
 	}
 
 	// Joints
@@ -485,8 +491,10 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 				auto udmSubMesh = udmSubMeshes[subMeshIdx];
 				subMesh = CreateSubMesh();
 				subMesh->LoadFromAssetData(udm::AssetData {udmSubMesh}, outErr);
-				if(subMesh == nullptr)
+				if(subMesh == nullptr) {
+					outErr = "Failed to load sub mesh " + std::to_string(subMeshIdx) + " of mesh " + std::to_string(meshIdx) + " of mesh group " + std::string {udmMeshGroup.key} + ": " + outErr;
 					return false;
+				}
 				// subMesh->Update(ModelUpdateFlags::UpdateBuffers);
 			}
 		}
@@ -501,8 +509,10 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 		animations.resize(udmAnimations.GetChildCount());
 		for(auto udmAnimation : udmAnimations.ElIt()) {
 			auto anim = pragma::animation::Animation::Load(udm::AssetData {udmAnimation.property}, outErr, &skeleton, &reference);
-			if(anim == nullptr)
+			if(anim == nullptr) {
+				outErr = "Failed to load animation " + std::string {udmAnimation.key} + ": " + outErr;
 				return false;
+			}
 			uint32_t index = 0;
 			udmAnimation.property["index"](index);
 			m_animationIDs[std::string {udmAnimation.key}] = index;
@@ -563,8 +573,10 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 		for(auto udmMorphTargetAnim : udmMorphTargetAnims.ElIt()) {
 			udmMorphTargetAnim.property["index"](idx);
 			morphAnims[idx] = VertexAnimation::Load(*this, udm::AssetData {udmMorphTargetAnim.property}, outErr);
-			if(morphAnims[idx] == nullptr)
+			if(morphAnims[idx] == nullptr) {
+				outErr = "Failed to load vertex animation " + std::string {udmMorphTargetAnim.key} + ": " + outErr;
 				return false;
+			}
 			++idx;
 		}
 
@@ -573,6 +585,12 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 		flexes.resize(udmFlexes.GetChildCount());
 		for(auto udmFlex : udmFlexes.ElIt()) {
 			udmFlex.property["index"](idx);
+			if(idx >= flexes.size()) {
+				// outErr = "Flex index " + std::to_string(idx) + " out of range! (Number of flexes: " + std::to_string(flexes.size()) + ")";
+				// return false;
+				Con::cwar << "Flex index " << std::to_string(idx) << " out of range! (Number of flexes: " << std::to_string(flexes.size()) << ")" << Con::endl;
+				flexes.resize(idx + 1);
+			}
 			auto &flex = flexes[idx];
 			flex.GetName() = udmFlex.key;
 
@@ -664,8 +682,10 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 			udmFlexAnim.property["index"](idx);
 			flexAnimNames[idx] = udmFlexAnim.key;
 			flexAnims[idx] = FlexAnimation::Load(udm::AssetData {udmFlexAnim.property}, outErr);
-			if(flexAnims[idx] == nullptr)
+			if(flexAnims[idx] == nullptr) {
+				outErr = "Failed to load flex animation " + std::string {udmFlexAnim.key} + ": " + outErr;
 				return false;
+			}
 		}
 	}
 

@@ -68,8 +68,8 @@ void ConstraintComponent::RegisterMembers(pragma::EntityComponentManager &compon
 	{
 		using TOrderIndex = int32_t;
 		auto memberInfo = create_component_member_info<T, TOrderIndex, static_cast<void (T::*)(TOrderIndex)>(&T::SetOrderIndex), static_cast<TOrderIndex (T::*)() const>(&T::GetOrderIndex)>("orderIndex", TOrderIndex {0});
-		memberInfo.SetMin(-1'00);
-		memberInfo.SetMax(1'00);
+		memberInfo.SetMin(-100);
+		memberInfo.SetMax(100);
 		registerMember(std::move(memberInfo));
 	}
 }

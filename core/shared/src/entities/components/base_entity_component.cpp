@@ -348,9 +348,26 @@ bool convert_transform_member_value_to_target_space(const BaseEntityComponent &c
 		  if(!pragma::ents::is_udm_member_type(memberInfo.type))
 			  throw std::invalid_argument {"Property has type '" + std::string {magic_enum::enum_name(memberInfo.type)} + "', which is not a valid UDM type!"};
 		  constexpr auto type = udm::type_to_enum<T>();
-		  if(static_cast<udm::Type>(memberInfo.type) != type) // Type has to be an exact match
-			  throw std::invalid_argument {"Property type '" + std::string {magic_enum::enum_name(memberInfo.type)} + "' does not match expected type '" + std::string {magic_enum::enum_name(type)} + "'!"};
-		  memcpy(outData, inOutPos, sizeof(T));
+		  auto memberType = static_cast<udm::Type>(memberInfo.type);
+		  if(memberType == type)
+			  memcpy(outData, inOutPos, sizeof(T));
+		  else if(udm::is_convertible(memberType, type)) {
+			  pragma::ents::visit_member(memberInfo.type, [inOutPos, outData](auto tag) {
+				  using TMember = typename decltype(tag)::type;
+				  if constexpr(!udm::is_convertible<TMember, T>()) {
+					  // unreachable
+					  return;
+				  }
+				  else {
+					  auto &tmp = *static_cast<const TMember *>(inOutPos);
+					  auto convValue = udm::convert<TMember, T>(tmp);
+					  memcpy(outData, &convValue, sizeof(T));
+					  return;
+				  }
+			  });
+		  }
+		  else
+			  throw std::invalid_argument {"Property type '" + std::string {magic_enum::enum_name(memberInfo.type)} + "' is not compatible with expected type '" + std::string {magic_enum::enum_name(type)} + "'!"};
 	  });
 }
 bool BaseEntityComponent::ConvertTransformMemberPosToTargetSpace(ComponentMemberIndex idx, umath::CoordinateSpace space, Vector3 &inOutPos) const { return convert_transform_member_value_to_target_space(*this, idx, space, inOutPos); }

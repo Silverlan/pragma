@@ -157,11 +157,11 @@ bool ConstraintChildOfComponent::UpdatePropertyInfos()
 {
 	if(!m_constraintC.valid())
 		return false;
-	if(m_drivenObjectPropertyInfo && m_driverPropertyInfo)
-		return true;
 	auto &constraintInfo = m_constraintC->GetConstraintParticipants();
 	if(!constraintInfo)
 		return false;
+	if(m_drivenObjectPropertyInfo && m_driverPropertyInfo)
+		return true;
 	auto &game = *GetEntity().GetNetworkState()->GetGameState();
 	auto applyPropInfo = [&game](const pragma::BaseEntityComponent &objC, pragma::ComponentMemberIndex propIdx, std::optional<PropertyInfo> &propInfo) {
 		auto drivenObjPoseProp = FindPosePropertyReference(objC, propIdx);

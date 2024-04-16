@@ -9,6 +9,7 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/gui/mainmenu/wimainmenu_base.h"
 #include "pragma/gui/mainmenu/wimainmenu.h"
+#include <pragma/string/format.h>
 #include <wgui/types/wibutton.h>
 #include "pragma/gui/wioptionslist.h"
 #include <wgui/types/witext.h>
@@ -305,7 +306,7 @@ void WIMainMenuElement::SetText(std::string &text)
 {
 	if(m_hText.IsValid()) {
 		auto upperText = text;
-		ustring::to_upper(upperText);
+		util::utf8_string_to_upper(upperText);
 		WIText *pText = static_cast<WIText *>(m_hText.get());
 		pText->SetText(upperText);
 		pText->SizeToContents();

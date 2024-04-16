@@ -293,13 +293,13 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawLines(const std::v
 	return objs.back().obj;
 }
 std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawLine(const Vector3 &start, const Vector3 &end, const DebugRenderInfo &renderInfo) { return DrawLines(std::vector<Vector3> {start, end}, renderInfo); }
-static std::shared_ptr<DebugRenderer::BaseObject> draw_box(const Vector3 &center, const Vector3 &min, const Vector3 &max, const EulerAngles &ang, const Color &color, const Color *outlineColor, float duration)
+static std::shared_ptr<DebugRenderer::BaseObject> draw_box(const Vector3 &center, const Vector3 &min, const Vector3 &max, const DebugRenderInfo &renderInfo, const Color *outlineColor)
 {
 	auto r = std::make_shared<DebugRenderer::CollectionObject>();
 	if(outlineColor != nullptr) {
 		DebugRenderInfo outlineDrawInfo {};
-		outlineDrawInfo.color = color;
-		outlineDrawInfo.duration = duration;
+		outlineDrawInfo.color = renderInfo.color;
+		outlineDrawInfo.duration = renderInfo.duration;
 		std::vector<Vector3> meshVerts = {min, {min.x, min.y, max.z}, {min.x, max.y, max.z}, {max.x, max.y, min.z}, min, {min.x, max.y, min.z}, {max.x, min.y, max.z}, min, {max.x, min.y, min.z}, {max.x, max.y, min.z}, {max.x, min.y, min.z}, min, min, {min.x, max.y, max.z},
 		  {min.x, max.y, min.z}, {max.x, min.y, max.z}, {min.x, min.y, max.z}, min, {min.x, max.y, max.z}, {min.x, min.y, max.z}, {max.x, min.y, max.z}, max, {max.x, min.y, min.z}, {max.x, max.y, min.z}, {max.x, min.y, min.z}, max, {max.x, min.y, max.z}, max, {max.x, max.y, min.z},
 		  {min.x, max.y, min.z}, max, {min.x, max.y, min.z}, {min.x, max.y, max.z}, max, {min.x, max.y, max.z}, {max.x, min.y, max.z}};
@@ -308,7 +308,8 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_box(const Vector3 &center
 			r->AddObject(oMesh);
 	}
 
-	auto oOutline = std::make_shared<DebugRenderer::WorldObject>(((outlineColor != nullptr) ? *outlineColor : color).ToVector4());
+	auto oOutline = std::make_shared<DebugRenderer::WorldObject>(((outlineColor != nullptr) ? *outlineColor : renderInfo.color).ToVector4());
+	init_debug_object(*oOutline, renderInfo);
 	auto &verts = oOutline->GetVertices();
 	auto start = min;
 	auto end = max;
@@ -319,17 +320,17 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_box(const Vector3 &center
 		return nullptr;
 	cleanup();
 	auto &objs = s_debugObjects[DebugRenderer::Type::Lines];
-	objs.push_back(DebugRenderer::RuntimeObject {oOutline, duration});
+	objs.push_back(DebugRenderer::RuntimeObject {oOutline, renderInfo.duration});
 	r->AddObject(oOutline);
 	r->SetPos(center);
-	r->SetAngles(ang);
+	r->SetAngles(renderInfo.pose.GetRotation());
 	return r;
 }
 std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawBox(const Vector3 &start, const Vector3 &end, const DebugRenderInfo &renderInfo)
 {
 	auto center = (end + start) * 0.5f;
 	auto *poutlineColor = renderInfo.outlineColor ? &*renderInfo.outlineColor : nullptr;
-	return draw_box(renderInfo.pose.GetOrigin(), start - center, end - center, renderInfo.pose.GetRotation(), renderInfo.color, poutlineColor, renderInfo.duration);
+	return draw_box(renderInfo.pose.GetOrigin(), start - center, end - center, renderInfo, poutlineColor);
 }
 static WIText *create_text_element(const std::string &text)
 {

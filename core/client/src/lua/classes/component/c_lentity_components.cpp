@@ -951,6 +951,8 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCDebugBox.def("SetColorOverride", &pragma::CDebugBoxComponent::SetColorOverride);
 	defCDebugBox.def("ClearColorOverride", &pragma::CDebugBoxComponent::ClearColorOverride);
 	defCDebugBox.def("GetColorOverride", &pragma::CDebugBoxComponent::GetColorOverride);
+	defCDebugBox.def("SetIgnoreDepthBuffer", &pragma::CDebugBoxComponent::SetIgnoreDepthBuffer);
+	defCDebugBox.def("ShouldIgnoreDepthBuffer", &pragma::CDebugBoxComponent::ShouldIgnoreDepthBuffer);
 	entsMod[defCDebugBox];
 
 	auto defCDebugSphere = pragma::lua::create_entity_component_class<pragma::CDebugSphereComponent, pragma::BaseDebugSphereComponent>("DebugSphereComponent");

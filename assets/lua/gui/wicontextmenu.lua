@@ -244,6 +244,9 @@ end
 function gui.WIContextMenu:GetParentMenu()
 	return self.m_parentMenu
 end
+function gui.WIContextMenu:GetParentItem()
+	return self.m_parentItem
+end
 function gui.WIContextMenu:CloseActiveSubMenu()
 	if util.is_valid(self.m_activeSubMenu) == false then
 		return
@@ -252,6 +255,28 @@ function gui.WIContextMenu:CloseActiveSubMenu()
 	pSubMenu:SetVisible(false)
 	self:RequestFocus()
 	self.m_activeSubMenu = nil
+end
+function gui.WIContextMenu:RemoveItem(item)
+	for i, el in ipairs(self.m_tItems) do
+		if el:IsValid() and el == item then
+			el:Remove()
+			table.remove(self.m_tItems, i)
+			return
+		end
+	end
+end
+function gui.WIContextMenu:RemoveSubMenu(menu)
+	for i, el in ipairs(self.m_subMenues) do
+		if el:IsValid() and el == menu then
+			el:Remove()
+			table.remove(self.m_subMenues, i)
+			break
+		end
+	end
+	local item = menu:GetParentItem()
+	if util.is_valid(item) then
+		self:RemoveItem(item)
+	end
 end
 function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
 	local pSubMenu

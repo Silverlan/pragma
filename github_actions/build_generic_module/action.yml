@@ -16,6 +16,10 @@ inputs:
     description: 'Install CUDA?'
     required: true
     default: '0'
+  token:
+    description: 'PAT token required to fetch the repository.'
+    required: true
+    default: '${{ github.token }}'
 outputs:
   build-dir:
     description: 'The directory where the build files are written to.'
@@ -58,10 +62,11 @@ runs:
         echo "build-args=$build_args" >> $GITHUB_OUTPUT
 
     - name: "Download Module"
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: 'recursive'
         path: 'pragma/modules/${{ inputs.module }}'
+        token: '${{ inputs.token }}'
 
     - name: Build Pragma
       id: build-pragma

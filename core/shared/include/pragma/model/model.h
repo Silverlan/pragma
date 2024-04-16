@@ -228,6 +228,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 			return nullptr;
 		return mdl;
 	}
+	static void GenerateStandardMetaRigReferenceBonePoses(const pragma::animation::MetaRig &metaRig, const pragma::animation::Skeleton &skeleton, const Frame &refFrame, std::vector<umath::ScaledTransform> &outPoses);
 	enum class DLLNETWORK MergeFlags : uint32_t {
 		None = 0,
 		Animations = 1,
@@ -386,6 +387,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	bool GenerateMetaBlendShapes();
 	void ClearMetaRig();
 	std::optional<umath::ScaledTransform> GetMetaRigReferencePose(pragma::animation::MetaRigBoneType type) const;
+	bool GenerateStandardMetaRigReferenceBonePoses(std::vector<umath::ScaledTransform> &outPoses) const;
 	void ApplyPostImportProcessing();
 
 	uint32_t GetBoneCount() const;

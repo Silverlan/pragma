@@ -368,7 +368,13 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDef.def("GetMetaRig", &::Model::GetMetaRig);
 	classDef.def("ClearMetaRig", &::Model::ClearMetaRig);
 	classDef.def("GetMetaRigReferencePose", &::Model::GetMetaRigReferencePose);
-
+	classDef.def(
+	  "GenerateStandardMetaRigReferenceBonePoses", +[](const ::Model &mdl) -> std::optional<std::vector<umath::ScaledTransform>> {
+		  std::vector<umath::ScaledTransform> poses;
+		  if(!mdl.GenerateStandardMetaRigReferenceBonePoses(poses))
+			  return {};
+		  return poses;
+	  });
 	classDef.def("GetTextureGroupCount", &Lua::Model::GetTextureGroupCount);
 	classDef.def("GetTextureGroups", &Lua::Model::GetTextureGroups);
 	classDef.def("GetTextureGroup", &Lua::Model::GetTextureGroup);
@@ -960,6 +966,8 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	auto defBoneInfo = luabind::class_<pragma::animation::MetaRigBone>("MetaRigBone");
 	defBoneInfo.def(luabind::tostring(luabind::self));
 	defBoneInfo.def_readwrite("boneId", &pragma::animation::MetaRigBone::boneId);
+	defBoneInfo.def_readwrite("radius", &pragma::animation::MetaRigBone::radius);
+	defBoneInfo.def_readwrite("length", &pragma::animation::MetaRigBone::length);
 	defBoneInfo.def_readwrite("normalizedRotationOffset", &pragma::animation::MetaRigBone::normalizedRotationOffset);
 	defBoneInfo.property(
 	  "min", +[](const pragma::animation::MetaRigBone &boneInfo) -> Vector3 { return boneInfo.bounds.first; }, +[](pragma::animation::MetaRigBone &boneInfo, const Vector3 &min) { boneInfo.bounds.first = min; });
@@ -1000,6 +1008,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 		  return boneId;
 	  });
 	defRig.def("GetBone", &pragma::animation::MetaRig::GetBone);
+	defRig.def("FindMetaBoneType", &pragma::animation::MetaRig::FindMetaBoneType);
 	defRig.def("GetBlendShape", &pragma::animation::MetaRig::GetBlendShape);
 	defRig.def("DebugPrint", &pragma::animation::MetaRig::DebugPrint);
 	defRig.add_static_constant("RIG_TYPE_BIPED", umath::to_integral(pragma::animation::RigType::Biped));

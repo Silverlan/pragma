@@ -482,11 +482,7 @@ if not Path(vcpkg_root).is_dir():
 	git_clone("https://github.com/Microsoft/vcpkg.git")
 
 os.chdir("vcpkg")
-reset_to_commit("ce1916404fc6f2b645f419a6d47b7ebafe686582") # See https://github.com/microsoft/vcpkg/commit/ce1916404fc6f2b645f419a6d47b7ebafe686582
-# This is a hotfix for the xz repository (required by oiio, which is in turn required by cycles), which was taken down on GitHub
-# and as a result causes build errors with vcpkg (State: 24-04-03)
-# See https://github.com/microsoft/vcpkg/issues/37839#issuecomment-2028011285 for more information
-replace_text_in_file(os.getcwd() +"/ports/liblzma/portfile.cmake","REPO tukaani-project/xz","REPO bminor/xz")
+reset_to_commit("ad3bae5")
 os.chdir("..")
 if platform == "linux":
 	subprocess.run([vcpkg_root +"/bootstrap-vcpkg.sh","-disableMetrics"],check=True,shell=True)
@@ -1022,7 +1018,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","19767b5dc0a9afb301c88974b532eec05100057c")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","1c345125269703835ee084a49c1d5292608bdafc")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","56d46dacb398fa7540e794359eaf1081c9df1edd")
 
 	if with_vr:

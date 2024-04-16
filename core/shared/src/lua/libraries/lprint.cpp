@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/libraries/lprint.h"
 #include "pragma/lua/libraries/ldebug.h"
+#include "pragma/lua/libraries/lutil.hpp"
 #include <pragma/console/conout.h>
 #include "pragma/logging.hpp"
 #include "pragma/lua/ldefinitions.h"
@@ -17,6 +18,10 @@
 
 bool Lua::lua_value_to_string(lua_State *L, int arg, int *r, std::string *val)
 {
+	if(Lua::IsUserData(L, arg) && !Lua::util::is_valid(L, luabind::object {luabind::from_stack(L, arg)})) {
+		*val = "NULL";
+		return true;
+	}
 	Lua::PushValue(L, arg);
 	arg = Lua::GetStackTop(L);
 	lua_getglobal(L, "tostring");
@@ -107,11 +112,11 @@ int Lua::console::msg(lua_State *l, int st)
 	if(argc > 0) {
 		NetworkState *state = engine->GetNetworkState(l);
 		if(state == NULL)
-			util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+			::util::set_console_color(::util::ConsoleColorFlags::White | ::util::ConsoleColorFlags::Intensity);
 		else if(state->IsServer())
-			util::set_console_color(util::ConsoleColorFlags::Cyan | util::ConsoleColorFlags::Intensity);
+			::util::set_console_color(::util::ConsoleColorFlags::Cyan | ::util::ConsoleColorFlags::Intensity);
 		else
-			util::set_console_color(util::ConsoleColorFlags::Magenta | util::ConsoleColorFlags::Intensity);
+			::util::set_console_color(::util::ConsoleColorFlags::Magenta | ::util::ConsoleColorFlags::Intensity);
 	}
 	for(int i = st; i <= argc; i++) {
 		auto status = -1;
@@ -125,12 +130,12 @@ int Lua::console::msg(lua_State *l, int st)
 
 int Lua::debug::print(lua_State *l)
 {
-	auto flags = util::ConsoleColorFlags::None;
+	auto flags = ::util::ConsoleColorFlags::None;
 	if(engine->GetNetworkState(l)->IsClient())
-		flags |= util::ConsoleColorFlags::BackgroundMagenta;
+		flags |= ::util::ConsoleColorFlags::BackgroundMagenta;
 	else
-		flags |= util::ConsoleColorFlags::BackgroundCyan;
-	util::set_console_color(flags | util::ConsoleColorFlags::BackgroundIntensity | util::ConsoleColorFlags::Black);
+		flags |= ::util::ConsoleColorFlags::BackgroundCyan;
+	::util::set_console_color(flags | ::util::ConsoleColorFlags::BackgroundIntensity | ::util::ConsoleColorFlags::Black);
 	int n = lua_gettop(l); /* number of arguments */
 	int i;
 	for(i = 1; i <= n; i++) {
@@ -270,9 +275,9 @@ int Lua::log::register_logger(lua_State *l)
 	Lua::Push<spdlog::logger *>(l, &logger);
 	return 1;
 }
-	int Lua::log::color(lua_State *l)
+int Lua::log::color(lua_State *l)
 {
-	auto level = static_cast<util::LogSeverity>(Lua::CheckInt(l, 1));
+	auto level = static_cast<::util::LogSeverity>(Lua::CheckInt(l, 1));
 	std::string c {};
 	switch(static_cast<spdlog::level::level_enum>(pragma::logging::severity_to_spdlog_level(level))) {
 	case spdlog::level::level_enum::warn:

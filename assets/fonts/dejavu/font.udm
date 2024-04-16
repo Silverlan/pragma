@@ -1,44 +1,44 @@
-"vera"
+"dejavu"
 {
 	$array files [element][
 		{
-			$string fileName "Vera.ttf"
+			$string fileName "DejaVuSans.ttf"
 			$string features "Sans"
 		},
 		{
-			$string fileName "VeraBd.ttf"
+			$string fileName "DejaVuSans-Bold.ttf"
 			$string features "Sans|Bold"
 		},
 		{
-			$string fileName "VeraBI.ttf"
+			$string fileName "DejaVuSans-BoldOblique.ttf"
 			$string features "Sans|Bold|Italic"
 		},
 		{
-			$string fileName "VeraIt.ttf"
+			$string fileName "DejaVuSans-Oblique.ttf"
 			$string features "Sans|Italic"
 		},
 		{
-			$string fileName "VeraMoBd.ttf"
+			$string fileName "DejaVuSansMono-Bold.ttf"
 			$string features "Sans|Mono|Bold"
 		},
 		{
-			$string fileName "VeraMoBI.ttf"
+			$string fileName "DejaVuSansMono-BoldOblique.ttf"
 			$string features "Sans|Mono|Bold|Italic"
 		},
 		{
-			$string fileName "VeraMoIt.ttf"
+			$string fileName "DejaVuSansMono-Oblique.ttf"
 			$string features "Sans|Mono|Italic"
 		},
 		{
-			$string fileName "VeraMono.ttf"
+			$string fileName "DejaVuSansMono.ttf"
 			$string features "Sans|Mono"
 		},
 		{
-			$string fileName "VeraSe.ttf"
+			$string fileName "DejaVuSerif.ttf"
 			$string features "Serif"
 		},
 		{
-			$string fileName "VeraSeBd.ttf"
+			$string fileName "DejaVuSerif-Bold.ttf"
 			$string features "Serif|Bold"
 		}
 	]

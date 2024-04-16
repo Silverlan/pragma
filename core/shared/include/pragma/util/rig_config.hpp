@@ -19,12 +19,19 @@
 #include "pragma/util/global_string_table.hpp"
 
 namespace pragma::ik {
+	// We'll assume 73 units to be roughly the size of a human and use that as a reference, i.e. a scale of 1.0 represents 73 game units
+	constexpr double REFERENCE_HUMAN_UNIT_SIZE = 73.0;
+	// This is the size of the ik rig of the reference model (test/ik_reference) divided by REFERENCE_HUMAN_UNIT_SIZE.
+	// The default radius/length of the standard meta rig bones were determined using this model, so this scaling factor can be used to
+	// apply them to rigs of different sizes.
+	constexpr double REFERENCE_META_RIG_SCALE = 0.0782465711;
+
 	struct DLLNETWORK RigConfigBone {
 		pragma::GString name;
 		bool locked = false;
 		// TODO: What units are these? Meters?
-		float width = 1.f;
-		float length = 0.25f;
+		float length = 1.f;
+		float radius = 0.25f;
 
 		// If not set, bone pose will be used instead
 		std::optional<umath::Transform> ikPose {};
@@ -138,6 +145,8 @@ namespace pragma::ik {
 		void SetRootBone(const std::string &rootBone) { m_rootBone = rootBone; }
 		void ClearRootBone() { m_rootBone = {}; }
 		const std::optional<std::string> &GetRootBone() const { return m_rootBone; }
+
+		float CalcScaleFactor() const;
 
 		bool Save(const std::string &fileName);
 	  private:

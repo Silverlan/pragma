@@ -154,7 +154,7 @@ void WIConsole::Initialize()
 	SetSize(512, 256);
 	FontInfo::FontSettings settings {};
 	settings.fontSize = 12;
-	FontManager::LoadFont("console", "vera/VeraMono", settings);
+	FontManager::LoadFont("console", "dejavu/DejaVuSansMono", settings);
 
 	auto &wgui = WGUI::GetInstance();
 	auto *pLogBg = wgui.Create<WIRect>(this);

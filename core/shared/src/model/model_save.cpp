@@ -333,8 +333,10 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 	if(!isStatic) {
 		auto udmSkeleton = udm["skeleton"];
 		m_skeleton = pragma::animation::Skeleton::Load(udm::AssetData {udmSkeleton}, outErr);
-		if(m_skeleton == nullptr)
+		if(m_skeleton == nullptr) {
+			outErr = "Failed to load skeleton: " + outErr;
 			return false;
+		}
 		auto &ref = GetReference();
 		auto &poses = m_skeleton->GetBonePoses();
 		ref.SetBoneCount(poses.size());
@@ -394,48 +396,11 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 
 		auto udmMetaRig = udm["metaRig"];
 		if(udmMetaRig) {
-			auto metaRig = std::make_shared<pragma::animation::MetaRig>();
-			udm::to_enum_value<pragma::animation::RigType>(udmMetaRig["rigType"], metaRig->rigType);
-			udmMetaRig["forwardFacingRotationOffset"](metaRig->forwardFacingRotationOffset);
-			udm::to_enum_value<pragma::SignedAxis>(udmMetaRig["forwardAxis"], metaRig->forwardAxis);
-			udm::to_enum_value<pragma::SignedAxis>(udmMetaRig["upAxis"], metaRig->upAxis);
-			auto udmBones = udmMetaRig["bones"];
-			for(auto &udmBone : udmBones) {
-				std::string type;
-				udmBone["type"](type);
-				auto etype = pragma::animation::get_meta_rig_bone_type_enum(type);
-				if(!etype)
-					continue;
-				std::string bone;
-				udmBone["bone"](bone);
-				auto boneId = m_skeleton->LookupBone(bone);
-				if(boneId == pragma::animation::INVALID_BONE_INDEX)
-					continue;
-				auto &metaBone = metaRig->bones[umath::to_integral(*etype)];
-				metaBone.boneId = boneId;
-				udmBone["normalizedRotationOffset"](metaBone.normalizedRotationOffset);
-
-				auto udmBounds = udmBone["bounds"];
-				udmBounds["min"](metaBone.bounds.first);
-				udmBounds["max"](metaBone.bounds.second);
+			m_metaRig = pragma::animation::MetaRig::Load(*m_skeleton, udm::AssetData {udmMetaRig}, outErr);
+			if(!m_metaRig) {
+				outErr = "Failed to load meta rig: " + outErr;
+				return false;
 			}
-
-			auto udmBlendShapes = udmMetaRig["blendShapes"];
-			for(auto &udmBlendShape : udmBlendShapes) {
-				std::string type;
-				udmBlendShape["type"](type);
-				auto etype = pragma::animation::get_blend_shape_enum(type);
-				if(!etype)
-					continue;
-				pragma::animation::FlexControllerId flexCId = pragma::animation::INVALID_FLEX_CONTROLLER_INDEX;
-				udmBlendShape["flexControllerId"](flexCId);
-				if(flexCId == pragma::animation::INVALID_FLEX_CONTROLLER_INDEX)
-					continue;
-				auto &blendShape = metaRig->blendShapes[umath::to_integral(*etype)];
-				blendShape.flexControllerId = flexCId;
-			}
-
-			m_metaRig = metaRig;
 		}
 	}
 
@@ -472,8 +437,10 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 	for(auto i = decltype(numColMeshes) {0u}; i < numColMeshes; ++i) {
 		auto &colMesh = colMeshes[i];
 		colMesh = CollisionMesh::Load(game, *this, udm::AssetData {udmColMeshes[i]}, outErr);
-		if(colMesh == nullptr)
+		if(colMesh == nullptr) {
+			outErr = "Failed to load collision mesh " + std::to_string(i) + ": " + outErr;
 			return false;
+		}
 	}
 
 	// Joints
@@ -524,8 +491,10 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 				auto udmSubMesh = udmSubMeshes[subMeshIdx];
 				subMesh = CreateSubMesh();
 				subMesh->LoadFromAssetData(udm::AssetData {udmSubMesh}, outErr);
-				if(subMesh == nullptr)
+				if(subMesh == nullptr) {
+					outErr = "Failed to load sub mesh " + std::to_string(subMeshIdx) + " of mesh " + std::to_string(meshIdx) + " of mesh group " + std::string {udmMeshGroup.key} + ": " + outErr;
 					return false;
+				}
 				// subMesh->Update(ModelUpdateFlags::UpdateBuffers);
 			}
 		}
@@ -540,8 +509,10 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 		animations.resize(udmAnimations.GetChildCount());
 		for(auto udmAnimation : udmAnimations.ElIt()) {
 			auto anim = pragma::animation::Animation::Load(udm::AssetData {udmAnimation.property}, outErr, &skeleton, &reference);
-			if(anim == nullptr)
+			if(anim == nullptr) {
+				outErr = "Failed to load animation " + std::string {udmAnimation.key} + ": " + outErr;
 				return false;
+			}
 			uint32_t index = 0;
 			udmAnimation.property["index"](index);
 			m_animationIDs[std::string {udmAnimation.key}] = index;
@@ -602,8 +573,10 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 		for(auto udmMorphTargetAnim : udmMorphTargetAnims.ElIt()) {
 			udmMorphTargetAnim.property["index"](idx);
 			morphAnims[idx] = VertexAnimation::Load(*this, udm::AssetData {udmMorphTargetAnim.property}, outErr);
-			if(morphAnims[idx] == nullptr)
+			if(morphAnims[idx] == nullptr) {
+				outErr = "Failed to load vertex animation " + std::string {udmMorphTargetAnim.key} + ": " + outErr;
 				return false;
+			}
 			++idx;
 		}
 
@@ -612,6 +585,12 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 		flexes.resize(udmFlexes.GetChildCount());
 		for(auto udmFlex : udmFlexes.ElIt()) {
 			udmFlex.property["index"](idx);
+			if(idx >= flexes.size()) {
+				// outErr = "Flex index " + std::to_string(idx) + " out of range! (Number of flexes: " + std::to_string(flexes.size()) + ")";
+				// return false;
+				Con::cwar << "Flex index " << std::to_string(idx) << " out of range! (Number of flexes: " << std::to_string(flexes.size()) << ")" << Con::endl;
+				flexes.resize(idx + 1);
+			}
 			auto &flex = flexes[idx];
 			flex.GetName() = udmFlex.key;
 
@@ -703,8 +682,10 @@ bool Model::LoadFromAssetData(Game &game, const udm::AssetData &data, std::strin
 			udmFlexAnim.property["index"](idx);
 			flexAnimNames[idx] = udmFlexAnim.key;
 			flexAnims[idx] = FlexAnimation::Load(udm::AssetData {udmFlexAnim.property}, outErr);
-			if(flexAnims[idx] == nullptr)
+			if(flexAnims[idx] == nullptr) {
+				outErr = "Failed to load flex animation " + std::string {udmFlexAnim.key} + ": " + outErr;
 				return false;
+			}
 		}
 	}
 
@@ -862,52 +843,8 @@ bool Model::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
 
 		if(m_metaRig) {
 			auto udmMetaRig = udm["metaRig"];
-			udmMetaRig["rigType"] = udm::enum_to_string(m_metaRig->rigType);
-			udmMetaRig["forwardFacingRotationOffset"] = m_metaRig->forwardFacingRotationOffset;
-			udmMetaRig["forwardAxis"] = udm::enum_to_string(m_metaRig->forwardAxis);
-			udmMetaRig["upAxis"] = udm::enum_to_string(m_metaRig->upAxis);
-
-			size_t numValidMetaBones = 0;
-			for(auto &metaBone : m_metaRig->bones) {
-				auto bone = m_skeleton->GetBone(metaBone.boneId);
-				if(bone.expired())
-					continue;
-				++numValidMetaBones;
-			}
-
-			auto udmBones = udmMetaRig.AddArray("bones", numValidMetaBones);
-			size_t idx = 0;
-			for(size_t i = 0; i < m_metaRig->bones.size(); ++i) {
-				auto &metaBone = m_metaRig->bones[i];
-				auto bone = m_skeleton->GetBone(metaBone.boneId);
-				if(bone.expired())
-					continue;
-				auto udmBone = udmBones[idx++];
-				udmBone["type"] = pragma::animation::get_meta_rig_bone_type_name(static_cast<pragma::animation::MetaRigBoneType>(i));
-				udmBone["bone"] = std::string {bone.lock()->name};
-				udmBone["normalizedRotationOffset"] = metaBone.normalizedRotationOffset;
-				auto udmBounds = udmBone["bounds"];
-				udmBounds["min"] = metaBone.bounds.first;
-				udmBounds["max"] = metaBone.bounds.second;
-			}
-
-			size_t numValidBlendShapes = 0;
-			for(auto &blendShape : m_metaRig->blendShapes) {
-				if(blendShape.flexControllerId == pragma::animation::INVALID_FLEX_CONTROLLER_INDEX)
-					continue;
-				++numValidBlendShapes;
-			}
-
-			auto udmBlendShapes = udmMetaRig.AddArray("blendShapes", numValidBlendShapes);
-			idx = 0;
-			for(size_t i = 0; i < m_metaRig->blendShapes.size(); ++i) {
-				auto &blendShape = m_metaRig->blendShapes[i];
-				if(blendShape.flexControllerId == pragma::animation::INVALID_FLEX_CONTROLLER_INDEX)
-					continue;
-				auto udmBlendShape = udmBlendShapes[idx++];
-				udmBlendShape["type"] = pragma::animation::get_blend_shape_name(static_cast<pragma::animation::BlendShape>(i));
-				udmBlendShape["flexControllerId"] = blendShape.flexControllerId;
-			}
+			if(!m_metaRig->Save(*m_skeleton, udm::AssetData {udmMetaRig}, outErr))
+				return false;
 		}
 	}
 
@@ -1059,48 +996,6 @@ bool Model::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
 				udmFlexC["max"] = flexC.max;
 			}
 
-			auto &eyeballs = GetEyeballs();
-			auto udmEyeballs = udm["eyeballs"];
-			uint32_t eyeballIdx = 0;
-			for(auto &eyeball : eyeballs) {
-				std::string name = eyeball.name;
-				if(name.empty()) {
-					name = "eyeball" + std::to_string(eyeballIdx);
-					Con::cwar << "Eyeball with no name found, assigning name '" << name << "'" << Con::endl;
-				}
-				auto udmEyeball = udmEyeballs[name];
-				udmEyeball["index"] = eyeballIdx++;
-				udmEyeball["bone"] = eyeball.boneIndex;
-				udmEyeball["origin"] = eyeball.origin;
-				udmEyeball["zOffset"] = eyeball.zOffset;
-				udmEyeball["radius"] = eyeball.radius;
-				udmEyeball["up"] = eyeball.up;
-				udmEyeball["forward"] = eyeball.forward;
-				udmEyeball["maxDilationFactor"] = eyeball.maxDilationFactor;
-
-				udmEyeball["iris"]["material"] = eyeball.irisMaterialIndex;
-				udmEyeball["iris"]["uvRadius"] = eyeball.irisUvRadius;
-				udmEyeball["iris"]["scale"] = eyeball.irisScale;
-
-				auto readLid = [](udm::LinkedPropertyWrapperArg prop, Eyeball::LidFlexDesc &lid) {
-					prop["raiser"]["lidFlexIndex"](lid.lidFlexIndex);
-
-					prop["raiser"]["raiserFlexIndex"](lid.raiserFlexIndex);
-					prop["raiser"]["targetAngle"](lid.raiserValue);
-					lid.raiserValue = umath::deg_to_rad(lid.raiserValue);
-
-					prop["neutral"]["neutralFlexIndex"](lid.neutralFlexIndex);
-					prop["neutral"]["targetAngle"](lid.neutralValue);
-					lid.neutralValue = umath::deg_to_rad(lid.neutralValue);
-
-					prop["lowerer"]["lowererFlexIndex"](lid.lowererFlexIndex);
-					prop["lowerer"]["targetAngle"](lid.lowererValue);
-					lid.lowererValue = umath::deg_to_rad(lid.lowererValue);
-				};
-				readLid(udmEyeball["eyelids"]["upperLid"], eyeball.upperLid);
-				readLid(udmEyeball["eyelids"]["lowerLid"], eyeball.lowerLid);
-			}
-
 			auto &phonemeMap = GetPhonemeMap();
 			auto udmPhonemes = udm["phonemes"];
 			for(auto &pairPhoneme : phonemeMap.phonemes)
@@ -1116,6 +1011,48 @@ bool Model::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
 				if(flexAnim->Save(udm::AssetData {udmFlexAnim}, outErr) == false)
 					return false;
 			}
+		}
+
+		auto &eyeballs = GetEyeballs();
+		auto udmEyeballs = udm["eyeballs"];
+		uint32_t eyeballIdx = 0;
+		for(auto &eyeball : eyeballs) {
+			std::string name = eyeball.name;
+			if(name.empty()) {
+				name = "eyeball" + std::to_string(eyeballIdx);
+				Con::cwar << "Eyeball with no name found, assigning name '" << name << "'" << Con::endl;
+			}
+			auto udmEyeball = udmEyeballs[name];
+			udmEyeball["index"] = eyeballIdx++;
+			udmEyeball["bone"] = eyeball.boneIndex;
+			udmEyeball["origin"] = eyeball.origin;
+			udmEyeball["zOffset"] = eyeball.zOffset;
+			udmEyeball["radius"] = eyeball.radius;
+			udmEyeball["up"] = eyeball.up;
+			udmEyeball["forward"] = eyeball.forward;
+			udmEyeball["maxDilationFactor"] = eyeball.maxDilationFactor;
+
+			udmEyeball["iris"]["material"] = eyeball.irisMaterialIndex;
+			udmEyeball["iris"]["uvRadius"] = eyeball.irisUvRadius;
+			udmEyeball["iris"]["scale"] = eyeball.irisScale;
+
+			auto readLid = [](udm::LinkedPropertyWrapperArg prop, Eyeball::LidFlexDesc &lid) {
+				prop["raiser"]["lidFlexIndex"](lid.lidFlexIndex);
+
+				prop["raiser"]["raiserFlexIndex"](lid.raiserFlexIndex);
+				prop["raiser"]["targetAngle"](lid.raiserValue);
+				lid.raiserValue = umath::deg_to_rad(lid.raiserValue);
+
+				prop["neutral"]["neutralFlexIndex"](lid.neutralFlexIndex);
+				prop["neutral"]["targetAngle"](lid.neutralValue);
+				lid.neutralValue = umath::deg_to_rad(lid.neutralValue);
+
+				prop["lowerer"]["lowererFlexIndex"](lid.lowererFlexIndex);
+				prop["lowerer"]["targetAngle"](lid.lowererValue);
+				lid.lowererValue = umath::deg_to_rad(lid.lowererValue);
+			};
+			readLid(udmEyeball["eyelids"]["upperLid"], eyeball.upperLid);
+			readLid(udmEyeball["eyelids"]["lowerLid"], eyeball.lowerLid);
 		}
 	}
 

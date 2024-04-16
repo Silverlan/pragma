@@ -620,6 +620,7 @@ void Lua::util::register_library(lua_State *l)
 	defRigConfig.def("SetRootBone", &pragma::ik::RigConfig::SetRootBone);
 	defRigConfig.def("ClearRootBone", &pragma::ik::RigConfig::ClearRootBone);
 	defRigConfig.def("GetRootBone", &pragma::ik::RigConfig::GetRootBone);
+	defRigConfig.def("CalcScaleFactor", &pragma::ik::RigConfig::CalcScaleFactor);
 	defRigConfig.def(
 	  "Save", +[](lua_State *l, pragma::ik::RigConfig &rigConfig, const std::string &fileName) -> std::pair<bool, std::optional<std::string>> {
 		  auto fname = fileName;

@@ -707,7 +707,7 @@ bool CEngine::Initialize(int argc, char *argv[])
 
 	LoadFontSets();
 	auto &defaultFontSet = m_defaultFontSet;
-	defaultFontSet = "vera";
+	defaultFontSet = "dejavu";
 	auto *lanInfo = Locale::GetLanguageInfo();
 	if(lanInfo && lanInfo->configData) {
 		std::vector<std::string> characterSetRequirements;

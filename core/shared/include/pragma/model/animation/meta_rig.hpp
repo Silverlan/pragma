@@ -16,6 +16,9 @@
 #include <string>
 
 class Model;
+namespace udm {
+	struct AssetData;
+};
 namespace pragma::animation {
 	enum class MetaRigBoneType : uint8_t {
 		// Note: Child bone types must not be defined before their parent!
@@ -109,6 +112,8 @@ namespace pragma::animation {
 	enum class BoneSide : uint8_t { Left = 0, Right, None };
 	constexpr std::optional<BoneSide> get_meta_rig_bone_type_side(MetaRigBoneType type);
 
+	constexpr std::optional<Quat> get_meta_rig_reference_rotation(MetaRigBoneType type);
+
 	enum class BlendShape : uint32_t {
 		Neutral = 0,
 		BrowDownLeft,
@@ -185,6 +190,9 @@ namespace pragma::animation {
 		pragma::animation::BoneId boneId = pragma::animation::INVALID_BONE_INDEX;
 		std::pair<Vector3, Vector3> bounds;
 		Quat normalizedRotationOffset; // Rotation offset from bone rotation to normalized rotation
+
+		float radius = 0.f;
+		float length = 0.f;
 	};
 
 	struct DLLNETWORK MetaRigBlendShape {
@@ -194,18 +202,29 @@ namespace pragma::animation {
 	enum class RigType : uint8_t { Biped = 0, Quadruped };
 	class Skeleton;
 	struct DLLNETWORK MetaRig {
+		static constexpr uint32_t FORMAT_VERSION = 1u;
+		static constexpr auto PMRIG_IDENTIFIER = "PMRIG";
+		static std::shared_ptr<MetaRig> Load(const Skeleton &skeleton, const udm::AssetData &data, std::string &outErr);
 		std::array<MetaRigBone, umath::to_integral(MetaRigBoneType::Count)> bones;
 		std::array<MetaRigBlendShape, umath::to_integral(BlendShape::Count)> blendShapes;
 
+		bool Save(const Skeleton &skeleton, const udm::AssetData &outData, std::string &outErr);
 		void DebugPrint(const Model &mdl);
 		const MetaRigBone *GetBone(pragma::animation::MetaRigBoneType type) const;
 		const MetaRigBlendShape *GetBlendShape(pragma::animation::BlendShape blendShape) const;
+		std::optional<pragma::animation::MetaRigBoneType> FindMetaBoneType(pragma::animation::BoneId boneId) const;
 		pragma::animation::BoneId GetBoneId(const pragma::GString &type) const;
-		pragma::animation::BoneId GetBoneId(pragma::animation::MetaRigBoneType &type) const;
+		pragma::animation::BoneId GetBoneId(pragma::animation::MetaRigBoneType type) const;
 		RigType rigType = RigType::Biped;
 		Quat forwardFacingRotationOffset = uquat::identity();
 		pragma::SignedAxis forwardAxis = pragma::SignedAxis::Z;
 		pragma::SignedAxis upAxis = pragma::SignedAxis::Y;
+
+		// Bounds in normalized space (with forwardFacingRotationOffset applied)
+		Vector3 min {};
+		Vector3 max {};
+	  private:
+		bool LoadFromAssetData(const Skeleton &skeleton, const udm::AssetData &data, std::string &outErr);
 	};
 };
 
@@ -495,6 +514,118 @@ constexpr std::optional<pragma::animation::MetaRigBoneType> pragma::animation::g
 		return pragma::animation::MetaRigBoneType::RightWingTip;
 	}
 	static_assert(umath::to_integral(MetaRigBoneType::Count) == 68, "Update this list when new types are added!");
+	return {};
+}
+
+constexpr std::optional<Quat> pragma::animation::get_meta_rig_reference_rotation(MetaRigBoneType type)
+{
+	// Based on the model characters/generic_anime_char_male
+	switch(type) {
+	case MetaRigBoneType::Hips:
+		return Quat {1, 0, 0, 0};
+	case MetaRigBoneType::Spine:
+		return Quat {1, 0, 0, 0};
+	case MetaRigBoneType::Spine1:
+		return Quat {1, 0, 0, 0};
+	case MetaRigBoneType::Spine2:
+		return Quat {1, 0, 0, 0};
+	case MetaRigBoneType::Neck:
+		return Quat {1, 0, 0, 0};
+	case MetaRigBoneType::Head:
+		return Quat {1, 0, 0, 0};
+	case MetaRigBoneType::LeftEye:
+		return Quat {1, 0, 0, 0};
+	case MetaRigBoneType::RightEye:
+		return Quat {1, 0, 0, 0};
+	case MetaRigBoneType::LeftUpperArm:
+		return Quat {0.70925945043564, 0.015900172293186, 0.70459121465683, -0.015795519575477};
+	case MetaRigBoneType::LeftLowerArm:
+		return Quat {0.73564946651459, 0.0017300515901297, 0.67735832929611, -0.0015929662622511};
+	case MetaRigBoneType::LeftHand:
+		return Quat {0.70710676908493, -0, 0.70710676908493, 0};
+	case MetaRigBoneType::RightUpperArm:
+		return Quat {0.70925945043564, 0.015900172293186, -0.70459115505219, 0.015795519575477};
+	case MetaRigBoneType::RightLowerArm:
+		return Quat {0.73564666509628, 0.0017298723105341, -0.677361369133, 0.0015928144566715};
+	case MetaRigBoneType::RightHand:
+		return Quat {0.70710676908493, 0, -0.70710676908493, 0};
+	case MetaRigBoneType::LeftUpperLeg:
+		return Quat {0.70097637176514, 0.71312469244003, -0.0065862922929227, -0.0064740921370685};
+	case MetaRigBoneType::LeftLowerLeg:
+		return Quat {0.68854504823685, 0.72507607936859, -0.0094661042094231, -0.0089891795068979};
+	case MetaRigBoneType::LeftFoot:
+		return Quat {0.99966150522232, 0.025743259117007, -0.0037670352030545, 9.7008603916038e-05};
+	case MetaRigBoneType::LeftToe:
+		return Quat {1, 0, 0, 0};
+	case MetaRigBoneType::RightUpperLeg:
+		return Quat {0.70097637176514, 0.71312469244003, 0.0065862922929227, 0.0064740921370685};
+	case MetaRigBoneType::RightLowerLeg:
+		return Quat {0.68854504823685, 0.72507607936859, 0.0094661042094231, 0.0089891795068979};
+	case MetaRigBoneType::RightFoot:
+		return Quat {0.99966150522232, 0.025743259117007, 0.0037670352030545, -9.7008603916038e-05};
+	case MetaRigBoneType::RightToe:
+		return Quat {1, 0, 0, 0};
+	case MetaRigBoneType::LeftThumb1:
+		return Quat {0.92458111047745, 0.027599347755313, 0.37981504201889, -0.011337725445628};
+	case MetaRigBoneType::LeftThumb2:
+		return Quat {0.91579794883728, 0.024189233779907, 0.40077045559883, -0.010585664771497};
+	case MetaRigBoneType::LeftThumb3:
+		return Quat {0.70710676908493, -0, 0.70710676908493, 0};
+	case MetaRigBoneType::LeftIndexFinger1:
+		return Quat {0.73233479261398, 0.0029825139790773, 0.68093264102936, -0.0027731731534004};
+	case MetaRigBoneType::LeftIndexFinger2:
+		return Quat {0.72356474399567, 0.013573048636317, 0.69000166654587, -0.012943454086781};
+	case MetaRigBoneType::LeftIndexFinger3:
+		return Quat {0.70710676908493, -0, 0.70710676908493, 0};
+	case MetaRigBoneType::LeftMiddleFinger1:
+		return Quat {0.73105651140213, 0.0031204828992486, 0.68230360746384, -0.0029123837593943};
+	case MetaRigBoneType::LeftMiddleFinger2:
+		return Quat {0.72607111930847, 0.0028717112727463, 0.68760824203491, -0.002719585550949};
+	case MetaRigBoneType::LeftMiddleFinger3:
+		return Quat {0.70710676908493, -0, 0.70710676908493, 0};
+	case MetaRigBoneType::LeftRingFinger1:
+		return Quat {0.72973650693893, 0.0016778439749032, 0.68372458219528, -0.0015720510855317};
+	case MetaRigBoneType::LeftRingFinger2:
+		return Quat {0.72460502386093, 0.0012374984798953, 0.68916231393814, -0.001176968566142};
+	case MetaRigBoneType::LeftRingFinger3:
+		return Quat {0.70710676908493, -0, 0.70710676908493, 0};
+	case MetaRigBoneType::LeftLittleFinger1:
+		return Quat {0.72936356067657, 0.00078585476148874, 0.68412548303604, -0.00073711288860068};
+	case MetaRigBoneType::LeftLittleFinger2:
+		return Quat {0.72452455759048, 0.0013547795824707, 0.68924647569656, -0.0012888135388494};
+	case MetaRigBoneType::LeftLittleFinger3:
+		return Quat {0.70710676908493, -0, 0.70710676908493, 0};
+	case MetaRigBoneType::RightThumb1:
+		return Quat {0.92465305328369, 0.027367763221264, -0.37965968251228, 0.011237119324505};
+	case MetaRigBoneType::RightThumb2:
+		return Quat {0.91569077968597, 0.02383815869689, -0.40103995800018, 0.010440264828503};
+	case MetaRigBoneType::RightThumb3:
+		return Quat {0.70710676908493, 0, -0.70710676908493, 0};
+	case MetaRigBoneType::RightIndexFinger1:
+		return Quat {0.73235160112381, 0.002984601771459, -0.68091458082199, 0.0027749773580581};
+	case MetaRigBoneType::RightIndexFinger2:
+		return Quat {0.72356468439102, 0.013573012314737, -0.69000172615051, 0.01294342149049};
+	case MetaRigBoneType::RightIndexFinger3:
+		return Quat {0.70710676908493, 0, -0.70710676908493, 0};
+	case MetaRigBoneType::RightMiddleFinger1:
+		return Quat {0.73105657100677, 0.0031204877886921, -0.68230354785919, 0.0029123879503459};
+	case MetaRigBoneType::RightMiddleFinger2:
+		return Quat {0.72607105970383, 0.0028717045206577, -0.68760830163956, 0.0027195792645216};
+	case MetaRigBoneType::RightMiddleFinger3:
+		return Quat {0.70710676908493, 0, -0.70710676908493, 0};
+	case MetaRigBoneType::RightRingFinger1:
+		return Quat {0.72973656654358, 0.0016778467688709, -0.68372458219528, 0.0015720536466688};
+	case MetaRigBoneType::RightRingFinger2:
+		return Quat {0.72460502386093, 0.0012374984798953, -0.68916231393814, 0.001176968566142};
+	case MetaRigBoneType::RightRingFinger3:
+		return Quat {0.70710676908493, 0, -0.70710676908493, 0};
+	case MetaRigBoneType::RightLittleFinger1:
+		return Quat {0.72936356067657, 0.00078585476148874, -0.68412548303604, 0.00073711288860068};
+	case MetaRigBoneType::RightLittleFinger2:
+		return Quat {0.72452455759048, 0.0013547795824707, -0.68924647569656, 0.0012888135388494};
+	case MetaRigBoneType::RightLittleFinger3:
+		return Quat {0.70710676908493, 0, -0.70710676908493, 0};
+	}
 	return {};
 }
 

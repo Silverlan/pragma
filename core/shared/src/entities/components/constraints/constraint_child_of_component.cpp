@@ -208,34 +208,34 @@ std::optional<umath::ScaledTransform> ConstraintChildOfComponent::CalcConstraint
 	m_driverPropertyInfo->propertyRef.UpdateMemberIndex(game);
 
 	umath::ScaledTransform parentPose {};
-	auto getPropertyValue = [](const PropertyInfo &propInfo, const BaseEntityComponent &c, umath::ScaledTransform &outPose) {
+	auto getPropertyValue = [](const PropertyInfo &propInfo, const BaseEntityComponent &c, umath::ScaledTransform &outPose, umath::CoordinateSpace space) {
 		switch(propInfo.type) {
 		case Type::Pose:
-			c.GetTransformMemberPose(propInfo.propertyRef.GetMemberIndex(), umath::CoordinateSpace::World, outPose);
+			c.GetTransformMemberPose(propInfo.propertyRef.GetMemberIndex(), space, outPose);
 			break;
 		case Type::Position:
 			{
 				Vector3 pos {};
-				c.GetTransformMemberPos(propInfo.propertyRef.GetMemberIndex(), umath::CoordinateSpace::World, pos);
+				c.GetTransformMemberPos(propInfo.propertyRef.GetMemberIndex(), space, pos);
 				outPose.SetOrigin(pos);
 				break;
 			}
 		case Type::Rotation:
 			{
 				Quat rot {};
-				c.GetTransformMemberRot(propInfo.propertyRef.GetMemberIndex(), umath::CoordinateSpace::World, rot);
+				c.GetTransformMemberRot(propInfo.propertyRef.GetMemberIndex(), space, rot);
 				outPose.SetRotation(rot);
 				break;
 			}
 		}
 	};
-	getPropertyValue(*m_driverPropertyInfo, *constraintInfo->driverC, parentPose);
+	getPropertyValue(*m_driverPropertyInfo, *constraintInfo->driverC, parentPose, static_cast<umath::CoordinateSpace>(m_constraintC->GetDriverSpace()));
 
 	umath::ScaledTransform curPose;
 	if(optPose)
 		curPose = *optPose;
 	else
-		getPropertyValue(*m_drivenObjectPropertyInfo, *constraintInfo->drivenObjectC, curPose);
+		getPropertyValue(*m_drivenObjectPropertyInfo, *constraintInfo->drivenObjectC, curPose, static_cast<umath::CoordinateSpace>(m_constraintC->GetDrivenObjectSpace()));
 
 	if(inverse)
 		parentPose = parentPose.GetInverse();

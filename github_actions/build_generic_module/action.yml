@@ -16,6 +16,10 @@ inputs:
     description: 'Install CUDA?'
     required: true
     default: '0'
+  repository:
+    description: 'Module repository name with owner.'
+    required: true
+    default: '${{ github.repository }}'
   token:
     description: 'PAT token required to fetch the repository.'
     required: true
@@ -67,6 +71,7 @@ runs:
         submodules: 'recursive'
         path: 'pragma/modules/${{ inputs.module }}'
         token: '${{ inputs.token }}'
+        repository: '${{ inputs.repository }}'
 
     - name: Build Pragma
       id: build-pragma
@@ -76,6 +81,7 @@ runs:
 
     - name: Set Output Variables
       shell: bash
+      if: always()
       id: set-output-vars
       run: |
         echo "build-dir=${{ steps.build-pragma.outputs.build-dir }}" >> $GITHUB_OUTPUT

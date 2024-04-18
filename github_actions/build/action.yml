@@ -28,23 +28,6 @@ runs:
     - uses: Silverlan/common_actions/action_start@main
       with:
         name: "pragma > build"
-  
-    - name: Build Pragma
-      if: runner.os == 'Linux'
-      id: build-linux
-      shell: bash
-      working-directory: 'pragma'
-      run: |
-        python build_scripts/build.py --no-confirm --build-config "${{inputs.build-config}}" ${{inputs.build-args}}
-        
-    - name: Build Pragma
-      if: runner.os == 'Windows'
-      id: build-windows
-      shell: bash
-      working-directory: 'pragma'
-      run: |
-        # We write the dependencies and build files to c:/ because the workspace disk provided by the runner isn't large enough
-        python build_scripts/build.py --build-config "${{inputs.build-config}}" --build-directory "c:/pragma/build" --deps-directory "c:/pragma/deps" ${{inputs.build-args}}
 
     - name: Set Output Variables
       shell: bash
@@ -64,6 +47,23 @@ runs:
           root_path=$(echo "$root_path" | sed -e 's/^\///' -e 's/\//\\/g' -e 's/^./\0:/')
         fi
         echo "root-dir=$root_path" >> $GITHUB_OUTPUT
+  
+    - name: Build Pragma
+      if: runner.os == 'Linux'
+      id: build-linux
+      shell: bash
+      working-directory: 'pragma'
+      run: |
+        python build_scripts/build.py --no-confirm --build-config "${{inputs.build-config}}" ${{inputs.build-args}}
+        
+    - name: Build Pragma
+      if: runner.os == 'Windows'
+      id: build-windows
+      shell: bash
+      working-directory: 'pragma'
+      run: |
+        # We write the dependencies and build files to c:/ because the workspace disk provided by the runner isn't large enough
+        python build_scripts/build.py --build-config "${{inputs.build-config}}" --build-directory "c:/pragma/build" --deps-directory "c:/pragma/deps" ${{inputs.build-args}}
 
     # Using the pragma build-script to build lua-debug results in errors, so we'll build it manually
     - name: Build lua-debug

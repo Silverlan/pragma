@@ -93,8 +93,10 @@ const std::optional<ConstraintComponent::ConstraintParticipants> &ConstraintComp
 
 const std::optional<ConstraintComponent::ConstraintParticipants> &ConstraintComponent::UpdateConstraintParticipants()
 {
-	if(m_constraintParticipants)
-		return m_constraintParticipants;
+	if(m_constraintParticipants) {
+		if(m_constraintParticipants->drivenObjectC.valid() && (!m_hasDriver || m_constraintParticipants->driverC.valid()))
+			return m_constraintParticipants;
+	}
 	auto &game = *GetEntity().GetNetworkState()->GetGameState();
 
 	auto &drivenObj = GetDrivenObject();

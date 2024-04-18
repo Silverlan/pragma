@@ -20,10 +20,10 @@ endif()
 
 if(MSVC)
 	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /we4715")
-	set (CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} /we4715")
+	set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /we4715")
 else()
 	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type")
-	set (CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type")
+	set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror=return-type")
 endif()
 
 #set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE CACHE INTERNAL "" FORCE)

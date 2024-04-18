@@ -65,14 +65,6 @@ runs:
         fi
         echo "build-args=$build_args" >> $GITHUB_OUTPUT
 
-    - name: Set Output Variables
-      shell: bash
-      id: set-output-vars
-      run: |
-        echo "build-dir=${{ steps.build-pragma.outputs.build-dir }}" >> $GITHUB_OUTPUT
-        echo "deps-dir=${{ steps.build-pragma.outputs.deps-dir }}" >> $GITHUB_OUTPUT
-        echo "install-dir=${{ steps.build-pragma.outputs.install-dir }}" >> $GITHUB_OUTPUT
-
     - name: "Download Module"
       uses: actions/checkout@v4
       with:
@@ -86,3 +78,12 @@ runs:
       uses: Silverlan/pragma/github_actions/build@master
       with:
         build-args: '--with-lua-debugger=0 --with-common-modules=0 --with-essential-client-modules=0 --cmake-arg=${{ steps.set-cmake-args.outputs.cmake-args }} ${{ steps.set-cmake-args.outputs.build-args }}'
+
+    - name: Set Output Variables
+      shell: bash
+      if: always()
+      id: set-output-vars
+      run: |
+        echo "build-dir=${{ steps.build-pragma.outputs.build-dir }}" >> $GITHUB_OUTPUT
+        echo "deps-dir=${{ steps.build-pragma.outputs.deps-dir }}" >> $GITHUB_OUTPUT
+        echo "install-dir=${{ steps.build-pragma.outputs.install-dir }}" >> $GITHUB_OUTPUT

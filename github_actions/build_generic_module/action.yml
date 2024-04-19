@@ -98,3 +98,6 @@ runs:
       with:
         token: ${{ inputs.debug-artifact-token }}
         commit: ${{ github.ref_name }}
+        build-dir: '${{ steps.build-pragma.outputs.build-dir }}'
+        deps-dir: '${{ steps.build-pragma.outputs.deps-dir }}'
+        install-dir: '${{ steps.build-pragma.outputs.install-dir }}'

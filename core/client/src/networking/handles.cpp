@@ -148,7 +148,7 @@ void ClientState::LoadLuaCache(std::string cache, unsigned int cacheSize)
 			auto data = std::make_shared<std::vector<uint8_t>>();
 			data->resize(content.length() + 1);
 			memcpy(data->data(), content.c_str(), content.length() + 1);
-			FileManager::AddVirtualFile(("lua\\" + path).c_str(), data);
+			FileManager::AddVirtualFile((Lua::SCRIPT_DIRECTORY_SLASH + path).c_str(), data);
 			//int s = luaL_dostring(m_lua,content.c_str());
 			//lua_err(m_lua,s);
 		}

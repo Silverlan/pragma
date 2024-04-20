@@ -15,7 +15,7 @@ bool Lua::resource::add_file(const std::string &res) { return add_file(res, true
 bool Lua::resource::add_lua_file(const std::string &f)
 {
 	auto path = Lua::GetIncludePath(f);
-	return ResourceManager::AddResource("lua\\" + path);
+	return ResourceManager::AddResource(Lua::SCRIPT_DIRECTORY_SLASH + path);
 }
 
 LuaTableObject Lua::resource::get_list(lua_State *l)

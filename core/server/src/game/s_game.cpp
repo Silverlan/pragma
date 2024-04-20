@@ -388,7 +388,7 @@ void SGame::UpdateLuaCache(const std::string &fName)
 	if(FileManager::Exists(fName.c_str(), includeFlags, excludeFlags))
 		FileManager::CopyFile(fName.c_str(), dstPath.c_str()); // Compiled file already exists, just copy it
 	else {
-		auto luaPath = fName.substr(0, fName.length() - 4) + "lua";
+		auto luaPath = fName.substr(0, fName.length() - 4) + Lua::SCRIPT_DIRECTORY;
 		auto luaPathNoLuaDir = luaPath.substr(4, luaPath.length());
 		auto s = LoadLuaFile(luaPathNoLuaDir, includeFlags, excludeFlags);
 		if(s == Lua::StatusCode::Ok) {
@@ -401,12 +401,12 @@ void SGame::UpdateLuaCache(const std::string &fName)
 void SGame::GenerateLuaCache()
 {
 	auto &resources = ResourceManager::GetResources();
-	FileManager::CreatePath("cache\\lua");
+	filemanager::create_path("cache/" + Lua::SCRIPT_DIRECTORY);
 	Con::csv << "Generating lua cache..." << Con::endl;
 	for(auto &res : resources) {
 		auto &fName = res.fileName;
 		std::string ext;
-		if(ufile::get_extension(fName, &ext) == true && ext == "clua")
+		if(ufile::get_extension(fName, &ext) == true && ext == Lua::FILE_EXTENSION_PRECOMPILED)
 			UpdateLuaCache(fName);
 	}
 }
@@ -415,7 +415,7 @@ bool SGame::InitializeGameMode()
 {
 	if(Game::InitializeGameMode() == false)
 		return false;
-	auto path = "lua\\" + GetGameModeScriptDirectoryPath();
+	auto path = Lua::SCRIPT_DIRECTORY_SLASH + GetGameModeScriptDirectoryPath();
 
 	std::vector<std::string> transferFiles; // Files which need to be transferred to the client
 
@@ -424,17 +424,17 @@ bool SGame::InitializeGameMode()
 		transferFiles.push_back(infoFile);
 
 	auto offset = transferFiles.size();
-	FileManager::FindFiles((path + "\\*.lua").c_str(), &transferFiles, nullptr); // Shared Files
+	FileManager::FindFiles((path + "\\*." + Lua::FILE_EXTENSION).c_str(), &transferFiles, nullptr); // Shared Files
 	if(Lua::are_precompiled_files_enabled())
-		FileManager::FindFiles((path + "\\*.clua").c_str(), &transferFiles, nullptr);
+		FileManager::FindFiles((path + "\\*." + Lua::FILE_EXTENSION_PRECOMPILED).c_str(), &transferFiles, nullptr);
 	for(auto i = offset; i < transferFiles.size(); ++i)
 		transferFiles.at(i) = path + '\\' + transferFiles.at(i);
 
 	auto pathClient = path + "\\client";
 	offset = transferFiles.size();
-	FileManager::FindFiles((pathClient + "\\*.lua").c_str(), &transferFiles, nullptr); // Clientside Files
+	FileManager::FindFiles((pathClient + "\\*." + Lua::FILE_EXTENSION).c_str(), &transferFiles, nullptr); // Clientside Files
 	if(Lua::are_precompiled_files_enabled())
-		FileManager::FindFiles((pathClient + "\\*.clua").c_str(), &transferFiles, nullptr);
+		FileManager::FindFiles((pathClient + "\\*." + Lua::FILE_EXTENSION_PRECOMPILED).c_str(), &transferFiles, nullptr);
 	for(auto i = offset; i < transferFiles.size(); ++i)
 		transferFiles.at(i) = pathClient + '\\' + transferFiles.at(i);
 

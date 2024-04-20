@@ -214,22 +214,22 @@ bool SGame::LoadLuaComponent(const std::string &luaFilePath, const std::string &
 	if(r == false)
 		return r;
 	auto nComponentName = FileManager::GetCanonicalizedPath(componentName);
-	auto componentPath = "lua\\" + mainPath + "\\components\\" + nComponentName;
-	auto filePathLuaFile = componentPath + "\\init.lua";
+	auto componentPath = Lua::SCRIPT_DIRECTORY_SLASH + mainPath + "\\components\\" + nComponentName;
+	auto filePathLuaFile = componentPath + "\\init" + Lua::DOT_FILE_EXTENSION;
 	if(FileManager::Exists(filePathLuaFile))
-		return r;                                                                         // init.lua is in main component directory, which means no network directories are used. In this case files that need to be transferred cannot be determined automatically.
-	std::vector<std::string> transferFiles;                                               // Files which need to be transferred to the client
-	FileManager::FindFiles((componentPath + "\\*.lua").c_str(), &transferFiles, nullptr); // Shared Files
+		return r;                                                                                               // init.lua is in main component directory, which means no network directories are used. In this case files that need to be transferred cannot be determined automatically.
+	std::vector<std::string> transferFiles;                                                                     // Files which need to be transferred to the client
+	FileManager::FindFiles((componentPath + "\\*" + Lua::DOT_FILE_EXTENSION).c_str(), &transferFiles, nullptr); // Shared Files
 	if(Lua::are_precompiled_files_enabled())
-		FileManager::FindFiles((componentPath + "\\*.clua").c_str(), &transferFiles, nullptr);
+		FileManager::FindFiles((componentPath + "\\*" + Lua::DOT_FILE_EXTENSION_PRECOMPILED).c_str(), &transferFiles, nullptr);
 	for(auto &fName : transferFiles)
 		fName = componentPath + '\\' + fName;
 
 	auto componentPathClient = componentPath + "\\client";
 	auto offset = transferFiles.size();
-	FileManager::FindFiles((componentPathClient + "\\*.lua").c_str(), &transferFiles, nullptr); // Clientside Files
+	FileManager::FindFiles((componentPathClient + "\\*" + Lua::DOT_FILE_EXTENSION).c_str(), &transferFiles, nullptr); // Clientside Files
 	if(Lua::are_precompiled_files_enabled())
-		FileManager::FindFiles((componentPathClient + "\\*.clua").c_str(), &transferFiles, nullptr);
+		FileManager::FindFiles((componentPathClient + "\\*" + Lua::DOT_FILE_EXTENSION_PRECOMPILED).c_str(), &transferFiles, nullptr);
 	for(auto i = offset; i < transferFiles.size(); ++i)
 		transferFiles.at(i) = componentPathClient + '\\' + transferFiles.at(i);
 
@@ -238,4 +238,4 @@ bool SGame::LoadLuaComponent(const std::string &luaFilePath, const std::string &
 	return r;
 }
 std::string SGame::GetLuaNetworkDirectoryName() const { return "server"; }
-std::string SGame::GetLuaNetworkFileName() const { return "init.lua"; }
+std::string SGame::GetLuaNetworkFileName() const { return "init" + Lua::DOT_FILE_EXTENSION; }

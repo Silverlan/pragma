@@ -197,7 +197,7 @@ void Lua::ents::register_library(lua_State *l)
 		luabind::def("load_component",&Game::LoadLuaComponentByName),
 		luabind::def("find_installed_custom_components",+[](lua_State *l,Game &game) -> Lua::tb<std::string> {
 			std::vector<std::string> dirs;
-			std::string rootPath {"lua/entities/components/"};
+			std::string rootPath {Lua::SCRIPT_DIRECTORY +"/entities/components/"};
 			filemanager::find_files(rootPath +'*',nullptr,&dirs);
 			auto customComponents = luabind::newtable(l);
 			auto nwStateDirName = game.GetLuaNetworkDirectoryName();
@@ -205,10 +205,10 @@ void Lua::ents::register_library(lua_State *l)
 
 			auto nwStateDirNameC = nwStateDirName;
 			auto luaFileNameC = luaFileName;
-			ufile::remove_extension_from_filename(nwStateDirNameC,std::vector<std::string>{"lua"});
-			ufile::remove_extension_from_filename(luaFileNameC,std::vector<std::string>{"lua"});
-			nwStateDirNameC += ".clua";
-			luaFileNameC += ".clua";
+			ufile::remove_extension_from_filename(nwStateDirNameC,std::vector<std::string>{Lua::FILE_EXTENSION});
+		    ufile::remove_extension_from_filename(luaFileNameC, std::vector<std::string> {Lua::FILE_EXTENSION});
+			nwStateDirNameC += Lua::DOT_FILE_EXTENSION_PRECOMPILED;
+		    luaFileNameC += Lua::DOT_FILE_EXTENSION_PRECOMPILED;
 			for(uint32_t idx=1;auto &dir : dirs)
 			{
 				auto cdir = rootPath +dir +'/';

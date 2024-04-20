@@ -70,13 +70,13 @@ void Lua::OpenFileInZeroBrane(const std::string &fname, uint32_t lineId)
 static bool print_code_snippet(std::stringstream &ssMsg, std::string fname, uint32_t lineId, const std::string &prefix = "")
 {
 	std::string ext;
-	if(ufile::get_extension(fname, &ext) == true && ext == "clua") {
+	if(ufile::get_extension(fname, &ext) == true && ext == Lua::FILE_EXTENSION_PRECOMPILED) {
 		//ssMsg<<"[PRECOMPILED - NO DEBUG INFORMATION AVAILABLE]";
 		return false;
 	}
 	fname = FileManager::GetNormalizedPath(fname);
 	auto br = fname.find_first_of(FileManager::GetDirectorySeparator());
-	while(br != std::string::npos && fname.substr(0, br) != "lua") {
+	while(br != std::string::npos && fname.substr(0, br) != Lua::SCRIPT_DIRECTORY) {
 		fname = fname.substr(br + 1);
 		br = fname.find_first_of(FileManager::GetDirectorySeparator());
 	}
@@ -120,7 +120,7 @@ static void strip_path_until_lua_dir(std::string &shortSrc)
 	auto br = shortSrc.find(c);
 	uint32_t offset = 0;
 	auto bFound = false;
-	auto luaPath = std::string("lua") + c;
+	auto luaPath = Lua::SCRIPT_DIRECTORY + c;
 	while(br != std::string::npos && shortSrc.length() >= offset + luaPath.length() && (bFound = ustring::compare(shortSrc.data() + offset, luaPath.c_str(), false, luaPath.length())) == false) {
 		offset = br + 1;
 		br = shortSrc.find(c, br + 1);
@@ -156,7 +156,7 @@ static void transform_path(const lua_Debug &d, std::string &errPath, int32_t cur
 		if(path.length() > maxLuaPathLen)
 			path = "..." + path.substr(path.size() - maxLuaPathLen);
 
-		if(Lua::GetLuaFilePath("lua/" + path))
+		if(Lua::GetLuaFilePath(Lua::SCRIPT_DIRECTORY_SLASH + path))
 			path = "{[l#luafile:,\"" + path + "\"," + std::to_string(currentLine) + "]}" + path + "{[/l]}";
 		errPath = ustring::substr(errPath, 0, qt0 + 1) + path + ustring::substr(errPath, qt1);
 	}
@@ -208,7 +208,7 @@ bool Lua::PrintTraceback(lua_State *l, std::stringstream &ssOut, std::string *pO
 			auto br = shortSrc.find(c);
 			uint32_t offset = 0;
 			auto bFound = false;
-			auto luaPath = std::string("lua") + c;
+			auto luaPath = Lua::SCRIPT_DIRECTORY + c;
 			while(br != std::string::npos && shortSrc.length() >= offset + luaPath.length() && (bFound = ustring::compare(shortSrc.data() + offset, luaPath.c_str(), false, luaPath.length())) == false) {
 				offset = br + 1;
 				br = shortSrc.find(c, br + 1);

@@ -64,9 +64,9 @@ void CEngine::RegisterConsoleCommands()
 	  ConVarFlags::None, "Opens and executes a lua-file on the client.",
 	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
 		  std::vector<std::string> resFiles;
-		  auto path = "lua\\" + arg;
-		  FileManager::FindFiles((path + "*.lua").c_str(), &resFiles, nullptr);
-		  FileManager::FindFiles((path + "*.clua").c_str(), &resFiles, nullptr);
+		  auto path = Lua::SCRIPT_DIRECTORY_SLASH + arg;
+		  FileManager::FindFiles((path + "*." +Lua::FILE_EXTENSION).c_str(), &resFiles, nullptr);
+		  FileManager::FindFiles((path + "*." +Lua::FILE_EXTENSION_PRECOMPILED).c_str(), &resFiles, nullptr);
 		  autoCompleteOptions.reserve(resFiles.size());
 		  path = ufile::get_path_from_filename(path.substr(4));
 		  for(auto &mapName : resFiles) {
@@ -469,9 +469,9 @@ void CEngine::RegisterConsoleCommands()
 	  ConVarFlags::None, "Opens and executes a lua-file on the GUI state.",
 	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
 		  std::vector<std::string> resFiles;
-		  auto path = "lua\\" + arg;
-		  FileManager::FindFiles((path + "*.lua").c_str(), &resFiles, nullptr);
-		  FileManager::FindFiles((path + "*.clua").c_str(), &resFiles, nullptr);
+		  auto path = Lua::SCRIPT_DIRECTORY_SLASH + arg;
+		  FileManager::FindFiles((path + "*." +Lua::FILE_EXTENSION).c_str(), &resFiles, nullptr);
+		  FileManager::FindFiles((path + "*." + Lua::FILE_EXTENSION_PRECOMPILED).c_str(), &resFiles, nullptr);
 		  autoCompleteOptions.reserve(resFiles.size());
 		  for(auto &mapName : resFiles) {
 			  auto fullPath = path.substr(4) + mapName;

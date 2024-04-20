@@ -24,7 +24,7 @@ void LuaDirectoryWatcherManager::Poll()
 bool LuaDirectoryWatcherManager::IsLuaFile(const std::string &path, bool bAllowCompiled) const
 {
 	std::string ext;
-	return (ufile::get_extension(path, &ext) == true && (ext == "lua" || (bAllowCompiled == true && ext == "clua"))) ? true : false;
+	return (ufile::get_extension(path, &ext) == true && (ext == Lua::FILE_EXTENSION || (bAllowCompiled == true && ext == Lua::FILE_EXTENSION_PRECOMPILED))) ? true : false;
 }
 
 void LuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &fName)

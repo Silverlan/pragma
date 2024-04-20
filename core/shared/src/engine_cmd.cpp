@@ -30,7 +30,8 @@
 
 #undef CreateFile
 
-static std::optional<std::string> udm_convert(const std::string &fileName) {
+static std::optional<std::string> udm_convert(const std::string &fileName)
+{
 	std::string err;
 	auto formatType = udm::Data::GetFormatType(fileName, err);
 	if(formatType.has_value() == false) {
@@ -92,9 +93,9 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 		  if(filemanager::is_dir(fileName)) {
 			  auto f = fileName + "/*";
 			  std::vector<std::string> files;
-			  filemanager::find_files(f, &files,nullptr);
+			  filemanager::find_files(f, &files, nullptr);
 			  for(auto &f : files)
-				  udm_convert(fileName +"/" +f);
+				  udm_convert(fileName + "/" + f);
 			  return;
 		  }
 		  auto rpath = udm_convert(fileName);
@@ -239,9 +240,9 @@ void Engine::RegisterConsoleCommands()
 	  ConVarFlags::None, "Opens and executes a lua-file on the server.",
 	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
 		  std::vector<std::string> resFiles;
-		  auto path = "lua\\" + arg;
-		  FileManager::FindFiles((path + "*.lua").c_str(), &resFiles, nullptr);
-		  FileManager::FindFiles((path + "*.clua").c_str(), &resFiles, nullptr);
+		  auto path = Lua::SCRIPT_DIRECTORY_SLASH + arg;
+		  FileManager::FindFiles((path + "*." + Lua::FILE_EXTENSION).c_str(), &resFiles, nullptr);
+		  FileManager::FindFiles((path + "*." + Lua::FILE_EXTENSION_PRECOMPILED).c_str(), &resFiles, nullptr);
 		  autoCompleteOptions.reserve(resFiles.size());
 		  for(auto &mapName : resFiles) {
 			  auto fullPath = path.substr(4) + mapName;

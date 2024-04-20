@@ -395,7 +395,7 @@ void CGame::SetupLua()
 void CGame::LoadLuaShaders()
 {
 	std::vector<std::string> files;
-	//FileManager::FindFiles("lua\\shaders\\*.lua",&files,NULL); // Deprecated; Shaders have to be explicitely included now
+	//FileManager::FindFiles(Lua::SCRIPT_DIRECTORY_SLASH +"shaders\\*.lua",&files,NULL); // Deprecated; Shaders have to be explicitely included now
 	for(unsigned int i = 0; i < files.size(); i++)
 		LoadLuaShader(files[i]);
 }
@@ -409,7 +409,7 @@ void CGame::LoadLuaShader(std::string file)
 }
 
 std::string CGame::GetLuaNetworkDirectoryName() const { return "client"; }
-std::string CGame::GetLuaNetworkFileName() const { return "cl_init.lua"; }
+std::string CGame::GetLuaNetworkFileName() const { return "cl_init" +Lua::DOT_FILE_EXTENSION; }
 
 //////////////////////////////////////////////
 

@@ -489,14 +489,14 @@ void Lua::file::find_external_game_resource_files(lua_State *l, const std::strin
 luabind::object Lua::file::FindLuaFiles(lua_State *l, const std::string &path, fsys::SearchFlags searchFlag)
 {
 	std::vector<std::string> files;
-	FileManager::FindFiles((path + "/*.lua").c_str(), &files, nullptr, searchFlag);
-	FileManager::FindFiles((path + "/*.clua").c_str(), &files, nullptr, searchFlag);
+	FileManager::FindFiles((path + "/*." + Lua::FILE_EXTENSION).c_str(), &files, nullptr, searchFlag);
+	FileManager::FindFiles((path + "/*." + Lua::FILE_EXTENSION_PRECOMPILED).c_str(), &files, nullptr, searchFlag);
 
 	auto t = luabind::newtable(l);
 	auto idx = 1;
 	for(auto &f : files) {
 		ufile::remove_extension_from_filename(f);
-		f += ".lua";
+		f += Lua::DOT_FILE_EXTENSION;
 		t[idx++] = f;
 	}
 	return t;

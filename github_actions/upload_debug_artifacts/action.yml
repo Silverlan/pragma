@@ -56,10 +56,10 @@ runs:
         fi
 
         mkdir artifacts
-        cp -u "${{ inputs.build-dir }}/CMakeCache.txt" artifacts/
-        cp -u "files_pragma_build.txt" artifacts/
-        cp -u "files_pragma_deps.txt" artifacts/
-        cp -u "files_pragma_install.txt" artifacts/
+        cp -u "${{ inputs.build-dir }}/CMakeCache.txt" artifacts/ || true
+        cp -u "files_pragma_build.txt" artifacts/ || true
+        cp -u "files_pragma_deps.txt" artifacts/ || true
+        cp -u "files_pragma_install.txt" artifacts/ || true
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4

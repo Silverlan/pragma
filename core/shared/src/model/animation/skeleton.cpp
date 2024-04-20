@@ -10,6 +10,7 @@
 #include <functional>
 #include <udm.hpp>
 #include <sharedutils/util_string.h>
+#pragma optimize("", off)
 std::shared_ptr<pragma::animation::Skeleton> pragma::animation::Skeleton::Load(const udm::AssetData &data, std::string &outErr)
 {
 	auto skeleton = std::make_shared<Skeleton>();
@@ -226,19 +227,28 @@ bool pragma::animation::Skeleton::Save(udm::AssetDataArg outData, std::string &o
 	outData.SetAssetVersion(FORMAT_VERSION);
 	auto udm = *outData;
 
-	std::function<void(udm::LinkedPropertyWrapperArg prop, const Bone &bone)> writeBone = nullptr;
-	writeBone = [this, &writeBone](udm::LinkedPropertyWrapperArg prop, const Bone &bone) {
+	std::function<bool(udm::LinkedPropertyWrapperArg prop, const Bone &bone)> writeBone = nullptr;
+	writeBone = [this, &writeBone, &outErr](udm::LinkedPropertyWrapperArg prop, const Bone &bone) -> bool {
 		std::string name = bone.name;
+		if(prop[name]) {
+			outErr = "Duplicate bone '" + name + "'.";
+			return false;
+		}
 		auto udmBone = prop[name];
 		udmBone["index"] = static_cast<uint32_t>(bone.ID);
 		udmBone["pose"] = m_referencePoses[bone.ID];
 
-		for(auto &pair : bone.children)
-			writeBone(udmBone["children"], *pair.second);
+		for(auto &pair : bone.children) {
+			if(!writeBone(udmBone["children"], *pair.second))
+				return false;
+		}
+		return true;
 	};
 	auto udmBones = udm["bones"];
-	for(auto &pair : m_rootBones)
-		writeBone(udmBones, *pair.second);
+	for(auto &pair : m_rootBones) {
+		if(!writeBone(udmBones, *pair.second))
+			return false;
+	}
 	return true;
 }
 

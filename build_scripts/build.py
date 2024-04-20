@@ -529,11 +529,12 @@ def add_pragma_module(name,repositoryUrl=None,commitSha=None,branch=None,skipBui
 	}
 	module_info.append(module)
 
-def add_pragma_module_prebuilt(name,engineVersion="",baseUrl="https://github.com/Silverlan/pragma_prebuilt_modules/releases/download/"):
-	url = baseUrl
+def add_pragma_module_prebuilt(name,engineVersion=""):
+	url = "https://github.com/" +name +"/releases/download/latest/"
 	if len(engineVersion) > 0:
 		url = url +engineVersion +"/"
-	url = url +name +"/"
+	else:
+		url = url +"latest/"
 
 	modules_prebuilt.append(url)
 
@@ -709,9 +710,9 @@ if with_common_modules:
 		commitSha="0d82a619deff13cde9fd05c62a00ded933a9558e",
 		repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
 	)
-	add_pragma_module_prebuilt("pr_mount_external")
-	add_pragma_module_prebuilt("pr_rig")
-	add_pragma_module_prebuilt("pr_ik")
+	add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt")
+	add_pragma_module_prebuilt("Silverlan/pr_rig_prebuilt")
+	add_pragma_module_prebuilt("Silverlan/pr_ik_prebuilt")
 
 if with_pfm:
 	if with_core_pfm_modules or with_all_pfm_modules:

@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 from sys import platform
-from distutils.dir_util import copy_tree
 from urllib.error import URLError, HTTPError
 import tarfile
 import argparse

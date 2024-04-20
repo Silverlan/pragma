@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <pragma/console/convars.h>
 #include <pragma/console/convarhandle.h>
+#pragma optimize("", off)
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &CVarHandler::GetConVarPtrs() { return *conVarPtrs; }
 ConVarHandle CVarHandler::GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ptrs, std::string scvar)
@@ -32,6 +33,10 @@ void CVarHandler::ClearCommands()
 {
 	m_conCommandIDs.clear();
 	m_cvarCallbacks.clear();
+	for(auto &[name, cv] : m_conVars) {
+		std::cout << name << std::endl;
+		cv = nullptr;
+	}
 	m_conVars.clear();
 }
 

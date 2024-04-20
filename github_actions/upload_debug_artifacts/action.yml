@@ -20,21 +20,38 @@ runs:
     - name: Generate Artifact File Lists
       shell: bash
       run: |
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          # Install tree command
+          choco install tree
+        fi
+          
         curDir=$(pwd)
 
         if [ -d "${{ inputs.build-dir }}" ]; then
           cd "${{ inputs.build-dir }}"
-          sudo tree --dirsfirst > "$curDir/files_pragma_build.txt"
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            tree --dirsfirst > "$curDir/files_pragma_build.txt"
+          else
+            sudo tree --dirsfirst > "$curDir/files_pragma_build.txt"
+          fi
           cd "$curDir"
         fi
         if [ -d "${{ inputs.deps-dir }}" ]; then
           cd "${{ inputs.deps-dir }}"
-          sudo tree --dirsfirst > "$curDir/files_pragma_deps.txt"
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            tree --dirsfirst > "$curDir/files_pragma_deps.txt"
+          else
+            sudo tree --dirsfirst > "$curDir/files_pragma_deps.txt"
+          fi
           cd "$curDir"
         fi
         if [ -d "${{ inputs.install-dir }}" ]; then
           cd "${{ inputs.install-dir }}"
-          sudo tree --dirsfirst > "$curDir/files_pragma_install.txt"
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            tree --dirsfirst > "$curDir/files_pragma_install.txt"
+          else
+            sudo tree --dirsfirst > "$curDir/files_pragma_deps.txt"
+          fi
           cd "$curDir"
         fi
 

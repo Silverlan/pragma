@@ -286,6 +286,7 @@ void Engine::Close()
 	util::close_external_archive_manager();
 	CloseServerState();
 
+	ClearCommands();
 	CloseConsole();
 	EndLogging();
 
@@ -1079,8 +1080,6 @@ Engine::~Engine()
 
 	spdlog::info("Closing logger...");
 	pragma::detail::close_logger();
-
-	ClearCommands();
 }
 
 Engine *pragma::get_engine() { return engine; }

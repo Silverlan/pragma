@@ -33,10 +33,6 @@ void CVarHandler::ClearCommands()
 {
 	m_conCommandIDs.clear();
 	m_cvarCallbacks.clear();
-	for(auto &[name, cv] : m_conVars) {
-		std::cout << name << std::endl;
-		cv = nullptr;
-	}
 	m_conVars.clear();
 }
 

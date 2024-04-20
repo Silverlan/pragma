@@ -54,6 +54,7 @@ class DLLNETWORK CVarHandler {
   public:
 	CVarHandler();
 	virtual ~CVarHandler();
+	void ClearCommands();
 
 	template<class T>
 	T *GetConVar(std::string scmd);

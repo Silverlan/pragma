@@ -1079,6 +1079,8 @@ Engine::~Engine()
 
 	spdlog::info("Closing logger...");
 	pragma::detail::close_logger();
+
+	ClearCommands();
 }
 
 Engine *pragma::get_engine() { return engine; }

@@ -109,6 +109,8 @@ ClientState::~ClientState()
 	FileManager::RemoveCustomMountDirectory("downloads");
 
 	c_engine->GetSoundSystem()->SetOnReleaseSoundCallback(nullptr);
+
+	ClearCommands();
 }
 
 void ClientState::UpdateGameWorldShaderSettings()

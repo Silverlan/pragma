@@ -530,7 +530,7 @@ def add_pragma_module(name,repositoryUrl=None,commitSha=None,branch=None,skipBui
 	module_info.append(module)
 
 def add_pragma_module_prebuilt(name,engineVersion=""):
-	url = "https://github.com/" +name +"/releases/download/latest/"
+	url = "https://github.com/" +name +"/releases/download/"
 	if len(engineVersion) > 0:
 		url = url +engineVersion +"/"
 	else:

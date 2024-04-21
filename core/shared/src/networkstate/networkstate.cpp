@@ -689,6 +689,15 @@ void NetworkState::DeregisterLuaModules(void *l, const std::string &identifier)
 
 ConVarMap *NetworkState::GetConVarMap() { return nullptr; }
 
+void NetworkState::UnregisterConVar(const std::string &scmd)
+{
+	auto lcmd = scmd;
+	ustring::to_lower(lcmd);
+	auto it = m_conVars.find(scmd);
+	if(it != m_conVars.end())
+		m_conVars.erase(it);
+}
+
 ConVar *NetworkState::RegisterConVar(const std::string &scmd, const std::shared_ptr<ConVar> &cvar)
 {
 	auto lcmd = scmd;

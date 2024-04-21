@@ -48,12 +48,12 @@ bool ResourceManager::AddResource(std::string res, bool stream)
 	res = FileManager::GetCanonicalizedPath(res);
 	auto checkName = res;
 	std::string ext;
-	if(ufile::get_extension(res, &ext) == true && ext == "lua") {
-		res = res.substr(0, res.length() - 3) + "clua";
-		ext = "clua";
+	if(ufile::get_extension(res, &ext) == true && ext == Lua::FILE_EXTENSION) {
+		res = res.substr(0, res.length() - 3) + Lua::FILE_EXTENSION_PRECOMPILED;
+		ext = Lua::FILE_EXTENSION_PRECOMPILED;
 	}
-	if(ext == "clua")
-		checkName = res.substr(0, res.length() - 4) + "lua";
+	if(ext == Lua::FILE_EXTENSION_PRECOMPILED)
+		checkName = res.substr(0, res.length() - 4) + Lua::FILE_EXTENSION;
 	if(!IsValidResource(res)) {
 		Con::cwar << "Attempted to add invalid resource '" << res << "'! Skipping..." << Con::endl;
 		return false;

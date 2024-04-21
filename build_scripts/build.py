@@ -1,7 +1,6 @@
 # import os
 from pathlib import Path
 from sys import platform
-from distutils.dir_util import copy_tree
 from urllib.error import URLError, HTTPError
 import tarfile
 import argparse
@@ -548,17 +547,26 @@ os.chdir(root +"/modules")
 
 module_info = []
 def add_pragma_module(name,repositoryUrl=None,commitSha=None,branch=None,skipBuildTarget=False):
-    for module in module_info:
-        if module["name"] == name:
-            return
-    module = {
-        "name": name,
-        "repositoryUrl": repositoryUrl,
-        "commitSha": commitSha,
-        "branch": branch,
+	for module in module_info:
+		if module["name"] == name:
+			return
+	module = {
+		"name": name,
+		"repositoryUrl": repositoryUrl,
+		"commitSha": commitSha,
+		"branch": branch,
 		"skipBuildTarget": skipBuildTarget
-    }
-    module_info.append(module)
+	}
+	module_info.append(module)
+
+def add_pragma_module_prebuilt(name,engineVersion=""):
+	url = "https://github.com/" +name +"/releases/download/"
+	if len(engineVersion) > 0:
+		url = url +engineVersion +"/"
+	else:
+		url = url +"latest/"
+
+	modules_prebuilt.append(url)
 
 def execfile(filepath, globals=None, locals=None, args=None):
 	if globals is None:
@@ -722,17 +730,19 @@ if with_essential_client_modules:
     )
 
 if with_common_modules:
-    add_pragma_module(
-        name="pr_bullet",
-        commitSha="013f8f3befa67df294bd49f76248234ddef7e5e2",
-        repositoryUrl="https://github.com/Slaweknowy/pr_bullet.git"
-    )
-    add_pragma_module(
-        name="pr_audio_soloud",
-        commitSha="0d82a619deff13cde9fd05c62a00ded933a9558e",
-        repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
-    )
-    #modules_prebuilt.append("Silverlan/pr_mount_external_prebuilt")
+	add_pragma_module(
+		name="pr_bullet",
+		commitSha="4f1aea9",
+		repositoryUrl="https://github.com/Silverlan/pr_bullet.git"
+	)
+	add_pragma_module(
+		name="pr_audio_soloud",
+		commitSha="0d82a619deff13cde9fd05c62a00ded933a9558e",
+		repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
+	)
+	#add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt")
+	add_pragma_module_prebuilt("Silverlan/pr_rig_prebuilt")
+	add_pragma_module_prebuilt("Silverlan/pr_ik_prebuilt")
 
 if with_pfm:
     if with_core_pfm_modules or with_all_pfm_modules:
@@ -1018,7 +1028,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","df6ec3f49fb548aa140ce6c174c5849b351f00e2")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","24f2084309a77184b5c381609bd913353a5ddc55")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","56d46dacb398fa7540e794359eaf1081c9df1edd")
 
 	if with_vr:

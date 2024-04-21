@@ -767,12 +767,12 @@ luabind::object Lua::global::include(lua_State *l, const std::string &f, std::ve
 			else
 				incPath = Lua::GetIncludePath(incPath);
 		}
-		incPath = "lua/" + incPath;
-		auto incPathLua = incPath + "*.lua";
+		incPath = Lua::SCRIPT_DIRECTORY_SLASH + incPath;
+		auto incPathLua = incPath + "*." + Lua::FILE_EXTENSION;
 		std::vector<std::string> files;
 		FileManager::FindFiles(incPathLua.c_str(), &files, nullptr);
 
-		auto incPathCLua = incPath + "*.clua";
+		auto incPathCLua = incPath + "*." + Lua::FILE_EXTENSION_PRECOMPILED;
 		std::vector<std::string> cfiles;
 		FileManager::FindFiles(incPathCLua.c_str(), &cfiles, nullptr);
 		files.reserve(files.size() + cfiles.size());

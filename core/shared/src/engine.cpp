@@ -303,6 +303,7 @@ void Engine::Close()
 	util::close_external_archive_manager();
 	CloseServerState();
 
+	ClearCommands();
 	CloseConsole();
 	EndLogging();
 

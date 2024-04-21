@@ -55,7 +55,7 @@ static void load_autorun_scripts(const std::function<void(const std::string &, s
 		games.push_back(cl->GetGameState());
 	for(auto *game : games) {
 		std::vector<std::string> files;
-		fFindFiles("lua\\autorun\\*.lua", files);
+		fFindFiles(Lua::SCRIPT_DIRECTORY + "\\autorun\\*." + Lua::FILE_EXTENSION, files);
 
 		for(auto &fName : files) {
 			auto luaFileName = "autorun\\" + fName;
@@ -64,7 +64,7 @@ static void load_autorun_scripts(const std::function<void(const std::string &, s
 
 		files.clear();
 		std::string gameDir = game->IsClient() ? "client" : "server";
-		fFindFiles("lua\\autorun\\" + gameDir + "\\*.lua", files);
+		fFindFiles(Lua::SCRIPT_DIRECTORY + "\\autorun\\" + gameDir + "\\*." + Lua::FILE_EXTENSION, files);
 		for(auto &fName : files) {
 			auto luaFileName = "autorun\\" + gameDir + '\\' + fName;
 			game->ExecuteLuaFile(luaFileName);
@@ -198,7 +198,7 @@ void AddonSystem::MountAddons()
 							  load_autorun_scripts([archFile](const std::string &findTarget, std::vector<std::string> &outFiles) {
 								  std::vector<uva::FileInfo *> results;
 								  archFile->SearchFiles(findTarget, results);
-								  //archFile->SearchFiles("lua\\autorun\\*.clua",results);
+								  // archFile->SearchFiles(Lua::SCRIPT_DIRECTORY + "\\autorun\\*." + Lua::FILE_EXTENSION_PRECOMPILED, results);
 								  outFiles.reserve(outFiles.size() + results.size());
 								  for(auto *fi : results) {
 									  if(fi->IsFile() == false)

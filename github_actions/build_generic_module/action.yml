@@ -24,6 +24,10 @@ inputs:
     description: 'PAT token required to fetch the repository.'
     required: true
     default: '${{ github.token }}'
+  debug-artifact-token:
+    description: 'Token required for upload of debug artifacts (e.g. CMakeCache.txt).'
+    required: true
+    default: ''
 outputs:
   build-dir:
     description: 'The directory where the build files are written to.'
@@ -87,3 +91,13 @@ runs:
         echo "build-dir=${{ steps.build-pragma.outputs.build-dir }}" >> $GITHUB_OUTPUT
         echo "deps-dir=${{ steps.build-pragma.outputs.deps-dir }}" >> $GITHUB_OUTPUT
         echo "install-dir=${{ steps.build-pragma.outputs.install-dir }}" >> $GITHUB_OUTPUT
+
+    - name: Upload Debug Artifacts
+      if: ${{ !cancelled() && inputs.debug-artifact-token != '' }}
+      uses: Silverlan/pragma/github_actions/upload_debug_artifacts@master
+      with:
+        token: ${{ inputs.debug-artifact-token }}
+        commit: ${{ github.ref_name }}
+        build-dir: '${{ steps.build-pragma.outputs.build-dir }}'
+        deps-dir: '${{ steps.build-pragma.outputs.deps-dir }}'
+        install-dir: '${{ steps.build-pragma.outputs.install-dir }}'

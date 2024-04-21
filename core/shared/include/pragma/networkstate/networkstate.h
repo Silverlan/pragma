@@ -190,6 +190,7 @@ class DLLNETWORK NetworkState : public CallbackHandler, public CVarHandler {
 
 	ConVar *CreateConVar(const std::string &scmd, udm::Type type, const std::string &value, ConVarFlags flags, const std::string &help = "");
 	ConVar *RegisterConVar(const std::string &scmd, const std::shared_ptr<ConVar> &cvar);
+	void UnregisterConVar(const std::string &scmd);
 	virtual ConCommand *CreateConCommand(const std::string &scmd, LuaFunction fc, ConVarFlags flags = ConVarFlags::None, const std::string &help = "");
   protected:
 	virtual Material *LoadMaterial(const std::string &path, bool precache, bool bReload);

@@ -17,7 +17,7 @@ void SLuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &path)
 		return;
 	LuaDirectoryWatcherManager::OnLuaFileChanged(path);
 
-	auto *res = ResourceManager::FindResource("lua\\" + path.substr(0, path.length() - 3) + "clua");
+	auto *res = ResourceManager::FindResource(Lua::SCRIPT_DIRECTORY_SLASH + path.substr(0, path.length() - 3) + Lua::FILE_EXTENSION_PRECOMPILED);
 	if(res == nullptr)
 		return;
 	s_game->UpdateLuaCache(res->fileName);

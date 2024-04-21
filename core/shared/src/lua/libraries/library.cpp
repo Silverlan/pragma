@@ -482,6 +482,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	  luabind::def("reduce_curve_points", &bezierfit::reduce),
 	  // luabind::def("reduce_curve_points", &bezierfit::reduce, luabind::default_parameter_policy<2, 2.f> {}), // Default float argument not supported in clang (state: 23-09-12)
 	  luabind::def("reduce_curve_points", &::reduce),
+	  luabind::def("calc_four_point_cubic_bezier", &bezierfit::calc_four_point_cubic_bezier),
 
 	  luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients, luabind::meta::join<luabind::default_parameter_policy<3, true>, luabind::default_parameter_policy<4, true>>::type {}),
 	  luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients, luabind::default_parameter_policy<4, true> {}), luabind::def("generate_two_pass_gaussian_blur_coefficients", &util::generate_two_pass_gaussian_blur_coefficients),
@@ -514,19 +515,18 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		    return umath::calc_bezier_point(cp0Val, cp0OutVal, cp1InVal, cp1Val, r[0]);
 	    }),
 		luabind::def("calc_bezier_point_fraction",+[](float t, const Vector2 &p0, const Vector2 &p1, const Vector2 &p2, const Vector2 &p3) {
-			auto u = 1 - t;
-			auto tt = t * t;
-			auto uu = u * u;
-			auto uuu = uu * u;
-			auto ttt = tt * t;
+		    auto u = 1 - t;
+		    auto tt = t * t;
+		    auto uu = u * u;
+		    auto uuu = uu * u;
+		    auto ttt = tt * t;
 
-			return uuu * p0 + 3 * uu * t * p1 + 3 * u * tt * p2 + ttt * p3;
+		    return uuu * p0 + 3 * uu * t * p1 + 3 * u * tt * p2 + ttt * p3;
 		  }),
 	  luabind::def(
 	    "axis_to_vector", static_cast<Vector3(*)(pragma::SignedAxis)>(&pragma::axis_to_vector)),
 	  luabind::def(
-	    "remap", +[](float value, float fromLow, float fromHigh, float toLow, float toHigh) {
-			   return toLow + (value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow);
+	    "remap", +[](float value, float fromLow, float fromHigh, float toLow, float toHigh) { return toLow + (value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow);
 			  }),
 		luabind::def("is_positive_axis",static_cast<bool(*)(pragma::SignedAxis)>(&pragma::is_positive_axis)),
 		luabind::def("is_negative_axis",static_cast<bool(*)(pragma::SignedAxis)>(&pragma::is_negative_axis))

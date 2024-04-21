@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <pragma/console/convars.h>
 #include <pragma/console/convarhandle.h>
+#pragma optimize("", off)
 static std::unordered_map<std::string, std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &CVarHandler::GetConVarPtrs() { return *conVarPtrs; }
 ConVarHandle CVarHandler::GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<PtrConVar>> &ptrs, std::string scvar)
@@ -26,7 +27,14 @@ ConVarHandle CVarHandler::GetConVarHandle(std::unordered_map<std::string, std::s
 
 CVarHandler::CVarHandler() {}
 
-CVarHandler::~CVarHandler() {}
+CVarHandler::~CVarHandler() { ClearCommands(); }
+
+void CVarHandler::ClearCommands()
+{
+	m_conCommandIDs.clear();
+	m_cvarCallbacks.clear();
+	m_conVars.clear();
+}
 
 void CVarHandler::Initialize()
 {
@@ -63,10 +71,10 @@ std::shared_ptr<ConVar> CVarHandler::RegisterConVar(const std::string &scmd, udm
 			return nullptr;
 		return std::static_pointer_cast<ConVar>(it->second);
 	}
-	udm::visit(type, [this,&it,&scmd,&value,&flags,&help](auto tag) {
+	udm::visit(type, [this, &it, &scmd, &value, &flags, &help](auto tag) {
 		using T = typename decltype(tag)::type;
-		if constexpr(console::is_valid_convar_type_v<T> && udm::is_convertible<std::string,T>())
-			it = m_conVars.insert(decltype(m_conVars)::value_type(scmd, ConVar::Create<T>(udm::convert<std::string,T>(value), flags, help))).first;
+		if constexpr(console::is_valid_convar_type_v<T> && udm::is_convertible<std::string, T>())
+			it = m_conVars.insert(decltype(m_conVars)::value_type(scmd, ConVar::Create<T>(udm::convert<std::string, T>(value), flags, help))).first;
 	});
 	if(it == m_conVars.end())
 		return nullptr;
@@ -100,7 +108,7 @@ CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, con
 		});
 	};
 	auto &callbacks = it->second;
-	callbacks.push_back(CvarCallback{f});
+	callbacks.push_back(CvarCallback {f});
 	return callbacks.back().GetFunction();
 }
 CallbackHandle CVarHandler::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, int, int)> &function) { return RegisterConVarCallback<int>(scvar, function); }

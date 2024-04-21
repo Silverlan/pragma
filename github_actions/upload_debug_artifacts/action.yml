@@ -1,0 +1,71 @@
+name: Upload Debug Artifacts
+description: 'Upload debug build files as artifacts'
+inputs:
+  build-dir:
+    description: 'Path to build directory'
+    required: true
+  deps-dir:
+    description: 'Path to deps directory'
+    required: true
+  install-dir:
+    description: 'Path to install directory'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: Silverlan/common_actions/action_start@main
+      with:
+        name: "pragma > upload_debug_artifacts"
+
+    - name: Generate Artifact File Lists
+      shell: bash
+      run: |
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          # Install tree command
+          choco install tree
+        fi
+          
+        curDir=$(pwd)
+
+        if [ -d "${{ inputs.build-dir }}" ]; then
+          cd "${{ inputs.build-dir }}"
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            tree --dirsfirst > "$curDir/files_pragma_build.txt"
+          else
+            sudo tree --dirsfirst > "$curDir/files_pragma_build.txt"
+          fi
+          cd "$curDir"
+        fi
+        if [ -d "${{ inputs.deps-dir }}" ]; then
+          cd "${{ inputs.deps-dir }}"
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            tree --dirsfirst > "$curDir/files_pragma_deps.txt"
+          else
+            sudo tree --dirsfirst > "$curDir/files_pragma_deps.txt"
+          fi
+          cd "$curDir"
+        fi
+        if [ -d "${{ inputs.install-dir }}" ]; then
+          cd "${{ inputs.install-dir }}"
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            tree --dirsfirst > "$curDir/files_pragma_install.txt"
+          else
+            sudo tree --dirsfirst > "$curDir/files_pragma_deps.txt"
+          fi
+          cd "$curDir"
+        fi
+
+        mkdir artifacts
+        cp -u "${{ inputs.build-dir }}/CMakeCache.txt" artifacts/ || true
+        cp -u "files_pragma_build.txt" artifacts/ || true
+        cp -u "files_pragma_deps.txt" artifacts/ || true
+        cp -u "files_pragma_install.txt" artifacts/ || true
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Artifacts
+        overwrite: true
+        path: "artifacts"
+
+    - uses: Silverlan/common_actions/action_end@main

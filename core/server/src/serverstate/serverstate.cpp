@@ -78,6 +78,8 @@ ServerState::~ServerState()
 	ResourceManager::ClearResources();
 	m_modelManager->Clear();
 	GetMaterialManager().ClearUnused();
+
+	ClearCommands();
 }
 
 void ServerState::InitializeGameServer(bool singlePlayerLocalGame)

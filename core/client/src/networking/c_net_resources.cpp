@@ -46,7 +46,7 @@ void ClientState::HandleClientResource(NetPacket &packet)
 	std::string ext;
 	auto fileDst = file;
 	if(ufile::get_extension(file, &ext) == true) {
-		if(ext == "clua") {
+		if(ext == Lua::FILE_EXTENSION_PRECOMPILED) {
 			bDefaultPath = false;
 			fileDst = m_svInfo->GetDownloadPath() + fileDst; // Lua-files are placed into a sub-directory specific to this server
 		}

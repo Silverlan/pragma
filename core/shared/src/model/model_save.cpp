@@ -952,7 +952,12 @@ bool Model::Save(Game &game, udm::AssetDataArg outData, std::string &outErr)
 			auto udmFlexes = udm["flexes"];
 			for(uint32_t flexIdx = 0u; flexIdx < flexes.size(); ++flexIdx) {
 				auto &flex = flexes[flexIdx];
-				auto udmFlex = udmFlexes[flex.GetName()];
+				auto &flexName = flex.GetName();
+				if(udmFlexes[flexName]) {
+					outErr = "Duplicate flex with name '" + flexName + "'!";
+					return false;
+				}
+				auto udmFlex = udmFlexes[flexName];
 				udmFlex["index"] = flexIdx;
 
 				auto *va = flex.GetVertexAnimation();

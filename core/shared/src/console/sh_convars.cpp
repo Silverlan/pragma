@@ -160,9 +160,9 @@ static void compile_lua_file(lua_State *l, Game &game, std::string f)
 	auto s = game.LoadLuaFile(path);
 	if(s != Lua::StatusCode::Ok)
 		return;
-	if(path.length() > 3 && path.substr(path.length() - 4) == ".lua")
+	if(path.length() > 3 && path.substr(path.length() - 4) == Lua::DOT_FILE_EXTENSION)
 		path = path.substr(0, path.length() - 4);
-	path += ".clua";
+	path += Lua::DOT_FILE_EXTENSION_PRECOMPILED;
 	auto r = Lua::compile_file(l, path);
 	if(r == false)
 		Con::cwar << "Unable to write file '" << path.c_str() << "'..." << Con::endl;
@@ -177,15 +177,15 @@ static void CMD_lua_compile(NetworkState *state, pragma::BasePlayerComponent *, 
 	Game *game = state->GetGameState();
 	auto *l = game->GetLuaState();
 	std::string arg = argv[0];
-	if(FileManager::IsDir("lua/" + arg)) {
+	if(FileManager::IsDir(Lua::SCRIPT_DIRECTORY_SLASH + arg)) {
 		std::function<void(const std::string &)> fCompileFiles = nullptr;
 		fCompileFiles = [l, game, &fCompileFiles](const std::string &path) {
 			std::vector<std::string> files {};
 			std::vector<std::string> dirs {};
-			FileManager::FindFiles(("lua/" + path + "/*").c_str(), &files, &dirs);
+			FileManager::FindFiles((Lua::SCRIPT_DIRECTORY_SLASH + path + "/*").c_str(), &files, &dirs);
 			for(auto &f : files) {
 				std::string ext;
-				if(ufile::get_extension(f, &ext) == false || ustring::compare<std::string>(ext, "lua", false) == false)
+				if(ufile::get_extension(f, &ext) == false || ustring::compare<std::string>(ext, Lua::FILE_EXTENSION, false) == false)
 					continue;
 				compile_lua_file(l, *game, path + '/' + f);
 			}
@@ -197,7 +197,7 @@ static void CMD_lua_compile(NetworkState *state, pragma::BasePlayerComponent *, 
 	}
 	compile_lua_file(l, *game, arg);
 }
-REGISTER_ENGINE_CONCOMMAND(lua_compile, CMD_lua_compile, ConVarFlags::None, "Opens the specified lua-file and outputs a precompiled file with the same name (And the extension '.clua').");
+REGISTER_ENGINE_CONCOMMAND(lua_compile, CMD_lua_compile, ConVarFlags::None, "Opens the specified lua-file and outputs a precompiled file with the same name (And the extension '" + Lua::DOT_FILE_EXTENSION_PRECOMPILED + "').");
 
 REGISTER_ENGINE_CONCOMMAND(
   toggleconsole,

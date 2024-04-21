@@ -106,6 +106,8 @@ namespace pragma {
 
 	class DLLCLIENT ShaderGameWorldLightingPass : public ShaderGameWorld, public ShaderSpecializationManager {
 	  public:
+		static void SetMinimalPipelineModeEnabled(bool enabled);
+
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_RENDER_BUFFER_INDEX;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX;
 

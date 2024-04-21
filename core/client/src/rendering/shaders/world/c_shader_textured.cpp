@@ -106,6 +106,8 @@ static void initialize_material_settings_buffer()
 	g_materialSettingsBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(bufCreateInfo, sizeof(ShaderGameWorldLightingPass::MaterialData), sizeof(ShaderGameWorldLightingPass::MaterialData) * 524'288, 0.05f);
 	g_materialSettingsBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 }
+static bool m_minimalPipelineModeEnabled = false;
+void ShaderGameWorldLightingPass::SetMinimalPipelineModeEnabled(bool enabled) { m_minimalPipelineModeEnabled = enabled; }
 ShaderGameWorldLightingPass::ShaderGameWorldLightingPass(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderGameWorld(context, identifier, vsShader, fsShader, gsShader)
 {
 	if(g_instanceCount++ == 0u)
@@ -141,6 +143,8 @@ ShaderGameWorldLightingPass::ShaderGameWorldLightingPass(prosper::IPrContext &co
 		// them for debugging, so we'll just use 1.
 		numPipelines = 1;
 	}
+	if(m_minimalPipelineModeEnabled)
+		numPipelines = 1;
 	SetPipelineCount(numPipelines);
 }
 ShaderGameWorldLightingPass::~ShaderGameWorldLightingPass()

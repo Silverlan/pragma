@@ -431,6 +431,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		    auto weights = Lua::table_to_vector<float>(l, tWeights, 2);
 		    return uquat::calc_average(rotations, weights);
 	    }),
+	  luabind::def("calc_rotation_to_axis", &uquat::get_rotation_to_axis),
 	  luabind::def("map_value_to_fraction", static_cast<float (*)(lua_State *, float, float, float)>([](lua_State *l, float v, float c, float i) -> float {
 		  auto pivot = 1 / (c - 1) * i;
 		  auto range = 1 / c;

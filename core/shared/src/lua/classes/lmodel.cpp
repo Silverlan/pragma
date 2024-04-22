@@ -986,6 +986,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	defRig.def_readwrite("forwardAxis", &pragma::animation::MetaRig::forwardAxis);
 	defRig.def_readwrite("upAxis", &pragma::animation::MetaRig::upAxis);
 	defRig.def(luabind::tostring(luabind::self));
+	defRig.add_static_constant("ROOT_BONE", umath::to_integral(pragma::animation::META_RIG_ROOT_BONE_TYPE));
 	defRig.scope[luabind::def("get_bone_name", &pragma::animation::get_meta_rig_bone_type_name)];
 	defRig.scope[luabind::def("get_bone_enum", &pragma::animation::get_meta_rig_bone_type_enum)];
 	defRig.scope[luabind::def("get_bone_side", &pragma::animation::get_meta_rig_bone_type_side)];

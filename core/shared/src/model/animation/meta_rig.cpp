@@ -224,7 +224,7 @@ std::vector<pragma::animation::MetaRigBoneType> pragma::animation::get_meta_rig_
 {
 	switch(type) {
 	case MetaRigBoneType::Hips:
-		return {MetaRigBoneType::Pelvis, MetaRigBoneType::Spine};
+		return {MetaRigBoneType::Pelvis, MetaRigBoneType::Spine, MetaRigBoneType::LeftUpperLeg, MetaRigBoneType::RightUpperLeg};
 	case MetaRigBoneType::Pelvis:
 		return {};
 	case MetaRigBoneType::Spine:

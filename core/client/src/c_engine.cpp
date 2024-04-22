@@ -24,6 +24,7 @@
 #include "pragma/networking/local_client.hpp"
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include <pragma/rendering/scene/util_draw_scene_info.hpp>
+#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include <pragma/entities/environment/lights/c_env_light.h>
 #include <pragma/input/input_binding_layer.hpp>
 #include <pragma/lua/lua_error_handling.hpp>
@@ -546,6 +547,7 @@ extern std::optional<uint32_t> g_launchParamWidth;
 extern std::optional<uint32_t> g_launchParamHeight;
 extern std::optional<Color> g_titleBarColor;
 extern std::optional<Color> g_borderColor;
+extern bool g_launchParamExperimentalMemoryOptimizationEnabled;
 extern bool g_windowless;
 void register_game_shaders();
 bool CEngine::Initialize(int argc, char *argv[])
@@ -561,6 +563,12 @@ bool CEngine::Initialize(int argc, char *argv[])
 			return args->front();
 		return {};
 	};
+
+	if(g_launchParamExperimentalMemoryOptimizationEnabled) {
+		// PhysX has a lower memory footprint compared to bullet
+		m_launchCommands.push_back({"phys_engine", {"physx"}});
+		pragma::ShaderGameWorldLightingPass::SetMinimalPipelineModeEnabled(true);
+	}
 
 	auto renderApi = findCmdArg("render_api");
 	if(renderApi)

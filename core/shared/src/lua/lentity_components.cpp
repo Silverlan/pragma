@@ -608,6 +608,14 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defOrigin];
 
 	auto defConstraint = pragma::lua::create_entity_component_class<pragma::ConstraintComponent, pragma::BaseEntityComponent>("ConstraintComponent");
+
+	auto defPart = luabind::class_<pragma::ConstraintComponent::ConstraintParticipants>("ConstraintParticipants");
+	defPart.def_readonly("driver", &pragma::ConstraintComponent::ConstraintParticipants::driverC);
+	defPart.def_readonly("drivenObject", &pragma::ConstraintComponent::ConstraintParticipants::drivenObjectC);
+	defPart.def_readonly("driverPropertyIndex", &pragma::ConstraintComponent::ConstraintParticipants::driverPropIdx);
+	defPart.def_readonly("drivenObjectPropertyIndex", &pragma::ConstraintComponent::ConstraintParticipants::drivenObjectPropIdx);
+	defConstraint.scope[defPart];
+
 	defConstraint.add_static_constant("EVENT_ON_ORDER_INDEX_CHANGED", pragma::ConstraintComponent::EVENT_ON_ORDER_INDEX_CHANGED);
 	defConstraint.add_static_constant("EVENT_APPLY_CONSTRAINT", pragma::ConstraintComponent::EVENT_APPLY_CONSTRAINT);
 	defConstraint.def("SetInfluence", &pragma::ConstraintComponent::SetInfluence);
@@ -624,6 +632,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defConstraint.def("GetDrivenObjectSpace", &pragma::ConstraintComponent::GetDrivenObjectSpace);
 	defConstraint.def("SetOrderIndex", &pragma::ConstraintComponent::SetOrderIndex);
 	defConstraint.def("GetOrderIndex", &pragma::ConstraintComponent::GetOrderIndex);
+	defConstraint.def("GetConstraintParticipants", &pragma::ConstraintComponent::GetConstraintParticipants);
 	entsMod[defConstraint];
 
 	auto defConstraintManager = pragma::lua::create_entity_component_class<pragma::ConstraintManagerComponent, pragma::BaseEntityComponent>("ConstraintManagerComponent");

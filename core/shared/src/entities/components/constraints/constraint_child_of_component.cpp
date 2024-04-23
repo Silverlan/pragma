@@ -111,6 +111,30 @@ void ConstraintChildOfComponent::SetScaleAxisEnabled(pragma::Axis axis, bool ena
 }
 bool ConstraintChildOfComponent::IsScaleAxisEnabled(pragma::Axis axis) const { return m_scaleEnabled[umath::to_integral(axis)]; }
 
+std::pair<std::optional<Vector3>, std::optional<Quat>> pragma::ConstraintChildOfComponent::GetDriverPose(umath::CoordinateSpace space) const
+{
+	if(!const_cast<ConstraintChildOfComponent *>(this)->UpdatePropertyInfos() || !m_driverPropertyInfo)
+		return {};
+	auto &constraintInfo = m_constraintC->GetConstraintParticipants();
+
+	auto &game = *GetEntity().GetNetworkState()->GetGameState();
+	m_driverPropertyInfo->propertyRef.UpdateMemberIndex(game);
+
+	return GetPropertyPose(*m_driverPropertyInfo, *constraintInfo->driverC, space);
+}
+
+std::pair<std::optional<Vector3>, std::optional<Quat>> pragma::ConstraintChildOfComponent::GetDrivenPose(umath::CoordinateSpace space) const
+{
+	if(!const_cast<ConstraintChildOfComponent *>(this)->UpdatePropertyInfos() || !m_drivenObjectPropertyInfo)
+		return {};
+	auto &constraintInfo = m_constraintC->GetConstraintParticipants();
+
+	auto &game = *GetEntity().GetNetworkState()->GetGameState();
+	m_drivenObjectPropertyInfo->propertyRef.UpdateMemberIndex(game);
+
+	return GetPropertyPose(*m_drivenObjectPropertyInfo, *constraintInfo->driverC, space);
+}
+
 const pragma::ComponentHandle<ConstraintComponent> &ConstraintChildOfComponent::GetConstraint() const { return m_constraintC; }
 void ConstraintChildOfComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void ConstraintChildOfComponent::OnEntityComponentAdded(BaseEntityComponent &component)
@@ -195,6 +219,31 @@ std::optional<umath::ScaledTransform> ConstraintChildOfComponent::CalcInversePos
 	pragma::ComponentMemberIndex drivenPropertyIndex;
 	ConstraintComponent::ConstraintParticipants constraintInfo;
 	return CalcConstraintPose(&pose, true, drivenPropertyIndex, constraintInfo);
+}
+
+std::pair<std::optional<Vector3>, std::optional<Quat>> ConstraintChildOfComponent::GetPropertyPose(const PropertyInfo &propInfo, const BaseEntityComponent &c, umath::CoordinateSpace space) const
+{
+	switch(propInfo.type) {
+	case Type::Pose:
+		{
+			umath::ScaledTransform pose;
+			c.GetTransformMemberPose(propInfo.propertyRef.GetMemberIndex(), space, pose);
+			return {pose.GetOrigin(), pose.GetRotation()};
+		}
+	case Type::Position:
+		{
+			Vector3 pos {};
+			c.GetTransformMemberPos(propInfo.propertyRef.GetMemberIndex(), space, pos);
+			return {pos, {}};
+		}
+	case Type::Rotation:
+		{
+			Quat rot {};
+			c.GetTransformMemberRot(propInfo.propertyRef.GetMemberIndex(), space, rot);
+			return {{}, rot};
+		}
+	}
+	return {};
 }
 
 std::optional<umath::ScaledTransform> ConstraintChildOfComponent::CalcConstraintPose(umath::ScaledTransform *optPose, bool inverse, pragma::ComponentMemberIndex &outDrivenPropertyIndex, ConstraintComponent::ConstraintParticipants &outConstraintParticipants) const

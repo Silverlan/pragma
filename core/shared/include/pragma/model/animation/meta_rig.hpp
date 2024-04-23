@@ -104,6 +104,7 @@ namespace pragma::animation {
 
 		Invalid = std::numeric_limits<uint8_t>::max(),
 	};
+	constexpr MetaRigBoneType META_RIG_ROOT_BONE_TYPE = MetaRigBoneType::Hips;
 	constexpr const char *get_meta_rig_bone_type_name(MetaRigBoneType type);
 	constexpr std::optional<MetaRigBoneType> get_meta_rig_bone_type_enum(const std::string_view &boneType);
 	constexpr std::optional<MetaRigBoneType> get_meta_rig_bone_parent_type(MetaRigBoneType type);

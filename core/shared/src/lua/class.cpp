@@ -1417,6 +1417,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat->def("ClampRotation", static_cast<Quat (*)(lua_State *, Quat &, const EulerAngles &)>([](lua_State *l, Quat &rot, const EulerAngles &bounds) -> Quat { return uquat::clamp_rotation(rot, -bounds, bounds); }));
 	defQuat->def("Distance", &uquat::distance);
 	defQuat->def("GetConjugate", static_cast<Quat (*)(const Quat &)>(&glm::conjugate));
+	defQuat->def("AlignToAxis", &uquat::align_rotation_to_axis);
 	defQuat->def(
 	  "Equals", +[](const Quat &a, const Quat &b, float epsilon) { return umath::abs(a.x - b.x) <= epsilon && umath::abs(a.y - b.y) <= epsilon && umath::abs(a.z - b.z) <= epsilon && umath::abs(a.w - b.w) <= epsilon; });
 	defQuat->def(

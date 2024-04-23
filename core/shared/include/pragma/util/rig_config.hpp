@@ -76,6 +76,7 @@ namespace pragma::ik {
 			TwistLimit,
 			SwivelHingeJoint,
 			TwistJoint,
+			AngularJoint,
 
 			Count,
 		};
@@ -127,6 +128,7 @@ namespace pragma::ik {
 		PRigConfigJoint AddTwistLimit(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, umath::Degree maxAngle, float rigidity = 1.f, const std::optional<Vector3> &measurementAxisA = {});
 		PRigConfigJoint AddSwivelHingeJoint(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity = 1.f);
 		PRigConfigJoint AddTwistJoint(const pragma::GString &bone0, const pragma::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity);
+		PRigConfigJoint AddAngularJoint(const pragma::GString &bone0, const pragma::GString &bone1, float rigidity = 1.f);
 
 		void RemoveConstraints(const pragma::GString &bone);
 		void RemoveConstraints(const pragma::GString &bone0, const pragma::GString &bone1);

@@ -29,20 +29,20 @@ namespace pragma {
 		void SetScaleAxisEnabled(pragma::Axis axis, bool enabled);
 		bool IsScaleAxisEnabled(pragma::Axis axis) const;
 
+		std::pair<std::optional<Vector3>, std::optional<Quat>> GetDriverPose(umath::CoordinateSpace space) const;
+		std::pair<std::optional<Vector3>, std::optional<Quat>> GetDrivenPose(umath::CoordinateSpace space) const;
+
 		const pragma::ComponentHandle<ConstraintComponent> &GetConstraint() const;
 
 		virtual void InitializeLuaObject(lua_State *lua) override;
 		std::optional<umath::ScaledTransform> CalcInversePose(umath::ScaledTransform &pose) const;
 	  protected:
-		enum class Type : uint8_t {
-			Pose = 0,
-			Position,
-			Rotation
-		};
+		enum class Type : uint8_t { Pose = 0, Position, Rotation };
 		struct PropertyInfo {
 			pragma::EntityUComponentMemberRef propertyRef;
 			Type type;
 		};
+		std::pair<std::optional<Vector3>, std::optional<Quat>> GetPropertyPose(const PropertyInfo &propInfo, const BaseEntityComponent &c, umath::CoordinateSpace space) const;
 
 		static std::optional<pragma::EntityUComponentMemberRef> FindPosePropertyReference(const pragma::BaseEntityComponent &c, pragma::ComponentMemberIndex basePropIdx);
 		void SetPropertyInfosDirty();

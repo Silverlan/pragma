@@ -1218,6 +1218,19 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 	classDefVertexAnimation.scope[classDefMeshVertexAnimation];
 
 	auto classDefSkeleton = luabind::class_<pragma::animation::Skeleton>("Skeleton");
+	classDefSkeleton.def(
+	  "DebugPrint", +[](const pragma::animation::Skeleton &skeleton) {
+		  std::stringstream ss;
+		  std::function<void(const std::string &, const pragma::animation::Bone &)> printBone = nullptr;
+		  printBone = [&ss, &printBone](const std::string &t, const pragma::animation::Bone &bone) {
+			  ss << t << bone.name << "\n";
+			  for(auto &[childId, child] : bone.children)
+				  printBone(t + "\t", *child);
+		  };
+		  for(auto &[boneId, bone] : skeleton.GetRootBones())
+			  printBone("", *bone);
+		  Con::cout << ss.str() << Con::endl;
+	  });
 	classDefSkeleton.def("GetBone", &Lua::Skeleton::GetBone);
 	classDefSkeleton.def("GetRootBones", &Lua::Skeleton::GetRootBones);
 	classDefSkeleton.def("GetBones", &Lua::Skeleton::GetBones);

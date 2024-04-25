@@ -1021,14 +1021,23 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 		  return boneId;
 	  });
 	defRig.def(
-	  "Save", +[](const pragma::animation::MetaRig &metaRig, const pragma::animation::Skeleton &skeleton, const std::string &fileName) -> std::pair<bool, std::optional<std::string>> {
+	  "Save", +[](lua_State *l, const pragma::animation::MetaRig &metaRig, const pragma::animation::Skeleton &skeleton, const std::string &fileName) -> std::pair<bool, std::optional<std::string>> {
 		  std::string err;
 		  auto udmData = udm::Data::Create();
 		  auto res = metaRig.Save(skeleton, udmData->GetAssetData(), err);
-		  if(res)
+		  if(!res)
 			  return {false, err};
-		  if(!udmData->SaveAscii(fileName))
+		  std::string writeFileName = fileName;
+		  if(Lua::file::validate_write_operation(l, writeFileName) == false)
 			  return {false, "Failed to save as file '" + fileName + "'!"};
+
+		  try {
+			  if(!udmData->SaveAscii(writeFileName))
+				  return {false, "Failed to save as file '" + writeFileName + "'!"};
+		  }
+		  catch(const udm::Exception &err) {
+			  return {false, err.what()};
+		  }
 		  return {true, {}};
 	  });
 	defRig.def("GetBone", &pragma::animation::MetaRig::GetBone);

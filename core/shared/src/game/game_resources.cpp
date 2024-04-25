@@ -25,7 +25,7 @@ static std::shared_ptr<util::Library> load_module(NetworkState *nw)
 	static std::shared_ptr<util::Library> dllHandle = nullptr;
 	if(dllHandle == nullptr) {
 		std::string err;
-		dllHandle = nw->LoadLibraryModule("mount_external/pr_mount_external", {}, &err);
+		dllHandle = nw->InitializeLibrary("mount_external/pr_mount_external", &err);
 		if(dllHandle == nullptr) {
 			static auto bPrintError = true;
 			if(bPrintError == true) {
@@ -161,9 +161,8 @@ bool util::port_source2_model(NetworkState *nw, const std::string &path, std::st
 {
 	ufile::remove_extension_from_filename(mdlName, std::array<std::string, 2> {"vmdl", "vmdl_c"});
 	mdlName += ".vmdl_c";
-	static auto *ptrConvertModel
-	  = reinterpret_cast<bool (*)(NetworkState * nw, const std::function<std::shared_ptr<Model>()> &, const std::function<bool(const std::shared_ptr<Model> &, const std::string &, const std::string &)> &, const std::string &, const std::string &, std::ostream *)>(
-	    impl::get_module_func(nw, "convert_source2_model"));
+	static auto *ptrConvertModel = reinterpret_cast<bool (*)(NetworkState *nw, const std::function<std::shared_ptr<Model>()> &, const std::function<bool(const std::shared_ptr<Model> &, const std::string &, const std::string &)> &, const std::string &, const std::string &, std::ostream *)>(
+	  impl::get_module_func(nw, "convert_source2_model"));
 	if(ptrConvertModel == nullptr)
 		return false;
 	auto lockWatcher = engine->ScopeLockResourceWatchers();
@@ -174,9 +173,8 @@ bool util::port_hl2_model(NetworkState *nw, const std::string &path, std::string
 {
 	ufile::remove_extension_from_filename(mdlName, std::array<std::string, 1> {"mdl"});
 	mdlName += ".mdl";
-	static auto *ptrConvertModel
-	  = reinterpret_cast<bool (*)(NetworkState * nw, const std::function<std::shared_ptr<Model>()> &, const std::function<bool(const std::shared_ptr<Model> &, const std::string &, const std::string &)> &, const std::string &, const std::string &, std::ostream *)>(
-	    impl::get_module_func(nw, "convert_hl2_model"));
+	static auto *ptrConvertModel = reinterpret_cast<bool (*)(NetworkState *nw, const std::function<std::shared_ptr<Model>()> &, const std::function<bool(const std::shared_ptr<Model> &, const std::string &, const std::string &)> &, const std::string &, const std::string &, std::ostream *)>(
+	  impl::get_module_func(nw, "convert_hl2_model"));
 	if(ptrConvertModel == nullptr)
 		return false;
 	auto lockWatcher = engine->ScopeLockResourceWatchers();

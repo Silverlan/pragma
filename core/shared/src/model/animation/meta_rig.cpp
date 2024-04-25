@@ -92,7 +92,7 @@ bool pragma::animation::MetaRig::LoadFromAssetData(const Skeleton &skeleton, con
 	return true;
 }
 
-bool pragma::animation::MetaRig::Save(const Skeleton &skeleton, udm::AssetDataArg outData, std::string &outErr)
+bool pragma::animation::MetaRig::Save(const Skeleton &skeleton, udm::AssetDataArg outData, std::string &outErr) const
 {
 	outData.SetAssetType(PMRIG_IDENTIFIER);
 	outData.SetAssetVersion(FORMAT_VERSION);

@@ -209,7 +209,7 @@ namespace pragma::animation {
 		std::array<MetaRigBone, umath::to_integral(MetaRigBoneType::Count)> bones;
 		std::array<MetaRigBlendShape, umath::to_integral(BlendShape::Count)> blendShapes;
 
-		bool Save(const Skeleton &skeleton, const udm::AssetData &outData, std::string &outErr);
+		bool Save(const Skeleton &skeleton, const udm::AssetData &outData, std::string &outErr) const;
 		void DebugPrint(const Model &mdl);
 		const MetaRigBone *GetBone(pragma::animation::MetaRigBoneType type) const;
 		const MetaRigBlendShape *GetBlendShape(pragma::animation::BlendShape blendShape) const;

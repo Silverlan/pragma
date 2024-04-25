@@ -470,8 +470,10 @@ void CEngine::KeyboardInput(prosper::Window &window, GLFW::Key key, int scanCode
 	}
 	if(client != nullptr && client->KeyboardInput(key, scanCode, state, mods, magnitude) == false)
 		return;
-	key = static_cast<GLFW::Key>(std::tolower(static_cast<int>(key)));
-	Input(static_cast<int>(key), state, buttonState, mods, magnitude);
+	auto ikey = umath::to_integral(key);
+	if(ikey >= umath::to_integral(GLFW::Key::A) && ikey <= umath::to_integral(GLFW::Key::Z))
+		key = static_cast<GLFW::Key>(std::tolower(ikey));
+	Input(umath::to_integral(key), state, buttonState, mods, magnitude);
 }
 void CEngine::CharInput(prosper::Window &window, unsigned int c)
 {

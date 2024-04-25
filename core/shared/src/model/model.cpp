@@ -1794,9 +1794,10 @@ bool Model::GenerateMetaRig()
 	auto *generateMetaRig = libRig->FindSymbolAddress<bool (*)(const Model &, pragma::animation::MetaRig &)>("generate_meta_rig");
 	if(!generateMetaRig)
 		return false;
-	m_metaRig = std::make_shared<pragma::animation::MetaRig>();
-	if(!generateMetaRig(*this, *m_metaRig))
+	auto metaRig = std::make_shared<pragma::animation::MetaRig>();
+	if(!generateMetaRig(*this, *metaRig))
 		return false;
+	m_metaRig = std::move(metaRig);
 	GenerateMetaBlendShapes();
 	return true;
 }

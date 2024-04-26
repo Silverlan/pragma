@@ -67,8 +67,9 @@ void pragma::AnimationUpdateManager::UpdateAnimations(double dt)
 
 		if(entInfo.panimaC)
 			entInfo.panimaC->UpdateAnimations(dt);
-		//return nullptr;
-		//});
+
+		if(entInfo.animatedC && entInfo.animatedC->IsPostAnimationUpdateEnabled())
+			m_postAnimListenerQueue.push_back(entInfo.animatedC);
 	}
 
 	m_threadPool.WaitForCompletion();
@@ -81,6 +82,10 @@ void pragma::AnimationUpdateManager::UpdateAnimations(double dt)
 
 	// This will also update IK solvers
 	UpdateConstraints(dt);
+
+	for(auto *animC : m_postAnimListenerQueue)
+		animC->PostAnimationsUpdated();
+	m_postAnimListenerQueue.clear();
 
 	{
 		EntityIterator entIt {game, m_animatedComponentId};

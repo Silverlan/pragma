@@ -58,6 +58,7 @@
 #include "pragma/entities/components/constraints/constraint_child_of_component.hpp"
 #include "pragma/entities/components/lifeline_link_component.hpp"
 #include "pragma/entities/components/meta_rig_component.hpp"
+#include "pragma/entities/components/bone_merge_component.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
@@ -316,6 +317,12 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defMetaRig.def("SetBoneRot", &pragma::MetaRigComponent::SetBoneRot, luabind::default_parameter_policy<4, umath::CoordinateSpace::Local> {});
 	defMetaRig.def("SetBoneScale", &pragma::MetaRigComponent::SetBoneScale, luabind::default_parameter_policy<4, umath::CoordinateSpace::Local> {});
 	entsMod[defMetaRig];
+
+	auto defBoneMerge = pragma::lua::create_entity_component_class<pragma::BoneMergeComponent, pragma::BaseEntityComponent>("BoneMergeComponent");
+	defBoneMerge.add_static_constant("EVENT_ON_TARGET_CHANGED", pragma::BoneMergeComponent::EVENT_ON_TARGET_CHANGED);
+	defBoneMerge.def("SetTarget", &pragma::BoneMergeComponent::SetTarget);
+	defBoneMerge.def("GetTarget", &pragma::BoneMergeComponent::GetTarget);
+	entsMod[defBoneMerge];
 
 	auto defIntersectionHandler = pragma::lua::create_entity_component_class<pragma::IntersectionHandlerComponent, pragma::BaseEntityComponent>("IntersectionHandlerComponent");
 	defIntersectionHandler.def(

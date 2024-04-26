@@ -32,6 +32,7 @@
 #include "pragma/entities/components/constraints/constraint_look_at_component.hpp"
 #include "pragma/entities/components/constraints/constraint_child_of_component.hpp"
 #include "pragma/entities/components/animation_driver_component.hpp"
+#include "pragma/entities/components/bone_merge_component.hpp"
 #include "pragma/entities/components/origin_component.hpp"
 #include "pragma/entities/components/lifeline_link_component.hpp"
 #include "pragma/entities/components/meta_rig_component.hpp"
@@ -67,6 +68,7 @@ void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentM
 	componentManager.RegisterComponentType<pragma::LifelineLinkComponent>("lifeline_link");
 	componentManager.RegisterComponentType<pragma::IntersectionHandlerComponent>("intersection_handler");
 	componentManager.RegisterComponentType<pragma::MetaRigComponent>("meta_rig");
+	componentManager.RegisterComponentType<pragma::BoneMergeComponent>("bone_merge");
 
 	pragma::BaseEntityComponent::RegisterEvents(componentManager, [&componentManager](const std::string &evName, pragma::ComponentEventInfo::Type type) -> pragma::ComponentEventId { return componentManager.RegisterEvent(evName, typeid(pragma::BaseEntityComponent), type); });
 	BaseEntity::RegisterEvents(componentManager);

@@ -38,6 +38,7 @@ namespace pragma {
 		pragma::ComponentId m_constraintManagerComponentId = std::numeric_limits<pragma::ComponentId>::max();
 		pragma::ThreadPool m_threadPool;
 		std::vector<AnimatedEntity> m_animatedEntities;
+		std::vector<BaseAnimatedComponent *> m_postAnimListenerQueue;
 	};
 };
 

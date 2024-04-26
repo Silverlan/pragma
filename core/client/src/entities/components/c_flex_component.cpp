@@ -195,6 +195,10 @@ void CFlexComponent::SetFlexController(uint32_t flexId, float val, float duratio
 
 	//if(m_vertexAnimationBuffer == nullptr) // prosper TODO
 	//	InitializeVertexAnimationBuffer(); // prosper TODO
+	if(AreFlexControllerUpdateListenersEnabled()) {
+		CEOnFlexControllerChanged evData {flexId, flexInfo.targetValue};
+		InvokeEventCallbacks(EVENT_ON_FLEX_CONTROLLER_CHANGED, evData);
+	}
 }
 bool CFlexComponent::GetFlexController(uint32_t flexId, float &val) const
 {

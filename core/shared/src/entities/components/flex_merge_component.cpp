@@ -1,0 +1,152 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2024 Silverlan
+ */
+
+#include "stdafx_shared.h"
+#include "pragma/entities/components/flex_merge_component.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
+#include "pragma/entities/components/base_flex_component.hpp"
+#include "pragma/entities/components/base_model_component.hpp"
+#include "pragma/model/model.h"
+
+using namespace pragma;
+
+bool FlexMergeComponent::can_merge(const Model &mdl, const Model &mdlParent)
+{
+	auto &flexControllers = mdl.GetFlexControllers();
+	for(auto &flexCon : flexControllers) {
+		uint32_t id;
+		if(mdlParent.GetFlexControllerId(flexCon.name, id))
+			return true;
+	}
+	return false;
+}
+
+ComponentEventId FlexMergeComponent::EVENT_ON_TARGET_CHANGED = pragma::INVALID_COMPONENT_ID;
+void FlexMergeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_TARGET_CHANGED = registerEvent("ON_TARGET_CHANGED", ComponentEventInfo::Type::Broadcast); }
+void FlexMergeComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
+{
+	using T = FlexMergeComponent;
+
+	{
+		using TTarget = pragma::EntityURef;
+		auto memberInfo = create_component_member_info<T, TTarget, static_cast<void (T::*)(const TTarget &)>(&T::SetTarget), static_cast<const TTarget &(T::*)() const>(&T::GetTarget)>("target", TTarget {});
+		registerMember(std::move(memberInfo));
+	}
+}
+FlexMergeComponent::FlexMergeComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+void FlexMergeComponent::Initialize()
+{
+	BaseEntityComponent::Initialize();
+	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { SetTargetDirty(); });
+}
+void FlexMergeComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
+void FlexMergeComponent::OnRemove()
+{
+	BaseEntityComponent::OnRemove();
+	SetTargetDirty();
+}
+
+void FlexMergeComponent::SetTarget(const pragma::EntityURef &target)
+{
+	m_target = target;
+	SetTargetDirty();
+	BroadcastEvent(EVENT_ON_TARGET_CHANGED);
+}
+const pragma::EntityURef &FlexMergeComponent::GetTarget() const { return m_target; }
+
+void FlexMergeComponent::SetTargetDirty()
+{
+	m_flexC = pragma::ComponentHandle<pragma::BaseFlexComponent> {};
+	m_flexCParent = pragma::ComponentHandle<pragma::BaseFlexComponent> {};
+	m_flexControllerMap.clear();
+	if(m_cbOnFlexControllerChanged.IsValid())
+		m_cbOnFlexControllerChanged.Remove();
+
+	SetTickPolicy(pragma::TickPolicy::Always);
+	UpdateFlexControllerMappings();
+}
+
+void FlexMergeComponent::OnTick(double tDelta)
+{
+	BaseEntityComponent::OnTick(tDelta);
+	UpdateFlexControllerMappings();
+}
+
+void FlexMergeComponent::UpdateFlexControllerMappings()
+{
+	auto &ent = GetEntity();
+	auto *entTgt = m_target.GetEntity(GetGame());
+	if(!entTgt)
+		return;
+	auto flexC = ent.FindComponent("flex");
+	auto flexCTgt = entTgt->FindComponent("flex");
+	if(flexC.expired() || flexCTgt.expired())
+		return;
+	auto &mdl = ent.GetModel();
+	auto &mdlTgt = entTgt->GetModel();
+	if(!mdl || !mdlTgt)
+		return;
+	auto &flexControllers = mdl->GetFlexControllers();
+	for(size_t i = 0; i < flexControllers.size(); ++i) {
+		auto &flexC = flexControllers[i];
+		uint32_t idTgt;
+		if(!mdlTgt->GetFlexControllerId(flexC.name, idTgt))
+			continue;
+		m_flexControllerMap[idTgt] = i;
+	}
+	m_flexC = flexC->GetHandle<BaseFlexComponent>();
+	m_flexCParent = flexCTgt->GetHandle<BaseFlexComponent>();
+	m_flexCParent->SetFlexControllerUpdateListenersEnabled(true);
+	if(m_cbOnFlexControllerChanged.IsValid())
+		m_cbOnFlexControllerChanged.Remove();
+	m_cbOnFlexControllerChanged = m_flexCParent->AddEventCallback(BaseFlexComponent::EVENT_ON_FLEX_CONTROLLER_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> ev) -> util::EventReply {
+		auto &evFlex = static_cast<pragma::CEOnFlexControllerChanged &>(ev.get());
+		ApplyFlexController(evFlex.flexControllerId, evFlex.value);
+		return util::EventReply::Unhandled;
+	});
+	MergeFlexControllers();
+
+	SetTickPolicy(TickPolicy::Never);
+}
+void FlexMergeComponent::OnEntityComponentAdded(BaseEntityComponent &component)
+{
+	BaseEntityComponent::OnEntityComponentAdded(component);
+	auto *flexC = dynamic_cast<BaseFlexComponent *>(&component);
+	if(flexC) {
+		SetTickPolicy(pragma::TickPolicy::Always);
+		UpdateFlexControllerMappings();
+	}
+}
+void FlexMergeComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
+{
+	BaseEntityComponent::OnEntityComponentRemoved(component);
+	auto *flexC = dynamic_cast<BaseFlexComponent *>(&component);
+	if(flexC) {
+		SetTickPolicy(pragma::TickPolicy::Always);
+		UpdateFlexControllerMappings();
+	}
+}
+void FlexMergeComponent::ApplyFlexController(animation::FlexControllerId flexCId, float value)
+{
+	if(m_flexC.expired())
+		return;
+	auto it = m_flexControllerMap.find(flexCId);
+	if(it == m_flexControllerMap.end())
+		return;
+	m_flexC->SetFlexController(it->second, value);
+}
+void FlexMergeComponent::MergeFlexControllers()
+{
+	if(m_flexC.expired() || m_flexCParent.expired())
+		return;
+	for(auto &[idTgt, id] : m_flexControllerMap) {
+		float val;
+		if(!m_flexCParent->GetFlexController(idTgt, val))
+			continue;
+		m_flexC->SetFlexController(id, val);
+	}
+}

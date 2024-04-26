@@ -14,6 +14,19 @@
 
 using namespace pragma;
 
+bool BoneMergeComponent::can_merge(const Model &mdl, const Model &mdlParent, bool includeRootBones)
+{
+	auto &skeleton = mdl.GetSkeleton();
+	auto &skeletonParent = mdlParent.GetSkeleton();
+	for(auto &bone : skeleton.GetBones()) {
+		if(!includeRootBones && bone->parent.expired())
+			continue; // We're filtering out root bones because there's usually no point in merging them
+		if(skeletonParent.LookupBone(bone->name) != -1)
+			return true;
+	}
+	return false;
+}
+
 ComponentEventId BoneMergeComponent::EVENT_ON_TARGET_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BoneMergeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent) { EVENT_ON_TARGET_CHANGED = registerEvent("ON_TARGET_CHANGED", ComponentEventInfo::Type::Broadcast); }
 void BoneMergeComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
@@ -53,8 +66,6 @@ void BoneMergeComponent::SetTargetDirty()
 	m_animC = pragma::ComponentHandle<pragma::BaseAnimatedComponent> {};
 	m_animCParent = pragma::ComponentHandle<pragma::BaseAnimatedComponent> {};
 	m_boneMappings.clear();
-	//if(m_onParentUpdateSkeleton.IsValid())
-	//	m_onParentUpdateSkeleton.Remove();
 
 	SetTickPolicy(pragma::TickPolicy::Always);
 	UpdateBoneMappings();
@@ -96,14 +107,6 @@ void BoneMergeComponent::UpdateBoneMappings()
 	m_animC = animC;
 	m_animCParent = animCTgt;
 	animC->SetPostAnimationUpdateEnabled(true);
-	//if(m_onParentUpdateSkeleton.IsValid())
-	//	m_onParentUpdateSkeleton.Remove();
-	//m_animC->SetSkeletonUpdateListenerEnabled(true);
-	//animCTgt->SetSkeletonUpdateListenerEnabled(true);
-	/*m_onParentUpdateSkeleton = animCTgt->AddEventCallback(BaseAnimatedComponent::EVENT_ON_UPDATE_SKELETON, [this](std::reference_wrapper<pragma::ComponentEvent> ev) -> util::EventReply {
-		MergeBonePoses();
-		return util::EventReply::Unhandled;
-	});*/
 	SetTickPolicy(TickPolicy::Never);
 }
 void BoneMergeComponent::OnEntityComponentAdded(BaseEntityComponent &component)

@@ -55,9 +55,18 @@ namespace pragma {
 		static ComponentEventId EVENT_PLAY_ANIMATION;
 		static ComponentEventId EVENT_ON_ANIMATION_RESET;
 		static ComponentEventId EVENT_ON_ANIMATIONS_UPDATED;
+		static ComponentEventId EVENT_ON_UPDATE_SKELETON;
+		static ComponentEventId EVENT_POST_ANIMATION_UPDATE;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		enum class StateFlags : uint8_t { None = 0u, AbsolutePosesDirty = 1u, BaseAnimationDirty = AbsolutePosesDirty << 1u, IsAnimated = BaseAnimationDirty << 1u };
+		enum class StateFlags : uint8_t {
+			None = 0u,
+			AbsolutePosesDirty = 1u,
+			BaseAnimationDirty = AbsolutePosesDirty << 1u,
+			IsAnimated = BaseAnimationDirty << 1u,
+			SkeletonUpdateListenerEnabled = IsAnimated << 1u,
+			NeedsPostAnimationUpdate = SkeletonUpdateListenerEnabled << 1u,
+		};
 
 		struct DLLNETWORK AnimationSlotInfo {
 		  public:
@@ -111,6 +120,9 @@ namespace pragma {
 		bool SetBoneRot(animation::BoneId boneId, const Quat &rot, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
 		bool SetBoneScale(animation::BoneId boneId, const Vector3 &scale, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
 		bool SetBonePose(animation::BoneId boneId, const Vector3 *optPos, const Quat *optRot, const Vector3 *optScale = nullptr, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
+
+		void SetSkeletonUpdateListenerEnabled(bool enabled);
+		bool IsSkeletonUpdateListenerEnabled() const;
 
 		bool IsPlayingAnimation() const;
 		bool CalcAnimationMovementSpeed(float *x, float *z, int32_t frameOffset = 0) const;
@@ -184,6 +196,11 @@ namespace pragma {
 
 		// Transforms all bone positions / rotations to entity space
 		bool UpdateSkeleton();
+		bool UpdateBonePoses();
+		void PostAnimationsUpdated();
+
+		void SetPostAnimationUpdateEnabled(bool enabled);
+		bool IsPostAnimationUpdateEnabled() const;
 
 		bool ShouldUpdateBones() const;
 		UInt32 GetBoneCount() const;
@@ -198,6 +215,7 @@ namespace pragma {
 
 		Activity TranslateActivity(Activity act);
 		void SetBaseAnimationDirty();
+		void SetAbsolutePosesDirty();
 		void ClearPreviousAnimation();
 
 		void BlendBonePoses(const std::vector<umath::Transform> &srcBonePoses, const std::vector<Vector3> *optSrcBoneScales, const std::vector<umath::Transform> &dstBonePoses, const std::vector<Vector3> *optDstBoneScales, std::vector<umath::Transform> &outBonePoses,
@@ -436,6 +454,13 @@ namespace pragma {
 		CEShouldUpdateBones();
 		virtual void PushArguments(lua_State *l) override;
 		bool shouldUpdate = true;
+	};
+	struct DLLNETWORK CEOnUpdateSkeleton : public ComponentEvent {
+		CEOnUpdateSkeleton();
+		virtual void PushArguments(lua_State *l) override;
+		virtual uint32_t GetReturnCount() override;
+		virtual void HandleReturnValues(lua_State *l) override;
+		bool bonePosesHaveChanged = false;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseAnimatedComponent::StateFlags)

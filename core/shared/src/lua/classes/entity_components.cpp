@@ -2968,6 +2968,7 @@ void pragma::lua::base_flashlight_component::register_class(luabind::module_ &mo
 void pragma::lua::base_flex_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFlexComponent>("BaseFlexComponent");
+	def.add_static_constant("EVENT_ON_FLEX_CONTROLLER_CHANGED", pragma::BaseFlexComponent::EVENT_ON_FLEX_CONTROLLER_CHANGED);
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 

@@ -16,5 +16,5 @@
 
 
 add_pragma_module(
-     name = "pr_source"
+     name = "pr_mount_external"
 )

@@ -53,7 +53,8 @@ jobs:
       
       - name: Move repo to target location
         run: |
-          mv pr_source ./pragma/modules/
+            mv pr_source/ pr_mount_external/ |
+            mv pr_mount_external ./pragma/modules/
 
       - name: Build Pragma
         uses: ./pragma/github_actions/build

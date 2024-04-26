@@ -574,6 +574,15 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def("GetPhonemeMap", &Lua::Model::GetPhonemeMap);
 	classDef.def("SetPhonemeMap", &Lua::Model::SetPhonemeMap);
+	classDef.def(
+	  "GetPhonemes", +[](const ::Model &mdl) -> std::vector<std::string> {
+		  auto &phonemeMap = mdl.GetPhonemeMap();
+		  std::vector<std::string> phonemes;
+		  phonemes.reserve(phonemeMap.phonemes.size());
+		  for(auto &[name, info] : phonemeMap.phonemes)
+			  phonemes.push_back(name);
+		  return phonemes;
+	  });
 
 	classDef.def("AssignDistinctMaterial", &Lua::Model::AssignDistinctMaterial);
 

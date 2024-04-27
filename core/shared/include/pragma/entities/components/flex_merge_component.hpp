@@ -34,6 +34,7 @@ namespace pragma {
 		pragma::ComponentHandle<BaseFlexComponent> m_flexC;
 		pragma::ComponentHandle<BaseFlexComponent> m_flexCParent;
 		CallbackHandle m_cbOnFlexControllerChanged;
+		CallbackHandle m_cbOnFlexControllerComponentRemoved;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 		void SetTargetDirty();

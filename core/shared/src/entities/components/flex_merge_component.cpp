@@ -10,6 +10,7 @@
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/components/base_flex_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
+#include "pragma/entities/components/base_generic_component.hpp"
 #include "pragma/model/model.h"
 
 using namespace pragma;
@@ -42,6 +43,7 @@ void FlexMergeComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> evData) { SetTargetDirty(); });
+	GetEntity().AddComponent("flex");
 }
 void FlexMergeComponent::InitializeLuaObject(lua_State *l) { pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void FlexMergeComponent::OnRemove()
@@ -65,6 +67,8 @@ void FlexMergeComponent::SetTargetDirty()
 	m_flexControllerMap.clear();
 	if(m_cbOnFlexControllerChanged.IsValid())
 		m_cbOnFlexControllerChanged.Remove();
+	if(m_cbOnFlexControllerComponentRemoved.IsValid())
+		m_cbOnFlexControllerComponentRemoved.Remove();
 
 	SetTickPolicy(pragma::TickPolicy::Always);
 	UpdateFlexControllerMappings();
@@ -103,11 +107,23 @@ void FlexMergeComponent::UpdateFlexControllerMappings()
 	m_flexCParent->SetFlexControllerUpdateListenersEnabled(true);
 	if(m_cbOnFlexControllerChanged.IsValid())
 		m_cbOnFlexControllerChanged.Remove();
+	if(m_cbOnFlexControllerComponentRemoved.IsValid())
+		m_cbOnFlexControllerComponentRemoved.Remove();
 	m_cbOnFlexControllerChanged = m_flexCParent->AddEventCallback(BaseFlexComponent::EVENT_ON_FLEX_CONTROLLER_CHANGED, [this](std::reference_wrapper<pragma::ComponentEvent> ev) -> util::EventReply {
 		auto &evFlex = static_cast<pragma::CEOnFlexControllerChanged &>(ev.get());
 		ApplyFlexController(evFlex.flexControllerId, evFlex.value);
 		return util::EventReply::Unhandled;
 	});
+	auto flexCId = m_flexCParent->GetComponentId();
+	auto *genericC = entTgt->GetGenericComponent();
+	if(genericC) {
+		m_cbOnFlexControllerComponentRemoved = genericC->AddEventCallback(BaseGenericComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED, [this, flexCId](std::reference_wrapper<pragma::ComponentEvent> ev) -> util::EventReply {
+			auto &evRemoved = static_cast<pragma::CEOnEntityComponentRemoved &>(ev.get());
+			if(evRemoved.component.GetComponentId() == flexCId)
+				SetTargetDirty();
+			return util::EventReply::Unhandled;
+		});
+	}
 	MergeFlexControllers();
 
 	SetTickPolicy(TickPolicy::Never);

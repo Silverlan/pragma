@@ -1354,10 +1354,10 @@ void pragma::model::create_ring(ModelSubMesh &mesh, const RingCreateInfo &create
 
 	if(innerRadius.has_value() == false)
 		verts.push_back({});
-	auto end = (360 + (innerRadius.has_value() ? stepSize : 0));
+	auto end = (totalAngle + (innerRadius.has_value() ? stepSize : 0));
 	for(uint32_t i = 0; i <= end; i += stepSize) {
 		auto endLoop = false;
-		if(i >= totalAngle) {
+		if(i >= totalAngle && !innerRadius) {
 			i = totalAngle;
 			end = totalAngle;
 			endLoop = true;

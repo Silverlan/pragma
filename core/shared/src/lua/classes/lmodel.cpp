@@ -2004,6 +2004,8 @@ void Lua::Model::AddCollisionMesh(lua_State *, ::Model &mdl, ::CollisionMesh &co
 }
 void Lua::Model::AddMaterial(lua_State *l, ::Model &mdl, uint32_t textureGroup, Material *mat)
 {
+	if(!mat)
+		return;
 	//Lua::CheckModel(l,1);
 	std::optional<uint32_t> skinTexIdx {};
 	auto r = mdl.AddMaterial(textureGroup, mat, {}, &skinTexIdx);

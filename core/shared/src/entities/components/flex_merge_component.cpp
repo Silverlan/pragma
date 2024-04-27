@@ -60,7 +60,7 @@ void FlexMergeComponent::SetTarget(const pragma::EntityURef &target)
 }
 const pragma::EntityURef &FlexMergeComponent::GetTarget() const { return m_target; }
 
-void FlexMergeComponent::SetTargetDirty()
+void FlexMergeComponent::SetTargetDirty(bool updateImmediately)
 {
 	m_flexC = pragma::ComponentHandle<pragma::BaseFlexComponent> {};
 	m_flexCParent = pragma::ComponentHandle<pragma::BaseFlexComponent> {};
@@ -71,7 +71,8 @@ void FlexMergeComponent::SetTargetDirty()
 		m_cbOnFlexControllerComponentRemoved.Remove();
 
 	SetTickPolicy(pragma::TickPolicy::Always);
-	UpdateFlexControllerMappings();
+	if(updateImmediately)
+		UpdateFlexControllerMappings();
 }
 
 void FlexMergeComponent::OnTick(double tDelta)
@@ -119,8 +120,11 @@ void FlexMergeComponent::UpdateFlexControllerMappings()
 	if(genericC) {
 		m_cbOnFlexControllerComponentRemoved = genericC->AddEventCallback(BaseGenericComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED, [this, flexCId](std::reference_wrapper<pragma::ComponentEvent> ev) -> util::EventReply {
 			auto &evRemoved = static_cast<pragma::CEOnEntityComponentRemoved &>(ev.get());
-			if(evRemoved.component.GetComponentId() == flexCId)
-				SetTargetDirty();
+			if(evRemoved.component.GetComponentId() == flexCId) {
+				if(m_cbOnFlexControllerComponentRemoved.IsValid())
+					m_cbOnFlexControllerComponentRemoved.Remove();
+				SetTargetDirty(false);
+			}
 			return util::EventReply::Unhandled;
 		});
 	}

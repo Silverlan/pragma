@@ -37,7 +37,7 @@ namespace pragma {
 		CallbackHandle m_cbOnFlexControllerComponentRemoved;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
-		void SetTargetDirty();
+		void SetTargetDirty(bool updateImmediately = true);
 		void UpdateFlexControllerMappings();
 		void ApplyFlexController(animation::FlexControllerId flexCId, float value);
 		void MergeFlexControllers();

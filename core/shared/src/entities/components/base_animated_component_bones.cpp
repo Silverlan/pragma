@@ -439,10 +439,10 @@ static void get_global_bone_transforms(std::vector<umath::ScaledTransform> &tran
 		get_global_bone_transforms(transforms, bone->children, t);
 	}
 }
-bool BaseAnimatedComponent::UpdateSkeleton()
+void BaseAnimatedComponent::SetSkeletonUpdateListenerEnabled(bool enabled) { umath::set_flag(m_stateFlags, StateFlags::SkeletonUpdateListenerEnabled); }
+bool BaseAnimatedComponent::IsSkeletonUpdateListenerEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::SkeletonUpdateListenerEnabled); }
+bool BaseAnimatedComponent::UpdateBonePoses()
 {
-	if(umath::is_flag_set(m_stateFlags, StateFlags::AbsolutePosesDirty) == false)
-		return false;
 	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return false;
@@ -452,3 +452,19 @@ bool BaseAnimatedComponent::UpdateSkeleton()
 	get_global_bone_transforms(m_processedBones, skeleton.GetRootBones());
 	return true;
 }
+bool BaseAnimatedComponent::UpdateSkeleton()
+{
+	if(IsSkeletonUpdateListenerEnabled()) {
+		CEOnUpdateSkeleton evData {};
+		if(InvokeEventCallbacks(EVENT_ON_UPDATE_SKELETON, evData) == util::EventReply::Handled)
+			return evData.bonePosesHaveChanged;
+	}
+	if(umath::is_flag_set(m_stateFlags, StateFlags::AbsolutePosesDirty) == false)
+		return false;
+	return UpdateBonePoses();
+}
+
+void BaseAnimatedComponent::PostAnimationsUpdated() { InvokeEventCallbacks(EVENT_POST_ANIMATION_UPDATE); }
+
+void BaseAnimatedComponent::SetPostAnimationUpdateEnabled(bool enabled) { umath::set_flag(m_stateFlags, StateFlags::NeedsPostAnimationUpdate, enabled); }
+bool BaseAnimatedComponent::IsPostAnimationUpdateEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::NeedsPostAnimationUpdate); }

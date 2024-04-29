@@ -54,6 +54,8 @@ ComponentEventId BaseAnimatedComponent::EVENT_ON_BLEND_ANIMATION_MT = pragma::IN
 ComponentEventId BaseAnimatedComponent::EVENT_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_ANIMATION_RESET = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId BaseAnimatedComponent::EVENT_ON_UPDATE_SKELETON = pragma::INVALID_COMPONENT_ID;
+ComponentEventId BaseAnimatedComponent::EVENT_POST_ANIMATION_UPDATE = pragma::INVALID_COMPONENT_ID;
 void BaseAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
 {
 	EVENT_HANDLE_ANIMATION_EVENT = registerEvent("HANDLE_ANIMATION_EVENT", ComponentEventInfo::Type::Explicit);
@@ -82,6 +84,8 @@ void BaseAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &compo
 	EVENT_PLAY_ANIMATION = registerEvent("PLAY_ANIMATION", ComponentEventInfo::Type::Explicit);
 	EVENT_ON_ANIMATION_RESET = registerEvent("ON_ANIMATION_RESET", ComponentEventInfo::Type::Broadcast);
 	EVENT_ON_ANIMATIONS_UPDATED = registerEvent("ON_ANIMATIONS_UPDATED", ComponentEventInfo::Type::Explicit);
+	EVENT_ON_UPDATE_SKELETON = registerEvent("ON_ANIMATIONS_UPDATED", ComponentEventInfo::Type::Explicit);
+	EVENT_POST_ANIMATION_UPDATE = registerEvent("POST_ANIMATION_UPDATE", ComponentEventInfo::Type::Explicit);
 }
 
 BaseAnimatedComponent::BaseAnimatedComponent(BaseEntity &ent) : BaseEntityComponent(ent), m_playbackRate(util::FloatProperty::Create(1.f)) {}
@@ -1006,6 +1010,7 @@ void BaseAnimatedComponent::PlayAnimation(int animation, FPlayAnim flags)
 }
 
 void BaseAnimatedComponent::SetBaseAnimationDirty() { umath::set_flag(m_stateFlags, StateFlags::BaseAnimationDirty, true); }
+void BaseAnimatedComponent::SetAbsolutePosesDirty() { umath::set_flag(m_stateFlags, StateFlags::AbsolutePosesDirty, true); }
 
 int32_t BaseAnimatedComponent::SelectTranslatedAnimation(Activity &inOutActivity) const
 {
@@ -1534,3 +1539,14 @@ void CEMaintainAnimationMovement::PushArguments(lua_State *l) { Lua::Push<Vector
 
 CEShouldUpdateBones::CEShouldUpdateBones() {}
 void CEShouldUpdateBones::PushArguments(lua_State *l) {}
+
+/////////////////
+
+CEOnUpdateSkeleton::CEOnUpdateSkeleton() {}
+void CEOnUpdateSkeleton::PushArguments(lua_State *l) { Lua::PushBool(l, bonePosesHaveChanged); }
+uint32_t CEOnUpdateSkeleton::GetReturnCount() { return 1; }
+void CEOnUpdateSkeleton::HandleReturnValues(lua_State *l)
+{
+	if(Lua::IsSet(l, -1))
+		bonePosesHaveChanged = Lua::CheckBool(l, -1);
+}

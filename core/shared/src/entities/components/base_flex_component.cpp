@@ -15,6 +15,12 @@
 
 using namespace pragma;
 
+ComponentEventId BaseFlexComponent::EVENT_ON_FLEX_CONTROLLER_CHANGED = INVALID_COMPONENT_ID;
+void BaseFlexComponent::RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent)
+{
+	BaseEntityComponent::RegisterEvents(componentManager, registerEvent);
+	EVENT_ON_FLEX_CONTROLLER_CHANGED = registerEvent("ON_FLEX_CONTROLLER_CHANGED", ComponentEventInfo::Type::Explicit);
+}
 void BaseFlexComponent::RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember)
 {
 	using T = BaseFlexComponent;
@@ -46,6 +52,8 @@ void BaseFlexComponent::Initialize()
 	if(mdl)
 		OnModelChanged(mdl);
 }
+void BaseFlexComponent::SetFlexControllerUpdateListenersEnabled(bool enabled) { umath::set_flag(m_stateFlags, StateFlags::EnableFlexControllerUpdateListeners, enabled); }
+bool BaseFlexComponent::AreFlexControllerUpdateListenersEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::EnableFlexControllerUpdateListeners); }
 void BaseFlexComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 {
 	util::ScopeGuard sg {[this]() { OnMembersChanged(); }};
@@ -111,8 +119,8 @@ bool BaseFlexComponent::GetScaledFlexController(uint32_t flexId, float &val) con
 	return true;
 }
 
-void BaseFlexComponent::SetFlexControllerLimitsEnabled(bool enabled) { m_enableFlexControllerLimits = enabled; }
-bool BaseFlexComponent::AreFlexControllerLimitsEnabled() const { return m_enableFlexControllerLimits; }
+void BaseFlexComponent::SetFlexControllerLimitsEnabled(bool enabled) { umath::set_flag(m_stateFlags, StateFlags::EnableFlexControllerLimits, enabled); }
+bool BaseFlexComponent::AreFlexControllerLimitsEnabled() const { return umath::is_flag_set(m_stateFlags, StateFlags::EnableFlexControllerLimits); }
 
 void BaseFlexComponent::SetFlexControllerScale(float scale) { m_flexControllerScale = scale; }
 float BaseFlexComponent::GetFlexControllerScale() const { return m_flexControllerScale; }
@@ -123,4 +131,13 @@ float BaseFlexComponent::GetFlexController(const std::string &flexController) co
 	if(!mdlComponent || mdlComponent->LookupFlexController(flexController, flexId) == false)
 		return 0.f;
 	return GetFlexController(flexId);
+}
+
+/////////////////
+
+CEOnFlexControllerChanged::CEOnFlexControllerChanged(pragma::animation::FlexControllerId flexControllerId, float value) : flexControllerId {flexControllerId}, value {value} {}
+void CEOnFlexControllerChanged::PushArguments(lua_State *l)
+{
+	Lua::PushInt(l, flexControllerId);
+	Lua::PushNumber(l, value);
 }

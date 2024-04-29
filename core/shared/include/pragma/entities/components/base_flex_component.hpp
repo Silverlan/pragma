@@ -13,8 +13,18 @@
 namespace pragma {
 	class DLLNETWORK BaseFlexComponent : public BaseEntityComponent, public DynamicMemberRegister {
 	  public:
+		enum class StateFlags : uint8_t {
+			None = 0u,
+			EnableFlexControllerLimits = 1u,
+			EnableFlexControllerUpdateListeners = EnableFlexControllerLimits << 1u,
+		};
+		static ComponentEventId EVENT_ON_FLEX_CONTROLLER_CHANGED;
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
+
+		void SetFlexControllerUpdateListenersEnabled(bool enabled);
+		bool AreFlexControllerUpdateListenersEnabled() const;
 
 		// Flex Controllers
 		void SetFlexController(const std::string &name, float val, float duration = 0.f, bool clampToLimits = true);
@@ -40,8 +50,15 @@ namespace pragma {
 		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
 		BaseFlexComponent(BaseEntity &ent);
 		float m_flexControllerScale = 1.f;
-		bool m_enableFlexControllerLimits = true;
+		StateFlags m_stateFlags = StateFlags::EnableFlexControllerLimits;
+	};
+	struct DLLNETWORK CEOnFlexControllerChanged : public ComponentEvent {
+		CEOnFlexControllerChanged(pragma::animation::FlexControllerId flexControllerId, float value);
+		virtual void PushArguments(lua_State *l) override;
+		pragma::animation::FlexControllerId flexControllerId;
+		float value;
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseFlexComponent::StateFlags)
 
 #endif

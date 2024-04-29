@@ -1522,6 +1522,8 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("EVENT_ON_ANIMATIONS_UPDATED", pragma::BaseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED);
 	def.add_static_constant("EVENT_PLAY_ANIMATION", pragma::BaseAnimatedComponent::EVENT_PLAY_ANIMATION);
 	def.add_static_constant("EVENT_ON_ANIMATION_RESET", pragma::BaseAnimatedComponent::EVENT_ON_ANIMATION_RESET);
+	def.add_static_constant("EVENT_ON_UPDATE_SKELETON", pragma::BaseAnimatedComponent::EVENT_ON_UPDATE_SKELETON);
+	def.add_static_constant("EVENT_POST_ANIMATION_UPDATE", pragma::BaseAnimatedComponent::EVENT_POST_ANIMATION_UPDATE);
 
 	def.add_static_constant("FPLAYANIM_NONE", umath::to_integral(pragma::FPlayAnim::None));
 	def.add_static_constant("FPLAYANIM_RESET", umath::to_integral(pragma::FPlayAnim::Reset));
@@ -2966,6 +2968,7 @@ void pragma::lua::base_flashlight_component::register_class(luabind::module_ &mo
 void pragma::lua::base_flex_component::register_class(luabind::module_ &mod)
 {
 	auto def = Lua::create_base_entity_component_class<pragma::BaseFlexComponent>("BaseFlexComponent");
+	def.add_static_constant("EVENT_ON_FLEX_CONTROLLER_CHANGED", pragma::BaseFlexComponent::EVENT_ON_FLEX_CONTROLLER_CHANGED);
 	util::ScopeGuard sgReg {[&mod, &def]() { mod[def]; }};
 }
 

@@ -441,7 +441,7 @@ function util.import_assets(files, settings)
 		if ext ~= nil and zipExts[ext] == true then
 			local zipFile = util.ZipFile.open(f, util.ZipFile.OPEN_MODE_READ)
 			if zipFile == nil then
-				logCb(
+				settings.logger(
 					"Unable to open zip-archive '" .. filePath .. "': Unsupported archive format?",
 					log.SEVERITY_ERROR
 				)
@@ -457,7 +457,7 @@ function util.import_assets(files, settings)
 	end
 	if #nonZipFiles == 0 then
 		if hasZipAssets == false then
-			logCb("No assets were detected!")
+			settings.logger("No assets were detected!")
 		end
 		return
 	end

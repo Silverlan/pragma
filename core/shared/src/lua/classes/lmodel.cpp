@@ -574,6 +574,15 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 
 	classDef.def("GetPhonemeMap", &Lua::Model::GetPhonemeMap);
 	classDef.def("SetPhonemeMap", &Lua::Model::SetPhonemeMap);
+	classDef.def(
+	  "GetPhonemes", +[](const ::Model &mdl) -> std::vector<std::string> {
+		  auto &phonemeMap = mdl.GetPhonemeMap();
+		  std::vector<std::string> phonemes;
+		  phonemes.reserve(phonemeMap.phonemes.size());
+		  for(auto &[name, info] : phonemeMap.phonemes)
+			  phonemes.push_back(name);
+		  return phonemes;
+	  });
 
 	classDef.def("AssignDistinctMaterial", &Lua::Model::AssignDistinctMaterial);
 
@@ -1021,14 +1030,23 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 		  return boneId;
 	  });
 	defRig.def(
-	  "Save", +[](const pragma::animation::MetaRig &metaRig, const pragma::animation::Skeleton &skeleton, const std::string &fileName) -> std::pair<bool, std::optional<std::string>> {
+	  "Save", +[](lua_State *l, const pragma::animation::MetaRig &metaRig, const pragma::animation::Skeleton &skeleton, const std::string &fileName) -> std::pair<bool, std::optional<std::string>> {
 		  std::string err;
 		  auto udmData = udm::Data::Create();
 		  auto res = metaRig.Save(skeleton, udmData->GetAssetData(), err);
-		  if(res)
+		  if(!res)
 			  return {false, err};
-		  if(!udmData->SaveAscii(fileName))
+		  std::string writeFileName = fileName;
+		  if(Lua::file::validate_write_operation(l, writeFileName) == false)
 			  return {false, "Failed to save as file '" + fileName + "'!"};
+
+		  try {
+			  if(!udmData->SaveAscii(writeFileName))
+				  return {false, "Failed to save as file '" + writeFileName + "'!"};
+		  }
+		  catch(const udm::Exception &err) {
+			  return {false, err.what()};
+		  }
 		  return {true, {}};
 	  });
 	defRig.def("GetBone", &pragma::animation::MetaRig::GetBone);
@@ -1986,6 +2004,8 @@ void Lua::Model::AddCollisionMesh(lua_State *, ::Model &mdl, ::CollisionMesh &co
 }
 void Lua::Model::AddMaterial(lua_State *l, ::Model &mdl, uint32_t textureGroup, Material *mat)
 {
+	if(!mat)
+		return;
 	//Lua::CheckModel(l,1);
 	std::optional<uint32_t> skinTexIdx {};
 	auto r = mdl.AddMaterial(textureGroup, mat, {}, &skinTexIdx);

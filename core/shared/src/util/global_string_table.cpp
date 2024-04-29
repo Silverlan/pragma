@@ -13,13 +13,17 @@ namespace pragma::ents {
 		const char *RegisterString(const std::string &str);
 		const char *RegisterString(const std::string_view &str);
 		const char *RegisterString(const char *str);
-		std::unordered_map<std::string, const char *> strings;
 		~StringTable();
+	  private:
+		std::unordered_map<std::string, const char *> m_strings;
+		std::mutex m_mutex;
 	};
 };
+
 pragma::ents::StringTable::~StringTable()
 {
-	for(auto &pair : strings)
+	std::unique_lock lock {m_mutex};
+	for(auto &pair : m_strings)
 		delete[] pair.second;
 }
 
@@ -32,29 +36,31 @@ const char *pragma::ents::StringTable::RegisterString(const std::string_view &st
 
 const char *pragma::ents::StringTable::RegisterString(const std::string &str)
 {
-	auto it = strings.find(str);
-	if(it != strings.end())
+	std::unique_lock lock {m_mutex};
+	auto it = m_strings.find(str);
+	if(it != m_strings.end())
 		return it->second;
 	else {
 		char *registrationId = new char[str.size() + 1];
 		std::copy(str.begin(), str.end(), registrationId);
 		registrationId[str.size()] = '\0';
-		strings.emplace(str, registrationId);
+		m_strings.emplace(str, registrationId);
 		return registrationId;
 	}
 }
 
 const char *pragma::ents::StringTable::RegisterString(const char *str)
 {
-	auto it = strings.find(str);
-	if(it != strings.end())
+	std::unique_lock lock {m_mutex};
+	auto it = m_strings.find(str);
+	if(it != m_strings.end())
 		return it->second;
 	else {
 		auto len = strlen(str);
 		char *registrationId = new char[len + 1];
 		strcpy(registrationId, str);
 		registrationId[len] = '\0';
-		strings.emplace(str, registrationId);
+		m_strings.emplace(str, registrationId);
 		return registrationId;
 	}
 }

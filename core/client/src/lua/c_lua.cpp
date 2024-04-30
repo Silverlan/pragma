@@ -383,8 +383,8 @@ void CGame::InitializeLua()
 void CGame::SetupLua()
 {
 	Game::SetupLua();
-	RunLuaFiles("autorun\\");
-	RunLuaFiles("autorun\\client\\");
+	RunLuaFiles("autorun/");
+	RunLuaFiles("autorun/client/");
 	InitializeGameMode();
 	//for(auto &subDir : GetLuaEntityDirectories())
 	//	LoadLuaEntities(subDir);
@@ -404,7 +404,7 @@ void CGame::LoadLuaShader(std::string file)
 {
 	StringToLower(file);
 	std::string identifier = file.substr(0, file.length() - 4);
-	file = "shaders\\" + file;
+	file = "shaders/" + file;
 	ExecuteLuaFile(file);
 }
 

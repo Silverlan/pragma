@@ -8,6 +8,7 @@
 #include "pragma/pragma_executable.hpp"
 
 int main(int argc, char *argv[])
+{
 try {
 	std::vector<std::string> extraArgs {
 	  "-icon",
@@ -24,7 +25,7 @@ catch(...) {
 	// Catching all unhandled exceptions here and then calling the handler works around that issue.
 	std::get_terminate()();
 }
-
+}
 #ifdef _WIN32
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) { return main(__argc, __argv); }
 #endif

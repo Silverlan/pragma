@@ -1,4 +1,4 @@
-import os
+# import os
 from pathlib import Path
 from sys import platform
 from urllib.error import URLError, HTTPError
@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev
 if platform == "linux":
 	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-15')
 	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-15')
-	defaultGenerator = "Unix Makefiles"
+	defaultGenerator = "Ninja Multi-Config"
 else:
 	defaultGenerator = "Visual Studio 17 2022"
 parser.add_argument('--generator', help='The generator to use.', default=defaultGenerator)
@@ -324,7 +324,7 @@ execscript(scripts_dir +"/scripts/modules.py")
 ########## zlib ##########
 # Download
 os.chdir(deps_dir)
-zlib_root = os.getcwd() +"/zlib-1.2.8"
+zlib_root = os.getcwd() +"/zlib"
 if platform == "linux":
 	zlib_lib_path = zlib_root +"/build"
 	zlib_lib = zlib_lib_path +"/libz.a"
@@ -334,9 +334,13 @@ else:
 zlib_include_dirs = zlib_root +" " +zlib_lib_path
 if not Path(zlib_root).is_dir():
 	print_msg("zlib not found. Downloading...")
-	git_clone("https://github.com/fmrico/zlib-1.2.8.git")
+	git_clone("https://github.com/madler/zlib")
+	os.chdir("zlib")
+	#Bump to zlib 1.3 to fix  CVE-2022-37434
+	reset_to_commit("09155eaa2f9270dc4ed1fa13e2b4b2613e6e4851")
 
-os.chdir("zlib-1.2.8")
+	os.chdir("../")
+os.chdir("zlib")
 
 # Build
 print_msg("Building zlib...")
@@ -351,19 +355,22 @@ os.chdir("../..")
 ########## boost ##########
 # Download
 os.chdir(deps_dir)
+#TODO: Newer versions of clang have an bound error with boost::mpl::integral_c bounds (this relied on UB on compile-time constants). See issue https://github.com/boostorg/mpl/issues/69. For now I'll bump boost to 1.81. Macports has a patch that works for 1.76 and up. Investigate.
+#Also boost is a package in vcpkg. Look if we can integrate that.
 if platform == "linux":
-	boost_root = os.getcwd() +"/boost_1_78_0"
+	boost_root = os.getcwd() +"/boost_1_81_0"
 	if not Path(boost_root).is_dir():
 		print_msg("boost not found. Downloading...")
-		zipName = "boost_1_78_0.tar.gz"
-		boost_url0 = "https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/" +zipName
+		zipName = "boost_1_81_0.tar.gz"
+		boost_url0 = "https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/" +zipName
 		# Mirror in case above url goes down ( https://github.com/boostorg/boost/issues/842 )
-		boost_url1 = "https://sourceforge.net/projects/boost/files/boost/1.78.0/" +zipName
+		boost_url1 = "https://sourceforge.net/projects/boost/files/boost/1.81.0/" +zipName
 		try:
 			http_extract(boost_url0,format="tar.gz")
 		except (URLError, HTTPError, tarfile.ReadError, tarfile.ExtractError) as e:
 			http_extract(boost_url1,format="tar.gz")
 else:
+    #TODO
 	boost_root = os.getcwd() +"/boost"
 	if not Path(boost_root).is_dir():
 		print_msg("boost not found. Downloading...")
@@ -380,13 +387,15 @@ ZLIB_SOURCE = normalize_path(zlib_root)
 ZLIB_INCLUDE = normalize_path(zlib_root)
 ZLIB_LIBPATH = normalize_path(zlib_lib_path)
 if platform == "linux":
+    #do we even need static build?
 	subprocess.run([boost_root +"/bootstrap.sh"],check=True,shell=True)
-	subprocess.run(["./b2","address-model=64","stage","variant=release","link=shared","runtime-link=shared","-j3"],check=True,shell=True)
-	subprocess.run(["./b2","address-model=64","stage","variant=release","link=static","runtime-link=shared","-j3"],check=True,shell=True)
+	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","address-model=64","stage","variant=release","link=shared","runtime-link=shared","-j3"],check=True,shell=True)
+	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","address-model=64","stage","variant=release","link=static","runtime-link=shared","-j3"],check=True,shell=True)
 
 	print_msg("Building boost zlib libraries...")
-	subprocess.run(["./b2","address-model=64","stage","variant=release","link=shared","runtime-link=shared","--with-iostreams","-sZLIB_SOURCE=" +ZLIB_SOURCE,"-sZLIB_INCLUDE=" +ZLIB_INCLUDE,"-sZLIB_LIBPATH=" +ZLIB_LIBPATH],check=True,shell=True)
-	subprocess.run(["./b2","address-model=64","stage","variant=release","link=static","runtime-link=shared","--with-iostreams","-sZLIB_SOURCE=" +ZLIB_SOURCE,"-sZLIB_INCLUDE=" +ZLIB_INCLUDE,"-sZLIB_LIBPATH=" +ZLIB_LIBPATH],check=True,shell=True)
+	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","address-model=64","stage","variant=release","link=shared","runtime-link=shared","--with-iostreams","-sZLIB_SOURCE=" +ZLIB_SOURCE,"-sZLIB_INCLUDE=" +ZLIB_INCLUDE,"-sZLIB_LIBPATH=" +ZLIB_LIBPATH],check=True,shell=True)
+    
+	subprocess.run(["./b2","cxxflags=-fPIC","cflags=-fPIC","address-model=64","stage","variant=release","link=static","runtime-link=shared","--with-iostreams","-sZLIB_SOURCE=" +ZLIB_SOURCE,"-sZLIB_INCLUDE=" +ZLIB_INCLUDE,"-sZLIB_LIBPATH=" +ZLIB_LIBPATH],check=True,shell=True)
 else:
 	mkdir("build",cd=True)
 
@@ -405,13 +414,28 @@ if platform == "linux":
 	os.chdir(root +"/third_party_libs/luajit/src")
 	subprocess.run(["make"],check=True)
 else:
-	os.chdir(deps_dir)
-	mkdir("luajit_build")
-	os.chdir("luajit_build")
-	cmake_configure(root +"/third_party_libs/luajit",generator,["-DBUILD_SHARED_LIBS=1"])
-	cmake_build("Release")
-
-	lua_jit_lib = normalize_path(deps_dir +"/luajit_build/src/Release/luajit.lib")
+	#devcmd_path = determine_vsdevcmd_path(deps_dir)
+	#os.chdir(root +"/third_party_libs/luajit/src")
+	vcvars_path = determine_vsdevcmd_path(deps_dir)
+	luajit_build_script = root+"/third_party_libs/luajit/src/msvcbuild.bat"
+	luajit_build_script_wrapper = os.path.join(deps_dir,"luajit_build","build_luajit.bat")
+	Path(os.path.join(deps_dir,"luajit_build")).mkdir(parents=True,exist_ok=True)
+	print_msg("Generating luajit batch-script...")
+	print("Writing '" +luajit_build_script_wrapper +"'...")
+	with open(luajit_build_script_wrapper, 'w') as file:
+		file.write("call \""+vcvars_path +"\" -arch=amd64 -host_arch=amd64\n") #TODO: allow arm64 to be usable by this.
+		file.write("cd \""+root+"/third_party_libs/luajit/src\"\n")
+		file.write("call \""+luajit_build_script +"\"\n")
+	subprocess.check_call( [luajit_build_script_wrapper] )
+	#subprocess.run([devcmd_path+" -no_logo & msvcbuild.bat"],check=True)    
+	lua_jit_lib = normalize_path(root +"/third_party_libs/luajit/src/lua51.lib")
+	# os.chdir(deps_dir)
+	# mkdir("luajit_build")
+	# os.chdir("luajit_build")
+	# cmake_configure(root +"/third_party_libs/luajit",generator,["-DBUILD_SHARED_LIBS=1"])
+	# cmake_build("Release")
+    
+	# lua_jit_lib = normalize_path(deps_dir +"/luajit_build/src/Release/luajit.lib")
 
 ########## GeometricTools ##########
 os.chdir(deps_dir)
@@ -482,6 +506,12 @@ if platform == "win32":
 	cmake_configure(root+"/third_party_libs/zlib",generator,zlib_cmake_args)
 	cmake_build("Release")
 	cmake_build("Release",["install"])
+
+
+########## compressonator deps ##########
+if platform == "linux":
+	execfile(root+"/external_libs/util_image/third_party_libs/compressonator/build/fetch_dependencies.py")
+
 
 ########## freetype (built in win32, sys in linux (set in cmake)) ##########
 freetype_include_dir = ""
@@ -710,7 +740,7 @@ if with_common_modules:
 		commitSha="0d82a619deff13cde9fd05c62a00ded933a9558e",
 		repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
 	)
-	add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt")
+	#add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt")
 	add_pragma_module_prebuilt("Silverlan/pr_rig_prebuilt")
 	add_pragma_module_prebuilt("Silverlan/pr_ik_prebuilt")
 
@@ -814,7 +844,6 @@ for module in module_info:
 
 	scriptPath = moduleDir +"build_scripts/setup.py"
 	if Path(scriptPath).is_file():
-		os.chdir(moduleDir)
 		print_msg("Executing module setup script...")
 		execbuildscript(scriptPath)
 
@@ -858,11 +887,11 @@ if platform == "linux":
 	cmake_args += [
 		"-DDEPENDENCY_BOOST_INCLUDE=" +boost_root,
 		"-DDEPENDENCY_BOOST_LIBRARY_LOCATION=" +boost_root +"/stage/lib",
-		"-DDEPENDENCY_BOOST_CHRONO_LIBRARY=" +boost_root +"/stage/lib/boost_chrono.a",
-		"-DDEPENDENCY_BOOST_DATE_TIME_LIBRARY=" +boost_root +"/stage/lib/boost_date_time.a",
-		"-DDEPENDENCY_BOOST_REGEX_LIBRARY=" +boost_root +"/stage/lib/boost_regex.a",
-		"-DDEPENDENCY_BOOST_SYSTEM_LIBRARY=" +boost_root +"/stage/lib/boost_system.a",
-		"-DDEPENDENCY_BOOST_THREAD_LIBRARY=" +boost_root +"/stage/lib/boost_thread.a",
+		"-DDEPENDENCY_BOOST_CHRONO_LIBRARY=" +boost_root +"/stage/lib/libboost_chrono.so",
+		"-DDEPENDENCY_BOOST_DATE_TIME_LIBRARY=" +boost_root +"/stage/lib/libboost_date_time.so",
+		"-DDEPENDENCY_BOOST_REGEX_LIBRARY=" +boost_root +"/stage/lib/libboost_regex.so",
+		"-DDEPENDENCY_BOOST_SYSTEM_LIBRARY=" +boost_root +"/stage/lib/libboost_system.so",
+		"-DDEPENDENCY_BOOST_THREAD_LIBRARY=" +boost_root +"/stage/lib/libsboost_thread.so",
 		"-DDEPENDENCY_LIBZIP_CONF_INCLUDE=" +build_dir +"/third_party_libs/libzip"
 	]
 else:
@@ -881,6 +910,11 @@ else:
 		"-DDEPENDENCY_LUA_LIBRARY=" +lua_jit_lib +""
 	]
 
+cmake_args.append("-DPME_EXTERNAL_LIB_LOCATION=" +external_libs_dir)
+cmake_args.append("-DPME_EXTERNAL_LIB_BIN_LOCATION=" +external_libs_bin_dir)
+cmake_args.append("-DPME_THIRD_PARTY_LIB_LOCATION=" +third_party_libs_dir)
+
+
 if with_lua_doc_generator:
 	if len(dia_include_path) > 0 and len(dia_library_path) > 0:
 		print_msg("Lua documentation generator is enabled!")
@@ -888,7 +922,7 @@ if with_lua_doc_generator:
 		cmake_args += ["-DDEPENDENCY_DIA_INCLUDE=" +dia_include_path]
 		cmake_args += ["-DDEPENDENCY_DIA_LIBRARY=" +dia_library_path]
 	else:
-		raise ArgumentError("Both the --dia-include-path and --dia-library-path options have to be specified to enable Lua documentation generator support!")
+		raise argparse.ArgumentError(None,"Both the --dia-include-path and --dia-library-path options have to be specified to enable Lua documentation generator support!")
 
 if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
 	if len(vtune_include_path) > 0 and len(vtune_library_path) > 0:
@@ -897,7 +931,7 @@ if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
 		cmake_args += ["-DDEPENDENCY_VTUNE_PROFILER_INCLUDE=" +vtune_include_path]
 		cmake_args += ["-DDEPENDENCY_VTUNE_PROFILER_LIBRARY=" +vtune_library_path]
 	else:
-		raise ArgumentError("Both the --vtune-include-path and --vtune-library-path options have to be specified to enable VTune support!")
+		raise argparse.ArgumentError(None,"Both the --vtune-include-path and --vtune-library-path options have to be specified to enable VTune support!")
 
 cmake_args += additional_cmake_args
 cmake_configure(root,generator,cmake_args)
@@ -948,7 +982,7 @@ if with_lua_debugger:
 	mkdir("build",cd=True)
 	luasocket_args = ["-DLUA_INCLUDE_DIR=" +root +"/third_party_libs/luajit/src"]
 	if platform == "win32":
-		luasocket_args.append("-DLUA_LIBRARY=" +deps_dir +"/luajit_build/src/Release/luajit.lib")
+		luasocket_args.append("-DLUA_LIBRARY=" +root +"/third_party_libs/luajit/src/lua51.lib")
 	else:
 		luasocket_args.append("-DLUA_LIBRARY=" +root +"/third_party_libs/luajit/src/libluajit-p.so")
 	cmake_configure("..",generator,luasocket_args)
@@ -958,7 +992,7 @@ if with_lua_debugger:
 	if platform == "win32":
 		cp(luasocket_root +"/build/socket/" +build_config +"/core.dll",install_dir +"/modules/socket/")
 	else:
-		cp(luasocket_root +"/build/socket/core.so",install_dir +"/modules/socket/")
+		cp(luasocket_root +"/build/socket/"+build_config +"/core.so",install_dir +"/modules/socket/")
 	os.chdir(curDir)
 
 ########## lua-debug ##########
@@ -998,7 +1032,7 @@ if not skip_repository_updates:
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","56d46dacb398fa7540e794359eaf1081c9df1edd")
 
 	if with_vr:
-		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","c773f171934b803785aa2a388b3a4d5176d48403")
+		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","908786fa9318205395296486012c7d47cbceb3dc")
 
 	if with_pfm:
 		download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")
@@ -1006,7 +1040,7 @@ if not skip_repository_updates:
 		download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","494aba78be98caf34249e3c7cb3e43477634c272")
 
 	if with_common_entities:
-		download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","a70f575")
+		download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","f652b19")
 		download_addon("TF2","pragma_tf2","https://github.com/Silverlan/pragma_tf2.git","eddee1f")
 
 os.chdir(curDir)
@@ -1043,21 +1077,21 @@ if build:
 	print_msg("Building Pragma...")
 
 	os.chdir(build_dir)
-	targets = ["pragma-install-full"]
+
+    
+	print_msg("Running build command...")
+	cmake_build(build_config,["pragma-install-full"])
+	targets = []
 	if with_pfm:
 		targets.append("pfm")
 	targets += additional_build_targets
-	targets.append("pragma-install")
+	#targets.append("pragma-install")
 
-	print_msg("Running build command...")
 	cmake_build(build_config,targets)
 
+	cmake_build(build_config,["pragma-install"])
 
-	#HACK: For some reason hafbuzz is not named libharfbuzz.so.0. Fix that by adding a symlink.
-	if platform=="linux":
-		os.chdir(install_dir+"/lib")
-		if not Path(os.getcwd()+"/libharfbuzz.so.0").is_symlink():
-			os.symlink("libharfbuzz.so","libharfbuzz.so.0")
+
 
 
 

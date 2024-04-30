@@ -152,7 +152,7 @@ void CSceneComponent::OnRemove()
 	auto sceneIndex = GetSceneIndex();
 	if(sceneIndex == std::numeric_limits<SceneIndex>::max())
 		return;
-	assert(g_sceneUseCount > 0);
+    assert(g_sceneUseCount.size() > 0);
 	--g_sceneUseCount.at(sceneIndex);
 	if(umath::is_flag_set(m_stateFlags, StateFlags::HasParentScene) == false) {
 		g_scenes.at(sceneIndex) = nullptr;

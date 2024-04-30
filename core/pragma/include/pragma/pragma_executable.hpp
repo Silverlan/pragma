@@ -103,9 +103,9 @@ namespace pragma {
 	static std::unique_ptr<ModuleWrapper> launch_pragma(int argc, char *argv[], bool server = false)
 	{
 #ifdef __linux__
-		const char *library = server ? "libshared.so" : "libclient.so";
+        const char *library = server ? "libshared.so" : "libclient.so";
 #else
-		const char *library = server ? "shared.dll" : "client.dll";
+        const char *library = server ? "shared.dll" : "client.dll";
 #endif
 		const char *runEngineSymbol = server ? "RunEngine" : "RunCEngine";
 
@@ -163,10 +163,10 @@ namespace pragma {
 			return MODULE_NULL;
 		}
 		auto wrapper = ModuleWrapper::Create(hEngine);
-#ifdef LINUX_THREAD_TEST
+#if 0
 		std::thread t([]() { std::cout << "Linux Thread Test"; });
 #endif
-		void (*runEngine)(int, char *[]) = (void (*)(int, char *[]))dlsym(hEngine, "RunCEngine");
+        void (*runEngine)(int, char *[]) = (void (*)(int, char *[]))dlsym(hEngine, runEngineSymbol);
 		if(runEngine != nullptr) {
 			runEngine(argc, argv);
 			return wrapper;

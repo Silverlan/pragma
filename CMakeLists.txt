@@ -1,6 +1,10 @@
-cmake_minimum_required(VERSION 3.13) # 3.11 for GENERATOR_IS_MULTI_CONFIG and INTERFACE items on IMPORTED targets
+cmake_minimum_required(VERSION 3.24) # 3.11 for GENERATOR_IS_MULTI_CONFIG and INTERFACE items on IMPORTED targets
 #3.13 for IMPORTED_TARGET GLOBAL for pkg_check_modules
+#3.15 for MSVC_RUNTIME_LIBRARY
+#3.24 for CMAKE_COLOR_DIAGNOSTICS
+#TODO: 3.29 for picking linker in UNIX environments
 project(pragma)
+set(CMAKE_COLOR_DIAGNOSTICS ON)
 
 option(CONFIG_BUILD_WITH_VTUNE_SUPPORT "Build with VTune profiler support?" OFF)
 
@@ -8,19 +12,50 @@ if(${CONFIG_BUILD_WITH_VTUNE_SUPPORT})
     add_definitions(-DPRAGMA_ENABLE_VTUNE_PROFILING)
 endif()
 
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+if(LINUX)
+	set(CMAKE_CXX_DEBUG_FLAGS "${CMAKE_CXX_DEBUG_FLAGS} -Og -g")
+endif()
+
+
+if(MSVC)
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /we4715")
+	set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /we4715")
+else()
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type")
+	set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror=return-type")
+endif()
+
 #set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE CACHE INTERNAL "" FORCE)
 #set_target_properties(freetype PROPERTIES CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz TRUE)
-set(CONFIG_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build Type")
-set_property(CACHE CONFIG_BUILD_TYPE PROPERTY STRINGS RelWithDebInfo Release Debug)
+
+#TODO: get "Ninja Multi-Config to work"
+get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(is_multi_config)
+	set(CONFIG_BUILD_TYPE "$<CONFIG>" CACHE STRING "Build Type" FORCE)
+	
+	set(CMAKE_BUILD_TYPE "") #ignored in multi-config scenarios but not in  anvil's ChooseMSVCCRT
+else()
+	set(CONFIG_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build Type")
+	set(CMAKE_BUILD_TYPE "${CONFIG_BUILD_TYPE}")
+endif()
+
+
+#set_property(CACHE CONFIG_BUILD_TYPE PROPERTY STRINGS RelWithDebInfo Release Debug)
+set(CMAKE_CONFIGURATION_TYPES "RelWithDebInfo;Release;Debug;" CACHE STRING "Supported configuration options" FORCE)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 if(UNIX)
 	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
-set(CMAKE_BUILD_TYPE ${CONFIG_BUILD_TYPE} CACHE STRING "" FORCE)
 
-get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+
+
+
+
+#set(CMAKE_BUILD_TYPE ${CONFIG_BUILD_TYPE} CACHE STRING "" FORCE)
+
 if(is_multi_config)
 	set(BINARY_PRAGMA_DIR ${CONFIG_BUILD_TYPE} CACHE INTERNAL "" FORCE)
 else()
@@ -228,15 +263,17 @@ search_lib_recursive_ext(DEPENDENCY_UTIL_UDM_LIBRARY util_udm STATIC)
 set(DEPENDENCY_PANIMA_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/panima/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_PANIMA_LIBRARY panima STATIC)
 
-set(DEPENDENCY_UTIL_ZIP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_zip/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_UTIL_ZIP_LIBRARY external_libs/util_zip/${BINARY_PRAGMA_DIR} util_zip STATIC)
 
 if(WIN32)
 	set(ZLIB_LIB_NAME "zlib" CACHE INTERNAL "" FORCE)
 else()
 	set(ZLIB_LIB_NAME "z" CACHE INTERNAL "" FORCE)
 endif()
-search_lib_recursive(DEPENDENCY_ZLIB_LIBRARY third_party_libs/zlib/${BINARY_PRAGMA_DIR} ${ZLIB_LIB_NAME})
+search_lib_recursive(DEPENDENCY_ZLIB_LIBRARY "third_party_libs/zlib/${BINARY_PRAGMA_DIR}" ${ZLIB_LIB_NAME})
+
+set(DEPENDENCY_UTIL_ZIP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_zip/include CACHE PATH "Path to include directory.")
+search_lib_recursive(DEPENDENCY_UTIL_ZIP_LIBRARY "external_libs/util_zip/${BINARY_PRAGMA_DIR}" util_zip STATIC)
+
 
 set(DEPENDENCY_ZLIB_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib CACHE PATH "Path to include directory.")
 
@@ -290,7 +327,7 @@ set(DEPENDENCY_LIBOGG_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs
 set(OGG_LIBRARIES ${DEPENDENCY_LIBOGG_LIBRARY} CACHE STRING "" FORCE)
 
 set(DEPENDENCY_BZIP2_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/bzip2 CACHE STRING "" FORCE)
-search_lib_recursive(DEPENDENCY_BZIP2_LIBRARY third_party_libs/bzip2/${BINARY_PRAGMA_DIR} bz2)
+search_lib_recursive(DEPENDENCY_BZIP2_LIBRARY third_party_libs/bzip2/${BINARY_PRAGMA_DIR} "bz2$<$<CONFIG:Debug>:d>")
 
 
 set(DEPENDENCY_LZ4_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_source2/third_party_libs/lz4/lib CACHE STRING "Path to include directory." FORCE)
@@ -326,10 +363,10 @@ set(DEPENDENCY_CPPBEZIERFIT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/c
 search_lib_recursive(DEPENDENCY_CPPBEZIERFIT_LIBRARY third_party_libs/cppbezierfit/${BINARY_PRAGMA_DIR} cppbezierfit STATIC)
 
 set(DEPENDENCY_SPDLOG_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/spdlog/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_SPDLOG_LIBRARY third_party_libs/spdlog/${BINARY_PRAGMA_DIR} spdlog)
+search_lib_recursive(DEPENDENCY_SPDLOG_LIBRARY third_party_libs/spdlog/${BINARY_PRAGMA_DIR} spdlog$<$<CONFIG:Debug>:d>)
 
 set(DEPENDENCY_FMT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/fmt/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_FMT_LIBRARY third_party_libs/fmt/${BINARY_PRAGMA_DIR} fmt STATIC)
+search_lib_recursive(DEPENDENCY_FMT_LIBRARY third_party_libs/fmt/${BINARY_PRAGMA_DIR} fmt$<$<CONFIG:Debug>:d> STATIC)
 
 if(WIN32)
     set(DEPENDENCY_7ZPP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/7zpp/include CACHE STRING "" FORCE)
@@ -388,9 +425,9 @@ search_lib_recursive(DEPENDENCY_LIBZIP_LIBRARY third_party_libs/libzip/lib/${BIN
 set(DEPENDENCY_LPNG_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libpng CACHE PATH "Path to include directory.")
 set(DEPENDENCY_LPNG_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/libpng CACHE PATH "Path to include directory.")
 if(WIN32)
-	set(LIBPNG_LIB_NAME "libpng16" CACHE INTERNAL "" FORCE)
+	set(LIBPNG_LIB_NAME "libpng16$<$<CONFIG:Debug>:d>" CACHE INTERNAL "" FORCE)
 else()
-	set(LIBPNG_LIB_NAME "png16" CACHE INTERNAL "" FORCE)
+	set(LIBPNG_LIB_NAME "png16$<$<CONFIG:Debug>:d>" CACHE INTERNAL "" FORCE)
 endif()
 search_lib_recursive(DEPENDENCY_LPNG_LIBRARY third_party_libs/libpng/${BINARY_PRAGMA_DIR} ${LIBPNG_LIB_NAME})
 
@@ -441,13 +478,13 @@ set(DEPENDENCY_EIGEN_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/eigen CA
 set(DEPENDENCY_TINYGLTF_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/tinygltf CACHE PATH "Path to include directory.")
 
 if(UNIX)
-	set(DEPENDENCY_BOOST_CHRONO_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_chrono.a CACHE PATH "Path to library." FORCE)
-	set(DEPENDENCY_BOOST_DATE_TIME_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_date_time.a CACHE PATH "Path to library." FORCE)
-	set(DEPENDENCY_BOOST_FILESYSTEM_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_filesystem.a CACHE PATH "Path to library." FORCE)
-	set(DEPENDENCY_BOOST_IOSTREAMS_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_iostreams.a CACHE PATH "Path to library." FORCE)
-	set(DEPENDENCY_BOOST_REGEX_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_regex.a CACHE PATH "Path to library." FORCE)
-	set(DEPENDENCY_BOOST_SYSTEM_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_system.a CACHE PATH "Path to library." FORCE)
-	set(DEPENDENCY_BOOST_THREAD_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_thread.a CACHE PATH "Path to library." FORCE)
+	set(DEPENDENCY_BOOST_CHRONO_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_chrono.so CACHE PATH "Path to library." FORCE)
+	set(DEPENDENCY_BOOST_DATE_TIME_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_date_time.so CACHE PATH "Path to library." FORCE)
+	set(DEPENDENCY_BOOST_FILESYSTEM_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_filesystem.so CACHE PATH "Path to library." FORCE)
+	set(DEPENDENCY_BOOST_IOSTREAMS_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_iostreams.so CACHE PATH "Path to library." FORCE)
+	set(DEPENDENCY_BOOST_REGEX_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_regex.so CACHE PATH "Path to library." FORCE)
+	set(DEPENDENCY_BOOST_SYSTEM_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_system.so CACHE PATH "Path to library." FORCE)
+	set(DEPENDENCY_BOOST_THREAD_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_thread.so CACHE PATH "Path to library." FORCE)
 
 	# Resolve links
 	function(resolve_links ID)
@@ -549,9 +586,6 @@ set(DEPENDENCY_LIBOGG_INCLUDE ${OGG_INCLUDE_DIRS} CACHE STRING "" FORCE)
 set(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/zlib CACHE STRING "" FORCE)
 set(DEPENDENCY_ZLIB_INCLUDE ${ZLIB_INCLUDE_DIR} CACHE STRING "" FORCE)
 
-set(ZLIB_VERSION_STRING "1.2.0" CACHE STRING "" FORCE) # Arbitrary version number larger then 1.1.2 to disable an error message from libzip, because the zlib-library does not exist at this point in time yet
-set(ZLIB_INCLUDE_DIR ${DEPENDENCY_ZLIB_INCLUDE} CACHE STRING "" FORCE)
-set(ZLIB_LIBRARY ${DEPENDENCY_ZLIB_LIBRARY} CACHE STRING "" FORCE)
 
 function(register_third_party_library LIB_NAME)
 	message("Processing third-party library '${LIB_NAME}'...")
@@ -602,7 +636,6 @@ add_subdirectory(core)
 
 message("Processing external libraries...")
 add_subdirectory(external_libs)
-
 set_target_folder(wgui external_libs/wgui)
 set_target_folder(sample_application external_libs/wgui)
 target_include_directories(util_image PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
@@ -760,7 +793,7 @@ else()
 	set(SPDLOG_USE_STD_FORMAT OFF CACHE BOOL OFF FORCE)
 endif()
 set(SPDLOG_CLOCK_COARSE ON CACHE BOOL ON FORCE)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 20) # bump to c++23 after we change scope ops in luabind.
 register_third_party_library(spdlog)
 set_target_folder(spdlog third_party_libs)
 unset(CMAKE_CXX_STANDARD)
@@ -837,6 +870,7 @@ target_include_directories(vorbis PUBLIC "${DEPENDENCY_LIBOGG_BUILD_INCLUDE}")
 #
 
 # zlib
+
 register_third_party_library(zlib)
 target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 target_include_directories(zlibstatic PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
@@ -846,6 +880,15 @@ set_target_folder(zlib third_party_libs/zlib)
 set_target_folder(zlibstatic third_party_libs/zlib)
 
 target_include_directories(materialsystem PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
+
+
+#if(UNIX)
+#intervene here beacuse libzip uses pkgconfig
+set(ZLIB_INCLUDE_DIR ${DEPENDENCY_ZLIB_INCLUDE} CACHE STRING "" FORCE)
+set(ZLIB_LIBRARY "$<TARGET_LINKER_FILE:zlib>" CACHE STRING "" FORCE)
+add_library(ZLIB::ZLIB ALIAS zlib) #for libzip just ahead.
+set(ZLIB_LINK_LIBRARY_NAME "ZLIB::ZLIB")
+#endif()
 #
 
 # libzip
@@ -853,7 +896,7 @@ set(LIBZIP_DO_INSTALL OFF CACHE BOOL ".." FORCE)
 set(ENABLE_BZIP2 OFF CACHE BOOL ".." FORCE)
 set(ENABLE_LZMA OFF CACHE BOOL ".." FORCE)
 register_third_party_library(libzip)
-target_include_directories(zip PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
+target_include_directories(zip PUBLIC ${DEPENDENCY_ZLIB_INCLUDE}) #ew.
 set_target_folder(add_from_filep third_party_libs/libzip)
 set_target_folder(can_clone_file third_party_libs/libzip)
 set_target_folder(check third_party_libs/libzip)
@@ -1081,6 +1124,8 @@ else()
         set(BINARY_OUTPUT_DIR "lib")
 endif()
 
+set(EXECUTABLE_OUTPUT_DIR "bin")
+
 set(PRAGMA_INSTALL_COMPONENT "pragma")
 set(PRAGMA_INSTALL_COMPONENT_FULL "pragma-full")
 function(pragma_install TARGET_NAME DESTINATION_PATH)
@@ -1142,14 +1187,14 @@ add_custom_target(pragma-install
 	DEPENDS pragma iclient iserver udm_convert ${PRAGMA_INSTALL_CUSTOM_TARGETS}
 	COMMAND 
 		"${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT}
-		-DBUILD_TYPE=${CMAKE_BUILD_TYPE}
+		-DBUILD_TYPE=${CONFIG_BUILD_TYPE}
 		-P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
 )
 add_custom_target(pragma-install-full
-	DEPENDS pragma-install
+	DEPENDS pragma iclient iserver
 	COMMAND 
 		"${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${PRAGMA_INSTALL_COMPONENT_FULL}
-		-DBUILD_TYPE=${CMAKE_BUILD_TYPE}
+		-DBUILD_TYPE=${CONFIG_BUILD_TYPE}
 		-P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
 )
 
@@ -1234,8 +1279,14 @@ endfunction(pragma_install_create_directory)
 
 pragma_install_create_directory(modules)
 # pragma_install_lib("${DEPENDENCY_ASSIMP_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+
+pragma_install_lib("${DEPENDENCY_BOOST_CHRONO_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_BOOST_DATE_TIME_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+pragma_install_lib("${DEPENDENCY_BOOST_FILESYSTEM_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+pragma_install_lib("${DEPENDENCY_BOOST_IOSTREAMS_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+pragma_install_lib("${DEPENDENCY_BOOST_REGEX_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_BOOST_SYSTEM_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+pragma_install_lib("${DEPENDENCY_BOOST_THREAD_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_BZIP2_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 #In Linux there is a cyclic deps between freetype,harfbuzz,pango,cairo and most importantly fontconfig.
 #Fontconfig in linux is reposnsible for discovery of fonts. (think C:\Windows\Fonts for linux but customizable via configs) 

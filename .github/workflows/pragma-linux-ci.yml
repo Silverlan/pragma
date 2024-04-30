@@ -31,16 +31,41 @@ jobs:
             generators: "Unix Makefiles"
             build_dir: 'build'
     steps:
+
+      
+      - name: setup gcc-11
+        run: |
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 200 --slave /usr/bin/g++ g++ /usr/bin/g++-11 --slave /usr/bin/gcov gcov /usr/bin/gcov-11
       - name: Setup Pragma
         uses: Silverlan/pragma/github_actions/setup@master
         with:
           clone_url: "https://github.com/${{ github.repository }}.git"
 
+
+      - name: Clone pr_source repo
+        uses: GuillaumeFalourd/clone-github-repo-action@main
+        with:
+          owner: 'Slaweknowy'
+          branch: master
+          repository: 'pr_source'
+          submodule: true
+          access-token: ${{ secrets.PR_SOURCE_REPO_TOKEN }}
+      
+      - name: Move repo to target location
+        run: |
+            mv pr_source/ pr_mount_external/ |
+            mv pr_mount_external ./pragma/modules/
+
       - name: Build Pragma
         uses: ./pragma/github_actions/build
         id: build-pragma
         with:
-          build-args: "--with-pfm --with-all-pfm-modules --with-vr --with-networking --with-lua-debugger=0"
+          build-args: "--with-pfm --with-all-pfm-modules --with-networking --with-vr --with-lua-debugger=0"
+
+          
+      - name: "Actually patch libraries we're about to pack"
+        run: |
+          bash ./pragma/build_scripts/cmake/patch_libraries.sh ${{ steps.build-pragma.outputs.install-dir }}
           
       - name: Create Release Archive
         shell: bash

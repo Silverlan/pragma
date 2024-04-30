@@ -29,7 +29,7 @@ class DLLCLIENT CParticleRendererBlob : public CParticleRenderer {
 	static pragma::ShaderParticleBlob *s_shader;
 	static Shader::ParticleBlobShadow *s_shadowShader;
   protected:
-	static const auto INVALID_BLOB_INDEX = std::numeric_limits<uint16_t>::max();
+	static constexpr auto INVALID_BLOB_INDEX = std::numeric_limits<uint16_t>::max();
 	struct Link {
 		uint32_t targetParticleIdx = INVALID_BLOB_INDEX;
 		float distSqr = std::numeric_limits<float>::max();

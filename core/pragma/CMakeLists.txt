@@ -10,3 +10,5 @@ if(UNIX)
 else()
 	set_target_properties(pragma PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext")
 endif()
+
+

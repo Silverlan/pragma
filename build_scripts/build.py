@@ -740,7 +740,7 @@ if with_common_modules:
 		commitSha="0d82a619deff13cde9fd05c62a00ded933a9558e",
 		repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
 	)
-	#add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt")
+	add_pragma_module_prebuilt("Silverlan/pr_mount_external_prebuilt")
 	add_pragma_module_prebuilt("Silverlan/pr_rig_prebuilt")
 	add_pragma_module_prebuilt("Silverlan/pr_ik_prebuilt")
 
@@ -887,11 +887,11 @@ if platform == "linux":
 	cmake_args += [
 		"-DDEPENDENCY_BOOST_INCLUDE=" +boost_root,
 		"-DDEPENDENCY_BOOST_LIBRARY_LOCATION=" +boost_root +"/stage/lib",
-		"-DDEPENDENCY_BOOST_CHRONO_LIBRARY=" +boost_root +"/stage/lib/libboost_chrono.so",
-		"-DDEPENDENCY_BOOST_DATE_TIME_LIBRARY=" +boost_root +"/stage/lib/libboost_date_time.so",
-		"-DDEPENDENCY_BOOST_REGEX_LIBRARY=" +boost_root +"/stage/lib/libboost_regex.so",
-		"-DDEPENDENCY_BOOST_SYSTEM_LIBRARY=" +boost_root +"/stage/lib/libboost_system.so",
-		"-DDEPENDENCY_BOOST_THREAD_LIBRARY=" +boost_root +"/stage/lib/libsboost_thread.so",
+		"-DDEPENDENCY_BOOST_CHRONO_LIBRARY=" +boost_root +"/stage/lib/boost_chrono.a",
+		"-DDEPENDENCY_BOOST_DATE_TIME_LIBRARY=" +boost_root +"/stage/lib/boost_date_time.a",
+		"-DDEPENDENCY_BOOST_REGEX_LIBRARY=" +boost_root +"/stage/lib/boost_regex.a",
+		"-DDEPENDENCY_BOOST_SYSTEM_LIBRARY=" +boost_root +"/stage/lib/boost_system.a",
+		"-DDEPENDENCY_BOOST_THREAD_LIBRARY=" +boost_root +"/stage/lib/boost_thread.a",
 		"-DDEPENDENCY_LIBZIP_CONF_INCLUDE=" +build_dir +"/third_party_libs/libzip"
 	]
 else:
@@ -1032,7 +1032,7 @@ if not skip_repository_updates:
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","56d46dacb398fa7540e794359eaf1081c9df1edd")
 
 	if with_vr:
-		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","908786fa9318205395296486012c7d47cbceb3dc")
+		download_addon("VR","virtual_reality","https://github.com/Silverlan/PragmaVR.git","c773f17")
 
 	if with_pfm:
 		download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")
@@ -1077,23 +1077,14 @@ if build:
 	print_msg("Building Pragma...")
 
 	os.chdir(build_dir)
-
-    
-	print_msg("Running build command...")
-	cmake_build(build_config,["pragma-install-full"])
-	targets = []
+	targets = ["pragma-install-full"]
 	if with_pfm:
 		targets.append("pfm")
 	targets += additional_build_targets
-	#targets.append("pragma-install")
+	targets.append("pragma-install")
 
+	print_msg("Running build command...")
 	cmake_build(build_config,targets)
-
-	cmake_build(build_config,["pragma-install"])
-
-
-
-
 
 	print_msg("Build Successful! Pragma has been installed to \"" +normalize_path(install_dir) +"\".")
 	print_msg("If you make any changes to the core source code, you can build the \"pragma-install\" target to compile the changes and re-install the binaries automatically.")

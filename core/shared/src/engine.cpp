@@ -98,9 +98,6 @@ ConVarHandle Engine::GetConVarHandle(std::string scvar)
 }
 
 DLLNETWORK Engine *engine = NULL;
-#ifdef __linux__
-int master_fd,slave_fd;
-#endif
 extern std::optional<std::string> g_lpLogFile;
 extern util::LogSeverity g_lpLogLevelCon;
 extern util::LogSeverity g_lpLogLevelFile;
@@ -285,7 +282,7 @@ void Engine::Close()
 #ifdef _WIN32
 		processPath = "bin/updater.exe";
 #else
-		processPath = "bin/updater";
+		processPath = "lib/updater";
 #endif
 		if(!::util::start_process(processPath.c_str(), "-executable=" + util::get_program_name()))
 			Con::cwar << "Failed to launch updater '" << processPath << "'! Please execute manually to install update." << Con::endl;

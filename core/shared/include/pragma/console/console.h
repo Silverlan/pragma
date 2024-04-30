@@ -25,13 +25,6 @@ class DLLNETWORK DebugConsole {
 	std::ifstream _console_cin;
 	std::ofstream _console_cout;
 	std::ofstream _console_cerr;
-
-#ifdef __linux__
-	int _cinfd;
-	int _coutfd;
-	int _cerrfd;
-	int master;
-#endif
 };
 
 #endif // __DBGCONSOLE_H__

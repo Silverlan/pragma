@@ -37,7 +37,7 @@ get_submodule("vorbis","https://github.com/xiph/vorbis.git","9eadeccdc4247127d91
 get_submodule("vtflib","https://github.com/Silverlan/VTFLib.git","3e6b80bcd6dacf6bd4a35666869464fac55051cc")
 get_submodule("zlib","https://github.com/Silverlan/zlib.git","0dcc7471231d72376d592f80f06c2e2246c2b3c4")
 get_submodule("fmt","https://github.com/fmtlib/fmt.git","a337011")
-get_submodule("cppbezierfit","https://github.com/Silverlan/cppbezierfit.git","b5541de2e16fcbb4b21388286414987fd7a81bae")
+get_submodule("cppbezierfit","https://github.com/Silverlan/cppbezierfit.git","2a3eea546f4d07494b2d6793ec863be8d35c023f")
 get_submodule("mpaheader","https://github.com/SlawekNowy/mpaheader.git","2618c39")
 
 os.chdir(curDir)

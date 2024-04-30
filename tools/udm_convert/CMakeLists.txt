@@ -53,19 +53,23 @@ endfunction(add_def)
 
 ##### CONFIGURATION #####
 
-set(PROJ_NAME pragma_updater)
+set(PROJ_NAME udm_convert)
 
 project(${PROJ_NAME} CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(DEPENDENCY_SHAREDUTILS_INCLUDE "" CACHE PATH "Path to sharedutils include directory.")
-set(DEPENDENCY_SHAREDUTILS_LIBRARY_STATIC "" CACHE FILEPATH "Path to static sharedutils library.")
-set(DEPENDENCY_MATHUTIL_LIBRARY_STATIC "" CACHE FILEPATH "Path to static mathutil library.")
-add_definitions(-DSHUTIL_STATIC)
-add_definitions(-DMATHUTIL_STATIC)
+set(DEPENDENCY_UTIL_UDM_INCLUDE "" CACHE PATH "Path to util_udm include directory.")
+set(DEPENDENCY_SHAREDUTILS_LIBRARY "" CACHE FILEPATH "Path to sharedutils library.")
+set(DEPENDENCY_MATHUTIL_LIBRARY "" CACHE FILEPATH "Path to mathutil library.")
+set(DEPENDENCY_VFILESYSTEM_LIBRARY "" CACHE FILEPATH "Path to vfilesystem library.")
+set(DEPENDENCY_UTIL_UDM_LIBRARY "" CACHE FILEPATH "Path to util_udm library.")
+set(DEPENDENCY_LZ4_LIBRARY "" CACHE FILEPATH "Path to lz4 library.")
 add_include_dir(sharedutils)
 add_include_dir(mathutil)
+add_include_dir(vfilesystem)
+add_include_dir(util_udm)
+add_include_dir(glm)
 
 ##### CONFIGURATION #####
 
@@ -90,10 +94,13 @@ file(GLOB_RECURSE SRC_FILES
     "${CMAKE_CURRENT_LIST_DIR}/include/*.hpp"
 )
 add_executable(${PROJ_NAME} ${SRC_FILES})
-set_target_properties(${PROJ_NAME} PROPERTIES OUTPUT_NAME "updater")
+set_target_properties(${PROJ_NAME} PROPERTIES OUTPUT_NAME "udm_convert")
 
-target_link_libraries(${PROJ_NAME} ${DEPENDENCY_SHAREDUTILS_LIBRARY_STATIC})
-# target_link_libraries(${PROJ_NAME} ${DEPENDENCY_MATHUTIL_LIBRARY_STATIC})
+target_link_libraries(${PROJ_NAME} ${DEPENDENCY_SHAREDUTILS_LIBRARY})
+target_link_libraries(${PROJ_NAME} ${DEPENDENCY_UTIL_UDM_LIBRARY})
+target_link_libraries(${PROJ_NAME} ${DEPENDENCY_MATHUTIL_LIBRARY})
+target_link_libraries(${PROJ_NAME} ${DEPENDENCY_VFILESYSTEM_LIBRARY})
+target_link_libraries(${PROJ_NAME} ${DEPENDENCY_LZ4_LIBRARY})
 
 if(WIN32)
 	set_property(TARGET ${PROJ_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
@@ -117,8 +124,6 @@ foreach(INCLUDE_PATH IN LISTS INCLUDE_DIRS)
 endforeach(INCLUDE_PATH)
 
 set(TARGET_PROPERTIES LINKER_LANGUAGE CXX)
-if(DEFINED PRECOMPILED_HEADER)
-	include(PrecompiledHeader.cmake)
-	add_precompiled_header(${PROJ_NAME} "src/${PRECOMPILED_HEADER}.h" c++17 FORCEINCLUDE)
-endif()
 set_target_properties(${PROJ_NAME} PROPERTIES ${TARGET_PROPERTIES})
+
+add_dependencies(${PROJ_NAME} sharedutils mathutil vfilesystem util_udm)

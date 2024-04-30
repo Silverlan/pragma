@@ -723,11 +723,11 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 
 # Register argument-dependent modules
 if with_essential_client_modules:
-    add_pragma_module(
-        name="pr_prosper_vulkan",
-        commitSha="185fe54e2ce98062b25e03f65ae002153d442e70",
-        repositoryUrl="https://github.com/SlawekNowy/pr_prosper_vulkan.git"
-    )
+	add_pragma_module(
+		name="pr_prosper_vulkan",
+		commitSha="7c797f46ee391359874c48693d46ea0e93f6056f",
+		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
+	)
 
 if with_common_modules:
 	add_pragma_module(
@@ -745,53 +745,53 @@ if with_common_modules:
 	add_pragma_module_prebuilt("Silverlan/pr_ik_prebuilt")
 
 if with_pfm:
-    if with_core_pfm_modules or with_all_pfm_modules:
-        add_pragma_module(
-            name="pr_curl",
-            commitSha="1e35c603ad2211476a8498f7dbded470d1b85cd9",
-            repositoryUrl="https://github.com/SlawekNowy/pr_curl.git"
-        )
-        add_pragma_module(
-            name="pr_dmx",
-            commitSha="0b48a3701bc69ba74f6b781d1e53e8bdedaf2c27",
-            repositoryUrl="https://github.com/Slaweknowy/pr_dmx.git"
-        )
-    if with_all_pfm_modules:
-        add_pragma_module(
-            name="pr_chromium",
-            commitSha="7d03a7af089c926fb228da6a5f9ebd2b4508e184",
-            repositoryUrl="https://github.com/SlawekNowy/pr_chromium.git"
-        )
-        add_pragma_module(
-            name="pr_unirender",
-            commitSha="7a1ba4f2dbaf414a7b83928612328d5e4823acb0",
-            repositoryUrl="https://github.com/Slaweknowy/pr_cycles.git"
-        )
-        add_pragma_module(
-            name="pr_curl",
-            commitSha="1e35c603ad2211476a8498f7dbded470d1b85cd9",
-            repositoryUrl="https://github.com/SlawekNowy/pr_curl.git"
-        )
-        add_pragma_module(
-            name="pr_dmx",
-            commitSha="0b48a3701bc69ba74f6b781d1e53e8bdedaf2c27",
-            repositoryUrl="https://github.com/Slaweknowy/pr_dmx.git"
-        )
-        add_pragma_module(
-            name="pr_xatlas",
-            commitSha="485eaad",
-            repositoryUrl="https://github.com/Silverlan/pr_xatlas.git"
-        )
-        add_pragma_module(
-            name="pr_davinci",
-            commitSha="e8863cd1b8e047ddcdf47b7ae6291e9962568d09",
-            repositoryUrl="https://github.com/Silverlan/pr_davinci.git"
-        )
-        add_pragma_module(
-            name="pr_opencv",
-            commitSha="152e758ae609ac01cf045e758fdbceef460990a2",
-            repositoryUrl="https://github.com/SlawekNowy/pr_opencv.git"
-        )
+	if with_core_pfm_modules or with_all_pfm_modules:
+		add_pragma_module(
+			name="pr_curl",
+			commitSha="025c6d150ba88031f1b7b9a1bcc387b746e1ac89",
+			repositoryUrl="https://github.com/Silverlan/pr_curl.git"
+		)
+		add_pragma_module(
+			name="pr_dmx",
+			commitSha="ce90ad2",
+			repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
+		)
+	if with_all_pfm_modules:
+		add_pragma_module(
+			name="pr_chromium",
+			commitSha="c8af9e774d67a12eb0f44d6a3af9e0d11efc7449",
+			repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
+		)
+		add_pragma_module(
+			name="pr_unirender",
+			commitSha="778553ad1116aba968d89c9407ee9e71088daff0",
+			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
+		)
+		add_pragma_module(
+			name="pr_curl",
+			commitSha="025c6d150ba88031f1b7b9a1bcc387b746e1ac89",
+			repositoryUrl="https://github.com/Silverlan/pr_curl.git"
+		)
+		add_pragma_module(
+			name="pr_dmx",
+			commitSha="ce90ad2",
+			repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
+		)
+		add_pragma_module(
+			name="pr_xatlas",
+			commitSha="485eaad",
+			repositoryUrl="https://github.com/Silverlan/pr_xatlas.git"
+		)
+		add_pragma_module(
+			name="pr_davinci",
+			commitSha="e8863cd1b8e047ddcdf47b7ae6291e9962568d09",
+			repositoryUrl="https://github.com/Silverlan/pr_davinci.git"
+		)
+		add_pragma_module(
+			name="pr_opencv",
+			commitSha="97a8b4477c584a10f5d70a2f29b0febf0d64a311",
+			repositoryUrl="https://github.com/Silverlan/pr_opencv.git"
+		)
 
 if with_lua_doc_generator or with_pfm:
 	add_pragma_module(
@@ -801,11 +801,11 @@ if with_lua_doc_generator or with_pfm:
 	)
 
 if with_vr:
-    add_pragma_module(
-        name="pr_openvr",
-        commitSha="3df87434fead3394e5befe60e8d9e3560bc083e1",
-        repositoryUrl="https://github.com/SlawekNowy/pr_openvr.git"
-    )
+	add_pragma_module(
+		name="pr_openvr",
+		commitSha="008773c",
+		repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
+	)
 
 if with_networking:
 	add_pragma_module(
@@ -1028,7 +1028,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","2eca0a354511296097ca49a87499af879b9f3efa")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","41b208b79f6bd3b8ac74cc7ac1514f0e351e1c48")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","56d46dacb398fa7540e794359eaf1081c9df1edd")
 
 	if with_vr:

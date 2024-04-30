@@ -643,7 +643,9 @@ void Lua::util::register_library(lua_State *l)
 	defRigControl.add_static_constant("TYPE_DRAG", umath::to_integral(pragma::ik::RigConfigControl::Type::Drag));
 	defRigControl.add_static_constant("TYPE_STATE", umath::to_integral(pragma::ik::RigConfigControl::Type::State));
 	defRigControl.add_static_constant("TYPE_ORIENTED_DRAG", umath::to_integral(pragma::ik::RigConfigControl::Type::OrientedDrag));
-	static_assert(umath::to_integral(pragma::ik::RigConfigControl::Type::Count) == 3u, "Update this list when new types are added!");
+	defRigControl.add_static_constant("TYPE_REVOLUTE", umath::to_integral(pragma::ik::RigConfigControl::Type::Revolute));
+	defRigControl.add_static_constant("TYPE_AXIS", umath::to_integral(pragma::ik::RigConfigControl::Type::Axis));
+	static_assert(umath::to_integral(pragma::ik::RigConfigControl::Type::Count) == 5u, "Update this list when new types are added!");
 	defRigControl.def_readwrite("bone", &pragma::ik::RigConfigControl::bone);
 	defRigControl.def_readwrite("type", &pragma::ik::RigConfigControl::type);
 	defRigControl.def_readwrite("maxForce", &pragma::ik::RigConfigControl::maxForce);

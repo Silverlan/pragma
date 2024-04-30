@@ -42,6 +42,8 @@ namespace pragma::ik {
 			Drag = 0,
 			State,
 			OrientedDrag,
+			Revolute,
+			Axis,
 			Count,
 		};
 		pragma::GString bone;

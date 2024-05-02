@@ -386,6 +386,7 @@ class DLLNETWORK Model : public std::enable_shared_from_this<Model> {
 	bool GenerateMetaRig();
 	bool GenerateMetaBlendShapes();
 	void ClearMetaRig();
+	std::optional<pragma::animation::MetaRigBoneType> GetMetaRigBoneParentId(pragma::animation::MetaRigBoneType type) const;
 	std::optional<umath::ScaledTransform> GetMetaRigReferencePose(pragma::animation::MetaRigBoneType type) const;
 	bool GenerateStandardMetaRigReferenceBonePoses(std::vector<umath::ScaledTransform> &outPoses) const;
 	void ApplyPostImportProcessing();

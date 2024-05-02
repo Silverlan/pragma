@@ -375,6 +375,7 @@ void Lua::Model::register_class(lua_State *l, luabind::class_<::Model> &classDef
 			  return {};
 		  return poses;
 	  });
+	classDef.def("GetMetaRigBoneParentId", &::Model::GetMetaRigBoneParentId);
 	classDef.def("GetTextureGroupCount", &Lua::Model::GetTextureGroupCount);
 	classDef.def("GetTextureGroups", &Lua::Model::GetTextureGroups);
 	classDef.def("GetTextureGroup", &Lua::Model::GetTextureGroup);

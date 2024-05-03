@@ -49,3 +49,11 @@ jobs:
         if: failure()
         with:
           timeout-minutes: 15
+
+      - name: Upload Debug Artifacts
+        if: ${{ !cancelled() }}
+        uses: ./pragma/github_actions/upload_debug_artifacts
+        with:
+          build-dir: '${{ steps.build-pragma.outputs.build-dir }}'
+          deps-dir: '${{ steps.build-pragma.outputs.deps-dir }}'
+          install-dir: '${{ steps.build-pragma.outputs.install-dir }}'

@@ -301,7 +301,7 @@ if platform == "linux":
 			"apt-get install pkg-config libfreetype-dev",
 
 
-			#Ninja
+			# Ninja
 			"apt-get install ninja-build"
 		]
 
@@ -732,7 +732,7 @@ if with_essential_client_modules:
 if with_common_modules:
 	add_pragma_module(
 		name="pr_bullet",
-		commitSha="4f1aea9",
+		commitSha="4eb3df9",
 		repositoryUrl="https://github.com/Silverlan/pr_bullet.git"
 	)
 	add_pragma_module(

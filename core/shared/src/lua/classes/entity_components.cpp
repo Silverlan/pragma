@@ -1488,6 +1488,18 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		  return pose;
 	  });
 	def.def("SetMetaBonePose", static_cast<bool (pragma::BaseAnimatedComponent::*)(pragma::animation::MetaRigBoneType, const umath::ScaledTransform &, umath::CoordinateSpace)>(&pragma::BaseAnimatedComponent::SetMetaBonePose));
+	def.def(
+	  "MetaBonePoseToSkeletal", +[](pragma::BaseAnimatedComponent &animC, animation::MetaRigBoneType boneType, const umath::ScaledTransform &pose) -> umath::ScaledTransform {
+		  auto newPose = pose;
+		  animC.MetaBonePoseToSkeletal(boneType, newPose);
+		  return newPose;
+	  });
+	def.def(
+	  "MetaBoneRotationToSkeletal", +[](pragma::BaseAnimatedComponent &animC, animation::MetaRigBoneType boneType, const Quat &rot) -> Quat {
+		  auto newRot = rot;
+		  animC.MetaBoneRotationToSkeletal(boneType, newRot);
+		  return newRot;
+	  });
 
 	def.add_static_constant("EVENT_HANDLE_ANIMATION_EVENT", pragma::BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT);
 	def.add_static_constant("EVENT_ON_PLAY_ANIMATION", pragma::BaseAnimatedComponent::EVENT_ON_PLAY_ANIMATION);

@@ -751,6 +751,13 @@ register_third_party_library(cppbezierfit)
 set_target_folder(cppbezierfit third_party_libs)
 #
 
+# VKVParser
+search_lib_recursive(DEPENDENCY_VKV_PARSER_LIBRARY third_party_libs/vkvparser/${BINARY_PRAGMA_DIR} KVParser)
+set(DEPENDENCY_VKV_PARSER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vkvparser/include CACHE PATH "Path to include directory.")
+register_third_party_library(vkvparser)
+set_target_folder(KVParser third_party_libs)
+#
+
 # spdlog
 set(SPDLOG_BUILD_SHARED ON CACHE BOOL ON FORCE)
 set(SPDLOG_BUILD_PIC ON CACHE BOOL ON FORCE)
@@ -1024,13 +1031,12 @@ add_dependencies(util_pad zip)
 # add_dependencies(util_archive bsa)
 
 add_dependencies(util_image mathutil vfilesystem sharedutils png)
-add_dependencies(materialsystem datasystem util_image png VTFLib13 util_source2 util_udm)
+add_dependencies(materialsystem KVParser datasystem util_image png VTFLib13 util_source2 util_udm)
 add_dependencies(mathutil sharedutils-static)
 add_dependencies(sharedutils mathutil)
 add_dependencies(vfilesystem sharedutils)
 add_dependencies(datasystem vfilesystem)
 add_dependencies(luasystem vfilesystem luabind)
-add_dependencies(materialsystem datasystem util_image png VTFLib13 util_source2)
 add_dependencies(iglfw glfw)
 add_dependencies(iglfw vfilesystem)
 add_dependencies(prosper vfilesystem iglfw util_image util_udm muparserx lz4)
@@ -1256,6 +1262,7 @@ pragma_install_lib("${DEPENDENCY_LIBZIP_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_LPNG_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_SPDLOG_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_MPAHEADER_LIBRARY}" "${BINARY_OUTPUT_DIR}")
+pragma_install_lib("${DEPENDENCY_VKV_PARSER_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 if(WIN32)
 pragma_install_lib_c("${DEPENDENCY_ZLIB_LIBRARY}" zlib1 "${BINARY_OUTPUT_DIR}")
 else()

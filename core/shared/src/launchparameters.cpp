@@ -10,6 +10,7 @@
 #include "pragma/engine.h"
 #include "pragma/console/conout.h"
 #include "pragma/logging_wrapper.hpp"
+#include <material_manager2.hpp>
 
 Engine::LaunchCommand::LaunchCommand(const std::string &cmd, const std::vector<std::string> &_args) : command(cmd), args(_args) {}
 
@@ -184,6 +185,12 @@ DLLNETWORK void LPARAM_connect(const std::vector<std::string> &argv)
 	//Connect(ip,port);//WEAVETODO
 }
 
+DLLNETWORK void LPARAM_USE_VKV_PARSER(const std::vector<std::string> &argv)
+{
+	if(argv.empty() || util::to_boolean(argv.front()))
+		msys::set_use_vkv_vmt_parser(true);
+}
+
 DLLNETWORK void LPARAM_help(const std::vector<std::string> &argv)
 {
 	engine->OpenConsole();
@@ -221,6 +228,7 @@ REGISTER_LAUNCH_PARAMETER_HELP(-tcpport, LPARAM_tcpport, "<port>", "set TCP port
 REGISTER_LAUNCH_PARAMETER_HELP(-udpport, LPARAM_udpport, "<port>", "set UDP port");
 REGISTER_LAUNCH_PARAMETER_HELP(-tcponly, LPARAM_tcponly, "", "use TCP for all communication");
 REGISTER_LAUNCH_PARAMETER_HELP(-connect, LPARAM_connect, "<ip>[:<port>]", "connect to server immediately. Default port is 29150");
+REGISTER_LAUNCH_PARAMETER_HELP(-experimental_use_vkv_parser, LPARAM_USE_VKV_PARSER, "<1/0>", "If enabled, VKV parser will be used for parsing VMT materials.");
 
 REGISTER_LAUNCH_PARAMETER_HELP(-help, LPARAM_help, "-? /?", "show this help message");
 REGISTER_LAUNCH_PARAMETER_HELP(-title, LPARAM_title, "<title>", "changes the window title");

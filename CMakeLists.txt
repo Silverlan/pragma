@@ -325,6 +325,9 @@ endif()
 set(DEPENDENCY_CPPBEZIERFIT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/cppbezierfit/include CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_CPPBEZIERFIT_LIBRARY third_party_libs/cppbezierfit/${BINARY_PRAGMA_DIR} cppbezierfit STATIC)
 
+search_lib_recursive(DEPENDENCY_VKV_PARSER_LIBRARY third_party_libs/vkvparser/${BINARY_PRAGMA_DIR} KVParser)
+set(DEPENDENCY_VKV_PARSER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vkvparser/include CACHE PATH "Path to include directory.")
+
 set(DEPENDENCY_SPDLOG_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/spdlog/include CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_SPDLOG_LIBRARY third_party_libs/spdlog/${BINARY_PRAGMA_DIR} spdlog)
 
@@ -752,8 +755,6 @@ set_target_folder(cppbezierfit third_party_libs)
 #
 
 # VKVParser
-search_lib_recursive(DEPENDENCY_VKV_PARSER_LIBRARY third_party_libs/vkvparser/${BINARY_PRAGMA_DIR} KVParser)
-set(DEPENDENCY_VKV_PARSER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vkvparser/include CACHE PATH "Path to include directory.")
 register_third_party_library(vkvparser)
 set_target_folder(KVParser third_party_libs)
 #

@@ -141,6 +141,8 @@ namespace pragma {
 		bool SetMetaBonePose(animation::MetaRigBoneType boneType, const Vector3 *optPos, const Quat *optRot = nullptr, const Vector3 *optScale = nullptr, umath::CoordinateSpace space = umath::CoordinateSpace::Local);
 		bool GetMetaBonePose(animation::MetaRigBoneType boneType, umath::ScaledTransform &outPose, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
 		bool GetMetaBonePose(animation::MetaRigBoneType boneType, Vector3 *optOutPos, Quat *optOutRot = nullptr, Vector3 *optOutScale = nullptr, umath::CoordinateSpace space = umath::CoordinateSpace::Local) const;
+		bool MetaBonePoseToSkeletal(animation::MetaRigBoneType boneType, umath::ScaledTransform &pose) const;
+		bool MetaBoneRotationToSkeletal(animation::MetaRigBoneType boneType, Quat &rot) const;
 
 		float GetCycle() const;
 		void SetCycle(float cycle);

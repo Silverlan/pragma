@@ -287,7 +287,7 @@ std::string Lua::file::to_relative_path(const std::string &path)
 }
 static bool is_extension_blacklisted(const std::string &ext)
 {
-	using namespace ustring::string_switch;
+	using namespace ustring::string_switch_ci;
 	switch(hash(ext)) {
 	// Windows File Extensions
 	case "exe"_:
@@ -330,22 +330,40 @@ static bool is_extension_blacklisted(const std::string &ext)
 	case "class"_:
 	case "war"_:
 	case "cgi"_:
+
+	// Code files
+	case "h"_:
+	case "hpp"_:
+	case "cpp"_:
+
+	// Shader files
+	case "ptx"_:
+	case "cubin"_:
 		return true;
 	default:
 		return false;
 	}
 	return false;
 }
+static const std::vector<std::string> pathBlacklist {
+  "cache/chromium",
+  "cache/shader.cache",
+  "cache/shaders",
+};
+static bool is_path_blacklisted(const std::string &path) {}
 bool Lua::file::validate_write_operation(lua_State *l, std::string &path, std::string &outRootPath)
 {
 	std::string ext;
 	if(ufile::get_extension(path, &ext) && is_extension_blacklisted(ext))
 		return false;
+	auto opath = util::Path::CreateFile(path);
+	opath.Canonicalize();
+	for(auto &item : pathBlacklist) {
+		if(ustring::find(opath.GetString(), item, false) != std::string::npos)
+			return false;
+	}
 	if(path.length() >= 7 && ustring::compare(path.c_str(), "addons", false, 6) && (path.at(6) == '/' || path.at(6) == '\\')) {
 		// Validate that this is an addon path
-		auto opath = util::Path::CreateFile(path);
-		opath.Canonicalize();
-
 		auto addonPath = opath;
 		while(addonPath.GetComponentCount() > 2)
 			addonPath.PopBack();

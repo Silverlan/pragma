@@ -350,7 +350,6 @@ static const std::vector<std::string> pathBlacklist {
   "cache/shader.cache",
   "cache/shaders",
 };
-static bool is_path_blacklisted(const std::string &path) {}
 bool Lua::file::validate_write_operation(lua_State *l, std::string &path, std::string &outRootPath)
 {
 	std::string ext;

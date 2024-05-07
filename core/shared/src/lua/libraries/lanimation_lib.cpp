@@ -50,8 +50,17 @@ static void reorder(udm::Array &v, std::vector<size_t> const &order)
 	}
 }
 
-static std::optional<uint32_t> set_channel_time(lua_State *l, panima::Channel &channel, uint32_t valueIndex, float time, bool resort)
+static std::optional<uint32_t> set_channel_time(lua_State *l, panima::Channel &channel, uint32_t valueIndex, float time, bool resort, bool removeExisting)
 {
+	if(removeExisting) {
+		auto existingIndex = channel.FindValueIndex(time);
+		if(existingIndex && *existingIndex != valueIndex) {
+			// Make sure the new timestamp isn't already occupied
+			channel.RemoveValueAtIndex(*existingIndex);
+			if(valueIndex > *existingIndex)
+				--valueIndex;
+		}
+	}
 	if(!resort) {
 		auto r = Lua::udm::set_array_value(l, channel.GetTimesArray(), valueIndex, luabind::object {l, time});
 		channel.Update();
@@ -339,7 +348,12 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	  });
 	cdChannel.def(
 	  "SetTime", +[](lua_State *l, panima::Channel &channel, uint32_t idx, float time) -> bool {
-		  auto r = set_channel_time(l, channel, idx, time, false);
+		  auto r = set_channel_time(l, channel, idx, time, false, true);
+		  return r.has_value();
+	  });
+	cdChannel.def(
+	  "SetTime", +[](lua_State *l, panima::Channel &channel, uint32_t idx, float time, bool resort) -> bool {
+		  auto r = set_channel_time(l, channel, idx, time, resort, true);
 		  return r.has_value();
 	  });
 	cdChannel.def("SetTime", &set_channel_time);

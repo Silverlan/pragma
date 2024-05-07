@@ -330,11 +330,14 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdChannel.def("Load", &panima::Channel::Load);
 	cdChannel.def("InsertSample", &panima::Channel::InsertSample);
 	cdChannel.def("ScaleTimeInRange", &panima::Channel::ScaleTimeInRange);
+	cdChannel.def("ScaleTimeInRange", &panima::Channel::ScaleTimeInRange, luabind::default_parameter_policy<6, true> {});
 	cdChannel.def("ShiftTimeInRange", &panima::Channel::ShiftTimeInRange);
+	cdChannel.def("ShiftTimeInRange", &panima::Channel::ShiftTimeInRange, luabind::default_parameter_policy<5, true> {});
 	cdChannel.def("TransformGlobal", &panima::Channel::TransformGlobal);
 	cdChannel.def("ClearAnimationData", &panima::Channel::ClearAnimationData);
 	cdChannel.def("ClearRange", &panima::Channel::ClearRange);
 	cdChannel.def("ClearRange", &panima::Channel::ClearRange, luabind::default_parameter_policy<4, true> {});
+	cdChannel.def("ResolveDuplicates", &panima::Channel::ResolveDuplicates);
 	cdChannel.def(
 	  "RemoveValue", +[](lua_State *l, panima::Channel &channel, uint32_t idx) -> bool {
 		  auto &times = channel.GetTimesArray();
@@ -574,6 +577,12 @@ void Lua::animation::register_library(Lua::Interface &lua)
 			  channel.GetDataInRange<TValue>(tStart, tEnd, times, values);
 			  return luabind::object {l, std::pair<std::vector<float>, std::vector<TValue>> {std::move(times), std::move(values)}};
 		  });
+	  });
+	cdChannel.def(
+	  "GetTimesInRange", +[](lua_State *l, panima::Channel &channel, float tStart, float tEnd) -> std::vector<float> {
+		  std::vector<float> times;
+		  channel.GetTimesInRange(tStart, tEnd, times);
+		  return times;
 	  });
 	cdChannel.def(
 	  "SortValues", +[](lua_State *l, panima::Channel &channel) {

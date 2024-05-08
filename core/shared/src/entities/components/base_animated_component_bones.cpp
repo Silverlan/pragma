@@ -219,14 +219,36 @@ std::optional<animation::BoneId> BaseAnimatedComponent::GetMetaBoneId(animation:
 	auto boneId = metaRig->GetBoneId(animation::get_meta_rig_bone_type_name(boneType));
 	return (boneId != animation::INVALID_BONE_INDEX) ? boneId : std::optional<animation::BoneId> {};
 }
+bool BaseAnimatedComponent::MetaBonePoseToSkeletal(animation::MetaRigBoneType boneType, umath::ScaledTransform &pose) const
+{
+	auto &hModel = GetEntity().GetModel();
+	if(hModel == nullptr)
+		return false;
+	auto &metaRig = hModel->GetMetaRig();
+	if(!metaRig)
+		return false;
+	pose.SetRotation(pose.GetRotation() * uquat::get_inverse(metaRig->bones[umath::to_integral(boneType)].normalizedRotationOffset));
+	return true;
+}
+bool BaseAnimatedComponent::MetaBoneRotationToSkeletal(animation::MetaRigBoneType boneType, Quat &rot) const
+{
+	auto &hModel = GetEntity().GetModel();
+	if(hModel == nullptr)
+		return false;
+	auto &metaRig = hModel->GetMetaRig();
+	if(!metaRig)
+		return false;
+	rot = rot * uquat::get_inverse(metaRig->bones[umath::to_integral(boneType)].normalizedRotationOffset);
+	return true;
+}
 bool BaseAnimatedComponent::SetMetaBonePose(animation::MetaRigBoneType boneType, const umath::ScaledTransform &pose, umath::CoordinateSpace space)
 {
 	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
-		return {};
+		return false;
 	auto &metaRig = hModel->GetMetaRig();
 	if(!metaRig)
-		return {};
+		return false;
 	auto boneId = GetMetaBoneId(boneType);
 	if(!boneId)
 		return false;

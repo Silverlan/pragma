@@ -615,6 +615,7 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 			  auto vCol = color.ToVector4();
 			  return cmdBuf.RecordClearImage(img, prosper::ImageLayout::TransferDstOptimal, std::array<float, 4> {vCol[0], vCol[1], vCol[2], vCol[3]});
 		  });
+		  return true;
 	  });
 	defPcb.def(
 	  "RecordCommands", +[](prosper::util::PreparedCommandBuffer &pcb, prosper::ICommandBuffer &cmd) -> bool { return pcb.RecordCommands(cmd, {}, {}); });

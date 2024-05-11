@@ -11,11 +11,13 @@ end
 function gui.BaseFileExplorer:SetFilter(filter)
 	self.m_filter = filter
 end
+function gui.BaseFileExplorer:OnPathChanged(path) end
 function gui.BaseFileExplorer:SetPath(path)
 	path = file.get_canonicalized_path(path)
 	if path:sub(-1) ~= "/" then
 		path = path .. "/"
 	end
+	self:OnPathChanged(path)
 	self:CallCallbacks("OnPathChanged", path)
 	self.m_path = path
 end

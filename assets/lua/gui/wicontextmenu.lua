@@ -31,6 +31,7 @@ function gui.WIContextMenu:OnInitialize()
 
 	self.m_tItems = {}
 	self.m_subMenues = {}
+	self.m_itemToSubMenu = {}
 	local pBg = gui.create("WIRect", self)
 	pBg:SetBackgroundElement(true)
 	pBg:SetAutoAlignToParent(true)
@@ -278,6 +279,21 @@ function gui.WIContextMenu:RemoveSubMenu(menu)
 		self:RemoveItem(item)
 	end
 end
+function gui.WIContextMenu:FindItemByName(name)
+	local children = self.m_contents:FindChildrenByName(name)
+	return children[1]
+end
+function gui.WIContextMenu:FindSubMenuByName(name)
+	local item = self:FindItemByName(name)
+	if util.is_valid(item) == false then
+		return
+	end
+	local subMenu = self.m_itemToSubMenu[item]
+	if util.is_valid(subMenu) == false then
+		return
+	end
+	return item, subMenu
+end
 function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
 	local pSubMenu
 	local pItem = self:AddItem(name, onClick or function()
@@ -338,6 +354,7 @@ function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
 	pSubMenu:SetVisible(false)
 	pItem:RemoveElementOnRemoval(pSubMenu)
 	table.insert(self.m_subMenues, pSubMenu)
+	self.m_itemToSubMenu[pItem] = pSubMenu
 
 	local pIcon = gui.create("WIArrow", pItem)
 	local function updateIcon()

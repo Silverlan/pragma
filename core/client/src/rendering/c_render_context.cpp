@@ -175,7 +175,7 @@ void RenderContext::ValidationCallback(prosper::DebugMessageSeverityFlags severi
 			if(l) {
 				std::stringstream ss;
 				if(Lua::get_callstack(l, ss))
-					LOGGER_VALIDATION.debug("Lua callstack: {}", ss.str());
+					LOGGER_VALIDATION.error("Lua callstack: {}", ss.str());
 			}
 		}
 #ifdef _WIN32

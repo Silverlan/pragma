@@ -301,6 +301,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdChannel.def("Update", &panima::Channel::Update);
 	cdChannel.def("GetTimeFrame", static_cast<panima::TimeFrame &(panima::Channel::*)()>(&panima::Channel::GetTimeFrame));
 	cdChannel.def("SetTimeFrame", &panima::Channel::SetTimeFrame);
+	cdChannel.def("Optimize", &panima::Channel::Optimize);
 	cdChannel.def("GetValueType", &panima::Channel::GetValueType);
 	cdChannel.def("SetValueType", &panima::Channel::SetValueType);
 	cdChannel.def("MergeValues", &panima::Channel::MergeValues);

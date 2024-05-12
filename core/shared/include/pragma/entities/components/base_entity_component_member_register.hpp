@@ -10,6 +10,7 @@
 #include "pragma/networkdefinitions.h"
 
 namespace pragma {
+	class BaseEntityComponentSystem;
 	class DLLNETWORK DynamicMemberRegister {
 	  public:
 		DynamicMemberRegister();
@@ -20,6 +21,7 @@ namespace pragma {
 		const std::unordered_map<ComponentMemberIndex, ComponentMemberInfo> &GetMembers() const { return m_members; }
 		const std::unordered_map<std::string, ComponentMemberIndex> &GetMemberIndexMap() const { return m_memberNameToIndex; }
 	  protected:
+		friend BaseEntityComponentSystem;
 		virtual void OnMemberRegistered(const ComponentMemberInfo &memberInfo, ComponentMemberIndex index) {}
 		virtual void OnMemberRemoved(const ComponentMemberInfo &memberInfo, ComponentMemberIndex index) {}
 		void ReserveMembers(uint32_t count);

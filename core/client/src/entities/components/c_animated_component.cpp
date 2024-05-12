@@ -154,6 +154,10 @@ std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const ModelSubM
 	return *t * glm::translate(umat::identity(), vertexOffset); // TODO: Confirm order!
 }
 
+void CAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl) { BaseAnimatedComponent::OnModelChanged(mdl); }
+
+bool CAnimatedComponent::HasBones() const { return !m_boneMatrices.empty(); }
+
 void CAnimatedComponent::ResetAnimation(const std::shared_ptr<Model> &mdl)
 {
 	BaseAnimatedComponent::ResetAnimation(mdl);

@@ -725,7 +725,7 @@ execfile(scripts_dir +"/user_modules.py",g,l)
 if with_essential_client_modules:
 	add_pragma_module(
 		name="pr_prosper_vulkan",
-		commitSha="7c797f46ee391359874c48693d46ea0e93f6056f",
+		commitSha="4e1f498386511a1370b4da1d1f466d7784b03cba",
 		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
 	)
 
@@ -764,7 +764,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="a112eec3889e0bd12611ab8de0c86358d27a1c26",
+			commitSha="bca577f478cf2fedfd1a2d024f1ab18f9187c9e3",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
@@ -789,7 +789,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_opencv",
-			commitSha="97a8b4477c584a10f5d70a2f29b0febf0d64a311",
+			commitSha="f7f715b",
 			repositoryUrl="https://github.com/Silverlan/pr_opencv.git"
 		)
 
@@ -1028,7 +1028,7 @@ def download_addon(name,addonName,url,commitId=None):
 curDir = os.getcwd()
 if not skip_repository_updates:
 	if with_pfm:
-		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","6bd9bad7edbd3f208d202bd4904c4401db6e980d")
+		download_addon("PFM","filmmaker","https://github.com/Silverlan/pfm.git","a80fb1f91370af10cfdd7a6661a40b2e4e71300f")
 		download_addon("model editor","tool_model_editor","https://github.com/Silverlan/pragma_model_editor.git","56d46dacb398fa7540e794359eaf1081c9df1edd")
 
 	if with_vr:
@@ -1037,7 +1037,7 @@ if not skip_repository_updates:
 	if with_pfm:
 		download_addon("PFM Living Room Demo","pfm_demo_living_room","https://github.com/Silverlan/pfm_demo_living_room.git","4cbecad4a2d6f502b6d9709178883678101f7e2c")
 		download_addon("PFM Bedroom Demo","pfm_demo_bedroom","https://github.com/Silverlan/pfm_demo_bedroom.git","0fed1d5b54a25c3ded2ce906e7da80ca8dd2fb0d")
-		download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","494aba78be98caf34249e3c7cb3e43477634c272")
+		download_addon("PFM Tutorials","pfm_tutorials","https://github.com/Silverlan/pfm_tutorials.git","c9ce5aae540480d11d510033e91558b8abfa19ff")
 
 	if with_common_entities:
 		download_addon("HL","pragma_hl","https://github.com/Silverlan/pragma_hl.git","f652b19")

@@ -213,7 +213,8 @@ void PanimaComponent::DebugPrint()
 	Con::cout << "Animation info: \n" << ss.str() << Con::endl;
 }
 
-void PanimaComponent::UpdateAnimationChannelSubmitters() {
+void PanimaComponent::UpdateAnimationChannelSubmitters()
+{
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	::debug::get_domain().BeginTask("panima_update_channel_values");
 #endif

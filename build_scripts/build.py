@@ -762,7 +762,7 @@ if with_pfm:
 		)
 		add_pragma_module(
 			name="pr_unirender",
-			commitSha="bca577f478cf2fedfd1a2d024f1ab18f9187c9e3",
+			commitSha="6cea10b5bd03ecd17ed61321688ef66e7cfe67f2",
 			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
 		)
 		add_pragma_module(
@@ -801,7 +801,7 @@ if with_lua_doc_generator or with_pfm:
 if with_vr:
 	add_pragma_module(
 		name="pr_openvr",
-		commitSha="008773c",
+		commitSha="08310f8c6cff3efc4bbdbc24d941c56c1d5fa892",
 		repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
 	)
 

@@ -348,6 +348,34 @@ if platform == "win32":
 cp("zconf.h","../")
 os.chdir("../..")
 
+########## icu ##########
+# Download
+os.chdir(deps_dir)
+icu_root = os.getcwd() +"/icu"
+if not Path(icu_root).is_dir():
+	print_msg("icu not found. Downloading...")
+	mkpath(icu_root)
+	os.chdir(icu_root)
+	base_url = "https://github.com/unicode-org/icu/releases/download/release-75-1/"
+	if platform == "win32":
+		http_extract(base_url +"icu4c-75_1-Win64-MSVC2022.zip")
+	else:
+		http_extract(base_url +"icu4c-75_1-Ubuntu22.04-x64.tgz",format="tar.gz")
+if platform == "win32":
+	cmake_args += [
+		"-DDEPENDENCY_ICU_INCLUDE=" +icu_root +"/include/",
+		"-DDEPENDENCY_ICU_ICUUC_LIBRARY=" +icu_root +"/lib64/icuuc.lib",
+		"-DDEPENDENCY_ICU_ICUUC_BINARY=" +icu_root +"/bin64/icuuc75.dll",
+		"-DDEPENDENCY_ICU_ICUDT_BINARY=" +icu_root +"/bin64/icudt75.dll"
+	]
+else:
+	cmake_args += [
+		"-DDEPENDENCY_ICU_INCLUDE=" +icu_root +"/icu/usr/local/include/",
+		"-DDEPENDENCY_ICU_ICUUC_LIBRARY=" +icu_root +"/icu/usr/local/lib/libicuuc.so",
+		"-DDEPENDENCY_ICU_ICUUC_BINARY=" +icu_root +"/icu/usr/local/lib/libicuuc.so",
+		"-DDEPENDENCY_ICU_ICUDT_BINARY=" +icu_root +"/icu/usr/local/lib/libicudata.so"
+	]
+
 ########## boost ##########
 # Download
 os.chdir(deps_dir)

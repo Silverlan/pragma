@@ -14,7 +14,6 @@
 #include <sharedutils/util_path.hpp>
 
 #undef CreateFile
-
 decltype(Locale::m_localization) Locale::m_localization;
 decltype(Locale::m_language) Locale::m_language;
 decltype(Locale::m_loadedFiles) Locale::m_loadedFiles;
@@ -191,7 +190,7 @@ bool Locale::GetRawText(const std::string &id, util::Utf8String &outText)
 	outText = it->second;
 	return true;
 }
-template<class TString, class TStringView>
+template<class TString>
 static void insert_arguments(const std::vector<TString> &args, TString &inOutText)
 {
 	size_t startPos = inOutText.find('{');
@@ -212,12 +211,20 @@ static void insert_arguments(const std::vector<TString> &args, TString &inOutTex
 			else {
 				// Missing argument
 				std::string arg = "{}";
+				std::string str;
 				inOutText = inOutText.replace(startPos, endPos - startPos + 1, arg);
 				numCharsAdded = arg.size();
 			}
 		}
 		else {
-			TStringView inner {inOutText.c_str() + startPos + 1, (endPos - startPos) - 1};
+			using TSubStr = std::conditional_t<std::is_same_v<TString, util::Utf8String>, std::string, std::string_view>;
+			auto innerStartPos = startPos + 1;
+			auto innerLen = (endPos - startPos) - 1;
+			TSubStr inner;
+			if constexpr(std::is_same_v<TString, util::Utf8String>)
+				inner = inOutText.substr(innerStartPos, innerLen).cpp_str();
+			else
+				inner = {inOutText.c_str() + innerStartPos, innerLen};
 			int32_t argIdx = -1;
 			auto result = std::from_chars(inner.data(), inner.data() + inner.size(), argIdx);
 			if(result.ec != std::errc::invalid_argument) {
@@ -254,7 +261,7 @@ bool Locale::GetText(const std::string &id, const std::vector<util::Utf8String> 
 	if(it == m_localization.texts.end())
 		return false;
 	outText = it->second;
-	insert_arguments<util::Utf8String, util::Utf8StringView>(args, outText);
+	insert_arguments<util::Utf8String>(args, outText);
 	return true;
 }
 bool Locale::GetText(const std::string &id, const std::vector<std::string> &args, std::string &outText)
@@ -263,7 +270,7 @@ bool Locale::GetText(const std::string &id, const std::vector<std::string> &args
 	if(it == m_localization.texts.end())
 		return false;
 	outText = it->second.cpp_str();
-	insert_arguments<std::string, std::string_view>(args, outText);
+	insert_arguments<std::string>(args, outText);
 	return true;
 }
 std::string Locale::GetText(const std::string &id, const std::vector<std::string> &args)
@@ -274,7 +281,7 @@ std::string Locale::GetText(const std::string &id, const std::vector<std::string
 		return std::string("<MISSING LOCALIZATION: ") + id + std::string(">");
 	}
 	auto r = it->second.cpp_str();
-	insert_arguments<std::string, std::string_view>(args, r);
+	insert_arguments<std::string>(args, r);
 	return r;
 }
 util::Utf8String Locale::GetTextUtf8(const std::string &id, const std::vector<util::Utf8String> &args)
@@ -285,7 +292,7 @@ util::Utf8String Locale::GetTextUtf8(const std::string &id, const std::vector<ut
 		return std::string("<MISSING LOCALIZATION: ") + id + std::string(">");
 	}
 	auto r = it->second;
-	insert_arguments<util::Utf8String, util::Utf8StringView>(args, r);
+	insert_arguments<util::Utf8String>(args, r);
 	return r;
 }
 std::string Locale::DetermineSystemLanguage()
@@ -317,7 +324,7 @@ util::Utf8String Locale::GetUsedCharacters()
 	std::sort(vUsedCharacters.begin(), vUsedCharacters.end());
 	util::Utf8String usedCharsStr;
 	for(auto c : vUsedCharacters)
-		usedCharsStr += c;
+		usedCharsStr += static_cast<char16_t>(c);
 	return usedCharsStr;
 }
 bool Locale::Localize(const std::string &identifier, const std::string &lan, const std::string &category, const util::Utf8String &text)

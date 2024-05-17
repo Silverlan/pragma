@@ -14,7 +14,6 @@
 #include "pragma/rendering/c_render_context.hpp"
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include "pragma/input/c_keybind.h"
-#include "pragma/util/font_set.hpp"
 #include <sharedutils/util_clock.hpp>
 #include <unordered_map>
 
@@ -34,6 +33,7 @@ namespace prosper {
 };
 struct InputBindingLayer;
 struct CoreInputBindingLayer;
+struct FontSet;
 #pragma warning(push)
 #pragma warning(disable : 4251)
 class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
@@ -275,7 +275,7 @@ class DLLCLIENT CEngine : public Engine, public pragma::RenderContext {
 	std::vector<CallbackHandle> m_gpuProfileHandlers = {};
 
 	std::string m_defaultFontSet;
-	std::unordered_map<std::string, FontSet> m_fontSets;
+	std::unordered_map<std::string, std::unique_ptr<FontSet>> m_fontSets;
 	float m_rawInputJoystickMagnitude = 0.f;
 	std::unordered_map<GLFW::Key, GLFW::KeyState> m_joystickKeyStates;
 

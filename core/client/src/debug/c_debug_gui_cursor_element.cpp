@@ -14,6 +14,7 @@
 #include <wgui/types/wiroot.h>
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
+#include <util_unicode.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

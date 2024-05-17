@@ -14,6 +14,7 @@
 #include <wgui/types/wiscrollbar.h>
 #include "pragma/gui/wiscrollcontainer.h"
 #include <prosper_window.hpp>
+#include <util_unicode.hpp>
 
 LINK_WGUI_TO_CLASS(WITable, WITable);
 LINK_WGUI_TO_CLASS(WITableRow, WITableRow);

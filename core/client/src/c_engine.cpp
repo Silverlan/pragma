@@ -65,6 +65,7 @@
 #include <pragma/asset/util_asset.hpp>
 #include <prosper_window.hpp>
 #include <fsys/ifile.hpp>
+#include <pragma/util/font_set.hpp>
 #ifdef _WIN32
 
 #include <dwmapi.h>
@@ -873,7 +874,7 @@ const FontSet &CEngine::GetDefaultFontSet() const
 const FontSet *CEngine::FindFontSet(const std::string &name) const
 {
 	auto it = m_fontSets.find(name);
-	return (it != m_fontSets.end()) ? &it->second : nullptr;
+	return (it != m_fontSets.end()) ? it->second.get() : nullptr;
 }
 void CEngine::LoadFontSets()
 {
@@ -911,7 +912,7 @@ void CEngine::LoadFontSets()
 							fontSet.fileData.push_back(fileData);
 						}
 					}
-					m_fontSets[dir] = std::move(fontSet);
+					m_fontSets[dir] = std::make_unique<FontSet>(std::move(fontSet));
 				}
 			}
 		}

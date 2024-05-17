@@ -26,6 +26,7 @@ link_external_library(panima)
 link_external_library(cppbezierfit)
 link_external_library(spdlog)
 link_external_library(fmt)
+link_external_library(util_unicode)
 
 add_external_library(luajit)
 add_external_library(luabind)

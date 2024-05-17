@@ -395,11 +395,15 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_text(WIText *el, const Ve
 }
 std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawText(const DebugRenderInfo &renderInfo, const std::string &text, const Vector2 &worldSize)
 {
-	auto r = DrawText(renderInfo, text, worldSize);
-	if(r == nullptr)
+	auto *pText = create_text_element(text);
+	if(!pText)
 		return nullptr;
+	auto r = draw_text(pText, renderInfo.pose.GetOrigin(), worldSize, renderInfo.duration);
+	if(r == nullptr) {
+		pText->Remove();
+		return nullptr;
+	}
 	auto color = renderInfo.color;
-	auto *pText = static_cast<TextObject *>(r.get())->GetTextElement();
 	pText->SetColor(color);
 	if(color.r != 0 || color.g != 0 || color.b != 0) {
 		auto colShadow = Color::Black;
@@ -412,11 +416,16 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawText(const DebugRe
 }
 std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawText(const DebugRenderInfo &renderInfo, const std::string &text, float sizeScale)
 {
-	auto r = DrawText(renderInfo, text, sizeScale);
-	if(r == nullptr)
+	auto *pText = create_text_element(text);
+	if(!pText)
 		return nullptr;
+	auto &sz = pText->GetSize();
+	auto r = draw_text(pText, renderInfo.pose.GetOrigin(), Vector2 {sz.x, sz.y} * sizeScale, renderInfo.duration);
+	if(r == nullptr) {
+		pText->Remove();
+		return nullptr;
+	}
 	auto color = renderInfo.color;
-	auto *pText = static_cast<TextObject *>(r.get())->GetTextElement();
 	pText->SetColor(color);
 	if(color.r != 0 || color.g != 0 || color.b != 0) {
 		auto colShadow = Color::Black;

@@ -1765,6 +1765,5 @@ void Game::RegisterLuaLibraries()
 	    {"FORMAT_DEFAULT", umath::to_integral(std::regex_constants::format_default)}, {"FORMAT_SED", umath::to_integral(std::regex_constants::format_sed)}, {"FORMAT_NO_COPY", umath::to_integral(std::regex_constants::format_no_copy)},
 	    {"FORMAT_FIRST_ONLY", umath::to_integral(std::regex_constants::format_first_only)}});
 	Lua::physenv::register_library(GetLuaInterface());
-	Lua::doc::register_library(GetLuaInterface());
 	Lua::animation::register_library(GetLuaInterface());
 }

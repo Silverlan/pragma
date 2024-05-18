@@ -123,5 +123,5 @@ bool util::port_sound_script(NetworkState *nw, const std::string &path)
 	auto fOut = FileManager::OpenFile<VFilePtrReal>(outPath.c_str(), "w");
 	if(fOut == nullptr)
 		return false;
-	return udmData->SaveAscii(fOut, udm::AsciiSaveFlags::None);
+	return udmData->SaveAscii(fOut, udm::AsciiSaveFlags::Default);
 }

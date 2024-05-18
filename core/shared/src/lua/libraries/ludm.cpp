@@ -314,7 +314,7 @@ static std::string serialize(::udm::PropertyWrapper &p)
 	auto data = udm::Data::Create();
 	data->GetAssetData().GetData().Merge(p, ::udm::MergeFlags::DeepCopy);
 	std::stringstream ss;
-	data->ToAscii(ss, ::udm::AsciiSaveFlags::DontCompressLz4Arrays);
+	data->ToAscii(ss, ::udm::AsciiSaveFlags::Default | ::udm::AsciiSaveFlags::DontCompressLz4Arrays);
 	return ss.str();
 }
 
@@ -900,7 +900,8 @@ void Lua::udm::register_library(Lua::Interface &lua)
 	    {"ASCII_SAVE_FLAG_NONE", umath::to_integral(::udm::AsciiSaveFlags::None)},
 	    {"ASCII_SAVE_FLAG_BIT_INCLUDE_HEADER", umath::to_integral(::udm::AsciiSaveFlags::IncludeHeader)},
 	    {"ASCII_SAVE_FLAG_BIT_DONT_COMPRESS_LZ4_ARRAYS", umath::to_integral(::udm::AsciiSaveFlags::DontCompressLz4Arrays)},
-
+	    {"ASCII_SAVE_FLAG_DEFAULT", umath::to_integral(::udm::AsciiSaveFlags::Default)},
+		
 	    {"FORMAT_TYPE_BINARY", umath::to_integral(::udm::FormatType::Binary)},
 	    {"FORMAT_TYPE_ASCII", umath::to_integral(::udm::FormatType::Ascii)},
 	  });

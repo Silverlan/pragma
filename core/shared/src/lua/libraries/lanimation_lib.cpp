@@ -374,7 +374,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		  auto udmData = data->GetAssetData().GetData();
 		  channel.Save(udmData);
 		  std::stringstream ss;
-		  data->ToAscii(ss, ::udm::AsciiSaveFlags::DontCompressLz4Arrays);
+		  data->ToAscii(ss, ::udm::AsciiSaveFlags::Default | :: udm::AsciiSaveFlags::DontCompressLz4Arrays);
 		  Con::cout << ss.str() << Con::endl;
 	  });
 	cdChannel.def(

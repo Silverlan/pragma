@@ -1,256 +1,144 @@
 "fx.fst_carpet"
 {
-	$array events [element][
+	$array events [element;1][
 		{
-			$string type "playsound"
 			$float gain 0.3
-			$float pitch 1
 			$string mode "mono"
-			$array source [string][
-				"fx/footsteps/fst_carpet01",
-				"fx/footsteps/fst_carpet02",
-				"fx/footsteps/fst_carpet03",
-				"fx/footsteps/fst_carpet04",
-				"fx/footsteps/fst_carpet05",
-				"fx/footsteps/fst_carpet06",
-				"fx/footsteps/fst_carpet07",
-				"fx/footsteps/fst_carpet08",
-				"fx/footsteps/fst_carpet09",
-				"fx/footsteps/fst_carpet10",
-				"fx/footsteps/fst_carpet11",
-				"fx/footsteps/fst_carpet12"
-			]
-		}
-	]
-}
-"fx.fst_gravel"
-{
-	$array events [element][
-		{
+			$float pitch 1
+			$array source [string;12]["fx/footsteps/fst_carpet01","fx/footsteps/fst_carpet02","fx/footsteps/fst_carpet03","fx/footsteps/fst_carpet04","fx/footsteps/fst_carpet05","fx/footsteps/fst_carpet06","fx/footsteps/fst_carpet07","fx/footsteps/fst_carpet08","fx/footsteps/fst_carpet09","fx/footsteps/fst_carpet10","fx/footsteps/fst_carpet11","fx/footsteps/fst_carpet12"]
 			$string type "playsound"
-			$float gain 0.3
-			$float pitch 1
-			$string mode "mono"
-			$array source [string][
-				"fx/footsteps/fst_gravel01",
-				"fx/footsteps/fst_gravel02",
-				"fx/footsteps/fst_gravel03",
-				"fx/footsteps/fst_gravel04",
-				"fx/footsteps/fst_gravel05",
-				"fx/footsteps/fst_gravel06",
-				"fx/footsteps/fst_gravel07",
-				"fx/footsteps/fst_gravel08",
-				"fx/footsteps/fst_gravel09",
-				"fx/footsteps/fst_gravel10",
-				"fx/footsteps/fst_gravel11",
-				"fx/footsteps/fst_gravel12"
-			]
 		}
 	]
 }
 "fx.fst_concrete"
 {
-	$array events [element][
+	$array events [element;1][
 		{
-			$string type "playsound"
 			$float gain 0.3
-			$float pitch 1
 			$string mode "mono"
-			$array source [string][
-				"fx/footsteps/fst_concrete01",
-				"fx/footsteps/fst_concrete02",
-				"fx/footsteps/fst_concrete03",
-				"fx/footsteps/fst_concrete04",
-				"fx/footsteps/fst_concrete05",
-				"fx/footsteps/fst_concrete06",
-				"fx/footsteps/fst_concrete07",
-				"fx/footsteps/fst_concrete08",
-				"fx/footsteps/fst_concrete09",
-				"fx/footsteps/fst_concrete10",
-				"fx/footsteps/fst_concrete11",
-				"fx/footsteps/fst_concrete12"
-			]
-		}
-	]
-}
-"fx.fst_water"
-{
-	$array events [element][
-		{
+			$float pitch 1
+			$array source [string;12]["fx/footsteps/fst_concrete01","fx/footsteps/fst_concrete02","fx/footsteps/fst_concrete03","fx/footsteps/fst_concrete04","fx/footsteps/fst_concrete05","fx/footsteps/fst_concrete06","fx/footsteps/fst_concrete07","fx/footsteps/fst_concrete08","fx/footsteps/fst_concrete09","fx/footsteps/fst_concrete10","fx/footsteps/fst_concrete11","fx/footsteps/fst_concrete12"]
 			$string type "playsound"
-			$float gain 0.3
-			$float pitch 1
-			$string mode "mono"
-			$array source [string][
-				"fx/footsteps/fst_water01",
-				"fx/footsteps/fst_water02",
-				"fx/footsteps/fst_water03",
-				"fx/footsteps/fst_water04",
-				"fx/footsteps/fst_water05",
-				"fx/footsteps/fst_water06",
-				"fx/footsteps/fst_water07",
-				"fx/footsteps/fst_water08"
-			]
 		}
 	]
 }
 "fx.fst_dirt"
 {
-	$array events [element][
+	$array events [element;1][
 		{
-			$string type "playsound"
 			$float gain 0.3
-			$float pitch 1
 			$string mode "mono"
-			$array source [string][
-				"fx/footsteps/fst_dirt01",
-				"fx/footsteps/fst_dirt02"
-			]
+			$float pitch 1
+			$array source [string;2]["fx/footsteps/fst_dirt01","fx/footsteps/fst_dirt02"]
+			$string type "playsound"
 		}
 	]
 }
 "fx.fst_glass"
 {
-	$array events [element][
+	$array events [element;1][
 		{
-			$string type "playsound"
 			$float gain 0.3
-			$float pitch 1
 			$string mode "mono"
-			$array source [string][
-				"fx/footsteps/fst_glass01",
-				"fx/footsteps/fst_glass02",
-				"fx/footsteps/fst_glass03",
-				"fx/footsteps/fst_glass04",
-				"fx/footsteps/fst_glass05",
-				"fx/footsteps/fst_glass06",
-				"fx/footsteps/fst_glass07",
-				"fx/footsteps/fst_glass08",
-				"fx/footsteps/fst_glass09",
-				"fx/footsteps/fst_glass10",
-				"fx/footsteps/fst_glass11",
-				"fx/footsteps/fst_glass12"
-			]
+			$float pitch 1
+			$array source [string;12]["fx/footsteps/fst_glass01","fx/footsteps/fst_glass02","fx/footsteps/fst_glass03","fx/footsteps/fst_glass04","fx/footsteps/fst_glass05","fx/footsteps/fst_glass06","fx/footsteps/fst_glass07","fx/footsteps/fst_glass08","fx/footsteps/fst_glass09","fx/footsteps/fst_glass10","fx/footsteps/fst_glass11","fx/footsteps/fst_glass12"]
+			$string type "playsound"
 		}
 	]
 }
 "fx.fst_grass"
 {
-	$array events [element][
+	$array events [element;1][
 		{
-			$string type "playsound"
 			$float gain 0.3
-			$float pitch 1
 			$string mode "mono"
-			$array source [string][
-				"fx/footsteps/fst_grass01",
-				"fx/footsteps/fst_grass02"
-			]
+			$float pitch 1
+			$array source [string;2]["fx/footsteps/fst_grass01","fx/footsteps/fst_grass02"]
+			$string type "playsound"
 		}
 	]
 }
-"fx.fst_rock"
+"fx.fst_gravel"
 {
-	$array events [element][
+	$array events [element;1][
 		{
-			$string type "playsound"
 			$float gain 0.3
-			$float pitch 1
 			$string mode "mono"
-			$array source [string][
-				"fx/footsteps/fst_rock01",
-				"fx/footsteps/fst_rock02"
-			]
+			$float pitch 1
+			$array source [string;12]["fx/footsteps/fst_gravel01","fx/footsteps/fst_gravel02","fx/footsteps/fst_gravel03","fx/footsteps/fst_gravel04","fx/footsteps/fst_gravel05","fx/footsteps/fst_gravel06","fx/footsteps/fst_gravel07","fx/footsteps/fst_gravel08","fx/footsteps/fst_gravel09","fx/footsteps/fst_gravel10","fx/footsteps/fst_gravel11","fx/footsteps/fst_gravel12"]
+			$string type "playsound"
 		}
 	]
 }
 "fx.fst_metal"
 {
-	$array events [element][
+	$array events [element;1][
 		{
-			$string type "playsound"
 			$float gain 0.3
-			$float pitch 1
 			$string mode "mono"
-			$array source [string][
-				"fx/footsteps/fst_metal01",
-				"fx/footsteps/fst_metal02",
-				"fx/footsteps/fst_metal03",
-				"fx/footsteps/fst_metal04",
-				"fx/footsteps/fst_metal05",
-				"fx/footsteps/fst_metal06",
-				"fx/footsteps/fst_metal07",
-				"fx/footsteps/fst_metal08",
-				"fx/footsteps/fst_metal09",
-				"fx/footsteps/fst_metal10",
-				"fx/footsteps/fst_metal11",
-				"fx/footsteps/fst_metal12"
-			]
+			$float pitch 1
+			$array source [string;12]["fx/footsteps/fst_metal01","fx/footsteps/fst_metal02","fx/footsteps/fst_metal03","fx/footsteps/fst_metal04","fx/footsteps/fst_metal05","fx/footsteps/fst_metal06","fx/footsteps/fst_metal07","fx/footsteps/fst_metal08","fx/footsteps/fst_metal09","fx/footsteps/fst_metal10","fx/footsteps/fst_metal11","fx/footsteps/fst_metal12"]
+			$string type "playsound"
 		}
 	]
 }
-"fx.fst_snow_hard"
+"fx.fst_rock"
 {
-	$array events [element][
+	$array events [element;1][
 		{
-			$string type "playsound"
-			$float gain 0.1
-			$float pitch 1
+			$float gain 0.3
 			$string mode "mono"
-			$array source [string][
-				"fx/footsteps/fst_snow_hard01",
-				"fx/footsteps/fst_snow_hard02"
-			]
+			$float pitch 1
+			$array source [string;2]["fx/footsteps/fst_rock01","fx/footsteps/fst_rock02"]
+			$string type "playsound"
 		}
 	]
 }
 "fx.fst_snow"
 {
-	$array events [element][
+	$array events [element;1][
 		{
-			$string type "playsound"
 			$float gain 0.1
-			$float pitch 1
 			$string mode "mono"
-			$array source [string][
-				"fx/footsteps/fst_snow01",
-				"fx/footsteps/fst_snow02",
-				"fx/footsteps/fst_snow03",
-				"fx/footsteps/fst_snow04",
-				"fx/footsteps/fst_snow05",
-				"fx/footsteps/fst_snow06",
-				"fx/footsteps/fst_snow07",
-				"fx/footsteps/fst_snow08",
-				"fx/footsteps/fst_snow09",
-				"fx/footsteps/fst_snow10",
-				"fx/footsteps/fst_snow11",
-				"fx/footsteps/fst_snow12"
-			]
+			$float pitch 1
+			$array source [string;12]["fx/footsteps/fst_snow01","fx/footsteps/fst_snow02","fx/footsteps/fst_snow03","fx/footsteps/fst_snow04","fx/footsteps/fst_snow05","fx/footsteps/fst_snow06","fx/footsteps/fst_snow07","fx/footsteps/fst_snow08","fx/footsteps/fst_snow09","fx/footsteps/fst_snow10","fx/footsteps/fst_snow11","fx/footsteps/fst_snow12"]
+			$string type "playsound"
+		}
+	]
+}
+"fx.fst_snow_hard"
+{
+	$array events [element;1][
+		{
+			$float gain 0.1
+			$string mode "mono"
+			$float pitch 1
+			$array source [string;2]["fx/footsteps/fst_snow_hard01","fx/footsteps/fst_snow_hard02"]
+			$string type "playsound"
+		}
+	]
+}
+"fx.fst_water"
+{
+	$array events [element;1][
+		{
+			$float gain 0.3
+			$string mode "mono"
+			$float pitch 1
+			$array source [string;8]["fx/footsteps/fst_water01","fx/footsteps/fst_water02","fx/footsteps/fst_water03","fx/footsteps/fst_water04","fx/footsteps/fst_water05","fx/footsteps/fst_water06","fx/footsteps/fst_water07","fx/footsteps/fst_water08"]
+			$string type "playsound"
 		}
 	]
 }
 "fx.fst_wood"
 {
-	$array events [element][
+	$array events [element;1][
 		{
-			$string type "playsound"
 			$float gain 0.3
-			$float pitch 1
 			$string mode "mono"
-			$array source [string][
-				"fx/footsteps/fst_wood01",
-				"fx/footsteps/fst_wood02",
-				"fx/footsteps/fst_wood03",
-				"fx/footsteps/fst_wood04",
-				"fx/footsteps/fst_wood05",
-				"fx/footsteps/fst_wood06",
-				"fx/footsteps/fst_wood07",
-				"fx/footsteps/fst_wood08",
-				"fx/footsteps/fst_wood09",
-				"fx/footsteps/fst_wood10",
-				"fx/footsteps/fst_wood11",
-				"fx/footsteps/fst_wood12"
-			]
+			$float pitch 1
+			$array source [string;12]["fx/footsteps/fst_wood01","fx/footsteps/fst_wood02","fx/footsteps/fst_wood03","fx/footsteps/fst_wood04","fx/footsteps/fst_wood05","fx/footsteps/fst_wood06","fx/footsteps/fst_wood07","fx/footsteps/fst_wood08","fx/footsteps/fst_wood09","fx/footsteps/fst_wood10","fx/footsteps/fst_wood11","fx/footsteps/fst_wood12"]
+			$string type "playsound"
 		}
 	]
 }

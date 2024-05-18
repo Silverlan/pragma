@@ -1,152 +1,84 @@
-"fx.phys_impact_generic_soft"
+"fx.phys_impact_generic_bullet"
 {
-	$array events [element][
+	$array events [element;1][
 		{
-			$string type "playsound"
 			$float gain 0.3
-			$float pitch 1
 			$string mode "mono"
-			$array source [string][
-				"fx/impact/impact_generic_soft01",
-				"fx/impact/impact_generic_soft02",
-				"fx/impact/impact_generic_soft03",
-				"fx/impact/impact_generic_soft04",
-				"fx/impact/impact_generic_soft05",
-				"fx/impact/impact_generic_soft06",
-				"fx/impact/impact_generic_soft07",
-				"fx/impact/impact_generic_soft08",
-				"fx/impact/impact_generic_soft09"
-			]
+			$float pitch 1
+			$array source [string;22]["fx/impact/impact_metal_bullet01","fx/impact/impact_metal_bullet02","fx/impact/impact_metal_bullet03","fx/impact/impact_metal_bullet04","fx/impact/impact_metal_bullet05","fx/impact/impact_metal_bullet06","fx/impact/impact_metal_bullet07","fx/impact/impact_metal_bullet08","fx/impact/impact_metal_bullet09","fx/impact/impact_metal_bullet10","fx/impact/impact_metal_bullet11","fx/impact/impact_metal_bullet12","fx/impact/impact_metal_bullet13","fx/impact/impact_metal_bullet14","fx/impact/impact_metal_bullet15","fx/impact/impact_metal_bullet16","fx/impact/impact_metal_bullet17","fx/impact/impact_metal_bullet18","fx/impact/impact_metal_bullet19","fx/impact/impact_metal_bullet20","fx/impact/impact_metal_bullet21","fx/impact/impact_metal_bullet22"]
+			$string type "playsound"
 		}
 	]
 }
 "fx.phys_impact_generic_hard"
 {
-	$array events [element][
+	$array events [element;1][
 		{
-			$string type "playsound"
 			$float gain 0.3
-			$float pitch 1
 			$string mode "mono"
-			$array source [string][
-				"fx/impact/impact_generic_hard01",
-				"fx/impact/impact_generic_hard02",
-				"fx/impact/impact_generic_hard03",
-				"fx/impact/impact_generic_hard04",
-				"fx/impact/impact_generic_hard05",
-				"fx/impact/impact_generic_hard06",
-				"fx/impact/impact_generic_hard07"
-			]
+			$float pitch 1
+			$array source [string;7]["fx/impact/impact_generic_hard01","fx/impact/impact_generic_hard02","fx/impact/impact_generic_hard03","fx/impact/impact_generic_hard04","fx/impact/impact_generic_hard05","fx/impact/impact_generic_hard06","fx/impact/impact_generic_hard07"]
+			$string type "playsound"
 		}
 	]
 }
-"fx.phys_impact_generic_bullet"
+"fx.phys_impact_generic_soft"
 {
-	$array events [element][
+	$array events [element;1][
 		{
-			$string type "playsound"
 			$float gain 0.3
-			$float pitch 1
 			$string mode "mono"
-			$array source [string][
-				"fx/impact/impact_metal_bullet01",
-				"fx/impact/impact_metal_bullet02",
-				"fx/impact/impact_metal_bullet03",
-				"fx/impact/impact_metal_bullet04",
-				"fx/impact/impact_metal_bullet05",
-				"fx/impact/impact_metal_bullet06",
-				"fx/impact/impact_metal_bullet07",
-				"fx/impact/impact_metal_bullet08",
-				"fx/impact/impact_metal_bullet09",
-				"fx/impact/impact_metal_bullet10",
-				"fx/impact/impact_metal_bullet11",
-				"fx/impact/impact_metal_bullet12",
-				"fx/impact/impact_metal_bullet13",
-				"fx/impact/impact_metal_bullet14",
-				"fx/impact/impact_metal_bullet15",
-				"fx/impact/impact_metal_bullet16",
-				"fx/impact/impact_metal_bullet17",
-				"fx/impact/impact_metal_bullet18",
-				"fx/impact/impact_metal_bullet19",
-				"fx/impact/impact_metal_bullet20",
-				"fx/impact/impact_metal_bullet21",
-				"fx/impact/impact_metal_bullet22"
-			]
-		}
-	]
-}
-"fx.phys_impact_wood_soft"
-{
-	$array events [element][
-		{
+			$float pitch 1
+			$array source [string;9]["fx/impact/impact_generic_soft01","fx/impact/impact_generic_soft02","fx/impact/impact_generic_soft03","fx/impact/impact_generic_soft04","fx/impact/impact_generic_soft05","fx/impact/impact_generic_soft06","fx/impact/impact_generic_soft07","fx/impact/impact_generic_soft08","fx/impact/impact_generic_soft09"]
 			$string type "playsound"
-			$float gain 0.3
-			$float pitch 1
-			$string mode "mono"
-			$array source [string][
-				"fx/impact/impact_wood_soft01",
-				"fx/impact/impact_wood_soft02",
-				"fx/impact/impact_wood_soft03",
-				"fx/impact/impact_wood_soft04",
-				"fx/impact/impact_wood_soft05",
-				"fx/impact/impact_wood_soft06",
-				"fx/impact/impact_wood_soft07",
-				"fx/impact/impact_wood_soft08",
-				"fx/impact/impact_wood_soft09",
-				"fx/impact/impact_wood_soft10"
-			]
 		}
 	]
 }
 "fx.phys_impact_rock_soft"
 {
-	$array events [element][
+	$array events [element;1][
 		{
-			$string type "playsound"
 			$float gain 0.3
-			$float pitch 1
 			$string mode "mono"
-			$array source [string][
-				"fx/impact/impact_rock_soft01",
-				"fx/impact/impact_rock_soft02",
-				"fx/impact/impact_rock_soft03",
-				"fx/impact/impact_rock_soft04",
-				"fx/impact/impact_rock_soft05"
-			]
-		}
-	]
-}
-"fx.phys_impact_water_soft"
-{
-	$array events [element][
-		{
+			$float pitch 1
+			$array source [string;5]["fx/impact/impact_rock_soft01","fx/impact/impact_rock_soft02","fx/impact/impact_rock_soft03","fx/impact/impact_rock_soft04","fx/impact/impact_rock_soft05"]
 			$string type "playsound"
-			$float gain 1
-			$float pitch 1
-			$string mode "mono"
-			$array source [string][
-				"fx/impact/impact_water_soft01",
-				"fx/impact/impact_water_soft02",
-				"fx/impact/impact_water_soft03",
-				"fx/impact/impact_water_soft04",
-				"fx/impact/impact_water_soft05",
-				"fx/impact/impact_water_soft06"
-			]
 		}
 	]
 }
 "fx.phys_impact_water_hard"
 {
-	$array events [element][
+	$array events [element;1][
 		{
-			$string type "playsound"
 			$float gain 1
-			$float pitch 1
 			$string mode "mono"
-			$array source [string][
-				"fx/impact/impact_water_hard01",
-				"fx/impact/impact_water_hard02"
-			]
+			$float pitch 1
+			$array source [string;2]["fx/impact/impact_water_hard01","fx/impact/impact_water_hard02"]
+			$string type "playsound"
+		}
+	]
+}
+"fx.phys_impact_water_soft"
+{
+	$array events [element;1][
+		{
+			$float gain 1
+			$string mode "mono"
+			$float pitch 1
+			$array source [string;6]["fx/impact/impact_water_soft01","fx/impact/impact_water_soft02","fx/impact/impact_water_soft03","fx/impact/impact_water_soft04","fx/impact/impact_water_soft05","fx/impact/impact_water_soft06"]
+			$string type "playsound"
+		}
+	]
+}
+"fx.phys_impact_wood_soft"
+{
+	$array events [element;1][
+		{
+			$float gain 0.3
+			$string mode "mono"
+			$float pitch 1
+			$array source [string;10]["fx/impact/impact_wood_soft01","fx/impact/impact_wood_soft02","fx/impact/impact_wood_soft03","fx/impact/impact_wood_soft04","fx/impact/impact_wood_soft05","fx/impact/impact_wood_soft06","fx/impact/impact_wood_soft07","fx/impact/impact_wood_soft08","fx/impact/impact_wood_soft09","fx/impact/impact_wood_soft10"]
+			$string type "playsound"
 		}
 	]
 }

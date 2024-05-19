@@ -683,6 +683,7 @@ def execbuildscript(filepath):
 	#	l["vcvars"] = "vcvars"
 
 	if platform == "win32":
+		l["determine_vs_installation_path"] = determine_vs_installation_path
 		l["determine_vsdevcmd_path"] = determine_vsdevcmd_path
 
 	execfile(filepath,g,l)

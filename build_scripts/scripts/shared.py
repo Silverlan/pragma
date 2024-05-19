@@ -261,7 +261,7 @@ def compile_lua_file(deps_dir, luaFile):
 	os.chdir(curDir)
 
 if platform == "win32":
-	def determine_vsdevcmd_path(deps_dir):
+	def determine_vs_installation_path(deps_dir):
 		# Create the deps_dir if it doesn't exist
 		if not os.path.exists(deps_dir):
 			os.makedirs(deps_dir)
@@ -273,7 +273,10 @@ if platform == "win32":
 		if not os.path.exists(vswhere_path):
 			urllib.request.urlretrieve(vswhere_url, vswhere_path)
 
-		installation_path = subprocess.check_output([vswhere_path, "-property", "installationPath"], text=True).strip()
+		return subprocess.check_output([vswhere_path, "-property", "installationPath"], text=True).strip()
+	
+	def determine_vsdevcmd_path(deps_dir):
+		installation_path = determine_vs_installation_path(deps_dir)
 		vsdevcmd_path = os.path.join(installation_path, "Common7", "Tools", "vsdevcmd.bat")
 		return vsdevcmd_path
 

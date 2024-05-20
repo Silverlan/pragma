@@ -24,11 +24,12 @@
 #include <pragma/debug/intel_vtune.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
-#include <util_pragma_doc.hpp>
 #include <unordered_set>
 #include <udm.hpp>
 
 #undef CreateFile
+
+import util_pragma_doc;
 
 static std::optional<std::string> udm_convert(const std::string &fileName)
 {
